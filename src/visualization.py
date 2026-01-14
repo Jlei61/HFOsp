@@ -470,6 +470,10 @@ def _overlay_events(ax, events, ch_labels, yticks, spacing, t_start, t_end):
         evt_start = event.get('start', 0)
         evt_end = event.get('end', evt_start + 0.1)
         evt_ch = event.get('channel', None)
+        evt_color = event.get('color', 'red')
+        evt_alpha = float(event.get('alpha', 0.25))
+        evt_edgecolor = event.get('edgecolor', evt_color)
+        evt_linewidth = float(event.get('linewidth', 1.0))
         
         # Skip events outside time window
         if evt_end < t_start or evt_start > t_end:
@@ -485,15 +489,97 @@ def _overlay_events(ax, events, ch_labels, yticks, spacing, t_start, t_end):
                 (evt_start, y_center - height/2),
                 evt_end - evt_start,
                 height,
-                facecolor='red',
-                alpha=0.3,
-                edgecolor='red',
-                linewidth=1
+                facecolor=evt_color,
+                alpha=evt_alpha,
+                edgecolor=evt_edgecolor,
+                linewidth=evt_linewidth
             )
             ax.add_patch(rect)
         else:
             # Highlight across all channels
-            ax.axvspan(evt_start, evt_end, alpha=0.2, color='red')
+            ax.axvspan(evt_start, evt_end, alpha=evt_alpha, color=evt_color)
+
+
+def detections_to_events(
+    det_result,
+    color: str = "#e94560",
+    alpha: float = 0.25,
+    max_events_per_channel: Optional[int] = None,
+) -> List[Dict]:
+    """
+    Convert HFODetectionResult -> event dicts usable by plot_seeg_segment(..., events=...).
+
+    Notes
+    -----
+    - det_result.events_by_channel is a list of (n_events, 2) arrays in seconds.
+    - For performance on dense detections, you can cap events per channel.
+    """
+    if det_result is None:
+        return []
+    if not hasattr(det_result, "events_by_channel") or not hasattr(det_result, "ch_names"):
+        raise ValueError("det_result must look like HFODetectionResult (events_by_channel + ch_names).")
+
+    events: List[Dict] = []
+    for ch_name, ev in zip(list(det_result.ch_names), list(det_result.events_by_channel)):
+        if ev is None:
+            continue
+        ev = np.asarray(ev)
+        if ev.size == 0:
+            continue
+        if ev.ndim != 2 or ev.shape[1] != 2:
+            raise ValueError(f"Invalid event array for channel {ch_name}: shape={ev.shape}")
+
+        if max_events_per_channel is not None and ev.shape[0] > max_events_per_channel:
+            ev = ev[:max_events_per_channel, :]
+
+        for s, e in ev:
+            events.append(
+                {
+                    "start": float(s),
+                    "end": float(e),
+                    "channel": ch_name,
+                    "color": color,
+                    "alpha": alpha,
+                }
+            )
+    return events
+
+
+def plot_event_counts(
+    det_result,
+    top_k: Optional[int] = 30,
+    figsize: Tuple[float, float] = (14, 5),
+    title: Optional[str] = None,
+) -> plt.Figure:
+    """
+    Plot detected event counts per channel (quick artifact triage).
+    """
+    if det_result is None:
+        raise ValueError("det_result is required.")
+    if not hasattr(det_result, "events_count") or not hasattr(det_result, "ch_names"):
+        raise ValueError("det_result must look like HFODetectionResult (events_count + ch_names).")
+
+    counts = np.asarray(det_result.events_count).astype(np.int64)
+    ch_names = list(det_result.ch_names)
+    if counts.shape[0] != len(ch_names):
+        raise ValueError("events_count length must match ch_names length.")
+
+    order = np.argsort(counts)[::-1]
+    if top_k is not None:
+        order = order[: int(top_k)]
+
+    fig, ax = plt.subplots(figsize=figsize)
+    xs = np.arange(len(order))
+    ax.bar(xs, counts[order], color=SEEG_COLORS["secondary"], alpha=0.75)
+    ax.set_xticks(xs)
+    ax.set_xticklabels([ch_names[i] for i in order], rotation=60, ha="right", fontsize=8)
+    ax.set_ylabel("Detected events")
+    if title is None:
+        title = f"HFO detections per channel (top {len(order)})"
+    ax.set_title(title, fontweight="bold")
+    ax.grid(axis="y", alpha=0.3)
+    plt.tight_layout()
+    return fig
 
 
 # =============================================================================

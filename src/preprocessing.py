@@ -778,9 +778,27 @@ class SEEGPreprocessor:
         
         # Transfer to GPU
         data_gpu = cp.asarray(data)
+
+        def _sosfiltfilt_reflect_gpu(x_gpu, sos_gpu, pad_len: int):
+            """
+            Approximate filtfilt on GPU via reflect padding + forward/backward sosfilt.
+            This avoids the worst edge transients from naive forward->flip->forward.
+            """
+            if pad_len <= 0:
+                y = cupy_sosfilt(sos_gpu, x_gpu, axis=-1)
+                y = cp.flip(y, axis=-1)
+                y = cupy_sosfilt(sos_gpu, y, axis=-1)
+                return cp.flip(y, axis=-1)
+
+            x_pad = cp.pad(x_gpu, ((0, 0), (pad_len, pad_len)), mode="reflect")
+            y = cupy_sosfilt(sos_gpu, x_pad, axis=-1)
+            y = cp.flip(y, axis=-1)
+            y = cupy_sosfilt(sos_gpu, y, axis=-1)
+            y = cp.flip(y, axis=-1)
+            return y[:, pad_len:-pad_len]
         
         # Notch filter - use forward-only filter on GPU (no filtfilt in cupy)
-        # We'll use a simple approach: filter forward then reverse
+        # We use reflect padding + forward/backward to suppress edge transients.
         if self.notch_freqs:
             for freq in self.notch_freqs:
                 if freq < sfreq / 2:
@@ -790,13 +808,10 @@ class SEEGPreprocessor:
                     from scipy.signal import tf2sos
                     sos = tf2sos(b, a)
                     sos_gpu = cp.asarray(sos)
-                    
-                    # Forward pass
-                    data_gpu = cupy_sosfilt(sos_gpu, data_gpu, axis=-1)
-                    # Reverse pass for zero-phase
-                    data_gpu = cp.flip(data_gpu, axis=-1)
-                    data_gpu = cupy_sosfilt(sos_gpu, data_gpu, axis=-1)
-                    data_gpu = cp.flip(data_gpu, axis=-1)
+                    # Heuristic pad length: similar to scipy filtfilt default (3*(ntaps-1)),
+                    # but we don't have direct ntaps for SOS; be conservative in seconds.
+                    pad_len = int(min(data_gpu.shape[1] // 4, max(1, round(0.5 * sfreq))))
+                    data_gpu = _sosfiltfilt_reflect_gpu(data_gpu, sos_gpu, pad_len)
         
         # Bandpass filter
         if self.bandpass is not None:
@@ -808,12 +823,8 @@ class SEEGPreprocessor:
                 
             sos = butter(4, [low / nyq, high / nyq], btype='band', output='sos')
             sos_gpu = cp.asarray(sos)
-            
-            # Forward-backward filtering
-            data_gpu = cupy_sosfilt(sos_gpu, data_gpu, axis=-1)
-            data_gpu = cp.flip(data_gpu, axis=-1)
-            data_gpu = cupy_sosfilt(sos_gpu, data_gpu, axis=-1)
-            data_gpu = cp.flip(data_gpu, axis=-1)
+            pad_len = int(min(data_gpu.shape[1] // 4, max(1, round(0.5 * sfreq))))
+            data_gpu = _sosfiltfilt_reflect_gpu(data_gpu, sos_gpu, pad_len)
         
         # Transfer back to CPU
         return cp.asnumpy(data_gpu)
