@@ -142,6 +142,43 @@ fig.savefig('output.png')
 
 ---
 
+## 🧠 EDF预处理与波形绘图（本项目）
+
+我们不从 `*_gpu.npz` 反推EDF是否做过重参考。需要什么参考方式就显式指定：
+- `reference='bipolar'`: 同一电极串相邻触点差分，**通道命名为`A1-A2`**（避免与单极`A1`混淆）
+- `reference='car'`: 每串CAR
+- `reference='none'`: 保持EDF原始参考
+
+```python
+from src.preprocessing import SEEGPreprocessor
+from src.visualization import plot_from_result, plot_shaft_channels
+
+edf = '/Volumes/Elements/yuquan_24h_edf/chengshuai/FC10477Q.edf'
+
+# 1) Bipolar 全通道（100s）
+bip = SEEGPreprocessor(reference='bipolar', crop_seconds=101).run(edf)
+plot_from_result(bip, start_sec=0, duration_sec=100, channels='all')
+
+# 2) CAR 全通道（100s）
+car = SEEGPreprocessor(reference='car', crop_seconds=101).run(edf)
+plot_from_result(car, start_sec=0, duration_sec=100, channels='all')
+
+# 3) 单电极串（例：K）
+plot_shaft_channels(bip.data, bip.sfreq, bip.ch_names, shaft='K', start_sec=0, duration_sec=30,
+                    reference_type=bip.reference_type)
+```
+
+如果你需要“完全复现某个`*_gpu.npz`里的通道集合”，用显式通道表，不要硬编码“去掉末端N个触点”：
+
+```python
+import numpy as np
+gpu = np.load('/Volumes/Elements/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz', allow_pickle=True)
+include = [str(x) for x in gpu['chns_names']]
+res = SEEGPreprocessor(reference='none', include_channels=include, crop_seconds=101).run(edf)
+```
+
+---
+
 ## 📈 数据结构
 
 ### 目录组织
