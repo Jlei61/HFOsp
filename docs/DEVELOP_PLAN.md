@@ -36,11 +36,11 @@ HFOsp/
 │   └── yuquan_24h_dataset_structure.md  # 数据结构详解
 ├── src/
 │   ├── __init__.py              # [待创建]
-│   ├── preprocessing.py         # [开发中] 预处理Pipeline
-│   ├── hfo_detector.py          # [待开发] HFO检测器
+│   ├── preprocessing.py         # ✅ 预处理Pipeline
+│   ├── hfo_detector.py          # ✅ HFO检测器
 │   ├── group_event_analysis.py  # [待开发] 群体事件分析
 │   ├── network_analysis.py      # [待开发] 网络分析
-│   ├── visualization.py         # [待开发] 可视化工具
+│   ├── visualization.py         # ✅ 可视化工具（基础功能）
 │   └── utils/
 │       └── bqk_utils.py         # 基础工具函数
 ├── datasets/
@@ -50,7 +50,7 @@ HFOsp/
 │   ├── visualize_event_waveforms.py
 │   └── yuquan_analysis.py
 ├── notebook/
-│   └── chengshuai_hfo_analysis.ipynb  # [待开发] 示例notebook
+│   └── chengshuai_hfo_analysis.ipynb  # ✅ 示例notebook
 ├── yuquan_dataloader.py         # 数据加载器
 └── requirements.txt             # [待创建]
 ```
@@ -116,20 +116,20 @@ HFOsp/
 
 ## 4. 模块开发计划
 
-### 模块1: src/preprocessing.py ✅ 完成（已重构，拒绝“猜测式”分支）
+### 模块1: src/preprocessing.py ✅ 完成（已重构，拒绝"猜测式"分支）
 
 | 功能 | 说明 | 状态 |
 |------|------|------|
 | 1.1 EDF读取 | 加载EDF, 清洗电极名称, encoding='latin1' | ✅ |
 | 1.2 电极名称解析 | 正则提取 (prefix, number), 支持A'5格式 | ✅ |
-| 1.3 重参考策略 | **显式** bipolar / car / none（auto=兼容别名→bipolar；不做任何“推断”） | ✅ |
-| 1.4 通道选择 | **显式** include/exclude channels（用于复现GPU通道列表；不硬编码“去掉末端N个触点”） | ✅ |
+| 1.3 重参考策略 | **显式** bipolar / car / none（auto=兼容别名→bipolar；不做任何"推断"） | ✅ |
+| 1.4 通道选择 | **显式** include/exclude channels（用于复现GPU通道列表；不硬编码"去掉末端N个触点"） | ✅ |
 | 1.5 重采样 | Ripple→1000Hz, FR→2000Hz | ✅ |
 | 1.6 滤波 | Notch + 可选Bandpass, GPU加速支持 | ✅ |
 | 1.7 通道质量检查 | z-score, 方差, 伪迹标记 | ✅ |
 
 **关键技术决策**:
-- **不再猜**：不再根据“某些contact缺失”去推断EDF是否已做bipolar；那是通道选择策略，不是重参考证据。
+- **不再猜**：不再根据"某些contact缺失"去推断EDF是否已做bipolar；那是通道选择策略，不是重参考证据。
 - **重参考策略（显式）**:
   - `'bipolar'`: 同shaft相邻触点差分；**命名为明确的`A1-A2`**，避免与单极通道混淆
   - `'car'`: 每个shaft内部做CAR
@@ -141,17 +141,23 @@ HFOsp/
 
 ---
 
-### 模块2: src/hfo_detector.py (待开发)
+### 模块2: src/hfo_detector.py ✅ 完成
 
-| 功能 | 说明 |
-|------|------|
-| 2.1 Ictal段落检测 | 宽带能量>阈值 且 持续>3秒 |
-| 2.2 背景基线估计 | 剔除Ictal后的鲁棒统计 (MAD) |
-| 2.3 Hilbert包络 | 带通滤波 + Hilbert变换 |
-| 2.4 双阈值检测 | rel_thresh×local + abs_thresh×global |
-| 2.5 事件合并筛选 | min_gap合并, min_duration筛选 |
-| 2.6 Ripple/FR分离 | 双频段并行检测 |
-| 2.7 验证函数 | 与*_gpu.npz对比 |
+| 功能 | 说明 | 状态 |
+|------|------|------|
+| 2.1 Ictal段落检测 | `_detect_ictal_mask`：能量爆发 + 持续>3秒 | ✅ |
+| 2.2 背景基线估计 | 剔除Ictal后MAD；bqk算法内部使用median | ✅ |
+| 2.3 Hilbert包络 | `scipy.hilbert` + `cupy_hilbert`（GPU FFT）；宽带分20Hz子带求和 | ✅ |
+| 2.4 双阈值检测 | `rel_thresh×local_median` ∧ `abs_thresh×global_median` | ✅ |
+| 2.5 事件合并筛选 | `merge_timeRanges` (min_gap) + `min_last` 持续时间过滤 | ✅ |
+| 2.6 Ripple/FR分离 | `band='ripple'/'fast_ripple'` | ✅ |
+| 2.7 验证函数 | Notebook验证通过（10232 events，K电极高密度） | ✅ |
+
+**关键技术决策**:
+- **算法选择**: 默认 `algorithm='bqk'`，严格复用 `src/utils/bqk_utils.py` 的检测逻辑
+- **Chunked处理**: 30s chunk + 1s overlap，避免内存爆炸；跨chunk事件正确合并
+- **GPU加速**: Hilbert变换可选GPU FFT（`use_gpu=True`），滤波仍在CPU以保持数值一致性
+- **双阈值策略**: 同时满足 `rel_thresh × local_median` **且** `abs_thresh × global_median`，能有效抑制噪声通道和全局伪迹
 
 ---
 
@@ -180,17 +186,22 @@ HFOsp/
 
 ---
 
-### 模块5: src/visualization.py (待开发)
+### 模块5: src/visualization.py ✅ 基础功能完成
 
-| 功能 | 说明 |
-|------|------|
-| 5.1 多通道时序图 | 单电极/全通道/核心电极视图 |
-| 5.2 Bipolar对比图 | 原始 vs Bipolar |
-| 5.3 HFO事件标注 | Ripple蓝色, FR红色 |
-| 5.4 滞后热图 | channels × events |
-| 5.5 传播动图 | 500ms窗口内能量传播动画 |
-| 5.6 网络拓扑图 | 节点=Strength, 边=权重, 颜色=SI |
-| 5.7 状态对比图 | Interictal vs Ictal 网络 |
+| 功能 | 说明 | 状态 |
+|------|------|------|
+| 5.1 多通道时序图 | `plot_seeg_segment`：单电极/全通道/核心电极视图 | ✅ |
+| 5.2 Bipolar对比图 | `plot_preprocessing_comparison`：原始 vs Bipolar | ✅ |
+| 5.3 HFO事件标注 | `_overlay_events` + `detections_to_events`：tick样式不遮波形 | ✅ |
+| 5.4 滞后热图 | channels × events | ⏳ 待模块3 |
+| 5.5 传播动图 | 500ms窗口内能量传播动画 | ⏳ 待模块3 |
+| 5.6 网络拓扑图 | 节点=Strength, 边=权重, 颜色=SI | ⏳ 待模块4 |
+| 5.7 状态对比图 | Interictal vs Ictal 网络 | ⏳ 待模块4 |
+
+**关键技术决策**:
+- **波形颜色**: `tableau_20_no_red` 避免与HFO红色标记冲突
+- **事件标注**: 默认 `style='tick'` 细线，不遮挡波形
+- **调试视图**: `plot_raw_filtered_envelope` 可视化 raw/filtered/envelope 验证检测器
 
 ---
 
@@ -198,7 +209,7 @@ HFOsp/
 
 | 陷阱 | 问题描述 | 解决方案 |
 |------|----------|----------|
-| “Pre-bipolar推断” | 通过“末端contact缺失”推断EDF已bipolar → **误解** | **禁止推断**；需要什么就显式 `reference='bipolar'/'car'/'none'` |
+| "Pre-bipolar推断" | 通过"末端contact缺失"推断EDF已bipolar → **误解** | **禁止推断**；需要什么就显式 `reference='bipolar'/'car'/'none'` |
 | Bipolar断桥 | 跨电极串差分产生伪信号 | 严格解析电极前缀, 仅同串相邻 |
 | FR采样率 | 1000Hz下500Hz严重衰减 | FR分析保留2000Hz |
 | Ictal阈值 | 发作期拉高全局阈值 | 剔除Ictal后计算基线 |
@@ -226,11 +237,24 @@ HFOsp/
   - [x] GPU加速支持 (CuPy可选)
   - [x] 通道质量检查
   - [x] chengshuai/FC10477Q: EDF vs GPU 通道差异来源确认（GPU=显式通道子集；不用于推断重参考）
-- [ ] **模块2: hfo_detector.py** ← 当前
-- [ ] 模块3: group_event_analysis.py
+- [x] **模块2: hfo_detector.py** ✅ 2026-01-14
+  - [x] 算法选择：bqk (复用bqk_utils.py) / mad_hysteresis
+  - [x] Ictal段落检测 (`_detect_ictal_mask`)
+  - [x] Hilbert包络（宽带分20Hz子带 + 求和）
+  - [x] 双阈值检测（rel_thresh × local_median ∧ abs_thresh × global_median）
+  - [x] 事件合并筛选（min_gap + min_last）
+  - [x] Ripple/FR分离
+  - [x] Chunked处理（30s chunk + 1s overlap）
+  - [x] GPU加速（cupy_hilbert）
+  - [x] Notebook验证通过（10232 events，K电极高密度）
+- [x] **模块5: visualization.py（基础功能）** ✅ 2026-01-14
+  - [x] 多通道时序图
+  - [x] HFO事件标注（tick样式）
+  - [x] 调试视图（raw/filtered/envelope）
+- [ ] 模块3: group_event_analysis.py ← 下一步
 - [ ] 模块4: network_analysis.py
-- [ ] 模块5: visualization.py
-- [x] Notebook: chengshuai_hfo_analysis.ipynb（极简：3张图）
+- [ ] 模块5: visualization.py（高级功能：滞后热图/传播动图/网络拓扑）
+- [x] Notebook: chengshuai_hfo_analysis.ipynb ✅
 - [ ] 验证与原结果一致性
 - [ ] 完整Pipeline测试
 
@@ -247,3 +271,7 @@ HFOsp/
 - GPU检测事件数: 46,738
 - 核心通道: ['E11', 'K3', 'K5', 'K6', 'K7', 'K8', 'K9', 'K10']
 - 对齐事件数: 2,601
+
+**Notebook验证结果（100s crop）**:
+- Detections: 10232 total
+- Top channels: ['K15-K16', 'G13-G14', 'J9-J10', 'K6-K7', 'D13-D14', ...]

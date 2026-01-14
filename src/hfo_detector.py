@@ -69,6 +69,11 @@ def cupy_hilbert(x_gpu):
 class HFODetectionConfig:
     """Configuration for HFO detection."""
 
+    # Detection algorithm:
+    # - 'bqk': match src/utils/bqk_utils.py (dual-threshold on Hilbert envelope + merge + min_last)
+    # - 'mad_hysteresis': this module's MAD + hysteresis detector (kept for comparison)
+    algorithm: str = "bqk"
+
     band: str = "ripple"  # 'ripple' or 'fast_ripple'
     bandpass: Optional[Tuple[float, float]] = None  # overrides default band
 
@@ -84,6 +89,11 @@ class HFODetectionConfig:
     min_duration_ms: float = 6.0
     max_duration_ms: float = 200.0
     min_gap_ms: float = 10.0
+
+    # bqk-style thresholds (see src/utils/bqk_utils.py: find_high_enveTimes)
+    rel_thresh: float = 3.0
+    abs_thresh: float = 3.0
+    min_last_ms: float = 50.0
 
     # Chunking (seconds). If None, process full signal at once.
     chunk_sec: Optional[float] = 30.0
@@ -316,9 +326,19 @@ class HFODetector:
             meta["ictal_excluded_fraction"] = float(np.mean(ictal_mask))
 
         # Detection
-        events_by_channel, med, mad = self._detect_chunked(
-            data=data, sfreq=sfreq_, bandpass=(low, high), ictal_mask=ictal_mask
-        )
+        algo = (cfg.algorithm or "bqk").lower().strip()
+        if algo == "bqk":
+            events_by_channel, med, mad = self._detect_bqk_chunked(
+                data=data, sfreq=sfreq_, freqband=(low, high)
+            )
+            meta["algorithm"] = "bqk_utils"
+        elif algo in ("mad_hysteresis", "hysteresis", "mad"):
+            events_by_channel, med, mad = self._detect_chunked(
+                data=data, sfreq=sfreq_, bandpass=(low, high), ictal_mask=ictal_mask
+            )
+            meta["algorithm"] = "mad_hysteresis"
+        else:
+            raise ValueError(f"Unknown algorithm='{cfg.algorithm}'. Use 'bqk' or 'mad_hysteresis'.")
         events_count = np.array([ev.shape[0] for ev in events_by_channel], dtype=np.int64)
 
         return HFODetectionResult(
@@ -333,6 +353,94 @@ class HFODetector:
             used_gpu=self._used_gpu,
             meta=meta,
         )
+
+    def _detect_bqk_chunked(
+        self,
+        data: np.ndarray,
+        sfreq: float,
+        freqband: Tuple[float, float],
+    ) -> Tuple[List[np.ndarray], np.ndarray, np.ndarray]:
+        """
+        Detection that matches src/utils/bqk_utils.py:
+        - envelope = return_hil_enve_norm(data, fs, freqband)
+        - high = (env > rel_thresh*ch_median) & (env > abs_thresh*global_median)
+        - ranges = return_timeRanges + merge_timeRanges
+        - keep events longer than min_last_ms
+
+        We do it chunked to bound memory; then merge across chunks.
+        """
+        try:
+            from src.utils import bqk_utils as bqk
+        except Exception:
+            from .utils import bqk_utils as bqk  # type: ignore
+
+        cfg = self.config
+        n_ch, n_samp = data.shape
+
+        # chunking
+        if cfg.chunk_sec is None:
+            chunk_len = n_samp
+        else:
+            chunk_len = int(round(cfg.chunk_sec * sfreq))
+        chunk_len = max(1, min(chunk_len, n_samp))
+        overlap = int(round(cfg.chunk_overlap_sec * sfreq))
+        overlap = max(0, min(overlap, chunk_len // 2))
+        step = max(1, chunk_len - overlap)
+
+        all_events: List[List[List[float]]] = [[] for _ in range(n_ch)]
+
+        for base_start in range(0, n_samp, step):
+            base_end = min(n_samp, base_start + chunk_len)
+            pad_start = max(0, base_start - overlap)
+            pad_end = min(n_samp, base_end + overlap)
+
+            x = data[:, pad_start:pad_end]
+            if x.shape[1] < int(0.2 * sfreq):
+                continue
+
+            # bqk envelope (includes bandpass+hilbert, plus filterbank sum)
+            env = bqk.return_hil_enve_norm(x, sfreq, freqband)
+            seg_events = bqk.find_high_enveTimes(
+                env,
+                chns_nums=env.shape[0],
+                fs=sfreq,
+                rel_thresh=cfg.rel_thresh,
+                abs_thresh=cfg.abs_thresh,
+                min_gap=cfg.min_gap_ms,
+                min_last=cfg.min_last_ms,
+                start_time=pad_start / sfreq,
+            )
+
+            # Keep only events in [base_start, base_end)
+            t0 = base_start / sfreq
+            t1 = base_end / sfreq
+            for ci in range(n_ch):
+                ch_ev = seg_events[ci]
+                if not ch_ev:
+                    continue
+                for s, e in ch_ev:
+                    if e < t0 or s > t1:
+                        continue
+                    s2 = max(s, t0)
+                    e2 = min(e, t1)
+                    all_events[ci].append([float(s2), float(e2)])
+
+        # Merge per-channel (bqk merge_timeRanges uses ms min_gap)
+        merged_out: List[np.ndarray] = []
+        for ci in range(n_ch):
+            if not all_events[ci]:
+                merged_out.append(np.zeros((0, 2), dtype=np.float64))
+                continue
+            # sort
+            ev = sorted(all_events[ci], key=lambda x: x[0])
+            ev = bqk.merge_timeRanges(np.array(ev), min_gap=cfg.min_gap_ms)
+            merged_out.append(np.array(ev, dtype=np.float64) if len(ev) else np.zeros((0, 2), dtype=np.float64))
+
+        # baseline placeholders (not used by bqk algorithm)
+        env0 = bqk.return_hil_enve_norm(data[:, : min(n_samp, int(2 * sfreq))], sfreq, freqband)
+        baseline_med = np.median(env0, axis=-1)
+        baseline_mad = np.zeros_like(baseline_med)
+        return merged_out, baseline_med, baseline_mad
 
     def _detect_chunked(
         self,

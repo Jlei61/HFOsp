@@ -40,11 +40,30 @@ SEEG_COLORS = {
     'background': '#fafafa',   # Light gray
     'grid': '#e0e0e0',         # Grid lines
     'shaft_colors': [          # Per-shaft colors
-        '#e41a1c', '#377eb8', '#4daf4a', '#984ea3',
-        '#ff7f00', '#ffff33', '#a65628', '#f781bf',
-        '#999999', '#66c2a5', '#fc8d62', '#8da0cb'
+        # Deprecated: replaced by TABLEAU_20 below for better readability.
+        '#4E79A7', '#A0CBE8', '#F28E2B', '#FFBE7D',
+        '#59A14F', '#8CD17D', '#B6992D', '#F1CE63',
+        '#499894', '#86BCB6', '#79706E', '#BAB0AC'
     ]
 }
+
+# Tableau 20 (explicit list; stable across matplotlib versions)
+tableau_20 = [
+    "#4E79A7", "#A0CBE8",  # 蓝 / 浅蓝
+    "#F28E2B", "#FFBE7D",  # 橙 / 浅橙
+    "#59A14F", "#8CD17D",  # 绿 / 浅绿
+    "#B6992D", "#F1CE63",  # 黄褐 / 浅黄
+    "#499894", "#86BCB6",  # 青 / 浅青
+    "#E15759", "#FF9D9A",  # 红 / 浅红
+    "#79706E", "#BAB0AC",  # 灰 / 浅灰
+    "#D37295", "#FABFD2",  # 粉红 / 浅粉
+    "#B07AA1", "#D4A6C8",  # 紫 / 浅紫
+    "#9D7660", "#D7B5A6"   # 褐 / 浅褐
+]
+
+# Waveform colors must avoid red-ish tones to not clash with HFO overlays.
+_TABLEAU_REDISH = {"#E15759", "#FF9D9A"}
+tableau_20_no_red = [c for c in tableau_20 if c not in _TABLEAU_REDISH]
 
 
 # =============================================================================
@@ -425,7 +444,8 @@ def _get_shaft_colors(ch_names: List[str]) -> List[str]:
             prefix = ch[0] if ch else 'X'
         
         if prefix not in shaft_color_map:
-            shaft_color_map[prefix] = SEEG_COLORS['shaft_colors'][color_idx % len(SEEG_COLORS['shaft_colors'])]
+            palette = tableau_20_no_red if len(tableau_20_no_red) > 0 else SEEG_COLORS["shaft_colors"]
+            shaft_color_map[prefix] = palette[color_idx % len(palette)]
             color_idx += 1
         
         colors.append(shaft_color_map[prefix])
@@ -474,6 +494,7 @@ def _overlay_events(ax, events, ch_labels, yticks, spacing, t_start, t_end):
         evt_alpha = float(event.get('alpha', 0.25))
         evt_edgecolor = event.get('edgecolor', evt_color)
         evt_linewidth = float(event.get('linewidth', 1.0))
+        evt_style = event.get('style', 'tick')  # 'tick'|'box'|'span'
         
         # Skip events outside time window
         if evt_end < t_start or evt_start > t_end:
@@ -483,21 +504,37 @@ def _overlay_events(ax, events, ch_labels, yticks, spacing, t_start, t_end):
         if evt_ch and evt_ch in ch_labels:
             ch_idx = ch_labels.index(evt_ch)
             y_center = yticks[ch_idx]
-            height = spacing * 0.8
-            
-            rect = Rectangle(
-                (evt_start, y_center - height/2),
-                evt_end - evt_start,
-                height,
-                facecolor=evt_color,
-                alpha=evt_alpha,
-                edgecolor=evt_edgecolor,
-                linewidth=evt_linewidth
-            )
-            ax.add_patch(rect)
+            if evt_style == 'box':
+                # Small box around the baseline (do NOT cover whole channel row)
+                height = spacing * 0.25
+                rect = Rectangle(
+                    (evt_start, y_center - height / 2),
+                    evt_end - evt_start,
+                    height,
+                    facecolor=evt_color,
+                    alpha=evt_alpha,
+                    edgecolor=evt_edgecolor,
+                    linewidth=evt_linewidth,
+                    zorder=3,
+                )
+                ax.add_patch(rect)
+            else:
+                # Default: thin tick line slightly above waveform baseline.
+                y = y_center + spacing * 0.18
+                ax.plot(
+                    [evt_start, evt_end],
+                    [y, y],
+                    color=evt_color,
+                    alpha=evt_alpha,
+                    linewidth=max(1.0, evt_linewidth),
+                    solid_capstyle='butt',
+                    zorder=3,
+                )
         else:
             # Highlight across all channels
-            ax.axvspan(evt_start, evt_end, alpha=evt_alpha, color=evt_color)
+            # Only use full-span highlight when explicitly requested.
+            if evt_style == 'span':
+                ax.axvspan(evt_start, evt_end, alpha=evt_alpha, color=evt_color, zorder=1)
 
 
 def detections_to_events(
@@ -505,6 +542,8 @@ def detections_to_events(
     color: str = "#e94560",
     alpha: float = 0.25,
     max_events_per_channel: Optional[int] = None,
+    style: str = "tick",
+    linewidth: float = 2.0,
 ) -> List[Dict]:
     """
     Convert HFODetectionResult -> event dicts usable by plot_seeg_segment(..., events=...).
@@ -540,6 +579,8 @@ def detections_to_events(
                     "channel": ch_name,
                     "color": color,
                     "alpha": alpha,
+                    "style": style,
+                    "linewidth": linewidth,
                 }
             )
     return events
@@ -578,6 +619,90 @@ def plot_event_counts(
         title = f"HFO detections per channel (top {len(order)})"
     ax.set_title(title, fontweight="bold")
     ax.grid(axis="y", alpha=0.3)
+    plt.tight_layout()
+    return fig
+
+
+def plot_raw_filtered_envelope(
+    data: np.ndarray,
+    sfreq: float,
+    ch_names: List[str],
+    channels: Union[List[str], List[int]],
+    start_sec: float = 0.0,
+    duration_sec: float = 2.0,
+    show_fast_ripple: bool = True,
+    figsize: Optional[Tuple[float, float]] = None,
+) -> plt.Figure:
+    """
+    Visualize for selected channels:
+    - raw waveform
+    - ripple-band filtered waveform + envelope
+    - (optional) fast-ripple-band filtered waveform + envelope
+
+    This is a debugging view to answer: "Is the detector firing on real band-limited bursts?"
+    """
+    # Lazy import to keep visualization module lightweight.
+    try:
+        from src.utils import bqk_utils as bqk
+    except Exception:
+        from .utils import bqk_utils as bqk  # type: ignore
+
+    ch_indices, ch_labels = _parse_channel_selection(channels, ch_names)
+    if len(ch_indices) == 0:
+        raise ValueError("No channels selected")
+
+    s0 = int(round(start_sec * sfreq))
+    s1 = int(round((start_sec + duration_sec) * sfreq))
+    s1 = min(s1, data.shape[1])
+    x = data[ch_indices, s0:s1]
+    t = np.arange(s0, s1) / sfreq
+
+    # Ripple (RP)
+    rp_band = (80.0, 250.0)
+    x_rp = bqk.band_filt(x, sfreq, rp_band)
+    env_rp = bqk.return_hil_enve_norm(x, sfreq, rp_band)
+
+    # Fast-ripple (FR)
+    if show_fast_ripple:
+        fr_band = (250.0, 500.0)
+        x_fr = bqk.band_filt(x, sfreq, fr_band)
+        env_fr = bqk.return_hil_enve_norm(x, sfreq, fr_band)
+    else:
+        x_fr, env_fr = None, None
+
+    n_ch = len(ch_indices)
+    n_cols = 3 if show_fast_ripple else 2
+    if figsize is None:
+        figsize = (16, max(6, 2.2 * n_ch))
+
+    fig, axes = plt.subplots(n_ch, n_cols, figsize=figsize, sharex=True)
+    if n_ch == 1:
+        axes = np.array([axes])
+
+    for i, lbl in enumerate(ch_labels):
+        ax0 = axes[i, 0]
+        ax0.plot(t, x[i], color="#333333", linewidth=0.7)
+        ax0.set_title(f"{lbl} raw", fontweight="bold")
+
+        ax1 = axes[i, 1]
+        ax1.plot(t, x_rp[i], color=tableau_20[0], linewidth=0.7, label="RP filt")
+        ax1.plot(t, env_rp[i], color=tableau_20[2], linewidth=0.7, alpha=0.9, label="RP env")
+        ax1.set_title("Ripple (80-250Hz)", fontweight="bold")
+        ax1.legend(fontsize=8, loc="upper right")
+
+        if show_fast_ripple:
+            ax2 = axes[i, 2]
+            ax2.plot(t, x_fr[i], color=tableau_20[4], linewidth=0.7, label="FR filt")
+            ax2.plot(t, env_fr[i], color=tableau_20[6], linewidth=0.7, alpha=0.9, label="FR env")
+            ax2.set_title("Fast Ripple (250-500Hz)", fontweight="bold")
+            ax2.legend(fontsize=8, loc="upper right")
+
+        for j in range(n_cols):
+            axes[i, j].grid(alpha=0.2)
+
+    for j in range(n_cols):
+        axes[-1, j].set_xlabel("Time (s)")
+
     plt.tight_layout()
     return fig
 
