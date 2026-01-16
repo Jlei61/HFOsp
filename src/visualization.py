@@ -630,9 +630,14 @@ def plot_group_events_band_raster(
     x_axis: str = "seconds",  # 'seconds'|'samples'
     downsample_ms: Optional[float] = 5.0,
     value_transform: str = "log1p",  # 'none'|'log1p'
+    trace_normalize: str = "p99",  # 'none'|'mad'|'p99'
+    trace_scale_percentile: float = 99.0,
     trace_lw: float = 0.6,
     trace_alpha: float = 0.9,
     trace_spacing: float = 6.0,
+    show_event_boundaries: bool = True,
+    boundary_lw: float = 0.3,
+    boundary_alpha: float = 0.4,
     figsize: Tuple[float, float] = (12, 8),
 ) -> plt.Figure:
     """
@@ -697,12 +702,15 @@ def plot_group_events_band_raster(
         seg_lens.append(seg.shape[1])
     X = np.concatenate(segs, axis=1) if segs else np.zeros((len(rows), 0))
 
-    # Robust normalization per channel
+    # Robust normalization per channel (mainly for imshow; for trace we do a separate, waveform-safe normalization)
     Xn = X.astype(np.float64, copy=False)
     if value_transform not in ("none", "log1p"):
         raise ValueError("value_transform must be 'none' or 'log1p'")
     if value_transform == "log1p" and mode == "bandpassed":
         # bandpassed traces are signed; log1p would silently clip negatives and distort the waveform
+        value_transform = "none"
+    if plot_style == "trace" and value_transform == "log1p":
+        # Trace view should look like a waveform, not a compressed heatmap.
         value_transform = "none"
     if value_transform == "log1p":
         Xn = np.log1p(np.maximum(Xn, 0.0))
@@ -745,8 +753,22 @@ def plot_group_events_band_raster(
         ax.set_ylabel("Channels")
     else:
         # Trace view: plot bandpassed waveform (or envelope) as stacked lines
-        # Normalize per channel to avoid one channel dominating.
-        Y = Xn.astype(np.float64, copy=False)
+        # Normalize per channel to avoid one channel dominating, without destroying waveform shape.
+        if trace_normalize not in ("none", "mad", "p99"):
+            raise ValueError("trace_normalize must be 'none', 'mad', or 'p99'")
+        Y = X.astype(np.float64, copy=False)  # IMPORTANT: use pre-transform data for waveform fidelity
+        if Y.size > 0:
+            # Center each channel to remove DC drift in the concatenated timeline.
+            Y = Y - np.median(Y, axis=1, keepdims=True)
+            if trace_normalize == "mad":
+                med = np.median(Y, axis=1, keepdims=True)
+                mad = np.median(np.abs(Y - med), axis=1, keepdims=True) + 1e-9
+                Y = Y / mad
+            elif trace_normalize == "p99":
+                p = float(trace_scale_percentile)
+                p = min(max(p, 50.0), 100.0)
+                scale = np.nanpercentile(np.abs(Y), p, axis=1, keepdims=True) + 1e-9
+                Y = Y / scale
         for ci, lab in enumerate(labels):
             y = Y[ci]
             offset = float(ci) * float(trace_spacing)
@@ -756,11 +778,12 @@ def plot_group_events_band_raster(
         ax.set_ylabel("Channels (stacked)")
 
     # event boundaries
-    cur = 0.0
-    for n in seg_lens:
-        xline = cur if x_axis == "samples" else cur / eff_sfreq
-        ax.axvline(xline, color="k", linewidth=0.3, alpha=0.4)
-        cur += float(n)
+    if show_event_boundaries:
+        cur = 0.0
+        for n in seg_lens:
+            xline = cur if x_axis == "samples" else cur / eff_sfreq
+            ax.axvline(xline, color="k", linewidth=float(boundary_lw), alpha=float(boundary_alpha))
+            cur += float(n)
 
     # style polish: remove useless whitespace + frame clutter
     ax.spines["top"].set_visible(False)
@@ -772,6 +795,331 @@ def plot_group_events_band_raster(
     plt.tight_layout()
     return fig
 
+
+def build_event_spans_from_packed_times(
+    packed_times_path: str,
+    *,
+    start_sec: Optional[float] = None,
+    end_sec: Optional[float] = None,
+    max_events: Optional[int] = None,
+    color: str = "#e94560",
+    alpha: float = 0.15,
+    style: str = "span",
+) -> List[Dict]:
+    """
+    Build event spans (for plot_seeg_segment events=...) from packedTimes.
+
+    Parameters
+    ----------
+    packed_times_path : str
+        Path to *_packedTimes.npy
+    start_sec, end_sec : float, optional
+        Only include events overlapping [start_sec, end_sec]
+    max_events : int, optional
+        Limit number of events for visualization
+    color, alpha, style : str/float
+        Event drawing style for plot_seeg_segment
+    """
+    packed = np.load(packed_times_path, allow_pickle=True)
+    spans: List[Dict] = []
+    count = 0
+    for s, e in packed:
+        s = float(s)
+        e = float(e)
+        if start_sec is not None and e < float(start_sec):
+            continue
+        if end_sec is not None and s > float(end_sec):
+            continue
+        spans.append(
+            {
+                "start": s,
+                "end": e,
+                "color": color,
+                "alpha": float(alpha),
+                "style": style,
+            }
+        )
+        count += 1
+        if max_events is not None and count >= int(max_events):
+            break
+    return spans
+
+
+def plot_bandpassed_segment_from_cache(
+    *,
+    cache_npz_path: str,
+    packed_times_path: str,
+    start_sec: float = 0.0,
+    duration_sec: float = 10.0,
+    channels: Union[str, List[str], List[int]] = "all",
+    mode: str = "bandpassed",  # "bandpassed"|"envelope"
+    color_by_shaft: bool = True,
+    event_alpha: float = 0.15,
+    max_events: Optional[int] = None,
+    title: Optional[str] = None,
+    figsize: Optional[Tuple[float, float]] = None,
+) -> plt.Figure:
+    """
+    Plot a bandpassed waveform (or envelope) segment from *_envCache.npz with event shading.
+    """
+    from .group_event_analysis import load_envelope_cache
+
+    meta = load_envelope_cache(cache_npz_path)
+    sfreq = float(meta["sfreq"])
+    ch_names = list(meta["ch_names"])
+    x_band = meta.get("x_band", None)
+    env = meta.get("env", None)
+
+    if mode not in ("bandpassed", "envelope"):
+        raise ValueError("mode must be 'bandpassed' or 'envelope'")
+    if mode == "bandpassed" and x_band is None:
+        raise ValueError("Cache does not contain x_band. Regenerate with save_bandpass=True.")
+    if mode == "envelope" and env is None:
+        raise ValueError("Cache does not contain env.")
+
+    data = x_band if mode == "bandpassed" else env
+    events = build_event_spans_from_packed_times(
+        packed_times_path,
+        start_sec=float(start_sec),
+        end_sec=float(start_sec + duration_sec),
+        max_events=max_events,
+        alpha=float(event_alpha),
+        style="span",
+    )
+    return plot_seeg_segment(
+        data=data,
+        sfreq=sfreq,
+        ch_names=ch_names,
+        start_sec=float(start_sec),
+        duration_sec=float(duration_sec),
+        channels=channels,
+        title=title,
+        reference_type="bipolar",
+        color_by_shaft=bool(color_by_shaft),
+        events=events,
+        figsize=figsize,
+    )
+
+
+def plot_channel_waveform_and_envelope_from_cache(
+    *,
+    cache_npz_path: str,
+    packed_times_path: str,
+    channel: str,
+    start_sec: float = 0.0,
+    duration_sec: float = 2.0,
+    event_alpha: float = 0.15,
+    max_events: Optional[int] = None,
+    figsize: Tuple[float, float] = (12, 4),
+    waveform_color: str = "#111111",
+    envelope_color: str = "#1f77b4",
+) -> plt.Figure:
+    """
+    Two-panel view:
+      Left  - bandpassed waveform (x_band)
+      Right - envelope (env)
+    Both panels overlay group-event shading.
+    """
+    from .group_event_analysis import load_envelope_cache
+
+    meta = load_envelope_cache(cache_npz_path)
+    sfreq = float(meta["sfreq"])
+    ch_names = list(meta["ch_names"])
+    x_band = meta.get("x_band", None)
+    env = meta.get("env", None)
+
+    if x_band is None or env is None:
+        raise ValueError("Cache must contain both x_band and env.")
+    if channel not in ch_names:
+        raise ValueError(f"Channel '{channel}' not found in cache.")
+
+    idx = ch_names.index(channel)
+    s0 = int(round(float(start_sec) * sfreq))
+    s1 = int(round(float(start_sec + duration_sec) * sfreq))
+    s1 = min(s1, x_band.shape[1])
+
+    t = np.arange(s0, s1) / sfreq
+    x = x_band[idx, s0:s1]
+    e = env[idx, s0:s1]
+
+    events = build_event_spans_from_packed_times(
+        packed_times_path,
+        start_sec=float(start_sec),
+        end_sec=float(start_sec + duration_sec),
+        max_events=max_events,
+        alpha=float(event_alpha),
+        style="span",
+    )
+
+    fig, axes = plt.subplots(1, 2, figsize=figsize, sharex=True)
+    ax0, ax1 = axes
+
+    ax0.plot(t, x, color=waveform_color, linewidth=0.8)
+    ax0.set_title(f"{channel} bandpassed waveform", fontweight="bold")
+    ax0.set_xlabel("Time (s)")
+    ax0.set_ylabel("Amplitude")
+
+    ax1.plot(t, e, color=envelope_color, linewidth=0.8)
+    ax1.set_title(f"{channel} envelope", fontweight="bold")
+    ax1.set_xlabel("Time (s)")
+    ax1.set_ylabel("Envelope")
+
+    for ev in events:
+        ax0.axvspan(ev["start"], ev["end"], color=ev["color"], alpha=ev["alpha"])
+        ax1.axvspan(ev["start"], ev["end"], color=ev["color"], alpha=ev["alpha"])
+
+    for ax in axes:
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.grid(alpha=0.2)
+
+    plt.tight_layout()
+    return fig
+
+def plot_paper_fig1_bandpassed_traces(
+    *,
+    cache_npz_path: str,
+    packed_times_path: str,
+    channel_order: Optional[List[str]] = None,
+    event_indices: Optional[List[int]] = None,
+    max_events: int = 30,
+    downsample_ms: Optional[float] = None,
+    figsize: Tuple[float, float] = (16, 10),
+) -> plt.Figure:
+    """
+    Paper-like Fig1:
+      - bandpassed waveform traces (80–250Hz in ripple cache)
+      - channels stacked (y)
+      - concatenated packedTimes windows (x)
+
+    This is a thin wrapper around `plot_group_events_band_raster` with "paper defaults".
+    """
+    fig = plot_group_events_band_raster(
+        cache_npz_path=cache_npz_path,
+        packed_times_path=packed_times_path,
+        channel_order=channel_order,
+        event_indices=event_indices,
+        max_events=int(max_events),
+        mode="bandpassed",
+        plot_style="trace",
+        robust_scale=False,  # waveform view should not use MAD z-scoring by default
+        value_transform="none",
+        downsample_ms=downsample_ms,
+        x_axis="seconds",
+        trace_normalize="p99",
+        trace_scale_percentile=99.0,
+        trace_lw=0.55,
+        trace_alpha=0.9,
+        trace_spacing=3.2,
+        show_event_boundaries=True,
+        boundary_lw=0.3,
+        boundary_alpha=0.35,
+        figsize=figsize,
+    )
+    ax = fig.axes[0]
+    # Typography + frame polish: close to typical paper Fig1 style
+    ax.set_title("80–250 Hz bandpassed traces (concatenated events)", fontweight="bold")
+    ax.spines["left"].set_visible(False)
+    ax.tick_params(axis="y", length=0)
+    ax.margins(x=0.0)
+    fig.tight_layout()
+    return fig
+
+
+def plot_raw_segment_from_cache(
+    *,
+    raw_cache_npz_path: str,
+    packed_times_path: str,
+    start_sec: float = 0.0,
+    duration_sec: float = 10.0,
+    channels: Union[str, List[str], List[int]] = "all",
+    color_by_shaft: bool = True,
+    event_alpha: float = 0.15,
+    max_events: Optional[int] = None,
+    title: Optional[str] = None,
+    figsize: Optional[Tuple[float, float]] = None,
+) -> plt.Figure:
+    """
+    Plot raw waveform segment from *_rawCache_*.npz with group-event shading.
+    """
+    from .preprocessing import load_raw_cache
+
+    meta = load_raw_cache(raw_cache_npz_path)
+    data = np.asarray(meta["data"])
+    sfreq = float(np.asarray(meta["sfreq"]).ravel()[0])
+    ch_names = [str(x) for x in meta["ch_names"]]
+
+    events = build_event_spans_from_packed_times(
+        packed_times_path,
+        start_sec=float(start_sec),
+        end_sec=float(start_sec + duration_sec),
+        max_events=max_events,
+        alpha=float(event_alpha),
+        style="span",
+    )
+
+    return plot_seeg_segment(
+        data=data,
+        sfreq=sfreq,
+        ch_names=ch_names,
+        start_sec=float(start_sec),
+        duration_sec=float(duration_sec),
+        channels=channels,
+        title=title,
+        reference_type=str(np.asarray(meta.get("reference_type", ["unknown"])).ravel()[0]),
+        color_by_shaft=bool(color_by_shaft),
+        events=events,
+        figsize=figsize,
+    )
+
+
+def plot_raw_segment_from_edf(
+    *,
+    edf_path: str,
+    packed_times_path: str,
+    start_sec: float = 0.0,
+    duration_sec: float = 10.0,
+    channels: Union[str, List[str], List[int]] = "all",
+    reference: str = "none",
+    color_by_shaft: bool = True,
+    event_alpha: float = 0.15,
+    max_events: Optional[int] = None,
+    title: Optional[str] = None,
+    figsize: Optional[Tuple[float, float]] = None,
+) -> plt.Figure:
+    """
+    Plot raw EDF waveform segment with group-event shading.
+
+    This uses SEEGPreprocessor(reference='none') to read raw data.
+    """
+    try:
+        from .preprocessing import SEEGPreprocessor
+    except Exception as exc:
+        raise ImportError("SEEGPreprocessor unavailable; ensure dependencies (mne) are installed.") from exc
+
+    pre = SEEGPreprocessor(reference=reference, crop_seconds=float(start_sec + duration_sec))
+    res = pre.run(str(edf_path))
+    events = build_event_spans_from_packed_times(
+        packed_times_path,
+        start_sec=float(start_sec),
+        end_sec=float(start_sec + duration_sec),
+        max_events=max_events,
+        alpha=float(event_alpha),
+        style="span",
+    )
+    return plot_seeg_segment(
+        data=res.data,
+        sfreq=res.sfreq,
+        ch_names=res.ch_names,
+        start_sec=float(start_sec),
+        duration_sec=float(duration_sec),
+        channels=channels,
+        title=title,
+        reference_type=res.reference_type,
+        color_by_shaft=bool(color_by_shaft),
+        events=events,
+        figsize=figsize,
+    )
 
 def plot_group_events_tf_centroids_per_channel(
     *,
@@ -913,7 +1261,8 @@ def plot_group_events_tf_centroids_per_channel(
             elif centroid_power != "power":
                 raise ValueError("centroid_power must be 'power' or 'power2'")
             denom = float(np.sum(W))
-            if denom <= 1e-12:
+            # Lower threshold: power^2 on small signals can be very small
+            if denom <= 1e-30:
                 continue
             if float(centroid_min_total_power) > 0.0 and denom < float(centroid_min_total_power):
                 continue
@@ -1010,12 +1359,15 @@ def plot_group_events_tf_centroid_paths(
     blob_sigma_ms: float = 20.0,
     power_gamma: float = 1.0,
     power_threshold: float = 0.05,
+    smooth_sigma_ms: Optional[float] = 8.0,
+    normalize_0_1: bool = True,
+    show_colorbar: bool = True,
+    colorbar_label: str = "Normalized TF power",
     figsize: Tuple[float, float] = (12, 8),
 ) -> plt.Figure:
     """
-    Figure 2 (paper-like): TF-power background + centroid dots and per-event path.
+    Figure 2 (paper-like): normalized TF-derived background + centroid dots + per-event path.
 
-    Background:
     Background:
       - Compute STFT power on bandpassed signal for each event, sum across frequencies in freq_band
         to get a time-power curve (still TF-derived).
@@ -1138,6 +1490,24 @@ def plot_group_events_tf_centroid_paths(
             else:
                 raise ValueError("background_mode must be 'tp' or 'blob'")
 
+    # Optional smoothing (paper figures are almost never "pixel-noisy")
+    if smooth_sigma_ms is not None and float(smooth_sigma_ms) > 0 and bg.size > 0:
+        try:
+            from scipy.ndimage import gaussian_filter1d
+
+            sigma_samp = float(smooth_sigma_ms) * 1e-3 * float(sfreq)
+            sigma_samp = max(0.5, sigma_samp)
+            bg = gaussian_filter1d(bg, sigma=sigma_samp, axis=1, mode="nearest")
+        except Exception:
+            pass
+
+    # Normalize to [0,1] for an interpretable paper-like colorbar.
+    if bool(normalize_0_1) and bg.size > 0:
+        vmax = float(np.nanmax(bg)) if np.isfinite(bg).any() else 0.0
+        if vmax > 1e-12:
+            bg = (bg / vmax).astype(np.float32, copy=False)
+        bg = np.clip(bg, 0.0, 1.0).astype(np.float32, copy=False)
+
     fig, ax = plt.subplots(figsize=figsize)
     if x_axis not in ("seconds", "samples"):
         raise ValueError("x_axis must be 'seconds' or 'samples'")
@@ -1148,10 +1518,19 @@ def plot_group_events_tf_centroid_paths(
         extent = (0.0, float(total_len), float(len(labels)), 0.0)
         xlabel = "Concatenated event samples"
 
-    ax.imshow(bg, aspect="auto", cmap="Blues", interpolation="nearest", origin="upper", vmin=0.0, vmax=1.0, extent=extent)
+    im = ax.imshow(
+        bg,
+        aspect="auto",
+        cmap="Blues",
+        interpolation="nearest",
+        origin="upper",
+        vmin=0.0,
+        vmax=1.0 if bool(normalize_0_1) else None,
+        extent=extent,
+    )
     ax.set_yticks(np.arange(len(labels)))
     ax.set_yticklabels(labels, fontsize=8)
-    ax.set_title("TF-derived power + centroid paths (concatenated events)", fontweight="bold")
+    ax.set_title("Normalized spectrogram (TF-derived) + centroid paths", fontweight="bold")
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Channels")
 
@@ -1181,7 +1560,308 @@ def plot_group_events_tf_centroid_paths(
                 xs2 = [x / sfreq for x in xs2]
             ax.plot(xs2, ys2, color=cfg.event_line_color, alpha=cfg.event_line_alpha, linewidth=1.0)
 
+    # paper-like frame cleanup
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.margins(x=0.0)
+
+    if show_colorbar:
+        cb = fig.colorbar(im, ax=ax, fraction=0.028, pad=0.02)
+        cb.set_label(str(colorbar_label))
+        cb.ax.tick_params(labelsize=10)
+
     plt.tight_layout()
+    return fig
+
+
+def plot_paper_fig2_normalized_spectrogram(
+    *,
+    cache_npz_path: str,
+    packed_times_path: str,
+    detections_npz_path: Optional[str] = None,
+    group_analysis_npz_path: Optional[str] = None,
+    channel_order: Optional[List[str]] = None,
+    event_indices: Optional[List[int]] = None,
+    max_events: int = 30,
+    freq_band: Tuple[float, float] = (80.0, 250.0),
+    nperseg: int = 128,
+    noverlap: int = 96,
+    centroid_marker_size: float = 30.0,
+    centroid_marker_color: str = "#d62728",
+    centroid_edge_color: str = "black",
+    path_line_width: float = 1.2,
+    path_line_alpha: float = 0.85,
+    show_colorbar: bool = True,
+    cmap: str = "Blues",
+    figsize: Tuple[float, float] = (16, 10),
+) -> plt.Figure:
+    """
+    Paper-like Fig2: Per-channel STFT spectrogram (y=frequency) + TF centroids + cross-channel paths.
+
+    **REFACTORED 2026-01-16**: If group_analysis_npz_path is provided, reads pre-computed TF centroids
+    from *_groupAnalysis.npz instead of computing them (following new architecture).
+
+    Structure (matching the paper screenshot):
+      - Each channel gets its own subplot (vertically stacked)
+      - Each subplot has y-axis = frequency (within freq_band)
+      - Background is the STFT power spectrogram (computed on-the-fly for visualization)
+      - Red dots mark the TF centroid (time, frequency) per event per channel
+      - Red lines connect centroids across channels within each event (sorted by time)
+    
+    Parameters
+    ----------
+    cache_npz_path : str
+        Path to *_envCache.npz (contains bandpassed signal)
+    packed_times_path : str
+        Path to *_packedTimes.npy
+    detections_npz_path : str, optional
+        Path to *_gpu.npz (for events_bool mask). Only used if group_analysis_npz_path is None.
+    group_analysis_npz_path : str, optional
+        Path to *_groupAnalysis.npz (contains pre-computed TF centroids).
+        If provided, reads centroids from here instead of computing.
+    channel_order, event_indices, max_events : ...
+        Channel and event selection
+    freq_band : tuple
+        Frequency band for STFT display
+    ...
+    
+    Returns
+    -------
+    fig : plt.Figure
+    """
+    from scipy.signal import stft
+    from .group_event_analysis import load_envelope_cache, load_group_analysis_results
+
+    meta = load_envelope_cache(cache_npz_path)
+    x_band = meta.get("x_band", None)
+    if x_band is None:
+        raise ValueError("Cache does not contain x_band. Regenerate with save_bandpass=True.")
+
+    sfreq = float(meta["sfreq"])
+    ch_names = [str(x) for x in meta["ch_names"]]
+    packed = np.load(packed_times_path, allow_pickle=True)
+
+    if event_indices is None:
+        event_indices = list(range(min(int(max_events), packed.shape[0])))
+    else:
+        event_indices = [int(i) for i in event_indices][: int(max_events)]
+
+    if channel_order is None:
+        channel_order = ch_names
+    idx_map = {c: i for i, c in enumerate(ch_names)}
+    rows = [idx_map[c] for c in channel_order if c in idx_map]
+    labels = [c for c in channel_order if c in idx_map]
+    if not rows:
+        raise ValueError("No channels matched channel_order.")
+
+    # Build concatenated signal per channel + event boundaries
+    boundaries_s = [0.0]
+    segs_idx = []
+    event_times = []
+    for eidx in event_indices:
+        s, e = float(packed[eidx, 0]), float(packed[eidx, 1])
+        i0 = int(round(s * sfreq))
+        i1 = int(round(e * sfreq))
+        segs_idx.append((i0, i1))
+        event_times.append((s, e))
+        boundaries_s.append(boundaries_s[-1] + float(i1 - i0) / sfreq)
+
+    n_ch = len(rows)
+    n_ev = len(event_indices)
+
+    # NEW: Load pre-computed centroids if available
+    use_precomputed = group_analysis_npz_path is not None
+    if use_precomputed:
+        ga = load_group_analysis_results(group_analysis_npz_path)
+        tf_centroid_time = ga.get('tf_centroid_time')
+        tf_centroid_freq = ga.get('tf_centroid_freq')
+        ga_events_bool = ga.get('events_bool')
+        if tf_centroid_time is None or tf_centroid_freq is None:
+            warnings.warn("TF centroids not in groupAnalysis, falling back to on-the-fly computation")
+            use_precomputed = False
+        else:
+            ga_idx_map = {c: i for i, c in enumerate(ga['ch_names'])}
+            ga_rows = [ga_idx_map.get(lbl) for lbl in labels]
+
+    # Fallback: build events_bool from detections_npz
+    if not use_precomputed:
+        events_bool = np.zeros((n_ch, n_ev), dtype=bool)
+        if detections_npz_path is not None:
+            gpu = np.load(detections_npz_path, allow_pickle=True)
+            det_names = [str(x) for x in gpu["chns_names"].tolist()]
+            name_to_i = {n: i for i, n in enumerate(det_names)}
+            for ci, ch in enumerate(labels):
+                if ch not in name_to_i:
+                    continue
+                det_times = np.asarray(gpu["whole_dets"][name_to_i[ch]])
+                if det_times.size == 0:
+                    continue
+                for ej, (ev_s, ev_e) in enumerate(event_times):
+                    if np.any((det_times[:, 1] > ev_s) & (det_times[:, 0] < ev_e)):
+                        events_bool[ci, ej] = True
+        else:
+            events_bool[:, :] = True
+
+    # Create figure
+    fig, axes = plt.subplots(
+        n_ch, 1,
+        figsize=figsize,
+        sharex=True,
+        gridspec_kw={"hspace": 0.02},
+    )
+    if n_ch == 1:
+        axes = [axes]
+
+    all_centroids = [[None for _ in range(n_ev)] for _ in range(n_ch)]
+
+    # Pass 1: compute STFT + centroids (or read pre-computed centroids)
+    per_channel_data = []
+    v99_list = []
+
+    for ci, row in enumerate(rows):
+        # Concatenate signal for STFT visualization
+        x_cat = np.concatenate([np.asarray(x_band[row, i0:i1]) for (i0, i1) in segs_idx], axis=0)
+        nwin = x_cat.shape[0]
+        nps = min(int(nperseg), max(16, nwin))
+        nov = min(int(noverlap), max(0, nps - 1))
+
+        f, t, Z = stft(x_cat, fs=sfreq, nperseg=nps, noverlap=nov, boundary=None)
+        P = (np.abs(Z) ** 2).astype(np.float64)
+        band_mask = (f >= float(freq_band[0])) & (f <= float(freq_band[1]))
+        f_band = f[band_mask]
+        P_band = P[band_mask, :]
+        P_show = np.log1p(P_band)
+
+        if np.isfinite(P_show).any():
+            v99_list.append(float(np.nanpercentile(P_show, 99)))
+
+        # TF centroids: read from groupAnalysis or compute
+        if use_precomputed:
+            ga_ci = ga_rows[ci]
+            if ga_ci is not None:
+                for ej, global_ej in enumerate(event_indices):
+                    if ga_events_bool[ga_ci, global_ej]:
+                        t_c_abs = float(tf_centroid_time[ga_ci, global_ej])
+                        f_c = float(tf_centroid_freq[ga_ci, global_ej])
+                        if np.isfinite(t_c_abs) and np.isfinite(f_c):
+                            # tf_centroid_time is in seconds within event window,
+                            # convert to concatenated timeline
+                            t_c_concat = boundaries_s[ej] + t_c_abs
+                            all_centroids[ci][ej] = (t_c_concat, f_c)
+        else:
+            # Fallback: compute on-the-fly
+            for ej in range(n_ev):
+                if not events_bool[ci, ej]:
+                    continue
+                t0, t1 = boundaries_s[ej], boundaries_s[ej + 1]
+                cols = (t >= t0) & (t < t1)
+                if not np.any(cols):
+                    continue
+                W = P_band[:, cols]
+                denom = float(np.sum(W))
+                if denom <= 1e-20:
+                    continue
+                t_sel = t[cols]
+                t_c = float(np.sum(W * t_sel[None, :]) / denom)
+                f_c = float(np.sum(W * f_band[:, None]) / denom)
+                all_centroids[ci][ej] = (t_c, f_c)
+
+        per_channel_data.append({
+            "t": t,
+            "f_band": f_band,
+            "P_show": P_show,
+            "label": labels[ci],
+        })
+
+    shared_vmax = max(v99_list) if v99_list else 1.0
+    shared_vmax = max(shared_vmax, 1e-12)
+
+    # Pass 2: plot
+    last_im = None
+    for ci, (ax, data) in enumerate(zip(axes, per_channel_data)):
+        last_im = ax.pcolormesh(
+            data["t"],
+            data["f_band"],
+            data["P_show"],
+            shading="auto",
+            cmap=cmap,
+            vmin=0.0,
+            vmax=shared_vmax,
+        )
+
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.tick_params(axis="both", which="both", labelsize=10)
+
+        if ci != n_ch - 1:
+            ax.tick_params(axis="x", bottom=False, labelbottom=False)
+
+        ax.set_ylabel(data["label"], fontsize=11, rotation=0, labelpad=25, va="center")
+        ax.set_yticks([])
+
+        for b in boundaries_s[1:-1]:
+            ax.axvline(b, color="k", linewidth=0.4, linestyle="--", alpha=0.4)
+
+        # Centroid dots
+        for ej in range(n_ev):
+            pt = all_centroids[ci][ej]
+            if pt is not None:
+                ax.scatter(
+                    [pt[0]], [pt[1]],
+                    s=float(centroid_marker_size),
+                    c=centroid_marker_color,
+                    alpha=0.95,
+                    linewidths=0.5,
+                    edgecolors=centroid_edge_color,
+                    zorder=5,
+                )
+
+        ax.set_xlim(boundaries_s[0], boundaries_s[-1])
+        ax.margins(x=0.0)
+
+    # Pass 3: cross-channel paths (top-to-bottom channel order)
+    for ej in range(n_ev):
+        event_pts = []
+        for ci in range(n_ch):
+            pt = all_centroids[ci][ej]
+            if pt is not None:
+                event_pts.append((pt[0], pt[1], ci, axes[ci]))
+        if len(event_pts) < 2:
+            continue
+        # keep channel order; do not sort by time
+        from matplotlib.patches import ConnectionPatch
+        for k in range(len(event_pts) - 1):
+            t1, f1, ci1, ax1 = event_pts[k]
+            t2, f2, ci2, ax2 = event_pts[k + 1]
+            con = ConnectionPatch(
+                xyA=(t1, f1), coordsA=ax1.transData,
+                xyB=(t2, f2), coordsB=ax2.transData,
+                color=centroid_marker_color,
+                linewidth=float(path_line_width),
+                alpha=float(path_line_alpha),
+                zorder=4,
+            )
+            fig.add_artist(con)
+
+    axes[0].set_title(
+        f"Normalized Spectrogram ({freq_band[0]:.0f}–{freq_band[1]:.0f} Hz)",
+        fontsize=14,
+        fontweight="bold",
+    )
+    axes[-1].set_xlabel("Time (s)", fontsize=12)
+
+    if show_colorbar and last_im is not None:
+        cb = fig.colorbar(last_im, ax=axes, fraction=0.018, pad=0.015)
+        cb.set_label("log1p(power)", fontsize=11)
+        cb.ax.tick_params(labelsize=10)
+
+    fig.subplots_adjust(hspace=0.02)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            plt.tight_layout()
+        except Exception:
+            pass
     return fig
 
 
@@ -1246,6 +1926,420 @@ def plot_lag_heatmaps(
     fig3 = _imshow(l, "Lag (ms) aligned to first centroid", cmap_lag, vmin=-v if v is not None else None, vmax=v)
     return fig1, fig2, fig3
 
+
+def plot_lag_heatmaps_from_group_analysis(
+    *,
+    group_analysis_npz: str,
+    env_cache_npz: str,
+    packed_times_npy: str,
+    channel_names: Optional[List[str]] = None,
+    max_events: int = 100,
+    cmap_energy: str = "viridis",
+    cmap_lag: str = "RdYlBu_r",
+    cmap_rank: str = "magma",
+    figsize: Tuple[float, float] = (14, 4),
+) -> Tuple[plt.Figure, plt.Figure, plt.Figure]:
+    """
+    Plot lag/rank/energy heatmaps directly from *_groupAnalysis.npz + *_envCache.npz.
+    
+    This is the HIGH-LEVEL convenience function: it reads pre-computed results and plots.
+    NO computation is done here (following the architecture refactor).
+    
+    Parameters
+    ----------
+    group_analysis_npz : str
+        Path to *_groupAnalysis.npz (contains lag_raw, lag_rank, events_bool, etc.)
+    env_cache_npz : str
+        Path to *_envCache.npz (contains envelope for energy calculation)
+    packed_times_npy : str
+        Path to *_packedTimes.npy (event windows)
+    channel_names : List[str], optional
+        Subset of channels to plot. If None, use all channels from group analysis.
+    max_events : int
+        Maximum number of events to plot (default 100)
+    cmap_energy, cmap_lag, cmap_rank : str
+        Colormaps for each heatmap
+    figsize : tuple
+        Figure size
+        
+    Returns
+    -------
+    fig_energy, fig_rank, fig_lag : plt.Figure
+        Three matplotlib figures
+    """
+    from .group_event_analysis import load_group_analysis_results, load_envelope_cache
+    
+    # Load pre-computed results
+    ga = load_group_analysis_results(group_analysis_npz)
+    cache = load_envelope_cache(env_cache_npz)
+    packed = np.load(packed_times_npy, allow_pickle=True)
+    
+    # Select channels
+    if channel_names is None:
+        channel_names = ga['ch_names']
+        ch_indices = list(range(ga['n_channels']))
+    else:
+        ch_name_to_idx = {n: i for i, n in enumerate(ga['ch_names'])}
+        ch_indices = [ch_name_to_idx[ch] for ch in channel_names if ch in ch_name_to_idx]
+        channel_names = [ch for ch in channel_names if ch in ch_name_to_idx]
+    
+    if len(ch_indices) == 0:
+        raise ValueError("No matching channels found")
+    
+    # Limit events
+    n_events = min(max_events, ga['n_events'])
+    
+    # Extract matrices
+    lag_raw = ga['lag_raw'][ch_indices, :n_events]
+    lag_rank = ga['lag_rank'][ch_indices, :n_events]
+    events_bool = ga['events_bool'][ch_indices, :n_events]
+    
+    # Compute energy from envelope cache
+    sf = cache['sfreq']
+    cache_name_to_idx = {n: i for i, n in enumerate(cache['ch_names'])}
+    cache_ch_indices = [cache_name_to_idx.get(ch) for ch in channel_names]
+    cache_ch_indices = [i for i in cache_ch_indices if i is not None]
+    
+    energy = np.full((len(ch_indices), n_events), np.nan, dtype=np.float64)
+    for ei in range(n_events):
+        if ei >= len(packed):
+            break
+        s, e = float(packed[ei, 0]), float(packed[ei, 1])
+        i0, i1 = int(round(s * sf)), int(round(e * sf))
+        i0, i1 = max(0, i0), min(cache['env'].shape[1], i1)
+        if i1 <= i0:
+            continue
+        for ci, cache_ci in enumerate(cache_ch_indices):
+            if ci < len(ch_indices) and events_bool[ci, ei]:
+                env_seg = cache['env'][cache_ci, i0:i1].astype(np.float64)
+                energy[ci, ei] = float(np.sum(env_seg ** 2))
+    
+    # Plot
+    return plot_lag_heatmaps(
+        energy=energy,
+        lag_ms=lag_raw * 1000.0,
+        rank=lag_rank,
+        ch_names=channel_names,
+        event_ids=list(range(n_events)),
+        cmap_energy=cmap_energy,
+        cmap_lag=cmap_lag,
+        cmap_rank=cmap_rank,
+        figsize=figsize,
+    )
+
+
+def plot_lag_statistics(
+    *,
+    group_analysis_npz: str,
+    patient_id: str = "",
+    record_id: str = "",
+    figsize: Tuple[float, float] = (15, 4),
+) -> plt.Figure:
+    """
+    Plot statistical analysis from *_groupAnalysis.npz:
+      1. Lag distribution (ms)
+      2. Rank distribution (0=earliest)
+      3. Channel participation rate (%)
+    
+    This reads pre-computed lag/rank/events_bool and plots statistics.
+    NO computation is done here.
+    
+    Parameters
+    ----------
+    group_analysis_npz : str
+        Path to *_groupAnalysis.npz
+    patient_id, record_id : str
+        Optional identifiers for plot title
+    figsize : tuple
+        Figure size
+        
+    Returns
+    -------
+    fig : plt.Figure
+    """
+    from .group_event_analysis import load_group_analysis_results
+    
+    ga = load_group_analysis_results(group_analysis_npz)
+    lag_raw = ga['lag_raw']
+    lag_rank = ga['lag_rank']
+    events_bool = ga['events_bool']
+    
+    fig, axes = plt.subplots(1, 3, figsize=figsize)
+    
+    # 1. Lag distribution
+    valid_lags = lag_raw[events_bool]
+    valid_lags = valid_lags[np.isfinite(valid_lags)]
+    if len(valid_lags) > 0:
+        axes[0].hist(valid_lags * 1000, bins=50, edgecolor='white', alpha=0.8, color='steelblue')
+        axes[0].set_xlabel('Relative Lag (ms)', fontsize=11)
+        axes[0].set_ylabel('Count', fontsize=11)
+        axes[0].set_title(f'Lag Distribution (n={len(valid_lags)})', fontweight='bold')
+        axes[0].axvline(0, color='red', linestyle='--', alpha=0.5, linewidth=1.5)
+        axes[0].grid(axis='y', alpha=0.3)
+    
+    # 2. Rank distribution
+    valid_ranks = lag_rank[events_bool]
+    valid_ranks = valid_ranks[valid_ranks >= 0]
+    if len(valid_ranks) > 0:
+        max_rank = int(valid_ranks.max())
+        axes[1].hist(valid_ranks, bins=np.arange(-0.5, max_rank + 1.5, 1), 
+                     edgecolor='white', alpha=0.8, color='mediumseagreen')
+        axes[1].set_xlabel('Rank (0=earliest)', fontsize=11)
+        axes[1].set_ylabel('Count', fontsize=11)
+        axes[1].set_title('Rank Distribution (0=source-like)', fontweight='bold')
+        axes[1].grid(axis='y', alpha=0.3)
+    
+    # 3. Channel participation rate
+    participation = np.mean(events_bool, axis=1) * 100
+    axes[2].barh(range(len(ga['ch_names'])), participation, color='coral', alpha=0.8)
+    axes[2].set_xlabel('Participation Rate (%)', fontsize=11)
+    axes[2].set_ylabel('Channel Index', fontsize=11)
+    axes[2].set_title('Channel Participation', fontweight='bold')
+    axes[2].invert_yaxis()
+    axes[2].grid(axis='x', alpha=0.3)
+    
+    title_str = 'Lag/Rank/Participation Analysis'
+    if patient_id or record_id:
+        title_str = f'{patient_id}/{record_id} — {title_str}'
+    plt.suptitle(title_str, fontsize=13, fontweight='bold')
+    plt.tight_layout()
+    return fig
+
+
+def plot_tf_centroid_statistics(
+    *,
+    group_analysis_npz: str,
+    patient_id: str = "",
+    record_id: str = "",
+    figsize: Tuple[float, float] = (12, 4),
+) -> plt.Figure:
+    """
+    Plot TF centroid statistics from *_groupAnalysis.npz:
+      1. TF frequency centroid distribution (Hz)
+      2. TF time centroid distribution (ms within event window)
+    
+    This reads pre-computed tf_centroid_time and tf_centroid_freq.
+    NO computation is done here.
+    
+    Parameters
+    ----------
+    group_analysis_npz : str
+        Path to *_groupAnalysis.npz
+    patient_id, record_id : str
+        Optional identifiers for plot title
+    figsize : tuple
+        Figure size
+        
+    Returns
+    -------
+    fig : plt.Figure or None
+        None if TF centroids are not available in the file
+    """
+    from .group_event_analysis import load_group_analysis_results
+    
+    ga = load_group_analysis_results(group_analysis_npz)
+    
+    if 'tf_centroid_time' not in ga or 'tf_centroid_freq' not in ga:
+        warnings.warn("TF centroids not found in groupAnalysis results")
+        return None
+    
+    tf_time = ga['tf_centroid_time']
+    tf_freq = ga['tf_centroid_freq']
+    mask = ga['events_bool']
+    
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    
+    # 1. Frequency centroid distribution
+    valid_freq = tf_freq[mask]
+    valid_freq = valid_freq[np.isfinite(valid_freq)]
+    if len(valid_freq) > 0:
+        axes[0].hist(valid_freq, bins=30, edgecolor='white', alpha=0.8, color='mediumorchid')
+        mean_freq = np.mean(valid_freq)
+        axes[0].axvline(mean_freq, color='red', linestyle='--', linewidth=1.5, 
+                       label=f'mean={mean_freq:.1f}Hz')
+        axes[0].set_xlabel('TF Frequency Centroid (Hz)', fontsize=11)
+        axes[0].set_ylabel('Count', fontsize=11)
+        axes[0].set_title('TF Frequency Centroid Distribution', fontweight='bold')
+        axes[0].legend()
+        axes[0].grid(axis='y', alpha=0.3)
+    
+    # 2. Time centroid distribution
+    valid_time = tf_time[mask]
+    valid_time = valid_time[np.isfinite(valid_time)]
+    if len(valid_time) > 0:
+        axes[1].hist(valid_time * 1000, bins=30, edgecolor='white', alpha=0.8, color='darkorange')
+        mean_time = np.mean(valid_time) * 1000
+        axes[1].axvline(mean_time, color='red', linestyle='--', linewidth=1.5, 
+                       label=f'mean={mean_time:.1f}ms')
+        axes[1].set_xlabel('TF Time Centroid (ms)', fontsize=11)
+        axes[1].set_ylabel('Count', fontsize=11)
+        axes[1].set_title('TF Time Centroid Distribution', fontweight='bold')
+        axes[1].legend()
+        axes[1].grid(axis='y', alpha=0.3)
+    
+    title_str = 'TF Centroid Analysis'
+    if patient_id or record_id:
+        title_str = f'{patient_id}/{record_id} — {title_str}'
+    plt.suptitle(title_str, fontsize=13, fontweight='bold')
+    plt.tight_layout()
+    return fig
+
+
+def plot_channel_lag_distributions(
+    *,
+    group_analysis_npz: str,
+    channel_order: Optional[List[str]] = None,
+    bins: int = 40,
+    figsize: Tuple[float, float] = (6, 10),
+    color: str = "#7f7f7f",
+    centroid_color: str = "#d62728",
+    title: str = "Per-channel lag distributions",
+) -> plt.Figure:
+    """
+    Plot per-channel lag distributions (ridge-like), with a red centroid path
+    from top to bottom (channel order).
+    """
+    from .group_event_analysis import load_group_analysis_results
+
+    ga = load_group_analysis_results(group_analysis_npz)
+    lag_raw = np.asarray(ga["lag_raw"], dtype=np.float64) * 1000.0  # ms
+    events_bool = np.asarray(ga["events_bool"], dtype=bool)
+    ch_names = [str(x) for x in ga["ch_names"]]
+
+    if channel_order is None:
+        channel_order = ch_names
+    idx_map = {c: i for i, c in enumerate(ch_names)}
+    rows = [idx_map[c] for c in channel_order if c in idx_map]
+    labels = [c for c in channel_order if c in idx_map]
+    if not rows:
+        raise ValueError("No channels matched channel_order.")
+
+    # Determine global range for hist bins
+    vals_all = []
+    for r in rows:
+        v = lag_raw[r][events_bool[r]]
+        v = v[np.isfinite(v)]
+        if v.size:
+            vals_all.append(v)
+    if not vals_all:
+        raise ValueError("No valid lag values found for selected channels.")
+    v_all = np.concatenate(vals_all)
+    vmin, vmax = float(np.nanmin(v_all)), float(np.nanmax(v_all))
+    if vmin == vmax:
+        vmin -= 1.0
+        vmax += 1.0
+    bins_edges = np.linspace(vmin, vmax, int(bins) + 1)
+    bin_centers = (bins_edges[:-1] + bins_edges[1:]) / 2.0
+
+    fig, ax = plt.subplots(figsize=figsize)
+    centroid_path_x = []
+    centroid_path_y = []
+
+    for i, (r, lbl) in enumerate(zip(rows, labels)):
+        v = lag_raw[r][events_bool[r]]
+        v = v[np.isfinite(v)]
+        if v.size == 0:
+            continue
+        hist, _ = np.histogram(v, bins=bins_edges)
+        if hist.max() > 0:
+            hist = hist / hist.max()
+        y0 = len(labels) - 1 - i
+        ax.fill_between(bin_centers, y0, y0 + hist, color=color, alpha=0.6, linewidth=0.0)
+
+        centroid = float(np.mean(v))
+        centroid_path_x.append(centroid)
+        centroid_path_y.append(y0 + 0.5)
+
+    if len(centroid_path_x) >= 2:
+        ax.plot(centroid_path_x, centroid_path_y, color=centroid_color, linewidth=2.0, marker="o")
+
+    ax.set_yticks(np.arange(len(labels)))
+    ax.set_yticklabels(list(reversed(labels)))
+    ax.set_xlabel("Lag (ms)")
+    ax.set_ylabel("Channels")
+    ax.set_title(title, fontweight="bold")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    plt.tight_layout()
+    return fig
+
+
+def plot_channel_centroid_distributions(
+    *,
+    group_analysis_npz: str,
+    channel_order: Optional[List[str]] = None,
+    bins: int = 40,
+    figsize: Tuple[float, float] = (6, 10),
+    color: str = "#7f7f7f",
+    centroid_color: str = "#d62728",
+    title: str = "Per-channel centroid time distributions",
+) -> plt.Figure:
+    """
+    Plot per-channel centroid time distributions (ridge-like), with a red centroid path.
+    Uses centroid_time (seconds) from *_groupAnalysis.npz.
+    """
+    from .group_event_analysis import load_group_analysis_results
+
+    ga = load_group_analysis_results(group_analysis_npz)
+    centroid_time = np.asarray(ga["centroid_time"], dtype=np.float64) * 1000.0  # ms
+    events_bool = np.asarray(ga["events_bool"], dtype=bool)
+    ch_names = [str(x) for x in ga["ch_names"]]
+
+    if channel_order is None:
+        channel_order = ch_names
+    idx_map = {c: i for i, c in enumerate(ch_names)}
+    rows = [idx_map[c] for c in channel_order if c in idx_map]
+    labels = [c for c in channel_order if c in idx_map]
+    if not rows:
+        raise ValueError("No channels matched channel_order.")
+
+    vals_all = []
+    for r in rows:
+        v = centroid_time[r][events_bool[r]]
+        v = v[np.isfinite(v)]
+        if v.size:
+            vals_all.append(v)
+    if not vals_all:
+        raise ValueError("No valid centroid values found for selected channels.")
+    v_all = np.concatenate(vals_all)
+    vmin, vmax = float(np.nanmin(v_all)), float(np.nanmax(v_all))
+    if vmin == vmax:
+        vmin -= 1.0
+        vmax += 1.0
+    bins_edges = np.linspace(vmin, vmax, int(bins) + 1)
+    bin_centers = (bins_edges[:-1] + bins_edges[1:]) / 2.0
+
+    fig, ax = plt.subplots(figsize=figsize)
+    centroid_path_x = []
+    centroid_path_y = []
+
+    for i, (r, lbl) in enumerate(zip(rows, labels)):
+        v = centroid_time[r][events_bool[r]]
+        v = v[np.isfinite(v)]
+        if v.size == 0:
+            continue
+        hist, _ = np.histogram(v, bins=bins_edges)
+        if hist.max() > 0:
+            hist = hist / hist.max()
+        y0 = len(labels) - 1 - i
+        ax.fill_between(bin_centers, y0, y0 + hist, color=color, alpha=0.6, linewidth=0.0)
+
+        centroid = float(np.mean(v))
+        centroid_path_x.append(centroid)
+        centroid_path_y.append(y0 + 0.5)
+
+    if len(centroid_path_x) >= 2:
+        ax.plot(centroid_path_x, centroid_path_y, color=centroid_color, linewidth=2.0, marker="o")
+
+    ax.set_yticks(np.arange(len(labels)))
+    ax.set_yticklabels(list(reversed(labels)))
+    ax.set_xlabel("Centroid time (ms)")
+    ax.set_ylabel("Channels")
+    ax.set_title(title, fontweight="bold")
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    plt.tight_layout()
+    return fig
 
 def plot_event_counts(
     det_result,

@@ -841,6 +841,112 @@ class SEEGPreprocessor:
 # Convenience Functions
 # =============================================================================
 
+def save_raw_cache(
+    edf_path: Union[str, Path],
+    output_dir: Union[str, Path],
+    output_prefix: str,
+    *,
+    reference: str = "none",
+    include_channels: Optional[List[str]] = None,
+    exclude_channels: Optional[List[str]] = None,
+    crop_seconds: Optional[float] = None,
+) -> str:
+    """
+    Save raw waveform cache (no resample, no filtering) for visualization.
+
+    The cache is generated using preprocessing utilities (clean names + reference),
+    but skips resampling and filtering to preserve raw waveform.
+    """
+    edf_path = Path(edf_path)
+    if not edf_path.exists():
+        raise FileNotFoundError(f"EDF file not found: {edf_path}")
+
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out_path = output_dir / f"{output_prefix}_rawCache_{reference}.npz"
+
+    # Read EDF header for channel list
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        temp_raw = mne.io.read_raw_edf(edf_path, preload=False, verbose=False, encoding="latin1")
+    all_chs = temp_raw.ch_names
+
+    # Keep valid SEEG channels
+    keep_chs = [ch for ch in all_chs if ElectrodeParser.is_valid_seeg(ch)]
+    if not keep_chs:
+        raise ValueError("No valid SEEG channels found in EDF.")
+
+    # Load data
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        raw = mne.io.read_raw_edf(
+            edf_path,
+            include=keep_chs,
+            preload=False,
+            verbose=False,
+            encoding="latin1",
+        )
+
+    if crop_seconds is not None and crop_seconds < raw.times[-1]:
+        raw.crop(tmax=crop_seconds)
+    raw.load_data()
+
+    # Clean channel names
+    rename_map = {ch: ElectrodeParser.clean_name(ch) for ch in raw.ch_names}
+    raw.rename_channels(rename_map)
+
+    data = raw.get_data()
+    ch_names = list(raw.ch_names)
+    sfreq = float(raw.info["sfreq"])
+
+    # Apply explicit channel include/exclude after cleaning
+    excluded_channels: List[str] = []
+    if include_channels is not None:
+        include_set = set(include_channels)
+        keep_indices = [i for i, nm in enumerate(ch_names) if nm in include_set]
+        excluded_channels.extend([nm for nm in ch_names if nm not in include_set])
+        data = data[keep_indices]
+        ch_names = [ch_names[i] for i in keep_indices]
+    if exclude_channels is not None:
+        exclude_set = set(exclude_channels)
+        keep_indices = [i for i, nm in enumerate(ch_names) if nm not in exclude_set]
+        excluded_channels.extend([nm for nm in ch_names if nm in exclude_set])
+        data = data[keep_indices]
+        ch_names = [ch_names[i] for i in keep_indices]
+
+    # Apply reference (no filtering/resampling)
+    reference_type = "monopolar"
+    if reference == "bipolar":
+        ref = BipolarReferencer(allow_gap=2, exclude_last_n=0)
+        data, ch_names, _ = ref.compute_bipolar(data, ch_names)
+        reference_type = "bipolar"
+    elif reference == "car":
+        ref = CommonAverageReferencer()
+        data, ch_names = ref.compute_car(data, ch_names)
+        reference_type = "car"
+    elif reference == "none":
+        reference_type = "monopolar"
+    else:
+        raise ValueError("reference must be 'none'|'bipolar'|'car'")
+
+    np.savez_compressed(
+        out_path,
+        data=data.astype(np.float32, copy=False),
+        sfreq=np.array([sfreq], dtype=np.float64),
+        ch_names=np.array(ch_names),
+        reference_type=np.array([reference_type]),
+        original_ch_names=np.array(all_chs),
+        excluded_channels=np.array(sorted(set(excluded_channels))),
+    )
+    return str(out_path)
+
+
+def load_raw_cache(cache_npz_path: Union[str, Path]) -> Dict[str, np.ndarray]:
+    """Load raw cache saved by save_raw_cache()."""
+    meta = np.load(str(cache_npz_path), allow_pickle=True)
+    return {k: meta[k] for k in meta.files}
+
+
 def preprocess_edf(file_path: Union[str, Path],
                    target_band: str = 'ripple',
                    notch_freqs: Optional[List[float]] = None

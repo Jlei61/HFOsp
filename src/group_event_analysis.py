@@ -1520,3 +1520,481 @@ def validate_packedtimes_centroid_lagrank_against_lagpat(
         out["pairwise_n"] = float(total_pairs)
     return out
 
+
+# =============================================================================
+# NEW: TF Centroid Computation (moved from visualization.py)
+# =============================================================================
+
+
+def compute_tf_centroids(
+    *,
+    x_band: np.ndarray,
+    sfreq: float,
+    event_windows: np.ndarray,
+    events_bool: np.ndarray,
+    freq_band: Tuple[float, float] = (80.0, 250.0),
+    nperseg: int = 128,
+    noverlap: int = 96,
+    centroid_power: str = "power2",
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Compute TF 2D centroids (time, freq) for each (channel, event).
+
+    This function performs STFT on bandpassed signal and computes energy-weighted
+    centroid in time-frequency space.
+
+    Parameters
+    ----------
+    x_band : np.ndarray
+        Bandpassed signal (n_channels, n_samples).
+    sfreq : float
+        Sampling frequency.
+    event_windows : np.ndarray
+        (n_events, 2) [start, end] in seconds.
+    events_bool : np.ndarray
+        (n_channels, n_events) bool, True if channel participates.
+    freq_band : tuple
+        (f_low, f_high) for TF analysis.
+    nperseg : int
+        STFT window size.
+    noverlap : int
+        STFT overlap.
+    centroid_power : str
+        'power' or 'power2' for weighting.
+
+    Returns
+    -------
+    tf_centroid_time : np.ndarray
+        (n_channels, n_events) time centroid relative to window start (seconds).
+    tf_centroid_freq : np.ndarray
+        (n_channels, n_events) frequency centroid (Hz).
+    """
+    from scipy.signal import stft
+
+    n_ch, n_samples = x_band.shape
+    n_events = event_windows.shape[0]
+
+    tf_centroid_time = np.full((n_ch, n_events), np.nan, dtype=np.float64)
+    tf_centroid_freq = np.full((n_ch, n_events), np.nan, dtype=np.float64)
+
+    for ei in range(n_events):
+        win_start, win_end = float(event_windows[ei, 0]), float(event_windows[ei, 1])
+        i0 = int(round(win_start * sfreq))
+        i1 = int(round(win_end * sfreq))
+        i0 = max(0, i0)
+        i1 = min(n_samples, i1)
+        if i1 <= i0:
+            continue
+
+        for ci in range(n_ch):
+            if not events_bool[ci, ei]:
+                continue
+
+            seg = x_band[ci, i0:i1]
+            nwin = seg.shape[0]
+            nps = min(int(nperseg), max(8, nwin))
+            nov = min(int(noverlap), max(0, nps - 1))
+
+            f, t, Z = stft(seg, fs=sfreq, nperseg=nps, noverlap=nov, boundary=None)
+            P = (np.abs(Z) ** 2).astype(np.float64)
+
+            # Mask to freq_band
+            band_mask = (f >= freq_band[0]) & (f <= freq_band[1])
+            f_band = f[band_mask]
+            P_band = P[band_mask, :]
+
+            if P_band.size == 0:
+                continue
+
+            # Apply power weighting
+            if centroid_power == "power2":
+                W = P_band ** 2
+            elif centroid_power == "power":
+                W = P_band
+            else:
+                raise ValueError(f"centroid_power must be 'power' or 'power2', got '{centroid_power}'")
+
+            denom = float(np.sum(W))
+            if denom <= 1e-30:
+                continue
+
+            # 2D centroid
+            t_c = float(np.sum(W * t[None, :]) / denom)
+            f_c = float(np.sum(W * f_band[:, None]) / denom)
+
+            tf_centroid_time[ci, ei] = t_c
+            tf_centroid_freq[ci, ei] = f_c
+
+    return tf_centroid_time, tf_centroid_freq
+
+
+# =============================================================================
+# NEW: Group Analysis Results I/O
+# =============================================================================
+
+
+def save_group_analysis_results(
+    npz_path: str,
+    *,
+    sfreq: float,
+    band: str,
+    ch_names: Sequence[str],
+    event_windows: np.ndarray,
+    centroid_time: np.ndarray,
+    events_bool: np.ndarray,
+    lag_raw: np.ndarray,
+    lag_rank: np.ndarray,
+    tf_centroid_time: Optional[np.ndarray] = None,
+    tf_centroid_freq: Optional[np.ndarray] = None,
+) -> str:
+    """
+    Save group analysis results to a standardized npz file.
+
+    This is the canonical output of group_event_analysis.
+    Visualization and network_analysis should read from this file.
+
+    Parameters
+    ----------
+    npz_path : str
+        Output file path.
+    sfreq : float
+        Sampling frequency.
+    band : str
+        'ripple' or 'fast_ripple'.
+    ch_names : sequence of str
+        Channel names (n_ch,).
+    event_windows : np.ndarray
+        (n_events, 2) [start, end] in seconds.
+    centroid_time : np.ndarray
+        (n_ch, n_events) Hilbert envelope centroid (seconds, relative to window start).
+    events_bool : np.ndarray
+        (n_ch, n_events) channel participation.
+    lag_raw : np.ndarray
+        (n_ch, n_events) relative lag (aligned to earliest channel).
+    lag_rank : np.ndarray
+        (n_ch, n_events) dense rank (0=earliest, -1=non-participant).
+    tf_centroid_time : np.ndarray, optional
+        (n_ch, n_events) TF time centroid.
+    tf_centroid_freq : np.ndarray, optional
+        (n_ch, n_events) TF frequency centroid.
+
+    Returns
+    -------
+    npz_path : str
+        The output path (for chaining).
+    """
+    n_ch = len(ch_names)
+    n_events = event_windows.shape[0]
+    window_sec = float(np.median(event_windows[:, 1] - event_windows[:, 0]))
+
+    data = {
+        "sfreq": np.array([float(sfreq)], dtype=np.float64),
+        "band": np.array([str(band)], dtype=object),
+        "ch_names": np.array([str(x) for x in ch_names], dtype=object),
+        "window_sec": np.array([window_sec], dtype=np.float64),
+        "n_events": np.array([n_events], dtype=np.int64),
+        "n_channels": np.array([n_ch], dtype=np.int64),
+        "event_windows": np.asarray(event_windows, dtype=np.float64),
+        "centroid_time": np.asarray(centroid_time, dtype=np.float64),
+        "events_bool": np.asarray(events_bool, dtype=bool),
+        "lag_raw": np.asarray(lag_raw, dtype=np.float64),
+        "lag_rank": np.asarray(lag_rank, dtype=np.int64),
+    }
+
+    if tf_centroid_time is not None:
+        data["tf_centroid_time"] = np.asarray(tf_centroid_time, dtype=np.float64)
+    if tf_centroid_freq is not None:
+        data["tf_centroid_freq"] = np.asarray(tf_centroid_freq, dtype=np.float64)
+
+    np.savez_compressed(npz_path, **data)
+    return npz_path
+
+
+def load_group_analysis_results(npz_path: str) -> Dict:
+    """
+    Load group analysis results from npz file.
+
+    Returns a dict with standardized keys.
+    """
+    d = np.load(npz_path, allow_pickle=True)
+
+    out = {
+        "sfreq": float(np.asarray(d["sfreq"]).ravel()[0]),
+        "band": str(np.asarray(d["band"]).ravel()[0]),
+        "ch_names": [str(x) for x in np.asarray(d["ch_names"]).tolist()],
+        "window_sec": float(np.asarray(d["window_sec"]).ravel()[0]),
+        "n_events": int(np.asarray(d["n_events"]).ravel()[0]),
+        "n_channels": int(np.asarray(d["n_channels"]).ravel()[0]),
+        "event_windows": np.asarray(d["event_windows"]),
+        "centroid_time": np.asarray(d["centroid_time"]),
+        "events_bool": np.asarray(d["events_bool"]).astype(bool),
+        "lag_raw": np.asarray(d["lag_raw"]),
+        "lag_rank": np.asarray(d["lag_rank"]),
+    }
+
+    if "tf_centroid_time" in d:
+        out["tf_centroid_time"] = np.asarray(d["tf_centroid_time"])
+    if "tf_centroid_freq" in d:
+        out["tf_centroid_freq"] = np.asarray(d["tf_centroid_freq"])
+
+    return out
+
+
+def compute_and_save_group_analysis(
+    *,
+    edf_path: str,
+    output_dir: Optional[str] = None,
+    output_prefix: Optional[str] = None,
+    packed_times_path: Optional[str] = None,
+    gpu_npz_path: Optional[str] = None,
+    core_channels: Optional[List[str]] = None,
+    band: str = "ripple",
+    reference: str = "bipolar",
+    alias_bipolar_to_left: bool = True,
+    crop_seconds: Optional[float] = None,
+    use_gpu: bool = True,
+    save_env_cache: bool = True,
+    centroid_power: float = 2.0,
+    tf_nperseg: int = 128,
+    tf_noverlap: int = 96,
+) -> Dict[str, str]:
+    """
+    One-stop function to compute and save all group analysis results.
+
+    This is the recommended entry point for Module 3.
+
+    Workflow:
+    1. Load EDF and preprocess (bipolar/filter)
+    2. Get detections (from gpu_npz or run HFO detector)
+    3. Get event windows (from packed_times or build from detections)
+    4. Precompute envelope cache (optional save)
+    5. Compute centroid, lag, rank
+    6. Compute TF centroids
+    7. Save groupAnalysis.npz
+
+    Parameters
+    ----------
+    edf_path : str
+        Path to EDF file.
+    output_dir : str, optional
+        Output directory. Default: same as EDF.
+    output_prefix : str, optional
+        File name prefix. Default: EDF basename.
+    packed_times_path : str, optional
+        Path to packedTimes.npy. If None, build windows from detections.
+    gpu_npz_path : str, optional
+        Path to *_gpu.npz. If None, run HFO detector.
+    core_channels : list of str, optional
+        Core channels to analyze. If None, use all channels.
+    band : str
+        'ripple' or 'fast_ripple'.
+    reference : str
+        'bipolar', 'car', or 'none'.
+    alias_bipolar_to_left : bool
+        If True, alias 'A1-A2' to 'A1'.
+    crop_seconds : float, optional
+        Limit analysis to first N seconds.
+    use_gpu : bool
+        Use GPU for envelope computation.
+    save_env_cache : bool
+        If True, save envelope cache.
+    centroid_power : float
+        Power for envelope centroid (default 2.0).
+    tf_nperseg : int
+        STFT window size for TF centroids.
+    tf_noverlap : int
+        STFT overlap for TF centroids.
+
+    Returns
+    -------
+    dict with keys:
+        'group_analysis_path': str
+        'env_cache_path': str (if saved)
+    """
+    from pathlib import Path
+    from .preprocessing import SEEGPreprocessor
+
+    edf_path = str(edf_path)
+    edf_stem = Path(edf_path).stem
+
+    if output_dir is None:
+        output_dir = str(Path(edf_path).parent)
+    if output_prefix is None:
+        output_prefix = edf_stem
+
+    # Determine freq band
+    b = band.lower().strip()
+    if b in ("ripple", "ripples"):
+        freq_band = (80.0, 250.0)
+    elif b in ("fast_ripple", "fast-ripple", "fr", "fast"):
+        freq_band = (250.0, 500.0)
+    else:
+        raise ValueError(f"Unknown band='{band}'")
+
+    # Step 1: Preprocess
+    pre = SEEGPreprocessor(
+        target_band="fast_ripple" if "fast" in b else "ripple",
+        reference=reference,
+        crop_seconds=crop_seconds,
+        check_quality=False,
+        use_gpu=False,
+    )
+    pre_out = pre.run(edf_path)
+    data = np.asarray(pre_out.data)
+    names = [str(x) for x in pre_out.ch_names]
+    sfreq = float(pre_out.sfreq)
+
+    # Step 2: Alias bipolar names if needed
+    if alias_bipolar_to_left:
+        allowed = None
+        if gpu_npz_path is not None:
+            g = np.load(gpu_npz_path, allow_pickle=True)
+            allowed = set(str(x).upper() for x in g["chns_names"].tolist())
+
+        keep_idx: List[int] = []
+        alias_names: List[str] = []
+        for i, nm in enumerate(names):
+            if "-" not in nm:
+                continue
+            left, right = nm.split("-", 1)
+            left = left.strip().upper()
+            right = right.strip().upper()
+            if allowed is not None and (left not in allowed or right not in allowed):
+                continue
+            keep_idx.append(i)
+            alias_names.append(left)
+
+        data = data[keep_idx] if keep_idx else np.zeros((0, data.shape[1]), dtype=np.float64)
+        names = alias_names
+
+    # Step 3: Get detections
+    if gpu_npz_path is not None:
+        gpu = np.load(gpu_npz_path, allow_pickle=True)
+        gpu_names = [str(x) for x in gpu["chns_names"].tolist()]
+        name_to_idx = {n: i for i, n in enumerate(gpu_names)}
+        dets: Dict[str, np.ndarray] = {}
+        for ch in names:
+            ch_up = ch.upper()
+            if ch_up in name_to_idx:
+                dets[ch] = np.asarray(gpu["whole_dets"][name_to_idx[ch_up]], dtype=np.float64)
+            else:
+                dets[ch] = np.zeros((0, 2), dtype=np.float64)
+    else:
+        from .hfo_detector import HFODetector, HFODetectionConfig
+        cfg = HFODetectionConfig(algorithm="bqk", band=band, use_gpu=False)
+        det = HFODetector(cfg)
+        res = det.detect(data, sfreq=sfreq, ch_names=names)
+        dets = _detections_dict_from_hfo_result(res)
+
+    # Step 4: Get event windows
+    if packed_times_path is not None:
+        packed = np.load(packed_times_path, allow_pickle=True)
+        windows = build_windows_from_packed_times(packed)
+        if crop_seconds is not None:
+            windows = [w for w in windows if w.start < float(crop_seconds)]
+        event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
+    else:
+        window_sec = 0.5
+        windows = build_windows_from_detections(dets, window_sec=window_sec)
+        if crop_seconds is not None:
+            windows = [w for w in windows if w.start < float(crop_seconds)]
+        event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
+
+    # Step 5: Filter to core channels if specified
+    if core_channels is not None:
+        core_set = set(str(x).upper() for x in core_channels)
+        keep_idx = [i for i, n in enumerate(names) if n.upper() in core_set]
+        data = data[keep_idx]
+        names = [names[i] for i in keep_idx]
+        dets = {n: dets.get(n, np.zeros((0, 2))) for n in names}
+
+    n_ch = len(names)
+    n_events = len(windows)
+
+    if n_ch == 0 or n_events == 0:
+        raise ValueError(f"No channels ({n_ch}) or no events ({n_events}) to analyze.")
+
+    # Step 6: Compute envelope (bandpass + Hilbert)
+    env = np.zeros((n_ch, data.shape[1]), dtype=np.float32)
+    x_band = np.zeros_like(data, dtype=np.float32)
+
+    for ci in range(n_ch):
+        env[ci] = _maybe_gpu_envelope(data[ci], sfreq, freq_band, use_gpu=use_gpu).astype(np.float32)
+
+    # Bandpass for TF
+    try:
+        from scipy.signal import butter, sosfiltfilt
+        nyq = sfreq / 2.0
+        lo, hi = freq_band
+        hi2 = hi if hi < nyq else max(nyq - 1.0, lo + 1.0)
+        sos = butter(4, [lo / nyq, hi2 / nyq], btype="bandpass", output="sos")
+        for ci in range(n_ch):
+            x_band[ci] = sosfiltfilt(sos, data[ci]).astype(np.float32)
+    except Exception:
+        x_band = data.astype(np.float32)
+
+    # Step 7: Compute centroids
+    centroids, events_bool = compute_centroid_matrix_from_envelope_cache(
+        windows=windows,
+        detections=dets,
+        ch_names=names,
+        env=env,
+        env_ch_names=names,
+        sfreq=sfreq,
+        start_sec=0.0,
+        centroid_power=centroid_power,
+    )
+
+    # Step 8: Compute lag/rank
+    lag_raw, lag_rank = lag_rank_from_centroids(centroids, events_bool, align="first_centroid")
+
+    # Step 9: Compute TF centroids
+    tf_time, tf_freq = compute_tf_centroids(
+        x_band=x_band,
+        sfreq=sfreq,
+        event_windows=event_windows,
+        events_bool=events_bool,
+        freq_band=freq_band,
+        nperseg=tf_nperseg,
+        noverlap=tf_noverlap,
+        centroid_power="power2",
+    )
+
+    # Step 10: Save results
+    out_paths: Dict[str, str] = {}
+
+    group_path = f"{output_dir}/{output_prefix}_groupAnalysis.npz"
+    save_group_analysis_results(
+        group_path,
+        sfreq=sfreq,
+        band=band,
+        ch_names=names,
+        event_windows=event_windows,
+        centroid_time=centroids,
+        events_bool=events_bool,
+        lag_raw=lag_raw,
+        lag_rank=lag_rank,
+        tf_centroid_time=tf_time,
+        tf_centroid_freq=tf_freq,
+    )
+    out_paths["group_analysis_path"] = group_path
+
+    if save_env_cache:
+        env_path = f"{output_dir}/{output_prefix}_envCache_{band}_{reference}.npz"
+        np.savez_compressed(
+            env_path,
+            env=env,
+            x_band=x_band,
+            sfreq=np.array([sfreq], dtype=np.float64),
+            ch_names=np.array(names, dtype=object),
+            band=np.array([band], dtype=object),
+            reference=np.array([reference], dtype=object),
+            crop_seconds=np.array([crop_seconds if crop_seconds else data.shape[1] / sfreq], dtype=np.float64),
+            start_sec=np.array([0.0], dtype=np.float64),
+            alias_bipolar_to_left=np.array([alias_bipolar_to_left], dtype=bool),
+            has_x_band=np.array([True], dtype=bool),
+        )
+        out_paths["env_cache_path"] = env_path
+
+    return out_paths
+

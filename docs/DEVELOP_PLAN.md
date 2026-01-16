@@ -3,7 +3,120 @@
 **项目目标**: 复现并扩展 HFO (高频振荡) 分析流程，验证 Source-Sink 理论  
 **数据集**: 玉泉24小时SEEG数据集  
 **数据路径**: `/mnt/yuquan_data/yuquan_24h_edf`  
-**更新日期**: 2026-01-14
+**更新日期**: 2026-01-16
+
+---
+
+## 0. 核心架构原则
+
+### 数据流设计哲学
+
+> "Bad programmers worry about the code. Good programmers worry about data structures." — Linus Torvalds
+
+**单一职责原则**：每个模块只做一件事并做好。
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              HFOsp 数据流架构                                    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  [原始EDF]                                                                      │
+│      │                                                                          │
+│      ▼                                                                          │
+│  ┌─────────────────┐                                                            │
+│  │ preprocessing   │ ──→ 预处理：重参考、滤波、通道选择                          │
+│  └────────┬────────┘                                                            │
+│           │ (data, sfreq, ch_names)                                             │
+│           ▼                                                                     │
+│  ┌─────────────────┐                                                            │
+│  │  hfo_detector   │ ──→ HFO检测：单通道事件列表                                 │
+│  └────────┬────────┘                                                            │
+│           │ Dict[ch_name → [(start, end), ...]]                                 │
+│           ▼                                                                     │
+│  ┌─────────────────────────────────────────────────────┐                        │
+│  │           group_event_analysis                       │                       │
+│  │  ┌─────────────────────────────────────────────┐    │                        │
+│  │  │ Step 1: 群体事件窗口构建                      │    │                       │
+│  │  │   - build_windows_from_detections           │    │                        │
+│  │  │   - 输出: EventWindow list                   │    │                       │
+│  │  └──────────────────┬──────────────────────────┘    │                        │
+│  │                     ▼                               │                        │
+│  │  ┌─────────────────────────────────────────────┐    │                        │
+│  │  │ Step 2: 预计算 Envelope + Bandpass 缓存       │    │                       │
+│  │  │   - precompute_envelope_cache               │    │                        │
+│  │  │   - 存储: *_envCache.npz                    │    │                        │
+│  │  └──────────────────┬──────────────────────────┘    │                        │
+│  │                     ▼                               │                        │
+│  │  ┌─────────────────────────────────────────────┐    │                        │
+│  │  │ Step 3: 质心+TF分析 → 存储中间结果            │    │                       │
+│  │  │   - compute_group_analysis_results          │    │                        │
+│  │  │   - 存储: *_groupAnalysis.npz               │    │ ← 关键新增！           │
+│  │  └──────────────────┬──────────────────────────┘    │                        │
+│  │                     │                               │                        │
+│  └─────────────────────┼───────────────────────────────┘                        │
+│                        │                                                        │
+│           ┌────────────┴────────────┐                                           │
+│           ▼                         ▼                                           │
+│  ┌─────────────────┐      ┌─────────────────┐                                   │
+│  │ network_analysis│      │  visualization  │ ← 只读取中间结果，不做计算！       │
+│  └─────────────────┘      └─────────────────┘                                   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 中间结果存储规范
+
+**存储位置**: `/mnt/yuquan_data/yuquan_24h_edf/<patient>/`（与EDF同目录）
+
+| 文件名模式 | 内容 | 来源模块 |
+|-----------|------|----------|
+| `*_gpu.npz` | 历史GPU检测结果 | (已有) |
+| `*_packedTimes.npy` | 事件窗口 | (已有) |
+| `*_lagPat*.npz` | 历史lag矩阵 | (已有) |
+| `*_envCache_{band}_{ref}.npz` | **Envelope+带通信号缓存** | `group_event_analysis` |
+| `*_groupAnalysis.npz` | **质心+TF+lag 完整分析结果** | `group_event_analysis` |
+
+### `*_groupAnalysis.npz` 结构（核心新增）
+
+```python
+{
+    # === 元数据 ===
+    'sfreq': np.array([2000.0]),           # 采样率
+    'band': np.array(['ripple']),          # 频段
+    'ch_names': np.array([...]),           # 核心通道名 (n_ch,)
+    'window_sec': np.array([0.5]),         # 窗口长度
+    'n_events': np.array([2601]),          # 事件数
+    'n_channels': np.array([8]),           # 通道数
+    
+    # === 事件窗口 ===
+    'event_windows': np.array([...]),      # (n_events, 2) [start, end] 秒
+    
+    # === 质心分析 ===
+    'centroid_time': np.array([...]),      # (n_ch, n_events) 时间质心(相对窗口起始)
+    'centroid_freq': np.array([...]),      # (n_ch, n_events) TF 2D质心的频率分量
+    'events_bool': np.array([...]),        # (n_ch, n_events) 通道是否参与
+    
+    # === Lag/Rank 分析 ===
+    'lag_raw': np.array([...]),            # (n_ch, n_events) 相对lag(对齐到最早通道)
+    'lag_rank': np.array([...]),           # (n_ch, n_events) 排名 (0=最早)
+    
+    # === 可选：TF 变换结果 (用于高级可视化) ===
+    'tf_power_per_event': np.array([...]), # (n_ch, n_events, n_freq, n_time) 可选
+}
+```
+
+### Visualization 职责边界（铁律）
+
+**visualization.py 只负责**：
+1. 读取 `*_groupAnalysis.npz` 或 `*_envCache.npz`
+2. 根据参数选择子集（通道、事件）
+3. 调用 matplotlib 画图
+
+**visualization.py 禁止**：
+- ❌ 计算 STFT
+- ❌ 计算质心
+- ❌ 计算 Hilbert envelope
+- ❌ 任何超过 100 行的数据处理
 
 ---
 
@@ -35,12 +148,12 @@ HFOsp/
 │   ├── README_YUQUAN.md         # 数据集使用说明
 │   └── yuquan_24h_dataset_structure.md  # 数据结构详解
 ├── src/
-│   ├── __init__.py              # [待创建]
+│   ├── __init__.py              # ✅ 模块导出
 │   ├── preprocessing.py         # ✅ 预处理Pipeline
 │   ├── hfo_detector.py          # ✅ HFO检测器
-│   ├── group_event_analysis.py  # [待开发] 群体事件分析
+│   ├── group_event_analysis.py  # ✅ 群体事件分析（核心计算中心）
 │   ├── network_analysis.py      # [待开发] 网络分析
-│   ├── visualization.py         # ✅ 可视化工具（基础功能）
+│   ├── visualization.py         # ⚠️ 可视化（需重构：剥离计算逻辑）
 │   └── utils/
 │       └── bqk_utils.py         # 基础工具函数
 ├── datasets/
@@ -161,21 +274,49 @@ HFOsp/
 
 ---
 
-### 模块3: src/group_event_analysis.py (待开发)
+### 模块3: src/group_event_analysis.py ✅ 核心逻辑完成
 
-| 功能 | 说明 |
-|------|------|
-| 3.1 群体事件窗口构建 | `build_windows_from_detections`（固定窗口，默认从`packedTimes`推断窗口长度；支持`min_channels`过滤；可与`packedTimes`做 overlap-based 对齐评估） |
-| 3.2 事件内时间定位 | 质心法：对 Hilbert envelope 计算能量质心；支持 `align='first_centroid'` 得到相对传播时延；支持 tie-tolerant rank 评估（<2ms 视为并列 + pairwise concordance） |
-| 3.3 核心通道筛选 | 在患者级 `_refineGpu.npz` 的 `events_count` 上用 `mean + 1*std` 复现 `hist_meanX.npz/pick_chns`；同时保留“全脑通道”分析路径 |
-| 3.4 GPU 加速与缓存 | 对整段 crop 预先计算每通道 envelope（GPU filter+Hilbert+20Hz 子带求和）并保存到 `/mnt/yuquan_data/yuquan_24h_edf/<patient>/`，后续按 window 切片计算质心，避免重复 Hilbert |
-| 3.5 验证函数 | Step1：检测→窗口 vs packedTimes；Step2-3：packedTimes→质心→lag/rank vs `*_lagPat.npz`（比较事件内相对 lag 与顺序一致性） |
+> **设计原则**：这是整个流程的"计算中心"——所有中间结果都从这里产出，后续模块只读取。
 
-**阶段性结论（2026-01-15，验证口径已对齐）**:
-- 核心通道筛选：在患者级 `_refineGpu.npz` 的 `events_count` 上，用 `mean + 1*std` 可复现 `hist_meanX.npz` 的 `pick_chns`（与 `*_lagPat.npz` 的 `chnNames` 一致）。
-- packedTimes 窗口长度：不同记录可能不同（例如 0.5s 与 0.3s 共存），不能硬编码窗口长度；应从 `packedTimes` 推断。
-- Step1（检测→窗口 vs packedTimes）：使用 `reference='bipolar'` + “别名通道”(A1≈A1-A2) + “丢末端 contact”(按 GPU 通道集过滤 pair) 能显著提升 packedTimes 覆盖率；precision 下降是正常现象（packedTimes 是筛选后的事件池）。
-- Step2-3（packedTimes→质心→相对lag/rank vs lagPat）：`eventsBool` 可达 100% 一致；相对 lag（对齐到最早通道）可到 ms 级误差；rank 对 ms 级抖动敏感，建议提供 tie-tolerant 评估（例如 <2ms 视为并列，并用 pairwise concordance 评估）。
+#### 输入规范
+
+| 输入 | 来源 | 数据结构 |
+|------|------|----------|
+| 预处理结果 | `preprocessing.py` | `PreprocessingResult` (data, sfreq, ch_names) |
+| HFO事件 | `hfo_detector.py` 或 `*_gpu.npz` | `Dict[ch_name → np.ndarray (n,2)]` |
+| 患者级汇总 | `_refineGpu.npz` | events_count (n_ch,), chns_names |
+| 核心通道 | `hist_meanX.npz` | pick_chns (8,) |
+| 事件窗口 | `*_packedTimes.npy` | (n_events, 2) [start, end] 秒 |
+
+#### 输出规范
+
+| 输出文件 | 内容 | 下游用户 |
+|----------|------|----------|
+| `*_envCache_{band}_{ref}.npz` | envelope + x_band + sfreq + ch_names | visualization (Fig1波形) |
+| `*_groupAnalysis.npz` | **质心+TF质心+lag+rank** | visualization, network_analysis |
+
+#### 功能分解
+
+| 功能 | 说明 | 状态 |
+|------|------|------|
+| 3.1 窗口构建 | `build_windows_from_detections` | ✅ |
+| 3.2 Envelope缓存 | `precompute_envelope_cache` | ✅ |
+| 3.3 质心计算 | `compute_centroid_matrix_from_envelope_cache` | ✅ |
+| 3.4 Lag/Rank | `lag_rank_from_centroids` | ✅ |
+| 3.5 TF质心 | `compute_tf_centroids` | ✅ |
+| 3.6 结果存储 | `save_group_analysis_results`, `load_group_analysis_results` | ✅ |
+| 3.7 一键API | `compute_and_save_group_analysis` | ✅ |
+| 3.7 通道筛选 | `select_core_channels_by_event_count` | ✅ |
+| 3.8 验证函数 | `validate_*` 系列 | ✅ |
+
+**阶段性结论（2026-01-16）**:
+- ✅ 核心通道筛选：`mean + 1*std` 可复现 `hist_meanX.npz` 的 `pick_chns`
+- ✅ packedTimes 窗口长度：从 `packedTimes[:,1]-packedTimes[:,0]` 推断
+- ✅ Step1 验证：`reference='bipolar'` + 别名通道 + GPU通道过滤 → 高覆盖率
+- ✅ Step2-3 验证：`eventsBool` 100% 一致；相对 lag 达 ms 级误差
+- ✅ TF质心计算：`compute_tf_centroids` 从 visualization 迁移完成
+- ✅ 统一存储：`save_group_analysis_results` + `load_group_analysis_results` 已实现
+- ✅ 一键API：`compute_and_save_group_analysis` 可从 EDF 一站式生成所有中间结果
 
 ---
 
@@ -192,27 +333,179 @@ HFOsp/
 
 ---
 
-### 模块5: src/visualization.py ✅ 基础功能完成
+### 模块5: src/visualization.py ✅ 重构完成（2026-01-16）
 
-| 功能 | 说明 | 状态 |
-|------|------|------|
-| 5.1 多通道时序图 | `plot_seeg_segment`：单电极/全通道/核心电极视图 | ✅ |
-| 5.2 Bipolar对比图 | `plot_preprocessing_comparison`：原始 vs Bipolar | ✅ |
-| 5.3 HFO事件标注 | `_overlay_events` + `detections_to_events`：tick样式不遮波形 | ✅ |
-| 5.4 群体事件图（Fig1/Fig2） | **Fig1**：`plot_group_events_band_raster(plot_style='trace', mode='bandpassed')` 画拼接窗口的**带通波形**（不是 block/heatmap）；**Fig2**：`plot_group_events_tf_centroids_per_channel` 对每通道做 STFT 并叠加 **TF(时间,频率) 质心** + colorbar；支持仅底部 x ticks、去 top/right 边框、紧凑布局 | ✅ |
-| 5.5 滞后热图 | `plot_lag_heatmaps`：channels × events 的能量/秩/lag（用于 Step2-3 验证） | ✅ |
-| 5.5 传播动图 | 500ms窗口内能量传播动画 | ⏳ 待模块3 |
-| 5.6 网络拓扑图 | 节点=Strength, 边=权重, 颜色=SI | ⏳ 待模块4 |
-| 5.7 状态对比图 | Interictal vs Ictal 网络 | ⏳ 待模块4 |
+> **铁律**：visualization 只负责读取已计算的中间结果并画图，**不做任何复杂计算**。
+
+#### 职责边界
+
+**✅ 允许**:
+1. 读取 `*_groupAnalysis.npz` 或 `*_envCache.npz`
+2. 根据参数选择子集（通道、事件）
+3. 调用 matplotlib 画图
+4. 简单的数据切片、reshape、颜色映射
+
+**❌ 禁止**:
+- 计算 STFT
+- 计算质心
+- 计算 Hilbert envelope
+- 任何超过 50 行的数据处理逻辑
+
+---
+
+#### 功能总览：可视化产出与资源依赖
+
+**A. 基础可视化（数据探索）**
+
+| 函数 | 产出图表 | 必需资源 | 用途 |
+|------|---------|---------|------|
+| `plot_seeg_segment` | 多通道时序波形 | `PreprocessingResult` (内存对象) | 查看预处理后数据 |
+| `plot_from_result` | 快速波形图 | `PreprocessingResult` | 便捷封装 |
+| `plot_shaft_channels` | 单电极串波形 | `PreprocessingResult` | 定位异常电极 |
+| `plot_preprocessing_comparison` | 前后对比图 | 2个 `PreprocessingResult` | 验证预处理效果 |
+| `plot_raw_filtered_envelope` | Raw/滤波/包络三联图 | `PreprocessingResult` + 通道选择 | 检测器调试 |
+| `plot_event_counts` | HFO事件计数柱状图 | `HFODetectionResult` | 快速伪迹筛查 |
+
+**B. 论文级可视化（只读取中间结果）**
+
+| 函数 | 产出图表 | 必需资源 | 可选资源 | 用途 |
+|------|---------|---------|---------|------|
+| `plot_paper_fig1_bandpassed_traces` | **Fig1**: 拼接事件窗口的带通波形 raster | `*_envCache.npz`<br>`*_packedTimes.npy` | - | 展示群体事件时序特征 |
+| `plot_paper_fig2_normalized_spectrogram` | **Fig2**: TF功率背景 + 质心点 + 传播路径 | `*_envCache.npz`<br>`*_packedTimes.npy`<br>`*_groupAnalysis.npz` | `*_gpu.npz`(mask) | 展示TF域传播模式 |
+| `plot_lag_heatmaps_from_group_analysis` | **3张热图**: Energy/Rank/Lag (channels×events) | `*_groupAnalysis.npz`<br>`*_envCache.npz`<br>`*_packedTimes.npy` | - | 量化传播滞后和能量分布 |
+| `plot_lag_statistics` | **统计三联图**: Lag分布/Rank分布/通道参与率 | `*_groupAnalysis.npz` | - | 群体统计特征 |
+| `plot_tf_centroid_statistics` | **TF质心统计**: 频率质心/时间质心分布 | `*_groupAnalysis.npz` | - | TF质心特征分析 |
+
+**C. 底层工具函数**
+
+| 函数 | 产出 | 输入 | 说明 |
+|------|------|------|------|
+| `detections_to_events` | 事件字典列表 | `HFODetectionResult` | 格式转换，供 `plot_seeg_segment` 叠加 |
+| `plot_lag_heatmaps` | 3张热图 | numpy 数组 | 底层绘图函数，通常用高层封装 |
+
+---
+
+#### 核心资源文件速查
+
+**中间结果文件（必需）**：
+
+```python
+# 1. Envelope + Bandpass 缓存
+"<record>_envCache_<band>_<ref>.npz"
+├─ env: (n_ch, n_samples) Hilbert envelope
+├─ x_band: (n_ch, n_samples) bandpassed signal
+├─ sfreq: 采样率
+└─ ch_names: 通道名列表
+
+# 2. 完整分析结果
+"<record>_groupAnalysis.npz"
+├─ centroid_time: (n_ch, n_events) 时间质心
+├─ tf_centroid_time: (n_ch, n_events) TF 2D质心-时间分量
+├─ tf_centroid_freq: (n_ch, n_events) TF 2D质心-频率分量
+├─ lag_raw: (n_ch, n_events) 相对滞后(秒)
+├─ lag_rank: (n_ch, n_events) 排名(0=最早)
+├─ events_bool: (n_ch, n_events) 参与mask
+└─ sfreq, band, ch_names, event_windows...
+
+# 3. 事件窗口
+"<record>_packedTimes.npy"
+└─ (n_events, 2) [start, end] 秒
+
+# 4. GPU检测结果（可选，用于mask）
+"<record>_gpu.npz"
+├─ whole_dets: List[(n_det, 2)] per channel
+└─ chns_names: 通道名
+```
+
+**典型可视化流程**：
+
+```python
+# Step 1: 生成中间结果（一次性）
+from src.group_event_analysis import compute_and_save_group_analysis
+out_paths = compute_and_save_group_analysis(
+    edf_path='FC10477Q.edf',
+    output_dir='./output',
+    output_prefix='FC10477Q',
+    packed_times_path='FC10477Q_packedTimes.npy',
+    gpu_npz_path='FC10477Q_gpu.npz',  # 可选
+    band='ripple',
+    reference='bipolar',
+    save_env_cache=True,
+)
+
+# Step 2: 可视化（任意多次，只读取）
+from src.visualization import (
+    plot_paper_fig1_bandpassed_traces,
+    plot_paper_fig2_normalized_spectrogram,
+    plot_lag_heatmaps_from_group_analysis,
+    plot_lag_statistics,
+    plot_tf_centroid_statistics,
+)
+
+# Fig1: 波形 raster
+fig1 = plot_paper_fig1_bandpassed_traces(
+    cache_npz_path=out_paths['env_cache_path'],
+    packed_times_path='FC10477Q_packedTimes.npy',
+    channel_order=CORE_CHANNELS,
+    event_indices=list(range(30)),
+)
+
+# Fig2: TF + 质心路径
+fig2 = plot_paper_fig2_normalized_spectrogram(
+    cache_npz_path=out_paths['env_cache_path'],
+    packed_times_path='FC10477Q_packedTimes.npy',
+    group_analysis_npz_path=out_paths['group_analysis_path'],  # 读取预计算TF质心
+    channel_order=CORE_CHANNELS,
+    event_indices=list(range(30)),
+)
+
+# 热图: Energy/Rank/Lag
+figE, figR, figL = plot_lag_heatmaps_from_group_analysis(
+    group_analysis_npz=out_paths['group_analysis_path'],
+    env_cache_npz=out_paths['env_cache_path'],
+    packed_times_npy='FC10477Q_packedTimes.npy',
+    channel_names=CORE_CHANNELS,
+    max_events=100,
+)
+
+# 统计图
+fig_stats = plot_lag_statistics(
+    group_analysis_npz=out_paths['group_analysis_path'],
+    patient_id='chengshuai',
+    record_id='FC10477Q',
+)
+
+# TF质心统计
+fig_tf = plot_tf_centroid_statistics(
+    group_analysis_npz=out_paths['group_analysis_path'],
+)
+```
+
+---
+
+#### 重构总结（2026-01-16）
+
+✅ **完成的重构**：
+1. ✅ 将 TF 质心计算从 `visualization.py` 迁移到 `group_event_analysis.py`
+2. ✅ 添加 `compute_tf_centroids()` 计算 2D TF 质心（时间+频率）
+3. ✅ `*_groupAnalysis.npz` 现在包含 `tf_centroid_time` 和 `tf_centroid_freq`
+4. ✅ `plot_paper_fig2_*` 重构为读取预计算质心，不再内部计算 STFT
+5. ✅ 新增便利函数：
+   - `plot_lag_heatmaps_from_group_analysis()` - 一键读取+绘制热图
+   - `plot_lag_statistics()` - 统计分析三联图
+   - `plot_tf_centroid_statistics()` - TF质心分布统计
+6. ✅ `chengshuai_hfo_analysis.ipynb` 重构为纯可视化终端（不做计算）
+
+**架构验证**：
+- ✅ visualization.py 不再有任何 STFT/质心计算逻辑
+- ✅ 所有复杂计算在 `group_event_analysis.py`
+- ✅ notebook 只调用 visualization 函数，不写内联绘图代码
+- ✅ 中间结果可复用，避免重复计算
 
 **关键技术决策**:
 - **波形颜色**: `tableau_20_no_red` 避免与HFO红色标记冲突
 - **事件标注**: 默认 `style='tick'` 细线，不遮挡波形
-- **调试视图**: `plot_raw_filtered_envelope` 可视化 raw/filtered/envelope 验证检测器
-- **Fig2 质心定义**: 在每个 event window 内、每通道对 STFT 功率 \(P(f,t)\) 计算 2D 质心：
-  - \(t_c = \\frac{\\sum_{f,t} P(f,t)\\,t}{\\sum_{f,t} P(f,t)}\)
-  - \(f_c = \\frac{\\sum_{f,t} P(f,t)\\,f}{\\sum_{f,t} P(f,t)}\)
-  默认 `centroid_power='power2'`（强调能量峰），并可通过 `mask_by_detections` 控制是否仅对有 detection 的 (channel,event) 画点。
+- **TF质心**: 从 STFT power 直接计算 2D 质心，而非先降维再计算
 
 ---
 
@@ -258,13 +551,27 @@ HFOsp/
   - [x] Chunked处理（30s chunk + 1s overlap）
   - [x] GPU加速（cupy_hilbert）
   - [x] Notebook验证通过（10232 events，K电极高密度）
-- [x] **模块5: visualization.py（基础功能）** ✅ 2026-01-14
-  - [x] 多通道时序图
-  - [x] HFO事件标注（tick样式）
-  - [x] 调试视图（raw/filtered/envelope）
-- [ ] 模块3: group_event_analysis.py ← 下一步
+- [x] **模块3: group_event_analysis.py** ✅ 2026-01-16（核心逻辑完成）
+  - [x] 窗口构建 (build_windows_from_detections)
+  - [x] Envelope缓存 (precompute_envelope_cache)
+  - [x] 质心计算 (compute_centroid_matrix_from_envelope_cache)
+  - [x] Lag/Rank计算 (lag_rank_from_centroids)
+  - [x] 通道筛选 (select_core_channels_by_event_count)
+  - [x] 验证函数 (validate_* 系列)
+  - [x] TF质心计算 (compute_tf_centroids) ✅
+  - [x] 统一结果存储 (save_group_analysis_results) ✅
+  - [x] 一键API (compute_and_save_group_analysis) ✅
+- [x] **模块5: visualization.py** ✅ 2026-01-16（重构完成）
+  - [x] 基础可视化（波形、事件标注、调试视图）
+  - [x] Fig1: 带通波形 raster（读取 envCache）
+  - [x] Fig2: TF功率+质心路径（读取 groupAnalysis 预计算质心）
+  - [x] 热图：Energy/Rank/Lag（读取 groupAnalysis）
+  - [x] 统计分析：Lag/Rank/Participation（读取 groupAnalysis）
+  - [x] TF质心统计（读取 groupAnalysis）
+  - [x] ✅ 架构重构：剥离所有 STFT/质心计算到 group_event_analysis
+  - [ ] 传播动图（500ms窗口内能量传播动画）
+  - [ ] 网络拓扑图（待模块4）
 - [ ] 模块4: network_analysis.py
-- [ ] 模块5: visualization.py（高级功能：滞后热图/传播动图/网络拓扑）
 - [x] Notebook: chengshuai_hfo_analysis.ipynb ✅
 - [ ] 验证与原结果一致性
 - [ ] 完整Pipeline测试
