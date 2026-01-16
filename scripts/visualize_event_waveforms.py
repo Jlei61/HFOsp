@@ -142,7 +142,7 @@ def main():
     record = sys.argv[2]
     event_idx = int(sys.argv[3])
     
-    base_dir = Path('/Volumes/Elements/yuquan_24h_edf')
+    base_dir = Path('/mnt/yuquan_data/yuquan_24h_edf')
     patient_dir = base_dir / patient
     
     print(f"\n加载数据: {patient} - {record}, 事件 #{event_idx}")

@@ -887,7 +887,7 @@ def validate_against_gpu_results(result: PreprocessingResult,
 
 if __name__ == '__main__':
     # Minimal smoke test (local)
-    edf_path = '/Volumes/Elements/yuquan_24h_edf/chengshuai/FC10477Q.edf'
+    edf_path = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf'
     print("=" * 70)
     print("Smoke test: SEEGPreprocessor (bipolar)")
     print("=" * 70)

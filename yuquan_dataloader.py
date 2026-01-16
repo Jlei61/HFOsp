@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 玉泉24小时SEEG数据集加载工具
-数据集路径: /Volumes/Elements/yuquan_24h_edf
+数据集路径: /mnt/yuquan_data/yuquan_24h_edf
 
 Author: Generated on 2026-01-12
 """
@@ -31,7 +31,7 @@ class RecordInfo:
 class YuquanDataset:
     """玉泉24小时SEEG数据集加载器"""
     
-    def __init__(self, base_dir: str = '/Volumes/Elements/yuquan_24h_edf'):
+    def __init__(self, base_dir: str = '/mnt/yuquan_data/yuquan_24h_edf'):
         self.base_dir = Path(base_dir)
         if not self.base_dir.exists():
             raise FileNotFoundError(f"数据集目录不存在: {base_dir}")

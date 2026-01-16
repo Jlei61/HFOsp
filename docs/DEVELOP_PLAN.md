@@ -2,7 +2,7 @@
 
 **项目目标**: 复现并扩展 HFO (高频振荡) 分析流程，验证 Source-Sink 理论  
 **数据集**: 玉泉24小时SEEG数据集  
-**数据路径**: `/Volumes/Elements/yuquan_24h_edf`  
+**数据路径**: `/mnt/yuquan_data/yuquan_24h_edf`  
 **更新日期**: 2026-01-14
 
 ---
@@ -165,11 +165,17 @@ HFOsp/
 
 | 功能 | 说明 |
 |------|------|
-| 3.1 多通道事件对齐 | 500ms窗口扫描, ≥2通道共现 |
-| 3.2 滞后计算 | **Hilbert包络**互相关 (避免相位滑移) |
-| 3.3 核心通道筛选 | 多策略对比: 密度/Out-Strength/首发 |
-| 3.4 频率中心计算 | 短时FFT / 瞬时频率 |
-| 3.5 验证函数 | 与*_lagPat.npz对比 |
+| 3.1 群体事件窗口构建 | `build_windows_from_detections`（固定窗口，默认从`packedTimes`推断窗口长度；支持`min_channels`过滤；可与`packedTimes`做 overlap-based 对齐评估） |
+| 3.2 事件内时间定位 | 质心法：对 Hilbert envelope 计算能量质心；支持 `align='first_centroid'` 得到相对传播时延；支持 tie-tolerant rank 评估（<2ms 视为并列 + pairwise concordance） |
+| 3.3 核心通道筛选 | 在患者级 `_refineGpu.npz` 的 `events_count` 上用 `mean + 1*std` 复现 `hist_meanX.npz/pick_chns`；同时保留“全脑通道”分析路径 |
+| 3.4 GPU 加速与缓存 | 对整段 crop 预先计算每通道 envelope（GPU filter+Hilbert+20Hz 子带求和）并保存到 `/mnt/yuquan_data/yuquan_24h_edf/<patient>/`，后续按 window 切片计算质心，避免重复 Hilbert |
+| 3.5 验证函数 | Step1：检测→窗口 vs packedTimes；Step2-3：packedTimes→质心→lag/rank vs `*_lagPat.npz`（比较事件内相对 lag 与顺序一致性） |
+
+**阶段性结论（2026-01-15，验证口径已对齐）**:
+- 核心通道筛选：在患者级 `_refineGpu.npz` 的 `events_count` 上，用 `mean + 1*std` 可复现 `hist_meanX.npz` 的 `pick_chns`（与 `*_lagPat.npz` 的 `chnNames` 一致）。
+- packedTimes 窗口长度：不同记录可能不同（例如 0.5s 与 0.3s 共存），不能硬编码窗口长度；应从 `packedTimes` 推断。
+- Step1（检测→窗口 vs packedTimes）：使用 `reference='bipolar'` + “别名通道”(A1≈A1-A2) + “丢末端 contact”(按 GPU 通道集过滤 pair) 能显著提升 packedTimes 覆盖率；precision 下降是正常现象（packedTimes 是筛选后的事件池）。
+- Step2-3（packedTimes→质心→相对lag/rank vs lagPat）：`eventsBool` 可达 100% 一致；相对 lag（对齐到最早通道）可到 ms 级误差；rank 对 ms 级抖动敏感，建议提供 tie-tolerant 评估（例如 <2ms 视为并列，并用 pairwise concordance 评估）。
 
 ---
 
@@ -193,7 +199,8 @@ HFOsp/
 | 5.1 多通道时序图 | `plot_seeg_segment`：单电极/全通道/核心电极视图 | ✅ |
 | 5.2 Bipolar对比图 | `plot_preprocessing_comparison`：原始 vs Bipolar | ✅ |
 | 5.3 HFO事件标注 | `_overlay_events` + `detections_to_events`：tick样式不遮波形 | ✅ |
-| 5.4 滞后热图 | channels × events | ⏳ 待模块3 |
+| 5.4 群体事件图（Fig1/Fig2） | **Fig1**：`plot_group_events_band_raster(plot_style='trace', mode='bandpassed')` 画拼接窗口的**带通波形**（不是 block/heatmap）；**Fig2**：`plot_group_events_tf_centroids_per_channel` 对每通道做 STFT 并叠加 **TF(时间,频率) 质心** + colorbar；支持仅底部 x ticks、去 top/right 边框、紧凑布局 | ✅ |
+| 5.5 滞后热图 | `plot_lag_heatmaps`：channels × events 的能量/秩/lag（用于 Step2-3 验证） | ✅ |
 | 5.5 传播动图 | 500ms窗口内能量传播动画 | ⏳ 待模块3 |
 | 5.6 网络拓扑图 | 节点=Strength, 边=权重, 颜色=SI | ⏳ 待模块4 |
 | 5.7 状态对比图 | Interictal vs Ictal 网络 | ⏳ 待模块4 |
@@ -202,6 +209,10 @@ HFOsp/
 - **波形颜色**: `tableau_20_no_red` 避免与HFO红色标记冲突
 - **事件标注**: 默认 `style='tick'` 细线，不遮挡波形
 - **调试视图**: `plot_raw_filtered_envelope` 可视化 raw/filtered/envelope 验证检测器
+- **Fig2 质心定义**: 在每个 event window 内、每通道对 STFT 功率 \(P(f,t)\) 计算 2D 质心：
+  - \(t_c = \\frac{\\sum_{f,t} P(f,t)\\,t}{\\sum_{f,t} P(f,t)}\)
+  - \(f_c = \\frac{\\sum_{f,t} P(f,t)\\,f}{\\sum_{f,t} P(f,t)}\)
+  默认 `centroid_power='power2'`（强调能量峰），并可通过 `mask_by_detections` 控制是否仅对有 detection 的 (channel,event) 画点。
 
 ---
 
@@ -264,7 +275,7 @@ HFOsp/
 
 **示例患者**: chengshuai  
 **示例记录**: FC10477Q  
-**数据路径**: `/Volumes/Elements/yuquan_24h_edf/chengshuai/FC10477Q.edf`
+**数据路径**: `/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf`
 
 **预期输出**:
 - Bipolar通道数: ~130（取决于每根电极串contact数量与缺失情况）

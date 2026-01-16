@@ -1,7 +1,7 @@
 # 玉泉24小时SEEG数据集分析工具包
 
 **数据集**: 玉泉医院24小时连续SEEG记录 + HFO检测结果  
-**路径**: `/Volumes/Elements/yuquan_24h_edf`  
+**路径**: `/mnt/yuquan_data/yuquan_24h_edf`  
 **生成日期**: 2026-01-12
 
 ---
@@ -153,7 +153,7 @@ fig.savefig('output.png')
 from src.preprocessing import SEEGPreprocessor
 from src.visualization import plot_from_result, plot_shaft_channels
 
-edf = '/Volumes/Elements/yuquan_24h_edf/chengshuai/FC10477Q.edf'
+edf = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf'
 
 # 1) Bipolar 全通道（100s）
 bip = SEEGPreprocessor(reference='bipolar', crop_seconds=101).run(edf)
@@ -172,7 +172,7 @@ plot_shaft_channels(bip.data, bip.sfreq, bip.ch_names, shaft='K', start_sec=0, d
 
 ```python
 import numpy as np
-gpu = np.load('/Volumes/Elements/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz', allow_pickle=True)
+gpu = np.load('/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz', allow_pickle=True)
 include = [str(x) for x in gpu['chns_names']]
 res = SEEGPreprocessor(reference='none', include_channels=include, crop_seconds=101).run(edf)
 ```
@@ -184,7 +184,7 @@ res = SEEGPreprocessor(reference='none', include_channels=include, crop_seconds=
 ### 目录组织
 
 ```
-/Volumes/Elements/yuquan_24h_edf/
+/mnt/yuquan_data/yuquan_24h_edf/
 ├── chengshuai/                    # 患者1
 │   ├── FC10477Q.edf              # 原始SEEG (2小时, 2000Hz, 145通道)
 │   ├── FC10477Q_gpu.npz          # GPU检测: 120通道, 数万事件
@@ -220,7 +220,7 @@ res = SEEGPreprocessor(reference='none', include_channels=include, crop_seconds=
 
 - **事件间隔**: 平均1-3秒, 呈长尾分布
 - **集簇现象**: 事件成串出现(burst), 中间有静默期
-- **事件持续**: 固定500ms窗口
+- **事件持续**: `packedTimes` 的窗口长度在不同记录中可能不同（常见 0.5s，也存在 0.3s），不要硬编码；应从 `times[:,1]-times[:,0]` 推断
 
 ### 空间特征
 
@@ -261,3 +261,107 @@ res = SEEGPreprocessor(reference='none', include_channels=include, crop_seconds=
   - 10个通道无事件
   - 幂律分布明显
 ```
+
+---
+
+## 🧩 模块3：群体事件分析（本项目）
+
+我们的目标不是“复刻别人保存的 lagPat 结构”，而是：
+1) 用我们自己的 `HFODetector(bqk)` 产出 detections  
+2) 用 `build_windows_from_detections` 构建群体事件窗口（并可与 `packedTimes` 做一致性对齐评估）  
+3) 在窗口内计算质心 → 相对 lag / rank（`align='first_centroid'`）  
+
+### 1) 快速验证 Step1：检测→窗口 vs packedTimes
+
+建议口径（更接近历史 pipeline）：
+- `reference='bipolar'`
+- “别名通道”：把 `A1-A2` 视为 `A1`（很多旧流程这样记名）
+- “丢末端 contact”：用 GPU `chns_names` 过滤 pair（只有左右触点都在 GPU 集合里的 pair 才保留）
+
+示例（120s crop，Ripple）：
+
+```python
+from src.group_event_analysis import bqk_detect_and_compare_windows_to_packed
+
+edf = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf'
+packed = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy'
+gpu_npz = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz'
+
+metrics = bqk_detect_and_compare_windows_to_packed(
+    edf_path=edf,
+    packed_times_path=packed,
+    band='ripple',
+    crop_seconds=120.0,
+    reference='bipolar',
+    alias_bipolar_to_left=True,
+    alias_filter_using_gpu_npz=gpu_npz,
+    # window_sec / min_overlap_sec 默认从 packedTimes 推断
+    min_channels=3,
+)
+print(metrics)
+```
+
+### 2) 推荐的加速方式：对整段 crop 预先缓存 envelope（GPU）
+
+如果你要跑大量 packedTimes 事件（比如 600s 或更多），不要每个事件窗都重复滤波+Hilbert。
+建议先在 GPU 上对整段 crop、每个通道计算 envelope 并保存，然后只做切窗+质心。
+
+```python
+from src.group_event_analysis import precompute_envelope_cache
+
+edf = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf'
+gpu_npz = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz'
+out = '/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_envCache_ripple_bipolar_alias_crop120s.npz'
+
+precompute_envelope_cache(
+    edf_path=edf,
+    out_npz_path=out,
+    band='ripple',
+    crop_seconds=120.0,
+    reference='bipolar',
+    alias_bipolar_to_left=True,
+    alias_filter_using_gpu_npz=gpu_npz,
+    use_gpu=True,
+    dtype='float32',
+)
+```
+
+### 3) Step2-3：质心 → 相对 lag/rank 的科学口径
+
+- `lagPatRaw` 的绝对值可能在“拼接/累积时间轴”上，跨事件不直接可比；比较传播时延应在**事件内**对齐参考（例如对齐到最早通道）。
+- rank 对 ms 级抖动很敏感。建议同时报告：
+  - strict rank match（全序）
+  - tie-tolerant rank（例如 <2ms 视为并列）
+  - pairwise concordance（一致的先后关系比例）
+
+---
+
+## 🎨 可视化（Module 3/5）
+
+我们保留两类图：**信号级别（你能看懂、能 debug）**，以及 **矩阵级别（你能量化对齐/传播）**。
+
+### Fig1：群体事件拼接后的带通波形（不是 block 图）
+
+- 用途：直观看到每个通道在每个事件窗内的带通 burst，避免 `imshow` 把时间结构“涂抹成块”。
+- 函数：`plot_group_events_band_raster(plot_style='trace', mode='bandpassed')`
+
+### Fig2：每通道独立 STFT + TF(时间,频率) 质心点（带 colorbar）
+
+- 用途：你明确要求的“每个通道都做时频变换”，并且质心是 **(t,f) 的 2D centroid**，不是只算时间质心。
+- 函数：`plot_group_events_tf_centroids_per_channel`
+- 默认版式：
+  - 去掉每个通道子图的 top/right 边框
+  - 除最底部外不显示 x ticks
+  - `hspace` 很小（子图紧凑）
+  - 统一 `vmax` + `colorbar`
+
+质心定义（事件窗内、每通道）：
+\[
+t_c = \frac{\sum_{f,t} P(f,t)\,t}{\sum_{f,t} P(f,t)},\quad
+f_c = \frac{\sum_{f,t} P(f,t)\,f}{\sum_{f,t} P(f,t)}
+\]
+
+### Fig3：channels × events 的能量/秩/lag（验证用）
+
+- 函数：`plot_lag_heatmaps`
+- 输出三张图：energy、rank、lag(ms)

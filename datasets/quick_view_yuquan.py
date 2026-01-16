@@ -21,7 +21,7 @@ def show_dataset_overview(ds):
     print("\n" + "="*70)
     print("玉泉24小时SEEG数据集")
     print("="*70)
-    print(f"数据路径: /Volumes/Elements/yuquan_24h_edf")
+    print(f"数据路径: /mnt/yuquan_data/yuquan_24h_edf")
     print(f"\n患者数量: {stats['n_patients']} (已处理: {stats['n_patients_processed']})")
     print(f"EDF文件: {stats['n_edf_files']}")
     print(f"HFO事件: {stats['total_events']:,}")
@@ -205,7 +205,7 @@ def main():
     except FileNotFoundError as e:
         print(f"\n❌ 错误: {e}")
         print("\n请确认数据集路径是否正确:")
-        print("  /Volumes/Elements/yuquan_24h_edf")
+        print("  /mnt/yuquan_data/yuquan_24h_edf")
         sys.exit(1)
     
     # 解析命令行参数

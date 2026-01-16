@@ -1,7 +1,7 @@
 # 玉泉24小时SEEG数据集结构分析
 
 **分析日期**: 2026-01-12  
-**数据路径**: `/Volumes/Elements/yuquan_24h_edf`
+**数据路径**: `/mnt/yuquan_data/yuquan_24h_edf`
 
 ---
 
@@ -29,7 +29,7 @@
 ## 2. 目录结构
 
 ```
-/Volumes/Elements/yuquan_24h_edf/
+/mnt/yuquan_data/yuquan_24h_edf/
 ├── chengshuai/          # 患者1
 │   ├── FC10477Q.edf                           # 原始SEEG信号 (2小时, 145通道)
 │   ├── FC10477Q_gpu.npz                       # GPU检测的HFO事件
@@ -141,7 +141,9 @@ lagPatFreq:   # 频率信息
 **关键洞察**:
 - 从120个通道**筛选出8个核心通道** → 降维90%
 - 2601个事件是跨所有通道的**时间对齐事件池**
-- `lagPatRaw[i, j]` 表示第i个通道在第j个事件中的滞后时间
+- `lagPatRaw[i, j]` 是每个事件内的“时间标量”，但其绝对值在事件间可能处于**拼接/累积时间轴**上（因此跨事件绝对值不直接可比）
+  - 若要比较“传播时延”，应在**每个事件内部**做参考系统一：例如 `lag_rel = lagPatRaw - min(lagPatRaw)`（或对齐到最早通道）
+  - `lagPatRank` 对应每个事件内的通道先后顺序（对 ms 级抖动非常敏感）
 
 ---
 
@@ -162,7 +164,7 @@ dtype: float64
 ```
 
 **特点**:
-- 事件窗长度固定为**500ms** (0.5秒)
+- 事件窗长度在不同记录中可能不同（常见 0.5s，也存在 0.3s），不要在代码里硬编码；应从 `packedTimes[:,1]-packedTimes[:,0]` 推断
 - 时间相对于记录开始时刻 (start_time)
 
 ---
