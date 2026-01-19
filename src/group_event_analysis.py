@@ -555,6 +555,388 @@ def load_envelope_cache(npz_path: str) -> Dict:
     }
 
 
+def _safe_filename_component(s: str) -> str:
+    """Make a string safe for filenames (ASCII-ish, no spaces/slashes)."""
+    s = str(s)
+    out = []
+    for c in s:
+        if c.isalnum() or c in ("-", "_", "."):
+            out.append(c)
+        else:
+            out.append("_")
+    # Collapse long runs of underscores
+    ss = "".join(out)
+    while "__" in ss:
+        ss = ss.replace("__", "_")
+    return ss.strip("_.") or "x"
+
+
+def compute_and_save_hfo_event_wavelet_tfr(
+    *,
+    raw_cache_npz_path: str,
+    target_channel: str,
+    event_start: float,
+    event_end: float,
+    margin_sec: float = 0.2,
+    band: Optional[str] = None,
+    fmin: float = 10.0,
+    fmax: float = 400.0,
+    n_freqs: int = 180,
+    n_cycles: float = 4.0,
+    n_cycles_mode: str = "linear",  # 'fixed'|'linear'|'f_over_2'
+    n_cycles_min: float = 3.0,
+    n_cycles_max: float = 10.0,
+    decim: int = 1,
+    baseline_mode: str = "robust_z",  # 'none'|'robust_z'|'event_pctl'
+    baseline_pctl_low: float = 5.0,
+    baseline_pctl_high: float = 95.0,
+    smooth_time_ms: float = 8.0,
+    smooth_freq_bins: float = 1.5,
+    output_npz_path: Optional[str] = None,
+    overwrite: bool = False,
+) -> str:
+    """
+    Precompute and save a single-event Morlet-wavelet TFR for later visualization.
+
+    Design principle
+    ----------------
+    - This function does the computation and writes an on-disk artifact (npz).
+    - `src/visualization.py` should only read the saved results and plot.
+
+    Parameters
+    ----------
+    raw_cache_npz_path : str
+        Path to *_rawCache_*.npz created by preprocessing.save_raw_cache().
+    target_channel : str
+        Channel name in raw cache.
+    event_start, event_end : float
+        Event window in seconds (absolute time w.r.t. the cached crop start).
+    margin_sec : float
+        Context window before/after event for plotting and TF computation.
+    band : str, optional
+        Convenience band selector: 'ripple' (80-250Hz) or 'fast_ripple' (250-500Hz).
+        If provided, overrides fmin/fmax and is stored in metadata.
+    fmin, fmax : float
+        Frequency range (Hz) for wavelet transform.
+    n_freqs : int
+        Number of frequencies between [fmin, fmax] (log-spaced).
+    n_cycles : float
+        Morlet cycles (tradeoff between time/frequency resolution).
+        For HFOs, smaller values (3-6) usually highlight short bursts better.
+    n_cycles_mode : str
+        How to set cycles across frequencies:
+        - 'fixed'    : use n_cycles for all freqs
+        - 'linear'   : linearly spaced from n_cycles_min to n_cycles_max
+        - 'f_over_2' : n_cycles = f / 2 (f in Hz)
+    n_cycles_min, n_cycles_max : float
+        Range for 'linear' mode.
+    decim : int
+        Decimation factor on time axis for TF output (>=1).
+    baseline_mode : str
+        Baseline normalization stored in cache for better contrast.
+        - 'none'     : only save power_db
+        - 'robust_z' : per-frequency robust z-score using baseline (outside [event_start,event_end])
+        - 'event_pctl' : per-frequency percentile scaling within the event window (paper-like contrast)
+    baseline_pctl_low, baseline_pctl_high : float
+        Percentile range used by 'event_pctl' scaling.
+    smooth_time_ms : float
+        Gaussian smoothing (ms) applied to power_db for visualization ("blob" look).
+    smooth_freq_bins : float
+        Gaussian smoothing (bins) along frequency axis.
+    output_npz_path : str, optional
+        Output path. If None, saves next to raw cache with a deterministic name.
+    overwrite : bool
+        If False and output exists, returns the existing path without recomputing.
+
+    Returns
+    -------
+    out_npz_path : str
+        Saved artifact path.
+    """
+    from pathlib import Path
+    from .preprocessing import load_raw_cache
+
+    try:
+        from scipy.signal import fftconvolve
+    except Exception as exc:
+        raise ImportError("SciPy is required for wavelet TFR (scipy.signal.fftconvolve).") from exc
+
+    raw_cache = load_raw_cache(str(raw_cache_npz_path))
+    data = np.asarray(raw_cache["data"])
+    sfreq = float(np.asarray(raw_cache["sfreq"]).ravel()[0])
+    ch_names = [str(x) for x in raw_cache["ch_names"]]
+    start_sec = float(np.asarray(raw_cache.get("start_sec", np.array([0.0]))).ravel()[0])
+
+    if target_channel not in ch_names:
+        raise ValueError(f"Channel '{target_channel}' not found in raw cache.")
+    if data.ndim != 2:
+        raise ValueError("raw cache 'data' must be 2D (n_channels, n_samples).")
+    if sfreq <= 0:
+        raise ValueError("Invalid sfreq in raw cache.")
+
+    event_start = float(event_start)
+    event_end = float(event_end)
+    if event_end <= event_start:
+        raise ValueError("event_end must be > event_start.")
+    margin_sec = float(margin_sec)
+    if margin_sec < 0:
+        raise ValueError("margin_sec must be >= 0.")
+
+    plot_start = max(float(start_sec), event_start - margin_sec)
+    plot_end = min(float(start_sec) + (data.shape[1] / sfreq), event_end + margin_sec)
+    if plot_end <= plot_start:
+        raise ValueError("Invalid plot window after clipping to raw cache bounds.")
+
+    i0 = int(round((plot_start - start_sec) * sfreq))
+    i1 = int(round((plot_end - start_sec) * sfreq))
+    i0 = max(0, i0)
+    i1 = min(int(data.shape[1]), i1)
+    if i1 <= i0:
+        raise ValueError("Empty signal segment after index conversion.")
+
+    ch_idx = ch_names.index(target_channel)
+    x = np.asarray(data[ch_idx, i0:i1], dtype=np.float64)
+    # Keep a stable time base in seconds (absolute time w.r.t. crop)
+    t = (np.arange(x.shape[0], dtype=np.float64) / sfreq) + plot_start
+
+    decim = int(decim)
+    if decim < 1:
+        raise ValueError("decim must be >= 1.")
+
+    # Log-spaced frequencies are usually more readable for HFO blobs.
+    band_name = "custom"
+    if band is not None:
+        b = str(band).lower().strip()
+        if b in ("ripple", "rp", "ripples"):
+            fmin, fmax = 80.0, 250.0
+            band_name = "ripple"
+        elif b in ("fast_ripple", "fast-ripple", "fr", "fast"):
+            fmin, fmax = 250.0, 500.0
+            band_name = "fast_ripple"
+        else:
+            raise ValueError("band must be 'ripple' or 'fast_ripple' (or None).")
+
+    fmin = float(fmin)
+    fmax = float(fmax)
+    if fmin <= 0 or fmax <= 0 or fmax <= fmin:
+        raise ValueError("Require 0 < fmin < fmax.")
+    n_freqs = int(n_freqs)
+    if n_freqs < 4:
+        raise ValueError("n_freqs must be >= 4.")
+    freqs = np.geomspace(fmin, fmax, n_freqs).astype(np.float64)
+
+    # SciPy-only Morlet wavelet power using fftconvolve (stable, no MNE dependency).
+    # Wavelet definition:
+    #   psi(t) = exp(2*pi*i*f*t) * exp(-t^2 / (2*sigma_t^2)), sigma_t = n_cycles/(2*pi*f)
+    method = "scipy_fftconvolve_morlet"
+    n_sig = int(x.shape[0])
+    power = np.zeros((freqs.shape[0], n_sig), dtype=np.float64)
+    n_cycles = float(n_cycles)
+    if n_cycles <= 0:
+        raise ValueError("n_cycles must be > 0.")
+    n_cycles_mode = str(n_cycles_mode).lower().strip()
+    if n_cycles_mode not in ("fixed", "linear", "f_over_2"):
+        raise ValueError("n_cycles_mode must be 'fixed', 'linear', or 'f_over_2'.")
+    if n_cycles_mode == "fixed":
+        cycles = np.full(freqs.shape[0], float(n_cycles), dtype=np.float64)
+    elif n_cycles_mode == "linear":
+        cmin = float(n_cycles_min)
+        cmax = float(n_cycles_max)
+        if cmin <= 0 or cmax <= 0 or cmax < cmin:
+            raise ValueError("n_cycles_min/max must be >0 and max>=min.")
+        cycles = np.linspace(cmin, cmax, freqs.shape[0]).astype(np.float64)
+    else:
+        cycles = (freqs / 2.0).astype(np.float64)
+
+    for fi, f0 in enumerate(freqs):
+        c = float(cycles[fi])
+        sigma_t = c / (2.0 * np.pi * float(f0))
+        # +/- 3 sigma covers 99.7% of Gaussian energy
+        half_support = int(np.ceil(3.0 * sigma_t * sfreq))
+        tt = (np.arange(-half_support, half_support + 1, dtype=np.float64) / sfreq)
+        w = np.exp(2j * np.pi * float(f0) * tt) * np.exp(-(tt**2) / (2.0 * sigma_t**2))
+        # L2 normalize (keeps scale comparable across freqs)
+        wn = np.sqrt(np.sum(np.abs(w) ** 2)) + 1e-30
+        w = w / wn
+        y = fftconvolve(x, w, mode="same")
+        power[fi, :] = (np.abs(y) ** 2).astype(np.float64, copy=False)
+
+    if decim > 1:
+        power = power[:, ::decim]
+
+    # Align time vector with decimated output
+    t_out = t[::decim] if decim > 1 else t
+    if power.shape[1] != t_out.shape[0]:
+        # guard for off-by-one from backend
+        n = min(power.shape[1], t_out.shape[0])
+        power = power[:, :n]
+        t_out = t_out[:n]
+
+    # Convert to dB for visualization (avoid -inf).
+    power_db = 10.0 * np.log10(power + 1e-30)
+
+    # Optional smoothing to reduce striping and highlight blobs.
+    power_db_smooth = None
+    try:
+        from scipy.ndimage import gaussian_filter
+
+        sigma_t = max(0.0, float(smooth_time_ms)) * 1e-3 * (sfreq / float(decim))
+        sigma_f = max(0.0, float(smooth_freq_bins))
+        if sigma_t > 0.0 or sigma_f > 0.0:
+            power_db_smooth = gaussian_filter(power_db, sigma=(sigma_f, sigma_t), mode="nearest")
+    except Exception:
+        power_db_smooth = None
+
+    # Optional baseline normalization for better HFO contrast.
+    baseline_mode = str(baseline_mode).lower().strip()
+    if baseline_mode not in ("none", "robust_z", "event_pctl"):
+        raise ValueError("baseline_mode must be 'none', 'robust_z', or 'event_pctl'.")
+    power_z = None
+    power_pctl = None
+    if baseline_mode == "robust_z":
+        base_mask = (t_out < float(event_start)) | (t_out > float(event_end))
+        # If margin is too small, base_mask could be empty; fall back to using full window.
+        if not np.any(base_mask):
+            base_mask = np.ones_like(t_out, dtype=bool)
+        # robust z-score per frequency: (x - median) / MAD
+        med = np.median(power_db[:, base_mask], axis=1, keepdims=True)
+        mad = np.median(np.abs(power_db[:, base_mask] - med), axis=1, keepdims=True) + 1e-9
+        power_z = (power_db - med) / mad
+    elif baseline_mode == "event_pctl":
+        low = float(baseline_pctl_low)
+        high = float(baseline_pctl_high)
+        if not (0.0 <= low < high <= 100.0):
+            raise ValueError("baseline_pctl_low/high must satisfy 0 <= low < high <= 100.")
+        ev_mask = (t_out >= float(event_start)) & (t_out <= float(event_end))
+        if not np.any(ev_mask):
+            ev_mask = np.ones_like(t_out, dtype=bool)
+        p_lo = np.percentile(power_db[:, ev_mask], low, axis=1, keepdims=True)
+        p_hi = np.percentile(power_db[:, ev_mask], high, axis=1, keepdims=True)
+        denom = (p_hi - p_lo) + 1e-9
+        power_pctl = (power_db - p_lo) / denom
+        power_pctl = np.clip(power_pctl, 0.0, 1.0)
+
+    if output_npz_path is None:
+        raw_path = Path(str(raw_cache_npz_path))
+        base = raw_path.name
+        # "FC10477Q_rawCache_none.npz" -> "FC10477Q"
+        prefix = base.split("_rawCache_", 1)[0]
+        ch_tag = _safe_filename_component(target_channel)
+        ev_tag = f"{event_start:.3f}_{event_end:.3f}".replace(".", "p")
+        band_tag = _safe_filename_component(band_name)
+        out_name = f"{prefix}_hfoVerify_wavelet_{band_tag}_{ch_tag}_{ev_tag}.npz"
+        output_npz_path = str(raw_path.parent / out_name)
+
+    out_p = Path(str(output_npz_path))
+    if out_p.exists() and not bool(overwrite):
+        return str(out_p)
+
+    np.savez_compressed(
+        str(out_p),
+        method=np.array([method], dtype=object),
+        band=np.array([band_name], dtype=object),
+        freq_band_hz=np.array([float(fmin), float(fmax)], dtype=np.float64),
+        sfreq=np.array([sfreq], dtype=np.float64),
+        start_sec=np.array([start_sec], dtype=np.float64),
+        target_channel=np.array([str(target_channel)], dtype=object),
+        plot_start=np.array([float(plot_start)], dtype=np.float64),
+        plot_end=np.array([float(plot_end)], dtype=np.float64),
+        event_start=np.array([float(event_start)], dtype=np.float64),
+        event_end=np.array([float(event_end)], dtype=np.float64),
+        margin_sec=np.array([float(margin_sec)], dtype=np.float64),
+        freqs_hz=freqs.astype(np.float64),
+        t_sec=t_out.astype(np.float64),
+        power_db=power_db.astype(np.float32),
+        power_db_smooth=(power_db_smooth.astype(np.float32) if power_db_smooth is not None else np.zeros((0, 0), dtype=np.float32)),
+        power_z=(power_z.astype(np.float32) if power_z is not None else np.zeros((0, 0), dtype=np.float32)),
+        power_pctl=(power_pctl.astype(np.float32) if power_pctl is not None else np.zeros((0, 0), dtype=np.float32)),
+        baseline_mode=np.array([baseline_mode], dtype=object),
+        baseline_pctl_low=np.array([float(baseline_pctl_low)], dtype=np.float64),
+        baseline_pctl_high=np.array([float(baseline_pctl_high)], dtype=np.float64),
+        smooth_time_ms=np.array([float(smooth_time_ms)], dtype=np.float64),
+        smooth_freq_bins=np.array([float(smooth_freq_bins)], dtype=np.float64),
+        n_cycles=np.array([float(n_cycles)], dtype=np.float64),
+        n_cycles_mode=np.array([str(n_cycles_mode)], dtype=object),
+        n_cycles_min=np.array([float(n_cycles_min)], dtype=np.float64),
+        n_cycles_max=np.array([float(n_cycles_max)], dtype=np.float64),
+        n_cycles_vec=cycles.astype(np.float64),
+        decim=np.array([int(decim)], dtype=np.int64),
+        fmin=np.array([float(fmin)], dtype=np.float64),
+        fmax=np.array([float(fmax)], dtype=np.float64),
+        source_raw_cache=np.array([str(raw_cache_npz_path)], dtype=object),
+    )
+    return str(out_p)
+
+
+def compute_and_save_hfo_event_wavelet_tfr_two_bands(
+    *,
+    raw_cache_npz_path: str,
+    target_channel: str,
+    event_start: float,
+    event_end: float,
+    margin_sec: float = 0.2,
+    n_freqs: int = 180,
+    n_cycles_ripple: float = 4.0,
+    n_cycles_fast_ripple: float = 4.0,
+    n_cycles_mode: str = "linear",
+    n_cycles_min: float = 3.0,
+    n_cycles_max: float = 10.0,
+    decim: int = 1,
+    baseline_mode: str = "robust_z",
+    baseline_pctl_low: float = 5.0,
+    baseline_pctl_high: float = 95.0,
+    smooth_time_ms: float = 8.0,
+    smooth_freq_bins: float = 1.5,
+    overwrite: bool = False,
+) -> Dict[str, str]:
+    """
+    Convenience wrapper: precompute and save BOTH ripple (80-250) and fast-ripple (250-500) TFR caches.
+    Returns dict with keys: 'ripple', 'fast_ripple'.
+    """
+    out: Dict[str, str] = {}
+    out["ripple"] = compute_and_save_hfo_event_wavelet_tfr(
+        raw_cache_npz_path=str(raw_cache_npz_path),
+        target_channel=str(target_channel),
+        event_start=float(event_start),
+        event_end=float(event_end),
+        margin_sec=float(margin_sec),
+        band="ripple",
+        n_freqs=int(n_freqs),
+        n_cycles=float(n_cycles_ripple),
+        n_cycles_mode=str(n_cycles_mode),
+        n_cycles_min=float(n_cycles_min),
+        n_cycles_max=float(n_cycles_max),
+        decim=int(decim),
+        baseline_mode=str(baseline_mode),
+        baseline_pctl_low=float(baseline_pctl_low),
+        baseline_pctl_high=float(baseline_pctl_high),
+        smooth_time_ms=float(smooth_time_ms),
+        smooth_freq_bins=float(smooth_freq_bins),
+        overwrite=bool(overwrite),
+    )
+    out["fast_ripple"] = compute_and_save_hfo_event_wavelet_tfr(
+        raw_cache_npz_path=str(raw_cache_npz_path),
+        target_channel=str(target_channel),
+        event_start=float(event_start),
+        event_end=float(event_end),
+        margin_sec=float(margin_sec),
+        band="fast_ripple",
+        n_freqs=int(n_freqs),
+        n_cycles=float(n_cycles_fast_ripple),
+        n_cycles_mode=str(n_cycles_mode),
+        n_cycles_min=float(n_cycles_min),
+        n_cycles_max=float(n_cycles_max),
+        decim=int(decim),
+        baseline_mode=str(baseline_mode),
+        baseline_pctl_low=float(baseline_pctl_low),
+        baseline_pctl_high=float(baseline_pctl_high),
+        smooth_time_ms=float(smooth_time_ms),
+        smooth_freq_bins=float(smooth_freq_bins),
+        overwrite=bool(overwrite),
+    )
+    return out
+
+
 def compute_centroid_matrix_from_envelope_cache(
     *,
     windows: Sequence[EventWindow],

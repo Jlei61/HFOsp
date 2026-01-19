@@ -2491,6 +2491,313 @@ def plot_raw_filtered_envelope(
 
 
 # =============================================================================
+# HFO Event Verification Card (Visualization only)
+# =============================================================================
+
+def plot_hfo_event_verification_from_tfr_cache(
+    *,
+    raw_cache_npz_path: str,
+    env_cache_npz_path: str,
+    tfr_npz_path: str,
+    target_channel: Optional[str] = None,
+    freq_band_label: Tuple[float, float] = (80.0, 250.0),
+    cmap_tf: str = "jet",
+    figsize: Tuple[float, float] = (12, 4),
+    tf_vmin: Optional[float] = None,
+    tf_vmax: Optional[float] = None,
+    tf_map: str = "auto",  # 'auto'|'power_db'|'power_db_smooth'|'power_z'|'power_pctl'|'db_ratio'|'db_ratio_smooth'
+    baseline_view: str = "none",  # 'none'|'pre_event' (legacy)
+    baseline_window_sec: Tuple[float, float] = (0.5, 0.2),
+    baseline_mode_vis: str = "none",  # 'none'|'db_ratio'
+    save_path: Optional[Union[str, Path]] = None,
+) -> plt.Figure:
+    """
+    Plot a single HFO event "verification card" from PRECOMPUTED caches.
+
+    Architecture
+    ------------
+    This function is visualization-only:
+    - Raw trace: read from *_rawCache_*.npz
+    - Ripple-band trace: read from *_envCache_*.npz (requires x_band in the cache)
+    - Time-frequency (wavelet TFR): read from *_hfoVerify_wavelet_*.npz
+
+    All heavy computation (wavelet transform) must be done upstream and saved to `tfr_npz_path`.
+    """
+    from .preprocessing import load_raw_cache
+    from .group_event_analysis import load_envelope_cache
+
+    raw = load_raw_cache(str(raw_cache_npz_path))
+    envc = load_envelope_cache(str(env_cache_npz_path))
+    tfr = np.load(str(tfr_npz_path), allow_pickle=True)
+
+    tfr_target = str(np.asarray(tfr["target_channel"]).ravel()[0])
+    if target_channel is None:
+        target_channel = tfr_target
+    if str(target_channel) != tfr_target:
+        raise ValueError(f"target_channel='{target_channel}' != cached '{tfr_target}'. Use the cached channel.")
+
+    sf_raw = float(np.asarray(raw["sfreq"]).ravel()[0])
+    sf_env = float(envc["sfreq"])
+    if abs(sf_raw - sf_env) > 1e-6:
+        warnings.warn(f"raw sfreq={sf_raw}Hz != envCache sfreq={sf_env}Hz; plotting may be misaligned.")
+
+    raw_ch_names = [str(x) for x in raw["ch_names"]]
+    env_ch_names = [str(x) for x in envc["ch_names"]]
+    if target_channel not in raw_ch_names:
+        raise ValueError(f"Channel '{target_channel}' not found in raw cache.")
+    if target_channel not in env_ch_names:
+        raise ValueError(f"Channel '{target_channel}' not found in env cache.")
+    if envc.get("x_band", None) is None:
+        raise ValueError(
+            "env cache does not contain x_band (bandpassed signal). "
+            "Regenerate envCache with save_bandpass=True."
+        )
+
+    plot_start = float(np.asarray(tfr["plot_start"]).ravel()[0])
+    plot_end = float(np.asarray(tfr["plot_end"]).ravel()[0])
+    event_start = float(np.asarray(tfr["event_start"]).ravel()[0])
+    event_end = float(np.asarray(tfr["event_end"]).ravel()[0])
+
+    # Slice raw segment
+    start_sec_raw = float(np.asarray(raw.get("start_sec", np.array([0.0]))).ravel()[0])
+    data_raw = np.asarray(raw["data"])
+    i0r = int(round((plot_start - start_sec_raw) * sf_raw))
+    i1r = int(round((plot_end - start_sec_raw) * sf_raw))
+    i0r = max(0, i0r)
+    i1r = min(int(data_raw.shape[1]), i1r)
+    if i1r <= i0r:
+        raise ValueError("Empty raw slice for the requested plot window.")
+    ridx = raw_ch_names.index(target_channel)
+    raw_seg = np.asarray(data_raw[ridx, i0r:i1r], dtype=np.float64)
+    t_raw = (np.arange(raw_seg.shape[0], dtype=np.float64) / sf_raw) + plot_start
+
+    # Slice ripple bandpassed segment from env cache
+    start_sec_env = float(envc.get("start_sec", 0.0))
+    x_band = np.asarray(envc["x_band"])
+    i0e = int(round((plot_start - start_sec_env) * sf_env))
+    i1e = int(round((plot_end - start_sec_env) * sf_env))
+    i0e = max(0, i0e)
+    i1e = min(int(x_band.shape[1]), i1e)
+    if i1e <= i0e:
+        raise ValueError("Empty x_band slice for the requested plot window.")
+    eidx = env_ch_names.index(target_channel)
+    ripple_seg = np.asarray(x_band[eidx, i0e:i1e], dtype=np.float64)
+    t_ripple = (np.arange(ripple_seg.shape[0], dtype=np.float64) / sf_env) + plot_start
+
+    # TFR
+    freqs = np.asarray(tfr["freqs_hz"], dtype=np.float64)
+    t_sec = np.asarray(tfr["t_sec"], dtype=np.float64)
+    power_db = np.asarray(tfr["power_db"], dtype=np.float64)
+    power_db_smooth = None
+    power_z = None
+    power_pctl = None
+    if "power_db_smooth" in tfr:
+        s = np.asarray(tfr["power_db_smooth"], dtype=np.float64)
+        if s.ndim == 2 and s.shape == power_db.shape and s.size > 0:
+            power_db_smooth = s
+    if "power_z" in tfr:
+        z = np.asarray(tfr["power_z"], dtype=np.float64)
+        if z.ndim == 2 and z.shape == power_db.shape and z.size > 0:
+            power_z = z
+    if "power_pctl" in tfr:
+        p = np.asarray(tfr["power_pctl"], dtype=np.float64)
+        if p.ndim == 2 and p.shape == power_db.shape and p.size > 0:
+            power_pctl = p
+    if power_db.ndim != 2 or power_db.shape[0] != freqs.shape[0] or power_db.shape[1] != t_sec.shape[0]:
+        raise ValueError("Invalid TFR shapes in cache.")
+
+    tf_map = str(tf_map).lower().strip()
+    if tf_map not in (
+        "auto",
+        "power_db",
+        "power_db_smooth",
+        "power_z",
+        "power_pctl",
+        "db_ratio",
+        "db_ratio_smooth",
+    ):
+        raise ValueError(
+            "tf_map must be 'auto', 'power_db', 'power_db_smooth', "
+            "'power_z', 'power_pctl', 'db_ratio', or 'db_ratio_smooth'."
+        )
+    if tf_map == "power_db_smooth" and power_db_smooth is None:
+        warnings.warn("power_db_smooth not found in TFR cache; falling back to power_db.")
+        tf_map = "power_db"
+    if tf_map == "power_pctl" and power_pctl is None:
+        warnings.warn("power_pctl not found in TFR cache; falling back to power_db.")
+        tf_map = "power_db"
+    if tf_map == "power_z" and power_z is None:
+        warnings.warn("power_z not found in TFR cache; falling back to power_db.")
+        tf_map = "power_db"
+    if tf_map == "auto":
+        if power_db_smooth is not None:
+            tf_map = "power_db_smooth"
+        elif power_pctl is not None:
+            tf_map = "power_pctl"
+        elif power_z is not None:
+            tf_map = "power_z"
+        else:
+            tf_map = "power_db"
+    if tf_map == "power_db_smooth":
+        tf_data = power_db_smooth
+    elif tf_map == "power_pctl":
+        tf_data = power_pctl
+    elif tf_map == "power_z":
+        tf_data = power_z
+    elif tf_map in ("db_ratio", "db_ratio_smooth"):
+        # Baseline-corrected dB relative to pre-event window (visualization-only).
+        pre_start, pre_end = float(baseline_window_sec[0]), float(baseline_window_sec[1])
+        if pre_start <= pre_end or pre_end < 0:
+            raise ValueError("baseline_window_sec must be like (0.5, 0.2) with start > end >= 0.")
+        b0 = float(event_start) - pre_start
+        b1 = float(event_start) - pre_end
+        pre_mask = (t_sec >= b0) & (t_sec <= b1)
+        if not np.any(pre_mask):
+            warnings.warn("No baseline window samples; falling back to full window.")
+            pre_mask = np.ones_like(t_sec, dtype=bool)
+        power_lin = 10.0 ** (power_db / 10.0)
+        base = np.mean(power_lin[:, pre_mask], axis=1, keepdims=True) + 1e-12
+        tf_data = 10.0 * np.log10(power_lin / base)
+        if tf_map == "db_ratio_smooth":
+            try:
+                from scipy.ndimage import gaussian_filter
+
+                smooth_time_ms = float(np.asarray(tfr.get("smooth_time_ms", [8.0])).ravel()[0])
+                smooth_freq_bins = float(np.asarray(tfr.get("smooth_freq_bins", [1.5])).ravel()[0])
+                sigma_t = max(0.0, smooth_time_ms) * 1e-3 * (sf_raw / float(max(1, int(np.asarray(tfr.get("decim", [1])).ravel()[0]))))
+                sigma_f = max(0.0, smooth_freq_bins)
+                if sigma_t > 0.0 or sigma_f > 0.0:
+                    tf_data = gaussian_filter(tf_data, sigma=(sigma_f, sigma_t), mode="nearest")
+            except Exception:
+                pass
+    else:
+        tf_data = power_db
+
+    # Visualization-only baseline: subtract pre-event baseline to enhance contrast.
+    baseline_view = str(baseline_view).lower().strip()
+    if baseline_view not in ("none", "pre_event"):
+        raise ValueError("baseline_view must be 'none' or 'pre_event'.")
+    if baseline_view == "pre_event":
+        if tf_map == "power_pctl":
+            warnings.warn("baseline_view='pre_event' ignored for power_pctl.")
+        else:
+            pre_mask = t_sec < float(event_start)
+            if not np.any(pre_mask):
+                warnings.warn("No pre-event samples available for baseline; skipping.")
+            else:
+                base = np.median(tf_data[:, pre_mask], axis=1, keepdims=True)
+                tf_data = tf_data - base
+
+    # Auto scale for nicer cards (avoid one extreme pixel dominating)
+    if tf_vmin is None or tf_vmax is None:
+        finite = tf_data[np.isfinite(tf_data)]
+        if finite.size:
+            if tf_map == "power_pctl":
+                p2, p98 = 0.0, 1.0
+            elif tf_map in ("db_ratio", "db_ratio_smooth"):
+                # Clip noise floor; everything below 0~2 dB looks the same.
+                p2, p98 = -2.0, 8.0
+            else:
+                p2, p98 = np.percentile(finite, [2, 98])
+            if tf_vmin is None:
+                tf_vmin = float(p2)
+            if tf_vmax is None:
+                tf_vmax = float(p98)
+        else:
+            tf_vmin = tf_vmin if tf_vmin is not None else 0.0
+            tf_vmax = tf_vmax if tf_vmax is not None else 1.0
+
+    # Layout: Left stacked traces, Right TFR heatmap
+    fig = plt.figure(figsize=figsize)
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.2, 1.0], wspace=0.15)
+
+    gs_left = gs[0].subgridspec(2, 1, hspace=0.05)
+    ax_raw = fig.add_subplot(gs_left[0])
+    ax_rip = fig.add_subplot(gs_left[1], sharex=ax_raw)
+
+    ax_raw.plot(t_raw, raw_seg, color="k", lw=1.0)
+    ax_raw.set_ylabel(f"{target_channel}\nRaw", fontsize=10)
+    ax_raw.tick_params(labelbottom=False)
+
+    ax_rip.plot(t_ripple, ripple_seg, color="#1f77b4", lw=1.0)
+    ax_rip.set_ylabel("Ripple", fontsize=10)
+    ax_rip.set_xlabel("Time (s)", fontsize=10)
+
+    # Event shading on traces
+    for ax in (ax_raw, ax_rip):
+        ax.axvspan(event_start, event_end, color="#d62728", alpha=0.3, lw=0, zorder=0)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+    ax_rip.spines["bottom"].set_visible(True)
+
+    ax_tf = fig.add_subplot(gs[1])
+    # Avoid white margins by padding data to display range if needed.
+    band_name = str(np.asarray(tfr.get("band", ["custom"])).ravel()[0])
+    if band_name == "fast_ripple":
+        display_max = 500.0
+    else:
+        display_max = 250.0
+    display_min = 1.0
+
+    freqs_plot = freqs
+    tf_plot = tf_data
+    if freqs_plot.size:
+        if display_min < float(freqs_plot.min()):
+            freqs_plot = np.concatenate([[display_min], freqs_plot])
+            tf_plot = np.vstack([tf_plot[:1, :], tf_plot])
+        if display_max > float(freqs_plot.max()):
+            freqs_plot = np.concatenate([freqs_plot, [display_max]])
+            tf_plot = np.vstack([tf_plot, tf_plot[-1:, :]])
+
+    im = ax_tf.pcolormesh(
+        t_sec,
+        freqs_plot,
+        tf_plot,
+        cmap=str(cmap_tf),
+        shading="auto",
+        rasterized=True,
+        vmin=float(tf_vmin),
+        vmax=float(tf_vmax),
+    )
+    ax_tf.set_xlabel("Time (s)", fontsize=10)
+    ax_tf.set_ylabel("Frequency (Hz)", fontsize=10)
+    if tf_map == "power_pctl":
+        title_suffix = "Wavelet pctl"
+    elif tf_map == "power_z":
+        title_suffix = "Wavelet z"
+    elif tf_map == "power_db_smooth":
+        title_suffix = "Wavelet dB (smooth)"
+    elif tf_map in ("db_ratio", "db_ratio_smooth"):
+        title_suffix = "Wavelet dB (baseline)"
+    else:
+        title_suffix = "Wavelet dB"
+    ax_tf.set_title(f"Time-Frequency ({title_suffix})", fontsize=10, fontweight="bold")
+    ax_tf.axvline(event_start, color="w", linestyle="--", alpha=0.5, lw=1)
+    ax_tf.axvline(event_end, color="w", linestyle="--", alpha=0.5, lw=1)
+
+    cb = plt.colorbar(im, ax=ax_tf, fraction=0.046, pad=0.04)
+    if tf_map == "power_pctl":
+        cb.set_label("Event pctl (0-1)", fontsize=8)
+    elif tf_map in ("power_db", "power_db_smooth"):
+        cb.set_label("Power (dB)", fontsize=8)
+    elif tf_map in ("db_ratio", "db_ratio_smooth"):
+        cb.set_label("Power (dB vs baseline)", fontsize=8)
+    else:
+        cb.set_label("Robust z", fontsize=8)
+
+    # Display range: 1-250 (ripple) or 1-500 (fast ripple)
+    ax_tf.set_ylim(display_min, display_max)
+
+    plt.tight_layout()
+    if save_path is not None:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(str(save_path), dpi=300, bbox_inches="tight")
+    return fig
+
+
+# =============================================================================
 # Convenience function for PreprocessingResult
 # =============================================================================
 
