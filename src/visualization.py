@@ -1130,8 +1130,8 @@ def plot_group_events_tf_centroids_per_channel(
     event_indices: Optional[List[int]] = None,
     max_events: int = 30,
     freq_band: Tuple[float, float] = (80.0, 250.0),
-    nperseg: int = 256,
-    noverlap: int = 192,
+    nperseg: int = 256,  # legacy, unused for wavelet
+    noverlap: int = 192,  # legacy, unused for wavelet
     power_log1p: bool = True,
     mask_by_detections: bool = False,
     centroid_power: str = "power2",  # 'power'|'power2'
@@ -1148,18 +1148,27 @@ def plot_group_events_tf_centroids_per_channel(
     tick_font_size: int = 12,
     hspace: float = 0.02,
     figsize: Tuple[float, float] = (12, 8),
+    tf_n_freqs: int = 180,
+    tf_n_cycles: float = 4.0,
+    tf_n_cycles_mode: str = "linear",
+    tf_n_cycles_min: float = 3.0,
+    tf_n_cycles_max: float = 10.0,
+    tf_freq_scale: str = "log",
+    baseline_n_select: int = 10,
+    baseline_min_distance_sec: float = 2.0,
+    baseline_window_sec: float = 2.0,
 ) -> plt.Figure:
     """
     Per-channel spectrogram view (what you actually want for Fig2):
-      - For each channel: STFT power (within freq_band) over concatenated packedTimes windows.
-      - Overlay a TF centroid (t,f) per event window.
+      - For each channel: Wavelet TF power (within freq_band) over concatenated packedTimes windows.
+      - Overlay a TF centroid (t,f) per event window (from groupAnalysis if available).
 
     Notes:
       - This is NOT a (channels×events) heatmap. It's a real per-channel TF transform.
-      - Centroid is computed in TF domain (2D centroid), so the dot should sit on the burst.
+      - Centroid is computed on wavelet+baseline log TF maps (2D centroid).
     """
-    from scipy.signal import stft
-    from .group_event_analysis import load_envelope_cache
+    from .group_event_analysis import load_envelope_cache, load_group_analysis_results
+    from .utils import bqk_utils
 
     meta = load_envelope_cache(cache_npz_path)
     x_band = meta.get("x_band", None)
@@ -1669,21 +1678,24 @@ def plot_paper_fig2_normalized_spectrogram(
     n_ch = len(rows)
     n_ev = len(event_indices)
 
-    # NEW: Load pre-computed centroids if available
     use_precomputed = group_analysis_npz_path is not None
+    ga = None
+    tf_centroid_time = None
+    tf_centroid_freq = None
+    ga_events_bool = None
+    ga_rows = None
     if use_precomputed:
         ga = load_group_analysis_results(group_analysis_npz_path)
-        tf_centroid_time = ga.get('tf_centroid_time')
-        tf_centroid_freq = ga.get('tf_centroid_freq')
-        ga_events_bool = ga.get('events_bool')
+        tf_centroid_time = ga.get("tf_centroid_time")
+        tf_centroid_freq = ga.get("tf_centroid_freq")
+        ga_events_bool = ga.get("events_bool")
         if tf_centroid_time is None or tf_centroid_freq is None:
             warnings.warn("TF centroids not in groupAnalysis, falling back to on-the-fly computation")
             use_precomputed = False
         else:
-            ga_idx_map = {c: i for i, c in enumerate(ga['ch_names'])}
+            ga_idx_map = {c: i for i, c in enumerate(ga["ch_names"])}
             ga_rows = [ga_idx_map.get(lbl) for lbl in labels]
 
-    # Fallback: build events_bool from detections_npz
     if not use_precomputed:
         events_bool = np.zeros((n_ch, n_ev), dtype=bool)
         if detections_npz_path is not None:
@@ -1714,61 +1726,131 @@ def plot_paper_fig2_normalized_spectrogram(
 
     all_centroids = [[None for _ in range(n_ev)] for _ in range(n_ch)]
 
-    # Pass 1: compute STFT + centroids (or read pre-computed centroids)
+    # Wavelet params (prefer groupAnalysis metadata)
+    if use_precomputed and ga is not None and "tf_freqs_hz" in ga and "tf_n_cycles_vec" in ga:
+        freqs_hz = np.asarray(ga["tf_freqs_hz"], dtype=np.float64)
+        n_cycles_vec = np.asarray(ga["tf_n_cycles_vec"], dtype=np.float64)
+        pool_starts = np.asarray(ga.get("baseline_pool_starts", np.zeros((0,))), dtype=np.float64)
+        pool_indices = np.asarray(ga.get("baseline_pool_indices", np.zeros((0,))), dtype=np.int64)
+        if "baseline_params" in ga:
+            bp = ga["baseline_params"].tolist()[0]
+            baseline_window_sec = float(bp.get("window_sec", baseline_window_sec))
+        if "tf_baseline_n_select" in ga:
+            baseline_n_select = int(np.asarray(ga["tf_baseline_n_select"]).ravel()[0])
+        if "tf_baseline_min_distance_sec" in ga:
+            baseline_min_distance_sec = float(np.asarray(ga["tf_baseline_min_distance_sec"]).ravel()[0])
+    else:
+        freqs_hz = bqk_utils.get_wavelet_freqs(freq_band[0], freq_band[1], int(tf_n_freqs), scale=tf_freq_scale)
+        mode = str(tf_n_cycles_mode).lower().strip()
+        if mode == "fixed":
+            n_cycles_vec = np.full(freqs_hz.shape[0], float(tf_n_cycles), dtype=np.float64)
+        elif mode == "linear":
+            n_cycles_vec = np.linspace(float(tf_n_cycles_min), float(tf_n_cycles_max), freqs_hz.shape[0]).astype(np.float64)
+        else:
+            n_cycles_vec = (freqs_hz / 2.0).astype(np.float64)
+        pool_starts = np.zeros((0,), dtype=np.float64)
+        pool_indices = np.zeros((0,), dtype=np.int64)
+
+    def _compute_wavelet_power(x: np.ndarray) -> np.ndarray:
+        from scipy.signal import fftconvolve
+        x = np.asarray(x, dtype=np.float64)
+        power = np.zeros((freqs_hz.shape[0], x.shape[0]), dtype=np.float64)
+        for fi, f0 in enumerate(freqs_hz):
+            c = float(n_cycles_vec[fi])
+            sigma_t = c / (2.0 * np.pi * float(f0))
+            half_support = int(np.ceil(3.0 * sigma_t * sfreq))
+            tt = (np.arange(-half_support, half_support + 1, dtype=np.float64) / sfreq)
+            w = np.exp(2j * np.pi * float(f0) * tt) * np.exp(-(tt**2) / (2.0 * sigma_t**2))
+            wn = np.sqrt(np.sum(np.abs(w) ** 2)) + 1e-30
+            w = w / wn
+            y = fftconvolve(x, w, mode="same")
+            power[fi, :] = (np.abs(y) ** 2).astype(np.float64, copy=False)
+        return power
+
+    # Pass 1: compute per-channel wavelet TF maps + centroids
     per_channel_data = []
     v99_list = []
 
     for ci, row in enumerate(rows):
-        # Concatenate signal for STFT visualization
-        x_cat = np.concatenate([np.asarray(x_band[row, i0:i1]) for (i0, i1) in segs_idx], axis=0)
-        nwin = x_cat.shape[0]
-        nps = min(int(nperseg), max(16, nwin))
-        nov = min(int(noverlap), max(0, nps - 1))
+        t_concat = []
+        p_concat = []
 
-        f, t, Z = stft(x_cat, fs=sfreq, nperseg=nps, noverlap=nov, boundary=None)
-        P = (np.abs(Z) ** 2).astype(np.float64)
-        band_mask = (f >= float(freq_band[0])) & (f <= float(freq_band[1]))
-        f_band = f[band_mask]
-        P_band = P[band_mask, :]
-        P_show = np.log1p(P_band)
+        for ej, (i0, i1) in enumerate(segs_idx):
+            seg = np.asarray(x_band[row, i0:i1], dtype=np.float64)
+            if seg.size == 0:
+                continue
+            power = _compute_wavelet_power(seg)
 
-        if np.isfinite(P_show).any():
-            v99_list.append(float(np.nanpercentile(P_show, 99)))
+            # Dynamic baseline (per event)
+            if pool_starts.size > 0 and pool_indices.size > 0:
+                event_time = 0.5 * (event_times[ej][0] + event_times[ej][1])
+                sel = np.argsort(np.abs(pool_starts - event_time))
+                sel = sel[np.abs(pool_starts[sel] - event_time) >= float(baseline_min_distance_sec)]
+                sel = sel[: int(baseline_n_select)]
+            else:
+                sel = np.array([], dtype=np.int64)
 
-        # TF centroids: read from groupAnalysis or compute
-        if use_precomputed:
-            ga_ci = ga_rows[ci]
-            if ga_ci is not None:
-                for ej, global_ej in enumerate(event_indices):
+            if sel.size > 0:
+                spectra = []
+                win_b = max(1, int(round(float(baseline_window_sec) * sfreq)))
+                for pj in pool_indices[sel]:
+                    s0 = int(pj)
+                    s1 = min(x_band.shape[1], s0 + win_b)
+                    if s1 <= s0:
+                        continue
+                    bseg = np.asarray(x_band[row, s0:s1], dtype=np.float64)
+                    bpow = _compute_wavelet_power(bseg)
+                    spectra.append(np.mean(bpow, axis=1))
+                if spectra:
+                    base = np.median(np.stack(spectra, axis=1), axis=1, keepdims=True) + 1e-30
+                    power_db = 10.0 * np.log10(power / base)
+                else:
+                    power_db = 10.0 * np.log10(power + 1e-30)
+            else:
+                power_db = 10.0 * np.log10(power + 1e-30)
+
+            if power_log1p:
+                P_show = np.log1p(np.maximum(power_db, 0.0))
+            else:
+                P_show = power_db
+
+            t_rel = (np.arange(seg.shape[0], dtype=np.float64) / sfreq) + boundaries_s[ej]
+            t_concat.append(t_rel)
+            p_concat.append(P_show)
+
+            # TF centroids: read from groupAnalysis or compute on-the-fly
+            if use_precomputed:
+                ga_ci = ga_rows[ci]
+                if ga_ci is not None and ga_events_bool is not None:
+                    global_ej = event_indices[ej]
                     if ga_events_bool[ga_ci, global_ej]:
                         t_c_abs = float(tf_centroid_time[ga_ci, global_ej])
                         f_c = float(tf_centroid_freq[ga_ci, global_ej])
                         if np.isfinite(t_c_abs) and np.isfinite(f_c):
-                            # tf_centroid_time is in seconds within event window,
-                            # convert to concatenated timeline
                             t_c_concat = boundaries_s[ej] + t_c_abs
                             all_centroids[ci][ej] = (t_c_concat, f_c)
+            else:
+                if events_bool[ci, ej]:
+                    W = np.maximum(power_db, 0.0)
+                    denom = float(np.sum(W))
+                    if denom > 1e-20:
+                        t_rel0 = np.arange(seg.shape[0], dtype=np.float64) / sfreq
+                        t_c = float(np.sum(W * t_rel0[None, :]) / denom)
+                        f_c = float(np.sum(W * freqs_hz[:, None]) / denom)
+                        all_centroids[ci][ej] = (boundaries_s[ej] + t_c, f_c)
+
+        if not t_concat or not p_concat:
+            t = np.array([0.0], dtype=np.float64)
+            P_show = np.zeros((freqs_hz.shape[0], 1), dtype=np.float64)
         else:
-            # Fallback: compute on-the-fly
-            for ej in range(n_ev):
-                if not events_bool[ci, ej]:
-                    continue
-                t0, t1 = boundaries_s[ej], boundaries_s[ej + 1]
-                cols = (t >= t0) & (t < t1)
-                if not np.any(cols):
-                    continue
-                W = P_band[:, cols]
-                denom = float(np.sum(W))
-                if denom <= 1e-20:
-                    continue
-                t_sel = t[cols]
-                t_c = float(np.sum(W * t_sel[None, :]) / denom)
-                f_c = float(np.sum(W * f_band[:, None]) / denom)
-                all_centroids[ci][ej] = (t_c, f_c)
+            t = np.concatenate(t_concat, axis=0)
+            P_show = np.concatenate(p_concat, axis=1)
+        if np.isfinite(P_show).any():
+            v99_list.append(float(np.nanpercentile(P_show, 99)))
 
         per_channel_data.append({
             "t": t,
-            "f_band": f_band,
+            "f_band": freqs_hz,
             "P_show": P_show,
             "label": labels[ci],
         })
@@ -2505,8 +2587,8 @@ def plot_hfo_event_verification_from_tfr_cache(
     figsize: Tuple[float, float] = (12, 4),
     tf_vmin: Optional[float] = None,
     tf_vmax: Optional[float] = None,
-    tf_map: str = "auto",  # 'auto'|'power_db'|'power_db_smooth'|'power_z'|'power_pctl'|'db_ratio'|'db_ratio_smooth'
-    baseline_view: str = "none",  # 'none'|'pre_event' (legacy)
+    tf_map: str = "auto",  # 'auto'|'power_db'|'power_db_smooth'|'power_z'|'power_pctl'|'power_db_baseline'
+    baseline_view: str = "none",  # legacy, ignored
     baseline_window_sec: Tuple[float, float] = (0.5, 0.2),
     baseline_mode_vis: str = "none",  # 'none'|'db_ratio'
     save_path: Optional[Union[str, Path]] = None,
@@ -2613,12 +2695,11 @@ def plot_hfo_event_verification_from_tfr_cache(
         "power_db_smooth",
         "power_z",
         "power_pctl",
-        "db_ratio",
-        "db_ratio_smooth",
+        "power_db_baseline",
     ):
         raise ValueError(
             "tf_map must be 'auto', 'power_db', 'power_db_smooth', "
-            "'power_z', 'power_pctl', 'db_ratio', or 'db_ratio_smooth'."
+            "'power_z', 'power_pctl', or 'power_db_baseline'."
         )
     if tf_map == "power_db_smooth" and power_db_smooth is None:
         warnings.warn("power_db_smooth not found in TFR cache; falling back to power_db.")
@@ -2629,8 +2710,18 @@ def plot_hfo_event_verification_from_tfr_cache(
     if tf_map == "power_z" and power_z is None:
         warnings.warn("power_z not found in TFR cache; falling back to power_db.")
         tf_map = "power_db"
+    power_db_baseline = None
+    if "power_db_baseline" in tfr:
+        pb = np.asarray(tfr["power_db_baseline"], dtype=np.float64)
+        if pb.ndim == 2 and pb.shape == power_db.shape and pb.size > 0:
+            power_db_baseline = pb
+    if tf_map == "power_db_baseline" and power_db_baseline is None:
+        warnings.warn("power_db_baseline not found in TFR cache; falling back to power_db.")
+        tf_map = "power_db"
     if tf_map == "auto":
-        if power_db_smooth is not None:
+        if power_db_baseline is not None:
+            tf_map = "power_db_baseline"
+        elif power_db_smooth is not None:
             tf_map = "power_db_smooth"
         elif power_pctl is not None:
             tf_map = "power_pctl"
@@ -2644,49 +2735,12 @@ def plot_hfo_event_verification_from_tfr_cache(
         tf_data = power_pctl
     elif tf_map == "power_z":
         tf_data = power_z
-    elif tf_map in ("db_ratio", "db_ratio_smooth"):
-        # Baseline-corrected dB relative to pre-event window (visualization-only).
-        pre_start, pre_end = float(baseline_window_sec[0]), float(baseline_window_sec[1])
-        if pre_start <= pre_end or pre_end < 0:
-            raise ValueError("baseline_window_sec must be like (0.5, 0.2) with start > end >= 0.")
-        b0 = float(event_start) - pre_start
-        b1 = float(event_start) - pre_end
-        pre_mask = (t_sec >= b0) & (t_sec <= b1)
-        if not np.any(pre_mask):
-            warnings.warn("No baseline window samples; falling back to full window.")
-            pre_mask = np.ones_like(t_sec, dtype=bool)
-        power_lin = 10.0 ** (power_db / 10.0)
-        base = np.mean(power_lin[:, pre_mask], axis=1, keepdims=True) + 1e-12
-        tf_data = 10.0 * np.log10(power_lin / base)
-        if tf_map == "db_ratio_smooth":
-            try:
-                from scipy.ndimage import gaussian_filter
-
-                smooth_time_ms = float(np.asarray(tfr.get("smooth_time_ms", [8.0])).ravel()[0])
-                smooth_freq_bins = float(np.asarray(tfr.get("smooth_freq_bins", [1.5])).ravel()[0])
-                sigma_t = max(0.0, smooth_time_ms) * 1e-3 * (sf_raw / float(max(1, int(np.asarray(tfr.get("decim", [1])).ravel()[0]))))
-                sigma_f = max(0.0, smooth_freq_bins)
-                if sigma_t > 0.0 or sigma_f > 0.0:
-                    tf_data = gaussian_filter(tf_data, sigma=(sigma_f, sigma_t), mode="nearest")
-            except Exception:
-                pass
+    elif tf_map == "power_db_baseline":
+        tf_data = power_db_baseline
     else:
         tf_data = power_db
 
-    # Visualization-only baseline: subtract pre-event baseline to enhance contrast.
-    baseline_view = str(baseline_view).lower().strip()
-    if baseline_view not in ("none", "pre_event"):
-        raise ValueError("baseline_view must be 'none' or 'pre_event'.")
-    if baseline_view == "pre_event":
-        if tf_map == "power_pctl":
-            warnings.warn("baseline_view='pre_event' ignored for power_pctl.")
-        else:
-            pre_mask = t_sec < float(event_start)
-            if not np.any(pre_mask):
-                warnings.warn("No pre-event samples available for baseline; skipping.")
-            else:
-                base = np.median(tf_data[:, pre_mask], axis=1, keepdims=True)
-                tf_data = tf_data - base
+    # Legacy baseline_view is ignored in new pipeline.
 
     # Auto scale for nicer cards (avoid one extreme pixel dominating)
     if tf_vmin is None or tf_vmax is None:
@@ -2694,8 +2748,7 @@ def plot_hfo_event_verification_from_tfr_cache(
         if finite.size:
             if tf_map == "power_pctl":
                 p2, p98 = 0.0, 1.0
-            elif tf_map in ("db_ratio", "db_ratio_smooth"):
-                # Clip noise floor; everything below 0~2 dB looks the same.
+            elif tf_map == "power_db_baseline":
                 p2, p98 = -2.0, 8.0
             else:
                 p2, p98 = np.percentile(finite, [2, 98])

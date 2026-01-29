@@ -7,6 +7,25 @@ from scipy import signal
 from scipy import fftpack
 import statistics
 
+def get_wavelet_freqs(fmin, fmax, n_freqs, *, scale="log"):
+    """
+    Shared frequency axis for wavelet-based TF analysis.
+    Use this everywhere to avoid mismatched grids.
+    """
+    fmin = float(fmin)
+    fmax = float(fmax)
+    n_freqs = int(n_freqs)
+    if fmin <= 0 or fmax <= 0 or fmax <= fmin:
+        raise ValueError("Require 0 < fmin < fmax.")
+    if n_freqs < 4:
+        raise ValueError("n_freqs must be >= 4.")
+    scale = str(scale).lower().strip()
+    if scale == "log":
+        return np.geomspace(fmin, fmax, n_freqs).astype(np.float64)
+    if scale == "linear":
+        return np.linspace(fmin, fmax, n_freqs).astype(np.float64)
+    raise ValueError("scale must be 'log' or 'linear'.")
+
 def Extract_HFO_features(event_list):
     event_counts = []
     durations_list = []

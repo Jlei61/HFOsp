@@ -91,6 +91,147 @@ def _ensure_2col_times(x: np.ndarray) -> np.ndarray:
     return x.astype(np.float64, copy=False)
 
 
+def _moving_mean_1d(x: np.ndarray, win: int) -> np.ndarray:
+    """Fast moving mean for 1D arrays."""
+    if win <= 1:
+        return x.astype(np.float64, copy=False)
+    x = x.astype(np.float64, copy=False)
+    c = np.cumsum(x)
+    out = c[win - 1 :] - np.concatenate(([0.0], c[:-win]))
+    return out / float(win)
+
+
+def _moving_sum_1d(x: np.ndarray, win: int) -> np.ndarray:
+    """Fast moving sum for 1D arrays."""
+    if win <= 1:
+        return x.astype(np.float64, copy=False)
+    x = x.astype(np.float64, copy=False)
+    c = np.cumsum(x)
+    out = c[win - 1 :] - np.concatenate(([0.0], c[:-win]))
+    return out
+
+
+def _select_nearest_pool_indices(
+    pool_starts: np.ndarray,
+    event_time: float,
+    *,
+    n_select: int = 10,
+    min_distance_sec: float = 2.0,
+) -> np.ndarray:
+    pool_starts = np.asarray(pool_starts, dtype=np.float64)
+    if pool_starts.size == 0:
+        return np.zeros((0,), dtype=np.int64)
+    dist = np.abs(pool_starts - float(event_time))
+    mask = dist >= float(min_distance_sec)
+    if not np.any(mask):
+        return np.zeros((0,), dtype=np.int64)
+    idx = np.where(mask)[0]
+    order = np.argsort(dist[idx])
+    keep = idx[order[: int(n_select)]]
+    return keep.astype(np.int64, copy=False)
+
+
+def compute_baseline_pool_indices(
+    *,
+    data: np.ndarray,
+    env: np.ndarray,
+    sfreq: float,
+    detections: Mapping[str, np.ndarray],
+    ictal_mask: Optional[np.ndarray],
+    window_sec: float = 2.0,
+    step_sec: float = 1.0,
+    line_length_q: float = 0.90,
+    ripple_env_q: float = 0.80,
+) -> Tuple[np.ndarray, np.ndarray, Dict]:
+    """
+    Build baseline pool using line length + ripple envelope, excluding ictal/HFO windows.
+    Returns (pool_starts_sec, pool_start_indices, params).
+    """
+    data = np.asarray(data, dtype=np.float64)
+    env = np.asarray(env, dtype=np.float64)
+    sfreq = float(sfreq)
+    if data.ndim != 2 or env.ndim != 2:
+        raise ValueError("data/env must be 2D (n_channels, n_samples)")
+    n_samples = data.shape[1]
+    win = max(1, int(round(float(window_sec) * sfreq)))
+    step = max(1, int(round(float(step_sec) * sfreq)))
+    if n_samples < win:
+        return (
+            np.zeros((0,), dtype=np.float64),
+            np.zeros((0,), dtype=np.int64),
+            {
+                "window_sec": float(window_sec),
+                "step_sec": float(step_sec),
+                "line_length_q": float(line_length_q),
+                "ripple_env_q": float(ripple_env_q),
+                "exclude_ictal": bool(ictal_mask is not None),
+                "exclude_hfo": True,
+            },
+        )
+
+    starts = np.arange(0, n_samples - win + 1, step, dtype=np.int64)
+
+    # Line length on channel-averaged signal
+    x_mean = np.mean(data, axis=0)
+    d = np.abs(np.diff(x_mean))
+    ll = _moving_sum_1d(d, max(1, win - 1))
+    ll_vals = ll[starts]
+
+    # Ripple envelope metric: median across channels, then windowed mean
+    env_med = np.median(env, axis=0)
+    env_mean = _moving_mean_1d(env_med, win)
+    env_vals = env_mean[starts]
+
+    valid = np.ones((starts.shape[0],), dtype=bool)
+
+    # Exclude ictal windows
+    if ictal_mask is not None and ictal_mask.size == n_samples:
+        ictal = ictal_mask.astype(np.int64)
+        prefix = np.concatenate(([0], np.cumsum(ictal)))
+        win_hits = prefix[starts + win] - prefix[starts]
+        valid &= (win_hits == 0)
+
+    # Exclude windows overlapping any HFO detection (across all channels)
+    if detections:
+        hfo_bad = np.zeros_like(valid)
+        for times in detections.values():
+            if times is None:
+                continue
+            arr = np.asarray(times)
+            if arr.size == 0:
+                continue
+            arr = _ensure_2col_times(arr)
+            for s, e in arr:
+                w0 = int(np.ceil((float(s) - float(window_sec)) / float(step_sec)))
+                w1 = int(np.floor(float(e) / float(step_sec)))
+                w0 = max(0, w0)
+                w1 = min(len(starts) - 1, w1)
+                if w1 >= w0:
+                    hfo_bad[w0 : w1 + 1] = True
+        valid &= ~hfo_bad
+
+    # Threshold by quantiles on remaining pool
+    pre_thresh_valid = valid.copy()
+    if np.any(valid):
+        ll_thr = float(np.quantile(ll_vals[valid], float(line_length_q)))
+        env_thr = float(np.quantile(env_vals[valid], float(ripple_env_q)))
+        valid &= (ll_vals <= ll_thr) & (env_vals <= env_thr)
+        if not np.any(valid):
+            # Fallback: keep pre-threshold pool if thresholds wipe out all windows
+            valid = pre_thresh_valid
+
+    pool_starts = starts[valid].astype(np.float64) / sfreq
+    pool_indices = starts[valid].astype(np.int64)
+    params = {
+        "window_sec": float(window_sec),
+        "step_sec": float(step_sec),
+        "line_length_q": float(line_length_q),
+        "ripple_env_q": float(ripple_env_q),
+        "exclude_ictal": bool(ictal_mask is not None),
+        "exclude_hfo": True,
+    }
+    return pool_starts, pool_indices, params
+
 def build_windows_from_packed_times(packed_times: np.ndarray) -> List[EventWindow]:
     """
     Convert Yuquan packedTimes.npy (n_events, 2) -> List[EventWindow].
@@ -594,6 +735,11 @@ def compute_and_save_hfo_event_wavelet_tfr(
     smooth_freq_bins: float = 1.5,
     output_npz_path: Optional[str] = None,
     overwrite: bool = False,
+    baseline_pool_starts: Optional[np.ndarray] = None,
+    baseline_pool_indices: Optional[np.ndarray] = None,
+    baseline_window_sec: float = 2.0,
+    baseline_n_select: int = 10,
+    baseline_min_distance_sec: float = 2.0,
 ) -> str:
     """
     Precompute and save a single-event Morlet-wavelet TFR for later visualization.
@@ -634,9 +780,10 @@ def compute_and_save_hfo_event_wavelet_tfr(
         Decimation factor on time axis for TF output (>=1).
     baseline_mode : str
         Baseline normalization stored in cache for better contrast.
-        - 'none'     : only save power_db
-        - 'robust_z' : per-frequency robust z-score using baseline (outside [event_start,event_end])
-        - 'event_pctl' : per-frequency percentile scaling within the event window (paper-like contrast)
+        - 'none'        : only save power_db
+        - 'robust_z'    : per-frequency robust z-score using baseline (outside [event_start,event_end])
+        - 'event_pctl'  : per-frequency percentile scaling within the event window (paper-like contrast)
+        - 'dynamic_pool': median baseline from nearest clean pool windows
     baseline_pctl_low, baseline_pctl_high : float
         Percentile range used by 'event_pctl' scaling.
     smooth_time_ms : float
@@ -723,13 +870,15 @@ def compute_and_save_hfo_event_wavelet_tfr(
     n_freqs = int(n_freqs)
     if n_freqs < 4:
         raise ValueError("n_freqs must be >= 4.")
-    freqs = np.geomspace(fmin, fmax, n_freqs).astype(np.float64)
+    freqs = bqk_utils.get_wavelet_freqs(fmin, fmax, n_freqs, scale="log")
 
     # SciPy-only Morlet wavelet power using fftconvolve (stable, no MNE dependency).
     # Wavelet definition:
     #   psi(t) = exp(2*pi*i*f*t) * exp(-t^2 / (2*sigma_t^2)), sigma_t = n_cycles/(2*pi*f)
     method = "scipy_fftconvolve_morlet"
     n_sig = int(x.shape[0])
+    x_full = np.asarray(data[ch_idx], dtype=np.float64)
+    n_sig_full = int(x_full.shape[0])
     power = np.zeros((freqs.shape[0], n_sig), dtype=np.float64)
     n_cycles = float(n_cycles)
     if n_cycles <= 0:
@@ -789,10 +938,11 @@ def compute_and_save_hfo_event_wavelet_tfr(
 
     # Optional baseline normalization for better HFO contrast.
     baseline_mode = str(baseline_mode).lower().strip()
-    if baseline_mode not in ("none", "robust_z", "event_pctl"):
-        raise ValueError("baseline_mode must be 'none', 'robust_z', or 'event_pctl'.")
+    if baseline_mode not in ("none", "robust_z", "event_pctl", "dynamic_pool"):
+        raise ValueError("baseline_mode must be 'none', 'robust_z', 'event_pctl', or 'dynamic_pool'.")
     power_z = None
     power_pctl = None
+    power_db_baseline = None
     if baseline_mode == "robust_z":
         base_mask = (t_out < float(event_start)) | (t_out > float(event_end))
         # If margin is too small, base_mask could be empty; fall back to using full window.
@@ -815,6 +965,49 @@ def compute_and_save_hfo_event_wavelet_tfr(
         denom = (p_hi - p_lo) + 1e-9
         power_pctl = (power_db - p_lo) / denom
         power_pctl = np.clip(power_pctl, 0.0, 1.0)
+    elif baseline_mode == "dynamic_pool":
+        if baseline_pool_starts is None or baseline_pool_indices is None:
+            raise ValueError("dynamic_pool requires baseline_pool_starts and baseline_pool_indices.")
+        pool_starts = np.asarray(baseline_pool_starts, dtype=np.float64)
+        pool_indices = np.asarray(baseline_pool_indices, dtype=np.int64)
+        if pool_starts.size == 0 or pool_indices.size == 0:
+            power_db_baseline = power_db.copy()
+        else:
+            event_time = 0.5 * (float(event_start) + float(event_end))
+            sel = _select_nearest_pool_indices(
+                pool_starts,
+                event_time,
+                n_select=int(baseline_n_select),
+                min_distance_sec=float(baseline_min_distance_sec),
+            )
+            if sel.size == 0:
+                power_db_baseline = power_db.copy()
+            else:
+                win = int(round(float(baseline_window_sec) * sfreq))
+                spectra = []
+                for pi in pool_indices[sel]:
+                    s0 = int(pi)
+                    s1 = min(n_sig_full, s0 + win)
+                    if s1 <= s0:
+                        continue
+                    xb = np.asarray(x_full[s0:s1], dtype=np.float64)
+                    power_b = np.zeros((freqs.shape[0], xb.shape[0]), dtype=np.float64)
+                    for fi, f0 in enumerate(freqs):
+                        c = float(cycles[fi])
+                        sigma_t = c / (2.0 * np.pi * float(f0))
+                        half_support = int(np.ceil(3.0 * sigma_t * sfreq))
+                        tt = (np.arange(-half_support, half_support + 1, dtype=np.float64) / sfreq)
+                        w = np.exp(2j * np.pi * float(f0) * tt) * np.exp(-(tt**2) / (2.0 * sigma_t**2))
+                        wn = np.sqrt(np.sum(np.abs(w) ** 2)) + 1e-30
+                        w = w / wn
+                        yb = fftconvolve(xb, w, mode="same")
+                        power_b[fi, :] = (np.abs(yb) ** 2).astype(np.float64, copy=False)
+                    spectra.append(np.mean(power_b, axis=1))
+                if spectra:
+                    base = np.median(np.stack(spectra, axis=1), axis=1, keepdims=True) + 1e-30
+                    power_db_baseline = 10.0 * np.log10(power / base)
+                else:
+                    power_db_baseline = power_db.copy()
 
     if output_npz_path is None:
         raw_path = Path(str(raw_cache_npz_path))
@@ -850,6 +1043,7 @@ def compute_and_save_hfo_event_wavelet_tfr(
         power_db_smooth=(power_db_smooth.astype(np.float32) if power_db_smooth is not None else np.zeros((0, 0), dtype=np.float32)),
         power_z=(power_z.astype(np.float32) if power_z is not None else np.zeros((0, 0), dtype=np.float32)),
         power_pctl=(power_pctl.astype(np.float32) if power_pctl is not None else np.zeros((0, 0), dtype=np.float32)),
+        power_db_baseline=(power_db_baseline.astype(np.float32) if power_db_baseline is not None else np.zeros((0, 0), dtype=np.float32)),
         baseline_mode=np.array([baseline_mode], dtype=object),
         baseline_pctl_low=np.array([float(baseline_pctl_low)], dtype=np.float64),
         baseline_pctl_high=np.array([float(baseline_pctl_high)], dtype=np.float64),
@@ -888,6 +1082,11 @@ def compute_and_save_hfo_event_wavelet_tfr_two_bands(
     smooth_time_ms: float = 8.0,
     smooth_freq_bins: float = 1.5,
     overwrite: bool = False,
+    baseline_pool_starts: Optional[np.ndarray] = None,
+    baseline_pool_indices: Optional[np.ndarray] = None,
+    baseline_window_sec: float = 2.0,
+    baseline_n_select: int = 10,
+    baseline_min_distance_sec: float = 2.0,
 ) -> Dict[str, str]:
     """
     Convenience wrapper: precompute and save BOTH ripple (80-250) and fast-ripple (250-500) TFR caches.
@@ -913,6 +1112,11 @@ def compute_and_save_hfo_event_wavelet_tfr_two_bands(
         smooth_time_ms=float(smooth_time_ms),
         smooth_freq_bins=float(smooth_freq_bins),
         overwrite=bool(overwrite),
+        baseline_pool_starts=baseline_pool_starts,
+        baseline_pool_indices=baseline_pool_indices,
+        baseline_window_sec=float(baseline_window_sec),
+        baseline_n_select=int(baseline_n_select),
+        baseline_min_distance_sec=float(baseline_min_distance_sec),
     )
     out["fast_ripple"] = compute_and_save_hfo_event_wavelet_tfr(
         raw_cache_npz_path=str(raw_cache_npz_path),
@@ -933,6 +1137,11 @@ def compute_and_save_hfo_event_wavelet_tfr_two_bands(
         smooth_time_ms=float(smooth_time_ms),
         smooth_freq_bins=float(smooth_freq_bins),
         overwrite=bool(overwrite),
+        baseline_pool_starts=baseline_pool_starts,
+        baseline_pool_indices=baseline_pool_indices,
+        baseline_window_sec=float(baseline_window_sec),
+        baseline_n_select=int(baseline_n_select),
+        baseline_min_distance_sec=float(baseline_min_distance_sec),
     )
     return out
 
@@ -1904,56 +2113,96 @@ def validate_packedtimes_centroid_lagrank_against_lagpat(
 
 
 # =============================================================================
-# NEW: TF Centroid Computation (moved from visualization.py)
+# NEW: TF Centroid Computation (wavelet + dynamic baseline)
 # =============================================================================
+
+
+def _compute_wavelet_power(
+    x: np.ndarray,
+    sfreq: float,
+    freqs: np.ndarray,
+    cycles: np.ndarray,
+) -> np.ndarray:
+    """Compute Morlet wavelet power (freqs x time)."""
+    from scipy.signal import fftconvolve
+
+    x = np.asarray(x, dtype=np.float64)
+    sfreq = float(sfreq)
+    freqs = np.asarray(freqs, dtype=np.float64)
+    cycles = np.asarray(cycles, dtype=np.float64)
+    power = np.zeros((freqs.shape[0], x.shape[0]), dtype=np.float64)
+
+    for fi, f0 in enumerate(freqs):
+        c = float(cycles[fi])
+        sigma_t = c / (2.0 * np.pi * float(f0))
+        half_support = int(np.ceil(3.0 * sigma_t * sfreq))
+        tt = (np.arange(-half_support, half_support + 1, dtype=np.float64) / sfreq)
+        w = np.exp(2j * np.pi * float(f0) * tt) * np.exp(-(tt**2) / (2.0 * sigma_t**2))
+        wn = np.sqrt(np.sum(np.abs(w) ** 2)) + 1e-30
+        w = w / wn
+        y = fftconvolve(x, w, mode="same")
+        power[fi, :] = (np.abs(y) ** 2).astype(np.float64, copy=False)
+
+    return power
+
+
+def compute_baseline_pool_spectra(
+    *,
+    data: np.ndarray,
+    sfreq: float,
+    pool_indices: np.ndarray,
+    window_sec: float,
+    freqs_hz: np.ndarray,
+    n_cycles_vec: np.ndarray,
+) -> np.ndarray:
+    """
+    Precompute baseline spectra for each channel and baseline window.
+    Returns shape (n_channels, n_freqs, n_pool).
+    """
+    data = np.asarray(data, dtype=np.float64)
+    pool_indices = np.asarray(pool_indices, dtype=np.int64)
+    sfreq = float(sfreq)
+    win = max(1, int(round(float(window_sec) * sfreq)))
+    n_ch = data.shape[0]
+    n_pool = pool_indices.shape[0]
+    n_freqs = int(np.asarray(freqs_hz).shape[0])
+    out = np.zeros((n_ch, n_freqs, n_pool), dtype=np.float32)
+    if n_pool == 0:
+        return out
+
+    for ci in range(n_ch):
+        for pj, s0 in enumerate(pool_indices):
+            s1 = min(data.shape[1], int(s0) + win)
+            if s1 <= s0:
+                continue
+            seg = data[ci, int(s0) : s1]
+            power = _compute_wavelet_power(seg, sfreq, freqs_hz, n_cycles_vec)
+            out[ci, :, pj] = np.mean(power, axis=1).astype(np.float32, copy=False)
+    return out
 
 
 def compute_tf_centroids(
     *,
-    x_band: np.ndarray,
+    data: np.ndarray,
     sfreq: float,
     event_windows: np.ndarray,
     events_bool: np.ndarray,
-    freq_band: Tuple[float, float] = (80.0, 250.0),
-    nperseg: int = 128,
-    noverlap: int = 96,
-    centroid_power: str = "power2",
+    freqs_hz: np.ndarray,
+    n_cycles_vec: np.ndarray,
+    baseline_pool_starts: np.ndarray,
+    baseline_pool_indices: np.ndarray,
+    baseline_pool_spectra: Optional[np.ndarray] = None,
+    baseline_n_select: int = 10,
+    baseline_min_distance_sec: float = 2.0,
+    baseline_window_sec: float = 2.0,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Compute TF 2D centroids (time, freq) for each (channel, event).
-
-    This function performs STFT on bandpassed signal and computes energy-weighted
-    centroid in time-frequency space.
-
-    Parameters
-    ----------
-    x_band : np.ndarray
-        Bandpassed signal (n_channels, n_samples).
-    sfreq : float
-        Sampling frequency.
-    event_windows : np.ndarray
-        (n_events, 2) [start, end] in seconds.
-    events_bool : np.ndarray
-        (n_channels, n_events) bool, True if channel participates.
-    freq_band : tuple
-        (f_low, f_high) for TF analysis.
-    nperseg : int
-        STFT window size.
-    noverlap : int
-        STFT overlap.
-    centroid_power : str
-        'power' or 'power2' for weighting.
-
-    Returns
-    -------
-    tf_centroid_time : np.ndarray
-        (n_channels, n_events) time centroid relative to window start (seconds).
-    tf_centroid_freq : np.ndarray
-        (n_channels, n_events) frequency centroid (Hz).
+    Compute TF 2D centroids (time, freq) using wavelet + dynamic baseline.
     """
-    from scipy.signal import stft
-
-    n_ch, n_samples = x_band.shape
+    data = np.asarray(data, dtype=np.float64)
+    freqs_hz = np.asarray(freqs_hz, dtype=np.float64)
+    n_cycles_vec = np.asarray(n_cycles_vec, dtype=np.float64)
+    n_ch, n_samples = data.shape
     n_events = event_windows.shape[0]
 
     tf_centroid_time = np.full((n_ch, n_events), np.nan, dtype=np.float64)
@@ -1968,42 +2217,50 @@ def compute_tf_centroids(
         if i1 <= i0:
             continue
 
+        event_time = 0.5 * (win_start + win_end)
+        sel = _select_nearest_pool_indices(
+            np.asarray(baseline_pool_starts, dtype=np.float64),
+            event_time,
+            n_select=int(baseline_n_select),
+            min_distance_sec=float(baseline_min_distance_sec),
+        )
+        if sel.size == 0:
+            continue
+
         for ci in range(n_ch):
             if not events_bool[ci, ei]:
                 continue
 
-            seg = x_band[ci, i0:i1]
-            nwin = seg.shape[0]
-            nps = min(int(nperseg), max(8, nwin))
-            nov = min(int(noverlap), max(0, nps - 1))
+            seg = data[ci, i0:i1]
+            power = _compute_wavelet_power(seg, sfreq, freqs_hz, n_cycles_vec)
 
-            f, t, Z = stft(seg, fs=sfreq, nperseg=nps, noverlap=nov, boundary=None)
-            P = (np.abs(Z) ** 2).astype(np.float64)
-
-            # Mask to freq_band
-            band_mask = (f >= freq_band[0]) & (f <= freq_band[1])
-            f_band = f[band_mask]
-            P_band = P[band_mask, :]
-
-            if P_band.size == 0:
-                continue
-
-            # Apply power weighting
-            if centroid_power == "power2":
-                W = P_band ** 2
-            elif centroid_power == "power":
-                W = P_band
+            if baseline_pool_spectra is not None and baseline_pool_spectra.size > 0:
+                base_pool = np.asarray(baseline_pool_spectra[ci, :, sel], dtype=np.float64)
             else:
-                raise ValueError(f"centroid_power must be 'power' or 'power2', got '{centroid_power}'")
+                base_pool = []
+                win_b = max(1, int(round(float(baseline_window_sec) * sfreq)))
+                for pj in np.asarray(baseline_pool_indices, dtype=np.int64)[sel]:
+                    s0 = int(pj)
+                    s1 = min(n_samples, s0 + win_b)
+                    if s1 <= s0:
+                        continue
+                    base_seg = data[ci, s0:s1]
+                    base_power = _compute_wavelet_power(base_seg, sfreq, freqs_hz, n_cycles_vec)
+                    base_pool.append(np.mean(base_power, axis=1))
+                if not base_pool:
+                    continue
+                base_pool = np.stack(base_pool, axis=1)
 
+            base = np.median(base_pool, axis=1, keepdims=True) + 1e-30
+            power_db = 10.0 * np.log10(power / base)
+            W = np.maximum(power_db, 0.0)
             denom = float(np.sum(W))
             if denom <= 1e-30:
                 continue
 
-            # 2D centroid
-            t_c = float(np.sum(W * t[None, :]) / denom)
-            f_c = float(np.sum(W * f_band[:, None]) / denom)
-
+            t_rel = np.arange(seg.shape[0], dtype=np.float64) / float(sfreq)
+            t_c = float(np.sum(W * t_rel[None, :]) / denom)
+            f_c = float(np.sum(W * freqs_hz[:, None]) / denom)
             tf_centroid_time[ci, ei] = t_c
             tf_centroid_freq[ci, ei] = f_c
 
@@ -2028,6 +2285,15 @@ def save_group_analysis_results(
     lag_rank: np.ndarray,
     tf_centroid_time: Optional[np.ndarray] = None,
     tf_centroid_freq: Optional[np.ndarray] = None,
+    baseline_pool_starts: Optional[np.ndarray] = None,
+    baseline_pool_indices: Optional[np.ndarray] = None,
+    baseline_params: Optional[Dict] = None,
+    tf_freqs_hz: Optional[np.ndarray] = None,
+    tf_n_cycles_vec: Optional[np.ndarray] = None,
+    tf_n_cycles_mode: Optional[np.ndarray] = None,
+    tf_freq_scale: Optional[np.ndarray] = None,
+    tf_baseline_n_select: Optional[np.ndarray] = None,
+    tf_baseline_min_distance_sec: Optional[np.ndarray] = None,
 ) -> str:
     """
     Save group analysis results to a standardized npz file.
@@ -2087,6 +2353,24 @@ def save_group_analysis_results(
         data["tf_centroid_time"] = np.asarray(tf_centroid_time, dtype=np.float64)
     if tf_centroid_freq is not None:
         data["tf_centroid_freq"] = np.asarray(tf_centroid_freq, dtype=np.float64)
+    if baseline_pool_starts is not None:
+        data["baseline_pool_starts"] = np.asarray(baseline_pool_starts, dtype=np.float32)
+    if baseline_pool_indices is not None:
+        data["baseline_pool_indices"] = np.asarray(baseline_pool_indices, dtype=np.int64)
+    if baseline_params is not None:
+        data["baseline_params"] = np.array([baseline_params], dtype=object)
+    if tf_freqs_hz is not None:
+        data["tf_freqs_hz"] = np.asarray(tf_freqs_hz, dtype=np.float64)
+    if tf_n_cycles_vec is not None:
+        data["tf_n_cycles_vec"] = np.asarray(tf_n_cycles_vec, dtype=np.float64)
+    if tf_n_cycles_mode is not None:
+        data["tf_n_cycles_mode"] = tf_n_cycles_mode
+    if tf_freq_scale is not None:
+        data["tf_freq_scale"] = tf_freq_scale
+    if tf_baseline_n_select is not None:
+        data["tf_baseline_n_select"] = tf_baseline_n_select
+    if tf_baseline_min_distance_sec is not None:
+        data["tf_baseline_min_distance_sec"] = tf_baseline_min_distance_sec
 
     np.savez_compressed(npz_path, **data)
     return npz_path
@@ -2137,8 +2421,21 @@ def compute_and_save_group_analysis(
     use_gpu: bool = True,
     save_env_cache: bool = True,
     centroid_power: float = 2.0,
-    tf_nperseg: int = 128,
-    tf_noverlap: int = 96,
+    tf_n_freqs: int = 180,
+    tf_n_cycles: float = 4.0,
+    tf_n_cycles_mode: str = "linear",
+    tf_n_cycles_min: float = 3.0,
+    tf_n_cycles_max: float = 10.0,
+    tf_freq_scale: str = "log",
+    baseline_window_sec: float = 2.0,
+    baseline_step_sec: float = 1.0,
+    baseline_n_select: int = 10,
+    baseline_min_distance_sec: float = 2.0,
+    baseline_line_length_q: float = 0.90,
+    baseline_ripple_env_q: float = 0.80,
+    seizure_ll_k: float = 6.0,
+    seizure_rms_k: float = 6.0,
+    seizure_min_duration_sec: float = 5.0,
 ) -> Dict[str, str]:
     """
     One-stop function to compute and save all group analysis results.
@@ -2194,7 +2491,11 @@ def compute_and_save_group_analysis(
         'env_cache_path': str (if saved)
     """
     from pathlib import Path
-    from .preprocessing import SEEGPreprocessor
+    from .preprocessing import (
+        SEEGPreprocessor,
+        detect_seizure_onsets_from_data,
+        save_seizure_onsets_json,
+    )
 
     edf_path = str(edf_path)
     edf_stem = Path(edf_path).stem
@@ -2296,7 +2597,33 @@ def compute_and_save_group_analysis(
     if n_ch == 0 or n_events == 0:
         raise ValueError(f"No channels ({n_ch}) or no events ({n_events}) to analyze.")
 
-    # Step 6: Compute envelope (bandpass + Hilbert)
+    # Step 6: Detect seizure onsets (subject-level) + ictal mask
+    seizure = detect_seizure_onsets_from_data(
+        data,
+        sfreq,
+        ll_k=float(seizure_ll_k),
+        rms_k=float(seizure_rms_k),
+        min_duration_sec=float(seizure_min_duration_sec),
+    )
+    ictal_mask = seizure.get("ictal_mask", None)
+    save_seizure_onsets_json(
+        subject_id=str(output_prefix),
+        onsets_sec=seizure.get("onsets_sec", np.zeros((0,), dtype=np.float64)),
+        offsets_sec=seizure.get("offsets_sec", np.zeros((0,), dtype=np.float64)),
+        sfreq=sfreq,
+        output_dir="results/seizure_onset",
+        params={
+            "ll_k": float(seizure_ll_k),
+            "rms_k": float(seizure_rms_k),
+            "min_duration_sec": float(seizure_min_duration_sec),
+            "ll_win_sec": 1.0,
+            "ll_step_sec": 0.2,
+            "rms_win_sec": 1.0,
+            "rms_step_sec": 0.2,
+        },
+    )
+
+    # Step 7: Compute envelope (bandpass + Hilbert)
     env = np.zeros((n_ch, data.shape[1]), dtype=np.float32)
     x_band = np.zeros_like(data, dtype=np.float32)
 
@@ -2315,7 +2642,7 @@ def compute_and_save_group_analysis(
     except Exception:
         x_band = data.astype(np.float32)
 
-    # Step 7: Compute centroids
+    # Step 8: Compute centroids
     centroids, events_bool = compute_centroid_matrix_from_envelope_cache(
         windows=windows,
         detections=dets,
@@ -2327,22 +2654,65 @@ def compute_and_save_group_analysis(
         centroid_power=centroid_power,
     )
 
-    # Step 8: Compute lag/rank
+    # Step 9: Compute lag/rank
     lag_raw, lag_rank = lag_rank_from_centroids(centroids, events_bool, align="first_centroid")
 
-    # Step 9: Compute TF centroids
+    # Step 10: Build baseline pool
+    pool_starts, pool_indices, pool_params = compute_baseline_pool_indices(
+        data=data,
+        env=env,
+        sfreq=sfreq,
+        detections=dets,
+        ictal_mask=ictal_mask,
+        window_sec=float(baseline_window_sec),
+        step_sec=float(baseline_step_sec),
+        line_length_q=float(baseline_line_length_q),
+        ripple_env_q=float(baseline_ripple_env_q),
+    )
+
+    # Step 11: Wavelet params (shared across analysis + visualization)
+    freqs_hz = bqk_utils.get_wavelet_freqs(freq_band[0], freq_band[1], int(tf_n_freqs), scale=tf_freq_scale)
+    n_cycles_mode = str(tf_n_cycles_mode).lower().strip()
+    if n_cycles_mode not in ("fixed", "linear", "f_over_2"):
+        raise ValueError("tf_n_cycles_mode must be 'fixed', 'linear', or 'f_over_2'.")
+    if n_cycles_mode == "fixed":
+        n_cycles_vec = np.full(freqs_hz.shape[0], float(tf_n_cycles), dtype=np.float64)
+    elif n_cycles_mode == "linear":
+        cmin = float(tf_n_cycles_min)
+        cmax = float(tf_n_cycles_max)
+        if cmin <= 0 or cmax <= 0 or cmax < cmin:
+            raise ValueError("tf_n_cycles_min/max must be >0 and max>=min.")
+        n_cycles_vec = np.linspace(cmin, cmax, freqs_hz.shape[0]).astype(np.float64)
+    else:
+        n_cycles_vec = (freqs_hz / 2.0).astype(np.float64)
+
+    # Step 12: Precompute baseline spectra (in-memory)
+    baseline_pool_spectra = compute_baseline_pool_spectra(
+        data=data,
+        sfreq=sfreq,
+        pool_indices=pool_indices,
+        window_sec=float(baseline_window_sec),
+        freqs_hz=freqs_hz,
+        n_cycles_vec=n_cycles_vec,
+    )
+
+    # Step 13: Compute TF centroids (wavelet + dynamic baseline)
     tf_time, tf_freq = compute_tf_centroids(
-        x_band=x_band,
+        data=data,
         sfreq=sfreq,
         event_windows=event_windows,
         events_bool=events_bool,
-        freq_band=freq_band,
-        nperseg=tf_nperseg,
-        noverlap=tf_noverlap,
-        centroid_power="power2",
+        freqs_hz=freqs_hz,
+        n_cycles_vec=n_cycles_vec,
+        baseline_pool_starts=pool_starts,
+        baseline_pool_indices=pool_indices,
+        baseline_pool_spectra=baseline_pool_spectra,
+        baseline_n_select=int(baseline_n_select),
+        baseline_min_distance_sec=float(baseline_min_distance_sec),
+        baseline_window_sec=float(baseline_window_sec),
     )
 
-    # Step 10: Save results
+    # Step 14: Save results
     out_paths: Dict[str, str] = {}
 
     group_path = f"{output_dir}/{output_prefix}_groupAnalysis.npz"
@@ -2358,6 +2728,15 @@ def compute_and_save_group_analysis(
         lag_rank=lag_rank,
         tf_centroid_time=tf_time,
         tf_centroid_freq=tf_freq,
+        baseline_pool_starts=pool_starts,
+        baseline_pool_indices=pool_indices,
+        baseline_params=pool_params,
+        tf_freqs_hz=freqs_hz,
+        tf_n_cycles_vec=n_cycles_vec,
+        tf_n_cycles_mode=np.array([str(tf_n_cycles_mode)], dtype=object),
+        tf_freq_scale=np.array([str(tf_freq_scale)], dtype=object),
+        tf_baseline_n_select=np.array([int(baseline_n_select)], dtype=np.int64),
+        tf_baseline_min_distance_sec=np.array([float(baseline_min_distance_sec)], dtype=np.float64),
     )
     out_paths["group_analysis_path"] = group_path
 

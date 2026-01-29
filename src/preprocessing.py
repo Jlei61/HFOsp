@@ -16,6 +16,7 @@ Author: HFOsp Team
 Date: 2026-01-14
 """
 
+import json
 import numpy as np
 import mne
 import re
@@ -51,6 +52,148 @@ class PreprocessingResult:
     excluded_channels: List[str] = field(default_factory=list)
     used_gpu: bool = False        # Whether GPU was used for processing
 
+
+def _moving_sum_1d(x: np.ndarray, win: int) -> np.ndarray:
+    """Fast moving sum for 1D arrays."""
+    if win <= 1:
+        return x.astype(np.float64, copy=False)
+    x = x.astype(np.float64, copy=False)
+    c = np.cumsum(x)
+    out = c[win - 1 :] - np.concatenate(([0.0], c[:-win]))
+    return out
+
+
+def _robust_z(x: np.ndarray, eps: float = 1e-9) -> np.ndarray:
+    """Robust z-score using median and MAD."""
+    x = np.asarray(x, dtype=np.float64)
+    med = float(np.median(x))
+    mad = float(np.median(np.abs(x - med))) + eps
+    return (x - med) / mad
+
+
+def detect_seizure_onsets_from_data(
+    data: np.ndarray,
+    sfreq: float,
+    *,
+    ll_win_sec: float = 1.0,
+    ll_step_sec: float = 0.2,
+    ll_k: float = 6.0,
+    rms_win_sec: float = 1.0,
+    rms_step_sec: float = 0.2,
+    rms_k: float = 6.0,
+    min_duration_sec: float = 5.0,
+) -> Dict[str, np.ndarray]:
+    """
+    Detect ictal segments using channel-averaged line length + RMS.
+    Returns onset/offset times and sample-level ictal mask.
+    """
+    data = np.asarray(data, dtype=np.float64)
+    if data.ndim != 2:
+        raise ValueError("data must be 2D (n_channels, n_samples)")
+    sfreq = float(sfreq)
+    if sfreq <= 0:
+        raise ValueError("sfreq must be > 0")
+
+    n_samples = data.shape[1]
+    x_mean = np.mean(data, axis=0)
+
+    def _windowed_values(x: np.ndarray, win_sec: float, step_sec: float, func) -> Tuple[np.ndarray, np.ndarray]:
+        win = max(1, int(round(win_sec * sfreq)))
+        step = max(1, int(round(step_sec * sfreq)))
+        if n_samples < win:
+            return np.zeros((0,), dtype=np.float64), np.zeros((0,), dtype=np.float64)
+        starts = np.arange(0, n_samples - win + 1, step, dtype=np.int64)
+        vals = np.zeros((starts.shape[0],), dtype=np.float64)
+        for i, s in enumerate(starts):
+            seg = x[s : s + win]
+            vals[i] = func(seg)
+        times = starts.astype(np.float64) / sfreq
+        return times, vals
+
+    ll_t, ll_vals = _windowed_values(
+        x_mean, ll_win_sec, ll_step_sec, lambda seg: float(np.sum(np.abs(np.diff(seg))))
+    )
+    rms_t, rms_vals = _windowed_values(
+        x_mean, rms_win_sec, rms_step_sec, lambda seg: float(np.sqrt(np.mean(seg**2))))
+
+    if ll_vals.size == 0 or rms_vals.size == 0:
+        return {
+            "onsets_sec": np.zeros((0,), dtype=np.float64),
+            "offsets_sec": np.zeros((0,), dtype=np.float64),
+            "ictal_mask": np.zeros((n_samples,), dtype=bool),
+        }
+
+    ll_z = _robust_z(ll_vals)
+    rms_z = _robust_z(rms_vals)
+
+    ll_flag = ll_z >= float(ll_k)
+    rms_flag = rms_z >= float(rms_k)
+
+    # Align to a common timeline by mapping onto the denser grid (use ll_t).
+    rms_interp = np.interp(ll_t, rms_t, rms_flag.astype(np.float64), left=0.0, right=0.0) >= 0.5
+    ictal_flag = ll_flag | rms_interp
+
+    # Enforce min duration on ll timeline
+    runs = []
+    cur = None
+    for i, val in enumerate(ictal_flag):
+        if val and cur is None:
+            cur = i
+        elif not val and cur is not None:
+            runs.append((cur, i))
+            cur = None
+    if cur is not None:
+        runs.append((cur, len(ictal_flag)))
+
+    onsets = []
+    offsets = []
+    ictal_mask = np.zeros((n_samples,), dtype=bool)
+    for s_idx, e_idx in runs:
+        t0 = ll_t[s_idx]
+        t1 = ll_t[e_idx - 1] + float(ll_step_sec) + float(ll_win_sec)
+        if (t1 - t0) < float(min_duration_sec):
+            continue
+        onsets.append(float(t0))
+        offsets.append(float(t1))
+        i0 = max(0, int(round(t0 * sfreq)))
+        i1 = min(n_samples, int(round(t1 * sfreq)))
+        if i1 > i0:
+            ictal_mask[i0:i1] = True
+
+    return {
+        "onsets_sec": np.asarray(onsets, dtype=np.float64),
+        "offsets_sec": np.asarray(offsets, dtype=np.float64),
+        "ictal_mask": ictal_mask,
+    }
+
+
+def save_seizure_onsets_json(
+    *,
+    subject_id: str,
+    onsets_sec: np.ndarray,
+    offsets_sec: np.ndarray,
+    sfreq: float,
+    output_dir: Union[str, Path] = "results/seizure_onset",
+    params: Optional[Dict] = None,
+    method: str = "line_length_rms_channel_avg",
+) -> str:
+    """
+    Save subject-level seizure onset JSON.
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out_path = output_dir / f"{subject_id}.json"
+    payload = {
+        "subject_id": str(subject_id),
+        "sfreq": float(sfreq),
+        "method": str(method),
+        "params": params or {},
+        "onsets_sec": [float(x) for x in np.asarray(onsets_sec).ravel().tolist()],
+        "offsets_sec": [float(x) for x in np.asarray(offsets_sec).ravel().tolist()],
+    }
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=True, indent=2)
+    return str(out_path)
 
 def get_array_module(use_gpu: bool = False):
     """Get numpy or cupy based on availability and preference."""

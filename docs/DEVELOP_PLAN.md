@@ -293,7 +293,7 @@ HFOsp/
 | 输出文件 | 内容 | 下游用户 |
 |----------|------|----------|
 | `*_envCache_{band}_{ref}.npz` | envelope + x_band + sfreq + ch_names | visualization (Fig1波形) |
-| `*_groupAnalysis.npz` | **质心+TF质心+lag+rank** | visualization, network_analysis |
+| `*_groupAnalysis.npz` | **质心+TF质心+lag+rank+baseline池元数据** | visualization, network_analysis |
 
 #### 功能分解
 
@@ -303,7 +303,7 @@ HFOsp/
 | 3.2 Envelope缓存 | `precompute_envelope_cache` | ✅ |
 | 3.3 质心计算 | `compute_centroid_matrix_from_envelope_cache` | ✅ |
 | 3.4 Lag/Rank | `lag_rank_from_centroids` | ✅ |
-| 3.5 TF质心 | `compute_tf_centroids` | ✅ |
+| 3.5 TF质心 | `compute_tf_centroids`（wavelet+动态基线） | ✅ |
 | 3.6 结果存储 | `save_group_analysis_results`, `load_group_analysis_results` | ✅ |
 | 3.7 一键API | `compute_and_save_group_analysis` | ✅ |
 | 3.7 通道筛选 | `select_core_channels_by_event_count` | ✅ |
@@ -314,7 +314,8 @@ HFOsp/
 - ✅ packedTimes 窗口长度：从 `packedTimes[:,1]-packedTimes[:,0]` 推断
 - ✅ Step1 验证：`reference='bipolar'` + 别名通道 + GPU通道过滤 → 高覆盖率
 - ✅ Step2-3 验证：`eventsBool` 100% 一致；相对 lag 达 ms 级误差
-- ✅ TF质心计算：`compute_tf_centroids` 从 visualization 迁移完成
+- ✅ TF质心计算：`compute_tf_centroids` 改为 **wavelet+动态基线**（非STFT）
+- ✅ 基线池：2s窗/1s步长，排除ictal+HFO+高LL+高Ripple，存入 `baseline_pool_starts/indices`
 - ✅ 统一存储：`save_group_analysis_results` + `load_group_analysis_results` 已实现
 - ✅ 一键API：`compute_and_save_group_analysis` 可从 EDF 一站式生成所有中间结果
 
@@ -505,7 +506,7 @@ fig_tf = plot_tf_centroid_statistics(
 **关键技术决策**:
 - **波形颜色**: `tableau_20_no_red` 避免与HFO红色标记冲突
 - **事件标注**: 默认 `style='tick'` 细线，不遮挡波形
-- **TF质心**: 从 STFT power 直接计算 2D 质心，而非先降维再计算
+- **TF质心**: 使用 wavelet TFR + 动态基线log校正，再在该TF图上计算2D质心
 
 ---
 
