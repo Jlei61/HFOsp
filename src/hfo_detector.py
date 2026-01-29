@@ -20,10 +20,12 @@ Date: 2026-01-14
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import time
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.signal import butter, sosfiltfilt, hilbert
+from .utils.logging_utils import get_run_logger, log_section
 
 try:
     import cupy as cp  # type: ignore
@@ -289,6 +291,13 @@ class HFODetector:
 
         If x is ndarray, sfreq and ch_names must be provided.
         """
+        t_start = time.time()
+        logger = get_run_logger("hfo_detect")
+        log_section(logger, "HFO DETECT START")
+        logger.info("algorithm=%s", str(self.config.algorithm))
+        logger.info("band=%s", str(self.config.band))
+        logger.info("use_gpu=%s", str(self.config.use_gpu))
+
         # Avoid importing preprocessing at module import time.
         if hasattr(x, "data") and hasattr(x, "sfreq") and hasattr(x, "ch_names"):
             data = getattr(x, "data")
@@ -341,7 +350,7 @@ class HFODetector:
             raise ValueError(f"Unknown algorithm='{cfg.algorithm}'. Use 'bqk' or 'mad_hysteresis'.")
         events_count = np.array([ev.shape[0] for ev in events_by_channel], dtype=np.int64)
 
-        return HFODetectionResult(
+        res = HFODetectionResult(
             sfreq=sfreq_,
             ch_names=ch_names_,
             band=cfg.band,
@@ -353,6 +362,13 @@ class HFODetector:
             used_gpu=self._used_gpu,
             meta=meta,
         )
+        log_section(logger, "HFO DETECT SUMMARY")
+        logger.info("channels=%d", int(len(ch_names_)))
+        logger.info("total_events=%d", int(np.sum(events_count)))
+        logger.info("mean_events_per_channel=%.3f", float(np.mean(events_count)))
+        logger.info("elapsed_sec=%.3f", float(time.time() - t_start))
+        log_section(logger, "HFO DETECT END")
+        return res
 
     def _detect_bqk_chunked(
         self,

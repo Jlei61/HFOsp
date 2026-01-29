@@ -17,6 +17,7 @@ Date: 2026-01-14
 """
 
 import json
+import time
 import numpy as np
 import mne
 import re
@@ -26,6 +27,7 @@ from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, field
 from scipy.signal import butter, sosfiltfilt, iirnotch, filtfilt
 from scipy import signal
+from .utils.logging_utils import get_run_logger, log_section
 
 # GPU support (optional)
 try:
@@ -750,6 +752,16 @@ class SEEGPreprocessor:
         Returns:
             PreprocessingResult containing processed data and metadata
         """
+        t_start = time.time()
+        logger = get_run_logger(f"preprocess_{Path(file_path).stem}")
+        log_section(logger, "PREPROCESS START")
+        logger.info("file_path=%s", str(file_path))
+        logger.info("target_band=%s", str(self.target_band))
+        logger.info("reference=%s", str(self.reference))
+        logger.info("target_sfreq=%s", str(self.target_sfreq))
+        logger.info("crop_seconds=%s", str(self.crop_seconds))
+        logger.info("use_gpu=%s", str(self.use_gpu))
+
         # Step 1: Load EDF
         self.load_edf(file_path)
         
@@ -853,6 +865,16 @@ class SEEGPreprocessor:
                 shaft_mapping[prefix].append(name)
         
         print(f"Preprocessing complete: {data.shape[0]} channels, {data.shape[1]/sfreq:.1f}s at {sfreq}Hz")
+        log_section(logger, "PREPROCESS SUMMARY")
+        logger.info("input_channels=%d", int(original_ch_count))
+        logger.info("output_channels=%d", int(data.shape[0]))
+        logger.info("reference_type=%s", str(reference_type))
+        logger.info("sfreq=%.3f", float(sfreq))
+        logger.info("duration_sec=%.3f", float(data.shape[1] / sfreq))
+        logger.info("excluded_channels=%d", int(len(set(excluded_channels))))
+        logger.info("bad_channels=%d", int(len(bad_channels)))
+        logger.info("elapsed_sec=%.3f", float(time.time() - t_start))
+        log_section(logger, "PREPROCESS END")
         
         return PreprocessingResult(
             data=data,

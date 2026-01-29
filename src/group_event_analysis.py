@@ -18,12 +18,14 @@ Design principles
 from __future__ import annotations
 
 from dataclasses import dataclass
+import time
 from typing import Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
 from .preprocessing import ElectrodeParser
 from .utils import bqk_utils
+from .utils.logging_utils import get_run_logger, log_section
 
 
 Seconds = float
@@ -2505,6 +2507,19 @@ def compute_and_save_group_analysis(
     if output_prefix is None:
         output_prefix = edf_stem
 
+    t_start = time.time()
+    logger = get_run_logger(f"group_analysis_{output_prefix}")
+    log_section(logger, "GROUP ANALYSIS START")
+    logger.info("edf_path=%s", str(edf_path))
+    logger.info("output_dir=%s", str(output_dir))
+    logger.info("output_prefix=%s", str(output_prefix))
+    logger.info("band=%s", str(band))
+    logger.info("reference=%s", str(reference))
+    logger.info("crop_seconds=%s", str(crop_seconds))
+    logger.info("baseline_window_sec=%.3f", float(baseline_window_sec))
+    logger.info("baseline_step_sec=%.3f", float(baseline_step_sec))
+    logger.info("baseline_n_select=%d", int(baseline_n_select))
+
     # Determine freq band
     b = band.lower().strip()
     if b in ("ripple", "ripples"):
@@ -2515,6 +2530,7 @@ def compute_and_save_group_analysis(
         raise ValueError(f"Unknown band='{band}'")
 
     # Step 1: Preprocess
+    t_step = time.time()
     pre = SEEGPreprocessor(
         target_band="fast_ripple" if "fast" in b else "ripple",
         reference=reference,
@@ -2526,6 +2542,7 @@ def compute_and_save_group_analysis(
     data = np.asarray(pre_out.data)
     names = [str(x) for x in pre_out.ch_names]
     sfreq = float(pre_out.sfreq)
+    logger.info("step=preprocess elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 2: Alias bipolar names if needed
     if alias_bipolar_to_left:
@@ -2551,6 +2568,7 @@ def compute_and_save_group_analysis(
         names = alias_names
 
     # Step 3: Get detections
+    t_step = time.time()
     if gpu_npz_path is not None:
         gpu = np.load(gpu_npz_path, allow_pickle=True)
         gpu_names = [str(x) for x in gpu["chns_names"].tolist()]
@@ -2568,8 +2586,10 @@ def compute_and_save_group_analysis(
         det = HFODetector(cfg)
         res = det.detect(data, sfreq=sfreq, ch_names=names)
         dets = _detections_dict_from_hfo_result(res)
+    logger.info("step=detections elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 4: Get event windows
+    t_step = time.time()
     if packed_times_path is not None:
         packed = np.load(packed_times_path, allow_pickle=True)
         windows = build_windows_from_packed_times(packed)
@@ -2582,14 +2602,17 @@ def compute_and_save_group_analysis(
         if crop_seconds is not None:
             windows = [w for w in windows if w.start < float(crop_seconds)]
         event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
+    logger.info("step=event_windows elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 5: Filter to core channels if specified
+    t_step = time.time()
     if core_channels is not None:
         core_set = set(str(x).upper() for x in core_channels)
         keep_idx = [i for i, n in enumerate(names) if n.upper() in core_set]
         data = data[keep_idx]
         names = [names[i] for i in keep_idx]
         dets = {n: dets.get(n, np.zeros((0, 2))) for n in names}
+    logger.info("step=core_channels elapsed_sec=%.3f", float(time.time() - t_step))
 
     n_ch = len(names)
     n_events = len(windows)
@@ -2598,6 +2621,7 @@ def compute_and_save_group_analysis(
         raise ValueError(f"No channels ({n_ch}) or no events ({n_events}) to analyze.")
 
     # Step 6: Detect seizure onsets (subject-level) + ictal mask
+    t_step = time.time()
     seizure = detect_seizure_onsets_from_data(
         data,
         sfreq,
@@ -2622,8 +2646,14 @@ def compute_and_save_group_analysis(
             "rms_step_sec": 0.2,
         },
     )
+    logger.info(
+        "step=seizure_onsets elapsed_sec=%.3f onsets=%d",
+        float(time.time() - t_step),
+        int(len(seizure.get("onsets_sec", []))),
+    )
 
     # Step 7: Compute envelope (bandpass + Hilbert)
+    t_step = time.time()
     env = np.zeros((n_ch, data.shape[1]), dtype=np.float32)
     x_band = np.zeros_like(data, dtype=np.float32)
 
@@ -2641,8 +2671,10 @@ def compute_and_save_group_analysis(
             x_band[ci] = sosfiltfilt(sos, data[ci]).astype(np.float32)
     except Exception:
         x_band = data.astype(np.float32)
+    logger.info("step=envelope elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 8: Compute centroids
+    t_step = time.time()
     centroids, events_bool = compute_centroid_matrix_from_envelope_cache(
         windows=windows,
         detections=dets,
@@ -2653,11 +2685,15 @@ def compute_and_save_group_analysis(
         start_sec=0.0,
         centroid_power=centroid_power,
     )
+    logger.info("step=centroid elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 9: Compute lag/rank
+    t_step = time.time()
     lag_raw, lag_rank = lag_rank_from_centroids(centroids, events_bool, align="first_centroid")
+    logger.info("step=lag_rank elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 10: Build baseline pool
+    t_step = time.time()
     pool_starts, pool_indices, pool_params = compute_baseline_pool_indices(
         data=data,
         env=env,
@@ -2668,6 +2704,11 @@ def compute_and_save_group_analysis(
         step_sec=float(baseline_step_sec),
         line_length_q=float(baseline_line_length_q),
         ripple_env_q=float(baseline_ripple_env_q),
+    )
+    logger.info(
+        "step=baseline_pool elapsed_sec=%.3f pool_windows=%d",
+        float(time.time() - t_step),
+        int(pool_starts.shape[0]),
     )
 
     # Step 11: Wavelet params (shared across analysis + visualization)
@@ -2687,6 +2728,7 @@ def compute_and_save_group_analysis(
         n_cycles_vec = (freqs_hz / 2.0).astype(np.float64)
 
     # Step 12: Precompute baseline spectra (in-memory)
+    t_step = time.time()
     baseline_pool_spectra = compute_baseline_pool_spectra(
         data=data,
         sfreq=sfreq,
@@ -2695,8 +2737,10 @@ def compute_and_save_group_analysis(
         freqs_hz=freqs_hz,
         n_cycles_vec=n_cycles_vec,
     )
+    logger.info("step=baseline_spectra elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 13: Compute TF centroids (wavelet + dynamic baseline)
+    t_step = time.time()
     tf_time, tf_freq = compute_tf_centroids(
         data=data,
         sfreq=sfreq,
@@ -2711,8 +2755,10 @@ def compute_and_save_group_analysis(
         baseline_min_distance_sec=float(baseline_min_distance_sec),
         baseline_window_sec=float(baseline_window_sec),
     )
+    logger.info("step=tf_centroid elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 14: Save results
+    t_step = time.time()
     out_paths: Dict[str, str] = {}
 
     group_path = f"{output_dir}/{output_prefix}_groupAnalysis.npz"
@@ -2756,6 +2802,16 @@ def compute_and_save_group_analysis(
             has_x_band=np.array([True], dtype=bool),
         )
         out_paths["env_cache_path"] = env_path
+
+    logger.info("step=save elapsed_sec=%.3f", float(time.time() - t_step))
+    log_section(logger, "GROUP ANALYSIS SUMMARY")
+    logger.info("channels=%d", int(n_ch))
+    logger.info("events=%d", int(n_events))
+    logger.info("group_analysis_path=%s", str(group_path))
+    if save_env_cache:
+        logger.info("env_cache_path=%s", str(env_path))
+    logger.info("elapsed_sec=%.3f", float(time.time() - t_start))
+    log_section(logger, "GROUP ANALYSIS END")
 
     return out_paths
 
