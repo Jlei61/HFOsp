@@ -329,23 +329,88 @@ preprocessor.filter_backend = MetalFilterBackend()
 
 ---
 
-### 模块2: src/hfo_detector.py ✅ 完成
+### 模块2: src/hfo_detector.py ✅ 完成（Phase 2 重构 2026-01-31）
 
 | 功能 | 说明 | 状态 |
 |------|------|------|
-| 2.1 Ictal段落检测 | `_detect_ictal_mask`：能量爆发 + 持续>3秒 | ✅ |
-| 2.2 背景基线估计 | 剔除Ictal后MAD；bqk算法内部使用median | ✅ |
-| 2.3 Hilbert包络 | `scipy.hilbert` + `cupy_hilbert`（GPU FFT）；宽带分20Hz子带求和 | ✅ |
-| 2.4 双阈值检测 | `rel_thresh×local_median` ∧ `abs_thresh×global_median` | ✅ |
-| 2.5 事件合并筛选 | `merge_timeRanges` (min_gap) + `min_last` 持续时间过滤 | ✅ |
-| 2.6 Ripple/FR分离 | `band='ripple'/'fast_ripple'` | ✅ |
-| 2.7 验证函数 | Notebook验证通过（10232 events，K电极高密度） | ✅ |
+| 2.1 纯BQK算法 | 删除 `mad_hysteresis` 算法（-200行代码） | ✅ |
+| 2.2 BQKDetector类 | 封装 `bqk_utils.py`，预计算滤波器系数 | ✅ |
+| 2.3 多带包络 | 宽带分20Hz子带，Butterworth 3阶滤波 + Hilbert | ✅ |
+| 2.4 并行化 | `joblib.Parallel` 并行计算子带包络 | ✅ |
+| 2.5 双阈值检测 | `rel_thresh×local_median` ∧ `abs_thresh×global_median` | ✅ |
+| 2.6 事件合并筛选 | `merge_timeRanges` + `min_last` 持续时间过滤 | ✅ |
+| 2.7 Ripple/FR分离 | `band='ripple'/'fast_ripple'` | ✅ |
+
+#### Phase 2 重构总结（2026-01-31）
+
+**核心改进：封装 + 并行化（但注意适用场景）**
+
+```python
+# Before: 分散的函数调用
+env = bqk.return_hil_enve_norm(data, fs, freqband)  # 内部循环K次滤波
+events = bqk.find_high_enveTimes(env, ...)
+
+# After: 清晰的类封装 + 可选并行
+detector = BQKDetector(sfreq=fs, freqband=(80,250), n_jobs=1)  # 默认串行
+env = detector.compute_envelope(data)  # 预计算滤波器系数
+events = detector.detect_events(data)  # 端到端检测
+```
+
+**删除的代码**（零破坏性，-348行）：
+- ❌ `mad_hysteresis` 算法及所有相关函数（~200行）
+- ❌ GPU相关代码（`cupy_hilbert`, `_HAS_CUPY`）
+- ❌ Ictal检测相关（`_detect_ictal_mask`, `_mad`, `_moving_average`, `_find_runs`）
+
+**性能测试结果**（2026-01-31, cuda_env）：
+
+| 场景 | n_jobs=1 | n_jobs=-1 | 结论 |
+|------|----------|-----------|------|
+| 小数据 (8ch×10s) | 0.078s | 0.902s | ❌ 并行慢12x (进程开销) |
+| 大数据 (16ch×30s) | 0.457s | 1.100s | ❌ 并行慢2.4x |
+| 数值一致性 | - | diff=1.81e-10 | ✅ 完美 |
+
+**关键发现（Amdahl's Law陷阱）**：
+```
+并行开销 = joblib进程创建 (~500ms) + 数据序列化 (~200ms)
+计算时间 = K × (滤波+Hilbert) ≈ 0.078s (K=9, 8ch×10s)
+
+当 计算时间 < 并行开销 → 串行更快
+```
+
+**并行化适用场景**：
+- ✅ **长时程无chunk**：`chunk_sec=None` + 单文件>2分钟 + K>20
+- ❌ **默认chunked处理**：30s chunk → 计算 <200ms → n_jobs=1 更快
+
+**推荐配置**：
+
+```python
+# 默认配置（推荐）：n_jobs=1
+config = HFODetectionConfig(
+    band='ripple',
+    chunk_sec=30.0,  # 分块处理
+    n_jobs=1,        # ← 串行避免进程开销
+)
+
+# 全文件处理（特殊场景）：
+config = HFODetectionConfig(
+    chunk_sec=None,  # ← 整个文件一次性处理
+    n_jobs=-1,       # ← 可能有收益（需测试）
+)
+```
+
+**收益**：
+- ✅ 代码: 632行 → 284行 (-55%)
+- ✅ 算法: 单一BQK路径
+- ✅ 封装: `BQKDetector` 类，滤波器系数预计算
+- ✅ 数值: 与原 `bqk_utils.py` 误差 <1e-9
+- ⚠️ 并行: **仅长时程场景有效，默认场景反而变慢**
 
 **关键技术决策**:
-- **算法选择**: 默认 `algorithm='bqk'`，严格复用 `src/utils/bqk_utils.py` 的检测逻辑
-- **Chunked处理**: 30s chunk + 1s overlap，避免内存爆炸；跨chunk事件正确合并
-- **GPU加速**: Hilbert变换可选GPU FFT（`use_gpu=True`），滤波仍在CPU以保持数值一致性
-- **双阈值策略**: 同时满足 `rel_thresh × local_median` **且** `abs_thresh × global_median`，能有效抑制噪声通道和全局伪迹
+- **算法纯化**: 只保留BQK，删除所有非BQK代码
+- **类封装**: `BQKDetector` 预计算滤波器系数（不再每chunk重复）
+- **Chunked处理**: 30s chunk + 1s overlap，避免内存爆炸
+- **并行化策略**: 默认 `n_jobs=1`（实测更快），避免joblib开销
+- **双阈值策略**: `rel_thresh × local_median` ∧ `abs_thresh × global_median`
 
 ---
 
@@ -687,16 +752,16 @@ preprocessor.filter_backend = MyCustomBackend()
   - [x] GPU加速支持 (CuPy可选)
   - [x] 通道质量检查
   - [x] chengshuai/FC10477Q: EDF vs GPU 通道差异来源确认（GPU=显式通道子集；不用于推断重参考）
-- [x] **模块2: hfo_detector.py** ✅ 2026-01-14
-  - [x] 算法选择：bqk (复用bqk_utils.py) / mad_hysteresis
-  - [x] Ictal段落检测 (`_detect_ictal_mask`)
-  - [x] Hilbert包络（宽带分20Hz子带 + 求和）
+- [x] **模块2: hfo_detector.py** ✅ Phase 2 重构完成（2026-01-31）
+  - [x] 删除 `mad_hysteresis` 算法（-200行）
+  - [x] 封装 `BQKDetector` 类（预计算滤波器系数）
+  - [x] 实现 joblib 并行化（多带包络计算）
+  - [x] 性能测试：串行 vs 并行（发现小数据并行反而慢）
   - [x] 双阈值检测（rel_thresh × local_median ∧ abs_thresh × global_median）
   - [x] 事件合并筛选（min_gap + min_last）
   - [x] Ripple/FR分离
   - [x] Chunked处理（30s chunk + 1s overlap）
-  - [x] GPU加速（cupy_hilbert）
-  - [x] Notebook验证通过（10232 events，K电极高密度）
+  - [x] 数值验证：与原 `bqk_utils.py` 误差 <1e-9
 - [x] **模块3: group_event_analysis.py** ✅ 2026-01-16（核心逻辑完成）
   - [x] 窗口构建 (build_windows_from_detections)
   - [x] Envelope缓存 (precompute_envelope_cache)
