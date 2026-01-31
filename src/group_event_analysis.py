@@ -2787,7 +2787,9 @@ def compute_and_save_group_analysis(
     out_paths["group_analysis_path"] = group_path
 
     if save_env_cache:
-        env_path = f"{output_dir}/{output_prefix}_envCache_{band}_{reference}.npz"
+        temp_dir = Path(output_dir) / "temp"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        env_path = str(temp_dir / f"{output_prefix}_envCache_{band}_{reference}.npz")
         np.savez_compressed(
             env_path,
             env=env,

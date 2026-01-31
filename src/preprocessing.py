@@ -330,22 +330,135 @@ class CommonAverageReferencer:
         return car_data, ch_names
 
 
-class PreBipolarDetector:
+class FilterBackend:
     """
-    Deprecated.
+    Abstract interface for filtering operations.
     
-    We do NOT guess whether EDF data is already bipolar referenced.
-    The Yuquan *_gpu.npz channel list differs from EDF mainly because GPU-side
-    processing selected a subset of contacts (e.g., often dropping distal contacts),
-    which is a channel-selection decision, not proof of bipolar referencing.
-    
-    Keep this class only for backwards compatibility; it always returns False.
+    Eliminates runtime if/else branching between CPU and GPU implementations.
     """
     
-    @staticmethod
-    def detect(ch_names: List[str], expected_contacts_per_shaft: Optional[Dict[str, int]] = None
-               ) -> Tuple[bool, str]:
-        return False, "PreBipolarDetector is deprecated; use explicit reference='bipolar'/'car'/'none'."
+    def apply_notch(self, data: np.ndarray, sfreq: float, freqs: List[float]) -> np.ndarray:
+        """Apply notch filter at specified frequencies."""
+        raise NotImplementedError
+    
+    def apply_bandpass(self, data: np.ndarray, sfreq: float, low: float, high: float) -> np.ndarray:
+        """Apply bandpass filter."""
+        raise NotImplementedError
+
+
+class CpuFilterBackend(FilterBackend):
+    """CPU-based filtering using scipy."""
+    
+    def apply_notch(self, data: np.ndarray, sfreq: float, freqs: List[float]) -> np.ndarray:
+        """Apply notch filter for power line harmonics."""
+        for freq in freqs:
+            if freq < sfreq / 2:  # Must be below Nyquist
+                Q = 30  # Quality factor
+                b, a = iirnotch(freq, Q, sfreq)
+                data = filtfilt(b, a, data, axis=-1)
+        return data
+    
+    def apply_bandpass(self, data: np.ndarray, sfreq: float, low: float, high: float) -> np.ndarray:
+        """Apply bandpass filter."""
+        nyq = sfreq / 2
+        
+        if high >= nyq:
+            warnings.warn(f"Bandpass high ({high}Hz) >= Nyquist ({nyq}Hz), clipping to {nyq-1}Hz")
+            high = nyq - 1
+            
+        sos = butter(4, [low / nyq, high / nyq], btype='band', output='sos')
+        data = sosfiltfilt(sos, data, axis=-1)
+        return data
+
+
+class GpuFilterBackend(FilterBackend):
+    """GPU-based filtering using CuPy."""
+    
+    def __init__(self, chunk_sec: float = 20.0):
+        """
+        Args:
+            chunk_sec: Chunk size in seconds for processing (avoids OOM on long recordings)
+        """
+        if not HAS_GPU:
+            raise RuntimeError("GPU requested but CuPy not available")
+        self.chunk_sec = float(chunk_sec)
+    
+    def _sosfiltfilt_reflect_gpu(self, x_gpu, sos_gpu, pad_len: int):
+        """
+        Approximate filtfilt on GPU via reflect padding + forward/backward sosfilt.
+        Avoids worst edge transients from naive forward->flip->forward.
+        """
+        if pad_len <= 0:
+            y = cupy_sosfilt(sos_gpu, x_gpu, axis=-1)
+            y = cp.flip(y, axis=-1)
+            y = cupy_sosfilt(sos_gpu, y, axis=-1)
+            return cp.flip(y, axis=-1)
+
+        x_pad = cp.pad(x_gpu, ((0, 0), (pad_len, pad_len)), mode="reflect")
+        y = cupy_sosfilt(sos_gpu, x_pad, axis=-1)
+        y = cp.flip(y, axis=-1)
+        y = cupy_sosfilt(sos_gpu, y, axis=-1)
+        y = cp.flip(y, axis=-1)
+        return y[:, pad_len:-pad_len]
+    
+    def _filter_in_chunks(self, x_gpu, sos_gpu, pad_len: int, sfreq: float):
+        """Filter data in chunks to avoid GPU OOM."""
+        n_samples = int(x_gpu.shape[1])
+        chunk_len = int(max(1, round(self.chunk_sec * sfreq)))
+        
+        if n_samples <= chunk_len:
+            return self._sosfiltfilt_reflect_gpu(x_gpu, sos_gpu, pad_len)
+        
+        out = cp.zeros_like(x_gpu, dtype=x_gpu.dtype)
+        step = max(1, chunk_len)
+        
+        for start in range(0, n_samples, step):
+            end = min(n_samples, start + step)
+            ext_start = max(0, start - pad_len)
+            ext_end = min(n_samples, end + pad_len)
+            chunk = x_gpu[:, ext_start:ext_end]
+            filt = self._sosfiltfilt_reflect_gpu(chunk, sos_gpu, pad_len)
+            s0 = start - ext_start
+            s1 = s0 + (end - start)
+            out[:, start:end] = filt[:, s0:s1]
+        
+        return out
+    
+    def apply_notch(self, data: np.ndarray, sfreq: float, freqs: List[float]) -> np.ndarray:
+        """Apply notch filter on GPU."""
+        # Transfer to GPU (float32 to reduce memory)
+        data_gpu = cp.asarray(data, dtype=cp.float32)
+        
+        for freq in freqs:
+            if freq < sfreq / 2:
+                Q = 30
+                b, a = iirnotch(freq, Q, sfreq)
+                from scipy.signal import tf2sos
+                sos = tf2sos(b, a)
+                sos_gpu = cp.asarray(sos)
+                pad_len = int(min(data_gpu.shape[1] // 4, max(1, round(0.5 * sfreq))))
+                data_gpu = self._filter_in_chunks(data_gpu, sos_gpu, pad_len, sfreq)
+        
+        return cp.asnumpy(data_gpu)
+    
+    def apply_bandpass(self, data: np.ndarray, sfreq: float, low: float, high: float) -> np.ndarray:
+        """Apply bandpass filter on GPU."""
+        nyq = sfreq / 2
+        
+        if high >= nyq:
+            high = nyq - 1
+            
+        sos = butter(4, [low / nyq, high / nyq], btype='band', output='sos')
+        
+        # Transfer to GPU
+        data_gpu = cp.asarray(data, dtype=cp.float32)
+        sos_gpu = cp.asarray(sos)
+        pad_len = int(min(data_gpu.shape[1] // 4, max(1, round(0.5 * sfreq))))
+        data_gpu = self._filter_in_chunks(data_gpu, sos_gpu, pad_len, sfreq)
+        
+        return cp.asnumpy(data_gpu)
+
+
 
 
 class BipolarReferencer:
@@ -358,27 +471,21 @@ class BipolarReferencer:
     3. Naming convention: explicit pair name (A1-A2, A2-A3, ...)
     """
     
-    def __init__(self, allow_gap: int = 2, exclude_last_n: int = 0):
+    def __init__(self, allow_gap: int = 2):
         """
         Args:
             allow_gap: Maximum allowed gap in contact numbers.
                        1 = only consecutive (A1-A2)
                        2 = allow one missing (A1-A3 if A2 doesn't exist)
-            exclude_last_n: Deprecated; do not bake dataset-specific contact dropping
-                            into referencing. Prefer explicit include_channels/exclude_channels
-                            in SEEGPreprocessor if you need to match an external channel list.
         """
         self.allow_gap = allow_gap
-        self.exclude_last_n = exclude_last_n
         
-    def group_by_shaft(self, ch_names: List[str], 
-                       exclude_last_n: Optional[int] = None) -> Dict[str, List[Tuple[int, str]]]:
+    def group_by_shaft(self, ch_names: List[str]) -> Dict[str, List[Tuple[int, str]]]:
         """
         Group channels by electrode shaft prefix.
         
         Args:
             ch_names: List of channel names
-            exclude_last_n: Override instance setting for excluding last N contacts
         
         Returns:
             Dict mapping prefix -> [(number, name), ...] sorted by number
@@ -395,18 +502,10 @@ class BipolarReferencer:
         # Sort each group by contact number
         for prefix in shaft_groups:
             shaft_groups[prefix].sort(key=lambda x: x[0])
-        
-        # Exclude last N contacts if requested
-        n_exclude = exclude_last_n if exclude_last_n is not None else self.exclude_last_n
-        if n_exclude > 0:
-            for prefix in shaft_groups:
-                if len(shaft_groups[prefix]) > n_exclude:
-                    shaft_groups[prefix] = shaft_groups[prefix][:-n_exclude]
             
         return shaft_groups
     
-    def compute_bipolar(self, data: np.ndarray, ch_names: List[str],
-                        exclude_last_n: Optional[int] = None
+    def compute_bipolar(self, data: np.ndarray, ch_names: List[str]
                         ) -> Tuple[np.ndarray, List[str], List[Tuple[str, str]]]:
         """
         Compute bipolar referenced data.
@@ -414,7 +513,6 @@ class BipolarReferencer:
         Args:
             data: (n_channels, n_samples) array
             ch_names: List of channel names
-            exclude_last_n: Override instance setting for excluding last N contacts
             
         Returns:
             bipolar_data: (n_bipolar, n_samples) array
@@ -422,7 +520,7 @@ class BipolarReferencer:
             bipolar_pairs: List of (ch1, ch2) pairs that were subtracted
         """
         ch_indices = {name: i for i, name in enumerate(ch_names)}
-        shaft_groups = self.group_by_shaft(ch_names, exclude_last_n)
+        shaft_groups = self.group_by_shaft(ch_names)
         
         bipolar_data = []
         bipolar_names = []
@@ -582,12 +680,14 @@ class SEEGPreprocessor:
                  bipolar_gap: int = 2,
                  include_channels: Optional[List[str]] = None,
                  exclude_channels: Optional[List[str]] = None,
-                 exclude_last_n: int = 0,
                  notch_freqs: Optional[List[float]] = None,
                  bandpass: Optional[Tuple[float, float]] = None,
                  check_quality: bool = True,
                  crop_seconds: Optional[float] = None,
-                 use_gpu: bool = False):
+                 use_gpu: bool = False,
+                 gpu_chunk_sec: float = 20.0,
+                 use_fif_cache: bool = True,
+                 fif_cache_dir: Optional[Union[str, Path]] = None):
         """
         Args:
             target_sfreq: Target sampling rate. If None, auto-select based on target_band:
@@ -603,7 +703,6 @@ class SEEGPreprocessor:
             include_channels: Explicit channel whitelist (after cleaning names). If set,
                               keeps only these channels (intersection, order preserved).
             exclude_channels: Explicit channel blacklist (after cleaning names).
-            exclude_last_n: Deprecated. Avoid dataset-specific "drop last N contacts" rules.
             notch_freqs: Notch filter frequencies (default: 50Hz harmonics)
             bandpass: (low, high) bandpass filter (default: None, applied in detector)
             check_quality: Whether to run quality checks
@@ -615,13 +714,21 @@ class SEEGPreprocessor:
         self.bipolar_gap = bipolar_gap
         self.include_channels = include_channels
         self.exclude_channels = exclude_channels
-        self.exclude_last_n = exclude_last_n
         self.check_quality = check_quality
         self.crop_seconds = crop_seconds
         self.use_gpu = use_gpu and HAS_GPU
+        self.gpu_chunk_sec = float(gpu_chunk_sec)
+        self.use_fif_cache = bool(use_fif_cache)
+        self.fif_cache_dir = Path(fif_cache_dir) if fif_cache_dir is not None else None
         
         if use_gpu and not HAS_GPU:
             warnings.warn("GPU requested but CuPy not available. Using CPU.")
+        
+        # Initialize filter backend (决定 CPU/GPU 一次,消除运行时判断)
+        if self.use_gpu:
+            self.filter_backend: FilterBackend = GpuFilterBackend(chunk_sec=self.gpu_chunk_sec)
+        else:
+            self.filter_backend: FilterBackend = CpuFilterBackend()
         
         # Auto-select sampling rate based on target band
         if target_sfreq is None:
@@ -644,10 +751,8 @@ class SEEGPreprocessor:
         self.bandpass = bandpass
         
         # Components
-        self.bipolar_ref = BipolarReferencer(allow_gap=bipolar_gap, exclude_last_n=0)
+        self.bipolar_ref = BipolarReferencer(allow_gap=bipolar_gap)
         self.car_ref = CommonAverageReferencer()
-        # Deprecated detector kept for backwards compatibility only; we don't use it.
-        self.prebipolar_detector = PreBipolarDetector()
         self.quality_checker = ChannelQualityChecker()
         
         # State
@@ -655,7 +760,6 @@ class SEEGPreprocessor:
         self._original_sfreq = None
         self._original_ch_names = []
         self._excluded_channels = []
-        self._is_pre_bipolar = False  # deprecated field; kept for compatibility
         self._used_gpu = False
         
     def _validate_nyquist(self):
@@ -676,6 +780,13 @@ class SEEGPreprocessor:
                     f"Nyquist limit violated!"
                 )
     
+    def _get_fif_cache_path(self, edf_path: Path) -> Path:
+        base = edf_path.stem
+        if self.crop_seconds is not None:
+            base = f"{base}_crop{int(self.crop_seconds)}s"
+        cache_dir = self.fif_cache_dir if self.fif_cache_dir is not None else edf_path.parent
+        return Path(cache_dir) / f"{base}.fif"
+
     def load_edf(self, file_path: Union[str, Path]) -> 'SEEGPreprocessor':
         """
         Load EDF file and filter to valid SEEG channels.
@@ -691,6 +802,22 @@ class SEEGPreprocessor:
             raise FileNotFoundError(f"EDF file not found: {file_path}")
             
         print(f"Loading: {file_path.name}")
+
+        # Optional: use cached FIF to speed repeated reads
+        if self.use_fif_cache:
+            fif_path = self._get_fif_cache_path(file_path)
+            if fif_path.exists():
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    self._raw = mne.io.read_raw_fif(
+                        str(fif_path),
+                        preload=True,
+                        verbose=False,
+                    )
+                self._original_sfreq = self._raw.info['sfreq']
+                self._original_ch_names = list(self._raw.ch_names)
+                print(f"  Loaded cached FIF: {fif_path.name}")
+                return self
         
         # First pass: read header to get channel list
         # Use latin1 encoding for Chinese hospital EDF files
@@ -739,6 +866,15 @@ class SEEGPreprocessor:
         print(f"  Loaded {len(self._raw.ch_names)} SEEG channels")
         print(f"  Original sfreq: {self._original_sfreq} Hz")
         print(f"  Duration: {self._raw.times[-1]:.1f} s ({self._raw.times[-1]/3600:.2f} h)")
+
+        if self.use_fif_cache:
+            try:
+                fif_path = self._get_fif_cache_path(file_path)
+                fif_path.parent.mkdir(parents=True, exist_ok=True)
+                self._raw.save(str(fif_path), overwrite=True, verbose=False)
+                print(f"  Saved FIF cache: {fif_path.name}")
+            except Exception:
+                pass
         
         return self
     
@@ -815,21 +951,6 @@ class SEEGPreprocessor:
             data = data[keep_indices]
             ch_names = [ch_names[i] for i in keep_indices]
 
-        # Step 4b: Deprecated distal-contact dropping (kept only for backwards compatibility)
-        if self.exclude_last_n > 0:
-            print(f"[DEPRECATED] Excluding last {self.exclude_last_n} contacts per shaft...")
-            shaft_groups = self.bipolar_ref.group_by_shaft(ch_names, exclude_last_n=0)
-            keep_names = set()
-            for _, contacts in shaft_groups.items():
-                keep_contacts = contacts[:-self.exclude_last_n] if len(contacts) > self.exclude_last_n else contacts
-                for _, name in keep_contacts:
-                    keep_names.add(name)
-            keep_indices = [i for i, name in enumerate(ch_names) if name in keep_names]
-            excluded_channels.extend([name for name in ch_names if name not in keep_names])
-            data = data[keep_indices]
-            ch_names = [ch_names[i] for i in keep_indices]
-            print(f"  {original_ch_count} -> {len(ch_names)} channels (excluded {len(set(excluded_channels))})")
-
         self._excluded_channels = sorted(set(excluded_channels))
         
         # Step 5: Resample if needed
@@ -905,94 +1026,17 @@ class SEEGPreprocessor:
         return resampled
     
     def _apply_filters(self, data: np.ndarray, sfreq: float) -> np.ndarray:
-        """Apply notch and bandpass filters with optional GPU acceleration."""
-        
-        if self.use_gpu and HAS_GPU:
-            return self._apply_filters_gpu(data, sfreq)
-        else:
-            return self._apply_filters_cpu(data, sfreq)
-    
-    def _apply_filters_cpu(self, data: np.ndarray, sfreq: float) -> np.ndarray:
-        """Apply filters on CPU."""
+        """Apply notch and bandpass filters using configured backend."""
         # Notch filter for power line harmonics
         if self.notch_freqs:
-            for freq in self.notch_freqs:
-                if freq < sfreq / 2:  # Must be below Nyquist
-                    Q = 30  # Quality factor
-                    b, a = iirnotch(freq, Q, sfreq)
-                    data = filtfilt(b, a, data, axis=-1)
+            data = self.filter_backend.apply_notch(data, sfreq, self.notch_freqs)
         
         # Bandpass filter (optional - usually applied in detector)
         if self.bandpass is not None:
             low, high = self.bandpass
-            nyq = sfreq / 2
-            
-            if high >= nyq:
-                warnings.warn(f"Bandpass high ({high}Hz) >= Nyquist ({nyq}Hz), clipping to {nyq-1}Hz")
-                high = nyq - 1
-                
-            sos = butter(4, [low / nyq, high / nyq], btype='band', output='sos')
-            data = sosfiltfilt(sos, data, axis=-1)
+            data = self.filter_backend.apply_bandpass(data, sfreq, low, high)
         
         return data
-    
-    def _apply_filters_gpu(self, data: np.ndarray, sfreq: float) -> np.ndarray:
-        """Apply filters on GPU using CuPy."""
-        if not HAS_GPU:
-            return self._apply_filters_cpu(data, sfreq)
-        
-        # Transfer to GPU
-        data_gpu = cp.asarray(data)
-
-        def _sosfiltfilt_reflect_gpu(x_gpu, sos_gpu, pad_len: int):
-            """
-            Approximate filtfilt on GPU via reflect padding + forward/backward sosfilt.
-            This avoids the worst edge transients from naive forward->flip->forward.
-            """
-            if pad_len <= 0:
-                y = cupy_sosfilt(sos_gpu, x_gpu, axis=-1)
-                y = cp.flip(y, axis=-1)
-                y = cupy_sosfilt(sos_gpu, y, axis=-1)
-                return cp.flip(y, axis=-1)
-
-            x_pad = cp.pad(x_gpu, ((0, 0), (pad_len, pad_len)), mode="reflect")
-            y = cupy_sosfilt(sos_gpu, x_pad, axis=-1)
-            y = cp.flip(y, axis=-1)
-            y = cupy_sosfilt(sos_gpu, y, axis=-1)
-            y = cp.flip(y, axis=-1)
-            return y[:, pad_len:-pad_len]
-        
-        # Notch filter - use forward-only filter on GPU (no filtfilt in cupy)
-        # We use reflect padding + forward/backward to suppress edge transients.
-        if self.notch_freqs:
-            for freq in self.notch_freqs:
-                if freq < sfreq / 2:
-                    Q = 30
-                    b, a = iirnotch(freq, Q, sfreq)
-                    # Convert to SOS for stability
-                    from scipy.signal import tf2sos
-                    sos = tf2sos(b, a)
-                    sos_gpu = cp.asarray(sos)
-                    # Heuristic pad length: similar to scipy filtfilt default (3*(ntaps-1)),
-                    # but we don't have direct ntaps for SOS; be conservative in seconds.
-                    pad_len = int(min(data_gpu.shape[1] // 4, max(1, round(0.5 * sfreq))))
-                    data_gpu = _sosfiltfilt_reflect_gpu(data_gpu, sos_gpu, pad_len)
-        
-        # Bandpass filter
-        if self.bandpass is not None:
-            low, high = self.bandpass
-            nyq = sfreq / 2
-            
-            if high >= nyq:
-                high = nyq - 1
-                
-            sos = butter(4, [low / nyq, high / nyq], btype='band', output='sos')
-            sos_gpu = cp.asarray(sos)
-            pad_len = int(min(data_gpu.shape[1] // 4, max(1, round(0.5 * sfreq))))
-            data_gpu = _sosfiltfilt_reflect_gpu(data_gpu, sos_gpu, pad_len)
-        
-        # Transfer back to CPU
-        return cp.asnumpy(data_gpu)
     
     def get_shaft_info(self) -> Dict[str, int]:
         """Get number of contacts per electrode shaft."""
@@ -1027,8 +1071,9 @@ def save_raw_cache(
         raise FileNotFoundError(f"EDF file not found: {edf_path}")
 
     output_dir = Path(output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    out_path = output_dir / f"{output_prefix}_rawCache_{reference}.npz"
+    temp_dir = output_dir / "temp"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    out_path = temp_dir / f"{output_prefix}_rawCache_{reference}.npz"
 
     # Read EDF header for channel list
     with warnings.catch_warnings():
@@ -1082,7 +1127,7 @@ def save_raw_cache(
     # Apply reference (no filtering/resampling)
     reference_type = "monopolar"
     if reference == "bipolar":
-        ref = BipolarReferencer(allow_gap=2, exclude_last_n=0)
+        ref = BipolarReferencer(allow_gap=2)
         data, ch_names, _ = ref.compute_bipolar(data, ch_names)
         reference_type = "bipolar"
     elif reference == "car":
@@ -1137,19 +1182,6 @@ def preprocess_edf(file_path: Union[str, Path],
     return result.data, result.sfreq, result.ch_names
 
 
-def validate_against_gpu_results(result: PreprocessingResult, 
-                                  gpu_ch_names: np.ndarray) -> Dict:
-    """
-    Deprecated.
-    
-    Do not infer referencing/channel-dropping rules from *_gpu.npz.
-    If you need to match GPU channel selection, pass include_channels explicitly:
-      include_channels=[str(n) for n in gpu['chns_names']]
-    """
-    raise RuntimeError(
-        "validate_against_gpu_results() is deprecated. "
-        "Use include_channels/exclude_channels for explicit channel selection."
-    )
 
 
 # =============================================================================
