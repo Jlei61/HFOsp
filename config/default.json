@@ -1,0 +1,64 @@
+{
+  "data_root": "/mnt/yuquan_data/yuquan_24h_edf",
+  "subject": "chengshuai",
+  "record": "FC10477Q",
+  "output_dir": null,
+  "output_prefix": null,
+  "paths": {
+    "packed_times_mode": "auto",
+    "gpu_detections_mode": "auto"
+  },
+  "core_channels": {
+    "source": "hist_meanX",
+    "manual_list": []
+  },
+  "analysis": {
+    "band": "ripple",
+    "reference": "bipolar",
+    "alias_bipolar_to_left": true,
+    "bipolar_gap": 2,
+    "crop_seconds": null,
+    "use_gpu_envelope": true,
+    "save_env_cache": true,
+    "window_sec": 0.5,
+    "force_rerun": false,
+    "interictal_only": false
+  },
+  "hfo_detection": {
+    "config": {
+      "band": "ripple",
+      "bandpass": null,
+      "subband_width": 20.0,
+      "rel_thresh": 2.0,
+      "abs_thresh": 2.0,
+      "min_gap_ms": 20.0,
+      "min_last_ms": 40.0,
+      "chunk_sec": 50.0,
+      "chunk_overlap_sec": 2.0,
+      "n_jobs": -1,
+      "verbose": 1
+    }
+  },
+  "group_analysis": {
+    "centroid_power": 2.0,
+    "tf_n_freqs": 180,
+    "tf_n_cycles": 4.0,
+    "tf_n_cycles_mode": "linear",
+    "tf_n_cycles_min": 3.0,
+    "tf_n_cycles_max": 10.0,
+    "tf_freq_scale": "log",
+    "baseline_window_sec": 2.0,
+    "baseline_step_sec": 1.0,
+    "baseline_n_select": 10,
+    "baseline_min_distance_sec": 2.0,
+    "baseline_line_length_q": 0.9,
+    "baseline_ripple_env_q": 0.8,
+    "seizure_ll_k": 6.0,
+    "seizure_rms_k": 6.0,
+    "seizure_min_duration_sec": 5.0
+  },
+  "outputs": {
+    "packed_times_suffix": "_packedTimes_pipeline.npy",
+    "lagpat_suffix": "_lagPat_pipeline.npz"
+  }
+}

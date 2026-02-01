@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import time
-from typing import Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -2237,7 +2237,15 @@ def compute_tf_centroids(
             power = _compute_wavelet_power(seg, sfreq, freqs_hz, n_cycles_vec)
 
             if baseline_pool_spectra is not None and baseline_pool_spectra.size > 0:
-                base_pool = np.asarray(baseline_pool_spectra[ci, :, sel], dtype=np.float64)
+                base_mat = np.asarray(baseline_pool_spectra[ci], dtype=np.float64)
+                if base_mat.ndim != 2:
+                    continue
+                if base_mat.shape[0] == freqs_hz.shape[0]:
+                    base_pool = base_mat[:, sel]
+                elif base_mat.shape[1] == freqs_hz.shape[0]:
+                    base_pool = base_mat[sel, :].T
+                else:
+                    base_pool = []
             else:
                 base_pool = []
                 win_b = max(1, int(round(float(baseline_window_sec) * sfreq)))
@@ -2253,6 +2261,8 @@ def compute_tf_centroids(
                     continue
                 base_pool = np.stack(base_pool, axis=1)
 
+            if isinstance(base_pool, list) or np.asarray(base_pool).size == 0:
+                continue
             base = np.median(base_pool, axis=1, keepdims=True) + 1e-30
             power_db = 10.0 * np.log10(power / base)
             W = np.maximum(power_db, 0.0)
@@ -2422,6 +2432,10 @@ def compute_and_save_group_analysis(
     crop_seconds: Optional[float] = None,
     use_gpu: bool = True,
     save_env_cache: bool = True,
+    hfo_config: Optional[Dict[str, Any]] = None,
+    window_sec: Optional[float] = None,
+    interictal_only: bool = False,
+    bipolar_gap: int = 2,
     centroid_power: float = 2.0,
     tf_n_freqs: int = 180,
     tf_n_cycles: float = 4.0,
@@ -2479,12 +2493,18 @@ def compute_and_save_group_analysis(
         Use GPU for envelope computation.
     save_env_cache : bool
         If True, save envelope cache.
+    hfo_config : dict, optional
+        Optional HFODetectionConfig overrides (used only if gpu_npz_path is None).
+    window_sec : float, optional
+        Window length when building windows from detections (packedTimes missing).
+    interictal_only : bool
+        If True, drop event windows that overlap ictal_mask.
+    bipolar_gap : int
+        Max allowed contact gap for bipolar re-reference (SEEGPreprocessor).
     centroid_power : float
         Power for envelope centroid (default 2.0).
-    tf_nperseg : int
-        STFT window size for TF centroids.
-    tf_noverlap : int
-        STFT overlap for TF centroids.
+    tf_n_freqs : int
+        Number of wavelet frequencies for TF centroids.
 
     Returns
     -------
@@ -2534,6 +2554,7 @@ def compute_and_save_group_analysis(
     pre = SEEGPreprocessor(
         target_band="fast_ripple" if "fast" in b else "ripple",
         reference=reference,
+        bipolar_gap=int(bipolar_gap),
         crop_seconds=crop_seconds,
         check_quality=False,
         use_gpu=False,
@@ -2582,7 +2603,11 @@ def compute_and_save_group_analysis(
                 dets[ch] = np.zeros((0, 2), dtype=np.float64)
     else:
         from .hfo_detector import HFODetector, HFODetectionConfig
-        cfg = HFODetectionConfig(algorithm="bqk", band=band, use_gpu=False)
+        cfg_kwargs = dict(hfo_config or {})
+        if "band" in cfg_kwargs and str(cfg_kwargs["band"]).lower().strip() != str(band).lower().strip():
+            raise ValueError("hfo_config['band'] must match compute_and_save_group_analysis band")
+        cfg_kwargs.setdefault("band", band)
+        cfg = HFODetectionConfig(**cfg_kwargs)
         det = HFODetector(cfg)
         res = det.detect(data, sfreq=sfreq, ch_names=names)
         dets = _detections_dict_from_hfo_result(res)
@@ -2597,7 +2622,7 @@ def compute_and_save_group_analysis(
             windows = [w for w in windows if w.start < float(crop_seconds)]
         event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
     else:
-        window_sec = 0.5
+        window_sec = float(window_sec) if window_sec is not None else 0.5
         windows = build_windows_from_detections(dets, window_sec=window_sec)
         if crop_seconds is not None:
             windows = [w for w in windows if w.start < float(crop_seconds)]
@@ -2615,10 +2640,8 @@ def compute_and_save_group_analysis(
     logger.info("step=core_channels elapsed_sec=%.3f", float(time.time() - t_step))
 
     n_ch = len(names)
-    n_events = len(windows)
-
-    if n_ch == 0 or n_events == 0:
-        raise ValueError(f"No channels ({n_ch}) or no events ({n_events}) to analyze.")
+    if n_ch == 0:
+        raise ValueError(f"No channels ({n_ch}) to analyze.")
 
     # Step 6: Detect seizure onsets (subject-level) + ictal mask
     t_step = time.time()
@@ -2630,12 +2653,13 @@ def compute_and_save_group_analysis(
         min_duration_sec=float(seizure_min_duration_sec),
     )
     ictal_mask = seizure.get("ictal_mask", None)
+    seizure_dir = str(Path(output_dir) / "seizure_onset")
     save_seizure_onsets_json(
         subject_id=str(output_prefix),
         onsets_sec=seizure.get("onsets_sec", np.zeros((0,), dtype=np.float64)),
         offsets_sec=seizure.get("offsets_sec", np.zeros((0,), dtype=np.float64)),
         sfreq=sfreq,
-        output_dir="results/seizure_onset",
+        output_dir=seizure_dir,
         params={
             "ll_k": float(seizure_ll_k),
             "rms_k": float(seizure_rms_k),
@@ -2651,6 +2675,25 @@ def compute_and_save_group_analysis(
         float(time.time() - t_step),
         int(len(seizure.get("onsets_sec", []))),
     )
+
+    # Optional: keep only interictal windows (no overlap with ictal_mask)
+    if bool(interictal_only) and ictal_mask is not None and len(windows) > 0:
+        keep_windows: List[EventWindow] = []
+        n_samples = int(ictal_mask.shape[0])
+        for w in windows:
+            i0 = max(0, int(round(w.start * sfreq)))
+            i1 = min(n_samples, int(round(w.end * sfreq)))
+            if i1 <= i0:
+                continue
+            if not bool(np.any(ictal_mask[i0:i1])):
+                keep_windows.append(w)
+        windows = keep_windows
+        event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
+        logger.info("step=interictal_filter kept_windows=%d", int(len(windows)))
+
+    n_events = len(windows)
+    if n_events == 0:
+        raise ValueError("No events to analyze after filtering.")
 
     # Step 7: Compute envelope (bandpass + Hilbert)
     t_step = time.time()
