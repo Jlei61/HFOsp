@@ -42,13 +42,13 @@
 │  │  └──────────────────┬──────────────────────────┘    │                        │
 │  │                     ▼                               │                        │
 │  │  ┌─────────────────────────────────────────────┐    │                        │
-│  │  │ Step 2: 预计算 Envelope + Bandpass 缓存       │    │                       │
+│  │  │ Step 2: 预计算 Envelope 缓存（bandpass可选）   │    │                       │
 │  │  │   - precompute_envelope_cache               │    │                        │
 │  │  │   - 存储: *_envCache.npz                    │    │                        │
 │  │  └──────────────────┬──────────────────────────┘    │                        │
 │  │                     ▼                               │                        │
 │  │  ┌─────────────────────────────────────────────┐    │                        │
-│  │  │ Step 3: 质心+TF分析 → 存储中间结果            │    │                       │
+│  │  │ Step 3: 质心分析（TF可选）→ 存储中间结果       │    │                       │
 │  │  │   - compute_group_analysis_results          │    │                        │
 │  │  │   - 存储: *_groupAnalysis.npz               │    │ ← 关键新增！           │
 │  │  └──────────────────┬──────────────────────────┘    │                        │
@@ -73,8 +73,8 @@
 | `*_gpu.npz` | 历史GPU检测结果 | (已有) |
 | `*_packedTimes.npy` | 事件窗口 | (已有) |
 | `*_lagPat*.npz` | 历史lag矩阵 | (已有) |
-| `*_envCache_{band}_{ref}.npz` | **Envelope+带通信号缓存** | `group_event_analysis` |
-| `*_groupAnalysis.npz` | **质心+TF+lag 完整分析结果** | `group_event_analysis` |
+| `*_envCache_{band}_{ref}.npz` | **Envelope缓存（x_band可选）** | `group_event_analysis` |
+| `*_groupAnalysis.npz` | **质心+lag（TF可选）分析结果** | `group_event_analysis` |
 
 ### `*_groupAnalysis.npz` 结构（核心新增）
 
@@ -92,13 +92,20 @@
     'event_windows': np.array([...]),      # (n_events, 2) [start, end] 秒
     
     # === 质心分析 ===
-    'centroid_time': np.array([...]),      # (n_ch, n_events) 时间质心(相对窗口起始)
-    'centroid_freq': np.array([...]),      # (n_ch, n_events) TF 2D质心的频率分量
+    'centroid_time': np.array([...]),      # (n_ch, n_events) 时间质心(相对窗口起始, 默认env)
+    'tf_centroid_time': np.array([...]),   # (n_ch, n_events) TF质心时间分量（可选）
+    'tf_centroid_freq': np.array([...]),   # (n_ch, n_events) TF质心频率分量（可选）
     'events_bool': np.array([...]),        # (n_ch, n_events) 通道是否参与
     
     # === Lag/Rank 分析 ===
     'lag_raw': np.array([...]),            # (n_ch, n_events) 相对lag(对齐到最早通道)
     'lag_rank': np.array([...]),           # (n_ch, n_events) 排名 (0=最早)
+
+    # === Co-activation (ch × ch) ===
+    'coact_event_count': np.array([...]),  # (n_ch, n_ch) 共同激活事件数
+    'coact_event_ratio': np.array([...]),  # (n_ch, n_ch) 共同激活比例 (=count/n_events)
+    'coact_time_ratio': np.array([...]),   # (n_ch, n_ch) 质心绝对时间对齐强度(0..1)
+    'coact_rank_ratio': np.array([...]),   # (n_ch, n_ch) 质心相对rank对齐强度(0..1)
     
     # === 可选：TF 变换结果 (用于高级可视化) ===
     'tf_power_per_event': np.array([...]), # (n_ch, n_events, n_freq, n_time) 可选
@@ -432,8 +439,8 @@ config = HFODetectionConfig(
 
 | 输出文件 | 内容 | 下游用户 |
 |----------|------|----------|
-| `*_envCache_{band}_{ref}.npz` | envelope + x_band + sfreq + ch_names | visualization (Fig1波形) |
-| `*_groupAnalysis.npz` | **质心+TF质心+lag+rank+baseline池元数据** | visualization, network_analysis |
+| `*_envCache_{band}_{ref}.npz` | envelope + (可选x_band) + sfreq + ch_names | visualization (Fig1波形) |
+| `*_groupAnalysis.npz` | **质心+lag+rank+baseline池元数据（TF可选）** | visualization, network_analysis |
 
 #### 功能分解
 
@@ -449,12 +456,17 @@ config = HFODetectionConfig(
 | 3.7 通道筛选 | `select_core_channels_by_event_count` | ✅ |
 | 3.8 验证函数 | `validate_*` 系列 | ✅ |
 
+**配置补充（默认行为）**：
+- `centroid_source='env'`：lag/rank 默认基于包络质心
+- `compute_tf_centroids=False`：TF质心默认不计算（可选开启）
+- `save_bandpass=False`：x_band 默认不保存（仅可视化需要时开启）
+
 **阶段性结论（2026-01-16）**:
 - ✅ 核心通道筛选：`mean + 1*std` 可复现 `hist_meanX.npz` 的 `pick_chns`
 - ✅ packedTimes 窗口长度：从 `packedTimes[:,1]-packedTimes[:,0]` 推断
 - ✅ Step1 验证：`reference='bipolar'` + 别名通道 + GPU通道过滤 → 高覆盖率
 - ✅ Step2-3 验证：`eventsBool` 100% 一致；相对 lag 达 ms 级误差
-- ✅ TF质心计算：`compute_tf_centroids` 改为 **wavelet+动态基线**（非STFT）
+- ✅ TF质心计算：`compute_tf_centroids` 改为 **wavelet+动态基线**（非STFT），默认可关闭
 - ✅ 基线池：2s窗/1s步长，排除ictal+HFO+高LL+高Ripple，存入 `baseline_pool_starts/indices`
 - ✅ 统一存储：`save_group_analysis_results` + `load_group_analysis_results` 已实现
 - ✅ 一键API：`compute_and_save_group_analysis` 可从 EDF 一站式生成所有中间结果
@@ -534,17 +546,21 @@ config = HFODetectionConfig(
 # 1. Envelope + Bandpass 缓存
 "<record>_envCache_<band>_<ref>.npz"
 ├─ env: (n_ch, n_samples) Hilbert envelope
-├─ x_band: (n_ch, n_samples) bandpassed signal
+├─ x_band: (n_ch, n_samples) bandpassed signal（可选）
 ├─ sfreq: 采样率
 └─ ch_names: 通道名列表
 
 # 2. 完整分析结果
 "<record>_groupAnalysis.npz"
 ├─ centroid_time: (n_ch, n_events) 时间质心
-├─ tf_centroid_time: (n_ch, n_events) TF 2D质心-时间分量
-├─ tf_centroid_freq: (n_ch, n_events) TF 2D质心-频率分量
+├─ tf_centroid_time: (n_ch, n_events) TF 2D质心-时间分量（可选）
+├─ tf_centroid_freq: (n_ch, n_events) TF 2D质心-频率分量（可选）
 ├─ lag_raw: (n_ch, n_events) 相对滞后(秒)
 ├─ lag_rank: (n_ch, n_events) 排名(0=最早)
+├─ coact_event_count: (n_ch, n_ch) 共同激活事件数
+├─ coact_event_ratio: (n_ch, n_ch) 共同激活比例
+├─ coact_time_ratio: (n_ch, n_ch) 质心绝对时间对齐强度
+├─ coact_rank_ratio: (n_ch, n_ch) 质心相对rank对齐强度
 ├─ events_bool: (n_ch, n_events) 参与mask
 └─ sfreq, band, ch_names, event_windows...
 
@@ -784,6 +800,7 @@ preprocessor.filter_backend = MyCustomBackend()
   - [ ] 网络拓扑图（待模块4）
 - [ ] 模块4: network_analysis.py
 - [x] Notebook: chengshuai_hfo_analysis.ipynb ✅
+- [x] 2026-02-01: toy timelag + env cache 接口测试（cuda_env）
 - [ ] 验证与原结果一致性
 - [ ] 完整Pipeline测试
 

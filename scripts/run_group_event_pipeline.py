@@ -27,7 +27,15 @@ if str(_PROJECT_ROOT) not in sys.path:
 from src.group_event_analysis import compute_and_save_group_analysis, load_group_analysis_results
 
 
-def _load_json(path: Path) -> Dict[str, Any]:
+def _load_config(path: Path) -> Dict[str, Any]:
+    if path.suffix.lower() in (".yml", ".yaml"):
+        try:
+            import yaml  # type: ignore
+        except Exception as exc:
+            raise ImportError("YAML config requires PyYAML (pip install pyyaml)") from exc
+        with path.open("r", encoding="utf-8") as f:
+            return yaml.safe_load(f)
+
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -84,7 +92,7 @@ def _resolve_paths(cfg: Dict[str, Any], subject: str, record: str) -> Tuple[Path
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run HFO group-event pipeline with config.")
-    parser.add_argument("--config", type=str, default="config/default.json", help="Path to JSON config")
+    parser.add_argument("--config", type=str, default="config/default.yaml", help="Path to YAML/JSON config")
     parser.add_argument("--subject", type=str, default=None, help="Override subject id")
     parser.add_argument("--record", type=str, default=None, help="Override record id (EDF stem)")
     args = parser.parse_args()
@@ -93,7 +101,7 @@ def main() -> None:
     if not cfg_path.exists():
         raise FileNotFoundError(f"Config not found: {cfg_path}")
 
-    cfg = _load_json(cfg_path)
+    cfg = _load_config(cfg_path)
     subject = args.subject or cfg.get("subject")
     record = args.record or cfg.get("record")
     if not subject or not record:
@@ -115,6 +123,10 @@ def main() -> None:
 
     analysis_cfg = cfg.get("analysis", {}) or {}
     group_cfg = cfg.get("group_analysis", {}) or {}
+    group_core = group_cfg.get("core", {}) or {}
+    group_tf = group_cfg.get("tf", {}) or {}
+    group_seizure = group_cfg.get("seizure", {}) or {}
+    group_viz = group_cfg.get("visualization", {}) or {}
     hfo_cfg = cfg.get("hfo_detection", {}) or {}
 
     band = str(analysis_cfg.get("band", "ripple"))
@@ -127,6 +139,10 @@ def main() -> None:
     force_rerun = bool(analysis_cfg.get("force_rerun", False))
     interictal_only = bool(analysis_cfg.get("interictal_only", False))
     bipolar_gap = int(analysis_cfg.get("bipolar_gap", 2))
+    compute_tf_centroids = bool(group_tf.get("compute_tf_centroids", False))
+    centroid_source = str(group_core.get("centroid_source", "env"))
+    min_channels = int(group_core.get("min_channels", 1))
+    save_bandpass = bool(group_viz.get("save_bandpass", False))
 
     output_dir_cfg = cfg.get("output_dir", None)
     output_prefix_cfg = cfg.get("output_prefix", None)
@@ -164,22 +180,26 @@ def main() -> None:
         window_sec=window_sec,
         interictal_only=interictal_only,
         bipolar_gap=bipolar_gap,
-        centroid_power=group_cfg.get("centroid_power", 2.0),
-        tf_n_freqs=group_cfg.get("tf_n_freqs", 180),
-        tf_n_cycles=group_cfg.get("tf_n_cycles", 4.0),
-        tf_n_cycles_mode=group_cfg.get("tf_n_cycles_mode", "linear"),
-        tf_n_cycles_min=group_cfg.get("tf_n_cycles_min", 3.0),
-        tf_n_cycles_max=group_cfg.get("tf_n_cycles_max", 10.0),
-        tf_freq_scale=group_cfg.get("tf_freq_scale", "log"),
-        baseline_window_sec=group_cfg.get("baseline_window_sec", 2.0),
-        baseline_step_sec=group_cfg.get("baseline_step_sec", 1.0),
-        baseline_n_select=group_cfg.get("baseline_n_select", 10),
-        baseline_min_distance_sec=group_cfg.get("baseline_min_distance_sec", 2.0),
-        baseline_line_length_q=group_cfg.get("baseline_line_length_q", 0.90),
-        baseline_ripple_env_q=group_cfg.get("baseline_ripple_env_q", 0.80),
-        seizure_ll_k=group_cfg.get("seizure_ll_k", 6.0),
-        seizure_rms_k=group_cfg.get("seizure_rms_k", 6.0),
-        seizure_min_duration_sec=group_cfg.get("seizure_min_duration_sec", 5.0),
+        compute_tf_centroids=compute_tf_centroids,
+        centroid_source=centroid_source,
+        min_channels=min_channels,
+        save_bandpass=save_bandpass,
+        centroid_power=group_core.get("centroid_power", 2.0),
+        tf_n_freqs=group_tf.get("tf_n_freqs", 180),
+        tf_n_cycles=group_tf.get("tf_n_cycles", 4.0),
+        tf_n_cycles_mode=group_tf.get("tf_n_cycles_mode", "linear"),
+        tf_n_cycles_min=group_tf.get("tf_n_cycles_min", 3.0),
+        tf_n_cycles_max=group_tf.get("tf_n_cycles_max", 10.0),
+        tf_freq_scale=group_tf.get("tf_freq_scale", "log"),
+        baseline_window_sec=group_tf.get("baseline_window_sec", 2.0),
+        baseline_step_sec=group_tf.get("baseline_step_sec", 1.0),
+        baseline_n_select=group_tf.get("baseline_n_select", 10),
+        baseline_min_distance_sec=group_tf.get("baseline_min_distance_sec", 2.0),
+        baseline_line_length_q=group_tf.get("baseline_line_length_q", 0.90),
+        baseline_ripple_env_q=group_tf.get("baseline_ripple_env_q", 0.80),
+        seizure_ll_k=group_seizure.get("seizure_ll_k", 6.0),
+        seizure_rms_k=group_seizure.get("seizure_rms_k", 6.0),
+        seizure_min_duration_sec=group_seizure.get("seizure_min_duration_sec", 5.0),
     )
 
     results = load_group_analysis_results(out_paths["group_analysis_path"])

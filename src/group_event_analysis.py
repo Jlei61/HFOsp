@@ -2284,6 +2284,79 @@ def compute_tf_centroids(
 # =============================================================================
 
 
+def compute_coactivation_matrices(
+    *,
+    centroid_time: np.ndarray,
+    lag_rank: np.ndarray,
+    events_bool: np.ndarray,
+    event_windows: np.ndarray,
+) -> Dict[str, np.ndarray]:
+    """
+    Compute channel×channel co-activation matrices from group event results.
+
+    Returns
+    -------
+    dict with keys:
+        - coact_event_count: (n_ch, n_ch) int, number of co-active events
+        - coact_event_ratio: (n_ch, n_ch) float, co-active / total events
+        - coact_time_ratio: (n_ch, n_ch) float, time-aligned strength (0..1)
+        - coact_rank_ratio: (n_ch, n_ch) float, rank-aligned strength (0..1)
+    """
+    centroid_time = np.asarray(centroid_time, dtype=np.float64)
+    lag_rank = np.asarray(lag_rank, dtype=np.float64)
+    events_bool = np.asarray(events_bool, dtype=bool)
+    event_windows = np.asarray(event_windows, dtype=np.float64)
+
+    n_ch, n_events = events_bool.shape
+    if n_events == 0:
+        raise ValueError("No events available for co-activation matrices.")
+
+    coact_count = np.zeros((n_ch, n_ch), dtype=np.int64)
+    time_sum = np.zeros((n_ch, n_ch), dtype=np.float64)
+    rank_sum = np.zeros((n_ch, n_ch), dtype=np.float64)
+
+    for ei in range(n_events):
+        active_idx = np.where(events_bool[:, ei])[0]
+        if active_idx.size < 2:
+            continue
+        wlen = float(event_windows[ei, 1] - event_windows[ei, 0])
+        if not np.isfinite(wlen) or wlen <= 0.0:
+            continue
+
+        t = centroid_time[active_idx, ei]
+        r = lag_rank[active_idx, ei]
+        if not np.isfinite(t).all() or not np.isfinite(r).all():
+            continue
+
+        diff_t = np.abs(t[:, None] - t[None, :])
+        score_t = 1.0 - np.minimum(diff_t / wlen, 1.0)
+
+        max_rank = float(active_idx.size - 1)
+        diff_r = np.abs(r[:, None] - r[None, :])
+        score_r = 1.0 - (diff_r / max_rank if max_rank > 0 else 0.0)
+
+        for i_pos, i_ch in enumerate(active_idx):
+            for j_pos, j_ch in enumerate(active_idx):
+                coact_count[i_ch, j_ch] += 1
+                time_sum[i_ch, j_ch] += score_t[i_pos, j_pos]
+                rank_sum[i_ch, j_ch] += score_r[i_pos, j_pos]
+
+    coact_ratio = coact_count.astype(np.float64) / float(n_events)
+    coact_time_ratio = np.full((n_ch, n_ch), np.nan, dtype=np.float64)
+    coact_rank_ratio = np.full((n_ch, n_ch), np.nan, dtype=np.float64)
+
+    valid = coact_count > 0
+    coact_time_ratio[valid] = time_sum[valid] / coact_count[valid]
+    coact_rank_ratio[valid] = rank_sum[valid] / coact_count[valid]
+
+    return {
+        "coact_event_count": coact_count,
+        "coact_event_ratio": coact_ratio,
+        "coact_time_ratio": coact_time_ratio,
+        "coact_rank_ratio": coact_rank_ratio,
+    }
+
+
 def save_group_analysis_results(
     npz_path: str,
     *,
@@ -2306,6 +2379,10 @@ def save_group_analysis_results(
     tf_freq_scale: Optional[np.ndarray] = None,
     tf_baseline_n_select: Optional[np.ndarray] = None,
     tf_baseline_min_distance_sec: Optional[np.ndarray] = None,
+    coact_event_count: Optional[np.ndarray] = None,
+    coact_event_ratio: Optional[np.ndarray] = None,
+    coact_time_ratio: Optional[np.ndarray] = None,
+    coact_rank_ratio: Optional[np.ndarray] = None,
 ) -> str:
     """
     Save group analysis results to a standardized npz file.
@@ -2383,6 +2460,14 @@ def save_group_analysis_results(
         data["tf_baseline_n_select"] = tf_baseline_n_select
     if tf_baseline_min_distance_sec is not None:
         data["tf_baseline_min_distance_sec"] = tf_baseline_min_distance_sec
+    if coact_event_count is not None:
+        data["coact_event_count"] = np.asarray(coact_event_count, dtype=np.int64)
+    if coact_event_ratio is not None:
+        data["coact_event_ratio"] = np.asarray(coact_event_ratio, dtype=np.float64)
+    if coact_time_ratio is not None:
+        data["coact_time_ratio"] = np.asarray(coact_time_ratio, dtype=np.float64)
+    if coact_rank_ratio is not None:
+        data["coact_rank_ratio"] = np.asarray(coact_rank_ratio, dtype=np.float64)
 
     np.savez_compressed(npz_path, **data)
     return npz_path
@@ -2414,6 +2499,14 @@ def load_group_analysis_results(npz_path: str) -> Dict:
         out["tf_centroid_time"] = np.asarray(d["tf_centroid_time"])
     if "tf_centroid_freq" in d:
         out["tf_centroid_freq"] = np.asarray(d["tf_centroid_freq"])
+    if "coact_event_count" in d:
+        out["coact_event_count"] = np.asarray(d["coact_event_count"])
+    if "coact_event_ratio" in d:
+        out["coact_event_ratio"] = np.asarray(d["coact_event_ratio"])
+    if "coact_time_ratio" in d:
+        out["coact_time_ratio"] = np.asarray(d["coact_time_ratio"])
+    if "coact_rank_ratio" in d:
+        out["coact_rank_ratio"] = np.asarray(d["coact_rank_ratio"])
 
     return out
 
@@ -2436,6 +2529,10 @@ def compute_and_save_group_analysis(
     window_sec: Optional[float] = None,
     interictal_only: bool = False,
     bipolar_gap: int = 2,
+    compute_tf_centroids: bool = False,
+    centroid_source: str = "env",
+    min_channels: int = 1,
+    save_bandpass: bool = False,
     centroid_power: float = 2.0,
     tf_n_freqs: int = 180,
     tf_n_cycles: float = 4.0,
@@ -2501,6 +2598,14 @@ def compute_and_save_group_analysis(
         If True, drop event windows that overlap ictal_mask.
     bipolar_gap : int
         Max allowed contact gap for bipolar re-reference (SEEGPreprocessor).
+    compute_tf_centroids : bool
+        If True, compute TF centroids (wavelet + baseline).
+    centroid_source : str
+        'env' or 'tf'. If 'tf', use TF centroid time as event center.
+    min_channels : int
+        Minimum number of participating channels required per event window.
+    save_bandpass : bool
+        If True and save_env_cache is enabled, compute bandpass signal for visualization.
     centroid_power : float
         Power for envelope centroid (default 2.0).
     tf_n_freqs : int
@@ -2643,6 +2748,17 @@ def compute_and_save_group_analysis(
     if n_ch == 0:
         raise ValueError(f"No channels ({n_ch}) to analyze.")
 
+    # Step 5.5: Filter windows by minimum participating channels
+    if int(min_channels) > 1:
+        t_step = time.time()
+        windows = filter_windows_by_min_channels(windows, dets, min_channels=int(min_channels))
+        event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
+        logger.info(
+            "step=min_channels_filter elapsed_sec=%.3f kept_windows=%d",
+            float(time.time() - t_step),
+            int(len(windows)),
+        )
+
     # Step 6: Detect seizure onsets (subject-level) + ictal mask
     t_step = time.time()
     seizure = detect_seizure_onsets_from_data(
@@ -2695,25 +2811,21 @@ def compute_and_save_group_analysis(
     if n_events == 0:
         raise ValueError("No events to analyze after filtering.")
 
-    # Step 7: Compute envelope (bandpass + Hilbert)
+    centroid_source = str(centroid_source).lower().strip()
+    if centroid_source not in ("env", "tf"):
+        raise ValueError("centroid_source must be 'env' or 'tf'.")
+    compute_tf_centroids_flag = bool(compute_tf_centroids)
+    if centroid_source == "tf":
+        compute_tf_centroids_flag = True
+    compute_tf_centroids_fn = globals().get("compute_tf_centroids")
+
+    # Step 7: Compute envelope (Hilbert)
     t_step = time.time()
     env = np.zeros((n_ch, data.shape[1]), dtype=np.float32)
-    x_band = np.zeros_like(data, dtype=np.float32)
 
     for ci in range(n_ch):
         env[ci] = _maybe_gpu_envelope(data[ci], sfreq, freq_band, use_gpu=use_gpu).astype(np.float32)
 
-    # Bandpass for TF
-    try:
-        from scipy.signal import butter, sosfiltfilt
-        nyq = sfreq / 2.0
-        lo, hi = freq_band
-        hi2 = hi if hi < nyq else max(nyq - 1.0, lo + 1.0)
-        sos = butter(4, [lo / nyq, hi2 / nyq], btype="bandpass", output="sos")
-        for ci in range(n_ch):
-            x_band[ci] = sosfiltfilt(sos, data[ci]).astype(np.float32)
-    except Exception:
-        x_band = data.astype(np.float32)
     logger.info("step=envelope elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 8: Compute centroids
@@ -2735,70 +2847,97 @@ def compute_and_save_group_analysis(
     lag_raw, lag_rank = lag_rank_from_centroids(centroids, events_bool, align="first_centroid")
     logger.info("step=lag_rank elapsed_sec=%.3f", float(time.time() - t_step))
 
-    # Step 10: Build baseline pool
-    t_step = time.time()
-    pool_starts, pool_indices, pool_params = compute_baseline_pool_indices(
-        data=data,
-        env=env,
-        sfreq=sfreq,
-        detections=dets,
-        ictal_mask=ictal_mask,
-        window_sec=float(baseline_window_sec),
-        step_sec=float(baseline_step_sec),
-        line_length_q=float(baseline_line_length_q),
-        ripple_env_q=float(baseline_ripple_env_q),
-    )
-    logger.info(
-        "step=baseline_pool elapsed_sec=%.3f pool_windows=%d",
-        float(time.time() - t_step),
-        int(pool_starts.shape[0]),
-    )
+    pool_starts = None
+    pool_indices = None
+    pool_params = None
+    freqs_hz = None
+    n_cycles_vec = None
+    tf_time = None
+    tf_freq = None
 
-    # Step 11: Wavelet params (shared across analysis + visualization)
-    freqs_hz = bqk_utils.get_wavelet_freqs(freq_band[0], freq_band[1], int(tf_n_freqs), scale=tf_freq_scale)
-    n_cycles_mode = str(tf_n_cycles_mode).lower().strip()
-    if n_cycles_mode not in ("fixed", "linear", "f_over_2"):
-        raise ValueError("tf_n_cycles_mode must be 'fixed', 'linear', or 'f_over_2'.")
-    if n_cycles_mode == "fixed":
-        n_cycles_vec = np.full(freqs_hz.shape[0], float(tf_n_cycles), dtype=np.float64)
-    elif n_cycles_mode == "linear":
-        cmin = float(tf_n_cycles_min)
-        cmax = float(tf_n_cycles_max)
-        if cmin <= 0 or cmax <= 0 or cmax < cmin:
-            raise ValueError("tf_n_cycles_min/max must be >0 and max>=min.")
-        n_cycles_vec = np.linspace(cmin, cmax, freqs_hz.shape[0]).astype(np.float64)
-    else:
-        n_cycles_vec = (freqs_hz / 2.0).astype(np.float64)
+    if compute_tf_centroids_flag:
+        # Step 10: Build baseline pool
+        t_step = time.time()
+        pool_starts, pool_indices, pool_params = compute_baseline_pool_indices(
+            data=data,
+            env=env,
+            sfreq=sfreq,
+            detections=dets,
+            ictal_mask=ictal_mask,
+            window_sec=float(baseline_window_sec),
+            step_sec=float(baseline_step_sec),
+            line_length_q=float(baseline_line_length_q),
+            ripple_env_q=float(baseline_ripple_env_q),
+        )
+        logger.info(
+            "step=baseline_pool elapsed_sec=%.3f pool_windows=%d",
+            float(time.time() - t_step),
+            int(pool_starts.shape[0]),
+        )
 
-    # Step 12: Precompute baseline spectra (in-memory)
-    t_step = time.time()
-    baseline_pool_spectra = compute_baseline_pool_spectra(
-        data=data,
-        sfreq=sfreq,
-        pool_indices=pool_indices,
-        window_sec=float(baseline_window_sec),
-        freqs_hz=freqs_hz,
-        n_cycles_vec=n_cycles_vec,
-    )
-    logger.info("step=baseline_spectra elapsed_sec=%.3f", float(time.time() - t_step))
+        # Step 11: Wavelet params
+        freqs_hz = bqk_utils.get_wavelet_freqs(freq_band[0], freq_band[1], int(tf_n_freqs), scale=tf_freq_scale)
+        n_cycles_mode = str(tf_n_cycles_mode).lower().strip()
+        if n_cycles_mode not in ("fixed", "linear", "f_over_2"):
+            raise ValueError("tf_n_cycles_mode must be 'fixed', 'linear', or 'f_over_2'.")
+        if n_cycles_mode == "fixed":
+            n_cycles_vec = np.full(freqs_hz.shape[0], float(tf_n_cycles), dtype=np.float64)
+        elif n_cycles_mode == "linear":
+            cmin = float(tf_n_cycles_min)
+            cmax = float(tf_n_cycles_max)
+            if cmin <= 0 or cmax <= 0 or cmax < cmin:
+                raise ValueError("tf_n_cycles_min/max must be >0 and max>=min.")
+            n_cycles_vec = np.linspace(cmin, cmax, freqs_hz.shape[0]).astype(np.float64)
+        else:
+            n_cycles_vec = (freqs_hz / 2.0).astype(np.float64)
 
-    # Step 13: Compute TF centroids (wavelet + dynamic baseline)
+        # Step 12: Precompute baseline spectra (in-memory)
+        t_step = time.time()
+        baseline_pool_spectra = compute_baseline_pool_spectra(
+            data=data,
+            sfreq=sfreq,
+            pool_indices=pool_indices,
+            window_sec=float(baseline_window_sec),
+            freqs_hz=freqs_hz,
+            n_cycles_vec=n_cycles_vec,
+        )
+        logger.info("step=baseline_spectra elapsed_sec=%.3f", float(time.time() - t_step))
+
+        # Step 13: Compute TF centroids (wavelet + dynamic baseline)
+        t_step = time.time()
+        if not callable(compute_tf_centroids_fn):
+            raise RuntimeError("compute_tf_centroids function is not available.")
+        tf_time, tf_freq = compute_tf_centroids_fn(
+            data=data,
+            sfreq=sfreq,
+            event_windows=event_windows,
+            events_bool=events_bool,
+            freqs_hz=freqs_hz,
+            n_cycles_vec=n_cycles_vec,
+            baseline_pool_starts=pool_starts,
+            baseline_pool_indices=pool_indices,
+            baseline_pool_spectra=baseline_pool_spectra,
+            baseline_n_select=int(baseline_n_select),
+            baseline_min_distance_sec=float(baseline_min_distance_sec),
+            baseline_window_sec=float(baseline_window_sec),
+        )
+        logger.info("step=tf_centroid elapsed_sec=%.3f", float(time.time() - t_step))
+
+    if centroid_source == "tf":
+        if tf_time is None:
+            raise ValueError("centroid_source='tf' requires compute_tf_centroids=True.")
+        centroids = np.asarray(tf_time, dtype=np.float64)
+        lag_raw, lag_rank = lag_rank_from_centroids(centroids, events_bool, align="first_centroid")
+
+    # Step 13.5: Co-activation matrices
     t_step = time.time()
-    tf_time, tf_freq = compute_tf_centroids(
-        data=data,
-        sfreq=sfreq,
-        event_windows=event_windows,
+    coact = compute_coactivation_matrices(
+        centroid_time=centroids,
+        lag_rank=lag_rank,
         events_bool=events_bool,
-        freqs_hz=freqs_hz,
-        n_cycles_vec=n_cycles_vec,
-        baseline_pool_starts=pool_starts,
-        baseline_pool_indices=pool_indices,
-        baseline_pool_spectra=baseline_pool_spectra,
-        baseline_n_select=int(baseline_n_select),
-        baseline_min_distance_sec=float(baseline_min_distance_sec),
-        baseline_window_sec=float(baseline_window_sec),
+        event_windows=event_windows,
     )
-    logger.info("step=tf_centroid elapsed_sec=%.3f", float(time.time() - t_step))
+    logger.info("step=coactivation elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 14: Save results
     t_step = time.time()
@@ -2822,21 +2961,38 @@ def compute_and_save_group_analysis(
         baseline_params=pool_params,
         tf_freqs_hz=freqs_hz,
         tf_n_cycles_vec=n_cycles_vec,
-        tf_n_cycles_mode=np.array([str(tf_n_cycles_mode)], dtype=object),
-        tf_freq_scale=np.array([str(tf_freq_scale)], dtype=object),
-        tf_baseline_n_select=np.array([int(baseline_n_select)], dtype=np.int64),
-        tf_baseline_min_distance_sec=np.array([float(baseline_min_distance_sec)], dtype=np.float64),
+        tf_n_cycles_mode=np.array([str(tf_n_cycles_mode)], dtype=object) if freqs_hz is not None else None,
+        tf_freq_scale=np.array([str(tf_freq_scale)], dtype=object) if freqs_hz is not None else None,
+        tf_baseline_n_select=np.array([int(baseline_n_select)], dtype=np.int64) if freqs_hz is not None else None,
+        tf_baseline_min_distance_sec=np.array([float(baseline_min_distance_sec)], dtype=np.float64) if freqs_hz is not None else None,
+        coact_event_count=coact["coact_event_count"],
+        coact_event_ratio=coact["coact_event_ratio"],
+        coact_time_ratio=coact["coact_time_ratio"],
+        coact_rank_ratio=coact["coact_rank_ratio"],
     )
     out_paths["group_analysis_path"] = group_path
 
     if save_env_cache:
+        x_band = None
+        if bool(save_bandpass):
+            try:
+                from scipy.signal import butter, sosfiltfilt
+                nyq = sfreq / 2.0
+                lo, hi = freq_band
+                hi2 = hi if hi < nyq else max(nyq - 1.0, lo + 1.0)
+                sos = butter(4, [lo / nyq, hi2 / nyq], btype="bandpass", output="sos")
+                x_band = np.zeros_like(data, dtype=np.float32)
+                for ci in range(n_ch):
+                    x_band[ci] = sosfiltfilt(sos, data[ci]).astype(np.float32)
+            except Exception:
+                x_band = None
         temp_dir = Path(output_dir) / "temp"
         temp_dir.mkdir(parents=True, exist_ok=True)
         env_path = str(temp_dir / f"{output_prefix}_envCache_{band}_{reference}.npz")
         np.savez_compressed(
             env_path,
             env=env,
-            x_band=x_band,
+            x_band=x_band if x_band is not None else np.zeros((0, 0), dtype=np.float32),
             sfreq=np.array([sfreq], dtype=np.float64),
             ch_names=np.array(names, dtype=object),
             band=np.array([band], dtype=object),
@@ -2844,7 +3000,7 @@ def compute_and_save_group_analysis(
             crop_seconds=np.array([crop_seconds if crop_seconds else data.shape[1] / sfreq], dtype=np.float64),
             start_sec=np.array([0.0], dtype=np.float64),
             alias_bipolar_to_left=np.array([alias_bipolar_to_left], dtype=bool),
-            has_x_band=np.array([True], dtype=bool),
+            has_x_band=np.array([x_band is not None], dtype=bool),
         )
         out_paths["env_cache_path"] = env_path
 

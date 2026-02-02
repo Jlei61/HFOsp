@@ -1,0 +1,85 @@
+# === Data root / subject selection ===
+# Controls input dataset location and target subject/record.
+data_root: /mnt/yuquan_data/yuquan_24h_edf  # Dataset root (contains subject folders)
+subject: chengshuai  # Subject folder name
+record: FC10477Q  # EDF stem (without .edf)
+output_dir: /mnt/yuquan_data/yuquan_24h_edf/chengshuai/temp  # Output directory (null -> subject dir)
+output_prefix: null  # Output file prefix (null -> record stem)
+
+# === Input discovery / reuse policy ===
+# Controls how to reuse existing packedTimes and GPU detections.
+paths:
+  packed_times_mode: auto  # Options: auto | existing | build | run
+  # auto: use existing if found; existing: must exist; build/run: ignore existing
+  gpu_detections_mode: auto  # Options: auto | existing | build | run
+  # auto: use existing if found; existing: must exist; build/run: ignore existing
+
+# === Core channel selection ===
+# Defines which channels participate in group analysis and lag/rank.
+core_channels:
+  source: hist_meanX  # Options: hist_meanX | manual | none
+  manual_list: []  # Only used when source=manual
+
+# === Preprocess + window construction ===
+# High-level analysis settings applied before group aggregation.
+analysis:
+  band: ripple  # Options: ripple | fast_ripple
+  reference: bipolar  # Options: bipolar | car | none
+  alias_bipolar_to_left: true  # For bipolar names like A1-A2 -> A1
+  bipolar_gap: 2  # Max allowed contact gap in bipolar re-reference
+  crop_seconds: 500  # Crop length (seconds); null -> full recording
+  use_gpu_envelope: true  # Use GPU for envelope if available
+  save_env_cache: true  # Save envCache npz for visualization reuse
+  window_sec: 0.5  # Window length if packedTimes is missing
+  force_rerun: false  # Ignore existing packedTimes/gpu results
+  interictal_only: true  # Drop windows overlapping ictal_mask
+
+# === HFO detection (per-channel) ===
+# Settings for detector used when GPU detections are missing.
+hfo_detection:
+  config:
+    band: ripple  # Options: ripple | fast_ripple (must match analysis.band)
+    bandpass: null  # Optional custom bandpass (low, high)
+    subband_width: 20.0  # Subband width for filterbank envelope
+    rel_thresh: 2.0  # Relative threshold multiplier
+    abs_thresh: 2.0  # Absolute threshold multiplier
+    min_gap_ms: 20.0  # Min gap to merge events (ms)
+    min_last_ms: 40.0  # Min event duration (ms)
+    chunk_sec: 50.0  # Chunk length for detection; null -> full
+    chunk_overlap_sec: 2.0  # Overlap per chunk (s)
+    n_jobs: -1  # Parallel jobs (-1 -> all cores)
+    verbose: 1  # Detector verbosity
+
+# === Group event analysis ===
+# Builds group events, computes centroids and lag/rank, optional TF.
+group_analysis:
+  core:
+    centroid_power: 2.0  # Envelope centroid weighting power
+    centroid_source: env  # Options: env | tf
+    min_channels: 6  # Min participating channels per group event window
+  tf:
+    compute_tf_centroids: true  # Enable TF centroid computation
+    tf_n_freqs: 180  # Number of wavelet frequencies
+    tf_n_cycles: 4.0  # Fixed cycles (used when tf_n_cycles_mode=fixed)
+    tf_n_cycles_mode: linear  # Options: fixed | linear | f_over_2
+    tf_n_cycles_min: 3.0  # Min cycles (linear mode)
+    tf_n_cycles_max: 10.0  # Max cycles (linear mode)
+    tf_freq_scale: log  # Options: log | linear
+    baseline_window_sec: 2.0  # Baseline window length
+    baseline_step_sec: 1.0  # Baseline window step
+    baseline_n_select: 10  # Baseline windows to select per event
+    baseline_min_distance_sec: 2.0  # Min distance from event time
+    baseline_line_length_q: 0.9  # Reject windows with high line length
+    baseline_ripple_env_q: 0.8  # Reject windows with high ripple envelope
+  seizure:
+    seizure_ll_k: 6.0  # Line-length multiplier for ictal detection
+    seizure_rms_k: 6.0  # RMS multiplier for ictal detection
+    seizure_min_duration_sec: 5.0  # Min ictal duration
+  visualization:
+    save_bandpass: true  # Save x_band in envCache (for Fig1)
+
+# === Output naming ===
+# Suffixes for derived files saved by the pipeline.
+outputs:
+  packed_times_suffix: _packedTimes_pipeline.npy  # Output packedTimes file
+  lagpat_suffix: _lagPat_pipeline.npz  # Output lagPat file

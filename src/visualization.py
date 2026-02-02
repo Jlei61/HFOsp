@@ -1600,6 +1600,16 @@ def plot_paper_fig2_normalized_spectrogram(
     centroid_edge_color: str = "black",
     path_line_width: float = 1.2,
     path_line_alpha: float = 0.85,
+    tf_n_freqs: int = 180,
+    tf_n_cycles: float = 4.0,
+    tf_n_cycles_mode: str = "linear",
+    tf_n_cycles_min: float = 3.0,
+    tf_n_cycles_max: float = 10.0,
+    tf_freq_scale: str = "log",
+    baseline_n_select: int = 10,
+    baseline_min_distance_sec: float = 2.0,
+    baseline_window_sec: float = 2.0,
+    power_log1p: bool = True,
     show_colorbar: bool = True,
     cmap: str = "Blues",
     figsize: Tuple[float, float] = (16, 10),
@@ -1640,6 +1650,7 @@ def plot_paper_fig2_normalized_spectrogram(
     """
     from scipy.signal import stft
     from .group_event_analysis import load_envelope_cache, load_group_analysis_results
+    from .utils import bqk_utils
 
     meta = load_envelope_cache(cache_npz_path)
     x_band = meta.get("x_band", None)
@@ -1969,9 +1980,15 @@ def plot_lag_heatmaps(
     lag_ms = np.asarray(lag_ms, dtype=np.float64)
     rank = np.asarray(rank, dtype=np.float64)
 
-    def _imshow(mat, title, cmap, vmin=None, vmax=None):
+    def _imshow(mat, title, cmap, vmin=None, vmax=None, bad_color=None):
         fig, ax = plt.subplots(figsize=figsize)
-        im = ax.imshow(mat, aspect="auto", interpolation="nearest", cmap=cmap, vmin=vmin, vmax=vmax)
+        if isinstance(cmap, str):
+            cmap_obj = plt.get_cmap(cmap).copy()
+        else:
+            cmap_obj = cmap
+        if bad_color is not None and hasattr(cmap_obj, "set_bad"):
+            cmap_obj.set_bad(bad_color)
+        im = ax.imshow(mat, aspect="auto", interpolation="nearest", cmap=cmap_obj, vmin=vmin, vmax=vmax)
         ax.set_title(title, fontweight="bold")
         ax.set_ylabel("Channels")
         ax.set_xlabel("Event id")
@@ -1995,7 +2012,19 @@ def plot_lag_heatmaps(
 
     r = rank.copy()
     r[~np.isfinite(r)] = np.nan
-    fig2 = _imshow(r, "Centroid order (rank; 0=earliest)", cmap_rank)
+    r[r < 0] = np.nan
+    if np.isfinite(r).any():
+        vmax_r = int(np.nanmax(r))
+    else:
+        vmax_r = None
+    fig2 = _imshow(
+        r,
+        "Centroid order (rank; 0=earliest)",
+        cmap_rank,
+        vmin=0,
+        vmax=vmax_r,
+        bad_color="#d9d9d9",
+    )
 
     l = lag_ms.copy()
     l[~np.isfinite(l)] = np.nan
@@ -2108,6 +2137,95 @@ def plot_lag_heatmaps_from_group_analysis(
         cmap_rank=cmap_rank,
         figsize=figsize,
     )
+
+
+def plot_coactivation_heatmap_from_group_analysis(
+    *,
+    group_analysis_npz: str,
+    metric: str = "time_ratio",
+    channel_names: Optional[List[str]] = None,
+    cmap: str = "mako",
+    figsize: Tuple[float, float] = (8, 7),
+    show_values: bool = False,
+) -> plt.Figure:
+    """
+    Plot channel×channel co-activation heatmap from *_groupAnalysis.npz.
+
+    Parameters
+    ----------
+    group_analysis_npz : str
+        Path to *_groupAnalysis.npz (contains co-activation matrices).
+    metric : str
+        'time_ratio' (absolute centroid time alignment) or
+        'rank_ratio' (relative centroid rank alignment) or
+        'event_ratio' (co-active event ratio).
+    channel_names : list of str, optional
+        Subset of channels to plot. If None, use all.
+    cmap : str
+        Seaborn colormap.
+    figsize : tuple
+        Figure size.
+    show_values : bool
+        Whether to annotate each cell with its value.
+    """
+    from .group_event_analysis import load_group_analysis_results
+    import seaborn as sns
+
+    ga = load_group_analysis_results(group_analysis_npz)
+
+    metric = str(metric).lower().strip()
+    if metric == "time_ratio":
+        mat = ga.get("coact_time_ratio")
+        title = "Co-activation (absolute time ratio)"
+        vmin, vmax = 0.0, 1.0
+    elif metric == "rank_ratio":
+        mat = ga.get("coact_rank_ratio")
+        title = "Co-activation (centroid rank ratio)"
+        vmin, vmax = 0.0, 1.0
+    elif metric == "event_ratio":
+        mat = ga.get("coact_event_ratio")
+        title = "Co-activation (event ratio)"
+        vmin, vmax = 0.0, 1.0
+    else:
+        raise ValueError("metric must be 'time_ratio', 'rank_ratio', or 'event_ratio'.")
+
+    if mat is None:
+        raise ValueError("Co-activation matrix not found in groupAnalysis results.")
+
+    all_names = [str(x) for x in ga["ch_names"]]
+    if channel_names is None:
+        channel_names = all_names
+        idx = list(range(len(all_names)))
+    else:
+        name_to_idx = {n: i for i, n in enumerate(all_names)}
+        idx = [name_to_idx[n] for n in channel_names if n in name_to_idx]
+        channel_names = [n for n in channel_names if n in name_to_idx]
+
+    if len(idx) == 0:
+        raise ValueError("No matching channels found for co-activation heatmap.")
+
+    mat = np.asarray(mat, dtype=np.float64)
+    sub = mat[np.ix_(idx, idx)]
+
+    fig, ax = plt.subplots(figsize=figsize)
+    sns.heatmap(
+        sub,
+        ax=ax,
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        square=True,
+        annot=bool(show_values),
+        fmt=".2f",
+        cbar_kws={"label": "Co-activation strength"},
+    )
+    ax.set_title(title, fontweight="bold")
+    ax.set_xlabel("Channel")
+    ax.set_ylabel("Channel")
+    ax.set_xticklabels(channel_names, rotation=90, fontsize=7)
+    ax.set_yticklabels(channel_names, rotation=0, fontsize=7)
+    plt.tight_layout()
+    return fig
 
 
 def plot_lag_statistics(
