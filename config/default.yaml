@@ -27,6 +27,7 @@ analysis:
   reference: bipolar  # Options: bipolar | car | none
   alias_bipolar_to_left: true  # For bipolar names like A1-A2 -> A1
   bipolar_gap: 2  # Max allowed contact gap in bipolar re-reference
+  resample_sfreq: auto  # Options: auto | none | number (Hz)
   crop_seconds: 500  # Crop length (seconds); null -> full recording
   use_gpu_envelope: true  # Use GPU for envelope if available
   save_env_cache: true  # Save envCache npz for visualization reuse
@@ -57,6 +58,9 @@ group_analysis:
     centroid_power: 2.0  # Envelope centroid weighting power
     centroid_source: env  # Options: env | tf
     min_channels: 6  # Min participating channels per group event window
+    coact_all_channels: true  # Compute coactivation using all channels
+    coact_min_event_ratio: 0.0  # Min coactivation ratio to keep pair
+    coact_time_lag_ms: 50.0  # 0 if lag >= this, 1 if no lag
   tf:
     compute_tf_centroids: true  # Enable TF centroid computation
     tf_n_freqs: 180  # Number of wavelet frequencies

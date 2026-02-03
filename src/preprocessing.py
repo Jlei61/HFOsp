@@ -674,7 +674,7 @@ class SEEGPreprocessor:
     """
     
     def __init__(self,
-                 target_sfreq: Optional[float] = None,
+                 target_sfreq: Optional[Union[float, str]] = None,
                  target_band: str = 'ripple',
                  reference: str = 'auto',
                  bipolar_gap: int = 2,
@@ -690,7 +690,8 @@ class SEEGPreprocessor:
                  fif_cache_dir: Optional[Union[str, Path]] = None):
         """
         Args:
-            target_sfreq: Target sampling rate. If None, auto-select based on target_band:
+            target_sfreq: Target sampling rate (Hz), or 'auto'/'none'.
+                          If None or 'auto', auto-select based on target_band:
                           - 'ripple': 1000 Hz
                           - 'fast_ripple': 2000 Hz (or keep original if >= 2000)
             target_band: 'ripple' (80-250Hz) or 'fast_ripple' (250-500Hz)
@@ -730,17 +731,29 @@ class SEEGPreprocessor:
         else:
             self.filter_backend: FilterBackend = CpuFilterBackend()
         
+        self._skip_resample = False
+        if isinstance(target_sfreq, str):
+            ts = target_sfreq.strip().lower()
+            if ts == "none":
+                self._skip_resample = True
+                self.target_sfreq = None
+            elif ts == "auto":
+                target_sfreq = None
+            else:
+                target_sfreq = float(target_sfreq)
+
         # Auto-select sampling rate based on target band
-        if target_sfreq is None:
+        if target_sfreq is None and not self._skip_resample:
             if target_band == 'fast_ripple':
                 self.target_sfreq = 2000.0  # Keep high for FR
             else:
                 self.target_sfreq = 1000.0  # Safe for Ripple
-        else:
+        elif not self._skip_resample:
             self.target_sfreq = float(target_sfreq)
-            
+
         # Validate Nyquist for target band
-        self._validate_nyquist()
+        if not self._skip_resample:
+            self._validate_nyquist()
         
         # Default notch frequencies (50Hz power line and harmonics)
         if notch_freqs is None:
@@ -895,6 +908,7 @@ class SEEGPreprocessor:
         logger.info("target_band=%s", str(self.target_band))
         logger.info("reference=%s", str(self.reference))
         logger.info("target_sfreq=%s", str(self.target_sfreq))
+        logger.info("skip_resample=%s", str(self._skip_resample))
         logger.info("crop_seconds=%s", str(self.crop_seconds))
         logger.info("use_gpu=%s", str(self.use_gpu))
 
@@ -954,7 +968,9 @@ class SEEGPreprocessor:
         self._excluded_channels = sorted(set(excluded_channels))
         
         # Step 5: Resample if needed
-        if sfreq != self.target_sfreq:
+        if self._skip_resample:
+            print(f"Skipping resample (target_sfreq=none); keeping {sfreq} Hz")
+        elif sfreq != self.target_sfreq:
             print(f"Resampling: {sfreq} -> {self.target_sfreq} Hz...")
             data = self._resample(data, sfreq, self.target_sfreq)
             sfreq = self.target_sfreq

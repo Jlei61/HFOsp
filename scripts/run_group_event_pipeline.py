@@ -139,9 +139,19 @@ def main() -> None:
     force_rerun = bool(analysis_cfg.get("force_rerun", False))
     interictal_only = bool(analysis_cfg.get("interictal_only", False))
     bipolar_gap = int(analysis_cfg.get("bipolar_gap", 2))
+    resample_sfreq = analysis_cfg.get("resample_sfreq", None)
+    if isinstance(resample_sfreq, str):
+        rs = resample_sfreq.strip().lower()
+        if rs in ("auto", "none"):
+            resample_sfreq = rs
+        else:
+            resample_sfreq = float(resample_sfreq)
     compute_tf_centroids = bool(group_tf.get("compute_tf_centroids", False))
     centroid_source = str(group_core.get("centroid_source", "env"))
     min_channels = int(group_core.get("min_channels", 1))
+    coact_all_channels = bool(group_core.get("coact_all_channels", False))
+    coact_min_event_ratio = float(group_core.get("coact_min_event_ratio", 0.1))
+    coact_time_lag_ms = float(group_core.get("coact_time_lag_ms", 200.0))
     save_bandpass = bool(group_viz.get("save_bandpass", False))
 
     output_dir_cfg = cfg.get("output_dir", None)
@@ -176,6 +186,7 @@ def main() -> None:
         crop_seconds=crop_seconds,
         use_gpu=use_gpu_envelope,
         save_env_cache=save_env_cache,
+        target_sfreq=resample_sfreq,
         hfo_config=hfo_cfg.get("config", None),
         window_sec=window_sec,
         interictal_only=interictal_only,
@@ -183,6 +194,9 @@ def main() -> None:
         compute_tf_centroids=compute_tf_centroids,
         centroid_source=centroid_source,
         min_channels=min_channels,
+        coact_all_channels=coact_all_channels,
+        coact_min_event_ratio=coact_min_event_ratio,
+        coact_time_lag_ms=coact_time_lag_ms,
         save_bandpass=save_bandpass,
         centroid_power=group_core.get("centroid_power", 2.0),
         tf_n_freqs=group_tf.get("tf_n_freqs", 180),

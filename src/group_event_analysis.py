@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import time
-from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -2290,6 +2290,8 @@ def compute_coactivation_matrices(
     lag_rank: np.ndarray,
     events_bool: np.ndarray,
     event_windows: np.ndarray,
+    min_event_ratio: float = 0.10,
+    time_lag_ms: float = 200.0,
 ) -> Dict[str, np.ndarray]:
     """
     Compute channel×channel co-activation matrices from group event results.
@@ -2315,12 +2317,10 @@ def compute_coactivation_matrices(
     time_sum = np.zeros((n_ch, n_ch), dtype=np.float64)
     rank_sum = np.zeros((n_ch, n_ch), dtype=np.float64)
 
+    time_lag_sec = float(time_lag_ms) * 1e-3
     for ei in range(n_events):
         active_idx = np.where(events_bool[:, ei])[0]
         if active_idx.size < 2:
-            continue
-        wlen = float(event_windows[ei, 1] - event_windows[ei, 0])
-        if not np.isfinite(wlen) or wlen <= 0.0:
             continue
 
         t = centroid_time[active_idx, ei]
@@ -2329,7 +2329,7 @@ def compute_coactivation_matrices(
             continue
 
         diff_t = np.abs(t[:, None] - t[None, :])
-        score_t = 1.0 - np.minimum(diff_t / wlen, 1.0)
+        score_t = 1.0 - np.minimum(diff_t / time_lag_sec, 1.0)
 
         max_rank = float(active_idx.size - 1)
         diff_r = np.abs(r[:, None] - r[None, :])
@@ -2341,11 +2341,13 @@ def compute_coactivation_matrices(
                 time_sum[i_ch, j_ch] += score_t[i_pos, j_pos]
                 rank_sum[i_ch, j_ch] += score_r[i_pos, j_pos]
 
-    coact_ratio = coact_count.astype(np.float64) / float(n_events)
+    min_events = int(np.ceil(float(min_event_ratio) * float(n_events)))
+    coact_ratio = np.full((n_ch, n_ch), np.nan, dtype=np.float64)
     coact_time_ratio = np.full((n_ch, n_ch), np.nan, dtype=np.float64)
     coact_rank_ratio = np.full((n_ch, n_ch), np.nan, dtype=np.float64)
 
-    valid = coact_count > 0
+    valid = coact_count >= min_events
+    coact_ratio[valid] = coact_count[valid].astype(np.float64) / float(n_events)
     coact_time_ratio[valid] = time_sum[valid] / coact_count[valid]
     coact_rank_ratio[valid] = rank_sum[valid] / coact_count[valid]
 
@@ -2383,6 +2385,11 @@ def save_group_analysis_results(
     coact_event_ratio: Optional[np.ndarray] = None,
     coact_time_ratio: Optional[np.ndarray] = None,
     coact_rank_ratio: Optional[np.ndarray] = None,
+    coact_all_event_count: Optional[np.ndarray] = None,
+    coact_all_event_ratio: Optional[np.ndarray] = None,
+    coact_all_time_ratio: Optional[np.ndarray] = None,
+    coact_all_rank_ratio: Optional[np.ndarray] = None,
+    coact_all_ch_names: Optional[np.ndarray] = None,
 ) -> str:
     """
     Save group analysis results to a standardized npz file.
@@ -2468,6 +2475,16 @@ def save_group_analysis_results(
         data["coact_time_ratio"] = np.asarray(coact_time_ratio, dtype=np.float64)
     if coact_rank_ratio is not None:
         data["coact_rank_ratio"] = np.asarray(coact_rank_ratio, dtype=np.float64)
+    if coact_all_event_count is not None:
+        data["coact_all_event_count"] = np.asarray(coact_all_event_count, dtype=np.int64)
+    if coact_all_event_ratio is not None:
+        data["coact_all_event_ratio"] = np.asarray(coact_all_event_ratio, dtype=np.float64)
+    if coact_all_time_ratio is not None:
+        data["coact_all_time_ratio"] = np.asarray(coact_all_time_ratio, dtype=np.float64)
+    if coact_all_rank_ratio is not None:
+        data["coact_all_rank_ratio"] = np.asarray(coact_all_rank_ratio, dtype=np.float64)
+    if coact_all_ch_names is not None:
+        data["coact_all_ch_names"] = np.asarray(coact_all_ch_names, dtype=object)
 
     np.savez_compressed(npz_path, **data)
     return npz_path
@@ -2507,6 +2524,16 @@ def load_group_analysis_results(npz_path: str) -> Dict:
         out["coact_time_ratio"] = np.asarray(d["coact_time_ratio"])
     if "coact_rank_ratio" in d:
         out["coact_rank_ratio"] = np.asarray(d["coact_rank_ratio"])
+    if "coact_all_event_count" in d:
+        out["coact_all_event_count"] = np.asarray(d["coact_all_event_count"])
+    if "coact_all_event_ratio" in d:
+        out["coact_all_event_ratio"] = np.asarray(d["coact_all_event_ratio"])
+    if "coact_all_time_ratio" in d:
+        out["coact_all_time_ratio"] = np.asarray(d["coact_all_time_ratio"])
+    if "coact_all_rank_ratio" in d:
+        out["coact_all_rank_ratio"] = np.asarray(d["coact_all_rank_ratio"])
+    if "coact_all_ch_names" in d:
+        out["coact_all_ch_names"] = np.asarray(d["coact_all_ch_names"])
 
     return out
 
@@ -2525,6 +2552,7 @@ def compute_and_save_group_analysis(
     crop_seconds: Optional[float] = None,
     use_gpu: bool = True,
     save_env_cache: bool = True,
+    target_sfreq: Optional[Union[float, str]] = None,
     hfo_config: Optional[Dict[str, Any]] = None,
     window_sec: Optional[float] = None,
     interictal_only: bool = False,
@@ -2532,6 +2560,9 @@ def compute_and_save_group_analysis(
     compute_tf_centroids: bool = False,
     centroid_source: str = "env",
     min_channels: int = 1,
+    coact_all_channels: bool = False,
+    coact_min_event_ratio: float = 0.10,
+    coact_time_lag_ms: float = 200.0,
     save_bandpass: bool = False,
     centroid_power: float = 2.0,
     tf_n_freqs: int = 180,
@@ -2590,6 +2621,8 @@ def compute_and_save_group_analysis(
         Use GPU for envelope computation.
     save_env_cache : bool
         If True, save envelope cache.
+    target_sfreq : float or str, optional
+        Target resampling rate (Hz), or 'auto'/'none'.
     hfo_config : dict, optional
         Optional HFODetectionConfig overrides (used only if gpu_npz_path is None).
     window_sec : float, optional
@@ -2604,6 +2637,12 @@ def compute_and_save_group_analysis(
         'env' or 'tf'. If 'tf', use TF centroid time as event center.
     min_channels : int
         Minimum number of participating channels required per event window.
+    coact_all_channels : bool
+        If True, compute coactivation matrices using all channels (not just core).
+    coact_min_event_ratio : float
+        Minimum coactivation ratio to keep a channel pair.
+    coact_time_lag_ms : float
+        Absolute time lag threshold (ms) for coactivation scoring.
     save_bandpass : bool
         If True and save_env_cache is enabled, compute bandpass signal for visualization.
     centroid_power : float
@@ -2657,6 +2696,7 @@ def compute_and_save_group_analysis(
     # Step 1: Preprocess
     t_step = time.time()
     pre = SEEGPreprocessor(
+        target_sfreq=target_sfreq,
         target_band="fast_ripple" if "fast" in b else "ripple",
         reference=reference,
         bipolar_gap=int(bipolar_gap),
@@ -2734,8 +2774,24 @@ def compute_and_save_group_analysis(
         event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
     logger.info("step=event_windows elapsed_sec=%.3f", float(time.time() - t_step))
 
+    data_full = data
+    names_full = names
+    dets_full = dets
+    env_full = None
+    coact_all = None
+
+    if bool(coact_all_channels):
+        t_step = time.time()
+        env_full = np.zeros((len(names_full), data_full.shape[1]), dtype=np.float32)
+        for ci in range(len(names_full)):
+            env_full[ci] = _maybe_gpu_envelope(
+                data_full[ci], sfreq, freq_band, use_gpu=use_gpu
+            ).astype(np.float32)
+        logger.info("step=envelope_all elapsed_sec=%.3f", float(time.time() - t_step))
+
     # Step 5: Filter to core channels if specified
     t_step = time.time()
+    keep_idx = None
     if core_channels is not None:
         core_set = set(str(x).upper() for x in core_channels)
         keep_idx = [i for i, n in enumerate(names) if n.upper() in core_set]
@@ -2743,6 +2799,13 @@ def compute_and_save_group_analysis(
         names = [names[i] for i in keep_idx]
         dets = {n: dets.get(n, np.zeros((0, 2))) for n in names}
     logger.info("step=core_channels elapsed_sec=%.3f", float(time.time() - t_step))
+
+    env = None
+    if env_full is not None:
+        if keep_idx is not None:
+            env = env_full[keep_idx]
+        else:
+            env = env_full
 
     n_ch = len(names)
     if n_ch == 0:
@@ -2811,6 +2874,29 @@ def compute_and_save_group_analysis(
     if n_events == 0:
         raise ValueError("No events to analyze after filtering.")
 
+    if bool(coact_all_channels) and env_full is not None:
+        t_step = time.time()
+        centroids_full, events_bool_full = compute_centroid_matrix_from_envelope_cache(
+            windows=windows,
+            detections=dets_full,
+            ch_names=names_full,
+            env=env_full,
+            sfreq=sfreq,
+            centroid_power=float(centroid_power),
+        )
+        lag_raw_full, lag_rank_full = lag_rank_from_centroids(
+            centroids_full, events_bool_full, align="first_centroid"
+        )
+        coact_all = compute_coactivation_matrices(
+            centroid_time=centroids_full,
+            lag_rank=lag_rank_full,
+            events_bool=events_bool_full,
+            event_windows=event_windows,
+            min_event_ratio=float(coact_min_event_ratio),
+            time_lag_ms=float(coact_time_lag_ms),
+        )
+        logger.info("step=coactivation_all elapsed_sec=%.3f", float(time.time() - t_step))
+
     centroid_source = str(centroid_source).lower().strip()
     if centroid_source not in ("env", "tf"):
         raise ValueError("centroid_source must be 'env' or 'tf'.")
@@ -2820,13 +2906,14 @@ def compute_and_save_group_analysis(
     compute_tf_centroids_fn = globals().get("compute_tf_centroids")
 
     # Step 7: Compute envelope (Hilbert)
-    t_step = time.time()
-    env = np.zeros((n_ch, data.shape[1]), dtype=np.float32)
-
-    for ci in range(n_ch):
-        env[ci] = _maybe_gpu_envelope(data[ci], sfreq, freq_band, use_gpu=use_gpu).astype(np.float32)
-
-    logger.info("step=envelope elapsed_sec=%.3f", float(time.time() - t_step))
+    if env is None:
+        t_step = time.time()
+        env = np.zeros((n_ch, data.shape[1]), dtype=np.float32)
+        for ci in range(n_ch):
+            env[ci] = _maybe_gpu_envelope(
+                data[ci], sfreq, freq_band, use_gpu=use_gpu
+            ).astype(np.float32)
+        logger.info("step=envelope elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 8: Compute centroids
     t_step = time.time()
@@ -2936,6 +3023,8 @@ def compute_and_save_group_analysis(
         lag_rank=lag_rank,
         events_bool=events_bool,
         event_windows=event_windows,
+        min_event_ratio=float(coact_min_event_ratio),
+        time_lag_ms=float(coact_time_lag_ms),
     )
     logger.info("step=coactivation elapsed_sec=%.3f", float(time.time() - t_step))
 
@@ -2969,6 +3058,11 @@ def compute_and_save_group_analysis(
         coact_event_ratio=coact["coact_event_ratio"],
         coact_time_ratio=coact["coact_time_ratio"],
         coact_rank_ratio=coact["coact_rank_ratio"],
+        coact_all_event_count=coact_all["coact_event_count"] if coact_all is not None else None,
+        coact_all_event_ratio=coact_all["coact_event_ratio"] if coact_all is not None else None,
+        coact_all_time_ratio=coact_all["coact_time_ratio"] if coact_all is not None else None,
+        coact_all_rank_ratio=coact_all["coact_rank_ratio"] if coact_all is not None else None,
+        coact_all_ch_names=np.asarray(names_full, dtype=object) if coact_all is not None else None,
     )
     out_paths["group_analysis_path"] = group_path
 

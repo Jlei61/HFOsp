@@ -1966,7 +1966,7 @@ def plot_lag_heatmaps(
     ch_names: List[str],
     event_ids: List[int],
     cmap_energy: str = "viridis",
-    cmap_lag: str = "RdYlBu_r",
+    cmap_lag: str = "viridis",
     cmap_rank: str = "magma",
     figsize: Tuple[float, float] = (14, 4),
 ) -> Tuple[plt.Figure, plt.Figure, plt.Figure]:
@@ -2008,7 +2008,7 @@ def plot_lag_heatmaps(
         vmax = np.nanpercentile(e, 99)
     else:
         vmax = None
-    fig1 = _imshow(e, "Event envelope energy (channels × events)", cmap_energy, vmin=0.0, vmax=vmax)
+    fig1 = _imshow(e, "Event envelope energy (normalized; channels × events)", cmap_energy, vmin=0.0, vmax=vmax)
 
     r = rank.copy()
     r[~np.isfinite(r)] = np.nan
@@ -2034,7 +2034,11 @@ def plot_lag_heatmaps(
         v = max(v, 1.0)
     else:
         v = None
-    fig3 = _imshow(l, "Lag (ms) aligned to first centroid", cmap_lag, vmin=-v if v is not None else None, vmax=v)
+    if v is not None and np.nanmin(l) >= 0:
+        vmin = 0.0
+    else:
+        vmin = -v if v is not None else None
+    fig3 = _imshow(l, "Lag (ms) aligned to first centroid", cmap_lag, vmin=vmin, vmax=v)
     return fig1, fig2, fig3
 
 
@@ -2124,6 +2128,15 @@ def plot_lag_heatmaps_from_group_analysis(
             if ci < len(ch_indices) and events_bool[ci, ei]:
                 env_seg = cache['env'][cache_ci, i0:i1].astype(np.float64)
                 energy[ci, ei] = float(np.sum(env_seg ** 2))
+
+    # Normalize energy per event (column-wise), keep NaNs for non-participants.
+    for ei in range(n_events):
+        col = energy[:, ei]
+        if not np.isfinite(col).any():
+            continue
+        total = float(np.nansum(col))
+        if total > 0:
+            energy[:, ei] = col / total
     
     # Plot
     return plot_lag_heatmaps(
@@ -2144,6 +2157,7 @@ def plot_coactivation_heatmap_from_group_analysis(
     group_analysis_npz: str,
     metric: str = "time_ratio",
     channel_names: Optional[List[str]] = None,
+    use_all_channels: bool = True,
     cmap: str = "mako",
     figsize: Tuple[float, float] = (8, 7),
     show_values: bool = False,
@@ -2174,16 +2188,20 @@ def plot_coactivation_heatmap_from_group_analysis(
     ga = load_group_analysis_results(group_analysis_npz)
 
     metric = str(metric).lower().strip()
+    use_all = bool(use_all_channels) and ("coact_all_time_ratio" in ga)
     if metric == "time_ratio":
-        mat = ga.get("coact_time_ratio")
+        key = "coact_all_time_ratio" if use_all else "coact_time_ratio"
+        mat = ga.get(key)
         title = "Co-activation (absolute time ratio)"
         vmin, vmax = 0.0, 1.0
     elif metric == "rank_ratio":
-        mat = ga.get("coact_rank_ratio")
+        key = "coact_all_rank_ratio" if use_all else "coact_rank_ratio"
+        mat = ga.get(key)
         title = "Co-activation (centroid rank ratio)"
         vmin, vmax = 0.0, 1.0
     elif metric == "event_ratio":
-        mat = ga.get("coact_event_ratio")
+        key = "coact_all_event_ratio" if use_all else "coact_event_ratio"
+        mat = ga.get(key)
         title = "Co-activation (event ratio)"
         vmin, vmax = 0.0, 1.0
     else:
@@ -2192,7 +2210,10 @@ def plot_coactivation_heatmap_from_group_analysis(
     if mat is None:
         raise ValueError("Co-activation matrix not found in groupAnalysis results.")
 
-    all_names = [str(x) for x in ga["ch_names"]]
+    if use_all and "coact_all_ch_names" in ga:
+        all_names = [str(x) for x in ga["coact_all_ch_names"]]
+    else:
+        all_names = [str(x) for x in ga["ch_names"]]
     if channel_names is None:
         channel_names = all_names
         idx = list(range(len(all_names)))
@@ -2206,6 +2227,14 @@ def plot_coactivation_heatmap_from_group_analysis(
 
     mat = np.asarray(mat, dtype=np.float64)
     sub = mat[np.ix_(idx, idx)]
+
+    # Drop channels whose row/col are entirely empty (no finite, non-zero values).
+    has_signal = np.any(np.isfinite(sub) & (sub > 0.0), axis=0) | np.any(
+        np.isfinite(sub) & (sub > 0.0), axis=1
+    )
+    if np.any(has_signal):
+        sub = sub[np.ix_(has_signal, has_signal)]
+        channel_names = [n for n, keep in zip(channel_names, has_signal) if keep]
 
     fig, ax = plt.subplots(figsize=figsize)
     sns.heatmap(
@@ -2222,6 +2251,9 @@ def plot_coactivation_heatmap_from_group_analysis(
     ax.set_title(title, fontweight="bold")
     ax.set_xlabel("Channel")
     ax.set_ylabel("Channel")
+    ticks = np.arange(len(channel_names)) + 0.5
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
     ax.set_xticklabels(channel_names, rotation=90, fontsize=7)
     ax.set_yticklabels(channel_names, rotation=0, fontsize=7)
     plt.tight_layout()
