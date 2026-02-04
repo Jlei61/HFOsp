@@ -473,16 +473,448 @@ config = HFODetectionConfig(
 
 ---
 
-### 模块4: src/network_analysis.py (待开发)
+### 模块4: src/network_analysis.py (开发中)
 
-| 功能 | 说明 |
-|------|------|
-| 4.1 容积传导剔除 | lag≈0+远距(>20mm)→剔除, 近距(<10mm)→保留 |
-| 4.2 加权有向图构建 | 边权重 = 频次 × 滞后一致性 |
-| 4.3 Interictal/Ictal分段 | 分别构建网络, 对比拓扑 |
-| 4.4 图论指标 | In/Out-Strength, Eccentricity, Betweenness, Clustering |
-| 4.5 传播速度验证 | 结合电极坐标, 验证生理范围 |
-| 4.6 Source-Sink验证 | SI指标, 状态翻转检验 |
+> **核心目标**：从 HFO 群体事件构建下一代癫痫网络，实现 SOZ 定位与传播路径预测。
+
+---
+
+#### 4.0 设计哲学与批判性前提
+
+**混合门控策略 (Hybrid Gating Strategy)**
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                      癫痫网络构建流水线                                  │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  [节点池]                                                               │
+│      │  ← 宽松准入（Rate + 条件概率 + 病理特征）                         │
+│      ▼                                                                 │
+│  ┌─────────────────────────────────────────────────────────────┐       │
+│  │  Co-activation Matrix (门控 Gatekeeper)                     │       │
+│  │  "只有关系够铁的节点，才配拥有连边"                            │       │
+│  │  → 剔除偶然随机重合，建立网络"骨架"                           │       │
+│  └──────────────────────────┬──────────────────────────────────┘       │
+│                             │                                          │
+│                             ▼                                          │
+│  ┌─────────────────────────────────────────────────────────────┐       │
+│  │  Lag Matrix (罗盘 Compass)                                  │       │
+│  │  "谁先谁后，决定谁是驱动者，谁是跟随者"                        │       │
+│  │  → 在骨架上赋予方向，注入网络"血流"                           │       │
+│  └──────────────────────────┬──────────────────────────────────┘       │
+│                             │                                          │
+│                             ▼                                          │
+│  ┌─────────────────────────────────────────────────────────────┐       │
+│  │  Physics Constraints (物理约束)                             │       │
+│  │  → 容积传导剔除 (<10mm)                                     │       │
+│  │  → 传播速度验证 (0.1-10 m/s 生理范围)                        │       │
+│  └──────────────────────────┬──────────────────────────────────┘       │
+│                             │                                          │
+│                             ▼                                          │
+│  [加权有向图 G(V, E, W)]  →  图论指标  →  SOZ/传播路径                  │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+**为什么不能二选一？**
+
+| 策略 | 单独使用的致命缺陷 |
+|------|-------------------|
+| 仅 Co-activation | 无方向信息，无法区分 Source 和 Sink |
+| 仅 Lag | 噪声敏感，偶然重合的通道对会产生随机方向 |
+| **混合** | Co-activation 降噪 → Lag 定向，互补 |
+
+---
+
+#### 4.1 现有资产盘点 (Asset Inventory)
+
+**✅ 已有数据（groupAnalysis.npz）**
+
+| 数据 | 形状 | 物理意义 | 网络用途 |
+|------|------|----------|---------|
+| `ch_names` | (n_ch,) | 核心通道名 | 节点标识 |
+| `coact_all_ch_names` | (n_all,) | **全通道名** | 扩大节点池 |
+| `coact_event_ratio` | (n_ch, n_ch) | 共激活概率 | **骨架构建** |
+| `coact_all_event_ratio` | (n_all, n_all) | **全通道共激活** | 扩大节点池 |
+| `lag_raw` | (n_ch, n_events) | 质心时间（相对窗口起点） | **方向计算** |
+| `events_bool` | (n_ch, n_events) | 通道参与mask | 事件过滤 |
+| `event_windows` | (n_events, 2) | 事件窗口 [start, end] | 时间分段 |
+
+**关键数据结构洞察**：
+
+```python
+# lag_raw 存储的是每通道相对于窗口起点的质心时间
+# 要获得通道对 (i, j) 在事件 k 中的时滞：
+lag_ij_k = lag_raw[i, k] - lag_raw[j, k]  # 负值 = i 领先 j
+
+# 这是紧凑存储：O(n_ch × n_events) vs O(n_ch² × n_events)
+# 运行时计算差值，空间换时间
+```
+
+**⚠️ 缺失数据（需要扩展）**
+
+| 数据 | 形状 | 来源 | 优先级 | 用途 |
+|------|------|------|--------|------|
+| `electrode_distance` | (n_all, n_all) | MNI坐标计算 | **P0 关键** | 容积传导剔除 |
+| `hfo_type_per_event` | (n_ch, n_events) | 检测器输出 | P1 高 | 病理加权 |
+| `tissue_label` | (n_all,) | FreeSurfer | P2 中 | 灰/白质过滤 |
+| `mni_coords` | (n_all, 3) | 配准结果 | P1 高 | 3D可视化 |
+
+---
+
+#### 4.2 节点筛选策略 (Node Selection) — 避免"8通道陷阱"
+
+**现状批判**：
+
+> 图论统计（小世界属性、Hub识别）在 $N=8$ 时统计效力极低，单点噪声可颠覆结论。
+
+**三层准入策略**：
+
+| 层级 | 规则 | 阈值建议 | 保留理由 |
+|------|------|----------|---------|
+| **频率准入** | HFO Rate > threshold | > 1次/分钟 | 基础活跃度 |
+| **条件概率准入** | $P(j \mid i) > 0.8$ 对任一核心节点 $i$ | 80% | "沉默的共犯"不能丢 |
+| **病理准入** | 包含 ≥1 次 Fast Ripple | - | 稀疏但高致痫性 |
+
+**伪代码**：
+
+```python
+def select_network_nodes(
+    rate_per_ch: np.ndarray,      # (n_all,) HFO rate (events/min)
+    coact_ratio: np.ndarray,      # (n_all, n_all) P(j|i)
+    has_fast_ripple: np.ndarray,  # (n_all,) bool
+    core_nodes: List[int],        # 已知高频节点索引
+    min_rate: float = 1.0,
+    conditional_prob_thresh: float = 0.8,
+) -> np.ndarray:
+    """
+    返回节点索引，目标 30-50 个节点。
+    """
+    n = len(rate_per_ch)
+    selected = np.zeros(n, dtype=bool)
+    
+    # 层1: 频率准入
+    selected |= (rate_per_ch > min_rate)
+    
+    # 层2: 条件概率准入 (沉默的共犯)
+    for core_i in core_nodes:
+        selected |= (coact_ratio[core_i, :] > conditional_prob_thresh)
+    
+    # 层3: 病理准入 (稀疏但高信噪比)
+    selected |= has_fast_ripple
+    
+    return np.where(selected)[0]
+```
+
+**⚠️ 不要做的事**：
+- ❌ 仅用白质标签剔除 — 灰质异位/脑室周围结节位于深部白质但是 HFO 高发区
+- ❌ 硬编码通道数 — 让数据决定，不是人为设定
+
+---
+
+#### 4.3 骨架构建 (Skeleton Construction) — 加权无向图
+
+**输入**：`coact_all_event_ratio` (n_all, n_all)
+
+**操作**：
+
+```python
+def build_skeleton(
+    coact_ratio: np.ndarray,
+    dist_matrix: Optional[np.ndarray] = None,
+    min_coact: float = 0.10,         # 共激活阈值
+    min_dist_mm: float = 10.0,       # 容积传导剔除距离
+) -> np.ndarray:
+    """
+    返回二值邻接矩阵 (骨架)。
+    """
+    n = coact_ratio.shape[0]
+    skeleton = coact_ratio > min_coact
+    
+    # 物理约束：剔除容积传导
+    if dist_matrix is not None:
+        close_mask = dist_matrix < min_dist_mm
+        skeleton[close_mask] = False
+    
+    # 对角线清零
+    np.fill_diagonal(skeleton, False)
+    
+    return skeleton.astype(np.float32)
+```
+
+**阈值选择建议**：
+- `min_coact = 0.10` (10%) — 宽松起点，后续可调
+- 或 Top 10% 边 — 保持网络稀疏性
+- **必须可配置**，不同患者病理差异大
+
+---
+
+#### 4.4 方向注入 (Direction Injection) — 骨架升级为有向图
+
+**核心改进：统计鲁棒性**
+
+> **批判**：直接用中位数 Lag 定向是危险的。多峰分布（直接通路 5ms + 间接通路 25ms）的中位数 15ms 在物理上没有意义。
+
+**鲁棒方向判定流程**：
+
+```python
+from scipy.stats import wilcoxon
+
+def inject_direction(
+    skeleton: np.ndarray,           # (n, n) 骨架
+    lag_raw: np.ndarray,            # (n, n_events) 质心时间
+    events_bool: np.ndarray,        # (n, n_events) 参与mask
+    min_events: int = 5,            # 最小样本量
+    lag_thresh_ms: float = 5.0,     # 零滞后阈值
+    consistency_thresh: float = 0.6, # 方向一致性阈值
+    p_value_thresh: float = 0.05,   # 显著性阈值
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    返回:
+        adj_directed: (n, n) 有向邻接矩阵，A[i,j] = i→j 的权重
+        edge_stats: dict 包含每条边的统计信息
+    """
+    n = skeleton.shape[0]
+    adj = np.zeros((n, n), dtype=np.float64)
+    
+    for i in range(n):
+        for j in range(i+1, n):
+            if not skeleton[i, j]:
+                continue
+            
+            # 提取共同事件的 lag
+            mask = events_bool[i] & events_bool[j]
+            if mask.sum() < min_events:
+                continue
+            
+            lags = lag_raw[i, mask] - lag_raw[j, mask]  # 负 = i 领先
+            
+            # === 统计检验 ===
+            
+            # 1. Wilcoxon 检验：Lag 是否显著异于 0？
+            try:
+                _, p_val = wilcoxon(lags)
+            except ValueError:  # 全零或样本太少
+                continue
+            
+            if p_val > p_value_thresh:
+                continue  # 零滞后同步，不定向
+            
+            # 2. 方向一致性检验
+            median_lag = np.median(lags)
+            if abs(median_lag) < lag_thresh_ms * 1e-3:
+                continue  # 太接近零，不定向
+            
+            direction = np.sign(median_lag)
+            consistency = np.mean(np.sign(lags) == direction)
+            
+            if consistency < consistency_thresh:
+                continue  # 方向太乱，视为湍流
+            
+            # 3. 赋予方向
+            if median_lag < 0:  # i 领先 j
+                adj[i, j] = consistency
+            else:              # j 领先 i
+                adj[j, i] = consistency
+    
+    return adj
+```
+
+**关键统计保护**：
+
+| 检验 | 目的 | 失败处理 |
+|------|------|---------|
+| Wilcoxon | Lag ≠ 0？ | 不定向（视为同步） |
+| 一致性 | 方向稳定？ | 不定向（视为湍流） |
+| 样本量 | n ≥ 5？ | 不建边（数据不足） |
+
+---
+
+#### 4.5 权重定义 (Weight Definition) — 病理加权升级
+
+**基础权重**：
+
+$$W_{ij} = \text{Coactivation}_{ij} \times \text{Consistency}_{ij}$$
+
+**病理升级（可选）**：
+
+$$W_{ij}^{pathology} = W_{ij} \times \left(1 + \alpha \cdot \frac{N_{FR}^{ij}}{N_{total}^{ij}}\right)$$
+
+其中：
+- $N_{FR}^{ij}$：通道对 (i,j) 共同事件中包含 Fast Ripple 的数量
+- $\alpha$：病理加权系数（建议 0.5-2.0）
+
+**设计理由**（参考 `SpikewHFO更重要.pdf`）：
+- 叠加 HFO 的 Spike 比单纯 Spike 更能定位 SOZ
+- Fast Ripple 比 Ripple 更具病理特异性
+- 给高病理性传播事件更高投票权
+
+---
+
+#### 4.6 图论指标计算 (Metric Calculation)
+
+**使用 `networkx` 库**：
+
+| 指标 | 公式 | 临床意义 |
+|------|------|---------|
+| **Net Outflow Index** | $\frac{OutDegree - InDegree}{OutDegree + InDegree}$ | **SOZ 定位**：值接近 +1 = Source |
+| **Outflow Volatility** | $\text{Var}(\text{NetOutflow}_t)$ | 真正 SOZ 往往发作前突然爆发 |
+| **Local Efficiency** | $E_{loc}(i) = \frac{1}{k_i(k_i-1)} \sum_{j,h \in N_i} \frac{1}{d_{jh}}$ | 致痫灶的紧密程度 |
+| **Shortest Path Tree** | 从 Source 出发的最短路径 | 传播路径预测 |
+
+```python
+import networkx as nx
+
+def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
+    """
+    计算核心图论指标。
+    """
+    G = nx.DiGraph()
+    n = adj.shape[0]
+    
+    for i in range(n):
+        for j in range(n):
+            if adj[i, j] > 0:
+                G.add_edge(ch_names[i], ch_names[j], weight=adj[i, j])
+    
+    metrics = {}
+    
+    # Net Outflow Index
+    for node in G.nodes():
+        out_deg = G.out_degree(node, weight='weight')
+        in_deg = G.in_degree(node, weight='weight')
+        total = out_deg + in_deg
+        metrics[f'{node}_outflow'] = (out_deg - in_deg) / total if total > 0 else 0
+    
+    # Local Efficiency (需要转无向图)
+    G_undirected = G.to_undirected()
+    metrics['local_efficiency'] = nx.local_efficiency(G_undirected)
+    
+    # Betweenness Centrality
+    metrics['betweenness'] = nx.betweenness_centrality(G, weight='weight')
+    
+    return metrics
+```
+
+---
+
+#### 4.7 关键陷阱与防护 (Critical Pitfalls)
+
+**陷阱1：容积传导的幽灵 (Volume Conduction)**
+
+| 现象 | 物理距离 <10mm，Lag ≈ 0，Co-activation 极高 |
+|------|-------------------------------------------|
+| 原因 | 电场直接传导，非神经元传播 |
+| 危害 | 网络被无意义短边主导 |
+| **防护** | 强制剔除 `dist_matrix < 10mm` 的边 |
+| **反向利用** | 保留局部连接强度作为 "Local Recruitment Score" |
+
+**陷阱2：采样偏差 (Sampling Bias)**
+
+| 现象 | SEEG 只能探测到插了电极的地方 |
+|------|------------------------------|
+| 危害 | 真正的源在未采样区，中继站被误判为源 |
+| **防护** | 结论必须谨慎：<br>"在被监测的网络中，节点 X 表现出源的特征" |
+
+**陷阱3：中位数陷阱 (The Median Trap)**
+
+| 现象 | Lag 分布多峰（直接通路 5ms + 间接通路 25ms） |
+|------|-------------------------------------------|
+| 危害 | 中位数 15ms 在物理上不存在 |
+| **防护** | 单峰性检验 (Hartigan's dip test) 或方差检查<br>高方差边标记为 "Unstable Connection"，降低权重 |
+
+**陷阱4：静态网络的局限**
+
+| 现象 | 24小时平均图抹杀时间维度 |
+|------|-------------------------|
+| 危害 | 间歇性喷发的 SOZ 被持续活跃的中继站掩盖 |
+| **进阶方向** | 动态切片：每 5 分钟或每 100 事件计算一次<br>比较 Pre-ictal vs Interictal 网络拓扑 |
+
+---
+
+#### 4.8 分步实施计划 (Implementation Roadmap)
+
+| Step | 任务 | 输入 | 输出 | 状态 |
+|------|------|------|------|------|
+| **0** | 电极坐标获取 | MNI配准结果 | `mni_coords.npy`, `dist_matrix.npy` | ⬜ 待定 |
+| **1** | 节点筛选 | `coact_all_*`, rate | `selected_nodes` | ⬜ 待开发 |
+| **2** | 骨架构建 | `coact_ratio`, `dist_matrix` | `skeleton` (无向) | ⬜ 待开发 |
+| **3** | 方向注入 | `skeleton`, `lag_raw` | `adj_directed` | ⬜ 待开发 |
+| **4** | 权重计算 | `adj`, `coact`, `consistency` | `adj_weighted` | ⬜ 待开发 |
+| **5** | 图论指标 | `adj_weighted` | `metrics_dict` | ⬜ 待开发 |
+| **6** | 可视化 | `metrics`, `mni_coords` | 3D 脑图 | ⬜ 待开发 |
+
+**核心 API 设计**：
+
+```python
+# src/network_analysis.py
+
+def build_hfo_network(
+    group_analysis_npz: str,
+    dist_matrix: Optional[np.ndarray] = None,
+    # 节点筛选
+    min_rate: float = 1.0,
+    conditional_prob_thresh: float = 0.8,
+    # 骨架构建
+    min_coact: float = 0.10,
+    min_dist_mm: float = 10.0,
+    # 方向判定
+    min_events: int = 5,
+    lag_thresh_ms: float = 5.0,
+    consistency_thresh: float = 0.6,
+    p_value_thresh: float = 0.05,
+) -> NetworkResult:
+    """
+    一站式构建癫痫网络。
+    
+    Returns
+    -------
+    NetworkResult : dataclass
+        - adj: (n_selected, n_selected) 有向加权邻接矩阵
+        - node_names: List[str]
+        - metrics: Dict[str, float] 图论指标
+        - edge_stats: Dict 每条边的统计信息
+    """
+    ...
+```
+
+**可视化终极目标**：
+
+```python
+def plot_outflow_brain_map(
+    network_result: NetworkResult,
+    mni_coords: np.ndarray,
+    output_path: str,
+):
+    """
+    3D 脑图：
+    - 节点颜色 = Net Outflow (红=Source, 蓝=Sink)
+    - 节点大小 = Local Efficiency
+    - 边颜色 = 传播方向
+    - 边粗细 = 权重
+    
+    这是直接对话临床医生的"终极图表"。
+    """
+    ...
+```
+
+---
+
+#### 4.9 功能清单 (Feature Checklist)
+
+| 功能 | 说明 | 依赖 | 状态 |
+|------|------|------|------|
+| 4.1 节点筛选 | 三层准入策略 | `coact_all_*` | ⬜ |
+| 4.2 骨架构建 | 加权无向图 | `coact_ratio` | ⬜ |
+| 4.3 容积传导剔除 | 距离约束 | `dist_matrix` | ⬜ |
+| 4.4 方向注入 | Wilcoxon + 一致性检验 | `lag_raw` | ⬜ |
+| 4.5 病理加权 | FR 比例加权 | `hfo_type` | ⬜ |
+| 4.6 图论指标 | Net Outflow, Local Efficiency | `adj` | ⬜ |
+| 4.7 传播路径 | 最短路径树 | `adj` | ⬜ |
+| 4.8 动态切片 | 时间窗分段网络 | `event_windows` | ⬜ |
+| 4.9 3D 脑图 | Outflow 颜色映射 | `mni_coords` | ⬜ |
+| 4.10 Source-Sink 验证 | SI 指标, 状态翻转检验 | `metrics` | ⬜ |
 
 ---
 
