@@ -63,8 +63,7 @@ group_analysis:
     coact_time_lag_ms: 50.0  # 0 if lag >= this, 1 if no lag
   tf:
     compute_tf_centroids: true  # Enable TF centroid computation
-    save_event_tf_cache: false  # Save event-level TF spectrogram (deprecated, use save_event_tf_tile_cache)
-    save_event_tf_tile_cache: true  # Save 4D TF tile cache for Fig2 (recommended)
+    save_event_tf_tile_cache: true  # Save 4D TF tile cache for Fig2
     tf_n_freqs: 180  # Number of wavelet frequencies (log-spaced)
     tf_n_cycles: 4.0  # Fixed cycles (used when tf_n_cycles_mode=fixed)
     tf_n_cycles_mode: linear  # Options: fixed | linear | f_over_2

@@ -26,7 +26,6 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 from src.group_event_analysis import (
     compute_and_save_group_analysis,
-    compute_and_save_group_event_tf_spectrogram_cache,
     compute_and_save_group_event_tf_tile_cache,
     load_group_analysis_results,
 )
@@ -151,17 +150,16 @@ def main() -> None:
             resample_sfreq = rs
         else:
             resample_sfreq = float(resample_sfreq)
-    save_event_tf_cache = bool(group_tf.get("save_event_tf_cache", False))
     save_event_tf_tile_cache = bool(group_tf.get("save_event_tf_tile_cache", False))
-    compute_tf_centroids = bool(group_tf.get("compute_tf_centroids", False)) or save_event_tf_cache or save_event_tf_tile_cache
+    compute_tf_centroids = bool(group_tf.get("compute_tf_centroids", False)) or save_event_tf_tile_cache
     centroid_source = str(group_core.get("centroid_source", "env"))
     min_channels = int(group_core.get("min_channels", 1))
     coact_all_channels = bool(group_core.get("coact_all_channels", False))
     coact_min_event_ratio = float(group_core.get("coact_min_event_ratio", 0.1))
     coact_time_lag_ms = float(group_core.get("coact_time_lag_ms", 200.0))
     save_bandpass = bool(group_viz.get("save_bandpass", False))
-    if (save_event_tf_cache or save_event_tf_tile_cache) and not save_bandpass:
-        raise ValueError("TF cache requires save_bandpass=True to provide x_band.")
+    if save_event_tf_tile_cache and not save_bandpass:
+        raise ValueError("TF tile cache requires save_bandpass=True to provide x_band.")
 
     output_dir_cfg = cfg.get("output_dir", None)
     output_prefix_cfg = cfg.get("output_prefix", None)
@@ -226,18 +224,6 @@ def main() -> None:
     )
 
     results = load_group_analysis_results(out_paths["group_analysis_path"])
-
-    if save_event_tf_cache:
-        env_cache_path = out_paths.get("env_cache_path", None)
-        if not env_cache_path:
-            raise ValueError("save_event_tf_cache requires env_cache_path (enable save_env_cache).")
-        tf_cache_path = compute_and_save_group_event_tf_spectrogram_cache(
-            env_cache_npz_path=str(env_cache_path),
-            group_analysis_npz_path=str(out_paths["group_analysis_path"]),
-            output_npz_path=None,
-            channel_order=core_channels,
-        )
-        out_paths["group_tf_spectrogram_path"] = tf_cache_path
 
     if save_event_tf_tile_cache:
         env_cache_path = out_paths.get("env_cache_path", None)
