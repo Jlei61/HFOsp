@@ -13,6 +13,7 @@ Date: 2026-01-14
 """
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import warnings
 from matplotlib.patches import Rectangle
@@ -627,7 +628,7 @@ def plot_group_events_band_raster(
     plot_style: str = "imshow",  # 'imshow'|'trace'
     robust_scale: bool = True,
     cmap: str = "gray",
-    x_axis: str = "seconds",  # 'seconds'|'samples'
+    x_axis: str = "event_index",  # 'seconds'|'samples'|'event_index'
     downsample_ms: Optional[float] = 5.0,
     value_transform: str = "log1p",  # 'none'|'log1p'
     trace_normalize: str = "p99",  # 'none'|'mad'|'p99'
@@ -723,8 +724,8 @@ def plot_group_events_band_raster(
 
     fig, ax = plt.subplots(figsize=figsize)
     # x-axis scaling
-    if x_axis not in ("seconds", "samples"):
-        raise ValueError("x_axis must be 'seconds' or 'samples'")
+    if x_axis not in ("seconds", "samples", "event_index"):
+        raise ValueError("x_axis must be 'seconds', 'samples', or 'event_index'")
     # If downsampled, adjust effective sfreq for x-axis scaling
     eff_sfreq = sfreq
     if downsample_ms is not None and downsample_ms > 0:
@@ -734,9 +735,12 @@ def plot_group_events_band_raster(
     if x_axis == "seconds":
         xs = np.arange(Xn.shape[1], dtype=np.float64) / eff_sfreq
         xlabel = "Concatenated event time (s)"
-    else:
+    elif x_axis == "samples":
         xs = np.arange(Xn.shape[1], dtype=np.float64)
         xlabel = "Concatenated event samples"
+    else:
+        xs = np.arange(Xn.shape[1], dtype=np.float64) / eff_sfreq
+        xlabel = "Event index (packedTimes order)"
 
     if plot_style == "imshow":
         extent = (float(xs[0]) if xs.size else 0.0, float(xs[-1]) if xs.size else 0.0, float(len(labels)), 0.0)
@@ -784,6 +788,17 @@ def plot_group_events_band_raster(
             xline = cur if x_axis == "samples" else cur / eff_sfreq
             ax.axvline(xline, color="k", linewidth=float(boundary_lw), alpha=float(boundary_alpha))
             cur += float(n)
+
+    if x_axis == "event_index" and seg_lens:
+        centers = []
+        cur = 0.0
+        for n in seg_lens:
+            centers.append(cur + 0.5 * float(n))
+            cur += float(n)
+        centers = np.asarray(centers, dtype=np.float64) / eff_sfreq
+        labels_evt = [str(int(i) + 1) for i in event_indices]
+        ax.set_xticks(centers)
+        ax.set_xticklabels(labels_evt, fontsize=8)
 
     # style polish: remove useless whitespace + frame clutter
     ax.spines["top"].set_visible(False)
@@ -1005,7 +1020,7 @@ def plot_paper_fig1_bandpassed_traces(
         robust_scale=False,  # waveform view should not use MAD z-scoring by default
         value_transform="none",
         downsample_ms=downsample_ms,
-        x_axis="seconds",
+        x_axis="event_index",
         trace_normalize="p99",
         trace_scale_percentile=99.0,
         trace_lw=0.55,
@@ -1121,840 +1136,299 @@ def plot_raw_segment_from_edf(
         figsize=figsize,
     )
 
-def plot_group_events_tf_centroids_per_channel(
+def plot_group_event_tf_spectrogram_from_cache(
     *,
-    cache_npz_path: str,
-    packed_times_path: str,
-    detections_npz_path: Optional[str] = None,
+    tfr_cache_npz_path: str,
+    group_analysis_npz_path: Optional[str] = None,
     channel_order: Optional[List[str]] = None,
     event_indices: Optional[List[int]] = None,
-    max_events: int = 30,
-    freq_band: Tuple[float, float] = (80.0, 250.0),
-    nperseg: int = 256,  # legacy, unused for wavelet
-    noverlap: int = 192,  # legacy, unused for wavelet
-    power_log1p: bool = True,
-    mask_by_detections: bool = False,
-    centroid_power: str = "power2",  # 'power'|'power2'
-    centroid_min_total_power: float = 0.0,
+    show_centroids: bool = True,
     centroid_marker_size: float = 18.0,
-    centroid_marker_color: str = "crimson",
-    centroid_marker_edge: str = "white",
-    centroid_marker_edge_lw: float = 0.6,
-    show_colorbar: bool = True,
+    centroid_marker_color: str = "#d62728",
+    centroid_line_width: float = 1.0,
+    centroid_line_alpha: float = 0.8,
     cmap: str = "Blues",
-    font_size: int = 14,
-    title_font_size: int = 16,
-    y_label_font_size: int = 12,
-    tick_font_size: int = 12,
-    hspace: float = 0.02,
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None,
+    vmin_floor: float = -2.0,
+    vmin_percentile: float = 5.0,
+    vmax_percentile: float = 99.0,
     figsize: Tuple[float, float] = (12, 8),
-    tf_n_freqs: int = 180,
-    tf_n_cycles: float = 4.0,
-    tf_n_cycles_mode: str = "linear",
-    tf_n_cycles_min: float = 3.0,
-    tf_n_cycles_max: float = 10.0,
-    tf_freq_scale: str = "log",
-    baseline_n_select: int = 10,
-    baseline_min_distance_sec: float = 2.0,
-    baseline_window_sec: float = 2.0,
 ) -> plt.Figure:
     """
-    Per-channel spectrogram view (what you actually want for Fig2):
-      - For each channel: Wavelet TF power (within freq_band) over concatenated packedTimes windows.
-      - Overlay a TF centroid (t,f) per event window (from groupAnalysis if available).
+    Plot group-event TF spectrogram from a precomputed cache.
 
-    Notes:
-      - This is NOT a (channels×events) heatmap. It's a real per-channel TF transform.
-      - Centroid is computed on wavelet+baseline log TF maps (2D centroid).
+    Background: event-wise mean TF power (dB vs baseline).
+    Overlay: TF centroid frequency paths per channel.
     """
-    from .group_event_analysis import load_envelope_cache, load_group_analysis_results
-    from .utils import bqk_utils
+    from .group_event_analysis import load_group_analysis_results
 
-    meta = load_envelope_cache(cache_npz_path)
-    x_band = meta.get("x_band", None)
-    if x_band is None:
-        raise ValueError("Cache does not contain x_band. Regenerate with save_bandpass=True.")
-
-    sfreq = float(meta["sfreq"])
-    ch_names = [str(x) for x in meta["ch_names"]]
-    packed = np.load(packed_times_path, allow_pickle=True)
+    tfr = np.load(str(tfr_cache_npz_path), allow_pickle=True)
+    freqs_hz = np.asarray(tfr["freqs_hz"], dtype=np.float64)
+    power_db_mean = np.asarray(tfr["power_db_mean"], dtype=np.float64)
+    cache_event_indices = np.asarray(tfr.get("event_indices", np.arange(power_db_mean.shape[0])), dtype=np.int64)
 
     if event_indices is None:
-        event_indices = list(range(min(int(max_events), packed.shape[0])))
+        pick = np.arange(cache_event_indices.shape[0])
+        event_labels = cache_event_indices
     else:
-        event_indices = [int(i) for i in event_indices][: int(max_events)]
+        idx_map = {int(e): i for i, e in enumerate(cache_event_indices.tolist())}
+        pick = [idx_map[int(e)] for e in event_indices if int(e) in idx_map]
+        event_labels = np.asarray([int(e) for e in event_indices if int(e) in idx_map], dtype=np.int64)
+    if len(pick) == 0:
+        raise ValueError("No matching events found in TF cache.")
 
-    if channel_order is None:
-        channel_order = ch_names
-    idx_map = {c: i for i, c in enumerate(ch_names)}
-    rows = [idx_map[c] for c in channel_order if c in idx_map]
-    labels = [c for c in channel_order if c in idx_map]
-    if not rows:
-        raise ValueError("No channels matched channel_order.")
+    power_db_mean = power_db_mean[np.asarray(pick, dtype=int), :]
+    n_events = int(power_db_mean.shape[0])
+    Z = power_db_mean.T
 
-    # detection mask (channel,event): used only to decide whether to compute/plot a centroid dot
-    det_mask = None
-    if mask_by_detections and detections_npz_path is not None:
-        gpu = np.load(detections_npz_path, allow_pickle=True)
-        det_names = [str(x) for x in gpu["chns_names"].tolist()]
-        name_to_i = {n: i for i, n in enumerate(det_names)}
-        det_mask = np.zeros((len(labels), len(event_indices)), dtype=bool)
-        for ci, ch in enumerate(labels):
-            if ch not in name_to_i:
-                continue
-            ev = np.asarray(gpu["whole_dets"][name_to_i[ch]])
-            if ev.size == 0:
-                continue
-            for ej, eidx in enumerate(event_indices):
-                s, e = float(packed[eidx, 0]), float(packed[eidx, 1])
-                det_mask[ci, ej] = bool(np.any((ev[:, 1] > s) & (ev[:, 0] < e)))
-
-    # Build concatenated signal per channel + event boundaries (seconds in concatenated timeline)
-    boundaries_s = [0.0]
-    segs_idx = []
-    cur_s = 0.0
-    for eidx in event_indices:
-        s, e = float(packed[eidx, 0]), float(packed[eidx, 1])
-        i0 = int(round(s * sfreq))
-        i1 = int(round(e * sfreq))
-        segs_idx.append((i0, i1))
-        cur_s += float(i1 - i0) / sfreq
-        boundaries_s.append(cur_s)
-
-    n_ch = len(rows)
-    fig, axes = plt.subplots(
-        n_ch,
-        1,
-        figsize=figsize,
-        sharex=True,
-        sharey=True,
-        gridspec_kw={"hspace": float(hspace)},
-    )
-    if n_ch == 1:
-        axes = [axes]
-
-    # Pass 1: compute per-channel STFT + centroids; choose a shared vmax for a meaningful colorbar.
-    per = []
-    v99s = []
-    for ci, (row, lab) in enumerate(zip(rows, labels)):
-        x_cat = np.concatenate([np.asarray(x_band[row, i0:i1]) for (i0, i1) in segs_idx], axis=0)
-        nwin = int(x_cat.shape[0])
-        nps = min(int(nperseg), max(16, nwin))
-        nov = min(int(noverlap), max(0, nps - 1))
-        f, t, Z = stft(x_cat, fs=sfreq, nperseg=nps, noverlap=nov, boundary=None)
-        P = (np.abs(Z) ** 2).astype(np.float64)
-        band_mask = (f >= float(freq_band[0])) & (f <= float(freq_band[1]))
-        f_band = f[band_mask]
-        P_band = P[band_mask, :]
-
-        if power_log1p:
-            P_show = np.log1p(P_band)
+    if vmin is None or vmax is None:
+        if np.isfinite(Z).any():
+            lo = float(np.nanpercentile(Z, float(vmin_percentile)))
+            hi = float(np.nanpercentile(Z, float(vmax_percentile)))
+            vmin = max(float(vmin_floor), lo) if vmin is None else float(vmin)
+            vmax = float(hi) if vmax is None else float(vmax)
+            if not np.isfinite(vmin) or not np.isfinite(vmax) or vmax <= vmin:
+                vmin, vmax = -2.0, 8.0
         else:
-            P_show = P_band
-
-        if np.isfinite(P_show).any():
-            v99s.append(float(np.nanpercentile(P_show, 99)))
-
-        # TF centroids per event
-        pts = []
-        for ej in range(len(event_indices)):
-            if det_mask is not None and not det_mask[ci, ej]:
-                continue
-            t0, t1 = float(boundaries_s[ej]), float(boundaries_s[ej + 1])
-            cols = (t >= t0) & (t < t1)
-            if not np.any(cols):
-                continue
-            W = P_band[:, cols]
-            if centroid_power == "power2":
-                W = W**2
-            elif centroid_power != "power":
-                raise ValueError("centroid_power must be 'power' or 'power2'")
-            denom = float(np.sum(W))
-            # Lower threshold: power^2 on small signals can be very small
-            if denom <= 1e-30:
-                continue
-            if float(centroid_min_total_power) > 0.0 and denom < float(centroid_min_total_power):
-                continue
-            t_sel = t[cols]
-            # 2D centroid: (t,f)
-            t_c = float(np.sum(W * t_sel[None, :]) / denom)
-            f_c = float(np.sum(W * f_band[:, None]) / denom)
-            pts.append((t_c, f_c))
-
-        per.append({"label": lab, "t": t, "f_band": f_band, "P_show": P_show, "pts": pts})
-
-    shared_vmax = max(v99s) if v99s else None
-    if shared_vmax is not None:
-        shared_vmax = max(float(shared_vmax), 1e-12)
-
-    # Pass 2: plot
-    last_im = None
-    for ci, (ax, item) in enumerate(zip(axes, per)):
-        last_im = ax.pcolormesh(
-            item["t"],
-            item["f_band"],
-            item["P_show"],
-            shading="auto",
-            cmap=cmap,
-            vmin=0.0,
-            vmax=shared_vmax,
-        )
-
-        # style: no top/right spines, minimal clutter
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.tick_params(axis="both", which="both", labelsize=int(tick_font_size))
-        # x ticks only on bottom axis
-        if ci != (len(axes) - 1):
-            ax.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
-
-        # channel label on left
-        ax.set_ylabel(item["label"], fontsize=int(y_label_font_size), rotation=0, labelpad=22, va="center")
-        ax.set_yticks([])  # avoid dense y ticks; label is enough
-
-        # vertical boundaries
-        for b in boundaries_s:
-            ax.axvline(float(b), color="k", linewidth=0.3, alpha=0.25)
-
-        # centroid dots
-        if item["pts"]:
-            xs = [p[0] for p in item["pts"]]
-            ys = [p[1] for p in item["pts"]]
-            ax.scatter(
-                xs,
-                ys,
-                s=float(centroid_marker_size),
-                c=centroid_marker_color,
-                alpha=0.95,
-                linewidths=float(centroid_marker_edge_lw),
-                edgecolors=centroid_marker_edge,
-                zorder=5,
-            )
-
-        # remove useless whitespace at both ends
-        ax.set_xlim(float(boundaries_s[0]), float(boundaries_s[-1]))
-        ax.margins(x=0.0)
-
-    axes[-1].set_xlabel("Concatenated event time (s)", fontsize=int(font_size))
-    axes[0].set_title(
-        f"Per-channel STFT + TF centroids ({freq_band[0]:.0f}-{freq_band[1]:.0f} Hz)",
-        fontsize=int(title_font_size),
-        fontweight="bold",
-    )
-
-    if show_colorbar and last_im is not None:
-        cb = fig.colorbar(last_im, ax=axes, fraction=0.018, pad=0.01)
-        cb.set_label("log1p(power)" if power_log1p else "power", fontsize=int(font_size))
-        cb.ax.tick_params(labelsize=int(tick_font_size))
-
-    fig.subplots_adjust(hspace=float(hspace))
-    return fig
-
-
-def plot_group_events_tf_centroid_paths(
-    *,
-    cache_npz_path: str,
-    packed_times_path: str,
-    detections_npz_path: Optional[str] = None,
-    channel_order: Optional[List[str]] = None,
-    event_indices: Optional[List[int]] = None,
-    max_events: int = 30,
-    freq_band: Tuple[float, float] = (80.0, 250.0),
-    nperseg: int = 128,
-    noverlap: int = 96,
-    cfg: GroupVizConfig = GroupVizConfig(),
-    x_axis: str = "seconds",  # 'seconds'|'samples'
-    background_mode: str = "blob",  # 'tp'|'blob'
-    blob_sigma_ms: float = 20.0,
-    power_gamma: float = 1.0,
-    power_threshold: float = 0.05,
-    smooth_sigma_ms: Optional[float] = 8.0,
-    normalize_0_1: bool = True,
-    show_colorbar: bool = True,
-    colorbar_label: str = "Normalized TF power",
-    figsize: Tuple[float, float] = (12, 8),
-) -> plt.Figure:
-    """
-    Figure 2 (paper-like): normalized TF-derived background + centroid dots + per-event path.
-
-    Background:
-      - Compute STFT power on bandpassed signal for each event, sum across frequencies in freq_band
-        to get a time-power curve (still TF-derived).
-      - Paste the curve into a concatenated timeline (same x-axis as Figure 1).
-
-    Overlay:
-      - Red dot per (channel,event): time centroid of TF-derived time-power.
-      - Connect dots within each event in ascending centroid time order ("priority path").
-
-    Note:
-      We use bandpassed signal from cache (x_band). If you want to mask only channels/events that
-      have detections, provide detections_npz_path and we'll use overlap with packedTimes.
-    """
-    from scipy.signal import stft
-    from .group_event_analysis import load_envelope_cache
-
-    meta = load_envelope_cache(cache_npz_path)
-    x_band = meta.get("x_band", None)
-    if x_band is None:
-        raise ValueError("Cache does not contain x_band. Regenerate with save_bandpass=True.")
-
-    sfreq = float(meta["sfreq"])
-    ch_names = list(meta["ch_names"])
-
-    packed = np.load(packed_times_path, allow_pickle=True)
-    if event_indices is None:
-        event_indices = list(range(min(int(max_events), packed.shape[0])))
-    else:
-        event_indices = [int(i) for i in event_indices][: int(max_events)]
-
-    if channel_order is None:
-        channel_order = ch_names
-    idx_map = {c: i for i, c in enumerate(ch_names)}
-    rows = [idx_map[c] for c in channel_order if c in idx_map]
-    labels = [c for c in channel_order if c in idx_map]
-    if not rows:
-        raise ValueError("No channels matched channel_order.")
-
-    # Optional detection mask (channel,event)
-    det_mask = None
-    if detections_npz_path is not None:
-        gpu = np.load(detections_npz_path, allow_pickle=True)
-        det_names = [str(x) for x in gpu["chns_names"].tolist()]
-        name_to_i = {n: i for i, n in enumerate(det_names)}
-        det_mask = np.zeros((len(labels), len(event_indices)), dtype=bool)
-        for ci, ch in enumerate(labels):
-            if ch not in name_to_i:
-                continue
-            ev = np.asarray(gpu["whole_dets"][name_to_i[ch]])
-            if ev.size == 0:
-                continue
-            for ej, eidx in enumerate(event_indices):
-                s, e = float(packed[eidx, 0]), float(packed[eidx, 1])
-                det_mask[ci, ej] = bool(np.any((ev[:, 1] > s) & (ev[:, 0] < e)))
-
-    # Build background and centroids
-    bg_rows: List[np.ndarray] = []
-    centroids: np.ndarray = np.full((len(rows), len(event_indices)), np.nan, dtype=np.float64)
-
-    cur = 0
-    boundaries = [0]
-    for ej, eidx in enumerate(event_indices):
-        s, e = float(packed[eidx, 0]), float(packed[eidx, 1])
-        n = int(round((e - s) * sfreq))
-        cur += n
-        boundaries.append(cur)
-
-    total_len = boundaries[-1]
-    bg = np.zeros((len(rows), total_len), dtype=np.float32)
-
-    for ej, eidx in enumerate(event_indices):
-        s, e = float(packed[eidx, 0]), float(packed[eidx, 1])
-        i0 = int(round(s * sfreq))
-        i1 = int(round(e * sfreq))
-        seg = x_band[rows, i0:i1]
-        # STFT per channel, get TF power summed in freq_band -> time power curve
-        for ci in range(seg.shape[0]):
-            if det_mask is not None and not det_mask[ci, ej]:
-                continue
-            # Guard against very short windows
-            nwin = int(seg.shape[1])
-            nps = min(int(nperseg), max(8, nwin))
-            nov = min(int(noverlap), max(0, nps - 1))
-            f, t, Z = stft(seg[ci], fs=sfreq, nperseg=nps, noverlap=nov, boundary=None)
-            P = (np.abs(Z) ** 2).astype(np.float64)
-            band_mask = (f >= freq_band[0]) & (f <= freq_band[1])
-            tp = np.sum(P[band_mask, :], axis=0)
-            if tp.size == 0:
-                continue
-            # normalize
-            tp = tp / (np.max(tp) + 1e-12)
-            if power_gamma != 1.0:
-                tp = np.power(tp, float(power_gamma))
-            # resample tp to event samples by simple linear interp
-            t_abs = t  # seconds within event
-            x_samples = np.linspace(0, (i1 - i0) / sfreq, i1 - i0, endpoint=False)
-            tp_s = np.interp(x_samples, t_abs, tp).astype(np.float32)
-            # Optional threshold to avoid filling whole window with low-level noise
-            tp_s = np.where(tp_s >= float(power_threshold), tp_s, 0.0).astype(np.float32)
-
-            # time centroid on tp_s
-            w = (tp_s.astype(np.float64) ** 2)
-            denom = np.sum(w)
-            if denom <= 1e-12:
-                continue
-            c = float(np.sum(x_samples * w) / denom)  # seconds within event
-            centroids[ci, ej] = c
-
-            if background_mode == "tp":
-                bg[ci, boundaries[ej] : boundaries[ej + 1]] = tp_s
-            elif background_mode == "blob":
-                # Draw a localized blob around centroid (closer to paper visuals)
-                sigma = max(1e-3, float(blob_sigma_ms) * 1e-3)
-                g = np.exp(-0.5 * ((x_samples - c) / sigma) ** 2).astype(np.float32)
-                amp = float(np.max(tp_s)) if tp_s.size > 0 else 0.0
-                bg[ci, boundaries[ej] : boundaries[ej + 1]] = np.maximum(
-                    bg[ci, boundaries[ej] : boundaries[ej + 1]],
-                    (amp * g).astype(np.float32),
-                )
-            else:
-                raise ValueError("background_mode must be 'tp' or 'blob'")
-
-    # Optional smoothing (paper figures are almost never "pixel-noisy")
-    if smooth_sigma_ms is not None and float(smooth_sigma_ms) > 0 and bg.size > 0:
-        try:
-            from scipy.ndimage import gaussian_filter1d
-
-            sigma_samp = float(smooth_sigma_ms) * 1e-3 * float(sfreq)
-            sigma_samp = max(0.5, sigma_samp)
-            bg = gaussian_filter1d(bg, sigma=sigma_samp, axis=1, mode="nearest")
-        except Exception:
-            pass
-
-    # Normalize to [0,1] for an interpretable paper-like colorbar.
-    if bool(normalize_0_1) and bg.size > 0:
-        vmax = float(np.nanmax(bg)) if np.isfinite(bg).any() else 0.0
-        if vmax > 1e-12:
-            bg = (bg / vmax).astype(np.float32, copy=False)
-        bg = np.clip(bg, 0.0, 1.0).astype(np.float32, copy=False)
+            vmin, vmax = -2.0, 8.0
 
     fig, ax = plt.subplots(figsize=figsize)
-    if x_axis not in ("seconds", "samples"):
-        raise ValueError("x_axis must be 'seconds' or 'samples'")
-    if x_axis == "seconds":
-        extent = (0.0, float(total_len) / sfreq, float(len(labels)), 0.0)
-        xlabel = "Concatenated event time (s)"
-    else:
-        extent = (0.0, float(total_len), float(len(labels)), 0.0)
-        xlabel = "Concatenated event samples"
+    x = np.arange(n_events, dtype=np.float64)
+    im = ax.pcolormesh(x, freqs_hz, Z, shading="auto", cmap=str(cmap), vmin=vmin, vmax=vmax)
+    ax.set_yscale("log")
+    ax.set_title("Normalized Spectrogram", fontweight="bold")
+    ax.set_ylabel("Frequency (Hz)")
+    ax.set_xlabel("Event index (packedTimes order)")
+    ax.set_xticks(x)
+    ax.set_xticklabels([str(int(e) + 1) for e in event_labels], fontsize=8)
 
-    im = ax.imshow(
-        bg,
-        aspect="auto",
-        cmap="Blues",
-        interpolation="nearest",
-        origin="upper",
-        vmin=0.0,
-        vmax=1.0 if bool(normalize_0_1) else None,
-        extent=extent,
-    )
-    ax.set_yticks(np.arange(len(labels)))
-    ax.set_yticklabels(labels, fontsize=8)
-    ax.set_title("Normalized spectrogram (TF-derived) + centroid paths", fontweight="bold")
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel("Channels")
+    if show_centroids and group_analysis_npz_path is not None:
+        ga = load_group_analysis_results(group_analysis_npz_path)
+        tf_centroid_freq = np.asarray(ga.get("tf_centroid_freq", np.zeros((0, 0))), dtype=np.float64)
+        events_bool = np.asarray(ga.get("events_bool", np.zeros((0, 0))), dtype=bool)
+        ga_ch_names = [str(x) for x in ga.get("ch_names", [])]
+        if tf_centroid_freq.size > 0 and events_bool.size > 0:
+            if channel_order is None:
+                channel_order = ga_ch_names
+            channel_order = [str(c) for c in channel_order]
+            ga_idx = {n: i for i, n in enumerate(ga_ch_names)}
+            rows = [ga_idx[c] for c in channel_order if c in ga_idx]
+            for row in rows:
+                ys = []
+                xs = []
+                for xi, ev in enumerate(event_labels):
+                    if ev < tf_centroid_freq.shape[1] and events_bool[row, ev]:
+                        val = float(tf_centroid_freq[row, ev])
+                        if np.isfinite(val):
+                            xs.append(float(xi))
+                            ys.append(val)
+                if xs:
+                    ax.plot(
+                        xs,
+                        ys,
+                        color=centroid_marker_color,
+                        linewidth=float(centroid_line_width),
+                        alpha=float(centroid_line_alpha),
+                        marker="o",
+                        markersize=max(2.0, float(centroid_marker_size) / 10.0),
+                    )
 
-    # vertical boundaries
-    for b in boundaries:
-        ax.axvline(b if x_axis == "samples" else b / sfreq, color="k", linewidth=0.3, alpha=0.4)
+    if freqs_hz.size > 0:
+        ticks = [80.0, 150.0, 250.0]
+        ticks = [t for t in ticks if freqs_hz.min() <= t <= freqs_hz.max()]
+        if ticks:
+            ax.set_yticks(ticks)
+            ax.get_yaxis().set_major_formatter(plt.ScalarFormatter())
 
-    # overlay centroids and per-event path
-    for ej in range(len(event_indices)):
-        xs = []
-        ys = []
-        for ci in range(len(rows)):
-            c = centroids[ci, ej]
-            if not np.isfinite(c):
-                continue
-            xpix = boundaries[ej] + int(round(c * sfreq))
-            xplot = xpix if x_axis == "samples" else xpix / sfreq
-            xs.append(xpix)
-            ys.append(ci)
-            ax.scatter([xplot], [ci], s=cfg.dot_size, c=cfg.event_line_color, alpha=cfg.event_line_alpha, linewidths=0)
-        if len(xs) >= 2:
-            # sort by x (earliest first) and connect
-            order = np.argsort(xs)
-            xs2 = [xs[i] for i in order]
-            ys2 = [ys[i] for i in order]
-            if x_axis == "seconds":
-                xs2 = [x / sfreq for x in xs2]
-            ax.plot(xs2, ys2, color=cfg.event_line_color, alpha=cfg.event_line_alpha, linewidth=1.0)
-
-    # paper-like frame cleanup
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    ax.margins(x=0.0)
-
-    if show_colorbar:
-        cb = fig.colorbar(im, ax=ax, fraction=0.028, pad=0.02)
-        cb.set_label(str(colorbar_label))
-        cb.ax.tick_params(labelsize=10)
-
+    fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02, label="Power (dB vs baseline)")
     plt.tight_layout()
     return fig
 
 
-def plot_paper_fig2_normalized_spectrogram(
+def plot_group_event_tf_propagation_from_cache(
     *,
-    cache_npz_path: str,
-    packed_times_path: str,
-    detections_npz_path: Optional[str] = None,
+    tfr_tile_cache_npz_path: str,
     group_analysis_npz_path: Optional[str] = None,
     channel_order: Optional[List[str]] = None,
     event_indices: Optional[List[int]] = None,
-    max_events: int = 30,
-    freq_band: Tuple[float, float] = (80.0, 250.0),
-    nperseg: int = 128,
-    noverlap: int = 96,
-    centroid_marker_size: float = 30.0,
-    centroid_marker_color: str = "#d62728",
-    centroid_edge_color: str = "black",
-    path_line_width: float = 1.2,
-    path_line_alpha: float = 0.85,
-    tf_n_freqs: int = 180,
-    tf_n_cycles: float = 4.0,
-    tf_n_cycles_mode: str = "linear",
-    tf_n_cycles_min: float = 3.0,
-    tf_n_cycles_max: float = 10.0,
-    tf_freq_scale: str = "log",
-    baseline_n_select: int = 10,
-    baseline_min_distance_sec: float = 2.0,
-    baseline_window_sec: float = 2.0,
-    power_log1p: bool = True,
-    show_colorbar: bool = True,
-    cmap: str = "Blues",
-    figsize: Tuple[float, float] = (16, 10),
+    show_centroids: bool = True,
+    show_paths: bool = True,
+    centroid_marker_size: float = 25.0,
+    centroid_marker_color: str = "black",
+    centroid_line_width: float = 1.2,
+    centroid_line_alpha: float = 0.6,
+    cmap: str = "RdBu_r",
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None,
+    vmin_percentile: float = 5.0,
+    vmax_percentile: float = 99.5,
+    mask_percentile: Optional[float] = None,
+    smooth_sigma: Optional[Tuple[float, float]] = (0.5, 1.5),
+    interpolation: str = "bicubic",
+    figsize: Tuple[float, float] = (14, 8),
 ) -> plt.Figure:
     """
-    Paper-like Fig2: Per-channel STFT spectrogram (y=frequency) + TF centroids + cross-channel paths.
-
-    **REFACTORED 2026-01-16**: If group_analysis_npz_path is provided, reads pre-computed TF centroids
-    from *_groupAnalysis.npz instead of computing them (following new architecture).
-
-    Structure (matching the paper screenshot):
-      - Each channel gets its own subplot (vertically stacked)
-      - Each subplot has y-axis = frequency (within freq_band)
-      - Background is the STFT power spectrogram (computed on-the-fly for visualization)
-      - Red dots mark the TF centroid (time, frequency) per event per channel
-      - Red lines connect centroids across channels within each event (sorted by time)
-    
-    Parameters
-    ----------
-    cache_npz_path : str
-        Path to *_envCache.npz (contains bandpassed signal)
-    packed_times_path : str
-        Path to *_packedTimes.npy
-    detections_npz_path : str, optional
-        Path to *_gpu.npz (for events_bool mask). Only used if group_analysis_npz_path is None.
-    group_analysis_npz_path : str, optional
-        Path to *_groupAnalysis.npz (contains pre-computed TF centroids).
-        If provided, reads centroids from here instead of computing.
-    channel_order, event_indices, max_events : ...
-        Channel and event selection
-    freq_band : tuple
-        Frequency band for STFT display
-    ...
-    
-    Returns
-    -------
-    fig : plt.Figure
+    Plot multi-channel multi-event TF propagation from a cached TF tile cube.
     """
-    from scipy.signal import stft
-    from .group_event_analysis import load_envelope_cache, load_group_analysis_results
-    from .utils import bqk_utils
+    from .group_event_analysis import load_group_analysis_results
 
-    meta = load_envelope_cache(cache_npz_path)
-    x_band = meta.get("x_band", None)
-    if x_band is None:
-        raise ValueError("Cache does not contain x_band. Regenerate with save_bandpass=True.")
-
-    sfreq = float(meta["sfreq"])
-    ch_names = [str(x) for x in meta["ch_names"]]
-    packed = np.load(packed_times_path, allow_pickle=True)
-
-    if event_indices is None:
-        event_indices = list(range(min(int(max_events), packed.shape[0])))
-    else:
-        event_indices = [int(i) for i in event_indices][: int(max_events)]
+    tfr = np.load(str(tfr_tile_cache_npz_path), allow_pickle=True)
+    freqs_hz = np.asarray(tfr["freqs_hz"], dtype=np.float64)
+    time_axis = np.asarray(tfr["time_axis"], dtype=np.float64)
+    power_db = np.asarray(tfr["power_db"], dtype=np.float64)
+    cache_event_indices = np.asarray(tfr.get("event_indices", np.arange(power_db.shape[1])), dtype=np.int64)
+    cache_ch_names = [str(x) for x in np.asarray(tfr.get("channel_names", []), dtype=object).tolist()]
+    window_sec = float(np.asarray(tfr.get("window_sec", np.array([time_axis[-1] if time_axis.size else 0.0]))).ravel()[0])
 
     if channel_order is None:
-        channel_order = ch_names
-    idx_map = {c: i for i, c in enumerate(ch_names)}
-    rows = [idx_map[c] for c in channel_order if c in idx_map]
-    labels = [c for c in channel_order if c in idx_map]
+        channel_order = cache_ch_names
+    channel_order = [str(c) for c in channel_order]
+    ch_idx = {n: i for i, n in enumerate(cache_ch_names)}
+    rows = [ch_idx[c] for c in channel_order if c in ch_idx]
+    labels = [c for c in channel_order if c in ch_idx]
     if not rows:
-        raise ValueError("No channels matched channel_order.")
+        raise ValueError("No channels matched in TF tile cache.")
 
-    # Build concatenated signal per channel + event boundaries
-    boundaries_s = [0.0]
-    segs_idx = []
-    event_times = []
-    for eidx in event_indices:
-        s, e = float(packed[eidx, 0]), float(packed[eidx, 1])
-        i0 = int(round(s * sfreq))
-        i1 = int(round(e * sfreq))
-        segs_idx.append((i0, i1))
-        event_times.append((s, e))
-        boundaries_s.append(boundaries_s[-1] + float(i1 - i0) / sfreq)
-
-    n_ch = len(rows)
-    n_ev = len(event_indices)
-
-    use_precomputed = group_analysis_npz_path is not None
-    ga = None
-    tf_centroid_time = None
-    tf_centroid_freq = None
-    ga_events_bool = None
-    ga_rows = None
-    if use_precomputed:
-        ga = load_group_analysis_results(group_analysis_npz_path)
-        tf_centroid_time = ga.get("tf_centroid_time")
-        tf_centroid_freq = ga.get("tf_centroid_freq")
-        ga_events_bool = ga.get("events_bool")
-        if tf_centroid_time is None or tf_centroid_freq is None:
-            warnings.warn("TF centroids not in groupAnalysis, falling back to on-the-fly computation")
-            use_precomputed = False
-        else:
-            ga_idx_map = {c: i for i, c in enumerate(ga["ch_names"])}
-            ga_rows = [ga_idx_map.get(lbl) for lbl in labels]
-
-    if not use_precomputed:
-        events_bool = np.zeros((n_ch, n_ev), dtype=bool)
-        if detections_npz_path is not None:
-            gpu = np.load(detections_npz_path, allow_pickle=True)
-            det_names = [str(x) for x in gpu["chns_names"].tolist()]
-            name_to_i = {n: i for i, n in enumerate(det_names)}
-            for ci, ch in enumerate(labels):
-                if ch not in name_to_i:
-                    continue
-                det_times = np.asarray(gpu["whole_dets"][name_to_i[ch]])
-                if det_times.size == 0:
-                    continue
-                for ej, (ev_s, ev_e) in enumerate(event_times):
-                    if np.any((det_times[:, 1] > ev_s) & (det_times[:, 0] < ev_e)):
-                        events_bool[ci, ej] = True
-        else:
-            events_bool[:, :] = True
-
-    # Create figure
-    fig, axes = plt.subplots(
-        n_ch, 1,
-        figsize=figsize,
-        sharex=True,
-        gridspec_kw={"hspace": 0.02},
-    )
-    if n_ch == 1:
-        axes = [axes]
-
-    all_centroids = [[None for _ in range(n_ev)] for _ in range(n_ch)]
-
-    # Wavelet params (prefer groupAnalysis metadata)
-    if use_precomputed and ga is not None and "tf_freqs_hz" in ga and "tf_n_cycles_vec" in ga:
-        freqs_hz = np.asarray(ga["tf_freqs_hz"], dtype=np.float64)
-        n_cycles_vec = np.asarray(ga["tf_n_cycles_vec"], dtype=np.float64)
-        pool_starts = np.asarray(ga.get("baseline_pool_starts", np.zeros((0,))), dtype=np.float64)
-        pool_indices = np.asarray(ga.get("baseline_pool_indices", np.zeros((0,))), dtype=np.int64)
-        if "baseline_params" in ga:
-            bp = ga["baseline_params"].tolist()[0]
-            baseline_window_sec = float(bp.get("window_sec", baseline_window_sec))
-        if "tf_baseline_n_select" in ga:
-            baseline_n_select = int(np.asarray(ga["tf_baseline_n_select"]).ravel()[0])
-        if "tf_baseline_min_distance_sec" in ga:
-            baseline_min_distance_sec = float(np.asarray(ga["tf_baseline_min_distance_sec"]).ravel()[0])
+    if event_indices is None:
+        pick = np.arange(cache_event_indices.shape[0])
+        event_labels = cache_event_indices
     else:
-        freqs_hz = bqk_utils.get_wavelet_freqs(freq_band[0], freq_band[1], int(tf_n_freqs), scale=tf_freq_scale)
-        mode = str(tf_n_cycles_mode).lower().strip()
-        if mode == "fixed":
-            n_cycles_vec = np.full(freqs_hz.shape[0], float(tf_n_cycles), dtype=np.float64)
-        elif mode == "linear":
-            n_cycles_vec = np.linspace(float(tf_n_cycles_min), float(tf_n_cycles_max), freqs_hz.shape[0]).astype(np.float64)
+        idx_map = {int(e): i for i, e in enumerate(cache_event_indices.tolist())}
+        pick = [idx_map[int(e)] for e in event_indices if int(e) in idx_map]
+        event_labels = np.asarray([int(e) for e in event_indices if int(e) in idx_map], dtype=np.int64)
+    if len(pick) == 0:
+        raise ValueError("No matching events found in TF tile cache.")
+
+    power_db = power_db[np.asarray(rows, dtype=int)][:, np.asarray(pick, dtype=int)]
+    n_ch = power_db.shape[0]
+    n_events = power_db.shape[1]
+
+    Z = power_db[np.isfinite(power_db)]
+    if vmin is None or vmax is None:
+        if Z.size > 0:
+            p99 = float(np.nanpercentile(np.abs(Z), float(vmax_percentile)))
+            if vmax is None:
+                vmax = p99
+            if vmin is None:
+                vmin = -p99 * 0.2
+            if not np.isfinite(vmin) or not np.isfinite(vmax) or vmax <= vmin:
+                vmin, vmax = -5.0, 10.0
         else:
-            n_cycles_vec = (freqs_hz / 2.0).astype(np.float64)
-        pool_starts = np.zeros((0,), dtype=np.float64)
-        pool_indices = np.zeros((0,), dtype=np.int64)
+            vmin, vmax = -5.0, 10.0
 
-    def _compute_wavelet_power(x: np.ndarray) -> np.ndarray:
-        from scipy.signal import fftconvolve
-        x = np.asarray(x, dtype=np.float64)
-        power = np.zeros((freqs_hz.shape[0], x.shape[0]), dtype=np.float64)
-        for fi, f0 in enumerate(freqs_hz):
-            c = float(n_cycles_vec[fi])
-            sigma_t = c / (2.0 * np.pi * float(f0))
-            half_support = int(np.ceil(3.0 * sigma_t * sfreq))
-            tt = (np.arange(-half_support, half_support + 1, dtype=np.float64) / sfreq)
-            w = np.exp(2j * np.pi * float(f0) * tt) * np.exp(-(tt**2) / (2.0 * sigma_t**2))
-            wn = np.sqrt(np.sum(np.abs(w) ** 2)) + 1e-30
-            w = w / wn
-            y = fftconvolve(x, w, mode="same")
-            power[fi, :] = (np.abs(y) ** 2).astype(np.float64, copy=False)
-        return power
+    norm = None
+    if float(vmin) < 0.0 < float(vmax):
+        norm = matplotlib.colors.TwoSlopeNorm(vmin=float(vmin), vcenter=0.0, vmax=float(vmax))
 
-    # Pass 1: compute per-channel wavelet TF maps + centroids
-    per_channel_data = []
-    v99_list = []
+    mask_thresh = None
+    if mask_percentile is not None and Z.size > 0:
+        mask_thresh = float(np.nanpercentile(np.abs(Z), float(mask_percentile)))
 
-    for ci, row in enumerate(rows):
-        t_concat = []
-        p_concat = []
+    fig, ax = plt.subplots(figsize=figsize)
+    fmin = float(np.nanmin(freqs_hz)) if freqs_hz.size else 0.0
+    fmax = float(np.nanmax(freqs_hz)) if freqs_hz.size else 1.0
+    freq_span = max(1e-9, fmax - fmin)
 
-        for ej, (i0, i1) in enumerate(segs_idx):
-            seg = np.asarray(x_band[row, i0:i1], dtype=np.float64)
-            if seg.size == 0:
+    for ci in range(n_ch):
+        y0 = float(ci)
+        y1 = float(ci) + 0.95
+        for ei in range(n_events):
+            tile = power_db[ci, ei]
+            if not np.isfinite(tile).any():
                 continue
-            power = _compute_wavelet_power(seg)
+            if smooth_sigma is not None:
+                from scipy.ndimage import gaussian_filter
 
-            # Dynamic baseline (per event)
-            if pool_starts.size > 0 and pool_indices.size > 0:
-                event_time = 0.5 * (event_times[ej][0] + event_times[ej][1])
-                sel = np.argsort(np.abs(pool_starts - event_time))
-                sel = sel[np.abs(pool_starts[sel] - event_time) >= float(baseline_min_distance_sec)]
-                sel = sel[: int(baseline_n_select)]
+                tile_smooth = gaussian_filter(tile, sigma=tuple(smooth_sigma))
             else:
-                sel = np.array([], dtype=np.int64)
+                tile_smooth = tile
+            tile_display = np.array(tile_smooth, copy=True)
+            tile_display[~np.isfinite(tile_display)] = np.nan
+            if mask_thresh is not None:
+                tile_display[np.abs(tile_display) < mask_thresh] = np.nan
+            x0 = float(ei) * float(window_sec)
+            x1 = x0 + float(window_sec)
+            ax.imshow(
+                tile_display,
+                origin="lower",
+                aspect="auto",
+                interpolation=str(interpolation),
+                cmap=str(cmap),
+                norm=norm,
+                vmin=float(vmin) if norm is None else None,
+                vmax=float(vmax) if norm is None else None,
+                extent=(x0, x1, y0, y1),
+            )
 
-            if sel.size > 0:
-                spectra = []
-                win_b = max(1, int(round(float(baseline_window_sec) * sfreq)))
-                for pj in pool_indices[sel]:
-                    s0 = int(pj)
-                    s1 = min(x_band.shape[1], s0 + win_b)
-                    if s1 <= s0:
-                        continue
-                    bseg = np.asarray(x_band[row, s0:s1], dtype=np.float64)
-                    bpow = _compute_wavelet_power(bseg)
-                    spectra.append(np.mean(bpow, axis=1))
-                if spectra:
-                    base = np.median(np.stack(spectra, axis=1), axis=1, keepdims=True) + 1e-30
-                    power_db = 10.0 * np.log10(power / base)
-                else:
-                    power_db = 10.0 * np.log10(power + 1e-30)
-            else:
-                power_db = 10.0 * np.log10(power + 1e-30)
+    for ei in range(n_events + 1):
+        x = float(ei) * float(window_sec)
+        ax.axvline(x, color="white", linewidth=1.5, linestyle="-", zorder=2)
 
-            if power_log1p:
-                P_show = np.log1p(np.maximum(power_db, 0.0))
-            else:
-                P_show = power_db
+    mappable = plt.cm.ScalarMappable(norm=norm, cmap=str(cmap))
+    cbar = fig.colorbar(mappable, ax=ax, fraction=0.015, pad=0.02)
+    cbar.set_label("Power (dB)", rotation=270, labelpad=15)
 
-            t_rel = (np.arange(seg.shape[0], dtype=np.float64) / sfreq) + boundaries_s[ej]
-            t_concat.append(t_rel)
-            p_concat.append(P_show)
+    ax.set_ylim(0, n_ch)
+    ax.set_yticks([i + 0.5 for i in range(n_ch)])
+    ax.set_yticklabels(labels, fontsize=10, fontweight="bold")
+    ax.invert_yaxis()
+    ax.set_xlabel("Time (s) - Concatenated Events")
+    ax.set_title("Normalized Spectrogram (80-250 Hz)", fontweight="bold")
+    ax.tick_params(axis="x", length=0)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
-            # TF centroids: read from groupAnalysis or compute on-the-fly
-            if use_precomputed:
-                ga_ci = ga_rows[ci]
-                if ga_ci is not None and ga_events_bool is not None:
-                    global_ej = event_indices[ej]
-                    if ga_events_bool[ga_ci, global_ej]:
-                        t_c_abs = float(tf_centroid_time[ga_ci, global_ej])
-                        f_c = float(tf_centroid_freq[ga_ci, global_ej])
-                        if np.isfinite(t_c_abs) and np.isfinite(f_c):
-                            t_c_concat = boundaries_s[ej] + t_c_abs
-                            all_centroids[ci][ej] = (t_c_concat, f_c)
-            else:
-                if events_bool[ci, ej]:
-                    W = np.maximum(power_db, 0.0)
-                    denom = float(np.sum(W))
-                    if denom > 1e-20:
-                        t_rel0 = np.arange(seg.shape[0], dtype=np.float64) / sfreq
-                        t_c = float(np.sum(W * t_rel0[None, :]) / denom)
-                        f_c = float(np.sum(W * freqs_hz[:, None]) / denom)
-                        all_centroids[ci][ej] = (boundaries_s[ej] + t_c, f_c)
+    if show_centroids and group_analysis_npz_path is not None:
+        ga = load_group_analysis_results(group_analysis_npz_path)
+        tf_centroid_time = np.asarray(ga.get("tf_centroid_time", np.zeros((0, 0))), dtype=np.float64)
+        tf_centroid_freq = np.asarray(ga.get("tf_centroid_freq", np.zeros((0, 0))), dtype=np.float64)
+        events_bool = np.asarray(ga.get("events_bool", np.zeros((0, 0))), dtype=bool)
+        ga_ch_names = [str(x) for x in ga.get("ch_names", [])]
+        ga_idx = {n: i for i, n in enumerate(ga_ch_names)}
 
-        if not t_concat or not p_concat:
-            t = np.array([0.0], dtype=np.float64)
-            P_show = np.zeros((freqs_hz.shape[0], 1), dtype=np.float64)
-        else:
-            t = np.concatenate(t_concat, axis=0)
-            P_show = np.concatenate(p_concat, axis=1)
-        if np.isfinite(P_show).any():
-            v99_list.append(float(np.nanpercentile(P_show, 99)))
-
-        per_channel_data.append({
-            "t": t,
-            "f_band": freqs_hz,
-            "P_show": P_show,
-            "label": labels[ci],
-        })
-
-    shared_vmax = max(v99_list) if v99_list else 1.0
-    shared_vmax = max(shared_vmax, 1e-12)
-
-    # Pass 2: plot
-    last_im = None
-    for ci, (ax, data) in enumerate(zip(axes, per_channel_data)):
-        last_im = ax.pcolormesh(
-            data["t"],
-            data["f_band"],
-            data["P_show"],
-            shading="auto",
-            cmap=cmap,
-            vmin=0.0,
-            vmax=shared_vmax,
-        )
-
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.tick_params(axis="both", which="both", labelsize=10)
-
-        if ci != n_ch - 1:
-            ax.tick_params(axis="x", bottom=False, labelbottom=False)
-
-        ax.set_ylabel(data["label"], fontsize=11, rotation=0, labelpad=25, va="center")
-        ax.set_yticks([])
-
-        for b in boundaries_s[1:-1]:
-            ax.axvline(b, color="k", linewidth=0.4, linestyle="--", alpha=0.4)
-
-        # Centroid dots
-        for ej in range(n_ev):
-            pt = all_centroids[ci][ej]
-            if pt is not None:
+        for ei, ev in enumerate(event_labels):
+            xs = []
+            ys = []
+            for ci, ch in enumerate(labels):
+                gi = ga_idx.get(ch, None)
+                if gi is None or ev >= tf_centroid_time.shape[1]:
+                    continue
+                if events_bool.size > 0 and not bool(events_bool[gi, ev]):
+                    continue
+                t_c = float(tf_centroid_time[gi, ev])
+                f_c = float(tf_centroid_freq[gi, ev])
+                if not np.isfinite(t_c) or not np.isfinite(f_c):
+                    continue
+                x = float(ei) * float(window_sec) + t_c
+                rel_f = (f_c - fmin) / freq_span
+                y = float(ci) + rel_f * 0.95
+                if 0.0 <= y <= float(n_ch):
+                    xs.append(x)
+                    ys.append(y)
+            if xs:
                 ax.scatter(
-                    [pt[0]], [pt[1]],
+                    xs,
+                    ys,
                     s=float(centroid_marker_size),
                     c=centroid_marker_color,
-                    alpha=0.95,
-                    linewidths=0.5,
-                    edgecolors=centroid_edge_color,
-                    zorder=5,
+                    edgecolors="white",
+                    linewidth=0.8,
+                    zorder=10,
                 )
+                if show_paths and len(xs) > 1:
+                    ax.plot(
+                        xs,
+                        ys,
+                        color=centroid_marker_color,
+                        linewidth=float(centroid_line_width),
+                        alpha=float(centroid_line_alpha),
+                        zorder=9,
+                    )
 
-        ax.set_xlim(boundaries_s[0], boundaries_s[-1])
-        ax.margins(x=0.0)
-
-    # Pass 3: cross-channel paths (top-to-bottom channel order)
-    for ej in range(n_ev):
-        event_pts = []
-        for ci in range(n_ch):
-            pt = all_centroids[ci][ej]
-            if pt is not None:
-                event_pts.append((pt[0], pt[1], ci, axes[ci]))
-        if len(event_pts) < 2:
-            continue
-        # keep channel order; do not sort by time
-        from matplotlib.patches import ConnectionPatch
-        for k in range(len(event_pts) - 1):
-            t1, f1, ci1, ax1 = event_pts[k]
-            t2, f2, ci2, ax2 = event_pts[k + 1]
-            con = ConnectionPatch(
-                xyA=(t1, f1), coordsA=ax1.transData,
-                xyB=(t2, f2), coordsB=ax2.transData,
-                color=centroid_marker_color,
-                linewidth=float(path_line_width),
-                alpha=float(path_line_alpha),
-                zorder=4,
-            )
-            fig.add_artist(con)
-
-    axes[0].set_title(
-        f"Normalized Spectrogram ({freq_band[0]:.0f}–{freq_band[1]:.0f} Hz)",
-        fontsize=14,
-        fontweight="bold",
-    )
-    axes[-1].set_xlabel("Time (s)", fontsize=12)
-
-    if show_colorbar and last_im is not None:
-        cb = fig.colorbar(last_im, ax=axes, fraction=0.018, pad=0.015)
-        cb.set_label("log1p(power)", fontsize=11)
-        cb.ax.tick_params(labelsize=10)
-
-    fig.subplots_adjust(hspace=0.02)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        try:
-            plt.tight_layout()
-        except Exception:
-            pass
+    plt.tight_layout()
     return fig
 
 

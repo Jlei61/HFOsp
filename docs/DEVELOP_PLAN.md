@@ -524,7 +524,7 @@ config = HFODetectionConfig(
 | 函数 | 产出图表 | 必需资源 | 可选资源 | 用途 |
 |------|---------|---------|---------|------|
 | `plot_paper_fig1_bandpassed_traces` | **Fig1**: 拼接事件窗口的带通波形 raster | `*_envCache.npz`<br>`*_packedTimes.npy` | - | 展示群体事件时序特征 |
-| `plot_paper_fig2_normalized_spectrogram` | **Fig2**: TF功率背景 + 质心点 + 传播路径 | `*_envCache.npz`<br>`*_packedTimes.npy`<br>`*_groupAnalysis.npz` | `*_gpu.npz`(mask) | 展示TF域传播模式 |
+| `plot_group_event_tf_spectrogram_from_cache` | **Fig2**: 缓存TF谱图 + 质心路径 | `*_groupTF_spectrogram.npz`<br>`*_groupAnalysis.npz` | - | 展示群体事件TF域模式 |
 | `plot_lag_heatmaps_from_group_analysis` | **3张热图**: Energy/Rank/Lag (channels×events) | `*_groupAnalysis.npz`<br>`*_envCache.npz`<br>`*_packedTimes.npy` | - | 量化传播滞后和能量分布 |
 | `plot_lag_statistics` | **统计三联图**: Lag分布/Rank分布/通道参与率 | `*_groupAnalysis.npz` | - | 群体统计特征 |
 | `plot_tf_centroid_statistics` | **TF质心统计**: 频率质心/时间质心分布 | `*_groupAnalysis.npz` | - | TF质心特征分析 |
@@ -568,7 +568,14 @@ config = HFODetectionConfig(
 "<record>_packedTimes.npy"
 └─ (n_events, 2) [start, end] 秒
 
-# 4. GPU检测结果（可选，用于mask）
+# 4. 群体TF谱图缓存（Fig2）
+"<record>_groupTF_spectrogram.npz"
+├─ power_db_mean: (n_events, n_freqs) 事件级TF谱图(dB)
+├─ freqs_hz: (n_freqs,) 对数频率轴
+├─ event_indices: (n_events,) 对应事件索引
+└─ channel_names: 使用的通道列表
+
+# 5. GPU检测结果（可选，用于mask）
 "<record>_gpu.npz"
 ├─ whole_dets: List[(n_det, 2)] per channel
 └─ chns_names: 通道名
@@ -593,7 +600,7 @@ out_paths = compute_and_save_group_analysis(
 # Step 2: 可视化（任意多次，只读取）
 from src.visualization import (
     plot_paper_fig1_bandpassed_traces,
-    plot_paper_fig2_normalized_spectrogram,
+    plot_group_event_tf_spectrogram_from_cache,
     plot_lag_heatmaps_from_group_analysis,
     plot_lag_statistics,
     plot_tf_centroid_statistics,
@@ -607,11 +614,10 @@ fig1 = plot_paper_fig1_bandpassed_traces(
     event_indices=list(range(30)),
 )
 
-# Fig2: TF + 质心路径
-fig2 = plot_paper_fig2_normalized_spectrogram(
-    cache_npz_path=out_paths['env_cache_path'],
-    packed_times_path='FC10477Q_packedTimes.npy',
-    group_analysis_npz_path=out_paths['group_analysis_path'],  # 读取预计算TF质心
+# Fig2: TF + 质心路径（缓存）
+fig2 = plot_group_event_tf_spectrogram_from_cache(
+    tfr_cache_npz_path=out_paths['group_tf_spectrogram_path'],
+    group_analysis_npz_path=out_paths['group_analysis_path'],
     channel_order=CORE_CHANNELS,
     event_indices=list(range(30)),
 )

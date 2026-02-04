@@ -345,21 +345,14 @@ precompute_envelope_cache(
 - 用途：直观看到每个通道在每个事件窗内的带通 burst，避免 `imshow` 把时间结构“涂抹成块”。
 - 函数：`plot_group_events_band_raster(plot_style='trace', mode='bandpassed')`
 
-### Fig2：每通道独立 STFT + TF(时间,频率) 质心点（带 colorbar）
+### Fig2：群体事件TF谱图（缓存）+ 频率质心路径
 
-- 用途：你明确要求的“每个通道都做时频变换”，并且质心是 **(t,f) 的 2D centroid**，不是只算时间质心。
-- 函数：`plot_group_events_tf_centroids_per_channel`
-- 默认版式：
-  - 去掉每个通道子图的 top/right 边框
-  - 除最底部外不显示 x ticks
-  - `hspace` 很小（子图紧凑）
-  - 统一 `vmax` + `colorbar`
+- 用途：统一用 Morlet 小波 + 对数频率轴 + 基线 dB，背景来自 pipeline 预计算缓存，绘图不再做复杂计算。
+- 函数：`plot_group_event_tf_spectrogram_from_cache`
+- 关键输入：`*_groupTF_spectrogram.npz` + `*_groupAnalysis.npz`
 
-质心定义（事件窗内、每通道）：
-\[
-t_c = \frac{\sum_{f,t} P(f,t)\,t}{\sum_{f,t} P(f,t)},\quad
-f_c = \frac{\sum_{f,t} P(f,t)\,f}{\sum_{f,t} P(f,t)}
-\]
+质心来源（事件窗内、每通道）：
+从 `groupAnalysis` 的 `tf_centroid_freq` 读取并按事件顺序绘制频率路径。
 
 ### Fig3：channels × events 的能量/秩/lag（验证用）
 

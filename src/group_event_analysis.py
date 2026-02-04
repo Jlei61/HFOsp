@@ -1148,6 +1148,376 @@ def compute_and_save_hfo_event_wavelet_tfr_two_bands(
     return out
 
 
+def compute_and_save_group_event_tf_spectrogram_cache(
+    *,
+    env_cache_npz_path: str,
+    group_analysis_npz_path: str,
+    output_npz_path: Optional[str] = None,
+    channel_order: Optional[Sequence[str]] = None,
+    event_indices: Optional[Sequence[int]] = None,
+    max_events: Optional[int] = None,
+    buffer_sec: float = 0.5,
+    baseline_fallback_pctl: float = 10.0,
+    use_event_mask: bool = True,
+) -> str:
+    """
+    Precompute a group-event TF spectrogram cache for visualization.
+
+    Output is a compact (n_events × n_freqs) map where each event's spectrum
+    is the mean dB power across participating channels.
+    """
+    from pathlib import Path
+
+    meta = load_envelope_cache(str(env_cache_npz_path))
+    x_band = meta.get("x_band", None)
+    if x_band is None:
+        raise ValueError("env cache has no x_band; set save_bandpass=True in pipeline.")
+
+    sfreq = float(meta["sfreq"])
+    env_ch_names = [str(x) for x in meta["ch_names"]]
+    x_band = np.asarray(x_band, dtype=np.float64)
+
+    ga = load_group_analysis_results(str(group_analysis_npz_path))
+    if "tf_freqs_hz" not in ga or "tf_n_cycles_vec" not in ga:
+        raise ValueError("groupAnalysis missing tf_freqs_hz/tf_n_cycles_vec (enable compute_tf_centroids).")
+    freqs_hz = np.asarray(ga["tf_freqs_hz"], dtype=np.float64)
+    n_cycles_vec = np.asarray(ga["tf_n_cycles_vec"], dtype=np.float64)
+    event_windows = np.asarray(ga["event_windows"], dtype=np.float64)
+    events_bool = np.asarray(ga["events_bool"], dtype=bool)
+    ga_ch_names = [str(x) for x in ga["ch_names"]]
+
+    pool_starts = np.asarray(ga.get("baseline_pool_starts", np.zeros((0,))), dtype=np.float64)
+    pool_indices = np.asarray(ga.get("baseline_pool_indices", np.zeros((0,))), dtype=np.int64)
+    baseline_n_select = int(np.asarray(ga.get("tf_baseline_n_select", np.array([10]))).ravel()[0])
+    baseline_min_distance_sec = float(
+        np.asarray(ga.get("tf_baseline_min_distance_sec", np.array([2.0]))).ravel()[0]
+    )
+
+    if channel_order is None:
+        channel_order = ga_ch_names
+    channel_order = [str(c) for c in channel_order]
+    env_idx = {n: i for i, n in enumerate(env_ch_names)}
+    ga_idx = {n: i for i, n in enumerate(ga_ch_names)}
+    rows_env = []
+    rows_ga = []
+    labels = []
+    for ch in channel_order:
+        if ch in env_idx and ch in ga_idx:
+            rows_env.append(env_idx[ch])
+            rows_ga.append(ga_idx[ch])
+            labels.append(ch)
+    if not rows_env:
+        raise ValueError("No channels matched between env cache and groupAnalysis.")
+
+    n_events_total = int(event_windows.shape[0])
+    if event_indices is None:
+        event_indices = list(range(n_events_total))
+    else:
+        event_indices = [int(i) for i in event_indices]
+    if max_events is not None:
+        event_indices = event_indices[: int(max_events)]
+    event_indices = [i for i in event_indices if 0 <= i < n_events_total]
+    if not event_indices:
+        raise ValueError("No valid events selected for TF cache.")
+
+    buffer_sec = float(buffer_sec)
+    baseline_fallback_pctl = float(baseline_fallback_pctl)
+    if buffer_sec < 0:
+        raise ValueError("buffer_sec must be >= 0.")
+    if not (0.0 < baseline_fallback_pctl < 100.0):
+        raise ValueError("baseline_fallback_pctl must be in (0, 100).")
+
+    # Precompute baseline spectra per channel/pool if available
+    baseline_pool_spectra = None
+    baseline_window_sec = 2.0
+    bp = ga.get("baseline_params", None)
+    if bp is not None:
+        try:
+            if isinstance(bp, dict):
+                baseline_window_sec = float(bp.get("window_sec", baseline_window_sec))
+            else:
+                baseline_window_sec = float(np.asarray(bp).ravel()[0].get("window_sec", baseline_window_sec))
+        except Exception:
+            pass
+    if pool_indices.size > 0:
+        baseline_pool_spectra = compute_baseline_pool_spectra(
+            data=x_band[np.asarray(rows_env, dtype=int)],
+            sfreq=sfreq,
+            pool_indices=pool_indices,
+            window_sec=float(baseline_window_sec),
+            freqs_hz=freqs_hz,
+            n_cycles_vec=n_cycles_vec,
+        )
+
+    eps = 1e-30
+    power_db_mean = np.full((len(event_indices), freqs_hz.shape[0]), np.nan, dtype=np.float32)
+
+    for ei, eidx in enumerate(event_indices):
+        s, e = float(event_windows[eidx, 0]), float(event_windows[eidx, 1])
+        if e <= s:
+            continue
+        event_time = 0.5 * (s + e)
+        seg_start = max(0.0, s - buffer_sec)
+        seg_end = min(float(x_band.shape[1]) / sfreq, e + buffer_sec)
+        i0 = int(round(seg_start * sfreq))
+        i1 = int(round(seg_end * sfreq))
+        if i1 <= i0:
+            continue
+        ev_len = int(round((e - s) * sfreq))
+        crop_start = int(round((s - seg_start) * sfreq))
+        crop_end = crop_start + ev_len
+        if crop_end <= crop_start:
+            continue
+
+        per_ch = []
+        if pool_starts.size > 0 and pool_indices.size > 0:
+            sel = _select_nearest_pool_indices(
+                pool_starts,
+                event_time,
+                n_select=int(baseline_n_select),
+                min_distance_sec=float(baseline_min_distance_sec),
+            )
+        else:
+            sel = np.array([], dtype=np.int64)
+
+        for ci, (row_env, row_ga) in enumerate(zip(rows_env, rows_ga)):
+            if use_event_mask and not bool(events_bool[row_ga, eidx]):
+                continue
+            seg = x_band[row_env, i0:i1]
+            if seg.size == 0:
+                continue
+            power = _compute_wavelet_power(seg, sfreq, freqs_hz, n_cycles_vec)
+            power = power[:, crop_start:crop_end]
+            if power.size == 0:
+                continue
+            event_power = np.mean(power, axis=1)
+
+            base = None
+            if baseline_pool_spectra is not None and sel.size > 0:
+                # Use two-step indexing to avoid numpy fancy indexing shape transposition
+                base_pool = np.asarray(baseline_pool_spectra[ci][:, sel], dtype=np.float64)
+                if base_pool.size > 0:
+                    base = np.median(base_pool, axis=1)
+            if base is None or base.size == 0:
+                base = np.percentile(power, baseline_fallback_pctl, axis=1)
+            base = np.asarray(base, dtype=np.float64).reshape(-1)
+            power_db = 10.0 * np.log10((event_power + eps) / (base + eps))
+            per_ch.append(power_db)
+
+        if per_ch:
+            power_db_mean[ei] = np.mean(np.stack(per_ch, axis=0), axis=0).astype(np.float32, copy=False)
+
+    if output_npz_path is None:
+        ga_path = Path(str(group_analysis_npz_path))
+        prefix = ga_path.name.replace("_groupAnalysis.npz", "")
+        output_npz_path = str(ga_path.parent / f"{prefix}_groupTF_spectrogram.npz")
+
+    np.savez_compressed(
+        str(output_npz_path),
+        freqs_hz=freqs_hz.astype(np.float64),
+        event_indices=np.asarray(event_indices, dtype=np.int64),
+        power_db_mean=power_db_mean.astype(np.float32),
+        sfreq=np.array([sfreq], dtype=np.float64),
+        channel_names=np.asarray(labels, dtype=object),
+        buffer_sec=np.array([buffer_sec], dtype=np.float64),
+        baseline_fallback_pctl=np.array([baseline_fallback_pctl], dtype=np.float64),
+        source_env_cache=np.array([str(env_cache_npz_path)], dtype=object),
+        source_group_analysis=np.array([str(group_analysis_npz_path)], dtype=object),
+    )
+    return str(output_npz_path)
+
+
+def compute_and_save_group_event_tf_tile_cache(
+    *,
+    env_cache_npz_path: str,
+    group_analysis_npz_path: str,
+    output_npz_path: Optional[str] = None,
+    channel_order: Optional[Sequence[str]] = None,
+    event_indices: Optional[Sequence[int]] = None,
+    max_events: Optional[int] = None,
+    buffer_sec: float = 0.5,
+    baseline_fallback_pctl: float = 10.0,
+    use_event_mask: bool = True,
+) -> str:
+    """
+    Precompute per-channel, per-event TF tiles for multi-channel propagation plots.
+
+    Output power_db has shape (n_channels, n_events, n_freqs, n_time).
+    """
+    from pathlib import Path
+
+    meta = load_envelope_cache(str(env_cache_npz_path))
+    x_band = meta.get("x_band", None)
+    if x_band is None:
+        raise ValueError("env cache has no x_band; set save_bandpass=True in pipeline.")
+
+    sfreq = float(meta["sfreq"])
+    env_ch_names = [str(x) for x in meta["ch_names"]]
+    x_band = np.asarray(x_band, dtype=np.float64)
+
+    ga = load_group_analysis_results(str(group_analysis_npz_path))
+    if "tf_freqs_hz" not in ga or "tf_n_cycles_vec" not in ga:
+        raise ValueError("groupAnalysis missing tf_freqs_hz/tf_n_cycles_vec (enable compute_tf_centroids).")
+    freqs_hz = np.asarray(ga["tf_freqs_hz"], dtype=np.float64)
+    n_cycles_vec = np.asarray(ga["tf_n_cycles_vec"], dtype=np.float64)
+    event_windows = np.asarray(ga["event_windows"], dtype=np.float64)
+    events_bool = np.asarray(ga["events_bool"], dtype=bool)
+    ga_ch_names = [str(x) for x in ga["ch_names"]]
+
+    pool_starts = np.asarray(ga.get("baseline_pool_starts", np.zeros((0,))), dtype=np.float64)
+    pool_indices = np.asarray(ga.get("baseline_pool_indices", np.zeros((0,))), dtype=np.int64)
+    baseline_n_select = int(np.asarray(ga.get("tf_baseline_n_select", np.array([10]))).ravel()[0])
+    baseline_min_distance_sec = float(
+        np.asarray(ga.get("tf_baseline_min_distance_sec", np.array([2.0]))).ravel()[0]
+    )
+
+    if channel_order is None:
+        channel_order = ga_ch_names
+    channel_order = [str(c) for c in channel_order]
+    env_idx = {n: i for i, n in enumerate(env_ch_names)}
+    ga_idx = {n: i for i, n in enumerate(ga_ch_names)}
+    rows_env = []
+    rows_ga = []
+    labels = []
+    for ch in channel_order:
+        if ch in env_idx and ch in ga_idx:
+            rows_env.append(env_idx[ch])
+            rows_ga.append(ga_idx[ch])
+            labels.append(ch)
+    if not rows_env:
+        raise ValueError("No channels matched between env cache and groupAnalysis.")
+
+    n_events_total = int(event_windows.shape[0])
+    if event_indices is None:
+        event_indices = list(range(n_events_total))
+    else:
+        event_indices = [int(i) for i in event_indices]
+    if max_events is not None:
+        event_indices = event_indices[: int(max_events)]
+    event_indices = [i for i in event_indices if 0 <= i < n_events_total]
+    if not event_indices:
+        raise ValueError("No valid events selected for TF cache.")
+
+    buffer_sec = float(buffer_sec)
+    baseline_fallback_pctl = float(baseline_fallback_pctl)
+    if buffer_sec < 0:
+        raise ValueError("buffer_sec must be >= 0.")
+    if not (0.0 < baseline_fallback_pctl < 100.0):
+        raise ValueError("baseline_fallback_pctl must be in (0, 100).")
+
+    window_sec = float(np.asarray(ga.get("window_sec", np.array([0.0]))).ravel()[0])
+    if window_sec <= 0:
+        durations = np.asarray(event_windows[:, 1] - event_windows[:, 0], dtype=np.float64)
+        window_sec = float(np.median(durations[durations > 0])) if np.any(durations > 0) else 0.5
+    win_samples = max(1, int(round(window_sec * sfreq)))
+    time_axis = np.arange(win_samples, dtype=np.float64) / float(sfreq)
+
+    baseline_pool_spectra = None
+    baseline_window_sec = 2.0
+    bp = ga.get("baseline_params", None)
+    if bp is not None:
+        try:
+            if isinstance(bp, dict):
+                baseline_window_sec = float(bp.get("window_sec", baseline_window_sec))
+            else:
+                baseline_window_sec = float(np.asarray(bp).ravel()[0].get("window_sec", baseline_window_sec))
+        except Exception:
+            pass
+    if pool_indices.size > 0:
+        baseline_pool_spectra = compute_baseline_pool_spectra(
+            data=x_band[np.asarray(rows_env, dtype=int)],
+            sfreq=sfreq,
+            pool_indices=pool_indices,
+            window_sec=float(baseline_window_sec),
+            freqs_hz=freqs_hz,
+            n_cycles_vec=n_cycles_vec,
+        )
+
+    eps = 1e-30
+    power_db = np.full(
+        (len(rows_env), len(event_indices), freqs_hz.shape[0], win_samples),
+        np.nan,
+        dtype=np.float32,
+    )
+
+    for ei, eidx in enumerate(event_indices):
+        s, e = float(event_windows[eidx, 0]), float(event_windows[eidx, 1])
+        if e <= s:
+            continue
+        event_time = 0.5 * (s + e)
+        seg_start = max(0.0, s - buffer_sec)
+        seg_end = min(float(x_band.shape[1]) / sfreq, e + buffer_sec)
+        i0 = int(round(seg_start * sfreq))
+        i1 = int(round(seg_end * sfreq))
+        if i1 <= i0:
+            continue
+        crop_start = int(round((s - seg_start) * sfreq))
+        crop_end = crop_start + win_samples
+
+        if pool_starts.size > 0 and pool_indices.size > 0:
+            sel = _select_nearest_pool_indices(
+                pool_starts,
+                event_time,
+                n_select=int(baseline_n_select),
+                min_distance_sec=float(baseline_min_distance_sec),
+            )
+        else:
+            sel = np.array([], dtype=np.int64)
+
+        for ci, (row_env, row_ga) in enumerate(zip(rows_env, rows_ga)):
+            if use_event_mask and not bool(events_bool[row_ga, eidx]):
+                continue
+            seg = x_band[row_env, i0:i1]
+            if seg.size == 0:
+                continue
+            power = _compute_wavelet_power(seg, sfreq, freqs_hz, n_cycles_vec)
+            if power.size == 0:
+                continue
+
+            crop_slice = power[:, crop_start:crop_end]
+            if crop_slice.size == 0:
+                continue
+            if crop_slice.shape[1] < win_samples:
+                pad = np.full((crop_slice.shape[0], win_samples), np.nan, dtype=np.float64)
+                pad[:, : crop_slice.shape[1]] = crop_slice
+                crop_slice = pad
+            elif crop_slice.shape[1] > win_samples:
+                crop_slice = crop_slice[:, :win_samples]
+
+            base = None
+            if baseline_pool_spectra is not None and sel.size > 0:
+                base_pool = np.asarray(baseline_pool_spectra[ci][:, sel], dtype=np.float64)
+                if base_pool.size > 0:
+                    base = np.median(base_pool, axis=1)
+            if base is None or base.size == 0:
+                base = np.percentile(crop_slice, baseline_fallback_pctl, axis=1)
+            base = np.asarray(base, dtype=np.float64).reshape(-1, 1)
+            power_db[ci, ei] = (10.0 * np.log10((crop_slice + eps) / (base + eps))).astype(
+                np.float32, copy=False
+            )
+
+    if output_npz_path is None:
+        ga_path = Path(str(group_analysis_npz_path))
+        prefix = ga_path.name.replace("_groupAnalysis.npz", "")
+        output_npz_path = str(ga_path.parent / f"{prefix}_groupTF_tiles.npz")
+
+    np.savez_compressed(
+        str(output_npz_path),
+        freqs_hz=freqs_hz.astype(np.float64),
+        time_axis=time_axis.astype(np.float64),
+        event_indices=np.asarray(event_indices, dtype=np.int64),
+        power_db=power_db.astype(np.float32),
+        window_sec=np.array([window_sec], dtype=np.float64),
+        sfreq=np.array([sfreq], dtype=np.float64),
+        channel_names=np.asarray(labels, dtype=object),
+        buffer_sec=np.array([buffer_sec], dtype=np.float64),
+        baseline_fallback_pctl=np.array([baseline_fallback_pctl], dtype=np.float64),
+        source_env_cache=np.array([str(env_cache_npz_path)], dtype=object),
+        source_group_analysis=np.array([str(group_analysis_npz_path)], dtype=object),
+    )
+    return str(output_npz_path)
+
+
 def compute_centroid_matrix_from_envelope_cache(
     *,
     windows: Sequence[EventWindow],
@@ -2265,16 +2635,13 @@ def compute_tf_centroids(
                 continue
             base = np.median(base_pool, axis=1, keepdims=True) + 1e-30
             power_db = 10.0 * np.log10(power / base)
-            W = np.maximum(power_db, 0.0)
-            denom = float(np.sum(W))
-            if denom <= 1e-30:
+            if not np.isfinite(power_db).any():
                 continue
 
-            t_rel = np.arange(seg.shape[0], dtype=np.float64) / float(sfreq)
-            t_c = float(np.sum(W * t_rel[None, :]) / denom)
-            f_c = float(np.sum(W * freqs_hz[:, None]) / denom)
-            tf_centroid_time[ci, ei] = t_c
-            tf_centroid_freq[ci, ei] = f_c
+            peak_idx = int(np.nanargmax(power_db))
+            fi, ti = np.unravel_index(peak_idx, power_db.shape)
+            tf_centroid_time[ci, ei] = float(ti) / float(sfreq)
+            tf_centroid_freq[ci, ei] = float(freqs_hz[int(fi)])
 
     return tf_centroid_time, tf_centroid_freq
 
@@ -2534,6 +2901,28 @@ def load_group_analysis_results(npz_path: str) -> Dict:
         out["coact_all_rank_ratio"] = np.asarray(d["coact_all_rank_ratio"])
     if "coact_all_ch_names" in d:
         out["coact_all_ch_names"] = np.asarray(d["coact_all_ch_names"])
+
+    # TF analysis parameters (needed for TF spectrogram cache generation)
+    if "tf_freqs_hz" in d:
+        out["tf_freqs_hz"] = np.asarray(d["tf_freqs_hz"])
+    if "tf_n_cycles_vec" in d:
+        out["tf_n_cycles_vec"] = np.asarray(d["tf_n_cycles_vec"])
+    if "tf_freq_scale" in d:
+        out["tf_freq_scale"] = str(np.asarray(d["tf_freq_scale"]).ravel()[0])
+    if "tf_n_cycles_mode" in d:
+        out["tf_n_cycles_mode"] = str(np.asarray(d["tf_n_cycles_mode"]).ravel()[0])
+    if "tf_baseline_n_select" in d:
+        out["tf_baseline_n_select"] = int(np.asarray(d["tf_baseline_n_select"]).ravel()[0])
+    if "tf_baseline_min_distance_sec" in d:
+        out["tf_baseline_min_distance_sec"] = float(np.asarray(d["tf_baseline_min_distance_sec"]).ravel()[0])
+
+    # Baseline pool data
+    if "baseline_pool_starts" in d:
+        out["baseline_pool_starts"] = np.asarray(d["baseline_pool_starts"])
+    if "baseline_pool_indices" in d:
+        out["baseline_pool_indices"] = np.asarray(d["baseline_pool_indices"])
+    if "baseline_params" in d:
+        out["baseline_params"] = d["baseline_params"]
 
     return out
 
