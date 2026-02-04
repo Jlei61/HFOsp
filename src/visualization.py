@@ -1470,7 +1470,7 @@ def plot_group_event_tf_propagation_from_cache(
         x_end = total_time - 0.02 * total_time
         x_start = x_end - bar_len
         y = float(n_ch) - 0.2
-        ax.plot([x_start, x_end], [y, y], color="black", linewidth=2.0, solid_capstyle="butt")
+        ax.plot([x_start, x_end], [y, y], color="black", linewidth=4.0, solid_capstyle="butt")
         label = scale_bar_label or f"{bar_len * 1000:.0f} ms"
         ax.text(
             (x_start + x_end) * 0.5,
@@ -1480,6 +1480,7 @@ def plot_group_event_tf_propagation_from_cache(
             va="top",
             fontsize=base_fontsize,
             color="black",
+            fontweight="bold",
         )
 
     if freq_scale_bar_hz is not None and float(freq_scale_bar_hz) > 0:
@@ -1489,7 +1490,7 @@ def plot_group_event_tf_propagation_from_cache(
         x = total_time - 0.05 * total_time
         y_bottom = float(n_ch) - 0.25
         y_top = y_bottom - (bar_hz / freq_span) * 0.95
-        ax.plot([x, x], [y_top, y_bottom], color="black", linewidth=2.0, solid_capstyle="butt")
+        ax.plot([x, x], [y_top, y_bottom], color="black", linewidth=4.0, solid_capstyle="butt")
         ax.text(
             x - 0.01 * total_time,
             (y_top + y_bottom) * 0.5,
@@ -1498,6 +1499,7 @@ def plot_group_event_tf_propagation_from_cache(
             va="center",
             fontsize=base_fontsize,
             color="black",
+            fontweight="bold",
         )
 
     if show_centroids and group_analysis_npz_path is not None:
@@ -1540,9 +1542,9 @@ def plot_group_event_tf_propagation_from_cache(
                     xs,
                     ys,
                     s=float(centroid_marker_size),
-                    c=centroid_marker_color,
-                    edgecolors="white",
-                    linewidth=0.8,
+                    facecolors="none",
+                    edgecolors=centroid_marker_color,
+                    linewidth=2.5,
                     zorder=10,
                 )
                 if show_paths and len(xs) > 1:

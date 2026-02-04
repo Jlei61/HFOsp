@@ -63,12 +63,14 @@ group_analysis:
     coact_time_lag_ms: 50.0  # 0 if lag >= this, 1 if no lag
   tf:
     compute_tf_centroids: true  # Enable TF centroid computation
-    tf_n_freqs: 180  # Number of wavelet frequencies
+    save_event_tf_cache: false  # Save event-level TF spectrogram (deprecated, use save_event_tf_tile_cache)
+    save_event_tf_tile_cache: true  # Save 4D TF tile cache for Fig2 (recommended)
+    tf_n_freqs: 180  # Number of wavelet frequencies (log-spaced)
     tf_n_cycles: 4.0  # Fixed cycles (used when tf_n_cycles_mode=fixed)
     tf_n_cycles_mode: linear  # Options: fixed | linear | f_over_2
     tf_n_cycles_min: 3.0  # Min cycles (linear mode)
     tf_n_cycles_max: 10.0  # Max cycles (linear mode)
-    tf_freq_scale: log  # Options: log | linear
+    tf_freq_scale: log  # Options: log | linear (log recommended for HFO)
     baseline_window_sec: 2.0  # Baseline window length
     baseline_step_sec: 1.0  # Baseline window step
     baseline_n_select: 10  # Baseline windows to select per event
@@ -81,6 +83,15 @@ group_analysis:
     seizure_min_duration_sec: 5.0  # Min ictal duration
   visualization:
     save_bandpass: true  # Save x_band in envCache (for Fig1)
+    save_event_tf_tile_cache: true  # Save TF tile cache for Fig2 (multi-channel TF plot)
+    # Fig2 TF plot parameters
+    plot_window_sec: 0.1  # Time window around event center (100ms recommended)
+    low_color_percentile: 70.0  # Values below this -> blue background (highlight energy blobs)
+    cmap: Reds  # Colormap for energy (Reds for blue background contrast)
+    scale_bar_sec: 0.05  # Time scale bar (50ms)
+    freq_scale_bar_hz: 50.0  # Frequency scale bar (50Hz)
+    base_fontsize: 12.0  # Font size for all text elements
+    centroid_marker_size: 25.0  # Size of hollow centroid circles
 
 # === Output naming ===
 # Suffixes for derived files saved by the pipeline.

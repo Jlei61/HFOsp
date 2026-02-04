@@ -345,14 +345,24 @@ precompute_envelope_cache(
 - 用途：直观看到每个通道在每个事件窗内的带通 burst，避免 `imshow` 把时间结构“涂抹成块”。
 - 函数：`plot_group_events_band_raster(plot_style='trace', mode='bandpassed')`
 
-### Fig2：群体事件TF谱图（缓存）+ 频率质心路径
+### Fig2：多通道多事件TF传播图（金标准可视化）
 
-- 用途：统一用 Morlet 小波 + 对数频率轴 + 基线 dB，背景来自 pipeline 预计算缓存，绘图不再做复杂计算。
-- 函数：`plot_group_event_tf_spectrogram_from_cache`
-- 关键输入：`*_groupTF_spectrogram.npz` + `*_groupAnalysis.npz`
+- 用途：展示群体事件在多通道中的时频传播特征（"publication-quality"）
+  - Morlet 小波 TF 分解（log 频率轴）
+  - 基线归一化（dB，动态基线池）
+  - 能量"斑块"（平滑+降采样）而非尖峰
+  - 质心标记（空心圆）和传播路径
+  - 蓝色背景 + 红色能量增强（高对比度）
+- 函数：`plot_group_event_tf_propagation_from_cache`
+- 关键输入：`*_groupTF_tiles.npz` (4D tiles) + `*_groupAnalysis.npz` (centroids)
+- 关键可视化参数（可在 config 中调整）：
+  - `plot_window_sec`: 时间窗口（推荐 0.1s，突出事件中心）
+  - `low_color_percentile`: 低能量阈值（70-80%，设为蓝色背景）
+  - `cmap`: 颜色映射（"Reds" 与蓝色背景对比强）
+  - `scale_bar_sec`, `freq_scale_bar_hz`: 标尺长度
+  - `base_fontsize`, `centroid_marker_size`: 视觉元素大小
 
-质心来源（事件窗内、每通道）：
-从 `groupAnalysis` 的 `tf_centroid_freq` 读取并按事件顺序绘制频率路径。
+质心来源：从 `groupAnalysis` 的 `tf_centroid_time/freq` 读取（peak power，非加权平均）。
 
 ### Fig3：channels × events 的能量/秩/lag（验证用）
 

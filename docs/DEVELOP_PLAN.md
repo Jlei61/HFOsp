@@ -568,7 +568,16 @@ config = HFODetectionConfig(
 "<record>_packedTimes.npy"
 └─ (n_events, 2) [start, end] 秒
 
-# 4. 群体TF谱图缓存（Fig2）
+# 4. 群体TF谱图缓存（Fig2，推荐）
+"<record>_groupTF_tiles.npz"
+├─ power_db: (n_ch, n_events, n_freqs, n_time) 4D TF tiles (dB)
+├─ freqs_hz: (n_freqs,) 对数频率轴
+├─ event_indices: (n_events,) 对应事件索引
+├─ channel_names: (n_ch,) 通道列表
+├─ window_sec: float 事件窗口长度
+└─ sfreq: float 采样率
+
+# 4b. 事件级TF谱图（已弃用，使用4）
 "<record>_groupTF_spectrogram.npz"
 ├─ power_db_mean: (n_events, n_freqs) 事件级TF谱图(dB)
 ├─ freqs_hz: (n_freqs,) 对数频率轴
@@ -614,12 +623,16 @@ fig1 = plot_paper_fig1_bandpassed_traces(
     event_indices=list(range(30)),
 )
 
-# Fig2: TF + 质心路径（缓存）
-fig2 = plot_group_event_tf_spectrogram_from_cache(
-    tfr_cache_npz_path=out_paths['group_tf_spectrogram_path'],
+# Fig2: 多通道TF传播（金标准）
+fig2 = plot_group_event_tf_propagation_from_cache(
+    tfr_tile_cache_npz_path=out_paths['group_tf_tile_cache_path'],
     group_analysis_npz_path=out_paths['group_analysis_path'],
     channel_order=CORE_CHANNELS,
     event_indices=list(range(30)),
+    plot_window_sec=0.1,  # 100ms 时间窗口
+    low_color="#1f4b99",  # 蓝色背景
+    low_color_percentile=70.0,  # 低于70%设为背景
+    cmap="Reds",  # 红色能量映射
 )
 
 # 热图: Energy/Rank/Lag
