@@ -1266,7 +1266,16 @@ def plot_group_event_tf_propagation_from_cache(
     vmin_percentile: float = 5.0,
     vmax_percentile: float = 99.5,
     mask_percentile: Optional[float] = None,
-    smooth_sigma: Optional[Tuple[float, float]] = (0.5, 1.5),
+    smooth_sigma: Optional[Tuple[float, float]] = (0.8, 2.0),
+    time_downsample: int = 1,
+    freq_downsample: int = 1,
+    plot_window_sec: Optional[float] = None,
+    low_color: Optional[str] = "#1f4b99",
+    low_color_percentile: float = 70.0,
+    scale_bar_sec: Optional[float] = 0.05,
+    scale_bar_label: Optional[str] = None,
+    freq_scale_bar_hz: Optional[float] = 50.0,
+    base_fontsize: float = 12.0,
     interpolation: str = "bicubic",
     figsize: Tuple[float, float] = (14, 8),
 ) -> plt.Figure:
@@ -1320,12 +1329,32 @@ def plot_group_event_tf_propagation_from_cache(
             vmin, vmax = -5.0, 10.0
 
     norm = None
-    if float(vmin) < 0.0 < float(vmax):
+    low_thresh = None
+    use_low_color = low_color is not None
+    if use_low_color:
+        Zpos = Z[Z > 0]
+        if Zpos.size > 0:
+            low_thresh = float(np.nanpercentile(Zpos, float(low_color_percentile)))
+        else:
+            low_thresh = float(vmin)
+        norm = matplotlib.colors.Normalize(vmin=float(low_thresh), vmax=float(vmax))
+    elif float(vmin) < 0.0 < float(vmax):
         norm = matplotlib.colors.TwoSlopeNorm(vmin=float(vmin), vcenter=0.0, vmax=float(vmax))
 
     mask_thresh = None
     if mask_percentile is not None and Z.size > 0:
         mask_thresh = float(np.nanpercentile(np.abs(Z), float(mask_percentile)))
+
+    time_mask = None
+    plot_win = None
+    if plot_window_sec is not None and time_axis.size > 0:
+        plot_win = float(plot_window_sec)
+        center_t = 0.5 * float(window_sec)
+        half = 0.5 * plot_win
+        time_mask = (time_axis >= (center_t - half)) & (time_axis <= (center_t + half))
+        if not np.any(time_mask):
+            time_mask = None
+            plot_win = None
 
     fig, ax = plt.subplots(figsize=figsize)
     fmin = float(np.nanmin(freqs_hz)) if freqs_hz.size else 0.0
@@ -1347,16 +1376,46 @@ def plot_group_event_tf_propagation_from_cache(
                 tile_smooth = tile
             tile_display = np.array(tile_smooth, copy=True)
             tile_display[~np.isfinite(tile_display)] = np.nan
+            if time_downsample and tile_display.shape[1] >= int(time_downsample):
+                ds = int(time_downsample)
+                new_len = tile_display.shape[1] // ds
+                if new_len > 0:
+                    trimmed = tile_display[:, : new_len * ds]
+                    tile_display = trimmed.reshape(trimmed.shape[0], new_len, ds).mean(axis=2)
+            if freq_downsample and tile_display.shape[0] >= int(freq_downsample):
+                fs = int(freq_downsample)
+                new_len_f = tile_display.shape[0] // fs
+                if new_len_f > 0:
+                    trimmed_f = tile_display[: new_len_f * fs, :]
+                    tile_display = trimmed_f.reshape(new_len_f, fs, trimmed_f.shape[1]).mean(axis=1)
+            if time_mask is not None:
+                tile_display = tile_display[:, time_mask[: tile_display.shape[1]]]
             if mask_thresh is not None:
                 tile_display[np.abs(tile_display) < mask_thresh] = np.nan
-            x0 = float(ei) * float(window_sec)
-            x1 = x0 + float(window_sec)
+            if use_low_color and norm is not None:
+                tile_display = np.where(
+                    np.isfinite(tile_display),
+                    tile_display,
+                    np.nan,
+                )
+                tile_display = np.where(tile_display < float(norm.vmin), float(norm.vmin) - 1e-6, tile_display)
+            if plot_win is None:
+                x0 = float(ei) * float(window_sec)
+                x1 = x0 + float(window_sec)
+            else:
+                x0 = float(ei) * float(plot_win)
+                x1 = x0 + float(plot_win)
+            if use_low_color:
+                cmap_obj = plt.get_cmap(str(cmap)).copy()
+                cmap_obj.set_under(str(low_color))
+            else:
+                cmap_obj = str(cmap)
             ax.imshow(
                 tile_display,
                 origin="lower",
                 aspect="auto",
                 interpolation=str(interpolation),
-                cmap=str(cmap),
+                cmap=cmap_obj,
                 norm=norm,
                 vmin=float(vmin) if norm is None else None,
                 vmax=float(vmax) if norm is None else None,
@@ -1364,22 +1423,82 @@ def plot_group_event_tf_propagation_from_cache(
             )
 
     for ei in range(n_events + 1):
-        x = float(ei) * float(window_sec)
+        step = float(window_sec) if plot_win is None else float(plot_win)
+        x = float(ei) * step
         ax.axvline(x, color="white", linewidth=1.5, linestyle="-", zorder=2)
 
-    mappable = plt.cm.ScalarMappable(norm=norm, cmap=str(cmap))
-    cbar = fig.colorbar(mappable, ax=ax, fraction=0.015, pad=0.02)
-    cbar.set_label("Power (dB)", rotation=270, labelpad=15)
+    if use_low_color:
+        cbar_cmap = plt.get_cmap(str(cmap)).copy()
+        cbar_cmap.set_under(str(low_color))
+    else:
+        cbar_cmap = str(cmap)
+    mappable = plt.cm.ScalarMappable(norm=norm, cmap=cbar_cmap)
+    cbar = fig.colorbar(
+        mappable,
+        ax=ax,
+        fraction=0.015,
+        pad=0.02,
+        extend="min" if use_low_color else "neither",
+    )
+    cbar.set_label("Power (dB)", rotation=270, labelpad=15, fontsize=base_fontsize)
+    cbar.ax.tick_params(labelsize=base_fontsize)
+    if use_low_color and low_thresh is not None:
+        cbar.ax.text(
+            0.5,
+            -0.06,
+            f"<{low_thresh:.2f} dB",
+            transform=cbar.ax.transAxes,
+            ha="center",
+            va="top",
+            fontsize=base_fontsize - 2,
+        )
 
     ax.set_ylim(0, n_ch)
     ax.set_yticks([i + 0.5 for i in range(n_ch)])
-    ax.set_yticklabels(labels, fontsize=10, fontweight="bold")
+    ax.set_yticklabels(labels, fontsize=base_fontsize, fontweight="bold")
     ax.invert_yaxis()
-    ax.set_xlabel("Time (s) - Concatenated Events")
-    ax.set_title("Normalized Spectrogram (80-250 Hz)", fontweight="bold")
-    ax.tick_params(axis="x", length=0)
+    ax.set_xlabel("Time (s) - Concatenated Events", fontsize=base_fontsize)
+    ax.set_title("Normalized Spectrogram (80-250 Hz)", fontweight="bold", fontsize=base_fontsize + 2)
+    ax.tick_params(axis="x", length=0, labelsize=base_fontsize)
     for spine in ax.spines.values():
         spine.set_visible(False)
+
+    if scale_bar_sec is not None and float(scale_bar_sec) > 0:
+        step = float(window_sec) if plot_win is None else float(plot_win)
+        total_time = float(step) * float(n_events)
+        bar_len = min(float(scale_bar_sec), total_time * 0.5)
+        x_end = total_time - 0.02 * total_time
+        x_start = x_end - bar_len
+        y = float(n_ch) - 0.2
+        ax.plot([x_start, x_end], [y, y], color="black", linewidth=2.0, solid_capstyle="butt")
+        label = scale_bar_label or f"{bar_len * 1000:.0f} ms"
+        ax.text(
+            (x_start + x_end) * 0.5,
+            min(float(n_ch) - 0.02, y + 0.15),
+            label,
+            ha="center",
+            va="top",
+            fontsize=base_fontsize,
+            color="black",
+        )
+
+    if freq_scale_bar_hz is not None and float(freq_scale_bar_hz) > 0:
+        bar_hz = min(float(freq_scale_bar_hz), freq_span * 0.5)
+        step = float(window_sec) if plot_win is None else float(plot_win)
+        total_time = float(step) * float(n_events)
+        x = total_time - 0.05 * total_time
+        y_bottom = float(n_ch) - 0.25
+        y_top = y_bottom - (bar_hz / freq_span) * 0.95
+        ax.plot([x, x], [y_top, y_bottom], color="black", linewidth=2.0, solid_capstyle="butt")
+        ax.text(
+            x - 0.01 * total_time,
+            (y_top + y_bottom) * 0.5,
+            f"{bar_hz:.0f} Hz",
+            ha="right",
+            va="center",
+            fontsize=base_fontsize,
+            color="black",
+        )
 
     if show_centroids and group_analysis_npz_path is not None:
         ga = load_group_analysis_results(group_analysis_npz_path)
@@ -1402,7 +1521,15 @@ def plot_group_event_tf_propagation_from_cache(
                 f_c = float(tf_centroid_freq[gi, ev])
                 if not np.isfinite(t_c) or not np.isfinite(f_c):
                     continue
-                x = float(ei) * float(window_sec) + t_c
+                if plot_win is None:
+                    x = float(ei) * float(window_sec) + t_c
+                else:
+                    center_t = 0.5 * float(window_sec)
+                    half = 0.5 * float(plot_win)
+                    t_plot = t_c - (center_t - half)
+                    if t_plot < 0.0 or t_plot > plot_win:
+                        continue
+                    x = float(ei) * float(plot_win) + t_plot
                 rel_f = (f_c - fmin) / freq_span
                 y = float(ci) + rel_f * 0.95
                 if 0.0 <= y <= float(n_ch):

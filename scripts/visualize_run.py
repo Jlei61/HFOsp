@@ -221,6 +221,13 @@ def main() -> None:
         channel_order=core_channels,
         event_indices=event_indices,
         centroid_marker_size=25.0,
+        plot_window_sec=0.16,
+        low_color="#1f4b99",
+        low_color_percentile=80.0,
+        cmap="Reds",
+        scale_bar_sec=0.05,
+        freq_scale_bar_hz=50.0,
+        base_fontsize=18.0,
         figsize=(12, 10),
     )
     fig2_path = out_dir / f"{output_prefix}_tf_centroid_paths.png"
