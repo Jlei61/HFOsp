@@ -282,6 +282,81 @@ def main() -> None:
     else:
         print(f"[WARN] lagPat not found: {lagpat_path}")
 
+    # ========= 5–7) Network Analysis Figures (Phase A) =========
+    network_result_path = _pick_path(
+        run_summary,
+        ["network_result_path", "networkResult", "network_result"],
+    ) or str(Path(output_dir) / f"{output_prefix}_networkResult.npz")
+
+    network_json_path = network_result_path + ".json"
+    if Path(network_result_path).exists() and Path(network_json_path).exists():
+        from src.network_analysis import (
+            load_network_result,
+            plot_network_topology_2d,
+            plot_outflow_bar_chart,
+            plot_adjacency_heatmap,
+            plot_edge_direction_summary,
+        )
+
+        net_result = load_network_result(network_result_path)
+        n_sel = net_result.n_selected
+        n_edges = net_result.metrics.get("n_edges", 0)
+        print(f"\n[INFO] Network: {n_sel} nodes, {n_edges} edges")
+
+        if n_sel >= 2:
+            # 5) Network topology (2D graph)
+            fig5 = plot_network_topology_2d(
+                net_result,
+                title=f"{subject}/{record} — HFO Epilepsy Network",
+            )
+            fig5_path = out_dir / f"{output_prefix}_network_topology.png"
+            fig5.savefig(fig5_path, dpi=160)
+            plt.close(fig5)
+            print(f"[OK] network topology: {fig5_path}")
+
+            # 6) Outflow bar chart (Source→Sink ranking)
+            fig6 = plot_outflow_bar_chart(
+                net_result,
+                title=f"{subject}/{record} — Source–Sink Ranking",
+            )
+            fig6_path = out_dir / f"{output_prefix}_outflow_ranking.png"
+            fig6.savefig(fig6_path, dpi=160)
+            plt.close(fig6)
+            print(f"[OK] outflow ranking: {fig6_path}")
+
+            # 7) Adjacency heatmap
+            fig7 = plot_adjacency_heatmap(
+                net_result,
+                title=f"{subject}/{record} — Directed Adjacency",
+            )
+            fig7_path = out_dir / f"{output_prefix}_adjacency_heatmap.png"
+            fig7.savefig(fig7_path, dpi=160)
+            plt.close(fig7)
+            print(f"[OK] adjacency heatmap: {fig7_path}")
+
+            # 8) Edge direction summary (pie + lag histogram)
+            fig8 = plot_edge_direction_summary(net_result)
+            fig8_path = out_dir / f"{output_prefix}_edge_direction_stats.png"
+            fig8.savefig(fig8_path, dpi=160)
+            plt.close(fig8)
+            print(f"[OK] edge direction stats: {fig8_path}")
+
+            # Print source ranking to console.
+            ranking = net_result.metrics.get("source_ranking", [])
+            if ranking:
+                print(f"\n{'─'*40}")
+                print(f"  Source–Sink Ranking ({len(ranking)} nodes)")
+                print(f"{'─'*40}")
+                for name, val in ranking:
+                    marker = "◀ SOURCE" if val > 0.3 else ("▶ SINK" if val < -0.3 else "")
+                    print(f"  {name:>10s}  outflow={val:+.3f}  {marker}")
+                print(f"{'─'*40}")
+        else:
+            print("[WARN] Fewer than 2 network nodes — skipping network figures.")
+    else:
+        print(f"[INFO] Network result not found at {network_result_path} — "
+              "run pipeline with network_analysis.enabled=true to generate.")
+
 
 if __name__ == "__main__":
     main()

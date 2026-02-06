@@ -92,6 +92,29 @@ group_analysis:
     base_fontsize: 12.0  # Font size for all text elements
     centroid_marker_size: 25.0  # Size of hollow centroid circles
 
+# === Network analysis (Phase A: Channel-Scale) ===
+# Builds directed weighted epilepsy network from group-analysis co-activation.
+network_analysis:
+  enabled: true  # Set false to skip network step entirely
+  use_all_channels: true  # Use coact_all (all bipolar channels) when available
+  # Node selection (spectral clustering)
+  min_dist_mm: 5.0  # Volume-conduction guard for affinity graph (Phase A: no dist_matrix, ignored)
+  min_cluster_size: 3  # Clusters smaller than this are discarded
+  n_clusters: null  # null = automatic Eigengap; integer = force this many clusters
+  alpha: 0.65  # EigenCentrality vs Rate blend (0.6–0.7 recommended)
+  # Surrogate significance test
+  run_surrogate: true  # Validate co-activation against circular-shift null
+  n_surrogates: 200  # Number of surrogate datasets (200 standard, 50 for quick)
+  # Skeleton construction
+  min_coact: 0.10  # Co-activation threshold for skeleton edges (10%)
+  # Direction injection
+  min_events: 5  # Minimum co-active events per channel pair
+  lag_thresh_ms: 5.0  # Zero-lag guard (|median lag| must exceed this)
+  consistency_thresh: 0.6  # Directional consistency threshold (60%)
+  p_value_thresh: 0.05  # Wilcoxon significance level
+  # Stability weights
+  stability_window_sec: 300.0  # Time-window for temporal robustness (5 min)
+
 # === Output naming ===
 # Suffixes for derived files saved by the pipeline.
 outputs:

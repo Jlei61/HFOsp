@@ -53,6 +53,11 @@ _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
     "select_network_nodes": ("src.network_analysis", "select_network_nodes"),
     "surrogate_significance_test": ("src.network_analysis", "surrogate_significance_test"),
     "compute_stability_weights": ("src.network_analysis", "compute_stability_weights"),
+    "save_network_result": ("src.network_analysis", "save_network_result"),
+    "load_network_result": ("src.network_analysis", "load_network_result"),
+    "plot_outflow_bar_chart": ("src.network_analysis", "plot_outflow_bar_chart"),
+    "plot_adjacency_heatmap": ("src.network_analysis", "plot_adjacency_heatmap"),
+    "plot_edge_direction_summary": ("src.network_analysis", "plot_edge_direction_summary"),
 }
 
 __all__ = ["__version__", *_LAZY_EXPORTS.keys()]

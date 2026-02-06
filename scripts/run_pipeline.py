@@ -237,6 +237,46 @@ def main() -> None:
         )
         out_paths["group_tf_tile_cache_path"] = tf_tile_path
 
+    # ========= Part 4: Network Analysis (Phase A) =========
+    network_cfg = cfg.get("network_analysis", {}) or {}
+    if network_cfg.get("enabled", True):
+        from src.network_analysis import build_hfo_network, save_network_result
+
+        # Map config keys → build_hfo_network kwargs.
+        net_kwargs = {}
+        _net_keys = [
+            "use_all_channels", "min_dist_mm", "min_cluster_size",
+            "n_clusters", "alpha", "run_surrogate", "n_surrogates",
+            "min_coact", "min_events", "lag_thresh_ms",
+            "consistency_thresh", "p_value_thresh", "stability_window_sec",
+        ]
+        for k in _net_keys:
+            if k in network_cfg and network_cfg[k] is not None:
+                net_kwargs[k] = network_cfg[k]
+
+        print("\n[Part 4] Network Analysis (Phase A) ...")
+        net_result = build_hfo_network(
+            out_paths["group_analysis_path"],
+            **net_kwargs,
+        )
+
+        network_npz_path = str(output_dir / f"{output_prefix}_networkResult.npz")
+        save_network_result(net_result, network_npz_path)
+        out_paths["network_result_path"] = network_npz_path
+
+        # Quick summary.
+        ranking = net_result.metrics.get("source_ranking", [])
+        print(f"  Nodes: {net_result.n_selected}/{net_result.n_pool_channels}  "
+              f"Edges: {net_result.metrics.get('n_edges', 0)}  "
+              f"Density: {net_result.metrics.get('density', 0):.3f}")
+        if ranking:
+            top = ranking[0]
+            bot = ranking[-1]
+            print(f"  Top Source: {top[0]} (outflow={top[1]:+.3f})")
+            print(f"  Top Sink:   {bot[0]} (outflow={bot[1]:+.3f})")
+    else:
+        print("\n[Part 4] Network Analysis SKIPPED (enabled=false)")
+
     outputs_cfg = cfg.get("outputs", {}) or {}
     packed_suffix = outputs_cfg.get("packed_times_suffix", "_packedTimes_pipeline.npy")
     lagpat_suffix = outputs_cfg.get("lagpat_suffix", "_lagPat_pipeline.npz")
@@ -272,6 +312,7 @@ def main() -> None:
         "env_cache_path": out_paths.get("env_cache_path"),
         "group_tf_spectrogram_path": out_paths.get("group_tf_spectrogram_path"),
         "group_tf_tile_cache_path": out_paths.get("group_tf_tile_cache_path"),
+        "network_result_path": out_paths.get("network_result_path"),
         "packed_times_path": str(packed_out),
         "lagpat_path": str(lagpat_out),
         "config_snapshot": str(snapshot_path),
@@ -296,6 +337,8 @@ def main() -> None:
         print(f"- groupTF: {out_paths['group_tf_spectrogram_path']}")
     if "group_tf_tile_cache_path" in out_paths:
         print(f"- groupTF tiles: {out_paths['group_tf_tile_cache_path']}")
+    if "network_result_path" in out_paths:
+        print(f"- networkResult: {out_paths['network_result_path']}")
     print(f"- packedTimes: {packed_out}")
     print(f"- lagPat: {lagpat_out}")
     print(f"- config snapshot: {snapshot_path}")

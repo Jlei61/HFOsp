@@ -1166,3 +1166,331 @@ def _empty_result(
         n_selected=0,
         params={},
     )
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  I/O — Save / Load NetworkResult
+# ═════════════════════════════════════════════════════════════════════════════
+
+def save_network_result(
+    result: NetworkResult,
+    npz_path: str,
+) -> str:
+    """Persist a :class:`NetworkResult` to disk.
+
+    Produces two files:
+
+    * ``<npz_path>``  — NumPy arrays (adj, skeleton, stability, …)
+    * ``<npz_path>.json``  — metrics, edge_stats, params (human-readable)
+
+    Parameters
+    ----------
+    result : NetworkResult
+    npz_path : str   output ``.npz`` path.
+
+    Returns
+    -------
+    npz_path : str   the path that was written.
+    """
+    import json as _json
+
+    np.savez_compressed(
+        npz_path,
+        adj=result.adj,
+        node_names=np.asarray(result.node_names, dtype=object),
+        node_weights=result.node_weights,
+        skeleton=result.skeleton,
+        direction_mask=result.direction_mask,
+        stability=result.stability,
+        cluster_labels=result.cluster_labels,
+        n_pool_channels=np.array([result.n_pool_channels]),
+        n_selected=np.array([result.n_selected]),
+    )
+
+    json_path = str(npz_path) + ".json"
+    sidecar = {
+        "metrics": _serialise_metrics(result.metrics),
+        "edge_stats": result.edge_stats,
+        "params": result.params,
+    }
+    with open(json_path, "w", encoding="utf-8") as f:
+        _json.dump(sidecar, f, ensure_ascii=False, indent=2)
+
+    logger.info("Network result saved: %s  (+%s)", npz_path, json_path)
+    return str(npz_path)
+
+
+def load_network_result(npz_path: str) -> NetworkResult:
+    """Reload a :class:`NetworkResult` from :func:`save_network_result` output."""
+    import json as _json
+
+    d = np.load(npz_path, allow_pickle=True)
+
+    json_path = str(npz_path) + ".json"
+    with open(json_path, "r", encoding="utf-8") as f:
+        sidecar = _json.load(f)
+
+    # Restore source_ranking tuples from JSON lists.
+    metrics = sidecar.get("metrics", {})
+    if "source_ranking" in metrics:
+        metrics["source_ranking"] = [
+            tuple(item) for item in metrics["source_ranking"]
+        ]
+
+    return NetworkResult(
+        adj=np.asarray(d["adj"]),
+        node_names=[str(x) for x in d["node_names"]],
+        node_weights=np.asarray(d["node_weights"]),
+        skeleton=np.asarray(d["skeleton"]),
+        direction_mask=np.asarray(d["direction_mask"]).astype(bool),
+        stability=np.asarray(d["stability"]),
+        cluster_labels=np.asarray(d["cluster_labels"]),
+        metrics=metrics,
+        edge_stats=sidecar.get("edge_stats", []),
+        n_pool_channels=int(np.asarray(d["n_pool_channels"]).ravel()[0]),
+        n_selected=int(np.asarray(d["n_selected"]).ravel()[0]),
+        params=sidecar.get("params", {}),
+    )
+
+
+def _serialise_metrics(metrics: Dict[str, Any]) -> Dict[str, Any]:
+    """Make metrics JSON-safe (convert tuples, numpy scalars, etc.)."""
+    out: Dict[str, Any] = {}
+    for k, v in metrics.items():
+        if isinstance(v, dict):
+            out[k] = {str(kk): float(vv) for kk, vv in v.items()}
+        elif isinstance(v, list):
+            out[k] = [list(item) if isinstance(item, tuple) else item for item in v]
+        elif isinstance(v, (np.integer, np.floating)):
+            out[k] = v.item()
+        else:
+            out[k] = v
+    return out
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  Outflow Bar Chart Visualisation
+# ═════════════════════════════════════════════════════════════════════════════
+
+def plot_outflow_bar_chart(
+    result: NetworkResult,
+    output_path: Optional[str] = None,
+    *,
+    figsize: Tuple[float, float] = (8, 6),
+    cmap: str = "RdBu_r",
+    title: Optional[str] = None,
+) -> Any:
+    """Horizontal bar chart of per-node Net Outflow Index.
+
+    Red bars (positive) = Source;  Blue bars (negative) = Sink.
+    Sorted from strongest source (top) to strongest sink (bottom).
+
+    Parameters
+    ----------
+    result : NetworkResult
+    output_path : str, optional   save to file.
+    figsize, cmap, title : display options.
+
+    Returns
+    -------
+    matplotlib Figure
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.colors as mcolors
+
+    outflow = result.metrics.get("net_outflow", {})
+    if not outflow:
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.text(0.5, 0.5, "No outflow data", ha="center", va="center",
+                transform=ax.transAxes, fontsize=14)
+        return fig
+
+    # Sort by outflow descending.
+    sorted_items = sorted(outflow.items(), key=lambda kv: kv[1], reverse=True)
+    names = [item[0] for item in sorted_items]
+    values = np.array([item[1] for item in sorted_items])
+
+    fig, ax = plt.subplots(figsize=figsize)
+
+    # Colour each bar by its outflow value.
+    cm = plt.get_cmap(cmap)
+    abs_max = max(abs(values.min()), abs(values.max()), 0.01)
+    norm = mcolors.Normalize(vmin=-abs_max, vmax=abs_max)
+    colors = [cm(norm(v)) for v in values]
+
+    y_pos = np.arange(len(names))
+    bars = ax.barh(y_pos, values, color=colors, edgecolor="black", linewidth=0.5)
+
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(names, fontsize=9)
+    ax.invert_yaxis()
+    ax.axvline(0, color="black", linewidth=0.8, linestyle="-")
+    ax.set_xlabel("Net Outflow Index  (← Sink | Source →)", fontsize=11)
+    ax.set_title(
+        title or "Source–Sink Ranking (Phase A)",
+        fontsize=13, fontweight="bold",
+    )
+
+    # Annotate values on bars.
+    for bar, val in zip(bars, values):
+        x_text = bar.get_width()
+        ha = "left" if val >= 0 else "right"
+        offset = 0.02 * abs_max * (1 if val >= 0 else -1)
+        ax.text(
+            x_text + offset, bar.get_y() + bar.get_height() / 2,
+            f"{val:+.2f}", va="center", ha=ha, fontsize=8,
+        )
+
+    fig.tight_layout()
+
+    if output_path:
+        fig.savefig(output_path, dpi=150, bbox_inches="tight")
+        logger.info("Outflow bar chart saved to %s", output_path)
+
+    return fig
+
+
+def plot_adjacency_heatmap(
+    result: NetworkResult,
+    output_path: Optional[str] = None,
+    *,
+    figsize: Tuple[float, float] = (9, 8),
+    cmap: str = "YlOrRd",
+    title: Optional[str] = None,
+) -> Any:
+    """Heatmap of the directed weighted adjacency matrix.
+
+    Parameters
+    ----------
+    result : NetworkResult
+    output_path : str, optional   save to file.
+
+    Returns
+    -------
+    matplotlib Figure
+    """
+    import matplotlib.pyplot as plt
+
+    adj = result.adj
+    names = result.node_names
+    n = len(names)
+
+    if n == 0:
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.text(0.5, 0.5, "Empty network", ha="center", va="center",
+                transform=ax.transAxes, fontsize=14)
+        return fig
+
+    fig, ax = plt.subplots(figsize=figsize)
+    im = ax.imshow(adj, cmap=cmap, aspect="auto", interpolation="nearest")
+    ax.set_xticks(range(n))
+    ax.set_yticks(range(n))
+    ax.set_xticklabels(names, rotation=45, ha="right", fontsize=8)
+    ax.set_yticklabels(names, fontsize=8)
+    ax.set_xlabel("Target (j)")
+    ax.set_ylabel("Source (i)")
+    ax.set_title(
+        title or "Directed Weighted Adjacency  A[i→j]",
+        fontsize=13, fontweight="bold",
+    )
+    cb = fig.colorbar(im, ax=ax, shrink=0.8)
+    cb.set_label("Composite Weight (Coact × Consistency × Stability)")
+    fig.tight_layout()
+
+    if output_path:
+        fig.savefig(output_path, dpi=150, bbox_inches="tight")
+        logger.info("Adjacency heatmap saved to %s", output_path)
+
+    return fig
+
+
+def plot_edge_direction_summary(
+    result: NetworkResult,
+    output_path: Optional[str] = None,
+    *,
+    figsize: Tuple[float, float] = (12, 5),
+) -> Any:
+    """Two-panel summary of direction injection statistics.
+
+    Left: pie chart of edge disposition (directed / p-value / zero-lag / …).
+    Right: histogram of median lag for directed edges.
+
+    Parameters
+    ----------
+    result : NetworkResult
+    output_path : str, optional   save to file.
+
+    Returns
+    -------
+    matplotlib Figure
+    """
+    import matplotlib.pyplot as plt
+
+    edge_stats = result.edge_stats
+    if not edge_stats:
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.text(0.5, 0.5, "No edge statistics", ha="center", va="center",
+                transform=ax.transAxes, fontsize=14)
+        return fig
+
+    # --- Left: Pie chart of reasons ---
+    reason_counts: Dict[str, int] = {}
+    directed_lags: List[float] = []
+    for es in edge_stats:
+        r = es.get("reason", "unknown")
+        reason_counts[r] = reason_counts.get(r, 0) + 1
+        if es.get("directed", False):
+            directed_lags.append(es.get("median_lag_ms", 0.0))
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
+
+    # Pie chart.
+    labels = list(reason_counts.keys())
+    sizes = list(reason_counts.values())
+    label_map = {
+        "directed": "Directed",
+        "p_value": "Not significant",
+        "zero_lag": "Zero lag",
+        "low_consistency": "Low consistency",
+        "too_few": "Too few events",
+        "nan_lags": "NaN lags",
+    }
+    display_labels = [label_map.get(l, l) for l in labels]
+    color_map = {
+        "directed": "#2ecc71",
+        "p_value": "#95a5a6",
+        "zero_lag": "#f39c12",
+        "low_consistency": "#e74c3c",
+        "too_few": "#bdc3c7",
+        "nan_lags": "#7f8c8d",
+    }
+    colors = [color_map.get(l, "#cccccc") for l in labels]
+
+    wedges, texts, autotexts = ax1.pie(
+        sizes, labels=display_labels, colors=colors,
+        autopct="%1.0f%%", startangle=90, textprops={"fontsize": 9},
+    )
+    ax1.set_title("Edge Direction Disposition", fontsize=12, fontweight="bold")
+
+    # --- Right: Lag histogram ---
+    if directed_lags:
+        lags_arr = np.array(directed_lags)
+        ax2.hist(lags_arr, bins=30, color="#2ecc71", edgecolor="black", alpha=0.8)
+        ax2.axvline(0, color="red", linewidth=1, linestyle="--")
+        ax2.set_xlabel("Median Lag (ms)", fontsize=11)
+        ax2.set_ylabel("Count", fontsize=11)
+        ax2.set_title(
+            f"Directed Edge Lags (n={len(directed_lags)})",
+            fontsize=12, fontweight="bold",
+        )
+    else:
+        ax2.text(0.5, 0.5, "No directed edges", ha="center", va="center",
+                 transform=ax2.transAxes, fontsize=14)
+
+    fig.tight_layout()
+
+    if output_path:
+        fig.savefig(output_path, dpi=150, bbox_inches="tight")
+        logger.info("Edge direction summary saved to %s", output_path)
+
+    return fig
