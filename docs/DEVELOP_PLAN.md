@@ -556,60 +556,266 @@ lag_ij_k = lag_raw[i, k] - lag_raw[j, k]  # 负值 = i 领先 j
 
 | 数据 | 形状 | 来源 | 优先级 | 用途 |
 |------|------|------|--------|------|
-| `electrode_distance` | (n_all, n_all) | MNI坐标计算 | **P0 关键** | 容积传导剔除 |
-| `hfo_type_per_event` | (n_ch, n_events) | 检测器输出 | P1 高 | 病理加权 |
-| `tissue_label` | (n_all,) | FreeSurfer | P2 中 | 灰/白质过滤 |
-| `mni_coords` | (n_all, 3) | 配准结果 | P1 高 | 3D可视化 |
+| `electrode_distance` | (n_all, n_all) | MNI坐标计算 | **Phase B 阻塞** | 容积传导剔除、传播速度验证 |
+| `hfo_type_per_event` | (n_ch, n_events) | 检测器输出 | **Phase B** | 病理加权 (FR 比例) |
+| `tissue_label` | (n_all,) | FreeSurfer | Phase C | 灰/白质过滤（不硬剔除） |
+| `mni_coords` | (n_all, 3) | 配准结果 | **Phase B 阻塞** | 3D可视化、距离矩阵 |
+| `lead_field_matrix` | (n_ch, n_sources) | BEM 前向建模 | Phase C | 源空间 LFM 概率投影 |
+| `sc_matrix` | (n_regions, n_regions) | HCP tractography | Phase C | SC-FC 耦合图 |
 
 ---
 
-#### 4.2 节点筛选策略 (Node Selection) — 避免"8通道陷阱"
+#### 4.2 节点筛选策略 (Node Selection) — 从"三层准入"到"谱聚类-率加权"
 
-**现状批判**：
+**核心问题**：图论统计在 $N=8$ 时统计效力极低。必须扩大节点池至 30-50 个，但不能无脑堆砌。
 
-> 图论统计（小世界属性、Hub识别）在 $N=8$ 时统计效力极低，单点噪声可颠覆结论。
+##### 4.2.1 两种主流策略的致命缺陷
 
-**三层准入策略**：
+| | Rate-based (发放率筛选) | Co-activation (共激活筛选) |
+|---|---|---|
+| **假设** | 发放率越高 = 致痫性越高 | 同步放电 = 病理网络 |
+| **优势** | $O(N)$ 复杂度，直观 | 天然噪声过滤器，拓扑相关 |
+| **致命缺陷 1** | **生理性 HFO 混淆**：视觉/运动皮层和海马在 NREM 期间产生高频率生理性 HFO，被误判为致痫灶 | **Sink 陷阱**：被动响应节点因频繁被驱动而表现出极高共激活率，无法区分 Source 和 Sink |
+| **致命缺陷 2** | **"最响亮节点"谬误**：最活跃的节点不一定是 Driver。真正的"起搏器"可能发放率低但在关键时刻触发全网同步 | **阈值敏感性**：20% 是经验值，对高度局灶性癫痫（微小 FCD）可能漏判 |
+| **致命缺陷 3** | **时间非平稳性**：受睡眠周期和药物浓度影响，短时统计阈值不稳定 | 无法提供"强度"信息，仅提供"存在性" |
 
-| 层级 | 规则 | 阈值建议 | 保留理由 |
-|------|------|----------|---------|
-| **频率准入** | HFO Rate > threshold | > 1次/分钟 | 基础活跃度 |
-| **条件概率准入** | $P(j \mid i) > 0.8$ 对任一核心节点 $i$ | 80% | "沉默的共犯"不能丢 |
-| **病理准入** | 包含 ≥1 次 Fast Ripple | - | 稀疏但高致痫性 |
+**结论**：必须融合两者 — 用 Co-activation 的抗噪性锁定网络核心，用 Rate 的强度信息区分 Source 和 Sink。
 
-**伪代码**：
+##### 4.2.2 推荐策略：时空约束的谱聚类-率加权筛选器
+
+> Spatially Constrained Spectral-Rate Filter
+
+**为什么用谱聚类而不是固定阈值？**
+
+固定阈值（如 top 20%）在患者间不具泛化性 — 高度局灶的 FCD 患者和弥漫性皮层发育不良患者的网络规模天差地别。谱聚类利用拉普拉斯矩阵的特征值间隙（Eigengap）**自适应地**确定聚类数，比任何固定阈值都更鲁棒。
+
+**三步流程**：
+
+```
+Step 1: 时空约束的共激活图
+   A_co (n×n) → 距离惩罚 → A_co_masked
+                             │
+Step 2: 谱聚类子图提取        │
+   L = D - A_co_masked       │
+   特征分解 → Eigengap       │
+   → 识别主要簇 (剔除孤立点)  │
+                             │
+Step 3: 率调制的中心性加权     │
+   W_i = α·EigenCentrality(i) + (1-α)·f(Rate_i)
+   → 最终节点集合 + 权重
+```
+
+**Step 1 — 构建时空约束的共激活图**：
+
+```python
+def build_spatial_coact_graph(
+    coact_ratio: np.ndarray,         # (n_all, n_all) 共激活概率
+    dist_matrix: Optional[np.ndarray] = None,  # (n_all, n_all) mm
+    min_dist_mm: float = 5.0,        # 容积传导惩罚距离
+) -> np.ndarray:
+    """
+    对共激活矩阵施加空间约束，剔除近距离虚假同步。
+
+    物理依据：
+    - SEEG 宏电极传感半径 ~3-5mm (触点 φ0.8mm, 长2mm)
+    - <5mm 的"高同步"多为电场直接传导，非突触传播
+    """
+    A = coact_ratio.copy()
+    np.fill_diagonal(A, 0)
+
+    if dist_matrix is not None:
+        close_mask = dist_matrix < min_dist_mm
+        A[close_mask] = 0  # 强制断开近距离边
+
+    # 对称化（取较小值，保守估计）
+    A = np.minimum(A, A.T)
+    return A
+```
+
+**Step 2 — 谱聚类子图提取**：
+
+```python
+from sklearn.cluster import SpectralClustering
+
+def extract_network_clusters(
+    A_co: np.ndarray,                 # 时空约束后的共激活矩阵
+    min_cluster_size: int = 3,        # 最小簇大小（<3 视为噪声）
+    n_clusters: Optional[int] = None, # None = 自动 Eigengap
+) -> Tuple[np.ndarray, int]:
+    """
+    从共激活矩阵中自适应提取网络核心簇。
+
+    Returns:
+        labels: (n,) 聚类标签，-1 表示被剔除的孤立/微小簇
+        n_clusters_found: 实际簇数
+    """
+    n = A_co.shape[0]
+
+    if n_clusters is None:
+        # Eigengap 启发式：拉普拉斯矩阵特征值最大跳跃
+        D = np.diag(A_co.sum(axis=1))
+        L = D - A_co
+        k = min(20, n - 1)
+        eigenvalues = np.sort(np.linalg.eigvalsh(L))[:k]
+        gaps = np.diff(eigenvalues)
+        n_clusters = int(np.argmax(gaps[1:])) + 2  # 跳过第一个(总是0)
+        n_clusters = max(2, min(n_clusters, n // 3))
+
+    sc = SpectralClustering(
+        n_clusters=n_clusters,
+        affinity='precomputed',
+        assign_labels='kmeans',
+        random_state=42,
+    )
+    labels = sc.fit_predict(A_co)
+
+    # 剔除过小的簇（非网络性 HFO 或噪声）
+    for cl in np.unique(labels):
+        if (labels == cl).sum() < min_cluster_size:
+            labels[labels == cl] = -1
+
+    return labels, n_clusters
+```
+
+**Step 3 — 率调制的中心性加权**：
+
+```python
+import networkx as nx
+
+def compute_node_weights(
+    A_co: np.ndarray,              # 共激活矩阵
+    rate_per_ch: np.ndarray,       # (n,) HFO发放率 (events/min)
+    cluster_labels: np.ndarray,    # (n,) 谱聚类标签
+    alpha: float = 0.65,           # 网络属性 vs 发放率权衡
+) -> np.ndarray:
+    """
+    融合网络地位（EigenCentrality）与病理活跃度（Rate）。
+
+    W_i = α · EigenCentrality(i) + (1-α) · normalize(log(1+Rate_i))
+
+    α 建议 0.6-0.7：
+      - 倾向网络属性：Hub节点权重高
+      - 保留率信息：区分 Source(率高且稳定) 和 Sink(被动响应)
+    """
+    n = len(rate_per_ch)
+    weights = np.zeros(n, dtype=np.float64)
+
+    valid = cluster_labels >= 0
+    if valid.sum() < 3:
+        return weights
+
+    # EigenCentrality（在子图上计算）
+    G = nx.from_numpy_array(A_co[np.ix_(valid, valid)])
+    try:
+        ec = nx.eigenvector_centrality_numpy(G, weight='weight')
+        ec_arr = np.array([ec[i] for i in range(valid.sum())])
+    except nx.NetworkXError:
+        ec_arr = np.ones(valid.sum()) / valid.sum()
+
+    # Rate（对数归一化，避免极端值主导）
+    rates = rate_per_ch[valid]
+    rates_log = np.log1p(rates)  # log(1+rate), 避免 log(0)
+    rates_norm = rates_log / (rates_log.max() + 1e-10)
+
+    ec_norm = ec_arr / (ec_arr.max() + 1e-10)
+
+    weights[valid] = alpha * ec_norm + (1 - alpha) * rates_norm
+    return weights
+```
+
+##### 4.2.3 替代数据显著性检验（Surrogate Testing）
+
+> 共激活的"统计显著"不等于"物理真实"。必须验证观测到的共激活是否显著高于随机。
+
+```python
+def surrogate_significance_test(
+    events_bool: np.ndarray,       # (n_ch, n_events) 参与mask
+    n_surrogates: int = 200,       # 替代数据集数量
+    p_threshold: float = 0.05,     # 显著性阈值
+) -> np.ndarray:
+    """
+    独立循环平移各通道事件序列生成替代数据集，
+    验证真实共激活是否显著高于随机预期。
+
+    Returns: (n_ch, n_ch) bool — 显著性 mask
+    """
+    n_ch, n_ev = events_bool.shape
+    real_coact = (events_bool @ events_bool.T).astype(np.float64) / n_ev
+
+    surr_counts = np.zeros((n_ch, n_ch), dtype=np.int64)
+    rng = np.random.default_rng(42)
+
+    for _ in range(n_surrogates):
+        shifted = np.zeros_like(events_bool)
+        for ci in range(n_ch):
+            shift = rng.integers(0, n_ev)
+            shifted[ci] = np.roll(events_bool[ci], shift)
+        surr_coact = (shifted @ shifted.T).astype(np.float64) / n_ev
+        surr_counts += (surr_coact >= real_coact).astype(np.int64)
+
+    p_values = surr_counts.astype(np.float64) / n_surrogates
+    return p_values < p_threshold
+```
+
+##### 4.2.4 完整节点筛选 API
 
 ```python
 def select_network_nodes(
-    rate_per_ch: np.ndarray,      # (n_all,) HFO rate (events/min)
-    coact_ratio: np.ndarray,      # (n_all, n_all) P(j|i)
-    has_fast_ripple: np.ndarray,  # (n_all,) bool
-    core_nodes: List[int],        # 已知高频节点索引
-    min_rate: float = 1.0,
-    conditional_prob_thresh: float = 0.8,
-) -> np.ndarray:
+    coact_ratio: np.ndarray,          # (n_all, n_all) 共激活概率
+    rate_per_ch: np.ndarray,          # (n_all,) HFO rate (events/min)
+    events_bool: Optional[np.ndarray] = None,  # 用于替代数据检验
+    dist_matrix: Optional[np.ndarray] = None,
+    # 谱聚类参数
+    min_dist_mm: float = 5.0,
+    min_cluster_size: int = 3,
+    n_clusters: Optional[int] = None,  # None = Eigengap 自动
+    # 权重参数
+    alpha: float = 0.65,
+    # 替代检验
+    n_surrogates: int = 200,
+) -> Tuple[np.ndarray, np.ndarray]:
     """
-    返回节点索引，目标 30-50 个节点。
+    三步混合筛选：空间约束 → 谱聚类 → 率加权。
+
+    Returns:
+        selected_idx: (n_selected,) 入选节点索引
+        node_weights: (n_selected,) 节点权重
     """
-    n = len(rate_per_ch)
-    selected = np.zeros(n, dtype=bool)
-    
-    # 层1: 频率准入
-    selected |= (rate_per_ch > min_rate)
-    
-    # 层2: 条件概率准入 (沉默的共犯)
-    for core_i in core_nodes:
-        selected |= (coact_ratio[core_i, :] > conditional_prob_thresh)
-    
-    # 层3: 病理准入 (稀疏但高信噪比)
-    selected |= has_fast_ripple
-    
-    return np.where(selected)[0]
+    # Step 1: 空间约束
+    A_co = build_spatial_coact_graph(coact_ratio, dist_matrix, min_dist_mm)
+
+    # Step 1.5: 替代数据检验（可选但推荐）
+    if events_bool is not None:
+        sig_mask = surrogate_significance_test(events_bool, n_surrogates)
+        A_co[~sig_mask] = 0
+
+    # Step 2: 谱聚类
+    labels, _ = extract_network_clusters(A_co, min_cluster_size, n_clusters)
+
+    # Step 3: 率调制中心性加权
+    weights = compute_node_weights(A_co, rate_per_ch, labels, alpha)
+
+    selected = np.where(labels >= 0)[0]
+    return selected, weights[selected]
 ```
 
-**⚠️ 不要做的事**：
-- ❌ 仅用白质标签剔除 — 灰质异位/脑室周围结节位于深部白质但是 HFO 高发区
-- ❌ 硬编码通道数 — 让数据决定，不是人为设定
+##### 4.2.5 可行性与工程约束
+
+**计算复杂度**：谱聚类的特征分解为 $O(N^3)$，SEEG 通道数 $N \approx 120$，实测耗时 **< 10ms**，完全可行。
+
+**Eigengap 不稳定时的退化策略**：当 Eigengap 不明显时（特征值平缓下降），提供 `n_clusters` 手动覆盖选项。也可退化为简单阈值筛选：
+
+```python
+# 退化方案（当谱聚类结果不理想时的保底策略）
+selected = np.where(rate_per_ch > min_rate)[0]  # 率筛选
+selected = selected[coact_ratio[selected][:, selected].sum(1) > min_coact]  # 共激活过滤
+```
+
+**⚠️ 关键约束**：
+- ❌ 不要仅用白质标签剔除 — 灰质异位/脑室周围结节位于深部白质但是 HFO 高发区
+- ❌ 不要硬编码通道数 — 让谱聚类的 Eigengap 决定网络规模
+- ❌ 不要忽略"沉默的共犯" — 低发放率但高条件概率的 Sink 节点被谱聚类自然保留
+- ✅ Eigengap 不稳定时，提供 `n_clusters` 手动覆盖选项
 
 ---
 
@@ -731,24 +937,97 @@ def inject_direction(
 
 ---
 
-#### 4.5 权重定义 (Weight Definition) — 病理加权升级
+#### 4.5 权重定义 (Weight Definition) — 多维复合权重
 
-**基础权重**：
+> 单一权重无法捕捉致痫网络的复杂性。必须融合因果性、稳定性与病理特异性。
 
-$$W_{ij} = \text{Coactivation}_{ij} \times \text{Consistency}_{ij}$$
+##### 4.5.1 三维权重模型
 
-**病理升级（可选）**：
+$$W_{ij} = \underbrace{\text{Coact}_{ij} \times \text{Consistency}_{ij}}_{\text{Causality（因果性）}} \times \underbrace{(1 - \text{CV}_{time}^{ij})}_{\text{Stability（稳定性）}} \times \underbrace{\left(1 + \alpha \cdot \frac{N_{FR}^{ij}}{N_{total}^{ij}}\right)}_{\text{Pathology（病理性）}}$$
 
-$$W_{ij}^{pathology} = W_{ij} \times \left(1 + \alpha \cdot \frac{N_{FR}^{ij}}{N_{total}^{ij}}\right)$$
+| 维度 | 定义 | 数据来源 | Phase |
+|------|------|----------|-------|
+| **Causality** | $\text{Coact}_{ij} \times \text{Consistency}_{ij}$ — 共激活概率 × 方向一致性 | `coact_ratio` + `lag_raw` | **A (立即可做)** |
+| **Stability** | $1 - \text{CV}(\text{Connectivity}(t))$ — 连接的时间鲁棒性 | `event_windows` 按时间窗切片 | **A (立即可做)** |
+| **Pathology** | $1 + \alpha \cdot \frac{N_{FR}}{N_{total}}$ — Fast Ripple 比例加权 | `hfo_type_per_event` | **B (需分类数据)** |
 
-其中：
-- $N_{FR}^{ij}$：通道对 (i,j) 共同事件中包含 Fast Ripple 的数量
-- $\alpha$：病理加权系数（建议 0.5-2.0）
+##### 4.5.2 Stability（稳定性）维度 — 时间鲁棒性
 
-**设计理由**（参考 `SpikewHFO更重要.pdf`）：
+**核心思想**：癫痫网络应具有刻板性（Stereotypical），随机出现的连接是噪声。
+
+```python
+def compute_stability_weights(
+    lag_raw: np.ndarray,           # (n_ch, n_events) 质心时间
+    events_bool: np.ndarray,       # (n_ch, n_events) 参与mask
+    event_times: np.ndarray,       # (n_events,) 事件时间戳
+    window_sec: float = 300.0,     # 5分钟时间窗
+    min_windows: int = 3,          # 最少窗口数
+) -> np.ndarray:
+    """
+    计算每条边在多个时间窗内的连接方向一致性。
+    
+    Stability = 1 - CV(consistency_per_window)
+    高稳定性 = 固定的病理通路；低稳定性 = 瞬态噪声
+    """
+    n_ch = lag_raw.shape[0]
+    stability = np.full((n_ch, n_ch), np.nan)
+    
+    # 按时间窗切片
+    t_min, t_max = event_times.min(), event_times.max()
+    edges = np.arange(t_min, t_max, window_sec)
+    if len(edges) < min_windows:
+        return np.ones((n_ch, n_ch))  # 数据不够，退化为权重1
+    
+    window_consistencies = []
+    for t_start in edges:
+        t_end = t_start + window_sec
+        win_mask = (event_times >= t_start) & (event_times < t_end)
+        if win_mask.sum() < 5:
+            continue
+        
+        # 每个时间窗内计算方向一致性
+        cons = np.zeros((n_ch, n_ch))
+        for i in range(n_ch):
+            for j in range(i+1, n_ch):
+                both = events_bool[i, win_mask] & events_bool[j, win_mask]
+                if both.sum() < 3:
+                    continue
+                lags = lag_raw[i, win_mask][both] - lag_raw[j, win_mask][both]
+                med = np.median(lags)
+                cons[i, j] = np.mean(np.sign(lags) == np.sign(med))
+                cons[j, i] = cons[i, j]
+        window_consistencies.append(cons)
+    
+    if len(window_consistencies) < min_windows:
+        return np.ones((n_ch, n_ch))
+    
+    stacked = np.stack(window_consistencies)
+    mean_cons = np.nanmean(stacked, axis=0)
+    std_cons = np.nanstd(stacked, axis=0)
+    cv = np.where(mean_cons > 0, std_cons / mean_cons, 1.0)
+    stability = 1.0 - np.clip(cv, 0, 1)
+    
+    return stability
+```
+
+##### 4.5.3 Pathology（病理性）维度 — 频率特异性
+
+**设计理由**（参考文献：SpikewHFO更重要.pdf）：
 - 叠加 HFO 的 Spike 比单纯 Spike 更能定位 SOZ
 - Fast Ripple 比 Ripple 更具病理特异性
 - 给高病理性传播事件更高投票权
+
+**Phase A（立即可做）**：用 Coact × Consistency × Stability 三维权重
+
+**Phase B（需 FR 分类数据后）**：加入 $(1 + \alpha \cdot FR_{ratio})$ 因子，$\alpha$ 建议 0.5-2.0
+
+##### 4.5.4 进阶方向：频谱因果性（Phase C 研究前沿）
+
+> 用频谱格兰杰因果 (Spectral GC) 或偏定向相干 (PDC) 替代 Lag-based 因果推断。
+
+$$W_{ij}^{advanced} = \underbrace{\text{PDC}_{ij}(f_{HFO})}_{\text{频域因果}} \times \underbrace{(1 - \text{CV}_{time})}_{\text{稳定性}} \times \underbrace{\frac{SC_{ij}}{SC_{max}}}_{\text{解剖先验}} \times \underbrace{\text{PathScore}_i}_{\text{节点病理分}}$$
+
+**为什么列为 Phase C**：PDC 需要模型阶数选择（AIC/BIC）、平稳性检验、$O(N^2 \times T \times p)$ 计算。对 50 通道 × 2h 数据虽然可行但调参复杂。先用 Lag-based 方法验证整体流程，再考虑替换为 PDC。
 
 ---
 
@@ -809,10 +1088,11 @@ def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
 | 危害 | 网络被无意义短边主导 |
 | **防护** | 强制剔除 `dist_matrix < 10mm` 的边 |
 | **反向利用** | 保留局部连接强度作为 "Local Recruitment Score" |
+| **零滞后陷阱** | 深部强源被两个远距电极同时记录 → 高同步但零延迟<br>必须用 PLI/wPLI（对零滞后不敏感）或 Wilcoxon 检验过滤 |
 
 **陷阱2：采样偏差 (Sampling Bias)**
 
-| 现象 | SEEG 只能探测到插了电极的地方 |
+| 现象 | SEEG 仅覆盖不到 1% 的脑体积 |
 |------|------------------------------|
 | 危害 | 真正的源在未采样区，中继站被误判为源 |
 | **防护** | 结论必须谨慎：<br>"在被监测的网络中，节点 X 表现出源的特征" |
@@ -831,50 +1111,121 @@ def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
 | 危害 | 间歇性喷发的 SOZ 被持续活跃的中继站掩盖 |
 | **进阶方向** | 动态切片：每 5 分钟或每 100 事件计算一次<br>比较 Pre-ictal vs Interictal 网络拓扑 |
 
+**陷阱5：生理性 HFO 混淆 (Physiological HFO Contamination)** 🔴 新增
+
+| 现象 | 视觉/运动皮层和海马在 NREM 期间产生高发放率生理性 HFO |
+|------|--------------------------------------------------|
+| 危害 | 功能区被误判为致痫灶 → 手术导致功能缺损 |
+| **防护** | 谱聚类 + 共激活过滤 — 生理性 HFO 往往是孤立的局部功能柱活动，不形成大尺度同步网络<br>Stability 权重 — 生理性 HFO 是任务/状态相关的瞬态，病理性更持续 |
+| **补充** | 结合 Spike-HFO 共现特征：叠加 Spike 的 HFO 病理特异性更高 |
+
+**陷阱6：Sink/Source 反转 (Sink Trap)** 🔴 新增
+
+| 现象 | SOZ 在发作间期可能表现为 Sink（被抑制），发作期转为 Source |
+|------|------------------------------------------------------|
+| 危害 | 仅分析发作间期数据会将 SOZ 误判为"接收节点" |
+| **防护** | 必须结合 Ictal 数据验证：寻找"间期 Sink → 发作期 Source"的动态反转节点<br>这种反转本身就是 EZ 的"指纹"特征 |
+| **指标** | $\Delta \text{Outflow} = \text{Outflow}_{ictal} - \text{Outflow}_{interictal}$ — 反转幅度最大的节点 |
+
+**陷阱7：SEEG 行波假设失效 (Traveling Wave Caveat)** 🔴 新增
+
+| 现象 | HFO/IED 在皮层上表现为行波（Traveling Waves） |
+|------|---------------------------------------------|
+| 危害 | 在 Grid 电极上可直接拟合波峰梯度场计算传播速度矢量<br>**但 SEEG 是棒状深部电极**，穿过不同皮层层级，2D 平面波假设失效 |
+| **防护** | 在 SEEG 中必须沿电极轴向（Axial）和跨电极（Cross-electrode）分别计算延迟<br>不可盲目拟合平面波 |
+| **方向反转** | IED 传播方向通常**指向**致痫灶（Sink 特征）<br>Ictal Discharge 通常**背离**致痫灶传播<br>这一方向反转是重要的定位特征 |
+
 ---
 
-#### 4.8 分步实施计划 (Implementation Roadmap)
+#### 4.8 三阶段实施路线图 (Three-Phase Roadmap)
 
-| Step | 任务 | 输入 | 输出 | 状态 |
-|------|------|------|------|------|
-| **0** | 电极坐标获取 | MNI配准结果 | `mni_coords.npy`, `dist_matrix.npy` | ⬜ 待定 |
-| **1** | 节点筛选 | `coact_all_*`, rate | `selected_nodes` | ⬜ 待开发 |
-| **2** | 骨架构建 | `coact_ratio`, `dist_matrix` | `skeleton` (无向) | ⬜ 待开发 |
-| **3** | 方向注入 | `skeleton`, `lag_raw` | `adj_directed` | ⬜ 待开发 |
-| **4** | 权重计算 | `adj`, `coact`, `consistency` | `adj_weighted` | ⬜ 待开发 |
-| **5** | 图论指标 | `adj_weighted` | `metrics_dict` | ⬜ 待开发 |
-| **6** | 可视化 | `metrics`, `mni_coords` | 3D 脑图 | ⬜ 待开发 |
+> "Theory and practice sometimes clash. Theory loses. Every single time." — 先用现有数据跑通全流程，再逐步加入高级特征。
+
+##### Phase A：Channel-Scale MVP（数据已就绪，立即可做）
+
+| Step | 任务 | 输入 | 输出 | 新增依赖 | 状态 |
+|------|------|------|------|----------|------|
+| A.1 | 谱聚类节点筛选 | `coact_all_event_ratio`, `rate` | `selected_nodes`, `node_weights` | `sklearn` | ⬜ |
+| A.2 | 替代数据显著性检验 | `events_bool` | `sig_mask` | — | ⬜ |
+| A.3 | 骨架构建（无距离约束） | `coact_ratio` | `skeleton` (无向) | — | ⬜ |
+| A.4 | 方向注入（Wilcoxon+一致性） | `skeleton`, `lag_raw` | `adj_directed` | `scipy.stats` | ⬜ |
+| A.5 | Stability 权重 | `lag_raw`, `event_windows` | `stability_matrix` | — | ⬜ |
+| A.6 | 复合权重计算 | `adj`, `coact`, `stability` | `adj_weighted` | — | ⬜ |
+| A.7 | 图论指标 | `adj_weighted` | `metrics_dict` | `networkx` | ⬜ |
+| A.8 | 2D 网络拓扑图 | `metrics` | `network_plot.png` | `matplotlib` | ⬜ |
+
+**Phase A 的交付物**：一个完整的 Channel-scale 有向加权癫痫网络，包含 Net Outflow 排名。
+
+##### Phase B：Channel-Scale + Geometry（需 MNI 坐标）
+
+| Step | 任务 | 输入 | 输出 | 阻塞条件 | 状态 |
+|------|------|------|------|----------|------|
+| B.0 | 电极坐标获取 | MNI 配准结果 | `mni_coords.npy`, `dist_matrix.npy` | **需临床数据** | ⬜ |
+| B.1 | 空间约束骨架 | `dist_matrix`, `coact_ratio` | `skeleton_spatial` | B.0 | ⬜ |
+| B.2 | 容积传导剔除 | `dist_matrix < 10mm` | `skeleton_clean` | B.0 | ⬜ |
+| B.3 | 传播速度验证 | `dist_matrix`, `lag_raw` | `velocity_map` (0.1-10 m/s) | B.0 | ⬜ |
+| B.4 | 病理加权（FR 比例） | `hfo_type_per_event` | `pathology_weight` | **需 FR 分类** | ⬜ |
+| B.5 | 3D 脑图 | `metrics`, `mni_coords` | `outflow_brain_3d.html` | B.0 | ⬜ |
+| B.6 | Ictal vs Interictal 对比 | `event_windows`, `seizure_onsets` | `delta_outflow` | — | ⬜ |
+
+**Phase B 的交付物**：物理约束后的网络 + 3D 可视化 + Sink/Source 反转分析。
+
+##### Phase C：Source-Scale 研究前沿（需影像学流水线）
+
+| Step | 任务 | 输入 | 阻塞条件 | 状态 |
+|------|------|------|----------|------|
+| C.1 | 前向模型(BEM) | FreeSurfer 输出, 电极坐标 | 需 MRI 分割 + 配准 | ⬜ |
+| C.2 | 导联场矩阵(LFM) | BEM 模型 | C.1 | ⬜ |
+| C.3 | LFM 概率投影 | `LFM`, `channel_metrics` | C.2 | ⬜ |
+| C.4 | SC-FC 耦合图 | HCP tractography | 需 DWI 数据 | ⬜ |
+| C.5 | PDC/频谱格兰杰 | 原始时间序列 | 计算密集 | ⬜ |
+| C.6 | NMM 验证 | 连接矩阵 | 独立研究课题 | ⬜ |
+
+**Phase C 的交付物**：源空间级别的病理网络重构（研究论文级别）。
+
+---
 
 **核心 API 设计**：
 
 ```python
 # src/network_analysis.py
 
+@dataclass
+class NetworkResult:
+    """癫痫网络分析结果。"""
+    adj: np.ndarray              # (n_selected, n_selected) 有向加权邻接矩阵
+    node_names: List[str]        # 节点通道名
+    node_weights: np.ndarray     # (n_selected,) 节点权重 (EigenCentrality × Rate)
+    metrics: Dict[str, Any]      # 图论指标
+    edge_stats: Dict[str, Any]   # 每条边的统计信息
+    cluster_labels: np.ndarray   # (n_all,) 谱聚类标签
+
 def build_hfo_network(
     group_analysis_npz: str,
     dist_matrix: Optional[np.ndarray] = None,
-    # 节点筛选
-    min_rate: float = 1.0,
-    conditional_prob_thresh: float = 0.8,
+    # 节点筛选（谱聚类参数）
+    min_dist_mm: float = 5.0,
+    min_cluster_size: int = 3,
+    n_clusters: Optional[int] = None,  # None = Eigengap 自动
+    alpha: float = 0.65,               # EigenCentrality vs Rate 权衡
     # 骨架构建
     min_coact: float = 0.10,
-    min_dist_mm: float = 10.0,
     # 方向判定
     min_events: int = 5,
     lag_thresh_ms: float = 5.0,
     consistency_thresh: float = 0.6,
     p_value_thresh: float = 0.05,
+    # Stability
+    stability_window_sec: float = 300.0,
 ) -> NetworkResult:
     """
-    一站式构建癫痫网络。
-    
+    一站式构建癫痫网络（Phase A: Channel-Scale）。
+
+    流程：谱聚类节点选择 → 骨架构建 → 方向注入 → 复合权重 → 图论指标
+
     Returns
     -------
-    NetworkResult : dataclass
-        - adj: (n_selected, n_selected) 有向加权邻接矩阵
-        - node_names: List[str]
-        - metrics: Dict[str, float] 图论指标
-        - edge_stats: Dict 每条边的统计信息
+    NetworkResult : 包含有向加权邻接矩阵、节点权重和图论指标
     """
     ...
 ```
@@ -888,13 +1239,29 @@ def plot_outflow_brain_map(
     output_path: str,
 ):
     """
-    3D 脑图：
+    3D 脑图（Phase B 交付物）：
     - 节点颜色 = Net Outflow (红=Source, 蓝=Sink)
     - 节点大小 = Local Efficiency
     - 边颜色 = 传播方向
     - 边粗细 = 权重
-    
+
     这是直接对话临床医生的"终极图表"。
+    """
+    ...
+
+def plot_network_topology_2d(
+    network_result: NetworkResult,
+    output_path: str,
+    layout: str = 'spring',
+):
+    """
+    2D 网络拓扑图（Phase A 交付物）：
+    - 节点颜色 = Net Outflow
+    - 节点大小 = Node Weight (EigenCentrality × Rate)
+    - 边粗细 = 复合权重
+    - 布局 = spring / circular / spectral
+
+    不需要 MNI 坐标，Phase A 即可生成。
     """
     ...
 ```
@@ -903,18 +1270,95 @@ def plot_outflow_brain_map(
 
 #### 4.9 功能清单 (Feature Checklist)
 
+**Phase A — Channel-Scale MVP（立即可做）**
+
 | 功能 | 说明 | 依赖 | 状态 |
 |------|------|------|------|
-| 4.1 节点筛选 | 三层准入策略 | `coact_all_*` | ⬜ |
-| 4.2 骨架构建 | 加权无向图 | `coact_ratio` | ⬜ |
-| 4.3 容积传导剔除 | 距离约束 | `dist_matrix` | ⬜ |
-| 4.4 方向注入 | Wilcoxon + 一致性检验 | `lag_raw` | ⬜ |
-| 4.5 病理加权 | FR 比例加权 | `hfo_type` | ⬜ |
-| 4.6 图论指标 | Net Outflow, Local Efficiency | `adj` | ⬜ |
-| 4.7 传播路径 | 最短路径树 | `adj` | ⬜ |
-| 4.8 动态切片 | 时间窗分段网络 | `event_windows` | ⬜ |
-| 4.9 3D 脑图 | Outflow 颜色映射 | `mni_coords` | ⬜ |
-| 4.10 Source-Sink 验证 | SI 指标, 状态翻转检验 | `metrics` | ⬜ |
+| A.1 谱聚类节点筛选 | Eigengap 自适应 + 率调制中心性 | `coact_all_*`, `sklearn` | ⬜ |
+| A.2 替代数据检验 | Surrogate test 验证共激活显著性 | `events_bool` | ⬜ |
+| A.3 骨架构建 | 加权无向图（Co-activation 阈值） | `coact_ratio` | ⬜ |
+| A.4 方向注入 | Wilcoxon + 一致性 + 零滞后过滤 | `lag_raw` | ⬜ |
+| A.5 Stability 权重 | 时间窗切片 + CV 计算 | `event_windows` | ⬜ |
+| A.6 复合权重 | Coact × Consistency × Stability | — | ⬜ |
+| A.7 图论指标 | Net Outflow, Local Efficiency, Betweenness | `networkx` | ⬜ |
+| A.8 2D 网络拓扑图 | Spring/Circular 布局 | `matplotlib` | ⬜ |
+| A.9 传播路径 | 最短路径树 | `adj` | ⬜ |
+
+**Phase B — Channel + Geometry（需 MNI 坐标）**
+
+| 功能 | 说明 | 阻塞条件 | 状态 |
+|------|------|----------|------|
+| B.1 空间约束骨架 | 距离惩罚 + 容积传导剔除 | MNI coords | ⬜ |
+| B.2 传播速度验证 | 0.1-10 m/s 生理范围检查 | MNI coords | ⬜ |
+| B.3 病理加权 | FR 比例加权 | HFO type 分类 | ⬜ |
+| B.4 3D 脑图 | Outflow 颜色映射 | MNI coords | ⬜ |
+| B.5 动态切片 | Pre-ictal vs Interictal 网络对比 | Seizure onsets | ⬜ |
+| B.6 Sink/Source 反转 | $\Delta$Outflow (ictal - interictal) | B.5 | ⬜ |
+
+**Phase C — Source Space 研究前沿**
+
+| 功能 | 说明 | 阻塞条件 | 状态 |
+|------|------|----------|------|
+| C.1 前向模型(BEM/FEM) | 患者个性化导联场 | FreeSurfer + MRI | ⬜ |
+| C.2 LFM 概率投影 | 灵敏度加权映射 | C.1 | ⬜ |
+| C.3 SC-FC 耦合图 | 解剖先验约束 | HCP tractography | ⬜ |
+| C.4 PDC/频谱格兰杰 | 频域因果性 | 模型阶数选择 | ⬜ |
+| C.5 NMM 验证 | 分析-综合闭环 | 独立研究课题 | ⬜ |
+
+---
+
+#### 4.10 源空间构建远景 (Source Space Vision) — Phase C 理论基础
+
+> 本节记录 Source-Scale 网络构建的理论基础和工程路径。**当前不实现**，作为研究前沿参考。
+
+##### 4.10.1 粒度困境 (Granularity Dilemma)
+
+| 尺度 | 分辨率 | 失效原因 |
+|------|--------|---------|
+| **脑区 (AAL/DK)** | ~100 区域 | HFO 生成器 <2mm，脑区平均化彻底淹没病理信号，SNR 指数下降 |
+| **顶点 (Vertex)** | ~20k/半球 | SEEG 仅 100-200 触点 → 极度欠定逆问题 → 无数据区域的"插值幻觉" |
+| **传感体积 (VOI)** | **5mm 半径** | ✅ 匹配 SEEG 宏电极传感半径 (~3-5mm)<br>✅ 包含 HFO 微观发生结构<br>✅ 避免过度插值 |
+
+**结论**：源空间节点应定义为以电极触点为中心的 5mm VOI（Virtual Voxels），非均匀全脑网格。
+
+##### 4.10.2 LFM 概率投影 (Lead-Field Weighted Projection)
+
+> 无需求解复杂的源成像逆问题。利用导联场矩阵作为几何先验进行概率映射。
+
+**核心公式**：
+
+$$W_{ji} = \frac{L_{ij}^2}{\sum_{k \in \text{Channels}} L_{kj}^2}$$
+
+$$\text{SourceMetric}_j = \sum_{i} W_{ji} \cdot \text{ChannelMetric}_i$$
+
+其中 $L_{ij}$ 是导联场矩阵中源 $j$ 对通道 $i$ 的贡献（包含距离衰减和偶极子方向信息）。使用平方是因为功率/能量随距离平方衰减。
+
+**优势**：
+- 计算高效：一次性线性变换，非迭代反演
+- 物理合理：自动处理距离加权 + 方向性
+- 避免 Double Counting：归一化权重自然分配重叠区域
+
+**对共激活矩阵的映射扩展**：
+
+$$\text{SourceCoAct}_{jk} = \sum_{m,n} W_{jm} \cdot \text{ChannelCoAct}_{mn} \cdot W_{kn}$$
+
+##### 4.10.3 SC-FC 耦合图 (Structure-Function Coupled Graph)
+
+> 在源空间定义传播路径时，必须引入 HCP SC 作为贝叶斯先验。
+
+$$P(E_{A \to B} | \text{Data}) \propto \text{FC}_{A \to B} \times \text{SC}_{A \to B}$$
+
+**物理意义**：如果源 A 到源 B 的功能连接（FC）很强，但无白质纤维束直接连接（SC ≈ 0），则该"连接"极可能是间接的或虚假的。
+
+**工程依赖链**：
+1. FreeSurfer 皮层重建 → 高分辨率 mesh
+2. BEM/FEM 前向建模 → 导联场矩阵 $G$
+3. 电极定位 (LeadDBS/iElectrodes) → MNI 坐标
+4. HCP tractography → 结构连接矩阵 SC
+5. LFM 概率投影 → 源空间指标
+6. SC × FC → 耦合图
+
+**现实评估**：这是一条 6 个月的工程路径，每个环节都需要独立验证。但一旦建成，可以实现从电生理到解剖的无缝对接，这是最终的临床转化目标。
 
 ---
 
@@ -1242,7 +1686,20 @@ preprocessor.filter_backend = MyCustomBackend()
   - [x] ✅ 架构重构：剥离所有 STFT/质心计算到 group_event_analysis
   - [ ] 传播动图（500ms窗口内能量传播动画）
   - [ ] 网络拓扑图（待模块4）
-- [ ] 模块4: network_analysis.py
+- [ ] **模块4: network_analysis.py** (三阶段递进)
+  - [ ] **Phase A: Channel-Scale MVP**
+    - [ ] A.1 谱聚类节点筛选 (Eigengap + 率调制中心性)
+    - [ ] A.2 替代数据显著性检验
+    - [ ] A.3-A.4 骨架构建 + 方向注入 (Wilcoxon + 一致性)
+    - [ ] A.5-A.6 Stability 权重 + 复合权重
+    - [ ] A.7 图论指标 (Net Outflow, Local Efficiency, Betweenness)
+    - [ ] A.8-A.9 2D 网络拓扑图 + 传播路径
+  - [ ] **Phase B: Channel + Geometry** (阻塞于 MNI 坐标)
+    - [ ] B.0 电极坐标获取
+    - [ ] B.1-B.3 空间约束 + 容积传导剔除 + 传播速度验证
+    - [ ] B.4 病理加权 (FR 分类)
+    - [ ] B.5-B.6 3D 脑图 + Ictal vs Interictal 对比
+  - [ ] **Phase C: Source Space** (研究前沿)
 - [x] Notebook: chengshuai_hfo_analysis.ipynb ✅
 - [x] 2026-02-01: toy timelag + env cache 接口测试（cuda_env）
 - [ ] 验证与原结果一致性

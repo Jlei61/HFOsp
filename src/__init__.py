@@ -43,6 +43,16 @@ _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
     "precompute_envelope_cache": ("src.group_event_analysis", "precompute_envelope_cache"),
     "load_envelope_cache": ("src.group_event_analysis", "load_envelope_cache"),
     "compute_centroid_matrix_from_envelope_cache": ("src.group_event_analysis", "compute_centroid_matrix_from_envelope_cache"),
+    # network_analysis public API
+    "NetworkResult": ("src.network_analysis", "NetworkResult"),
+    "build_hfo_network": ("src.network_analysis", "build_hfo_network"),
+    "build_skeleton": ("src.network_analysis", "build_skeleton"),
+    "inject_direction": ("src.network_analysis", "inject_direction"),
+    "compute_network_metrics": ("src.network_analysis", "compute_network_metrics"),
+    "plot_network_topology_2d": ("src.network_analysis", "plot_network_topology_2d"),
+    "select_network_nodes": ("src.network_analysis", "select_network_nodes"),
+    "surrogate_significance_test": ("src.network_analysis", "surrogate_significance_test"),
+    "compute_stability_weights": ("src.network_analysis", "compute_stability_weights"),
 }
 
 __all__ = ["__version__", *_LAZY_EXPORTS.keys()]
