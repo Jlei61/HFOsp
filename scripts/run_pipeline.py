@@ -237,24 +237,25 @@ def main() -> None:
         )
         out_paths["group_tf_tile_cache_path"] = tf_tile_path
 
-    # ========= Part 4: Network Analysis (Phase A) =========
+    # ========= Part 4: Network Analysis v2 (Build-Prune-Direct) =========
     network_cfg = cfg.get("network_analysis", {}) or {}
     if network_cfg.get("enabled", True):
         from src.network_analysis import build_hfo_network, save_network_result
 
-        # Map config keys → build_hfo_network kwargs.
+        # Map config keys → build_hfo_network kwargs (v2 API).
         net_kwargs = {}
         _net_keys = [
-            "use_all_channels", "min_dist_mm", "min_cluster_size",
-            "n_clusters", "alpha", "run_surrogate", "n_surrogates",
-            "min_coact", "min_events", "lag_thresh_ms",
+            "edge_method", "run_surrogate", "n_surrogates",
+            "min_rate", "max_entropy", "use_spectral",
+            "min_cluster_size", "n_clusters",
+            "min_events", "lag_thresh_ms",
             "consistency_thresh", "p_value_thresh", "stability_window_sec",
         ]
         for k in _net_keys:
             if k in network_cfg and network_cfg[k] is not None:
                 net_kwargs[k] = network_cfg[k]
 
-        print("\n[Part 4] Network Analysis (Phase A) ...")
+        print("\n[Part 4] Network Analysis v2 (Build-Prune-Direct) ...")
         net_result = build_hfo_network(
             out_paths["group_analysis_path"],
             **net_kwargs,
@@ -266,7 +267,8 @@ def main() -> None:
 
         # Quick summary.
         ranking = net_result.metrics.get("source_ranking", [])
-        print(f"  Nodes: {net_result.n_selected}/{net_result.n_pool_channels}  "
+        print(f"  Pool: {net_result.n_pool_channels}  "
+              f"Selected: {net_result.n_selected}  "
               f"Edges: {net_result.metrics.get('n_edges', 0)}  "
               f"Density: {net_result.metrics.get('density', 0):.3f}")
         if ranking:

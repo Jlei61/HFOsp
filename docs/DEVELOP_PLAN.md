@@ -481,34 +481,44 @@ config = HFODetectionConfig(
 
 #### 4.0 设计哲学与批判性前提
 
-**混合门控策略 (Hybrid Gating Strategy)**
+**"宽建图 → 精剪枝 → 定方向" 策略 (Build-Prune-Direct Strategy)**
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                      癫痫网络构建流水线                                  │
+│                    癫痫网络构建流水线 v2                                 │
+│               "宽建图 → 精剪枝 → 定方向"                                │
 ├────────────────────────────────────────────────────────────────────────┤
 │                                                                        │
-│  [节点池]                                                               │
-│      │  ← 宽松准入（Rate + 条件概率 + 病理特征）                         │
+│  [全通道池] (n_all ≈ 120)                                              │
+│      │                                                                 │
 │      ▼                                                                 │
 │  ┌─────────────────────────────────────────────────────────────┐       │
-│  │  Co-activation Matrix (门控 Gatekeeper)                     │       │
-│  │  "只有关系够铁的节点，才配拥有连边"                            │       │
-│  │  → 剔除偶然随机重合，建立网络"骨架"                           │       │
+│  │  Step 1: 宽建图 (Broad Graph Construction)                  │       │
+│  │  边权 = Simpson Index (归一化共激活)                         │       │
+│  │  "不再用原始共激活计数——校正基础率偏差"                       │       │
+│  │  + Surrogate 显著性检验 → 剔除随机重合                      │       │
 │  └──────────────────────────┬──────────────────────────────────┘       │
 │                             │                                          │
 │                             ▼                                          │
 │  ┌─────────────────────────────────────────────────────────────┐       │
-│  │  Lag Matrix (罗盘 Compass)                                  │       │
-│  │  "谁先谁后，决定谁是驱动者，谁是跟随者"                        │       │
-│  │  → 在骨架上赋予方向，注入网络"血流"                           │       │
+│  │  Step 2: XYZ 多维剪枝 (Multi-Dimensional Pruning)          │       │
+│  │  X = HFO Rate (活跃度) → 节点是病理活动发生者               │       │
+│  │  Y = Connection Entropy (特异性) → 剔除全脑噪声/参考伪迹    │       │
+│  │  Z = FR/R Ratio (致痫性) 或 谱聚类(XYZ距离度量)            │       │
 │  └──────────────────────────┬──────────────────────────────────┘       │
 │                             │                                          │
 │                             ▼                                          │
 │  ┌─────────────────────────────────────────────────────────────┐       │
-│  │  Physics Constraints (物理约束)                             │       │
-│  │  → 容积传导剔除 (<10mm)                                     │       │
-│  │  → 传播速度验证 (0.1-10 m/s 生理范围)                        │       │
+│  │  Step 3: 方向注入 (Direction Injection)                     │       │
+│  │  Wilcoxon + 一致性检验 → 有向边                             │       │
+│  └──────────────────────────┬──────────────────────────────────┘       │
+│                             │                                          │
+│                             ▼                                          │
+│  ┌─────────────────────────────────────────────────────────────┐       │
+│  │  Step 4: 复合权重 + 物理约束                                │       │
+│  │  Simpson × Consistency × Stability                          │       │
+│  │  + 容积传导剔除 (<10mm, Phase B)                            │       │
+│  │  + 传播速度验证 (0.1-10 m/s, Phase B)                       │       │
 │  └──────────────────────────┬──────────────────────────────────┘       │
 │                             │                                          │
 │                             ▼                                          │
@@ -517,13 +527,13 @@ config = HFODetectionConfig(
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-**为什么不能二选一？**
+**为什么是 "宽建图 → 精剪枝" 而不是旧版 "选节点 → 建骨架"？**
 
-| 策略 | 单独使用的致命缺陷 |
-|------|-------------------|
-| 仅 Co-activation | 无方向信息，无法区分 Source 和 Sink |
-| 仅 Lag | 噪声敏感，偶然重合的通道对会产生随机方向 |
-| **混合** | Co-activation 降噪 → Lag 定向，互补 |
+| 策略 | 致命缺陷 |
+|------|---------|
+| 先选节点再建边 | 选节点用的 co-activation 本身被基础率偏差污染，垃圾进垃圾出 |
+| 先建骨架再选节点 | 骨架的边权（原始 count/ratio）无法区分"真同步"和"随机重合" |
+| **宽建图 → 精剪枝** | Simpson 归一化消除率偏差 → XYZ 多维独立剪枝，每步可审计可回溯 |
 
 ---
 
@@ -565,167 +575,106 @@ lag_ij_k = lag_raw[i, k] - lag_raw[j, k]  # 负值 = i 领先 j
 
 ---
 
-#### 4.2 节点筛选策略 (Node Selection) — 从"三层准入"到"谱聚类-率加权"
+#### 4.2 宽建图 (Broad Graph Construction) — Simpson Index 归一化共激活
 
-**核心问题**：图论统计在 $N=8$ 时统计效力极低。必须扩大节点池至 30-50 个，但不能无脑堆砌。
+> "建图宽进，剪枝严出。" 先把所有有意义的连接保留下来，用统计学上正确的指标度量，再在下一步精确剪枝。
 
-##### 4.2.1 两种主流策略的致命缺陷
+##### 4.2.1 为什么不能直接用 Co-activation Count 建边？
 
-| | Rate-based (发放率筛选) | Co-activation (共激活筛选) |
-|---|---|---|
-| **假设** | 发放率越高 = 致痫性越高 | 同步放电 = 病理网络 |
-| **优势** | $O(N)$ 复杂度，直观 | 天然噪声过滤器，拓扑相关 |
-| **致命缺陷 1** | **生理性 HFO 混淆**：视觉/运动皮层和海马在 NREM 期间产生高频率生理性 HFO，被误判为致痫灶 | **Sink 陷阱**：被动响应节点因频繁被驱动而表现出极高共激活率，无法区分 Source 和 Sink |
-| **致命缺陷 2** | **"最响亮节点"谬误**：最活跃的节点不一定是 Driver。真正的"起搏器"可能发放率低但在关键时刻触发全网同步 | **阈值敏感性**：20% 是经验值，对高度局灶性癫痫（微小 FCD）可能漏判 |
-| **致命缺陷 3** | **时间非平稳性**：受睡眠周期和药物浓度影响，短时统计阈值不稳定 | 无法提供"强度"信息，仅提供"存在性" |
+**致命缺陷：基础率偏差 (Base Rate Bias)**
 
-**结论**：必须融合两者 — 用 Co-activation 的抗噪性锁定网络核心，用 Rate 的强度信息区分 Source 和 Sink。
+假设节点 A 只有 10 次 HFO，节点 B 有 1000 次。A 的 10 次**全部**伴随 B 发生（100% 必然跟随）：
 
-##### 4.2.2 推荐策略：时空约束的谱聚类-率加权筛选器
+| 指标 | 计算 | 结果 | 问题 |
+|------|------|------|------|
+| Raw Count | $\|E_A \cap E_B\| = 10$ | 10 | 被 B 的 1000 次淹没，看起来"不重要" |
+| Jaccard | $\frac{10}{10 + 1000 - 10}$ | 1% | 分母被 B 的规模稀释 |
+| Dice | $\frac{2 \times 10}{10 + 1000}$ | 2% | 同上，稍好但仍被稀释 |
+| **Simpson** | $\frac{10}{\min(10, 1000)}$ | **100%** | 完美捕捉"A 必然跟随 B" |
 
-> Spatially Constrained Spectral-Rate Filter
+**在癫痫网络中，"必然跟随"比"共同活跃"更重要**：
+- 真正的"起搏器"可能发放率不高，但每次发放都必然带动下游
+- 传播通路节点的特征是：它的每次 HFO 都伴随上游 Source 发放
+- Simpson Index 天然捕捉这种不对称的包含关系
 
-**为什么用谱聚类而不是固定阈值？**
+##### 4.2.2 推荐边权指标：Simpson Index
 
-固定阈值（如 top 20%）在患者间不具泛化性 — 高度局灶的 FCD 患者和弥漫性皮层发育不良患者的网络规模天差地别。谱聚类利用拉普拉斯矩阵的特征值间隙（Eigengap）**自适应地**确定聚类数，比任何固定阈值都更鲁棒。
+$$W_{ij}^{Simpson} = \frac{|E_i \cap E_j|}{\min(|E_i|, |E_j|)}$$
 
-**三步流程**：
+**备选**（供对比验证）：
 
-```
-Step 1: 时空约束的共激活图
-   A_co (n×n) → 距离惩罚 → A_co_masked
-                             │
-Step 2: 谱聚类子图提取        │
-   L = D - A_co_masked       │
-   特征分解 → Eigengap       │
-   → 识别主要簇 (剔除孤立点)  │
-                             │
-Step 3: 率调制的中心性加权     │
-   W_i = α·EigenCentrality(i) + (1-α)·f(Rate_i)
-   → 最终节点集合 + 权重
-```
+$$W_{ij}^{Dice} = \frac{2 \cdot |E_i \cap E_j|}{|E_i| + |E_j|}$$
 
-**Step 1 — 构建时空约束的共激活图**：
+| 指标 | 公式 | 偏向 | 适用场景 |
+|------|------|------|----------|
+| **Simpson** (推荐) | $\frac{\|E_i \cap E_j\|}{\min(\|E_i\|, \|E_j\|)}$ | 捕捉包含/跟随关系 | 癫痫传播网络（不对称耦合） |
+| Dice (备选) | $\frac{2\|E_i \cap E_j\|}{\|E_i\| + \|E_j\|}$ | 对称，温和归一化 | 一般共激活网络 |
+| Jaccard | $\frac{\|E_i \cap E_j\|}{\|E_i \cup E_j\|}$ | 惩罚不对称对 | ❌ 不推荐：稀释低频节点 |
+| Raw Count/Ratio | $\|E_i \cap E_j\|$ 或 $/ N$ | 随率缩放 | ❌ 不推荐：高频节点主导 |
+
+**默认选择 Simpson 的理由**：
+1. 癫痫网络的核心问题是识别"谁跟随谁"，Simpson 正是度量包含关系的指标
+2. Simpson 的不对称偏差会被 Step 2 的 HFO Rate (X) 剪枝校正 — 率太低的节点会被剔除
+3. Simpson 对"沉默的共犯"友好 — 低频但 100% 跟随的节点不会被遗漏
+
+##### 4.2.3 数据来源与向量化实现
+
+**关键洞察**：所有需要的数据已存在于 `*_groupAnalysis.npz`：
 
 ```python
-def build_spatial_coact_graph(
-    coact_ratio: np.ndarray,         # (n_all, n_all) 共激活概率
-    dist_matrix: Optional[np.ndarray] = None,  # (n_all, n_all) mm
-    min_dist_mm: float = 5.0,        # 容积传导惩罚距离
+# 数据来源映射
+intersection = coact_all_event_count[i, j]   # |E_i ∩ E_j|
+event_count_i = coact_all_event_count[i, i]  # |E_i| (对角线 = 自身事件数)
+event_count_j = coact_all_event_count[j, j]  # |E_j|
+```
+
+**向量化实现** (N=120, <1ms)：
+
+```python
+def build_broad_graph(
+    coact_event_count: np.ndarray,    # (n_all, n_all) 共激活事件计数矩阵
+    method: str = 'simpson',          # 'simpson' | 'dice'
+    significance_mask: Optional[np.ndarray] = None,  # surrogate 检验结果
 ) -> np.ndarray:
     """
-    对共激活矩阵施加空间约束，剔除近距离虚假同步。
+    从共激活计数矩阵构建归一化边权图。
 
-    物理依据：
-    - SEEG 宏电极传感半径 ~3-5mm (触点 φ0.8mm, 长2mm)
-    - <5mm 的"高同步"多为电场直接传导，非突触传播
+    Simpson: W_ij = |E_i ∩ E_j| / min(|E_i|, |E_j|)
+    Dice:    W_ij = 2|E_i ∩ E_j| / (|E_i| + |E_j|)
+
+    Returns: (n_all, n_all) 对称边权矩阵, 值域 [0, 1]
     """
-    A = coact_ratio.copy()
-    np.fill_diagonal(A, 0)
+    intersection = coact_event_count.astype(np.float64).copy()
+    events_count = np.diag(coact_event_count).astype(np.float64)  # |E_i|
+    np.fill_diagonal(intersection, 0.0)
 
-    if dist_matrix is not None:
-        close_mask = dist_matrix < min_dist_mm
-        A[close_mask] = 0  # 强制断开近距离边
+    if method == 'simpson':
+        denom = np.minimum.outer(events_count, events_count)
+    elif method == 'dice':
+        denom = np.add.outer(events_count, events_count) / 2.0
+    else:
+        raise ValueError(f"Unknown method: {method}. Use 'simpson' or 'dice'.")
 
-    # 对称化（取较小值，保守估计）
-    A = np.minimum(A, A.T)
-    return A
-```
-
-**Step 2 — 谱聚类子图提取**：
-
-```python
-from sklearn.cluster import SpectralClustering
-
-def extract_network_clusters(
-    A_co: np.ndarray,                 # 时空约束后的共激活矩阵
-    min_cluster_size: int = 3,        # 最小簇大小（<3 视为噪声）
-    n_clusters: Optional[int] = None, # None = 自动 Eigengap
-) -> Tuple[np.ndarray, int]:
-    """
-    从共激活矩阵中自适应提取网络核心簇。
-
-    Returns:
-        labels: (n,) 聚类标签，-1 表示被剔除的孤立/微小簇
-        n_clusters_found: 实际簇数
-    """
-    n = A_co.shape[0]
-
-    if n_clusters is None:
-        # Eigengap 启发式：拉普拉斯矩阵特征值最大跳跃
-        D = np.diag(A_co.sum(axis=1))
-        L = D - A_co
-        k = min(20, n - 1)
-        eigenvalues = np.sort(np.linalg.eigvalsh(L))[:k]
-        gaps = np.diff(eigenvalues)
-        n_clusters = int(np.argmax(gaps[1:])) + 2  # 跳过第一个(总是0)
-        n_clusters = max(2, min(n_clusters, n // 3))
-
-    sc = SpectralClustering(
-        n_clusters=n_clusters,
-        affinity='precomputed',
-        assign_labels='kmeans',
-        random_state=42,
+    W = np.divide(
+        intersection, denom,
+        out=np.zeros_like(intersection),
+        where=denom > 0,
     )
-    labels = sc.fit_predict(A_co)
 
-    # 剔除过小的簇（非网络性 HFO 或噪声）
-    for cl in np.unique(labels):
-        if (labels == cl).sum() < min_cluster_size:
-            labels[labels == cl] = -1
+    # 对称化（Simpson 可能因浮点不完全对称）
+    W = np.maximum(W, W.T)
 
-    return labels, n_clusters
+    # 显著性门控（可选）
+    if significance_mask is not None:
+        W[~significance_mask] = 0.0
+
+    np.fill_diagonal(W, 0.0)
+    return W
 ```
 
-**Step 3 — 率调制的中心性加权**：
+##### 4.2.4 Surrogate 显著性检验（保留，逻辑不变）
 
-```python
-import networkx as nx
-
-def compute_node_weights(
-    A_co: np.ndarray,              # 共激活矩阵
-    rate_per_ch: np.ndarray,       # (n,) HFO发放率 (events/min)
-    cluster_labels: np.ndarray,    # (n,) 谱聚类标签
-    alpha: float = 0.65,           # 网络属性 vs 发放率权衡
-) -> np.ndarray:
-    """
-    融合网络地位（EigenCentrality）与病理活跃度（Rate）。
-
-    W_i = α · EigenCentrality(i) + (1-α) · normalize(log(1+Rate_i))
-
-    α 建议 0.6-0.7：
-      - 倾向网络属性：Hub节点权重高
-      - 保留率信息：区分 Source(率高且稳定) 和 Sink(被动响应)
-    """
-    n = len(rate_per_ch)
-    weights = np.zeros(n, dtype=np.float64)
-
-    valid = cluster_labels >= 0
-    if valid.sum() < 3:
-        return weights
-
-    # EigenCentrality（在子图上计算）
-    G = nx.from_numpy_array(A_co[np.ix_(valid, valid)])
-    try:
-        ec = nx.eigenvector_centrality_numpy(G, weight='weight')
-        ec_arr = np.array([ec[i] for i in range(valid.sum())])
-    except nx.NetworkXError:
-        ec_arr = np.ones(valid.sum()) / valid.sum()
-
-    # Rate（对数归一化，避免极端值主导）
-    rates = rate_per_ch[valid]
-    rates_log = np.log1p(rates)  # log(1+rate), 避免 log(0)
-    rates_norm = rates_log / (rates_log.max() + 1e-10)
-
-    ec_norm = ec_arr / (ec_arr.max() + 1e-10)
-
-    weights[valid] = alpha * ec_norm + (1 - alpha) * rates_norm
-    return weights
-```
-
-##### 4.2.3 替代数据显著性检验（Surrogate Testing）
-
-> 共激活的"统计显著"不等于"物理真实"。必须验证观测到的共激活是否显著高于随机。
+> 共激活的"统计显著"不等于"物理真实"。即使用了 Simpson 归一化，也必须验证观测值是否显著高于随机。
 
 ```python
 def surrogate_significance_test(
@@ -735,128 +684,266 @@ def surrogate_significance_test(
 ) -> np.ndarray:
     """
     独立循环平移各通道事件序列生成替代数据集，
-    验证真实共激活是否显著高于随机预期。
+    验证真实 Simpson/Dice 共激活是否显著高于随机预期。
 
     Returns: (n_ch, n_ch) bool — 显著性 mask
     """
-    n_ch, n_ev = events_bool.shape
-    real_coact = (events_bool @ events_bool.T).astype(np.float64) / n_ev
-
-    surr_counts = np.zeros((n_ch, n_ch), dtype=np.int64)
-    rng = np.random.default_rng(42)
-
-    for _ in range(n_surrogates):
-        shifted = np.zeros_like(events_bool)
-        for ci in range(n_ch):
-            shift = rng.integers(0, n_ev)
-            shifted[ci] = np.roll(events_bool[ci], shift)
-        surr_coact = (shifted @ shifted.T).astype(np.float64) / n_ev
-        surr_counts += (surr_coact >= real_coact).astype(np.int64)
-
-    p_values = surr_counts.astype(np.float64) / n_surrogates
-    return p_values < p_threshold
+    # 实现逻辑同之前：circular shift → 重算 → p-value
+    ...
 ```
 
-##### 4.2.4 完整节点筛选 API
+##### 4.2.5 宽建图的设计约束
+
+**⚠️ 关键原则**：
+
+- ✅ **宽进**：此步不做任何节点剔除，保留所有有 HFO 的通道
+- ✅ **归一化**：Simpson/Dice 消除基础率偏差
+- ✅ **统计门控**：Surrogate 剔除随机重合边（可选但推荐）
+- ❌ **不做阈值剪枝**：不设 `min_coact` — 那是 Step 2 的活
+- ❌ **不做节点选择**：不在这里用谱聚类 — 那也是 Step 2 的活
+- ❌ **不做距离约束**：Phase A 无 MNI 坐标，Phase B 再加
+
+**输出**：`W_broad` — (n_all, n_all) 归一化的对称边权矩阵，值域 [0, 1]
+
+---
+
+#### 4.3 XYZ 多维剪枝 (Multi-Dimensional Pruning) — 从广泛图中提取病理网络
+
+> "建图宽进，剪枝严出。" 三个正交维度，每个维度瞄准一类特定的噪声源。
+
+##### 4.3.1 三维度框架总览
+
+```
+              高                    ┌──────────────────────┐
+               │                    │  SOZ 核心 (保留)      │
+               │       ┌────────────┤  高率 + 低熵 + 高 Z   │
+    X: HFO    │       │            └──────────────────────┘
+    Rate       │       │
+   (活跃度)    │       │    ┌──────────────────────┐
+               │       │    │  参考伪迹 (剔除)      │
+               │       │    │  高率 + 高熵           │
+              低       │    └──────────────────────┘
+               ─────────┼──────────────────────────────→
+              低        │                            高
+                 Y: Connection Entropy (特异性)
+```
+
+| 维度 | 指标 | 物理意义 | 剪枝方向 | Phase |
+|------|------|----------|----------|-------|
+| **X (Activity)** | HFO Rate ($events/min$) | 节点是否是病理活动的活跃发生者 | 保留 $X > X_{min}$ | **A** |
+| **Y (Specificity)** | Connection Entropy $\hat{H}_i$ | 连接是特异性的还是全脑弥散的 | 保留 $\hat{H} < H_{max}$ | **A** |
+| **Z (Epileptogenicity)** | FR/R Ratio 或 谱聚类(XYZ距离) | 节点的致痫性特异度 | Phase A: 谱聚类; Phase B: FR比例 | **A/B** |
+
+##### 4.3.2 维度 X — HFO Rate (活跃度)
+
+$$X_i = \frac{|E_i|}{T_{recording}} \quad (\text{events/min})$$
+
+- **物理意义**：节点是否产生足够多的 HFO 来被纳入网络分析
+- **剪枝逻辑**：$X_i \geq X_{min}$
+- **默认阈值**：`min_rate = 0.5 events/min`（每2分钟至少1次 HFO）
+- **⚠️ 不要设太高**：真正的"起搏器"可能发放率不高但每次必然带动下游（Simpson 已捕捉这种关系）
+
+##### 4.3.3 维度 Y — Connection Entropy (特异性) 🔑 核心创新
+
+**定义**：给定节点 $i$ 在宽建图 $W$ 中的连接权重分布：
+
+$$p_{ij} = \frac{W_{ij}}{\sum_{k \neq i} W_{ik}}, \quad H_i = -\sum_{j \neq i} p_{ij} \ln p_{ij}$$
+
+**归一化熵**（映射到 [0, 1]）：
+
+$$\hat{H}_i = \frac{H_i}{\ln(N_{neighbors,i})}$$
+
+其中 $N_{neighbors,i}$ = 节点 $i$ 的非零连接数。
+
+**物理解释**：
+
+| $\hat{H}_i$ | 含义 | 网络角色 | 判定 |
+|---|---|---|---|
+| **≈ 0** | 连接集中于1-2个节点 | 高度特异的"共犯关系" | ✅ 保留（局灶性传播通路） |
+| **0.3 - 0.6** | 中等分散 | 有选择性的 Hub | ✅ 保留 |
+| **≈ 1.0** | 均匀连接所有节点 | 全脑同步（伪迹/噪声） | ❌ 剔除 |
+
+**为什么 Connection Entropy 是剔除 Global Artifacts 的"神技"**：
+
+Reference contamination 的数学特征：一个通道因共参考电极而与所有通道产生虚假"共激活"。在 Simpson 空间中，这个通道与每个其他通道的 Simpson 值都 > 0（因为它的每次 HFO 都"伴随"很多通道）。**但它的连接分布接近均匀** → $\hat{H} \approx 1.0$。
+
+真正的病理通道只与网络内的特定"共犯"高度同步 → $\hat{H}$ 显著低于 1.0。
+
+这比传统的"剔除与太多通道连接的节点"更精确——它不关心你连了多少通道，而关心你的连接是否有**选择性**。
+
+**剪枝逻辑**：$\hat{H}_i < H_{max}$，默认 `max_entropy = 0.85`
 
 ```python
-def select_network_nodes(
-    coact_ratio: np.ndarray,          # (n_all, n_all) 共激活概率
-    rate_per_ch: np.ndarray,          # (n_all,) HFO rate (events/min)
-    events_bool: Optional[np.ndarray] = None,  # 用于替代数据检验
-    dist_matrix: Optional[np.ndarray] = None,
-    # 谱聚类参数
-    min_dist_mm: float = 5.0,
+def compute_connection_entropy(W: np.ndarray) -> np.ndarray:
+    """
+    计算每个节点的归一化连接熵。
+
+    Parameters
+    ----------
+    W : (n, n) 边权矩阵 (Simpson/Dice，对角线为0)
+
+    Returns
+    -------
+    H_norm : (n,) 归一化熵，0=极度特异，1=均匀弥散
+    """
+    n = W.shape[0]
+    H_norm = np.ones(n, dtype=np.float64)  # 默认最大熵（最坏情况）
+
+    for i in range(n):
+        w_i = W[i].copy()
+        w_i[i] = 0.0
+        total = w_i.sum()
+        if total < 1e-10:
+            continue  # 孤立节点，保持默认
+        p = w_i / total
+        nonzero = p > 0
+        n_neighbors = nonzero.sum()
+        if n_neighbors < 2:
+            H_norm[i] = 0.0  # 只有1个连接 = 最大特异性
+            continue
+        H = -np.sum(p[nonzero] * np.log(p[nonzero]))
+        H_max = np.log(n_neighbors)
+        H_norm[i] = H / H_max if H_max > 0 else 1.0
+
+    return H_norm
+```
+
+##### 4.3.4 维度 Z — Epileptogenicity (致痫性)
+
+**Phase A（无 FR 分类数据）**：
+
+在 X-Y 空间中用谱聚类，以 Simpson 连接权重为亲和度、以 XY 特征为辅助距离度量：
+
+$$A_{ij}^{cluster} = W_{ij}^{Simpson} \times \exp\left(-\frac{(\hat{X}_i - \hat{X}_j)^2 + (\hat{Y}_i - \hat{Y}_j)^2}{2\sigma^2}\right)$$
+
+- 谱聚类在此作为"自适应社区发现"工具
+- Eigengap 自动确定聚类数（不硬编码 N=8）
+- 小于 `min_cluster_size` 的孤立簇被标记为噪声
+
+**Phase B（有 FR 分类数据后）**：
+
+$$Z_i = \frac{N_{FR,i}}{N_{Ripple,i} + N_{FR,i}}$$
+
+**更激进的 XYZ 距离度量**（Phase B）：
+
+$$d_{ij}^{XYZ} = \sqrt{w_X(\hat{X}_i - \hat{X}_j)^2 + w_Y(\hat{Y}_i - \hat{Y}_j)^2 + w_Z(\hat{Z}_i - \hat{Z}_j)^2}$$
+
+谱聚类使用 $A_{ij} = W_{ij}^{Simpson} \times \exp(-d_{ij}^{XYZ}/2\sigma^2)$ 作为亲和矩阵，同时编码**连接强度**和**病理特征相似性**。
+
+##### 4.3.5 完整剪枝 API
+
+```python
+def compute_node_xyz(
+    W_broad: np.ndarray,               # (n_all, n_all) Simpson 宽建图
+    events_count: np.ndarray,           # (n_all,) 每通道 HFO 事件数
+    recording_duration_min: float,      # 记录时长（分钟）
+    fr_ratio: Optional[np.ndarray] = None,  # (n_all,) FR/(R+FR) (Phase B)
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    计算每个节点的 XYZ 三维病理特征。
+
+    Returns
+    -------
+    X : (n_all,) HFO Rate (events/min)
+    Y : (n_all,) Normalized Connection Entropy (0=specific, 1=diffuse)
+    Z : (n_all,) Epileptogenicity (Phase A: zeros; Phase B: FR ratio)
+    """
+    X = events_count.astype(np.float64) / max(recording_duration_min, 1e-6)
+    Y = compute_connection_entropy(W_broad)
+    Z = fr_ratio.copy() if fr_ratio is not None else np.zeros_like(X)
+    return X, Y, Z
+
+
+def prune_network(
+    W_broad: np.ndarray,               # (n_all, n_all) 宽建图
+    X: np.ndarray,                     # HFO Rate
+    Y: np.ndarray,                     # Connection Entropy
+    Z: np.ndarray,                     # Epileptogenicity
+    *,
+    min_rate: float = 0.5,             # X: 最低 HFO Rate (events/min)
+    max_entropy: float = 0.85,         # Y: 最高归一化连接熵
+    use_spectral: bool = True,         # Z: 在 XY+Simpson 空间做谱聚类
     min_cluster_size: int = 3,
     n_clusters: Optional[int] = None,  # None = Eigengap 自动
-    # 权重参数
-    alpha: float = 0.65,
-    # 替代检验
-    n_surrogates: int = 200,
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    三步混合筛选：空间约束 → 谱聚类 → 率加权。
+    XYZ 多维剪枝：从宽建图中提取病理网络核心。
 
-    Returns:
-        selected_idx: (n_selected,) 入选节点索引
-        node_weights: (n_selected,) 节点权重
+    Pipeline:
+    1. X 门控 → 剔除低活跃度节点
+    2. Y 门控 → 剔除高熵（全脑弥散）节点
+    3. Z 门控 → 谱聚类 (Phase A) 或 FR 比例筛选 (Phase B)
+
+    Returns
+    -------
+    selected_idx : (n_sel,) 入选节点的全通道池索引
+    W_pruned : (n_sel, n_sel) 剪枝后的边权子图
+    cluster_labels : (n_all,) 聚类标签 (-1=剔除)
     """
-    # Step 1: 空间约束
-    A_co = build_spatial_coact_graph(coact_ratio, dist_matrix, min_dist_mm)
+    n = W_broad.shape[0]
+    labels = np.full(n, -1, dtype=np.int32)
 
-    # Step 1.5: 替代数据检验（可选但推荐）
-    if events_bool is not None:
-        sig_mask = surrogate_significance_test(events_bool, n_surrogates)
-        A_co[~sig_mask] = 0
+    # Step 1: X 门控 — 活跃度
+    x_pass = X >= min_rate
 
-    # Step 2: 谱聚类
-    labels, _ = extract_network_clusters(A_co, min_cluster_size, n_clusters)
+    # Step 2: Y 门控 — 特异性（剔除高熵 = 伪迹/弥散噪声）
+    y_pass = Y <= max_entropy
 
-    # Step 3: 率调制中心性加权
-    weights = compute_node_weights(A_co, rate_per_ch, labels, alpha)
+    # 联合 mask
+    node_mask = x_pass & y_pass
+    candidate_idx = np.where(node_mask)[0]
 
-    selected = np.where(labels >= 0)[0]
-    return selected, weights[selected]
+    if len(candidate_idx) < min_cluster_size + 1:
+        # 候选太少，退化为全部保留
+        selected_idx = candidate_idx
+        labels[candidate_idx] = 0
+    elif use_spectral:
+        # Step 3: 谱聚类 → 识别病理网络社区，剔除孤立噪声
+        W_sub = W_broad[np.ix_(candidate_idx, candidate_idx)]
+        sub_labels, _ = extract_network_clusters(
+            W_sub, min_cluster_size, n_clusters,
+        )
+        # 映射回全通道索引
+        for si, ci in enumerate(candidate_idx):
+            labels[ci] = sub_labels[si]
+        selected_idx = candidate_idx[sub_labels >= 0]
+    else:
+        selected_idx = candidate_idx
+        labels[candidate_idx] = 0
+
+    W_pruned = W_broad[np.ix_(selected_idx, selected_idx)]
+    return selected_idx, W_pruned, labels
 ```
 
-##### 4.2.5 可行性与工程约束
+##### 4.3.6 典型案例：XYZ 如何区分真网络与伪迹
 
-**计算复杂度**：谱聚类的特征分解为 $O(N^3)$，SEEG 通道数 $N \approx 120$，实测耗时 **< 10ms**，完全可行。
+| 场景 | HFO Rate (X) | Entropy (Y) | FR Ratio (Z) | 判定 |
+|------|---|---|---|---|
+| SOZ 核心 | 高 (8/min) | **低** (0.2) | 高 (0.6) | ✅ 保留 — 高活跃、特异连接、高致痫性 |
+| 传播通路 | 中 (2/min) | **低** (0.3) | 中 (0.3) | ✅ 保留 — 活跃且有选择性 |
+| 参考伪迹 | 高 (10/min) | **极高** (0.95) | 低 (0.1) | ❌ Y 剔除 — 与所有通道均匀连接 |
+| 生理性 HFO | 中 (1.5/min) | 中 (0.5) | **极低** (0.02) | ⚠️ X 保留, Y 保留, Z 低 → 被谱聚类标记为边缘/噪声 |
+| 安静关键节点 | **低** (0.3/min) | **极低** (0.1) | 高 (0.5) | ❌ X 剔除 — 活跃度不足（Simpson 已记录其跟随关系，后续可回溯） |
 
-**Eigengap 不稳定时的退化策略**：当 Eigengap 不明显时（特征值平缓下降），提供 `n_clusters` 手动覆盖选项。也可退化为简单阈值筛选：
-
-```python
-# 退化方案（当谱聚类结果不理想时的保底策略）
-selected = np.where(rate_per_ch > min_rate)[0]  # 率筛选
-selected = selected[coact_ratio[selected][:, selected].sum(1) > min_coact]  # 共激活过滤
-```
+##### 4.3.7 工程约束与退化策略
 
 **⚠️ 关键约束**：
-- ❌ 不要仅用白质标签剔除 — 灰质异位/脑室周围结节位于深部白质但是 HFO 高发区
-- ❌ 不要硬编码通道数 — 让谱聚类的 Eigengap 决定网络规模
-- ❌ 不要忽略"沉默的共犯" — 低发放率但高条件概率的 Sink 节点被谱聚类自然保留
-- ✅ Eigengap 不稳定时，提供 `n_clusters` 手动覆盖选项
+- ❌ 不要仅用白质标签剔除 — 灰质异位/脑室周围结节位于深部白质但 HFO 高发
+- ❌ 不要硬编码通道数 — 让谱聚类的 Eigengap 或 XY 阈值自适应决定
+- ✅ 所有阈值（min_rate, max_entropy）必须可配置 — 患者间差异大
+- ✅ Eigengap 不稳定时，`n_clusters` 可手动覆盖
+- ✅ 被剔除的节点信息保留在 `cluster_labels` 中，可随时回溯
 
----
-
-#### 4.3 骨架构建 (Skeleton Construction) — 加权无向图
-
-**输入**：`coact_all_event_ratio` (n_all, n_all)
-
-**操作**：
+**退化策略**（当 XYZ 剪枝过于激进时）：
 
 ```python
-def build_skeleton(
-    coact_ratio: np.ndarray,
-    dist_matrix: Optional[np.ndarray] = None,
-    min_coact: float = 0.10,         # 共激活阈值
-    min_dist_mm: float = 10.0,       # 容积传导剔除距离
-) -> np.ndarray:
-    """
-    返回二值邻接矩阵 (骨架)。
-    """
-    n = coact_ratio.shape[0]
-    skeleton = coact_ratio > min_coact
-    
-    # 物理约束：剔除容积传导
-    if dist_matrix is not None:
-        close_mask = dist_matrix < min_dist_mm
-        skeleton[close_mask] = False
-    
-    # 对角线清零
-    np.fill_diagonal(skeleton, False)
-    
-    return skeleton.astype(np.float32)
+# 保底：只用 X 门控 + 弱 Y 门控
+selected = np.where((X >= min_rate) & (Y <= 0.95))[0]
 ```
-
-**阈值选择建议**：
-- `min_coact = 0.10` (10%) — 宽松起点，后续可调
-- 或 Top 10% 边 — 保持网络稀疏性
-- **必须可配置**，不同患者病理差异大
 
 ---
 
-#### 4.4 方向注入 (Direction Injection) — 骨架升级为有向图
+#### 4.4 方向注入 (Direction Injection) — 剪枝图升级为有向图
 
 **核心改进：统计鲁棒性**
 
@@ -868,7 +955,7 @@ def build_skeleton(
 from scipy.stats import wilcoxon
 
 def inject_direction(
-    skeleton: np.ndarray,           # (n, n) 骨架
+    W_pruned: np.ndarray,           # (n_sel, n_sel) 剪枝后的 Simpson 边权图
     lag_raw: np.ndarray,            # (n, n_events) 质心时间
     events_bool: np.ndarray,        # (n, n_events) 参与mask
     min_events: int = 5,            # 最小样本量
@@ -943,11 +1030,11 @@ def inject_direction(
 
 ##### 4.5.1 三维权重模型
 
-$$W_{ij} = \underbrace{\text{Coact}_{ij} \times \text{Consistency}_{ij}}_{\text{Causality（因果性）}} \times \underbrace{(1 - \text{CV}_{time}^{ij})}_{\text{Stability（稳定性）}} \times \underbrace{\left(1 + \alpha \cdot \frac{N_{FR}^{ij}}{N_{total}^{ij}}\right)}_{\text{Pathology（病理性）}}$$
+$$W_{ij} = \underbrace{\text{Simpson}_{ij} \times \text{Consistency}_{ij}}_{\text{Causality（因果性）}} \times \underbrace{(1 - \text{CV}_{time}^{ij})}_{\text{Stability（稳定性）}} \times \underbrace{\left(1 + \alpha \cdot \frac{N_{FR}^{ij}}{N_{total}^{ij}}\right)}_{\text{Pathology（病理性）}}$$
 
 | 维度 | 定义 | 数据来源 | Phase |
 |------|------|----------|-------|
-| **Causality** | $\text{Coact}_{ij} \times \text{Consistency}_{ij}$ — 共激活概率 × 方向一致性 | `coact_ratio` + `lag_raw` | **A (立即可做)** |
+| **Causality** | $\text{Simpson}_{ij} \times \text{Consistency}_{ij}$ — Simpson 归一化共激活 × 方向一致性 | `W_pruned` + `lag_raw` | **A (立即可做)** |
 | **Stability** | $1 - \text{CV}(\text{Connectivity}(t))$ — 连接的时间鲁棒性 | `event_windows` 按时间窗切片 | **A (立即可做)** |
 | **Pathology** | $1 + \alpha \cdot \frac{N_{FR}}{N_{total}}$ — Fast Ripple 比例加权 | `hfo_type_per_event` | **B (需分类数据)** |
 
@@ -1145,16 +1232,20 @@ def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
 
 | Step | 任务 | 输入 | 输出 | 新增依赖 | 状态 |
 |------|------|------|------|----------|------|
-| A.1 | 谱聚类节点筛选 | `coact_all_event_ratio`, `rate` | `selected_nodes`, `node_weights` | `sklearn` | ⬜ |
+| A.1 | **宽建图 (Simpson Index)** | `coact_all_event_count` | `W_broad` (n_all, n_all) | — | ⬜ |
 | A.2 | 替代数据显著性检验 | `events_bool` | `sig_mask` | — | ⬜ |
-| A.3 | 骨架构建（无距离约束） | `coact_ratio` | `skeleton` (无向) | — | ⬜ |
-| A.4 | 方向注入（Wilcoxon+一致性） | `skeleton`, `lag_raw` | `adj_directed` | `scipy.stats` | ⬜ |
-| A.5 | Stability 权重 | `lag_raw`, `event_windows` | `stability_matrix` | — | ⬜ |
-| A.6 | 复合权重计算 | `adj`, `coact`, `stability` | `adj_weighted` | — | ⬜ |
-| A.7 | 图论指标 | `adj_weighted` | `metrics_dict` | `networkx` | ⬜ |
-| A.8 | 2D 网络拓扑图 | `metrics` | `network_plot.png` | `matplotlib` | ⬜ |
+| A.3 | **XYZ 特征计算** | `W_broad`, `events_count`, `duration` | `X, Y, Z` per node | — | ⬜ |
+| A.4 | **XYZ 多维剪枝** | `W_broad`, `X`, `Y`, `Z` | `selected_idx`, `W_pruned` | `sklearn` (谱聚类) | ⬜ |
+| A.5 | 方向注入（Wilcoxon+一致性） | `W_pruned`, `lag_raw` | `adj_directed` | `scipy.stats` | ⬜ |
+| A.6 | Stability 权重 | `lag_raw`, `event_windows` | `stability_matrix` | — | ⬜ |
+| A.7 | 复合权重计算 | `adj`, `W_pruned`, `stability` | `adj_weighted` | — | ⬜ |
+| A.8 | 图论指标 | `adj_weighted` | `metrics_dict` | `networkx` | ⬜ |
+| A.9 | 2D 网络拓扑图 + XY 散点诊断图 | `metrics`, `X`, `Y` | `network_plot.png` | `matplotlib` | ⬜ |
 
-**Phase A 的交付物**：一个完整的 Channel-scale 有向加权癫痫网络，包含 Net Outflow 排名。
+**Phase A 的交付物**：
+1. 一个完整的 Channel-scale 有向加权癫痫网络（Simpson 归一化 + XYZ 剪枝）
+2. XY 散点诊断图：直观展示哪些节点被保留/剔除及原因
+3. Net Outflow 排名（Source-Sink 预测）
 
 ##### Phase B：Channel-Scale + Geometry（需 MNI 坐标）
 
@@ -1192,40 +1283,46 @@ def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
 
 @dataclass
 class NetworkResult:
-    """癫痫网络分析结果。"""
-    adj: np.ndarray              # (n_selected, n_selected) 有向加权邻接矩阵
+    """癫痫网络分析结果 (v2: Build-Prune-Direct)."""
+    adj: np.ndarray              # (n_sel, n_sel) 有向加权邻接矩阵
     node_names: List[str]        # 节点通道名
-    node_weights: np.ndarray     # (n_selected,) 节点权重 (EigenCentrality × Rate)
+    node_xyz: Dict[str, np.ndarray]  # {'X': rate, 'Y': entropy, 'Z': epileptogenicity}
+    W_broad: np.ndarray          # (n_all, n_all) Simpson 宽建图（可回溯）
+    W_pruned: np.ndarray         # (n_sel, n_sel) 剪枝后子图
     metrics: Dict[str, Any]      # 图论指标
-    edge_stats: Dict[str, Any]   # 每条边的统计信息
-    cluster_labels: np.ndarray   # (n_all,) 谱聚类标签
+    edge_stats: List[Dict]       # 每条边的统计信息
+    cluster_labels: np.ndarray   # (n_all,) 谱聚类标签 (-1=剔除)
 
 def build_hfo_network(
     group_analysis_npz: str,
     dist_matrix: Optional[np.ndarray] = None,
-    # 节点筛选（谱聚类参数）
-    min_dist_mm: float = 5.0,
+    *,
+    # — Step 1: 宽建图 —
+    edge_method: str = 'simpson',     # 'simpson' | 'dice'
+    run_surrogate: bool = True,
+    n_surrogates: int = 200,
+    # — Step 2: XYZ 剪枝 —
+    min_rate: float = 0.5,            # X: 最低 HFO Rate (events/min)
+    max_entropy: float = 0.85,        # Y: 最高归一化连接熵
+    use_spectral: bool = True,        # Z: 谱聚类进一步剪枝
     min_cluster_size: int = 3,
-    n_clusters: Optional[int] = None,  # None = Eigengap 自动
-    alpha: float = 0.65,               # EigenCentrality vs Rate 权衡
-    # 骨架构建
-    min_coact: float = 0.10,
-    # 方向判定
+    n_clusters: Optional[int] = None, # None = Eigengap 自动
+    # — Step 3: 方向注入 —
     min_events: int = 5,
     lag_thresh_ms: float = 5.0,
     consistency_thresh: float = 0.6,
     p_value_thresh: float = 0.05,
-    # Stability
+    # — Step 4: 稳定性 —
     stability_window_sec: float = 300.0,
 ) -> NetworkResult:
     """
-    一站式构建癫痫网络（Phase A: Channel-Scale）。
+    一站式构建癫痫网络 v2（Phase A: Channel-Scale）。
 
-    流程：谱聚类节点选择 → 骨架构建 → 方向注入 → 复合权重 → 图论指标
+    流程：Simpson 宽建图 → XYZ 多维剪枝 → 方向注入 → 复合权重 → 图论指标
 
     Returns
     -------
-    NetworkResult : 包含有向加权邻接矩阵、节点权重和图论指标
+    NetworkResult : 包含有向加权邻接矩阵、XYZ 特征和图论指标
     """
     ...
 ```
@@ -1274,15 +1371,16 @@ def plot_network_topology_2d(
 
 | 功能 | 说明 | 依赖 | 状态 |
 |------|------|------|------|
-| A.1 谱聚类节点筛选 | Eigengap 自适应 + 率调制中心性 | `coact_all_*`, `sklearn` | ⬜ |
+| A.1 宽建图 (Simpson) | Simpson Index 归一化共激活 → 宽边权图 | `coact_all_event_count` | ⬜ |
 | A.2 替代数据检验 | Surrogate test 验证共激活显著性 | `events_bool` | ⬜ |
-| A.3 骨架构建 | 加权无向图（Co-activation 阈值） | `coact_ratio` | ⬜ |
-| A.4 方向注入 | Wilcoxon + 一致性 + 零滞后过滤 | `lag_raw` | ⬜ |
-| A.5 Stability 权重 | 时间窗切片 + CV 计算 | `event_windows` | ⬜ |
-| A.6 复合权重 | Coact × Consistency × Stability | — | ⬜ |
-| A.7 图论指标 | Net Outflow, Local Efficiency, Betweenness | `networkx` | ⬜ |
-| A.8 2D 网络拓扑图 | Spring/Circular 布局 | `matplotlib` | ⬜ |
-| A.9 传播路径 | 最短路径树 | `adj` | ⬜ |
+| A.3 XYZ 特征计算 | X=Rate, Y=Connection Entropy, Z=placeholder | `W_broad` | ⬜ |
+| A.4 XYZ 多维剪枝 | X门控 + Y门控 + 谱聚类(XY距离) | `sklearn` | ⬜ |
+| A.5 方向注入 | Wilcoxon + 一致性 + 零滞后过滤 | `lag_raw`, `scipy.stats` | ⬜ |
+| A.6 Stability 权重 | 时间窗切片 + CV 计算 | `event_windows` | ⬜ |
+| A.7 复合权重 | Simpson × Consistency × Stability | — | ⬜ |
+| A.8 图论指标 | Net Outflow, Local Efficiency, Betweenness | `networkx` | ⬜ |
+| A.9 2D 网络拓扑图 | Spring 布局 + XY 散点诊断图 | `matplotlib` | ⬜ |
+| A.10 传播路径 | 最短路径树 | `adj` | ⬜ |
 
 **Phase B — Channel + Geometry（需 MNI 坐标）**
 
@@ -1686,18 +1784,19 @@ preprocessor.filter_backend = MyCustomBackend()
   - [x] ✅ 架构重构：剥离所有 STFT/质心计算到 group_event_analysis
   - [ ] 传播动图（500ms窗口内能量传播动画）
   - [ ] 网络拓扑图（待模块4）
-- [ ] **模块4: network_analysis.py** (三阶段递进)
+- [ ] **模块4: network_analysis.py** (三阶段递进, v2: 宽建图→精剪枝→定方向)
   - [ ] **Phase A: Channel-Scale MVP**
-    - [ ] A.1 谱聚类节点筛选 (Eigengap + 率调制中心性)
-    - [ ] A.2 替代数据显著性检验
-    - [ ] A.3-A.4 骨架构建 + 方向注入 (Wilcoxon + 一致性)
-    - [ ] A.5-A.6 Stability 权重 + 复合权重
-    - [ ] A.7 图论指标 (Net Outflow, Local Efficiency, Betweenness)
-    - [ ] A.8-A.9 2D 网络拓扑图 + 传播路径
+    - [ ] A.1 宽建图 (Simpson Index 归一化共激活)
+    - [ ] A.2 替代数据显著性检验 (Surrogate)
+    - [ ] A.3-A.4 XYZ 特征计算 + 多维剪枝 (Rate × Entropy × 谱聚类)
+    - [ ] A.5 方向注入 (Wilcoxon + 一致性)
+    - [ ] A.6-A.7 Stability 权重 + 复合权重
+    - [ ] A.8 图论指标 (Net Outflow, Local Efficiency, Betweenness)
+    - [ ] A.9-A.10 2D 网络拓扑图 + XY 散点诊断图 + 传播路径
   - [ ] **Phase B: Channel + Geometry** (阻塞于 MNI 坐标)
     - [ ] B.0 电极坐标获取
     - [ ] B.1-B.3 空间约束 + 容积传导剔除 + 传播速度验证
-    - [ ] B.4 病理加权 (FR 分类)
+    - [ ] B.4 病理加权 (FR 分类 → Z 维度升级)
     - [ ] B.5-B.6 3D 脑图 + Ictal vs Interictal 对比
   - [ ] **Phase C: Source Space** (研究前沿)
 - [x] Notebook: chengshuai_hfo_analysis.ipynb ✅

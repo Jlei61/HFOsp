@@ -282,7 +282,7 @@ def main() -> None:
     else:
         print(f"[WARN] lagPat not found: {lagpat_path}")
 
-    # ========= 5–7) Network Analysis Figures (Phase A) =========
+    # ========= 5–10) Network Analysis Figures (v2: Build-Prune-Direct) =========
     network_result_path = _pick_path(
         run_summary,
         ["network_result_path", "networkResult", "network_result"],
@@ -296,50 +296,75 @@ def main() -> None:
             plot_outflow_bar_chart,
             plot_adjacency_heatmap,
             plot_edge_direction_summary,
+            plot_broad_graph_comparison,
+            plot_xy_scatter_diagnostic,
         )
 
         net_result = load_network_result(network_result_path)
         n_sel = net_result.n_selected
+        n_pool = net_result.n_pool_channels
         n_edges = net_result.metrics.get("n_edges", 0)
-        print(f"\n[INFO] Network: {n_sel} nodes, {n_edges} edges")
+        print(f"\n[INFO] Network v2: pool={n_pool}, selected={n_sel}, edges={n_edges}")
+
+        # 5) Broad graph comparison (Simpson vs Dice) — always plot if pool exists
+        if n_pool >= 2 and net_result.W_simpson.size > 0:
+            fig5 = plot_broad_graph_comparison(
+                net_result,
+                title=f"{subject}/{record} — Broad Graph: Simpson vs Dice",
+            )
+            fig5_path = out_dir / f"{output_prefix}_broad_graph_comparison.png"
+            fig5.savefig(fig5_path, dpi=160)
+            plt.close(fig5)
+            print(f"[OK] broad graph comparison: {fig5_path}")
+
+        # 6) XY scatter diagnostic — always plot if XYZ features exist
+        if "X" in net_result.node_xyz and len(net_result.node_xyz["X"]) > 0:
+            fig6 = plot_xy_scatter_diagnostic(
+                net_result,
+                title=f"{subject}/{record} — XY Pruning Diagnostic",
+            )
+            fig6_path = out_dir / f"{output_prefix}_xy_scatter_diagnostic.png"
+            fig6.savefig(fig6_path, dpi=160)
+            plt.close(fig6)
+            print(f"[OK] XY scatter diagnostic: {fig6_path}")
 
         if n_sel >= 2:
-            # 5) Network topology (2D graph)
-            fig5 = plot_network_topology_2d(
+            # 7) Network topology (2D graph)
+            fig7 = plot_network_topology_2d(
                 net_result,
                 title=f"{subject}/{record} — HFO Epilepsy Network",
             )
-            fig5_path = out_dir / f"{output_prefix}_network_topology.png"
-            fig5.savefig(fig5_path, dpi=160)
-            plt.close(fig5)
-            print(f"[OK] network topology: {fig5_path}")
+            fig7_path = out_dir / f"{output_prefix}_network_topology.png"
+            fig7.savefig(fig7_path, dpi=160)
+            plt.close(fig7)
+            print(f"[OK] network topology: {fig7_path}")
 
-            # 6) Outflow bar chart (Source→Sink ranking)
-            fig6 = plot_outflow_bar_chart(
+            # 8) Outflow bar chart (Source→Sink ranking)
+            fig8 = plot_outflow_bar_chart(
                 net_result,
                 title=f"{subject}/{record} — Source–Sink Ranking",
             )
-            fig6_path = out_dir / f"{output_prefix}_outflow_ranking.png"
-            fig6.savefig(fig6_path, dpi=160)
-            plt.close(fig6)
-            print(f"[OK] outflow ranking: {fig6_path}")
+            fig8_path = out_dir / f"{output_prefix}_outflow_ranking.png"
+            fig8.savefig(fig8_path, dpi=160)
+            plt.close(fig8)
+            print(f"[OK] outflow ranking: {fig8_path}")
 
-            # 7) Adjacency heatmap
-            fig7 = plot_adjacency_heatmap(
+            # 9) Adjacency heatmap
+            fig9 = plot_adjacency_heatmap(
                 net_result,
                 title=f"{subject}/{record} — Directed Adjacency",
             )
-            fig7_path = out_dir / f"{output_prefix}_adjacency_heatmap.png"
-            fig7.savefig(fig7_path, dpi=160)
-            plt.close(fig7)
-            print(f"[OK] adjacency heatmap: {fig7_path}")
+            fig9_path = out_dir / f"{output_prefix}_adjacency_heatmap.png"
+            fig9.savefig(fig9_path, dpi=160)
+            plt.close(fig9)
+            print(f"[OK] adjacency heatmap: {fig9_path}")
 
-            # 8) Edge direction summary (pie + lag histogram)
-            fig8 = plot_edge_direction_summary(net_result)
-            fig8_path = out_dir / f"{output_prefix}_edge_direction_stats.png"
-            fig8.savefig(fig8_path, dpi=160)
-            plt.close(fig8)
-            print(f"[OK] edge direction stats: {fig8_path}")
+            # 10) Edge direction summary (pie + lag histogram)
+            fig10 = plot_edge_direction_summary(net_result)
+            fig10_path = out_dir / f"{output_prefix}_edge_direction_stats.png"
+            fig10.savefig(fig10_path, dpi=160)
+            plt.close(fig10)
+            print(f"[OK] edge direction stats: {fig10_path}")
 
             # Print source ranking to console.
             ranking = net_result.metrics.get("source_ranking", [])
@@ -352,7 +377,7 @@ def main() -> None:
                     print(f"  {name:>10s}  outflow={val:+.3f}  {marker}")
                 print(f"{'─'*40}")
         else:
-            print("[WARN] Fewer than 2 network nodes — skipping network figures.")
+            print("[WARN] Fewer than 2 selected nodes — skipping directed network figures.")
     else:
         print(f"[INFO] Network result not found at {network_result_path} — "
               "run pipeline with network_analysis.enabled=true to generate.")
