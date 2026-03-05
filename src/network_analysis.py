@@ -1,7 +1,7 @@
 """
 Module 4: Network Analysis — Epilepsy Network from HFO Co-activation
 
-**v2: Build-Prune-Direct Pipeline**
+**v3: Direction-First Causal Pipeline**
 
 Phase A: Channel-Scale MVP (no MNI coordinates required)
 Phase B: + Geometry (MNI coords) — stubs only
@@ -9,12 +9,12 @@ Phase C: Source Space (research frontier) — not implemented
 
 Pipeline
 --------
-1. build_broad_graph   — Simpson / Dice normalised co-activation (wide net)
-2. compute_node_xyz    — X=Rate, Y=Entropy, Z=Epileptogenicity
-3. prune_network       — XYZ gating + optional spectral clustering
-4. inject_direction    — Wilcoxon + consistency on lag_raw
-5. composite weights   — Simpson × Consistency × Stability
-6. graph metrics       — Net Outflow, Betweenness, Local Efficiency
+1. pairwise association from detections (association window)
+2. direction inference before pruning (Wilcoxon + consistency)
+3. fusion (broad score + direction confidence + stability)
+4. physics constraint (distance + near-zero lag guard)
+5. final node pruning with edge-evidence rescue
+6. graph metrics (Net Outflow, Betweenness, Local Efficiency)
 
 Public API
 ----------
@@ -31,7 +31,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class NetworkResult:
-    """Complete epilepsy network analysis result (v2: Build-Prune-Direct)."""
+    """Complete epilepsy network analysis result (direction-first)."""
 
     # --- Core graph ---
     adj: np.ndarray
@@ -171,6 +171,154 @@ def build_broad_graph(
     n_edges = int((W > 0).sum()) // 2
     logger.info("build_broad_graph(%s): %d nodes, %d edges.", method, W.shape[0], n_edges)
     return W
+
+
+def _load_detection_starts_from_gpu_npz(
+    gpu_npz_path: str,
+    pool_names: Sequence[str],
+) -> Dict[str, np.ndarray]:
+    """Load per-channel detection start times from *_gpu.npz."""
+    d = np.load(gpu_npz_path, allow_pickle=True)
+    if "chns_names" not in d or "whole_dets" not in d:
+        raise KeyError("gpu npz must contain 'chns_names' and 'whole_dets'.")
+    raw_names = [str(x).upper() for x in d["chns_names"].tolist()]
+    whole_dets = d["whole_dets"]
+    name_to_idx = {name: idx for idx, name in enumerate(raw_names)}
+    starts_by_channel: Dict[str, np.ndarray] = {}
+    for name in pool_names:
+        idx = name_to_idx.get(str(name).upper(), None)
+        if idx is None:
+            starts_by_channel[str(name)] = np.zeros((0,), dtype=np.float64)
+            continue
+        arr = np.asarray(whole_dets[idx], dtype=np.float64)
+        if arr.size == 0:
+            starts_by_channel[str(name)] = np.zeros((0,), dtype=np.float64)
+            continue
+        if arr.ndim == 1:
+            arr = arr.reshape(-1, 2)
+        starts = np.asarray(arr[:, 0], dtype=np.float64)
+        starts = starts[np.isfinite(starts)]
+        starts.sort()
+        starts_by_channel[str(name)] = starts
+    return starts_by_channel
+
+
+def _nearest_lags_within_window(
+    src_starts: np.ndarray,
+    dst_starts: np.ndarray,
+    window_sec: float,
+) -> np.ndarray:
+    """Vectorised nearest-neighbour lag samples `src - dst` within window."""
+    src = np.asarray(src_starts, dtype=np.float64)
+    dst = np.asarray(dst_starts, dtype=np.float64)
+    if src.size == 0 or dst.size == 0:
+        return np.zeros((0,), dtype=np.float64)
+    if not np.all(src[:-1] <= src[1:]):
+        src = np.sort(src)
+    if not np.all(dst[:-1] <= dst[1:]):
+        dst = np.sort(dst)
+
+    idx = np.searchsorted(dst, src, side="left")
+    idx_prev = np.clip(idx - 1, 0, dst.size - 1)
+    idx_next = np.clip(idx, 0, dst.size - 1)
+
+    lag_prev = src - dst[idx_prev]
+    lag_next = src - dst[idx_next]
+    abs_prev = np.abs(lag_prev)
+    abs_next = np.abs(lag_next)
+    pick_prev = abs_prev <= abs_next
+
+    best_lag = np.where(pick_prev, lag_prev, lag_next)
+    best_abs = np.where(pick_prev, abs_prev, abs_next)
+    mask = best_abs <= float(window_sec)
+    return np.asarray(best_lag[mask], dtype=np.float64)
+
+
+def compute_pairwise_association(
+    starts_by_channel: Mapping[str, np.ndarray],
+    pool_names: Sequence[str],
+    *,
+    assoc_window_ms: float = 40.0,
+    sample_cap_per_edge: int = 50000,
+) -> Dict[str, np.ndarray]:
+    """Compute pairwise association support from detections (vectorised per pair).
+
+    Notes
+    -----
+    - No triple loop over channel×channel×event.
+    - Per pair uses `np.searchsorted` + vectorised nearest-neighbour extraction.
+    """
+    n = len(pool_names)
+    win_sec = float(assoc_window_ms) * 1e-3
+    assoc_count = np.zeros((n, n), dtype=np.int64)
+    lag_median_ms = np.full((n, n), np.nan, dtype=np.float64)
+    lag_consistency = np.zeros((n, n), dtype=np.float64)
+
+    rng = np.random.default_rng(42)
+    for i in range(n):
+        s_i = np.asarray(starts_by_channel.get(pool_names[i], np.zeros((0,))), dtype=np.float64)
+        for j in range(i + 1, n):
+            s_j = np.asarray(starts_by_channel.get(pool_names[j], np.zeros((0,))), dtype=np.float64)
+            if s_i.size == 0 or s_j.size == 0:
+                continue
+
+            # Query shorter side to keep per-pair cost bounded.
+            if s_i.size <= s_j.size:
+                lags = _nearest_lags_within_window(s_i, s_j, win_sec)
+                sign_factor = 1.0
+            else:
+                lags = _nearest_lags_within_window(s_j, s_i, win_sec)
+                sign_factor = -1.0
+
+            if lags.size == 0:
+                continue
+            if sample_cap_per_edge > 0 and lags.size > int(sample_cap_per_edge):
+                keep = rng.choice(lags.size, size=int(sample_cap_per_edge), replace=False)
+                lags = lags[np.sort(keep)]
+            lags = sign_factor * np.asarray(lags, dtype=np.float64)
+            cnt = int(lags.size)
+            assoc_count[i, j] = cnt
+            assoc_count[j, i] = cnt
+
+            med_ms = float(np.median(lags) * 1e3)
+            lag_median_ms[i, j] = med_ms
+            lag_median_ms[j, i] = -med_ms
+            if med_ms == 0.0:
+                cons = 0.5
+            else:
+                cons = float(np.mean(np.sign(lags) == np.sign(med_ms)))
+            lag_consistency[i, j] = cons
+            lag_consistency[j, i] = cons
+
+    return {
+        "assoc_count": assoc_count,
+        "lag_median_ms": lag_median_ms,
+        "lag_consistency": lag_consistency,
+    }
+
+
+def _apply_physics_constraint(
+    edge_mask: np.ndarray,
+    lag_abs_ms: np.ndarray,
+    dist_matrix: Optional[np.ndarray],
+    *,
+    min_dist_mm: float = 10.0,
+    lag_vc_ms: float = 3.0,
+) -> np.ndarray:
+    """Apply volume-conduction guard before final pruning."""
+    if dist_matrix is None:
+        return edge_mask.copy()
+    dist = np.asarray(dist_matrix, dtype=np.float64)
+    if dist.shape != edge_mask.shape:
+        logger.warning(
+            "Physics constraint skipped: dist_matrix shape %s != edge shape %s.",
+            dist.shape, edge_mask.shape,
+        )
+        return edge_mask.copy()
+    too_close = dist <= float(min_dist_mm)
+    near_zero_lag = lag_abs_ms < float(lag_vc_ms)
+    reject = too_close & near_zero_lag
+    return edge_mask & (~reject)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -594,24 +742,6 @@ def compute_stability_weights(
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  A.7 — Composite Weights
-# ═══════════════════════════════════════════════════════════════════════
-
-def compute_composite_weights(
-    adj_directed: np.ndarray,
-    W_pruned: np.ndarray,
-    stability: np.ndarray,
-) -> np.ndarray:
-    """Phase A composite: Simpson × Consistency × Stability.
-
-    ``adj_directed[i,j]`` carries the consistency value.
-    ``W_pruned[i,j]`` carries the Simpson/Dice weight.
-    """
-    W = np.where(np.isfinite(W_pruned), W_pruned, 0.0)
-    return adj_directed * W * stability
-
-
-# ═══════════════════════════════════════════════════════════════════════
 #  A.8 — Graph Theory Metrics
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -676,38 +806,102 @@ def build_hfo_network(
     group_analysis_npz: str,
     dist_matrix: Optional[np.ndarray] = None,
     *,
+    detections_npz_path: Optional[str] = None,
     # — Step 1: Broad graph —
     edge_method: str = "simpson",
     run_surrogate: bool = True,
     n_surrogates: int = 200,
-    # — Step 2: XYZ pruning —
     min_rate: float = 0.5,
     max_entropy: float = 0.85,
     use_spectral: bool = True,
     min_cluster_size: int = 3,
     n_clusters: Optional[int] = None,
-    # — Step 3: Direction —
     min_events: int = 5,
     lag_thresh_ms: float = 5.0,
     consistency_thresh: float = 0.6,
     p_value_thresh: float = 0.05,
-    # — Step 4: Stability —
     stability_window_sec: float = 300.0,
+    assoc_window_ms: float = 40.0,
+    min_pair_events: int = 5,
+    tau_assoc: float = 20.0,
+    tau_lag_ms: float = 10.0,
+    fusion_w_b: float = 0.35,
+    fusion_w_d: float = 0.45,
+    fusion_w_s: float = 0.20,
+    d_strong: float = 0.35,
+    b_min: float = 0.2,
+    min_dist_mm: float = 10.0,
+    lag_vc_ms: float = 3.0,
+    sample_cap_per_edge: int = 50000,
 ) -> NetworkResult:
-    """One-stop v2 epilepsy network builder (Phase A).
+    """Unified entrypoint: direction-first causal pipeline."""
+    return _build_network_direction_first(
+        group_analysis_npz,
+        detections_npz_path=detections_npz_path,
+        dist_matrix=dist_matrix,
+        edge_method=edge_method,
+        run_surrogate=run_surrogate,
+        n_surrogates=n_surrogates,
+        min_rate=min_rate,
+        max_entropy=max_entropy,
+        use_spectral=use_spectral,
+        min_cluster_size=min_cluster_size,
+        n_clusters=n_clusters,
+        min_events=min_events,
+        lag_thresh_ms=lag_thresh_ms,
+        consistency_thresh=consistency_thresh,
+        p_value_thresh=p_value_thresh,
+        stability_window_sec=stability_window_sec,
+        assoc_window_ms=assoc_window_ms,
+        min_pair_events=min_pair_events,
+        tau_assoc=tau_assoc,
+        tau_lag_ms=tau_lag_ms,
+        fusion_w_b=fusion_w_b,
+        fusion_w_d=fusion_w_d,
+        fusion_w_s=fusion_w_s,
+        d_strong=d_strong,
+        b_min=b_min,
+        min_dist_mm=min_dist_mm,
+        lag_vc_ms=lag_vc_ms,
+        sample_cap_per_edge=sample_cap_per_edge,
+    )
 
-    Pipeline
-    --------
-    1. Build both Simpson & Dice broad graphs
-    2. Compute XYZ features → multi-dimensional pruning
-    3. Direction injection (Wilcoxon + consistency)
-    4. Stability weights → composite weight → graph metrics
-    """
+
+def _build_network_direction_first(
+    group_analysis_npz: str,
+    dist_matrix: Optional[np.ndarray] = None,
+    *,
+    detections_npz_path: Optional[str] = None,
+    edge_method: str = "simpson",
+    run_surrogate: bool = True,
+    n_surrogates: int = 200,
+    min_rate: float = 0.5,
+    max_entropy: float = 0.85,
+    use_spectral: bool = True,
+    min_cluster_size: int = 3,
+    n_clusters: Optional[int] = None,
+    min_events: int = 5,
+    lag_thresh_ms: float = 5.0,
+    consistency_thresh: float = 0.6,
+    p_value_thresh: float = 0.05,
+    stability_window_sec: float = 300.0,
+    assoc_window_ms: float = 40.0,
+    min_pair_events: int = 5,
+    tau_assoc: float = 20.0,
+    tau_lag_ms: float = 10.0,
+    fusion_w_b: float = 0.35,
+    fusion_w_d: float = 0.45,
+    fusion_w_s: float = 0.20,
+    d_strong: float = 0.35,
+    b_min: float = 0.2,
+    min_dist_mm: float = 10.0,
+    lag_vc_ms: float = 3.0,
+    sample_cap_per_edge: int = 50000,
+) -> NetworkResult:
+    """Private implementation: direction-first + fusion + physics + final prune."""
     from .group_event_analysis import load_group_analysis_results
 
     data = load_group_analysis_results(group_analysis_npz)
-
-    # ── Resolve channel pool ──
     core_names: List[str] = list(data["ch_names"])
     lag_raw: np.ndarray = data["lag_raw"]
     events_bool: np.ndarray = data["events_bool"]
@@ -720,15 +914,11 @@ def build_hfo_network(
     else:
         coact_count = np.asarray(data["coact_event_count"])
         pool_names = list(core_names)
-
     n_pool = len(pool_names)
-    logger.info("Channel pool: %d (%s).", n_pool, "all" if has_all else "core")
+    logger.info("Causal mode: pool=%d channels.", n_pool)
 
-    # ── Step 1: Build both broad graphs ──
     W_simpson = build_broad_graph(coact_count, method="simpson")
     W_dice = build_broad_graph(coact_count, method="dice")
-
-    # Optional surrogate (applies to core submatrix only).
     if run_surrogate and events_bool is not None:
         sig_mask = surrogate_significance_test(events_bool, n_surrogates)
         core_pool_idx = []
@@ -744,79 +934,169 @@ def build_hfo_network(
                         W_simpson[ci_pool, cj_pool] = 0.0
                         W_dice[ci_pool, cj_pool] = 0.0
 
-    W_active = W_simpson if edge_method == "simpson" else W_dice
+    method_norm = str(edge_method).strip().lower()
+    if method_norm not in {"simpson", "dice"}:
+        raise ValueError(
+            f"Invalid edge_method='{edge_method}'. Expected 'simpson' or 'dice'."
+        )
+    W_active = W_simpson if method_norm == "simpson" else W_dice
 
-    # ── Step 2: XYZ features + pruning ──
     events_count = np.diag(coact_count).astype(np.float64)
     duration_min = _recording_duration_min(event_windows)
     X, Y, Z = compute_node_xyz(W_active, events_count, duration_min)
 
-    selected_idx, W_pruned, cluster_labels = prune_network(
-        W_active, X, Y, Z,
+    core_name_to_idx = {name: ci for ci, name in enumerate(core_names)}
+    n_events = lag_raw.shape[1]
+    lag_pool = np.full((n_pool, n_events), np.nan, dtype=np.float64)
+    eb_pool = np.zeros((n_pool, n_events), dtype=bool)
+    for pi, name in enumerate(pool_names):
+        ci = core_name_to_idx.get(name, -1)
+        if ci >= 0:
+            lag_pool[pi] = lag_raw[ci]
+            eb_pool[pi] = events_bool[ci]
+
+    if detections_npz_path:
+        try:
+            starts = _load_detection_starts_from_gpu_npz(detections_npz_path, pool_names)
+            pair = compute_pairwise_association(
+                starts,
+                pool_names,
+                assoc_window_ms=float(assoc_window_ms),
+                sample_cap_per_edge=int(sample_cap_per_edge),
+            )
+            assoc_count = pair["assoc_count"].astype(np.float64)
+        except Exception as exc:
+            logger.warning(
+                "Falling back to coact counts for association (%s): %s",
+                detections_npz_path, exc,
+            )
+            assoc_count = np.asarray(coact_count, dtype=np.float64)
+    else:
+        assoc_count = np.asarray(coact_count, dtype=np.float64)
+    np.fill_diagonal(assoc_count, 0.0)
+
+    assoc_support = 1.0 - np.exp(-assoc_count / max(float(tau_assoc), 1e-6))
+    candidate_mask = assoc_count >= float(min_pair_events)
+    W_candidate = np.where(candidate_mask, assoc_support, 0.0)
+
+    # Direction-first: infer direction on association candidates before pruning.
+    adj_dir_pool, dir_mask_pool, edge_stats_pool = inject_direction(
+        W_candidate,
+        lag_pool,
+        eb_pool,
+        min_events=min_events,
+        lag_thresh_ms=lag_thresh_ms,
+        consistency_thresh=consistency_thresh,
+        p_value_thresh=p_value_thresh,
+    )
+
+    event_times = event_windows[:, 0]
+    stab_pool = compute_stability_weights(
+        lag_pool, eb_pool, event_times, window_sec=stability_window_sec,
+    )
+
+    lag_abs_ms = np.full((n_pool, n_pool), np.inf, dtype=np.float64)
+    for es in edge_stats_pool:
+        if not es.get("directed", False):
+            continue
+        src = int(es.get("source", -1))
+        tgt = int(es.get("target", -1))
+        if src < 0 or tgt < 0:
+            continue
+        lag_abs_ms[src, tgt] = abs(float(es.get("median_lag_ms", 0.0)))
+
+    w_sum = float(fusion_w_b + fusion_w_d + fusion_w_s)
+    if w_sum <= 0:
+        w_b, w_d, w_s = 0.35, 0.45, 0.20
+    else:
+        w_b = float(fusion_w_b) / w_sum
+        w_d = float(fusion_w_d) / w_sum
+        w_s = float(fusion_w_s) / w_sum
+    D = np.where(dir_mask_pool, adj_dir_pool, 0.0)
+    B = np.asarray(W_active, dtype=np.float64)
+    S = np.asarray(stab_pool, dtype=np.float64)
+    lag_scale_ms = max(float(tau_lag_ms), 1e-6)
+    lag_amp = np.tanh(np.where(np.isfinite(lag_abs_ms), lag_abs_ms, 0.0) / lag_scale_ms)
+    W_fuse_pool = assoc_support * (w_b * B + w_d * D + w_s * S) * np.maximum(lag_amp, 0.1)
+    rescue_mask = (
+        ((D >= float(d_strong)) & (assoc_count >= float(min_pair_events)))
+        | ((B >= float(b_min)) & (assoc_count >= float(min_pair_events)))
+    )
+    rescue_mask &= dir_mask_pool
+
+    physics_mask = _apply_physics_constraint(
+        rescue_mask,
+        lag_abs_ms,
+        dist_matrix,
+        min_dist_mm=min_dist_mm,
+        lag_vc_ms=lag_vc_ms,
+    )
+    adj_pool = np.where(physics_mask, W_fuse_pool, 0.0)
+
+    # Final pruning on fused evidence — with node-level rescue.
+    # Step A: standard XYZ prune (same as legacy).
+    W_prune_ref = np.maximum(B, assoc_support)
+    selected_idx_base, _W_unused, cluster_labels = prune_network(
+        W_prune_ref, X, Y, Z,
         min_rate=min_rate, max_entropy=max_entropy,
         use_spectral=use_spectral,
         min_cluster_size=min_cluster_size,
         n_clusters=n_clusters,
     )
-
+    # Step B: rescue nodes that are endpoints of a rescued edge.
+    # adj_pool > 0 means edge survived fusion + physics; endpoints deserve to stay.
+    rescued_node_mask = np.zeros(n_pool, dtype=bool)
+    rescued_node_mask[np.where(np.any(adj_pool > 0, axis=1))[0]] = True  # sources
+    rescued_node_mask[np.where(np.any(adj_pool > 0, axis=0))[0]] = True  # targets
+    rescued_extra = np.where(rescued_node_mask & ~np.isin(np.arange(n_pool), selected_idx_base))[0]
+    if rescued_extra.size > 0:
+        logger.info(
+            "Causal node rescue: %d extra nodes saved by edge evidence (total base=%d).",
+            rescued_extra.size, len(selected_idx_base),
+        )
+        for ri in rescued_extra:
+            cluster_labels[ri] = 0  # mark as included
+    selected_idx = np.sort(np.union1d(selected_idx_base, rescued_extra).astype(int))
     n_sel = len(selected_idx)
-    sel_names = [pool_names[i] for i in selected_idx]
-    logger.info("Selected %d / %d nodes: %s", n_sel, n_pool, sel_names)
-
     if n_sel < 2:
-        logger.warning("Fewer than 2 nodes — returning empty network.")
-        return _empty_result(pool_names, cluster_labels, n_pool,
-                             W_simpson, W_dice,
-                             {"X": X, "Y": Y, "Z": Z})
+        logger.warning("Causal mode selected <2 nodes — returning empty network.")
+        return _empty_result(pool_names, cluster_labels, n_pool, W_simpson, W_dice, {"X": X, "Y": Y, "Z": Z})
 
-    # ── Map selected → core for lag / events data ──
-    core_name_to_idx = {name: ci for ci, name in enumerate(core_names)}
-    sel_to_core = np.full(n_sel, -1, dtype=np.int64)
-    for si, name in enumerate(sel_names):
-        if name in core_name_to_idx:
-            sel_to_core[si] = core_name_to_idx[name]
+    sel_names = [pool_names[i] for i in selected_idx]
+    adj_sel = adj_pool[np.ix_(selected_idx, selected_idx)]
+    W_pruned = W_prune_ref[np.ix_(selected_idx, selected_idx)]
+    dir_mask_sel = (adj_sel > 0).astype(bool)
+    stab_sel = stab_pool[np.ix_(selected_idx, selected_idx)]
 
-    n_events = lag_raw.shape[1]
-    lag_sel = np.full((n_sel, n_events), np.nan, dtype=np.float64)
-    eb_sel = np.zeros((n_sel, n_events), dtype=bool)
-    for si in range(n_sel):
-        ci = sel_to_core[si]
-        if ci >= 0:
-            lag_sel[si] = lag_raw[ci]
-            eb_sel[si] = events_bool[ci]
-
-    # ── Step 3: Direction injection ──
-    adj_dir, dir_mask, edge_stats = inject_direction(
-        W_pruned, lag_sel, eb_sel,
-        min_events=min_events, lag_thresh_ms=lag_thresh_ms,
-        consistency_thresh=consistency_thresh, p_value_thresh=p_value_thresh,
-    )
-
-    # ── Step 4: Stability ──
-    event_times = event_windows[:, 0]
-    stab = compute_stability_weights(lag_sel, eb_sel, event_times,
-                                     window_sec=stability_window_sec)
-
-    # ── Step 5: Composite weights ──
-    adj_weighted = compute_composite_weights(adj_dir, W_pruned, stab)
-
-    # ── Step 6: Metrics ──
-    metrics = compute_network_metrics(adj_weighted, sel_names)
-
-    # ── Annotate edge_stats ──
-    for es in edge_stats:
-        es["ch_i"] = sel_names[es["i"]]
-        es["ch_j"] = sel_names[es["j"]]
-        if es.get("source", -1) >= 0:
-            es["source_name"] = sel_names[es["source"]]
-            es["target_name"] = sel_names[es["target"]]
-
-    # ── Pack result ──
+    metrics = compute_network_metrics(adj_sel, sel_names)
     node_weights = X[selected_idx]
     skeleton = (W_pruned > 0).astype(np.float32)
 
+    old_to_new = {int(old): int(new) for new, old in enumerate(selected_idx)}
+    edge_stats: List[Dict[str, Any]] = []
+    for es in edge_stats_pool:
+        if not es.get("directed", False):
+            continue
+        src_old = int(es.get("source", -1))
+        tgt_old = int(es.get("target", -1))
+        if src_old not in old_to_new or tgt_old not in old_to_new:
+            continue
+        src = old_to_new[src_old]
+        tgt = old_to_new[tgt_old]
+        if adj_sel[src, tgt] <= 0:
+            continue
+        item = dict(es)
+        item["source"] = src
+        item["target"] = tgt
+        item["source_name"] = sel_names[src]
+        item["target_name"] = sel_names[tgt]
+        item["ch_i"] = pool_names[src_old]
+        item["ch_j"] = pool_names[tgt_old]
+        edge_stats.append(item)
+
     params = {
-        "edge_method": edge_method,
+        "mode": "causal",
+        "edge_method": method_norm,
         "run_surrogate": run_surrogate,
         "n_surrogates": n_surrogates,
         "min_rate": min_rate,
@@ -829,10 +1109,30 @@ def build_hfo_network(
         "consistency_thresh": consistency_thresh,
         "p_value_thresh": p_value_thresh,
         "stability_window_sec": stability_window_sec,
+        "assoc_window_ms": assoc_window_ms,
+        "min_pair_events": min_pair_events,
+        "tau_assoc": tau_assoc,
+        "tau_lag_ms": tau_lag_ms,
+        "fusion_w_b": w_b,
+        "fusion_w_d": w_d,
+        "fusion_w_s": w_s,
+        "d_strong": d_strong,
+        "b_min": b_min,
+        "min_dist_mm": min_dist_mm,
+        "lag_vc_ms": lag_vc_ms,
+        "detections_npz_path": detections_npz_path,
+    }
+    metrics["causal_diagnostics"] = {
+        "n_candidate_edges": int((candidate_mask.sum() - np.trace(candidate_mask)) // 2),
+        "n_directed_pool_edges": int(dir_mask_pool.sum()),
+        "n_physics_kept_edges": int((adj_pool > 0).sum()),
+        "n_base_pruned_nodes": int(len(selected_idx_base)),
+        "n_rescued_nodes": int(rescued_extra.size),
+        "n_final_nodes": n_sel,
     }
 
     return NetworkResult(
-        adj=adj_weighted,
+        adj=adj_sel,
         node_names=sel_names,
         node_weights=node_weights,
         W_simpson=W_simpson,
@@ -842,8 +1142,8 @@ def build_hfo_network(
         selected_idx=selected_idx,
         node_xyz={"X": X, "Y": Y, "Z": Z},
         skeleton=skeleton,
-        direction_mask=dir_mask,
-        stability=stab,
+        direction_mask=dir_mask_sel,
+        stability=stab_sel,
         cluster_labels=cluster_labels,
         metrics=metrics,
         edge_stats=edge_stats,
@@ -940,7 +1240,8 @@ def plot_broad_graph_comparison(
     figsize: Tuple[float, float] = (18, 7),
     cmap: str = "YlOrRd",
     title: Optional[str] = None,
-    min_events_for_display: int = 1,
+    exclude_zero_hfo_nodes: bool = True,
+    min_rate_for_display: float = 0.0,
 ) -> Any:
     """Side-by-side heatmaps of Simpson and Dice broad graphs.
 
@@ -951,8 +1252,11 @@ def plot_broad_graph_comparison(
     pool_names = result.pool_names
     X = result.node_xyz["X"]
 
-    # Filter: keep nodes with at least min_events_for_display HFO
-    keep = X > 0
+    # Filter by configurable rate threshold; default excludes only zero-HFO nodes.
+    if exclude_zero_hfo_nodes:
+        keep = X > max(min_rate_for_display, 0.0)
+    else:
+        keep = np.ones_like(X, dtype=bool)
     if keep.sum() < 2:
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.text(0.5, 0.5, "No active nodes", ha="center", va="center",
@@ -1141,6 +1445,90 @@ def plot_adjacency_heatmap(
     ax.set_ylabel("Source (i)")
     ax.set_title(title or "Directed Weighted Adjacency  A[i→j]", fontsize=13, fontweight="bold")
     fig.colorbar(im, ax=ax, shrink=0.8).set_label("Simpson × Consistency × Stability")
+    fig.tight_layout()
+    if output_path:
+        fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    return fig
+
+
+def plot_diff_adjacency_heatmap(
+    new_result: NetworkResult,
+    old_result: NetworkResult,
+    output_path: Optional[str] = None,
+    *,
+    figsize: Tuple[float, float] = (9, 8),
+    cmap: str = "RdBu_r",
+    title: Optional[str] = None,
+    only_changed: bool = True,
+) -> Any:
+    """Heatmap of `Diff_Adjacency = New_Adj - Old_Adj`.
+
+    Parameters
+    ----------
+    only_changed : bool
+        If True (default), only show channels that have at least one
+        non-zero diff cell — keeps the plot compact and readable.
+    """
+    import matplotlib.pyplot as plt
+
+    new_names = list(new_result.node_names)
+    old_names = list(old_result.node_names)
+    union_names = sorted(set(new_names) | set(old_names))
+    n = len(union_names)
+    if n == 0:
+        fig, ax = plt.subplots(figsize=figsize)
+        ax.text(0.5, 0.5, "Empty network", ha="center", va="center",
+                transform=ax.transAxes, fontsize=14)
+        return fig
+
+    new_map = {nm: i for i, nm in enumerate(new_names)}
+    old_map = {nm: i for i, nm in enumerate(old_names)}
+    M_new = np.zeros((n, n), dtype=np.float64)
+    M_old = np.zeros((n, n), dtype=np.float64)
+    for ui, src in enumerate(union_names):
+        i_new = new_map.get(src, None)
+        i_old = old_map.get(src, None)
+        for uj, tgt in enumerate(union_names):
+            j_new = new_map.get(tgt, None)
+            j_old = old_map.get(tgt, None)
+            if i_new is not None and j_new is not None:
+                M_new[ui, uj] = float(new_result.adj[i_new, j_new])
+            if i_old is not None and j_old is not None:
+                M_old[ui, uj] = float(old_result.adj[i_old, j_old])
+
+    diff_full = M_new - M_old
+
+    # Filter to only channels involved in at least one changed cell.
+    if only_changed:
+        eps = 1e-12
+        row_has_diff = np.any(np.abs(diff_full) > eps, axis=1)
+        col_has_diff = np.any(np.abs(diff_full) > eps, axis=0)
+        keep = row_has_diff | col_has_diff
+        keep_idx = np.where(keep)[0]
+        if keep_idx.size < 2:
+            # Fall back to showing all if nothing changed.
+            keep_idx = np.arange(n)
+        disp_names = [union_names[i] for i in keep_idx]
+        diff = diff_full[np.ix_(keep_idx, keep_idx)]
+    else:
+        disp_names = union_names
+        diff = diff_full
+
+    nd = len(disp_names)
+    abs_max = max(float(np.max(np.abs(diff))), 1e-6)
+    fig, ax = plt.subplots(figsize=figsize)
+    im = ax.imshow(diff, cmap=cmap, aspect="auto", interpolation="nearest",
+                   vmin=-abs_max, vmax=abs_max)
+    ax.set_xticks(range(nd))
+    ax.set_yticks(range(nd))
+    ax.set_xticklabels(disp_names, rotation=45, ha="right", fontsize=8)
+    ax.set_yticklabels(disp_names, fontsize=8)
+    ax.set_xlabel("Target (j)")
+    ax.set_ylabel("Source (i)")
+    subtitle = f" ({nd}/{n} channels with changes)" if only_changed and nd < n else ""
+    ax.set_title((title or "Diff Adjacency (New - Old)") + subtitle,
+                 fontsize=13, fontweight="bold")
+    fig.colorbar(im, ax=ax, shrink=0.8).set_label("Positive = rescued edge weight")
     fig.tight_layout()
     if output_path:
         fig.savefig(output_path, dpi=150, bbox_inches="tight")

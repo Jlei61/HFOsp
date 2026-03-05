@@ -35,6 +35,14 @@ analysis:
   force_rerun: false  # Ignore existing packedTimes/gpu results
   interictal_only: true  # Drop windows overlapping ictal_mask
 
+# === Tier-1 causal tuning knobs (patient-specific) ===
+# Keep this block small; tune only when necessary.
+causal_tuning:
+  band: ripple  # [T1] physical target: ripple | fast_ripple
+  rel_thresh: 3.0  # [T1] detector sensitivity (2.0-4.0)
+  assoc_window_ms: 40.0  # [T1] causal association window
+  d_strong: 0.35  # [T1] rescue aggressiveness
+
 # === HFO detection (per-channel) ===
 # Settings for detector used when GPU detections are missing.
 hfo_detection:
@@ -96,24 +104,52 @@ group_analysis:
 # Builds directed weighted epilepsy network from group-analysis co-activation.
 network_analysis:
   enabled: true  # Set false to skip network step entirely
-  use_all_channels: true  # Use coact_all (all bipolar channels) when available
-  # Node selection (spectral clustering)
-  min_dist_mm: 5.0  # Volume-conduction guard for affinity graph (Phase A: no dist_matrix, ignored)
-  min_cluster_size: 3  # Clusters smaller than this are discarded
-  n_clusters: null  # null = automatic Eigengap; integer = force this many clusters
-  alpha: 0.65  # EigenCentrality vs Rate blend (0.6–0.7 recommended)
-  # Surrogate significance test
+  strict_baseline: true  # true -> lock Tier-2 defaults in run_pipeline.py
+  # Step 1: broad graph (Simpson / Dice)
+  edge_method: simpson  # Options: simpson | dice
   run_surrogate: true  # Validate co-activation against circular-shift null
   n_surrogates: 200  # Number of surrogate datasets (200 standard, 50 for quick)
-  # Skeleton construction
-  min_coact: 0.10  # Co-activation threshold for skeleton edges (10%)
-  # Direction injection
+  # Step 2: XYZ pruning (locked when strict_baseline=true)
+  min_rate: 0.5  # Minimum HFO rate (events/min)
+  max_entropy: 0.85  # Maximum normalized connection entropy
+  use_spectral: true  # Spectral clustering on XY-filtered nodes
+  min_cluster_size: 3  # Clusters smaller than this are discarded
+  n_clusters: null  # null = automatic Eigengap; integer = force this many clusters
+  # Step 3: direction injection (locked when strict_baseline=true)
   min_events: 5  # Minimum co-active events per channel pair
   lag_thresh_ms: 5.0  # Zero-lag guard (|median lag| must exceed this)
   consistency_thresh: 0.6  # Directional consistency threshold (60%)
   p_value_thresh: 0.05  # Wilcoxon significance level
-  # Stability weights
+  # Step 4: stability (locked when strict_baseline=true)
   stability_window_sec: 300.0  # Time-window for temporal robustness (5 min)
+  # Step 5: direction-first fusion + physics constraint (locked when strict_baseline=true)
+  assoc_window_ms: 40.0  # Pairwise association window on detections
+  min_pair_events: 5  # Minimum pairwise associated events per edge
+  tau_assoc: 20.0  # Saturation scale for association support
+  tau_lag_ms: 10.0  # Saturation scale for lag-confidence term
+  fusion_w_b: 0.35  # Broad score weight
+  fusion_w_d: 0.45  # Direction confidence weight
+  fusion_w_s: 0.20  # Stability weight
+  d_strong: 0.35  # Strong-direction rescue threshold
+  b_min: 0.20  # Minimal broad-score fallback threshold
+  min_dist_mm: 10.0  # Physics constraint distance threshold
+  lag_vc_ms: 3.0  # Near-zero lag threshold for volume conduction
+  sample_cap_per_edge: 50000  # Upper bound for lag samples per edge
+  dist_matrix_path: null  # Optional path to NxN distance matrix (.npy/.npz)
+  # Optional evidence audit (A/B/C)
+  audit_ablation:
+    enabled: false
+    a_min_channels: 6
+    a_window_sec: 0.5
+    b_min_channels: 2
+    b_window_sec: 0.5
+    c_min_channels: 2
+    c_window_sec: 0.12
+  # Visualization controls for scripts/visualize_run.py
+  visualization:
+    exclude_zero_hfo_nodes: true  # Hide nodes with zero HFO in broad-graph heatmaps
+    min_rate_for_display: 0.0  # Additional display filter on X (events/min)
+    topology_layout: spring  # Options: spring | circular | spectral | kamada_kawai
 
 # === Output naming ===
 # Suffixes for derived files saved by the pipeline.
