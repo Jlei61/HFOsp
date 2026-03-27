@@ -26,7 +26,7 @@ analysis:
   band: ripple  # Options: ripple | fast_ripple
   reference: bipolar  # Options: bipolar | car | none
   alias_bipolar_to_left: true  # For bipolar names like A1-A2 -> A1
-  bipolar_gap: 2  # Max allowed contact gap in bipolar re-reference
+  bipolar_gap: 1  # Max allowed contact gap in bipolar re-reference (1 = strictly adjacent, matching legacy yuquan pipeline)
   resample_sfreq: auto  # Options: auto | none | number (Hz)
   crop_seconds: 500  # Crop length (seconds); null -> full recording
   use_gpu_envelope: true  # Use GPU for envelope if available
@@ -50,10 +50,12 @@ hfo_detection:
     band: ripple  # Options: ripple | fast_ripple (must match analysis.band)
     bandpass: null  # Optional custom bandpass (low, high)
     subband_width: 20.0  # Subband width for filterbank envelope
-    rel_thresh: 2.0  # Relative threshold multiplier
-    abs_thresh: 2.0  # Absolute threshold multiplier
+    rel_thresh: 2.0  # Relative threshold multiplier (legacy yuquan = 2.0)
+    abs_thresh: 2.0  # Absolute threshold multiplier (legacy yuquan = 2.0)
     min_gap_ms: 20.0  # Min gap to merge events (ms)
-    min_last_ms: 40.0  # Min event duration (ms)
+    min_last_ms: 50.0  # Min event duration (ms, legacy yuquan = 50)
+    max_last_ms: 200.0  # Max event duration (ms, legacy yuquan = 200); null = no limit
+    side_thresh: 1.5  # Side-band denoise ratio (legacy yuquan = 1.5); null = disabled
     chunk_sec: 50.0  # Chunk length for detection; null -> full
     chunk_overlap_sec: 2.0  # Overlap per chunk (s)
     n_jobs: -1  # Parallel jobs (-1 -> all cores)
@@ -63,8 +65,8 @@ hfo_detection:
 # Builds group events, computes centroids and lag/rank, optional TF.
 group_analysis:
   core:
-    centroid_power: 2.0  # Envelope centroid weighting power
-    centroid_source: env  # Options: env | tf
+    centroid_power: 3.0  # Centroid weighting power (legacy yuquan spectrogram uses 3.0; env mode typically 2.0)
+    centroid_source: spectrogram  # Options: env | tf | spectrogram (spectrogram matches legacy yuquan)
     min_channels: 6  # Min participating channels per group event window
     coact_all_channels: true  # Compute coactivation using all channels
     coact_min_event_ratio: 0.0  # Min coactivation ratio to keep pair

@@ -1402,6 +1402,97 @@ def compute_centroid_matrix_from_envelope_cache(
 
     return centroids, events_bool
 
+def compute_centroid_matrix_spectrogram(
+    *,
+    windows: Sequence[EventWindow],
+    detections: Mapping[str, np.ndarray],
+    ch_names: Sequence[str],
+    x_band: np.ndarray,
+    sfreq: float,
+    start_sec: float = 0.0,
+    spec_freq_range: Tuple[float, float] = (50.0, 300.0),
+    spec_nperseg_sec: float = 0.05,
+    spec_noverlap_ratio: float = 0.8,
+    gaussian_sigma: float = 1.5,
+    centroid_power: float = 2.0,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Compute centroids using spectrogram mass-center, matching legacy yuquan pipeline.
+
+    Legacy algorithm (packGroupEvents*.py → return_massCenterPat):
+    1. Per-channel spectrogram (hamming, nperseg=0.05s, 80% overlap, magnitude)
+    2. Gaussian smooth σ=1.5
+    3. Crop to spec_freq_range
+    4. spec^centroid_power → normalized weight → weighted time centroid
+    """
+    from scipy.signal import spectrogram as sp_spectrogram
+    from scipy.ndimage import gaussian_filter
+
+    ch_names = [str(c) for c in ch_names]
+    windows = list(windows)
+    x_band = np.asarray(x_band, dtype=np.float64)
+    sf = float(sfreq)
+
+    if x_band.ndim != 2:
+        raise ValueError("x_band must be 2D (n_channels, n_samples)")
+
+    n_ch = len(ch_names)
+    n_ev = len(windows)
+    events_bool = np.zeros((n_ch, n_ev), dtype=bool)
+    centroids = np.full((n_ch, n_ev), np.nan, dtype=np.float64)
+
+    nperseg = int(spec_nperseg_sec * sf)
+    noverlap = int(spec_noverlap_ratio * nperseg)
+    if nperseg < 4:
+        nperseg = 4
+    if noverlap >= nperseg:
+        noverlap = nperseg - 1
+
+    for ei, win in enumerate(windows):
+        i0 = int(round((win.start - start_sec) * sf))
+        i1 = int(round((win.end - start_sec) * sf))
+        if i1 <= 0 or i0 >= x_band.shape[1]:
+            continue
+        i0c = max(0, i0)
+        i1c = min(x_band.shape[1], i1)
+        if i1c - i0c < nperseg:
+            continue
+
+        for ci, ch in enumerate(ch_names):
+            times = detections.get(ch, None)
+            if not _overlaps_any_event(times, win):
+                continue
+            events_bool[ci, ei] = True
+
+            seg = x_band[ci, i0c:i1c]
+            f, t, Sxx = sp_spectrogram(
+                seg, sf, window='hamming',
+                nperseg=nperseg, noverlap=noverlap,
+                nfft=nperseg, mode='magnitude',
+            )
+            if Sxx.size == 0:
+                continue
+
+            Sxx = gaussian_filter(Sxx, sigma=gaussian_sigma)
+
+            freq_mask = (f >= spec_freq_range[0]) & (f <= spec_freq_range[1])
+            Sxx = Sxx[freq_mask, :]
+            if Sxx.size == 0:
+                continue
+
+            w = np.power(np.maximum(Sxx, 0.0), centroid_power)
+            denom = float(np.sum(w))
+            if denom <= 1e-12:
+                continue
+
+            t_abs = t + float(win.start)
+            t_grid = np.tile(t_abs, (w.shape[0], 1))
+            c_time = float(np.sum(w * t_grid) / denom)
+            centroids[ci, ei] = float(c_time - win.start)
+
+    return centroids, events_bool
+
+
 def _xcorr_lag(env1: np.ndarray, env2: np.ndarray, sfreq: float) -> float:
     """
     Compute lag of env2 relative to env1 using cross-correlation on Hilbert envelopes.
@@ -2766,9 +2857,9 @@ def compute_and_save_group_analysis(
     hfo_config: Optional[Dict[str, Any]] = None,
     window_sec: Optional[float] = None,
     interictal_only: bool = False,
-    bipolar_gap: int = 2,
+    bipolar_gap: int = 1,
     compute_tf_centroids: bool = False,
-    centroid_source: str = "env",
+    centroid_source: str = "spectrogram",
     min_channels: int = 1,
     coact_all_channels: bool = False,
     coact_min_event_ratio: float = 0.10,
@@ -2844,7 +2935,7 @@ def compute_and_save_group_analysis(
     compute_tf_centroids : bool
         If True, compute TF centroids (wavelet + baseline).
     centroid_source : str
-        'env' or 'tf'. If 'tf', use TF centroid time as event center.
+        'env', 'tf', or 'spectrogram'. 'spectrogram' matches legacy yuquan pipeline.
     min_channels : int
         Minimum number of participating channels required per event window.
     coact_all_channels : bool
@@ -3108,14 +3199,14 @@ def compute_and_save_group_analysis(
         logger.info("step=coactivation_all elapsed_sec=%.3f", float(time.time() - t_step))
 
     centroid_source = str(centroid_source).lower().strip()
-    if centroid_source not in ("env", "tf"):
-        raise ValueError("centroid_source must be 'env' or 'tf'.")
+    if centroid_source not in ("env", "tf", "spectrogram"):
+        raise ValueError("centroid_source must be 'env', 'tf', or 'spectrogram'.")
     compute_tf_centroids_flag = bool(compute_tf_centroids)
     if centroid_source == "tf":
         compute_tf_centroids_flag = True
     compute_tf_centroids_fn = globals().get("compute_tf_centroids")
 
-    # Step 7: Compute envelope (Hilbert)
+    # Step 7: Compute envelope (Hilbert) — always needed for events_bool even if centroid_source != 'env'
     if env is None:
         t_step = time.time()
         env = np.zeros((n_ch, data.shape[1]), dtype=np.float32)
@@ -3127,17 +3218,35 @@ def compute_and_save_group_analysis(
 
     # Step 8: Compute centroids
     t_step = time.time()
-    centroids, events_bool = compute_centroid_matrix_from_envelope_cache(
-        windows=windows,
-        detections=dets,
-        ch_names=names,
-        env=env,
-        env_ch_names=names,
-        sfreq=sfreq,
-        start_sec=0.0,
-        centroid_power=centroid_power,
-    )
-    logger.info("step=centroid elapsed_sec=%.3f", float(time.time() - t_step))
+    if centroid_source == "spectrogram":
+        from .utils.bqk_utils import band_filt
+        x_band = band_filt(data.astype(np.float64), sfreq, freq_band)
+        centroids, events_bool = compute_centroid_matrix_spectrogram(
+            windows=windows,
+            detections=dets,
+            ch_names=names,
+            x_band=x_band,
+            sfreq=sfreq,
+            start_sec=0.0,
+            spec_freq_range=(50.0, 300.0),
+            spec_nperseg_sec=0.05,
+            spec_noverlap_ratio=0.8,
+            gaussian_sigma=1.5,
+            centroid_power=centroid_power,
+        )
+        logger.info("step=centroid_spectrogram elapsed_sec=%.3f", float(time.time() - t_step))
+    else:
+        centroids, events_bool = compute_centroid_matrix_from_envelope_cache(
+            windows=windows,
+            detections=dets,
+            ch_names=names,
+            env=env,
+            env_ch_names=names,
+            sfreq=sfreq,
+            start_sec=0.0,
+            centroid_power=centroid_power,
+        )
+        logger.info("step=centroid_env elapsed_sec=%.3f", float(time.time() - t_step))
 
     # Step 9: Compute lag/rank
     t_step = time.time()

@@ -471,11 +471,11 @@ class BipolarReferencer:
     3. Naming convention: explicit pair name (A1-A2, A2-A3, ...)
     """
     
-    def __init__(self, allow_gap: int = 2):
+    def __init__(self, allow_gap: int = 1):
         """
         Args:
             allow_gap: Maximum allowed gap in contact numbers.
-                       1 = only consecutive (A1-A2)
+                       1 = only consecutive (A1-A2), matching legacy yuquan pipeline
                        2 = allow one missing (A1-A3 if A2 doesn't exist)
         """
         self.allow_gap = allow_gap

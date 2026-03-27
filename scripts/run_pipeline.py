@@ -163,7 +163,7 @@ def main() -> None:
     window_sec = analysis_cfg.get("window_sec", None)
     force_rerun = bool(analysis_cfg.get("force_rerun", False))
     interictal_only = bool(analysis_cfg.get("interictal_only", False))
-    bipolar_gap = int(analysis_cfg.get("bipolar_gap", 2))
+    bipolar_gap = int(analysis_cfg.get("bipolar_gap", 1))
     resample_sfreq = analysis_cfg.get("resample_sfreq", None)
     if isinstance(resample_sfreq, str):
         rs = resample_sfreq.strip().lower()
@@ -174,10 +174,9 @@ def main() -> None:
     if hfo_cfg.get("config", None) is None:
         hfo_cfg["config"] = {}
     hfo_cfg["config"]["band"] = band
-    hfo_cfg["config"]["rel_thresh"] = float(tuning.rel_thresh)
     save_event_tf_tile_cache = bool(group_tf.get("save_event_tf_tile_cache", False))
     compute_tf_centroids = bool(group_tf.get("compute_tf_centroids", False)) or save_event_tf_tile_cache
-    centroid_source = str(group_core.get("centroid_source", "env"))
+    centroid_source = str(group_core.get("centroid_source", "spectrogram"))
     min_channels = int(group_core.get("min_channels", 6))
     coact_all_channels = bool(group_core.get("coact_all_channels", False))
     coact_min_event_ratio = float(group_core.get("coact_min_event_ratio", 0.1))

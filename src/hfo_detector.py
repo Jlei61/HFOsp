@@ -38,12 +38,14 @@ class HFODetectionConfig:
     subband_width: float = 20.0  # Width of each sub-band in Hz (BQK standard)
 
     # BQK dual-threshold parameters
-    rel_thresh: float = 3.0  # Relative threshold (× channel median)
-    abs_thresh: float = 3.0  # Absolute threshold (× global median)
+    rel_thresh: float = 2.0  # Relative threshold (× channel median); 2.0 matches legacy yuquan
+    abs_thresh: float = 2.0  # Absolute threshold (× global median); 2.0 matches legacy yuquan
     
     # Event post-processing
     min_gap_ms: float = 20.0     # Minimum gap between events (ms)
     min_last_ms: float = 50.0    # Minimum event duration (ms)
+    max_last_ms: Optional[float] = 200.0  # Maximum event duration (ms); None = no upper limit
+    side_thresh: Optional[float] = 1.5    # Side-band denoise ratio; None = disabled
 
     # Chunking (seconds). If None, process full signal at once.
     chunk_sec: Optional[float] = 30.0
@@ -211,7 +213,6 @@ class HFODetector:
         cfg = self.config
         n_ch, n_samp = data.shape
 
-        # Create BQK detector (pre-computes filter coefficients)
         detector = BQKDetector(
             sfreq=sfreq,
             freqband=freqband,
@@ -220,6 +221,8 @@ class HFODetector:
             abs_thresh=cfg.abs_thresh,
             min_gap=cfg.min_gap_ms,
             min_last=cfg.min_last_ms,
+            max_last=cfg.max_last_ms,
+            side_thresh=cfg.side_thresh,
             n_jobs=cfg.n_jobs,
             verbose=cfg.verbose,
         )

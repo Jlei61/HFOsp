@@ -143,22 +143,55 @@ def merge_timeRanges(range_times,min_gap=10):
             merged_times.append(range_times[i])
     return merged_times
 
-def find_high_enveTimes(raw_enve,chns_nums,fs,rel_thresh=3.,abs_thresh=3.,min_gap=20,min_last=50,start_time=0):
+def find_high_enveTimes(raw_enve,chns_nums,fs,rel_thresh=3.,abs_thresh=3.,min_gap=20,min_last=50,
+                        max_last=None,side_thresh=None,start_time=0):
     whole_data_median=np.median(raw_enve)
     high_times=[]
     for chi in range(chns_nums):
         tmp_enve=raw_enve[chi]
-        # tmp_std=np.std(tmp_enve)
         tmp_median=np.median(tmp_enve)
         tmp_highTime=((tmp_enve>rel_thresh*tmp_median)&(tmp_enve>abs_thresh*whole_data_median)).astype('int')
         tmp_highTime=return_timeRanges(tmp_highTime,fs,start_time)
         tmp_highTime=merge_timeRanges(tmp_highTime,min_gap)
         tmp_highEnveLong=[x[1]-x[0] for x in tmp_highTime]
-        further_index=np.where((np.array(tmp_highEnveLong)>min_last*1e-3))[0]
+        if max_last is not None:
+            further_index=np.where(
+                (np.array(tmp_highEnveLong)>min_last*1e-3) &
+                (np.array(tmp_highEnveLong)<max_last*1e-3)
+            )[0]
+        else:
+            further_index=np.where((np.array(tmp_highEnveLong)>min_last*1e-3))[0]
         if len(further_index)==0:
             high_times.append([])
+            continue
+
+        tmp_highTime=np.array(tmp_highTime)[further_index]
+
+        if side_thresh is not None and side_thresh > 0:
+            after_denoise_list=[]
+            for tmp_tr in tmp_highTime:
+                tr_local = tmp_tr - start_time
+                dur = tr_local[1] - tr_local[0]
+                i_pre_start = int((tr_local[0] - dur) * fs)
+                i_pre_end = int(tr_local[0] * fs)
+                i_post_start = int(tr_local[1] * fs)
+                i_post_end = int((tr_local[1] + dur) * fs)
+                i_pre_start = max(0, i_pre_start)
+                i_post_end = min(len(tmp_enve), i_post_end)
+                side_pre = tmp_enve[i_pre_start:i_pre_end]
+                side_post = tmp_enve[i_post_start:i_post_end]
+                if len(side_pre) == 0 and len(side_post) == 0:
+                    after_denoise_list.append(tmp_tr.tolist())
+                    continue
+                side_mean = float(np.mean(np.concatenate([side_pre, side_post])))
+                pick_enve = tmp_enve[int(tr_local[0]*fs):int(tr_local[1]*fs)]
+                if len(pick_enve) == 0:
+                    continue
+                pick_mean = float(np.mean(pick_enve))
+                if side_mean <= 0 or pick_mean >= side_thresh * side_mean:
+                    after_denoise_list.append(tmp_tr.tolist())
+            high_times.append(after_denoise_list)
         else:
-            tmp_highTime=np.array(tmp_highTime)[further_index]
             high_times.append(tmp_highTime.tolist())
 
     return high_times
@@ -243,6 +276,8 @@ class BQKDetector:
         abs_thresh: float = 3.0,
         min_gap: float = 20.0,
         min_last: float = 50.0,
+        max_last: Optional[float] = None,
+        side_thresh: Optional[float] = None,
         n_jobs: int = -1,
         verbose: int = 0,
     ):
@@ -253,6 +288,8 @@ class BQKDetector:
         self.abs_thresh = float(abs_thresh)
         self.min_gap = float(min_gap)
         self.min_last = float(min_last)
+        self.max_last = float(max_last) if max_last is not None else None
+        self.side_thresh = float(side_thresh) if side_thresh is not None else None
         self.n_jobs = int(n_jobs)
         self.verbose = int(verbose)
         
@@ -411,7 +448,6 @@ class BQKDetector:
         # Compute composite envelope
         envelope = self.compute_envelope(data)
         
-        # Threshold detection + merging + duration filtering
         n_channels = data.shape[0]
         events = find_high_enveTimes(
             raw_enve=envelope,
@@ -421,6 +457,8 @@ class BQKDetector:
             abs_thresh=self.abs_thresh,
             min_gap=self.min_gap,
             min_last=self.min_last,
+            max_last=self.max_last,
+            side_thresh=self.side_thresh,
             start_time=start_time,
         )
         
