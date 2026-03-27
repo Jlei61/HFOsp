@@ -321,6 +321,59 @@ def _apply_physics_constraint(
     return edge_mask & (~reject)
 
 
+def validate_propagation_velocity(
+    edge_stats: List[Dict[str, Any]],
+    dist_matrix: np.ndarray,
+    pool_names: List[str],
+    *,
+    min_velocity_ms: float = 0.1,
+    max_velocity_ms: float = 10.0,
+) -> List[Dict[str, Any]]:
+    """Annotate directed edges with propagation velocity diagnostics.
+
+    Velocity is computed in m/s using ``dist_mm / |lag_ms|``.
+    Edges are not removed here; only flagged.
+    """
+    dist = np.asarray(dist_matrix, dtype=np.float64)
+    name_to_idx = {str(nm): i for i, nm in enumerate(pool_names)}
+    out: List[Dict[str, Any]] = []
+
+    for es in edge_stats:
+        item = dict(es)
+        item["velocity_ms"] = np.nan
+        item["velocity_flag"] = "insufficient_data"
+
+        if not bool(es.get("directed", False)):
+            out.append(item)
+            continue
+
+        src = int(es.get("source", -1))
+        tgt = int(es.get("target", -1))
+        if src < 0 or tgt < 0:
+            src_name = str(es.get("ch_i", ""))
+            tgt_name = str(es.get("ch_j", ""))
+            src = int(name_to_idx.get(src_name, -1))
+            tgt = int(name_to_idx.get(tgt_name, -1))
+        if src < 0 or tgt < 0 or src >= dist.shape[0] or tgt >= dist.shape[1]:
+            out.append(item)
+            continue
+
+        lag_ms = abs(float(es.get("median_lag_ms", np.nan)))
+        dist_mm = float(dist[src, tgt])
+        if (not np.isfinite(lag_ms)) or lag_ms <= 0 or (not np.isfinite(dist_mm)) or dist_mm <= 0:
+            out.append(item)
+            continue
+
+        velocity = dist_mm / lag_ms  # mm/ms == m/s
+        item["velocity_ms"] = float(velocity)
+        if float(min_velocity_ms) <= velocity <= float(max_velocity_ms):
+            item["velocity_flag"] = "valid"
+        else:
+            item["velocity_flag"] = "suspicious"
+        out.append(item)
+    return out
+
+
 # ═══════════════════════════════════════════════════════════════════════
 #  A.2 — Surrogate Significance Testing
 # ═══════════════════════════════════════════════════════════════════════
@@ -1031,6 +1084,12 @@ def _build_network_direction_first(
         min_dist_mm=min_dist_mm,
         lag_vc_ms=lag_vc_ms,
     )
+    if dist_matrix is not None:
+        edge_stats_pool = validate_propagation_velocity(
+            edge_stats_pool,
+            np.asarray(dist_matrix, dtype=np.float64),
+            list(pool_names),
+        )
     adj_pool = np.where(physics_mask, W_fuse_pool, 0.0)
 
     # Final pruning on fused evidence — with node-level rescue.
@@ -1129,6 +1188,18 @@ def _build_network_direction_first(
         "n_base_pruned_nodes": int(len(selected_idx_base)),
         "n_rescued_nodes": int(rescued_extra.size),
         "n_final_nodes": n_sel,
+    }
+    vel_vals = [
+        float(es.get("velocity_ms", np.nan))
+        for es in edge_stats
+        if np.isfinite(float(es.get("velocity_ms", np.nan)))
+    ]
+    n_valid = int(sum(1 for es in edge_stats if es.get("velocity_flag") == "valid"))
+    n_suspicious = int(sum(1 for es in edge_stats if es.get("velocity_flag") == "suspicious"))
+    metrics["velocity_diagnostics"] = {
+        "n_velocity_valid": n_valid,
+        "n_velocity_suspicious": n_suspicious,
+        "median_velocity_ms": float(np.median(vel_vals)) if vel_vals else None,
     }
 
     return NetworkResult(
@@ -1535,6 +1606,103 @@ def plot_diff_adjacency_heatmap(
     return fig
 
 
+def compare_ictal_interictal_networks(
+    interictal_result: NetworkResult,
+    ictal_result: NetworkResult,
+) -> Dict[str, Any]:
+    """Compute delta outflow and structural edge differences."""
+    names = sorted(set(interictal_result.node_names) | set(ictal_result.node_names))
+    n = len(names)
+    name_to_idx = {nm: i for i, nm in enumerate(names)}
+
+    i_mat = np.zeros((n, n), dtype=np.float64)
+    t_mat = np.zeros((n, n), dtype=np.float64)
+    for a, src in enumerate(interictal_result.node_names):
+        for b, tgt in enumerate(interictal_result.node_names):
+            i_mat[name_to_idx[src], name_to_idx[tgt]] = float(interictal_result.adj[a, b])
+    for a, src in enumerate(ictal_result.node_names):
+        for b, tgt in enumerate(ictal_result.node_names):
+            t_mat[name_to_idx[src], name_to_idx[tgt]] = float(ictal_result.adj[a, b])
+
+    i_out = interictal_result.metrics.get("net_outflow", {})
+    t_out = ictal_result.metrics.get("net_outflow", {})
+    delta_outflow = {
+        nm: float(t_out.get(nm, 0.0) - i_out.get(nm, 0.0))
+        for nm in names
+    }
+
+    edges_only_ictal: List[Tuple[str, str, float]] = []
+    edges_only_interictal: List[Tuple[str, str, float]] = []
+    shared_edges_weight_change: List[Dict[str, Any]] = []
+    for i, src in enumerate(names):
+        for j, tgt in enumerate(names):
+            if i == j:
+                continue
+            w_i = float(i_mat[i, j])
+            w_t = float(t_mat[i, j])
+            if w_t > 0 and w_i <= 0:
+                edges_only_ictal.append((src, tgt, w_t))
+            elif w_i > 0 and w_t <= 0:
+                edges_only_interictal.append((src, tgt, w_i))
+            elif w_i > 0 and w_t > 0:
+                shared_edges_weight_change.append({
+                    "source": src,
+                    "target": tgt,
+                    "interictal_weight": w_i,
+                    "ictal_weight": w_t,
+                    "delta_weight": w_t - w_i,
+                })
+
+    return {
+        "delta_outflow": delta_outflow,
+        "edges_only_ictal": edges_only_ictal,
+        "edges_only_interictal": edges_only_interictal,
+        "shared_edges_weight_change": shared_edges_weight_change,
+    }
+
+
+def plot_delta_outflow(
+    interictal_result: NetworkResult,
+    ictal_result: NetworkResult,
+    output_path: Optional[str] = None,
+) -> Any:
+    """Plot per-node interictal vs ictal outflow with ictal-rise highlight."""
+    import matplotlib.pyplot as plt
+
+    cmp = compare_ictal_interictal_networks(interictal_result, ictal_result)
+    names = list(cmp["delta_outflow"].keys())
+    inter = np.array(
+        [float(interictal_result.metrics.get("net_outflow", {}).get(nm, 0.0)) for nm in names],
+        dtype=np.float64,
+    )
+    ictal = np.array(
+        [float(ictal_result.metrics.get("net_outflow", {}).get(nm, 0.0)) for nm in names],
+        dtype=np.float64,
+    )
+    delta = ictal - inter
+
+    x = np.arange(len(names))
+    w = 0.4
+    fig, ax = plt.subplots(figsize=(max(8, len(names) * 0.45), 6))
+    ax.bar(x - w / 2, inter, width=w, label="Interictal", color="#4c78a8", alpha=0.85)
+    bars_ictal = ax.bar(x + w / 2, ictal, width=w, label="Ictal", color="#f58518", alpha=0.85)
+    for bi, d in enumerate(delta):
+        if d > 0:
+            bars_ictal[bi].set_edgecolor("#d62728")
+            bars_ictal[bi].set_linewidth(1.4)
+
+    ax.axhline(0.0, color="black", linewidth=0.8)
+    ax.set_xticks(x)
+    ax.set_xticklabels(names, rotation=45, ha="right", fontsize=8)
+    ax.set_ylabel("Net Outflow")
+    ax.set_title("Ictal vs Interictal Delta Outflow")
+    ax.legend()
+    fig.tight_layout()
+    if output_path:
+        fig.savefig(output_path, dpi=150, bbox_inches="tight")
+    return fig
+
+
 def plot_edge_direction_summary(
     result: NetworkResult,
     output_path: Optional[str] = None,
@@ -1734,7 +1902,15 @@ def _serialise_metrics(metrics: Dict[str, Any]) -> Dict[str, Any]:
     out: Dict[str, Any] = {}
     for k, v in metrics.items():
         if isinstance(v, dict):
-            out[k] = {str(kk): float(vv) for kk, vv in v.items()}
+            sub: Dict[str, Any] = {}
+            for kk, vv in v.items():
+                if isinstance(vv, (np.integer, np.floating)):
+                    sub[str(kk)] = vv.item()
+                elif isinstance(vv, (int, float, str, bool)) or vv is None:
+                    sub[str(kk)] = vv
+                else:
+                    sub[str(kk)] = vv
+            out[k] = sub
         elif isinstance(v, list):
             out[k] = [list(item) if isinstance(item, tuple) else item for item in v]
         elif isinstance(v, (np.integer, np.floating)):

@@ -264,7 +264,12 @@ def main() -> None:
     # ========= Part 4: Network Analysis (direction-first causal pipeline) =========
     network_cfg = cfg.get("network_analysis", {}) or {}
     if network_cfg.get("enabled", True):
-        from src.network_analysis import build_hfo_network, save_network_result
+        from src.network_analysis import (
+            build_hfo_network,
+            compare_ictal_interictal_networks,
+            plot_delta_outflow,
+            save_network_result,
+        )
 
         # Tier-2 fixed baseline for consistency across patients.
         net_kwargs = {
@@ -357,6 +362,89 @@ def main() -> None:
             bot = ranking[-1]
             print(f"  Top Source: {top[0]} (outflow={top[1]:+.3f})")
             print(f"  Top Sink:   {bot[0]} (outflow={bot[1]:+.3f})")
+
+        # Optional Ictal vs Interictal comparison.
+        ictal_cmp_cfg = network_cfg.get("ictal_comparison", {}) or {}
+        if bool(ictal_cmp_cfg.get("enabled", False)):
+            min_ictal_windows = int(ictal_cmp_cfg.get("min_ictal_windows", 10))
+            print("\n  [Ictal Comparison] Building ictal-only subnetwork ...")
+            try:
+                ictal_prefix = f"{output_prefix}_ictal_only"
+                ictal_out = compute_and_save_group_analysis(
+                    edf_path=str(edf_path),
+                    output_dir=str(output_dir),
+                    output_prefix=ictal_prefix,
+                    packed_times_path=packed_times_path,
+                    gpu_npz_path=gpu_npz_path,
+                    core_channels=core_channels,
+                    band=band,
+                    reference=reference,
+                    alias_bipolar_to_left=alias_bipolar_to_left,
+                    crop_seconds=crop_seconds,
+                    use_gpu=use_gpu_envelope,
+                    save_env_cache=False,
+                    target_sfreq=resample_sfreq,
+                    hfo_config=hfo_cfg.get("config", None),
+                    window_sec=window_sec,
+                    interictal_only=False,
+                    ictal_only=True,
+                    bipolar_gap=bipolar_gap,
+                    compute_tf_centroids=False,
+                    centroid_source=centroid_source,
+                    min_channels=min_channels,
+                    coact_all_channels=coact_all_channels,
+                    coact_min_event_ratio=coact_min_event_ratio,
+                    coact_time_lag_ms=coact_time_lag_ms,
+                    save_bandpass=False,
+                    centroid_power=group_core.get("centroid_power", 2.0),
+                    tf_n_freqs=group_tf.get("tf_n_freqs", 180),
+                    tf_n_cycles=group_tf.get("tf_n_cycles", 4.0),
+                    tf_n_cycles_mode=group_tf.get("tf_n_cycles_mode", "linear"),
+                    tf_n_cycles_min=group_tf.get("tf_n_cycles_min", 3.0),
+                    tf_n_cycles_max=group_tf.get("tf_n_cycles_max", 10.0),
+                    tf_freq_scale=group_tf.get("tf_freq_scale", "log"),
+                    baseline_window_sec=group_tf.get("baseline_window_sec", 2.0),
+                    baseline_step_sec=group_tf.get("baseline_step_sec", 1.0),
+                    baseline_n_select=group_tf.get("baseline_n_select", 10),
+                    baseline_min_distance_sec=group_tf.get("baseline_min_distance_sec", 2.0),
+                    baseline_line_length_q=group_tf.get("baseline_line_length_q", 0.90),
+                    baseline_ripple_env_q=group_tf.get("baseline_ripple_env_q", 0.80),
+                    seizure_ll_k=group_seizure.get("seizure_ll_k", 6.0),
+                    seizure_rms_k=group_seizure.get("seizure_rms_k", 6.0),
+                    seizure_min_duration_sec=group_seizure.get("seizure_min_duration_sec", 5.0),
+                )
+                ictal_group = load_group_analysis_results(ictal_out["group_analysis_path"])
+                n_ictal_windows = int(ictal_group.get("n_events", 0))
+                if n_ictal_windows < min_ictal_windows:
+                    print(
+                        f"  [Ictal Comparison] skip: ictal windows {n_ictal_windows} "
+                        f"< min_ictal_windows {min_ictal_windows}"
+                    )
+                else:
+                    ictal_result = build_hfo_network(
+                        ictal_out["group_analysis_path"],
+                        detections_npz_path=gpu_npz_path,
+                        dist_matrix=dist_matrix,
+                        **net_kwargs,
+                    )
+                    ictal_network_npz_path = str(output_dir / f"{output_prefix}_ictal_networkResult.npz")
+                    save_network_result(ictal_result, ictal_network_npz_path)
+                    out_paths["ictal_network_result_path"] = ictal_network_npz_path
+
+                    cmp_dict = compare_ictal_interictal_networks(net_result, ictal_result)
+                    cmp_json = output_dir / f"{output_prefix}_ictal_vs_interictal.json"
+                    with cmp_json.open("w", encoding="utf-8") as f:
+                        json.dump(cmp_dict, f, ensure_ascii=True, indent=2)
+                    out_paths["ictal_comparison_path"] = str(cmp_json)
+
+                    fig = plot_delta_outflow(net_result, ictal_result)
+                    fig_path = output_dir / f"{output_prefix}_delta_outflow.png"
+                    fig.savefig(fig_path, dpi=150, bbox_inches="tight")
+                    out_paths["delta_outflow_plot_path"] = str(fig_path)
+                    print(f"  [Ictal Comparison] saved: {cmp_json}")
+                    print(f"  [Ictal Comparison] saved: {fig_path}")
+            except Exception as exc:
+                print(f"  [WARN] ictal comparison skipped: {exc}")
 
         # Optional A/B/C audit for evidence-first debugging.
         audit_cfg = network_cfg.get("audit_ablation", {}) or {}
@@ -490,6 +578,9 @@ def main() -> None:
         "group_tf_spectrogram_path": out_paths.get("group_tf_spectrogram_path"),
         "group_tf_tile_cache_path": out_paths.get("group_tf_tile_cache_path"),
         "network_result_path": out_paths.get("network_result_path"),
+        "ictal_network_result_path": out_paths.get("ictal_network_result_path"),
+        "ictal_comparison_path": out_paths.get("ictal_comparison_path"),
+        "delta_outflow_plot_path": out_paths.get("delta_outflow_plot_path"),
         "network_audit_path": out_paths.get("network_audit_path"),
         "packed_times_path": str(packed_out),
         "lagpat_path": str(lagpat_out),

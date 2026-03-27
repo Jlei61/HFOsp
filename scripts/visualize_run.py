@@ -282,7 +282,13 @@ def main() -> None:
     else:
         print(f"[WARN] lagPat not found: {lagpat_path}")
 
-    # ========= 5–10) Network Analysis Figures (v2: Build-Prune-Direct) =========
+    # ========= 5–10) Network Analysis Figures (direction-first pipeline) =========
+    network_cfg = cfg.get("network_analysis", {}) or {}
+    net_viz_cfg = network_cfg.get("visualization", {}) or {}
+    topology_layout = str(net_viz_cfg.get("topology_layout", "spring"))
+    exclude_zero_hfo_nodes = bool(net_viz_cfg.get("exclude_zero_hfo_nodes", True))
+    min_rate_for_display = float(net_viz_cfg.get("min_rate_for_display", 0.0))
+
     network_result_path = _pick_path(
         run_summary,
         ["network_result_path", "networkResult", "network_result"],
@@ -311,6 +317,8 @@ def main() -> None:
             fig5 = plot_broad_graph_comparison(
                 net_result,
                 title=f"{subject}/{record} — Broad Graph: Simpson vs Dice",
+                exclude_zero_hfo_nodes=exclude_zero_hfo_nodes,
+                min_rate_for_display=min_rate_for_display,
             )
             fig5_path = out_dir / f"{output_prefix}_broad_graph_comparison.png"
             fig5.savefig(fig5_path, dpi=160)
@@ -333,6 +341,7 @@ def main() -> None:
             fig7 = plot_network_topology_2d(
                 net_result,
                 title=f"{subject}/{record} — HFO Epilepsy Network",
+                layout=topology_layout,
             )
             fig7_path = out_dir / f"{output_prefix}_network_topology.png"
             fig7.savefig(fig7_path, dpi=160)

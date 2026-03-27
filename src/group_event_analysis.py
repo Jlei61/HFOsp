@@ -1402,6 +1402,7 @@ def compute_centroid_matrix_from_envelope_cache(
 
     return centroids, events_bool
 
+
 def compute_centroid_matrix_spectrogram(
     *,
     windows: Sequence[EventWindow],
@@ -2627,8 +2628,19 @@ def compute_coactivation_matrices(
 
     valid = coact_count >= min_events
     coact_ratio[valid] = coact_count[valid].astype(np.float64) / float(n_events)
-    coact_time_ratio[valid] = time_sum[valid] / coact_count[valid]
-    coact_rank_ratio[valid] = rank_sum[valid] / coact_count[valid]
+    denom = coact_count.astype(np.float64)
+    np.divide(
+        time_sum,
+        denom,
+        out=coact_time_ratio,
+        where=valid & (denom > 0),
+    )
+    np.divide(
+        rank_sum,
+        denom,
+        out=coact_rank_ratio,
+        where=valid & (denom > 0),
+    )
 
     return {
         "coact_event_count": coact_count,
@@ -2857,6 +2869,7 @@ def compute_and_save_group_analysis(
     hfo_config: Optional[Dict[str, Any]] = None,
     window_sec: Optional[float] = None,
     interictal_only: bool = False,
+    ictal_only: bool = False,
     bipolar_gap: int = 1,
     compute_tf_centroids: bool = False,
     centroid_source: str = "spectrogram",
@@ -2930,6 +2943,8 @@ def compute_and_save_group_analysis(
         Window length when building windows from detections (packedTimes missing).
     interictal_only : bool
         If True, drop event windows that overlap ictal_mask.
+    ictal_only : bool
+        If True, keep only event windows overlapping ictal_mask.
     bipolar_gap : int
         Max allowed contact gap for bipolar re-reference (SEEGPreprocessor).
     compute_tf_centroids : bool
@@ -3156,6 +3171,9 @@ def compute_and_save_group_analysis(
         int(len(seizure.get("onsets_sec", []))),
     )
 
+    if bool(interictal_only) and bool(ictal_only):
+        raise ValueError("interictal_only and ictal_only cannot both be True.")
+
     # Optional: keep only interictal windows (no overlap with ictal_mask)
     if bool(interictal_only) and ictal_mask is not None and len(windows) > 0:
         keep_windows: List[EventWindow] = []
@@ -3170,6 +3188,23 @@ def compute_and_save_group_analysis(
         windows = keep_windows
         event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
         logger.info("step=interictal_filter kept_windows=%d", int(len(windows)))
+
+    # Optional: keep only ictal windows (must overlap ictal_mask)
+    if bool(ictal_only) and len(windows) > 0:
+        if ictal_mask is None:
+            raise ValueError("ictal_only=True requires available ictal_mask.")
+        keep_windows: List[EventWindow] = []
+        n_samples = int(ictal_mask.shape[0])
+        for w in windows:
+            i0 = max(0, int(round(w.start * sfreq)))
+            i1 = min(n_samples, int(round(w.end * sfreq)))
+            if i1 <= i0:
+                continue
+            if bool(np.any(ictal_mask[i0:i1])):
+                keep_windows.append(w)
+        windows = keep_windows
+        event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
+        logger.info("step=ictal_filter kept_windows=%d", int(len(windows)))
 
     n_events = len(windows)
     if n_events == 0:

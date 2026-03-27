@@ -138,6 +138,9 @@ network_analysis:
   lag_vc_ms: 3.0  # Near-zero lag threshold for volume conduction
   sample_cap_per_edge: 50000  # Upper bound for lag samples per edge
   dist_matrix_path: null  # Optional path to NxN distance matrix (.npy/.npz)
+  ictal_comparison:
+    enabled: false
+    min_ictal_windows: 10  # Minimum ictal windows to run comparison
   # Optional evidence audit (A/B/C)
   audit_ablation:
     enabled: false
