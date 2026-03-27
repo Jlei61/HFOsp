@@ -3,7 +3,7 @@
 **项目目标**: 复现并扩展 HFO (高频振荡) 分析流程，验证 Source-Sink 理论  
 **数据集**: 玉泉24小时SEEG数据集  
 **数据路径**: `/mnt/yuquan_data/yuquan_24h_edf`  
-**更新日期**: 2026-01-16
+**更新日期**: 2026-03-05
 
 ---
 
@@ -1232,15 +1232,15 @@ def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
 
 | Step | 任务 | 输入 | 输出 | 新增依赖 | 状态 |
 |------|------|------|------|----------|------|
-| A.1 | **宽建图 (Simpson Index)** | `coact_all_event_count` | `W_broad` (n_all, n_all) | — | ⬜ |
-| A.2 | 替代数据显著性检验 | `events_bool` | `sig_mask` | — | ⬜ |
-| A.3 | **XYZ 特征计算** | `W_broad`, `events_count`, `duration` | `X, Y, Z` per node | — | ⬜ |
-| A.4 | **XYZ 多维剪枝** | `W_broad`, `X`, `Y`, `Z` | `selected_idx`, `W_pruned` | `sklearn` (谱聚类) | ⬜ |
-| A.5 | 方向注入（Wilcoxon+一致性） | `W_pruned`, `lag_raw` | `adj_directed` | `scipy.stats` | ⬜ |
-| A.6 | Stability 权重 | `lag_raw`, `event_windows` | `stability_matrix` | — | ⬜ |
-| A.7 | 复合权重计算 | `adj`, `W_pruned`, `stability` | `adj_weighted` | — | ⬜ |
-| A.8 | 图论指标 | `adj_weighted` | `metrics_dict` | `networkx` | ⬜ |
-| A.9 | 2D 网络拓扑图 + XY 散点诊断图 | `metrics`, `X`, `Y` | `network_plot.png` | `matplotlib` | ⬜ |
+| A.1 | **宽建图 (Simpson Index)** | `coact_all_event_count` | `W_simpson/W_dice` (n_all, n_all) | — | ✅ |
+| A.2 | 替代数据显著性检验 | `events_bool` | `sig_mask` | — | ✅ |
+| A.3 | **XYZ 特征计算** | `W_broad`, `events_count`, `duration` | `X, Y, Z` per node | — | ✅ |
+| A.4 | **XYZ 多维剪枝** | `W_broad`, `X`, `Y`, `Z` | `selected_idx`, `W_pruned` | `sklearn` (谱聚类) | ✅ |
+| A.5 | 方向注入（Wilcoxon+一致性） | `W_pruned`, `lag_raw` | `adj_directed` | `scipy.stats` | ✅ |
+| A.6 | Stability 权重 | `lag_raw`, `event_windows` | `stability_matrix` | — | ✅ |
+| A.7 | 复合/融合权重（direction-first） | `assoc/B/D/S/lag` | `adj_weighted` | — | ✅ |
+| A.8 | 图论指标 | `adj_weighted` | `metrics_dict` | `networkx` | ✅ |
+| A.9 | 2D 网络拓扑图 + XY 散点诊断图 | `metrics`, `X`, `Y` | `network_plot.png` | `matplotlib` | ✅ |
 
 **Phase A 的交付物**：
 1. 一个完整的 Channel-scale 有向加权癫痫网络（Simpson 归一化 + XYZ 剪枝）
@@ -1254,10 +1254,10 @@ def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
 | B.0 | 电极坐标获取 | MNI 配准结果 | `mni_coords.npy`, `dist_matrix.npy` | **需临床数据** | ⬜ |
 | B.1 | 空间约束骨架 | `dist_matrix`, `coact_ratio` | `skeleton_spatial` | B.0 | ⬜ |
 | B.2 | 容积传导剔除 | `dist_matrix < 10mm` | `skeleton_clean` | B.0 | ⬜ |
-| B.3 | 传播速度验证 | `dist_matrix`, `lag_raw` | `velocity_map` (0.1-10 m/s) | B.0 | ⬜ |
+| B.3 | 传播速度验证 | `dist_matrix`, `lag_raw` | `velocity diagnostics` (0.1-10 m/s) | B.0 | 🔄 |
 | B.4 | 病理加权（FR 比例） | `hfo_type_per_event` | `pathology_weight` | **需 FR 分类** | ⬜ |
 | B.5 | 3D 脑图 | `metrics`, `mni_coords` | `outflow_brain_3d.html` | B.0 | ⬜ |
-| B.6 | Ictal vs Interictal 对比 | `event_windows`, `seizure_onsets` | `delta_outflow` | — | ⬜ |
+| B.6 | Ictal vs Interictal 对比 | `event_windows`, `seizure_onsets` | `delta_outflow` | — | 🔄 |
 
 **Phase B 的交付物**：物理约束后的网络 + 3D 可视化 + Sink/Source 反转分析。
 
@@ -1283,20 +1283,31 @@ def compute_network_metrics(adj: np.ndarray, ch_names: List[str]) -> Dict:
 
 @dataclass
 class NetworkResult:
-    """癫痫网络分析结果 (v2: Build-Prune-Direct)."""
-    adj: np.ndarray              # (n_sel, n_sel) 有向加权邻接矩阵
-    node_names: List[str]        # 节点通道名
-    node_xyz: Dict[str, np.ndarray]  # {'X': rate, 'Y': entropy, 'Z': epileptogenicity}
-    W_broad: np.ndarray          # (n_all, n_all) Simpson 宽建图（可回溯）
-    W_pruned: np.ndarray         # (n_sel, n_sel) 剪枝后子图
-    metrics: Dict[str, Any]      # 图论指标
-    edge_stats: List[Dict]       # 每条边的统计信息
-    cluster_labels: np.ndarray   # (n_all,) 谱聚类标签 (-1=剔除)
+    """癫痫网络分析结果 (v3: direction-first causal)."""
+    adj: np.ndarray
+    node_names: List[str]
+    node_weights: np.ndarray
+    W_simpson: np.ndarray
+    W_dice: np.ndarray
+    W_pruned: np.ndarray
+    pool_names: List[str]
+    selected_idx: np.ndarray
+    node_xyz: Dict[str, np.ndarray]
+    skeleton: np.ndarray
+    direction_mask: np.ndarray
+    stability: np.ndarray
+    cluster_labels: np.ndarray
+    metrics: Dict[str, Any]
+    edge_stats: List[Dict]
+    n_pool_channels: int
+    n_selected: int
+    params: Dict[str, Any]
 
 def build_hfo_network(
     group_analysis_npz: str,
     dist_matrix: Optional[np.ndarray] = None,
     *,
+    detections_npz_path: Optional[str] = None,
     # — Step 1: 宽建图 —
     edge_method: str = 'simpson',     # 'simpson' | 'dice'
     run_surrogate: bool = True,
@@ -1312,13 +1323,26 @@ def build_hfo_network(
     lag_thresh_ms: float = 5.0,
     consistency_thresh: float = 0.6,
     p_value_thresh: float = 0.05,
-    # — Step 4: 稳定性 —
+    # — Step 4: 稳定性 / direction-first 融合 —
     stability_window_sec: float = 300.0,
+    assoc_window_ms: float = 40.0,
+    min_pair_events: int = 5,
+    tau_assoc: float = 20.0,
+    tau_lag_ms: float = 10.0,
+    fusion_w_b: float = 0.35,
+    fusion_w_d: float = 0.45,
+    fusion_w_s: float = 0.20,
+    d_strong: float = 0.35,
+    b_min: float = 0.2,
+    min_dist_mm: float = 10.0,
+    lag_vc_ms: float = 3.0,
+    sample_cap_per_edge: int = 50000,
 ) -> NetworkResult:
     """
-    一站式构建癫痫网络 v2（Phase A: Channel-Scale）。
+    一站式构建癫痫网络 v3（direction-first causal）。
 
-    流程：Simpson 宽建图 → XYZ 多维剪枝 → 方向注入 → 复合权重 → 图论指标
+    流程：pairwise association → direction injection → fusion + physics →
+         final pruning + node rescue → metrics
 
     Returns
     -------
@@ -1371,27 +1395,27 @@ def plot_network_topology_2d(
 
 | 功能 | 说明 | 依赖 | 状态 |
 |------|------|------|------|
-| A.1 宽建图 (Simpson) | Simpson Index 归一化共激活 → 宽边权图 | `coact_all_event_count` | ⬜ |
-| A.2 替代数据检验 | Surrogate test 验证共激活显著性 | `events_bool` | ⬜ |
-| A.3 XYZ 特征计算 | X=Rate, Y=Connection Entropy, Z=placeholder | `W_broad` | ⬜ |
-| A.4 XYZ 多维剪枝 | X门控 + Y门控 + 谱聚类(XY距离) | `sklearn` | ⬜ |
-| A.5 方向注入 | Wilcoxon + 一致性 + 零滞后过滤 | `lag_raw`, `scipy.stats` | ⬜ |
-| A.6 Stability 权重 | 时间窗切片 + CV 计算 | `event_windows` | ⬜ |
-| A.7 复合权重 | Simpson × Consistency × Stability | — | ⬜ |
-| A.8 图论指标 | Net Outflow, Local Efficiency, Betweenness | `networkx` | ⬜ |
-| A.9 2D 网络拓扑图 | Spring 布局 + XY 散点诊断图 | `matplotlib` | ⬜ |
-| A.10 传播路径 | 最短路径树 | `adj` | ⬜ |
+| A.1 宽建图 (Simpson) | Simpson Index 归一化共激活 → 宽边权图 | `coact_all_event_count` | ✅ |
+| A.2 替代数据检验 | Surrogate test 验证共激活显著性 | `events_bool` | ✅ |
+| A.3 XYZ 特征计算 | X=Rate, Y=Connection Entropy, Z=placeholder | `W_broad` | ✅ |
+| A.4 XYZ 多维剪枝 | X门控 + Y门控 + 谱聚类(XY距离) | `sklearn` | ✅ |
+| A.5 方向注入 | Wilcoxon + 一致性 + 零滞后过滤 | `lag_raw`, `scipy.stats` | ✅ |
+| A.6 Stability 权重 | 时间窗切片 + CV 计算 | `event_windows` | ✅ |
+| A.7 复合权重 | direction-first 融合权重 | — | ✅ |
+| A.8 图论指标 | Net Outflow, Local Efficiency, Betweenness | `networkx` | ✅ |
+| A.9 2D 网络拓扑图 | Spring 布局 + XY 散点诊断图 | `matplotlib` | ✅ |
+| A.10 传播路径 | 最短路径树 | `adj` | ✅ |
 
 **Phase B — Channel + Geometry（需 MNI 坐标）**
 
 | 功能 | 说明 | 阻塞条件 | 状态 |
 |------|------|----------|------|
 | B.1 空间约束骨架 | 距离惩罚 + 容积传导剔除 | MNI coords | ⬜ |
-| B.2 传播速度验证 | 0.1-10 m/s 生理范围检查 | MNI coords | ⬜ |
+| B.2 传播速度验证 | 0.1-10 m/s 生理范围检查 | MNI coords | 🔄 |
 | B.3 病理加权 | FR 比例加权 | HFO type 分类 | ⬜ |
 | B.4 3D 脑图 | Outflow 颜色映射 | MNI coords | ⬜ |
 | B.5 动态切片 | Pre-ictal vs Interictal 网络对比 | Seizure onsets | ⬜ |
-| B.6 Sink/Source 反转 | $\Delta$Outflow (ictal - interictal) | B.5 | ⬜ |
+| B.6 Sink/Source 反转 | $\Delta$Outflow (ictal - interictal) | B.5 | 🔄 |
 
 **Phase C — Source Space 研究前沿**
 
