@@ -144,12 +144,27 @@ lagPatFreq:   # 频率信息
 - `lagPatRaw[i, j]` 是每个事件内的“时间标量”，但其绝对值在事件间可能处于**拼接/累积时间轴**上（因此跨事件绝对值不直接可比）
   - 若要比较“传播时延”，应在**每个事件内部**做参考系统一：例如 `lag_rel = lagPatRaw - min(lagPatRaw)`（或对齐到最早通道）
   - `lagPatRank` 对应每个事件内的通道先后顺序（对 ms 级抖动非常敏感）
+- `lagPatRaw` / `lagPatRank` 会对**每个 picked channel、每个 packed window**都给出一个值；真正告诉你“这个通道在该群体事件里是否参与”的，是同文件里的 `eventsBool`
+
+### 3.3.1 `eventsBool` 的严格语义
+
+`eventsBool[ch, ev] = 1` 的条件很朴素：
+
+- 通道 `ch` 在群体事件窗口 `ev` 对应的 `packedTimes[ev]` 里
+- 只要有任意一段独立 HFO 检测事件与该窗口重叠
+- 就记为 1，否则为 0
+
+这意味着：
+
+- `eventsBool` 是**参与掩码**，不是强度、不是置信度、不是排序
+- `lagPatRaw`/`lagPatRank` 本身**不会自动屏蔽**未参与通道
+- 所以下游脚本若不用 `eventsBool` 过滤，就等于把“背景时频质心”也当成真实传播成员
 
 ---
 
-### 3.4 事件时间窗: `*_packedTimes.npy`
+### 3.4 群体事件时间窗: `*_packedTimes.npy`
 
-**内容**: 所有检测到的事件时间边界
+**内容**: 由 picked channels 的独立 HFO 事件打包得到的群体事件窗口，不是“所有检测到的单通道事件边界”
 
 ```python
 shape: (2601, 2)  # 2601个事件 × [start, end]
@@ -163,26 +178,50 @@ dtype: float64
  [7199.xxx, 7199.xxx]] # 最后一个事件
 ```
 
+**老代码生成逻辑**:
+1. 从 `*_gpu.npz` 的 `whole_dets` 出发，每个 picked channel 的独立 HFO 事件先左右各扩展 `ext=30ms`
+2. 把这些扩展事件投影到统一时间轴，统计每个时刻被多少 picked channels 覆盖
+3. 取覆盖通道数 `>= chnsThr * n_picked_channels` 的连续区间，老代码默认 `chnsThr=0.5`
+4. 对每个过阈值区间取中心点，再扩成固定长度窗口 `packWinLen`
+5. 若相邻两个候选窗口重叠，`pick_noOverlap_timeRanges()` 会把两个都删掉
+
 **特点**:
+- `packedTimes` 代表的是“群体事件定义”，不是原始 detector 逐通道事件
 - 事件窗长度在不同记录中可能不同（常见 0.5s，也存在 0.3s），不要在代码里硬编码；应从 `packedTimes[:,1]-packedTimes[:,0]` 推断
 - 时间相对于记录开始时刻 (start_time)
+- 后续 `eventsBool`、`lagPatRaw`、`lagPatRank` 都建立在这些窗口上；这一步如果混入 spike/噪声事件，或把本应分开的事件错并，后续 pattern 会被系统性带偏
 
 ---
 
 ### 3.5 患者级汇总: `_refineGpu.npz`
 
-**内容**: 整合该患者所有记录的统计信息
+**内容**: 患者级 `refine` 后的通道计数汇总，不是简单的原始 GPU 事件数求和
 
 ```python
 键名: ['events_count', 'chns_names']
 
-events_count: # 所有记录文件累加的事件数
+events_count: # 所有记录文件在 refine 后重新统计的事件数
   - shape: (120,)
   - dtype: int64
 
 chns_names:   # 通道名
   - shape: (120,)
 ```
+
+**关键区别**:
+
+- `*_gpu.npz` 的 `events_count`:
+  - 是单个 2h 记录里，每个通道原始 HFO 检测事件数
+- `_refineGpu.npz` 的 `events_count`:
+  - 不是把所有 `*_gpu.npz` 的计数直接相加
+  - 老代码实际流程是：
+    1. 先把所有 `*_gpu.npz` 的原始 `events_count` 跨记录求和
+    2. 用 `mean + pickChn_thresh * std` 选一批 provisional channels
+    3. 在每个 2h 记录上，仅用这批通道生成 packed group events
+    4. 再用这些 packed windows 对 **所有通道** 做一次 `reHist_events_byPacking`
+    5. 把这一步的 recount 结果跨记录求和，写入 `_refineGpu.npz`
+
+结论：`_refineGpu.npz` 是 **“同步性约束后的患者级 recount”**，不是简单的 GPU 汇总。
 
 ---
 
@@ -193,7 +232,7 @@ chns_names:   # 通道名
 ```python
 键名: ['hist_meanX', 'pick_chns']
 
-hist_meanX:   # 某种均值统计 (可能是事件密度/质量分数)
+hist_meanX:   # 基于 rank 直方图的模板位置统计，不是原始 lag 时间均值
   - shape: (8,)
   - dtype: float64
   - 示例: [6.17, 6.19, 3.99, 1.00, 3.01, 3.01, 5.03, 6.14]
@@ -210,17 +249,41 @@ pick_chns:    # 筛选出的8个核心通道
 ```
 [原始EDF 2000Hz, 145通道]
          ↓
-    带通滤波 (80-250Hz 或 250-500Hz)
+   双极参考 + 去掉最外触点
          ↓
-    GPU加速HFO检测 (阈值法?)
+    重采样到 800Hz
          ↓
-   [*_gpu.npz: 120通道, 数千~数万事件]
+    带通滤波 (80-250Hz)
          ↓
-    通道质量评估 + 事件对齐
+    GPU加速HFO检测
+      - rel/abs 双阈值
+      - min_gap 合并
+      - 50-200ms 时长过滤
+      - side-band 去噪
          ↓
-   筛选出8个核心通道 + 2601个代表性事件
+   [*_gpu.npz: 单通道独立候选事件]
          ↓
-   [*_lagPat.npz: 8×2601滞后模式矩阵]
+    跨记录原始 events_count 汇总
+         ↓
+    provisional channel pick (mean + k*std)
+         ↓
+    用 provisional channels 构建 packed group events
+      - ext=30ms
+      - 覆盖通道数 >= 50%
+      - 取中心点扩成固定窗长
+      - 删除重叠窗口
+         ↓
+    对所有通道做 refine recount
+         ↓
+   [_refineGpu.npz: 患者级 refine 后 recount]
+         ↓
+    再次通道筛选
+         ↓
+    计算群体事件参与矩阵 `eventsBool`
+         ↓
+    在每个 packed window 内计算 spectrogram 质心
+         ↓
+   [*_lagPat.npz: 8×2601 时频质心/排序矩阵]
          ↓
     频率中心计算
          ↓
@@ -233,8 +296,90 @@ pick_chns:    # 筛选出的8个核心通道
 
 ```
 whole_dets (120通道 × 变长事件列表)
-    ↓ 时间对齐 + 筛选
+    ↓ provisional channel pick
 packedTimes (2601个统一事件 × [start, end])
-    ↓ 通道筛选 (120 → 8)
-lagPatRaw (8通道 × 2601事件)
+    ↓ eventsBool: 哪些通道在该群体窗内参与
+lagPatRaw (8通道 × 2601事件, spectrogram时间质心)
+    ↓ 逐事件排序
+lagPatRank (8通道 × 2601事件)
 ```
+
+---
+
+## 6. 老链路输入/输出合同表
+
+| 资产 | 谁生成 | 上游依赖 | 下游消费者 | 语义合同 | 常见误读 |
+| --- | --- | --- | --- | --- | --- |
+| `<record>_gpu.npz` | `p16_cuda_24h_bipolar.py` | EDF、双极参考、800Hz重采样、80-250Hz检测包络 | `p16_refine_chns_bySyn.py`、`p16_packGroupEvents*.py` | `whole_dets` 是**单通道独立候选事件**；`events_count` 是该 2h 文件内的原始检测计数 | 把它当成“群体事件”或把 `events_count` 当成最终临床有效事件数 |
+| `_refineGpu.npz` | `p16_refine_chns_bySyn.py` | 全部 `*_gpu.npz`、provisional picked channels、packed recount | `p16_packGroupEvents*_refine*.py`、当前 `core_channels.source=_refineGpu` 路径 | `events_count` 是**群体窗口约束后的 recount**，不是原始检测计数累加 | 把它当成“所有 GPU 文件 events_count 直接求和” |
+| `<record>_packedTimes.npy` | `p16_packGroupEvents*.py` via `hfo_net.py::get_packedEventsTimes_overThresh` | 当前文件的 `whole_dets` + 患者级 `_refineGpu.npz` 选出的 picked channels | `get_packedEvents_bool()`、`return_seg_splitContiHigh()`、各类 `plotting_fig3/4/7/8*` | 每一行是**一个群体事件窗口**；窗口中心来自“过半通道覆盖区间”的中心点，再扩成固定窗长 | 把它当成单通道事件边界，或假设它独立于 picked channels 定义 |
+| `<record>_lagPat.npz` | `p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool.py` | `packedTimes`、picked channels 高频信号、`eventsBool` | `merge24h_lagPat.py`、MI/variance/region/network 统计、论文图脚本 | `lagPatRaw` 是**群体窗口内的时频质心时间**；`lagPatRank` 是逐事件排序；`eventsBool` 标记参与通道 | 把 `lagPatRaw` 当成原始波形峰值、detector 起点，或把跨事件绝对值直接比较 |
+| `<record>_lagPat_withFreqCent.npz` | `p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py` | 同上，外加频率质心计算 | `plotting_fig4_durDelayStats.py`、`plotting_fig4_seqsTemporalStats.py`、`plotting_fig8_HigherAndEarly.py` | 在 `lagPat` 基础上增加 `lagPatFreq`，用于时间-频率联合统计 | 以为它和旧版 `lagPat.npz` 完全同名同消费者；很多老图脚本其实还读旧名字 |
+| `hist_meanX.npz` | `p16_merge24h_lagPat.py` | 全部 `lagPatRank` 拼接后的 rank 直方图 | 当前 `run_pipeline.py`、`visualize_run.py`、部分 core-channel 选择链路 | `hist_meanX` 是**24h rank 模板位置统计**，用来概括“谁更常靠前” | 把它当成原始 lag 时间均值或单事件统计 |
+
+### 6.1 最小依赖链
+
+```
+EDF
+  -> *_gpu.npz
+  -> _refineGpu.npz
+  -> *_packedTimes.npy
+  -> *_lagPat.npz / *_lagPat_withFreqCent.npz
+  -> hist_meanX.npz
+```
+
+### 6.2 真正该盯的断点
+
+- `*_gpu.npz` 脏：说明单通道独立候选事件就不对，后面全错。
+- `_refineGpu.npz` 脏：说明 provisional channels 或 recount 逻辑错了，packed 定义会漂。
+- `*_packedTimes.npy` 脏：说明群体事件定义错了，`eventsBool` 和 `lagPat*` 一起连坐。
+- `lagPatRaw` 漂：先怀疑 `packedTimes` 和 spectrogram 边界，不要先怪 rank 统计。
+
+### 6.3 `eventsBool` 的消费者风险分级
+
+- 明确正确使用 `eventsBool` 的代表：
+  - `plotting_fig4_pairedDelay.py`
+  - `plotting_fig4_durDelayStats*.py`
+  - 这些脚本会先用 `eventsBool==0` 屏蔽未参与通道，再算传播时长、相邻延迟、频率中心等
+- 部分使用 `eventsBool`，但模板统计仍混入未屏蔽 rank 的代表：
+  - `plotting_fig7_networkDemo.py`
+  - 它在 `bool_hist`/`rank1_count` 上用了 `eventsBool`，但 `hist_meanX` 风格的模板位置仍然来自未过滤的 `tmpHist`
+- 基本忽略 `eventsBool`、直接消费 `lagPatRank` 的代表：
+  - `p16_merge24h_lagPat.py`
+  - `plotting_fig5_lagPat_variance.py`
+  - `plotting_fig3_pickExamples.py`
+  - 这类脚本更接近“rank 模板统计”，不是严格的“参与通道传播统计”
+
+结论：
+
+- 若任务是算传播时长、频率中心、参与通道数，必须尊重 `eventsBool`
+- 若任务是复现老代码里的 `hist_meanX` / rank 模板链路，就得接受它带着“未参与通道也被硬排序”的历史包袱
+
+### 6.4 模板链审计: `hist_meanX / MI / variance`
+
+| 链路 | 代表脚本 | 实际输入 | 是否先用 `eventsBool` 屏蔽未参与通道 | 结论 |
+| --- | --- | --- | --- | --- |
+| `hist_meanX` | `p16_merge24h_lagPat.py` | 拼接后的 `whole_cat = concat(lagPatRank)` | 否 | **建立在未屏蔽 rank 上** |
+| MI 模板 | `p16_quantify_MI.py` | `whole_cat = concat(lagPatRank)` | 否 | **建立在未屏蔽 rank 上** |
+| 24h MI 变化 | `p16_MI_24hChange.py` / `p16_MI_24hChange_entropy.py` | 每个 2h 片段的 `lagPatRank`，模板来自 `return_hist_mean_rank()` | 否 | **建立在未屏蔽 rank 上** |
+| variance / rank 分布 | `plotting_fig5_lagPat_variance.py` | 拼接后的 `whole_cat = concat(lagPatRank)` | 否 | **建立在未屏蔽 rank 上** |
+| delay / duration / freq | `plotting_fig4_pairedDelay.py` / `plotting_fig4_durDelayStats*.py` | `lagPatRaw`/`lagPatFreq` + `eventsBool` | 是 | 这类统计更接近“真实参与通道”分析 |
+
+审计说明：
+
+- `p16_merge24h_lagPat.py` 虽然把 `eventsBool` 也读进来了，但生成 `hist_meanX` 时实际对 `whole_cat[ci]` 直接做直方图，没有先按 `eventsBool` 过滤。
+- `p16_quantify_MI.py` 和 `p16_MI_24hChange*.py` 的模板函数 `return_hist_mean_rank()` 都直接对 `whole_cat_matrix[ci]` 做 `np.histogram`，再把这个模板与每个事件的整列 `lagPatRank` 比较。
+- `plotting_fig5_lagPat_variance.py` 整条方差/模板分布链直接围绕 `whole_cat = concat(lagPatRank)` 展开，没有参与掩码。
+- 因此，这条模板链更准确的名字应该是：**老式未屏蔽 rank 模板链**。
+
+能支持什么结论：
+
+- “在老实现定义下，某些通道在 rank 模板里更常靠前”
+- “老实现定义下，群体事件排序模式在 24h 内具有一定重复性”
+- “老实现定义下，模板与事件的 MI 高于随机置换”
+
+不能过度宣称什么：
+
+- 不能直接把它说成“只有真实参与通道的传播模板稳定”
+- 不能把 `hist_meanX` 直接解释为生理上的绝对先导时延均值
+- 不能把 MI/variance 直接解释为严格参与成员的传播稳定性

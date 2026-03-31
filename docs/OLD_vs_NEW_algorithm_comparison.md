@@ -14,7 +14,7 @@
 | 预处理            | `p16_cuda_24h_bipolar.py` 内联                                 | `src/preprocessing.py` → `SEEGPreprocessor`                                                          |
 | HFO 检测         | 同上, `find_high_enveTimes_cu()`                               | `src/hfo_detector.py` → `HFODetector`                                                                |
 | 同步性约束 / 通道筛选   | `p16_refine_chns_bySyn.py`                                   | `group_event_analysis.py` → `select_core_channels_by_event_count` + `filter_windows_by_min_channels` |
-| 群体事件窗口         | `hfo_net.py` → `get_packedEventsTimes_overThresh`            | `group_event_analysis.py` → `build_windows_from_packed_times` / `build_windows_from_detections`      |
+| 群体事件窗口         | `hfo_net.py` → `get_packedEventsTimes_overThresh`            | `build_windows_from_packed_times` / `build_windows_from_detections`（同步计数 packing，已无贪心分箱）      |
 | 质心/时序 (lagPat) | `packGroupEvents*.py` → `return_massCenterPat` (spectrogram) | `group_event_analysis.py` → `compute_centroid_matrix_spectrogram` / `compute_centroid_matrix_from_envelope_cache` |
 | lag → rank     | `np.argsort(np.argsort(x))` 内联                               | `lag_rank_from_centroids` → `compute_dense_rank`                                                     |
 | 网络构建           | `diffnet_prepareTXT.py` → netRate外部工具                        | `src/network_analysis.py` → `build_hfo_network`                                                      |
@@ -150,23 +150,36 @@ for tmp_tr in tmp_highTime:
 
 参数因患者而异：`packWinLen` = 200ms~500ms, `chnsThr` = 0.5
 
+补充判断：
+
+- `packedTimes` 的质量直接决定后续 `eventsBool / lagPatRaw / lagPatRank` 的质量
+- 若 packed 窗口混入 spike/噪声、或把本应分开的事件错并，后续传播 pattern 会被系统性带偏
+- 因此老代码里“群体事件定义”本身就是分析对象的一部分，不是可随便替换的小预处理
+
 ### 4.2 新代码 (`build_windows_from_detections`)
 
+**当前状态（已对齐老 `hfo_net.py::get_packedEventsTimes_overThresh` + `pick_noOverlap_timeRanges`）**：
+
 ```
-1. 所有通道的事件按 start 时间排序
-2. 取最早未分配的事件 start → 窗口 = [start, start + window_sec)
-3. 所有 start 落在窗口内的事件标记为已分配
-4. 重复直到所有事件分配完毕
+0. `packing_channels` 与 `core_channels` 已显式分离：
+   - packing 通道默认来自 subject 目录下 `_refineGpu.npz`
+   - 再按老脚本的 `mean + pickChn_thresh*std` 取最终 picked channels
+   - `chengshuai` 的老参数是 `pickChn_thresh=1.0`
+1. 各通道事件时间前后各扩展 ext（默认 30ms）
+2. 在 500Hz 时间轴上对**所有扩展事件直接累加** → `index_array`
+   （不先做每通道并集，这一点按老 `hfo_net.py` 原样复现）
+3. 取 `index_array >= chnsThr × n_picked` 的连续区间
+4. 每个区间取中点为中心，窗口 = [center ± packWinLen/2]
+5. `pick_noOverlap_timeRanges` 原样复现：
+   - 若相邻两个候选窗重叠，则**两个都删**
+6. 丢弃长度 > 2s 的窗口
 ```
 
-或者直接读取老代码生成的 `packedTimes.npy`：`build_windows_from_packed_times`。
+若提供老代码生成的 `packedTimes.npy`，仍使用 `build_windows_from_packed_times`（与旧结果逐窗一致）。
 
-**关键差异**：
+**历史差异（已解决）**：
 
-- 老代码：**累积通道计数 → 阈值 → 中心对齐**，窗口是"大多数通道同步活动"的时刻
-- 新代码：**最早事件驱动 → 贪心分配**，窗口是从第一个事件开始的固定长度窗
-- 老代码的窗口含义更接近"群体同步事件"，新代码的窗口更像"检测事件的时间分箱"
-- **如果新代码使用 `packed_times_path` 走 legacy 路径，则窗口定义完全一致**
+- 曾实现过「最早起点 + 固定窗长」的贪心分箱，与老的「同步通道计数」不一致，会导致窗口数与金标准严重偏离；该分支已移除。
 
 ---
 
@@ -184,6 +197,14 @@ for tmp_tr in tmp_highTime:
 4. `lagPatRank` = `argsort(argsort(lagPatRaw per event))`
 5. 变体脚本 `*_withFreqCent.npz` 还会额外保存 `lagPatFreq`（频率质心）
 ```
+
+解释边界：
+
+- `lagPatRaw` 是**时频质心时间**，不是原始波形峰值，也不是 detector 事件起点
+- 对大多数表现为“岛状频率增强”的 HFO，这个统计量在 pattern 级别通常可用
+- 但它的绝对值会受上游 `packedTimes` 是否干净、spectrogram 参数、以及拼接边界影响
+- 因此老代码更适合把它解释为“群体事件内的相对传播时间标量”，而不是精确生理起始时刻
+- 还有一个老代码包袱：`lagPatRaw/Rank` 会对每个 picked channel、每个 packed window 都给出值；是否真参与该事件，要靠 `eventsBool` 另行屏蔽
 
 ### 5.2 新代码（当前默认已切到 spectrogram）
 
@@ -264,6 +285,32 @@ for tmp_tr in tmp_highTime:
 - `p16_MI_24hChange.py`、`p16_MI_24hChange_entropy.py`：按 2h/全天跟踪 pattern 稳定性、模板 MI、rank 直方图熵
 - `plotting_fig5_lagPat_variance.py`：每通道 rank 分布、均值模板、变异性
 
+这部分说明老代码真正追求的“稳定性”主要不是单个 `lagPatRaw` 的绝对毫秒值稳不稳，而是：
+
+- 事件间 rank/pattern 是否反复出现
+- 24h 汇总后的 rank 直方图模板是否稳定
+- 事件与模板之间的 MI 是否显著高于 permutation
+
+但要注意一个历史坑：
+
+- `p16_merge24h_lagPat.py`、`plotting_fig5_lagPat_variance.py` 这类 rank 模板脚本，主要直接消费 `lagPatRank`
+- 它们并不总是先用 `eventsBool` 屏蔽未参与通道
+- 所以这类“模板稳定性”更准确地说是**老式 rank 模板稳定性**，而不是严格意义上的“参与通道传播模板稳定性”
+
+进一步核对结果：
+
+- `hist_meanX`：`p16_merge24h_lagPat.py` 直接对 `whole_cat = concat(lagPatRank)` 做直方图并提取 3-bin weighted mean，没有先用 `eventsBool` 过滤。
+- MI：`p16_quantify_MI.py`、`p16_MI_24hChange.py`、`p16_MI_24hChange_entropy.py` 的 `return_hist_mean_rank()` 都直接基于 `lagPatRank` 做模板，再与每个事件整列 rank 比较；同样没有参与掩码。
+- variance：`plotting_fig5_lagPat_variance.py` 的 rank 分布、hist mean、混合分布拟合也都直接建立在 `whole_cat = concat(lagPatRank)` 上。
+
+因此，论文里凡是主要依赖 `hist_meanX / MI / variance` 这条链的结论，都应理解为：
+
+- “老实现下的未屏蔽 rank 模板重复性/稳定性”
+
+而不是：
+
+- “严格参与通道传播模板的重复性/稳定性”
+
 ### 6.5.4 区域级传播统计
 
 - `p16_region_lagPat_stats.py`：将电极映射到解剖区，统计 region-to-region 的 leader→follower 方向计数
@@ -315,7 +362,18 @@ for tmp_tr in tmp_highTime:
 - 老代码的闭环 refine 通道筛选还没有移植
 - 若不用 `packedTimes.npy` 而走新窗口生成逻辑，群体事件定义仍不同
 - 滤波实现仍是老代码 FIR vs 新代码 IIR
-- `lagPatFreq` 仍未进入新代码标准输出
+- （已补齐）`groupAnalysis.npz`/`_lagPat_pipeline.npz` 现同时标准输出 `lag_abs`/`lag_raw`/`lag_rank`/`lag_freq`
+
+PR1 输出合同状态（2026-03-27）：
+
+- `groupAnalysis.npz`:
+  - `lag_abs`：绝对质心时间（秒）
+  - `lag_raw`：相对最早通道的时延（秒）
+  - `lag_rank`：逐事件 dense rank（非参与通道=-1）
+  - `lag_freq`：频率质心（Hz，若可用）
+- `_lagPat_pipeline.npz`:
+  - `lagPatAbs` / `lagPatRaw` / `lagPatRank` / `lagPatFreq`
+  - `schema_version=lagpat-v2-abs-rel`
 
 ### 7.3 建议方案
 

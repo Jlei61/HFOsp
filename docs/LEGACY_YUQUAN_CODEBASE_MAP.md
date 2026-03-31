@@ -69,6 +69,14 @@
 | `<record>_lagPat_withFreqCent.npz` | 质心 + 频率中心 | `p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py` | `groupAnalysis` / `lag_freq` 导出链 | 这是很多论文图的直接输入 |
 | `hist_meanX.npz` | 24h lag 模式汇总后得到的核心通道结果 | `p16_merge24h_lagPat.py` | `core_channels.source=hist_meanX` 的消费者在 `scripts/run_pipeline.py` | 写入键为 `hist_meanX / pick_chns` |
 
+补充合同：
+
+- `<record>_gpu.npz`：单通道独立候选事件，不是群体事件。
+- `_refineGpu.npz`：群体窗口约束后的 recount，不是原始 `events_count` 跨文件直加。
+- `<record>_packedTimes.npy`：群体事件定义本身；这一步脏了，后面 `eventsBool / lagPat*` 全部连坐。
+- `<record>_lagPat.npz`：`lagPatRaw` 是时频质心时间，不是原始峰值或 detector 起点。
+- `hist_meanX.npz`：24h rank 模板位置统计，不是 raw lag 时间均值。
+
 ---
 
 ## 4. 关键逻辑别再瞎找
