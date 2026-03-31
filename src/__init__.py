@@ -35,6 +35,8 @@ _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
     "filter_windows_by_min_channels": ("src.group_event_analysis", "filter_windows_by_min_channels"),
     "gpu_detections_and_compare_windows_to_packed": ("src.group_event_analysis", "gpu_detections_and_compare_windows_to_packed"),
     "select_core_channels_by_event_count": ("src.group_event_analysis", "select_core_channels_by_event_count"),
+    "legacy_refine_channels_from_detections": ("src.group_event_analysis", "legacy_refine_channels_from_detections"),
+    "legacy_refine_core_channels": ("src.group_event_analysis", "legacy_refine_core_channels"),
     "lag_rank_from_centroids": ("src.group_event_analysis", "lag_rank_from_centroids"),
     "validate_packedtimes_centroid_lagrank_against_lagpat": (
         "src.group_event_analysis",

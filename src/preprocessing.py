@@ -53,6 +53,8 @@ class PreprocessingResult:
     reference_type: str = 'unknown'  # 'monopolar', 'bipolar', 'car'
     excluded_channels: List[str] = field(default_factory=list)
     used_gpu: bool = False        # Whether GPU was used for processing
+    outer_contact_mode: str = "none"
+    dropped_outer_contacts: List[str] = field(default_factory=list)
 
 
 def _moving_sum_1d(x: np.ndarray, win: int) -> np.ndarray:
@@ -677,7 +679,8 @@ class SEEGPreprocessor:
                  target_sfreq: Optional[Union[float, str]] = None,
                  target_band: str = 'ripple',
                  reference: str = 'auto',
-                 bipolar_gap: int = 2,
+                 bipolar_gap: int = 1,
+                 outer_contact_mode: str = "none",
                  include_channels: Optional[List[str]] = None,
                  exclude_channels: Optional[List[str]] = None,
                  notch_freqs: Optional[List[float]] = None,
@@ -700,7 +703,10 @@ class SEEGPreprocessor:
                        - 'bipolar': Apply bipolar referencing
                        - 'car': Common Average Reference per shaft
                        - 'auto': Alias for 'bipolar' (no guessing)
-            bipolar_gap: Max gap in contact numbers for bipolar (default=2)
+            bipolar_gap: Max gap in contact numbers for bipolar (default=1)
+            outer_contact_mode: Optional legacy contact-edge handling.
+                               - 'none': keep all contacts
+                               - 'drop_shaft_edges': drop first/last contact per shaft
             include_channels: Explicit channel whitelist (after cleaning names). If set,
                               keeps only these channels (intersection, order preserved).
             exclude_channels: Explicit channel blacklist (after cleaning names).
@@ -713,6 +719,7 @@ class SEEGPreprocessor:
         self.target_band = target_band
         self.reference = reference
         self.bipolar_gap = bipolar_gap
+        self.outer_contact_mode = str(outer_contact_mode).strip().lower()
         self.include_channels = include_channels
         self.exclude_channels = exclude_channels
         self.check_quality = check_quality
@@ -774,6 +781,12 @@ class SEEGPreprocessor:
         self._original_ch_names = []
         self._excluded_channels = []
         self._used_gpu = False
+
+        if self.outer_contact_mode not in {"none", "drop_shaft_edges"}:
+            raise ValueError(
+                "outer_contact_mode must be 'none' or 'drop_shaft_edges'. "
+                f"Got: {outer_contact_mode!r}"
+            )
         
     def _validate_nyquist(self):
         """Warn if sampling rate is too low for target band."""
@@ -792,6 +805,50 @@ class SEEGPreprocessor:
                     f"Target sfreq {self.target_sfreq}Hz is too low for Ripple (80-250Hz). "
                     f"Nyquist limit violated!"
                 )
+
+    def _edge_drop_key(self, name: str) -> Tuple[Optional[str], Optional[int]]:
+        """Map a channel name to (shaft, order) for edge-contact dropping."""
+        nm = str(name).strip().upper()
+        if "-" in nm:
+            left, right = nm.split("-", 1)
+            p1, n1 = ElectrodeParser.parse(left.strip())
+            p2, n2 = ElectrodeParser.parse(right.strip())
+            if p1 is not None and p2 is not None and p1 == p2:
+                return p1, min(int(n1), int(n2))
+        p, n = ElectrodeParser.parse(nm)
+        if p is None:
+            return None, None
+        return p, int(n)
+
+    def _drop_outer_contacts_per_shaft(
+        self,
+        data: np.ndarray,
+        ch_names: List[str],
+    ) -> Tuple[np.ndarray, List[str], List[str]]:
+        """Drop first/last ordered contact in each shaft group when possible."""
+        groups: Dict[str, List[Tuple[int, int, str]]] = {}
+        for idx, nm in enumerate(ch_names):
+            shaft, order = self._edge_drop_key(nm)
+            if shaft is None or order is None:
+                continue
+            groups.setdefault(str(shaft), []).append((int(order), int(idx), str(nm)))
+
+        drop_idx: set = set()
+        dropped: List[str] = []
+        for _, items in groups.items():
+            if len(items) <= 2:
+                continue
+            items_sorted = sorted(items, key=lambda x: (x[0], x[1]))
+            for _, idx, nm in (items_sorted[0], items_sorted[-1]):
+                if idx not in drop_idx:
+                    drop_idx.add(idx)
+                    dropped.append(nm)
+
+        if not drop_idx:
+            return data, ch_names, []
+
+        keep_indices = [i for i in range(len(ch_names)) if i not in drop_idx]
+        return data[keep_indices], [ch_names[i] for i in keep_indices], dropped
     
     def _get_fif_cache_path(self, edf_path: Path) -> Path:
         base = edf_path.stem
@@ -911,6 +968,7 @@ class SEEGPreprocessor:
         logger.info("skip_resample=%s", str(self._skip_resample))
         logger.info("crop_seconds=%s", str(self.crop_seconds))
         logger.info("use_gpu=%s", str(self.use_gpu))
+        logger.info("outer_contact_mode=%s", str(self.outer_contact_mode))
 
         # Step 1: Load EDF
         self.load_edf(file_path)
@@ -949,8 +1007,20 @@ class SEEGPreprocessor:
         else:
             raise ValueError(f"Unknown reference='{self.reference}'. Use 'none'/'bipolar'/'car'.")
 
+        dropped_outer_contacts: List[str] = []
+        if self.outer_contact_mode == "drop_shaft_edges":
+            pre_drop = len(ch_names)
+            data, ch_names, dropped_outer_contacts = self._drop_outer_contacts_per_shaft(data, ch_names)
+            if dropped_outer_contacts:
+                print(
+                    "Dropping shaft-edge contacts "
+                    f"({len(dropped_outer_contacts)}): {dropped_outer_contacts[:5]}..."
+                )
+            print(f"  Edge-drop mode: {pre_drop} -> {len(ch_names)} channels")
+
         # Step 4: Apply explicit channel include/exclude lists (post-reference)
         excluded_channels: List[str] = []
+        excluded_channels.extend(dropped_outer_contacts)
         if self.include_channels is not None:
             include_set = set(self.include_channels)
             keep_indices = [i for i, nm in enumerate(ch_names) if nm in include_set]
@@ -1009,6 +1079,7 @@ class SEEGPreprocessor:
         logger.info("sfreq=%.3f", float(sfreq))
         logger.info("duration_sec=%.3f", float(data.shape[1] / sfreq))
         logger.info("excluded_channels=%d", int(len(set(excluded_channels))))
+        logger.info("dropped_outer_contacts=%d", int(len(dropped_outer_contacts)))
         logger.info("bad_channels=%d", int(len(bad_channels)))
         logger.info("elapsed_sec=%.3f", float(time.time() - t_start))
         log_section(logger, "PREPROCESS END")
@@ -1024,7 +1095,9 @@ class SEEGPreprocessor:
             quality_scores=quality_scores,
             reference_type=reference_type,
             excluded_channels=excluded_channels,
-            used_gpu=self._used_gpu
+            used_gpu=self._used_gpu,
+            outer_contact_mode=str(self.outer_contact_mode),
+            dropped_outer_contacts=dropped_outer_contacts,
         )
     
     def _resample(self, data: np.ndarray, orig_sfreq: float, target_sfreq: float) -> np.ndarray:
@@ -1143,7 +1216,7 @@ def save_raw_cache(
     # Apply reference (no filtering/resampling)
     reference_type = "monopolar"
     if reference == "bipolar":
-        ref = BipolarReferencer(allow_gap=2)
+        ref = BipolarReferencer(allow_gap=1)
         data, ch_names, _ = ref.compute_bipolar(data, ch_names)
         reference_type = "bipolar"
     elif reference == "car":

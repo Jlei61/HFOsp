@@ -9,6 +9,7 @@ Outputs:
 
 import argparse
 import json
+import runpy
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,8 +29,36 @@ if str(_PROJECT_ROOT) not in sys.path:
 from src.group_event_analysis import (
     compute_and_save_group_analysis,
     compute_and_save_group_event_tf_tile_cache,
+    legacy_refine_counts_from_edf_paths,
+    legacy_refine_counts_from_gpu_npz_paths,
+    legacy_refine_core_channels,
     load_group_analysis_results,
 )
+
+LAGPAT_SCHEMA_VERSION = "lagpat-v2-abs-rel"
+LEGACY_PACK_PICK_K_BY_SUBJECT = {
+    "zhangkexuan": 0.5,
+    "pengzihang": 1.0,
+    "chengshuai": 1.0,
+    "huangwanling": 3.0,
+    "liyouran": 1.0,
+    "songzishuo": 1.0,
+    "zhangbichen": 0.5,
+    "zhangjiaqi": 1.7,
+    "zhaochenxi": 0.5,
+    "zhaojinrui": 1.0,
+    "zhourongxuan": 1.0,
+    "sunyuanxin": 1.0,
+    "chenziyang": 1.0,
+    "hanyuxuan": 1.0,
+    "huanghanwen": 1.0,
+    "litengsheng": 1.0,
+    "xuxinyi": 0.7,
+    "zhangjinhan": 1.0,
+    "gaolan": 1.9,
+    "wangyiyang": 1.0,
+    "dongyiming": 0.5,
+}
 
 
 @dataclass
@@ -84,13 +113,156 @@ def _select_existing_path(mode: str, path: Path, label: str) -> Optional[str]:
     return None
 
 
-def _load_core_channels(cfg: Dict[str, Any], subject_dir: Path) -> Optional[list]:
+def _legacy_pack_pick_k(subject: str) -> float:
+    return float(LEGACY_PACK_PICK_K_BY_SUBJECT.get(str(subject).lower().strip(), 1.0))
+
+
+def _load_packing_channels(
+    cfg: Dict[str, Any],
+    subject_dir: Path,
+    *,
+    band: Optional[str] = None,
+    reference: str = "bipolar",
+    alias_bipolar_to_left: bool = True,
+    outer_contact_mode: str = "drop_shaft_edges",
+    bipolar_gap: int = 1,
+    target_sfreq: Optional[float] = None,
+    hfo_config: Optional[Dict[str, Any]] = None,
+    output_dir: Optional[Path] = None,
+    output_prefix: Optional[str] = None,
+) -> Optional[list]:
+    pack_cfg = cfg.get("packing_channels", {}) or {}
+    source = str(pack_cfg.get("source", "legacy_refine_gpu_counts")).lower().strip()
+
+    if source in ("none", ""):
+        return None
+
+    if source == "manual":
+        manual = pack_cfg.get("manual_list", []) or []
+        return [str(x) for x in manual]
+
+    pick_k_cfg = pack_cfg.get("pick_k", "auto")
+    pick_k = _legacy_pack_pick_k(subject_dir.name) if str(pick_k_cfg).lower().strip() == "auto" else float(pick_k_cfg)
+    refine_window_sec = float(pack_cfg.get("refine_window_sec", 0.3))
+    refine_ext_ms = float(pack_cfg.get("refine_ext_ms", 30.0))
+    refine_chns_thr = float(pack_cfg.get("refine_chns_thr", 0.5))
+    refine_time_axis_hz = float(pack_cfg.get("refine_time_axis_hz", 500.0))
+    refine_max_window_sec = float(pack_cfg.get("refine_max_window_sec", 2.0))
+
+    if source == "legacy_refine_gpu_counts":
+        refine_path = subject_dir / "_refineGpu.npz"
+        if not refine_path.exists():
+            raise FileNotFoundError(f"legacy refineGpu not found: {refine_path}")
+        data = np.load(str(refine_path), allow_pickle=True)
+        counts = np.asarray(data["events_count"], dtype=np.float64)
+        names = [str(x) for x in data["chns_names"].tolist()]
+        thr = float(np.mean(counts) + pick_k * np.std(counts))
+        return [nm for nm, c in zip(names, counts) if float(c) > thr]
+
+    if source == "legacy_refine_recompute_gpu":
+        gpu_paths = sorted(subject_dir.glob("*_gpu.npz"))
+        out = legacy_refine_counts_from_gpu_npz_paths(
+            [str(p) for p in gpu_paths],
+            pick_k=float(pick_k),
+            refine_window_sec=refine_window_sec,
+            refine_ext_ms=refine_ext_ms,
+            refine_chns_thr=refine_chns_thr,
+            refine_time_axis_hz=refine_time_axis_hz,
+            refine_max_window_sec=refine_max_window_sec,
+        )
+        if output_dir is not None and output_prefix is not None:
+            diag_path = output_dir / f"{output_prefix}_recomputed_refineGpu.npz"
+            np.savez_compressed(
+                str(diag_path),
+                events_count=np.asarray(out["refined_counts"], dtype=np.int64),
+                chns_names=np.asarray(out["all_channels"], dtype=object),
+                initial_counts=np.asarray(out["initial_counts"], dtype=np.int64),
+            )
+        return [str(x) for x in out["refined_channels"]]
+
+    if source == "legacy_refine_recompute_edf":
+        if band is None:
+            raise ValueError("band is required for packing_channels.source=legacy_refine_recompute_edf")
+        edf_paths = sorted(subject_dir.glob("*.edf"))
+        out = legacy_refine_counts_from_edf_paths(
+            [str(p) for p in edf_paths],
+            band=str(band),
+            reference=str(reference),
+            alias_bipolar_to_left=bool(alias_bipolar_to_left),
+            outer_contact_mode=str(outer_contact_mode),
+            bipolar_gap=int(bipolar_gap),
+            target_sfreq=target_sfreq,
+            hfo_config=hfo_config,
+            pick_k=float(pick_k),
+            refine_window_sec=refine_window_sec,
+            refine_ext_ms=refine_ext_ms,
+            refine_chns_thr=refine_chns_thr,
+            refine_time_axis_hz=refine_time_axis_hz,
+            refine_max_window_sec=refine_max_window_sec,
+        )
+        if output_dir is not None and output_prefix is not None:
+            diag_path = output_dir / f"{output_prefix}_recomputed_refineGpu.npz"
+            np.savez_compressed(
+                str(diag_path),
+                events_count=np.asarray(out["refined_counts"], dtype=np.int64),
+                chns_names=np.asarray(out["all_channels"], dtype=object),
+                initial_counts=np.asarray(out["initial_counts"], dtype=np.int64),
+            )
+        return [str(x) for x in out["refined_channels"]]
+
+    if source == "legacy_gpu_counts":
+        counts_sum = None
+        names = None
+        for p in sorted(subject_dir.glob("*_gpu.npz")):
+            data = np.load(str(p), allow_pickle=True)
+            cur_counts = np.asarray(data["events_count"], dtype=np.float64)
+            cur_names = [str(x) for x in data["chns_names"].tolist()]
+            if counts_sum is None:
+                counts_sum = cur_counts.copy()
+                names = cur_names
+            else:
+                if cur_names != names:
+                    raise ValueError(f"Channel mismatch while summing legacy gpu counts: {p}")
+                counts_sum += cur_counts
+        if counts_sum is None or names is None:
+            raise FileNotFoundError(f"No *_gpu.npz files found under {subject_dir}")
+        thr = float(np.mean(counts_sum) + pick_k * np.std(counts_sum))
+        return [nm for nm, c in zip(names, counts_sum) if float(c) > thr]
+
+    raise ValueError(f"Unknown packing_channels.source='{source}'")
+
+
+def _load_core_channels(cfg: Dict[str, Any], subject_dir: Path, packing_channels: Optional[list] = None) -> Optional[list]:
     core_cfg = cfg.get("core_channels", {}) or {}
-    source = str(core_cfg.get("source", "none")).lower().strip()
+    source = str(core_cfg.get("source", "legacy_soz")).lower().strip()
+
+    if source == "packing_channels":
+        return [str(x) for x in (packing_channels or [])] or None
 
     if source == "manual":
         manual = core_cfg.get("manual_list", []) or []
         return [str(x) for x in manual]
+
+    if source == "legacy_soz":
+        info_path = (
+            _PROJECT_ROOT
+            / "ReplayIED"
+            / "inter_events"
+            / "yuquan_24h_perPatientAnalysis_dropRef"
+            / "p16_subs_info.py"
+        )
+        if not info_path.exists():
+            print(f"[WARN] legacy SOZ info not found: {info_path} (skip core channel filtering)")
+            return None
+        info = runpy.run_path(str(info_path))
+        subs_elecs_info = info.get("subs_elecs_info", {})
+        subject = str(subject_dir.name)
+        subj_map = subs_elecs_info.get(subject, {})
+        out: list[str] = []
+        for shaft, contacts in subj_map.items():
+            for c in contacts:
+                out.append(f"{shaft}{int(c)}")
+        return out or None
 
     if source == "hist_meanx":
         hist_path = subject_dir / "hist_meanX.npz"
@@ -101,6 +273,20 @@ def _load_core_channels(cfg: Dict[str, Any], subject_dir: Path) -> Optional[list
         return [str(x) for x in data["pick_chns"].tolist()]
 
     return None
+
+
+def _to_native_json(x: Any) -> Any:
+    if isinstance(x, dict):
+        return {str(k): _to_native_json(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_to_native_json(v) for v in x]
+    if isinstance(x, tuple):
+        return [_to_native_json(v) for v in x]
+    if isinstance(x, np.ndarray):
+        return _to_native_json(x.tolist())
+    if isinstance(x, (np.integer, np.floating)):
+        return x.item()
+    return x
 
 
 def _resolve_paths(cfg: Dict[str, Any], subject: str, record: str) -> Tuple[Path, Path, Path, Path]:
@@ -143,8 +329,6 @@ def main() -> None:
         paths_cfg.get("gpu_detections_mode", "auto"), gpu_path, "gpu detections"
     )
 
-    core_channels = _load_core_channels(cfg, subject_dir)
-
     analysis_cfg = cfg.get("analysis", {}) or {}
     group_cfg = cfg.get("group_analysis", {}) or {}
     group_core = group_cfg.get("core", {}) or {}
@@ -161,8 +345,18 @@ def main() -> None:
     use_gpu_envelope = bool(analysis_cfg.get("use_gpu_envelope", True))
     save_env_cache = bool(analysis_cfg.get("save_env_cache", True))
     window_sec = analysis_cfg.get("window_sec", None)
+    packed_ext_ms = float(analysis_cfg.get("packed_events_ext_ms", 30.0))
+    packed_chns_thr = float(analysis_cfg.get("packed_events_chns_thr", 0.5))
+    packed_time_axis_hz = float(analysis_cfg.get("packed_events_time_axis_hz", 500.0))
+    packed_max_window_sec = float(analysis_cfg.get("packed_events_max_window_sec", 2.0))
+    packed_pick_k_raw = analysis_cfg.get("packed_events_pick_k", 1.0)
+    if isinstance(packed_pick_k_raw, str) and packed_pick_k_raw.strip().lower() == "auto":
+        packed_pick_k = _legacy_pack_pick_k(str(subject))
+    else:
+        packed_pick_k = float(packed_pick_k_raw)
     force_rerun = bool(analysis_cfg.get("force_rerun", False))
     interictal_only = bool(analysis_cfg.get("interictal_only", False))
+    outer_contact_mode = str(analysis_cfg.get("outer_contact_mode", "drop_shaft_edges"))
     bipolar_gap = int(analysis_cfg.get("bipolar_gap", 1))
     resample_sfreq = analysis_cfg.get("resample_sfreq", None)
     if isinstance(resample_sfreq, str):
@@ -191,6 +385,66 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_prefix = output_prefix_cfg or _resolve_record_stem(record)
 
+    packing_channels = _load_packing_channels(
+        cfg,
+        subject_dir,
+        band=band,
+        reference=reference,
+        alias_bipolar_to_left=alias_bipolar_to_left,
+        outer_contact_mode=outer_contact_mode,
+        bipolar_gap=bipolar_gap,
+        target_sfreq=resample_sfreq,
+        hfo_config=hfo_cfg.get("config", None),
+        output_dir=output_dir,
+        output_prefix=output_prefix,
+    )
+    core_cfg = cfg.get("core_channels", {}) or {}
+    core_source = str(core_cfg.get("source", "packing_channels")).lower().strip()
+    core_channels = _load_core_channels(cfg, subject_dir, packing_channels=packing_channels)
+
+    refine_diag_path: Optional[str] = None
+    if core_source == "legacy_refine":
+        refine_cfg = core_cfg.get("legacy_refine", {}) or {}
+        print("\n[Core Channels] Running legacy refine loop ...")
+        refine_out = legacy_refine_core_channels(
+            edf_path=str(edf_path),
+            band=band,
+            reference=reference,
+            alias_bipolar_to_left=alias_bipolar_to_left,
+            outer_contact_mode=outer_contact_mode,
+            bipolar_gap=bipolar_gap,
+            crop_seconds=crop_seconds,
+            target_sfreq=resample_sfreq,
+            gpu_npz_path=gpu_npz_path,
+            hfo_config=hfo_cfg.get("config", None),
+            window_sec=float(refine_cfg.get("window_sec", window_sec if window_sec is not None else 0.5)),
+            initial_method=str(refine_cfg.get("initial_method", "mean_std")),
+            initial_k=float(refine_cfg.get("initial_k", 1.0)),
+            initial_top_n=(
+                int(refine_cfg["initial_top_n"])
+                if refine_cfg.get("initial_top_n", None) is not None
+                else None
+            ),
+            refine_method=str(refine_cfg.get("refine_method", "mean_std")),
+            refine_k=float(refine_cfg.get("refine_k", 1.0)),
+            refine_top_n=(
+                int(refine_cfg["refine_top_n"])
+                if refine_cfg.get("refine_top_n", None) is not None
+                else None
+            ),
+            min_count=int(refine_cfg.get("min_count", 1)),
+            provisional_min_channels=int(refine_cfg.get("provisional_min_channels", 1)),
+        )
+        core_channels = [str(x) for x in refine_out.get("refined_channels", [])]
+        refine_diag_path = str(output_dir / f"{output_prefix}_legacy_refine_core_channels.json")
+        with Path(refine_diag_path).open("w", encoding="utf-8") as f:
+            json.dump(_to_native_json(refine_out), f, ensure_ascii=True, indent=2)
+        print(
+            f"  [Core Channels] initial={len(refine_out.get('initial_selected_channels', []))} "
+            f"refined={len(core_channels)} windows={len(refine_out.get('provisional_windows', []))}"
+        )
+        print(f"  [Core Channels] diagnostics saved: {refine_diag_path}")
+
     if force_rerun:
         packed_times_path = None
         gpu_npz_path = None
@@ -210,6 +464,7 @@ def main() -> None:
         output_prefix=str(output_prefix),
         packed_times_path=packed_times_path,
         gpu_npz_path=gpu_npz_path,
+        packing_channels=packing_channels,
         core_channels=core_channels,
         band=band,
         reference=reference,
@@ -220,7 +475,13 @@ def main() -> None:
         target_sfreq=resample_sfreq,
         hfo_config=hfo_cfg.get("config", None),
         window_sec=window_sec,
+        packed_ext_ms=packed_ext_ms,
+        packed_chns_thr=packed_chns_thr,
+        packed_time_axis_hz=packed_time_axis_hz,
+        packed_max_window_sec=packed_max_window_sec,
+        packed_pick_k=packed_pick_k,
         interictal_only=interictal_only,
+        outer_contact_mode=outer_contact_mode,
         bipolar_gap=bipolar_gap,
         compute_tf_centroids=compute_tf_centroids,
         centroid_source=centroid_source,
@@ -388,6 +649,7 @@ def main() -> None:
                     window_sec=window_sec,
                     interictal_only=False,
                     ictal_only=True,
+                    outer_contact_mode=outer_contact_mode,
                     bipolar_gap=bipolar_gap,
                     compute_tf_centroids=False,
                     centroid_source=centroid_source,
@@ -475,6 +737,7 @@ def main() -> None:
                     hfo_config=hfo_cfg.get("config", None),
                     window_sec=sc_win_sec,
                     interictal_only=interictal_only,
+                    outer_contact_mode=outer_contact_mode,
                     bipolar_gap=bipolar_gap,
                     compute_tf_centroids=False,
                     centroid_source=centroid_source,
@@ -553,8 +816,11 @@ def main() -> None:
 
     np.savez_compressed(
         str(lagpat_out),
+        schema_version=np.array([LAGPAT_SCHEMA_VERSION], dtype=object),
+        lagPatAbs=np.asarray(results.get("lag_abs"), dtype=np.float64),
         lagPatRaw=np.asarray(results["lag_raw"], dtype=np.float64),
         lagPatRank=np.asarray(results["lag_rank"], dtype=np.int64),
+        lagPatFreq=np.asarray(results.get("lag_freq", np.full_like(results["lag_raw"], np.nan)), dtype=np.float64),
         eventsBool=np.asarray(results["events_bool"], dtype=bool),
         chnNames=np.asarray(results["ch_names"], dtype=object),
         start_t=np.array([0.0], dtype=np.float64),
@@ -569,6 +835,9 @@ def main() -> None:
         "record": record,
         "band": band,
         "reference": reference,
+        "core_channels_source": core_source,
+        "outer_contact_mode": outer_contact_mode,
+        "output_schema_version": LAGPAT_SCHEMA_VERSION,
         "force_rerun": force_rerun,
         "interictal_only": interictal_only,
         "n_channels": int(results["n_channels"]),
@@ -582,6 +851,7 @@ def main() -> None:
         "ictal_comparison_path": out_paths.get("ictal_comparison_path"),
         "delta_outflow_plot_path": out_paths.get("delta_outflow_plot_path"),
         "network_audit_path": out_paths.get("network_audit_path"),
+        "legacy_refine_core_channels_path": refine_diag_path,
         "packed_times_path": str(packed_out),
         "lagpat_path": str(lagpat_out),
         "config_snapshot": str(snapshot_path),
@@ -596,7 +866,10 @@ def main() -> None:
         logs_out = output_dir / "logs"
         logs_out.mkdir(parents=True, exist_ok=True)
         for log_path in logs_dir.glob("*.log"):
-            shutil.copy2(log_path, logs_out / log_path.name)
+            try:
+                shutil.copy2(log_path, logs_out / log_path.name)
+            except PermissionError:
+                print(f"[WARN] Skip log metadata copy (permission denied): {log_path.name}")
 
     print("OK")
     print(f"- groupAnalysis: {out_paths['group_analysis_path']}")

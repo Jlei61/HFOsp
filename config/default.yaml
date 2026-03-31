@@ -14,11 +14,28 @@ paths:
   gpu_detections_mode: auto  # Options: auto | existing | build | run
   # auto: use existing if found; existing: must exist; build/run: ignore existing
 
+# === Packing channel selection ===
+# Defines which channels are used to build packed group-event windows when packedTimes is absent.
+packing_channels:
+  source: legacy_refine_gpu_counts  # Options: legacy_refine_gpu_counts | legacy_gpu_counts | manual | none
+  pick_k: auto  # 'auto' -> subject-specific legacy pickChn_thresh from old pack script
+  manual_list: []  # Only used when source=manual
+
 # === Core channel selection ===
 # Defines which channels participate in group analysis and lag/rank.
 core_channels:
-  source: hist_meanX  # Options: hist_meanX | manual | none
+  source: packing_channels  # Options: packing_channels | hist_meanX | manual | legacy_refine | legacy_soz | none
   manual_list: []  # Only used when source=manual
+  legacy_refine:
+    window_sec: 0.5  # Provisional group-window size used in refine loop
+    initial_method: mean_std  # Initial pick method: mean_std | log_mean_std | log_median_mad | top_n | log_top_n
+    initial_k: 1.0  # Threshold k for initial pick
+    initial_top_n: null  # Optional cap on initial channels
+    refine_method: mean_std  # Refine pick method applied to recounts
+    refine_k: 1.0  # Threshold k for refine pick
+    refine_top_n: null  # Optional cap on refined channels
+    min_count: 1  # Minimum count for alive channel in both passes
+    provisional_min_channels: 1  # Optional window filter on initial-picked channels
 
 # === Preprocess + window construction ===
 # High-level analysis settings applied before group aggregation.
@@ -27,11 +44,18 @@ analysis:
   reference: bipolar  # Options: bipolar | car | none
   alias_bipolar_to_left: true  # For bipolar names like A1-A2 -> A1
   bipolar_gap: 1  # Max allowed contact gap in bipolar re-reference (1 = strictly adjacent, matching legacy yuquan pipeline)
-  resample_sfreq: auto  # Options: auto | none | number (Hz)
+  outer_contact_mode: drop_shaft_edges  # Options: none | drop_shaft_edges (legacy-style per-shaft edge drop)
+  resample_sfreq: 800  # Options: auto | none | number (Hz); pin 800 for legacy Yuquan EDF reproduction because auto may resolve to a dataset/default rate instead of legacy 800 Hz
   crop_seconds: 500  # Crop length (seconds); null -> full recording
   use_gpu_envelope: true  # Use GPU for envelope if available
   save_env_cache: true  # Save envCache npz for visualization reuse
-  window_sec: 0.5  # Window length if packedTimes is missing
+  window_sec: 0.5  # packWinLen when packedTimes is missing (Yuquan synchronous packing)
+  # Yuquan hfo_net-style group windows when building from detections (no packedTimes)
+  packed_events_ext_ms: 30.0  # extend each event before channel counting (legacy ~30ms)
+  packed_events_chns_thr: 0.5  # require >= ceil(thr * n_active) channels co-active (legacy ~0.5)
+  packed_events_time_axis_hz: 500.0  # index_array bin rate (legacy ~500Hz)
+  packed_events_max_window_sec: 2.0  # drop longer windows (legacy >2s)
+  packed_events_pick_k: 1.0  # mean + k*std pick for packing channels (legacy pickChn_thresh≈1)
   force_rerun: false  # Ignore existing packedTimes/gpu results
   interictal_only: true  # Drop windows overlapping ictal_mask
 

@@ -1,0 +1,104 @@
+data_root: /mnt/yuquan_data/yuquan_24h_edf
+subject: chengshuai
+record: FC10477Q
+output_dir: /mnt/yuquan_data/yuquan_24h_edf/chengshuai/temp/cuda_fresh_verify
+output_prefix: FC10477Q_cuda_fresh
+
+paths:
+  packed_times_mode: build
+  gpu_detections_mode: build
+
+packing_channels:
+  source: legacy_refine_gpu_counts
+  pick_k: auto
+  manual_list: []
+
+core_channels:
+  source: packing_channels
+  manual_list: []
+
+analysis:
+  band: ripple
+  reference: bipolar
+  alias_bipolar_to_left: true
+  bipolar_gap: 1
+  outer_contact_mode: drop_shaft_edges
+  resample_sfreq: 800
+  crop_seconds: 500
+  use_gpu_envelope: true
+  save_env_cache: false
+  window_sec: 0.5
+  packed_events_ext_ms: 30.0
+  packed_events_chns_thr: 0.5
+  packed_events_time_axis_hz: 500.0
+  packed_events_max_window_sec: 2.0
+  packed_events_pick_k: 1.0
+  force_rerun: true
+  interictal_only: false
+
+causal_tuning:
+  band: ripple
+  rel_thresh: 3.0
+  assoc_window_ms: 40.0
+  d_strong: 0.35
+
+hfo_detection:
+  config:
+    band: ripple
+    bandpass: null
+    subband_width: 20.0
+    rel_thresh: 2.0
+    abs_thresh: 2.0
+    min_gap_ms: 20.0
+    min_last_ms: 50.0
+    max_last_ms: 200.0
+    side_thresh: 1.5
+    chunk_sec: 50.0
+    chunk_overlap_sec: 2.0
+    n_jobs: -1
+    verbose: 1
+
+group_analysis:
+  core:
+    centroid_power: 3.0
+    centroid_source: spectrogram
+    min_channels: 1
+    coact_all_channels: true
+    coact_min_event_ratio: 0.0
+    coact_time_lag_ms: 50.0
+  tf:
+    compute_tf_centroids: false
+    save_event_tf_tile_cache: false
+    tf_n_freqs: 180
+    tf_n_cycles: 4.0
+    tf_n_cycles_mode: linear
+    tf_n_cycles_min: 3.0
+    tf_n_cycles_max: 10.0
+    tf_freq_scale: log
+    baseline_window_sec: 2.0
+    baseline_step_sec: 1.0
+    baseline_n_select: 10
+    baseline_min_distance_sec: 2.0
+    baseline_line_length_q: 0.9
+    baseline_ripple_env_q: 0.8
+  seizure:
+    seizure_ll_k: 6.0
+    seizure_rms_k: 6.0
+    seizure_min_duration_sec: 5.0
+  visualization:
+    save_bandpass: false
+    save_event_tf_tile_cache: false
+    plot_window_sec: 0.1
+    low_color_percentile: 70.0
+    cmap: Reds
+    scale_bar_sec: 0.05
+    freq_scale_bar_hz: 50.0
+    base_fontsize: 12.0
+    centroid_marker_size: 25.0
+
+network_analysis:
+  enabled: false
+
+outputs:
+  packed_times_suffix: _packedTimes_pipeline.npy
+  lagpat_suffix: _lagPat_pipeline.npz

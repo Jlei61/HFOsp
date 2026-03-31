@@ -32,15 +32,6 @@ Seconds = float
 
 
 @dataclass(frozen=True)
-class SingleEvent:
-    """Single-channel detection in seconds (relative to record start)."""
-
-    start: Seconds
-    end: Seconds
-    ch_name: str
-
-
-@dataclass(frozen=True)
 class EventWindow:
     """
     An aligned group-event window [start, end] in seconds (relative to record start).
@@ -242,67 +233,154 @@ def build_windows_from_packed_times(packed_times: np.ndarray) -> List[EventWindo
     return [EventWindow(float(s), float(e), int(i)) for i, (s, e) in enumerate(t)]
 
 
+def _legacy_return_time_ranges(on_off: np.ndarray, fs: float, start_time: float = 0.0) -> np.ndarray:
+    """Faithful port of legacy `return_timeRanges()` from `ReplayIED/.../hfo_net.py`."""
+    arr = np.asarray(on_off).astype(int).ravel()
+    if arr.size == 0:
+        return np.zeros((0, 2), dtype=np.float64)
+    times = np.arange(arr.size, dtype=np.float64) / float(fs) + float(start_time)
+    start_index = np.where(np.diff(arr) == 1)[0] + 1
+    end_index = np.where(np.diff(arr) == -1)[0]
+    if arr[0] == 1:
+        start_index = np.append(start_index[::-1], [0])[::-1]
+    if arr[-1] == 1:
+        end_index = np.append(end_index, [arr.size - 1])
+    if start_index.size == 0 or end_index.size == 0:
+        return np.zeros((0, 2), dtype=np.float64)
+    return np.vstack([times[start_index], times[end_index]]).T.astype(np.float64, copy=False)
+
+
+def _legacy_pick_no_overlap_time_ranges(time_ranges: np.ndarray, less_than_sec: float) -> np.ndarray:
+    """
+    Faithful port of legacy `pick_noOverlap_timeRanges()`.
+
+    Important: if two adjacent windows overlap, legacy drops *both* windows.
+    This is stricter than keeping the earliest one.
+    """
+    arr = np.asarray(time_ranges, dtype=np.float64)
+    if arr.size == 0:
+        return np.zeros((0, 2), dtype=np.float64)
+    arr = _ensure_2col_times(arr)
+    if arr.shape[0] < 2:
+        return arr
+
+    overlap_index = np.where(arr[1:, 0] < arr[:-1, 1])[0]
+    if overlap_index.size > 0:
+        drop_index = np.array(sorted(set(np.concatenate([overlap_index, overlap_index + 1]).tolist())), dtype=np.int64)
+        no_overlap = np.delete(arr, drop_index, axis=0)
+    else:
+        no_overlap = arr
+    return no_overlap[(no_overlap[:, 1] - no_overlap[:, 0]) < float(less_than_sec)]
+
+
 def build_windows_from_detections(
     detections: Mapping[str, np.ndarray],
     window_sec: float = 0.5,
     *,
-    strategy: str = "fixed_from_earliest_start",
+    ext_ms: float = 30.0,
+    chns_thr: float = 0.5,
+    time_axis_hz: float = 500.0,
+    max_window_sec: float = 2.0,
+    t_max_sec: Optional[float] = None,
 ) -> List[EventWindow]:
     """
-    Build fixed-length windows from per-channel detections.
+    Build group-event windows from per-channel detections using the exact Yuquan
+    `hfo_net.py` logic:
+      `get_packedEventsTimes_overThresh(...)` -> `pick_noOverlap_timeRanges(..., 2)`.
 
-    This is a pragmatic approximation when packedTimes is unavailable.
-    For validation against Yuquan lagPat, prefer using packedTimes directly.
+    This intentionally mirrors legacy behavior, including two non-obvious details:
+      1. `index_array` is built by summing *all extended events directly*.
+         We do not first union events within a channel.
+      2. When adjacent windows overlap, legacy drops *both* windows.
 
-    Strategy
-    --------
-    fixed_from_earliest_start:
-        Take earliest unassigned event start as window start; window is [start, start+window_sec).
-        Assign all events whose start lies in the window, mark them assigned, repeat.
+    Parameters
+    ----------
+    window_sec
+        Half-width is window_sec/2 around each run center (legacy ``packWinLen``).
+    ext_ms
+        Per-event temporal extension before counting (legacy ~30 ms).
+    chns_thr
+        Fraction of active picked channels required for synchronous activity (legacy ~0.5).
+    time_axis_hz
+        Binning rate for the index array (legacy used 500 Hz).
+    t_max_sec
+        Clip analysis timeline to [0, t_max_sec). Use ``crop_seconds`` from preprocessing
+        when available so windows do not extend past the cropped segment.
     """
     if window_sec <= 0:
         raise ValueError("window_sec must be > 0")
-    if strategy != "fixed_from_earliest_start":
-        raise ValueError(f"Unknown strategy='{strategy}'")
+    if ext_ms < 0:
+        raise ValueError("ext_ms must be >= 0")
+    if not (0.0 < chns_thr <= 1.0):
+        raise ValueError("chns_thr must be in (0, 1]")
+    if max_window_sec <= 0:
+        raise ValueError("max_window_sec must be > 0")
+    if time_axis_hz <= 0:
+        raise ValueError("time_axis_hz must be > 0")
 
-    flat: List[SingleEvent] = []
-    for ch, times in detections.items():
+    ext_sec = float(ext_ms) * 1e-3
+    high_events_times: List[List[List[float]]] = []
+    t_end_data = 0.0
+    for _, times in detections.items():
         if times is None:
             continue
         arr = np.asarray(times)
         if arr.size == 0:
             continue
         arr = _ensure_2col_times(arr)
-        for s, e in arr:
-            flat.append(SingleEvent(float(s), float(e), str(ch)))
-
-    flat.sort(key=lambda ev: ev.start)
-    if not flat:
+        high_events_times.append(arr.astype(np.float64, copy=False).tolist())
+        t_end_data = max(t_end_data, float(np.max(arr[:, 1])))
+    chns_num = len(high_events_times)
+    if chns_num == 0:
         return []
 
-    assigned = np.zeros(len(flat), dtype=bool)
-    windows: List[EventWindow] = []
-    i = 0
-    while True:
-        while i < len(flat) and assigned[i]:
-            i += 1
-        if i >= len(flat):
-            break
+    if t_max_sec is None:
+        t_lim = t_end_data + ext_sec + 1.0
+    else:
+        t_lim = float(t_max_sec)
+    if t_lim <= 0:
+        return []
 
-        w_start = flat[i].start
-        w_end = w_start + float(window_sec)
-        # Mark all events starting within window as assigned.
-        for j in range(i, len(flat)):
-            if assigned[j]:
-                continue
-            if flat[j].start < w_end:
-                assigned[j] = True
-            else:
-                break
+    tmp_all_times = np.array([tp for ch_times in high_events_times for tp in ch_times], dtype=np.float64)
+    if tmp_all_times.size == 0:
+        return []
+    tmp_all_times[:, 0] -= ext_sec
+    tmp_all_times[:, 1] += ext_sec
+    min_times = max(0.0, float(np.min(tmp_all_times[:, 0])))
+    max_times = min(float(np.max(tmp_all_times[:, 1])), t_lim)
+    if max_times <= min_times:
+        return []
 
-        windows.append(EventWindow(float(w_start), float(w_end), int(len(windows))))
+    n_bins = int((max_times + 1.0) * float(time_axis_hz))
+    if n_bins <= 0:
+        return []
+    index_array = np.zeros(n_bins, dtype=np.int32)
+    for s, e in tmp_all_times:
+        a = max(0.0, float(s))
+        b = min(float(e), t_lim)
+        if b <= a:
+            continue
+        i0 = int(a * float(time_axis_hz))
+        i1 = int(b * float(time_axis_hz) + 1.0)
+        i0 = max(0, min(n_bins, i0))
+        i1 = max(0, min(n_bins, i1))
+        if i1 > i0:
+            index_array[i0:i1] += 1
 
-    return windows
+    index_thresh = float(chns_thr) * float(chns_num)
+    tmp_packed = _legacy_return_time_ranges((index_array >= index_thresh).astype(int), fs=float(time_axis_hz), start_time=0.0)
+    if tmp_packed.size == 0:
+        return []
+    centers = np.mean(tmp_packed, axis=1)
+    packed_time_ranges = np.vstack([centers - float(window_sec) / 2.0, centers + float(window_sec) / 2.0]).T
+    packed_time_ranges = _legacy_pick_no_overlap_time_ranges(packed_time_ranges, less_than_sec=float(max_window_sec))
+    if packed_time_ranges.size == 0:
+        return []
+    packed_time_ranges = packed_time_ranges[packed_time_ranges[:, 0] < float(t_lim)]
+    return [
+        EventWindow(float(s), float(e), int(i))
+        for i, (s, e) in enumerate(np.asarray(packed_time_ranges, dtype=np.float64))
+    ]
 
 
 def compare_window_sets(
@@ -457,6 +535,513 @@ def select_core_channels_by_event_count(
         sel_idx = sorted(sel_idx, key=lambda i: counts[i], reverse=True)[: int(top_n)]
 
     return [names[i] for i in sel_idx]
+
+
+def legacy_refine_channels_from_detections(
+    detections: Mapping[str, np.ndarray],
+    *,
+    window_sec: float = 0.5,
+    initial_method: str = "mean_std",
+    initial_k: float = 1.0,
+    initial_top_n: Optional[int] = None,
+    refine_method: str = "mean_std",
+    refine_k: float = 1.0,
+    refine_top_n: Optional[int] = None,
+    min_count: int = 1,
+    provisional_min_channels: int = 1,
+) -> Dict[str, Any]:
+    """
+    Legacy-style closed-loop core-channel refine from detections.
+
+    Loop:
+      1) pick high-count channels
+      2) build provisional windows from picked channels
+      3) recount all channels inside provisional windows
+      4) pick refined channels from recounts
+    """
+    all_names = [str(x) for x in detections.keys()]
+    counts_initial = np.array(
+        [int(np.asarray(detections.get(nm, np.zeros((0, 2)))).shape[0]) for nm in all_names],
+        dtype=np.int64,
+    )
+    initial_selected = select_core_channels_by_event_count(
+        events_count=counts_initial,
+        ch_names=all_names,
+        method=str(initial_method),
+        k=float(initial_k),
+        top_n=initial_top_n,
+        min_count=int(min_count),
+    )
+
+    initial_dets: Dict[str, np.ndarray] = {
+        nm: np.asarray(detections.get(nm, np.zeros((0, 2))), dtype=np.float64)
+        for nm in initial_selected
+    }
+    provisional_windows = build_windows_from_detections(initial_dets, window_sec=float(window_sec))
+    if int(provisional_min_channels) > 1:
+        provisional_windows = filter_windows_by_min_channels(
+            provisional_windows,
+            initial_dets,
+            min_channels=int(provisional_min_channels),
+        )
+
+    counts_refined = np.zeros((len(all_names),), dtype=np.int64)
+    for i, nm in enumerate(all_names):
+        det = np.asarray(detections.get(nm, np.zeros((0, 2))), dtype=np.float64)
+        if det.size == 0:
+            continue
+        cnt = 0
+        for w in provisional_windows:
+            if _overlaps_any_event(det, w):
+                cnt += 1
+        counts_refined[i] = int(cnt)
+
+    refined_selected = select_core_channels_by_event_count(
+        events_count=counts_refined,
+        ch_names=all_names,
+        method=str(refine_method),
+        k=float(refine_k),
+        top_n=refine_top_n,
+        min_count=int(min_count),
+    )
+
+    return {
+        "all_channels": all_names,
+        "initial_counts": counts_initial,
+        "initial_selected_channels": [str(x) for x in initial_selected],
+        "provisional_windows": np.array(
+            [[float(w.start), float(w.end)] for w in provisional_windows],
+            dtype=np.float64,
+        ),
+        "refined_counts": counts_refined,
+        "refined_channels": [str(x) for x in refined_selected],
+    }
+
+
+def legacy_refine_core_channels(
+    *,
+    edf_path: str,
+    band: str,
+    reference: str = "bipolar",
+    alias_bipolar_to_left: bool = True,
+    outer_contact_mode: str = "drop_shaft_edges",
+    bipolar_gap: int = 1,
+    crop_seconds: Optional[float] = None,
+    target_sfreq: Optional[Union[float, str]] = None,
+    gpu_npz_path: Optional[str] = None,
+    hfo_config: Optional[Dict[str, Any]] = None,
+    window_sec: float = 0.5,
+    initial_method: str = "mean_std",
+    initial_k: float = 1.0,
+    initial_top_n: Optional[int] = None,
+    refine_method: str = "mean_std",
+    refine_k: float = 1.0,
+    refine_top_n: Optional[int] = None,
+    min_count: int = 1,
+    provisional_min_channels: int = 1,
+) -> Dict[str, Any]:
+    """
+    Run legacy-style refine loop on real data and return diagnostics.
+    """
+    from .preprocessing import SEEGPreprocessor
+
+    pre = SEEGPreprocessor(
+        target_sfreq=target_sfreq,
+        target_band="fast_ripple" if "fast" in str(band).lower() else "ripple",
+        reference=reference,
+        bipolar_gap=int(bipolar_gap),
+        outer_contact_mode=str(outer_contact_mode),
+        crop_seconds=crop_seconds,
+        check_quality=False,
+        use_gpu=False,
+    )
+    pre_out = pre.run(edf_path)
+    data = np.asarray(pre_out.data)
+    names = [str(x) for x in pre_out.ch_names]
+    sfreq = float(pre_out.sfreq)
+
+    if alias_bipolar_to_left:
+        allowed = None
+        if gpu_npz_path is not None:
+            g = np.load(gpu_npz_path, allow_pickle=True)
+            allowed = set(str(x).upper() for x in g["chns_names"].tolist())
+        keep_idx: List[int] = []
+        alias_names: List[str] = []
+        for i, nm in enumerate(names):
+            if "-" not in nm:
+                continue
+            left, right = nm.split("-", 1)
+            left = left.strip().upper()
+            right = right.strip().upper()
+            if allowed is not None and (left not in allowed or right not in allowed):
+                continue
+            keep_idx.append(i)
+            alias_names.append(left)
+        data = data[keep_idx] if keep_idx else np.zeros((0, data.shape[1]), dtype=np.float64)
+        names = alias_names
+
+    if gpu_npz_path is not None:
+        gpu = np.load(gpu_npz_path, allow_pickle=True)
+        gpu_names = [str(x) for x in gpu["chns_names"].tolist()]
+        name_to_idx = {n: i for i, n in enumerate(gpu_names)}
+        dets: Dict[str, np.ndarray] = {}
+        for ch in names:
+            ch_up = ch.upper()
+            if ch_up in name_to_idx:
+                dets[ch] = np.asarray(gpu["whole_dets"][name_to_idx[ch_up]], dtype=np.float64)
+            else:
+                dets[ch] = np.zeros((0, 2), dtype=np.float64)
+    else:
+        from .hfo_detector import HFODetector, HFODetectionConfig
+
+        cfg_kwargs = dict(hfo_config or {})
+        cfg_kwargs.setdefault("band", band)
+        cfg = HFODetectionConfig(**cfg_kwargs)
+        det = HFODetector(cfg)
+        res = det.detect(data, sfreq=sfreq, ch_names=names)
+        dets = _detections_dict_from_hfo_result(res)
+
+    out = legacy_refine_channels_from_detections(
+        dets,
+        window_sec=float(window_sec),
+        initial_method=str(initial_method),
+        initial_k=float(initial_k),
+        initial_top_n=initial_top_n,
+        refine_method=str(refine_method),
+        refine_k=float(refine_k),
+        refine_top_n=refine_top_n,
+        min_count=int(min_count),
+        provisional_min_channels=int(provisional_min_channels),
+    )
+    out["sfreq"] = float(sfreq)
+    out["n_channels"] = int(len(names))
+    return out
+
+
+def _count_overlapping_windows_per_channel(
+    detections: Mapping[str, np.ndarray],
+    windows: Sequence[EventWindow],
+    ch_names: Sequence[str],
+) -> np.ndarray:
+    """
+    Legacy refine recount: for each channel, count how many packed windows it overlaps.
+
+    This matches the intent of `reHist_events_byPacking()` in
+    `ReplayIED/.../p16_refine_chns_bySyn.py`, but without materializing 1 kHz boolean arrays.
+    """
+    out = np.zeros((len(ch_names),), dtype=np.int64)
+    for i, nm in enumerate(ch_names):
+        det = np.asarray(detections.get(str(nm), np.zeros((0, 2))), dtype=np.float64)
+        if det.size == 0:
+            continue
+        cnt = 0
+        for w in windows:
+            if _overlaps_any_event(det, w):
+                cnt += 1
+        out[i] = int(cnt)
+    return out
+
+
+def _legacy_rehist_events_by_packing(
+    detections: Mapping[str, np.ndarray],
+    packed_windows: Sequence[EventWindow],
+    ch_names: Sequence[str],
+    *,
+    fs: float = 1000.0,
+) -> np.ndarray:
+    """
+    Literal port of legacy `reHist_events_byPacking()`.
+
+    The legacy code rasterizes both packed windows and channel events onto a 1 kHz boolean
+    array, multiplies them, then counts `diff(and_bool) == 1`. We keep that exact behavior
+    because tiny endpoint/discretization details affect thresholded channel selection.
+    """
+    if len(ch_names) == 0:
+        return np.zeros((0,), dtype=np.int64)
+    if len(packed_windows) == 0:
+        return np.zeros((len(ch_names),), dtype=np.int64)
+
+    packed_arr = np.asarray([[float(w.start), float(w.end)] for w in packed_windows], dtype=np.float64)
+    packed_times_max = float(np.max(packed_arr))
+    n = int((packed_times_max + 10.0) * float(fs))
+    if n <= 0:
+        return np.zeros((len(ch_names),), dtype=np.int64)
+
+    packed_bool = np.zeros((n,), dtype=np.uint8)
+    for s, e in packed_arr:
+        i0 = int(float(s) * float(fs))
+        i1 = int(float(e) * float(fs))
+        i0 = max(0, min(n, i0))
+        i1 = max(0, min(n, i1))
+        if i1 > i0:
+            packed_bool[i0:i1] = 1
+
+    out = np.zeros((len(ch_names),), dtype=np.int64)
+    for i, nm in enumerate(ch_names):
+        det = np.asarray(detections.get(str(nm), np.zeros((0, 2))), dtype=np.float64)
+        if det.size == 0:
+            continue
+        det = _ensure_2col_times(det)
+        per_ch_bool = np.zeros_like(packed_bool)
+        for s, e in det:
+            if float(e) < packed_times_max + 10.0:
+                i0 = int(float(s) * float(fs))
+                i1 = int(float(e) * float(fs))
+                i0 = max(0, min(n, i0))
+                i1 = max(0, min(n, i1))
+                if i1 > i0:
+                    per_ch_bool[i0:i1] = 1
+        and_bool = packed_bool * per_ch_bool
+        out[i] = int(np.sum(np.diff(and_bool.astype(np.int8)) == 1))
+    return out
+
+
+def legacy_refine_counts_from_detection_sets(
+    detection_sets: Sequence[Mapping[str, np.ndarray]],
+    ch_names: Sequence[str],
+    *,
+    initial_counts_override: Optional[Sequence[int]] = None,
+    pick_k: float = 1.0,
+    refine_window_sec: float = 0.3,
+    refine_ext_ms: float = 30.0,
+    refine_chns_thr: float = 0.5,
+    refine_time_axis_hz: float = 500.0,
+    refine_max_window_sec: float = 2.0,
+) -> Dict[str, Any]:
+    """
+    Reproduce subject-level `_refineGpu.npz` logic from the legacy Yuquan pipeline.
+
+    Legacy order:
+      1) Sum raw `events_count` across all per-record detection files.
+      2) Pick channels by `mean + pick_k * std`.
+      3) For each record, build packed windows using only those picked channels.
+      4) Recount *all* channels by overlap with those packed windows.
+      5) Sum recounts across records -> `refined_counts` (legacy `_refineGpu.npz`).
+
+    `initial_counts_override` exists because legacy `*_gpu.npz` files store an explicit
+    `events_count` vector, and the original scripts use that vector directly for the
+    first-pass channel pick instead of recomputing counts from `whole_dets`.
+    """
+    names = [str(x) for x in ch_names]
+    if len(names) == 0:
+        return {
+            "all_channels": [],
+            "initial_counts": np.zeros((0,), dtype=np.int64),
+            "initial_selected_channels": [],
+            "refined_counts": np.zeros((0,), dtype=np.int64),
+            "refined_channels": [],
+            "windows_by_file": [],
+        }
+
+    initial_counts = np.zeros((len(names),), dtype=np.int64)
+    normalized_sets: List[Dict[str, np.ndarray]] = []
+    for dets in detection_sets:
+        cur: Dict[str, np.ndarray] = {}
+        for nm in names:
+            arr = np.asarray(dets.get(nm, np.zeros((0, 2))), dtype=np.float64)
+            if arr.size == 0:
+                arr = np.zeros((0, 2), dtype=np.float64)
+            else:
+                arr = _ensure_2col_times(arr)
+            cur[nm] = arr
+        normalized_sets.append(cur)
+        initial_counts += np.asarray([cur[nm].shape[0] for nm in names], dtype=np.int64)
+
+    initial_counts_for_pick = initial_counts
+    if initial_counts_override is not None:
+        initial_counts_for_pick = np.asarray(initial_counts_override, dtype=np.int64)
+        if initial_counts_for_pick.shape != initial_counts.shape:
+            raise ValueError(
+                "initial_counts_override length must match ch_names length"
+            )
+
+    initial_selected = select_core_channels_by_event_count(
+        events_count=initial_counts_for_pick,
+        ch_names=names,
+        method="mean_std",
+        k=float(pick_k),
+        min_count=1,
+    )
+
+    refined_counts = np.zeros((len(names),), dtype=np.int64)
+    windows_by_file: List[np.ndarray] = []
+    for dets in normalized_sets:
+        picked_dets = {nm: dets[nm] for nm in initial_selected}
+        windows = build_windows_from_detections(
+            picked_dets,
+            window_sec=float(refine_window_sec),
+            ext_ms=float(refine_ext_ms),
+            chns_thr=float(refine_chns_thr),
+            time_axis_hz=float(refine_time_axis_hz),
+            max_window_sec=float(refine_max_window_sec),
+            t_max_sec=None,
+        )
+        windows_by_file.append(
+            np.asarray([[float(w.start), float(w.end)] for w in windows], dtype=np.float64)
+        )
+        refined_counts += _legacy_rehist_events_by_packing(dets, windows, names, fs=1000.0)
+
+    refined_selected = select_core_channels_by_event_count(
+        events_count=refined_counts,
+        ch_names=names,
+        method="mean_std",
+        k=float(pick_k),
+        min_count=1,
+    )
+
+    return {
+        "all_channels": names,
+        "initial_counts": initial_counts,
+        "initial_counts_for_pick": initial_counts_for_pick,
+        "initial_selected_channels": [str(x) for x in initial_selected],
+        "refined_counts": refined_counts,
+        "refined_channels": [str(x) for x in refined_selected],
+        "windows_by_file": windows_by_file,
+        "pick_k": float(pick_k),
+        "refine_window_sec": float(refine_window_sec),
+        "refine_ext_ms": float(refine_ext_ms),
+        "refine_chns_thr": float(refine_chns_thr),
+        "refine_time_axis_hz": float(refine_time_axis_hz),
+        "refine_max_window_sec": float(refine_max_window_sec),
+    }
+
+
+def legacy_refine_counts_from_gpu_npz_paths(
+    gpu_npz_paths: Sequence[str],
+    *,
+    pick_k: float = 1.0,
+    refine_window_sec: float = 0.3,
+    refine_ext_ms: float = 30.0,
+    refine_chns_thr: float = 0.5,
+    refine_time_axis_hz: float = 500.0,
+    refine_max_window_sec: float = 2.0,
+) -> Dict[str, Any]:
+    """Recompute legacy `_refineGpu` counts from existing per-record `*_gpu.npz` files."""
+    paths = [str(p) for p in gpu_npz_paths]
+    if len(paths) == 0:
+        raise ValueError("gpu_npz_paths must not be empty")
+
+    names_ref: Optional[List[str]] = None
+    detection_sets: List[Dict[str, np.ndarray]] = []
+    initial_counts_sum: Optional[np.ndarray] = None
+    for p in paths:
+        gpu = np.load(str(p), allow_pickle=True)
+        names = [str(x) for x in gpu["chns_names"].tolist()]
+        if names_ref is None:
+            names_ref = names
+        elif names != names_ref:
+            raise ValueError(f"Channel mismatch across gpu npz files: {p}")
+        dets: Dict[str, np.ndarray] = {}
+        for i, nm in enumerate(names):
+            dets[nm] = np.asarray(gpu["whole_dets"][i], dtype=np.float64)
+        detection_sets.append(dets)
+        counts = np.asarray(gpu["events_count"], dtype=np.int64)
+        if initial_counts_sum is None:
+            initial_counts_sum = counts.copy()
+        else:
+            initial_counts_sum += counts
+
+    assert names_ref is not None
+    assert initial_counts_sum is not None
+    out = legacy_refine_counts_from_detection_sets(
+        detection_sets,
+        names_ref,
+        initial_counts_override=initial_counts_sum,
+        pick_k=float(pick_k),
+        refine_window_sec=float(refine_window_sec),
+        refine_ext_ms=float(refine_ext_ms),
+        refine_chns_thr=float(refine_chns_thr),
+        refine_time_axis_hz=float(refine_time_axis_hz),
+        refine_max_window_sec=float(refine_max_window_sec),
+    )
+    out["gpu_npz_paths"] = paths
+    return out
+
+
+def legacy_refine_counts_from_edf_paths(
+    edf_paths: Sequence[str],
+    *,
+    band: str,
+    reference: str = "bipolar",
+    alias_bipolar_to_left: bool = True,
+    outer_contact_mode: str = "drop_shaft_edges",
+    bipolar_gap: int = 1,
+    target_sfreq: Optional[Union[float, str]] = None,
+    hfo_config: Optional[Dict[str, Any]] = None,
+    pick_k: float = 1.0,
+    refine_window_sec: float = 0.3,
+    refine_ext_ms: float = 30.0,
+    refine_chns_thr: float = 0.5,
+    refine_time_axis_hz: float = 500.0,
+    refine_max_window_sec: float = 2.0,
+) -> Dict[str, Any]:
+    """
+    Recompute legacy `_refineGpu` counts directly from EDF files.
+
+    This is expensive by design: it detects HFOs for every EDF in the subject folder,
+    then runs the same subject-level refine recount as the legacy pipeline.
+    """
+    from .preprocessing import SEEGPreprocessor
+    from .hfo_detector import HFODetector, HFODetectionConfig
+
+    paths = [str(p) for p in edf_paths]
+    if len(paths) == 0:
+        raise ValueError("edf_paths must not be empty")
+
+    names_ref: Optional[List[str]] = None
+    detection_sets: List[Dict[str, np.ndarray]] = []
+    for edf_path in paths:
+        pre = SEEGPreprocessor(
+            target_sfreq=target_sfreq,
+            target_band="fast_ripple" if "fast" in str(band).lower() else "ripple",
+            reference=reference,
+            bipolar_gap=int(bipolar_gap),
+            outer_contact_mode=str(outer_contact_mode),
+            crop_seconds=None,
+            check_quality=False,
+            use_gpu=False,
+        )
+        pre_out = pre.run(str(edf_path))
+        data = np.asarray(pre_out.data)
+        names = [str(x) for x in pre_out.ch_names]
+
+        if alias_bipolar_to_left:
+            keep_idx: List[int] = []
+            alias_names: List[str] = []
+            for i, nm in enumerate(names):
+                if "-" not in nm:
+                    continue
+                left, _ = nm.split("-", 1)
+                keep_idx.append(i)
+                alias_names.append(left.strip().upper())
+            data = data[keep_idx] if keep_idx else np.zeros((0, data.shape[1]), dtype=np.float64)
+            names = alias_names
+
+        cfg_kwargs = dict(hfo_config or {})
+        cfg_kwargs.setdefault("band", band)
+        det = HFODetector(HFODetectionConfig(**cfg_kwargs))
+        res = det.detect(data, sfreq=float(pre_out.sfreq), ch_names=names)
+        dets = _detections_dict_from_hfo_result(res)
+
+        if names_ref is None:
+            names_ref = [str(x) for x in names]
+        elif [str(x) for x in names] != names_ref:
+            raise ValueError(f"Channel mismatch across EDF-derived detections: {edf_path}")
+        detection_sets.append({str(k): np.asarray(v, dtype=np.float64) for k, v in dets.items()})
+
+    assert names_ref is not None
+    out = legacy_refine_counts_from_detection_sets(
+        detection_sets,
+        names_ref,
+        pick_k=float(pick_k),
+        refine_window_sec=float(refine_window_sec),
+        refine_ext_ms=float(refine_ext_ms),
+        refine_chns_thr=float(refine_chns_thr),
+        refine_time_axis_hz=float(refine_time_axis_hz),
+        refine_max_window_sec=float(refine_max_window_sec),
+    )
+    out["edf_paths"] = paths
+    return out
 
 
 def compare_channel_sets(a: Sequence[str], b: Sequence[str]) -> Dict[str, float]:
@@ -1483,7 +2068,7 @@ def compute_centroid_matrix_spectrogram(
 
             w = np.power(np.maximum(Sxx, 0.0), centroid_power)
             denom = float(np.sum(w))
-            if denom <= 1e-12:
+            if (not np.isfinite(denom)) or denom <= 0.0:
                 continue
 
             t_abs = t + float(win.start)
@@ -2034,7 +2619,7 @@ def bqk_detect_and_compare_windows_to_packed(
 ) -> Dict[str, float]:
     """
     Step-1 validation:
-      Our bqk detector -> build_windows_from_detections
+      Our bqk detector -> Yuquan synchronous packing (`build_windows_from_detections`)
       vs
       Dataset packedTimes (within the same crop time).
 
@@ -2110,7 +2695,27 @@ def bqk_detect_and_compare_windows_to_packed(
         r = set(str(x) for x in restrict_channels)
         dets = {k: v for k, v in dets.items() if k in r}
 
-    our_windows = build_windows_from_detections(dets, window_sec=float(window_sec))
+    all_nm = [str(x) for x in dets.keys()]
+    counts = np.asarray(
+        [int(np.asarray(dets.get(nm, np.zeros((0, 2)))).shape[0]) for nm in all_nm],
+        dtype=np.int64,
+    )
+    pack_names = select_core_channels_by_event_count(
+        events_count=counts,
+        ch_names=all_nm,
+        method="mean_std",
+        k=1.0,
+        min_count=1,
+    )
+    if not pack_names:
+        pack_names = [nm for nm, c in zip(all_nm, counts) if int(c) > 0]
+    dets_for_pack = {k: np.asarray(dets.get(k, np.zeros((0, 2))), dtype=np.float64) for k in pack_names}
+
+    our_windows = build_windows_from_detections(
+        dets_for_pack,
+        window_sec=float(window_sec),
+        t_max_sec=float(crop_seconds),
+    )
     # crop our windows too, in case detection creates a late window start close to crop boundary
     our_windows = [w for w in our_windows if w.start < float(crop_seconds)]
     our_windows = filter_windows_by_min_channels(our_windows, dets, min_channels=int(min_channels))
@@ -2141,7 +2746,7 @@ def gpu_detections_and_compare_windows_to_packed(
 ) -> Dict[str, float]:
     """
     Step-1 control experiment:
-      Use dataset-provided GPU detections -> build_windows_from_detections
+      Use dataset-provided GPU detections -> Yuquan synchronous packing
       and compare to packedTimes.
 
     This isolates whether our window-building logic matches the dataset's packedTimes logic.
@@ -2171,7 +2776,25 @@ def gpu_detections_and_compare_windows_to_packed(
     for ch in use_names:
         dets[ch] = np.asarray(dets_obj[name_to_idx[ch]], dtype=np.float64)
 
-    our_windows = build_windows_from_detections(dets, window_sec=float(window_sec))
+    all_nm = [str(x) for x in dets.keys()]
+    counts = np.asarray(
+        [int(np.asarray(dets.get(nm, np.zeros((0, 2)))).shape[0]) for nm in all_nm],
+        dtype=np.int64,
+    )
+    pack_names = select_core_channels_by_event_count(
+        events_count=counts,
+        ch_names=all_nm,
+        method="mean_std",
+        k=1.0,
+        min_count=1,
+    )
+    if not pack_names:
+        pack_names = [nm for nm, c in zip(all_nm, counts) if int(c) > 0]
+    dets_for_pack = {k: np.asarray(dets.get(k, np.zeros((0, 2))), dtype=np.float64) for k in pack_names}
+
+    our_windows = build_windows_from_detections(
+        dets_for_pack, window_sec=float(window_sec), t_max_sec=float(crop_seconds)
+    )
     our_windows = [w for w in our_windows if w.start < float(crop_seconds)]
     our_windows = filter_windows_by_min_channels(our_windows, dets, min_channels=int(min_channels))
 
@@ -2661,6 +3284,8 @@ def save_group_analysis_results(
     events_bool: np.ndarray,
     lag_raw: np.ndarray,
     lag_rank: np.ndarray,
+    lag_abs: Optional[np.ndarray] = None,
+    lag_freq: Optional[np.ndarray] = None,
     tf_centroid_time: Optional[np.ndarray] = None,
     tf_centroid_freq: Optional[np.ndarray] = None,
     baseline_pool_starts: Optional[np.ndarray] = None,
@@ -2708,6 +3333,11 @@ def save_group_analysis_results(
         (n_ch, n_events) relative lag (aligned to earliest channel).
     lag_rank : np.ndarray
         (n_ch, n_events) dense rank (0=earliest, -1=non-participant).
+    lag_abs : np.ndarray, optional
+        (n_ch, n_events) absolute centroid time in seconds.
+        If None, derived from event window starts + centroid_time.
+    lag_freq : np.ndarray, optional
+        (n_ch, n_events) frequency centroid (Hz), when available.
     tf_centroid_time : np.ndarray, optional
         (n_ch, n_events) TF time centroid.
     tf_centroid_freq : np.ndarray, optional
@@ -2721,6 +3351,11 @@ def save_group_analysis_results(
     n_ch = len(ch_names)
     n_events = event_windows.shape[0]
     window_sec = float(np.median(event_windows[:, 1] - event_windows[:, 0]))
+    if lag_abs is None:
+        starts = np.asarray(event_windows, dtype=np.float64)[:, 0][None, :]
+        lag_abs = np.asarray(centroid_time, dtype=np.float64) + starts
+    if lag_freq is None and tf_centroid_freq is not None:
+        lag_freq = np.asarray(tf_centroid_freq, dtype=np.float64)
 
     data = {
         "sfreq": np.array([float(sfreq)], dtype=np.float64),
@@ -2732,6 +3367,7 @@ def save_group_analysis_results(
         "event_windows": np.asarray(event_windows, dtype=np.float64),
         "centroid_time": np.asarray(centroid_time, dtype=np.float64),
         "events_bool": np.asarray(events_bool, dtype=bool),
+        "lag_abs": np.asarray(lag_abs, dtype=np.float64),
         "lag_raw": np.asarray(lag_raw, dtype=np.float64),
         "lag_rank": np.asarray(lag_rank, dtype=np.int64),
     }
@@ -2740,6 +3376,8 @@ def save_group_analysis_results(
         data["tf_centroid_time"] = np.asarray(tf_centroid_time, dtype=np.float64)
     if tf_centroid_freq is not None:
         data["tf_centroid_freq"] = np.asarray(tf_centroid_freq, dtype=np.float64)
+    if lag_freq is not None:
+        data["lag_freq"] = np.asarray(lag_freq, dtype=np.float64)
     if baseline_pool_starts is not None:
         data["baseline_pool_starts"] = np.asarray(baseline_pool_starts, dtype=np.float32)
     if baseline_pool_indices is not None:
@@ -2802,11 +3440,20 @@ def load_group_analysis_results(npz_path: str) -> Dict:
         "lag_raw": np.asarray(d["lag_raw"]),
         "lag_rank": np.asarray(d["lag_rank"]),
     }
+    if "lag_abs" in d:
+        out["lag_abs"] = np.asarray(d["lag_abs"])
+    else:
+        starts = np.asarray(out["event_windows"], dtype=np.float64)[:, 0][None, :]
+        out["lag_abs"] = np.asarray(out["centroid_time"], dtype=np.float64) + starts
 
     if "tf_centroid_time" in d:
         out["tf_centroid_time"] = np.asarray(d["tf_centroid_time"])
     if "tf_centroid_freq" in d:
         out["tf_centroid_freq"] = np.asarray(d["tf_centroid_freq"])
+    if "lag_freq" in d:
+        out["lag_freq"] = np.asarray(d["lag_freq"])
+    elif "tf_centroid_freq" in out:
+        out["lag_freq"] = np.asarray(out["tf_centroid_freq"])
     if "coact_event_count" in d:
         out["coact_event_count"] = np.asarray(d["coact_event_count"])
     if "coact_event_ratio" in d:
@@ -2858,6 +3505,7 @@ def compute_and_save_group_analysis(
     output_prefix: Optional[str] = None,
     packed_times_path: Optional[str] = None,
     gpu_npz_path: Optional[str] = None,
+    packing_channels: Optional[List[str]] = None,
     core_channels: Optional[List[str]] = None,
     band: str = "ripple",
     reference: str = "bipolar",
@@ -2868,8 +3516,14 @@ def compute_and_save_group_analysis(
     target_sfreq: Optional[Union[float, str]] = None,
     hfo_config: Optional[Dict[str, Any]] = None,
     window_sec: Optional[float] = None,
+    packed_ext_ms: float = 30.0,
+    packed_chns_thr: float = 0.5,
+    packed_time_axis_hz: float = 500.0,
+    packed_max_window_sec: float = 2.0,
+    packed_pick_k: float = 1.0,
     interictal_only: bool = False,
     ictal_only: bool = False,
+    outer_contact_mode: str = "none",
     bipolar_gap: int = 1,
     compute_tf_centroids: bool = False,
     centroid_source: str = "spectrogram",
@@ -2941,10 +3595,18 @@ def compute_and_save_group_analysis(
         Optional HFODetectionConfig overrides (used only if gpu_npz_path is None).
     window_sec : float, optional
         Window length when building windows from detections (packedTimes missing).
+    packed_ext_ms, packed_chns_thr, packed_time_axis_hz, packed_max_window_sec, packed_pick_k
+        Yuquan-style synchronous packing (see docs §4.1). Used only when packedTimes is absent.
+        ``packed_pick_k`` is only the fallback heuristic when explicit `packing_channels`
+        are not provided by the caller.
     interictal_only : bool
         If True, drop event windows that overlap ictal_mask.
     ictal_only : bool
         If True, keep only event windows overlapping ictal_mask.
+    outer_contact_mode : str
+        Legacy contact edge handling:
+        - 'none': keep all channels
+        - 'drop_shaft_edges': drop first/last channel in each shaft group
     bipolar_gap : int
         Max allowed contact gap for bipolar re-reference (SEEGPreprocessor).
     compute_tf_centroids : bool
@@ -3016,6 +3678,7 @@ def compute_and_save_group_analysis(
         target_band="fast_ripple" if "fast" in b else "ripple",
         reference=reference,
         bipolar_gap=int(bipolar_gap),
+        outer_contact_mode=str(outer_contact_mode),
         crop_seconds=crop_seconds,
         check_quality=False,
         use_gpu=False,
@@ -3084,7 +3747,37 @@ def compute_and_save_group_analysis(
         event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
     else:
         window_sec = float(window_sec) if window_sec is not None else 0.5
-        windows = build_windows_from_detections(dets, window_sec=window_sec)
+        if packing_channels is not None and len(packing_channels) > 0:
+            pack_set = {str(x).upper() for x in packing_channels}
+            pack_names = [nm for nm in dets.keys() if str(nm).upper() in pack_set]
+        else:
+            # Fallback only: preserve a usable default for non-Yuquan callers.
+            all_nm = [str(x) for x in dets.keys()]
+            counts = np.asarray(
+                [int(np.asarray(dets.get(nm, np.zeros((0, 2)))).shape[0]) for nm in all_nm],
+                dtype=np.int64,
+            )
+            pack_names = select_core_channels_by_event_count(
+                events_count=counts,
+                ch_names=all_nm,
+                method="mean_std",
+                k=float(packed_pick_k),
+                min_count=1,
+            )
+            if not pack_names:
+                pack_names = [nm for nm, c in zip(all_nm, counts) if int(c) > 0]
+        dets_for_pack = {
+            k: np.asarray(dets.get(k, np.zeros((0, 2))), dtype=np.float64) for k in pack_names
+        }
+        windows = build_windows_from_detections(
+            dets_for_pack,
+            window_sec=window_sec,
+            ext_ms=float(packed_ext_ms),
+            chns_thr=float(packed_chns_thr),
+            time_axis_hz=float(packed_time_axis_hz),
+            max_window_sec=float(packed_max_window_sec),
+            t_max_sec=float(crop_seconds) if crop_seconds is not None else None,
+        )
         if crop_seconds is not None:
             windows = [w for w in windows if w.start < float(crop_seconds)]
         event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
@@ -3128,7 +3821,9 @@ def compute_and_save_group_analysis(
         raise ValueError(f"No channels ({n_ch}) to analyze.")
 
     # Step 5.5: Filter windows by minimum participating channels
-    if int(min_channels) > 1:
+    # When packedTimes is provided, windows are already legacy-thresholded group events.
+    # Re-filtering with a fixed channel count is a second, non-legacy constraint.
+    if int(min_channels) > 1 and packed_times_path is None:
         t_step = time.time()
         windows = filter_windows_by_min_channels(windows, dets, min_channels=int(min_channels))
         event_windows = np.array([[w.start, w.end] for w in windows], dtype=np.float64)
@@ -3136,6 +3831,11 @@ def compute_and_save_group_analysis(
             "step=min_channels_filter elapsed_sec=%.3f kept_windows=%d",
             float(time.time() - t_step),
             int(len(windows)),
+        )
+    elif int(min_channels) > 1 and packed_times_path is not None:
+        logger.info(
+            "step=min_channels_filter skipped=true reason=packed_times_authoritative min_channels=%d",
+            int(min_channels),
         )
 
     # Step 6: Detect seizure onsets (subject-level) + ictal mask
@@ -3395,8 +4095,10 @@ def compute_and_save_group_analysis(
         event_windows=event_windows,
         centroid_time=centroids,
         events_bool=events_bool,
+        lag_abs=centroids + event_windows[:, 0][None, :],
         lag_raw=lag_raw,
         lag_rank=lag_rank,
+        lag_freq=tf_freq,
         tf_centroid_time=tf_time,
         tf_centroid_freq=tf_freq,
         baseline_pool_starts=pool_starts,
