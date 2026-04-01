@@ -236,7 +236,7 @@ HFOsp/
 
 ## 4. 模块开发计划
 
-### 模块1: src/preprocessing.py ✅ 完成（Phase 1 重构 2026-01-30）
+### 模块1: src/preprocessing.py ✅ 完成（Phase 1 重构 2026-01-30; PR1 扩展 2026-04-01）
 
 | 功能 | 说明 | 状态 |
 |------|------|------|
@@ -247,7 +247,10 @@ HFOsp/
 | 1.5 重采样 | Ripple→1000Hz, FR→2000Hz | ✅ |
 | 1.6 滤波 | Notch + 可选Bandpass, GPU加速支持 | ✅ |
 | 1.7 通道质量检查 | z-score, 方差, 伪迹标记 | ✅ |
-| **1.8 FilterBackend架构** | **抽象接口 + CPU/GPU实现分离** | ✅ **NEW** |
+| **1.8 FilterBackend架构** | **抽象接口 + CPU/GPU实现分离** | ✅ |
+| **1.9 EDF+ Annotation Parser** | `fast_read_edf_annotations()` — 二进制 TAL 解析, memmap stride read, 不依赖 MNE | ✅ **PR1** |
+| **1.10 Seizure Annotation Parser** | `parse_seizure_onsets_from_annotations()` — 精确 label 匹配 + onset-END 自动配对 → 绝对 epoch interval | ✅ **PR1** |
+| **1.11 Timezone Infrastructure** | `epoch_to_local_hour()` — `zoneinfo.ZoneInfo` 显式时区转换; `config/default.yaml` 新增 `dataset.timezone_default` | ✅ **PR1** |
 
 #### Phase 1 重构总结（2026-01-30）
 
@@ -1765,7 +1768,7 @@ preprocessor.filter_backend = MyCustomBackend()
 
 - [x] 项目结构设计
 - [x] 开发计划文档
-- [x] **模块1: preprocessing.py** ✅ Phase 1 重构完成 (2026-01-30)
+- [x] **模块1: preprocessing.py** ✅ Phase 1 重构完成 (2026-01-30); PR1 扩展 (2026-04-01)
   - [x] 电极名称解析 (ElectrodeParser)
   - [x] 重参考（显式）:
     - [x] Bipolar (BipolarReferencer) — 命名 `A1-A2`
@@ -1778,6 +1781,10 @@ preprocessor.filter_backend = MyCustomBackend()
   - [x] GPU加速支持 (CuPy可选)
   - [x] 通道质量检查
   - [x] chengshuai/FC10477Q: EDF vs GPU 通道差异来源确认（GPU=显式通道子集；不用于推断重参考）
+  - [x] **✅ PR1: EDF+ Annotation Parser** - `fast_read_edf_annotations()` memmap stride read, ~1.4s/4GB EDF
+  - [x] **✅ PR1: Seizure Annotation Parser** - `parse_seizure_onsets_from_annotations()` 精确 label 匹配 + onset-END 配对
+  - [x] **✅ PR1: Timezone Infrastructure** - `epoch_to_local_hour()` via `zoneinfo`; `config/default.yaml` 新增 `dataset.timezone_default/timezone_overrides`
+  - [x] **✅ PR1 验证**: litengsheng 16 EDF 全部解析, 6 seizure-bearing EDF 正确识别 (8 intervals), 时区 Asia/Shanghai=8 Europe/Paris=1
 - [x] **模块2: hfo_detector.py** ✅ Phase 2 重构完成（2026-01-31）
   - [x] 删除 `mad_hysteresis` 算法（-200行）
   - [x] 封装 `BQKDetector` 类（预计算滤波器系数）

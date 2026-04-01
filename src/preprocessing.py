@@ -25,6 +25,8 @@ import warnings
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from scipy.signal import butter, sosfiltfilt, iirnotch, filtfilt
 from scipy import signal
 from .utils.logging_utils import get_run_logger, log_section
@@ -198,6 +200,247 @@ def save_seizure_onsets_json(
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=True, indent=2)
     return str(out_path)
+
+
+def _parse_fixed_width_ascii_int(raw: bytes, default: int = 0) -> int:
+    txt = raw.decode("ascii", errors="ignore").strip()
+    if not txt:
+        return int(default)
+    return int(float(txt))
+
+
+def _split_fixed_fields(blob: bytes, width: int, count: int) -> List[bytes]:
+    fields: List[bytes] = []
+    for i in range(int(count)):
+        start = i * int(width)
+        end = start + int(width)
+        fields.append(blob[start:end])
+    return fields
+
+
+def _parse_tal_annotations(raw_text: str) -> List[Tuple[float, float, str]]:
+    out: List[Tuple[float, float, str]] = []
+    for tal in raw_text.split("\x00"):
+        if not tal or "\x14" not in tal:
+            continue
+        parts = tal.split("\x14")
+        if not parts:
+            continue
+        onset_dur = parts[0]
+        if not onset_dur:
+            continue
+        if "\x15" in onset_dur:
+            onset_str, duration_str = onset_dur.split("\x15", 1)
+        else:
+            onset_str, duration_str = onset_dur, ""
+        onset_str = onset_str.strip()
+        duration_str = duration_str.strip()
+        if not onset_str:
+            continue
+        try:
+            onset = float(onset_str)
+        except ValueError:
+            continue
+        try:
+            duration = float(duration_str) if duration_str else 0.0
+        except ValueError:
+            duration = 0.0
+        for desc in parts[1:]:
+            desc_clean = desc.strip()
+            if not desc_clean:
+                continue
+            out.append((float(onset), float(duration), desc_clean))
+    return out
+
+
+def _normalize_annotation_label(text: str) -> str:
+    return " ".join(str(text).strip().lower().split())
+
+
+def _maybe_collapse_utf16_annotation_bytes(payload_bytes: bytes) -> bytes:
+    """
+    Some EDF writers store TAL text as 16-bit little-endian characters.
+    Detect that layout using only non-padding byte pairs.
+    """
+    if len(payload_bytes) < 2:
+        return payload_bytes
+    even_bytes = payload_bytes[0::2]
+    odd_bytes = payload_bytes[1::2]
+    active_pairs = [
+        (int(lo), int(hi))
+        for lo, hi in zip(even_bytes, odd_bytes)
+        if lo != 0 or hi != 0
+    ]
+    if not active_pairs:
+        return payload_bytes
+    odd_zero_ratio = sum(1 for _, hi in active_pairs if hi == 0) / len(active_pairs)
+    even_printable_ratio = sum(
+        1
+        for lo, _ in active_pairs
+        if lo in (9, 10, 13, 20, 21) or 32 <= lo <= 126
+    ) / len(active_pairs)
+    if odd_zero_ratio >= 0.8 and even_printable_ratio >= 0.6:
+        return bytes(lo for lo, _ in active_pairs)
+    return payload_bytes
+
+
+def fast_read_edf_annotations(edf_path: Union[str, Path]) -> List[Tuple[float, float, str]]:
+    """
+    Fast binary EDF+ TAL parser.
+
+    Returns:
+        List of (onset_sec, duration_sec, description), sorted by onset.
+    """
+    edf_path = Path(edf_path)
+    if not edf_path.exists():
+        raise FileNotFoundError(f"EDF file not found: {edf_path}")
+    with open(edf_path, "rb") as f:
+        header_fixed = f.read(256)
+        if len(header_fixed) < 256:
+            raise ValueError(f"Invalid EDF header (too short): {edf_path}")
+
+        header_n_bytes = _parse_fixed_width_ascii_int(header_fixed[184:192], default=256)
+        n_records = _parse_fixed_width_ascii_int(header_fixed[236:244], default=0)
+        n_signals = _parse_fixed_width_ascii_int(header_fixed[252:256], default=0)
+        if header_n_bytes < 256 or n_signals <= 0:
+            return []
+
+        signal_header_blob = f.read(header_n_bytes - 256)
+        if len(signal_header_blob) < (header_n_bytes - 256):
+            return []
+
+        cursor = 0
+        labels_blob = signal_header_blob[cursor : cursor + (16 * n_signals)]
+        cursor += 16 * n_signals
+        cursor += 80 * n_signals  # transducer
+        cursor += 8 * n_signals   # phys dim
+        cursor += 8 * n_signals   # phys min
+        cursor += 8 * n_signals   # phys max
+        cursor += 8 * n_signals   # dig min
+        cursor += 8 * n_signals   # dig max
+        cursor += 80 * n_signals  # prefilter
+        nsamples_blob = signal_header_blob[cursor : cursor + (8 * n_signals)]
+
+        labels = [b.decode("ascii", errors="ignore").strip() for b in _split_fixed_fields(labels_blob, 16, n_signals)]
+        nsamples_per_record = [_parse_fixed_width_ascii_int(b, default=0) for b in _split_fixed_fields(nsamples_blob, 8, n_signals)]
+        if not nsamples_per_record or any(v < 0 for v in nsamples_per_record):
+            return []
+
+        ann_indices = [i for i, lab in enumerate(labels) if lab.lower().startswith("edf annotations")]
+        if not ann_indices:
+            return []
+
+        bytes_per_signal = [2 * int(v) for v in nsamples_per_record]
+        record_n_bytes = int(sum(bytes_per_signal))
+        if record_n_bytes <= 0:
+            return []
+
+        if n_records < 0:
+            file_size = edf_path.stat().st_size
+            payload_n_bytes = max(0, file_size - header_n_bytes)
+            n_records = int(payload_n_bytes // record_n_bytes)
+        if n_records <= 0:
+            return []
+
+        byte_offsets = np.cumsum([0, *bytes_per_signal[:-1]], dtype=np.int64)
+        payload_start = int(header_n_bytes)
+        ann_spans = [
+            (int(byte_offsets[ann_idx]), int(bytes_per_signal[ann_idx]))
+            for ann_idx in ann_indices
+        ]
+        ann_bytes_per_record = int(sum(n for _, n in ann_spans))
+        if ann_bytes_per_record <= 0:
+            return []
+
+    file_size = edf_path.stat().st_size
+    available = max(0, int(file_size) - payload_start)
+    actual_records = min(int(n_records), available // record_n_bytes)
+    if actual_records <= 0:
+        return []
+
+    mm = np.memmap(
+        edf_path, mode="r", dtype=np.uint8,
+        offset=payload_start,
+        shape=(actual_records, record_n_bytes),
+    )
+    parts = [mm[:, off : off + sz] for off, sz in ann_spans]
+    ann_bytes = np.ascontiguousarray(
+        np.concatenate(parts, axis=1) if len(parts) > 1 else parts[0]
+    )
+    del mm
+    payload_bytes = _maybe_collapse_utf16_annotation_bytes(ann_bytes.tobytes())
+    tal_text = payload_bytes.decode("latin1", errors="ignore")
+    annotations = _parse_tal_annotations(tal_text)
+    return sorted(annotations, key=lambda x: (float(x[0]), float(x[1]), x[2]))
+
+
+def parse_seizure_onsets_from_annotations(
+    edf_path: Union[str, Path],
+    target_labels: List[str],
+    start_t_epoch: float,
+) -> List[Tuple[float, float]]:
+    """
+    Parse seizure intervals from EDF+ annotations and convert to absolute epoch.
+
+    Returns:
+        List[(onset_epoch, offset_epoch)]
+    """
+    labels_norm = {
+        _normalize_annotation_label(x)
+        for x in target_labels
+        if str(x).strip()
+    }
+    if not labels_norm:
+        return []
+    events = fast_read_edf_annotations(edf_path)
+    base_epoch = float(start_t_epoch)
+    end_labels = {"end", "eeg end", "seizure end", "sz end", "ictal end", "offset"}
+    out: List[Tuple[float, float]] = []
+    for idx, (onset_sec, duration_sec, desc) in enumerate(events):
+        desc_norm = _normalize_annotation_label(desc)
+        if not desc_norm:
+            continue
+        if desc_norm not in labels_norm:
+            continue
+        onset_epoch = base_epoch + float(onset_sec)
+        dur = max(0.0, float(duration_sec))
+        if dur > 0.0:
+            offset_epoch = onset_epoch + dur
+        else:
+            offset_epoch = onset_epoch
+            for next_onset_sec, _, next_desc in events[idx + 1 :]:
+                next_desc_norm = _normalize_annotation_label(next_desc)
+                if next_desc_norm in end_labels and float(next_onset_sec) >= float(onset_sec):
+                    offset_epoch = base_epoch + float(next_onset_sec)
+                    break
+        out.append((float(onset_epoch), float(offset_epoch)))
+    return out
+
+
+def parse_seizure_annotations(
+    edf_path: Union[str, Path],
+    target_labels: List[str],
+    start_t_epoch: float,
+) -> List[Tuple[float, float]]:
+    """
+    Backward-compatible alias for parse_seizure_onsets_from_annotations().
+    """
+    return parse_seizure_onsets_from_annotations(
+        edf_path=edf_path,
+        target_labels=target_labels,
+        start_t_epoch=start_t_epoch,
+    )
+
+
+def epoch_to_local_hour(epoch_ts: float, timezone_str: str) -> int:
+    """
+    Convert epoch timestamp to local hour in explicit timezone.
+    """
+    tz_name = str(timezone_str).strip()
+    if not tz_name:
+        raise ValueError("timezone_str must be non-empty.")
+    dt_utc = datetime.fromtimestamp(float(epoch_ts), tz=timezone.utc)
+    return int(dt_utc.astimezone(ZoneInfo(tz_name)).hour)
 
 def get_array_module(use_gpu: bool = False):
     """Get numpy or cupy based on availability and preference."""

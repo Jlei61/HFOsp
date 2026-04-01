@@ -6,6 +6,11 @@ record: FC10477Q  # EDF stem (without .edf)
 output_dir: /mnt/yuquan_data/yuquan_24h_edf/chengshuai/temp  # Output directory (null -> subject dir)
 output_prefix: null  # Output file prefix (null -> record stem)
 
+# === Dataset timezone defaults ===
+dataset:
+  timezone_default: Asia/Shanghai  # Yuquan default timezone
+  timezone_overrides: {}  # Optional per-subject/per-record timezone override
+
 # === Input discovery / reuse policy ===
 # Controls how to reuse existing packedTimes and GPU detections.
 paths:
