@@ -268,6 +268,10 @@ HFOsp/
 
 #### PR1.5 Epilepsiae 数据契约调研（2026-04-02）
 
+- 验收结论：
+  - ✅ **PR1.5 已验收通过**
+  - 验收边界：`Epilepsiae` 数据契约、统一时间轴、manifest、block-level synchrony、以及严格整块归属的 interval/window 聚合层
+  - 不在 PR1.5 验收边界内：PR6 统计建模本身（Friedman / LMM / 终稿图）
 - 新增脚本：`scripts/survey_epilepsiae_dataset.py`
 - 新增脚本：`scripts/run_epilepsiae_interictal_synchrony.py`
 - 新增脚本：`scripts/aggregate_epilepsiae_interictal_synchrony.py`

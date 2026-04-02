@@ -603,6 +603,8 @@ manifest 分层语义：
 
 ## 最短结论
 
+- **PR1.5 已验收通过**：范围包括数据契约、inventory、manifest、时区/day-night 规则、`ready_full_artifacts` 同步性实跑、以及严格整块归属的 interval/window 聚合。
+- **PR1.5 不等于 PR6 完成**：后续统计建模与终稿图仍属于下一阶段工作。
 - `Epilepsiae` 全量是 **27 个 subject**，不是 20 个。
 - 其中 **20 个**有老间期间期中间产物，**7 个**只有原始数据/SQL。
 - 原始数据主合同是 `*.data + *.head + SQL`，不是 EDF。
