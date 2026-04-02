@@ -502,7 +502,56 @@ manifest 分层语义：
   - 输出目录：`results/interictal_synchrony/epilepsiae_ready_full_artifacts`
   - 汇总表：`results/interictal_synchrony/epilepsiae_ready_full_artifacts/epilepsiae_ready_full_artifacts_interictal_sync_summary.csv`
 
-### 10.3 Epilepsiae 是否能直接纳入当前项目
+### 10.3 block-level 同步性往临床窗口聚合
+
+这一步最容易写出垃圾代码，因为 `lagPat` 同步性目前是 **1h block** 粒度，不是 event-level 临床时间轴。
+
+因此当前实现采用保守规则：
+
+- `seizure interval`：只用 **完整 EEG seizure**，按相邻 onset 构建 interval
+- `post_ictal`：以上一次 seizure `offset` 为锚点，取 `[offset, offset + 70min)`，也就是 `1h + 10min buffer`
+- `interictal`：从 `post_ictal` 结束到下一次 seizure onset
+- `day/night`：沿用 `Europe/Berlin` 与 `08:00-20:00`
+- **整块归属，否则排除**：
+  - block 只要跨 seizure 区间
+  - 或跨 `post_ictal / interictal` 边界
+  - 或跨 `day/night` 边界
+  - 或前面存在非平凡 gap
+  - 就不强行塞进对应聚合窗
+
+新增接口：
+
+- `src/interictal_synchrony_aggregation.py`
+  - `build_epilepsiae_seizure_intervals()`
+  - `annotate_epilepsiae_sync_blocks()`
+  - `aggregate_epilepsiae_sync_rows()`
+  - `run_epilepsiae_sync_aggregation()`
+- 新增脚本：`scripts/aggregate_epilepsiae_interictal_synchrony.py`
+
+当前实跑结果：
+
+- 输入 block-level synchrony：`2962`
+- 能安全落进完整 seizure interval 的 block：`1903`
+- 能进入 `phase(post_ictal/interictal)` 聚合的 block：`1742`
+- 能进入 `day/night` 聚合的 block：`2724`
+- 生成 `subject × seizure_interval × window_type` 主表：`409` 行
+- 生成 `subject × window_type` 汇总表：`62` 行
+
+被排除的主要原因不是程序太严，而是数据粒度本来就粗：
+
+- `outside_complete_intervals`: `796`
+- `overlaps_seizure`: `263`
+- `phase_boundary_crossing`: `161`
+- `day_night_transition`: `238`
+- `nontrivial_gap_before_block`: `194`
+
+因此这里的硬规则是：
+
+- **不要**把 1h block 假装成精细临床片段
+- **不要**为了凑样本量去做半块归属
+- 真要研究更细 post-ictal 动态，只能以后重做更细时间粒度，不是靠当前 block 表硬切
+
+### 10.4 Epilepsiae 是否能直接纳入当前项目
 
 答案是：
 
@@ -530,6 +579,11 @@ manifest 分层语义：
 - `src/interictal_synchrony.py`
   - `build_interictal_synchrony_from_legacy_lagpat()`
   - `run_epilepsiae_interictal_synchrony_from_manifest()`
+- `src/interictal_synchrony_aggregation.py`
+  - `build_epilepsiae_seizure_intervals()`
+  - `annotate_epilepsiae_sync_blocks()`
+  - `aggregate_epilepsiae_sync_rows()`
+  - `run_epilepsiae_sync_aggregation()`
 
 输出：
 
@@ -540,6 +594,10 @@ manifest 分层语义：
 - `results/epilepsiae_dataset_summary.json`
 - `results/epilepsiae_sync_subject_manifest.csv`
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/`
+- `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_block_annotations.csv`
+- `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_interval_window_table.csv`
+- `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_subject_window_summary.csv`
+- `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_aggregation_summary.json`
 
 ---
 
@@ -555,4 +613,5 @@ manifest 分层语义：
 - `vigilance` 不是 day/night；day/night 现在由显式 `Europe/Berlin` wall-clock 规则给出，并保留 override。
 - `results/epilepsiae_sync_subject_manifest.csv` 已经把 subject 分成“可直接分析 / 资产不完整 / 缺中间产物”三类。
 - `ready_full_artifacts` 的 `16` 个 subjects 已经实际跑完 `2962` 个 block 的同步性指标。
+- block-level synchrony 已进一步聚合成 `subject × seizure_interval × window_type` 表，但采用严格整块归属；跨边界 block 会被排除，不做补丁式硬分配。
 - 老代码里能复用的是解析思路，不是脚本组织方式本身。

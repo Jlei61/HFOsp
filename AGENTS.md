@@ -17,6 +17,7 @@ Before tracing any result, read these in order:
 
 - Current codebase: `HFOsp/`
 - Canonical artifact root: `/mnt/yuquan_data/yuquan_24h_edf`
+- Epilepsiae raw/sql/artifact root: `/mnt/epilepsia_data`
 - Historical legacy tree:
   - repo root: `/home/honglab/leijiaxin/HFOsp/ReplayIED`
   - Yuquan mainline: `/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/`
@@ -105,6 +106,38 @@ Important drift:
 
 Do not assume current plotting covers all legacy paper figures. Many old paper figures were produced by legacy `plotting_fig*` scripts, not by the new visualization module.
 
+## Epilepsiae Contract
+
+Read `docs/epilepsiae_dataset_structure.md` before answering any Epilepsiae question.
+
+- Dataset contract:
+  - raw signal: `*.data + *.head`
+  - metadata truth: `all_data_sqls/*.sql`
+  - interictal artifacts: `interilca_inter_results/all_data_lns/<subject>/all_recs`
+- Trust order inside Epilepsiae:
+  1. SQL `recording / block / seizure`
+  2. `.head.start_ts` only for block-level validation
+  3. legacy scripts only as hints
+- Do not treat `vigilance` as day/night.
+- Current mounted data resolves to `hospital=UKLFR` -> `Europe/Berlin`.
+- Day/night rule for current Epilepsiae analysis: `08:00-20:00 = day`, else `night`.
+- Reusable current interfaces:
+  - `src.epilepsiae_dataset`
+  - `src.interictal_synchrony`
+  - `src.interictal_synchrony_aggregation`
+- Current machine-readable outputs:
+  - `results/epilepsiae_subject_inventory.csv`
+  - `results/epilepsiae_recording_inventory.csv`
+  - `results/epilepsiae_block_inventory.csv`
+  - `results/epilepsiae_seizure_inventory.csv`
+  - `results/epilepsiae_sync_subject_manifest.csv`
+  - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/`
+  - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/`
+- Aggregation rule:
+  - block-level synchrony is computed on 1h lagPat blocks
+  - do not invent sub-block seizure / post-ictal / day-night labels
+  - if a block crosses seizure, post-ictal, day-night, or nontrivial gap boundaries, exclude it from that aggregate instead of force-assigning it
+
 ## Source-of-Truth Order
 
 When answers conflict, trust them in this order:
@@ -122,6 +155,7 @@ Stop and ask the user instead of guessing when:
 - the legacy `ReplayIED` tree is not present
 - a figure clearly depends on a legacy plotting script not in this repo
 - a key artifact is missing from `/mnt/yuquan_data/yuquan_24h_edf`
+- an Epilepsiae request needs sub-block clinical labels that cannot be justified from 1h block outputs
 
 ## Fast Path For Common Questions
 

@@ -270,7 +270,9 @@ HFOsp/
 
 - 新增脚本：`scripts/survey_epilepsiae_dataset.py`
 - 新增脚本：`scripts/run_epilepsiae_interictal_synchrony.py`
+- 新增脚本：`scripts/aggregate_epilepsiae_interictal_synchrony.py`
 - 新增正式接口：`src/epilepsiae_dataset.py`
+- 新增正式接口：`src/interictal_synchrony_aggregation.py`
 - 新增文档：`docs/epilepsiae_dataset_structure.md`
 - 已确认：
   - `Epilepsiae` 原始数据合同是 `*.data + *.head + SQL`，不是 EDF
@@ -282,11 +284,14 @@ HFOsp/
   - 当前挂载数据的时区已经钉死为 `UKLFR -> Europe/Berlin`；`src.epilepsiae_dataset` 已内建 override 接口与 `08:00-20:00` day/night 规则
   - 已输出 `results/epilepsiae_sync_subject_manifest.csv`，按 `ready_full_artifacts / ready_partial_artifacts / missing_interictal_artifacts` 分层
   - `interictal_synchrony` 已接上 manifest，并实际跑完 `ready_full_artifacts` 的 `16` 个 subjects / `2962` 个 blocks
+  - block-level synchrony 已进一步聚合成 `subject × seizure_interval × window_type` 分析表；聚合规则是严格整块归属，跨 seizure / post-ictal / day-night / gap 边界的 block 直接排除
+  - 当前聚合实跑保留：`1903` blocks 能安全落进完整 seizure interval，`1742` blocks 能进入 `phase(post_ictal/interictal)` 聚合，主表产出 `409` 行
 - 对后续 PR 的硬约束：
   - 若将 Epilepsiae 纳入同步性分析，必须消费 `results/epilepsiae_*_inventory.*` 形成的统一时间轴与 seizure inventory
   - subject 选择必须优先消费 manifest，而不是手工挑病人
   - 不能把“20 个 artifact subjects”误当成“全量数据集”
   - 不能把 Yuquan 的 EDF 路径直接套到 Epilepsiae 上
+  - 不能把 1h block-level synchrony 假装成任意精细的临床窗口；当前聚合层明确拒绝半块归属
 
 #### PR2 Streaming Seizure Detector 验收复盘（2026-04-02）
 
