@@ -316,7 +316,7 @@ HFOsp/
   - PR2 基础设施通过，可作为后续检测器与验证框架
   - channel-mean 检测器不再继续加补丁（如 `ignore_initial`）；进入 PR2.5 重构
 
-#### PR2.5 空间招募检测器（第一性原理）（计划）
+#### PR2.5 空间招募检测器（第一性原理）（2026-04-02 实施）
 
 - 第一性原理约束：
   - 发作具有通道逐步招募特征（participation 上升）
@@ -324,10 +324,32 @@ HFOsp/
   - 发作有自限性（participation 回落形成 offset）
 - 核心顺序修正：
   - 旧：`channels -> mean -> LL/RMS -> threshold`
-  - 新：`channels -> per-channel LL -> per-channel z -> active-channel fraction -> threshold`
-- 预期收益：
-  - 消除 `combine_mode` / `ignore_initial` 这类补丁参数
-  - 提升跨 subject 泛化，减少单通道伪迹导致的 FP 与均值稀释导致的 FN
+  - 新：`channels -> bipolar per-channel LL -> per-channel z -> active-channel fraction -> threshold`
+- 消除的补丁参数：`combine_mode`, `ignore_initial_sec`, `rms_k`, `AND/OR/SUM`
+- 新增 4 个物理可解释参数：`per_channel_k`, `min_active_frac`, `min_duration_sec`, `merge_gap_sec`
+
+**实现过程中踩到的三个坑（按发现顺序）：**
+
+1. **MAD 缩放常数缺失**：`_robust_z` 用 raw MAD 做分母，k=3.5 实际只等价于 2.36σ（P≈0.91%）而非 3.5σ（P≈0.023%）。修复：在 `detect_seizure_by_spatial_extent` 中用 `MAD × 1.4826` 估计 σ。但单独修这个对 FP 几乎无改善，因为 LL 是重尾分布、通道间高度相关。
+2. **单极导联共参考噪声（根因）**：`_stream_edf_channel_ll` 读的是 EDF 原始单极通道（A1, A2, ...），它们共享参考电极。参考端的呼吸/心电/体动噪声同时污染 100% 的通道 → participation 虚假飙升 → FP 风暴。无论怎么提高 `min_active_frac` 都没用，因为噪声本身就是共模的。修复：在流式读取器中直接做双极减法（相邻触点，同 shaft），消除共参考后通道之间才真正近独立。
+3. **`min_duration_sec` 默认值过短**：初始 10s 对玉泉数据集（发作 >50s）太宽松，放过了大量生理性短暂事件。修正为 30s。
+
+**验收结果（v3 = 双极 LL + MAD×1.4826 + frac=0.40 + dur=30）：**
+
+| 指标 | litengsheng (7 seizures) | sunyuanxin (8 seizures) |
+|---|---|---|
+| TP | 6 | 8 |
+| FP | 16 | 39 |
+| FN | 1 | 0 |
+| Recall | 0.857 | 1.000 |
+| Precision | 0.273 | 0.170 |
+| Median onset err | 3.9s | 2.5s |
+| Peak memory | ~150MB | ~122MB |
+
+对比演进：v1（单极, raw MAD）→ FP=819/528；v2（单极, MAD×1.4826）→ FP=939/499（无改善）；**v3（双极）→ FP=16/39**。
+
+**已消除的参数**：`combine_mode`, `ignore_initial_sec`, `rms_k`, `rms_win_sec`, `rms_step_sec`
+**保留的旧接口**：`detect_seizure_streaming()` 标记 deprecated，不删除
 
 #### Phase 1 重构总结（2026-01-30）
 

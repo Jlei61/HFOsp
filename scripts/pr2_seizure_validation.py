@@ -1,8 +1,8 @@
 """
-PR2 Seizure Detection Validation — litengsheng
+PR2.5 Spatial-Extent Seizure Detection Validation
 
 Produces four artifacts required by the plan:
-  1. Per-EDF overlay plot (LL/RMS robust-z + manual/detected onsets)
+  1. Per-EDF overlay plot (participation fraction + manual/detected onsets)
   2. 24h concatenated timeline (manual vs algorithm)
   3. Per-event onset/offset error scatter (FP/FN marked)
   4. Audit CSV  (per-EDF TP/FP/FN, median errors)
@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 
 from src.preprocessing import (
-    detect_seizure_streaming,
+    detect_seizure_by_spatial_extent,
     match_seizure_intervals,
     _flag_to_runs,
     _merge_close_runs,
@@ -52,36 +52,44 @@ DEFAULT_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 
 
 def plot_single_edf(det, manual_rels, manual_onset_only, record, out_path):
-    """Artifact 1: single-EDF overlay (LL/RMS z-scores + thresholds + onset lines)."""
-    fig, axes = plt.subplots(2, 1, figsize=(18, 7), sharex=True)
+    """Artifact 1: single-EDF overlay (participation fraction + onset lines)."""
+    fig, ax = plt.subplots(1, 1, figsize=(18, 4.5))
 
-    ax_ll = axes[0]
-    ax_ll.plot(det["ll_t"], det["ll_z"], linewidth=0.4, color="#1f77b4", label="LL robust-z")
-    ax_ll.axhline(det["ll_k"], color="#d62728", ls="--", lw=1, label=f"LL thresh (k={det['ll_k']})")
-    ax_ll.set_ylabel("LL robust-z")
-    ax_ll.legend(loc="upper right", fontsize=8)
+    ax.plot(
+        det["participation_t"],
+        det["participation"],
+        linewidth=0.7,
+        color="#1f77b4",
+        label="Active-channel fraction",
+    )
+    ax.axhline(
+        det["min_active_frac"],
+        color="#d62728",
+        ls="--",
+        lw=1.0,
+        label=f"Participation thresh ({det['min_active_frac']:.2f})",
+    )
 
-    ax_rms = axes[1]
-    ax_rms.plot(det["rms_t"], det["rms_z"], linewidth=0.4, color="#ff7f0e", label="RMS robust-z")
-    ax_rms.axhline(det["rms_k"], color="#d62728", ls="--", lw=1, label=f"RMS thresh (k={det['rms_k']})")
-    ax_rms.set_ylabel("RMS robust-z")
-    ax_rms.set_xlabel("Time (s)")
-    ax_rms.legend(loc="upper right", fontsize=8)
+    for on, off in manual_rels:
+        ax.axvspan(on, off, color="lime", alpha=0.18, zorder=0)
+        ax.axvline(on, color="green", ls="-", lw=1.2, alpha=0.7)
+        ax.axvline(off, color="green", ls=":", lw=1.0, alpha=0.5)
+    for on in manual_onset_only:
+        ax.axvline(on, color="green", ls="-", lw=1.2, alpha=0.7)
+    for on, off in zip(det["onsets_sec"], det["offsets_sec"]):
+        ax.axvline(on, color="red", ls="-", lw=1.2, alpha=0.7)
+        ax.axvline(off, color="red", ls=":", lw=1.0, alpha=0.5)
 
-    for ax in axes:
-        for on, off in manual_rels:
-            ax.axvspan(on, off, color="lime", alpha=0.18, zorder=0)
-            ax.axvline(on, color="green", ls="-", lw=1.2, alpha=0.7)
-            ax.axvline(off, color="green", ls=":", lw=1.0, alpha=0.5)
-        for on in manual_onset_only:
-            ax.axvline(on, color="green", ls="-", lw=1.2, alpha=0.7)
-        for on, off in zip(det["onsets_sec"], det["offsets_sec"]):
-            ax.axvline(on, color="red", ls="-", lw=1.2, alpha=0.7)
-            ax.axvline(off, color="red", ls=":", lw=1.0, alpha=0.5)
-        ax.set_xlim(0, det["duration_sec"])
-
-    fig.suptitle(f"{record}  |  manual(green) vs detected(red)", fontsize=11)
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    ax.set_xlim(0, det["duration_sec"])
+    ax.set_ylim(0, 1.02)
+    ax.set_ylabel("Participation fraction")
+    ax.set_xlabel("Time (s)")
+    ax.legend(loc="upper right", fontsize=8)
+    fig.suptitle(
+        f"{record}  |  manual(green) vs detected(red) | k={det['per_channel_k']:.2f}",
+        fontsize=11,
+    )
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
     fig.savefig(out_path, dpi=150)
     plt.close(fig)
 
@@ -185,44 +193,43 @@ def _load_or_build_feature_cache(edf_path: Path, cache_dir: Path) -> dict:
     cache_path = _feature_cache_path(cache_dir, edf_path)
     if cache_path.exists():
         meta = np.load(str(cache_path), allow_pickle=False)
-        return {
-            "ll_t": meta["ll_t"],
-            "ll_z": meta["ll_z"],
-            "rms_t": meta["rms_t"],
-            "rms_z": meta["rms_z"],
-            "sfreq": float(meta["sfreq"][0]),
-            "n_channels": int(meta["n_channels"][0]),
-            "duration_sec": float(meta["duration_sec"][0]),
-            "peak_mem_est_mb": float(meta["peak_mem_est_mb"][0]),
-        }
+        if "ch_ll_z" in meta.files:
+            return {
+                "participation_t": meta["participation_t"],
+                "ch_ll_z": meta["ch_ll_z"],
+                "sfreq": float(meta["sfreq"][0]),
+                "n_channels": int(meta["n_channels"][0]),
+                "n_records": int(meta["n_records"][0]),
+                "record_duration_sec": float(meta["record_duration_sec"][0]),
+                "duration_sec": float(meta["duration_sec"][0]),
+                "peak_mem_est_mb": float(meta["peak_mem_est_mb"][0]),
+            }
 
-    det = detect_seizure_streaming(
+    det = detect_seizure_by_spatial_extent(
         edf_path,
-        ll_k=99.0,
-        rms_k=99.0,
+        per_channel_k=99.0,
+        min_active_frac=1.0,
         min_duration_sec=9999.0,
         merge_gap_sec=1.0,
-        combine_mode="and",
-        ignore_initial_sec=0.0,
     )
     np.savez_compressed(
         cache_path,
-        ll_t=det["ll_t"],
-        ll_z=det["ll_z"],
-        rms_t=det["rms_t"],
-        rms_z=det["rms_z"],
+        participation_t=det["participation_t"],
+        ch_ll_z=det["ch_ll_z"],
         sfreq=np.array([det["sfreq"]], dtype=np.float64),
         n_channels=np.array([det["n_channels"]], dtype=np.int64),
+        n_records=np.array([det["n_records"]], dtype=np.int64),
+        record_duration_sec=np.array([det["record_duration_sec"]], dtype=np.float64),
         duration_sec=np.array([det["duration_sec"]], dtype=np.float64),
         peak_mem_est_mb=np.array([det["peak_mem_est_mb"]], dtype=np.float64),
     )
     return {
-        "ll_t": det["ll_t"],
-        "ll_z": det["ll_z"],
-        "rms_t": det["rms_t"],
-        "rms_z": det["rms_z"],
+        "participation_t": det["participation_t"],
+        "ch_ll_z": det["ch_ll_z"],
         "sfreq": float(det["sfreq"]),
         "n_channels": int(det["n_channels"]),
+        "n_records": int(det["n_records"]),
+        "record_duration_sec": float(det["record_duration_sec"]),
         "duration_sec": float(det["duration_sec"]),
         "peak_mem_est_mb": float(det["peak_mem_est_mb"]),
     }
@@ -231,74 +238,47 @@ def _load_or_build_feature_cache(edf_path: Path, cache_dir: Path) -> dict:
 def _apply_thresholds_to_feature_traces(
     feat: dict,
     *,
-    ll_k: float,
-    rms_k: float,
+    per_channel_k: float,
+    min_active_frac: float,
     min_duration_sec: float,
     merge_gap_sec: float,
-    combine_mode: str,
-    ignore_initial_sec: float,
 ) -> dict:
-    ll_t = feat["ll_t"]
-    ll_z = feat["ll_z"]
-    rms_t = feat["rms_t"]
-    rms_z = feat["rms_z"]
-    sfreq = float(feat["sfreq"])
+    participation_t = feat["participation_t"]
+    ch_ll_z = feat["ch_ll_z"]
     duration_sec = float(feat["duration_sec"])
-    n_samples = int(round(duration_sec * sfreq))
-
-    rms_interp_z = np.interp(ll_t, rms_t, rms_z)
-    ll_flag = ll_z >= float(ll_k)
-    rms_flag = rms_interp_z >= float(rms_k)
-
-    combine_mode = str(combine_mode).strip().lower()
-    if combine_mode == "and":
-        ictal_flag = ll_flag & rms_flag
-    elif combine_mode == "or":
-        ictal_flag = ll_flag | rms_flag
-    elif combine_mode == "sum":
-        ictal_flag = (ll_z + rms_interp_z) >= float(ll_k + rms_k)
-    else:
-        raise ValueError("combine_mode must be 'and', 'or', or 'sum'")
-
-    if float(ignore_initial_sec) > 0.0:
-        ictal_flag = ictal_flag.copy()
-        ictal_flag[ll_t < float(ignore_initial_sec)] = False
+    record_duration_sec = float(feat["record_duration_sec"])
+    active_mask = ch_ll_z >= float(per_channel_k)
+    participation = active_mask.mean(axis=0)
+    ictal_flag = participation >= float(min_active_frac)
 
     runs = _flag_to_runs(ictal_flag)
-    merged = _merge_close_runs(runs, ll_t, merge_gap_sec)
-    ll_step_sec = float(np.median(np.diff(ll_t))) if ll_t.size >= 2 else 0.2
-    ll_win_sec = 1.0
+    merged = _merge_close_runs(runs, participation_t, merge_gap_sec)
 
     onsets = []
     offsets = []
-    ictal_mask = np.zeros((n_samples,), dtype=bool)
+    ictal_mask = np.zeros((len(participation_t),), dtype=bool)
     for s_idx, e_idx in merged:
-        t0 = float(ll_t[s_idx])
-        t1 = float(ll_t[min(e_idx - 1, len(ll_t) - 1)] + ll_step_sec + ll_win_sec)
+        t0 = float(participation_t[s_idx])
+        t1 = float(participation_t[min(e_idx - 1, len(participation_t) - 1)] + record_duration_sec)
         if (t1 - t0) < float(min_duration_sec):
             continue
         onsets.append(t0)
         offsets.append(t1)
-        i0 = max(0, int(round(t0 * sfreq)))
-        i1 = min(n_samples, int(round(t1 * sfreq)))
-        if i1 > i0:
-            ictal_mask[i0:i1] = True
+        ictal_mask[s_idx:e_idx] = True
 
     return {
         "onsets_sec": np.asarray(onsets, dtype=np.float64),
         "offsets_sec": np.asarray(offsets, dtype=np.float64),
         "ictal_mask": ictal_mask,
-        "ll_t": ll_t,
-        "ll_z": ll_z,
-        "rms_t": rms_t,
-        "rms_z": rms_z,
-        "ll_k": float(ll_k),
-        "rms_k": float(rms_k),
-        "combine_mode": combine_mode,
-        "ignore_initial_sec": float(ignore_initial_sec),
-        "sfreq": sfreq,
+        "participation_t": participation_t,
+        "participation": participation,
+        "active_counts": active_mask.sum(axis=0),
+        "per_channel_k": float(per_channel_k),
+        "min_active_frac": float(min_active_frac),
+        "sfreq": float(feat["sfreq"]),
         "n_channels": int(feat["n_channels"]),
         "duration_sec": duration_sec,
+        "record_duration_sec": record_duration_sec,
         "peak_mem_est_mb": float(feat["peak_mem_est_mb"]),
     }
 
@@ -329,10 +309,14 @@ def _match_onset_only_annotations(onset_only, detected_pairs, matched_detected, 
     return tp
 
 
-def _process_one_edf(edf_path: Path, ll_k: float, rms_k: float,
-                     min_duration_sec: float, merge_gap_sec: float,
-                     combine_mode: str, ignore_initial_sec: float,
-                     cache_dir: Path) -> dict:
+def _process_one_edf(
+    edf_path: Path,
+    per_channel_k: float,
+    min_active_frac: float,
+    min_duration_sec: float,
+    merge_gap_sec: float,
+    cache_dir: Path,
+) -> dict:
     """Pure-compute worker: detect + parse annotations.  No matplotlib."""
     record = edf_path.stem
     t0 = time.time()
@@ -340,12 +324,10 @@ def _process_one_edf(edf_path: Path, ll_k: float, rms_k: float,
     feat = _load_or_build_feature_cache(edf_path, cache_dir)
     det = _apply_thresholds_to_feature_traces(
         feat,
-        ll_k=ll_k,
-        rms_k=rms_k,
+        per_channel_k=per_channel_k,
+        min_active_frac=min_active_frac,
         min_duration_sec=min_duration_sec,
         merge_gap_sec=merge_gap_sec,
-        combine_mode=combine_mode,
-        ignore_initial_sec=ignore_initial_sec,
     )
     elapsed = time.time() - t0
 
@@ -403,14 +385,17 @@ def _process_one_edf(edf_path: Path, ll_k: float, rms_k: float,
 # ── main ─────────────────────────────────────────────────────────────
 
 
-def run_validation(subject: str, data_root: Path, output_dir: Path,
-                   ll_k: float = 12.0, rms_k: float = 7.0,
-                   min_duration_sec: float = 45.0,
-                   merge_gap_sec: float = 20.0,
-                   combine_mode: str = "and",
-                   ignore_initial_sec: float = 0.0,
-                   cache_dir: Path | None = None,
-                   n_jobs: int = 4):
+def run_validation(
+    subject: str,
+    data_root: Path,
+    output_dir: Path,
+    per_channel_k: float = 3.5,
+    min_active_frac: float = 0.25,
+    min_duration_sec: float = 30.0,
+    merge_gap_sec: float = 15.0,
+    cache_dir: Path | None = None,
+    n_jobs: int = 4,
+):
     output_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = cache_dir if cache_dir is not None else (output_dir / "feature_cache")
     subj_dir = data_root / subject
@@ -419,18 +404,25 @@ def run_validation(subject: str, data_root: Path, output_dir: Path,
         print(f"No EDF files found for {subject} in {subj_dir}")
         return
 
-    print(f"=== PR2 Validation: {subject} ({len(edfs)} EDFs, n_jobs={n_jobs}) ===",
+    print(f"=== PR2.5 Validation: {subject} ({len(edfs)} EDFs, n_jobs={n_jobs}) ===",
           flush=True)
-    print(f"    mode={combine_mode}, ll_k={ll_k}, rms_k={rms_k}, "
-          f"min_dur={min_duration_sec}s, merge_gap={merge_gap_sec}s, "
-          f"ignore_initial={ignore_initial_sec}s", flush=True)
+    print(
+        f"    per_channel_k={per_channel_k}, min_active_frac={min_active_frac}, "
+        f"min_dur={min_duration_sec}s, merge_gap={merge_gap_sec}s",
+        flush=True,
+    )
 
     # ── parallel detect ──
     t_wall = time.time()
     results = Parallel(n_jobs=n_jobs, backend="loky", verbose=0)(
-        delayed(_process_one_edf)(edf, ll_k, rms_k,
-                                  min_duration_sec, merge_gap_sec, combine_mode,
-                                  ignore_initial_sec, cache_dir)
+        delayed(_process_one_edf)(
+            edf,
+            per_channel_k,
+            min_active_frac,
+            min_duration_sec,
+            merge_gap_sec,
+            cache_dir,
+        )
         for edf in edfs
     )
     wall = time.time() - t_wall
@@ -477,8 +469,13 @@ def run_validation(subject: str, data_root: Path, output_dir: Path,
         })
 
         if manual_rel or r["manual_onset_only"] or len(det["onsets_sec"]) > 0:
-            plot_single_edf(det, manual_rel, r["manual_onset_only"], record,
-                            output_dir / f"pr2_{record}_overlay.png")
+            plot_single_edf(
+                det,
+                manual_rel,
+                r["manual_onset_only"],
+                record,
+                output_dir / f"pr25_{record}_overlay.png",
+            )
 
         if r["manual"]["raw_interval_details"] or r["manual_onset_only"]:
             onset_dir = output_dir / "manual_onset_context"
@@ -505,7 +502,7 @@ def run_validation(subject: str, data_root: Path, output_dir: Path,
                     ),
                 )
                 fig.savefig(
-                    onset_dir / f"pr2_{record}_manual_onset_{idx:02d}_bipolar_raw.png",
+                    onset_dir / f"pr25_{record}_manual_onset_{idx:02d}_bipolar_raw.png",
                     dpi=150,
                     bbox_inches="tight",
                 )
@@ -523,7 +520,7 @@ def run_validation(subject: str, data_root: Path, output_dir: Path,
                     title=f"{record} | orphan onset {idx:02d} | no reliable offset",
                 )
                 fig.savefig(
-                    onset_dir / f"pr2_{record}_orphan_onset_{idx:02d}_bipolar_raw.png",
+                    onset_dir / f"pr25_{record}_orphan_onset_{idx:02d}_bipolar_raw.png",
                     dpi=150,
                     bbox_inches="tight",
                 )
@@ -549,28 +546,29 @@ def run_validation(subject: str, data_root: Path, output_dir: Path,
         print(f"  Median offset err: {offset_med:.1f}s")
     print(f"{'='*60}")
 
-    plot_24h_timeline(results, subject, output_dir / f"pr2_{subject}_24h_timeline.png")
-    plot_error_scatter(all_tp, all_fp_count, all_fn_count, subject,
-                       output_dir / f"pr2_{subject}_error_scatter.png")
-    write_audit_csv(audit_rows, output_dir / f"pr2_{subject}_audit.csv")
+    plot_24h_timeline(results, subject, output_dir / f"pr25_{subject}_24h_timeline.png")
+    plot_error_scatter(
+        all_tp,
+        all_fp_count,
+        all_fn_count,
+        subject,
+        output_dir / f"pr25_{subject}_error_scatter.png",
+    )
+    write_audit_csv(audit_rows, output_dir / f"pr25_{subject}_audit.csv")
     print(f"\nArtifacts saved to {output_dir}/")
 
 
 def main():
-    ap = argparse.ArgumentParser(description="PR2 seizure detection validation")
+    ap = argparse.ArgumentParser(description="PR2.5 spatial-extent seizure validation")
     ap.add_argument("--subject", default="litengsheng")
     ap.add_argument("--data-root", default=str(DEFAULT_ROOT))
     ap.add_argument("--output-dir", default="results/pr2_seizure")
-    ap.add_argument("--ll-k", type=float, default=12.0)
-    ap.add_argument("--rms-k", type=float, default=7.0)
-    ap.add_argument("--min-dur", type=float, default=45.0,
-                    help="Min seizure duration (s); Yuquan seizures are >50s")
-    ap.add_argument("--merge-gap", type=float, default=20.0,
+    ap.add_argument("--per-channel-k", type=float, default=3.5)
+    ap.add_argument("--min-active-frac", type=float, default=0.25)
+    ap.add_argument("--min-dur", type=float, default=30.0,
+                    help="Min seizure duration (s)")
+    ap.add_argument("--merge-gap", type=float, default=15.0,
                     help="Merge detections closer than this (s)")
-    ap.add_argument("--combine-mode", default="and", choices=["and", "or", "sum"],
-                    help="How to combine LL and RMS evidence")
-    ap.add_argument("--ignore-initial", type=float, default=0.0,
-                    help="Ignore detections starting in the first N seconds")
     ap.add_argument("--cache-dir", default=None,
                     help="Optional feature cache directory; defaults to <output-dir>/feature_cache")
     ap.add_argument("--n-jobs", type=int, default=4,
@@ -580,12 +578,10 @@ def main():
         subject=args.subject,
         data_root=Path(args.data_root),
         output_dir=Path(args.output_dir),
-        ll_k=args.ll_k,
-        rms_k=args.rms_k,
+        per_channel_k=args.per_channel_k,
+        min_active_frac=args.min_active_frac,
         min_duration_sec=args.min_dur,
         merge_gap_sec=args.merge_gap,
-        combine_mode=args.combine_mode,
-        ignore_initial_sec=args.ignore_initial,
         cache_dir=Path(args.cache_dir) if args.cache_dir else None,
         n_jobs=args.n_jobs,
     )

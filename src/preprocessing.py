@@ -286,6 +286,7 @@ def _parse_edf_header_for_streaming(edf_path: Path) -> Dict:
         "record_duration": record_duration,
         "record_total_bytes": record_total_bytes,
         "seeg_idx": seeg_idx,
+        "seeg_labels": [labels[i] for i in seeg_idx],
         "n_seeg": len(seeg_idx),
         "spr": spr,
         "sample_offsets": sample_offsets,
@@ -327,6 +328,81 @@ def _stream_edf_channel_mean(edf_path: Path) -> Tuple[np.ndarray, float, int]:
     return x_mean, h["sfreq"], h["n_seeg"]
 
 
+def _build_bipolar_pairs(labels: List[str]) -> Tuple[List[Tuple[int, int]], List[str]]:
+    """Group SEEG labels by shaft → adjacent-contact bipolar pairs."""
+    parsed = []
+    for idx, lab in enumerate(labels):
+        prefix, num = ElectrodeParser.parse(lab)
+        if prefix is not None and num is not None:
+            parsed.append((prefix, num, idx))
+
+    from collections import defaultdict
+    shafts: Dict[str, List[Tuple[int, int]]] = defaultdict(list)
+    for prefix, num, idx in parsed:
+        shafts[prefix].append((num, idx))
+
+    pairs: List[Tuple[int, int]] = []
+    pair_labels: List[str] = []
+    for prefix in sorted(shafts):
+        contacts = sorted(shafts[prefix])
+        for i in range(len(contacts) - 1):
+            num_a, idx_a = contacts[i]
+            num_b, idx_b = contacts[i + 1]
+            if num_b - num_a <= 1:
+                pairs.append((idx_a, idx_b))
+                lab_a = ElectrodeParser.clean_name(labels[idx_a])
+                lab_b = ElectrodeParser.clean_name(labels[idx_b])
+                pair_labels.append(f"{lab_a}-{lab_b}")
+    return pairs, pair_labels
+
+
+def _stream_edf_channel_ll(
+    edf_path: Path,
+) -> Tuple[np.ndarray, float, float, int, List[str]]:
+    """
+    Read EDF binary sequentially, return bipolar per-channel LL per record.
+
+    Bipolar re-referencing (adjacent contacts, same shaft) is applied on-the-fly
+    to eliminate common-reference noise before computing line length.
+    Output shape is (n_bipolar_channels, n_records).
+    """
+    h = _parse_edf_header_for_streaming(edf_path)
+    pairs, pair_labels = _build_bipolar_pairs(h["seeg_labels"])
+    if not pairs:
+        raise ValueError(f"No bipolar pairs in {edf_path.name}")
+
+    n_pairs = len(pairs)
+    n_rec = h["n_records"]
+    spr = h["spr"]
+    ch_ll = np.empty((n_pairs, n_rec), dtype=np.float64)
+    gains = h["gains"][:, None]
+    offs = h["offsets"][:, None]
+    so = h["sample_offsets"]
+    rtb = h["record_total_bytes"]
+
+    with open(edf_path, "rb") as f:
+        f.seek(h["header_n_bytes"])
+        for rec in range(n_rec):
+            raw = f.read(rtb)
+            if len(raw) < rtb:
+                ch_ll = ch_ll[:, :rec]
+                break
+            all_i16 = np.frombuffer(raw, dtype="<i2")
+            mono = np.stack([all_i16[int(o): int(o) + spr] for o in so])
+            physical = mono.astype(np.float64) * gains + offs
+            for pi, (ia, ib) in enumerate(pairs):
+                bipolar = physical[ia] - physical[ib]
+                ch_ll[pi, rec] = float(np.sum(np.abs(np.diff(bipolar))))
+
+    return (
+        ch_ll,
+        float(h["record_duration"]),
+        float(h["sfreq"]),
+        n_pairs,
+        pair_labels,
+    )
+
+
 def detect_seizure_streaming(
     edf_path: Union[str, Path],
     *,
@@ -341,10 +417,11 @@ def detect_seizure_streaming(
     combine_mode: str = "and",
 ) -> Dict:
     """
-    Streaming seizure detector — reads EDF binary directly (no mne).
+    Deprecated channel-mean streaming seizure detector.
 
-    Single sequential pass → NFS-friendly, peak memory ≈ one data-record.
-    Returns onset/offset times plus LL / RMS traces for plotting.
+    Kept for backward compatibility. New work should use
+    `detect_seizure_by_spatial_extent()`, which preserves per-channel spatial
+    recruitment instead of averaging channels first.
     """
     edf_path = Path(edf_path)
     if not edf_path.exists():
@@ -418,6 +495,107 @@ def detect_seizure_streaming(
         "sfreq": sfreq, "n_channels": n_channels,
         "duration_sec": float(n_samples / sfreq),
         "peak_mem_est_mb": peak_mb,
+    }
+
+
+_MAD_TO_SIGMA = 1.4826  # MAD × 1.4826 ≈ σ for Gaussian
+
+
+def detect_seizure_by_spatial_extent(
+    edf_path: Union[str, Path],
+    *,
+    per_channel_k: float = 3.5,
+    min_active_frac: float = 0.25,
+    min_duration_sec: float = 30.0,
+    merge_gap_sec: float = 15.0,
+) -> Dict:
+    """
+    Detect seizures from per-channel LL and spatial participation.
+
+    First principles:
+    - seizures recruit many channels over time
+    - ictal activity produces sustained large line length
+    - seizure ends when channel recruitment collapses back to baseline
+
+    per_channel_k is in true standard-deviation units (MAD scaled by 1.4826).
+    """
+    edf_path = Path(edf_path)
+    if not edf_path.exists():
+        raise FileNotFoundError(edf_path)
+    if not (0.0 < float(min_active_frac) <= 1.0):
+        raise ValueError("min_active_frac must be in (0, 1].")
+
+    ch_ll, record_duration, sfreq, n_channels, channel_labels = _stream_edf_channel_ll(
+        edf_path
+    )
+    n_records = int(ch_ll.shape[1])
+    participation_t = np.arange(n_records, dtype=np.float64) * record_duration
+
+    if n_records == 0 or n_channels == 0:
+        return {
+            "onsets_sec": np.zeros((0,), dtype=np.float64),
+            "offsets_sec": np.zeros((0,), dtype=np.float64),
+            "ictal_mask": np.zeros((n_records,), dtype=bool),
+            "participation": np.zeros((n_records,), dtype=np.float64),
+            "participation_t": participation_t,
+            "ch_ll_z": np.zeros((n_channels, n_records), dtype=np.float64),
+            "per_channel_k": float(per_channel_k),
+            "min_active_frac": float(min_active_frac),
+            "sfreq": float(sfreq),
+            "n_channels": int(n_channels),
+            "n_records": int(n_records),
+            "record_duration_sec": float(record_duration),
+            "duration_sec": float(n_records * record_duration),
+            "channel_labels": list(channel_labels),
+            "peak_mem_est_mb": 0.0,
+        }
+
+    eps = 1e-9
+    ch_ll_z = np.empty_like(ch_ll)
+    for ch_idx in range(n_channels):
+        row = ch_ll[ch_idx]
+        med = float(np.median(row))
+        sigma = float(np.median(np.abs(row - med))) * _MAD_TO_SIGMA + eps
+        ch_ll_z[ch_idx] = (row - med) / sigma
+
+    active_mask = ch_ll_z >= float(per_channel_k)
+    participation = active_mask.mean(axis=0)
+    ictal_flag = participation >= float(min_active_frac)
+
+    runs = _flag_to_runs(ictal_flag)
+    merged = _merge_close_runs(runs, participation_t, merge_gap_sec)
+
+    onsets: List[float] = []
+    offsets: List[float] = []
+    ictal_mask = np.zeros((n_records,), dtype=bool)
+    for s_idx, e_idx in merged:
+        t0 = float(participation_t[s_idx])
+        t1 = float(participation_t[e_idx - 1] + record_duration)
+        if (t1 - t0) < float(min_duration_sec):
+            continue
+        onsets.append(t0)
+        offsets.append(t1)
+        ictal_mask[s_idx:e_idx] = True
+
+    peak_mem_est_mb = (
+        ch_ll.nbytes + ch_ll_z.nbytes + participation.nbytes + active_mask.nbytes
+    ) / (1024 ** 2)
+    return {
+        "onsets_sec": np.asarray(onsets, dtype=np.float64),
+        "offsets_sec": np.asarray(offsets, dtype=np.float64),
+        "ictal_mask": ictal_mask,
+        "participation": participation.astype(np.float64, copy=False),
+        "participation_t": participation_t,
+        "ch_ll_z": ch_ll_z,
+        "per_channel_k": float(per_channel_k),
+        "min_active_frac": float(min_active_frac),
+        "sfreq": float(sfreq),
+        "n_channels": int(n_channels),
+        "n_records": int(n_records),
+        "record_duration_sec": float(record_duration),
+        "duration_sec": float(n_records * record_duration),
+        "channel_labels": list(channel_labels),
+        "peak_mem_est_mb": round(float(peak_mem_est_mb), 1),
     }
 
 
