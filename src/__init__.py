@@ -19,6 +19,25 @@ __version__ = "0.1.0"
 
 # Lazy-exported symbols (module, attr)
 _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
+    # epilepsiae_dataset public API
+    "EpilepsiaePaths": ("src.epilepsiae_dataset", "EpilepsiaePaths"),
+    "EpilepsiaeInventory": ("src.epilepsiae_dataset", "EpilepsiaeInventory"),
+    "EpilepsiaeTimeConfig": ("src.epilepsiae_dataset", "EpilepsiaeTimeConfig"),
+    "resolve_epilepsiae_timezone": ("src.epilepsiae_dataset", "resolve_epilepsiae_timezone"),
+    "survey_epilepsiae_dataset": ("src.epilepsiae_dataset", "survey_epilepsiae_dataset"),
+    "build_epilepsiae_sync_subject_manifest": (
+        "src.epilepsiae_dataset",
+        "build_epilepsiae_sync_subject_manifest",
+    ),
+    "load_epilepsiae_sync_subject_manifest": (
+        "src.epilepsiae_dataset",
+        "load_epilepsiae_sync_subject_manifest",
+    ),
+    "save_epilepsiae_inventory": ("src.epilepsiae_dataset", "save_epilepsiae_inventory"),
+    "save_epilepsiae_sync_subject_manifest": (
+        "src.epilepsiae_dataset",
+        "save_epilepsiae_sync_subject_manifest",
+    ),
     # group_event_analysis public API
     "EventWindow": ("src.group_event_analysis", "EventWindow"),
     "GroupEventAnalyzer": ("src.group_event_analysis", "GroupEventAnalyzer"),
@@ -65,6 +84,31 @@ _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
     "plot_outflow_bar_chart": ("src.network_analysis", "plot_outflow_bar_chart"),
     "plot_adjacency_heatmap": ("src.network_analysis", "plot_adjacency_heatmap"),
     "plot_edge_direction_summary": ("src.network_analysis", "plot_edge_direction_summary"),
+    # interictal_synchrony public API
+    "InterictalSynchronyResult": ("src.interictal_synchrony", "InterictalSynchronyResult"),
+    "select_core_penumbra_mask": ("src.interictal_synchrony", "select_core_penumbra_mask"),
+    "compute_event_synchrony_metrics": ("src.interictal_synchrony", "compute_event_synchrony_metrics"),
+    "compute_adjacent_jaccard": ("src.interictal_synchrony", "compute_adjacent_jaccard"),
+    "compute_interictal_synchrony": ("src.interictal_synchrony", "compute_interictal_synchrony"),
+    "build_interictal_synchrony": ("src.interictal_synchrony", "build_interictal_synchrony"),
+    "load_legacy_lagpat_group_analysis": (
+        "src.interictal_synchrony",
+        "load_legacy_lagpat_group_analysis",
+    ),
+    "build_interictal_synchrony_from_legacy_lagpat": (
+        "src.interictal_synchrony",
+        "build_interictal_synchrony_from_legacy_lagpat",
+    ),
+    "run_epilepsiae_interictal_synchrony_from_manifest": (
+        "src.interictal_synchrony",
+        "run_epilepsiae_interictal_synchrony_from_manifest",
+    ),
+    "save_interictal_synchrony_summary": (
+        "src.interictal_synchrony",
+        "save_interictal_synchrony_summary",
+    ),
+    "save_interictal_synchrony_result": ("src.interictal_synchrony", "save_interictal_synchrony_result"),
+    "load_interictal_synchrony_result": ("src.interictal_synchrony", "load_interictal_synchrony_result"),
 }
 
 __all__ = ["__version__", *_LAZY_EXPORTS.keys()]
