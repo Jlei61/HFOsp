@@ -266,6 +266,60 @@ HFOsp/
   - 大多数 subject 是连续分段记录，但总时长并不固定在 24h；`litengsheng`、`zhangjiaqi` 存在真实缺口
 - 结论：PR1 可作为 **后续 PR2/PR3 的可靠时间轴与人工标注入口**，但不是最终的发作真值来源。
 
+#### PR1.5 Epilepsiae 数据契约调研（2026-04-02）
+
+- 新增脚本：`scripts/survey_epilepsiae_dataset.py`
+- 新增脚本：`scripts/run_epilepsiae_interictal_synchrony.py`
+- 新增正式接口：`src/epilepsiae_dataset.py`
+- 新增文档：`docs/epilepsiae_dataset_structure.md`
+- 已确认：
+  - `Epilepsiae` 原始数据合同是 `*.data + *.head + SQL`，不是 EDF
+  - 挂载盘全量是 **27** 个 SQL subjects；其中只有 **20** 个有 `all_data_lns` 间期中间产物
+  - 时间真值应优先信 SQL `recording / block / seizure`，`.head.start_ts` 只做块级校验
+  - 当前挂载数据上，`.head.start_ts` 与 SQL `block.begin` 是 **0s 对齐**
+  - 数据连续性不干净：`75` 个 recordings 里只有 `10` 个 block 级连续；`27` 个 subjects 里只有 `5` 个没有明显 inter-recording gap
+  - seizure 标注整体可用，但不是每条 EEG interval 都完整；`vigilance` 不能直接当 day/night
+  - 当前挂载数据的时区已经钉死为 `UKLFR -> Europe/Berlin`；`src.epilepsiae_dataset` 已内建 override 接口与 `08:00-20:00` day/night 规则
+  - 已输出 `results/epilepsiae_sync_subject_manifest.csv`，按 `ready_full_artifacts / ready_partial_artifacts / missing_interictal_artifacts` 分层
+  - `interictal_synchrony` 已接上 manifest，并实际跑完 `ready_full_artifacts` 的 `16` 个 subjects / `2962` 个 blocks
+- 对后续 PR 的硬约束：
+  - 若将 Epilepsiae 纳入同步性分析，必须消费 `results/epilepsiae_*_inventory.*` 形成的统一时间轴与 seizure inventory
+  - subject 选择必须优先消费 manifest，而不是手工挑病人
+  - 不能把“20 个 artifact subjects”误当成“全量数据集”
+  - 不能把 Yuquan 的 EDF 路径直接套到 Epilepsiae 上
+
+#### PR2 Streaming Seizure Detector 验收复盘（2026-04-02）
+
+- 已完成（基础设施，可复用）：
+  - `src/preprocessing.py`：二进制 EDF 流式读取与 channel-mean LL+RMS 检测主流程
+  - `scripts/pr2_seizure_validation.py`：单 EDF 叠图、24h 总览、误差散点、审计 CSV
+  - `tests/test_seizure_streaming.py`：`_flag_to_runs` / `_merge_close_runs` / `match_seizure_intervals` 合成数据测试
+  - NFS 性能优化：单次顺序读取 + 特征缓存，支持 `n_jobs` 并行批跑
+  - 手工标注评估修正：interval 与 onset-only 分开匹配，避免漏算人工标注
+- 已验收（litengsheng）：
+  - 峰值内存约 `110MB`（< `500MB`）
+  - onset 中位误差约 `4.6s`（< `30s`）
+  - recall 达到门槛附近（约 `80%+`）
+- 未通过（跨 subject 泛化）：
+  - 同一参数在 `sunyuanxin` 上出现明显漏检，无法同时兼顾低 FP 与高 recall
+  - 根因不是阈值没调好，而是数据结构有损：先对多通道取均值再做特征，抹掉了空间招募信息
+- 结论：
+  - PR2 基础设施通过，可作为后续检测器与验证框架
+  - channel-mean 检测器不再继续加补丁（如 `ignore_initial`）；进入 PR2.5 重构
+
+#### PR2.5 空间招募检测器（第一性原理）（计划）
+
+- 第一性原理约束：
+  - 发作具有通道逐步招募特征（participation 上升）
+  - 发作期存在大幅高频振荡（LL 对该特征敏感）
+  - 发作有自限性（participation 回落形成 offset）
+- 核心顺序修正：
+  - 旧：`channels -> mean -> LL/RMS -> threshold`
+  - 新：`channels -> per-channel LL -> per-channel z -> active-channel fraction -> threshold`
+- 预期收益：
+  - 消除 `combine_mode` / `ignore_initial` 这类补丁参数
+  - 提升跨 subject 泛化，减少单通道伪迹导致的 FP 与均值稀释导致的 FN
+
 #### Phase 1 重构总结（2026-01-30）
 
 **核心改进：消除重复的条件判断**
