@@ -109,6 +109,27 @@ _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
     ),
     "save_interictal_synchrony_result": ("src.interictal_synchrony", "save_interictal_synchrony_result"),
     "load_interictal_synchrony_result": ("src.interictal_synchrony", "load_interictal_synchrony_result"),
+    # interictal_synchrony_aggregation public API
+    "EpilepsiaeSyncAggregationConfig": (
+        "src.interictal_synchrony_aggregation",
+        "EpilepsiaeSyncAggregationConfig",
+    ),
+    "build_epilepsiae_seizure_intervals": (
+        "src.interictal_synchrony_aggregation",
+        "build_epilepsiae_seizure_intervals",
+    ),
+    "annotate_epilepsiae_sync_blocks": (
+        "src.interictal_synchrony_aggregation",
+        "annotate_epilepsiae_sync_blocks",
+    ),
+    "aggregate_epilepsiae_sync_rows": (
+        "src.interictal_synchrony_aggregation",
+        "aggregate_epilepsiae_sync_rows",
+    ),
+    "run_epilepsiae_sync_aggregation": (
+        "src.interictal_synchrony_aggregation",
+        "run_epilepsiae_sync_aggregation",
+    ),
 }
 
 __all__ = ["__version__", *_LAZY_EXPORTS.keys()]
