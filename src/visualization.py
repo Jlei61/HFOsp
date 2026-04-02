@@ -1136,6 +1136,119 @@ def plot_raw_segment_from_edf(
         figsize=figsize,
     )
 
+
+def plot_bipolar_onset_context_from_cache(
+    *,
+    raw_cache_npz_path: str,
+    onset_sec: float,
+    offset_sec: Optional[float] = None,
+    pre_sec: float = 15.0,
+    post_sec: float = 30.0,
+    channels: Union[str, List[str], List[int]] = "all",
+    color_by_shaft: bool = True,
+    title: Optional[str] = None,
+    figsize: Optional[Tuple[float, float]] = None,
+) -> plt.Figure:
+    """
+    Plot all-channel bipolar raw activity around a manual onset marker.
+
+    This is visualization-only and reuses *_rawCache_*.npz generated upstream.
+    """
+    from .preprocessing import load_raw_cache
+
+    meta = load_raw_cache(raw_cache_npz_path)
+    data = np.asarray(meta["data"])
+    sfreq = float(np.asarray(meta["sfreq"]).ravel()[0])
+    ch_names = [str(x) for x in meta["ch_names"]]
+    cache_start_sec = float(np.asarray(meta.get("start_sec", [0.0])).ravel()[0])
+    reference_type = str(np.asarray(meta.get("reference_type", ["unknown"])).ravel()[0])
+    if reference_type != "bipolar":
+        warnings.warn(f"raw cache reference_type='{reference_type}', expected 'bipolar'.")
+
+    total_duration_sec = float(data.shape[1] / sfreq)
+    onset_rel_sec = float(onset_sec) - cache_start_sec
+    offset_rel_sec = None if offset_sec is None else float(offset_sec) - cache_start_sec
+    start_sec = 0.0
+    duration_sec = total_duration_sec
+    fig = plot_seeg_segment(
+        data=data,
+        sfreq=sfreq,
+        ch_names=ch_names,
+        start_sec=start_sec,
+        duration_sec=duration_sec,
+        channels=channels,
+        title=title,
+        reference_type=reference_type,
+        color_by_shaft=bool(color_by_shaft),
+        figsize=figsize,
+    )
+    ax = fig.axes[0]
+    window_end = start_sec + duration_sec
+    ax.axvline(onset_rel_sec, color="green", ls="-", lw=1.4, alpha=0.9, zorder=4)
+    if offset_rel_sec is not None and float(offset_rel_sec) > onset_rel_sec:
+        shade_end = min(float(offset_rel_sec), window_end)
+        ax.axvspan(onset_rel_sec, shade_end, color="lime", alpha=0.14, zorder=0)
+        if float(offset_rel_sec) <= window_end:
+            ax.axvline(float(offset_rel_sec), color="green", ls=":", lw=1.0, alpha=0.7, zorder=4)
+    ax.text(
+        onset_rel_sec,
+        ax.get_ylim()[1],
+        " manual onset",
+        color="green",
+        fontsize=9,
+        va="top",
+        ha="left",
+    )
+    return fig
+
+
+def plot_bipolar_onset_context_from_edf(
+    *,
+    edf_path: str,
+    onset_sec: float,
+    offset_sec: Optional[float] = None,
+    output_dir: Optional[Union[str, Path]] = None,
+    output_prefix: Optional[str] = None,
+    pre_sec: float = 15.0,
+    post_sec: float = 30.0,
+    channels: Union[str, List[str], List[int]] = "all",
+    color_by_shaft: bool = True,
+    title: Optional[str] = None,
+    figsize: Optional[Tuple[float, float]] = None,
+) -> plt.Figure:
+    """
+    Plot all-channel bipolar raw activity around onset by reusing raw cache helpers.
+    """
+    from .preprocessing import save_raw_cache
+
+    edf_path = Path(edf_path)
+    if output_dir is None:
+        output_dir = edf_path.parent / "temp"
+    output_dir = Path(output_dir)
+    output_prefix = output_prefix or edf_path.stem
+    onset_sec = float(onset_sec)
+    crop_start_sec = max(0.0, onset_sec - float(pre_sec))
+    crop_duration_sec = float(pre_sec + post_sec)
+    raw_cache_path = save_raw_cache(
+        edf_path=edf_path,
+        output_dir=output_dir,
+        output_prefix=output_prefix,
+        reference="bipolar",
+        crop_start_sec=crop_start_sec,
+        crop_seconds=crop_duration_sec,
+    )
+    return plot_bipolar_onset_context_from_cache(
+        raw_cache_npz_path=str(raw_cache_path),
+        onset_sec=onset_sec,
+        offset_sec=None if offset_sec is None else float(offset_sec),
+        pre_sec=float(pre_sec),
+        post_sec=float(post_sec),
+        channels=channels,
+        color_by_shaft=bool(color_by_shaft),
+        title=title,
+        figsize=figsize,
+    )
+
 def plot_group_event_tf_propagation_from_cache(
     *,
     tfr_tile_cache_npz_path: str,
