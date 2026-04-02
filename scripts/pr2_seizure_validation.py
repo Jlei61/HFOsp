@@ -29,6 +29,8 @@ from joblib import Parallel, delayed
 from src.preprocessing import (
     detect_seizure_streaming,
     match_seizure_intervals,
+    _flag_to_runs,
+    _merge_close_runs,
     parse_seizure_annotation_events,
     read_edf_start_time,
 )
@@ -171,6 +173,136 @@ def write_audit_csv(rows, out_path):
 # ── per-EDF worker (runs in subprocess via joblib) ───────────────────
 
 
+def _feature_cache_path(cache_dir: Path, edf_path: Path) -> Path:
+    return cache_dir / f"{edf_path.stem}_seizureFeatures.npz"
+
+
+def _load_or_build_feature_cache(edf_path: Path, cache_dir: Path) -> dict:
+    """
+    The expensive part is reading EDF. Cache feature traces once and reuse them.
+    """
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = _feature_cache_path(cache_dir, edf_path)
+    if cache_path.exists():
+        meta = np.load(str(cache_path), allow_pickle=False)
+        return {
+            "ll_t": meta["ll_t"],
+            "ll_z": meta["ll_z"],
+            "rms_t": meta["rms_t"],
+            "rms_z": meta["rms_z"],
+            "sfreq": float(meta["sfreq"][0]),
+            "n_channels": int(meta["n_channels"][0]),
+            "duration_sec": float(meta["duration_sec"][0]),
+            "peak_mem_est_mb": float(meta["peak_mem_est_mb"][0]),
+        }
+
+    det = detect_seizure_streaming(
+        edf_path,
+        ll_k=99.0,
+        rms_k=99.0,
+        min_duration_sec=9999.0,
+        merge_gap_sec=1.0,
+        combine_mode="and",
+        ignore_initial_sec=0.0,
+    )
+    np.savez_compressed(
+        cache_path,
+        ll_t=det["ll_t"],
+        ll_z=det["ll_z"],
+        rms_t=det["rms_t"],
+        rms_z=det["rms_z"],
+        sfreq=np.array([det["sfreq"]], dtype=np.float64),
+        n_channels=np.array([det["n_channels"]], dtype=np.int64),
+        duration_sec=np.array([det["duration_sec"]], dtype=np.float64),
+        peak_mem_est_mb=np.array([det["peak_mem_est_mb"]], dtype=np.float64),
+    )
+    return {
+        "ll_t": det["ll_t"],
+        "ll_z": det["ll_z"],
+        "rms_t": det["rms_t"],
+        "rms_z": det["rms_z"],
+        "sfreq": float(det["sfreq"]),
+        "n_channels": int(det["n_channels"]),
+        "duration_sec": float(det["duration_sec"]),
+        "peak_mem_est_mb": float(det["peak_mem_est_mb"]),
+    }
+
+
+def _apply_thresholds_to_feature_traces(
+    feat: dict,
+    *,
+    ll_k: float,
+    rms_k: float,
+    min_duration_sec: float,
+    merge_gap_sec: float,
+    combine_mode: str,
+    ignore_initial_sec: float,
+) -> dict:
+    ll_t = feat["ll_t"]
+    ll_z = feat["ll_z"]
+    rms_t = feat["rms_t"]
+    rms_z = feat["rms_z"]
+    sfreq = float(feat["sfreq"])
+    duration_sec = float(feat["duration_sec"])
+    n_samples = int(round(duration_sec * sfreq))
+
+    rms_interp_z = np.interp(ll_t, rms_t, rms_z)
+    ll_flag = ll_z >= float(ll_k)
+    rms_flag = rms_interp_z >= float(rms_k)
+
+    combine_mode = str(combine_mode).strip().lower()
+    if combine_mode == "and":
+        ictal_flag = ll_flag & rms_flag
+    elif combine_mode == "or":
+        ictal_flag = ll_flag | rms_flag
+    elif combine_mode == "sum":
+        ictal_flag = (ll_z + rms_interp_z) >= float(ll_k + rms_k)
+    else:
+        raise ValueError("combine_mode must be 'and', 'or', or 'sum'")
+
+    if float(ignore_initial_sec) > 0.0:
+        ictal_flag = ictal_flag.copy()
+        ictal_flag[ll_t < float(ignore_initial_sec)] = False
+
+    runs = _flag_to_runs(ictal_flag)
+    merged = _merge_close_runs(runs, ll_t, merge_gap_sec)
+    ll_step_sec = float(np.median(np.diff(ll_t))) if ll_t.size >= 2 else 0.2
+    ll_win_sec = 1.0
+
+    onsets = []
+    offsets = []
+    ictal_mask = np.zeros((n_samples,), dtype=bool)
+    for s_idx, e_idx in merged:
+        t0 = float(ll_t[s_idx])
+        t1 = float(ll_t[min(e_idx - 1, len(ll_t) - 1)] + ll_step_sec + ll_win_sec)
+        if (t1 - t0) < float(min_duration_sec):
+            continue
+        onsets.append(t0)
+        offsets.append(t1)
+        i0 = max(0, int(round(t0 * sfreq)))
+        i1 = min(n_samples, int(round(t1 * sfreq)))
+        if i1 > i0:
+            ictal_mask[i0:i1] = True
+
+    return {
+        "onsets_sec": np.asarray(onsets, dtype=np.float64),
+        "offsets_sec": np.asarray(offsets, dtype=np.float64),
+        "ictal_mask": ictal_mask,
+        "ll_t": ll_t,
+        "ll_z": ll_z,
+        "rms_t": rms_t,
+        "rms_z": rms_z,
+        "ll_k": float(ll_k),
+        "rms_k": float(rms_k),
+        "combine_mode": combine_mode,
+        "ignore_initial_sec": float(ignore_initial_sec),
+        "sfreq": sfreq,
+        "n_channels": int(feat["n_channels"]),
+        "duration_sec": duration_sec,
+        "peak_mem_est_mb": float(feat["peak_mem_est_mb"]),
+    }
+
+
 def _match_onset_only_annotations(onset_only, detected_pairs, matched_detected, tol_sec=60.0):
     """Match onset-only labels by containment or onset proximity."""
     tp = []
@@ -199,15 +331,21 @@ def _match_onset_only_annotations(onset_only, detected_pairs, matched_detected, 
 
 def _process_one_edf(edf_path: Path, ll_k: float, rms_k: float,
                      min_duration_sec: float, merge_gap_sec: float,
-                     combine_mode: str) -> dict:
+                     combine_mode: str, ignore_initial_sec: float,
+                     cache_dir: Path) -> dict:
     """Pure-compute worker: detect + parse annotations.  No matplotlib."""
     record = edf_path.stem
     t0 = time.time()
     start_epoch = read_edf_start_time(edf_path)
-    det = detect_seizure_streaming(
-        edf_path, ll_k=ll_k, rms_k=rms_k,
-        min_duration_sec=min_duration_sec, merge_gap_sec=merge_gap_sec,
+    feat = _load_or_build_feature_cache(edf_path, cache_dir)
+    det = _apply_thresholds_to_feature_traces(
+        feat,
+        ll_k=ll_k,
+        rms_k=rms_k,
+        min_duration_sec=min_duration_sec,
+        merge_gap_sec=merge_gap_sec,
         combine_mode=combine_mode,
+        ignore_initial_sec=ignore_initial_sec,
     )
     elapsed = time.time() - t0
 
@@ -270,8 +408,11 @@ def run_validation(subject: str, data_root: Path, output_dir: Path,
                    min_duration_sec: float = 45.0,
                    merge_gap_sec: float = 20.0,
                    combine_mode: str = "and",
+                   ignore_initial_sec: float = 0.0,
+                   cache_dir: Path | None = None,
                    n_jobs: int = 4):
     output_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir = cache_dir if cache_dir is not None else (output_dir / "feature_cache")
     subj_dir = data_root / subject
     edfs = sorted(subj_dir.glob("*.edf"))
     if not edfs:
@@ -281,13 +422,15 @@ def run_validation(subject: str, data_root: Path, output_dir: Path,
     print(f"=== PR2 Validation: {subject} ({len(edfs)} EDFs, n_jobs={n_jobs}) ===",
           flush=True)
     print(f"    mode={combine_mode}, ll_k={ll_k}, rms_k={rms_k}, "
-          f"min_dur={min_duration_sec}s, merge_gap={merge_gap_sec}s", flush=True)
+          f"min_dur={min_duration_sec}s, merge_gap={merge_gap_sec}s, "
+          f"ignore_initial={ignore_initial_sec}s", flush=True)
 
     # ── parallel detect ──
     t_wall = time.time()
     results = Parallel(n_jobs=n_jobs, backend="loky", verbose=0)(
         delayed(_process_one_edf)(edf, ll_k, rms_k,
-                                  min_duration_sec, merge_gap_sec, combine_mode)
+                                  min_duration_sec, merge_gap_sec, combine_mode,
+                                  ignore_initial_sec, cache_dir)
         for edf in edfs
     )
     wall = time.time() - t_wall
@@ -426,6 +569,10 @@ def main():
                     help="Merge detections closer than this (s)")
     ap.add_argument("--combine-mode", default="and", choices=["and", "or", "sum"],
                     help="How to combine LL and RMS evidence")
+    ap.add_argument("--ignore-initial", type=float, default=0.0,
+                    help="Ignore detections starting in the first N seconds")
+    ap.add_argument("--cache-dir", default=None,
+                    help="Optional feature cache directory; defaults to <output-dir>/feature_cache")
     ap.add_argument("--n-jobs", type=int, default=4,
                     help="Parallel EDF workers (4 is sweet spot for NFS)")
     args = ap.parse_args()
@@ -438,6 +585,8 @@ def main():
         min_duration_sec=args.min_dur,
         merge_gap_sec=args.merge_gap,
         combine_mode=args.combine_mode,
+        ignore_initial_sec=args.ignore_initial,
+        cache_dir=Path(args.cache_dir) if args.cache_dir else None,
         n_jobs=args.n_jobs,
     )
 
