@@ -248,9 +248,23 @@ HFOsp/
 | 1.6 滤波 | Notch + 可选Bandpass, GPU加速支持 | ✅ |
 | 1.7 通道质量检查 | z-score, 方差, 伪迹标记 | ✅ |
 | **1.8 FilterBackend架构** | **抽象接口 + CPU/GPU实现分离** | ✅ |
-| **1.9 EDF+ Annotation Parser** | `fast_read_edf_annotations()` — 二进制 TAL 解析, memmap stride read, 不依赖 MNE | ✅ **PR1** |
-| **1.10 Seizure Annotation Parser** | `parse_seizure_onsets_from_annotations()` — 精确 label 匹配 + onset-END 自动配对 → 绝对 epoch interval | ✅ **PR1** |
+| **1.9 EDF+ Annotation Parser** | `fast_read_edf_annotations()` — 二进制 TAL 解析；NFS 上改为 annotation-tail threaded `pread`，不依赖 MNE | ✅ **PR1** |
+| **1.10 Seizure Annotation Parser** | `parse_seizure_onsets_from_annotations()` — 精确 label 匹配 + onset-END 自动配对；默认丢弃 orphan zero-duration，并合并重叠重复区间 | ✅ **PR1** |
 | **1.11 Timezone Infrastructure** | `epoch_to_local_hour()` — `zoneinfo.ZoneInfo` 显式时区转换; `config/default.yaml` 新增 `dataset.timezone_default` | ✅ **PR1** |
+| **1.12 Recording Timeline Helper** | `read_edf_record_info()` + `build_recording_timeline()` — header 驱动的 subject 连续时间轴；禁止硬编码 `12 files == 24h` | ✅ **PR1 hardening** |
+
+#### PR1 真验收更新（2026-04-01）
+
+- **PR1 现在可以作为真正验收，但验收边界要说清楚**：
+  - ✅ 已验收：EDF+ annotation parsing、seizure interval extraction、timezone conversion、header-driven timeline foundation
+  - ❌ 不能夸大：它还不是“临床 gold-standard seizure inventory”；EDF 原始标注本身存在重复 onset、孤立 onset、缺失 END 等脏数据
+- 全量 Yuquan 审计（21 subjects / 260 EDF）后确认：
+  - 原始命中 `32` 个 seizure-bearing EDF、`54` 个原始 intervals
+  - 归一化后为 `25` 个 valid interval-bearing EDF、`30` 个 normalized intervals
+  - 另外保留 `16` 个 orphan onset markers（有 onset、无可靠 offset）
+  - 对 32 个 seizure-labeled EDF 的 offset 审计显示：有效 offset 全部来自后续 `END` 标签配对，`duration` 来源为 0；重复问题来自多 onset 共享同一个 END，而不是 offset 错配
+  - 大多数 subject 是连续分段记录，但总时长并不固定在 24h；`litengsheng`、`zhangjiaqi` 存在真实缺口
+- 结论：PR1 可作为 **后续 PR2/PR3 的可靠时间轴与人工标注入口**，但不是最终的发作真值来源。
 
 #### Phase 1 重构总结（2026-01-30）
 
@@ -1781,10 +1795,11 @@ preprocessor.filter_backend = MyCustomBackend()
   - [x] GPU加速支持 (CuPy可选)
   - [x] 通道质量检查
   - [x] chengshuai/FC10477Q: EDF vs GPU 通道差异来源确认（GPU=显式通道子集；不用于推断重参考）
-  - [x] **✅ PR1: EDF+ Annotation Parser** - `fast_read_edf_annotations()` memmap stride read, ~1.4s/4GB EDF
-  - [x] **✅ PR1: Seizure Annotation Parser** - `parse_seizure_onsets_from_annotations()` 精确 label 匹配 + onset-END 配对
+  - [x] **✅ PR1: EDF+ Annotation Parser** - `fast_read_edf_annotations()` annotation-tail threaded `pread`; 冷 NFS 文件从 ~113s 降到 ~10-14s/文件
+  - [x] **✅ PR1: Seizure Annotation Parser** - `parse_seizure_onsets_from_annotations()` 精确 label 匹配 + onset-END 配对 + 重叠区间合并 + orphan zero-duration 丢弃
   - [x] **✅ PR1: Timezone Infrastructure** - `epoch_to_local_hour()` via `zoneinfo`; `config/default.yaml` 新增 `dataset.timezone_default/timezone_overrides`
-  - [x] **✅ PR1 验证**: litengsheng 16 EDF 全部解析, 6 seizure-bearing EDF 正确识别 (8 intervals), 时区 Asia/Shanghai=8 Europe/Paris=1
+  - [x] **✅ PR1: Recording Timeline Helper** - `read_edf_record_info()` / `build_recording_timeline()`，不再假设固定 24h
+  - [x] **✅ PR1 验证**: litengsheng 16 EDF 全部解析；全量 Yuquan 21 subjects / 260 EDF 审计完成，确认重复标注、零时长 marker 与非固定 24h 的真实约束
 - [x] **模块2: hfo_detector.py** ✅ Phase 2 重构完成（2026-01-31）
   - [x] 删除 `mad_hysteresis` 算法（-200行）
   - [x] 封装 `BQKDetector` 类（预计算滤波器系数）

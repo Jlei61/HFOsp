@@ -202,6 +202,313 @@ def save_seizure_onsets_json(
     return str(out_path)
 
 
+# =====================================================================
+# PR2 — Streaming seizure detection (direct binary EDF, NFS-friendly)
+# =====================================================================
+
+def read_edf_start_time(edf_path: Union[str, Path]) -> float:
+    """Read recording start epoch from EDF header bytes 168–184 (UTC assumed)."""
+    edf_path = Path(edf_path)
+    with open(edf_path, "rb") as f:
+        hdr = f.read(256)
+    if len(hdr) < 184:
+        raise ValueError(f"EDF header too short: {edf_path}")
+    date_str = hdr[168:176].decode("ascii", errors="ignore").strip()
+    time_str = hdr[176:184].decode("ascii", errors="ignore").strip()
+    dd, mm, yy = date_str.split(".")
+    hh, mi, ss = time_str.split(".")
+    yy_int = int(yy)
+    year = 2000 + yy_int if yy_int < 85 else 1900 + yy_int
+    dt = datetime(year, int(mm), int(dd), int(hh), int(mi), int(ss),
+                  tzinfo=timezone.utc)
+    return dt.timestamp()
+
+
+def _parse_edf_header_for_streaming(edf_path: Path) -> Dict:
+    """Parse EDF header and return everything needed for binary streaming."""
+    with open(edf_path, "rb") as f:
+        fixed = f.read(256)
+        header_n_bytes = int(float(fixed[184:192].decode("ascii", errors="ignore").strip()))
+        n_records_raw = int(float(fixed[236:244].decode("ascii", errors="ignore").strip()))
+        record_dur_str = fixed[244:252].decode("ascii", errors="ignore").strip()
+        record_duration = float(record_dur_str) if record_dur_str else 1.0
+        n_signals = int(float(fixed[252:256].decode("ascii", errors="ignore").strip()))
+        var = f.read(header_n_bytes - 256)
+
+    c = 0
+    labels = [var[c + i * 16: c + (i + 1) * 16].decode("ascii", errors="ignore").strip()
+              for i in range(n_signals)]
+    c += 16 * n_signals
+    c += 80 * n_signals   # transducer
+    c += 8 * n_signals    # phys dim
+    phys_min = [float(var[c + i * 8: c + (i + 1) * 8].decode("ascii", errors="ignore").strip() or "0")
+                for i in range(n_signals)]
+    c += 8 * n_signals
+    phys_max = [float(var[c + i * 8: c + (i + 1) * 8].decode("ascii", errors="ignore").strip() or "0")
+                for i in range(n_signals)]
+    c += 8 * n_signals
+    dig_min = [float(var[c + i * 8: c + (i + 1) * 8].decode("ascii", errors="ignore").strip() or "-32768")
+               for i in range(n_signals)]
+    c += 8 * n_signals
+    dig_max = [float(var[c + i * 8: c + (i + 1) * 8].decode("ascii", errors="ignore").strip() or "32767")
+               for i in range(n_signals)]
+    c += 8 * n_signals
+    c += 80 * n_signals   # prefilter
+    nsamp = [int(float(var[c + i * 8: c + (i + 1) * 8].decode("ascii", errors="ignore").strip() or "0"))
+             for i in range(n_signals)]
+
+    gains = np.array([(phys_max[i] - phys_min[i]) / max(1e-12, dig_max[i] - dig_min[i])
+                       for i in range(n_signals)], dtype=np.float64)
+    offsets = np.array([phys_min[i] - dig_min[i] * gains[i]
+                        for i in range(n_signals)], dtype=np.float64)
+
+    seeg_idx = [i for i, lab in enumerate(labels) if ElectrodeParser.is_valid_seeg(lab)]
+    if not seeg_idx:
+        raise ValueError(f"No SEEG channels in {edf_path.name}")
+
+    sprs = [nsamp[i] for i in seeg_idx]
+    if len(set(sprs)) != 1:
+        raise ValueError("SEEG channels have differing sample rates — cannot stream")
+    spr = sprs[0]
+
+    sample_offsets = np.array([sum(nsamp[:i]) for i in seeg_idx], dtype=np.int64)
+    record_total_samples = sum(nsamp)
+    record_total_bytes = record_total_samples * 2
+
+    n_records = n_records_raw
+    if n_records <= 0:
+        file_bytes = edf_path.stat().st_size
+        n_records = max(0, (file_bytes - header_n_bytes) // record_total_bytes)
+
+    return {
+        "header_n_bytes": header_n_bytes,
+        "n_records": n_records,
+        "record_duration": record_duration,
+        "record_total_bytes": record_total_bytes,
+        "seeg_idx": seeg_idx,
+        "n_seeg": len(seeg_idx),
+        "spr": spr,
+        "sample_offsets": sample_offsets,
+        "gains": gains[seeg_idx],
+        "offsets": offsets[seeg_idx],
+        "sfreq": float(spr / record_duration),
+    }
+
+
+def _stream_edf_channel_mean(edf_path: Path) -> Tuple[np.ndarray, float, int]:
+    """
+    Read EDF binary sequentially, return SEEG channel mean.
+
+    Single pass, no seeks, ~2.5 MB peak per record — optimal for NFS.
+    """
+    h = _parse_edf_header_for_streaming(edf_path)
+    n_rec = h["n_records"]
+    spr = h["spr"]
+    total = n_rec * spr
+    x_mean = np.empty(total, dtype=np.float64)
+    gains = h["gains"][:, None]       # (n_ch, 1)
+    offs = h["offsets"][:, None]      # (n_ch, 1)
+    so = h["sample_offsets"]
+    rtb = h["record_total_bytes"]
+
+    with open(edf_path, "rb") as f:
+        f.seek(h["header_n_bytes"])
+        for rec in range(n_rec):
+            raw = f.read(rtb)
+            if len(raw) < rtb:
+                x_mean = x_mean[: rec * spr]
+                break
+            all_i16 = np.frombuffer(raw, dtype="<i2")
+            ch_data = np.stack([all_i16[int(o): int(o) + spr] for o in so])
+            physical = ch_data.astype(np.float64) * gains + offs
+            start = rec * spr
+            x_mean[start: start + spr] = physical.mean(axis=0)
+
+    return x_mean, h["sfreq"], h["n_seeg"]
+
+
+def detect_seizure_streaming(
+    edf_path: Union[str, Path],
+    *,
+    ll_win_sec: float = 1.0,
+    ll_step_sec: float = 0.2,
+    ll_k: float = 6.0,
+    rms_win_sec: float = 1.0,
+    rms_step_sec: float = 0.2,
+    rms_k: float = 6.0,
+    min_duration_sec: float = 5.0,
+    merge_gap_sec: float = 10.0,
+    combine_mode: str = "and",
+) -> Dict:
+    """
+    Streaming seizure detector — reads EDF binary directly (no mne).
+
+    Single sequential pass → NFS-friendly, peak memory ≈ one data-record.
+    Returns onset/offset times plus LL / RMS traces for plotting.
+    """
+    edf_path = Path(edf_path)
+    if not edf_path.exists():
+        raise FileNotFoundError(edf_path)
+
+    x_mean, sfreq, n_channels = _stream_edf_channel_mean(edf_path)
+    n_samples = len(x_mean)
+
+    ll_win = max(1, int(round(ll_win_sec * sfreq)))
+    ll_step = max(1, int(round(ll_step_sec * sfreq)))
+    rms_win = max(1, int(round(rms_win_sec * sfreq)))
+    rms_step = max(1, int(round(rms_step_sec * sfreq)))
+
+    diff_abs = np.abs(np.diff(x_mean))
+    ll_full = _moving_sum_1d(diff_abs, ll_win)
+    ll_idx = np.arange(0, len(ll_full), ll_step, dtype=np.int64)
+    ll_vals = ll_full[ll_idx]
+    ll_t = ll_idx.astype(np.float64) / sfreq
+
+    x2 = x_mean ** 2
+    rms_sum = _moving_sum_1d(x2, rms_win)
+    rms_full = np.sqrt(rms_sum / rms_win)
+    rms_idx = np.arange(0, len(rms_full), rms_step, dtype=np.int64)
+    rms_vals = rms_full[rms_idx]
+    rms_t = rms_idx.astype(np.float64) / sfreq
+
+    ll_z = _robust_z(ll_vals)
+    rms_z = _robust_z(rms_vals)
+
+    ll_flag = ll_z >= float(ll_k)
+    rms_interp_z = np.interp(ll_t, rms_t, rms_z)
+    rms_flag = rms_interp_z >= float(rms_k)
+
+    combine_mode = str(combine_mode).strip().lower()
+    if combine_mode == "and":
+        ictal_flag = ll_flag & rms_flag
+    elif combine_mode == "or":
+        ictal_flag = ll_flag | rms_flag
+    elif combine_mode == "sum":
+        ictal_flag = (ll_z + rms_interp_z) >= float(ll_k + rms_k)
+    else:
+        raise ValueError("combine_mode must be 'and', 'or', or 'sum'")
+
+    runs = _flag_to_runs(ictal_flag)
+    merged = _merge_close_runs(runs, ll_t, merge_gap_sec)
+
+    onsets: List[float] = []
+    offsets_list: List[float] = []
+    ictal_mask = np.zeros(n_samples, dtype=bool)
+    for s_idx, e_idx in merged:
+        t0 = float(ll_t[s_idx])
+        t1 = float(ll_t[min(e_idx - 1, len(ll_t) - 1)] + ll_step_sec + ll_win_sec)
+        if (t1 - t0) < float(min_duration_sec):
+            continue
+        onsets.append(t0)
+        offsets_list.append(t1)
+        i0 = max(0, int(round(t0 * sfreq)))
+        i1 = min(n_samples, int(round(t1 * sfreq)))
+        if i1 > i0:
+            ictal_mask[i0:i1] = True
+
+    peak_mb = round(n_samples * 8 / (1024 ** 2), 1)
+    return {
+        "onsets_sec": np.asarray(onsets, dtype=np.float64),
+        "offsets_sec": np.asarray(offsets_list, dtype=np.float64),
+        "ictal_mask": ictal_mask,
+        "ll_t": ll_t, "ll_z": ll_z,
+        "rms_t": rms_t, "rms_z": rms_z,
+        "ll_k": float(ll_k), "rms_k": float(rms_k),
+        "combine_mode": combine_mode,
+        "sfreq": sfreq, "n_channels": n_channels,
+        "duration_sec": float(n_samples / sfreq),
+        "peak_mem_est_mb": peak_mb,
+    }
+
+
+def _flag_to_runs(flag: np.ndarray) -> List[Tuple[int, int]]:
+    """Boolean flag → list of (start_idx, end_idx) contiguous True runs."""
+    runs: List[Tuple[int, int]] = []
+    cur = None
+    for i, v in enumerate(flag):
+        if v and cur is None:
+            cur = i
+        elif not v and cur is not None:
+            runs.append((cur, i))
+            cur = None
+    if cur is not None:
+        runs.append((cur, len(flag)))
+    return runs
+
+
+def _merge_close_runs(
+    runs: List[Tuple[int, int]],
+    time_axis: np.ndarray,
+    gap_sec: float,
+) -> List[Tuple[int, int]]:
+    """Merge consecutive runs whose gap ≤ *gap_sec*."""
+    if not runs:
+        return []
+    merged = [runs[0]]
+    for s, e in runs[1:]:
+        prev_s, prev_e = merged[-1]
+        if float(time_axis[s] - time_axis[min(prev_e - 1, len(time_axis) - 1)]) <= gap_sec:
+            merged[-1] = (prev_s, e)
+        else:
+            merged.append((s, e))
+    return merged
+
+
+def match_seizure_intervals(
+    manual: List[Tuple[float, float]],
+    detected: List[Tuple[float, float]],
+    *,
+    onset_tolerance_sec: float = 30.0,
+) -> Dict:
+    """
+    Match detected vs manual seizure intervals via overlap.
+
+    Returns dict: tp (list of match dicts), fp, fn, recall, precision, f1.
+    """
+    n_man = len(manual)
+    n_det = len(detected)
+    if n_man == 0 and n_det == 0:
+        return {"tp": [], "fp": [], "fn": [], "recall": 1.0, "precision": 1.0, "f1": 1.0}
+    if n_man == 0:
+        return {"tp": [], "fp": list(range(n_det)), "fn": [],
+                "recall": 1.0, "precision": 0.0, "f1": 0.0}
+    if n_det == 0:
+        return {"tp": [], "fp": [], "fn": list(range(n_man)),
+                "recall": 0.0, "precision": 0.0, "f1": 0.0}
+
+    matched_det: set = set()
+    matched_man: set = set()
+    tp: List[Dict] = []
+
+    for mi, (m_on, m_off) in enumerate(manual):
+        best_di = -1
+        best_dist = float("inf")
+        for di, (d_on, d_off) in enumerate(detected):
+            if di in matched_det:
+                continue
+            if min(m_off, d_off) - max(m_on, d_on) > 0:
+                dist = abs(d_on - m_on)
+                if dist < best_dist:
+                    best_dist = dist
+                    best_di = di
+        if best_di >= 0:
+            d_on, d_off = detected[best_di]
+            tp.append({"manual_idx": mi, "detected_idx": best_di,
+                        "onset_err": float(d_on - m_on),
+                        "offset_err": float(d_off - m_off)})
+            matched_det.add(best_di)
+            matched_man.add(mi)
+
+    fp = [di for di in range(n_det) if di not in matched_det]
+    fn = [mi for mi in range(n_man) if mi not in matched_man]
+    n_tp = len(tp)
+    recall = n_tp / n_man if n_man else 0.0
+    precision = n_tp / n_det if n_det else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+    return {"tp": tp, "fp": fp, "fn": fn,
+            "recall": recall, "precision": precision, "f1": f1}
+
+
 def _parse_fixed_width_ascii_int(raw: bytes, default: int = 0) -> int:
     txt = raw.decode("ascii", errors="ignore").strip()
     if not txt:
@@ -255,6 +562,32 @@ def _parse_tal_annotations(raw_text: str) -> List[Tuple[float, float, str]]:
 
 def _normalize_annotation_label(text: str) -> str:
     return " ".join(str(text).strip().lower().split())
+
+
+def _merge_time_intervals(
+    intervals: List[Tuple[float, float]],
+    *,
+    gap_sec: float = 0.0,
+) -> List[Tuple[float, float]]:
+    """Sort and merge overlapping / near-adjacent intervals."""
+    if not intervals:
+        return []
+    gap_sec = max(0.0, float(gap_sec))
+    cleaned = sorted(
+        (float(start), float(end))
+        for start, end in intervals
+        if float(end) > float(start)
+    )
+    if not cleaned:
+        return []
+    merged: List[List[float]] = [[cleaned[0][0], cleaned[0][1]]]
+    for start, end in cleaned[1:]:
+        prev = merged[-1]
+        if start <= (prev[1] + gap_sec):
+            prev[1] = max(prev[1], end)
+        else:
+            merged.append([start, end])
+    return [(float(start), float(end)) for start, end in merged]
 
 
 def _maybe_collapse_utf16_annotation_bytes(payload_bytes: bytes) -> bytes:
@@ -358,32 +691,58 @@ def fast_read_edf_annotations(edf_path: Union[str, Path]) -> List[Tuple[float, f
     if actual_records <= 0:
         return []
 
-    mm = np.memmap(
-        edf_path, mode="r", dtype=np.uint8,
-        offset=payload_start,
-        shape=(actual_records, record_n_bytes),
+    first_ann_off = min(off for off, _ in ann_spans)
+    last_ann_end = max(off + sz for off, sz in ann_spans)
+    tail_offset = int(first_ann_off)
+    tail_size = int(last_ann_end - first_ann_off)
+    local_spans = [(int(off - first_ann_off), int(sz)) for off, sz in ann_spans]
+
+    import os as _os
+    from concurrent.futures import ThreadPoolExecutor
+
+    fd = _os.open(str(edf_path), _os.O_RDONLY)
+    try:
+        positions = [
+            payload_start + i * record_n_bytes + tail_offset
+            for i in range(actual_records)
+        ]
+        _N_WORKERS = min(128, actual_records)
+
+        def _pread_tail(pos: int) -> bytes:
+            return _os.pread(fd, tail_size, pos)
+
+        with ThreadPoolExecutor(max_workers=_N_WORKERS) as pool:
+            chunks = list(pool.map(_pread_tail, positions))
+    finally:
+        _os.close(fd)
+
+    buf = b"".join(chunks)
+    arr = np.frombuffer(buf, dtype=np.uint8).reshape(actual_records, tail_size)
+    parts = [arr[:, lo : lo + sz] for lo, sz in local_spans]
+    ann_all = np.concatenate(parts, axis=1) if len(parts) > 1 else parts[0]
+    payload_bytes = _maybe_collapse_utf16_annotation_bytes(
+        np.ascontiguousarray(ann_all).tobytes()
     )
-    parts = [mm[:, off : off + sz] for off, sz in ann_spans]
-    ann_bytes = np.ascontiguousarray(
-        np.concatenate(parts, axis=1) if len(parts) > 1 else parts[0]
-    )
-    del mm
-    payload_bytes = _maybe_collapse_utf16_annotation_bytes(ann_bytes.tobytes())
     tal_text = payload_bytes.decode("latin1", errors="ignore")
     annotations = _parse_tal_annotations(tal_text)
     return sorted(annotations, key=lambda x: (float(x[0]), float(x[1]), x[2]))
 
 
-def parse_seizure_onsets_from_annotations(
+def parse_seizure_annotation_events(
     edf_path: Union[str, Path],
     target_labels: List[str],
     start_t_epoch: float,
-) -> List[Tuple[float, float]]:
+    *,
+    merge_gap_sec: float = 0.0,
+) -> Dict[str, object]:
     """
-    Parse seizure intervals from EDF+ annotations and convert to absolute epoch.
+    Parse seizure annotations into normalized intervals plus orphan onset markers.
 
-    Returns:
-        List[(onset_epoch, offset_epoch)]
+    Returns a dict with:
+    - intervals: merged List[(onset_epoch, offset_epoch)]
+    - orphan_onsets: List[onset_epoch]
+    - raw_interval_details: one entry per raw onset that produced an interval
+    - merged_interval_details: merged interval summaries with provenance
     """
     labels_norm = {
         _normalize_annotation_label(x)
@@ -391,36 +750,150 @@ def parse_seizure_onsets_from_annotations(
         if str(x).strip()
     }
     if not labels_norm:
-        return []
+        return {
+            "intervals": [],
+            "orphan_onsets": [],
+            "raw_interval_details": [],
+            "merged_interval_details": [],
+        }
+
     events = fast_read_edf_annotations(edf_path)
     base_epoch = float(start_t_epoch)
     end_labels = {"end", "eeg end", "seizure end", "sz end", "ictal end", "offset"}
-    out: List[Tuple[float, float]] = []
+    raw_interval_details: List[Dict[str, object]] = []
+    orphan_onsets: List[float] = []
+
     for idx, (onset_sec, duration_sec, desc) in enumerate(events):
         desc_norm = _normalize_annotation_label(desc)
-        if not desc_norm:
+        if not desc_norm or desc_norm not in labels_norm:
             continue
-        if desc_norm not in labels_norm:
-            continue
+
         onset_epoch = base_epoch + float(onset_sec)
         dur = max(0.0, float(duration_sec))
+        detail: Dict[str, object] = {
+            "label": str(desc),
+            "label_norm": desc_norm,
+            "onset_epoch": float(onset_epoch),
+            "onset_rel_sec": float(onset_sec),
+            "offset_epoch": None,
+            "offset_rel_sec": None,
+            "duration_sec": None,
+            "offset_source": None,
+            "paired_end_label": None,
+            "paired_end_rel_sec": None,
+        }
+
         if dur > 0.0:
             offset_epoch = onset_epoch + dur
+            detail["offset_epoch"] = float(offset_epoch)
+            detail["offset_rel_sec"] = float(onset_sec + dur)
+            detail["duration_sec"] = float(dur)
+            detail["offset_source"] = "duration"
+            raw_interval_details.append(detail)
+            continue
+
+        offset_epoch = None
+        for next_onset_sec, _, next_desc in events[idx + 1 :]:
+            next_desc_norm = _normalize_annotation_label(next_desc)
+            if next_desc_norm in end_labels and float(next_onset_sec) >= float(onset_sec):
+                offset_epoch = base_epoch + float(next_onset_sec)
+                detail["offset_epoch"] = float(offset_epoch)
+                detail["offset_rel_sec"] = float(next_onset_sec)
+                detail["duration_sec"] = float(next_onset_sec - float(onset_sec))
+                detail["offset_source"] = "end_label"
+                detail["paired_end_label"] = str(next_desc)
+                detail["paired_end_rel_sec"] = float(next_onset_sec)
+                break
+
+        if offset_epoch is None or float(offset_epoch) <= float(onset_epoch):
+            orphan_onsets.append(float(onset_epoch))
+            continue
+        raw_interval_details.append(detail)
+
+    raw_interval_details.sort(key=lambda x: (float(x["onset_epoch"]), float(x["offset_epoch"])))
+
+    merged_interval_details: List[Dict[str, object]] = []
+    gap_sec = max(0.0, float(merge_gap_sec))
+    for detail in raw_interval_details:
+        onset_epoch = float(detail["onset_epoch"])
+        offset_epoch = float(detail["offset_epoch"])
+        if (
+            merged_interval_details
+            and onset_epoch <= float(merged_interval_details[-1]["offset_epoch"]) + gap_sec
+        ):
+            prev = merged_interval_details[-1]
+            prev["offset_epoch"] = max(float(prev["offset_epoch"]), offset_epoch)
+            prev["duration_sec"] = float(prev["offset_epoch"]) - float(prev["onset_epoch"])
+            prev["raw_onset_count"] = int(prev["raw_onset_count"]) + 1
+            prev["labels"].append(str(detail["label"]))
+            prev["offset_sources"].append(str(detail["offset_source"]))
+            if detail["paired_end_label"] is not None:
+                prev["paired_end_labels"].append(str(detail["paired_end_label"]))
         else:
-            offset_epoch = onset_epoch
-            for next_onset_sec, _, next_desc in events[idx + 1 :]:
-                next_desc_norm = _normalize_annotation_label(next_desc)
-                if next_desc_norm in end_labels and float(next_onset_sec) >= float(onset_sec):
-                    offset_epoch = base_epoch + float(next_onset_sec)
-                    break
-        out.append((float(onset_epoch), float(offset_epoch)))
-    return out
+            merged_interval_details.append(
+                {
+                    "onset_epoch": onset_epoch,
+                    "offset_epoch": offset_epoch,
+                    "duration_sec": offset_epoch - onset_epoch,
+                    "raw_onset_count": 1,
+                    "labels": [str(detail["label"])],
+                    "offset_sources": [str(detail["offset_source"])],
+                    "paired_end_labels": (
+                        [str(detail["paired_end_label"])]
+                        if detail["paired_end_label"] is not None
+                        else []
+                    ),
+                }
+            )
+
+    intervals = [
+        (float(x["onset_epoch"]), float(x["offset_epoch"]))
+        for x in merged_interval_details
+    ]
+    orphan_onsets = sorted(float(x) for x in orphan_onsets)
+    return {
+        "intervals": intervals,
+        "orphan_onsets": orphan_onsets,
+        "raw_interval_details": raw_interval_details,
+        "merged_interval_details": merged_interval_details,
+    }
+
+
+def parse_seizure_onsets_from_annotations(
+    edf_path: Union[str, Path],
+    target_labels: List[str],
+    start_t_epoch: float,
+    *,
+    merge_gap_sec: float = 0.0,
+) -> List[Tuple[float, float]]:
+    """
+    Parse seizure intervals from EDF+ annotations and convert to absolute epoch.
+
+    Returns:
+        List[(onset_epoch, offset_epoch)].
+
+    Notes:
+        - Exact label match after normalization.
+        - Zero-duration onset markers are paired to the next explicit END label.
+        - Orphan onset markers are preserved by `parse_seizure_annotation_events()`
+          but omitted here because this legacy API returns intervals only.
+        - Overlapping duplicate intervals are merged.
+    """
+    parsed = parse_seizure_annotation_events(
+        edf_path=edf_path,
+        target_labels=target_labels,
+        start_t_epoch=start_t_epoch,
+        merge_gap_sec=merge_gap_sec,
+    )
+    return list(parsed["intervals"])
 
 
 def parse_seizure_annotations(
     edf_path: Union[str, Path],
     target_labels: List[str],
     start_t_epoch: float,
+    *,
+    merge_gap_sec: float = 0.0,
 ) -> List[Tuple[float, float]]:
     """
     Backward-compatible alias for parse_seizure_onsets_from_annotations().
@@ -429,6 +902,7 @@ def parse_seizure_annotations(
         edf_path=edf_path,
         target_labels=target_labels,
         start_t_epoch=start_t_epoch,
+        merge_gap_sec=merge_gap_sec,
     )
 
 
@@ -441,6 +915,103 @@ def epoch_to_local_hour(epoch_ts: float, timezone_str: str) -> int:
         raise ValueError("timezone_str must be non-empty.")
     dt_utc = datetime.fromtimestamp(float(epoch_ts), tz=timezone.utc)
     return int(dt_utc.astimezone(ZoneInfo(tz_name)).hour)
+
+
+def read_edf_record_info(edf_path: Union[str, Path]) -> Dict[str, Union[str, int, float]]:
+    """
+    Read start time and duration from EDF header.
+
+    Returns a small header-driven summary suitable for subject-level timelines.
+    """
+    edf_path = Path(edf_path)
+    if not edf_path.exists():
+        raise FileNotFoundError(f"EDF file not found: {edf_path}")
+    with open(edf_path, "rb") as f:
+        hdr = f.read(256)
+    if len(hdr) < 256:
+        raise ValueError(f"Invalid EDF header (too short): {edf_path}")
+    date_str = hdr[168:176].decode("ascii", errors="ignore").strip()
+    time_str = hdr[176:184].decode("ascii", errors="ignore").strip()
+    dd, mm, yy = date_str.split(".")
+    hh, mi, ss = time_str.split(".")
+    yy_int = int(yy)
+    year = 2000 + yy_int if yy_int < 85 else 1900 + yy_int
+    start_dt = datetime(
+        year, int(mm), int(dd), int(hh), int(mi), int(ss), tzinfo=timezone.utc
+    )
+    n_records = _parse_fixed_width_ascii_int(hdr[236:244], default=0)
+    record_duration_sec = float(
+        hdr[244:252].decode("ascii", errors="ignore").strip() or "0"
+    )
+    header_n_bytes = _parse_fixed_width_ascii_int(hdr[184:192], default=256)
+    duration_sec = max(0.0, float(n_records) * float(record_duration_sec))
+    return {
+        "record": edf_path.stem,
+        "path": str(edf_path),
+        "start_epoch": float(start_dt.timestamp()),
+        "end_epoch": float(start_dt.timestamp() + duration_sec),
+        "start_iso_utc": start_dt.isoformat(),
+        "duration_sec": float(duration_sec),
+        "duration_hours": float(duration_sec / 3600.0),
+        "n_records": int(n_records),
+        "record_duration_sec": float(record_duration_sec),
+        "header_n_bytes": int(header_n_bytes),
+        "file_size_bytes": int(edf_path.stat().st_size),
+    }
+
+
+def build_recording_timeline(
+    edf_paths: List[Union[str, Path]],
+    *,
+    continuity_gap_tolerance_sec: float = 120.0,
+) -> Dict[str, Union[float, int, bool, List[Dict[str, Union[str, int, float, bool]]]]]:
+    """
+    Build a header-driven subject timeline from EDF files.
+
+    This is the canonical way to reason about subject duration / continuity.
+    Do not assume "12 files == 24h".
+    """
+    entries = [read_edf_record_info(p) for p in edf_paths]
+    if not entries:
+        return {
+            "records": [],
+            "n_records": 0,
+            "sum_duration_sec": 0.0,
+            "span_sec": 0.0,
+            "max_abs_gap_sec": 0.0,
+            "n_gap_violations": 0,
+            "is_continuous": True,
+        }
+    entries.sort(key=lambda x: float(x["start_epoch"]))
+    tol = max(0.0, float(continuity_gap_tolerance_sec))
+    max_abs_gap_sec = 0.0
+    n_gap_violations = 0
+    for idx, entry in enumerate(entries):
+        prev = entries[idx - 1] if idx > 0 else None
+        if prev is None:
+            gap_prev_sec = 0.0
+            continuous_prev = True
+        else:
+            gap_prev_sec = float(entry["start_epoch"]) - float(prev["end_epoch"])
+            continuous_prev = abs(gap_prev_sec) <= tol
+            max_abs_gap_sec = max(max_abs_gap_sec, abs(gap_prev_sec))
+            if not continuous_prev:
+                n_gap_violations += 1
+        entry["gap_prev_sec"] = float(gap_prev_sec)
+        entry["continuous_prev"] = bool(continuous_prev)
+    sum_duration_sec = sum(float(x["duration_sec"]) for x in entries)
+    span_sec = float(entries[-1]["end_epoch"]) - float(entries[0]["start_epoch"])
+    return {
+        "records": entries,
+        "n_records": len(entries),
+        "sum_duration_sec": float(sum_duration_sec),
+        "sum_duration_hours": float(sum_duration_sec / 3600.0),
+        "span_sec": float(span_sec),
+        "span_hours": float(span_sec / 3600.0),
+        "max_abs_gap_sec": float(max_abs_gap_sec),
+        "n_gap_violations": int(n_gap_violations),
+        "is_continuous": bool(n_gap_violations == 0),
+    }
 
 def get_array_module(use_gpu: bool = False):
     """Get numpy or cupy based on availability and preference."""
@@ -1390,6 +1961,7 @@ def save_raw_cache(
     reference: str = "none",
     include_channels: Optional[List[str]] = None,
     exclude_channels: Optional[List[str]] = None,
+    crop_start_sec: float = 0.0,
     crop_seconds: Optional[float] = None,
 ) -> str:
     """
@@ -1429,8 +2001,20 @@ def save_raw_cache(
             encoding="latin1",
         )
 
-    if crop_seconds is not None and crop_seconds < raw.times[-1]:
-        raw.crop(tmax=crop_seconds)
+    crop_start_sec = max(0.0, float(crop_start_sec))
+    if crop_seconds is not None:
+        crop_seconds = float(crop_seconds)
+        if crop_seconds <= 0:
+            raise ValueError("crop_seconds must be > 0 when provided.")
+    if crop_start_sec > 0.0 or crop_seconds is not None:
+        total_duration = float(raw.times[-1])
+        tmin = min(crop_start_sec, total_duration)
+        if crop_seconds is None:
+            tmax = total_duration
+        else:
+            tmax = min(total_duration, crop_start_sec + crop_seconds)
+        if tmax > tmin:
+            raw.crop(tmin=tmin, tmax=tmax)
     raw.load_data()
 
     # Clean channel names
@@ -1476,6 +2060,7 @@ def save_raw_cache(
         data=data.astype(np.float32, copy=False),
         sfreq=np.array([sfreq], dtype=np.float64),
         ch_names=np.array(ch_names),
+        start_sec=np.array([crop_start_sec], dtype=np.float64),
         reference_type=np.array([reference_type]),
         original_ch_names=np.array(all_chs),
         excluded_channels=np.array(sorted(set(excluded_channels))),

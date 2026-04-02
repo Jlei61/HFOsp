@@ -20,9 +20,12 @@
 | GPU检测结果 | 176个 |
 | 已检测HFO事件 | 约70万+ |
 | 采样率 | 2000 Hz |
-| 单文件时长 | 约2小时 |
+| 单文件时长 | 多数约2小时，但存在截断段 |
 
-**注意**: 有5个患者(pengzihang, songzishuo, zhangbichen, zhangkexuan, zhaochenxi, zhaojinrui, zhourongxuan)只有EDF原始文件，尚未完成GPU检测。
+**注意**:
+- 有5个患者(pengzihang, songzishuo, zhangbichen, zhangkexuan, zhaochenxi, zhaojinrui, zhourongxuan)只有EDF原始文件，尚未完成GPU检测。
+- **不要硬编码 `12 files == 24h`。** 2026-04-01 按 EDF header 审计后，subject 总时长分布为 `22h / 24h / 26h / 30.9h`；大多数是连续分段记录，但 `litengsheng` 和 `zhangjiaqi` 存在真实时间缺口。
+- 后续任何 day/night、post-ictal、interictal slicing，都必须基于 **EDF header start time + duration** 构建时间轴，而不是文件序号乘以 2h。
 
 ---
 
@@ -37,8 +40,8 @@
 │   ├── FC10477Q_lagPat_withFreqCent.npz       # 滞后模式+频率中心
 │   ├── FC10477Q_packedTimes.npy               # 事件时间窗
 │   ├── FC10477Q_packedTimes_withFreqCent.npy  # 事件时间窗+频率
-│   ├── FC10477R.edf                           # 下一个2小时记录
-│   ├── ...                                    # (共12个2小时记录)
+│   ├── FC10477R.edf                           # 下一个连续记录分段
+│   ├── ...                                    # 多数 subject 为 12 段，但也有 11/13/16 段
 │   ├── _refineGpu.npz                         # 患者级汇总
 │   ├── hist_meanX.npz                         # 统计信息
 │   ├── pick_chns.png                          # 筛选通道可视化
@@ -60,7 +63,7 @@
 # 示例: FC10477Q.edf
 采样率: 2000 Hz
 通道数: 145个 (包含SEEG电极 + ECG/EMG)
-时长: 7200秒 (2小时)
+时长: 多数 7200秒 (2小时)，但不能假定所有 EDF 都满 2 小时
 开始时间: 2019-09-20 22:19:56 (Unix: 1569017996.0)
 
 通道命名:
@@ -291,6 +294,71 @@ pick_chns:    # 筛选出的8个核心通道
 ```
 
 ---
+
+## 4.1 2026-04-01 连续性与 Seizure 标注审计
+
+### EDF 连续性审计（以 header 为准）
+
+- **严格连续的主流情况**：大多数 subject 的相邻 EDF 之间只有 `-0.1s ~ 0.0s` 级别误差，这是 EDF record rounding，不是实际缺口。
+- **非 24h 但连续**：
+  - `zhangbichen`: `22.00h`
+  - `hanyuxuan`, `xuxinyi`, `zhangjinhan`, `zhaojinrui`: `26.00h`
+- **存在真实缺口 / 截断段**：
+  - `litengsheng`: 总记录 `30.88h`，`FC1047M6` 仅 `0.88h`，到下一段有 `159s` gap
+  - `zhangjiaqi`: 总记录 `24.68h`，`FC1047TK` 仅 `0.68h`，到下一段有 `8523s` gap
+
+### 全量 seizure annotation 审计（260 EDF）
+
+- 扫描范围：21 subjects / 260 EDF
+- 原始命中：`32` 个 seizure-bearing EDF，`54` 个原始 intervals
+- **关键脏数据**：
+  - 同一次 seizure 被多个 onset label 重复标注，导致区间重叠
+  - 一部分标注只有 onset、没有 duration 或 END，形成零时长 point marker
+- 归一化规则（现已写进 `src/preprocessing.py`）：
+  - 只接受 **有 duration** 或 **能配到显式 END** 的 seizure 区间
+  - 丢弃 orphan zero-duration onset
+  - 同文件内重叠/包含区间自动合并
+- 最终更可信的统计：
+  - `32` 个 raw seizure-bearing EDF -> `25` 个 valid interval-bearing EDF
+  - `54` 个 raw intervals -> `30` 个 normalized intervals
+  - 额外保留 `16` 个 orphan onset markers（有 onset、无可靠 offset）
+
+### offset 配对质量（2026-04-01 审计）
+
+- 审计范围：32 个命中过 seizure 标注的 EDF
+- 结果很明确：
+  - **raw interval details = 38**
+  - `offset_source = duration`: **0**
+  - `offset_source = end_label`: **38**
+- 这说明在当前 Yuquan seizure-bearing EDF 里，**有效 offset 全部来自后续 `END` 类标签**，不是 TAL duration 字段。
+- `END` 复用（同一个 END 被多个 onset 指向）的文件有 8 个：
+  - `huanghanwen/FA1348N4`
+  - `litengsheng/FC1047M4`
+  - `pengzihang/FA1349ZH`
+  - `pengzihang/FA1349ZI`
+  - `zhangkexuan/FA134AX7`
+  - `zhangkexuan/FA134AXE`
+  - `zhaojinrui/FA0012BD`
+  - `zhaojinrui/FA0012BK`
+- 解释：
+  - 这些不是“offset 配错了”，而是**同一次 seizure 被重复写了多个 onset**
+  - 当前实现已把这种重复 onset 自动合并成一个 normalized interval
+
+### 哪些 subject 带 seizure 标注
+
+| subject | raw seizure EDFs | 原始 intervals | normalized intervals |
+| --- | ---: | ---: | ---: |
+| chenziyang | 1 | 1 | 0 |
+| gaolan | 4 | 4 | 4 |
+| huanghanwen | 1 | 2 | 1 |
+| litengsheng | 6 | 8 | 6 |
+| pengzihang | 4 | 8 | 5 |
+| sunyuanxin | 5 | 8 | 8 |
+| xuxinyi | 3 | 3 | 1 |
+| zhangbichen | 1 | 1 | 0 |
+| zhangjinhan | 1 | 8 | 0 |
+| zhangkexuan | 3 | 6 | 2 |
+| zhaojinrui | 3 | 5 | 3 |
 
 ## 5. 关键数据关系
 

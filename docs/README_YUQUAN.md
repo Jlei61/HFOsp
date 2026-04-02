@@ -13,6 +13,16 @@
 - **172万+HFO事件** (高频振荡)
 - **采样率**: 2000 Hz
 - **主要频段**: Ripple (80-250Hz)
+- **多数 EDF 约2小时，但不能假定所有 subject 都是固定 12 段 / 24h**
+
+## 时间轴警告
+
+- 不要用“文件序号 × 2h”去构造绝对时间轴。
+- 2026-04-01 按 EDF header 审计后：
+  - 大多数 subject 是连续分段记录
+  - 但总时长实际分布为 `22h / 24h / 26h / 30.9h`
+  - `litengsheng`、`zhangjiaqi` 存在真实缺口
+- 后续任何 `day/night`、`post-ictal`、`interictal` slicing，都必须基于 **EDF header start time + file duration**。
 
 ---
 
@@ -190,7 +200,7 @@ res = SEEGPreprocessor(reference='none', include_channels=include, crop_seconds=
 │   ├── FC10477Q_gpu.npz          # GPU检测: 120通道, 数万事件
 │   ├── FC10477Q_lagPat_withFreqCent.npz  # 8通道 × 2601事件
 │   ├── FC10477Q_packedTimes.npy  # 2601个事件的时间窗
-│   ├── FC10477R.edf              # 下一个2小时
+│   ├── FC10477R.edf              # 下一个连续记录分段
 │   ├── ...
 │   ├── _refineGpu.npz            # 患者级汇总
 │   └── hist_meanX.npz            # 通道筛选结果
@@ -203,7 +213,7 @@ res = SEEGPreprocessor(reference='none', include_channels=include, crop_seconds=
 
 | 文件 | 内容 | 形状 |
 |------|------|------|
-| `*.edf` | 原始SEEG信号 | 2000Hz × 7200s × 145通道 |
+| `*.edf` | 原始SEEG信号 | 2000Hz × 多数约7200s × 145通道 |
 | `*_gpu.npz` | HFO检测结果 | 120通道 × 变长事件列表 |
 | `*_lagPat*.npz` | 滞后模式矩阵 | 8核心通道 × 2601事件 |
 | `*_packedTimes.npy` | 事件时间窗 | 2601事件 × [start, end] |
