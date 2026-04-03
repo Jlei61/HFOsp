@@ -523,14 +523,14 @@ manifest 分层语义：
 
 - `src/interictal_synchrony_aggregation.py`
   - `build_epilepsiae_seizure_intervals()`
-  - `annotate_epilepsiae_sync_blocks()`
+  - `annotate_epilepsiae_sync_events()`
   - `aggregate_epilepsiae_sync_rows()`
   - `run_epilepsiae_sync_aggregation()`
 - 新增脚本：`scripts/aggregate_epilepsiae_interictal_synchrony.py`
 
 当前实跑结果：
 
-- 输入 block-level synchrony：`2962`
+- 输入 event-level synchrony rows：`2962`
 - 能安全落进完整 seizure interval 的 block：`1903`
 - 能进入 `phase(post_ictal/interictal)` 聚合的 block：`1742`
 - 能进入 `day/night` 聚合的 block：`2724`
@@ -543,7 +543,7 @@ manifest 分层语义：
 - `overlaps_seizure`: `263`
 - `phase_boundary_crossing`: `161`
 - `day_night_transition`: `238`
-- `nontrivial_gap_before_block`: `194`
+- `nontrivial_gap_before_event`: `194`
 
 因此这里的硬规则是：
 
@@ -581,7 +581,7 @@ manifest 分层语义：
   - `run_epilepsiae_interictal_synchrony_from_manifest()`
 - `src/interictal_synchrony_aggregation.py`
   - `build_epilepsiae_seizure_intervals()`
-  - `annotate_epilepsiae_sync_blocks()`
+  - `annotate_epilepsiae_sync_events()`
   - `aggregate_epilepsiae_sync_rows()`
   - `run_epilepsiae_sync_aggregation()`
 
@@ -594,17 +594,20 @@ manifest 分层语义：
 - `results/epilepsiae_dataset_summary.json`
 - `results/epilepsiae_sync_subject_manifest.csv`
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/`
+- `results/interictal_synchrony/epilepsiae_ready_full_artifacts/epilepsiae_ready_full_artifacts_interictal_sync_events.csv`（event-level 主表，~1.28M rows）
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_block_annotations.csv`
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_interval_window_table.csv`
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_subject_window_summary.csv`
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_aggregation_summary.json`
+- `results/pr6_analysis/stats/pr6_analysis_stats.json`（PR6 统计结果）
+- `results/pr6_analysis/figures/`（Figures A–E）
 
 ---
 
 ## 最短结论
 
-- **PR1.5 已验收通过**：范围包括数据契约、inventory、manifest、时区/day-night 规则、`ready_full_artifacts` 同步性实跑、以及严格整块归属的 interval/window 聚合。
-- **PR1.5 不等于 PR6 完成**：后续统计建模与终稿图仍属于下一阶段工作。
+- **PR1.5 已验收通过**：范围包括数据契约、inventory、manifest、时区/day-night 规则、`ready_full_artifacts` 同步性实跑、以及严格按事件边界归属的 interval/window 聚合。
+- **PR4–PR6（Epilepsiae 侧）已完成**：16 subjects / ~1,280,824 event rows / 232 intervals 上的 event-level 同步性全链分析已跑通。**结论：队列水平 null**（固定窗口三指标 p>0.35；within-interval trajectory 三指标 p>0.05）。个体异质性远大于队列效应。详见 `docs/plans/interictal_synchrony_analysis_v4.plan.md` 的"当前科学结论"章节。
 - `Epilepsiae` 全量是 **27 个 subject**，不是 20 个。
 - 其中 **20 个**有老间期间期中间产物，**7 个**只有原始数据/SQL。
 - 原始数据主合同是 `*.data + *.head + SQL`，不是 EDF。
@@ -615,5 +618,5 @@ manifest 分层语义：
 - `vigilance` 不是 day/night；day/night 现在由显式 `Europe/Berlin` wall-clock 规则给出，并保留 override。
 - `results/epilepsiae_sync_subject_manifest.csv` 已经把 subject 分成“可直接分析 / 资产不完整 / 缺中间产物”三类。
 - `ready_full_artifacts` 的 `16` 个 subjects 已经实际跑完 `2962` 个 block 的同步性指标。
-- block-level synchrony 已进一步聚合成 `subject × seizure_interval × window_type` 表，但采用严格整块归属；跨边界 block 会被排除，不做补丁式硬分配。
+- event-level synchrony 已进一步聚合成 `subject × seizure_interval × window_type` 表，但采用严格按事件边界归属；跨边界 event 会被排除，不做补丁式硬分配。
 - 老代码里能复用的是解析思路，不是脚本组织方式本身。
