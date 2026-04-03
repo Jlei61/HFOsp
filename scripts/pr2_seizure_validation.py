@@ -8,11 +8,10 @@ Produces four artifacts required by the plan:
   4. Audit CSV  (per-EDF TP/FP/FN, median errors)
 
 Usage:
-    python scripts/pr2_seizure_validation.py [--subject litengsheng] [--n-jobs 4]
+    python scripts/pr2_seizure_validation.py [--dataset yuquan --subject litengsheng] [--n-jobs 4]
 """
 import argparse
 import csv
-import json
 import sys
 import time
 from pathlib import Path
@@ -28,12 +27,14 @@ from joblib import Parallel, delayed
 
 from src.preprocessing import (
     detect_seizure_by_spatial_extent,
+    detect_seizure_by_spatial_extent_epilepsiae,
     match_seizure_intervals,
     _flag_to_runs,
     _merge_close_runs,
     parse_seizure_annotation_events,
     read_edf_start_time,
 )
+from src.epilepsiae_dataset import survey_epilepsiae_dataset
 from src.visualization import plot_bipolar_onset_context_from_edf
 
 SEIZURE_LABELS = [
@@ -165,7 +166,7 @@ def plot_error_scatter(all_tp, all_fp_count, all_fn_count, subject, out_path):
 def write_audit_csv(rows, out_path):
     """Artifact 4: audit table CSV."""
     fieldnames = [
-        "record", "n_manual", "n_detected",
+        "dataset", "subject", "record", "n_manual", "n_detected",
         "TP", "FP", "FN",
         "recall", "precision", "f1",
         "median_onset_err_s", "median_offset_err_s",
@@ -176,6 +177,179 @@ def write_audit_csv(rows, out_path):
         writer.writeheader()
         for r in rows:
             writer.writerow(r)
+
+
+def _epilepsiae_block_cache_path(cache_dir: Path, block_stem: str) -> Path:
+    return cache_dir / f"{block_stem}_seizureFeatures.npz"
+
+
+def _load_or_build_feature_cache_epilepsiae(
+    data_path: Path,
+    head_path: Path,
+    cache_dir: Path,
+) -> dict:
+    """Cache per-block Epilepsiae LL z-traces just like the EDF path."""
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = _epilepsiae_block_cache_path(cache_dir, data_path.stem)
+    if cache_path.exists():
+        meta = np.load(str(cache_path), allow_pickle=False)
+        if "ch_ll_z" in meta.files:
+            return {
+                "participation_t": meta["participation_t"],
+                "ch_ll_z": meta["ch_ll_z"],
+                "sfreq": float(meta["sfreq"][0]),
+                "n_channels": int(meta["n_channels"][0]),
+                "n_records": int(meta["n_records"][0]),
+                "record_duration_sec": float(meta["record_duration_sec"][0]),
+                "duration_sec": float(meta["duration_sec"][0]),
+                "peak_mem_est_mb": float(meta["peak_mem_est_mb"][0]),
+            }
+
+    det = detect_seizure_by_spatial_extent_epilepsiae(
+        data_path,
+        head_path,
+        per_channel_k=99.0,
+        min_active_frac=1.0,
+        min_duration_sec=9999.0,
+        merge_gap_sec=1.0,
+    )
+    np.savez_compressed(
+        cache_path,
+        participation_t=det["participation_t"],
+        ch_ll_z=det["ch_ll_z"],
+        sfreq=np.array([det["sfreq"]], dtype=np.float64),
+        n_channels=np.array([det["n_channels"]], dtype=np.int64),
+        n_records=np.array([det["n_records"]], dtype=np.int64),
+        record_duration_sec=np.array([det["record_duration_sec"]], dtype=np.float64),
+        duration_sec=np.array([det["duration_sec"]], dtype=np.float64),
+        peak_mem_est_mb=np.array([det["peak_mem_est_mb"]], dtype=np.float64),
+    )
+    return {
+        "participation_t": det["participation_t"],
+        "ch_ll_z": det["ch_ll_z"],
+        "sfreq": float(det["sfreq"]),
+        "n_channels": int(det["n_channels"]),
+        "n_records": int(det["n_records"]),
+        "record_duration_sec": float(det["record_duration_sec"]),
+        "duration_sec": float(det["duration_sec"]),
+        "peak_mem_est_mb": float(det["peak_mem_est_mb"]),
+    }
+
+
+def _epilepsiae_manual_rel(block_row: dict, seizure_rows: list[dict]) -> list[tuple[float, float]]:
+    """Clip recording-level EEG seizure intervals to the current block."""
+    return [
+        (seg["rel_onset_sec"], seg["rel_offset_sec"])
+        for seg in _epilepsiae_manual_segments(block_row, seizure_rows)
+    ]
+
+
+def _epilepsiae_manual_segments(block_row: dict, seizure_rows: list[dict]) -> list[dict]:
+    """Return block-clipped seizure segments with stable seizure ids."""
+    block_start = float(block_row["block_start_epoch"])
+    block_end = float(block_row["block_end_epoch"])
+    manual_segments = []
+    for seizure in seizure_rows:
+        onset = seizure.get("eeg_onset_epoch")
+        offset = seizure.get("eeg_offset_epoch")
+        if onset is None or offset is None:
+            continue
+        onset = float(onset)
+        offset = float(offset)
+        overlap_on = max(onset, block_start)
+        overlap_off = min(offset, block_end)
+        if overlap_off > overlap_on:
+            manual_segments.append(
+                {
+                    "seizure_id": str(seizure["seizure_id"]),
+                    "recording_id": str(seizure["recording_id"]),
+                    "abs_onset_epoch": overlap_on,
+                    "abs_offset_epoch": overlap_off,
+                    "rel_onset_sec": overlap_on - block_start,
+                    "rel_offset_sec": overlap_off - block_start,
+                }
+            )
+    manual_segments.sort(key=lambda x: (x["abs_onset_epoch"], x["abs_offset_epoch"]))
+    return manual_segments
+
+
+def _merge_interval_pairs(intervals, gap_sec=0.0):
+    """Merge absolute intervals if they overlap or nearly touch."""
+    pairs = sorted((float(on), float(off)) for on, off in intervals if float(off) > float(on))
+    if not pairs:
+        return []
+    merged = [pairs[0]]
+    for on, off in pairs[1:]:
+        prev_on, prev_off = merged[-1]
+        if on <= (prev_off + float(gap_sec)):
+            merged[-1] = (prev_on, max(prev_off, off))
+        else:
+            merged.append((on, off))
+    return merged
+
+
+def _subject_level_match(results, dataset):
+    """Compute subject-level event metrics on a single absolute timeline."""
+    dataset = str(dataset).strip().lower()
+    detected_abs = []
+    manual_abs = []
+    manual_onset_only_abs = []
+    for r in results:
+        detected_abs.extend(r.get("detected_abs_intervals", []))
+        manual_abs.extend(r.get("manual_abs_intervals", []))
+        manual_onset_only_abs.extend(r.get("manual_abs_onset_only", []))
+
+    detected_pairs = _merge_interval_pairs(
+        detected_abs,
+        gap_sec=1.0 if dataset == "epilepsiae" else 0.0,
+    )
+    if dataset == "epilepsiae":
+        by_seizure = {}
+        for seg in manual_abs:
+            seizure_id = str(seg["seizure_id"])
+            prev = by_seizure.get(seizure_id)
+            if prev is None:
+                by_seizure[seizure_id] = (
+                    float(seg["abs_onset_epoch"]),
+                    float(seg["abs_offset_epoch"]),
+                )
+            else:
+                by_seizure[seizure_id] = (
+                    min(prev[0], float(seg["abs_onset_epoch"])),
+                    max(prev[1], float(seg["abs_offset_epoch"])),
+                )
+        manual_pairs = sorted(by_seizure.values())
+        onset_only_abs = []
+    else:
+        manual_pairs = sorted(
+            (float(seg["abs_onset_epoch"]), float(seg["abs_offset_epoch"]))
+            for seg in manual_abs
+        )
+        onset_only_abs = sorted(float(x) for x in manual_onset_only_abs)
+
+    interval_match = match_seizure_intervals(manual_pairs, detected_pairs)
+    matched_detected = {tp["detected_idx"] for tp in interval_match["tp"]}
+    onset_only_tp = _match_onset_only_annotations(onset_only_abs, detected_pairs, matched_detected)
+    tp = interval_match["tp"] + onset_only_tp
+    fp = [di for di in range(len(detected_pairs)) if di not in matched_detected]
+    fn = interval_match["fn"] + list(range(len(onset_only_tp), len(onset_only_abs)))
+    n_manual_total = len(manual_pairs) + len(onset_only_abs)
+    n_tp = len(tp)
+    n_det = len(detected_pairs)
+    recall = n_tp / n_manual_total if n_manual_total else 1.0
+    precision = n_tp / n_det if n_det else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+    return {
+        "manual_pairs": manual_pairs,
+        "detected_pairs": detected_pairs,
+        "manual_onset_only_abs": onset_only_abs,
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "recall": recall,
+        "precision": precision,
+        "f1": f1,
+    }
 
 
 # ── per-EDF worker (runs in subprocess via joblib) ───────────────────
@@ -242,12 +416,17 @@ def _apply_thresholds_to_feature_traces(
     min_active_frac: float,
     min_duration_sec: float,
     merge_gap_sec: float,
+    min_channel_consec_sec: float = 0.0,
 ) -> dict:
+    from src.preprocessing import _sustained_active_mask
     participation_t = feat["participation_t"]
     ch_ll_z = feat["ch_ll_z"]
     duration_sec = float(feat["duration_sec"])
     record_duration_sec = float(feat["record_duration_sec"])
     active_mask = ch_ll_z >= float(per_channel_k)
+    min_consec = max(1, int(round(float(min_channel_consec_sec) / float(record_duration_sec))))
+    if min_consec > 1:
+        active_mask = _sustained_active_mask(active_mask, min_consec)
     participation = active_mask.mean(axis=0)
     ictal_flag = participation >= float(min_active_frac)
 
@@ -316,6 +495,7 @@ def _process_one_edf(
     min_duration_sec: float,
     merge_gap_sec: float,
     cache_dir: Path,
+    min_channel_consec_sec: float = 0.0,
 ) -> dict:
     """Pure-compute worker: detect + parse annotations.  No matplotlib."""
     record = edf_path.stem
@@ -328,6 +508,7 @@ def _process_one_edf(
         min_active_frac=min_active_frac,
         min_duration_sec=min_duration_sec,
         merge_gap_sec=merge_gap_sec,
+        min_channel_consec_sec=min_channel_consec_sec,
     )
     elapsed = time.time() - t0
 
@@ -371,12 +552,85 @@ def _process_one_edf(
 
     return {
         "record": record,
+        "dataset": "yuquan",
         "edf_path": str(edf_path),
         "start_epoch": start_epoch,
         "det": det,
         "manual": manual,
         "manual_rel": manual_rel,
         "manual_onset_only": manual_onset_only,
+        "manual_abs_intervals": [
+            {"abs_onset_epoch": float(on), "abs_offset_epoch": float(off)}
+            for on, off in manual["intervals"]
+        ],
+        "manual_abs_onset_only": [float(on) for on in manual["orphan_onsets"]],
+        "detected_abs_intervals": [
+            (float(start_epoch + on), float(start_epoch + off)) for on, off in detected_pairs
+        ],
+        "match": match,
+        "elapsed": elapsed,
+    }
+
+
+def _process_one_epilepsiae_block(
+    block_row: dict,
+    seizure_rows: list[dict],
+    per_channel_k: float,
+    min_active_frac: float,
+    min_duration_sec: float,
+    merge_gap_sec: float,
+    cache_dir: Path,
+    min_channel_consec_sec: float = 0.0,
+) -> dict:
+    """Pure-compute worker for one Epilepsiae raw block."""
+    data_path = Path(block_row["data_path"])
+    head_path = Path(block_row["head_path"])
+    record = str(block_row["block_stem"])
+    t0 = time.time()
+    feat = _load_or_build_feature_cache_epilepsiae(data_path, head_path, cache_dir)
+    det = _apply_thresholds_to_feature_traces(
+        feat,
+        per_channel_k=per_channel_k,
+        min_active_frac=min_active_frac,
+        min_duration_sec=min_duration_sec,
+        merge_gap_sec=merge_gap_sec,
+        min_channel_consec_sec=min_channel_consec_sec,
+    )
+    elapsed = time.time() - t0
+    manual_segments = _epilepsiae_manual_segments(block_row, seizure_rows)
+    manual_rel = [
+        (seg["rel_onset_sec"], seg["rel_offset_sec"])
+        for seg in manual_segments
+    ]
+    detected_pairs = list(zip(det["onsets_sec"].tolist(), det["offsets_sec"].tolist()))
+    match = match_seizure_intervals(manual_rel, detected_pairs)
+
+    print(
+        f"  [{record}] {len(det['onsets_sec'])} det, "
+        f"{len(manual_rel)} interval manual, "
+        f"TP={len(match['tp'])} FP={len(match['fp'])} FN={len(match['fn'])}, "
+        f"mem≈{det['peak_mem_est_mb']}MB, {elapsed:.1f}s",
+        flush=True,
+    )
+    return {
+        "record": record,
+        "dataset": "epilepsiae",
+        "data_path": str(data_path),
+        "head_path": str(head_path),
+        "start_epoch": float(block_row["block_start_epoch"]),
+        "det": det,
+        "manual": {"raw_interval_details": [], "orphan_onsets": []},
+        "manual_rel": manual_rel,
+        "manual_onset_only": [],
+        "manual_abs_intervals": manual_segments,
+        "manual_abs_onset_only": [],
+        "detected_abs_intervals": [
+            (
+                float(block_row["block_start_epoch"] + on),
+                float(block_row["block_start_epoch"] + off),
+            )
+            for on, off in detected_pairs
+        ],
         "match": match,
         "elapsed": elapsed,
     }
@@ -387,54 +641,98 @@ def _process_one_edf(
 
 def run_validation(
     subject: str,
+    dataset: str,
     data_root: Path,
     output_dir: Path,
-    per_channel_k: float = 3.5,
-    min_active_frac: float = 0.25,
+    per_channel_k: float = 5.0,
+    min_active_frac: float = 0.30,
     min_duration_sec: float = 30.0,
-    merge_gap_sec: float = 15.0,
+    merge_gap_sec: float = 5.0,
+    min_channel_consec_sec: float = 0.0,
     cache_dir: Path | None = None,
     n_jobs: int = 4,
+    make_plots: bool = True,
+    write_audit: bool = True,
 ):
     output_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = cache_dir if cache_dir is not None else (output_dir / "feature_cache")
-    subj_dir = data_root / subject
-    edfs = sorted(subj_dir.glob("*.edf"))
-    if not edfs:
-        print(f"No EDF files found for {subject} in {subj_dir}")
-        return
+    dataset = str(dataset).strip().lower()
+    workers = []
+    subject_desc = ""
+    if dataset == "yuquan":
+        subj_dir = data_root / subject
+        edfs = sorted(subj_dir.glob("*.edf"))
+        if not edfs:
+            print(f"No EDF files found for {subject} in {subj_dir}")
+            return None
+        workers = [
+            delayed(_process_one_edf)(
+                edf,
+                per_channel_k,
+                min_active_frac,
+                min_duration_sec,
+                merge_gap_sec,
+                cache_dir,
+                min_channel_consec_sec,
+            )
+            for edf in edfs
+        ]
+        subject_desc = f"{len(edfs)} EDFs"
+    elif dataset == "epilepsiae":
+        inventory = survey_epilepsiae_dataset()
+        block_rows = [
+            row
+            for row in inventory.block_rows
+            if str(row["subject"]) == str(subject)
+            and bool(row["head_exists"])
+            and bool(row["data_exists"])
+            and int(row["intracranial_channels"] or 0) >= 2
+        ]
+        seizure_rows = [
+            row
+            for row in inventory.seizure_rows
+            if str(row["subject"]) == str(subject)
+            and bool(row["has_complete_eeg_interval"])
+        ]
+        if not block_rows:
+            print(f"No Epilepsiae raw blocks found for subject {subject}")
+            return None
+        workers = [
+            delayed(_process_one_epilepsiae_block)(
+                block_row,
+                seizure_rows,
+                per_channel_k,
+                min_active_frac,
+                min_duration_sec,
+                merge_gap_sec,
+                cache_dir,
+                min_channel_consec_sec,
+            )
+            for block_row in block_rows
+        ]
+        subject_desc = f"{len(block_rows)} raw blocks"
+    else:
+        raise ValueError("dataset must be 'yuquan' or 'epilepsiae'")
 
-    print(f"=== PR2.5 Validation: {subject} ({len(edfs)} EDFs, n_jobs={n_jobs}) ===",
+    print(f"=== PR2.5 Validation: {dataset}/{subject} ({subject_desc}, n_jobs={n_jobs}) ===",
           flush=True)
     print(
         f"    per_channel_k={per_channel_k}, min_active_frac={min_active_frac}, "
-        f"min_dur={min_duration_sec}s, merge_gap={merge_gap_sec}s",
+        f"min_dur={min_duration_sec}s, merge_gap={merge_gap_sec}s, "
+        f"consec={min_channel_consec_sec}s",
         flush=True,
     )
 
     # ── parallel detect ──
     t_wall = time.time()
-    results = Parallel(n_jobs=n_jobs, backend="loky", verbose=0)(
-        delayed(_process_one_edf)(
-            edf,
-            per_channel_k,
-            min_active_frac,
-            min_duration_sec,
-            merge_gap_sec,
-            cache_dir,
-        )
-        for edf in edfs
-    )
+    results = Parallel(n_jobs=n_jobs, backend="loky", verbose=0)(workers)
     wall = time.time() - t_wall
-    print(f"\nAll {len(edfs)} EDFs done in {wall:.0f}s "
-          f"(≈{wall/len(edfs):.0f}s/EDF effective)", flush=True)
+    print(f"\nAll {len(results)} items done in {wall:.0f}s "
+          f"(≈{wall/max(len(results), 1):.0f}s/item effective)", flush=True)
 
     # ── serial aggregate + plot ──
-    results.sort(key=lambda r: r["record"])
+    results.sort(key=lambda r: (r["start_epoch"], r["record"]))
     audit_rows = []
-    all_tp = []
-    all_fp_count = 0
-    all_fn_count = 0
 
     for r in results:
         det = r["det"]
@@ -445,16 +743,15 @@ def run_validation(
         n_tp = len(match["tp"])
         n_fp = len(match["fp"])
         n_fn = len(match["fn"])
-        all_tp.extend(match["tp"])
-        all_fp_count += n_fp
-        all_fn_count += n_fn
 
         onset_errs = [t["onset_err"] for t in match["tp"]]
-        offset_errs = [t["offset_err"] for t in match["tp"]]
+        offset_errs = [t["offset_err"] for t in match["tp"] if np.isfinite(t["offset_err"])]
         med_onset = float(np.median(onset_errs)) if onset_errs else float("nan")
         med_offset = float(np.median(offset_errs)) if offset_errs else float("nan")
 
         audit_rows.append({
+            "dataset": dataset,
+            "subject": subject,
             "record": record,
             "n_manual": len(manual_rel) + len(r["manual_onset_only"]),
             "n_detected": len(list(zip(det["onsets_sec"], det["offsets_sec"]))),
@@ -468,7 +765,7 @@ def run_validation(
             "elapsed_sec": f"{r['elapsed']:.1f}",
         })
 
-        if manual_rel or r["manual_onset_only"] or len(det["onsets_sec"]) > 0:
+        if make_plots and (manual_rel or r["manual_onset_only"] or len(det["onsets_sec"]) > 0):
             plot_single_edf(
                 det,
                 manual_rel,
@@ -477,7 +774,7 @@ def run_validation(
                 output_dir / f"pr25_{record}_overlay.png",
             )
 
-        if r["manual"]["raw_interval_details"] or r["manual_onset_only"]:
+        if make_plots and dataset == "yuquan" and (r["manual"]["raw_interval_details"] or r["manual_onset_only"]):
             onset_dir = output_dir / "manual_onset_context"
             onset_dir.mkdir(parents=True, exist_ok=True)
             for idx, detail in enumerate(r["manual"]["raw_interval_details"]):
@@ -527,48 +824,90 @@ def run_validation(
                 plt.close(fig)
 
     # ── summary ──
-    total_man = sum(len(r["manual_rel"]) + len(r["manual_onset_only"]) for r in results)
-    total_det = sum(len(r["det"]["onsets_sec"]) for r in results)
+    subject_match = _subject_level_match(results, dataset)
+    all_tp = subject_match["tp"]
+    all_fp_count = len(subject_match["fp"])
+    all_fn_count = len(subject_match["fn"])
+    total_man = len(subject_match["manual_pairs"]) + len(subject_match["manual_onset_only_abs"])
+    total_det = len(subject_match["detected_pairs"])
     total_tp = len(all_tp)
-    recall = total_tp / total_man if total_man else 0.0
-    precision = total_tp / total_det if total_det else 0.0
+    recall = float(subject_match["recall"])
+    precision = float(subject_match["precision"])
 
     print(f"\n{'='*60}")
-    print(f"  SUMMARY: {subject}")
-    print(f"  Manual intervals:  {total_man}")
+    print(f"  SUMMARY: {dataset}/{subject}")
+    print(f"  Manual events:     {total_man}")
     print(f"  Detected intervals:{total_det}")
     print(f"  TP={total_tp}  FP={all_fp_count}  FN={all_fn_count}")
     print(f"  Recall={recall:.3f}  Precision={precision:.3f}")
     if all_tp:
         onset_med = float(np.median([t["onset_err"] for t in all_tp]))
-        offset_med = float(np.median([t["offset_err"] for t in all_tp]))
+        finite_offset = [t["offset_err"] for t in all_tp if np.isfinite(t["offset_err"])]
+        offset_med = float(np.median(finite_offset)) if finite_offset else float("nan")
         print(f"  Median onset err:  {onset_med:.1f}s")
         print(f"  Median offset err: {offset_med:.1f}s")
     print(f"{'='*60}")
 
-    plot_24h_timeline(results, subject, output_dir / f"pr25_{subject}_24h_timeline.png")
-    plot_error_scatter(
-        all_tp,
-        all_fp_count,
-        all_fn_count,
-        subject,
-        output_dir / f"pr25_{subject}_error_scatter.png",
-    )
-    write_audit_csv(audit_rows, output_dir / f"pr25_{subject}_audit.csv")
+    timeline_path = output_dir / f"pr25_{dataset}_{subject}_timeline.png"
+    error_scatter_path = output_dir / f"pr25_{dataset}_{subject}_error_scatter.png"
+    audit_path = output_dir / f"pr25_{dataset}_{subject}_audit.csv"
+    if make_plots:
+        plot_24h_timeline(results, f"{dataset}/{subject}", timeline_path)
+        plot_error_scatter(
+            all_tp,
+            all_fp_count,
+            all_fn_count,
+            f"{dataset}/{subject}",
+            error_scatter_path,
+        )
+    if write_audit:
+        write_audit_csv(audit_rows, audit_path)
     print(f"\nArtifacts saved to {output_dir}/")
+    onset_med = float(np.median([t["onset_err"] for t in all_tp])) if all_tp else float("nan")
+    finite_offset = [t["offset_err"] for t in all_tp if np.isfinite(t["offset_err"])]
+    offset_med = float(np.median(finite_offset)) if finite_offset else float("nan")
+    fp_per_manual = (all_fp_count / total_man) if total_man else float("inf")
+    return {
+        "dataset": dataset,
+        "subject": subject,
+        "n_records": len(results),
+        "n_manual": total_man,
+        "n_detected": total_det,
+        "TP": total_tp,
+        "FP": all_fp_count,
+        "FN": all_fn_count,
+        "recall": float(recall),
+        "precision": float(precision),
+        "f1": float(2 * precision * recall / (precision + recall)) if (precision + recall) > 0 else 0.0,
+        "median_onset_err_s": onset_med,
+        "median_offset_err_s": offset_med,
+        "fp_per_manual": float(fp_per_manual),
+        "per_channel_k": float(per_channel_k),
+        "min_active_frac": float(min_active_frac),
+        "min_duration_sec": float(min_duration_sec),
+        "merge_gap_sec": float(merge_gap_sec),
+        "min_channel_consec_sec": float(min_channel_consec_sec),
+        "output_dir": str(output_dir),
+        "audit_csv": str(audit_path) if write_audit else None,
+        "timeline_png": str(timeline_path) if make_plots else None,
+        "error_scatter_png": str(error_scatter_path) if make_plots else None,
+    }
 
 
 def main():
     ap = argparse.ArgumentParser(description="PR2.5 spatial-extent seizure validation")
+    ap.add_argument("--dataset", choices=["yuquan", "epilepsiae"], default="yuquan")
     ap.add_argument("--subject", default="litengsheng")
     ap.add_argument("--data-root", default=str(DEFAULT_ROOT))
     ap.add_argument("--output-dir", default="results/pr2_seizure")
-    ap.add_argument("--per-channel-k", type=float, default=3.5)
-    ap.add_argument("--min-active-frac", type=float, default=0.25)
+    ap.add_argument("--per-channel-k", type=float, default=5.0)
+    ap.add_argument("--min-active-frac", type=float, default=0.30)
     ap.add_argument("--min-dur", type=float, default=30.0,
                     help="Min seizure duration (s)")
-    ap.add_argument("--merge-gap", type=float, default=15.0,
+    ap.add_argument("--merge-gap", type=float, default=5.0,
                     help="Merge detections closer than this (s)")
+    ap.add_argument("--min-channel-consec", type=float, default=0.0,
+                    help="Channel must sustain z > k for this many consecutive seconds")
     ap.add_argument("--cache-dir", default=None,
                     help="Optional feature cache directory; defaults to <output-dir>/feature_cache")
     ap.add_argument("--n-jobs", type=int, default=4,
@@ -576,12 +915,14 @@ def main():
     args = ap.parse_args()
     run_validation(
         subject=args.subject,
+        dataset=args.dataset,
         data_root=Path(args.data_root),
         output_dir=Path(args.output_dir),
         per_channel_k=args.per_channel_k,
         min_active_frac=args.min_active_frac,
         min_duration_sec=args.min_dur,
         merge_gap_sec=args.merge_gap,
+        min_channel_consec_sec=args.min_channel_consec,
         cache_dir=Path(args.cache_dir) if args.cache_dir else None,
         n_jobs=args.n_jobs,
     )

@@ -17,6 +17,8 @@ Date: 2026-01-14
 """
 
 import json
+import os
+import struct
 import time
 import numpy as np
 import mne
@@ -403,6 +405,232 @@ def _stream_edf_channel_ll(
     )
 
 
+def _epilepsiae_intracranial_indices(labels: List[str]) -> List[int]:
+    """Keep only intracranial channels from Epilepsiae block labels."""
+    scalp_or_aux = {
+        "FP1", "FP2", "F3", "F4", "C3", "C4", "P3", "P4", "O1", "O2",
+        "FZ", "CZ", "PZ", "F7", "F8", "T3", "T4", "T5", "T6", "T1", "T2",
+        "EOG", "EOG1", "EOG2", "ECG", "EMG", "EMG1", "EMG2", "HP1", "HP2",
+        "HP3", "PHO", "FT9", "FT10", "T7", "T8", "P7", "P8",
+    }
+    return [idx for idx, lab in enumerate(labels) if str(lab).strip().upper() not in scalp_or_aux]
+
+
+def _read_epilepsiae_head_for_streaming(head_path: Path) -> Dict[str, object]:
+    """Parse the minimal head fields needed for block-level streaming."""
+    info: Dict[str, str] = {}
+    with open(head_path, "r", encoding="utf-8") as fh:
+        for raw_line in fh:
+            line = raw_line.strip()
+            if not line or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            info[key] = value
+    elec_names = str(info.get("elec_names", ""))[1:-1]
+    ch_names = [x.strip() for x in elec_names.split(",") if x.strip()]
+    num_channels = int(info["num_channels"])
+    sample_freq = float(info["sample_freq"])
+    duration_sec = float(info["duration_in_sec"])
+    num_samples = int(info.get("num_samples", round(sample_freq * duration_sec)))
+    sample_bytes = int(info.get("sample_bytes", 2))
+    conversion_factor = float(info.get("conversion_factor", 1.0))
+    return {
+        "channel_names": ch_names,
+        "num_channels": num_channels,
+        "sample_freq": sample_freq,
+        "duration_sec": duration_sec,
+        "num_samples": num_samples,
+        "sample_bytes": sample_bytes,
+        "conversion_factor": conversion_factor,
+    }
+
+
+def _stream_epilepsiae_channel_ll(
+    data_path: Path,
+    head_path: Path,
+) -> Tuple[np.ndarray, float, float, int, List[str]]:
+    """
+    Read Epilepsiae raw block sequentially and return bipolar LL per 1s chunk.
+
+    The raw file is little-endian interleaved samples. We keep only intracranial
+    channels, build adjacent-contact bipolar pairs, then compute line length on
+    1-second chunks so the detector core sees the same contract as EDF.
+    """
+    head = _read_epilepsiae_head_for_streaming(head_path)
+    if int(head["sample_bytes"]) != 2:
+        raise ValueError(f"Unsupported sample_bytes={head['sample_bytes']} for {head_path.name}")
+    sfreq = float(head["sample_freq"])
+    if sfreq <= 0:
+        raise ValueError(f"Invalid sample_freq in {head_path.name}")
+    rounded_sfreq = int(round(sfreq))
+    if not np.isclose(sfreq, rounded_sfreq, atol=1e-6):
+        raise ValueError(
+            f"Non-integer sample_freq={sfreq} in {head_path.name}; "
+            "current chunking assumes 1-second integer sample counts."
+        )
+    samples_per_record = max(1, rounded_sfreq)
+    n_channels_total = int(head["num_channels"])
+    channel_names = list(head["channel_names"])
+    keep_idx = _epilepsiae_intracranial_indices(channel_names)
+    keep_labels = [channel_names[idx] for idx in keep_idx]
+    pairs, pair_labels = _build_bipolar_pairs(keep_labels)
+    if not pairs:
+        raise ValueError(f"No bipolar pairs in {head_path.name}")
+
+    bytes_per_sample_frame = int(head["sample_bytes"]) * n_channels_total
+    file_size = os.path.getsize(data_path)
+    if file_size % bytes_per_sample_frame != 0:
+        raise ValueError(
+            f"Raw file size {file_size} is not divisible by one sample frame "
+            f"({bytes_per_sample_frame}) for {data_path.name}"
+        )
+    total_samples_from_file = file_size // bytes_per_sample_frame
+    total_samples_head = int(head["num_samples"])
+    if total_samples_head != total_samples_from_file:
+        raise ValueError(
+            f"Head/data sample mismatch for {data_path.name}: "
+            f"head={total_samples_head}, file={total_samples_from_file}"
+        )
+    total_samples = total_samples_head
+    n_records = (total_samples + samples_per_record - 1) // samples_per_record
+    ch_ll = np.empty((len(pairs), n_records), dtype=np.float64)
+    conversion = -1.0 * float(head["conversion_factor"])
+
+    with open(data_path, "rb") as fh:
+        rec = 0
+        while rec < n_records:
+            samples_left = total_samples - rec * samples_per_record
+            if samples_left <= 0:
+                break
+            read_samples = min(samples_per_record, samples_left)
+            raw = fh.read(read_samples * bytes_per_sample_frame)
+            if not raw:
+                break
+            count = len(raw) // int(head["sample_bytes"])
+            fetched = np.asarray(struct.unpack(f"<{count}h", raw), dtype=np.float64)
+            mono = fetched.reshape(-1, n_channels_total).T * conversion
+            intracranial = mono[keep_idx]
+            for pi, (ia, ib) in enumerate(pairs):
+                bipolar = intracranial[ia] - intracranial[ib]
+                ch_ll[pi, rec] = float(np.sum(np.abs(np.diff(bipolar))))
+            rec += 1
+
+    ch_ll = ch_ll[:, :rec]
+    return ch_ll, 1.0, sfreq, len(pairs), pair_labels
+
+
+def _sustained_active_mask(raw_active: np.ndarray, min_consec: int) -> np.ndarray:
+    """Keep only runs of True values that span ≥ min_consec consecutive samples."""
+    if min_consec <= 1:
+        return raw_active
+    n_ch, n_rec = raw_active.shape
+    sustained = np.zeros_like(raw_active)
+    for ch in range(n_ch):
+        row = raw_active[ch]
+        diffs = np.diff(row.astype(np.int8))
+        starts = np.where(diffs == 1)[0] + 1
+        ends = np.where(diffs == -1)[0] + 1
+        if row[0]:
+            starts = np.concatenate(([0], starts))
+        if row[-1]:
+            ends = np.concatenate((ends, [n_rec]))
+        for s, e in zip(starts, ends):
+            if (e - s) >= min_consec:
+                sustained[ch, s:e] = True
+    return sustained
+
+
+def _detect_seizure_from_ll_matrix(
+    ch_ll: np.ndarray,
+    *,
+    record_duration: float,
+    sfreq: float,
+    channel_labels: List[str],
+    per_channel_k: float,
+    min_active_frac: float,
+    min_duration_sec: float,
+    merge_gap_sec: float,
+    min_channel_consec_sec: float = 0.0,
+) -> Dict:
+    """Shared spatial-extent detector core for any source that yields LL traces."""
+    if not (0.0 < float(min_active_frac) <= 1.0):
+        raise ValueError("min_active_frac must be in (0, 1].")
+    ch_ll = np.asarray(ch_ll, dtype=np.float64)
+    if ch_ll.ndim != 2:
+        raise ValueError("ch_ll must be 2D (n_channels, n_records).")
+    n_channels = int(ch_ll.shape[0])
+    n_records = int(ch_ll.shape[1])
+    participation_t = np.arange(n_records, dtype=np.float64) * float(record_duration)
+    if n_records == 0 or n_channels == 0:
+        return {
+            "onsets_sec": np.zeros((0,), dtype=np.float64),
+            "offsets_sec": np.zeros((0,), dtype=np.float64),
+            "ictal_mask": np.zeros((n_records,), dtype=bool),
+            "participation": np.zeros((n_records,), dtype=np.float64),
+            "participation_t": participation_t,
+            "ch_ll_z": np.zeros((n_channels, n_records), dtype=np.float64),
+            "per_channel_k": float(per_channel_k),
+            "min_active_frac": float(min_active_frac),
+            "sfreq": float(sfreq),
+            "n_channels": int(n_channels),
+            "n_records": int(n_records),
+            "record_duration_sec": float(record_duration),
+            "duration_sec": float(n_records * record_duration),
+            "channel_labels": list(channel_labels),
+            "peak_mem_est_mb": 0.0,
+        }
+
+    eps = 1e-9
+    ch_ll_z = np.empty_like(ch_ll)
+    for ch_idx in range(n_channels):
+        row = ch_ll[ch_idx]
+        med = float(np.median(row))
+        sigma = float(np.median(np.abs(row - med))) * _MAD_TO_SIGMA + eps
+        ch_ll_z[ch_idx] = (row - med) / sigma
+
+    active_mask = ch_ll_z >= float(per_channel_k)
+    min_consec = max(1, int(round(float(min_channel_consec_sec) / float(record_duration))))
+    if min_consec > 1:
+        active_mask = _sustained_active_mask(active_mask, min_consec)
+    participation = active_mask.mean(axis=0)
+    ictal_flag = participation >= float(min_active_frac)
+    runs = _flag_to_runs(ictal_flag)
+    merged = _merge_close_runs(runs, participation_t, merge_gap_sec)
+
+    onsets: List[float] = []
+    offsets: List[float] = []
+    ictal_mask = np.zeros((n_records,), dtype=bool)
+    for s_idx, e_idx in merged:
+        t0 = float(participation_t[s_idx])
+        t1 = float(participation_t[e_idx - 1] + record_duration)
+        if (t1 - t0) < float(min_duration_sec):
+            continue
+        onsets.append(t0)
+        offsets.append(t1)
+        ictal_mask[s_idx:e_idx] = True
+
+    peak_mem_est_mb = (
+        ch_ll.nbytes + ch_ll_z.nbytes + participation.nbytes + active_mask.nbytes
+    ) / (1024 ** 2)
+    return {
+        "onsets_sec": np.asarray(onsets, dtype=np.float64),
+        "offsets_sec": np.asarray(offsets, dtype=np.float64),
+        "ictal_mask": ictal_mask,
+        "participation": participation.astype(np.float64, copy=False),
+        "participation_t": participation_t,
+        "ch_ll_z": ch_ll_z,
+        "per_channel_k": float(per_channel_k),
+        "min_active_frac": float(min_active_frac),
+        "sfreq": float(sfreq),
+        "n_channels": int(n_channels),
+        "n_records": int(n_records),
+        "record_duration_sec": float(record_duration),
+        "duration_sec": float(n_records * record_duration),
+        "channel_labels": list(channel_labels),
+        "peak_mem_est_mb": round(float(peak_mem_est_mb), 1),
+    }
+
+
 def detect_seizure_streaming(
     edf_path: Union[str, Path],
     *,
@@ -504,10 +732,11 @@ _MAD_TO_SIGMA = 1.4826  # MAD × 1.4826 ≈ σ for Gaussian
 def detect_seizure_by_spatial_extent(
     edf_path: Union[str, Path],
     *,
-    per_channel_k: float = 3.5,
-    min_active_frac: float = 0.25,
+    per_channel_k: float = 5.0,
+    min_active_frac: float = 0.30,
     min_duration_sec: float = 30.0,
-    merge_gap_sec: float = 15.0,
+    merge_gap_sec: float = 5.0,
+    min_channel_consec_sec: float = 0.0,
 ) -> Dict:
     """
     Detect seizures from per-channel LL and spatial participation.
@@ -518,85 +747,66 @@ def detect_seizure_by_spatial_extent(
     - seizure ends when channel recruitment collapses back to baseline
 
     per_channel_k is in true standard-deviation units (MAD scaled by 1.4826).
+    min_channel_consec_sec requires each channel to sustain z > k for at least
+    this many consecutive seconds before counting as "active".  This eliminates
+    brief interictal spikes while preserving genuine seizure recruitment.
     """
     edf_path = Path(edf_path)
     if not edf_path.exists():
         raise FileNotFoundError(edf_path)
-    if not (0.0 < float(min_active_frac) <= 1.0):
-        raise ValueError("min_active_frac must be in (0, 1].")
-
     ch_ll, record_duration, sfreq, n_channels, channel_labels = _stream_edf_channel_ll(
         edf_path
     )
-    n_records = int(ch_ll.shape[1])
-    participation_t = np.arange(n_records, dtype=np.float64) * record_duration
+    return _detect_seizure_from_ll_matrix(
+        ch_ll,
+        record_duration=record_duration,
+        sfreq=sfreq,
+        channel_labels=channel_labels,
+        per_channel_k=per_channel_k,
+        min_active_frac=min_active_frac,
+        min_duration_sec=min_duration_sec,
+        merge_gap_sec=merge_gap_sec,
+        min_channel_consec_sec=min_channel_consec_sec,
+    )
 
-    if n_records == 0 or n_channels == 0:
-        return {
-            "onsets_sec": np.zeros((0,), dtype=np.float64),
-            "offsets_sec": np.zeros((0,), dtype=np.float64),
-            "ictal_mask": np.zeros((n_records,), dtype=bool),
-            "participation": np.zeros((n_records,), dtype=np.float64),
-            "participation_t": participation_t,
-            "ch_ll_z": np.zeros((n_channels, n_records), dtype=np.float64),
-            "per_channel_k": float(per_channel_k),
-            "min_active_frac": float(min_active_frac),
-            "sfreq": float(sfreq),
-            "n_channels": int(n_channels),
-            "n_records": int(n_records),
-            "record_duration_sec": float(record_duration),
-            "duration_sec": float(n_records * record_duration),
-            "channel_labels": list(channel_labels),
-            "peak_mem_est_mb": 0.0,
-        }
 
-    eps = 1e-9
-    ch_ll_z = np.empty_like(ch_ll)
-    for ch_idx in range(n_channels):
-        row = ch_ll[ch_idx]
-        med = float(np.median(row))
-        sigma = float(np.median(np.abs(row - med))) * _MAD_TO_SIGMA + eps
-        ch_ll_z[ch_idx] = (row - med) / sigma
+def detect_seizure_by_spatial_extent_epilepsiae(
+    data_path: Union[str, Path],
+    head_path: Union[str, Path],
+    *,
+    per_channel_k: float = 5.0,
+    min_active_frac: float = 0.30,
+    min_duration_sec: float = 30.0,
+    merge_gap_sec: float = 5.0,
+    min_channel_consec_sec: float = 0.0,
+) -> Dict:
+    """
+    Detect seizures on Epilepsiae raw blocks using the same spatial-extent core.
 
-    active_mask = ch_ll_z >= float(per_channel_k)
-    participation = active_mask.mean(axis=0)
-    ictal_flag = participation >= float(min_active_frac)
-
-    runs = _flag_to_runs(ictal_flag)
-    merged = _merge_close_runs(runs, participation_t, merge_gap_sec)
-
-    onsets: List[float] = []
-    offsets: List[float] = []
-    ictal_mask = np.zeros((n_records,), dtype=bool)
-    for s_idx, e_idx in merged:
-        t0 = float(participation_t[s_idx])
-        t1 = float(participation_t[e_idx - 1] + record_duration)
-        if (t1 - t0) < float(min_duration_sec):
-            continue
-        onsets.append(t0)
-        offsets.append(t1)
-        ictal_mask[s_idx:e_idx] = True
-
-    peak_mem_est_mb = (
-        ch_ll.nbytes + ch_ll_z.nbytes + participation.nbytes + active_mask.nbytes
-    ) / (1024 ** 2)
-    return {
-        "onsets_sec": np.asarray(onsets, dtype=np.float64),
-        "offsets_sec": np.asarray(offsets, dtype=np.float64),
-        "ictal_mask": ictal_mask,
-        "participation": participation.astype(np.float64, copy=False),
-        "participation_t": participation_t,
-        "ch_ll_z": ch_ll_z,
-        "per_channel_k": float(per_channel_k),
-        "min_active_frac": float(min_active_frac),
-        "sfreq": float(sfreq),
-        "n_channels": int(n_channels),
-        "n_records": int(n_records),
-        "record_duration_sec": float(record_duration),
-        "duration_sec": float(n_records * record_duration),
-        "channel_labels": list(channel_labels),
-        "peak_mem_est_mb": round(float(peak_mem_est_mb), 1),
-    }
+    The source contract differs (`*.data + *.head` instead of EDF), but the
+    detector logic is identical once we have per-channel bipolar LL traces.
+    """
+    data_path = Path(data_path)
+    head_path = Path(head_path)
+    if not data_path.exists():
+        raise FileNotFoundError(data_path)
+    if not head_path.exists():
+        raise FileNotFoundError(head_path)
+    ch_ll, record_duration, sfreq, _, channel_labels = _stream_epilepsiae_channel_ll(
+        data_path,
+        head_path,
+    )
+    return _detect_seizure_from_ll_matrix(
+        ch_ll,
+        record_duration=record_duration,
+        sfreq=sfreq,
+        channel_labels=channel_labels,
+        per_channel_k=per_channel_k,
+        min_active_frac=min_active_frac,
+        min_duration_sec=min_duration_sec,
+        merge_gap_sec=merge_gap_sec,
+        min_channel_consec_sec=min_channel_consec_sec,
+    )
 
 
 def _flag_to_runs(flag: np.ndarray) -> List[Tuple[int, int]]:

@@ -8,8 +8,10 @@ from src.preprocessing import (
     _merge_close_runs,
     _robust_z,
     _stream_edf_channel_ll,
+    _stream_epilepsiae_channel_ll,
     match_seizure_intervals,
     detect_seizure_by_spatial_extent,
+    detect_seizure_by_spatial_extent_epilepsiae,
     detect_seizure_onsets_from_data,
 )
 
@@ -231,3 +233,143 @@ class TestSpatialExtentDetector:
             res["participation"],
             np.array([0.0, 0.0, 0.0, 0.0, 0.25, 0.5, 0.75, 0.25, 0.0, 0.0, 0.0, 0.0]),
         )
+
+
+class TestStreamEpilepsiaeChannelLL:
+    def test_streams_intracranial_bipolar_ll_from_raw_block(self, tmp_path):
+        head_path = tmp_path / "107300102_0000.head"
+        data_path = tmp_path / "107300102_0000.data"
+        head_path.write_text(
+            "\n".join(
+                [
+                    "start_ts=2009-07-06 18:54:09.000",
+                    "num_samples=8",
+                    "sample_freq=4",
+                    "conversion_factor=1",
+                    "num_channels=4",
+                    "duration_in_sec=2",
+                    "sample_bytes=2",
+                    "elec_names=[A1, A2, A3, ECG]",
+                ]
+            )
+        )
+        # Interleaved by sample: [A1, A2, A3, ECG] × 8 samples.
+        samples = np.array(
+            [
+                [1, 0, 1, 9],
+                [2, 0, 1, 9],
+                [4, 0, 1, 9],
+                [7, 0, 1, 9],
+                [7, 1, 2, 9],
+                [7, 3, 2, 9],
+                [7, 6, 2, 9],
+                [7, 10, 2, 9],
+            ],
+            dtype="<i2",
+        )
+        data_path.write_bytes(samples.reshape(-1).tobytes())
+
+        ll, record_duration, sfreq, n_channels, labels = _stream_epilepsiae_channel_ll(
+            data_path,
+            head_path,
+        )
+
+        assert record_duration == pytest.approx(1.0)
+        assert sfreq == pytest.approx(4.0)
+        assert n_channels == 2
+        assert labels == ["A1-A2", "A2-A3"]
+        assert ll.shape == (2, 2)
+        np.testing.assert_allclose(ll, np.array([[6.0, 9.0], [0.0, 9.0]]))
+
+    def test_detector_reuses_same_core_for_epilepsiae_blocks(self, tmp_path):
+        ch_ll = np.zeros((6, 10), dtype=np.float64)
+        ch_ll[:, 3:7] = 10.0
+        data_path = tmp_path / "fake.data"
+        head_path = tmp_path / "fake.head"
+        data_path.write_bytes(b"")
+        head_path.write_text("")
+
+        with patch(
+            "src.preprocessing._stream_epilepsiae_channel_ll",
+            return_value=(ch_ll, 1.0, 1000.0, 6, [f"A{i+1}" for i in range(6)]),
+        ):
+            res = detect_seizure_by_spatial_extent_epilepsiae(
+                data_path,
+                head_path,
+                per_channel_k=3.0,
+                min_active_frac=0.5,
+                min_duration_sec=2.0,
+                merge_gap_sec=0.0,
+            )
+
+        np.testing.assert_allclose(res["onsets_sec"], np.array([3.0]))
+        np.testing.assert_allclose(res["offsets_sec"], np.array([7.0]))
+
+    def test_sustained_active_mask_filters_short_runs(self):
+        """_sustained_active_mask should keep only runs ≥ min_consec."""
+        from src.preprocessing import _sustained_active_mask
+        raw = np.array([
+            [False, True, True, False, True, True, True, True, False, True],
+            [False, False, True, True, True, True, True, True, True, False],
+        ])
+        result = _sustained_active_mask(raw, min_consec=3)
+        expected = np.array([
+            [False, False, False, False, True, True, True, True, False, False],
+            [False, False, True, True, True, True, True, True, True, False],
+        ])
+        np.testing.assert_array_equal(result, expected)
+
+    def test_sustained_active_mask_passthrough_when_1(self):
+        from src.preprocessing import _sustained_active_mask
+        raw = np.array([[True, False, True]])
+        np.testing.assert_array_equal(_sustained_active_mask(raw, 1), raw)
+
+    def test_detect_with_consec_reduces_detections(self, tmp_path):
+        """min_channel_consec_sec should eliminate brief spikes."""
+        n_ch, n_rec = 8, 100
+        ch_ll = np.ones((n_ch, n_rec), dtype=np.float64) * 0.5
+        ch_ll[:, 10:14] = 50.0
+        ch_ll[:, 50:65] = 50.0
+
+        data_path = tmp_path / "test.data"
+        head_path = tmp_path / "test.head"
+        data_path.write_bytes(b"\x00")
+        head_path.write_text("")
+
+        from unittest.mock import patch
+        with patch(
+            "src.preprocessing._stream_edf_channel_ll",
+            return_value=(ch_ll, 1.0, 1000.0, n_ch, [f"A{i+1}" for i in range(n_ch)]),
+        ):
+            res_no = detect_seizure_by_spatial_extent(
+                data_path, per_channel_k=3.0, min_active_frac=0.5,
+                min_duration_sec=3.0, merge_gap_sec=1.0, min_channel_consec_sec=0.0,
+            )
+            res_yes = detect_seizure_by_spatial_extent(
+                data_path, per_channel_k=3.0, min_active_frac=0.5,
+                min_duration_sec=3.0, merge_gap_sec=1.0, min_channel_consec_sec=5.0,
+            )
+        assert len(res_no["onsets_sec"]) == 2
+        assert len(res_yes["onsets_sec"]) == 1
+
+    def test_rejects_non_integer_sample_frequency(self, tmp_path):
+        head_path = tmp_path / "bad.head"
+        data_path = tmp_path / "bad.data"
+        head_path.write_text(
+            "\n".join(
+                [
+                    "start_ts=2009-07-06 18:54:09.000",
+                    "num_samples=5",
+                    "sample_freq=2.5",
+                    "conversion_factor=1",
+                    "num_channels=2",
+                    "duration_in_sec=2",
+                    "sample_bytes=2",
+                    "elec_names=[A1, A2]",
+                ]
+            )
+        )
+        data_path.write_bytes(np.zeros((5, 2), dtype="<i2").reshape(-1).tobytes())
+
+        with pytest.raises(ValueError, match="Non-integer sample_freq"):
+            _stream_epilepsiae_channel_ll(data_path, head_path)
