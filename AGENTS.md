@@ -88,6 +88,7 @@ Important drift:
 
 - Entry point: `scripts/run_pipeline.py`
 - Preprocess: `src/preprocessing.py`
+  - includes `detect_seizure_by_spatial_extent()` (Yuquan EDF) and `detect_seizure_by_spatial_extent_epilepsiae()` (*.data/*.head)
 - HFO detection: `src/hfo_detector.py`
 - Legacy-aligned refine / packing / lag:
   - `src/group_event_analysis.py`
@@ -99,12 +100,40 @@ Important drift:
     - `build_windows_from_packed_times()`
     - `compute_centroid_matrix_spectrogram()`
     - `lag_rank_from_centroids()`
+- Interictal synchrony (event-level, PR4–PR6):
+  - `src/interictal_synchrony.py` — event row export (`build_event_rows_from_result`), legacy lagPat consumer
+  - `src/interictal_synchrony_aggregation.py` — interval annotation, day/night, exclusion rules
+  - `src/interictal_synchrony_analysis.py` — fixed-window tests, trajectory analysis, Figures A–E, `run_pr6_analysis()`
+  - `scripts/pr6_interictal_sync_figures.py` — PR6 CLI
+  - `scripts/run_epilepsiae_interictal_synchrony.py` / `scripts/run_yuquan_interictal_synchrony.py` — event CSV export
+  - `scripts/aggregate_epilepsiae_interictal_synchrony.py` / `scripts/aggregate_yuquan_interictal_synchrony.py` — aggregation
+- Epilepsiae dataset: `src/epilepsiae_dataset.py`
 - Network: `src/network_analysis.py`
 - Plotting in current repo:
   - `src/visualization.py`
   - `scripts/visualize_run.py`
+- Seizure validation:
+  - `scripts/pr2_seizure_validation.py` — dual-dataset (yuquan + epilepsiae) detector validation
+  - `scripts/pr25_loso_validation.py` — LOSO threshold search scaffold
 
 Do not assume current plotting covers all legacy paper figures. Many old paper figures were produced by legacy `plotting_fig*` scripts, not by the new visualization module.
+
+## Interictal Synchrony Analysis — Current Status (2026-04-03)
+
+**Read `docs/plans/interictal_synchrony_analysis_v4.plan.md` § "当前科学结论" for full evidence.**
+
+- PR4–PR6 (Epilepsiae side) **completed**. Conclusion: **population-level null**.
+  - 16 subjects / ~1,280,824 event rows / 232 intervals
+  - Fixed-window Post vs Pre: all three metrics p > 0.35
+  - Within-interval trajectory: all three metrics p > 0.05
+  - Individual heterogeneity dominates; only 3/16 subjects weakly fit resynchronization hypothesis
+- Analysis is **event-level**, not block-mean. Primary artifact: `*_interictal_sync_events.csv`.
+- Metric hierarchy: **phase** (primary scientific) > **legacy** (paper-comparable) > **span** (appendix).
+- Legacy metric "0.6 wall" at n_participating=3 is a **mathematical artifact** (≈0.5918), not biology.
+- Core/Global are **indistinguishable** on Epilepsiae: lagPat channels ≡ legacy high-event channels, no clinical SOZ labels consumed. SQL `electrode.focus_rel` (`i`/`e`/`l`) available but not yet used.
+- Paper Figure 7B/C (subject 548 = E14) **reproduced exactly**: r=0.147, p=3.2e−14 (single-subject effect).
+- Yuquan PR6: event export done; interval analysis blocked on PR3 (seizure interval inventory).
+- Next scientific directions: (1) focus_rel SOZ mask, (2) n_participating covariate, (3) subject stratification, (4) event-timestamp resolution, (5) prediction framing. See v4 plan for details.
 
 ## Epilepsiae Contract
 
@@ -125,6 +154,7 @@ Read `docs/epilepsiae_dataset_structure.md` before answering any Epilepsiae ques
   - `src.epilepsiae_dataset`
   - `src.interictal_synchrony`
   - `src.interictal_synchrony_aggregation`
+  - `src.interictal_synchrony_analysis`
 - Current machine-readable outputs:
   - `results/epilepsiae_subject_inventory.csv`
   - `results/epilepsiae_recording_inventory.csv`
@@ -133,10 +163,12 @@ Read `docs/epilepsiae_dataset_structure.md` before answering any Epilepsiae ques
   - `results/epilepsiae_sync_subject_manifest.csv`
   - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/`
   - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/`
+  - `results/pr6_analysis/stats/pr6_analysis_stats.json`
+  - `results/pr6_analysis/figures/`
 - Aggregation rule:
-  - block-level synchrony is computed on 1h lagPat blocks
+  - synchrony is computed per event from 1h lagPat blocks; analysis consumes event-level rows
   - do not invent sub-block seizure / post-ictal / day-night labels
-  - if a block crosses seizure, post-ictal, day-night, or nontrivial gap boundaries, exclude it from that aggregate instead of force-assigning it
+  - if an event's parent block crosses seizure, post-ictal, day-night, or nontrivial gap boundaries, exclude the event instead of force-assigning it
 
 ## Source-of-Truth Order
 
@@ -158,6 +190,21 @@ Stop and ask the user instead of guessing when:
 - an Epilepsiae request needs sub-block clinical labels that cannot be justified from 1h block outputs
 
 ## Fast Path For Common Questions
+
+- "What did the interictal synchrony analysis find?"
+  - Read `docs/plans/interictal_synchrony_analysis_v4.plan.md` § "当前科学结论"
+  - Short answer: **population-level null** on Epilepsiae 16 subjects; individual heterogeneity dominates
+  - Paper 548/E14 reproduced exactly; not generalizable to cohort
+
+- "What metrics should I use for synchrony?"
+  - **phase** (`sync_phase_global`) = primary scientific metric (no low-channel discretization artifact)
+  - **legacy** (`sync_legacy_global`) = only for backward compatibility with old paper
+  - **span** (`sync_span_global`) = appendix / sensitivity only
+  - See DEVELOP_PLAN.md § "指标层级判定"
+
+- "Why is legacy synchrony always ~0.6?"
+  - Mathematical artifact: 3-channel uniform lag pattern → theoretical limit ≈ 0.5918
+  - Not biology. Filter by `n_participating >= 5` or use **phase** metric instead.
 
 - "Where does `_refineGpu.npz` come from?"
   - Read `docs/LEGACY_YUQUAN_CODEBASE_MAP.md`

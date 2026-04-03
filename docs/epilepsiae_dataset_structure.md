@@ -502,18 +502,18 @@ manifest 分层语义：
   - 输出目录：`results/interictal_synchrony/epilepsiae_ready_full_artifacts`
   - 汇总表：`results/interictal_synchrony/epilepsiae_ready_full_artifacts/epilepsiae_ready_full_artifacts_interictal_sync_summary.csv`
 
-### 10.3 block-level 同步性往临床窗口聚合
+### 10.3 event-level 同步性往临床窗口聚合
 
-这一步最容易写出垃圾代码，因为 `lagPat` 同步性目前是 **1h block** 粒度，不是 event-level 临床时间轴。
+**重要更新（2026-04-03）**：分析主语已从 block mean 重构为 **event-level**（每个 HFO 群体事件一行，含三指标 `sync_legacy_global` / `sync_phase_global` / `sync_span_global`）。聚合层标注的对象是事件行，不再是 1h block。Day/night 由事件 epoch 直接推导。
 
-因此当前实现采用保守规则：
+聚合保守规则不变：
 
 - `seizure interval`：只用 **完整 EEG seizure**，按相邻 onset 构建 interval
 - `post_ictal`：以上一次 seizure `offset` 为锚点，取 `[offset, offset + 70min)`，也就是 `1h + 10min buffer`
 - `interictal`：从 `post_ictal` 结束到下一次 seizure onset
 - `day/night`：沿用 `Europe/Berlin` 与 `08:00-20:00`
-- **整块归属，否则排除**：
-  - block 只要跨 seizure 区间
+- **严格边界归属，否则排除**：
+  - 事件所属 block 只要跨 seizure 区间
   - 或跨 `post_ictal / interictal` 边界
   - 或跨 `day/night` 边界
   - 或前面存在非平凡 gap
@@ -584,6 +584,12 @@ manifest 分层语义：
   - `annotate_epilepsiae_sync_events()`
   - `aggregate_epilepsiae_sync_rows()`
   - `run_epilepsiae_sync_aggregation()`
+- `src/interictal_synchrony_analysis.py`（PR6 统计与图）
+  - `assign_fixed_window_positions()`
+  - `compute_normalized_trajectory()`
+  - `paired_window_test()`
+  - `within_interval_trend_test()`
+  - `run_pr6_analysis()`
 
 输出：
 
