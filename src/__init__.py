@@ -103,6 +103,10 @@ _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
         "src.interictal_synchrony",
         "run_epilepsiae_interictal_synchrony_from_manifest",
     ),
+    "run_yuquan_interictal_synchrony": (
+        "src.interictal_synchrony",
+        "run_yuquan_interictal_synchrony",
+    ),
     "save_interictal_synchrony_summary": (
         "src.interictal_synchrony",
         "save_interictal_synchrony_summary",
@@ -114,21 +118,74 @@ _LAZY_EXPORTS: Dict[str, Tuple[str, str]] = {
         "src.interictal_synchrony_aggregation",
         "EpilepsiaeSyncAggregationConfig",
     ),
+    "YuquanSyncAggregationConfig": (
+        "src.interictal_synchrony_aggregation",
+        "YuquanSyncAggregationConfig",
+    ),
     "build_epilepsiae_seizure_intervals": (
         "src.interictal_synchrony_aggregation",
         "build_epilepsiae_seizure_intervals",
     ),
-    "annotate_epilepsiae_sync_blocks": (
+    "build_yuquan_seizure_inventory": (
         "src.interictal_synchrony_aggregation",
-        "annotate_epilepsiae_sync_blocks",
+        "build_yuquan_seizure_inventory",
+    ),
+    "build_yuquan_seizure_intervals": (
+        "src.interictal_synchrony_aggregation",
+        "build_yuquan_seizure_intervals",
+    ),
+    "annotate_epilepsiae_sync_events": (
+        "src.interictal_synchrony_aggregation",
+        "annotate_epilepsiae_sync_events",
+    ),
+    "annotate_yuquan_sync_events": (
+        "src.interictal_synchrony_aggregation",
+        "annotate_yuquan_sync_events",
     ),
     "aggregate_epilepsiae_sync_rows": (
         "src.interictal_synchrony_aggregation",
         "aggregate_epilepsiae_sync_rows",
     ),
+    "aggregate_yuquan_sync_rows": (
+        "src.interictal_synchrony_aggregation",
+        "aggregate_yuquan_sync_rows",
+    ),
     "run_epilepsiae_sync_aggregation": (
         "src.interictal_synchrony_aggregation",
         "run_epilepsiae_sync_aggregation",
+    ),
+    "run_yuquan_sync_aggregation": (
+        "src.interictal_synchrony_aggregation",
+        "run_yuquan_sync_aggregation",
+    ),
+    # interictal_synchrony_analysis (PR6) public API
+    "load_event_rows": (
+        "src.interictal_synchrony_analysis",
+        "load_event_rows",
+    ),
+    "assign_fixed_window_positions": (
+        "src.interictal_synchrony_analysis",
+        "assign_fixed_window_positions",
+    ),
+    "compute_normalized_trajectory": (
+        "src.interictal_synchrony_analysis",
+        "compute_normalized_trajectory",
+    ),
+    "paired_window_test": (
+        "src.interictal_synchrony_analysis",
+        "paired_window_test",
+    ),
+    "trajectory_trend_test": (
+        "src.interictal_synchrony_analysis",
+        "trajectory_trend_test",
+    ),
+    "within_interval_trend_test": (
+        "src.interictal_synchrony_analysis",
+        "within_interval_trend_test",
+    ),
+    "run_pr6_analysis": (
+        "src.interictal_synchrony_analysis",
+        "run_pr6_analysis",
     ),
 }
 

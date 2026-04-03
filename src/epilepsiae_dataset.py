@@ -305,6 +305,9 @@ def _read_head_info(head_path: Path) -> Dict[str, object]:
         "duration_sec": float(info["duration_in_sec"]),
         "sample_freq": float(info["sample_freq"]),
         "n_channels": int(info["num_channels"]),
+        "num_samples": int(info.get("num_samples", round(float(info["sample_freq"]) * float(info["duration_in_sec"])))),
+        "sample_bytes": int(info.get("sample_bytes", 2)),
+        "conversion_factor": float(info.get("conversion_factor", 1.0)),
         "channel_names": ch_names,
     }
 
@@ -526,6 +529,9 @@ def _build_rows_for_subject(
                 "head_exists": bool(raw_block and raw_block.head_path),
                 "data_exists": bool(raw_block and raw_block.data_path),
                 "raw_gpu_exists": bool(raw_block and raw_block.raw_gpu_path),
+                "head_path": None if not raw_block or not raw_block.head_path else str(raw_block.head_path),
+                "data_path": None if not raw_block or not raw_block.data_path else str(raw_block.data_path),
+                "raw_gpu_path": None if not raw_block or not raw_block.raw_gpu_path else str(raw_block.raw_gpu_path),
                 "artifact_gpu_exists": (artifact_dir / f"{stem}_gpu.npz").exists(),
                 "has_lagpat": (artifact_dir / f"{stem}_lagPat.npz").exists(),
                 "has_lagpat_freq": (artifact_dir / f"{stem}_lagPat_withFreqCent.npz").exists(),
@@ -535,6 +541,9 @@ def _build_rows_for_subject(
                 "head_duration_sec": None if not head_info else head_info["duration_sec"],
                 "head_sample_rate": None if not head_info else head_info["sample_freq"],
                 "head_n_channels": None if not head_info else head_info["n_channels"],
+                "head_num_samples": None if not head_info else head_info["num_samples"],
+                "head_sample_bytes": None if not head_info else head_info["sample_bytes"],
+                "head_conversion_factor": None if not head_info else head_info["conversion_factor"],
                 "head_sql_start_delta_sec": head_delta,
                 "has_eeg": channel_info["has_eeg"],
                 "intracranial_channels": channel_info["intracranial_channels"],
@@ -866,10 +875,12 @@ def build_epilepsiae_sync_subject_manifest(
     """
     Build a subject-level manifest for interictal synchrony analysis.
 
-    Readiness is intentionally simple:
+    The subject gate is intentionally minimal:
     - at least `min_complete_eeg_intervals` complete EEG seizures
-    - at least one inter-seizure interval >= `min_sync_interval_sec`
     - artifacts (`lagPat` + `packedTimes`) available when `require_artifacts=True`
+
+    Interval length is recorded, not used as a subject-level exclusion gate.
+    Long intervals remain available as a legacy-comparable subcohort.
     """
     seizure_by_subject: Dict[str, List[Dict[str, object]]] = {}
     for row in inventory.seizure_rows:
@@ -879,12 +890,19 @@ def build_epilepsiae_sync_subject_manifest(
     for subj in sorted(inventory.subject_rows, key=lambda x: str(x["subject"])):
         subject = str(subj["subject"])
         seizures = seizure_by_subject.get(subject, [])
-        complete_eeg = [x for x in seizures if x["has_complete_eeg_interval"]]
+        complete_eeg = sorted(
+            (x for x in seizures if x["has_complete_eeg_interval"]),
+            key=lambda x: float(x["eeg_onset_epoch"] or 0.0),
+        )
+        interval_lengths = [
+            float(curr["eeg_onset_epoch"]) - float(prev["eeg_onset_epoch"])
+            for prev, curr in zip(complete_eeg[:-1], complete_eeg[1:])
+        ]
         long_intervals = [
-            float(x["seizure_interval_from_prev_sec"])
-            for x in seizures
-            if x["seizure_interval_from_prev_sec"] not in ("", None)
-            and float(x["seizure_interval_from_prev_sec"]) >= float(min_sync_interval_sec)
+            x for x in interval_lengths if float(x) >= float(min_sync_interval_sec)
+        ]
+        short_intervals = [
+            x for x in interval_lengths if float(x) < float(min_sync_interval_sec)
         ]
         lagpat_cov = 0.0
         if int(subj["n_gpu_artifact_blocks"] or 0) > 0:
@@ -896,7 +914,6 @@ def build_epilepsiae_sync_subject_manifest(
         )
         ready = (
             len(complete_eeg) >= int(min_complete_eeg_intervals)
-            and len(long_intervals) >= 1
             and artifact_ready
         )
         if ready and lagpat_cov >= 0.95:
@@ -905,8 +922,6 @@ def build_epilepsiae_sync_subject_manifest(
             tier = "ready_partial_artifacts"
         elif int(subj["n_complete_eeg_intervals"] or 0) < int(min_complete_eeg_intervals):
             tier = "not_enough_complete_seizures"
-        elif len(long_intervals) == 0:
-            tier = "no_long_interictal_interval"
         elif not artifact_ready:
             tier = "missing_interictal_artifacts"
         else:
@@ -915,8 +930,6 @@ def build_epilepsiae_sync_subject_manifest(
         reasons: List[str] = []
         if int(subj["n_complete_eeg_intervals"] or 0) < int(min_complete_eeg_intervals):
             reasons.append("fewer_than_required_complete_eeg_seizures")
-        if len(long_intervals) == 0:
-            reasons.append("no_interseizure_interval_ge_threshold")
         if not artifact_ready:
             reasons.append("missing_lagpat_or_packed_times")
         if float(subj["n_inter_record_gaps_gt2s"] or 0) > 0:
@@ -931,6 +944,10 @@ def build_epilepsiae_sync_subject_manifest(
                 "tier": tier,
                 "ready_for_sync_analysis": ready,
                 "n_complete_eeg_intervals": len(complete_eeg),
+                "n_all_eligible_intervals": len(interval_lengths),
+                "n_legacy_comparable_intervals": len(long_intervals),
+                "n_short_intervals": len(short_intervals),
+                "has_legacy_comparable_intervals": len(long_intervals) > 0,
                 "n_intervals_ge_threshold": len(long_intervals),
                 "min_sync_interval_sec": float(min_sync_interval_sec),
                 "artifact_subject_present": subj["artifact_subject_present"],
