@@ -270,7 +270,7 @@ HFOsp/
 
 - 验收结论：
   - ✅ **PR1.5 已验收通过**
-  - 验收边界：`Epilepsiae` 数据契约、统一时间轴、manifest、block-level synchrony、以及严格整块归属的 interval/window 聚合层
+  - 验收边界：`Epilepsiae` 数据契约、统一时间轴、manifest、event-level synchrony 主链，以及基于事件边界严格归属的 interval/window 聚合层
   - 不在 PR1.5 验收边界内：PR6 统计建模本身（Friedman / LMM / 终稿图）
 - 新增脚本：`scripts/survey_epilepsiae_dataset.py`
 - 新增脚本：`scripts/run_epilepsiae_interictal_synchrony.py`
@@ -288,14 +288,14 @@ HFOsp/
   - 当前挂载数据的时区已经钉死为 `UKLFR -> Europe/Berlin`；`src.epilepsiae_dataset` 已内建 override 接口与 `08:00-20:00` day/night 规则
   - 已输出 `results/epilepsiae_sync_subject_manifest.csv`，按 `ready_full_artifacts / ready_partial_artifacts / missing_interictal_artifacts` 分层
   - `interictal_synchrony` 已接上 manifest，并实际跑完 `ready_full_artifacts` 的 `16` 个 subjects / `2962` 个 blocks
-  - block-level synchrony 已进一步聚合成 `subject × seizure_interval × window_type` 分析表；聚合规则是严格整块归属，跨 seizure / post-ictal / day-night / gap 边界的 block 直接排除
+  - event-level synchrony 已进一步聚合成 `subject × seizure_interval × window_type` 分析表；聚合规则是严格按事件边界归属，跨 seizure / post-ictal / day-night / gap 边界的 event 直接排除
   - 当前聚合实跑保留：`1903` blocks 能安全落进完整 seizure interval，`1742` blocks 能进入 `phase(post_ictal/interictal)` 聚合，主表产出 `409` 行
 - 对后续 PR 的硬约束：
   - 若将 Epilepsiae 纳入同步性分析，必须消费 `results/epilepsiae_*_inventory.*` 形成的统一时间轴与 seizure inventory
   - subject 选择必须优先消费 manifest，而不是手工挑病人
   - 不能把“20 个 artifact subjects”误当成“全量数据集”
   - 不能把 Yuquan 的 EDF 路径直接套到 Epilepsiae 上
-  - 不能把 1h block-level synchrony 假装成任意精细的临床窗口；当前聚合层明确拒绝半块归属
+  - 不能把 1h artifact block 的来源元数据误当成分析主语；当前聚合层明确以 event-level metric 为主，block summary 只保留兼容派生视图
 
 #### PR2 Streaming Seizure Detector 验收复盘（2026-04-02）
 
@@ -316,7 +316,7 @@ HFOsp/
   - PR2 基础设施通过，可作为后续检测器与验证框架
   - channel-mean 检测器不再继续加补丁（如 `ignore_initial`）；进入 PR2.5 重构
 
-#### PR2.5 空间招募检测器（第一性原理）（2026-04-02 实施）
+#### PR2.5 空间招募检测器（第一性原理）（2026-04-02 起，进行中）
 
 - 第一性原理约束：
   - 发作具有通道逐步招募特征（participation 上升）
@@ -334,7 +334,7 @@ HFOsp/
 2. **单极导联共参考噪声（根因）**：`_stream_edf_channel_ll` 读的是 EDF 原始单极通道（A1, A2, ...），它们共享参考电极。参考端的呼吸/心电/体动噪声同时污染 100% 的通道 → participation 虚假飙升 → FP 风暴。无论怎么提高 `min_active_frac` 都没用，因为噪声本身就是共模的。修复：在流式读取器中直接做双极减法（相邻触点，同 shaft），消除共参考后通道之间才真正近独立。
 3. **`min_duration_sec` 默认值过短**：初始 10s 对玉泉数据集（发作 >50s）太宽松，放过了大量生理性短暂事件。修正为 30s。
 
-**验收结果（v3 = 双极 LL + MAD×1.4826 + frac=0.40 + dur=30）：**
+**当前最佳候选（v3 = 双极 LL + MAD×1.4826 + frac=0.40 + dur=30）：**
 
 | 指标 | litengsheng (7 seizures) | sunyuanxin (8 seizures) |
 |---|---|---|
@@ -350,6 +350,41 @@ HFOsp/
 
 **已消除的参数**：`combine_mode`, `ignore_initial_sec`, `rms_k`, `rms_win_sec`, `rms_step_sec`
 **保留的旧接口**：`detect_seizure_streaming()` 标记 deprecated，不删除
+
+**但这还不算 PR2.5 验收通过**：
+
+- 上面结果只证明 `Yuquan` 已标注患者上的 detector 方向正确，不足以证明对未标注患者鲁棒。
+- `PR2.5` 的真实验收口径改为：
+  - 同一 detector core 同时支持 `Yuquan EDF` 与 `Epilepsiae *.data + *.head`
+  - 真实患者验证必须统一输出审计表、时间线图、误差图
+  - 主门槛不再是单 cohort 调参，而是 labeled patients 的 held-out subject 验证
+  - 目标是 `FP` 压到与手工标注同一量级，并保持 `recall >= 0.80`
+- `Epilepsiae` 的角色不是补一份报告，而是作为额外的高质量手工标注训练/验证来源，用来约束跨患者泛化而不是做患者特异补丁
+
+#### PR4-PR6 Interictal Synchrony 主链与现阶段科学结论（2026-04-03）
+
+- 【核心判断】
+  - ✅ 值得做：这条线最大的进展不是“多了几张图”，而是把分析主语和统计层级纠正了
+  - 当前必须坚持：`event-level` 是主链，`block summary` 只是兼容派生视图
+  - 当前不能夸大：群体层面还**没有**证实“post-ictal reset -> resynchronize -> pre-ictal peak”是普适规律
+- 现在已经做到：
+  - PR4 主产物已切到 `event rows`，不再把 block 平均值当主分析对象
+  - PR5 已按 `event_start/end` 做 interval / phase / day-night / gap 的严格归属；跨边界 event 直接排除
+  - PR6 的固定窗、trajectory、Figure A-E、cohort summary 框架已落地
+  - Figure A 已按 seizure-free interval / 连续事件段分段，避免折线视觉上穿过 seizure 时间
+- 这阶段最关键的方法论修正：
+  - 旧的 pooled trajectory 把 `subject x interval` 全混在一起做 Spearman，统计层级错误
+  - 该错误已经在真实数据上暴露为 **Simpson's paradox**：单病人正趋势和全 cohort 负趋势同时出现
+  - 正确主检验应回到 **within-interval** 层级，再向上做 subject / cohort 聚合
+- 当前真实结果（以 `Epilepsiae ready_full_artifacts` 为主）：
+  - 单病人 `Subject 916` 明显支持假设：`legacy rho=+0.175 (p=0.001)`，`phase rho=+0.185 (p=0.0007)`
+  - 但修正为 `within-interval` 后，cohort 的三个主指标整体都围绕 0 摆动，fixed-window 的 Post vs Pre 也没有稳定显著差异
+  - 现阶段最老实的结论只能是：**假设在部分 interval / subject 上成立，但还不是稳定可复现的 cohort-level 规律**
+- 第一性原理下真正的破局点：
+  - 不是继续 pooled，也不是继续抠图，而是找出**什么条件下**会发生 resynchronization
+  - 下一步优先分层：`long vs short interval`、`core_only vs all`、`coverage / gap burden`、标注质量
+  - 若做群体统计，应优先考虑 `interval-level slope/effect -> hierarchical aggregation`，而不是把所有 event 扔进一个桶
+- 详细状态与下一步口径见：`docs/interictal_synchrony_current_status.md`
 
 #### Phase 1 重构总结（2026-01-30）
 
