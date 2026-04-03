@@ -566,6 +566,9 @@ manifest 分层语义：
 脚本：
 
 - `scripts/survey_epilepsiae_dataset.py`
+- `scripts/run_epilepsiae_interictal_synchrony.py`（Epilepsiae event CSV 产出）
+- `scripts/aggregate_epilepsiae_interictal_synchrony.py`（Epilepsiae 聚合）
+- `scripts/pr6_interictal_sync_figures.py`（PR6 统计与图 CLI）
 
 正式可复用接口：
 
@@ -613,7 +616,7 @@ manifest 分层语义：
 ## 最短结论
 
 - **PR1.5 已验收通过**：范围包括数据契约、inventory、manifest、时区/day-night 规则、`ready_full_artifacts` 同步性实跑、以及严格按事件边界归属的 interval/window 聚合。
-- **PR4–PR6（Epilepsiae 侧）已完成**：16 subjects / ~1,280,824 event rows / 232 intervals 上的 event-level 同步性全链分析已跑通。**结论：队列水平 null**（固定窗口三指标 p>0.35；within-interval trajectory 三指标 p>0.05）。个体异质性远大于队列效应。详见 `docs/plans/interictal_synchrony_analysis_v4.plan.md` 的"当前科学结论"章节。
+- **PR4–PR6（Epilepsiae 侧）已完成**：16 subjects / ~1,280,824 event rows / 232 intervals 上的 event-level 同步性全链分析已跑通。**结论：队列水平 null**（固定窗口三指标 p>0.35；within-interval trajectory legacy p=0.290, phase p=0.933, span p=0.053 但方向与假设相反）。个体异质性远大于队列效应。详见 `docs/plans/interictal_synchrony_analysis_v4.plan.md` 的"当前科学结论"章节。
 - `Epilepsiae` 全量是 **27 个 subject**，不是 20 个。
 - 其中 **20 个**有老间期间期中间产物，**7 个**只有原始数据/SQL。
 - 原始数据主合同是 `*.data + *.head + SQL`，不是 EDF。

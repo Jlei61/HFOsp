@@ -124,8 +124,8 @@ Do not assume current plotting covers all legacy paper figures. Many old paper f
 
 - PR4–PR6 (Epilepsiae side) **completed**. Conclusion: **population-level null**.
   - 16 subjects / ~1,280,824 event rows / 232 intervals
-  - Fixed-window Post vs Pre: all three metrics p > 0.35
-  - Within-interval trajectory: all three metrics p > 0.05
+  - Fixed-window Post vs Pre: all three metrics p > 0.35 (legacy 0.529, phase 0.380, span 0.947)
+  - Within-interval trajectory: legacy p=0.290, phase p=0.933, span p=0.053 (borderline but **direction opposes** hypothesis)
   - Individual heterogeneity dominates; only 3/16 subjects weakly fit resynchronization hypothesis
 - Analysis is **event-level**, not block-mean. Primary artifact: `*_interictal_sync_events.csv`.
 - Metric hierarchy: **phase** (primary scientific) > **legacy** (paper-comparable) > **span** (appendix).

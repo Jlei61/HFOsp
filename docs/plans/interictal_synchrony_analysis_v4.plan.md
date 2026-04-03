@@ -1,6 +1,6 @@
 ---
 name: Interictal Synchrony Analysis
-overview: "Three-phase plan + optional sleep staging. Phase 1 (PR1–PR2.5): seizure/interval truth + Epilepsiae baseline — done. Phase 2 (PR4–PR6): event-level synchrony + interval annotation + stats — Epilepsiae done, **population-level null result confirmed**. Phase 3 (PR7–PR8): lagPat backfill. Science pivot: individual-subject dynamics, not cohort-level resynchronization."
+overview: "Three-phase plan + optional sleep staging. Phase 1 (PR1–PR2): infrastructure done; PR2.5 spatial detector in progress. Phase 2 (PR4–PR6): event-level synchrony — Epilepsiae done, **population-level null result confirmed**; Yuquan pending PR3. Phase 3 (PR7–PR8): lagPat backfill. Science pivot: individual-subject dynamics, not cohort-level resynchronization."
 todos:
   - id: p1-pr1-edf-parser
     content: "PR1: fast_read_edf_annotations + parse_seizure + zoneinfo + recording timeline (see PR1 supplement 2026-04-01)"
@@ -18,13 +18,13 @@ todos:
     content: "PR3: full Yuquan outputs -> seizure_onsets JSON + interval inventory + yuquan_tier_assignment.csv (tier supplements interval truth)"
     status: pending
   - id: p2-pr4-sync-metrics
-    content: "PR4: event-level metric contract (interictal_synchrony event rows + block compat view); Yuquan+Epilepsiae isomorphic CSV; 34 tests pass"
+    content: "PR4: event-level metric contract (interictal_synchrony event rows + block compat view); Yuquan+Epilepsiae isomorphic CSV; sync tests pass"
     status: completed
   - id: p2-pr5-period-slicer
     content: "PR5: event-level interval annotation + fixed-window vs normalized-trajectory + gap-aware exclusions (Epilepsiae aggregation pattern; Yuquan timeline)"
     status: completed
   - id: p2-pr6-analysis-script
-    content: "PR6: interictal_sync_analysis + Figures A–E + stats — Epilepsiae done (null result); Yuquan pending PR3 interval inventory"
+    content: "PR6: interictal_sync_analysis + Figures A–E + stats — Epilepsiae done (null result); Yuquan blocked on PR3 interval inventory"
     status: completed
   - id: p2-pr6-science-pivot
     content: "PR6 follow-up: science pivot — subject stratification, SOZ-label core analysis, n_participating covariate, prediction framing"
@@ -62,9 +62,9 @@ isProject: false
 | 固定窗口 Post vs Pre (paired Wilcoxon) | legacy | 128 pairs | r=0.064 | 0.529 | null |
 | | phase | 128 pairs | r=0.089 | 0.380 | null |
 | | span | 128 pairs | r=0.007 | 0.947 | null |
-| Within-interval trajectory (median ρ → one-sample Wilcoxon) | legacy | 232 intervals | median_ρ=−0.003 | 0.290 | null |
-| | phase | 232 intervals | median_ρ=+0.001 | 0.933 | null |
-| | span | 232 intervals | median_ρ=−0.008 | 0.053 | 边缘，方向与假设相反 |
+| Within-interval trajectory (median ρ → one-sample Wilcoxon) | legacy | 232 intervals | median_ρ=−0.0026 | 0.290 | null |
+| | phase | 232 intervals | median_ρ=+0.0011 | 0.933 | null |
+| | span | 232 intervals | median_ρ=−0.0079 | 0.053 | 边缘(p≈0.053)，方向与假设相反 |
 
 Subject-level direction counts（phase pre−post）：11 负 / 5 正 → 无一致方向。
 
@@ -443,7 +443,7 @@ dataset:
 - `src/interictal_synchrony_analysis.py`：`assign_fixed_window_positions()`；`compute_normalized_trajectory()`；`paired_window_test()`；`within_interval_trend_test()`；`run_pr6_analysis()`；Figures A–E
 - `scripts/run_epilepsiae_interictal_synchrony.py`、`scripts/aggregate_epilepsiae_interictal_synchrony.py`、`scripts/pr6_interictal_sync_figures.py`
 - Yuquan：`scripts/run_yuquan_interictal_synchrony.py`、`scripts/aggregate_yuquan_interictal_synchrony.py`、`scripts/interictal_sync_analysis.py`
-- `tests/test_interictal_synchrony_analysis.py`：34 tests pass
+- `tests/test_interictal_synchrony_analysis.py`（23 tests）+ `test_interictal_synchrony.py` + `test_interictal_synchrony_aggregation.py`：sync 三件套合计 38 tests pass
 
 ### PR4：Event-level synchrony metric contract（✅ 已完成）
 

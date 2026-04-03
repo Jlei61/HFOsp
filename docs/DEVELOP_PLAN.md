@@ -373,8 +373,10 @@ HFOsp/
 - `scripts/pr6_interictal_sync_figures.py`：Figure A–E 全链 CLI
 - `scripts/run_epilepsiae_interictal_synchrony.py`：Epilepsiae event CSV 产出
 - `scripts/run_yuquan_interictal_synchrony.py`：Yuquan event CSV 产出
-- `scripts/aggregate_epilepsiae_interictal_synchrony.py`：event-level 聚合
-- `tests/test_interictal_synchrony_analysis.py`：34 个用例全通过
+- `scripts/aggregate_epilepsiae_interictal_synchrony.py`：Epilepsiae event-level 聚合
+- `scripts/aggregate_yuquan_interictal_synchrony.py`：Yuquan event-level 聚合
+- `scripts/interictal_sync_analysis.py`：Yuquan 侧分析入口
+- `tests/test_interictal_synchrony_analysis.py`（23 tests）+ `test_interictal_synchrony.py` + `test_interictal_synchrony_aggregation.py`：sync 三件套合计 38 tests pass
 
 **数据规模（Epilepsiae `ready_full_artifacts`）**
 
