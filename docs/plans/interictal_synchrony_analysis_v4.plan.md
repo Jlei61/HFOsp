@@ -1,6 +1,6 @@
 ---
 name: Interictal Synchrony Analysis
-overview: "Three-phase plan + optional sleep staging: (1) seizure/interval truth + Yuquan artifact tier + Epilepsiae as real validation baseline (PR1.5 done; cohort = interval-first), (2) event-level synchrony contract + interval annotation + stats/figures (PR4–PR6; Yuquan + Epilepsiae), (3) EDF/.data→lagPat backfill with Epilepsiae smoke. GPU/CPU split; >3h = legacy-comparable subset only, not global subject gate."
+overview: "Three-phase plan + optional sleep staging. Phase 1 (PR1–PR2.5): seizure/interval truth + Epilepsiae baseline — done. Phase 2 (PR4–PR6): event-level synchrony + interval annotation + stats — Epilepsiae done, **population-level null result confirmed**. Phase 3 (PR7–PR8): lagPat backfill. Science pivot: individual-subject dynamics, not cohort-level resynchronization."
 todos:
   - id: p1-pr1-edf-parser
     content: "PR1: fast_read_edf_annotations + parse_seizure + zoneinfo + recording timeline (see PR1 supplement 2026-04-01)"
@@ -18,13 +18,16 @@ todos:
     content: "PR3: full Yuquan outputs -> seizure_onsets JSON + interval inventory + yuquan_tier_assignment.csv (tier supplements interval truth)"
     status: pending
   - id: p2-pr4-sync-metrics
-    content: "PR4: event-level metric contract (interictal_synchrony + group_event_analysis); event rows are primary artifact, block summary only compatibility view"
+    content: "PR4: event-level metric contract (interictal_synchrony event rows + block compat view); Yuquan+Epilepsiae isomorphic CSV; 34 tests pass"
     status: completed
   - id: p2-pr5-period-slicer
-    content: "PR5: event-level interval annotation + fixed-window vs normalized-trajectory + gap-aware exclusions (strict event-boundary assignment)"
+    content: "PR5: event-level interval annotation + fixed-window vs normalized-trajectory + gap-aware exclusions (Epilepsiae aggregation pattern; Yuquan timeline)"
     status: completed
   - id: p2-pr6-analysis-script
-    content: "PR6: interictal_sync_analysis + cohort summaries + Figures A–E + within-interval stats; framework landed, scientific acceptance still pending"
+    content: "PR6: interictal_sync_analysis + Figures A–E + stats — Epilepsiae done (null result); Yuquan pending PR3 interval inventory"
+    status: completed
+  - id: p2-pr6-science-pivot
+    content: "PR6 follow-up: science pivot — subject stratification, SOZ-label core analysis, n_participating covariate, prediction framing"
     status: pending
   - id: p3-pr7-pipeline-validate
     content: "PR7: GPU smoke + run_pipeline EDF->lagPat vs legacy lagPat"
@@ -43,6 +46,77 @@ isProject: false
 ## 核心科学问题
 
 验证假设：间期 HFO 群体事件的通道间同步性是否在两次癫痫发作之间呈现「发作后 reset → resynchronize → 发作前峰值」的趋势。
+
+---
+
+## 当前科学结论（2026-04-03 实证更新）
+
+### 核心结论：队列水平 null，个体水平异质
+
+在 Epilepsiae `ready_full_artifacts` 16 subjects / ~1,280,824 event rows / 232 intervals 上完成了 event-level PR4→PR5→PR6 全链分析。**原始假设（发作后 reset → 再同步 → 发作前峰值）在队列水平不成立**。
+
+**定量证据**
+
+| 检验 | 指标 | n | 统计量 | p | 判定 |
+|---|---|---|---|---|---|
+| 固定窗口 Post vs Pre (paired Wilcoxon) | legacy | 128 pairs | r=0.064 | 0.529 | null |
+| | phase | 128 pairs | r=0.089 | 0.380 | null |
+| | span | 128 pairs | r=0.007 | 0.947 | null |
+| Within-interval trajectory (median ρ → one-sample Wilcoxon) | legacy | 232 intervals | median_ρ=−0.003 | 0.290 | null |
+| | phase | 232 intervals | median_ρ=+0.001 | 0.933 | null |
+| | span | 232 intervals | median_ρ=−0.008 | 0.053 | 边缘，方向与假设相反 |
+
+Subject-level direction counts（phase pre−post）：11 负 / 5 正 → 无一致方向。
+
+**关键个体发现**
+
+- **Subject 548**（= 论文 E14）：within-interval legacy ρ = +0.133。按论文同口径（event-level, 发作前 1h, Pearson）复现 r=0.147, p=3.2e−14, n_seizures=14 — **数值完全一致**。证明论文图 7B/7C 是真实的单 subject 效应，不是管线 bug。
+- **Subject 916**（52 seizures, 435 blocks）：within-interval legacy ρ = +0.175, p=0.001 — **本队列最强正信号**。
+- **Subject 1073**（>216h, 194k events）：legacy ρ = −0.674 — **强负趋势**，与假设完全相反。
+- 仅 3/16 subjects 弱满足 adaptive-Kuramoto 双判据（phase pre>post AND positive within-interval ρ）。
+
+**方法学教训**
+
+1. **Pooled Spearman 不可用**：~1M event-level pooled 相关给出 p≈0（legacy ρ=−0.019），但效应量 <0.04，且 Simpson 悖论使正/负 subject 混为一谈。
+2. **Legacy 指标 "0.6 wall"**：n_participating=3 时理论极限 ≈ 0.5918，非生物学。
+3. **Core/Global 当前不可区分**：Epilepsiae lagPat 通道 ≡ legacy high-event 通道，非临床 SOZ；`n_core == n_channels` 在 100% event rows 上成立。
+
+### 第一性原理：为什么 null，以及可能的破局点
+
+**为什么 null 是合理的**
+
+原始假设假定"所有 subject 的发作间同步性遵循同一动力学"。但从第一性原理看：
+
+1. **发作起源区异质性**：不同 subject 的 SOZ 位置、范围、传播模式完全不同。用"高事件率通道"作为通道宇宙（legacy `avgPickChns`）并不等价于 SOZ-internal 通道。一个 subject 的"高事件率通道"可能主要是传播区，另一个可能确实是起源区。**通道选择语义不统一时，全队列均值化没有物理意义。**
+
+2. **Interval 时长分布极不均匀**：3h 到 >50h 的 interval 被归一化到 [0,1] 后，"早期"和"晚期"的物理含义完全不同。对短 interval，Post 1h 可能就是整个 interictal 段；对长 interval，Pre 1h 只是末端一小段。**归一化时间轴假设了标度不变性，但没有物理理由。**
+
+3. **1h block 时间分辨率限制**：如果再同步化的特征时间尺度是分钟级（如发作后 10-30 分钟的快速 reset），1h 粒度看不到它。如果是 >24h 的慢趋势，短 interval 根本装不下。**block 粒度对快/慢过程都不利。**
+
+**可能的破局方向（按可行性排序）**
+
+1. **消费 SQL `focus_rel` 构建真实 SOZ mask**：`focus_rel = 'i'`（in-focus）的电极子集与 `'e'`（extra-focal）分开分析。如果 SOZ-internal 通道的同步性确实在发作前上升，而 propagation 区不变或下降，当前 all-channel 分析会把两个方向平均成 null。
+   - **可行性**：高。SQL 已解析；只需在 PR4 的 event export 中增加 `focus_rel` 标注，按通道子集重算 phase metric。
+   - **风险**：`focus_rel` 语义未完全确认（`l` 可能是边界不确定标签）；部分 subject 的 `focus_rel` 混合（如 1073 有 `i`+`l`，1077 有 `e`+`i`）。
+
+2. **`n_participating` 条件分析**：legacy 0.6 wall 证明低通道事件的指标是离散化噪声。只分析 n_participating ≥ 某阈值（如 ≥5 或 ≥ median）的事件，或将 n_participating 作为协变量进入混合效应模型。
+   - **可行性**：高。数据已有 `n_participating` 列。
+   - **科学意义**：大事件（高 participation）更可能代表"网络级"同步化，而非局部孤立事件。
+
+3. **Subject 分层描述而非 cohort 检验**：放弃"全队列单一假设"的框架。对每个 subject 给出 within-interval trend 方向与强度，然后问"什么样的 subject 表现出正趋势？"——按 SOZ location、seizure frequency、seizure type、recording duration 等临床特征分组。
+   - **可行性**：中。需要更多临床元数据（部分可从 SQL 获取）。
+   - **科学意义**：最诚实的描述；可以写成"异质性本身就是发现"。
+
+4. **Event-level temporal resolution（非 block-epoch）**：当前 event 的时间戳是 block start epoch + event 在 block 内的偏移。如果直接用 event timestamp（秒级精度）做 trajectory，而不是先塌缩到 1h block center，可以捕捉更细的时间结构。
+   - **可行性**：中。需修改 `build_event_rows_from_result()` 以输出精确 event timestamp（目前仅 block_start_epoch + event_idx 推算）。
+   - **风险**：事件间距不均匀；需要 GAM/样条而非简单 Spearman。
+
+5. **预发作 prediction framing**：不问"trajectory shape"，而是问"发作前 1h 的事件特征是否系统性区别于其余时段？"——本质上是 seizure forecasting / pre-ictal state 的分类问题，而非 trajectory 的回归问题。
+   - **可行性**：低-中。需要多 subject 的发作标注（Epilepsiae 已有）。
+   - **科学意义**：与 seizure prediction 文献对接更自然。
+
+6. **Yuquan Tier A subjects（手工标注 ≥2 seizures）**：gaolan(4), litengsheng(6), sunyuanxin(5), xuxinyi(3) 共 4 subjects。这些有最可靠的发作标注。如果方向 1-2 在这些 subject 上出现信号，可以作为 Epilepsiae null 的对照。
+   - **依赖**：PR3（Yuquan interval inventory）必须先完成。
 
 ---
 
@@ -277,7 +351,7 @@ dataset:
 **验收结论（2026-04-02）**
 
 - ✅ **PR1.5 已验收通过**
-- 已完成：数据契约钉死、`src.epilepsiae_dataset` 正式接口、四张 inventory、manifest、时区/day-night 规则、`ready_full_artifacts` event-level synchrony 主链实跑、以及严格按事件边界归属的 interval/window 聚合
+- 已完成：数据契约钉死、`src.epilepsiae_dataset` 正式接口、四张 inventory、manifest、时区/day-night 规则、`ready_full_artifacts` block-level synchrony 实跑、以及严格整块归属的 interval/window 聚合
 - 明确保留到后续 PR：PR6 统计建模、跨 subject 终稿图与正式统计结论
 
 **对后续 PR 的影响**
@@ -360,108 +434,89 @@ dataset:
 
 ## Phase 2：已有 lagPat 上的同步性与统计（Yuquan + Epilepsiae 同构交付）
 
-**Epilepsiae 在本 Phase 为强制验证路径**：指标契约与聚合规则须先在 `ready_full_artifacts` 上跑通；`ready_partial_artifacts` 仅作敏感性队列；主结论须在 Epilepsiae 真数据上复现或明确反证。
+**状态：Epilepsiae 侧 PR4–PR6 已完成，结论为 population-level null。Yuquan 侧 event export 完成，interval 分析待 PR3 interval inventory。**
 
-**实现主链**（与计划文字一致）：
+**实现主链（已落地）**
 
-- `src/interictal_synchrony.py`（PR4 event-level 契约；block summary 仅兼容）
-- `src/interictal_synchrony_aggregation.py`（PR5 Epilepsiae 侧 event annotation + interval/window 聚合）
-- `scripts/run_epilepsiae_interictal_synchrony.py`、`scripts/aggregate_epilepsiae_interictal_synchrony.py`
-- Yuquan：`scripts/interictal_sync_analysis.py` + 与 `build_recording_timeline` 一致的 interval 切分
+- `src/interictal_synchrony.py`：`build_event_rows_from_result()` → `event_sync_v1` schema；`build_interictal_synchrony_from_legacy_lagpat()`；`run_epilepsiae_interictal_synchrony_from_manifest()`
+- `src/interictal_synchrony_aggregation.py`：`_annotate_sync_events_against_intervals()`；`aggregate_epilepsiae_sync_rows()`；`run_epilepsiae_sync_aggregation()`
+- `src/interictal_synchrony_analysis.py`：`assign_fixed_window_positions()`；`compute_normalized_trajectory()`；`paired_window_test()`；`within_interval_trend_test()`；`run_pr6_analysis()`；Figures A–E
+- `scripts/run_epilepsiae_interictal_synchrony.py`、`scripts/aggregate_epilepsiae_interictal_synchrony.py`、`scripts/pr6_interictal_sync_figures.py`
+- Yuquan：`scripts/run_yuquan_interictal_synchrony.py`、`scripts/aggregate_yuquan_interictal_synchrony.py`、`scripts/interictal_sync_analysis.py`
+- `tests/test_interictal_synchrony_analysis.py`：34 tests pass
 
-### PR4：Synchrony metric contract（event-level，Yuquan + Epilepsiae 同构）
+### PR4：Event-level synchrony metric contract（✅ 已完成）
 
-**落点（双轨）**
+**原计划 block-level → 实施时重构为 event-level**：每个 HFO 群体事件输出一行三指标（`sync_legacy_global`, `sync_phase_global`, `sync_span_global`），加 `n_participating`、`n_channels`、`block_stem`、`block_start_epoch` 等元数据。Block mean 保留为兼容派生视图（`block_sync_compat_v1`），但不再是分析主语。
 
-- 低层事件函数：`[src/group_event_analysis.py](file:///home/honglab/leijiaxin/HFOsp/src/group_event_analysis.py)` — `sync_legacy_pdelay`、`sync_exp_pairwise`、`sync_pairwise_coincidence`、`extract_event_features`
-- 对外契约与批量：`[src/interictal_synchrony.py](file:///home/honglab/leijiaxin/HFOsp/src/interictal_synchrony.py)` — `compute_interictal_synchrony`、`build_interictal_synchrony_from_legacy_lagpat`
+**落点**
 
-**主产物字段（event row，逐事件一行）**
+- 低层事件函数：`src/group_event_analysis.py` — `sync_legacy_pdelay`、`sync_exp_pairwise`、`sync_pairwise_coincidence`
+- 对外契约与批量：`src/interictal_synchrony.py` — `build_event_rows_from_result()` → `event_sync_v1` schema
+- 元数据：`subject`、`recording_id`（如有）、`block_stem`、`block_start_epoch`、`block_end_epoch`、`event_idx`、`n_participating`
 
-- 事件时间：`event_start_epoch`、`event_end_epoch`、`event_center_epoch`
-- 指标：`sync_phase_*`、`sync_legacy_*`、`sync_span_*`、`jaccard_*_with_next`
-- 事件结构：`n_participating`、`n_core`、`n_penumbra`、`event_stratum`
-- 元数据：`subject`、`recording_id`（如有）、`block_stem`、`block_start_epoch`、`block_end_epoch`
-- 兼容视图：从 event rows 反聚合出的 block summary 允许保留，但只能标注为 compatibility view，不能再当分析主语
+**数据规模**
+
+- Epilepsiae：16 subjects / 2962 blocks → **~1,280,824** event rows（CSV ~数百 MB）
+- Yuquan：156 blocks → event CSV ~72.6 MB
+- Subject 1073 单独贡献 ~194,521 event rows
 
 **验收**
 
-- 指标契约固定；Yuquan 与 Epilepsiae 输出**同构**可 join
-- 单测：`tests/test_interictal_synchrony.py` — 全同步、N≤1、tau 单调、Jaccard 边界
+- 指标契约固定；Yuquan 与 Epilepsiae 输出同构可 join
+- 单测：`tests/test_interictal_synchrony.py` + `tests/test_interictal_synchrony_analysis.py` — 合计 34 tests pass
 
-### PR5：Interval annotation + 窗型（非「仅 3h 间期」）
+### PR5：Event-level interval annotation（✅ 已完成）
 
-**语义**：PR5 是 **interval annotation layer**，不是全局 `>=3h` 才把 subject 算进来。
+**重构**：annotation 对象从 block 变为 event row。Day/night 直接由事件 epoch 推导，不继承 block label。
 
-**窗型 1 — fixed-window analysis（与 legacy / 固定 1h 可比）**
+**窗型 1 — fixed-window analysis**
 
-- 仅对**固定 Post/Mid/Pre 1h 窗能完整落下**的 interval 执行；默认主队列 = `legacyComparableLongIntervals`（如相邻 onset 间隔 ≥3h，**参数可配**）
-- Post/Mid/Pre 定义与 PR1 时间轴一致；自适应 post 滑动保留，但须记录 `window_actual_start_epoch`、`insufficient_*` 标志
+- 仅对 `clean_between_seizures_sec ≥ 3h` 的 interval 执行；Post/Mid/Pre 各 1h
+- 事件按 `block_center` 落入判定；优先级 Post > Pre > Mid
+- Epilepsiae 实跑：128 Post–Pre pairs / 15 subjects
 
-**窗型 2 — normalized-trajectory analysis（覆盖含短间期）**
+**窗型 2 — normalized-trajectory**
 
-- 时间轴：`(t - t_prev_seizure_end) / (t_next_seizure_onset - t_prev_seizure_end)` 或项目约定的 clean interval 边界（与 `interictal_synchrony_aggregation` 一致）
-- **所有** `allEligibleIntervals` 中可挂载 event 的 interval 均可进入，**不**因 `<3h` 剔除 subject
+- `norm_t = (event_epoch − clean_start) / span`，clamp 到 [0,1]
+- Within-interval trend 要求 ≥3 events per interval → 232 intervals 可用
 
-**Gap-aware 与昼夜**
+**Gap-aware 排除**
 
-- 严格按事件边界归属：跨 seizure、post/interictal 边界、day/night、非平凡 gap 的 event **排除**并记录 `exclusion_reasons`（与 `AGENTS.md` 一致）
-- 昼夜必须按 event 的真实时间边界计算，不能继承父 block 标签
-- 昼夜：`epoch_to_local_hour` + `timezone_default` / overrides；Epilepsiae 当前挂载规则见 `docs/epilepsiae_dataset_structure.md`
+- 跨 seizure / post-ictal / day-night / gap 边界的 event 直接排除
+- 排除统计（Epilepsiae）：outside_intervals 796, overlaps_seizure 263, phase_boundary 161, day_night_transition 238, nontrivial_gap 194
 
-**交付表（最少）**
+### PR6：统计 + 同步性变化图 + cohort summary（✅ Epilepsiae 已完成；Yuquan 待 PR3）
 
-- `seizure_interval` 表；`event_annotations`；`subject × seizure_interval × window_type` 主表
-- 各 window：`n_events`、`coverage_ratio`、`excluded_event_count`；`exclusion_breakdown` JSON/CSV
-- Yuquan 与 Epilepsiae 分别一份 interval coverage 摘要
+**脚本**：`scripts/pr6_interictal_sync_figures.py`（CLI）、`src/interictal_synchrony_analysis.py`（统计与图核心）
 
-### PR6：统计 + 同步性变化图 + cohort summary
+**落盘（Epilepsiae）**
 
-**脚本**：`scripts/interictal_sync_analysis.py`（及 Epilepsiae 聚合脚本输出表的统计层）
+- `results/pr6_analysis/stats/pr6_analysis_stats.json`
+- `results/pr6_analysis/figures/subjects/<subject>/figure_a_*.png`（16 subjects，Subject 1073 产出 57 张 = 3×(1+18)×12h panels）
+- `results/pr6_analysis/figures/figure_b_*.png`、`figure_c_*.png`、`figure_d_*.png`、`figure_e_*.png`
 
-**落盘（每次运行）**
+**统计结果摘要（Epilepsiae `ready_full_artifacts`）**
 
-- `results/{subject}_interictal_sync.npz`（Yuquan）
-- `results/interictal_sync_subject_summary.csv`、`results/interictal_sync_period_summary.csv`
-- Epilepsiae：`results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_interval_window_table.csv` 等（已存在则扩展列/队列标签）
+见本文档"当前科学结论"章节。核心判定：
 
-**统计交付**
+- 固定窗口 Post vs Pre：三指标均 p > 0.35 → **null**
+- Within-interval trajectory：三指标均 p > 0.05（span p=0.053 方向反） → **null**
+- Subject-level：巨大异质性，3/16 弱满足 Kuramoto 双判据
 
-- Subject-level：各 window/trajectory 下 synchrony effect；**`sync_all` 与 `sync_core_only` 并列**
-- Cohort-level：`n_subjects`、`n_intervals`、`n_events`；各队列纳入/排除统计；主效应 + CI 或 permutation p
-- Sensitivity：`>=3h` 子集 vs 全 interval；`all` vs `core_only`；`ready_full` vs `ready_partial`
+**图单产出状态**
 
-**同步性变化图（图单，须可验收）**
+- Figure A：✅ 16 subjects，12h facets，三指标 + seizure shading + window markers
+- Figure B：✅ normalized trajectory ribbon（pooled + within-interval 两级汇总）
+- Figure C：✅ fixed-window Post/Mid/Pre paired
+- Figure D：✅ robustness（三指标并列）
+- Figure E：✅ coverage/exclusion audit
 
-- **Figure A**：单 subject interval timeline — x=绝对时间或 interval 内时间；竖线 seizure onset/offset；叠加 `sync_all` 与 `sync_core_only`
-- **Figure B**：normalized trajectory ribbon — x∈[0,1]；y=同步性；cohort mean/median + 置信带或 spaghetti；**全 interval 与 `>=3h` 子集各一图**
-- **Figure C**：fixed-window Post/Mid/Pre — paired / box + subject 连线；`all` 与 `core_only` 并列
-- **Figure D**：robustness — `phase`/`legacy`/`span` 并列；`allEligibleIntervals` vs `legacyComparableLongIntervals`；**Epilepsiae 与 Yuquan 分开展示 + combined summary**
-- **Figure E**：coverage/exclusion audit — 各队列 subject/interval/event 计数；主要排除原因分布
+**Yuquan 侧 PR6 现状**
 
-**检验语义**
-
-- Fixed-window **主检验**仅在合法 fixed-window interval 上报告
-- Normalized trajectory 必须以 **within-interval** 为主统计层级；禁止再把全部 event pooled 后直接做主检验
-- 短间期单独 cohort 报告，**不**当噪声默认删除
-
-**PR6 验收（v4）**
-
-- Epilepsiae `ready_full_artifacts`：上述图单与 summary **至少覆盖**该队列；Yuquan Tier A 4 subjects 全出图
-- 每个主结论同时给出 `sync_all` 与 `sync_core_only`
-
-**2026-04-03 状态更新**
-
-- 工程骨架已落地：Figure A-E、fixed-window、normalized trajectory、cohort summary 都已实现并经过真实 Epilepsiae 数据跑通。
-- 但方法论做过一轮硬修正：旧的 pooled trajectory 已被证明确实会产生 Simpson's paradox 伪影，不能再当主结论。
-- 真实结果必须分两层汇报：
-  - `Subject 916` 这类单病人正例明确存在，说明假设在部分 subject / interval 上成立。
-  - cohort 的 `within-interval` 主检验目前整体为 null，说明“reset -> resynchronize -> peak”还不是稳定的普适规律。
-- 因此 PR6 现阶段的正确状态是：
-  - ✅ 统计与作图框架可用
-  - ✅ 主检验层级已经纠正
-  - ❌ 科学假设尚未被 cohort-level 证实
-  - 下一步重点应转向异质性分层，而不是继续 pooled 或继续润图
+- Event export（PR4）：已完成，CSV 在 `results/interictal_synchrony/yuquan_blocks/`
+- Interval annotation（PR5）：部分完成；需 PR3 产出 Yuquan seizure interval inventory 后才能做完整 interval 标注
+- 统计（PR6）：待 PR5 Yuquan 完成后才能跑
 
 ---
 
@@ -514,39 +569,41 @@ dataset:
 
 ---
 
-## 风险摘要
+## 风险摘要（2026-04-03 更新）
 
 
-| 风险                 | 应对                             |
-| ------------------ | ------------------------------ |
-| 时区错（Epilepsiae 多国） | `timezone_default` + overrides |
-| N 与网络扩张混淆          | Core-only + Penumbra           |
-| 空间漂移               | Jaccard/余弦                     |
-| 自适应 Post 窗混叠       | `window_actual` + LMM          |
-| 假阴性 seizure        | 阈值 + 辅助特征 + 置信度                |
-| 昼夜节律               | day-only + PR9                 |
-| 短间期硬切固定 1h 窗      | 仅 `legacyComparableLongIntervals` 做 fixed-window；其余用 trajectory + 透明 `not_applicable` |
-| `>=3h` 与全队列混淆      | 写死为 legacy 子队列参数，不当作 subject 全局门槛 |
-| Epilepsiae 仅写在 Phase 1 | 每 Phase 绑定 manifest/aggregated 验收锚点 |
+| 风险 | 当前状态 | 应对 |
+|---|---|---|
+| 时区错（Epilepsiae 多国） | ✅ 已解决 | `timezone_default` + overrides；当前全量 UKLFR |
+| N 与网络扩张混淆 | ⚠️ 未解决 | Core/Global 不可区分（无真实 SOZ label）；需消费 `focus_rel` |
+| Legacy 指标离散化伪影 | ⚠️ 已识别 | n_participating=3 时 legacy ≈ 0.5918；phase 无此问题 |
+| 空间漂移 | 未验证 | Jaccard/余弦（PR4 已输出 `adjacent_jaccard`） |
+| 假阴性 seizure | PR2.5 进行中 | spatial detector v3 candidate；LOSO 待做 |
+| 昼夜节律 | 部分控制 | day/night 已标注；PR9 sleep proxy 仍 optional |
+| 短间期硬切固定 1h 窗 | ✅ 已解决 | trajectory 覆盖全 interval；fixed-window 仅限 ≥3h |
+| Pooled 统计 Simpson 悖论 | ✅ 已解决 | within-interval + paired 两级检验；pooled 仅附录 |
+| 队列水平假设本身不合理 | ⚠️ 核心发现 | **需科学 pivot**：subject stratification 或条件分析 |
 
 
 ---
 
-## PR 与验收总览
+## PR 与验收总览（2026-04-03 更新）
 
 
-| PR    | Phase | 核心交付                           | 主要资源    | 验收要点                   |
-| ----- | ----- | ------------------------------ | ------- | ---------------------- |
-| PR1   | P1    | EDF 解析 + 时区 + timeline         | CPU/I-O | 见 PR1 补充；归一化区间         |
-| PR1.5 | P1    | Epilepsiae 契约 + manifest + 聚合层 | CPU/I-O | 已验收；禁止半块归属；全阶段验证基线 |
-| PR2   | P1    | streaming 检测 + **可视化**         | CPU/I-O | 指标 + 单 EDF + 24h + CSV |
-| PR3   | P1    | Yuquan JSON + interval 表 + tier | CPU 并行  | interval-first + 队列标签 |
-| PR4   | P2    | event metric 契约 + 同构 event CSV/NPZ | CPU     | 已完成；event rows 主链 + compatibility view |
-| PR5   | P2    | event annotation + fixed vs trajectory + 排除 | CPU | 已完成；strict event-boundary + gap-aware |
-| PR6   | P2    | 统计 + Figures A–E + cohort summary | CPU     | 框架已落地；主检验改为 within-interval；科学结论待分层验证 |
-| PR7   | P3    | smoke + legacy 对齐 + Epilepsiae 路径 | GPU+CPU | corr + smoke + 记录 Epilepsiae |
-| PR8   | P3    | Tier C lagPat + Epilepsiae 补跑 manifest | GPU 主导 | 摘要 + manifest 更新 |
-| PR9   | Opt   | sleep proxy                    | CPU/I-O | 曲线合理                   |
+| PR | Phase | 状态 | 核心交付 | 验收要点 |
+|---|---|---|---|---|
+| PR1 | P1 | ✅ | EDF 解析 + 时区 + timeline | 归一化区间 |
+| PR1.5 | P1 | ✅ | Epilepsiae 契约 + manifest + 聚合层 | 已验收；全阶段验证基线 |
+| PR2 | P1 | ✅ | streaming 检测 + 可视化 | 基础设施通过；channel-mean 方案降级 |
+| PR2.5 | P1 | 🔄 进行中 | 空间招募检测器 | v3 候选待 LOSO + Epilepsiae 验证 |
+| PR3 | P1 | ⏳ 待做 | Yuquan JSON + interval 表 + tier | interval-first + 队列标签 |
+| PR4 | P2 | ✅ | **event-level** metric 契约 + 同构 CSV | 34 tests pass；~1.28M event rows |
+| PR5 | P2 | ✅ | event-level interval 标注 + 排除 | 128 pairs + 232 intervals |
+| PR6 | P2 | ✅ Epi / ⏳ Yuquan | 统计 + Figures A–E | **Epilepsiae null confirmed**；Yuquan 待 PR3 |
+| PR6+ | P2 | ⏳ 待做 | 科学 pivot：SOZ label + n_participating + stratification | 破局方向 |
+| PR7 | P3 | ⏳ 待做 | GPU smoke + legacy 对齐 | corr + smoke |
+| PR8 | P3 | ⏳ 待做 | Tier C lagPat + Epilepsiae 补跑 | manifest 更新 |
+| PR9 | Opt | ⏳ 待做 | sleep proxy | 曲线合理 |
 
 
 ---
