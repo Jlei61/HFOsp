@@ -5,13 +5,18 @@ from pathlib import Path
 import numpy as np
 
 from src.interictal_synchrony import (
+    EVENT_SYNC_SCHEMA_VERSION,
+    BLOCK_SYNC_COMPAT_SCHEMA_VERSION,
     build_interictal_synchrony,
+    build_block_summary_from_event_rows,
+    build_event_rows_from_result,
     build_interictal_synchrony_from_legacy_lagpat,
     compute_adjacent_jaccard,
     compute_event_synchrony_metrics,
     compute_interictal_synchrony,
     load_interictal_synchrony_result,
     run_epilepsiae_interictal_synchrony_from_manifest,
+    run_yuquan_interictal_synchrony,
     save_interictal_synchrony_result,
     select_core_penumbra_mask,
 )
@@ -99,7 +104,11 @@ def test_save_load_interictal_synchrony_roundtrip(tmp_path: Path) -> None:
         "lag_raw": np.array([[0.01, 0.02], [0.03, 0.04]], dtype=np.float64),
         "events_bool": np.ones((2, 2), dtype=bool),
     }
-    result = compute_interictal_synchrony(group_analysis, core_channels=["A1"])
+    result = compute_interictal_synchrony(
+        group_analysis,
+        core_channels=["A1"],
+        metadata={"subject": "1073", "block_stem": "107300102_0000"},
+    )
     out_npz = tmp_path / "interictal_sync.npz"
     save_interictal_synchrony_result(result, str(out_npz))
     loaded = load_interictal_synchrony_result(str(out_npz))
@@ -108,6 +117,7 @@ def test_save_load_interictal_synchrony_roundtrip(tmp_path: Path) -> None:
     assert np.array_equal(loaded.core_mask, result.core_mask)
     assert np.allclose(loaded.sync_phase_global, result.sync_phase_global, equal_nan=True)
     assert np.allclose(loaded.jaccard_global, result.jaccard_global, equal_nan=True)
+    assert loaded.metadata == result.metadata
     assert loaded.summary["n_events"] == result.summary["n_events"]
 
 
@@ -132,6 +142,32 @@ def test_build_interictal_synchrony_from_legacy_lagpat(tmp_path: Path) -> None:
     assert result.ch_names == ["A1", "B1"]
     assert np.array_equal(result.core_mask, np.array([True, False], dtype=bool))
     assert result.summary["n_events"] == 2.0
+
+
+def test_build_event_rows_and_compat_summary() -> None:
+    group_analysis = {
+        "ch_names": ["A1", "B1"],
+        "event_windows": np.array([[0.0, 1.0], [1.0, 2.0]], dtype=np.float64),
+        "lag_raw": np.array([[0.0, 0.2], [0.0, 0.3]], dtype=np.float64),
+        "events_bool": np.ones((2, 2), dtype=bool),
+    }
+    result = compute_interictal_synchrony(
+        group_analysis,
+        metadata={"subject": "S1", "block_start_epoch": 100.0, "block_stem": "S1_blk"},
+    )
+    rows = build_event_rows_from_result(result)
+    assert len(rows) == 2
+    assert rows[0]["schema_version"] == EVENT_SYNC_SCHEMA_VERSION
+    assert rows[0]["event_start_epoch"] == 100.0
+    assert rows[1]["event_center_epoch"] == 101.5
+    compat = build_block_summary_from_event_rows(rows)
+    assert compat["schema_version"] == BLOCK_SYNC_COMPAT_SCHEMA_VERSION
+    assert compat["n_events"] == 2.0
+    assert np.isclose(
+        compat["mean_sync_legacy_global"],
+        result.summary["mean_sync_legacy_global"],
+        equal_nan=True,
+    )
 
 
 def test_run_epilepsiae_interictal_synchrony_from_manifest(tmp_path: Path) -> None:
@@ -161,14 +197,87 @@ def test_run_epilepsiae_interictal_synchrony_from_manifest(tmp_path: Path) -> No
         encoding="utf-8",
     )
 
-    rows = run_epilepsiae_interictal_synchrony_from_manifest(
-        str(manifest_csv),
-        str(tmp_path / "outputs"),
-        artifact_root=str(artifact_root),
-    )
+    fake_inventory = type(
+        "Inventory",
+        (),
+        {
+            "block_rows": [
+                {
+                    "subject": "1073",
+                    "patient_code": "FR_1073",
+                    "recording_id": "107300102",
+                    "block_stem": "107300102_0000",
+                    "block_start_epoch": 123.0,
+                    "block_end_epoch": 483.0,
+                    "block_start_day_night": "day",
+                    "block_end_day_night": "day",
+                    "timezone_name": "Europe/Berlin",
+                }
+            ]
+        },
+    )()
+
+    import src.interictal_synchrony as sync_mod
+
+    original_survey = sync_mod.survey_epilepsiae_dataset
+    sync_mod.survey_epilepsiae_dataset = lambda: fake_inventory
+    try:
+        rows = run_epilepsiae_interictal_synchrony_from_manifest(
+            str(manifest_csv),
+            str(tmp_path / "outputs"),
+            artifact_root=str(artifact_root),
+        )
+    finally:
+        sync_mod.survey_epilepsiae_dataset = original_survey
 
     assert len(rows) == 1
     assert rows[0]["subject"] == "1073"
+    assert rows[0]["recording_id"] == "107300102"
+    assert rows[0]["block_start_epoch"] == 123.0
+    assert rows[0]["block_end_epoch"] == 483.0
+    assert Path(str(rows[0]["output_npz_path"])).exists()
+    assert rows[0]["n_events"] == 2.0
+
+
+def test_run_yuquan_interictal_synchrony(tmp_path: Path) -> None:
+    artifact_root = tmp_path / "yuquan"
+    subject_dir = artifact_root / "litengsheng"
+    subject_dir.mkdir(parents=True)
+
+    lagpat_path = subject_dir / "rec01_lagPat.npz"
+    packed_times_path = subject_dir / "rec01_packedTimes.npy"
+    edf_path = subject_dir / "rec01.edf"
+    np.savez_compressed(
+        lagpat_path,
+        lagPatRaw=np.array([[0.01, 0.02], [0.03, 0.04]], dtype=np.float64),
+        eventsBool=np.ones((2, 2), dtype=np.float64),
+        chnNames=np.array(["A1", "B1"], dtype=object),
+    )
+    np.save(packed_times_path, np.array([[0.0, 0.5], [1.0, 1.5]], dtype=np.float64))
+    edf_path.write_bytes(b"fake")
+
+    import src.interictal_synchrony as sync_mod
+
+    original_read = sync_mod.read_edf_record_info
+    sync_mod.read_edf_record_info = lambda path: {
+        "record": "rec01",
+        "start_epoch": 0.0,
+        "end_epoch": 7200.0,
+    }
+    try:
+        rows = run_yuquan_interictal_synchrony(
+            str(tmp_path / "outputs"),
+            artifact_root=str(artifact_root),
+            subjects=["litengsheng"],
+        )
+    finally:
+        sync_mod.read_edf_record_info = original_read
+
+    assert len(rows) == 1
+    assert rows[0]["subject"] == "litengsheng"
+    assert rows[0]["recording_id"] == "rec01"
+    assert rows[0]["block_start_day_night"] == "day"
+    assert rows[0]["block_end_day_night"] == "day"
     assert Path(str(rows[0]["output_npz_path"])).exists()
     assert rows[0]["n_events"] == 2.0
 

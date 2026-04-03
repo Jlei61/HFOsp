@@ -16,14 +16,21 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 import numpy as np
 
-from .epilepsiae_dataset import EpilepsiaePaths, load_epilepsiae_sync_subject_manifest
+from .epilepsiae_dataset import (
+    EpilepsiaePaths,
+    load_epilepsiae_sync_subject_manifest,
+    survey_epilepsiae_dataset,
+)
 from .group_event_analysis import load_group_analysis_results
+from .preprocessing import epoch_to_local_hour, read_edf_record_info
 
 
 _EMPTY_STRATUM = "empty"
 _CORE_ONLY_STRATUM = "core_only"
 _PENUMBRA_ONLY_STRATUM = "penumbra_only"
 _MIXED_STRATUM = "mixed"
+EVENT_SYNC_SCHEMA_VERSION = "event_sync_v1"
+BLOCK_SYNC_COMPAT_SCHEMA_VERSION = "block_sync_compat_v1"
 
 
 @dataclass
@@ -49,6 +56,7 @@ class InterictalSynchronyResult:
     jaccard_global: np.ndarray
     jaccard_core: np.ndarray
     jaccard_penumbra: np.ndarray
+    metadata: Dict[str, Any] = field(default_factory=dict)
     params: Dict[str, Any] = field(default_factory=dict)
     summary: Dict[str, float] = field(default_factory=dict)
 
@@ -235,10 +243,141 @@ def _safe_nanmean(x: np.ndarray) -> float:
     return float(np.nanmean(arr))
 
 
+def _normalize_metadata(metadata: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
+    if metadata is None:
+        return {}
+    return {str(key): value for key, value in dict(metadata).items()}
+
+
+def _event_metric_or_none(arr: np.ndarray, idx: int) -> Optional[float]:
+    value = float(arr[idx])
+    if np.isnan(value):
+        return None
+    return value
+
+
+def build_event_rows_from_result(result: InterictalSynchronyResult) -> List[Dict[str, object]]:
+    """
+    Flatten a per-block synchrony result into event-level rows.
+
+    The exported rows are the primary PR4 artifact for downstream PR5/PR6.
+    """
+    metadata = dict(result.metadata)
+    block_start_epoch = metadata.get("block_start_epoch")
+    block_start = None if block_start_epoch in (None, "") else float(block_start_epoch)
+    windows = np.asarray(result.event_windows, dtype=np.float64)
+    n_events = int(windows.shape[0])
+    rows: List[Dict[str, object]] = []
+
+    for event_idx in range(n_events):
+        start_rel = float(windows[event_idx, 0])
+        end_rel = float(windows[event_idx, 1])
+        center_rel = 0.5 * (start_rel + end_rel)
+        if block_start is None:
+            event_start_epoch = None
+            event_end_epoch = None
+            event_center_epoch = None
+        else:
+            event_start_epoch = block_start + start_rel
+            event_end_epoch = block_start + end_rel
+            event_center_epoch = block_start + center_rel
+
+        row: Dict[str, object] = {
+            **metadata,
+            "schema_version": EVENT_SYNC_SCHEMA_VERSION,
+            "n_channels": int(len(result.ch_names)),
+            "n_core_channels": int(np.sum(result.core_mask)),
+            "n_penumbra_channels": int(np.sum(~result.core_mask)),
+            "event_index": event_idx,
+            "event_start_sec_rel": start_rel,
+            "event_end_sec_rel": end_rel,
+            "event_center_sec_rel": center_rel,
+            "event_duration_sec": float(end_rel - start_rel),
+            "event_start_epoch": event_start_epoch,
+            "event_end_epoch": event_end_epoch,
+            "event_center_epoch": event_center_epoch,
+            "n_participating": int(result.event_n_participating[event_idx]),
+            "n_core": int(result.event_n_core[event_idx]),
+            "n_penumbra": int(result.event_n_penumbra[event_idx]),
+            "event_stratum": str(result.event_stratum[event_idx]),
+            "sync_phase_global": _event_metric_or_none(result.sync_phase_global, event_idx),
+            "sync_phase_core": _event_metric_or_none(result.sync_phase_core, event_idx),
+            "sync_phase_penumbra": _event_metric_or_none(result.sync_phase_penumbra, event_idx),
+            "sync_legacy_global": _event_metric_or_none(result.sync_legacy_global, event_idx),
+            "sync_legacy_core": _event_metric_or_none(result.sync_legacy_core, event_idx),
+            "sync_legacy_penumbra": _event_metric_or_none(result.sync_legacy_penumbra, event_idx),
+            "sync_span_global": _event_metric_or_none(result.sync_span_global, event_idx),
+            "sync_span_core": _event_metric_or_none(result.sync_span_core, event_idx),
+            "sync_span_penumbra": _event_metric_or_none(result.sync_span_penumbra, event_idx),
+            "jaccard_global_with_next": None,
+            "jaccard_core_with_next": None,
+            "jaccard_penumbra_with_next": None,
+        }
+        if event_idx < len(result.jaccard_global):
+            row["jaccard_global_with_next"] = _event_metric_or_none(result.jaccard_global, event_idx)
+            row["jaccard_core_with_next"] = _event_metric_or_none(result.jaccard_core, event_idx)
+            row["jaccard_penumbra_with_next"] = _event_metric_or_none(result.jaccard_penumbra, event_idx)
+        rows.append(row)
+    return rows
+
+
+def build_block_summary_from_event_rows(event_rows: Sequence[Mapping[str, object]]) -> Dict[str, object]:
+    """
+    Build the compatibility block-level summary from event rows.
+
+    This keeps old consumers alive while making clear that block summaries are
+    derived views, not primary metrics.
+    """
+    rows = [dict(r) for r in event_rows]
+    if not rows:
+        return {"schema_version": BLOCK_SYNC_COMPAT_SCHEMA_VERSION}
+
+    def _mean_of(key: str) -> float:
+        values = [
+            float(r[key])
+            for r in rows
+            if r.get(key) not in (None, "", "nan", "NaN")
+        ]
+        if not values:
+            return float("nan")
+        return float(np.mean(values))
+
+    n_events = float(len(rows))
+    frac_core_only = float(np.mean([str(r.get("event_stratum")) == _CORE_ONLY_STRATUM for r in rows]))
+    frac_penumbra_only = float(
+        np.mean([str(r.get("event_stratum")) == _PENUMBRA_ONLY_STRATUM for r in rows])
+    )
+    frac_mixed = float(np.mean([str(r.get("event_stratum")) == _MIXED_STRATUM for r in rows]))
+    summary = {
+        "schema_version": BLOCK_SYNC_COMPAT_SCHEMA_VERSION,
+        "n_events": n_events,
+        "n_channels": float(rows[0].get("n_channels") or np.nan),
+        "n_core_channels": float(rows[0].get("n_core_channels") or np.nan),
+        "n_penumbra_channels": float(rows[0].get("n_penumbra_channels") or np.nan),
+        "mean_sync_phase_global": _mean_of("sync_phase_global"),
+        "mean_sync_phase_core": _mean_of("sync_phase_core"),
+        "mean_sync_phase_penumbra": _mean_of("sync_phase_penumbra"),
+        "mean_sync_legacy_global": _mean_of("sync_legacy_global"),
+        "mean_sync_legacy_core": _mean_of("sync_legacy_core"),
+        "mean_sync_legacy_penumbra": _mean_of("sync_legacy_penumbra"),
+        "mean_sync_span_global": _mean_of("sync_span_global"),
+        "mean_sync_span_core": _mean_of("sync_span_core"),
+        "mean_sync_span_penumbra": _mean_of("sync_span_penumbra"),
+        "mean_jaccard_global": _mean_of("jaccard_global_with_next"),
+        "mean_jaccard_core": _mean_of("jaccard_core_with_next"),
+        "mean_jaccard_penumbra": _mean_of("jaccard_penumbra_with_next"),
+        "frac_core_only_events": frac_core_only,
+        "frac_penumbra_only_events": frac_penumbra_only,
+        "frac_mixed_events": frac_mixed,
+    }
+    return summary
+
+
 def compute_interictal_synchrony(
     group_analysis: Mapping[str, Any],
     *,
     core_channels: Optional[Sequence[str]] = None,
+    metadata: Optional[Mapping[str, Any]] = None,
 ) -> InterictalSynchronyResult:
     """Compute PR4 synchrony features from a loaded group-analysis mapping."""
     ch_names = [str(x) for x in group_analysis["ch_names"]]
@@ -307,6 +446,7 @@ def compute_interictal_synchrony(
         jaccard_global=jaccard_global,
         jaccard_core=jaccard_core,
         jaccard_penumbra=jaccard_penumbra,
+        metadata=_normalize_metadata(metadata),
         params={
             "metrics": ["phase", "legacy", "span"],
             "spatial_stability": "adjacent_jaccard",
@@ -360,19 +500,29 @@ def build_interictal_synchrony_from_legacy_lagpat(
     packed_times_path: str,
     *,
     core_channels: Optional[Sequence[str]] = None,
+    metadata: Optional[Mapping[str, Any]] = None,
 ) -> InterictalSynchronyResult:
     group_analysis = load_legacy_lagpat_group_analysis(lagpat_npz_path, packed_times_path)
-    return compute_interictal_synchrony(group_analysis, core_channels=core_channels)
+    return compute_interictal_synchrony(
+        group_analysis,
+        core_channels=core_channels,
+        metadata=metadata,
+    )
 
 
 def build_interictal_synchrony(
     group_analysis_npz_path: str,
     *,
     core_channels: Optional[Sequence[str]] = None,
+    metadata: Optional[Mapping[str, Any]] = None,
 ) -> InterictalSynchronyResult:
     """Load `groupAnalysis.npz` and compute PR4 synchrony features."""
     group_analysis = load_group_analysis_results(group_analysis_npz_path)
-    return compute_interictal_synchrony(group_analysis, core_channels=core_channels)
+    return compute_interictal_synchrony(
+        group_analysis,
+        core_channels=core_channels,
+        metadata=metadata,
+    )
 
 
 def save_interictal_synchrony_result(result: InterictalSynchronyResult, npz_path: str) -> str:
@@ -398,6 +548,7 @@ def save_interictal_synchrony_result(result: InterictalSynchronyResult, npz_path
         jaccard_global=np.asarray(result.jaccard_global, dtype=np.float64),
         jaccard_core=np.asarray(result.jaccard_core, dtype=np.float64),
         jaccard_penumbra=np.asarray(result.jaccard_penumbra, dtype=np.float64),
+        metadata=np.array([result.metadata], dtype=object),
         params=np.array([result.params], dtype=object),
         summary=np.array([result.summary], dtype=object),
     )
@@ -418,6 +569,19 @@ def save_interictal_synchrony_summary(rows: Sequence[Mapping[str, object]], csv_
     return str(path)
 
 
+def _classify_day_night(
+    epoch_ts: float,
+    *,
+    timezone_name: str,
+    day_start_hour: int,
+    night_start_hour: int,
+) -> str:
+    local_hour = epoch_to_local_hour(float(epoch_ts), timezone_name)
+    if int(day_start_hour) <= int(local_hour) < int(night_start_hour):
+        return "day"
+    return "night"
+
+
 def run_epilepsiae_interictal_synchrony_from_manifest(
     manifest_csv_path: str,
     output_dir: str,
@@ -425,6 +589,7 @@ def run_epilepsiae_interictal_synchrony_from_manifest(
     tier: str = "ready_full_artifacts",
     artifact_root: Optional[str] = None,
     core_channels_by_subject: Optional[Mapping[str, Sequence[str]]] = None,
+    event_rows_csv_path: Optional[str] = None,
 ) -> List[Dict[str, object]]:
     manifest_rows = load_epilepsiae_sync_subject_manifest(manifest_csv_path)
     selected = [row for row in manifest_rows if row.get("tier") == tier]
@@ -434,8 +599,25 @@ def run_epilepsiae_interictal_synchrony_from_manifest(
     artifact_dir_root = Path(artifact_root) if artifact_root else EpilepsiaePaths().artifact_root
     out_root = Path(output_dir)
     out_root.mkdir(parents=True, exist_ok=True)
+    inventory = survey_epilepsiae_dataset()
+    block_meta_by_key = {
+        (str(block["subject"]), str(block["block_stem"])): {
+            "subject": str(block["subject"]),
+            "patient_code": str(block.get("patient_code", "")),
+            "recording_id": str(block.get("recording_id", "")),
+            "block_stem": str(block["block_stem"]),
+            "block_start_epoch": float(block["block_start_epoch"]),
+            "block_end_epoch": float(block["block_end_epoch"]),
+            "block_start_day_night": str(block.get("block_start_day_night", "")),
+            "block_end_day_night": str(block.get("block_end_day_night", "")),
+            "timezone_name": str(block.get("timezone_name", "")),
+        }
+        for block in inventory.block_rows
+        if block.get("block_start_epoch") is not None and block.get("block_end_epoch") is not None
+    }
 
     summary_rows: List[Dict[str, object]] = []
+    event_rows: List[Dict[str, object]] = []
     for row in selected:
         subject = str(row["subject"])
         subject_dir = artifact_dir_root / subject / "all_recs"
@@ -451,11 +633,22 @@ def run_epilepsiae_interictal_synchrony_from_manifest(
             packed_times_path = subject_dir / f"{stem}_packedTimes.npy"
             if not packed_times_path.exists():
                 continue
+            block_metadata = block_meta_by_key.get((subject, stem))
+            if block_metadata is None:
+                raise ValueError(
+                    f"Missing block metadata for subject={subject} block_stem={stem}."
+                )
+            result_metadata = {
+                **block_metadata,
+                "tier": tier,
+                "day_night_rule": row.get("day_night_rule", ""),
+            }
 
             result = build_interictal_synchrony_from_legacy_lagpat(
                 str(lagpat_path),
                 str(packed_times_path),
                 core_channels=core_channels,
+                metadata=result_metadata,
             )
             subject_out_dir = out_root / subject
             subject_out_dir.mkdir(parents=True, exist_ok=True)
@@ -464,18 +657,126 @@ def run_epilepsiae_interictal_synchrony_from_manifest(
 
             summary_rows.append(
                 {
-                    "subject": subject,
-                    "patient_code": row.get("patient_code", ""),
-                    "tier": tier,
-                    "timezone_name": row.get("timezone_name", ""),
-                    "day_night_rule": row.get("day_night_rule", ""),
-                    "block_stem": stem,
+                    **result.metadata,
                     "lagpat_npz_path": str(lagpat_path),
                     "packed_times_path": str(packed_times_path),
                     "output_npz_path": str(npz_path),
                     **result.summary,
+                    "summary_schema_version": BLOCK_SYNC_COMPAT_SCHEMA_VERSION,
+                    "event_schema_version": EVENT_SYNC_SCHEMA_VERSION,
                 }
             )
+            event_rows.extend(build_event_rows_from_result(result))
+
+    if event_rows_csv_path:
+        save_interictal_synchrony_summary(event_rows, event_rows_csv_path)
+
+    return summary_rows
+
+
+def run_yuquan_interictal_synchrony(
+    output_dir: str,
+    *,
+    artifact_root: str = "/mnt/yuquan_data/yuquan_24h_edf",
+    subjects: Optional[Sequence[str]] = None,
+    core_channels_by_subject: Optional[Mapping[str, Sequence[str]]] = None,
+    timezone_name: str = "Asia/Shanghai",
+    day_start_hour: int = 8,
+    night_start_hour: int = 20,
+    event_rows_csv_path: Optional[str] = None,
+) -> List[Dict[str, object]]:
+    artifact_dir_root = Path(artifact_root)
+    if not artifact_dir_root.exists():
+        raise ValueError(f"Yuquan artifact root missing: {artifact_dir_root}")
+
+    if subjects is None:
+        selected_subjects = sorted(x.name for x in artifact_dir_root.iterdir() if x.is_dir())
+    else:
+        selected_subjects = sorted(str(x) for x in subjects)
+    if not selected_subjects:
+        raise ValueError("No Yuquan subjects selected for interictal synchrony.")
+
+    out_root = Path(output_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+    summary_rows: List[Dict[str, object]] = []
+    event_rows: List[Dict[str, object]] = []
+    day_night_rule = (
+        f"day={int(day_start_hour):02d}:00-{int(night_start_hour):02d}:00 local"
+    )
+
+    for subject in selected_subjects:
+        subject_dir = artifact_dir_root / subject
+        if not subject_dir.exists():
+            raise ValueError(f"Yuquan subject directory missing: {subject_dir}")
+
+        core_channels = None
+        if core_channels_by_subject is not None:
+            core_channels = core_channels_by_subject.get(subject)
+
+        for lagpat_path in sorted(subject_dir.glob("*_lagPat.npz")):
+            stem = lagpat_path.stem.removesuffix("_lagPat")
+            packed_times_path = subject_dir / f"{stem}_packedTimes.npy"
+            if not packed_times_path.exists():
+                raise ValueError(
+                    f"Missing packedTimes for subject={subject} block_stem={stem}: {packed_times_path}"
+                )
+            edf_path = subject_dir / f"{stem}.edf"
+            if not edf_path.exists():
+                raise ValueError(
+                    f"Missing EDF for subject={subject} block_stem={stem}: {edf_path}"
+                )
+            record_info = read_edf_record_info(edf_path)
+            block_start_epoch = float(record_info["start_epoch"])
+            block_end_epoch = float(record_info["end_epoch"])
+            result_metadata = {
+                "subject": subject,
+                "patient_code": subject,
+                "recording_id": stem,
+                "block_stem": stem,
+                "block_start_epoch": block_start_epoch,
+                "block_end_epoch": block_end_epoch,
+                "block_start_day_night": _classify_day_night(
+                    block_start_epoch,
+                    timezone_name=timezone_name,
+                    day_start_hour=day_start_hour,
+                    night_start_hour=night_start_hour,
+                ),
+                "block_end_day_night": _classify_day_night(
+                    block_end_epoch,
+                    timezone_name=timezone_name,
+                    day_start_hour=day_start_hour,
+                    night_start_hour=night_start_hour,
+                ),
+                "timezone_name": timezone_name,
+                "day_night_rule": day_night_rule,
+            }
+
+            result = build_interictal_synchrony_from_legacy_lagpat(
+                str(lagpat_path),
+                str(packed_times_path),
+                core_channels=core_channels,
+                metadata=result_metadata,
+            )
+            subject_out_dir = out_root / subject
+            subject_out_dir.mkdir(parents=True, exist_ok=True)
+            npz_path = subject_out_dir / f"{stem}_interictal_sync.npz"
+            save_interictal_synchrony_result(result, str(npz_path))
+            summary_rows.append(
+                {
+                    **result.metadata,
+                    "lagpat_npz_path": str(lagpat_path),
+                    "packed_times_path": str(packed_times_path),
+                    "edf_path": str(edf_path),
+                    "output_npz_path": str(npz_path),
+                    **result.summary,
+                    "summary_schema_version": BLOCK_SYNC_COMPAT_SCHEMA_VERSION,
+                    "event_schema_version": EVENT_SYNC_SCHEMA_VERSION,
+                }
+            )
+            event_rows.extend(build_event_rows_from_result(result))
+
+    if event_rows_csv_path:
+        save_interictal_synchrony_summary(event_rows, event_rows_csv_path)
 
     return summary_rows
 
@@ -503,6 +804,11 @@ def load_interictal_synchrony_result(npz_path: str) -> InterictalSynchronyResult
         jaccard_global=np.asarray(d["jaccard_global"], dtype=np.float64),
         jaccard_core=np.asarray(d["jaccard_core"], dtype=np.float64),
         jaccard_penumbra=np.asarray(d["jaccard_penumbra"], dtype=np.float64),
+        metadata=(
+            dict(np.asarray(d["metadata"], dtype=object).ravel()[0])
+            if "metadata" in d
+            else {}
+        ),
         params=dict(np.asarray(d["params"], dtype=object).ravel()[0]),
         summary=dict(np.asarray(d["summary"], dtype=object).ravel()[0]),
     )
