@@ -1,6 +1,6 @@
 ---
 name: Interictal Synchrony Analysis
-overview: "Three-phase plan + optional sleep staging: (1) seizure/interval truth + Yuquan artifact tier + Epilepsiae as real validation baseline (PR1.5 done; cohort = interval-first), (2) block-level synchrony contract + interval annotation + stats/figures (PR4–PR6; Yuquan + Epilepsiae), (3) EDF/.data→lagPat backfill with Epilepsiae smoke. GPU/CPU split; >3h = legacy-comparable subset only, not global subject gate."
+overview: "Three-phase plan + optional sleep staging: (1) seizure/interval truth + Yuquan artifact tier + Epilepsiae as real validation baseline (PR1.5 done; cohort = interval-first), (2) event-level synchrony contract + interval annotation + stats/figures (PR4–PR6; Yuquan + Epilepsiae), (3) EDF/.data→lagPat backfill with Epilepsiae smoke. GPU/CPU split; >3h = legacy-comparable subset only, not global subject gate."
 todos:
   - id: p1-pr1-edf-parser
     content: "PR1: fast_read_edf_annotations + parse_seizure + zoneinfo + recording timeline (see PR1 supplement 2026-04-01)"
@@ -18,13 +18,13 @@ todos:
     content: "PR3: full Yuquan outputs -> seizure_onsets JSON + interval inventory + yuquan_tier_assignment.csv (tier supplements interval truth)"
     status: pending
   - id: p2-pr4-sync-metrics
-    content: "PR4: block-level metric contract (interictal_synchrony + group_event_analysis); Yuquan+Epilepsiae isomorphic NPZ/CSV; tests"
-    status: pending
+    content: "PR4: event-level metric contract (interictal_synchrony + group_event_analysis); event rows are primary artifact, block summary only compatibility view"
+    status: completed
   - id: p2-pr5-period-slicer
-    content: "PR5: interval annotation + fixed-window vs normalized-trajectory + gap-aware exclusions (Epilepsiae aggregation pattern; Yuquan timeline)"
-    status: pending
+    content: "PR5: event-level interval annotation + fixed-window vs normalized-trajectory + gap-aware exclusions (strict event-boundary assignment)"
+    status: completed
   - id: p2-pr6-analysis-script
-    content: "PR6: interictal_sync_analysis + cohort summaries + Figures A–E + stats; Epilepsiae mandatory validation cohort"
+    content: "PR6: interictal_sync_analysis + cohort summaries + Figures A–E + within-interval stats; framework landed, scientific acceptance still pending"
     status: pending
   - id: p3-pr7-pipeline-validate
     content: "PR7: GPU smoke + run_pipeline EDF->lagPat vs legacy lagPat"
@@ -277,7 +277,7 @@ dataset:
 **验收结论（2026-04-02）**
 
 - ✅ **PR1.5 已验收通过**
-- 已完成：数据契约钉死、`src.epilepsiae_dataset` 正式接口、四张 inventory、manifest、时区/day-night 规则、`ready_full_artifacts` block-level synchrony 实跑、以及严格整块归属的 interval/window 聚合
+- 已完成：数据契约钉死、`src.epilepsiae_dataset` 正式接口、四张 inventory、manifest、时区/day-night 规则、`ready_full_artifacts` event-level synchrony 主链实跑、以及严格按事件边界归属的 interval/window 聚合
 - 明确保留到后续 PR：PR6 统计建模、跨 subject 终稿图与正式统计结论
 
 **对后续 PR 的影响**
@@ -364,24 +364,25 @@ dataset:
 
 **实现主链**（与计划文字一致）：
 
-- `src/interictal_synchrony.py`（PR4 block-level 契约）
-- `src/interictal_synchrony_aggregation.py`（PR5 Epilepsiae 侧 interval/window 聚合）
+- `src/interictal_synchrony.py`（PR4 event-level 契约；block summary 仅兼容）
+- `src/interictal_synchrony_aggregation.py`（PR5 Epilepsiae 侧 event annotation + interval/window 聚合）
 - `scripts/run_epilepsiae_interictal_synchrony.py`、`scripts/aggregate_epilepsiae_interictal_synchrony.py`
 - Yuquan：`scripts/interictal_sync_analysis.py` + 与 `build_recording_timeline` 一致的 interval 切分
 
-### PR4：Synchrony metric contract（block-level，Yuquan + Epilepsiae 同构）
+### PR4：Synchrony metric contract（event-level，Yuquan + Epilepsiae 同构）
 
 **落点（双轨）**
 
 - 低层事件函数：`[src/group_event_analysis.py](file:///home/honglab/leijiaxin/HFOsp/src/group_event_analysis.py)` — `sync_legacy_pdelay`、`sync_exp_pairwise`、`sync_pairwise_coincidence`、`extract_event_features`
 - 对外契约与批量：`[src/interictal_synchrony.py](file:///home/honglab/leijiaxin/HFOsp/src/interictal_synchrony.py)` — `compute_interictal_synchrony`、`build_interictal_synchrony_from_legacy_lagpat`
 
-**Block-level NPZ/CSV 最少字段（每 block 一份）**
+**主产物字段（event row，逐事件一行）**
 
-- Global / Core / Penumbra 三套 summary；事件族 `phase` / `legacy` / `span`；`adjacent_jaccard`
-- `frac_core_only_events`、`frac_penumbra_only_events`、`frac_mixed_events`
-- `n_events`、`n_valid_events`、通道规模与 core 通道数（与 `InterictalSynchronyResult` 对齐）
-- 元数据：`subject`、`recording_id`（如有）、`block_stem`、`block_start_epoch`、`block_end_epoch`，供 PR5 join
+- 事件时间：`event_start_epoch`、`event_end_epoch`、`event_center_epoch`
+- 指标：`sync_phase_*`、`sync_legacy_*`、`sync_span_*`、`jaccard_*_with_next`
+- 事件结构：`n_participating`、`n_core`、`n_penumbra`、`event_stratum`
+- 元数据：`subject`、`recording_id`（如有）、`block_stem`、`block_start_epoch`、`block_end_epoch`
+- 兼容视图：从 event rows 反聚合出的 block summary 允许保留，但只能标注为 compatibility view，不能再当分析主语
 
 **验收**
 
@@ -400,17 +401,18 @@ dataset:
 **窗型 2 — normalized-trajectory analysis（覆盖含短间期）**
 
 - 时间轴：`(t - t_prev_seizure_end) / (t_next_seizure_onset - t_prev_seizure_end)` 或项目约定的 clean interval 边界（与 `interictal_synchrony_aggregation` 一致）
-- **所有** `allEligibleIntervals` 中可挂载 block 的 interval 均可进入，**不**因 `<3h` 剔除 subject
+- **所有** `allEligibleIntervals` 中可挂载 event 的 interval 均可进入，**不**因 `<3h` 剔除 subject
 
 **Gap-aware 与昼夜**
 
-- 整块归属：跨 seizure、post/interictal 边界、day/night、非平凡 gap 的 block **排除**并记录 `exclusion_reasons`（与 `AGENTS.md` 一致）
+- 严格按事件边界归属：跨 seizure、post/interictal 边界、day/night、非平凡 gap 的 event **排除**并记录 `exclusion_reasons`（与 `AGENTS.md` 一致）
+- 昼夜必须按 event 的真实时间边界计算，不能继承父 block 标签
 - 昼夜：`epoch_to_local_hour` + `timezone_default` / overrides；Epilepsiae 当前挂载规则见 `docs/epilepsiae_dataset_structure.md`
 
 **交付表（最少）**
 
-- `seizure_interval` 表；`block_annotations`；`subject × seizure_interval × window_type` 主表
-- 各 window：`n_blocks`、`coverage_ratio`、`excluded_block_count`；`exclusion_breakdown` JSON/CSV
+- `seizure_interval` 表；`event_annotations`；`subject × seizure_interval × window_type` 主表
+- 各 window：`n_events`、`coverage_ratio`、`excluded_event_count`；`exclusion_breakdown` JSON/CSV
 - Yuquan 与 Epilepsiae 分别一份 interval coverage 摘要
 
 ### PR6：统计 + 同步性变化图 + cohort summary
@@ -426,7 +428,7 @@ dataset:
 **统计交付**
 
 - Subject-level：各 window/trajectory 下 synchrony effect；**`sync_all` 与 `sync_core_only` 并列**
-- Cohort-level：`n_subjects`、`n_intervals`、`n_blocks`；各队列纳入/排除统计；主效应 + CI 或 permutation p
+- Cohort-level：`n_subjects`、`n_intervals`、`n_events`；各队列纳入/排除统计；主效应 + CI 或 permutation p
 - Sensitivity：`>=3h` 子集 vs 全 interval；`all` vs `core_only`；`ready_full` vs `ready_partial`
 
 **同步性变化图（图单，须可验收）**
@@ -435,18 +437,31 @@ dataset:
 - **Figure B**：normalized trajectory ribbon — x∈[0,1]；y=同步性；cohort mean/median + 置信带或 spaghetti；**全 interval 与 `>=3h` 子集各一图**
 - **Figure C**：fixed-window Post/Mid/Pre — paired / box + subject 连线；`all` 与 `core_only` 并列
 - **Figure D**：robustness — `phase`/`legacy`/`span` 并列；`allEligibleIntervals` vs `legacyComparableLongIntervals`；**Epilepsiae 与 Yuquan 分开展示 + combined summary**
-- **Figure E**：coverage/exclusion audit — 各队列 subject/interval/block 计数；主要排除原因分布
+- **Figure E**：coverage/exclusion audit — 各队列 subject/interval/event 计数；主要排除原因分布
 
 **检验语义**
 
 - Fixed-window **主检验**仅在合法 fixed-window interval 上报告
-- Normalized trajectory 作为更广覆盖的趋势分析
+- Normalized trajectory 必须以 **within-interval** 为主统计层级；禁止再把全部 event pooled 后直接做主检验
 - 短间期单独 cohort 报告，**不**当噪声默认删除
 
 **PR6 验收（v4）**
 
 - Epilepsiae `ready_full_artifacts`：上述图单与 summary **至少覆盖**该队列；Yuquan Tier A 4 subjects 全出图
 - 每个主结论同时给出 `sync_all` 与 `sync_core_only`
+
+**2026-04-03 状态更新**
+
+- 工程骨架已落地：Figure A-E、fixed-window、normalized trajectory、cohort summary 都已实现并经过真实 Epilepsiae 数据跑通。
+- 但方法论做过一轮硬修正：旧的 pooled trajectory 已被证明确实会产生 Simpson's paradox 伪影，不能再当主结论。
+- 真实结果必须分两层汇报：
+  - `Subject 916` 这类单病人正例明确存在，说明假设在部分 subject / interval 上成立。
+  - cohort 的 `within-interval` 主检验目前整体为 null，说明“reset -> resynchronize -> peak”还不是稳定的普适规律。
+- 因此 PR6 现阶段的正确状态是：
+  - ✅ 统计与作图框架可用
+  - ✅ 主检验层级已经纠正
+  - ❌ 科学假设尚未被 cohort-level 证实
+  - 下一步重点应转向异质性分层，而不是继续 pooled 或继续润图
 
 ---
 
@@ -526,9 +541,9 @@ dataset:
 | PR1.5 | P1    | Epilepsiae 契约 + manifest + 聚合层 | CPU/I-O | 已验收；禁止半块归属；全阶段验证基线 |
 | PR2   | P1    | streaming 检测 + **可视化**         | CPU/I-O | 指标 + 单 EDF + 24h + CSV |
 | PR3   | P1    | Yuquan JSON + interval 表 + tier | CPU 并行  | interval-first + 队列标签 |
-| PR4   | P2    | block metric 契约 + 同构 NPZ/CSV   | CPU     | 单测 + Epilepsiae + Yuquan |
-| PR5   | P2    | interval 标注 + fixed vs trajectory + 排除 | CPU | timeline + tz + gap-aware |
-| PR6   | P2    | 统计 + Figures A–E + cohort summary | CPU     | Epilepsiae 强制 + Tier A Yuquan |
+| PR4   | P2    | event metric 契约 + 同构 event CSV/NPZ | CPU     | 已完成；event rows 主链 + compatibility view |
+| PR5   | P2    | event annotation + fixed vs trajectory + 排除 | CPU | 已完成；strict event-boundary + gap-aware |
+| PR6   | P2    | 统计 + Figures A–E + cohort summary | CPU     | 框架已落地；主检验改为 within-interval；科学结论待分层验证 |
 | PR7   | P3    | smoke + legacy 对齐 + Epilepsiae 路径 | GPU+CPU | corr + smoke + 记录 Epilepsiae |
 | PR8   | P3    | Tier C lagPat + Epilepsiae 补跑 manifest | GPU 主导 | 摘要 + manifest 更新 |
 | PR9   | Opt   | sleep proxy                    | CPU/I-O | 曲线合理                   |
