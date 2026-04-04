@@ -171,6 +171,76 @@ def load_epilepsiae_sync_summary_rows(csv_path: Path | str) -> List[Dict[str, ob
     return load_sync_event_rows(csv_path)
 
 
+def _parse_inventory_rows(
+    rows: Sequence[Mapping[str, object]],
+) -> List[Dict[str, object]]:
+    float_cols = {
+        "eeg_onset_epoch",
+        "eeg_offset_epoch",
+        "eeg_duration_sec",
+        "record_start_epoch",
+        "record_end_epoch",
+        "eeg_onset_local_hour",
+    }
+    bool_cols = {"has_complete_eeg_interval", "has_complete_clin_interval"}
+    out: List[Dict[str, object]] = []
+    for row in rows:
+        parsed: Dict[str, object] = dict(row)
+        for col in float_cols:
+            if col in parsed:
+                parsed[col] = _as_float(parsed.get(col))
+        for col in bool_cols:
+            if col in parsed:
+                parsed[col] = _as_bool(parsed.get(col))
+        out.append(parsed)
+    return out
+
+
+def load_yuquan_seizure_inventory_rows(
+    path: Path | str,
+) -> List[Dict[str, object]]:
+    """Load Yuquan seizure inventory rows from CSV or JSON artifacts."""
+    src = Path(path)
+    if src.suffix.lower() == ".csv":
+        return _parse_inventory_rows(_read_csv_rows(src))
+
+    payload = json.loads(src.read_text(encoding="utf-8"))
+    if isinstance(payload, list):
+        return _parse_inventory_rows(payload)
+    if isinstance(payload, dict) and isinstance(payload.get("seizure_rows"), list):
+        return _parse_inventory_rows(payload["seizure_rows"])
+    if isinstance(payload, dict) and isinstance(payload.get("files"), list):
+        rows: List[Dict[str, object]] = []
+        seizure_idx = 0
+        subject = str(payload.get("subject", src.stem))
+        timezone_name = str(payload.get("timezone_name", "Asia/Shanghai"))
+        for file_row in payload["files"]:
+            record = str(file_row.get("record", ""))
+            record_info = file_row.get("record_info", {}) or {}
+            for interval in file_row.get("seizure_intervals", []):
+                seizure_idx += 1
+                rows.append(
+                    {
+                        "subject": subject,
+                        "patient_code": subject,
+                        "recording_id": record,
+                        "record": record,
+                        "seizure_id": f"{subject}_sz_{seizure_idx:03d}",
+                        "eeg_onset_epoch": interval.get("onset_epoch"),
+                        "eeg_offset_epoch": interval.get("offset_epoch"),
+                        "eeg_duration_sec": interval.get("duration_sec"),
+                        "has_complete_eeg_interval": True,
+                        "timezone_name": timezone_name,
+                        "eeg_onset_local_hour": None,
+                        "eeg_onset_day_night": "",
+                        "record_start_epoch": record_info.get("start_epoch"),
+                        "record_end_epoch": record_info.get("end_epoch"),
+                    }
+                )
+        return _parse_inventory_rows(rows)
+    raise ValueError(f"Unsupported Yuquan seizure inventory format: {src}")
+
+
 def load_epilepsiae_block_inventory_rows(csv_path: Path | str) -> List[Dict[str, object]]:
     rows = _read_csv_rows(csv_path)
     float_cols = {
@@ -890,6 +960,7 @@ def run_yuquan_sync_aggregation(
     output_dir: Path | str,
     data_root: Path | str = "/mnt/yuquan_data/yuquan_24h_edf",
     subjects: Optional[Sequence[str]] = None,
+    seizure_inventory_path: Optional[Path | str] = None,
     config: Optional[YuquanSyncAggregationConfig] = None,
 ) -> Dict[str, object]:
     cfg = config or YuquanSyncAggregationConfig()
@@ -902,10 +973,14 @@ def run_yuquan_sync_aggregation(
         )
     if subjects is None:
         subjects = sorted({str(row["subject"]) for row in sync_rows})
-    seizure_rows = build_yuquan_seizure_inventory(
-        data_root,
-        subjects=subjects,
-        config=cfg,
+    seizure_rows = (
+        load_yuquan_seizure_inventory_rows(seizure_inventory_path)
+        if seizure_inventory_path is not None
+        else build_yuquan_seizure_inventory(
+            data_root,
+            subjects=subjects,
+            config=cfg,
+        )
     )
     annotated_rows, interval_rows, annotation_summary = annotate_yuquan_sync_events(
         sync_rows,
@@ -921,6 +996,12 @@ def run_yuquan_sync_aggregation(
     outputs = {
         "event_annotations_csv": _write_csv(
             out_dir / "yuquan_sync_event_annotations.csv", annotated_rows
+        ),
+        "seizure_inventory_csv": _write_csv(
+            out_dir / "yuquan_seizure_inventory.csv", seizure_rows
+        ),
+        "seizure_interval_inventory_csv": _write_csv(
+            out_dir / "yuquan_seizure_interval_inventory.csv", interval_rows
         ),
         "interval_window_csv": _write_csv(
             out_dir / "yuquan_sync_interval_window_table.csv", interval_window_rows
@@ -940,6 +1021,11 @@ def run_yuquan_sync_aggregation(
             "day_start_hour": cfg.day_start_hour,
             "night_start_hour": cfg.night_start_hour,
         },
+        "inventory_source": (
+            str(seizure_inventory_path)
+            if seizure_inventory_path is not None
+            else "built_from_edf_annotations"
+        ),
         "annotation": annotation_summary,
         "aggregation": aggregate_summary,
         "outputs": outputs,

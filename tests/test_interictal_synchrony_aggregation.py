@@ -615,6 +615,8 @@ def test_run_yuquan_sync_aggregation_writes_outputs(tmp_path: Path) -> None:
         agg_mod.build_yuquan_seizure_inventory = original_builder
 
     assert (tmp_path / "out" / "yuquan_sync_event_annotations.csv").exists()
+    assert (tmp_path / "out" / "yuquan_seizure_inventory.csv").exists()
+    assert (tmp_path / "out" / "yuquan_seizure_interval_inventory.csv").exists()
     assert (tmp_path / "out" / "yuquan_sync_interval_window_table.csv").exists()
     assert (tmp_path / "out" / "yuquan_sync_subject_window_summary.csv").exists()
     payload = json.loads(
@@ -622,5 +624,6 @@ def test_run_yuquan_sync_aggregation_writes_outputs(tmp_path: Path) -> None:
             encoding="utf-8"
         )
     )
+    assert payload["inventory_source"] == "built_from_edf_annotations"
     assert payload["annotation"]["n_annotated_rows"] == 1
     assert summary["aggregation"]["n_interval_window_rows"] >= 1

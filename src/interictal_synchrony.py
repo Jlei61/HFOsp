@@ -89,9 +89,8 @@ def select_core_penumbra_mask(
     """
     Return a boolean mask marking channels treated as core.
 
-    If `core_channels` is omitted, all provided channels are considered core.
-    This keeps the PR4 framework non-destructive for legacy lagPat assets that
-    only expose a core-channel universe.
+    If `core_channels` is omitted **or** none of the given core channels appear
+    in `ch_names`, all channels are treated as core (full-core fallback).
     """
     names = [str(x) for x in ch_names]
     if core_channels is None:
@@ -99,7 +98,13 @@ def select_core_penumbra_mask(
     core_set = {str(x) for x in core_channels}
     mask = np.array([name in core_set for name in names], dtype=bool)
     if not np.any(mask):
-        raise ValueError("No overlap between `core_channels` and `ch_names`.")
+        import warnings
+        warnings.warn(
+            f"No overlap between core_channels ({len(core_set)}) and "
+            f"ch_names ({len(names)}); falling back to all-core.",
+            stacklevel=2,
+        )
+        return np.ones((len(names),), dtype=bool)
     return mask
 
 

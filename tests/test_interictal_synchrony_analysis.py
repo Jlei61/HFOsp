@@ -577,14 +577,18 @@ def test_run_pr6_analysis_end_to_end(tmp_path: Path) -> None:
     assert summary["n_trajectory_events"] == 15
     assert (output_dir / "pr6_fixed_window_events.csv").exists()
     assert (output_dir / "pr6_trajectory_events.csv").exists()
+    assert (output_dir / "pr6_fixed_window_interval_means.csv").exists()
+    assert (output_dir / "pr6_trajectory_interval_stats.csv").exists()
     assert (output_dir / "pr6_statistics_summary.json").exists()
     assert len(summary["figures"]) >= 4
 
     stats = json.loads(
         (output_dir / "pr6_statistics_summary.json").read_text(encoding="utf-8")
     )
+    assert stats["analysis_contract"]["formal_statistical_unit"] == "seizure_interval"
     assert "post_vs_pre_legacy_all" in stats
     assert "trajectory_pooled_legacy_all" in stats
     assert "trajectory_within_interval_legacy_all" in stats
+    assert stats["trajectory_pooled_legacy_all"]["is_exploratory"] is True
     assert stats["trajectory_pooled_legacy_all"]["spearman_r"] is not None
     assert stats["trajectory_within_interval_legacy_all"]["n_intervals_tested"] >= 1

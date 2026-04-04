@@ -1,11 +1,12 @@
 """
-PR6: Event-level interictal synchrony statistical analysis and visualization.
+PR6: interval-first interictal synchrony statistics and visualization.
 
-Consumes PR5 event_annotations CSV and produces:
-- event-level fixed-window extraction with paired statistics
-- event-level normalized trajectory with trend statistics
-- Figures A-E
-- cohort summary tables
+Consumes annotated PR5 event rows as raw inputs, but the formal hypothesis tests
+operate at the seizure-interval level:
+- fixed-window: mean within subject × seizure_interval × window_position, then paired test
+- trajectory: per-interval Spearman rho, then one-sample test on rho distribution
+- pooled event-level correlations are kept only as exploratory reference
+- Figures A-E and interval-level audit tables
 """
 
 from __future__ import annotations
@@ -81,6 +82,9 @@ _FLOAT_COLS = frozenset({
     "next_eeg_onset_epoch", "next_eeg_offset_epoch",
     "clean_between_seizures_sec", "post_ictal_available_sec",
     "interictal_available_sec", "n_channels", "n_core_channels", "n_penumbra_channels",
+    "sync_phase_i", "sync_legacy_i", "sync_span_i", "n_i",
+    "sync_phase_l", "sync_legacy_l", "sync_span_l", "n_l",
+    "sync_phase_e", "sync_legacy_e", "sync_span_e", "n_e",
 })
 
 _BOOL_COLS = frozenset({
@@ -120,7 +124,7 @@ def load_event_rows(
     *,
     dataset: str = "",
 ) -> List[Dict[str, object]]:
-    """Load event-level PR4/PR5 rows."""
+    """Load annotated PR4/PR5 event rows (raw inputs for interval-level PR6)."""
     return load_annotated_event_rows(csv_path, dataset=dataset)
 
 
@@ -214,12 +218,12 @@ def _safe_median(arr: Sequence[float]) -> Optional[float]:
 
 def _metric_axis_label(metric_col: str) -> str:
     labels = {
-        "sync_legacy_global": "Legacy synchronization (event-level)",
-        "sync_legacy_core": "Legacy synchronization, core only (event-level)",
-        "sync_phase_global": "Phase-order synchronization (event-level)",
-        "sync_phase_core": "Phase-order synchronization, core only (event-level)",
-        "sync_span_global": "Span synchronization (event-level)",
-        "sync_span_core": "Span synchronization, core only (event-level)",
+        "sync_legacy_global": "Legacy synchronization",
+        "sync_legacy_core": "Legacy synchronization, core only",
+        "sync_phase_global": "Phase-order synchronization",
+        "sync_phase_core": "Phase-order synchronization, core only",
+        "sync_span_global": "Span synchronization",
+        "sync_span_core": "Span synchronization, core only",
     }
     return labels.get(metric_col, metric_col.replace("sync_", "").replace("_", " "))
 
@@ -376,6 +380,8 @@ def paired_window_test(
         "pair": f"{a_name}_vs_{b_name}",
         "n_pairs": len(a_vals),
         "n_unique_subjects": len(set(paired_subjects)),
+        "statistical_unit": "seizure_interval",
+        "interval_summary": "mean_across_events_per_window",
     }
 
     if len(a_vals) < 2:
@@ -446,6 +452,8 @@ def trajectory_trend_test(
     result: Dict[str, object] = {
         "metric": metric_col,
         "n_events": len(norm_ts),
+        "statistical_unit": "pooled_event_rows_exploratory",
+        "is_exploratory": True,
     }
     if len(norm_ts) < 3:
         result.update({"spearman_r": None, "spearman_p": None, "bins": []})
@@ -531,6 +539,8 @@ def within_interval_trend_test(
         "metric": metric_col,
         "n_intervals_tested": len(per_interval_rho),
         "min_events_per_interval": min_events_per_interval,
+        "statistical_unit": "seizure_interval",
+        "interval_effect": "spearman_rho_within_interval",
     }
 
     if len(per_interval_rho) < 3:
@@ -560,6 +570,90 @@ def within_interval_trend_test(
         "per_interval_details": per_interval_details,
     })
     return result
+
+
+def event_rate_paired_window_test(
+    fixed_window_rows: Sequence[Mapping],
+    *,
+    window_sec: float = DEFAULT_WINDOW_SEC,
+    pair: Tuple[str, str] = ("post", "pre"),
+) -> Dict[str, object]:
+    """Paired Wilcoxon on event rate (events/hour) per interval-window."""
+    count: Dict[Tuple[str, str, str], int] = defaultdict(int)
+    for row in fixed_window_rows:
+        key = (
+            str(row["subject"]),
+            str(row["seizure_interval_id"]),
+            str(row["window_position"]),
+        )
+        count[key] += 1
+
+    interval_rates: Dict[Tuple[str, str], Dict[str, float]] = defaultdict(dict)
+    rate_scale = 3600.0 / float(window_sec)
+    for (subj, iv_id, win_pos), n in count.items():
+        interval_rates[(subj, iv_id)][win_pos] = float(n) * rate_scale
+
+    a_name, b_name = pair
+    a_vals: List[float] = []
+    b_vals: List[float] = []
+    for (subj, iv_id), windows in sorted(interval_rates.items()):
+        if a_name in windows and b_name in windows:
+            a_vals.append(windows[a_name])
+            b_vals.append(windows[b_name])
+
+    result: Dict[str, object] = {
+        "metric": "event_rate_per_hour",
+        "pair": f"{a_name}_vs_{b_name}",
+        "n_pairs": len(a_vals),
+        "statistical_unit": "seizure_interval",
+        "window_sec": window_sec,
+    }
+    if len(a_vals) < 2:
+        result.update({
+            "statistic": None, "p_value": None,
+            "median_a": _safe_median(a_vals), "median_b": _safe_median(b_vals),
+        })
+        return result
+
+    a_arr = np.array(a_vals)
+    b_arr = np.array(b_vals)
+    diff = b_arr - a_arr
+    nonzero = diff[diff != 0]
+    if len(nonzero) < 2:
+        result.update({
+            "statistic": None, "p_value": None,
+            "median_a": float(np.median(a_arr)),
+            "median_b": float(np.median(b_arr)),
+            "median_diff": float(np.median(diff)),
+        })
+        return result
+
+    wtest = sp_stats.wilcoxon(nonzero, alternative="two-sided")
+    result.update({
+        "statistic": float(wtest.statistic),
+        "p_value": float(wtest.pvalue),
+        "median_a": float(np.median(a_arr)),
+        "median_b": float(np.median(b_arr)),
+        "median_diff": float(np.median(diff)),
+        "mean_a": float(np.mean(a_arr)),
+        "mean_b": float(np.mean(b_arr)),
+    })
+    return result
+
+
+def _detect_available_region_metrics(
+    rows: Sequence[Mapping],
+) -> Dict[str, Tuple[str, ...]]:
+    """Discover which region-stratified columns have data (i/l/e)."""
+    region_families: Dict[str, Tuple[str, ...]] = {}
+    step = max(1, len(rows) // 500)
+    sample = rows[::step]
+    for region in ("i", "l", "e"):
+        col = f"sync_phase_{region}"
+        has_data = any(_float_or_none(r.get(col)) is not None for r in sample)
+        if has_data:
+            region_families[f"phase_{region}"] = (f"sync_phase_{region}",)
+    return region_families
 
 
 # ── cohort summary ─────────────────────────────────────────────────────────
@@ -608,6 +702,106 @@ def build_cohort_summary(
         "n_trajectory_events": len(trajectory_rows),
         "exclusion_reason_counts": dict(exclusion_counts),
     }
+
+
+def build_fixed_window_interval_means_table(
+    fixed_window_rows: Sequence[Mapping[str, object]],
+) -> List[Dict[str, object]]:
+    """Materialize the PR6 fixed-window analysis unit: one row per interval."""
+    grouped: Dict[Tuple[str, str], List[Mapping[str, object]]] = defaultdict(list)
+    for row in fixed_window_rows:
+        subject = str(row.get("subject", ""))
+        interval_id = str(row.get("seizure_interval_id", ""))
+        if subject and interval_id:
+            grouped[(subject, interval_id)].append(row)
+
+    metric_cols = sorted(set(SYNC_METRICS.values()))
+    out: List[Dict[str, object]] = []
+    for (subject, interval_id), rows in sorted(grouped.items()):
+        per_window_rows: Dict[str, List[Mapping[str, object]]] = defaultdict(list)
+        for row in rows:
+            per_window_rows[str(row["window_position"])].append(row)
+
+        sample = rows[0]
+        result: Dict[str, object] = {
+            "subject": subject,
+            "dataset": str(sample.get("dataset", "")),
+            "seizure_interval_id": interval_id,
+            "clean_between_seizures_sec": _float_or_none(
+                sample.get("clean_between_seizures_sec")
+            ),
+        }
+        for position in ("post", "mid", "pre"):
+            window_rows = per_window_rows.get(position, [])
+            result[f"{position}_n_events"] = len(window_rows)
+            for metric_col in metric_cols:
+                vals = [
+                    val
+                    for val in (_metric_value(r, metric_col) for r in window_rows)
+                    if val is not None
+                ]
+                result[f"{metric_col}_{position}_mean"] = (
+                    float(np.mean(vals)) if vals else None
+                )
+        out.append(result)
+    return out
+
+
+def build_trajectory_interval_stats_table(
+    trajectory_rows: Sequence[Mapping[str, object]],
+) -> List[Dict[str, object]]:
+    """Materialize the PR6 trajectory analysis unit: one row per interval."""
+    grouped: Dict[Tuple[str, str], List[Mapping[str, object]]] = defaultdict(list)
+    for row in trajectory_rows:
+        subject = str(row.get("subject", ""))
+        interval_id = str(row.get("seizure_interval_id", ""))
+        if subject and interval_id:
+            grouped[(subject, interval_id)].append(row)
+
+    metric_cols = sorted(set(SYNC_METRICS.values()))
+    out: List[Dict[str, object]] = []
+    for (subject, interval_id), rows in sorted(grouped.items()):
+        sample = rows[0]
+        result: Dict[str, object] = {
+            "subject": subject,
+            "dataset": str(sample.get("dataset", "")),
+            "seizure_interval_id": interval_id,
+            "n_events": len(rows),
+            "clean_between_seizures_sec": _float_or_none(
+                sample.get("clean_between_seizures_sec")
+            ),
+        }
+        ts = np.array(
+            [
+                t
+                for t in (_float_or_none(row.get("norm_t")) for row in rows)
+                if t is not None
+            ],
+            dtype=np.float64,
+        )
+        for metric_col in metric_cols:
+            paired = [
+                (t, v)
+                for row in rows
+                for t, v in [(_float_or_none(row.get("norm_t")), _metric_value(row, metric_col))]
+                if t is not None and v is not None
+            ]
+            result[f"{metric_col}_n_events"] = len(paired)
+            if len(paired) < 3:
+                result[f"{metric_col}_spearman_rho"] = None
+                result[f"{metric_col}_spearman_p"] = None
+                continue
+            metric_ts = np.array([t for t, _ in paired], dtype=np.float64)
+            metric_vs = np.array([v for _, v in paired], dtype=np.float64)
+            if np.ptp(metric_ts) == 0 or np.ptp(metric_vs) == 0:
+                result[f"{metric_col}_spearman_rho"] = None
+                result[f"{metric_col}_spearman_p"] = None
+                continue
+            rho, p_val = sp_stats.spearmanr(metric_ts, metric_vs)
+            result[f"{metric_col}_spearman_rho"] = float(rho)
+            result[f"{metric_col}_spearman_p"] = float(p_val)
+        out.append(result)
+    return out
 
 
 # ── figures ────────────────────────────────────────────────────────────────
@@ -1018,12 +1212,12 @@ def plot_figure_b_trajectory_ribbon(
     title_suffix: str = "",
     within_interval_stat: Optional[Dict[str, object]] = None,
 ) -> Figure:
-    """Figure B: normalized trajectory ribbon with spaghetti + median ± IQR.
+    """Figure B: interval-aware normalized trajectory ribbon with median ± IQR.
 
     The ribbon is computed via two-level averaging (per-interval means first,
     then median across intervals) to avoid Simpson's-paradox artifacts.
-    Annotations show both the within-interval test (primary) and pooled
-    Spearman (for reference).
+    Annotations show both the within-interval test (primary) and the pooled
+    event-level Spearman only as exploratory reference.
     """
     by_interval: Dict[str, List[Tuple[float, float]]] = defaultdict(list)
     for r in trajectory_rows:
@@ -1067,7 +1261,7 @@ def plot_figure_b_trajectory_ribbon(
     rho = pooled.get("spearman_r")
     p = pooled.get("spearman_p")
     if rho is not None:
-        annotation_lines.append(f"pooled (ref): ρ={rho:.3f}, p={p:.2e}")
+        annotation_lines.append(f"pooled event ref (exploratory): ρ={rho:.3f}, p={p:.2e}")
 
     if annotation_lines:
         ax.text(
@@ -1097,7 +1291,7 @@ def plot_figure_c_fixed_window_comparison(
     metric_col_core: str = "sync_legacy_core",
     metric_label: str = "legacy sync",
 ) -> Figure:
-    """Figure C: Post/Mid/Pre boxplot with paired lines; all vs core side by side."""
+    """Figure C: interval-mean Post/Mid/Pre comparison; all vs core side by side."""
     positions = ("post", "mid", "pre")
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5), sharey=True)
@@ -1164,7 +1358,7 @@ def plot_figure_c_fixed_window_comparison(
         ax.set_title(col_label)
 
     axes[0].set_ylabel(metric_label)
-    fig.suptitle("Fixed-window Post / Mid / Pre comparison", fontsize=12)
+    fig.suptitle("Fixed-window Post / Mid / Pre comparison (interval means)", fontsize=12)
     fig.tight_layout()
     return fig
 
@@ -1281,6 +1475,48 @@ def plot_figure_e_coverage_audit(
     return fig
 
 
+def plot_figure_f_event_rate(
+    fixed_window_rows: Sequence[Mapping],
+    *,
+    window_sec: float = DEFAULT_WINDOW_SEC,
+) -> Figure:
+    """Figure F: event rate (events/hour) in Post / Mid / Pre windows."""
+    count: Dict[Tuple[str, str, str], int] = defaultdict(int)
+    for row in fixed_window_rows:
+        key = (
+            str(row["subject"]),
+            str(row["seizure_interval_id"]),
+            str(row["window_position"]),
+        )
+        count[key] += 1
+
+    rate_scale = 3600.0 / float(window_sec)
+    by_window: Dict[str, List[float]] = defaultdict(list)
+    intervals = {(s, i) for s, i, _ in count.keys()}
+    for subj, iv_id in intervals:
+        for wp in ("post", "mid", "pre"):
+            n = count.get((subj, iv_id, wp), 0)
+            by_window[wp].append(float(n) * rate_scale)
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+    positions = {"post": 0, "mid": 1, "pre": 2}
+    colors = [WINDOW_COLORS.get(wp, "#999") for wp in ("post", "mid", "pre")]
+    data = [by_window.get(wp, []) for wp in ("post", "mid", "pre")]
+    bp = ax.boxplot(data, positions=[0, 1, 2], patch_artist=True, widths=0.5)
+    for patch, color in zip(bp["boxes"], colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.6)
+    ax.set_xticks([0, 1, 2])
+    ax.set_xticklabels(["Post", "Mid", "Pre"])
+    ax.set_ylabel("Events / hour")
+    ax.set_title("Interictal group event rate by window position")
+    medians = [float(np.median(d)) if d else 0.0 for d in data]
+    for i, med in enumerate(medians):
+        ax.text(i, med, f"{med:.1f}", ha="center", va="bottom", fontsize=8)
+    fig.tight_layout()
+    return fig
+
+
 # ── orchestration ──────────────────────────────────────────────────────────
 
 
@@ -1318,12 +1554,27 @@ def run_pr6_analysis(
         all_rows, min_interval_sec=min_interval_sec, window_sec=window_sec
     )
     traj = compute_normalized_trajectory(all_rows)
+    fixed_interval_means = build_fixed_window_interval_means_table(fixed)
+    trajectory_interval_stats = build_trajectory_interval_stats_table(traj)
 
     _write_csv(out / "pr6_fixed_window_events.csv", fixed)
     _write_csv(out / "pr6_trajectory_events.csv", traj)
+    _write_csv(out / "pr6_fixed_window_interval_means.csv", fixed_interval_means)
+    _write_csv(out / "pr6_trajectory_interval_stats.csv", trajectory_interval_stats)
 
     stats_results: Dict[str, object] = {}
     within_interval_stats: Dict[str, Dict[str, object]] = {}
+    stats_results["analysis_contract"] = {
+        "formal_statistical_unit": "seizure_interval",
+        "raw_input_unit": "event_row",
+        "fixed_window_primary_test": (
+            "paired Wilcoxon on subject×interval window means"
+        ),
+        "trajectory_primary_test": (
+            "within-interval Spearman rho, then one-sample Wilcoxon across intervals"
+        ),
+        "pooled_event_level_trend": "exploratory_reference_only",
+    }
     for family, (metric_all, metric_core) in METRIC_FAMILIES.items():
         for label, mc in [("all", metric_all), ("core", metric_core)]:
             key = f"{family}_{label}"
@@ -1333,12 +1584,30 @@ def run_pr6_analysis(
             stats_results[f"post_vs_mid_{key}"] = paired_window_test(
                 fixed, metric_col=mc, pair=("post", "mid")
             )
-            stats_results[f"trajectory_pooled_{key}"] = trajectory_trend_test(
-                traj, metric_col=mc, n_bins=n_bins
-            )
+            pooled = trajectory_trend_test(traj, metric_col=mc, n_bins=n_bins)
+            stats_results[f"trajectory_pooled_{key}"] = pooled
             wi = within_interval_trend_test(traj, metric_col=mc)
             stats_results[f"trajectory_within_interval_{key}"] = wi
             within_interval_stats[mc] = wi
+
+    # ── event rate analysis ──
+    if fixed:
+        stats_results["event_rate_post_vs_pre"] = event_rate_paired_window_test(
+            fixed, window_sec=window_sec, pair=("post", "pre")
+        )
+        stats_results["event_rate_post_vs_mid"] = event_rate_paired_window_test(
+            fixed, window_sec=window_sec, pair=("post", "mid")
+        )
+
+    # ── region-stratified analysis (i/l/e, if columns present) ──
+    region_families = _detect_available_region_metrics(all_rows)
+    for rkey, (rcol,) in region_families.items():
+        stats_results[f"post_vs_pre_{rkey}"] = paired_window_test(
+            fixed, metric_col=rcol, pair=("post", "pre")
+        )
+        stats_results[f"trajectory_within_interval_{rkey}"] = (
+            within_interval_trend_test(traj, metric_col=rcol)
+        )
 
     cohort = build_cohort_summary(all_rows, fixed, traj)
     stats_results["cohort_summary"] = cohort
@@ -1451,11 +1720,20 @@ def run_pr6_analysis(
     plt.close(fig)
     saved_figures.append(str(p))
 
+    if fixed:
+        fig = plot_figure_f_event_rate(fixed, window_sec=window_sec)
+        p = fig_dir / "figure_f_event_rate.png"
+        fig.savefig(str(p), dpi=150)
+        plt.close(fig)
+        saved_figures.append(str(p))
+
     output_summary = {
         "output_dir": str(out),
         "n_annotated_event_rows": len(all_rows),
         "n_fixed_window_events": len(fixed),
         "n_trajectory_events": len(traj),
+        "n_fixed_window_intervals": len(fixed_interval_means),
+        "n_trajectory_intervals": len(trajectory_interval_stats),
         "statistics_json": str(summary_path),
         "figures": saved_figures,
         "subject_timeline_dirs": subject_timeline_dirs,
