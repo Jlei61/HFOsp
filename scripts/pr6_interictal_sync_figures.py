@@ -6,10 +6,11 @@ Usage examples:
 
     # Both datasets (event rows)
     python scripts/pr6_interictal_sync_figures.py \
-        --yuquan-events results/interictal_synchrony/yuquan/yuquan_sync_event_annotations.csv
+        --yuquan-events results/interictal_synchrony/yuquan_soz/aggregated/yuquan_sync_event_annotations.csv
 
     # Custom output directory
-    python scripts/pr6_interictal_sync_figures.py --output-dir results/pr6_custom
+    python scripts/pr6_interictal_sync_figures.py \
+        --output-dir results/interictal_synchrony/analysis/yuquan
 """
 
 from __future__ import annotations
@@ -32,7 +33,7 @@ DEFAULT_EPILEPSIAE_EVENTS = (
     / "aggregated"
     / "epilepsiae_sync_event_annotations.csv"
 )
-DEFAULT_OUTPUT_DIR = RESULTS_DIR / "pr6_analysis"
+DEFAULT_OUTPUT_DIR = RESULTS_DIR / "interictal_synchrony" / "analysis" / "combined"
 
 
 def main() -> None:

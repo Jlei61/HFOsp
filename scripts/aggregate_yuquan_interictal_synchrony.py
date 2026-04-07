@@ -13,9 +13,9 @@ from src.interictal_synchrony_aggregation import run_yuquan_sync_aggregation
 
 
 RESULTS_DIR = Path("results")
-SYNC_DIR = RESULTS_DIR / "interictal_synchrony" / "yuquan_blocks"
-SYNC_EVENT_CSV = SYNC_DIR / "yuquan_interictal_sync_events.csv"
-OUTPUT_DIR = RESULTS_DIR / "interictal_synchrony" / "yuquan"
+SYNC_DIR = RESULTS_DIR / "interictal_synchrony" / "yuquan_soz"
+SYNC_EVENT_CSV = SYNC_DIR / "yuquan_soz_interictal_sync_events.csv"
+OUTPUT_DIR = RESULTS_DIR / "interictal_synchrony" / "yuquan_soz"
 
 
 def _parse_subjects(raw: str) -> list[str] | None:

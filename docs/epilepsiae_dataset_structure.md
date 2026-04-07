@@ -608,8 +608,8 @@ manifest 分层语义：
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_interval_window_table.csv`
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_subject_window_summary.csv`
 - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/epilepsiae_sync_aggregation_summary.json`
-- `results/pr6_analysis/stats/pr6_analysis_stats.json`（PR6 统计结果）
-- `results/pr6_analysis/figures/`（Figures A–E）
+- `results/interictal_synchrony/analysis/combined/pr6_statistics_summary.json`（合并队列统计结果）
+- `results/interictal_synchrony/analysis/combined/figures/`（Figures B–F + 每受试者时序图）
 
 ---
 

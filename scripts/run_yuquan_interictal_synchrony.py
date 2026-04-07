@@ -16,9 +16,9 @@ from src.interictal_synchrony import (
 
 
 RESULTS_DIR = Path("results")
-OUTPUT_DIR = RESULTS_DIR / "interictal_synchrony" / "yuquan_blocks"
-SUMMARY_CSV = OUTPUT_DIR / "yuquan_interictal_sync_summary.csv"
-EVENT_CSV = OUTPUT_DIR / "yuquan_interictal_sync_events.csv"
+OUTPUT_DIR = RESULTS_DIR / "interictal_synchrony" / "yuquan_soz"
+SUMMARY_CSV = OUTPUT_DIR / "yuquan_soz_interictal_sync_summary.csv"
+EVENT_CSV = OUTPUT_DIR / "yuquan_soz_interictal_sync_events.csv"
 
 
 def _parse_subjects(raw: str) -> list[str] | None:

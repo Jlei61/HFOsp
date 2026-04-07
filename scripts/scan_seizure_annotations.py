@@ -14,6 +14,8 @@ from src.preprocessing import (
 DATA_ROOT = Path('/mnt/yuquan_data/yuquan_24h_edf')
 RESULTS_DIR = Path('results')
 RESULTS_DIR.mkdir(exist_ok=True)
+SEIZURE_DETECTION_DIR = RESULTS_DIR / 'seizure_detection'
+SEIZURE_DETECTION_DIR.mkdir(exist_ok=True)
 
 SEIZURE_LABELS = [
     'EEG SZ', 'SZ', 'SZ1', 'SZ2', 'SZ3', 'SZ4', 'SZ5', 'SZ6', 'SZ7',
@@ -168,7 +170,7 @@ def main():
             'all_unique_labels': sorted(subj_all_labels),
         }
 
-        out_json = RESULTS_DIR / f'pr1_seizure_{subj}.json'
+        out_json = SEIZURE_DETECTION_DIR / f'pr1_seizure_{subj}.json'
         with open(out_json, 'w') as fp:
             json.dump(subj_result, fp, indent=2, ensure_ascii=False)
         print(f"  -> saved {out_json}", flush=True)
@@ -200,7 +202,7 @@ def main():
             flush=True,
         )
 
-    summary_json = RESULTS_DIR / 'pr1_seizure_all_yuquan_summary.json'
+    summary_json = SEIZURE_DETECTION_DIR / 'pr1_seizure_all_yuquan_summary.json'
     with open(summary_json, 'w') as fp:
         json.dump(global_summary, fp, indent=2, ensure_ascii=False)
     print(f"\n-> summary saved to {summary_json}", flush=True)

@@ -185,8 +185,9 @@ Read `docs/epilepsiae_dataset_structure.md` before answering any Epilepsiae ques
   - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/`
   - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/epilepsiae_region_stratified_events.csv`
   - `results/interictal_synchrony/yuquan_soz/` — Yuquan SOZ-stratified event CSV + aggregated
-  - `results/pr6_analysis_soz/pr6_statistics_summary.json` — combined cohort PR6 statistics
-  - `results/pr6_analysis_soz/figures/` — Figures A–F
+  - `results/interictal_synchrony/analysis/combined/pr6_statistics_summary.json` — combined cohort statistics
+  - `results/interictal_synchrony/analysis/combined/figures/` — Figures B–F + per-subject timelines
+  - `results/interictal_synchrony/analysis/yuquan/figures/` — Yuquan-only Figures A–E
 - Aggregation rule:
   - synchrony is computed per event from 1h lagPat blocks; analysis consumes event-level rows
   - do not invent sub-block seizure / post-ictal / day-night labels
@@ -260,3 +261,64 @@ Stop and ask the user instead of guessing when:
   - First identify the artifact class from axis labels and annotations
   - Then map artifact -> producer -> plotter
   - Never start from figure numbering alone
+
+## Results Directory Standards
+
+### 目录命名规则
+
+- **按 topic 分类，不使用 PR 编号命名。** `pr6_analysis/` 这类命名是坏味道，应是 `interictal_synchrony/analysis/combined/`。
+- 新建结果目录时，目录名必须能独立传达"这是什么分析的什么阶段输出"。
+
+### 优先级分层
+
+1. **图（`figures/`子目录）— 最高优先级**
+   - 每次生成后用户需亲自目视检查。
+   - 每个含图的目录**必须**有一个 `figures/README.md`，用中文逐图说明"这张图在展示什么，关注点在哪里"。
+   - README.md 格式：`### filename`开头，正文2–4句，末尾一行`**关注点**：`。
+   - 不需要每次重新生成图时重写 README，但当图的含义发生根本改变时必须更新。
+
+2. **聚合 CSV / JSON 统计（次优先）**
+   - 放在主目录下（与 `figures/` 同级），不单独建子目录。
+   - 文件名体现 topic，不体现 PR 号（`pr6_statistics_summary.json` 可以保留内容但要放在正确目录）。
+
+3. **中间 JSON / per-subject 文件（最低优先）**
+   - 放在 `per_subject/`、`phase2/`、`epilepsiae/`、`yuquan/` 等子目录中，不散落在主目录。
+   - 不需要 README，有 `cohort_summary.json` 提供索引即可。
+
+### 当前规范目录结构
+
+```
+results/
+├── dataset_inventory/          (epilepsiae/yuquan 元数据 inventory CSV/JSON)
+├── seizure_detection/          (pr1 per-subject seizure JSON + validation)
+├── event_periodicity/
+│   ├── figures/
+│   │   ├── README.md           ← 必须存在，中文
+│   │   ├── *_cohort_psd_stack.png
+│   │   ├── *_iei_summary.png
+│   │   ├── epilepsiae/         (per-subject PSD)
+│   │   └── yuquan/             (per-subject PSD)
+│   ├── epilepsiae/             (per-subject JSON — 次优先)
+│   ├── yuquan/                 (per-subject JSON — 次优先)
+│   └── phase2/                 (5个实验 JSON — 次优先)
+├── interictal_synchrony/
+│   ├── analysis/
+│   │   ├── combined/           (Epilepsiae+Yuquan 合并统计)
+│   │   │   ├── figures/
+│   │   │   │   └── README.md   ← 必须存在，中文
+│   │   │   └── *.csv / *.json
+│   │   └── yuquan/             (Yuquan 独立统计)
+│   │       ├── figures/
+│   │       │   └── README.md   ← 必须存在，中文
+│   │       └── *.csv / *.json
+│   ├── epilepsiae_ready_full_artifacts/
+│   └── yuquan_soz/
+├── run_logs/
+└── seizure_onset/
+```
+
+### Agent 行为规范
+
+- 生成新的图目录时，**同时生成** `figures/README.md`，不得只生成图不写说明。
+- README.md 必须在图实际生成后写，不得提前占位写空内容。
+- 引用结果路径时使用上述规范路径，不得出现 `pr1_`/`pr4_`/`pr6_` 开头的**目录名**（文件名内有 PR 编号可以接受，目录名不行）。
