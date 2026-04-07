@@ -108,6 +108,14 @@ Important drift:
   - `scripts/run_epilepsiae_interictal_synchrony.py` / `scripts/run_yuquan_interictal_synchrony.py` — event CSV export (both support `--soz-core-json`)
   - `scripts/aggregate_epilepsiae_interictal_synchrony.py` / `scripts/aggregate_yuquan_interictal_synchrony.py` — aggregation
   - `scripts/compute_region_stratified_synchrony.py` — augment event CSV with per-region (i/l/e) synchrony columns
+- Event periodicity (Fig 3C / S7 / S13 verification):
+  - `src/event_periodicity.py` — pulse train PSD, specparam, IEI MLE, ISI-shuffle/Gamma surrogate, Phase 2 tools (hazard, return map, packing sweep, centroid bypass, propagation stereotypy)
+  - `scripts/run_event_periodicity.py` — Phase 1 dual-dataset batch driver
+  - `scripts/run_surrogates_batch.py` — group-only surrogate batch
+  - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
+  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (5 experiments)
+  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization
+  - `docs/event_periodicity_analysis.md` — full results and conclusions (Phase 4+5)
 - Epilepsiae dataset: `src/epilepsiae_dataset.py`
 - Network: `src/network_analysis.py`
 - Plotting in current repo:
@@ -214,6 +222,21 @@ Stop and ask the user instead of guessing when:
   - **legacy** (`sync_legacy_global`) = only for backward compatibility with old paper
   - **span** (`sync_span_global`) = appendix / sensitivity only
   - See DEVELOP_PLAN.md § "指标层级判定"
+
+- "Is the ~2Hz event periodicity real?"
+  - Read `docs/event_periodicity_analysis.md`
+  - Short answer: **NO.** The ~2Hz PSD peak is a refractory-period artifact.
+  - Gamma renewal null (matching firing rate + refractory period) explains 15/30 subject peaks entirely
+  - ISI-shuffle shows peaks are distribution-shape artifacts, not temporal-order effects
+  - IEI distribution is lognormal (30/30), NOT power-law as old paper claimed
+  - Only 1/30 subjects passes both surrogate tests (huanghanwen, n=484, likely false positive)
+  - Per-channel vs group peak frequencies are inconsistent (packing artifact)
+  - Phase 2 (artifact localization):
+    - f_peak ≠ 1/W across 9 window sizes → packing window size is not the direct cause
+    - Centroid bypass: 3 event definitions give identical peaks → not grid quantization
+    - IEI serial correlation is **positive for all 30 subjects** → slow rate modulation, not oscillator
+    - Propagation stereotypy: SOZ events more stereotyped (tau=0.119 vs 0.048, p=0.077)
+  - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
 
 - "Why is legacy synchrony always ~0.6?"
   - Mathematical artifact: 3-channel uniform lag pattern → theoretical limit ≈ 0.5918
