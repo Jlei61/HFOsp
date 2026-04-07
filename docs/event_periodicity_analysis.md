@@ -6,6 +6,7 @@
 > Phase 5 完成日期：2026-04-05
 > 关联论文图：Figure 3, Figure S7, Figure S13
 > 系统审阅：见 `docs/event_periodicity_phase2_review_2026-04-05.md`
+> 方法学叙事更新：见 `docs/interictal_population_event_methodological_review.md`
 
 ---
 
@@ -190,10 +191,14 @@ PSD 周期峰可在两个数据集中复现：
 | 指标 | 结果 |
 |------|------|
 | 3 方法峰频差 < 0.1Hz | 13/30 subjects |
-| 峰频最大差异 | < 0.04Hz（有峰的 subjects 中） |
+| 解释边界 | 当前比较仍依赖 legacy `lagPatRaw -> 绝对时间` 映射，不是真正独立的 timestamp 重建 |
 
-**结论：在窗口内使用不同的时间锚点对 PSD 峰频无影响。**
-峰的来源不是事件时间戳的离散化（packing grid），而是 IEI 分布的固有统计特性。
+**降级后的结论：** 对多数检出 peak 的 subject，在当前 legacy 一致的时间映射框架内，
+窗口内锚点的改变通常不会显著改变峰频。
+
+这说明峰频**不是简单的窗口起点选择伪影**；但这**不等于**已经完全脱离 packing /
+lagPatRaw 生成链路。要彻底回答这个问题，仍需要从原始 envelope / spectrogram
+独立重建绝对事件时间。
 
 #### 5.3.3 实验 3：IEI Hazard Function
 
@@ -208,12 +213,13 @@ PSD 周期峰可在两个数据集中复现：
 
 #### 5.3.4 实验 4：IEI Return Map（关键新发现）
 
-对 30 subjects 计算连续 IEI 的 serial correlation corr(IEI[n], IEI[n+1])。
+对 30 subjects 计算连续 **log-IEI** 的 serial correlation
+`corr(log IEI[n], log IEI[n+1])`。
 
 | 指标 | 结果 |
 |------|------|
 | 正相关 subjects | **30/30**（100%） |
-| 显著 (p < 0.001) | **30/30** |
+| Subject-level sign test | **p = 9.31e-10** |
 | Mean r | 0.318 (range 0.124–0.511) |
 
 **这是一个重要的新发现：**
@@ -221,6 +227,11 @@ PSD 周期峰可在两个数据集中复现：
   （如昼夜节律、睡眠阶段变化、发作间歇状态漂移）
 - 若存在振荡器驱动的周期性，应观察到 **负** serial correlation（短-长交替）
 - 这进一步排除了内在振荡机制，指向 **非平稳率过程** 的正确解释
+
+**口径注意：**
+- 当前代码内部还会输出 Pearson `p` 值，但那只是描述性数字，不能作为正式
+  subject-level 推断，因为相邻 IEI 对之间并不独立。
+- 正式报告应优先使用“30/30 方向一致 + sign test”这一层级。
 
 #### 5.3.5 实验 5：传播立体型分析
 
@@ -231,11 +242,12 @@ PSD 周期峰可在两个数据集中复现：
 | 全部事件 | 0.126 (0.014–0.322) | 30 |
 | SOZ 事件 | 0.119 | 25 (有 SOZ 的) |
 | non-SOZ 事件 | 0.048 | 12 (有 non-SOZ 的) |
-| Wilcoxon SOZ vs nonSOZ | p = 0.077 | 12 pairs |
+| sign test (SOZ > non-SOZ) | p = 0.073 | 12 pairs |
+| one-sided Wilcoxon | p = 0.039 | 12 pairs |
 
 - 高 tau 个体：548/E14 (0.322), 922 (0.309), 818 (0.298) — 传播路径相对固定
 - 低 tau 个体：635 (0.014), 958 (0.032), 620 (0.035) — 近乎随机传播
-- SOZ 事件的传播比 non-SOZ 更有规律（边缘显著）
+- SOZ 事件的传播比 non-SOZ 更有规律，但当前仍属于**探索性证据**
 
 ### 5.4 最终科学结论
 
@@ -253,13 +265,13 @@ Phase 5 证据链（伪影源定位）：
 6. 质心旁路对峰频无影响 → 窗口栅格量化不是来源
 7. Hazard function 显示经典不应期模式 → 支持 renewal process 解释
 8. **IEI serial correlation 全部为正** → 排除振荡器，指向率慢调制
-9. 传播立体型：SOZ 事件路径更固定，但这是空间规律而非时间周期性
+9. 传播立体型：SOZ 事件路径更固定，但目前是探索性空间规律而非定论
 
 **建议**：
 - 在最终论文中不宜将 PSD 周期峰作为正面发现报告
-- IEI 正 serial correlation（率慢调制）是一个值得讨论的方法学发现
+- IEI 正 serial correlation（率慢调制）是一个值得讨论的方法学发现，正式统计口径应使用 subject-level direction consistency
 - 传播立体型（SOZ vs non-SOZ）可作为空间组织规律的候选发现，
-  但需更大样本验证（当前 Wilcoxon p=0.077，边缘显著）
+  但需更大样本验证（当前仅有探索性单侧证据）
 
 ---
 

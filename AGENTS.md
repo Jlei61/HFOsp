@@ -115,7 +115,9 @@ Important drift:
   - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
   - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (5 experiments)
   - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization
-  - `docs/event_periodicity_analysis.md` — full results and conclusions (Phase 4+5)
+  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5)
+  - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
+  - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
 - Epilepsiae dataset: `src/epilepsiae_dataset.py`
 - Network: `src/network_analysis.py`
 - Plotting in current repo:
@@ -225,7 +227,8 @@ Stop and ask the user instead of guessing when:
 
 - "Is the ~2Hz event periodicity real?"
   - Read `docs/event_periodicity_analysis.md`
-  - Short answer: **NO.** The ~2Hz PSD peak is a refractory-period artifact.
+  - Then read `docs/interictal_population_event_methodological_review.md` if the question is about scientific narrative / mechanism
+  - Short answer: **NO.** The ~2Hz PSD peak is not evidence for an intrinsic oscillator; current evidence supports a refractory / dead-time artifact plus slow rate modulation.
   - Gamma renewal null (matching firing rate + refractory period) explains 15/30 subject peaks entirely
   - ISI-shuffle shows peaks are distribution-shape artifacts, not temporal-order effects
   - IEI distribution is lognormal (30/30), NOT power-law as old paper claimed
@@ -233,9 +236,10 @@ Stop and ask the user instead of guessing when:
   - Per-channel vs group peak frequencies are inconsistent (packing artifact)
   - Phase 2 (artifact localization):
     - f_peak ≠ 1/W across 9 window sizes → packing window size is not the direct cause
-    - Centroid bypass: 3 event definitions give identical peaks → not grid quantization
-    - IEI serial correlation is **positive for all 30 subjects** → slow rate modulation, not oscillator
-    - Propagation stereotypy: SOZ events more stereotyped (tau=0.119 vs 0.048, p=0.077)
+    - Centroid bypass: within the current legacy `lagPatRaw -> absolute time` mapping, most subjects keep similar peaks; this is not yet a fully independent timestamp reconstruction
+    - IEI serial correlation is **positive for all 30 subjects** on log-IEI; formal reporting should use subject-level direction consistency / sign test, not naive within-subject Pearson p-values
+    - Hazard curves are qualitative dead-time visualizations, not formal survival-analysis estimates
+    - Propagation stereotypy is the part most likely to reflect real network structure, but SOZ > non-SOZ is still exploratory rather than definitive
   - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
 
 - "Why is legacy synchrony always ~0.6?"
