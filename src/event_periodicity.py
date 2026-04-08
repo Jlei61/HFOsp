@@ -735,6 +735,230 @@ def test_peak_significance_gamma_renewal(
 
 
 # ---------------------------------------------------------------------------
+# Phase 2 follow-up (PR1): Analytic renewal PSD + SOZ dead-time split
+# ---------------------------------------------------------------------------
+
+def compute_renewal_psd_analytic(
+    iei: np.ndarray,
+    freqs: np.ndarray,
+    event_dur: float = 0.0,
+) -> np.ndarray:
+    """Analytic PSD of a shifted-gamma renewal process.
+
+    Parameters
+    ----------
+    iei : array of inter-event intervals (seconds)
+    freqs : 1-D frequency array (Hz), must not contain 0
+    event_dur : mean event duration for sinc^2 rectangle correction; 0 = skip
+
+    Returns
+    -------
+    S : one-sided PSD prediction on ``freqs``.
+
+    Notes
+    -----
+    Uses a shifted-gamma characteristic function
+    ``phi(w) = exp(i*w*tau_r) * (1 - i*w*theta)^(-k)``, where:
+      - ``tau_r`` = 2nd percentile of IEI
+      - ``k, theta`` are method-of-moments estimates on ``iei - tau_r``.
+    DC is not defined (phi=1 -> 0/0), so callers should pass ``freqs > 0``.
+    """
+    iei = np.asarray(iei, dtype=float)
+    freqs = np.asarray(freqs, dtype=float)
+    iei = iei[np.isfinite(iei) & (iei > 0)]
+
+    if iei.size < 5:
+        return np.zeros_like(freqs, dtype=float)
+    if freqs.size == 0:
+        return np.array([], dtype=float)
+    if np.any(freqs <= 0):
+        raise ValueError("freqs must be strictly positive (exclude DC bin)")
+
+    tau_r = float(np.percentile(iei, 2))
+    mu = float(np.mean(iei))
+    sigma2 = float(np.var(iei))
+    shifted_mu = mu - tau_r
+
+    eps = 1e-12
+    lam = 1.0 / max(mu, eps)
+    if shifted_mu <= eps or sigma2 <= eps:
+        k = 1.0
+        theta = max(shifted_mu, eps)
+    else:
+        k = (shifted_mu ** 2) / sigma2
+        theta = sigma2 / shifted_mu
+
+    omega = 2.0 * np.pi * freqs
+    z = 1.0 - 1j * omega * theta
+    phi_gamma = np.exp(-k * np.log(z))
+    phi = np.exp(1j * omega * tau_r) * phi_gamma
+
+    denom = 1.0 - phi
+    denom[np.abs(denom) < eps] = eps
+    s_delta = lam * np.real((1.0 + phi) / denom)
+    s_delta = np.clip(s_delta, 0.0, None)
+
+    if event_dur > 0:
+        s_delta = s_delta * (np.sinc(freqs * float(event_dur)) ** 2)
+
+    return s_delta
+
+
+def _load_group_events_with_soz_labels(
+    subject_dir: Path,
+    dataset: str,
+    soz_channels: Optional[List[str]] = None,
+) -> Dict[str, Any]:
+    """Load group-event absolute times and SOZ participation labels."""
+    subject_dir = Path(subject_dir)
+    lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
+    soz_set = set(soz_channels or [])
+
+    if not lagpat_files:
+        return {
+            "warning": "no_lagpat_files",
+            "events": np.zeros((0, 2), dtype=float),
+            "is_soz": np.zeros(0, dtype=bool),
+            "n_channels_total": 0,
+            "n_soz_channels_input": len(soz_set),
+            "n_soz_channels_matched": 0,
+        }
+
+    def _to_abs_events(lp_file: Path, lp: Any) -> np.ndarray:
+        stem = lp_file.stem.replace("_lagPat", "")
+        packed_f = lp_file.with_name(stem + "_packedTimes.npy")
+        if not packed_f.exists():
+            return np.zeros((0, 2), dtype=float)
+
+        packed = np.load(packed_f)
+        lag_raw = lp["lagPatRaw"]
+        if packed.size == 0 or lag_raw.size == 0 or 0 in packed.shape or 0 in lag_raw.shape:
+            return np.zeros((0, 2), dtype=float)
+
+        if dataset == "yuquan":
+            gpu_f = lp_file.with_name(stem + "_gpu.npz")
+            if not gpu_f.exists():
+                return np.zeros((0, 2), dtype=float)
+            gpu = _try_load_gpu(gpu_f)
+            if gpu is None:
+                return np.zeros((0, 2), dtype=float)
+            start_t = float(gpu["start_time"])
+        else:
+            start_t = float(lp["start_t"])
+
+        lag_min = np.min(lag_raw, axis=0)
+        lag_max = np.max(lag_raw, axis=0)
+        mean_win = float(np.mean(packed[:, 1] - packed[:, 0]))
+        if mean_win <= 0:
+            return np.zeros((0, 2), dtype=float)
+
+        offsets = np.zeros((len(lag_min), 2))
+        offsets[:, 0] = lag_min % mean_win
+        offsets[:, 1] = offsets[:, 0] + (lag_max - lag_min)
+        return packed[:, 0:1] + offsets + start_t
+
+    all_events = []
+    all_is_soz = []
+    all_chn_names = []
+
+    for lp_file in lagpat_files:
+        lp = np.load(lp_file, allow_pickle=True)
+        events_bool = lp["eventsBool"]
+        chn_names = [str(x) for x in list(lp["chnNames"])]
+        all_chn_names.extend(chn_names)
+
+        packed_abs = _to_abs_events(lp_file, lp)
+        if packed_abs.size == 0:
+            continue
+
+        n_ev = packed_abs.shape[0]
+        n_ev_bool = events_bool.shape[1] if events_bool.ndim == 2 else 0
+        if n_ev_bool == 0:
+            continue
+        if n_ev != n_ev_bool:
+            min_ev = min(n_ev, n_ev_bool)
+            packed_abs = packed_abs[:min_ev]
+            events_bool = events_bool[:, :min_ev]
+
+        soz_mask_ch = np.array([c in soz_set for c in chn_names], dtype=bool)
+        if np.any(soz_mask_ch):
+            is_soz_ev = np.any(events_bool[soz_mask_ch, :] > 0, axis=0)
+        else:
+            is_soz_ev = np.zeros(events_bool.shape[1], dtype=bool)
+
+        all_events.append(packed_abs)
+        all_is_soz.append(is_soz_ev)
+
+    soz_overlap = len(set(all_chn_names) & soz_set)
+    if not all_events:
+        out = {
+            "warning": "no_group_events",
+            "events": np.zeros((0, 2), dtype=float),
+            "is_soz": np.zeros(0, dtype=bool),
+            "n_channels_total": len(set(all_chn_names)),
+            "n_soz_channels_input": len(soz_set),
+            "n_soz_channels_matched": soz_overlap,
+        }
+        if soz_set and soz_overlap == 0:
+            out["warning"] = "no_soz_channel_match"
+        return out
+
+    events = np.concatenate(all_events, axis=0)
+    is_soz = np.concatenate(all_is_soz, axis=0)
+    order = np.argsort(events[:, 0])
+
+    out = {
+        "events": events[order],
+        "is_soz": is_soz[order],
+        "n_channels_total": len(set(all_chn_names)),
+        "n_soz_channels_input": len(soz_set),
+        "n_soz_channels_matched": soz_overlap,
+    }
+    if soz_set and soz_overlap == 0:
+        out["warning"] = "no_soz_channel_match"
+    return out
+
+
+def compute_soz_stratified_deadtime(
+    subject_dir: Path,
+    dataset: str,
+    soz_channels: List[str],
+    block_ranges: List[Tuple[float, float]],
+) -> Dict[str, Any]:
+    """Split group events by SOZ participation and summarize IEI dead-time stats."""
+    loaded = _load_group_events_with_soz_labels(subject_dir, dataset, soz_channels)
+    events = loaded["events"]
+    is_soz = loaded["is_soz"]
+
+    def _stats(ev: np.ndarray) -> Dict[str, Any]:
+        if ev.shape[0] < 2:
+            return {"n_events": int(ev.shape[0]), "n_iei": 0}
+        iei = compute_iei(ev, block_ranges=block_ranges)
+        if iei.size == 0:
+            return {"n_events": int(ev.shape[0]), "n_iei": 0}
+        return {
+            "n_events": int(ev.shape[0]),
+            "n_iei": int(iei.size),
+            "iei_min": float(np.min(iei)),
+            "iei_median": float(np.median(iei)),
+            "iei_mean": float(np.mean(iei)),
+            "iei_p02": float(np.percentile(iei, 2)),
+        }
+
+    out: Dict[str, Any] = {
+        "n_channels_total": int(loaded["n_channels_total"]),
+        "n_soz_channels_input": int(loaded["n_soz_channels_input"]),
+        "n_soz_channels_matched": int(loaded["n_soz_channels_matched"]),
+        "all": _stats(events),
+        "soz": _stats(events[is_soz]),
+        "nonsoz": _stats(events[~is_soz]),
+    }
+    if "warning" in loaded:
+        out["warning"] = loaded["warning"]
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Subject-level runner
 # ---------------------------------------------------------------------------
 
@@ -1160,6 +1384,175 @@ def compute_hazard_function(
 # Phase 2: Return map / Poincaré plot (Experiment 4)
 # ---------------------------------------------------------------------------
 
+def _log_iei_pairs(
+    iei: np.ndarray,
+    lag: int = 1,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return log-IEI pairs separated by ``lag`` intervals."""
+    iei = np.asarray(iei, dtype=float)
+    if lag < 1:
+        raise ValueError("lag must be >= 1")
+    iei = iei[np.isfinite(iei) & (iei > 0)]
+    if iei.size <= lag:
+        return np.array([], dtype=float), np.array([], dtype=float)
+
+    x = np.log(iei[:-lag])
+    y = np.log(iei[lag:])
+    valid = np.isfinite(x) & np.isfinite(y)
+    return x[valid], y[valid]
+
+
+def _pearson_corr(x: np.ndarray, y: np.ndarray) -> Tuple[float, float]:
+    """Safe Pearson correlation helper."""
+    from scipy.stats import pearsonr
+
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if x.size < 2 or y.size < 2:
+        return np.nan, np.nan
+
+    try:
+        r, p = pearsonr(x, y)
+    except Exception:
+        return np.nan, np.nan
+    return (float(r) if np.isfinite(r) else np.nan,
+            float(p) if np.isfinite(p) else np.nan)
+
+
+def _serial_corr_decay_from_sequences(
+    iei_sequences: Sequence[np.ndarray],
+    max_lag: int = 100,
+    min_pairs: int = 50,
+) -> Dict[str, Any]:
+    """Pool lag-k serial correlation across multiple IEI sequences."""
+    lags: List[int] = []
+    rs: List[float] = []
+    n_pairs_list: List[int] = []
+
+    max_lag = max(1, int(max_lag))
+    min_pairs = max(2, int(min_pairs))
+
+    for lag in range(1, max_lag + 1):
+        xs = []
+        ys = []
+        n_pairs = 0
+        for seq in iei_sequences:
+            x, y = _log_iei_pairs(seq, lag=lag)
+            if x.size == 0:
+                continue
+            xs.append(x)
+            ys.append(y)
+            n_pairs += int(x.size)
+        if n_pairs < min_pairs:
+            break
+        x_all = np.concatenate(xs)
+        y_all = np.concatenate(ys)
+        r, _ = _pearson_corr(x_all, y_all)
+        lags.append(lag)
+        rs.append(float(r) if np.isfinite(r) else np.nan)
+        n_pairs_list.append(n_pairs)
+
+    half_life_lag = np.nan
+    valid_rs = np.asarray(rs, dtype=float)
+    if valid_rs.size > 0 and np.isfinite(valid_rs[0]) and valid_rs[0] > 0:
+        target = 0.5 * valid_rs[0]
+        prev_lag = float(lags[0])
+        prev_r = float(valid_rs[0])
+        if prev_r <= target:
+            half_life_lag = prev_lag
+        else:
+            for lag, r in zip(lags[1:], valid_rs[1:]):
+                if not np.isfinite(r):
+                    prev_lag = float(lag)
+                    continue
+                if r <= target:
+                    denom = prev_r - r
+                    frac = 0.0 if abs(denom) < 1e-12 else (prev_r - target) / denom
+                    frac = float(np.clip(frac, 0.0, 1.0))
+                    half_life_lag = prev_lag + frac * (float(lag) - prev_lag)
+                    break
+                prev_lag = float(lag)
+                prev_r = float(r)
+
+    return {
+        "lags": np.asarray(lags, dtype=int),
+        "rs": np.asarray(rs, dtype=float),
+        "n_pairs": np.asarray(n_pairs_list, dtype=int),
+        "half_life_lag": half_life_lag,
+    }
+
+
+def _rolling_log_iei_residuals(
+    event_times: np.ndarray,
+    iei: np.ndarray,
+    window_sec: float = 600.0,
+    min_local_events: int = 5,
+) -> Dict[str, Any]:
+    """Estimate log-IEI residuals after local-median detrending."""
+    event_times = np.asarray(event_times, dtype=float)
+    iei = np.asarray(iei, dtype=float)
+    iei = iei[np.isfinite(iei) & (iei > 0)]
+
+    if iei.size < 3:
+        return {
+            "residual": np.array([], dtype=float),
+            "valid_interval": np.zeros(0, dtype=bool),
+            "valid_pair": np.zeros(0, dtype=bool),
+            "local_baseline": np.array([], dtype=float),
+            "local_counts": np.array([], dtype=int),
+        }
+
+    if event_times.size == iei.size + 1:
+        centers = 0.5 * (event_times[:-1] + event_times[1:])
+    elif event_times.size == iei.size:
+        centers = event_times
+    else:
+        raise ValueError("event_times must have len(iei) or len(iei)+1")
+
+    half_window = 0.5 * float(window_sec)
+    min_local_events = max(3, int(min_local_events))
+
+    baseline = np.full(iei.shape, np.nan, dtype=float)
+    counts = np.zeros(iei.shape, dtype=int)
+
+    for i, center in enumerate(centers):
+        in_window = np.abs(centers - center) <= half_window
+        counts[i] = int(np.sum(in_window))
+        if counts[i] >= min_local_events:
+            baseline[i] = float(np.median(iei[in_window]))
+
+    valid_interval = np.isfinite(baseline) & (baseline > 0)
+    residual = np.full(iei.shape, np.nan, dtype=float)
+    residual[valid_interval] = np.log(iei[valid_interval]) - np.log(baseline[valid_interval])
+    valid_pair = valid_interval[:-1] & valid_interval[1:]
+
+    return {
+        "residual": residual,
+        "valid_interval": valid_interval,
+        "valid_pair": valid_pair,
+        "local_baseline": baseline,
+        "local_counts": counts,
+    }
+
+
+def _split_events_by_block(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+) -> List[np.ndarray]:
+    """Split an event series into block-contained sub-series."""
+    events = np.asarray(events, dtype=float)
+    if events.size == 0:
+        return []
+
+    starts = events[:, 0]
+    blocks = []
+    for block_start, block_end in sorted(block_ranges, key=lambda x: x[0]):
+        mask = (starts >= block_start) & (starts < block_end)
+        if np.any(mask):
+            blocks.append(events[mask])
+    return blocks
+
+
 def compute_iei_return_map(
     iei: np.ndarray,
 ) -> Dict[str, Any]:
@@ -1179,20 +1572,15 @@ def compute_iei_return_map(
     subject-level significance test because adjacent IEI pairs are not
     independent.
     """
-    from scipy.stats import pearsonr
-
-    iei = iei[iei > 0]
+    iei = np.asarray(iei, dtype=float)
+    iei = iei[np.isfinite(iei) & (iei > 0)]
     if len(iei) < 10:
         return {"iei_n": np.array([]), "iei_n1": np.array([]),
                 "serial_corr": np.nan, "serial_corr_p": np.nan}
 
     iei_n = iei[:-1]
     iei_n1 = iei[1:]
-
-    try:
-        r, p = pearsonr(np.log(iei_n), np.log(iei_n1))
-    except Exception:
-        r, p = np.nan, np.nan
+    r, p = _pearson_corr(np.log(iei_n), np.log(iei_n1))
 
     return {
         "iei_n": iei_n,
@@ -1200,6 +1588,147 @@ def compute_iei_return_map(
         "serial_corr": float(r) if np.isfinite(r) else 0.0,
         "serial_corr_p": float(p) if np.isfinite(p) else 1.0,
     }
+
+
+def compute_serial_correlation_decay(
+    iei: np.ndarray,
+    max_lag: int = 100,
+    min_pairs: int = 50,
+) -> Dict[str, Any]:
+    """Pearson r(log IEI[n], log IEI[n+k]) for k = 1..max_lag."""
+    out = _serial_corr_decay_from_sequences([iei], max_lag=max_lag, min_pairs=min_pairs)
+    return {
+        "lags": out["lags"],
+        "rs": out["rs"],
+        "n_pairs": out["n_pairs"],
+        "half_life_lag": out["half_life_lag"],
+        "lag1_r": float(out["rs"][0]) if len(out["rs"]) else np.nan,
+    }
+
+
+def compute_detrended_serial_correlation(
+    event_times: np.ndarray,
+    iei: np.ndarray,
+    window_sec: float = 600.0,
+) -> Dict[str, Any]:
+    """Estimate lag-1 serial correlation after local-median detrending."""
+    iei = np.asarray(iei, dtype=float)
+    iei = iei[np.isfinite(iei) & (iei > 0)]
+    raw_x, raw_y = _log_iei_pairs(iei, lag=1)
+    raw_r, _ = _pearson_corr(raw_x, raw_y)
+
+    rolled = _rolling_log_iei_residuals(event_times, iei, window_sec=window_sec)
+    residual = rolled["residual"]
+    valid_pair = rolled["valid_pair"]
+    det_x = residual[:-1][valid_pair]
+    det_y = residual[1:][valid_pair]
+    detrended_r, _ = _pearson_corr(det_x, det_y)
+
+    detrend_fraction = np.nan
+    if np.isfinite(raw_r) and abs(raw_r) > 1e-12 and np.isfinite(detrended_r):
+        detrend_fraction = 1.0 - (detrended_r / raw_r)
+
+    local_counts = rolled["local_counts"]
+    return {
+        "raw_r": raw_r,
+        "detrended_r": detrended_r,
+        "detrend_fraction": detrend_fraction,
+        "window_sec": float(window_sec),
+        "min_local_events": 5,
+        "n_intervals": int(iei.size),
+        "n_valid_intervals": int(np.sum(rolled["valid_interval"])),
+        "n_valid_pairs": int(det_x.size),
+        "median_local_count": float(np.median(local_counts)) if local_counts.size else np.nan,
+    }
+
+
+def compute_within_block_serial_corr(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+) -> Dict[str, Any]:
+    """Compute lag-1 serial correlation separately inside each valid block."""
+    blocks = _split_events_by_block(events, block_ranges)
+    per_block = []
+    pooled_x = []
+    pooled_y = []
+
+    for idx, block_events in enumerate(blocks):
+        block_start = float(block_events[0, 0]) if len(block_events) else np.nan
+        block_end = float(block_events[-1, 1]) if len(block_events) else np.nan
+        iei = compute_iei(block_events)
+        x, y = _log_iei_pairs(iei, lag=1)
+        r, _ = _pearson_corr(x, y)
+
+        per_block.append({
+            "block_idx": idx,
+            "start_sec": block_start,
+            "end_sec": block_end,
+            "duration_sec": float(block_end - block_start) if np.isfinite(block_start) and np.isfinite(block_end) else np.nan,
+            "n_events": int(block_events.shape[0]),
+            "n_iei": int(iei.size),
+            "serial_corr": r,
+            "n_pairs": int(x.size),
+        })
+        if x.size:
+            pooled_x.append(x)
+            pooled_y.append(y)
+
+    if pooled_x:
+        pooled_r, _ = _pearson_corr(np.concatenate(pooled_x), np.concatenate(pooled_y))
+        pooled_n_pairs = int(sum(arr.size for arr in pooled_x))
+    else:
+        pooled_r = np.nan
+        pooled_n_pairs = 0
+
+    block_rs = np.asarray(
+        [blk["serial_corr"] for blk in per_block if np.isfinite(blk["serial_corr"])],
+        dtype=float,
+    )
+    return {
+        "n_blocks_total": len(block_ranges),
+        "n_blocks_with_events": len(blocks),
+        "n_blocks_used": int(np.sum([blk["n_pairs"] > 0 for blk in per_block])),
+        "pooled_r": pooled_r,
+        "pooled_n_pairs": pooled_n_pairs,
+        "median_block_r": float(np.median(block_rs)) if block_rs.size else np.nan,
+        "per_block": per_block,
+    }
+
+
+def compute_serial_corr_soz_stratified(
+    subject_dir: Path,
+    dataset: str,
+    soz_channels: List[str],
+    block_ranges: List[Tuple[float, float]],
+) -> Dict[str, Any]:
+    """Build SOZ-only and nonSOZ-only packed event sequences and compute lag-1 r."""
+    loaded = _load_group_events_with_soz_labels(subject_dir, dataset, soz_channels)
+    events = loaded["events"]
+    is_soz = loaded["is_soz"]
+
+    def _summary(ev: np.ndarray) -> Dict[str, Any]:
+        base = {
+            "n_events": int(ev.shape[0]),
+            "n_iei": int(max(ev.shape[0] - 1, 0)),
+        }
+        within = compute_within_block_serial_corr(ev, block_ranges)
+        base.update(within)
+        base["lag1_r"] = within["pooled_r"]
+        if ev.shape[0] < 50:
+            base["warning"] = "insufficient_events_lt_50"
+        return base
+
+    out: Dict[str, Any] = {
+        "n_channels_total": int(loaded["n_channels_total"]),
+        "n_soz_channels_input": int(loaded["n_soz_channels_input"]),
+        "n_soz_channels_matched": int(loaded["n_soz_channels_matched"]),
+        "all": _summary(events),
+        "soz": _summary(events[is_soz]),
+        "nonsoz": _summary(events[~is_soz]),
+    }
+    if "warning" in loaded:
+        out["warning"] = loaded["warning"]
+    return out
 
 
 # ---------------------------------------------------------------------------

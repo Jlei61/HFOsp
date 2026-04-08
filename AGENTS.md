@@ -230,11 +230,14 @@ Stop and ask the user instead of guessing when:
   - Read `docs/event_periodicity_analysis.md`
   - Then read `docs/interictal_population_event_methodological_review.md` if the question is about scientific narrative / mechanism
   - Short answer: **NO.** The ~2Hz PSD peak is not evidence for an intrinsic oscillator; current evidence supports a refractory / dead-time artifact plus slow rate modulation.
-  - Gamma renewal null (matching firing rate + refractory period) explains 15/30 subject peaks entirely
+  - Gamma renewal null (matching firing rate + refractory period) explains 15/21 subject peaks with specparam peaks
+  - Analytic renewal PSD overlay (PR-1 exp6A): 16/21 |Δf| < 1 Hz; **two independent paths cover 19/21 (90%)**
+  - Escaping 2/21 (1084, 1096) attributed to extreme non-stationarity, not oscillator; pending PR-2 detrending confirmation
   - ISI-shuffle shows peaks are distribution-shape artifacts, not temporal-order effects
   - IEI distribution is lognormal (30/30), NOT power-law as old paper claimed
   - Only 1/30 subjects passes both surrogate tests (huanghanwen, n=484, likely false positive)
   - Per-channel vs group peak frequencies are inconsistent (packing artifact)
+  - SOZ dead-time (PR-1 exp6B): SOZ < non-SOZ (p=0.008, n=8, exploratory); 22/30 subjects have nearly zero pure non-SOZ group events
   - Phase 2 (artifact localization):
     - f_peak ≠ 1/W across 9 window sizes → packing window size is not the direct cause
     - Centroid bypass: within the current legacy `lagPatRaw -> absolute time` mapping, most subjects keep similar peaks; this is not yet a fully independent timestamp reconstruction

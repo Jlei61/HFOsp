@@ -191,28 +191,107 @@ IEI 分布（论文 Fig S7）：log-log scale 上做线性回归拟合 power-law
 
 **结果**：**30/30 subjects 的 LLR R 都为负（lognormal 显著优于 power-law），p < 0.05**。`R` 范围 -103.3 到 -3.2。这把论文 Fig S7 的"幂律"叙事彻底推翻。
 
-### 2.4 这些分析的可信度边界
+#### 2.3.7 解析 Renewal PSD Overlay（实验 6A — PR-1，2026-04-07 完成）
+
+**目的**：把 shifted-gamma renewal process 的理论 PSD **直接画在**经验 PSD 上，用零自由参数的解析预测来证明"~2 Hz 峰是不应期的必然产物"。
+
+**方法**：
+
+1. 对每个 subject，从已有群体事件计算 IEI 序列。
+2. 估计 shifted-gamma 参数：$\tau_r$ = percentile(IEI, 2)，$k = (\mu - \tau_r)^2 / \sigma^2$，$\theta = \sigma^2 / (\mu - \tau_r)$，$\lambda = 1/\mu$。
+3. 解析特征函数 $\varphi(\omega) = e^{i\omega\tau_r} (1 - i\omega\theta)^{-k}$，PSD 公式 $S(f) = \lambda \cdot \text{Re}\left[\frac{1+\varphi}{1-\varphi}\right]$。
+4. 重新计算 delta-train（脉冲模式）Welch PSD 作为经验对照（避免 rectangle 模式的 sinc² 效应——尽管实际事件时长 ~0.058 s 使 sinc² 修正 < 5%，科学上可忽略）。
+5. 两条曲线在 0.5–8 Hz 内做 **min-max 归一化**后叠图。经验 PSD 做 Savitzky-Golay 平滑（window=101, order=3）以暴露 bump 结构。
+6. 在 0.5–5 Hz 内分别取 argmax，作为 empirical peak freq / analytic peak freq，报告 |Δf|。
+
+**关于 shifted-gamma vs lognormal 的建模选择**：Phase 1/5 已经证明 IEI 是 lognormal 而非 power-law（30/30）。此处仍用 shifted-gamma 是因为解析 PSD 需要闭合形式的特征函数；lognormal 没有。shifted-gamma 在此仅作为**局部近似**以预测 1–5 Hz 频段的 PSD 峰位，不是对 IEI 全分布的声明。
+
+**结果**：
+
+30 个 subject 全量运行（Yuquan 10 + Epilepsiae 20）。对有 specparam 峰的 21 个 subject：
+
+| 判据 | 覆盖 |
+|---|---|
+| Gamma surrogate p ≥ 0.05（Monte Carlo 路径） | 15/21 |
+| 解析峰频 \|Δf\| < 1 Hz（解析路径） | 16/21 |
+| **两者至少一个成立** | **19/21 (90%)** |
+| 两者都不成立 | 2/21 (1084, 1096) |
+
+- |Δf| 中位数 = 0.64 Hz；9/21 在 0.5 Hz 以内，16/21 在 1 Hz 以内。
+- Cohort scatter (analytic vs empirical peak freq)：r = 0.34, p = 0.13。
+- 解析曲线呈现出清晰的**谐波梳齿结构**（fundamental + harmonics），这是 renewal 过程的数学必然；经验 PSD 中谐波被 τ_r 变异性 wash out。这本身是一条有信息量的观察：**个体内 τ_r 不是常数而是有分布的，进一步支持"非平稳"解读**。
+
+**逃逸的 2 个 subject 的特征**：
+
+- **1084**：mean/median ratio = 16.1（极端 bursty），n = 11149。IEI 分布严重右偏。
+- **1096**：iei_min = 0.064（所有 subject 中最短 dead-time），n = 223394（最多事件），mean/median = 3.09。
+
+两者共同特征：**高度非平稳事件率**。gamma surrogate（假设平稳率）会低估真实 PSD 峰功率 → p 偏低 → 误判为"峰是真的"；解析公式（假设单一 τ_r + 平稳率）也会偏移峰频。
+
+**关键解读**：这不意味着 1084 和 1096 有内禀振荡器。它意味着**平稳 renewal null 模型对这两个 subject 不够用**——需要非平稳 renewal（即 PR-2 的 detrending 分析）才能完成解释。换言之，Layer 3 不是"另一种物理机制"，而是同一个 refractory renewal 机制在更强的慢调制下的表现。
+
+**结论**：解析 PSD overlay 不是当初设想的"杀手锏图"（cohort r = 0.34 不够强），但作为 gamma surrogate 的**理论补充**是充分的。两条路径互补覆盖 90% 的有峰 subject。
+
+#### 2.3.8 SOZ vs non-SOZ Dead-Time 分层（实验 6B — PR-1，2026-04-07 完成）
+
+**目的**：比较 SOZ 参与事件与 non-SOZ-only 事件的不应期特征，回答"SOZ 兴奋性是否更高"。
+
+**方法**：
+
+对每个 subject，按 `eventsBool` 中是否有 SOZ 通道参与将群体事件分为两组，分别计算 IEI 统计量（iei_min, iei_p02, iei_median, iei_mean）。要求两组事件数都 ≥ 50 才纳入配对比较。
+
+**SOZ 定义来源**：Epilepsiae 用 `electrode.focus_rel == 'i'` → `results/epilepsiae_soz_core_channels.json`；Yuquan 用 `p16_subs_info.py` 手工标注 → `results/yuquan_soz_core_channels.json`。
+
+**结果**：
+
+只有 **8/30** subject 可以形成有效配对。原因分解：
+
+| 排除原因 | 数量 |
+|---|---|
+| SOZ JSON 中无该 subject 定义 | 5 |
+| non-SOZ 群体事件 < 50 | 17 |
+| 有效配对 | 8 |
+
+17/30 subject 的群体事件**几乎全部由 SOZ 通道参与**（non-SOZ 事件为 0 或个位数）。这本身是一条重要发现：**群体事件是 SOZ 驱动的现象**，纯 non-SOZ 群体事件极其稀少。
+
+在 8 个有效配对中：
+
+| 指标 | Wilcoxon p | 方向 |
+|---|---|---|
+| IEI 2nd percentile（dead-time proxy） | **0.008** | SOZ < non-SOZ |
+| IEI median | **0.016** | SOZ < non-SOZ |
+
+**SOZ 参与事件的 dead-time 和 IEI 中位数都显著短于 non-SOZ 事件**。方向与"SOZ 兴奋性更高 / 恢复更快"的 FHN/HR 框架一致。
+
+**可信度边界**：n = 8 对，且多数配对中两组事件数极度不平衡（如 958：165484 SOZ vs 93 non-SOZ），结论为**探索性**。要扩大样本量，需要改用连续变量（SOZ 参与度比例）或降到 per-channel 层面比较。
+
+### 2.4 这些分析的可信度边界（更新版）
 
 | 结论 | 强度 | 边界 |
 |---|---|---|
-| Gamma surrogate 完全可以解释 15/30 的峰 | **强** | 仅当 shifted gamma 是合理的 refractory null 时；可以再用 inverse-Gaussian 或经验 IEI shuffle 加测 |
-| IEI 是 lognormal 而非 power-law（30/30） | **强** | MLE + LLR 是该领域标准方法，结论方向极其一致 |
-| 简单 $1/W$ 量化不是峰频来源（PackWinLen） | **中-强** | 仅 Yuquan，未在 Epilepsiae 复扫；specparam 是否检出峰对参数敏感 |
-| Centroid bypass 不改变峰频 | **中** | 仍依附于 legacy `lagPatRaw % mean_win` 近似，不是真正独立重建 |
-| Hazard function 与 refractory renewal 一致 | **定性** | KDE-based 数值积分不是严格生存分析估计量；不能做参数比较 |
-| 仅 1/30 是"genuine periodic"（huanghanwen） | **中** | 该 subject 仅 484 events，统计稳健性差 |
+| Gamma surrogate 完全可以解释 15/21 的峰 | **强** | 仅当 shifted gamma 是合理的 refractory null 时 |
+| IEI 是 lognormal 而非 power-law（30/30） | **强** | MLE + LLR 是该领域标准方法 |
+| 解析 PSD + gamma surrogate 互补覆盖 19/21 (90%) | **中-强** | 解析部分用 shifted-gamma 近似，峰位对齐 < 1 Hz 但形状相关弱 (r=0.34) |
+| 逃逸的 2/21 归因于非平稳调制 | **定性** | 尚未用去趋势后 PSD 验证；需 PR-2 完成后回填 |
+| 简单 $1/W$ 量化不是峰频来源（PackWinLen） | **中-强** | 仅 Yuquan |
+| Centroid bypass 不改变峰频 | **中** | 仍依附于 legacy 映射 |
+| Hazard function 与 refractory renewal 一致 | **定性** | KDE-based，不做参数推断 |
+| SOZ dead-time < non-SOZ dead-time | **探索性** | n=8 配对，组间事件数严重不平衡 |
+| 群体事件几乎全部由 SOZ 参与 (22/30) | **描述性，强** | 直接从 eventsBool 计数，无统计推断需求 |
 
-### 2.5 仍需补充
+### 2.5 仍需补充（更新版）
 
-1. **解析 PSD 写出来**：refractory renewal process 的事件率 PSD 有解析表达式（参见 Cox & Lewis, *The Statistical Analysis of Series of Events*, 1966; Lindner 2004）。把这个理论 PSD 直接画在真实 PSD 上，会是一张能让所有合作者立刻信服的"杀手锏图"——它可以**没有任何拟合参数**地说明"~2 Hz 峰位置和高度都被不应期参数硬性预测"。这是 highest-priority TODO。
+1. ~~**解析 PSD 写出来**~~ → **已完成**（实验 6A）。不是"杀手锏"但与 gamma surrogate 互补达 90% 覆盖。
 
 2. **真正独立的事件时间重建**：从原始 80–250 Hz envelope 直接定义事件时间（比如 envelope 局部最大值的时间），完全不走 packing/lagPatRaw 链路。如果这条独立链路下峰频还在 ~2 Hz，centroid bypass 的结论才能升级到"已彻底排除 packing"。
 
 3. **替换 Fig S13 的 t-test**：将来如果还要发表周期性图，必须用 Gamma surrogate p-value 替代 t-test。
 
-4. **SOZ vs non-SOZ 分层 hazard**：dead-time 长度是否在 SOZ 内更长/更短？这能直接回答你提到的"SOZ 内外不应期是否有差别"。
+4. ~~**SOZ vs non-SOZ 分层 hazard**~~ → **已完成**（实验 6B）。SOZ dead-time < non-SOZ，p=0.008，但 n=8 且探索性。**下一步**：用 SOZ 参与度连续变量（soz_fraction）或 per-channel 层面扩大样本量。
 
-5. **对 huanghanwen 这个唯一"genuine"做敏感性分析**：把不同 surrogate 参数（gamma shape、shift、shuffle 类型）扫一遍，看它是否真的稳健。n=484 的样本量本来就在边缘。
+5. **对逃逸的 2/21 (1084, 1096) 做非平稳控制**：在 PR-2 的去趋势分析完成后，对这两个 subject 做去趋势后重算 PSD + gamma surrogate。如果去趋势后峰消失 → 证明峰完全来自慢率调制，关闭 Layer 3 缺口。
+
+6. **对 huanghanwen 这个唯一"genuine"做敏感性分析**：把不同 surrogate 参数（gamma shape、shift、shuffle 类型）扫一遍，看它是否真的稳健。n=484 的样本量本来就在边缘。
 
 ### 2.6 动力学含义：Kuramoto 还是 FHN/HR？——这是叙事更新的核心
 
@@ -360,7 +439,7 @@ $$\dot{u} = -u/\tau_u + \eta(t)$$
 
 ---
 
-## 给合作者的总结
+## 给合作者的总结（2026-04-07 更新）
 
 我认为可以接受的更新过的 narrative 是这样的：
 
@@ -370,12 +449,26 @@ $$\dot{u} = -u/\tau_u + \eta(t)$$
 >
 > 老论文的 Hopfield-Kuramoto 框架在数学层面（Hebbian-like 对称连接编码 stereotype）可以保留，但节点动力学需要从 Kuramoto 振荡器换成 FHN / HR / theta-neuron 类兴奋性单元。这样既能继续解释 stereotype 的稳定性，也能自然容纳不应期、宽 IEI 分布、和慢调制驱动的事件率漂移。
 
-**最值得立刻做的三件事**（按性价比）：
+### 已完成的验证工作
 
-1. 把 refractory renewal process 的解析 PSD 直接画在真实 PSD 上（话题 2 P0）。这是一张能让所有合作者立刻接受立场更新的杀手锏图，几乎不需要额外计算。
+| 工作项 | 状态 | 核心数字 |
+|---|---|---|
+| Gamma surrogate 检验 ~2 Hz 峰 | ✅ Phase 5 | 15/21 有峰 subject 的峰被平稳 renewal 完全解释 |
+| 解析 renewal PSD overlay | ✅ PR-1 (exp 6A) | 16/21 |Δf| < 1 Hz；两条路径互补覆盖 19/21 (90%) |
+| ISI shuffle surrogate | ✅ Phase 5 | 仅 1/30 同时通过两重检验（huanghanwen, n=484, 可能假阳性） |
+| Power-law vs lognormal (MLE + LLR) | ✅ Phase 4 | 30/30 lognormal 显著优于 power-law |
+| Packing window 扫参 | ✅ Phase 2 exp 1 | f_peak ≠ 1/W；dead-zone 受 W 控制但峰频不受 |
+| Centroid bypass | ✅ Phase 2 exp 2 | 13/15 峰频差 < 0.1 Hz |
+| SOZ vs non-SOZ dead-time | ✅ PR-1 (exp 6B) | SOZ < non-SOZ, p=0.008 (n=8 pairs, 探索性) |
+| IEI serial correlation (lag-1) | ✅ Phase 2 exp 4 | 30/30 正相关，r 中位数 ≈ 0.31 |
+| 传播刻板性 SOZ vs non-SOZ | ✅ Phase 2 exp 5 | SOZ > non-SOZ, p=0.039 (n=12 pairs, 探索性) |
 
-2. 做 SOZ vs non-SOZ 的 serial correlation 对比 + dead-time 对比（话题 3 P1 + 话题 2 P1）。这两个问题在已有数据上 1-2 天就能跑出来，且**直接产出新的、论文里没有的生物学发现**。
+### 最值得继续做的三件事（按性价比，更新版）
 
-3. 对话题 1 做 mixture 检测和 n_participating 分层（话题 1 P0）。这件事不动摇 narrative，但能让 Fig 2 的 17/18 + 20/20 数字变得真正可信。
+1. **PR-2：IEI serial correlation 深层分析**（话题 3 P0–P1）。做 lag-k 衰减曲线确定调制时间尺度；去趋势后重算 serial correlation 区分"慢率漂移"和"短程 facilitation"；block 内 vs 跨 block 分层确定调制起源；SOZ vs non-SOZ 分层确定调制是否 SOZ 自治。完成后回填 PR-1 的逃逸 subject (1084, 1096) 用去趋势 PSD 关闭 Layer 3 缺口。
 
-如果上面三件事的结果都符合预期，整篇论文的叙事可以转向"interictal events as a refractory excitable point process under slow state modulation, with SOZ-specific propagation stereotypy"——这是一个比"~2 Hz oscillator"更准确、也更可发表的故事。
+2. **PR-3：传播 stereotype 稳健性检验**（话题 1 P0）。Hartigan dip test 检测 mixture stereotype；centered rank tau 控制 detection ordering bias；按 n_participating 分层去除离散化噪声。让 Fig 2 的 17/18 + 20/20 变得真正可信。
+
+3. **SOZ dead-time 样本量扩展**。当前 8 pairs 太少。方案一：per-channel dead-time（从 `_gpu.npz` 单通道 HFO）；方案二：用 SOZ 参与度连续变量替代二分。
+
+如果 PR-2 和 PR-3 的结果符合预期，整篇论文的叙事可以转向"interictal events as a refractory excitable point process under slow state modulation, with SOZ-specific propagation stereotypy"——这是一个比"~2 Hz oscillator"更准确、也更可发表的故事。

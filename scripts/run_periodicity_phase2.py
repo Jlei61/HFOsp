@@ -8,6 +8,8 @@ Experiments:
   3. Hazard function — H(t) of IEI for packed and centroid events
   4. IEI return map — IEI[n] vs IEI[n+1] serial structure
   5. Propagation stereotypy — Kendall tau of channel activation order
+  6. Renewal analytic PSD + SOZ dead-time stratification
+  7. Serial-correlation deep dive — lag-k decay, detrending, within-block, SOZ split
 
 Usage:
     # All experiments, smoke test
@@ -45,12 +47,21 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.event_periodicity import (
+    _log_iei_pairs,
+    _pearson_corr,
+    _rolling_log_iei_residuals,
+    _serial_corr_decay_from_sequences,
+    _split_events_by_block,
     build_pulse_train,
+    compute_renewal_psd_analytic,
     compute_event_psd,
     compute_hazard_function,
     compute_iei,
     compute_iei_return_map,
     compute_propagation_stereotypy,
+    compute_serial_corr_soz_stratified,
+    compute_soz_stratified_deadtime,
+    compute_within_block_serial_corr,
     fit_psd_periodic,
     load_centroid_event_times,
     load_epilepsiae_subject_events,
@@ -111,6 +122,28 @@ def _save(data: Any, path: Path) -> None:
     with open(path, "w") as f:
         json.dump(data, f, cls=NumpyEncoder, indent=2)
     logger.info(f"Saved {path}")
+
+
+def _load_phase1_group(dataset: str, subject: str) -> Dict[str, Any]:
+    path = Path("results/event_periodicity") / dataset / f"{subject}_periodicity.json"
+    if not path.exists():
+        return {}
+    with open(path) as f:
+        data = json.load(f)
+    return data.get("group", {})
+
+
+def _normalize_unit_area(freqs: np.ndarray, psd: np.ndarray,
+                         f_lo: float = 0.5, f_hi: float = 10.0) -> np.ndarray:
+    freqs = np.asarray(freqs, dtype=float)
+    psd = np.asarray(psd, dtype=float)
+    out = np.zeros_like(psd, dtype=float)
+    band = (freqs >= f_lo) & (freqs <= f_hi) & np.isfinite(psd) & (psd >= 0)
+    if np.any(band):
+        area = np.trapz(psd[band], freqs[band])
+        if area > 0:
+            out = psd / area
+    return out
 
 
 # ==========================================================================
@@ -345,13 +378,266 @@ def run_exp5(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
 
 
 # ==========================================================================
+# Experiment 6: Renewal analytic PSD + SOZ dead-time
+# ==========================================================================
+
+def run_exp6(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
+    """Overlay analytic renewal PSD prediction and compute SOZ dead-time split."""
+    logger.info("=== Experiment 6: Renewal PSD + SOZ dead-time ===")
+    soz_yq = _load_soz(SOZ_FILE)
+    soz_epi = _load_soz(SOZ_FILE_EPI)
+    psd_results: Dict[str, Any] = {}
+    deadtime_results: Dict[str, Any] = {}
+
+    for dataset, root in roots.items():
+        soz_map = soz_yq if dataset == "yuquan" else soz_epi
+        loader = load_yuquan_subject_events if dataset == "yuquan" else load_epilepsiae_subject_events
+
+        for sub in subjects:
+            sub_dir = root / sub if dataset == "yuquan" else root / sub / "all_recs"
+            if not sub_dir.exists():
+                continue
+            if not list(sub_dir.glob("*_lagPat.npz")):
+                continue
+
+            key = f"{dataset}/{sub}"
+            logger.info(f"  {key}: renewal overlay")
+            try:
+                group = _load_phase1_group(dataset, sub)
+                if not group:
+                    psd_results[key] = {"warning": "phase1_group_json_missing"}
+                    deadtime_results[key] = {"warning": "phase1_group_json_missing"}
+                    continue
+
+                _, packed, _, block_ranges = loader(sub_dir)
+                if len(packed) < 10:
+                    psd_results[key] = {"warning": "insufficient_group_events"}
+                    deadtime_results[key] = {"warning": "insufficient_group_events"}
+                    continue
+
+                iei = compute_iei(packed, block_ranges=block_ranges)
+                if len(iei) < 10:
+                    psd_results[key] = {"warning": "insufficient_iei"}
+                    deadtime_results[key] = {"warning": "insufficient_iei"}
+                    continue
+
+                fs = float(group.get("psd", {}).get("fs_pulse", 100.0))
+                nperseg_samples = int(group.get("psd", {}).get("nperseg", int(500 * fs)))
+                nperseg_sec = nperseg_samples / fs if fs > 0 else 500.0
+
+                pulse_delta, mask_delta, _ = build_pulse_train(
+                    packed, fs=fs, mode="delta", block_ranges=block_ranges
+                )
+                psd_delta = compute_event_psd(
+                    pulse_delta, mask_delta, fs=fs, nperseg_sec=nperseg_sec
+                )
+
+                freqs = psd_delta.freqs
+                positive = freqs > 0
+                mean_event_dur = float(np.mean(packed[:, 1] - packed[:, 0]))
+
+                analytic_delta = np.zeros_like(freqs, dtype=float)
+                analytic_rect = np.zeros_like(freqs, dtype=float)
+                analytic_delta[positive] = compute_renewal_psd_analytic(
+                    iei, freqs[positive], event_dur=0.0
+                )
+                analytic_rect[positive] = compute_renewal_psd_analytic(
+                    iei, freqs[positive], event_dur=mean_event_dur
+                )
+
+                phase1_psd = np.asarray(group.get("psd", {}).get("power", []), dtype=float)
+                phase1_freqs = np.asarray(group.get("psd", {}).get("freqs", []), dtype=float)
+                phase1_ap = np.asarray(group.get("specparam", {}).get("ap_fit", []), dtype=float)
+                phase1_sp_freqs = np.asarray(group.get("specparam", {}).get("freqs", []), dtype=float)
+                has_peak = False
+                peaks = np.asarray(group.get("specparam", {}).get("peaks", []), dtype=float)
+                if peaks.size > 0 and peaks.ndim == 2 and peaks.shape[1] >= 2:
+                    peak_mask = (peaks[:, 0] >= 0.5) & (peaks[:, 0] <= 10.0)
+                    has_peak = bool(np.any(peak_mask))
+
+                psd_results[key] = {
+                    "dataset": dataset,
+                    "subject": sub,
+                    "has_peak_0p5_10hz": has_peak,
+                    "iei_n": int(len(iei)),
+                    "iei_min": float(np.min(iei)),
+                    "iei_median": float(np.median(iei)),
+                    "iei_mean": float(np.mean(iei)),
+                    "event_dur_mean": mean_event_dur,
+                    "phase1_freqs": phase1_freqs,
+                    "phase1_psd": phase1_psd,
+                    "phase1_sp_freqs": phase1_sp_freqs,
+                    "phase1_ap_fit_log10": phase1_ap,
+                    "delta_freqs": freqs,
+                    "delta_psd": psd_delta.power,
+                    "analytic_delta": analytic_delta,
+                    "analytic_rect": analytic_rect,
+                    "delta_psd_norm": _normalize_unit_area(freqs, psd_delta.power),
+                    "analytic_delta_norm": _normalize_unit_area(freqs, analytic_delta),
+                    "analytic_rect_norm": _normalize_unit_area(freqs, analytic_rect),
+                }
+
+                deadtime_results[key] = compute_soz_stratified_deadtime(
+                    subject_dir=sub_dir,
+                    dataset=dataset,
+                    soz_channels=soz_map.get(sub, []),
+                    block_ranges=block_ranges,
+                )
+            except Exception as e:
+                logger.error(f"  {key}: FAILED — {e}", exc_info=True)
+                psd_results[key] = {"error": str(e)}
+                deadtime_results[key] = {"error": str(e)}
+
+    _save(psd_results, out_dir / "exp6_renewal_psd.json")
+    _save(deadtime_results, out_dir / "exp6_soz_deadtime.json")
+    return psd_results, deadtime_results
+
+
+# ==========================================================================
+# Experiment 7: Serial-correlation deep dive
+# ==========================================================================
+
+def run_exp7(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
+    """Deep analysis of IEI serial correlation with block-aware pooling."""
+    logger.info("=== Experiment 7: Serial-Correlation Deep Dive ===")
+    soz_yq = _load_soz(SOZ_FILE)
+    soz_epi = _load_soz(SOZ_FILE_EPI)
+    all_results: Dict[str, Any] = {}
+
+    max_lag = 100
+    min_pairs = 50
+    detrend_window_sec = 600.0
+
+    for dataset, root in roots.items():
+        soz_map = soz_yq if dataset == "yuquan" else soz_epi
+        loader = load_yuquan_subject_events if dataset == "yuquan" else load_epilepsiae_subject_events
+
+        for sub in subjects:
+            sub_dir = root / sub if dataset == "yuquan" else root / sub / "all_recs"
+            if not sub_dir.exists():
+                continue
+            if not list(sub_dir.glob("*_lagPat.npz")):
+                continue
+
+            key = f"{dataset}/{sub}"
+            logger.info(f"  {key}: serial-correlation deep dive")
+            try:
+                _, packed, _, block_ranges = loader(sub_dir)
+                if len(packed) < 10:
+                    all_results[key] = {"warning": "insufficient_group_events"}
+                    continue
+
+                iei_all = compute_iei(packed, block_ranges=block_ranges)
+                event_blocks = _split_events_by_block(packed, block_ranges)
+                iei_blocks = []
+                start_blocks = []
+                for block in event_blocks:
+                    iei_block = compute_iei(block)
+                    if iei_block.size < 3:
+                        continue
+                    iei_blocks.append(iei_block)
+                    start_blocks.append(block[:, 0])
+
+                decay = _serial_corr_decay_from_sequences(
+                    iei_blocks,
+                    max_lag=max_lag,
+                    min_pairs=min_pairs,
+                )
+                lag1_r = float(decay["rs"][0]) if len(decay["rs"]) else np.nan
+                median_iei = float(np.median(iei_all)) if iei_all.size else np.nan
+                half_life_lag = float(decay["half_life_lag"]) if np.isfinite(decay["half_life_lag"]) else np.nan
+                half_life_sec = float(half_life_lag * median_iei) if np.isfinite(half_life_lag) and np.isfinite(median_iei) else np.nan
+
+                raw_x = []
+                raw_y = []
+                det_x = []
+                det_y = []
+                n_valid_intervals = 0
+                for starts, iei_block in zip(start_blocks, iei_blocks):
+                    x_block, y_block = _log_iei_pairs(iei_block, lag=1)
+                    if x_block.size:
+                        raw_x.append(x_block)
+                        raw_y.append(y_block)
+
+                    rolled = _rolling_log_iei_residuals(
+                        starts,
+                        iei_block,
+                        window_sec=detrend_window_sec,
+                    )
+                    resid = rolled["residual"]
+                    valid_pair = rolled["valid_pair"]
+                    if resid.size and np.any(valid_pair):
+                        det_x.append(resid[:-1][valid_pair])
+                        det_y.append(resid[1:][valid_pair])
+                    n_valid_intervals += int(np.sum(rolled["valid_interval"]))
+
+                raw_r, _ = _pearson_corr(
+                    np.concatenate(raw_x) if raw_x else np.array([]),
+                    np.concatenate(raw_y) if raw_y else np.array([]),
+                )
+                detrended_r, _ = _pearson_corr(
+                    np.concatenate(det_x) if det_x else np.array([]),
+                    np.concatenate(det_y) if det_y else np.array([]),
+                )
+                detrend_fraction = np.nan
+                if np.isfinite(raw_r) and abs(raw_r) > 1e-12 and np.isfinite(detrended_r):
+                    detrend_fraction = 1.0 - (detrended_r / raw_r)
+
+                within_block = compute_within_block_serial_corr(packed, block_ranges)
+                soz_summary = compute_serial_corr_soz_stratified(
+                    subject_dir=sub_dir,
+                    dataset=dataset,
+                    soz_channels=soz_map.get(sub, []),
+                    block_ranges=block_ranges,
+                )
+
+                all_results[key] = {
+                    "dataset": dataset,
+                    "subject": sub,
+                    "n_events": int(packed.shape[0]),
+                    "n_iei": int(iei_all.size),
+                    "median_iei": median_iei,
+                    "serial_decay": {
+                        "max_lag": max_lag,
+                        "min_pairs": min_pairs,
+                        "lags": decay["lags"],
+                        "rs": decay["rs"],
+                        "n_pairs": decay["n_pairs"],
+                        "lag1_r": lag1_r,
+                        "half_life_lag": half_life_lag,
+                        "half_life_sec": half_life_sec,
+                    },
+                    "detrended": {
+                        "window_sec": detrend_window_sec,
+                        "raw_r": raw_r,
+                        "detrended_r": detrended_r,
+                        "detrend_fraction": detrend_fraction,
+                        "n_valid_intervals": n_valid_intervals,
+                        "n_valid_pairs": int(sum(arr.size for arr in det_x)),
+                    },
+                    "within_block": within_block,
+                    "soz_stratified": soz_summary,
+                }
+                logger.info(
+                    f"  {key}: lag1={lag1_r:.3f}, detrended={detrended_r:.3f}, "
+                    f"half-life={half_life_sec:.1f}s"
+                )
+            except Exception as e:
+                logger.error(f"  {key}: FAILED — {e}", exc_info=True)
+                all_results[key] = {"error": str(e)}
+
+    _save(all_results, out_dir / "exp7_serial_corr_deep.json")
+    return all_results
+
+
+# ==========================================================================
 # Main
 # ==========================================================================
 
 def main():
     parser = argparse.ArgumentParser(description="Phase 2 periodicity experiments")
     parser.add_argument("--exp", default="all",
-                        help="Experiment number(s): 1,2,3,4,5 or 'all'")
+                        help="Experiment number(s): 1,2,3,4,5,6,7 or 'all'")
     parser.add_argument("--dataset", choices=["yuquan", "epilepsiae", "both"],
                         default="both")
     parser.add_argument("--subjects", nargs="+", default=None)
@@ -363,7 +649,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if args.exp == "all":
-        exps = {1, 2, 3, 4, 5}
+        exps = {1, 2, 3, 4, 5, 6, 7}
     else:
         exps = {int(x) for x in args.exp.split(",")}
 
@@ -402,6 +688,12 @@ def main():
 
     if 5 in exps:
         run_exp5(all_subs, roots, out_dir)
+
+    if 6 in exps:
+        run_exp6(all_subs, roots, out_dir)
+
+    if 7 in exps:
+        run_exp7(all_subs, roots, out_dir)
 
     logger.info(f"=== Phase 2 complete: {time.time()-t_total:.0f}s total ===")
 
