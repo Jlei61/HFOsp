@@ -1087,6 +1087,205 @@ def plot_exp7b():
 
 
 # ==========================================================================
+# Exp 7C: Continuous long-timescale modulation (PR-2.6)
+# ==========================================================================
+
+def plot_exp7c():
+    """PR-2.6 long-timescale figure: 24h traces, multi-hour summary, contiguous day/night."""
+    data = _load("exp7c_long_timescale.json")
+    if not data:
+        return
+
+    valid = [
+        rec for rec in data.values()
+        if isinstance(rec, dict) and "error" not in rec and "warning" not in rec
+    ]
+    if not valid:
+        print("  No valid exp7c data")
+        return
+
+    fig = plt.figure(figsize=(15, 10.5))
+    gs = fig.add_gridspec(2, 2, hspace=0.32, wspace=0.26,
+                          left=0.06, right=0.97, top=0.93, bottom=0.08)
+
+    # ---- Panel A: continuous rate trace examples ----
+    subgs = gs[0, 0].subgridspec(2, 1, hspace=0.26)
+    example_records = []
+    for dataset in ("yuquan", "epilepsiae"):
+        subset = [rec for rec in valid if rec.get("dataset") == dataset]
+        if not subset:
+            continue
+        example_records.append(
+            max(subset, key=lambda r: r.get("long_timescale", {}).get("continuity", {}).get("longest_run_hours", 0.0))
+        )
+
+    for idx, rec in enumerate(example_records[:2]):
+        ax = fig.add_subplot(subgs[idx, 0])
+        lt = rec["long_timescale"]
+        trace = lt["trace"]
+        x = np.asarray(trace["bin_hours_from_start"], dtype=float)
+        y = np.asarray(trace["rate_per_hour"], dtype=float)
+        y1 = np.asarray(trace.get("smooth_3600s", []), dtype=float)
+        y4 = np.asarray(trace.get("smooth_14400s", []), dtype=float)
+        valid_mask = np.asarray(trace["valid_mask"], dtype=bool)
+
+        ax.plot(x[valid_mask], y[valid_mask], color="0.75", lw=0.8, alpha=0.7, label="5-min rate")
+        if y1.size == y.size:
+            ax.plot(x[valid_mask], y1[valid_mask], color="#2166AC", lw=1.8, label="1h smooth")
+        if y4.size == y.size:
+            ax.plot(x[valid_mask], y4[valid_mask], color="#B2182B", lw=1.4, ls="--", label="4h smooth")
+
+        cont = lt["continuity"]
+        ax.set_xlim(0, np.nanmax(x) if x.size else 1)
+        ax.set_ylabel("Rate (events/hour)", fontsize=9)
+        ax.set_title(
+            f"{rec['dataset']}/{rec['subject']}\n"
+            f"observed={cont['total_observed_hours']:.1f}h, "
+            f"longest run={cont['longest_run_hours']:.1f}h, "
+            f"runs={cont['n_runs_merged']}",
+            fontsize=8.5,
+        )
+        ax.grid(True, alpha=0.15)
+        if idx == 0:
+            ax.legend(fontsize=8, loc="upper right")
+        if idx == len(example_records[:2]) - 1:
+            ax.set_xlabel("Hours from start", fontsize=9)
+
+    # ---- Panel B: cohort-level multi-hour fluctuation summary ----
+    ax = fig.add_subplot(gs[0, 1])
+    windows = None
+    for rec in valid:
+        rate_summary = rec.get("long_timescale", {}).get("rate_summary", [])
+        if not rate_summary:
+            continue
+        x = np.array([row["window_hours"] for row in rate_summary], dtype=float)
+        y = np.array([row["fluct_strength_iqr_over_median"] for row in rate_summary], dtype=float)
+        windows = x
+        color = "#2166AC" if rec["dataset"] == "yuquan" else "#E08214"
+        ax.plot(x, y, color="0.82", lw=0.8, alpha=0.6)
+
+    for dataset, color, label in [
+        ("yuquan", "#2166AC", "Yuquan median"),
+        ("epilepsiae", "#E08214", "Epilepsiae median"),
+    ]:
+        subset = [rec for rec in valid if rec.get("dataset") == dataset]
+        curves = []
+        for rec in subset:
+            rate_summary = rec.get("long_timescale", {}).get("rate_summary", [])
+            if not rate_summary:
+                continue
+            curves.append([row["fluct_strength_iqr_over_median"] for row in rate_summary])
+        if curves:
+            curves_arr = np.asarray(curves, dtype=float)
+            ax.plot(windows, np.nanmedian(curves_arr, axis=0), color=color, lw=2.3, label=label)
+
+    ax.set_xscale("log")
+    ax.set_xlabel("Smoothing window (hours)", fontsize=9)
+    ax.set_ylabel("Fluctuation strength (IQR / median)", fontsize=9)
+    ax.set_title("PR-2.6: Multi-hour fluctuation summary", fontsize=10)
+    ax.grid(True, alpha=0.18, which="both")
+    ax.legend(fontsize=8, loc="upper right")
+
+    # ---- Panel C: contiguous day vs contiguous night ----
+    ax = fig.add_subplot(gs[1, 0])
+    day_vals = []
+    night_vals = []
+    colors = []
+    for rec in valid:
+        dn = rec.get("contiguous_daynight", {})
+        day_r = dn.get("day", {}).get("pooled_detrended_r")
+        night_r = dn.get("night", {}).get("pooled_detrended_r")
+        if day_r is None or night_r is None:
+            continue
+        if not (np.isfinite(day_r) and np.isfinite(night_r)):
+            continue
+        day_vals.append(float(day_r))
+        night_vals.append(float(night_r))
+        colors.append("#2166AC" if rec["dataset"] == "yuquan" else "#E08214")
+
+    if day_vals:
+        day_arr = np.asarray(day_vals, dtype=float)
+        night_arr = np.asarray(night_vals, dtype=float)
+        ax.scatter(day_arr, night_arr, c=colors, s=42, edgecolors="white", linewidths=0.5)
+        lim_lo = min(np.min(day_arr), np.min(night_arr)) - 0.03
+        lim_hi = max(np.max(day_arr), np.max(night_arr)) + 0.03
+        ax.plot([lim_lo, lim_hi], [lim_lo, lim_hi], "k--", lw=0.8, alpha=0.4)
+        ax.axhline(0, color="gray", lw=0.5, alpha=0.4)
+        ax.axvline(0, color="gray", lw=0.5, alpha=0.4)
+        try:
+            stat = wilcoxon(day_arr, night_arr, alternative="two-sided")
+            p_txt = f"Wilcoxon p={stat.pvalue:.3g}"
+        except Exception:
+            p_txt = "Wilcoxon p=N/A"
+        both_pos = int(np.sum((day_arr > 0) & (night_arr > 0)))
+        ax.set_xlim(lim_lo, lim_hi)
+        ax.set_ylim(lim_lo, lim_hi)
+        ax.set_xlabel("Continuous day pooled detrended r", fontsize=9)
+        ax.set_ylabel("Continuous night pooled detrended r", fontsize=9)
+        ax.set_title(
+            "PR-2.6: Continuous day/night segment analysis\n"
+            f"n={len(day_arr)}, both positive={both_pos}/{len(day_arr)}, {p_txt}",
+            fontsize=10,
+        )
+        ax.grid(True, alpha=0.18)
+        ax.scatter([], [], c="#2166AC", s=36, label="Yuquan")
+        ax.scatter([], [], c="#E08214", s=36, label="Epilepsiae")
+        ax.legend(fontsize=8, loc="upper left")
+    else:
+        ax.text(0.5, 0.5, "no valid continuous\nday/night pairs", ha="center",
+                va="center", transform=ax.transAxes)
+        ax.set_title("PR-2.6: Continuous day/night segment analysis", fontsize=10)
+
+    # ---- Panel D: coverage / continuity summary ----
+    ax = fig.add_subplot(gs[1, 1])
+    total_obs = []
+    longest_run = []
+    point_colors = []
+    for rec in valid:
+        cont = rec.get("long_timescale", {}).get("continuity", {})
+        obs = cont.get("total_observed_hours")
+        longest = cont.get("longest_run_hours")
+        if obs is None or longest is None:
+            continue
+        if not (np.isfinite(obs) and np.isfinite(longest)):
+            continue
+        total_obs.append(float(obs))
+        longest_run.append(float(longest))
+        point_colors.append("#2166AC" if rec["dataset"] == "yuquan" else "#E08214")
+
+    if total_obs:
+        total_obs_arr = np.asarray(total_obs, dtype=float)
+        longest_arr = np.asarray(longest_run, dtype=float)
+        ax.scatter(total_obs_arr, longest_arr, c=point_colors, s=44,
+                   edgecolors="white", linewidths=0.5)
+        lim = max(np.max(total_obs_arr), np.max(longest_arr)) + 2.0
+        ax.plot([0, lim], [0, lim], "k--", lw=0.8, alpha=0.4)
+        ax.axhline(24.0, color="#B2182B", lw=0.8, ls=":", alpha=0.6)
+        ax.axvline(24.0, color="#B2182B", lw=0.8, ls=":", alpha=0.6)
+        n_full = int(np.sum(longest_arr >= 22.0))
+        ax.set_xlabel("Total observed hours", fontsize=9)
+        ax.set_ylabel("Longest continuous run (hours)", fontsize=9)
+        ax.set_title(
+            "PR-2.6: Coverage / continuity summary\n"
+            f"near-24h continuous subjects={n_full}/{len(longest_arr)}",
+            fontsize=10,
+        )
+        ax.grid(True, alpha=0.18)
+        ax.scatter([], [], c="#2166AC", s=36, label="Yuquan")
+        ax.scatter([], [], c="#E08214", s=36, label="Epilepsiae")
+        ax.legend(fontsize=8, loc="upper left")
+    else:
+        ax.text(0.5, 0.5, "no continuity data", ha="center", va="center",
+                transform=ax.transAxes)
+        ax.set_title("PR-2.6: Coverage / continuity summary", fontsize=10)
+
+    fig.suptitle("Exp 7C: Continuous Long-Timescale Modulation (PR-2.6)", fontsize=13)
+    fig.savefig(FIG_DIR / "exp7c_long_timescale.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print("  Saved exp7c_long_timescale.png")
+
+
+# ==========================================================================
 
 def main():
     parser = argparse.ArgumentParser()
@@ -1094,7 +1293,7 @@ def main():
     args = parser.parse_args()
 
     if args.exp == "all":
-        exps = {"1", "2", "3", "4", "5", "6", "7", "7b"}
+        exps = {"1", "2", "3", "4", "5", "6", "7", "7b", "7c"}
     else:
         exps = {x.strip() for x in args.exp.split(",")}
 
@@ -1118,6 +1317,8 @@ def main():
         plot_exp7()
     if "7b" in exps:
         plot_exp7b()
+    if "7c" in exps:
+        plot_exp7c()
 
     print(f"\nDone. Figures in {FIG_DIR}")
 

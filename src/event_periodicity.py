@@ -2153,6 +2153,457 @@ def compute_daynight_stratified_detrending(
     }
 
 
+# ---------------------------------------------------------------------------
+# PR-2.6: Continuous long-timescale analysis
+# ---------------------------------------------------------------------------
+
+def _dataset_timezone(dataset: str) -> str:
+    """Canonical timezone used for local-clock summaries."""
+    return "Asia/Shanghai" if dataset == "yuquan" else "Europe/Berlin"
+
+
+def _hour_to_hms(hour_float: float) -> Tuple[int, int, int]:
+    """Convert fractional hour to (hour, minute, second)."""
+    total_seconds = int(round(float(hour_float) * 3600.0))
+    total_seconds %= 24 * 3600
+    hour = total_seconds // 3600
+    minute = (total_seconds % 3600) // 60
+    second = total_seconds % 60
+    return hour, minute, second
+
+
+def _contiguous_true_spans(mask: np.ndarray) -> List[Tuple[int, int]]:
+    """Return contiguous [start, end) spans where mask is True."""
+    mask = np.asarray(mask, dtype=bool)
+    if mask.size == 0:
+        return []
+
+    diff = np.diff(mask.astype(int))
+    starts = np.where(diff == 1)[0] + 1
+    ends = np.where(diff == -1)[0] + 1
+    if mask[0]:
+        starts = np.r_[0, starts]
+    if mask[-1]:
+        ends = np.r_[ends, mask.size]
+    return [(int(s), int(e)) for s, e in zip(starts, ends)]
+
+
+def _segmented_moving_average(
+    values: np.ndarray,
+    valid_mask: np.ndarray,
+    window_bins: int,
+) -> np.ndarray:
+    """Centered moving average applied independently to each valid span."""
+    values = np.asarray(values, dtype=float)
+    valid_mask = np.asarray(valid_mask, dtype=bool)
+    window_bins = max(1, int(window_bins))
+
+    out = np.full(values.shape, np.nan, dtype=float)
+    kernel = np.ones(window_bins, dtype=float)
+
+    for start, end in _contiguous_true_spans(valid_mask):
+        seg = values[start:end]
+        if seg.size == 0:
+            continue
+        if seg.size <= window_bins:
+            out[start:end] = float(np.mean(seg))
+            continue
+        numer = np.convolve(seg, kernel, mode="same")
+        denom = np.convolve(np.ones(seg.size, dtype=float), kernel, mode="same")
+        out[start:end] = numer / np.maximum(denom, 1.0)
+    return out
+
+
+def _segmented_autocorr(
+    values: np.ndarray,
+    valid_mask: np.ndarray,
+    lag_bins: int,
+    min_pairs: int = 10,
+) -> Dict[str, Any]:
+    """Pearson autocorrelation at a fixed lag across contiguous valid spans."""
+    values = np.asarray(values, dtype=float)
+    valid_mask = np.asarray(valid_mask, dtype=bool)
+    lag_bins = max(1, int(lag_bins))
+    xs: List[np.ndarray] = []
+    ys: List[np.ndarray] = []
+
+    for start, end in _contiguous_true_spans(valid_mask):
+        seg = values[start:end]
+        if seg.size <= lag_bins:
+            continue
+        xs.append(seg[:-lag_bins])
+        ys.append(seg[lag_bins:])
+
+    if not xs:
+        return {"r": np.nan, "n_pairs": 0}
+
+    x_all = np.concatenate(xs)
+    y_all = np.concatenate(ys)
+    if x_all.size < min_pairs:
+        return {"r": np.nan, "n_pairs": int(x_all.size)}
+
+    r, _ = _pearson_corr(x_all, y_all)
+    return {"r": r, "n_pairs": int(x_all.size)}
+
+
+def summarize_block_continuity(
+    block_ranges: List[Tuple[float, float]],
+    merge_gap_sec: float = 5.0,
+) -> Dict[str, Any]:
+    """Summarize observation continuity after merging tiny inter-block gaps."""
+    merged = merge_contiguous_blocks(block_ranges, max_gap_sec=merge_gap_sec)
+    if not merged:
+        return {
+            "n_blocks_original": 0,
+            "n_runs_merged": 0,
+            "total_observed_hours": 0.0,
+            "total_span_hours": 0.0,
+            "coverage_fraction": np.nan,
+            "longest_run_hours": 0.0,
+            "median_run_hours": 0.0,
+            "merged_runs": [],
+        }
+
+    durations = np.asarray([end - start for start, end in merged], dtype=float)
+    total_observed = float(np.sum(durations))
+    total_span = float(merged[-1][1] - merged[0][0])
+    return {
+        "n_blocks_original": int(len(block_ranges)),
+        "n_runs_merged": int(len(merged)),
+        "total_observed_hours": total_observed / 3600.0,
+        "total_span_hours": total_span / 3600.0,
+        "coverage_fraction": float(total_observed / total_span) if total_span > 0 else np.nan,
+        "longest_run_hours": float(np.max(durations) / 3600.0),
+        "median_run_hours": float(np.median(durations) / 3600.0),
+        "merged_runs": [[float(s), float(e)] for s, e in merged],
+    }
+
+
+def build_continuous_rate_trace(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    bin_sec: float = 300.0,
+    merge_gap_sec: float = 5.0,
+    min_coverage_frac: float = 0.95,
+) -> Dict[str, Any]:
+    """Build a continuous-time rate trace on the real observation axis.
+
+    The trace is binned on an absolute clock. Bins with incomplete observation
+    coverage are retained in ``coverage_frac`` but excluded from long-timescale
+    summaries via ``valid_mask``.
+    """
+    events = np.asarray(events, dtype=float)
+    if events.size == 0 or not block_ranges:
+        return {"warning": "no_events_or_blocks"}
+
+    continuity = summarize_block_continuity(block_ranges, merge_gap_sec=merge_gap_sec)
+    merged = [(float(s), float(e)) for s, e in continuity["merged_runs"]]
+    if not merged:
+        return {"warning": "no_merged_runs"}
+
+    bin_sec = float(bin_sec)
+    t0 = merged[0][0]
+    t1 = merged[-1][1]
+    edges = np.arange(t0, t1 + bin_sec, bin_sec, dtype=float)
+    if edges[-1] < t1:
+        edges = np.r_[edges, edges[-1] + bin_sec]
+    centers = 0.5 * (edges[:-1] + edges[1:])
+    n_bins = centers.size
+
+    observed_sec = np.zeros(n_bins, dtype=float)
+    for run_start, run_end in merged:
+        i0 = max(0, int(np.floor((run_start - t0) / bin_sec)))
+        i1 = min(n_bins - 1, int(np.floor((run_end - t0 - 1e-9) / bin_sec)))
+        for idx in range(i0, i1 + 1):
+            overlap = max(0.0, min(edges[idx + 1], run_end) - max(edges[idx], run_start))
+            observed_sec[idx] += overlap
+
+    starts = events[:, 0]
+    counts = np.histogram(starts, bins=edges)[0].astype(float)
+    rate_per_hour = np.full(n_bins, np.nan, dtype=float)
+    valid_obs = observed_sec > 0
+    rate_per_hour[valid_obs] = counts[valid_obs] * 3600.0 / observed_sec[valid_obs]
+    coverage_frac = observed_sec / bin_sec
+    valid_mask = np.isfinite(rate_per_hour) & (coverage_frac >= float(min_coverage_frac))
+
+    return {
+        "bin_sec": bin_sec,
+        "time_start": float(t0),
+        "time_end": float(t1),
+        "bin_edges": edges,
+        "bin_centers": centers,
+        "count": counts,
+        "observed_sec": observed_sec,
+        "coverage_frac": coverage_frac,
+        "rate_per_hour": rate_per_hour,
+        "valid_mask": valid_mask,
+        "continuity": continuity,
+    }
+
+
+def compute_long_timescale_rate_summary(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    bin_sec: float = 300.0,
+    smooth_windows_sec: Sequence[float] = (1800, 3600, 7200, 14400, 28800),
+    autocorr_lag_hours: Sequence[float] = (0.5, 1.0, 2.0, 4.0, 8.0),
+    merge_gap_sec: float = 5.0,
+    min_coverage_frac: float = 0.95,
+) -> Dict[str, Any]:
+    """Summarize long-timescale modulation on the real continuous time axis."""
+    trace = build_continuous_rate_trace(
+        events=events,
+        block_ranges=block_ranges,
+        bin_sec=bin_sec,
+        merge_gap_sec=merge_gap_sec,
+        min_coverage_frac=min_coverage_frac,
+    )
+    if "warning" in trace:
+        return trace
+
+    rate = np.asarray(trace["rate_per_hour"], dtype=float)
+    valid = np.asarray(trace["valid_mask"], dtype=bool)
+    rate_summary: List[Dict[str, Any]] = []
+    smooth_traces: Dict[str, List[float]] = {}
+
+    for window_sec in smooth_windows_sec:
+        window_bins = max(1, int(round(float(window_sec) / float(bin_sec))))
+        smooth = _segmented_moving_average(rate, valid, window_bins)
+        smooth_valid = np.isfinite(smooth) & valid
+
+        fluct_strength = np.nan
+        if np.sum(smooth_valid) >= 5:
+            smooth_vals = smooth[smooth_valid]
+            med = float(np.median(smooth_vals))
+            if med > 0:
+                q75, q25 = np.percentile(smooth_vals, [75, 25])
+                fluct_strength = float((q75 - q25) / med)
+
+        rate_summary.append({
+            "window_sec": float(window_sec),
+            "window_hours": float(window_sec) / 3600.0,
+            "window_bins": int(window_bins),
+            "n_valid_bins": int(np.sum(smooth_valid)),
+            "fluct_strength_iqr_over_median": fluct_strength,
+        })
+        smooth_traces[f"smooth_{int(round(window_sec))}s"] = smooth.tolist()
+
+    rate_autocorr: List[Dict[str, Any]] = []
+    for lag_h in autocorr_lag_hours:
+        lag_bins = max(1, int(round(float(lag_h) * 3600.0 / float(bin_sec))))
+        ac = _segmented_autocorr(rate, valid, lag_bins)
+        rate_autocorr.append({
+            "lag_hours": float(lag_h),
+            "lag_bins": int(lag_bins),
+            "r": ac["r"],
+            "n_pairs": int(ac["n_pairs"]),
+        })
+
+    trace["continuity"]["is_near_24h_continuous"] = bool(
+        trace["continuity"]["longest_run_hours"] >= 22.0
+    )
+
+    return {
+        "bin_sec": float(bin_sec),
+        "continuity": trace["continuity"],
+        "trace": {
+            "bin_centers": np.asarray(trace["bin_centers"], dtype=float),
+            "bin_hours_from_start": (
+                (np.asarray(trace["bin_centers"], dtype=float) - float(trace["time_start"])) / 3600.0
+            ),
+            "rate_per_hour": rate,
+            "coverage_frac": np.asarray(trace["coverage_frac"], dtype=float),
+            "valid_mask": valid,
+            **smooth_traces,
+        },
+        "rate_summary": rate_summary,
+        "rate_autocorr": rate_autocorr,
+    }
+
+
+def _next_local_transition(
+    epoch_sec: float,
+    timezone: str,
+    day_hours: Tuple[float, float],
+) -> float:
+    """Return next local day/night transition after epoch_sec."""
+    import datetime
+    try:
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo(timezone)
+    except ImportError:
+        import pytz
+        tz = pytz.timezone(timezone)
+
+    dt = datetime.datetime.fromtimestamp(epoch_sec, tz=tz)
+    h_day_start, m_day_start, s_day_start = _hour_to_hms(day_hours[0])
+    h_day_end, m_day_end, s_day_end = _hour_to_hms(day_hours[1])
+    day_start = dt.replace(hour=h_day_start, minute=m_day_start,
+                           second=s_day_start, microsecond=0)
+    day_end = dt.replace(hour=h_day_end, minute=m_day_end,
+                         second=s_day_end, microsecond=0)
+
+    if dt < day_start:
+        next_dt = day_start
+    elif dt < day_end:
+        next_dt = day_end
+    else:
+        next_dt = day_start + datetime.timedelta(days=1)
+    return float(next_dt.timestamp())
+
+
+def split_contiguous_daynight_segments(
+    block_ranges: List[Tuple[float, float]],
+    dataset: str,
+    day_hours: Tuple[float, float] = (8.0, 20.0),
+    merge_gap_sec: float = 5.0,
+) -> List[Dict[str, Any]]:
+    """Split continuous observed runs into continuous day/night segments."""
+    timezone = _dataset_timezone(dataset)
+    merged = merge_contiguous_blocks(block_ranges, max_gap_sec=merge_gap_sec)
+    segments: List[Dict[str, Any]] = []
+
+    for run_idx, (run_start, run_end) in enumerate(merged):
+        cursor = float(run_start)
+        while cursor < run_end - 1e-9:
+            local_hour = _epoch_to_hour(cursor, timezone)
+            label = "day" if day_hours[0] <= local_hour < day_hours[1] else "night"
+            boundary = _next_local_transition(cursor + 1e-6, timezone, day_hours)
+            seg_end = min(float(run_end), boundary)
+            segments.append({
+                "run_idx": int(run_idx),
+                "label": label,
+                "start_sec": float(cursor),
+                "end_sec": float(seg_end),
+                "duration_hours": float((seg_end - cursor) / 3600.0),
+            })
+            cursor = seg_end
+
+    return segments
+
+
+def compute_contiguous_daynight_detrending(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    dataset: str,
+    window_sec: float = 600.0,
+    day_hours: Tuple[float, float] = (8.0, 20.0),
+    merge_gap_sec: float = 5.0,
+    min_segment_iei: int = 20,
+) -> Dict[str, Any]:
+    """Compute serial correlation inside continuous day/night segments."""
+    events = np.asarray(events, dtype=float)
+    segments = split_contiguous_daynight_segments(
+        block_ranges=block_ranges,
+        dataset=dataset,
+        day_hours=day_hours,
+        merge_gap_sec=merge_gap_sec,
+    )
+
+    if events.size == 0 or not segments:
+        return {"warning": "no_events_or_segments", "segments": []}
+
+    starts = events[:, 0]
+    segment_records: List[Dict[str, Any]] = []
+    pooled: Dict[str, Dict[str, List[np.ndarray]]] = {
+        "day": {"raw_x": [], "raw_y": [], "det_x": [], "det_y": []},
+        "night": {"raw_x": [], "raw_y": [], "det_x": [], "det_y": []},
+    }
+
+    for seg in segments:
+        mask = (starts >= seg["start_sec"]) & (starts < seg["end_sec"])
+        seg_events = events[mask]
+        n_events = int(seg_events.shape[0])
+        if n_events < 2:
+            segment_records.append({**seg, "n_events": n_events, "n_iei": 0})
+            continue
+
+        seg_iei = compute_iei(seg_events)
+        n_iei = int(seg_iei.size)
+        if n_iei < min_segment_iei:
+            segment_records.append({
+                **seg,
+                "n_events": n_events,
+                "n_iei": n_iei,
+                "raw_r": np.nan,
+                "detrended_r": np.nan,
+                "detrend_fraction": np.nan,
+            })
+            continue
+
+        seg_starts = seg_events[:, 0]
+        det = compute_detrended_serial_correlation(
+            event_times=seg_starts,
+            iei=seg_iei,
+            window_sec=window_sec,
+        )
+        record = {
+            **seg,
+            "n_events": n_events,
+            "n_iei": n_iei,
+            "raw_r": det["raw_r"],
+            "detrended_r": det["detrended_r"],
+            "detrend_fraction": det["detrend_fraction"],
+        }
+        segment_records.append(record)
+
+        label = seg["label"]
+        raw_x, raw_y = _log_iei_pairs(seg_iei, lag=1)
+        if raw_x.size:
+            pooled[label]["raw_x"].append(raw_x)
+            pooled[label]["raw_y"].append(raw_y)
+
+        rolled = _rolling_log_iei_residuals(seg_starts, seg_iei, window_sec=window_sec)
+        resid = rolled["residual"]
+        valid_pair = rolled["valid_pair"]
+        if resid.size and np.any(valid_pair):
+            pooled[label]["det_x"].append(resid[:-1][valid_pair])
+            pooled[label]["det_y"].append(resid[1:][valid_pair])
+
+    def _label_summary(label: str) -> Dict[str, Any]:
+        label_segments = [rec for rec in segment_records if rec["label"] == label]
+        used_segments = [rec for rec in label_segments if np.isfinite(rec.get("detrended_r", np.nan))]
+
+        raw_r, _ = _pearson_corr(
+            np.concatenate(pooled[label]["raw_x"]) if pooled[label]["raw_x"] else np.array([]),
+            np.concatenate(pooled[label]["raw_y"]) if pooled[label]["raw_y"] else np.array([]),
+        )
+        det_r, _ = _pearson_corr(
+            np.concatenate(pooled[label]["det_x"]) if pooled[label]["det_x"] else np.array([]),
+            np.concatenate(pooled[label]["det_y"]) if pooled[label]["det_y"] else np.array([]),
+        )
+        detrend_fraction = np.nan
+        if np.isfinite(raw_r) and abs(raw_r) > 1e-12 and np.isfinite(det_r):
+            detrend_fraction = 1.0 - (det_r / raw_r)
+
+        detrended_vals = np.asarray(
+            [rec["detrended_r"] for rec in used_segments if np.isfinite(rec["detrended_r"])],
+            dtype=float,
+        )
+        return {
+            "n_segments_total": int(len(label_segments)),
+            "n_segments_used": int(len(used_segments)),
+            "total_hours": float(np.sum([rec["duration_hours"] for rec in label_segments])),
+            "total_iei": int(np.sum([rec.get("n_iei", 0) for rec in used_segments])),
+            "pooled_raw_r": raw_r,
+            "pooled_detrended_r": det_r,
+            "pooled_detrend_fraction": detrend_fraction,
+            "median_segment_detrended_r": (
+                float(np.median(detrended_vals)) if detrended_vals.size else np.nan
+            ),
+        }
+
+    return {
+        "timezone": _dataset_timezone(dataset),
+        "day_hours": list(day_hours),
+        "merge_gap_sec": float(merge_gap_sec),
+        "window_sec": float(window_sec),
+        "segments": segment_records,
+        "day": _label_summary("day"),
+        "night": _label_summary("night"),
+    }
+
+
 def compute_detrended_psd_backfill(
     events: np.ndarray,
     block_ranges: List[Tuple[float, float]],
@@ -2247,6 +2698,323 @@ def compute_detrended_psd_backfill(
         "peak_disappeared": bool(det_peak_power <= 0 and raw_peak_power > 0),
         "peak_insignificant": bool(gamma_p_det >= 0.05 if np.isfinite(gamma_p_det) else False),
     }
+
+
+# ---------------------------------------------------------------------------
+# Per-channel spatial modulation analysis
+# ---------------------------------------------------------------------------
+
+
+def _normalize_channel_name(name: str) -> str:
+    """Strip whitespace, uppercase, remove known prefixes."""
+    s = name.strip().upper()
+    for prefix in ("EEG ", "EEG_"):
+        if s.startswith(prefix):
+            s = s[len(prefix):]
+    return s
+
+
+def match_bipolar_soz(ch_name: str, soz_set: set) -> str:
+    """Match bipolar channel X-Y against SOZ set; any contact in SOZ -> 'soz'."""
+    normalized = _normalize_channel_name(ch_name)
+    parts = normalized.split("-")
+    for p in parts:
+        p = p.strip()
+        if p in soz_set:
+            return "soz"
+    return "non_soz"
+
+
+def match_bipolar_focus_rel(
+    ch_name: str, focus_rel: Dict[str, list]
+) -> str:
+    """Match bipolar channel to Epilepsiae i/l/e; priority i > l > e."""
+    normalized = _normalize_channel_name(ch_name)
+    parts = [p.strip() for p in normalized.split("-")]
+    for label in ("i", "l", "e"):
+        label_set = {_normalize_channel_name(c) for c in focus_rel.get(label, [])}
+        for p in parts:
+            if p in label_set:
+                return label
+    return "unknown"
+
+
+def load_perchannel_events_relaxed(
+    subject_dir: Path,
+    dataset: str,
+    refine_k: float = 0.0,
+    min_count: int = 100,
+    min_rate: float = 5.0,
+) -> Optional[Dict[str, Any]]:
+    """Load per-channel events from *_gpu.npz with relaxed refine threshold.
+
+    Unlike load_yuquan_subject_events, the channel set comes from gpu.npz
+    full channel names + relaxed refine, not from lagPat chnNames.
+
+    Returns None if no valid gpu.npz found.
+    """
+    from src.group_event_analysis import select_core_channels_by_event_count
+
+    subject_dir = Path(subject_dir)
+
+    all_ch_names: List[str] = []
+    ch_name_set: set = set()
+    sum_events_count: Dict[str, int] = {}
+    per_ch_events_raw: Dict[str, list] = {}
+    block_ranges: List[Tuple[float, float]] = []
+    total_hours = 0.0
+
+    if dataset == "yuquan":
+        block_dur = 2 * 3600.0
+        edf_files = sorted(subject_dir.glob("*.edf"))
+        for edf in edf_files:
+            gpu_file = edf.with_name(edf.stem + "_gpu.npz")
+            gpu = _try_load_gpu(gpu_file) if gpu_file.exists() else None
+            if gpu is None:
+                continue
+
+            start_t = float(gpu["start_time"])
+            block_ranges.append((start_t, start_t + block_dur))
+            total_hours += block_dur / 3600.0
+
+            chns = list(gpu["chns_names"])
+            dets = gpu["whole_dets"]
+            try:
+                ecnt = np.array(gpu["events_count"], dtype=int).ravel()
+            except Exception:
+                ecnt = np.zeros(len(chns), dtype=int)
+
+            for i, ch in enumerate(chns):
+                if ch not in ch_name_set:
+                    ch_name_set.add(ch)
+                    all_ch_names.append(ch)
+                    per_ch_events_raw[ch] = []
+                cnt = int(ecnt[i]) if i < len(ecnt) else 0
+                sum_events_count[ch] = sum_events_count.get(ch, 0) + cnt
+
+                if cnt > 0:
+                    try:
+                        ch_dets = np.array(dets[i]).reshape(-1, 2)
+                        per_ch_events_raw[ch].append(ch_dets + start_t)
+                    except Exception:
+                        pass
+
+    elif dataset == "epilepsiae":
+        block_dur = 3600.0
+        lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
+
+        start_t_map = {}
+        for lp_file in lagpat_files:
+            stem = lp_file.stem.replace("_lagPat", "")
+            try:
+                lp = np.load(lp_file, allow_pickle=True)
+                start_t_map[stem] = float(lp["start_t"])
+            except Exception:
+                pass
+
+        gpu_files = sorted(subject_dir.glob("*_gpu.npz"))
+        for gpu_file in gpu_files:
+            gpu = _try_load_gpu(gpu_file)
+            if gpu is None:
+                continue
+
+            stem = gpu_file.stem.replace("_gpu", "")
+            if "start_time" in gpu:
+                start_t = float(gpu["start_time"])
+            elif stem in start_t_map:
+                start_t = start_t_map[stem]
+            else:
+                continue
+
+            block_ranges.append((start_t, start_t + block_dur))
+            total_hours += block_dur / 3600.0
+
+            chns = list(gpu["chns_names"])
+            dets = gpu["whole_dets"]
+            try:
+                ecnt = np.array(gpu["events_count"], dtype=int).ravel()
+            except Exception:
+                ecnt = np.zeros(len(chns), dtype=int)
+
+            for i, ch in enumerate(chns):
+                if ch not in ch_name_set:
+                    ch_name_set.add(ch)
+                    all_ch_names.append(ch)
+                    per_ch_events_raw[ch] = []
+                cnt = int(ecnt[i]) if i < len(ecnt) else 0
+                sum_events_count[ch] = sum_events_count.get(ch, 0) + cnt
+
+                if cnt > 0:
+                    try:
+                        ch_dets = np.array(dets[i]).reshape(-1, 2)
+                        per_ch_events_raw[ch].append(ch_dets + start_t)
+                    except Exception:
+                        pass
+    else:
+        raise ValueError(f"Unknown dataset: {dataset}")
+
+    if not all_ch_names or total_hours == 0:
+        return None
+
+    counts_arr = np.array(
+        [sum_events_count.get(c, 0) for c in all_ch_names], dtype=float,
+    )
+    selected = select_core_channels_by_event_count(
+        events_count=counts_arr,
+        ch_names=all_ch_names,
+        method="mean_std",
+        k=refine_k,
+        min_count=1,
+    )
+    selected = [
+        ch for ch in selected
+        if sum_events_count.get(ch, 0) >= min_count
+        and (sum_events_count.get(ch, 0) / total_hours) >= min_rate
+    ]
+
+    if not selected:
+        return None
+
+    per_ch_events: Dict[str, np.ndarray] = {}
+    for ch in selected:
+        if per_ch_events_raw.get(ch):
+            cat = np.concatenate(per_ch_events_raw[ch], axis=0)
+            per_ch_events[ch] = cat[cat[:, 0].argsort()]
+        else:
+            per_ch_events[ch] = np.zeros((0, 2))
+
+    lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
+    lagpat_channels: set = set()
+    if lagpat_files:
+        try:
+            tmp = np.load(lagpat_files[0], allow_pickle=True)
+            lagpat_channels = set(tmp["chnNames"])
+        except Exception:
+            pass
+
+    return {
+        "per_ch_events": per_ch_events,
+        "ch_names": selected,
+        "lagpat_channels": lagpat_channels,
+        "block_ranges": block_ranges,
+        "total_hours": total_hours,
+        "events_count_all": sum_events_count,
+    }
+
+
+def compute_perchannel_metrics(
+    ch_name: str,
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    total_hours: float,
+    iei_min_threshold: float = 0.01,
+    cv_threshold: float = 5.0,
+) -> Dict[str, Any]:
+    """Compute per-channel temporal metrics with quality control.
+
+    Reuses compute_serial_correlation_decay and
+    compute_detrended_serial_correlation on single-channel event sequences.
+
+    Quality control:
+      1. IEI < iei_min_threshold (10ms) dropped (detector artifact)
+      2. Channels with CV > cv_threshold flagged artifact_suspect
+      3. Caller enforces min_count + min_rate double threshold
+    """
+    n_events = len(events)
+    if n_events < 2:
+        return _empty_channel_metrics(ch_name, n_events, total_hours)
+
+    iei = compute_iei(events, block_ranges=block_ranges)
+    if len(iei) == 0:
+        return _empty_channel_metrics(ch_name, n_events, total_hours)
+
+    iei_clean = iei[iei >= iei_min_threshold]
+    n_iei_dropped = len(iei) - len(iei_clean)
+    iei = iei_clean
+
+    if len(iei) < 10:
+        return _empty_channel_metrics(ch_name, n_events, total_hours)
+
+    event_rate = n_events / total_hours if total_hours > 0 else 0.0
+    iei_mean = float(np.mean(iei))
+    iei_std = float(np.std(iei))
+    iei_cv = iei_std / iei_mean if iei_mean > 0 else 0.0
+    artifact_suspect = iei_cv > cv_threshold
+
+    iei_median = float(np.median(iei))
+    iei_p02 = float(np.percentile(iei, 2))
+
+    decay = compute_serial_correlation_decay(iei, max_lag=50, min_pairs=20)
+    lag1_r = decay["lag1_r"]
+    half_life_lag = decay["half_life_lag"]
+
+    event_starts = events[:, 0]
+    detrended = compute_detrended_serial_correlation(event_starts, iei, window_sec=600.0)
+    detrended_r = detrended["detrended_r"]
+    detrend_fraction = detrended["detrend_fraction"]
+
+    return {
+        "ch_name": ch_name,
+        "n_events": n_events,
+        "event_rate": round(event_rate, 2),
+        "n_iei": len(iei),
+        "n_iei_dropped": n_iei_dropped,
+        "iei_mean": round(iei_mean, 6),
+        "iei_median": round(iei_median, 6),
+        "iei_p02": round(iei_p02, 6),
+        "iei_cv": round(iei_cv, 3),
+        "artifact_suspect": artifact_suspect,
+        "iei_lag1_r": round(lag1_r, 4) if np.isfinite(lag1_r) else None,
+        "iei_half_life": half_life_lag,
+        "iei_detrended_r": round(detrended_r, 4) if np.isfinite(detrended_r) else None,
+        "detrend_fraction": round(detrend_fraction, 3) if np.isfinite(detrend_fraction) else None,
+    }
+
+
+def _empty_channel_metrics(ch_name: str, n_events: int, total_hours: float) -> Dict[str, Any]:
+    return {
+        "ch_name": ch_name,
+        "n_events": n_events,
+        "event_rate": round(n_events / total_hours, 2) if total_hours > 0 else 0.0,
+        "n_iei": 0,
+        "n_iei_dropped": 0,
+        "iei_mean": None,
+        "iei_median": None,
+        "iei_p02": None,
+        "iei_cv": None,
+        "artifact_suspect": True,
+        "iei_lag1_r": None,
+        "iei_half_life": None,
+        "iei_detrended_r": None,
+        "detrend_fraction": None,
+    }
+
+
+def annotate_channels_soz(
+    ch_names: List[str],
+    soz_channels: List[str],
+    focus_rel: Optional[Dict[str, list]] = None,
+) -> Dict[str, str]:
+    """Annotate each channel with SOZ label using bipolar-any matching.
+
+    For Yuquan: binary soz/non_soz.
+    For Epilepsiae with focus_rel: three-tier i/l/e.
+    Channels not found in any SOZ/focus_rel set are 'unknown'.
+    """
+    soz_set = {_normalize_channel_name(c) for c in soz_channels}
+
+    labels = {}
+    for ch in ch_names:
+        if focus_rel is not None:
+            label = match_bipolar_focus_rel(ch, focus_rel)
+            if label != "unknown":
+                labels[ch] = label
+                continue
+
+        label = match_bipolar_soz(ch, soz_set)
+        labels[ch] = label
+
+    return labels
 
 
 # ---------------------------------------------------------------------------

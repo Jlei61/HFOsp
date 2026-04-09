@@ -113,17 +113,18 @@ Important drift:
   - `scripts/run_event_periodicity.py` — Phase 1 dual-dataset batch driver
   - `scripts/run_surrogates_batch.py` — group-only surrogate batch
   - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
-  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (8 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5)
-  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7b)
-  - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 function unit tests
-  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5)
+  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (9 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5, exp7c PR-2.6)
+  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7c)
+  - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 function unit tests
+  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5+PR-1+PR-2+PR-2.5+PR-2.6)
   - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
   - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
 - Spatial modulation / SOZ analysis (Where question):
   - `docs/spatial_modulation_soz_analysis.md` — plan and results for per-channel SOZ spatial attribution
-  - `scripts/audit_gpu_npz.py` — Step 0 data audit (planned)
-  - `scripts/run_spatial_modulation.py` — PR-1 batch driver (planned)
-  - `scripts/plot_spatial_modulation.py` — PR-1 figures (planned)
+  - `scripts/audit_gpu_npz.py` — Step 0 data audit (Yuquan PASS 11/18, Epilepsiae FAIL 0/20)
+  - `scripts/run_spatial_modulation.py` — PR-1 batch driver (Yuquan-only, 9 valid pairs)
+  - `scripts/plot_spatial_modulation.py` — PR-1 figures
+  - `src/event_periodicity.py` — `load_perchannel_events_relaxed()`, `compute_perchannel_metrics()`, `annotate_channels_soz()`, `match_bipolar_soz()`
 - Epilepsiae dataset: `src/epilepsiae_dataset.py`
 - Network: `src/network_analysis.py`
 - Plotting in current repo:
@@ -260,17 +261,21 @@ Stop and ask the user instead of guessing when:
     - n_participating Spearman autocorrelation: cross-corr with IEI decay median 0.742 (18/30 > 0.7) → **single global state variable confirmed**
     - Day/night stratified detrending: 28/30 still positive after within-segment detrending (day median 0.094, night 0.086) → short-range dependency is genuine, not day/night boundary artifact
     - Backfill for escape subjects 1084, 1096: **peaks completely disappear after 600s detrending** → Layer 3 gap closed, 21/21 specparam peaks fully explained by renewal + slow modulation
+  - PR-2.6 (exp7c, 2026-04-09): continuous long-timescale analysis on 30 subjects:
+    - Yuquan 10/10 subjects provide near-24h continuous trajectories; Epilepsiae longest continuous run median = 75.1h, observed duration median = 158.4h
+    - Continuous-time rate fluctuation remains visible from 0.5h to 8h windows → slow modulation truly extends to multi-hour real time, not just event-index statistics
+    - Continuous day/night segment analysis: Yuquan 9/10 and Epilepsiae 17/20 remain positive on both sides → short-range dependency survives inside continuous day/night segments
   - Next: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
   - Method caveats incorporated: detrend_fraction curve behavior depends on window vs modulation timescale (use Δ_frac for band localization); n_participating must use Spearman not Pearson-on-log; centered rank tau must check SOZ source node preservation
   - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
 
 - "Where does the slow IEI modulation occur? Is it SOZ-specific?"
   - Read `docs/spatial_modulation_soz_analysis.md`
-  - Short answer: **analysis in progress (PR-1 planned)**
-  - Current evidence from lagPat-based analysis is structurally limited: 22/30 subjects have nearly zero non-SOZ group events because lagPat channels are SOZ-enriched by construction (refine selects high-HFO-count channels ≈ SOZ)
-  - Correct approach: per-channel IEI serial correlation on relaxed-refine channel set (beyond lagPat), then SOZ vs non-SOZ spatial comparison
-  - PR-2 exp7D hint: SOZ lag-1 r 0.302 > nonSOZ 0.132, p=0.055 (n=9, borderline, lagPat-limited)
-  - Epilepsiae has three-tier labels (i/l/e) enabling dose-gradient analysis
+  - Short answer: **PR-1 completed (Yuquan-only, n=9)**. Raw serial corr shows **no SOZ difference** (p=1.0). But **detrend_fraction is lower in SOZ** (7/9 subjects, p=0.129) — SOZ channels have more short-range memory, less slow drift. SOZ median IEI is shorter (p=0.055, marginal).
+  - Epilepsiae gpu.npz are all corrupt stubs (216 bytes); per-channel analysis requires HFO re-detection
+  - Per-channel approach (relaxed refine k=0.0) successfully expands channel set from lagPat ~10 to ~33, with 9/11 subjects forming valid SOZ/nonSOZ pairs
+  - Key insight: lagPat-based SOZ > nonSOZ serial corr (PR-2 exp7D, p=0.055) was confounded by SOZ's higher event rate → global modulation effect. Per-channel detrending separates this into global (no difference) + local (SOZ has more short-range memory).
+  - Epilepsiae three-tier (i/l/e) gradient analysis deferred to PR-2
 
 - "Why is legacy synchrony always ~0.6?"
   - Mathematical artifact: 3-channel uniform lag pattern → theoretical limit ≈ 0.5918

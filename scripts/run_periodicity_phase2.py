@@ -53,8 +53,10 @@ from src.event_periodicity import (
     _serial_corr_decay_from_sequences,
     _split_events_by_block,
     build_pulse_train,
+    compute_contiguous_daynight_detrending,
     compute_daynight_stratified_detrending,
     compute_detrended_psd_backfill,
+    compute_long_timescale_rate_summary,
     compute_multiscale_detrend_fraction,
     compute_nparticipating_autocorrelation,
     compute_renewal_psd_analytic,
@@ -824,13 +826,84 @@ def run_exp7b(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
 
 
 # ==========================================================================
+# Experiment 7C: Continuous long-timescale modulation (PR-2.6)
+# ==========================================================================
+
+def run_exp7c(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
+    """PR-2.6: true continuous-time long-timescale analysis."""
+    logger.info("=== Experiment 7C: Continuous Long-Timescale Modulation (PR-2.6) ===")
+    all_results: Dict[str, Any] = {}
+
+    for dataset, root in roots.items():
+        loader = load_yuquan_subject_events if dataset == "yuquan" else load_epilepsiae_subject_events
+        for sub in subjects:
+            sub_dir = root / sub if dataset == "yuquan" else root / sub / "all_recs"
+            if not sub_dir.exists():
+                continue
+            if not list(sub_dir.glob("*_lagPat.npz")):
+                continue
+
+            key = f"{dataset}/{sub}"
+            logger.info(f"  {key}: PR-2.6 continuous long-timescale analysis")
+            t0 = time.time()
+            try:
+                _, packed, _, block_ranges = loader(sub_dir)
+                if len(packed) < 10:
+                    all_results[key] = {"warning": "insufficient_group_events"}
+                    continue
+
+                rate_summary = compute_long_timescale_rate_summary(
+                    events=packed,
+                    block_ranges=block_ranges,
+                    bin_sec=300.0,
+                    smooth_windows_sec=(1800, 3600, 7200, 14400, 28800),
+                    autocorr_lag_hours=(0.5, 1.0, 2.0, 4.0, 8.0),
+                )
+                contiguous_dn = compute_contiguous_daynight_detrending(
+                    events=packed,
+                    block_ranges=block_ranges,
+                    dataset=dataset,
+                    window_sec=600.0,
+                    merge_gap_sec=5.0,
+                    min_segment_iei=20,
+                )
+
+                all_results[key] = {
+                    "dataset": dataset,
+                    "subject": sub,
+                    "n_events": int(packed.shape[0]),
+                    "long_timescale": rate_summary,
+                    "contiguous_daynight": contiguous_dn,
+                }
+
+                continuity = rate_summary.get("continuity", {})
+                longest_run = continuity.get("longest_run_hours", np.nan)
+                total_obs = continuity.get("total_observed_hours", np.nan)
+                day_r = contiguous_dn.get("day", {}).get("pooled_detrended_r", np.nan)
+                night_r = contiguous_dn.get("night", {}).get("pooled_detrended_r", np.nan)
+                logger.info(
+                    f"    longest_run={longest_run:.2f}h, observed={total_obs:.2f}h, "
+                    f"day_r={day_r:.3f}, night_r={night_r:.3f}"
+                    if np.isfinite(longest_run) and np.isfinite(total_obs)
+                    else "    continuity summary unavailable"
+                )
+                logger.info(f"  {key}: done ({time.time() - t0:.1f}s)")
+            except Exception as e:
+                logger.error(f"  {key}: FAILED — {e}", exc_info=True)
+                all_results[key] = {"error": str(e)}
+
+    _save(all_results, out_dir / "exp7c_long_timescale.json")
+    return all_results
+
+
+# ==========================================================================
 # Main
 # ==========================================================================
 
 def main():
     parser = argparse.ArgumentParser(description="Phase 2 periodicity experiments")
     parser.add_argument("--exp", default="all",
-                        help="Experiment number(s): 1,2,3,4,5,6,7,7b or 'all'")
+                        help="Experiment number(s): 1,2,3,4,5,6,7,7b,7c or 'all'")
     parser.add_argument("--dataset", choices=["yuquan", "epilepsiae", "both"],
                         default="both")
     parser.add_argument("--subjects", nargs="+", default=None)
@@ -842,7 +915,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if args.exp == "all":
-        exps = {"1", "2", "3", "4", "5", "6", "7", "7b"}
+        exps = {"1", "2", "3", "4", "5", "6", "7", "7b", "7c"}
     else:
         exps = {x.strip() for x in args.exp.split(",")}
 
@@ -890,6 +963,9 @@ def main():
 
     if "7b" in exps:
         run_exp7b(all_subs, roots, out_dir)
+
+    if "7c" in exps:
+        run_exp7c(all_subs, roots, out_dir)
 
     logger.info(f"=== Phase 2 complete: {time.time()-t_total:.0f}s total ===")
 

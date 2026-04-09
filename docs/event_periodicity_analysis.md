@@ -1,11 +1,12 @@
 # 间期群体事件周期性分析
 
-> 状态：**完成** — Phase 4 + Phase 5 + PR-1 + PR-2 + PR-2.5 均已完成
+> 状态：**完成** — Phase 4 + Phase 5 + PR-1 + PR-2 + PR-2.5 + PR-2.6 均已完成
 > 创建日期：2026-04-04
 > Phase 4 完成日期：2026-04-04
 > Phase 5 完成日期：2026-04-05
 > PR-2 完成日期：2026-04-08
 > PR-2.5 完成日期：2026-04-08
+> PR-2.6 完成日期：2026-04-09
 > 关联论文图：Figure 3, Figure S7, Figure S13
 > 系统审阅：见 `docs/event_periodicity_phase2_review_2026-04-05.md`
 > 方法学叙事更新：见 `docs/interictal_population_event_methodological_review.md`
@@ -390,7 +391,57 @@ lagPatRaw 生成链路。要彻底回答这个问题，仍需要从原始 envelo
 3. 28% 短程依赖在日间和夜间段内独立存在，是真实的网络短程记忆效应
 4. 逃逸 subject 的谱峰完全由慢率调制产生 → **21/21 全覆盖**，~2 Hz 周期性假说彻底终结
 
-### 5.7 最终科学结论
+### 5.7 PR-2.6 — 连续长时程调制分析（实验 7C，2026-04-09 完成）
+
+PR-2.6 的目标不是再做一版标签池化，而是把“慢调制”真正放到**真实连续时间轴**上，回答两个遗留问题：
+
+1. 慢调制是否真的延伸到多小时 / 24h，而不只是 60s–7200s 去趋势窗的间接推断？
+2. PR-2.5 的 day/night 结论是否能在**连续白天段 / 连续夜晚段**内部复现？
+
+#### 5.7.1 连续时间覆盖与 24h 优势
+
+PR-2.6 先将相邻 block（gap ≤ 5s）合并为连续观测段，再在真实时间轴上做 5 分钟 bin 的 rate trace。
+
+| 数据集 | N | 最长连续段中位数 | 总观测时长中位数 | near-24h continuous |
+|------|---:|-----------------:|-----------------:|--------------------:|
+| Yuquan | 10 | **24.0h** | **24.0h** | **10/10** |
+| Epilepsiae | 20 | **75.1h** | **158.4h** | **20/20** |
+
+**结论**：这次分析真正吃到了连续时间优势。Yuquan 提供标准 24h 连续轨迹；Epilepsiae 甚至提供了远超 24h 的长连续运行段。
+
+#### 5.7.2 多小时连续时间率过程
+
+对连续 rate trace 做多小时平滑（0.5h / 1h / 2h / 4h / 8h），并用 IQR/median 量化 fluctuation strength；同时对 0.5h / 1h / 2h / 4h / 8h lag 的连续时间 rate autocorrelation 做摘要。
+
+| 数据集 | 0.5h fluct | 8h fluct | 0.5h rate acorr | 8h rate acorr |
+|------|-----------:|---------:|----------------:|--------------:|
+| Yuquan | 1.067 | 0.442 | 0.251 | -0.058 |
+| Epilepsiae | 2.243 | 1.322 | 0.493 | 0.108 |
+
+**解读**：
+- 连续时间率过程的起伏在 8h 平滑后仍未消失，说明慢调制**确实延伸到多小时尺度**。
+- Epilepsiae 的多小时调制更强、更持久；Yuquan 也有明确的多小时起伏，但 cohort-median rate autocorr 到 8h 时已接近 0。
+- 因此，“慢调制”不再只是 IEI 序列的统计形容词，而是在真实时间轴上可见的超慢率漂移。
+
+#### 5.7.3 连续 day/night 段内部的短程相关
+
+PR-2.5 的 `compute_daynight_stratified_detrending()` 是按时钟标签切分的 pooled 子序列；PR-2.6 改为先切出**连续白天段 / 连续夜晚段**，再在每段内部独立计算去趋势 lag-1 r，并在 subject 层面汇总。
+
+| 数据集 | Day pooled detrended r 中位 | Night pooled detrended r 中位 | day/night 两侧都为正 |
+|------|-----------------------------:|-------------------------------:|--------------------:|
+| Yuquan | **0.0937** | **0.0629** | **9/10** |
+| Epilepsiae | **0.0823** | **0.0823** | **17/20** |
+
+**结论**：PR-2.5 的结论站得住，而且现在语义更干净了。短程依赖并不是 pooled day/night 标签带来的伪影，而是在**连续 day/night 段内部**依然存在。
+
+#### 5.7.4 PR-2.6 综合解读
+
+1. 慢调制**确实延伸到多小时连续时间尺度**，尤其在 Epilepsiae 的长连续段上最明显
+2. PR-2.5 的“无单一主导时间尺度”结论没有被推翻，反而被连续时间率过程进一步支持
+3. “day/night 内仍有短程相关”现在可以更严谨地表述为：**连续 day/night 段内部仍保留短程依赖**
+4. PR-2.6 没有改变 PR-2 / PR-2.5 的主结论，只是把“慢调制”从间接推断升级成了真实时间轴上的直接观察
+
+### 5.8 最终科学结论
 
 **间期群体事件的 ~2Hz PSD 周期峰是不应期/检测窗限制的数学伪影，
 不是由网络内在振荡器驱动的真正节律。**
@@ -414,11 +465,17 @@ PR-2.5 证据链（多尺度调制解剖）：
 12. 28% 短程依赖在 day/night 段内独立存在 → 非日夜边界伪影
 13. **逃逸 subject (1084, 1096) 去趋势后峰完全消失** → 21/21 全覆盖，Layer 3 缺口关闭
 
+PR-2.6 证据链（连续长时程）：
+14. Yuquan 10/10 subject 提供 near-24h continuous 轨迹；Epilepsiae 最长连续段中位数 75.1h → 24h 优势已被真正利用
+15. 连续时间 rate fluctuation 在 8h 平滑后仍明显存在，Epilepsiae 的 8h rate autocorr 中位数仍为正 (0.108) → 慢调制延伸到多小时真实时间尺度
+16. 在**连续 day/night 段内部**，Yuquan 9/10、Epilepsiae 17/20 两侧都仍为正 → 短程依赖不是 pooled day/night 标签伪影
+
 **建议**：
 - 在最终论文中不宜将 PSD 周期峰作为正面发现报告
 - IEI 正 serial correlation（率慢调制）是一个值得讨论的方法学发现，正式统计口径应使用 subject-level direction consistency
-- PR-2 / PR-2.5 量化了调制成分：~72% 慢漂移 + ~28% 短程依赖。**慢漂移是多尺度 1/f 型全局生理调制（不可简化为单一 circadian 或 sleep stage），短程部分是真实的局部网络效应**
+- PR-2 / PR-2.5 / PR-2.6 共同量化了调制成分：~72% 慢漂移 + ~28% 短程依赖。更稳健的表述是：**未见单一主导时间尺度，慢调制延伸到多小时连续时间轴，短程部分是真实的局部网络效应**
 - n_participating 的同源调制支持"兴奋性增益模型"——全局状态 S(t) 同时控制事件率和参与范围
+- 连续 day/night 段分析表明：短程依赖在白天和夜晚的连续段内部都存在，不能简单归因于日夜边界或标签池化
 - 传播立体型（SOZ vs non-SOZ）可作为空间组织规律的候选发现，
   但需更大样本验证（当前仅有探索性单侧证据）
 
@@ -459,9 +516,17 @@ PR-2.5 证据链（多尺度调制解剖）：
   - `_epoch_to_hour()` — Unix epoch → 本地小时（PR-2.5 Exp 7D）
   - `compute_daynight_stratified_detrending()` — 日夜分层去趋势（PR-2.5 Exp 7D）
   - `compute_detrended_psd_backfill()` — 去趋势后 PSD 回填 + gamma surrogate（PR-2.5 Exp 7F）
-- `scripts/run_periodicity_phase2.py` — Phase 2 批量驱动（exp 1-7b）
-- `scripts/plot_periodicity_phase2.py` — Phase 2 可视化（exp 1-7b）
-- `tests/test_event_periodicity.py` — PR-2 / PR-2.5 函数单元测试
+  - `_dataset_timezone()` / `_hour_to_hms()` / `_contiguous_true_spans()` — PR-2.6 连续时间辅助函数
+  - `_segmented_moving_average()` / `_segmented_autocorr()` — 连续段上的 rate trace 平滑与自相关
+  - `summarize_block_continuity()` — 连续观测覆盖摘要（PR-2.6）
+  - `build_continuous_rate_trace()` — 真实时间轴 5min bin rate trace（PR-2.6）
+  - `compute_long_timescale_rate_summary()` — 多小时 fluctuation + rate autocorr（PR-2.6）
+  - `_next_local_transition()` — 下一个日夜切换边界（PR-2.6）
+  - `split_contiguous_daynight_segments()` — 连续 day/night 段切分（PR-2.6）
+  - `compute_contiguous_daynight_detrending()` — 连续 day/night 段内 serial corr（PR-2.6）
+- `scripts/run_periodicity_phase2.py` — Phase 2 批量驱动（exp 1-7c）
+- `scripts/plot_periodicity_phase2.py` — Phase 2 可视化（exp 1-7c）
+- `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 函数单元测试
 
 ### 结果文件
 - `results/event_periodicity/phase2/exp1_packing_sweep.json`
@@ -477,4 +542,5 @@ PR-2.5 证据链（多尺度调制解剖）：
 - `results/event_periodicity/phase2/exp7b_daynight.json`（PR-2.5 Exp 7D）
 - `results/event_periodicity/phase2/exp7b_merge_sensitivity.json`（PR-2.5 Exp 7E）
 - `results/event_periodicity/phase2/exp7b_backfill.json`（PR-2.5 Exp 7F）
+- `results/event_periodicity/phase2/exp7c_long_timescale.json`（PR-2.6）
 - `results/event_periodicity/phase2/figures/` — 可视化图

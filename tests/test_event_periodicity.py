@@ -7,14 +7,18 @@ import numpy as np
 from src.event_periodicity import (
     _compute_half_life,
     _epoch_to_hour,
+    build_continuous_rate_trace,
+    compute_contiguous_daynight_detrending,
     compute_daynight_stratified_detrending,
     compute_detrended_serial_correlation,
+    compute_long_timescale_rate_summary,
     compute_multiscale_detrend_fraction,
     compute_nparticipating_autocorrelation,
     compute_serial_correlation_decay,
     compute_serial_corr_soz_stratified,
     compute_within_block_serial_corr,
     merge_contiguous_blocks,
+    split_contiguous_daynight_segments,
 )
 
 
@@ -394,3 +398,121 @@ def test_daynight_detrending_too_few_events() -> None:
 
     assert out["timezone"] == "Asia/Shanghai"
     assert out["day"]["n_iei"] + out["night"]["n_iei"] <= 3
+
+
+# -----------------------------------------------------------------------
+# PR-2.6: continuous long-timescale analysis
+# -----------------------------------------------------------------------
+
+def test_build_continuous_rate_trace_respects_gap_coverage() -> None:
+    starts = np.array([100.0, 250.0, 400.0, 4300.0, 4450.0, 4600.0])
+    events = _events_from_starts(starts, dur=0.05)
+    block_ranges = [(0.0, 900.0), (4200.0, 4800.0)]
+
+    out = build_continuous_rate_trace(
+        events=events,
+        block_ranges=block_ranges,
+        bin_sec=300.0,
+        min_coverage_frac=0.95,
+    )
+
+    assert "warning" not in out
+    assert out["continuity"]["n_runs_merged"] == 2
+    assert out["continuity"]["total_observed_hours"] == (900.0 + 600.0) / 3600.0
+
+    coverage = np.asarray(out["coverage_frac"], dtype=float)
+    valid = np.asarray(out["valid_mask"], dtype=bool)
+    assert np.any(coverage == 0.0)
+    assert np.any(~valid)
+    assert np.any(valid)
+
+
+def test_split_contiguous_daynight_segments_uses_continuous_clock_segments() -> None:
+    import datetime
+    try:
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo("Europe/Berlin")
+    except ImportError:
+        import pytz
+        tz = pytz.timezone("Europe/Berlin")
+
+    start = datetime.datetime(2024, 7, 15, 19, 0, 0, tzinfo=tz).timestamp()
+    end = datetime.datetime(2024, 7, 16, 9, 0, 0, tzinfo=tz).timestamp()
+    segments = split_contiguous_daynight_segments(
+        block_ranges=[(start, end)],
+        dataset="epilepsiae",
+    )
+
+    labels = [seg["label"] for seg in segments]
+    hours = [round(seg["duration_hours"], 1) for seg in segments]
+    assert labels == ["day", "night", "day"]
+    assert hours == [1.0, 12.0, 1.0]
+
+
+def test_compute_contiguous_daynight_detrending_aggregates_by_segment() -> None:
+    import datetime
+    try:
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo("Europe/Berlin")
+    except ImportError:
+        import pytz
+        tz = pytz.timezone("Europe/Berlin")
+
+    day_epoch = datetime.datetime(2024, 7, 15, 10, 0, 0, tzinfo=tz).timestamp()
+    night_epoch = datetime.datetime(2024, 7, 15, 22, 0, 0, tzinfo=tz).timestamp()
+
+    day_iei = _ar1_iei(120, phi=0.7, sigma=0.12, seed=101)
+    night_iei = _ar1_iei(120, phi=0.75, sigma=0.12, seed=102)
+    day_starts = day_epoch + np.concatenate([[0.0], np.cumsum(day_iei)])
+    night_starts = night_epoch + np.concatenate([[0.0], np.cumsum(night_iei)])
+    events = np.vstack([
+        _events_from_starts(day_starts, dur=0.05),
+        _events_from_starts(night_starts, dur=0.05),
+    ])
+    events = events[np.argsort(events[:, 0])]
+
+    out = compute_contiguous_daynight_detrending(
+        events=events,
+        block_ranges=[
+            (day_epoch, day_starts[-1] + 1.0),
+            (night_epoch, night_starts[-1] + 1.0),
+        ],
+        dataset="epilepsiae",
+        window_sec=120.0,
+        min_segment_iei=20,
+    )
+
+    assert out["day"]["n_segments_used"] == 1
+    assert out["night"]["n_segments_used"] == 1
+    assert np.isfinite(out["day"]["pooled_detrended_r"])
+    assert np.isfinite(out["night"]["pooled_detrended_r"])
+    assert len(out["segments"]) >= 2
+
+
+def test_compute_long_timescale_rate_summary_reports_multi_hour_metrics() -> None:
+    starts = [0.0]
+    intervals = (
+        [25.0] * 120 +
+        [90.0] * 60 +
+        [30.0] * 120 +
+        [80.0] * 60
+    )
+    for dt in intervals:
+        starts.append(starts[-1] + dt)
+    events = _events_from_starts(np.array(starts), dur=0.05)
+
+    out = compute_long_timescale_rate_summary(
+        events=events,
+        block_ranges=[(0.0, starts[-1] + 300.0)],
+        bin_sec=300.0,
+        smooth_windows_sec=(1800, 3600, 7200),
+        autocorr_lag_hours=(0.5, 1.0, 2.0),
+    )
+
+    assert "warning" not in out
+    assert out["continuity"]["n_runs_merged"] == 1
+    assert out["continuity"]["longest_run_hours"] > 4.0
+    assert len(out["rate_summary"]) == 3
+    assert len(out["rate_autocorr"]) == 3
+    assert np.isfinite(out["rate_summary"][0]["fluct_strength_iqr_over_median"])
+    assert len(out["trace"]["bin_centers"]) == len(out["trace"]["rate_per_hour"])
