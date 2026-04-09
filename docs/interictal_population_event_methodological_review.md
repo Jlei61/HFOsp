@@ -540,7 +540,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 解读：
 
-- 慢调制在**真实连续时间轴**上确实延伸到多小时，而不只是去趋势窗里的数学产物
+- 宏观事件率（5 分钟 bin rate trace）的慢漂移在**真实连续时间轴**上确实延伸到多小时，而不只是去趋势窗里的数学产物。注意这是 binned rate 的时间自相关，不等同于 IEI 事件级 serial correlation 的直接延伸
 - Epilepsiae 的多小时调制更强、更持久；Yuquan 也有明确的多小时起伏，但 cohort-median rate autocorr 到 8h 已接近 0
 
 **连续 day/night 段分析**
@@ -556,7 +556,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 - PR-2.5 的方向没有变，但现在语义更硬了：短程依赖是在**连续 day/night 段内部**仍然存在
 - PR-2.6 没有推翻 PR-2 / PR-2.5，而是把“慢调制”从间接推断升级为真实时间轴上的直接观察
-- 因此，对外口径可以从“宽频段 1/f-like”收敛为更稳健的一句话：**未见单一主导时间尺度，且慢调制延伸到多小时连续时间尺度**
+- 因此，对外口径可以收敛为：**宏观事件率的慢漂移未见单一主导时间尺度，且在连续时间轴上延伸到多小时**。IEI 事件级 serial correlation（半衰期 ~1.8 min）与多小时率漂移是同一个慢过程的两个尺度上的投影，但它们是不同层级的量测
 
 ### 3.5 仍需补充（更远期）
 
@@ -580,7 +580,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 我认为可以接受的更新过的 narrative 是这样的：
 
-> 间期 HFO 群体事件的产生不是由网络内禀振荡器驱动的——之前 Fig 3 的 ~2 Hz 谱峰在 (i) refractory renewal null model, (ii) ISI shuffle null model 下都不再显著，并且 IEI 分布是 lognormal 而不是 power-law。这些事件更符合一个**带不应期的兴奋性点过程**（FHN / HR / theta-neuron 类），其时序由 (a) 局部兴奋性恢复动力学和 (b) 慢时间尺度的状态调制共同塑造。后者的存在被 IEI 相邻正相关（30/30 subjects）直接证明，而 PR-2.6 进一步显示这种慢调制**确实延伸到多小时连续时间尺度**，并不是事件索引统计上的假象。
+> 间期 HFO 群体事件的产生不是由网络内禀振荡器驱动的——之前 Fig 3 的 ~2 Hz 谱峰在 (i) refractory renewal null model, (ii) ISI shuffle null model 下都不再显著，并且 IEI 分布是 lognormal 而不是 power-law。这些事件更符合一个**带不应期的兴奋性点过程**（FHN / HR / theta-neuron 类），其时序由 (a) 局部兴奋性恢复动力学和 (b) 慢时间尺度的状态调制共同塑造。后者的存在被 IEI 相邻正相关（30/30 subjects）直接证明，而 PR-2.6 进一步显示**宏观事件率的慢漂移确实延伸到多小时连续时间尺度**（5 分钟 bin rate trace 自相关在 Epilepsiae 到 8h 仍为正），并不是事件索引统计上的假象。
 >
 > 在空间维度上，群体事件的传播 rank 在某些个体上确实呈现出可重复的 stereotype，并且 SOZ 参与的事件比 non-SOZ 事件更刻板（探索性证据，单侧 p = 0.039）。这是论文 Fig 1, 2 叙事中**仍然站得住的那一部分**——但需要在 mixture 检测、identity bias 控制（注意 centering 不能抹掉 SOZ 作为真实源节点的传播拓扑）、按 n_participating 分层之后才能给出最终的定量结论。
 >
@@ -601,7 +601,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 | 传播刻板性 SOZ vs non-SOZ | ✅ Phase 2 exp 5 | SOZ > non-SOZ, p=0.039 (n=12 pairs, 探索性) |
 | **PR-2: lag-k 衰减 + 去趋势 + block 内 + SOZ 分层** | **✅ exp 7** | **半衰期 107s; 72% 慢漂移 + 28% 短程; within-block 30/30 正; SOZ > nonSOZ p=0.055 (n=9)** |
 | **PR-2.5: 多尺度调制 + n_part + day/night + 回填** | **✅ exp 7b** | **Δ_frac 平坦(1/f); n_part 互相关 0.742; day/night 28/30 正; 1084+1096 峰消失→21/21 全覆盖** |
-| **PR-2.6: 连续长时程 + 连续 day/night 段** | **✅ exp 7c** | **Yuquan 10/10 near-24h continuous; Epilepsiae 最长连续段中位 75.1h; 连续 day/night 两侧仍正 (9/10, 17/20)** |
+| **PR-2.6: 连续长时程 + 连续 day/night 段** | **✅ exp 7c** | **Yuquan 10/10 near-24h continuous; Epilepsiae 最长连续段中位 75.1h; binned rate autocorr 到 8h 仍正 (Epilepsiae); 连续 day/night 段内 pooled detrended r 仍正 (26/30)** |
 
 ### 已完成项的状态更新（2026-04-08）
 
@@ -609,7 +609,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 2. **PR-2.5：多尺度调制解剖 + 逃逸 subject 回填** — **已完成**。详见 §3.4.7。核心发现：(i) 慢调制是宽频段 1/f 型（Δ_frac 平坦），无单一主导时间尺度；(ii) n_participating 与 IEI 同源调制（互相关 0.742），证实全局状态变量假说；(iii) 28% 短程依赖在日夜段内独立存在；(iv) **逃逸 subject 1084, 1096 的谱峰去趋势后完全消失 → 21/21 全覆盖，~2 Hz 周期性假说彻底终结**。
 
-3. **PR-2.6：连续长时程调制分析** — **已完成**。详见 §3.4.8。核心发现：(i) 慢调制在真实连续时间轴上延伸到多小时；(ii) Yuquan 的 24h 优势被真正利用，10/10 near-24h continuous；(iii) 连续 day/night 段内部仍保留短程依赖，说明此前结论不是 pooled 标签伪影。
+3. **PR-2.6：连续长时程调制分析** — **已完成**。详见 §3.4.8。核心发现：(i) 宏观事件率（binned rate trace）的慢漂移在真实连续时间轴上延伸到多小时（注意这不等于 IEI serial correlation 本身持续到多小时）；(ii) Yuquan 的 24h 优势被真正利用，10/10 near-24h continuous；(iii) 连续 day/night 段内部仍保留短程依赖（subject 内同标签段 pooled），说明此前结论不是 pooled 标签伪影。
 
 ### 最值得继续做的事（按性价比，更新版）
 

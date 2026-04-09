@@ -263,7 +263,7 @@ Stop and ask the user instead of guessing when:
     - Backfill for escape subjects 1084, 1096: **peaks completely disappear after 600s detrending** → Layer 3 gap closed, 21/21 specparam peaks fully explained by renewal + slow modulation
   - PR-2.6 (exp7c, 2026-04-09): continuous long-timescale analysis on 30 subjects:
     - Yuquan 10/10 subjects provide near-24h continuous trajectories; Epilepsiae longest continuous run median = 75.1h, observed duration median = 158.4h
-    - Continuous-time rate fluctuation remains visible from 0.5h to 8h windows → slow modulation truly extends to multi-hour real time, not just event-index statistics
+    - Continuous-time binned rate autocorrelation (5-min bins) remains positive from 0.5h to 8h lags in Epilepsiae (median 0.108 at 8h); Yuquan positive to 4h but ~0 at 8h. Note: this is binned rate autocorrelation, not a direct extension of IEI lag-k serial correlation
     - Continuous day/night segment analysis: Yuquan 9/10 and Epilepsiae 17/20 remain positive on both sides → short-range dependency survives inside continuous day/night segments
   - Next: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
   - Method caveats incorporated: detrend_fraction curve behavior depends on window vs modulation timescale (use Δ_frac for band localization); n_participating must use Spearman not Pearson-on-log; centered rank tau must check SOZ source node preservation
