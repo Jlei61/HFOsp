@@ -53,6 +53,10 @@ from src.event_periodicity import (
     _serial_corr_decay_from_sequences,
     _split_events_by_block,
     build_pulse_train,
+    compute_daynight_stratified_detrending,
+    compute_detrended_psd_backfill,
+    compute_multiscale_detrend_fraction,
+    compute_nparticipating_autocorrelation,
     compute_renewal_psd_analytic,
     compute_event_psd,
     compute_hazard_function,
@@ -66,6 +70,7 @@ from src.event_periodicity import (
     load_centroid_event_times,
     load_epilepsiae_subject_events,
     load_yuquan_subject_events,
+    merge_contiguous_blocks,
     run_centroid_bypass,
     run_packing_sweep,
 )
@@ -544,7 +549,8 @@ def run_exp7(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
                     min_pairs=min_pairs,
                 )
                 lag1_r = float(decay["rs"][0]) if len(decay["rs"]) else np.nan
-                median_iei = float(np.median(iei_all)) if iei_all.size else np.nan
+                within_block_iei = np.concatenate(iei_blocks) if iei_blocks else np.array([])
+                median_iei = float(np.median(within_block_iei)) if within_block_iei.size else np.nan
                 half_life_lag = float(decay["half_life_lag"]) if np.isfinite(decay["half_life_lag"]) else np.nan
                 half_life_sec = float(half_life_lag * median_iei) if np.isfinite(half_life_lag) and np.isfinite(median_iei) else np.nan
 
@@ -631,13 +637,200 @@ def run_exp7(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
 
 
 # ==========================================================================
+# Experiment 7B: Multi-scale modulation anatomy (PR-2.5)
+# ==========================================================================
+
+ESCAPE_SUBJECTS = ["1084", "1096"]
+
+
+def run_exp7b(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
+    """PR-2.5: multi-scale detrending, n_participating autocorr, day/night, backfill."""
+    logger.info("=== Experiment 7B: Multi-Scale Modulation Anatomy (PR-2.5) ===")
+
+    multiscale_results: Dict[str, Any] = {}
+    npart_results: Dict[str, Any] = {}
+    daynight_results: Dict[str, Any] = {}
+    merge_results: Dict[str, Any] = {}
+    backfill_results: Dict[str, Any] = {}
+
+    windows = [60, 180, 600, 1800, 3600, 7200]
+
+    for dataset, root in roots.items():
+        loader = (load_yuquan_subject_events if dataset == "yuquan"
+                  else load_epilepsiae_subject_events)
+        for sub in subjects:
+            sub_dir = root / sub if dataset == "yuquan" else root / sub / "all_recs"
+            if not sub_dir.exists():
+                continue
+            if not list(sub_dir.glob("*_lagPat.npz")):
+                continue
+
+            key = f"{dataset}/{sub}"
+            logger.info(f"  {key}: PR-2.5 multi-scale analysis")
+            t0 = time.time()
+
+            try:
+                _, packed, _, block_ranges = loader(sub_dir)
+                if len(packed) < 10:
+                    logger.warning(f"  {key}: SKIP (insufficient events)")
+                    continue
+
+                iei = compute_iei(packed, block_ranges=block_ranges)
+                if iei.size < 10:
+                    logger.warning(f"  {key}: SKIP (insufficient IEI)")
+                    continue
+
+                starts = packed[:, 0]
+                event_times = starts if starts.size == iei.size + 1 else starts[:iei.size]
+
+                # --- 7B: multi-scale detrending ---
+                ms = compute_multiscale_detrend_fraction(
+                    event_times, iei, windows=windows)
+                ms["dataset"] = dataset
+                ms["subject"] = sub
+                ms["n_iei"] = int(iei.size)
+                ms["median_iei"] = float(np.median(iei))
+                multiscale_results[key] = ms
+                logger.info(
+                    f"    7B multi-scale: fractions="
+                    f"{[pw['detrend_fraction'] for pw in ms['per_window']]}"
+                )
+
+                # --- 7C: n_participating autocorrelation ---
+                npart = compute_nparticipating_autocorrelation(
+                    sub_dir, dataset, block_ranges, max_lag=100, min_pairs=50)
+                npart["dataset"] = dataset
+                npart["subject"] = sub
+                npart_results[key] = npart
+                logger.info(
+                    f"    7C n_part: lag1_r={npart.get('lag1_r', 'N/A')}, "
+                    f"half_life={npart.get('half_life_lag', 'N/A')}"
+                )
+
+                # --- 7D: day/night stratified detrending ---
+                dn = compute_daynight_stratified_detrending(
+                    event_times, iei, dataset=dataset, window_sec=600.0)
+                dn["dataset"] = dataset
+                dn["subject"] = sub
+                daynight_results[key] = dn
+                day_r = dn["day"].get("detrended_r", np.nan)
+                night_r = dn["night"].get("detrended_r", np.nan)
+                logger.info(
+                    f"    7D day/night: day_det_r={day_r:.3f}, "
+                    f"night_det_r={night_r:.3f}"
+                    if np.isfinite(day_r) and np.isfinite(night_r)
+                    else f"    7D day/night: day_n={dn['n_day']}, night_n={dn['n_night']}"
+                )
+
+                # --- 7E: block merge sensitivity ---
+                merged_blocks = merge_contiguous_blocks(block_ranges, max_gap_sec=5.0)
+                event_blocks_merged = []
+                for block in _split_events_by_block(packed, merged_blocks):
+                    iei_b = compute_iei(block)
+                    if iei_b.size >= 3:
+                        event_blocks_merged.append(iei_b)
+                if event_blocks_merged:
+                    from src.event_periodicity import _serial_corr_decay_from_sequences
+                    decay_merged = _serial_corr_decay_from_sequences(
+                        event_blocks_merged, max_lag=100, min_pairs=50)
+                    iei_merged = np.concatenate(event_blocks_merged)
+                    med_iei_m = float(np.median(iei_merged)) if iei_merged.size else np.nan
+                    hl_lag_m = float(decay_merged["half_life_lag"])
+                    hl_sec_m = hl_lag_m * med_iei_m if np.isfinite(hl_lag_m) else np.nan
+                    merge_results[key] = {
+                        "dataset": dataset, "subject": sub,
+                        "n_blocks_original": len(block_ranges),
+                        "n_blocks_merged": len(merged_blocks),
+                        "half_life_lag_merged": hl_lag_m,
+                        "half_life_sec_merged": hl_sec_m,
+                        "lag1_r_merged": float(decay_merged["rs"][0])
+                            if decay_merged["rs"].size else np.nan,
+                    }
+                    logger.info(
+                        f"    7E merge: {len(block_ranges)} → {len(merged_blocks)} blocks, "
+                        f"half_life={hl_sec_m:.1f}s"
+                    )
+
+                # --- 7F: backfill escape subjects ---
+                if sub in ESCAPE_SUBJECTS:
+                    n_surr = 50 if len(packed) > 50000 else 200
+                    logger.info(f"    7F backfill: {sub} (escape, n_surr={n_surr})")
+                    bf = compute_detrended_psd_backfill(
+                        packed, block_ranges, window_sec=600.0,
+                        fs=100.0, nperseg_sec=500.0, n_surrogates=n_surr)
+                    bf["dataset"] = dataset
+                    bf["subject"] = sub
+                    backfill_results[key] = bf
+                    logger.info(
+                        f"    7F: raw_peak={bf['raw']['peak_freq']:.2f}Hz "
+                        f"(gamma_p={bf['raw']['gamma_p']:.3f}), "
+                        f"det_peak={bf['detrended']['peak_freq']:.2f}Hz "
+                        f"(gamma_p={bf['detrended']['gamma_p']:.3f}), "
+                        f"disappeared={bf['peak_disappeared']}"
+                    )
+
+                logger.info(f"  {key}: done ({time.time()-t0:.1f}s)")
+            except Exception as e:
+                logger.error(f"  {key}: FAILED — {e}", exc_info=True)
+                multiscale_results[key] = {"error": str(e)}
+
+    # Cross-correlation of IEI decay vs n_participating decay
+    logger.info("  Computing IEI vs n_participating decay cross-correlations...")
+    exp7_path = out_dir / "exp7_serial_corr_deep.json"
+    exp7_data = {}
+    if exp7_path.exists():
+        with open(exp7_path) as f:
+            exp7_data = json.load(f)
+
+    for key in npart_results:
+        npart_rec = npart_results[key]
+        exp7_rec = exp7_data.get(key, {})
+        iei_decay = exp7_rec.get("serial_decay", {})
+        iei_rs = np.asarray(iei_decay.get("rs", []), dtype=float)
+        npart_rs = np.asarray(npart_rec.get("rs", []), dtype=float)
+
+        min_len = min(iei_rs.size, npart_rs.size)
+        if min_len >= 5:
+            from scipy.stats import pearsonr
+            try:
+                cross_r, cross_p = pearsonr(iei_rs[:min_len], npart_rs[:min_len])
+            except Exception:
+                cross_r, cross_p = np.nan, np.nan
+            npart_rec["cross_decay_r"] = float(cross_r) if np.isfinite(cross_r) else np.nan
+            npart_rec["cross_decay_p"] = float(cross_p) if np.isfinite(cross_p) else np.nan
+            npart_rec["iei_half_life_lag"] = float(iei_decay.get("half_life_lag", np.nan))
+            npart_rec["iei_half_life_sec"] = float(iei_decay.get("half_life_sec", np.nan))
+            logger.info(
+                f"    {key}: cross_decay_r={cross_r:.3f}"
+            )
+        else:
+            npart_rec["cross_decay_r"] = np.nan
+            npart_rec["cross_decay_p"] = np.nan
+
+    _save(multiscale_results, out_dir / "exp7b_multiscale.json")
+    _save(npart_results, out_dir / "exp7b_npart_autocorr.json")
+    _save(daynight_results, out_dir / "exp7b_daynight.json")
+    _save(merge_results, out_dir / "exp7b_merge_sensitivity.json")
+    if backfill_results:
+        _save(backfill_results, out_dir / "exp7b_backfill.json")
+
+    return {
+        "multiscale": multiscale_results,
+        "npart": npart_results,
+        "daynight": daynight_results,
+        "merge": merge_results,
+        "backfill": backfill_results,
+    }
+
+
+# ==========================================================================
 # Main
 # ==========================================================================
 
 def main():
     parser = argparse.ArgumentParser(description="Phase 2 periodicity experiments")
     parser.add_argument("--exp", default="all",
-                        help="Experiment number(s): 1,2,3,4,5,6,7 or 'all'")
+                        help="Experiment number(s): 1,2,3,4,5,6,7,7b or 'all'")
     parser.add_argument("--dataset", choices=["yuquan", "epilepsiae", "both"],
                         default="both")
     parser.add_argument("--subjects", nargs="+", default=None)
@@ -649,9 +842,9 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if args.exp == "all":
-        exps = {1, 2, 3, 4, 5, 6, 7}
+        exps = {"1", "2", "3", "4", "5", "6", "7", "7b"}
     else:
-        exps = {int(x) for x in args.exp.split(",")}
+        exps = {x.strip() for x in args.exp.split(",")}
 
     if args.smoke:
         yq_subs = ["chengshuai"]
@@ -674,26 +867,29 @@ def main():
 
     t_total = time.time()
 
-    if 1 in exps:
+    if "1" in exps:
         run_exp1(yq_subs, out_dir)
 
-    if 2 in exps:
+    if "2" in exps:
         run_exp2(all_subs, roots, out_dir)
 
-    if 3 in exps:
+    if "3" in exps:
         run_exp3(all_subs, roots, out_dir)
 
-    if 4 in exps:
+    if "4" in exps:
         run_exp4(all_subs, roots, out_dir)
 
-    if 5 in exps:
+    if "5" in exps:
         run_exp5(all_subs, roots, out_dir)
 
-    if 6 in exps:
+    if "6" in exps:
         run_exp6(all_subs, roots, out_dir)
 
-    if 7 in exps:
+    if "7" in exps:
         run_exp7(all_subs, roots, out_dir)
+
+    if "7b" in exps:
+        run_exp7b(all_subs, roots, out_dir)
 
     logger.info(f"=== Phase 2 complete: {time.time()-t_total:.0f}s total ===")
 

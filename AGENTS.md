@@ -113,11 +113,17 @@ Important drift:
   - `scripts/run_event_periodicity.py` — Phase 1 dual-dataset batch driver
   - `scripts/run_surrogates_batch.py` — group-only surrogate batch
   - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
-  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (5 experiments)
-  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization
+  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (8 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5)
+  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7b)
+  - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 function unit tests
   - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5)
   - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
   - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
+- Spatial modulation / SOZ analysis (Where question):
+  - `docs/spatial_modulation_soz_analysis.md` — plan and results for per-channel SOZ spatial attribution
+  - `scripts/audit_gpu_npz.py` — Step 0 data audit (planned)
+  - `scripts/run_spatial_modulation.py` — PR-1 batch driver (planned)
+  - `scripts/plot_spatial_modulation.py` — PR-1 figures (planned)
 - Epilepsiae dataset: `src/epilepsiae_dataset.py`
 - Network: `src/network_analysis.py`
 - Plotting in current repo:
@@ -232,7 +238,7 @@ Stop and ask the user instead of guessing when:
   - Short answer: **NO.** The ~2Hz PSD peak is not evidence for an intrinsic oscillator; current evidence supports a refractory / dead-time artifact plus slow rate modulation.
   - Gamma renewal null (matching firing rate + refractory period) explains 15/21 subject peaks with specparam peaks
   - Analytic renewal PSD overlay (PR-1 exp6A): 16/21 |Δf| < 1 Hz; **two independent paths cover 19/21 (90%)**
-  - Escaping 2/21 (1084, 1096) attributed to extreme non-stationarity, not oscillator; pending PR-2 detrending confirmation
+  - Escaping 2/21 (1084, 1096) **resolved by PR-2.5 backfill**: detrended PSD shows peaks completely disappear → slow rate modulation, not oscillator
   - ISI-shuffle shows peaks are distribution-shape artifacts, not temporal-order effects
   - IEI distribution is lognormal (30/30), NOT power-law as old paper claimed
   - Only 1/30 subjects passes both surrogate tests (huanghanwen, n=484, likely false positive)
@@ -244,7 +250,27 @@ Stop and ask the user instead of guessing when:
     - IEI serial correlation is **positive for all 30 subjects** on log-IEI; formal reporting should use subject-level direction consistency / sign test, not naive within-subject Pearson p-values
     - Hazard curves are qualitative dead-time visualizations, not formal survival-analysis estimates
     - Propagation stereotypy is the part most likely to reflect real network structure, but SOZ > non-SOZ is still exploratory rather than definitive
+  - PR-2 (exp7, 2026-04-08): lag-k serial correlation deep dive on 30 subjects:
+    - Half-life median = 107.5s ≈ 1.8 min; 6/30 never reach half (persistent slow modulation)
+    - 600s rolling-median detrending: **~72% of positive correlation is slow rate drift** (>10 min), **~28% is short-range dependency**; 27/30 still positive after detrending
+    - Within-block pooled: 30/30 positive (cross-block contamination ruled out)
+    - SOZ vs non-SOZ: SOZ median 0.302 > nonSOZ 0.132, p=0.055 (n=9, borderline)
+  - PR-2.5 (exp7b, 2026-04-08): multi-scale modulation anatomy on 30 subjects:
+    - Δ_frac nearly flat (0.080–0.147) → broad-band (1/f-like) modulation, no single dominant timescale; minor peak ~329s (~5.5 min)
+    - n_participating Spearman autocorrelation: cross-corr with IEI decay median 0.742 (18/30 > 0.7) → **single global state variable confirmed**
+    - Day/night stratified detrending: 28/30 still positive after within-segment detrending (day median 0.094, night 0.086) → short-range dependency is genuine, not day/night boundary artifact
+    - Backfill for escape subjects 1084, 1096: **peaks completely disappear after 600s detrending** → Layer 3 gap closed, 21/21 specparam peaks fully explained by renewal + slow modulation
+  - Next: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
+  - Method caveats incorporated: detrend_fraction curve behavior depends on window vs modulation timescale (use Δ_frac for band localization); n_participating must use Spearman not Pearson-on-log; centered rank tau must check SOZ source node preservation
   - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
+
+- "Where does the slow IEI modulation occur? Is it SOZ-specific?"
+  - Read `docs/spatial_modulation_soz_analysis.md`
+  - Short answer: **analysis in progress (PR-1 planned)**
+  - Current evidence from lagPat-based analysis is structurally limited: 22/30 subjects have nearly zero non-SOZ group events because lagPat channels are SOZ-enriched by construction (refine selects high-HFO-count channels ≈ SOZ)
+  - Correct approach: per-channel IEI serial correlation on relaxed-refine channel set (beyond lagPat), then SOZ vs non-SOZ spatial comparison
+  - PR-2 exp7D hint: SOZ lag-1 r 0.302 > nonSOZ 0.132, p=0.055 (n=9, borderline, lagPat-limited)
+  - Epilepsiae has three-tier labels (i/l/e) enabling dose-gradient analysis
 
 - "Why is legacy synchrony always ~0.6?"
   - Mathematical artifact: 3-channel uniform lag pattern → theoretical limit ≈ 0.5918
@@ -316,6 +342,16 @@ results/
 │   │       └── *.csv / *.json
 │   ├── epilepsiae_ready_full_artifacts/
 │   └── yuquan_soz/
+├── spatial_modulation/
+│   ├── gpu_audit.csv
+│   ├── relaxed_refine_channel_counts.csv
+│   ├── per_channel_metrics/
+│   │   ├── yuquan/
+│   │   └── epilepsiae/
+│   └── soz_comparison/
+│       ├── figures/
+│       │   └── README.md ← 必须存在，中文
+│       └── *.csv / *.json
 ├── run_logs/
 └── seizure_onset/
 ```

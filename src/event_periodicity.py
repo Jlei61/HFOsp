@@ -844,7 +844,7 @@ def _load_group_events_with_soz_labels(
                 return np.zeros((0, 2), dtype=float)
             start_t = float(gpu["start_time"])
         else:
-            start_t = float(lp["start_t"])
+            start_t = float(np.ravel(lp["start_t"])[0])
 
         lag_min = np.min(lag_raw, axis=0)
         lag_max = np.max(lag_raw, axis=0)
@@ -1515,11 +1515,18 @@ def _rolling_log_iei_residuals(
     baseline = np.full(iei.shape, np.nan, dtype=float)
     counts = np.zeros(iei.shape, dtype=int)
 
-    for i, center in enumerate(centers):
-        in_window = np.abs(centers - center) <= half_window
-        counts[i] = int(np.sum(in_window))
-        if counts[i] >= min_local_events:
-            baseline[i] = float(np.median(iei[in_window]))
+    order = np.argsort(centers)
+    sorted_c = centers[order]
+    sorted_iei = iei[order]
+
+    for idx in range(len(sorted_c)):
+        left = int(np.searchsorted(sorted_c, sorted_c[idx] - half_window, side="left"))
+        right = int(np.searchsorted(sorted_c, sorted_c[idx] + half_window, side="right"))
+        cnt = right - left
+        orig_i = order[idx]
+        counts[orig_i] = cnt
+        if cnt >= min_local_events:
+            baseline[orig_i] = float(np.median(sorted_iei[left:right]))
 
     valid_interval = np.isfinite(baseline) & (baseline > 0)
     residual = np.full(iei.shape, np.nan, dtype=float)
@@ -1841,6 +1848,405 @@ def compute_propagation_stereotypy(
         result["nonsoz_n_events"] = nonsoz_n
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# PR-2.5: Multi-scale modulation anatomy
+# ---------------------------------------------------------------------------
+
+def compute_multiscale_detrend_fraction(
+    event_times: np.ndarray,
+    iei: np.ndarray,
+    windows: Sequence[float] = (60, 180, 600, 1800, 3600, 7200),
+) -> Dict[str, Any]:
+    """Detrend fraction at multiple window sizes → modulation anatomy.
+
+    Smaller windows track the series more aggressively (removing both slow
+    and fast structure), while larger windows only remove slow modulation.
+    Use ``delta_frac`` (the difference between adjacent scales) to identify
+    which timescale concentrates the most modulation energy.
+    """
+    iei = np.asarray(iei, dtype=float)
+    iei = iei[np.isfinite(iei) & (iei > 0)]
+    event_times = np.asarray(event_times, dtype=float)
+
+    raw_x, raw_y = _log_iei_pairs(iei, lag=1)
+    raw_r, _ = _pearson_corr(raw_x, raw_y)
+
+    windows = sorted(windows)
+    per_window: List[Dict[str, Any]] = []
+
+    for win_sec in windows:
+        rolled = _rolling_log_iei_residuals(event_times, iei, window_sec=win_sec)
+        resid = rolled["residual"]
+        valid_pair = rolled["valid_pair"]
+
+        if np.any(valid_pair):
+            det_r, _ = _pearson_corr(resid[:-1][valid_pair], resid[1:][valid_pair])
+        else:
+            det_r = np.nan
+
+        frac = np.nan
+        if np.isfinite(raw_r) and abs(raw_r) > 1e-12 and np.isfinite(det_r):
+            frac = 1.0 - (det_r / raw_r)
+
+        per_window.append({
+            "window_sec": float(win_sec),
+            "detrended_r": float(det_r) if np.isfinite(det_r) else np.nan,
+            "detrend_fraction": float(frac) if np.isfinite(frac) else np.nan,
+            "n_valid_pairs": int(np.sum(valid_pair)),
+        })
+
+    delta_frac: List[Dict[str, Any]] = []
+    fracs = [pw["detrend_fraction"] for pw in per_window]
+    for i in range(len(windows) - 1):
+        f_small = fracs[i]
+        f_large = fracs[i + 1]
+        midpoint = float(np.sqrt(windows[i] * windows[i + 1]))
+
+        df = np.nan
+        if np.isfinite(f_small) and np.isfinite(f_large):
+            df = float(f_small - f_large)
+
+        delta_frac.append({
+            "midpoint_sec": midpoint,
+            "window_lo": float(windows[i]),
+            "window_hi": float(windows[i + 1]),
+            "delta_frac": df,
+        })
+
+    return {
+        "raw_r": float(raw_r) if np.isfinite(raw_r) else np.nan,
+        "windows": [float(w) for w in windows],
+        "per_window": per_window,
+        "delta_frac": delta_frac,
+    }
+
+
+def _compute_half_life(lags: Sequence[int], rs: np.ndarray) -> float:
+    """Interpolate lag at which r drops to half of r[0]."""
+    if rs.size == 0 or not np.isfinite(rs[0]) or rs[0] <= 0:
+        return np.nan
+    target = 0.5 * rs[0]
+    prev_lag, prev_r = float(lags[0]), float(rs[0])
+    if prev_r <= target:
+        return prev_lag
+    for lag, r in zip(list(lags)[1:], rs[1:]):
+        if not np.isfinite(r):
+            prev_lag = float(lag)
+            continue
+        if r <= target:
+            denom = prev_r - r
+            frac = 0.0 if abs(denom) < 1e-12 else (prev_r - target) / denom
+            frac = float(np.clip(frac, 0.0, 1.0))
+            return prev_lag + frac * (float(lag) - prev_lag)
+        prev_lag, prev_r = float(lag), float(r)
+    return np.nan
+
+
+def compute_nparticipating_autocorrelation(
+    subject_dir: Path,
+    dataset: str,
+    block_ranges: List[Tuple[float, float]],
+    max_lag: int = 100,
+    min_pairs: int = 50,
+) -> Dict[str, Any]:
+    """Lag-k Spearman autocorrelation of n_participating (integer counts).
+
+    Returns decay curve and cross-correlation with the IEI Pearson decay.
+    Spearman is used because n_participating is a small discrete integer.
+    """
+    from scipy.stats import spearmanr
+
+    subject_dir = Path(subject_dir)
+    lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
+
+    all_n_part: List[np.ndarray] = []
+    all_starts: List[np.ndarray] = []
+
+    for lp_file in lagpat_files:
+        lp = np.load(lp_file, allow_pickle=True)
+        events_bool = lp["eventsBool"]
+        stem = lp_file.stem.replace("_lagPat", "")
+        packed_f = lp_file.with_name(stem + "_packedTimes.npy")
+        if not packed_f.exists():
+            continue
+
+        if dataset == "yuquan":
+            gpu_f = lp_file.with_name(stem + "_gpu.npz")
+            if not gpu_f.exists():
+                continue
+            gpu = _try_load_gpu(gpu_f)
+            if gpu is None:
+                continue
+            start_t = float(gpu["start_time"])
+        else:
+            start_t = float(np.ravel(lp["start_t"])[0])
+
+        packed = np.load(packed_f)
+        if events_bool.size == 0 or packed.size == 0:
+            continue
+        n_ev = min(events_bool.shape[1], packed.shape[0])
+        n_part = events_bool[:, :n_ev].sum(axis=0).astype(int)
+        starts = packed[:n_ev, 0] + start_t
+
+        all_n_part.append(n_part)
+        all_starts.append(starts)
+
+    if not all_n_part:
+        return {"warning": "no_data", "n_events": 0}
+
+    n_part_all = np.concatenate(all_n_part)
+    starts_all = np.concatenate(all_starts)
+    order = np.argsort(starts_all)
+    n_part_all = n_part_all[order]
+    starts_all = starts_all[order]
+
+    block_seqs: List[np.ndarray] = []
+    for b_start, b_end in sorted(block_ranges, key=lambda x: x[0]):
+        mask = (starts_all >= b_start) & (starts_all < b_end)
+        if np.sum(mask) >= 3:
+            block_seqs.append(n_part_all[mask])
+
+    lags_out: List[int] = []
+    rs_out: List[float] = []
+    n_pairs_out: List[int] = []
+
+    for lag in range(1, max_lag + 1):
+        xs, ys = [], []
+        n_pairs = 0
+        for seq in block_seqs:
+            if seq.size <= lag:
+                continue
+            xs.append(seq[:-lag])
+            ys.append(seq[lag:])
+            n_pairs += seq.size - lag
+        if n_pairs < min_pairs:
+            break
+        x_all = np.concatenate(xs)
+        y_all = np.concatenate(ys)
+        try:
+            rho, _ = spearmanr(x_all, y_all)
+            rho = float(rho) if np.isfinite(rho) else np.nan
+        except Exception:
+            rho = np.nan
+        lags_out.append(lag)
+        rs_out.append(rho)
+        n_pairs_out.append(n_pairs)
+
+    rs_arr = np.asarray(rs_out, dtype=float)
+    half_life = _compute_half_life(lags_out, rs_arr)
+
+    return {
+        "n_events": int(n_part_all.size),
+        "n_blocks_used": len(block_seqs),
+        "n_part_median": float(np.median(n_part_all)),
+        "n_part_mean": float(np.mean(n_part_all)),
+        "n_part_min": int(np.min(n_part_all)),
+        "n_part_max": int(np.max(n_part_all)),
+        "lags": np.asarray(lags_out, dtype=int),
+        "rs": rs_arr,
+        "n_pairs": np.asarray(n_pairs_out, dtype=int),
+        "half_life_lag": half_life,
+        "lag1_r": float(rs_out[0]) if rs_out else np.nan,
+    }
+
+
+def merge_contiguous_blocks(
+    block_ranges: List[Tuple[float, float]],
+    max_gap_sec: float = 5.0,
+) -> List[Tuple[float, float]]:
+    """Merge adjacent blocks where gap in [0, max_gap_sec]."""
+    if not block_ranges:
+        return []
+    sorted_blocks = sorted(block_ranges, key=lambda x: x[0])
+    merged = [list(sorted_blocks[0])]
+    for b_start, b_end in sorted_blocks[1:]:
+        gap = b_start - merged[-1][1]
+        if 0 <= gap <= max_gap_sec:
+            merged[-1][1] = max(merged[-1][1], b_end)
+        elif gap < 0:
+            merged[-1][1] = max(merged[-1][1], b_end)
+        else:
+            merged.append([b_start, b_end])
+    return [(s, e) for s, e in merged]
+
+
+def _epoch_to_hour(epoch_sec: float, timezone: str) -> float:
+    """Convert Unix epoch to fractional hour of local day."""
+    import datetime
+    try:
+        from zoneinfo import ZoneInfo
+        tz = ZoneInfo(timezone)
+    except ImportError:
+        import pytz
+        tz = pytz.timezone(timezone)
+    dt = datetime.datetime.fromtimestamp(epoch_sec, tz=tz)
+    return dt.hour + dt.minute / 60.0 + dt.second / 3600.0
+
+
+def compute_daynight_stratified_detrending(
+    event_times: np.ndarray,
+    iei: np.ndarray,
+    dataset: str,
+    window_sec: float = 600.0,
+    day_hours: Tuple[float, float] = (8.0, 20.0),
+) -> Dict[str, Any]:
+    """Detrend IEI within day and night segments separately.
+
+    Yuquan uses Asia/Shanghai; Epilepsiae uses Europe/Berlin.
+    """
+    iei = np.asarray(iei, dtype=float)
+    mask_pos = np.isfinite(iei) & (iei > 0)
+    iei = iei[mask_pos]
+    event_times = np.asarray(event_times, dtype=float)
+    if event_times.size == iei.size + 1:
+        centers = 0.5 * (event_times[:-1] + event_times[1:])
+    elif event_times.size == iei.size:
+        centers = event_times.copy()
+    else:
+        return {"warning": "event_times_iei_length_mismatch"}
+    centers = centers[mask_pos] if mask_pos.size == centers.size else centers
+
+    tz = "Asia/Shanghai" if dataset == "yuquan" else "Europe/Berlin"
+    hours = np.array([_epoch_to_hour(t, tz) for t in centers])
+    is_day = (hours >= day_hours[0]) & (hours < day_hours[1])
+
+    def _detrend_segment(idx: np.ndarray) -> Dict[str, Any]:
+        if idx.size < 20:
+            return {"n_iei": int(idx.size), "raw_r": np.nan,
+                    "detrended_r": np.nan, "detrend_fraction": np.nan}
+        seg_iei = iei[idx]
+        seg_times = centers[idx]
+        raw_x, raw_y = _log_iei_pairs(seg_iei, lag=1)
+        raw_r, _ = _pearson_corr(raw_x, raw_y)
+
+        rolled = _rolling_log_iei_residuals(seg_times, seg_iei, window_sec=window_sec)
+        resid = rolled["residual"]
+        vp = rolled["valid_pair"]
+        if np.any(vp):
+            det_r, _ = _pearson_corr(resid[:-1][vp], resid[1:][vp])
+        else:
+            det_r = np.nan
+
+        frac = np.nan
+        if np.isfinite(raw_r) and abs(raw_r) > 1e-12 and np.isfinite(det_r):
+            frac = 1.0 - (det_r / raw_r)
+        return {
+            "n_iei": int(idx.size),
+            "raw_r": float(raw_r) if np.isfinite(raw_r) else np.nan,
+            "detrended_r": float(det_r) if np.isfinite(det_r) else np.nan,
+            "detrend_fraction": float(frac) if np.isfinite(frac) else np.nan,
+        }
+
+    day_idx = np.where(is_day)[0]
+    night_idx = np.where(~is_day)[0]
+
+    return {
+        "timezone": tz,
+        "day_hours": list(day_hours),
+        "n_day": int(day_idx.size),
+        "n_night": int(night_idx.size),
+        "day": _detrend_segment(day_idx),
+        "night": _detrend_segment(night_idx),
+        "combined": _detrend_segment(np.arange(iei.size)),
+    }
+
+
+def compute_detrended_psd_backfill(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    window_sec: float = 600.0,
+    fs: float = 100.0,
+    nperseg_sec: float = 500.0,
+    n_surrogates: int = 200,
+) -> Dict[str, Any]:
+    """Detrend IEI by removing slow rate modulation, rebuild pulse train, recompute PSD.
+
+    For the PR-1 escape subjects (1084, 1096): if the peak disappears after
+    detrending, the peak was caused by slow rate drift rather than an oscillator.
+    """
+    if len(events) < 10:
+        return {"warning": "insufficient_events"}
+
+    iei = compute_iei(events, block_ranges=block_ranges)
+    if iei.size < 10:
+        return {"warning": "insufficient_iei"}
+
+    starts = events[:, 0]
+    if starts.size == iei.size + 1:
+        ev_times = starts
+    else:
+        ev_times = starts[:iei.size]
+
+    rolled = _rolling_log_iei_residuals(ev_times, iei, window_sec=window_sec)
+    baseline = rolled["local_baseline"]
+    valid = rolled["valid_interval"]
+
+    global_median = float(np.median(iei[iei > 0]))
+    detrended_iei = iei.copy()
+    ok = valid & np.isfinite(baseline) & (baseline > 0)
+    detrended_iei[ok] = iei[ok] / baseline[ok] * global_median
+
+    new_starts = np.empty(len(detrended_iei) + 1)
+    new_starts[0] = events[0, 0]
+    new_starts[1:] = new_starts[0] + np.cumsum(detrended_iei)
+    new_events = np.column_stack([new_starts, new_starts + 0.01])
+
+    pulse_raw, mask_raw, _ = build_pulse_train(
+        events, fs=fs, mode="delta", block_ranges=block_ranges)
+    psd_raw = compute_event_psd(pulse_raw, mask_raw, fs=fs, nperseg_sec=nperseg_sec)
+    sp_raw = fit_psd_periodic(psd_raw)
+
+    pulse_det, mask_det, _ = build_pulse_train(
+        new_events, fs=fs, mode="delta", block_ranges=block_ranges)
+    psd_det = compute_event_psd(pulse_det, mask_det, fs=fs, nperseg_sec=nperseg_sec)
+    sp_det = fit_psd_periodic(psd_det)
+
+    raw_peak_freq, raw_peak_power = (0.0, 0.0)
+    if sp_raw is not None:
+        raw_peak_freq, raw_peak_power = _find_primary_peak(sp_raw)
+
+    det_peak_freq, det_peak_power = (0.0, 0.0)
+    if sp_det is not None:
+        det_peak_freq, det_peak_power = _find_primary_peak(sp_det)
+
+    gamma_p_raw = np.nan
+    gamma_p_det = np.nan
+    if sp_raw is not None and n_surrogates > 0:
+        sr = test_peak_significance_gamma_renewal(
+            events, sp_raw, n_surrogates=n_surrogates,
+            fs=fs, nperseg_sec=nperseg_sec, block_ranges=block_ranges)
+        if sr is not None:
+            gamma_p_raw = sr.p_value
+    if sp_det is not None and n_surrogates > 0 and det_peak_power > 0:
+        sr = test_peak_significance_gamma_renewal(
+            new_events, sp_det, n_surrogates=n_surrogates,
+            fs=fs, nperseg_sec=nperseg_sec, block_ranges=block_ranges)
+        if sr is not None:
+            gamma_p_det = sr.p_value
+
+    return {
+        "n_events": int(events.shape[0]),
+        "n_iei": int(iei.size),
+        "window_sec": float(window_sec),
+        "raw": {
+            "peak_freq": float(raw_peak_freq),
+            "peak_power": float(raw_peak_power),
+            "gamma_p": float(gamma_p_raw),
+            "freqs": psd_raw.freqs,
+            "power": psd_raw.power,
+        },
+        "detrended": {
+            "peak_freq": float(det_peak_freq),
+            "peak_power": float(det_peak_power),
+            "gamma_p": float(gamma_p_det),
+            "freqs": psd_det.freqs,
+            "power": psd_det.power,
+        },
+        "peak_disappeared": bool(det_peak_power <= 0 and raw_peak_power > 0),
+        "peak_insignificant": bool(gamma_p_det >= 0.05 if np.isfinite(gamma_p_det) else False),
+    }
 
 
 # ---------------------------------------------------------------------------

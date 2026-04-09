@@ -796,6 +796,297 @@ def plot_exp7():
 
 
 # ==========================================================================
+# Exp 7B: Multi-scale modulation anatomy (PR-2.5)
+# ==========================================================================
+
+def plot_exp7b():
+    """Fig 7B-1/2: multi-scale detrend fraction + delta_frac.
+    Fig 7C-1/2: n_participating vs IEI decay cross-correlation.
+    Fig 7D-1: day vs night detrended r.
+    Fig 7F: backfill PSD for 1084/1096."""
+
+    ms_data = _load("exp7b_multiscale.json")
+    np_data = _load("exp7b_npart_autocorr.json")
+    dn_data = _load("exp7b_daynight.json")
+    bf_data = _load("exp7b_backfill.json")
+
+    if not ms_data:
+        return
+
+    fig = plt.figure(figsize=(18, 14))
+    gs = fig.add_gridspec(3, 3, hspace=0.42, wspace=0.32,
+                          left=0.06, right=0.97, top=0.94, bottom=0.05)
+
+    # ---- 7B-1: cumulative detrend fraction ----
+    ax = fig.add_subplot(gs[0, 0])
+    all_fracs = []
+    for key, rec in ms_data.items():
+        if not isinstance(rec, dict) or "error" in rec:
+            continue
+        pw = rec.get("per_window", [])
+        if not pw:
+            continue
+        wins = [p["window_sec"] for p in pw]
+        fracs = [p["detrend_fraction"] for p in pw]
+        ax.plot(wins, fracs, color="0.75", lw=0.8, alpha=0.5)
+        all_fracs.append(fracs)
+
+    if all_fracs:
+        arr = np.array(all_fracs)
+        median_fracs = np.nanmedian(arr, axis=0)
+        wins_common = [p["window_sec"] for p in list(ms_data.values())[0]["per_window"]]
+        ax.plot(wins_common, median_fracs, color="black", lw=2.5, label="cohort median")
+    ax.set_xscale("log")
+    ax.set_xlabel("Window size (s)", fontsize=9)
+    ax.set_ylabel("Detrend fraction", fontsize=9)
+    ax.set_title("Fig 7B-1: Cumulative detrend fraction\n(larger window = less removal)",
+                 fontsize=9)
+    ax.grid(True, alpha=0.18, which="both")
+    ax.axhline(0, color="gray", lw=0.5)
+    ax.legend(fontsize=8)
+
+    # ---- 7B-2: differential delta_frac ----
+    ax = fig.add_subplot(gs[0, 1])
+    all_delta = []
+    for key, rec in ms_data.items():
+        if not isinstance(rec, dict) or "error" in rec:
+            continue
+        df = rec.get("delta_frac", [])
+        if not df:
+            continue
+        mids = [d["midpoint_sec"] for d in df]
+        dfs = [d["delta_frac"] for d in df]
+        ax.plot(mids, dfs, color="0.75", lw=0.8, alpha=0.5)
+        all_delta.append(dfs)
+
+    if all_delta:
+        arr = np.array(all_delta)
+        median_df = np.nanmedian(arr, axis=0)
+        mids_common = [d["midpoint_sec"] for d in list(ms_data.values())[0]["delta_frac"]]
+        ax.plot(mids_common, median_df, color="black", lw=2.5, label="cohort median")
+        peak_idx = int(np.nanargmax(median_df))
+        peak_mid = mids_common[peak_idx]
+        ax.axvline(peak_mid, color="#B2182B", ls="--", lw=1.3, alpha=0.7)
+        ax.annotate(f"peak ≈ {peak_mid:.0f}s", xy=(peak_mid, median_df[peak_idx]),
+                    fontsize=8, color="#B2182B", ha="left",
+                    xytext=(10, 5), textcoords="offset points")
+    ax.set_xscale("log")
+    ax.set_xlabel("Midpoint of scale pair (s)", fontsize=9)
+    ax.set_ylabel("Δ_frac (released correlation)", fontsize=9)
+    ax.set_title("Fig 7B-2: Differential detrend fraction\n(peak = dominant modulation band)",
+                 fontsize=9)
+    ax.grid(True, alpha=0.18, which="both")
+    ax.axhline(0, color="gray", lw=0.5)
+    ax.legend(fontsize=8)
+
+    # ---- 7C-1: IEI half-life vs n_participating half-life ----
+    ax = fig.add_subplot(gs[0, 2])
+    if np_data:
+        exp7_data = _load("exp7_serial_corr_deep.json")
+        iei_hls = []
+        npart_hls = []
+        for key, nrec in np_data.items():
+            if not isinstance(nrec, dict) or "warning" in nrec:
+                continue
+            nh = nrec.get("half_life_lag")
+            if nh is None or not np.isfinite(nh):
+                continue
+            e7 = exp7_data.get(key, {})
+            ih = e7.get("serial_decay", {}).get("half_life_lag")
+            if ih is None or not np.isfinite(ih):
+                continue
+            iei_hls.append(float(ih))
+            npart_hls.append(float(nh))
+
+        if iei_hls:
+            iei_hls = np.array(iei_hls)
+            npart_hls = np.array(npart_hls)
+            ax.scatter(iei_hls, npart_hls, s=40, c="#2166AC",
+                       edgecolors="white", linewidths=0.5)
+            lims = [0, max(np.max(iei_hls), np.max(npart_hls)) * 1.1]
+            ax.plot(lims, lims, "k--", lw=0.8, alpha=0.4)
+            ax.set_xlabel("IEI half-life (lags)", fontsize=9)
+            ax.set_ylabel("n_participating half-life (lags)", fontsize=9)
+            ax.set_title(f"Fig 7C-1: IEI vs n_part half-life\n"
+                         f"n={len(iei_hls)} subjects with finite half-lives",
+                         fontsize=9)
+            ax.grid(True, alpha=0.18)
+        else:
+            ax.text(0.5, 0.5, "no subjects with\nboth finite half-lives",
+                    ha="center", va="center", transform=ax.transAxes)
+            ax.set_title("Fig 7C-1: IEI vs n_part half-life", fontsize=9)
+
+    # ---- 7C-2: cross-decay-correlation histogram ----
+    ax = fig.add_subplot(gs[1, 0])
+    if np_data:
+        cross_rs = []
+        for nrec in np_data.values():
+            if not isinstance(nrec, dict) or "warning" in nrec:
+                continue
+            cr = nrec.get("cross_decay_r")
+            if cr is not None and np.isfinite(cr):
+                cross_rs.append(float(cr))
+        if cross_rs:
+            cross_rs = np.array(cross_rs)
+            ax.hist(cross_rs, bins=15, color="#2166AC", alpha=0.7, edgecolor="white")
+            ax.axvline(np.median(cross_rs), color="#B2182B", ls="--", lw=1.5)
+            n_high = int(np.sum(cross_rs > 0.7))
+            ax.set_xlabel("Cross-decay r (IEI vs n_part)", fontsize=9)
+            ax.set_ylabel("Count", fontsize=9)
+            ax.set_title(
+                f"Fig 7C-2: IEI–n_part decay cross-correlation\n"
+                f"median={np.median(cross_rs):.2f}, r>0.7: {n_high}/{len(cross_rs)}",
+                fontsize=9)
+            ax.grid(True, axis="y", alpha=0.18)
+        else:
+            ax.text(0.5, 0.5, "no cross-correlation data", ha="center",
+                    va="center", transform=ax.transAxes)
+            ax.set_title("Fig 7C-2: IEI–n_part decay cross-correlation", fontsize=9)
+
+    # ---- 7D-1: day vs night detrended r ----
+    ax = fig.add_subplot(gs[1, 1])
+    if dn_data:
+        day_rs = []
+        night_rs = []
+        for key, drec in dn_data.items():
+            if not isinstance(drec, dict) or "warning" in drec:
+                continue
+            dr = drec.get("day", {}).get("detrended_r")
+            nr = drec.get("night", {}).get("detrended_r")
+            if dr is not None and nr is not None and np.isfinite(dr) and np.isfinite(nr):
+                day_rs.append(float(dr))
+                night_rs.append(float(nr))
+        day_rs = np.array(day_rs)
+        night_rs = np.array(night_rs)
+        if day_rs.size:
+            ax.scatter(day_rs, night_rs, s=40, c="#2166AC",
+                       edgecolors="white", linewidths=0.5)
+            lim = max(abs(np.min(day_rs)), abs(np.max(day_rs)),
+                      abs(np.min(night_rs)), abs(np.max(night_rs))) + 0.05
+            ax.plot([-lim, lim], [-lim, lim], "k--", lw=0.8, alpha=0.4)
+            ax.axhline(0, color="gray", lw=0.5, alpha=0.4)
+            ax.axvline(0, color="gray", lw=0.5, alpha=0.4)
+
+            both_positive = int(np.sum((day_rs > 0) & (night_rs > 0)))
+            try:
+                stat = wilcoxon(night_rs, day_rs, alternative="two-sided")
+                p_txt = f"night vs day: p={stat.pvalue:.3g}"
+            except Exception:
+                p_txt = "p=N/A"
+
+            ax.set_xlabel("Day detrended lag-1 r", fontsize=9)
+            ax.set_ylabel("Night detrended lag-1 r", fontsize=9)
+            ax.set_title(
+                f"Fig 7D-1: Day vs Night detrended r\n"
+                f"n={day_rs.size}, both positive: {both_positive}/{day_rs.size}\n"
+                f"day median={np.median(day_rs):.3f}, night median={np.median(night_rs):.3f}, {p_txt}",
+                fontsize=8.5)
+            ax.grid(True, alpha=0.18)
+        else:
+            ax.text(0.5, 0.5, "no valid day/night pairs", ha="center",
+                    va="center", transform=ax.transAxes)
+            ax.set_title("Fig 7D-1: Day vs Night detrended r", fontsize=9)
+
+    # ---- 7E: merge sensitivity (summary text) ----
+    ax = fig.add_subplot(gs[1, 2])
+    mg_data = _load("exp7b_merge_sensitivity.json")
+    if mg_data:
+        exp7_data = _load("exp7_serial_corr_deep.json")
+        split_hls = []
+        merged_hls = []
+        subs_lbl = []
+        for key, mrec in mg_data.items():
+            if not isinstance(mrec, dict) or "error" in mrec:
+                continue
+            mh = mrec.get("half_life_sec_merged")
+            e7 = exp7_data.get(key, {})
+            sh = e7.get("serial_decay", {}).get("half_life_sec")
+            if (mh is not None and np.isfinite(mh) and
+                    sh is not None and np.isfinite(sh)):
+                split_hls.append(float(sh))
+                merged_hls.append(float(mh))
+                subs_lbl.append(key.split("/")[-1])
+        if split_hls:
+            split_hls = np.array(split_hls)
+            merged_hls = np.array(merged_hls)
+            ax.scatter(split_hls, merged_hls, s=40, c="#2166AC",
+                       edgecolors="white", linewidths=0.5)
+            lim = max(np.max(split_hls), np.max(merged_hls)) * 1.1
+            ax.plot([0, lim], [0, lim], "k--", lw=0.8, alpha=0.4)
+            ax.set_xlabel("Split half-life (s)", fontsize=9)
+            ax.set_ylabel("Merged half-life (s)", fontsize=9)
+            n_above = int(np.sum(merged_hls > split_hls))
+            ax.set_title(
+                f"Fig 7E: Block merge sensitivity\n"
+                f"n={len(split_hls)} with both finite, merged > split: {n_above}/{len(split_hls)}",
+                fontsize=9)
+            ax.grid(True, alpha=0.18)
+        else:
+            ax.text(0.5, 0.5, "no subjects with both\nfinite half-lives", ha="center",
+                    va="center", transform=ax.transAxes, fontsize=10)
+            ax.set_title("Fig 7E: Block merge sensitivity", fontsize=9)
+    else:
+        ax.set_visible(False)
+
+    # ---- 7F: backfill PSD for escape subjects ----
+    if bf_data:
+        for i, (key, brec) in enumerate(sorted(bf_data.items())):
+            if not isinstance(brec, dict) or "error" in brec:
+                continue
+            ax = fig.add_subplot(gs[2, i])
+            sub = brec.get("subject", key.split("/")[-1])
+            raw = brec.get("raw", {})
+            det = brec.get("detrended", {})
+
+            raw_freqs = np.asarray(raw.get("freqs", []), dtype=float)
+            raw_power = np.asarray(raw.get("power", []), dtype=float)
+            det_freqs = np.asarray(det.get("freqs", []), dtype=float)
+            det_power = np.asarray(det.get("power", []), dtype=float)
+
+            band = (raw_freqs > 0) & (raw_freqs <= 8)
+            if raw_freqs.size and np.any(band):
+                ax.plot(raw_freqs[band], raw_power[band] / raw_power[band].max(),
+                        color="#2166AC", lw=1.8, label="raw PSD")
+            band_d = (det_freqs > 0) & (det_freqs <= 8)
+            if det_freqs.size and np.any(band_d):
+                scale = raw_power[band].max() if np.any(band) else 1.0
+                ax.plot(det_freqs[band_d], det_power[band_d] / max(det_power[band_d].max(), 1e-30),
+                        color="#E66101", lw=1.8, ls="--", label="detrended PSD")
+
+            raw_pf = raw.get("peak_freq", 0)
+            det_pf = det.get("peak_freq", 0)
+            if raw_pf > 0:
+                ax.axvline(raw_pf, color="#2166AC", ls=":", lw=0.9, alpha=0.7)
+            if det_pf > 0:
+                ax.axvline(det_pf, color="#E66101", ls=":", lw=0.9, alpha=0.7)
+
+            disappeared = brec.get("peak_disappeared", False)
+            ax.set_xlabel("Frequency (Hz)", fontsize=9)
+            ax.set_ylabel("Normalized PSD", fontsize=9)
+            ax.set_title(
+                f"Fig 7F: {sub} — detrended backfill\n"
+                f"raw peak={raw_pf:.2f}Hz (γ_p={raw.get('gamma_p', np.nan):.3f})\n"
+                f"det peak={'GONE' if disappeared else f'{det_pf:.2f}Hz'} "
+                f"(γ_p={det.get('gamma_p', np.nan):.3f})",
+                fontsize=8.5)
+            ax.set_xlim(0, 8)
+            ax.legend(fontsize=8)
+            ax.grid(True, alpha=0.18)
+
+        if len(bf_data) < 3:
+            for j in range(len(bf_data), 3):
+                fig.add_subplot(gs[2, j]).set_visible(False)
+    else:
+        for j in range(3):
+            fig.add_subplot(gs[2, j]).set_visible(False)
+
+    fig.suptitle("Exp 7B: PR-2.5 Multi-Scale Modulation Anatomy", fontsize=13)
+    fig.savefig(FIG_DIR / "exp7b_multiscale_anatomy.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print("  Saved exp7b_multiscale_anatomy.png")
+
+
+# ==========================================================================
 
 def main():
     parser = argparse.ArgumentParser()
@@ -803,28 +1094,30 @@ def main():
     args = parser.parse_args()
 
     if args.exp == "all":
-        exps = {1, 2, 3, 4, 5, 6, 7}
+        exps = {"1", "2", "3", "4", "5", "6", "7", "7b"}
     else:
-        exps = {int(x) for x in args.exp.split(",")}
+        exps = {x.strip() for x in args.exp.split(",")}
 
     print(f"Phase 2 visualization — experiments: {sorted(exps)}")
     print(f"Results dir: {RESULTS_DIR}")
     print(f"Figures dir: {FIG_DIR}")
 
-    if 1 in exps:
+    if "1" in exps:
         plot_exp1()
-    if 2 in exps:
+    if "2" in exps:
         plot_exp2()
-    if 3 in exps:
+    if "3" in exps:
         plot_exp3()
-    if 4 in exps:
+    if "4" in exps:
         plot_exp4()
-    if 5 in exps:
+    if "5" in exps:
         plot_exp5()
-    if 6 in exps:
+    if "6" in exps:
         plot_exp6()
-    if 7 in exps:
+    if "7" in exps:
         plot_exp7()
+    if "7b" in exps:
+        plot_exp7b()
 
     print(f"\nDone. Figures in {FIG_DIR}")
 

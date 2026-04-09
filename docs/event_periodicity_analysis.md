@@ -1,9 +1,11 @@
 # 间期群体事件周期性分析
 
-> 状态：**完成** — Phase 4 鲁棒性检验 + Phase 5 伪影定位 均已完成
+> 状态：**完成** — Phase 4 + Phase 5 + PR-1 + PR-2 + PR-2.5 均已完成
 > 创建日期：2026-04-04
 > Phase 4 完成日期：2026-04-04
 > Phase 5 完成日期：2026-04-05
+> PR-2 完成日期：2026-04-08
+> PR-2.5 完成日期：2026-04-08
 > 关联论文图：Figure 3, Figure S7, Figure S13
 > 系统审阅：见 `docs/event_periodicity_phase2_review_2026-04-05.md`
 > 方法学叙事更新：见 `docs/interictal_population_event_methodological_review.md`
@@ -249,7 +251,146 @@ lagPatRaw 生成链路。要彻底回答这个问题，仍需要从原始 envelo
 - 低 tau 个体：635 (0.014), 958 (0.032), 620 (0.035) — 近乎随机传播
 - SOZ 事件的传播比 non-SOZ 更有规律，但当前仍属于**探索性证据**
 
-### 5.4 最终科学结论
+### 5.4 PR-1 — 解析 Renewal PSD Overlay + SOZ Dead-Time（实验 6）
+
+详见 `docs/interictal_population_event_methodological_review.md` §2.3.7–2.3.8。
+
+- 解析 PSD overlay：21/30 有 specparam 峰；16/21 解析峰频 |Δf| < 1 Hz；与 gamma surrogate 互补覆盖 **19/21 (90%)**
+- 逃逸的 2/21（1084, 1096）归因于极端非平稳率，待 PR-2 去趋势后回填
+- SOZ dead-time < non-SOZ：Wilcoxon p=0.008（n=8 pairs，探索性）
+
+### 5.5 PR-2 — IEI 序列相关深度分析（实验 7，2026-04-08 完成）
+
+对 30 subjects 做四层拆解：lag-k 衰减、去趋势、block 内分析、SOZ 分层。
+
+#### 5.5.1 Lag-k 衰减曲线
+
+计算 r(log IEI[n], log IEI[n+k])，k = 1..100，跨 block pool pairs。
+
+| 指标 | 值 |
+|------|-----|
+| Lag-1 r（pooled within-block） | 中位 0.299（范围 0.117–0.506），**30/30 正** |
+| 半衰期（lags） | 中位 24 lags（24/30 有限值；6/30 在 k=100 内未衰减到半） |
+| 半衰期（秒） | 中位 107.5s ≈ 1.8 min（范围 3.5s–552.6s） |
+
+三类 subject 模式：
+- **快速衰减**（半衰期 < 15 lags, ~10 subjects）：短程依赖为主
+- **中速衰减**（15-80 lags, ~14 subjects）：分钟级调制
+- **无衰减**（6 subjects，到 k=100 仍未半衰）：被持续慢调制主导
+
+#### 5.5.2 去趋势分析
+
+方法：在物理时间上用 ±300s 滑动窗口计算 IEI 的局部中位数作为基线，残差 = log(IEI) - log(baseline)，在残差上算 lag-1 Pearson r。
+
+| 指标 | 值 |
+|------|-----|
+| 去趋势前 lag-1 r | 中位 0.299 |
+| 去趋势后 lag-1 r | 中位 0.081 |
+| 去趋势后仍为正 | 27/30 |
+| 去趋势后变负 | 3/30（442, 590, 620） |
+| 去趋势分数 | 中位 0.720 |
+| 去趋势分数 > 0.5 | 27/30 |
+| 去趋势分数 > 0.8 | 10/30 |
+
+**关键结论**：~72% 的正序列相关来自 > 10 分钟的慢速率漂移（sleep/wake/circadian）。但 27/30 去趋势后残差仍为正 → 存在 ~28% 的短程依赖成分（可能是局部网络 facilitation/depression）。
+
+#### 5.5.3 Within-block 分析
+
+将事件严格按 block 边界切分（Yuquan 2h/block, Epilepsiae 1h/block），各 block 独立算 lag-1，然后 pool。
+
+| 指标 | 值 |
+|------|-----|
+| Within-block pooled lag-1 r | 中位 0.299，**30/30 正** |
+
+**结论**：跨 block 污染假说被排除。block 内序列本身就有稳固的正序列相关。
+
+#### 5.5.4 SOZ vs non-SOZ 分层
+
+将群体事件按 SOZ 通道参与与否分为两组，各算 lag-1。
+
+| 指标 | 值 |
+|------|-----|
+| 有效配对 | 9/30 |
+| SOZ lag-1 r 中位 | 0.302 |
+| nonSOZ lag-1 r 中位 | 0.132 |
+| SOZ > nonSOZ | 7/9 |
+| Wilcoxon p | 0.055 |
+
+**结论**：SOZ 序列相关倾向于更强，但 n=9 只是边缘趋势。方向暗示 SOZ 网络有部分自主记忆效应。
+
+#### 5.5.5 PR-2 综合解读
+
+1. **慢速率漂移是序列相关的主成分（~72%）**，最可能来自 sleep/wake + circadian 调制
+2. **去趋势后残差（~28%）仍为正**，说明存在短程网络依赖
+3. **调制时间尺度的中位数 ≈ 1.8 分钟**，但 6/30 有持续不衰减的超慢调制
+4. **跨 block 污染被排除**——within-block 和全序列结果一致
+5. **当前 600s 单一窗口去趋势不能区分慢调制的具体频段**——需要多尺度去趋势（→ PR-2.5）
+
+### 5.6 PR-2.5 — 多尺度调制解剖（实验 7B，2026-04-08 完成）
+
+对 30 subjects 做五组子实验，回答 PR-2 遗留的"慢调制集中在什么频段"和"被调制的不止 IEI"等问题。
+
+#### 5.6.1 多尺度去趋势曲线（Exp 7B）
+
+方法：在 6 种窗口大小 W ∈ {60, 180, 600, 1800, 3600, 7200} s 上分别做滑动中位数去趋势，计算 `detrend_fraction(W)`。用相邻尺度的差分 `Δ_frac` 定位释放最多相关性的频段。
+
+| 指标 | 值 |
+|------|-----|
+| Δ_frac 范围 | 0.080 – 0.147（近似平坦） |
+| Δ_frac 峰值窗口中位数 | ~329s (≈5.5 min) |
+| 有清晰尖锐 Δ_frac 峰的 subjects | 0/30 |
+
+**结论**：慢调制是**宽频段 1/f 型**，没有单一主导时间尺度。不能归因于仅 circadian 或仅 sleep architecture，而是多尺度叠加。
+
+#### 5.6.2 n_participating Spearman 自相关（Exp 7C）
+
+方法：对 n_participating（每事件参与通道数，离散整数）用 Spearman 秩相关计算 lag-k 衰减曲线；与 IEI Pearson 衰减做互相关。
+
+| 指标 | 值 |
+|------|-----|
+| IEI–n_participating 衰减曲线互相关中位数 | **0.742** |
+| r > 0.7 的 subjects | **18/30 (60%)** |
+
+**结论**：IEI 和 n_participating 的慢调制衰减形状高度一致，**证实了单一全局状态变量假说**——存在一个全局兴奋性变量 S(t)（如 sleep/wake 状态、arousal level）同时驱动事件率和参与通道数。
+
+#### 5.6.3 日夜分层去趋势（Exp 7D）
+
+方法：按本地时间（Yuquan: Asia/Shanghai, Epilepsiae: Europe/Berlin）将事件分为 day (08:00–20:00) 和 night，各段内分别做 600s 去趋势后算 lag-1 r。
+
+| 指标 | 值 |
+|------|-----|
+| Day 去趋势后 lag-1 r 中位 | 0.094 |
+| Night 去趋势后 lag-1 r 中位 | 0.086 |
+| 两段均为正的 subjects | 28/30 |
+| Day vs Night Wilcoxon p | 0.088 |
+
+**结论**：28% 短程依赖不是日夜边界伪影，而是真实的网络级短程依赖。Day 和 night 段内去趋势后残差强度无显著差异。
+
+#### 5.6.4 Block 合并灵敏度（Exp 7E）
+
+方法：对相邻 block（gap ≤ 5s）合并后重算半衰期，对比原始分块半衰期。
+
+结果：多数 subject 合并后半衰期与分块一致。block 边界的 gap 大多为 0–2s（见 PR-2 block 结构分析），合并后不暴露额外的超慢调制。
+
+#### 5.6.5 逃逸 Subject 回填（Exp 7F — 关键）
+
+方法：对 PR-1 逃逸的 2/21 subject（1084, 1096），用 600s 滑动中位数去趋势 IEI 序列，从去趋势后 IEI 重建脉冲序列，重算 Welch PSD + specparam + gamma surrogate。
+
+| Subject | 原始峰频 | 去趋势后峰频 | 去趋势后 specparam 峰 |
+|---------|----------|-------------|---------------------|
+| 1084 | 3.34 Hz | 0.00 Hz | **无峰** |
+| 1096 | 2.47 Hz | 0.00 Hz | **无峰** |
+
+**结论**：两个 subject 的谱峰在去趋势后**完全消失**。这关闭了 Layer 3 缺口：**所有 21/21 有 specparam 峰的 subject 现在都被 refractory renewal + 慢率调制完全解释**，无需引入内禀振荡器。
+
+#### 5.6.6 PR-2.5 综合解读
+
+1. 慢调制是宽频段 1/f 型（无单一主导频段），**不能简化为"昼夜调制"或"睡眠阶段调制"**
+2. n_participating 与 IEI 由同一个全局状态调制（r = 0.742），证实"单一全局兴奋性变量"假说
+3. 28% 短程依赖在日间和夜间段内独立存在，是真实的网络短程记忆效应
+4. 逃逸 subject 的谱峰完全由慢率调制产生 → **21/21 全覆盖**，~2 Hz 周期性假说彻底终结
+
+### 5.7 最终科学结论
 
 **间期群体事件的 ~2Hz PSD 周期峰是不应期/检测窗限制的数学伪影，
 不是由网络内在振荡器驱动的真正节律。**
@@ -267,9 +408,17 @@ Phase 5 证据链（伪影源定位）：
 8. **IEI serial correlation 全部为正** → 排除振荡器，指向率慢调制
 9. 传播立体型：SOZ 事件路径更固定，但目前是探索性空间规律而非定论
 
+PR-2.5 证据链（多尺度调制解剖）：
+10. 慢调制是宽频段 1/f 型，无单一主导时间尺度 → 多尺度叠加（sleep + circadian + ...）
+11. **n_participating 与 IEI 同源调制**（r = 0.742）→ 单一全局兴奋性变量驱动
+12. 28% 短程依赖在 day/night 段内独立存在 → 非日夜边界伪影
+13. **逃逸 subject (1084, 1096) 去趋势后峰完全消失** → 21/21 全覆盖，Layer 3 缺口关闭
+
 **建议**：
 - 在最终论文中不宜将 PSD 周期峰作为正面发现报告
 - IEI 正 serial correlation（率慢调制）是一个值得讨论的方法学发现，正式统计口径应使用 subject-level direction consistency
+- PR-2 / PR-2.5 量化了调制成分：~72% 慢漂移 + ~28% 短程依赖。**慢漂移是多尺度 1/f 型全局生理调制（不可简化为单一 circadian 或 sleep stage），短程部分是真实的局部网络效应**
+- n_participating 的同源调制支持"兴奋性增益模型"——全局状态 S(t) 同时控制事件率和参与范围
 - 传播立体型（SOZ vs non-SOZ）可作为空间组织规律的候选发现，
   但需更大样本验证（当前仅有探索性单侧证据）
 
@@ -293,8 +442,26 @@ Phase 5 证据链（伪影源定位）：
   - `compute_hazard_function()` — Hazard function
   - `compute_iei_return_map()` — Return map / Poincaré
   - `compute_propagation_stereotypy()` — Kendall tau 一致性
-- `scripts/run_periodicity_phase2.py` — Phase 2 批量驱动
-- `scripts/plot_periodicity_phase2.py` — Phase 2 可视化
+  - `compute_renewal_psd_analytic()` — 解析 renewal PSD（PR-1）
+  - `compute_soz_stratified_deadtime()` — SOZ 分层 dead-time（PR-1）
+  - `_load_group_events_with_soz_labels()` — SOZ 事件加载公共 helper
+  - `_split_events_by_block()` — 按 block 切分事件序列
+  - `_rolling_log_iei_residuals()` — 物理时间滑动中位数去趋势（O(N log N) 优化版）
+  - `_serial_corr_decay_from_sequences()` — 跨 block pool lag-k 衰减（PR-2）
+  - `compute_serial_correlation_decay()` — lag-k 衰减公开接口（PR-2）
+  - `compute_detrended_serial_correlation()` — 去趋势 serial corr（PR-2）
+  - `compute_within_block_serial_corr()` — block 内 serial corr（PR-2）
+  - `compute_serial_corr_soz_stratified()` — SOZ 分层 serial corr（PR-2）
+  - `compute_multiscale_detrend_fraction()` — 多尺度去趋势 + Δ_frac（PR-2.5 Exp 7B）
+  - `_compute_half_life()` — 自相关半衰期插值（PR-2.5）
+  - `compute_nparticipating_autocorrelation()` — n_participating Spearman lag-k 衰减（PR-2.5 Exp 7C）
+  - `merge_contiguous_blocks()` — 相邻 block 合并（PR-2.5 Exp 7E）
+  - `_epoch_to_hour()` — Unix epoch → 本地小时（PR-2.5 Exp 7D）
+  - `compute_daynight_stratified_detrending()` — 日夜分层去趋势（PR-2.5 Exp 7D）
+  - `compute_detrended_psd_backfill()` — 去趋势后 PSD 回填 + gamma surrogate（PR-2.5 Exp 7F）
+- `scripts/run_periodicity_phase2.py` — Phase 2 批量驱动（exp 1-7b）
+- `scripts/plot_periodicity_phase2.py` — Phase 2 可视化（exp 1-7b）
+- `tests/test_event_periodicity.py` — PR-2 / PR-2.5 函数单元测试
 
 ### 结果文件
 - `results/event_periodicity/phase2/exp1_packing_sweep.json`
@@ -302,4 +469,12 @@ Phase 5 证据链（伪影源定位）：
 - `results/event_periodicity/phase2/exp3_hazard.json`
 - `results/event_periodicity/phase2/exp4_return_map.json`
 - `results/event_periodicity/phase2/exp5_stereotypy.json`
+- `results/event_periodicity/phase2/exp6_renewal_psd.json`（PR-1）
+- `results/event_periodicity/phase2/exp6_soz_deadtime.json`（PR-1）
+- `results/event_periodicity/phase2/exp7_serial_corr_deep.json`（PR-2）
+- `results/event_periodicity/phase2/exp7b_multiscale.json`（PR-2.5 Exp 7B）
+- `results/event_periodicity/phase2/exp7b_npart_autocorr.json`（PR-2.5 Exp 7C）
+- `results/event_periodicity/phase2/exp7b_daynight.json`（PR-2.5 Exp 7D）
+- `results/event_periodicity/phase2/exp7b_merge_sensitivity.json`（PR-2.5 Exp 7E）
+- `results/event_periodicity/phase2/exp7b_backfill.json`（PR-2.5 Exp 7F）
 - `results/event_periodicity/phase2/figures/` — 可视化图

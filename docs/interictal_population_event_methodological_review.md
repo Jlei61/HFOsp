@@ -272,7 +272,7 @@ IEI 分布（论文 Fig S7）：log-log scale 上做线性回归拟合 power-law
 | Gamma surrogate 完全可以解释 15/21 的峰 | **强** | 仅当 shifted gamma 是合理的 refractory null 时 |
 | IEI 是 lognormal 而非 power-law（30/30） | **强** | MLE + LLR 是该领域标准方法 |
 | 解析 PSD + gamma surrogate 互补覆盖 19/21 (90%) | **中-强** | 解析部分用 shifted-gamma 近似，峰位对齐 < 1 Hz 但形状相关弱 (r=0.34) |
-| 逃逸的 2/21 归因于非平稳调制 | **定性** | 尚未用去趋势后 PSD 验证；需 PR-2 完成后回填 |
+| 逃逸的 2/21 归因于非平稳调制 → **已验证** | **强** | PR-2.5 Exp 7F：去趋势后峰完全消失，21/21 全覆盖 |
 | 简单 $1/W$ 量化不是峰频来源（PackWinLen） | **中-强** | 仅 Yuquan |
 | Centroid bypass 不改变峰频 | **中** | 仍依附于 legacy 映射 |
 | Hazard function 与 refractory renewal 一致 | **定性** | KDE-based，不做参数推断 |
@@ -289,7 +289,7 @@ IEI 分布（论文 Fig S7）：log-log scale 上做线性回归拟合 power-law
 
 4. ~~**SOZ vs non-SOZ 分层 hazard**~~ → **已完成**（实验 6B）。SOZ dead-time < non-SOZ，p=0.008，但 n=8 且探索性。**下一步**：用 SOZ 参与度连续变量（soz_fraction）或 per-channel 层面扩大样本量。
 
-5. **对逃逸的 2/21 (1084, 1096) 做非平稳控制**：在 PR-2 的去趋势分析完成后，对这两个 subject 做去趋势后重算 PSD + gamma surrogate。如果去趋势后峰消失 → 证明峰完全来自慢率调制，关闭 Layer 3 缺口。
+5. ~~**对逃逸的 2/21 (1084, 1096) 做非平稳控制**~~ → **已完成**（PR-2.5 Exp 7F）。去趋势后 1084 和 1096 的峰**完全消失**。Layer 3 缺口已关闭。
 
 6. **对 huanghanwen 这个唯一"genuine"做敏感性分析**：把不同 surrogate 参数（gamma shape、shift、shuffle 类型）扫一遍，看它是否真的稳健。n=484 的样本量本来就在边缘。
 
@@ -413,39 +413,125 @@ $$\dot{u} = -u/\tau_u + \eta(t)$$
 
 老论文的 Hopfield-Kuramoto 部分（编码刻板传播）的核心数学**不需要丢**——Hebbian-like 对称耦合可以在 FHN 网络里同样实现，已经有文献做过。但概念叙事要从"oscillator network with phase entrainment"转到"excitable network with refractory + slow modulation, structurally constrained by Hebbian-shaped connectivity"。Adaptive Kuramoto 那部分的"first-order phase transition"叙事也可以保留，但相变机制变成 SNIC（saddle-node on invariant cycle）类的兴奋性集体激活，而不是 Kuramoto 的 splay→sync。
 
-### 3.4 仍需补充
+### 3.4 PR-2 已完成的深度分析（2026-04-08）
 
-**优先级 P0**
+上述 P0 第 1–3 条和 P1 第 5 条已在 PR-2 中完成（实验 7，30 subjects 全量）。
 
-1. **多 lag serial correlation 衰减曲线**：corr(IEI[n], IEI[n+k]) for k = 1...100 per subject。报告 median 衰减时间常数。这直接给出调制的时间尺度。
+#### 3.4.1 Lag-k 衰减曲线（P0.1 → 完成）
 
-2. **块内 vs 跨块**：如果 IEI 数据来自多个 1h block，分别计算 within-block 和 across-block 的 serial correlation。如果 within-block 接近 0 而 across-block 强 → 调制时间尺度 > 1h（昼夜/睡眠/multi-day）；反之 → 分钟级（vigilance/breathing）。
+r(log IEI[n], log IEI[n+k])，k=1..100，在 block 内 IEI 序列上 pool pairs。
 
-3. **去趋势检验**：对 IEI 序列减去局部平滑率（10 min moving median），重算 serial correlation。如果去趋势后 corr 接近 0，说明正相关**完全**由慢率调制解释；如果残差仍正相关，存在更短范围的内存（比如 facilitation/depression）。
+- **30/30 正方向**（与 exp4 一致），lag-1 中位 0.299（0.117–0.506）
+- **半衰期中位 107.5 秒 ≈ 1.8 分钟**（24/30 有限值，范围 3.5s–552.6s）
+- **6/30 在 k=100 内未衰减到半**：持续慢调制主导（chengshuai, huangwanling, 384, 922, 253, 1146）
+- 三类模式：快衰减（~10）、中速衰减（~14）、不衰减（~6）
+
+#### 3.4.2 去趋势检验（P0.3 → 完成）
+
+物理时间 ±300s 滑动窗口中位数作为局部基线，残差 = log(IEI) − log(baseline)。
+
+- **去趋势分数中位 0.720** → ~72% 的正相关来自 > 10 分钟的慢率漂移
+- **27/30 去趋势后仍为正**（残差 lag-1 r 中位 0.081）→ 存在 ~28% 的短程网络依赖
+- 3/30 变负（442: −0.021, 590: −0.047, 620: −0.011）→ 这些 subject 的正相关完全是慢漂移
+- 去趋势分数 > 0.8 的 10/30 subject 几乎全由慢漂移主导
+
+#### 3.4.3 Block 内分析（P0.2 → 完成）
+
+将事件严格按 block 边界切分（Yuquan 2h, Epilepsiae 1h），各 block 独立算 lag-1 后 pool。
+
+- **Within-block pooled lag-1 r：中位 0.299，30/30 正**
+- 结论：跨 block 污染假说被排除。Block 内序列本身有稳固的正序列相关。
+- 真实的 block 间隔结构：Yuquan 所有 gap=0（12×2h 完美连续 24h）；Epilepsiae 91.7% 的 gap ∈ [0,2]s（本质连续），4.2% 负 gap（overlap/block_dur 过估），2.1% 真实 >1h 中断
+
+#### 3.4.4 SOZ vs non-SOZ 分层（P1.5 → 完成）
+
+- **有效配对**：9/30（多数 subject non-SOZ 事件 < 50）
+- SOZ lag-1 r 中位 0.302，nonSOZ 中位 0.132
+- SOZ > nonSOZ：7/9，Wilcoxon p = 0.055
+- 方向暗示 SOZ 网络有自主记忆效应，但 n=9 只是边缘趋势
+
+#### 3.4.5 PR-2 综合解读
+
+1. **慢速率漂移是序列相关的主成分（~72%）**，最可能来自 sleep/wake + circadian 全局生理调制
+2. **去趋势后残差（~28%）仍为正**，说明存在短程网络依赖（facilitation/depression），不完全是全局调制
+3. **调制时间尺度中位数 ≈ 1.8 分钟**，但当前 600s 单一窗口不能区分具体频段
+4. **SOZ 倾向于更强的序列相关**，但 n 太小不能定论
+5. **跨 block 污染被完全排除**
+
+#### 3.4.6 PR-2 的局限 → PR-2.5 动机（已解决）
+
+PR-2 回答了"有多少 / 方向如何"，但**没有回答"慢调制集中在什么频段"**：
+
+- 600s 去趋势是一刀切。那 72% 是集中在 20 分钟还是 12 小时？
+- 短程残差的 28% 是 1 秒还是 5 分钟？
+- 除了 IEI，慢调制是否同时改变了 n_participating（参与通道数）？
+- Day vs night 是否是主导分割点？
+
+→ **PR-2.5 已全部完成**，见 §3.4.7。
+
+#### 3.4.7 PR-2.5 多尺度调制解剖（2026-04-08 完成）
+
+**Exp 7B：多尺度去趋势曲线**
+
+在 6 种窗口 W ∈ {60, 180, 600, 1800, 3600, 7200}s 上计算 detrend_fraction(W)，用差分 Δ_frac 定位释放最多相关性的频段。
+
+- Δ_frac 近似平坦（0.080–0.147），峰值中位数在 ~329s（≈5.5 min），但不尖锐
+- **结论**：慢调制是宽频段 1/f 型，不能归因于单一生理过程
+
+**Exp 7C：n_participating Spearman 自相关**
+
+对每事件参与通道数（离散整数）用 Spearman 秩相关计算 lag-k 衰减，与 IEI Pearson 衰减做互相关。
+
+- IEI–n_participating 衰减曲线互相关中位数 = **0.742**，18/30 subject > 0.7
+- **结论**：**证实单一全局状态变量假说**。IEI 和 n_participating 由同一个缓慢变化的全局兴奋性 S(t) 驱动
+
+**Exp 7D：日夜分层去趋势**
+
+按本地时间（Yuquan: Asia/Shanghai, Epilepsiae: Europe/Berlin）将事件分为 day/night，各段内独立做 600s 去趋势。
+
+- Day 去趋势后 lag-1 r 中位 = 0.094，Night = 0.086
+- 28/30 subject 在两段中均为正
+- Wilcoxon day vs night p = 0.088（无显著差异）
+- **结论**：28% 短程依赖不是日夜边界伪影，是真实的网络级短程记忆
+
+**Exp 7E：Block 合并灵敏度**
+
+相邻 block（gap ≤ 5s）合并后重算半衰期。结果与分块一致，block 边界不隐藏额外的超慢调制。
+
+**Exp 7F：逃逸 Subject 回填（决定性）**
+
+对 PR-1 逃逸的 1084 和 1096，用 600s 去趋势 IEI → 重建脉冲序列 → 重算 PSD + specparam + gamma surrogate。
+
+| Subject | 原始峰频 | 去趋势后峰频 |
+|---------|----------|-------------|
+| 1084 | 3.34 Hz | **0.00 Hz（无峰）** |
+| 1096 | 2.47 Hz | **0.00 Hz（无峰）** |
+
+**结论**：谱峰在去趋势后完全消失 → **Layer 3 缺口关闭**。21/21 有 specparam 峰的 subject 全部被 refractory renewal + 慢率调制解释。
+
+### 3.5 仍需补充（更远期）
+
+~~**PR-2.5（多尺度解剖 + 被调制量验证）**~~ → **已完成**，见 §3.4.7。核心发现：(i) 慢调制是宽频段 1/f 型（Δ_frac 近似平坦）；(ii) n_participating 与 IEI 同源调制（r=0.742）→ 单一全局状态变量；(iii) 28% 短程依赖在日夜段内独立存在；(iv) 逃逸 subject 谱峰去趋势后消失 → 21/21 全覆盖。
+
+**更远期**
 
 4. **time-rescaled 残差检验**：在估计的 $\hat{r}(t)$ 下做时间尺度变换 $\tilde{t} = \int_0^t \hat{r}(s) ds$。在 $\tilde{t}$ 上 IEI 应该是单位指数分布且独立。KS 检验残差的指数性 + 残差独立性。这是点过程拟合优度的金标准（参见 Brown, Barbieri, Eden, Frank 2002）。
-
-**优先级 P1**
-
-5. **SOZ vs non-SOZ 的 serial correlation 对比**（即上面 Q3）。
 
 6. **与 sleep / circadian 标签关联**：Epilepsiae SQL 有 vigilance 字段，PR1.5 已经做了 day/night 标签。把每个 IEI 标注上其所在窗口的 day/night（或 NREM/REM 如果有），看 serial correlation 是否在状态切换处出现 break。
 
 7. **与发作距离关联**：每个 IEI 标注"距离上次/下次发作的时间"，看 serial correlation 是否在发作前后系统性变化。这直接对接到 PR6 的 pre-ictal trajectory 分析。
 
-**优先级 P2**
-
 8. **联合模型拟合**：拟合一个 inhomogeneous renewal process with hidden slow rate（state-space model 或 latent-Gaussian process），看拟合质量。
 
 ---
 
-## 给合作者的总结（2026-04-07 更新）
+## 给合作者的总结（2026-04-08 更新）
 
 我认为可以接受的更新过的 narrative 是这样的：
 
 > 间期 HFO 群体事件的产生不是由网络内禀振荡器驱动的——之前 Fig 3 的 ~2 Hz 谱峰在 (i) refractory renewal null model, (ii) ISI shuffle null model 下都不再显著，并且 IEI 分布是 lognormal 而不是 power-law。这些事件更符合一个**带不应期的兴奋性点过程**（FHN / HR / theta-neuron 类），其时序由 (a) 局部兴奋性恢复动力学和 (b) 慢时间尺度的状态调制共同塑造。后者的存在被 IEI 相邻正相关（30/30 subjects）直接证明。
 >
-> 在空间维度上，群体事件的传播 rank 在某些个体上确实呈现出可重复的 stereotype，并且 SOZ 参与的事件比 non-SOZ 事件更刻板（探索性证据，单侧 p = 0.039）。这是论文 Fig 1, 2 叙事中**仍然站得住的那一部分**——但需要在 mixture 检测、identity bias 控制、按 n_participating 分层之后才能给出最终的定量结论。
+> 在空间维度上，群体事件的传播 rank 在某些个体上确实呈现出可重复的 stereotype，并且 SOZ 参与的事件比 non-SOZ 事件更刻板（探索性证据，单侧 p = 0.039）。这是论文 Fig 1, 2 叙事中**仍然站得住的那一部分**——但需要在 mixture 检测、identity bias 控制（注意 centering 不能抹掉 SOZ 作为真实源节点的传播拓扑）、按 n_participating 分层之后才能给出最终的定量结论。
 >
 > 老论文的 Hopfield-Kuramoto 框架在数学层面（Hebbian-like 对称连接编码 stereotype）可以保留，但节点动力学需要从 Kuramoto 振荡器换成 FHN / HR / theta-neuron 类兴奋性单元。这样既能继续解释 stereotype 的稳定性，也能自然容纳不应期、宽 IEI 分布、和慢调制驱动的事件率漂移。
 
@@ -462,13 +548,19 @@ $$\dot{u} = -u/\tau_u + \eta(t)$$
 | SOZ vs non-SOZ dead-time | ✅ PR-1 (exp 6B) | SOZ < non-SOZ, p=0.008 (n=8 pairs, 探索性) |
 | IEI serial correlation (lag-1) | ✅ Phase 2 exp 4 | 30/30 正相关，r 中位数 ≈ 0.31 |
 | 传播刻板性 SOZ vs non-SOZ | ✅ Phase 2 exp 5 | SOZ > non-SOZ, p=0.039 (n=12 pairs, 探索性) |
+| **PR-2: lag-k 衰减 + 去趋势 + block 内 + SOZ 分层** | **✅ exp 7** | **半衰期 107s; 72% 慢漂移 + 28% 短程; within-block 30/30 正; SOZ > nonSOZ p=0.055 (n=9)** |
+| **PR-2.5: 多尺度调制 + n_part + day/night + 回填** | **✅ exp 7b** | **Δ_frac 平坦(1/f); n_part 互相关 0.742; day/night 28/30 正; 1084+1096 峰消失→21/21 全覆盖** |
 
-### 最值得继续做的三件事（按性价比，更新版）
+### 已完成项的状态更新（2026-04-08）
 
-1. **PR-2：IEI serial correlation 深层分析**（话题 3 P0–P1）。做 lag-k 衰减曲线确定调制时间尺度；去趋势后重算 serial correlation 区分"慢率漂移"和"短程 facilitation"；block 内 vs 跨 block 分层确定调制起源；SOZ vs non-SOZ 分层确定调制是否 SOZ 自治。完成后回填 PR-1 的逃逸 subject (1084, 1096) 用去趋势 PSD 关闭 Layer 3 缺口。
+1. **PR-2：IEI serial correlation 深层分析** — **已完成**。详见 §3.4。核心发现：(i) 调制半衰期 ~1.8 分钟；(ii) 72% 慢漂移 + 28% 短程依赖；(iii) 跨 block 污染排除；(iv) SOZ 倾向于更强（p=0.055，边缘）。
 
-2. **PR-3：传播 stereotype 稳健性检验**（话题 1 P0）。Hartigan dip test 检测 mixture stereotype；centered rank tau 控制 detection ordering bias；按 n_participating 分层去除离散化噪声。让 Fig 2 的 17/18 + 20/20 变得真正可信。
+2. **PR-2.5：多尺度调制解剖 + 逃逸 subject 回填** — **已完成**。详见 §3.4.7。核心发现：(i) 慢调制是宽频段 1/f 型（Δ_frac 平坦），无单一主导时间尺度；(ii) n_participating 与 IEI 同源调制（互相关 0.742），证实全局状态变量假说；(iii) 28% 短程依赖在日夜段内独立存在；(iv) **逃逸 subject 1084, 1096 的谱峰去趋势后完全消失 → 21/21 全覆盖，~2 Hz 周期性假说彻底终结**。
 
-3. **SOZ dead-time 样本量扩展**。当前 8 pairs 太少。方案一：per-channel dead-time（从 `_gpu.npz` 单通道 HFO）；方案二：用 SOZ 参与度连续变量替代二分。
+### 最值得继续做的事（按性价比，更新版）
 
-如果 PR-2 和 PR-3 的结果符合预期，整篇论文的叙事可以转向"interictal events as a refractory excitable point process under slow state modulation, with SOZ-specific propagation stereotypy"——这是一个比"~2 Hz oscillator"更准确、也更可发表的故事。
+1. **PR-3：传播 stereotype 稳健性检验**（话题 1 P0）。Hartigan dip test 检测 mixture stereotype；centered rank tau 控制 detection ordering bias；按 n_participating 分层去除离散化噪声。让 Fig 2 的 17/18 + 20/20 变得真正可信。**注意：centering 存在"把婴儿和洗澡水一起倒掉"的风险——SOZ 通道因高兴奋性天然点火最早，均值扣除可能抹掉真实的 SOZ 驱动的传播拓扑。计划中已加入必选诊断：对比 center 前后的 top-3 源通道列表，如 SOZ 源节点被抹掉则报告 `soz_source_erased`，并侧报 raw vs centered tau 而非仅报 centered。**
+
+2. **对 huanghanwen 这个唯一"genuine"做敏感性分析**：把不同 surrogate 参数（gamma shape、shift、shuffle 类型）扫一遍，看它是否真的稳健。n=484 的样本量本来就在边缘。
+
+整篇论文的叙事现在可以定格为 **"interictal events as a refractory excitable point process under multi-timescale state modulation, with SOZ-specific propagation stereotypy"** ——这是一个比"~2 Hz oscillator"更准确、更有层次、也更可发表的故事。PR-3 是这一叙事中唯一未完成的定量验证（话题 1 的 stereotype 部分）。
