@@ -411,7 +411,9 @@ PR-2.6 先将相邻 block（gap ≤ 5s）合并为连续观测段，再在真实
 
 #### 5.7.2 多小时连续时间率过程
 
-对连续 rate trace 做多小时平滑（0.5h / 1h / 2h / 4h / 8h），并用 IQR/median 量化 fluctuation strength；同时对 0.5h / 1h / 2h / 4h / 8h lag 的连续时间 rate autocorrelation 做摘要。
+对连续 rate trace（5 分钟 bin 的事件率时间序列）做多窗长平滑（0.5h / 1h / 2h / 4h / 8h），用 IQR/median 量化 fluctuation strength；同时在连续有效段上计算 rate trace 的 Pearson 自相关 `corr(rate[t], rate[t+lag])`，lag 取 0.5h / 1h / 2h / 4h / 8h。
+
+**注意**：这里测的是**binned 事件率的时间自相关**，不是 IEI lag-k serial correlation 的直接延伸。IEI serial correlation 是逐事件的（PR-2 半衰期 ~1.8 min），rate autocorrelation 是逐 bin 的（5 分钟分辨率，可以测到多小时）。两者测量对象不同：前者度量"上一次间隔长，下一次也长"的事件级记忆；后者度量"这个 5 分钟窗事件多，几小时后也多"的宏观率漂移。
 
 | 数据集 | 0.5h fluct | 8h fluct | 0.5h rate acorr | 8h rate acorr |
 |------|-----------:|---------:|----------------:|--------------:|
@@ -419,9 +421,9 @@ PR-2.6 先将相邻 block（gap ≤ 5s）合并为连续观测段，再在真实
 | Epilepsiae | 2.243 | 1.322 | 0.493 | 0.108 |
 
 **解读**：
-- 连续时间率过程的起伏在 8h 平滑后仍未消失，说明慢调制**确实延伸到多小时尺度**。
-- Epilepsiae 的多小时调制更强、更持久；Yuquan 也有明确的多小时起伏，但 cohort-median rate autocorr 到 8h 时已接近 0。
-- 因此，“慢调制”不再只是 IEI 序列的统计形容词，而是在真实时间轴上可见的超慢率漂移。
+- 5 分钟 bin 事件率的起伏在 8h 平滑后仍未消失，说明**宏观事件率的慢漂移确实延伸到多小时尺度**。
+- Epilepsiae 的多小时率漂移更强、更持久（8h rate autocorr 中位 0.108 仍为正）；Yuquan 也有明确的多小时起伏，但到 8h 时 cohort-median rate autocorr 已接近 0。
+- 这把“慢调制”从 IEI 序列上的间接推断（PR-2.5 的 Δ_frac 分析），升级为**真实时间轴上可直接观察的宏观率漂移**。但这不等于说 IEI 的事件级 serial correlation 本身也持续到 8h——那是另一个更强的声明，尚未被直接测量。
 
 #### 5.7.3 连续 day/night 段内部的短程相关
 

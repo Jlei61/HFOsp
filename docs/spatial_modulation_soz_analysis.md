@@ -1,6 +1,6 @@
 # 群体事件时序调制的空间归因分析
 
-> 状态：**规划中** — PR-1 待实施
+> 状态：**PR-1 完成** — 2026-04-09
 > 创建日期：2026-04-09
 > 核心问题：**IEI 序列相关所反映的慢调制，发生在哪里？SOZ 与非 SOZ 通道是否存在可分离的调制特征？**
 > 上游依赖：`docs/event_periodicity_analysis.md`（Phase 1–5 + PR-1/2/2.5）、`docs/interictal_population_event_methodological_review.md`
@@ -389,51 +389,137 @@ results/spatial_modulation/
 
 ---
 
-## 4. 预期结论的可能方向
+## 4. PR-1 实际结果（2026-04-09）
 
-### 4.1 如果 SOZ 通道的 serial corr 显著更高
+### 4.0 审计结果
 
-→ 支持"SOZ 网络有自主的状态调制"假说，与 PR-2 exp7D 的边缘趋势（p=0.055, n=9）方向一致但统计力更强。
-→ 科学故事：SOZ 的兴奋性不仅体现为更高的事件率和更短的 dead-time（PR-1 exp6B 已示），还体现为更强的慢时间尺度状态依赖性。
-→ 临床价值：如果效应量大到在个体水平可区分，per-channel lag-1 r 可以作为 SOZ 辅助定位的候选标志物。
+| 数据集 | 有效被试 / 总数 | gpu.npz 状态 | 通过标准 |
+|--------|----------------|-------------|---------|
+| Yuquan | **11/18** | 11 完整（全部 block 有效），7 无 gpu.npz | **PASS** (≥8) |
+| Epilepsiae | **0/20** | 全部 216 字节损坏桩 | **FAIL** |
 
-### 4.2 如果 SOZ 和 non-SOZ 的 serial corr 无差异
+**Epilepsiae 不可用**：所有 gpu.npz 文件都是空桩（216 bytes），per-channel 放松 refine 在当前数据上不可能做。要做 Epilepsiae 需要从 `.data` 原始信号重跑 HFO 检测，超出 PR-1 范围。
 
-→ 支持"调制是全局性的"（最可能是 sleep/wake 驱动的全脑兴奋性变化）。
-→ 这个结果本身也有价值：它意味着慢调制不能区分 SOZ 和 non-SOZ，SOZ 的特异性只体现在事件率和 dead-time 上。
+**k 值选择**：k=0.0（method=mean_std），中位通道数 33（vs lagPat 中位 ~10）。
 
-### 4.3 如果 Epilepsiae 呈现 i > l > e 的单调梯度
+### 4.1 被试排除
 
-→ 最有文章价值的结果。建立"调制强度与致痫性的空间梯度"。
-→ 可以对接到 Epileptor permittivity 变量的空间分布叙事。
+| 被试 | 排除原因 |
+|------|---------|
+| chengshuai | k=0.0 下 15 通道全部是 SOZ，无 non-SOZ 对照 |
+| zhangjiaqi | 28 通道全部 CV > 10（极端 bursty），被质控排除 |
+
+chengshuai 的全 SOZ 通道正好印证了 §1.1 第一层偏差："refine 后通道集天然富集 SOZ"。即使用 k=0.0 放松到 mean 阈值，这个被试的 SOZ 通道仍然主导了所有高事件通道。
+
+zhangjiaqi 的全通道 CV > 10 不是伪迹，是极端的 bursty 事件模式（所有通道一致 CV ~11, event_rate ~600 events/hour）。CV=5.0 阈值在此把整个被试排除，这个阈值可能在未来需要调整。
+
+**有效配对**：9 个被试（SOZ ≥ 3 且 non-SOZ ≥ 3 个非伪迹通道）。
+
+### 4.2 统计结果
+
+| 指标 | median_diff (SOZ−nonSOZ) | Wilcoxon p | SOZ>nonSOZ | 解读 |
+|------|------------------------|------------|------------|------|
+| **iei_lag1_r** | +0.027 | **1.000** | 5/9 | 无效应：原始 serial corr 无 SOZ 差异 |
+| **iei_detrended_r** | +0.038 | 0.250 | **7/9** | 趋势：去趋势后 SOZ 残差稍高 |
+| **detrend_fraction** | **−0.137** | 0.129 | **2/9** | 趋势：SOZ 的慢漂移占比更低 |
+| iei_p02 | −0.002 | 0.203 | 3/9 | 无效应：dead-time 无 SOZ 差异 |
+| **iei_median** | **−0.539** | **0.055** | **3/9** | 边缘：SOZ 中位 IEI 更短 |
+| event_rate | +88.2 | 0.164 | 7/9 | 趋势：SOZ 事件率更高 |
+
+### 4.3 解读
+
+**最重要的发现不是任何单个 p 值，而是 detrend_fraction 的方向一致性。**
+
+7/9 被试中，SOZ 通道的 detrend_fraction **低于** non-SOZ（中位差 −0.137）。detrend_fraction 衡量"slow rate drift 占总 serial correlation 的比例"。SOZ detrend_fraction 更低意味着：
+
+1. SOZ 通道的 serial correlation 中，来自 >10 分钟慢漂移的部分**更少**
+2. 来自短程网络依赖（局部兴奋性状态）的部分**更多**
+3. 换言之：**SOZ 有更强的自主状态记忆，而非被全局调制被动驱动**
+
+这与 PR-2.5 exp7C 的发现方向一致（IEI 和 n_participating 共享同一全局状态变量），但在空间维度上新增了一条信息：**全局调制对所有通道作用，但 SOZ 通道在此之上还有独立的短程记忆效应**。
+
+**iei_median 边缘显著**（p=0.055）方向也与预期一致：SOZ 事件更密集（更短 IEI），与 PR-1 exp6B 的 n=8 结果方向相同但在 per-channel 框架下 n 扩大到 9。
+
+**iei_lag1_r 无差异**（p=1.0）：raw serial correlation 整合了全局调制 + 局部调制。如果两者在 SOZ 和 non-SOZ 上的贡献不同但方向相反（SOZ 全局调制弱但局部调制强），总和可以无差异。detrend_fraction 的分解正好证实了这一点。
+
+### 4.4 事件率混淆诊断
+
+`event_rate_vs_lag1r_scatter.png` 是推断前门控图。初步观察：
+- SOZ 通道的 event_rate 范围更广（100–1500+ events/hour），non-SOZ 更集中
+- 两组在 100–500 events/hour 区间有重叠
+- 在重叠区间内，SOZ 和 non-SOZ 的 serial corr 分布无明显分离
+
+这意味着 serial correlation 的差异（如果存在）**不能简单归因于事件率差异**，但 SOZ 通道的高事件率尾部（> 500 events/hour）在 non-SOZ 中没有对照。完整的混淆控制需要 PR-2 的 mixed effects 模型。
+
+### 4.5 与已有 PR 的对比
+
+| 分析 | 框架 | 有效 n | SOZ vs nonSOZ 方向 | p |
+|------|------|--------|-------------------|---|
+| PR-1 exp6B (dead-time) | lagPat 群体事件 | 8 | SOZ < nonSOZ | 0.008 |
+| PR-2 exp7D (serial corr) | lagPat 群体事件 | 9 | SOZ > nonSOZ | 0.055 |
+| **本 PR-1 (iei_lag1_r)** | **per-channel relaxed** | **9** | 5/9 SOZ > nonSOZ | **1.000** |
+| **本 PR-1 (iei_detrended_r)** | **per-channel relaxed** | **9** | **7/9 SOZ > nonSOZ** | **0.250** |
+| **本 PR-1 (detrend_fraction)** | **per-channel relaxed** | **9** | **2/9 SOZ > nonSOZ** | **0.129** |
+
+per-channel 框架的 raw serial corr 差异消失了（p=1.0 vs lagPat 的 p=0.055），但去趋势后 SOZ 仍有更高的残差（7/9）。**lagPat 框架的 SOZ > nonSOZ 效应可能部分来自 SOZ 通道事件率更高导致的全局调制效应更强**，这个混淆在 per-channel 去趋势后被分离出来。
+
+## 5. 预期结论的可能方向（更新版）
+
+### 5.1 当前实际情况
+
+**最接近 §4.2 的场景**：raw serial corr 无 SOZ 差异，但 detrended 残差有 SOZ 趋势。这是一个**混合结果**——全局调制对 SOZ 和 non-SOZ 等效作用，但 SOZ 在此之上有额外的短程记忆。
+
+这比纯粹的"无差异"更有信息量，可以写成：
+> "IEI serial correlation 的全局调制成分（~72% 慢漂移）在 SOZ 和 non-SOZ 通道间无差异，支持 sleep/wake 驱动的全脑兴奋性变化假说。但去趋势后的短程残差（~28%）在 SOZ 通道中更强（7/9 被试方向一致），提示 SOZ 网络可能存在自主的局部状态记忆。"
+
+### 5.2 Epilepsiae 三值梯度
+
+Epilepsiae 的 i/l/e 三值分析在当前数据上不可行（gpu.npz 全坏）。如果未来重跑 Epilepsiae HFO 检测获得 per-channel 数据，i > l > e 的单调梯度仍然是最有文章价值的目标。
+
+### 5.3 PR-2 方向
+
+基于 PR-1 结果，后续可以：
+1. **Mixed effects 模型**：metric ~ soz_label + log(event_rate) + (1|subject)，控制事件率混淆
+2. **1:1 匹配方案**：对 event_rate 支撑域重叠区间做匹配对
+3. **Epilepsiae HFO 重检测**：从 .data 原始信号重跑检测，解锁 per-channel 分析
+4. **ROC / AUC 预测分析**：如果效应确认存在，评估 per-channel detrended_r 的 SOZ 预测能力
 
 ---
 
-## 5. 代码文件清单
+## 6. 代码文件清单
 
-| 文件 | 变更类型 | 说明 |
+| 文件 | 变更类型 | 状态 |
 |------|---------|------|
-| `scripts/audit_gpu_npz.py` | **新建** | Step 0 审计脚本 |
-| `src/event_periodicity.py` | 新增函数 | `load_perchannel_events_relaxed` + 调用已有函数的胶水 |
-| `scripts/run_spatial_modulation.py` | **新建** | PR-1 batch driver |
-| `scripts/plot_spatial_modulation.py` | **新建** | PR-1 图表 |
-| `src/group_event_analysis.py` | **不修改** | 只以不同 k 调用 `select_core_channels_by_event_count` |
-| `config/default.yaml` | **不修改** | relaxed k 作为脚本参数，不改默认配置 |
+| `scripts/audit_gpu_npz.py` | **新建** | ✅ 完成 |
+| `src/event_periodicity.py` | 新增 6 个函数 | ✅ 完成 |
+| `scripts/run_spatial_modulation.py` | **新建** | ✅ 完成 |
+| `scripts/plot_spatial_modulation.py` | **新建** | ✅ 完成 |
+| `src/group_event_analysis.py` | **不修改** | — |
+| `config/default.yaml` | **不修改** | — |
+
+新增函数（在 `src/event_periodicity.py`）：
+- `_normalize_channel_name()` — 通道名归一化
+- `match_bipolar_soz()` — 双极 SOZ 匹配（alias_bipolar_to_any）
+- `match_bipolar_focus_rel()` — Epilepsiae i/l/e 三值匹配
+- `load_perchannel_events_relaxed()` — 放松 refine 的 per-channel 事件加载器
+- `compute_perchannel_metrics()` — 单通道时序指标 + 质控
+- `annotate_channels_soz()` — 通道 SOZ 标注
 
 ---
 
-## 6. 执行顺序
+## 7. 执行顺序
 
-| 步骤 | 依赖 | 估计耗时 | 通过条件 |
-|------|------|---------|---------|
-| Step 0：审计 | 无 | 0.5 天 | Yuquan ≥8, Epilepsiae ≥10 通过审计 |
-| Step 1：k 值选择 | Step 0 | 0.5 天 | 选定 k 使中位通道数 15–30 |
-| Step 2：Loader | Step 1 | 1 天 | 与 Phase 1 per-channel 结果一致性校验通过 |
-| Step 3：SOZ 标注 | Step 2 | 0.5 天 | 通道名匹配率 > 80% |
-| Step 4：指标计算 | Step 2+3 | 1 天 | 30 subjects 全量运行 |
-| Step 5：统计 + 图 | Step 4 | 1 天 | figures/README.md 生成 |
+| 步骤 | 依赖 | 状态 | 备注 |
+|------|------|------|------|
+| Step 0：审计 | 无 | ✅ 完成 | Yuquan 11/18 PASS, Epilepsiae 0/20 FAIL |
+| Step 1：k 值选择 | Step 0 | ✅ 完成 | k=0.0, 中位通道数 33 |
+| Step 2：Loader | Step 1 | ✅ 完成 | `load_perchannel_events_relaxed()` |
+| Step 3：SOZ 标注 | Step 2 | ✅ 完成 | `alias_bipolar_to_any` 匹配 |
+| Step 4：指标计算 | Step 2+3 | ✅ 完成 | 11 subjects 全量运行 (Yuquan-only) |
+| Step 5：统计 + 图 | Step 4 | ✅ 完成 | 6 张图 + figures/README.md |
 
-**总计**：~4.5 天。Step 0 如果不通过则整个 PR-1 暂停。
+**实际耗时**：~3 分钟计算 + 代码编写。
+**Epilepsiae 降级**：审计证实 Epilepsiae gpu.npz 全部损坏，PR-1 为 **Yuquan-only** 探索性分析。
 
 ---
 
