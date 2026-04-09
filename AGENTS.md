@@ -113,10 +113,10 @@ Important drift:
   - `scripts/run_event_periodicity.py` — Phase 1 dual-dataset batch driver
   - `scripts/run_surrogates_batch.py` — group-only surrogate batch
   - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
-  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (9 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5, exp7c PR-2.6)
-  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7c)
-  - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 function unit tests
-  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5+PR-1+PR-2+PR-2.5+PR-2.6)
+  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (10 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5, exp7c PR-2.6, exp7d PR-2.7 planned)
+  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7d)
+  - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 / PR-2.7 function unit tests
+  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5+PR-1+PR-2+PR-2.5+PR-2.6+PR-2.7)
   - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
   - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
 - Spatial modulation / SOZ analysis (Where question):
@@ -265,7 +265,11 @@ Stop and ask the user instead of guessing when:
     - Yuquan 10/10 subjects provide near-24h continuous trajectories; Epilepsiae longest continuous run median = 75.1h, observed duration median = 158.4h
     - Continuous-time binned rate autocorrelation (5-min bins) remains positive from 0.5h to 8h lags in Epilepsiae (median 0.108 at 8h); Yuquan positive to 4h but ~0 at 8h. Note: this is binned rate autocorrelation, not a direct extension of IEI lag-k serial correlation
     - Continuous day/night segment analysis: Yuquan 9/10 and Epilepsiae 17/20 remain positive on both sides → short-range dependency survives inside continuous day/night segments
-  - Next: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
+  - PR-2.7 (exp7d, PLANNED): rate-trace spectral characterization + seizure proximity
+    - Exp 7E: Welch PSD of continuous rate trace + OLS 1/f slope β — directly measures spectral exponent (PR-2.5 Δ_frac was indirect)
+    - Exp 7F: rate × n_participating cross-spectral coherence — frequency-resolved global state variable test (upgrades PR-2.5's single-number r=0.742)
+    - Exp 7G: seizure-triggered rate average ±12h — tests pre-ictal ramp / post-ictal suppression; connects to PR6 synchrony null
+  - Next after PR-2.7: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
   - Method caveats incorporated: detrend_fraction curve behavior depends on window vs modulation timescale (use Δ_frac for band localization); n_participating must use Spearman not Pearson-on-log; centered rank tau must check SOZ source node preservation
   - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
 

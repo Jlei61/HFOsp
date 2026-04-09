@@ -564,13 +564,23 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 ~~**PR-2.6（连续长时程 + 连续 day/night 段）**~~ → **已完成**，见 §3.4.8。核心发现：(i) 慢调制在真实连续时间轴上延伸到多小时；(ii) Yuquan 10/10 为 near-24h continuous，Epilepsiae 最长连续段中位数 75.1h；(iii) 连续 day/night 段内部仍保留短程依赖（Yuquan 9/10，Epilepsiae 17/20）。
 
+**PR-2.7（Rate-Trace 谱特征刻画 + 发作邻近调制）** → PLANNED
+
+三件事：
+
+1. **Rate-trace PSD + 1/f 斜率**：对 PR-2.6 生成的 5 分钟 bin rate trace 做 Welch PSD，拟合 log-log 斜率 β。PR-2.5 的 Δ_frac 平坦只是间接推断"1/f-like"；PR-2.7 直接测量谱指数。β ≈ 1 → pink noise；β ≈ 2 → Brownian。拟合范围 0.02–0.5 mHz（≈30 min 至 8h 周期）。
+2. **Rate × n_participating 连续时间相干性**：对 rate trace 与 mean(n_participating) trace 做 cross-spectral coherence。PR-2.5 的 event-index 互相关 r = 0.742 是单个标量汇总；相干函数展示*在哪些频率上*全局状态变量假说成立。高频相干低 → 局部兴奋性独立成分。
+3. **Seizure-triggered rate average**：提取每次发作 ±12h 窗口内的 z-scored rate trace 并平均。测试 pre-ictal [-6h, -1h] vs baseline [-12h, -6h] 是否有系统性升高（Wilcoxon）。如果 rate 在发作前爬升而同步性（PR4–PR6）无变化 → rate 比 synchrony 更敏感的 pre-ictal 标志物。
+
+实验编号：exp7d（7E / 7F / 7G 三面板）。输出 `exp7d_rate_spectral.json`。详细计划见 `.cursor/rules/event-periodicity-pr-plan.mdc`。
+
 **更远期**
 
 4. **time-rescaled 残差检验**：在估计的 $\hat{r}(t)$ 下做时间尺度变换 $\tilde{t} = \int_0^t \hat{r}(s) ds$。在 $\tilde{t}$ 上 IEI 应该是单位指数分布且独立。KS 检验残差的指数性 + 残差独立性。这是点过程拟合优度的金标准（参见 Brown, Barbieri, Eden, Frank 2002）。
 
 6. **与 sleep / circadian 标签关联**：Epilepsiae SQL 有 vigilance 字段，PR1.5 已经做了 day/night 标签。把每个 IEI 标注上其所在窗口的 day/night（或 NREM/REM 如果有），看 serial correlation 是否在状态切换处出现 break。
 
-7. **与发作距离关联**：每个 IEI 标注"距离上次/下次发作的时间"，看 serial correlation 是否在发作前后系统性变化。这直接对接到 PR6 的 pre-ictal trajectory 分析。
+7. ~~**与发作距离关联**~~：由 PR-2.7 exp 7G (seizure-triggered rate average) 部分覆盖。若 PR-2.7 发现系统性 rate 变化，进一步做 IEI serial correlation 在发作前后的 break 分析。
 
 8. **联合模型拟合**：拟合一个 inhomogeneous renewal process with hidden slow rate（state-space model 或 latent-Gaussian process），看拟合质量。
 
