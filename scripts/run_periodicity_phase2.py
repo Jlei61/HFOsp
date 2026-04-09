@@ -75,6 +75,10 @@ from src.event_periodicity import (
     merge_contiguous_blocks,
     run_centroid_bypass,
     run_packing_sweep,
+    compute_rate_trace_psd,
+    compute_rate_npart_coherence,
+    compute_seizure_triggered_rate,
+    load_seizure_times,
 )
 
 logging.basicConfig(
@@ -896,6 +900,89 @@ def run_exp7c(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
     return all_results
 
 
+def run_exp7d(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
+    """PR-2.7: rate-trace PSD + coherence + seizure-triggered average."""
+    logger.info("=== Experiment 7D: Rate-Trace Spectral + Seizure Proximity (PR-2.7) ===")
+    all_results: Dict[str, Any] = {}
+
+    for dataset, root in roots.items():
+        loader = load_yuquan_subject_events if dataset == "yuquan" else load_epilepsiae_subject_events
+        for sub in subjects:
+            sub_dir = root / sub if dataset == "yuquan" else root / sub / "all_recs"
+            if not sub_dir.exists():
+                continue
+            if not list(sub_dir.glob("*_lagPat.npz")):
+                continue
+
+            key = f"{dataset}/{sub}"
+            logger.info(f"  {key}: PR-2.7 rate spectral analysis")
+            t0 = time.time()
+            try:
+                _, packed, _, block_ranges = loader(sub_dir)
+                if len(packed) < 10:
+                    all_results[key] = {"warning": "insufficient_group_events"}
+                    continue
+
+                psd_result = compute_rate_trace_psd(
+                    events=packed,
+                    block_ranges=block_ranges,
+                    bin_sec=300.0,
+                    min_span_bins=48,
+                    nperseg_max=64,
+                    fit_freq_range_mhz=(0.02, 0.5),
+                )
+
+                coh_result = compute_rate_npart_coherence(
+                    events=packed,
+                    block_ranges=block_ranges,
+                    subject_dir=sub_dir,
+                    dataset=dataset,
+                    bin_sec=300.0,
+                    min_span_bins=48,
+                    nperseg_max=64,
+                    coherence_band_mhz=(0.02, 0.5),
+                )
+
+                sz_times = load_seizure_times(sub, dataset)
+                if sz_times:
+                    sta_result = compute_seizure_triggered_rate(
+                        events=packed,
+                        block_ranges=block_ranges,
+                        seizure_times=sz_times,
+                        bin_sec=300.0,
+                        window_hours=12.0,
+                    )
+                else:
+                    sta_result = {"warning": "no_seizure_times"}
+
+                entry: Dict[str, Any] = {
+                    "dataset": dataset,
+                    "subject": sub,
+                    "n_events": int(packed.shape[0]),
+                    "rate_psd": psd_result,
+                    "coherence": coh_result,
+                    "seizure_sta": sta_result,
+                }
+                all_results[key] = entry
+
+                beta = psd_result.get("beta", np.nan)
+                r2 = psd_result.get("beta_r2", np.nan)
+                med_coh = coh_result.get("median_coherence", np.nan)
+                n_sz = sta_result.get("n_seizures_usable", 0)
+                logger.info(
+                    f"    β={beta:.2f}, r²={r2:.3f}, med_coh={med_coh:.3f}, "
+                    f"seizures_usable={n_sz}"
+                    if np.isfinite(beta) else f"    PSD warning: {psd_result.get('warning', '?')}"
+                )
+                logger.info(f"  {key}: done ({time.time() - t0:.1f}s)")
+            except Exception as e:
+                logger.error(f"  {key}: FAILED — {e}", exc_info=True)
+                all_results[key] = {"error": str(e)}
+
+    _save(all_results, out_dir / "exp7d_rate_spectral.json")
+    return all_results
+
+
 # ==========================================================================
 # Main
 # ==========================================================================
@@ -903,7 +990,7 @@ def run_exp7c(subjects: List[str], roots: Dict[str, Path], out_dir: Path):
 def main():
     parser = argparse.ArgumentParser(description="Phase 2 periodicity experiments")
     parser.add_argument("--exp", default="all",
-                        help="Experiment number(s): 1,2,3,4,5,6,7,7b,7c or 'all'")
+                        help="Experiment number(s): 1,2,3,4,5,6,7,7b,7c,7d or 'all'")
     parser.add_argument("--dataset", choices=["yuquan", "epilepsiae", "both"],
                         default="both")
     parser.add_argument("--subjects", nargs="+", default=None)
@@ -915,7 +1002,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if args.exp == "all":
-        exps = {"1", "2", "3", "4", "5", "6", "7", "7b", "7c"}
+        exps = {"1", "2", "3", "4", "5", "6", "7", "7b", "7c", "7d"}
     else:
         exps = {x.strip() for x in args.exp.split(",")}
 
@@ -966,6 +1053,9 @@ def main():
 
     if "7c" in exps:
         run_exp7c(all_subs, roots, out_dir)
+
+    if "7d" in exps:
+        run_exp7d(all_subs, roots, out_dir)
 
     logger.info(f"=== Phase 2 complete: {time.time()-t_total:.0f}s total ===")
 

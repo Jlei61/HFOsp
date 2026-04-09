@@ -1287,13 +1287,260 @@ def plot_exp7c():
 
 # ==========================================================================
 
+def plot_exp7d():
+    """PR-2.7: rate-trace PSD, coherence, seizure-triggered average."""
+    data = _load("exp7d_rate_spectral.json")
+    if not data:
+        return
+
+    valid = [
+        rec for rec in data.values()
+        if isinstance(rec, dict) and "error" not in rec and "warning" not in rec
+    ]
+    if not valid:
+        print("  No valid exp7d data")
+        return
+
+    fig = plt.figure(figsize=(16, 12))
+    gs = fig.add_gridspec(3, 2, hspace=0.38, wspace=0.28,
+                          left=0.07, right=0.96, top=0.93, bottom=0.07)
+
+    # ---- Panel A (7E-1): Rate PSD per subject + cohort median ----
+    ax = fig.add_subplot(gs[0, 0])
+    for rec in valid:
+        psd_info = rec.get("rate_psd", {})
+        if "warning" in psd_info or "freqs_mhz" not in psd_info:
+            continue
+        freqs = np.asarray(psd_info["freqs_mhz"], dtype=float)
+        psd = np.asarray(psd_info["psd"], dtype=float)
+        pos = (freqs > 0) & (psd > 0)
+        if not np.any(pos):
+            continue
+        color = "#2166AC" if rec["dataset"] == "yuquan" else "#E08214"
+        ax.loglog(freqs[pos], psd[pos], color="0.8", lw=0.6, alpha=0.5)
+
+    for dataset, color, label in [("yuquan", "#2166AC", "Yuquan"), ("epilepsiae", "#E08214", "Epilepsiae")]:
+        subset = [r for r in valid if r.get("dataset") == dataset and "freqs_mhz" in r.get("rate_psd", {})]
+        if not subset:
+            continue
+        all_psd = []
+        common_f = None
+        for r in subset:
+            f = np.asarray(r["rate_psd"]["freqs_mhz"], dtype=float)
+            p = np.asarray(r["rate_psd"]["psd"], dtype=float)
+            if common_f is None:
+                common_f = f
+            if len(f) == len(common_f):
+                all_psd.append(p)
+        if all_psd and common_f is not None:
+            med_psd = np.nanmedian(np.array(all_psd), axis=0)
+            pos = (common_f > 0) & (med_psd > 0)
+            ax.loglog(common_f[pos], med_psd[pos], color=color, lw=2.2, label=label)
+
+    betas = [r["rate_psd"]["beta"] for r in valid if np.isfinite(r.get("rate_psd", {}).get("beta", np.nan))]
+    if betas:
+        med_beta = float(np.median(betas))
+        ax.set_title(f"Rate-trace PSD (median β={med_beta:.2f})", fontsize=10)
+    else:
+        ax.set_title("Rate-trace PSD", fontsize=10)
+    ax.set_xlabel("Frequency (mHz)", fontsize=9)
+    ax.set_ylabel("PSD", fontsize=9)
+    ax.legend(fontsize=8, loc="upper right")
+    ax.grid(True, alpha=0.15, which="both")
+
+    # ---- Panel B (7E-2): β distribution ----
+    ax = fig.add_subplot(gs[0, 1])
+    betas_yq = [r["rate_psd"]["beta"] for r in valid if r["dataset"] == "yuquan" and np.isfinite(r.get("rate_psd", {}).get("beta", np.nan))]
+    betas_ep = [r["rate_psd"]["beta"] for r in valid if r["dataset"] == "epilepsiae" and np.isfinite(r.get("rate_psd", {}).get("beta", np.nan))]
+    positions = []
+    data_list = []
+    colors_vp = []
+    if betas_yq:
+        positions.append(1)
+        data_list.append(betas_yq)
+        colors_vp.append("#2166AC")
+    if betas_ep:
+        positions.append(2)
+        data_list.append(betas_ep)
+        colors_vp.append("#E08214")
+    if data_list:
+        parts = ax.violinplot(data_list, positions=positions, showmedians=True)
+        for i, pc in enumerate(parts.get("bodies", [])):
+            pc.set_facecolor(colors_vp[i])
+            pc.set_alpha(0.6)
+    ax.axhline(1.0, color="red", ls="--", lw=1.0, alpha=0.6, label="β=1 (pink noise)")
+    ax.axhline(2.0, color="blue", ls=":", lw=1.0, alpha=0.4, label="β=2 (Brownian)")
+    ax.set_xticks([1, 2])
+    ax.set_xticklabels(["Yuquan", "Epilepsiae"], fontsize=9)
+    ax.set_ylabel("Spectral exponent β", fontsize=9)
+    ax.set_title("1/f slope distribution", fontsize=10)
+    ax.legend(fontsize=8, loc="upper right")
+    ax.grid(True, alpha=0.15)
+
+    # ---- Panel C (7F-1): Coherence curves ----
+    ax = fig.add_subplot(gs[1, 0])
+    for rec in valid:
+        coh_info = rec.get("coherence", {})
+        if "warning" in coh_info or "freqs_mhz" not in coh_info:
+            continue
+        freqs = np.asarray(coh_info["freqs_mhz"], dtype=float)
+        coh = np.asarray(coh_info["coherence"], dtype=float)
+        pos = freqs > 0
+        ax.plot(freqs[pos], coh[pos], color="0.8", lw=0.6, alpha=0.5)
+
+    for dataset, color, label in [("yuquan", "#2166AC", "Yuquan"), ("epilepsiae", "#E08214", "Epilepsiae")]:
+        subset = [r for r in valid if r.get("dataset") == dataset and "freqs_mhz" in r.get("coherence", {})]
+        if not subset:
+            continue
+        all_coh = []
+        common_f = None
+        for r in subset:
+            f = np.asarray(r["coherence"]["freqs_mhz"], dtype=float)
+            c = np.asarray(r["coherence"]["coherence"], dtype=float)
+            if common_f is None:
+                common_f = f
+            if len(f) == len(common_f):
+                all_coh.append(c)
+        if all_coh and common_f is not None:
+            med_coh = np.nanmedian(np.array(all_coh), axis=0)
+            pos = common_f > 0
+            ax.plot(common_f[pos], med_coh[pos], color=color, lw=2.2, label=label)
+
+    ax.axhline(0.5, color="gray", ls="--", lw=0.8, alpha=0.6)
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency (mHz)", fontsize=9)
+    ax.set_ylabel("Coherence", fontsize=9)
+    ax.set_ylim(-0.05, 1.05)
+    ax.set_title("Rate × n_participating coherence", fontsize=10)
+    ax.legend(fontsize=8, loc="upper right")
+    ax.grid(True, alpha=0.15, which="both")
+
+    # ---- Panel D (7F-2): Cross-validation with PR-2.5 event-index r ----
+    ax = fig.add_subplot(gs[1, 1])
+    exp7b_data = _load("exp7b_npart_autocorr.json")
+    if exp7b_data:
+        x_vals = []
+        y_vals = []
+        pt_colors = []
+        for rec in valid:
+            coh_info = rec.get("coherence", {})
+            med_c = coh_info.get("median_coherence")
+            if med_c is None or not np.isfinite(med_c):
+                continue
+            key = f"{rec['dataset']}/{rec['subject']}"
+            pr25_rec = exp7b_data.get(key, {})
+            cross_r = pr25_rec.get("cross_decay_r")
+            if cross_r is None or not np.isfinite(cross_r):
+                continue
+            x_vals.append(float(cross_r))
+            y_vals.append(float(med_c))
+            pt_colors.append("#2166AC" if rec["dataset"] == "yuquan" else "#E08214")
+        if x_vals:
+            ax.scatter(x_vals, y_vals, c=pt_colors, s=42, edgecolors="white", linewidths=0.5)
+            try:
+                r_corr, p_corr = pearsonr(x_vals, y_vals)
+                ax.set_title(f"Event-index r vs continuous coherence\nr={r_corr:.2f}, p={p_corr:.3g}", fontsize=10)
+            except Exception:
+                ax.set_title("Event-index r vs continuous coherence", fontsize=10)
+            ax.set_xlabel("PR-2.5 cross-decay r (event-index)", fontsize=9)
+            ax.set_ylabel("PR-2.7 median coherence (continuous)", fontsize=9)
+            ax.grid(True, alpha=0.15)
+        else:
+            ax.text(0.5, 0.5, "no matched data", ha="center", va="center", transform=ax.transAxes)
+            ax.set_title("Event-index r vs continuous coherence", fontsize=10)
+    else:
+        ax.text(0.5, 0.5, "exp7b_npart_autocorr.json\nnot found", ha="center", va="center", transform=ax.transAxes)
+        ax.set_title("Event-index r vs continuous coherence", fontsize=10)
+
+    # ---- Panel E (7G-1): Seizure-triggered average ----
+    ax = fig.add_subplot(gs[2, 0])
+    sta_recs = [r for r in valid if r.get("seizure_sta", {}).get("n_seizures_usable", 0) > 0]
+    if sta_recs:
+        for dataset, color, label in [("yuquan", "#2166AC", "Yuquan"), ("epilepsiae", "#E08214", "Epilepsiae")]:
+            subset = [r for r in sta_recs if r["dataset"] == dataset]
+            if not subset:
+                continue
+            all_sta = []
+            common_t = None
+            for r in subset:
+                sta = r["seizure_sta"]
+                t = np.asarray(sta["time_hours"], dtype=float)
+                m = np.asarray(sta["sta_mean"], dtype=float)
+                if common_t is None:
+                    common_t = t
+                if len(t) == len(common_t):
+                    all_sta.append(m)
+            if all_sta and common_t is not None:
+                stacked = np.array(all_sta, dtype=float)
+                cohort_mean = np.nanmean(stacked, axis=0)
+                cohort_sem = np.nanstd(stacked, axis=0, ddof=1) / np.sqrt(len(all_sta)) if len(all_sta) > 1 else np.zeros_like(cohort_mean)
+                ax.plot(common_t, cohort_mean, color=color, lw=2.0, label=f"{label} (n={len(subset)})")
+                ax.fill_between(common_t, cohort_mean - cohort_sem, cohort_mean + cohort_sem,
+                                color=color, alpha=0.15)
+        ax.axvline(0, color="red", ls="-", lw=1.5, alpha=0.7, label="Seizure onset")
+        ax.axhline(0, color="gray", ls="--", lw=0.5, alpha=0.5)
+        ax.set_xlabel("Time relative to seizure (hours)", fontsize=9)
+        ax.set_ylabel("Z-scored rate", fontsize=9)
+        ax.set_title(f"Seizure-triggered rate average (n_subjects={len(sta_recs)})", fontsize=10)
+        ax.legend(fontsize=8, loc="upper left")
+        ax.grid(True, alpha=0.15)
+    else:
+        ax.text(0.5, 0.5, "no usable seizure windows", ha="center", va="center", transform=ax.transAxes)
+        ax.set_title("Seizure-triggered rate average", fontsize=10)
+
+    # ---- Panel F (7G-2): Pre-ictal vs baseline rate ----
+    ax = fig.add_subplot(gs[2, 1])
+    if sta_recs:
+        pre_vals = []
+        base_vals = []
+        pt_colors = []
+        for r in sta_recs:
+            sta = r["seizure_sta"]
+            pre = sta.get("pre_rate")
+            base = sta.get("baseline_rate")
+            if pre is not None and base is not None and np.isfinite(pre) and np.isfinite(base):
+                pre_vals.append(float(pre))
+                base_vals.append(float(base))
+                pt_colors.append("#2166AC" if r["dataset"] == "yuquan" else "#E08214")
+        if len(pre_vals) >= 2:
+            pre_arr = np.array(pre_vals, dtype=float)
+            base_arr = np.array(base_vals, dtype=float)
+            for i in range(len(pre_vals)):
+                ax.plot([base_arr[i], pre_arr[i]], [i, i], color=pt_colors[i], lw=1.5, alpha=0.7)
+                ax.scatter([base_arr[i]], [i], color=pt_colors[i], s=30, marker="o", zorder=3)
+                ax.scatter([pre_arr[i]], [i], color=pt_colors[i], s=30, marker="s", zorder=3)
+            try:
+                stat = wilcoxon(pre_arr, base_arr, alternative="two-sided")
+                p_txt = f"p={stat.pvalue:.3g}"
+            except Exception:
+                p_txt = "p=N/A"
+            ax.set_xlabel("Z-scored rate", fontsize=9)
+            ax.set_ylabel("Subject index", fontsize=9)
+            ax.set_title(f"Pre-ictal [-6h,-1h] vs baseline [-12h,-6h]\nn={len(pre_vals)}, Wilcoxon {p_txt}", fontsize=10)
+            ax.scatter([], [], color="gray", marker="o", s=30, label="Baseline")
+            ax.scatter([], [], color="gray", marker="s", s=30, label="Pre-ictal")
+            ax.legend(fontsize=8, loc="upper right")
+            ax.grid(True, alpha=0.15)
+        else:
+            ax.text(0.5, 0.5, "insufficient paired data", ha="center", va="center", transform=ax.transAxes)
+            ax.set_title("Pre-ictal vs baseline rate", fontsize=10)
+    else:
+        ax.text(0.5, 0.5, "no seizure data", ha="center", va="center", transform=ax.transAxes)
+        ax.set_title("Pre-ictal vs baseline rate", fontsize=10)
+
+    fig.suptitle("Exp 7D: Rate-Trace Spectral + Seizure Proximity (PR-2.7)", fontsize=13)
+    fig.savefig(FIG_DIR / "exp7d_rate_spectral.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print("  Saved exp7d_rate_spectral.png")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp", default="all")
     args = parser.parse_args()
 
     if args.exp == "all":
-        exps = {"1", "2", "3", "4", "5", "6", "7", "7b", "7c"}
+        exps = {"1", "2", "3", "4", "5", "6", "7", "7b", "7c", "7d"}
     else:
         exps = {x.strip() for x in args.exp.split(",")}
 
@@ -1319,6 +1566,8 @@ def main():
         plot_exp7b()
     if "7c" in exps:
         plot_exp7c()
+    if "7d" in exps:
+        plot_exp7d()
 
     print(f"\nDone. Figures in {FIG_DIR}")
 

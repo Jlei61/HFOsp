@@ -564,15 +564,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 ~~**PR-2.6（连续长时程 + 连续 day/night 段）**~~ → **已完成**，见 §3.4.8。核心发现：(i) 慢调制在真实连续时间轴上延伸到多小时；(ii) Yuquan 10/10 为 near-24h continuous，Epilepsiae 最长连续段中位数 75.1h；(iii) 连续 day/night 段内部仍保留短程依赖（Yuquan 9/10，Epilepsiae 17/20）。
 
-**PR-2.7（Rate-Trace 谱特征刻画 + 发作邻近调制）** → PLANNED
-
-三件事：
-
-1. **Rate-trace PSD + 1/f 斜率**：对 PR-2.6 生成的 5 分钟 bin rate trace 做 Welch PSD，拟合 log-log 斜率 β。PR-2.5 的 Δ_frac 平坦只是间接推断"1/f-like"；PR-2.7 直接测量谱指数。β ≈ 1 → pink noise；β ≈ 2 → Brownian。拟合范围 0.02–0.5 mHz（≈30 min 至 8h 周期）。
-2. **Rate × n_participating 连续时间相干性**：对 rate trace 与 mean(n_participating) trace 做 cross-spectral coherence。PR-2.5 的 event-index 互相关 r = 0.742 是单个标量汇总；相干函数展示*在哪些频率上*全局状态变量假说成立。高频相干低 → 局部兴奋性独立成分。
-3. **Seizure-triggered rate average**：提取每次发作 ±12h 窗口内的 z-scored rate trace 并平均。测试 pre-ictal [-6h, -1h] vs baseline [-12h, -6h] 是否有系统性升高（Wilcoxon）。如果 rate 在发作前爬升而同步性（PR4–PR6）无变化 → rate 比 synchrony 更敏感的 pre-ictal 标志物。
-
-实验编号：exp7d（7E / 7F / 7G 三面板）。输出 `exp7d_rate_spectral.json`。详细计划见 `.cursor/rules/event-periodicity-pr-plan.mdc`。
+~~**PR-2.7（Rate-Trace 谱特征刻画 + 发作邻近调制）**~~ → **已完成**，见 `docs/event_periodicity_analysis.md` §5.9。核心发现：(i) Rate-trace PSD 谱指数 β 中位 0.67（30 subjects），确认宽频段长程依赖但非严格 1/f；(ii) rate × n_participating 连续时间相干中位 0.576（去除短段伪影后 0.471），频域部分支持全局状态变量；(iii) **seizure-triggered rate average 发现 pre-ictal 率升高（p=0.019，16/21 pre > baseline）——这是整个调制分析线中唯一 population-level significant 的发作关联发现**。
 
 **更远期**
 
@@ -590,11 +582,11 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 我认为可以接受的更新过的 narrative 是这样的：
 
-> 间期 HFO 群体事件的产生不是由网络内禀振荡器驱动的——之前 Fig 3 的 ~2 Hz 谱峰在 (i) refractory renewal null model, (ii) ISI shuffle null model 下都不再显著，并且 IEI 分布是 lognormal 而不是 power-law。这些事件更符合一个**带不应期的兴奋性点过程**（FHN / HR / theta-neuron 类），其时序由 (a) 局部兴奋性恢复动力学和 (b) 慢时间尺度的状态调制共同塑造。后者的存在被 IEI 相邻正相关（30/30 subjects）直接证明，而 PR-2.6 进一步显示**宏观事件率的慢漂移确实延伸到多小时连续时间尺度**（5 分钟 bin rate trace 自相关在 Epilepsiae 到 8h 仍为正），并不是事件索引统计上的假象。
+> 间期 HFO 群体事件的产生不是由网络内禀振荡器驱动的——之前 Fig 3 的 ~2 Hz 谱峰在 (i) refractory renewal null model, (ii) ISI shuffle null model 下都不再显著，并且 IEI 分布是 lognormal 而不是 power-law。这些事件更符合一个**带不应期的兴奋性点过程**（FHN / HR / theta-neuron 类），其时序由 (a) 局部兴奋性恢复动力学和 (b) 慢时间尺度的状态调制共同塑造。后者的存在被 IEI 相邻正相关（30/30 subjects）直接证明，而 PR-2.6 进一步显示**宏观事件率的慢漂移确实延伸到多小时连续时间尺度**（5 分钟 bin rate trace 自相关在 Epilepsiae 到 8h 仍为正），并不是事件索引统计上的假象。PR-2.7 直接测量了率过程的谱指数（β 中位 0.67，sub-pink-noise），并发现 **HFO 群体事件率在发作前 1–6h 系统性升高**（pre vs baseline Wilcoxon p=0.019，16/21 subjects），而 PR4–PR6 的 phase synchrony 在同一群体水平无显著变化——这意味着 rate 比 synchrony 是更敏感的 pre-ictal 标志物。
 >
 > 在空间维度上，群体事件的传播 rank 在某些个体上确实呈现出可重复的 stereotype，并且 SOZ 参与的事件比 non-SOZ 事件更刻板（探索性证据，单侧 p = 0.039）。这是论文 Fig 1, 2 叙事中**仍然站得住的那一部分**——但需要在 mixture 检测、identity bias 控制（注意 centering 不能抹掉 SOZ 作为真实源节点的传播拓扑）、按 n_participating 分层之后才能给出最终的定量结论。
 >
-> 老论文的 Hopfield-Kuramoto 框架在数学层面（Hebbian-like 对称连接编码 stereotype）可以保留，但节点动力学需要从 Kuramoto 振荡器换成 FHN / HR / theta-neuron 类兴奋性单元。这样既能继续解释 stereotype 的稳定性，也能自然容纳不应期、宽 IEI 分布、和慢调制驱动的事件率漂移。
+> 老论文的 Hopfield-Kuramoto 框架在数学层面（Hebbian-like 对称连接编码 stereotype）可以保留，但节点动力学需要从 Kuramoto 振荡器换成 FHN / HR / theta-neuron 类兴奋性单元。这样既能继续解释 stereotype 的稳定性，也能自然容纳不应期、宽 IEI 分布、和慢调制驱动的事件率漂移。发作前率升高的发现进一步连接了 interictal 时序动力学与 pre-ictal 状态。
 
 ### 已完成的验证工作
 
@@ -612,8 +604,9 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 | **PR-2: lag-k 衰减 + 去趋势 + block 内 + SOZ 分层** | **✅ exp 7** | **半衰期 107s; 72% 慢漂移 + 28% 短程; within-block 30/30 正; SOZ > nonSOZ p=0.055 (n=9)** |
 | **PR-2.5: 多尺度调制 + n_part + day/night + 回填** | **✅ exp 7b** | **Δ_frac 平坦(1/f); n_part 互相关 0.742; day/night 28/30 正; 1084+1096 峰消失→21/21 全覆盖** |
 | **PR-2.6: 连续长时程 + 连续 day/night 段** | **✅ exp 7c** | **Yuquan 10/10 near-24h continuous; Epilepsiae 最长连续段中位 75.1h; binned rate autocorr 到 8h 仍正 (Epilepsiae); 连续 day/night 段内 pooled detrended r 仍正 (26/30)** |
+| **PR-2.7: Rate-trace 谱特征 + 发作邻近调制** | **✅ exp 7d** | **β 中位 0.67; coherence 中位 0.576; **seizure STA pre > baseline p=0.019 (16/21)** — 发作前 rate 系统性升高** |
 
-### 已完成项的状态更新（2026-04-08）
+### 已完成项的状态更新（2026-04-09）
 
 1. **PR-2：IEI serial correlation 深层分析** — **已完成**。详见 §3.4。核心发现：(i) 调制半衰期 ~1.8 分钟；(ii) 72% 慢漂移 + 28% 短程依赖；(iii) 跨 block 污染排除；(iv) SOZ 倾向于更强（p=0.055，边缘）。
 
@@ -621,10 +614,14 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 3. **PR-2.6：连续长时程调制分析** — **已完成**。详见 §3.4.8。核心发现：(i) 宏观事件率（binned rate trace）的慢漂移在真实连续时间轴上延伸到多小时（注意这不等于 IEI serial correlation 本身持续到多小时）；(ii) Yuquan 的 24h 优势被真正利用，10/10 near-24h continuous；(iii) 连续 day/night 段内部仍保留短程依赖（subject 内同标签段 pooled），说明此前结论不是 pooled 标签伪影。
 
+4. **PR-2.7：Rate-trace 谱特征 + 发作邻近调制** — **已完成**。详见 `docs/event_periodicity_analysis.md` §5.9。核心发现：(i) Rate-trace PSD 谱指数 β 中位 0.67（范围 0.06–1.62），确认率过程具有超越白噪声的长程依赖但非严格 1/f，与 PR-2.5 宽频段结论一致；(ii) rate × n_participating 连续时间相干中位 0.576（去伪影后 0.471），部分频域支持全局状态变量；(iii) **seizure-triggered rate average: pre-ictal [-6h,-1h] vs baseline [-12h,-6h] Wilcoxon p=0.019, 16/21 pre > baseline — HFO 率在发作前系统性升高**。这是整个调制分析线中唯一 population-level significant 的发作关联发现，也是 rate 比 synchrony 更敏感的 pre-ictal 标志物的直接证据。
+
 ### 最值得继续做的事（按性价比，更新版）
 
 1. **PR-3：传播 stereotype 稳健性检验**（话题 1 P0）。Hartigan dip test 检测 mixture stereotype；centered rank tau 控制 detection ordering bias；按 n_participating 分层去除离散化噪声。让 Fig 2 的 17/18 + 20/20 变得真正可信。**注意：centering 存在"把婴儿和洗澡水一起倒掉"的风险——SOZ 通道因高兴奋性天然点火最早，均值扣除可能抹掉真实的 SOZ 驱动的传播拓扑。计划中已加入必选诊断：对比 center 前后的 top-3 源通道列表，如 SOZ 源节点被抹掉则报告 `soz_source_erased`，并侧报 raw vs centered tau 而非仅报 centered。**
 
 2. **对 huanghanwen 这个唯一"genuine"做敏感性分析**：把不同 surrogate 参数（gamma shape、shift、shuffle 类型）扫一遍，看它是否真的稳健。n=484 的样本量本来就在边缘。
 
-整篇论文的叙事现在可以定格为 **"interictal events as a refractory excitable point process under multi-timescale state modulation, with SOZ-specific propagation stereotypy"** ——这是一个比"~2 Hz oscillator"更准确、更有层次、也更可发表的故事。PR-3 是这一叙事中唯一未完成的定量验证（话题 1 的 stereotype 部分）。
+3. **Seizure-triggered rate 的后续深化**：PR-2.7 发现发作前 rate 升高（p=0.019），但 (i) 需要控制发作密度对 z-score 的影响；(ii) 需要按 subject 做 leave-one-seizure-out 检验稳健性；(iii) 需要与 PR4–PR6 的同步性指标在同一窗口内做 dissociation 分析。
+
+整篇论文的叙事现在可以定格为 **"interictal events as a refractory excitable point process under multi-timescale state modulation, with pre-ictal rate elevation and SOZ-specific propagation stereotypy"** ——这比之前的版本增加了一个 actionable finding（pre-ictal rate），使故事从纯描述性升级到潜在的临床相关性。PR-3 是 stereotype 定量验证的唯一未完成项。

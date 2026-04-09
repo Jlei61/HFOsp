@@ -87,14 +87,21 @@ Important drift:
 ## Current Code Map
 
 - Entry point: `scripts/run_pipeline.py`
+- Batch HFO detection: `scripts/run_hfo_detection.py` — produces `*_gpu.npz` + `_refineGpu.npz` for both datasets
+  - Per-subject parameters: `config/subject_params.json`
 - Preprocess: `src/preprocessing.py`
   - includes `detect_seizure_by_spatial_extent()` (Yuquan EDF) and `detect_seizure_by_spatial_extent_epilepsiae()` (*.data/*.head)
+  - includes `load_epilepsiae_block()` — full signal loader for Epilepsiae `.data/.head` (CAR or bipolar)
 - HFO detection: `src/hfo_detector.py`
+  - `save_detection_as_gpu_npz()` — persist detection result as legacy-compatible `*_gpu.npz`
+  - `build_legacy_alias_map()` — bipolar→left-contact alias for backward compatibility
+  - Nyquist hard gate: `sfreq/2 <= band_upper` raises `ValueError`
 - Legacy-aligned refine / packing / lag:
   - `src/group_event_analysis.py`
   - look for:
     - `legacy_refine_channels_from_detections()`
     - `legacy_refine_counts_from_detection_sets()`
+    - `save_refine_gpu_npz()` — produce + persist `_refineGpu.npz`
     - `_legacy_rehist_events_by_packing()`
     - `build_windows_from_detections()`
     - `build_windows_from_packed_times()`
@@ -113,17 +120,18 @@ Important drift:
   - `scripts/run_event_periodicity.py` — Phase 1 dual-dataset batch driver
   - `scripts/run_surrogates_batch.py` — group-only surrogate batch
   - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
-  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (10 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5, exp7c PR-2.6, exp7d PR-2.7 planned)
+  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (10 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5, exp7c PR-2.6, exp7d PR-2.7)
   - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7d)
   - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 / PR-2.7 function unit tests
-  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5+PR-1+PR-2+PR-2.5+PR-2.6+PR-2.7)
+  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5 + PR-1 to PR-2.7)
   - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
   - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
 - Spatial modulation / SOZ analysis (Where question):
-  - `docs/spatial_modulation_soz_analysis.md` — plan and results for per-channel SOZ spatial attribution
+  - `docs/spatial_modulation_soz_analysis.md` — plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
   - `scripts/audit_gpu_npz.py` — Step 0 data audit (Yuquan PASS 11/18, Epilepsiae FAIL 0/20)
   - `scripts/run_spatial_modulation.py` — PR-1 batch driver (Yuquan-only, 9 valid pairs)
   - `scripts/plot_spatial_modulation.py` — PR-1 figures
+  - `scripts/run_hfo_detection.py` — batch HFO detection for both datasets (`--dataset yuquan/epilepsiae --subject/--all`)
   - `src/event_periodicity.py` — `load_perchannel_events_relaxed()`, `compute_perchannel_metrics()`, `annotate_channels_soz()`, `match_bipolar_soz()`
 - Epilepsiae dataset: `src/epilepsiae_dataset.py`
 - Network: `src/network_analysis.py`
@@ -265,18 +273,18 @@ Stop and ask the user instead of guessing when:
     - Yuquan 10/10 subjects provide near-24h continuous trajectories; Epilepsiae longest continuous run median = 75.1h, observed duration median = 158.4h
     - Continuous-time binned rate autocorrelation (5-min bins) remains positive from 0.5h to 8h lags in Epilepsiae (median 0.108 at 8h); Yuquan positive to 4h but ~0 at 8h. Note: this is binned rate autocorrelation, not a direct extension of IEI lag-k serial correlation
     - Continuous day/night segment analysis: Yuquan 9/10 and Epilepsiae 17/20 remain positive on both sides → short-range dependency survives inside continuous day/night segments
-  - PR-2.7 (exp7d, PLANNED): rate-trace spectral characterization + seizure proximity
-    - Exp 7E: Welch PSD of continuous rate trace + OLS 1/f slope β — directly measures spectral exponent (PR-2.5 Δ_frac was indirect)
-    - Exp 7F: rate × n_participating cross-spectral coherence — frequency-resolved global state variable test (upgrades PR-2.5's single-number r=0.742)
-    - Exp 7G: seizure-triggered rate average ±12h — tests pre-ictal ramp / post-ictal suppression; connects to PR6 synchrony null
-  - Next after PR-2.7: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
+  - PR-2.7 (exp7d, 2026-04-09): rate-trace spectral characterization + seizure proximity on 30 subjects:
+    - Rate-trace PSD β: cohort median = 0.67 (range 0.06–1.62), r² median 0.698 → sub-pink-noise but confirms long-range dependence beyond white noise; consistent with PR-2.5 broad-band Δ_frac
+    - Rate × n_participating coherence: median 0.576 (16/26 > 0.5); excluding short-segment artifacts (coh≈1.0): median 0.471 → partial frequency-domain confirmation of global state variable
+    - **Seizure-triggered rate average: pre-ictal [-6h,-1h] vs baseline [-12h,-6h] Wilcoxon p=0.019, 16/21 pre > baseline → HFO rate systematically elevated before seizures**. Rate is more sensitive pre-ictal marker than phase synchrony (PR4–PR6 population null). Primarily Epilepsiae-driven (21 subjects, 341 seizures total)
+  - Next: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
   - Method caveats incorporated: detrend_fraction curve behavior depends on window vs modulation timescale (use Δ_frac for band localization); n_participating must use Spearman not Pearson-on-log; centered rank tau must check SOZ source node preservation
   - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
 
 - "Where does the slow IEI modulation occur? Is it SOZ-specific?"
   - Read `docs/spatial_modulation_soz_analysis.md`
   - Short answer: **PR-1 completed (Yuquan-only, n=9)**. Raw serial corr shows **no SOZ difference** (p=1.0). But **detrend_fraction is lower in SOZ** (7/9 subjects, p=0.129) — SOZ channels have more short-range memory, less slow drift. SOZ median IEI is shorter (p=0.055, marginal).
-  - Epilepsiae gpu.npz are all corrupt stubs (216 bytes); per-channel analysis requires HFO re-detection
+   - Epilepsiae gpu.npz are all corrupt stubs (216 bytes); per-channel analysis requires HFO re-detection via `scripts/run_hfo_detection.py --dataset epilepsiae --all`
   - Per-channel approach (relaxed refine k=0.0) successfully expands channel set from lagPat ~10 to ~33, with 9/11 subjects forming valid SOZ/nonSOZ pairs
   - Key insight: lagPat-based SOZ > nonSOZ serial corr (PR-2 exp7D, p=0.055) was confounded by SOZ's higher event rate → global modulation effect. Per-channel detrending separates this into global (no difference) + local (SOZ has more short-range memory).
   - Epilepsiae three-tier (i/l/e) gradient analysis deferred to PR-2

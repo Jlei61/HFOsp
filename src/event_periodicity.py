@@ -2701,6 +2701,394 @@ def compute_detrended_psd_backfill(
 
 
 # ---------------------------------------------------------------------------
+# PR-2.7: Rate-trace spectral characterization + seizure proximity
+# ---------------------------------------------------------------------------
+
+
+def compute_rate_trace_psd(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    bin_sec: float = 300.0,
+    merge_gap_sec: float = 5.0,
+    min_span_bins: int = 48,
+    nperseg_max: int = 64,
+    fit_freq_range_mhz: Tuple[float, float] = (0.02, 0.5),
+) -> Dict[str, Any]:
+    """Welch PSD of the continuous rate trace with OLS 1/f slope fit.
+
+    Only contiguous valid spans (>= min_span_bins) are used.  PSDs from
+    multiple spans are averaged weighted by span length.  The 1/f slope β
+    is estimated via OLS on log10(PSD) vs log10(f) within fit_freq_range_mhz.
+    """
+    from scipy.signal import welch as scipy_welch
+
+    trace = build_continuous_rate_trace(
+        events=events, block_ranges=block_ranges,
+        bin_sec=bin_sec, merge_gap_sec=merge_gap_sec,
+    )
+    if "warning" in trace:
+        return {"warning": trace["warning"]}
+
+    rate = np.asarray(trace["rate_per_hour"], dtype=float)
+    valid = np.asarray(trace["valid_mask"], dtype=bool)
+    spans = _contiguous_true_spans(valid)
+
+    usable = [(s, e) for s, e in spans if (e - s) >= min_span_bins]
+    if not usable:
+        return {"warning": "no_usable_spans"}
+
+    fs_hz = 1.0 / float(bin_sec)
+    all_psd: List[np.ndarray] = []
+    all_weights: List[float] = []
+    common_freqs: Optional[np.ndarray] = None
+
+    for s, e in usable:
+        seg = rate[s:e].copy()
+        seg -= np.nanmean(seg)
+        nperseg = min(nperseg_max, len(seg))
+        noverlap = nperseg // 2
+        freqs, pxx = scipy_welch(seg, fs=fs_hz, nperseg=nperseg,
+                                 noverlap=noverlap, detrend="linear")
+        if common_freqs is None:
+            common_freqs = freqs
+        if len(freqs) == len(common_freqs):
+            all_psd.append(pxx)
+            all_weights.append(float(e - s))
+
+    if not all_psd or common_freqs is None:
+        return {"warning": "psd_computation_failed"}
+
+    weights = np.array(all_weights, dtype=float)
+    weights /= weights.sum()
+    avg_psd = np.zeros_like(all_psd[0])
+    for w, p in zip(weights, all_psd):
+        avg_psd += w * p
+
+    freqs_mhz = common_freqs * 1000.0
+
+    f_lo, f_hi = fit_freq_range_mhz
+    fit_mask = (freqs_mhz >= f_lo) & (freqs_mhz <= f_hi) & (avg_psd > 0) & (common_freqs > 0)
+
+    beta = np.nan
+    beta_r2 = np.nan
+    n_fit_pts = int(np.sum(fit_mask))
+    if n_fit_pts >= 3:
+        log_f = np.log10(freqs_mhz[fit_mask])
+        log_p = np.log10(avg_psd[fit_mask])
+        coeffs = np.polyfit(log_f, log_p, 1)
+        beta = -float(coeffs[0])
+        predicted = np.polyval(coeffs, log_f)
+        ss_res = np.sum((log_p - predicted) ** 2)
+        ss_tot = np.sum((log_p - np.mean(log_p)) ** 2)
+        beta_r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0
+
+    total_hours = sum((e - s) * bin_sec / 3600.0 for s, e in usable)
+
+    return {
+        "freqs_mhz": freqs_mhz,
+        "psd": avg_psd,
+        "beta": beta,
+        "beta_r2": beta_r2,
+        "n_fit_points": n_fit_pts,
+        "n_spans": len(usable),
+        "total_hours": float(total_hours),
+        "bin_sec": float(bin_sec),
+    }
+
+
+def compute_rate_npart_coherence(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    subject_dir: Path,
+    dataset: str,
+    bin_sec: float = 300.0,
+    merge_gap_sec: float = 5.0,
+    min_span_bins: int = 48,
+    nperseg_max: int = 64,
+    coherence_band_mhz: Tuple[float, float] = (0.02, 0.5),
+) -> Dict[str, Any]:
+    """Cross-spectral coherence between rate trace and n_participating trace.
+
+    n_participating is computed as mean(eventsBool.sum(axis=0)) per bin.
+    Only contiguous spans where both rate and npart are valid are used.
+    """
+    from scipy.signal import coherence as scipy_coherence
+
+    trace = build_continuous_rate_trace(
+        events=events, block_ranges=block_ranges,
+        bin_sec=bin_sec, merge_gap_sec=merge_gap_sec,
+    )
+    if "warning" in trace:
+        return {"warning": trace["warning"]}
+
+    rate = np.asarray(trace["rate_per_hour"], dtype=float)
+    valid_rate = np.asarray(trace["valid_mask"], dtype=bool)
+    bin_edges = np.asarray(trace["bin_edges"], dtype=float)
+    n_bins = len(rate)
+
+    npart_arr = _build_npart_trace(events, subject_dir, dataset, bin_edges, n_bins)
+    if npart_arr is None:
+        return {"warning": "npart_trace_failed"}
+
+    valid_npart = np.isfinite(npart_arr)
+    joint_valid = valid_rate & valid_npart
+    spans = _contiguous_true_spans(joint_valid)
+    usable = [(s, e) for s, e in spans if (e - s) >= min_span_bins]
+
+    if not usable:
+        return {"warning": "no_usable_joint_spans"}
+
+    fs_hz = 1.0 / float(bin_sec)
+    all_coh: List[np.ndarray] = []
+    all_weights: List[float] = []
+    common_freqs: Optional[np.ndarray] = None
+
+    for s, e in usable:
+        r_seg = rate[s:e].copy()
+        n_seg = npart_arr[s:e].copy()
+        r_seg -= np.nanmean(r_seg)
+        n_seg -= np.nanmean(n_seg)
+        nperseg = min(nperseg_max, len(r_seg))
+        noverlap = nperseg // 2
+        freqs, cxy = scipy_coherence(r_seg, n_seg, fs=fs_hz,
+                                     nperseg=nperseg, noverlap=noverlap)
+        if common_freqs is None:
+            common_freqs = freqs
+        if len(freqs) == len(common_freqs):
+            all_coh.append(cxy)
+            all_weights.append(float(e - s))
+
+    if not all_coh or common_freqs is None:
+        return {"warning": "coherence_computation_failed"}
+
+    weights = np.array(all_weights, dtype=float)
+    weights /= weights.sum()
+    avg_coh = np.zeros_like(all_coh[0])
+    for w, c in zip(weights, all_coh):
+        avg_coh += w * c
+
+    freqs_mhz = common_freqs * 1000.0
+    f_lo, f_hi = coherence_band_mhz
+    band_mask = (freqs_mhz >= f_lo) & (freqs_mhz <= f_hi)
+    median_coh = float(np.median(avg_coh[band_mask])) if np.any(band_mask) else np.nan
+
+    return {
+        "freqs_mhz": freqs_mhz,
+        "coherence": avg_coh,
+        "median_coherence": median_coh,
+        "n_spans": len(usable),
+        "bin_sec": float(bin_sec),
+    }
+
+
+def _build_npart_trace(
+    events: np.ndarray,
+    subject_dir: Path,
+    dataset: str,
+    bin_edges: np.ndarray,
+    n_bins: int,
+) -> Optional[np.ndarray]:
+    """Build mean(n_participating) trace from lagPat files.
+
+    Returns an array of length n_bins with NaN for bins without events.
+    """
+    subject_dir = Path(subject_dir)
+    lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
+    if not lagpat_files:
+        return None
+
+    all_npart: List[float] = []
+    all_times: List[float] = []
+
+    for lp_file in lagpat_files:
+        try:
+            lp = np.load(lp_file, allow_pickle=True)
+            events_bool = lp["eventsBool"]
+            start_t = float(lp["start_t"])
+        except Exception:
+            continue
+
+        n_ch, n_events = events_bool.shape
+        npart_per_event = events_bool.sum(axis=0).astype(float)
+
+        packed_file = lp_file.parent / lp_file.name.replace("_lagPat.npz", "_packedTimes.npy")
+        wfc_packed = lp_file.parent / lp_file.name.replace(
+            "_lagPat.npz", "_packedTimes_withFreqCent.npy"
+        )
+        for pf in (wfc_packed, packed_file):
+            if pf.exists():
+                try:
+                    packed_times = np.load(pf, allow_pickle=True)
+                    if len(packed_times) >= n_events:
+                        for i in range(n_events):
+                            ev = packed_times[i]
+                            if hasattr(ev, '__len__') and len(ev) >= 2:
+                                t = start_t + float(ev[0])
+                            else:
+                                t = start_t + float(ev)
+                            all_times.append(t)
+                            all_npart.append(float(npart_per_event[i]))
+                        break
+                except Exception:
+                    continue
+        else:
+            block_dur = 2 * 3600.0 if dataset == "yuquan" else 3600.0
+            spacing = block_dur / max(n_events, 1)
+            for i in range(n_events):
+                all_times.append(start_t + i * spacing)
+                all_npart.append(float(npart_per_event[i]))
+
+    if not all_times:
+        return None
+
+    times_arr = np.array(all_times, dtype=float)
+    npart_vals = np.array(all_npart, dtype=float)
+
+    result = np.full(n_bins, np.nan, dtype=float)
+    bin_idx = np.digitize(times_arr, bin_edges) - 1
+    for i in range(n_bins):
+        mask = bin_idx == i
+        if np.any(mask):
+            result[i] = float(np.mean(npart_vals[mask]))
+
+    return result
+
+
+def compute_seizure_triggered_rate(
+    events: np.ndarray,
+    block_ranges: List[Tuple[float, float]],
+    seizure_times: List[float],
+    bin_sec: float = 300.0,
+    window_hours: float = 12.0,
+    merge_gap_sec: float = 5.0,
+    min_valid_frac: float = 0.5,
+) -> Dict[str, Any]:
+    """Seizure-triggered average (STA) of the rate trace.
+
+    For each seizure, extracts a ±window_hours window from the continuous
+    rate trace, z-scores it, then averages across usable seizures.
+    """
+    if not seizure_times:
+        return {"warning": "no_seizure_times"}
+
+    trace = build_continuous_rate_trace(
+        events=events, block_ranges=block_ranges,
+        bin_sec=bin_sec, merge_gap_sec=merge_gap_sec,
+    )
+    if "warning" in trace:
+        return {"warning": trace["warning"]}
+
+    rate = np.asarray(trace["rate_per_hour"], dtype=float)
+    valid = np.asarray(trace["valid_mask"], dtype=bool)
+    centers = np.asarray(trace["bin_centers"], dtype=float)
+
+    global_vals = rate[valid & np.isfinite(rate)]
+    if len(global_vals) < 5:
+        return {"warning": "insufficient_valid_bins"}
+    g_mean = float(np.mean(global_vals))
+    g_std = float(np.std(global_vals))
+    if g_std < 1e-12:
+        return {"warning": "zero_rate_variance"}
+
+    window_sec = window_hours * 3600.0
+    n_window_bins = int(round(2 * window_sec / bin_sec))
+    half_bins = n_window_bins // 2
+    time_axis = np.linspace(-window_hours, window_hours, n_window_bins)
+
+    usable_windows: List[np.ndarray] = []
+    for sz_t in seizure_times:
+        center_idx = np.argmin(np.abs(centers - sz_t))
+        i0 = center_idx - half_bins
+        i1 = center_idx + half_bins
+        if i0 < 0 or i1 > len(rate):
+            continue
+        window_rate = rate[i0:i1].copy()
+        window_valid = valid[i0:i1].copy()
+        valid_frac = float(np.sum(window_valid)) / len(window_valid)
+        if valid_frac < min_valid_frac:
+            continue
+        z_rate = (window_rate - g_mean) / g_std
+        z_rate[~window_valid] = np.nan
+        usable_windows.append(z_rate)
+
+    n_usable = len(usable_windows)
+    if n_usable == 0:
+        return {
+            "warning": "no_usable_seizure_windows",
+            "n_seizures_total": len(seizure_times),
+            "n_seizures_usable": 0,
+        }
+
+    stacked = np.array(usable_windows, dtype=float)
+    sta_mean = np.nanmean(stacked, axis=0)
+    sta_sem = np.nanstd(stacked, axis=0, ddof=1) / np.sqrt(n_usable) if n_usable > 1 else np.zeros_like(sta_mean)
+
+    bins_per_hour = 3600.0 / bin_sec
+    def _mean_z_in_range(h_lo: float, h_hi: float) -> float:
+        i0 = int(round((h_lo + window_hours) * bins_per_hour))
+        i1 = int(round((h_hi + window_hours) * bins_per_hour))
+        i0 = max(0, min(i0, len(sta_mean)))
+        i1 = max(0, min(i1, len(sta_mean)))
+        seg = sta_mean[i0:i1]
+        return float(np.nanmean(seg)) if len(seg) > 0 else np.nan
+
+    pre_rate = _mean_z_in_range(-6.0, -1.0)
+    baseline_rate = _mean_z_in_range(-12.0, -6.0)
+    post_rate = _mean_z_in_range(1.0, 6.0)
+    post_baseline = _mean_z_in_range(6.0, 12.0)
+
+    return {
+        "time_hours": time_axis,
+        "sta_mean": sta_mean,
+        "sta_sem": sta_sem,
+        "n_seizures_total": len(seizure_times),
+        "n_seizures_usable": n_usable,
+        "pre_rate": pre_rate,
+        "baseline_rate": baseline_rate,
+        "post_rate": post_rate,
+        "post_baseline": post_baseline,
+    }
+
+
+def load_seizure_times(subject: str, dataset: str) -> List[float]:
+    """Load seizure onset times (Unix epoch seconds) from existing results.
+
+    Yuquan: reads results/seizure_detection/pr1_seizure_<subject>.json
+    Epilepsiae: reads results/epilepsiae_seizure_inventory.csv
+    """
+    import csv
+
+    times: List[float] = []
+    if dataset == "yuquan":
+        path = Path("results/seizure_detection") / f"pr1_seizure_{subject}.json"
+        if not path.exists():
+            return times
+        with open(path) as f:
+            data = json.load(f)
+        for file_rec in data.get("files", []):
+            for si in file_rec.get("seizure_intervals", []):
+                onset = si.get("onset_epoch")
+                if onset is not None:
+                    times.append(float(onset))
+    elif dataset == "epilepsiae":
+        path = Path("results/epilepsiae_seizure_inventory.csv")
+        if not path.exists():
+            return times
+        with open(path) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get("subject") == subject:
+                    onset = row.get("eeg_onset_epoch", "")
+                    if onset:
+                        try:
+                            times.append(float(onset))
+                        except ValueError:
+                            pass
+    times.sort()
+    return times
+
+
+# ---------------------------------------------------------------------------
 # Per-channel spatial modulation analysis
 # ---------------------------------------------------------------------------
 

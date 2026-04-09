@@ -14,6 +14,8 @@ from src.event_periodicity import (
     compute_long_timescale_rate_summary,
     compute_multiscale_detrend_fraction,
     compute_nparticipating_autocorrelation,
+    compute_rate_trace_psd,
+    compute_seizure_triggered_rate,
     compute_serial_correlation_decay,
     compute_serial_corr_soz_stratified,
     compute_within_block_serial_corr,
@@ -516,3 +518,72 @@ def test_compute_long_timescale_rate_summary_reports_multi_hour_metrics() -> Non
     assert len(out["rate_autocorr"]) == 3
     assert np.isfinite(out["rate_summary"][0]["fluct_strength_iqr_over_median"])
     assert len(out["trace"]["bin_centers"]) == len(out["trace"]["rate_per_hour"])
+
+
+def test_compute_rate_trace_psd_returns_beta_and_psd() -> None:
+    """PR-2.7: rate-trace PSD should return a spectral exponent and PSD array."""
+    rng = np.random.default_rng(42)
+    n_events = 500
+    base_iei = rng.exponential(scale=30.0, size=n_events)
+    slow_mod = 20.0 * np.sin(2 * np.pi * np.arange(n_events) / 100.0)
+    iei = base_iei + slow_mod
+    iei = np.clip(iei, 5.0, None)
+    starts = np.concatenate([[0.0], np.cumsum(iei)])
+    events = _events_from_starts(starts, dur=0.05)
+    block_end = starts[-1] + 300.0
+
+    out = compute_rate_trace_psd(
+        events=events,
+        block_ranges=[(0.0, block_end)],
+        bin_sec=300.0,
+        min_span_bins=12,
+        nperseg_max=32,
+    )
+
+    assert "warning" not in out
+    assert np.isfinite(out["beta"])
+    assert out["n_spans"] >= 1
+    assert len(out["freqs_mhz"]) == len(out["psd"])
+    assert out["total_hours"] > 1.0
+
+
+def test_compute_seizure_triggered_rate_reports_sta() -> None:
+    """PR-2.7: seizure STA should produce a time-aligned average."""
+    rng = np.random.default_rng(99)
+    n_events = 800
+    iei = rng.exponential(scale=20.0, size=n_events)
+    starts = np.concatenate([[0.0], np.cumsum(iei)])
+    events = _events_from_starts(starts, dur=0.05)
+    total_time = starts[-1] + 300.0
+
+    mid = total_time / 2.0
+    seizure_times = [mid]
+
+    out = compute_seizure_triggered_rate(
+        events=events,
+        block_ranges=[(0.0, total_time)],
+        seizure_times=seizure_times,
+        bin_sec=300.0,
+        window_hours=2.0,
+        min_valid_frac=0.3,
+    )
+
+    if out.get("warning") == "no_usable_seizure_windows":
+        assert out["n_seizures_total"] == 1
+    else:
+        assert out["n_seizures_usable"] >= 1
+        assert len(out["time_hours"]) == len(out["sta_mean"])
+        assert np.isfinite(out["pre_rate"]) or np.isnan(out["pre_rate"])
+
+
+def test_compute_seizure_triggered_rate_no_seizures() -> None:
+    """PR-2.7: should handle empty seizure list gracefully."""
+    events = _events_from_starts(np.array([0.0, 10.0, 20.0]), dur=0.05)
+    out = compute_seizure_triggered_rate(
+        events=events,
+        block_ranges=[(0.0, 100.0)],
+        seizure_times=[],
+        bin_sec=10.0,
+        window_hours=0.01,
+    )
+    assert out.get("warning") == "no_seizure_times"
