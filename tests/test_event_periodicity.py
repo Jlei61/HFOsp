@@ -543,6 +543,7 @@ def test_compute_rate_trace_psd_returns_beta_and_psd() -> None:
     assert "warning" not in out
     assert np.isfinite(out["beta"])
     assert out["n_spans"] >= 1
+    assert out["nperseg"] >= 8
     assert len(out["freqs_mhz"]) == len(out["psd"])
     assert out["total_hours"] > 1.0
 
@@ -557,7 +558,7 @@ def test_compute_seizure_triggered_rate_reports_sta() -> None:
     total_time = starts[-1] + 300.0
 
     mid = total_time / 2.0
-    seizure_times = [mid]
+    seizure_times = [mid - 3600.0, mid + 3600.0]
 
     out = compute_seizure_triggered_rate(
         events=events,
@@ -568,10 +569,10 @@ def test_compute_seizure_triggered_rate_reports_sta() -> None:
         min_valid_frac=0.3,
     )
 
-    if out.get("warning") == "no_usable_seizure_windows":
-        assert out["n_seizures_total"] == 1
+    if out.get("warning") in {"no_usable_seizure_windows", "insufficient_usable_seizure_windows"}:
+        assert out["n_seizures_total"] == 2
     else:
-        assert out["n_seizures_usable"] >= 1
+        assert out["n_seizures_usable"] >= 2
         assert len(out["time_hours"]) == len(out["sta_mean"])
         assert np.isfinite(out["pre_rate"]) or np.isnan(out["pre_rate"])
 
@@ -587,3 +588,23 @@ def test_compute_seizure_triggered_rate_no_seizures() -> None:
         window_hours=0.01,
     )
     assert out.get("warning") == "no_seizure_times"
+
+
+def test_compute_seizure_triggered_rate_requires_two_usable_seizures() -> None:
+    """PR-2.7: subject-level STA should require at least two usable seizures."""
+    rng = np.random.default_rng(7)
+    iei = rng.exponential(scale=20.0, size=600)
+    starts = np.concatenate([[0.0], np.cumsum(iei)])
+    events = _events_from_starts(starts, dur=0.05)
+    total_time = starts[-1] + 300.0
+
+    out = compute_seizure_triggered_rate(
+        events=events,
+        block_ranges=[(0.0, total_time)],
+        seizure_times=[total_time / 2.0],
+        bin_sec=300.0,
+        window_hours=1.0,
+        min_valid_frac=0.3,
+    )
+    assert out.get("warning") == "insufficient_usable_seizure_windows"
+    assert out["n_seizures_usable"] == 1

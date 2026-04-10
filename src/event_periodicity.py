@@ -2737,6 +2737,15 @@ def compute_rate_trace_psd(
     if not usable:
         return {"warning": "no_usable_spans"}
 
+    span_lengths = [e - s for s, e in usable]
+    min_span_len = min(span_lengths)
+    common_nperseg = min(int(nperseg_max), max(8, int(min_span_len // 2)))
+    if common_nperseg < 8:
+        return {"warning": "insufficient_span_length_for_psd"}
+    usable = [(s, e) for s, e in usable if (e - s) >= common_nperseg]
+    if not usable:
+        return {"warning": "no_usable_spans_after_common_nperseg"}
+
     fs_hz = 1.0 / float(bin_sec)
     all_psd: List[np.ndarray] = []
     all_weights: List[float] = []
@@ -2745,13 +2754,16 @@ def compute_rate_trace_psd(
     for s, e in usable:
         seg = rate[s:e].copy()
         seg -= np.nanmean(seg)
-        nperseg = min(nperseg_max, len(seg))
-        noverlap = nperseg // 2
-        freqs, pxx = scipy_welch(seg, fs=fs_hz, nperseg=nperseg,
-                                 noverlap=noverlap, detrend="linear")
+        freqs, pxx = scipy_welch(
+            seg,
+            fs=fs_hz,
+            nperseg=common_nperseg,
+            noverlap=common_nperseg // 2,
+            detrend="linear",
+        )
         if common_freqs is None:
             common_freqs = freqs
-        if len(freqs) == len(common_freqs):
+        if len(freqs) == len(common_freqs) and np.allclose(freqs, common_freqs):
             all_psd.append(pxx)
             all_weights.append(float(e - s))
 
@@ -2791,6 +2803,7 @@ def compute_rate_trace_psd(
         "beta_r2": beta_r2,
         "n_fit_points": n_fit_pts,
         "n_spans": len(usable),
+        "nperseg": int(common_nperseg),
         "total_hours": float(total_hours),
         "bin_sec": float(bin_sec),
     }
@@ -2838,6 +2851,15 @@ def compute_rate_npart_coherence(
     if not usable:
         return {"warning": "no_usable_joint_spans"}
 
+    span_lengths = [e - s for s, e in usable]
+    min_span_len = min(span_lengths)
+    common_nperseg = min(int(nperseg_max), max(8, int(min_span_len // 2)))
+    if common_nperseg < 8:
+        return {"warning": "insufficient_span_length_for_coherence"}
+    usable = [(s, e) for s, e in usable if (e - s) >= common_nperseg]
+    if not usable:
+        return {"warning": "no_usable_joint_spans_after_common_nperseg"}
+
     fs_hz = 1.0 / float(bin_sec)
     all_coh: List[np.ndarray] = []
     all_weights: List[float] = []
@@ -2848,13 +2870,16 @@ def compute_rate_npart_coherence(
         n_seg = npart_arr[s:e].copy()
         r_seg -= np.nanmean(r_seg)
         n_seg -= np.nanmean(n_seg)
-        nperseg = min(nperseg_max, len(r_seg))
-        noverlap = nperseg // 2
-        freqs, cxy = scipy_coherence(r_seg, n_seg, fs=fs_hz,
-                                     nperseg=nperseg, noverlap=noverlap)
+        freqs, cxy = scipy_coherence(
+            r_seg,
+            n_seg,
+            fs=fs_hz,
+            nperseg=common_nperseg,
+            noverlap=common_nperseg // 2,
+        )
         if common_freqs is None:
             common_freqs = freqs
-        if len(freqs) == len(common_freqs):
+        if len(freqs) == len(common_freqs) and np.allclose(freqs, common_freqs):
             all_coh.append(cxy)
             all_weights.append(float(e - s))
 
@@ -2877,6 +2902,7 @@ def compute_rate_npart_coherence(
         "coherence": avg_coh,
         "median_coherence": median_coh,
         "n_spans": len(usable),
+        "nperseg": int(common_nperseg),
         "bin_sec": float(bin_sec),
     }
 
@@ -2993,7 +3019,7 @@ def compute_seizure_triggered_rate(
     window_sec = window_hours * 3600.0
     n_window_bins = int(round(2 * window_sec / bin_sec))
     half_bins = n_window_bins // 2
-    time_axis = np.linspace(-window_hours, window_hours, n_window_bins)
+    time_axis = (np.arange(-half_bins, half_bins, dtype=float) * float(bin_sec)) / 3600.0
 
     usable_windows: List[np.ndarray] = []
     for sz_t in seizure_times:
@@ -3018,10 +3044,31 @@ def compute_seizure_triggered_rate(
             "n_seizures_total": len(seizure_times),
             "n_seizures_usable": 0,
         }
+    if n_usable < 2:
+        return {
+            "warning": "insufficient_usable_seizure_windows",
+            "n_seizures_total": len(seizure_times),
+            "n_seizures_usable": n_usable,
+        }
 
     stacked = np.array(usable_windows, dtype=float)
-    sta_mean = np.nanmean(stacked, axis=0)
-    sta_sem = np.nanstd(stacked, axis=0, ddof=1) / np.sqrt(n_usable) if n_usable > 1 else np.zeros_like(sta_mean)
+    valid_counts = np.sum(np.isfinite(stacked), axis=0)
+    sum_vals = np.nansum(stacked, axis=0)
+    sta_mean = np.full(stacked.shape[1], np.nan, dtype=float)
+    mean_mask = valid_counts > 0
+    sta_mean[mean_mask] = sum_vals[mean_mask] / valid_counts[mean_mask]
+
+    if n_usable > 1:
+        centered = stacked - sta_mean[None, :]
+        centered[~np.isfinite(stacked)] = np.nan
+        ss = np.nansum(centered ** 2, axis=0)
+        denom = np.maximum(valid_counts - 1, 1)
+        std = np.full_like(sta_mean, np.nan)
+        std[valid_counts > 1] = np.sqrt(ss[valid_counts > 1] / denom[valid_counts > 1])
+        sta_sem = np.full_like(sta_mean, np.nan)
+        sta_sem[valid_counts > 1] = std[valid_counts > 1] / np.sqrt(valid_counts[valid_counts > 1])
+    else:
+        sta_sem = np.zeros_like(sta_mean)
 
     bins_per_hour = 3600.0 / bin_sec
     def _mean_z_in_range(h_lo: float, h_hi: float) -> float:
@@ -3041,6 +3088,7 @@ def compute_seizure_triggered_rate(
         "time_hours": time_axis,
         "sta_mean": sta_mean,
         "sta_sem": sta_sem,
+        "valid_counts_per_bin": valid_counts.astype(int),
         "n_seizures_total": len(seizure_times),
         "n_seizures_usable": n_usable,
         "pre_rate": pre_rate,

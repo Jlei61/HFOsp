@@ -274,9 +274,9 @@ Stop and ask the user instead of guessing when:
     - Continuous-time binned rate autocorrelation (5-min bins) remains positive from 0.5h to 8h lags in Epilepsiae (median 0.108 at 8h); Yuquan positive to 4h but ~0 at 8h. Note: this is binned rate autocorrelation, not a direct extension of IEI lag-k serial correlation
     - Continuous day/night segment analysis: Yuquan 9/10 and Epilepsiae 17/20 remain positive on both sides → short-range dependency survives inside continuous day/night segments
   - PR-2.7 (exp7d, 2026-04-09): rate-trace spectral characterization + seizure proximity on 30 subjects:
-    - Rate-trace PSD β: cohort median = 0.67 (range 0.06–1.62), r² median 0.698 → sub-pink-noise but confirms long-range dependence beyond white noise; consistent with PR-2.5 broad-band Δ_frac
-    - Rate × n_participating coherence: median 0.576 (16/26 > 0.5); excluding short-segment artifacts (coh≈1.0): median 0.471 → partial frequency-domain confirmation of global state variable
-    - **Seizure-triggered rate average: pre-ictal [-6h,-1h] vs baseline [-12h,-6h] Wilcoxon p=0.019, 16/21 pre > baseline → HFO rate systematically elevated before seizures**. Rate is more sensitive pre-ictal marker than phase synchrony (PR4–PR6 population null). Primarily Epilepsiae-driven (21 subjects, 341 seizures total)
+    - Rate-trace PSD β: cohort median = 0.64 (range 0.04–1.62), r² median 0.709 → sub-pink-noise but still confirms long-range dependence beyond white noise; consistent with PR-2.5 broad-band Δ_frac
+    - Rate × n_participating coherence: after fixing multi-span spectral averaging bug, median = 0.358 (4/26 > 0.5) → only weak/moderate frequency-domain coupling; do NOT overclaim a strong single global state variable
+    - **Seizure-triggered rate average: pre-ictal [-6h,-1h] vs baseline [-12h,-6h] Wilcoxon p=0.019, 16/21 pre > baseline, but post > pre (p=0.016)** → supports seizure-centered broad rate elevation, not yet a pure pre-ictal ramp. Primarily Epilepsiae-driven (21 subjects, 328 usable seizure windows)
   - Next: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
   - Method caveats incorporated: detrend_fraction curve behavior depends on window vs modulation timescale (use Δ_frac for band localization); n_participating must use Spearman not Pearson-on-log; centered rank tau must check SOZ source node preservation
   - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results

@@ -564,7 +564,17 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 ~~**PR-2.6（连续长时程 + 连续 day/night 段）**~~ → **已完成**，见 §3.4.8。核心发现：(i) 慢调制在真实连续时间轴上延伸到多小时；(ii) Yuquan 10/10 为 near-24h continuous，Epilepsiae 最长连续段中位数 75.1h；(iii) 连续 day/night 段内部仍保留短程依赖（Yuquan 9/10，Epilepsiae 17/20）。
 
-~~**PR-2.7（Rate-Trace 谱特征刻画 + 发作邻近调制）**~~ → **已完成**，见 `docs/event_periodicity_analysis.md` §5.9。核心发现：(i) Rate-trace PSD 谱指数 β 中位 0.67（30 subjects），确认宽频段长程依赖但非严格 1/f；(ii) rate × n_participating 连续时间相干中位 0.576（去除短段伪影后 0.471），频域部分支持全局状态变量；(iii) **seizure-triggered rate average 发现 pre-ictal 率升高（p=0.019，16/21 pre > baseline）——这是整个调制分析线中唯一 population-level significant 的发作关联发现**。
+~~**PR-2.7（Rate-Trace 谱特征刻画 + 发作邻近调制）**~~ → **已完成**，见 `docs/event_periodicity_analysis.md` §5.9。修正实现后，核心发现应收紧为：(i) Rate-trace PSD 谱指数 β 中位 0.64（30 subjects），确认宽频段长程依赖但非严格 1/f；(ii) rate × n_participating 连续时间相干中位仅 0.358（4/26 > 0.5），不支持“强单一全局状态变量”；(iii) **seizure-triggered rate average 支持 seizure-centered broad rate elevation（pre vs earlier baseline p=0.019，16/21 同方向），但 post > pre，尚不能把它定性为纯 pre-ictal ramp**。
+
+**给 reviewer 的意见（当前最稳妥口径）**
+
+如果 reviewer 问“这是不是已经说明 HFO rate 是 pre-ictal biomarker？”，当前最严谨的回答应该是否定的。我们现在能 defend 的只有三点：
+
+1. `Exp 7G` 给出了一个 **subject-level seizure-linked signal**：`[-6h,-1h] > [-12h,-6h]`，`p=0.019`，`16/21` subjects 同方向。
+2. 但 `post > pre`，所以它更像 **seizure-centered broad elevation**，而不是已经锁定的纯 pre-ictal buildup。
+3. 因此，这个结果是一个需要继续追到底的现象，不是已经可以写成机制定论的结论。
+
+如果 reviewer 问“PR-2.5 的 global state variable 假说在 PR-2.7 里是否被确认？”，答案也应该收紧：**只得到弱到中等频域支持，不能再做强版陈述。**
 
 **更远期**
 
@@ -582,7 +592,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 我认为可以接受的更新过的 narrative 是这样的：
 
-> 间期 HFO 群体事件的产生不是由网络内禀振荡器驱动的——之前 Fig 3 的 ~2 Hz 谱峰在 (i) refractory renewal null model, (ii) ISI shuffle null model 下都不再显著，并且 IEI 分布是 lognormal 而不是 power-law。这些事件更符合一个**带不应期的兴奋性点过程**（FHN / HR / theta-neuron 类），其时序由 (a) 局部兴奋性恢复动力学和 (b) 慢时间尺度的状态调制共同塑造。后者的存在被 IEI 相邻正相关（30/30 subjects）直接证明，而 PR-2.6 进一步显示**宏观事件率的慢漂移确实延伸到多小时连续时间尺度**（5 分钟 bin rate trace 自相关在 Epilepsiae 到 8h 仍为正），并不是事件索引统计上的假象。PR-2.7 直接测量了率过程的谱指数（β 中位 0.67，sub-pink-noise），并发现 **HFO 群体事件率在发作前 1–6h 系统性升高**（pre vs baseline Wilcoxon p=0.019，16/21 subjects），而 PR4–PR6 的 phase synchrony 在同一群体水平无显著变化——这意味着 rate 比 synchrony 是更敏感的 pre-ictal 标志物。
+> 间期 HFO 群体事件的产生不是由网络内禀振荡器驱动的——之前 Fig 3 的 ~2 Hz 谱峰在 (i) refractory renewal null model, (ii) ISI shuffle null model 下都不再显著，并且 IEI 分布是 lognormal 而不是 power-law。这些事件更符合一个**带不应期的兴奋性点过程**（FHN / HR / theta-neuron 类），其时序由 (a) 局部兴奋性恢复动力学和 (b) 慢时间尺度的状态调制共同塑造。后者的存在被 IEI 相邻正相关（30/30 subjects）直接证明，而 PR-2.6 进一步显示**宏观事件率的慢漂移确实延伸到多小时连续时间尺度**（5 分钟 bin rate trace 自相关在 Epilepsiae 到 8h 仍为正），并不是事件索引统计上的假象。PR-2.7 直接测量了率过程的谱指数（β 中位 0.64，sub-pink-noise），但修正实现后，rate × n_participating 的连续时间相干只剩弱到中等支持（中位 0.358），因此不应再把“单一全局状态变量”说得过满。另一方面，PR-2.7 的 seizure-centered analysis 确实发现 **发作邻近的 broad rate elevation**：pre vs earlier-baseline Wilcoxon p=0.019，16/21 subjects 同方向，但 post window 甚至更高，因此目前更合理的解释是“peri-ictal broad elevation”，而不是已经锁定的纯 pre-ictal biomarker。
 >
 > 在空间维度上，群体事件的传播 rank 在某些个体上确实呈现出可重复的 stereotype，并且 SOZ 参与的事件比 non-SOZ 事件更刻板（探索性证据，单侧 p = 0.039）。这是论文 Fig 1, 2 叙事中**仍然站得住的那一部分**——但需要在 mixture 检测、identity bias 控制（注意 centering 不能抹掉 SOZ 作为真实源节点的传播拓扑）、按 n_participating 分层之后才能给出最终的定量结论。
 >
@@ -604,7 +614,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 | **PR-2: lag-k 衰减 + 去趋势 + block 内 + SOZ 分层** | **✅ exp 7** | **半衰期 107s; 72% 慢漂移 + 28% 短程; within-block 30/30 正; SOZ > nonSOZ p=0.055 (n=9)** |
 | **PR-2.5: 多尺度调制 + n_part + day/night + 回填** | **✅ exp 7b** | **Δ_frac 平坦(1/f); n_part 互相关 0.742; day/night 28/30 正; 1084+1096 峰消失→21/21 全覆盖** |
 | **PR-2.6: 连续长时程 + 连续 day/night 段** | **✅ exp 7c** | **Yuquan 10/10 near-24h continuous; Epilepsiae 最长连续段中位 75.1h; binned rate autocorr 到 8h 仍正 (Epilepsiae); 连续 day/night 段内 pooled detrended r 仍正 (26/30)** |
-| **PR-2.7: Rate-trace 谱特征 + 发作邻近调制** | **✅ exp 7d** | **β 中位 0.67; coherence 中位 0.576; **seizure STA pre > baseline p=0.019 (16/21)** — 发作前 rate 系统性升高** |
+| **PR-2.7: Rate-trace 谱特征 + 发作邻近调制** | **✅ exp 7d** | **β 中位 0.64; coherence 中位 0.358; seizure STA: pre > earlier baseline p=0.019 (16/21), but post > pre → seizure-centered broad elevation** |
 
 ### 已完成项的状态更新（2026-04-09）
 
@@ -614,7 +624,7 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 3. **PR-2.6：连续长时程调制分析** — **已完成**。详见 §3.4.8。核心发现：(i) 宏观事件率（binned rate trace）的慢漂移在真实连续时间轴上延伸到多小时（注意这不等于 IEI serial correlation 本身持续到多小时）；(ii) Yuquan 的 24h 优势被真正利用，10/10 near-24h continuous；(iii) 连续 day/night 段内部仍保留短程依赖（subject 内同标签段 pooled），说明此前结论不是 pooled 标签伪影。
 
-4. **PR-2.7：Rate-trace 谱特征 + 发作邻近调制** — **已完成**。详见 `docs/event_periodicity_analysis.md` §5.9。核心发现：(i) Rate-trace PSD 谱指数 β 中位 0.67（范围 0.06–1.62），确认率过程具有超越白噪声的长程依赖但非严格 1/f，与 PR-2.5 宽频段结论一致；(ii) rate × n_participating 连续时间相干中位 0.576（去伪影后 0.471），部分频域支持全局状态变量；(iii) **seizure-triggered rate average: pre-ictal [-6h,-1h] vs baseline [-12h,-6h] Wilcoxon p=0.019, 16/21 pre > baseline — HFO 率在发作前系统性升高**。这是整个调制分析线中唯一 population-level significant 的发作关联发现，也是 rate 比 synchrony 更敏感的 pre-ictal 标志物的直接证据。
+4. **PR-2.7：Rate-trace 谱特征 + 发作邻近调制** — **已完成**。详见 `docs/event_periodicity_analysis.md` §5.9。修复多段谱平均 bug 后，核心发现应更新为：(i) Rate-trace PSD 谱指数 β 中位 0.64（范围 0.04–1.62），确认率过程具有超越白噪声的长程依赖但非严格 1/f；(ii) rate × n_participating 连续时间相干中位仅 0.358，频域耦合偏弱，不支持强版全局状态变量；(iii) **seizure-triggered rate average: pre-ictal [-6h,-1h] vs baseline [-12h,-6h] Wilcoxon p=0.019, 16/21 pre > baseline，但 post > pre (p=0.016)**。因此更准确的结论是：存在 seizure-centered broad rate elevation，pre-window 已可见升高，但尚不能把它定性为纯 pre-ictal ramp。
 
 ### 最值得继续做的事（按性价比，更新版）
 
@@ -622,6 +632,6 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 
 2. **对 huanghanwen 这个唯一"genuine"做敏感性分析**：把不同 surrogate 参数（gamma shape、shift、shuffle 类型）扫一遍，看它是否真的稳健。n=484 的样本量本来就在边缘。
 
-3. **Seizure-triggered rate 的后续深化**：PR-2.7 发现发作前 rate 升高（p=0.019），但 (i) 需要控制发作密度对 z-score 的影响；(ii) 需要按 subject 做 leave-one-seizure-out 检验稳健性；(iii) 需要与 PR4–PR6 的同步性指标在同一窗口内做 dissociation 分析。
+3. **Seizure-triggered rate 的后续深化**：PR-2.7 目前最值得追的不是“继续喊 pre-ictal marker”，而是分解这个 broad elevation 到底有多少是真 pre-ictal buildup、多少是 post-ictal carryover、多少是 seizure clustering / circadian baseline。至少要做：(i) matched control windows；(ii) 去 overlap / 去 cluster 的 seizure subsampling；(iii) 与 PR4–PR6 synchrony 在同一 seizure-centered windows 上正面对比。
 
-整篇论文的叙事现在可以定格为 **"interictal events as a refractory excitable point process under multi-timescale state modulation, with pre-ictal rate elevation and SOZ-specific propagation stereotypy"** ——这比之前的版本增加了一个 actionable finding（pre-ictal rate），使故事从纯描述性升级到潜在的临床相关性。PR-3 是 stereotype 定量验证的唯一未完成项。
+整篇论文的叙事现在更稳妥的版本应是 **"interictal events as a refractory excitable point process under multi-timescale state modulation, with seizure-centered broad rate elevation and SOZ-specific propagation stereotypy"**。这比“~2 Hz oscillator”强得多，也比“已经抓到 pre-ictal biomarker”诚实得多。下一步若要把临床相关性做实，优先级已经从 PR-3 并列转向对 seizure-centered rate elevation 的机制拆解。
