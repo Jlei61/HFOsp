@@ -113,14 +113,20 @@ def plot_heatmap_examples(subjects: Dict[str, Dict[str, Any]]) -> None:
                                                  width_ratios=[2, 2, 1.2], wspace=0.15)
 
         valid_events = np.where(np.sum(bools > 0, axis=0) >= 3)[0]
-        display_ranks = ranks[:, valid_events] if valid_events.size > 0 else ranks
+        MAX_DISPLAY = 2000
+        if valid_events.size > MAX_DISPLAY:
+            step = valid_events.size // MAX_DISPLAY
+            display_indices = valid_events[::step][:MAX_DISPLAY]
+        else:
+            display_indices = valid_events
+        display_ranks = ranks[:, display_indices] if display_indices.size > 0 else ranks
 
         ax_ori = fig.add_subplot(inner[0])
         im = ax_ori.pcolormesh(display_ranks, rasterized=True, cmap="viridis")
         ax_ori.set_yticks(np.arange(n_ch) + 0.5)
         ax_ori.set_yticklabels(ch_names, fontsize=6)
         ax_ori.set_xlabel("Pop Events (time order)", fontsize=9)
-        n_ev_disp = display_ranks.shape[1]
+        n_ev_disp = int(valid_events.size)
         clust_info_str = ""
         if cluster_info.get("clusters"):
             c0 = cluster_info["clusters"][0]
@@ -139,15 +145,24 @@ def plot_heatmap_examples(subjects: Dict[str, Dict[str, Any]]) -> None:
         ax_clust = fig.add_subplot(inner[1])
         if labels.size == valid_events.size and labels.size > 0:
             order = np.argsort(labels)
-            clustered_ranks = display_ranks[:, order]
-            clustered_labels = labels[order]
+            if valid_events.size > MAX_DISPLAY:
+                disp_labels = labels[::step][:MAX_DISPLAY]
+                disp_order = np.argsort(disp_labels)
+                clustered_ranks = display_ranks[:, disp_order]
+                clustered_labels = disp_labels[disp_order]
+            else:
+                clustered_ranks = display_ranks[:, order]
+                clustered_labels = labels[order]
             ax_clust.pcolormesh(clustered_ranks, rasterized=True, cmap="viridis")
             boundary = int(np.sum(clustered_labels == 0))
+            n_ev_disp_clust = clustered_ranks.shape[1]
             ax_clust.axvline(boundary, color="red", lw=1.5, ls="--")
+            c0_total = int(np.sum(labels == 0))
+            c1_total = int(np.sum(labels == 1))
             ax_clust.text(boundary / 2, n_ch + 0.3,
-                          f"C0 (n={boundary})", ha="center", fontsize=7, color="red")
-            ax_clust.text((boundary + n_ev_disp) / 2, n_ch + 0.3,
-                          f"C1 (n={n_ev_disp - boundary})", ha="center", fontsize=7, color="red")
+                          f"C0 (n={c0_total})", ha="center", fontsize=7, color="red")
+            ax_clust.text((boundary + n_ev_disp_clust) / 2, n_ch + 0.3,
+                          f"C1 (n={c1_total})", ha="center", fontsize=7, color="red")
         else:
             ax_clust.pcolormesh(display_ranks, rasterized=True, cmap="viridis")
         ax_clust.set_yticks([])
