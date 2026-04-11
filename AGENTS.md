@@ -137,6 +137,7 @@ Important drift:
   - `docs/spatial_modulation_soz_analysis.md` — plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
   - `scripts/audit_gpu_npz.py` — Step 0 data audit (Yuquan PASS 11/18, Epilepsiae FAIL 0/20)
   - `scripts/run_spatial_modulation.py` — PR-1 batch driver (Yuquan-only, 9 valid pairs)
+  - `scripts/plot_refine_soz_validation.py` — Refine-SOZ validation figure (legacy Fig1/S12 equivalent, AUC + bar charts)
   - `scripts/plot_spatial_modulation.py` — PR-1 figures
   - `scripts/run_hfo_detection.py` — batch HFO detection for both datasets (`--dataset yuquan/epilepsiae --subject/--all`)
   - `src/event_periodicity.py` — `load_perchannel_events_relaxed()`, `compute_perchannel_metrics()`, `annotate_channels_soz()`, `match_bipolar_soz()`
@@ -366,6 +367,12 @@ results/
 │   │       └── *.csv / *.json
 │   ├── epilepsiae_ready_full_artifacts/
 │   └── yuquan_soz/
+├── refine_soz_validation/
+│   ├── refine_soz_summary.json
+│   └── figures/
+│       ├── README.md             ← 必须存在，中文
+│       ├── yuquan_refine_soz_cohort.png
+│       └── per_subject/
 ├── spatial_modulation/
 │   ├── gpu_audit.csv
 │   ├── relaxed_refine_channel_counts.csv

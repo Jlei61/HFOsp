@@ -613,7 +613,31 @@ GPU 加速 pipeline 已在 Yuquan 全量 21/21 有数据 subject 上完成（`re
 - `exclude_channels` 在双极参考后应用，单极名无法匹配双极通道名 → 修复为展开匹配
 - CuPy 内存池未在 record 间释放 → 高通道数 subject OOM → 添加显式释放
 
-### 8.8 后续 PR-2 方向
+### 8.8 Refine-SOZ 验证图（2026-04-11 完成）
+
+重构了老代码 `plotting_fig1_hfoHist.py` + `plotting_fig2_AUC_groupingComp.py` 的核心逻辑，对 Yuquan 新产出的 `*_gpu.npz` 和 `_refineGpu.npz` 做 SOZ 对照验证。
+
+**脚本**: `scripts/plot_refine_soz_validation.py`
+**输出**: `results/refine_soz_validation/` （gitignored，本地生成）
+
+核心数字：
+
+| 指标 | 值 |
+|---|---|
+| Raw AUC mean | 0.829 |
+| Refined AUC mean | **0.862**（老论文 Yuquan: 0.857） |
+| Raw vs Refined Wilcoxon p | **0.010** |
+| 有效 subjects | 14（其中 13 有 raw+refined 配对） |
+
+关键点：
+- Refined AUC 0.862 与老论文报告的 0.857 高度吻合 → 重构后 pipeline 检测质量可靠
+- Refine 步骤带来统计显著的 AUC 提升（p=0.010）→ 同步性筛选有效增强 SOZ 区分度
+- 6 subjects 缺 gpu.npz（songzishuo, zhangbichen, zhangkexuan, zhaochenxi, zhaojinrui, zhourongxuan），1 subject 有 gpu 但无 refine（pengzihang）
+- gaolan 是唯一 refine 后 AUC 下降的 subject（0.751 → 0.697，pick_k=1.9）
+
+SOZ 匹配使用 `match_bipolar_soz()`（any-contact 策略），与 per-channel 分析使用相同逻辑。
+
+### 8.9 后续 PR-2 方向
 
 1. **Epilepsiae 全量检测**：跑完后重做 gpu_audit，解锁 per-channel 空间分析
 2. **三值梯度（i/l/e）**：在 Epilepsiae per-channel 数据上验证 SOZ > lesion > extra-focal
