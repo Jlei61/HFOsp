@@ -18,7 +18,7 @@ Usage:
 This script reproduces the legacy-style periodicity metrics and adds the null
 model checks used in the current review. Its outputs are analysis artifacts,
 not direct scientific conclusions by themselves: the key interpretation lives in
-`docs/event_periodicity_analysis.md` and the follow-up review docs.
+`docs/archive/topic2/event_periodicity_analysis.md` and the follow-up review docs.
 """
 
 from __future__ import annotations

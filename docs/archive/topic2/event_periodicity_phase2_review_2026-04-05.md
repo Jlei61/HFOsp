@@ -1,5 +1,9 @@
 # 间期群体事件周期性 Phase 2 结果系统审阅报告
 
+> 状态：历史审阅文档
+> 当前正式入口：`docs/topic2_between_event_dynamics.md`
+> 用途：保留 Phase 2 结果的可信度审阅、统计边界和 reviewer 风险点；当前正式结论应以 topic 文档为准。
+
 > 审阅日期：2026-04-05
 > 审阅对象：
 > - `docs/event_periodicity_analysis.md`

@@ -1,5 +1,9 @@
 # 间期同步性分析初步结果（经审阅修订 v2）
 
+> 状态：历史统计报告
+> 当前正式入口：`docs/topic1_within_event_dynamics.md`
+> 用途：保留 PR4–PR6 的统计口径、表格和产出物清单；若只想快速获取当前论文口径，请先读正式入口。
+
 ## 文档目的
 
 本文件是 Epilepsiae + Yuquan 双队列间期同步性分析的**统计报告**。所有正式统计以 seizure interval 为统计单位，event-level 结果仅作探索性参考。

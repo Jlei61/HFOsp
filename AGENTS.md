@@ -13,6 +13,17 @@ Before tracing any result, read these in order:
 5. `docs/yuquan_24h_dataset_structure.md`
 6. `config/default.yaml`
 
+## Canonical Topic Docs
+
+When answering scientific-status questions, prefer these canonical entry docs first:
+
+- `docs/paper_overview.md` — total index + one-line conclusions for all topics
+- `docs/topic1_within_event_dynamics.md` — within-event dynamics (propagation + synchrony)
+- `docs/topic2_between_event_dynamics.md` — event-between-event timing
+- `docs/topic3_spatial_soz_modulation.md` — where / SOZ spatial attribution
+
+Historical docs remain valuable, but they are no longer the first entry point.
+
 ## Canonical Roots
 
 - Current codebase: `HFOsp/`
@@ -123,18 +134,21 @@ Important drift:
   - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (artifact localization + PR-1 to PR-2.7 for event-between-event analyses)
   - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7d)
   - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 / PR-2.7 function unit tests
-  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion for event-between-event analyses (Phase 4+5 + PR-1 to PR-2.7)
-  - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
-  - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
+  - `docs/topic2_between_event_dynamics.md` — current formal entry for event-between-event analyses
+  - `docs/archive/topic2/event_periodicity_analysis.md` — detailed results + code map (historical main record)
+  - `docs/archive/topic2/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
+  - `docs/archive/topic2/interictal_population_event_methodological_review.md` — collaborator-facing historical narrative update and next-step framing
 - Interictal group-event internal propagation (event-inside-event topic; former Periodicity PR-3):
   - `src/interictal_propagation.py` — lagPatRank / eventsBool loader, mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic, KMeans cluster stereotypy, legacy MI + permutation test
   - `scripts/run_interictal_propagation.py` — independent batch driver for internal propagation PR-1
   - `scripts/plot_interictal_propagation.py` — Figure-2-style heatmap examples + 6-panel cohort summary
   - `tests/test_interictal_propagation.py` — unit tests for centered-rank handling, mixture detection, and source-node diagnostics
-  - `docs/interictal_group_event_internal_propagation.md` — standalone topic note and current result summary
+  - `docs/topic1_within_event_dynamics.md` — current formal entry for within-event dynamics
+  - `docs/archive/topic1/interictal_group_event_internal_propagation.md` — detailed internal-propagation result note
   - `results/interictal_propagation/` — per-subject JSON, cohort summary, and figures
 - Spatial modulation / SOZ analysis (Where question):
-  - `docs/spatial_modulation_soz_analysis.md` — plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
+  - `docs/topic3_spatial_soz_modulation.md` — current formal entry for where / SOZ spatial attribution
+  - `docs/archive/topic3/spatial_modulation_soz_analysis.md` — detailed plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
   - `scripts/audit_gpu_npz.py` — Step 0 data audit (Yuquan PASS 11/18, Epilepsiae FAIL 0/20)
   - `scripts/run_spatial_modulation.py` — PR-1 batch driver (Yuquan-only, 9 valid pairs)
   - `scripts/plot_refine_soz_validation.py` — Refine-SOZ validation figure (legacy Fig1/S12 equivalent, AUC + bar charts)
@@ -154,7 +168,8 @@ Do not assume current plotting covers all legacy paper figures. Many old paper f
 
 ## Interictal Synchrony Analysis — Current Status (2026-04-04)
 
-**Read `docs/interictal_synchrony_preliminary_report_2026-04-03.md` for the full statistical report.**
+**Read `docs/topic1_within_event_dynamics.md` first for the current formal summary.**
+Use `docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md` for the full statistical report.
 
 - PR4–PR6 **completed for both Epilepsiae + Yuquan**. Overall conclusion: **population-level null** for phase synchrony.
   - Combined: 29 subjects / 1,468,780 event rows / 253 intervals / 141 fixed-window intervals
@@ -238,7 +253,8 @@ Stop and ask the user instead of guessing when:
 ## Fast Path For Common Questions
 
 - "What did the interictal synchrony analysis find?"
-  - Read `docs/interictal_synchrony_preliminary_report_2026-04-03.md`
+  - Read `docs/topic1_within_event_dynamics.md` first
+  - Then read `docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md` for detailed stats
   - Short answer: **population-level null** on 29 subjects (Epilepsiae + Yuquan); individual heterogeneity dominates
   - **One exploratory finding**: extra-focal (`e`) phase synchrony is pre > post (p=0.012, r=0.31); SOZ (`i`) and lesion (`l`) show no effect
   - Paper 548/E14 reproduced exactly; not generalizable to cohort
@@ -250,8 +266,9 @@ Stop and ask the user instead of guessing when:
   - See DEVELOP_PLAN.md § "指标层级判定"
 
 - "Is the ~2Hz event periodicity real?"
-  - Read `docs/event_periodicity_analysis.md`
-  - Then read `docs/interictal_population_event_methodological_review.md` if the question is about scientific narrative / mechanism
+  - Read `docs/topic2_between_event_dynamics.md` first
+  - Then read `docs/archive/topic2/event_periodicity_analysis.md`
+  - Then read `docs/archive/topic2/interictal_population_event_methodological_review.md` if the question is about scientific narrative / mechanism
   - Short answer: **NO.** The ~2Hz PSD peak is not evidence for an intrinsic oscillator; current evidence supports a refractory / dead-time artifact plus slow rate modulation.
   - Gamma renewal null (matching firing rate + refractory period) explains 15/21 subject peaks with specparam peaks
   - Analytic renewal PSD overlay (PR-1 exp6A): 16/21 |Δf| < 1 Hz; **two independent paths cover 19/21 (90%)**
@@ -290,7 +307,8 @@ Stop and ask the user instead of guessing when:
   - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
 
 - "Where does the slow IEI modulation occur? Is it SOZ-specific?"
-  - Read `docs/spatial_modulation_soz_analysis.md`
+  - Read `docs/topic3_spatial_soz_modulation.md` first
+  - Then read `docs/archive/topic3/spatial_modulation_soz_analysis.md`
   - Short answer: **PR-1 completed (Yuquan-only, n=9)**. Raw serial corr shows **no SOZ difference** (p=1.0). But **detrend_fraction is lower in SOZ** (7/9 subjects, p=0.129) — SOZ channels have more short-range memory, less slow drift. SOZ median IEI is shorter (p=0.055, marginal).
    - Epilepsiae gpu.npz are all corrupt stubs (216 bytes); per-channel analysis requires HFO re-detection via `scripts/run_hfo_detection.py --dataset epilepsiae --all`
   - Per-channel approach (relaxed refine k=0.0) successfully expands channel set from lagPat ~10 to ~33, with 9/11 subjects forming valid SOZ/nonSOZ pairs
