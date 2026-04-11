@@ -14,6 +14,14 @@ try:
 except ImportError:
     _HAS_JOBLIB = False
 
+try:
+    import cupy as cp
+    import cusignal
+    _HAS_GPU = True
+except ImportError:
+    _HAS_GPU = False
+    cp = None  # type: ignore[assignment]
+
 def get_wavelet_freqs(fmin, fmax, n_freqs, *, scale="log"):
     """
     Shared frequency axis for wavelet-based TF analysis.
@@ -280,6 +288,7 @@ class BQKDetector:
         side_thresh: Optional[float] = None,
         n_jobs: int = -1,
         verbose: int = 0,
+        use_gpu: bool = False,
     ):
         self.sfreq = float(sfreq)
         self.freqband = tuple(freqband)
@@ -292,10 +301,21 @@ class BQKDetector:
         self.side_thresh = float(side_thresh) if side_thresh is not None else None
         self.n_jobs = int(n_jobs)
         self.verbose = int(verbose)
+        self.use_gpu = bool(use_gpu) and _HAS_GPU
+
+        if use_gpu and not _HAS_GPU:
+            import warnings
+            warnings.warn(
+                "GPU requested but CuPy/cusignal not available. Using CPU.",
+                RuntimeWarning,
+            )
         
         # Pre-compute filter bank (SOS format for numerical stability)
         self.filter_bank_ranges = self._build_filter_bank_ranges()
         self.filter_bank_sos = self._build_filter_bank_sos()
+
+        if self.use_gpu:
+            self._fir_coeffs_gpu = self._build_fir_bank_gpu()
         
         # Check joblib availability
         if self.n_jobs != 1 and not _HAS_JOBLIB:
@@ -387,6 +407,124 @@ class BQKDetector:
         # Envelope (magnitude of analytic signal)
         return np.abs(analytic)
     
+    # ------------------------------------------------------------------
+    # GPU helpers (cusignal FIR + CuPy Hilbert, mirrors legacy p16_cuda)
+    # ------------------------------------------------------------------
+
+    def _build_fir_bank_gpu(self) -> list:
+        """Pre-compute FIR bandpass coefficients on GPU (legacy 201-tap firwin)."""
+        coeffs = []
+        for low, high in self.filter_bank_ranges:
+            high_c = min(high, self.sfreq / 2.0 - 1.0)
+            b = cusignal.firwin(
+                201, [low / (self.sfreq / 2), high_c / (self.sfreq / 2)],
+                pass_zero=False,
+            )
+            coeffs.append(b)
+        return coeffs
+
+    def _compute_envelope_gpu(self, data: np.ndarray) -> np.ndarray:
+        """GPU-accelerated multi-band envelope (cusignal FIR + Hilbert)."""
+        data_gpu = cp.asarray(data, dtype=cp.float64)
+        envelope_sum = cp.zeros_like(data_gpu)
+
+        for fir_b in self._fir_coeffs_gpu:
+            filt = cusignal.convolution.fftconvolve(
+                data_gpu, fir_b[None, :], mode="same",
+            )
+            analytic = cusignal.hilbert(filt, axis=-1)
+            envelope_sum += cp.abs(analytic)
+
+        result = cp.asnumpy(envelope_sum)
+        del data_gpu, envelope_sum
+        cp.get_default_memory_pool().free_all_blocks()
+        return result
+
+    def _find_high_enveTimes_gpu(
+        self, raw_enve: np.ndarray, n_channels: int,
+        start_time: float = 0.0,
+    ) -> List[List[Tuple[float, float]]]:
+        """GPU-accelerated thresholding + event extraction (mirrors legacy)."""
+        enve_gpu = cp.asarray(raw_enve, dtype=cp.float64)
+        whole_median = float(cp.median(enve_gpu))
+        fs = self.sfreq
+        min_gap_s = self.min_gap * 1e-3
+        min_last_s = self.min_last * 1e-3
+        max_last_s = self.max_last * 1e-3 if self.max_last else None
+        side_thr = self.side_thresh
+
+        high_times: List[List[Tuple[float, float]]] = []
+
+        for chi in range(n_channels):
+            ch_enve = enve_gpu[chi]
+            ch_median = float(cp.median(ch_enve))
+            mask = (
+                (ch_enve > self.rel_thresh * ch_median)
+                & (ch_enve > self.abs_thresh * whole_median)
+            ).astype(cp.int32)
+
+            # return_timeRanges_cu
+            times = cp.arange(len(mask), dtype=cp.float64) / fs + start_time
+            diff_mask = cp.diff(mask)
+            starts = cp.where(diff_mask == 1)[0] + 1
+            ends = cp.where(diff_mask == -1)[0]
+            if int(mask[0]) == 1:
+                starts = cp.concatenate([cp.array([0]), starts])
+            if int(mask[-1]) == 1:
+                ends = cp.concatenate([ends, cp.array([len(mask) - 1])])
+            if len(starts) == 0 or len(ends) == 0:
+                high_times.append([])
+                continue
+            ranges = cp.stack([times[starts], times[ends]], axis=1)
+
+            # merge_timeRanges_cu
+            if len(ranges) > 1:
+                gaps = ranges[1:, 0] - ranges[:-1, 1]
+                new_seg = cp.where(gaps > min_gap_s)[0] + 1
+                s_idx = cp.concatenate([cp.array([0]), new_seg])
+                e_idx = cp.concatenate([new_seg - 1, cp.array([len(ranges) - 1])])
+                ranges = cp.stack([ranges[s_idx, 0], ranges[e_idx, 1]], axis=1)
+
+            durs = ranges[:, 1] - ranges[:, 0]
+            keep = durs > min_last_s
+            if max_last_s is not None:
+                keep &= durs < max_last_s
+            ranges = ranges[keep]
+            if len(ranges) == 0:
+                high_times.append([])
+                continue
+
+            # side-band denoise
+            if side_thr is not None and side_thr > 0:
+                accepted = []
+                for ri in range(len(ranges)):
+                    tr = ranges[ri] - start_time
+                    dur_s = float(tr[1] - tr[0])
+                    i_pre_s = max(0, int((float(tr[0]) - dur_s) * fs))
+                    i_pre_e = int(float(tr[0]) * fs)
+                    i_post_s = int(float(tr[1]) * fs)
+                    i_post_e = min(len(ch_enve), int((float(tr[1]) + dur_s) * fs))
+                    side_pre = ch_enve[i_pre_s:i_pre_e]
+                    side_post = ch_enve[i_post_s:i_post_e]
+                    if len(side_pre) == 0 and len(side_post) == 0:
+                        accepted.append(ranges[ri])
+                        continue
+                    side_mean = float(cp.mean(cp.concatenate([side_pre, side_post])))
+                    pick = ch_enve[int(float(tr[0]) * fs):int(float(tr[1]) * fs)]
+                    if len(pick) == 0:
+                        continue
+                    pick_mean = float(cp.mean(pick))
+                    if side_mean <= 0 or pick_mean >= side_thr * side_mean:
+                        accepted.append(ranges[ri])
+                if len(accepted) == 0:
+                    high_times.append([])
+                else:
+                    high_times.append(cp.asnumpy(cp.stack(accepted)).tolist())
+            else:
+                high_times.append(cp.asnumpy(ranges).tolist())
+
+        return high_times
+
     def compute_envelope(self, data: np.ndarray) -> np.ndarray:
         """
         Compute multi-band composite envelope (BQK algorithm).
@@ -406,6 +544,9 @@ class BQKDetector:
             shape (n_channels, n_samples).
         """
         data = np.asarray(data, dtype=np.float64)
+
+        if self.use_gpu:
+            return self._compute_envelope_gpu(data)
         
         # Serial processing
         if self.n_jobs == 1 or len(self.filter_bank_sos) == 1:
@@ -445,10 +586,16 @@ class BQKDetector:
             Detected events per channel. events[i] is a list of (start, end)
             tuples in seconds for channel i.
         """
-        # Compute composite envelope
         envelope = self.compute_envelope(data)
-        
         n_channels = data.shape[0]
+
+        if self.use_gpu:
+            result = self._find_high_enveTimes_gpu(
+                envelope, n_channels, start_time=start_time,
+            )
+            cp.get_default_memory_pool().free_all_blocks()
+            return result
+
         events = find_high_enveTimes(
             raw_enve=envelope,
             chns_nums=n_channels,

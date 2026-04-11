@@ -20,6 +20,7 @@ Date: 2026-01-31
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 import time
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -57,6 +58,9 @@ class HFODetectionConfig:
     #       for typical chunk sizes (30s). Use n_jobs=1 unless chunk_sec=None.
     n_jobs: int = 1
     verbose: int = 0  # joblib verbosity level
+
+    # GPU acceleration (requires CuPy + cusignal in the active environment)
+    use_gpu: bool = False
 
 
 @dataclass
@@ -152,6 +156,15 @@ class HFODetector:
         cfg = self.config
         low, high = cfg.bandpass if cfg.bandpass is not None else _default_bandpass_for(cfg.band)
 
+        nyquist = sfreq_ / 2.0
+        if nyquist <= high:
+            raise ValueError(
+                f"Sampling rate {sfreq_} Hz is too low for target band "
+                f"[{low}, {high}] Hz. Nyquist frequency ({nyquist} Hz) must "
+                f"exceed the upper band edge ({high} Hz). "
+                f"Data at this rate contains aliased garbage above {nyquist} Hz."
+            )
+
         meta: Dict = {
             "bandpass": (low, high),
             "algorithm": "bqk_parallel",
@@ -225,6 +238,7 @@ class HFODetector:
             side_thresh=cfg.side_thresh,
             n_jobs=cfg.n_jobs,
             verbose=cfg.verbose,
+            use_gpu=cfg.use_gpu,
         )
 
         # Chunking parameters
@@ -286,3 +300,73 @@ class HFODetector:
         return merged_out, baseline_med
 
 
+def save_detection_as_gpu_npz(
+    result: HFODetectionResult,
+    output_path: Union[str, Path],
+    *,
+    start_time: float = 0.0,
+    reference_type: str = "unknown",
+    bipolar_pairs: Optional[List[Tuple[str, str]]] = None,
+) -> Path:
+    """Save HFODetectionResult in legacy ``*_gpu.npz`` format.
+
+    The primary channel names are stored AS-IS from the detection result.
+    For bipolar channels this means full edge names like ``A1-A2``.
+
+    For backward compatibility with legacy scripts that expect monopolar
+    left-contact aliases, callers can reconstruct aliases from
+    ``bipolar_pairs`` stored in the file.
+
+    Keys written
+    ------------
+    whole_dets : object array, each element ``(n_events, 2)`` float64
+    chns_names : str array — primary channel names (full bipolar or monopolar)
+    events_count : int64 array
+    start_time : float scalar (Unix epoch)
+    reference_type : str ("bipolar", "car", "none")
+    bipolar_pairs : object array of (left, right) tuples, or empty if CAR/mono
+
+    Returns the resolved output path.
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    n_ch = len(result.ch_names)
+    whole_dets = np.empty(n_ch, dtype=object)
+    for i, ev in enumerate(result.events_by_channel):
+        arr = np.asarray(ev, dtype=np.float64)
+        if arr.ndim != 2 or (arr.shape[0] > 0 and arr.shape[1] != 2):
+            arr = arr.reshape(-1, 2) if arr.size else np.zeros((0, 2), dtype=np.float64)
+        whole_dets[i] = arr
+
+    bp_arr = np.empty(0, dtype=object)
+    if bipolar_pairs:
+        bp_arr = np.empty(len(bipolar_pairs), dtype=object)
+        for i, pair in enumerate(bipolar_pairs):
+            bp_arr[i] = pair
+
+    np.savez(
+        str(output_path),
+        whole_dets=whole_dets,
+        chns_names=np.array(result.ch_names, dtype=object),
+        events_count=np.asarray(result.events_count, dtype=np.int64),
+        start_time=np.float64(start_time),
+        reference_type=str(reference_type),
+        bipolar_pairs=bp_arr,
+    )
+    return output_path
+
+
+def build_legacy_alias_map(ch_names: List[str]) -> Dict[str, str]:
+    """Build a full-bipolar-name -> left-contact-alias mapping.
+
+    For ``A1-A2`` returns ``{"A1-A2": "A1"}``.
+    For monopolar names returns identity mapping.
+    """
+    alias: Dict[str, str] = {}
+    for name in ch_names:
+        if "-" in name:
+            alias[name] = name.split("-")[0].strip()
+        else:
+            alias[name] = name
+    return alias

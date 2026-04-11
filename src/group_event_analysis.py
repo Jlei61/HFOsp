@@ -958,6 +958,47 @@ def legacy_refine_counts_from_gpu_npz_paths(
     return out
 
 
+def save_refine_gpu_npz(
+    gpu_npz_paths: Sequence[str],
+    output_path: Union[str, "Path"],
+    *,
+    pick_k: float = 1.0,
+    refine_window_sec: float = 0.3,
+    refine_ext_ms: float = 30.0,
+    refine_chns_thr: float = 0.5,
+    refine_time_axis_hz: float = 500.0,
+    refine_max_window_sec: float = 2.0,
+) -> Dict[str, Any]:
+    """Produce and save ``_refineGpu.npz`` from per-record ``*_gpu.npz`` files.
+
+    Wraps ``legacy_refine_counts_from_gpu_npz_paths``, then persists the
+    result in legacy-compatible format (keys: ``events_count``, ``chns_names``).
+
+    Returns the full refine summary dict.
+    """
+    from pathlib import Path as _Path
+    output_path = _Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    out = legacy_refine_counts_from_gpu_npz_paths(
+        gpu_npz_paths,
+        pick_k=pick_k,
+        refine_window_sec=refine_window_sec,
+        refine_ext_ms=refine_ext_ms,
+        refine_chns_thr=refine_chns_thr,
+        refine_time_axis_hz=refine_time_axis_hz,
+        refine_max_window_sec=refine_max_window_sec,
+    )
+
+    np.savez(
+        str(output_path),
+        events_count=np.asarray(out["refined_counts"], dtype=np.int64),
+        chns_names=np.asarray(out["all_channels"], dtype=object),
+    )
+
+    return out
+
+
 def legacy_refine_counts_from_edf_paths(
     edf_paths: Sequence[str],
     *,

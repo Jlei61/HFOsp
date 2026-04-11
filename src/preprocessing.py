@@ -59,6 +59,7 @@ class PreprocessingResult:
     used_gpu: bool = False        # Whether GPU was used for processing
     outer_contact_mode: str = "none"
     dropped_outer_contacts: List[str] = field(default_factory=list)
+    start_time: float = 0.0       # Recording start (Unix epoch), 0 if unknown
 
 
 def _moving_sum_1d(x: np.ndarray, win: int) -> np.ndarray:
@@ -405,15 +406,18 @@ def _stream_edf_channel_ll(
     )
 
 
+EPILEPSIAE_SCALP_AUX_CHANNELS = {
+    "FP1", "FP2", "F3", "F4", "C3", "C4", "P3", "P4", "O1", "O2",
+    "FZ", "CZ", "PZ", "F7", "F8", "T3", "T4", "T5", "T6", "T1", "T2",
+    "EOG", "EOG1", "EOG2", "ECG", "EMG", "EMG1", "EMG2", "HP1", "HP2",
+    "HP3", "PHO", "FT9", "FT10", "T7", "T8", "P7", "P8",
+}
+
+
 def _epilepsiae_intracranial_indices(labels: List[str]) -> List[int]:
     """Keep only intracranial channels from Epilepsiae block labels."""
-    scalp_or_aux = {
-        "FP1", "FP2", "F3", "F4", "C3", "C4", "P3", "P4", "O1", "O2",
-        "FZ", "CZ", "PZ", "F7", "F8", "T3", "T4", "T5", "T6", "T1", "T2",
-        "EOG", "EOG1", "EOG2", "ECG", "EMG", "EMG1", "EMG2", "HP1", "HP2",
-        "HP3", "PHO", "FT9", "FT10", "T7", "T8", "P7", "P8",
-    }
-    return [idx for idx, lab in enumerate(labels) if str(lab).strip().upper() not in scalp_or_aux]
+    return [idx for idx, lab in enumerate(labels)
+            if str(lab).strip().upper() not in EPILEPSIAE_SCALP_AUX_CHANNELS]
 
 
 def _read_epilepsiae_head_for_streaming(head_path: Path) -> Dict[str, object]:
@@ -443,6 +447,159 @@ def _read_epilepsiae_head_for_streaming(head_path: Path) -> Dict[str, object]:
         "sample_bytes": sample_bytes,
         "conversion_factor": conversion_factor,
     }
+
+
+def load_epilepsiae_block(
+    data_path: Union[str, Path],
+    head_path: Union[str, Path],
+    *,
+    reference: str = "car",
+    drop_channels: Optional[List[str]] = None,
+    segment_sec: Optional[float] = 200.0,
+    notch_freqs: Optional[List[float]] = None,
+) -> "PreprocessingResult":
+    """Load an Epilepsiae raw block (.data + .head) for HFO detection.
+
+    Reads little-endian int16 interleaved samples, filters out scalp/aux
+    channels, applies the requested reference, applies notch filter for
+    power line harmonics, and returns a PreprocessingResult ready for
+    HFODetector.
+
+    Parameters
+    ----------
+    reference : str
+        "car" (legacy Epilepsiae default) or "bipolar" (for SEEG subjects).
+    drop_channels : list of str, optional
+        Per-subject channels to exclude (e.g. bad contacts).
+    segment_sec : float or None
+        If not None, read in segments of this length to limit peak memory.
+        None = read entire block at once.
+    notch_freqs : list of float, optional
+        Frequencies for IIR notch filter (Hz).  Default: [50, 100, 150, 200]
+        (50 Hz power line and harmonics within the ripple band).
+        Pass an empty list to skip notch filtering.
+    """
+    if notch_freqs is None:
+        notch_freqs = [50.0, 100.0, 150.0, 200.0]
+    data_path = Path(data_path)
+    head_path = Path(head_path)
+    if not data_path.exists():
+        raise FileNotFoundError(f"Epilepsiae data file not found: {data_path}")
+    if not head_path.exists():
+        raise FileNotFoundError(f"Epilepsiae head file not found: {head_path}")
+
+    head = _read_epilepsiae_head_for_streaming(head_path)
+    sample_bytes = int(head["sample_bytes"])
+    if sample_bytes != 2:
+        raise ValueError(f"Unsupported sample_bytes={sample_bytes} for {head_path.name}")
+
+    sfreq = float(head["sample_freq"])
+    n_channels_total = int(head["num_channels"])
+    channel_names = list(head["channel_names"])
+    conversion = -1.0 * float(head["conversion_factor"])
+    duration_sec = float(head["duration_sec"])
+
+    # Parse start_time from head (start_ts field)
+    start_time = 0.0
+    raw_info: Dict[str, str] = {}
+    with open(head_path, "r", encoding="utf-8") as fh:
+        for raw_line in fh:
+            line = raw_line.strip()
+            if "=" in line:
+                k, v = line.split("=", 1)
+                raw_info[k] = v
+    if "start_ts" in raw_info:
+        try:
+            start_time = datetime.strptime(
+                raw_info["start_ts"], "%Y-%m-%d %H:%M:%S.%f"
+            ).replace(tzinfo=timezone.utc).timestamp()
+        except (ValueError, OSError):
+            pass
+
+    keep_idx = _epilepsiae_intracranial_indices(channel_names)
+    keep_labels = [channel_names[idx] for idx in keep_idx]
+
+    if drop_channels:
+        drop_set = {ch.strip().upper() for ch in drop_channels}
+        filtered = [(idx, lab) for idx, lab in zip(keep_idx, keep_labels)
+                    if lab.strip().upper() not in drop_set]
+        if filtered:
+            keep_idx, keep_labels = zip(*filtered)
+            keep_idx = list(keep_idx)
+            keep_labels = list(keep_labels)
+        else:
+            keep_idx = []
+            keep_labels = []
+
+    if not keep_labels:
+        raise ValueError(f"No intracranial channels remain after filtering in {data_path.name}")
+
+    bytes_per_frame = sample_bytes * n_channels_total
+    file_size = os.path.getsize(data_path)
+    total_samples = file_size // bytes_per_frame
+
+    seg_samples = total_samples if segment_sec is None else int(round(segment_sec * sfreq))
+    seg_samples = max(1, min(seg_samples, total_samples))
+
+    all_data_segments: List[np.ndarray] = []
+    with open(data_path, "rb") as fh:
+        offset = 0
+        while offset < total_samples:
+            read_len = min(seg_samples, total_samples - offset)
+            raw_bytes = fh.read(read_len * bytes_per_frame)
+            if not raw_bytes:
+                break
+            count = len(raw_bytes) // sample_bytes
+            fetched = np.frombuffer(raw_bytes, dtype="<i2").astype(np.float64)
+            mono = fetched.reshape(-1, n_channels_total).T * conversion
+            intracranial = mono[keep_idx]
+            all_data_segments.append(intracranial)
+            offset += read_len
+
+    if not all_data_segments:
+        raise ValueError(f"No data read from {data_path.name}")
+
+    data = np.concatenate(all_data_segments, axis=1)
+
+    # Apply reference
+    bipolar_pairs = None
+    if reference == "car":
+        data = data - np.mean(data, axis=0, keepdims=True)
+        ch_names_out = list(keep_labels)
+        ref_type = "car"
+    elif reference == "bipolar":
+        pairs, pair_labels = _build_bipolar_pairs(keep_labels)
+        if not pairs:
+            raise ValueError(f"No bipolar pairs found in {data_path.name}")
+        bp_data = np.empty((len(pairs), data.shape[1]), dtype=np.float64)
+        bp_pairs_named: List[Tuple[str, str]] = []
+        for pi, (ia, ib) in enumerate(pairs):
+            bp_data[pi] = data[ia] - data[ib]
+            bp_pairs_named.append((keep_labels[ia], keep_labels[ib]))
+        data = bp_data
+        ch_names_out = pair_labels
+        bipolar_pairs = bp_pairs_named
+        ref_type = "bipolar"
+    else:
+        ch_names_out = list(keep_labels)
+        ref_type = "none"
+
+    # Notch filter for power line harmonics (same as SEEGPreprocessor path)
+    nyq = sfreq / 2.0
+    for freq in notch_freqs:
+        if freq < nyq:
+            b, a = iirnotch(freq, 30, sfreq)
+            data = filtfilt(b, a, data, axis=-1)
+
+    return PreprocessingResult(
+        data=data,
+        sfreq=sfreq,
+        ch_names=ch_names_out,
+        original_ch_names=list(channel_names),
+        bipolar_pairs=bipolar_pairs,
+        reference_type=ref_type,
+        start_time=start_time,
+    )
 
 
 def _stream_epilepsiae_channel_ll(
@@ -2232,8 +2389,17 @@ class SEEGPreprocessor:
 
         if self.exclude_channels is not None:
             exclude_set = set(self.exclude_channels)
-            keep_indices = [i for i, nm in enumerate(ch_names) if nm not in exclude_set]
-            excluded_channels.extend([nm for nm in ch_names if nm in exclude_set])
+            def _should_exclude(name: str) -> bool:
+                if name in exclude_set:
+                    return True
+                if '-' in name:
+                    left, right = name.split('-', 1)
+                    return left in exclude_set or right in exclude_set
+                return False
+            keep_indices = [i for i, nm in enumerate(ch_names) if not _should_exclude(nm)]
+            excluded_channels.extend([nm for nm in ch_names if _should_exclude(nm)])
+            if len(keep_indices) < len(ch_names):
+                print(f"  Excluded {len(ch_names) - len(keep_indices)} channels matching {sorted(exclude_set)}")
             data = data[keep_indices]
             ch_names = [ch_names[i] for i in keep_indices]
 
@@ -2286,6 +2452,14 @@ class SEEGPreprocessor:
         logger.info("elapsed_sec=%.3f", float(time.time() - t_start))
         log_section(logger, "PREPROCESS END")
         
+        rec_start_time = 0.0
+        md = self._raw.info.get("meas_date")
+        if md is not None:
+            try:
+                rec_start_time = md.timestamp()
+            except (AttributeError, OSError):
+                pass
+
         return PreprocessingResult(
             data=data,
             sfreq=sfreq,
@@ -2300,6 +2474,7 @@ class SEEGPreprocessor:
             used_gpu=self._used_gpu,
             outer_contact_mode=str(self.outer_contact_mode),
             dropped_outer_contacts=dropped_outer_contacts,
+            start_time=rec_start_time,
         )
     
     def _resample(self, data: np.ndarray, orig_sfreq: float, target_sfreq: float) -> np.ndarray:
