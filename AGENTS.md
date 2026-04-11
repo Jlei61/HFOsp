@@ -116,16 +116,23 @@ Important drift:
   - `scripts/aggregate_epilepsiae_interictal_synchrony.py` / `scripts/aggregate_yuquan_interictal_synchrony.py` — aggregation
   - `scripts/compute_region_stratified_synchrony.py` — augment event CSV with per-region (i/l/e) synchrony columns
 - Event periodicity (Fig 3C / S7 / S13 verification):
-  - `src/event_periodicity.py` — pulse train PSD, specparam, IEI MLE, ISI-shuffle/Gamma surrogate, Phase 2 tools (hazard, return map, packing sweep, centroid bypass, propagation stereotypy)
+  - `src/event_periodicity.py` — pulse train PSD, specparam, IEI MLE, ISI-shuffle/Gamma surrogate, Phase 2 tools (hazard, return map, packing sweep, centroid bypass)
   - `scripts/run_event_periodicity.py` — Phase 1 dual-dataset batch driver
   - `scripts/run_surrogates_batch.py` — group-only surrogate batch
   - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
-  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (10 experiments: exp1–5 artifact localization, exp6 PR-1, exp7 PR-2, exp7b PR-2.5, exp7c PR-2.6, exp7d PR-2.7)
+  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (artifact localization + PR-1 to PR-2.7 for event-between-event analyses)
   - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7d)
   - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 / PR-2.7 function unit tests
-  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion (Phase 4+5 + PR-1 to PR-2.7)
+  - `docs/event_periodicity_analysis.md` — main results, code map, and current conclusion for event-between-event analyses (Phase 4+5 + PR-1 to PR-2.7)
   - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
   - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
+- Interictal group-event internal propagation (event-inside-event topic; former Periodicity PR-3):
+  - `src/interictal_propagation.py` — lagPatRank / eventsBool loader, mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic
+  - `scripts/run_interictal_propagation.py` — independent batch driver for internal propagation PR-1
+  - `scripts/plot_interictal_propagation.py` — cohort robustness figure for internal propagation PR-1
+  - `tests/test_interictal_propagation.py` — unit tests for centered-rank handling, mixture detection, and source-node diagnostics
+  - `docs/interictal_group_event_internal_propagation.md` — standalone topic note and current result summary
+  - `results/interictal_propagation/` — per-subject JSON, cohort summary, and figures
 - Spatial modulation / SOZ analysis (Where question):
   - `docs/spatial_modulation_soz_analysis.md` — plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
   - `scripts/audit_gpu_npz.py` — Step 0 data audit (Yuquan PASS 11/18, Epilepsiae FAIL 0/20)

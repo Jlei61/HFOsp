@@ -494,7 +494,7 @@ Epilepsiae 的 i/l/e 三值分析在当前数据上不可行（gpu.npz 全坏）
 | `src/event_periodicity.py` | 新增 6 个函数 | ✅ 完成 |
 | `scripts/run_spatial_modulation.py` | **新建** | ✅ 完成 |
 | `scripts/plot_spatial_modulation.py` | **新建** | ✅ 完成 |
-| `src/group_event_analysis.py` | **不修改** | — |
+| `src/group_event_analysis.py` | 新增 `save_refine_gpu_npz()` | ✅ 完成 |
 | `config/default.yaml` | **不修改** | — |
 
 新增函数（在 `src/event_periodicity.py`）：
@@ -520,6 +520,105 @@ Epilepsiae 的 i/l/e 三值分析在当前数据上不可行（gpu.npz 全坏）
 
 **实际耗时**：~3 分钟计算 + 代码编写。
 **Epilepsiae 降级**：审计证实 Epilepsiae gpu.npz 全部损坏，PR-1 为 **Yuquan-only** 探索性分析。
+
+---
+
+## 8. HFO 检测基础设施重构（2026-04-09）
+
+### 8.1 动机
+
+PR-1 暴露了一个根本性的基础设施缺口：**Epilepsiae 的 `*_gpu.npz` 全部损坏（216 字节空桩），Yuquan 也有 7/18 subjects 缺失**。这意味着 per-channel 空间分析被上游数据限制在 Yuquan-only 的 11 个 subjects。
+
+要解除这个限制，需要让新 pipeline 自主产出 `*_gpu.npz` 和 `_refineGpu.npz`，不再依赖 legacy 中间产物。
+
+### 8.2 关键设计决策
+
+**D1: 通道命名主合同改为完整双极边名**
+
+新 `*_gpu.npz` 的 `chns_names` 保留完整双极名（如 `A1-A2`），不再使用 `alias_bipolar_to_left` 作为主数据结构。原因：
+
+- 检测器拥有的是"边上的事件"，不是"点上的事件"
+- Where 空间分析需要 edge → endpoint/midpoint 的显式映射
+- 偷偷把 edge 当 node 会在 SOZ 空间归因中引入系统性偏移
+
+文件内新增 `bipolar_pairs` 和 `reference_type` 元数据，旧脚本可通过 `build_legacy_alias_map()` 获取左触点兼容视图。
+
+**D2: Nyquist 硬门禁**
+
+`HFODetector.detect()` 入口增加采样率检查：`sfreq/2 <= band_upper` 时直接 `raise ValueError`。256 Hz 数据上做 80–250 Hz 检测在物理上是混叠垃圾，不是 warning 问题。
+
+**D3: 数据集参数分层**
+
+| 参数 | Yuquan (SEEG) | Epilepsiae (legacy default) |
+|------|--------------|----------------------------|
+| reference | bipolar (gap=1) | CAR |
+| resample | 800 Hz | native fs |
+| side_thresh | 1.5 | 2.0 |
+| 通道命名 | `A1-A2` (full bipolar) | monopolar (CAR) |
+
+所有 per-subject 参数合并到 `config/subject_params.json`，包括 drop_channels 和 pick_k。
+
+### 8.3 新增代码
+
+| 文件 | 变更 | 用途 |
+|------|------|------|
+| `src/preprocessing.py` | 新增 `load_epilepsiae_block()` | Epilepsiae `.data/.head` 全信号加载器（CAR/bipolar 可配） |
+| `src/hfo_detector.py` | 新增 `save_detection_as_gpu_npz()` | 持久化 HFODetectionResult 为 legacy 格式 |
+| `src/hfo_detector.py` | 新增 `build_legacy_alias_map()` | 双极→左触点别名兼容层 |
+| `src/hfo_detector.py` | 修改 `detect()` | Nyquist 硬门禁 |
+| `src/group_event_analysis.py` | 新增 `save_refine_gpu_npz()` | 封装 legacy refine + 落盘 |
+| `config/subject_params.json` | **新建** | 合并 Yuquan 29 + Epilepsiae 20 subjects 参数 |
+| `scripts/run_hfo_detection.py` | **新建** | 批量检测脚本，支持 `--dataset/--subject/--all/--smoke` |
+
+### 8.4 `*_gpu.npz` 新合同
+
+| Key | 类型 | 说明 |
+|-----|------|------|
+| `whole_dets` | object array, 每元素 `(n_events, 2)` float64 | 事件起止时间（秒） |
+| `chns_names` | str array | **完整双极名**（如 `A1-A2`）或 CAR 下的单极名 |
+| `events_count` | int64 array | 每通道事件数 |
+| `start_time` | float scalar | Unix epoch |
+| `reference_type` | str | `"bipolar"` / `"car"` / `"none"` |
+| `bipolar_pairs` | object array of (left, right) | 双极端点对；CAR 时为空 |
+
+### 8.5 Smoke 测试结果
+
+Yuquan `chengshuai/FC10477Q`（2h record）：
+- 130 channels（vs legacy 120——差异来自 shaft-edge 保留策略）
+- 48,319 events detected
+- Channel set IoU with legacy = 0.923（legacy 120 是新 130 的子集）
+- `_try_load_gpu` 验证通过
+- 耗时 ~17 分钟（CPU, chunk_sec=50）
+
+### 8.6 Epilepsiae 解锁路径
+
+批量跑 `python scripts/run_hfo_detection.py --dataset epilepsiae --all` 即可。需注意：
+- 256 Hz recordings 会被 Nyquist 门禁自动跳过
+- 全量 ~2000 block-hours 预计 CPU 耗时 10–20 小时
+- 建议先用 `--smoke` 验证 1 个 subject 后再 `--all`
+
+### 8.7 Yuquan 全量验证结果（2026-04-11 完成）
+
+GPU 加速 pipeline 已在 Yuquan 全量 21/21 有数据 subject 上完成（`results/hfo_detection/`）。
+
+**事件级对比（7 subjects 有完好老 gpu.npz）：**
+- 通道间事件相关性 median r = 0.9983（空间分布高度一致）
+- 总事件数偏差 median 21.4%（新 pipeline 系统性偏高，因 notch 滤波差异 + FIR vs IIR）
+
+**Refine IoU（13 subjects 有 lagPat 对照）：**
+- median IoU = 0.750，9/13 ≥ 0.7，2/13 完美匹配（1.000）
+- 低 IoU subjects（hanyuxuan 0.115, litengsheng 0.219）原因是 `mean+k*std` 阈值对事件总数高度敏感，非 bug
+
+**修复的 bug：**
+- `exclude_channels` 在双极参考后应用，单极名无法匹配双极通道名 → 修复为展开匹配
+- CuPy 内存池未在 record 间释放 → 高通道数 subject OOM → 添加显式释放
+
+### 8.8 后续 PR-2 方向
+
+1. **Epilepsiae 全量检测**：跑完后重做 gpu_audit，解锁 per-channel 空间分析
+2. **三值梯度（i/l/e）**：在 Epilepsiae per-channel 数据上验证 SOZ > lesion > extra-focal
+3. **Mixed effects 模型**：`metric ~ soz_label + log(event_rate) + (1|subject)`
+4. **Robust refine**：候选 `log_median_mad`、quantile、mixture model 替代 `mean+k*std`
 
 ---
 
