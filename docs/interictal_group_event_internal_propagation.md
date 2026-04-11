@@ -83,6 +83,8 @@ PR-1 的目标：
   - `compute_stereotypy_by_nparticipating()`
   - `compute_source_node_diagnostic()`
   - `compute_propagation_stereotypy()`
+  - `compute_cluster_stereotypy()` — KMeans(k=2) + 簇内 τ + 簇间 correlation
+  - `compute_legacy_mi()` — 老论文 MI 模板算法 + 行内 shuffle 置换检验
   - `run_subject_interictal_propagation_pr1()`
   - `summarize_propagation_cohort()`
 - `scripts/run_interictal_propagation.py`
@@ -145,24 +147,38 @@ PR-1 的目标：
 - Wilcoxon (greater) p = 0.088 → 未达显著
 - **SOZ source erasure**: 仅 3/30（10%）受试者在中心化后丧失 SOZ source node → centering 未过度校正
 
-### 7.5 科学解读（初版，待簇内分析补充后修订）
+### 7.5 Cluster-aware stereotypy（已补全）
 
-以上结果表明：
+KMeans(k=2) 聚类后的簇内分析：
 
-1. **多模态性是普遍的**（30/30），但这与"刻板性"并不矛盾 — 一个 subject 可以有多种刻板模式。
-2. **全体 mean τ 低**（0.089）是跨模式混合的数学必然，不能直接作为"刻板性弱"的证据。
-3. **Identity bias 占全体 τ 的 65%** — 这个数字在簇内可能会不同，需要簇内重新计算才能下结论。
-4. **SOZ 差异边际**（p = 0.088），但 n = 12 过小。
-5. **Centering 没有过度校正**（10% SOZ source erasure），这个结论是稳固的。
+- **Within-cluster τ median = 0.250** → 从全体 0.089 跳到簇内 0.250，uplift median = +0.096
+- **29/30 subject 的 within-cluster τ > overall τ** → 跨模式混合是全体 τ 低的主要原因
+- **Inter-cluster Spearman r median = −0.374** → 两种模式整体倾向互补
+- **11/30 (37%) 的 r < −0.5** → forward/reverse 双模式不是 958 (E3) 的特例，而是普遍存在
+- 958 复现：inter-cluster r = **−0.915**（老论文 r = −0.91），簇比例 48%/52%
+- 簇内 τ 最高的 subject：huangwanling (0.402), 1077 (0.401), 922 (0.381)
 
-**关键缺口**：当前分析没有做簇内 τ 计算，因此**既不能确认也不能否认"多种模式各自刻板"**这一核心假设。需要 KMeans 聚类 + 簇内 τ + legacy MI 来补全。
+### 7.6 Legacy MI（已补全）
 
-### 7.6 待补充分析
+- **30/30 全部显著** (permutation test p < 0.05) → 完全复现老论文的 17/18 + 20/20
+- MI median = **0.194**（range 0.048–0.431）
+- MI ≡ Kendall τ（数学上等价），但 MI 使用固定模板，τ 使用全 pair，两者互补
 
-- KMeans(k=2) 簇内 τ — 如果簇内 τ 显著高于全体 τ，则确认多模式刻板性
-- Legacy MI + 置换检验 — 向后兼容老论文指标
-- 簇间 pattern correlation — 量化模式间差异（E3 式 forward/reverse 是极端情况还是普遍现象？）
-- Figure 2 样式可视化 — lagPatRank heatmap + per-channel rank 分布
+### 7.7 科学解读（最终版）
+
+1. **多模态性是普遍的（30/30），且与刻板性共存**。每种模式内部 τ ≈ 0.250（中位），比全体 τ = 0.089 高 3 倍。全体 τ 低的原因是跨模式混合。
+2. **Forward/reverse 双模式是普遍现象**：37% 的 subject 有 r < −0.5 的强互逆模式。958 (E3) 不是孤例。
+3. **Legacy MI 全部显著**：完全复现老论文结论，没有 single failure。
+4. **Identity bias 仍然重要**（全体 bias fraction = 65%），但在簇内水平，真实传播结构是主要贡献者（958 的簇内 centered τ ≈ 0.15-0.20，几乎未衰减）。
+5. **SOZ 差异仍不显著**（p = 0.088），这是当前最弱的环节。
+
+**核心结论**：间期群体事件内部存在多种传播模式，但每种模式内部是刻板的、时间上稳定的。这反映了癫痫病理网络具有多条优选传播路径。老论文的 MI 显著性结论完全可复现。
+
+### 7.8 对后续的影响
+
+- 簇内 τ 和 MI 同时显著 → 可以直接用在新论文中
+- Forward/reverse 双模式的生理解释是 PR-2 的方向（例如 day/night、seizure proximity 调控不同模式的出现频率）
+- 最佳 k 的选择（目前固定 k=2）可以用 silhouette / BIC 优化，但 k=2 已经与老论文一致
 
 ## 8. 当前状态
 
@@ -170,6 +186,8 @@ PR-1 的目标：
 - 独立结果目录已建立
 - **PR-1 全量完成并验证**（30 subjects，0 errors）
 - PR-1 的 cohort 结果以 `pr1_cohort_summary.json` 为准
-- 图已生成并通过目视验证：`results/interictal_propagation/figures/pr1_interictal_propagation_robustness.png`
+- 图已生成：
+  - `results/interictal_propagation/figures/pr1_propagation_heatmap_examples.png` — Figure 2 样式 heatmap
+  - `results/interictal_propagation/figures/pr1_propagation_cohort_summary.png` — 6-panel cohort summary
 
 本文件只维护这个主题本身；涉及 IEI / PSD / rate modulation 的内容请回到 `docs/event_periodicity_analysis.md`。

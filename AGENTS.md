@@ -127,9 +127,9 @@ Important drift:
   - `docs/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
   - `docs/interictal_population_event_methodological_review.md` — collaborator-facing narrative update and next-step framing
 - Interictal group-event internal propagation (event-inside-event topic; former Periodicity PR-3):
-  - `src/interictal_propagation.py` — lagPatRank / eventsBool loader, mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic
+  - `src/interictal_propagation.py` — lagPatRank / eventsBool loader, mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic, KMeans cluster stereotypy, legacy MI + permutation test
   - `scripts/run_interictal_propagation.py` — independent batch driver for internal propagation PR-1
-  - `scripts/plot_interictal_propagation.py` — cohort robustness figure for internal propagation PR-1
+  - `scripts/plot_interictal_propagation.py` — Figure-2-style heatmap examples + 6-panel cohort summary
   - `tests/test_interictal_propagation.py` — unit tests for centered-rank handling, mixture detection, and source-node diagnostics
   - `docs/interictal_group_event_internal_propagation.md` — standalone topic note and current result summary
   - `results/interictal_propagation/` — per-subject JSON, cohort summary, and figures
