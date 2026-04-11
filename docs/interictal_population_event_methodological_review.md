@@ -16,6 +16,11 @@
 
 ## 话题 1：群体事件内部时序刻板性（对应论文 Fig 1, Fig 2）
 
+> 2026-04-11 注：这一块现在已从 `event_periodicity` 线中独立出来，作为单独主题
+> "interictal group-event internal propagation" 维护。实现、结果和图请优先看
+> `docs/interictal_group_event_internal_propagation.md` 与
+> `results/interictal_propagation/`；本节保留方法学叙事与问题定义。
+
 ### 1.1 老论文及代码做了什么
 
 老论文用 80–250 Hz 带通滤波 + Hilbert 包络，在每个通道上检测 HFO/spike-coupled HFO 作为 IE。相邻通道的 IE 在时间上重叠时被合并为"群体事件"。每个群体事件中，参与通道的"激活时间"由该通道在事件窗内 80–250 Hz 频谱图（spectrogram）的**时频质心** $(t_c, f_c)$ 中的 $t_c$ 给出（公式 2）。把 $t_c$ 排序就得到该事件的传播 rank 向量。
@@ -635,3 +640,63 @@ PR-2.6 的做法很克制：不引入新的强模型，只把分析主轴改成*
 3. **Seizure-triggered rate 的后续深化**：PR-2.7 目前最值得追的不是“继续喊 pre-ictal marker”，而是分解这个 broad elevation 到底有多少是真 pre-ictal buildup、多少是 post-ictal carryover、多少是 seizure clustering / circadian baseline。至少要做：(i) matched control windows；(ii) 去 overlap / 去 cluster 的 seizure subsampling；(iii) 与 PR4–PR6 synchrony 在同一 seizure-centered windows 上正面对比。
 
 整篇论文的叙事现在更稳妥的版本应是 **"interictal events as a refractory excitable point process under multi-timescale state modulation, with seizure-centered broad rate elevation and SOZ-specific propagation stereotypy"**。这比“~2 Hz oscillator”强得多，也比“已经抓到 pre-ictal biomarker”诚实得多。下一步若要把临床相关性做实，优先级已经从 PR-3 并列转向对 seizure-centered rate elevation 的机制拆解。
+
+### PR-2.9 计划（2026-04-10 草案，先写入不提交）
+
+这件事值不值得做？**值得。** 但前提是别再做“多画几张 seizure-centered 图”的伪进展。PR-2.9 的唯一意义，是把 PR-2.7 里那个 `p=0.019` 的信号拆干净，回答下面这个真问题：
+
+> 这到底是 **true pre-ictal buildup**，还是 **broad peri-ictal elevation / cluster contamination / circadian baseline**？
+
+如果回答不了这个问题，继续谈 biomarker 就是在自欺欺人。
+
+#### 核心判断
+
+- **值得做**：因为 `Exp 7G` 已经给出了一个真实的 subject-level seizure-linked signal，但解释仍然被三个混杂卡死了。
+- **最大风险**：把 repeated seizures 当独立样本，或者继续使用 overlap 污染的窗口，最后得到看似更显著、其实更假的结果。
+- **设计原则**：统计单位必须仍是 **subject**；所有新增分析都必须明确消掉一种歧义，而不是加描述性图。
+
+#### PR-2.9 应该只做三件事
+
+1. **分段轨迹（piecewise trajectory）**
+   把 `[-12,-6] / [-6,-1] / [+1,+6]` 这种粗窗口改成非重叠分段：`[-12,-6]`、`[-6,-3]`、`[-3,-1]`、`[-1,0]`、`[0,1]`、`[1,3]`、`[3,6]`、`[6,12]`。  
+   目的不是多做统计，而是判断形状：是逐渐爬升到 0 点，还是前后一起抬高。
+
+2. **隔离 / cluster 分层**
+   明确算每次 seizure 的 `time since previous seizure` 和 `time until next seizure`。  
+   至少比较三组：
+   - isolated: `[-12h,+12h]` 内没有别的 seizure
+   - pre-clean: `[-12h,0]` 内没有 prior seizure
+   - clustered: `[-12h,0]` 内有 prior seizure
+
+   如果所谓 pre-elevation 在 isolated / pre-clean 里消失，只在 clustered seizure 里存在，那它八成就是 post-ictal carryover 或 cluster state，不是什么 prediction。
+
+3. **matched control + synchrony 正面对比**
+   对每个 seizure pre-window `[-6h,-1h]`，在同 subject 里找 **同 local clock、同 day/night、且离任意 seizure 足够远** 的 control windows。  
+   然后在**同一批窗口**上比较：
+   - rate: seizure-pre vs matched control
+   - synchrony: seizure-pre vs matched control
+
+   这一步是关键。否则你没资格说“rate 比 synchrony 更敏感”，因为之前根本不是同窗比较。
+
+#### Reviewer-facing 预期口径
+
+PR-2.9 做完后，结论只能落在三种之一：
+
+1. **True pre-ictal buildup**
+   isolated seizures 仍保留渐进式 pre-onset rise，matched controls 没有，且 synchrony 仍为 null。
+
+2. **Broad peri-ictal elevation**
+   前后都高，只是 pre-window 先开始抬升；更像 seizure-centered state shift，不该写成 prediction marker。
+
+3. **Cluster / baseline artifact**
+   一旦做 isolation / matching，效应基本消失。那就该老老实实承认 PR-2.7 抓到的是混杂。
+
+#### 我的审稿式结论
+
+这个 PR-2.9 方案现在是**可靠且合理的**，因为它直接打三个真正的漏洞：形状、cluster、baseline。  
+不合理的做法只有两种：
+
+1. 把 seizure 当独立样本继续堆显著性。
+2. 不做 matched controls，就继续喊 pre-ictal biomarker。
+
+那种做法是垃圾，会把一个本来很有价值的现象做废。

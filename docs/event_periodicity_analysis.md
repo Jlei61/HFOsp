@@ -572,7 +572,6 @@ PR-2.7 证据链（rate-trace 谱特征 + 发作邻近，2026-04-09 完成）：
   - `run_centroid_bypass()` — 实验 2 驱动
   - `compute_hazard_function()` — Hazard function
   - `compute_iei_return_map()` — Return map / Poincaré
-  - `compute_propagation_stereotypy()` — Kendall tau 一致性
   - `compute_renewal_psd_analytic()` — 解析 renewal PSD（PR-1）
   - `compute_soz_stratified_deadtime()` — SOZ 分层 dead-time（PR-1）
   - `_load_group_events_with_soz_labels()` — SOZ 事件加载公共 helper
@@ -607,12 +606,23 @@ PR-2.7 证据链（rate-trace 谱特征 + 发作邻近，2026-04-09 完成）：
 - `scripts/plot_periodicity_phase2.py` — Phase 2 可视化（exp 1-7d）
 - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 / PR-2.7 函数单元测试
 
+### 独立主题：群体事件内部传播
+
+这部分原来作为 `event_periodicity` Phase 2 的探索性 `exp5_stereotypy` 存在，
+现在已独立成单独主题，不再作为"事件之间"分析的一部分维护。
+
+- `src/interictal_propagation.py` — `lagPatRank/eventsBool` 加载、mixture screen、centered-rank τ、`n_participating` 分层、SOZ source-erasure 诊断
+- `scripts/run_interictal_propagation.py` — 独立批量驱动（内部传播 PR-1）
+- `scripts/plot_interictal_propagation.py` — 独立 cohort 图
+- `tests/test_interictal_propagation.py` — 独立单元测试
+- `docs/interictal_group_event_internal_propagation.md` — 独立主题说明
+
 ### 结果文件
 - `results/event_periodicity/phase2/exp1_packing_sweep.json`
 - `results/event_periodicity/phase2/exp2_centroid_bypass.json`
 - `results/event_periodicity/phase2/exp3_hazard.json`
 - `results/event_periodicity/phase2/exp4_return_map.json`
-- `results/event_periodicity/phase2/exp5_stereotypy.json`
+- `results/event_periodicity/phase2/exp5_stereotypy.json` — 历史探索版，现已被独立主题 `results/interictal_propagation/` 取代
 - `results/event_periodicity/phase2/exp6_renewal_psd.json`（PR-1）
 - `results/event_periodicity/phase2/exp6_soz_deadtime.json`（PR-1）
 - `results/event_periodicity/phase2/exp7_serial_corr_deep.json`（PR-2）
@@ -624,3 +634,4 @@ PR-2.7 证据链（rate-trace 谱特征 + 发作邻近，2026-04-09 完成）：
 - `results/event_periodicity/phase2/exp7c_long_timescale.json`（PR-2.6）
 - `results/event_periodicity/phase2/exp7d_rate_spectral.json`（PR-2.7）
 - `results/event_periodicity/phase2/figures/` — 可视化图
+- `results/interictal_propagation/` — 群体事件内部传播独立结果目录
