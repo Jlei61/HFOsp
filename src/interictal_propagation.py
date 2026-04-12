@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 from scipy.stats import kendalltau, spearmanr, wilcoxon
 from sklearn.cluster import AgglomerativeClustering, KMeans
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import adjusted_mutual_info_score, silhouette_score
 
 try:
     from diptest import diptest as hartigan_diptest
@@ -14,14 +15,40 @@ except Exception:  # pragma: no cover - optional import guard
     hartigan_diptest = None
 
 
-def load_subject_propagation_patterns(subject_dir: Path) -> Dict[str, Any]:
-    """Load and align lagPatRank / eventsBool across all blocks for one subject."""
+def _record_name_from_lagpat_path(path: Path) -> str:
+    name = path.name
+    if name.endswith("_lagPat.npz"):
+        return name[: -len("_lagPat.npz")]
+    return path.stem
+
+
+def _safe_float_scalar(value: Any) -> float:
+    arr = np.asarray(value, dtype=float)
+    if arr.size == 0:
+        return float("nan")
+    return float(arr.reshape(-1)[0])
+
+
+def _finite_minmax(values: np.ndarray) -> Tuple[float, float]:
+    arr = np.asarray(values, dtype=float)
+    finite = arr[np.isfinite(arr)]
+    if finite.size == 0:
+        return float("nan"), float("nan")
+    return float(np.min(finite)), float(np.max(finite))
+
+
+def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
+    """Load one subject into a single event contract with timing metadata.
+
+    Blocks are ordered by `start_t` first, then filename as a stable tie-breaker.
+    Event absolute time is reconstructed as `packedTimes[:, 0] + start_t`.
+    """
     subject_dir = Path(subject_dir)
     lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
     if not lagpat_files:
         raise FileNotFoundError(f"No *_lagPat.npz in {subject_dir}")
 
-    raw_blocks: List[Tuple[List[str], np.ndarray, np.ndarray]] = []
+    raw_blocks: List[Dict[str, Any]] = []
     channel_names: List[str] = []
     channel_index: Dict[str, int] = {}
 
@@ -30,6 +57,7 @@ def load_subject_propagation_patterns(subject_dir: Path) -> Dict[str, Any]:
         ranks = np.asarray(lp["lagPatRank"], dtype=float)
         bools = np.asarray(lp["eventsBool"]) > 0
         chns = [str(x) for x in list(lp["chnNames"])]
+        start_t = _safe_float_scalar(lp["start_t"]) if "start_t" in lp else float("nan")
         if ranks.ndim != 2 or bools.ndim != 2:
             continue
         if ranks.size == 0 or bools.size == 0:
@@ -48,21 +76,75 @@ def load_subject_propagation_patterns(subject_dir: Path) -> Dict[str, Any]:
             if ch not in channel_index:
                 channel_index[ch] = len(channel_names)
                 channel_names.append(ch)
-        raw_blocks.append((chns, ranks, bools))
+
+        record_name = _record_name_from_lagpat_path(lp_file)
+        packed_path = lp_file.with_name(f"{record_name}_packedTimes.npy")
+        packed = None
+        event_rel_times = np.full(n_ev, np.nan, dtype=float)
+        event_abs_times = np.full(n_ev, np.nan, dtype=float)
+        has_packed_times = packed_path.exists()
+        if has_packed_times:
+            packed = np.asarray(np.load(packed_path), dtype=float)
+            if packed.ndim == 2 and packed.shape[1] >= 1:
+                n_ev = min(n_ev, packed.shape[0])
+                ranks = ranks[:, :n_ev]
+                bools = bools[:, :n_ev]
+                event_rel_times = packed[:n_ev, 0].astype(float, copy=False)
+                if np.isfinite(start_t):
+                    event_abs_times = event_rel_times + start_t
+
+        raw_blocks.append(
+            {
+                "path": str(lp_file),
+                "record_name": record_name,
+                "start_t": start_t,
+                "channel_names": chns,
+                "ranks": ranks,
+                "bools": bools,
+                "event_rel_times": event_rel_times,
+                "event_abs_times": event_abs_times,
+                "has_packed_times": has_packed_times,
+            }
+        )
 
     if not raw_blocks:
         return {
             "ranks": np.zeros((0, 0), dtype=float),
             "bools": np.zeros((0, 0), dtype=bool),
             "channel_names": [],
+            "event_abs_times": np.zeros(0, dtype=float),
+            "event_rel_times": np.zeros(0, dtype=float),
+            "block_ids": np.zeros(0, dtype=int),
+            "record_names": [],
+            "block_boundaries": [],
+            "block_start_times": np.zeros(0, dtype=float),
+            "n_blocks_total": 0,
             "n_blocks_used": 0,
         }
+
+    raw_blocks = sorted(
+        raw_blocks,
+        key=lambda block: (
+            block["start_t"] if np.isfinite(block["start_t"]) else float("inf"),
+            os.path.basename(block["path"]),
+        ),
+    )
 
     n_union = len(channel_names)
     aligned_ranks: List[np.ndarray] = []
     aligned_bools: List[np.ndarray] = []
+    aligned_event_abs_times: List[np.ndarray] = []
+    aligned_event_rel_times: List[np.ndarray] = []
+    block_ids: List[np.ndarray] = []
+    record_names: List[str] = []
+    block_boundaries: List[Dict[str, Any]] = []
+    block_start_times: List[float] = []
+    cursor = 0
 
-    for chns, ranks, bools in raw_blocks:
+    for block_id, block in enumerate(raw_blocks):
+        chns = block["channel_names"]
+        ranks = block["ranks"]
+        bools = block["bools"]
         n_ev = ranks.shape[1]
         rank_block = np.zeros((n_union, n_ev), dtype=float)
         bool_block = np.zeros((n_union, n_ev), dtype=bool)
@@ -72,13 +154,42 @@ def load_subject_propagation_patterns(subject_dir: Path) -> Dict[str, Any]:
             bool_block[idx, :] = bools[row, :]
         aligned_ranks.append(rank_block)
         aligned_bools.append(bool_block)
+        aligned_event_abs_times.append(np.asarray(block["event_abs_times"], dtype=float))
+        aligned_event_rel_times.append(np.asarray(block["event_rel_times"], dtype=float))
+        block_ids.append(np.full(n_ev, block_id, dtype=int))
+        record_names.append(str(block["record_name"]))
+        block_start_times.append(float(block["start_t"]))
+        block_boundaries.append(
+            {
+                "block_id": int(block_id),
+                "record_name": str(block["record_name"]),
+                "start_event_idx": int(cursor),
+                "end_event_idx": int(cursor + n_ev),
+                "n_events": int(n_ev),
+                "start_t": float(block["start_t"]),
+                "has_packed_times": bool(block["has_packed_times"]),
+            }
+        )
+        cursor += n_ev
 
     return {
         "ranks": np.concatenate(aligned_ranks, axis=1),
         "bools": np.concatenate(aligned_bools, axis=1),
         "channel_names": channel_names,
+        "event_abs_times": np.concatenate(aligned_event_abs_times, axis=0),
+        "event_rel_times": np.concatenate(aligned_event_rel_times, axis=0),
+        "block_ids": np.concatenate(block_ids, axis=0),
+        "record_names": record_names,
+        "block_boundaries": block_boundaries,
+        "block_start_times": np.asarray(block_start_times, dtype=float),
+        "n_blocks_total": len(lagpat_files),
         "n_blocks_used": len(raw_blocks),
     }
+
+
+def load_subject_propagation_patterns(subject_dir: Path) -> Dict[str, Any]:
+    """Backward-compatible wrapper for aligned propagation matrices."""
+    return load_subject_propagation_events(subject_dir)
 
 
 def label_events_by_soz(
@@ -547,7 +658,7 @@ def run_subject_interictal_propagation_pr1(
     min_shared_channels: int = 3,
     min_center_participation: int = 10,
 ) -> Dict[str, Any]:
-    loaded = load_subject_propagation_patterns(subject_dir)
+    loaded = load_subject_propagation_events(subject_dir)
     ranks = loaded["ranks"]
     bools = loaded["bools"]
     channel_names = loaded["channel_names"]
@@ -607,18 +718,38 @@ def run_subject_interictal_propagation_pr1(
         min_participation=min_center_participation,
     )
     mi_result = compute_legacy_mi(ranks, bools, n_permutations=200, seed=0)
+    adaptive_cluster = compute_adaptive_cluster_stereotypy(
+        ranks,
+        bools,
+        channel_names=channel_names,
+        n_sample=n_sample,
+        n_tau_seeds=n_seeds,
+        min_shared_channels=min_shared_channels,
+        min_participation=min_center_participation,
+    )
+    first_event_abs_time, last_event_abs_time = _finite_minmax(loaded["event_abs_times"])
 
     return {
         "dataset": dataset,
         "subject": subject,
         "n_channels": int(ranks.shape[0]),
+        "n_events_total": int(ranks.shape[1]),
+        "n_blocks_used": int(loaded["n_blocks_used"]),
         "channel_names": channel_names,
+        "event_metadata": {
+            "record_names": loaded["record_names"],
+            "block_boundaries": loaded["block_boundaries"],
+            "block_start_times": loaded["block_start_times"].tolist(),
+            "first_event_abs_time": first_event_abs_time,
+            "last_event_abs_time": last_event_abs_time,
+        },
         "propagation_stereotypy": stereotypy,
         "mixture": mixture,
         "centered_rank": centered,
         "by_nparticipating": by_n,
         "source_diagnostic": source_diag,
         "cluster": cluster_result,
+        "adaptive_cluster": adaptive_cluster,
         "legacy_mi": mi_result,
     }
 
@@ -802,6 +933,263 @@ def compute_cluster_stereotypy(
     }
 
 
+_MAX_SILHOUETTE_EVENTS = 2000
+
+
+def _kmeans_stability_for_k(
+    features: np.ndarray,
+    k: int,
+    n_seeds: int = 10,
+    min_cluster_fraction: float = 0.10,
+    stability_threshold: float = 0.70,
+) -> Dict[str, Any]:
+    """Assess KMeans label stability at a single *k* via multi-seed AMI.
+
+    Silhouette is computed on a subsample of at most
+    ``_MAX_SILHOUETTE_EVENTS`` rows to keep O(n²) tractable on large
+    event sets.  KMeans and AMI always use the full data.
+    """
+    n = features.shape[0]
+    empty: Dict[str, Any] = {
+        "k": int(k),
+        "viable": False,
+        "reason": "too_few_events",
+        "median_silhouette": np.nan,
+        "median_ami": np.nan,
+        "worst_min_cluster_fraction": 0.0,
+        "passes_stability": False,
+        "passes_fraction": False,
+        "passes_both": False,
+        "best_seed": 0,
+        "best_labels": np.zeros(n, dtype=int).tolist(),
+    }
+    if n < 2 * k:
+        return empty
+
+    sil_rng = np.random.default_rng(0)
+    all_labels: List[np.ndarray] = []
+    silhouettes: List[float] = []
+    min_fracs: List[float] = []
+
+    for seed in range(n_seeds):
+        km = KMeans(n_clusters=k, n_init=10, random_state=seed)
+        lab = km.fit_predict(features)
+        all_labels.append(lab)
+        unique, counts = np.unique(lab, return_counts=True)
+        frac = float(np.min(counts) / n) if len(unique) == k else 0.0
+        min_fracs.append(frac)
+        if len(unique) >= 2:
+            if n > _MAX_SILHOUETTE_EVENTS:
+                idx = sil_rng.choice(n, _MAX_SILHOUETTE_EVENTS, replace=False)
+                silhouettes.append(float(silhouette_score(features[idx], lab[idx])))
+            else:
+                silhouettes.append(float(silhouette_score(features, lab)))
+        else:
+            silhouettes.append(np.nan)
+
+    amis: List[float] = []
+    for i in range(len(all_labels)):
+        for j in range(i + 1, len(all_labels)):
+            amis.append(float(adjusted_mutual_info_score(all_labels[i], all_labels[j])))
+
+    median_ami = float(np.median(amis)) if amis else np.nan
+    sil_finite = [s for s in silhouettes if np.isfinite(s)]
+    median_sil = float(np.median(sil_finite)) if sil_finite else np.nan
+    worst_frac = float(np.min(min_fracs)) if min_fracs else 0.0
+
+    passes_stab = bool(median_ami >= stability_threshold) if np.isfinite(median_ami) else False
+    passes_frac = worst_frac >= min_cluster_fraction
+
+    sil_arr = np.array(silhouettes, dtype=float)
+    best_idx = int(np.nanargmax(sil_arr)) if np.any(np.isfinite(sil_arr)) else 0
+
+    return {
+        "k": int(k),
+        "viable": True,
+        "median_silhouette": median_sil,
+        "median_ami": median_ami,
+        "worst_min_cluster_fraction": worst_frac,
+        "passes_stability": passes_stab,
+        "passes_fraction": passes_frac,
+        "passes_both": bool(passes_stab and passes_frac),
+        "best_seed": int(best_idx),
+        "best_labels": all_labels[best_idx].tolist(),
+    }
+
+
+def compute_adaptive_cluster_stereotypy(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    channel_names: Sequence[str],
+    k_range: Tuple[int, int] = (2, 8),
+    n_stability_seeds: int = 10,
+    min_cluster_fraction: float = 0.10,
+    stability_threshold: float = 0.70,
+    n_sample: int = 200,
+    n_tau_seeds: int = 5,
+    min_shared_channels: int = 3,
+    min_participation: int = 10,
+) -> Dict[str, Any]:
+    """Scan *k* values with stability checks, report per-cluster stereotypy.
+
+    Returns ``stable_k`` — the *k* with the highest silhouette among
+    those that pass both the AMI stability gate and the minimum-cluster-
+    fraction gate.  If no *k* passes, falls back to ``k_min`` with a
+    ``chosen_reason`` flag.  The output includes a full scan summary
+    (without per-seed label arrays) and an inter-cluster Spearman
+    correlation matrix with candidate forward/reverse pair annotations.
+    """
+    valid_events = _valid_event_indices(bools, min_participating=min_shared_channels)
+    if valid_events.size < 2 * k_range[0]:
+        return {"error": "too_few_valid_events", "n_valid": int(valid_events.size)}
+
+    rank_features = ranks[:, valid_events].T.copy()
+    rank_features = np.where(np.isfinite(rank_features), rank_features, 0.0)
+
+    k_min, k_max = k_range
+    k_max = min(k_max, max(valid_events.size // 2, k_min))
+
+    scan_results: List[Dict[str, Any]] = []
+    for k in range(k_min, k_max + 1):
+        scan_results.append(
+            _kmeans_stability_for_k(
+                rank_features,
+                k,
+                n_seeds=n_stability_seeds,
+                min_cluster_fraction=min_cluster_fraction,
+                stability_threshold=stability_threshold,
+            )
+        )
+
+    passing = [r for r in scan_results if r.get("passes_both")]
+    if passing:
+        stable_k_entry = max(passing, key=lambda r: r["median_silhouette"])
+        stable_k: Optional[int] = stable_k_entry["k"]
+    else:
+        stable_k = None
+        stable_k_entry = None
+
+    chosen_k = stable_k if stable_k is not None else k_min
+    chosen_entry = stable_k_entry if stable_k_entry is not None else scan_results[0]
+    labels = np.array(chosen_entry["best_labels"], dtype=int)
+
+    centered_meta = _center_rank_matrix(ranks, bools, min_participation=min_participation)
+
+    clusters: List[Dict[str, Any]] = []
+    templates: List[np.ndarray] = []
+    for ci in range(chosen_k):
+        cluster_events = valid_events[labels == ci]
+        n_cluster = int(cluster_events.size)
+
+        if n_cluster < 2:
+            clusters.append(
+                {
+                    "cluster_id": int(ci),
+                    "n_events": n_cluster,
+                    "fraction": float(n_cluster / valid_events.size),
+                    "raw_tau": np.nan,
+                    "raw_tau_ci_lo": np.nan,
+                    "raw_tau_ci_hi": np.nan,
+                    "centered_tau": np.nan,
+                    "template_rank": [],
+                }
+            )
+            templates.append(np.zeros(ranks.shape[0], dtype=float))
+            continue
+
+        tau_sum = _multi_seed_tau_summary(
+            ranks,
+            bools,
+            event_indices=cluster_events,
+            n_sample=min(n_sample, n_cluster),
+            n_seeds=n_tau_seeds,
+            min_shared_channels=min_shared_channels,
+        )
+        cent_tau_sum = _multi_seed_tau_summary(
+            centered_meta["centered_ranks"],
+            bools,
+            event_indices=cluster_events,
+            n_sample=min(n_sample, n_cluster),
+            n_seeds=n_tau_seeds,
+            min_shared_channels=min_shared_channels,
+            channel_mask=centered_meta["valid_center_mask"],
+        )
+
+        template = _legacy_hist_mean_rank(
+            ranks[:, cluster_events],
+            bools[:, cluster_events],
+        )
+        templates.append(template)
+
+        clusters.append(
+            {
+                "cluster_id": int(ci),
+                "n_events": n_cluster,
+                "fraction": float(n_cluster / valid_events.size),
+                "raw_tau": tau_sum["mean_tau"],
+                "raw_tau_ci_lo": tau_sum["tau_ci_lo"],
+                "raw_tau_ci_hi": tau_sum["tau_ci_hi"],
+                "centered_tau": cent_tau_sum["mean_tau"],
+                "template_rank": np.argsort(np.argsort(template)).tolist(),
+            }
+        )
+
+    n_t = len(templates)
+    corr_matrix = np.full((n_t, n_t), np.nan, dtype=float)
+    candidate_pairs: List[Dict[str, Any]] = []
+    for i in range(n_t):
+        corr_matrix[i, i] = 1.0
+        for j in range(i + 1, n_t):
+            if np.std(templates[i]) > 1e-12 and np.std(templates[j]) > 1e-12:
+                r, _ = spearmanr(templates[i], templates[j])
+                corr_matrix[i, j] = float(r)
+                corr_matrix[j, i] = float(r)
+                if r < -0.5:
+                    candidate_pairs.append(
+                        {
+                            "cluster_a": int(i),
+                            "cluster_b": int(j),
+                            "spearman_r": float(r),
+                            "label": "candidate_forward_reverse",
+                        }
+                    )
+
+    overall_tau = _multi_seed_tau_summary(
+        ranks,
+        bools,
+        event_indices=valid_events,
+        n_sample=n_sample,
+        n_seeds=n_tau_seeds,
+        min_shared_channels=min_shared_channels,
+    )["mean_tau"]
+
+    within_taus = [c["raw_tau"] for c in clusters if np.isfinite(c["raw_tau"])]
+    within_tau_mean = float(np.mean(within_taus)) if within_taus else np.nan
+    uplift = (
+        float(within_tau_mean - overall_tau)
+        if np.isfinite(within_tau_mean) and np.isfinite(overall_tau)
+        else np.nan
+    )
+
+    scan_summary = [{k: v for k, v in r.items() if k != "best_labels"} for r in scan_results]
+
+    return {
+        "k_range": [int(k_min), int(k_max)],
+        "n_valid_events": int(valid_events.size),
+        "scan": scan_summary,
+        "stable_k": stable_k,
+        "chosen_k": int(chosen_k),
+        "chosen_reason": "stable_k" if stable_k is not None else "fallback_k_min",
+        "clusters": clusters,
+        "inter_cluster_corr_matrix": corr_matrix.tolist(),
+        "candidate_forward_reverse_pairs": candidate_pairs,
+        "overall_tau": overall_tau,
+        "within_cluster_tau_mean": within_tau_mean,
+        "uplift": uplift,
+        "labels": chosen_entry["best_labels"],
+    }
+
+
 def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     valid = [
         rec
@@ -917,4 +1305,51 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
             "n_significant": int(mi_sig),
             "n_tested": int(len(mi_means)),
         },
+        "adaptive_cluster_analysis": _summarize_adaptive_clusters(valid),
+    }
+
+
+def _summarize_adaptive_clusters(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Cohort-level summary of adaptive (stability-first) clustering."""
+    adaptive_recs = [
+        rec["adaptive_cluster"]
+        for rec in valid
+        if rec.get("adaptive_cluster") and "error" not in rec.get("adaptive_cluster", {})
+    ]
+    if not adaptive_recs:
+        return {"n_subjects": 0}
+
+    stable_ks = [r["stable_k"] for r in adaptive_recs if r.get("stable_k") is not None]
+    chosen_ks = [r["chosen_k"] for r in adaptive_recs]
+    n_fallback = sum(1 for r in adaptive_recs if r.get("chosen_reason") == "fallback_k_min")
+
+    ada_uplifts = [
+        r["uplift"] for r in adaptive_recs if np.isfinite(r.get("uplift", np.nan))
+    ]
+    ada_within = [
+        r["within_cluster_tau_mean"]
+        for r in adaptive_recs
+        if np.isfinite(r.get("within_cluster_tau_mean", np.nan))
+    ]
+    n_fwd_rev = sum(
+        len(r.get("candidate_forward_reverse_pairs", [])) for r in adaptive_recs
+    )
+
+    return {
+        "n_subjects": int(len(adaptive_recs)),
+        "stable_k_distribution": {
+            int(k): int(stable_ks.count(k)) for k in sorted(set(stable_ks))
+        } if stable_ks else {},
+        "chosen_k_distribution": {
+            int(k): int(chosen_ks.count(k)) for k in sorted(set(chosen_ks))
+        },
+        "n_stable_k_found": int(len(stable_ks)),
+        "n_fallback": int(n_fallback),
+        "stable_k_median": float(np.median(stable_ks)) if stable_ks else np.nan,
+        "uplift_median": float(np.median(ada_uplifts)) if ada_uplifts else np.nan,
+        "within_cluster_tau_median": float(np.median(ada_within)) if ada_within else np.nan,
+        "n_subjects_with_forward_reverse": int(
+            sum(1 for r in adaptive_recs if r.get("candidate_forward_reverse_pairs"))
+        ),
+        "total_forward_reverse_pairs": int(n_fwd_rev),
     }
