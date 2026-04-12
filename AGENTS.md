@@ -141,12 +141,13 @@ Important drift:
 - Interictal group-event internal propagation (event-inside-event topic; former Periodicity PR-3):
   - `src/interictal_propagation.py` — lagPatRank / eventsBool loader (`load_subject_propagation_events` with start_t sorting + time rebuild), mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic, KMeans cluster stereotypy, adaptive k-scan cluster stereotypy (`compute_adaptive_cluster_stereotypy` with AMI stability + silhouette + min-fraction gate), fixed-template helpers (`build_cluster_templates`, `assign_events_to_templates`), cross-time reproducibility (`compute_time_split_reproducibility`), legacy MI + permutation test
   - `scripts/run_interictal_propagation.py` — independent batch driver for internal propagation PR-1 and PR-2.5 (`--pr25`)
-  - `scripts/plot_interictal_propagation.py` — Figure-2-style heatmap examples + 6-panel cohort summary
+  - `scripts/plot_interictal_propagation.py` — per-subject propagation heatmaps (`--pr3`), per-subject MI distributions (`--mi`), 6-panel cohort summary (`--cohort`)
   - `tests/test_interictal_propagation.py` — unit tests for centered-rank handling, mixture detection, and source-node diagnostics
   - `docs/topic1_within_event_dynamics.md` — current formal entry for within-event dynamics
   - `docs/archive/topic1/interictal_group_event_internal_propagation.md` — detailed internal-propagation result note
   - `results/interictal_propagation/` — per-subject JSON, cohort summary, and figures
   - Current accepted bottom line: `30/30` subjects have stable adaptive solutions with `stable_k` distribution `27x k=2`, `2x k=4`, `1x k=6`; PR-2.5 adds split-half / odd-even block reproducibility with `23 strong / 7 moderate / 0 weak` and `11/12` forward/reverse subjects reproduced. `stable_k` remains descriptive compression, not a claim about the true number of modes.
+  - PR-3 visualization completed (2026-04-12): 30/30 per-subject propagation heatmaps, 30/30 per-subject MI distribution plots (Fig.2B style with cluster-level permutation tests), 6-panel cohort summary. MI significant for `30/30` (median 0.229, range 0.067–0.515). Within-cluster τ median = 0.252 vs overall τ = 0.089.
 - Spatial modulation / SOZ analysis (Where question):
   - `docs/topic3_spatial_soz_modulation.md` — current formal entry for where / SOZ spatial attribution
   - `docs/archive/topic3/spatial_modulation_soz_analysis.md` — detailed plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
