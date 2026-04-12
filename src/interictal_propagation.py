@@ -5,6 +5,7 @@ import os
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
+from scipy.optimize import linear_sum_assignment
 from scipy.stats import kendalltau, spearmanr, wilcoxon
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.metrics import adjusted_mutual_info_score, silhouette_score
@@ -1190,6 +1191,361 @@ def compute_adaptive_cluster_stereotypy(
     }
 
 
+def build_cluster_templates(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    labels: np.ndarray,
+    n_clusters: int,
+) -> np.ndarray:
+    """Legacy-aligned template per cluster.
+
+    Parameters
+    ----------
+    ranks : (n_ch, n_events)
+    bools : (n_ch, n_events)
+    labels : (n_events,) — cluster label per event
+    n_clusters : int
+
+    Returns
+    -------
+    templates : (n_clusters, n_ch) — legacy MI template with NaN for channels
+    that never participate in the cluster
+    """
+    n_ch = ranks.shape[0]
+    templates = np.full((n_clusters, n_ch), np.nan, dtype=float)
+    for k in range(n_clusters):
+        mask = labels == k
+        if not np.any(mask):
+            continue
+        cluster_ranks = ranks[:, mask]
+        cluster_bools = bools[:, mask]
+        template = _legacy_hist_mean_rank(cluster_ranks, cluster_bools)
+        missing_mask = np.sum(cluster_bools > 0, axis=1) == 0
+        template = np.asarray(template, dtype=float)
+        template[missing_mask] = np.nan
+        templates[k] = template
+    return templates
+
+
+def assign_events_to_templates(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    templates: np.ndarray,
+    min_shared_channels: int = 3,
+) -> np.ndarray:
+    """Assign events to nearest template by masked Euclidean distance.
+
+    Consistent with the KMeans distance metric used during clustering.
+    Returns array of length n_events with cluster IDs (-1 if unassignable).
+    """
+    n_ch, n_events = ranks.shape
+    n_clusters = templates.shape[0]
+    masked_ranks = np.where(bools > 0, ranks, np.nan)
+
+    best_dist = np.full(n_events, np.inf, dtype=float)
+    assignments = np.full(n_events, -1, dtype=int)
+
+    for k in range(n_clusters):
+        diff = masked_ranks - templates[k][:, None]
+        sq_diff = diff ** 2
+        valid = np.isfinite(sq_diff)
+        n_valid = np.sum(valid, axis=0)
+        with np.errstate(invalid="ignore"):
+            mean_sq = np.nansum(sq_diff, axis=0) / np.maximum(n_valid, 1)
+        mean_sq = np.where(n_valid >= min_shared_channels, mean_sq, np.inf)
+
+        improved = mean_sq < best_dist
+        assignments = np.where(improved, k, assignments)
+        best_dist = np.where(improved, mean_sq, best_dist)
+
+    return assignments
+
+
+def _match_templates_across_splits(
+    templates_a: np.ndarray,
+    templates_b: np.ndarray,
+    min_finite_channels: int = 3,
+) -> Dict[str, Any]:
+    """Optimal matching of templates from two splits via Spearman + Hungarian."""
+    n_a = templates_a.shape[0]
+    n_b = templates_b.shape[0]
+    k = min(n_a, n_b)
+
+    corr_matrix = np.full((n_a, n_b), np.nan, dtype=float)
+    for i in range(n_a):
+        for j in range(n_b):
+            both_fin = np.isfinite(templates_a[i]) & np.isfinite(templates_b[j])
+            if int(np.sum(both_fin)) >= min_finite_channels:
+                r, _ = spearmanr(templates_a[i, both_fin], templates_b[j, both_fin])
+                corr_matrix[i, j] = float(r) if np.isfinite(r) else np.nan
+
+    cost = np.where(np.isfinite(corr_matrix[:k, :k]), -corr_matrix[:k, :k], 1e6)
+    row_ind, col_ind = linear_sum_assignment(cost)
+
+    mapping = {int(r): int(c) for r, c in zip(row_ind, col_ind)}
+    matched_corrs = [
+        float(corr_matrix[r, c])
+        for r, c in zip(row_ind, col_ind)
+        if np.isfinite(corr_matrix[r, c])
+    ]
+
+    return {
+        "corr_matrix": corr_matrix,
+        "mapping_a_to_b": mapping,
+        "matched_corrs": matched_corrs,
+        "mean_match_corr": float(np.mean(matched_corrs)) if matched_corrs else np.nan,
+        "min_match_corr": float(np.min(matched_corrs)) if matched_corrs else np.nan,
+    }
+
+
+def _find_anticorrelated_pairs(
+    templates: np.ndarray,
+    threshold: float = -0.5,
+    min_finite_channels: int = 3,
+) -> List[Tuple[int, int]]:
+    """Find template pairs with Spearman r below *threshold*."""
+    n = templates.shape[0]
+    pairs: List[Tuple[int, int]] = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            both_fin = np.isfinite(templates[i]) & np.isfinite(templates[j])
+            if int(np.sum(both_fin)) < min_finite_channels:
+                continue
+            r, _ = spearmanr(templates[i, both_fin], templates[j, both_fin])
+            if np.isfinite(r) and r < threshold:
+                pairs.append((i, j))
+    return pairs
+
+
+def _map_pairs(pair_list: List[Tuple[int, int]], mapping: Dict[int, int]) -> List[Tuple[int, int]]:
+    """Map cluster-pair indices across a template matching."""
+    mapped: List[Tuple[int, int]] = []
+    for i, j in pair_list:
+        if i not in mapping or j not in mapping:
+            continue
+        a = int(mapping[i])
+        b = int(mapping[j])
+        mapped.append((min(a, b), max(a, b)))
+    return mapped
+
+
+def compute_time_split_reproducibility(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    event_abs_times: np.ndarray,
+    block_ids: np.ndarray,
+    chosen_k: int,
+    adaptive_labels: np.ndarray,
+    valid_event_indices: np.ndarray,
+    min_shared_channels: int = 3,
+    fwd_rev_threshold: float = -0.5,
+) -> Dict[str, Any]:
+    """Assess cross-time template reproducibility via split-half and odd/even splits.
+
+    For each split:
+    1. Re-cluster each half independently at ``k=chosen_k``
+    2. Build templates from each half's clustering
+    3. Match templates across halves (Hungarian on Spearman correlation)
+    4. Assign half-B events to half-A templates and compute label agreement
+
+    Returns a reproducibility grade: ``strong`` / ``moderate`` / ``weak``.
+    """
+    labels = np.asarray(adaptive_labels, dtype=int)
+    valid_event_indices = np.asarray(valid_event_indices, dtype=int)
+    v_times = np.asarray(event_abs_times[valid_event_indices], dtype=float)
+    if labels.size != valid_event_indices.size:
+        raise ValueError("adaptive_labels size must equal valid_event_indices size")
+
+    # Split-half must respect true event time, not whatever order the arrays happen to be in.
+    order = np.argsort(np.where(np.isfinite(v_times), v_times, np.inf), kind="mergesort")
+    sorted_valid = valid_event_indices[order]
+    labels = labels[order]
+    v_ranks = ranks[:, sorted_valid]
+    v_bools = bools[:, sorted_valid]
+    v_blocks = block_ids[sorted_valid]
+    v_times = v_times[order]
+    n_valid = sorted_valid.size
+
+    full_templates = build_cluster_templates(v_ranks, v_bools, labels, chosen_k)
+    full_fwd_rev = _find_anticorrelated_pairs(
+        full_templates, fwd_rev_threshold, min_shared_channels
+    )
+
+    splits: Dict[str, Tuple[np.ndarray, np.ndarray]] = {}
+
+    mid = n_valid // 2
+    if mid >= 2 * chosen_k and (n_valid - mid) >= 2 * chosen_k:
+        splits["first_half_second_half"] = (np.arange(mid), np.arange(mid, n_valid))
+
+    unique_blocks = np.unique(v_blocks)
+    if len(unique_blocks) >= 2:
+        even_blocks = unique_blocks[0::2]
+        odd_blocks = unique_blocks[1::2]
+        even_mask = np.isin(v_blocks, even_blocks)
+        odd_mask = np.isin(v_blocks, odd_blocks)
+        if int(np.sum(even_mask)) >= 2 * chosen_k and int(np.sum(odd_mask)) >= 2 * chosen_k:
+            splits["odd_even_block"] = (
+                np.where(even_mask)[0],
+                np.where(odd_mask)[0],
+            )
+
+    split_results: Dict[str, Any] = {}
+
+    for split_name, (idx_a, idx_b) in splits.items():
+        feat_a = v_ranks[:, idx_a].T.copy()
+        feat_a = np.where(np.isfinite(feat_a), feat_a, 0.0)
+        km_a = KMeans(n_clusters=chosen_k, n_init=10, random_state=0)
+        labels_a = km_a.fit_predict(feat_a)
+        templates_a = build_cluster_templates(
+            v_ranks[:, idx_a], v_bools[:, idx_a], labels_a, chosen_k
+        )
+
+        feat_b = v_ranks[:, idx_b].T.copy()
+        feat_b = np.where(np.isfinite(feat_b), feat_b, 0.0)
+        km_b = KMeans(n_clusters=chosen_k, n_init=10, random_state=0)
+        labels_b = km_b.fit_predict(feat_b)
+        templates_b = build_cluster_templates(
+            v_ranks[:, idx_b], v_bools[:, idx_b], labels_b, chosen_k
+        )
+
+        match = _match_templates_across_splits(templates_a, templates_b, min_shared_channels)
+
+        assigned_b = assign_events_to_templates(
+            v_ranks[:, idx_b], v_bools[:, idx_b], templates_a, min_shared_channels
+        )
+
+        mapping = match["mapping_a_to_b"]
+        n_assignable = int(np.sum(assigned_b >= 0))
+        n_agree = 0
+        for ev in range(idx_b.size):
+            a_lab = int(assigned_b[ev])
+            b_lab = int(labels_b[ev])
+            if a_lab >= 0 and a_lab in mapping and mapping[a_lab] == b_lab:
+                n_agree += 1
+        agreement = float(n_agree / n_assignable) if n_assignable > 0 else np.nan
+
+        fwd_rev_a = _find_anticorrelated_pairs(templates_a, fwd_rev_threshold, min_shared_channels)
+        fwd_rev_b = _find_anticorrelated_pairs(templates_b, fwd_rev_threshold, min_shared_channels)
+        fwd_rev_reproduced: Optional[bool] = None
+        if full_fwd_rev:
+            mapped_a_pairs = set(_map_pairs(fwd_rev_a, mapping))
+            b_pairs = set((min(i, j), max(i, j)) for i, j in fwd_rev_b)
+            fwd_rev_reproduced = bool(mapped_a_pairs & b_pairs)
+
+        split_results[split_name] = {
+            "n_events_a": int(idx_a.size),
+            "n_events_b": int(idx_b.size),
+            "template_corr_matrix": match["corr_matrix"].tolist(),
+            "mapping_a_to_b": {str(k_): int(v_) for k_, v_ in mapping.items()},
+            "mean_match_corr": match["mean_match_corr"],
+            "min_match_corr": match["min_match_corr"],
+            "assignment_agreement": agreement,
+            "n_assignable": n_assignable,
+            "n_agree": n_agree,
+            "forward_reverse_in_a": len(fwd_rev_a),
+            "forward_reverse_in_b": len(fwd_rev_b),
+            "forward_reverse_reproduced": fwd_rev_reproduced,
+        }
+
+    completed = [v for v in split_results.values() if isinstance(v, dict)]
+    if not completed:
+        grade = "insufficient_data"
+    else:
+        mean_matches = [
+            r["mean_match_corr"]
+            for r in completed
+            if np.isfinite(r.get("mean_match_corr", np.nan))
+        ]
+        agreements = [
+            r["assignment_agreement"]
+            for r in completed
+            if np.isfinite(r.get("assignment_agreement", np.nan))
+        ]
+        avg_match = float(np.mean(mean_matches)) if mean_matches else 0.0
+        avg_agree = float(np.mean(agreements)) if agreements else 0.0
+        if avg_match >= 0.8 and avg_agree >= 0.70:
+            grade = "strong"
+        elif avg_match >= 0.5 and avg_agree >= 0.50:
+            grade = "moderate"
+        else:
+            grade = "weak"
+
+    return {
+        "chosen_k": int(chosen_k),
+        "n_valid_events": int(n_valid),
+        "full_data_forward_reverse_pairs": len(full_fwd_rev),
+        "splits": split_results,
+        "reproducibility_grade": grade,
+    }
+
+
+def _summarize_reproducibility(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Cohort-level summary of cross-time template reproducibility."""
+    repro_recs = [
+        rec["time_split_reproducibility"]
+        for rec in valid
+        if rec.get("time_split_reproducibility")
+        and "splits" in rec.get("time_split_reproducibility", {})
+    ]
+    if not repro_recs:
+        return {"n_subjects": 0}
+
+    grades = [r["reproducibility_grade"] for r in repro_recs]
+    grade_counts = {g: int(grades.count(g)) for g in sorted(set(grades))}
+
+    def _collect_split(key: str) -> Tuple[List[float], List[float]]:
+        corrs: List[float] = []
+        agrees: List[float] = []
+        for r in repro_recs:
+            s = r["splits"].get(key)
+            if not s:
+                continue
+            mc = s.get("mean_match_corr", np.nan)
+            ag = s.get("assignment_agreement", np.nan)
+            if np.isfinite(mc):
+                corrs.append(float(mc))
+            if np.isfinite(ag):
+                agrees.append(float(ag))
+        return corrs, agrees
+
+    sh_corrs, sh_agrees = _collect_split("first_half_second_half")
+    oe_corrs, oe_agrees = _collect_split("odd_even_block")
+
+    n_fwd_rev_full = sum(
+        1 for r in repro_recs if r.get("full_data_forward_reverse_pairs", 0) > 0
+    )
+    n_fwd_rev_reproduced = 0
+    for r in repro_recs:
+        if r.get("full_data_forward_reverse_pairs", 0) == 0:
+            continue
+        any_repro = any(
+            s.get("forward_reverse_reproduced")
+            for s in r.get("splits", {}).values()
+            if isinstance(s, dict)
+        )
+        if any_repro:
+            n_fwd_rev_reproduced += 1
+
+    return {
+        "n_subjects": len(repro_recs),
+        "grade_distribution": grade_counts,
+        "split_half": {
+            "n_subjects": len(sh_corrs),
+            "median_match_corr": float(np.median(sh_corrs)) if sh_corrs else np.nan,
+            "median_agreement": float(np.median(sh_agrees)) if sh_agrees else np.nan,
+        },
+        "odd_even_block": {
+            "n_subjects": len(oe_corrs),
+            "median_match_corr": float(np.median(oe_corrs)) if oe_corrs else np.nan,
+            "median_agreement": float(np.median(oe_agrees)) if oe_agrees else np.nan,
+        },
+        "forward_reverse": {
+            "n_subjects_with_pairs": n_fwd_rev_full,
+            "n_reproduced": n_fwd_rev_reproduced,
+        },
+    }
+
+
 def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     valid = [
         rec
@@ -1306,6 +1662,7 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
             "n_tested": int(len(mi_means)),
         },
         "adaptive_cluster_analysis": _summarize_adaptive_clusters(valid),
+        "reproducibility_analysis": _summarize_reproducibility(valid),
     }
 
 

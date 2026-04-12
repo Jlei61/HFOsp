@@ -19,13 +19,13 @@
 
 - 旧线名称：`event_periodicity` 里的 `PR-3`
 - 新线名称：`interictal group-event internal propagation`
-- 当前阶段：**PR-2 已验收**
+- 当前阶段：**PR-2.5 已验收**
 
 ### 核心科学态度
 
 **我们不是在说一个 subject 只存在"一种"刻板的传播时序。**
 
-我们的工作假设是：不论存在几种时序模式，主要的这几种模式都对应病理网络中的优选传播路径。PR-2 已经证明这些模式在**同一批事件云上**是可重复分解的；但它们是否在跨小时、跨昼夜、跨发作邻近尺度上保持稳定，仍然需要后续验证。老论文 Figure 5 已经展示过 E3 (subject 958) 存在 forward/reverse 两种主要模式（KMeans k=2 聚类，模式间 Spearman r = −0.91），这不是 bug 而是 feature。
+我们的工作假设是：不论存在几种时序模式，主要的这几种模式都对应病理网络中的优选传播路径。PR-2 已经证明这些模式在**同一批事件云上**可重复分解，PR-2.5 进一步证明它们在 **split-half / odd-even block** 尺度上总体稳定；但这仍不等于已经回答了 day/night、seizure proximity 或 occupancy 漂移。老论文 Figure 5 已经展示过 E3 (subject 958) 存在 forward/reverse 两种主要模式（KMeans k=2 聚类，模式间 Spearman r = −0.91），这不是 bug 而是 feature。
 
 PR-1 的目标：
 
@@ -96,11 +96,15 @@ PR-1 的目标：
   - `compute_propagation_stereotypy()`
   - `compute_cluster_stereotypy()` — KMeans(k=2) + 簇内 τ + 簇间 correlation
   - `compute_adaptive_cluster_stereotypy()` — adaptive k-scan + AMI + silhouette + min-fraction gate
+  - `build_cluster_templates()` — 从固定标签事件构建 cluster template
+  - `assign_events_to_templates()` — 新事件投到固定模板
+  - `compute_time_split_reproducibility()` — split-half / odd-even block 模板复现
   - `compute_legacy_mi()` — 老论文 MI 模板算法 + 行内 shuffle 置换检验
   - `run_subject_interictal_propagation_pr1()`
   - `summarize_propagation_cohort()`
 - `scripts/run_interictal_propagation.py`
   - 批量生成 per-subject JSON + cohort summary
+  - `--pr25`：基于现有 PR-2 JSON 增补跨时间复现层
 - `scripts/plot_interictal_propagation.py`
   - 生成 PR-1 cohort robustness 图
 - `tests/test_interictal_propagation.py`
@@ -194,32 +198,56 @@ KMeans(k=2) 聚类后的簇内分析：
 - MI median = **0.194**（range 0.048–0.431）
 - MI ≡ Kendall τ（数学上等价），但 MI 使用固定模板，τ 使用全 pair，两者互补
 
-### 7.7 科学解读（PR-2 验收版）
+### 7.5c Cross-time template reproducibility（PR-2.5 accepted layer）
+
+- **30/30 可用 subject 全部完成 PR-2.5**
+- reproducibility grade：
+  - `strong`: `23/30`
+  - `moderate`: `7/30`
+  - `weak`: `0/30`
+- split-half：
+  - median template match corr = **0.899**
+  - median assignment agreement = **0.865**
+- odd/even block：
+  - median template match corr = **0.985**
+  - median assignment agreement = **0.882**
+- **Forward/reverse 候选对：`11/12` 在时间切片中复现**
+- moderate subject：
+  - `1096`, `442`, `590`, `818`, `huanghanwen`, `litengsheng`, `zhangjinhan`
+  - 其中 `818 (k=4)` 与 `zhangjinhan (k=6)` 仍是高 k 结构稳定性的重点风险点
+  - `huanghanwen` 是唯一 forward/reverse 未通过跨时间复现的 subject
+
+解读：
+
+1. **PR-2.5 解决了 PR-2 最大的逻辑缺口**：现在我们不只是能说“同一批事件上 KMeans 很稳定”，而是可以说“模板在 split-half / blockwise 尺度上总体稳定”。
+2. `k=2` 主导 subject 的模板几乎都表现出非常高的跨时间一致性。
+3. 少数 `k>2` subject 的**方向结构**仍然存在，但**精确 cluster 边界**更容易漂。`818` 和 `zhangjinhan` 是后续鲁棒性复核的重点对象。
+4. `forward/reverse` 现在已经不只是一次性几何标签；至少在当前 split-half / blockwise 验证下，它在有该结构的 subject 中是可持续复现的。
+
+### 7.7 科学解读（PR-2.5 验收版）
 
 1. **多模态性是普遍的（30/30），且与刻板性共存**。每种模式内部 τ ≈ 0.25（中位），比全体 τ = 0.089 高约 3 倍。全体 τ 低的原因是跨模式混合。
 2. **`k=2` 是主导压缩，但不是唯一结构**。`27/30` subject 的 `stable_k=2`，但还有 `3/30` 明显需要 `k=4` 或 `k=6` 才能更好描述。
-3. **Forward/reverse 不是 958 的孤例，但也不能滥写成普遍机制**。当前只能说 `12/30` 有候选互逆对，真正的机制结论还要做跨时间复现。
+3. **Forward/reverse 不是 958 的孤例，而且现在已经过了最基本的时间复现关**。当前 `11/12` 带有候选互逆结构的 subject 都能在时间切片中复现该关系；但这仍然只是稳定的描述结构，不是最终机制解释。
 4. **Legacy MI 全部显著**：完全复现老论文结论，没有 single failure。
 5. **Identity bias 仍然重要**（全体 bias fraction = 65%），但在簇内水平，真实传播结构是主要贡献者。
 6. **SOZ 差异仍不显著**（p = 0.088），这是当前最弱的环节。
 
-**核心结论**：间期群体事件内部存在多种传播模式，而且每种模式内部是刻板的。PR-2 让我们可以更诚实地说：大多数 subject 以二模态为主，但少数 subject 明显更复杂。老论文的 MI 显著性结论完全可复现。至于这些模板是否真的“跨时间稳定”，还需要下一轮验证，当前不能偷换概念。
+**核心结论**：间期群体事件内部存在多种传播模式，而且每种模式内部是刻板的。PR-2 让我们可以更诚实地说：大多数 subject 以二模态为主，但少数 subject 明显更复杂；PR-2.5 则补上了最关键的一层，证明这些模板在 split-half / blockwise 尺度上总体稳定。老论文的 MI 显著性结论完全可复现，forward/reverse 候选结构也已经过了基础复现关。下一步不该再纠结“模板在不在”，而该转向“稳定模板的占比如何随时间漂移”。
 
 ### 7.8 推荐的下一步验证
 
-- **跨时间 split-half / odd-even block 模板复现**
-  - 先把 subject 切成前后半程、奇偶 block 或 day/night 两半
-  - 一半学模板，另一半做模板匹配和相关性复现
-  - 这一步是“刻板性”最关键的缺失验证
-- **cluster occupancy 时间轨迹**
+- **PR-3：固定模板的论文级 per-subject 图**
+  - 现在模板已经过 PR-2.5 认证，应该把 `raw / k=2 / stable_k` 放在同一张高质量图上
+  - `moderate` subject 需要在图上显式标注，不许伪装成铁板一块
+- **PR-4A：cluster occupancy 时间轨迹**
   - 模板固定后，跟踪 cluster fraction 随 24h、day/night、seizure proximity 的变化
   - 这能区分“模板稳定但占比漂移”与“模板本身在漂”
-- **参与通道数 / centered-rank 鲁棒性复核**
-  - 对 `k>2` subject 和 forward/reverse 候选，做 `n_participating` 匹配子样本和 raw/centered 双版本模板比较
+- **高 k subject 的鲁棒性复核**
+  - 对 `818`、`zhangjinhan` 这类 subject 做 `n_participating` 匹配子样本和 raw/centered 双版本模板比较
   - 防止把稀疏事件或 channel identity 残差误当成高维多模态
-- **forward/reverse 候选的 split-half 复现**
-  - 不再满足于一次 `r < -0.5`
-  - 要求互逆关系在不同时间切片中方向一致，才值得往机制解释走
+- **PR-4B：和 Topic 2 的慢调制做固定模板 coupling**
+  - 模板本身已经稳定，下一步才能诚实地问：慢 rate state 改变的是模式占比，还是模式内部 stereotype 强度
 
 ### 7.9 对后续的影响
 
@@ -231,7 +259,7 @@ KMeans(k=2) 聚类后的簇内分析：
 
 - 代码与独立脚本已拆出
 - 独立结果目录已建立
-- **PR-2 全量完成并验收**（30 subjects，0 errors）
+- **PR-2.5 全量完成并验收**（30 subjects，23 strong / 7 moderate / 0 weak）
 - PR-1 的 cohort 结果以 `pr1_cohort_summary.json` 为准
 - 图已生成：
   - `results/interictal_propagation/figures/pr1_propagation_heatmap_examples.png` — Figure 2 样式 heatmap

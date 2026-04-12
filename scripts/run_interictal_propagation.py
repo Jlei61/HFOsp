@@ -11,6 +11,9 @@ from typing import Any, Dict, List
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.interictal_propagation import (  # noqa: E402
+    _valid_event_indices,
+    compute_time_split_reproducibility,
+    load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
     summarize_propagation_cohort,
 )
@@ -75,6 +78,84 @@ def _save(data: Any, path: Path) -> None:
     logger.info("Saved %s", path)
 
 
+def _run_pr25(
+    datasets_list: List,
+    per_subject_dir: Path,
+) -> None:
+    """PR-2.5: augment existing per-subject JSONs with cross-time reproducibility."""
+    import numpy as np
+
+    all_results: Dict[str, Dict[str, Any]] = {}
+
+    for dataset, root, subjects, _soz_map in datasets_list:
+        for subject in subjects:
+            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            json_path = per_subject_dir / f"{dataset}_{subject}.json"
+            key = f"{dataset}/{subject}"
+
+            if not json_path.exists():
+                logger.warning("Skip %s: no existing JSON at %s", key, json_path)
+                continue
+
+            with open(json_path) as f:
+                existing = json.load(f)
+
+            ac = existing.get("adaptive_cluster", {})
+            if "error" in ac or "labels" not in ac:
+                logger.warning("Skip %s: adaptive_cluster missing or errored", key)
+                all_results[key] = existing
+                continue
+
+            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+                logger.warning("Skip %s: raw data dir missing", key)
+                all_results[key] = existing
+                continue
+
+            logger.info("PR-2.5 reproducibility: %s", key)
+            try:
+                loaded = load_subject_propagation_events(subject_dir)
+                valid_events = _valid_event_indices(loaded["bools"], min_participating=3)
+                labels = np.array(ac["labels"], dtype=int)
+                chosen_k = int(ac["chosen_k"])
+
+                if valid_events.size != len(labels):
+                    logger.error(
+                        "Skip %s: valid_events size %d != labels size %d",
+                        key, valid_events.size, len(labels),
+                    )
+                    all_results[key] = existing
+                    continue
+
+                repro = compute_time_split_reproducibility(
+                    ranks=loaded["ranks"],
+                    bools=loaded["bools"],
+                    event_abs_times=loaded["event_abs_times"],
+                    block_ids=loaded["block_ids"],
+                    chosen_k=chosen_k,
+                    adaptive_labels=labels,
+                    valid_event_indices=valid_events,
+                )
+                existing["time_split_reproducibility"] = repro
+                logger.info(
+                    "  %s: grade=%s  split-half corr=%.3f agree=%.3f",
+                    key,
+                    repro["reproducibility_grade"],
+                    repro["splits"].get("first_half_second_half", {}).get("mean_match_corr", float("nan")),
+                    repro["splits"].get("first_half_second_half", {}).get("assignment_agreement", float("nan")),
+                )
+            except Exception as exc:
+                logger.exception("Failed PR-2.5 for %s", key)
+                existing["time_split_reproducibility"] = {"error": str(exc)}
+
+            _save(existing, json_path)
+            all_results[key] = existing
+
+    cohort = summarize_propagation_cohort(all_results)
+    _save(all_results, RESULTS_DIR / "pr1_subject_summary.json")
+    _save(cohort, RESULTS_DIR / "pr1_cohort_summary.json")
+    logger.info("PR-2.5 done. Cohort reproducibility: %s", cohort.get("reproducibility_analysis", {}))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Interictal group-event internal propagation PR-1 analysis"
@@ -82,6 +163,7 @@ def main() -> None:
     parser.add_argument("--dataset", choices=["yuquan", "epilepsiae", "both"], default="both")
     parser.add_argument("--subjects", nargs="+", default=None)
     parser.add_argument("--smoke", action="store_true", help="Run chengshuai + 548 only")
+    parser.add_argument("--pr25", action="store_true", help="PR-2.5: cross-time template reproducibility only")
     parser.add_argument("--n-sample", type=int, default=200)
     parser.add_argument("--n-seeds", type=int, default=5)
     args = parser.parse_args()
@@ -101,14 +183,18 @@ def main() -> None:
         yq_subjects = YUQUAN_SUBJECTS
         epi_subjects = EPILEPSIAE_SUBJECTS
 
-    subject_results: Dict[str, Dict[str, Any]] = {}
-    datasets = []
+    datasets_list = []
     if args.dataset in ("yuquan", "both"):
-        datasets.append(("yuquan", YUQUAN_ROOT, yq_subjects, soz_yq))
+        datasets_list.append(("yuquan", YUQUAN_ROOT, yq_subjects, soz_yq))
     if args.dataset in ("epilepsiae", "both"):
-        datasets.append(("epilepsiae", EPILEPSIAE_ROOT, epi_subjects, soz_epi))
+        datasets_list.append(("epilepsiae", EPILEPSIAE_ROOT, epi_subjects, soz_epi))
 
-    for dataset, root, subjects, soz_map in datasets:
+    if args.pr25:
+        _run_pr25(datasets_list, per_subject_dir)
+        return
+
+    subject_results: Dict[str, Dict[str, Any]] = {}
+    for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
             subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
             if not subject_dir.exists():

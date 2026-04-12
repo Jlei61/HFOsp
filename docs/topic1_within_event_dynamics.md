@@ -21,7 +21,7 @@
 
 ## 2. 一句话当前结论
 
-- **传播线**：单个群体事件内部的传播结构是真实存在的，但不是单一模板；`k=2` 是主导压缩，不是普适真相，少数 subject 存在更丰富的 `k=4` 到 `k=6` 多模态路径集合。
+- **传播线**：单个群体事件内部的传播结构是真实存在的，但不是单一模板；`k=2` 是主导压缩，不是普适真相，少数 subject 存在更丰富的 `k=4` 到 `k=6` 多模态路径集合，而且这些模板在 split-half / blockwise 尺度上总体稳定（`23/30 strong`, `7/30 moderate`, `0 weak`）。
 - **同步性线**：cohort-level interictal synchrony 总体为 null，没有支持“post-ictal reset / pre-ictal resynchronization”；唯一探索性信号是 extra-focal `phase_e` 的 `pre > post`。
 
 ---
@@ -39,7 +39,7 @@
 
 这说明老论文说的“传播路径可重复”没有错，但原来的“单一平均模板”口径太粗。真正合理的口径是：**一个 subject 常常有多条主要传播路径，而每条路径内部仍然是刻板的。**
 
-### 3.1b 数据合同与聚类稳定性（PR-2a/2b）
+### 3.1b 数据合同、聚类稳定性与跨时间复现（PR-2a/2b/2.5）
 
 - PR-2a：`load_subject_propagation_events()` 按 `start_t` 排序 block，事件绝对时间从 `packedTimes[:, 0] + start_t` 重建。channel 跨 block 完全稳定。
 - PR-2b：`compute_adaptive_cluster_stereotypy()` 对 k 扫描，multi-seed AMI 稳定性 + 最小簇比例约束。
@@ -48,7 +48,12 @@
   - Adaptive within-cluster `τ` 中位数为 `0.252`，相对整体 `τ = 0.089` 的 uplift 中位数为 `+0.100`。
   - `12/30` subject 出现 `candidate_forward_reverse` 对，共 `17` 对；`958` 的 `r = -0.915` 被精确复现，但 `candidate_forward_reverse` 仍只是描述标签，不是机制结论。
   - `stable_k` 的语义是“在当前事件云上的最佳稳定压缩”，不是“真实传播模式数”。
-  - 现在我们已经证明了**算法稳定性**，但还没有证明**跨时间稳定性**。这两件事不能混写。
+- PR-2.5：`compute_time_split_reproducibility()` 对同一 subject 做 split-half + odd/even block 模板复现。
+  - cohort `30/30` 可用 subject 中，`23/30` 为 `strong`，`7/30` 为 `moderate`，`0` 为 `weak`。
+  - split-half 中位模板相关为 `0.899`，中位 assignment agreement 为 `0.865`。
+  - odd/even block 中位模板相关为 `0.985`，中位 assignment agreement 为 `0.882`。
+  - `12` 个带有 forward/reverse 候选对的 subject 中，`11` 个能在时间切片中复现同一匹配后的互逆关系；`huanghanwen` 未通过该关。
+  - 这说明我们现在不只是证明了**算法稳定性**，而是已经证明了**blockwise / split-half 尺度上的跨时间模板稳定性**；但这还不等于已经回答了 day/night、seizure proximity 或 occupancy 漂移。
 
 ### 3.2 Identity bias 不是小问题，但也不是全部
 
@@ -86,10 +91,11 @@ Epilepsiae 的区域分层分析中：
 ### 4.1 传播刻板性
 
 - 多模态是普遍现象，不是例外；但主要压缩仍然是 `k=2`
-- `958` 的 forward/reverse 双模式可复现，不是孤例；不过 cohort 中只有 `12/30` 达到当前候选阈值
+- 模板在跨时间切片上总体稳定：`23/30 strong`，其余 `7/30 moderate`，没有 `weak`
+- `958` 的 forward/reverse 双模式可复现，不是孤例；现在 `11/12` 的候选互逆 subject 都能在 split-half / blockwise 分析中复现该关系
 - legacy MI 全部显著，老论文最硬的结果站得住
 - 真正可信的定量指标应该是 cluster-aware `τ` 与 raw/centered 并列报告，而不是只给一个整体 MI
-- 少数 subject 的 `k=4` / `k=6` 结构是真结果，不该被强行压回 `k=2`
+- 少数 subject 的 `k=4` / `k=6` 结构里，互逆关系仍能复现；但精确 cluster 边界在 `818`、`zhangjinhan` 这类高 k subject 上还不够稳，不能过度解读
 
 ### 4.2 同步性
 
@@ -103,9 +109,9 @@ Epilepsiae 的区域分层分析中：
 
 - SOZ > non-SOZ 的传播优势仍偏弱，当前更像探索性趋势，不该写成定论。
 - centered rank 可能过度校正；虽然当前 `soz_source_erased` 仅 `3/30`，但今后仍必须和 raw 结果并列报告。
-- PR-2 证明的是“同一批事件上的聚类稳定”，不是“模板跨小时、跨昼夜、跨发作邻近稳定”。真正的生物学刻板性还需要时间维度验证。
+- PR-2.5 已经证明模板在 split-half / odd-even block 尺度上稳定；但还没有正式回答 day/night、seizure proximity、occupancy 漂移这些更长时间尺度问题。
 - `candidate_forward_reverse` 目前只是 `inter-cluster Spearman r < -0.5` 的描述标签。它可以提示互逆模式，但还不够资格直接写成生理机制。
-- 少数 `k>2` subject 需要额外验证，确认这些模式不是 `n_participating`、稀有事件或 channel identity 残差造成的假复杂度。
+- 少数 `k>2` subject 仍需要额外验证，确认高维多模态不是 `n_participating`、稀有事件或 channel identity 残差造成的假复杂度。当前最需要盯的是 `818` 与 `zhangjinhan`。
 - synchrony 线最大的风险不是假阳性，而是“把 null 写得太花”。现在最诚实的说法就是：**总体 null，局部 extra-focal 线索待验证。**
 - propagation 与 synchrony 都是 topic 1，但它们不是同一个统计对象，文档里必须并列而不能混写成一个指标体系。
 
@@ -113,23 +119,21 @@ Epilepsiae 的区域分层分析中：
 
 ## 6. 推荐的下一步验证
 
-如果只看传播刻板性，这一段最该做的不是再换一个聚类算法，而是补上下面 4 个验证：
+PR-2.5 已经把“模板跨时间是否还在”这个最核心的验证补上了。现在下一步该做的不是再发明一个新聚类器，而是把稳定模板真正用起来：
 
-1. **跨时间 split-half / odd-even block 模板复现**
-   - 用 `event_abs_times`、`block_ids` 把 subject 切成前后半程、奇偶 block 或 day/night 两半。
-   - 在一半数据上学模板，在另一半做模板匹配与相关性复现。
-   - 这一步回答的是真问题：模式是不是长期存在，而不是 KMeans 在同一堆点上能不能重复跑出同样结果。
-2. **cluster occupancy 的时间轨迹**
+1. **PR-3：固定模板的论文级 per-subject 图**
+   - 现在模板已经过 PR-2.5 认证，PR-3 可以正式把 `raw / k=2 / stable_k` 放在同一张 per-subject 图里。
+   - 对 `moderate` subject 必须明确标注“模板边界较不稳”，不能画得像铁证。
+2. **PR-4A：cluster occupancy 的时间轨迹**
    - 在模板固定的前提下，画 24h 内各 cluster fraction 的时间变化。
    - 这能区分“模板稳定但占比漂移”和“模板本身不稳定”。
-3. **参与通道数 / centered-rank 鲁棒性复核**
+3. **高 k subject 的鲁棒性复核**
    - 对 `k>2` subject 和 forward/reverse 候选，做 `n_participating` 匹配子样本、raw/centered 双版本模板比较。
-   - 目标是排除“复杂结构只是稀疏事件或 channel identity 偏差”的垃圾解释。
-4. **forward/reverse 候选的 split-half 复现**
-   - 不要只报一次 `r < -0.5`。
-   - 应该要求互逆对在不同时间切片里仍能复现，至少模板相关方向一致。
+   - 目标是排除“复杂结构只是稀疏事件或 channel identity 偏差”的垃圾解释；当前最关键的对象是 `818` 和 `zhangjinhan`。
+4. **PR-4B：和 Topic 2 的慢调制做固定模板 coupling**
+   - 既然模板本身已经被验证稳定，下一步才能诚实地问：慢 rate state 改变的是模式占比，还是模式内部的 stereotype 强度。
 
-这 4 件事里，优先级最高的是 `1` 和 `2`。它们直接决定“刻板性”这三个字能不能站稳。
+这 4 件事里，优先级最高的是 `1` 和 `2`。因为 PR-2.5 已经把“刻板性是否站得住”这个最危险的问题回答了，接下来该做的是把这个稳定模板变成真正可展示、可解释的时间图像。
 
 ---
 

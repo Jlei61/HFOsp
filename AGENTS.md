@@ -139,14 +139,14 @@ Important drift:
   - `docs/archive/topic2/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
   - `docs/archive/topic2/interictal_population_event_methodological_review.md` — collaborator-facing historical narrative update and next-step framing
 - Interictal group-event internal propagation (event-inside-event topic; former Periodicity PR-3):
-  - `src/interictal_propagation.py` — lagPatRank / eventsBool loader (`load_subject_propagation_events` with start_t sorting + time rebuild), mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic, KMeans cluster stereotypy, adaptive k-scan cluster stereotypy (`compute_adaptive_cluster_stereotypy` with AMI stability + silhouette + min-fraction gate), legacy MI + permutation test
-  - `scripts/run_interictal_propagation.py` — independent batch driver for internal propagation PR-1
+  - `src/interictal_propagation.py` — lagPatRank / eventsBool loader (`load_subject_propagation_events` with start_t sorting + time rebuild), mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic, KMeans cluster stereotypy, adaptive k-scan cluster stereotypy (`compute_adaptive_cluster_stereotypy` with AMI stability + silhouette + min-fraction gate), fixed-template helpers (`build_cluster_templates`, `assign_events_to_templates`), cross-time reproducibility (`compute_time_split_reproducibility`), legacy MI + permutation test
+  - `scripts/run_interictal_propagation.py` — independent batch driver for internal propagation PR-1 and PR-2.5 (`--pr25`)
   - `scripts/plot_interictal_propagation.py` — Figure-2-style heatmap examples + 6-panel cohort summary
   - `tests/test_interictal_propagation.py` — unit tests for centered-rank handling, mixture detection, and source-node diagnostics
   - `docs/topic1_within_event_dynamics.md` — current formal entry for within-event dynamics
   - `docs/archive/topic1/interictal_group_event_internal_propagation.md` — detailed internal-propagation result note
   - `results/interictal_propagation/` — per-subject JSON, cohort summary, and figures
-  - Current accepted bottom line: `30/30` subjects have stable adaptive solutions with `stable_k` distribution `27x k=2`, `2x k=4`, `1x k=6`; `stable_k` is descriptive compression, not proof of cross-time biological stationarity
+  - Current accepted bottom line: `30/30` subjects have stable adaptive solutions with `stable_k` distribution `27x k=2`, `2x k=4`, `1x k=6`; PR-2.5 adds split-half / odd-even block reproducibility with `23 strong / 7 moderate / 0 weak` and `11/12` forward/reverse subjects reproduced. `stable_k` remains descriptive compression, not a claim about the true number of modes.
 - Spatial modulation / SOZ analysis (Where question):
   - `docs/topic3_spatial_soz_modulation.md` — current formal entry for where / SOZ spatial attribution
   - `docs/archive/topic3/spatial_modulation_soz_analysis.md` — detailed plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
