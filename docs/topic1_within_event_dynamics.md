@@ -21,7 +21,7 @@
 
 ## 2. 一句话当前结论
 
-- **传播线**：单个群体事件内部的传播结构是真实存在的，但不是单一模板；`k=2` 是主导压缩，不是普适真相，少数 subject 存在更丰富的 `k=4` 到 `k=6` 多模态路径集合，而且这些模板在 split-half / blockwise 尺度上总体稳定（`23/30 strong`, `7/30 moderate`, `0 weak`）。
+- **传播线**：单个群体事件内部的传播结构是真实存在的，但不是单一模板；`k=2` 是主导压缩，不是普适真相，少数 subject 存在更丰富的 `k=4` 到 `k=6` 多模态路径集合，而且这些模板在 split-half / blockwise 尺度上总体稳定（`23/30 strong`, `7/30 moderate`, `0 weak`）。`PR-4A` 进一步显示：在固定模板下，day/night occupancy 漂移整体很弱，当前更像轻微描述性变化，而不是强昼夜重排。
 - **同步性线**：cohort-level interictal synchrony 总体为 null，没有支持“post-ictal reset / pre-ictal resynchronization”；唯一探索性信号是 extra-focal `phase_e` 的 `pre > post`。
 
 ---
@@ -54,6 +54,17 @@
   - odd/even block 中位模板相关为 `0.985`，中位 assignment agreement 为 `0.882`。
   - `12` 个带有 forward/reverse 候选对的 subject 中，`11` 个能在时间切片中复现同一匹配后的互逆关系；`huanghanwen` 未通过该关。
   - 这说明我们现在不只是证明了**算法稳定性**，而是已经证明了**blockwise / split-half 尺度上的跨时间模板稳定性**；但这还不等于已经回答了 day/night、seizure proximity 或 occupancy 漂移。
+
+### 3.1c PR-3 / PR-4A：固定模板可视化与 occupancy 漂移
+
+- PR-3 已验收并回到主树：`raw / k=2 / stable_k` 的 per-subject 图和 cohort 可视化已经固定下来，`moderate` subject 在图上不再被伪装成"铁板一块"。
+- PR-4A：`compute_temporal_cluster_dynamics()` 在**固定模板投射**前提下，按 block 覆盖时间窗做 occupancy timeline，避免把停录空窗误画成连续零占比。
+- `30/30` subject 都得到 day/night summary。
+- dominant fraction：day median `0.587`，night median `0.575`，subject-level Wilcoxon `p = 0.124`。
+- normalized entropy：day median `0.960`，night median `0.974`，subject-level Wilcoxon `p = 0.245`。
+- day-night total variation distance：median `0.019`，IQR `0.011-0.030`。
+- fixed-template projection agreement 中位数为 `0.888`；只有 `3/30` subject 低于 `0.8`（`chengshuai`, `253`, `818`），说明大多数 subject 的 occupancy 轨迹并不是模板投射失真造出来的。
+- 这层结果支持的最强口径是：**模板稳定，但占比的昼夜漂移整体较弱**。它是高质量描述性结果，不是强机制结论。
 
 ### 3.2 Identity bias 不是小问题，但也不是全部
 
@@ -92,6 +103,8 @@ Epilepsiae 的区域分层分析中：
 
 - 多模态是普遍现象，不是例外；但主要压缩仍然是 `k=2`
 - 模板在跨时间切片上总体稳定：`23/30 strong`，其余 `7/30 moderate`，没有 `weak`
+- `PR-3` 已经把固定模板的 per-subject / cohort 图稳定下来，后续展示口径不再依赖临时绘图脚本
+- `PR-4A` 显示 fixed-template occupancy 的 day/night 漂移很弱：dominant fraction 与 entropy 的 subject-level paired summary 都没有显著差异，TV distance 也很小（median `0.019`）
 - `958` 的 forward/reverse 双模式可复现，不是孤例；现在 `11/12` 的候选互逆 subject 都能在 split-half / blockwise 分析中复现该关系
 - legacy MI 全部显著，老论文最硬的结果站得住
 - 真正可信的定量指标应该是 cluster-aware `τ` 与 raw/centered 并列报告，而不是只给一个整体 MI
@@ -109,9 +122,10 @@ Epilepsiae 的区域分层分析中：
 
 - SOZ > non-SOZ 的传播优势仍偏弱，当前更像探索性趋势，不该写成定论。
 - centered rank 可能过度校正；虽然当前 `soz_source_erased` 仅 `3/30`，但今后仍必须和 raw 结果并列报告。
-- PR-2.5 已经证明模板在 split-half / odd-even block 尺度上稳定；但还没有正式回答 day/night、seizure proximity、occupancy 漂移这些更长时间尺度问题。
+- `PR-4A` 已经给了 day/night occupancy 的描述性答案，但还没有回答 seizure proximity，也没有把 day/night 写成正式的强统计结论。
 - `candidate_forward_reverse` 目前只是 `inter-cluster Spearman r < -0.5` 的描述标签。它可以提示互逆模式，但还不够资格直接写成生理机制。
 - 少数 `k>2` subject 仍需要额外验证，确认高维多模态不是 `n_participating`、稀有事件或 channel identity 残差造成的假复杂度。当前最需要盯的是 `818` 与 `zhangjinhan`。
+- 固定模板投射 agreement 虽然整体够高（median `0.888`），但 `chengshuai`、`253`、`818` 这 3 个 subject 仍应谨慎解释时间轨迹细节。
 - synchrony 线最大的风险不是假阳性，而是“把 null 写得太花”。现在最诚实的说法就是：**总体 null，局部 extra-focal 线索待验证。**
 - propagation 与 synchrony 都是 topic 1，但它们不是同一个统计对象，文档里必须并列而不能混写成一个指标体系。
 
@@ -119,23 +133,17 @@ Epilepsiae 的区域分层分析中：
 
 ## 6. 推荐的下一步验证
 
-PR-3 已完成全部论文级可视化。现在模板和 MI 分布都已经有正式的 per-subject 图和 cohort 汇总图。
+PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已经固定下来。
 
-1. ~~**PR-3：固定模板的论文级 per-subject 图**~~ ✅ 已完成（2026-04-12）
-   - 30/30 subject 的 2×2 propagation heatmap + rank 分布图
-   - 30/30 subject 的 MI distribution 图（老论文 Fig.2B 风格，含 cluster 内置换检验）
-   - 6-panel cohort summary 图
-   - 结果在 `results/interictal_propagation/figures/`
-2. **PR-4A：cluster occupancy 的时间轨迹**
-   - 在模板固定的前提下，画 24h 内各 cluster fraction 的时间变化。
-   - 这能区分“模板稳定但占比漂移”和“模板本身不稳定”。
-3. **高 k subject 的鲁棒性复核**
+1. **高 k subject 的鲁棒性复核**
    - 对 `k>2` subject 和 forward/reverse 候选，做 `n_participating` 匹配子样本、raw/centered 双版本模板比较。
-   - 目标是排除“复杂结构只是稀疏事件或 channel identity 偏差”的垃圾解释；当前最关键的对象是 `818` 和 `zhangjinhan`。
-4. **PR-4B：和 Topic 2 的慢调制做固定模板 coupling**
+   - 目标是排除"复杂结构只是稀疏事件或 channel identity 偏差"的垃圾解释；当前最关键的对象是 `818` 和 `zhangjinhan`。
+2. **PR-4B：和 Topic 2 的慢调制做固定模板 coupling**
    - 既然模板本身已经被验证稳定，下一步才能诚实地问：慢 rate state 改变的是模式占比，还是模式内部的 stereotype 强度。
+3. **seizure proximity 的固定模板占比轨迹**
+   - `PR-4A` 已经把 day/night 的描述层补上了，下一步若继续做时间上下文，应该优先问 seizure 邻近，而不是再重复一个昼夜散点图。
 
-优先级最高的是 `2` 和 `4`。PR-3 完成后，传播刻板性的可视化已经可以直接用于论文；接下来该做的是在时间维度上检验 occupancy 是否漂移。
+现在优先级最高的是 `1` 和 `2`。因为 `PR-3` 和 `PR-4A` 已经把"模板长什么样"和"占比会不会明显漂"这两层补上了，接下来该做的是盯高 `k` 风险点，以及把 Topic 1 和 Topic 2 的耦合问题收窄成一个硬分析。
 
 ---
 

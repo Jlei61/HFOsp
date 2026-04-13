@@ -237,32 +237,39 @@ KMeans(k=2) 聚类后的簇内分析：
 
 ### 7.8 推荐的下一步验证
 
-- **PR-3：固定模板的论文级 per-subject 图**
-  - 现在模板已经过 PR-2.5 认证，应该把 `raw / k=2 / stable_k` 放在同一张高质量图上
-  - `moderate` subject 需要在图上显式标注，不许伪装成铁板一块
-- **PR-4A：cluster occupancy 时间轨迹**
-  - 模板固定后，跟踪 cluster fraction 随 24h、day/night、seizure proximity 的变化
-  - 这能区分“模板稳定但占比漂移”与“模板本身在漂”
+- ~~**PR-3：固定模板的论文级 per-subject 图**~~ ✅ 已验收（2026-04-12）
+- ~~**PR-4A：cluster occupancy 时间轨迹**~~ ✅ 已验收（2026-04-12）
+  - `30/30` subject day/night summary；dominant fraction Wilcoxon p=0.124，entropy p=0.245，TV distance median=0.019
+  - 固定模板投射 agreement median=0.888（3/30 < 0.8）
+  - 结论：day/night occupancy 漂移整体很弱，描述性结果，不是强机制结论
 - **高 k subject 的鲁棒性复核**
   - 对 `818`、`zhangjinhan` 这类 subject 做 `n_participating` 匹配子样本和 raw/centered 双版本模板比较
   - 防止把稀疏事件或 channel identity 残差误当成高维多模态
 - **PR-4B：和 Topic 2 的慢调制做固定模板 coupling**
   - 模板本身已经稳定，下一步才能诚实地问：慢 rate state 改变的是模式占比，还是模式内部 stereotype 强度
+- **seizure proximity 的固定模板占比轨迹**
+  - day/night 已完成，下一个时间上下文应该优先问 seizure 邻近
 
 ### 7.9 对后续的影响
 
 - 簇内 τ 和 MI 同时显著 → 可以直接用在新论文中
 - Forward/reverse 双模式的生理解释仍然只能算候选方向（例如 day/night、seizure proximity 调控不同模式的出现频率）
-- 下一步最该做的不是再发明一个更花的 clustering，而是证明模板是否跨时间稳定
+- PR-4A 已经回答了"占比是否昼夜漂移"（答案：很弱），下一步转向 seizure proximity 和 Topic 2 耦合
 
 ## 8. 当前状态
 
 - 代码与独立脚本已拆出
 - 独立结果目录已建立
 - **PR-2.5 全量完成并验收**（30 subjects，23 strong / 7 moderate / 0 weak）
+- **PR-3 全量完成并验收**（30/30 per-subject propagation + MI heatmaps, 6-panel cohort summary）
+- **PR-4A 全量完成并验收**（30/30 occupancy timelines + day/night group summary）
 - PR-1 的 cohort 结果以 `pr1_cohort_summary.json` 为准
+- PR-4A 结果以 `pr4a_temporal_dynamics.json` 为准
 - 图已生成：
   - `results/interictal_propagation/figures/pr1_propagation_heatmap_examples.png` — Figure 2 样式 heatmap
   - `results/interictal_propagation/figures/pr1_propagation_cohort_summary.png` — 6-panel cohort summary
+  - `results/interictal_propagation/figures/per_subject/*_propagation.png` — PR-3 per-subject 2×2 heatmap
+  - `results/interictal_propagation/figures/per_subject/*_24h_timeline.png` — PR-4A occupancy timeline
+  - `results/interictal_propagation/figures/pr4a_daynight_group_analysis.png` — PR-4A cohort day/night summary
 
 本文件只维护这个主题本身；涉及 IEI / PSD / rate modulation 的内容请回到 `docs/topic2_between_event_dynamics.md`。
