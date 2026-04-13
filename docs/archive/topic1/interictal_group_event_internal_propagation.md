@@ -90,23 +90,28 @@ PR-1 的目标：
   - `load_subject_propagation_events()` — `start_t` 排序 + 绝对时间重建 + block/event 合同
   - `load_subject_propagation_patterns()` — backward-compatible wrapper
   - `detect_propagation_mixture()`
+  - `compute_pairwise_tau_values()` — 返回采样 pairwise τ 值数组，用于双峰性可视化
   - `compute_centered_rank_tau()`
   - `compute_stereotypy_by_nparticipating()`
   - `compute_source_node_diagnostic()`
   - `compute_propagation_stereotypy()`
   - `compute_cluster_stereotypy()` — KMeans(k=2) + 簇内 τ + 簇间 correlation
+  - `compute_within_cluster_centered_tau()` — 簇内 identity-bias 分解（per-cluster centering + bias fraction）
   - `compute_adaptive_cluster_stereotypy()` — adaptive k-scan + AMI + silhouette + min-fraction gate
   - `build_cluster_templates()` — 从固定标签事件构建 cluster template
   - `assign_events_to_templates()` — 新事件投到固定模板
   - `compute_time_split_reproducibility()` — split-half / odd-even block 模板复现
   - `compute_legacy_mi()` — 老论文 MI 模板算法 + 行内 shuffle 置换检验
-  - `run_subject_interictal_propagation_pr1()`
+  - `run_subject_interictal_propagation_pr1()` — 现在输出包含 `within_cluster_centered`
   - `summarize_propagation_cohort()`
 - `scripts/run_interictal_propagation.py`
   - 批量生成 per-subject JSON + cohort summary
   - `--pr25`：基于现有 PR-2 JSON 增补跨时间复现层
+  - `--augment-cluster-bias`：增补簇内 identity-bias 数据（不重跑全 pipeline）
 - `scripts/plot_interictal_propagation.py`
-  - 生成 PR-1 cohort robustness 图
+  - `plot_cohort_summary()` — 6-panel 论文级群体图（MI+null / bimodality / uplift / stability / inter-cluster r / within-cluster bias）
+  - `plot_heatmap_examples()` — Figure 2 样式 heatmap
+  - PR-3 per-subject 图 + MI 分布图
 - `tests/test_interictal_propagation.py`
   - 覆盖 centered rank、mixture screen、`n_participating` 分层、SOZ source-erasure smoke case
 
@@ -235,6 +240,35 @@ KMeans(k=2) 聚类后的簇内分析：
 
 **核心结论**：间期群体事件内部存在多种传播模式，而且每种模式内部是刻板的。PR-2 让我们可以更诚实地说：大多数 subject 以二模态为主，但少数 subject 明显更复杂；PR-2.5 则补上了最关键的一层，证明这些模板在 split-half / blockwise 尺度上总体稳定。老论文的 MI 显著性结论完全可复现，forward/reverse 候选结构也已经过了基础复现关。下一步不该再纠结“模板在不在”，而该转向“稳定模板的占比如何随时间漂移”。
 
+### 7.7b Within-cluster identity-bias（PR-3 可视化后续补充，2026-04-13）
+
+**Status: COMPLETED — 30/30 subjects augmented**
+
+在 PR-3 论文级 cohort 图的优化过程中，发现需要在**簇内水平**做 identity-bias 分解，而不只是整体水平。新增的 `compute_within_cluster_centered_tau()` 函数使用 adaptive cluster 标签，对每个簇分别计算 channel-mean centered τ 并与 raw within-cluster τ 对比。
+
+核心发现：
+- **Within-cluster bias fraction median = 86%**（range 51–94%）
+- 整体 bias fraction median = 65%；在簇内水平，identity bias 占比**更高**
+- Within-cluster centered τ median ≈ **0.03**（very low）
+- 解读：每个传播模式内部，约 86% 的"有序性"来自通道本身的固定激活顺序（identity ordering），只有约 14% 是事件特异性的传播结构
+- 这不意味着传播结构不真实 — 通道身份排序本身反映的是网络拓扑约束。但量化口径必须更新：**stereotypy 主要由网络结构性通道排序驱动，而不是每次事件独立产生的传播动力学**
+
+### 7.7c PR-3 Cohort 6-panel 图设计（2026-04-13 更新）
+
+6-panel cohort 图的叙事逻辑分两层：
+
+**a→c：证明 stereotypy 存在且为多模态**
+- Panel a：MI data vs permutation null（paired violin + Mann-Whitney U ***）
+- Panel b：代表 subject 的 within/between cluster τ KDE 密度分布，直观展示双峰性
+- Panel c：Overall τ vs within-cluster τ scatter（29/30 在对角线以上，Δτ = +0.100）
+
+**d→f：证明模板稳定、反相关、identity-bias 组成**
+- Panel d：Split-half template match correlation violin（23 strong / 7 moderate / 0 weak）
+- Panel e：Inter-cluster Spearman r 直方图 + KDE（median = −0.37, Wilcoxon p = 6.3e-04 ***）
+- Panel f：Within-cluster raw τ vs centered τ scatter（median bias = 86%）
+
+图文件：`results/interictal_propagation/figures/cohort_propagation_summary.png`
+
 ### 7.8 推荐的下一步验证
 
 - ~~**PR-3：固定模板的论文级 per-subject 图**~~ ✅ 已验收（2026-04-12）
@@ -262,13 +296,15 @@ KMeans(k=2) 聚类后的簇内分析：
 - 独立结果目录已建立
 - **PR-2.5 全量完成并验收**（30 subjects，23 strong / 7 moderate / 0 weak）
 - **PR-3 全量完成并验收**（30/30 per-subject propagation + MI heatmaps, 6-panel cohort summary）
+- **PR-3 viz 后续完成**（2026-04-13）：6-panel 论文级 cohort 图重设计 + within-cluster identity-bias 计算
 - **PR-4A 全量完成并验收**（30/30 occupancy timelines + day/night group summary）
 - PR-1 的 cohort 结果以 `pr1_cohort_summary.json` 为准
 - PR-4A 结果以 `pr4a_temporal_dynamics.json` 为准
 - 图已生成：
   - `results/interictal_propagation/figures/pr1_propagation_heatmap_examples.png` — Figure 2 样式 heatmap
-  - `results/interictal_propagation/figures/pr1_propagation_cohort_summary.png` — 6-panel cohort summary
+  - `results/interictal_propagation/figures/cohort_propagation_summary.png` — 6-panel 论文级 cohort summary（PR-3 viz 最终版）
   - `results/interictal_propagation/figures/per_subject/*_propagation.png` — PR-3 per-subject 2×2 heatmap
+  - `results/interictal_propagation/figures/per_subject/*_mi_distribution.png` — PR-3 per-subject MI 分布
   - `results/interictal_propagation/figures/per_subject/*_24h_timeline.png` — PR-4A occupancy timeline
   - `results/interictal_propagation/figures/pr4a_daynight_group_analysis.png` — PR-4A cohort day/night summary
 

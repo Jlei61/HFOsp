@@ -58,6 +58,7 @@
 ### 3.1c PR-3 / PR-4A：固定模板可视化与 occupancy 漂移
 
 - PR-3 已验收并回到主树：`raw / k=2 / stable_k` 的 per-subject 图和 cohort 可视化已经固定下来，`moderate` subject 在图上不再被伪装成"铁板一块"。
+- PR-3 后续（2026-04-13）：cohort 6-panel 图完成论文级重设计。叙事逻辑为 a→c 证明 stereotypy 显著且多模态，d→f 证明模板稳定、反相关、identity-bias 组成。新增簇内 identity-bias 计算（`compute_within_cluster_centered_tau()`），median bias = 86%。Forward/reverse 复现统计修正为 8/9（使用 first_half_second_half 或 odd_even_block 任一 split）。
 - PR-4A：`compute_temporal_cluster_dynamics()` 在**固定模板投射**前提下，按 block 覆盖时间窗做 occupancy timeline，避免把停录空窗误画成连续零占比。
 - `30/30` subject 都得到 day/night summary。
 - dominant fraction：day median `0.587`，night median `0.575`，subject-level Wilcoxon `p = 0.124`。
@@ -66,13 +67,19 @@
 - fixed-template projection agreement 中位数为 `0.888`；只有 `3/30` subject 低于 `0.8`（`chengshuai`, `253`, `818`），说明大多数 subject 的 occupancy 轨迹并不是模板投射失真造出来的。
 - 这层结果支持的最强口径是：**模板稳定，但占比的昼夜漂移整体较弱**。它是高质量描述性结果，不是强机制结论。
 
-### 3.2 Identity bias 不是小问题，但也不是全部
+### 3.2 Identity bias 不是小问题，在簇内水平更高
 
+**整体水平：**
 - Raw `τ` 中位数：`0.089`
 - Centered `τ` 中位数：`0.023`
 - Bias fraction 中位数：`0.652`
 
-也就是说，约 `65%` 的表观刻板性来自 channel identity bias。但这不等于传播结构不存在，因为 cluster-aware 后的 centered 结果仍保留了真实信号。
+**簇内水平（PR-3 后续补充，2026-04-13）：**
+- Within-cluster raw `τ` 中位数：`0.252`
+- Within-cluster centered `τ` 中位数：`≈0.03`
+- **Within-cluster bias fraction 中位数：`0.86`**
+
+关键解读：在每个传播模式内部，约 86% 的通道排序一致性来自通道本身的固有激活位置（identity ordering），只有约 14% 是事件特异性传播动力学。这并不否定传播结构——通道身份排序本身反映网络拓扑约束。但量化口径必须更新：**stereotypy 主要由结构性通道排序驱动，而不是每次事件独立产生的传播动力学。**
 
 ### 3.3 Event-level synchrony 的正式统计口径
 
@@ -105,7 +112,7 @@ Epilepsiae 的区域分层分析中：
 - 模板在跨时间切片上总体稳定：`23/30 strong`，其余 `7/30 moderate`，没有 `weak`
 - `PR-3` 已经把固定模板的 per-subject / cohort 图稳定下来，后续展示口径不再依赖临时绘图脚本
 - `PR-4A` 显示 fixed-template occupancy 的 day/night 漂移很弱：dominant fraction 与 entropy 的 subject-level paired summary 都没有显著差异，TV distance 也很小（median `0.019`）
-- `958` 的 forward/reverse 双模式可复现，不是孤例；现在 `11/12` 的候选互逆 subject 都能在 split-half / blockwise 分析中复现该关系
+- `958` 的 forward/reverse 双模式可复现，不是孤例；`9` 个 inter-cluster `r < -0.5` 的 subject 中，`8/9` 能在 split-half 或 odd/even block 分析中复现该关系
 - legacy MI 全部显著，老论文最硬的结果站得住
 - 真正可信的定量指标应该是 cluster-aware `τ` 与 raw/centered 并列报告，而不是只给一个整体 MI
 - 少数 subject 的 `k=4` / `k=6` 结构里，互逆关系仍能复现；但精确 cluster 边界在 `818`、`zhangjinhan` 这类高 k subject 上还不够稳，不能过度解读
