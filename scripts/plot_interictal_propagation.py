@@ -216,12 +216,12 @@ def _style_panel(ax: plt.Axes, label: str = "") -> None:
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     for spine in ["left", "bottom"]:
-        ax.spines[spine].set_linewidth(1.2)
-    ax.tick_params(labelsize=18, width=1.2, length=5)
+        ax.spines[spine].set_linewidth(1.4)
+    ax.tick_params(labelsize=20, width=1.4, length=6)
     if label:
         ax.text(
             -0.14, 1.08, label, transform=ax.transAxes,
-            fontsize=26, fontweight="bold", va="top", ha="left",
+            fontsize=30, fontweight="bold", va="top", ha="left",
             fontfamily="sans-serif",
         )
 
@@ -325,8 +325,8 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
     _style_panel(ax, "a")
 
     COL_NULL = "#BBBBBB"
-    group_spacing = 3.0
-    pair_gap = 0.7
+    group_spacing = 1.8
+    pair_gap = 0.6
 
     for gi, (recs, col, label) in enumerate(
         [(yq, COL_YQ, "Yuquan"), (epi, COL_EPI, "Epilepsiae")]
@@ -367,16 +367,16 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
         if r.get("legacy_mi", {}).get("significant", False)
     )
     ax.set_xticks([0, pair_gap, group_spacing, group_spacing + pair_gap])
-    ax.set_xticklabels(["Data", "Null", "Data", "Null"], fontsize=16)
+    ax.set_xticklabels(["Data", "Null", "Data", "Null"], fontsize=18)
     ax.text(pair_gap / 2, -0.12, "Yuquan", transform=ax.get_xaxis_transform(),
-            ha="center", fontsize=18, fontweight="bold")
+            ha="center", fontsize=20, fontweight="bold")
     ax.text(group_spacing + pair_gap / 2, -0.12, "Epilepsiae",
             transform=ax.get_xaxis_transform(),
-            ha="center", fontsize=18, fontweight="bold")
-    ax.set_ylabel("Matching Index", fontsize=20)
+            ha="center", fontsize=20, fontweight="bold")
+    ax.set_ylabel("Matching Index", fontsize=22)
     ax.set_title(
         f"MI: data vs permutation null  ({n_sig}/{len(valid)} sig.)",
-        fontsize=20, pad=12,
+        fontsize=22, pad=12,
     )
 
     # ================================================================
@@ -435,24 +435,24 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
                         between_taus.append(tau)
 
         if within_taus and between_taus:
-            bins = np.linspace(-1, 1, 50)
-            ax.hist(
-                within_taus, bins=bins, density=True,
-                alpha=0.6, color="#4477AA", edgecolor="white",
-                linewidth=0.5, label="Within-cluster pairs",
-            )
-            ax.hist(
-                between_taus, bins=bins, density=True,
-                alpha=0.6, color="#EE6677", edgecolor="white",
-                linewidth=0.5, label="Between-cluster pairs",
-            )
             from scipy.stats import gaussian_kde
-            for taus, col in [(within_taus, "#4477AA"), (between_taus, "#EE6677")]:
+            xg = np.linspace(-1, 1, 300)
+            for taus, col, label_t in [
+                (within_taus, "#4477AA", "Within-cluster pairs"),
+                (between_taus, "#EE6677", "Between-cluster pairs"),
+            ]:
                 if len(taus) > 10:
-                    kde = gaussian_kde(taus, bw_method=0.15)
-                    xg = np.linspace(-1, 1, 200)
-                    ax.plot(xg, kde(xg), color=col, lw=2.5)
+                    kde = gaussian_kde(taus, bw_method=0.12)
+                    yg = kde(xg)
+                    ax.fill_between(xg, yg, alpha=0.25, color=col)
+                    ax.plot(xg, yg, color=col, lw=2.5, label=label_t)
             ax.legend(fontsize=14, frameon=False, loc="upper left")
+            all_taus = within_taus + between_taus
+            x_lo = max(-1, np.percentile(all_taus, 0.5) - 0.05)
+            x_hi = min(1, np.percentile(all_taus, 99.5) + 0.05)
+            ax.set_xlim(x_lo, x_hi)
+            y_top = ax.get_ylim()[1]
+            ax.set_ylim(0, y_top * 1.02)
             tau_dist_ok = True
     except Exception:
         pass
@@ -467,16 +467,16 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
         1 for r in valid
         if r.get("mixture", {}).get("dip_p", 1) < 0.05
     )
-    ax.set_xlabel("Pairwise Kendall \u03c4", fontsize=20)
-    ax.set_ylabel("Density", fontsize=20)
+    ax.set_xlabel("Pairwise Kendall \u03c4", fontsize=22)
+    ax.set_ylabel("Density", fontsize=22)
     ax.set_title(
         f"Bimodality  ({n_multimodal}/{len(valid)} dip test p < 0.001)",
-        fontsize=20, pad=12,
+        fontsize=22, pad=12,
     )
     ax.text(
         0.97, 0.95,
         f"Example: {rep_ds}:{rep_sub}",
-        transform=ax.transAxes, fontsize=13,
+        transform=ax.transAxes, fontsize=14,
         va="top", ha="right",
         bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
                   edgecolor="#CCCCCC", alpha=0.85),
@@ -522,90 +522,82 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
         ax.annotate(
             f"\u0394\u03c4 = {med_uplift:+.3f}",
             xy=(0.05, 0.92), xycoords="axes fraction",
-            fontsize=16, fontweight="bold",
+            fontsize=18, fontweight="bold",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
                       edgecolor="#CCCCCC", alpha=0.85),
         )
         n_above = int(np.sum(wi_arr > ov_arr))
         ax.text(
             0.95, 0.05, f"{n_above}/{len(ov_arr)} above diagonal",
-            transform=ax.transAxes, fontsize=14,
+            transform=ax.transAxes, fontsize=16,
             ha="right", va="bottom", color="#666666",
         )
 
-    ax.set_xlabel("Overall \u03c4", fontsize=20)
-    ax.set_ylabel("Within-cluster \u03c4", fontsize=20)
-    ax.set_title("Cluster-aware stereotypy uplift", fontsize=20, pad=12)
+    ax.set_xlabel("Overall \u03c4", fontsize=22)
+    ax.set_ylabel("Within-cluster \u03c4", fontsize=22)
+    ax.set_title("Cluster-aware stereotypy uplift", fontsize=22, pad=12)
     ax.set_aspect("equal", adjustable="box")
 
     # ================================================================
-    # Panel d: Stability \u00d7 symmetry (persistent anti-correlated templates)
+    # Panel d: Template temporal stability (split-half reproducibility)
     # ================================================================
     ax = axes[1, 0]
     _style_panel(ax, "d")
 
-    d_inter_r: List[float] = []
-    d_match_corr: List[float] = []
-    d_ds_colors: List[str] = []
-    n_fr_reproduced = 0
-    n_fr_candidates = 0
+    d_match_yq: List[float] = []
+    d_match_epi: List[float] = []
+    n_strong, n_moderate, n_weak = 0, 0, 0
     for rec in valid:
-        ada = rec.get("adaptive_cluster", {})
         repro = rec.get("time_split_reproducibility", {})
-        sk = ada.get("stable_k") or ada.get("chosen_k")
-        if sk != 2:
-            continue
-        corr_mat = ada.get("inter_cluster_corr_matrix", [])
-        if not (corr_mat and len(corr_mat) >= 2 and len(corr_mat[0]) >= 2):
-            continue
-        r_val = float(corr_mat[0][1])
         splits = repro.get("splits", {})
         sh = splits.get("first_half_second_half", {})
         mc = sh.get("mean_match_corr", np.nan)
         if not np.isfinite(mc):
             oe = splits.get("odd_even_block", {})
             mc = oe.get("mean_match_corr", np.nan)
-        if not np.isfinite(r_val) or not np.isfinite(mc):
+        if not np.isfinite(mc):
             continue
-        d_inter_r.append(r_val)
-        d_match_corr.append(mc)
-        d_ds_colors.append(COL_YQ if rec["dataset"] == "yuquan" else COL_EPI)
-        fr = repro.get("forward_reverse_reproduced")
-        fwd_rev_pairs = ada.get("candidate_forward_reverse_pairs", [])
-        if fwd_rev_pairs:
-            n_fr_candidates += 1
-            if fr:
-                n_fr_reproduced += 1
+        (d_match_yq if rec["dataset"] == "yuquan" else d_match_epi).append(mc)
+        grade = repro.get("reproducibility_grade", "")
+        if grade == "strong":
+            n_strong += 1
+        elif grade == "moderate":
+            n_moderate += 1
+        else:
+            n_weak += 1
 
-    if d_inter_r:
-        r_arr_d = np.array(d_inter_r)
-        mc_arr_d = np.array(d_match_corr)
-        ax.axvspan(-1.05, -0.5, color="#FFEEEE", alpha=0.5, zorder=0)
-        ax.axhline(0.8, color="#CCCCCC", ls=":", lw=1, zorder=1)
-        ax.axvline(-0.5, color=COL_SIG, ls="--", lw=1.5, alpha=0.6, zorder=1)
-        ax.axvline(0, color="#CCCCCC", ls="-", lw=1, alpha=0.4, zorder=1)
-        ax.scatter(
-            r_arr_d, mc_arr_d, c=d_ds_colors, s=100,
-            edgecolors="white", linewidths=1.0, zorder=3, alpha=0.85,
-        )
-        n_stable_anti = int(np.sum((r_arr_d < -0.5) & (mc_arr_d > 0.8)))
-        ax.text(
-            0.03, 0.03,
-            f"Stable & anti-correlated: {n_stable_anti}/{len(r_arr_d)}\n"
-            f"Forward/reverse reproduced: {n_fr_reproduced}/{n_fr_candidates}",
-            transform=ax.transAxes, fontsize=14,
-            va="bottom", ha="left",
-            bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
-                      edgecolor="#CCCCCC", alpha=0.85),
-        )
-        ax.set_xlim(-1.05, 1.05)
-        ax.set_ylim(0, 1.08)
+    positions_d = [0, 1]
+    for i, (mc_data, pos, col) in enumerate(
+        zip([d_match_yq, d_match_epi], positions_d, [COL_YQ, COL_EPI])
+    ):
+        if not mc_data:
+            continue
+        vals = np.asarray(mc_data, dtype=float)
+        _violin_with_scatter(ax, vals, pos, col, rng_seed=77 + i, scatter_size=70)
 
-    ax.set_xlabel("Inter-cluster template r", fontsize=20)
-    ax.set_ylabel("Split-half match correlation", fontsize=20)
+    ax.axhline(0.8, color=COL_SIG, ls="--", lw=1.5, alpha=0.5, zorder=1,
+               label="strong threshold")
+    ax.axhline(0.5, color="#AAAAAA", ls=":", lw=1.2, alpha=0.5, zorder=1,
+               label="moderate threshold")
+    ax.set_xticks(positions_d)
+    ax.set_xticklabels(["Yuquan", "Epilepsiae"], fontsize=22)
+    ax.set_ylabel("Split-half template\nmatch correlation", fontsize=22)
+    ax.set_ylim(0, 1.12)
+    ax.set_xlim(-0.6, 1.6)
+    total_d = len(d_match_yq) + len(d_match_epi)
+    ax.text(
+        0.97, 0.05,
+        f"Strong: {n_strong}/{total_d}\n"
+        f"Moderate: {n_moderate}/{total_d}\n"
+        f"Weak: {n_weak}/{total_d}",
+        transform=ax.transAxes, fontsize=16,
+        va="bottom", ha="right",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
+                  edgecolor="#CCCCCC", alpha=0.85),
+    )
     ax.set_title(
-        f"Template symmetry \u00d7 temporal stability (k=2, n={len(d_inter_r)})",
-        fontsize=20, pad=12,
+        f"Template temporal stability  (n={total_d})",
+        fontsize=22, pad=12,
     )
 
     # ================================================================
@@ -629,17 +621,24 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
     w_p = np.nan
     if inter_corrs_k2:
         r_arr = np.array(inter_corrs_k2)
-        bins = np.linspace(-1, 1, 20)
+
+        bins = np.linspace(-1, 1, 18)
         ax.hist(
             r_arr, bins=bins, color=_K_COLORS[2],
-            edgecolor="white", alpha=0.7, linewidth=1.2,
+            edgecolor="white", alpha=0.55, linewidth=1.2, zorder=2,
         )
-        ax.axvline(0, color="#BBBBBB", ls="-", lw=1, alpha=0.5, zorder=0)
+        from scipy.stats import gaussian_kde as _gkde
+        if len(r_arr) > 5:
+            kde_e = _gkde(r_arr, bw_method=0.2)
+            xg_e = np.linspace(-1.05, 1.05, 200)
+            yg_e = kde_e(xg_e) * len(r_arr) * (bins[1] - bins[0])
+            ax.fill_between(xg_e, yg_e, alpha=0.15, color=_K_COLORS[2], zorder=1)
+            ax.plot(xg_e, yg_e, color=_K_COLORS[2], lw=2, alpha=0.8, zorder=1)
+
+        ax.axvline(0, color="#BBBBBB", ls="-", lw=1.2, alpha=0.5, zorder=0)
+
         med_r = float(np.median(r_arr))
-        ax.axvline(
-            med_r, color="black", ls="--", lw=2, zorder=4,
-            label=f"median = {med_r:.2f}",
-        )
+        ax.axvline(med_r, color="black", ls="--", lw=2.5, zorder=4)
         n_anti = int(np.sum(r_arr < -0.5))
 
         try:
@@ -648,37 +647,33 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
             w_p = np.nan
 
         y_max = ax.get_ylim()[1]
-
         if np.isfinite(w_p) and w_p < 0.05:
-            if w_p < 0.001:
-                star = "***"
-            elif w_p < 0.01:
-                star = "**"
-            else:
-                star = "*"
-            ax.text(
-                med_r, y_max * 0.92, star,
-                ha="center", va="bottom", fontsize=22, fontweight="bold",
+            star = "***" if w_p < 0.001 else ("**" if w_p < 0.01 else "*")
+            ax.annotate(
+                star, xy=(med_r, y_max * 0.88),
+                fontsize=26, fontweight="bold", ha="center", va="bottom",
+                color=COL_SIG,
             )
 
+        ax.axvspan(-1.05, -0.5, color="#FFEEEE", alpha=0.3, zorder=0)
         ax.text(
             0.97, 0.95,
             f"n = {len(r_arr)} (k=2)\n"
             f"median r = {med_r:.2f}\n"
             f"n(r < \u22120.5) = {n_anti}\n"
             f"Wilcoxon p = {w_p:.1e}",
-            transform=ax.transAxes, fontsize=14,
+            transform=ax.transAxes, fontsize=16,
             va="top", ha="right",
             bbox=dict(
                 boxstyle="round,pad=0.4", facecolor="white",
-                edgecolor="#CCCCCC", alpha=0.9,
+                edgecolor="#CCCCCC", alpha=0.92,
             ),
         )
-        ax.legend(fontsize=14, frameon=False, loc="upper left")
+        ax.set_xlim(-1.05, 1.05)
 
-    ax.set_xlabel("Inter-cluster Spearman r", fontsize=20)
-    ax.set_ylabel("Count", fontsize=20)
-    ax.set_title("Inter-cluster template correlation (k=2)", fontsize=20, pad=12)
+    ax.set_xlabel("Inter-cluster Spearman r", fontsize=22)
+    ax.set_ylabel("Count", fontsize=22)
+    ax.set_title("Inter-cluster template correlation (k=2)", fontsize=22, pad=12)
 
     # ================================================================
     # Panel f: Within-cluster identity-bias decomposition
@@ -755,14 +750,14 @@ def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, A
         ax.annotate(
             f"Median bias = {med_bias:.0%}" if np.isfinite(med_bias) else "",
             xy=(0.05, 0.92), xycoords="axes fraction",
-            fontsize=16, fontweight="bold",
+            fontsize=18, fontweight="bold",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
                       edgecolor="#CCCCCC", alpha=0.85),
         )
 
-    ax.set_xlabel(f"Raw \u03c4 ({label_suffix})", fontsize=20)
-    ax.set_ylabel(f"Centered \u03c4 ({label_suffix})", fontsize=20)
-    ax.set_title("Identity-bias decomposition", fontsize=20, pad=12)
+    ax.set_xlabel(f"Raw \u03c4 ({label_suffix})", fontsize=22)
+    ax.set_ylabel(f"Centered \u03c4 ({label_suffix})", fontsize=22)
+    ax.set_title("Identity-bias decomposition", fontsize=22, pad=12)
     ax.set_aspect("equal", adjustable="box")
 
     # ================================================================
