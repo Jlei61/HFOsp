@@ -52,7 +52,7 @@
   - cohort `30/30` 可用 subject 中，`23/30` 为 `strong`，`7/30` 为 `moderate`，`0` 为 `weak`。
   - split-half 中位模板相关为 `0.899`，中位 assignment agreement 为 `0.865`。
   - odd/even block 中位模板相关为 `0.985`，中位 assignment agreement 为 `0.882`。
-  - `12` 个带有 forward/reverse 候选对的 subject 中，`11` 个能在时间切片中复现同一匹配后的互逆关系；`huanghanwen` 未通过该关。
+  - `9` 个 k=2 subject 带有 forward/reverse 候选对（inter-cluster `r < -0.5`），其中 `8/9` 能在时间切片中复现同一匹配后的互逆关系（使用 first_half_second_half 或 odd_even_block 任一 split）。
   - 这说明我们现在不只是证明了**算法稳定性**，而是已经证明了**blockwise / split-half 尺度上的跨时间模板稳定性**；但这还不等于已经回答了 day/night、seizure proximity 或 occupancy 漂移。
 
 ### 3.1c PR-3 / PR-4A：固定模板可视化与 occupancy 漂移
@@ -135,26 +135,99 @@ Epilepsiae 的区域分层分析中：
 - 固定模板投射 agreement 虽然整体够高（median `0.888`），但 `chengshuai`、`253`、`818` 这 3 个 subject 仍应谨慎解释时间轨迹细节。
 - synchrony 线最大的风险不是假阳性，而是“把 null 写得太花”。现在最诚实的说法就是：**总体 null，局部 extra-focal 线索待验证。**
 - propagation 与 synchrony 都是 topic 1，但它们不是同一个统计对象，文档里必须并列而不能混写成一个指标体系。
+- **当前传播线的指标体系完全是 ordinal 的（rank + tau + MI），对绝对时间精度完全盲。** 如果慢调控改变的是 lag compression（时间压缩）而非 rank order，tau 完全看不到。这是 PR-4B 必须补上的 L3 层。
 
 ---
 
-## 6. 推荐的下一步验证
+## 6. 传播模板受慢调控的三层分析框架
+
+PR-4 系列的核心问题是：**固定传播模板受到什么慢调控？**
+
+为了诚实地回答这个问题，需要区分三个独立的调控层面：
+
+| 调控层 | 科学问题 | 因变量 | 需要的指标 | 数据来源 | 状态 |
+|--------|----------|--------|------------|----------|------|
+| **L1: Mode selection** | 慢调制改变了哪个模板出现得多？ | Occupancy fraction | Cluster fraction per time bin | `lagPatRank` cluster labels | PR-4A done |
+| **L2: Ordinal precision** | 慢调制改变了模板内部的 rank 一致性？ | Within-cluster τ | Pairwise Kendall τ (high vs low rate) | `lagPatRank` | PR-4B planned |
+| **L3: Timing precision** | 慢调制改变了模板内部的绝对时间精度？ | Within-cluster lag span / Pearson r | Within-cluster absolute lag statistics | `lagPatRaw` | PR-4B planned |
+
+### 为什么需要 L3
+
+L2 (tau) 是纯 ordinal metric——只看通道的激活顺序，完全不看绝对时间。考虑以下场景：在高率状态下，rank order 完全不变（tau 不变），但所有通道的 lag 从 50ms 压缩到 5ms（所有通道更紧密地同步激活）。这在 Kuramoto 模型下是 coupling strength 增强的最自然预测（`K(t)` 升高 → 锁相更紧 → lag 压缩），但 **tau 对此完全无感**。
+
+L3 需要 `lagPatRaw`（centroid 绝对时间，秒），而不是 `lagPatRank`。数据已经在 `lagPat.npz` 中，无需重新检测。但 **`lagPatRaw` 存储的是拼接时间轴上的 centroid 绝对时间**（跨事件单调递增），不是事件内相对 lag。做跨事件比较前必须先做 per-event min-subtraction：`relative_lag[ch, ev] = lagPatRaw[ch, ev] - min(lagPatRaw[participating, ev])`。这和 `lag_rank_from_centroids()` 的 `align='first_centroid'` 逻辑以及 synchrony 线 `_compute_sync_metrics` 的处理完全一致。
+
+### L3 与 synchrony 线的关系
+
+synchrony 线（`interictal_synchrony.py`）也使用 `lagPatRaw`，但它的 `sync_phase_global` 衡量的是**单个事件内部**通道 lag 的集中程度（within-event dispersion），不是**跨事件**的模式一致性（cross-event consistency）。引入 L3 到传播线，是在已有的固定 cluster 结构上加一层 cardinal precision 维度——回答的问题比 synchrony 线更结构化（在已识别的固定模板框架内做 timing precision 的时间轨迹跟踪，而非单个标量的 pre/post 比较）。
+
+### L3 不需要重做聚类
+
+Legacy `lagPatRank` 是 `lagPatRaw` 的全通道 argsort（rank 0 = 最早 centroid，**包含 non-participating channels**）。传播分析中的 tau 只使用 participating channels 子集，所以全通道 rank 语义不影响 tau 正确性。rank-based clustering 在大多数情况下也把 absolute lag 结构聚好了。方案：保留 rank-based cluster labels，在已有簇内计算 absolute lag 统计作为验证层。
+
+### Pearson r 的 n_participating 门槛
+
+Pearson r 在低 n_participating 下**完全不可靠**：模拟表明，纯随机 3 维向量有 51% 概率产生 |r| > 0.7，4 维有 29%，5 维 17%，8 维以上才降到 6% 以下。因此 L3 的 Pearson r 必须设 **`min_participating >= 5`** 的硬门槛。Step 0 验证报告中必须按 n_participating 分层（3-4 / 5-8 / 9+）报告 Pearson r，而不是笼统的 cohort median。部分 subject（如 `zhangjinhan` n_ch=5, median n_part=3）在 L3 分析中可能因可用事件不足而无法参与。
+
+### L3 的灵敏度优势与 L2 的局限
+
+Within-cluster identity-bias 高达 86%，意味着 L2（within-cluster tau）中只有 ~14% 是 event-specific dynamics。即使 H2 成立（coupling modulation 导致 event-specific tau 提升 50%），在总 tau 上的反映只有 14% × 50% ≈ 7%——这个效应大小在 30 subjects 的 paired Wilcoxon 上可能被噪声淹没。**L3（absolute lag span）不受 identity-bias 影响**（直接测量时间跨度，不做 rank centering），因此 L3 是 H2 的**主检测层**，L2 是辅助层。如果 L2 为 null 但 L3 有信号，仍然支持 H2。
+
+### MI 在 L3 层不适用
+
+MI (`_mi_vector`) 本质上是 `np.sign()` 比较，纯 ordinal，输入 absolute lag 和输入 rank 得到完全相同的结果。L3 层应使用 **Pearson r**（捕获 order + proportional timing，需 n_part ≥ 5）或 **lag span**（鲁棒标量，不受 n_part 限制），而不是沿用 MI。
+
+---
+
+## 7. 推荐的下一步验证
 
 PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已经固定下来。
 
-1. **高 k subject 的鲁棒性复核**
-   - 对 `k>2` subject 和 forward/reverse 候选，做 `n_participating` 匹配子样本、raw/centered 双版本模板比较。
-   - 目标是排除"复杂结构只是稀疏事件或 channel identity 偏差"的垃圾解释；当前最关键的对象是 `818` 和 `zhangjinhan`。
-2. **PR-4B：和 Topic 2 的慢调制做固定模板 coupling**
-   - 既然模板本身已经被验证稳定，下一步才能诚实地问：慢 rate state 改变的是模式占比，还是模式内部的 stereotype 强度。
-3. **seizure proximity 的固定模板占比轨迹**
-   - `PR-4A` 已经把 day/night 的描述层补上了，下一步若继续做时间上下文，应该优先问 seizure 邻近，而不是再重复一个昼夜散点图。
+### 7.1 PR-4B：Rate state × stereotype coupling（H1/H2 判别）
 
-现在优先级最高的是 `1` 和 `2`。因为 `PR-3` 和 `PR-4A` 已经把"模板长什么样"和"占比会不会明显漂"这两层补上了，接下来该做的是盯高 `k` 风险点，以及把 Topic 1 和 Topic 2 的耦合问题收窄成一个硬分析。
+**科学问题**：慢 rate state 改变的是模式占比（L1），还是模式内部的 ordinal precision（L2），还是 timing precision（L3）？对应 `layered_model_framework.md` 的 H1 vs H2 判别。
+
+**分析内容**：
+1. 按 local event-rate 中位数分窗为 high/low
+2. **L2**：within-cluster pairwise τ (high vs low)，paired Wilcoxon on subject-level（注意 86% identity-bias 使 L2 为 H2 辅助检测层）
+3. **L3**：within-cluster mean lag span (high vs low)；within-cluster Pearson r on absolute lag vectors (high vs low, **仅 n_part ≥ 5 事件**）。L3 是 H2 主检测层
+4. **L1**：occupancy fraction 与 local rate 的 Spearman correlation per cluster
+5. `n_participating` matched subsampling：lag span 的 high/low 比较中，必须对两组做 n_participating 匹配（高 rate → 高 n_part → 更大 span 的混杂必须被控制）
+
+**前置验证（PR-4B Step 0）**：
+1. **Per-event min-subtraction**：`relative_lag[ch] = lagPatRaw[ch] - min(lagPatRaw[participating])`，验证相对 lag 全部非负且 channel-order 与 lagPatRank 一致
+2. 对 30 subject 计算 within-cluster Pearson r on relative absolute lag vectors，**按 n_participating 分层报告**（3-4 / 5-8 / 9+），不使用笼统 cohort median 门槛
+3. 对 n_part ≥ 5 子集报告 cohort median Pearson r（期望 > 0.7）；n_part < 5 的事件标记为 L3-ineligible，仅参与 L1 和 L2
+
+**统计单元**：subject。不做 pooled event-level p-value。
+
+### 7.2 PR-4C：Seizure proximity
+
+**科学问题**：发作邻近是否改变了传播模板的选择、ordinal 精度和 timing 精度？
+
+**分析内容**：
+1. 借用 Topic 2 PR-2.7 已有的 seizure-triggered rate framework 定义 pre-ictal / baseline / post-ictal 窗口
+2. **L1**：occupancy trajectory — seizure 前后固定模板占比变化
+3. **L2**：within-cluster τ trajectory — 发作邻近的 ordinal precision 变化（辅助层，灵敏度受 identity-bias 限制）
+4. **L3**：within-cluster lag span trajectory + Pearson r — 发作邻近的 timing precision 变化（主检测层，仅 n_part ≥ 5 事件）
+5. Subject-level paired comparison（baseline vs pre-ictal vs post-ictal），**lag span 比较需 n_participating 匹配**
+
+**前置依赖**：PR-4B 完成后再做。PR-4B 提供 L2+L3 的基础指标实现、absolute lag 验证层和 n_participating 匹配框架。
+
+### 7.3 高 k subject 的鲁棒性复核
+
+- 对 `818`、`zhangjinhan` 做 `n_participating` 匹配子样本、raw/centered 双版本模板比较
+- 可与 PR-4B 并行，不阻塞
+
+### 7.4 优先级
+
+1. **PR-4B**（P0）：rate × L2 + L3 + absolute lag validation — 这是 H1/H2 判别的核心实验
+2. **PR-4C**（P1）：seizure proximity — 依赖 PR-4B 的指标实现
+3. **高 k 复核**（P1）：与 PR-4B 并行
 
 ---
 
-## 7. 代码与结果入口
+## 8. 代码与结果入口
 
 ### 内部传播
 
@@ -172,7 +245,7 @@ PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已
 
 ---
 
-## 8. 与其他 topic 的边界
+## 9. 与其他 topic 的边界
 
 - 如果问题在问“`~2 Hz` 峰是不是真的”或“IEI serial correlation 说明什么”，跳到 `docs/topic2_between_event_dynamics.md`
 - 如果问题在问“SOZ 和 non-SOZ 到底差在哪里”，跳到 `docs/topic3_spatial_soz_modulation.md`
@@ -180,7 +253,7 @@ PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已
 
 ---
 
-## 9. 历史文档索引
+## 10. 历史文档索引
 
 - `docs/archive/topic1/interictal_group_event_internal_propagation.md`
   - 这份是内部传播线的详细结果与合同文档
