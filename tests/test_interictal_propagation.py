@@ -12,10 +12,12 @@ from src.interictal_propagation import (
     compute_adaptive_cluster_stereotypy,
     compute_source_node_diagnostic,
     compute_stereotypy_by_nparticipating,
+    compute_temporal_cluster_dynamics,
     compute_time_split_reproducibility,
     detect_propagation_mixture,
     load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
+    summarize_propagation_cohort,
 )
 
 
@@ -183,6 +185,7 @@ def test_load_subject_propagation_events_sorts_by_start_t_and_rebuilds_times(tmp
     assert loaded["block_ids"].tolist() == [0, 1, 1]
     assert loaded["event_rel_times"].tolist() == [2.0, 1.0, 3.0]
     assert loaded["event_abs_times"].tolist() == [102.0, 201.0, 203.0]
+    assert loaded["block_time_ranges"] == [(102.0, 102.5), (201.0, 203.5)]
     assert loaded["block_boundaries"] == [
         {
             "block_id": 0,
@@ -192,6 +195,8 @@ def test_load_subject_propagation_events_sorts_by_start_t_and_rebuilds_times(tmp
             "n_events": 1,
             "start_t": 100.0,
             "has_packed_times": True,
+            "block_start_epoch": 102.0,
+            "block_end_epoch": 102.5,
         },
         {
             "block_id": 1,
@@ -201,6 +206,8 @@ def test_load_subject_propagation_events_sorts_by_start_t_and_rebuilds_times(tmp
             "n_events": 2,
             "start_t": 200.0,
             "has_packed_times": True,
+            "block_start_epoch": 201.0,
+            "block_end_epoch": 203.5,
         },
     ]
 
@@ -506,3 +513,117 @@ def test_time_split_reproducibility_is_invariant_to_event_order_if_times_match()
     sh_shuffled = repro_shuffled["splits"]["first_half_second_half"]
     assert repro_sorted["reproducibility_grade"] == repro_shuffled["reproducibility_grade"]
     assert abs(sh_sorted["mean_match_corr"] - sh_shuffled["mean_match_corr"]) < 1e-6
+
+
+def test_compute_temporal_cluster_dynamics_reports_timeline_and_daynight() -> None:
+    import datetime
+
+    tz = datetime.timezone(datetime.timedelta(hours=8))
+    base = datetime.datetime(2024, 1, 1, 7, 0, 0, tzinfo=tz).timestamp()
+    event_abs_times = np.array(
+        [
+            base + 0.0,        # 07:00 night
+            base + 1800.0,     # 07:30 night
+            base + 5400.0,     # 08:30 day
+            base + 7200.0,     # 09:00 day
+        ],
+        dtype=float,
+    )
+    labels = np.array([0, 1, 0, 0], dtype=int)
+
+    out = compute_temporal_cluster_dynamics(
+        event_abs_times=event_abs_times,
+        cluster_labels=labels,
+        n_clusters=2,
+        dataset="yuquan",
+        bin_hours=1.0,
+    )
+
+    assert out["timezone_name"] == "Asia/Shanghai"
+    assert out["n_events_used"] == 4
+    assert len(out["timeline_bins"]) == 2
+    assert out["timeline_bins"][0]["n_events"] == 2
+    np.testing.assert_allclose(out["timeline_bins"][0]["cluster_fractions"], [0.5, 0.5])
+    assert out["timeline_bins"][1]["day_night"] == "day"
+    assert out["timeline_bins"][0]["hours_from_timeline_start"] == 0.5
+    assert out["day_night_summary"]["day"]["n_events"] == 2
+    assert out["day_night_summary"]["night"]["n_events"] == 2
+    np.testing.assert_allclose(
+        out["day_night_summary"]["day"]["cluster_fractions"],
+        [1.0, 0.0],
+    )
+    np.testing.assert_allclose(
+        out["day_night_summary"]["night"]["cluster_fractions"],
+        [0.5, 0.5],
+    )
+    assert out["day_night_summary"]["total_variation_distance"] > 0.0
+
+
+def test_compute_temporal_cluster_dynamics_respects_coverage_ranges_and_entropy_scale() -> None:
+    event_abs_times = np.array([0.0, 3600.0 * 10.0], dtype=float)
+    labels = np.array([0, 0], dtype=int)
+    out = compute_temporal_cluster_dynamics(
+        event_abs_times=event_abs_times,
+        cluster_labels=labels,
+        n_clusters=3,
+        dataset="epilepsiae",
+        coverage_ranges=[(0.0, 3600.0), (3600.0 * 10.0, 3600.0 * 11.0)],
+        bin_hours=1.0,
+    )
+
+    assert len(out["timeline_bins"]) == 2
+    assert [b["bin_id"] for b in out["timeline_bins"]] == [0, 10]
+    assert out["day_night_summary"]["day"]["normalized_entropy"] == 0.0
+
+
+def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary() -> None:
+    subject_results = {
+        "yuquan/a": {
+            "dataset": "yuquan",
+            "subject": "a",
+            "propagation_stereotypy": {"all": {"mean_tau": 0.1}, "soz": {}, "nonsoz": {}},
+            "mixture": {"is_mixture": False, "possible_mixture": False},
+            "centered_rank": {"bias_fraction": 0.3},
+            "source_diagnostic": {"soz_source_erased": False},
+            "by_nparticipating": [{"bin_label": "3", "mean_tau": 0.1}],
+            "cluster": {"within_cluster_tau_mean": 0.2, "uplift": 0.1, "overall_tau": 0.1, "inter_cluster_corr": -0.6},
+            "legacy_mi": {"mi_mean": 0.2, "significant": True},
+            "adaptive_cluster": {"stable_k": 2, "chosen_k": 2, "uplift": 0.1, "within_cluster_tau_mean": 0.2},
+            "time_split_reproducibility": {"reproducibility_grade": "strong", "splits": {}},
+            "temporal_dynamics": {
+                "day_night_summary": {
+                    "day": {"n_events": 5, "dominant_fraction": 0.8, "normalized_entropy": 0.1},
+                    "night": {"n_events": 5, "dominant_fraction": 0.4, "normalized_entropy": 0.9},
+                    "total_variation_distance": 0.4,
+                }
+            },
+        },
+        "epilepsiae/b": {
+            "dataset": "epilepsiae",
+            "subject": "b",
+            "propagation_stereotypy": {"all": {"mean_tau": 0.2}, "soz": {}, "nonsoz": {}},
+            "mixture": {"is_mixture": True, "possible_mixture": True},
+            "centered_rank": {"bias_fraction": 0.5},
+            "source_diagnostic": {"soz_source_erased": False},
+            "by_nparticipating": [{"bin_label": "3", "mean_tau": 0.2}],
+            "cluster": {"within_cluster_tau_mean": 0.3, "uplift": 0.1, "overall_tau": 0.2, "inter_cluster_corr": -0.4},
+            "legacy_mi": {"mi_mean": 0.3, "significant": True},
+            "adaptive_cluster": {"stable_k": 2, "chosen_k": 2, "uplift": 0.1, "within_cluster_tau_mean": 0.3},
+            "time_split_reproducibility": {"reproducibility_grade": "moderate", "splits": {}},
+            "temporal_dynamics": {
+                "day_night_summary": {
+                    "day": {"n_events": 6, "dominant_fraction": 0.7, "normalized_entropy": 0.2},
+                    "night": {"n_events": 6, "dominant_fraction": 0.6, "normalized_entropy": 0.4},
+                    "total_variation_distance": 0.2,
+                }
+            },
+        },
+    }
+
+    cohort = summarize_propagation_cohort(subject_results)
+    temporal = cohort["temporal_dynamics_analysis"]
+    assert temporal["n_subjects"] == 2
+    assert temporal["n_subjects_with_day_night"] == 2
+    assert np.isfinite(temporal["dominant_fraction"]["day_median"])
+    assert np.isfinite(temporal["normalized_entropy"]["night_median"])
+    assert temporal["day_night_total_variation"]["median"] == 0.30000000000000004

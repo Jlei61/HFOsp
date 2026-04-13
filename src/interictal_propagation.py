@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import datetime
 from pathlib import Path
 import os
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
+from zoneinfo import ZoneInfo
 from scipy.optimize import linear_sum_assignment
 from scipy.stats import kendalltau, spearmanr, wilcoxon
 from sklearn.cluster import AgglomerativeClustering, KMeans
@@ -83,6 +85,8 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
         packed = None
         event_rel_times = np.full(n_ev, np.nan, dtype=float)
         event_abs_times = np.full(n_ev, np.nan, dtype=float)
+        event_rel_end_times = np.full(n_ev, np.nan, dtype=float)
+        event_abs_end_times = np.full(n_ev, np.nan, dtype=float)
         has_packed_times = packed_path.exists()
         if has_packed_times:
             packed = np.asarray(np.load(packed_path), dtype=float)
@@ -91,8 +95,13 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
                 ranks = ranks[:, :n_ev]
                 bools = bools[:, :n_ev]
                 event_rel_times = packed[:n_ev, 0].astype(float, copy=False)
+                if packed.shape[1] >= 2:
+                    event_rel_end_times = packed[:n_ev, 1].astype(float, copy=False)
+                else:
+                    event_rel_end_times = event_rel_times.copy()
                 if np.isfinite(start_t):
                     event_abs_times = event_rel_times + start_t
+                    event_abs_end_times = event_rel_end_times + start_t
 
         raw_blocks.append(
             {
@@ -104,6 +113,8 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
                 "bools": bools,
                 "event_rel_times": event_rel_times,
                 "event_abs_times": event_abs_times,
+                "event_rel_end_times": event_rel_end_times,
+                "event_abs_end_times": event_abs_end_times,
                 "has_packed_times": has_packed_times,
             }
         )
@@ -119,6 +130,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
             "record_names": [],
             "block_boundaries": [],
             "block_start_times": np.zeros(0, dtype=float),
+            "block_time_ranges": [],
             "n_blocks_total": 0,
             "n_blocks_used": 0,
         }
@@ -140,6 +152,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     record_names: List[str] = []
     block_boundaries: List[Dict[str, Any]] = []
     block_start_times: List[float] = []
+    block_time_ranges: List[Tuple[float, float]] = []
     cursor = 0
 
     for block_id, block in enumerate(raw_blocks):
@@ -160,6 +173,16 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
         block_ids.append(np.full(n_ev, block_id, dtype=int))
         record_names.append(str(block["record_name"]))
         block_start_times.append(float(block["start_t"]))
+        block_start_epoch, block_end_epoch = _finite_minmax(
+            np.array(
+                [
+                    np.nanmin(block["event_abs_times"]) if np.any(np.isfinite(block["event_abs_times"])) else np.nan,
+                    np.nanmax(block["event_abs_end_times"]) if np.any(np.isfinite(block["event_abs_end_times"])) else np.nan,
+                ],
+                dtype=float,
+            )
+        )
+        block_time_ranges.append((block_start_epoch, block_end_epoch))
         block_boundaries.append(
             {
                 "block_id": int(block_id),
@@ -169,6 +192,8 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
                 "n_events": int(n_ev),
                 "start_t": float(block["start_t"]),
                 "has_packed_times": bool(block["has_packed_times"]),
+                "block_start_epoch": block_start_epoch,
+                "block_end_epoch": block_end_epoch,
             }
         )
         cursor += n_ev
@@ -183,6 +208,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
         "record_names": record_names,
         "block_boundaries": block_boundaries,
         "block_start_times": np.asarray(block_start_times, dtype=float),
+        "block_time_ranges": block_time_ranges,
         "n_blocks_total": len(lagpat_files),
         "n_blocks_used": len(raw_blocks),
     }
@@ -351,6 +377,27 @@ def _multi_seed_tau_summary(
         "n_events_sampled": int(np.nanmedian(n_events_sampled)) if n_events_sampled else 0,
         "n_pairs_valid_median": int(np.nanmedian(n_pairs_valid)) if n_pairs_valid else 0,
     }
+
+
+def compute_pairwise_tau_values(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    n_sample: int = 300,
+    seed: int = 0,
+    min_shared_channels: int = 3,
+) -> np.ndarray:
+    """Return flat array of sampled pairwise Kendall tau values.
+
+    Intended for bimodality visualization — lightweight enough
+    for a single subject at plot time.
+    """
+    valid_events = _valid_event_indices(bools, min_participating=min_shared_channels)
+    out = _pairwise_tau_summary(
+        ranks, bools, event_indices=valid_events,
+        n_sample=n_sample, seed=seed,
+        min_shared_channels=min_shared_channels,
+    )
+    return np.asarray(out["tau_values"], dtype=float)
 
 
 def _center_rank_matrix(
@@ -728,6 +775,19 @@ def run_subject_interictal_propagation_pr1(
         min_shared_channels=min_shared_channels,
         min_participation=min_center_participation,
     )
+
+    valid_ev = _valid_event_indices(bools, min_participating=min_shared_channels)
+    ada_labels = np.array(adaptive_cluster.get("labels", []), dtype=int)
+    if ada_labels.size == valid_ev.size and ada_labels.size > 0:
+        within_cluster_bias = compute_within_cluster_centered_tau(
+            ranks, bools, ada_labels, valid_ev,
+            n_sample=n_sample, n_seeds=n_seeds,
+            min_shared_channels=min_shared_channels,
+            min_participation=min_center_participation,
+        )
+    else:
+        within_cluster_bias = {"error": "labels_size_mismatch"}
+
     first_event_abs_time, last_event_abs_time = _finite_minmax(loaded["event_abs_times"])
 
     return {
@@ -751,6 +811,7 @@ def run_subject_interictal_propagation_pr1(
         "source_diagnostic": source_diag,
         "cluster": cluster_result,
         "adaptive_cluster": adaptive_cluster,
+        "within_cluster_centered": within_cluster_bias,
         "legacy_mi": mi_result,
     }
 
@@ -931,6 +992,77 @@ def compute_cluster_stereotypy(
         "within_cluster_tau_mean": within_tau_mean,
         "uplift": float(within_tau_mean - overall_tau) if np.isfinite(within_tau_mean) and np.isfinite(overall_tau) else np.nan,
         "labels": labels.tolist(),
+    }
+
+
+def compute_within_cluster_centered_tau(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    labels: np.ndarray,
+    valid_events: np.ndarray,
+    n_sample: int = 200,
+    n_seeds: int = 5,
+    min_shared_channels: int = 3,
+    min_participation: int = 10,
+) -> Dict[str, Any]:
+    """Within-cluster identity-bias decomposition.
+
+    For each cluster separately: compute channel-mean-centered tau and
+    compare with raw within-cluster tau.  The bias fraction quantifies
+    how much of the within-cluster stereotypy comes from channel
+    identity ordering vs event-specific propagation structure.
+    """
+    per_cluster: Dict[str, Dict[str, Any]] = {}
+
+    for cid in np.unique(labels):
+        mask = labels == cid
+        cluster_ev = valid_events[mask]
+        if cluster_ev.size < 2 * min_shared_channels:
+            continue
+
+        sub_ranks = ranks[:, cluster_ev]
+        sub_bools = bools[:, cluster_ev]
+        sub_idx = np.arange(cluster_ev.size)
+
+        raw = _multi_seed_tau_summary(
+            sub_ranks, sub_bools, event_indices=sub_idx,
+            n_sample=min(n_sample, cluster_ev.size),
+            n_seeds=n_seeds, min_shared_channels=min_shared_channels,
+        )
+
+        center_info = _center_rank_matrix(
+            sub_ranks, sub_bools, min_participation=min_participation,
+        )
+
+        centered = _multi_seed_tau_summary(
+            center_info["centered_ranks"], sub_bools, event_indices=sub_idx,
+            n_sample=min(n_sample, cluster_ev.size),
+            n_seeds=n_seeds, min_shared_channels=min_shared_channels,
+            channel_mask=center_info["valid_center_mask"],
+        )
+
+        raw_tau = raw["mean_tau"]
+        centered_tau = centered["mean_tau"]
+        bias_frac = np.nan
+        if np.isfinite(raw_tau) and abs(raw_tau) > 1e-12 and np.isfinite(centered_tau):
+            bias_frac = float((raw_tau - centered_tau) / raw_tau)
+
+        per_cluster[str(int(cid))] = {
+            "raw_tau": raw_tau,
+            "centered_tau": centered_tau,
+            "bias_fraction": bias_frac,
+            "n_events": int(cluster_ev.size),
+        }
+
+    raw_taus = [v["raw_tau"] for v in per_cluster.values() if np.isfinite(v["raw_tau"])]
+    cen_taus = [v["centered_tau"] for v in per_cluster.values() if np.isfinite(v["centered_tau"])]
+    biases = [v["bias_fraction"] for v in per_cluster.values() if np.isfinite(v["bias_fraction"])]
+
+    return {
+        "per_cluster": per_cluster,
+        "mean_raw_tau": float(np.mean(raw_taus)) if raw_taus else np.nan,
+        "mean_centered_tau": float(np.mean(cen_taus)) if cen_taus else np.nan,
+        "mean_bias_fraction": float(np.mean(biases)) if biases else np.nan,
     }
 
 
@@ -1546,6 +1678,327 @@ def _summarize_reproducibility(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+# ---------------------------------------------------------------------------
+# PR-4A: temporal cluster dynamics
+# ---------------------------------------------------------------------------
+
+
+def _dataset_timezone(dataset: str) -> str:
+    """Canonical timezone used for local-clock summaries."""
+    return "Asia/Shanghai" if dataset == "yuquan" else "Europe/Berlin"
+
+
+def _epoch_to_local_hour(epoch_sec: float, timezone_name: str) -> float:
+    """Convert Unix epoch to fractional local hour."""
+    if not np.isfinite(epoch_sec):
+        return float("nan")
+    dt = datetime.datetime.fromtimestamp(float(epoch_sec), tz=ZoneInfo(timezone_name))
+    return (
+        float(dt.hour)
+        + float(dt.minute) / 60.0
+        + float(dt.second) / 3600.0
+        + float(dt.microsecond) / 3.6e9
+    )
+
+
+def _classify_day_night(
+    epoch_sec: float,
+    *,
+    timezone_name: str,
+    day_start_hour: int,
+    night_start_hour: int,
+) -> str:
+    hour = _epoch_to_local_hour(epoch_sec, timezone_name)
+    if not np.isfinite(hour):
+        return "unknown"
+    return "day" if int(day_start_hour) <= hour < int(night_start_hour) else "night"
+
+
+def _normalized_entropy(prob: np.ndarray) -> float:
+    """Permutation-invariant concentration summary bounded to [0, 1]."""
+    prob = np.asarray(prob, dtype=float)
+    finite = prob[np.isfinite(prob)]
+    if finite.size == 0:
+        return float("nan")
+    if finite.size == 1:
+        return 0.0
+    positive = finite[finite > 0]
+    if positive.size == 0:
+        return 0.0
+    ent = float(-np.sum(positive * np.log(positive)))
+    max_ent = float(np.log(finite.size))
+    if max_ent <= 0:
+        return 0.0
+    return ent / max_ent
+
+
+def _safe_fraction_vector(counts: np.ndarray) -> np.ndarray:
+    counts = np.asarray(counts, dtype=float)
+    total = float(np.sum(counts))
+    if total <= 0:
+        return np.full(counts.shape, np.nan, dtype=float)
+    return counts / total
+
+
+def _summarize_fraction_vector(counts: np.ndarray) -> Dict[str, Any]:
+    counts = np.asarray(counts, dtype=int)
+    frac = _safe_fraction_vector(counts)
+    return {
+        "n_events": int(np.sum(counts)),
+        "cluster_counts": counts.astype(int).tolist(),
+        "cluster_fractions": frac.tolist(),
+        "dominant_fraction": float(np.nanmax(frac)) if np.any(np.isfinite(frac)) else np.nan,
+        "normalized_entropy": _normalized_entropy(frac),
+    }
+
+
+def compute_temporal_cluster_dynamics(
+    event_abs_times: np.ndarray,
+    cluster_labels: np.ndarray,
+    n_clusters: int,
+    dataset: str,
+    coverage_ranges: Optional[Sequence[Tuple[float, float]]] = None,
+    bin_hours: float = 1.0,
+    formal_day_range: Tuple[int, int] = (8, 20),
+) -> Dict[str, Any]:
+    """Fixed-template occupancy trajectories and day/night summaries.
+
+    The input labels must come from a single fixed template set for the subject.
+    This function only bins those labels over time; it never re-clusters per bin.
+    """
+    if bin_hours <= 0:
+        raise ValueError("bin_hours must be > 0")
+    day_start_hour, night_start_hour = formal_day_range
+    if not (0 <= int(day_start_hour) < int(night_start_hour) <= 24):
+        raise ValueError("formal_day_range must satisfy 0 <= start < end <= 24")
+
+    times = np.asarray(event_abs_times, dtype=float)
+    labels = np.asarray(cluster_labels, dtype=int)
+    if times.shape[0] != labels.shape[0]:
+        raise ValueError("event_abs_times and cluster_labels must have the same length")
+
+    valid = np.isfinite(times) & (labels >= 0) & (labels < int(n_clusters))
+    times = times[valid]
+    labels = labels[valid]
+    timezone_name = _dataset_timezone(dataset)
+    bin_sec = float(bin_hours) * 3600.0
+
+    if times.size == 0:
+        return {
+            "dataset": dataset,
+            "timezone_name": timezone_name,
+            "day_night_rule": f"day={day_start_hour:02d}:00-{night_start_hour:02d}:00 local",
+            "bin_hours": float(bin_hours),
+            "n_events_used": 0,
+            "n_clusters": int(n_clusters),
+            "timeline_bins": [],
+            "day_night_summary": {
+                "day": _summarize_fraction_vector(np.zeros(int(n_clusters), dtype=int)),
+                "night": _summarize_fraction_vector(np.zeros(int(n_clusters), dtype=int)),
+                "total_variation_distance": np.nan,
+            },
+        }
+
+    order = np.argsort(times, kind="mergesort")
+    times = times[order]
+    labels = labels[order]
+
+    t_min = float(times[0])
+    t_max = float(times[-1])
+    if coverage_ranges:
+        raw_ranges = [
+            (float(start), float(end))
+            for start, end in coverage_ranges
+            if np.isfinite(start) and np.isfinite(end) and float(end) >= float(start)
+        ]
+    else:
+        raw_ranges = [(t_min, t_max)]
+
+    selected_bin_ids = set()
+    for start, end in raw_ranges:
+        start_bin = int(np.floor(float(start) / bin_sec))
+        end_bin = int(np.ceil(float(end) / bin_sec) - 1)
+        for bin_id in range(start_bin, end_bin + 1):
+            selected_bin_ids.add(int(bin_id))
+    if not selected_bin_ids:
+        start_bin = int(np.floor(t_min / bin_sec))
+        end_bin = int(np.floor(t_max / bin_sec))
+        selected_bin_ids.update(range(start_bin, end_bin + 1))
+
+    sorted_bin_ids = np.array(sorted(selected_bin_ids), dtype=int)
+    counts = np.zeros((sorted_bin_ids.size, int(n_clusters)), dtype=int)
+    totals = np.zeros(sorted_bin_ids.size, dtype=int)
+    bin_lookup = {int(bin_id): idx for idx, bin_id in enumerate(sorted_bin_ids)}
+
+    raw_event_bins = np.floor(times / bin_sec).astype(int)
+    for raw_bin, label in zip(raw_event_bins, labels):
+        if int(raw_bin) not in bin_lookup:
+            continue
+        row = bin_lookup[int(raw_bin)]
+        counts[row, int(label)] += 1
+        totals[row] += 1
+
+    edges = sorted_bin_ids.astype(float) * bin_sec
+    centers = edges + 0.5 * bin_sec
+    timeline_start = float(edges[0])
+    fractions = np.full((sorted_bin_ids.size, int(n_clusters)), np.nan, dtype=float)
+    valid_bins = totals > 0
+    fractions[valid_bins] = counts[valid_bins] / totals[valid_bins, None]
+
+    timeline_bins: List[Dict[str, Any]] = []
+    for idx, start_edge in enumerate(edges):
+        center = float(centers[idx])
+        local_hour = _epoch_to_local_hour(center, timezone_name)
+        timeline_bins.append(
+            {
+                "bin_id": int(sorted_bin_ids[idx]),
+                "start_epoch": float(start_edge),
+                "end_epoch": float(start_edge + bin_sec),
+                "center_epoch": center,
+                "hours_from_timeline_start": float((center - timeline_start) / 3600.0),
+                "local_hour": local_hour,
+                "day_night": _classify_day_night(
+                    center,
+                    timezone_name=timezone_name,
+                    day_start_hour=day_start_hour,
+                    night_start_hour=night_start_hour,
+                ),
+                "n_events": int(totals[idx]),
+                "cluster_counts": counts[idx].astype(int).tolist(),
+                "cluster_fractions": fractions[idx].tolist(),
+            }
+        )
+
+    event_day_mask = np.array(
+        [
+            _classify_day_night(
+                t,
+                timezone_name=timezone_name,
+                day_start_hour=day_start_hour,
+                night_start_hour=night_start_hour,
+            )
+            == "day"
+            for t in times
+        ],
+        dtype=bool,
+    )
+    day_counts = np.bincount(labels[event_day_mask], minlength=int(n_clusters))
+    night_counts = np.bincount(labels[~event_day_mask], minlength=int(n_clusters))
+    day_summary = _summarize_fraction_vector(day_counts)
+    night_summary = _summarize_fraction_vector(night_counts)
+    tv_distance = np.nan
+    day_frac = np.asarray(day_summary["cluster_fractions"], dtype=float)
+    night_frac = np.asarray(night_summary["cluster_fractions"], dtype=float)
+    if np.any(np.isfinite(day_frac)) and np.any(np.isfinite(night_frac)):
+        tv_distance = float(0.5 * np.nansum(np.abs(day_frac - night_frac)))
+
+    return {
+        "dataset": dataset,
+        "timezone_name": timezone_name,
+        "day_night_rule": f"day={day_start_hour:02d}:00-{night_start_hour:02d}:00 local",
+        "bin_hours": float(bin_hours),
+        "n_events_used": int(times.size),
+        "n_clusters": int(n_clusters),
+        "first_event_epoch": t_min,
+        "last_event_epoch": t_max,
+        "timeline_start_epoch": timeline_start,
+        "timeline_bins": timeline_bins,
+        "day_night_summary": {
+            "day": day_summary,
+            "night": night_summary,
+            "total_variation_distance": tv_distance,
+        },
+    }
+
+
+def _summarize_temporal_dynamics(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Cohort summary for PR-4A using label-invariant subject-level summaries."""
+    temporal_recs = [
+        rec["temporal_dynamics"]
+        for rec in valid
+        if rec.get("temporal_dynamics") and rec["temporal_dynamics"].get("day_night_summary")
+    ]
+    if not temporal_recs:
+        return {"n_subjects": 0}
+
+    paired_dom_day: List[float] = []
+    paired_dom_night: List[float] = []
+    paired_ent_day: List[float] = []
+    paired_ent_night: List[float] = []
+    tv_values: List[float] = []
+
+    for td in temporal_recs:
+        dn = td.get("day_night_summary", {})
+        day = dn.get("day", {})
+        night = dn.get("night", {})
+        dom_day = day.get("dominant_fraction", np.nan)
+        dom_night = night.get("dominant_fraction", np.nan)
+        ent_day = day.get("normalized_entropy", np.nan)
+        ent_night = night.get("normalized_entropy", np.nan)
+        if (
+            day.get("n_events", 0) > 0
+            and night.get("n_events", 0) > 0
+            and np.isfinite(dom_day)
+            and np.isfinite(dom_night)
+        ):
+            paired_dom_day.append(float(dom_day))
+            paired_dom_night.append(float(dom_night))
+        if (
+            day.get("n_events", 0) > 0
+            and night.get("n_events", 0) > 0
+            and np.isfinite(ent_day)
+            and np.isfinite(ent_night)
+        ):
+            paired_ent_day.append(float(ent_day))
+            paired_ent_night.append(float(ent_night))
+        tv = dn.get("total_variation_distance", np.nan)
+        if np.isfinite(tv):
+            tv_values.append(float(tv))
+
+    dom_p = np.nan
+    ent_p = np.nan
+    if len(paired_dom_day) >= 2:
+        try:
+            dom_p = float(wilcoxon(np.asarray(paired_dom_day), np.asarray(paired_dom_night)).pvalue)
+        except Exception:
+            dom_p = np.nan
+    if len(paired_ent_day) >= 2:
+        try:
+            ent_p = float(wilcoxon(np.asarray(paired_ent_day), np.asarray(paired_ent_night)).pvalue)
+        except Exception:
+            ent_p = np.nan
+
+    return {
+        "n_subjects": int(len(temporal_recs)),
+        "n_subjects_with_day_night": int(len(paired_dom_day)),
+        "dominant_fraction": {
+            "day_median": float(np.median(paired_dom_day)) if paired_dom_day else np.nan,
+            "night_median": float(np.median(paired_dom_night)) if paired_dom_night else np.nan,
+            "median_day_minus_night": float(
+                np.median(np.asarray(paired_dom_day) - np.asarray(paired_dom_night))
+            )
+            if paired_dom_day
+            else np.nan,
+            "wilcoxon_p": dom_p,
+        },
+        "normalized_entropy": {
+            "day_median": float(np.median(paired_ent_day)) if paired_ent_day else np.nan,
+            "night_median": float(np.median(paired_ent_night)) if paired_ent_night else np.nan,
+            "median_day_minus_night": float(
+                np.median(np.asarray(paired_ent_day) - np.asarray(paired_ent_night))
+            )
+            if paired_ent_day
+            else np.nan,
+            "wilcoxon_p": ent_p,
+        },
+        "day_night_total_variation": {
+            "median": float(np.median(tv_values)) if tv_values else np.nan,
+            "q1": float(np.percentile(tv_values, 25)) if tv_values else np.nan,
+            "q3": float(np.percentile(tv_values, 75)) if tv_values else np.nan,
+        },
+    }
+
+
 def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     valid = [
         rec
@@ -1573,8 +2026,8 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
     paired_soz = []
     paired_nonsoz = []
     for rec in valid:
-        soz_tau = rec["propagation_stereotypy"]["soz"].get("mean_tau")
-        nonsoz_tau = rec["propagation_stereotypy"]["nonsoz"].get("mean_tau")
+        soz_tau = _safe_float_scalar(rec["propagation_stereotypy"]["soz"].get("mean_tau", np.nan))
+        nonsoz_tau = _safe_float_scalar(rec["propagation_stereotypy"]["nonsoz"].get("mean_tau", np.nan))
         if np.isfinite(soz_tau) and np.isfinite(nonsoz_tau):
             paired_soz.append(float(soz_tau))
             paired_nonsoz.append(float(nonsoz_tau))
@@ -1663,6 +2116,7 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
         },
         "adaptive_cluster_analysis": _summarize_adaptive_clusters(valid),
         "reproducibility_analysis": _summarize_reproducibility(valid),
+        "temporal_dynamics_analysis": _summarize_temporal_dynamics(valid),
     }
 
 
