@@ -18,6 +18,7 @@ from src.interictal_propagation import (
     load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
     summarize_propagation_cohort,
+    validate_absolute_lag_clustering,
 )
 
 
@@ -162,6 +163,7 @@ def test_load_subject_propagation_events_sorts_by_start_t_and_rebuilds_times(tmp
     np.savez_compressed(
         subject_dir / "blockB_lagPat.npz",
         lagPatRank=ranks_a,
+        lagPatRaw=np.array([[10.0, 13.0], [11.0, 12.0]], dtype=float),
         eventsBool=bools_a,
         chnNames=np.array(["A", "B"], dtype=object),
         start_t=np.array(200.0),
@@ -173,6 +175,7 @@ def test_load_subject_propagation_events_sorts_by_start_t_and_rebuilds_times(tmp
     np.savez_compressed(
         subject_dir / "blockA_lagPat.npz",
         lagPatRank=ranks_b,
+        lagPatRaw=np.array([[5.0], [6.0]], dtype=float),
         eventsBool=bools_b,
         chnNames=np.array(["A", "B"], dtype=object),
         start_t=np.array(100.0),
@@ -185,6 +188,10 @@ def test_load_subject_propagation_events_sorts_by_start_t_and_rebuilds_times(tmp
     assert loaded["block_ids"].tolist() == [0, 1, 1]
     assert loaded["event_rel_times"].tolist() == [2.0, 1.0, 3.0]
     assert loaded["event_abs_times"].tolist() == [102.0, 201.0, 203.0]
+    np.testing.assert_allclose(
+        loaded["lag_raw"],
+        np.array([[5.0, 10.0, 13.0], [6.0, 11.0, 12.0]], dtype=float),
+    )
     assert loaded["block_time_ranges"] == [(102.0, 102.5), (201.0, 203.5)]
     assert loaded["block_boundaries"] == [
         {
@@ -576,6 +583,61 @@ def test_compute_temporal_cluster_dynamics_respects_coverage_ranges_and_entropy_
     assert out["day_night_summary"]["day"]["normalized_entropy"] == 0.0
 
 
+def test_validate_absolute_lag_clustering_reports_stratified_r_and_order_match() -> None:
+    n_ch = 6
+    n_ev = 10
+    bools = np.zeros((n_ch, n_ev), dtype=bool)
+    lag_raw = np.full((n_ch, n_ev), np.nan, dtype=float)
+    ranks = np.zeros((n_ch, n_ev), dtype=float)
+    labels = np.array([0, 0, 1, 1, 0, 0, 1, 1, 0, 1], dtype=int)
+
+    base_patterns = {
+        0: np.array([0.00, 0.10, 0.22, 0.35, 0.48, 0.60], dtype=float),
+        1: np.array([0.55, 0.44, 0.31, 0.20, 0.08, 0.00], dtype=float),
+    }
+    participating = [6, 6, 6, 6, 6, 6, 4, 4, 4, 4]
+
+    for ev in range(n_ev):
+        n_part = participating[ev]
+        mask = np.zeros(n_ch, dtype=bool)
+        mask[:n_part] = True
+        bools[:, ev] = mask
+
+        rel = base_patterns[int(labels[ev])].copy()
+        rel[:n_part] += 0.01 * ev
+        abs_offset = 100.0 + 7.0 * ev
+        lag_raw[mask, ev] = abs_offset + rel[mask]
+
+        rank_vals = np.argsort(np.argsort(rel[mask], kind="mergesort"), kind="mergesort") + 1
+        ranks[mask, ev] = rank_vals.astype(float)
+
+    valid_events = _valid_event_indices(bools, min_participating=3)
+    out = validate_absolute_lag_clustering(
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=2,
+        valid_event_indices=valid_events,
+        n_sample=20,
+        seed=0,
+        min_shared_channels=3,
+        min_participating=5,
+    )
+
+    assert out["n_valid_events"] == n_ev
+    assert out["order_validation"]["exact_order_match_fraction"] == 1.0
+    assert out["order_validation"]["pairwise_order_concordance"] == 1.0
+    assert out["order_validation"]["nonnegative_fraction"] == 1.0
+    assert out["within_cluster_pearson_r_by_npart"]["5-8"]["n_pairs_valid"] > 0
+    assert out["within_cluster_pearson_r_by_npart"]["5-8"]["median_r"] > 0.99
+    assert out["within_cluster_pearson_r_by_npart"]["3-4"]["n_events"] == 4
+    assert out["eligible_fraction"] == 0.6
+    assert out["dominant_cluster_median_r"] > 0.99
+    assert out["dominant_cluster_fraction"] > 0.0
+    assert out["validation_pass"] is True
+
+
 def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary() -> None:
     subject_results = {
         "yuquan/a": {
@@ -590,6 +652,23 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
             "legacy_mi": {"mi_mean": 0.2, "significant": True},
             "adaptive_cluster": {"stable_k": 2, "chosen_k": 2, "uplift": 0.1, "within_cluster_tau_mean": 0.2},
             "time_split_reproducibility": {"reproducibility_grade": "strong", "splits": {}},
+            "absolute_lag_validation": {
+                "eligible_fraction": 0.6,
+                "eligible_median_r": 0.82,
+                "dominant_cluster_median_r": 0.85,
+                "dominant_cluster_fraction": 0.7,
+                "dominant_cluster_id": 0,
+                "validation_pass": True,
+                "order_validation": {
+                    "exact_order_match_fraction": 1.0,
+                    "pairwise_order_concordance": 1.0,
+                },
+                "within_cluster_pearson_r_by_npart": {
+                    "3-4": {"median_r": 0.55},
+                    "5-8": {"median_r": 0.82},
+                    "9+": {"median_r": np.nan},
+                },
+            },
             "temporal_dynamics": {
                 "day_night_summary": {
                     "day": {"n_events": 5, "dominant_fraction": 0.8, "normalized_entropy": 0.1},
@@ -610,6 +689,23 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
             "legacy_mi": {"mi_mean": 0.3, "significant": True},
             "adaptive_cluster": {"stable_k": 2, "chosen_k": 2, "uplift": 0.1, "within_cluster_tau_mean": 0.3},
             "time_split_reproducibility": {"reproducibility_grade": "moderate", "splits": {}},
+            "absolute_lag_validation": {
+                "eligible_fraction": 0.4,
+                "eligible_median_r": 0.74,
+                "dominant_cluster_median_r": 0.80,
+                "dominant_cluster_fraction": 0.6,
+                "dominant_cluster_id": 1,
+                "validation_pass": True,
+                "order_validation": {
+                    "exact_order_match_fraction": 0.95,
+                    "pairwise_order_concordance": 0.98,
+                },
+                "within_cluster_pearson_r_by_npart": {
+                    "3-4": {"median_r": 0.51},
+                    "5-8": {"median_r": 0.74},
+                    "9+": {"median_r": 0.88},
+                },
+            },
             "temporal_dynamics": {
                 "day_night_summary": {
                     "day": {"n_events": 6, "dominant_fraction": 0.7, "normalized_entropy": 0.2},
@@ -627,3 +723,9 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
     assert np.isfinite(temporal["dominant_fraction"]["day_median"])
     assert np.isfinite(temporal["normalized_entropy"]["night_median"])
     assert temporal["day_night_total_variation"]["median"] == 0.30000000000000004
+    lag_summary = cohort["absolute_lag_validation_analysis"]
+    assert lag_summary["n_subjects"] == 2
+    assert lag_summary["n_subjects_pass"] == 2
+    assert lag_summary["dominant_cluster_median_r_median"] == 0.825
+    assert lag_summary["cohort_validation_pass"] is True
+    assert lag_summary["within_cluster_pearson_r_by_npart"]["5-8"]["median_r"] == 0.78

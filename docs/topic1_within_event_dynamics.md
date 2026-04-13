@@ -136,6 +136,7 @@ Epilepsiae 的区域分层分析中：
 - synchrony 线最大的风险不是假阳性，而是“把 null 写得太花”。现在最诚实的说法就是：**总体 null，局部 extra-focal 线索待验证。**
 - propagation 与 synchrony 都是 topic 1，但它们不是同一个统计对象，文档里必须并列而不能混写成一个指标体系。
 - **当前传播线的指标体系完全是 ordinal 的（rank + tau + MI），对绝对时间精度完全盲。** 如果慢调控改变的是 lag compression（时间压缩）而非 rank order，tau 完全看不到。这是 PR-4B 必须补上的 L3 层。
+- **PR-4B Step 0 已完成（2026-04-13）**：`lagPatRaw → relative_lag` 的 per-event min-subtraction 验证通过（30/30 order match = 1.0），但 rank-based cluster 在 absolute-lag 空间的 Pearson r **不理想**：dominant cluster cohort median = 0.601（8/30 pass > 0.7）。Spearman(dominant τ, dominant r) = 0.910（p < 0.0001），说明 ordinal 好的簇在 cardinal 空间也紧，但不是所有 subject 都足够紧。huangwanling（eligible_frac = 0）在 L3 层完全 ineligible。后续 L3 分析应分全 cohort（29 subjects）和 high-confidence subset（8 subjects with dominant_r > 0.7）两层报告。
 
 ---
 
@@ -149,7 +150,7 @@ PR-4 系列的核心问题是：**固定传播模板受到什么慢调控？**
 |--------|----------|--------|------------|----------|------|
 | **L1: Mode selection** | 慢调制改变了哪个模板出现得多？ | Occupancy fraction | Cluster fraction per time bin | `lagPatRank` cluster labels | PR-4A done |
 | **L2: Ordinal precision** | 慢调制改变了模板内部的 rank 一致性？ | Within-cluster τ | Pairwise Kendall τ (high vs low rate) | `lagPatRank` | PR-4B planned |
-| **L3: Timing precision** | 慢调制改变了模板内部的绝对时间精度？ | Within-cluster lag span / Pearson r | Within-cluster absolute lag statistics | `lagPatRaw` | PR-4B planned |
+| **L3: Timing precision** | 慢调制改变了模板内部的绝对时间精度？ | Within-cluster lag span / Pearson r | Within-cluster absolute lag statistics | `lagPatRaw` | PR-4B Step 0 done |
 
 ### 为什么需要 L3
 
@@ -187,17 +188,28 @@ PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已
 
 **科学问题**：慢 rate state 改变的是模式占比（L1），还是模式内部的 ordinal precision（L2），还是 timing precision（L3）？对应 `layered_model_framework.md` 的 H1 vs H2 判别。
 
-**分析内容**：
+**Step 0 结论（DONE 2026-04-13）**：
+- `lagPatRaw → relative_lag` per-event min-subtraction 正确：30/30 exact order match = 1.0
+- Dominant cluster Pearson r cohort median = **0.601**；pooled eligible median = 0.453
+- 8/30 subjects dominant_r > 0.7（high confidence）
+- Spearman(dominant_τ, dominant_r) = **0.910**（p < 0.0001, n=29）
+- huangwanling（eligible_frac = 0）在 L3 完全 ineligible → 后续 L3 分析 n=29
+- **关键洞察**：低 Pearson r 不是 bug，而是与弱 ordinal stereotypy 高度共变 — rank clustering 对这些 subject 本身就不够紧。后续 L3 rate-coupling 分析应做全 cohort + high-confidence (dom_r > 0.7) 两层报告
+
+**分析内容（Step 1–3 TODO）**：
 1. 按 local event-rate 中位数分窗为 high/low
 2. **L2**：within-cluster pairwise τ (high vs low)，paired Wilcoxon on subject-level（注意 86% identity-bias 使 L2 为 H2 辅助检测层）
 3. **L3**：within-cluster mean lag span (high vs low)；within-cluster Pearson r on absolute lag vectors (high vs low, **仅 n_part ≥ 5 事件**）。L3 是 H2 主检测层
 4. **L1**：occupancy fraction 与 local rate 的 Spearman correlation per cluster
 5. `n_participating` matched subsampling：lag span 的 high/low 比较中，必须对两组做 n_participating 匹配（高 rate → 高 n_part → 更大 span 的混杂必须被控制）
 
-**前置验证（PR-4B Step 0）**：
-1. **Per-event min-subtraction**：`relative_lag[ch] = lagPatRaw[ch] - min(lagPatRaw[participating])`，验证相对 lag 全部非负且 channel-order 与 lagPatRank 一致
-2. 对 30 subject 计算 within-cluster Pearson r on relative absolute lag vectors，**按 n_participating 分层报告**（3-4 / 5-8 / 9+），不使用笼统 cohort median 门槛
-3. 对 n_part ≥ 5 子集报告 cohort median Pearson r（期望 > 0.7）；n_part < 5 的事件标记为 L3-ineligible，仅参与 L1 和 L2
+**前置验证（PR-4B Step 0 — DONE 2026-04-13）**：
+1. **Per-event min-subtraction**：`relative_lag[ch] = lagPatRaw[ch] - min(lagPatRaw[participating])`，验证相对 lag 全部非负且 channel-order 与 lagPatRank 一致 → **30/30 exact order match = 1.0, pairwise concordance = 1.0**
+2. 对 30 subject 计算 within-cluster Pearson r on relative absolute lag vectors，**按 n_participating 分层报告**（3-4 / 5-8 / 9+）
+3. Dominant cluster cohort median Pearson r = **0.601**（range 0.213–0.925）；原始 pooled median = 0.453
+4. **8/30 subjects** dominant cluster median_r > 0.7（pass）；**7/30 borderline**（0.6–0.7）；**14/30 weak**（< 0.6）；**1/30 ineligible**（huangwanling, eligible_frac = 0）
+5. Dominant τ 与 dominant Pearson r 的 **Spearman ρ = 0.910（p < 0.0001）**：ordinal stereotypy 强的簇在 absolute-lag 空间也紧
+6. 结果文件：`results/interictal_propagation/pr4b_lag_validation.json`
 
 **统计单元**：subject。不做 pooled event-level p-value。
 

@@ -40,6 +40,136 @@ def _finite_minmax(values: np.ndarray) -> Tuple[float, float]:
     return float(np.min(finite)), float(np.max(finite))
 
 
+def _compute_relative_lag_matrix(lag_raw: np.ndarray, bools: np.ndarray) -> np.ndarray:
+    """Convert stitched centroid times into per-event relative lag."""
+    lag_raw = np.asarray(lag_raw, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    if lag_raw.shape != bools.shape:
+        raise ValueError("lag_raw and bools must have the same shape")
+
+    rel = np.full(lag_raw.shape, np.nan, dtype=float)
+    for ev in range(lag_raw.shape[1]):
+        mask = bools[:, ev] & np.isfinite(lag_raw[:, ev])
+        if not np.any(mask):
+            continue
+        rel[mask, ev] = lag_raw[mask, ev] - float(np.min(lag_raw[mask, ev]))
+    return rel
+
+
+def _event_order_alignment_summary(
+    ranks: np.ndarray,
+    relative_lag: np.ndarray,
+    bools: np.ndarray,
+    *,
+    min_shared_channels: int = 3,
+) -> Dict[str, Any]:
+    """Check that relative lag preserves the within-event participating order."""
+    ranks = np.asarray(ranks, dtype=float)
+    relative_lag = np.asarray(relative_lag, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    if ranks.shape != relative_lag.shape or ranks.shape != bools.shape:
+        raise ValueError("ranks, relative_lag, and bools must share shape")
+
+    exact_match: List[float] = []
+    pairwise_concordance: List[float] = []
+
+    for ev in range(ranks.shape[1]):
+        mask = bools[:, ev] & np.isfinite(relative_lag[:, ev]) & np.isfinite(ranks[:, ev])
+        if int(np.sum(mask)) < int(min_shared_channels):
+            continue
+
+        rel_ev = relative_lag[mask, ev]
+        rank_ev = ranks[mask, ev]
+        exact_match.append(
+            float(
+                np.array_equal(
+                    np.argsort(rel_ev, kind="mergesort"),
+                    np.argsort(rank_ev, kind="mergesort"),
+                )
+            )
+        )
+
+        total_pairs = 0
+        agree_pairs = 0
+        for i in range(rel_ev.size):
+            for j in range(i + 1, rel_ev.size):
+                rel_delta = float(rel_ev[i] - rel_ev[j])
+                rank_delta = float(rank_ev[i] - rank_ev[j])
+                if abs(rel_delta) <= 1e-12 or abs(rank_delta) <= 1e-12:
+                    continue
+                total_pairs += 1
+                if np.sign(rel_delta) == np.sign(rank_delta):
+                    agree_pairs += 1
+        if total_pairs > 0:
+            pairwise_concordance.append(float(agree_pairs / total_pairs))
+
+    participating_rel = relative_lag[bools & np.isfinite(relative_lag)]
+    return {
+        "n_events_checked": int(len(exact_match)),
+        "exact_order_match_fraction": float(np.mean(exact_match)) if exact_match else np.nan,
+        "pairwise_order_concordance": (
+            float(np.mean(pairwise_concordance)) if pairwise_concordance else np.nan
+        ),
+        "nonnegative_fraction": (
+            float(np.mean(participating_rel >= -1e-12)) if participating_rel.size else np.nan
+        ),
+        "relative_lag_min": (
+            float(np.min(participating_rel)) if participating_rel.size else np.nan
+        ),
+        "relative_lag_max": (
+            float(np.max(participating_rel)) if participating_rel.size else np.nan
+        ),
+    }
+
+
+def _pairwise_relative_lag_correlations(
+    relative_lag: np.ndarray,
+    bools: np.ndarray,
+    event_indices: np.ndarray,
+    *,
+    min_shared_channels: int,
+) -> Dict[str, Any]:
+    """Within-subset pairwise Pearson r on shared participating channels."""
+    relative_lag = np.asarray(relative_lag, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    event_indices = np.asarray(event_indices, dtype=int)
+
+    pearson_r_values: List[float] = []
+    n_pairs_considered = 0
+    n_pairs_valid = 0
+
+    for i in range(event_indices.size):
+        ev_i = int(event_indices[i])
+        for j in range(i + 1, event_indices.size):
+            ev_j = int(event_indices[j])
+            n_pairs_considered += 1
+            mask = (
+                bools[:, ev_i]
+                & bools[:, ev_j]
+                & np.isfinite(relative_lag[:, ev_i])
+                & np.isfinite(relative_lag[:, ev_j])
+            )
+            if int(np.sum(mask)) < int(min_shared_channels):
+                continue
+            x = relative_lag[mask, ev_i]
+            y = relative_lag[mask, ev_j]
+            if x.size < 2 or np.std(x) <= 1e-12 or np.std(y) <= 1e-12:
+                continue
+            r = float(np.corrcoef(x, y)[0, 1])
+            if not np.isfinite(r):
+                continue
+            pearson_r_values.append(r)
+            n_pairs_valid += 1
+
+    return {
+        "n_pairs_considered": int(n_pairs_considered),
+        "n_pairs_valid": int(n_pairs_valid),
+        "median_r": float(np.median(pearson_r_values)) if pearson_r_values else np.nan,
+        "mean_r": float(np.mean(pearson_r_values)) if pearson_r_values else np.nan,
+        "pearson_r_values": pearson_r_values,
+    }
+
+
 def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     """Load one subject into a single event contract with timing metadata.
 
@@ -58,20 +188,26 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     for lp_file in lagpat_files:
         lp = np.load(lp_file, allow_pickle=True)
         ranks = np.asarray(lp["lagPatRank"], dtype=float)
+        lag_raw = (
+            np.asarray(lp["lagPatRaw"], dtype=float)
+            if "lagPatRaw" in lp
+            else np.full(ranks.shape, np.nan, dtype=float)
+        )
         bools = np.asarray(lp["eventsBool"]) > 0
         chns = [str(x) for x in list(lp["chnNames"])]
         start_t = _safe_float_scalar(lp["start_t"]) if "start_t" in lp else float("nan")
-        if ranks.ndim != 2 or bools.ndim != 2:
+        if ranks.ndim != 2 or lag_raw.ndim != 2 or bools.ndim != 2:
             continue
-        if ranks.size == 0 or bools.size == 0:
+        if ranks.size == 0 or bools.size == 0 or lag_raw.size == 0:
             continue
 
-        n_ev = min(ranks.shape[1], bools.shape[1])
-        n_ch = min(ranks.shape[0], bools.shape[0], len(chns))
+        n_ev = min(ranks.shape[1], lag_raw.shape[1], bools.shape[1])
+        n_ch = min(ranks.shape[0], lag_raw.shape[0], bools.shape[0], len(chns))
         if n_ev == 0 or n_ch == 0:
             continue
 
         ranks = ranks[:n_ch, :n_ev]
+        lag_raw = lag_raw[:n_ch, :n_ev]
         bools = bools[:n_ch, :n_ev]
         chns = chns[:n_ch]
 
@@ -110,6 +246,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
                 "start_t": start_t,
                 "channel_names": chns,
                 "ranks": ranks,
+                "lag_raw": lag_raw,
                 "bools": bools,
                 "event_rel_times": event_rel_times,
                 "event_abs_times": event_abs_times,
@@ -122,6 +259,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     if not raw_blocks:
         return {
             "ranks": np.zeros((0, 0), dtype=float),
+            "lag_raw": np.zeros((0, 0), dtype=float),
             "bools": np.zeros((0, 0), dtype=bool),
             "channel_names": [],
             "event_abs_times": np.zeros(0, dtype=float),
@@ -145,6 +283,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
 
     n_union = len(channel_names)
     aligned_ranks: List[np.ndarray] = []
+    aligned_lag_raw: List[np.ndarray] = []
     aligned_bools: List[np.ndarray] = []
     aligned_event_abs_times: List[np.ndarray] = []
     aligned_event_rel_times: List[np.ndarray] = []
@@ -158,15 +297,19 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     for block_id, block in enumerate(raw_blocks):
         chns = block["channel_names"]
         ranks = block["ranks"]
+        lag_raw = block["lag_raw"]
         bools = block["bools"]
         n_ev = ranks.shape[1]
         rank_block = np.zeros((n_union, n_ev), dtype=float)
+        lag_raw_block = np.full((n_union, n_ev), np.nan, dtype=float)
         bool_block = np.zeros((n_union, n_ev), dtype=bool)
         for row, ch in enumerate(chns):
             idx = channel_index[ch]
             rank_block[idx, :] = ranks[row, :]
+            lag_raw_block[idx, :] = lag_raw[row, :]
             bool_block[idx, :] = bools[row, :]
         aligned_ranks.append(rank_block)
+        aligned_lag_raw.append(lag_raw_block)
         aligned_bools.append(bool_block)
         aligned_event_abs_times.append(np.asarray(block["event_abs_times"], dtype=float))
         aligned_event_rel_times.append(np.asarray(block["event_rel_times"], dtype=float))
@@ -200,6 +343,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
 
     return {
         "ranks": np.concatenate(aligned_ranks, axis=1),
+        "lag_raw": np.concatenate(aligned_lag_raw, axis=1),
         "bools": np.concatenate(aligned_bools, axis=1),
         "channel_names": channel_names,
         "event_abs_times": np.concatenate(aligned_event_abs_times, axis=0),
@@ -1611,6 +1755,163 @@ def compute_time_split_reproducibility(
     }
 
 
+def validate_absolute_lag_clustering(
+    ranks: np.ndarray,
+    lag_raw: np.ndarray,
+    bools: np.ndarray,
+    cluster_labels: np.ndarray,
+    n_clusters: int,
+    *,
+    valid_event_indices: Optional[np.ndarray] = None,
+    n_sample: int = 200,
+    seed: int = 0,
+    min_shared_channels: int = 3,
+    min_participating: int = 5,
+) -> Dict[str, Any]:
+    """Validate rank-based clusters in relative-lag space for PR-4B Step 0."""
+    ranks = np.asarray(ranks, dtype=float)
+    lag_raw = np.asarray(lag_raw, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    labels = np.asarray(cluster_labels, dtype=int)
+    if ranks.shape != lag_raw.shape or ranks.shape != bools.shape:
+        raise ValueError("ranks, lag_raw, and bools must share shape")
+
+    if valid_event_indices is None:
+        if labels.size == ranks.shape[1]:
+            valid_event_indices = np.arange(ranks.shape[1], dtype=int)
+        else:
+            valid_event_indices = _valid_event_indices(bools, min_participating=min_shared_channels)
+    valid_event_indices = np.asarray(valid_event_indices, dtype=int)
+    if labels.size != valid_event_indices.size:
+        raise ValueError("cluster_labels size must equal valid_event_indices size")
+
+    relative_lag = _compute_relative_lag_matrix(lag_raw, bools)
+    v_ranks = ranks[:, valid_event_indices]
+    v_rel = relative_lag[:, valid_event_indices]
+    v_bools = bools[:, valid_event_indices]
+    n_part = np.sum(v_bools, axis=0).astype(int)
+
+    order_summary = _event_order_alignment_summary(
+        v_ranks,
+        v_rel,
+        v_bools,
+        min_shared_channels=min_shared_channels,
+    )
+
+    npart_bins: List[Tuple[str, int, Optional[int]]] = [
+        ("3-4", 3, 4),
+        ("5-8", 5, 8),
+        ("9+", 9, None),
+    ]
+    by_bin: Dict[str, Any] = {}
+    eligible_values_all: List[float] = []
+
+    for bin_idx, (label, lo, hi) in enumerate(npart_bins):
+        if hi is None:
+            bin_mask = n_part >= int(lo)
+        else:
+            bin_mask = (n_part >= int(lo)) & (n_part <= int(hi))
+        min_shared = int(min_participating) if lo >= int(min_participating) else int(min_shared_channels)
+
+        cluster_stats: List[Dict[str, Any]] = []
+        bin_values: List[float] = []
+        for cluster_id in range(int(n_clusters)):
+            local_idx = np.where((labels == cluster_id) & bin_mask)[0]
+            sampled_idx = _sample_event_indices(
+                local_idx,
+                n_sample=n_sample,
+                seed=seed + 101 * bin_idx + 1009 * cluster_id,
+            )
+            stats = _pairwise_relative_lag_correlations(
+                v_rel,
+                v_bools,
+                sampled_idx,
+                min_shared_channels=min_shared,
+            )
+            bin_values.extend(stats["pearson_r_values"])
+            cluster_stats.append(
+                {
+                    "cluster_id": int(cluster_id),
+                    "n_events": int(local_idx.size),
+                    "n_events_sampled": int(sampled_idx.size),
+                    "n_pairs_valid": int(stats["n_pairs_valid"]),
+                    "median_r": stats["median_r"],
+                }
+            )
+
+        if lo >= int(min_participating):
+            eligible_values_all.extend(bin_values)
+
+        by_bin[label] = {
+            "n_events": int(np.sum(bin_mask)),
+            "n_clusters": int(n_clusters),
+            "min_shared_channels_for_r": int(min_shared),
+            "median_r": float(np.median(bin_values)) if bin_values else np.nan,
+            "mean_r": float(np.mean(bin_values)) if bin_values else np.nan,
+            "n_pairs_valid": int(len(bin_values)),
+            "cluster_stats": cluster_stats,
+        }
+
+    eligible_mask = n_part >= int(min_participating)
+    per_cluster_pearson_r: List[Dict[str, Any]] = []
+    for cluster_id in range(int(n_clusters)):
+        local_idx = np.where((labels == cluster_id) & eligible_mask)[0]
+        sampled_idx = _sample_event_indices(
+            local_idx,
+            n_sample=n_sample,
+            seed=seed + 5003 + 1009 * cluster_id,
+        )
+        stats = _pairwise_relative_lag_correlations(
+            v_rel,
+            v_bools,
+            sampled_idx,
+            min_shared_channels=int(min_participating),
+        )
+        per_cluster_pearson_r.append(
+            {
+                "cluster_id": int(cluster_id),
+                "n_events": int(local_idx.size),
+                "n_events_sampled": int(sampled_idx.size),
+                "n_pairs_valid": int(stats["n_pairs_valid"]),
+                "median_r": stats["median_r"],
+            }
+        )
+
+    eligible_fraction = float(np.mean(eligible_mask)) if eligible_mask.size else np.nan
+    eligible_median_r = (
+        float(np.median(eligible_values_all)) if eligible_values_all else np.nan
+    )
+
+    cluster_fractions = np.zeros(int(n_clusters), dtype=float)
+    cluster_median_rs = np.full(int(n_clusters), np.nan, dtype=float)
+    total_eligible = int(np.sum(eligible_mask))
+    for ci, cr in enumerate(per_cluster_pearson_r):
+        cluster_fractions[ci] = float(cr["n_events"] / total_eligible) if total_eligible else 0.0
+        cluster_median_rs[ci] = cr["median_r"]
+
+    dominant_idx = int(np.argmax(cluster_fractions))
+    dominant_median_r = float(cluster_median_rs[dominant_idx])
+    dominant_fraction = float(cluster_fractions[dominant_idx])
+
+    return {
+        "n_valid_events": int(valid_event_indices.size),
+        "n_clusters": int(n_clusters),
+        "n_sample": int(n_sample),
+        "min_participating": int(min_participating),
+        "order_validation": order_summary,
+        "within_cluster_pearson_r_by_npart": by_bin,
+        "eligible_fraction": eligible_fraction,
+        "eligible_median_r": eligible_median_r,
+        "dominant_cluster_id": int(dominant_idx),
+        "dominant_cluster_fraction": dominant_fraction,
+        "dominant_cluster_median_r": dominant_median_r,
+        "per_cluster_pearson_r": per_cluster_pearson_r,
+        "validation_pass": bool(
+            np.isfinite(dominant_median_r) and dominant_median_r > 0.7
+        ),
+    }
+
+
 def _summarize_reproducibility(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Cohort-level summary of cross-time template reproducibility."""
     repro_recs = [
@@ -1675,6 +1976,84 @@ def _summarize_reproducibility(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
             "n_subjects_with_pairs": n_fwd_rev_full,
             "n_reproduced": n_fwd_rev_reproduced,
         },
+    }
+
+
+def _summarize_absolute_lag_validation(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Cohort-level PR-4B Step 0 summary."""
+    lag_recs = [
+        rec["absolute_lag_validation"]
+        for rec in valid
+        if rec.get("absolute_lag_validation")
+        and "error" not in rec.get("absolute_lag_validation", {})
+    ]
+    if not lag_recs:
+        return {"n_subjects": 0}
+
+    eligible_fraction = [
+        float(r["eligible_fraction"])
+        for r in lag_recs
+        if np.isfinite(r.get("eligible_fraction", np.nan))
+    ]
+    eligible_median = [
+        float(r["eligible_median_r"])
+        for r in lag_recs
+        if np.isfinite(r.get("eligible_median_r", np.nan))
+    ]
+    exact_order = [
+        float(r["order_validation"]["exact_order_match_fraction"])
+        for r in lag_recs
+        if np.isfinite(r.get("order_validation", {}).get("exact_order_match_fraction", np.nan))
+    ]
+    pairwise_order = [
+        float(r["order_validation"]["pairwise_order_concordance"])
+        for r in lag_recs
+        if np.isfinite(r.get("order_validation", {}).get("pairwise_order_concordance", np.nan))
+    ]
+
+    bins_summary: Dict[str, Any] = {}
+    for bin_label in ("3-4", "5-8", "9+"):
+        vals = [
+            float(r["within_cluster_pearson_r_by_npart"][bin_label]["median_r"])
+            for r in lag_recs
+            if bin_label in r.get("within_cluster_pearson_r_by_npart", {})
+            and np.isfinite(
+                r["within_cluster_pearson_r_by_npart"][bin_label].get("median_r", np.nan)
+            )
+        ]
+        bins_summary[bin_label] = {
+            "n_subjects": int(len(vals)),
+            "median_r": float(np.median(vals)) if vals else np.nan,
+        }
+
+    n_subjects_pass = sum(int(r.get("validation_pass", False)) for r in lag_recs)
+    cohort_median = float(np.median(eligible_median)) if eligible_median else np.nan
+
+    dominant_rs = [
+        float(r["dominant_cluster_median_r"])
+        for r in lag_recs
+        if np.isfinite(r.get("dominant_cluster_median_r", np.nan))
+    ]
+    dominant_median = float(np.median(dominant_rs)) if dominant_rs else np.nan
+
+    return {
+        "n_subjects": int(len(lag_recs)),
+        "n_subjects_pass": int(n_subjects_pass),
+        "eligible_fraction_median": (
+            float(np.median(eligible_fraction)) if eligible_fraction else np.nan
+        ),
+        "eligible_median_r_median": cohort_median,
+        "dominant_cluster_median_r_median": dominant_median,
+        "cohort_validation_pass": bool(
+            np.isfinite(dominant_median) and dominant_median > 0.7
+        ),
+        "exact_order_match_fraction_median": (
+            float(np.median(exact_order)) if exact_order else np.nan
+        ),
+        "pairwise_order_concordance_median": (
+            float(np.median(pairwise_order)) if pairwise_order else np.nan
+        ),
+        "within_cluster_pearson_r_by_npart": bins_summary,
     }
 
 
@@ -2116,6 +2495,7 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
         },
         "adaptive_cluster_analysis": _summarize_adaptive_clusters(valid),
         "reproducibility_analysis": _summarize_reproducibility(valid),
+        "absolute_lag_validation_analysis": _summarize_absolute_lag_validation(valid),
         "temporal_dynamics_analysis": _summarize_temporal_dynamics(valid),
     }
 
