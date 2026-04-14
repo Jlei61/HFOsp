@@ -49,6 +49,18 @@ from src.preprocessing import (
 )
 
 
+def _flush_gpu_memory() -> None:
+    """Release CuPy memory pool to prevent cross-block OOM accumulation."""
+    try:
+        import cupy as _cp
+        pool = _cp.get_default_memory_pool()
+        pool.free_all_blocks()
+        pinned = _cp.get_default_pinned_memory_pool()
+        pinned.free_all_blocks()
+    except (ImportError, Exception):
+        pass
+
+
 def load_subject_params(dataset: str, subject: str) -> Dict[str, Any]:
     """Merge dataset defaults with per-subject overrides."""
     params_path = _PROJECT_ROOT / "config" / "subject_params.json"
@@ -223,6 +235,8 @@ def run_yuquan_subject(
             "elapsed_sec": round(elapsed, 1),
         })
 
+        _flush_gpu_memory()
+
     # Refine
     if not smoke and len(gpu_paths) > 0:
         refine_path = out_dir / "_refineGpu.npz"
@@ -371,6 +385,8 @@ def run_epilepsiae_subject(
             "total_events": total_events,
             "elapsed_sec": round(elapsed, 1),
         })
+
+        _flush_gpu_memory()
 
     # Refine (across all records from all recording dirs)
     if not smoke and len(gpu_paths) > 0:
