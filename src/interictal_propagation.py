@@ -170,6 +170,132 @@ def _pairwise_relative_lag_correlations(
     }
 
 
+def _event_lag_span_summary(
+    relative_lag: np.ndarray,
+    bools: np.ndarray,
+    event_indices: np.ndarray,
+    *,
+    min_participating: int,
+) -> Dict[str, Any]:
+    """Per-event lag span summary on relative lag vectors."""
+    relative_lag = np.asarray(relative_lag, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    event_indices = np.asarray(event_indices, dtype=int)
+
+    lag_spans: List[float] = []
+    n_participating_values: List[int] = []
+    for ev in event_indices:
+        mask = bools[:, ev] & np.isfinite(relative_lag[:, ev])
+        n_part = int(np.sum(mask))
+        if n_part < int(min_participating):
+            continue
+        values = relative_lag[mask, ev]
+        lag_spans.append(float(np.max(values) - np.min(values)))
+        n_participating_values.append(n_part)
+
+    return {
+        "n_events": int(len(lag_spans)),
+        "mean_lag_span": float(np.mean(lag_spans)) if lag_spans else np.nan,
+        "median_lag_span": float(np.median(lag_spans)) if lag_spans else np.nan,
+        "min_lag_span": float(np.min(lag_spans)) if lag_spans else np.nan,
+        "max_lag_span": float(np.max(lag_spans)) if lag_spans else np.nan,
+        "median_n_participating": (
+            float(np.median(n_participating_values)) if n_participating_values else np.nan
+        ),
+    }
+
+
+def _match_event_indices_by_nparticipating(
+    high_indices: np.ndarray,
+    low_indices: np.ndarray,
+    n_participating: np.ndarray,
+    *,
+    seed: int,
+    min_participating: int = 3,
+) -> Dict[str, Any]:
+    """Exact-match high/low event subsets by n_participating."""
+    high_indices = np.asarray(high_indices, dtype=int)
+    low_indices = np.asarray(low_indices, dtype=int)
+    n_participating = np.asarray(n_participating, dtype=int)
+    rng = np.random.default_rng(int(seed))
+
+    high_indices = high_indices[n_participating[high_indices] >= int(min_participating)]
+    low_indices = low_indices[n_participating[low_indices] >= int(min_participating)]
+
+    matched_high: List[int] = []
+    matched_low: List[int] = []
+    matched_counts: Dict[str, int] = {}
+
+    high_values = {int(v) for v in n_participating[high_indices].tolist()}
+    low_values = {int(v) for v in n_participating[low_indices].tolist()}
+    shared_values = sorted(high_values & low_values)
+    for value in shared_values:
+        high_local = high_indices[n_participating[high_indices] == value]
+        low_local = low_indices[n_participating[low_indices] == value]
+        n_match = int(min(high_local.size, low_local.size))
+        if n_match <= 0:
+            continue
+        if high_local.size > n_match:
+            high_local = rng.choice(high_local, size=n_match, replace=False)
+        if low_local.size > n_match:
+            low_local = rng.choice(low_local, size=n_match, replace=False)
+        matched_high.extend(int(x) for x in np.sort(high_local))
+        matched_low.extend(int(x) for x in np.sort(low_local))
+        matched_counts[str(int(value))] = n_match
+
+    return {
+        "high_event_indices": np.asarray(sorted(matched_high), dtype=int),
+        "low_event_indices": np.asarray(sorted(matched_low), dtype=int),
+        "n_matched": int(len(matched_high)),
+        "matched_counts_by_n_participating": matched_counts,
+        "min_participating": int(min_participating),
+    }
+
+
+def _cluster_state_l3_summary(
+    relative_lag: np.ndarray,
+    bools: np.ndarray,
+    *,
+    lag_span_event_indices: np.ndarray,
+    pearson_event_indices: np.ndarray,
+    min_lag_span_participating: int,
+    min_shared_channels_for_r: int,
+    n_sample_pearson: int = 200,
+    pearson_seed: int = 0,
+) -> Dict[str, Any]:
+    """L3 summary for one state within one cluster."""
+    lag_span = _event_lag_span_summary(
+        relative_lag,
+        bools,
+        lag_span_event_indices,
+        min_participating=min_lag_span_participating,
+    )
+    sampled_pearson = _sample_event_indices(
+        np.asarray(pearson_event_indices, dtype=int),
+        n_sample=n_sample_pearson,
+        seed=pearson_seed,
+    )
+    pearson = _pairwise_relative_lag_correlations(
+        relative_lag,
+        bools,
+        sampled_pearson,
+        min_shared_channels=min_shared_channels_for_r,
+    )
+    return {
+        "lag_span_n_events": int(lag_span["n_events"]),
+        "lag_span_mean": lag_span["mean_lag_span"],
+        "lag_span_median": lag_span["median_lag_span"],
+        "lag_span_min": lag_span["min_lag_span"],
+        "lag_span_max": lag_span["max_lag_span"],
+        "lag_span_median_n_participating": lag_span["median_n_participating"],
+        "pearson_r_n_events": int(np.asarray(pearson_event_indices, dtype=int).size),
+        "pearson_r_n_events_sampled": int(sampled_pearson.size),
+        "pearson_r_n_pairs_valid": int(pearson["n_pairs_valid"]),
+        "pearson_r_median": pearson["median_r"],
+        "pearson_r_mean": pearson["mean_r"],
+    }
+
+
 def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     """Load one subject into a single event contract with timing metadata.
 
@@ -2064,11 +2190,14 @@ def _cluster_state_tau_summary(
 def _aggregate_cluster_state_metric(
     per_cluster: List[Dict[str, Any]],
     metric_key: str,
+    *,
+    high_key: str = "high",
+    low_key: str = "low",
 ) -> Dict[str, Any]:
     comparable = [
         cluster for cluster in per_cluster
-        if np.isfinite(cluster["high"].get(metric_key, np.nan))
-        and np.isfinite(cluster["low"].get(metric_key, np.nan))
+        if np.isfinite(cluster.get(high_key, {}).get(metric_key, np.nan))
+        and np.isfinite(cluster.get(low_key, {}).get(metric_key, np.nan))
     ]
     if not comparable:
         return {
@@ -2080,8 +2209,8 @@ def _aggregate_cluster_state_metric(
             "n_clusters_high_gt_low": 0,
         }
 
-    high_vals = np.array([cluster["high"][metric_key] for cluster in comparable], dtype=float)
-    low_vals = np.array([cluster["low"][metric_key] for cluster in comparable], dtype=float)
+    high_vals = np.array([cluster[high_key][metric_key] for cluster in comparable], dtype=float)
+    low_vals = np.array([cluster[low_key][metric_key] for cluster in comparable], dtype=float)
     delta_vals = high_vals - low_vals
     return {
         "n_clusters_compared": int(len(comparable)),
@@ -2111,11 +2240,13 @@ def compute_rate_state_coupling(
     min_participating_l3: int = 5,
     match_seed: int = 42,
 ) -> Dict[str, Any]:
-    """PR-4B Step 1: high-rate vs low-rate within-cluster tau comparison.
+    """PR-4B Step 1-3: high-rate vs low-rate L1/L2/L3 comparison.
 
     Matched subsampling: for each cluster, the larger state group is
     randomly downsampled to the size of the smaller group before tau
-    computation, eliminating the event-count asymmetry confound.
+    computation, eliminating the event-count asymmetry confound. L3 uses
+    separate exact n_participating matching so lag span is not inflated by
+    state-dependent participation differences.
     """
     times = np.asarray(event_abs_times, dtype=float)
     ranks = np.asarray(ranks, dtype=float)
@@ -2140,6 +2271,9 @@ def compute_rate_state_coupling(
     v_times = times[valid_event_indices]
     v_ranks = ranks[:, valid_event_indices]
     v_bools = bools[:, valid_event_indices]
+    v_rel = _compute_relative_lag_matrix(
+        lag_raw[:, valid_event_indices], v_bools
+    )
     n_part = np.sum(v_bools, axis=0).astype(int)
 
     bin_info = _build_rate_state_bins(
@@ -2148,18 +2282,22 @@ def compute_rate_state_coupling(
         min_events_per_bin=min_events_per_bin,
     )
     event_states = np.asarray(bin_info["event_rate_states"], dtype=object)
+    event_bin_ids = np.asarray(bin_info["event_bin_ids"], dtype=int)
     state_masks = {
         "high": event_states == "high",
         "low": event_states == "low",
     }
 
     match_rng = np.random.default_rng(int(match_seed))
+    cluster_counts = np.bincount(labels, minlength=int(n_clusters)) if labels.size else np.zeros(int(n_clusters), dtype=int)
 
     per_cluster: List[Dict[str, Any]] = []
     for cluster_id in range(int(n_clusters)):
         cluster_mask = labels == int(cluster_id)
-        high_idx = np.where(cluster_mask & state_masks["high"])[0]
-        low_idx = np.where(cluster_mask & state_masks["low"])[0]
+        high_idx_all = np.where(cluster_mask & state_masks["high"])[0]
+        low_idx_all = np.where(cluster_mask & state_masks["low"])[0]
+        high_idx = np.asarray(high_idx_all, dtype=int)
+        low_idx = np.asarray(low_idx_all, dtype=int)
 
         n_match = int(min(high_idx.size, low_idx.size))
 
@@ -2176,6 +2314,7 @@ def compute_rate_state_coupling(
         cluster_entry: Dict[str, Any] = {
             "cluster_id": int(cluster_id),
             "n_matched": n_match,
+            "n_events_total": int(np.sum(cluster_mask)),
         }
         for state_name, state_idx in (("high", high_idx), ("low", low_idx)):
             cluster_entry[state_name] = _cluster_state_tau_summary(
@@ -2201,10 +2340,104 @@ def compute_rate_state_coupling(
             if np.isfinite(high_centered) and np.isfinite(low_centered)
             else np.nan
         )
+
+        l3_span_match = _match_event_indices_by_nparticipating(
+            high_idx_all,
+            low_idx_all,
+            n_part,
+            seed=int(match_seed) + 7919 * int(cluster_id) + 17,
+            min_participating=int(min_shared_channels),
+        )
+        l3_pearson_match = _match_event_indices_by_nparticipating(
+            high_idx_all,
+            low_idx_all,
+            n_part,
+            seed=int(match_seed) + 7919 * int(cluster_id) + 43,
+            min_participating=int(min_participating_l3),
+        )
+        cluster_entry["l3_matching"] = {
+            "lag_span": {
+                "n_matched": int(l3_span_match["n_matched"]),
+                "matched_counts_by_n_participating": l3_span_match["matched_counts_by_n_participating"],
+                "min_participating": int(l3_span_match["min_participating"]),
+            },
+            "pearson_r": {
+                "n_matched": int(l3_pearson_match["n_matched"]),
+                "matched_counts_by_n_participating": l3_pearson_match["matched_counts_by_n_participating"],
+                "min_participating": int(l3_pearson_match["min_participating"]),
+            },
+        }
+        cluster_entry["high_l3"] = _cluster_state_l3_summary(
+            v_rel,
+            v_bools,
+            lag_span_event_indices=l3_span_match["high_event_indices"],
+            pearson_event_indices=l3_pearson_match["high_event_indices"],
+            min_lag_span_participating=int(min_shared_channels),
+            min_shared_channels_for_r=int(min_participating_l3),
+            n_sample_pearson=n_sample,
+            pearson_seed=int(match_seed) + 7919 * int(cluster_id) + 101,
+        )
+        cluster_entry["low_l3"] = _cluster_state_l3_summary(
+            v_rel,
+            v_bools,
+            lag_span_event_indices=l3_span_match["low_event_indices"],
+            pearson_event_indices=l3_pearson_match["low_event_indices"],
+            min_lag_span_participating=int(min_shared_channels),
+            min_shared_channels_for_r=int(min_participating_l3),
+            n_sample_pearson=n_sample,
+            pearson_seed=int(match_seed) + 7919 * int(cluster_id) + 137,
+        )
+        high_lag_span = cluster_entry["high_l3"]["lag_span_mean"]
+        low_lag_span = cluster_entry["low_l3"]["lag_span_mean"]
+        high_pearson = cluster_entry["high_l3"]["pearson_r_median"]
+        low_pearson = cluster_entry["low_l3"]["pearson_r_median"]
+        cluster_entry["lag_span_delta_high_minus_low"] = (
+            float(high_lag_span - low_lag_span)
+            if np.isfinite(high_lag_span) and np.isfinite(low_lag_span)
+            else np.nan
+        )
+        cluster_entry["pearson_r_delta_high_minus_low"] = (
+            float(high_pearson - low_pearson)
+            if np.isfinite(high_pearson) and np.isfinite(low_pearson)
+            else np.nan
+        )
+        eligible_rate_bins = [entry for entry in bin_info["rate_bins"] if entry.get("eligible", False)]
+        rate_values: List[float] = []
+        frac_values: List[float] = []
+        for entry in eligible_rate_bins:
+            bin_id = int(entry["bin_id"])
+            bin_mask = event_bin_ids == bin_id
+            n_bin_events = int(np.sum(bin_mask))
+            if n_bin_events <= 0:
+                continue
+            rate_values.append(float(entry["rate_per_hour"]))
+            frac_values.append(float(np.sum(cluster_mask & bin_mask) / n_bin_events))
+        if len(rate_values) >= 2 and len(set(np.round(rate_values, 12))) >= 2 and len(set(np.round(frac_values, 12))) >= 2:
+            rho, pval = spearmanr(rate_values, frac_values)
+        else:
+            rho, pval = np.nan, np.nan
+        cluster_entry["occupancy_rate"] = {
+            "n_bins": int(len(rate_values)),
+            "mean_fraction": float(np.mean(frac_values)) if frac_values else np.nan,
+            "occupancy_rate_spearman_rho": float(rho) if np.isfinite(rho) else np.nan,
+            "occupancy_rate_spearman_p": float(pval) if np.isfinite(pval) else np.nan,
+        }
         per_cluster.append(cluster_entry)
 
     l2_raw = _aggregate_cluster_state_metric(per_cluster, "raw_tau")
     l2_centered = _aggregate_cluster_state_metric(per_cluster, "centered_tau")
+    l3_lag_span = _aggregate_cluster_state_metric(
+        per_cluster,
+        "lag_span_mean",
+        high_key="high_l3",
+        low_key="low_l3",
+    )
+    l3_pearson = _aggregate_cluster_state_metric(
+        per_cluster,
+        "pearson_r_median",
+        high_key="high_l3",
+        low_key="low_l3",
+    )
     state_event_counts = {
         "high": int(np.sum(state_masks["high"])),
         "low": int(np.sum(state_masks["low"])),
@@ -2223,9 +2456,26 @@ def compute_rate_state_coupling(
 
     subject_raw_delta = l2_raw.get("delta_high_minus_low", np.nan)
     subject_centered_delta = l2_centered.get("delta_high_minus_low", np.nan)
+    subject_lag_span_delta = l3_lag_span.get("delta_high_minus_low", np.nan)
+    subject_pearson_delta = l3_pearson.get("delta_high_minus_low", np.nan)
+    dominant_cluster_id = int(np.argmax(cluster_counts)) if cluster_counts.size else -1
+    dominant_cluster_l1 = next(
+        (entry["occupancy_rate"] for entry in per_cluster if int(entry["cluster_id"]) == dominant_cluster_id),
+        {
+            "n_bins": 0,
+            "mean_fraction": np.nan,
+            "occupancy_rate_spearman_rho": np.nan,
+            "occupancy_rate_spearman_p": np.nan,
+        },
+    )
+    l1_rhos = [
+        float(entry["occupancy_rate"]["occupancy_rate_spearman_rho"])
+        for entry in per_cluster
+        if np.isfinite(entry.get("occupancy_rate", {}).get("occupancy_rate_spearman_rho", np.nan))
+    ]
 
     out: Dict[str, Any] = {
-        "step_status": "step1_l2_complete",
+        "step_status": "step23_l1_l2_l3_complete",
         "n_valid_events": int(valid_event_indices.size),
         "n_clusters": int(n_clusters),
         "rate_bin_hours": float(rate_bin_hours),
@@ -2247,9 +2497,27 @@ def compute_rate_state_coupling(
         "subject_centered_delta": (
             float(subject_centered_delta) if np.isfinite(subject_centered_delta) else None
         ),
+        "subject_lag_span_delta": (
+            float(subject_lag_span_delta) if np.isfinite(subject_lag_span_delta) else None
+        ),
+        "subject_pearson_r_delta": (
+            float(subject_pearson_delta) if np.isfinite(subject_pearson_delta) else None
+        ),
         "l2": {
             "raw": l2_raw,
             "centered": l2_centered,
+        },
+        "l3": {
+            "matching_rule": "exact_n_participating_match",
+            "lag_span": l3_lag_span,
+            "pearson_r": l3_pearson,
+            "pearson_r_min_participating": int(min_participating_l3),
+        },
+        "l1": {
+            "dominant_cluster_id": dominant_cluster_id,
+            "dominant_cluster": dominant_cluster_l1,
+            "max_abs_spearman_rho": float(np.max(np.abs(l1_rhos))) if l1_rhos else np.nan,
+            "n_clusters_with_valid_spearman": int(len(l1_rhos)),
         },
     }
     if (
@@ -2407,7 +2675,7 @@ def _summarize_absolute_lag_validation(valid: List[Dict[str, Any]]) -> Dict[str,
 
 
 def _summarize_rate_state_coupling(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """Cohort-level PR-4B Step 1 summary with subject-level Wilcoxon."""
+    """Cohort-level PR-4B Step 1-3 summary with subject-level Wilcoxon."""
     coupling_recs = [
         rec["rate_state_coupling"]
         for rec in valid
@@ -2423,7 +2691,19 @@ def _summarize_rate_state_coupling(valid: List[Dict[str, Any]]) -> Dict[str, Any
     raw_lows: List[float] = []
     centered_highs: List[float] = []
     centered_lows: List[float] = []
+    lag_span_deltas: List[float] = []
+    lag_span_highs: List[float] = []
+    lag_span_lows: List[float] = []
+    pearson_deltas: List[float] = []
+    pearson_highs: List[float] = []
+    pearson_lows: List[float] = []
+    pearson_hc_deltas: List[float] = []
+    pearson_hc_highs: List[float] = []
+    pearson_hc_lows: List[float] = []
     eligible_rates: List[float] = []
+    l3_eligible_fraction: List[float] = []
+    dominant_l1_rhos: List[float] = []
+    max_abs_l1_rhos: List[float] = []
 
     for rec in coupling_recs:
         rd = rec.get("subject_raw_delta")
@@ -2445,9 +2725,46 @@ def _summarize_rate_state_coupling(valid: List[Dict[str, Any]]) -> Dict[str, Any
             centered_highs.append(float(ch))
         if np.isfinite(cl):
             centered_lows.append(float(cl))
+        ls_delta = rec.get("subject_lag_span_delta")
+        if ls_delta is not None and np.isfinite(ls_delta):
+            lag_span_deltas.append(float(ls_delta))
+        pr_delta = rec.get("subject_pearson_r_delta")
+        if pr_delta is not None and np.isfinite(pr_delta):
+            pearson_deltas.append(float(pr_delta))
+        l3 = rec.get("l3", {})
+        ls = l3.get("lag_span", {})
+        pr = l3.get("pearson_r", {})
+        ls_high = ls.get("high_mean", np.nan)
+        ls_low = ls.get("low_mean", np.nan)
+        pr_high = pr.get("high_mean", np.nan)
+        pr_low = pr.get("low_mean", np.nan)
+        if np.isfinite(ls_high):
+            lag_span_highs.append(float(ls_high))
+        if np.isfinite(ls_low):
+            lag_span_lows.append(float(ls_low))
+        if np.isfinite(pr_high):
+            pearson_highs.append(float(pr_high))
+        if np.isfinite(pr_low):
+            pearson_lows.append(float(pr_low))
+        if rec.get("l3_validation_pass") is True:
+            if np.isfinite(pr_high):
+                pearson_hc_highs.append(float(pr_high))
+            if np.isfinite(pr_low):
+                pearson_hc_lows.append(float(pr_low))
+            if pr_delta is not None and np.isfinite(pr_delta):
+                pearson_hc_deltas.append(float(pr_delta))
+        l3ef = rec.get("l3_eligible_fraction", np.nan)
+        if np.isfinite(l3ef):
+            l3_eligible_fraction.append(float(l3ef))
         er = rec.get("median_eligible_rate_per_hour", np.nan)
         if np.isfinite(er):
             eligible_rates.append(float(er))
+        dom_rho = rec.get("l1", {}).get("dominant_cluster", {}).get("occupancy_rate_spearman_rho", np.nan)
+        if np.isfinite(dom_rho):
+            dominant_l1_rhos.append(float(dom_rho))
+        max_abs_rho = rec.get("l1", {}).get("max_abs_spearman_rho", np.nan)
+        if np.isfinite(max_abs_rho):
+            max_abs_l1_rhos.append(float(max_abs_rho))
 
     def _wilcoxon_on_deltas(deltas: List[float]) -> Dict[str, Any]:
         if len(deltas) < 2:
@@ -2491,6 +2808,57 @@ def _summarize_rate_state_coupling(valid: List[Dict[str, Any]]) -> Dict[str, Any
             "n_subjects_high_gt_low": int(sum(val > 0 for val in centered_deltas)),
             "wilcoxon_p": centered_wilcoxon["p"],
             "wilcoxon_n": centered_wilcoxon["n"],
+        },
+        "l3": {
+            "eligible_fraction_median": (
+                float(np.median(l3_eligible_fraction)) if l3_eligible_fraction else np.nan
+            ),
+            "n_subjects_high_confidence": int(
+                sum(rec.get("l3_validation_pass") is True for rec in coupling_recs)
+            ),
+            "lag_span": {
+                "high_median": float(np.median(lag_span_highs)) if lag_span_highs else np.nan,
+                "low_median": float(np.median(lag_span_lows)) if lag_span_lows else np.nan,
+                "delta_high_minus_low_median": (
+                    float(np.median(lag_span_deltas)) if lag_span_deltas else np.nan
+                ),
+                "n_subjects_high_gt_low": int(sum(val > 0 for val in lag_span_deltas)),
+                "wilcoxon_p": _wilcoxon_on_deltas(lag_span_deltas)["p"],
+                "wilcoxon_n": _wilcoxon_on_deltas(lag_span_deltas)["n"],
+            },
+            "pearson_r_exploratory": {
+                "high_median": float(np.median(pearson_highs)) if pearson_highs else np.nan,
+                "low_median": float(np.median(pearson_lows)) if pearson_lows else np.nan,
+                "delta_high_minus_low_median": (
+                    float(np.median(pearson_deltas)) if pearson_deltas else np.nan
+                ),
+                "n_subjects_high_gt_low": int(sum(val > 0 for val in pearson_deltas)),
+                "wilcoxon_p": _wilcoxon_on_deltas(pearson_deltas)["p"],
+                "wilcoxon_n": _wilcoxon_on_deltas(pearson_deltas)["n"],
+            },
+            "pearson_r_high_confidence": {
+                "high_median": (
+                    float(np.median(pearson_hc_highs)) if pearson_hc_highs else np.nan
+                ),
+                "low_median": (
+                    float(np.median(pearson_hc_lows)) if pearson_hc_lows else np.nan
+                ),
+                "delta_high_minus_low_median": (
+                    float(np.median(pearson_hc_deltas)) if pearson_hc_deltas else np.nan
+                ),
+                "n_subjects_high_gt_low": int(sum(val > 0 for val in pearson_hc_deltas)),
+                "wilcoxon_p": _wilcoxon_on_deltas(pearson_hc_deltas)["p"],
+                "wilcoxon_n": _wilcoxon_on_deltas(pearson_hc_deltas)["n"],
+            },
+        },
+        "l1": {
+            "dominant_cluster_rho_median": (
+                float(np.median(dominant_l1_rhos)) if dominant_l1_rhos else np.nan
+            ),
+            "n_subjects_dominant_positive": int(sum(val > 0 for val in dominant_l1_rhos)),
+            "max_abs_rho_median": (
+                float(np.median(max_abs_l1_rhos)) if max_abs_l1_rhos else np.nan
+            ),
         },
     }
 

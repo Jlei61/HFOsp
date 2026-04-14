@@ -640,7 +640,7 @@ def test_validate_absolute_lag_clustering_reports_stratified_r_and_order_match()
 
 
 def test_compute_rate_state_coupling_reports_high_vs_low_tau() -> None:
-    n_ch = 4
+    n_ch = 5
     n_ev = 12
     ranks = np.zeros((n_ch, n_ev), dtype=float)
     bools = np.ones((n_ch, n_ev), dtype=bool)
@@ -664,13 +664,21 @@ def test_compute_rate_state_coupling_reports_high_vs_low_tau() -> None:
         dtype=float,
     )
 
-    pattern_stable = np.array([1.0, 2.0, 3.0, 4.0], dtype=float)
-    pattern_reverse = np.array([4.0, 3.0, 2.0, 1.0], dtype=float)
+    pattern_stable = np.array([1.0, 2.0, 3.0, 4.0, 5.0], dtype=float)
+    pattern_reverse = np.array([5.0, 4.0, 3.0, 2.0, 1.0], dtype=float)
     low_events = {0, 1, 6, 7}
     for ev in range(n_ev):
         pattern = pattern_stable if ev not in low_events or ev % 2 == 0 else pattern_reverse
         ranks[:, ev] = pattern
-        lag_raw[:, ev] = 100.0 + 10.0 * ev + 0.05 * pattern
+        if ev in low_events:
+            rel = (
+                np.array([0.0, 0.2, 0.4, 0.6, 0.8], dtype=float)
+                if np.array_equal(pattern, pattern_stable)
+                else np.array([0.8, 0.6, 0.4, 0.2, 0.0], dtype=float)
+            )
+        else:
+            rel = np.array([0.0, 0.05, 0.10, 0.15, 0.20], dtype=float)
+        lag_raw[:, ev] = 100.0 + 10.0 * ev + rel
 
     out = compute_rate_state_coupling(
         event_abs_times=times,
@@ -702,6 +710,13 @@ def test_compute_rate_state_coupling_reports_high_vs_low_tau() -> None:
     assert out["l2"]["raw"]["delta_high_minus_low"] > 0.2
     assert "centered" in out["l2"]
     assert out["subject_raw_delta"] is not None
+    assert out["l3"]["lag_span"]["n_clusters_compared"] == 1
+    assert out["subject_lag_span_delta"] is not None
+    assert out["subject_lag_span_delta"] < 0.0
+    assert out["l3"]["pearson_r"]["n_clusters_compared"] == 1
+    assert out["subject_pearson_r_delta"] is not None
+    assert out["subject_pearson_r_delta"] > 0.5
+    assert out["l1"]["dominant_cluster_id"] == 0
     assert "rate_bin_summary" in out
     assert "rate_bins" not in out
 
@@ -740,11 +755,23 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
             "rate_state_coupling": {
                 "subject_raw_delta": 0.20,
                 "subject_centered_delta": 0.10,
+                "subject_lag_span_delta": -0.30,
+                "subject_pearson_r_delta": 0.25,
+                "l3_validation_pass": True,
                 "l2": {
                     "raw": {"high_mean": 0.30, "low_mean": 0.10, "delta_high_minus_low": 0.20},
                     "centered": {"high_mean": 0.12, "low_mean": 0.02, "delta_high_minus_low": 0.10},
                 },
+                "l3": {
+                    "lag_span": {"high_mean": 0.20, "low_mean": 0.50, "delta_high_minus_low": -0.30},
+                    "pearson_r": {"high_mean": 0.90, "low_mean": 0.65, "delta_high_minus_low": 0.25},
+                },
+                "l1": {
+                    "dominant_cluster": {"occupancy_rate_spearman_rho": 0.40},
+                    "max_abs_spearman_rho": 0.50,
+                },
                 "median_eligible_rate_per_hour": 12.0,
+                "l3_eligible_fraction": 0.60,
             },
             "temporal_dynamics": {
                 "day_night_summary": {
@@ -786,11 +813,23 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
             "rate_state_coupling": {
                 "subject_raw_delta": 0.10,
                 "subject_centered_delta": 0.05,
+                "subject_lag_span_delta": -0.10,
+                "subject_pearson_r_delta": -0.05,
+                "l3_validation_pass": False,
                 "l2": {
                     "raw": {"high_mean": 0.25, "low_mean": 0.15, "delta_high_minus_low": 0.10},
                     "centered": {"high_mean": 0.08, "low_mean": 0.03, "delta_high_minus_low": 0.05},
                 },
+                "l3": {
+                    "lag_span": {"high_mean": 0.30, "low_mean": 0.40, "delta_high_minus_low": -0.10},
+                    "pearson_r": {"high_mean": 0.70, "low_mean": 0.75, "delta_high_minus_low": -0.05},
+                },
+                "l1": {
+                    "dominant_cluster": {"occupancy_rate_spearman_rho": -0.20},
+                    "max_abs_spearman_rho": 0.30,
+                },
                 "median_eligible_rate_per_hour": 10.0,
+                "l3_eligible_fraction": 0.40,
             },
             "temporal_dynamics": {
                 "day_night_summary": {
@@ -822,3 +861,7 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
     assert "wilcoxon_p" in coupling["raw_tau"]
     assert "wilcoxon_n" in coupling["raw_tau"]
     assert coupling["raw_tau"]["wilcoxon_n"] == 2
+    assert coupling["l3"]["lag_span"]["delta_high_minus_low_median"] == -0.2
+    assert coupling["l3"]["pearson_r_exploratory"]["delta_high_minus_low_median"] == 0.1
+    assert coupling["l3"]["pearson_r_high_confidence"]["wilcoxon_n"] == 1
+    assert coupling["l1"]["max_abs_rho_median"] == 0.4
