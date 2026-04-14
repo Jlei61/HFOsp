@@ -582,6 +582,149 @@ def _run_pr4b_step1(
     )
 
 
+def _run_pr4b_step23(
+    datasets_list: List,
+    per_subject_dir: Path,
+    *,
+    n_sample: int,
+    n_seeds: int,
+    rate_bin_hours: float,
+    min_events_per_rate_bin: int,
+) -> None:
+    """PR-4B Step 2-3: L3 lag span/Pearson plus L1 occupancy-rate."""
+    import numpy as np
+
+    all_results: Dict[str, Dict[str, Any]] = {}
+    coupling_results: Dict[str, Dict[str, Any]] = {}
+
+    for dataset, root, subjects, soz_map in datasets_list:
+        for subject in subjects:
+            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            key = f"{dataset}/{subject}"
+            json_path = per_subject_dir / f"{dataset}_{subject}.json"
+
+            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+                logger.warning("Skip %s: raw data dir missing", key)
+                continue
+
+            if json_path.exists():
+                with open(json_path) as f:
+                    existing = json.load(f)
+            else:
+                logger.info("PR-4B Step 2-3 bootstrap base result: %s", key)
+                existing = run_subject_interictal_propagation_pr1(
+                    subject_dir=subject_dir,
+                    dataset=dataset,
+                    subject=subject,
+                    soz_channels=soz_map.get(subject, []),
+                    n_sample=n_sample,
+                    n_seeds=n_seeds,
+                )
+
+            if "error" in existing:
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            ac = existing.get("adaptive_cluster", {})
+            if "error" in ac or "labels" not in ac:
+                logger.warning("Skip %s: adaptive_cluster missing or errored", key)
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            loaded = load_subject_propagation_events(subject_dir)
+            valid_events = _valid_event_indices(loaded["bools"], min_participating=3)
+            labels = np.asarray(ac["labels"], dtype=int)
+            chosen_k = int(ac["chosen_k"])
+
+            if valid_events.size != labels.size:
+                existing["rate_state_coupling"] = {
+                    "error": (
+                        f"valid_event_mismatch: valid_events={valid_events.size} "
+                        f"labels={labels.size}"
+                    )
+                }
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            if not existing.get("absolute_lag_validation"):
+                validation = validate_absolute_lag_clustering(
+                    ranks=loaded["ranks"],
+                    lag_raw=loaded["lag_raw"],
+                    bools=loaded["bools"],
+                    cluster_labels=labels,
+                    n_clusters=chosen_k,
+                    valid_event_indices=valid_events,
+                    n_sample=n_sample,
+                    seed=0,
+                    min_shared_channels=3,
+                    min_participating=5,
+                )
+                validation.update(
+                    {
+                        "dataset": dataset,
+                        "subject": subject,
+                        "chosen_k": chosen_k,
+                        "stable_k": int(ac.get("stable_k", chosen_k) or chosen_k),
+                    }
+                )
+                existing["absolute_lag_validation"] = validation
+
+            coupling = compute_rate_state_coupling(
+                event_abs_times=loaded["event_abs_times"],
+                ranks=loaded["ranks"],
+                lag_raw=loaded["lag_raw"],
+                bools=loaded["bools"],
+                cluster_labels=labels,
+                n_clusters=chosen_k,
+                valid_event_indices=valid_events,
+                rate_bin_hours=rate_bin_hours,
+                min_events_per_bin=min_events_per_rate_bin,
+                n_sample=n_sample,
+                n_seeds=n_seeds,
+                min_shared_channels=3,
+                min_center_participation=5,
+                min_participating_l3=5,
+            )
+            coupling.update(
+                {
+                    "dataset": dataset,
+                    "subject": subject,
+                    "chosen_k": chosen_k,
+                    "stable_k": int(ac.get("stable_k", chosen_k) or chosen_k),
+                    "l3_validation_pass": bool(
+                        existing.get("absolute_lag_validation", {}).get("validation_pass", False)
+                    ),
+                }
+            )
+            existing["rate_state_coupling"] = coupling
+            coupling_results[key] = coupling
+            all_results[key] = existing
+            _save(existing, json_path)
+            logger.info(
+                "PR-4B Step 2-3: %s  k=%d  lag_delta=%.4f  pearson_delta=%.4f  dom_rho=%.4f",
+                key,
+                chosen_k,
+                coupling.get("subject_lag_span_delta") or float("nan"),
+                coupling.get("subject_pearson_r_delta") or float("nan"),
+                coupling.get("l1", {}).get("dominant_cluster", {}).get(
+                    "occupancy_rate_spearman_rho",
+                    float("nan"),
+                ),
+            )
+
+    cohort = summarize_propagation_cohort(all_results)
+    _save(all_results, RESULTS_DIR / "pr1_subject_summary.json")
+    _save(cohort, RESULTS_DIR / "pr1_cohort_summary.json")
+    _save(coupling_results, RESULTS_DIR / "pr4b_coupling_summary.json")
+    logger.info(
+        "PR-4B Step 2-3 done. Cohort rate-coupling summary: %s",
+        cohort.get("rate_state_coupling_analysis", {}),
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Interictal group-event internal propagation PR-1 analysis"
@@ -597,6 +740,8 @@ def main() -> None:
                         help="PR-4B Step 0: absolute lag validation only")
     parser.add_argument("--pr4b-step1", action="store_true",
                         help="PR-4B Step 1: rate-state within-cluster tau only")
+    parser.add_argument("--pr4b-step23", action="store_true",
+                        help="PR-4B Step 2-3: lag span/Pearson plus occupancy-rate")
     parser.add_argument("--bin-hours", type=float, default=1.0, help="PR-4A occupancy bin width in hours")
     parser.add_argument("--rate-bin-hours", type=float, default=2.0,
                         help="PR-4B local rate bin width in hours")
@@ -656,6 +801,17 @@ def main() -> None:
 
     if args.pr4b_step1:
         _run_pr4b_step1(
+            datasets_list,
+            per_subject_dir,
+            n_sample=args.n_sample,
+            n_seeds=args.n_seeds,
+            rate_bin_hours=args.rate_bin_hours,
+            min_events_per_rate_bin=args.min_events_per_rate_bin,
+        )
+        return
+
+    if args.pr4b_step23:
+        _run_pr4b_step23(
             datasets_list,
             per_subject_dir,
             n_sample=args.n_sample,
