@@ -21,7 +21,7 @@
 
 ## 2. 一句话当前结论
 
-- **传播线**：单个群体事件内部的传播结构是真实存在的，但不是单一模板；`k=2` 是主导压缩，不是普适真相，少数 subject 存在更丰富的 `k=4` 到 `k=6` 多模态路径集合，而且这些模板在 split-half / blockwise 尺度上总体稳定（`23/30 strong`, `7/30 moderate`, `0 weak`）。`PR-4A` 进一步显示：在固定模板下，day/night occupancy 漂移整体很弱，当前更像轻微描述性变化，而不是强昼夜重排。`PR-4B Step 1` 显示：L2 ordinal precision（rank order 一致性）在高率 vs 低率状态间**无显著差异**（raw τ Wilcoxon p=0.349, centered τ p=0.221），符合 86% identity-bias 下 L2 灵敏度极低的预期。L3（absolute timing precision）是 H2 判别的主战场。
+- **传播线**：单个群体事件内部的传播结构是真实存在的，但不是单一模板；`k=2` 是主导压缩，不是普适真相，少数 subject 存在更丰富的 `k=4` 到 `k=6` 多模态路径集合，而且这些模板在 split-half / blockwise 尺度上总体稳定（`23/30 strong`, `7/30 moderate`, `0 weak`）。`PR-4A` 进一步显示：在固定模板下，day/night occupancy 漂移整体很弱。`PR-4B` 三层调控分析完成（L1/L2/L3, 30 subjects）：L1（模板选择）和 L2（秩序一致性）均为 **null**；L3（绝对时间精度）在全 cohort 上无显著差异，但在 8 个 absolute-lag 高置信 subject（dom_r > 0.7）中 Pearson r 显著更高（p=0.016, 7/8 方向一致），表明高速率下同一模板的事件 timing 更一致。跨指标同向性强（24/29 subjects lag span 与 Pearson r delta 同号, binomial p=0.0003）。**H2 在高置信子集有探索性支持，在全 cohort 上证据不足。**
 - **同步性线**：cohort-level interictal synchrony 总体为 null，没有支持“post-ictal reset / pre-ictal resynchronization”；唯一探索性信号是 extra-focal `phase_e` 的 `pre > post`。
 
 ---
@@ -135,8 +135,9 @@ Epilepsiae 的区域分层分析中：
 - 固定模板投射 agreement 虽然整体够高（median `0.888`），但 `chengshuai`、`253`、`818` 这 3 个 subject 仍应谨慎解释时间轨迹细节。
 - synchrony 线最大的风险不是假阳性，而是“把 null 写得太花”。现在最诚实的说法就是：**总体 null，局部 extra-focal 线索待验证。**
 - propagation 与 synchrony 都是 topic 1，但它们不是同一个统计对象，文档里必须并列而不能混写成一个指标体系。
-- **当前传播线的指标体系完全是 ordinal 的（rank + tau + MI），对绝对时间精度完全盲。** 如果慢调控改变的是 lag compression（时间压缩）而非 rank order，tau 完全看不到。PR-4B Step 1 已确认 L2 为 null（p=0.349/0.221），下一步 L3（lag span + Pearson r）是 H2 判别的主战场。
-- **PR-4B Step 0 已完成（2026-04-13）**：`lagPatRaw → relative_lag` 的 per-event min-subtraction 验证通过（30/30 order match = 1.0），但 rank-based cluster 在 absolute-lag 空间的 Pearson r **不理想**：dominant cluster cohort median = 0.601（8/30 pass > 0.7）。Spearman(dominant τ, dominant r) = 0.910（p < 0.0001），说明 ordinal 好的簇在 cardinal 空间也紧，但不是所有 subject 都足够紧。huangwanling（eligible_frac = 0）在 L3 层完全 ineligible。后续 L3 分析应分全 cohort（29 subjects）和 high-confidence subset（8 subjects with dominant_r > 0.7）两层报告。
+- **PR-4B 三层分析已完成（2026-04-14）。** L1 null + L2 null（identity-bias 限制灵敏度）已为确定性结论。L3 的唯一显著信号来自 n=8 的高置信子集（Pearson r p=0.016）：Wilcoxon n=8 的最小可能 p 值为 `2^-8=0.004`，当前 p=0.016 是倒数第二小的可能值（W=1），统计功效极有限。该子集的选择标准（dom_r > 0.7）来自 Step 0 的数据质量判断（不是结果依赖选择），但 8/30 的样本量不足以做出强 population-level 结论。
+- **L3 lag span 在全 cohort 上 p=0.135（18/30），高置信子集 p=0.055（6/8）。** 方向与 Pearson r 一致（24/29 同号, binomial p=0.0003），但单独不显著。lag span delta 正值意味着高速率状态下 lag 跨度**更大**（不是更压缩）。这与 Kuramoto K(t) 升高 → lag 压缩的最简单预测**相反**——高速率伴随的是更稳定但更展开的传播。
+- **huangwanling 在 L3 完全 ineligible**（eligible_frac=0，仅 n_part=3–4 事件），所有 L3 分析 n=29。
 
 ---
 
@@ -207,11 +208,30 @@ PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已
 6. 结果文件：`results/interictal_propagation/pr4b_step1_rate_coupling.json`
 7. Cohort summary：`results/interictal_propagation/pr1_cohort_summary.json` → `rate_state_coupling_analysis`
 
-**分析内容（Step 2–3 TODO）**：
-1. **L3-primary（lag span）**：within-cluster mean lag span (high vs low)，**n_participating 匹配后**。lag span 是 per-event scalar（max-min of relative lag among participating channels），不受跨事件 Pearson r baseline 水平限制，对全 cohort（n=29）均有效。**lag span 是 L3 的唯一主检测指标。**
-2. **L3-secondary（Pearson r）**：within-cluster Pearson r on absolute lag vectors (high vs low, **仅 n_part ≥ 5 事件**），**仅在 high-confidence subset（dominant_r > 0.7, n=8）上做正式报告**，全 cohort 报告降级为 exploratory。Step 0 显示 baseline within-cluster Pearson r cohort median = 0.601，在此基线上检测 rate-dependent 差异的灵敏度有限
-3. **L1**：occupancy fraction 与 local rate 的 Spearman correlation per cluster
-4. `n_participating` matched subsampling：lag span 的 high/low 比较中，必须对两组做 n_participating 匹配（高 rate → 高 n_part → 更大 span 的混杂必须被控制）
+**Step 2–3 结论（L3 + L1, DONE 2026-04-14）**：
+
+L3 分析：within-cluster lag span 和 Pearson r 在 high/low rate 状态间比较，**n_participating 精确匹配**后。
+
+1. **L3 lag span（全 cohort n=30）**：delta median = **+0.001**，18/30 high > low，Wilcoxon **p = 0.135**。方向一致但不显著
+2. **L3 lag span（高置信 n=8）**：delta median = **+0.004**，6/8 high > low，Wilcoxon **p = 0.055**
+3. **L3 Pearson r（探索性，n=29）**：delta median = **+0.033**，17/29 high > low，Wilcoxon **p = 0.265**
+4. **L3 Pearson r（高置信 n=8，dom_r > 0.7）**：delta median = **+0.083**，**7/8 high > low**，Wilcoxon **p = 0.016**
+5. **跨指标同向性**：lag span delta 与 Pearson r delta 的 Spearman ρ = **0.628**（p=0.0003, n=29），24/29 subjects 两个 delta 同号（binomial p=0.0003）
+
+L1 分析：occupancy fraction 与 local rate 的 Spearman 相关。
+
+6. **L1 dominant cluster ρ median = −0.083**，13/30 正方向。Max |ρ| median = 0.275。**L1 null**：事件率不系统性改变模板占比
+
+**综合结论**：
+
+- **L1 null**：速率不改变模板选择
+- **L2 null**（Step 1）：identity-bias 86% 使灵敏度结构性不足
+- **L3 全 cohort null**，**L3 高置信子集 Pearson r 显著**（p=0.016, 7/8）
+- Lag span delta 正值 = 高速率下 lag 跨度更大（**不是**更压缩）。与 Pearson r 正值联合解读：高速率状态下同一模板的事件 timing pattern 更一致，但不是 Kuramoto 意义上的 lag 压缩
+- H2（rate modulation of timing precision）在高置信子集有**探索性支持**，在全 cohort 上**证据不足**
+- 高置信子集 p=0.016 的功效极有限：n=8 Wilcoxon 最小可能 p = 0.004，当前 W=1（仅 1 个 subject 反方向 zhangjinhan）
+
+7. 结果文件：`results/interictal_propagation/pr4b_coupling_summary.json`（per-subject L1/L2/L3），`results/interictal_propagation/pr1_cohort_summary.json` → `rate_state_coupling_analysis`
 
 **前置验证（PR-4B Step 0 — DONE 2026-04-13）**：
 1. **Per-event min-subtraction**：`relative_lag[ch] = lagPatRaw[ch] - min(lagPatRaw[participating])`，验证相对 lag 全部非负且 channel-order 与 lagPatRank 一致 → **30/30 exact order match = 1.0, pairwise concordance = 1.0**
@@ -234,7 +254,7 @@ PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已
 4. **L3**：within-cluster lag span trajectory + Pearson r — 发作邻近的 timing precision 变化（主检测层，仅 n_part ≥ 5 事件）
 5. Subject-level paired comparison（baseline vs pre-ictal vs post-ictal），**lag span 比较需 n_participating 匹配**
 
-**前置依赖**：PR-4B 完成后再做。PR-4B 提供 L2+L3 的基础指标实现、absolute lag 验证层和 n_participating 匹配框架。
+**前置依赖**：PR-4B 已完成。PR-4B 提供了 L2+L3 的基础指标实现（`compute_rate_state_coupling`）、absolute lag 验证层（`validate_absolute_lag_clustering`）和 n_participating 匹配框架（`_match_event_indices_by_nparticipating`）。PR-4C 可直接复用这些实现，将 rate-state 分窗替换为 seizure-proximity 分窗。
 
 ### 7.3 高 k subject 的鲁棒性复核
 
@@ -243,9 +263,9 @@ PR-3 和 PR-4A 已完成。模板在可视化和 occupancy 时间轨迹上都已
 
 ### 7.4 优先级
 
-1. **PR-4B**（P0）：rate × L2 + L3 + absolute lag validation — 这是 H1/H2 判别的核心实验
-2. **PR-4C**（P1）：seizure proximity — 依赖 PR-4B 的指标实现
-3. **高 k 复核**（P1）：与 PR-4B 并行
+1. ~~**PR-4B**（P0）：rate × L2 + L3 + absolute lag validation~~ — **DONE（2026-04-14）**
+2. **PR-4C**（P0）：seizure proximity L1+L2+L3 — PR-4B 已提供所有指标实现，可直接启动
+3. **高 k 复核**（P1）：不阻塞，可并行
 
 ---
 
