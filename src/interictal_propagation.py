@@ -1912,6 +1912,355 @@ def validate_absolute_lag_clustering(
     }
 
 
+def _build_rate_state_bins(
+    event_abs_times: np.ndarray,
+    *,
+    bin_hours: float,
+    min_events_per_bin: int,
+) -> Dict[str, Any]:
+    times = np.asarray(event_abs_times, dtype=float)
+    if bin_hours <= 0:
+        raise ValueError("bin_hours must be > 0")
+    if min_events_per_bin <= 0:
+        raise ValueError("min_events_per_bin must be > 0")
+
+    finite_mask = np.isfinite(times)
+    finite_idx = np.where(finite_mask)[0]
+    if finite_idx.size == 0:
+        return {
+            "event_bin_ids": np.full(times.shape, -1, dtype=int),
+            "event_rate_states": np.full(times.shape, "excluded", dtype=object),
+            "rate_bins": [],
+            "n_bins_total": 0,
+            "n_bins_eligible": 0,
+            "median_eligible_rate_per_hour": np.nan,
+            "high_bin_ids": [],
+            "low_bin_ids": [],
+        }
+
+    bin_sec = float(bin_hours) * 3600.0
+    finite_times = times[finite_mask]
+    timeline_start = float(np.min(finite_times))
+    event_bin_ids = np.full(times.shape, -1, dtype=int)
+    event_bin_ids[finite_mask] = np.floor((finite_times - timeline_start) / bin_sec).astype(int)
+
+    unique_bin_ids = sorted(set(event_bin_ids[finite_mask].tolist()))
+    rate_bins: List[Dict[str, Any]] = []
+    eligible_bins: List[Dict[str, Any]] = []
+    for bin_id in unique_bin_ids:
+        mask = event_bin_ids == int(bin_id)
+        n_events = int(np.sum(mask))
+        rate_per_hour = float(n_events / float(bin_hours))
+        entry = {
+            "bin_id": int(bin_id),
+            "start_time": timeline_start + int(bin_id) * bin_sec,
+            "end_time": timeline_start + (int(bin_id) + 1) * bin_sec,
+            "n_events": n_events,
+            "rate_per_hour": rate_per_hour,
+            "eligible": bool(n_events >= int(min_events_per_bin)),
+        }
+        rate_bins.append(entry)
+        if entry["eligible"]:
+            eligible_bins.append(entry)
+
+    eligible_sorted = sorted(
+        eligible_bins,
+        key=lambda entry: (float(entry["rate_per_hour"]), int(entry["bin_id"])),
+    )
+    half = len(eligible_sorted) // 2
+    low_bin_ids = {int(entry["bin_id"]) for entry in eligible_sorted[:half]}
+    high_bin_ids = (
+        {int(entry["bin_id"]) for entry in eligible_sorted[-half:]}
+        if half > 0
+        else set()
+    )
+
+    event_rate_states = np.full(times.shape, "excluded", dtype=object)
+    for entry in rate_bins:
+        bin_id = int(entry["bin_id"])
+        if bin_id in high_bin_ids:
+            state = "high"
+        elif bin_id in low_bin_ids:
+            state = "low"
+        else:
+            state = "excluded"
+        entry["rate_state"] = state
+        event_rate_states[event_bin_ids == bin_id] = state
+
+    eligible_rates = [
+        float(entry["rate_per_hour"]) for entry in eligible_sorted
+        if np.isfinite(entry["rate_per_hour"])
+    ]
+    return {
+        "event_bin_ids": event_bin_ids,
+        "event_rate_states": event_rate_states,
+        "rate_bins": rate_bins,
+        "n_bins_total": int(len(rate_bins)),
+        "n_bins_eligible": int(len(eligible_sorted)),
+        "median_eligible_rate_per_hour": (
+            float(np.median(eligible_rates)) if eligible_rates else np.nan
+        ),
+        "high_bin_ids": sorted(high_bin_ids),
+        "low_bin_ids": sorted(low_bin_ids),
+    }
+
+
+def _cluster_state_tau_summary(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    event_indices: np.ndarray,
+    *,
+    n_sample: int,
+    n_seeds: int,
+    min_shared_channels: int,
+    min_center_participation: int,
+) -> Dict[str, Any]:
+    event_indices = np.asarray(event_indices, dtype=int)
+    if event_indices.size == 0:
+        return {
+            "n_events": 0,
+            "raw_tau": np.nan,
+            "centered_tau": np.nan,
+            "raw_n_pairs_valid": 0,
+            "centered_n_pairs_valid": 0,
+        }
+
+    sub_ranks = np.asarray(ranks[:, event_indices], dtype=float)
+    sub_bools = np.asarray(bools[:, event_indices], dtype=bool)
+    sub_idx = np.arange(event_indices.size, dtype=int)
+    n_sample_local = int(min(int(n_sample), event_indices.size))
+
+    raw = _multi_seed_tau_summary(
+        sub_ranks,
+        sub_bools,
+        event_indices=sub_idx,
+        n_sample=n_sample_local,
+        n_seeds=n_seeds,
+        min_shared_channels=min_shared_channels,
+    )
+    centered_meta = _center_rank_matrix(
+        sub_ranks,
+        sub_bools,
+        min_participation=min_center_participation,
+    )
+    centered = _multi_seed_tau_summary(
+        centered_meta["centered_ranks"],
+        sub_bools,
+        event_indices=sub_idx,
+        n_sample=n_sample_local,
+        n_seeds=n_seeds,
+        min_shared_channels=min_shared_channels,
+        channel_mask=centered_meta["valid_center_mask"],
+    )
+    return {
+        "n_events": int(event_indices.size),
+        "raw_tau": raw["mean_tau"],
+        "centered_tau": centered["mean_tau"],
+        "raw_n_pairs_valid": int(raw["n_pairs_valid_median"]),
+        "centered_n_pairs_valid": int(centered["n_pairs_valid_median"]),
+    }
+
+
+def _aggregate_cluster_state_metric(
+    per_cluster: List[Dict[str, Any]],
+    metric_key: str,
+) -> Dict[str, Any]:
+    comparable = [
+        cluster for cluster in per_cluster
+        if np.isfinite(cluster["high"].get(metric_key, np.nan))
+        and np.isfinite(cluster["low"].get(metric_key, np.nan))
+    ]
+    if not comparable:
+        return {
+            "n_clusters_compared": 0,
+            "cluster_ids_compared": [],
+            "high_mean": np.nan,
+            "low_mean": np.nan,
+            "delta_high_minus_low": np.nan,
+            "n_clusters_high_gt_low": 0,
+        }
+
+    high_vals = np.array([cluster["high"][metric_key] for cluster in comparable], dtype=float)
+    low_vals = np.array([cluster["low"][metric_key] for cluster in comparable], dtype=float)
+    delta_vals = high_vals - low_vals
+    return {
+        "n_clusters_compared": int(len(comparable)),
+        "cluster_ids_compared": [int(cluster["cluster_id"]) for cluster in comparable],
+        "high_mean": float(np.mean(high_vals)),
+        "low_mean": float(np.mean(low_vals)),
+        "delta_high_minus_low": float(np.mean(delta_vals)),
+        "n_clusters_high_gt_low": int(np.sum(delta_vals > 0)),
+    }
+
+
+def compute_rate_state_coupling(
+    event_abs_times: np.ndarray,
+    ranks: np.ndarray,
+    lag_raw: np.ndarray,
+    bools: np.ndarray,
+    cluster_labels: np.ndarray,
+    n_clusters: int,
+    *,
+    valid_event_indices: Optional[np.ndarray] = None,
+    rate_bin_hours: float = 2.0,
+    min_events_per_bin: int = 20,
+    n_sample: int = 200,
+    n_seeds: int = 5,
+    min_shared_channels: int = 3,
+    min_center_participation: int = 10,
+    min_participating_l3: int = 5,
+    match_seed: int = 42,
+) -> Dict[str, Any]:
+    """PR-4B Step 1: high-rate vs low-rate within-cluster tau comparison.
+
+    Matched subsampling: for each cluster, the larger state group is
+    randomly downsampled to the size of the smaller group before tau
+    computation, eliminating the event-count asymmetry confound.
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    ranks = np.asarray(ranks, dtype=float)
+    lag_raw = np.asarray(lag_raw, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    labels = np.asarray(cluster_labels, dtype=int)
+    if ranks.shape != bools.shape or ranks.shape != lag_raw.shape:
+        raise ValueError("ranks, lag_raw, and bools must share shape")
+
+    if valid_event_indices is None:
+        if labels.size == ranks.shape[1]:
+            valid_event_indices = np.arange(ranks.shape[1], dtype=int)
+        else:
+            valid_event_indices = _valid_event_indices(
+                bools,
+                min_participating=min_shared_channels,
+            )
+    valid_event_indices = np.asarray(valid_event_indices, dtype=int)
+    if labels.size != valid_event_indices.size:
+        raise ValueError("cluster_labels size must equal valid_event_indices size")
+
+    v_times = times[valid_event_indices]
+    v_ranks = ranks[:, valid_event_indices]
+    v_bools = bools[:, valid_event_indices]
+    n_part = np.sum(v_bools, axis=0).astype(int)
+
+    bin_info = _build_rate_state_bins(
+        v_times,
+        bin_hours=rate_bin_hours,
+        min_events_per_bin=min_events_per_bin,
+    )
+    event_states = np.asarray(bin_info["event_rate_states"], dtype=object)
+    state_masks = {
+        "high": event_states == "high",
+        "low": event_states == "low",
+    }
+
+    match_rng = np.random.default_rng(int(match_seed))
+
+    per_cluster: List[Dict[str, Any]] = []
+    for cluster_id in range(int(n_clusters)):
+        cluster_mask = labels == int(cluster_id)
+        high_idx = np.where(cluster_mask & state_masks["high"])[0]
+        low_idx = np.where(cluster_mask & state_masks["low"])[0]
+
+        n_match = int(min(high_idx.size, low_idx.size))
+
+        if high_idx.size > n_match and n_match > 0:
+            high_idx = match_rng.choice(high_idx, size=n_match, replace=False)
+        if low_idx.size > n_match and n_match > 0:
+            low_idx = match_rng.choice(low_idx, size=n_match, replace=False)
+
+        adj_center = int(min(
+            int(min_center_participation),
+            max(1, n_match // 5),
+        ))
+
+        cluster_entry: Dict[str, Any] = {
+            "cluster_id": int(cluster_id),
+            "n_matched": n_match,
+        }
+        for state_name, state_idx in (("high", high_idx), ("low", low_idx)):
+            cluster_entry[state_name] = _cluster_state_tau_summary(
+                v_ranks,
+                v_bools,
+                state_idx,
+                n_sample=n_sample,
+                n_seeds=n_seeds,
+                min_shared_channels=min_shared_channels,
+                min_center_participation=adj_center,
+            )
+        high_raw = cluster_entry["high"]["raw_tau"]
+        low_raw = cluster_entry["low"]["raw_tau"]
+        high_centered = cluster_entry["high"]["centered_tau"]
+        low_centered = cluster_entry["low"]["centered_tau"]
+        cluster_entry["raw_delta_high_minus_low"] = (
+            float(high_raw - low_raw)
+            if np.isfinite(high_raw) and np.isfinite(low_raw)
+            else np.nan
+        )
+        cluster_entry["centered_delta_high_minus_low"] = (
+            float(high_centered - low_centered)
+            if np.isfinite(high_centered) and np.isfinite(low_centered)
+            else np.nan
+        )
+        per_cluster.append(cluster_entry)
+
+    l2_raw = _aggregate_cluster_state_metric(per_cluster, "raw_tau")
+    l2_centered = _aggregate_cluster_state_metric(per_cluster, "centered_tau")
+    state_event_counts = {
+        "high": int(np.sum(state_masks["high"])),
+        "low": int(np.sum(state_masks["low"])),
+        "excluded": int(np.sum(event_states == "excluded")),
+    }
+
+    rate_bin_summary = [
+        {
+            "bin_id": int(entry["bin_id"]),
+            "n_events": int(entry["n_events"]),
+            "rate_per_hour": float(entry["rate_per_hour"]),
+            "rate_state": str(entry.get("rate_state", "excluded")),
+        }
+        for entry in bin_info["rate_bins"]
+    ]
+
+    subject_raw_delta = l2_raw.get("delta_high_minus_low", np.nan)
+    subject_centered_delta = l2_centered.get("delta_high_minus_low", np.nan)
+
+    out: Dict[str, Any] = {
+        "step_status": "step1_l2_complete",
+        "n_valid_events": int(valid_event_indices.size),
+        "n_clusters": int(n_clusters),
+        "rate_bin_hours": float(rate_bin_hours),
+        "min_events_per_bin": int(min_events_per_bin),
+        "n_rate_bins_total": int(bin_info["n_bins_total"]),
+        "n_rate_bins_eligible": int(bin_info["n_bins_eligible"]),
+        "median_eligible_rate_per_hour": bin_info["median_eligible_rate_per_hour"],
+        "high_bin_ids": bin_info["high_bin_ids"],
+        "low_bin_ids": bin_info["low_bin_ids"],
+        "state_event_counts": state_event_counts,
+        "l3_eligible_fraction": (
+            float(np.mean(n_part >= int(min_participating_l3))) if n_part.size else np.nan
+        ),
+        "rate_bin_summary": rate_bin_summary,
+        "per_cluster": per_cluster,
+        "subject_raw_delta": (
+            float(subject_raw_delta) if np.isfinite(subject_raw_delta) else None
+        ),
+        "subject_centered_delta": (
+            float(subject_centered_delta) if np.isfinite(subject_centered_delta) else None
+        ),
+        "l2": {
+            "raw": l2_raw,
+            "centered": l2_centered,
+        },
+    }
+    if (
+        state_event_counts["high"] == 0
+        or state_event_counts["low"] == 0
+        or l2_raw["n_clusters_compared"] == 0
+    ):
+        out["warning"] = "insufficient_high_low_state_coverage"
+    return out
+
+
 def _summarize_reproducibility(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Cohort-level summary of cross-time template reproducibility."""
     repro_recs = [
@@ -2054,6 +2403,95 @@ def _summarize_absolute_lag_validation(valid: List[Dict[str, Any]]) -> Dict[str,
             float(np.median(pairwise_order)) if pairwise_order else np.nan
         ),
         "within_cluster_pearson_r_by_npart": bins_summary,
+    }
+
+
+def _summarize_rate_state_coupling(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Cohort-level PR-4B Step 1 summary with subject-level Wilcoxon."""
+    coupling_recs = [
+        rec["rate_state_coupling"]
+        for rec in valid
+        if rec.get("rate_state_coupling")
+        and "error" not in rec.get("rate_state_coupling", {})
+    ]
+    if not coupling_recs:
+        return {"n_subjects": 0}
+
+    raw_deltas: List[float] = []
+    centered_deltas: List[float] = []
+    raw_highs: List[float] = []
+    raw_lows: List[float] = []
+    centered_highs: List[float] = []
+    centered_lows: List[float] = []
+    eligible_rates: List[float] = []
+
+    for rec in coupling_recs:
+        rd = rec.get("subject_raw_delta")
+        if rd is not None and np.isfinite(rd):
+            raw_deltas.append(float(rd))
+        cd = rec.get("subject_centered_delta")
+        if cd is not None and np.isfinite(cd):
+            centered_deltas.append(float(cd))
+        l2 = rec.get("l2", {})
+        rh = l2.get("raw", {}).get("high_mean", np.nan)
+        rl = l2.get("raw", {}).get("low_mean", np.nan)
+        ch = l2.get("centered", {}).get("high_mean", np.nan)
+        cl = l2.get("centered", {}).get("low_mean", np.nan)
+        if np.isfinite(rh):
+            raw_highs.append(float(rh))
+        if np.isfinite(rl):
+            raw_lows.append(float(rl))
+        if np.isfinite(ch):
+            centered_highs.append(float(ch))
+        if np.isfinite(cl):
+            centered_lows.append(float(cl))
+        er = rec.get("median_eligible_rate_per_hour", np.nan)
+        if np.isfinite(er):
+            eligible_rates.append(float(er))
+
+    def _wilcoxon_on_deltas(deltas: List[float]) -> Dict[str, Any]:
+        if len(deltas) < 2:
+            return {"p": np.nan, "n": int(len(deltas))}
+        arr = np.asarray(deltas, dtype=float)
+        nonzero = arr[np.abs(arr) > 1e-15]
+        if nonzero.size < 2:
+            return {"p": np.nan, "n": int(nonzero.size)}
+        try:
+            p = float(wilcoxon(nonzero, alternative="two-sided").pvalue)
+        except Exception:
+            p = np.nan
+        return {"p": p, "n": int(nonzero.size)}
+
+    raw_wilcoxon = _wilcoxon_on_deltas(raw_deltas)
+    centered_wilcoxon = _wilcoxon_on_deltas(centered_deltas)
+
+    return {
+        "n_subjects": int(len(coupling_recs)),
+        "n_subjects_with_raw_l2": int(len(raw_deltas)),
+        "n_subjects_with_centered_l2": int(len(centered_deltas)),
+        "median_eligible_rate_per_hour": (
+            float(np.median(eligible_rates)) if eligible_rates else np.nan
+        ),
+        "raw_tau": {
+            "high_median": float(np.median(raw_highs)) if raw_highs else np.nan,
+            "low_median": float(np.median(raw_lows)) if raw_lows else np.nan,
+            "delta_high_minus_low_median": (
+                float(np.median(raw_deltas)) if raw_deltas else np.nan
+            ),
+            "n_subjects_high_gt_low": int(sum(val > 0 for val in raw_deltas)),
+            "wilcoxon_p": raw_wilcoxon["p"],
+            "wilcoxon_n": raw_wilcoxon["n"],
+        },
+        "centered_tau": {
+            "high_median": float(np.median(centered_highs)) if centered_highs else np.nan,
+            "low_median": float(np.median(centered_lows)) if centered_lows else np.nan,
+            "delta_high_minus_low_median": (
+                float(np.median(centered_deltas)) if centered_deltas else np.nan
+            ),
+            "n_subjects_high_gt_low": int(sum(val > 0 for val in centered_deltas)),
+            "wilcoxon_p": centered_wilcoxon["p"],
+            "wilcoxon_n": centered_wilcoxon["n"],
+        },
     }
 
 
@@ -2496,6 +2934,7 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
         "adaptive_cluster_analysis": _summarize_adaptive_clusters(valid),
         "reproducibility_analysis": _summarize_reproducibility(valid),
         "absolute_lag_validation_analysis": _summarize_absolute_lag_validation(valid),
+        "rate_state_coupling_analysis": _summarize_rate_state_coupling(valid),
         "temporal_dynamics_analysis": _summarize_temporal_dynamics(valid),
     }
 

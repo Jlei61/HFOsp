@@ -10,6 +10,7 @@ from src.interictal_propagation import (
     assign_events_to_templates,
     build_cluster_templates,
     compute_adaptive_cluster_stereotypy,
+    compute_rate_state_coupling,
     compute_source_node_diagnostic,
     compute_stereotypy_by_nparticipating,
     compute_temporal_cluster_dynamics,
@@ -638,6 +639,73 @@ def test_validate_absolute_lag_clustering_reports_stratified_r_and_order_match()
     assert out["validation_pass"] is True
 
 
+def test_compute_rate_state_coupling_reports_high_vs_low_tau() -> None:
+    n_ch = 4
+    n_ev = 12
+    ranks = np.zeros((n_ch, n_ev), dtype=float)
+    bools = np.ones((n_ch, n_ev), dtype=bool)
+    lag_raw = np.zeros((n_ch, n_ev), dtype=float)
+    labels = np.zeros(n_ev, dtype=int)
+    times = np.array(
+        [
+            0.0,
+            1800.0,
+            7200.0,
+            7800.0,
+            8400.0,
+            9000.0,
+            14400.0,
+            15000.0,
+            21600.0,
+            22200.0,
+            22800.0,
+            23400.0,
+        ],
+        dtype=float,
+    )
+
+    pattern_stable = np.array([1.0, 2.0, 3.0, 4.0], dtype=float)
+    pattern_reverse = np.array([4.0, 3.0, 2.0, 1.0], dtype=float)
+    low_events = {0, 1, 6, 7}
+    for ev in range(n_ev):
+        pattern = pattern_stable if ev not in low_events or ev % 2 == 0 else pattern_reverse
+        ranks[:, ev] = pattern
+        lag_raw[:, ev] = 100.0 + 10.0 * ev + 0.05 * pattern
+
+    out = compute_rate_state_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        valid_event_indices=np.arange(n_ev, dtype=int),
+        rate_bin_hours=2.0,
+        min_events_per_bin=2,
+        n_sample=20,
+        n_seeds=3,
+        min_shared_channels=3,
+        min_center_participation=1,
+    )
+
+    assert out["n_rate_bins_total"] == 4
+    assert out["n_rate_bins_eligible"] == 4
+    assert out["high_bin_ids"] == [1, 3]
+    assert out["low_bin_ids"] == [0, 2]
+    assert out["state_event_counts"]["high"] == 8
+    assert out["state_event_counts"]["low"] == 4
+    assert out["l2"]["raw"]["n_clusters_compared"] == 1
+    assert "per_cluster" in out
+    assert len(out["per_cluster"]) == 1
+    pc = out["per_cluster"][0]
+    assert pc["high"]["n_events"] == pc["low"]["n_events"]
+    assert out["l2"]["raw"]["delta_high_minus_low"] > 0.2
+    assert "centered" in out["l2"]
+    assert out["subject_raw_delta"] is not None
+    assert "rate_bin_summary" in out
+    assert "rate_bins" not in out
+
+
 def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary() -> None:
     subject_results = {
         "yuquan/a": {
@@ -668,6 +736,15 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
                     "5-8": {"median_r": 0.82},
                     "9+": {"median_r": np.nan},
                 },
+            },
+            "rate_state_coupling": {
+                "subject_raw_delta": 0.20,
+                "subject_centered_delta": 0.10,
+                "l2": {
+                    "raw": {"high_mean": 0.30, "low_mean": 0.10, "delta_high_minus_low": 0.20},
+                    "centered": {"high_mean": 0.12, "low_mean": 0.02, "delta_high_minus_low": 0.10},
+                },
+                "median_eligible_rate_per_hour": 12.0,
             },
             "temporal_dynamics": {
                 "day_night_summary": {
@@ -706,6 +783,15 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
                     "9+": {"median_r": 0.88},
                 },
             },
+            "rate_state_coupling": {
+                "subject_raw_delta": 0.10,
+                "subject_centered_delta": 0.05,
+                "l2": {
+                    "raw": {"high_mean": 0.25, "low_mean": 0.15, "delta_high_minus_low": 0.10},
+                    "centered": {"high_mean": 0.08, "low_mean": 0.03, "delta_high_minus_low": 0.05},
+                },
+                "median_eligible_rate_per_hour": 10.0,
+            },
             "temporal_dynamics": {
                 "day_night_summary": {
                     "day": {"n_events": 6, "dominant_fraction": 0.7, "normalized_entropy": 0.2},
@@ -729,3 +815,10 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
     assert lag_summary["dominant_cluster_median_r_median"] == 0.825
     assert lag_summary["cohort_validation_pass"] is True
     assert lag_summary["within_cluster_pearson_r_by_npart"]["5-8"]["median_r"] == 0.78
+    coupling = cohort["rate_state_coupling_analysis"]
+    assert coupling["n_subjects"] == 2
+    assert coupling["raw_tau"]["delta_high_minus_low_median"] == 0.15000000000000002
+    assert coupling["centered_tau"]["n_subjects_high_gt_low"] == 2
+    assert "wilcoxon_p" in coupling["raw_tau"]
+    assert "wilcoxon_n" in coupling["raw_tau"]
+    assert coupling["raw_tau"]["wilcoxon_n"] == 2
