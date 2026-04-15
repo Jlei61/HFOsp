@@ -50,9 +50,9 @@ def load_subject_params(params_json: Path) -> dict:
         return json.load(f)
 
 
-def get_pick_k(subject_params: dict, sub_name: str) -> float:
-    defaults = subject_params.get("yuquan", {}).get("_defaults", {})
-    sub_cfg = subject_params.get("yuquan", {}).get(sub_name, {})
+def get_pick_k(subject_params: dict, sub_name: str, dataset: str = "yuquan") -> float:
+    defaults = subject_params.get(dataset, {}).get("_defaults", {})
+    sub_cfg = subject_params.get(dataset, {}).get(sub_name, {})
     return sub_cfg.get("pick_k", defaults.get("pick_k", 1.0))
 
 
@@ -133,12 +133,19 @@ def run(
     soz_json: Path,
     params_json: Path,
     out_dir: Path,
+    dataset: str = "yuquan",
 ):
     soz_all = load_soz_channels(soz_json)
     subject_params = load_subject_params(params_json)
+    dataset_label = dataset.capitalize()
 
     subjects = sorted(os.listdir(data_root))
     subjects = [s for s in subjects if (data_root / s).is_dir()]
+
+    ds_params = subject_params.get(dataset, {})
+    ds_subject_ids = {k for k in ds_params if not k.startswith("_")}
+    if ds_subject_ids:
+        subjects = [s for s in subjects if s in ds_subject_ids]
 
     results = {}
 
@@ -161,7 +168,7 @@ def run(
             print(f"  {sub}: skip (no SOZ info)")
             continue
 
-        pick_k = get_pick_k(subject_params, sub)
+        pick_k = get_pick_k(subject_params, sub, dataset=dataset)
 
         soz_idx_raw, non_soz_idx_raw = classify_channels_soz(raw_chns, soz_list)
 
@@ -295,7 +302,7 @@ def run(
     ax_box.set_xticks([0, 1])
     ax_box.set_xticklabels(["Raw Counts", "Refined Counts"], fontsize=11)
     ax_box.set_ylabel("AUC", fontsize=12, fontweight="bold")
-    ax_box.set_title("Raw vs Refined AUC (Yuquan)", fontsize=12)
+    ax_box.set_title(f"Raw vs Refined AUC ({dataset_label})", fontsize=12)
     ax_box.spines["top"].set_visible(False)
     ax_box.spines["right"].set_visible(False)
 
@@ -320,10 +327,10 @@ def run(
     ax_bar.spines["top"].set_visible(False)
     ax_bar.spines["right"].set_visible(False)
 
-    fig.suptitle("Yuquan HFO Detection — Refine vs SOZ Validation", fontsize=14, fontweight="bold")
-    fig.savefig(fig_dir / "yuquan_refine_soz_cohort.png", dpi=200, bbox_inches="tight")
+    fig.suptitle(f"{dataset_label} HFO Detection — Refine vs SOZ Validation", fontsize=14, fontweight="bold")
+    fig.savefig(fig_dir / f"{dataset}_refine_soz_cohort.png", dpi=200, bbox_inches="tight")
     plt.close(fig)
-    print(f"\nCohort figure saved: {fig_dir / 'yuquan_refine_soz_cohort.png'}")
+    print(f"\nCohort figure saved: {fig_dir / f'{dataset}_refine_soz_cohort.png'}")
 
     # ── Summary JSON ──
     summary = {
@@ -352,22 +359,40 @@ def run(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Refine-SOZ validation figure (Yuquan)")
-    parser.add_argument("--data-root", default="/mnt/yuquan_data/yuquan_24h_edf",
-                       help="Yuquan data root directory")
-    parser.add_argument("--soz-json", default=str(PROJECT_ROOT / "results" / "yuquan_soz_core_channels.json"),
-                       help="SOZ channels JSON")
+    parser = argparse.ArgumentParser(description="Refine-SOZ validation figure")
+    parser.add_argument("--dataset", default="yuquan", choices=["yuquan", "epilepsiae"],
+                       help="Dataset to validate")
+    parser.add_argument("--data-root", default=None,
+                       help="Data root directory (auto-detected from dataset)")
+    parser.add_argument("--soz-json", default=None,
+                       help="SOZ channels JSON (auto-detected from dataset)")
     parser.add_argument("--params-json", default=str(PROJECT_ROOT / "config" / "subject_params.json"),
                        help="Subject parameters JSON")
-    parser.add_argument("--out-dir", default=str(PROJECT_ROOT / "results" / "refine_soz_validation"),
-                       help="Output directory")
+    parser.add_argument("--out-dir", default=None,
+                       help="Output directory (auto-detected from dataset)")
     args = parser.parse_args()
+
+    if args.data_root is None:
+        if args.dataset == "yuquan":
+            args.data_root = str(PROJECT_ROOT / "results" / "hfo_detection")
+        else:
+            args.data_root = str(PROJECT_ROOT / "results" / "hfo_detection")
+
+    if args.soz_json is None:
+        if args.dataset == "yuquan":
+            args.soz_json = str(PROJECT_ROOT / "results" / "yuquan_soz_core_channels.json")
+        else:
+            args.soz_json = str(PROJECT_ROOT / "results" / "epilepsiae_soz_core_channels.json")
+
+    if args.out_dir is None:
+        args.out_dir = str(PROJECT_ROOT / "results" / "refine_soz_validation")
 
     run(
         data_root=Path(args.data_root),
         soz_json=Path(args.soz_json),
         params_json=Path(args.params_json),
         out_dir=Path(args.out_dir),
+        dataset=args.dataset,
     )
 
 
