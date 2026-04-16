@@ -30,6 +30,13 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.plot_style import (  # noqa: E402
+    style_panel as _style_panel,
+    violin_with_scatter as _violin_with_scatter,
+    add_significance_bracket as _add_significance_bracket,
+    COL_YQ, COL_EPI, COL_SIG, COL_NONSIG,
+)
+
 RESULTS_DIR = Path("results/interictal_propagation")
 FIG_DIR = RESULTS_DIR / "figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -211,85 +218,7 @@ def plot_heatmap_examples(subjects: Dict[str, Dict[str, Any]]) -> None:
     print(f"Saved {out}")
 
 
-def _style_panel(ax: plt.Axes, label: str = "") -> None:
-    """Publication-quality panel styling (Nature/Science conventions)."""
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    for spine in ["left", "bottom"]:
-        ax.spines[spine].set_linewidth(1.4)
-    ax.tick_params(labelsize=20, width=1.4, length=6)
-    if label:
-        ax.text(
-            -0.14, 1.08, label, transform=ax.transAxes,
-            fontsize=30, fontweight="bold", va="top", ha="left",
-            fontfamily="sans-serif",
-        )
-
-
-COL_YQ = "#2166AC"
-COL_EPI = "#D55E00"
-COL_SIG = "#CC3311"
-COL_NONSIG = "#AAAAAA"
 _K_COLORS = {2: "#4477AA", 4: "#EE6677", 6: "#228833"}
-
-
-def _add_significance_bracket(
-    ax: plt.Axes,
-    x0: float, x1: float, y: float,
-    p: float, dy: float = 0.02,
-) -> None:
-    """Draw a bracket with significance stars between two x positions."""
-    if p < 0.001:
-        label = "***"
-    elif p < 0.01:
-        label = "**"
-    elif p < 0.05:
-        label = "*"
-    else:
-        label = "n.s."
-    ax.plot([x0, x0, x1, x1], [y, y + dy, y + dy, y], lw=1.5, color="black")
-    ax.text(
-        (x0 + x1) / 2, y + dy * 1.3, label,
-        ha="center", va="bottom", fontsize=18, fontweight="bold",
-    )
-
-
-def _violin_with_scatter(
-    ax: plt.Axes, vals: np.ndarray, pos: float,
-    color: str, width: float = 0.45, scatter_size: float = 55,
-    alpha_body: float = 0.2, rng_seed: int = 42,
-) -> None:
-    """Violin + boxplot + jittered scatter at a given position."""
-    if vals.size == 0:
-        return
-    vp = ax.violinplot(
-        vals, positions=[pos], widths=width,
-        bw_method="silverman",
-        showmeans=False, showmedians=False, showextrema=False,
-    )
-    for pc in vp["bodies"]:
-        pc.set_facecolor(color)
-        pc.set_alpha(alpha_body)
-        pc.set_edgecolor(color)
-        pc.set_linewidth(1.2)
-    bp = ax.boxplot(
-        vals, positions=[pos], widths=width * 0.5,
-        patch_artist=True, showfliers=False, showcaps=False,
-        medianprops=dict(linewidth=2.5, color="black"),
-        whiskerprops=dict(linewidth=1.2, color="black"),
-        zorder=2,
-    )
-    for patch in bp["boxes"]:
-        patch.set_facecolor(color)
-        patch.set_alpha(0.55)
-        patch.set_edgecolor("black")
-        patch.set_linewidth(1.0)
-    rng = np.random.default_rng(rng_seed)
-    jit = np.full(vals.size, pos) + rng.normal(0, 0.04, vals.size)
-    ax.scatter(
-        jit, vals, s=scatter_size, c=color,
-        edgecolors="white", linewidths=0.8, zorder=3, alpha=0.85,
-    )
 
 
 def plot_cohort_summary(subjects: Dict[str, Dict[str, Any]], cohort: Dict[str, Any]) -> None:
@@ -1626,6 +1555,78 @@ def plot_pr4a_daynight_group(
     print(f"Saved {out}")
 
 
+def _plot_followup_single_subject(record: Dict[str, Any]) -> None:
+    """Per-subject PR-4D figure: rate envelope (top) + stacked histogram (bottom)."""
+    dataset = record.get("dataset", "unknown")
+    subject = record.get("subject", "unknown")
+    nc = int(record.get("n_clusters", record.get("chosen_k", 0)))
+    rc = record.get("rate_curve", {})
+    hist = record.get("histogram", {})
+    summary = record.get("summary", {})
+
+    grid_hours = np.array(rc.get("grid_hours", []), dtype=float)
+    ptr = np.array(rc.get("per_template_rate", []), dtype=float)
+    bin_hours = np.array(hist.get("bin_center_hours", []), dtype=float)
+    bin_width_hours = np.array(hist.get("bin_width_hours", []), dtype=float)
+    ptc = np.array(hist.get("per_template_count", []), dtype=int)
+
+    if grid_hours.size == 0 or ptr.size == 0:
+        return
+
+    x_max = float(np.nanmax(grid_hours)) * 1.005
+
+    fig = plt.figure(figsize=(14, 7), constrained_layout=True)
+    outer = gridspec.GridSpec(2, 1, figure=fig, height_ratios=[3, 2], hspace=0.15)
+
+    ax_rate = fig.add_subplot(outer[0])
+    for c in range(min(nc, ptr.shape[0])):
+        ax_rate.plot(
+            grid_hours, ptr[c], lw=2.0,
+            color=PR4A_COLORS[c % len(PR4A_COLORS)], label=f"C{c}",
+        )
+    ax_rate.set_xlim(0, x_max)
+    ax_rate.set_ylim(bottom=0)
+    ax_rate.set_ylabel("Rate (events / hr)", fontsize=11)
+    dom_frac = summary.get("dominant_rate_fraction", float("nan"))
+    ax_rate.set_title(
+        f"{dataset}:{subject}  template-decomposed rate  |  "
+        f"dom_frac={dom_frac:.3f}  n={record.get('n_events_used', '?')}",
+        fontsize=12,
+    )
+    ax_rate.legend(loc="upper right", ncol=min(4, max(1, nc)), fontsize=9)
+    ax_rate.grid(True, axis="y", alpha=0.2)
+    ax_rate.spines["top"].set_visible(False)
+    ax_rate.spines["right"].set_visible(False)
+
+    ax_hist = fig.add_subplot(outer[1], sharex=ax_rate)
+    if bin_hours.size > 0 and ptc.size > 0:
+        if bin_width_hours.size != bin_hours.size:
+            bin_width_hours = np.full(bin_hours.shape, float(record.get("bin_hours", 1.0)), dtype=float)
+        bottom = np.zeros(ptc.shape[1], dtype=float)
+        for c in range(min(nc, ptc.shape[0])):
+            ax_hist.bar(
+                bin_hours, ptc[c], width=bin_width_hours * 0.9, bottom=bottom,
+                color=PR4A_COLORS[c % len(PR4A_COLORS)], alpha=0.8,
+            )
+            bottom += ptc[c].astype(float)
+    ax_hist.set_ylim(bottom=0)
+    ax_hist.set_ylabel("Event count / bin", fontsize=10)
+    ax_hist.set_xlabel("Hours from timeline start", fontsize=11)
+    ax_hist.spines["top"].set_visible(False)
+    ax_hist.spines["right"].set_visible(False)
+
+    out = PR4A_FIG_DIR / f"{dataset}_{subject}_pr4d_template_rate.png"
+    fig.savefig(out, dpi=250, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {out}")
+
+
+def plot_pr4a_followup_subjects(followup_results: Dict[str, Dict[str, Any]]) -> None:
+    for record in followup_results.values():
+        if isinstance(record, dict) and record.get("rate_curve"):
+            _plot_followup_single_subject(record)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Plot interictal propagation figures")
     parser.add_argument("--pr3", action="store_true", help="Generate PR-3 per-subject figures")
@@ -1635,6 +1636,7 @@ def main() -> None:
     parser.add_argument("--subjects", nargs="+", default=None, help="Optional subject filter")
     parser.add_argument("--smoke", action="store_true", help="Use chengshuai + 548 for PR-3 preview")
     parser.add_argument("--pr4a", action="store_true", help="Generate PR-4A temporal dynamics figures")
+    parser.add_argument("--pr4a-followup", action="store_true", help="Generate PR-4D template-rate figures")
     parser.add_argument("--max-events", type=int, default=2000, help="Max displayed events per panel")
     args = parser.parse_args()
 
@@ -1644,6 +1646,12 @@ def main() -> None:
         if temporal:
             plot_pr4a_subject_timelines(temporal)
             plot_pr4a_daynight_group(temporal, cohort)
+        return
+
+    if args.pr4a_followup:
+        followup = _load("pr4a_followup_template_mix_dynamics.json")
+        if followup:
+            plot_pr4a_followup_subjects(followup)
         return
 
     if args.pr3:

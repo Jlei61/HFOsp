@@ -3096,6 +3096,281 @@ def compute_temporal_cluster_dynamics(
     }
 
 
+def _sanitize_coverage_ranges(
+    coverage_ranges: Optional[Sequence[Tuple[float, float]]],
+    *,
+    t_min: float,
+    t_max: float,
+) -> List[Tuple[float, float]]:
+    if coverage_ranges:
+        raw = [
+            (float(start), float(end))
+            for start, end in coverage_ranges
+            if np.isfinite(start) and np.isfinite(end) and float(end) >= float(start)
+        ]
+    else:
+        raw = [(float(t_min), float(t_max))]
+    if not raw:
+        return [(float(t_min), float(t_max))]
+    raw.sort(key=lambda pair: pair[0])
+    merged: List[Tuple[float, float]] = []
+    for start, end in raw:
+        if not merged or start > merged[-1][1]:
+            merged.append((start, end))
+        else:
+            prev_start, prev_end = merged[-1]
+            merged[-1] = (prev_start, max(prev_end, end))
+    return merged
+
+
+def _build_continuous_grid(
+    ranges: Sequence[Tuple[float, float]],
+    *,
+    step_sec: float,
+) -> np.ndarray:
+    if step_sec <= 0:
+        raise ValueError("step_sec must be > 0")
+    points: List[np.ndarray] = []
+    for start, end in ranges:
+        if end < start:
+            continue
+        if np.isclose(end, start):
+            points.append(np.array([float(start)], dtype=float))
+            continue
+        grid = np.arange(float(start), float(end) + 0.5 * step_sec, step_sec, dtype=float)
+        if grid.size == 0 or grid[-1] < float(end):
+            grid = np.append(grid, float(end))
+        points.append(grid)
+    if not points:
+        return np.array([], dtype=float)
+    merged = np.unique(np.concatenate(points))
+    return np.sort(merged.astype(float))
+
+
+def _run_length_stats(labels: np.ndarray) -> Dict[str, Any]:
+    labels = np.asarray(labels, dtype=int)
+    if labels.size == 0:
+        return {
+            "n_runs": 0,
+            "dwell_events_median": np.nan,
+            "dwell_events_q1": np.nan,
+            "dwell_events_q3": np.nan,
+        }
+    runs: List[int] = []
+    run_len = 1
+    for idx in range(1, labels.size):
+        if int(labels[idx]) == int(labels[idx - 1]):
+            run_len += 1
+        else:
+            runs.append(int(run_len))
+            run_len = 1
+    runs.append(int(run_len))
+    runs_arr = np.asarray(runs, dtype=float)
+    return {
+        "n_runs": int(len(runs)),
+        "dwell_events_median": float(np.median(runs_arr)) if runs_arr.size else np.nan,
+        "dwell_events_q1": float(np.percentile(runs_arr, 25)) if runs_arr.size else np.nan,
+        "dwell_events_q3": float(np.percentile(runs_arr, 75)) if runs_arr.size else np.nan,
+    }
+
+
+def compute_continuous_template_dynamics(
+    event_abs_times: np.ndarray,
+    cluster_labels: np.ndarray,
+    n_clusters: int,
+    dataset: str,
+    *,
+    coverage_ranges: Optional[Sequence[Tuple[float, float]]] = None,
+    smoothing_hours: float = 2.0,
+    bin_hours: float = 1.0,
+) -> Dict[str, Any]:
+    """PR-4D: per-template absolute event rate over time.
+
+    Produces two complementary views of the same data:
+
+    * **rate_curve** — Gaussian KDE rate estimate (events/hr) for each
+      template on a fine grid.  Formula at grid point *t* for template *c*:
+
+          λ_c(t) = (3600 / (h·√(2π))) · Σ_i exp(−(t−t_i)²/(2h²)) · 𝟙[label_i=c]
+
+      where *h* = ``smoothing_hours × 3600`` seconds.
+
+    * **histogram** — raw event counts per template in fixed-width bins
+      (width = ``bin_hours``).
+
+    Together they answer: "when total rate changes, which template is
+    responsible?"  Normalised fractions hide this because they always
+    sum to 1.
+    """
+    if smoothing_hours <= 0:
+        raise ValueError("smoothing_hours must be > 0")
+    if bin_hours <= 0:
+        raise ValueError("bin_hours must be > 0")
+
+    times = np.asarray(event_abs_times, dtype=float)
+    labels = np.asarray(cluster_labels, dtype=int)
+    nc = int(n_clusters)
+    if times.shape[0] != labels.shape[0]:
+        raise ValueError("event_abs_times and cluster_labels must have the same length")
+
+    valid = np.isfinite(times) & (labels >= 0) & (labels < nc)
+    times = times[valid]
+    labels = labels[valid]
+
+    timezone_name = _dataset_timezone(dataset)
+    _nan_list = lambda: [float("nan")] * nc
+    if times.size == 0:
+        return {
+            "dataset": dataset,
+            "timezone_name": timezone_name,
+            "smoothing_hours": float(smoothing_hours),
+            "bin_hours": float(bin_hours),
+            "n_events_used": 0,
+            "n_clusters": nc,
+            "rate_curve": {
+                "grid_hours": [],
+                "total_rate": [],
+                "per_template_rate": [[] for _ in range(nc)],
+            },
+            "histogram": {
+                "bin_center_hours": [],
+                "bin_width_hours": [],
+                "total_count": [],
+                "per_template_count": [[] for _ in range(nc)],
+            },
+            "summary": {
+                "per_template_event_count": [0] * nc,
+                "per_template_mean_rate": _nan_list(),
+                "per_template_rate_fraction": _nan_list(),
+                "total_mean_rate": float("nan"),
+                "dominant_template_id": -1,
+                "dominant_rate_fraction": float("nan"),
+            },
+        }
+
+    order = np.argsort(times, kind="mergesort")
+    times = times[order]
+    labels = labels[order]
+
+    t_min = float(times[0])
+    t_max = float(times[-1])
+    ranges = _sanitize_coverage_ranges(coverage_ranges, t_min=t_min, t_max=t_max)
+
+    # ---- KDE rate curves ----
+    bandwidth_sec = float(smoothing_hours) * 3600.0
+    step_sec = max(300.0, bandwidth_sec / 4.0)
+    norm = 3600.0 / (bandwidth_sec * np.sqrt(2.0 * np.pi))
+
+    indicator = np.zeros((nc, times.size), dtype=float)
+    for c in range(nc):
+        indicator[c, labels == c] = 1.0
+
+    grid_origin = float(ranges[0][0])
+    grid_parts: List[np.ndarray] = []
+    rate_parts: List[np.ndarray] = []
+    for ri, (start, end) in enumerate(ranges):
+        seg_grid = _build_continuous_grid([(start, end)], step_sec=step_sec)
+        if seg_grid.size == 0:
+            continue
+        seg_rate = np.zeros((nc, seg_grid.size), dtype=float)
+        for gi, t in enumerate(seg_grid):
+            delta = (times - float(t)) / bandwidth_sec
+            kernel = np.exp(-0.5 * delta * delta)
+            seg_rate[:, gi] = indicator.dot(kernel) * norm
+        grid_parts.append(seg_grid)
+        rate_parts.append(seg_rate)
+        if ri < len(ranges) - 1:
+            grid_parts.append(np.array([float("nan")], dtype=float))
+            rate_parts.append(np.full((nc, 1), np.nan, dtype=float))
+
+    grid = np.concatenate(grid_parts) if grid_parts else np.array([], dtype=float)
+    per_template_rate = (
+        np.concatenate(rate_parts, axis=1) if rate_parts else np.zeros((nc, 0), dtype=float)
+    )
+    total_rate = np.nansum(per_template_rate, axis=0)
+    total_rate[np.all(np.isnan(per_template_rate), axis=0)] = np.nan
+    grid_hours = ((grid - grid_origin) / 3600.0).tolist()
+
+    # ---- Histogram bins ----
+    bin_sec = float(bin_hours) * 3600.0
+    hist_centers: List[float] = []
+    hist_widths: List[float] = []
+    hist_counts: List[np.ndarray] = []
+    for start, end in ranges:
+        bin_edges = np.arange(float(start), float(end) + 0.5 * bin_sec, bin_sec)
+        if bin_edges.size < 2:
+            bin_edges = np.array([float(start), float(end)], dtype=float)
+        if bin_edges[-1] < float(end):
+            bin_edges = np.append(bin_edges, float(end))
+        n_bins = len(bin_edges) - 1
+        seg_counts = np.zeros((nc, n_bins), dtype=int)
+        for c in range(nc):
+            seg_counts[c], _ = np.histogram(times[labels == c], bins=bin_edges)
+        hist_counts.append(seg_counts)
+        hist_centers.extend((0.5 * (bin_edges[:-1] + bin_edges[1:])).tolist())
+        hist_widths.extend((bin_edges[1:] - bin_edges[:-1]).tolist())
+
+    per_template_count = (
+        np.concatenate(hist_counts, axis=1) if hist_counts else np.zeros((nc, 0), dtype=int)
+    )
+    total_count = per_template_count.sum(axis=0)
+    bin_center_hours = ((np.asarray(hist_centers, dtype=float) - grid_origin) / 3600.0).tolist()
+
+    # ---- Summary ----
+    duration_hr = float(sum((end - start) for start, end in ranges) / 3600.0)
+    total_n = int(times.size)
+    per_templ_cnt = [int(np.sum(labels == c)) for c in range(nc)]
+    per_templ_rate = [
+        float(cnt / duration_hr) if np.isfinite(duration_hr) and duration_hr > 0
+        else float("nan")
+        for cnt in per_templ_cnt
+    ]
+    per_templ_frac = [
+        float(cnt / total_n) if total_n > 0 else float("nan")
+        for cnt in per_templ_cnt
+    ]
+    dom_id = int(np.argmax(per_templ_cnt))
+
+    return {
+        "dataset": dataset,
+        "timezone_name": timezone_name,
+        "smoothing_hours": float(smoothing_hours),
+        "bin_hours": float(bin_hours),
+        "n_events_used": total_n,
+        "n_clusters": nc,
+        "first_event_epoch": t_min,
+        "last_event_epoch": t_max,
+        "duration_hours": duration_hr,
+        "coverage_ranges_hours": [
+            [float((start - grid_origin) / 3600.0), float((end - grid_origin) / 3600.0)]
+            for start, end in ranges
+        ],
+        "rate_curve": {
+            "grid_hours": grid_hours,
+            "total_rate": total_rate.tolist(),
+            "per_template_rate": per_template_rate.tolist(),
+        },
+        "histogram": {
+            "bin_center_hours": bin_center_hours,
+            "bin_width_hours": (np.asarray(hist_widths, dtype=float) / 3600.0).tolist(),
+            "total_count": total_count.tolist(),
+            "per_template_count": per_template_count.tolist(),
+        },
+        "summary": {
+            "per_template_event_count": per_templ_cnt,
+            "per_template_mean_rate": per_templ_rate,
+            "per_template_rate_fraction": per_templ_frac,
+            "total_mean_rate": (
+                float(total_n / duration_hr)
+                if np.isfinite(duration_hr) and duration_hr > 0
+                else float("nan")
+            ),
+            "dominant_template_id": dom_id,
+            "dominant_rate_fraction": per_templ_frac[dom_id],
+        },
+    }
+
+
 def _summarize_temporal_dynamics(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Cohort summary for PR-4A using label-invariant subject-level summaries."""
     temporal_recs = [
@@ -3181,6 +3456,38 @@ def _summarize_temporal_dynamics(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
             "q1": float(np.percentile(tv_values, 25)) if tv_values else np.nan,
             "q3": float(np.percentile(tv_values, 75)) if tv_values else np.nan,
         },
+    }
+
+
+def _summarize_temporal_dynamics_followup(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Cohort summary for PR-4D per-template rate decomposition."""
+    recs = [
+        rec.get("temporal_dynamics_followup")
+        for rec in valid
+        if isinstance(rec.get("temporal_dynamics_followup"), dict)
+        and "summary" in rec.get("temporal_dynamics_followup", {})
+    ]
+    if not recs:
+        return {"n_subjects": 0}
+
+    dom_fracs: List[float] = []
+    total_rates: List[float] = []
+    for rec in recs:
+        s = rec.get("summary", {})
+        df = s.get("dominant_rate_fraction")
+        tr = s.get("total_mean_rate")
+        if df is not None and np.isfinite(df):
+            dom_fracs.append(float(df))
+        if tr is not None and np.isfinite(tr):
+            total_rates.append(float(tr))
+
+    return {
+        "n_subjects": len(recs),
+        "dominant_rate_fraction_median": float(np.median(dom_fracs)) if dom_fracs else np.nan,
+        "dominant_rate_fraction_range": (
+            [float(np.min(dom_fracs)), float(np.max(dom_fracs))] if dom_fracs else [np.nan, np.nan]
+        ),
+        "total_mean_rate_median": float(np.median(total_rates)) if total_rates else np.nan,
     }
 
 
@@ -3304,6 +3611,7 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
         "absolute_lag_validation_analysis": _summarize_absolute_lag_validation(valid),
         "rate_state_coupling_analysis": _summarize_rate_state_coupling(valid),
         "temporal_dynamics_analysis": _summarize_temporal_dynamics(valid),
+        "temporal_dynamics_followup_analysis": _summarize_temporal_dynamics_followup(valid),
     }
 
 

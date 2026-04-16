@@ -14,6 +14,7 @@ from src.interictal_propagation import (  # noqa: E402
     _valid_event_indices,
     assign_events_to_templates,
     build_cluster_templates,
+    compute_continuous_template_dynamics,
     compute_rate_state_coupling,
     validate_absolute_lag_clustering,
     compute_temporal_cluster_dynamics,
@@ -357,6 +358,125 @@ def _run_pr4a(
     logger.info(
         "PR-4A done. Cohort temporal summary: %s",
         cohort.get("temporal_dynamics_analysis", {}),
+    )
+
+
+def _run_pr4a_followup(
+    datasets_list: List,
+    per_subject_dir: Path,
+    *,
+    n_sample: int,
+    n_seeds: int,
+    smoothing_hours: float,
+    bin_hours: float,
+) -> None:
+    """PR-4D: gap-aware per-template absolute rate decomposition over time."""
+    import numpy as np
+
+    all_results: Dict[str, Dict[str, Any]] = {}
+    followup_results: Dict[str, Dict[str, Any]] = {}
+
+    for dataset, root, subjects, soz_map in datasets_list:
+        for subject in subjects:
+            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            key = f"{dataset}/{subject}"
+            json_path = per_subject_dir / f"{dataset}_{subject}.json"
+
+            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+                logger.warning("Skip %s: raw data dir missing", key)
+                continue
+
+            if json_path.exists():
+                with open(json_path) as f:
+                    existing = json.load(f)
+            else:
+                logger.info("PR-4D bootstrap base result: %s", key)
+                existing = run_subject_interictal_propagation_pr1(
+                    subject_dir=subject_dir,
+                    dataset=dataset,
+                    subject=subject,
+                    soz_channels=soz_map.get(subject, []),
+                    n_sample=n_sample,
+                    n_seeds=n_seeds,
+                )
+
+            if "error" in existing:
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            ac = existing.get("adaptive_cluster", {})
+            if "error" in ac or "labels" not in ac:
+                logger.warning("Skip %s: adaptive_cluster missing or errored", key)
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            loaded = load_subject_propagation_events(subject_dir)
+            valid_events = _valid_event_indices(loaded["bools"], min_participating=3)
+            labels = np.asarray(ac["labels"], dtype=int)
+            chosen_k = int(ac["chosen_k"])
+            if valid_events.size != labels.size:
+                existing["temporal_dynamics_followup"] = {
+                    "error": (
+                        f"valid_event_mismatch: valid_events={valid_events.size} "
+                        f"labels={labels.size}"
+                    )
+                }
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            v_ranks = loaded["ranks"][:, valid_events]
+            v_bools = loaded["bools"][:, valid_events]
+            v_times = loaded["event_abs_times"][valid_events]
+            templates = build_cluster_templates(v_ranks, v_bools, labels, chosen_k)
+            projected = assign_events_to_templates(v_ranks, v_bools, templates)
+            assignable = projected >= 0
+            if not np.any(assignable):
+                existing["temporal_dynamics_followup"] = {"error": "no_assignable_events"}
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            times_assignable = v_times[assignable]
+            projected_assignable = projected[assignable]
+
+            result = compute_continuous_template_dynamics(
+                event_abs_times=times_assignable,
+                cluster_labels=projected_assignable,
+                n_clusters=chosen_k,
+                dataset=dataset,
+                coverage_ranges=loaded.get("block_time_ranges"),
+                smoothing_hours=smoothing_hours,
+                bin_hours=bin_hours,
+            )
+            follow = {
+                "subject": subject,
+                "dataset": dataset,
+                "chosen_k": chosen_k,
+                "stable_k": int(ac.get("stable_k", chosen_k) or chosen_k),
+                **result,
+            }
+            existing["temporal_dynamics_followup"] = follow
+            followup_results[key] = follow
+            all_results[key] = existing
+            _save(existing, json_path)
+            logger.info(
+                "PR-4D: %s  k=%d  n=%d  dom_frac=%.3f",
+                key,
+                chosen_k,
+                int(result.get("n_events_used", 0)),
+                result.get("summary", {}).get("dominant_rate_fraction", float("nan")),
+            )
+
+    cohort = summarize_propagation_cohort(all_results)
+    _save(all_results, RESULTS_DIR / "pr1_subject_summary.json")
+    _save(cohort, RESULTS_DIR / "pr1_cohort_summary.json")
+    _save(followup_results, RESULTS_DIR / "pr4a_followup_template_mix_dynamics.json")
+    logger.info(
+        "PR-4D done. Cohort summary: %s",
+        cohort.get("temporal_dynamics_followup_analysis", {}),
     )
 
 
@@ -736,6 +856,11 @@ def main() -> None:
     parser.add_argument("--augment-cluster-bias", action="store_true",
                         help="Augment existing JSONs with within-cluster identity-bias")
     parser.add_argument("--pr4a", action="store_true", help="PR-4A: temporal occupancy dynamics only")
+    parser.add_argument(
+        "--pr4a-followup",
+        action="store_true",
+        help="PR-4D: gap-aware per-template absolute rate decomposition",
+    )
     parser.add_argument("--pr4b-step0", action="store_true",
                         help="PR-4B Step 0: absolute lag validation only")
     parser.add_argument("--pr4b-step1", action="store_true",
@@ -747,6 +872,18 @@ def main() -> None:
                         help="PR-4B local rate bin width in hours")
     parser.add_argument("--min-events-per-rate-bin", type=int, default=20,
                         help="PR-4B minimum events required for an eligible rate bin")
+    parser.add_argument(
+        "--followup-smoothing-hours",
+        type=float,
+        default=2.0,
+        help="PR-4D Gaussian KDE bandwidth in hours for rate envelope",
+    )
+    parser.add_argument(
+        "--followup-bin-hours",
+        type=float,
+        default=1.0,
+        help="PR-4D histogram bin width in hours",
+    )
     parser.add_argument("--n-sample", type=int, default=200)
     parser.add_argument("--n-seeds", type=int, default=5)
     args = parser.parse_args()
@@ -787,6 +924,17 @@ def main() -> None:
             n_sample=args.n_sample,
             n_seeds=args.n_seeds,
             bin_hours=args.bin_hours,
+        )
+        return
+
+    if args.pr4a_followup:
+        _run_pr4a_followup(
+            datasets_list,
+            per_subject_dir,
+            n_sample=args.n_sample,
+            n_seeds=args.n_seeds,
+            smoothing_hours=args.followup_smoothing_hours,
+            bin_hours=args.followup_bin_hours,
         )
         return
 

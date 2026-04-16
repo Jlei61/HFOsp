@@ -10,6 +10,7 @@ from src.interictal_propagation import (
     assign_events_to_templates,
     build_cluster_templates,
     compute_adaptive_cluster_stereotypy,
+    compute_continuous_template_dynamics,
     compute_rate_state_coupling,
     compute_source_node_diagnostic,
     compute_stereotypy_by_nparticipating,
@@ -584,6 +585,87 @@ def test_compute_temporal_cluster_dynamics_respects_coverage_ranges_and_entropy_
     assert out["day_night_summary"]["day"]["normalized_entropy"] == 0.0
 
 
+def test_compute_continuous_template_dynamics_rate_and_histogram() -> None:
+    event_abs_times = np.array([0.0, 1800.0, 3600.0, 5400.0], dtype=float)
+    labels = np.array([0, 0, 1, 1], dtype=int)
+    out = compute_continuous_template_dynamics(
+        event_abs_times=event_abs_times,
+        cluster_labels=labels,
+        n_clusters=2,
+        dataset="yuquan",
+        coverage_ranges=[(0.0, 7200.0)],
+        smoothing_hours=1.0,
+        bin_hours=1.0,
+    )
+
+    assert out["n_events_used"] == 4
+    assert out["n_clusters"] == 2
+    assert np.isfinite(out["duration_hours"])
+
+    rc = out["rate_curve"]
+    assert len(rc["grid_hours"]) > 0
+    assert len(rc["per_template_rate"]) == 2
+    assert len(rc["total_rate"]) == len(rc["grid_hours"])
+    total = np.array(rc["total_rate"])
+    assert np.all(total >= 0)
+
+    hist = out["histogram"]
+    assert len(hist["per_template_count"]) == 2
+    assert sum(sum(c) for c in hist["per_template_count"]) == 4
+
+    s = out["summary"]
+    assert s["dominant_rate_fraction"] == 0.5
+    assert s["total_mean_rate"] > 0
+    assert sum(s["per_template_event_count"]) == 4
+
+
+def test_compute_continuous_template_dynamics_respects_coverage_gaps() -> None:
+    event_abs_times = np.array([600.0, 36600.0], dtype=float)
+    labels = np.array([0, 1], dtype=int)
+    out = compute_continuous_template_dynamics(
+        event_abs_times=event_abs_times,
+        cluster_labels=labels,
+        n_clusters=2,
+        dataset="yuquan",
+        coverage_ranges=[(0.0, 3600.0), (36000.0, 39600.0)],
+        smoothing_hours=0.5,
+        bin_hours=1.0,
+    )
+
+    # Exposure must be the observed time only: 2 x 1h windows = 2h.
+    assert out["duration_hours"] == 2.0
+    assert out["summary"]["total_mean_rate"] == 1.0
+    assert out["summary"]["per_template_mean_rate"] == [0.5, 0.5]
+
+    # Histogram should not manufacture zero-count bins inside the 9h gap.
+    hist = out["histogram"]
+    assert hist["bin_center_hours"] == [0.5, 10.5]
+    assert hist["total_count"] == [1, 1]
+    assert hist["bin_width_hours"] == [1.0, 1.0]
+
+    # Rate curves should break across the recording gap instead of connecting.
+    total_rate = np.asarray(out["rate_curve"]["total_rate"], dtype=float)
+    assert np.any(np.isnan(total_rate))
+
+
+def test_compute_continuous_template_dynamics_unequal_templates() -> None:
+    event_abs_times = np.array([0.0, 120.0, 240.0, 7200.0], dtype=float)
+    labels = np.array([0, 0, 0, 1], dtype=int)
+    out = compute_continuous_template_dynamics(
+        event_abs_times=event_abs_times,
+        cluster_labels=labels,
+        n_clusters=2,
+        dataset="yuquan",
+        smoothing_hours=0.5,
+        bin_hours=0.5,
+    )
+
+    s = out["summary"]
+    assert s["dominant_template_id"] == 0
+    assert s["dominant_rate_fraction"] == 0.75
+    assert s["per_template_event_count"] == [3, 1]
+
+
 def test_validate_absolute_lag_clustering_reports_stratified_r_and_order_match() -> None:
     n_ch = 6
     n_ev = 10
@@ -780,6 +862,16 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
                     "total_variation_distance": 0.4,
                 }
             },
+            "temporal_dynamics_followup": {
+                "summary": {
+                    "dominant_rate_fraction": 0.62,
+                    "total_mean_rate": 50.0,
+                    "per_template_event_count": [620, 380],
+                    "per_template_mean_rate": [31.0, 19.0],
+                    "per_template_rate_fraction": [0.62, 0.38],
+                    "dominant_template_id": 0,
+                },
+            },
         },
         "epilepsiae/b": {
             "dataset": "epilepsiae",
@@ -838,6 +930,16 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
                     "total_variation_distance": 0.2,
                 }
             },
+            "temporal_dynamics_followup": {
+                "summary": {
+                    "dominant_rate_fraction": 0.58,
+                    "total_mean_rate": 40.0,
+                    "per_template_event_count": [580, 420],
+                    "per_template_mean_rate": [23.2, 16.8],
+                    "per_template_rate_fraction": [0.58, 0.42],
+                    "dominant_template_id": 0,
+                },
+            },
         },
     }
 
@@ -865,3 +967,7 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
     assert coupling["l3"]["pearson_r_exploratory"]["delta_high_minus_low_median"] == 0.1
     assert coupling["l3"]["pearson_r_high_confidence"]["wilcoxon_n"] == 1
     assert coupling["l1"]["max_abs_rho_median"] == 0.4
+    followup = cohort["temporal_dynamics_followup_analysis"]
+    assert followup["n_subjects"] == 2
+    assert followup["dominant_rate_fraction_median"] == 0.6
+    assert followup["total_mean_rate_median"] == 45.0
