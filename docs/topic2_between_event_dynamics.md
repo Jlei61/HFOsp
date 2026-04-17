@@ -123,9 +123,27 @@ PR-2.7 的 seizure-triggered rate average：
 - 主文档：`docs/archive/topic2/event_periodicity_analysis.md`
 - 方法学审阅：`docs/archive/topic2/event_periodicity_phase2_review_2026-04-05.md`
 - 合作者叙事版：`docs/archive/topic2/interictal_population_event_methodological_review.md`
-- 代码：`src/event_periodicity.py`
-- 脚本：`scripts/run_event_periodicity.py`、`scripts/run_periodicity_phase2.py`、`scripts/plot_periodicity_phase2.py`
-- 结果：`results/event_periodicity/`、`results/event_periodicity/phase2/`
+- 代码：`src/event_periodicity.py`、统一画图样式 `src/plot_style.py`（Morandi 调色板）
+- 脚本：
+  - 分析：`scripts/run_event_periodicity.py`、`scripts/run_periodicity_phase2.py`、`scripts/plot_periodicity_phase2.py`
+  - PPT 5 图：`scripts/plot_topic2_ppt.py`
+- 结果：`results/event_periodicity/`、`results/event_periodicity/phase2/`、PPT 图集 `results/event_periodicity/figures/ppt/`
+
+---
+
+## 6.1 PPT 5 图叙事链
+
+为汇报准备的"少而精"5 图集合，按破—立两段递进，全部生成自 `scripts/plot_topic2_ppt.py`：
+
+| 图 | 文件 | 信息要点 |
+|---|---|---|
+| Fig 1 | `fig1_isi_shuffle.png` | Toy 振荡器（峰摧毁） vs Toy 不应期（峰保留），cohort 行为匹配后者：14 个有 specparam peak 的 subject 中只有 5 个 real > shuffled，median ratio = 0.89× |
+| Fig 2 | `fig2_refractory_renewal.png` | 不应期机制：toy + hazard cohort overlay + 解析式 PSD overlay (3 个最佳匹配 subject) + sampling test 例 + cohort p-value + 覆盖率 90% |
+| Fig 3 | `fig3_lognormal_vs_powerlaw.png` | 概念图（log-log 直线 vs 钟形）+ 真实 subject 拟合 + cohort Vuong R 30/30 全部 < 0 |
+| Fig 4 | `fig4_iei_dynamics.png` | 4-subject return map + lag-1 r 全正 + lag-k 衰减 + 600s 去趋势示意 + Raw vs Detrended 配对 *** + detrend fraction 中位 72% |
+| Fig 5 | `fig5_slow_modulation.png` | Y:liyouran 24h trace（昼夜对比最强） + 多日 E:916 trace + 5-min binned rate autocorr + 日夜分段 detrended r |
+
+详细图说见 `results/event_periodicity/figures/ppt/README.md`。
 
 ---
 

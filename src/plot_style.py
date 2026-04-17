@@ -15,24 +15,36 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # =========================================================================
-# Semantic color palette — unified across all topics
+# Semantic color palette — Morandi-inspired (muted, low-saturation tones)
 # =========================================================================
 
-COL_YUQUAN = "#2166AC"
-COL_EPILEPSIAE = "#D55E00"
-COL_SIG = "#CC3311"
-COL_NONSIG = "#AAAAAA"
+# Datasets
+COL_YUQUAN = "#6F8FA8"        # Morandi blue
+COL_EPILEPSIAE = "#B07A6E"    # Morandi terracotta
 
-COL_SOZ = "#D6604D"
-COL_NONSOZ = "#4393C3"
+# Significance
+COL_SIG = "#A35E48"           # Morandi rust
+COL_NONSIG = "#9B9B9B"        # neutral gray
 
-COL_EMPIRICAL = "#2166AC"
-COL_ANALYTIC = "#B2182B"
-COL_SURROGATE = "#66C2A5"
-COL_DETRENDED = "#E66101"
+# SOZ vs non-SOZ
+COL_SOZ = "#C49B92"           # Morandi rose
+COL_NONSOZ = "#8C9AA3"        # Morandi slate
 
-COL_DAY = "#FDB863"
-COL_NIGHT = "#5E4FA2"
+# Empirical / analytic / surrogate triplet
+COL_EMPIRICAL = "#6F8FA8"     # blue (matches Yuquan)
+COL_ANALYTIC = "#A35E48"      # rust
+COL_SURROGATE = "#9DAA90"     # Morandi sage
+
+COL_DETRENDED = "#C9A86A"     # Morandi mustard
+
+# Day / night
+COL_DAY = "#D8C7A8"           # Morandi cream
+COL_NIGHT = "#7E6E84"         # Morandi plum
+
+# Misc
+COL_NEUTRAL = "#A89B8A"       # Morandi dust
+COL_OSCILLATOR = "#A67C5A"    # warm brown (toy oscillator)
+COL_REFRACTORY = "#6F8FA8"    # blue (toy refractory)
 
 # Convenience alias kept for backward compat with Topic 1 scripts
 COL_YQ = COL_YUQUAN
@@ -55,13 +67,20 @@ DPI_PUB = 300
 # =========================================================================
 
 
-def style_panel(ax: plt.Axes, label: str = "") -> None:
+def style_panel(
+    ax: plt.Axes,
+    label: str = "",
+    label_x: float = -0.18,
+    label_y: float = 1.12,
+) -> None:
     """Apply Nature/Science publication conventions to a single axis.
 
     - Remove top and right spines
     - Thicken left and bottom spines (1.4 pt)
     - Enlarge tick labels
-    - Optionally place a bold panel letter (a, b, c ...) at top-left
+    - Optionally place a bold panel letter (a, b, c ...) at top-left.
+      `label_x`/`label_y` allow per-panel tuning when ticks or annotations
+      collide with the default position.
     """
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -70,10 +89,10 @@ def style_panel(ax: plt.Axes, label: str = "") -> None:
     ax.tick_params(labelsize=FS_TICK, width=1.4, length=6)
     if label:
         ax.text(
-            -0.14, 1.08, label,
+            label_x, label_y, label,
             transform=ax.transAxes,
             fontsize=FS_PANEL_LETTER, fontweight="bold",
-            va="top", ha="left", fontfamily="sans-serif",
+            va="bottom", ha="right", fontfamily="sans-serif",
         )
 
 

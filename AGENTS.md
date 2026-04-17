@@ -133,6 +133,7 @@ Important drift:
   - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
   - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (artifact localization + PR-1 to PR-2.7 for event-between-event analyses)
   - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7d)
+ - `scripts/plot_topic2_ppt.py` — Topic 2 PPT 5-figure narrative set (uses `src/plot_style.py` Morandi palette); outputs `results/event_periodicity/figures/ppt/`
   - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 / PR-2.7 function unit tests
   - `docs/topic2_between_event_dynamics.md` — current formal entry for event-between-event analyses
   - `docs/archive/topic2/event_periodicity_analysis.md` — detailed results + code map (historical main record)
