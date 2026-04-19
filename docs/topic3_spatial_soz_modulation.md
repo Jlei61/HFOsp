@@ -216,7 +216,36 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 ---
 
-## 7. 代码与结果入口
+## 7. 可选方向：稳定传播模板的空间锚定（Topic 1 × Topic 3）
+
+> 来源：`docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` §6.2 / §9。
+> 性质：可选 / 后续；不替代当前 PR-2 的 Epilepsiae per-channel 工作。
+> **状态升级（2026-04-19）**：PR-4C P0 已 CLOSED，propagation pattern 的 seizure-proximity 调制正式封板为 null。该方向已成为 Topic 1 × Topic 3 桥接里 **唯一仍能解释"群体事件刻板 ↔ 病理网络"假设** 的路径，优先级从"可选"上调为"P1 候选"。
+
+**科学问题**：Topic 1 已经稳健建立了刻板传播模板（30/30 stable adaptive solutions、`23/30 strong` + `7/30 moderate` 跨时间复现、`8/9` forward/reverse subject 跨时间分裂可复现）。这套模板反映的是结构性病理网络，按假设它的 source / sink 通道应该在解剖上锚定到 SOZ / lesion / extra-focal，而不是均匀分布。这条路把 Topic 1 的"刻板"直接挂到 Topic 3 的"病理空间"，不依赖发作邻近窗口的功效——后者已被 PR-4C 复跑证伪。
+
+**最小工作合同**：
+
+1. 直接复用 Topic 1 已经验收的 `lagPatRank` cluster templates 与 `lagPatRaw` 衍生的 per-event relative lag（`src/interictal_propagation.py` 已有 `build_cluster_templates` / `assign_events_to_templates`），不重新聚类
+2. 对每个 subject 的每个 stable cluster，定义两个空间读数：
+   - **source 通道**：cluster centroid 中 rank 最早 / lag 最小的 1–3 个通道
+   - **sink 通道**：rank 最晚 / lag 最大的 1–3 个通道
+3. 用现有 SOZ / focus_rel 标签（`results/yuquan_soz_core_channels.json`、`results/epilepsiae_soz_core_channels.json`、`results/epilepsiae_electrode_focus_rel.json`）做归因
+4. 主统计读数：subject-level paired 比较 source vs sink 中 SOZ 通道占比；cohort-level 用 sign test / Wilcoxon
+5. forward/reverse subject 单独看：互逆模板的 source 与 sink 是否在解剖上正好对调
+6. 暂不画新主图；在已有 PR-3 cohort 6-panel 图旁边补一栏小 inset 即可
+
+**与本 topic 现有 PR-1/PR-2 的边界**：
+
+- 当前 PR-1（per-channel SOZ serial corr）回答的是"慢调制是否 SOZ-specific"
+- 这条可选方向回答的是"传播模板的源/汇通道是否落在 SOZ 解剖上"
+- 两者数据不重叠（PR-1 用 per-channel HFO 列；这条用 lagPat cluster centroid），结论可以独立并存
+
+**判定边界**：本分支只回答"刻板模板是否有解剖锚定"。它**不**回答"模板是否随发作邻近变化"——后者由 Topic 1 PR-4C 在 2026-04-19 复跑后正式封板为 null（5 个 propagation pattern metrics 在主+辅助两套配置下 cohort 级均无可复制信号）。换句话说：发作邻近这条门已经关上，剩下能撑起"病理网络"假设的就是模板本身的解剖锚定。
+
+---
+
+## 8. 代码与结果入口
 
 - 主文档：`docs/archive/topic3/spatial_modulation_soz_analysis.md`
 - HFO 检测脚本：`scripts/run_hfo_detection.py`（支持 `--dataset yuquan/epilepsiae --all --gpu`）
@@ -232,7 +261,7 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 ---
 
-## 8. 与其他 topic 的边界
+## 9. 与其他 topic 的边界
 
 - 如果问题是"慢调制本身是否存在、是不是 oscillator"，去 `docs/topic2_between_event_dynamics.md`
 - 如果问题是"SOZ 传播路径是否更刻板"，去 `docs/topic1_within_event_dynamics.md`
@@ -240,7 +269,7 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 ---
 
-## 9. 历史文档索引
+## 10. 历史文档索引
 
 - `docs/archive/topic3/spatial_modulation_soz_analysis.md`
   - 保留完整的计划、执行过程、基础设施与阶段结果
