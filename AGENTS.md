@@ -24,6 +24,17 @@ When answering scientific-status questions, prefer these canonical entry docs fi
 
 Historical docs remain valuable, but they are no longer the first entry point.
 
+## 文档与输出形式
+
+本仓库 Topic 1/2/3 的科学结论一律走"分层中文 markdown 文档 + archive 归档"，不走 canvas / 单文件富前端面板。
+
+- **不要写 Cursor canvas (`*.canvas.tsx` / `canvases/` 下任何 React 面板)** 来呈现 Topic 1/2/3 的科学结论、审阅报告、统计结果或 next-step 路线图。即便用户问的是"给我看一下结果"，也走 markdown，不走 canvas。
+- 主文档 (`docs/topic{1,2,3}_*.md`) 只保留正式口径：当前接受结论、风险点、最小合同、推荐下一步。语言一律中文，必要的英文术语 / 变量名 / 文件名保持原样（如 `lagPatRank`, `pre_ictal vs baseline`）。
+- 审阅 / 总结 / 阶段性报告 / 完整数值表 / 长篇推理这类一次性产出，归档到 `docs/archive/<topic>/<descriptive_name>_<YYYY-MM-DD>.md`，命名参考 `docs/archive/topic2/event_periodicity_phase2_review_2026-04-05.md`。
+- 在主文档"历史文档索引"和**所有相关章节末尾**回链到 archive，确保后续 agent 顺着主文档就能找到完整背景，不需要靠对话上下文。
+- 不要在主文档里复制 archive 里的全量数值表；主文档只保留摘要和链接。
+- 如果用户没有明确点名 canvas，默认产出仍然是 markdown + archive。canvas 只在用户**明确**说"用 canvas / 给我做个交互面板"时才考虑。
+
 ## Canonical Roots
 
 - Current codebase: `HFOsp/`
