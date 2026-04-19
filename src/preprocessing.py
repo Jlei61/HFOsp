@@ -2049,7 +2049,9 @@ class SEEGPreprocessor:
                  use_gpu: bool = False,
                  gpu_chunk_sec: float = 20.0,
                  use_fif_cache: bool = True,
-                 fif_cache_dir: Optional[Union[str, Path]] = None):
+                 fif_cache_dir: Optional[Union[str, Path]] = None,
+                 legacy_align: bool = False,
+                 legacy_resample: Optional[bool] = None):
         """
         Args:
             target_sfreq: Target sampling rate (Hz), or 'auto'/'none'.
@@ -2087,6 +2089,15 @@ class SEEGPreprocessor:
         self.gpu_chunk_sec = float(gpu_chunk_sec)
         self.use_fif_cache = bool(use_fif_cache)
         self.fif_cache_dir = Path(fif_cache_dir) if fif_cache_dir is not None else None
+        # Legacy alignment flags. legacy_align controls notch impl (FIR firwin
+        # 801, ±2Hz forward fftconvolve) [D14]. legacy_resample controls
+        # resample factors (up=2, down=round(2*fs/800)) [D03]. By default
+        # legacy_resample inherits from legacy_align.
+        self.legacy_align = bool(legacy_align)
+        self.legacy_resample = (
+            bool(legacy_resample) if legacy_resample is not None
+            else bool(legacy_align)
+        )
         
         if use_gpu and not HAS_GPU:
             warnings.warn("GPU requested but CuPy not available. Using CPU.")
@@ -2478,30 +2489,75 @@ class SEEGPreprocessor:
         )
     
     def _resample(self, data: np.ndarray, orig_sfreq: float, target_sfreq: float) -> np.ndarray:
-        """Resample data using polyphase filtering."""
+        """Resample data using polyphase filtering.
+
+        When ``legacy_resample`` is set, mirror legacy
+        `p16_cuda_24h_bipolar.py` exactly: ``up=2,
+        down=round(2*orig_sfreq/target_sfreq)``. This produces a slightly
+        different effective rate when ``orig_sfreq`` is not a clean multiple
+        of ``target_sfreq`` (e.g. 2048 Hz -> ~819.2 Hz instead of exact 800)
+        but matches the legacy filter-bank evaluation grid. See D03.
+        """
+        from scipy.signal import resample_poly
+        if self.legacy_resample:
+            up = 2
+            down = int(round(2 * float(orig_sfreq) / float(target_sfreq)))
+            down = max(1, down)
+            return resample_poly(data, up, down, axis=-1)
+
         from fractions import Fraction
-        
-        # Find up/down factors
         frac = Fraction(int(target_sfreq), int(orig_sfreq)).limit_denominator(1000)
         up, down = frac.numerator, frac.denominator
-        
-        # Use scipy's resample_poly (handles anti-aliasing)
-        from scipy.signal import resample_poly
-        resampled = resample_poly(data, up, down, axis=-1)
-        
-        return resampled
-    
+        return resample_poly(data, up, down, axis=-1)
+
+    def _apply_notch_legacy_fir(self, data: np.ndarray, sfreq: float,
+                                 freqs: List[float]) -> np.ndarray:
+        """Legacy notch: per-band FIR firwin(801, [(f-2)/nyq, (f+2)/nyq]) forward fftconvolve.
+
+        Mirrors `p16_cuda_24h_bipolar.py:notch_filt_cu` exactly:
+
+            for f in freqs:
+                b = firwin(801, [(f-2)/nyq, (f+2)/nyq], pass_zero=True)
+                data = fftconvolve(data, b, mode='same')
+
+        With ``pass_zero=True`` and two cutoffs, ``firwin`` returns a
+        **bandstop** kernel (passband [DC, f-2], stopband [f-2, f+2],
+        passband [f+2, Nyquist]). One forward fftconvolve already performs
+        the notch — do NOT subtract from the original (that inverts the
+        kernel into a bandpass and decimates the signal). See D14.
+        """
+        from scipy.signal import firwin, fftconvolve
+        nyq = sfreq / 2.0
+        out = data
+        for f in freqs:
+            if f <= 0 or f >= nyq:
+                continue
+            low = max(1e-3, (f - 2.0) / nyq)
+            high = min(1.0 - 1e-3, (f + 2.0) / nyq)
+            if high <= low:
+                continue
+            b = firwin(801, [low, high], pass_zero=True)
+            out = fftconvolve(out, b[None, :], mode="same", axes=-1)
+        return out
+
     def _apply_filters(self, data: np.ndarray, sfreq: float) -> np.ndarray:
-        """Apply notch and bandpass filters using configured backend."""
-        # Notch filter for power line harmonics
+        """Apply notch and bandpass filters.
+
+        Under ``legacy_align`` the notch is forced through the legacy FIR
+        path (D14). Bandpass is left alone (the detector applies its own
+        sub-band FIR/Butter, which is what gets aligned to legacy via
+        BQKDetector(legacy_align=True)).
+        """
         if self.notch_freqs:
-            data = self.filter_backend.apply_notch(data, sfreq, self.notch_freqs)
-        
-        # Bandpass filter (optional - usually applied in detector)
+            if self.legacy_align:
+                data = self._apply_notch_legacy_fir(data, sfreq, self.notch_freqs)
+            else:
+                data = self.filter_backend.apply_notch(data, sfreq, self.notch_freqs)
+
         if self.bandpass is not None:
             low, high = self.bandpass
             data = self.filter_backend.apply_bandpass(data, sfreq, low, high)
-        
+
         return data
     
     def get_shaft_info(self) -> Dict[str, int]:

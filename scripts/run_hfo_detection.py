@@ -161,9 +161,18 @@ def run_yuquan_subject(
     reference = params.get("reference", "bipolar")
     resample_sfreq = params.get("resample_sfreq", 800)
     drop_channels = params.get("drop_channels", [])
+    legacy_align = bool(params.get("legacy_align", False))
+    notch_freqs = params.get("notch_freqs")  # None => SEEGPreprocessor default
 
     band_range = params.get("band", [80, 250])
-    gpu_chunk = 600.0 if use_gpu else 50.0
+    # Legacy: per-segment threshold window of 200 s. Otherwise default
+    # GPU 600 s / CPU 50 s (legacy heuristic for memory).
+    if "chunk_sec" in params and params["chunk_sec"] is not None:
+        chunk_sec = float(params["chunk_sec"])
+    elif legacy_align:
+        chunk_sec = 200.0
+    else:
+        chunk_sec = 600.0 if use_gpu else 50.0
     hfo_cfg = HFODetectionConfig(
         band="ripple",
         bandpass=tuple(band_range) if band_range else None,
@@ -173,10 +182,11 @@ def run_yuquan_subject(
         min_gap_ms=float(params.get("min_gap_ms", 20.0)),
         min_last_ms=float(params.get("min_last_ms", 50.0)),
         max_last_ms=float(params.get("max_last_ms", 200.0)),
-        chunk_sec=gpu_chunk,
-        chunk_overlap_sec=2.0,
+        chunk_sec=chunk_sec,
+        chunk_overlap_sec=0.0 if legacy_align else 2.0,
         n_jobs=1,
         use_gpu=use_gpu,
+        legacy_align=legacy_align,
     )
     detector = HFODetector(hfo_cfg)
 
@@ -208,7 +218,9 @@ def run_yuquan_subject(
             bipolar_gap=int(params.get("bipolar_gap", 1)),
             target_sfreq=resample_sfreq,
             exclude_channels=drop_channels if drop_channels else None,
+            notch_freqs=notch_freqs,
             use_gpu=use_gpu,
+            legacy_align=legacy_align,
         )
         pre = preprocessor.run(str(edf_path))
 
@@ -237,11 +249,15 @@ def run_yuquan_subject(
 
         _flush_gpu_memory()
 
-    # Refine
+    # Refine. R02 fix: refine stage uses GLOBAL pickChn_thresh=1.0 in legacy
+    # for every subject; only the pack stage applies per-subject pick_k.
+    # Read `refine_pick_k` (default 1.0) here, NOT the per-subject `pick_k`
+    # (which now belongs solely to scripts/run_pipeline.py:_legacy_pack_pick_k).
     if not smoke and len(gpu_paths) > 0:
         refine_path = out_dir / "_refineGpu.npz"
-        pick_k = float(params.get("pick_k", 1.0))
-        print(f"  [REFINE] pick_k={pick_k}, {len(gpu_paths)} records ...")
+        pick_k = float(params.get("refine_pick_k", 1.0))
+        print(f"  [REFINE] refine_pick_k={pick_k} (legacy global=1.0), "
+              f"{len(gpu_paths)} records ...")
         t0 = time.time()
 
         refine_out = save_refine_gpu_npz(
@@ -388,11 +404,14 @@ def run_epilepsiae_subject(
 
         _flush_gpu_memory()
 
-    # Refine (across all records from all recording dirs)
+    # Refine (across all records from all recording dirs).
+    # R02 fix: refine uses GLOBAL pickChn_thresh=1.0 in legacy for every
+    # subject; pack stage applies per-subject pick_k separately.
     if not smoke and len(gpu_paths) > 0:
         refine_path = out_dir / "_refineGpu.npz"
-        pick_k = float(params.get("pick_k", 1.0))
-        print(f"  [REFINE] pick_k={pick_k}, {len(gpu_paths)} blocks ...")
+        pick_k = float(params.get("refine_pick_k", 1.0))
+        print(f"  [REFINE] refine_pick_k={pick_k} (legacy global=1.0), "
+              f"{len(gpu_paths)} blocks ...")
         t0 = time.time()
 
         try:

@@ -62,6 +62,13 @@ class HFODetectionConfig:
     # GPU acceleration (requires CuPy + cusignal in the active environment)
     use_gpu: bool = False
 
+    # Legacy alignment: when True, mirror legacy `p16_cuda_24h_bipolar.py`:
+    #   - chunk_overlap forced to 0 (no boundary remerge) [D21]
+    #   - CPU bandpass uses FIR firwin(201) forward fftconvolve [D15]
+    #   - chunk-edge events (empty side windows) are REJECTED [D18]
+    # See docs/plans/yuquan_detector_drift_root_cause.plan.md.
+    legacy_align: bool = False
+
 
 @dataclass
 class HFODetectionResult:
@@ -239,6 +246,7 @@ class HFODetector:
             n_jobs=cfg.n_jobs,
             verbose=cfg.verbose,
             use_gpu=cfg.use_gpu,
+            legacy_align=cfg.legacy_align,
         )
 
         # Chunking parameters
@@ -247,7 +255,9 @@ class HFODetector:
         else:
             chunk_len = int(round(cfg.chunk_sec * sfreq))
         chunk_len = max(1, min(chunk_len, n_samp))
-        overlap = int(round(cfg.chunk_overlap_sec * sfreq))
+        # Legacy: no chunk overlap, just back-to-back 200 s segments [D21]
+        overlap_sec = 0.0 if cfg.legacy_align else cfg.chunk_overlap_sec
+        overlap = int(round(overlap_sec * sfreq))
         overlap = max(0, min(overlap, chunk_len // 2))
         step = max(1, chunk_len - overlap)
 

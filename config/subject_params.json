@@ -15,6 +15,10 @@
       "max_last_ms": 200.0,
       "band": [80, 250],
       "pick_k": 1.0,
+      "refine_pick_k": 1.0,
+      "legacy_align": true,
+      "notch_freqs": [50, 100, 150, 200, 250],
+      "chunk_sec": 200.0,
       "data_root": "/mnt/yuquan_data/yuquan_24h_edf",
       "file_format": "edf"
     },

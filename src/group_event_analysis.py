@@ -5,7 +5,10 @@ Goal
 ----
 Assemble per-channel HFO detections into aligned group-event windows (typically 500ms),
 then compute per-channel timing within each window:
-- absolute timing: centroid time relative to window start (lagPatRaw-like)
+- absolute timing: centroid time relative to window start for the new group-analysis
+  contract. This is *not* the exact legacy `lagPatRaw` semantic, which lives on a
+  stitched per-segment timeline. Use `compute_stitched_spectrogram_centroids_legacy()`
+  when exact legacy compatibility is required.
 - relative ordering: rank within the window (lagPatRank-like)
 
 Design principles
@@ -51,7 +54,7 @@ class EventWindow:
 @dataclass(frozen=True)
 class LagMatrices:
     """
-    Output compatible with Yuquan lagPat-like representation.
+    Output for the new group-analysis contract.
 
     lag_raw:
         (n_channels, n_events) float seconds, relative to window start.
@@ -231,6 +234,103 @@ def build_windows_from_packed_times(packed_times: np.ndarray) -> List[EventWindo
     """
     t = _ensure_2col_times(packed_times)
     return [EventWindow(float(s), float(e), int(i)) for i, (s, e) in enumerate(t)]
+
+
+def filter_windows_for_legacy_segment_loop(
+    windows: Sequence[EventWindow],
+    *,
+    segment_duration_sec: float,
+    record_last_sec: float,
+    sfreq: float,
+    start_sec: float = 0.0,
+) -> List[EventWindow]:
+    """
+    Apply the legacy 200 s segment admission rule used before writing lagPat.
+
+    Legacy `return_per2h_lagPattern()` first builds packed windows globally, but it
+    only keeps windows that fit fully inside one segment's `segTime` range:
+
+      `packTimes[:, 0] >= segTime[0] and packTimes[:, 1] <= segTime[-1]`
+
+    Therefore, windows that cross segment boundaries are silently dropped before
+    `lagPat.npz` / `packedTimes.npy` are written. This helper reproduces that
+    filtering contract.
+    """
+    if segment_duration_sec <= 0:
+        raise ValueError("segment_duration_sec must be > 0")
+    if sfreq <= 0:
+        raise ValueError("sfreq must be > 0")
+
+    last_t = float(record_last_sec)
+    start_t = float(start_sec)
+    if last_t < start_t:
+        return []
+
+    keep: List[EventWindow] = []
+    sample_dt = 1.0 / float(sfreq)
+    for win in windows:
+        if win.start < start_t:
+            continue
+        if win.end > last_t + 1e-12:
+            continue
+        seg_id = int(np.floor((float(win.start) - start_t) / float(segment_duration_sec)))
+        seg_start = start_t + seg_id * float(segment_duration_sec)
+        seg_last = min(last_t, seg_start + float(segment_duration_sec) - sample_dt)
+        if float(win.end) <= seg_last + 1e-12:
+            keep.append(win)
+    return keep
+
+
+def build_stitched_window_signal(
+    x: np.ndarray,
+    windows: Sequence[EventWindow],
+    *,
+    sfreq: float,
+    start_sec: float = 0.0,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Stitch windowed samples together using the legacy inclusive endpoint rule.
+
+    Legacy code uses:
+
+      `twBool = (batch_t >= tw[0]) & (batch_t <= tw[1])`
+
+    so every packed window contributes both boundary samples when they exist on the
+    resampled time grid. The returned `split_border_t` matches the legacy
+    `np.cumsum(tWinLen_list) / fs`.
+    """
+    arr = np.asarray(x, dtype=np.float64)
+    if arr.ndim != 2:
+        raise ValueError("x must be 2D (n_channels, n_samples)")
+    if sfreq <= 0:
+        raise ValueError("sfreq must be > 0")
+
+    windows = list(windows)
+    if not windows:
+        return np.zeros((arr.shape[0], 0), dtype=np.float64), np.zeros((0,), dtype=np.float64)
+
+    n_samples = arr.shape[1]
+    pieces: List[np.ndarray] = []
+    lengths: List[int] = []
+    for win in windows:
+        i0 = int(np.ceil((float(win.start) - float(start_sec)) * float(sfreq) - 1e-12))
+        i1 = int(np.floor((float(win.end) - float(start_sec)) * float(sfreq) + 1e-12))
+        i0 = max(0, min(n_samples - 1, i0))
+        i1 = max(0, min(n_samples - 1, i1))
+        if i1 < i0:
+            continue
+        piece = arr[:, i0 : i1 + 1]
+        if piece.shape[1] == 0:
+            continue
+        pieces.append(piece)
+        lengths.append(int(piece.shape[1]))
+
+    if not pieces:
+        return np.zeros((arr.shape[0], 0), dtype=np.float64), np.zeros((0,), dtype=np.float64)
+
+    stitched = np.concatenate(pieces, axis=1)
+    split_border_t = np.cumsum(np.asarray(lengths, dtype=np.float64)) / float(sfreq)
+    return stitched, split_border_t
 
 
 def _legacy_return_time_ranges(on_off: np.ndarray, fs: float, start_time: float = 0.0) -> np.ndarray:
@@ -2041,7 +2141,7 @@ def compute_centroid_matrix_spectrogram(
     spec_nperseg_sec: float = 0.05,
     spec_noverlap_ratio: float = 0.8,
     gaussian_sigma: float = 1.5,
-    centroid_power: float = 2.0,
+    centroid_power: float = 3.0,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Compute centroids using spectrogram mass-center, matching legacy yuquan pipeline.
@@ -2118,6 +2218,92 @@ def compute_centroid_matrix_spectrogram(
             centroids[ci, ei] = float(c_time - win.start)
 
     return centroids, events_bool
+
+
+def compute_stitched_spectrogram_centroids_legacy(
+    stitched_band: np.ndarray,
+    split_border_t: np.ndarray,
+    *,
+    sfreq: float,
+    spec_freq_range: Tuple[float, float] = (50.0, 300.0),
+    spec_nperseg_sec: float = 0.05,
+    spec_noverlap_ratio: float = 0.8,
+    gaussian_sigma: float = 1.5,
+    centroid_power: float = 3.0,
+) -> np.ndarray:
+    """
+    Legacy `return_massCenterPat()` on a stitched per-segment bandpassed signal.
+
+    Parameters
+    ----------
+    stitched_band
+        2D array `(n_channels, n_samples_stitched)` containing all packed-window
+        samples from one segment concatenated in event order.
+    split_border_t
+        Cumulative border times in stitched coordinates, exactly the legacy
+        `np.cumsum(tWinLen_list) / fs`.
+
+    Returns
+    -------
+    centroids
+        `(n_channels, n_events)` stitched-time centroid matrix. This matches the
+        stored legacy `lagPatRaw` semantic for one segment: values are on the
+        segment-local stitched timeline, not relative to window start.
+    """
+    from scipy.signal import spectrogram as sp_spectrogram
+    from scipy.ndimage import gaussian_filter
+
+    x = np.asarray(stitched_band, dtype=np.float64)
+    borders = np.asarray(split_border_t, dtype=np.float64).ravel()
+    if x.ndim != 2:
+        raise ValueError("stitched_band must be 2D (n_channels, n_samples)")
+    if borders.ndim != 1:
+        raise ValueError("split_border_t must be 1D")
+    if sfreq <= 0:
+        raise ValueError("sfreq must be > 0")
+    if borders.size == 0:
+        return np.zeros((x.shape[0], 0), dtype=np.float64)
+
+    nperseg = int(spec_nperseg_sec * float(sfreq))
+    noverlap = int(spec_noverlap_ratio * nperseg)
+    if nperseg < 4:
+        nperseg = 4
+    if noverlap >= nperseg:
+        noverlap = nperseg - 1
+
+    centroids = np.full((x.shape[0], borders.size), np.nan, dtype=np.float64)
+    split_times_ext = np.concatenate([[0.0], borders])
+    for ci in range(x.shape[0]):
+        _, spec_t, sxx = sp_spectrogram(
+            x[ci],
+            float(sfreq),
+            window="hamming",
+            nperseg=nperseg,
+            noverlap=noverlap,
+            nfft=nperseg,
+            mode="magnitude",
+        )
+        if sxx.size == 0:
+            continue
+        sxx = gaussian_filter(sxx, sigma=gaussian_sigma)
+        freqs = np.fft.rfftfreq(nperseg, d=1.0 / float(sfreq))
+        freq_mask = (freqs > spec_freq_range[0]) & (freqs < spec_freq_range[1])
+        sxx = sxx[freq_mask, :]
+        if sxx.size == 0:
+            continue
+        for ei, (t0, t1) in enumerate(zip(split_times_ext[:-1], split_times_ext[1:])):
+            mask_t = (spec_t > float(t0)) & (spec_t < float(t1))
+            if not np.any(mask_t):
+                continue
+            win_spec = sxx[:, mask_t]
+            w = np.power(np.maximum(win_spec, 0.0), float(centroid_power))
+            denom = float(np.sum(w))
+            if (not np.isfinite(denom)) or denom <= 0.0:
+                continue
+            win_times = spec_t[mask_t]
+            t_grid = np.tile(win_times, (w.shape[0], 1))
+            centroids[ci, ei] = float(np.sum(w * t_grid) / denom)
+    return centroids
 
 
 def _xcorr_lag(env1: np.ndarray, env2: np.ndarray, sfreq: float) -> float:
@@ -2273,7 +2459,10 @@ class BipolarAliasOnDemandLoader:
 
 class GroupEventAnalyzer:
     """
-    Compute lag matrices (lagPatRaw-like) and ranks from aligned event windows.
+    Compute per-window centroid timing and ranks from aligned event windows.
+
+    Note: this class returns the *new* per-window timing contract. For exact
+    legacy `lagPatRaw`, use the stitched per-segment helper path instead.
     
     Supports two timing methods:
     - 'centroid': Energy-weighted centroid time within window (default)
@@ -3573,7 +3762,7 @@ def compute_and_save_group_analysis(
     coact_min_event_ratio: float = 0.10,
     coact_time_lag_ms: float = 200.0,
     save_bandpass: bool = False,
-    centroid_power: float = 2.0,
+    centroid_power: Optional[float] = None,
     tf_n_freqs: int = 180,
     tf_n_cycles: float = 4.0,
     tf_n_cycles_mode: str = "linear",
@@ -3664,8 +3853,10 @@ def compute_and_save_group_analysis(
         Absolute time lag threshold (ms) for coactivation scoring.
     save_bandpass : bool
         If True and save_env_cache is enabled, compute bandpass signal for visualization.
-    centroid_power : float
-        Power for envelope centroid (default 2.0).
+    centroid_power : float, optional
+        Power for centroid weighting. If None, defaults are mode-aware:
+        ``centroid_source='spectrogram'`` → 3.0 (matches legacy ``spec ** 3``);
+        ``centroid_source='env'`` or ``'tf'`` → 2.0 (envelope L2 weighting).
     tf_n_freqs : int
         Number of wavelet frequencies for TF centroids.
 
@@ -3951,6 +4142,21 @@ def compute_and_save_group_analysis(
     if n_events == 0:
         raise ValueError("No events to analyze after filtering.")
 
+    centroid_source = str(centroid_source).lower().strip()
+    if centroid_source not in ("env", "tf", "spectrogram"):
+        raise ValueError("centroid_source must be 'env', 'tf', or 'spectrogram'.")
+
+    if centroid_power is None:
+        spec_centroid_power = 3.0
+        env_centroid_power = 2.0
+    else:
+        spec_centroid_power = float(centroid_power)
+        env_centroid_power = float(centroid_power)
+    logger.info(
+        "step=centroid_power_resolution source=%s spec_power=%.3f env_power=%.3f explicit=%s",
+        centroid_source, spec_centroid_power, env_centroid_power, centroid_power is not None,
+    )
+
     if bool(coact_all_channels) and env_full is not None:
         t_step = time.time()
         centroids_full, events_bool_full = compute_centroid_matrix_from_envelope_cache(
@@ -3959,7 +4165,7 @@ def compute_and_save_group_analysis(
             ch_names=names_full,
             env=env_full,
             sfreq=sfreq,
-            centroid_power=float(centroid_power),
+            centroid_power=env_centroid_power,
         )
         lag_raw_full, lag_rank_full = lag_rank_from_centroids(
             centroids_full, events_bool_full, align="first_centroid"
@@ -3974,9 +4180,6 @@ def compute_and_save_group_analysis(
         )
         logger.info("step=coactivation_all elapsed_sec=%.3f", float(time.time() - t_step))
 
-    centroid_source = str(centroid_source).lower().strip()
-    if centroid_source not in ("env", "tf", "spectrogram"):
-        raise ValueError("centroid_source must be 'env', 'tf', or 'spectrogram'.")
     compute_tf_centroids_flag = bool(compute_tf_centroids)
     if centroid_source == "tf":
         compute_tf_centroids_flag = True
@@ -4008,7 +4211,7 @@ def compute_and_save_group_analysis(
             spec_nperseg_sec=0.05,
             spec_noverlap_ratio=0.8,
             gaussian_sigma=1.5,
-            centroid_power=centroid_power,
+            centroid_power=spec_centroid_power,
         )
         logger.info("step=centroid_spectrogram elapsed_sec=%.3f", float(time.time() - t_step))
     else:
@@ -4020,7 +4223,7 @@ def compute_and_save_group_analysis(
             env_ch_names=names,
             sfreq=sfreq,
             start_sec=0.0,
-            centroid_power=centroid_power,
+            centroid_power=env_centroid_power,
         )
         logger.info("step=centroid_env elapsed_sec=%.3f", float(time.time() - t_step))
 

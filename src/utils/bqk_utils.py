@@ -152,7 +152,18 @@ def merge_timeRanges(range_times,min_gap=10):
     return merged_times
 
 def find_high_enveTimes(raw_enve,chns_nums,fs,rel_thresh=3.,abs_thresh=3.,min_gap=20,min_last=50,
-                        max_last=None,side_thresh=None,start_time=0):
+                        max_last=None,side_thresh=None,start_time=0,legacy_align=False):
+    """Detect high-envelope events on each channel.
+
+    Parameters
+    ----------
+    legacy_align : bool, default False
+        When True, mirror the legacy `find_high_enveTimes_cu` rejection rule
+        for chunk-edge events: if both side windows are empty (event sits at
+        the very start or end of a segment), REJECT the event. The default
+        (False) accepts such events. See `docs/plans/yuquan_detector_drift_root_cause.plan.md`
+        D18.
+    """
     whole_data_median=np.median(raw_enve)
     high_times=[]
     for chi in range(chns_nums):
@@ -189,6 +200,9 @@ def find_high_enveTimes(raw_enve,chns_nums,fs,rel_thresh=3.,abs_thresh=3.,min_ga
                 side_pre = tmp_enve[i_pre_start:i_pre_end]
                 side_post = tmp_enve[i_post_start:i_post_end]
                 if len(side_pre) == 0 and len(side_post) == 0:
+                    if legacy_align:
+                        # Legacy: empty side windows => side_mean=NaN => rejected
+                        continue
                     after_denoise_list.append(tmp_tr.tolist())
                     continue
                 side_mean = float(np.mean(np.concatenate([side_pre, side_post])))
@@ -289,6 +303,7 @@ class BQKDetector:
         n_jobs: int = -1,
         verbose: int = 0,
         use_gpu: bool = False,
+        legacy_align: bool = False,
     ):
         self.sfreq = float(sfreq)
         self.freqband = tuple(freqband)
@@ -302,6 +317,12 @@ class BQKDetector:
         self.n_jobs = int(n_jobs)
         self.verbose = int(verbose)
         self.use_gpu = bool(use_gpu) and _HAS_GPU
+        # legacy_align: when True, mirror legacy `p16_cuda_24h_bipolar.py`
+        # exactly. Affects:
+        #   - CPU bandpass: FIR firwin(201) forward fftconvolve
+        #     (instead of Butter-3 sosfiltfilt) [D15]
+        #   - chunk-edge events: reject when both side windows empty [D18]
+        self.legacy_align = bool(legacy_align)
 
         if use_gpu and not _HAS_GPU:
             import warnings
@@ -312,7 +333,13 @@ class BQKDetector:
         
         # Pre-compute filter bank (SOS format for numerical stability)
         self.filter_bank_ranges = self._build_filter_bank_ranges()
-        self.filter_bank_sos = self._build_filter_bank_sos()
+        if self.legacy_align:
+            # Legacy CPU path uses FIR firwin(201) forward only
+            self.filter_bank_fir_cpu = self._build_fir_bank_cpu_legacy()
+            self.filter_bank_sos = []  # not used in legacy path
+        else:
+            self.filter_bank_fir_cpu = []
+            self.filter_bank_sos = self._build_filter_bank_sos()
 
         if self.use_gpu:
             self._fir_coeffs_gpu = self._build_fir_bank_gpu()
@@ -375,7 +402,29 @@ class BQKDetector:
             sos_filters.append(sos)
         
         return sos_filters
-    
+
+    def _build_fir_bank_cpu_legacy(self) -> List[np.ndarray]:
+        """Pre-compute FIR bandpass coefficients (CPU, legacy 201-tap firwin).
+
+        Mirrors `p16_cuda_24h_bipolar.py` GPU FIR bank exactly so the CPU
+        path under ``legacy_align=True`` produces numerically identical
+        envelopes to the legacy detector.
+        """
+        from scipy.signal import firwin
+        nyq = self.sfreq / 2.0
+        coeffs: List[np.ndarray] = []
+        for low, high in self.filter_bank_ranges:
+            high_c = min(high, nyq - 1.0)
+            if high_c <= low:
+                high_c = low + 1.0
+            b = firwin(
+                201,
+                [low / nyq, high_c / nyq],
+                pass_zero=False,
+            )
+            coeffs.append(np.asarray(b, dtype=np.float64))
+        return coeffs
+
     def _compute_subband_envelope(
         self, 
         sos: np.ndarray, 
@@ -405,6 +454,24 @@ class BQKDetector:
         analytic = signal.hilbert(filt_data, N=n_fft, axis=-1)[..., :n_samples]
         
         # Envelope (magnitude of analytic signal)
+        return np.abs(analytic)
+
+    def _compute_subband_envelope_legacy_cpu(
+        self,
+        fir_b: np.ndarray,
+        data: np.ndarray,
+    ) -> np.ndarray:
+        """Single sub-band envelope using legacy FIR-201 forward fftconvolve.
+
+        Mirrors `p16_cuda_24h_bipolar.py` GPU branch exactly (single-pass FIR,
+        not zero-phase) so the CPU and GPU legacy paths agree.
+        """
+        from scipy.signal import fftconvolve
+        # Forward (causal) FIR — same as legacy GPU branch
+        filt_data = fftconvolve(data, fir_b[None, :], mode="same", axes=-1)
+        n_samples = data.shape[-1]
+        n_fft = fftpack.next_fast_len(n_samples)
+        analytic = signal.hilbert(filt_data, N=n_fft, axis=-1)[..., :n_samples]
         return np.abs(analytic)
     
     # ------------------------------------------------------------------
@@ -507,6 +574,9 @@ class BQKDetector:
                     side_pre = ch_enve[i_pre_s:i_pre_e]
                     side_post = ch_enve[i_post_s:i_post_e]
                     if len(side_pre) == 0 and len(side_post) == 0:
+                        if self.legacy_align:
+                            # Legacy: empty side windows => side_mean=NaN => rejected
+                            continue
                         accepted.append(ranges[ri])
                         continue
                     side_mean = float(cp.mean(cp.concatenate([side_pre, side_post])))
@@ -547,8 +617,22 @@ class BQKDetector:
 
         if self.use_gpu:
             return self._compute_envelope_gpu(data)
-        
-        # Serial processing
+
+        # Legacy CPU path: FIR firwin(201) forward fftconvolve (D15)
+        if self.legacy_align:
+            if self.n_jobs == 1 or len(self.filter_bank_fir_cpu) == 1:
+                envelopes = [
+                    self._compute_subband_envelope_legacy_cpu(b, data)
+                    for b in self.filter_bank_fir_cpu
+                ]
+            else:
+                envelopes = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)(
+                    delayed(self._compute_subband_envelope_legacy_cpu)(b, data)
+                    for b in self.filter_bank_fir_cpu
+                )
+            return np.sum(envelopes, axis=0)
+
+        # Default CPU path: Butter-3 SOS sosfiltfilt
         if self.n_jobs == 1 or len(self.filter_bank_sos) == 1:
             envelopes = [
                 self._compute_subband_envelope(sos, data)
@@ -607,6 +691,7 @@ class BQKDetector:
             max_last=self.max_last,
             side_thresh=self.side_thresh,
             start_time=start_time,
+            legacy_align=self.legacy_align,
         )
         
         return events
