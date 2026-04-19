@@ -16,6 +16,7 @@ from src.interictal_propagation import (  # noqa: E402
     build_cluster_templates,
     compute_continuous_template_dynamics,
     compute_rate_state_coupling,
+    compute_seizure_proximity_coupling,
     validate_absolute_lag_clustering,
     compute_temporal_cluster_dynamics,
     compute_time_split_reproducibility,
@@ -24,6 +25,7 @@ from src.interictal_propagation import (  # noqa: E402
     run_subject_interictal_propagation_pr1,
     summarize_propagation_cohort,
 )
+from src.event_periodicity import load_seizure_times  # noqa: E402
 
 
 logging.basicConfig(
@@ -845,7 +847,176 @@ def _run_pr4b_step23(
     )
 
 
-def main() -> None:
+def _run_pr4c(
+    datasets_list: List,
+    per_subject_dir: Path,
+    *,
+    n_sample: int,
+    n_seeds: int,
+    config_name: str = "main",
+) -> None:
+    """PR-4C: seizure proximity L1/L2/L3 analysis.
+
+    ``config_name`` selects the named window configuration from
+    :data:`SEIZURE_PROXIMITY_CONFIGS`. ``main`` writes the per-subject field
+    ``seizure_proximity_coupling`` and cohort artifact
+    ``pr4c_seizure_proximity.json``; ``auxiliary`` writes
+    ``seizure_proximity_coupling_auxiliary`` and
+    ``pr4c_seizure_proximity_auxiliary.json``.
+    """
+    import numpy as np
+    from src.interictal_propagation import SEIZURE_PROXIMITY_CONFIGS
+
+    if config_name not in SEIZURE_PROXIMITY_CONFIGS:
+        raise ValueError(
+            f"Unknown PR-4C config_name={config_name}; "
+            f"expected one of {sorted(SEIZURE_PROXIMITY_CONFIGS)}"
+        )
+    cfg = SEIZURE_PROXIMITY_CONFIGS[config_name]
+    output_key = (
+        "seizure_proximity_coupling"
+        if config_name == "main"
+        else f"seizure_proximity_coupling_{config_name}"
+    )
+    artifact_stem = (
+        "pr4c_seizure_proximity"
+        if config_name == "main"
+        else f"pr4c_seizure_proximity_{config_name}"
+    )
+
+    all_results: Dict[str, Dict[str, Any]] = {}
+    seizure_results: Dict[str, Dict[str, Any]] = {}
+
+    for dataset, root, subjects, soz_map in datasets_list:
+        for subject in subjects:
+            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            key = f"{dataset}/{subject}"
+            json_path = per_subject_dir / f"{dataset}_{subject}.json"
+
+            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+                logger.warning("Skip %s: raw data dir missing", key)
+                continue
+
+            if json_path.exists():
+                with open(json_path) as f:
+                    existing = json.load(f)
+            else:
+                logger.info("PR-4C bootstrap base result: %s", key)
+                existing = run_subject_interictal_propagation_pr1(
+                    subject_dir=subject_dir,
+                    dataset=dataset,
+                    subject=subject,
+                    soz_channels=soz_map.get(subject, []),
+                    n_sample=n_sample,
+                    n_seeds=n_seeds,
+                )
+
+            if "error" in existing:
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            ac = existing.get("adaptive_cluster", {})
+            if "error" in ac or "labels" not in ac:
+                logger.warning("Skip %s: adaptive_cluster missing or errored", key)
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            loaded = load_subject_propagation_events(subject_dir)
+            valid_events = _valid_event_indices(loaded["bools"], min_participating=3)
+            labels = np.asarray(ac["labels"], dtype=int)
+            chosen_k = int(ac["chosen_k"])
+            if valid_events.size != labels.size:
+                existing[output_key] = {
+                    "error": (
+                        f"valid_event_mismatch: valid_events={valid_events.size} "
+                        f"labels={labels.size}"
+                    )
+                }
+                all_results[key] = existing
+                _save(existing, json_path)
+                continue
+
+            seizure_times = load_seizure_times(subject, dataset)
+            coupling = compute_seizure_proximity_coupling(
+                event_abs_times=loaded["event_abs_times"],
+                ranks=loaded["ranks"],
+                lag_raw=loaded["lag_raw"],
+                bools=loaded["bools"],
+                cluster_labels=labels,
+                n_clusters=chosen_k,
+                seizure_times=seizure_times,
+                valid_event_indices=valid_events,
+                coverage_ranges=loaded.get("block_time_ranges"),
+                n_sample=n_sample,
+                n_seeds=n_seeds,
+                min_shared_channels=3,
+                min_center_participation=5,
+                min_participating_l3=5,
+                **cfg,
+            )
+            coupling.update(
+                {
+                    "dataset": dataset,
+                    "subject": subject,
+                    "chosen_k": chosen_k,
+                    "stable_k": int(ac.get("stable_k", chosen_k) or chosen_k),
+                    "n_seizures_loaded": int(len(seizure_times)),
+                    "config_name": config_name,
+                }
+            )
+            existing[output_key] = coupling
+            seizure_results[key] = coupling
+            all_results[key] = existing
+            _save(existing, json_path)
+            logger.info(
+                "PR-4C[%s]: %s  seizures=%d  usable=%d  warning=%s",
+                config_name,
+                key,
+                len(seizure_times),
+                coupling.get("n_seizures_usable", 0),
+                coupling.get("warning"),
+            )
+
+    subject_summary_path = RESULTS_DIR / "pr1_subject_summary.json"
+    merged: Dict[str, Dict[str, Any]] = {}
+    if subject_summary_path.exists():
+        try:
+            with open(subject_summary_path) as f:
+                existing_summary = json.load(f)
+            if isinstance(existing_summary, dict):
+                merged.update(existing_summary)
+        except Exception as exc:
+            logger.warning("Failed to merge existing subject summary: %s", exc)
+    merged.update(all_results)
+
+    cohort = summarize_propagation_cohort(merged)
+    _save(merged, subject_summary_path)
+    _save(cohort, RESULTS_DIR / "pr1_cohort_summary.json")
+    _save(seizure_results, RESULTS_DIR / f"{artifact_stem}.json")
+    logger.info(
+        "PR-4C[%s] done. Subjects processed this run=%d, total in summary=%d",
+        config_name, len(all_results), len(merged),
+    )
+    cohort_key = (
+        "seizure_proximity_analysis"
+        if config_name == "main"
+        else f"seizure_proximity_analysis_{config_name}"
+    )
+    logger.info(
+        "PR-4C[%s] cohort seizure summary: %s",
+        config_name,
+        cohort.get(cohort_key, {}),
+    )
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    """Build the CLI argument parser.
+
+    Factored out so tests (and other tooling) can introspect available
+    flags without executing ``main``.
+    """
     parser = argparse.ArgumentParser(
         description="Interictal group-event internal propagation PR-1 analysis"
     )
@@ -867,6 +1038,10 @@ def main() -> None:
                         help="PR-4B Step 1: rate-state within-cluster tau only")
     parser.add_argument("--pr4b-step23", action="store_true",
                         help="PR-4B Step 2-3: lag span/Pearson plus occupancy-rate")
+    parser.add_argument("--pr4c", action="store_true",
+                        help="PR-4C: seizure proximity L1/L2/L3 analysis (main config: 4/1/1 h)")
+    parser.add_argument("--pr4c-auxiliary", action="store_true",
+                        help="PR-4C: seizure proximity analysis with auxiliary config (2/0.5/1 h) for sensitivity check")
     parser.add_argument("--bin-hours", type=float, default=1.0, help="PR-4A occupancy bin width in hours")
     parser.add_argument("--rate-bin-hours", type=float, default=2.0,
                         help="PR-4B local rate bin width in hours")
@@ -886,6 +1061,11 @@ def main() -> None:
     )
     parser.add_argument("--n-sample", type=int, default=200)
     parser.add_argument("--n-seeds", type=int, default=5)
+    return parser
+
+
+def main() -> None:
+    parser = _build_parser()
     args = parser.parse_args()
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -966,6 +1146,26 @@ def main() -> None:
             n_seeds=args.n_seeds,
             rate_bin_hours=args.rate_bin_hours,
             min_events_per_rate_bin=args.min_events_per_rate_bin,
+        )
+        return
+
+    if args.pr4c:
+        _run_pr4c(
+            datasets_list,
+            per_subject_dir,
+            n_sample=args.n_sample,
+            n_seeds=args.n_seeds,
+            config_name="main",
+        )
+        return
+
+    if args.pr4c_auxiliary:
+        _run_pr4c(
+            datasets_list,
+            per_subject_dir,
+            n_sample=args.n_sample,
+            n_seeds=args.n_seeds,
+            config_name="auxiliary",
         )
         return
 
