@@ -207,12 +207,103 @@ NEW picked 多了 3 个 SOZ 邻近 channels (A6, D4, E5)。每个 packed window 
 
 ---
 
-## 9. 用户决策点
+## 9. Phase E / Phase F-1 — 决策已落地（追加 2026-04-20）
 
-是否继续推进到 **Phase E (lagPat backfill)** ?
+> 用户在 2026-04-19 commit 了 Phase D (`10e30f2`)，并要求：
+> (a) 把 8 个 backfill-only subject 的 detection 也走 Phase D pipeline 跑完；
+> (b) 紧接着把 yuquan 主 cohort 10 个也重跑（让 13 个 yuquan + 11 个 backfill 共 24 个全同源）；
+> (c) Epilepsiae 20 subjects 不在本轮 scope（无 legacy_align 配置、CAR ref、3788 blocks ≈ 24 days GPU）。
 
-- **是**: 跑剩 8 个 backfill subject 的 detection (~10h GPU)，然后在 11 个 subjects 上生成 `_lagPat.npz` / `_packedTimes.npy` 落到 raw 目录（gaolan/dongyiming/wangyiyang 老的存为 `.legacy_backup`）
-- **否**: 现有结果已经够回答"detector drift 是否可控"——可以 commit Phase D 修复 + 报告，留 Phase E 给下一轮
+### 9.1 Phase E — 8 backfill-only subjects detection
+
+- 启动: 2026-04-19 11:59，runner pid 358227
+- Cohort: pengzihang / songzishuo / zhangbichen / zhangjiaqi / zhangkexuan / zhaochenxi / zhaojinrui / zhourongxuan
+- Pre-D 旧 detection 已搬到 `results/hfo_detection/<subject>.pre_phaseD_backup/`
+- 配置全部走 yuquan defaults (`legacy_align=true`, `notch_freqs` 含 250, `chunk_sec=200`, `refine_pick_k=1.0`)，已在每个 log 头看到 `Filtering (GPU): notch=[50,100,150,200,250]` 行确认生效
+- 编排: `scripts/_phaseE_run_backfill.sh`
+- 进度（截 2026-04-20 00:18）：6/8 完成 + zhaojinrui 12/13 + zhourongxuan 待跑
+
+| Subject       | start | finish | duration | blocks |
+|---------------|-------|--------|----------|--------|
+| pengzihang    | 11:59 | 13:49  | 1h50m    | 12 |
+| songzishuo    | 13:49 | 16:02  | 2h13m    | 12 |
+| zhangbichen   | 16:02 | 17:57  | 1h55m    | 11 |
+| zhangjiaqi    | 17:57 | 19:41  | 1h44m    | 13 |
+| zhangkexuan   | 19:41 | 20:59  | 1h17m    | 12 |
+| zhaochenxi    | 20:59 | 22:23  | 1h24m    | 12 |
+| zhaojinrui    | 22:23 | (in flight, 12/13) | ~1h55m | 13 |
+| zhourongxuan  | pending | -    | ~1h30m   | 12 |
+| **TOTAL**     |       |        | **~14h** | **97** |
+
+**Phase E sanity (a): per-subject events_count 与 raw block 数对得上**（6/8 完成的）：
+
+```
+subject        raw_blk phaseE_blk   sum_evt   med/blk      min      max
+pengzihang          12         12    945945     81020    62795   104865  [ok]
+songzishuo          12         12    499744     40961    34791    56312  [ok]
+zhangbichen         11         11   1899101    176082   115748   204444  [ok]
+zhangjiaqi          13         13    977916     75833    23953    92737  [ok]
+zhangkexuan         12         12   1416695    124698    69200   137471  [ok]
+zhaochenxi          12         12    843259     75125    32269    99936  [ok]
+```
+
+所有 6 subject `phaseE_blk == raw_blk` 且全部 block `status=ok`。zhaojinrui / zhourongxuan 跑完后补完 8/8 即可。
+
+**Phase E sanity (b): cohort 内分布离群** — 待 packing 跑完后才能算 lagPat 层离群（用 `scripts/validate_drift_new_detector.py` 比 cohort 内 events_count / picked / lag_span / n_participating 分布）。Detection 层目前看 6 subject 之间 sum_evt 范围 50w–190w（4×），med/blk 41k–176k，没有量级离群。
+
+### 9.2 Phase F-1 — yuquan 主 cohort 10 subjects 重跑（chain 接力）
+
+- Cohort: chengshuai / chenziyang / hanyuxuan / huanghanwen / huangwanling / litengsheng / liyouran / sunyuanxin / xuxinyi / zhangjinhan
+- 这 10 个的旧 detection 全是 2026-04-10/11，**早于 Phase D 修复 8 天**，必须重跑
+- Pre-D 旧 detection 已搬到 `results/hfo_detection/<subject>.pre_phaseD_backup/`
+- 编排: `scripts/_phaseF1_run_yuquan_main.sh`
+- 接力: `scripts/_phaseE_to_F1_chain.sh` (pid 688904) 在 Phase E runner 退出且 `_runner.log` 含 "Phase E ALL DONE" 时自动 launch
+- 预估时长: 10 × ~1h45m ≈ 17.5h，预计 2026-04-20 19:30 前完成
+
+**为什么不并行（用户问的）**：实测 GPU 在 detection 段 100% util、3.8 GiB used。同卡两条 detection 必然抢 SM、cufft cache 累加 → OOM 风险高于 throughput 收益。改用 chain 接力（0 风险，watchdog 自动接），整体只多 ~14h（Phase E 总时间）就能让全 25 个 yuquan subject 同源。
+
+### 9.3 Phase E 第二段 — lagPat / packedTimes backfill (待 detection 完成后启动)
+
+- 范围: 11 个 yuquan subject (3 ref + 8 backfill)
+- 写入: `/mnt/yuquan_data/yuquan_24h_edf/<subject>/<record>_lagPat.npz` + `_packedTimes.npy`
+- 备份: gaolan / dongyiming / wangyiyang 旧产物先 mv 到 `*.legacy_backup`
+- Channel naming: 旧式左触点别名 (A1-A2 → A1)，alias collision QC（保留 events_count 高者，必须进 manifest）
+- Pack pick_k: 沿用 `scripts/run_pipeline.py:LEGACY_PACK_PICK_K_BY_SUBJECT` per-subject 表
+- 编排 script: **待写**（依赖 `compute_and_save_group_analysis` 单 record 接口，需要外加 batch loop + atomic write + alias QC + manifest）
+
+> 这段不抢 GPU（packing 主要是 CPU + envelope cache）。Phase F-1 detection 跑完后再启动可以，或在 Phase F-1 还没启动前先启动也可以（packing 本身可以用 cuda_env 但 GPU memory 占用极小）。
+
+### 9.4 Epilepsiae cohort — 不做（明确出 scope）
+
+| 项 | 量级 |
+|---|---|
+| Subjects | 20 |
+| 总 blocks | ~3788 |
+| 估时 (按 yuquan ~9 min/block) | ~568 GPU 小时 ≈ 24 天 |
+| 现有 `legacy_align` 配置 | **无** (subject_params.json `epilepsiae._defaults` 没有 legacy_align / notch_freqs / chunk_sec / refine_pick_k) |
+| Reference | CAR (与 yuquan bipolar 不同) |
+
+Epilepsiae 的 legacy 等价审计是 PR-level 工作（Phase D 在 yuquan 上做的事要在 epilepsiae 重做一遍：找它的老 MATLAB pipeline 默认 + diff 出 D-flag）。本轮不做。**41-subject extended cohort 的科学口径仍按 plan §149-178 contract，可以说"all 41 subjects under legacy-compatible asset contract"，不能说"identical end-to-end pipeline"。**
+
+---
+
+## 10. 文件 / 状态备忘
+
+```
+新备份目录:
+  results/hfo_detection/{pengzihang,songzishuo,zhangbichen,zhangjiaqi,zhangkexuan,zhaochenxi,zhaojinrui,zhourongxuan}.pre_phaseD_backup/
+  results/hfo_detection/{chengshuai,chenziyang,hanyuxuan,huanghanwen,huangwanling,litengsheng,liyouran,sunyuanxin,xuxinyi,zhangjinhan}.pre_phaseD_backup/
+新脚本:
+  scripts/_phaseE_run_backfill.sh         # Phase E detection runner
+  scripts/_phaseF1_run_yuquan_main.sh     # Phase F-1 detection runner
+  scripts/_phaseE_to_F1_chain.sh          # watchdog (auto-launch F-1)
+后台进程:
+  pid 358227 — Phase E runner (zhaojinrui in flight, ETA 02:00)
+  pid 688904 — Phase E→F-1 watchdog (idle)
+日志:
+  logs/phaseE/<subject>.log + _runner.log
+  logs/phaseF1/<subject>.log + _chain.log + _runner.log (after F-1 starts)
+```
 
 ---
 
