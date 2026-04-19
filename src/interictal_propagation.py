@@ -2529,6 +2529,844 @@ def compute_rate_state_coupling(
     return out
 
 
+_PR4C_PAIRS: Tuple[Tuple[str, str, str], ...] = (
+    ("pre_vs_baseline", "baseline", "pre"),
+    ("post_vs_pre", "pre", "post"),
+    ("post_vs_baseline", "baseline", "post"),
+)
+
+
+def _build_seizure_proximity_windows(
+    event_abs_times: np.ndarray,
+    seizure_times: Sequence[float],
+    *,
+    baseline_hours: Tuple[float, float],
+    pre_ictal_hours: Tuple[float, float],
+    post_ictal_hours: Tuple[float, float],
+) -> Dict[str, Any]:
+    """Assign each event to a single (seizure, state) and mark per-pair usability.
+
+    Two contracts that earlier versions got wrong:
+
+    * **Event ownership** (Fix B): we enumerate every legal ``(seizure, state)``
+      candidate for an event and break ties by the smallest ``|delta_h|``,
+      rather than first picking the nearest seizure and discarding the event
+      if that seizure's window happens to exclude it. This recovers boundary
+      events that fall outside the nearest seizure's window but inside a
+      slightly farther seizure's window.
+    * **Window usability** (Fix A): each pair (``pre_vs_baseline``,
+      ``post_vs_pre``, ``post_vs_baseline``) is marked usable independently.
+      A window with non-empty baseline+pre but empty post still feeds the
+      ``pre_vs_baseline`` comparison.
+
+    ``usable_windows`` reports windows where at least one pair is usable; the
+    legacy ``usable`` boolean per window means "any pair usable" so that
+    downstream cohort code keeps working without per-pair plumbing.
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    sz_times = np.asarray(sorted(float(x) for x in seizure_times), dtype=float)
+    state_names = ("baseline", "pre", "post")
+    state_ranges = {
+        "baseline": tuple(float(x) for x in baseline_hours),
+        "pre": tuple(float(x) for x in pre_ictal_hours),
+        "post": tuple(float(x) for x in post_ictal_hours),
+    }
+    event_states = np.full(times.shape, "excluded", dtype=object)
+    event_window_ids = np.full(times.shape, -1, dtype=int)
+    windows: List[Dict[str, Any]] = [
+        {
+            "seizure_id": int(sz_id),
+            "seizure_time": float(sz_t),
+            "state_event_indices": {name: [] for name in state_names},
+        }
+        for sz_id, sz_t in enumerate(sz_times)
+    ]
+
+    def _state_for(delta_h: float) -> Optional[str]:
+        for state_name in state_names:
+            lo, hi = state_ranges[state_name]
+            if lo <= delta_h < hi:
+                return state_name
+        return None
+
+    if sz_times.size > 0:
+        for ev, event_time in enumerate(times):
+            if not np.isfinite(event_time):
+                continue
+            best: Optional[Tuple[float, int, str]] = None
+            for sz_id, sz_t in enumerate(sz_times):
+                delta_h = (float(event_time) - float(sz_t)) / 3600.0
+                state = _state_for(delta_h)
+                if state is None:
+                    continue
+                key = abs(delta_h)
+                if best is None or key < best[0]:
+                    best = (key, int(sz_id), state)
+            if best is None:
+                continue
+            _, sz_id, state = best
+            windows[sz_id]["state_event_indices"][state].append(int(ev))
+            event_states[ev] = state
+            event_window_ids[ev] = int(sz_id)
+
+    state_event_counts = {name: 0 for name in state_names}
+    usable_windows: List[Dict[str, Any]] = []
+    for window in windows:
+        state_indices = {
+            name: np.asarray(window["state_event_indices"][name], dtype=int)
+            for name in state_names
+        }
+        state_counts = {
+            name: int(state_indices[name].size)
+            for name in state_names
+        }
+        for name in state_names:
+            state_event_counts[name] += state_counts[name]
+        pair_usability = {
+            pair: (state_counts[a] > 0 and state_counts[b] > 0)
+            for pair, a, b in _PR4C_PAIRS
+        }
+        usable_any_pair = any(pair_usability.values())
+        usable_window = {
+            "seizure_id": int(window["seizure_id"]),
+            "seizure_time": float(window["seizure_time"]),
+            "state_event_indices": state_indices,
+            "state_event_counts": state_counts,
+            "pair_usability": pair_usability,
+            "usable": bool(usable_any_pair),
+        }
+        if usable_any_pair:
+            usable_windows.append(usable_window)
+        window.update(usable_window)
+    state_event_counts["excluded"] = int(np.sum(event_window_ids < 0))
+
+    return {
+        "event_states": event_states,
+        "event_window_ids": event_window_ids,
+        "windows": windows,
+        "usable_windows": usable_windows,
+        "state_event_counts": state_event_counts,
+        "state_ranges_hours": {
+            key: [float(val[0]), float(val[1])]
+            for key, val in state_ranges.items()
+        },
+    }
+
+
+def _rate_by_template_for_window(
+    window: Dict[str, Any],
+    cluster_labels: np.ndarray,
+    n_clusters: int,
+    *,
+    state_durations_hours: Dict[str, float],
+) -> Dict[str, Any]:
+    """Decompose per-state event counts into per-template rate (events/hour).
+
+    Single-window version of PR-4D's gap-aware rate×type: within a seizure
+    window, each state is a fixed-duration slab, so rate = count / duration.
+    """
+    labels = np.asarray(cluster_labels, dtype=int)
+    out: Dict[str, Dict[str, Any]] = {}
+    for state, duration in state_durations_hours.items():
+        idx = np.asarray(
+            window["state_event_indices"].get(state, []), dtype=int
+        )
+        if idx.size:
+            counts = np.bincount(labels[idx], minlength=int(n_clusters)).astype(int)
+        else:
+            counts = np.zeros(int(n_clusters), dtype=int)
+        total = int(counts.sum())
+        dur = float(max(duration, 1e-9))
+        rate = counts / dur
+        frac = counts / total if total > 0 else np.full_like(counts, np.nan, dtype=float)
+        out[state] = {
+            "duration_hours": float(duration),
+            "counts_total": int(total),
+            "rate_total_per_hour": float(total / dur),
+            "counts_by_template": counts.astype(int).tolist(),
+            "rate_by_template_per_hour": rate.astype(float).tolist(),
+            "fraction_by_template": frac.astype(float).tolist(),
+        }
+    return out
+
+
+def _summarize_rate_by_template_records(
+    records: List[Dict[str, Any]],
+    n_clusters: int,
+) -> Dict[str, Any]:
+    """Per-subject aggregate of per-window rate×type across usable seizures."""
+    if not records:
+        return {"n_windows": 0}
+    state_names = ("baseline", "pre", "post")
+
+    def _stack(state: str, key: str) -> np.ndarray:
+        rows = []
+        for rec in records:
+            state_rec = rec.get(state, {})
+            vals = state_rec.get(key)
+            if vals is None:
+                continue
+            arr = np.asarray(vals, dtype=float)
+            if arr.size == int(n_clusters):
+                rows.append(arr)
+        return np.asarray(rows, dtype=float) if rows else np.zeros((0, int(n_clusters)))
+
+    def _state_totals(state: str) -> List[float]:
+        return [
+            float(rec.get(state, {}).get("rate_total_per_hour", np.nan))
+            for rec in records
+            if np.isfinite(rec.get(state, {}).get("rate_total_per_hour", np.nan))
+        ]
+
+    per_state: Dict[str, Any] = {}
+    for state in state_names:
+        rates = _stack(state, "rate_by_template_per_hour")
+        fracs = _stack(state, "fraction_by_template")
+        totals = _state_totals(state)
+        per_state[state] = {
+            "n_windows": int(rates.shape[0]),
+            "median_rate_per_hour_total": (
+                float(np.median(totals)) if totals else np.nan
+            ),
+            "median_rate_by_template_per_hour": (
+                np.nanmedian(rates, axis=0).astype(float).tolist()
+                if rates.size else [np.nan] * int(n_clusters)
+            ),
+            "median_fraction_by_template": (
+                np.nanmedian(fracs, axis=0).astype(float).tolist()
+                if fracs.size else [np.nan] * int(n_clusters)
+            ),
+        }
+
+    def _pair_delta(state_a: str, state_b: str) -> Dict[str, Any]:
+        rate_a = _stack(state_a, "rate_by_template_per_hour")
+        rate_b = _stack(state_b, "rate_by_template_per_hour")
+        frac_a = _stack(state_a, "fraction_by_template")
+        frac_b = _stack(state_b, "fraction_by_template")
+        pairs = min(rate_a.shape[0], rate_b.shape[0])
+        if pairs == 0:
+            return {
+                "n_windows": 0,
+                "median_rate_delta_by_template": [np.nan] * int(n_clusters),
+                "median_fraction_delta_by_template": [np.nan] * int(n_clusters),
+                "max_abs_fraction_delta_template": np.nan,
+            }
+        d_rate = rate_b[:pairs] - rate_a[:pairs]
+        d_frac = frac_b[:pairs] - frac_a[:pairs]
+        med_rate = np.nanmedian(d_rate, axis=0).astype(float)
+        med_frac = np.nanmedian(d_frac, axis=0).astype(float)
+        return {
+            "n_windows": int(pairs),
+            "median_rate_delta_by_template": med_rate.tolist(),
+            "median_fraction_delta_by_template": med_frac.tolist(),
+            "max_abs_fraction_delta_template": (
+                float(np.nanmax(np.abs(med_frac)))
+                if np.any(np.isfinite(med_frac)) else np.nan
+            ),
+        }
+
+    return {
+        "n_windows": int(len(records)),
+        "n_templates": int(n_clusters),
+        "by_state": per_state,
+        "pre_vs_baseline": _pair_delta("baseline", "pre"),
+        "post_vs_pre": _pair_delta("pre", "post"),
+        "post_vs_baseline": _pair_delta("baseline", "post"),
+    }
+
+
+def _rename_state_pair_summary(summary: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "n_clusters_compared": int(summary.get("n_clusters_compared", 0)),
+        "cluster_ids_compared": list(summary.get("cluster_ids_compared", [])),
+        "state_a_mean": summary.get("low_mean", np.nan),
+        "state_b_mean": summary.get("high_mean", np.nan),
+        "delta_state_b_minus_state_a": summary.get("delta_high_minus_low", np.nan),
+        "n_clusters_state_b_gt_state_a": int(summary.get("n_clusters_high_gt_low", 0)),
+    }
+
+
+def _compare_two_event_states(
+    ranks: np.ndarray,
+    relative_lag: np.ndarray,
+    bools: np.ndarray,
+    cluster_labels: np.ndarray,
+    n_clusters: int,
+    *,
+    state_a_indices: np.ndarray,
+    state_b_indices: np.ndarray,
+    state_a_name: str,
+    state_b_name: str,
+    n_sample: int,
+    n_seeds: int,
+    min_shared_channels: int,
+    min_center_participation: int,
+    min_participating_l3: int,
+    match_seed: int,
+) -> Dict[str, Any]:
+    """Compare two named event states using the PR-4B L1/L2/L3 contracts."""
+    labels = np.asarray(cluster_labels, dtype=int)
+    state_a_indices = np.asarray(state_a_indices, dtype=int)
+    state_b_indices = np.asarray(state_b_indices, dtype=int)
+    n_part = np.sum(np.asarray(bools, dtype=bool), axis=0).astype(int)
+    cluster_counts = (
+        np.bincount(labels, minlength=int(n_clusters))
+        if labels.size else np.zeros(int(n_clusters), dtype=int)
+    )
+    match_rng = np.random.default_rng(int(match_seed))
+    per_cluster: List[Dict[str, Any]] = []
+
+    for cluster_id in range(int(n_clusters)):
+        state_a_all = state_a_indices[labels[state_a_indices] == int(cluster_id)]
+        state_b_all = state_b_indices[labels[state_b_indices] == int(cluster_id)]
+        n_match = int(min(state_a_all.size, state_b_all.size))
+        state_a_tau = np.asarray(state_a_all, dtype=int)
+        state_b_tau = np.asarray(state_b_all, dtype=int)
+        if state_a_tau.size > n_match and n_match > 0:
+            state_a_tau = np.sort(match_rng.choice(state_a_tau, size=n_match, replace=False))
+        if state_b_tau.size > n_match and n_match > 0:
+            state_b_tau = np.sort(match_rng.choice(state_b_tau, size=n_match, replace=False))
+
+        adj_center = int(min(
+            int(min_center_participation),
+            max(1, n_match // 5),
+        ))
+        cluster_entry: Dict[str, Any] = {
+            "cluster_id": int(cluster_id),
+            "n_events_total": int(np.sum(labels == int(cluster_id))),
+            "n_matched_tau": int(n_match),
+        }
+        cluster_entry[state_a_name] = _cluster_state_tau_summary(
+            ranks,
+            bools,
+            state_a_tau,
+            n_sample=n_sample,
+            n_seeds=n_seeds,
+            min_shared_channels=min_shared_channels,
+            min_center_participation=adj_center,
+        )
+        cluster_entry[state_b_name] = _cluster_state_tau_summary(
+            ranks,
+            bools,
+            state_b_tau,
+            n_sample=n_sample,
+            n_seeds=n_seeds,
+            min_shared_channels=min_shared_channels,
+            min_center_participation=adj_center,
+        )
+
+        lag_span_match = _match_event_indices_by_nparticipating(
+            state_b_all,
+            state_a_all,
+            n_part,
+            seed=int(match_seed) + 7919 * int(cluster_id) + 17,
+            min_participating=int(min_shared_channels),
+        )
+        pearson_match = _match_event_indices_by_nparticipating(
+            state_b_all,
+            state_a_all,
+            n_part,
+            seed=int(match_seed) + 7919 * int(cluster_id) + 43,
+            min_participating=int(min_participating_l3),
+        )
+        cluster_entry["l3_matching"] = {
+            "lag_span": {
+                "n_matched": int(lag_span_match["n_matched"]),
+                "matched_counts_by_n_participating": lag_span_match["matched_counts_by_n_participating"],
+                "min_participating": int(lag_span_match["min_participating"]),
+            },
+            "pearson_r": {
+                "n_matched": int(pearson_match["n_matched"]),
+                "matched_counts_by_n_participating": pearson_match["matched_counts_by_n_participating"],
+                "min_participating": int(pearson_match["min_participating"]),
+            },
+        }
+        cluster_entry[f"{state_a_name}_l3"] = _cluster_state_l3_summary(
+            relative_lag,
+            bools,
+            lag_span_event_indices=lag_span_match["low_event_indices"],
+            pearson_event_indices=pearson_match["low_event_indices"],
+            min_lag_span_participating=int(min_shared_channels),
+            min_shared_channels_for_r=int(min_participating_l3),
+            n_sample_pearson=n_sample,
+            pearson_seed=int(match_seed) + 7919 * int(cluster_id) + 101,
+        )
+        cluster_entry[f"{state_b_name}_l3"] = _cluster_state_l3_summary(
+            relative_lag,
+            bools,
+            lag_span_event_indices=lag_span_match["high_event_indices"],
+            pearson_event_indices=pearson_match["high_event_indices"],
+            min_lag_span_participating=int(min_shared_channels),
+            min_shared_channels_for_r=int(min_participating_l3),
+            n_sample_pearson=n_sample,
+            pearson_seed=int(match_seed) + 7919 * int(cluster_id) + 137,
+        )
+
+        state_a_raw = cluster_entry[state_a_name]["raw_tau"]
+        state_b_raw = cluster_entry[state_b_name]["raw_tau"]
+        state_a_centered = cluster_entry[state_a_name]["centered_tau"]
+        state_b_centered = cluster_entry[state_b_name]["centered_tau"]
+        state_a_lag = cluster_entry[f"{state_a_name}_l3"]["lag_span_mean"]
+        state_b_lag = cluster_entry[f"{state_b_name}_l3"]["lag_span_mean"]
+        state_a_r = cluster_entry[f"{state_a_name}_l3"]["pearson_r_median"]
+        state_b_r = cluster_entry[f"{state_b_name}_l3"]["pearson_r_median"]
+
+        cluster_entry["raw_delta_state_b_minus_state_a"] = (
+            float(state_b_raw - state_a_raw)
+            if np.isfinite(state_a_raw) and np.isfinite(state_b_raw)
+            else np.nan
+        )
+        cluster_entry["centered_delta_state_b_minus_state_a"] = (
+            float(state_b_centered - state_a_centered)
+            if np.isfinite(state_a_centered) and np.isfinite(state_b_centered)
+            else np.nan
+        )
+        cluster_entry["lag_span_delta_state_b_minus_state_a"] = (
+            float(state_b_lag - state_a_lag)
+            if np.isfinite(state_a_lag) and np.isfinite(state_b_lag)
+            else np.nan
+        )
+        cluster_entry["pearson_r_delta_state_b_minus_state_a"] = (
+            float(state_b_r - state_a_r)
+            if np.isfinite(state_a_r) and np.isfinite(state_b_r)
+            else np.nan
+        )
+        cluster_entry["occupancy_fraction"] = {
+            state_a_name: (
+                float(state_a_all.size / state_a_indices.size)
+                if state_a_indices.size else np.nan
+            ),
+            state_b_name: (
+                float(state_b_all.size / state_b_indices.size)
+                if state_b_indices.size else np.nan
+            ),
+        }
+        per_cluster.append(cluster_entry)
+
+    l2_raw = _rename_state_pair_summary(
+        _aggregate_cluster_state_metric(
+            per_cluster,
+            "raw_tau",
+            high_key=state_b_name,
+            low_key=state_a_name,
+        )
+    )
+    l2_centered = _rename_state_pair_summary(
+        _aggregate_cluster_state_metric(
+            per_cluster,
+            "centered_tau",
+            high_key=state_b_name,
+            low_key=state_a_name,
+        )
+    )
+    l3_lag = _rename_state_pair_summary(
+        _aggregate_cluster_state_metric(
+            per_cluster,
+            "lag_span_mean",
+            high_key=f"{state_b_name}_l3",
+            low_key=f"{state_a_name}_l3",
+        )
+    )
+    l3_pearson = _rename_state_pair_summary(
+        _aggregate_cluster_state_metric(
+            per_cluster,
+            "pearson_r_median",
+            high_key=f"{state_b_name}_l3",
+            low_key=f"{state_a_name}_l3",
+        )
+    )
+    dominant_cluster_id = int(np.argmax(cluster_counts)) if cluster_counts.size else -1
+    dominant_fraction = next(
+        (
+            cluster["occupancy_fraction"]
+            for cluster in per_cluster
+            if int(cluster["cluster_id"]) == dominant_cluster_id
+        ),
+        {state_a_name: np.nan, state_b_name: np.nan},
+    )
+    fraction_shifts = [
+        float(cluster["occupancy_fraction"][state_b_name] - cluster["occupancy_fraction"][state_a_name])
+        for cluster in per_cluster
+        if np.isfinite(cluster["occupancy_fraction"].get(state_a_name, np.nan))
+        and np.isfinite(cluster["occupancy_fraction"].get(state_b_name, np.nan))
+    ]
+
+    out = {
+        "state_a_name": state_a_name,
+        "state_b_name": state_b_name,
+        "state_event_counts": {
+            state_a_name: int(state_a_indices.size),
+            state_b_name: int(state_b_indices.size),
+        },
+        "per_cluster": per_cluster,
+        "subject_raw_delta": (
+            float(l2_raw["delta_state_b_minus_state_a"])
+            if np.isfinite(l2_raw["delta_state_b_minus_state_a"]) else None
+        ),
+        "subject_centered_delta": (
+            float(l2_centered["delta_state_b_minus_state_a"])
+            if np.isfinite(l2_centered["delta_state_b_minus_state_a"]) else None
+        ),
+        "subject_lag_span_delta": (
+            float(l3_lag["delta_state_b_minus_state_a"])
+            if np.isfinite(l3_lag["delta_state_b_minus_state_a"]) else None
+        ),
+        "subject_pearson_r_delta": (
+            float(l3_pearson["delta_state_b_minus_state_a"])
+            if np.isfinite(l3_pearson["delta_state_b_minus_state_a"]) else None
+        ),
+        "l2": {
+            "raw": l2_raw,
+            "centered": l2_centered,
+        },
+        "l3": {
+            "matching_rule": "exact_n_participating_match",
+            "lag_span": l3_lag,
+            "pearson_r": l3_pearson,
+            "pearson_r_min_participating": int(min_participating_l3),
+        },
+        "l1": {
+            "dominant_cluster_id": int(dominant_cluster_id),
+            "dominant_cluster_fraction": {
+                state_a_name: dominant_fraction.get(state_a_name, np.nan),
+                state_b_name: dominant_fraction.get(state_b_name, np.nan),
+                "delta_state_b_minus_state_a": (
+                    float(dominant_fraction.get(state_b_name, np.nan) - dominant_fraction.get(state_a_name, np.nan))
+                    if np.isfinite(dominant_fraction.get(state_a_name, np.nan))
+                    and np.isfinite(dominant_fraction.get(state_b_name, np.nan))
+                    else np.nan
+                ),
+            },
+            "max_abs_fraction_shift": (
+                float(np.max(np.abs(fraction_shifts))) if fraction_shifts else np.nan
+            ),
+        },
+    }
+    if (
+        state_a_indices.size == 0
+        or state_b_indices.size == 0
+        or l2_raw["n_clusters_compared"] == 0
+    ):
+        out["warning"] = "insufficient_state_coverage"
+    return out
+
+
+def _summarize_state_pair_records(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    if not records:
+        return {"n_windows": 0}
+    state_a_name = str(records[0].get("state_a_name", "state_a"))
+    state_b_name = str(records[0].get("state_b_name", "state_b"))
+
+    def _collect(metric_key: str, path: Tuple[str, ...]) -> List[float]:
+        values: List[float] = []
+        for record in records:
+            current: Any = record
+            for key in path:
+                current = current.get(key, {})
+            value = current.get(metric_key, np.nan)
+            if np.isfinite(value):
+                values.append(float(value))
+        return values
+
+    def _wilcoxon_on_deltas(deltas: List[float]) -> Dict[str, Any]:
+        if len(deltas) < 2:
+            return {"p": np.nan, "n": int(len(deltas))}
+        arr = np.asarray(deltas, dtype=float)
+        nonzero = arr[np.abs(arr) > 1e-15]
+        if nonzero.size < 2:
+            return {"p": np.nan, "n": int(nonzero.size)}
+        try:
+            p = float(wilcoxon(nonzero, alternative="two-sided").pvalue)
+        except Exception:
+            p = np.nan
+        return {"p": p, "n": int(nonzero.size)}
+
+    def _pair_summary(path: Tuple[str, ...]) -> Dict[str, Any]:
+        state_a = _collect("state_a_mean", path)
+        state_b = _collect("state_b_mean", path)
+        delta = _collect("delta_state_b_minus_state_a", path)
+        wil = _wilcoxon_on_deltas(delta)
+        return {
+            "state_a_median": float(np.median(state_a)) if state_a else np.nan,
+            "state_b_median": float(np.median(state_b)) if state_b else np.nan,
+            "delta_state_b_minus_state_a_median": float(np.median(delta)) if delta else np.nan,
+            "n_windows_state_b_gt_state_a": int(sum(val > 0 for val in delta)),
+            "wilcoxon_p": wil["p"],
+            "wilcoxon_n": wil["n"],
+        }
+
+    def _fraction_summary() -> Dict[str, Any]:
+        state_a_vals: List[float] = []
+        state_b_vals: List[float] = []
+        delta_vals: List[float] = []
+        for record in records:
+            frac = record.get("l1", {}).get("dominant_cluster_fraction", {})
+            a_val = frac.get(state_a_name, np.nan)
+            b_val = frac.get(state_b_name, np.nan)
+            d_val = frac.get("delta_state_b_minus_state_a", np.nan)
+            if np.isfinite(a_val):
+                state_a_vals.append(float(a_val))
+            if np.isfinite(b_val):
+                state_b_vals.append(float(b_val))
+            if np.isfinite(d_val):
+                delta_vals.append(float(d_val))
+        wil = _wilcoxon_on_deltas(delta_vals)
+        return {
+            "state_a_median": float(np.median(state_a_vals)) if state_a_vals else np.nan,
+            "state_b_median": float(np.median(state_b_vals)) if state_b_vals else np.nan,
+            "delta_state_b_minus_state_a_median": (
+                float(np.median(delta_vals)) if delta_vals else np.nan
+            ),
+            "n_windows_state_b_gt_state_a": int(sum(val > 0 for val in delta_vals)),
+            "wilcoxon_p": wil["p"],
+            "wilcoxon_n": wil["n"],
+        }
+
+    return {
+        "n_windows": int(len(records)),
+        "raw_tau": _pair_summary(("l2", "raw")),
+        "centered_tau": _pair_summary(("l2", "centered")),
+        "l3": {
+            "lag_span": _pair_summary(("l3", "lag_span")),
+            "pearson_r": _pair_summary(("l3", "pearson_r")),
+        },
+        "dominant_cluster_fraction": _fraction_summary(),
+    }
+
+
+SEIZURE_PROXIMITY_CONFIGS: Dict[str, Dict[str, Tuple[float, float]]] = {
+    # PR-4C main track: retains the largest number of usable seizures across
+    # the cohort (median ~7/subject) while keeping >=400 events/state on
+    # median. Data-driven choice; see scripts/pr4c_window_sweep_report.py.
+    "main": {
+        "baseline_hours": (-4.0, -1.0),
+        "pre_ictal_hours": (-1.0, -0.25),
+        "post_ictal_hours": (0.25, 1.0),
+    },
+    # PR-4C auxiliary track: tighter peri-ictal windows for sensitivity
+    # analysis. Direction of pre/post deltas should agree with main to
+    # claim robustness.
+    "auxiliary": {
+        "baseline_hours": (-2.0, -0.5),
+        "pre_ictal_hours": (-0.5, -1.0 / 12.0),
+        "post_ictal_hours": (1.0 / 12.0, 1.0),
+    },
+}
+
+
+def _intersect_seconds(
+    t0: float,
+    t1: float,
+    coverage_ranges: Optional[Sequence[Tuple[float, float]]],
+) -> float:
+    """Return covered seconds inside ``[t0, t1)`` given gap-aware coverage ranges.
+
+    When ``coverage_ranges`` is ``None`` we fall back to nominal ``t1 - t0``,
+    so callers without a coverage map keep the legacy fixed-window behaviour.
+    """
+    if t1 <= t0:
+        return 0.0
+    if coverage_ranges is None:
+        return float(t1 - t0)
+    total = 0.0
+    for lo, hi in coverage_ranges:
+        a = max(t0, float(lo))
+        b = min(t1, float(hi))
+        if b > a:
+            total += float(b - a)
+    return total
+
+
+def compute_seizure_proximity_coupling(
+    event_abs_times: np.ndarray,
+    ranks: np.ndarray,
+    lag_raw: np.ndarray,
+    bools: np.ndarray,
+    cluster_labels: np.ndarray,
+    n_clusters: int,
+    *,
+    seizure_times: Sequence[float],
+    valid_event_indices: Optional[np.ndarray] = None,
+    pre_ictal_hours: Tuple[float, float] = (-1.0, -0.25),
+    baseline_hours: Tuple[float, float] = (-4.0, -1.0),
+    post_ictal_hours: Tuple[float, float] = (0.25, 1.0),
+    coverage_ranges: Optional[Sequence[Tuple[float, float]]] = None,
+    n_sample: int = 200,
+    n_seeds: int = 5,
+    min_shared_channels: int = 3,
+    min_center_participation: int = 10,
+    min_participating_l3: int = 5,
+    match_seed: int = 42,
+) -> Dict[str, Any]:
+    """PR-4C: seizure-proximity comparison for propagation pattern + rate metrics.
+
+    Three corrected contracts (vs. earlier versions):
+
+    * Per-pair window usability (Fix A): a window with non-empty
+      baseline+pre but empty post still feeds ``pre_vs_baseline``.
+    * Candidate-then-tie-break event ownership (Fix B): boundary events
+      that fall outside the nearest seizure's window but inside a
+      slightly farther seizure's window are no longer dropped.
+    * Gap-aware rate denominators (Fix C): when ``coverage_ranges`` is
+      provided, ``rate_by_template`` divides by the actual covered hours
+      inside each state's slab, not by the nominal window width.
+    """
+    if not seizure_times:
+        return {"warning": "no_seizure_times"}
+
+    times = np.asarray(event_abs_times, dtype=float)
+    ranks = np.asarray(ranks, dtype=float)
+    lag_raw = np.asarray(lag_raw, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    labels = np.asarray(cluster_labels, dtype=int)
+    if ranks.shape != bools.shape or ranks.shape != lag_raw.shape:
+        raise ValueError("ranks, lag_raw, and bools must share shape")
+
+    if valid_event_indices is None:
+        if labels.size == ranks.shape[1]:
+            valid_event_indices = np.arange(ranks.shape[1], dtype=int)
+        else:
+            valid_event_indices = _valid_event_indices(
+                bools,
+                min_participating=min_shared_channels,
+            )
+    valid_event_indices = np.asarray(valid_event_indices, dtype=int)
+    if labels.size != valid_event_indices.size:
+        raise ValueError("cluster_labels size must equal valid_event_indices size")
+
+    v_times = times[valid_event_indices]
+    v_ranks = ranks[:, valid_event_indices]
+    v_bools = bools[:, valid_event_indices]
+    v_rel = _compute_relative_lag_matrix(lag_raw[:, valid_event_indices], v_bools)
+    proximity = _build_seizure_proximity_windows(
+        v_times,
+        seizure_times,
+        baseline_hours=baseline_hours,
+        pre_ictal_hours=pre_ictal_hours,
+        post_ictal_hours=post_ictal_hours,
+    )
+
+    state_hours = {
+        "baseline": (float(baseline_hours[0]), float(baseline_hours[1])),
+        "pre": (float(pre_ictal_hours[0]), float(pre_ictal_hours[1])),
+        "post": (float(post_ictal_hours[0]), float(post_ictal_hours[1])),
+    }
+    nominal_state_hours = {
+        name: float(hi - lo) for name, (lo, hi) in state_hours.items()
+    }
+    coverage_norm: Optional[List[Tuple[float, float]]] = None
+    if coverage_ranges is not None:
+        coverage_norm = [
+            (float(lo), float(hi))
+            for lo, hi in coverage_ranges
+            if float(hi) > float(lo)
+        ]
+
+    def _per_window_state_hours(seizure_time: float) -> Dict[str, float]:
+        if coverage_norm is None:
+            return dict(nominal_state_hours)
+        out: Dict[str, float] = {}
+        for name, (lo, hi) in state_hours.items():
+            t0 = float(seizure_time + lo * 3600.0)
+            t1 = float(seizure_time + hi * 3600.0)
+            covered_seconds = _intersect_seconds(t0, t1, coverage_norm)
+            out[name] = covered_seconds / 3600.0
+        return out
+
+    comparison_records: Dict[str, List[Dict[str, Any]]] = {
+        pair: [] for pair, _, _ in _PR4C_PAIRS
+    }
+    rate_by_template_records: List[Dict[str, Any]] = []
+    seizure_windows: List[Dict[str, Any]] = []
+    n_seizures_pair_usable: Dict[str, int] = {pair: 0 for pair, _, _ in _PR4C_PAIRS}
+    pair_state_indices_lookup: Dict[str, Tuple[str, str]] = {
+        pair: (a, b) for pair, a, b in _PR4C_PAIRS
+    }
+    for window in proximity["windows"]:
+        per_window_hours = _per_window_state_hours(window["seizure_time"])
+        rate_decomposition = _rate_by_template_for_window(
+            window,
+            labels,
+            n_clusters,
+            state_durations_hours=per_window_hours,
+        )
+        pair_usability = dict(window.get("pair_usability", {}))
+        window_out = {
+            "seizure_id": int(window["seizure_id"]),
+            "seizure_time": float(window["seizure_time"]),
+            "state_event_counts": dict(window["state_event_counts"]),
+            "pair_usability": pair_usability,
+            "state_covered_hours": dict(per_window_hours),
+            "usable": bool(window["usable"]),
+            "rate_by_template": rate_decomposition,
+        }
+        if not window["usable"]:
+            seizure_windows.append(window_out)
+            continue
+        rate_by_template_records.append(rate_decomposition)
+        state_indices = {
+            name: np.asarray(window["state_event_indices"][name], dtype=int)
+            for name in ("baseline", "pre", "post")
+        }
+        pairwise: Dict[str, Dict[str, Any]] = {}
+        for pair_name, state_a_name, state_b_name in _PR4C_PAIRS:
+            if not pair_usability.get(pair_name, False):
+                continue
+            seed_offset = {
+                "pre_vs_baseline": 11,
+                "post_vs_pre": 29,
+                "post_vs_baseline": 53,
+            }[pair_name]
+            pair_record = _compare_two_event_states(
+                v_ranks,
+                v_rel,
+                v_bools,
+                labels,
+                n_clusters,
+                state_a_indices=state_indices[state_a_name],
+                state_b_indices=state_indices[state_b_name],
+                state_a_name=state_a_name,
+                state_b_name=state_b_name,
+                n_sample=n_sample,
+                n_seeds=n_seeds,
+                min_shared_channels=min_shared_channels,
+                min_center_participation=min_center_participation,
+                min_participating_l3=min_participating_l3,
+                match_seed=int(match_seed)
+                + 1000 * int(window["seizure_id"])
+                + seed_offset,
+            )
+            pairwise[pair_name] = pair_record
+            comparison_records[pair_name].append(pair_record)
+            n_seizures_pair_usable[pair_name] += 1
+        window_out["pairwise_comparisons"] = pairwise
+        seizure_windows.append(window_out)
+
+    out = {
+        "step_status": "pr4c_seizure_proximity_complete",
+        "n_valid_events": int(valid_event_indices.size),
+        "n_clusters": int(n_clusters),
+        "n_seizures_total": int(len(seizure_times)),
+        "n_seizures_usable": int(len(proximity["usable_windows"])),
+        "n_seizures_pair_usable": n_seizures_pair_usable,
+        "coverage_aware_rate": bool(coverage_norm is not None),
+        "window_hours": proximity["state_ranges_hours"],
+        "state_event_counts": proximity["state_event_counts"],
+        "seizure_windows": seizure_windows,
+        "comparison_summary": {
+            key: _summarize_state_pair_records(records)
+            for key, records in comparison_records.items()
+        },
+        "rate_by_template_summary": _summarize_rate_by_template_records(
+            rate_by_template_records,
+            int(n_clusters),
+        ),
+    }
+    if not proximity["usable_windows"]:
+        out["warning"] = "no_usable_seizure_windows"
+    return out
+
+
 def _summarize_reproducibility(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Cohort-level summary of cross-time template reproducibility."""
     repro_recs = [
@@ -3491,6 +4329,201 @@ def _summarize_temporal_dynamics_followup(valid: List[Dict[str, Any]]) -> Dict[s
     }
 
 
+def _summarize_seizure_proximity(
+    valid: List[Dict[str, Any]],
+    *,
+    coupling_key: str = "seizure_proximity_coupling",
+) -> Dict[str, Any]:
+    """Cohort summary for PR-4C seizure-proximity coupling.
+
+    ``coupling_key`` selects which per-subject field to aggregate:
+    ``seizure_proximity_coupling`` (main) or ``seizure_proximity_coupling_auxiliary``.
+    """
+    recs = [
+        rec.get(coupling_key)
+        for rec in valid
+        if isinstance(rec.get(coupling_key), dict)
+        and "comparison_summary" in rec.get(coupling_key, {})
+    ]
+    if not recs:
+        return {"n_subjects": 0}
+
+    usable_windows = [
+        int(rec.get("n_seizures_usable", 0))
+        for rec in recs
+    ]
+
+    def _wilcoxon_on_deltas(deltas: List[float]) -> Dict[str, Any]:
+        if len(deltas) < 2:
+            return {"p": np.nan, "n": int(len(deltas))}
+        arr = np.asarray(deltas, dtype=float)
+        nonzero = arr[np.abs(arr) > 1e-15]
+        if nonzero.size < 2:
+            return {"p": np.nan, "n": int(nonzero.size)}
+        try:
+            p = float(wilcoxon(nonzero, alternative="two-sided").pvalue)
+        except Exception:
+            p = np.nan
+        return {"p": p, "n": int(nonzero.size)}
+
+    def _pair_metric(pair_recs: List[Dict[str, Any]], path: Tuple[str, ...]) -> Dict[str, Any]:
+        state_a_vals: List[float] = []
+        state_b_vals: List[float] = []
+        delta_vals: List[float] = []
+        for rec in pair_recs:
+            current: Any = rec
+            for key in path:
+                current = current.get(key, {})
+            a_val = current.get("state_a_median", np.nan)
+            b_val = current.get("state_b_median", np.nan)
+            d_val = current.get("delta_state_b_minus_state_a_median", np.nan)
+            if np.isfinite(a_val):
+                state_a_vals.append(float(a_val))
+            if np.isfinite(b_val):
+                state_b_vals.append(float(b_val))
+            if np.isfinite(d_val):
+                delta_vals.append(float(d_val))
+        wil = _wilcoxon_on_deltas(delta_vals)
+        return {
+            "state_a_median": float(np.median(state_a_vals)) if state_a_vals else np.nan,
+            "state_b_median": float(np.median(state_b_vals)) if state_b_vals else np.nan,
+            "delta_state_b_minus_state_a_median": (
+                float(np.median(delta_vals)) if delta_vals else np.nan
+            ),
+            "n_subjects_state_b_gt_state_a": int(sum(val > 0 for val in delta_vals)),
+            "wilcoxon_p": wil["p"],
+            "wilcoxon_n": wil["n"],
+        }
+
+    def _pair_summary(pair_name: str) -> Dict[str, Any]:
+        pair_recs = [
+            rec["comparison_summary"][pair_name]
+            for rec in recs
+            if pair_name in rec.get("comparison_summary", {})
+        ]
+        if not pair_recs:
+            return {"n_subjects": 0}
+        return {
+            "n_subjects": int(len(pair_recs)),
+            "raw_tau": _pair_metric(pair_recs, ("raw_tau",)),
+            "centered_tau": _pair_metric(pair_recs, ("centered_tau",)),
+            "l3": {
+                "lag_span": _pair_metric(pair_recs, ("l3", "lag_span")),
+                "pearson_r": _pair_metric(pair_recs, ("l3", "pearson_r")),
+            },
+            "dominant_cluster_fraction": _pair_metric(pair_recs, ("dominant_cluster_fraction",)),
+        }
+
+    def _rate_by_template_summary() -> Dict[str, Any]:
+        state_names = ("baseline", "pre", "post")
+        subject_totals: Dict[str, List[float]] = {s: [] for s in state_names}
+        subject_dominant_rate: Dict[str, List[float]] = {s: [] for s in state_names}
+        pair_max_abs_frac_shift: Dict[str, List[float]] = {
+            "pre_vs_baseline": [], "post_vs_pre": [], "post_vs_baseline": [],
+        }
+        pair_dominant_rate_delta: Dict[str, List[float]] = {
+            "pre_vs_baseline": [], "post_vs_pre": [], "post_vs_baseline": [],
+        }
+        for rec in recs:
+            rbt = rec.get("rate_by_template_summary", {})
+            if not rbt or rbt.get("n_windows", 0) == 0:
+                continue
+            by_state = rbt.get("by_state", {})
+            dom_id_per_state: Dict[str, int] = {}
+            for state in state_names:
+                st = by_state.get(state, {})
+                total = st.get("median_rate_per_hour_total", np.nan)
+                if np.isfinite(total):
+                    subject_totals[state].append(float(total))
+                rates = np.asarray(st.get("median_rate_by_template_per_hour", []), dtype=float)
+                if rates.size:
+                    finite_mask = np.isfinite(rates)
+                    if finite_mask.any():
+                        dom_idx = int(np.nanargmax(rates))
+                        dom_id_per_state[state] = dom_idx
+                        subject_dominant_rate[state].append(float(rates[dom_idx]))
+            for pair_name in pair_max_abs_frac_shift:
+                pair_rec = rbt.get(pair_name, {})
+                mabs = pair_rec.get("max_abs_fraction_delta_template", np.nan)
+                if np.isfinite(mabs):
+                    pair_max_abs_frac_shift[pair_name].append(float(mabs))
+                rate_deltas = np.asarray(
+                    pair_rec.get("median_rate_delta_by_template", []), dtype=float
+                )
+                state_a, state_b = {
+                    "pre_vs_baseline": ("baseline", "pre"),
+                    "post_vs_pre": ("pre", "post"),
+                    "post_vs_baseline": ("baseline", "post"),
+                }[pair_name]
+                dom_idx = dom_id_per_state.get(state_b, dom_id_per_state.get(state_a))
+                if dom_idx is not None and rate_deltas.size > dom_idx and np.isfinite(
+                    rate_deltas[dom_idx]
+                ):
+                    pair_dominant_rate_delta[pair_name].append(float(rate_deltas[dom_idx]))
+
+        def _median(vals: List[float]) -> float:
+            return float(np.median(vals)) if vals else np.nan
+
+        return {
+            "n_subjects": int(
+                sum(1 for rec in recs if rec.get("rate_by_template_summary", {}).get("n_windows", 0) > 0)
+            ),
+            "by_state": {
+                state: {
+                    "n_subjects": int(len(subject_totals[state])),
+                    "median_rate_per_hour_total": _median(subject_totals[state]),
+                    "median_dominant_template_rate_per_hour": _median(
+                        subject_dominant_rate[state]
+                    ),
+                }
+                for state in state_names
+            },
+            "pre_vs_baseline": {
+                "max_abs_fraction_delta_median": _median(
+                    pair_max_abs_frac_shift["pre_vs_baseline"]
+                ),
+                "dominant_template_rate_delta_median": _median(
+                    pair_dominant_rate_delta["pre_vs_baseline"]
+                ),
+                "wilcoxon_dominant_rate": _wilcoxon_on_deltas(
+                    pair_dominant_rate_delta["pre_vs_baseline"]
+                ),
+            },
+            "post_vs_pre": {
+                "max_abs_fraction_delta_median": _median(
+                    pair_max_abs_frac_shift["post_vs_pre"]
+                ),
+                "dominant_template_rate_delta_median": _median(
+                    pair_dominant_rate_delta["post_vs_pre"]
+                ),
+                "wilcoxon_dominant_rate": _wilcoxon_on_deltas(
+                    pair_dominant_rate_delta["post_vs_pre"]
+                ),
+            },
+            "post_vs_baseline": {
+                "max_abs_fraction_delta_median": _median(
+                    pair_max_abs_frac_shift["post_vs_baseline"]
+                ),
+                "dominant_template_rate_delta_median": _median(
+                    pair_dominant_rate_delta["post_vs_baseline"]
+                ),
+                "wilcoxon_dominant_rate": _wilcoxon_on_deltas(
+                    pair_dominant_rate_delta["post_vs_baseline"]
+                ),
+            },
+        }
+
+    return {
+        "n_subjects": int(len(recs)),
+        "n_subjects_with_usable_windows": int(sum(val > 0 for val in usable_windows)),
+        "n_usable_windows_total": int(sum(usable_windows)),
+        "pre_vs_baseline": _pair_summary("pre_vs_baseline"),
+        "post_vs_pre": _pair_summary("post_vs_pre"),
+        "post_vs_baseline": _pair_summary("post_vs_baseline"),
+        "rate_by_template": _rate_by_template_summary(),
+    }
+
+
 def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     valid = [
         rec
@@ -3612,6 +4645,10 @@ def summarize_propagation_cohort(subject_results: Dict[str, Dict[str, Any]]) -> 
         "rate_state_coupling_analysis": _summarize_rate_state_coupling(valid),
         "temporal_dynamics_analysis": _summarize_temporal_dynamics(valid),
         "temporal_dynamics_followup_analysis": _summarize_temporal_dynamics_followup(valid),
+        "seizure_proximity_analysis": _summarize_seizure_proximity(valid),
+        "seizure_proximity_analysis_auxiliary": _summarize_seizure_proximity(
+            valid, coupling_key="seizure_proximity_coupling_auxiliary"
+        ),
     }
 
 

@@ -12,6 +12,7 @@ from src.interictal_propagation import (
     compute_adaptive_cluster_stereotypy,
     compute_continuous_template_dynamics,
     compute_rate_state_coupling,
+    compute_seizure_proximity_coupling,
     compute_source_node_diagnostic,
     compute_stereotypy_by_nparticipating,
     compute_temporal_cluster_dynamics,
@@ -803,6 +804,269 @@ def test_compute_rate_state_coupling_reports_high_vs_low_tau() -> None:
     assert "rate_bins" not in out
 
 
+def test_seizure_proximity_configs_declares_main_and_auxiliary() -> None:
+    """Named window configs: main=A (4/1/1), auxiliary=B (2/0.5/1)."""
+    from src.interictal_propagation import SEIZURE_PROXIMITY_CONFIGS
+
+    assert set(SEIZURE_PROXIMITY_CONFIGS) == {"main", "auxiliary"}
+
+    main = SEIZURE_PROXIMITY_CONFIGS["main"]
+    assert tuple(main["baseline_hours"]) == (-4.0, -1.0)
+    assert tuple(main["pre_ictal_hours"]) == (-1.0, -0.25)
+    assert tuple(main["post_ictal_hours"]) == (0.25, 1.0)
+
+    aux = SEIZURE_PROXIMITY_CONFIGS["auxiliary"]
+    assert tuple(aux["baseline_hours"]) == (-2.0, -0.5)
+    assert abs(aux["pre_ictal_hours"][0] - -0.5) < 1e-9
+    assert abs(aux["pre_ictal_hours"][1] - (-1.0 / 12.0)) < 1e-9
+    assert abs(aux["post_ictal_hours"][0] - (1.0 / 12.0)) < 1e-9
+    assert aux["post_ictal_hours"][1] == 1.0
+
+
+def test_compute_seizure_proximity_coupling_default_window_is_main_config() -> None:
+    """Unqualified call uses main config (A = 4/1/1 hours)."""
+    n_ch = 5
+    # Events spread across -4..+1h relative to seizure at t=10h
+    seizure_t = 10.0 * 3600.0
+    offsets_hours = [-3.5, -2.5, -1.5, -0.5, 0.5]  # each should land in a window
+    times = np.array(
+        [seizure_t + h * 3600.0 for h in offsets_hours], dtype=float
+    )
+    labels = np.zeros(times.size, dtype=int)
+    bools = np.ones((n_ch, times.size), dtype=bool)
+    ranks = np.tile(np.arange(1.0, n_ch + 1).reshape(-1, 1), (1, times.size))
+    lag_raw = np.tile(np.linspace(0.0, 0.4, n_ch).reshape(-1, 1), (1, times.size))
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        seizure_times=[seizure_t],
+        valid_event_indices=np.arange(times.size, dtype=int),
+        n_sample=10,
+        n_seeds=2,
+        min_shared_channels=3,
+        min_center_participation=1,
+        min_participating_l3=5,
+    )
+
+    wh = out["window_hours"]
+    assert tuple(wh["baseline"]) == (-4.0, -1.0)
+    assert tuple(wh["pre"]) == (-1.0, -0.25)
+    assert tuple(wh["post"]) == (0.25, 1.0)
+
+
+def test_compute_seizure_proximity_coupling_handles_empty_seizure_list() -> None:
+    ranks = np.tile(np.arange(1.0, 6.0).reshape(-1, 1), (1, 6))
+    bools = np.ones_like(ranks, dtype=bool)
+    lag_raw = np.tile(np.linspace(0.0, 0.4, 5).reshape(-1, 1), (1, 6))
+    times = np.arange(6, dtype=float) * 3600.0
+    labels = np.zeros(6, dtype=int)
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        seizure_times=[],
+        valid_event_indices=np.arange(6, dtype=int),
+    )
+
+    assert out.get("warning") == "no_seizure_times"
+
+
+def test_compute_seizure_proximity_coupling_reports_pre_vs_baseline_l2_l3() -> None:
+    n_ch = 5
+    times = np.array(
+        [
+            9.0,
+            11.0,
+            15.0,
+            18.0,
+            22.0,
+            24.0,
+        ],
+        dtype=float,
+    ) * 3600.0
+    labels = np.zeros(times.size, dtype=int)
+    bools = np.ones((n_ch, times.size), dtype=bool)
+    ranks = np.array(
+        [
+            [1.0, 5.0, 1.0, 1.0, 1.0, 1.0],
+            [2.0, 4.0, 2.0, 2.0, 2.0, 2.0],
+            [3.0, 3.0, 3.0, 3.0, 3.0, 3.0],
+            [4.0, 2.0, 4.0, 4.0, 4.0, 4.0],
+            [5.0, 1.0, 5.0, 5.0, 5.0, 5.0],
+        ],
+        dtype=float,
+    )
+    lag_raw = np.array(
+        [
+            [0.00, 0.80, 0.00, 0.00, 0.00, 0.00],
+            [0.20, 0.60, 0.08, 0.09, 0.06, 0.07],
+            [0.40, 0.40, 0.16, 0.18, 0.12, 0.14],
+            [0.60, 0.20, 0.24, 0.27, 0.18, 0.21],
+            [0.80, 0.00, 0.32, 0.36, 0.24, 0.28],
+        ],
+        dtype=float,
+    )
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        seizure_times=[20.0 * 3600.0],
+        valid_event_indices=np.arange(times.size, dtype=int),
+        baseline_hours=(-12.0, -6.0),
+        pre_ictal_hours=(-6.0, -1.0),
+        post_ictal_hours=(1.0, 6.0),
+        n_sample=20,
+        n_seeds=3,
+        min_shared_channels=3,
+        min_center_participation=1,
+        min_participating_l3=5,
+    )
+
+    assert out["n_seizures_total"] == 1
+    assert out["n_seizures_usable"] == 1
+    assert out["state_event_counts"] == {
+        "baseline": 2,
+        "pre": 2,
+        "post": 2,
+        "excluded": 0,
+    }
+    assert len(out["seizure_windows"]) == 1
+
+    pre_vs_baseline = out["comparison_summary"]["pre_vs_baseline"]
+    assert pre_vs_baseline["n_windows"] == 1
+    assert pre_vs_baseline["raw_tau"]["delta_state_b_minus_state_a_median"] > 1.5
+    assert "delta_state_b_minus_state_a_median" in pre_vs_baseline["centered_tau"]
+    assert pre_vs_baseline["l3"]["lag_span"]["delta_state_b_minus_state_a_median"] < 0.0
+    assert pre_vs_baseline["l3"]["pearson_r"]["delta_state_b_minus_state_a_median"] > 1.5
+    assert pre_vs_baseline["dominant_cluster_fraction"]["state_a_median"] == 1.0
+    assert pre_vs_baseline["dominant_cluster_fraction"]["state_b_median"] == 1.0
+
+
+def test_compute_seizure_proximity_coupling_rate_by_template_decomposes_states() -> None:
+    """PR-4C secondary descriptive layer: per-state per-template event rate."""
+    n_ch = 5
+    times = (
+        np.array(
+            [
+                9.0, 10.0,
+                15.0, 17.0, 19.0,
+                22.0, 24.0, 25.0,
+            ],
+            dtype=float,
+        )
+        * 3600.0
+    )
+    labels = np.array([0, 0, 0, 1, 0, 1, 1, 0], dtype=int)
+    bools = np.ones((n_ch, times.size), dtype=bool)
+    ranks = np.tile(np.arange(1.0, n_ch + 1).reshape(-1, 1), (1, times.size))
+    lag_raw = np.tile(np.linspace(0.0, 0.4, n_ch).reshape(-1, 1), (1, times.size))
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=2,
+        seizure_times=[20.0 * 3600.0],
+        valid_event_indices=np.arange(times.size, dtype=int),
+        baseline_hours=(-12.0, -6.0),
+        pre_ictal_hours=(-6.0, -1.0),
+        post_ictal_hours=(1.0, 6.0),
+        n_sample=20,
+        n_seeds=3,
+        min_shared_channels=3,
+        min_center_participation=1,
+        min_participating_l3=5,
+    )
+
+    assert out["n_seizures_usable"] == 1
+    window = out["seizure_windows"][0]
+    assert "rate_by_template" in window
+    baseline_state = window["rate_by_template"]["baseline"]
+    pre_state = window["rate_by_template"]["pre"]
+    post_state = window["rate_by_template"]["post"]
+    assert baseline_state["counts_total"] == 2
+    assert baseline_state["counts_by_template"] == [2, 0]
+    assert baseline_state["duration_hours"] == 6.0
+    assert abs(baseline_state["rate_total_per_hour"] - 2.0 / 6.0) < 1e-9
+    assert pre_state["counts_by_template"] == [1, 1]
+    assert post_state["counts_by_template"] == [1, 2]
+
+    rbt_summary = out["rate_by_template_summary"]
+    assert rbt_summary["n_windows"] == 1
+    assert rbt_summary["n_templates"] == 2
+    pre_vs_baseline = rbt_summary["pre_vs_baseline"]
+    assert pre_vs_baseline["n_windows"] == 1
+    assert pre_vs_baseline["median_rate_delta_by_template"][1] > 0
+    assert np.isfinite(pre_vs_baseline["max_abs_fraction_delta_template"])
+    post_vs_baseline = rbt_summary["post_vs_baseline"]
+    assert post_vs_baseline["median_rate_delta_by_template"][1] > 0
+
+
+def test_seizure_proximity_assigns_events_to_nearest_seizure_for_dense_clusters() -> None:
+    """Dense seizures: an event between two seizures goes to the closer one."""
+    n_ch = 5
+    seizure_t = [20.0 * 3600.0, 30.0 * 3600.0]
+    times = np.array(
+        [
+            9.0,   # baseline of sz0 (-11h)
+            15.0,  # pre of sz0 (-5h). Also in baseline of sz1 (-15h) -> out of baseline range (-12,-6). Actually -15 is out of (-12,-6). Unambig -> pre(sz0).
+            24.0,  # post of sz0 (+4h). Also pre of sz1 (-6h) -> boundary pre(-6,-1): -6 == lo so pre(sz1). Nearest = sz1 (6h) < sz0 (4h)? |24-20|=4, |24-30|=6, nearest=sz0, post(sz0).
+            26.0,  # post of sz0 (+6h) out of [1,6). |26-20|=6 not<6; nearest=sz1 (|26-30|=4), pre(sz1)=(-4h) in (-6,-1) -> pre(sz1).
+            35.0,  # post of sz1 (+5h). Nearest=sz1. post(sz1).
+        ],
+        dtype=float,
+    ) * 3600.0
+    labels = np.zeros(times.size, dtype=int)
+    bools = np.ones((n_ch, times.size), dtype=bool)
+    ranks = np.tile(np.arange(1.0, n_ch + 1).reshape(-1, 1), (1, times.size))
+    lag_raw = np.tile(np.linspace(0.0, 0.4, n_ch).reshape(-1, 1), (1, times.size))
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        seizure_times=seizure_t,
+        valid_event_indices=np.arange(times.size, dtype=int),
+        baseline_hours=(-12.0, -6.0),
+        pre_ictal_hours=(-6.0, -1.0),
+        post_ictal_hours=(1.0, 6.0),
+        n_sample=10,
+        n_seeds=2,
+        min_shared_channels=3,
+        min_center_participation=1,
+        min_participating_l3=5,
+    )
+
+    totals = out["state_event_counts"]
+    assert totals["baseline"] >= 1
+    assert totals["pre"] >= 1
+    assert totals["post"] >= 1
+    assert totals["excluded"] <= 1
+
+    assert len(out["seizure_windows"]) == 2
+    for window in out["seizure_windows"]:
+        for state in ("baseline", "pre", "post"):
+            assert state in window["state_event_counts"]
+
+
 def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary() -> None:
     subject_results = {
         "yuquan/a": {
@@ -870,6 +1134,38 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
                     "per_template_mean_rate": [31.0, 19.0],
                     "per_template_rate_fraction": [0.62, 0.38],
                     "dominant_template_id": 0,
+                },
+            },
+            "seizure_proximity_coupling": {
+                "n_seizures_usable": 3,
+                "comparison_summary": {
+                    "pre_vs_baseline": {
+                        "raw_tau": {"delta_state_b_minus_state_a_median": 0.10},
+                        "centered_tau": {"delta_state_b_minus_state_a_median": 0.05},
+                        "l3": {
+                            "lag_span": {"delta_state_b_minus_state_a_median": -0.02},
+                            "pearson_r": {"delta_state_b_minus_state_a_median": 0.20},
+                        },
+                        "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.01},
+                    },
+                    "post_vs_pre": {
+                        "raw_tau": {"delta_state_b_minus_state_a_median": -0.03},
+                        "centered_tau": {"delta_state_b_minus_state_a_median": -0.02},
+                        "l3": {
+                            "lag_span": {"delta_state_b_minus_state_a_median": 0.01},
+                            "pearson_r": {"delta_state_b_minus_state_a_median": -0.10},
+                        },
+                        "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.00},
+                    },
+                    "post_vs_baseline": {
+                        "raw_tau": {"delta_state_b_minus_state_a_median": 0.07},
+                        "centered_tau": {"delta_state_b_minus_state_a_median": 0.03},
+                        "l3": {
+                            "lag_span": {"delta_state_b_minus_state_a_median": -0.01},
+                            "pearson_r": {"delta_state_b_minus_state_a_median": 0.10},
+                        },
+                        "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.01},
+                    },
                 },
             },
         },
@@ -940,6 +1236,38 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
                     "dominant_template_id": 0,
                 },
             },
+            "seizure_proximity_coupling": {
+                "n_seizures_usable": 2,
+                "comparison_summary": {
+                    "pre_vs_baseline": {
+                        "raw_tau": {"delta_state_b_minus_state_a_median": 0.00},
+                        "centered_tau": {"delta_state_b_minus_state_a_median": 0.02},
+                        "l3": {
+                            "lag_span": {"delta_state_b_minus_state_a_median": -0.01},
+                            "pearson_r": {"delta_state_b_minus_state_a_median": 0.05},
+                        },
+                        "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": -0.02},
+                    },
+                    "post_vs_pre": {
+                        "raw_tau": {"delta_state_b_minus_state_a_median": 0.02},
+                        "centered_tau": {"delta_state_b_minus_state_a_median": 0.01},
+                        "l3": {
+                            "lag_span": {"delta_state_b_minus_state_a_median": 0.03},
+                            "pearson_r": {"delta_state_b_minus_state_a_median": -0.02},
+                        },
+                        "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.03},
+                    },
+                    "post_vs_baseline": {
+                        "raw_tau": {"delta_state_b_minus_state_a_median": 0.01},
+                        "centered_tau": {"delta_state_b_minus_state_a_median": 0.03},
+                        "l3": {
+                            "lag_span": {"delta_state_b_minus_state_a_median": 0.02},
+                            "pearson_r": {"delta_state_b_minus_state_a_median": 0.00},
+                        },
+                        "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.01},
+                    },
+                },
+            },
         },
     }
 
@@ -971,3 +1299,300 @@ def test_summarize_propagation_cohort_includes_temporal_label_invariant_summary(
     assert followup["n_subjects"] == 2
     assert followup["dominant_rate_fraction_median"] == 0.6
     assert followup["total_mean_rate_median"] == 45.0
+    seizure = cohort["seizure_proximity_analysis"]
+    assert seizure["n_subjects"] == 2
+    assert seizure["n_subjects_with_usable_windows"] == 2
+    assert seizure["n_usable_windows_total"] == 5
+    assert seizure["pre_vs_baseline"]["raw_tau"]["delta_state_b_minus_state_a_median"] == 0.05
+    assert seizure["pre_vs_baseline"]["l3"]["lag_span"]["delta_state_b_minus_state_a_median"] == -0.015
+    assert "rate_by_template" in seizure
+    assert seizure["rate_by_template"]["n_subjects"] == 0
+
+
+def test_summarize_propagation_cohort_reports_auxiliary_seizure_proximity_when_present() -> None:
+    """Cohort aggregates seizure_proximity_coupling_auxiliary separately."""
+    from src.interictal_propagation import summarize_propagation_cohort
+
+    common = {
+        "propagation_stereotypy": {"all": {"mean_tau": 0.1}, "soz": {}, "nonsoz": {}},
+        "mixture": {"is_mixture": False, "possible_mixture": False},
+        "centered_rank": {"bias_fraction": 0.3},
+        "source_diagnostic": {"soz_source_erased": False},
+        "by_nparticipating": [{"bin_label": "3", "mean_tau": 0.1}],
+        "cluster": {"within_cluster_tau_mean": 0.2, "uplift": 0.1, "overall_tau": 0.1, "inter_cluster_corr": -0.6},
+        "legacy_mi": {"mi_mean": 0.2, "significant": False},
+        "adaptive_cluster": {"stable_k": 2, "chosen_k": 2, "uplift": 0.1, "within_cluster_tau_mean": 0.2},
+    }
+
+    def _sp_rec(raw_delta: float, n_usable: int) -> Dict[str, Any]:
+        return {
+            "n_seizures_usable": n_usable,
+            "comparison_summary": {
+                "pre_vs_baseline": {
+                    "raw_tau": {"delta_state_b_minus_state_a_median": raw_delta},
+                    "centered_tau": {"delta_state_b_minus_state_a_median": 0.0},
+                    "l3": {
+                        "lag_span": {"delta_state_b_minus_state_a_median": 0.0},
+                        "pearson_r": {"delta_state_b_minus_state_a_median": 0.0},
+                    },
+                    "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.0},
+                },
+                "post_vs_pre": {
+                    "raw_tau": {"delta_state_b_minus_state_a_median": 0.0},
+                    "centered_tau": {"delta_state_b_minus_state_a_median": 0.0},
+                    "l3": {
+                        "lag_span": {"delta_state_b_minus_state_a_median": 0.0},
+                        "pearson_r": {"delta_state_b_minus_state_a_median": 0.0},
+                    },
+                    "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.0},
+                },
+                "post_vs_baseline": {
+                    "raw_tau": {"delta_state_b_minus_state_a_median": 0.0},
+                    "centered_tau": {"delta_state_b_minus_state_a_median": 0.0},
+                    "l3": {
+                        "lag_span": {"delta_state_b_minus_state_a_median": 0.0},
+                        "pearson_r": {"delta_state_b_minus_state_a_median": 0.0},
+                    },
+                    "dominant_cluster_fraction": {"delta_state_b_minus_state_a_median": 0.0},
+                },
+            },
+        }
+
+    subject_results = {
+        "epilepsiae/a": {
+            **common,
+            "dataset": "epilepsiae", "subject": "a",
+            "seizure_proximity_coupling": _sp_rec(raw_delta=0.10, n_usable=4),
+            "seizure_proximity_coupling_auxiliary": _sp_rec(raw_delta=0.05, n_usable=6),
+        },
+        "epilepsiae/b": {
+            **common,
+            "dataset": "epilepsiae", "subject": "b",
+            "seizure_proximity_coupling": _sp_rec(raw_delta=0.20, n_usable=3),
+            "seizure_proximity_coupling_auxiliary": _sp_rec(raw_delta=0.08, n_usable=5),
+        },
+    }
+
+    cohort = summarize_propagation_cohort(subject_results)
+    main = cohort["seizure_proximity_analysis"]
+    aux = cohort["seizure_proximity_analysis_auxiliary"]
+    assert main["n_subjects"] == 2
+    assert main["n_usable_windows_total"] == 7
+    assert abs(
+        main["pre_vs_baseline"]["raw_tau"]["delta_state_b_minus_state_a_median"] - 0.15
+    ) < 1e-9
+    assert aux["n_subjects"] == 2
+    assert aux["n_usable_windows_total"] == 11
+    assert abs(
+        aux["pre_vs_baseline"]["raw_tau"]["delta_state_b_minus_state_a_median"] - 0.065
+    ) < 1e-9
+
+
+def test_seizure_proximity_window_missing_post_still_supports_pre_vs_baseline() -> None:
+    """Fix A contract: per-pair usability, not all-three-states gate.
+
+    A window with 5 baseline events + 5 pre-ictal events but 0 post-ictal
+    events must still feed the pre_vs_baseline pair. Discarding it whole is a
+    pure power loss that systematically biases pre_vs_baseline toward null.
+    """
+    n_ch = 5
+    sz_t = 50.0 * 3600.0
+    delta_h = np.array(
+        [
+            -10.0, -9.5, -9.0, -8.5, -8.0,
+            -5.0, -4.0, -3.0, -2.0, -1.5,
+        ],
+        dtype=float,
+    )
+    times = sz_t + delta_h * 3600.0
+    labels = np.zeros(times.size, dtype=int)
+    bools = np.ones((n_ch, times.size), dtype=bool)
+    rng = np.random.default_rng(0)
+    ranks = np.tile(np.arange(1.0, n_ch + 1).reshape(-1, 1), (1, times.size))
+    ranks = ranks + rng.normal(0.0, 0.05, size=ranks.shape)
+    lag_raw = np.tile(np.linspace(0.0, 0.4, n_ch).reshape(-1, 1), (1, times.size))
+    lag_raw = lag_raw + rng.normal(0.0, 0.005, size=lag_raw.shape)
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        seizure_times=[sz_t],
+        valid_event_indices=np.arange(times.size, dtype=int),
+        baseline_hours=(-12.0, -6.0),
+        pre_ictal_hours=(-6.0, -1.0),
+        post_ictal_hours=(1.0, 6.0),
+        n_sample=20,
+        n_seeds=2,
+        min_shared_channels=3,
+        min_center_participation=1,
+        min_participating_l3=5,
+    )
+
+    assert len(out["seizure_windows"]) == 1
+    window = out["seizure_windows"][0]
+    assert window["state_event_counts"]["baseline"] == 5
+    assert window["state_event_counts"]["pre"] == 5
+    assert window["state_event_counts"]["post"] == 0
+
+    pair_status = window.get("pair_usability", {})
+    assert pair_status.get("pre_vs_baseline") is True, (
+        "Fix A: pre_vs_baseline must be marked usable when its two states are non-empty"
+    )
+    assert pair_status.get("post_vs_pre") is False
+    assert pair_status.get("post_vs_baseline") is False
+
+    assert "pairwise_comparisons" in window
+    assert "pre_vs_baseline" in window["pairwise_comparisons"]
+
+    cohort = out["comparison_summary"]
+    assert cohort["pre_vs_baseline"]["n_windows"] >= 1, (
+        "Window contributing baseline+pre must enter the pre_vs_baseline summary"
+    )
+    assert cohort["post_vs_pre"]["n_windows"] == 0
+    assert cohort["post_vs_baseline"]["n_windows"] == 0
+
+
+def test_seizure_proximity_assigns_event_to_non_nearest_seizure_when_nearest_has_no_state() -> None:
+    """Fix B contract: candidate enumeration, not nearest-first hard cut.
+
+    Two seizures sz0=0h, sz1=8h. Windows baseline=(-12,-6), pre=(-6,-1),
+    post=(1,6). Place a rescued event at sz0 + 0.5h. Distance to sz0 is
+    +0.5h (no legal state — outside post.lo=1.0 and pre.hi=-1.0). Distance
+    to sz1 is -7.5h (legal: in baseline=(-12,-6)). Nearest seizure is sz0
+    (|0.5| < |7.5|), so the legacy "pick nearest then check state" path
+    discards the event. Fix B must enumerate candidates and assign it to
+    sz1.baseline.
+    """
+    n_ch = 5
+    sz0 = 0.0
+    sz1 = 8.0 * 3600.0
+    seizure_t = [sz0, sz1]
+    other_baseline = sz0 + np.array([-10.0, -9.0, -8.0, -7.0]) * 3600.0
+    other_pre = sz0 + np.array([-5.0, -4.0, -3.0, -2.0]) * 3600.0
+    other_post = sz1 + np.array([1.5, 2.0, 3.0, 4.0]) * 3600.0
+    rescued_event = np.array([sz0 + 0.5 * 3600.0])
+    times = np.concatenate([other_baseline, other_pre, other_post, rescued_event])
+    rescued_idx = times.size - 1
+
+    labels = np.zeros(times.size, dtype=int)
+    bools = np.ones((n_ch, times.size), dtype=bool)
+    ranks = np.tile(np.arange(1.0, n_ch + 1).reshape(-1, 1), (1, times.size))
+    lag_raw = np.tile(np.linspace(0.0, 0.4, n_ch).reshape(-1, 1), (1, times.size))
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        seizure_times=seizure_t,
+        valid_event_indices=np.arange(times.size, dtype=int),
+        baseline_hours=(-12.0, -6.0),
+        pre_ictal_hours=(-6.0, -1.0),
+        post_ictal_hours=(1.0, 6.0),
+        n_sample=10,
+        n_seeds=2,
+        min_shared_channels=3,
+        min_center_participation=1,
+        min_participating_l3=5,
+    )
+
+    counts = out["state_event_counts"]
+    assert counts["excluded"] == 0, (
+        "Fix B: rescued event must not be excluded (sz1 baseline is legal even though sz0 is nearest)"
+    )
+
+    sz1_window = next(
+        win for win in out["seizure_windows"] if win["seizure_id"] == 1
+    )
+    sz0_window = next(
+        win for win in out["seizure_windows"] if win["seizure_id"] == 0
+    )
+    assert sz1_window["state_event_counts"]["baseline"] == 1, (
+        "Fix B: sz1 baseline must own exactly the rescued event"
+    )
+    assert sz1_window["state_event_counts"]["pre"] == 0
+    assert sz1_window["state_event_counts"]["post"] == 4
+    assert sz0_window["state_event_counts"]["baseline"] == 4
+    assert sz0_window["state_event_counts"]["pre"] == 4
+    assert sz0_window["state_event_counts"]["post"] == 0
+
+
+def test_rate_by_template_uses_gap_aware_coverage_when_available() -> None:
+    """Fix C contract: rate denominator uses real coverage_ranges, not fixed window width.
+
+    Construct one seizure at 50h, baseline window (-12, -6) h relative.
+    Provide coverage_ranges that cover only the second half of baseline
+    (i.e. (-9, -6) h). 3 baseline events occur inside the covered second
+    half. Real covered duration = 3 h, not the 6 h nominal window width.
+    Therefore baseline rate must be 3 / 3 = 1.0, not 3 / 6 = 0.5.
+    """
+    n_ch = 5
+    sz_t = 50.0 * 3600.0
+    baseline_events = sz_t + np.array([-8.5, -7.5, -6.5]) * 3600.0
+    pre_events = sz_t + np.array([-5.0, -3.0, -2.0]) * 3600.0
+    post_events = sz_t + np.array([1.5, 2.5, 4.0]) * 3600.0
+    times = np.concatenate([baseline_events, pre_events, post_events])
+
+    labels = np.zeros(times.size, dtype=int)
+    bools = np.ones((n_ch, times.size), dtype=bool)
+    ranks = np.tile(np.arange(1.0, n_ch + 1).reshape(-1, 1), (1, times.size))
+    lag_raw = np.tile(np.linspace(0.0, 0.4, n_ch).reshape(-1, 1), (1, times.size))
+
+    coverage_ranges = [
+        (sz_t - 9.0 * 3600.0, sz_t - 6.0 * 3600.0),
+        (sz_t - 6.0 * 3600.0, sz_t - 1.0 * 3600.0),
+        (sz_t + 1.0 * 3600.0, sz_t + 6.0 * 3600.0),
+    ]
+
+    out = compute_seizure_proximity_coupling(
+        event_abs_times=times,
+        ranks=ranks,
+        lag_raw=lag_raw,
+        bools=bools,
+        cluster_labels=labels,
+        n_clusters=1,
+        seizure_times=[sz_t],
+        valid_event_indices=np.arange(times.size, dtype=int),
+        baseline_hours=(-12.0, -6.0),
+        pre_ictal_hours=(-6.0, -1.0),
+        post_ictal_hours=(1.0, 6.0),
+        coverage_ranges=coverage_ranges,
+        n_sample=10,
+        n_seeds=2,
+        min_shared_channels=3,
+        min_center_participation=1,
+        min_participating_l3=5,
+    )
+
+    window = out["seizure_windows"][0]
+    baseline_state = window["rate_by_template"]["baseline"]
+    pre_state = window["rate_by_template"]["pre"]
+    post_state = window["rate_by_template"]["post"]
+
+    assert abs(baseline_state["duration_hours"] - 3.0) < 1e-6, (
+        "Fix C: baseline duration must reflect actual covered hours (3.0), not nominal window width (6.0)"
+    )
+    assert abs(baseline_state["rate_total_per_hour"] - 1.0) < 1e-6, (
+        "Fix C: baseline rate must be counts / actual_covered_hours = 3/3 = 1.0"
+    )
+    assert abs(pre_state["duration_hours"] - 5.0) < 1e-6
+    assert abs(post_state["duration_hours"] - 5.0) < 1e-6
+
+
+def test_runner_parser_exposes_pr4c_auxiliary_flag() -> None:
+    """CLI must expose --pr4c-auxiliary alongside --pr4c."""
+    import importlib
+
+    mod = importlib.import_module("scripts.run_interictal_propagation")
+    parser = mod._build_parser()  # expected helper
+    option_strings = {
+        opt for action in parser._actions for opt in action.option_strings
+    }
+    assert "--pr4c" in option_strings
+    assert "--pr4c-auxiliary" in option_strings
