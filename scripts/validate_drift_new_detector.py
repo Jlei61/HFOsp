@@ -9,7 +9,7 @@ legacy ``/mnt/yuquan_data/.../<block>_gpu.npz`` + legacy
 while keeping the **same legacy-clone packing + spectrogram pipeline**
 (see ``scripts/validate_pack_against_legacy.py`` for the algorithm path).
 
-Per ``docs/plans/yuquan_lagpat_backfill_validation.plan.md`` Phase B:
+Per ``docs/archive/yuquan_lagpat/yuquan_lagpat_backfill_validation.plan.md`` Phase B:
 
   L1 picked channels       : Jaccard, exclusive sets, alias collisions
   L2 packed window count   : ratio (new / legacy), per-block + per-subject

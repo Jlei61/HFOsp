@@ -6,7 +6,7 @@ Goal: prove that, given the *exact same legacy inputs* (legacy `_gpu.npz`,
 centroid pipeline reproduces the legacy `_lagPat.npz` contract closely enough
 to trust batch generation.
 
-Per ``docs/plans/yuquan_lagpat_backfill_validation.plan.md``:
+Per ``docs/archive/yuquan_lagpat/yuquan_lagpat_backfill_validation.plan.md``:
 
   A1 picked channels  : exact match against ``lagPat["chnNames"]``
   A2 packed windows   : new ``build_windows_from_detections`` vs legacy

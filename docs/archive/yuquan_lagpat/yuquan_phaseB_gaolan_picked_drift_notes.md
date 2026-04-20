@@ -52,7 +52,7 @@ mean+k·std 阈值是相对于全脑通道分布的，对 std 敏感。新 detec
 
 ## Plan 怎么处理
 
-`docs/plans/yuquan_lagpat_backfill_validation.plan.md` 第 §149-178 行明确：
+`docs/archive/yuquan_lagpat/yuquan_lagpat_backfill_validation.plan.md` 第 §149-178 行明确：
 
 > 本轮必须复刻旧 contract，不允许借机"修正"它。
 > 如果要改 contract，那是另一个 PR，必须全 cohort 重算，不准夹带私货。

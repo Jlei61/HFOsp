@@ -2,7 +2,7 @@
 
 > 时间: 2026-04-19  
 > 范围: gaolan / dongyiming / wangyiyang，全 24h，36 blocks  
-> 上游计划: `docs/plans/yuquan_detector_drift_root_cause.plan.md`  
+> 上游计划: `docs/archive/yuquan_lagpat/yuquan_detector_drift_root_cause.plan.md`  
 > 修复 commit: legacy_align flag 已经在代码里实现 (subject_params.json 自 `447a81e` 起开 `legacy_align: true`，但既有 `_gpu.npz` 都是 `447a81e` 之前生成的，所以一直没真正拉齐)
 
 ## TL;DR

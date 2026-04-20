@@ -161,7 +161,7 @@ def find_high_enveTimes(raw_enve,chns_nums,fs,rel_thresh=3.,abs_thresh=3.,min_ga
         When True, mirror the legacy `find_high_enveTimes_cu` rejection rule
         for chunk-edge events: if both side windows are empty (event sits at
         the very start or end of a segment), REJECT the event. The default
-        (False) accepts such events. See `docs/plans/yuquan_detector_drift_root_cause.plan.md`
+        (False) accepts such events. See `docs/archive/yuquan_lagpat/yuquan_detector_drift_root_cause.plan.md`
         D18.
     """
     whole_data_median=np.median(raw_enve)

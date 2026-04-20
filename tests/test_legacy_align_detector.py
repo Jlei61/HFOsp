@@ -1,6 +1,6 @@
 """Unit tests for legacy_align flag plumbing in the HFO detector + preprocessor.
 
-Covers Phase D fixes from `docs/plans/yuquan_detector_drift_root_cause.plan.md`:
+Covers Phase D fixes from `docs/archive/yuquan_lagpat/yuquan_detector_drift_root_cause.plan.md`:
 - R02: refine uses global pickChn_thresh=1.0; pack uses per-subject pick_k
 - D03: legacy resample factors `up=2, down=round(2*fs/800)`
 - D04: legacy chunk_sec = 200 s

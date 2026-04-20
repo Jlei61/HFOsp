@@ -66,7 +66,7 @@ class HFODetectionConfig:
     #   - chunk_overlap forced to 0 (no boundary remerge) [D21]
     #   - CPU bandpass uses FIR firwin(201) forward fftconvolve [D15]
     #   - chunk-edge events (empty side windows) are REJECTED [D18]
-    # See docs/plans/yuquan_detector_drift_root_cause.plan.md.
+    # See docs/archive/yuquan_lagpat/yuquan_detector_drift_root_cause.plan.md.
     legacy_align: bool = False
 
 

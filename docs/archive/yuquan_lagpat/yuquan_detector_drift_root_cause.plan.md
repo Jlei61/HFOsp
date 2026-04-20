@@ -367,9 +367,9 @@ contract is recovery, not relaxation.
 - [ ] §5.2 user decision: R02 scope (default = backfill only)
 - [ ] §4.1 implement D13 + D14 + R02 (Phase D1 changes)
 - [ ] §4.2 A/B on gaolan single block, write report
-       `docs/plans/yuquan_detector_drift_phaseD1_results.md`
+       `docs/archive/yuquan_lagpat/yuquan_detector_drift_phaseD_results.md`
 - [ ] §4.3/§4.4 conditional escalation
 - [ ] §4.5 cohort rerun (11 backfill subjects) + Phase B re-validation,
-       update `docs/plans/yuquan_lagpat_phaseB_results.md`
-- [ ] update `docs/plans/yuquan_lagpat_backfill_validation.plan.md` §555
+       update `docs/archive/yuquan_lagpat/yuquan_lagpat_phaseB_results.md`
+- [ ] update `docs/archive/yuquan_lagpat/yuquan_lagpat_backfill_validation.plan.md` §555
        prerequisites if they overlap with new fields (`refine_pick_k`)
