@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -11,6 +12,7 @@ from src.interictal_propagation import (
     build_cluster_templates,
     compute_adaptive_cluster_stereotypy,
     compute_continuous_template_dynamics,
+    compute_novel_template_gate,
     compute_rate_state_coupling,
     compute_seizure_proximity_coupling,
     compute_source_node_diagnostic,
@@ -20,6 +22,7 @@ from src.interictal_propagation import (
     detect_propagation_mixture,
     load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
+    summarize_pr5_novel_template_gate,
     summarize_propagation_cohort,
     validate_absolute_lag_clustering,
 )
@@ -1596,3 +1599,356 @@ def test_runner_parser_exposes_pr4c_auxiliary_flag() -> None:
     }
     assert "--pr4c" in option_strings
     assert "--pr4c-auxiliary" in option_strings
+
+
+# ---------------------------------------------------------------------------
+# PR-5-A: novel-template falsification gate
+# ---------------------------------------------------------------------------
+#
+# Contract reference: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md
+#   §3.2 data contract, §3.3 metric definitions, §3.5 PASS/FAIL thresholds,
+#   §5.3 tests 1-3.
+#
+# The gate must, for events in baseline / pre / post:
+#   1. Filter to L3-eligible events (n_participating >= min_participating_l3=5).
+#   2. Per event compute (a) best-template Spearman r between v_rel on
+#      participating channels and the matched template's rank vector,
+#      (b) min reconstruction error in rank-space (mean squared diff,
+#      masked, >=min_shared_channels=3), (c) assignment gap = 2nd best
+#      recon - best recon.
+#   3. Pool across all usable seizure windows; take per-state medians;
+#      report deltas (state - baseline).
+
+
+def _pr5a_synthetic_window(
+    state_indices_dict: Dict[str, np.ndarray],
+) -> Dict[str, Any]:
+    """Build a minimal usable-window dict matching ``compute_seizure_proximity_coupling`` output."""
+    counts = {name: int(idx.size) for name, idx in state_indices_dict.items()}
+    return {
+        "seizure_id": 0,
+        "seizure_time": 0.0,
+        "state_event_indices": {
+            name: np.asarray(idx, dtype=int)
+            for name, idx in state_indices_dict.items()
+        },
+        "state_event_counts": counts,
+        "pair_usability": {
+            "pre_vs_baseline": counts["baseline"] > 0 and counts["pre"] > 0,
+            "post_vs_pre": counts["pre"] > 0 and counts["post"] > 0,
+            "post_vs_baseline": counts["baseline"] > 0 and counts["post"] > 0,
+        },
+        "usable": True,
+    }
+
+
+def _pr5a_make_event_arrays(
+    rng: np.random.Generator,
+    base_templates: List[np.ndarray],
+    n_events: int,
+    *,
+    rank_noise: float,
+    rel_noise: float,
+    rel_scale: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Sample events from the supplied template set with small Gaussian noise.
+
+    Returns (ranks (n_ch, n), rel (n_ch, n)) such that Spearman(v_rel[:, i],
+    template) is near 1.0 when the chosen template matches the source.
+    """
+    n_ch = base_templates[0].size
+    ranks = np.empty((n_ch, n_events), dtype=float)
+    rel = np.empty((n_ch, n_events), dtype=float)
+    for i in range(n_events):
+        base = base_templates[rng.integers(0, len(base_templates))]
+        ranks[:, i] = base + rng.normal(0.0, rank_noise, size=n_ch)
+        r_vec = base * rel_scale + rng.normal(0.0, rel_noise, size=n_ch)
+        rel[:, i] = r_vec - r_vec.min()
+    return ranks, rel
+
+
+def test_pr5_gate_passes_when_states_are_resampled_baseline() -> None:
+    """Per §3.5: when pre/post events are drawn from the same distribution as
+    baseline (no novel template), gate must observe near-zero deltas for r and
+    e and the cohort thresholds (|Δr|<=0.05, |Δe/e_baseline|<=0.10) are met.
+
+    n_per_state is set to 200 so the per-state median is tight enough to
+    actually exercise the §3.5 thresholds; small samples (n=60) leak ~10%
+    relative drift on e purely from sampling noise."""
+    rng = np.random.default_rng(0)
+    n_ch = 8
+    n_per_state = 200
+
+    template_a = np.arange(1.0, n_ch + 1, dtype=float)
+    template_b = template_a[::-1].copy()
+    templates = np.stack([template_a, template_b])
+
+    n_total = n_per_state * 3
+    ranks, rel = _pr5a_make_event_arrays(
+        rng,
+        [template_a, template_b],
+        n_total,
+        rank_noise=0.10,
+        rel_noise=0.005,
+        rel_scale=0.05,
+    )
+    bools = np.ones((n_ch, n_total), dtype=bool)
+
+    state_indices = {
+        "baseline": np.arange(0, n_per_state, dtype=int),
+        "pre": np.arange(n_per_state, 2 * n_per_state, dtype=int),
+        "post": np.arange(2 * n_per_state, 3 * n_per_state, dtype=int),
+    }
+    windows = [_pr5a_synthetic_window(state_indices)]
+
+    out = compute_novel_template_gate(
+        v_ranks=ranks,
+        v_rel=rel,
+        v_bools=bools,
+        templates=templates,
+        proximity_windows=windows,
+        min_participating_l3=5,
+        min_shared_channels=3,
+    )
+
+    assert out["n_events_by_state"] == {
+        "baseline": n_per_state,
+        "pre": n_per_state,
+        "post": n_per_state,
+    }
+    assert out["n_l3_excluded_by_state"] == {"baseline": 0, "pre": 0, "post": 0}
+
+    medians = out["median_by_state"]
+    assert medians["baseline"]["r"] > 0.9
+    assert medians["pre"]["r"] > 0.9
+    assert medians["post"]["r"] > 0.9
+
+    delta_pre = out["delta_pre_minus_baseline"]
+    delta_post = out["delta_post_minus_baseline"]
+    assert abs(delta_pre["r"]) < 0.05
+    assert abs(delta_post["r"]) < 0.05
+
+    e_base = max(abs(medians["baseline"]["e"]), 1e-9)
+    assert abs(delta_pre["e"]) / e_base < 0.10
+    assert abs(delta_post["e"]) / e_base < 0.10
+
+
+def test_pr5_gate_fails_when_post_events_drawn_from_orthogonal_template() -> None:
+    """Per §3.5: when post events come from a near-orthogonal "novel" template,
+    best-template r must drop sharply and reconstruction error must rise; pre
+    (drawn from the original distribution) must remain near baseline."""
+    rng = np.random.default_rng(1)
+    n_ch = 8
+    n_per_state = 60
+
+    template_a = np.arange(1.0, n_ch + 1, dtype=float)
+    template_b = template_a[::-1].copy()
+    template_c = np.array([3, 7, 2, 8, 5, 1, 6, 4], dtype=float)
+    # Sanity: |Spearman(C, A)| and |Spearman(C, B)| are both near zero (~0.05),
+    # so events from C should never produce a high best-template r against
+    # the in-distribution library {A, B}.
+    assert abs(spearmanr_check := float(np.corrcoef(template_a, template_c)[0, 1])) < 0.30
+    assert abs(float(np.corrcoef(template_b, template_c)[0, 1])) < 0.30
+    del spearmanr_check
+
+    templates = np.stack([template_a, template_b])
+    n_total = n_per_state * 3
+    ranks = np.empty((n_ch, n_total), dtype=float)
+    rel = np.empty((n_ch, n_total), dtype=float)
+    bools = np.ones((n_ch, n_total), dtype=bool)
+
+    for i in range(n_total):
+        if i < 2 * n_per_state:
+            base = template_a if rng.integers(0, 2) == 0 else template_b
+        else:
+            base = template_c
+        ranks[:, i] = base + rng.normal(0.0, 0.10, size=n_ch)
+        r_vec = base * 0.05 + rng.normal(0.0, 0.005, size=n_ch)
+        rel[:, i] = r_vec - r_vec.min()
+
+    state_indices = {
+        "baseline": np.arange(0, n_per_state, dtype=int),
+        "pre": np.arange(n_per_state, 2 * n_per_state, dtype=int),
+        "post": np.arange(2 * n_per_state, 3 * n_per_state, dtype=int),
+    }
+    windows = [_pr5a_synthetic_window(state_indices)]
+
+    out = compute_novel_template_gate(
+        v_ranks=ranks,
+        v_rel=rel,
+        v_bools=bools,
+        templates=templates,
+        proximity_windows=windows,
+        min_participating_l3=5,
+        min_shared_channels=3,
+    )
+
+    medians = out["median_by_state"]
+    delta_pre = out["delta_pre_minus_baseline"]
+    delta_post = out["delta_post_minus_baseline"]
+
+    # Baseline + pre should still see near-perfect r; pre delta should be small.
+    assert medians["baseline"]["r"] > 0.9
+    assert medians["pre"]["r"] > 0.9
+    assert abs(delta_pre["r"]) < 0.10
+
+    # Post must show a large drop in best-template r and a large rise in e.
+    assert medians["post"]["r"] < 0.3
+    assert delta_post["r"] < -0.5
+    e_base = max(abs(medians["baseline"]["e"]), 1e-9)
+    assert delta_post["e"] / e_base > 1.0
+
+
+def test_pr5_gate_uses_only_l3_eligible_events() -> None:
+    """Per §3.2: events with n_participating < min_participating_l3 (=5) must
+    be excluded from the r/e/gap distributions even if they sit inside the
+    state's window. The excluded count must be reported per state."""
+    rng = np.random.default_rng(2)
+    n_ch = 8
+
+    template_a = np.arange(1.0, n_ch + 1, dtype=float)
+    template_b = template_a[::-1].copy()
+    template_c_bad = np.array([3, 7, 2, 8, 5, 1, 6, 4], dtype=float)
+    templates = np.stack([template_a, template_b])
+
+    n_l3 = 30
+    n_bad = 15
+    per_state_n = n_l3 + n_bad
+    n_total = per_state_n * 3
+
+    ranks = np.empty((n_ch, n_total), dtype=float)
+    rel = np.empty((n_ch, n_total), dtype=float)
+    bools = np.zeros((n_ch, n_total), dtype=bool)
+
+    for s in range(3):
+        offset = s * per_state_n
+        # L3-eligible portion: drawn from {A, B}, all 8 channels active.
+        for j in range(n_l3):
+            base = template_a if rng.integers(0, 2) == 0 else template_b
+            ranks[:, offset + j] = base + rng.normal(0.0, 0.05, size=n_ch)
+            r_vec = base * 0.05 + rng.normal(0.0, 0.005, size=n_ch)
+            rel[:, offset + j] = r_vec - r_vec.min()
+            bools[:, offset + j] = True
+        # NOT L3-eligible portion: only 3 channels participate; drawn from
+        # the orthogonal "bad" template. If these leak into the gate, baseline
+        # median r would crash.
+        for j in range(n_bad):
+            ranks[:, offset + n_l3 + j] = template_c_bad + rng.normal(0.0, 0.05, size=n_ch)
+            r_vec = template_c_bad * 0.05 + rng.normal(0.0, 0.005, size=n_ch)
+            rel[:, offset + n_l3 + j] = r_vec - r_vec.min()
+            participating = rng.choice(n_ch, size=3, replace=False)
+            bools[participating, offset + n_l3 + j] = True
+
+    state_indices = {
+        "baseline": np.arange(0, per_state_n, dtype=int),
+        "pre": np.arange(per_state_n, 2 * per_state_n, dtype=int),
+        "post": np.arange(2 * per_state_n, 3 * per_state_n, dtype=int),
+    }
+    windows = [_pr5a_synthetic_window(state_indices)]
+
+    out = compute_novel_template_gate(
+        v_ranks=ranks,
+        v_rel=rel,
+        v_bools=bools,
+        templates=templates,
+        proximity_windows=windows,
+        min_participating_l3=5,
+        min_shared_channels=3,
+    )
+
+    assert out["n_events_by_state"] == {
+        "baseline": n_l3,
+        "pre": n_l3,
+        "post": n_l3,
+    }
+    assert out["n_l3_excluded_by_state"] == {
+        "baseline": n_bad,
+        "pre": n_bad,
+        "post": n_bad,
+    }
+    # If the bad events had leaked in, baseline median r would be much lower.
+    assert out["median_by_state"]["baseline"]["r"] > 0.9
+    delta_pre = out["delta_pre_minus_baseline"]
+    delta_post = out["delta_post_minus_baseline"]
+    assert abs(delta_pre["r"]) < 0.05
+    assert abs(delta_post["r"]) < 0.05
+
+
+def _pr5a_summary_record(
+    *,
+    subject_id: str,
+    baseline_e: float = 4.0,
+    delta_pre_r: float = 0.01,
+    delta_post_r: float = -0.01,
+    delta_pre_e: float = 0.10,
+    delta_post_e: float = -0.08,
+    delta_pre_gap: float = 0.20,
+    delta_post_gap: float = 0.15,
+    n_events: int = 40,
+) -> Dict[str, Any]:
+    return {
+        "subject_id": subject_id,
+        "dataset": "synthetic",
+        "config_name": "main",
+        "n_events_by_state": {"baseline": n_events, "pre": n_events, "post": n_events},
+        "n_l3_excluded_by_state": {"baseline": 0, "pre": 0, "post": 0},
+        "n_seizures_usable": 3,
+        "median_by_state": {
+            "baseline": {"r": 0.80, "e": baseline_e, "gap": 1.00},
+            "pre": {"r": 0.80 + delta_pre_r, "e": baseline_e + delta_pre_e, "gap": 1.00 + delta_pre_gap},
+            "post": {"r": 0.80 + delta_post_r, "e": baseline_e + delta_post_e, "gap": 1.00 + delta_post_gap},
+        },
+        "delta_pre_minus_baseline": {"r": delta_pre_r, "e": delta_pre_e, "gap": delta_pre_gap},
+        "delta_post_minus_baseline": {"r": delta_post_r, "e": delta_post_e, "gap": delta_post_gap},
+        "n_clusters": 2,
+    }
+
+
+def test_pr5_gate_summary_reports_sign_test_and_passes() -> None:
+    records = [
+        _pr5a_summary_record(
+            subject_id=f"s{i}",
+            delta_pre_r=(0.01 if i % 2 == 0 else -0.01),
+            delta_post_r=(-0.01 if i % 2 == 0 else 0.01),
+            delta_pre_e=(0.08 if i < 2 else -0.06),
+            delta_post_e=(-0.04 if i < 2 else 0.03),
+            delta_pre_gap=(0.20 if i < 2 else 0.10),
+            delta_post_gap=(0.15 if i < 2 else 0.05),
+        )
+        for i in range(4)
+    ]
+    out = summarize_pr5_novel_template_gate(
+        {"main": records, "auxiliary": records},
+        min_state_events_for_gate=30,
+    )
+
+    pre_r = out["main"]["delta_summary"]["pre_vs_baseline"]["r"]
+    post_e = out["auxiliary"]["delta_summary"]["post_vs_baseline"]["e"]
+    assert "sign_test_p" in pre_r
+    assert np.isfinite(pre_r["sign_test_p"])
+    assert abs(pre_r["sign_test_p"] - 1.0) < 1e-12
+    assert "sign_test_p" in post_e
+    assert np.isfinite(post_e["sign_test_p"])
+    assert out["main"]["gate_pass"] is True
+    assert out["auxiliary"]["gate_pass"] is True
+    assert out["overall_pass"] is True
+
+
+def test_pr5_gate_summary_fails_when_gap_is_significantly_lower() -> None:
+    harmful = [
+        _pr5a_summary_record(
+            subject_id=f"s{i}",
+            delta_pre_gap=-0.30,
+            delta_post_gap=-0.30,
+        )
+        for i in range(6)
+    ]
+    out = summarize_pr5_novel_template_gate(
+        {"main": harmful, "auxiliary": harmful},
+        min_state_events_for_gate=30,
+    )
+
+    main_gap = out["main"]["gate_evaluation"]["axis_details"]["gap"]["pre_vs_baseline"]
+    assert main_gap["harmful"] is True
+    assert out["main"]["gate_pass"] is False
+    assert out["overall_pass"] is False

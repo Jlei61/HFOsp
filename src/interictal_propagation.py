@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 from zoneinfo import ZoneInfo
 from scipy.optimize import linear_sum_assignment
-from scipy.stats import kendalltau, spearmanr, wilcoxon
+from scipy.stats import binomtest, kendalltau, spearmanr, wilcoxon
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from sklearn.metrics import adjusted_mutual_info_score, silhouette_score
 
@@ -4696,3 +4696,471 @@ def _summarize_adaptive_clusters(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
         ),
         "total_forward_reverse_pairs": int(n_fwd_rev),
     }
+
+
+# ---------------------------------------------------------------------------
+# PR-5-A: novel-template falsification gate
+# ---------------------------------------------------------------------------
+#
+# Contract: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md
+#   §3.2 data, §3.3 metrics, §3.5 PASS/FAIL thresholds, §5.2 code entry.
+#
+# The gate decides whether peri-ictal events are still in-distribution under
+# the global stable template library `T_global = build_cluster_templates(...)`.
+# A FAIL means H_OOD ("peri-ictal events come from a novel template family")
+# cannot be ruled out, in which case PR-5-B must not start.
+
+PR5A_R_DELTA_THRESHOLD: float = 0.05
+PR5A_E_RELATIVE_THRESHOLD: float = 0.10
+PR5A_WILCOXON_ALPHA: float = 0.05
+PR5A_GATE_STATES: Tuple[str, ...] = ("baseline", "pre", "post")
+
+
+def _per_event_gate_metrics(
+    rel_vec: np.ndarray,
+    rank_vec: np.ndarray,
+    bool_vec: np.ndarray,
+    templates: np.ndarray,
+    *,
+    min_shared_channels: int,
+) -> Tuple[float, float, float]:
+    """Per-event (best_r, best_recon_err, assignment_gap) against templates.
+
+    * ``best_r`` — max over k of Spearman r between ``rel_vec`` on
+      participating channels and ``templates[k]`` on the same channels.
+    * ``best_recon_err`` — min over k of the mean squared (rank-space)
+      difference on shared finite channels (>= ``min_shared_channels``).
+      Identical math to ``assign_events_to_templates``.
+    * ``assignment_gap`` — second-best ``recon_err`` minus best ``recon_err``.
+    """
+    n_clusters = int(templates.shape[0])
+    bool_mask = bool_vec.astype(bool)
+    masked_rel = np.where(bool_mask, rel_vec, np.nan)
+    masked_rank = np.where(bool_mask, rank_vec, np.nan)
+
+    best_r = -np.inf
+    errs = np.full(n_clusters, np.inf, dtype=float)
+    for k in range(n_clusters):
+        tmpl = templates[k]
+        finite_rel = np.isfinite(masked_rel) & np.isfinite(tmpl)
+        n_rel = int(np.sum(finite_rel))
+        if n_rel >= int(min_shared_channels):
+            tmpl_vals = tmpl[finite_rel]
+            rel_vals = masked_rel[finite_rel]
+            # spearmanr requires variation in both inputs; otherwise it
+            # returns NaN, which we drop into the "no usable correlation"
+            # bucket together with the under-coverage cases above.
+            if (
+                np.unique(tmpl_vals).size >= 2
+                and np.unique(rel_vals).size >= 2
+            ):
+                r_val, _ = spearmanr(rel_vals, tmpl_vals)
+                if np.isfinite(r_val) and float(r_val) > best_r:
+                    best_r = float(r_val)
+        finite_rank = np.isfinite(masked_rank) & np.isfinite(tmpl)
+        n_rank = int(np.sum(finite_rank))
+        if n_rank >= int(min_shared_channels):
+            diff = masked_rank[finite_rank] - tmpl[finite_rank]
+            errs[k] = float(np.mean(diff ** 2))
+
+    best_r_out = float(best_r) if np.isfinite(best_r) else float("nan")
+    finite_errs = errs[np.isfinite(errs)]
+    if finite_errs.size == 0:
+        return best_r_out, float("nan"), float("nan")
+    if finite_errs.size == 1:
+        return best_r_out, float(finite_errs[0]), float("nan")
+    sorted_errs = np.sort(finite_errs)
+    return (
+        best_r_out,
+        float(sorted_errs[0]),
+        float(sorted_errs[1] - sorted_errs[0]),
+    )
+
+
+def compute_novel_template_gate(
+    *,
+    v_ranks: np.ndarray,
+    v_rel: np.ndarray,
+    v_bools: np.ndarray,
+    templates: np.ndarray,
+    proximity_windows: Sequence[Dict[str, Any]],
+    min_participating_l3: int = 5,
+    min_shared_channels: int = 3,
+) -> Dict[str, Any]:
+    """PR-5-A novel-template falsification gate.
+
+    For each baseline / pre / post event (after dropping events with fewer
+    than ``min_participating_l3`` participating channels), compute three
+    per-event diagnostics against the fixed global template library
+    ``templates``:
+
+    1. ``best_r`` — max over k of Spearman r between the event's relative-lag
+       vector ``v_rel[:, i]`` (on participating channels) and ``templates[k]``
+       on the same channels.
+    2. ``recon_err`` — min over k of the mean squared rank-space difference
+       on shared finite channels (>= ``min_shared_channels``). Identical math
+       to :func:`assign_events_to_templates`.
+    3. ``gap`` — second-best ``recon_err`` minus best ``recon_err``; the
+       assignment confidence margin.
+
+    Pool events across all usable seizure windows per state and return per
+    state distributions, medians, and per-subject deltas (state - baseline).
+
+    Parameters
+    ----------
+    v_ranks, v_rel, v_bools
+        Same ``(n_ch, n_valid_events)`` arrays that
+        :func:`compute_seizure_proximity_coupling` builds internally
+        (already sliced by ``valid_event_indices`` with
+        ``min_participating>=min_shared_channels``).
+    templates
+        ``T_global`` from
+        ``build_cluster_templates(v_ranks, v_bools, adaptive_labels, stable_k)``;
+        the same library used by PR-4D fixed-template projection. NaN
+        channels are tolerated.
+    proximity_windows
+        Iterable of window dicts shaped like
+        ``compute_seizure_proximity_coupling`` ``seizure_windows`` but **also
+        carrying** ``state_event_indices`` per state (which the runner
+        provides directly from ``_build_seizure_proximity_windows`` to avoid
+        a second source-of-truth window builder per §3.2).
+    """
+    v_ranks = np.asarray(v_ranks, dtype=float)
+    v_rel = np.asarray(v_rel, dtype=float)
+    v_bools = np.asarray(v_bools, dtype=bool)
+    templates = np.asarray(templates, dtype=float)
+    if v_ranks.shape != v_rel.shape or v_ranks.shape != v_bools.shape:
+        raise ValueError("v_ranks, v_rel, and v_bools must share shape")
+    n_ch = v_ranks.shape[0]
+    if templates.ndim != 2 or templates.shape[1] != n_ch:
+        raise ValueError("templates must have shape (n_clusters, n_ch)")
+
+    n_clusters = int(templates.shape[0])
+    n_part = np.sum(v_bools > 0, axis=0)
+    eligible_mask = n_part >= int(min_participating_l3)
+
+    pooled_indices: Dict[str, List[int]] = {name: [] for name in PR5A_GATE_STATES}
+    excluded_counts: Dict[str, int] = {name: 0 for name in PR5A_GATE_STATES}
+    n_windows_used = 0
+    for window in proximity_windows:
+        if not bool(window.get("usable", True)):
+            continue
+        n_windows_used += 1
+        state_indices = window.get("state_event_indices", {})
+        for name in PR5A_GATE_STATES:
+            raw = state_indices.get(name, [])
+            idx = np.asarray(raw, dtype=int)
+            if idx.size == 0:
+                continue
+            mask = eligible_mask[idx]
+            for i in idx[mask]:
+                pooled_indices[name].append(int(i))
+            excluded_counts[name] += int(np.sum(~mask))
+
+    per_state_metrics: Dict[str, Dict[str, List[float]]] = {
+        name: {"r": [], "e": [], "gap": []} for name in PR5A_GATE_STATES
+    }
+    for state_name in PR5A_GATE_STATES:
+        for ev in pooled_indices[state_name]:
+            r_val, e_val, gap_val = _per_event_gate_metrics(
+                v_rel[:, ev],
+                v_ranks[:, ev],
+                v_bools[:, ev],
+                templates,
+                min_shared_channels=int(min_shared_channels),
+            )
+            if np.isfinite(r_val):
+                per_state_metrics[state_name]["r"].append(float(r_val))
+            if np.isfinite(e_val):
+                per_state_metrics[state_name]["e"].append(float(e_val))
+            if np.isfinite(gap_val):
+                per_state_metrics[state_name]["gap"].append(float(gap_val))
+
+    medians: Dict[str, Dict[str, float]] = {}
+    n_events: Dict[str, int] = {}
+    for name in PR5A_GATE_STATES:
+        n_events[name] = int(len(pooled_indices[name]))
+        medians[name] = {
+            metric: (
+                float(np.median(per_state_metrics[name][metric]))
+                if per_state_metrics[name][metric]
+                else float("nan")
+            )
+            for metric in ("r", "e", "gap")
+        }
+
+    def _delta(state: str) -> Dict[str, float]:
+        return {
+            metric: float(medians[state][metric] - medians["baseline"][metric])
+            for metric in ("r", "e", "gap")
+        }
+
+    return {
+        "n_clusters": n_clusters,
+        "n_channels": int(n_ch),
+        "n_windows_used": int(n_windows_used),
+        "n_events_by_state": n_events,
+        "n_l3_excluded_by_state": excluded_counts,
+        "min_participating_l3": int(min_participating_l3),
+        "min_shared_channels": int(min_shared_channels),
+        "r_by_state": {name: list(per_state_metrics[name]["r"]) for name in PR5A_GATE_STATES},
+        "e_by_state": {name: list(per_state_metrics[name]["e"]) for name in PR5A_GATE_STATES},
+        "gap_by_state": {name: list(per_state_metrics[name]["gap"]) for name in PR5A_GATE_STATES},
+        "median_by_state": medians,
+        "delta_pre_minus_baseline": _delta("pre"),
+        "delta_post_minus_baseline": _delta("post"),
+    }
+
+
+def _wilcoxon_safe(deltas: Sequence[float]) -> Tuple[float, float, int]:
+    """Paired Wilcoxon vs zero on subject-level deltas.
+
+    Returns ``(median, p_value, n_used)`` with ``p_value=NaN`` when scipy
+    refuses (e.g. all zero deltas after the wilcoxon "wsr" zero-handling).
+    """
+    arr = np.asarray([float(x) for x in deltas if np.isfinite(x)], dtype=float)
+    n = int(arr.size)
+    if n == 0:
+        return float("nan"), float("nan"), 0
+    median = float(np.median(arr))
+    if n < 2 or np.all(arr == 0):
+        return median, float("nan"), n
+    try:
+        _, p = wilcoxon(arr, zero_method="wilcox", alternative="two-sided")
+        return median, float(p), n
+    except ValueError:
+        return median, float("nan"), n
+
+
+def _sign_test_safe(deltas: Sequence[float]) -> Tuple[float, int]:
+    """Two-sided exact sign test on non-zero subject-level deltas."""
+    arr = np.asarray([float(x) for x in deltas if np.isfinite(x)], dtype=float)
+    if arr.size == 0:
+        return float("nan"), 0
+    nonzero = arr[arr != 0]
+    n = int(nonzero.size)
+    if n == 0:
+        return float("nan"), 0
+    n_pos = int(np.sum(nonzero > 0))
+    p = binomtest(n_pos, n=n, p=0.5, alternative="two-sided").pvalue
+    return float(p), n
+
+
+def _evaluate_pr5_gate_thresholds(
+    cohort: Dict[str, Dict[str, Any]],
+    *,
+    r_delta_threshold: float,
+    e_relative_threshold: float,
+    wilcoxon_alpha: float,
+) -> Dict[str, Any]:
+    """Apply §3.5 PASS/FAIL rules to a cohort-level summary.
+
+    Returns the per-axis (r, e, gap) PASS booleans plus the overall config
+    PASS boolean. PR-5-A is intentionally conservative: failing any axis on
+    any state pair (pre vs baseline OR post vs baseline) flips the gate to
+    FAIL, and the threshold values are baked into the contract so reruns
+    cannot drift the bar.
+    """
+    pairs = ("pre_vs_baseline", "post_vs_baseline")
+    e_baseline_median = float(cohort.get("e_baseline_subject_median", float("nan")))
+
+    def _axis_pass_r() -> Tuple[bool, Dict[str, Dict[str, Any]]]:
+        details: Dict[str, Dict[str, Any]] = {}
+        ok = True
+        for pair in pairs:
+            entry = cohort["delta_summary"][pair]["r"]
+            med = float(entry["median"])
+            p = float(entry["wilcoxon_p"]) if np.isfinite(entry["wilcoxon_p"]) else float("nan")
+            magnitude_ok = bool(np.isfinite(med) and abs(med) <= r_delta_threshold)
+            wilcoxon_ok = (not np.isfinite(p)) or bool(p >= wilcoxon_alpha)
+            pair_ok = magnitude_ok and wilcoxon_ok
+            details[pair] = {
+                "median_delta": med,
+                "wilcoxon_p": p,
+                "magnitude_ok": magnitude_ok,
+                "wilcoxon_ok": wilcoxon_ok,
+                "pair_pass": pair_ok,
+            }
+            ok = ok and pair_ok
+        return ok, details
+
+    def _axis_pass_e() -> Tuple[bool, Dict[str, Dict[str, Any]]]:
+        details: Dict[str, Dict[str, Any]] = {}
+        ok = True
+        denom = max(abs(e_baseline_median), 1e-12)
+        for pair in pairs:
+            entry = cohort["delta_summary"][pair]["e"]
+            med = float(entry["median"])
+            p = float(entry["wilcoxon_p"]) if np.isfinite(entry["wilcoxon_p"]) else float("nan")
+            relative = abs(med) / denom if np.isfinite(med) else float("nan")
+            magnitude_ok = bool(
+                np.isfinite(relative) and relative <= e_relative_threshold
+            )
+            wilcoxon_ok = (not np.isfinite(p)) or bool(p >= wilcoxon_alpha)
+            pair_ok = magnitude_ok and wilcoxon_ok
+            details[pair] = {
+                "median_delta": med,
+                "median_baseline_subject_median": e_baseline_median,
+                "relative_delta": relative,
+                "wilcoxon_p": p,
+                "magnitude_ok": magnitude_ok,
+                "wilcoxon_ok": wilcoxon_ok,
+                "pair_pass": pair_ok,
+            }
+            ok = ok and pair_ok
+        return ok, details
+
+    def _axis_pass_gap() -> Tuple[bool, Dict[str, Dict[str, Any]]]:
+        # Per §3.5: only fail if peri-ictal gap is *significantly lower* than
+        # baseline (i.e. negative direction with Wilcoxon p < alpha). Higher
+        # gap (positive delta) is fine and direction-only failures (without
+        # significance) are also fine.
+        details: Dict[str, Dict[str, Any]] = {}
+        ok = True
+        for pair in pairs:
+            entry = cohort["delta_summary"][pair]["gap"]
+            med = float(entry["median"])
+            p = float(entry["wilcoxon_p"]) if np.isfinite(entry["wilcoxon_p"]) else float("nan")
+            wilcoxon_significant = np.isfinite(p) and p < wilcoxon_alpha
+            harmful = bool(np.isfinite(med) and med < 0 and wilcoxon_significant)
+            pair_ok = not harmful
+            details[pair] = {
+                "median_delta": med,
+                "wilcoxon_p": p,
+                "harmful": harmful,
+                "pair_pass": pair_ok,
+            }
+            ok = ok and pair_ok
+        return ok, details
+
+    r_ok, r_details = _axis_pass_r()
+    e_ok, e_details = _axis_pass_e()
+    gap_ok, gap_details = _axis_pass_gap()
+
+    return {
+        "thresholds": {
+            "r_delta": float(r_delta_threshold),
+            "e_relative": float(e_relative_threshold),
+            "wilcoxon_alpha": float(wilcoxon_alpha),
+        },
+        "axis_pass": {"r": r_ok, "e": e_ok, "gap": gap_ok},
+        "axis_details": {
+            "r": r_details,
+            "e": e_details,
+            "gap": gap_details,
+        },
+        "config_pass": bool(r_ok and e_ok and gap_ok),
+    }
+
+
+def summarize_pr5_novel_template_gate(
+    per_subject_records_by_config: Dict[str, Sequence[Dict[str, Any]]],
+    *,
+    r_delta_threshold: float = PR5A_R_DELTA_THRESHOLD,
+    e_relative_threshold: float = PR5A_E_RELATIVE_THRESHOLD,
+    wilcoxon_alpha: float = PR5A_WILCOXON_ALPHA,
+    min_state_events_for_gate: int = 30,
+) -> Dict[str, Any]:
+    """Cohort-level PR-5-A summary + PASS/FAIL for both window configs.
+
+    Each value in ``per_subject_records_by_config`` is a list of per-subject
+    gate records (output of :func:`compute_novel_template_gate`) augmented
+    with at least ``subject_id`` and ``dataset`` (and optionally
+    ``warning``). Records that fail the per-state ``min_state_events_for_gate``
+    threshold are dropped from cohort statistics but counted as
+    ``ineligible``.
+
+    Returns ``{config_name: per_config_summary, "overall_pass": bool}`` where
+    ``overall_pass`` is the conjunction of every config's ``config_pass``
+    (PR-5-A sensitivity = main AND auxiliary, per §3.5 last row).
+    """
+    summary: Dict[str, Any] = {}
+    config_passes: List[bool] = []
+
+    for config_name, records in per_subject_records_by_config.items():
+        eligible: List[Dict[str, Any]] = []
+        ineligible: List[Dict[str, Any]] = []
+        for rec in records:
+            counts = rec.get("n_events_by_state") or {}
+            min_count = min(
+                int(counts.get(name, 0)) for name in PR5A_GATE_STATES
+            ) if counts else 0
+            label = {
+                "subject_id": rec.get("subject_id"),
+                "dataset": rec.get("dataset"),
+                "n_events_by_state": dict(counts),
+                "min_state_events": int(min_count),
+            }
+            if min_count < int(min_state_events_for_gate) or rec.get("warning"):
+                ineligible.append(
+                    {**label, "reason": rec.get("warning") or "below_min_state_events"}
+                )
+                continue
+            eligible.append(rec)
+
+        baseline_e_subject_medians = [
+            float(rec["median_by_state"]["baseline"]["e"])
+            for rec in eligible
+            if np.isfinite(rec["median_by_state"]["baseline"]["e"])
+        ]
+        e_baseline_subject_median = (
+            float(np.median(baseline_e_subject_medians))
+            if baseline_e_subject_medians
+            else float("nan")
+        )
+
+        delta_summary: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        for pair, delta_key in (
+            ("pre_vs_baseline", "delta_pre_minus_baseline"),
+            ("post_vs_baseline", "delta_post_minus_baseline"),
+        ):
+            pair_summary: Dict[str, Dict[str, Any]] = {}
+            for metric in ("r", "e", "gap"):
+                deltas = [
+                    float(rec[delta_key][metric])
+                    for rec in eligible
+                    if np.isfinite(rec[delta_key][metric])
+                ]
+                med, p, n_used = _wilcoxon_safe(deltas)
+                n_pos = int(np.sum(np.asarray(deltas) > 0)) if deltas else 0
+                n_neg = int(np.sum(np.asarray(deltas) < 0)) if deltas else 0
+                sign_p, sign_n = _sign_test_safe(deltas)
+                pair_summary[metric] = {
+                    "n_subjects": n_used,
+                    "median": float(med) if np.isfinite(med) else float("nan"),
+                    "wilcoxon_p": float(p) if np.isfinite(p) else float("nan"),
+                    "sign_test_p": float(sign_p) if np.isfinite(sign_p) else float("nan"),
+                    "sign_test_n": int(sign_n),
+                    "n_positive": n_pos,
+                    "n_negative": n_neg,
+                }
+            delta_summary[pair] = pair_summary
+
+        cohort = {
+            "config_name": config_name,
+            "n_subjects_eligible": int(len(eligible)),
+            "n_subjects_ineligible": int(len(ineligible)),
+            "ineligible_subjects": ineligible,
+            "min_state_events_for_gate": int(min_state_events_for_gate),
+            "e_baseline_subject_median": float(e_baseline_subject_median),
+            "delta_summary": delta_summary,
+        }
+        gate_eval = _evaluate_pr5_gate_thresholds(
+            cohort,
+            r_delta_threshold=r_delta_threshold,
+            e_relative_threshold=e_relative_threshold,
+            wilcoxon_alpha=wilcoxon_alpha,
+        )
+        cohort["gate_evaluation"] = gate_eval
+        cohort["gate_pass"] = bool(gate_eval["config_pass"])
+        config_passes.append(cohort["gate_pass"])
+        summary[config_name] = cohort
+
+    summary["overall_pass"] = bool(config_passes) and all(config_passes)
+    summary["thresholds"] = {
+        "r_delta": float(r_delta_threshold),
+        "e_relative": float(e_relative_threshold),
+        "wilcoxon_alpha": float(wilcoxon_alpha),
+        "min_state_events_for_gate": int(min_state_events_for_gate),
+    }
+    return summary

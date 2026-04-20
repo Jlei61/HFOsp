@@ -11,10 +11,14 @@ from typing import Any, Dict, List
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.interictal_propagation import (  # noqa: E402
+    SEIZURE_PROXIMITY_CONFIGS,
+    _build_seizure_proximity_windows,
+    _compute_relative_lag_matrix,
     _valid_event_indices,
     assign_events_to_templates,
     build_cluster_templates,
     compute_continuous_template_dynamics,
+    compute_novel_template_gate,
     compute_rate_state_coupling,
     compute_seizure_proximity_coupling,
     validate_absolute_lag_clustering,
@@ -23,6 +27,7 @@ from src.interictal_propagation import (  # noqa: E402
     compute_within_cluster_centered_tau,
     load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
+    summarize_pr5_novel_template_gate,
     summarize_propagation_cohort,
 )
 from src.event_periodicity import load_seizure_times  # noqa: E402
@@ -1011,6 +1016,189 @@ def _run_pr4c(
     )
 
 
+def _run_pr5_gate(
+    datasets_list: List,
+    per_subject_dir: Path,
+    *,
+    min_state_events_for_gate: int = 30,
+) -> None:
+    """PR-5-A: novel-template falsification gate (main + auxiliary configs).
+
+    For each subject we reuse the PR-4C P0 fix machinery
+    (``_build_seizure_proximity_windows`` + the same ``v_ranks/v_rel/v_bools``
+    construction as :func:`compute_seizure_proximity_coupling`), build the
+    fixed global template library ``T_global`` exactly as PR-4D does, and
+    run :func:`compute_novel_template_gate` on the gate-eligible event pool
+    (``min_participating_l3=5``). Cohort-level PASS/FAIL is delegated to
+    :func:`summarize_pr5_novel_template_gate` which encodes the §3.5
+    thresholds; both window configs must PASS for ``overall_pass=True``.
+    """
+    import numpy as np
+
+    pr5a_dir = per_subject_dir / "pr5a"
+    pr5a_dir.mkdir(parents=True, exist_ok=True)
+
+    config_records: Dict[str, List[Dict[str, Any]]] = {
+        "main": [],
+        "auxiliary": [],
+    }
+    per_subject_archive: Dict[str, Dict[str, Any]] = {}
+
+    for dataset, root, subjects, _soz_map in datasets_list:
+        for subject in subjects:
+            key = f"{dataset}/{subject}"
+            json_path = per_subject_dir / f"{dataset}_{subject}.json"
+            if not json_path.exists():
+                logger.warning("PR-5-A skip %s: per-subject PR-1 JSON missing", key)
+                continue
+
+            with open(json_path) as f:
+                base = json.load(f)
+            ac = base.get("adaptive_cluster", {})
+            if "error" in ac or "labels" not in ac:
+                logger.warning(
+                    "PR-5-A skip %s: adaptive_cluster missing/errored", key
+                )
+                continue
+
+            subject_dir = (
+                root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            )
+            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+                logger.warning("PR-5-A skip %s: raw lagPat dir missing", key)
+                continue
+
+            loaded = load_subject_propagation_events(subject_dir)
+            valid_events = _valid_event_indices(loaded["bools"], min_participating=3)
+            labels = np.asarray(ac["labels"], dtype=int)
+            chosen_k = int(ac["chosen_k"])
+            if valid_events.size != labels.size:
+                logger.warning(
+                    "PR-5-A skip %s: label/valid mismatch (labels=%d valid=%d)",
+                    key,
+                    labels.size,
+                    valid_events.size,
+                )
+                continue
+
+            v_times = loaded["event_abs_times"][valid_events]
+            v_ranks = loaded["ranks"][:, valid_events]
+            v_bools = loaded["bools"][:, valid_events]
+            v_rel = _compute_relative_lag_matrix(
+                loaded["lag_raw"][:, valid_events], v_bools
+            )
+            templates = build_cluster_templates(v_ranks, v_bools, labels, chosen_k)
+            seizure_times = load_seizure_times(subject, dataset)
+            if not seizure_times:
+                logger.warning("PR-5-A skip %s: no seizure times", key)
+                continue
+
+            subject_payload: Dict[str, Any] = {
+                "dataset": dataset,
+                "subject": subject,
+                "chosen_k": chosen_k,
+                "stable_k": int(ac.get("stable_k", chosen_k) or chosen_k),
+                "n_seizures_loaded": int(len(seizure_times)),
+                "n_valid_events": int(valid_events.size),
+                "configs": {},
+            }
+
+            for config_name, cfg in SEIZURE_PROXIMITY_CONFIGS.items():
+                proximity = _build_seizure_proximity_windows(
+                    v_times,
+                    seizure_times,
+                    baseline_hours=cfg["baseline_hours"],
+                    pre_ictal_hours=cfg["pre_ictal_hours"],
+                    post_ictal_hours=cfg["post_ictal_hours"],
+                )
+                gate_result = compute_novel_template_gate(
+                    v_ranks=v_ranks,
+                    v_rel=v_rel,
+                    v_bools=v_bools,
+                    templates=templates,
+                    proximity_windows=proximity["usable_windows"],
+                    min_participating_l3=5,
+                    min_shared_channels=3,
+                )
+                gate_result["n_seizures_usable"] = int(
+                    len(proximity["usable_windows"])
+                )
+                gate_result["window_hours"] = proximity["state_ranges_hours"]
+                gate_result["state_event_counts_window_total"] = (
+                    proximity["state_event_counts"]
+                )
+                # Drop the per-event distributions from cohort archive to
+                # keep the consolidated JSON small; per-subject JSON keeps
+                # them for downstream exploratory diagnostics.
+                cohort_record = {
+                    "subject_id": subject,
+                    "dataset": dataset,
+                    "config_name": config_name,
+                    "n_events_by_state": gate_result["n_events_by_state"],
+                    "n_l3_excluded_by_state": gate_result["n_l3_excluded_by_state"],
+                    "n_seizures_usable": gate_result["n_seizures_usable"],
+                    "median_by_state": gate_result["median_by_state"],
+                    "delta_pre_minus_baseline": gate_result["delta_pre_minus_baseline"],
+                    "delta_post_minus_baseline": gate_result["delta_post_minus_baseline"],
+                    "n_clusters": gate_result["n_clusters"],
+                }
+                if (
+                    gate_result["n_events_by_state"]["baseline"] == 0
+                    and gate_result["n_events_by_state"]["pre"] == 0
+                    and gate_result["n_events_by_state"]["post"] == 0
+                ):
+                    cohort_record["warning"] = "no_gate_eligible_events"
+                config_records[config_name].append(cohort_record)
+                subject_payload["configs"][config_name] = gate_result
+
+            per_subject_archive[key] = subject_payload
+            _save(subject_payload, pr5a_dir / f"{dataset}_{subject}.json")
+            logger.info(
+                "PR-5-A %s: usable seizures main=%d aux=%d  events main(b/p/p)=%s aux(b/p/p)=%s",
+                key,
+                subject_payload["configs"]["main"]["n_seizures_usable"],
+                subject_payload["configs"]["auxiliary"]["n_seizures_usable"],
+                subject_payload["configs"]["main"]["n_events_by_state"],
+                subject_payload["configs"]["auxiliary"]["n_events_by_state"],
+            )
+
+    cohort_summary = summarize_pr5_novel_template_gate(
+        config_records,
+        min_state_events_for_gate=int(min_state_events_for_gate),
+    )
+
+    artifact_root = RESULTS_DIR / "pr5a_novel_template_gate.json"
+    _save(
+        {
+            "per_subject": config_records,
+            "cohort": cohort_summary,
+        },
+        artifact_root,
+    )
+
+    cohort_path = RESULTS_DIR / "pr1_cohort_summary.json"
+    cohort_doc: Dict[str, Any] = {}
+    if cohort_path.exists():
+        try:
+            with open(cohort_path) as f:
+                loaded_doc = json.load(f)
+            if isinstance(loaded_doc, dict):
+                cohort_doc = loaded_doc
+        except Exception as exc:
+            logger.warning("PR-5-A: failed to merge cohort summary: %s", exc)
+    cohort_doc["novel_template_gate"] = cohort_summary
+    _save(cohort_doc, cohort_path)
+
+    logger.info(
+        "PR-5-A done. overall_pass=%s  main_pass=%s aux_pass=%s  n_subjects(main/aux)=%d/%d",
+        cohort_summary.get("overall_pass"),
+        cohort_summary.get("main", {}).get("gate_pass"),
+        cohort_summary.get("auxiliary", {}).get("gate_pass"),
+        cohort_summary.get("main", {}).get("n_subjects_eligible", 0),
+        cohort_summary.get("auxiliary", {}).get("n_subjects_eligible", 0),
+    )
+
+
 def _build_parser() -> argparse.ArgumentParser:
     """Build the CLI argument parser.
 
@@ -1042,6 +1230,22 @@ def _build_parser() -> argparse.ArgumentParser:
                         help="PR-4C: seizure proximity L1/L2/L3 analysis (main config: 4/1/1 h)")
     parser.add_argument("--pr4c-auxiliary", action="store_true",
                         help="PR-4C: seizure proximity analysis with auxiliary config (2/0.5/1 h) for sensitivity check")
+    parser.add_argument("--pr5-gate", action="store_true",
+                        help=(
+                            "PR-5-A novel-template falsification gate (main + auxiliary configs)."
+                            " Hard prerequisite for PR-5-B; per-subject results in"
+                            " results/interictal_propagation/per_subject/pr5a/."
+                        ))
+    parser.add_argument(
+        "--pr5-min-state-events",
+        type=int,
+        default=30,
+        help=(
+            "PR-5-A per-subject ineligibility threshold (minimum events per"
+            " baseline/pre/post state, pooled across usable seizure windows)."
+            " Default = 30 per archive §2.3 fail-fast contract."
+        ),
+    )
     parser.add_argument("--bin-hours", type=float, default=1.0, help="PR-4A occupancy bin width in hours")
     parser.add_argument("--rate-bin-hours", type=float, default=2.0,
                         help="PR-4B local rate bin width in hours")
@@ -1166,6 +1370,14 @@ def main() -> None:
             n_sample=args.n_sample,
             n_seeds=args.n_seeds,
             config_name="auxiliary",
+        )
+        return
+
+    if args.pr5_gate:
+        _run_pr5_gate(
+            datasets_list,
+            per_subject_dir,
+            min_state_events_for_gate=args.pr5_min_state_events,
         )
         return
 
