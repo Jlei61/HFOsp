@@ -41,11 +41,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 # ---- Bump global font sizes BEFORE importing helpers ----
 # All `style_panel`, `add_significance_bracket`, etc. read these at call time.
 import src.plot_style as _ps
-_ps.FS_TICK = 18
-_ps.FS_LABEL = 18
-_ps.FS_TITLE = 22
-_ps.FS_SUPTITLE = 24
-_ps.FS_PANEL_LETTER = 28
+_ps.FS_TICK = 20
+_ps.FS_LABEL = 20
+_ps.FS_TITLE = 24
+_ps.FS_SUPTITLE = 26
+_ps.FS_PANEL_LETTER = 30
 
 from src.plot_style import (
     style_panel, violin_with_scatter, add_significance_bracket,
@@ -1550,7 +1550,7 @@ def plot_fig5():
 
 def _plot_cluster_rank_curves_semantic(
     ax, ranks, bools, valid_events, labels, channel_order,
-    channel_names, title=""):
+    channel_names, title="", show_legend: bool = False):
     """Per-cluster mean rank +/- std curves on fixed channel order, using
     TEMPLATE_COLORS so cluster id matches rate-panel template id colour.
     """
@@ -1558,6 +1558,7 @@ def _plot_cluster_rank_curves_semantic(
     ordered_names = [channel_names[idx] for idx in channel_order]
     unique_k = np.unique(labels)
     y_pos = np.arange(n_ch, dtype=float)
+    xs_for_lim: list[float] = []
     for cid in unique_k:
         mask_cluster = labels == cid
         eidx = valid_events[mask_cluster]
@@ -1572,10 +1573,16 @@ def _plot_cluster_rank_curves_semantic(
                 stds[ci_plot] = float(np.std(vals))
         valid = np.isfinite(means)
         col = TEMPLATE_COLORS[int(cid) % len(TEMPLATE_COLORS)]
-        ax.fill_betweenx(y_pos[valid], (means - stds)[valid],
-                         (means + stds)[valid],
+        lo = (means - stds)[valid]
+        hi = (means + stds)[valid]
+        m = means[valid]
+        if lo.size:
+            xs_for_lim.extend(lo.tolist())
+            xs_for_lim.extend(hi.tolist())
+            xs_for_lim.extend(m.tolist())
+        ax.fill_betweenx(y_pos[valid], lo, hi,
                          color=col, alpha=0.18, linewidth=0)
-        ax.plot(means[valid], y_pos[valid], "-o",
+        ax.plot(m, y_pos[valid], "-o",
                 color=col, lw=2.4, ms=6, zorder=10,
                 label=f"C{int(cid)} (n={int(mask_cluster.sum())})")
     ax.set_yticks(y_pos)
@@ -1584,12 +1591,21 @@ def _plot_cluster_rank_curves_semantic(
     ax.set_ylim(-0.5, n_ch - 0.5)
     ax.invert_yaxis()
     ax.set_xlabel("Rank", fontsize=FS_LABEL)
-    ax.set_xlim(-0.5, n_ch - 0.5)
+    if xs_for_lim:
+        xmin = float(np.min(xs_for_lim))
+        xmax = float(np.max(xs_for_lim))
+        span = xmax - xmin
+        pad = max(0.03 * span, 0.12) if span > 0 else 0.25
+        ax.set_xlim(xmin - pad, xmax + pad)
+    else:
+        ax.set_xlim(-0.5, 0.5)
+    ax.margins(x=0, y=0)
     if title:
         ax.set_title(title, fontsize=FS_TITLE - 2, fontweight="bold", pad=8)
-    ax.legend(fontsize=FS_TICK - 2, loc="upper center",
-              bbox_to_anchor=(0.5, -0.10),
-              ncol=max(1, len(unique_k)), framealpha=0.95)
+    if show_legend:
+        ax.legend(fontsize=FS_TICK - 2, loc="upper center",
+                  bbox_to_anchor=(0.5, -0.10),
+                  ncol=max(1, len(unique_k)), framealpha=0.95)
 
 
 def _draw_daynight_strip(ax, bin_h, is_day, bin_w):
@@ -1781,12 +1797,21 @@ def plot_pr_per_subject_combined():
         # wall-clock time first (a/b share the day/night strip), then drill
         # down into the propagation structure on the event-index axis.
         if pr3_ok:
-            h_unit = max(2.8, 0.24 * n_ch)
-            fig = plt.figure(figsize=(22, 2 * h_unit + 13.5))
+            # h_unit = HEATMAP-only height for c/e (in relative units).
+            # The c row reserves an extra ``strip_extra`` slice for the
+            # day/night sub-strip below the raw heatmap, so c's heatmap
+            # ends up the SAME physical height as e's heatmap (and d/f
+            # match because they mirror the sub-gridspec). Without this,
+            # c was ~4% shorter than e and the ▼ sz markers above c made
+            # the visual gap obvious.
+            h_unit = max(3.4, 0.28 * n_ch)
+            strip_extra = 0.18
+            fig = plt.figure(figsize=(22, 2 * h_unit + 14.5))
 
             outer = gridspec.GridSpec(
                 2, 1,
-                height_ratios=[4.2 + 4.2 + 0.32, 2 * h_unit + 1.2],
+                height_ratios=[4.2 + 4.2 + 0.32,
+                               2 * h_unit + strip_extra + 1.4],
                 left=0.06, right=0.985, top=0.93, bottom=0.05,
                 hspace=0.30,
             )
@@ -1823,19 +1848,25 @@ def plot_pr_per_subject_combined():
             else:
                 ax_dn.axis("off")
 
-            # ---- BOTTOM block: c|d (raw heatmap + rank histo)  /  e|f
-            #      (clustered heatmap + cluster curves) ----
+            # ---- BOTTOM block: c|d  →  rank colorbar (between c and e)  →  e|f
+            cbar_h = 0.20
             bot_gs = gridspec.GridSpecFromSubplotSpec(
-                2, 2, subplot_spec=outer[1],
-                width_ratios=[4.4, 0.85],
-                height_ratios=[h_unit, h_unit],
-                hspace=0.78, wspace=0.13,
+                3, 2, subplot_spec=outer[1],
+                width_ratios=[5.0, 0.6],
+                # Row 0: c|d (c heatmap slice = h_unit, matches e row).
+                # Row 1: shared horizontal colorbar for c + e.
+                # Row 2: e|f.
+                height_ratios=[h_unit + strip_extra, cbar_h, h_unit],
+                hspace=0.42, wspace=0.13,
             )
 
             # --- c: raw rank heatmap + per-event day/night sub-strip ---
+            # The right column (d) uses a MIRRORED 2-row sub-gridspec so
+            # that d's plotting region matches c's HEATMAP height exactly.
+            c_sub_ratios = [h_unit, strip_extra]
             c_sub = gridspec.GridSpecFromSubplotSpec(
                 2, 1, subplot_spec=bot_gs[0, 0],
-                height_ratios=[18, 1.4], hspace=0.06,
+                height_ratios=c_sub_ratios, hspace=0.06,
             )
             ax_c = fig.add_subplot(c_sub[0])
             display_ranks_raw = ranks[channel_order][:, display_events]
@@ -1883,21 +1914,27 @@ def plot_pr_per_subject_combined():
             style_panel(ax_c, "")
 
             # --- d: per-channel rank distribution ---
-            ax_d = fig.add_subplot(bot_gs[0, 1])
+            # Mirror c's sub-gridspec so d's drawing region has the same
+            # height as c's heatmap (and not c+strip).
+            d_sub = gridspec.GridSpecFromSubplotSpec(
+                2, 1, subplot_spec=bot_gs[0, 1],
+                height_ratios=c_sub_ratios, hspace=0.06,
+            )
+            ax_d = fig.add_subplot(d_sub[0])
             _plot_rank_histogram(
                 ax_d, ranks, bools, valid_events,
                 original_order, channel_names,
                 title="",
             )
             ax_d.text(
-                0.5, 1.05, "Per-channel rank distribution",
+                0.5, 1.05, "Per-channel ranks",
                 transform=ax_d.transAxes, ha="center", va="bottom",
-                fontsize=FS_TITLE - 3, fontweight="bold", color="#222",
+                fontsize=FS_TITLE - 4, fontweight="bold", color="#222",
             )
             style_panel(ax_d, "")
 
             # --- e: clustered rank heatmap ---
-            ax_e = fig.add_subplot(bot_gs[1, 0])
+            ax_e = fig.add_subplot(bot_gs[2, 0])
             if has_best:
                 disp_best_labels = best_labels[
                     np.isin(valid_events, display_events)]
@@ -1943,27 +1980,27 @@ def plot_pr_per_subject_combined():
             style_panel(ax_e, "")
 
             # --- f: cluster rank curves (TEMPLATE_COLORS) ---
-            ax_f = fig.add_subplot(bot_gs[1, 1])
+            ax_f = fig.add_subplot(bot_gs[2, 1])
             if has_best:
                 _plot_cluster_rank_curves_semantic(
                     ax_f, ranks, bools, valid_events, best_labels,
                     channel_order, channel_names,
-                    title="Cluster rank curves",
+                    title="Cluster ranks",
                 )
             style_panel(ax_f, "")
 
-            # --- colorbar for rank heatmaps, placed beneath panel e ---
+            # --- rank colorbar between c and e: same *length* as before (inset
+            # under e used width=32% of the heatmap column); host is left col only.
+            ax_cbar_host = fig.add_subplot(bot_gs[1, 0])
+            ax_cbar_host.set_axis_off()
             cax = inset_axes(
-                ax_e, width="100%", height="100%",
-                loc="lower left",
-                bbox_to_anchor=(0.34, -0.50, 0.32, 0.05),
-                bbox_transform=ax_e.transAxes, borderpad=0,
+                ax_cbar_host, width="32%", height="72%",
+                loc="center", borderpad=0,
             )
-            cbar = fig.colorbar(im_rank, cax=cax,
-                                orientation="horizontal")
-            cbar.set_label("rank: First → Last", fontsize=FS_TICK - 1,
-                           labelpad=2)
-            cbar.ax.tick_params(labelsize=FS_TICK - 3)
+            cbar = fig.colorbar(im_rank, cax=cax, orientation="horizontal")
+            cbar.set_label("rank: First → Last", fontsize=FS_LABEL,
+                           labelpad=4)
+            cbar.ax.tick_params(labelsize=FS_TICK - 1)
 
             # Panel letter for a sits inside its own top-left (va="top")
             # because a is tightly stacked above b — lifting it would push

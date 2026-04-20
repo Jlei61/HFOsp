@@ -6,7 +6,7 @@
 > `violin_with_scatter` / `add_significance_bracket` / `savefig_pub`，
 > `DPI_PUB=300`）。本脚本在导入时把 `FS_TICK / FS_LABEL / FS_TITLE /
 > FS_SUPTITLE / FS_PANEL_LETTER` 全部上调到 PPT 可读字号
-> （18 / 18 / 22 / 24 / 28 pt）。Day/Night 调色板换成接近黑白的
+> （20 / 20 / 24 / 26 / 30 pt）。Day/Night 调色板换成接近黑白的
 > `#EDEDED / #3D3D3D`，散点 / 连接线 / strip / label 全用同一对，
 > 严格 label-to-bar 一致。
 
@@ -268,6 +268,47 @@ suptitle 与图体之间留出大间距。
 
 ---
 
+## per_subject/{ds}_{sub}.png — PR-3 + PR-4D 单病人综合图（本轮对话迭代）
+
+> 输出位置：`results/interictal_propagation/figures/ppt/per_subject/`
+> 入口：`python scripts/plot_topic1_pr4_ppt.py --per-subject`
+
+本轮和用户反复迭代后，版式与语义合同固定为：
+
+- 上半是实时间轴：`a`（rate envelope）+ `b`（stacked count）+ 共享 day/night strip（不再重复 legend）
+- 下半是事件轴：`c` raw rank heatmap、`d` per-channel rank、`e` clustered heatmap、`f` cluster rank curves
+- `b` 不单独打 panel letter；`a/c/d/e/f` 用统一外边距 panel letters
+- `f` 取消 legend（颜色语义由 `c/e` 与 `TEMPLATE_COLORS` 已经提供）
+- `f` 的 x 轴改为按真实 rank 数据自适应收紧，去掉白边；y 轴保持通道完整覆盖
+- rank colorbar 从“e 下方”改为“c 与 e 之间”，且长度保持旧版视觉比例（热图列宽的 32%）
+- 全图字体整体放大（20/20/24/26/30），用于 PPT 直接投屏
+
+### 从综合图提炼的关键观察（记录到文档，非新增推断）
+
+- **rate 调制 + seizure onset cluster 的共现是真实存在但异质性强**：`enrich ≥ 1.5` 的 subject 为 `15/25`，其中 strict `9/25`，说明“高 rate burst 富集 seizure onset”是一个群体子模式，不是全体规律
+- **同一现象在“绝对 rate”和“相对占比”两条读数上要分开看**：
+  - 绝对率：PR-4C/PR-5 已支持 dominant template post-ictal 招募率升高
+  - 相对占比：panel d 的方向在 PR-5 合同下不稳定，不能升级为主结论
+- **最有趣患者池（优先 case-series）**：
+  - strict 且效应强：`yuquan:litengsheng`、`epilepsiae:139`、`epilepsiae:1096`、`epilepsiae:1125`、`epilepsiae:916`、`yuquan:sunyuanxin`
+  - 对照型异常：`epilepsiae:818/590/253`（enrich 高但 ρ 近 0，属于 loose）
+  - 视觉错觉样本：`epilepsiae:548`（seizure 密度高导致“看起来都压在 burst 上”，但 enrich≈1）
+
+### 需要新 metric 的现象定义（下一步，不在 PR-4 里强行下结论）
+
+当前 `enrich + ρ_dom` 足够做筛查，不足以区分“同一 burst 内的时序簇化”和“均匀高密度背景上的偶然重叠”。建议新增两类指标（先在 archive 立合同，再上主文档）：
+
+1. **Seizure-onset burst concentration index（SBCI）**
+   - 目标：量化“发作起点在少数 burst 中是否过度聚集”
+   - 形式：对 burst-level seizure count 做 concentration / inequality 统计（可用 Gini/HHI 或归一化熵）
+   - 意义：把 `548` 这类“高密度均匀分布”与“真正簇化”分开
+2. **Template recruitment imbalance slope（TRIS）**
+   - 目标：量化“靠近 seizure 时 dominant 与 non-dominant 的绝对招募斜率差”
+   - 形式：`d(rate_dom-rate_nondom)/d|Δt_to_seizure|`
+   - 意义：直接回答“是总量共升，还是 non-dominant 被额外招募”
+
+---
+
 ## Take-home (整体)
 
 > 之前贴在 fig 4 panel d 的内容，按用户要求挪到这里：
@@ -300,10 +341,10 @@ suptitle 与图体之间留出大间距。
 | 项目              | 值 |
 |-------------------|----|
 | 脊线              | 仅保留 left + bottom，1.4 pt |
-| 刻度字号          | **18 pt**（PPT 可读，比 topic 2 大） |
-| 标题字号          | **22 pt** |
-| 子图字母          | **28 pt 黑体**，左上角 |
-| suptitle          | **24 pt 黑体**（fig 1 / fig 5 不画） |
+| 刻度字号          | **20 pt**（PPT 可读，比 topic 2 大） |
+| 标题字号          | **24 pt** |
+| 子图字母          | **30 pt 黑体**，左上角 |
+| suptitle          | **26 pt 黑体**（fig 1 / fig 5 不画） |
 | dpi               | 300 |
 | 背景              | white |
 | 数据集色          | Yuquan `#6F8FA8` / Epilepsiae `#B07A6E` |
@@ -313,7 +354,7 @@ suptitle 与图体之间留出大间距。
 | 模板调色板        | blue / rust / mustard / sage / plum / dust |
 | 显著性            | bracket + `***`/`**`/`*`/`n.s.` |
 | seizure marker    | `#C0392B` red dashed line |
-| Legend            | upper right / lower right，framealpha = 0.95 |
+| Legend            | 仅在必要 panel 显示；`per_subject` 的 f 面板不重复 legend |
 
 如有需要，新增图请直接复用 `src/plot_style.py` 的常量与 helpers，**不要**
 再本地定义颜色或样式（必须 override 时如本脚本，集中在文件顶部 monkey
