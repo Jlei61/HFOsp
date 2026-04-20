@@ -5164,3 +5164,566 @@ def summarize_pr5_novel_template_gate(
         "min_state_events_for_gate": int(min_state_events_for_gate),
     }
     return summary
+
+
+# ---------------------------------------------------------------------------
+# PR-5-B: template recruitment shift
+#
+# Spec: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md §4
+# Three layers:
+#   1. ``compute_template_recruitment_shift`` — per-subject computation, runs
+#      on the same gate-eligible event pool as PR-5-A, recomputes per-window
+#      counts_by_template under the filtered pool, emits dual dominant
+#      readings (global vs per-window) and the share composition diagnostic.
+#   2. ``summarize_pr5_template_recruitment_shift`` — cohort aggregation,
+#      paired Wilcoxon + bootstrap CI on subject-level deltas. Composition
+#      diagnostic lives in a sibling field with its own schema (no
+#      ``bonferroni_pass`` key) per §4.5.3 isolation contract.
+#   3. ``_compute_pr5b_sensitivity_gate`` — reads only ``dominant_rate``;
+#      monkey-patching ``composition_diagnostic`` MUST NOT change its output.
+# ---------------------------------------------------------------------------
+
+
+PR5B_STATES: Tuple[str, ...] = ("baseline", "pre", "post")
+PR5B_PAIRS: Tuple[Tuple[str, str, str], ...] = (
+    ("pre_minus_baseline", "baseline", "pre"),
+    ("post_minus_baseline", "baseline", "post"),
+    ("post_minus_pre", "pre", "post"),
+)
+PR5B_BONFERRONI_FAMILY_SIZE = 6  # 3 pairs × 2 configs (main + auxiliary)
+
+
+def _pr5b_argmax_or_neg1(counts: np.ndarray) -> int:
+    if counts.size == 0 or int(counts.sum()) == 0:
+        return -1
+    return int(np.argmax(counts))
+
+
+def _pr5b_weighted_rate(counts: Sequence[float], hours: Sequence[float]) -> float:
+    h = float(np.sum([float(x) for x in hours if np.isfinite(x) and float(x) > 0.0]))
+    c = float(np.sum([float(x) for x in counts if np.isfinite(x)]))
+    if h <= 0.0:
+        return float("nan")
+    return c / h
+
+
+def _pr5b_weighted_share(
+    shares: Sequence[float], hours: Sequence[float]
+) -> Tuple[float, int]:
+    """Weight-average share with state_covered_hours weights.
+
+    Returns ``(share, n_eligible_windows)``. Windows with zero hours or
+    NaN share are excluded.
+    """
+    pairs = [
+        (float(s), float(h))
+        for s, h in zip(shares, hours)
+        if np.isfinite(s) and np.isfinite(h) and float(h) > 0.0
+    ]
+    if not pairs:
+        return float("nan"), 0
+    total_h = sum(h for _, h in pairs)
+    if total_h <= 0.0:
+        return float("nan"), 0
+    weighted = sum(s * h for s, h in pairs)
+    return float(weighted / total_h), int(len(pairs))
+
+
+def compute_template_recruitment_shift(
+    *,
+    cluster_labels: np.ndarray,
+    n_part_per_event: np.ndarray,
+    n_clusters: int,
+    dominant_global_id: int,
+    proximity_windows: Sequence[Dict[str, Any]],
+    min_participating_l3: int = 5,
+) -> Dict[str, Any]:
+    """PR-5-B per-subject template recruitment shift.
+
+    Reuses PR-4C P0 fix machinery (window ownership, pair usability,
+    gap-aware ``state_covered_hours``) but recomputes per-window
+    ``counts_by_template`` on the gate-eligible event pool
+    (``min_participating_l3``), so the analysis runs on exactly the same
+    events PR-5-A audited.
+
+    Two dominant definitions run in parallel (§4.3):
+
+    - ``dominant_global``: caller-supplied ``dominant_global_id`` (per-subject
+      whole-recording occupancy max, identical to PR-4D).
+    - ``dominant_per_window``: per-window argmax over **filtered** baseline
+      counts; baseline empty → fall back to argmax over the window's filtered
+      total counts; window with zero filtered events anywhere → ``-1`` (window
+      ineligible for candidate B).
+
+    Aggregation across a subject's windows is sum(counts) / sum(covered_hours)
+    for rates, and weighted average of per-window share for the composition
+    diagnostic (weight = ``state_covered_hours``, identical to the rate
+    weighting per §4.5.1 contract).
+    """
+    cluster_labels = np.asarray(cluster_labels, dtype=int)
+    n_part_per_event = np.asarray(n_part_per_event, dtype=int)
+    if cluster_labels.shape != n_part_per_event.shape:
+        raise ValueError("cluster_labels and n_part_per_event must share shape")
+
+    eligible_mask = n_part_per_event >= int(min_participating_l3)
+    n_clusters = int(n_clusters)
+    if not (0 <= int(dominant_global_id) < n_clusters):
+        raise ValueError(
+            f"dominant_global_id={dominant_global_id} out of range for n_clusters={n_clusters}"
+        )
+
+    per_window: List[Dict[str, Any]] = []
+    n_windows_used = 0
+    n_windows_total = int(len(proximity_windows))
+
+    for window in proximity_windows:
+        if not bool(window.get("usable", True)):
+            continue
+        n_windows_used += 1
+        state_indices = window.get("state_event_indices", {})
+        covered_hours = window.get("state_covered_hours", {})
+
+        state_counts: Dict[str, np.ndarray] = {}
+        state_total: Dict[str, int] = {}
+        for state in PR5B_STATES:
+            raw = np.asarray(state_indices.get(state, []), dtype=int)
+            if raw.size == 0:
+                state_counts[state] = np.zeros(n_clusters, dtype=int)
+                state_total[state] = 0
+                continue
+            keep = raw[eligible_mask[raw]] if raw.size else raw
+            if keep.size == 0:
+                state_counts[state] = np.zeros(n_clusters, dtype=int)
+                state_total[state] = 0
+                continue
+            state_counts[state] = np.bincount(
+                cluster_labels[keep], minlength=n_clusters
+            ).astype(int)
+            state_total[state] = int(keep.size)
+
+        baseline_counts = state_counts["baseline"]
+        if int(baseline_counts.sum()) > 0:
+            dom_window_id = _pr5b_argmax_or_neg1(baseline_counts)
+        else:
+            total_counts = (
+                state_counts["baseline"]
+                + state_counts["pre"]
+                + state_counts["post"]
+            )
+            dom_window_id = _pr5b_argmax_or_neg1(total_counts)
+
+        per_window.append(
+            {
+                "seizure_id": int(window.get("seizure_id", -1)),
+                "seizure_time": float(window.get("seizure_time", float("nan"))),
+                "state_covered_hours": {
+                    s: float(covered_hours.get(s, float("nan"))) for s in PR5B_STATES
+                },
+                "state_total_counts_filtered": {
+                    s: int(state_total[s]) for s in PR5B_STATES
+                },
+                "state_counts_dom_global": {
+                    s: int(state_counts[s][int(dominant_global_id)]) for s in PR5B_STATES
+                },
+                "state_counts_dom_window": {
+                    s: int(state_counts[s][dom_window_id]) if dom_window_id >= 0 else 0
+                    for s in PR5B_STATES
+                },
+                "state_counts_nondom_global": {
+                    s: int(state_total[s] - state_counts[s][int(dominant_global_id)])
+                    for s in PR5B_STATES
+                },
+                "dom_window_id": int(dom_window_id),
+                "_state_counts_full": {s: state_counts[s].tolist() for s in PR5B_STATES},
+            }
+        )
+
+    weighted_per_state: Dict[str, Dict[str, float]] = {
+        "dom_global_rate_per_hour": {},
+        "dom_window_rate_per_hour": {},
+        "nondom_global_rate_per_hour": {},
+        "dom_global_share": {},
+    }
+    share_state_n_eligible_windows: Dict[str, int] = {}
+
+    for state in PR5B_STATES:
+        h_all = [w["state_covered_hours"][state] for w in per_window]
+        c_dom_global = [w["state_counts_dom_global"][state] for w in per_window]
+        c_dom_window = [
+            w["state_counts_dom_window"][state]
+            for w in per_window
+            if w["dom_window_id"] >= 0
+        ]
+        h_dom_window = [
+            w["state_covered_hours"][state]
+            for w in per_window
+            if w["dom_window_id"] >= 0
+        ]
+        c_nondom = [w["state_counts_nondom_global"][state] for w in per_window]
+
+        weighted_per_state["dom_global_rate_per_hour"][state] = _pr5b_weighted_rate(
+            c_dom_global, h_all
+        )
+        weighted_per_state["dom_window_rate_per_hour"][state] = _pr5b_weighted_rate(
+            c_dom_window, h_dom_window
+        )
+        weighted_per_state["nondom_global_rate_per_hour"][state] = _pr5b_weighted_rate(
+            c_nondom, h_all
+        )
+
+        share_per_window: List[float] = []
+        share_hours: List[float] = []
+        for w in per_window:
+            tot = w["state_total_counts_filtered"][state]
+            h = w["state_covered_hours"][state]
+            if tot <= 0 or not np.isfinite(h) or h <= 0.0:
+                continue
+            share_per_window.append(w["state_counts_dom_global"][state] / float(tot))
+            share_hours.append(h)
+        share_val, n_share = _pr5b_weighted_share(share_per_window, share_hours)
+        weighted_per_state["dom_global_share"][state] = share_val
+        share_state_n_eligible_windows[state] = int(n_share)
+
+    deltas: Dict[str, Dict[str, float]] = {
+        metric: {} for metric in (
+            "dom_global_rate", "dom_window_rate", "nondom_global_rate", "dom_global_share"
+        )
+    }
+    metric_to_key = {
+        "dom_global_rate": "dom_global_rate_per_hour",
+        "dom_window_rate": "dom_window_rate_per_hour",
+        "nondom_global_rate": "nondom_global_rate_per_hour",
+        "dom_global_share": "dom_global_share",
+    }
+    for metric, weighted_key in metric_to_key.items():
+        per_state = weighted_per_state[weighted_key]
+        for pair_name, state_a, state_b in PR5B_PAIRS:
+            a = per_state.get(state_a, float("nan"))
+            b = per_state.get(state_b, float("nan"))
+            deltas[metric][pair_name] = (
+                float(b - a) if np.isfinite(a) and np.isfinite(b) else float("nan")
+            )
+
+    share_pair_eligible: Dict[str, bool] = {}
+    for pair_name, state_a, state_b in PR5B_PAIRS:
+        share_pair_eligible[pair_name] = bool(
+            share_state_n_eligible_windows[state_a] >= 1
+            and share_state_n_eligible_windows[state_b] >= 1
+        )
+
+    dom_window_ids = [w["dom_window_id"] for w in per_window]
+    matched = sum(1 for wid in dom_window_ids if wid == int(dominant_global_id))
+    dom_agreement = (
+        float(matched) / float(len(dom_window_ids)) if dom_window_ids else float("nan")
+    )
+
+    for w in per_window:
+        w.pop("_state_counts_full", None)
+
+    return {
+        "n_clusters": int(n_clusters),
+        "dom_global_id": int(dominant_global_id),
+        "min_participating_l3": int(min_participating_l3),
+        "n_windows_total": int(n_windows_total),
+        "n_windows_used": int(n_windows_used),
+        "per_window": per_window,
+        "weighted_per_state": weighted_per_state,
+        "deltas": deltas,
+        "share_state_n_eligible_windows": share_state_n_eligible_windows,
+        "share_pair_eligible": share_pair_eligible,
+        "dom_window_ids_per_window": [int(w) for w in dom_window_ids],
+        "dom_agreement": float(dom_agreement) if np.isfinite(dom_agreement) else float("nan"),
+    }
+
+
+def _pr5b_bootstrap_median_ci(
+    deltas: Sequence[float],
+    *,
+    n_boot: int,
+    seed: int,
+    alpha: float = 0.05,
+) -> Tuple[float, float]:
+    arr = np.asarray([float(x) for x in deltas if np.isfinite(x)], dtype=float)
+    if arr.size == 0:
+        return float("nan"), float("nan")
+    if arr.size == 1:
+        return float(arr[0]), float(arr[0])
+    rng = np.random.default_rng(int(seed))
+    idx = rng.integers(0, arr.size, size=(int(n_boot), arr.size))
+    medians = np.median(arr[idx], axis=1)
+    lo = float(np.percentile(medians, 100.0 * alpha / 2.0))
+    hi = float(np.percentile(medians, 100.0 * (1.0 - alpha / 2.0)))
+    return lo, hi
+
+
+def _pr5b_pair_summary(
+    deltas: Sequence[float],
+    *,
+    n_boot: int,
+    seed: int,
+    bonferroni_alpha: Optional[float] = None,
+) -> Dict[str, Any]:
+    arr = np.asarray([float(x) for x in deltas if np.isfinite(x)], dtype=float)
+    n = int(arr.size)
+    median, p, n_used = _wilcoxon_safe(arr.tolist())
+    sign_p, sign_n = _sign_test_safe(arr.tolist())
+    n_pos = int(np.sum(arr > 0))
+    n_neg = int(np.sum(arr < 0))
+    ci_lo, ci_hi = _pr5b_bootstrap_median_ci(arr.tolist(), n_boot=n_boot, seed=seed)
+    out: Dict[str, Any] = {
+        "n": n,
+        "n_used_wilcoxon": int(n_used),
+        "median_delta": float(median) if np.isfinite(median) else float("nan"),
+        "wilcoxon_p": float(p) if np.isfinite(p) else float("nan"),
+        "sign_test_p": float(sign_p) if np.isfinite(sign_p) else float("nan"),
+        "sign_test_n": int(sign_n),
+        "n_positive": n_pos,
+        "n_negative": n_neg,
+        "ci95_lo": float(ci_lo) if np.isfinite(ci_lo) else float("nan"),
+        "ci95_hi": float(ci_hi) if np.isfinite(ci_hi) else float("nan"),
+    }
+    if bonferroni_alpha is not None:
+        out["bonferroni_alpha"] = float(bonferroni_alpha)
+        out["bonferroni_pass"] = bool(
+            np.isfinite(p) and float(p) < float(bonferroni_alpha)
+        )
+    return out
+
+
+def _pr5b_share_pair_summary(
+    records: Sequence[Dict[str, Any]],
+    pair_name: str,
+    *,
+    n_boot: int,
+    seed: int,
+) -> Dict[str, Any]:
+    deltas: List[float] = []
+    n_ineligible = 0
+    for rec in records:
+        if not bool(rec.get("share_pair_eligible", {}).get(pair_name, False)):
+            n_ineligible += 1
+            continue
+        d = rec.get("deltas", {}).get("dom_global_share", {}).get(pair_name)
+        if d is None or not np.isfinite(float(d)):
+            n_ineligible += 1
+            continue
+        deltas.append(float(d))
+    arr = np.asarray(deltas, dtype=float)
+    median, p, n_used = _wilcoxon_safe(arr.tolist())
+    sign_p, sign_n = _sign_test_safe(arr.tolist())
+    n_pos = int(np.sum(arr > 0))
+    n_neg = int(np.sum(arr < 0))
+    ci_lo, ci_hi = _pr5b_bootstrap_median_ci(arr.tolist(), n_boot=n_boot, seed=seed)
+    a_priori_consistent = (
+        n_neg
+        if pair_name in ("pre_minus_baseline", "post_minus_baseline")
+        else None
+    )
+    return {
+        "n": int(arr.size),
+        "n_ineligible": int(n_ineligible),
+        "n_used_wilcoxon": int(n_used),
+        "median_delta_share": float(median) if np.isfinite(median) else float("nan"),
+        "wilcoxon_p": float(p) if np.isfinite(p) else float("nan"),
+        "sign_test_p": float(sign_p) if np.isfinite(sign_p) else float("nan"),
+        "sign_test_n": int(sign_n),
+        "n_positive": n_pos,
+        "n_negative": n_neg,
+        "direction_consistent_count": (
+            int(a_priori_consistent) if a_priori_consistent is not None else None
+        ),
+        "ci95_lo": float(ci_lo) if np.isfinite(ci_lo) else float("nan"),
+        "ci95_hi": float(ci_hi) if np.isfinite(ci_hi) else float("nan"),
+    }
+
+
+def summarize_pr5_template_recruitment_shift(
+    per_subject_records_by_config: Dict[str, Sequence[Dict[str, Any]]],
+    *,
+    n_boot: int = 2000,
+    bootstrap_seed: int = 42,
+    bonferroni_family_size: int = PR5B_BONFERRONI_FAMILY_SIZE,
+    nominal_alpha: float = 0.05,
+) -> Dict[str, Any]:
+    """Cohort-level PR-5-B summary (§4.4 + §4.5).
+
+    For each window config (``main`` / ``auxiliary``) emit:
+
+    - ``dominant_rate``: candidate A (``dominant_global``) and candidate B
+      (``dominant_per_window``) per-pair Wilcoxon + sign test + bootstrap
+      median CI + Bonferroni decision (alpha = ``nominal_alpha``/family_size).
+    - ``composition_diagnostic.share``: subject-level paired Wilcoxon on
+      dominant share deltas; **no** ``bonferroni_pass`` field per §4.5.3
+      isolation contract. Subjects with ``share_pair_eligible[pair]=False``
+      are dropped from the test and counted in ``n_ineligible``.
+
+    Sensitivity gate is **not** computed here; call
+    :func:`_compute_pr5b_sensitivity_gate` separately so it can be unit-
+    tested for isolation from ``composition_diagnostic``.
+    """
+    bonferroni_alpha = float(nominal_alpha) / float(bonferroni_family_size)
+    summary: Dict[str, Any] = {
+        "dominant_rate_weight_key": "state_covered_hours",
+        "composition_diagnostic_weight_key": "state_covered_hours",
+        "thresholds": {
+            "nominal_alpha": float(nominal_alpha),
+            "bonferroni_family_size": int(bonferroni_family_size),
+            "bonferroni_alpha": float(bonferroni_alpha),
+            "n_boot": int(n_boot),
+            "bootstrap_seed": int(bootstrap_seed),
+        },
+    }
+
+    candidate_metric_map = {
+        "candidate_a_global": "dom_global_rate",
+        "candidate_b_window": "dom_window_rate",
+    }
+
+    for config_name, records in per_subject_records_by_config.items():
+        records = list(records)
+
+        dominant_rate: Dict[str, Dict[str, Any]] = {}
+        for cand_name, metric_key in candidate_metric_map.items():
+            cand: Dict[str, Any] = {}
+            for pair_name, _, _ in PR5B_PAIRS:
+                deltas = [
+                    rec.get("deltas", {}).get(metric_key, {}).get(pair_name)
+                    for rec in records
+                ]
+                deltas = [float(d) for d in deltas if d is not None and np.isfinite(float(d))]
+                seed = (
+                    int(bootstrap_seed)
+                    + 17 * (1 + sum(ord(c) for c in cand_name))
+                    + 31 * (1 + sum(ord(c) for c in pair_name))
+                    + 7 * (1 + sum(ord(c) for c in config_name))
+                )
+                cand[pair_name] = _pr5b_pair_summary(
+                    deltas,
+                    n_boot=int(n_boot),
+                    seed=seed,
+                    bonferroni_alpha=bonferroni_alpha,
+                )
+            dominant_rate[cand_name] = cand
+
+        composition: Dict[str, Dict[str, Any]] = {"share": {}}
+        for pair_name, _, _ in PR5B_PAIRS:
+            seed = (
+                int(bootstrap_seed)
+                + 41 * (1 + sum(ord(c) for c in pair_name))
+                + 13 * (1 + sum(ord(c) for c in config_name))
+            )
+            composition["share"][pair_name] = _pr5b_share_pair_summary(
+                records, pair_name, n_boot=int(n_boot), seed=seed
+            )
+
+        summary[config_name] = {
+            "config_name": config_name,
+            "n_subjects": int(len(records)),
+            "n_subjects_dom_agreement_lt_half": int(
+                sum(
+                    1 for r in records
+                    if np.isfinite(float(r.get("dom_agreement", float("nan"))))
+                    and float(r["dom_agreement"]) < 0.5
+                )
+            ),
+            "dominant_rate": dominant_rate,
+            "composition_diagnostic": composition,
+        }
+
+    summary["sensitivity"] = _compute_pr5b_sensitivity_gate(summary)
+    return summary
+
+
+def _compute_pr5b_sensitivity_gate(summary: Dict[str, Any]) -> Dict[str, Any]:
+    """PR-5-B §4.4 sensitivity gate, derived **only** from ``dominant_rate``.
+
+    Strong  : candidate A post_vs_baseline same direction in main + aux,
+              at least one config Bonferroni passes and the other reaches
+              nominal 0.05; AND candidate B post_vs_baseline in main reaches
+              nominal 0.05 with same direction.
+    Medium  : candidate A satisfies above but candidate B does not.
+    Descriptive : candidate A fails.
+
+    Reads only ``summary["main"]["dominant_rate"]`` and
+    ``summary["auxiliary"]["dominant_rate"]``; mutating
+    ``composition_diagnostic`` cannot change the output.
+    """
+    nominal_alpha = float(
+        summary.get("thresholds", {}).get("nominal_alpha", 0.05)
+    )
+
+    def _entry(config: str, candidate: str) -> Dict[str, Any]:
+        return (
+            summary.get(config, {})
+            .get("dominant_rate", {})
+            .get(candidate, {})
+            .get("post_minus_baseline", {})
+        )
+
+    main_a = _entry("main", "candidate_a_global")
+    aux_a = _entry("auxiliary", "candidate_a_global")
+    main_b = _entry("main", "candidate_b_window")
+
+    def _sign(x: Any) -> int:
+        try:
+            v = float(x)
+        except (TypeError, ValueError):
+            return 0
+        if not np.isfinite(v):
+            return 0
+        return int(np.sign(v))
+
+    sign_main_a = _sign(main_a.get("median_delta"))
+    sign_aux_a = _sign(aux_a.get("median_delta"))
+    sign_main_b = _sign(main_b.get("median_delta"))
+
+    same_direction_a = sign_main_a != 0 and sign_main_a == sign_aux_a
+
+    main_a_bonf = bool(main_a.get("bonferroni_pass", False))
+    aux_a_bonf = bool(aux_a.get("bonferroni_pass", False))
+
+    def _nominal(p: Any) -> bool:
+        try:
+            v = float(p)
+        except (TypeError, ValueError):
+            return False
+        return bool(np.isfinite(v) and v < nominal_alpha)
+
+    main_a_nom = _nominal(main_a.get("wilcoxon_p"))
+    aux_a_nom = _nominal(aux_a.get("wilcoxon_p"))
+    main_b_nom = _nominal(main_b.get("wilcoxon_p"))
+
+    candidate_a_strong = (
+        same_direction_a
+        and (main_a_bonf or aux_a_bonf)
+        and (
+            (main_a_bonf and aux_a_nom)
+            or (aux_a_bonf and main_a_nom)
+            or (main_a_bonf and aux_a_bonf)
+        )
+    )
+    candidate_b_supports = (
+        candidate_a_strong
+        and main_b_nom
+        and sign_main_b == sign_main_a
+    )
+
+    overall_strong = bool(candidate_a_strong and candidate_b_supports)
+    overall_medium = bool(candidate_a_strong and not candidate_b_supports)
+    overall_descriptive = bool(not candidate_a_strong)
+
+    return {
+        "overall_strong": overall_strong,
+        "overall_medium": overall_medium,
+        "overall_descriptive": overall_descriptive,
+        "candidate_a_strong": bool(candidate_a_strong),
+        "candidate_b_supports": bool(candidate_b_supports),
+        "candidate_a_main_sign": int(sign_main_a),
+        "candidate_a_aux_sign": int(sign_aux_a),
+        "candidate_b_main_sign": int(sign_main_b),
+        "main_a_bonferroni_pass": bool(main_a_bonf),
+        "aux_a_bonferroni_pass": bool(aux_a_bonf),
+        "main_a_nominal_pass": bool(main_a_nom),
+        "aux_a_nominal_pass": bool(aux_a_nom),
+        "main_b_nominal_pass": bool(main_b_nom),
+    }

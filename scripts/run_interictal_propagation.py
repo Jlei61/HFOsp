@@ -6,7 +6,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -14,6 +14,7 @@ from src.interictal_propagation import (  # noqa: E402
     SEIZURE_PROXIMITY_CONFIGS,
     _build_seizure_proximity_windows,
     _compute_relative_lag_matrix,
+    _intersect_seconds,
     _valid_event_indices,
     assign_events_to_templates,
     build_cluster_templates,
@@ -21,6 +22,7 @@ from src.interictal_propagation import (  # noqa: E402
     compute_novel_template_gate,
     compute_rate_state_coupling,
     compute_seizure_proximity_coupling,
+    compute_template_recruitment_shift,
     validate_absolute_lag_clustering,
     compute_temporal_cluster_dynamics,
     compute_time_split_reproducibility,
@@ -28,6 +30,7 @@ from src.interictal_propagation import (  # noqa: E402
     load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
     summarize_pr5_novel_template_gate,
+    summarize_pr5_template_recruitment_shift,
     summarize_propagation_cohort,
 )
 from src.event_periodicity import load_seizure_times  # noqa: E402
@@ -1199,6 +1202,280 @@ def _run_pr5_gate(
     )
 
 
+def _run_pr5_recruitment(
+    datasets_list: List,
+    per_subject_dir: Path,
+    *,
+    min_state_events_for_gate: int = 30,
+    n_boot: int = 2000,
+    bootstrap_seed: int = 42,
+) -> None:
+    """PR-5-B: template recruitment shift (main + auxiliary configs).
+
+    Hard prerequisites (§2.3 fail-fast):
+
+    1. ``pr5a_novel_template_gate.json`` must exist (PR-5-A run).
+    2. ``cohort.overall_pass`` must be ``True`` (gate PASSED in both configs).
+
+    Either condition unmet → ``SystemExit(2)`` and **no** PR-5-B artifact is
+    written, so a stale recruitment JSON cannot survive a gate FAIL by
+    accident.
+    """
+    import numpy as np
+
+    gate_json_path = RESULTS_DIR / "pr5a_novel_template_gate.json"
+    if not gate_json_path.exists():
+        logger.error(
+            "PR-5-B abort: gate JSON missing at %s. Run --pr5-gate first.",
+            gate_json_path,
+        )
+        raise SystemExit(2)
+    try:
+        with open(gate_json_path) as f:
+            gate_doc = json.load(f)
+    except Exception as exc:
+        logger.error("PR-5-B abort: failed to load gate JSON: %s", exc)
+        raise SystemExit(2)
+    cohort_gate = gate_doc.get("cohort", {}) if isinstance(gate_doc, dict) else {}
+    if not bool(cohort_gate.get("overall_pass", False)):
+        logger.error(
+            "PR-5-B abort: gate overall_pass=%s. PR-5-B not allowed; refusing"
+            " to write recruitment artifact.",
+            cohort_gate.get("overall_pass"),
+        )
+        raise SystemExit(2)
+    retained_subject_keys_by_config = _pr5a_retained_subject_keys_by_config(gate_doc)
+
+    pr5b_dir = per_subject_dir / "pr5b"
+    pr5b_dir.mkdir(parents=True, exist_ok=True)
+
+    config_records: Dict[str, List[Dict[str, Any]]] = {
+        "main": [],
+        "auxiliary": [],
+    }
+    per_subject_archive: Dict[str, Dict[str, Any]] = {}
+
+    for dataset, root, subjects, _soz_map in datasets_list:
+        for subject in subjects:
+            key = f"{dataset}/{subject}"
+            json_path = per_subject_dir / f"{dataset}_{subject}.json"
+            if not json_path.exists():
+                logger.warning("PR-5-B skip %s: PR-1 JSON missing", key)
+                continue
+            with open(json_path) as f:
+                base = json.load(f)
+            ac = base.get("adaptive_cluster", {})
+            if "error" in ac or "labels" not in ac:
+                logger.warning("PR-5-B skip %s: adaptive_cluster missing/errored", key)
+                continue
+
+            subject_dir = (
+                root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            )
+            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+                logger.warning("PR-5-B skip %s: raw lagPat dir missing", key)
+                continue
+
+            loaded = load_subject_propagation_events(subject_dir)
+            valid_events = _valid_event_indices(loaded["bools"], min_participating=3)
+            labels = np.asarray(ac["labels"], dtype=int)
+            chosen_k = int(ac["chosen_k"])
+            if valid_events.size != labels.size:
+                logger.warning(
+                    "PR-5-B skip %s: label/valid mismatch (labels=%d valid=%d)",
+                    key, labels.size, valid_events.size,
+                )
+                continue
+
+            v_times = loaded["event_abs_times"][valid_events]
+            v_bools = loaded["bools"][:, valid_events]
+
+            n_part = np.sum(v_bools > 0, axis=0).astype(int)
+
+            counts_full = np.bincount(labels, minlength=chosen_k).astype(int)
+            if int(counts_full.sum()) == 0:
+                logger.warning("PR-5-B skip %s: zero events post valid filter", key)
+                continue
+            dominant_global_id = int(np.argmax(counts_full))
+
+            seizure_times = load_seizure_times(subject, dataset)
+            if not seizure_times:
+                logger.warning("PR-5-B skip %s: no seizure times", key)
+                continue
+
+            block_ranges = loaded.get("block_time_ranges")
+            coverage_ranges = (
+                [(float(lo), float(hi)) for lo, hi in block_ranges]
+                if block_ranges is not None else None
+            )
+
+            subject_payload: Dict[str, Any] = {
+                "dataset": dataset,
+                "subject": subject,
+                "chosen_k": chosen_k,
+                "stable_k": int(ac.get("stable_k", chosen_k) or chosen_k),
+                "dom_global_id": dominant_global_id,
+                "n_seizures_loaded": int(len(seizure_times)),
+                "n_valid_events": int(valid_events.size),
+                "configs": {},
+            }
+
+            for config_name, cfg in SEIZURE_PROXIMITY_CONFIGS.items():
+                proximity = _build_seizure_proximity_windows(
+                    v_times,
+                    seizure_times,
+                    baseline_hours=cfg["baseline_hours"],
+                    pre_ictal_hours=cfg["pre_ictal_hours"],
+                    post_ictal_hours=cfg["post_ictal_hours"],
+                )
+
+                state_ranges = {
+                    "baseline": cfg["baseline_hours"],
+                    "pre": cfg["pre_ictal_hours"],
+                    "post": cfg["post_ictal_hours"],
+                }
+                windows_with_hours: List[Dict[str, Any]] = []
+                for w in proximity["usable_windows"]:
+                    sz_t = float(w["seizure_time"])
+                    covered = {}
+                    for state_name, (lo, hi) in state_ranges.items():
+                        t0 = sz_t + float(lo) * 3600.0
+                        t1 = sz_t + float(hi) * 3600.0
+                        if coverage_ranges is None:
+                            covered[state_name] = float(hi - lo)
+                        else:
+                            covered[state_name] = (
+                                _intersect_seconds(t0, t1, coverage_ranges) / 3600.0
+                            )
+                    enriched = dict(w)
+                    enriched["state_covered_hours"] = covered
+                    windows_with_hours.append(enriched)
+
+                shift = compute_template_recruitment_shift(
+                    cluster_labels=labels,
+                    n_part_per_event=n_part,
+                    n_clusters=chosen_k,
+                    dominant_global_id=dominant_global_id,
+                    proximity_windows=windows_with_hours,
+                    min_participating_l3=5,
+                )
+                shift["n_seizures_usable"] = int(len(windows_with_hours))
+                shift["window_hours"] = proximity["state_ranges_hours"]
+                shift["state_event_counts_window_total"] = (
+                    proximity["state_event_counts"]
+                )
+                shift["retained_for_pr5b"] = bool(
+                    key in retained_subject_keys_by_config.get(config_name, set())
+                )
+
+                cohort_record = {
+                    "subject_id": subject,
+                    "dataset": dataset,
+                    "config_name": config_name,
+                    "dom_global_id": shift["dom_global_id"],
+                    "dom_window_ids_per_window": shift["dom_window_ids_per_window"],
+                    "dom_agreement": shift["dom_agreement"],
+                    "n_windows_used": shift["n_windows_used"],
+                    "n_windows_total": shift["n_windows_total"],
+                    "n_seizures_usable": shift["n_seizures_usable"],
+                    "min_participating_l3": shift["min_participating_l3"],
+                    "n_clusters": shift["n_clusters"],
+                    "weighted_per_state": shift["weighted_per_state"],
+                    "deltas": shift["deltas"],
+                    "share_state_n_eligible_windows": shift["share_state_n_eligible_windows"],
+                    "share_pair_eligible": shift["share_pair_eligible"],
+                }
+                if shift["retained_for_pr5b"]:
+                    config_records[config_name].append(cohort_record)
+                subject_payload["configs"][config_name] = shift
+
+            per_subject_archive[key] = subject_payload
+            _save(subject_payload, pr5b_dir / f"{dataset}_{subject}.json")
+            logger.info(
+                "PR-5-B %s: dom_global_id=%d  windows main/aux=%d/%d  agreement main/aux=%.2f/%.2f",
+                key, dominant_global_id,
+                subject_payload["configs"]["main"]["n_windows_used"],
+                subject_payload["configs"]["auxiliary"]["n_windows_used"],
+                subject_payload["configs"]["main"]["dom_agreement"]
+                if np.isfinite(subject_payload["configs"]["main"]["dom_agreement"]) else float("nan"),
+                subject_payload["configs"]["auxiliary"]["dom_agreement"]
+                if np.isfinite(subject_payload["configs"]["auxiliary"]["dom_agreement"]) else float("nan"),
+            )
+
+    cohort_summary = summarize_pr5_template_recruitment_shift(
+        config_records,
+        n_boot=int(n_boot),
+        bootstrap_seed=int(bootstrap_seed),
+    )
+
+    artifact_root = RESULTS_DIR / "pr5b_recruitment_shift.json"
+    _save(
+        {"per_subject": config_records, "cohort": cohort_summary},
+        artifact_root,
+    )
+
+    cohort_path = RESULTS_DIR / "pr1_cohort_summary.json"
+    cohort_doc: Dict[str, Any] = {}
+    if cohort_path.exists():
+        try:
+            with open(cohort_path) as f:
+                loaded_doc = json.load(f)
+            if isinstance(loaded_doc, dict):
+                cohort_doc = loaded_doc
+        except Exception as exc:
+            logger.warning("PR-5-B: failed to merge cohort summary: %s", exc)
+    cohort_doc["template_recruitment_shift"] = cohort_summary
+    _save(cohort_doc, cohort_path)
+
+    sens = cohort_summary.get("sensitivity", {})
+    logger.info(
+        "PR-5-B done. n_subjects(main/aux)=%d/%d  sensitivity strong=%s medium=%s descriptive=%s",
+        cohort_summary.get("main", {}).get("n_subjects", 0),
+        cohort_summary.get("auxiliary", {}).get("n_subjects", 0),
+        sens.get("overall_strong"),
+        sens.get("overall_medium"),
+        sens.get("overall_descriptive"),
+    )
+
+
+def _pr5a_retained_subject_keys_by_config(
+    gate_doc: Dict[str, Any],
+) -> Dict[str, Set[str]]:
+    """Return config-specific retained subject keys from PR-5-A artifact.
+
+    PR-5-B must inherit the exact PR-5-A retained subset per config. The gate
+    artifact stores every processed subject in ``per_subject[config]`` and the
+    config-specific exclusions in ``cohort[config].ineligible_subjects``.
+    """
+    per_subject = gate_doc.get("per_subject", {}) if isinstance(gate_doc, dict) else {}
+    cohort = gate_doc.get("cohort", {}) if isinstance(gate_doc, dict) else {}
+    retained: Dict[str, Set[str]] = {}
+
+    for config_name in SEIZURE_PROXIMITY_CONFIGS:
+        all_keys: Set[str] = set()
+        for rec in per_subject.get(config_name, []):
+            if not isinstance(rec, dict):
+                continue
+            dataset = rec.get("dataset")
+            subject = rec.get("subject_id") or rec.get("subject")
+            if dataset and subject:
+                all_keys.add(f"{dataset}/{subject}")
+
+        ineligible_keys: Set[str] = set()
+        config_cohort = cohort.get(config_name, {})
+        if isinstance(config_cohort, dict):
+            for rec in config_cohort.get("ineligible_subjects", []):
+                if not isinstance(rec, dict):
+                    continue
+                dataset = rec.get("dataset")
+                subject = rec.get("subject_id") or rec.get("subject")
+                if dataset and subject:
+                    ineligible_keys.add(f"{dataset}/{subject}")
+
+        retained[config_name] = all_keys - ineligible_keys
+    return retained
+
+
 def _build_parser() -> argparse.ArgumentParser:
     """Build the CLI argument parser.
 
@@ -1236,6 +1513,17 @@ def _build_parser() -> argparse.ArgumentParser:
                             " Hard prerequisite for PR-5-B; per-subject results in"
                             " results/interictal_propagation/per_subject/pr5a/."
                         ))
+    parser.add_argument("--pr5-recruitment", action="store_true",
+                        help=(
+                            "PR-5-B template recruitment shift (main + auxiliary configs)."
+                            " Requires --pr5-gate to have produced overall_pass=True"
+                            " in pr5a_novel_template_gate.json; aborts with non-zero"
+                            " exit code otherwise."
+                        ))
+    parser.add_argument("--pr5-recruitment-n-boot", type=int, default=2000,
+                        help="PR-5-B subject-level cluster bootstrap iterations (default 2000).")
+    parser.add_argument("--pr5-recruitment-bootstrap-seed", type=int, default=42,
+                        help="PR-5-B bootstrap seed (default 42).")
     parser.add_argument(
         "--pr5-min-state-events",
         type=int,
@@ -1378,6 +1666,16 @@ def main() -> None:
             datasets_list,
             per_subject_dir,
             min_state_events_for_gate=args.pr5_min_state_events,
+        )
+        return
+
+    if args.pr5_recruitment:
+        _run_pr5_recruitment(
+            datasets_list,
+            per_subject_dir,
+            min_state_events_for_gate=args.pr5_min_state_events,
+            n_boot=args.pr5_recruitment_n_boot,
+            bootstrap_seed=args.pr5_recruitment_bootstrap_seed,
         )
         return
 

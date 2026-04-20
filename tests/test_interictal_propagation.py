@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -7,6 +8,7 @@ import numpy as np
 
 from src.interictal_propagation import (
     _center_rank_matrix,
+    _compute_pr5b_sensitivity_gate,
     _valid_event_indices,
     assign_events_to_templates,
     build_cluster_templates,
@@ -17,12 +19,14 @@ from src.interictal_propagation import (
     compute_seizure_proximity_coupling,
     compute_source_node_diagnostic,
     compute_stereotypy_by_nparticipating,
+    compute_template_recruitment_shift,
     compute_temporal_cluster_dynamics,
     compute_time_split_reproducibility,
     detect_propagation_mixture,
     load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
     summarize_pr5_novel_template_gate,
+    summarize_pr5_template_recruitment_shift,
     summarize_propagation_cohort,
     validate_absolute_lag_clustering,
 )
@@ -1952,3 +1956,624 @@ def test_pr5_gate_summary_fails_when_gap_is_significantly_lower() -> None:
     assert main_gap["harmful"] is True
     assert out["main"]["gate_pass"] is False
     assert out["overall_pass"] is False
+
+
+# =============================================================================
+# PR-5-B: compute_template_recruitment_shift
+#
+# Spec: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md §4 / §5.3
+# tests #4-#9. Tests #1-#3 above already cover PR-5-A gate; PR-5-B adds 6 tests
+# for: same gate-eligible event pool, gap-aware coverage, multi-window weighting,
+# runner gate-prerequisite check, dual dominant definitions, and composition
+# diagnostic isolation from main sensitivity family.
+# =============================================================================
+
+
+def _pr5b_synthetic_window(
+    *,
+    seizure_id: int,
+    state_event_indices: Dict[str, np.ndarray],
+    state_covered_hours: Dict[str, float],
+) -> Dict[str, Any]:
+    counts = {name: int(np.asarray(idx).size) for name, idx in state_event_indices.items()}
+    return {
+        "seizure_id": int(seizure_id),
+        "seizure_time": float(seizure_id) * 3600.0,
+        "state_event_indices": {
+            name: np.asarray(idx, dtype=int) for name, idx in state_event_indices.items()
+        },
+        "state_event_counts": counts,
+        "pair_usability": {
+            "pre_vs_baseline": counts["baseline"] > 0 and counts["pre"] > 0,
+            "post_vs_pre": counts["pre"] > 0 and counts["post"] > 0,
+            "post_vs_baseline": counts["baseline"] > 0 and counts["post"] > 0,
+        },
+        "state_covered_hours": {k: float(v) for k, v in state_covered_hours.items()},
+        "usable": True,
+    }
+
+
+def test_pr5_recruitment_uses_same_l3_eligible_event_pool_as_gate() -> None:
+    """§4.2 / spec test #4: events with n_part < min_participating_l3 must be
+    excluded from per-window counts_by_template, exactly mirroring the PR-5-A
+    gate's eligibility mask."""
+    n_clusters = 3
+    n_per_state_eligible = 10
+    n_per_state_bad = 7
+
+    cluster_labels: List[int] = []
+    n_part: List[int] = []
+    for _state in range(3):
+        cluster_labels.extend([0] * 6 + [1] * 3 + [2] * 1)
+        n_part.extend([5] * n_per_state_eligible)
+        cluster_labels.extend([2] * n_per_state_bad)
+        n_part.extend([3] * n_per_state_bad)
+    cluster_labels_arr = np.asarray(cluster_labels, dtype=int)
+    n_part_arr = np.asarray(n_part, dtype=int)
+
+    per_state_total = n_per_state_eligible + n_per_state_bad
+    state_indices = {
+        "baseline": np.arange(0, per_state_total, dtype=int),
+        "pre": np.arange(per_state_total, 2 * per_state_total, dtype=int),
+        "post": np.arange(2 * per_state_total, 3 * per_state_total, dtype=int),
+    }
+    window = _pr5b_synthetic_window(
+        seizure_id=0,
+        state_event_indices=state_indices,
+        state_covered_hours={"baseline": 3.0, "pre": 0.75, "post": 0.75},
+    )
+
+    out = compute_template_recruitment_shift(
+        cluster_labels=cluster_labels_arr,
+        n_part_per_event=n_part_arr,
+        n_clusters=n_clusters,
+        dominant_global_id=0,
+        proximity_windows=[window],
+        min_participating_l3=5,
+    )
+
+    pw = out["per_window"][0]
+    for state in ("baseline", "pre", "post"):
+        assert pw["state_total_counts_filtered"][state] == n_per_state_eligible
+        assert pw["state_counts_dom_global"][state] == 6
+    expected_baseline_rate = 6.0 / 3.0
+    assert abs(out["weighted_per_state"]["dom_global_rate_per_hour"]["baseline"] - expected_baseline_rate) < 1e-9
+    assert abs(out["weighted_per_state"]["dom_global_share"]["baseline"] - 0.6) < 1e-12
+
+
+def test_pr5_recruitment_uses_gap_aware_coverage() -> None:
+    """§4.2 / spec test #5: dominant rate must divide by the gap-aware
+    state_covered_hours, not the nominal window width."""
+    cluster_labels = np.zeros(20, dtype=int)
+    n_part = np.full(20, 5, dtype=int)
+    state_indices = {
+        "baseline": np.arange(0, 10, dtype=int),
+        "pre": np.arange(10, 15, dtype=int),
+        "post": np.arange(15, 20, dtype=int),
+    }
+    nominal = {"baseline": 3.0, "pre": 0.75, "post": 0.75}
+    covered = {"baseline": 1.5, "pre": 0.75, "post": 0.75}
+    window = _pr5b_synthetic_window(
+        seizure_id=0,
+        state_event_indices=state_indices,
+        state_covered_hours=covered,
+    )
+
+    out = compute_template_recruitment_shift(
+        cluster_labels=cluster_labels,
+        n_part_per_event=n_part,
+        n_clusters=1,
+        dominant_global_id=0,
+        proximity_windows=[window],
+        min_participating_l3=5,
+    )
+
+    rate = out["weighted_per_state"]["dom_global_rate_per_hour"]["baseline"]
+    assert abs(rate - (10.0 / covered["baseline"])) < 1e-9
+    assert abs(rate - (10.0 / nominal["baseline"])) > 1.0
+
+
+def test_pr5_recruitment_weights_per_window_by_covered_hours() -> None:
+    """§4.3 / spec test #6: aggregation across windows must weight by
+    state_covered_hours so a long window does not get equal vote with a tiny
+    window. Equivalently: sum(counts) / sum(covered_hours)."""
+    cluster_labels = np.zeros(40, dtype=int)
+    n_part = np.full(40, 5, dtype=int)
+    win_a = _pr5b_synthetic_window(
+        seizure_id=0,
+        state_event_indices={
+            "baseline": np.arange(0, 8, dtype=int),
+            "pre": np.arange(8, 12, dtype=int),
+            "post": np.arange(12, 16, dtype=int),
+        },
+        state_covered_hours={"baseline": 4.0, "pre": 0.75, "post": 0.75},
+    )
+    win_b = _pr5b_synthetic_window(
+        seizure_id=1,
+        state_event_indices={
+            "baseline": np.arange(16, 26, dtype=int),
+            "pre": np.arange(26, 32, dtype=int),
+            "post": np.arange(32, 40, dtype=int),
+        },
+        state_covered_hours={"baseline": 1.0, "pre": 0.75, "post": 0.75},
+    )
+
+    out = compute_template_recruitment_shift(
+        cluster_labels=cluster_labels,
+        n_part_per_event=n_part,
+        n_clusters=1,
+        dominant_global_id=0,
+        proximity_windows=[win_a, win_b],
+        min_participating_l3=5,
+    )
+
+    expected_rate = (8 + 10) / (4.0 + 1.0)
+    got = out["weighted_per_state"]["dom_global_rate_per_hour"]["baseline"]
+    assert abs(got - expected_rate) < 1e-9
+    naive_avg = 0.5 * (8.0 / 4.0 + 10.0 / 1.0)
+    assert abs(got - naive_avg) > 0.5
+
+
+def test_pr5_recruitment_aborts_if_gate_not_passed(tmp_path) -> None:
+    """§5.3 spec test #7: --pr5-recruitment must SystemExit when the gate JSON
+    is missing or reports overall_pass=False; never write a recruitment JSON."""
+    import json
+    import sys
+    from unittest import mock
+
+    from scripts import run_interictal_propagation as runner
+
+    results_dir = tmp_path / "results" / "interictal_propagation"
+    results_dir.mkdir(parents=True)
+
+    # Case 1: no gate JSON at all -> SystemExit
+    with mock.patch.object(runner, "RESULTS_DIR", results_dir):
+        with mock.patch.object(sys, "argv", ["run", "--pr5-recruitment"]):
+            try:
+                runner.main()
+            except SystemExit as exc:
+                assert exc.code != 0
+            else:
+                raise AssertionError("expected SystemExit when gate JSON missing")
+
+    assert not (results_dir / "pr5b_recruitment_shift.json").exists()
+
+    # Case 2: gate JSON present but overall_pass=False -> SystemExit
+    gate_json = results_dir / "pr5a_novel_template_gate.json"
+    gate_json.write_text(json.dumps({"cohort": {"overall_pass": False}}))
+    with mock.patch.object(runner, "RESULTS_DIR", results_dir):
+        with mock.patch.object(sys, "argv", ["run", "--pr5-recruitment"]):
+            try:
+                runner.main()
+            except SystemExit as exc:
+                assert exc.code != 0
+            else:
+                raise AssertionError("expected SystemExit when gate FAIL")
+
+    assert not (results_dir / "pr5b_recruitment_shift.json").exists()
+
+
+def test_pr5_recruitment_filters_to_gate_retained_subset_per_config(
+    tmp_path, monkeypatch
+) -> None:
+    """PR-5-B must only send PR-5-A retained subjects into each config-level
+    cohort summary. Retention is config-specific, so main/aux subsets may
+    differ even when overall_pass=True."""
+    from scripts import run_interictal_propagation as runner
+
+    results_dir = tmp_path / "results" / "interictal_propagation"
+    results_dir.mkdir(parents=True)
+    per_subject_dir = results_dir / "per_subject"
+    per_subject_dir.mkdir(parents=True)
+    root = tmp_path / "yuquan"
+    root.mkdir()
+
+    subjects = ["keep", "drop_main"]
+    for subject in subjects:
+        subject_dir = root / subject
+        subject_dir.mkdir()
+        (subject_dir / f"{subject}_lagPat.npz").write_text("stub")
+        (per_subject_dir / f"yuquan_{subject}.json").write_text(
+            json.dumps(
+                {
+                    "adaptive_cluster": {
+                        "labels": [0, 0, 0],
+                        "chosen_k": 1,
+                        "stable_k": 1,
+                    }
+                }
+            )
+        )
+
+    gate_doc = {
+        "per_subject": {
+            "main": [
+                {"dataset": "yuquan", "subject_id": "keep"},
+                {"dataset": "yuquan", "subject_id": "drop_main"},
+            ],
+            "auxiliary": [
+                {"dataset": "yuquan", "subject_id": "keep"},
+                {"dataset": "yuquan", "subject_id": "drop_main"},
+            ],
+        },
+        "cohort": {
+            "overall_pass": True,
+            "main": {
+                "ineligible_subjects": [
+                    {"dataset": "yuquan", "subject_id": "drop_main"}
+                ]
+            },
+            "auxiliary": {"ineligible_subjects": []},
+        },
+    }
+    (results_dir / "pr5a_novel_template_gate.json").write_text(json.dumps(gate_doc))
+
+    def fake_loaded(_subject_dir):
+        return {
+            "bools": np.ones((5, 3), dtype=bool),
+            "event_abs_times": np.array([1.0, 2.0, 3.0], dtype=float),
+            "block_time_ranges": [(0.0, 3600.0)],
+        }
+
+    def fake_windows(*_args, **_kwargs):
+        return {
+            "usable_windows": [
+                {
+                    "seizure_time": 10.0,
+                    "state_event_indices": {
+                        "baseline": np.array([0], dtype=int),
+                        "pre": np.array([1], dtype=int),
+                        "post": np.array([2], dtype=int),
+                    },
+                }
+            ],
+            "state_ranges_hours": {
+                "baseline": (-2.0, -1.0),
+                "pre": (-1.0, 0.0),
+                "post": (0.0, 1.0),
+            },
+            "state_event_counts": {"baseline": 1, "pre": 1, "post": 1},
+        }
+
+    def fake_shift(**_kwargs):
+        return {
+            "dom_global_id": 0,
+            "dom_window_ids_per_window": [0],
+            "dom_agreement": 1.0,
+            "n_windows_used": 1,
+            "n_windows_total": 1,
+            "min_participating_l3": 5,
+            "n_clusters": 1,
+            "weighted_per_state": {
+                "dom_global_rate_per_hour": {
+                    "baseline": 1.0,
+                    "pre": 1.5,
+                    "post": 2.0,
+                },
+                "dom_window_rate_per_hour": {
+                    "baseline": 1.0,
+                    "pre": 1.5,
+                    "post": 2.0,
+                },
+                "dom_global_share": {
+                    "baseline": 0.5,
+                    "pre": 0.4,
+                    "post": 0.3,
+                },
+            },
+            "deltas": {
+                "dom_global_rate": {
+                    "pre_minus_baseline": 0.5,
+                    "post_minus_baseline": 1.0,
+                    "post_minus_pre": 0.5,
+                },
+                "dom_window_rate": {
+                    "pre_minus_baseline": 0.5,
+                    "post_minus_baseline": 1.0,
+                    "post_minus_pre": 0.5,
+                },
+                "dom_global_share": {
+                    "pre_minus_baseline": -0.1,
+                    "post_minus_baseline": -0.2,
+                    "post_minus_pre": -0.1,
+                },
+            },
+            "share_state_n_eligible_windows": {
+                "baseline": 1,
+                "pre": 1,
+                "post": 1,
+            },
+            "share_pair_eligible": {
+                "pre_minus_baseline": True,
+                "post_minus_baseline": True,
+                "post_minus_pre": True,
+            },
+        }
+
+    captured = {}
+
+    def fake_summary(per_subject_records_by_config, **_kwargs):
+        for config_name, records in per_subject_records_by_config.items():
+            captured[config_name] = [
+                f"{rec['dataset']}/{rec['subject_id']}" for rec in records
+            ]
+        return {
+            "main": {"n_subjects": len(per_subject_records_by_config["main"])},
+            "auxiliary": {
+                "n_subjects": len(per_subject_records_by_config["auxiliary"])
+            },
+            "sensitivity": {
+                "overall_strong": False,
+                "overall_medium": False,
+                "overall_descriptive": True,
+            },
+        }
+
+    monkeypatch.setattr(runner, "RESULTS_DIR", results_dir)
+    monkeypatch.setattr(runner, "load_subject_propagation_events", fake_loaded)
+    monkeypatch.setattr(
+        runner,
+        "_valid_event_indices",
+        lambda _bools, min_participating=3: np.array([0, 1, 2], dtype=int),
+    )
+    monkeypatch.setattr(runner, "load_seizure_times", lambda *_args, **_kwargs: [10.0])
+    monkeypatch.setattr(runner, "_build_seizure_proximity_windows", fake_windows)
+    monkeypatch.setattr(runner, "compute_template_recruitment_shift", fake_shift)
+    monkeypatch.setattr(
+        runner, "summarize_pr5_template_recruitment_shift", fake_summary
+    )
+    monkeypatch.setattr(runner, "_save", lambda *_args, **_kwargs: None)
+
+    runner._run_pr5_recruitment(
+        [("yuquan", root, subjects, {})],
+        per_subject_dir,
+        min_state_events_for_gate=30,
+        n_boot=20,
+        bootstrap_seed=1,
+    )
+
+    assert captured["main"] == ["yuquan/keep"]
+    assert captured["auxiliary"] == ["yuquan/keep", "yuquan/drop_main"]
+
+
+def test_pr5_recruitment_dual_dominant_definitions() -> None:
+    """§4.3 / spec test #8: window A baseline argmax = cluster 0, window B
+    baseline argmax = cluster 1, but global dominant = cluster 0 (more events
+    overall). dom_window_ids must reflect per-window argmax; dom_agreement =
+    0.5; candidates A and B must produce distinguishable rates."""
+    n_clusters = 2
+
+    cluster_labels = np.concatenate([
+        np.array([0] * 6 + [1] * 2, dtype=int),
+        np.array([0] * 4, dtype=int),
+        np.array([0] * 4, dtype=int),
+        np.array([0] * 1 + [1] * 5, dtype=int),
+        np.array([1] * 4, dtype=int),
+        np.array([1] * 4, dtype=int),
+    ])
+    n_part = np.full(cluster_labels.size, 5, dtype=int)
+
+    win_a = _pr5b_synthetic_window(
+        seizure_id=0,
+        state_event_indices={
+            "baseline": np.arange(0, 8, dtype=int),
+            "pre": np.arange(8, 12, dtype=int),
+            "post": np.arange(12, 16, dtype=int),
+        },
+        state_covered_hours={"baseline": 1.0, "pre": 1.0, "post": 1.0},
+    )
+    win_b = _pr5b_synthetic_window(
+        seizure_id=1,
+        state_event_indices={
+            "baseline": np.arange(16, 22, dtype=int),
+            "pre": np.arange(22, 26, dtype=int),
+            "post": np.arange(26, 30, dtype=int),
+        },
+        state_covered_hours={"baseline": 1.0, "pre": 1.0, "post": 1.0},
+    )
+
+    out = compute_template_recruitment_shift(
+        cluster_labels=cluster_labels,
+        n_part_per_event=n_part,
+        n_clusters=n_clusters,
+        dominant_global_id=0,
+        proximity_windows=[win_a, win_b],
+        min_participating_l3=5,
+    )
+
+    assert out["dom_global_id"] == 0
+    assert out["dom_window_ids_per_window"] == [0, 1]
+    assert abs(out["dom_agreement"] - 0.5) < 1e-12
+
+    a_rate = out["weighted_per_state"]["dom_global_rate_per_hour"]["baseline"]
+    b_rate = out["weighted_per_state"]["dom_window_rate_per_hour"]["baseline"]
+    assert abs(a_rate - 7.0 / 2.0) < 1e-9
+    assert abs(b_rate - (6.0 + 5.0) / 2.0) < 1e-9
+    assert abs(a_rate - b_rate) > 0.5
+
+    for cand in ("dom_global_rate", "dom_window_rate"):
+        for pair in ("pre_minus_baseline", "post_minus_baseline", "post_minus_pre"):
+            assert pair in out["deltas"][cand]
+
+
+def _pr5b_subject_record(
+    *,
+    subject_id: str,
+    base_rate: float = 4.0,
+    delta_pre_rate: float = 0.0,
+    delta_post_rate: float = 0.0,
+    delta_pre_share: float = 0.0,
+    delta_post_share: float = 0.0,
+    base_share: float = 0.5,
+    n_windows_used: int = 4,
+) -> Dict[str, Any]:
+    """Per-subject record matching the schema produced by
+    compute_template_recruitment_shift, used to feed cohort summaries."""
+    weighted = {
+        "dom_global_rate_per_hour": {
+            "baseline": base_rate,
+            "pre": base_rate + delta_pre_rate,
+            "post": base_rate + delta_post_rate,
+        },
+        "dom_window_rate_per_hour": {
+            "baseline": base_rate,
+            "pre": base_rate + delta_pre_rate,
+            "post": base_rate + delta_post_rate,
+        },
+        "nondom_global_rate_per_hour": {
+            "baseline": base_rate * 0.5,
+            "pre": base_rate * 0.5,
+            "post": base_rate * 0.5,
+        },
+        "dom_global_share": {
+            "baseline": base_share,
+            "pre": base_share + delta_pre_share,
+            "post": base_share + delta_post_share,
+        },
+    }
+
+    def _pair_deltas(metric_key: str) -> Dict[str, float]:
+        b = weighted[metric_key]["baseline"]
+        p = weighted[metric_key]["pre"]
+        q = weighted[metric_key]["post"]
+        return {
+            "pre_minus_baseline": p - b,
+            "post_minus_baseline": q - b,
+            "post_minus_pre": q - p,
+        }
+
+    return {
+        "subject_id": subject_id,
+        "dataset": "synthetic",
+        "config_name": "main",
+        "dom_global_id": 0,
+        "dom_window_ids_per_window": [0] * n_windows_used,
+        "dom_agreement": 1.0,
+        "n_windows_used": n_windows_used,
+        "n_windows_total": n_windows_used,
+        "min_participating_l3": 5,
+        "n_clusters": 2,
+        "weighted_per_state": weighted,
+        "deltas": {
+            "dom_global_rate": _pair_deltas("dom_global_rate_per_hour"),
+            "dom_window_rate": _pair_deltas("dom_window_rate_per_hour"),
+            "nondom_global_rate": _pair_deltas("nondom_global_rate_per_hour"),
+            "dom_global_share": _pair_deltas("dom_global_share"),
+        },
+        "share_state_n_eligible_windows": {
+            "baseline": n_windows_used,
+            "pre": n_windows_used,
+            "post": n_windows_used,
+        },
+        "share_pair_eligible": {
+            "pre_minus_baseline": True,
+            "post_minus_baseline": True,
+            "post_minus_pre": True,
+        },
+    }
+
+
+def test_pr5_recruitment_composition_diagnostic_isolated_from_main_family() -> None:
+    """§4.5 / spec test #9: composition diagnostic is reported next to but
+    physically separated from dominant_rate. Sensitivity gate must read only
+    dominant_rate; ineligible windows / subjects on share are accounted for
+    without touching dominant_rate accounting."""
+    n_subjects = 12
+    rng = np.random.default_rng(0)
+
+    main_records = []
+    aux_records = []
+    for i in range(n_subjects):
+        delta_post_rate_main = float(2.5 + rng.normal(0.0, 0.20))
+        delta_post_share_main = float(-0.10 + rng.normal(0.0, 0.02))
+        rec_main = _pr5b_subject_record(
+            subject_id=f"s{i}",
+            delta_pre_rate=0.05,
+            delta_post_rate=delta_post_rate_main,
+            delta_pre_share=-0.01,
+            delta_post_share=delta_post_share_main,
+        )
+        rec_main["config_name"] = "main"
+        main_records.append(rec_main)
+
+        delta_post_rate_aux = float(2.0 + rng.normal(0.0, 0.20))
+        delta_post_share_aux = float(-0.08 + rng.normal(0.0, 0.02))
+        rec_aux = _pr5b_subject_record(
+            subject_id=f"s{i}",
+            delta_pre_rate=0.05,
+            delta_post_rate=delta_post_rate_aux,
+            delta_pre_share=-0.01,
+            delta_post_share=delta_post_share_aux,
+        )
+        rec_aux["config_name"] = "auxiliary"
+        aux_records.append(rec_aux)
+
+    aux_records[0]["share_state_n_eligible_windows"]["post"] = 0
+    aux_records[0]["share_pair_eligible"]["post_minus_baseline"] = False
+    aux_records[0]["share_pair_eligible"]["post_minus_pre"] = False
+
+    summary = summarize_pr5_template_recruitment_shift(
+        {"main": main_records, "auxiliary": aux_records},
+        n_boot=200,
+        bootstrap_seed=7,
+    )
+
+    # Assertion 1: composition_diagnostic schema is independent + lacks bonferroni_pass.
+    cd_main = summary["main"]["composition_diagnostic"]["share"]
+    for pair in ("pre_minus_baseline", "post_minus_baseline", "post_minus_pre"):
+        entry = cd_main[pair]
+        assert "wilcoxon_p" in entry
+        assert "median_delta_share" in entry
+        assert "ci95_lo" in entry and "ci95_hi" in entry
+        assert "direction_consistent_count" in entry
+        assert "bonferroni_pass" not in entry
+    assert summary["auxiliary"]["composition_diagnostic"]["share"]["post_minus_baseline"]["n_ineligible"] >= 1
+
+    # Assertion 2: monkey-patching composition_diagnostic must not change sensitivity gate.
+    sens_before = _compute_pr5b_sensitivity_gate(summary)
+    summary_polluted = json.loads(json.dumps(summary))
+    summary_polluted["main"]["composition_diagnostic"] = {"share": "GARBAGE"}
+    summary_polluted["auxiliary"]["composition_diagnostic"] = {"share": "GARBAGE"}
+    sens_after = _compute_pr5b_sensitivity_gate(summary_polluted)
+    assert sens_before == sens_after
+    assert sens_before["overall_strong"] is True
+
+    # Assertion 3: cohort summary explicitly records the share weight key.
+    assert summary["composition_diagnostic_weight_key"] == "state_covered_hours"
+    assert summary["dominant_rate_weight_key"] == "state_covered_hours"
+
+    # Assertion 4: ineligible window / subject accounting visible on share but
+    # untouched on dominant_rate.
+    cd_aux_post = summary["auxiliary"]["composition_diagnostic"]["share"]["post_minus_baseline"]
+    assert cd_aux_post["n"] == n_subjects - 1
+    aux_dom_post = summary["auxiliary"]["dominant_rate"]["candidate_a_global"]["post_minus_baseline"]
+    assert aux_dom_post["n"] == n_subjects
+
+
+def test_pr5_recruitment_share_post_minus_pre_has_no_a_priori_direction() -> None:
+    records = [
+        _pr5b_subject_record(
+            subject_id="s0",
+            delta_pre_share=-0.02,
+            delta_post_share=0.05,
+        ),
+        _pr5b_subject_record(
+            subject_id="s1",
+            delta_pre_share=-0.01,
+            delta_post_share=-0.04,
+        ),
+    ]
+
+    summary = summarize_pr5_template_recruitment_shift(
+        {"main": records, "auxiliary": records},
+        n_boot=100,
+        bootstrap_seed=11,
+    )
+
+    pre_post = summary["main"]["composition_diagnostic"]["share"]["post_minus_pre"]
+    assert pre_post["direction_consistent_count"] is None
+    assert pre_post["n_positive"] == 1
+    assert pre_post["n_negative"] == 1
+
+    pre_base = summary["main"]["composition_diagnostic"]["share"]["pre_minus_baseline"]
+    assert isinstance(pre_base["direction_consistent_count"], int)
