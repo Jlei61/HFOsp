@@ -1857,7 +1857,7 @@ def plot_pr_per_subject_combined():
                 # Row 1: shared horizontal colorbar for c + e.
                 # Row 2: e|f.
                 height_ratios=[h_unit + strip_extra, cbar_h, h_unit],
-                hspace=0.42, wspace=0.13,
+                hspace=0.52, wspace=0.13,
             )
 
             # --- c: raw rank heatmap + per-event day/night sub-strip ---
@@ -1993,13 +1993,15 @@ def plot_pr_per_subject_combined():
             # under e used width=32% of the heatmap column); host is left col only.
             ax_cbar_host = fig.add_subplot(bot_gs[1, 0])
             ax_cbar_host.set_axis_off()
+            # Top of this row (toward c): loc=upper center on host; do not pass
+            # bbox_to_anchor with %-sized inset (matplotlib requires a Bbox then).
             cax = inset_axes(
-                ax_cbar_host, width="32%", height="72%",
-                loc="center", borderpad=0,
+                ax_cbar_host, width="32%", height="58%",
+                loc="upper center", borderpad=0,
             )
             cbar = fig.colorbar(im_rank, cax=cax, orientation="horizontal")
             cbar.set_label("rank: First → Last", fontsize=FS_LABEL,
-                           labelpad=4)
+                           labelpad=2)
             cbar.ax.tick_params(labelsize=FS_TICK - 1)
 
             # Panel letter for a sits inside its own top-left (va="top")
