@@ -83,22 +83,30 @@ suptitle 与图体之间留出大间距。
   - 方向：ρ > 0 ⇒ dom-fraction 在 *离 seizure 远* 的 bin 更**高**，
     *近 seizure* 的 bin 更**低**
 
-  **重要解读**（这是个新发现，补充 PR-4C）：
+  **历史 motivation / 补充现象（不是正式结论）**：
   这个信号不与 PR-4C 的 "dominant template **rate** ↑ post-ictal" 矛盾，
   而是正交：
   - PR-4C：dominant template 的**绝对 rate**（events/h）在 post-ictal ↑
   - 本图：dominant template 的**占比** (dom / total) 在 seizure 附近 ↓
 
   合起来：seizure 附近所有模板都被招募更多，而 *non-dominant* 模板被
-  招募得更多 → 这正是 PR-5A novel-template gate 关心的方向，是 PR-5 主
-  分析的间接 motivation。
+  招募得更多。
+
+  **正式归属**：本现象的正式分析在 **PR-5-B §4.5 secondary composition
+  diagnostic**（详见 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md`
+  §4.5），口径不同：那里用与 PR-5-A gate 相同的 gate-eligible 事件池、
+  PR-4C 离散三段窗口（baseline/pre/post）、subject-level paired Wilcoxon。
+  本图的 cohort 26 个 ρ 与 panel d Wilcoxon p=0.041 **不再**被引用为
+  正式结论，只作为本图的描述与历史 motivation。
 
   **诚实约束**：
   - p = 0.041 紧贴 0.05 边界
   - 单方向 sign 16/26（正二项 p ≈ 0.16 单侧）— direction 一致但量级小
   - 仅 cohort-level，subject-level 异质性大
-  - **不能** 单独把它升级为 "novel template emergence" 机制结论；这是
-    PR-5-A novel-template falsification gate 的工作
+  - **不与 PR-5-A novel-template gate 相关**：PR-5-A 已 PASS
+    （`overall_pass=True`），peri-ictal 事件仍属 in-distribution，本现象
+    不能解读为 "novel template emergence"；它只描述同一固定模板库内部
+    的招募权重变化，正式化路径是 PR-5-B §4.5 而非 PR-5-A
 
 ---
 
@@ -173,14 +181,90 @@ suptitle 与图体之间留出大间距。
 
 ## fig5_pr4d_template_rate.png — PR-4D 模板分解事件率（描述层）
 
-本次未改（用户没提）。结构：
-- panel a/b：两个代表 subject (epilepsiae/548 + yuquan/chenziyang) 的
-  gap-aware rate envelope (events/h，上) + 同色离散计数堆叠柱（下）。
-  NaN 在 grid 中自然把 gap 留白
-- panel c：cohort dominant rate fraction 分布（按数据集 dataset_color
-  着色）
-- panel d：dominant template 切换次数统计（25/30 任意切换，17/30
+结构：
+- **Panel a/b**：两个代表 subject (`epilepsiae/548` + `yuquan/chenziyang`)
+  的 gap-aware rate envelope (events/h，上) + 同色离散计数堆叠柱（下）。
+  - 用 `mask = isfinite(grid) & isfinite(v)` filter 后再
+    `fill_between(step="mid")` + `plot(steps-mid)`，解决了 grid 每隔一个
+    NaN 导致曲线全部画零长度段的 bug
+  - y 轴用 `p95 × 1.20` 截断，long-tail spike 用 lower-right corner 小字
+    "off-axis: T*: peak = X ev/h" 注释最大值
+  - **每个 panel 上下两层都画红色虚线标记 seizure onset**（rate envelope
+    + stacked count），与 fig 2 一致
+- **Panel c**：cohort dominant rate fraction 分布（按数据集 dataset_color
+  着色），median = 0.584
+- **Panel d**：dominant template 切换次数统计（25/30 任意切换，17/30
   meaningful 切换 ≥ 25% peak rate, 6/30 重复切换 ≥ 3 次）
+
+### "rate-cluster ↔ seizure-cluster + template-fraction 调制" 模式
+
+用户 fig 5 a 视觉观察："rate ramp 对应一簇 seizure，且两个 fixed template
+的占比也随 rate 调制"。把这个观察 operationalize 成可量化的 cohort 排序：
+
+**指标定义**（`_score_rate_cluster_seizure`，运行 `--fig 5` 时 stdout 打印）：
+1. `enrich = N(sz in rate>p75 bin) / Expected_uniform`
+   - rate > p75 占总时间的 ~25%；如 sz 是均匀分布，`enrich ≈ 1`
+   - `enrich > 1` 说明 sz 富集在 high-rate burst 内（即"rate ramp 触发
+     seizure cluster"）
+2. `rho_dom = Spearman ρ(per-bin dominant fraction, |Δt to nearest sz|)`
+   - 同 fig 2d
+   - `ρ > 0` ⇒ sz 附近 dom-fraction ↓ ⇒ non-dominant template 被更多招募
+3. **strict match**: `enrich ≥ 1.5 AND |ρ_dom| ≥ 0.15`
+   **loose match**: `enrich ≥ 1.5` 但 ρ 接近 0
+
+**cohort ranking（25 subjects with ≥2 in-window seizures，按 enrich 降序）**：
+
+| 排名 | subject | k | n_sz | hours | enrich | ρ_dom | match |
+|----:|:--------|--:|----:|------:|------:|-----:|:-----:|
+| 1 | epilepsiae:818 | 4 | 9 | 252 | 3.52 | −0.05 | loose |
+| 2 | epilepsiae:590 | 2 | 13 | 251 | 3.12 | +0.07 | loose |
+| 3 | epilepsiae:253 | 2 | 7 | 262 | 2.84 | −0.01 | loose |
+| 4 | **epilepsiae:1125** | 2 | 14 | 158 | 2.82 | **+0.37** | **strict** |
+| 5 | **epilepsiae:1096** | 2 | 9 | 163 | 2.63 | **+0.40** | **strict** |
+| 6 | **epilepsiae:916** | 2 | 52 | 430 | 2.61 | **+0.34** | **strict** |
+| 7 | **yuquan:sunyuanxin** | 2 | 8 | 24 | 2.60 | **+0.35** | **strict** |
+| 8 | **epilepsiae:635** | 2 | 21 | 119 | 2.48 | +0.25 | **strict** |
+| 9 | **epilepsiae:442** | 2 | 22 | 185 | 2.36 | +0.18 | **strict** |
+| 10 | epilepsiae:384 | 2 | 8 | 67 | 2.03 | +0.03 | loose |
+| 11 | epilepsiae:958 | 2 | 16 | 232 | 2.00 | −0.03 | loose |
+| 12 | **epilepsiae:1150** | 2 | 9 | 159 | 1.80 | +0.21 | **strict** |
+| 13 | epilepsiae:1077 | 2 | 9 | 186 | 1.76 | −0.15 | loose |
+| 14 | **epilepsiae:139** | 2 | 5 | 127 | 1.58 | **+0.44** | **strict** |
+| 15 | **yuquan:litengsheng** | 2 | 8 | 31 | 1.50 | **+0.55** | **strict** |
+| 16 | epilepsiae:922 | 2 | 29 | 114 | 1.39 | +0.16 | − |
+| 17 | yuquan:xuxinyi | 2 | 3 | 26 | 1.29 | +0.26 | − |
+| 18 | epilepsiae:1146 | 2 | 26 | 113 | 1.22 | −0.32 | − |
+| 19 | epilepsiae:620 | 2 | 7 | 255 | 1.16 | −0.09 | − |
+| 20 | **epilepsiae:548 (本图 panel a)** | 2 | 31 | 143 | **1.02** | +0.04 | − |
+| 21 | epilepsiae:583 | 2 | 22 | 204 | 0.54 | +0.09 | − |
+| 22 | epilepsiae:1073 | 2 | 18 | 229 | 0.22 | −0.10 | − |
+| 23 | epilepsiae:1084 | 2 | 93 | 250 | 0.09 | −0.16 | − |
+| 24 | yuquan:huanghanwen | 2 | 2 | 24 | 0.00 | −0.08 | − |
+| 25 | yuquan:zhangjinhan | 6 | 8 | 26 | 0.00 | −0.25 | − |
+
+**结论**：
+- **strict match: 9/25 (36%)**，全部 ρ > 0（与 fig 2d 的 cohort median
+  ρ = +0.077 方向一致）
+- **loose match: 6/25 (24%)** —— rate burst 富集 sz，但 dom-fraction
+  没有显著调制
+- 合计 15/25 (60%) 显示了 enrich ≥ 1.5
+- **`epilepsiae:548`（fig 5 panel a）的 enrich = 1.02 → 几乎均匀，并不是
+  这个模式的代表 subject**：548 有 31 sz / 143 h，密度极高（~4.6 h 一个
+  sz），加上 5 个 burst 把 panel 视觉上"挤"成了"burst 上有红线"，但
+  burst 之间也有同样多红线，纯属采样饱和的视错觉
+- **真正的代表 subject 是 `epilepsiae:1125`、`epilepsiae:1096`、
+  `epilepsiae:916`、`yuquan:sunyuanxin`、`epilepsiae:139`、
+  `yuquan:litengsheng`**——它们同时满足"rate burst 富集 sz"和"dom-fraction
+  在 sz 附近 ↓"两个准则
+- 这个 9 个 subject 的 cluster 是 **PR-5-B recruitment shift 的天然候选
+  patient pool**
+
+**诚实约束**：
+- 仅 25/30 subjects 有 ≥2 in-window sz；剩 5 个无 sz 或仅 1 sz 不入分析
+- enrich score 用 p75 single-cutoff，对 single-burst recordings (e.g.
+  yuquan:huanghanwen) 数学上会得 0（无 sz 落在 burst 上）
+- ρ_dom 是 cohort 描述指标，subject-level 不做单独 inference
+- 这一节是 **观察性排序**，不是 mechanistic claim；要做机制结论，等 PR-5
 
 ---
 

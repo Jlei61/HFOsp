@@ -53,8 +53,32 @@ from src.plot_style import (
     COL_YUQUAN, COL_EPILEPSIAE, COL_EMPIRICAL, COL_ANALYTIC,
     COL_SURROGATE, COL_DETRENDED,
     COL_SOZ, COL_NONSOZ, COL_SIG, COL_NONSIG, COL_NEUTRAL,
-    FS_LABEL, FS_TITLE, FS_TICK, FS_SUPTITLE,
+    FS_LABEL, FS_TITLE, FS_TICK, FS_SUPTITLE, FS_PANEL_LETTER,
 )
+
+
+def _place_panel_letters(fig, axes_letters, dx: float = -0.038,
+                         dy: float = 0.014, va: str = "bottom") -> None:
+    """Place bold panel letters near the top-left of each axis using
+    figure-fraction coordinates (so left-column letters stay vertically
+    aligned regardless of per-axis width).
+
+    Default placement: letter sits ABOVE the panel's top edge in the
+    figure left margin (``dx<0`` outside left edge, ``dy>0`` lifts above,
+    ``va="bottom"`` anchors letter base on that line). Use ``va="top"``
+    for tightly-stacked rows where lifting the letter would push it into
+    the next panel up.
+
+    Pass a list of ``(ax, letter)`` tuples. Any caller using this should
+    call ``style_panel(ax, "")`` (no letter arg) on each axis first.
+    """
+    for ax, letter in axes_letters:
+        bbox = ax.get_position()
+        fig.text(
+            bbox.x0 + dx, bbox.y1 + dy, letter,
+            fontsize=FS_PANEL_LETTER, fontweight="bold",
+            ha="left", va=va, fontfamily="sans-serif",
+        )
 from src.event_periodicity import load_seizure_times
 
 # Local PR-4 day/night palette: closer to black/white, label colour matches
@@ -1182,7 +1206,117 @@ def plot_fig4():
 # Fig 5: PR-4D template-decomposed rate (descriptive)
 # =========================================================================
 
-def _plot_pr4d_subject(ax_top, ax_bot, rec: dict):
+def _score_rate_cluster_seizure(pr4a: dict) -> list:
+    """For each subject, compute two coupled scores describing the
+    'rate-burst window enriches seizure occurrence + dominant-template
+    fraction is modulated by seizure proximity' pattern visible in
+    Fig 5 / Fig 2.
+
+    Returns a list of dicts sorted by enrichment, each with:
+        subject, dataset, k, n_sz, hours, enrich, rho_dom, hi_frac_time
+        match  ('strict' / 'loose' / '-')
+
+        - enrich       = N(sz in rate>p75 bin) / Expected_uniform
+        - rho_dom      = Spearman rho(per-bin dominant fraction,
+                                       |Δt to nearest seizure|)
+        - hi_frac_time = fraction of recording time in the rate>p75 window
+
+    Inclusion criteria for "match":
+        strict  enrich >= 1.5  AND  |rho_dom| >= 0.15
+        loose   enrich >= 1.5  AND  |rho_dom| <  0.15
+    """
+    out = []
+    for k, r in pr4a.items():
+        bins = r.get("timeline_bins", [])
+        if not bins:
+            continue
+        bin_h = np.array(
+            [b["hours_from_timeline_start"] for b in bins], dtype=float)
+        n_ev = np.array([b["n_events"] for b in bins], dtype=float)
+        bin_w = float(r.get("bin_hours", 1.0))
+        rate = n_ev / bin_w
+        nc = max(int(r.get("n_clusters", 2)), 1)
+        fracs = np.array(
+            [(b.get("cluster_fractions", []) + [0.0] * nc)[:nc] for b in bins],
+            dtype=float)
+        dom_frac = fracs.max(axis=1)
+        try:
+            sz_ep = load_seizure_times(r.get("subject", ""),
+                                       r.get("dataset", ""))
+        except Exception:
+            sz_ep = []
+        if not sz_ep:
+            continue
+        t0 = float(r.get("timeline_start_epoch",
+                         r.get("first_event_epoch", 0.0)))
+        sz_h = np.array([(s - t0) / 3600.0 for s in sz_ep], dtype=float)
+        sz_h = sz_h[(sz_h >= 0) & (sz_h <= bin_h.max())]
+        if sz_h.size < 2:
+            continue
+        pos_rate = rate[rate > 0]
+        if pos_rate.size < 5:
+            continue
+        p75 = float(np.percentile(pos_rate, 75))
+        hi_mask = rate > p75
+        if hi_mask.sum() == 0:
+            continue
+        hi_bins = bin_h[hi_mask]
+        hi_frac_time = float(hi_mask.sum() / len(rate))
+        sz_in_hi = 0
+        for s in sz_h:
+            if np.any(np.abs(hi_bins - s) <= bin_w / 2 + 0.5):
+                sz_in_hi += 1
+        expected = sz_h.size * hi_frac_time
+        enrich = float(sz_in_hi / expected) if expected > 0 else float("nan")
+        dist = np.min(np.abs(bin_h[:, None] - sz_h[None, :]), axis=1)
+        keep = (n_ev >= 5) & np.isfinite(dom_frac) & np.isfinite(dist)
+        if keep.sum() >= 6:
+            rho, _ = spearmanr(dist[keep], dom_frac[keep])
+            rho = float(rho) if np.isfinite(rho) else float("nan")
+        else:
+            rho = float("nan")
+        if enrich >= 1.5 and abs(rho) >= 0.15:
+            tag = "strict"
+        elif enrich >= 1.5:
+            tag = "loose"
+        else:
+            tag = "-"
+        out.append({
+            "subject": r.get("subject", k),
+            "dataset": r.get("dataset", "?"),
+            "key": k,
+            "k": int(r.get("stable_k", nc)),
+            "n_sz": int(sz_h.size),
+            "hours": int(bin_h.max()),
+            "enrich": enrich,
+            "rho_dom": rho,
+            "hi_frac_time": hi_frac_time,
+            "match": tag,
+        })
+    out.sort(key=lambda x: -x["enrich"])
+    return out
+
+
+def _print_rate_cluster_seizure_table():
+    pr4a = _load_json("pr4a_temporal_dynamics.json")
+    if not pr4a:
+        return
+    rows = _score_rate_cluster_seizure(pr4a)
+    print("\n  cohort rate-cluster ↔ seizure-cluster pattern table:")
+    print(f"  {'subject':<32s} {'k':>2} {'nsz':>4} {'hrs':>5} "
+          f"{'enrich':>7} {'rho_dom':>8} {'match':>7}")
+    print("  " + "-" * 76)
+    for r in rows:
+        print(f"  {r['dataset']+':'+r['subject']:<32s} {r['k']:>2} "
+              f"{r['n_sz']:>4} {r['hours']:>5} {r['enrich']:>7.2f} "
+              f"{r['rho_dom']:>8.3f} {r['match']:>7s}")
+    n_strict = sum(1 for r in rows if r["match"] == "strict")
+    n_loose = sum(1 for r in rows if r["match"] == "loose")
+    print(f"  → strict match (enrich≥1.5 & |ρ|≥0.15): {n_strict}/{len(rows)}")
+    print(f"  → loose  match (enrich≥1.5 only):       {n_loose}/{len(rows)}")
+
+
+def _plot_pr4d_subject(ax_top, ax_bot, rec: dict, sz_h=None):
     nc = int(rec.get("n_clusters", rec.get("chosen_k", 2)))
     rc = rec.get("rate_curve", {})
     hist = rec.get("histogram", {})
@@ -1253,6 +1387,25 @@ def _plot_pr4d_subject(ax_top, ax_bot, rec: dict):
     ax_top.set_xlim(0, x_max)
     ax_bot.set_xlim(0, x_max)
 
+    # Seizure onset markers on BOTH rate envelope and stacked count panels
+    if sz_h is not None and len(sz_h):
+        sz_h = np.asarray(sz_h, dtype=float)
+        sz_h = sz_h[(sz_h >= 0) & (sz_h <= x_max)]
+        for h in sz_h:
+            ax_top.axvline(h, color=COL_SEIZURE, lw=1.6, ls="--",
+                           alpha=0.85, zorder=4)
+            ax_bot.axvline(h, color=COL_SEIZURE, lw=1.6, ls="--",
+                           alpha=0.85, zorder=4)
+        # one dashed-line legend entry on the rate panel only
+        from matplotlib.lines import Line2D
+        cur_handles, cur_labels = ax_top.get_legend_handles_labels()
+        cur_handles.append(Line2D([0], [0], color=COL_SEIZURE, lw=1.6,
+                                  ls="--"))
+        cur_labels.append(f"sz onset (n={sz_h.size})")
+        ax_top.legend(cur_handles, cur_labels, loc="upper left",
+                      fontsize=FS_TICK - 2, framealpha=0.95,
+                      ncol=min(4, len(cur_handles)))
+
 
 def plot_fig5():
     """PR-4D: gap-aware template-decomposed rate (descriptive layer)."""
@@ -1281,21 +1434,38 @@ def plot_fig5():
         left=0.07, right=0.98, top=0.92, bottom=0.10,
     )
 
-    # ---- Panel a + a': representative subject A (top + hist) ----
+    def _sz_h_for(key):
+        if key not in pr4d:
+            return np.array([])
+        rec = pr4d[key]
+        try:
+            sz_ep = load_seizure_times(rec.get("subject", ""),
+                                       rec.get("dataset", ""))
+        except Exception:
+            sz_ep = []
+        if not sz_ep:
+            return np.array([])
+        t0 = float(rec.get("timeline_start_epoch",
+                           rec.get("first_event_epoch", 0.0)))
+        return np.array([(s - t0) / 3600.0 for s in sz_ep], dtype=float)
+
     if sub_a_key and sub_a_key in pr4d:
         ax_a_top = fig.add_subplot(gs[0, 0])
         ax_a_bot = fig.add_subplot(gs[1, 0], sharex=ax_a_top)
-        _plot_pr4d_subject(ax_a_top, ax_a_bot, pr4d[sub_a_key])
+        _plot_pr4d_subject(ax_a_top, ax_a_bot, pr4d[sub_a_key],
+                           sz_h=_sz_h_for(sub_a_key))
         style_panel(ax_a_top, "a")
         style_panel(ax_a_bot, "")
 
-    # ---- Panel b + b': representative subject B ----
     if sub_b_key and sub_b_key in pr4d:
         ax_b_top = fig.add_subplot(gs[0, 1])
         ax_b_bot = fig.add_subplot(gs[1, 1], sharex=ax_b_top)
-        _plot_pr4d_subject(ax_b_top, ax_b_bot, pr4d[sub_b_key])
+        _plot_pr4d_subject(ax_b_top, ax_b_bot, pr4d[sub_b_key],
+                           sz_h=_sz_h_for(sub_b_key))
         style_panel(ax_b_top, "b")
         style_panel(ax_b_bot, "")
+
+    _print_rate_cluster_seizure_table()
 
     # ---- Panel c: cohort dominant rate fraction distribution ----
     ax_c = fig.add_subplot(gs[2, 0])
@@ -1378,29 +1548,517 @@ def plot_fig5():
 # CLI
 # =========================================================================
 
+def _plot_cluster_rank_curves_semantic(
+    ax, ranks, bools, valid_events, labels, channel_order,
+    channel_names, title=""):
+    """Per-cluster mean rank +/- std curves on fixed channel order, using
+    TEMPLATE_COLORS so cluster id matches rate-panel template id colour.
+    """
+    n_ch = len(channel_order)
+    ordered_names = [channel_names[idx] for idx in channel_order]
+    unique_k = np.unique(labels)
+    y_pos = np.arange(n_ch, dtype=float)
+    for cid in unique_k:
+        mask_cluster = labels == cid
+        eidx = valid_events[mask_cluster]
+        means = np.full(n_ch, np.nan)
+        stds = np.full(n_ch, np.nan)
+        for ci_plot, ci_raw in enumerate(channel_order):
+            vals = np.asarray(ranks[ci_raw, eidx], dtype=float)
+            bmask = np.asarray(bools[ci_raw, eidx], dtype=bool)
+            vals = vals[bmask & np.isfinite(vals)]
+            if vals.size > 0:
+                means[ci_plot] = float(np.mean(vals))
+                stds[ci_plot] = float(np.std(vals))
+        valid = np.isfinite(means)
+        col = TEMPLATE_COLORS[int(cid) % len(TEMPLATE_COLORS)]
+        ax.fill_betweenx(y_pos[valid], (means - stds)[valid],
+                         (means + stds)[valid],
+                         color=col, alpha=0.18, linewidth=0)
+        ax.plot(means[valid], y_pos[valid], "-o",
+                color=col, lw=2.4, ms=6, zorder=10,
+                label=f"C{int(cid)} (n={int(mask_cluster.sum())})")
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(ordered_names,
+                       fontsize=FS_TICK if n_ch <= 20 else FS_TICK - 3)
+    ax.set_ylim(-0.5, n_ch - 0.5)
+    ax.invert_yaxis()
+    ax.set_xlabel("Rank", fontsize=FS_LABEL)
+    ax.set_xlim(-0.5, n_ch - 0.5)
+    if title:
+        ax.set_title(title, fontsize=FS_TITLE - 2, fontweight="bold", pad=8)
+    ax.legend(fontsize=FS_TICK - 2, loc="upper center",
+              bbox_to_anchor=(0.5, -0.10),
+              ncol=max(1, len(unique_k)), framealpha=0.95)
+
+
+def _draw_daynight_strip(ax, bin_h, is_day, bin_w):
+    """Paint a thin coloured day/night strip ribbon at the very bottom of
+    the axis (axes-fraction y=0..0.025). Uses semantic COL_DAY / COL_NIGHT.
+    """
+    for i in range(len(bin_h)):
+        col = COL_DAY if is_day[i] else COL_NIGHT
+        ax.axvspan(bin_h[i] - bin_w / 2.0, bin_h[i] + bin_w / 2.0,
+                   ymin=0.0, ymax=0.025,
+                   facecolor=col, edgecolor="none", zorder=4)
+
+
+def _draw_full_daynight_axis(ax, bin_h, is_day, bin_w, x_max):
+    """Draw a stand-alone day/night strip on its own axis."""
+    for i in range(len(bin_h)):
+        col = COL_DAY if is_day[i] else COL_NIGHT
+        ax.axvspan(bin_h[i] - bin_w / 2.0, bin_h[i] + bin_w / 2.0,
+                   facecolor=col, edgecolor="none")
+    ax.set_xlim(0, x_max)
+    ax.set_yticks([])
+    ax.set_ylim(0, 1)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+
+
+def plot_pr_per_subject_combined():
+    """Single-PNG per-subject figure integrating PR-3 (rank heatmaps +
+    cluster geometry) and PR-4D (rate envelope + stacked count). Day/night
+    background and seizure-onset markers are drawn on every time-axis panel
+    using the unified semantic palette (Morandi day/night, COL_SEIZURE,
+    TEMPLATE_COLORS shared between cluster ids and template ids).
+
+    Output: ``results/interictal_propagation/figures/ppt/per_subject/{ds}_{sub}.png``
+    """
+    print("Plotting integrated PR-3 + PR-4D per-subject figures ...")
+
+    # Lazy import: only paid when --per-subject is requested
+    from matplotlib.colors import ListedColormap
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from scripts.plot_interictal_propagation import (
+        _load_pr3_subject_records, _resolve_subject_dir, _load_lagpat,
+        _formal_day_mask, _fixed_channel_order, _sample_event_indices,
+        _plot_rank_heatmap, _plot_rank_histogram,
+    )
+    from src.interictal_propagation import _valid_event_indices
+
+    pr4d = _load_json("pr4a_followup_template_mix_dynamics.json")
+    pr4a = _load_json("pr4a_temporal_dynamics.json")
+    if not pr4d:
+        print("  PR-4D data missing, abort")
+        return None
+
+    pr3_records = _load_pr3_subject_records("both", None)
+    pr3_by_key = {f"{r['dataset']}/{r['subject']}": r for r in pr3_records}
+
+    score_table = {}
+    if pr4a:
+        for r in _score_rate_cluster_seizure(pr4a):
+            score_table[r["key"]] = r
+
+    # day/night info per subject (1-h bins from PR-4A timeline_bins)
+    daynight_by_key = {}
+    if pr4a:
+        for k, r in pr4a.items():
+            bins = r.get("timeline_bins", [])
+            if not bins:
+                continue
+            bh = np.array([b["hours_from_timeline_start"] for b in bins],
+                          dtype=float)
+            isd = np.array([b.get("day_night") == "day" for b in bins],
+                           dtype=bool)
+            bw = float(r.get("bin_hours", 1.0))
+            daynight_by_key[k] = (bh, isd, bw)
+
+    TAG_COL = {
+        "strict": "#5A8C6E",       # Morandi sage
+        "loose":  COL_DETRENDED,   # Morandi mustard
+        "-":      COL_NONSIG,
+    }
+    TAG_TEXT = {
+        "strict": "STRICT match",
+        "loose":  "LOOSE match",
+        "-":      "no-match",
+    }
+
+    out_dir = PPT_DIR / "per_subject"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    keys = sorted(set(pr4d.keys()) & set(pr3_by_key.keys()))
+    only_4d = sorted(set(pr4d.keys()) - set(pr3_by_key.keys()))
+    if only_4d:
+        print(f"  {len(only_4d)} subjects without PR-3 record → "
+              f"PR-4D-only figure: {only_4d}")
+
+    for k in sorted(set(pr4d.keys())):
+        rec_4d = pr4d[k]
+        rec_3 = pr3_by_key.get(k)
+        ds = rec_4d.get("dataset", "?")
+        sub = rec_4d.get("subject", "?")
+
+        try:
+            sz_ep = load_seizure_times(sub, ds)
+        except Exception:
+            sz_ep = []
+        t0 = float(rec_4d.get("timeline_start_epoch",
+                              rec_4d.get("first_event_epoch", 0.0)))
+        sz_h_4d = (np.array([(s - t0) / 3600.0 for s in sz_ep], dtype=float)
+                   if sz_ep else np.array([], dtype=float))
+
+        # NOTE: score_table is still consulted by _print_rate_cluster_seizure_table
+        # at the end of this function. Per-figure STRICT/enrich annotations
+        # have been removed at user request, so we no longer build a per-
+        # subject score_line / tag here.
+
+        # ----- attempt PR-3 prep -----
+        pr3_ok = False
+        if rec_3 is not None:
+            try:
+                subject_dir = _resolve_subject_dir(ds, sub)
+                loaded = _load_lagpat(subject_dir)
+                ranks = np.asarray(loaded["ranks"], dtype=float)
+                bools = np.asarray(loaded["bools"], dtype=bool)
+                channel_names = list(loaded["channel_names"])
+                n_ch = ranks.shape[0]
+                valid_events = _valid_event_indices(
+                    bools, min_participating=3)
+                if valid_events.size > 0:
+                    channel_order = _fixed_channel_order(ranks, bools)
+                    ordered_names = [channel_names[i] for i in channel_order]
+                    original_order = np.arange(n_ch, dtype=int)
+                    display_events = _sample_event_indices(
+                        valid_events, max_events=2000)
+                    day_mask_event = _formal_day_mask(
+                        ds, loaded["event_abs_times"][display_events])
+                    event_h = (np.asarray(
+                        loaded["event_abs_times"][display_events],
+                        dtype=float) - t0) / 3600.0
+                    adaptive = rec_3.get("adaptive_cluster", {})
+                    adaptive_labels = np.asarray(
+                        adaptive.get("labels", []), dtype=int)
+                    has_adaptive = (
+                        adaptive_labels.size == valid_events.size
+                        and adaptive_labels.size > 0)
+                    if has_adaptive:
+                        best_k = int(adaptive.get("chosen_k", 2))
+                        best_labels = adaptive_labels
+                        within_tau = adaptive.get(
+                            "within_cluster_tau_mean", float("nan"))
+                        corr_mat = adaptive.get(
+                            "inter_cluster_corr_matrix", [])
+                        inter_corr = (
+                            float(corr_mat[0][1])
+                            if (corr_mat and best_k == 2
+                                and len(corr_mat) >= 2
+                                and len(corr_mat[0]) >= 2)
+                            else float("nan"))
+                    else:
+                        k2 = rec_3.get("cluster", {})
+                        best_k = 2
+                        best_labels = np.asarray(
+                            k2.get("labels", []), dtype=int)
+                        within_tau = k2.get(
+                            "within_cluster_tau_mean", float("nan"))
+                        inter_corr = k2.get(
+                            "inter_cluster_corr", float("nan"))
+                    has_best = (best_labels.size == valid_events.size
+                                and best_labels.size > 0)
+                    all_tau = rec_3.get("propagation_stereotypy", {}).get(
+                        "all", {}).get("mean_tau", float("nan"))
+                    repro_grade = rec_3.get(
+                        "time_split_reproducibility", {}).get(
+                        "reproducibility_grade", "unknown")
+                    pr3_ok = True
+            except Exception as e:
+                print(f"  {k}: PR-3 panels unavailable ({e})")
+
+        # ===== build figure =====
+        # New ordering (top → bottom):
+        #   a  rate envelope        (real time, hours)
+        #   b  stacked event count  (real time, hours)
+        #      day/night strip      (shared time axis, no legend)
+        #   c  raw rank heatmap     (event index)
+        #   d  per-channel rank distribution
+        #   e  k-clustered rank heatmap
+        #   f  cluster rank curves
+        # Rationale: present what the recording actually looks like in real
+        # wall-clock time first (a/b share the day/night strip), then drill
+        # down into the propagation structure on the event-index axis.
+        if pr3_ok:
+            h_unit = max(2.8, 0.24 * n_ch)
+            fig = plt.figure(figsize=(22, 2 * h_unit + 13.5))
+
+            outer = gridspec.GridSpec(
+                2, 1,
+                height_ratios=[4.2 + 4.2 + 0.32, 2 * h_unit + 1.2],
+                left=0.06, right=0.985, top=0.93, bottom=0.05,
+                hspace=0.30,
+            )
+
+            # ---- TOP block: a (rate) + b (count) + day/night strip ----
+            top_gs = gridspec.GridSpecFromSubplotSpec(
+                3, 1, subplot_spec=outer[0],
+                height_ratios=[4.2, 4.2, 0.32], hspace=0.06,
+            )
+            ax_a = fig.add_subplot(top_gs[0])
+            ax_b = fig.add_subplot(top_gs[1], sharex=ax_a)
+            _plot_pr4d_subject(ax_a, ax_b, rec_4d, sz_h=sz_h_4d)
+            ax_a.set_title("")
+            ax_a.tick_params(axis="x", labelbottom=False)
+            ax_b.set_xlabel("")
+            ax_b.tick_params(axis="x", labelbottom=False)
+            # Larger ticks on the time-axis block (a/b + day-night strip)
+            # so peak rates / counts are easy to read at PPT scale.
+            for _ax in (ax_a, ax_b):
+                _ax.tick_params(axis="y", labelsize=FS_TICK + 2)
+                _ax.yaxis.label.set_size(FS_LABEL + 1)
+            style_panel(ax_a, "")
+            style_panel(ax_b, "")
+
+            ax_dn = fig.add_subplot(top_gs[2], sharex=ax_a)
+            dn_info = daynight_by_key.get(k)
+            if dn_info is not None:
+                bh, isd, bw = dn_info
+                x_max = float(ax_a.get_xlim()[1])
+                _draw_full_daynight_axis(ax_dn, bh, isd, bw, x_max)
+                ax_dn.set_xlabel("Hours from recording start",
+                                 fontsize=FS_LABEL + 1)
+                ax_dn.tick_params(axis="x", labelsize=FS_TICK + 2)
+            else:
+                ax_dn.axis("off")
+
+            # ---- BOTTOM block: c|d (raw heatmap + rank histo)  /  e|f
+            #      (clustered heatmap + cluster curves) ----
+            bot_gs = gridspec.GridSpecFromSubplotSpec(
+                2, 2, subplot_spec=outer[1],
+                width_ratios=[4.4, 0.85],
+                height_ratios=[h_unit, h_unit],
+                hspace=0.78, wspace=0.13,
+            )
+
+            # --- c: raw rank heatmap + per-event day/night sub-strip ---
+            c_sub = gridspec.GridSpecFromSubplotSpec(
+                2, 1, subplot_spec=bot_gs[0, 0],
+                height_ratios=[18, 1.4], hspace=0.06,
+            )
+            ax_c = fig.add_subplot(c_sub[0])
+            display_ranks_raw = ranks[channel_order][:, display_events]
+            im_rank = _plot_rank_heatmap(
+                ax_c, display_ranks_raw, ordered_names, title="")
+            ax_c.text(
+                0.5, 1.06,
+                f"raw rank heatmap  ·  n={valid_events.size}, "
+                f"τ={all_tau:.3f}",
+                transform=ax_c.transAxes, ha="center", va="bottom",
+                fontsize=FS_TITLE - 3, fontweight="bold", color="#222",
+            )
+            ax_c.tick_params(axis="x", labelbottom=False)
+            ax_c.set_xlabel("")
+            sz_idx_c = []
+            if sz_h_4d.size and event_h.size:
+                for sz in sz_h_4d:
+                    idx = int(np.argmin(np.abs(event_h - sz)))
+                    if abs(event_h[idx] - sz) <= 2.0:
+                        ax_c.axvline(idx + 0.5, color=COL_SEIZURE,
+                                     lw=3.0, ls="--", alpha=1.0,
+                                     zorder=10)
+                        sz_idx_c.append(idx + 0.5)
+            ax_c_strip = fig.add_subplot(c_sub[1], sharex=ax_c)
+            strip = np.where(day_mask_event, 1, 0)[None, :]
+            ax_c_strip.imshow(
+                strip, aspect="auto", interpolation="nearest",
+                cmap=ListedColormap([COL_NIGHT, COL_DAY]),
+                vmin=0, vmax=1,
+            )
+            for x in sz_idx_c:
+                ax_c_strip.axvline(x, color=COL_SEIZURE, lw=3.0,
+                                   ls="--", alpha=1.0, zorder=10)
+            if sz_idx_c:
+                ax_c.scatter(
+                    sz_idx_c, [n_ch + 0.25] * len(sz_idx_c),
+                    marker="v", s=110, color=COL_SEIZURE,
+                    edgecolors="white", linewidths=0.8,
+                    zorder=11, clip_on=False,
+                )
+            ax_c_strip.set_yticks([])
+            ax_c_strip.set_xticks([])
+            for sp in ax_c_strip.spines.values():
+                sp.set_visible(False)
+            style_panel(ax_c, "")
+
+            # --- d: per-channel rank distribution ---
+            ax_d = fig.add_subplot(bot_gs[0, 1])
+            _plot_rank_histogram(
+                ax_d, ranks, bools, valid_events,
+                original_order, channel_names,
+                title="",
+            )
+            ax_d.text(
+                0.5, 1.05, "Per-channel rank distribution",
+                transform=ax_d.transAxes, ha="center", va="bottom",
+                fontsize=FS_TITLE - 3, fontweight="bold", color="#222",
+            )
+            style_panel(ax_d, "")
+
+            # --- e: clustered rank heatmap ---
+            ax_e = fig.add_subplot(bot_gs[1, 0])
+            if has_best:
+                disp_best_labels = best_labels[
+                    np.isin(valid_events, display_events)]
+                order_best = np.argsort(disp_best_labels, kind="stable")
+                best_events_sorted = display_events[order_best]
+                best_labels_sorted = disp_best_labels[order_best]
+                display_ranks_best = ranks[channel_order][:, best_events_sorted]
+                _plot_rank_heatmap(
+                    ax_e, display_ranks_best, ordered_names, title="")
+                cursor = 0
+                for cid in np.unique(best_labels_sorted):
+                    cnt = int(np.sum(best_labels_sorted == cid))
+                    col = TEMPLATE_COLORS[int(cid) % len(TEMPLATE_COLORS)]
+                    if cursor > 0:
+                        ax_e.axvline(cursor, color=col, lw=2.0, ls="--",
+                                     zorder=4)
+                    ax_e.text(
+                        (cursor + cnt / 2.0) / max(1, len(best_events_sorted)),
+                        0.96,
+                        f"C{int(cid)}  n={cnt}",
+                        transform=ax_e.transAxes,
+                        color="white", ha="center", va="top",
+                        fontsize=FS_TICK, fontweight="bold",
+                        bbox=dict(boxstyle="round,pad=0.25",
+                                  facecolor=col, edgecolor="white",
+                                  alpha=0.92),
+                    )
+                    cursor += cnt
+                ax_e.text(
+                    0.5, 1.05,
+                    f"k={best_k} clustered  ·  "
+                    f"within-τ={within_tau:.3f}  ·  "
+                    f"inter-corr={inter_corr:.2f}",
+                    transform=ax_e.transAxes, ha="center", va="bottom",
+                    fontsize=FS_TITLE - 3, fontweight="bold", color="#222",
+                )
+            else:
+                _plot_rank_heatmap(
+                    ax_e, display_ranks_raw, ordered_names,
+                    title="(no cluster labels)")
+            ax_e.set_xlabel("Pop events (sorted by cluster)",
+                            fontsize=FS_LABEL, labelpad=2)
+            style_panel(ax_e, "")
+
+            # --- f: cluster rank curves (TEMPLATE_COLORS) ---
+            ax_f = fig.add_subplot(bot_gs[1, 1])
+            if has_best:
+                _plot_cluster_rank_curves_semantic(
+                    ax_f, ranks, bools, valid_events, best_labels,
+                    channel_order, channel_names,
+                    title="Cluster rank curves",
+                )
+            style_panel(ax_f, "")
+
+            # --- colorbar for rank heatmaps, placed beneath panel e ---
+            cax = inset_axes(
+                ax_e, width="100%", height="100%",
+                loc="lower left",
+                bbox_to_anchor=(0.34, -0.50, 0.32, 0.05),
+                bbox_transform=ax_e.transAxes, borderpad=0,
+            )
+            cbar = fig.colorbar(im_rank, cax=cax,
+                                orientation="horizontal")
+            cbar.set_label("rank: First → Last", fontsize=FS_TICK - 1,
+                           labelpad=2)
+            cbar.ax.tick_params(labelsize=FS_TICK - 3)
+
+            # Panel letter for a sits inside its own top-left (va="top")
+            # because a is tightly stacked above b — lifting it would push
+            # it off the figure / above the suptitle. b's letter is
+            # intentionally omitted (panel b inherits its identity from
+            # the shared time axis with a). Letters c/d/e/f are lifted
+            # ABOVE their panels (default va="bottom") so they read more
+            # like classic panel labels.
+            _place_panel_letters(fig, [(ax_a, "a")], dy=0.0, va="top")
+            _place_panel_letters(fig, [
+                (ax_c, "c"), (ax_d, "d"),
+                (ax_e, "e"), (ax_f, "f"),
+            ])
+
+            title_main = (
+                f"{ds}:{sub}  ·  repro = {repro_grade}    "
+                f"dom_frac = "
+                f"{rec_4d.get('summary',{}).get('dominant_rate_fraction', float('nan')):.3f},  "
+                f"n = {rec_4d.get('n_events_used','?')}"
+            )
+
+        else:
+            # PR-3 missing → fall back to a 2-panel PR-4D-only layout
+            fig = plt.figure(figsize=(18, 11))
+            outer = gridspec.GridSpec(
+                3, 1, height_ratios=[1.0, 1.0, 0.15], hspace=0.10,
+                left=0.07, right=0.985, top=0.92, bottom=0.07,
+            )
+            ax_a = fig.add_subplot(outer[0])
+            ax_b = fig.add_subplot(outer[1], sharex=ax_a)
+            _plot_pr4d_subject(ax_a, ax_b, rec_4d, sz_h=sz_h_4d)
+            ax_a.set_title("")
+            ax_a.tick_params(axis="x", labelbottom=False)
+            ax_b.tick_params(axis="x", labelbottom=False)
+            ax_b.set_xlabel("")
+            style_panel(ax_a, "")
+            style_panel(ax_b, "")
+            ax_dn = fig.add_subplot(outer[2], sharex=ax_a)
+            dn_info = daynight_by_key.get(k)
+            if dn_info is not None:
+                bh, isd, bw = dn_info
+                x_max = float(ax_a.get_xlim()[1])
+                _draw_full_daynight_axis(ax_dn, bh, isd, bw, x_max)
+                ax_dn.set_xlabel("Hours from recording start",
+                                 fontsize=FS_LABEL)
+            else:
+                ax_dn.axis("off")
+            _place_panel_letters(fig, [(ax_a, "a")], dy=0.0, va="top")
+            title_main = (
+                f"{ds}:{sub}    "
+                f"dom_frac = "
+                f"{rec_4d.get('summary',{}).get('dominant_rate_fraction', float('nan')):.3f},  "
+                f"n = {rec_4d.get('n_events_used','?')}"
+            )
+
+        # ----- shared title (single line; STRICT/enrich rows removed) -----
+        _suptitle(fig, title_main, y=0.97)
+
+        savefig_pub(fig, out_dir / f"{ds}_{sub}.png")
+
+    print(f"  per-subject figures written to {out_dir}")
+    _print_rate_cluster_seizure_table()
+    return out_dir
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--all", action="store_true",
                         help="Generate all 5 figures")
     parser.add_argument("--fig", type=str, default="",
                         help="Comma-separated figure indices, e.g. 1,3,4")
+    parser.add_argument("--per-subject", action="store_true",
+                        help="Also write a Fig-5-style image for every "
+                             "subject into per_subject/")
     args = parser.parse_args()
 
     fns = {1: plot_fig1, 2: plot_fig2, 3: plot_fig3,
            4: plot_fig4, 5: plot_fig5}
 
+    targets = []
     if args.all:
         targets = sorted(fns.keys())
     elif args.fig:
         targets = [int(x.strip()) for x in args.fig.split(",") if x.strip()]
-    else:
-        parser.error("specify --all or --fig 1,2,...")
+    elif not args.per_subject:
+        parser.error("specify --all, --fig 1,2,..., or --per-subject")
 
     for i in targets:
         if i not in fns:
             print(f"  unknown figure {i}, skipping")
             continue
         fns[i]()
+
+    if args.per_subject:
+        plot_pr_per_subject_combined()
 
 
 if __name__ == "__main__":
