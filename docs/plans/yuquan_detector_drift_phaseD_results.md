@@ -70,12 +70,24 @@ Pre-D 旧产物已搬到 `results/hfo_detection/_legacy_align_backup/<subject>_p
 | dongyiming  | 12       | **0.906** (all)     | 1.07 - 1.40          | **0.998 - 1.000** | 0.18 - 0.32 |
 | wangyiyang  | 12       | **0.919** (all)     | 1.07 - 2.13 (max PF) | **0.972 - 1.000** | 0.35 - 0.63 |
 
-**Linus 翻译**: 通道分布的相对模式跟 legacy 完全一致 (Pearson r ≈ 1.0)，绝对总数大约高 10-20%。这个偏差源于：
+**Linus 翻译**: 通道分布的相对模式跟 legacy 完全一致 (Pearson r ≈ 1.0)，绝对总数大约高 10-20%。这个偏差源于（**勘误 2026-04-20**: 之前归因 "GPU↔CPU 浮点差" 是错的）：
 
-1. D03 残留：`up=2, down=round(2*fs/800)` 在 fs=2048 Hz 时给 819.2 Hz 而非 800 Hz —— 影响每个 sub-band 的实际 sampling grid，进而让相对阈值略有偏移。
-2. D15 / D18 残留：CPU FIR firwin(201) 与 legacy CUDA cusignal 实现的浮点级别差异。
+Phase D 的 detection 全部用了 `--gpu`（参见 `scripts/_phaseD_run_references.sh`），detector envelope 那一段 (`_compute_envelope_gpu`) 走 cusignal `firwin(201) + fftconvolve + hilbert + abs`，和 legacy `p16_cuda_24h_bipolar.py:band_filt_cu` **逐行相同的 GPU 实现**；`_find_high_enveTimes_gpu` 也是 cuPy 复刻。所以 detector 主路径**没有** GPU↔CPU 差。
 
-这些是不可消除的实现差异，但因为它们对所有 channel 同向作用 (Pearson r ≈ 1)，下游 picked-channel 选择基本不受影响。
+唯一残留差异在 `SEEGPreprocessor._apply_notch_legacy_fir`：
+
+| 阶段 | 新代码 (Phase D `--gpu`) | Legacy `p16_cuda_24h_bipolar.py` |
+|---|---|---|
+| resample (CPU `resample_poly(2,5)`) | ✅ 一致 | ✅ 一致 |
+| **notch** (50/100/150/200/250 Hz, `firwin(801)+fftconvolve`) | **scipy CPU** | **cusignal GPU** ⚠ |
+| sub-band envelope (`firwin(201)+fftconvolve+hilbert+abs`) | cusignal GPU | cusignal GPU ✅ |
+| threshold + event extract | cuPy GPU | cusignal/cuPy GPU ✅ |
+
+`SEEGPreprocessor` 是跨数据集共用的预处理类（epilepsiae cohort 也用），目前不感知下游 detector 是否在 GPU 上跑。`legacy_align=True` 把 notch kernel 强制对齐到 `firwin(801)`，但 backend 还是 numpy/scipy — 算法和系数逐字相同，但**浮点累加顺序不同 → ε 级误差，被后续非线性 envelope + sharp 阈值放大成 events_count ±10-20% 的漂移**。
+
+D03 (resample factor `round(2*fs/800)` 在 fs=2048 时给 819.2 Hz 而非 800) 也是残留，但**两边都用 scipy CPU resample_poly，输出 byte-identical**，不贡献差异。
+
+这些差异对 picked-channel 选择 (Pearson r ≈ 1.0) 透明，对 lagPat (centroid 排序) 透明，Phase B contract 通过。**修不修的判断**：要消除残留，需要给 `SEEGPreprocessor` 加可选的 GPU notch backend，但这对所有 contract 已经通过的下游分析不带来增量价值，且会引入 epilepsiae cohort 不必要的 GPU 强依赖 — **暂不修，记入 known limitation**。
 
 ### gaolan 关键家族 (Phase B 之前指控的"5.9x 放大")
 
@@ -195,15 +207,17 @@ NEW picked 多了 3 个 SOZ 邻近 channels (A6, D4, E5)。每个 packed window 
 | D04 chunk_sec=200 (legacy_align 派生) | ✅ |
 | D13 notch 包含 250 Hz | ✅ (subject_params.json) |
 | D14 notch FIR firwin(801, ±2Hz) forward | ✅ (`_apply_notch_legacy_fir`) |
-| D15 CPU bandpass FIR firwin(201) | ✅ (`BQKDetector.legacy_align=True`) |
+| D15 bandpass FIR firwin(201) | ✅ GPU `_compute_envelope_gpu` (cusignal) 与 legacy 路径一致；CPU `_compute_subband_envelope_legacy_cpu` 仅作 fallback |
 | D18 chunk-edge events 拒绝 (空 side window) | ✅ |
 | D21 chunk_overlap=0 under legacy_align | ✅ |
 | R02 refine 用全局 pick_k=1.0 | ✅ (`run_hfo_detection.py:258`) |
 | 3 reference subjects 重跑 | ✅ (Phase D, 5h GPU) |
 | Phase B 重跑 + 验证 | ✅ (1/3 flag, no stop) |
-| 8 backfill-only subjects 重跑 | ⏳ 待用户决策 |
-| LagPat 生成 (用新 _refineGpu.npz) for 11 subjects | ⏳ 待用户决策 |
+| 8 backfill-only subjects 重跑 (Phase E) | ✅ (2026-04-20 01:42, 8/8) |
+| 10 main-cohort subjects 重跑 (Phase F-1) | 🔄 进行中 (chained from Phase E) |
+| LagPat 生成 (Phase E2, 11 subjects) | 🔄 进行中 (`scripts/run_yuquan_lagpat_backfill.py`, dry-run PASS) |
 | D12 legacy "drop ≥3" 行为是否要复刻 | ⏸ defer (按 plan §5.1) |
+| **Known limitation**: SEEGPreprocessor notch 仍走 scipy CPU (而非 cusignal GPU)，是 events_count ±10-20% 残留差异源；不修，理由见 §3 | ⏸ won't-fix |
 
 ---
 
