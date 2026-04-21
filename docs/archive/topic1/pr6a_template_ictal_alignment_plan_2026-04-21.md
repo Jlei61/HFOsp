@@ -160,6 +160,19 @@ Aung et al. 2026 Epilepsia: "Spectral similarity between Sp-HFOs and ictal HFA i
 
 这个门槛直接对标 Liu 2019 的 "DP-Stability was 0.88 ± 0.07"——他们的 stability 在 interictal spike propagation 上是 0.88；我们允许 ictal 场景降到 0.5（strict）/ 0.3（relaxed）是因为 ictal seizure 数通常远少于 interictal segment，统计上噪声更大。
 
+### 3.6 Sentinel cohort（Step 2-4 共用，落定于 2026-04-21 Step 2）
+
+PR-6-A pipeline 在进入全 cohort 复跑前，先在 2 个 sentinel subject 上做 visual inspection，避免 pipeline-level bug 污染整张 cohort 表。Sentinel 选择已在 Step 2 落定，后续 Step 3、Step 4 的 sentinel 报告（CUSUM alarm 表 / baseline false-alarm / per-band r_sz）必须复用同一对 subject，**禁止在 step 之间偷换 sentinel**。
+
+| key | subject | k | PR-5-A retained main | 9-subset (forward/reverse) | inter-cluster r | n_seizures (PR-5-A gate-eligible) | 入选理由 |
+|---|---|---|---|---|---|---|---|
+| `sentinel_A` | `epilepsiae/548` | 2 | ✓ | ✓ | −0.62 | 31 | 9-subset 中 seizure 数最多，最直接对应 Smith 2022 双向行波 sanity |
+| `sentinel_B` | `epilepsiae/916` | 2 | ✓ | ✗ | −0.37 | 51 | 普通 k=2、reproducibility grade=strong、不在 9-subset 内，作为"非双向行波 baseline" |
+
+Sentinel 选择来源：交叉 [results/interictal_propagation/pr5a_novel_template_gate.json](../../../results/interictal_propagation/pr5a_novel_template_gate.json) 中 main retained 名单（n=23）与 [results/interictal_propagation/per_subject/](../../../results/interictal_propagation/per_subject/) 下每个 subject 的 `adaptive_cluster.inter_cluster_corr_matrix` + `time_split_reproducibility.full_data_forward_reverse_pairs`；筛选 `stable_k=2` 后按 9-subset / 非 9-subset 各取一个 seizure 数最大者。
+
+Step 2 sentinel 已产出每个 sentinel × 每套 ER 配置 × 2 个 seizure 的 z-ER trace 图，路径 `results/interictal_propagation/ictal_alignment/_sentinel_step2/<subject>_<seizure_idx>_<gamma_ER|broad_ER>.png`，并附 [sentinel_step2_summary.json](../../../results/interictal_propagation/ictal_alignment/_sentinel_step2/sentinel_step2_summary.json)（含每张图 focal vs nonfocal 的 pre30s / post30s z-ER 中位数 max）。
+
 ---
 
 ## 4. 假设与统计合同

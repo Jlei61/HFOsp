@@ -1,0 +1,170 @@
+{
+  "step": "PR-6-A Step 2 sentinel ER + baseline z-score visual inspection",
+  "generated_at": "2026-04-21T17:57:15+0800",
+  "sentinels": [
+    {
+      "key": "sentinel_A",
+      "subject": "epilepsiae/548",
+      "rationale": "k=2, PR-5-A retained main, in 9-subset forward/reverse, n_seizures=31 (max in subset)",
+      "focal_channels": [
+        "HL10",
+        "HL7",
+        "HL8",
+        "HL9",
+        "TBLA1",
+        "TBLA2",
+        "TBLA3"
+      ],
+      "seizures": [
+        {
+          "seizure_idx": 0,
+          "seizure_id": "54800000102",
+          "block_stem": "54800102_0043",
+          "clin_onset_epoch": 1138413562.208008,
+          "n_channels": 84,
+          "fs": 1024.0,
+          "bands": {
+            "gamma_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 7,
+              "n_nonfocal_valid": 77,
+              "focal_zER_pre30s_max_median": 2.0726261317721995,
+              "focal_zER_post30s_max_median": 2.7638055318332704,
+              "nonfocal_zER_pre30s_max_median": 2.140631303391285,
+              "nonfocal_zER_post30s_max_median": 2.3545701919460225,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_548_00_gamma_ER.png"
+            },
+            "broad_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 7,
+              "n_nonfocal_valid": 77,
+              "focal_zER_pre30s_max_median": 2.4874768160224248,
+              "focal_zER_post30s_max_median": 3.5472166236082923,
+              "nonfocal_zER_pre30s_max_median": 2.319224963062451,
+              "nonfocal_zER_post30s_max_median": 2.294526736144554,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_548_00_broad_ER.png"
+            }
+          }
+        },
+        {
+          "seizure_idx": 1,
+          "seizure_id": "54800100102",
+          "block_stem": "54800102_0046",
+          "clin_onset_epoch": 1138422030.709961,
+          "n_channels": 84,
+          "fs": 1024.0,
+          "bands": {
+            "gamma_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 7,
+              "n_nonfocal_valid": 77,
+              "focal_zER_pre30s_max_median": -0.05415760958828602,
+              "focal_zER_post30s_max_median": 0.6298236808839272,
+              "nonfocal_zER_pre30s_max_median": 2.1784818070729384,
+              "nonfocal_zER_post30s_max_median": 2.040298343079101,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_548_01_gamma_ER.png"
+            },
+            "broad_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 7,
+              "n_nonfocal_valid": 77,
+              "focal_zER_pre30s_max_median": 1.3383101014000236,
+              "focal_zER_post30s_max_median": 2.184345149499247,
+              "nonfocal_zER_pre30s_max_median": 2.482005914086912,
+              "nonfocal_zER_post30s_max_median": 2.3010102503565153,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_548_01_broad_ER.png"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "sentinel_B",
+      "subject": "epilepsiae/916",
+      "rationale": "k=2, PR-5-A retained main, NOT in forward/reverse subset, ordinary k=2, n_seizures=51",
+      "focal_channels": [
+        "AM7",
+        "F8",
+        "FT10",
+        "PB1",
+        "PB2",
+        "PB3",
+        "PB4",
+        "PB5",
+        "PB6",
+        "PB7",
+        "T8"
+      ],
+      "seizures": [
+        {
+          "seizure_idx": 0,
+          "seizure_id": "91600001102",
+          "block_stem": "91601102_0005",
+          "clin_onset_epoch": 1215538647.216797,
+          "n_channels": 84,
+          "fs": 1024.0,
+          "bands": {
+            "gamma_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 8,
+              "n_nonfocal_valid": 76,
+              "focal_zER_pre30s_max_median": 2.4110065865393357,
+              "focal_zER_post30s_max_median": 3.481238677169235,
+              "nonfocal_zER_pre30s_max_median": 2.918298514484386,
+              "nonfocal_zER_post30s_max_median": 3.414168551121465,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_916_00_gamma_ER.png"
+            },
+            "broad_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 8,
+              "n_nonfocal_valid": 76,
+              "focal_zER_pre30s_max_median": 2.6046515726907327,
+              "focal_zER_post30s_max_median": 2.7989711580083645,
+              "nonfocal_zER_pre30s_max_median": 2.710685403503038,
+              "nonfocal_zER_post30s_max_median": 2.902331296092415,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_916_00_broad_ER.png"
+            }
+          }
+        },
+        {
+          "seizure_idx": 1,
+          "seizure_id": "91600101102",
+          "block_stem": "91601102_0030",
+          "clin_onset_epoch": 1215629321.549805,
+          "n_channels": 84,
+          "fs": 1024.0,
+          "bands": {
+            "gamma_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 8,
+              "n_nonfocal_valid": 76,
+              "focal_zER_pre30s_max_median": 2.603859007288387,
+              "focal_zER_post30s_max_median": 2.809336469800214,
+              "nonfocal_zER_pre30s_max_median": 3.120360493397157,
+              "nonfocal_zER_post30s_max_median": 3.2028303614517073,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_916_01_gamma_ER.png"
+            },
+            "broad_ER": {
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_focal_valid": 8,
+              "n_nonfocal_valid": 76,
+              "focal_zER_pre30s_max_median": 2.6316093796964815,
+              "focal_zER_post30s_max_median": 2.739151541099892,
+              "nonfocal_zER_pre30s_max_median": 2.9522238265020433,
+              "nonfocal_zER_post30s_max_median": 2.721999389747198,
+              "png": "results/interictal_propagation/ictal_alignment/_sentinel_step2/epilepsiae_916_01_broad_ER.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
