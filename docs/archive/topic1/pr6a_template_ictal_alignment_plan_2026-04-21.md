@@ -72,21 +72,30 @@ Aung et al. 2026 Epilepsia: "Spectral similarity between Sp-HFOs and ictal HFA i
 
 这是你关心的核心问题："如何定义+提取 channel-wise earliest activation，不被传播带来的大范围同步高信号干扰"。答案是 **4 层防御**，每层针对一种污染源。
 
-### 3.1 Layer 1 — Feature choice: Energy Ratio (ER)
+### 3.1 Layer 1 — Feature choice: Energy Ratio (ER) — 双配置并列
 
 **为什么不用 amplitude crossing**：Seizure 的大 amplitude 是 propagation 后的事，amplitude crossing 会被晚起但大振幅的通道率先触发。
 
 **为什么用 ER**："The Page-Hinkley algorithm provides a detection time Nd for each brain structure if involved in the generation of a rapid discharge" — ER 对频谱结构变化敏感（fast oscillation replacing slower background），不是对 amplitude 本身。"EI was developed by Bartolomei et al. to quantify the appearance of high frequency oscillations by averaging the energy ratio between high and low frequency bands over the lag in seizure onset time relative to a reference point"。
 
-**具体定义**（相对 Bartolomei 2008 调参以适应我们的 HFO-focused 数据）：
+**两套配置写死，从 Step 2 起并行跑到底**（命名硬绑定，绝不接受运行时第三套自定义频段）：
+
+| key | E_fast | E_slow | 定位 |
+|---|---|---|---|
+| `gamma_ER` | `∫_{60}^{100} \|S(f,n)\|² df` | `∫_{4}^{20} \|S(f,n)\|² df` | **主配置**（HFO-centered pipeline，LVFA 期望在 gamma 带最早出现） |
+| `broad_ER` | `∫_{12}^{127} \|S(f,n)\|² df` | `∫_{4}^{20} \|S(f,n)\|² df` | **sensitivity 配置**（Bartolomei 2008 原版，覆盖 burst-suppression / delta brush 等非 LVFA onset 模式） |
+
+通用约束（两套共享）：
 
 - 滤波：bandpass 4–250 Hz（Epilepsiae 主流 fs 1024 Hz 可支持）
-- `E_fast[n] = ∫_{60}^{100} |S(f,n)|² df`（gamma band burst）
-- `E_slow[n] = ∫_{4}^{20} |S(f,n)|² df`（theta/alpha/low-beta 背景）
 - `ER[n] = log(E_fast[n] / E_slow[n])`（log 稳定化，避免 slow band 低谷时 ratio 爆炸）
 - 滑窗 1 s，步长 100 ms
 
-**为什么是 60–100 Hz 而不是 Bartolomei 原版 12–127 Hz**：我们整个 pipeline 是 HFO-centered（80–250 Hz ripple/fast ripple 是 detection 焦点），LVFA 期望在 gamma 带最早出现。12–127 Hz 过宽会把 alpha/low-beta 的 ictal rhythmic 活动一起吸收，这些在 widespread propagation 期才明显，污染 onset rank。注意 gamma 带 60–100 不包括我们的 HFO 带 80–250 的主体，故意避开以防 HFO detector 的影响被双重计入。
+**关键约束（合同级，不可松动）**：
+
+- `gamma_ER` 与 `broad_ER` **从 Step 2 ER 提取起一直到 Step 7 H1' 全程并行跑**；所有下游统计（r_sz / sanity / H1 / H1'）在两套配置上各跑一遍并行报告。
+- **禁止按 subject 后验切换主配置**。即不允许"这个 subject gamma_ER 失败、改用 broad_ER"。两套独立产出独立的 r_sz / s_sz / cohort 文件，独立做 H1 推断。
+- 主配置切换只发生在 cohort-level Sanity gate（§4.3 / Step 5）：若 gamma cohort sanity FAIL 而 broad cohort sanity PASS，则在 archive 中正式切换主配置为 broad，**整体重跑下游**——不做 per-subject mix。
 
 ### 3.2 Layer 2 — Per-channel baseline z-score（抗 identity-bias）
 
@@ -131,17 +140,25 @@ Aung et al. 2026 Epilepsia: "Spectral similarity between Sp-HFOs and ictal HFA i
 - 若某次 seizure 中 `<30%` 通道有 valid `n_d`（多数 channel "unreached"）→ 该 seizure 标记 **`onset_unreached`**，完全排除
 - Subject 至少 3 个 non-tied non-unreached seizures 才 qualifies for main cohort
 
-### 3.5 Per-subject r_sz 构造与 stability gate
+### 3.5 Per-subject r_sz 构造与 stability gate（双 cohort，无加权档）
 
 - 对 qualifying subject，每次 seizure 得到一个 per-channel rank vector `r_{sz,s}`（s 为 seizure index）
 - 主 r_sz = **median rank per channel across seizures**
 - **Stability gate**：计算所有 seizure pair (s, s') 的 Spearman ρ on r：
   - `s_sz = median{ρ(r_{sz,s}, r_{sz,s'})}` over all pairs
-  - `s_sz < 0.3` → subject 退出 main cohort（"onset rank 本身都不稳，template 对比无意义"）
-  - `0.3 ≤ s_sz < 0.5` → 参与 cohort 但在敏感性分析中降权
-  - `s_sz ≥ 0.5` → 全权重
 
-这个门槛直接对标 Liu 2019 的 "DP-Stability was 0.88 ± 0.07"——他们的 stability 在 interictal spike propagation 上是 0.88；我们允许 ictal 场景降到 0.3 / 0.5 是因为 ictal seizure 数通常远少于 interictal segment，统计上噪声更大。
+**双 cohort 划分（合同级，不可加权）**：
+
+| cohort key | 入选条件 | 用途 |
+|---|---|---|
+| `strict_cohort` | `s_sz >= 0.5` | **主分析**（H1 主结论、sanity 主判据均在 strict 上跑） |
+| `relaxed_cohort` | `s_sz >= 0.3`（含 strict 全部成员） | **sensitivity 分析**（H1 / sanity 同步在 relaxed 上跑作为对比） |
+
+- `s_sz < 0.3` → subject 完全退出，不进任何 cohort（"onset rank 本身都不稳，template 对比无意义"）
+- **不存在加权档**：strict 与 relaxed 是两个独立 cohort，统计永远在 cohort 内 unweighted；从不在同一检验里把不同 stability 的 subject 加权汇总。
+- Wilcoxon / sign test 在 strict 上跑主结论，在 relaxed 上跑 sensitivity，两份结果并列报告（每套 ER 配置 × 每个 cohort = 4 套数）。
+
+这个门槛直接对标 Liu 2019 的 "DP-Stability was 0.88 ± 0.07"——他们的 stability 在 interictal spike propagation 上是 0.88；我们允许 ictal 场景降到 0.5（strict）/ 0.3（relaxed）是因为 ictal seizure 数通常远少于 interictal segment，统计上噪声更大。
 
 ---
 
@@ -149,49 +166,67 @@ Aung et al. 2026 Epilepsia: "Spectral similarity between Sp-HFOs and ictal HFA i
 
 ### 4.1 主假设 H1（Smith 2022 一般预测）
 
-- **定义**：对每个 qualifying subject（k=2, s_sz ≥ 0.5），计算：
+- **定义**：对每个 strict_cohort 内 subject（k=2, `s_sz >= 0.5`），计算：
   - `ρ_T0_sz = Spearman(T0_centroid_rank, r_sz)` on C_common
   - `ρ_T1_sz = Spearman(T1_centroid_rank, r_sz)` on C_common
   - `ρ_max = sign-preserving argmax by |ρ|`；取该值为 `ρ_aligned`
-- **Cohort-level test**：
+- **Cohort-level test（双 cohort × 双 ER 配置共 4 套数）**：
+  - **主分析在 strict_cohort 上**，sensitivity 在 relaxed_cohort 上；从不在加权样本上跑（§3.5 双 cohort 合同）。
   - 主检验：one-sample Wilcoxon on `ρ_aligned` against 0（H1 预测 ρ_aligned 中位数 > 0）
   - 次检验：sign test（n subjects with ρ_aligned > 0.2 / total qualifying）
   - 报告 `|ρ_aligned|` 中位数和 IQR
 - **α 分配**：
-  - Main cohort Bonferroni：α = 0.05 / 2 tests = 0.025
-  - "PASS" 判据：Wilcoxon p < 0.025 且 sign-test 超过 70% 正向
+  - 主 cohort Bonferroni：α = 0.05 / 2 tests = 0.025（Wilcoxon + sign test 各一）
+  - **PASS 判据（strict 上跑）**：Wilcoxon p < 0.025 且 sign-test 超过 70% 正向
+  - relaxed cohort 不分独立 α，只作为方向一致性 sensitivity 报告
+  - k≠2 subject（`818`、`zhangjinhan`）走 case-series，不进任何 cohort 推断（详见 Step 6 三态决策）
 
-### 4.2 备择假设 H1'（Smith 2022 双向预测，9-subject subset）
+### 4.2 备择假设 H1'（Smith 2022 双向预测，9-subject subset） — pre-registered secondary
 
-在 `inter-cluster r < -0.5` 的 9 个 subject 子集上（与 main cohort 重叠的那些）：
+H1' 是**预先注册的次级检验（pre-registered secondary test）**：不进 H1 的 α 池、不分 α 阈值，只做方向性 / sign test 的强弱判读，**不承载主结论**。判读语言全程使用 "direction supported / sign count" 等方向性表达，绝不引用 H1 的 Bonferroni-corrected 阈值。
+
+在 `inter-cluster r < -0.5` 的 9 个 subject 子集上（与 strict_cohort 取交集，即只在 strict 内的 9-subset 成员上跑，避免拿非 strict subject 拉读数）：
 
 - 两 template 应与 r_sz 呈符号相反的相关
 - 定义 **bidirectional score**：`B = −(ρ_T0_sz × ρ_T1_sz)`（若符号相反且绝对值都大，B 大）
 - H1' 预测 B > 0 在大多数 9-subset subject 上成立
-- Sign test：`# subjects with ρ_T0_sz × ρ_T1_sz < 0` / 9
-- 报告 individual `(ρ_T0, ρ_T1)` 散点图
+- Sign test：`# subjects with ρ_T0_sz × ρ_T1_sz < 0` / n（n = 9-subset ∩ strict_cohort 的实际样本数）
+- 报告 individual `(ρ_T0, ρ_T1)` 散点图与 sign 计数；**不出 p-value 主结论**
 
-这是 PR-6-A 里**最直接对应 Smith 2022 的检验**。9 个 subject 功效极有限（sign test min p ≈ 0.004），所以这一层从一开始就声明为 **exploratory**，不分 α。
+这是 PR-6-A 里**最直接对应 Smith 2022 的检验**。9 个 subject 功效极有限（sign test 理论最小 p ≈ 0.004），所以从设计上就把 H1' 钉为方向性次级证据：不被 H1 alpha 池吸收，也不会被"显著/不显著"二分判读。
 
-### 4.3 Sanity check（pipeline 可信度 gate）
+### 4.3 Sanity check（pipeline 可信度 gate） — i vs e only
 
-**必须先通过这一关才能解读 H1/H1'**。用 Epilepsiae `focus_rel` 三值标注（`i` = focal / `l` = lesion / `e` = extra-focal）：
+**必须先通过这一关才能解读 H1/H1'**。用 Epilepsiae `focus_rel` 标注，**只看 `i` 与 `e` 两值**：
+
+- `i` = focal（pipeline 预测 rank 更小 = 更早激活）
+- `e` = extra-focal（pipeline 预测 rank 更大 = 更晚激活）
+- `l` = lesion 通道**完全不进 sanity 集合、不进检验**（cohort 内 `l` 通道数普遍偏少，混入会污染 i vs e 的方向读数）
+
+主 sanity 检验：
 
 - Per-subject：`i` 通道的 r_sz rank 分布 vs `e` 通道的 r_sz rank 分布 → Mann-Whitney U
-- Cohort-level：`i` 通道 median r_sz vs `e` 通道 median r_sz 的 paired Wilcoxon
+- Cohort-level：每个 subject 取 `median(r_sz | i) − median(r_sz | e)` 做 paired Wilcoxon
 - **PASS 判据**：cohort Wilcoxon p < 0.05 且方向是 `i < e`（focal channel rank 更小 = 更早激活）
-- **如果 sanity check FAIL**：pipeline 有 bug 或 SOZ label 有问题，**H1/H1' 结果不发布**，回到 §3 调参（λ, bandpass, baseline window 三选一）
+
+附录展示（不进判据）：
+
+- 在 archive §11 附录里给一张 `l` 通道的 r_sz 分布描述图，便于观察 lesion 通道在 onset rank 中的相对位置；这张图**仅描述**，不进 sanity gate、不影响 PASS/FAIL。
+
+**如果 sanity check FAIL**：pipeline 有 bug 或 SOZ label 有问题，**H1/H1' 结果不发布**。Step 5 hard gate 三态决策（gamma sanity / broad sanity）写在 step 计划 Step 5 节，本节不再展开。
 
 ### 4.4 失败合同
 
 | 触发条件 | 响应 |
 |---|---|
-| <50% PR-5-A retained main subject 能通过 §3.5 stability gate | cohort underpowered → 降级为 case-series (n≥5)，H1 作为 descriptive only |
-| Sanity check (§4.3) cohort null | pipeline 问题或 label 问题；**暂缓 H1/H1' 发布** |
-| H1 Wilcoxon p > 0.025 且 `|ρ_aligned|` 中位数 < 0.25 | Smith 2022 在 HFO population event 层面不复现；诚实公开 null |
-| H1 PASS 但 H1' 9-subset null | H1' 视作 underpowered exploration，不作为主结论一部分 |
+| `strict_cohort` 任一 ER 配置 `n < 8` | Step 4 HARD GATE 1 触发：PR6A 降级为 case-series；archive 写明并在主文档 §7 标注 underpowered |
+| 任一 ER 配置 cohort 级 `tied_fraction > 0.4` | Step 4 HARD GATE 2 触发：把 cohort 拆 `tied / resolved` 分别上报，不能默认 pool |
+| Sanity check (§4.3) gamma cohort null 但 broad cohort PASS | 在 archive 中正式切换主配置为 broad，重跑 Step 4 cohort 报告后再继续；不做 per-subject mix |
+| Sanity check (§4.3) gamma + broad 两套都 null | PR6A 进入 BLOCKED 状态：archive 写明 sanity FAIL、不发布 H1，回 Step 2/3 重新调参（建议先调 baseline window，再调 λ） |
+| H1 strict cohort Wilcoxon p > 0.025 且 `\|ρ_aligned\|` 中位数 < 0.25（两套 ER 配置均如此） | Smith 2022 在 HFO population event 层面不复现；诚实公开 null，不重跑 |
+| H1 PASS 但 H1' 9-subset sign-count 不强 | H1' 仅作方向性描述，不作为主结论一部分；不再用"显著/不显著"语言 |
 | `onset_tied` seizure 比例 > 40%（跨 cohort） | Epilepsiae 多数 seizure 是 rapid-spread 模式；rank extraction 时间分辨率限制；在 `onset_tied` vs `onset_resolved` 两层上各跑一次，分别报告 |
-| H1 和 sanity check 同时 PASS 但 H1' 显示 `ρ_T0` 和 `ρ_T1` 同号且都 > 0 | 两 template 都同向对应 ictal onset，inter-cluster 负相关是在非-onset-related 维度上发生；Smith bidirectional hypothesis 不成立，但"模板锚 ictal"成立 → 这是一种有趣的 intermediate outcome |
+| H1 与 sanity 同时 PASS 但 H1' 显示 `ρ_T0` 和 `ρ_T1` 同号且都 > 0 | 两 template 都同向对应 ictal onset，inter-cluster 负相关是在非-onset-related 维度上发生；Smith bidirectional 不成立，但"模板锚 ictal"成立 → intermediate outcome，按方向性语言记录 |
 
 ---
 
@@ -218,47 +253,74 @@ scripts/plot_pr6a_alignment.py       # cohort 散点 + 9-subset individual + san
 
 ---
 
-## 6. TDD 测试合同（锁 9 项，主文档不允许在未跑过前松动）
+## 6. TDD 测试合同（锁 9 项，按 step 归属分三组）
+
+测试文件：`tests/test_pr6a_ictal_onset.py`
+
+| 组 | 归属 step | 测试 ID | 范围 |
+|---|---|---|---|
+| **数据层** | Step 2-4 | T1, T2, T3, T4, T5, T6 | ER 提取 / baseline z-score / CUSUM / tie 标记 / C_common re-rank / 双 cohort gate |
+| **Sanity 层** | Step 5 | T8 | i vs e sanity gate |
+| **推断层** | Step 6-7 | T9, T7 | H1 cohort 路由 / H1' 双向方向性 |
+
+### 数据层（Step 2-4 共用）
 
 ```
-tests/test_pr6a_ictal_onset.py
-
-T1. test_er_channel_independence:
+T1. test_er_channel_independence:                          [Step 2]
     构造 2-channel synthetic signal，channel 0 在 onset+1s 注入 80Hz burst，
     channel 1 在 onset+3s 注入同等 burst。验证 n_d[ch0] < n_d[ch1].
+    必须对 gamma_ER 与 broad_ER 两套 band 配置都通过.
 
-T2. test_baseline_zscore_removes_identity_bias:
+T2. test_baseline_zscore_removes_identity_bias:            [Step 2]
     2 channels，ch0 baseline ER 始终比 ch1 高 5 dB，但 seizure 时两者都升高
     同等幅度。未做 z-score 时 ch0 n_d < ch1 n_d（错误）；做 z-score 后应
     两者 n_d 接近.
 
-T3. test_page_hinkley_no_false_alarm_on_pure_baseline:
+T3. test_page_hinkley_no_false_alarm_on_pure_baseline:     [Step 3]
     仅 baseline segment，CUSUM λ 按 §3.3 permutation null 设定后，
-    false positive rate < 1/hour.
+    false positive rate < 1/hour. λ 必须 per-subject + per-band 标定.
 
-T4. test_onset_tied_flagging:
+T4. test_onset_tied_flagging:                              [Step 3]
     synthetic seizure, 80% channels 在 onset+0.2s 同时 recruit.
     pipeline 必须标记 onset_tied=True.
 
-T5. test_c_common_rebalancing:
+T5. test_c_common_rebalancing:                             [Step 4]
     C_interictal 和 C_ictal_reachable 部分重合 (|common| = 7);
     template centroid 被正确 re-rank 到 7-channel space;
     r_sz 同样 re-rank 到 7-channel space.
 
-T6. test_stability_gate:
-    构造 subject with 5 seizures: 3 一致的 onset rank + 2 随机 rank.
-    s_sz 应落在 [0.3, 0.5] 区间，subject 被降权而非剔除.
+T6. test_dual_cohort_gate:                                 [Step 4]
+    构造 subject with 5 seizures:
+      (a) 全部一致 → s_sz ≈ 0.85 → strict_cohort=True, relaxed_cohort=True
+      (b) 3 一致 + 2 随机 → s_sz 落在 [0.3, 0.5) → strict_cohort=False,
+          relaxed_cohort=True（不被剔除，但只进 sensitivity）
+      (c) 全部随机 → s_sz < 0.3 → strict_cohort=False, relaxed_cohort=False
+          （完全退出，禁止任何中间档加权标记）
+    断言：不存在权重字段，仅有两个布尔 cohort 标记.
+```
 
-T7. test_h1prime_bidirectional:
+### Sanity 层（Step 5）
+
+```
+T8. test_sanity_check_i_vs_e_only:                         [Step 5]
+    模拟 sanity check fail 情景（focal `i` vs extra-focal `e` rank 无差异），
+    sanity 函数应返回 pass_flag=False，并阻止 H1/H1' 发布.
+    断言：l 通道既不进 sanity 通道集合，也不进检验输入；其存在不会改变
+    pass_flag 与方向输出. gamma_ER 与 broad_ER 各跑一份.
+```
+
+### 推断层（Step 6-7）
+
+```
+T9. test_k_neq_2_routed_to_caseseries:                     [Step 6]
+    k=4 subject (818) 与 k=6 subject (zhangjinhan) 走 case-series path，
+    不进入 strict_cohort 也不进入 relaxed_cohort 的 H1 推断；
+    断言：H1 cohort 列表中不含这两个 subject id.
+
+T7. test_h1prime_bidirectional:                            [Step 7]
     synthetic subject with ρ_T0_sz = +0.7, ρ_T1_sz = −0.6
     → B = 0.42 > 0, 计入 "bidirectional supported" 样本.
-
-T8. test_sanity_check_gate_blocks_h1_release:
-    模拟 sanity check fail 情景（focal vs extra-focal rank 无差异），
-    统计函数应返回 h1_released=False 标记.
-
-T9. test_k_neq_2_routed_to_caseseries:
-    k=4 subject 走 case-series path，不进入 main H1 test.
+    断言：H1' 输出仅含 sign 计数与方向，不含 alpha-corrected p 阈值判读.
 ```
 
 ---
@@ -273,14 +335,16 @@ T9. test_k_neq_2_routed_to_caseseries:
 
 ## 8. 预期时间线（按 2026-04-21 起算）
 
-| Week | 交付 |
-|---|---|
-| 1 | `src/ictal_onset_extraction.py` 完成 T1-T3；在 1-2 个 pilot subject 上手动验证 onset rank 提取合理 |
-| 2 | §3.3 λ 阈值校定 + §3.4 tie 门槛 tune；cohort 级 sanity check pass 为硬 milestone |
-| 3 | `src/template_ictal_alignment.py` + cohort run + archive 中间报告 `pr6a_onset_extraction_validation_2026-04-xx.md` |
-| 4 | H1/H1' 全 cohort 跑通 + sensitivity analyses + 验收文档 |
+> 注：详细的 step 间 hard checkpoint 与执行顺序写在 `.cursor/plans/pr6a_step_decomposition_*.plan.md`；本节仅给粗粒度 week 级时间预估。
 
-验收条件：sanity check PASS + 所有 9 个 TDD test 通过 + archive plan 同步更新 + 主文档 §2/§4/§7 一句话结论更新。
+| Week | 交付（对应 step） |
+|---|---|
+| 1 | `src/ictal_onset_extraction.py` 完成 T1-T3 + sentinel cohort 选定（Step 2-3）；2 个 sentinel subject 上 gamma_ER + broad_ER 双配置 visual PASS |
+| 2 | T4-T6 + per-subject λ 标定 + 双 cohort gate（Step 3-4）；Step 4 hard gate（strict n>=8 + tied_fraction）必须通过才能进 Step 5 |
+| 3 | T8 sanity i vs e（Step 5） + `src/template_ictal_alignment.py` H1 主分析（Step 6）；archive 中间报告 `pr6a_onset_extraction_validation_2026-04-xx.md` |
+| 4 | H1' 双向次级 + 全 cohort 复跑 sensitivity（Step 7） + 归档与主文档回写（Step 8）|
+
+验收条件：sanity check PASS（gamma 或 broad 至少一套）+ 9 项 TDD 测试三组全绿 + archive plan §11 复跑结论同步更新 + 主文档 §7.10 一句话结论更新。
 
 ---
 
@@ -304,13 +368,17 @@ T9. test_k_neq_2_routed_to_caseseries:
 
 **Q5: Epilepsiae 部分 subject 是 ECoG，seizure 有 DC shifts；gamma ER 会不会漏掉这些？**
 
-"SEEG signature of LVFA was found to be largely observed (~70%) and the other onset patterns like burst-suppression and delta brush patterns were very rare"，即便非 LVFA onset 也有 20–30%。针对这类情况，sensitivity 分析里我们额外跑一个 **broader-band ER** (`E_fast = 12-127 Hz` 的 Bartolomei 原版)，专门救那些 gamma band 失败的 seizure。若 broader-band 拯救了 >10% subject 的 stability，我们在正式结果里并列报告两版结果。
+"SEEG signature of LVFA was found to be largely observed (~70%) and the other onset patterns like burst-suppression and delta brush patterns were very rare"，即便非 LVFA onset 也有 20–30%。这正是 §3.1 双配置并列的动机：`gamma_ER`（60–100 Hz）瞄准 LVFA 主流模式，`broad_ER`（12–127 Hz Bartolomei 原版）覆盖 burst-suppression / delta brush 等非 LVFA onset。两套**从 Step 2 起一直并行跑到 Step 7**，不是"gamma 失败再切 broad"的 fallback；只有 cohort-level sanity gate 才允许在 archive 里正式切换主配置（详见 §4.4 与 step 计划 Step 5）。
 
 ---
 
-需要我接着把这份 plan 转成正式的 archive markdown 文件（含完整 §1–§9 + numbered section anchors 与 Topic 1 主文档的 back-links），还是你想先对几个设计点拍板再定稿？重点你可以现在决定的几件事：
+## 10. 设计拍板记录（Step 1 已锁，不再开放）
 
-1. ER 的 fast band 固定 60–100 Hz，还是并列 broader-band 12–127 Hz 两版？
-2. §3.5 的 stability gate 阈值 0.3 / 0.5 是否合理？（我从 Liu 2019 的 0.88 往下降了大步，因为 ictal seizure 数远少于他们的 interictal segment 数）
-3. §4.3 sanity check 用 `focus_rel` 三值还是二值（`i` vs non-`i`）？三值更精细但 cohort 里 `l` 通道数往往少。
-4. H1' 的 9-subset 是否声明完全 exploratory、不分 α？
+下列设计点已在 Step 1 archive 重写中拍板，落入正文 §3.1 / §3.5 / §4.2 / §4.3。不再作为开放问题。
+
+| # | 设计点 | 决定 | 落点 |
+|---|---|---|---|
+| 1 | ER fast band | `gamma_ER` (60–100 Hz) 主 + `broad_ER` (12–127 Hz) sensitivity，**全程并行**，禁止 per-subject 后验切换 | §3.1 / §4.4 / §6 T1 |
+| 2 | Stability gate 阈值 | 双 cohort：`strict_cohort` (`s_sz >= 0.5`) 主 + `relaxed_cohort` (`s_sz >= 0.3`) sensitivity；**移除中间加权档** | §3.5 / §4.1 / §6 T6 |
+| 3 | Sanity check 标签 | **i vs e only**；`l` 通道完全不进判据，仅在 §11 附录描述性展示 | §4.3 / §6 T8 |
+| 4 | H1' 9-subset 性质 | **pre-registered secondary test**，不分 α，只出方向性 sign test 与散点；判读语言全程使用方向性表达，不再使用"非主结论的探索性试验"这类含糊措辞 | §4.2 / §6 T7 / §4.4 |
