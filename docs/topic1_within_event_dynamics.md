@@ -25,7 +25,7 @@
 - **慢调制（PR-4B）**：模板混合（L1）与模板内顺序一致性（L2）cohort 全 null；模板内相对时延结构（L3）在全 cohort 上证据不足，仅在 8 个高置信子集（`dom_r > 0.7`）的 Pearson r 上探索性显著（p=0.016, 7/8）。详见 `docs/archive/topic1/interictal_group_event_internal_propagation.md`。
 - **发作邻近（PR-4C）**：propagation pattern 五指标 cohort Wilcoxon 在主+辅两配置下均 null（主 1/15 / 辅 1/15 名义显著且跨配置不一致）→ **模板内部几何无稳健发作邻近调制，正式封板为阴性**。唯一稳健信号在 `rate_by_template`（post_ictal vs baseline 主 p=0.0009、辅 p=0.0067）。详见 `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` §9。
 - **模板招募（PR-5）— 核心科学结论（已验收 2026-04-20）**：在 PR-5-A novel-template gate 已 PASS（main n=23 / aux n=22，未观察到 `H_OOD` 或 `H_assignment_drift` 的 cohort-level 证据）的前提下，PR-5-B 把 PR-4C `rate_by_template` 的描述层信号正式升级为推断结论：**dominant template 的绝对事件率（events/h）在 post-ictal 相对 baseline 出现 cohort-level 系统升高**（候选 A `dominant_global` `post_minus_baseline` median main `+65.46` / aux `+42.43` events/h；main p=0.00128 Bonferroni-pass α=0.0083，aux p=0.0115 nominal-pass，方向一致；候选 B main p=0.00214 同向支持 → §4.4 sensitivity gate `overall_strong=True`）。**§4.5 composition diagnostic 在 PR-5 合同下未复制 panel d**：`share_post_minus_baseline` 两配置都是 nominal-positive 但**与 panel d 预期方向相反**（main `+0.0156`, p=0.0149，direction-consistent 6/23；aux `+0.0328`, p=0.0301，direction-consistent 5/22）→ panel d 信号不在 PR-5 cohort 复现，且不为主结论背书。验收口径：PR-5-A PASS / PR-5-B STRONG；`pre_minus_baseline`、`post_minus_pre` 仅留为次级描述层。详见 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` §11。
-- **PR-6 KONWAC v2** 维持 deferred placeholder（aux 仅 nominal 通过，未达 Bonferroni 双配置硬启动条件）。
+- **未来模型层（§7.9）** 维持冻结：当前不绑 PR 编号，原 PR-6 编号空间已让位给 PR-6A/B/C/D/E 数据发现序列。
 - **同步性**：cohort-level interictal synchrony 总体为 null。唯一探索性信号是 extra-focal `phase_e` 的 `pre > post`（p=0.012, r=0.31）。
 
 ---
@@ -124,7 +124,7 @@ Epilepsiae 的区域分层分析中：
 - **PR-4B 高置信子集 H2 探索性支持的功效极有限**：n=8 Wilcoxon 最小可能 p = 0.004，当前 p=0.016（W=1）；不能据此做 population-level 结论。`huangwanling` 在 L3 读数上完全 ineligible（n=29）
 - **PR-4C 阴性已封板**（2026-04-19，三处合同 P0 修复后复跑两套配置）。原本怀疑被合同 bug 掩盖的 `pre_ictal vs baseline raw_tau aux` 在修复后也消失（p=0.0005 → p=0.141），印证旧版那条信号是 bug 制品
 - **PR-5 已完成**：完整阈值 / 失败合同 / sensitivity gate 三态以 archive `pr5_template_recruitment_plan_2026-04-20.md` 为单一来源；本文档只保留判定摘要。已知边界：PR-5-B cohort 必须严格限定在 PR-5-A retained subset（main n=23 / aux n=22）；`pre_minus_baseline` / `post_minus_pre` 主配置未通过 Bonferroni（次级描述层）；§4.5 composition diagnostic `share_post_minus_baseline` 在两配置下都 nominal-significant 但方向与 panel d 预期反向 → panel d 未在 PR-5 合同下复制，且不能为主结论背书
-- **PR-6 KONWAC v2 未解锁**：硬前置 PR-5-B `post_vs_baseline` Bonferroni 双配置通过未达成（aux 仅 nominal 通过），维持 deferred placeholder
+- **未来模型层尚未启动**：硬前置见 §7.9；当前数据发现序列尚未给出已封板的几何/招募一致性结论，模型层维持冻结，不进主线工作量
 
 ---
 
@@ -199,8 +199,8 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 3. ~~**PR-4D**（P1）~~ — DONE / ACCEPTED（2026-04-16）
 4. **高 k 复核**（P1）：可并行
 5. ~~**PR-5**（P0）~~ — DONE（2026-04-20，PR-5-A PASS + PR-5-B STRONG）；详见 §7.8
-6. **PR-6**（deferred placeholder）：硬前置未达成，维持冻结；详见 §7.9
-7. **§7.6 / §7.7 可选方向**：§7.6 已被 PR-5 吸收为正式分析，§7.7 仍维持 exploratory 子集
+6. **§7.6 / §7.7 可选方向**：§7.6 已被 PR-5 吸收为正式分析，§7.7 仍维持 exploratory 子集
+7. **未来模型层（§7.9）**：硬前置未达成，维持冻结；不绑 PR 编号
 
 ---
 
@@ -242,7 +242,7 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 **已知边界（按 archive §7 风险写死）**：
 - `pre_minus_baseline` 与 `post_minus_pre` 主配置未通过 Bonferroni → 维持次级描述层
 - 高对称 subject `dom_agreement < 0.5`（main 7 / aux 5）按 sensitivity gate `medium` 判读路径，不剔除
-- share 与 absolute rate 数学耦合 → 机制层不展开，留 PR-6
+- share 与 absolute rate 数学耦合 → 机制层不展开，留未来模型层（§7.9）
 
 **与 PR-4C / PR-4D 的边界**：PR-4C 五指标几何 cohort null 保持封板；PR-4D `rate×type` 描述层保持原状。PR-5 不涉及 SOZ 解剖锚定（属于 Topic 3 §7 独立 P1 候选）。PR-4 PPT panel d（`scripts/plot_topic1_pr4_ppt.py` fig 2d）已在 `docs/topic1_pr4_ppt_figures.md` 与 archive plan §6 同步降级为"历史 motivation / 描述层"，正式归属一律指向 §4.5。
 
@@ -252,23 +252,21 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 |---|---|---|
 | **PR-5-A** | ✅ PASS / ACCEPTED | `overall_pass=True`；六条 gate 对比全部满足 archive §3.5 写死阈值（max \|Δr\|=0.0088，max \|Δe/e_baseline\|=0.0169，所有 Wilcoxon p ≥ 0.21）；retained subset 透明记录；49/49 测试通过 |
 | **PR-5-B** | ✅ STRONG / ACCEPTED | `overall_strong=True`；候选 A 主配置 Bonferroni-pass + 辅配置同向 nominal-pass；候选 B 主配置同向 nominal-pass；composition diagnostic 反向结果按 §4.5.3 第二条诚实记录、不联动主结论；cohort filtering 按 retained subset per config 严格执行（regression test 锁死） |
-| **PR-6** | ⏸ DEFERRED | 硬启动条件"`post_vs_baseline` 双配置 Bonferroni"未达成（aux p=0.0115 > 0.0083）→ 维持冻结，sketch 仅在 archive §9 |
 
 **核心科学结论一句话**：剔除 novel-template / assignment-drift 假象后，dominant template 在 post-ictal 相对 baseline 的**绝对招募率**系统抬升（main +65 ev/h Bonferroni-pass，aux +42 ev/h nominal-pass 同向）；其相对**占比**变化在 PR-5 合同下不复制 panel d，所以这是"绝对招募整体增多、模板间相对权重不偏向 non-dominant"的画面，而**不是** "non-dominant template emergence"。
 
-### 7.9 PR-6：KONWAC v2 进阶建模（占位）
+### 7.9 未来模型层（不绑 PR 编号）
 
-> 完整科学定位与候选可证伪问题：archive `pr5_template_recruitment_plan_2026-04-20.md` §9。
-> 性质：deferred placeholder。本节只锁 scope 与启动条件。
+> 性质：未来候选模型方向，不占任何 PR 编号空间，不进数据发现序列主线。本节只锁定模型层启动条件与排除清单；与数据发现序列的边界由 §7.5 优先级与 §7.10 起的数据发现条目共同界定。
 
-**硬启动条件**：
-- PR-5-A gate PASS ✓
-- PR-5-B `post_vs_baseline` 主 + 辅两配置 Bonferroni 通过 ✗（aux 仅 nominal p=0.0088 > 0.0083）
-- → **PR-6 暂不解锁**，维持 deferred placeholder
+**硬启动条件（模型层尚未启动）**：
+- 数据发现序列必须先在主文档形成至少一条已封板的几何/招募一致性结论；
+- 数据合同冻结后才允许讨论"框架是否能解释现象"；
+- 在数据层证据未就位之前，模型层维持冻结，不进任何主线工作量与排期。
 
-**为什么不在 PR-5 内做**：老 KONWAC（2024）已经把"框架能解释现象"做完。继续沿老 KONWAC 重跑没有论文价值边际。要做 v2，必须以 PR-4 已钉死的事实 + PR-5 通过后的结果做强约束。
+**为什么不在数据发现序列内做**：老一代多模板 Hebbian 框架（2024）已经把"框架能解释现象"做完。继续沿同一框架重跑没有论文价值边际。要做下一代框架，必须以 §7.1–§7.8 已钉死的事实 + 数据发现序列通过后的结果做强约束。
 
-**几何 / manifold / persistent homology 方向**：不进 PR-5/PR-6 主线；当前不立项。
+**几何 / manifold / persistent homology 方向**：不进数据发现序列主线；当前不立项，仅留作模型层启动后再评估的可选讨论层。
 
 ---
 
@@ -303,7 +301,7 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 - `docs/archive/topic1/interictal_group_event_internal_propagation.md` — 内部传播线的详细结果与合同文档
 - `docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md` — PR4–PR6 的统计报告
 - `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` — PR-4C 主+辅助配置全量审阅。§1-§8 是 2026-04-17 第一轮审阅（cohort 数值表 / 三处实现合同问题 / P0/P1/P2/P3 路线）；**§9 是 2026-04-19 P0 修复完成后的复跑数值与正式封板结论**。Topic 1 §3.1c / §5 / §7.2 / §7.6 / §7.7 都引用本文件。
-- `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 完整计划合同：科学问题 / 主+备择假设 / 失败合同 / PR-5-A novel-template gate / PR-5-B recruitment shift（含 §4.5 secondary composition diagnostic 独立合同）/ 9 项 TDD 测试合同 / §9 PR-6 略写占位 / §11 复跑结论。Topic 1 §5 / §7.5 / §7.6 / §7.8 / §7.9 / §10 都引用本文件。
+- `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 完整计划合同：科学问题 / 主+备择假设 / 失败合同 / PR-5-A novel-template gate / PR-5-B recruitment shift（含 §4.5 secondary composition diagnostic 独立合同）/ 9 项 TDD 测试合同 / §9 未来模型层占位（不绑 PR 编号，对应主文档 §7.9）/ §11 复跑结论。Topic 1 §5 / §7.5 / §7.6 / §7.8 / §7.9 / §10 都引用本文件。
 - `docs/archive/topic1/pr5a_novel_template_gate_2026-04-20.md` — PR-5-A gate 全 cohort 跑数与判定中间报告。
 - `docs/archive/topic1/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
 
