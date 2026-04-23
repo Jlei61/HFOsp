@@ -25,6 +25,7 @@
 - **慢调制（PR-4B）**：模板混合（L1）与模板内顺序一致性（L2）cohort 全 null；模板内相对时延结构（L3）在全 cohort 上证据不足，仅在 8 个高置信子集（`dom_r > 0.7`）的 Pearson r 上探索性显著（p=0.016, 7/8）。详见 `docs/archive/topic1/interictal_group_event_internal_propagation.md`。
 - **发作邻近（PR-4C）**：propagation pattern 五指标 cohort Wilcoxon 在主+辅两配置下均 null（主 1/15 / 辅 1/15 名义显著且跨配置不一致）→ **模板内部几何无稳健发作邻近调制，正式封板为阴性**。唯一稳健信号在 `rate_by_template`（post_ictal vs baseline 主 p=0.0009、辅 p=0.0067）。详见 `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` §9。
 - **模板招募（PR-5）— 核心科学结论（已验收 2026-04-20）**：在 PR-5-A novel-template gate 已 PASS（main n=23 / aux n=22，未观察到 `H_OOD` 或 `H_assignment_drift` 的 cohort-level 证据）的前提下，PR-5-B 把 PR-4C `rate_by_template` 的描述层信号正式升级为推断结论：**dominant template 的绝对事件率（events/h）在 post-ictal 相对 baseline 出现 cohort-level 系统升高**（候选 A `dominant_global` `post_minus_baseline` median main `+65.46` / aux `+42.43` events/h；main p=0.00128 Bonferroni-pass α=0.0083，aux p=0.0115 nominal-pass，方向一致；候选 B main p=0.00214 同向支持 → §4.4 sensitivity gate `overall_strong=True`）。**§4.5 composition diagnostic 在 PR-5 合同下未复制 panel d**：`share_post_minus_baseline` 两配置都是 nominal-positive 但**与 panel d 预期方向相反**（main `+0.0156`, p=0.0149，direction-consistent 6/23；aux `+0.0328`, p=0.0301，direction-consistent 5/22）→ panel d 信号不在 PR-5 cohort 复现，且不为主结论背书。验收口径：PR-5-A PASS / PR-5-B STRONG；`pre_minus_baseline`、`post_minus_pre` 仅留为次级描述层。详见 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` §11。
+- **PR-6A（2026-04-23 审阅）**：Step0-2 的 EEG-aware baseline clip、baseline-invalid no-fallback 与 sentinel Step2 新图 **有条件验收通过**；但 Step3 `t_ER_onset` 目前只接受为 preview-only。`548` 在同一次 seizure 内呈中等 gamma/broad 一致性（`rho ≈ 0.67–0.74`），提示 ER 可能含有部分 clinical 前 recruitment 顺序信息；`916` 更不稳定，且最早通道常落在 `other`。当前正式口径：**ER 值得继续作为 clinical 前 electrographic recruitment 的候选特征，但 onset-rank 提取层尚未封板**。详见 `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md`。
 - **未来模型层（§7.9）** 维持冻结：当前不绑 PR 编号，原 PR-6 编号空间已让位给 PR-6A/B/C/D/E 数据发现序列。
 - **同步性**：cohort-level interictal synchrony 总体为 null。唯一探索性信号是 extra-focal `phase_e` 的 `pre > post`（p=0.012, r=0.31）。
 
@@ -124,6 +125,7 @@ Epilepsiae 的区域分层分析中：
 - **PR-4B 高置信子集 H2 探索性支持的功效极有限**：n=8 Wilcoxon 最小可能 p = 0.004，当前 p=0.016（W=1）；不能据此做 population-level 结论。`huangwanling` 在 L3 读数上完全 ineligible（n=29）
 - **PR-4C 阴性已封板**（2026-04-19，三处合同 P0 修复后复跑两套配置）。原本怀疑被合同 bug 掩盖的 `pre_ictal vs baseline raw_tau aux` 在修复后也消失（p=0.0005 → p=0.141），印证旧版那条信号是 bug 制品
 - **PR-5 已完成**：完整阈值 / 失败合同 / sensitivity gate 三态以 archive `pr5_template_recruitment_plan_2026-04-20.md` 为单一来源；本文档只保留判定摘要。已知边界：PR-5-B cohort 必须严格限定在 PR-5-A retained subset（main n=23 / aux n=22）；`pre_minus_baseline` / `post_minus_pre` 主配置未通过 Bonferroni（次级描述层）；§4.5 composition diagnostic `share_post_minus_baseline` 在两配置下都 nominal-significant 但方向与 panel d 预期反向 → panel d 未在 PR-5 合同下复制，且不能为主结论背书
+- **PR-6A 尚未封板**：当前 Step3-preview 只能作为 preview-only 工具层，不进入 H1/H1' / sanity 正式叙事；`548` 有中等 band 内一致性但跨 seizure 稳定性不足，`916` 更不稳，且最早通道常被 `other` 主导。另一个未完成点是 §3.2 baseline 合同中的 `IED peak exclusion` 还没真正接通。详见 `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md`。
 - **未来模型层尚未启动**：硬前置见 §7.9；当前数据发现序列尚未给出已封板的几何/招募一致性结论，模型层维持冻结，不进主线工作量
 
 ---
@@ -303,6 +305,7 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 - `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` — PR-4C 主+辅助配置全量审阅。§1-§8 是 2026-04-17 第一轮审阅（cohort 数值表 / 三处实现合同问题 / P0/P1/P2/P3 路线）；**§9 是 2026-04-19 P0 修复完成后的复跑数值与正式封板结论**。Topic 1 §3.1c / §5 / §7.2 / §7.6 / §7.7 都引用本文件。
 - `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 完整计划合同：科学问题 / 主+备择假设 / 失败合同 / PR-5-A novel-template gate / PR-5-B recruitment shift（含 §4.5 secondary composition diagnostic 独立合同）/ 9 项 TDD 测试合同 / §9 未来模型层占位（不绑 PR 编号，对应主文档 §7.9）/ §11 复跑结论。Topic 1 §5 / §7.5 / §7.6 / §7.8 / §7.9 / §10 都引用本文件。
 - `docs/archive/topic1/pr5a_novel_template_gate_2026-04-20.md` — PR-5-A gate 全 cohort 跑数与判定中间报告。
+- `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` — PR-6A Step0-2 / Step3-preview 阶段性审阅与验收记录：哪些部分已通过、哪些仍是 preview-only、sentinel `548/916` 的关键数值与科学判断、以及当前阻塞点（`IED peak exclusion`、正式 Step 3 λ 校准、preview 防误读护栏）。
 - `docs/archive/topic1/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。

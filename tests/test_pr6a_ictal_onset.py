@@ -11,10 +11,15 @@ import numpy as np
 import pytest
 
 from src.ictal_onset_extraction import (
-    GAMMA_ER_BANDS,
     BROAD_ER_BANDS,
+    GAMMA_ER_BANDS,
+    MIN_BASELINE_VALID_SEC,
     baseline_zscore_er,
     compute_er,
+    detect_er_onset_preview,
+    preview_threshold_from_baseline,
+    resolve_detection_window,
+    resolve_baseline_window,
 )
 
 
@@ -194,3 +199,257 @@ def test_compute_er_rejects_bands_above_nyquist() -> None:
     sig = np.random.default_rng(0).standard_normal((2, int(fs * 4)))
     with pytest.raises(ValueError):
         compute_er(sig, fs=fs, fast_band=(60.0, 150.0), slow_band=(4.0, 20.0))
+
+
+# ---------------------------------------------------------------------------
+# T_baseline_clip — EEG-onset-aware baseline window resolver
+# ---------------------------------------------------------------------------
+
+
+def test_baseline_window_uses_clinical_only_when_no_eeg_onset() -> None:
+    """When eeg_onset is missing, baseline ends at clin_onset - buffer (legacy contract)."""
+
+    n_t = int(round((300 + 30) / 0.1))
+    win = resolve_baseline_window(
+        n_t,
+        hop_sec=0.1,
+        pre_sec=300.0,
+        buffer_sec=60.0,
+        eeg_onset_rel_sec=None,
+    )
+    assert win.valid is True
+    assert win.clipped_by_eeg_onset is False
+    assert win.end_sec == pytest.approx(-60.0, abs=0.05)
+    assert win.start_sec == pytest.approx(-300.0, abs=0.05)
+    assert win.valid_sec == pytest.approx(240.0, abs=0.1)
+
+
+def test_baseline_window_no_clip_when_eeg_at_or_after_clin() -> None:
+    """eeg_onset later than (or equal to) clin_onset must not pull baseline back."""
+
+    n_t = int(round((300 + 30) / 0.1))
+    win = resolve_baseline_window(
+        n_t,
+        hop_sec=0.1,
+        pre_sec=300.0,
+        buffer_sec=60.0,
+        eeg_onset_rel_sec=5.0,
+    )
+    assert win.valid is True
+    assert win.clipped_by_eeg_onset is False
+    assert win.end_sec == pytest.approx(-60.0, abs=0.05)
+
+
+def test_baseline_window_clips_to_eeg_onset_when_earlier() -> None:
+    """eeg_onset earlier than clin_onset must move baseline end back by buffer_sec."""
+
+    n_t = int(round((300 + 30) / 0.1))
+    win = resolve_baseline_window(
+        n_t,
+        hop_sec=0.1,
+        pre_sec=300.0,
+        buffer_sec=60.0,
+        eeg_onset_rel_sec=-100.0,
+    )
+    assert win.valid is True
+    assert win.clipped_by_eeg_onset is True
+    assert win.end_sec == pytest.approx(-160.0, abs=0.1)
+    assert win.start_sec == pytest.approx(-300.0, abs=0.1)
+    assert win.valid_sec == pytest.approx(140.0, abs=0.2)
+
+
+def test_baseline_window_marks_invalid_when_clipped_below_min_and_does_not_fall_back() -> None:
+    """If EEG-aware clip leaves <60s of baseline, return invalid; do NOT silently
+    fall back to the legacy clinical window (that would re-introduce the
+    pre-ictal contamination this fix exists to remove)."""
+
+    n_t = int(round((300 + 30) / 0.1))
+    win = resolve_baseline_window(
+        n_t,
+        hop_sec=0.1,
+        pre_sec=300.0,
+        buffer_sec=60.0,
+        eeg_onset_rel_sec=-220.0,
+        min_baseline_valid_sec=MIN_BASELINE_VALID_SEC,
+    )
+    assert win.valid is False
+    assert win.clipped_by_eeg_onset is True
+    assert win.valid_sec < MIN_BASELINE_VALID_SEC
+    assert win.end_sec == pytest.approx(-280.0, abs=0.2)
+    assert win.end_sec < -60.0 - 1e-6, "Must not fall back to legacy clinical baseline edge"
+
+
+def test_baseline_zscore_uses_clipped_window_and_drops_pre_ictal_offset() -> None:
+    """End-to-end: a per-channel pre-ictal ER bump that lives only in [-200, -60]
+    must be excluded from the baseline z-score statistics once eeg_onset_rel_sec
+    is supplied. Channel 1 has the bump; channel 0 is clean. Without clipping,
+    channel 1's z-ER baseline mean would drift positive; with EEG-aware
+    clipping it must stay near 0."""
+
+    fs = 1000.0
+    duration = 360.0
+    win_sec = 1.0
+    hop_sec = 0.1
+    pre_sec = 300.0
+    buffer_sec = 60.0
+    eeg_onset_rel_sec = -150.0
+
+    rng = np.random.default_rng(0)
+    n_samples = int(round(fs * duration))
+    t = np.arange(n_samples) / fs
+
+    sig = rng.standard_normal((2, n_samples))
+    pre_ictal_mask = (t >= 100.0) & (t < 240.0)
+    bump = 2.0 * np.sin(2.0 * np.pi * 80.0 * t)
+    sig[1, pre_ictal_mask] += bump[pre_ictal_mask]
+
+    er = compute_er(
+        sig, fs=fs,
+        fast_band=GAMMA_ER_BANDS["fast"], slow_band=GAMMA_ER_BANDS["slow"],
+        win_sec=win_sec, hop_sec=hop_sec,
+    )
+
+    clipped = resolve_baseline_window(
+        er.shape[1], hop_sec=hop_sec, pre_sec=pre_sec, buffer_sec=buffer_sec,
+        eeg_onset_rel_sec=eeg_onset_rel_sec,
+    )
+    legacy = resolve_baseline_window(
+        er.shape[1], hop_sec=hop_sec, pre_sec=pre_sec, buffer_sec=buffer_sec,
+        eeg_onset_rel_sec=None,
+    )
+    assert clipped.valid and legacy.valid
+    assert clipped.end_sec < legacy.end_sec - 1.0
+
+    z_clip = baseline_zscore_er(
+        er, baseline_idx_window=(clipped.start_idx, clipped.end_idx),
+        hop_sec=hop_sec,
+    )
+    z_legacy = baseline_zscore_er(
+        er, baseline_idx_window=(legacy.start_idx, legacy.end_idx),
+        hop_sec=hop_sec,
+    )
+
+    bl_clip = z_clip[1, clipped.start_idx:clipped.end_idx]
+    bl_legacy = z_legacy[1, legacy.start_idx:legacy.end_idx]
+    assert abs(np.nanmean(bl_clip)) < 0.05, (
+        f"clipped baseline mean must be ~0 for biased channel, got {np.nanmean(bl_clip)}"
+    )
+    assert np.nanstd(bl_legacy) < np.nanstd(z_clip[1]), (
+        "legacy baseline std underestimates true ER variability when pre-ictal bump leaks in"
+    )
+
+
+# ---------------------------------------------------------------------------
+# T_detection_preview — pre-clinical ER onset preview before formal Step 3.
+# ---------------------------------------------------------------------------
+
+
+def test_detection_window_starts_at_later_of_baseline_end_and_start_floor() -> None:
+    n_t = int(round((300.0 + 30.0) / 0.1))
+    win = resolve_detection_window(
+        n_t,
+        hop_sec=0.1,
+        pre_sec=300.0,
+        baseline_end_sec=-80.0,
+        start_floor_sec=-120.0,
+        end_sec=30.0,
+    )
+    assert win.start_sec == pytest.approx(-80.0, abs=0.05)
+    assert win.end_sec == pytest.approx(30.0, abs=0.05)
+    assert win.valid is True
+
+    win2 = resolve_detection_window(
+        n_t,
+        hop_sec=0.1,
+        pre_sec=300.0,
+        baseline_end_sec=-160.0,
+        start_floor_sec=-120.0,
+        end_sec=30.0,
+    )
+    assert win2.start_sec == pytest.approx(-120.0, abs=0.05)
+    assert win2.end_sec == pytest.approx(30.0, abs=0.05)
+    assert win2.valid is True
+
+
+def test_detect_er_onset_preview_returns_first_preclinical_crossing_and_none_when_unreached() -> None:
+    hop_sec = 0.1
+    pre_sec = 300.0
+    n_t = int(round((pre_sec + 30.0) / hop_sec))
+    t_axis = (np.arange(n_t) * hop_sec) - pre_sec
+
+    det_win = resolve_detection_window(
+        n_t,
+        hop_sec=hop_sec,
+        pre_sec=pre_sec,
+        baseline_end_sec=-120.0,
+        start_floor_sec=-120.0,
+        end_sec=30.0,
+    )
+
+    z = np.zeros(n_t, dtype=float)
+    rise_mask = t_axis >= -40.0
+    z[rise_mask] = 2.0
+    hit = detect_er_onset_preview(
+        z,
+        t_axis,
+        detection_idx_window=(det_win.start_idx, det_win.end_idx),
+        bias=0.5,
+        threshold=4.0,
+    )
+    assert hit.detected is True
+    assert hit.onset_sec is not None
+    assert -40.1 <= hit.onset_sec <= -39.5
+
+    miss = detect_er_onset_preview(
+        np.zeros(n_t, dtype=float),
+        t_axis,
+        detection_idx_window=(det_win.start_idx, det_win.end_idx),
+        bias=0.5,
+        threshold=4.0,
+    )
+    assert miss.detected is False
+    assert miss.onset_idx is None
+    assert miss.onset_sec is None
+
+
+def test_preview_threshold_from_baseline_filters_small_drift_but_keeps_real_rise() -> None:
+    hop_sec = 0.1
+    pre_sec = 300.0
+    n_t = int(round((pre_sec + 30.0) / hop_sec))
+    t_axis = (np.arange(n_t) * hop_sec) - pre_sec
+
+    baseline_mask = (t_axis >= -270.0) & (t_axis < -120.0)
+    detection_mask = (t_axis >= -120.0) & (t_axis <= 30.0)
+
+    z = np.zeros(n_t, dtype=float)
+    z[baseline_mask] = 0.8
+    z[detection_mask] = 0.8
+    z[t_axis >= -20.0] = 5.0
+
+    threshold = preview_threshold_from_baseline(
+        z,
+        baseline_idx_window=(int(np.where(baseline_mask)[0][0]), int(np.where(baseline_mask)[0][-1]) + 1),
+        bias=0.5,
+        threshold_margin=1.0,
+    )
+    assert threshold > 5.0
+
+    early_only = detect_er_onset_preview(
+        np.where(t_axis < -20.0, z, 0.0),
+        t_axis,
+        detection_idx_window=(int(np.where(detection_mask)[0][0]), int(np.where(detection_mask)[0][-1]) + 1),
+        bias=0.5,
+        threshold=threshold,
+    )
+    assert early_only.detected is False
+
+    full = detect_er_onset_preview(
+        z,
+        t_axis,
+        detection_idx_window=(int(np.where(detection_mask)[0][0]), int(np.where(detection_mask)[0][-1]) + 1),
+        bias=0.5,
+        threshold=threshold,
+    )
+    assert full.detected is True
+    assert full.onset_sec is not None
+    assert -20.1 <= full.onset_sec <= -15.0

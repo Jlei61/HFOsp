@@ -3,6 +3,8 @@
 先说一下文档定位：下面这份是对标 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` 的合同级计划，落盘后应放在 `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-xx.md`。Topic 1 主文档 §7 增加 PR-6-A 条目；§7.9 的 KONWAC placeholder 已剥离为「未来模型层（不绑 PR 编号）」。
 
 > 本计划占用 PR-6A 编号；PR-6 编号空间从此对应 PR-6A/B/C/D/E 数据发现序列；KONWAC v2 已剥离到主文档 §7.9 未来模型层，不绑 PR 编号。
+>
+> 2026-04-23 阶段性执行/审阅状态见 `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md`：Step0-2（EEG-aware baseline clip + sentinel Step2 图）有条件验收通过；Step3 `t_ER_onset` 当前只接受为 preview-only，不进入 H1/H1' / sanity 正式叙事。
 
 ---
 
@@ -103,9 +105,18 @@ Aung et al. 2026 Epilepsia: "Spectral similarity between Sp-HFOs and ictal HFA i
 
 **解决**：每个 channel 独立 z-score normalize：
 
-- `baseline window = [-300s, -60s]` 相对 seizure onset
+- `baseline window = [-300s, baseline_end_sec]` 相对 **clinical onset**，其中
+  `baseline_end_sec = min(0, eeg_onset_rel_sec) − 60s`
+  （即对 EEG-onset 与 clinical onset 中较早的一个再后退 60s buffer）。
+  当 `eeg_onset_epoch` 缺失时退化为 legacy `[−300s, −60s]`。Epilepsiae 队列里
+  `523/540` 个 seizure 拥有 `eeg_onset_epoch` 且其中 ~91% 早于 clinical onset，
+  因此这条合同实际生效在大多数 seizure 上。
 - 排除窗内所有 "known IED peaks"（用 Epilepsiae 已有 spike annotation 或从 HFO detection 反推）
-- 若某通道 baseline < 60s valid → 该 seizure 该通道退出（不参与 rank）
+- **Baseline-invalid 规则（不回退）**：若 EEG-aware clip 之后 baseline 有效长度 `< 60s`，
+  该 seizure 整体记为 baseline-invalid，**不**回退到 legacy `[−300, −60]`
+  窗（那等于把要规避的 pre-ictal / electrographic onset 重新吃回来）。
+  下游 rank / CUSUM 必须直接丢弃该 seizure。
+- 若某通道在合法 baseline 内 `< 60s` valid 样本 → 该 seizure 该通道退出（不参与 rank）
 - `z_ER[n] = (ER[n] − μ_bl) / σ_bl`
 - 对所有通道 baseline-normalize 后才进入下一步
 
@@ -377,7 +388,7 @@ T7. test_h1prime_bidirectional:                            [Step 7]
 
 **Q4: seizure onset annotation 本身有 ±几秒的不准确，这会多大程度影响结果？**
 
-§3.3 的 detection window `[onset−5s, onset+30s]` 就是为此而设。ER CUSUM 的 alarm time `n_d` 是相对 detection window 起点的，不依赖 annotation 精准到秒。Annotation 误差只会影响 baseline window 是否被 ictal 活动污染——我们 baseline 窗在 `[−300s, −60s]`，60s buffer 已覆盖绝大多数 annotation 误差。
+§3.3 的 detection window `[onset−5s, onset+30s]` 就是为此而设。ER CUSUM 的 alarm time `n_d` 是相对 detection window 起点的，不依赖 annotation 精准到秒。Annotation 误差只会污染 baseline window——为此 §3.2 已把 baseline 末端改成 `min(0, eeg_onset_rel_sec) − 60s`（取 EEG/clinical onset 中较早者再后退 60s buffer），不可触达的 60s buffer 覆盖大多数残余 annotation 误差，而 EEG-onset 提前的情况由动态 clip 直接处理；不满足 60s 最小有效长度的 seizure 直接判 baseline-invalid，不回退。
 
 **Q5: Epilepsiae 部分 subject 是 ECoG，seizure 有 DC shifts；gamma ER 会不会漏掉这些？**
 

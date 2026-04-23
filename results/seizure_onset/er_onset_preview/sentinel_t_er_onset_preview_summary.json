@@ -1,0 +1,4149 @@
+{
+  "generated_at": "2026-04-23T19:46:31+0800",
+  "step2_summary_path": "results/interictal_propagation/ictal_alignment/_sentinel_step2/sentinel_step2_summary.json",
+  "settings": {
+    "start_floor_sec": -120.0,
+    "end_sec": 30.0,
+    "bias": 0.5,
+    "threshold_margin": 1.0,
+    "pre_sec": 300.0,
+    "post_sec": 30.0
+  },
+  "sentinels": [
+    {
+      "key": "sentinel_A",
+      "subject": "epilepsiae/548",
+      "rationale": "k=2, PR-5-A retained main, in 9-subset forward/reverse, n_seizures=31 (max in subset)",
+      "display_cluster_id": 1,
+      "seizures": [
+        {
+          "seizure_idx": 1,
+          "seizure_id": "54800100102",
+          "block_stem": "54800102_0046",
+          "eeg_onset_rel_sec": -46.86914086341858,
+          "bands": {
+            "gamma_ER": {
+              "band": "gamma_ER",
+              "baseline_end_rel_sec": -106.86914086341858,
+              "detection_start_rel_sec": -106.86914086341858,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 27,
+              "n_detected_preclinical": 23,
+              "order_detected": [
+                {
+                  "channel": "TBLA3",
+                  "t_er_onset_sec": -100.0,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL2",
+                  "t_er_onset_sec": -90.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL3",
+                  "t_er_onset_sec": -88.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC2",
+                  "t_er_onset_sec": -58.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL4",
+                  "t_er_onset_sec": -50.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA4",
+                  "t_er_onset_sec": -49.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -48.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -48.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC2",
+                  "t_er_onset_sec": -48.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB2",
+                  "t_er_onset_sec": -48.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC1",
+                  "t_er_onset_sec": -47.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB1",
+                  "t_er_onset_sec": -47.599999999999994,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "TBLB3",
+                  "t_er_onset_sec": -47.599999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD1",
+                  "t_er_onset_sec": -47.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA1",
+                  "t_er_onset_sec": -43.0,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "HL7",
+                  "t_er_onset_sec": -42.599999999999966,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 11
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -42.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL6",
+                  "t_er_onset_sec": -41.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC3",
+                  "t_er_onset_sec": -36.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC1",
+                  "t_er_onset_sec": -25.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC7",
+                  "t_er_onset_sec": -3.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -3.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC8",
+                  "t_er_onset_sec": 1.1000000000000227,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC3",
+                  "t_er_onset_sec": 19.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC6",
+                  "t_er_onset_sec": 22.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA6",
+                  "t_er_onset_sec": 25.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "TBLA3",
+                  "t_er_onset_sec": -100.0,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL2",
+                  "t_er_onset_sec": -90.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL3",
+                  "t_er_onset_sec": -88.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC2",
+                  "t_er_onset_sec": -58.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL4",
+                  "t_er_onset_sec": -50.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA4",
+                  "t_er_onset_sec": -49.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -48.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -48.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC2",
+                  "t_er_onset_sec": -48.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB2",
+                  "t_er_onset_sec": -48.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC1",
+                  "t_er_onset_sec": -47.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB1",
+                  "t_er_onset_sec": -47.599999999999994,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "TBLB3",
+                  "t_er_onset_sec": -47.599999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD1",
+                  "t_er_onset_sec": -47.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA1",
+                  "t_er_onset_sec": -43.0,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "HL7",
+                  "t_er_onset_sec": -42.599999999999966,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 11
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -42.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL6",
+                  "t_er_onset_sec": -41.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC3",
+                  "t_er_onset_sec": -36.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC1",
+                  "t_er_onset_sec": -25.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC7",
+                  "t_er_onset_sec": -3.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -3.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            },
+            "broad_ER": {
+              "band": "broad_ER",
+              "baseline_end_rel_sec": -106.86914086341858,
+              "detection_start_rel_sec": -106.86914086341858,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 48,
+              "n_detected_preclinical": 34,
+              "order_detected": [
+                {
+                  "channel": "HL9",
+                  "t_er_onset_sec": -100.0,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 9
+                },
+                {
+                  "channel": "HL3",
+                  "t_er_onset_sec": -95.1,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC6",
+                  "t_er_onset_sec": -94.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC4",
+                  "t_er_onset_sec": -91.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC5",
+                  "t_er_onset_sec": -91.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL2",
+                  "t_er_onset_sec": -91.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB1",
+                  "t_er_onset_sec": -90.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB6",
+                  "t_er_onset_sec": -89.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA2",
+                  "t_er_onset_sec": -88.39999999999998,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 6
+                },
+                {
+                  "channel": "HL4",
+                  "t_er_onset_sec": -88.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA4",
+                  "t_er_onset_sec": -87.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD1",
+                  "t_er_onset_sec": -49.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB2",
+                  "t_er_onset_sec": -48.599999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -48.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB3",
+                  "t_er_onset_sec": -47.599999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -46.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA1",
+                  "t_er_onset_sec": -46.599999999999994,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "TBLA3",
+                  "t_er_onset_sec": -44.599999999999994,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL7",
+                  "t_er_onset_sec": -42.89999999999998,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 11
+                },
+                {
+                  "channel": "HL10",
+                  "t_er_onset_sec": -42.80000000000001,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 8
+                },
+                {
+                  "channel": "HL6",
+                  "t_er_onset_sec": -42.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL5",
+                  "t_er_onset_sec": -41.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL8",
+                  "t_er_onset_sec": -37.599999999999966,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 10
+                },
+                {
+                  "channel": "TBLC3",
+                  "t_er_onset_sec": -36.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC2",
+                  "t_er_onset_sec": -34.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC7",
+                  "t_er_onset_sec": -5.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD2",
+                  "t_er_onset_sec": -5.899999999999977,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "TBLC4",
+                  "t_er_onset_sec": -5.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -4.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB5",
+                  "t_er_onset_sec": -4.399999999999977,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 7
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -3.3000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB1",
+                  "t_er_onset_sec": -2.8999999999999773,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -2.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC4",
+                  "t_er_onset_sec": -1.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB3",
+                  "t_er_onset_sec": 1.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC2",
+                  "t_er_onset_sec": 2.3000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC3",
+                  "t_er_onset_sec": 2.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB1",
+                  "t_er_onset_sec": 2.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB2",
+                  "t_er_onset_sec": 3.3000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC8",
+                  "t_er_onset_sec": 3.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA6",
+                  "t_er_onset_sec": 3.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC6",
+                  "t_er_onset_sec": 6.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC1",
+                  "t_er_onset_sec": 7.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA3",
+                  "t_er_onset_sec": 7.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA2",
+                  "t_er_onset_sec": 14.100000000000023,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC4",
+                  "t_er_onset_sec": 14.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA5",
+                  "t_er_onset_sec": 18.200000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB7",
+                  "t_er_onset_sec": 30.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "HL9",
+                  "t_er_onset_sec": -100.0,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 9
+                },
+                {
+                  "channel": "HL3",
+                  "t_er_onset_sec": -95.1,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC6",
+                  "t_er_onset_sec": -94.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC4",
+                  "t_er_onset_sec": -91.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC5",
+                  "t_er_onset_sec": -91.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL2",
+                  "t_er_onset_sec": -91.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB1",
+                  "t_er_onset_sec": -90.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB6",
+                  "t_er_onset_sec": -89.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA2",
+                  "t_er_onset_sec": -88.39999999999998,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 6
+                },
+                {
+                  "channel": "HL4",
+                  "t_er_onset_sec": -88.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA4",
+                  "t_er_onset_sec": -87.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD1",
+                  "t_er_onset_sec": -49.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB2",
+                  "t_er_onset_sec": -48.599999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -48.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB3",
+                  "t_er_onset_sec": -47.599999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -46.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA1",
+                  "t_er_onset_sec": -46.599999999999994,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "TBLA3",
+                  "t_er_onset_sec": -44.599999999999994,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL7",
+                  "t_er_onset_sec": -42.89999999999998,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 11
+                },
+                {
+                  "channel": "HL10",
+                  "t_er_onset_sec": -42.80000000000001,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 8
+                },
+                {
+                  "channel": "HL6",
+                  "t_er_onset_sec": -42.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL5",
+                  "t_er_onset_sec": -41.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL8",
+                  "t_er_onset_sec": -37.599999999999966,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 10
+                },
+                {
+                  "channel": "TBLC3",
+                  "t_er_onset_sec": -36.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC2",
+                  "t_er_onset_sec": -34.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC7",
+                  "t_er_onset_sec": -5.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD2",
+                  "t_er_onset_sec": -5.899999999999977,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "TBLC4",
+                  "t_er_onset_sec": -5.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -4.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB5",
+                  "t_er_onset_sec": -4.399999999999977,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 7
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -3.3000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB1",
+                  "t_er_onset_sec": -2.8999999999999773,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -2.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC4",
+                  "t_er_onset_sec": -1.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            }
+          },
+          "gamma_vs_broad": {
+            "n_common_detected": 20,
+            "common_detected_channels": [
+              "GA1",
+              "GA4",
+              "GB1",
+              "GC7",
+              "GD1",
+              "HL1",
+              "HL2",
+              "HL3",
+              "HL4",
+              "HL6",
+              "HL7",
+              "TBLA3",
+              "TBLA4",
+              "TBLB2",
+              "TBLB3",
+              "TBLC2",
+              "TBLC3",
+              "TBRB2",
+              "TLRB1",
+              "TLRC3"
+            ],
+            "spearman_rho": 0.7399163638623001
+          }
+        },
+        {
+          "seizure_idx": 2,
+          "seizure_id": "54800200102",
+          "block_stem": "54800102_0047",
+          "eeg_onset_rel_sec": -86.216796875,
+          "bands": {
+            "gamma_ER": {
+              "band": "gamma_ER",
+              "baseline_end_rel_sec": -146.216796875,
+              "detection_start_rel_sec": -120.0,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 33,
+              "n_detected_preclinical": 27,
+              "order_detected": [
+                {
+                  "channel": "GD2",
+                  "t_er_onset_sec": -111.19999999999999,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "GC6",
+                  "t_er_onset_sec": -108.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD5",
+                  "t_er_onset_sec": -105.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB4",
+                  "t_er_onset_sec": -83.79999999999998,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 5
+                },
+                {
+                  "channel": "TLRA4",
+                  "t_er_onset_sec": -73.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB7",
+                  "t_er_onset_sec": -66.1,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA6",
+                  "t_er_onset_sec": -25.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC6",
+                  "t_er_onset_sec": -25.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA3",
+                  "t_er_onset_sec": -24.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -23.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -22.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA7",
+                  "t_er_onset_sec": -22.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA5",
+                  "t_er_onset_sec": -22.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -21.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA8",
+                  "t_er_onset_sec": -21.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC4",
+                  "t_er_onset_sec": -21.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC1",
+                  "t_er_onset_sec": -20.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB3",
+                  "t_er_onset_sec": -18.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -17.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC3",
+                  "t_er_onset_sec": -17.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA4",
+                  "t_er_onset_sec": -16.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA2",
+                  "t_er_onset_sec": -15.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC1",
+                  "t_er_onset_sec": -11.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB2",
+                  "t_er_onset_sec": -8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA3",
+                  "t_er_onset_sec": -7.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -4.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC6",
+                  "t_er_onset_sec": -3.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC2",
+                  "t_er_onset_sec": 1.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB1",
+                  "t_er_onset_sec": 3.1999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL8",
+                  "t_er_onset_sec": 4.900000000000034,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 10
+                },
+                {
+                  "channel": "HL7",
+                  "t_er_onset_sec": 5.800000000000011,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 11
+                },
+                {
+                  "channel": "TLRC5",
+                  "t_er_onset_sec": 6.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA1",
+                  "t_er_onset_sec": 7.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "GD2",
+                  "t_er_onset_sec": -111.19999999999999,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "GC6",
+                  "t_er_onset_sec": -108.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD5",
+                  "t_er_onset_sec": -105.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB4",
+                  "t_er_onset_sec": -83.79999999999998,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 5
+                },
+                {
+                  "channel": "TLRA4",
+                  "t_er_onset_sec": -73.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB7",
+                  "t_er_onset_sec": -66.1,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA6",
+                  "t_er_onset_sec": -25.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC6",
+                  "t_er_onset_sec": -25.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA3",
+                  "t_er_onset_sec": -24.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -23.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -22.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA7",
+                  "t_er_onset_sec": -22.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA5",
+                  "t_er_onset_sec": -22.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -21.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA8",
+                  "t_er_onset_sec": -21.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC4",
+                  "t_er_onset_sec": -21.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC1",
+                  "t_er_onset_sec": -20.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB3",
+                  "t_er_onset_sec": -18.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -17.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC3",
+                  "t_er_onset_sec": -17.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA4",
+                  "t_er_onset_sec": -16.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA2",
+                  "t_er_onset_sec": -15.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC1",
+                  "t_er_onset_sec": -11.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB2",
+                  "t_er_onset_sec": -8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA3",
+                  "t_er_onset_sec": -7.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -4.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC6",
+                  "t_er_onset_sec": -3.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            },
+            "broad_ER": {
+              "band": "broad_ER",
+              "baseline_end_rel_sec": -146.216796875,
+              "detection_start_rel_sec": -120.0,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 49,
+              "n_detected_preclinical": 42,
+              "order_detected": [
+                {
+                  "channel": "GC6",
+                  "t_er_onset_sec": -114.6,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB6",
+                  "t_er_onset_sec": -111.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC2",
+                  "t_er_onset_sec": -110.6,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA6",
+                  "t_er_onset_sec": -109.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD2",
+                  "t_er_onset_sec": -107.79999999999998,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -104.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB4",
+                  "t_er_onset_sec": -86.1,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 5
+                },
+                {
+                  "channel": "TLRA4",
+                  "t_er_onset_sec": -82.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA2",
+                  "t_er_onset_sec": -81.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB7",
+                  "t_er_onset_sec": -76.6,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL10",
+                  "t_er_onset_sec": -43.0,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 8
+                },
+                {
+                  "channel": "HL9",
+                  "t_er_onset_sec": -38.599999999999966,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 9
+                },
+                {
+                  "channel": "TBLA1",
+                  "t_er_onset_sec": -38.599999999999966,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL7",
+                  "t_er_onset_sec": -38.5,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 11
+                },
+                {
+                  "channel": "GA5",
+                  "t_er_onset_sec": -37.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL6",
+                  "t_er_onset_sec": -37.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB1",
+                  "t_er_onset_sec": -26.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC6",
+                  "t_er_onset_sec": -25.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -24.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC2",
+                  "t_er_onset_sec": -24.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA3",
+                  "t_er_onset_sec": -23.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA8",
+                  "t_er_onset_sec": -22.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -22.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC3",
+                  "t_er_onset_sec": -22.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA3",
+                  "t_er_onset_sec": -22.399999999999977,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA7",
+                  "t_er_onset_sec": -22.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC1",
+                  "t_er_onset_sec": -22.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA3",
+                  "t_er_onset_sec": -22.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB3",
+                  "t_er_onset_sec": -21.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC1",
+                  "t_er_onset_sec": -21.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC2",
+                  "t_er_onset_sec": -20.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC2",
+                  "t_er_onset_sec": -20.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA2",
+                  "t_er_onset_sec": -17.5,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA4",
+                  "t_er_onset_sec": -17.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB2",
+                  "t_er_onset_sec": -12.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB1",
+                  "t_er_onset_sec": -11.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA2",
+                  "t_er_onset_sec": -11.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -9.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA1",
+                  "t_er_onset_sec": -9.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC4",
+                  "t_er_onset_sec": -5.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA3",
+                  "t_er_onset_sec": -2.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -2.3999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA2",
+                  "t_er_onset_sec": 0.6000000000000227,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 6
+                },
+                {
+                  "channel": "TLRA1",
+                  "t_er_onset_sec": 2.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL8",
+                  "t_er_onset_sec": 4.800000000000011,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 10
+                },
+                {
+                  "channel": "TLRC6",
+                  "t_er_onset_sec": 5.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL5",
+                  "t_er_onset_sec": 6.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC4",
+                  "t_er_onset_sec": 8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB4",
+                  "t_er_onset_sec": 9.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "GC6",
+                  "t_er_onset_sec": -114.6,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB6",
+                  "t_er_onset_sec": -111.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC2",
+                  "t_er_onset_sec": -110.6,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA6",
+                  "t_er_onset_sec": -109.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GD2",
+                  "t_er_onset_sec": -107.79999999999998,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "TBRB2",
+                  "t_er_onset_sec": -104.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB4",
+                  "t_er_onset_sec": -86.1,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 5
+                },
+                {
+                  "channel": "TLRA4",
+                  "t_er_onset_sec": -82.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA2",
+                  "t_er_onset_sec": -81.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GB7",
+                  "t_er_onset_sec": -76.6,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL10",
+                  "t_er_onset_sec": -43.0,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 8
+                },
+                {
+                  "channel": "HL9",
+                  "t_er_onset_sec": -38.599999999999966,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 9
+                },
+                {
+                  "channel": "TBLA1",
+                  "t_er_onset_sec": -38.599999999999966,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL7",
+                  "t_er_onset_sec": -38.5,
+                  "role": "high_hi_ictal",
+                  "high_hi_rank": 11
+                },
+                {
+                  "channel": "GA5",
+                  "t_er_onset_sec": -37.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL6",
+                  "t_er_onset_sec": -37.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLB1",
+                  "t_er_onset_sec": -26.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC6",
+                  "t_er_onset_sec": -25.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC3",
+                  "t_er_onset_sec": -24.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC2",
+                  "t_er_onset_sec": -24.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA3",
+                  "t_er_onset_sec": -23.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA8",
+                  "t_er_onset_sec": -22.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA4",
+                  "t_er_onset_sec": -22.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC3",
+                  "t_er_onset_sec": -22.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA3",
+                  "t_er_onset_sec": -22.399999999999977,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA7",
+                  "t_er_onset_sec": -22.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC1",
+                  "t_er_onset_sec": -22.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GA3",
+                  "t_er_onset_sec": -22.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB3",
+                  "t_er_onset_sec": -21.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRC1",
+                  "t_er_onset_sec": -21.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "GC2",
+                  "t_er_onset_sec": -20.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRC2",
+                  "t_er_onset_sec": -20.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLA2",
+                  "t_er_onset_sec": -17.5,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA4",
+                  "t_er_onset_sec": -17.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB2",
+                  "t_er_onset_sec": -12.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRB1",
+                  "t_er_onset_sec": -11.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA2",
+                  "t_er_onset_sec": -11.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "HL1",
+                  "t_er_onset_sec": -9.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBRA1",
+                  "t_er_onset_sec": -9.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TBLC4",
+                  "t_er_onset_sec": -5.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRA3",
+                  "t_er_onset_sec": -2.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TLRB1",
+                  "t_er_onset_sec": -2.3999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            }
+          },
+          "gamma_vs_broad": {
+            "n_common_detected": 24,
+            "common_detected_channels": [
+              "GA4",
+              "GA5",
+              "GA6",
+              "GA7",
+              "GA8",
+              "GB4",
+              "GB7",
+              "GC6",
+              "GD2",
+              "HL1",
+              "TBRA3",
+              "TBRA4",
+              "TBRB2",
+              "TBRB3",
+              "TBRC1",
+              "TBRC3",
+              "TBRC6",
+              "TLRA2",
+              "TLRA3",
+              "TLRA4",
+              "TLRB1",
+              "TLRB2",
+              "TLRC1",
+              "TLRC3"
+            ],
+            "spearman_rho": 0.6687128232135348
+          }
+        }
+      ]
+    },
+    {
+      "key": "sentinel_B",
+      "subject": "epilepsiae/916",
+      "rationale": "k=2, PR-5-A retained main, NOT in forward/reverse subset, ordinary k=2, n_seizures=51",
+      "display_cluster_id": 1,
+      "seizures": [
+        {
+          "seizure_idx": 0,
+          "seizure_id": "91600001102",
+          "block_stem": "91601102_0005",
+          "eeg_onset_rel_sec": -0.4580080509185791,
+          "bands": {
+            "gamma_ER": {
+              "band": "gamma_ER",
+              "baseline_end_rel_sec": -60.45800805091858,
+              "detection_start_rel_sec": -60.45800805091858,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 62,
+              "n_detected_preclinical": 16,
+              "order_detected": [
+                {
+                  "channel": "PH5",
+                  "t_er_onset_sec": -55.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -54.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB5",
+                  "t_er_onset_sec": -53.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB4",
+                  "t_er_onset_sec": -29.899999999999977,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB11",
+                  "t_er_onset_sec": -14.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH12",
+                  "t_er_onset_sec": -14.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB12",
+                  "t_er_onset_sec": -13.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS4",
+                  "t_er_onset_sec": -13.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB13",
+                  "t_er_onset_sec": -13.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS3",
+                  "t_er_onset_sec": -13.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS1",
+                  "t_er_onset_sec": -11.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM4",
+                  "t_er_onset_sec": -5.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM5",
+                  "t_er_onset_sec": -4.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB6",
+                  "t_er_onset_sec": -4.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB4",
+                  "t_er_onset_sec": -3.8999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -2.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS11",
+                  "t_er_onset_sec": 2.1000000000000227,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS9",
+                  "t_er_onset_sec": 2.1000000000000227,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM3",
+                  "t_er_onset_sec": 2.1999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM6",
+                  "t_er_onset_sec": 2.1999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS10",
+                  "t_er_onset_sec": 2.1999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS12",
+                  "t_er_onset_sec": 2.1999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB14",
+                  "t_er_onset_sec": 2.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB14",
+                  "t_er_onset_sec": 2.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM15",
+                  "t_er_onset_sec": 2.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB15",
+                  "t_er_onset_sec": 2.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM2",
+                  "t_er_onset_sec": 3.8000000000000114,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 5
+                },
+                {
+                  "channel": "PB1",
+                  "t_er_onset_sec": 4.0,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH1",
+                  "t_er_onset_sec": 4.300000000000011,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "PB2",
+                  "t_er_onset_sec": 4.600000000000023,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB13",
+                  "t_er_onset_sec": 4.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH2",
+                  "t_er_onset_sec": 4.699999999999989,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "TB1",
+                  "t_er_onset_sec": 4.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB3",
+                  "t_er_onset_sec": 4.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB3",
+                  "t_er_onset_sec": 4.900000000000034,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM7",
+                  "t_er_onset_sec": 5.0,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB2",
+                  "t_er_onset_sec": 5.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH1",
+                  "t_er_onset_sec": 7.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM8",
+                  "t_er_onset_sec": 8.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH4",
+                  "t_er_onset_sec": 12.100000000000023,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 3
+                },
+                {
+                  "channel": "AH15",
+                  "t_er_onset_sec": 12.700000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM14",
+                  "t_er_onset_sec": 13.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH9",
+                  "t_er_onset_sec": 13.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS8",
+                  "t_er_onset_sec": 13.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH10",
+                  "t_er_onset_sec": 14.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH11",
+                  "t_er_onset_sec": 14.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH11",
+                  "t_er_onset_sec": 14.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH3",
+                  "t_er_onset_sec": 14.600000000000023,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "PH10",
+                  "t_er_onset_sec": 14.700000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH4",
+                  "t_er_onset_sec": 15.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB10",
+                  "t_er_onset_sec": 16.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH8",
+                  "t_er_onset_sec": 16.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH7",
+                  "t_er_onset_sec": 16.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB9",
+                  "t_er_onset_sec": 18.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH8",
+                  "t_er_onset_sec": 18.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH5",
+                  "t_er_onset_sec": 18.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH9",
+                  "t_er_onset_sec": 20.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH6",
+                  "t_er_onset_sec": 23.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB9",
+                  "t_er_onset_sec": 25.700000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH3",
+                  "t_er_onset_sec": 26.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH7",
+                  "t_er_onset_sec": 26.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH2",
+                  "t_er_onset_sec": 26.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "PH5",
+                  "t_er_onset_sec": -55.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -54.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB5",
+                  "t_er_onset_sec": -53.39999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB4",
+                  "t_er_onset_sec": -29.899999999999977,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB11",
+                  "t_er_onset_sec": -14.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH12",
+                  "t_er_onset_sec": -14.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB12",
+                  "t_er_onset_sec": -13.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS4",
+                  "t_er_onset_sec": -13.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB13",
+                  "t_er_onset_sec": -13.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS3",
+                  "t_er_onset_sec": -13.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS1",
+                  "t_er_onset_sec": -11.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM4",
+                  "t_er_onset_sec": -5.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM5",
+                  "t_er_onset_sec": -4.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB6",
+                  "t_er_onset_sec": -4.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB4",
+                  "t_er_onset_sec": -3.8999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -2.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            },
+            "broad_ER": {
+              "band": "broad_ER",
+              "baseline_end_rel_sec": -60.45800805091858,
+              "detection_start_rel_sec": -60.45800805091858,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 59,
+              "n_detected_preclinical": 29,
+              "order_detected": [
+                {
+                  "channel": "AH14",
+                  "t_er_onset_sec": -56.099999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -55.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB12",
+                  "t_er_onset_sec": -54.099999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH8",
+                  "t_er_onset_sec": -53.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB15",
+                  "t_er_onset_sec": -51.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH11",
+                  "t_er_onset_sec": -49.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB11",
+                  "t_er_onset_sec": -49.099999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB1",
+                  "t_er_onset_sec": -31.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH4",
+                  "t_er_onset_sec": -30.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS8",
+                  "t_er_onset_sec": -29.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB2",
+                  "t_er_onset_sec": -28.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH11",
+                  "t_er_onset_sec": -28.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS1",
+                  "t_er_onset_sec": -13.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH12",
+                  "t_er_onset_sec": -10.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB10",
+                  "t_er_onset_sec": -9.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM4",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM5",
+                  "t_er_onset_sec": -4.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB14",
+                  "t_er_onset_sec": -4.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB14",
+                  "t_er_onset_sec": -4.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS9",
+                  "t_er_onset_sec": -4.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM15",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS10",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS11",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS12",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB11",
+                  "t_er_onset_sec": -3.8999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB15",
+                  "t_er_onset_sec": -3.8999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB6",
+                  "t_er_onset_sec": -3.8000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -1.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB9",
+                  "t_er_onset_sec": -1.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB2",
+                  "t_er_onset_sec": 4.600000000000023,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB3",
+                  "t_er_onset_sec": 5.0,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS2",
+                  "t_er_onset_sec": 5.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH1",
+                  "t_er_onset_sec": 6.800000000000011,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "AH2",
+                  "t_er_onset_sec": 6.900000000000034,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "AM8",
+                  "t_er_onset_sec": 8.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH8",
+                  "t_er_onset_sec": 8.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS3",
+                  "t_er_onset_sec": 12.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH9",
+                  "t_er_onset_sec": 13.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH10",
+                  "t_er_onset_sec": 14.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB1",
+                  "t_er_onset_sec": 14.100000000000023,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB13",
+                  "t_er_onset_sec": 16.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH10",
+                  "t_er_onset_sec": 16.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS6",
+                  "t_er_onset_sec": 17.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB13",
+                  "t_er_onset_sec": 18.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH9",
+                  "t_er_onset_sec": 18.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH7",
+                  "t_er_onset_sec": 18.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB9",
+                  "t_er_onset_sec": 21.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH7",
+                  "t_er_onset_sec": 23.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH3",
+                  "t_er_onset_sec": 23.200000000000045,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "AH4",
+                  "t_er_onset_sec": 23.30000000000001,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 3
+                },
+                {
+                  "channel": "AH15",
+                  "t_er_onset_sec": 24.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS7",
+                  "t_er_onset_sec": 24.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS5",
+                  "t_er_onset_sec": 25.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB12",
+                  "t_er_onset_sec": 25.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS4",
+                  "t_er_onset_sec": 27.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM11",
+                  "t_er_onset_sec": 28.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH6",
+                  "t_er_onset_sec": 29.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH3",
+                  "t_er_onset_sec": 29.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH12",
+                  "t_er_onset_sec": 30.200000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "AH14",
+                  "t_er_onset_sec": -56.099999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -55.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB12",
+                  "t_er_onset_sec": -54.099999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH8",
+                  "t_er_onset_sec": -53.29999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB15",
+                  "t_er_onset_sec": -51.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH11",
+                  "t_er_onset_sec": -49.19999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB11",
+                  "t_er_onset_sec": -49.099999999999994,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB1",
+                  "t_er_onset_sec": -31.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH4",
+                  "t_er_onset_sec": -30.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS8",
+                  "t_er_onset_sec": -29.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB2",
+                  "t_er_onset_sec": -28.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH11",
+                  "t_er_onset_sec": -28.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS1",
+                  "t_er_onset_sec": -13.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH12",
+                  "t_er_onset_sec": -10.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB10",
+                  "t_er_onset_sec": -9.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM4",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM5",
+                  "t_er_onset_sec": -4.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB14",
+                  "t_er_onset_sec": -4.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB14",
+                  "t_er_onset_sec": -4.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS9",
+                  "t_er_onset_sec": -4.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM15",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS10",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS11",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS12",
+                  "t_er_onset_sec": -4.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB11",
+                  "t_er_onset_sec": -3.8999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB15",
+                  "t_er_onset_sec": -3.8999999999999773,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB6",
+                  "t_er_onset_sec": -3.8000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -1.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB9",
+                  "t_er_onset_sec": -1.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            }
+          },
+          "gamma_vs_broad": {
+            "n_common_detected": 8,
+            "common_detected_channels": [
+              "AH13",
+              "AM4",
+              "AM5",
+              "PB11",
+              "PH12",
+              "TB6",
+              "TB8",
+              "TS1"
+            ],
+            "spearman_rho": 0.6395926856099424
+          }
+        },
+        {
+          "seizure_idx": 1,
+          "seizure_id": "91600101102",
+          "block_stem": "91601102_0030",
+          "eeg_onset_rel_sec": -5.3330078125,
+          "bands": {
+            "gamma_ER": {
+              "band": "gamma_ER",
+              "baseline_end_rel_sec": -65.3330078125,
+              "detection_start_rel_sec": -65.3330078125,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 63,
+              "n_detected_preclinical": 42,
+              "order_detected": [
+                {
+                  "channel": "AH15",
+                  "t_er_onset_sec": -62.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS8",
+                  "t_er_onset_sec": -60.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS1",
+                  "t_er_onset_sec": -20.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB1",
+                  "t_er_onset_sec": -19.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH14",
+                  "t_er_onset_sec": -19.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM11",
+                  "t_er_onset_sec": -8.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM9",
+                  "t_er_onset_sec": -8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB9",
+                  "t_er_onset_sec": -7.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB13",
+                  "t_er_onset_sec": -7.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB12",
+                  "t_er_onset_sec": -7.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -7.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH2",
+                  "t_er_onset_sec": -7.5,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "PB10",
+                  "t_er_onset_sec": -7.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH12",
+                  "t_er_onset_sec": -7.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB10",
+                  "t_er_onset_sec": -7.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH3",
+                  "t_er_onset_sec": -7.099999999999966,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "PB12",
+                  "t_er_onset_sec": -7.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS11",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS10",
+                  "t_er_onset_sec": -6.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB15",
+                  "t_er_onset_sec": -6.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM7",
+                  "t_er_onset_sec": -6.5,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH11",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB8",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB11",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB15",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM15",
+                  "t_er_onset_sec": -6.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB14",
+                  "t_er_onset_sec": -6.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS12",
+                  "t_er_onset_sec": -6.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH10",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM14",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB14",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB7",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS9",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB4",
+                  "t_er_onset_sec": -5.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH7",
+                  "t_er_onset_sec": -5.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM6",
+                  "t_er_onset_sec": -5.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH1",
+                  "t_er_onset_sec": -5.199999999999989,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "PB6",
+                  "t_er_onset_sec": -5.099999999999966,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB13",
+                  "t_er_onset_sec": -4.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH4",
+                  "t_er_onset_sec": -4.300000000000011,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 3
+                },
+                {
+                  "channel": "AM8",
+                  "t_er_onset_sec": -3.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH1",
+                  "t_er_onset_sec": 1.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM4",
+                  "t_er_onset_sec": 2.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM3",
+                  "t_er_onset_sec": 3.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM2",
+                  "t_er_onset_sec": 4.0,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 5
+                },
+                {
+                  "channel": "AM5",
+                  "t_er_onset_sec": 4.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB2",
+                  "t_er_onset_sec": 4.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB1",
+                  "t_er_onset_sec": 4.5,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB3",
+                  "t_er_onset_sec": 6.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH12",
+                  "t_er_onset_sec": 6.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM1",
+                  "t_er_onset_sec": 7.0,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 4
+                },
+                {
+                  "channel": "PB2",
+                  "t_er_onset_sec": 7.900000000000034,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH8",
+                  "t_er_onset_sec": 12.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB9",
+                  "t_er_onset_sec": 21.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH2",
+                  "t_er_onset_sec": 22.700000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH10",
+                  "t_er_onset_sec": 23.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH9",
+                  "t_er_onset_sec": 23.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH11",
+                  "t_er_onset_sec": 23.600000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB11",
+                  "t_er_onset_sec": 23.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB7",
+                  "t_er_onset_sec": 23.900000000000034,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB5",
+                  "t_er_onset_sec": 25.400000000000034,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH5",
+                  "t_er_onset_sec": 27.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "AH15",
+                  "t_er_onset_sec": -62.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS8",
+                  "t_er_onset_sec": -60.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS1",
+                  "t_er_onset_sec": -20.80000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB1",
+                  "t_er_onset_sec": -19.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH14",
+                  "t_er_onset_sec": -19.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM11",
+                  "t_er_onset_sec": -8.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM9",
+                  "t_er_onset_sec": -8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB9",
+                  "t_er_onset_sec": -7.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB13",
+                  "t_er_onset_sec": -7.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB12",
+                  "t_er_onset_sec": -7.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -7.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH2",
+                  "t_er_onset_sec": -7.5,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "PB10",
+                  "t_er_onset_sec": -7.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH12",
+                  "t_er_onset_sec": -7.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB10",
+                  "t_er_onset_sec": -7.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH3",
+                  "t_er_onset_sec": -7.099999999999966,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 2
+                },
+                {
+                  "channel": "PB12",
+                  "t_er_onset_sec": -7.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS11",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS10",
+                  "t_er_onset_sec": -6.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB15",
+                  "t_er_onset_sec": -6.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM7",
+                  "t_er_onset_sec": -6.5,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH11",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB8",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB11",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB15",
+                  "t_er_onset_sec": -6.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM15",
+                  "t_er_onset_sec": -6.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB14",
+                  "t_er_onset_sec": -6.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS12",
+                  "t_er_onset_sec": -6.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH10",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM14",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB14",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB7",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS9",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB4",
+                  "t_er_onset_sec": -5.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH7",
+                  "t_er_onset_sec": -5.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM6",
+                  "t_er_onset_sec": -5.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH1",
+                  "t_er_onset_sec": -5.199999999999989,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "PB6",
+                  "t_er_onset_sec": -5.099999999999966,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB13",
+                  "t_er_onset_sec": -4.699999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH4",
+                  "t_er_onset_sec": -4.300000000000011,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 3
+                },
+                {
+                  "channel": "AM8",
+                  "t_er_onset_sec": -3.6999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            },
+            "broad_ER": {
+              "band": "broad_ER",
+              "baseline_end_rel_sec": -65.3330078125,
+              "detection_start_rel_sec": -65.3330078125,
+              "detection_end_rel_sec": 30.0,
+              "n_channels_total": 84,
+              "n_channels_valid": 84,
+              "n_detected": 61,
+              "n_detected_preclinical": 31,
+              "order_detected": [
+                {
+                  "channel": "PH1",
+                  "t_er_onset_sec": -49.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB12",
+                  "t_er_onset_sec": -46.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH7",
+                  "t_er_onset_sec": -45.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM12",
+                  "t_er_onset_sec": -43.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB1",
+                  "t_er_onset_sec": -42.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB11",
+                  "t_er_onset_sec": -39.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM8",
+                  "t_er_onset_sec": -30.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH8",
+                  "t_er_onset_sec": -18.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB2",
+                  "t_er_onset_sec": -14.199999999999989,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB8",
+                  "t_er_onset_sec": -10.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS8",
+                  "t_er_onset_sec": -10.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -10.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB13",
+                  "t_er_onset_sec": -10.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB7",
+                  "t_er_onset_sec": -10.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB10",
+                  "t_er_onset_sec": -10.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB11",
+                  "t_er_onset_sec": -10.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB9",
+                  "t_er_onset_sec": -10.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB13",
+                  "t_er_onset_sec": -10.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH3",
+                  "t_er_onset_sec": -9.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM10",
+                  "t_er_onset_sec": -9.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM11",
+                  "t_er_onset_sec": -9.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM9",
+                  "t_er_onset_sec": -8.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB10",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH15",
+                  "t_er_onset_sec": -6.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM14",
+                  "t_er_onset_sec": -6.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH12",
+                  "t_er_onset_sec": -6.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB12",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB6",
+                  "t_er_onset_sec": -5.0,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB7",
+                  "t_er_onset_sec": -4.599999999999966,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH14",
+                  "t_er_onset_sec": -4.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS2",
+                  "t_er_onset_sec": 1.8000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS5",
+                  "t_er_onset_sec": 2.8000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS1",
+                  "t_er_onset_sec": 3.1999999999999886,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM5",
+                  "t_er_onset_sec": 3.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS4",
+                  "t_er_onset_sec": 3.8000000000000114,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM15",
+                  "t_er_onset_sec": 7.400000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB15",
+                  "t_er_onset_sec": 8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS12",
+                  "t_er_onset_sec": 8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS9",
+                  "t_er_onset_sec": 8.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS10",
+                  "t_er_onset_sec": 8.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS11",
+                  "t_er_onset_sec": 8.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB15",
+                  "t_er_onset_sec": 8.700000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB14",
+                  "t_er_onset_sec": 8.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB14",
+                  "t_er_onset_sec": 9.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH1",
+                  "t_er_onset_sec": 9.400000000000034,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 0
+                },
+                {
+                  "channel": "PH2",
+                  "t_er_onset_sec": 10.200000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH2",
+                  "t_er_onset_sec": 13.400000000000034,
+                  "role": "high_hi_index",
+                  "high_hi_rank": 1
+                },
+                {
+                  "channel": "AM4",
+                  "t_er_onset_sec": 18.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS6",
+                  "t_er_onset_sec": 18.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB9",
+                  "t_er_onset_sec": 21.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH10",
+                  "t_er_onset_sec": 21.100000000000023,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH7",
+                  "t_er_onset_sec": 21.700000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS7",
+                  "t_er_onset_sec": 21.700000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH11",
+                  "t_er_onset_sec": 21.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB3",
+                  "t_er_onset_sec": 22.900000000000034,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH9",
+                  "t_er_onset_sec": 22.900000000000034,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH6",
+                  "t_er_onset_sec": 23.200000000000045,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH8",
+                  "t_er_onset_sec": 23.30000000000001,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB5",
+                  "t_er_onset_sec": 23.700000000000045,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS3",
+                  "t_er_onset_sec": 26.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ],
+              "order_detected_preclinical": [
+                {
+                  "channel": "PH1",
+                  "t_er_onset_sec": -49.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB12",
+                  "t_er_onset_sec": -46.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH7",
+                  "t_er_onset_sec": -45.79999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM12",
+                  "t_er_onset_sec": -43.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB1",
+                  "t_er_onset_sec": -42.69999999999999,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB11",
+                  "t_er_onset_sec": -39.89999999999998,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM8",
+                  "t_er_onset_sec": -30.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH8",
+                  "t_er_onset_sec": -18.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB2",
+                  "t_er_onset_sec": -14.199999999999989,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB8",
+                  "t_er_onset_sec": -10.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TS8",
+                  "t_er_onset_sec": -10.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB8",
+                  "t_er_onset_sec": -10.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB13",
+                  "t_er_onset_sec": -10.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB7",
+                  "t_er_onset_sec": -10.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB10",
+                  "t_er_onset_sec": -10.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB11",
+                  "t_er_onset_sec": -10.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "TB9",
+                  "t_er_onset_sec": -10.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB13",
+                  "t_er_onset_sec": -10.0,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PH3",
+                  "t_er_onset_sec": -9.800000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM10",
+                  "t_er_onset_sec": -9.5,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM11",
+                  "t_er_onset_sec": -9.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM9",
+                  "t_er_onset_sec": -8.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH13",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB10",
+                  "t_er_onset_sec": -6.899999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH15",
+                  "t_er_onset_sec": -6.599999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AM14",
+                  "t_er_onset_sec": -6.300000000000011,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH12",
+                  "t_er_onset_sec": -6.199999999999989,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB12",
+                  "t_er_onset_sec": -6.099999999999966,
+                  "role": "other",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB6",
+                  "t_er_onset_sec": -5.0,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "PB7",
+                  "t_er_onset_sec": -4.599999999999966,
+                  "role": "ictal",
+                  "high_hi_rank": null
+                },
+                {
+                  "channel": "AH14",
+                  "t_er_onset_sec": -4.399999999999977,
+                  "role": "other",
+                  "high_hi_rank": null
+                }
+              ]
+            }
+          },
+          "gamma_vs_broad": {
+            "n_common_detected": 23,
+            "common_detected_channels": [
+              "AH12",
+              "AH13",
+              "AH14",
+              "AH15",
+              "AH7",
+              "AM11",
+              "AM14",
+              "AM8",
+              "AM9",
+              "PB10",
+              "PB12",
+              "PB13",
+              "PB6",
+              "PB8",
+              "TB1",
+              "TB10",
+              "TB11",
+              "TB12",
+              "TB13",
+              "TB7",
+              "TB8",
+              "TB9",
+              "TS8"
+            ],
+            "spearman_rho": -0.20958999427703215
+          }
+        }
+      ]
+    }
+  ]
+}
