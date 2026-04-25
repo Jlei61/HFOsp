@@ -1,0 +1,463 @@
+"""TDD tests for PR-6 template endpoint anatomical anchoring.
+
+Contract: docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md §9.
+"""
+
+from __future__ import annotations
+
+import math
+import sys
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.template_anatomical_anchoring import (
+    audit_subject_eligibility,
+    compute_subject_delta,
+    compute_template_anchoring,
+    extract_endpoint_middle,
+    forward_reverse_swap_check,
+)
+
+
+# ---------------------------------------------------------------------------
+# T1. test_extract_endpoint_middle_basic
+# ---------------------------------------------------------------------------
+def test_extract_endpoint_middle_basic():
+    channel_names = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    template_rank = [7, 6, 5, 4, 3, 2, 1, 0]  # H earliest (rank=0), A latest (rank=7)
+
+    out = extract_endpoint_middle(channel_names, template_rank, n=3)
+
+    assert out["source"] == ["H", "G", "F"]
+    assert out["sink"] == ["A", "B", "C"]
+    assert set(out["endpoint"]) == {"A", "B", "C", "F", "G", "H"}
+    assert set(out["middle"]) == {"D", "E"}
+    assert out["exit_reason"] is None
+
+
+# ---------------------------------------------------------------------------
+# T2. test_extract_endpoint_middle_min_n_ch
+# ---------------------------------------------------------------------------
+def test_extract_endpoint_middle_min_n_ch():
+    # n_ch == 6: endpoint covers all, middle empty (allowed but H1 ineligible —
+    # compute_subject_delta must skip frac_middle=NaN; audit must mark
+    # h1_primary_eligible=False, see test_cohort_exit_audit)
+    chs6 = ["A", "B", "C", "D", "E", "F"]
+    rank6 = [0, 1, 2, 3, 4, 5]
+    out6 = extract_endpoint_middle(chs6, rank6, n=3)
+    assert set(out6["endpoint"]) == set(chs6)
+    assert out6["middle"] == []
+    assert out6["exit_reason"] is None
+
+    # n_ch == 5: helper must signal exit_reason='n_ch<6'
+    chs5 = ["A", "B", "C", "D", "E"]
+    rank5 = [0, 1, 2, 3, 4]
+    out5 = extract_endpoint_middle(chs5, rank5, n=3)
+    assert out5["exit_reason"] == "n_ch<6"
+
+
+def test_extract_endpoint_middle_respects_valid_mask():
+    # 8 channels but 2 are non-participating in this cluster — they must NOT
+    # be picked as source or sink, and middle must be drawn only from the
+    # remaining 6 valid channels.
+    channel_names = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    # ranks: A=0, B=1, ..., H=7; mask out A and H (the would-be source / sink)
+    template_rank = [0, 1, 2, 3, 4, 5, 6, 7]
+    valid_mask = [False, True, True, True, True, True, True, False]
+
+    out = extract_endpoint_middle(channel_names, template_rank, n=3, valid_mask=valid_mask)
+    # source must come from valid channels: B, C, D (smallest valid ranks)
+    assert out["source"] == ["B", "C", "D"]
+    # sink: G, F, E (largest valid ranks, ordered largest first)
+    assert out["sink"] == ["G", "F", "E"]
+    # middle is empty since 6 valid channels are exactly endpoint
+    assert out["middle"] == []
+    assert out["n_valid"] == 6
+
+
+def test_extract_endpoint_middle_sentinel_negative_one():
+    # Split-half encodes invalid channels as rank=-1; default behaviour (no
+    # explicit valid_mask) should still skip them.
+    channel_names = ["A", "B", "C", "D", "E", "F", "G"]
+    template_rank = [-1, 0, 1, 2, 3, 4, 5]  # A is non-participating
+    out = extract_endpoint_middle(channel_names, template_rank, n=3)
+    # A excluded, source/sink drawn from B..G only
+    assert "A" not in out["source"]
+    assert "A" not in out["sink"]
+    assert out["source"] == ["B", "C", "D"]
+    assert out["sink"] == ["G", "F", "E"]
+
+
+# ---------------------------------------------------------------------------
+# T3. test_align_yuquan_bipolar (uses match_bipolar_soz reuse)
+# ---------------------------------------------------------------------------
+def test_align_yuquan_bipolar():
+    channel_names = ["D13-D14", "D14-D15", "E1-E2", "F1-F2", "F2-F3", "F3-F4"]
+    # template_rank: D13-D14 earliest, F3-F4 latest
+    template_rank = [0, 1, 2, 3, 4, 5]
+    soz = ["D13", "D14", "E1", "E2"]
+
+    rec = compute_template_anchoring(channel_names, template_rank, soz, focus_rel_dict=None)
+
+    # source = top-3 smallest rank: D13-D14, D14-D15, E1-E2 (all SOZ via match_bipolar_soz)
+    assert rec["source"] == ["D13-D14", "D14-D15", "E1-E2"]
+    # sink = top-3 largest rank: F3-F4, F2-F3, F1-F2 (none in SOZ)
+    assert rec["sink"] == ["F3-F4", "F2-F3", "F1-F2"]
+
+    assert rec["frac_SOZ_source"] == pytest.approx(3 / 3)
+    assert rec["frac_SOZ_sink"] == pytest.approx(0 / 3)
+    # endpoint = source ∪ sink = all 6 channels (3 SOZ + 3 non-SOZ)
+    assert rec["frac_SOZ_endpoint"] == pytest.approx(3 / 6)
+    # middle = empty when n_ch == 6 -> frac_SOZ_middle is NaN
+    assert math.isnan(rec["frac_SOZ_middle"])
+
+    # n_ch >= 7 case to exercise frac_SOZ_middle
+    channel_names2 = channel_names + ["G1-G2", "G2-G3"]
+    template_rank2 = [0, 1, 2, 3, 4, 5, 6, 7]
+    rec2 = compute_template_anchoring(channel_names2, template_rank2, soz)
+    # source still top 3 (D13-D14, D14-D15, E1-E2 -> 3 SOZ)
+    # sink top 3 = G2-G3, G1-G2, F3-F4 -> 0 SOZ
+    # middle = F1-F2, F2-F3 -> 0 SOZ
+    assert rec2["frac_SOZ_endpoint"] == pytest.approx(3 / 6)
+    assert rec2["frac_SOZ_middle"] == pytest.approx(0 / 2)
+
+
+# ---------------------------------------------------------------------------
+# T4. test_align_epilepsiae_focus_rel_3level
+# ---------------------------------------------------------------------------
+def test_align_epilepsiae_focus_rel_3level():
+    focus_rel = {
+        "i": ["HRA1"],
+        "l": ["BFLA1", "BFLA2"],
+        "e": [],
+    }
+    # 7 channels so middle is non-empty
+    channel_names = ["HRA1", "HRB1", "BFLA1", "BFLA2", "BFLA3", "BFLA4", "BFLB1"]
+    template_rank = [0, 1, 2, 3, 4, 5, 6]
+    soz_channels = focus_rel["i"]  # i-only as SOZ proxy
+
+    rec = compute_template_anchoring(
+        channel_names, template_rank, soz_channels, focus_rel_dict=focus_rel
+    )
+
+    # source = HRA1, HRB1, BFLA1
+    assert rec["source"] == ["HRA1", "HRB1", "BFLA1"]
+    # sink top 3 largest = BFLB1, BFLA4, BFLA3
+    assert rec["sink"] == ["BFLB1", "BFLA4", "BFLA3"]
+    # endpoint = source + sink = 6 channels
+    # i in endpoint: HRA1 -> 1/6
+    assert rec["frac_i_endpoint"] == pytest.approx(1 / 6)
+    # l in endpoint: BFLA1 only (BFLA3/BFLA4/BFLB1/HRB1 are NOT in focus_rel['l']) -> 1/6
+    assert rec["frac_l_endpoint"] == pytest.approx(1 / 6)
+    # e in endpoint: 0/6
+    assert rec["frac_e_endpoint"] == pytest.approx(0 / 6)
+    # middle = BFLA2 -> l only (BFLA2 is in focus_rel['l'])
+    assert rec["frac_i_middle"] == pytest.approx(0 / 1)
+    assert rec["frac_l_middle"] == pytest.approx(1 / 1)
+    assert rec["frac_e_middle"] == pytest.approx(0 / 1)
+
+
+# ---------------------------------------------------------------------------
+# T5. test_subject_delta_averages_over_k
+# ---------------------------------------------------------------------------
+def test_subject_delta_averages_over_k():
+    per_template_records = [
+        {"frac_SOZ_endpoint": 0.5, "frac_SOZ_middle": 0.1, "frac_SOZ_source": 0.6, "frac_SOZ_sink": 0.4},
+        {"frac_SOZ_endpoint": 0.3, "frac_SOZ_middle": 0.2, "frac_SOZ_source": 0.2, "frac_SOZ_sink": 0.4},
+    ]
+    out = compute_subject_delta(per_template_records)
+
+    # mean over k of (endpoint - middle): (0.5-0.1 + 0.3-0.2)/2 = (0.4 + 0.1)/2 = 0.25
+    assert out["delta_endpoint_vs_middle"] == pytest.approx(0.25)
+    # mean over k of (source - sink): (0.6-0.4 + 0.2-0.4)/2 = (0.2 + (-0.2))/2 = 0.0
+    assert out["delta_source_vs_sink"] == pytest.approx(0.0)
+    assert out["n_templates_used"] == 2
+
+
+def test_subject_delta_handles_nan_middle():
+    # When n_ch == 6, frac_middle is NaN; subject delta must skip the NaN
+    per_template_records = [
+        {"frac_SOZ_endpoint": 0.5, "frac_SOZ_middle": float("nan"), "frac_SOZ_source": 0.6, "frac_SOZ_sink": 0.4},
+        {"frac_SOZ_endpoint": 0.3, "frac_SOZ_middle": 0.2, "frac_SOZ_source": 0.2, "frac_SOZ_sink": 0.4},
+    ]
+    out = compute_subject_delta(per_template_records)
+    # only second record has valid middle: delta = 0.3 - 0.2 = 0.1
+    assert out["delta_endpoint_vs_middle"] == pytest.approx(0.1)
+    assert out["n_templates_endpoint_middle_valid"] == 1
+
+
+# ---------------------------------------------------------------------------
+# T6. test_split_half_centroid_rank_storage
+# ---------------------------------------------------------------------------
+def test_split_half_centroid_rank_storage():
+    """compute_time_split_reproducibility must store cluster_rank_a / cluster_rank_b
+    per split for every cluster."""
+    from src.interictal_propagation import compute_time_split_reproducibility
+
+    rng = np.random.default_rng(42)
+    n_ch = 8
+    n_events = 40
+    chosen_k = 2
+
+    # Build two distinct rank profiles to make k=2 separable
+    ranks = np.zeros((n_ch, n_events), dtype=float)
+    bools = np.ones((n_ch, n_events), dtype=bool)
+    half = n_events // 2
+
+    # Cluster A: channels 0-3 early, 4-7 late
+    profile_a = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=float)
+    # Cluster B: reversed
+    profile_b = np.array([7, 6, 5, 4, 3, 2, 1, 0], dtype=float)
+
+    for ev in range(half):
+        ranks[:, ev] = profile_a + rng.normal(0, 0.3, size=n_ch)
+    for ev in range(half, n_events):
+        ranks[:, ev] = profile_b + rng.normal(0, 0.3, size=n_ch)
+
+    event_abs_times = np.linspace(0, n_events, n_events).astype(float)
+    block_ids = np.zeros(n_events, dtype=int)
+    block_ids[half:] = 1
+
+    valid_event_indices = np.arange(n_events)
+    # Adaptive labels (the 'truth' labels)
+    adaptive_labels = np.concatenate([np.zeros(half, dtype=int), np.ones(half, dtype=int)])
+
+    out = compute_time_split_reproducibility(
+        ranks=ranks,
+        bools=bools,
+        event_abs_times=event_abs_times,
+        block_ids=block_ids,
+        chosen_k=chosen_k,
+        adaptive_labels=adaptive_labels,
+        valid_event_indices=valid_event_indices,
+    )
+
+    splits = out["splits"]
+    assert "first_half_second_half" in splits
+    fh = splits["first_half_second_half"]
+    # All four PR-6 robustness fields must exist
+    for key in (
+        "cluster_rank_a",
+        "cluster_rank_b",
+        "cluster_valid_mask_a",
+        "cluster_valid_mask_b",
+        "cluster_rank_b_matched_to_a",
+        "cluster_valid_mask_b_matched_to_a",
+    ):
+        assert key in fh, f"missing key {key} in split result"
+
+    # Shape: (k, n_ch)
+    arr_a = np.asarray(fh["cluster_rank_a"], dtype=int)
+    arr_b = np.asarray(fh["cluster_rank_b"], dtype=int)
+    assert arr_a.shape == (chosen_k, n_ch)
+    assert arr_b.shape == (chosen_k, n_ch)
+    # Valid channels (rank >= 0) must form a permutation of [0..n_valid-1]
+    mask_a = np.asarray(fh["cluster_valid_mask_a"], dtype=bool)
+    mask_b = np.asarray(fh["cluster_valid_mask_b"], dtype=bool)
+    assert mask_a.shape == (chosen_k, n_ch)
+    assert mask_b.shape == (chosen_k, n_ch)
+    for row, mrow in zip(arr_a, mask_a):
+        valid_ranks = sorted(row[mrow].tolist())
+        assert valid_ranks == list(range(int(mrow.sum())))
+        # Non-valid channels must be -1
+        assert all(int(r) == -1 for r, m in zip(row, mrow) if not m)
+
+
+def test_split_half_cluster_rank_b_matched_to_a():
+    """cluster_rank_b_matched_to_a[i] must equal cluster_rank_b[mapping[i]],
+    not cluster_rank_b[i]. KMeans labels are arbitrary, so direct same-index
+    Jaccard would mix unrelated clusters."""
+    from src.interictal_propagation import compute_time_split_reproducibility
+
+    rng = np.random.default_rng(7)
+    n_ch = 8
+    n_events = 60
+    chosen_k = 2
+    ranks = np.zeros((n_ch, n_events), dtype=float)
+    bools = np.ones((n_ch, n_events), dtype=bool)
+    half = n_events // 2
+    profile_a = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=float)
+    profile_b = np.array([7, 6, 5, 4, 3, 2, 1, 0], dtype=float)
+    for ev in range(half):
+        ranks[:, ev] = profile_a + rng.normal(0, 0.2, size=n_ch)
+    for ev in range(half, n_events):
+        ranks[:, ev] = profile_b + rng.normal(0, 0.2, size=n_ch)
+
+    event_abs_times = np.linspace(0, n_events, n_events).astype(float)
+    block_ids = np.zeros(n_events, dtype=int)
+    block_ids[half:] = 1
+    valid_event_indices = np.arange(n_events)
+    adaptive_labels = np.concatenate(
+        [np.zeros(half, dtype=int), np.ones(half, dtype=int)]
+    )
+
+    out = compute_time_split_reproducibility(
+        ranks=ranks,
+        bools=bools,
+        event_abs_times=event_abs_times,
+        block_ids=block_ids,
+        chosen_k=chosen_k,
+        adaptive_labels=adaptive_labels,
+        valid_event_indices=valid_event_indices,
+    )
+
+    fh = out["splits"]["first_half_second_half"]
+    mapping = {int(k): int(v) for k, v in fh["mapping_a_to_b"].items()}
+    raw_b = fh["cluster_rank_b"]
+    matched_b = fh["cluster_rank_b_matched_to_a"]
+    for a_id in range(chosen_k):
+        if a_id in mapping:
+            b_id = mapping[a_id]
+            assert matched_b[a_id] == raw_b[b_id], (
+                f"matched_b[{a_id}] != raw_b[mapping[{a_id}]={b_id}]"
+            )
+
+
+# ---------------------------------------------------------------------------
+# T7. test_forward_reverse_swap_score
+# ---------------------------------------------------------------------------
+def test_forward_reverse_swap_score():
+    channel_names = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    # T0 source = A,B,C  -> T1 sink = B,C,A (full overlap, same set)
+    # T0 sink = F,G,H    -> T1 source = G,H,F (full overlap)
+    out = forward_reverse_swap_check(
+        t0_source=["A", "B", "C"],
+        t0_sink=["F", "G", "H"],
+        t1_source=["G", "H", "F"],
+        t1_sink=["B", "C", "A"],
+        channel_names=channel_names,
+        n_perm=500,
+        seed=0,
+    )
+
+    # Both Jaccards = 1.0 -> mean = 1.0
+    assert out["swap_score"] == pytest.approx(1.0)
+    # null_p must be small (perfect swap is rare under random sampling of 8-channel
+    # space with 3-element sets)
+    assert out["null_p"] < 0.05
+    assert "null_95th" in out
+    assert out["null_95th"] < 1.0  # null distribution shouldn't be all 1.0
+
+
+def test_forward_reverse_swap_score_no_swap():
+    """Disjoint endpoints -> swap_score 0 -> null_p high."""
+    channel_names = list("ABCDEFGHIJKL")
+    out = forward_reverse_swap_check(
+        t0_source=["A", "B", "C"],
+        t0_sink=["D", "E", "F"],
+        t1_source=["G", "H", "I"],  # disjoint from t0_sink
+        t1_sink=["J", "K", "L"],  # disjoint from t0_source
+        channel_names=channel_names,
+        n_perm=500,
+        seed=0,
+    )
+    assert out["swap_score"] == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# T8. test_cohort_exit_audit
+# ---------------------------------------------------------------------------
+def test_cohort_exit_audit():
+    """audit_subject_eligibility returns one row per candidate with two
+    orthogonal flags: endpoint_defined (n_ch >= 6) and h1_primary_eligible
+    (n_ch >= 7).  pass == h1_primary_eligible."""
+    candidates = [
+        # A: stable_k=2, soz=['A','B'], n_ch=10 -> PASS (h1_primary_eligible)
+        {
+            "subject_id": "A",
+            "dataset": "yuquan",
+            "stable_k": 2,
+            "soz_channels": ["A", "B"],
+            "channel_names": ["A", "B"] + [f"C{i}" for i in range(8)],
+            "template_ranks": [list(range(10)), list(range(10))[::-1]],
+        },
+        # B: stable_k=4 -> EXIT 'k!=2'
+        {
+            "subject_id": "B",
+            "dataset": "yuquan",
+            "stable_k": 4,
+            "soz_channels": ["C0"],
+            "channel_names": [f"C{i}" for i in range(10)],
+            "template_ranks": [list(range(10))] * 4,
+        },
+        # C: stable_k=2, soz=[] -> EXIT 'empty_soz'
+        {
+            "subject_id": "C",
+            "dataset": "yuquan",
+            "stable_k": 2,
+            "soz_channels": [],
+            "channel_names": [f"C{i}" for i in range(10)],
+            "template_ranks": [list(range(10))] * 2,
+        },
+        # D: stable_k=2, soz=['Z'] not in channel_names -> EXIT 'no_matched_soz'
+        {
+            "subject_id": "D",
+            "dataset": "yuquan",
+            "stable_k": 2,
+            "soz_channels": ["Z"],
+            "channel_names": [f"C{i}" for i in range(10)],
+            "template_ranks": [list(range(10))] * 2,
+        },
+        # E: stable_k=2, n_ch=5 -> EXIT 'n_ch<6' (endpoint cannot be extracted)
+        {
+            "subject_id": "E",
+            "dataset": "yuquan",
+            "stable_k": 2,
+            "soz_channels": ["C0"],
+            "channel_names": [f"C{i}" for i in range(5)],
+            "template_ranks": [list(range(5))] * 2,
+        },
+        # F: stable_k=2, n_ch=6 -> endpoint_defined=True but H1 ineligible
+        # (middle is empty) -> EXIT 'middle_empty', pass=False
+        {
+            "subject_id": "F",
+            "dataset": "yuquan",
+            "stable_k": 2,
+            "soz_channels": ["C0", "C1"],
+            "channel_names": [f"C{i}" for i in range(6)],
+            "template_ranks": [list(range(6)), list(range(6))[::-1]],
+        },
+    ]
+
+    rows = audit_subject_eligibility(candidates)
+    assert len(rows) == 6
+
+    by_id = {r["subject_id"]: r for r in rows}
+
+    # A: full PASS
+    assert by_id["A"]["pass"] is True
+    assert by_id["A"]["endpoint_defined"] is True
+    assert by_id["A"]["h1_primary_eligible"] is True
+    assert by_id["A"]["exit_reason"] is None
+
+    # B: k!=2
+    assert by_id["B"]["pass"] is False
+    assert by_id["B"]["endpoint_defined"] is False
+    assert by_id["B"]["exit_reason"] == "k!=2"
+
+    # C: empty SOZ
+    assert by_id["C"]["pass"] is False
+    assert by_id["C"]["endpoint_defined"] is False
+    assert by_id["C"]["exit_reason"] == "empty_soz"
+
+    # D: SOZ list non-empty but none match channels
+    assert by_id["D"]["pass"] is False
+    assert by_id["D"]["endpoint_defined"] is False
+    assert by_id["D"]["exit_reason"] == "no_matched_soz"
+
+    # E: n_ch < 6 -> endpoint cannot even be extracted
+    assert by_id["E"]["pass"] is False
+    assert by_id["E"]["endpoint_defined"] is False
+    assert by_id["E"]["exit_reason"] == "n_ch<6"
+
+    # F: n_ch == 6 -> endpoint_defined but H1 ineligible
+    assert by_id["F"]["pass"] is False
+    assert by_id["F"]["endpoint_defined"] is True
+    assert by_id["F"]["h1_primary_eligible"] is False
+    assert by_id["F"]["exit_reason"] == "middle_empty"

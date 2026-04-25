@@ -1834,6 +1834,50 @@ def compute_time_split_reproducibility(
             b_pairs = set((min(i, j), max(i, j)) for i, j in fwd_rev_b)
             fwd_rev_reproduced = bool(mapped_a_pairs & b_pairs)
 
+        # PR-6 robustness: rank ONLY valid (participating) channels per cluster.
+        # Non-valid channels get rank = -1 sentinel; downstream source/sink
+        # extraction must filter on cluster_valid_mask_a/b.  Filling NaN with
+        # the mean would give non-participating channels a fake mid-rank and
+        # make split-half robustness look more stable than it is.
+        n_ch_total = templates_a.shape[1]
+
+        def _rank_with_mask(template_row: np.ndarray) -> Tuple[List[int], List[bool]]:
+            valid = np.isfinite(template_row)
+            rank = np.full(n_ch_total, -1, dtype=int)
+            valid_idx = np.where(valid)[0]
+            if valid_idx.size >= 2:
+                vals = template_row[valid_idx]
+                local_rank = np.argsort(np.argsort(vals))
+                rank[valid_idx] = local_rank
+            return rank.tolist(), valid.tolist()
+
+        cluster_rank_a: List[List[int]] = []
+        cluster_rank_b: List[List[int]] = []
+        cluster_valid_mask_a: List[List[bool]] = []
+        cluster_valid_mask_b: List[List[bool]] = []
+        for ki in range(chosen_k):
+            ra, ma = _rank_with_mask(templates_a[ki])
+            rb, mb = _rank_with_mask(templates_b[ki])
+            cluster_rank_a.append(ra)
+            cluster_rank_b.append(rb)
+            cluster_valid_mask_a.append(ma)
+            cluster_valid_mask_b.append(mb)
+
+        # PR-6 mapping alignment: cluster_rank_a[ki] is A's cluster ki, but
+        # cluster_rank_b[ki] is B's raw KMeans label ki — KMeans labels are
+        # arbitrary, so direct same-index Jaccard would compare unrelated
+        # clusters.  Re-key B's ranks under A's cluster id via mapping_a_to_b.
+        cluster_rank_b_matched_to_a: List[Optional[List[int]]] = []
+        cluster_valid_mask_b_matched_to_a: List[Optional[List[bool]]] = []
+        for a_id in range(chosen_k):
+            b_id = mapping.get(int(a_id))
+            if b_id is not None and 0 <= int(b_id) < chosen_k:
+                cluster_rank_b_matched_to_a.append(cluster_rank_b[int(b_id)])
+                cluster_valid_mask_b_matched_to_a.append(cluster_valid_mask_b[int(b_id)])
+            else:
+                cluster_rank_b_matched_to_a.append(None)
+                cluster_valid_mask_b_matched_to_a.append(None)
+
         split_results[split_name] = {
             "n_events_a": int(idx_a.size),
             "n_events_b": int(idx_b.size),
@@ -1847,6 +1891,12 @@ def compute_time_split_reproducibility(
             "forward_reverse_in_a": len(fwd_rev_a),
             "forward_reverse_in_b": len(fwd_rev_b),
             "forward_reverse_reproduced": fwd_rev_reproduced,
+            "cluster_rank_a": cluster_rank_a,
+            "cluster_rank_b": cluster_rank_b,
+            "cluster_valid_mask_a": cluster_valid_mask_a,
+            "cluster_valid_mask_b": cluster_valid_mask_b,
+            "cluster_rank_b_matched_to_a": cluster_rank_b_matched_to_a,
+            "cluster_valid_mask_b_matched_to_a": cluster_valid_mask_b_matched_to_a,
         }
 
     completed = [v for v in split_results.values() if isinstance(v, dict)]

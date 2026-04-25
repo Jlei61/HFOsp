@@ -25,8 +25,8 @@
 - **慢调制（PR-4B）**：模板混合（L1）与模板内顺序一致性（L2）cohort 全 null；模板内相对时延结构（L3）在全 cohort 上证据不足，仅在 8 个高置信子集（`dom_r > 0.7`）的 Pearson r 上探索性显著（p=0.016, 7/8）。详见 `docs/archive/topic1/interictal_group_event_internal_propagation.md`。
 - **发作邻近（PR-4C）**：propagation pattern 五指标 cohort Wilcoxon 在主+辅两配置下均 null（主 1/15 / 辅 1/15 名义显著且跨配置不一致）→ **模板内部几何无稳健发作邻近调制，正式封板为阴性**。唯一稳健信号在 `rate_by_template`（post_ictal vs baseline 主 p=0.0009、辅 p=0.0067）。详见 `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` §9。
 - **模板招募（PR-5）— 核心科学结论（已验收 2026-04-20）**：在 PR-5-A novel-template gate 已 PASS（main n=23 / aux n=22，未观察到 `H_OOD` 或 `H_assignment_drift` 的 cohort-level 证据）的前提下，PR-5-B 把 PR-4C `rate_by_template` 的描述层信号正式升级为推断结论：**dominant template 的绝对事件率（events/h）在 post-ictal 相对 baseline 出现 cohort-level 系统升高**（候选 A `dominant_global` `post_minus_baseline` median main `+65.46` / aux `+42.43` events/h；main p=0.00128 Bonferroni-pass α=0.0083，aux p=0.0115 nominal-pass，方向一致；候选 B main p=0.00214 同向支持 → §4.4 sensitivity gate `overall_strong=True`）。**§4.5 composition diagnostic 在 PR-5 合同下未复制 panel d**：`share_post_minus_baseline` 两配置都是 nominal-positive 但**与 panel d 预期方向相反**（main `+0.0156`, p=0.0149，direction-consistent 6/23；aux `+0.0328`, p=0.0301，direction-consistent 5/22）→ panel d 信号不在 PR-5 cohort 复现，且不为主结论背书。验收口径：PR-5-A PASS / PR-5-B STRONG；`pre_minus_baseline`、`post_minus_pre` 仅留为次级描述层。详见 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` §11。
-- **PR-6A（2026-04-23 审阅）**：Step0-2 的 EEG-aware baseline clip、baseline-invalid no-fallback 与 sentinel Step2 新图 **有条件验收通过**；但 Step3 `t_ER_onset` 目前只接受为 preview-only。`548` 在同一次 seizure 内呈中等 gamma/broad 一致性（`rho ≈ 0.67–0.74`），提示 ER 可能含有部分 clinical 前 recruitment 顺序信息；`916` 更不稳定，且最早通道常落在 `other`。当前正式口径：**ER 值得继续作为 clinical 前 electrographic recruitment 的候选特征，但 onset-rank 提取层尚未封板**。详见 `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md`。
-- **未来模型层（§7.9）** 维持冻结：当前不绑 PR 编号，原 PR-6 编号空间已让位给 PR-6A/B/C/D/E 数据发现序列。
+- **PR-6（2026-04-25 重启）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 主线**全部冻结归档**（sentinel `548/916` 已经把“稳定 ictal onset rank”证伪：cross-seizure top10 overlap=0、cross-band ρ=−0.21、early channels 大量落在 `other`），文献亦指明该方向在领域内高风险（Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021）。**新主线 = stable template endpoint (source ∪ sink) anatomical anchoring**：H1 检验 `frac_SOZ(endpoint) − frac_SOZ(middle)` 的 subject-level cohort Wilcoxon，subset polarity（H1b）+ forward/reverse swap（H2）+ Epilepsiae focus_rel i/l/e（H3）作为方向性 / 机制 / 解剖三类 sensitivity。复用 `match_bipolar_soz` / `match_bipolar_focus_rel` 与已有 `template_rank`，cohort 从 audit 推导不预写 N。详见正式 plan-of-record：`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`；老 PR-6-A 三份 doc 顶部已加 SUPERSEDED 块。
+- **未来模型层（§7.9）** 维持冻结：当前不绑 PR 编号。
 - **同步性**：cohort-level interictal synchrony 总体为 null。唯一探索性信号是 extra-focal `phase_e` 的 `pre > post`（p=0.012, r=0.31）。
 
 ---
@@ -125,7 +125,7 @@ Epilepsiae 的区域分层分析中：
 - **PR-4B 高置信子集 H2 探索性支持的功效极有限**：n=8 Wilcoxon 最小可能 p = 0.004，当前 p=0.016（W=1）；不能据此做 population-level 结论。`huangwanling` 在 L3 读数上完全 ineligible（n=29）
 - **PR-4C 阴性已封板**（2026-04-19，三处合同 P0 修复后复跑两套配置）。原本怀疑被合同 bug 掩盖的 `pre_ictal vs baseline raw_tau aux` 在修复后也消失（p=0.0005 → p=0.141），印证旧版那条信号是 bug 制品
 - **PR-5 已完成**：完整阈值 / 失败合同 / sensitivity gate 三态以 archive `pr5_template_recruitment_plan_2026-04-20.md` 为单一来源；本文档只保留判定摘要。已知边界：PR-5-B cohort 必须严格限定在 PR-5-A retained subset（main n=23 / aux n=22）；`pre_minus_baseline` / `post_minus_pre` 主配置未通过 Bonferroni（次级描述层）；§4.5 composition diagnostic `share_post_minus_baseline` 在两配置下都 nominal-significant 但方向与 panel d 预期反向 → panel d 未在 PR-5 合同下复制，且不能为主结论背书
-- **PR-6A 尚未封板**：当前 Step3-preview 只能作为 preview-only 工具层，不进入 H1/H1' / sanity 正式叙事；`548` 有中等 band 内一致性但跨 seizure 稳定性不足，`916` 更不稳，且最早通道常被 `other` 主导。另一个未完成点是 §3.2 baseline 合同中的 `IED peak exclusion` 还没真正接通。详见 `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md`。
+- **PR-6 已 pivot（2026-04-25）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 三份 doc（`pr6a-1.md`、`pr6a_template_ictal_alignment_plan_2026-04-21.md`、`pr6a_step0-2_step3preview_review_2026-04-23.md`）已冻结归档；不再继续推 ER pipeline / CUSUM / `t_ER_onset` 封板。新主线见 §7.10 + `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`。新主线的已知风险：(a) cohort audit 后实际 n 可能 < 10（Yuquan SOZ JSON coverage 限）→ 需要先看 audit 再判 PASS/null；(b) Epilepsiae focus_rel `e` 在多 subject 上 list 为空 → H3 的 negative control 可能 underpowered；(c) split-half 通道稳定性 Jaccard < 0.4 时 H1 解读必须加 caveat。
 - **未来模型层尚未启动**：硬前置见 §7.9；当前数据发现序列尚未给出已封板的几何/招募一致性结论，模型层维持冻结，不进主线工作量
 
 ---
@@ -201,8 +201,9 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 3. ~~**PR-4D**（P1）~~ — DONE / ACCEPTED（2026-04-16）
 4. **高 k 复核**（P1）：可并行
 5. ~~**PR-5**（P0）~~ — DONE（2026-04-20，PR-5-A PASS + PR-5-B STRONG）；详见 §7.8
-6. **§7.6 / §7.7 可选方向**：§7.6 已被 PR-5 吸收为正式分析，§7.7 仍维持 exploratory 子集
-7. **未来模型层（§7.9）**：硬前置未达成，维持冻结；不绑 PR 编号
+6. **PR-6 Stable Template Endpoint Anatomical Anchoring**（**P0，2026-04-25 重启**）：原 PR-6-A 三份 doc 冻结归档；新主线问 “stable template endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel-i”；详见 §7.10 + `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
+7. **§7.6 / §7.7 可选方向**：§7.6 已被 PR-5 吸收为正式分析，§7.7 仍维持 exploratory 子集
+8. **未来模型层（§7.9）**：硬前置未达成，维持冻结；不绑 PR 编号
 
 ---
 
@@ -272,6 +273,41 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 ---
 
+### 7.10 PR-6：Stable Template Endpoint Anatomical Anchoring（Topic 1 × Topic 3 桥）
+
+> 完整合同（数据/假设/失败合同/代码入口/测试合同/工作量）+ §11 复跑结论：`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
+> 性质：正式入口。本节只保留**判定摘要 + pivot 来源**，不重述阈值与 metric 定义（避免与 archive 双源漂移）。
+
+**Pivot 来源（2026-04-25）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 已冻结归档：
+- `docs/archive/topic1/pr6a-1.md` — multi-anchor consensus probe 计划（5 anchor voting）
+- `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md` — single ictal anchor 主线
+- `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` — Step3 `t_ER_onset` preview-only 审阅
+- `docs/archive/topic1/pr6_direction_brainstorm_2026-04-25.md` — pivot 决策的 brainstorm（Obs 1–4 + 文献分类 + Topic 1 × Topic 3 桥的提出）
+
+三份 PR-6-A doc 顶部已加 `> SUPERSEDED 2026-04-25` 块。Pivot 的实证基础：sentinel `548/916` 跨 seizure 顶部通道 overlap=0、cross-band ρ=−0.21、early channels 被 `other` 主导；文献基础：Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021 一起说 “稳定 ictal anchor 在领域里已知不 work”。
+
+**新主线一句话**：把每个 stable template centroid rank 的 **endpoint (source ∪ sink, top-3 + bottom-3)** vs **middle (其余通道)** 的 SOZ / focus_rel 富集差异折叠成 subject-level delta，跨 cohort 跑 Wilcoxon。Forward/reverse subject 上的 polarity 抵消问题被 endpoint 框架自动消除；source vs sink 极性只作 H1b secondary 描述。
+
+**假设结构（archive §3）**：
+- **H1 primary**：`delta_subject = mean_k(frac_SOZ_endpoint − frac_SOZ_middle)`，pooled (Yuquan + Epilepsiae) Wilcoxon vs 0，α=0.05；PASS = Wilcoxon p<0.05 + sign test p<0.05 + cohort delta median > 0
+- **H1b secondary**：source vs sink polarity，**仅在 non-forward/reverse subset** 上跑（forward/reverse subject 极性相消，会假阴）
+- **H2 mechanism sanity**：8/9 forward/reverse subject 上 `Jaccard(source_T0, sink_T1)` + permutation null
+- **H3 sensitivity**（仅 Epilepsiae）：focus_rel i / l / e 三套 endpoint vs middle，i 主预期、l 次预期、e 应 ≈0
+- **Dataset-specific**：Yuquan、Epilepsiae 各自 Wilcoxon，仅作 robustness，不进 H1 α 池
+
+**Cohort 处理**：audit-derived，不预写 N。入选条件 = stable_k=2 ∩ SOZ JSON 非空 ∩ n_ch ≥ 6 ∩ centroid 有 polarity ∩ matched_SOZ ≥ 1。Step 2 第一动作是出 `cohort_audit.csv`。`818` (k=4) 与 `zhangjinhan` (k=6) 走 case-series。
+
+**复用基础设施**：
+- `adaptive_cluster.clusters[k].template_rank`（`src/interictal_propagation.py:1536`）— argsort-of-argsort 整数 rank 已计算好
+- `match_bipolar_soz` / `match_bipolar_focus_rel`（`src/event_periodicity.py:3153,3164`）— Yuquan bipolar endpoint matching + Epilepsiae CAR 直接匹配
+- `compute_time_split_reproducibility`（仅扩展 ~20 行存 `cluster_rank_a/b`）
+
+**显式不做**：不重启 ER pipeline / CUSUM / Page-Hinkley / `t_ER_onset`；不引入 multi-anchor voting / naming label；不重跑 PR-2 / PR-2.5 / PR-3 / PR-4A/B / PR-5；不做 π embedding；不做"先挑 hub 再重跑 PR-4C"的 double-dipping replay（留给独立后续 PR）。
+
+**当前状态**：plan-of-record 已落盘；**Step 1 ACCEPTED（2026-04-26）**：`src/template_anatomical_anchoring.py` 7 个 helper + `compute_time_split_reproducibility` split-half 扩展（含 mapping 对齐 + valid_mask + `-1` sentinel）+ 13 PR-6 测试 + 49 既有测试 = 62/62 全绿。Step 1 review 触发三处合同修订并落入 plan §4 / §6 / §15：audit 拆为 `endpoint_defined` / `h1_primary_eligible` 2-tier、split-half `cluster_rank_b_matched_to_a` 与 `cluster_valid_mask_*` 强制对齐 + 防伪稳定性。Step 2（cohort audit + per-subject runner）下一步启动。
+
+---
+
 ## 8. 代码与结果入口
 
 ### 内部传播
@@ -305,7 +341,11 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 - `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` — PR-4C 主+辅助配置全量审阅。§1-§8 是 2026-04-17 第一轮审阅（cohort 数值表 / 三处实现合同问题 / P0/P1/P2/P3 路线）；**§9 是 2026-04-19 P0 修复完成后的复跑数值与正式封板结论**。Topic 1 §3.1c / §5 / §7.2 / §7.6 / §7.7 都引用本文件。
 - `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 完整计划合同：科学问题 / 主+备择假设 / 失败合同 / PR-5-A novel-template gate / PR-5-B recruitment shift（含 §4.5 secondary composition diagnostic 独立合同）/ 9 项 TDD 测试合同 / §9 未来模型层占位（不绑 PR 编号，对应主文档 §7.9）/ §11 复跑结论。Topic 1 §5 / §7.5 / §7.6 / §7.8 / §7.9 / §10 都引用本文件。
 - `docs/archive/topic1/pr5a_novel_template_gate_2026-04-20.md` — PR-5-A gate 全 cohort 跑数与判定中间报告。
-- `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` — PR-6A Step0-2 / Step3-preview 阶段性审阅与验收记录：哪些部分已通过、哪些仍是 preview-only、sentinel `548/916` 的关键数值与科学判断、以及当前阻塞点（`IED peak exclusion`、正式 Step 3 λ 校准、preview 防误读护栏）。
+- `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` — **SUPERSEDED 2026-04-25**：PR-6A Step0-2 / Step3-preview 阶段性审阅；保留作为 pivot 决策的实证证据（sentinel `548/916` 跨 seizure top10 overlap=0 / cross-band ρ=−0.21）。当前正式入口：`pr6_template_endpoint_anchoring_plan_2026-04-25.md`。
+- `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md` — **SUPERSEDED 2026-04-25**：原 PR-6-A single ictal anchor + Smith 2022 重现的合同级计划；保留作为科学背景与方法学讨论。
+- `docs/archive/topic1/pr6a-1.md` — **SUPERSEDED 2026-04-25**：原 PR-6-A multi-anchor consensus probe 计划（5 anchor voting）；保留作为 pivot 决策证据。
+- `docs/archive/topic1/pr6_direction_brainstorm_2026-04-25.md` — PR-6 pivot 决策的 brainstorm 文档：Obs 1–4 分类、文献整理、Topic 1 × Topic 3 桥的提出；驱动了 PR-6 主线从 ictal alignment 转向 endpoint anatomical anchoring。
+- `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — **PR-6 正式入口（plan-of-record）**：H1 endpoint vs middle / H1b polarity / H2 forward-reverse swap / H3 i-l-e sensitivity / cohort audit-derived / 8 项 TDD / 失败合同。Topic 1 §2 / §5 / §7.5 / §7.10 / §10 都引用本文件。
 - `docs/archive/topic1/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。

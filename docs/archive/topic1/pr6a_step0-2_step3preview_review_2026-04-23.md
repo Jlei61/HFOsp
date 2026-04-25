@@ -1,3 +1,7 @@
+> **SUPERSEDED 2026-04-25**：本审阅记录已不再驱动 PR-6 主线。PR-6 已 pivot 到“stable template endpoint (source ∪ sink) 解剖锚定 SOZ”，不再继续推进 ER pipeline / CUSUM / `t_ER_onset` 的封板路径。本文档保留作为 pivot 决策的关键证据 — `548` 跨 seizure top10 overlap=0、`916` cross-band ρ=−0.21、early channels 大量落在 `other` 这三条数值是触发 pivot 的实证基础。**正式 plan-of-record**：[`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`](pr6_template_endpoint_anchoring_plan_2026-04-25.md)。Step3-preview 工具层（`detect_er_onset_preview`）维持 preview-only，不被新主线消费。
+
+---
+
 # PR-6A Step0-2 / Step3-preview 审阅与验收记录（2026-04-23）
 
 > 性质：archive / 阶段性审阅与验收记录
