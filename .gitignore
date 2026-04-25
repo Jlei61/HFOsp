@@ -222,6 +222,15 @@ results/gpu_compare_legacy_*/
 .compare_legacy_refine_modules.json
 .scan_refine_params.json
 
+# Run-time logs (batch / pack / orchestrator output) — never tracked
+logs/
+
+# Per-run scratch evidence under any docs/archive topic — never tracked.
+# Use the topic doc + commit history as the durable record; raw per-subject
+# summaries / canary outputs / phase-aligned npz dumps live in results/ until
+# they are consumed.
+docs/archive/**/_artifacts/
+
 # Local paper markdown / MinerU extractions (not tracked)
 docs/paper/
 .worktrees/

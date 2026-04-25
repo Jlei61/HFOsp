@@ -88,48 +88,82 @@ LEGACY_CENTROID_POWER = 3.0
 LEGACY_PACKED_BOOL_FS = 500.0
 
 # ---------------------------------------------------------------------------
-# Per-subject packing parameters (legacy P16 __main__ block, both commented and
-# uncommented sub_pickT_list / sub_packWL_list entries unioned).
+# Per-subject packing parameters are sourced from `config/subject_params.json`
+# (yuquan section). Required pack-stage fields per subject:
+#   - pick_k             pack-stage mean+k*std threshold  (legacy sub_pickT_list)
+#   - pack_win_sec       packing window length            (legacy sub_packWL_list)
+#   - pack_drop_channels packing-stage bipolar drop list  (legacy module-level
+#                        `drop_chns`, globally empty for yuquan)
+#   - pack_top_n         optional: explicit cardinality cap (must be documented
+#                        in docs/archive/yuquan_lagpat/, not introduced silently)
+# `_defaults` provides the inheritable values; per-subject entries only override.
+# Detector-stage `drop_channels` is NOT used for packing.
 # ---------------------------------------------------------------------------
-LEGACY_SUBJECT_PARAMS: Dict[str, Dict[str, float]] = {
-    # Pre-existing-lagPat reference subjects (from sub_packWL_list active block)
-    "chenziyang":   {"pick_k": 1.0, "pack_win_sec": 0.300},
-    "hanyuxuan":    {"pick_k": 1.0, "pack_win_sec": 0.300},
-    "huanghanwen":  {"pick_k": 1.0, "pack_win_sec": 0.200},
-    "litengsheng":  {"pick_k": 1.0, "pack_win_sec": 0.300},
-    "xuxinyi":      {"pick_k": 0.7, "pack_win_sec": 0.200},
-    "zhangjinhan":  {"pick_k": 1.0, "pack_win_sec": 0.200},
-    "sunyuanxin":   {"pick_k": 1.0, "pack_win_sec": 0.250},
-    "gaolan":       {"pick_k": 1.9, "pack_win_sec": 0.300},
-    "wangyiyang":   {"pick_k": 1.0, "pack_win_sec": 0.250},
-    "dongyiming":   {"pick_k": 0.5, "pack_win_sec": 0.220},
-    # Backfill-only subjects (from commented block)
-    "zhangkexuan":  {"pick_k": 0.5, "pack_win_sec": 0.500},
-    "pengzihang":   {"pick_k": 1.0, "pack_win_sec": 0.500},
-    "chengshuai":   {"pick_k": 1.0, "pack_win_sec": 0.500},
-    "huangwanling": {"pick_k": 3.0, "pack_win_sec": 0.300},
-    "liyouran":     {"pick_k": 1.0, "pack_win_sec": 0.250},
-    "songzishuo":   {"pick_k": 1.0, "pack_win_sec": 0.300},
-    "zhangbichen":  {"pick_k": 0.5, "pack_win_sec": 0.300},
-    "zhangjiaqi":   {"pick_k": 1.7, "pack_win_sec": 0.150},
-    "zhaochenxi":   {"pick_k": 0.5, "pack_win_sec": 0.300},
-    "zhaojinrui":   {"pick_k": 1.0, "pack_win_sec": 0.300},
-    "zhourongxuan": {"pick_k": 1.0, "pack_win_sec": 0.200},
-}
-
-# Per-subject drop_chns. Legacy P16
-# (`yuquan_24h_perPatientAnalysis_dropRef/P16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool.py`)
-# uses a *global empty* drop_chns (`drop_chns = np.array([])` at module top, the
-# only commented-out value being `np.array(['A8'])`). There is no per-subject
-# drop table for yuquan in the legacy code path. Keep it empty for all subjects
-# to match legacy. Phase A on `gaolan` was incidentally validated with
-# `["B'4"]` in the validator, but `B'4` was never picked anyway, so the
-# validator passing is not evidence for a non-empty drop list.
-SUBJECT_DROP_CHNS: Dict[str, List[str]] = {s: [] for s in LEGACY_SUBJECT_PARAMS}
 
 DATA_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 DETECT_ROOT = REPO_ROOT / "results" / "hfo_detection"
 RESULTS_ROOT = REPO_ROOT / "results" / "lagpat_backfill"
+SUBJECT_PARAMS_PATH = REPO_ROOT / "config" / "subject_params.json"
+
+# 24-subject same-source Yuquan cohort (10 main cohort that have legacy lagPat
+# under the legacy 30-subject pipeline + 3 reference subjects with legacy lagPat
+# + 8 backfill-only subjects that the legacy pipeline skipped). All must have
+# an entry under `config/subject_params.json::yuquan` with pack-stage fields
+# resolvable.
+YUQUAN_SAME_SOURCE_SUBJECTS: Tuple[str, ...] = (
+    # Reference subjects (have legacy lagPat AND legacy detection)
+    "gaolan", "dongyiming", "wangyiyang",
+    # Main cohort with legacy lagPat (legacy 30-subject set, yuquan side)
+    "chenziyang", "hanyuxuan", "huanghanwen", "huangwanling", "litengsheng",
+    "sunyuanxin", "xuxinyi", "zhangjinhan",
+    # Backfill subjects (legacy detection ran but lagPat was missing/skipped)
+    "chengshuai", "liyouran", "pengzihang", "songzishuo",
+    "zhangbichen", "zhangjiaqi", "zhangkexuan", "zhaochenxi",
+    "zhaojinrui", "zhourongxuan",
+)
+
+_PACK_REQUIRED_FIELDS = ("pick_k", "pack_win_sec", "pack_drop_channels")
+_PACK_OPTIONAL_FIELDS = ("pack_top_n",)
+
+
+def _load_subject_params_registry() -> Dict[str, Dict[str, object]]:
+    if not SUBJECT_PARAMS_PATH.exists():
+        raise FileNotFoundError(f"subject params config missing: {SUBJECT_PARAMS_PATH}")
+    with SUBJECT_PARAMS_PATH.open("r", encoding="utf-8") as fh:
+        cfg = json.load(fh)
+    if "yuquan" not in cfg:
+        raise KeyError(f"no yuquan section in {SUBJECT_PARAMS_PATH}")
+    return cfg["yuquan"]
+
+
+def resolve_subject_pack_params(subject: str) -> Dict[str, object]:
+    """Return resolved pack-stage params for `subject` from config.
+
+    Raises KeyError if subject is missing from the yuquan section, and
+    ValueError if any required pack-stage field is missing after merge.
+    Only the pack-relevant subset is returned; the detector-stage
+    `drop_channels` is intentionally excluded from pack params.
+    """
+    registry = _load_subject_params_registry()
+    if subject not in registry:
+        raise KeyError(f"subject '{subject}' missing from yuquan section of {SUBJECT_PARAMS_PATH}")
+    if subject == "_defaults":
+        raise KeyError("'_defaults' is not a real subject")
+    defaults = dict(registry.get("_defaults", {}))
+    merged = dict(defaults)
+    merged.update(registry[subject])
+    missing = [f for f in _PACK_REQUIRED_FIELDS if f not in merged]
+    if missing:
+        raise ValueError(f"subject '{subject}' pack params missing fields: {missing}")
+    out: Dict[str, object] = {
+        "pick_k": float(merged["pick_k"]),
+        "pack_win_sec": float(merged["pack_win_sec"]),
+        "pack_drop_channels": list(merged["pack_drop_channels"]),
+    }
+    for f in _PACK_OPTIONAL_FIELDS:
+        if f in merged:
+            out[f] = merged[f]
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -277,14 +311,24 @@ def _alias_left(name: str) -> str:
 
 def alias_bipolar_to_left_with_arbitration(
     chns_names: Sequence[str], counts: np.ndarray
-) -> Tuple[Dict[str, AliasMap], List[Dict[str, int]]]:
+) -> Tuple[Dict[str, AliasMap], List[Dict[str, int]], List[Dict[str, object]]]:
     """Collapse `'A1-A2'`-style names into alias-left `'A1'`. On collision keep
-    the entry with higher events_count.
+    the entry with higher events_count. Then drop the *outermost* alias of each
+    shaft so the resulting alias set is identical to the one produced by legacy
+    `_legacy_bipolar_reref_and_drop` (whose chain
+    `valid_chan_index`(drop max contact) -> `bipolar_rerefAndDrop_eeg`
+    (drop new max contact) makes max alias = `max_edf_contact_num - 2`).
+
+    The new detection pipeline pairs *every* contact, so a 14-contact shaft
+    yields aliases up to `<pre>13`, but legacy only reaches `<pre>12`. Any
+    `'<pre>13'` picked channel will be missing from the legacy bipolar output
+    and crash `compute_stitched_lagpat`.
 
     Returns
     -------
-    alias_map : dict alias -> AliasMap
+    alias_map  : dict alias -> AliasMap (after outermost drop)
     collisions : list of collision records (for QC manifest)
+    outer_drops: list of {alias, orig, counts, reason} for outermost-shaft drops
     """
     if len(chns_names) != len(counts):
         raise ValueError("chns_names / counts length mismatch")
@@ -310,7 +354,29 @@ def alias_bipolar_to_left_with_arbitration(
                 "winner": {"orig": am.orig, "counts": am.counts},
                 "losers": am.losers,
             })
-    return aliases, collisions
+
+    # Drop the highest-num alias per shaft to align the alias set with the
+    # legacy bipolar output. Group aliases by their letter prefix.
+    by_pre: Dict[str, List[Tuple[int, str]]] = {}
+    for a in aliases:
+        try:
+            pre, num = _split_chn(a)
+        except ValueError:
+            continue
+        by_pre.setdefault(pre, []).append((int(num), a))
+    outer_drops: List[Dict[str, object]] = []
+    for pre, items in by_pre.items():
+        items.sort(key=lambda t: t[0])
+        max_alias = items[-1][1]
+        am = aliases.pop(max_alias)
+        outer_drops.append({
+            "alias": max_alias,
+            "orig": am.orig,
+            "counts": am.counts,
+            "reason": "shaft_outermost_alias_not_in_legacy_bipolar",
+        })
+
+    return aliases, collisions, outer_drops
 
 
 # ---------------------------------------------------------------------------
@@ -412,54 +478,119 @@ def compute_stitched_lagpat(
 # ---------------------------------------------------------------------------
 
 
+START_TIME_DELTA_THRESHOLD_SEC = 1.0
+
+
+def _block_qc_metrics(events_bool: np.ndarray, lag_raw: np.ndarray) -> Dict[str, float]:
+    """Per-block QC: median n_participating per event, median lag span (ms)."""
+    if events_bool.size == 0 or events_bool.shape[1] == 0:
+        return {"median_n_participating": float("nan"), "median_lag_span_ms": float("nan")}
+    n_part = events_bool.sum(axis=0)  # (n_events,)
+    median_n_part = float(np.median(n_part)) if n_part.size else float("nan")
+
+    spans_ms: List[float] = []
+    for i in range(lag_raw.shape[1]):
+        col = lag_raw[:, i]
+        finite = col[np.isfinite(col)]
+        if finite.size >= 2:
+            spans_ms.append(float((finite.max() - finite.min()) * 1000.0))
+    median_lag_span_ms = float(np.median(spans_ms)) if spans_ms else float("nan")
+    return {"median_n_participating": median_n_part, "median_lag_span_ms": median_lag_span_ms}
+
+
 def pack_one_record(
     *,
     subject: str,
     edf_path: Path,
     gpu_npz_path: Path,
-    refine_npz_path: Path,
+    aliases: Dict[str, AliasMap],
     pack_pick_k: float,
     pack_win_sec: float,
+    pack_top_n: Optional[int],
     drop_chns: Sequence[str],
     out_dir: Path,
     backup_dir: Optional[Path] = None,
+    start_time_threshold_sec: float = START_TIME_DELTA_THRESHOLD_SEC,
 ) -> Dict[str, object]:
     import mne
     raw = mne.io.read_raw_edf(str(edf_path), preload=False, verbose=False, encoding="latin1")
     fs_in = float(raw.info["sfreq"])
     record_last_sec = float(raw.times[-1])
     meas_date = raw.info.get("meas_date")
-    start_t = float(meas_date.timestamp()) if meas_date is not None else 0.0
+    edf_start_t = float(meas_date.timestamp()) if meas_date is not None else None
 
-    # 1. Load subject-level _refineGpu.npz (event_count over alias-left set)
-    refine = np.load(refine_npz_path, allow_pickle=True)
-    refine_counts_orig = refine["events_count"].astype(np.int64)
-    refine_names_orig = [str(x) for x in refine["chns_names"]]
-
-    aliases, collisions = alias_bipolar_to_left_with_arbitration(
-        refine_names_orig, refine_counts_orig
-    )
-    alias_keys = sorted(aliases.keys())
-    alias_counts = np.array([aliases[a].counts for a in alias_keys], dtype=np.int64)
-
-    # 2. Pick channels by mean + pack_pick_k * std
-    counts_f = alias_counts.astype(np.float64)
-    thr = float(counts_f.mean() + pack_pick_k * counts_f.std())
-    pick_mask = counts_f > thr
-    picked_alias_names = [alias_keys[i] for i in np.where(pick_mask)[0]]
-    if len(picked_alias_names) < 2:
-        return {
-            "status": "skipped",
-            "reason": f"only {len(picked_alias_names)} picked channels under thr={thr:.4g}",
-            "n_picked": len(picked_alias_names),
-            "alias_collisions": collisions,
-        }
-
-    # 3. Per-record _gpu.npz: load whole_dets and look up by *original* name
+    # Per-record _gpu.npz: load whole_dets and look up by *original* name
     gpu = np.load(gpu_npz_path, allow_pickle=True)
     gpu_names_orig = [str(x) for x in gpu["chns_names"]]
     gpu_dets = gpu["whole_dets"]
     gpu_name_to_idx = {n: i for i, n in enumerate(gpu_names_orig)}
+    gpu_start_t = float(gpu["start_time"]) if "start_time" in gpu.files else None
+
+    # 0. start_time hard check: gpu.npz['start_time'] vs EDF meas_date.timestamp()
+    start_time_validation: Dict[str, object] = {
+        "gpu_npz_start_time": gpu_start_t,
+        "edf_meas_date_epoch": edf_start_t,
+        "delta_sec": (
+            float(abs(gpu_start_t - edf_start_t))
+            if (gpu_start_t is not None and edf_start_t is not None) else None
+        ),
+        "threshold_sec": float(start_time_threshold_sec),
+        "passed": False,
+    }
+    if gpu_start_t is None or edf_start_t is None:
+        start_time_validation["passed"] = False
+        return {
+            "record": edf_path.stem,
+            "status": "skipped",
+            "skip_reason": "start_time_missing",
+            "start_time_validation": start_time_validation,
+            "n_picked": 0,
+            "wrote_lagpat": False,
+            "wrote_packed": False,
+        }
+    if start_time_validation["delta_sec"] > start_time_threshold_sec:
+        return {
+            "record": edf_path.stem,
+            "status": "skipped",
+            "skip_reason": (
+                f"start_time_mismatch delta={start_time_validation['delta_sec']:.3f}s "
+                f"> {start_time_threshold_sec}s"
+            ),
+            "start_time_validation": start_time_validation,
+            "n_picked": 0,
+            "wrote_lagpat": False,
+            "wrote_packed": False,
+        }
+    start_time_validation["passed"] = True
+    start_t = edf_start_t  # canonical: legacy lagPat.start_t used EDF meas_date
+
+    alias_keys = sorted(aliases.keys())
+    alias_counts = np.array([aliases[a].counts for a in alias_keys], dtype=np.int64)
+
+    # 1. Pick channels by mean + pack_pick_k * std
+    counts_f = alias_counts.astype(np.float64)
+    thr = float(counts_f.mean() + pack_pick_k * counts_f.std())
+    pick_mask = counts_f > thr
+    picked_alias_names = [alias_keys[i] for i in np.where(pick_mask)[0]]
+    if pack_top_n is not None and len(picked_alias_names) > int(pack_top_n):
+        picked_alias_names = sorted(
+            picked_alias_names,
+            key=lambda nm: (-aliases[nm].counts, nm),
+        )[: int(pack_top_n)]
+    n_collisions_in_picked = sum(
+        1 for nm in picked_alias_names if aliases[nm].losers
+    )
+    if len(picked_alias_names) < 2:
+        return {
+            "record": edf_path.stem,
+            "status": "skipped",
+            "skip_reason": f"only {len(picked_alias_names)} picked channels under thr={thr:.4g}",
+            "n_picked": len(picked_alias_names),
+            "n_alias_collisions_in_picked": int(n_collisions_in_picked),
+            "start_time_validation": start_time_validation,
+            "wrote_lagpat": False,
+            "wrote_packed": False,
+        }
 
     dets: Dict[str, np.ndarray] = {}
     missing_in_gpu: List[str] = []
@@ -490,10 +621,15 @@ def pack_one_record(
     )
     if not new_windows:
         return {
+            "record": edf_path.stem,
             "status": "skipped",
-            "reason": "no packed windows after segment filter",
+            "skip_reason": "no packed windows after segment filter",
             "n_picked": len(picked_alias_names),
-            "alias_collisions": collisions,
+            "n_alias_collisions_in_picked": int(n_collisions_in_picked),
+            "missing_in_gpu_npz": missing_in_gpu,
+            "start_time_validation": start_time_validation,
+            "wrote_lagpat": False,
+            "wrote_packed": False,
         }
     packed_times = np.array([[w.start, w.end] for w in new_windows], dtype=np.float64)
     n_events = packed_times.shape[0]
@@ -517,11 +653,14 @@ def pack_one_record(
     out_dir.mkdir(parents=True, exist_ok=True)
     out_lagpat = out_dir / f"{edf_path.stem}_lagPat.npz"
     out_packed = out_dir / f"{edf_path.stem}_packedTimes.npy"
+    backup_events: List[Dict[str, str]] = []
     if backup_dir is not None:
         backup_dir.mkdir(parents=True, exist_ok=True)
         for src in (out_lagpat, out_packed):
             if src.exists() and not (backup_dir / src.name).exists():
-                os.rename(str(src), str(backup_dir / src.name))
+                dst = backup_dir / src.name
+                os.rename(str(src), str(dst))
+                backup_events.append({"src": str(src), "dst": str(dst)})
 
     # 8. Atomic write. np.savez/save auto-append .npz/.npy when the path does
     # not end with the corresponding suffix; we put .tmp *before* the suffix
@@ -540,20 +679,30 @@ def pack_one_record(
     os.replace(str(tmp_lag), str(out_lagpat))
     os.replace(str(tmp_packed), str(out_packed))
 
+    qc = _block_qc_metrics(events_bool, lag_raw)
+
     return {
-        "status": "ok",
         "record": edf_path.stem,
+        "status": "ok",
+        "skip_reason": None,
         "n_picked": len(picked_alias_names),
         "n_events": int(n_events),
         "n_events_with_finite_lag": int(np.isfinite(lag_raw).all(axis=0).sum()),
-        "alias_collisions": collisions,
+        "n_alias_collisions_in_picked": int(n_collisions_in_picked),
         "missing_in_gpu_npz": missing_in_gpu,
         "out_lagpat": str(out_lagpat),
         "out_packed": str(out_packed),
-        "pack_pick_k": pack_pick_k,
-        "pack_win_sec": pack_win_sec,
+        "wrote_lagpat": True,
+        "wrote_packed": True,
+        "backup_events": backup_events,
+        "pack_pick_k": float(pack_pick_k),
+        "pack_win_sec": float(pack_win_sec),
+        "pack_top_n": int(pack_top_n) if pack_top_n is not None else None,
         "picked_chnNames": picked_alias_names,
         "start_t_epoch": start_t,
+        "start_time_validation": start_time_validation,
+        "median_n_participating": qc["median_n_participating"],
+        "median_lag_span_ms": qc["median_lag_span_ms"],
     }
 
 
@@ -562,16 +711,98 @@ def pack_one_record(
 # ---------------------------------------------------------------------------
 
 
+SCHEMA_VERSION = "yuquan_lagpat_backfill_v2_2026Q2"
+
+
+def _file_stat(p: Path) -> Dict[str, object]:
+    try:
+        st = p.stat()
+        return {"path": str(p), "size_bytes": int(st.st_size), "mtime": float(st.st_mtime)}
+    except FileNotFoundError:
+        return {"path": str(p), "size_bytes": None, "mtime": None}
+
+
+def _legacy_block_presence_diff(
+    raw_dir: Path, edf_stems: Sequence[str], records: Sequence[Dict[str, object]]
+) -> Dict[str, object]:
+    """Compare new-pipeline written blocks to pre-existing legacy lagPat presence.
+
+    Legacy semantics — `.legacy_backup/` is the single source of truth once it
+    exists. A subject's `.legacy_backup/` directory is created the first time
+    `pack_one_record` writes into the raw dir, and from that moment forward
+    `<raw_dir>/<stem>_lagPat.npz` is a *new-pipeline* artifact, not legacy.
+
+    - If `.legacy_backup/` exists:
+        legacy_present = stems with `<.legacy_backup>/<stem>_lagPat.npz`
+    - Else (subject has never been backfilled):
+        legacy_present = stems with `<raw_dir>/<stem>_lagPat.npz`
+
+    This avoids the previous bug where the audit would read a v1 backfill
+    output sitting in the raw dir as if it were legacy evidence.
+    """
+    backup_dir = raw_dir / ".legacy_backup"
+    legacy_source: Path
+    legacy_source_kind: str
+    if backup_dir.exists():
+        legacy_source = backup_dir
+        legacy_source_kind = "legacy_backup_dir"
+    else:
+        legacy_source = raw_dir
+        legacy_source_kind = "raw_dir_untouched"
+
+    legacy_present: List[str] = []
+    legacy_absent: List[str] = []
+    for stem in edf_stems:
+        if (legacy_source / f"{stem}_lagPat.npz").exists():
+            legacy_present.append(stem)
+        else:
+            legacy_absent.append(stem)
+
+    rec_by_stem = {r["record"]: r for r in records if "record" in r}
+
+    def _bucket(stems: Sequence[str]) -> Dict[str, List[str]]:
+        out = {"ok": [], "skipped": [], "missing_gpu_npz": [], "error": []}
+        for s in stems:
+            r = rec_by_stem.get(s)
+            if r is None:
+                out.setdefault("not_processed", []).append(s)
+                continue
+            st = r.get("status", "unknown")
+            out.setdefault(st, []).append(s)
+        return out
+
+    legacy_present_status = _bucket(legacy_present)
+    legacy_absent_status = _bucket(legacy_absent)
+    return {
+        "legacy_source_kind": legacy_source_kind,
+        "legacy_source_path": str(legacy_source),
+        "n_legacy_present": len(legacy_present),
+        "n_legacy_absent": len(legacy_absent),
+        "legacy_present_status": legacy_present_status,
+        "legacy_absent_status": legacy_absent_status,
+        # Red flag: legacy had it, new pipeline failed/skipped to write
+        "regressions": [
+            s for s in legacy_present
+            if rec_by_stem.get(s, {}).get("status") not in ("ok",)
+        ],
+        # Informational: new pipeline wrote a block legacy didn't have
+        "extras_written": [
+            s for s in legacy_absent
+            if rec_by_stem.get(s, {}).get("status") == "ok"
+        ],
+    }
+
+
 def run_subject(
     subject: str,
     *,
     dry_run_out_dir: Optional[Path] = None,
     only_records: Optional[Sequence[str]] = None,
-) -> Dict[str, object]:
-    if subject not in LEGACY_SUBJECT_PARAMS:
-        raise KeyError(f"subject {subject} missing from LEGACY_SUBJECT_PARAMS")
-    params = LEGACY_SUBJECT_PARAMS[subject]
-    drop_chns = SUBJECT_DROP_CHNS.get(subject, [])
+) -> Tuple[Dict[str, object], Dict[str, object]]:
+    """Run packing for one subject and return (summary_dict, manifest_dict)."""
+    params = resolve_subject_pack_params(subject)
+    drop_chns = list(params["pack_drop_channels"])
+    pack_top_n = int(params["pack_top_n"]) if "pack_top_n" in params else None
 
     raw_dir = DATA_ROOT / subject
     detect_dir = DETECT_ROOT / subject
@@ -593,14 +824,26 @@ def run_subject(
     if not edfs:
         raise FileNotFoundError(f"no EDF found in {raw_dir} (only_records={only_records})")
 
+    # Subject-level alias resolution (refine_npz is loaded ONCE, not per block)
+    refine = np.load(refine_npz, allow_pickle=True)
+    refine_counts_orig = refine["events_count"].astype(np.int64)
+    refine_names_orig = [str(x) for x in refine["chns_names"]]
+    aliases, alias_collisions, alias_outer_drops = alias_bipolar_to_left_with_arbitration(
+        refine_names_orig, refine_counts_orig
+    )
+
     records: List[Dict[str, object]] = []
     t_start = time.time()
     for i, edf in enumerate(edfs, 1):
         gpu_npz = detect_dir / f"{edf.stem}_gpu.npz"
         if not gpu_npz.exists():
             records.append({
-                "record": edf.stem, "status": "missing_gpu_npz",
+                "record": edf.stem,
+                "status": "missing_gpu_npz",
+                "skip_reason": "missing_gpu_npz",
                 "gpu_npz": str(gpu_npz),
+                "wrote_lagpat": False,
+                "wrote_packed": False,
             })
             print(f"  [{i}/{len(edfs)}] {edf.stem}: MISSING gpu_npz")
             continue
@@ -610,9 +853,10 @@ def run_subject(
                 subject=subject,
                 edf_path=edf,
                 gpu_npz_path=gpu_npz,
-                refine_npz_path=refine_npz,
+                aliases=aliases,
                 pack_pick_k=params["pick_k"],
                 pack_win_sec=params["pack_win_sec"],
+                pack_top_n=pack_top_n,
                 drop_chns=drop_chns,
                 out_dir=out_dir,
                 backup_dir=backup_dir,
@@ -622,29 +866,144 @@ def run_subject(
             status = r["status"]
             extra = ""
             if status == "ok":
-                extra = f"  n_pick={r['n_picked']:>3} n_ev={r['n_events']:>5} elapsed={r['elapsed_sec']}s"
+                extra = (
+                    f"  n_pick={r['n_picked']:>3} n_ev={r['n_events']:>5} "
+                    f"med_part={r['median_n_participating']:.1f} "
+                    f"med_lag={r['median_lag_span_ms']:.1f}ms "
+                    f"elapsed={r['elapsed_sec']}s"
+                )
             elif status == "skipped":
-                extra = f"  reason={r.get('reason','?')}"
+                extra = f"  reason={r.get('skip_reason','?')}"
             print(f"  [{i}/{len(edfs)}] {edf.stem}: {status}{extra}")
         except Exception as e:
-            records.append({"record": edf.stem, "status": "error", "error": repr(e)})
+            records.append({
+                "record": edf.stem,
+                "status": "error",
+                "skip_reason": "exception",
+                "error": repr(e),
+                "wrote_lagpat": False,
+                "wrote_packed": False,
+            })
             print(f"  [{i}/{len(edfs)}] {edf.stem}: ERROR {e!r}")
 
-    summary = {
+    n_total = len(edfs)
+    n_ok = sum(1 for r in records if r.get("status") == "ok")
+    n_skipped = sum(1 for r in records if r.get("status") == "skipped")
+    n_error = sum(1 for r in records if r.get("status") == "error")
+    n_missing = sum(1 for r in records if r.get("status") == "missing_gpu_npz")
+
+    if n_total == 0:
+        write_status = "no_inputs"
+    elif n_ok == 0:
+        write_status = "all_failed"
+    elif n_ok == n_total:
+        write_status = "ok"
+    else:
+        write_status = "partial_ok"
+
+    # Aggregate QC across blocks that wrote successfully
+    ok_records = [r for r in records if r.get("status") == "ok"]
+    if ok_records:
+        med_part = float(np.median([r["median_n_participating"] for r in ok_records]))
+        med_lag = float(np.median([r["median_lag_span_ms"] for r in ok_records]))
+        n_coll_in_picked_max = max(
+            int(r.get("n_alias_collisions_in_picked", 0)) for r in ok_records
+        )
+        n_coll_in_picked_min = min(
+            int(r.get("n_alias_collisions_in_picked", 0)) for r in ok_records
+        )
+    else:
+        med_part = float("nan")
+        med_lag = float("nan")
+        n_coll_in_picked_max = 0
+        n_coll_in_picked_min = 0
+
+    # start_time validation aggregate
+    st_validations = [
+        r["start_time_validation"] for r in records
+        if isinstance(r.get("start_time_validation"), dict)
+    ]
+    start_time_overall_pass = bool(st_validations) and all(
+        v.get("passed") is True for v in st_validations
+    )
+
+    block_presence = _legacy_block_presence_diff(raw_dir, [e.stem for e in edfs], records)
+
+    summary: Dict[str, object] = {
+        "schema_version": SCHEMA_VERSION,
         "subject": subject,
+        "cohort": "yuquan_same_source",
         "params": params,
         "drop_chns": drop_chns,
-        "n_records_total": len(edfs),
-        "n_records_ok": sum(1 for r in records if r.get("status") == "ok"),
-        "n_records_skipped": sum(1 for r in records if r.get("status") == "skipped"),
-        "n_records_error": sum(1 for r in records if r.get("status") == "error"),
-        "n_records_missing_gpu_npz": sum(1 for r in records if r.get("status") == "missing_gpu_npz"),
+        "write_status": write_status,
+        "n_blocks_total": n_total,
+        "n_blocks_written": n_ok,
+        "n_blocks_skipped": n_skipped,
+        "n_blocks_error": n_error,
+        "n_blocks_missing_gpu_npz": n_missing,
+        "n_alias_collisions": len(alias_collisions),
+        "n_alias_collisions_in_picked_max": n_coll_in_picked_max,
+        "n_alias_collisions_in_picked_min": n_coll_in_picked_min,
+        "median_n_participating": med_part,
+        "median_lag_span_ms": med_lag,
+        "start_time_validation_overall_pass": start_time_overall_pass,
         "out_dir": str(out_dir),
         "backup_dir": str(backup_dir) if backup_dir else None,
         "elapsed_sec_total": round(time.time() - t_start, 1),
+        "legacy_block_presence_diff": block_presence,
         "records": records,
     }
-    return summary
+
+    manifest: Dict[str, object] = {
+        "schema_version": SCHEMA_VERSION,
+        "subject": subject,
+        "cohort": "yuquan_same_source",
+        "in_yuquan_same_source_24": subject in YUQUAN_SAME_SOURCE_SUBJECTS,
+        "subject_params_path": str(SUBJECT_PARAMS_PATH),
+        "params_resolved": params,
+        "data_root": str(DATA_ROOT),
+        "detect_root": str(DETECT_ROOT),
+        "refine_npz": _file_stat(refine_npz),
+        "alias_collisions": alias_collisions,
+        "alias_outer_drops": alias_outer_drops,
+        "blocks": [
+            {
+                "record": e.stem,
+                "edf": _file_stat(e),
+                "gpu_npz": _file_stat(detect_dir / f"{e.stem}_gpu.npz"),
+                "status": next(
+                    (r.get("status") for r in records if r.get("record") == e.stem),
+                    None,
+                ),
+                "skip_reason": next(
+                    (r.get("skip_reason") for r in records if r.get("record") == e.stem),
+                    None,
+                ),
+                "wrote_lagpat": next(
+                    (r.get("wrote_lagpat") for r in records if r.get("record") == e.stem),
+                    False,
+                ),
+                "wrote_packed": next(
+                    (r.get("wrote_packed") for r in records if r.get("record") == e.stem),
+                    False,
+                ),
+                "out_lagpat": next(
+                    (r.get("out_lagpat") for r in records if r.get("record") == e.stem),
+                    None,
+                ),
+                "out_packed": next(
+                    (r.get("out_packed") for r in records if r.get("record") == e.stem),
+                    None,
+                ),
+                "backup_events": next(
+                    (r.get("backup_events", []) for r in records if r.get("record") == e.stem),
+                    [],
+                ),
+            }
+            for e in edfs
+        ],
+    }
+    return summary, manifest
 
 
 def main() -> int:
@@ -670,25 +1029,45 @@ def main() -> int:
     for subject in args.subject:
         print(f"\n=========== subject={subject} ===========")
         try:
-            summary = run_subject(subject, dry_run_out_dir=dry_dir, only_records=only_records)
+            summary, manifest = run_subject(
+                subject, dry_run_out_dir=dry_dir, only_records=only_records
+            )
         except Exception as e:
             print(f"FATAL subject={subject}: {e!r}")
             rc = 1
             continue
 
         out_root = dry_dir if dry_dir is not None else RESULTS_ROOT
+        subj_out_dir = (
+            Path(args.summary_out).parent if args.summary_out
+            else (out_root / subject)
+        )
+        subj_out_dir.mkdir(parents=True, exist_ok=True)
         summary_path = (
             Path(args.summary_out) if args.summary_out
-            else (out_root / subject / "summary.json")
+            else (subj_out_dir / "summary.json")
         )
-        summary_path.parent.mkdir(parents=True, exist_ok=True)
-        summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False))
-        print(f"summary: {summary_path}")
-        print(f"  ok={summary['n_records_ok']}/{summary['n_records_total']}  "
-              f"skipped={summary['n_records_skipped']}  "
-              f"err={summary['n_records_error']}  "
-              f"miss_gpu={summary['n_records_missing_gpu_npz']}  "
-              f"elapsed={summary['elapsed_sec_total']}s")
+        manifest_path = subj_out_dir / "manifest.json"
+
+        summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False, default=str))
+        manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False, default=str))
+        print(f"summary:  {summary_path}")
+        print(f"manifest: {manifest_path}")
+        print(
+            f"  write_status={summary['write_status']} "
+            f"ok={summary['n_blocks_written']}/{summary['n_blocks_total']}  "
+            f"skipped={summary['n_blocks_skipped']}  "
+            f"err={summary['n_blocks_error']}  "
+            f"miss_gpu={summary['n_blocks_missing_gpu_npz']}  "
+            f"alias_coll={summary['n_alias_collisions']} (in_picked_max={summary['n_alias_collisions_in_picked_max']})  "
+            f"st_ok={summary['start_time_validation_overall_pass']}  "
+            f"elapsed={summary['elapsed_sec_total']}s"
+        )
+        if summary["legacy_block_presence_diff"]["regressions"]:
+            print(
+                "  WARN: legacy-present blocks not written by new pipeline: "
+                f"{summary['legacy_block_presence_diff']['regressions']}"
+            )
 
     return rc
 
