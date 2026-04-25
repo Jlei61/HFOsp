@@ -50,7 +50,7 @@ import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import scipy.signal
@@ -332,6 +332,13 @@ def alias_bipolar_to_left_with_arbitration(
     """
     if len(chns_names) != len(counts):
         raise ValueError("chns_names / counts length mismatch")
+    # Detect input format: legacy 2021-era refineGpu was already
+    # bipolar-collapsed (single-electrode names like 'A1', 'A2'); the new
+    # detector pipeline emits bipolar-pair names ('A1-A2', 'A2-A3') that
+    # need both alias collapse + outermost-shaft drop. The outer drop is a
+    # no-op (and can be incorrect, removing a legitimately picked channel)
+    # when the input is already in single-electrode form.
+    is_bipolar_pair_input = any("-" in str(n) for n in chns_names)
     aliases: Dict[str, AliasMap] = {}
     for orig, c in zip(chns_names, counts.tolist()):
         a = _alias_left(str(orig))
@@ -355,26 +362,28 @@ def alias_bipolar_to_left_with_arbitration(
                 "losers": am.losers,
             })
 
-    # Drop the highest-num alias per shaft to align the alias set with the
-    # legacy bipolar output. Group aliases by their letter prefix.
-    by_pre: Dict[str, List[Tuple[int, str]]] = {}
-    for a in aliases:
-        try:
-            pre, num = _split_chn(a)
-        except ValueError:
-            continue
-        by_pre.setdefault(pre, []).append((int(num), a))
     outer_drops: List[Dict[str, object]] = []
-    for pre, items in by_pre.items():
-        items.sort(key=lambda t: t[0])
-        max_alias = items[-1][1]
-        am = aliases.pop(max_alias)
-        outer_drops.append({
-            "alias": max_alias,
-            "orig": am.orig,
-            "counts": am.counts,
-            "reason": "shaft_outermost_alias_not_in_legacy_bipolar",
-        })
+    if is_bipolar_pair_input:
+        # Bipolar-pair input ('A1-A2', ...): the alias set ends one contact
+        # higher than the legacy bipolar reref output, so drop the highest
+        # alias per shaft to align with `_legacy_bipolar_reref_and_drop`.
+        by_pre: Dict[str, List[Tuple[int, str]]] = {}
+        for a in aliases:
+            try:
+                pre, num = _split_chn(a)
+            except ValueError:
+                continue
+            by_pre.setdefault(pre, []).append((int(num), a))
+        for pre, items in by_pre.items():
+            items.sort(key=lambda t: t[0])
+            max_alias = items[-1][1]
+            am = aliases.pop(max_alias)
+            outer_drops.append({
+                "alias": max_alias,
+                "orig": am.orig,
+                "counts": am.counts,
+                "reason": "shaft_outermost_alias_not_in_legacy_bipolar",
+            })
 
     return aliases, collisions, outer_drops
 
@@ -793,29 +802,174 @@ def _legacy_block_presence_diff(
     }
 
 
+# ---------------------------------------------------------------------------
+# Path-injection layer (Track B replay reuse)
+#
+# `run_subject` is shared between the canonical same-source contract (refine
+# + gpu both under DETECT_ROOT) and the legacy-refine replay (refine + gpu
+# under <legacy_root>/<subject>/...). Path resolution is extracted into one
+# helper so both call sites go through the same code and provenance fields
+# end up in `summary.json` / `manifest.json` for the audit's provenance gate.
+# ---------------------------------------------------------------------------
+
+_SENTINEL: object = object()
+_GpuResolver = Callable[[str, str], Path]
+
+
+@dataclass(frozen=True)
+class _ResolvedSubjectIO:
+    raw_dir: Path
+    refine_npz: Path
+    gpu_resolver: _GpuResolver
+    out_dir: Path
+    backup_dir: Optional[Path]
+    same_source_assertion: bool
+    legacy_refine_root_recorded: Optional[str]
+    legacy_gpu_root_recorded: Optional[str]
+
+
+def _resolve_run_subject_io(
+    subject: str,
+    *,
+    legacy_refine_root: Optional[Path] = None,
+    legacy_gpu_root: Optional[Path] = None,
+    out_dir: Optional[Path] = None,
+    backup_dir: object = _SENTINEL,
+    same_source_assertion: bool = True,
+    dry_run_out_dir: Optional[Path] = None,
+) -> _ResolvedSubjectIO:
+    """Resolve all I/O paths for one subject in one place.
+
+    Behavior:
+
+    - No overrides ⇒ same-source contract:
+      * `refine_npz = DETECT_ROOT / subject / _refineGpu.npz`
+      * `gpu_resolver(s, r) = DETECT_ROOT / s / f"{r}_gpu.npz"`
+      * `out_dir = DATA_ROOT / subject`
+      * `backup_dir = DATA_ROOT / subject / .legacy_backup`
+      * `same_source_assertion = True`
+
+    - `legacy_refine_root` and/or `legacy_gpu_root` set ⇒ paths are rerouted
+      to `<root>/<subject>/...`. Same-source assertion drops to False and
+      the recorded provenance fields capture the supplied roots so the
+      replay-audit provenance gate can verify the run actually consumed
+      legacy artifacts.
+
+    - `dry_run_out_dir` is the pre-refactor backward-compat knob: same-source
+      paths, but write to `<dry>/<subject>/` and never auto-create a
+      `.legacy_backup`.
+
+    Defensive guards:
+
+    - When `same_source_assertion=False`, `out_dir` must not equal
+      `DATA_ROOT/<subject>` — replays must not overwrite the live cohort.
+    """
+    raw_dir = DATA_ROOT / subject
+    detect_dir = DETECT_ROOT / subject
+
+    # refine
+    if legacy_refine_root is None:
+        refine_npz = detect_dir / "_refineGpu.npz"
+        legacy_refine_root_recorded: Optional[str] = None
+    else:
+        legacy_refine_root = Path(legacy_refine_root)
+        refine_npz = legacy_refine_root / subject / "_refineGpu.npz"
+        legacy_refine_root_recorded = str(legacy_refine_root)
+
+    # gpu resolver
+    if legacy_gpu_root is None:
+        def _default_gpu_resolver(s: str, r: str) -> Path:
+            return DETECT_ROOT / s / f"{r}_gpu.npz"
+        gpu_resolver: _GpuResolver = _default_gpu_resolver
+        legacy_gpu_root_recorded: Optional[str] = None
+    else:
+        legacy_gpu_root = Path(legacy_gpu_root)
+
+        def _legacy_gpu_resolver(s: str, r: str, _root: Path = legacy_gpu_root) -> Path:
+            return _root / s / f"{r}_gpu.npz"
+        gpu_resolver = _legacy_gpu_resolver
+        legacy_gpu_root_recorded = str(legacy_gpu_root)
+
+    # same_source_assertion auto-flag (any legacy root override forces False)
+    if legacy_refine_root is not None or legacy_gpu_root is not None:
+        same_source_assertion = False
+
+    # out_dir
+    if out_dir is None:
+        if dry_run_out_dir is not None:
+            resolved_out_dir = Path(dry_run_out_dir) / subject
+        else:
+            resolved_out_dir = raw_dir
+    else:
+        resolved_out_dir = Path(out_dir)
+
+    # backup_dir
+    if backup_dir is _SENTINEL:
+        if dry_run_out_dir is not None or out_dir is not None:
+            # explicit out_dir or dry-run ⇒ never auto-create a backup
+            resolved_backup_dir: Optional[Path] = None
+        else:
+            resolved_backup_dir = raw_dir / ".legacy_backup"
+    else:
+        resolved_backup_dir = Path(backup_dir) if backup_dir is not None else None
+
+    # defensive guard
+    if not same_source_assertion and resolved_out_dir == raw_dir:
+        raise ValueError(
+            f"replay (same_source_assertion=False) must not write replay output "
+            f"into the production raw tree at {raw_dir}"
+        )
+
+    return _ResolvedSubjectIO(
+        raw_dir=raw_dir,
+        refine_npz=refine_npz,
+        gpu_resolver=gpu_resolver,
+        out_dir=resolved_out_dir,
+        backup_dir=resolved_backup_dir,
+        same_source_assertion=same_source_assertion,
+        legacy_refine_root_recorded=legacy_refine_root_recorded,
+        legacy_gpu_root_recorded=legacy_gpu_root_recorded,
+    )
+
+
 def run_subject(
     subject: str,
     *,
+    legacy_refine_root: Optional[Path] = None,
+    legacy_gpu_root: Optional[Path] = None,
+    out_dir: Optional[Path] = None,
+    backup_dir: object = _SENTINEL,
+    same_source_assertion: bool = True,
     dry_run_out_dir: Optional[Path] = None,
     only_records: Optional[Sequence[str]] = None,
 ) -> Tuple[Dict[str, object], Dict[str, object]]:
-    """Run packing for one subject and return (summary_dict, manifest_dict)."""
+    """Run packing for one subject and return (summary_dict, manifest_dict).
+
+    See `_resolve_run_subject_io` for the path-injection contract. The
+    same-source CLI (`main()`) calls this with no path overrides; the
+    Track B replay driver passes `legacy_refine_root` + `legacy_gpu_root`
+    + an explicit `out_dir`."""
+    io = _resolve_run_subject_io(
+        subject,
+        legacy_refine_root=legacy_refine_root,
+        legacy_gpu_root=legacy_gpu_root,
+        out_dir=out_dir,
+        backup_dir=backup_dir,
+        same_source_assertion=same_source_assertion,
+        dry_run_out_dir=dry_run_out_dir,
+    )
+    raw_dir = io.raw_dir
+    refine_npz = io.refine_npz
+    gpu_resolver = io.gpu_resolver
+    resolved_out_dir = io.out_dir
+    resolved_backup_dir = io.backup_dir
+
     params = resolve_subject_pack_params(subject)
     drop_chns = list(params["pack_drop_channels"])
     pack_top_n = int(params["pack_top_n"]) if "pack_top_n" in params else None
 
-    raw_dir = DATA_ROOT / subject
-    detect_dir = DETECT_ROOT / subject
-    refine_npz = detect_dir / "_refineGpu.npz"
     if not refine_npz.exists():
         raise FileNotFoundError(f"missing {refine_npz}")
-
-    if dry_run_out_dir is not None:
-        out_dir = dry_run_out_dir / subject
-        backup_dir = None  # never touch raw in dry-run
-    else:
-        out_dir = raw_dir
-        backup_dir = raw_dir / ".legacy_backup"
 
     edfs = sorted(raw_dir.glob("*.edf"))
     if only_records:
@@ -835,7 +989,7 @@ def run_subject(
     records: List[Dict[str, object]] = []
     t_start = time.time()
     for i, edf in enumerate(edfs, 1):
-        gpu_npz = detect_dir / f"{edf.stem}_gpu.npz"
+        gpu_npz = gpu_resolver(subject, edf.stem)
         if not gpu_npz.exists():
             records.append({
                 "record": edf.stem,
@@ -858,9 +1012,11 @@ def run_subject(
                 pack_win_sec=params["pack_win_sec"],
                 pack_top_n=pack_top_n,
                 drop_chns=drop_chns,
-                out_dir=out_dir,
-                backup_dir=backup_dir,
+                out_dir=resolved_out_dir,
+                backup_dir=resolved_backup_dir,
             )
+            r["gpu_npz_used"] = str(gpu_npz)
+            r["refine_npz_used"] = str(refine_npz)
             r["elapsed_sec"] = round(time.time() - t0, 1)
             records.append(r)
             status = r["status"]
@@ -932,7 +1088,11 @@ def run_subject(
     summary: Dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
         "subject": subject,
-        "cohort": "yuquan_same_source",
+        "cohort": "yuquan_same_source" if io.same_source_assertion else "yuquan_legacy_refine_replay",
+        "same_source_assertion": io.same_source_assertion,
+        "legacy_refine_root": io.legacy_refine_root_recorded,
+        "legacy_gpu_root": io.legacy_gpu_root_recorded,
+        "refine_npz_used": str(refine_npz),
         "params": params,
         "drop_chns": drop_chns,
         "write_status": write_status,
@@ -947,8 +1107,8 @@ def run_subject(
         "median_n_participating": med_part,
         "median_lag_span_ms": med_lag,
         "start_time_validation_overall_pass": start_time_overall_pass,
-        "out_dir": str(out_dir),
-        "backup_dir": str(backup_dir) if backup_dir else None,
+        "out_dir": str(resolved_out_dir),
+        "backup_dir": str(resolved_backup_dir) if resolved_backup_dir else None,
         "elapsed_sec_total": round(time.time() - t_start, 1),
         "legacy_block_presence_diff": block_presence,
         "records": records,
@@ -957,20 +1117,25 @@ def run_subject(
     manifest: Dict[str, object] = {
         "schema_version": SCHEMA_VERSION,
         "subject": subject,
-        "cohort": "yuquan_same_source",
+        "cohort": "yuquan_same_source" if io.same_source_assertion else "yuquan_legacy_refine_replay",
+        "same_source_assertion": io.same_source_assertion,
+        "legacy_refine_root": io.legacy_refine_root_recorded,
+        "legacy_gpu_root": io.legacy_gpu_root_recorded,
         "in_yuquan_same_source_24": subject in YUQUAN_SAME_SOURCE_SUBJECTS,
         "subject_params_path": str(SUBJECT_PARAMS_PATH),
         "params_resolved": params,
         "data_root": str(DATA_ROOT),
         "detect_root": str(DETECT_ROOT),
         "refine_npz": _file_stat(refine_npz),
+        "refine_npz_used": str(refine_npz),
         "alias_collisions": alias_collisions,
         "alias_outer_drops": alias_outer_drops,
         "blocks": [
             {
                 "record": e.stem,
                 "edf": _file_stat(e),
-                "gpu_npz": _file_stat(detect_dir / f"{e.stem}_gpu.npz"),
+                "gpu_npz": _file_stat(gpu_resolver(subject, e.stem)),
+                "gpu_npz_used": str(gpu_resolver(subject, e.stem)),
                 "status": next(
                     (r.get("status") for r in records if r.get("record") == e.stem),
                     None,

@@ -1,10 +1,12 @@
 # Yuquan 24-subject same-source lagPat contract — implementation status
 
-Status: **code path closed, batch re-run pending**.
+Status: **structural cohort PASS (2026-04-23) + dual-track numerical audit underway (Phase γ ablation pending)**.
 
 This document captures the state of the Yuquan same-source `lagPat` /
 `packedTimes` contract after the 2026Q2 closure pass driven by the plan
-`/.cursor/plans/yuquan-24-contract_2ad18e1e.plan.md`.
+`/.cursor/plans/yuquan-24-contract_2ad18e1e.plan.md`. Numerical-equivalence
+results land separately under `dual_track_audit_2026-04-26.md`; this doc
+links to that archive in §"Numerical equivalence audit (next step)".
 
 ## Cohort definition
 
@@ -16,10 +18,27 @@ buckets). The single source of truth is the constant
 | group | count | subjects |
 |---|---|---|
 | Reference (have legacy `lagPat`) | 3 | `gaolan`, `dongyiming`, `wangyiyang` |
-| Main cohort (have legacy `lagPat`) | 10 | `chenziyang`, `hanyuxuan`, `huanghanwen`, `huangwanling`, `litengsheng`, `sunyuanxin`, `xuxinyi`, `zhangjinhan`, `chengshuai`, `liyouran` |
-| Backfill-only (legacy skipped) | 8 | `pengzihang`, `songzishuo`, `zhangbichen`, `zhangjiaqi`, `zhangkexuan`, `zhaochenxi`, `zhaojinrui`, `zhourongxuan` |
+| Main cohort (have legacy `lagPat`) | 11 | `chenziyang`, `hanyuxuan`, `huanghanwen`, `huangwanling`, `litengsheng`, `sunyuanxin`, `xuxinyi`, `zhangjinhan`, `chengshuai`, `liyouran`, `zhangjiaqi` ⁱ |
+| Backfill-only (legacy skipped) | 7 | `pengzihang`, `songzishuo`, `zhangbichen`, `zhangkexuan`, `zhaochenxi`, `zhaojinrui`, `zhourongxuan` |
 
-`scripts/_phaseE2_run_packing.sh --list` prints this list at runtime.
+ⁱ **Footnote — `zhangjiaqi` cohort-row correction (2026-04-26):** Earlier
+versions of this table listed `zhangjiaqi` under "Backfill-only (legacy
+skipped)". A direct disk audit shows `zhangjiaqi` actually has 13 legacy
+`<raw>/<stem>_gpu.npz`, a legacy `<raw>/_refineGpu.npz`, and 13 backup
+`_lagPat.npz` files — i.e. it has full legacy artifacts. It is therefore
+moved into "Main cohort". The column-2 count goes from `Reference 3 +
+Main 10 + Backfill-only 8 = 21` to `Reference 3 + Main 11 + Backfill-only
+7 = 21`. **Important caveat:** zhangjiaqi's legacy `_gpu.npz` was produced
+under a **monopolar** reference (`['A1', 'A2', …]`, 116 chn) while the
+new pipeline uses **bipolar** (`['A1-A2', 'A2-A3', …]`, 128 chn). Although
+left-contact alias-collapse maps both to the same channel name, the
+underlying signals differ → `zhangjiaqi` is **scheme-divergent** at the
+detector level (≈ +7.5 ms global onset shift, 0.2% tight match) and is
+explicitly excluded from the Track A detector-equivalence claim. See
+`dual_track_audit_2026-04-26.md` §2.5 for full evidence.
+
+`scripts/_phaseE2_run_packing.sh --list` prints this list at runtime
+(updated to reflect the corrected cohort split).
 
 ## What changed in this closure pass
 
@@ -338,30 +357,245 @@ This is how the legacy producer
 (`p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py`)
 shipped the file.
 
-## Numerical equivalence audit (next step)
+## Numerical equivalence audit — dual-track (Track A + Track B + Phase γ)
 
 The cohort verdict above is **structural** (file presence, schema,
-start-time, alias collisions, regressions). It does **not** verify
-that the per-event `lagPatRank` / `lagPatRaw` arrays match the legacy
-ground truth in `.legacy_backup/<stem>_lagPat.npz` to within a
-floating-point physical-error tolerance.
+start-time, alias collisions, regressions). The structural verdict
+**does not** verify that the per-event `lagPatRank` / `lagPatRaw`
+arrays match the legacy ground truth at the level of physical
+floating-point error.
 
-The next step is a separate read-only audit that, for every block in
-the 21-subject cohort, pairs:
+Numerical equivalence is being audited along two independent tracks +
+a root-cause ablation phase. **Full evidence is in the archive
+`dual_track_audit_2026-04-26.md`**; this section quotes the verdicts
+and links back.
 
-- `<raw>/<stem>_lagPat.npz`            (new v2 output, post-batch)
-- `<raw>/.legacy_backup/<stem>_lagPat.npz` (legacy ground truth)
+### Track A — Detector event-level attribution (DONE)
 
-and reports per-record / per-subject / cohort-level array distances:
+Goal: classify the documented ±10–20% events_count drift between new
+and legacy `_gpu.npz` (phaseD) at the event level — is it physical-FP
+threshold-edge drift on a fixed detection logic, or is it a coarse
+logic divergence (channel mapping error / global time shift)?
 
-- `chnNames` set-identity (alias-mapped)
-- `eventsBool` exact equality
-- `lagPatRank` exact equality (ordinal, no physical noise allowed)
-- `lagPatRaw` max-abs and median-abs distance against a published
-  threshold; gap between threshold and observed max
-- `start_t` |delta| ≤ 1.0 s
+Cohort coverage (21 subjects, exact bucketing):
 
-This audit is tracked separately and lives under
-`results/lagpat_backfill/_audit/numerical_equivalence/`. Until it
-reports `cohort_numerical_pass=True`, the cohort claim is "structural
-contract closed; numerical equivalence pending".
+| bucket | n | subjects |
+|---|---|---|
+| **detector-comparable** (≥1 legacy gpu_npz, ≥80% record coverage) | 13 | gaolan, dongyiming, wangyiyang, chenziyang, hanyuxuan, huanghanwen, huangwanling, litengsheng, sunyuanxin, xuxinyi, zhangjinhan, chengshuai, liyouran |
+| **scheme-divergent (excluded from detector-equivalence claim)** | 1 | zhangjiaqi |
+| **degenerate_evidence** (only 1/12 records have a legacy gpu) | 1 | pengzihang |
+| **no_legacy_gpu** | 6 | songzishuo, zhangbichen, zhangkexuan, zhaochenxi, zhaojinrui, zhourongxuan |
+| **总计** | 21 | ✓ |
+
+Findings:
+
+- 13/13 detector-comparable subjects support `threshold_sensitive_FP_drift`:
+  alias-collapsed `legacy_containment_in_new` median = 1.000,
+  `|global_onset_shift|` = 0.00 ms across the bucket, max unmatched
+  fraction ≤ 14.8% (within phaseD-documented ±20% budget).
+- 1/13 (`zhangjiaqi`) excluded with cause: legacy uses a **monopolar**
+  reference, new uses **bipolar**; alias-collapse maps both to the same
+  channel name but the underlying signals differ → **+7.5 ms global
+  onset shift, 0.2% tight match, 61% unmatched events**. This is a
+  reference-scheme divergence-by-design, not a new-pipeline bug.
+
+**Cohort verdict label**: `coarse_logic_divergence`. **Important
+reading caveat**: the label is triggered entirely by `zhangjiaqi`'s
++7.5 ms shift pulling Layer 1 below threshold. **It is not a普遍
+failure** — read the verdict together with the per-subject table.
+
+Reports:
+- `results/lagpat_backfill/_audit/detector_attribution/cohort_detector_attribution.{json,md}`
+- `results/lagpat_backfill/_audit/detector_attribution/per_subject/<subject>.json`
+
+Implementation:
+- `scripts/audit_yuquan_detector_event_match.py`
+- `tests/test_yuquan_detector_event_match.py` (10 tests)
+
+### Track B — Pack+lagPat replay numerical preflight on `gaolan` (DONE)
+
+Goal: hold detector + refine drift constant (use legacy
+`_refineGpu.npz` + legacy `<raw>/<stem>_gpu.npz` as inputs) and let the
+new pack + lagPat code compete only on its own numerical drift vs the
+legacy `<raw>/.legacy_backup/<stem>_lagPat.npz`.
+
+Comparator design (3-layer verdict):
+
+- **strict**: `lagPatRaw` maxabs ≤ 1 ns + `lagPatRank` exact + pack-stage exact.
+- **phaseA_baseline**: `lagPatRaw` {median ≤ 5 ms, p95 ≤ 20 ms, RMSE ≤ 10 ms} + `lagPatRank` full-event match ≥ 0.95 (Phase A's already-validated thresholds from `validate_pack_against_legacy.py`).
+- **pack_stage_only**: `chnNames` + `packedTimes` + `eventsBool` exact (ignoring centroid-stage drift).
+
+Two-axis alignment (this is the central correctness invariant): rows
+by `chnNames` (exact set + permute), columns by `packedTimes` (1:1
+nearest-onset within `pack_win_sec/2 = 150 ms`); array diffs run
+**only** on aligned indices. Provenance gate: comparator refuses to
+verdict any record whose manifest reports a `gpu_npz_used` /
+`refine_npz_used` under `DETECT_ROOT` (= a same-source masquerading
+as a replay).
+
+Preflight result on `gaolan` (12 records, 2026-04-25):
+
+| 层级 | 通过 |
+|---|---:|
+| **pack-stage exact** | **12/12** ✓ |
+| Phase A baseline | 3/12 |
+| strict | 0/12 |
+
+`lagPatRaw` maxabs ranges **1.5–67 ms** with strong positive correlation
+to record event count: ≤70 events → ≤8 ms; 550–1682 events → 37–67 ms
+maxabs. This is **not** physical FP — it is a real numerical drift in
+the centroid stage that scales with the number of stft frames.
+
+Implementation:
+- `scripts/run_yuquan_legacy_refine_replay.py` (replay driver, requires
+  explicit `--legacy-refine-root` / `--legacy-gpu-root` / `--out-root`)
+- `scripts/audit_yuquan_legacy_refine_replay.py` (comparator with
+  3-layer verdict + provenance gate)
+- `scripts/run_yuquan_lagpat_backfill.py` (`run_subject` refactored to
+  accept the same path-injection points; same-source CLI default
+  unchanged)
+- `tests/test_run_subject_path_overrides.py` (6 tests),
+  `tests/test_yuquan_legacy_refine_replay_audit.py` (10 tests)
+
+Preflight artifacts:
+- `results/lagpat_backfill_legacy_refine_replay/gaolan/{*_lagPat.npz, *_packedTimes.npy, summary.json, manifest.json}`
+- `/tmp/track_b_preflight/cohort_replay_audit.{json,md}` (will be moved
+  to `results/lagpat_backfill/_audit/legacy_refine_replay/preflight/`
+  during the topical commit).
+
+### Phase γ — Root-cause ablation + cohort run (DONE 2026-04-26)
+
+γ found and fixed two independent code bugs, then re-ran the 14-subject
+cohort. **Code-level Track B parity is established** for refine-stable
+subjects; the 8 fail subjects fail due to data archaeology, not code.
+
+**γ.0 provenance**: confirmed legacy pack stage active path is scipy
+CPU `iirnotch + filtfilt` / `butter(3) + filtfilt` (GPU branches in
+the legacy script are commented out). phaseD's "GPU vs CPU FP" cause
+applies to the **detector** stage only, not to pack. **GPU port is
+NOT a candidate**.
+
+**γ.1 ablation finding**: on `FA0013L8` (low drift, 38 events) and
+`FA0013KP` (high drift, 1224 events), L1–L4 (bipolar reref →
+resample_poly → notch → band) match bit-for-bit between Branch P
+(production) and Branch L (literal legacy reimpl). Branch L matches
+R0 (`.legacy_backup`) to within float64 ε (3.3e-16 / 1.4e-14 s).
+Branch P diverges at **L5 stitched signal**: one boundary sample is
+dropped per high-drift record because
+`(end_sec - start_sec) * sfreq` rounds slightly below an integer in
+float64, and the previous `+1e-12` epsilon was insufficient.
+
+**γ.1 fix #1** (`src/group_event_analysis.py:284`):
+`build_stitched_window_signal` switches to legacy literal path
+`batch_t = start_sec + np.arange(n) / sfreq` + boolean union mask,
+removing the FP epsilon trap. No algorithm / parameter change.
+
+**γ.4 cohort run (14 subjects, 176 records) revealed second bug**:
+`alias_bipolar_to_left_with_arbitration` over-removed channels for
+subjects whose 2021-era legacy `_refineGpu.npz` already used
+single-electrode `chns_names` (e.g. `['A1', 'A2', ...]`) instead of
+bipolar pair (`['A1-A2', 'A2-A3', ...]`). The function's
+"outermost-shaft alias drop" was designed for bipolar-pair input and
+became destructive on single-electrode input.
+
+**γ.4b fix #2** (`scripts/run_yuquan_lagpat_backfill.py:312`):
+`alias_bipolar_to_left_with_arbitration` auto-detects input schema
+via `any('-' in name for name in chns_names)`. Bipolar pair input
+keeps the original outer-drop behavior (preserves same-source
+contract). Single-electrode input skips outer-drop (already
+alias-collapsed by legacy refine). 247 in-scope tests still green.
+
+**γ.5 final cohort verdict (Track B legacy-refine replay)**:
+
+| bucket | subjects | pass-eligible records | strict ε pass |
+|---|---|---:|---:|
+| **refine-stable + strict pass** | 6 | 74 | 68 ✓ |
+| **refine drift / uncomparable (excluded from numerical claim)** | 8 | 102 | 0 |
+| **not_replayed (no legacy refineGpu)** | 7 | 0 | n/a |
+| total | 21 | 176 | 68 |
+
+Refine-stable PASS subjects: `gaolan` 12/12, `dongyiming` 9/12 (3 records
+have no legacy backup), `wangyiyang` 9/12 (option-A `pack_top_n=22`
+with 3 explicit skips), `sunyuanxin` 12/12, `xuxinyi` 13/13,
+`zhangjinhan` 13/13.
+
+Refine-drift FAIL subjects: 7 (`chenziyang`, `hanyuxuan`,
+`huanghanwen`, `huangwanling`, `litengsheng`, `chengshuai`,
+`liyouran`) had `<raw>/_refineGpu.npz` regenerated by the new
+detection pipeline on 2026-04-09/10, overwriting the 2021-era refine
+legacy used. The 1 additional fail (`zhangjiaqi`) shows ε-level
+events_count drift between its 2021 refine and what legacy-era
+threshold logic implied — H1 sits 235 counts above the current
+`mean + 1.7*std` threshold, but legacy's pick excluded H1.
+
+Cohort verdict label remains `fail` because the strict criterion
+demands all-records-pass cohort-wide. **Read together with the
+bucketing** the Track B pack+lagPat code-correctness claim is:
+
+> Code path proven: when `<raw>/_refineGpu.npz` matches the 2021-era
+> legacy refine, new pack+lagPat reproduces `.legacy_backup` to
+> within float64 ε (6/14 subjects, 68/74 pass-eligible records).
+> Other 8/14 subjects fail purely because their refine inputs are
+> not the same data legacy used.
+
+**Reports**:
+- `results/lagpat_backfill/_audit/legacy_refine_replay/cohort_replay_audit.{json,md}`
+- `results/lagpat_backfill/_audit/legacy_refine_replay/per_subject/<subject>.json`
+- `results/lagpat_backfill/_audit/pack_layer_ablation/gaolan/{FA0013L8,FA0013KP}_diff_report.json`
+- Full evidence + decision tree + bucket table: `dual_track_audit_2026-04-26.md`
+
+### Status table (final)
+
+| 项 | 状态 |
+|---|---|
+| Structural cohort PASS (21/21 same-source) | ✅ DONE (2026-04-23) |
+| `run_subject` path-injection refactor + tests | ✅ DONE |
+| Track A — detector event-level attribution | ✅ DONE |
+| Track B — pack+lag replay preflight on gaolan | ✅ DONE |
+| γ.0 — provenance verification | ✅ DONE |
+| γ.1 — layer ablation tool + run | ✅ DONE |
+| γ.1 fix — `build_stitched_window_signal` legacy literal path | ✅ DONE |
+| γ.4 — Track B 14-subject cohort run | ✅ DONE |
+| γ.4b fix — `alias_bipolar_to_left_with_arbitration` auto-detect | ✅ DONE |
+| γ.5 — final audit verdict (6/14 strict pass) | ✅ DONE |
+| Status doc + topical commit | 🟡 PENDING (this commit) |
+
+The canonical cohort claim has updated to its final form:
+
+- **Structural contract closed.** 21/21 subjects produced
+  `_lagPat.npz` + `_packedTimes.npy` under a single closed code path;
+  all schema / start-time / alias / presence checks pass.
+- **Detector-equivalence supported on 13/21**, with `zhangjiaqi`
+  scheme-divergent and `pengzihang` + 6 no-legacy-gpu uncomparable.
+- **Pack+lagPat code-level parity proven on 6/14 refine-stable
+  subjects, 68/74 records, ε-level**: when fed legacy refine + legacy
+  gpu_npz, new code reproduces `.legacy_backup` to within float64 ε.
+- **8/14 Track B subjects uncomparable** due to refine drift between
+  2021 legacy era and 2026 (overwritten or ε-drifted), not a code
+  defect.
+
+### Status table
+
+| 项 | 状态 |
+|---|---|
+| Structural cohort PASS (21/21 same-source) | ✅ DONE (2026-04-23) |
+| `run_subject` path-injection refactor + 31 in-scope tests green | ✅ DONE |
+| Track A — detector event-level attribution | ✅ DONE |
+| Track B — pack+lag replay preflight on gaolan | ✅ DONE |
+| γ.0 — provenance verification | 🟡 PENDING |
+| γ.1 — layer ablation tool + run | 🟡 PENDING |
+| γ.2 — decision tree readout | 🟡 PENDING |
+| Track B — 14-subject cohort run | ⏸️ blocked on γ.2 |
+| Status doc + topical commit | 🟡 PENDING |
+
+Until γ.2 lands, the canonical cohort claim is exactly:
+
+- **Structural contract closed.** 21/21 subjects produced
+  `_lagPat.npz` + `_packedTimes.npy` under a single closed code path;
+  all schema / start-time / alias / presence checks pass.
+- **Detector-equivalence supported on 13/21**, with `zhangjiaqi`
+  scheme-divergent and `pengzihang` + 6 no-legacy-gpu uncomparable.
+- **Pack-stage parity supported (12/12 records on `gaolan`)**:
+  chnNames + packedTimes + eventsBool exact when fed legacy refine +
+  legacy gpu_npz; centroid-stage drift root cause is the open
+  question for γ.

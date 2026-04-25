@@ -291,13 +291,33 @@ def build_stitched_window_signal(
     """
     Stitch windowed samples together using the legacy inclusive endpoint rule.
 
-    Legacy code uses:
+    Faithful port of legacy `plot_perSeg_specCenter` /
+    `return_seg_splitContiHigh` (`p16_packGroupEvents_*.py:82–96 / 196–214`):
 
-      `twBool = (batch_t >= tw[0]) & (batch_t <= tw[1])`
+        batch_t = start_sec + np.arange(n_samples) / sfreq
+        timeWin_boolVec = np.zeros(n_samples)
+        tWinLen_list = []
+        for tw in windows:
+            twBool = (batch_t >= tw.start) & (batch_t <= tw.end)
+            tWinLen_list.append(twBool.sum())
+            timeWin_boolVec[twBool] = 1
+        stitched = x[:, timeWin_boolVec > 0.5]
+        split_border_t = np.cumsum(tWinLen_list) / sfreq
 
-    so every packed window contributes both boundary samples when they exist on the
-    resampled time grid. The returned `split_border_t` matches the legacy
-    `np.cumsum(tWinLen_list) / fs`.
+    Building `batch_t = start_sec + i/sfreq` (rather than computing
+    `(t - start_sec) * sfreq` per window with ceil/floor + epsilon) avoids
+    the FP-subtraction error that otherwise drops a sample at boundaries
+    where `(end_sec - start_sec) * sfreq` rounds slightly below an integer
+    (e.g. `(2605.02 - 2600.0) * 800 ≈ 4015.99999999985` ≠ `2600 + 4016/800`).
+
+    Per the legacy semantics:
+    - boundary samples landing exactly on `tw.start` or `tw.end` are
+      included (both inequalities are non-strict);
+    - if two windows share a boundary sample, the boolean union (`|=`)
+      includes that sample only once in `stitched`, but `tWinLen_list`
+      still counts it for each window — so `split_border_t` retains the
+      legacy quirk that cumulative borders may exceed
+      `stitched.shape[1] / sfreq` when adjacent windows touch.
     """
     arr = np.asarray(x, dtype=np.float64)
     if arr.ndim != 2:
@@ -310,25 +330,18 @@ def build_stitched_window_signal(
         return np.zeros((arr.shape[0], 0), dtype=np.float64), np.zeros((0,), dtype=np.float64)
 
     n_samples = arr.shape[1]
-    pieces: List[np.ndarray] = []
+    batch_t = float(start_sec) + np.arange(n_samples, dtype=np.float64) / float(sfreq)
+    win_bool_vec = np.zeros(n_samples, dtype=bool)
     lengths: List[int] = []
     for win in windows:
-        i0 = int(np.ceil((float(win.start) - float(start_sec)) * float(sfreq) - 1e-12))
-        i1 = int(np.floor((float(win.end) - float(start_sec)) * float(sfreq) + 1e-12))
-        i0 = max(0, min(n_samples - 1, i0))
-        i1 = max(0, min(n_samples - 1, i1))
-        if i1 < i0:
-            continue
-        piece = arr[:, i0 : i1 + 1]
-        if piece.shape[1] == 0:
-            continue
-        pieces.append(piece)
-        lengths.append(int(piece.shape[1]))
+        tw_bool = (batch_t >= float(win.start)) & (batch_t <= float(win.end))
+        lengths.append(int(tw_bool.sum()))
+        win_bool_vec |= tw_bool
 
-    if not pieces:
+    if not win_bool_vec.any():
         return np.zeros((arr.shape[0], 0), dtype=np.float64), np.zeros((0,), dtype=np.float64)
 
-    stitched = np.concatenate(pieces, axis=1)
+    stitched = arr[:, win_bool_vec]
     split_border_t = np.cumsum(np.asarray(lengths, dtype=np.float64)) / float(sfreq)
     return stitched, split_border_t
 
