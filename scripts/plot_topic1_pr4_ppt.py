@@ -11,7 +11,6 @@ Five figures, each tells one cohesive story about the PR-4 question:
     5. PR-4D rate-by-type  — gap-aware template-decomposed rate (descriptive)
 
 Usage::
-
     python scripts/plot_topic1_pr4_ppt.py --all
     python scripts/plot_topic1_pr4_ppt.py --fig 1,3,4
 
@@ -22,6 +21,7 @@ Style contract follows ``src/plot_style`` (Morandi semantic palette,
 ``add_significance_bracket``, ``savefig_pub`` with ``DPI_PUB=300``).
 This is the Topic-1 sibling of ``scripts/plot_topic2_ppt.py``.
 """
+
 from __future__ import annotations
 
 import argparse
