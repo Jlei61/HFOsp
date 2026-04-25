@@ -304,7 +304,7 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 **显式不做**：不重启 ER pipeline / CUSUM / Page-Hinkley / `t_ER_onset`；不引入 multi-anchor voting / naming label；不重跑 PR-2 / PR-2.5 / PR-3 / PR-4A/B / PR-5；不做 π embedding；不做"先挑 hub 再重跑 PR-4C"的 double-dipping replay（留给独立后续 PR）。
 
-**当前状态**：plan-of-record 已落盘；**Step 1 ACCEPTED（2026-04-26）**：`src/template_anatomical_anchoring.py` 7 个 helper + `compute_time_split_reproducibility` split-half 扩展（含 mapping 对齐 + valid_mask + `-1` sentinel）+ 13 PR-6 测试 + 49 既有测试 = 62/62 全绿。Step 1 review 触发三处合同修订并落入 plan §4 / §6 / §15：audit 拆为 `endpoint_defined` / `h1_primary_eligible` 2-tier、split-half `cluster_rank_b_matched_to_a` 与 `cluster_valid_mask_*` 强制对齐 + 防伪稳定性。Step 2（cohort audit + per-subject runner）下一步启动。
+**当前状态**：plan-of-record 已落盘；Step 1 ACCEPTED（2026-04-26，13 PR-6 + 49 既有测试 = 62/62 全绿，含 audit 2-tier flag 与 split-half mapping/valid_mask 修订）；**Step 2 跑完（2026-04-26）**：`scripts/run_pr6_template_anchoring.py` 三模式落盘 cohort_audit / per-subject / cohort_summary。Audit-derived 主 cohort **n=21（13 epilepsiae + 8 yuquan）**；2 个 n_ch=6 case-series（1073/1077）；4 个 SOZ 缺失退出；3 个 k≠2 退出。**初步 cohort 数字（待 Step 5/6 封板）**：H1 pooled p=0.42 / median=0.0 / sign-test 9pos/8neg → cohort-level NULL（plan §10 "endpoint 不锚定 SOZ → framing 转向 stereotypy independent of SOZ" 触发）；H1b polarity (n=17 non-fwdrev) p=0.62 NULL；**H2 forward/reverse swap n=5 全部超 null_95th（per-subject null_p ≤ 0.05）→ Smith 2022 双向行波 mechanism 单点支持**；H3 i/l/e 全 NULL。详见 plan §15 Step 2 完成记录。Step 3 plotting + Step 5 sensitivity 待启动。
 
 ---
 
