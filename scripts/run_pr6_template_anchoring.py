@@ -33,6 +33,10 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.interictal_propagation import (
+    _valid_event_indices,
+    load_subject_propagation_events,
+)
 from src.template_anatomical_anchoring import (
     audit_subject_eligibility,
     cohort_sign_test,
@@ -50,6 +54,14 @@ PER_SUBJECT_DIR = ROOT / "results" / "interictal_propagation" / "per_subject"
 YUQUAN_SOZ_PATH = ROOT / "results" / "yuquan_soz_core_channels.json"
 EPILEPSIAE_SOZ_PATH = ROOT / "results" / "epilepsiae_soz_core_channels.json"
 EPILEPSIAE_FOCUS_REL_PATH = ROOT / "results" / "epilepsiae_electrode_focus_rel.json"
+
+# Raw lagPat data roots (matches scripts/run_interictal_propagation.py).
+# Required to derive per-cluster valid_mask honestly — see _legacy_hist_mean_rank
+# fallback `template[ci] = ci` for non-participating channels, which would
+# otherwise pollute endpoint/middle extraction with channels that never
+# actually appeared in this cluster's events.
+YUQUAN_RAW_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
+EPILEPSIAE_RAW_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
 
 OUT_DIR = ROOT / "results" / "interictal_propagation" / "template_anchoring"
 PER_SUBJECT_OUT = OUT_DIR / "per_subject"
@@ -76,6 +88,12 @@ def _parse_per_subject_filename(stem: str) -> Tuple[str, str]:
     raise ValueError(f"Unknown dataset prefix in filename: {stem}")
 
 
+def _subject_raw_dir(dataset: str, subject_id: str) -> Path:
+    if dataset == "yuquan":
+        return YUQUAN_RAW_ROOT / subject_id
+    return EPILEPSIAE_RAW_ROOT / subject_id / "all_recs"
+
+
 def _load_candidate(path: Path, soz_yuquan: Dict, soz_epi: Dict, focus_rel: Dict) -> Dict[str, Any]:
     data = _load_json(path)
     dataset, subject_id = _parse_per_subject_filename(path.stem)
@@ -85,6 +103,7 @@ def _load_candidate(path: Path, soz_yuquan: Dict, soz_epi: Dict, focus_rel: Dict
     clusters = ac.get("clusters") or []
     template_ranks = [c.get("template_rank") for c in clusters]
     channel_names = data.get("channel_names") or []
+    labels = ac.get("labels")
 
     soz_dict = soz_yuquan if dataset == "yuquan" else soz_epi
     soz_channels = list(soz_dict.get(subject_id) or [])
@@ -97,11 +116,126 @@ def _load_candidate(path: Path, soz_yuquan: Dict, soz_epi: Dict, focus_rel: Dict
         "soz_channels": soz_channels,
         "channel_names": channel_names,
         "template_ranks": template_ranks,
+        "labels": labels,
         "focus_rel": focus_rel_dict,
         "raw_path": str(path),
+        "raw_subject_dir": str(_subject_raw_dir(dataset, subject_id)),
         "inter_cluster_corr_matrix": ac.get("inter_cluster_corr_matrix"),
         "time_split_reproducibility": data.get("time_split_reproducibility") or {},
     }
+
+
+# ---------------------------------------------------------------------------
+# Per-cluster valid_mask from raw events
+# ---------------------------------------------------------------------------
+def _load_bools_and_channels(subject_dir: Path) -> Optional[Dict[str, Any]]:
+    """Inline minimal lagPat loader that prefers `*_lagPat_withFreqCent.npz`
+    (the full-channel pipeline used by adaptive_cluster JSONs) and falls back
+    to `*_lagPat.npz`.  Returns dict with 'bools' (n_ch, n_events), and
+    'channel_names' (union across blocks ordered by first appearance, matching
+    the per_subject JSON convention)."""
+    fc_files = sorted(subject_dir.glob("*_lagPat_withFreqCent.npz"))
+    plain_files = sorted(subject_dir.glob("*_lagPat.npz"))
+    files = fc_files if fc_files else plain_files
+    if not files:
+        return None
+
+    channel_names: List[str] = []
+    channel_index: Dict[str, int] = {}
+    block_records: List[Dict[str, Any]] = []
+    for f in files:
+        try:
+            lp = np.load(f, allow_pickle=True)
+        except Exception:
+            continue
+        if "eventsBool" not in lp.files or "chnNames" not in lp.files:
+            continue
+        bools = np.asarray(lp["eventsBool"]) > 0
+        chns = [str(x) for x in list(lp["chnNames"])]
+        start_t = float(lp["start_t"]) if "start_t" in lp.files else float("nan")
+        if bools.ndim != 2 or bools.size == 0:
+            continue
+        n_ch = min(bools.shape[0], len(chns))
+        bools = bools[:n_ch, :]
+        chns = chns[:n_ch]
+        for ch in chns:
+            if ch not in channel_index:
+                channel_index[ch] = len(channel_names)
+                channel_names.append(ch)
+        block_records.append({"bools": bools, "chns": chns, "start_t": start_t})
+
+    if not block_records:
+        return None
+
+    # Sort by start_t (matches load_subject_propagation_events)
+    block_records.sort(
+        key=lambda r: (
+            r["start_t"] if np.isfinite(r["start_t"]) else float("inf"),
+        )
+    )
+
+    n_ch_total = len(channel_names)
+    bool_blocks: List[np.ndarray] = []
+    for r in block_records:
+        big = np.zeros((n_ch_total, r["bools"].shape[1]), dtype=bool)
+        for src_idx, ch in enumerate(r["chns"]):
+            big[channel_index[ch], :] = r["bools"][src_idx, :]
+        bool_blocks.append(big)
+    full_bools = np.concatenate(bool_blocks, axis=1) if bool_blocks else None
+    if full_bools is None:
+        return None
+    return {
+        "bools": full_bools,
+        "channel_names": channel_names,
+        "source_glob": "withFreqCent" if fc_files else "plain",
+    }
+
+
+def compute_per_cluster_valid_mask(cand: Dict[str, Any]) -> Optional[List[List[bool]]]:
+    """Re-derive per-cluster valid_mask = "channel participated in at least one
+    event of this cluster" from the raw lagPat NPZ.  Returns one bool list per
+    cluster, aligned to candidate's channel_names; or None if raw data missing
+    or label/event count misaligned (caller decides how to handle)."""
+    sd = Path(cand["raw_subject_dir"])
+    if not sd.exists():
+        return None
+
+    loaded = _load_bools_and_channels(sd)
+    if loaded is None:
+        return None
+
+    bools = loaded["bools"]
+    if bools.ndim != 2 or bools.size == 0:
+        return None
+    raw_channel_names = list(loaded["channel_names"])
+    json_channel_names = list(cand["channel_names"])
+    if raw_channel_names != json_channel_names:
+        return None
+
+    valid_events = _valid_event_indices(bools, min_participating=3)
+    labels = cand.get("labels")
+    if labels is None:
+        return None
+    labels = np.asarray(labels, dtype=int)
+    if valid_events.size != labels.size:
+        return None
+
+    n_clusters = int(np.max(labels)) + 1 if labels.size else 0
+    if n_clusters < 2:
+        return None
+
+    valid_bools = bools[:, valid_events]  # (n_ch, n_valid_events)
+    masks: List[List[bool]] = []
+    for k in range(n_clusters):
+        cluster_mask = labels == k
+        if not np.any(cluster_mask):
+            masks.append([False] * bools.shape[0])
+            continue
+        cluster_bools = valid_bools[:, cluster_mask]
+        # channel participates if at least one event of this cluster activates it
+        valid_per_channel = np.sum(cluster_bools > 0, axis=1) > 0
+        masks.append(valid_per_channel.tolist())
+    return masks
 
 
 def load_all_candidates() -> List[Dict[str, Any]]:
@@ -129,18 +263,33 @@ AUDIT_CSV_FIELDS = [
     "h1_primary_eligible",
     "pass",
     "exit_reason",
+    "forward_reverse_full_data",
+    "forward_reverse_reproduced_split_half",
+    "forward_reverse_reproduced_odd_even",
+    "forward_reverse_reproduced",
+    "has_focus_rel",
 ]
 
 
 def _decorate_audit_rows(rows: List[Dict[str, Any]], candidates: List[Dict[str, Any]]):
+    """Annotate audit rows with PR-2.5 forward/reverse provenance.
+
+    `forward_reverse_reproduced` follows PR-2.5 accepted rule: split-half OR
+    odd/even reproduces.  Older runner only checked split-half and undercounted.
+    """
     by_id = {c["subject_id"]: c for c in candidates}
     for row in rows:
         cand = by_id.get(row["subject_id"], {})
         tsr = cand.get("time_split_reproducibility") or {}
         splits = tsr.get("splits") or {}
         fh = splits.get("first_half_second_half") or {}
+        oe = splits.get("odd_even_block") or {}
+        repro_fh = bool(fh.get("forward_reverse_reproduced") or False)
+        repro_oe = bool(oe.get("forward_reverse_reproduced") or False)
         row["forward_reverse_full_data"] = int(tsr.get("full_data_forward_reverse_pairs") or 0) > 0
-        row["forward_reverse_reproduced"] = bool(fh.get("forward_reverse_reproduced") or False)
+        row["forward_reverse_reproduced_split_half"] = repro_fh
+        row["forward_reverse_reproduced_odd_even"] = repro_oe
+        row["forward_reverse_reproduced"] = bool(repro_fh or repro_oe)
         row["has_focus_rel"] = cand.get("focus_rel") is not None
 
 
@@ -150,16 +299,11 @@ def run_audit() -> List[Dict[str, Any]]:
     _decorate_audit_rows(rows, candidates)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    full_fields = AUDIT_CSV_FIELDS + [
-        "forward_reverse_full_data",
-        "forward_reverse_reproduced",
-        "has_focus_rel",
-    ]
     with AUDIT_CSV.open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=full_fields)
+        w = csv.DictWriter(f, fieldnames=AUDIT_CSV_FIELDS)
         w.writeheader()
         for row in rows:
-            w.writerow({k: row.get(k, "") for k in full_fields})
+            w.writerow({k: row.get(k, "") for k in AUDIT_CSV_FIELDS})
 
     # Console summary
     n_total = len(rows)
@@ -199,6 +343,7 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
 
     PER_SUBJECT_OUT.mkdir(parents=True, exist_ok=True)
     written: List[Dict[str, Any]] = []
+    valid_mask_fail_subjects: List[str] = []
 
     for row in audit_rows:
         # Process both pass (H1) and endpoint_defined-only (case-series); skip
@@ -207,18 +352,47 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
             continue
 
         cand = by_id[row["subject_id"]]
+
+        # PR-6 Step 1 review fix: derive per-cluster valid_mask honestly from
+        # raw bools.  Without this, _legacy_hist_mean_rank's `template[ci]=ci`
+        # fallback for non-participating channels would pollute endpoint/middle.
+        per_cluster_masks = compute_per_cluster_valid_mask(cand)
+        valid_mask_source: str
+        if per_cluster_masks is None:
+            valid_mask_source = "fallback_all_valid"
+            valid_mask_fail_subjects.append(
+                f"{cand['dataset']}_{cand['subject_id']}"
+            )
+            # Fallback: treat all channels as valid (matches legacy behaviour
+            # but flagged in audit row + summary so reviewers can see)
+            n_ch = len(cand["channel_names"])
+            per_cluster_masks = [[True] * n_ch] * len(cand["template_ranks"])
+        else:
+            valid_mask_source = "raw_bools"
+        row["valid_mask_source"] = valid_mask_source
+
         per_template_records = []
         for k_idx, tr in enumerate(cand["template_ranks"]):
             if tr is None:
                 continue
+            mask = (
+                per_cluster_masks[k_idx]
+                if k_idx < len(per_cluster_masks)
+                else None
+            )
             rec = compute_template_anchoring(
                 channel_names=cand["channel_names"],
                 template_rank=tr,
                 soz_channels=cand["soz_channels"],
                 focus_rel_dict=cand["focus_rel"],
                 n=3,
+                valid_mask=mask,
             )
             rec["cluster_id"] = k_idx
+            rec["valid_mask"] = mask
+            rec["n_valid_channels"] = (
+                int(sum(mask)) if mask is not None else len(cand["channel_names"])
+            )
             per_template_records.append(rec)
 
         delta = compute_subject_delta(
@@ -261,6 +435,12 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
         written.append(out_obj)
 
     print(f"[per-subject] wrote {len(written)} subject json files -> {PER_SUBJECT_OUT}")
+    if valid_mask_fail_subjects:
+        print(
+            f"[per-subject] WARNING: valid_mask fallback applied to "
+            f"{len(valid_mask_fail_subjects)} subject(s) (raw lagPat unreachable "
+            f"or channel order mismatch): {valid_mask_fail_subjects}"
+        )
     return written
 
 
