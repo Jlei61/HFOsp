@@ -270,6 +270,22 @@ Stop and ask the user instead of guessing when:
 - a key artifact is missing from `/mnt/yuquan_data/yuquan_24h_edf`
 - an Epilepsiae request needs sub-block clinical labels that cannot be justified from 1h block outputs
 
+## Cross-PR Contract Lookups
+
+When a downstream PR consumes a field defined by an earlier PR, look up the accepted definition in the earlier PR's archive doc before using it — the JSON field name alone is not the contract. Frequent lookups follow.
+
+**`forward_reverse_reproduced` (PR-2.5)** — accepted rule is **split-half OR odd-even** (8/9 subjects). The per-subject JSON exposes both `time_split_reproducibility.splits.first_half_second_half.forward_reverse_reproduced` and `splits.odd_even_block.forward_reverse_reproduced`; downstream consumers must take the OR. Checking only split-half undercounts. Source: `docs/archive/topic1/interictal_group_event_internal_propagation.md` PR-2.5 section.
+
+**`template_rank` (PR-2 adaptive cluster)** — `adaptive_cluster.clusters[k].template_rank` is `argsort(argsort(template))`. Channels that never participate in this cluster's events still get a rank because `_legacy_hist_mean_rank` fallback assigns `template[ci] = ci`. Downstream code that picks rank extremes (source/sink, top-N) **must** derive a per-cluster `valid_mask` from raw bools and exclude non-participating channels — otherwise non-participating channels can be silently picked as endpoint members. Use `_load_bools_and_channels` (or `load_subject_propagation_events`) on the **`*_lagPat_withFreqCent.npz`** files (10ch full set), not `*_lagPat.npz` (older 7ch legacy slice).
+
+**`channel_names` ordering** — JSON `channel_names` and any downstream `template_rank` / `template_valid_mask` indices are aligned to the same channel ordering, but raw lagPat NPZ may order them differently per block. Always re-derive the union ordering and compare against JSON `channel_names` before indexing. Mismatch means template_rank indices map to the wrong channels.
+
+**Pre-registered hypothesis tier** — every PR plan archive declares hypothesis tiers (primary / secondary / mechanism sanity / sensitivity). Look up the tier in the plan archive when writing results; do not infer it from the data's strength. PR-6 H2 forward/reverse swap is registered as **directional mechanism sanity, not cohort claim** in `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §3.3 — never report it as "independent finding" regardless of swap_score magnitude.
+
+**`valid_mask` semantics in PR-6 helpers** — `extract_endpoint_middle` and `compute_template_anchoring` accept `valid_mask`. Two consumer modes: split-half consumers pass `-1` sentinels in the rank vector and rely on the default mask derivation; full-data consumers must compute `valid_mask` per cluster from raw bools and pass it explicitly. **Default `valid_mask=None` for full-data input restores the buggy "all channels valid" path** — this is silent and only catchable by audit.
+
+**Audit eligibility tiers (PR-6)** — `endpoint_defined` (n_ch ≥ 6) and `h1_primary_eligible` (n_ch ≥ 7) are orthogonal. `pass = h1_primary_eligible`. Never collapse them to a single "pass" without losing the n_ch=6 case-series subjects.
+
 ## Fast Path For Common Questions
 
 - "What did the interictal synchrony analysis find?"

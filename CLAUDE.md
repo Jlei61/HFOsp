@@ -73,6 +73,20 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. Re-consult the Contract at Every Step Boundary
+
+When advancing through a multi-step plan, the plan-of-record is the source of truth. Mental summaries decay between steps and silently flatten distinctions. At each step boundary, re-read the relevant plan sections instead of acting on memory.
+
+**Apply safety fixes end-to-end, not just at the site that surfaced the bug.** When a robustness fix is applied to one consumer of upstream data (e.g. split-half), audit every other consumer of the same upstream artifact (e.g. full-data main analysis). The same upstream pollution feeds multiple paths. When a helper grows a new safety parameter (`valid_mask=`, `min_n_channels=`), every existing caller must pass it — `default=None` silently restores the buggy path. The test: search the codebase for every call site of the helper and verify the new parameter is set.
+
+**Re-read upstream definitions before using a derived flag.** A JSON field name (e.g. `forward_reverse_reproduced`) encodes only a subset of the contract. The accepted definition lives in the upstream PR's archive doc — not in the field name. Look up the definition before using the field. One JSON key may capture only one of multiple alternatives the upstream rule allows (e.g. "split-half OR odd-even"). Acting on the field name alone undercounts.
+
+**Sensitivity gates are pre-conditions for main-doc conclusions, not afterthoughts.** A primary statistic from one run is preliminary. Don't write paper-level framing into main docs until alternate metric definitions, robustness checks, and held-out validations have all run. Preliminary numbers go to archive only, tagged "preliminary, pending sensitivity". The bar to enter the topic main doc is "all sensitivity gates passed", not "the first run produced a number".
+
+**Pre-registered hypothesis tier is fixed at planning time.** When a plan defines H2 as "directional mechanism sanity, not cohort claim", report it that way regardless of how strong the directional signal looks. Don't upgrade a hypothesis tier in results — the tier is part of the design, not the result. Phrases like "independent, publishable finding" require the hypothesis to have been pre-registered as primary; if it was registered as sanity check, it stays sanity check.
+
+The unifying principle: every step boundary is a re-read checkpoint. Memory of "what the plan said" is not enough — open the archive doc and verify.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
