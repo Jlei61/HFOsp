@@ -20,7 +20,10 @@ from src.template_anatomical_anchoring import (
     audit_subject_eligibility,
     compute_subject_delta,
     compute_template_anchoring,
+    compute_template_anchoring_by_coreness,
+    compute_template_coreness,
     extract_endpoint_middle,
+    extract_endpoint_middle_by_coreness,
     forward_reverse_swap_check,
 )
 
@@ -461,3 +464,118 @@ def test_cohort_exit_audit():
     assert by_id["F"]["endpoint_defined"] is True
     assert by_id["F"]["h1_primary_eligible"] is False
     assert by_id["F"]["exit_reason"] == "middle_empty"
+
+
+# ---------------------------------------------------------------------------
+# Step 5a — coreness composite sensitivity
+# ---------------------------------------------------------------------------
+def test_compute_template_coreness_picks_highly_polarized_channel():
+    """Channel with stable extreme rank + high participation should outrank
+    a channel with mid-range rank, the same participation, and the same IQR."""
+    n_ch = 8
+    n_events = 50
+    rng = np.random.default_rng(0)
+
+    # Cluster 0: channel 0 always rank 0 (perfect early), channel 7 always
+    # rank 7 (perfect late), channel 3 always rank ~3.5 (center).  All channels
+    # participate every event.
+    ranks = np.zeros((n_ch, n_events), dtype=float)
+    bools = np.ones((n_ch, n_events), dtype=bool)
+    fixed = np.array([0, 1, 2, 3, 4, 5, 6, 7], dtype=float)
+    for ev in range(n_events):
+        ranks[:, ev] = fixed + rng.normal(0, 0.15, size=n_ch)
+    labels = np.zeros(n_events, dtype=int)
+
+    out = compute_template_coreness(ranks, bools, labels, n_clusters=1)
+    rec = out[0]
+    assert rec["valid_mask"] == [True] * n_ch
+    coreness = np.asarray(rec["coreness"])
+    # Channels 0 and 7 (extremes) should have highest coreness; channel 3 / 4
+    # (center) lowest among polarity term
+    assert coreness[0] > coreness[3]
+    assert coreness[7] > coreness[4]
+
+
+def test_compute_template_coreness_zero_for_non_participating():
+    n_ch = 8
+    n_events = 30
+    ranks = np.zeros((n_ch, n_events), dtype=float)
+    for ev in range(n_events):
+        ranks[:, ev] = np.arange(n_ch, dtype=float)
+    bools = np.ones((n_ch, n_events), dtype=bool)
+    bools[2, :] = False  # channel 2 never participates in cluster 0
+    labels = np.zeros(n_events, dtype=int)
+
+    rec = compute_template_coreness(ranks, bools, labels, n_clusters=1)[0]
+    assert rec["valid_mask"][2] is False
+    assert rec["coreness"][2] == 0.0
+    # Other channels should still register
+    assert rec["valid_mask"][0] is True
+    assert rec["coreness"][0] > 0.0
+
+
+def test_extract_endpoint_middle_by_coreness_matches_main_size():
+    """Coreness sensitivity must keep |endpoint| == 2*n so H1 direction is
+    comparable to the main top/bottom-3 definition."""
+    channel_names = list("ABCDEFGHIJ")  # n_ch=10
+    n_ch = 10
+    # Coreness: channel 0 highest, then 9, 1, 8, 2, 7, 3, 6, 4, 5 (extremes)
+    coreness = [0.95, 0.80, 0.65, 0.40, 0.10, 0.05, 0.45, 0.70, 0.85, 0.90]
+    median_rank = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    valid = [True] * 10
+
+    rec = extract_endpoint_middle_by_coreness(
+        channel_names,
+        {"coreness": coreness, "median_rank": median_rank, "valid_mask": valid},
+        n=3,
+    )
+    # Top-6 by coreness, descending: A (0.95), J (0.90), I (0.85), B (0.80),
+    # H (0.70), C (0.65)  → indices [0,9,8,1,7,2]
+    # Within these, sort by median_rank: A(0), B(1), C(2), H(7), I(8), J(9)
+    # Source = lowest 3 medians: A, B, C
+    # Sink = highest 3 medians (largest first): J, I, H
+    assert rec["source"] == ["A", "B", "C"]
+    assert rec["sink"] == ["J", "I", "H"]
+    assert set(rec["endpoint"]) == {"A", "B", "C", "H", "I", "J"}
+    # Middle = the OTHER valid channels: D, E, F, G
+    assert set(rec["middle"]) == {"D", "E", "F", "G"}
+    assert rec["exit_reason"] is None
+    assert rec["n_endpoint"] == 6
+
+
+def test_extract_endpoint_middle_by_coreness_n_valid_too_small():
+    channel_names = list("ABCDE")
+    coreness = [0.5, 0.4, 0.3, 0.2, 0.1]
+    median_rank = [0, 1, 2, 3, 4]
+    valid = [True, True, True, False, False]  # only 3 valid; need 6
+    rec = extract_endpoint_middle_by_coreness(
+        channel_names,
+        {"coreness": coreness, "median_rank": median_rank, "valid_mask": valid},
+        n=3,
+    )
+    assert rec["exit_reason"] == "n_valid<2n"
+
+
+def test_compute_template_anchoring_by_coreness_yuquan_bipolar():
+    channel_names = ["D13-D14", "D14-D15", "E1-E2", "F1-F2", "F2-F3", "F3-F4", "G1-G2"]
+    # 7 channels.  Make first 3 clearly the highest coreness with low median
+    # rank (source), last 3 the second-highest coreness with high median rank
+    # (sink), middle one (G1-G2) lowest coreness (middle).
+    coreness = [0.9, 0.85, 0.8, 0.7, 0.65, 0.6, 0.1]
+    median_rank = [0, 1, 2, 5, 6, 7, 4]
+    valid = [True] * 7
+    soz = ["D13", "D14", "E1", "E2"]
+
+    rec = compute_template_anchoring_by_coreness(
+        channel_names,
+        {"coreness": coreness, "median_rank": median_rank, "valid_mask": valid},
+        soz_channels=soz,
+        n=3,
+    )
+    assert rec["source"] == ["D13-D14", "D14-D15", "E1-E2"]
+    assert rec["sink"] == ["F3-F4", "F2-F3", "F1-F2"]
+    # Source 3/3 SOZ, sink 0/3, middle 0/1 (G1-G2)
+    assert rec["frac_SOZ_source"] == pytest.approx(1.0)
+    assert rec["frac_SOZ_sink"] == pytest.approx(0.0)
+    assert rec["frac_SOZ_endpoint"] == pytest.approx(0.5)
+    assert rec["frac_SOZ_middle"] == pytest.approx(0.0)

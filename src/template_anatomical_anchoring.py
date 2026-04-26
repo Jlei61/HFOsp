@@ -505,6 +505,207 @@ def audit_subject_eligibility(
     return rows
 
 
+# ---------------------------------------------------------------------------
+# Step 5a — coreness composite sensitivity (plan §5.2)
+# ---------------------------------------------------------------------------
+def compute_template_coreness(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    labels: np.ndarray,
+    n_clusters: int,
+) -> List[Dict[str, Any]]:
+    """Per-cluster coreness composite (plan §5.2):
+
+        coreness_ch = (1 / (IQR(ranks_ch) + 1))
+                    × |median_rank_ch − (n_ch − 1) / 2| / ((n_ch − 1) / 2)
+                    × mean(bools_ch)
+
+    where the IQR / median are taken over events of THIS cluster restricted to
+    events where the channel actually participates (bools[ch, ev] == 1) and
+    rank is finite.
+
+    Returns a list of n_clusters dicts; each dict has ``coreness``,
+    ``median_rank``, ``rank_iqr``, ``participation`` and ``valid_mask``
+    (channel participated in ≥1 cluster event).
+    """
+    if ranks.shape != bools.shape:
+        raise ValueError("ranks and bools shapes must match")
+    n_ch, n_events = ranks.shape
+    labels = np.asarray(labels, dtype=int)
+    if labels.size != n_events:
+        raise ValueError("labels length must equal n_events")
+
+    out: List[Dict[str, Any]] = []
+    for k in range(n_clusters):
+        cluster_mask = labels == k
+        coreness = np.zeros(n_ch, dtype=float)
+        median_rank = np.full(n_ch, np.nan, dtype=float)
+        rank_iqr = np.full(n_ch, np.nan, dtype=float)
+        participation = np.zeros(n_ch, dtype=float)
+        valid = np.zeros(n_ch, dtype=bool)
+
+        if not np.any(cluster_mask):
+            out.append(
+                {
+                    "coreness": coreness.tolist(),
+                    "median_rank": median_rank.tolist(),
+                    "rank_iqr": rank_iqr.tolist(),
+                    "participation": participation.tolist(),
+                    "valid_mask": valid.tolist(),
+                }
+            )
+            continue
+
+        c_ranks = ranks[:, cluster_mask]
+        c_bools = bools[:, cluster_mask]
+        n_cluster_events = int(cluster_mask.sum())
+
+        for ci in range(n_ch):
+            participating = c_bools[ci, :] > 0
+            participation[ci] = float(participating.sum() / max(n_cluster_events, 1))
+            if not np.any(participating):
+                continue
+            vals = c_ranks[ci, participating]
+            vals = vals[np.isfinite(vals)]
+            if vals.size == 0:
+                continue
+            valid[ci] = True
+            med = float(np.median(vals))
+            iqr = float(np.percentile(vals, 75) - np.percentile(vals, 25))
+            median_rank[ci] = med
+            rank_iqr[ci] = iqr
+            stability = 1.0 / (iqr + 1.0)
+            polarity_denom = (n_ch - 1) / 2.0 if n_ch > 1 else 1.0
+            polarity = abs(med - (n_ch - 1) / 2.0) / polarity_denom if polarity_denom > 0 else 0.0
+            coreness[ci] = stability * polarity * participation[ci]
+
+        out.append(
+            {
+                "coreness": coreness.tolist(),
+                "median_rank": median_rank.tolist(),
+                "rank_iqr": rank_iqr.tolist(),
+                "participation": participation.tolist(),
+                "valid_mask": valid.tolist(),
+            }
+        )
+    return out
+
+
+def extract_endpoint_middle_by_coreness(
+    channel_names: Sequence[str],
+    coreness_record: Dict[str, Any],
+    n: int = 3,
+) -> Dict[str, Any]:
+    """Pick top-2n channels by coreness (within valid set), then split into
+    source / sink half-half by median_rank: lower → source, upper → sink.
+
+    Endpoint size is **identical to the main top-3/bottom-3 definition (2n)**
+    so the only thing varying between this sensitivity and §5.1 main is the
+    selection rule (rank-position vs coreness composite); endpoint cardinality
+    is fixed for fair H1 direction comparison.
+    """
+    channel_names = list(channel_names)
+    n_ch = len(channel_names)
+    coreness = np.asarray(coreness_record.get("coreness", []), dtype=float)
+    median_rank = np.asarray(coreness_record.get("median_rank", []), dtype=float)
+    valid = np.asarray(coreness_record.get("valid_mask", []), dtype=bool)
+
+    if coreness.size != n_ch or median_rank.size != n_ch or valid.size != n_ch:
+        raise ValueError(
+            "coreness_record arrays must align with channel_names length"
+        )
+
+    valid_indices = np.where(valid)[0]
+    n_valid = int(valid_indices.size)
+    n_endpoint = 2 * n
+    if n_valid < n_endpoint:
+        return {
+            "source": [],
+            "sink": [],
+            "endpoint": [],
+            "middle": [],
+            "exit_reason": "n_valid<2n",
+            "n_valid": n_valid,
+        }
+
+    # Sort valid channels by coreness DESCENDING (highest coreness first)
+    valid_coreness = coreness[valid_indices]
+    if float(np.std(valid_coreness)) < 1e-12:
+        return {
+            "source": [],
+            "sink": [],
+            "endpoint": [],
+            "middle": [],
+            "exit_reason": "no_coreness_polarity",
+            "n_valid": n_valid,
+        }
+    order_desc = np.argsort(-valid_coreness, kind="mergesort")
+    top_valid_idx = valid_indices[order_desc[:n_endpoint]]
+
+    # Within top-2n, split by median_rank: lower n → source, upper n → sink
+    top_median_rank = median_rank[top_valid_idx]
+    inner_order = np.argsort(top_median_rank, kind="mergesort")
+    source_idx = top_valid_idx[inner_order[:n]].tolist()
+    sink_idx = top_valid_idx[inner_order[-n:][::-1]].tolist()  # largest first
+
+    source = [channel_names[i] for i in source_idx]
+    sink = [channel_names[i] for i in sink_idx]
+    endpoint = source + sink
+    endpoint_set = set(source_idx) | set(sink_idx)
+    middle = [
+        channel_names[i] for i in valid_indices.tolist() if i not in endpoint_set
+    ]
+
+    return {
+        "source": source,
+        "sink": sink,
+        "endpoint": endpoint,
+        "middle": middle,
+        "exit_reason": None,
+        "n_valid": n_valid,
+        "n_endpoint": n_endpoint,
+    }
+
+
+def compute_template_anchoring_by_coreness(
+    channel_names: Sequence[str],
+    coreness_record: Dict[str, Any],
+    soz_channels: Sequence[str],
+    focus_rel_dict: Optional[Dict[str, list]] = None,
+    n: int = 3,
+) -> Dict[str, Any]:
+    """Like compute_template_anchoring but using coreness-selected endpoints."""
+    parts = extract_endpoint_middle_by_coreness(
+        channel_names, coreness_record, n=n
+    )
+    rec: Dict[str, Any] = dict(parts)
+    if rec["exit_reason"] is not None:
+        return rec
+
+    soz_set = {_normalize_channel_name(c) for c in soz_channels}
+    rec["frac_SOZ_source"] = _frac_in_set(rec["source"], soz_set)
+    rec["frac_SOZ_sink"] = _frac_in_set(rec["sink"], soz_set)
+    rec["frac_SOZ_endpoint"] = _frac_in_set(rec["endpoint"], soz_set)
+    rec["frac_SOZ_middle"] = _frac_in_set(rec["middle"], soz_set)
+
+    if focus_rel_dict is not None:
+        for label in ("i", "l", "e"):
+            rec[f"frac_{label}_source"] = _frac_focus_rel(
+                rec["source"], focus_rel_dict, label
+            )
+            rec[f"frac_{label}_sink"] = _frac_focus_rel(
+                rec["sink"], focus_rel_dict, label
+            )
+            rec[f"frac_{label}_endpoint"] = _frac_focus_rel(
+                rec["endpoint"], focus_rel_dict, label
+            )
+            rec[f"frac_{label}_middle"] = _frac_focus_rel(
+                rec["middle"], focus_rel_dict, label
+            )
+
+    return rec
+
+
 __all__ = [
     "extract_endpoint_middle",
     "compute_template_anchoring",
@@ -513,4 +714,7 @@ __all__ = [
     "cohort_sign_test",
     "forward_reverse_swap_check",
     "audit_subject_eligibility",
+    "compute_template_coreness",
+    "extract_endpoint_middle_by_coreness",
+    "compute_template_anchoring_by_coreness",
 ]

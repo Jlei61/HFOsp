@@ -43,6 +43,8 @@ from src.template_anatomical_anchoring import (
     cohort_wilcoxon,
     compute_subject_delta,
     compute_template_anchoring,
+    compute_template_anchoring_by_coreness,
+    compute_template_coreness,
     forward_reverse_swap_check,
 )
 
@@ -131,9 +133,11 @@ def _load_candidate(path: Path, soz_yuquan: Dict, soz_epi: Dict, focus_rel: Dict
 def _load_bools_and_channels(subject_dir: Path) -> Optional[Dict[str, Any]]:
     """Inline minimal lagPat loader that prefers `*_lagPat_withFreqCent.npz`
     (the full-channel pipeline used by adaptive_cluster JSONs) and falls back
-    to `*_lagPat.npz`.  Returns dict with 'bools' (n_ch, n_events), and
+    to `*_lagPat.npz`.  Returns dict with 'bools' (n_ch, n_events), 'ranks'
+    (n_ch, n_events, NaN-padded for non-participating block channels), and
     'channel_names' (union across blocks ordered by first appearance, matching
-    the per_subject JSON convention)."""
+    the per_subject JSON convention).  ranks is needed by Step 5a coreness
+    sensitivity; bools alone is enough for the Step 2 valid_mask path."""
     fc_files = sorted(subject_dir.glob("*_lagPat_withFreqCent.npz"))
     plain_files = sorted(subject_dir.glob("*_lagPat.npz"))
     files = fc_files if fc_files else plain_files
@@ -148,21 +152,30 @@ def _load_bools_and_channels(subject_dir: Path) -> Optional[Dict[str, Any]]:
             lp = np.load(f, allow_pickle=True)
         except Exception:
             continue
-        if "eventsBool" not in lp.files or "chnNames" not in lp.files:
+        if (
+            "eventsBool" not in lp.files
+            or "chnNames" not in lp.files
+            or "lagPatRank" not in lp.files
+        ):
             continue
         bools = np.asarray(lp["eventsBool"]) > 0
+        ranks = np.asarray(lp["lagPatRank"], dtype=float)
         chns = [str(x) for x in list(lp["chnNames"])]
         start_t = float(lp["start_t"]) if "start_t" in lp.files else float("nan")
-        if bools.ndim != 2 or bools.size == 0:
+        if bools.ndim != 2 or bools.size == 0 or ranks.ndim != 2:
             continue
-        n_ch = min(bools.shape[0], len(chns))
-        bools = bools[:n_ch, :]
+        n_ev = min(bools.shape[1], ranks.shape[1])
+        n_ch = min(bools.shape[0], ranks.shape[0], len(chns))
+        bools = bools[:n_ch, :n_ev]
+        ranks = ranks[:n_ch, :n_ev]
         chns = chns[:n_ch]
         for ch in chns:
             if ch not in channel_index:
                 channel_index[ch] = len(channel_names)
                 channel_names.append(ch)
-        block_records.append({"bools": bools, "chns": chns, "start_t": start_t})
+        block_records.append(
+            {"bools": bools, "ranks": ranks, "chns": chns, "start_t": start_t}
+        )
 
     if not block_records:
         return None
@@ -176,26 +189,44 @@ def _load_bools_and_channels(subject_dir: Path) -> Optional[Dict[str, Any]]:
 
     n_ch_total = len(channel_names)
     bool_blocks: List[np.ndarray] = []
+    rank_blocks: List[np.ndarray] = []
     for r in block_records:
-        big = np.zeros((n_ch_total, r["bools"].shape[1]), dtype=bool)
+        big_bools = np.zeros((n_ch_total, r["bools"].shape[1]), dtype=bool)
+        big_ranks = np.full((n_ch_total, r["ranks"].shape[1]), np.nan, dtype=float)
         for src_idx, ch in enumerate(r["chns"]):
-            big[channel_index[ch], :] = r["bools"][src_idx, :]
-        bool_blocks.append(big)
+            tgt_idx = channel_index[ch]
+            big_bools[tgt_idx, :] = r["bools"][src_idx, :]
+            big_ranks[tgt_idx, :] = r["ranks"][src_idx, :]
+        bool_blocks.append(big_bools)
+        rank_blocks.append(big_ranks)
+
     full_bools = np.concatenate(bool_blocks, axis=1) if bool_blocks else None
-    if full_bools is None:
+    full_ranks = np.concatenate(rank_blocks, axis=1) if rank_blocks else None
+    if full_bools is None or full_ranks is None:
         return None
     return {
         "bools": full_bools,
+        "ranks": full_ranks,
         "channel_names": channel_names,
         "source_glob": "withFreqCent" if fc_files else "plain",
     }
 
 
-def compute_per_cluster_valid_mask(cand: Dict[str, Any]) -> Optional[List[List[bool]]]:
-    """Re-derive per-cluster valid_mask = "channel participated in at least one
-    event of this cluster" from the raw lagPat NPZ.  Returns one bool list per
-    cluster, aligned to candidate's channel_names; or None if raw data missing
-    or label/event count misaligned (caller decides how to handle)."""
+def _resolve_cluster_data(
+    cand: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
+    """Load raw ranks/bools, intersect with valid events used by adaptive
+    cluster, and return everything Step 5a needs to derive both per-cluster
+    valid_mask AND per-cluster coreness composite.
+
+    Returns dict with:
+      ``valid_ranks`` (n_ch, n_valid_events) – NaN for non-participating
+      ``valid_bools`` (n_ch, n_valid_events)
+      ``labels`` (n_valid_events,)
+      ``n_clusters`` (int)
+    or ``None`` when raw NPZ missing / channel order mismatch / event-count
+    drift relative to JSON labels.
+    """
     sd = Path(cand["raw_subject_dir"])
     if not sd.exists():
         return None
@@ -203,9 +234,14 @@ def compute_per_cluster_valid_mask(cand: Dict[str, Any]) -> Optional[List[List[b
     loaded = _load_bools_and_channels(sd)
     if loaded is None:
         return None
-
     bools = loaded["bools"]
-    if bools.ndim != 2 or bools.size == 0:
+    ranks = loaded["ranks"]
+    if (
+        bools.ndim != 2
+        or bools.size == 0
+        or ranks.ndim != 2
+        or ranks.shape != bools.shape
+    ):
         return None
     raw_channel_names = list(loaded["channel_names"])
     json_channel_names = list(cand["channel_names"])
@@ -213,26 +249,40 @@ def compute_per_cluster_valid_mask(cand: Dict[str, Any]) -> Optional[List[List[b
         return None
 
     valid_events = _valid_event_indices(bools, min_participating=3)
-    labels = cand.get("labels")
-    if labels is None:
+    labels_raw = cand.get("labels")
+    if labels_raw is None:
         return None
-    labels = np.asarray(labels, dtype=int)
+    labels = np.asarray(labels_raw, dtype=int)
     if valid_events.size != labels.size:
         return None
-
     n_clusters = int(np.max(labels)) + 1 if labels.size else 0
     if n_clusters < 2:
         return None
 
-    valid_bools = bools[:, valid_events]  # (n_ch, n_valid_events)
+    return {
+        "valid_ranks": ranks[:, valid_events],
+        "valid_bools": bools[:, valid_events],
+        "labels": labels,
+        "n_clusters": n_clusters,
+    }
+
+
+def compute_per_cluster_valid_mask(cand: Dict[str, Any]) -> Optional[List[List[bool]]]:
+    """Re-derive per-cluster valid_mask = "channel participated in at least one
+    event of this cluster".  Backwards-compat entry; new callers should prefer
+    `_resolve_cluster_data` to avoid double-loading the raw NPZ."""
+    cd = _resolve_cluster_data(cand)
+    if cd is None:
+        return None
+    valid_bools = cd["valid_bools"]
+    labels = cd["labels"]
     masks: List[List[bool]] = []
-    for k in range(n_clusters):
+    for k in range(cd["n_clusters"]):
         cluster_mask = labels == k
         if not np.any(cluster_mask):
-            masks.append([False] * bools.shape[0])
+            masks.append([False] * valid_bools.shape[0])
             continue
         cluster_bools = valid_bools[:, cluster_mask]
-        # channel participates if at least one event of this cluster activates it
         valid_per_channel = np.sum(cluster_bools > 0, axis=1) > 0
         masks.append(valid_per_channel.tolist())
     return masks
@@ -356,22 +406,46 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
         # PR-6 Step 1 review fix: derive per-cluster valid_mask honestly from
         # raw bools.  Without this, _legacy_hist_mean_rank's `template[ci]=ci`
         # fallback for non-participating channels would pollute endpoint/middle.
-        per_cluster_masks = compute_per_cluster_valid_mask(cand)
-        valid_mask_source: str
-        if per_cluster_masks is None:
+        # PR-6 Step 5a: also derive per-cluster coreness composite from raw
+        # ranks for sensitivity analysis (parallel definition, plan §5.2).
+        cluster_data = _resolve_cluster_data(cand)
+        per_cluster_masks: List[List[bool]]
+        per_cluster_coreness: List[Optional[Dict[str, Any]]]
+        if cluster_data is None:
             valid_mask_source = "fallback_all_valid"
             valid_mask_fail_subjects.append(
                 f"{cand['dataset']}_{cand['subject_id']}"
             )
-            # Fallback: treat all channels as valid (matches legacy behaviour
-            # but flagged in audit row + summary so reviewers can see)
             n_ch = len(cand["channel_names"])
             per_cluster_masks = [[True] * n_ch] * len(cand["template_ranks"])
+            per_cluster_coreness = [None] * len(cand["template_ranks"])
         else:
             valid_mask_source = "raw_bools"
+            valid_bools = cluster_data["valid_bools"]
+            labels = cluster_data["labels"]
+            n_clusters = cluster_data["n_clusters"]
+            per_cluster_masks = []
+            for k in range(n_clusters):
+                cluster_mask = labels == k
+                if not np.any(cluster_mask):
+                    per_cluster_masks.append(
+                        [False] * valid_bools.shape[0]
+                    )
+                    continue
+                cluster_bools = valid_bools[:, cluster_mask]
+                valid_per_channel = np.sum(cluster_bools > 0, axis=1) > 0
+                per_cluster_masks.append(valid_per_channel.tolist())
+            # Coreness composite per cluster
+            per_cluster_coreness = compute_template_coreness(
+                cluster_data["valid_ranks"],
+                cluster_data["valid_bools"].astype(float),
+                labels,
+                n_clusters,
+            )
         row["valid_mask_source"] = valid_mask_source
 
         per_template_records = []
+        per_template_coreness_records = []
         for k_idx, tr in enumerate(cand["template_ranks"]):
             if tr is None:
                 continue
@@ -395,8 +469,33 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
             )
             per_template_records.append(rec)
 
+            # Step 5a coreness sensitivity (only if raw_bools path succeeded)
+            coreness_rec = (
+                per_cluster_coreness[k_idx]
+                if k_idx < len(per_cluster_coreness)
+                else None
+            )
+            if coreness_rec is not None:
+                c_rec = compute_template_anchoring_by_coreness(
+                    channel_names=cand["channel_names"],
+                    coreness_record=coreness_rec,
+                    soz_channels=cand["soz_channels"],
+                    focus_rel_dict=cand["focus_rel"],
+                    n=3,
+                )
+                c_rec["cluster_id"] = k_idx
+                per_template_coreness_records.append(c_rec)
+
         delta = compute_subject_delta(
             per_template_records, focus_rel=cand["focus_rel"] is not None
+        )
+        delta_coreness = (
+            compute_subject_delta(
+                per_template_coreness_records,
+                focus_rel=cand["focus_rel"] is not None,
+            )
+            if per_template_coreness_records
+            else None
         )
 
         # H2 swap mechanism: only meaningful when the subject has a forward/reverse
@@ -428,6 +527,8 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
             "per_template": per_template_records,
             "subject_delta": delta,
             "h2_swap_check": swap_check,
+            "per_template_coreness": per_template_coreness_records,
+            "subject_delta_coreness": delta_coreness,
         }
         out_path = PER_SUBJECT_OUT / f"{row['dataset']}_{row['subject_id']}.json"
         with out_path.open("w") as f:
@@ -574,9 +675,76 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
             "sign_test": cohort_sign_test(deltas),
         }
 
+    # Step 5a sensitivity: parallel H1 with coreness-defined endpoints.
+    # Reports direction agreement, NOT a parallel main metric — see plan §5.2.
+    h1_coreness_subjects = [
+        r
+        for r in h1_subjects
+        if r.get("subject_delta_coreness") is not None
+        and np.isfinite(
+            r["subject_delta_coreness"].get("delta_endpoint_vs_middle", float("nan"))
+        )
+    ]
+    h1_coreness_deltas = [
+        r["subject_delta_coreness"]["delta_endpoint_vs_middle"]
+        for r in h1_coreness_subjects
+    ]
+    # Per-subject direction agreement: distinguish three regimes —
+    #   same_sign      : both deltas have matching sign (or both ≈ 0)
+    #   direction_discordant : strict sign opposition (main * coreness < 0,
+    #                          neither is ≈ 0)
+    #   one_is_zero    : exactly one of the two is ≈ 0 (technically not
+    #                    same-sign, but not "direction-discordant" either)
+    pair_records = []
+    for r in h1_coreness_subjects:
+        d_main = r["subject_delta"]["delta_endpoint_vs_middle"]
+        d_core = r["subject_delta_coreness"]["delta_endpoint_vs_middle"]
+        eps = 1e-12
+        main_zero = abs(d_main) < eps
+        core_zero = abs(d_core) < eps
+        if main_zero and core_zero:
+            same_sign = True
+            direction_discordant = False
+            one_is_zero = False
+        elif main_zero or core_zero:
+            same_sign = False
+            direction_discordant = False
+            one_is_zero = True
+        else:
+            same_sign = (d_main > 0) == (d_core > 0)
+            direction_discordant = not same_sign
+            one_is_zero = False
+        pair_records.append(
+            {
+                "subject_id": r["subject_id"],
+                "dataset": r["dataset"],
+                "delta_main": d_main,
+                "delta_coreness": d_core,
+                "same_sign": same_sign,
+                "direction_discordant": direction_discordant,
+                "one_is_zero": one_is_zero,
+            }
+        )
+    n_same_sign = sum(1 for p in pair_records if p["same_sign"])
+    n_direction_discordant = sum(1 for p in pair_records if p["direction_discordant"])
+    n_one_is_zero = sum(1 for p in pair_records if p["one_is_zero"])
+    h1_coreness = {
+        "n": len(h1_coreness_deltas),
+        "subject_ids": [r["subject_id"] for r in h1_coreness_subjects],
+        "wilcoxon_greater": cohort_wilcoxon(h1_coreness_deltas, "greater"),
+        "wilcoxon_two_sided": cohort_wilcoxon(h1_coreness_deltas, "two-sided"),
+        "sign_test": cohort_sign_test(h1_coreness_deltas),
+        "n_same_sign_with_main": n_same_sign,
+        "n_direction_discordant": n_direction_discordant,
+        "n_one_is_zero": n_one_is_zero,
+        "n_with_both_definitions": len(pair_records),
+        "per_subject_pairs": pair_records,
+    }
+
     summary = {
         "h1_pooled": h1_pooled,
         "h1_dataset_specific": {"yuquan": h1_yuquan, "epilepsiae": h1_epi},
+        "h1_coreness_sensitivity": h1_coreness,
         "h1b_polarity_non_fwdrev": h1b,
         "h2_forward_reverse_swap": h2,
         "h3_focus_rel_epilepsiae": h3,
@@ -591,6 +759,12 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
           f"median={h1_pooled['wilcoxon_greater']['median']:.4f} "
           f"p_greater={h1_pooled['wilcoxon_greater']['p_value']:.4g}")
     print(f"[cohort] H1 yuquan   n={h1_yuquan['n']}  | epilepsiae n={h1_epi['n']}")
+    print(f"[cohort] H1 coreness n={h1_coreness['n']} "
+          f"median={h1_coreness['wilcoxon_greater']['median']:.4f} "
+          f"p_greater={h1_coreness['wilcoxon_greater']['p_value']:.4g} "
+          f"same_sign={n_same_sign}/{len(pair_records)} "
+          f"direction_discordant={n_direction_discordant} "
+          f"one_is_zero={n_one_is_zero}")
     print(f"[cohort] H1b polarity (non-fwdrev) n={h1b['n']}")
     print(f"[cohort] H2 swap n={h2['n']} exceeding null_95th={n_exceed}")
     for label, rec in h3.items():
