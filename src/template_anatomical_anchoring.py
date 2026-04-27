@@ -859,6 +859,114 @@ def compute_template_pair_geometry(
     return out
 
 
+# ---------------------------------------------------------------------------
+# Step 4b — node-level template-pair anatomy
+# ---------------------------------------------------------------------------
+NODE_CLASSES = (
+    "swap_node",
+    "same_side_node",
+    "template_specific_endpoint",
+    "shared_endpoint_unassigned",
+    "non_endpoint",
+)
+
+
+def classify_template_pair_nodes(
+    channel_names: Sequence[str],
+    t0_source: Sequence[str],
+    t0_sink: Sequence[str],
+    t1_source: Sequence[str],
+    t1_sink: Sequence[str],
+) -> Dict[str, Any]:
+    """Classify each channel into one of 5 categories by its T0/T1 endpoint role.
+
+    Categories partition all channels:
+        swap_node                 in (T0_source ∩ T1_sink) ∪ (T0_sink ∩ T1_source)
+        same_side_node            in (T0_source ∩ T1_source) ∪ (T0_sink ∩ T1_sink)
+        template_specific_endpoint in exactly one template's endpoint
+        shared_endpoint_unassigned in BOTH endpoints but in neither swap nor
+                                   same_side — theoretical edge case (should
+                                   be 0 since endpoint = source ∪ sink and
+                                   source ∩ sink = ∅); reported as sanity
+        non_endpoint              in neither template's endpoint
+
+    Returns dict with ``per_channel`` (list of {channel, class}), ``counts``
+    (per-class integer count), and ``channels_by_class`` (per-class list of
+    channel names).
+    """
+    s0 = set(t0_source)
+    k0 = set(t0_sink)
+    s1 = set(t1_source)
+    k1 = set(t1_sink)
+    e0 = s0 | k0
+    e1 = s1 | k1
+
+    per_channel: List[Dict[str, str]] = []
+    counts: Dict[str, int] = {c: 0 for c in NODE_CLASSES}
+    by_class: Dict[str, List[str]] = {c: [] for c in NODE_CLASSES}
+
+    for ch in channel_names:
+        in_e0 = ch in e0
+        in_e1 = ch in e1
+        if not in_e0 and not in_e1:
+            cls = "non_endpoint"
+        elif in_e0 != in_e1:
+            cls = "template_specific_endpoint"
+        else:
+            t0_role = "source" if ch in s0 else "sink"
+            t1_role = "source" if ch in s1 else "sink"
+            if t0_role == t1_role:
+                cls = "same_side_node"
+            elif {t0_role, t1_role} == {"source", "sink"}:
+                cls = "swap_node"
+            else:
+                cls = "shared_endpoint_unassigned"
+        per_channel.append({"channel": ch, "class": cls})
+        counts[cls] += 1
+        by_class[cls].append(ch)
+
+    return {
+        "per_channel": per_channel,
+        "counts": counts,
+        "channels_by_class": by_class,
+    }
+
+
+def soz_breakdown_by_node_class(
+    node_classification: Dict[str, Any],
+    soz_channels: Sequence[str],
+    focus_rel_dict: Optional[Dict[str, list]] = None,
+) -> Dict[str, Dict[str, Any]]:
+    """For each node class, count SOZ + focus_rel-i/l/e channels and report
+    fraction.  Reuses match_bipolar_soz / match_bipolar_focus_rel.
+
+    Returns dict keyed by node class -> {n, n_soz, frac_soz, [n_i, n_l,
+    n_e, frac_i, frac_l, frac_e]}.
+    """
+    soz_set = {_normalize_channel_name(c) for c in soz_channels}
+    out: Dict[str, Dict[str, Any]] = {}
+    for cls in NODE_CLASSES:
+        channels = node_classification["channels_by_class"].get(cls, [])
+        n = len(channels)
+        n_soz = sum(1 for ch in channels if match_bipolar_soz(ch, soz_set) == "soz")
+        rec: Dict[str, Any] = {
+            "n": n,
+            "n_soz": n_soz,
+            "frac_soz": (n_soz / n) if n > 0 else float("nan"),
+        }
+        if focus_rel_dict is not None:
+            for label in ("i", "l", "e"):
+                n_lab = sum(
+                    1
+                    for ch in channels
+                    if match_bipolar_focus_rel(ch, focus_rel_dict) == label
+                )
+                rec[f"n_{label}"] = n_lab
+                rec[f"frac_{label}"] = (n_lab / n) if n > 0 else float("nan")
+        out[cls] = rec
+    return out
+
+
 __all__ = [
     "extract_endpoint_middle",
     "compute_template_anchoring",
@@ -872,4 +980,7 @@ __all__ = [
     "compute_template_anchoring_by_coreness",
     "compute_split_half_endpoint_jaccards",
     "compute_template_pair_geometry",
+    "classify_template_pair_nodes",
+    "soz_breakdown_by_node_class",
+    "NODE_CLASSES",
 ]

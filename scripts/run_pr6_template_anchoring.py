@@ -39,7 +39,9 @@ from src.interictal_propagation import (
     load_subject_propagation_events,
 )
 from src.template_anatomical_anchoring import (
+    NODE_CLASSES,
     audit_subject_eligibility,
+    classify_template_pair_nodes,
     cohort_sign_test,
     cohort_wilcoxon,
     compute_split_half_endpoint_jaccards,
@@ -49,6 +51,7 @@ from src.template_anatomical_anchoring import (
     compute_template_coreness,
     compute_template_pair_geometry,
     forward_reverse_swap_check,
+    soz_breakdown_by_node_class,
 )
 
 
@@ -624,6 +627,7 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
         # networks, two directions of the same network, or sharing high-HI
         # nodes with re-shuffled ordering?
         template_pair_geometry: Optional[Dict[str, Any]] = None
+        node_anatomy: Optional[Dict[str, Any]] = None
         if (
             len(cand["template_ranks"]) >= 2
             and cand["template_ranks"][0] is not None
@@ -642,6 +646,51 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
                 n=3,
             )
 
+            # Step 4b — node-level template-pair anatomy.  Use the same
+            # source/sink lists that geometry's helper would produce by
+            # calling extract_endpoint_middle directly.
+            from src.template_anatomical_anchoring import extract_endpoint_middle
+            t0_parts = extract_endpoint_middle(
+                cand["channel_names"],
+                cand["template_ranks"][0],
+                n=3,
+                valid_mask=per_cluster_masks[0]
+                if len(per_cluster_masks) > 0
+                else None,
+            )
+            t1_parts = extract_endpoint_middle(
+                cand["channel_names"],
+                cand["template_ranks"][1],
+                n=3,
+                valid_mask=per_cluster_masks[1]
+                if len(per_cluster_masks) > 1
+                else None,
+            )
+            if (
+                t0_parts.get("exit_reason") is None
+                and t1_parts.get("exit_reason") is None
+            ):
+                node_classification = classify_template_pair_nodes(
+                    channel_names=cand["channel_names"],
+                    t0_source=t0_parts["source"],
+                    t0_sink=t0_parts["sink"],
+                    t1_source=t1_parts["source"],
+                    t1_sink=t1_parts["sink"],
+                )
+                soz_breakdown = soz_breakdown_by_node_class(
+                    node_classification,
+                    soz_channels=cand["soz_channels"],
+                    focus_rel_dict=cand["focus_rel"],
+                )
+                node_anatomy = {
+                    "classification": node_classification,
+                    "soz_breakdown": soz_breakdown,
+                    "swap_minus_same_side_count": (
+                        node_classification["counts"]["swap_node"]
+                        - node_classification["counts"]["same_side_node"]
+                    ),
+                }
+
         out_obj = {
             "subject_id": row["subject_id"],
             "dataset": row["dataset"],
@@ -653,6 +702,7 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
             "subject_delta_coreness": delta_coreness,
             "split_half_robustness": split_half_robustness,
             "template_pair_geometry": template_pair_geometry,
+            "node_anatomy": node_anatomy,
         }
         out_path = PER_SUBJECT_OUT / f"{row['dataset']}_{row['subject_id']}.json"
         with out_path.open("w") as f:
@@ -996,6 +1046,205 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
         "per_subject": geom_records,
     }
 
+    # Step 4b — node-level anatomy stratified summary
+    anatomy_records = []
+    for r in per_subject_records:
+        na = r.get("node_anatomy")
+        if not na:
+            continue
+        cls = na["classification"]
+        soz = na["soz_breakdown"]
+        anatomy_records.append(
+            {
+                "subject_id": r["subject_id"],
+                "dataset": r["dataset"],
+                "h1_eligible": bool(r["audit"].get("h1_primary_eligible")),
+                "endpoint_defined": bool(r["audit"].get("endpoint_defined")),
+                "forward_reverse_reproduced": bool(
+                    r["audit"].get("forward_reverse_reproduced")
+                ),
+                "n_swap_node": cls["counts"]["swap_node"],
+                "n_same_side_node": cls["counts"]["same_side_node"],
+                "n_template_specific_endpoint": cls["counts"][
+                    "template_specific_endpoint"
+                ],
+                "n_shared_endpoint_unassigned": cls["counts"][
+                    "shared_endpoint_unassigned"
+                ],
+                "n_non_endpoint": cls["counts"]["non_endpoint"],
+                "swap_minus_same_side_count": na.get("swap_minus_same_side_count"),
+                # SOZ counts per class
+                "soz_in_swap": soz.get("swap_node", {}).get("n_soz", 0),
+                "soz_in_same_side": soz.get("same_side_node", {}).get("n_soz", 0),
+                "soz_in_template_specific": soz.get(
+                    "template_specific_endpoint", {}
+                ).get("n_soz", 0),
+                "soz_in_non_endpoint": soz.get("non_endpoint", {}).get("n_soz", 0),
+                "frac_soz_swap": soz.get("swap_node", {}).get("frac_soz"),
+                "frac_soz_same_side": soz.get("same_side_node", {}).get("frac_soz"),
+                "frac_soz_template_specific": soz.get(
+                    "template_specific_endpoint", {}
+                ).get("frac_soz"),
+                "frac_soz_non_endpoint": soz.get("non_endpoint", {}).get(
+                    "frac_soz"
+                ),
+            }
+        )
+
+    def _anatomy_strata_summary(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+        if not records:
+            return {"n": 0}
+        keys_count = (
+            "n_swap_node",
+            "n_same_side_node",
+            "n_template_specific_endpoint",
+            "n_shared_endpoint_unassigned",
+            "n_non_endpoint",
+            "swap_minus_same_side_count",
+        )
+        out: Dict[str, Any] = {"n": len(records)}
+        for k in keys_count:
+            vals = [r[k] for r in records if r.get(k) is not None]
+            if vals:
+                out[f"median_{k}"] = float(np.median(vals))
+                out[f"mean_{k}"] = float(np.mean(vals))
+                out[f"sum_{k}"] = float(np.sum(vals))
+            else:
+                out[f"median_{k}"] = float("nan")
+        # Pooled SOZ fraction by category (channel-pooled across cohort).
+        # KEEP these for transparency, but they are NOT cohort claims — they
+        # are channel-count-weighted aggregates and can be dominated by a few
+        # high-n_ch subjects.  The valid cohort claims live in the
+        # subject-level paired tests below.
+        for cat_count, cat_soz in (
+            ("n_swap_node", "soz_in_swap"),
+            ("n_same_side_node", "soz_in_same_side"),
+            ("n_template_specific_endpoint", "soz_in_template_specific"),
+            ("n_non_endpoint", "soz_in_non_endpoint"),
+        ):
+            total_n = sum(int(r.get(cat_count, 0)) for r in records)
+            total_soz = sum(int(r.get(cat_soz, 0)) for r in records)
+            out[f"pooled_frac_soz_{cat_count.replace('n_', '')}"] = (
+                total_soz / total_n if total_n > 0 else float("nan")
+            )
+            out[f"pooled_n_{cat_count.replace('n_', '')}"] = total_n
+            out[f"pooled_n_soz_{cat_count.replace('n_', '')}"] = total_soz
+
+        # === Subject-level paired tests (P0/P1 of Step 4b review) ===
+        # 1) Swap-leaning geometry: per-subject `n_swap_node − n_same_side_node`,
+        #    then cohort Wilcoxon (greater + two-sided) + sign-test against 0.
+        swap_minus_same = [
+            (r["subject_id"], int(r["n_swap_node"]) - int(r["n_same_side_node"]))
+            for r in records
+            if r.get("n_swap_node") is not None
+            and r.get("n_same_side_node") is not None
+        ]
+        deltas_swap_same = [d for _, d in swap_minus_same]
+        out["subject_level_swap_minus_same"] = {
+            "n": len(swap_minus_same),
+            "median": float(np.median(deltas_swap_same)) if deltas_swap_same else float("nan"),
+            "n_positive": int(sum(1 for d in deltas_swap_same if d > 0)),
+            "n_negative": int(sum(1 for d in deltas_swap_same if d < 0)),
+            "n_zero": int(sum(1 for d in deltas_swap_same if d == 0)),
+            "wilcoxon_greater": cohort_wilcoxon(deltas_swap_same, "greater"),
+            "wilcoxon_two_sided": cohort_wilcoxon(deltas_swap_same, "two-sided"),
+            "sign_test": cohort_sign_test(deltas_swap_same),
+            "per_subject": [
+                {"subject_id": sid, "swap_minus_same_count": d}
+                for sid, d in swap_minus_same
+            ],
+        }
+
+        # 2) Subject-level SOZ-frac swap vs template-specific (the headline
+        #    claim that "swap nodes are NOT subject-level SOZ-enriched
+        #    relative to template-specific endpoints").  Skip subjects where
+        #    either fraction is undefined (zero count in that category).
+        soz_pairs = []
+        for r in records:
+            fs = r.get("frac_soz_swap")
+            ft = r.get("frac_soz_template_specific")
+            if (
+                fs is None
+                or ft is None
+                or not np.isfinite(fs)
+                or not np.isfinite(ft)
+            ):
+                continue
+            soz_pairs.append(
+                {
+                    "subject_id": r["subject_id"],
+                    "frac_soz_swap": float(fs),
+                    "frac_soz_template_specific": float(ft),
+                    "delta": float(fs) - float(ft),
+                }
+            )
+        deltas_soz = [p["delta"] for p in soz_pairs]
+        out["subject_level_soz_swap_vs_template_specific"] = {
+            "n": len(soz_pairs),
+            "median_delta": float(np.median(deltas_soz)) if deltas_soz else float("nan"),
+            "n_positive": int(sum(1 for d in deltas_soz if d > 0)),
+            "n_negative": int(sum(1 for d in deltas_soz if d < 0)),
+            "n_zero": int(sum(1 for d in deltas_soz if d == 0)),
+            "wilcoxon_greater": cohort_wilcoxon(deltas_soz, "greater"),
+            "wilcoxon_two_sided": cohort_wilcoxon(deltas_soz, "two-sided"),
+            "sign_test": cohort_sign_test(deltas_soz),
+            "per_subject": soz_pairs,
+        }
+
+        # 3) Same paired test for SOZ swap vs same-side (where both defined).
+        soz_pairs_same = []
+        for r in records:
+            fs = r.get("frac_soz_swap")
+            fsa = r.get("frac_soz_same_side")
+            if (
+                fs is None
+                or fsa is None
+                or not np.isfinite(fs)
+                or not np.isfinite(fsa)
+            ):
+                continue
+            soz_pairs_same.append(
+                {
+                    "subject_id": r["subject_id"],
+                    "frac_soz_swap": float(fs),
+                    "frac_soz_same_side": float(fsa),
+                    "delta": float(fs) - float(fsa),
+                }
+            )
+        deltas_soz_same = [p["delta"] for p in soz_pairs_same]
+        out["subject_level_soz_swap_vs_same_side"] = {
+            "n": len(soz_pairs_same),
+            "median_delta": float(np.median(deltas_soz_same))
+            if deltas_soz_same
+            else float("nan"),
+            "n_positive": int(sum(1 for d in deltas_soz_same if d > 0)),
+            "n_negative": int(sum(1 for d in deltas_soz_same if d < 0)),
+            "n_zero": int(sum(1 for d in deltas_soz_same if d == 0)),
+            "wilcoxon_greater": cohort_wilcoxon(deltas_soz_same, "greater"),
+            "wilcoxon_two_sided": cohort_wilcoxon(deltas_soz_same, "two-sided"),
+            "sign_test": cohort_sign_test(deltas_soz_same),
+            "per_subject": soz_pairs_same,
+        }
+        return out
+
+    anatomy_summary = {
+        "all_endpoint_defined": _anatomy_strata_summary(anatomy_records),
+        "h1_eligible": _anatomy_strata_summary(
+            [r for r in anatomy_records if r["h1_eligible"]]
+        ),
+        "forward_reverse_reproduced": _anatomy_strata_summary(
+            [r for r in anatomy_records if r["forward_reverse_reproduced"]]
+        ),
+        "non_forward_reverse_h1_eligible": _anatomy_strata_summary(
+            [
+                r
+                for r in anatomy_records
+                if r["h1_eligible"] and not r["forward_reverse_reproduced"]
+            ]
+        ),
+        "per_subject": anatomy_records,
+    }
+
     summary = {
         "h1_pooled": h1_pooled,
         "h1_dataset_specific": {"yuquan": h1_yuquan, "epilepsiae": h1_epi},
@@ -1005,6 +1254,7 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
         "h3_focus_rel_epilepsiae": h3,
         "split_half_endpoint_robustness": split_half_summary,
         "template_pair_geometry": template_pair_geometry_summary,
+        "node_anatomy": anatomy_summary,
         "n_per_subject_records": len(per_subject_records),
     }
 
@@ -1038,6 +1288,52 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
             f"sink={ss['median_jaccard_sink']:.3f} "
             f"endpoint<0.4 subjects={ss['n_subjects_endpoint_jaccard_below_0p4']}"
         )
+    # Step 4b — node-level anatomy stratified summary
+    print(
+        "[cohort] node-level anatomy — stratified "
+        "(median counts + subject-level paired tests):"
+    )
+    for stratum_name in (
+        "h1_eligible",
+        "forward_reverse_reproduced",
+        "non_forward_reverse_h1_eligible",
+    ):
+        ss = anatomy_summary.get(stratum_name) or {"n": 0}
+        if ss.get("n", 0) == 0:
+            print(f"  {stratum_name}: n=0")
+            continue
+        print(
+            f"  {stratum_name:<40} n={ss['n']:>3} "
+            f"med swap={ss['median_n_swap_node']:.1f} "
+            f"med same={ss['median_n_same_side_node']:.1f} "
+            f"med tspec={ss['median_n_template_specific_endpoint']:.1f}"
+        )
+        sl_ss = ss.get("subject_level_swap_minus_same") or {}
+        if sl_ss.get("n", 0) > 0:
+            print(
+                f"    swap−same per subject (n={sl_ss['n']}): "
+                f"median={sl_ss['median']:+.1f} "
+                f"pos/neg/zero={sl_ss['n_positive']}/{sl_ss['n_negative']}/{sl_ss['n_zero']} "
+                f"Wilcoxon-greater p={sl_ss['wilcoxon_greater'].get('p_value')!r} "
+                f"sign-test p={sl_ss['sign_test'].get('p_value')!r}"
+            )
+        sl_soz = ss.get("subject_level_soz_swap_vs_template_specific") or {}
+        if sl_soz.get("n", 0) > 0:
+            print(
+                f"    SOZ frac (swap − tspec) per subject (n={sl_soz['n']}): "
+                f"median={sl_soz['median_delta']:+.3f} "
+                f"pos/neg/zero={sl_soz['n_positive']}/{sl_soz['n_negative']}/{sl_soz['n_zero']} "
+                f"Wilcoxon-greater p={sl_soz['wilcoxon_greater'].get('p_value')!r}"
+            )
+        print(
+            f"    [pooled-only, NOT cohort claim] SOZ frac: swap={ss.get('pooled_frac_soz_swap_node', float('nan')):.3f} "
+            f"({ss.get('pooled_n_soz_swap_node', 0)}/{ss.get('pooled_n_swap_node', 0)}), "
+            f"same={ss.get('pooled_frac_soz_same_side_node', float('nan')):.3f} "
+            f"({ss.get('pooled_n_soz_same_side_node', 0)}/{ss.get('pooled_n_same_side_node', 0)}), "
+            f"tspec={ss.get('pooled_frac_soz_template_specific_endpoint', float('nan')):.3f} "
+            f"({ss.get('pooled_n_soz_template_specific_endpoint', 0)}/{ss.get('pooled_n_template_specific_endpoint', 0)})"
+        )
+
     # Template-pair geometry stratified summary
     print(
         "[cohort] template-pair geometry — stratified (medians):"

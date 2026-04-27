@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 
 from src.template_anatomical_anchoring import (
     audit_subject_eligibility,
+    classify_template_pair_nodes,
     compute_split_half_endpoint_jaccards,
     compute_subject_delta,
     compute_template_anchoring,
@@ -27,6 +28,7 @@ from src.template_anatomical_anchoring import (
     extract_endpoint_middle,
     extract_endpoint_middle_by_coreness,
     forward_reverse_swap_check,
+    soz_breakdown_by_node_class,
 )
 
 
@@ -607,6 +609,113 @@ def test_split_half_endpoint_jaccard_full_swap():
     assert rec["jaccard_sink"] == pytest.approx(0.0)
     # Endpoint sets are SAME 6 channels (A,B,C,F,G,H) → jaccard=1.0
     assert rec["jaccard_endpoint"] == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# Step 4b — node-level template-pair anatomy
+# ---------------------------------------------------------------------------
+def test_classify_template_pair_nodes_full_swap():
+    """T0 source = T1 sink and vice versa: every endpoint channel is a swap_node."""
+    channel_names = list("ABCDEFGH")
+    out = classify_template_pair_nodes(
+        channel_names,
+        t0_source=["A", "B", "C"],
+        t0_sink=["F", "G", "H"],
+        t1_source=["F", "G", "H"],
+        t1_sink=["A", "B", "C"],
+    )
+    assert out["counts"]["swap_node"] == 6
+    assert out["counts"]["same_side_node"] == 0
+    assert out["counts"]["template_specific_endpoint"] == 0
+    assert out["counts"]["shared_endpoint_unassigned"] == 0
+    assert out["counts"]["non_endpoint"] == 2  # D, E
+    assert set(out["channels_by_class"]["non_endpoint"]) == {"D", "E"}
+
+
+def test_classify_template_pair_nodes_identical_templates():
+    """Identical T0 and T1: all endpoint channels are same_side_node."""
+    channel_names = list("ABCDEFGH")
+    out = classify_template_pair_nodes(
+        channel_names,
+        t0_source=["A", "B", "C"],
+        t0_sink=["F", "G", "H"],
+        t1_source=["A", "B", "C"],
+        t1_sink=["F", "G", "H"],
+    )
+    assert out["counts"]["same_side_node"] == 6
+    assert out["counts"]["swap_node"] == 0
+    assert out["counts"]["template_specific_endpoint"] == 0
+
+
+def test_classify_template_pair_nodes_template_specific():
+    """Disjoint endpoints: all template_specific_endpoint."""
+    channel_names = list("ABCDEFGHIJKLMN")
+    out = classify_template_pair_nodes(
+        channel_names,
+        t0_source=["A", "B", "C"],
+        t0_sink=["D", "E", "F"],
+        t1_source=["G", "H", "I"],
+        t1_sink=["J", "K", "L"],
+    )
+    assert out["counts"]["template_specific_endpoint"] == 12
+    assert out["counts"]["same_side_node"] == 0
+    assert out["counts"]["swap_node"] == 0
+    assert out["counts"]["non_endpoint"] == 2  # M, N
+
+
+def test_classify_template_pair_nodes_partial_swap_partial_specific():
+    """Realistic mix: 1 swap, 1 same-side, 4 template-specific."""
+    channel_names = list("ABCDEFGH")
+    # T0 endpoint: A,B,C (source) + F,G,H (sink)
+    # T1 endpoint: A,B,F (source) + C,G,H (sink) — wait this would re-use
+    # Let me design more carefully:
+    # T0: source=[A,B,C], sink=[F,G,H]
+    # T1: source=[F,B,D], sink=[C,E,G]
+    # A: T0 source only -> template_specific
+    # B: T0 source AND T1 source -> same_side
+    # C: T0 source AND T1 sink -> swap
+    # D: T1 source only -> template_specific
+    # E: T1 sink only -> template_specific
+    # F: T0 sink AND T1 source -> swap
+    # G: T0 sink AND T1 sink -> same_side
+    # H: T0 sink only -> template_specific
+    out = classify_template_pair_nodes(
+        channel_names,
+        t0_source=["A", "B", "C"],
+        t0_sink=["F", "G", "H"],
+        t1_source=["F", "B", "D"],
+        t1_sink=["C", "E", "G"],
+    )
+    assert out["counts"]["swap_node"] == 2  # C, F
+    assert out["counts"]["same_side_node"] == 2  # B, G
+    assert out["counts"]["template_specific_endpoint"] == 4  # A, D, E, H
+    assert out["counts"]["non_endpoint"] == 0
+    by_class = out["channels_by_class"]
+    assert set(by_class["swap_node"]) == {"C", "F"}
+    assert set(by_class["same_side_node"]) == {"B", "G"}
+
+
+def test_soz_breakdown_by_node_class_yuquan_bipolar():
+    """SOZ enrichment per node class, bipolar contact matching."""
+    channel_names = ["D13-D14", "D14-D15", "E1-E2", "F1-F2", "F2-F3", "F3-F4", "G1-G2", "G2-G3"]
+    # T0: source=D13-D14,D14-D15,E1-E2; sink=F3-F4,F2-F3,F1-F2
+    # T1: source=F3-F4,F2-F3,F1-F2; sink=D13-D14,D14-D15,E1-E2 (full swap)
+    # → all 6 are swap_node; G1-G2 / G2-G3 are non_endpoint
+    soz = ["D13", "D14", "E1", "E2"]
+    nc = classify_template_pair_nodes(
+        channel_names,
+        t0_source=channel_names[:3],
+        t0_sink=channel_names[3:6][::-1],  # F3-F4, F2-F3, F1-F2
+        t1_source=channel_names[3:6][::-1],
+        t1_sink=channel_names[:3],
+    )
+    assert nc["counts"]["swap_node"] == 6
+    breakdown = soz_breakdown_by_node_class(nc, soz)
+    # swap_nodes contain D13-D14, D14-D15, E1-E2 (3 SOZ via match) + F1-F2,
+    # F2-F3, F3-F4 (0 SOZ) = 3/6 SOZ in swap nodes
+    assert breakdown["swap_node"]["n_soz"] == 3
+    assert breakdown["swap_node"]["frac_soz"] == pytest.approx(0.5)
+    assert breakdown["non_endpoint"]["n_soz"] == 0
 
 
 def test_template_pair_geometry_full_swap():
