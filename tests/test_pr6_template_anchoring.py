@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 
 from src.template_anatomical_anchoring import (
     audit_subject_eligibility,
+    compute_split_half_endpoint_jaccards,
     compute_subject_delta,
     compute_template_anchoring,
     compute_template_anchoring_by_coreness,
@@ -554,6 +555,72 @@ def test_extract_endpoint_middle_by_coreness_n_valid_too_small():
         n=3,
     )
     assert rec["exit_reason"] == "n_valid<2n"
+
+
+# ---------------------------------------------------------------------------
+# Step 5b — split-half endpoint robustness Jaccard
+# ---------------------------------------------------------------------------
+def test_split_half_endpoint_jaccard_perfect_stability():
+    """Identical rank+mask in both splits → all Jaccards = 1.0."""
+    channel_names = list("ABCDEFGH")
+    rank = [[0, 1, 2, 3, 4, 5, 6, 7], [7, 6, 5, 4, 3, 2, 1, 0]]
+    mask = [[True] * 8, [True] * 8]
+
+    out = compute_split_half_endpoint_jaccards(
+        channel_names=channel_names,
+        cluster_rank_a=rank,
+        cluster_valid_mask_a=mask,
+        cluster_rank_b_matched_to_a=rank,  # identical
+        cluster_valid_mask_b_matched_to_a=mask,
+        n=3,
+    )
+    assert len(out) == 2
+    for rec in out:
+        assert rec["exit_reason"] is None
+        assert rec["jaccard_source"] == pytest.approx(1.0)
+        assert rec["jaccard_sink"] == pytest.approx(1.0)
+        assert rec["jaccard_endpoint"] == pytest.approx(1.0)
+
+
+def test_split_half_endpoint_jaccard_full_swap():
+    """B half has reversed ranks within the same valid set → source_A vs
+    source_B disjoint, jaccard=0."""
+    channel_names = list("ABCDEFGH")
+    rank_a = [[0, 1, 2, 3, 4, 5, 6, 7]]
+    rank_b = [[7, 6, 5, 4, 3, 2, 1, 0]]
+    mask_full = [[True] * 8]
+
+    out = compute_split_half_endpoint_jaccards(
+        channel_names=channel_names,
+        cluster_rank_a=rank_a,
+        cluster_valid_mask_a=mask_full,
+        cluster_rank_b_matched_to_a=rank_b,
+        cluster_valid_mask_b_matched_to_a=mask_full,
+        n=3,
+    )
+    rec = out[0]
+    assert rec["exit_reason"] is None
+    # Source_A = A,B,C; Source_B = H,G,F → disjoint
+    assert rec["jaccard_source"] == pytest.approx(0.0)
+    # Sink_A = H,G,F; Sink_B = A,B,C → disjoint
+    assert rec["jaccard_sink"] == pytest.approx(0.0)
+    # Endpoint sets are SAME 6 channels (A,B,C,F,G,H) → jaccard=1.0
+    assert rec["jaccard_endpoint"] == pytest.approx(1.0)
+
+
+def test_split_half_endpoint_jaccard_no_mapping_exit():
+    """When mapping returns None for a cluster, record exit_reason='no_mapping'."""
+    channel_names = list("ABCDEFGH")
+    rank_a = [[0, 1, 2, 3, 4, 5, 6, 7], [7, 6, 5, 4, 3, 2, 1, 0]]
+    mask = [[True] * 8, [True] * 8]
+    rank_b_matched = [None, [7, 6, 5, 4, 3, 2, 1, 0]]
+    mask_b_matched = [None, [True] * 8]
+
+    out = compute_split_half_endpoint_jaccards(
+        channel_names, rank_a, mask, rank_b_matched, mask_b_matched, n=3
+    )
+    assert out[0]["exit_reason"] == "no_mapping"
+    assert out[1]["exit_reason"] is None
 
 
 def test_compute_template_anchoring_by_coreness_yuquan_bipolar():

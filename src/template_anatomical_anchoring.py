@@ -706,6 +706,71 @@ def compute_template_anchoring_by_coreness(
     return rec
 
 
+# ---------------------------------------------------------------------------
+# Step 5b — split-half endpoint robustness via Jaccard
+# ---------------------------------------------------------------------------
+def compute_split_half_endpoint_jaccards(
+    channel_names: Sequence[str],
+    cluster_rank_a: Sequence[Sequence[int]],
+    cluster_valid_mask_a: Sequence[Sequence[bool]],
+    cluster_rank_b_matched_to_a: Sequence[Optional[Sequence[int]]],
+    cluster_valid_mask_b_matched_to_a: Sequence[Optional[Sequence[bool]]],
+    n: int = 3,
+) -> List[Dict[str, Any]]:
+    """For each split-A cluster (already aligned via mapping_a_to_b on the B
+    side — see ``compute_time_split_reproducibility``), extract source / sink
+    / endpoint sets in both halves and compute set Jaccards.
+
+    Inputs use the per-cluster fields written by Step 1's split-half
+    extension: rank vectors carry ``-1`` for non-participating channels and
+    valid_mask gives the ground truth.  ``cluster_rank_b_matched_to_a[k]``
+    can be ``None`` when no Hungarian match was found for split-A cluster k
+    (e.g. degenerate split with only one cluster); in that case we record
+    ``exit_reason='no_mapping'`` and skip the Jaccards.
+
+    Returns one dict per split-A cluster, with
+    ``jaccard_source / jaccard_sink / jaccard_endpoint`` (or exit_reason).
+    """
+    n_clusters = len(cluster_rank_a)
+    out: List[Dict[str, Any]] = []
+    for k in range(n_clusters):
+        rank_a = cluster_rank_a[k]
+        mask_a = cluster_valid_mask_a[k]
+        rank_b = cluster_rank_b_matched_to_a[k] if k < len(cluster_rank_b_matched_to_a) else None
+        mask_b = (
+            cluster_valid_mask_b_matched_to_a[k]
+            if k < len(cluster_valid_mask_b_matched_to_a)
+            else None
+        )
+        if rank_b is None or mask_b is None:
+            out.append({"cluster_id": k, "exit_reason": "no_mapping"})
+            continue
+
+        sa = extract_endpoint_middle(channel_names, rank_a, n=n, valid_mask=mask_a)
+        sb = extract_endpoint_middle(channel_names, rank_b, n=n, valid_mask=mask_b)
+        if sa["exit_reason"] is not None or sb["exit_reason"] is not None:
+            out.append(
+                {
+                    "cluster_id": k,
+                    "exit_reason": f"extract_failed:a={sa['exit_reason']},b={sb['exit_reason']}",
+                }
+            )
+            continue
+
+        out.append(
+            {
+                "cluster_id": k,
+                "jaccard_source": _jaccard(sa["source"], sb["source"]),
+                "jaccard_sink": _jaccard(sa["sink"], sb["sink"]),
+                "jaccard_endpoint": _jaccard(sa["endpoint"], sb["endpoint"]),
+                "n_valid_a": sa["n_valid"],
+                "n_valid_b": sb["n_valid"],
+                "exit_reason": None,
+            }
+        )
+    return out
+
+
 __all__ = [
     "extract_endpoint_middle",
     "compute_template_anchoring",
@@ -717,4 +782,5 @@ __all__ = [
     "compute_template_coreness",
     "extract_endpoint_middle_by_coreness",
     "compute_template_anchoring_by_coreness",
+    "compute_split_half_endpoint_jaccards",
 ]

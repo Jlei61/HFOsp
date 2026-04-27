@@ -35,12 +35,14 @@ if str(ROOT) not in sys.path:
 
 from src.interictal_propagation import (
     _valid_event_indices,
+    compute_time_split_reproducibility,
     load_subject_propagation_events,
 )
 from src.template_anatomical_anchoring import (
     audit_subject_eligibility,
     cohort_sign_test,
     cohort_wilcoxon,
+    compute_split_half_endpoint_jaccards,
     compute_subject_delta,
     compute_template_anchoring,
     compute_template_anchoring_by_coreness,
@@ -190,7 +192,8 @@ def _load_bools_and_channels(subject_dir: Path) -> Optional[Dict[str, Any]]:
     n_ch_total = len(channel_names)
     bool_blocks: List[np.ndarray] = []
     rank_blocks: List[np.ndarray] = []
-    for r in block_records:
+    block_id_arrays: List[np.ndarray] = []
+    for block_idx, r in enumerate(block_records):
         big_bools = np.zeros((n_ch_total, r["bools"].shape[1]), dtype=bool)
         big_ranks = np.full((n_ch_total, r["ranks"].shape[1]), np.nan, dtype=float)
         for src_idx, ch in enumerate(r["chns"]):
@@ -199,14 +202,21 @@ def _load_bools_and_channels(subject_dir: Path) -> Optional[Dict[str, Any]]:
             big_ranks[tgt_idx, :] = r["ranks"][src_idx, :]
         bool_blocks.append(big_bools)
         rank_blocks.append(big_ranks)
+        block_id_arrays.append(
+            np.full(r["bools"].shape[1], block_idx, dtype=int)
+        )
 
     full_bools = np.concatenate(bool_blocks, axis=1) if bool_blocks else None
     full_ranks = np.concatenate(rank_blocks, axis=1) if rank_blocks else None
-    if full_bools is None or full_ranks is None:
+    full_block_ids = (
+        np.concatenate(block_id_arrays) if block_id_arrays else None
+    )
+    if full_bools is None or full_ranks is None or full_block_ids is None:
         return None
     return {
         "bools": full_bools,
         "ranks": full_ranks,
+        "block_ids": full_block_ids,
         "channel_names": channel_names,
         "source_glob": "withFreqCent" if fc_files else "plain",
     }
@@ -264,7 +274,85 @@ def _resolve_cluster_data(
         "valid_bools": bools[:, valid_events],
         "labels": labels,
         "n_clusters": n_clusters,
+        "full_ranks": ranks,
+        "full_bools": bools,
+        "full_block_ids": loaded["block_ids"],
+        "valid_event_indices": valid_events,
     }
+
+
+def compute_split_half_robustness(
+    cand: Dict[str, Any],
+    cluster_data: Dict[str, Any],
+    n_endpoint: int = 3,
+) -> Dict[str, Any]:
+    """Step 5b: invoke compute_time_split_reproducibility inline (so the
+    Step 1 split-half extension fields are populated for THIS run, not relying
+    on legacy per_subject JSONs predating Step 1) and return per-split Jaccard
+    summaries.  Synthetic event_abs_times = arange so monotonic-by-construction;
+    real block_ids drive odd/even split."""
+    full_bools = cluster_data["full_bools"]
+    full_ranks = cluster_data["full_ranks"]
+    block_ids = cluster_data["full_block_ids"]
+    valid_event_indices = cluster_data["valid_event_indices"]
+    labels = cluster_data["labels"]
+    n_clusters = cluster_data["n_clusters"]
+    n_events = full_bools.shape[1]
+
+    event_abs_times = np.arange(n_events, dtype=float)
+    try:
+        repro = compute_time_split_reproducibility(
+            ranks=full_ranks,
+            bools=full_bools,
+            event_abs_times=event_abs_times,
+            block_ids=block_ids,
+            chosen_k=n_clusters,
+            adaptive_labels=labels,
+            valid_event_indices=valid_event_indices,
+        )
+    except Exception as exc:
+        return {"exit_reason": f"split_half_failed:{exc}"}
+
+    out: Dict[str, Any] = {"per_split": {}}
+    for split_name, split_rec in (repro.get("splits") or {}).items():
+        if not isinstance(split_rec, dict):
+            continue
+        per_cluster = compute_split_half_endpoint_jaccards(
+            channel_names=cand["channel_names"],
+            cluster_rank_a=split_rec.get("cluster_rank_a") or [],
+            cluster_valid_mask_a=split_rec.get("cluster_valid_mask_a") or [],
+            cluster_rank_b_matched_to_a=split_rec.get("cluster_rank_b_matched_to_a")
+            or [],
+            cluster_valid_mask_b_matched_to_a=split_rec.get(
+                "cluster_valid_mask_b_matched_to_a"
+            )
+            or [],
+            n=n_endpoint,
+        )
+        # Subject-level summary: mean jaccard across non-exit clusters
+        valid_clusters = [c for c in per_cluster if c.get("exit_reason") is None]
+        if valid_clusters:
+            mean_src = float(
+                np.mean([c["jaccard_source"] for c in valid_clusters])
+            )
+            mean_snk = float(
+                np.mean([c["jaccard_sink"] for c in valid_clusters])
+            )
+            mean_ep = float(
+                np.mean([c["jaccard_endpoint"] for c in valid_clusters])
+            )
+        else:
+            mean_src = mean_snk = mean_ep = float("nan")
+        out["per_split"][split_name] = {
+            "n_events_a": split_rec.get("n_events_a"),
+            "n_events_b": split_rec.get("n_events_b"),
+            "mean_match_corr": split_rec.get("mean_match_corr"),
+            "per_cluster": per_cluster,
+            "subject_mean_jaccard_source": mean_src,
+            "subject_mean_jaccard_sink": mean_snk,
+            "subject_mean_jaccard_endpoint": mean_ep,
+        }
+    return out
 
 
 def compute_per_cluster_valid_mask(cand: Dict[str, Any]) -> Optional[List[List[bool]]]:
@@ -520,6 +608,16 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
                 seed=0,
             )
 
+        # Step 5b — split-half endpoint robustness (uses raw bools + ranks +
+        # block_ids loaded by _resolve_cluster_data; only runs when cluster_data
+        # available, since the synthetic event_abs_times path needs the full
+        # bools/ranks arrays)
+        split_half_robustness: Optional[Dict[str, Any]] = None
+        if cluster_data is not None:
+            split_half_robustness = compute_split_half_robustness(
+                cand, cluster_data, n_endpoint=3
+            )
+
         out_obj = {
             "subject_id": row["subject_id"],
             "dataset": row["dataset"],
@@ -529,6 +627,7 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
             "h2_swap_check": swap_check,
             "per_template_coreness": per_template_coreness_records,
             "subject_delta_coreness": delta_coreness,
+            "split_half_robustness": split_half_robustness,
         }
         out_path = PER_SUBJECT_OUT / f"{row['dataset']}_{row['subject_id']}.json"
         with out_path.open("w") as f:
@@ -741,6 +840,52 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
         "per_subject_pairs": pair_records,
     }
 
+    # Step 5b — split-half endpoint robustness Jaccard cohort summary
+    split_half_records: Dict[str, List[Dict[str, Any]]] = {
+        "first_half_second_half": [],
+        "odd_even_block": [],
+    }
+    for r in h1_subjects:
+        shr = r.get("split_half_robustness") or {}
+        per_split = shr.get("per_split") or {}
+        for split_name, ps in per_split.items():
+            if split_name not in split_half_records:
+                continue
+            mean_ep = ps.get("subject_mean_jaccard_endpoint")
+            if mean_ep is None or not np.isfinite(mean_ep):
+                continue
+            split_half_records[split_name].append(
+                {
+                    "subject_id": r["subject_id"],
+                    "dataset": r["dataset"],
+                    "mean_jaccard_source": ps.get("subject_mean_jaccard_source"),
+                    "mean_jaccard_sink": ps.get("subject_mean_jaccard_sink"),
+                    "mean_jaccard_endpoint": ps.get("subject_mean_jaccard_endpoint"),
+                    "mean_match_corr": ps.get("mean_match_corr"),
+                }
+            )
+
+    split_half_summary: Dict[str, Any] = {}
+    for split_name, recs in split_half_records.items():
+        if not recs:
+            split_half_summary[split_name] = {"n": 0}
+            continue
+        eps = [r["mean_jaccard_endpoint"] for r in recs]
+        srcs = [r["mean_jaccard_source"] for r in recs]
+        snks = [r["mean_jaccard_sink"] for r in recs]
+        split_half_summary[split_name] = {
+            "n": len(recs),
+            "median_jaccard_endpoint": float(np.median(eps)),
+            "median_jaccard_source": float(np.median(srcs)),
+            "median_jaccard_sink": float(np.median(snks)),
+            "iqr_jaccard_endpoint": [
+                float(np.percentile(eps, 25)),
+                float(np.percentile(eps, 75)),
+            ],
+            "n_subjects_endpoint_jaccard_below_0p4": int(sum(1 for e in eps if e < 0.4)),
+            "per_subject": recs,
+        }
+
     summary = {
         "h1_pooled": h1_pooled,
         "h1_dataset_specific": {"yuquan": h1_yuquan, "epilepsiae": h1_epi},
@@ -748,6 +893,7 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
         "h1b_polarity_non_fwdrev": h1b,
         "h2_forward_reverse_swap": h2,
         "h3_focus_rel_epilepsiae": h3,
+        "split_half_endpoint_robustness": split_half_summary,
         "n_per_subject_records": len(per_subject_records),
     }
 
@@ -770,6 +916,17 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
     for label, rec in h3.items():
         print(f"[cohort] H3 {label} n={rec['n']} "
               f"median={rec['wilcoxon_greater']['median']}")
+    for split_name, ss in split_half_summary.items():
+        if ss.get("n", 0) == 0:
+            print(f"[cohort] split-half {split_name}: n=0")
+            continue
+        print(
+            f"[cohort] split-half {split_name} n={ss['n']} "
+            f"median Jaccard endpoint={ss['median_jaccard_endpoint']:.3f} "
+            f"source={ss['median_jaccard_source']:.3f} "
+            f"sink={ss['median_jaccard_sink']:.3f} "
+            f"endpoint<0.4 subjects={ss['n_subjects_endpoint_jaccard_below_0p4']}"
+        )
     print(f"[cohort] summary -> {COHORT_SUMMARY}")
     return summary
 
