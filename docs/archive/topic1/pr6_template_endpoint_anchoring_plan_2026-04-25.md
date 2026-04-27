@@ -592,11 +592,75 @@ source J 和 sink J 在 cohort 中位数都是 0.750（首个半），但 4 个 
 
 新问题：**两类 stable templates 是两套独立网络，还是同一稳定几何网络的两个方向？** 这比单纯 SOZ anchoring 更贴合当前数据（H1 定义敏感 + endpoint 时间稳）。
 
-**Step 3（主图）后置到 Step 4 之后**：现在不画。最终图服务三层叙事：
-1. source/sink/endpoint 在时间上稳定（Step 5b）
-2. 两类 template 之间是否共享/互换几何端点（Step 4 升级）
-3. SOZ anchoring 对 endpoint 定义敏感，不是论文主结论（Step 5a + H1）
+### Step 4 — Template-pair geometry analysis（preliminary，2026-04-26）
 
-主故事**不**是 "endpoint vs middle SOZ p=0.42"；是 "stable templates have reproducible endpoint geometry; template pairs often show structured geometric relationships; SOZ anchoring is not robust to endpoint definition"。
+**交付**：
+- `src/template_anatomical_anchoring.py`：新增 `compute_template_pair_geometry`，对 T0/T1 同时计算 4 类 Jaccard（endpoint / source-same / sink-same / source→sink / sink→source）+ Spearman(rank_T0, rank_T1) on valid intersection
+- `scripts/run_pr6_template_anchoring.py`：所有 endpoint-defined subject 都跑 pair geometry（不限 forward/reverse 子集）；`cohort_summary.json` 加 `template_pair_geometry` block，含 5 个分层（all_endpoint_defined / h1_eligible / forward_reverse_reproduced / non_forward_reverse_h1_eligible / endpoint_stable_split_half_h1_eligible）
+- 3 项新 TDD（full swap / identical templates / independent low overlap）；总 24 PR-6 + 49 既有 = **73/73 全绿**
 
-**Step 6 启动条件**：Step 4 升级 + Step 3 主图都跑完才进。
+**Cohort 数字（stratified medians）**：
+
+| Stratum | n | endpoint | src_same | snk_same | src→snk | snk→src | spearman |
+|---|---|---|---|---|---|---|---|
+| all endpoint_defined | 23 | **0.500** | 0.000 | 0.000 | 0.200 | 0.500 | -0.371 |
+| h1_eligible | 21 | 0.500 | 0.000 | 0.000 | 0.200 | 0.200 | -0.286 |
+| **forward/reverse reproduced** | **6** | **0.714** | **0.000** | **0.000** | **0.750** | **0.750** | **−0.721** |
+| non-fwdrev h1_eligible | 16 | 0.500 | 0.200 | 0.100 | 0.200 | 0.200 | -0.118 |
+| endpoint-stable split-half | 13 | 0.500 | 0.000 | 0.000 | 0.500 | 0.200 | -0.464 |
+
+**关键 caveat — 循环定义风险**：`forward_reverse_reproduced` subset 在 PR-2.5 里就是按 `inter-cluster Spearman r < −0.5` + 跨 split 复现这一定义筛出来的，**所以 Step 4 在该子集上看到 `Spearman(rank_T0, rank_T1) = −0.72` 与 `J(src→snk) = 0.75` 是部分 tautological**。Step 4 在该子集上的真正贡献**不是**重新证明它们反向，而是 **把 PR-2.5 的 cluster-centroid 负相关翻译成 node-level source/sink 互换几何**（rank 反向 ≠ 端点互换；后者更具体、更 falsifiable）。
+
+**分子集观察（注意：分组本身来自已有标签，不是 cohort 自发涌现的 regime）**：
+
+1. **forward/reverse reproduced 子集 (n=6)**：
+   - `J(endpoint) = 0.71` → 两 template 用 ~70% 同一批节点
+   - `J(source_same) = 0` 且 `J(sink_same) = 0` → source/sink 角色不重合
+   - `J(source→sink) = J(sink→source) = 0.75` → T0 source ≈ T1 sink，T0 sink ≈ T1 source
+   - `Spearman = −0.72`
+   - 真正的新发现：**节点级 source/sink swap geometry 与 cluster-centroid rank 反向一致**；rank 反向不是抽象数值反向，而是落在端点角色互换上
+   - 与 Smith 2022 μm-scale bidirectional traveling wave 的 mm-scale population-event 级类比是 plausible，但不是本节独立证据 — 还需 Step 4b 节点级 anatomy 才能区分 "整路径反向" 与 "少数 hub 互换 + 其余非特异性共享"
+
+2. **non-forward/reverse 子集 (n=16)** — 三条独立观察，不合并成单一 narrative：
+   - **partially shared endpoint pool**：`J(endpoint) = 0.50` → 共用约一半 high-HI 节点（不算"共享低"也不算"独立网络"）
+   - **weak role swap**：`J(src_same) = 0.20`、`J(snk_same) = 0.10`、`J(src→snk) ≈ J(snk→src) ≈ 0.20` — 各类对位 J 都低，**没有任何一类对位关系强**
+   - **no coherent bidirectional rank reversal**：`Spearman = −0.12` → 接近零，不存在全局 rank 反向
+   - 这三条共同**不**支持 "两 template 是同一路径双向" 假说，也**不**支持 "两 template 完全独立" 结论；中间状态需要 Step 4b 节点级解构才能区分
+
+3. **所有 strata 共同点**：`J(source_same)` 与 `J(sink_same)` 都低 → 在 endpoint-set 同构 (J ≈ 0.50–0.71) 的同时，**source/sink 的具体角色分配在两 template 之间不重合**。但 cohort median 是粗读数 — Regime B 内部可能有少数局部 swap 节点 + 多数非特异性共享 hub；Regime A 内部也可能有共用的非特异性 hub 不参与 swap。**Jaccard 集合重叠看不到这层结构**。
+
+**Step 4 工程层 ACCEPT，科学口径降级**：
+
+✅ 可以说：
+- "Template pairs show structured geometric relationships, distinct from same-direction redundancy"
+- "Forward/reverse subset shows strong **node-level** source/sink swap that is consistent with (and operationalizes) PR-2.5 cluster-rank anticorrelation"
+- "Non-forward/reverse subjects exhibit partially shared endpoint pools but no global rank reversal"
+
+❌ 暂时不要说：
+- ~~"cohort 自发分成两个 regime"~~ — 分组来自已有 PR-2.5 forward/reverse 标签，不是数据自然涌现
+- ~~"non-fwdrev 是 independent networks"~~ — endpoint J=0.5 共享不低，"independent" 是过度解读
+- ~~"forward/reverse subset reproduces Smith 2022 bidirectional traveling wave"~~ — 当前只到 endpoint-set swap，没到节点级 anatomy；Smith 2022 类比留给 Step 4b 之后
+
+**Step 4b（next）— Node-level template-pair anatomy（必需）**：
+
+为了把上面这几条 cohort-median 拆开，必须做节点级分类：
+
+- **四格节点分类**（每个 endpoint channel 标一类）：
+  - `swap_node`: `T0_source ∩ T1_sink` 或 `T0_sink ∩ T1_source`
+  - `same_side_node`: `T0_source ∩ T1_source` 或 `T0_sink ∩ T1_sink`
+  - `template_specific_endpoint`: 只属于 T0 endpoint 或只属于 T1 endpoint
+  - `shared_endpoint_unassigned`: 两边都是 endpoint 但不在前两格里（理论上为 0；作 sanity 报）
+- **Regime B 局部 swap 检查**：每个 non-fwdrev subject 列出 swap-node 数 / shared-endpoint 数 / template-specific 数 / `swap_score − same_side_score`，回答"完全没有局部 swap，还是有少数节点 swap 但不成全局路径"
+- **Regime A 非特异性节点检查**：fwd/rev subject 中找 endpoint 共享但**不**参与 swap 的节点；查它们是否高 participation / high-HI hub；SOZ / focus_rel-i 是否更集中在 swap nodes 还是 non-specific shared nodes
+- 输出 per-subject node classification 表 + 跨 cohort 节点类别 SOZ 富集对比
+
+Step 4b 才能给当前 Step 4 cohort medians 一个机制层的脊柱，否则单看 Jaccard 是 "不够告诉我们哪些节点在共享、哪些在换位、哪些是泛参与 hub"。
+
+**Step 4 验收**：
+- ✅ 73 PR-6 + 49 既有测试 = 73 PR-6 + 49 既有全绿
+- ✅ Per-subject JSON 含 `template_pair_geometry`
+- ✅ Cohort summary 含 5 分层 stratified medians
+- ✅ 科学口径降级到避免循环定义 + 不夸大 non-fwdrev 解读
+- ⏳ Step 4b 节点级 anatomy 是 Step 4 完整故事的硬前置；Step 4 单独不能进 Step 6
+
+**Step 6 / Step 3 启动条件（更新）**：必须等 Step 4b 完成之后。Step 3 主图与 Step 6 archive doc 都需要 Step 4b 的节点级数据来支撑 "structured pair geometry" 而非只是 "median Jaccard"。

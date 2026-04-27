@@ -23,6 +23,7 @@ from src.template_anatomical_anchoring import (
     compute_template_anchoring,
     compute_template_anchoring_by_coreness,
     compute_template_coreness,
+    compute_template_pair_geometry,
     extract_endpoint_middle,
     extract_endpoint_middle_by_coreness,
     forward_reverse_swap_check,
@@ -606,6 +607,76 @@ def test_split_half_endpoint_jaccard_full_swap():
     assert rec["jaccard_sink"] == pytest.approx(0.0)
     # Endpoint sets are SAME 6 channels (A,B,C,F,G,H) → jaccard=1.0
     assert rec["jaccard_endpoint"] == pytest.approx(1.0)
+
+
+def test_template_pair_geometry_full_swap():
+    """T0 = [0..7], T1 = [7..0]: bidirectional swap.  Same-side J should be 0,
+    swap J should be 1, endpoint shared (same 6 channels), Spearman = -1."""
+    channel_names = list("ABCDEFGH")
+    t0_rank = [0, 1, 2, 3, 4, 5, 6, 7]
+    t1_rank = [7, 6, 5, 4, 3, 2, 1, 0]
+    valid = [True] * 8
+
+    out = compute_template_pair_geometry(
+        channel_names, t0_rank, t1_rank, valid, valid, n=3
+    )
+    assert out["exit_reason"] is None
+    # T0 source = A,B,C; T1 source = H,G,F → disjoint
+    assert out["jaccard_source_same"] == pytest.approx(0.0)
+    # T0 sink = H,G,F; T1 sink = A,B,C → disjoint
+    assert out["jaccard_sink_same"] == pytest.approx(0.0)
+    # T0 source vs T1 sink = A,B,C vs A,B,C → identical
+    assert out["jaccard_source_to_sink"] == pytest.approx(1.0)
+    assert out["jaccard_sink_to_source"] == pytest.approx(1.0)
+    assert out["swap_score"] == pytest.approx(1.0)
+    assert out["same_side_score"] == pytest.approx(0.0)
+    # Endpoint sets are SAME 6 channels {A,B,C,F,G,H}
+    assert out["jaccard_endpoint"] == pytest.approx(1.0)
+    # Spearman on full inverse permutation
+    assert out["spearman_rank_pair"] == pytest.approx(-1.0)
+
+
+def test_template_pair_geometry_identical_templates():
+    """Identical templates: same-side J = 1, swap J = 0 (source ≠ sink),
+    endpoint J = 1, Spearman = +1."""
+    channel_names = list("ABCDEFGH")
+    rank = [0, 1, 2, 3, 4, 5, 6, 7]
+    valid = [True] * 8
+
+    out = compute_template_pair_geometry(
+        channel_names, rank, rank, valid, valid, n=3
+    )
+    assert out["exit_reason"] is None
+    assert out["jaccard_source_same"] == pytest.approx(1.0)
+    assert out["jaccard_sink_same"] == pytest.approx(1.0)
+    assert out["jaccard_endpoint"] == pytest.approx(1.0)
+    assert out["jaccard_source_to_sink"] == pytest.approx(0.0)
+    assert out["jaccard_sink_to_source"] == pytest.approx(0.0)
+    assert out["spearman_rank_pair"] == pytest.approx(1.0)
+
+
+def test_template_pair_geometry_independent_low_overlap():
+    """T0 and T1 use mostly disjoint endpoint channels → all Jaccards low,
+    endpoint overlap also low; Spearman near 0 within intersection."""
+    channel_names = list("ABCDEFGHIJ")
+    # T0 endpoint: A,B,C / H,I,J
+    t0_rank = [0, 1, 2, 5, 5, 5, 5, 6, 7, 8]
+    t0_valid = [True, True, True, False, False, False, False, True, True, True]
+    # T1 endpoint: D,E,F / G (only 7 valid → can't pick 3 sink, fail)
+    # Make T1 endpoint use D,E / G,H,I... actually need n_valid >= 6
+    t1_rank = [10, 11, 12, 0, 1, 2, 8, 9, 10, 13]
+    t1_valid = [False, False, False, True, True, True, True, True, True, False]
+
+    out = compute_template_pair_geometry(
+        channel_names, t0_rank, t1_rank, t0_valid, t1_valid, n=3
+    )
+    # T1 valid=[D,E,F,G,H,I] = 6, so endpoint = D,E,F / I,H,G; sink top-3 = I,H,G
+    # T0 valid=[A,B,C,H,I,J] = 6, so endpoint = A,B,C / J,I,H
+    # Same-side: source A,B,C vs D,E,F = 0; sink J,I,H vs I,H,G = 2/4 = 0.5
+    assert out["exit_reason"] is None
+    assert out["jaccard_source_same"] == pytest.approx(0.0)
+    # Endpoint overlap: {A,B,C,H,I,J} vs {D,E,F,G,H,I} = {H,I} / {A..J} = 2/10
+    assert out["jaccard_endpoint"] == pytest.approx(2.0 / 10.0)
 
 
 def test_split_half_endpoint_jaccard_no_mapping_exit():

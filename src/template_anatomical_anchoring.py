@@ -771,6 +771,94 @@ def compute_split_half_endpoint_jaccards(
     return out
 
 
+# ---------------------------------------------------------------------------
+# Step 4 (upgraded) — template-pair geometry analysis
+# ---------------------------------------------------------------------------
+def compute_template_pair_geometry(
+    channel_names: Sequence[str],
+    t0_template_rank: Sequence[int],
+    t1_template_rank: Sequence[int],
+    t0_valid_mask: Optional[Sequence[bool]] = None,
+    t1_valid_mask: Optional[Sequence[bool]] = None,
+    n: int = 3,
+) -> Dict[str, Any]:
+    """Compute the full geometric relationship between two cluster templates
+    of the same subject (Step 4 upgraded scope).
+
+    Returns:
+        - jaccard_endpoint    J(T0_endpoint, T1_endpoint)
+                              ─ do both templates use the same high-HI nodes?
+        - jaccard_source_same J(T0_source, T1_source)
+        - jaccard_sink_same   J(T0_sink, T1_sink)
+                              ─ are the source/sink channels themselves shared?
+        - jaccard_source_to_sink J(T0_source, T1_sink)
+        - jaccard_sink_to_source J(T0_sink, T1_source)
+                              ─ same path, opposite direction?
+        - swap_score          mean of source_to_sink + sink_to_source
+        - same_side_score     mean of source_same + sink_same
+        - spearman_rank_pair  Spearman(rank_T0, rank_T1) on channels valid in
+                              BOTH templates (global anti-correlation vs
+                              local re-shuffling of just a few core nodes)
+        - n_valid_intersection  number of channels valid in both
+    """
+    from scipy.stats import spearmanr
+
+    p0 = extract_endpoint_middle(
+        channel_names, t0_template_rank, n=n, valid_mask=t0_valid_mask
+    )
+    p1 = extract_endpoint_middle(
+        channel_names, t1_template_rank, n=n, valid_mask=t1_valid_mask
+    )
+    out: Dict[str, Any] = {
+        "exit_reason": None,
+        "n_valid_t0": p0.get("n_valid"),
+        "n_valid_t1": p1.get("n_valid"),
+    }
+    if p0["exit_reason"] is not None or p1["exit_reason"] is not None:
+        out["exit_reason"] = (
+            f"extract_failed:t0={p0['exit_reason']},t1={p1['exit_reason']}"
+        )
+        return out
+
+    out["jaccard_endpoint"] = _jaccard(p0["endpoint"], p1["endpoint"])
+    out["jaccard_source_same"] = _jaccard(p0["source"], p1["source"])
+    out["jaccard_sink_same"] = _jaccard(p0["sink"], p1["sink"])
+    out["jaccard_source_to_sink"] = _jaccard(p0["source"], p1["sink"])
+    out["jaccard_sink_to_source"] = _jaccard(p0["sink"], p1["source"])
+    out["swap_score"] = (
+        out["jaccard_source_to_sink"] + out["jaccard_sink_to_source"]
+    ) / 2.0
+    out["same_side_score"] = (
+        out["jaccard_source_same"] + out["jaccard_sink_same"]
+    ) / 2.0
+
+    # Spearman on valid intersection only.
+    rank0 = np.asarray(t0_template_rank, dtype=float)
+    rank1 = np.asarray(t1_template_rank, dtype=float)
+    n_ch = len(channel_names)
+    if t0_valid_mask is None:
+        v0 = np.isfinite(rank0) & (rank0 >= 0)
+    else:
+        v0 = np.asarray(t0_valid_mask, dtype=bool) & np.isfinite(rank0) & (rank0 >= 0)
+    if t1_valid_mask is None:
+        v1 = np.isfinite(rank1) & (rank1 >= 0)
+    else:
+        v1 = np.asarray(t1_valid_mask, dtype=bool) & np.isfinite(rank1) & (rank1 >= 0)
+    inter = v0 & v1
+    n_inter = int(inter.sum())
+    out["n_valid_intersection"] = n_inter
+    if n_inter < 3:
+        out["spearman_rank_pair"] = float("nan")
+    else:
+        try:
+            r, _ = spearmanr(rank0[inter], rank1[inter])
+            out["spearman_rank_pair"] = float(r) if np.isfinite(r) else float("nan")
+        except ValueError:
+            out["spearman_rank_pair"] = float("nan")
+
+    return out
+
+
 __all__ = [
     "extract_endpoint_middle",
     "compute_template_anchoring",
@@ -783,4 +871,5 @@ __all__ = [
     "extract_endpoint_middle_by_coreness",
     "compute_template_anchoring_by_coreness",
     "compute_split_half_endpoint_jaccards",
+    "compute_template_pair_geometry",
 ]

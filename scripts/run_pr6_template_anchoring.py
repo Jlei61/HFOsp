@@ -47,6 +47,7 @@ from src.template_anatomical_anchoring import (
     compute_template_anchoring,
     compute_template_anchoring_by_coreness,
     compute_template_coreness,
+    compute_template_pair_geometry,
     forward_reverse_swap_check,
 )
 
@@ -618,6 +619,29 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
                 cand, cluster_data, n_endpoint=3
             )
 
+        # Step 4 (upgraded) — template-pair geometry for all k=2 subjects
+        # (not just forward/reverse).  Asks: are T0/T1 two independent
+        # networks, two directions of the same network, or sharing high-HI
+        # nodes with re-shuffled ordering?
+        template_pair_geometry: Optional[Dict[str, Any]] = None
+        if (
+            len(cand["template_ranks"]) >= 2
+            and cand["template_ranks"][0] is not None
+            and cand["template_ranks"][1] is not None
+        ):
+            template_pair_geometry = compute_template_pair_geometry(
+                channel_names=cand["channel_names"],
+                t0_template_rank=cand["template_ranks"][0],
+                t1_template_rank=cand["template_ranks"][1],
+                t0_valid_mask=per_cluster_masks[0]
+                if len(per_cluster_masks) > 0
+                else None,
+                t1_valid_mask=per_cluster_masks[1]
+                if len(per_cluster_masks) > 1
+                else None,
+                n=3,
+            )
+
         out_obj = {
             "subject_id": row["subject_id"],
             "dataset": row["dataset"],
@@ -628,6 +652,7 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
             "per_template_coreness": per_template_coreness_records,
             "subject_delta_coreness": delta_coreness,
             "split_half_robustness": split_half_robustness,
+            "template_pair_geometry": template_pair_geometry,
         }
         out_path = PER_SUBJECT_OUT / f"{row['dataset']}_{row['subject_id']}.json"
         with out_path.open("w") as f:
@@ -886,6 +911,91 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
             "per_subject": recs,
         }
 
+    # Step 4 (upgraded) — template-pair geometry, stratified
+    geom_records = []
+    for r in per_subject_records:
+        tpg = r.get("template_pair_geometry")
+        if not tpg or tpg.get("exit_reason") is not None:
+            continue
+        # Endpoint-stable subset: split-half subject_mean_jaccard_endpoint >= 0.7
+        shr = (r.get("split_half_robustness") or {}).get("per_split", {}) or {}
+        fh = shr.get("first_half_second_half") or {}
+        ep_stable = (
+            fh.get("subject_mean_jaccard_endpoint") is not None
+            and np.isfinite(fh.get("subject_mean_jaccard_endpoint", float("nan")))
+            and fh["subject_mean_jaccard_endpoint"] >= 0.7
+        )
+        geom_records.append(
+            {
+                "subject_id": r["subject_id"],
+                "dataset": r["dataset"],
+                "h1_eligible": bool(r["audit"].get("h1_primary_eligible")),
+                "endpoint_defined": bool(r["audit"].get("endpoint_defined")),
+                "forward_reverse_reproduced": bool(
+                    r["audit"].get("forward_reverse_reproduced")
+                ),
+                "endpoint_stable_split_half": bool(ep_stable),
+                "jaccard_endpoint": tpg.get("jaccard_endpoint"),
+                "jaccard_source_same": tpg.get("jaccard_source_same"),
+                "jaccard_sink_same": tpg.get("jaccard_sink_same"),
+                "jaccard_source_to_sink": tpg.get("jaccard_source_to_sink"),
+                "jaccard_sink_to_source": tpg.get("jaccard_sink_to_source"),
+                "swap_score": tpg.get("swap_score"),
+                "same_side_score": tpg.get("same_side_score"),
+                "spearman_rank_pair": tpg.get("spearman_rank_pair"),
+            }
+        )
+
+    def _strata_summary(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+        if not records:
+            return {"n": 0}
+        keys = (
+            "jaccard_endpoint",
+            "jaccard_source_same",
+            "jaccard_sink_same",
+            "jaccard_source_to_sink",
+            "jaccard_sink_to_source",
+            "swap_score",
+            "same_side_score",
+            "spearman_rank_pair",
+        )
+        out: Dict[str, Any] = {"n": len(records)}
+        for k in keys:
+            vals = [
+                r[k] for r in records if r.get(k) is not None and np.isfinite(r[k])
+            ]
+            out[f"median_{k}"] = float(np.median(vals)) if vals else float("nan")
+            out[f"iqr_{k}"] = (
+                [
+                    float(np.percentile(vals, 25)),
+                    float(np.percentile(vals, 75)),
+                ]
+                if vals
+                else [float("nan"), float("nan")]
+            )
+        return out
+
+    geom_h1 = [r for r in geom_records if r["h1_eligible"]]
+    geom_fwdrev = [r for r in geom_records if r["forward_reverse_reproduced"]]
+    geom_non_fwdrev = [
+        r
+        for r in geom_records
+        if r["h1_eligible"] and not r["forward_reverse_reproduced"]
+    ]
+    geom_endpoint_stable = [
+        r for r in geom_records if r["h1_eligible"] and r["endpoint_stable_split_half"]
+    ]
+    template_pair_geometry_summary = {
+        "all_endpoint_defined": _strata_summary(geom_records),
+        "h1_eligible": _strata_summary(geom_h1),
+        "forward_reverse_reproduced": _strata_summary(geom_fwdrev),
+        "non_forward_reverse_h1_eligible": _strata_summary(geom_non_fwdrev),
+        "endpoint_stable_split_half_h1_eligible": _strata_summary(
+            geom_endpoint_stable
+        ),
+        "per_subject": geom_records,
+    }
+
     summary = {
         "h1_pooled": h1_pooled,
         "h1_dataset_specific": {"yuquan": h1_yuquan, "epilepsiae": h1_epi},
@@ -894,6 +1004,7 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
         "h2_forward_reverse_swap": h2,
         "h3_focus_rel_epilepsiae": h3,
         "split_half_endpoint_robustness": split_half_summary,
+        "template_pair_geometry": template_pair_geometry_summary,
         "n_per_subject_records": len(per_subject_records),
     }
 
@@ -926,6 +1037,30 @@ def run_cohort(per_subject_records: Optional[List[Dict[str, Any]]] = None) -> Di
             f"source={ss['median_jaccard_source']:.3f} "
             f"sink={ss['median_jaccard_sink']:.3f} "
             f"endpoint<0.4 subjects={ss['n_subjects_endpoint_jaccard_below_0p4']}"
+        )
+    # Template-pair geometry stratified summary
+    print(
+        "[cohort] template-pair geometry — stratified (medians):"
+    )
+    for stratum_name in (
+        "all_endpoint_defined",
+        "h1_eligible",
+        "forward_reverse_reproduced",
+        "non_forward_reverse_h1_eligible",
+        "endpoint_stable_split_half_h1_eligible",
+    ):
+        ss = template_pair_geometry_summary.get(stratum_name) or {"n": 0}
+        if ss.get("n", 0) == 0:
+            print(f"  {stratum_name}: n=0")
+            continue
+        print(
+            f"  {stratum_name:<40} n={ss['n']:>3} "
+            f"endpoint={ss['median_jaccard_endpoint']:+.3f} "
+            f"src_same={ss['median_jaccard_source_same']:+.3f} "
+            f"snk_same={ss['median_jaccard_sink_same']:+.3f} "
+            f"src→snk={ss['median_jaccard_source_to_sink']:+.3f} "
+            f"snk→src={ss['median_jaccard_sink_to_source']:+.3f} "
+            f"spearman={ss['median_spearman_rank_pair']:+.3f}"
         )
     print(f"[cohort] summary -> {COHORT_SUMMARY}")
     return summary
