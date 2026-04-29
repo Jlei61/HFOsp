@@ -201,9 +201,10 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 3. ~~**PR-4D**（P1）~~ — DONE / ACCEPTED（2026-04-16）
 4. **高 k 复核**（P1）：可并行
 5. ~~**PR-5**（P0）~~ — DONE（2026-04-20，PR-5-A PASS + PR-5-B STRONG）；详见 §7.8
-6. **PR-6 Stable Template Endpoint Anatomical Anchoring**（**P0，2026-04-25 重启**）：原 PR-6-A 三份 doc 冻结归档；新主线问 “stable template endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel-i”；详见 §7.10 + `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
-7. **§7.6 / §7.7 可选方向**：§7.6 已被 PR-5 吸收为正式分析，§7.7 仍维持 exploratory 子集
-8. **未来模型层（§7.9）**：硬前置未达成，维持冻结；不绑 PR 编号
+6. **PR-6 Stable Template Endpoint Anatomical Anchoring**（**P0，2026-04-25 重启**）：原 PR-6-A 三份 doc 冻结归档；新主线问 "stable template endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel-i"；详见 §7.10 + `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
+7. **PR-7 Template Antagonistic Temporal Pairing**（**P0，2026-04-28 立项**）：检验 forward/reverse template 在短时间尺度上是否构成"拮抗性配对"（Ping-Pong 假说的功能耦合层）。Pre-registered triple-gate PASS（10s Wilcoxon + 10s sign + 30s 同方向）；主 null = N2 local-window 30 min；详见 §7.11 + `docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md` + `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md`
+8. **§7.6 / §7.7 可选方向**：§7.6 已被 PR-5 吸收为正式分析，§7.7 仍维持 exploratory 子集
+9. **未来模型层（§7.9）**：硬前置未达成，维持冻结；不绑 PR 编号
 
 ---
 
@@ -304,7 +305,58 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 **显式不做**：不重启 ER pipeline / CUSUM / Page-Hinkley / `t_ER_onset`；不引入 multi-anchor voting / naming label；不重跑 PR-2 / PR-2.5 / PR-3 / PR-4A/B / PR-5；不做 π embedding；不做"先挑 hub 再重跑 PR-4C"的 double-dipping replay（留给独立后续 PR）。
 
-**当前状态**：plan-of-record 已落盘；Step 1 ACCEPTED（2026-04-26，13 PR-6 + 49 既有测试 = 62/62 全绿）；**Step 2 preliminary（2026-04-26，pending Step 5 sensitivity 才能写论文级结论）**：`scripts/run_pr6_template_anchoring.py` 三模式落盘 cohort_audit / per-subject / cohort_summary，含 P0 valid_mask 修复（runner 派生 per-cluster `valid_mask` 传给 `compute_template_anchoring` 避免 `_legacy_hist_mean_rank` `template[ci]=ci` fallback 污染）与 P1 H2 OR 规则修复（split-half 或 odd-even 任一复现，n 从 5 修正到 6）。Audit-derived 主 cohort **n=21（13 epilepsiae + 8 yuquan）**；2 个 n_ch=6 case-series；4 个 SOZ 缺失退出；3 个 k≠2 退出。**Preliminary cohort 数字（不写论文级结论，待 Step 5 sensitivity 后再定调）**：H1 pooled n=21 median=0.0 Wilcoxon p=0.42（当前算法下不显著，但需 coreness composite + split-half Jaccard sensitivity 才能判 “框架 robust” 或 “定义敏感”）；H2 n=6 forward/reverse swap 5/6 exceed null_95th（**directional mechanism sanity，n=6 underpowered**，binomial 5/6 ≈ p=0.11，不作 cohort 主结论）；H1b 与 H3 i/l/e 当前皆无显著方向。详见 plan §15 Step 2 record 与 caveat A/B/C。**Step 3 plotting + Step 5 sensitivity 都是 H1 framing 入主文档的硬前置**。
+**当前状态（2026-04-27 综合更新）**：plan-of-record 已落盘；Step 1 ACCEPTED（2026-04-26，78 测试全绿）；Step 2 / 4 / 4b / 5a / 5b / 3 全部 preliminary 验收。综合科学叙事：
+
+> Stable interictal HFO group-event template pairs show **swap-leaning node geometry detectable cohort-wide on Wilcoxon (h1-eligible n=21, swap_node count − same_side_node count median +2, p=0.012) but failing the more conservative sign-test (p=0.12)**. The cohort-wide effect is largely driven by the forward/reverse-reproduced subset (n=6, 6/6 positive, sign-test p=0.031), translating PR-2.5 cluster-rank anticorrelation into node-level swap counts. The non-forward/reverse subset alone (n=16) does not reach cohort significance (Wilcoxon p=0.18) and spans a heterogeneous spectrum from no-swap (subject 590, all template-specific endpoints) to partial local swap. **The swap-vs-same geometry is not explained by subject-level SOZ enrichment** (h1-eligible n=19, SOZ frac in swap-nodes minus SOZ frac in template-specific endpoints: median Δ=0, Wilcoxon-greater p=0.19, sign-test 9p/4n/6z); pooled SOZ fractions are channel-count-weighted aggregates, not valid cohort claims. Endpoint geometry is time-stable within a fixed metric (Step 5b: split-half median Jaccard 0.71, odd-even 0.93), but H1 SOZ-anchoring direction is not robust under endpoint metric change (Step 5a: 7/20 direction-discordant + 1 one-is-zero between top-3 vs coreness-top-20%). **Single-metric H1 cannot determine whether stable templates anchor clinical SOZ; the more robust observation is the structured node-level pair geometry, which is itself not explained by clinical SOZ annotation.**
+
+**Cohort 与方法层数字**：
+- Audit-derived 主 cohort **n=21（13 epilepsiae + 8 yuquan）**；2 个 n_ch=6 case-series；4 个 SOZ 缺失退出；3 个 k≠2 退出
+- H1 pooled n=21 Wilcoxon p=0.42（NULL）；coreness top-20% sensitivity (n=20) Wilcoxon p=0.140（同 NULL，但 7 subject direction-discordant、1 subject one-is-zero）→ endpoint 主定义不 robust
+- Step 4b node-level：4 分层（all_endpoint_defined / h1_eligible / forward_reverse_reproduced / non_forward_reverse_h1_eligible）的 subject-level swap−same paired Wilcoxon + sign-test 都已落盘，结果如上
+- Step 5b time-stability：split-half endpoint Jaccard median 0.71，odd-even 0.93；source/sink 各自分别报告；稳定性是在 rank-position endpoint 这一定义内部成立，仅限 lagPat/high-HI 覆盖到的节点集合
+- Step 3 figures：6-panel 主图 + 3 张 supp 已生成（`results/interictal_propagation/template_anchoring/figures/`），主图中心是 template-pair geometry 而非 H1 SOZ null
+
+**论文级 framing 收紧**（2026-04-27）：
+- ✅ 可以说："stereotypy 内部存在结构化的 pair-level 几何（fwd/rev = 干净 swap，non-fwdrev = 弱混合 spectrum）；这套结构在 cohort 上 partially significant，且不能由 subject-level SOZ 富集解释"
+- ❌ 不能说："stereotyped HFO timing 锚定 SOZ"（H1 cohort NULL）；"swap geometry 与 SOZ 无关"（仅检验了 swap vs template-specific）；"non-fwdrev = 独立网络"（实际是渐变 spectrum）
+- 与 paper 主论点"间期事件刻板时序能否成为癫痫病理网络指示器"的差距：当前能描述 stereotypy 的几何结构，但不能直接断言它锚定 clinical SOZ；论文 framing 应转向"stereotypy 是稳定可测的 pair-level 几何，但与 clinical SOZ 标签不简单同构 → 需要更精细的 anatomy 检验（onset 通道 / ictal 传播路径）"
+
+**最值得做的下一步验证（plan §15 Step 6 详细列表）**：
+1. **Endpoint vs per-seizure onset channel set** Jaccard / hit-rate（subject-level Wilcoxon）— 用真实 onset 通道而非 SOZ JSON 二值化，预算 0.5 d（最高优先）
+2. **Held-out time validation**：前 50% 时间训练 template、后 50% 跑 endpoint anchoring 检验，避免 PR-2 + PR-6 同数据 double-dipping，预算 0.5 d
+3. **PR-4B HC subset (n=8) × PR-6 endpoint** 联动：高放电期 dominant cluster 的 endpoint 是否更靠 SOZ，预算 1 d
+4. **fwd/rev subject 的 ictal propagation 直接对比**：reuse Topic 3 PR-2.5 onset estimation，把 T0 source / T1 sink 与真实 ictal LFP 传播方向比对，预算 1.5 d 起步
+5. **pre-ictal vs baseline endpoint anatomy**：reuse PR-2.7 seizure-triggered window，把 endpoint 集合在 pre-ictal vs baseline 各自建 template，看通道集合是否偏移
+
+**显式不做**：不在当前数据上重新调 endpoint 定义（top-3 / coreness / median 之外）；不重做 PR-2/3/4/4B 核心 cluster pipeline；不引入 ictal anchor / ER / CUSUM。
+
+**Step 6 / archive results doc 推迟**：等 §1 或 §2 中的下一步验证有结果后再写正式归档 doc 与主文档一句话回写；当前 PR-6 主线（Step 1–5b + 4 + 4b + 3）所有结果归档到 `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15。
+
+---
+
+### 7.11 PR-7：Template Antagonistic Temporal Pairing（Ping-Pong 功能耦合层）
+
+> 完整合同（数据/假设/失败合同/代码入口/测试合同/可视化方案/工作量）：`docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md`
+> 整体假说审阅与 PR roadmap：`docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md`
+> 性质：正式入口，**plan-of-record 已落盘 2026-04-28**。本节只保留**判定摘要**与 pivot 来源，不重述阈值与 metric 定义（避免与 archive 双源漂移）。
+
+**科学问题**：PR-2.5 + PR-6 Step 4 已经稳健建立 forward/reverse template 的现象学（n=6 fwd/rev reproduced subject，节点级 source/sink swap geometry sign-test p=0.031）。这建立了**现象学层 (A)**，但没有回答**功能耦合层 (B)**：T_a 与 T_b 是不是在时间上配对出现？如果它们时间上独立，"两类反向模板"只是同一群体事件流的统计压缩，**Ping-Pong 因果叙事不成立**。
+
+PR-7 是 Ping-Pong 假说能否成立的最直接可证伪检验。失败（lift ≈ 1 across all Δt）即关闭机制叙事；通过则功能耦合层得到支持，可向 inhibitory restraint / rebound 文献借用机制语言（**仅作文献一致性，HFO 80–250 Hz 不区分 E/I**）。
+
+**假设结构**（archive §3）：
+- **H1 primary triple gate**：`excess(10s)` Wilcoxon p<0.05 **AND** sign p<0.05 **AND** `excess(30s)` 中位数 > 0
+- **H1b**：direction symmetry（T_a→T_b 与 T_b→T_a 应对称）
+- **H2 negative control**：non-fwdrev cohort `excess(10s)` Wilcoxon p > 0.10
+- **Secondary**：next-event transition odds + time-to-next（描述层，不进 α 池）
+
+**Cohort（pre-registered）**：endpoint_defined ∩ forward_reverse_reproduced ∩ n_events≥300 ∩ min_cluster_n≥75 ∩ (n_blocks≥3 OR coverage≥6h)；预期 4–6（PR-6 §15 H2 cohort 6 是上界）；**门槛不放宽**，n<4 走 case-series。
+
+**Surrogate hierarchy**：N2 local-window shuffle (30 min) 主 null；N3 circular shift robustness；N0/N1 sanity；N4 rate-matched ISI 仅在 N2/N3 不一致时 conditional follow-up。
+
+**显式不做**：不重做 cluster 算法（KMeans k=2 锁死）；不做节点级 signed displacement（→ PR-8 candidate）；不做 subject typology × PR-5 split（→ PR-9 candidate）；不做发作邻近窗口（PR-4C 已封板 null）。
+
+**当前状态（2026-04-28）**：plan-of-record 已落盘；Step 0（本节回写）+ Step 1（代码层 + TDD）进行中。
 
 ---
 
@@ -346,6 +398,8 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 - `docs/archive/topic1/pr6a-1.md` — **SUPERSEDED 2026-04-25**：原 PR-6-A multi-anchor consensus probe 计划（5 anchor voting）；保留作为 pivot 决策证据。
 - `docs/archive/topic1/pr6_direction_brainstorm_2026-04-25.md` — PR-6 pivot 决策的 brainstorm 文档：Obs 1–4 分类、文献整理、Topic 1 × Topic 3 桥的提出；驱动了 PR-6 主线从 ictal alignment 转向 endpoint anatomical anchoring。
 - `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — **PR-6 正式入口（plan-of-record）**：H1 endpoint vs middle / H1b polarity / H2 forward-reverse swap / H3 i-l-e sensitivity / cohort audit-derived / 8 项 TDD / 失败合同。Topic 1 §2 / §5 / §7.5 / §7.10 / §10 都引用本文件。
+- `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` — Ping-Pong 假说整体审阅：三层分离（现象学 A / 功能耦合 B / 机制 C）+ user 提议实验逐项对账 + PR roadmap（PR-7 → PR-8 candidate → PR-9 candidate）。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
+- `docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 正式入口（plan-of-record）**：H1 triple gate (10s primary + 30s sensitivity + sign test) / H1b direction symmetry / H2 non-fwdrev negative control / N0–N4 surrogate hierarchy（N2 主 null + N3 robustness + N4 conditional）/ cohort 5 条 pre-registered 入选门槛 / 10 项 TDD / §6.5 可视化方案 / 7 类失败合同。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
 - `docs/archive/topic1/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。
