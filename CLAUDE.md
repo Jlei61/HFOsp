@@ -87,6 +87,59 @@ When advancing through a multi-step plan, the plan-of-record is the source of tr
 
 The unifying principle: every step boundary is a re-read checkpoint. Memory of "what the plan said" is not enough — open the archive doc and verify.
 
+## 6. Implement to the Plan's Full Contract, Not the Function Signature
+
+This rule comes from a PR-7 review (2026-04-28) that caught five
+science-contract violations the function signatures alone would not surface.
+"It compiles and the basic test passes" is not the bar. Read the plan
+section RIGHT BEFORE writing the function body — the contract lives in
+prose, not signature.
+
+**Boundary parameters propagate through every related helper.** If the main
+estimator takes `block_time_ranges` (or any "valid range" / "gap" / "boundary"
+parameter), every secondary helper that walks the same time series must
+take it too. A `compute_transition_odds()` that lacks `block_time_ranges`
+silently treats a recording-gap of hours as a neural transition. The fix is
+mechanical: scan every function in the module that consumes `event_abs_times`
+or per-event labels, confirm each takes the boundary parameter and
+respects it. No defaults that revert to "everything is one block".
+
+**Paired-cohort tests must enforce subject-key match.** Code like
+`np.array(list(d_10s.values()))` followed by Wilcoxon against
+`np.array(list(d_30s.values()))` is broken — the two arrays may not align
+by subject, so subject-A's 10s metric pairs against subject-B's 30s
+metric. The fix: sort by `sorted(set(d_a.keys()))` after asserting
+`set(d_a.keys()) == set(d_b.keys())`; raise on mismatch, never silently
+align by index.
+
+**Stubs must `raise NotImplementedError`.** A stub of a planned helper that
+silently returns plausible values gets called in production and pollutes
+results. If the plan explicitly marks a helper as "conditional follow-up,
+not in main TDD", the implementation MUST raise — not return a "best-effort"
+shuffle of ISIs that happens to look right on a unit test. Loud failure
+beats silent contamination.
+
+**"Reported but not main metric" requirements are first-pass requirements.**
+When a plan says "report H1b direction asymmetry alongside H1 main symmetric
+metric", the directional fields go into the FIRST implementation of the
+core estimator — not deferred to "Step N will add it". Deferred secondary
+fields get forgotten and later patched ad-hoc, producing inconsistent
+schemas across per-subject JSONs.
+
+**Surrogate construction details ARE the contract.** When the plan
+specifies a null with "30 min window, 50% overlap, first-covering rule,
+per-block independent", every clause is part of the science contract.
+Implementing only "30 min non-overlapping windows from t_min" because
+"the test passes" silently changes the null. Re-read the surrogate clause
+before writing the shuffle function, and write a TDD test for each
+non-trivial clause (overlap behavior, first-covering rule, block isolation).
+
+The unifying principle: a plan's prose lists invariants the implementation
+must hold simultaneously. Tests that exercise only the function's surface
+behavior (does it return a number? does it permute?) miss invariants. Each
+science-contract clause needs its own test that would fail if that specific
+clause were violated.
+
 ---
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying questions come before implementation rather than after mistakes, and helpers handle every plan-specified invariant on the first pass.

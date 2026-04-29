@@ -9,14 +9,14 @@ Contract: docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Hashable, Mapping, Sequence, Tuple
 
 import numpy as np
 from scipy.stats import binomtest, wilcoxon
 
 
 # ---------------------------------------------------------------------------
-# Core lift estimator (block-aware to prevent cross-block spurious counts)
+# Block bookkeeping (every helper that walks events sequentially MUST use this)
 # ---------------------------------------------------------------------------
 def _assign_blocks(
     times: np.ndarray, block_time_ranges: Sequence[Tuple[float, float]]
@@ -29,6 +29,9 @@ def _assign_blocks(
     return out
 
 
+# ---------------------------------------------------------------------------
+# Core lift estimator (symmetric + directional fields)
+# ---------------------------------------------------------------------------
 def compute_pairing_lift(
     event_abs_times: Sequence[float],
     cluster_labels: Sequence[int],
@@ -37,14 +40,33 @@ def compute_pairing_lift(
 ) -> Dict[str, float]:
     """Per-anchor opposite/same counts in (t_i, t_i + Δt] within the same block.
 
-    Returns dict with p_opposite / p_same / n_used (all anchors used,
-    including those whose window is empty after block clipping).
+    Returns:
+        p_opposite / p_same — symmetric (per-anchor opposite/same averages)
+        p_a_to_b / p_b_to_a — directional (avg opposite count per anchor of class)
+        p_a_to_a / p_b_to_b — directional same
+        n_a_anchors / n_b_anchors — anchor counts per class
+        n_used — total in-block anchors
+
+    Cluster labels MUST be in {0, 1} (`a` = 0, `b` = 1) per archive §3.1
+    label normalization. Other values are ignored as anchors but still
+    block-mapped.
     """
     times = np.asarray(event_abs_times, dtype=float)
     labels = np.asarray(cluster_labels, dtype=int)
     n = times.size
+    empty: Dict[str, float] = {
+        "p_opposite": 0.0,
+        "p_same": 0.0,
+        "p_a_to_b": 0.0,
+        "p_b_to_a": 0.0,
+        "p_a_to_a": 0.0,
+        "p_b_to_b": 0.0,
+        "n_a_anchors": 0,
+        "n_b_anchors": 0,
+        "n_used": 0,
+    }
     if n == 0:
-        return {"p_opposite": 0.0, "p_same": 0.0, "n_used": 0}
+        return empty
 
     sort_idx = np.argsort(times, kind="stable")
     times_s = times[sort_idx]
@@ -56,10 +78,22 @@ def compute_pairing_lift(
     n_opp = 0
     n_same = 0
     n_anchors = 0
+    n_a_to_b = 0
+    n_b_to_a = 0
+    n_a_to_a = 0
+    n_b_to_b = 0
+    n_a_anchors = 0
+    n_b_anchors = 0
+
     for i in range(n):
         if block_s[i] < 0:
             continue
         n_anchors += 1
+        a_label = int(labels_s[i])
+        if a_label == 0:
+            n_a_anchors += 1
+        elif a_label == 1:
+            n_b_anchors += 1
         b_end = block_ends[int(block_s[i])]
         window_end = min(times_s[i] + delta_t_seconds, b_end)
         if window_end <= times_s[i]:
@@ -68,26 +102,41 @@ def compute_pairing_lift(
         for j in range(i + 1, hi):
             if block_s[j] != block_s[i]:
                 continue
-            if labels_s[j] == labels_s[i]:
+            other = int(labels_s[j])
+            if other == a_label:
                 n_same += 1
+                if a_label == 0:
+                    n_a_to_a += 1
+                elif a_label == 1:
+                    n_b_to_b += 1
             else:
                 n_opp += 1
+                if a_label == 0 and other == 1:
+                    n_a_to_b += 1
+                elif a_label == 1 and other == 0:
+                    n_b_to_a += 1
 
     if n_anchors == 0:
-        return {"p_opposite": 0.0, "p_same": 0.0, "n_used": 0}
+        return empty
 
     return {
         "p_opposite": float(n_opp) / float(n_anchors),
         "p_same": float(n_same) / float(n_anchors),
+        "p_a_to_b": float(n_a_to_b) / float(max(n_a_anchors, 1)),
+        "p_b_to_a": float(n_b_to_a) / float(max(n_b_anchors, 1)),
+        "p_a_to_a": float(n_a_to_a) / float(max(n_a_anchors, 1)),
+        "p_b_to_b": float(n_b_to_b) / float(max(n_b_anchors, 1)),
+        "n_a_anchors": int(n_a_anchors),
+        "n_b_anchors": int(n_b_anchors),
         "n_used": int(n_anchors),
     }
 
 
 # ---------------------------------------------------------------------------
-# Surrogate label-shufflers (N0 / N1 / N2 / N3) and cluster-ISI resampler (N4)
+# Surrogate label-shufflers (N0 / N1 / N2 / N3); N4 raises NotImplementedError
 # ---------------------------------------------------------------------------
 def shuffle_labels_global(labels: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-    """N0 — global Fisher-Yates shuffle (weak ceiling sanity)."""
+    """N0 — global Fisher-Yates shuffle (sanity ceiling)."""
     return rng.permutation(np.asarray(labels, dtype=int))
 
 
@@ -97,7 +146,7 @@ def shuffle_labels_block_aware(
     block_time_ranges: Sequence[Tuple[float, float]],
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """N1 — shuffle inside each block independently."""
+    """N1 — shuffle inside each block independently (sanity / mid-strength)."""
     labels = np.asarray(labels, dtype=int)
     times = np.asarray(event_abs_times, dtype=float)
     out = labels.copy()
@@ -112,30 +161,51 @@ def shuffle_labels_local_window(
     labels: np.ndarray,
     event_abs_times: np.ndarray,
     window_seconds: float,
+    block_time_ranges: Sequence[Tuple[float, float]],
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """N2 — non-overlapping local-window shuffle (main null).
+    """N2 main null — local-window shuffle inside each block, 50% overlap, first-covering rule.
 
-    Each event is assigned to exactly one window of size `window_seconds`
-    starting at ``times[0]``. Per archive §4.2 the runner exposes a
-    `--null-window-min` flag; the pure shuffler keeps a single deterministic
-    partition for testability.
+    Per archive §4.1 / §4.2:
+    - window_seconds default 30 min (caller passes seconds explicitly)
+    - step = window_seconds / 2 (50% overlap of windows)
+    - **first-covering rule**: each event is assigned to the EARLIEST window
+      that covers it (smallest window index `w` such that
+      `b_start + w*step <= t < b_start + w*step + window_seconds`)
+    - **never crosses block boundaries**: each block is processed independently;
+      events outside every block are not shuffled
+
+    The 50% overlap + first-covering partitioning gives effective shuffle
+    pools of: first window full-sized [b_start, b_start+window), then
+    half-step pools [b_start+w*step, b_start+(w+1)*step) for w >= 2 i.e.
+    starting at b_start+window. This is intentional and matches plan §4.2.
     """
     labels = np.asarray(labels, dtype=int)
     times = np.asarray(event_abs_times, dtype=float)
-    if times.size == 0:
-        return labels.copy()
     out = labels.copy()
-    t_min = float(times.min())
-    t_max = float(times.max())
-    span = max(t_max - t_min, 1e-9)
-    n_windows = int(np.ceil(span / window_seconds)) + 1
-    for w in range(n_windows):
-        w_start = t_min + w * window_seconds
-        w_end = w_start + window_seconds
-        idx = np.where((times >= w_start) & (times < w_end))[0]
-        if idx.size > 1:
-            out[idx] = rng.permutation(out[idx])
+    if times.size == 0:
+        return out
+    if window_seconds <= 0:
+        raise ValueError("window_seconds must be positive")
+    step = window_seconds / 2.0
+    for b_start, b_end in block_time_ranges:
+        in_block = (times >= b_start) & (times <= b_end)
+        block_idx_arr = np.where(in_block)[0]
+        if block_idx_arr.size < 2:
+            continue
+        block_times = times[block_idx_arr]
+        # First-covering window index: smallest w >= 0 such that
+        #   b_start + w*step <= t  AND  b_start + w*step + window_seconds > t
+        # Algebra: w = max(0, floor((t - b_start - window_seconds) / step) + 1)
+        first_w = np.maximum(
+            0,
+            np.floor((block_times - b_start - window_seconds) / step).astype(int) + 1,
+        )
+        for w_idx in np.unique(first_w):
+            mask = first_w == w_idx
+            sub = block_idx_arr[mask]
+            if sub.size > 1:
+                out[sub] = rng.permutation(out[sub])
     return out
 
 
@@ -155,38 +225,24 @@ def shuffle_labels_circular(
     return np.roll(labels, shift)
 
 
-def resample_isi_per_cluster(
-    event_abs_times: np.ndarray,
-    cluster_labels: np.ndarray,
-    local_window_seconds: float,
-    rng: np.random.Generator,
-) -> Tuple[np.ndarray, np.ndarray]:
-    """N4 — conditional follow-up null. Per-cluster ISI shuffle keeping per-cluster total count.
+def resample_isi_per_cluster(*args: Any, **kwargs: Any) -> Tuple[np.ndarray, np.ndarray]:
+    """N4 conditional follow-up null — NOT IMPLEMENTED.
 
-    NOT in PR-7 main TDD set; only triggered when N2 and N3 disagree (archive §4.1).
-    The implementation here is a simple ISI permutation per cluster anchored
-    at each cluster's first event time. local_window_seconds is unused in
-    this minimal stub — reserved for the gamma-fit-per-window upgrade if
-    follow-up is ever triggered.
+    Plan §4.1 / §4.2 specifies a per-cluster rate-matched ISI null with a
+    gamma fit per local window. That is intentionally deferred until the
+    follow-up trigger condition fires (N2 positive but N3 inconsistent).
+
+    Calling this function raises NotImplementedError on purpose: a silent
+    stub would let unsuitable values into primary results. When the
+    follow-up is actually triggered, implement the gamma-fit-per-window
+    construction here and add a dedicated TDD test.
     """
-    del local_window_seconds  # placeholder for future per-window gamma fit
-    times = np.asarray(event_abs_times, dtype=float)
-    labels = np.asarray(cluster_labels, dtype=int)
-    new_times = times.copy()
-    for c in np.unique(labels):
-        mask = labels == c
-        cluster_times = times[mask]
-        if cluster_times.size < 2:
-            continue
-        isis = np.diff(cluster_times)
-        rng.shuffle(isis)
-        new_cluster_times = np.empty_like(cluster_times)
-        new_cluster_times[0] = cluster_times[0]
-        for k in range(1, cluster_times.size):
-            new_cluster_times[k] = new_cluster_times[k - 1] + isis[k - 1]
-        new_times[mask] = new_cluster_times
-    sort_idx = np.argsort(new_times, kind="stable")
-    return new_times[sort_idx], labels[sort_idx]
+    raise NotImplementedError(
+        "resample_isi_per_cluster (N4) is a conditional follow-up null. "
+        "Implement gamma-fit-per-window per archive §4.1 before use; the "
+        "stub is intentionally absent so it cannot leak into primary "
+        "judgments."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -209,9 +265,16 @@ def _generate_null_labels(
     if null_name == "N1":
         return shuffle_labels_block_aware(labels, times, block_time_ranges, rng)
     if null_name == "N2":
-        return shuffle_labels_local_window(labels, times, n2_window_seconds, rng)
+        return shuffle_labels_local_window(
+            labels, times, n2_window_seconds, block_time_ranges, rng
+        )
     if null_name == "N3":
         return shuffle_labels_circular(labels, rng)
+    if null_name == "N4":
+        raise NotImplementedError(
+            "N4 must not be invoked from compute_pairing_with_nulls; it is a "
+            "conditional follow-up. See resample_isi_per_cluster docstring."
+        )
     raise ValueError(f"Unknown null id: {null_name}")
 
 
@@ -227,7 +290,15 @@ def compute_pairing_with_nulls(
 ) -> Dict[str, Any]:
     """Per-subject driver. Returns nested dict matching archive §6.1.
 
-    Keys: 'empirical' / 'null' / 'lift' (per null × per Δt).
+    Keys:
+      - 'empirical': {Δt: pairing_lift_dict (full directional fields)}
+      - 'null':     {null_id: {Δt: {p_opposite_dist / p_same_dist /
+                                    p_a_to_b_dist / p_b_to_a_dist}}}
+      - 'lift':     {null_id: {Δt: {opposite_lift / same_lift / excess /
+                                    a_to_b_lift / b_to_a_lift / asym}}}
+
+    `n2_window_seconds` is only consumed by N2 and is independent of any
+    Δt in `delta_t_grid`.
     """
     times = np.asarray(event_abs_times, dtype=float)
     labels = np.asarray(cluster_labels, dtype=int)
@@ -239,8 +310,9 @@ def compute_pairing_with_nulls(
     for dt in grid:
         empirical[dt] = compute_pairing_lift(times, labels, dt, block_time_ranges)
 
+    null_dist_keys = ("p_opposite_dist", "p_same_dist", "p_a_to_b_dist", "p_b_to_a_dist")
     null_results: Dict[str, Dict[float, Dict[str, list]]] = {
-        n_id: {dt: {"p_opposite_dist": [], "p_same_dist": []} for dt in grid}
+        n_id: {dt: {k: [] for k in null_dist_keys} for dt in grid}
         for n_id in nulls
     }
     for null_name in nulls:
@@ -252,70 +324,99 @@ def compute_pairing_with_nulls(
                 out = compute_pairing_lift(times, shuffled, dt, block_time_ranges)
                 null_results[null_name][dt]["p_opposite_dist"].append(out["p_opposite"])
                 null_results[null_name][dt]["p_same_dist"].append(out["p_same"])
+                null_results[null_name][dt]["p_a_to_b_dist"].append(out["p_a_to_b"])
+                null_results[null_name][dt]["p_b_to_a_dist"].append(out["p_b_to_a"])
 
     lift_results: Dict[str, Dict[float, Dict[str, float]]] = {}
     for null_name in nulls:
         lift_results[null_name] = {}
         for dt in grid:
+            ed = empirical[dt]
             null_p_opp = float(np.mean(null_results[null_name][dt]["p_opposite_dist"]))
             null_p_same = float(np.mean(null_results[null_name][dt]["p_same_dist"]))
-            opp_lift = empirical[dt]["p_opposite"] / max(null_p_opp, 1e-12)
-            same_lift = empirical[dt]["p_same"] / max(null_p_same, 1e-12)
+            null_p_atb = float(np.mean(null_results[null_name][dt]["p_a_to_b_dist"]))
+            null_p_bta = float(np.mean(null_results[null_name][dt]["p_b_to_a_dist"]))
+            opp_lift = ed["p_opposite"] / max(null_p_opp, 1e-12)
+            same_lift = ed["p_same"] / max(null_p_same, 1e-12)
+            atb_lift = ed["p_a_to_b"] / max(null_p_atb, 1e-12)
+            bta_lift = ed["p_b_to_a"] / max(null_p_bta, 1e-12)
             lift_results[null_name][dt] = {
                 "opposite_lift": float(opp_lift),
                 "same_lift": float(same_lift),
                 "excess": float(opp_lift - same_lift),
+                "a_to_b_lift": float(atb_lift),
+                "b_to_a_lift": float(bta_lift),
+                "asym": float(atb_lift - bta_lift),
                 "null_p_opposite_mean": null_p_opp,
                 "null_p_same_mean": null_p_same,
+                "null_p_a_to_b_mean": null_p_atb,
+                "null_p_b_to_a_mean": null_p_bta,
             }
 
     return {"empirical": empirical, "null": null_results, "lift": lift_results}
 
 
 # ---------------------------------------------------------------------------
-# Secondary descriptive: next-event transition odds (archive §3.6)
+# Secondary descriptive: next-event transition odds (block-aware, archive §3.6)
 # ---------------------------------------------------------------------------
 def compute_transition_odds(
     event_abs_times: Sequence[float],
     cluster_labels: Sequence[int],
+    block_time_ranges: Sequence[Tuple[float, float]],
 ) -> Dict[str, float]:
-    """Next-event transition odds + time-to-next medians.
+    """Next-event transition odds + time-to-next medians, BLOCK-AWARE.
 
-    Assumes events are sorted by time within their valid range. Returns
-    transition_odds vs the i.i.d. baseline odds 2*p*(1-p)/(1-2p(1-p)).
+    Per archive §3.6 with §10 risk: cross-block pairs (e.g. an event at the
+    end of one recording block and the next event in a later block separated
+    by a gap of hours) are NOT counted as transitions. They would otherwise
+    pollute mechanistic interpretation.
+
+    Returns transition_odds vs the i.i.d. baseline odds 2*p*(1-p)/(1-2p(1-p)).
     """
     times = np.asarray(event_abs_times, dtype=float)
     labels = np.asarray(cluster_labels, dtype=int)
     n = times.size
+    empty = {
+        "p_next_opposite": float("nan"),
+        "transition_odds": float("nan"),
+        "baseline_odds": float("nan"),
+        "time_to_next_opposite_median": float("nan"),
+        "time_to_next_same_median": float("nan"),
+        "n_pairs": 0,
+    }
     if n < 2:
-        return {
-            "p_next_opposite": float("nan"),
-            "transition_odds": float("nan"),
-            "baseline_odds": float("nan"),
-            "time_to_next_opposite_median": float("nan"),
-            "time_to_next_same_median": float("nan"),
-            "n_pairs": 0,
-        }
+        return empty
 
     sort_idx = np.argsort(times, kind="stable")
     times_s = times[sort_idx]
     labels_s = labels[sort_idx]
+    block_s = _assign_blocks(times_s, block_time_ranges)
+
+    same_block = (block_s[:-1] == block_s[1:]) & (block_s[:-1] >= 0)
+    n_pairs = int(np.sum(same_block))
+    if n_pairs == 0:
+        return empty
 
     next_diff = labels_s[:-1] != labels_s[1:]
-    p_next_opposite = float(np.mean(next_diff))
+    valid_diff = next_diff & same_block
 
+    p_next_opposite = float(np.sum(valid_diff)) / float(n_pairs)
     eps = 1e-12
     transition_odds = p_next_opposite / max(1.0 - p_next_opposite, eps)
 
-    n_total = labels_s.size
-    n_pos = int(np.sum(labels_s == 1))
-    p1 = n_pos / n_total if n_total else 0.0
+    # Baseline: same-block events only, treat as i.i.d. label draws
+    block_eligible_event_mask = block_s >= 0
+    valid_labels = labels_s[block_eligible_event_mask]
+    n_eligible = valid_labels.size
+    if n_eligible == 0:
+        return empty
+    p1 = float(np.sum(valid_labels == 1)) / float(n_eligible)
     baseline_p_opposite = 2.0 * p1 * (1.0 - p1)
     baseline_odds = baseline_p_opposite / max(1.0 - baseline_p_opposite, eps)
 
     isis = np.diff(times_s)
-    t_opp = isis[next_diff]
-    t_same = isis[~next_diff]
+    t_opp = isis[same_block & next_diff]
+    t_same = isis[same_block & ~next_diff]
 
     return {
         "p_next_opposite": p_next_opposite,
@@ -323,19 +424,46 @@ def compute_transition_odds(
         "baseline_odds": float(baseline_odds),
         "time_to_next_opposite_median": float(np.median(t_opp)) if t_opp.size else float("nan"),
         "time_to_next_same_median": float(np.median(t_same)) if t_same.size else float("nan"),
-        "n_pairs": int(next_diff.size),
+        "n_pairs": n_pairs,
     }
 
 
 # ---------------------------------------------------------------------------
-# Cohort-level paired test + triple-gate PASS judgment
+# Cohort-level paired test + triple-gate PASS judgment (key-matched)
 # ---------------------------------------------------------------------------
+def _aligned_excess_arrays(
+    excess_a: Mapping[Hashable, float],
+    excess_b: Mapping[Hashable, float],
+) -> Tuple[Tuple[Hashable, ...], np.ndarray, np.ndarray]:
+    """Return (sorted_keys, arr_a, arr_b) with subject-key alignment enforced.
+
+    Raises ValueError if the two dicts do not share an identical subject key
+    set. This is required by archive §3.2 (subject-level paired design):
+    `excess(10s)` and `excess(30s)` MUST be the same subjects.
+    """
+    keys_a = set(excess_a.keys())
+    keys_b = set(excess_b.keys())
+    if keys_a != keys_b:
+        only_a = sorted(keys_a - keys_b)
+        only_b = sorted(keys_b - keys_a)
+        raise ValueError(
+            "Subject key mismatch between cohort dicts; paired design requires "
+            f"identical subjects. Only in first dict: {only_a}; "
+            f"only in second dict: {only_b}"
+        )
+    keys_sorted = tuple(sorted(keys_a))
+    arr_a = np.asarray([excess_a[k] for k in keys_sorted], dtype=float)
+    arr_b = np.asarray([excess_b[k] for k in keys_sorted], dtype=float)
+    return keys_sorted, arr_a, arr_b
+
+
 def cohort_paired_test(
-    excess_per_subject: Dict[str, float],
+    excess_per_subject: Mapping[Hashable, float],
     alternative: str = "greater",
 ) -> Dict[str, float]:
-    """Paired Wilcoxon + sign test on subject-level excess values."""
-    excess = np.asarray(list(excess_per_subject.values()), dtype=float)
+    """Wilcoxon + sign test on subject-level excess values."""
+    keys_sorted = tuple(sorted(excess_per_subject.keys()))
+    excess = np.asarray([excess_per_subject[k] for k in keys_sorted], dtype=float)
     n = int(excess.size)
     if n < 2:
         return {"wilcoxon_p": float("nan"), "sign_test_p": float("nan"), "median": float("nan"), "n": n}
@@ -356,7 +484,6 @@ def cohort_paired_test(
     elif alternative == "less":
         sign_p = float(binomtest(n_neg, n_used, p=0.5, alternative="greater").pvalue)
     else:
-        # two-sided: 2 * min tail
         side = max(n_pos, n_neg)
         sign_p = float(binomtest(side, n_used, p=0.5, alternative="greater").pvalue)
         sign_p = min(1.0, 2.0 * sign_p)
@@ -370,24 +497,29 @@ def cohort_paired_test(
 
 
 def evaluate_pass_criteria(
-    cohort_excess_10s: Dict[str, float],
-    cohort_excess_30s: Dict[str, float],
+    cohort_excess_10s: Mapping[Hashable, float],
+    cohort_excess_30s: Mapping[Hashable, float],
     alpha: float = 0.05,
 ) -> Dict[str, Any]:
     """Triple-gate PASS judgment per archive §3.2.
+
+    Subject keys MUST match between the two dicts (raises ValueError on
+    mismatch). This guards the subject-level paired design: 10s and 30s
+    statistics must be computed on the same cohort.
 
     PASS requires ALL THREE:
       (1) excess(10s) Wilcoxon (greater) p < alpha
       (2) excess(10s) sign test (greater) p < alpha
       (3) excess(30s) cohort median > 0 (sensitivity, not significance)
-
-    Returns dict with per-gate values + 'pass' bool.
     """
-    excess_10s = np.asarray(list(cohort_excess_10s.values()), dtype=float)
-    excess_30s = np.asarray(list(cohort_excess_30s.values()), dtype=float)
+    keys_sorted, arr_10, arr_30 = _aligned_excess_arrays(
+        cohort_excess_10s, cohort_excess_30s
+    )
 
-    test_10s = cohort_paired_test(cohort_excess_10s, alternative="greater")
-    median_30s = float(np.median(excess_30s)) if excess_30s.size else float("nan")
+    aligned_10s = {k: cohort_excess_10s[k] for k in keys_sorted}
+    test_10s = cohort_paired_test(aligned_10s, alternative="greater")
+
+    median_30s = float(np.median(arr_30)) if arr_30.size else float("nan")
     median_30s_positive = bool(median_30s > 0.0)
 
     overall_pass = (
@@ -403,7 +535,7 @@ def evaluate_pass_criteria(
         "median_10s": test_10s["median"],
         "median_30s": median_30s,
         "median_30s_positive": median_30s_positive,
-        "n_subjects_10s": int(excess_10s.size),
-        "n_subjects_30s": int(excess_30s.size),
+        "n_subjects": int(arr_10.size),
+        "subjects": list(keys_sorted),
         "alpha": float(alpha),
     }

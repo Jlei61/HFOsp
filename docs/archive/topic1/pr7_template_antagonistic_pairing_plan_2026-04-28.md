@@ -245,8 +245,14 @@ def compute_pairing_lift(
     event_abs_times: np.ndarray,
     cluster_labels: np.ndarray,
     delta_t_seconds: float,
+    block_time_ranges: List[Tuple[float, float]],
 ) -> Dict[str, float]:
-    """Return {'p_opposite', 'p_same', 'n_used'}."""
+    """Block-aware lift estimator. Returns symmetric + directional fields:
+       {'p_opposite', 'p_same',
+        'p_a_to_b', 'p_b_to_a', 'p_a_to_a', 'p_b_to_b',
+        'n_a_anchors', 'n_b_anchors', 'n_used'}.
+       Cluster labels MUST be in {0, 1} (a=0, b=1) per §3.1 normalization.
+       Cross-block events filtered (no spurious cross-block counting)."""
 
 def shuffle_labels_global(labels: np.ndarray, rng) -> np.ndarray: ...
 
@@ -257,15 +263,19 @@ def shuffle_labels_block_aware(
 
 def shuffle_labels_local_window(
     labels: np.ndarray, event_abs_times: np.ndarray,
-    window_seconds: float, rng,
-) -> np.ndarray: ...
+    window_seconds: float,
+    block_time_ranges: List[Tuple[float, float]],   # MUST be passed; never crosses blocks
+    rng,
+) -> np.ndarray:
+    """N2 main null: 50% overlap (step = window/2), first-covering rule,
+       per-block independent. See §4.2 for the precise partition."""
 
 def shuffle_labels_circular(labels: np.ndarray, rng) -> np.ndarray: ...
 
-def resample_isi_per_cluster(
-    event_abs_times: np.ndarray, cluster_labels: np.ndarray,
-    local_window_seconds: float, rng,
-) -> Tuple[np.ndarray, np.ndarray]: ...
+def resample_isi_per_cluster(*args, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
+    """N4 conditional follow-up — RAISES NotImplementedError.
+       The gamma-fit-per-window construction in §4.1 has not been built
+       because N4 is conditional. Implement before any follow-up trigger."""
 
 def compute_pairing_with_nulls(
     event_abs_times: np.ndarray,
@@ -274,35 +284,47 @@ def compute_pairing_with_nulls(
     delta_t_grid: List[float] = (1, 5, 10, 30, 60, 300, 1800, 3600),
     n_perm: int = 1000,
     nulls: Tuple[str, ...] = ("N0", "N1", "N2", "N3"),
+    n2_window_seconds: float = 1800.0,
     seed: int = 0,
 ) -> Dict[str, Any]:
     """Per-subject driver. Returns nested dict:
        {
-         'empirical': {Δt: {p_opposite, p_same}},
-         'null': {N0/N1/N2/N3: {Δt: {p_opposite_dist, p_same_dist, ...}}, ...},
-         'lift': {N0/N1/N2/N3: {Δt: {opposite_lift, same_lift, excess}}, ...},
+         'empirical': {Δt: pairing_lift_dict (full directional fields)},
+         'null': {N0/N1/N2/N3: {Δt: {p_opposite_dist, p_same_dist,
+                                     p_a_to_b_dist, p_b_to_a_dist}}},
+         'lift': {N0/N1/N2/N3: {Δt: {opposite_lift, same_lift, excess,
+                                     a_to_b_lift, b_to_a_lift, asym}}},
        }
-       N4 not in default nulls; trigger via separate call when N2/N3 disagree."""
+       N4 raises if listed in `nulls`; conditional follow-up only."""
 
 def compute_transition_odds(
     event_abs_times: np.ndarray,
     cluster_labels: np.ndarray,
+    block_time_ranges: List[Tuple[float, float]],   # block-aware mandatory
 ) -> Dict[str, float]:
-    """Secondary descriptive (§3.6). Returns
+    """Secondary descriptive (§3.6). Cross-block consecutive pairs are NOT
+       counted as transitions (a recording-gap of hours is not a neural
+       transition). Returns
        {'p_next_opposite', 'transition_odds', 'baseline_odds',
-        'time_to_next_opposite_median', 'time_to_next_same_median'}."""
+        'time_to_next_opposite_median', 'time_to_next_same_median',
+        'n_pairs'}."""
 
 def cohort_paired_test(
-    excess_per_subject: Dict[str, float], alternative: str = "greater",
+    excess_per_subject: Mapping[Hashable, float], alternative: str = "greater",
 ) -> Dict[str, float]:
-    """Wilcoxon + sign test, returns {'wilcoxon_p', 'sign_test_p', 'median', 'n'}."""
+    """Wilcoxon + sign test, key-aligned. Returns {'wilcoxon_p',
+       'sign_test_p', 'median', 'n'}."""
 
 def evaluate_pass_criteria(
-    cohort_excess_10s: Dict[str, float],
-    cohort_excess_30s: Dict[str, float],
+    cohort_excess_10s: Mapping[Hashable, float],
+    cohort_excess_30s: Mapping[Hashable, float],
+    alpha: float = 0.05,
 ) -> Dict[str, Any]:
-    """Triple gate: 10s Wilcoxon p<0.05 AND sign p<0.05 AND median(30s)>0.
-       Returns {'pass': bool, 'wilcoxon_10s', 'sign_10s', 'median_30s_positive', ...}."""
+    """Triple gate: 10s Wilcoxon p<α AND sign p<α AND median(30s)>0.
+       RAISES ValueError on subject-key mismatch between 10s and 30s dicts —
+       paired design requires the same cohort on both sides.
+       Returns {'pass': bool, 'wilcoxon_10s', 'sign_10s', 'median_30s',
+                'median_30s_positive', 'n_subjects', 'subjects', ...}."""
 ```
 
 ### 6.2 新增：`scripts/run_pr7_template_pairing.py`
@@ -437,7 +459,9 @@ def evaluate_pass_criteria(
 
 ---
 
-## 8. TDD 测试合同（锁 10 项）
+## 8. TDD 测试合同（锁 16 项 — 含 2026-04-28 review 加固的 5 项）
+
+> **2026-04-28 review 加固**：T11–T15 五项是科学合同 audit 后补上的关键测试，针对 N2 partition / cross-block 隔离 / 主 paired-test key-match / direction asymmetry 等容易被实现层悄悄破坏的合同。T16 锁 N4 stub 必须 raise，避免静默使用。
 
 测试文件 `tests/test_pr7_template_pairing.py`：
 
@@ -491,11 +515,37 @@ T10. test_evaluate_pass_criteria_triple_gate:
     case 1: 10s_wilcoxon_p=0.01, sign_p=0.03, 30s_median=0.05 -> pass=True
     case 2: 10s_wilcoxon_p=0.01, sign_p=0.03, 30s_median=-0.02 -> pass=False (30s reversal)
     case 3: 10s_wilcoxon_p=0.08, sign_p=0.02, 30s_median=0.05 -> pass=False (10s wilcoxon fail)
+
+T11. test_n2_first_covering_partition_with_50pct_overlap (review-加固):
+    构造 4 段不同 label 比例，验证 N2 50% overlap + first-covering:
+    pool 0 = [0, 1800)，混 0/1; pool 1 = [1800, 2700)，homogeneous; pool 2 = [2700, 3600)
+    -> 验证 pool 0 内部 mix，pool 1 / pool 2 各自保持 homogeneous 比例
+
+T12. test_n2_does_not_cross_block_boundaries (review-加固):
+    Block A [0, 1000) 全 label 0；gap；Block B [5000, 6000) 全 label 1
+    用 window=10000s（远大于 block 距离），跑 N2:
+    -> Block A 内仍全 0，Block B 内仍全 1（永不跨 block shuffle）
+
+T13. test_evaluate_pass_criteria_rejects_key_mismatch (review-加固):
+    excess_10s = {s1, s2, s3}; excess_30s = {s1, s2, s4}（s3 vs s4 不匹配）
+    -> 必须 raise ValueError，提示 paired design 要求 subject-key 一致
+
+T14. test_transition_odds_does_not_cross_blocks (review-加固):
+    Block A 全 0，gap 1万s，Block B 全 1
+    block-aware: p_next_opposite = 0（block 内全部 same）
+    naive 单 block: p_next_opposite = 1/99（cross-block 那一对被错误计入）
+
+T15. test_pairing_lift_direction_asymmetry (review-加固):
+    Schedule [0,1,1,1,1,0,1,1,1,1,...]：T_a 后必接 T_b；T_b 大多接 T_b
+    -> p_a_to_b > 0.9，p_b_to_a < 0.3，asym = p_a_to_b − p_b_to_a > 0.5
+
+T16. test_resample_isi_per_cluster_raises:
+    -> 必须 raise NotImplementedError，stub 不允许沉默返回
 ```
 
-每条测试 < 30 行；总 10 项 < 300 行。
+每条测试 < 30 行；总 16 项 < 500 行。
 
-**注**：N4 (rate-matched ISI) 实现保留在 src 中，但**不在 PR-7 主交付的 TDD 锁定测试**里 — N4 仅在 N2/N3 不一致时作 follow-up 跑，届时单独加测试。
+**注**：N4 (rate-matched ISI per cluster) 实现**故意 raise NotImplementedError**（src/template_temporal_pairing.py），不留 silent stub。N4 仅在 N2/N3 不一致时作 follow-up，届时实现完整 gamma-fit-per-window null 后 加专门 TDD 测试。
 
 ---
 
