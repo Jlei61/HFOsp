@@ -106,6 +106,31 @@ def test_pack_record_returns_packed_times_2d():
         assert pt[:, 1].max() < 4000.0  # SECONDS contract
 
 
+def test_compute_lagpat_record_shapes():
+    """compute_lagpat_record yields the legacy-compatible schema for one record.
+
+    Shape contract: lagPatRaw (n_pick, n_ev), lagPatRank (n_pick, n_ev),
+    eventsBool (n_pick, n_ev), chnNames (n_pick,), start_t scalar Unix epoch.
+    """
+    from scripts.run_epilepsiae_lagpat_backfill import compute_lagpat_record
+
+    out = compute_lagpat_record("253", "25300102_0000")
+    assert set(out.keys()) >= {
+        "lagPatRaw",
+        "lagPatRank",
+        "eventsBool",
+        "chnNames",
+        "start_t",
+    }
+    n_pick = len(out["chnNames"])
+    n_ev = out["lagPatRaw"].shape[1]
+    assert out["lagPatRaw"].shape == (n_pick, n_ev)
+    assert out["lagPatRank"].shape == (n_pick, n_ev)
+    assert out["eventsBool"].shape == (n_pick, n_ev)
+    # start_t is Unix epoch; Epilepsiae 253 was recorded 2008-2012.
+    assert 1e9 < float(out["start_t"]) < 2e9
+
+
 def test_smoke_does_not_create_output_files():
     """--smoke must not create any files under OUTPUT_ROOT.
 
