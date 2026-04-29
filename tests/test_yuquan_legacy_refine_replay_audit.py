@@ -186,7 +186,10 @@ def test_provenance_gate_rejects_detect_root_paths():
         "record": "FA0013KP",
         "gpu_npz_used": "/home/honglab/leijiaxin/HFOsp/results/hfo_detection/gaolan/FA0013KP_gpu.npz",
     }
-    summary = {"refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz"}
+    summary = {
+        "same_source_assertion": False,
+        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz",
+    }
     assert provenance_violates_gate(summary, rec) is True
 
 
@@ -196,7 +199,8 @@ def test_provenance_gate_rejects_detect_root_in_refine():
         "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
     }
     summary = {
-        "refine_npz_used": "/home/honglab/leijiaxin/HFOsp/results/hfo_detection/gaolan/_refineGpu.npz"
+        "same_source_assertion": False,
+        "refine_npz_used": "/home/honglab/leijiaxin/HFOsp/results/hfo_detection/gaolan/_refineGpu.npz",
     }
     assert provenance_violates_gate(summary, rec) is True
 
@@ -207,6 +211,90 @@ def test_provenance_gate_passes_legacy_paths():
         "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
     }
     summary = {
-        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz"
+        "same_source_assertion": False,
+        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz",
     }
     assert provenance_violates_gate(summary, rec) is False
+
+
+def test_provenance_gate_rejects_missing_same_source_assertion():
+    """A summary without `same_source_assertion` is ambiguous — the audit
+    cannot tell whether it's a replay or a same-source run, so default to
+    violation."""
+    rec = {
+        "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
+    }
+    summary = {
+        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz",
+    }
+    assert provenance_violates_gate(summary, rec) is True
+
+
+def test_provenance_gate_rejects_same_source_assertion_true():
+    """A summary that explicitly says `same_source_assertion=True` is a
+    same-source run, not a replay — the comparator must refuse to verdict
+    it."""
+    rec = {
+        "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
+    }
+    summary = {
+        "same_source_assertion": True,
+        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz",
+    }
+    assert provenance_violates_gate(summary, rec) is True
+
+
+def test_provenance_gate_rejects_same_source_assertion_none():
+    rec = {
+        "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
+    }
+    summary = {
+        "same_source_assertion": None,
+        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz",
+    }
+    assert provenance_violates_gate(summary, rec) is True
+
+
+def test_provenance_gate_rejects_missing_refine_path():
+    rec = {
+        "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
+    }
+    summary = {"same_source_assertion": False}
+    assert provenance_violates_gate(summary, rec) is True
+
+
+def test_provenance_gate_rejects_empty_refine_path():
+    rec = {
+        "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
+    }
+    summary = {"same_source_assertion": False, "refine_npz_used": ""}
+    assert provenance_violates_gate(summary, rec) is True
+
+
+def test_provenance_gate_rejects_missing_gpu_path():
+    rec = {}
+    summary = {
+        "same_source_assertion": False,
+        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz",
+    }
+    assert provenance_violates_gate(summary, rec) is True
+
+
+def test_provenance_gate_rejects_relative_refine_path():
+    rec = {
+        "gpu_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/FA0013KP_gpu.npz",
+    }
+    summary = {
+        "same_source_assertion": False,
+        "refine_npz_used": "data/gaolan/_refineGpu.npz",  # relative
+    }
+    assert provenance_violates_gate(summary, rec) is True
+
+
+def test_provenance_gate_rejects_relative_gpu_path():
+    rec = {"gpu_npz_used": "FA0013KP_gpu.npz"}  # relative
+    summary = {
+        "same_source_assertion": False,
+        "refine_npz_used": "/mnt/yuquan_data/yuquan_24h_edf/gaolan/_refineGpu.npz",
+    }
+    assert provenance_violates_gate(summary, rec) is True

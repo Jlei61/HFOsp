@@ -14,10 +14,18 @@ Two-axis alignment:
           Unmatched columns counted; `eventsBool` / `lagPatRank` /
           `lagPatRaw` only diffed on aligned indices.
 
-Provenance gate: `verdict_record` refuses to verdict any record whose
-manifest reports a `gpu_npz_used` or `refine_npz_used` under
-`DETECT_ROOT` — that would be a same-source run masquerading as a
-legacy-refine replay.
+Provenance gate (fail-closed): `provenance_violates_gate` requires
+ALL of the following before it lets a record through:
+  - `summary["same_source_assertion"]` is present and is exactly `False`
+    (a missing field, `None`, or `True` is a violation)
+  - `summary["refine_npz_used"]` is present, non-empty, and an
+    absolute path that does NOT live under `DETECT_ROOT`
+  - per-record `gpu_npz_used` is present, non-empty, and an absolute
+    path that does NOT live under `DETECT_ROOT`
+Anything else (missing fields, relative paths, paths that resolve under
+`DETECT_ROOT`) is a violation. The audit cannot tell a same-source run
+from a legacy-refine replay if these fields are absent, so it must
+default to "violation" rather than silently passing.
 
 Cohort verdict: `pack_lag_parity_pass` iff over all replayed subjects /
 records (passing the provenance gate):
@@ -323,14 +331,51 @@ def compare_lagpat_pair(
 
 
 def provenance_violates_gate(summary: Dict, record_manifest: Dict) -> bool:
-    """Return True if either the subject-level `refine_npz_used` or the
-    per-record `gpu_npz_used` lives under `DETECT_ROOT`. That would mean
-    the record was produced by the same-source contract, not the
-    legacy-refine replay, and the comparator must refuse to verdict it."""
-    detect_str = str(DETECT_ROOT)
-    refine_used = str(summary.get("refine_npz_used", ""))
-    gpu_used = str(record_manifest.get("gpu_npz_used", ""))
-    return refine_used.startswith(detect_str) or gpu_used.startswith(detect_str)
+    """Fail-closed provenance gate.
+
+    Return True (violation) unless ALL of the following hold:
+      - `summary["same_source_assertion"]` is exactly `False`
+      - `summary["refine_npz_used"]` is a non-empty absolute path NOT under DETECT_ROOT
+      - `record_manifest["gpu_npz_used"]` is a non-empty absolute path NOT under DETECT_ROOT
+
+    Missing fields, `None`, empty strings, relative paths, and any path
+    under `DETECT_ROOT` all count as violations. The audit cannot
+    distinguish a same-source run from a legacy-refine replay if these
+    provenance fields are absent, so the default must be "violation"
+    rather than silently letting the record through.
+    """
+    if "same_source_assertion" not in summary:
+        return True
+    if summary["same_source_assertion"] is not False:
+        return True
+
+    refine_used = summary.get("refine_npz_used")
+    gpu_used = record_manifest.get("gpu_npz_used")
+    detect_root = Path(DETECT_ROOT).resolve()
+
+    def _path_violates(value) -> bool:
+        if value is None:
+            return True
+        s = str(value).strip()
+        if not s:
+            return True
+        try:
+            p = Path(s)
+        except (TypeError, ValueError):
+            return True
+        if not p.is_absolute():
+            return True
+        try:
+            p_resolved = p.resolve()
+        except (OSError, RuntimeError):
+            p_resolved = p
+        try:
+            p_resolved.relative_to(detect_root)
+        except ValueError:
+            return False
+        return True
+
+    return _path_violates(refine_used) or _path_violates(gpu_used)
 
 
 # ---------------------------------------------------------------------------

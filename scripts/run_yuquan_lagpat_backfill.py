@@ -338,7 +338,21 @@ def alias_bipolar_to_left_with_arbitration(
     # need both alias collapse + outermost-shaft drop. The outer drop is a
     # no-op (and can be incorrect, removing a legitimately picked channel)
     # when the input is already in single-electrode form.
-    is_bipolar_pair_input = any("-" in str(n) for n in chns_names)
+    #
+    # Schema must be uniform across all entries — a mix of bipolar-pair
+    # and single-electrode names is undefined and we refuse to silently
+    # pick a branch. Caller should canonicalize before calling.
+    pair_names = [str(n) for n in chns_names if "-" in str(n)]
+    nopair_names = [str(n) for n in chns_names if "-" not in str(n)]
+    if pair_names and nopair_names:
+        raise ValueError(
+            "alias_bipolar_to_left_with_arbitration: mixed schema in chns_names "
+            f"({len(pair_names)} bipolar-pair + {len(nopair_names)} single-electrode); "
+            f"first pair example: {pair_names[0]!r}, first single example: {nopair_names[0]!r}. "
+            "Input must be uniformly bipolar-pair ('A1-A2', 'A2-A3', ...) or "
+            "uniformly single-electrode ('A1', 'A2', ...)."
+        )
+    is_bipolar_pair_input = bool(pair_names)
     aliases: Dict[str, AliasMap] = {}
     for orig, c in zip(chns_names, counts.tolist()):
         a = _alias_left(str(orig))

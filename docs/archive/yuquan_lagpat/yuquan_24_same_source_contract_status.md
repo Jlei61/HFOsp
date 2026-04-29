@@ -1,6 +1,6 @@
 # Yuquan 24-subject same-source lagPat contract — implementation status
 
-Status: **structural cohort PASS (2026-04-23) + dual-track numerical audit underway (Phase γ ablation pending)**.
+Status: **structural cohort PASS (2026-04-23) + dual-track numerical audit complete (Track A done, Track B 6/14 refine-stable subjects strict-ε pass, γ ablation done 2026-04-26)**.
 
 This document captures the state of the Yuquan same-source `lagPat` /
 `packedTimes` contract after the 2026Q2 closure pass driven by the plan
@@ -387,22 +387,51 @@ Cohort coverage (21 subjects, exact bucketing):
 | **no_legacy_gpu** | 6 | songzishuo, zhangbichen, zhangkexuan, zhaochenxi, zhaojinrui, zhourongxuan |
 | **总计** | 21 | ✓ |
 
-Findings:
+Findings — read the per-subject table together with the cohort
+verdict; the verdict alone is misleading.
 
-- 13/13 detector-comparable subjects support `threshold_sensitive_FP_drift`:
-  alias-collapsed `legacy_containment_in_new` median = 1.000,
-  `|global_onset_shift|` = 0.00 ms across the bucket, max unmatched
-  fraction ≤ 14.8% (within phaseD-documented ±20% budget).
-- 1/13 (`zhangjiaqi`) excluded with cause: legacy uses a **monopolar**
-  reference, new uses **bipolar**; alias-collapse maps both to the same
-  channel name but the underlying signals differ → **+7.5 ms global
-  onset shift, 0.2% tight match, 61% unmatched events**. This is a
-  reference-scheme divergence-by-design, not a new-pipeline bug.
+What is established for the 13 detector-comparable subjects:
 
-**Cohort verdict label**: `coarse_logic_divergence`. **Important
-reading caveat**: the label is triggered entirely by `zhangjiaqi`'s
-+7.5 ms shift pulling Layer 1 below threshold. **It is not a普遍
-failure** — read the verdict together with the per-subject table.
+- alias-collapsed `legacy_containment_in_new` median ≈ 1.000 (legacy
+  channels are present in the new alias set; new can be a strict
+  superset because new bipolar pairs include channels legacy didn't);
+- `|global_onset_shift|` = 0.00 ms across the bucket — **no global
+  coarse time shift**;
+- max per-subject unmatched fraction ≤ 14.8% — within the
+  phaseD-documented ±20% events_count drift budget. Residuals are
+  consistent with **threshold-sensitive FP drift**: events near the
+  detector threshold flip in/out of the set under FP-level differences,
+  the rest match.
+
+What is **NOT** established:
+
+- **Tight event-level equivalence** (1-sample / 1.25 ms onset match) is
+  NOT achieved for all 13. Only 4 subjects (`gaolan`, `wangyiyang`,
+  `sunyuanxin`, `xuxinyi`) reach the script's ≥ 0.85 tight-match
+  threshold; the remaining 9 sit between 0.51 and 0.84. The bulk of
+  matches land in the medium / loose buckets (≤ 6.25 / ≤ 25 ms),
+  consistent with FP-level drift in the envelope filter and threshold
+  decision but **not** a per-event one-to-one reproduction.
+
+So the precise Track A claim is:
+
+> 13 detector-comparable subjects show no global coarse shift and
+> residuals consistent with threshold-sensitive drift; tight
+> event-level equivalence is not established for all 13.
+
+1/13 (`zhangjiaqi`) is excluded entirely with cause: legacy uses a
+**monopolar** reference, new uses **bipolar**; alias-collapse maps
+both to the same channel name but the underlying signals differ →
+**+7.5 ms global onset shift, 0.2% tight match, 61% unmatched events**.
+Reference-scheme divergence-by-design, not a new-pipeline bug.
+
+**Cohort verdict label**: `coarse_logic_divergence`. **Reading
+caveat**: the label is triggered by the script's combined Layer 1 gate
+(containment ≥ 0.95 AND |shift| ≤ 1.25 ms AND tight_min ≥ 0.85). The
+gate is failed by `zhangjiaqi`'s +7.5 ms shift AND by the lower
+tight-match fractions on most subjects. The label itself does NOT
+mean the detector behaviour is broadly wrong — read it together with
+the per-subject table and the precise claim above.
 
 Reports:
 - `results/lagpat_backfill/_audit/detector_attribution/cohort_detector_attribution.{json,md}`
@@ -565,8 +594,12 @@ The canonical cohort claim has updated to its final form:
 - **Structural contract closed.** 21/21 subjects produced
   `_lagPat.npz` + `_packedTimes.npy` under a single closed code path;
   all schema / start-time / alias / presence checks pass.
-- **Detector-equivalence supported on 13/21**, with `zhangjiaqi`
-  scheme-divergent and `pengzihang` + 6 no-legacy-gpu uncomparable.
+- **Detector residuals consistent with threshold-sensitive drift on
+  13/21.** No global coarse time shift; max per-subject unmatched
+  fraction ≤ 14.8%. **Tight event-level (1-sample) equivalence is
+  not established for all 13** — only 4 subjects clear the ≥ 0.85
+  tight-match bar; the rest sit in the 0.51–0.84 band. `zhangjiaqi`
+  scheme-divergent; `pengzihang` + 6 no-legacy-gpu uncomparable.
 - **Pack+lagPat code-level parity proven on 6/14 refine-stable
   subjects, 68/74 records, ε-level**: when fed legacy refine + legacy
   gpu_npz, new code reproduces `.legacy_backup` to within float64 ε.
@@ -574,28 +607,3 @@ The canonical cohort claim has updated to its final form:
   2021 legacy era and 2026 (overwritten or ε-drifted), not a code
   defect.
 
-### Status table
-
-| 项 | 状态 |
-|---|---|
-| Structural cohort PASS (21/21 same-source) | ✅ DONE (2026-04-23) |
-| `run_subject` path-injection refactor + 31 in-scope tests green | ✅ DONE |
-| Track A — detector event-level attribution | ✅ DONE |
-| Track B — pack+lag replay preflight on gaolan | ✅ DONE |
-| γ.0 — provenance verification | 🟡 PENDING |
-| γ.1 — layer ablation tool + run | 🟡 PENDING |
-| γ.2 — decision tree readout | 🟡 PENDING |
-| Track B — 14-subject cohort run | ⏸️ blocked on γ.2 |
-| Status doc + topical commit | 🟡 PENDING |
-
-Until γ.2 lands, the canonical cohort claim is exactly:
-
-- **Structural contract closed.** 21/21 subjects produced
-  `_lagPat.npz` + `_packedTimes.npy` under a single closed code path;
-  all schema / start-time / alias / presence checks pass.
-- **Detector-equivalence supported on 13/21**, with `zhangjiaqi`
-  scheme-divergent and `pengzihang` + 6 no-legacy-gpu uncomparable.
-- **Pack-stage parity supported (12/12 records on `gaolan`)**:
-  chnNames + packedTimes + eventsBool exact when fed legacy refine +
-  legacy gpu_npz; centroid-stage drift root cause is the open
-  question for γ.
