@@ -69,6 +69,43 @@ def test_load_refine_chns_for_subject_returns_tuple():
     assert chns == chns2
 
 
+def test_whole_dets_units_are_seconds():
+    """Defensive: probe whole_dets max value is in seconds, not samples.
+
+    A 1h block at 512 Hz has up to ~1.84M samples but only ~3600 seconds.
+    If max ever exceeds 4000, the upstream contract drifted (probably to
+    samples) and pack_record would explode. Auto-guard for hfo_detector.py:82.
+    """
+    import numpy as np
+
+    z = np.load(
+        "results/hfo_detection/253/25300102_0000_gpu.npz", allow_pickle=True
+    )
+    found = False
+    for arr in z["whole_dets"]:
+        a = np.asarray(arr, dtype=float)
+        if a.size == 0:
+            continue
+        found = True
+        assert float(a.max()) < 4000.0, "whole_dets unit drift detected (samples?)"
+    assert found, "no non-empty whole_dets in the smoke record"
+
+
+def test_pack_record_returns_packed_times_2d():
+    """pack_record yields (n_events, 2) [start_sec, end_sec] with end >= start.
+
+    Smoke verification on 253/25300102_0000 (pure 512 Hz, 1h block).
+    """
+    from scripts.run_epilepsiae_lagpat_backfill import pack_record
+
+    pt = pack_record("253", "25300102_0000")
+    assert pt.ndim == 2
+    assert pt.shape[1] == 2
+    if pt.shape[0] > 0:
+        assert (pt[:, 1] >= pt[:, 0]).all()
+        assert pt[:, 1].max() < 4000.0  # SECONDS contract
+
+
 def test_smoke_does_not_create_output_files():
     """--smoke must not create any files under OUTPUT_ROOT.
 

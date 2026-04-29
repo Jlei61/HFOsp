@@ -102,6 +102,52 @@ def _discover_records(subject: str) -> List[Dict]:
     return out
 
 
+def pack_record(subject: str, stem: str) -> np.ndarray:
+    """Produce (n_events, 2) packed [start_sec, end_sec] times for one record.
+
+    whole_dets contract: each element shape (n_dets, 2) in SECONDS [start, end]
+    relative to record start (verified at src/hfo_detector.py:82 / :224 and
+    re-verified per Stage B.2 probe 2026-04-29).
+
+    Filters per-channel detections to the subject-level refined channel list,
+    then runs build_windows_from_detections with the legacy-aligned defaults
+    (window_sec=0.5, ext_ms=30, chns_thr=0.5, time_axis_hz=500). Returns
+    empty (0, 2) array if there are no participating channels or no surviving
+    windows.
+    """
+    from src.group_event_analysis import build_windows_from_detections
+
+    gpu_path = NEW_GPU_ROOT / subject / f"{stem}_gpu.npz"
+    z = np.load(gpu_path, allow_pickle=True)
+    chns_names = [str(c) for c in z["chns_names"]]
+    whole_dets = z["whole_dets"]  # already in seconds; do NOT divide
+
+    refine_chns_set = set(load_refine_chns_for_subject(subject))
+
+    detections: Dict[str, np.ndarray] = {}
+    for i, ch in enumerate(chns_names):
+        if ch not in refine_chns_set:
+            continue
+        arr = np.atleast_2d(np.asarray(whole_dets[i], dtype=float))
+        if arr.size == 0:
+            continue
+        detections[ch] = arr
+
+    if not detections:
+        return np.empty((0, 2), dtype=float)
+
+    windows = build_windows_from_detections(
+        detections,
+        window_sec=0.5,
+        chns_thr=0.5,
+        ext_ms=30.0,
+        time_axis_hz=500.0,
+    )
+    if not windows:
+        return np.empty((0, 2), dtype=float)
+    return np.array([(w.start, w.end) for w in windows], dtype=float)
+
+
 def _smoke_print(subject: str) -> None:
     """Dry-print first record's metadata; do not write any files.
 
