@@ -73,8 +73,6 @@ def compute_pairing_lift(
     labels_s = labels[sort_idx]
     block_s = _assign_blocks(times_s, block_time_ranges)
 
-    block_ends = {b_idx: b_end for b_idx, (_, b_end) in enumerate(block_time_ranges)}
-
     n_opp = 0
     n_same = 0
     n_anchors = 0
@@ -85,36 +83,49 @@ def compute_pairing_lift(
     n_a_anchors = 0
     n_b_anchors = 0
 
-    for i in range(n):
-        if block_s[i] < 0:
+    # Per-block vectorized accumulation (assumes blocks are non-overlapping;
+    # any event with t in (t_i, t_i+Δt] outside this block is by definition
+    # outside the block_end clamp, so the block_s[j] != block_s[i] check
+    # from the scalar version is implicit here).
+    for b_idx, (b_start, b_end) in enumerate(block_time_ranges):
+        bl_idx = np.where(block_s == b_idx)[0]
+        if bl_idx.size == 0:
             continue
-        n_anchors += 1
-        a_label = int(labels_s[i])
-        if a_label == 0:
-            n_a_anchors += 1
-        elif a_label == 1:
-            n_b_anchors += 1
-        b_end = block_ends[int(block_s[i])]
-        window_end = min(times_s[i] + delta_t_seconds, b_end)
-        if window_end <= times_s[i]:
-            continue
-        hi = int(np.searchsorted(times_s, window_end, side="right"))
-        for j in range(i + 1, hi):
-            if block_s[j] != block_s[i]:
-                continue
-            other = int(labels_s[j])
-            if other == a_label:
-                n_same += 1
-                if a_label == 0:
-                    n_a_to_a += 1
-                elif a_label == 1:
-                    n_b_to_b += 1
-            else:
-                n_opp += 1
-                if a_label == 0 and other == 1:
-                    n_a_to_b += 1
-                elif a_label == 1 and other == 0:
-                    n_b_to_a += 1
+        bl_times = times_s[bl_idx]
+        bl_labels = labels_s[bl_idx]
+        nb = bl_idx.size
+
+        # Cumulative label counts, padded so cum[k] = count over indices [0..k-1].
+        cum_0_pad = np.concatenate([[0], np.cumsum(bl_labels == 0)])
+        cum_1_pad = np.concatenate([[0], np.cumsum(bl_labels == 1)])
+
+        # Per-anchor window end clamped to block end.
+        window_ends = np.minimum(bl_times + delta_t_seconds, b_end)
+        # `hi[i]` = first index in bl_times that is > window_ends[i].
+        hi = np.searchsorted(bl_times, window_ends, side="right")
+
+        # Events strictly after anchor i but at or before window_end[i] live
+        # at indices [i+1, hi[i]-1]. Count them via the padded cumsum.
+        i_arr = np.arange(nb)
+        n_label0_in_window = cum_0_pad[hi] - cum_0_pad[i_arr + 1]
+        n_label1_in_window = cum_1_pad[hi] - cum_1_pad[i_arr + 1]
+
+        is_a = bl_labels == 0
+        is_b = bl_labels == 1
+
+        n_opp += int(
+            n_label1_in_window[is_a].sum() + n_label0_in_window[is_b].sum()
+        )
+        n_same += int(
+            n_label0_in_window[is_a].sum() + n_label1_in_window[is_b].sum()
+        )
+        n_anchors += nb
+        n_a_anchors += int(is_a.sum())
+        n_b_anchors += int(is_b.sum())
+        n_a_to_b += int(n_label1_in_window[is_a].sum())
+        n_b_to_a += int(n_label0_in_window[is_b].sum())
+        n_a_to_a += int(n_label0_in_window[is_a].sum())
+        n_b_to_b += int(n_label1_in_window[is_b].sum())
 
     if n_anchors == 0:
         return empty
