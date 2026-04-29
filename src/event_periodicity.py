@@ -3360,13 +3360,32 @@ def compute_perchannel_metrics(
     if n_events < 2:
         return _empty_channel_metrics(ch_name, n_events, total_hours)
 
-    iei = compute_iei(events, block_ranges=block_ranges)
-    if len(iei) == 0:
-        return _empty_channel_metrics(ch_name, n_events, total_hours)
+    # Build iei + per-pair event centers with explicit keep-mask so event_centers
+    # stays length-aligned to iei after both cross-block and < threshold filters.
+    # (compute_iei does the filter internally but discards the mask, which broke
+    # compute_detrended_serial_correlation when any IEI was dropped — latent in
+    # Yuquan PR-1 because no Yuquan channel had sub-10ms IEIs; surfaces on
+    # Epilepsiae high-density CAR data.)
+    starts = events[:, 0]
+    raw_iei = np.diff(starts)
+    keep_mask = np.ones(len(raw_iei), dtype=bool)
+    if block_ranges:
+        sorted_blocks = sorted(block_ranges, key=lambda x: x[0])
+        gap_threshold_sec = 300.0
+        gap_pairs = [
+            (sorted_blocks[i - 1][1], sorted_blocks[i][0])
+            for i in range(1, len(sorted_blocks))
+            if sorted_blocks[i][0] - sorted_blocks[i - 1][1] > gap_threshold_sec
+        ]
+        if gap_pairs:
+            mid_times = (starts[:-1] + starts[1:]) / 2.0
+            for gs, ge in gap_pairs:
+                keep_mask &= ~((mid_times > gs) & (mid_times < ge))
 
-    iei_clean = iei[iei >= iei_min_threshold]
-    n_iei_dropped = len(iei) - len(iei_clean)
-    iei = iei_clean
+    n_iei_pre_threshold = int(keep_mask.sum())
+    keep_mask &= raw_iei >= iei_min_threshold
+    iei = raw_iei[keep_mask]
+    n_iei_dropped = n_iei_pre_threshold - len(iei)
 
     if len(iei) < 10:
         return _empty_channel_metrics(ch_name, n_events, total_hours)
@@ -3384,8 +3403,8 @@ def compute_perchannel_metrics(
     lag1_r = decay["lag1_r"]
     half_life_lag = decay["half_life_lag"]
 
-    event_starts = events[:, 0]
-    detrended = compute_detrended_serial_correlation(event_starts, iei, window_sec=600.0)
+    event_centers = ((starts[:-1] + starts[1:]) / 2.0)[keep_mask]
+    detrended = compute_detrended_serial_correlation(event_centers, iei, window_sec=600.0)
     detrended_r = detrended["detrended_r"]
     detrend_fraction = detrended["detrend_fraction"]
 

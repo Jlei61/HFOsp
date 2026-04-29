@@ -44,10 +44,18 @@ logger = logging.getLogger("audit_gpu")
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+EPILEPSIAE_NEW_GPU_ROOT = Path("results/hfo_detection")
 RESULTS_DIR = Path("results/spatial_modulation")
 SOZ_FILE_YQ = Path("results/yuquan_soz_core_channels.json")
 SOZ_FILE_EPI = Path("results/epilepsiae_soz_core_channels.json")
 FOCUS_REL_FILE = Path("results/epilepsiae_electrode_focus_rel.json")
+
+# Legacy lagPat files must contain these keys to be considered "complete"
+LAGPAT_REQUIRED_KEYS = ("lagPatRaw", "lagPatRank", "eventsBool", "chnNames", "start_t")
+# New pipeline gpu_npz must contain these keys for Stage 2 to construct block_ranges + per-channel events
+NEW_GPU_REQUIRED_KEYS = ("whole_dets", "chns_names", "events_count", "start_time")
+# Stub heuristic: legacy 216B stubs fail the 500B threshold inside _try_load_gpu
+STUB_SIZE_THRESHOLD = 500
 
 YUQUAN_SUBJECTS = [
     "zhangkexuan", "pengzihang", "chengshuai", "huangwanling",
@@ -332,6 +340,249 @@ def audit_subject_epilepsiae(
     }
 
 
+def _inspect_gpu_file(path: Path) -> Dict[str, Any]:
+    """Inspect a *_gpu.npz file and report file-size + schema details.
+
+    Used by the artifact census to distinguish between (legacy 216B stub)
+    vs (loadable but missing keys) vs (fully OK). Does NOT load whole_dets
+    fully — only checks key presence to keep the audit fast.
+    """
+    info: Dict[str, Any] = {
+        "exists": False,
+        "size_bytes": 0,
+        "is_stub": False,
+        "loadable": False,
+        "keys": [],
+    }
+    if not path.exists():
+        return info
+    info["exists"] = True
+    try:
+        info["size_bytes"] = path.stat().st_size
+    except OSError:
+        info["size_bytes"] = 0
+    if info["size_bytes"] < STUB_SIZE_THRESHOLD:
+        info["is_stub"] = True
+        return info
+    try:
+        with np.load(path, allow_pickle=True) as data:
+            info["keys"] = list(data.keys())
+        info["loadable"] = True
+    except Exception:
+        info["loadable"] = False
+    return info
+
+
+def _inspect_lagpat_file(path: Path) -> Dict[str, Any]:
+    """Inspect a *_lagPat*.npz file and report key completeness."""
+    info: Dict[str, Any] = {
+        "exists": False,
+        "loadable": False,
+        "keys": [],
+        "keys_complete": False,
+    }
+    if not path.exists():
+        return info
+    info["exists"] = True
+    try:
+        with np.load(path, allow_pickle=True) as data:
+            info["keys"] = list(data.keys())
+        info["loadable"] = True
+        info["keys_complete"] = all(k in info["keys"] for k in LAGPAT_REQUIRED_KEYS)
+    except Exception:
+        pass
+    return info
+
+
+def _inspect_simple_npz(path: Path) -> Dict[str, Any]:
+    """Light loadable + size check for sub_refineGpu.npz / packedTimes.npy."""
+    info: Dict[str, Any] = {"exists": False, "size_bytes": 0, "loadable": False}
+    if not path.exists():
+        return info
+    info["exists"] = True
+    try:
+        info["size_bytes"] = path.stat().st_size
+    except OSError:
+        info["size_bytes"] = 0
+    try:
+        with np.load(path, allow_pickle=True) as _:
+            pass
+        info["loadable"] = True
+    except Exception:
+        info["loadable"] = False
+    return info
+
+
+def _classify_legacy_verdict(
+    legacy_refine_ok: bool,
+    legacy_gpu_real_count: int,
+    legacy_gpu_stub_count: int,
+    legacy_lagpat_records: int,
+    legacy_lagpat_keys_complete: bool,
+) -> str:
+    """Decide legacy_verdict ∈ {replay_eligible, lagpat_only, refine_only, corrupt_gpu, missing}.
+
+    Track B replay needs three-piece set: refine + real gpu + lagPat with full keys.
+    If legacy gpu is all stubs but lagPat exists → lagpat_only (cannot replay refine→pack).
+    """
+    if (
+        legacy_refine_ok
+        and legacy_gpu_real_count > 0
+        and legacy_lagpat_records > 0
+        and legacy_lagpat_keys_complete
+    ):
+        return "replay_eligible"
+    if legacy_lagpat_records > 0 and legacy_gpu_stub_count > 0 and legacy_gpu_real_count == 0:
+        return "corrupt_gpu"
+    if legacy_lagpat_records > 0 and legacy_refine_ok:
+        return "lagpat_only"
+    if legacy_refine_ok and legacy_lagpat_records == 0:
+        return "refine_only"
+    return "missing"
+
+
+def _classify_new_verdict(
+    new_subject_dir_exists: bool,
+    new_gpu_records_total: int,
+    new_gpu_records_loadable: int,
+    new_gpu_start_time_present_count: int,
+    new_gpu_schema_complete_count: int,
+    new_refine_ok: bool,
+) -> str:
+    """Decide new_verdict ∈ {ready, partial, broken_time_axis, missing}.
+
+    Stage 2 (per-channel relaxed-refine) requires:
+      - all gpu records loadable
+      - all records have start_time (block_ranges construction)
+      - all records have whole_dets/chns_names/events_count
+      - _refineGpu.npz loadable
+    """
+    if not new_subject_dir_exists or new_gpu_records_total == 0:
+        return "missing"
+    if (
+        new_gpu_records_loadable == new_gpu_records_total
+        and new_gpu_start_time_present_count == new_gpu_records_total
+        and new_gpu_schema_complete_count == new_gpu_records_total
+        and new_refine_ok
+    ):
+        return "ready"
+    if new_gpu_start_time_present_count < new_gpu_records_total:
+        return "broken_time_axis"
+    return "partial"
+
+
+def audit_subject_artifact_census_epilepsiae(subject: str) -> Dict[str, Any]:
+    """Per-subject deep artifact census: legacy + new pipeline → verdicts.
+
+    Used by the Epilepsiae Topic 3 Stage 0 census (--include-pack-lag mode).
+    Distinguishes legacy_verdict (Track B feasibility) from new_verdict
+    (Stage 2 per-channel relaxed-refine feasibility).
+    """
+    # ---- Legacy side ----
+    legacy_root = EPILEPSIAE_ROOT / subject / "all_recs"
+    legacy_root_exists = legacy_root.exists()
+
+    legacy_refine_info = _inspect_simple_npz(legacy_root / "sub_refineGpu.npz") if legacy_root_exists else {"exists": False, "loadable": False, "size_bytes": 0}
+    legacy_refine_ok = bool(legacy_refine_info.get("loadable"))
+
+    legacy_gpu_files = sorted(legacy_root.glob("*_gpu.npz")) if legacy_root_exists else []
+    legacy_gpu_real_count = 0
+    legacy_gpu_stub_count = 0
+    legacy_gpu_unloadable_count = 0
+    for f in legacy_gpu_files:
+        info = _inspect_gpu_file(f)
+        if info["is_stub"]:
+            legacy_gpu_stub_count += 1
+        elif info["loadable"]:
+            legacy_gpu_real_count += 1
+        else:
+            legacy_gpu_unloadable_count += 1
+
+    legacy_lagpat_files = sorted(legacy_root.glob("*_lagPat.npz")) if legacy_root_exists else []
+    legacy_lagpat_with_freq_files = sorted(legacy_root.glob("*_lagPat_withFreqCent.npz")) if legacy_root_exists else []
+    legacy_packedtimes_files = sorted(legacy_root.glob("*_packedTimes.npy")) if legacy_root_exists else []
+
+    legacy_lagpat_keys_complete = False
+    legacy_lagpat_keys_first: List[str] = []
+    if legacy_lagpat_files:
+        first_info = _inspect_lagpat_file(legacy_lagpat_files[0])
+        legacy_lagpat_keys_complete = bool(first_info.get("keys_complete"))
+        legacy_lagpat_keys_first = first_info.get("keys", [])
+
+    legacy_verdict = _classify_legacy_verdict(
+        legacy_refine_ok=legacy_refine_ok,
+        legacy_gpu_real_count=legacy_gpu_real_count,
+        legacy_gpu_stub_count=legacy_gpu_stub_count,
+        legacy_lagpat_records=len(legacy_lagpat_files),
+        legacy_lagpat_keys_complete=legacy_lagpat_keys_complete,
+    )
+
+    # ---- New pipeline side ----
+    new_root = EPILEPSIAE_NEW_GPU_ROOT / subject
+    new_root_exists = new_root.exists()
+
+    new_gpu_files = sorted(new_root.glob("*_gpu.npz")) if new_root_exists else []
+    new_gpu_records_total = len(new_gpu_files)
+    new_gpu_records_loadable = 0
+    new_gpu_start_time_present_count = 0
+    new_gpu_schema_complete_count = 0
+    for f in new_gpu_files:
+        info = _inspect_gpu_file(f)
+        if not info["loadable"]:
+            continue
+        new_gpu_records_loadable += 1
+        keys = set(info["keys"])
+        if "start_time" in keys:
+            new_gpu_start_time_present_count += 1
+        if all(k in keys for k in NEW_GPU_REQUIRED_KEYS):
+            new_gpu_schema_complete_count += 1
+
+    new_refine_info = _inspect_simple_npz(new_root / "_refineGpu.npz") if new_root_exists else {"loadable": False, "size_bytes": 0}
+    new_refine_ok = bool(new_refine_info.get("loadable"))
+
+    new_verdict = _classify_new_verdict(
+        new_subject_dir_exists=new_root_exists,
+        new_gpu_records_total=new_gpu_records_total,
+        new_gpu_records_loadable=new_gpu_records_loadable,
+        new_gpu_start_time_present_count=new_gpu_start_time_present_count,
+        new_gpu_schema_complete_count=new_gpu_schema_complete_count,
+        new_refine_ok=new_refine_ok,
+    )
+
+    # Coverage: does new pipeline cover the legacy record set?
+    legacy_record_stems = {f.stem.replace("_gpu", "") for f in legacy_gpu_files}
+    new_record_stems = {f.stem.replace("_gpu", "") for f in new_gpu_files}
+    new_covers_legacy = legacy_record_stems.issubset(new_record_stems) if legacy_record_stems else False
+
+    return {
+        "subject": subject,
+        "dataset": "epilepsiae",
+        # Legacy side
+        "legacy_root_exists": legacy_root_exists,
+        "legacy_refine_ok": legacy_refine_ok,
+        "legacy_refine_size_bytes": legacy_refine_info.get("size_bytes", 0),
+        "legacy_gpu_records_total": len(legacy_gpu_files),
+        "legacy_gpu_real_count": legacy_gpu_real_count,
+        "legacy_gpu_stub_count": legacy_gpu_stub_count,
+        "legacy_gpu_unloadable_count": legacy_gpu_unloadable_count,
+        "legacy_lagpat_records": len(legacy_lagpat_files),
+        "legacy_lagpat_withfreq_records": len(legacy_lagpat_with_freq_files),
+        "legacy_lagpat_keys_complete": legacy_lagpat_keys_complete,
+        "legacy_lagpat_keys_first_record": ";".join(legacy_lagpat_keys_first),
+        "legacy_packedtimes_records": len(legacy_packedtimes_files),
+        "legacy_verdict": legacy_verdict,
+        # New pipeline side
+        "new_root_exists": new_root_exists,
+        "new_gpu_records_total": new_gpu_records_total,
+        "new_gpu_records_loadable": new_gpu_records_loadable,
+        "new_gpu_start_time_present_count": new_gpu_start_time_present_count,
+        "new_gpu_schema_complete_count": new_gpu_schema_complete_count,
+        "new_refine_ok": new_refine_ok,
+        "new_covers_legacy_records": new_covers_legacy,
+        "new_verdict": new_verdict,
+    }
+
+
 def _empty_row(subject: str, dataset: str, total_blocks: int) -> Dict[str, Any]:
     return {
         "subject": subject,
@@ -354,13 +605,70 @@ def _empty_row(subject: str, dataset: str, total_blocks: int) -> Dict[str, Any]:
     }
 
 
+def _run_artifact_census_epilepsiae() -> None:
+    """Stage 0 deep census for Epilepsiae Topic 3 prep.
+
+    Writes a per-subject CSV with both legacy_verdict (Track B feasibility)
+    and new_verdict (Stage 2 per-channel feasibility), so future agents can
+    decide path-of-action without re-scanning the disk.
+    """
+    logger.info("=== Epilepsiae artifact census (--include-pack-lag) ===")
+    rows = []
+    for subj in EPILEPSIAE_SUBJECTS:
+        logger.info(f"  {subj}...")
+        row = audit_subject_artifact_census_epilepsiae(subj)
+        rows.append(row)
+        logger.info(
+            f"    legacy: refine={row['legacy_refine_ok']} "
+            f"gpu_real/stub={row['legacy_gpu_real_count']}/{row['legacy_gpu_stub_count']} "
+            f"lagpat={row['legacy_lagpat_records']} keys_complete={row['legacy_lagpat_keys_complete']} "
+            f"-> {row['legacy_verdict']}"
+        )
+        logger.info(
+            f"    new:    gpu_loadable={row['new_gpu_records_loadable']}/{row['new_gpu_records_total']} "
+            f"start_time={row['new_gpu_start_time_present_count']}/{row['new_gpu_records_total']} "
+            f"schema={row['new_gpu_schema_complete_count']}/{row['new_gpu_records_total']} "
+            f"refine={row['new_refine_ok']} "
+            f"-> {row['new_verdict']}"
+        )
+
+    df = pd.DataFrame(rows)
+    out_path = RESULTS_DIR / "epilepsiae_artifact_census.csv"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    logger.info(f"\nSaved {out_path}")
+
+    legacy_hist = df["legacy_verdict"].value_counts().to_dict()
+    new_hist = df["new_verdict"].value_counts().to_dict()
+    logger.info("\n=== CENSUS SUMMARY ===")
+    logger.info(f"legacy_verdict: {legacy_hist}")
+    logger.info(f"new_verdict:    {new_hist}")
+    n_replay = int((df["legacy_verdict"] == "replay_eligible").sum())
+    n_stage2_ready = int((df["new_verdict"] == "ready").sum())
+    logger.info(f"Track B replay-eligible: {n_replay}/{len(df)}")
+    logger.info(f"Stage 2 ready (new pipeline OK): {n_stage2_ready}/{len(df)}")
+    if n_replay == 0:
+        logger.info("→ Track B SKIP for Epilepsiae cohort (no replay-eligible subjects)")
+    if n_stage2_ready < len(df):
+        broken = df[df["new_verdict"] != "ready"]["subject"].tolist()
+        logger.warning(f"→ Stage 2 BLOCKED for: {broken} (fix detector / start_time before running PR-2)")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Audit gpu.npz availability for spatial modulation PR-1")
     parser.add_argument("--min-count", type=int, default=100,
                         help="Minimum total event count per channel (default: 100)")
     parser.add_argument("--min-rate", type=float, default=5.0,
                         help="Minimum event rate in events/hour (default: 5.0)")
+    parser.add_argument("--include-pack-lag", action="store_true",
+                        help="Run Stage 0 Epilepsiae artifact census (legacy refine/gpu/lagPat + new pipeline schema). "
+                             "Writes results/spatial_modulation/epilepsiae_artifact_census.csv. "
+                             "Skips the standard Yuquan+Epilepsiae k-sweep audit when set.")
     args = parser.parse_args()
+
+    if args.include_pack_lag:
+        _run_artifact_census_epilepsiae()
+        return
 
     soz_yq = _load_json(SOZ_FILE_YQ)
     soz_epi = _load_json(SOZ_FILE_EPI)

@@ -139,7 +139,7 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 | 922     | 114    | 82 (CAR)  | ✅          |                                 |
 | 958     | 225    | 96 (CAR)  | ✅          |                                 |
 | 1073    | 231    | 71 (CAR)  | ✅          | 首轮 GPU OOM → memory flush 修复后成功 |
-| 1077    | 48/189 | 121 (CAR) | 🔄 CPU 运行中 | 121 ch 超 24GB GPU 显存 → CPU 模式   |
+| 1077    | 189    | 121 (CAR) | ✅ CPU 完成   | 121 ch 超 24GB GPU 显存 → CPU 模式（2026-04-16 完成 189/189） |
 | 1084    | 252    | 87 (CAR)  | ✅          |                                 |
 | 1096    | 165    | 74 (CAR)  | ✅          |                                 |
 | 1125    | 160    | 62 (CAR)  | ✅          |                                 |
@@ -210,9 +210,14 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 ## 6. 仍未解决的问题 / 下一步
 
-- **Epilepsiae per-channel 时序指标**：现在上游 gpu.npz 已就绪，可以跑 per-channel relaxed-refine SOZ 对比（PR-2），预期 n 从 9 → 15+ 配对
-- **Epilepsiae 三值梯度（i/l/e）**：Epilepsiae 有 `focus_rel` 三值标注（`results/epilepsiae_electrode_focus_rel.json`），可以做 SOZ > lesion > extra-focal 的梯度分析
-- 1077 CPU 模式跑完后补充 refine → 补入 SOZ-AUC 表
+- **Epilepsiae PR-2 已运行（2026-04-27）— 三层结构性不可执行 + 二元 fallback null**：
+  - Stage 0 artifact census：20/20 subject 的 legacy `*_gpu.npz` 全是 216 byte stub → Track B replay hard-impossible；20/20 subject 的新 pipeline `results/hfo_detection/<subject>/` 全 ready。**PR-2 走新 pipeline，不声明 legacy lagPat 数值 parity**。详见 `docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md`。
+  - PR-2 i/l/e 三层 cohort: **n=1 valid (`253`)**，全 metric SKIPPED (n<3)。8/16 subject 的 `focus_rel.l` 列表为空（lesion 标注缺），其余 7 subject 在活动门槛后单一区域 < 3 通道。
+  - 二元 i vs e fallback (n=8): `iei_detrended_r` greater p=0.19 (6/8 i>e), `iei_median` less p=0.37 (方向同 Yuquan PR-1), `event_rate` 7/8 i>e p=0.078 (**确认 SOZ rate confound**)。整体 underpowered null + 弱方向一致。详见 `docs/archive/topic3/epilepsiae_three_tier_pr2_2026-04-27.md`。
+- **可继续的方向**：
+  - 补 8 subject 的 `focus_rel.l` 标注（数据合同问题，找 SQL / 临床团队）
+  - sensitivity at 更松的 min_count / min_rate 看能否把 borderline subject 推过门槛
+  - Yuquan PR-1 + Epilepsiae PR-2 联合 meta-analysis (n=17)
 - SOZ / non-SOZ 的 event-rate 支撑域不完全重叠，仍有混淆，需 mixed-effects 模型控制
 - 当前结果最容易被误读成"SOZ 没差异"；更准确的说法是"差异主要出现在去趋势后的局部残差，而不是 raw 总量"
 
@@ -245,10 +250,12 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 ## 8. 代码与结果入口
 
 - 主文档：`docs/archive/topic3/spatial_modulation_soz_analysis.md`
+- **Stage 0 artifact census（2026-04-27）**：`docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md` + `results/spatial_modulation/epilepsiae_artifact_census.csv`
+- **PR-2 三层 i/l/e（2026-04-27）**：`docs/archive/topic3/epilepsiae_three_tier_pr2_2026-04-27.md` + `results/spatial_modulation/soz_comparison/epilepsiae/`
 - HFO 检测脚本：`scripts/run_hfo_detection.py`（支持 `--dataset yuquan/epilepsiae --all --gpu`）
 - 检测参数：`config/subject_params.json`
 - SOZ-AUC 验证脚本：`scripts/plot_refine_soz_validation.py`（支持 `--dataset yuquan/epilepsiae`）
-- 审计脚本：`scripts/audit_gpu_npz.py`
+- 审计脚本：`scripts/audit_gpu_npz.py`（默认 k-sweep audit；`--include-pack-lag` 触发 Stage 0 Epilepsiae artifact census）
 - Per-channel 主脚本：`scripts/run_spatial_modulation.py`
 - Per-channel 作图：`scripts/plot_spatial_modulation.py`
 - 相关代码：`src/event_periodicity.py` 中的 per-channel / SOZ helpers，`src/group_event_analysis.py`
