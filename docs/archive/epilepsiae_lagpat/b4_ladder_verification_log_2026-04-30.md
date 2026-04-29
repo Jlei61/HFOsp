@@ -2,7 +2,7 @@
 
 > 创建：2026-04-30
 > 计划档：[`epilepsiae_lagpat_backfill_plan_2026-04-29.md`](./epilepsiae_lagpat_backfill_plan_2026-04-29.md)
-> 范围：plan §3 Task B.4 ladder 的 a/b/c 步骤实测验收日志。B.4.d 与 B.5 待跑。
+> 范围：plan §3 Task B.4 ladder 的 a/b/c/d 步骤实测验收日志。B.5 待跑。
 
 ## 状态总览
 
@@ -11,6 +11,7 @@
 | B.4.a | 253 / 25300102_0000 | 1 | 1 / 0 | 8.7 s（首跑）→ 8.9 s（`--force` 重跑） | PASS |
 | B.4.b | 253 全 subject (512 Hz) | 268 | 267 + 1 skip / 0 | **11.0 s** | PASS |
 | B.4.c | 548 全 subject (1024 Hz) | 147 | 147 / 0 | **49.4 s** | PASS |
+| B.4.d | 384 全 subject (mixed 1024+256, 仅 1024 Hz blocks 通过 detector) | 65 | 65 / 0 | **63.2 s** | PASS |
 
 `PASS` 的判据：`n_failed == 0`，cohort 内 `n_participating == 0` 列数 = 0，
 `packedTimes` 与 lagPat 事件数对齐，min `n_participating` ≥ 1。
@@ -99,6 +100,36 @@ unique chnNames: 83
 通道前缀（多 shaft 大网）：`GA*/GB*/GC*/GD* (32 grid)`、`HL1-10`、
 `TBLA*/TBLB*/TBLC* + TBRA*/TBRB*/TBRC*`、`TLRA*/TLRB*/TLRC*`。
 
+## B.4.d — 384 全 subject (mixed 1024+256, 仅 1024 Hz blocks 通过 detector)
+
+```
+started_at  = 2026-04-30T01:23:25
+completed_at = 2026-04-30T02:29:12   (wall 1 h 5 m 47 s)
+n_records_total       = 65
+n_records_done        = 65
+n_skipped_existing    = 0
+n_failed              = 0
+median_record_seconds = 63.23
+```
+
+cohort 体检：
+
+```
+records with empty event columns (BUG): 0
+records with packedTimes/lagPat misalignment: 0
+records with 0 events (legitimate, low signal): 8
+total events across cohort: 1 047
+events/record: min=0  max=166  median=9
+min n_participating across all events: 30
+unique chnNames: 93
+```
+
+通道前缀（前颞底 + 多 shaft）：`FBA*/FBB* (前颞底)`、`FLA*/FLB*` 等。
+
+主验收（plan §8 B.4.d）：mixed-sfreq subject 跑通 65/65，0 failed。**PASS**。
+1024 Hz 中位数 63.2 s 略高于 548 的 49.4 s，但仍在同量级；mixed
+subject 单 record 工作量略大不影响合同验收。
+
 ### 主验收 vs 次级期望
 
 - **主**（plan §8 B.4.c）：sfreq 通用性 — `147/147 done, 0 failed`。**PASS**。
@@ -139,6 +170,5 @@ N_JOBS=5            ≈ 9–10 h
 
 ## Pending（不在本日志范围）
 
-- **B.4.d** — 1 个 mixed-sfreq subject（384，65 records，仅 1024 Hz blocks 经过 detector）。
 - **B.5** — Cohort batch driver + GNU parallel 脚本，全 cohort ~3 700 records。
 - **Stage C / D** — 待 B.5 完成后开始。
