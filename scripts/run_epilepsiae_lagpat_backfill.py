@@ -15,6 +15,8 @@ Plan: docs/archive/epilepsiae_lagpat/epilepsiae_lagpat_backfill_plan_2026-04-29.
 from __future__ import annotations
 
 import argparse
+import datetime
+import json
 import sys
 import time
 from functools import lru_cache
@@ -156,6 +158,7 @@ def _empty_lagpat_record(start_t_epoch: float) -> Dict[str, np.ndarray]:
         "eventsBool": np.empty((0, 0), dtype=np.float64),
         "chnNames": np.array([], dtype=object),
         "start_t": np.float64(start_t_epoch),
+        "packedTimes": np.empty((0, 2), dtype=np.float64),
     }
 
 
@@ -277,17 +280,48 @@ def compute_lagpat_record(
             centroids[:, ev_idx] = seg_centroids[:, col_in_seg]
             events_bool[:, ev_idx] = float(1.0) * seg_evbool[:, col_in_seg]
 
+    # Drop any event column with n_participating == 0. Sources of empty
+    # columns: window with start < 0, window crossing a 200s segment boundary,
+    # or segment too short for the spectrogram. Keeping such columns would
+    # contaminate downstream event counts, structural similarity (Stage C),
+    # and rate-coupling stats (Stage D).
+    keep_mask = events_bool.sum(axis=0) > 0
+    if not keep_mask.any():
+        return _empty_lagpat_record(start_t_epoch)
+    centroids_kept = centroids[:, keep_mask]
+    events_bool_kept = events_bool[:, keep_mask]
+    packed_times_kept = packed_times[keep_mask]
+
     lag_raw, lag_rank = lag_rank_from_centroids(
-        centroids, events_bool.astype(bool), align="first_centroid"
+        centroids_kept, events_bool_kept.astype(bool), align="first_centroid"
     )
 
     return {
         "lagPatRaw": lag_raw.astype(np.float64),
         "lagPatRank": lag_rank.astype(np.int64),
-        "eventsBool": events_bool.astype(np.float64),
+        "eventsBool": events_bool_kept.astype(np.float64),
         "chnNames": np.array(pick_names, dtype=object),
         "start_t": np.float64(start_t_epoch),
+        "packedTimes": packed_times_kept.astype(np.float64),
     }
+
+
+def _outputs_exist_and_loadable(pt_path: Path, lag_path: Path) -> bool:
+    """Both files exist on disk AND can be loaded without raising.
+
+    Catches a partially-written record left behind by a SIGKILL: the file
+    is present but truncated, so np.load raises. In that case the caller
+    treats the record as not-yet-done and re-runs.
+    """
+    if not (pt_path.exists() and lag_path.exists()):
+        return False
+    try:
+        np.load(pt_path)
+        with np.load(lag_path, allow_pickle=True) as z:
+            _ = list(z.files)
+        return True
+    except Exception:
+        return False
 
 
 def process_one_record(
@@ -299,28 +333,28 @@ def process_one_record(
     """Pack + lagPat for one (subject, stem); write outputs to OUTPUT_ROOT.
 
     Returns a per-record summary suitable for inclusion in _backfill_log.json.
-    Skips work when both output files already exist unless force=True.
+    When force=False (default), skips records whose outputs already exist
+    AND load cleanly; when force=True, overwrites unconditionally.
     """
     out_dir = OUTPUT_ROOT / subject
     pt_path = out_dir / f"{stem}_packedTimes.npy"
     lag_path = out_dir / f"{stem}_lagPat.npz"
 
-    if not force and pt_path.exists() and lag_path.exists():
+    if not force and _outputs_exist_and_loadable(pt_path, lag_path):
         return {
             "stem": stem,
             "skipped": True,
-            "reason": "outputs exist",
+            "reason": "outputs exist (loadable)",
             "pt_path": str(pt_path),
             "lag_path": str(lag_path),
         }
 
     out_dir.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    packed_times = pack_record(subject, stem)
-    lag = compute_lagpat_record(subject, stem, packed_times=packed_times)
+    lag = compute_lagpat_record(subject, stem)
     runtime_sec = time.time() - t0
 
-    np.save(pt_path, packed_times)
+    np.save(pt_path, lag["packedTimes"])
     np.savez_compressed(
         lag_path,
         chnNames=lag["chnNames"],
@@ -335,12 +369,76 @@ def process_one_record(
         "skipped": False,
         "n_events": int(lag["lagPatRaw"].shape[1]),
         "n_channels": int(len(lag["chnNames"])),
-        "n_packed": int(packed_times.shape[0]),
+        "n_packed": int(lag["packedTimes"].shape[0]),
         "start_t": float(lag["start_t"]),
         "runtime_sec": float(runtime_sec),
         "pt_path": str(pt_path),
         "lag_path": str(lag_path),
     }
+
+
+def _atomic_write_json(path: Path, data: Dict[str, Any]) -> None:
+    """Write JSON via tmp + rename so a SIGKILL mid-write does not corrupt the file."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w") as fh:
+        json.dump(data, fh, indent=2, default=str)
+    tmp.replace(path)
+
+
+def process_subject(
+    subject: str,
+    *,
+    force: bool = False,
+) -> Dict[str, Any]:
+    """Run pack + lagPat for every record of a subject, with per-record logging.
+
+    Failure-tolerant: if one record raises, log the failure and continue. The
+    log is flushed atomically after every record so a crash leaves a usable
+    state for resume on the next invocation.
+    """
+    out_dir = OUTPUT_ROOT / subject
+    out_dir.mkdir(parents=True, exist_ok=True)
+    log_path = out_dir / "_backfill_log.json"
+
+    records = _discover_records(subject)
+    log: Dict[str, Any] = {
+        "subject": subject,
+        "started_at": datetime.datetime.now().isoformat(timespec="seconds"),
+        "completed_at": None,
+        "n_records_total": len(records),
+        "n_records_done": 0,
+        "n_skipped_existing": 0,
+        "n_failed": 0,
+        "failures": [],
+        "per_record_seconds": {},
+        "median_record_seconds": None,
+    }
+    _atomic_write_json(log_path, log)
+
+    for rec in records:
+        stem = rec["stem"]
+        try:
+            result = process_one_record(subject, stem, force=force)
+            if result.get("skipped"):
+                log["n_skipped_existing"] += 1
+            else:
+                log["n_records_done"] += 1
+                log["per_record_seconds"][stem] = float(result["runtime_sec"])
+        except Exception as exc:
+            log["n_failed"] += 1
+            log["failures"].append(
+                {"stem": stem, "type": type(exc).__name__, "error": str(exc)}
+            )
+            print(f"  FAIL {stem}: {type(exc).__name__}: {exc}")
+        _atomic_write_json(log_path, log)
+
+    if log["per_record_seconds"]:
+        log["median_record_seconds"] = float(
+            np.median(list(log["per_record_seconds"].values()))
+        )
+    log["completed_at"] = datetime.datetime.now().isoformat(timespec="seconds")
+    _atomic_write_json(log_path, log)
+    return log
 
 
 def _smoke_print(subject: str) -> None:
@@ -420,9 +518,29 @@ def main() -> None:
             print(f"  lag_path={result['lag_path']}")
         return
 
-    raise NotImplementedError(
-        "Cohort batch (Stage B.5) not implemented yet. Use --stem for single-record mode."
-    )
+    if args.subject:
+        log = process_subject(args.subject, force=args.force)
+        median = log.get("median_record_seconds")
+        median_str = f"{median:.1f}s" if median is not None else "n/a"
+        print(
+            f"[B.4.b] subject={args.subject}  "
+            f"done={log['n_records_done']}/{log['n_records_total']}  "
+            f"skipped={log['n_skipped_existing']}  failed={log['n_failed']}  "
+            f"median_runtime={median_str}"
+        )
+        if log["failures"]:
+            print(f"  first {min(5, len(log['failures']))} failures:")
+            for f in log["failures"][:5]:
+                print(f"    {f['stem']}: {f['type']}: {f['error']}")
+        return
+
+    if args.all:
+        raise NotImplementedError(
+            "Cohort batch driver (Stage B.5) not implemented yet. "
+            "Run --subject <X> per subject; cross-subject parallel comes in B.5."
+        )
+
+    parser.error("provide one of --subject, --subject --stem, or --smoke")
 
 
 if __name__ == "__main__":

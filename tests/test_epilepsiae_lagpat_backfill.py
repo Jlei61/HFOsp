@@ -111,6 +111,9 @@ def test_compute_lagpat_record_shapes():
 
     Shape contract: lagPatRaw (n_pick, n_ev), lagPatRank (n_pick, n_ev),
     eventsBool (n_pick, n_ev), chnNames (n_pick,), start_t scalar Unix epoch.
+    Also asserts packedTimes is returned aligned with kept events, and that
+    no event column has n_participating == 0 (regression guard against
+    boundary-window leakage).
     """
     from scripts.run_epilepsiae_lagpat_backfill import compute_lagpat_record
 
@@ -121,14 +124,62 @@ def test_compute_lagpat_record_shapes():
         "eventsBool",
         "chnNames",
         "start_t",
+        "packedTimes",
     }
     n_pick = len(out["chnNames"])
     n_ev = out["lagPatRaw"].shape[1]
     assert out["lagPatRaw"].shape == (n_pick, n_ev)
     assert out["lagPatRank"].shape == (n_pick, n_ev)
     assert out["eventsBool"].shape == (n_pick, n_ev)
-    # start_t is Unix epoch; Epilepsiae 253 was recorded 2008-2012.
+    assert out["packedTimes"].shape == (n_ev, 2)
+    # start_t is Unix epoch; Epilepsiae 253 was recorded 2004-2012.
     assert 1e9 < float(out["start_t"]) < 2e9
+
+    # Regression guard: previously a packed window with negative start
+    # (boundary-centered run) was excluded by the segment rule but its
+    # column was kept, leaking n_participating=0 events into downstream
+    # stats. The empty column now must never be saved.
+    if out["eventsBool"].size > 0:
+        per_event_n_part = (out["eventsBool"] > 0).sum(axis=0)
+        assert (per_event_n_part > 0).all(), (
+            f"empty event columns leaked: per_event = {per_event_n_part.tolist()}"
+        )
+
+
+def test_process_subject_writes_log_with_required_keys(tmp_path, monkeypatch):
+    """process_subject writes _backfill_log.json with the required schema.
+
+    Uses an empty discovery list so the test runs in milliseconds and does
+    not touch real data; the log writer is the unit under test.
+    """
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    monkeypatch.setattr(mod, "OUTPUT_ROOT", tmp_path)
+    monkeypatch.setattr(mod, "_discover_records", lambda subject: [])
+
+    log = mod.process_subject("FAKE")
+    log_path = tmp_path / "FAKE" / "_backfill_log.json"
+    assert log_path.exists()
+    import json
+
+    with open(log_path) as fh:
+        data = json.load(fh)
+    assert set(data.keys()) >= {
+        "subject",
+        "started_at",
+        "completed_at",
+        "n_records_total",
+        "n_records_done",
+        "n_skipped_existing",
+        "n_failed",
+        "failures",
+        "per_record_seconds",
+        "median_record_seconds",
+    }
+    assert data["subject"] == "FAKE"
+    assert data["n_records_total"] == 0
+    assert data["completed_at"] is not None
+    assert log["n_records_done"] == 0
 
 
 def test_smoke_does_not_create_output_files():
