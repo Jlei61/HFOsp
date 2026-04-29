@@ -16,8 +16,9 @@ from __future__ import annotations
 
 import argparse
 import sys
+from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -33,6 +34,33 @@ OUTPUT_ROOT = Path("results/epilepsiae_lagpat_backfill")
 RIPPLE_BAND = (80.0, 250.0)
 NYQUIST_GATE_HZ = 2.0 * RIPPLE_BAND[1]  # 500 Hz; 256 Hz blocks fail this
 SEGMENT_SEC = 200.0  # mirrors Yuquan stitched-segment legacy semantics
+
+
+def _refine_path_for_subject(subject: str) -> Path:
+    """Path to the subject-level refine artifact.
+
+    The new pipeline (scripts/run_hfo_detection.py) writes ONE _refineGpu.npz
+    per subject (no per-record suffix, no `sub_` prefix). Schema:
+    {chns_names, events_count}.
+    """
+    return NEW_GPU_ROOT / subject / "_refineGpu.npz"
+
+
+@lru_cache(maxsize=32)
+def load_refine_chns_for_subject(subject: str) -> Tuple[str, ...]:
+    """Read subject-level refined channel names (cached per subject).
+
+    Returns a tuple (immutable) so lru_cache is safe; convert to list at call
+    site if mutation is needed.
+    """
+    refine_path = _refine_path_for_subject(subject)
+    if not refine_path.exists():
+        raise FileNotFoundError(
+            f"Subject-level refine artifact missing: {refine_path}\n"
+            "Expected file produced by scripts/run_hfo_detection.py."
+        )
+    z = np.load(refine_path, allow_pickle=True)
+    return tuple(str(c) for c in z["chns_names"])
 
 
 def _discover_records(subject: str) -> List[Dict]:

@@ -38,6 +38,37 @@ def test_smoke_lists_first_record():
     assert first["raw_data_path"].exists() and first["raw_head_path"].exists()
 
 
+def test_refine_path_is_subject_not_per_record():
+    """Refine artifact lives at <gpu_dir>/<subject>/_refineGpu.npz (subject-level).
+
+    The new pipeline writes ONE refine artifact per subject (no per-record
+    suffix, no `sub_` prefix). Schema: {chns_names, events_count}.
+    """
+    from scripts.run_epilepsiae_lagpat_backfill import _refine_path_for_subject
+
+    p = _refine_path_for_subject("253")
+    assert p.name == "_refineGpu.npz"
+    assert p.parent.name == "253"
+
+
+def test_load_refine_chns_for_subject_returns_tuple():
+    """load_refine_chns_for_subject returns a hashable Tuple[str, ...].
+
+    Note: deviates from the plan draft which asserted `isinstance(chns, list)`.
+    The implementation uses lru_cache, which requires hashable returns; tuple
+    is the correct contract.
+    """
+    from scripts.run_epilepsiae_lagpat_backfill import load_refine_chns_for_subject
+
+    chns = load_refine_chns_for_subject("253")
+    assert isinstance(chns, tuple)
+    assert len(chns) > 0
+    assert all(isinstance(c, str) for c in chns)
+    # subject-level: two calls return identical content
+    chns2 = load_refine_chns_for_subject("253")
+    assert chns == chns2
+
+
 def test_smoke_does_not_create_output_files():
     """--smoke must not create any files under OUTPUT_ROOT.
 
