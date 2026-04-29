@@ -36,3 +36,27 @@ def test_smoke_lists_first_record():
     assert first["sfreq"] in (256.0, 512.0, 1024.0)
     assert first["new_gpu_path"].exists()
     assert first["raw_data_path"].exists() and first["raw_head_path"].exists()
+
+
+def test_smoke_does_not_create_output_files():
+    """--smoke must not create any files under OUTPUT_ROOT.
+
+    Snapshots OUTPUT_ROOT contents before and after _smoke_print(); equality
+    means zero new files written. Auto-guard: if a future change accidentally
+    introduces a write inside _smoke_print (logs, partial artifacts, etc.),
+    this test catches it instead of relying on a manual `find` audit.
+    """
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    def _snapshot(p: Path) -> set:
+        if not p.exists():
+            return set()
+        return set(p.rglob("*"))
+
+    before = _snapshot(mod.OUTPUT_ROOT)
+    mod._smoke_print("253")
+    after = _snapshot(mod.OUTPUT_ROOT)
+    assert before == after, (
+        f"--smoke must not write to OUTPUT_ROOT={mod.OUTPUT_ROOT}; "
+        f"new entries: {sorted(after - before)}"
+    )

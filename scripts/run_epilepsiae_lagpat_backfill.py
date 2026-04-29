@@ -16,9 +16,8 @@ from __future__ import annotations
 
 import argparse
 import sys
-from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import numpy as np
 
@@ -36,28 +35,6 @@ NYQUIST_GATE_HZ = 2.0 * RIPPLE_BAND[1]  # 500 Hz; 256 Hz blocks fail this
 SEGMENT_SEC = 200.0  # mirrors Yuquan stitched-segment legacy semantics
 
 
-def _refine_path_for_subject(subject: str) -> Path:
-    return NEW_GPU_ROOT / subject / "_refineGpu.npz"
-
-
-@lru_cache(maxsize=32)
-def load_refine_chns_for_subject(subject: str) -> Tuple[str, ...]:
-    """Read subject-level refined channel names (cached per subject).
-
-    The new pipeline writes ONE refine artifact per subject (no per-record
-    suffix), schema: {chns_names, events_count}. Returns a tuple so lru_cache
-    is safe; convert at call site if mutation is needed.
-    """
-    refine_path = _refine_path_for_subject(subject)
-    if not refine_path.exists():
-        raise FileNotFoundError(
-            f"Subject-level refine artifact missing: {refine_path}\n"
-            "Expected file produced by scripts/run_hfo_detection.py."
-        )
-    z = np.load(refine_path, allow_pickle=True)
-    return tuple(str(c) for c in z["chns_names"])
-
-
 def _discover_records(subject: str) -> List[Dict]:
     """Cross-reference results/hfo_detection/<subject>/*_gpu.npz with raw .data/.head.
 
@@ -72,7 +49,8 @@ def _discover_records(subject: str) -> List[Dict]:
         raise FileNotFoundError(f"No new-pipeline gpu dir: {new_gpu_dir}")
     out: List[Dict] = []
     for gpu_path in sorted(new_gpu_dir.glob("*_gpu.npz")):
-        stem = gpu_path.stem.replace("_gpu", "")
+        # suffix-only strip; replace() would mangle e.g. "X_gpu_y_gpu"
+        stem = gpu_path.stem.removesuffix("_gpu")
         if stem.endswith("_refineGpu") or stem.startswith("sub_"):
             continue
         if stem not in raw_blocks:
@@ -97,7 +75,12 @@ def _discover_records(subject: str) -> List[Dict]:
 
 
 def _smoke_print(subject: str) -> None:
-    """Dry-print first record's metadata; do not write any files."""
+    """Dry-print first record's metadata; do not write any files.
+
+    Stage A scope: gpu/raw discovery only. Refine-list lookup belongs to
+    Stage B.1 and is not invoked here, so subjects without _refineGpu.npz
+    can still complete Stage A smoke without error.
+    """
     recs = _discover_records(subject)
     if not recs:
         print(f"[smoke] subject={subject} no records discovered")
@@ -111,16 +94,12 @@ def _smoke_print(subject: str) -> None:
         for d in whole_dets
         if np.asarray(d).size
     )
-    refine_chns = load_refine_chns_for_subject(subject)
     print(f"[smoke] subject={subject}  total_records={len(recs)}")
     print(f"[smoke] first stem={first['stem']}  sfreq={first['sfreq']}")
     print(f"[smoke]   gpu_path={first['new_gpu_path']}")
     print(f"[smoke]   raw_data={first['raw_data_path']}")
     print(f"[smoke]   raw_head={first['raw_head_path']}")
-    print(
-        f"[smoke]   n_chns_full={len(chns_names)}  "
-        f"n_chns_refined={len(refine_chns)}  n_dets_total={n_dets}"
-    )
+    print(f"[smoke]   n_chns_full={len(chns_names)}  n_dets_total={n_dets}")
     print("[smoke] (no files written)")
 
 
