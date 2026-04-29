@@ -16,9 +16,10 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -158,7 +159,12 @@ def _empty_lagpat_record(start_t_epoch: float) -> Dict[str, np.ndarray]:
     }
 
 
-def compute_lagpat_record(subject: str, stem: str) -> Dict[str, np.ndarray]:
+def compute_lagpat_record(
+    subject: str,
+    stem: str,
+    *,
+    packed_times: Optional[np.ndarray] = None,
+) -> Dict[str, np.ndarray]:
     """End-to-end per-record pack + lagPat for the Epilepsiae new pipeline.
 
     Schema matches legacy {chnNames, lagPatRaw, lagPatRank, eventsBool, start_t}.
@@ -213,8 +219,9 @@ def compute_lagpat_record(subject: str, stem: str) -> Dict[str, np.ndarray]:
     b, a = butter(4, [RIPPLE_BAND[0] / nyq, RIPPLE_BAND[1] / nyq], btype="band")
     sig_band = filtfilt(b, a, sig_pick, axis=-1)
 
-    # 4. Pack windows (already in seconds)
-    packed_times = pack_record(subject, stem)
+    # 4. Pack windows (already in seconds); reuse a precomputed array when available
+    if packed_times is None:
+        packed_times = pack_record(subject, stem)
     if packed_times.size == 0:
         return _empty_lagpat_record(start_t_epoch)
 
@@ -283,6 +290,59 @@ def compute_lagpat_record(subject: str, stem: str) -> Dict[str, np.ndarray]:
     }
 
 
+def process_one_record(
+    subject: str,
+    stem: str,
+    *,
+    force: bool = False,
+) -> Dict[str, Any]:
+    """Pack + lagPat for one (subject, stem); write outputs to OUTPUT_ROOT.
+
+    Returns a per-record summary suitable for inclusion in _backfill_log.json.
+    Skips work when both output files already exist unless force=True.
+    """
+    out_dir = OUTPUT_ROOT / subject
+    pt_path = out_dir / f"{stem}_packedTimes.npy"
+    lag_path = out_dir / f"{stem}_lagPat.npz"
+
+    if not force and pt_path.exists() and lag_path.exists():
+        return {
+            "stem": stem,
+            "skipped": True,
+            "reason": "outputs exist",
+            "pt_path": str(pt_path),
+            "lag_path": str(lag_path),
+        }
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    t0 = time.time()
+    packed_times = pack_record(subject, stem)
+    lag = compute_lagpat_record(subject, stem, packed_times=packed_times)
+    runtime_sec = time.time() - t0
+
+    np.save(pt_path, packed_times)
+    np.savez_compressed(
+        lag_path,
+        chnNames=lag["chnNames"],
+        lagPatRaw=lag["lagPatRaw"],
+        lagPatRank=lag["lagPatRank"],
+        eventsBool=lag["eventsBool"],
+        start_t=lag["start_t"],
+    )
+
+    return {
+        "stem": stem,
+        "skipped": False,
+        "n_events": int(lag["lagPatRaw"].shape[1]),
+        "n_channels": int(len(lag["chnNames"])),
+        "n_packed": int(packed_times.shape[0]),
+        "start_t": float(lag["start_t"]),
+        "runtime_sec": float(runtime_sec),
+        "pt_path": str(pt_path),
+        "lag_path": str(lag_path),
+    }
+
+
 def _smoke_print(subject: str) -> None:
     """Dry-print first record's metadata; do not write any files.
 
@@ -317,11 +377,18 @@ def main() -> None:
         description="Epilepsiae new-pipeline pack + lagPat backfill (Stage A skeleton).",
     )
     parser.add_argument("--subject", type=str, default=None)
+    parser.add_argument("--stem", type=str, default=None,
+                        help="Process a single record stem (B.4.a single-record mode).")
     parser.add_argument("--all", action="store_true")
     parser.add_argument(
         "--smoke",
         action="store_true",
         help="Process first record of given subject only; dry-print, no writes.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Re-run even if output files already exist (overwrite).",
     )
     args = parser.parse_args()
 
@@ -331,8 +398,30 @@ def main() -> None:
         _smoke_print(args.subject)
         return
 
+    if args.stem:
+        if not args.subject:
+            parser.error("--stem requires --subject")
+        result = process_one_record(args.subject, args.stem, force=args.force)
+        if result.get("skipped"):
+            print(
+                f"[B.4.a] subject={args.subject} stem={args.stem} SKIPPED "
+                f"({result.get('reason')}); use --force to overwrite"
+            )
+            print(f"  pt_path={result['pt_path']}")
+            print(f"  lag_path={result['lag_path']}")
+        else:
+            print(
+                f"[B.4.a] subject={args.subject} stem={args.stem}  "
+                f"n_events={result['n_events']}  n_channels={result['n_channels']}  "
+                f"n_packed={result['n_packed']}  runtime={result['runtime_sec']:.1f}s"
+            )
+            print(f"  start_t={result['start_t']:.0f} (Unix epoch)")
+            print(f"  pt_path={result['pt_path']}")
+            print(f"  lag_path={result['lag_path']}")
+        return
+
     raise NotImplementedError(
-        "Stage A skeleton only. Stage B (pack + lagPat production) not implemented yet."
+        "Cohort batch (Stage B.5) not implemented yet. Use --stem for single-record mode."
     )
 
 
