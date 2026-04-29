@@ -22,8 +22,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.template_temporal_pairing import (  # noqa: E402
+    compute_burst_diagnostic_with_nulls,
+    compute_lag1_same_fraction,
     compute_pairing_lift,
     compute_pairing_with_nulls,
+    compute_run_metrics,
+    compute_runs,
     compute_transition_odds,
     evaluate_pass_criteria,
     resample_isi_per_cluster,
@@ -437,3 +441,100 @@ def test_resample_isi_per_cluster_raises():
             local_window_seconds=300.0,
             rng=rng,
         )
+
+
+# ---------------------------------------------------------------------------
+# Step 3.5 burst-level diagnostic — T_burst_1 .. T_burst_6
+# ---------------------------------------------------------------------------
+def test_compute_runs_basic():
+    times = np.arange(9, dtype=float) * 1.0
+    labels = np.array([0, 0, 0, 1, 1, 0, 1, 1, 1], dtype=int)
+    block = [(times[0] - 0.1, times[-1] + 0.1)]
+    runs = compute_runs(times, labels, block)
+    assert runs["run_label"].tolist() == [0, 1, 0, 1]
+    assert runs["run_length"].tolist() == [3, 2, 1, 3]
+
+
+def test_compute_runs_block_isolation():
+    # Block A: events at t=0,1,2 with labels [0,0,0]
+    # Block B: events at t=10,11,12 with labels [0,1,1]
+    times = np.array([0.0, 1.0, 2.0, 10.0, 11.0, 12.0])
+    labels = np.array([0, 0, 0, 0, 1, 1], dtype=int)
+    block = [(0.0, 5.0), (9.5, 13.0)]
+    runs = compute_runs(times, labels, block)
+    # Even though label 0 spans the gap, the runs MUST split at block boundary
+    assert runs["run_label"].tolist() == [0, 0, 1]
+    assert runs["run_length"].tolist() == [3, 1, 2]
+    assert runs["run_block_id"].tolist() == [0, 1, 1]
+
+
+def test_compute_runs_alternating():
+    times = np.arange(8, dtype=float)
+    labels = np.array([0, 1, 0, 1, 0, 1, 0, 1], dtype=int)
+    block = [(times[0] - 0.1, times[-1] + 0.1)]
+    runs = compute_runs(times, labels, block)
+    assert int(runs["run_length"].size) == 8
+    assert all(rl == 1 for rl in runs["run_length"])
+    metrics = compute_run_metrics(runs)
+    assert metrics["mean_run_length"] == pytest.approx(1.0, abs=1e-9)
+
+
+def test_compute_run_metrics_constant_label():
+    times = np.arange(10, dtype=float)
+    labels = np.zeros(10, dtype=int)
+    block = [(times[0] - 0.1, times[-1] + 0.1)]
+    runs = compute_runs(times, labels, block)
+    assert runs["run_label"].tolist() == [0]
+    assert runs["run_length"].tolist() == [10]
+    metrics = compute_run_metrics(runs)
+    assert metrics["mean_run_length"] == pytest.approx(10.0, abs=1e-9)
+    assert metrics["mean_run_length_a"] == pytest.approx(10.0, abs=1e-9)
+    assert np.isnan(metrics["mean_run_length_b"])
+
+
+def test_run_length_lift_under_independence():
+    """Sanity: i.i.d. labels give run_length_lift ≈ 1 against block-aware null."""
+    rng = np.random.default_rng(31)
+    times = np.sort(rng.uniform(0, 1000, size=5000))
+    labels = rng.integers(0, 2, size=5000)
+    block = [(times[0] - 0.1, times[-1] + 0.1)]
+
+    out = compute_burst_diagnostic_with_nulls(
+        event_abs_times=times,
+        cluster_labels=labels,
+        block_time_ranges=block,
+        n_perm=100,
+        nulls=("N1",),
+        seed=0,
+    )
+    rll = out["lift"]["N1"]["run_length_lift"]
+    assert abs(rll - 1.0) < 0.10, f"i.i.d. labels should give run_length_lift ≈ 1, got {rll}"
+
+
+def test_lag1_same_excess_alternating_vs_clustered():
+    # Strict alternating: lag1 same is 0
+    times_alt = np.arange(200, dtype=float)
+    labels_alt = np.array([i % 2 for i in range(200)], dtype=int)
+    block_alt = [(times_alt[0] - 0.1, times_alt[-1] + 0.1)]
+    p_same_alt = compute_lag1_same_fraction(times_alt, labels_alt, block_alt)
+    assert p_same_alt == pytest.approx(0.0, abs=1e-9)
+
+    # Strongly clustered: 100x label0 then 100x label1
+    times_clu = np.arange(200, dtype=float)
+    labels_clu = np.array([0] * 100 + [1] * 100, dtype=int)
+    p_same_clu = compute_lag1_same_fraction(times_clu, labels_clu, block_alt)
+    # 198 same-label pairs (within each block of 100) + 1 differing pair = 198/199
+    assert p_same_clu == pytest.approx(198.0 / 199.0, abs=1e-6)
+
+    # lag1_same_excess on alternating against any null: empirical = 0,
+    # null mean for shuffled 100/100 distribution ≈ 0.5 -> excess ≈ -0.5
+    out_alt = compute_burst_diagnostic_with_nulls(
+        event_abs_times=times_alt,
+        cluster_labels=labels_alt,
+        block_time_ranges=block_alt,
+        n_perm=100,
+        nulls=("N1",),
+        seed=0,
+    )
+    excess_alt = out_alt["lag1_same_excess"]["N1"]
+    assert excess_alt < -0.40, f"alternating should give strongly negative lag1_same_excess, got {excess_alt}"

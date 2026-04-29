@@ -451,7 +451,8 @@ def evaluate_pass_criteria(
 | **PR-7 Step 1** | 代码层 + TDD（§8） | `src/template_temporal_pairing.py` + 4 个 shuffle helper + `compute_pairing_with_nulls` + `compute_transition_odds` + `evaluate_pass_criteria`；T1–T10 全绿 | 1.5 d |
 | **PR-7 Step 2** | Cohort audit + per-subject 跑（fwd/rev cohort） | `pr7_cohort_audit.csv` + audit-pass fwd/rev subject 全部 per-subject JSON（含 N0/N1/N2/N3 4 nulls + transition odds） | 0.5 d |
 | **PR-7 Step 3** | H1 primary cohort + 10s/30s 双门 + N3 robustness | fwd/rev cohort `excess(10s)` Wilcoxon + sign test；30s 同方向；N3 一致性 | 0.5 d |
-| **PR-7 Step 4** | H2 negative control（non-fwdrev cohort） | non-fwdrev cohort 跑同一流程；H2 守住 / FAIL 判定 | 0.5 d |
+| **PR-7 Step 3.5** | **Burst-level run diagnostic（post-hoc exploratory）** | run-length 与 gap_to_iei_ratio vs block-aware label-shuffle null；解释 H1 NULL etiology；**不**改 H1 verdict、不进 PASS gate；plan-of-record: `pr7_step3p5_burst_diagnostic_plan_2026-04-29.md` | 0.8 d |
+| **PR-7 Step 4** | H2 negative control（non-fwdrev cohort） | non-fwdrev cohort 跑同一流程；H2 守住 / FAIL 判定。**优先级降**：在 Step 3.5 后条件性决定是否跑 | 0.5 d |
 | **PR-7 Step 5** | Robustness：null window sweep + N4 conditional follow-up | window 10/30/60 min sweep；N4 仅在 N2/N3 不一致时触发 | 0.5 d |
 | **PR-7 Step 6** | **可视化（§6.5 全部 4 主图 + 3 appendix）** | `scripts/plot_pr7_template_pairing.py` + 7 张图 + `figures/README.md` 中文图说 + cohort verdict text 写入主图 1 | 0.75 d |
 | **PR-7 Step 7** | 归档 + 主文档结论 | `docs/archive/topic1/pr7_template_pairing_results_2026-05-xx.md` + topic1 §7 一句话结论；本计划落入"历史索引" | 0.5 d |

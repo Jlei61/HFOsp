@@ -292,6 +292,84 @@ def plot_per_subject_curves() -> List[Path]:
 
 
 # ---------------------------------------------------------------------------
+# Step 3.5 burst-level diagnostic main figure (fig5)
+# ---------------------------------------------------------------------------
+def plot_main_fig5_burst_diagnostic(summary: Dict[str, Any]) -> Optional[Path]:
+    """fig5: per-subject N2 (filled) + N1 (open) markers for run_length_lift,
+    gap_to_iei_lift, lag1_same_excess. Cohort median bar + 1.0 baseline line.
+    """
+    burst_block = summary.get("burst_diagnostic_per_cohort", {}).get("h1_primary")
+    if not burst_block or "by_null" not in burst_block:
+        print("No burst diagnostic data in cohort_summary.json; skipping fig5.")
+        return None
+
+    n2 = burst_block["by_null"].get("N2", {})
+    n1 = burst_block["by_null"].get("N1", {})
+    if not n2:
+        print("No N2 burst data; skipping fig5.")
+        return None
+
+    rll_n2 = n2.get("run_length_lift", {})
+    rll_n1 = n1.get("run_length_lift", {})
+    git_n2 = n2.get("gap_to_iei_lift", {})
+    git_n1 = n1.get("gap_to_iei_lift", {})
+    lag_n2 = n2.get("lag1_same_excess", {})
+    lag_n1 = n1.get("lag1_same_excess", {})
+
+    subjects = sorted(rll_n2.keys())
+    if not subjects:
+        return None
+    short_labels = [s.replace("epilepsiae_", "E:").replace("yuquan_", "Y:") for s in subjects]
+    x = np.arange(len(subjects))
+
+    fig, axes = new_figure(nrows=1, ncols=3, figsize=(15.0, 5.0))
+    panels = [
+        (axes[0], "run_length_lift", rll_n2, rll_n1, 1.0, "lift", "(a) mean run length / null"),
+        (axes[1], "gap_to_iei_lift", git_n2, git_n1, 1.0, "lift", "(b) gap-to-IEI ratio / null"),
+        (axes[2], "lag1_same_excess", lag_n2, lag_n1, 0.0, "excess", "(c) lag-1 same-label excess"),
+    ]
+    for ax, key, n2_dict, n1_dict, baseline, ylabel, title in panels:
+        n2_vals = [n2_dict.get(s, np.nan) for s in subjects]
+        n1_vals = [n1_dict.get(s, np.nan) for s in subjects]
+        ax.scatter(
+            x, n2_vals, marker="o", s=110,
+            facecolor=COL_SIG, edgecolor="black", zorder=4,
+            label="N2 (main null)",
+        )
+        ax.scatter(
+            x, n1_vals, marker="o", s=70,
+            facecolor="white", edgecolor=COL_SIG, linewidths=1.5, zorder=3,
+            label="N1 (sanity)",
+        )
+        # cohort median (N2)
+        n2_arr = np.asarray([v for v in n2_vals if np.isfinite(v)])
+        if n2_arr.size:
+            ax.axhline(
+                float(np.median(n2_arr)), color=COL_SIG, linestyle="--",
+                linewidth=1.0, alpha=0.6,
+            )
+        ax.axhline(baseline, color="black", linestyle=":", linewidth=1.0, alpha=0.7)
+        ax.set_xticks(x)
+        ax.set_xticklabels(short_labels, rotation=30, ha="right", fontsize=11)
+        ax.set_ylabel(ylabel, fontsize=FS_LABEL)
+        ax.set_title(title, fontsize=FS_TITLE)
+        ax.grid(True, alpha=0.25, linestyle=":")
+        ax.legend(loc="best", fontsize=10)
+
+    fig.suptitle(
+        "PR-7 Step 3.5 — burst-level diagnostic (post-hoc exploratory)",
+        fontsize=FS_TITLE,
+    )
+    plt.tight_layout()
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    out = FIG_DIR / "fig5_burst_diagnostic.png"
+    savefig_pub(fig, out, dpi=DPI_PUB)
+    plt.close(fig)
+    print(f"Wrote {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
 # README.md for figures dir (AGENTS.md spec)
 # ---------------------------------------------------------------------------
 def write_figures_readme(summary: Dict[str, Any]) -> None:
@@ -302,6 +380,15 @@ def write_figures_readme(summary: Dict[str, Any]) -> None:
     wilc = triple.get("wilcoxon_10s", float("nan"))
     sign = triple.get("sign_10s", float("nan"))
     med30 = triple.get("median_30s", float("nan"))
+    burst_block = summary.get("burst_diagnostic_per_cohort", {}).get("h1_primary", {})
+    burst_n2 = burst_block.get("by_null", {}).get("N2", {})
+    rll_med = burst_n2.get("median_run_length_lift", float("nan"))
+    rll_pos = burst_n2.get("n_subjects_run_length_lift_gt_1")
+    git_med = burst_n2.get("median_gap_to_iei_lift", float("nan"))
+    git_pos = burst_n2.get("n_subjects_gap_to_iei_lift_gt_1")
+    lag1_med = burst_n2.get("median_lag1_same_excess", float("nan"))
+    lag1_pos = burst_n2.get("n_subjects_lag1_excess_positive")
+
     md = f"""# PR-7 Template Antagonistic Temporal Pairing 图集
 
 ## 主图
@@ -319,6 +406,23 @@ sign p={sign:.3f}、median(30s)={med30:+.3f}）。短窗 10s/30s 上没有
 检测到 fwd/rev cohort 的 opposite-template excess；长窗几乎归零，慢漂移
 共驱不是 confound。仅否定 short-window reciprocal coupling，**不**否定
 PR-6 已建立的 fwd/rev 几何相关性，**不**否定其它形式的因果耦合。
+
+### fig5_burst_diagnostic.png
+
+PR-7 Step 3.5 post-hoc exploratory diagnostic。三个 panel 分别画
+H1 cohort (n={n_h1}) 上每 subject 的 (a) `run_length_lift`、(b)
+`gap_to_iei_lift`、(c) `lag1_same_excess`，每个数字在 N2 主 null（实心
+红圆）和 N1 sanity（空心红圆）下分别给出。点线 baseline（lift=1 或
+excess=0），虚线为 cohort 中位数（N2）。
+
+**关注点**：观察是否存在 same-template persistence（form 2 vs form 5）：
+- 当前 cohort 中位 `run_length_lift` (N2) = {rll_med:.3f}，
+  {rll_pos}/{n_h1} subject > 1.0
+- 中位 `gap_to_iei_lift` (N2) = {git_med:.3f}，
+  {git_pos}/{n_h1} > 1.0
+- 中位 `lag1_same_excess` (N2) = {lag1_med:+.4f}，
+  {lag1_pos}/{n_h1} > 0
+本 figure **不**进 H1 PASS 判据；仅作 H1 NULL 的机制解释。
 
 ## per_subject/
 
@@ -349,6 +453,7 @@ def main() -> None:
 
     plot_main_fig1(summary)
     plot_per_subject_curves()
+    plot_main_fig5_burst_diagnostic(summary)
     write_figures_readme(summary)
 
 

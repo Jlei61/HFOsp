@@ -39,6 +39,7 @@ from src.interictal_propagation import (  # noqa: E402
 )
 from src.template_temporal_pairing import (  # noqa: E402
     cohort_paired_test,
+    compute_burst_diagnostic_with_nulls,
     compute_pairing_with_nulls,
     compute_transition_odds,
     evaluate_pass_criteria,
@@ -180,6 +181,7 @@ EPILEPSIAE_RAW_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data
 
 OUT_DIR = ROOT / "results" / "interictal_propagation" / "template_pairing"
 PER_SUBJECT_OUT = OUT_DIR / "per_subject"
+PER_SUBJECT_BURST_OUT = OUT_DIR / "per_subject_burst"
 AUDIT_CSV = OUT_DIR / "pr7_cohort_audit.csv"
 COHORT_SUMMARY_JSON = OUT_DIR / "cohort_summary.json"
 
@@ -616,6 +618,162 @@ def run_per_subject(
 
 
 # ---------------------------------------------------------------------------
+# Step 3.5 burst-level diagnostic — per-subject + cohort aggregation
+# ---------------------------------------------------------------------------
+def _run_one_subject_burst(
+    subject_id: str,
+    dataset: str,
+    n_perm: int,
+    n2_window_seconds: float,
+    nulls: Tuple[str, ...],
+    seed: int,
+) -> Optional[Dict[str, Any]]:
+    json_path = _per_subject_json_path(dataset, subject_id)
+    if not json_path.exists():
+        print(f"  [skip] {dataset}/{subject_id}: missing per-subject JSON")
+        return None
+    with json_path.open() as fh:
+        psj = json.load(fh)
+    labels = np.asarray(
+        psj.get("adaptive_cluster", {}).get("labels", []), dtype=int
+    )
+
+    subject_dir = _resolve_subject_dir(dataset, subject_id)
+    if subject_dir is None:
+        print(f"  [skip] {dataset}/{subject_id}: raw data root unmounted")
+        return None
+    loaded = _load_subject_with_freqcent(subject_dir)
+    if loaded is None:
+        print(f"  [skip] {dataset}/{subject_id}: no *_lagPat_withFreqCent.npz")
+        return None
+    raw_times = np.asarray(loaded["event_abs_times"], dtype=float)
+    bools = np.asarray(loaded["bools"], dtype=int)
+    block_time_ranges = [tuple(b) for b in loaded.get("block_time_ranges", [])]
+
+    valid_idx = _valid_event_indices(bools, min_participating=3)
+    if valid_idx.size != labels.size:
+        print(
+            f"  [skip] {dataset}/{subject_id}: valid_event_count {valid_idx.size} "
+            f"!= label count {labels.size}"
+        )
+        return None
+    times = raw_times[valid_idx]
+    finite_mask = np.isfinite(times) & (labels >= 0)
+    times = times[finite_mask]
+    labels = labels[finite_mask]
+    if times.size == 0:
+        print(f"  [skip] {dataset}/{subject_id}: no finite events after filter")
+        return None
+
+    t0 = time.time()
+    diag = compute_burst_diagnostic_with_nulls(
+        event_abs_times=times,
+        cluster_labels=labels,
+        block_time_ranges=block_time_ranges,
+        n_perm=n_perm,
+        nulls=nulls,
+        n2_window_seconds=n2_window_seconds,
+        seed=seed,
+    )
+    elapsed = time.time() - t0
+
+    def _to_jsonable(x: Any) -> Any:
+        if isinstance(x, dict):
+            return {str(k): _to_jsonable(v) for k, v in x.items()}
+        if isinstance(x, list):
+            return [_to_jsonable(v) for v in x]
+        if isinstance(x, tuple):
+            return [_to_jsonable(v) for v in x]
+        if isinstance(x, np.ndarray):
+            return x.tolist()
+        if isinstance(x, (np.integer,)):
+            return int(x)
+        if isinstance(x, (np.floating,)):
+            return float(x)
+        return x
+
+    record = {
+        "subject_id": subject_id,
+        "dataset": dataset,
+        "n_events_used": int(times.size),
+        "n_T_a": int(np.sum(labels == 0)),
+        "n_T_b": int(np.sum(labels == 1)),
+        "n_blocks": len(block_time_ranges),
+        "nulls_run": list(nulls),
+        "n_perm": int(n_perm),
+        "n2_window_seconds": float(n2_window_seconds),
+        "seed": int(seed),
+        "burst_diagnostic": _to_jsonable(diag),
+        "elapsed_seconds": float(elapsed),
+    }
+
+    PER_SUBJECT_BURST_OUT.mkdir(parents=True, exist_ok=True)
+    out = PER_SUBJECT_BURST_OUT / f"{dataset}_{subject_id}.json"
+    with out.open("w") as fh:
+        json.dump(record, fh, indent=2)
+    rll_n2 = diag["lift"].get("N2", {}).get("run_length_lift", float("nan"))
+    git_n2 = diag["lift"].get("N2", {}).get("gap_to_iei_lift", float("nan"))
+    lag1_n2 = diag["lag1_same_excess"].get("N2", float("nan"))
+    print(
+        f"  [done] {dataset}/{subject_id} in {elapsed:.1f}s "
+        f"(N2: rll={rll_n2:.3f}, gap_iei={git_n2:.3f}, lag1_excess={lag1_n2:+.4f})"
+    )
+    return record
+
+
+def run_burst_diagnostic(
+    cohort: str = "h1_primary",
+    n_perm: int = 500,
+    n2_window_seconds: float = 1800.0,
+    nulls: Tuple[str, ...] = ("N1", "N2"),
+    seed: int = 0,
+    only: Optional[List[str]] = None,
+) -> List[Dict[str, Any]]:
+    if not AUDIT_CSV.exists():
+        raise FileNotFoundError(
+            f"PR-7 audit CSV not found at {AUDIT_CSV}; run --audit first."
+        )
+
+    with AUDIT_CSV.open() as fh:
+        rows = list(csv.DictReader(fh))
+
+    def _is_target(row: Dict[str, str]) -> bool:
+        if cohort == "h1_primary":
+            return row.get("h1_primary_pass") == "True"
+        if cohort == "h2_negative":
+            return row.get("h2_negative_pass") == "True"
+        if cohort == "all_eligible":
+            return (
+                row.get("h1_primary_pass") == "True"
+                or row.get("h2_negative_pass") == "True"
+            )
+        raise ValueError(f"Unknown cohort: {cohort}")
+
+    targets = [r for r in rows if _is_target(r)]
+    if only:
+        only_set = set(only)
+        targets = [r for r in targets if r["subject_id"] in only_set]
+
+    print(
+        f"Burst diagnostic for cohort='{cohort}' on {len(targets)} subjects"
+        f" (n_perm={n_perm}, nulls={nulls}, n2_window={n2_window_seconds}s)"
+    )
+    results: List[Dict[str, Any]] = []
+    for r in targets:
+        rec = _run_one_subject_burst(
+            subject_id=r["subject_id"],
+            dataset=r["dataset"],
+            n_perm=n_perm,
+            n2_window_seconds=n2_window_seconds,
+            nulls=nulls,
+            seed=seed,
+        )
+        if rec is not None:
+            results.append(rec)
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Cohort aggregation (Step 3 deliverable)
 # ---------------------------------------------------------------------------
 def _classify_subjects_by_cohort() -> Dict[str, List[Tuple[str, str]]]:
@@ -746,6 +904,68 @@ def aggregate_cohort(
 
         summary["cohorts"][cohort_name] = cohort_block
 
+    # Step 3.5 burst-level diagnostic block (per-cohort), if available
+    summary["burst_diagnostic_per_cohort"] = {}
+    for cohort_name, members in cohorts.items():
+        if not members:
+            continue
+        per_subject_burst: Dict[str, Dict[str, Any]] = {}
+        for ds, sid in members:
+            p = PER_SUBJECT_BURST_OUT / f"{ds}_{sid}.json"
+            if not p.exists():
+                continue
+            with p.open() as fh:
+                rec = json.load(fh)
+            per_subject_burst[f"{ds}_{sid}"] = {
+                "empirical": rec["burst_diagnostic"]["empirical"],
+                "lift": rec["burst_diagnostic"]["lift"],
+                "lag1_same_excess": rec["burst_diagnostic"]["lag1_same_excess"],
+                "n_events_used": rec["n_events_used"],
+            }
+        if not per_subject_burst:
+            continue
+        # cohort-level summary by null
+        cohort_burst_summary: Dict[str, Any] = {
+            "n_with_burst_data": len(per_subject_burst),
+            "per_subject": per_subject_burst,
+            "by_null": {},
+        }
+        for null_id in ("N1", "N2"):
+            rll = {
+                k: v["lift"].get(null_id, {}).get("run_length_lift", float("nan"))
+                for k, v in per_subject_burst.items()
+            }
+            git = {
+                k: v["lift"].get(null_id, {}).get("gap_to_iei_lift", float("nan"))
+                for k, v in per_subject_burst.items()
+            }
+            l1ex = {
+                k: v["lag1_same_excess"].get(null_id, float("nan"))
+                for k, v in per_subject_burst.items()
+            }
+            rll_arr = np.asarray([v for v in rll.values() if np.isfinite(v)])
+            git_arr = np.asarray([v for v in git.values() if np.isfinite(v)])
+            l1_arr = np.asarray([v for v in l1ex.values() if np.isfinite(v)])
+            cohort_burst_summary["by_null"][null_id] = {
+                "run_length_lift": rll,
+                "gap_to_iei_lift": git,
+                "lag1_same_excess": l1ex,
+                "n_subjects": int(rll_arr.size),
+                "median_run_length_lift": (
+                    float(np.median(rll_arr)) if rll_arr.size else float("nan")
+                ),
+                "n_subjects_run_length_lift_gt_1": int(np.sum(rll_arr > 1.0)),
+                "median_gap_to_iei_lift": (
+                    float(np.median(git_arr)) if git_arr.size else float("nan")
+                ),
+                "n_subjects_gap_to_iei_lift_gt_1": int(np.sum(git_arr > 1.0)),
+                "median_lag1_same_excess": (
+                    float(np.median(l1_arr)) if l1_arr.size else float("nan")
+                ),
+                "n_subjects_lag1_excess_positive": int(np.sum(l1_arr > 0.0)),
+            }
+        summary["burst_diagnostic_per_cohort"][cohort_name] = cohort_burst_summary
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with COHORT_SUMMARY_JSON.open("w") as fh:
         json.dump(summary, fh, indent=2)
@@ -785,6 +1005,11 @@ def main() -> None:
         action="store_true",
         help="Aggregate per-subject JSONs -> cohort_summary.json + triple-gate",
     )
+    parser.add_argument(
+        "--burst-diagnostic",
+        action="store_true",
+        help="Step 3.5 burst-level diagnostic on a cohort (post-hoc exploratory)",
+    )
     parser.add_argument("--all", action="store_true", help="Audit then per-subject")
     parser.add_argument(
         "--cohort",
@@ -793,7 +1018,14 @@ def main() -> None:
         choices=["h1_primary", "h2_negative", "all_eligible"],
         help="Which cohort to run for --per-subject (default: all_eligible)",
     )
-    parser.add_argument("--n-perm", type=int, default=1000)
+    parser.add_argument(
+        "--n-perm", type=int, default=1000,
+        help="Permutations for --per-subject (event-level pairing). Default 1000.",
+    )
+    parser.add_argument(
+        "--burst-n-perm", type=int, default=500,
+        help="Permutations for --burst-diagnostic (run/lag1 metrics). Default 500.",
+    )
     parser.add_argument("--n2-window-min", type=float, default=30.0)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument(
@@ -804,9 +1036,16 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if not (args.audit or args.per_subject or args.cohort_stats or args.all):
+    if not (
+        args.audit
+        or args.per_subject
+        or args.cohort_stats
+        or args.burst_diagnostic
+        or args.all
+    ):
         parser.error(
-            "Must specify one of --audit / --per-subject / --cohort-stats / --all"
+            "Must specify one of --audit / --per-subject / --cohort-stats "
+            "/ --burst-diagnostic / --all"
         )
 
     if args.audit or args.all:
@@ -819,6 +1058,18 @@ def main() -> None:
         run_per_subject(
             cohort=args.cohort,
             n_perm=args.n_perm,
+            n2_window_seconds=args.n2_window_min * 60.0,
+            seed=args.seed,
+            only=only_list,
+        )
+
+    if args.burst_diagnostic:
+        only_list = (
+            [s.strip() for s in args.only.split(",")] if args.only else None
+        )
+        run_burst_diagnostic(
+            cohort=args.cohort,
+            n_perm=args.burst_n_perm,
             n2_window_seconds=args.n2_window_min * 60.0,
             seed=args.seed,
             only=only_list,

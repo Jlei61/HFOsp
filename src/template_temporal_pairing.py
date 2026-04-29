@@ -550,3 +550,331 @@ def evaluate_pass_criteria(
         "subjects": list(keys_sorted),
         "alpha": float(alpha),
     }
+
+
+# ---------------------------------------------------------------------------
+# Step 3.5 — Burst-level run diagnostic (post-hoc exploratory)
+# Plan: docs/archive/topic1/pr7_step3p5_burst_diagnostic_plan_2026-04-29.md.
+# Does NOT change H1 verdict; not a PASS/FAIL gate.
+# ---------------------------------------------------------------------------
+def compute_runs(
+    event_abs_times: Sequence[float],
+    cluster_labels: Sequence[int],
+    block_time_ranges: Sequence[Tuple[float, float]],
+) -> Dict[str, np.ndarray]:
+    """Maximal consecutive same-label runs, block-aware.
+
+    Run boundary triggers: label change OR block change. No ISI threshold
+    (no ad hoc parameter per archive §3).
+
+    Returns dict with arrays keyed by run:
+      'run_label'         (n_runs,)  cluster label of the run
+      'run_length'        (n_runs,)  number of events in the run
+      'run_block_id'      (n_runs,)  block index for the run
+      'run_t_first'       (n_runs,)  absolute time of first event in run
+      'run_t_last'        (n_runs,)  absolute time of last event in run
+      'within_run_iei'    (n_events_in_runs - n_runs,)  pooled ISIs inside runs
+      'between_run_gap'   (n_runs - n_runs_per_block_total,)  gaps between
+                                     adjacent runs in the SAME block
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    labels = np.asarray(cluster_labels, dtype=int)
+    n = times.size
+    if n == 0:
+        return {
+            "run_label": np.zeros(0, dtype=int),
+            "run_length": np.zeros(0, dtype=int),
+            "run_block_id": np.zeros(0, dtype=int),
+            "run_t_first": np.zeros(0, dtype=float),
+            "run_t_last": np.zeros(0, dtype=float),
+            "within_run_iei": np.zeros(0, dtype=float),
+            "between_run_gap": np.zeros(0, dtype=float),
+        }
+
+    sort_idx = np.argsort(times, kind="stable")
+    times_s = times[sort_idx]
+    labels_s = labels[sort_idx]
+    block_s = _assign_blocks(times_s, block_time_ranges)
+
+    in_block_mask = block_s >= 0
+    if not np.any(in_block_mask):
+        return {
+            "run_label": np.zeros(0, dtype=int),
+            "run_length": np.zeros(0, dtype=int),
+            "run_block_id": np.zeros(0, dtype=int),
+            "run_t_first": np.zeros(0, dtype=float),
+            "run_t_last": np.zeros(0, dtype=float),
+            "within_run_iei": np.zeros(0, dtype=float),
+            "between_run_gap": np.zeros(0, dtype=float),
+        }
+
+    # Run boundary at index i (>0) iff labels_s[i] != labels_s[i-1]
+    # OR block_s[i] != block_s[i-1] OR either side is out-of-block.
+    run_labels: List[int] = []
+    run_lengths: List[int] = []
+    run_block_ids: List[int] = []
+    run_t_firsts: List[float] = []
+    run_t_lasts: List[float] = []
+    within_iei_chunks: List[np.ndarray] = []
+    between_gap_chunks: List[float] = []
+
+    cur_label: Optional[int] = None
+    cur_block: int = -1
+    cur_start: int = 0
+    cur_count: int = 0
+    last_run_end_idx_per_block: Dict[int, int] = {}
+
+    def _close_run(end_idx_excl: int) -> None:
+        if cur_count == 0:
+            return
+        run_labels.append(int(cur_label) if cur_label is not None else -1)
+        run_lengths.append(int(cur_count))
+        run_block_ids.append(int(cur_block))
+        first_idx = cur_start
+        last_idx = end_idx_excl - 1
+        run_t_firsts.append(float(times_s[first_idx]))
+        run_t_lasts.append(float(times_s[last_idx]))
+        if cur_count >= 2:
+            within_iei_chunks.append(np.diff(times_s[first_idx:end_idx_excl]))
+        prev_last = last_run_end_idx_per_block.get(cur_block)
+        if prev_last is not None:
+            between_gap_chunks.append(
+                float(times_s[first_idx] - times_s[prev_last])
+            )
+        last_run_end_idx_per_block[cur_block] = last_idx
+
+    for i in range(n):
+        if not in_block_mask[i]:
+            # Out-of-block event: close current run (if any), reset.
+            _close_run(i)
+            cur_label = None
+            cur_block = -1
+            cur_count = 0
+            continue
+        l_i = int(labels_s[i])
+        b_i = int(block_s[i])
+        if cur_count == 0:
+            cur_label = l_i
+            cur_block = b_i
+            cur_start = i
+            cur_count = 1
+        elif l_i == cur_label and b_i == cur_block:
+            cur_count += 1
+        else:
+            _close_run(i)
+            cur_label = l_i
+            cur_block = b_i
+            cur_start = i
+            cur_count = 1
+    _close_run(n)
+
+    within_iei = (
+        np.concatenate(within_iei_chunks)
+        if within_iei_chunks
+        else np.zeros(0, dtype=float)
+    )
+    between_gap = (
+        np.asarray(between_gap_chunks, dtype=float)
+        if between_gap_chunks
+        else np.zeros(0, dtype=float)
+    )
+
+    return {
+        "run_label": np.asarray(run_labels, dtype=int),
+        "run_length": np.asarray(run_lengths, dtype=int),
+        "run_block_id": np.asarray(run_block_ids, dtype=int),
+        "run_t_first": np.asarray(run_t_firsts, dtype=float),
+        "run_t_last": np.asarray(run_t_lasts, dtype=float),
+        "within_run_iei": within_iei,
+        "between_run_gap": between_gap,
+    }
+
+
+def compute_run_metrics(
+    runs: Dict[str, np.ndarray],
+) -> Dict[str, Any]:
+    """Per-subject summary statistics from a `compute_runs` result.
+
+    Returns archive §4.2 A/B/C metrics: run-length stats, run-time
+    structure, global burst fractions. lag1_same_excess is computed
+    separately (needs raw events + null shuffles).
+    """
+    rl = runs["run_length"]
+    rlab = runs["run_label"]
+    n_runs = int(rl.size)
+    if n_runs == 0:
+        return {
+            "n_runs_total": 0,
+            "mean_run_length": float("nan"),
+            "median_run_length": float("nan"),
+            "p95_run_length": float("nan"),
+            "mean_run_length_a": float("nan"),
+            "mean_run_length_b": float("nan"),
+            "run_duration_seconds_median": float("nan"),
+            "within_run_iei_median": float("nan"),
+            "between_run_gap_median": float("nan"),
+            "gap_to_iei_ratio": float("nan"),
+            "event_fraction_in_long_runs": 0.0,
+            "event_fraction_in_singleton_runs": 0.0,
+            "n_events_total": 0,
+        }
+
+    n_events_total = int(rl.sum())
+    durations = runs["run_t_last"] - runs["run_t_first"]
+    within_iei = runs["within_run_iei"]
+    between_gap = runs["between_run_gap"]
+
+    rl_a = rl[rlab == 0]
+    rl_b = rl[rlab == 1]
+
+    mean_within = float(np.median(within_iei)) if within_iei.size else float("nan")
+    mean_between = float(np.median(between_gap)) if between_gap.size else float("nan")
+    if np.isfinite(mean_within) and mean_within > 0 and np.isfinite(mean_between):
+        gap_iei_ratio = mean_between / mean_within
+    else:
+        gap_iei_ratio = float("nan")
+
+    return {
+        "n_runs_total": n_runs,
+        "mean_run_length": float(np.mean(rl)),
+        "median_run_length": float(np.median(rl)),
+        "p95_run_length": float(np.percentile(rl, 95)) if n_runs >= 2 else float(rl[0]),
+        "mean_run_length_a": float(np.mean(rl_a)) if rl_a.size else float("nan"),
+        "mean_run_length_b": float(np.mean(rl_b)) if rl_b.size else float("nan"),
+        "run_duration_seconds_median": float(np.median(durations)),
+        "within_run_iei_median": mean_within,
+        "between_run_gap_median": mean_between,
+        "gap_to_iei_ratio": float(gap_iei_ratio),
+        "event_fraction_in_long_runs": float(np.sum(rl[rl >= 3])) / float(n_events_total),
+        "event_fraction_in_singleton_runs": float(np.sum(rl[rl == 1])) / float(n_events_total),
+        "n_events_total": n_events_total,
+    }
+
+
+def compute_lag1_same_fraction(
+    event_abs_times: Sequence[float],
+    cluster_labels: Sequence[int],
+    block_time_ranges: Sequence[Tuple[float, float]],
+) -> float:
+    """Fraction of consecutive same-block event pairs with same label.
+
+    Returns nan if no eligible pairs.
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    labels = np.asarray(cluster_labels, dtype=int)
+    if times.size < 2:
+        return float("nan")
+    sort_idx = np.argsort(times, kind="stable")
+    times_s = times[sort_idx]
+    labels_s = labels[sort_idx]
+    block_s = _assign_blocks(times_s, block_time_ranges)
+    same_block = (block_s[:-1] == block_s[1:]) & (block_s[:-1] >= 0)
+    if not np.any(same_block):
+        return float("nan")
+    same_label = labels_s[:-1] == labels_s[1:]
+    return float(np.mean(same_label[same_block]))
+
+
+def compute_burst_diagnostic_with_nulls(
+    event_abs_times: Sequence[float],
+    cluster_labels: Sequence[int],
+    block_time_ranges: Sequence[Tuple[float, float]],
+    n_perm: int = 500,
+    nulls: Sequence[str] = ("N1", "N2"),
+    n2_window_seconds: float = 1800.0,
+    seed: int = 0,
+) -> Dict[str, Any]:
+    """Per-subject burst diagnostic driver. Returns nested dict:
+
+    {
+      'empirical': {... compute_run_metrics output ..., 'lag1_same': float},
+      'null': {N1: {metric_name: {'mean': float, 'std': float}}, N2: {...}},
+      'lift': {N1: {metric_name: float lift}, N2: {...}},
+      'lag1_same_excess': {N1: float, N2: float},
+    }
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    labels = np.asarray(cluster_labels, dtype=int)
+    rng = np.random.default_rng(seed)
+
+    runs = compute_runs(times, labels, block_time_ranges)
+    emp_metrics = compute_run_metrics(runs)
+    emp_lag1 = compute_lag1_same_fraction(times, labels, block_time_ranges)
+    empirical: Dict[str, Any] = dict(emp_metrics)
+    empirical["lag1_same"] = emp_lag1
+
+    metric_keys = (
+        "mean_run_length",
+        "median_run_length",
+        "gap_to_iei_ratio",
+        "event_fraction_in_long_runs",
+    )
+
+    null_block: Dict[str, Dict[str, Dict[str, float]]] = {}
+    lift_block: Dict[str, Dict[str, float]] = {}
+    lag1_excess_block: Dict[str, float] = {}
+
+    for null_name in nulls:
+        per_perm: Dict[str, List[float]] = {k: [] for k in metric_keys}
+        per_perm["lag1_same"] = []
+        for _ in range(n_perm):
+            shuffled = _generate_null_labels(
+                null_name, labels, times, block_time_ranges, rng, n2_window_seconds
+            )
+            r = compute_runs(times, shuffled, block_time_ranges)
+            m = compute_run_metrics(r)
+            for k in metric_keys:
+                per_perm[k].append(m[k])
+            per_perm["lag1_same"].append(
+                compute_lag1_same_fraction(times, shuffled, block_time_ranges)
+            )
+
+        per_null_summary: Dict[str, Dict[str, float]] = {}
+        for k in metric_keys:
+            arr = np.asarray(per_perm[k], dtype=float)
+            arr = arr[np.isfinite(arr)]
+            per_null_summary[k] = {
+                "mean": float(np.mean(arr)) if arr.size else float("nan"),
+                "std": float(np.std(arr, ddof=1)) if arr.size > 1 else float("nan"),
+            }
+        lag1_arr = np.asarray(per_perm["lag1_same"], dtype=float)
+        lag1_arr = lag1_arr[np.isfinite(lag1_arr)]
+        per_null_summary["lag1_same"] = {
+            "mean": float(np.mean(lag1_arr)) if lag1_arr.size else float("nan"),
+            "std": float(np.std(lag1_arr, ddof=1)) if lag1_arr.size > 1 else float("nan"),
+        }
+        null_block[null_name] = per_null_summary
+
+        lift_per_null: Dict[str, float] = {}
+        for k in metric_keys:
+            null_mean = per_null_summary[k]["mean"]
+            emp_val = empirical[k]
+            if not np.isfinite(emp_val) or not np.isfinite(null_mean) or null_mean == 0:
+                lift_per_null[k] = float("nan")
+            else:
+                lift_per_null[k] = float(emp_val / null_mean)
+        # gap_to_iei_lift specifically named for clarity
+        lift_per_null["run_length_lift"] = lift_per_null.get(
+            "mean_run_length", float("nan")
+        )
+        lift_per_null["gap_to_iei_lift"] = lift_per_null.get(
+            "gap_to_iei_ratio", float("nan")
+        )
+        lift_block[null_name] = lift_per_null
+
+        # lag1_same_excess = empirical - null_mean (signed difference, NOT ratio)
+        if np.isfinite(emp_lag1) and np.isfinite(per_null_summary["lag1_same"]["mean"]):
+            lag1_excess_block[null_name] = float(
+                emp_lag1 - per_null_summary["lag1_same"]["mean"]
+            )
+        else:
+            lag1_excess_block[null_name] = float("nan")
+
+    return {
+        "empirical": empirical,
+        "null": null_block,
+        "lift": lift_block,
+        "lag1_same_excess": lag1_excess_block,
+        "n_perm": int(n_perm),
+        "nulls_run": list(nulls),
+    }

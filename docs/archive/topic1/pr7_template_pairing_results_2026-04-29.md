@@ -208,7 +208,7 @@ per-subject JSON: `results/interictal_propagation/template_pairing/per_subject/{
 | (4) | **latent-state coupling** | A/B 占比随隐状态（rate / vigilance / seizure proximity）漂移 | **未测**：本 PR 设计性排除（N2 30min 窗口在主 null 中 absorbing 这层调制）；属 Topic 1 PR-5 / PR-4A 已部分检验范围 |
 | (5) | **几何相关但时间独立** | 两模板共享同一网络几何（PR-6），但每次事件的 mark 选择 ≈ 独立抽样 | **PR-7 cohort NULL 与此 default 兼容**；不能据此 claim 一定是 (5)，因为 (3) (4) 也兼容 |
 
-PR-7 NULL **只**否定 (1)。**未排除** (2)（事实上 same_cluster persistence 是 548 的 cohort outlier 的合理解释）、(3)、(4)。结论"两类模板共享同一病理网络几何（PR-6）"不被 PR-7 NULL 否定。
+PR-7 NULL **只**否定 (1)。Step 3.5 进一步测了 (2) 在**无 ISI 阈值的 same-label run 定义**下的两个签名（run length 与 lag-1 same-label）以及 run 间 gap-to-IEI 比值（详见 §14），结果**也基本 NULL**：cohort `run_length_lift` 中位 0.977、`lag1_same_excess` 中位 −0.013，6/6 subject 接近 null baseline；548 在 burst 维度有最强方向但量级仅 5–20% above null，**不**能完全解释其 event-level −0.20。**未排除**：(2) 在其它 burst 定义下的形式（如 ISI-threshold-based bursts）、(3) 慢状态切换（rate-state switching / seizure proximity switching）、(4) latent-state coupling。结论"两类模板共享同一病理网络几何（PR-6）"不被 PR-7 NULL 否定。当前数据**与 form (5) mark-independent sampling 在已测尺度上 compatible**——这是**最简洁的描述（most parsimonious）**，**不是 form (5) 的证明**：(2) under other burst definitions / (3) / (4) 仍可能存在，超出 PR-7 metric 视野。
 
 ---
 
@@ -259,4 +259,105 @@ P(next_event_label = B | history) ~ logistic(
 
 ## 13. 历史
 
-- 2026-04-29：本文件落盘（Step 3 H1 NULL 封口）；同步修正 plan §9.1 framing（仅否定 short-window reciprocal coupling 这一特定形式，不否定 PR-6 几何相关性 / 因果性 / 慢时间尺度耦合 / burst-level switching / 几何相关但时间独立等其他 4 种 time-coupling 形式）。论文叙事建议从"短时乒乓球理论"撤回，新叙事方向 = "双模板几何 + burst/state 选择"
+- **2026-04-29**：本文件落盘（Step 3 H1 NULL 封口）；同步修正 plan §9.1 framing（仅否定 short-window reciprocal coupling 这一特定形式，不否定 PR-6 几何相关性 / 因果性 / 慢时间尺度耦合 / burst-level switching / 几何相关但时间独立等其他 4 种 time-coupling 形式）。论文叙事建议从"短时乒乓球理论"撤回，新叙事方向 = "双模板几何 + burst/state 选择"
+- **2026-04-30**：追加 §14 Step 3.5 burst-level diagnostic 结果（n=6 H1 cohort，N2 主 null + N1 sanity，n_perm=500）。判读"在**无 ISI 阈值的 same-label run 定义**下未见 persistence，与 mark-independent sampling 在已测尺度上 compatible（最简洁解释，不等于证明独立）"：N2 cohort 中位 `run_length_lift` = 0.977、`gap_to_iei_lift` = 1.008、`lag1_same_excess` = −0.013；548 在 burst 维度上**不是**强 outlier（rll=1.054 vs cohort median 0.977），其 event-level 强反向 excess(−0.20) **不能**由 burst persistence 完全解释；其它 burst 定义、rate-state switching、seizure proximity switching、form (4) latent-state coupling 均**未测**，留作独立 follow-up
+
+---
+
+## 14. Step 3.5 — Burst-level diagnostic 结果（post-hoc exploratory）
+
+> 状态：post-hoc exploratory，**不**改 H1 NULL verdict，**不**进 PASS/FAIL 判据
+> Plan: `pr7_step3p5_burst_diagnostic_plan_2026-04-29.md`
+> 数据：`results/interictal_propagation/template_pairing/per_subject_burst/*.json`
+> 图：`results/interictal_propagation/template_pairing/figures/fig5_burst_diagnostic.png`
+
+### 14.1 Cohort-level summary（N2 主 null + N1 sanity）
+
+| Metric | N2 cohort median | N1 cohort median | 解读阈值 |
+|---|---:|---:|---|
+| `run_length_lift` | **0.977** | 0.978 | > 1 = same-template persistence；≈ 1 = mark 序列像独立抽样 |
+| `gap_to_iei_lift` | **1.008** | 1.000 | > 1 = burst 时间成簇 |
+| `lag1_same_excess` | **−0.013** | −0.013 | > 0 = empirical 比 null 更易 lag-1 same |
+
+N2 与 N1 在所有 6 subject 上**几乎完全一致**（差 < 0.005）→ robustness 守住，结果不依赖具体 30 min 窗口选择。
+
+### 14.2 Per-subject 数字（N2 主 null）
+
+| Subject | N | run_length_lift | gap_to_iei_lift | lag1_same_excess |
+|---|---:|---:|---:|---:|
+| epilepsiae/1073 | 193171 | 0.932 | 0.981 | −0.034 |
+| epilepsiae/139 | 14438 | 1.005 | 1.031 | +0.002 |
+| **epilepsiae/548** | 25282 | **1.054** | **1.199** | **+0.014** |
+| epilepsiae/635 | 13973 | 0.947 | 0.985 | −0.028 |
+| epilepsiae/958 | 165577 | 0.989 | 1.109 | −0.005 |
+| yuquan/chenziyang | 9609 | 0.965 | 0.972 | −0.017 |
+| **cohort median** | | **0.977** | **1.008** | **−0.013** |
+| **n > baseline (N2)** | | **2/6** | **3/6** | **2/6** |
+
+### 14.3 判读路径（按 plan §5）
+
+**走 §5.2 路径——在已测尺度（无 ISI 阈值的 same-label run）下与 mark-independent sampling compatible（最简洁解释，不是证明独立）**：
+- cohort 中位 `run_length_lift = 0.977` ≈ 1，**未检测到** same-template persistence
+- 6 subject 中**仅 2 个**（548, 139）在 N2 下 `run_length_lift > 1`，且 magnitudes 小（最大 1.054）
+- `lag1_same_excess` cohort 中位 −0.013（极小负值）；2/6 > 0；6 subject 一致**接近 0**
+- N1 sanity 与 N2 完全一致 → 不是 N2 局部窗口选择伪影
+
+**未测**：其它 burst 定义（如 ISI-threshold-based bursts）、rate-state switching、seizure proximity switching、form (4) latent-state coupling。Step 3.5 NULL 仅适用于上述特定 metric，**不能**升级为"模板在 burst 层面无关"。
+
+按 plan §5.2 论文 framing（修正版，避免过度解释）：
+
+> "At the event/run scale tested here (no-ISI-threshold same-label runs), mark sequences are statistically indistinguishable from N2 local-window null shuffles (cohort median run_length_lift = 0.977, |lag1_same_excess| < 0.04 in all 6 subjects, 2/6 above null in either metric). At these specific scales the data are **compatible with mark-independent sampling** as the most parsimonious description; this is not proof of independence. Slower-state switching, rate-state coupling, seizure-proximity coupling and other burst definitions remain untested here and are deferred to independent analyses."
+
+### 14.4 548 specific diagnostic（按 plan §5.3）
+
+`epilepsiae/548` 在 event-level Step 3 中是 cohort outlier（excess(10s) = −0.20）。Step 3.5 检验该负向是否由 same-template burst persistence 解释（form 2）：
+
+- 548 `run_length_lift = 1.054`：**cohort 最大值**，但**绝对量级很小**（仅高于 null 5%）
+- 548 `gap_to_iei_lift = 1.199`：cohort 最大；时间 burst 比 null 略强
+- 548 `lag1_same_excess = +0.014`：cohort 最大正值；但 lag-1 same fraction 仅高 1.4 个百分点
+
+**结论**：548 在 burst 维度上确实是 cohort 中**方向最一致**的（3 个 metric 都正）但**量级仅高 5–20% above null**。其 event-level 强反向 `excess(−0.20)` **不能**由 burst persistence 完全解释——burst-level 信号比 event-level 量级小一个数量级。
+
+按 plan §5.3 写法：
+
+> "Subject 548 shows the strongest within-cohort burst direction (run_length_lift = 1.054, gap_to_iei_lift = 1.199, lag1_same_excess = +0.014, all 3/3 above null), but the magnitudes (≤ 5–20% above null) are an order of magnitude weaker than its event-level excess(−0.20). The event-level negativity is not fully explained by burst-level persistence at this granularity; alternative explanations (cluster definition artefact / sub-burst structure within the 5s packing window) remain open."
+
+**严禁**升级 548 为 cohort claim。
+
+### 14.5 与 §11 marked-point-process taxonomy 的关系
+
+| Form | PR-7 检验 | 结果 |
+|---|---|---|
+| (1) short-window cross-excitation | Step 3 H1 cohort | **NULL**（已封）|
+| (2) short-window persistence | Step 3.5 run length / lag1（**仅无 ISI 阈值 same-label run 定义**）| **未见 persistence at tested definition**（cohort median run_length_lift = 0.977）；其它 burst 定义未测 |
+| (3) burst-level switching | Step 3.5 gap_to_iei + run_length 联动 | 仅 548 弱方向；cohort 不支持；slower state switching / rate-state / seizure-proximity 未测 |
+| (4) latent-state coupling | **未测**（PR-7 设计性排除）| 留给 Topic 1 PR-4A / PR-5 framework / 独立 follow-up PR |
+| (5) geometry-correlated mark-independent | Step 3.5 cohort behavior | **most parsimonious within tested scales**：mark 序列在已测的 event/run/lag-1 三个 metric 上 compatible with independent sampling |
+
+**重要 caveat**：form (5) "most parsimonious" **不等于"已证明"**。NULL 结果只能说"在已测 metric 上没有检测到依赖"，不能说"独立"。具体限制：
+- 仅 6 subject 的小 cohort，能检出 effect 范围有限
+- 仅检验 event-level fixed-window excess + no-ISI-threshold same-label run + lag-1 same-label
+- form (4) latent-state、其它 burst 定义、rate-state / seizure-proximity switching 都不在 PR-7 metric 视野内
+
+### 14.6 论文 framing 升级（基于 Step 3 + Step 3.5 联合）
+
+✅ 现在可以写：
+- "At Δt ∈ [10s, 30s] (event-level, Step 3) and at no-ISI-threshold same-label run + lag-1 same-label scales (Step 3.5), forward/reverse template marks are statistically indistinguishable from null draws preserving block-conditional label fractions. The data at these specific scales are **compatible with mark-independent sampling** as the most parsimonious description (this is not proof of independence). PR-6 geometric coupling (source/sink swap, n=6 sign-test p=0.031) is preserved."
+- "Subject 548's strong event-level reciprocal-coupling negativity (excess = −0.20) is not fully explained by either packing-window stickiness or burst-level same-template persistence at the tested run definition; it is reported as a single-subject outlier rather than a cohort feature."
+- "Slower-state switching, rate-state coupling, seizure-proximity coupling, alternative burst definitions, and history-dependent regression models are deferred as independent follow-ups; PR-7 NULL verdict applies to the specific time signatures tested, not to all conceivable forms of template time-coupling."
+
+❌ **不**写：
+- "Two templates are time-independent" / "no causal coupling" / "mark sequences are mark-independent"
+- "在 burst 层面也无关 / 也独立"
+- 任何把 548 升级为 cohort claim 的措辞
+- "Burst-level reciprocal coupling restores Ping-Pong"
+- 删除 PR-6 几何 narrative
+
+### 14.7 下一步
+
+| 候选 | 优先级 | 说明 |
+|---|---|---|
+| Step 4 H2 negative control（n=17） | 中 | PR-7 完整性补强；H1 NULL + Step 3.5 form (5) default 已稳；H2 主要回答"非 fwd/rev cohort 是否同样 form (5)" |
+| Step 5/6/7 PR-7 收口 | 中 | Step 5 robustness（N2 window sweep）+ Step 6 主图 2/3/4 + Step 7 最终 archive doc |
+| 独立 follow-up PR：history-dependent regression | 低（不绑 PR-7 主线）| 测 form (1)+(2)+(4) 一并；按 archive §12.2 草案 |
+| 进一步 case-series 看 548 | 低 | 检查 548 cluster 定义内部是否有 sub-template 结构；不进 PR-7 主线 |
