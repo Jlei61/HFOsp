@@ -38,8 +38,10 @@ from src.interictal_propagation import (  # noqa: E402
     load_subject_propagation_events,
 )
 from src.template_temporal_pairing import (  # noqa: E402
+    cohort_paired_test,
     compute_pairing_with_nulls,
     compute_transition_odds,
+    evaluate_pass_criteria,
 )
 
 
@@ -179,6 +181,7 @@ EPILEPSIAE_RAW_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data
 OUT_DIR = ROOT / "results" / "interictal_propagation" / "template_pairing"
 PER_SUBJECT_OUT = OUT_DIR / "per_subject"
 AUDIT_CSV = OUT_DIR / "pr7_cohort_audit.csv"
+COHORT_SUMMARY_JSON = OUT_DIR / "cohort_summary.json"
 
 
 # ---------------------------------------------------------------------------
@@ -613,6 +616,162 @@ def run_per_subject(
 
 
 # ---------------------------------------------------------------------------
+# Cohort aggregation (Step 3 deliverable)
+# ---------------------------------------------------------------------------
+def _classify_subjects_by_cohort() -> Dict[str, List[Tuple[str, str]]]:
+    """Read pr7_cohort_audit.csv and return mapping cohort -> [(dataset, subject_id)]."""
+    if not AUDIT_CSV.exists():
+        raise FileNotFoundError(f"Audit not found at {AUDIT_CSV}; run --audit first")
+    with AUDIT_CSV.open() as fh:
+        rows = list(csv.DictReader(fh))
+    out = {"h1_primary": [], "h2_negative": []}
+    for r in rows:
+        ds = r["dataset"]
+        sid = r["subject_id"]
+        if r.get("h1_primary_pass") == "True":
+            out["h1_primary"].append((ds, sid))
+        if r.get("h2_negative_pass") == "True":
+            out["h2_negative"].append((ds, sid))
+    return out
+
+
+def _load_per_subject_record(dataset: str, subject_id: str) -> Optional[Dict[str, Any]]:
+    p = PER_SUBJECT_OUT / f"{dataset}_{subject_id}.json"
+    if not p.exists():
+        return None
+    with p.open() as fh:
+        return json.load(fh)
+
+
+def _gather_excess_per_subject(
+    members: List[Tuple[str, str]],
+    null_id: str,
+    delta_t: float,
+    field: str = "excess",
+) -> Dict[str, float]:
+    """Read per-subject JSONs and pull lift[null_id][Δt][field] keyed by subject."""
+    dt_str = f"{delta_t}"
+    excess: Dict[str, float] = {}
+    for ds, sid in members:
+        rec = _load_per_subject_record(ds, sid)
+        if rec is None:
+            continue
+        try:
+            v = rec["pairing_with_nulls"]["lift"][null_id][dt_str][field]
+        except KeyError:
+            continue
+        excess[f"{ds}_{sid}"] = float(v)
+    return excess
+
+
+def _gather_transition_per_subject(
+    members: List[Tuple[str, str]],
+) -> Dict[str, Dict[str, float]]:
+    out: Dict[str, Dict[str, float]] = {}
+    for ds, sid in members:
+        rec = _load_per_subject_record(ds, sid)
+        if rec is None:
+            continue
+        out[f"{ds}_{sid}"] = rec.get("transition_odds", {})
+    return out
+
+
+def aggregate_cohort(
+    delta_t_grid: Tuple[float, ...] = DEFAULT_DELTA_T_GRID,
+    nulls: Tuple[str, ...] = DEFAULT_NULLS,
+) -> Dict[str, Any]:
+    """Build cohort_summary.json for H1 primary + H2 negative cohorts.
+
+    For each cohort × null × Δt, compute:
+      - paired Wilcoxon (greater) p, sign-test p, median, n
+      - per-subject excess values (key-aligned)
+
+    For H1 primary, additionally evaluate the triple-gate PASS criteria
+    (10s primary + 30s sensitivity).
+    """
+    cohorts = _classify_subjects_by_cohort()
+    summary: Dict[str, Any] = {
+        "delta_t_grid_seconds": list(delta_t_grid),
+        "nulls": list(nulls),
+        "cohort_membership": {
+            cohort: [{"dataset": ds, "subject_id": sid} for ds, sid in members]
+            for cohort, members in cohorts.items()
+        },
+        "cohorts": {},
+    }
+
+    for cohort_name, members in cohorts.items():
+        if not members:
+            summary["cohorts"][cohort_name] = {
+                "n_members": 0,
+                "skipped": "empty cohort",
+            }
+            continue
+
+        per_null: Dict[str, Any] = {}
+        for null_id in nulls:
+            per_dt: Dict[str, Any] = {}
+            for dt in delta_t_grid:
+                excess = _gather_excess_per_subject(members, null_id, dt, "excess")
+                a_to_b = _gather_excess_per_subject(members, null_id, dt, "a_to_b_lift")
+                b_to_a = _gather_excess_per_subject(members, null_id, dt, "b_to_a_lift")
+                wilc = cohort_paired_test(excess, alternative="greater")
+                per_dt[f"{dt}"] = {
+                    "n_subjects": len(excess),
+                    "excess_per_subject": excess,
+                    "median_excess": wilc["median"],
+                    "wilcoxon_greater_p": wilc["wilcoxon_p"],
+                    "sign_test_greater_p": wilc["sign_test_p"],
+                    "a_to_b_lift_per_subject": a_to_b,
+                    "b_to_a_lift_per_subject": b_to_a,
+                }
+            per_null[null_id] = per_dt
+        cohort_block: Dict[str, Any] = {
+            "n_members": len(members),
+            "by_null": per_null,
+            "transition_odds_per_subject": _gather_transition_per_subject(members),
+        }
+
+        # Triple-gate PASS for H1 primary cohort (N2 main null + N3 robustness)
+        if cohort_name == "h1_primary":
+            triple_gate: Dict[str, Any] = {}
+            for null_id in ("N2", "N3"):
+                e10 = _gather_excess_per_subject(members, null_id, 10.0, "excess")
+                e30 = _gather_excess_per_subject(members, null_id, 30.0, "excess")
+                if not e10 or not e30:
+                    triple_gate[null_id] = {"skipped": "missing per-subject data"}
+                    continue
+                triple_gate[null_id] = evaluate_pass_criteria(e10, e30)
+            cohort_block["triple_gate_pass"] = triple_gate
+
+        summary["cohorts"][cohort_name] = cohort_block
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    with COHORT_SUMMARY_JSON.open("w") as fh:
+        json.dump(summary, fh, indent=2)
+    print(f"Wrote {COHORT_SUMMARY_JSON}")
+
+    for cohort_name, block in summary["cohorts"].items():
+        if block.get("skipped"):
+            print(f"  [{cohort_name}] {block['skipped']}")
+            continue
+        print(f"  [{cohort_name}] n={block['n_members']}")
+        if "triple_gate_pass" in block:
+            for null_id, gate in block["triple_gate_pass"].items():
+                if gate.get("skipped"):
+                    print(f"    {null_id} triple-gate: {gate['skipped']}")
+                    continue
+                print(
+                    f"    {null_id} triple-gate: PASS={gate['pass']} | "
+                    f"wilc(10s)={gate['wilcoxon_10s']:.4f}, "
+                    f"sign(10s)={gate['sign_10s']:.4f}, "
+                    f"med(10s)={gate['median_10s']:+.4f}, "
+                    f"med(30s)={gate['median_30s']:+.4f}"
+                )
+    return summary
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def main() -> None:
@@ -620,6 +779,11 @@ def main() -> None:
     parser.add_argument("--audit", action="store_true", help="Run cohort audit")
     parser.add_argument(
         "--per-subject", action="store_true", help="Run per-subject pairing+nulls"
+    )
+    parser.add_argument(
+        "--cohort-stats",
+        action="store_true",
+        help="Aggregate per-subject JSONs -> cohort_summary.json + triple-gate",
     )
     parser.add_argument("--all", action="store_true", help="Audit then per-subject")
     parser.add_argument(
@@ -640,8 +804,10 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if not (args.audit or args.per_subject or args.all):
-        parser.error("Must specify one of --audit / --per-subject / --all")
+    if not (args.audit or args.per_subject or args.cohort_stats or args.all):
+        parser.error(
+            "Must specify one of --audit / --per-subject / --cohort-stats / --all"
+        )
 
     if args.audit or args.all:
         run_audit()
@@ -657,6 +823,9 @@ def main() -> None:
             seed=args.seed,
             only=only_list,
         )
+
+    if args.cohort_stats or args.all:
+        aggregate_cohort()
 
 
 if __name__ == "__main__":

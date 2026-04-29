@@ -356,7 +356,7 @@ PR-7 是 Ping-Pong 假说能否成立的最直接可证伪检验。失败（lift
 
 **显式不做**：不重做 cluster 算法（KMeans k=2 锁死）；不做节点级 signed displacement（→ PR-8 candidate）；不做 subject typology × PR-5 split（→ PR-9 candidate）；不做发作邻近窗口（PR-4C 已封板 null）。
 
-**当前状态（2026-04-28）**：plan-of-record 已落盘；Step 0（本节回写）+ Step 1（代码层 + TDD）进行中。
+**当前状态（2026-04-29）**：Step 0–3 已完成。Step 1 代码层 16/16 TDD 全绿；Step 2 audit n=6 H1 primary cohort + n=17 H2 negative cohort，H1 per-subject n_perm=1000 跑齐（~1h50m）；**Step 3 H1 cohort NULL 已封**：N2 主 null Wilcoxon(10s, greater) p=0.844、sign p=0.656、median(30s)=−0.015，三条 PASS gate 全部 fail；N3 robustness 一致 NULL（Wilcoxon p=0.891，与 N2 在 5/6 subject 同号）；长尺度（≥30min）正确归零（slow-drive confound 排除）。**精确 framing**：仅否定 "short-window opposite-template excess at Δt ∈ [10s, 30s]" 这一**特定**时间签名，**不**否定 PR-6 已建立的 fwd/rev 几何相关性、因果性本身、或慢时间尺度耦合。详见 `docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md`。Step 4 H2 negative control（n=17）+ Step 5 robustness + Step 6 全套图 + Step 7 最终封口待续。
 
 ---
 

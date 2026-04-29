@@ -555,10 +555,17 @@ T16. test_resample_isi_per_cluster_raises:
 
 ### 9.1 H1 NULL（cohort excess(10s) Wilcoxon p > 0.10）
 
-→ Ping-Pong 在功能耦合层不成立。论文 framing 转向：
-- "Forward/reverse template geometry exists but is not temporally coupled at short scales"
-- "Bidirectional traveling waves coexist as independent slow-modulated streams"
-- 删除所有"乒乓球"/"Ping-Pong"机制叙事
+→ 仅否定**这一种特定形式**的功能耦合：fwd/rev cohort 在 10s/30s 窗口内没有检测到"反向模板比同模板更易紧随"这一固定时间签名。**不否定**：
+- PR-6 已建立的几何相关性（forward/reverse 模板共享同一网络，source/sink swap）
+- 因果性本身（观测性事件序列 + 当前固定窗口 excess metric 的 null 不能支持"无因果"这种强论断）
+- 慢时间尺度耦合（hours / circadian / seizure proximity 等被本检验设计性排除）
+
+论文 framing（pre-registered）：
+- ✅ 可以写："Forward/reverse propagation geometries coexist, but their event timing shows no robust short-window reciprocal coupling at the tested scales (Δt ∈ [10s, 30s])"
+- ✅ 可以写："The bouncing-back / short-range reciprocal version of Ping-Pong is rejected; geometric coupling (PR-6 source/sink swap) is preserved"
+- ❌ **不**写："两种模板时间上无关 / 无相关 / 无因果"
+- ❌ **不**删除 PR-6 几何叙事；只撤回"短时接力"叙事
+- 后续 follow-up（独立 PR）：历史依赖模型 P(next_label / hazard_opposite | recent history + local rate + block / state)，检验"加上前一个模板标签是否提高预测"——比固定窗口 excess 更不依赖单一时间尺度
 
 ### 9.2 H2 negative control FAIL（non-fwdrev cohort 也显著）
 
