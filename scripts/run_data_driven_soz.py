@@ -6,9 +6,25 @@ Usage:
     python scripts/run_data_driven_soz.py --per-subject  # Step 3 (not yet)
     python scripts/run_data_driven_soz.py --cohort-overlap  # Step 4 (not yet)
 
-Step 0 (``--audit``) enumerates the cohort, applies the canonical channel
-matcher, and writes ``results/spatial_modulation/data_driven_soz/audit.csv``
-with eligibility columns. No M1/M2 computation here.
+Step 0 (``--audit``) enumerates the **expected** cohort
+(``epilepsiae_subject_inventory.csv`` + ``/mnt/yuquan_data/yuquan_24h_edf/``
+listing) and left-joins the HFO detection artifacts under
+``results/hfo_detection/<subject>/``. Subjects whose HFO output is
+absent show up as rows with ``hfo_npz_ok=0`` instead of being silently
+skipped — this is what the audit is for.
+
+Per-subject the script:
+
+- Loads every block npz, validates required keys, checks ``chns_names``
+  schema consistency across blocks (plan §3.2 hard requirement).
+- Reports sfreq from retained npz blocks (cross-ref ``block_inventory``
+  for Epilepsiae, EDF probe for Yuquan).
+- Annotates the analysis channel set against the clinical SOZ list
+  using the canonical 3-state matcher
+  (``src.data_driven_soz.annotate_clinical_soz``) and reports unmatched
+  clinical contacts via ``matched_clinical_contacts``.
+
+Output: ``results/spatial_modulation/data_driven_soz/audit.csv``.
 
 See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
 """
@@ -37,11 +53,14 @@ from src.data_driven_soz import (  # noqa: E402
     SOZ_LABEL,
     UNKNOWN_LABEL,
     annotate_clinical_soz,
+    check_channel_schema_consistency,
+    matched_clinical_contacts,
 )
 
 
 HFO_DETECTION_DIR = ROOT / "results" / "hfo_detection"
 EPILEPSIAE_BLOCK_INVENTORY = ROOT / "results" / "epilepsiae_block_inventory.csv"
+EPILEPSIAE_SUBJECT_INVENTORY = ROOT / "results" / "epilepsiae_subject_inventory.csv"
 EPILEPSIAE_SEIZURE_INVENTORY = ROOT / "results" / "epilepsiae_seizure_inventory.csv"
 EPILEPSIAE_SOZ_JSON = ROOT / "results" / "epilepsiae_soz_core_channels.json"
 YUQUAN_SOZ_JSON = ROOT / "results" / "yuquan_soz_core_channels.json"
@@ -52,33 +71,28 @@ OUTPUT_DIR = ROOT / "results" / "spatial_modulation" / "data_driven_soz"
 NYQUIST_BAND_HIGH = 250.0           # M2 primary band upper edge
 NYQUIST_SAFETY = 1.05               # plan §3.4: 5% safety margin
 M2_MIN_SFREQ = NYQUIST_BAND_HIGH * 2 * NYQUIST_SAFETY   # = 525 Hz
+HFO_DETECTION_MIN_SFREQ = 500       # scripts/run_hfo_detection.py threshold
 
-EXCLUDED_DIR_TOKENS = ("backup", "summary", ".log", ".json")
+REQUIRED_NPZ_KEYS = ("whole_dets", "chns_names", "events_count", "start_time")
 
 
 # ---------------------------------------------------------------------------
-# Subject enumeration
+# Cohort enumeration (expected sources, not "what we already have")
 # ---------------------------------------------------------------------------
 
 
-def list_subject_dirs(detection_root: Path) -> List[Tuple[str, str, Path]]:
-    """Return ``[(dataset, subject, dir_path)]`` for every clean subject dir.
+def expected_epilepsiae_subjects(path: Path) -> List[str]:
+    if not path.exists():
+        return []
+    with path.open() as f:
+        rdr = csv.DictReader(f)
+        return sorted({row["subject"] for row in rdr if row.get("subject")})
 
-    Dataset is ``"epilepsiae"`` for numeric IDs and ``"yuquan"`` otherwise.
-    Skips backup/summary/log/json artifacts that live next to the dirs.
-    """
-    out: List[Tuple[str, str, Path]] = []
-    if not detection_root.exists():
-        return out
-    for entry in sorted(detection_root.iterdir()):
-        if not entry.is_dir():
-            continue
-        name = entry.name
-        if any(tok in name for tok in EXCLUDED_DIR_TOKENS):
-            continue
-        dataset = "epilepsiae" if name.isdigit() else "yuquan"
-        out.append((dataset, name, entry))
-    return out
+
+def expected_yuquan_subjects(data_root: Path) -> List[str]:
+    if not data_root.exists():
+        return []
+    return sorted(d.name for d in data_root.iterdir() if d.is_dir())
 
 
 # ---------------------------------------------------------------------------
@@ -87,10 +101,7 @@ def list_subject_dirs(detection_root: Path) -> List[Tuple[str, str, Path]]:
 
 
 def load_epilepsiae_block_inventory(path: Path) -> Dict[str, List[Dict[str, str]]]:
-    """Group block_inventory rows by ``subject``.
-
-    Returns ``{subject: [row_dict, ...]}``.
-    """
+    """Group block_inventory rows by ``subject``."""
     by_subject: Dict[str, List[Dict[str, str]]] = defaultdict(list)
     with path.open() as f:
         rdr = csv.DictReader(f)
@@ -129,12 +140,7 @@ def load_yuquan_seizure_count(subject: str) -> Optional[int]:
 
 
 def probe_yuquan_sfreq(subject: str) -> Optional[float]:
-    """Return raw EDF sampling frequency for one EDF in subject dir.
-
-    Probes the first ``*.edf`` (alphabetical) under
-    ``/mnt/yuquan_data/yuquan_24h_edf/<subject>/``. Returns None if the
-    directory is missing or unreadable.
-    """
+    """Return raw EDF sampling frequency for one EDF in subject dir."""
     sub_dir = YUQUAN_DATA_ROOT / subject
     if not sub_dir.exists():
         return None
@@ -152,23 +158,65 @@ def probe_yuquan_sfreq(subject: str) -> Optional[float]:
 
 
 # ---------------------------------------------------------------------------
-# HFO npz inspection
+# HFO npz inspection — full per-subject block validation
 # ---------------------------------------------------------------------------
 
 
 def list_npz_blocks(subject_dir: Path) -> List[Path]:
+    if not subject_dir.exists():
+        return []
     return sorted(subject_dir.glob("*_gpu.npz"))
 
 
 def npz_block_stem(npz_path: Path) -> str:
-    """Strip the ``_gpu.npz`` suffix to recover the block stem."""
     return npz_path.name[: -len("_gpu.npz")]
 
 
-def load_npz_channels(npz_path: Path) -> List[str]:
-    """Return ``chns_names`` from a single HFO npz file."""
-    with np.load(npz_path, allow_pickle=True) as data:
-        return list(data["chns_names"].tolist())
+def _scan_subject_blocks(subject_dir: Path) -> Dict[str, object]:
+    """Load every npz under ``subject_dir`` and report per-block status.
+
+    Returns a dict with:
+
+    - ``n_blocks_actual``: int — files that match ``*_gpu.npz``
+    - ``n_blocks_stub``: int — files smaller than 1 KB
+    - ``n_blocks_loadable``: int — files that opened with all required keys
+    - ``unloadable_blocks``: list[str]
+    - ``missing_key_blocks``: list[str]
+    - ``schema_consistency``: dict from ``check_channel_schema_consistency``
+    - ``channel_lists``: list[list[str]] — schema across loadable blocks
+    """
+    npz_files = list_npz_blocks(subject_dir)
+    n_actual = len(npz_files)
+    n_stub = sum(1 for p in npz_files if p.stat().st_size < 1024)
+
+    channel_lists: List[List[str]] = []
+    unloadable: List[str] = []
+    missing_keys: List[str] = []
+
+    for npz_path in npz_files:
+        if npz_path.stat().st_size < 1024:
+            unloadable.append(npz_block_stem(npz_path))
+            continue
+        try:
+            with np.load(npz_path, allow_pickle=True) as data:
+                missing = [k for k in REQUIRED_NPZ_KEYS if k not in data.files]
+                if missing:
+                    missing_keys.append(npz_block_stem(npz_path))
+                    continue
+                channel_lists.append(list(data["chns_names"].tolist()))
+        except Exception:
+            unloadable.append(npz_block_stem(npz_path))
+
+    schema = check_channel_schema_consistency(channel_lists)
+    return {
+        "n_blocks_actual": n_actual,
+        "n_blocks_stub": n_stub,
+        "n_blocks_loadable": len(channel_lists),
+        "unloadable_blocks": unloadable,
+        "missing_key_blocks": missing_keys,
+        "schema_consistency": schema,
+        "channel_lists": channel_lists,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -182,6 +230,10 @@ AUDIT_COLUMNS = [
     "n_blocks_actual",
     "n_blocks_expected",
     "n_blocks_stub",
+    "n_blocks_loadable",
+    "schema_consistent",
+    "schema_n_channels_min",
+    "schema_n_channels_max",
     "hfo_npz_ok",
     "block_count_match",
     "n_seizures",
@@ -189,7 +241,6 @@ AUDIT_COLUMNS = [
     "sfreq_max",
     "sfreq_source",
     "m2_eligible",
-    "n_analysis_channels",
     "n_clinical_total",
     "n_clinical_matched",
     "n_clinical_unmatched",
@@ -201,22 +252,139 @@ AUDIT_COLUMNS = [
 ]
 
 
+def _empty_row(dataset: str, subject: str) -> Dict[str, str]:
+    """Initial values for a subject row; fields filled in by builders."""
+    return {
+        "dataset": dataset,
+        "subject": subject,
+        "n_blocks_actual": 0,
+        "n_blocks_expected": "",
+        "n_blocks_stub": 0,
+        "n_blocks_loadable": 0,
+        "schema_consistent": "",
+        "schema_n_channels_min": 0,
+        "schema_n_channels_max": 0,
+        "hfo_npz_ok": 0,
+        "block_count_match": "",
+        "n_seizures": 0,
+        "sfreq_min": "",
+        "sfreq_max": "",
+        "sfreq_source": "missing",
+        "m2_eligible": 0,
+        "n_clinical_total": 0,
+        "n_clinical_matched": 0,
+        "n_clinical_unmatched": 0,
+        "n_unknown_channels": 0,
+        "unmatched_clinical_names": "",
+        "soz_eligible": 0,
+        "audit_eligible": 0,
+        "notes": "",
+    }
+
+
+def _annotate_clinical(
+    channel_lists: List[List[str]],
+    clinical_soz: List[str],
+) -> Tuple[Dict[str, str], int, int, int, List[str]]:
+    """Annotate analysis channels (using block 0's schema, the schema_consistency
+    check guarantees other blocks agree) and compute matched / unmatched stats
+    via the canonical helpers.
+
+    Returns ``(annotation, n_matched_channels, n_unknown_channels,
+    n_clinical_unmatched, unmatched_names)``.
+    """
+    if not channel_lists:
+        return {}, 0, 0, 0, []
+    analysis_channels = channel_lists[0]
+    ann = annotate_clinical_soz(analysis_channels, clinical_soz)
+    matched_set = matched_clinical_contacts(analysis_channels, clinical_soz)
+    from src.event_periodicity import _normalize_channel_name  # canonical
+
+    norm_clinical = {_normalize_channel_name(s) for s in clinical_soz if s}
+    unmatched = sorted(norm_clinical - matched_set)
+    n_matched_channels = sum(1 for v in ann.values() if v == SOZ_LABEL)
+    n_unknown_channels = sum(1 for v in ann.values() if v == UNKNOWN_LABEL)
+    return ann, n_matched_channels, n_unknown_channels, len(unmatched), unmatched
+
+
+def _finalize_eligibility(
+    row: Dict[str, str],
+    notes: List[str],
+) -> None:
+    """Common eligibility logic: write soz_eligible / audit_eligible /
+    notes column in place. Plan §6.1 conditions:
+
+    - hfo_npz_ok: at least one valid (>1KB) npz block
+    - all_blocks_loadable: every npz parsed and had required keys
+    - schema_consistent: chns_names identical across blocks
+    - n_seizures >= 2 (per-seizure consistency well defined)
+    - n_clinical_matched >= 1 (audit baseline)
+
+    For ``hfo_npz_ok`` to be True we additionally require
+    ``n_blocks_loadable == n_blocks_actual`` AND ``schema_consistent``.
+    """
+    n_actual = int(row["n_blocks_actual"])
+    n_loadable = int(row["n_blocks_loadable"])
+    n_stub = int(row["n_blocks_stub"])
+
+    schema_ok_str = row.get("schema_consistent")
+    schema_ok = schema_ok_str == 1 or schema_ok_str is True
+    hfo_npz_ok = (
+        n_actual > 0
+        and n_stub == 0
+        and n_loadable == n_actual
+        and schema_ok
+    )
+    row["hfo_npz_ok"] = int(hfo_npz_ok)
+
+    soz_eligible = int(row["n_clinical_matched"]) >= 1
+    n_seizures = int(row["n_seizures"])
+    audit_eligible = (
+        hfo_npz_ok
+        and n_seizures >= 2
+        and soz_eligible
+    )
+    row["soz_eligible"] = int(soz_eligible)
+    row["audit_eligible"] = int(audit_eligible)
+
+    if n_actual == 0:
+        notes.insert(0, "no hfo_detection dir / npz")
+    else:
+        if n_stub > 0:
+            notes.append(f"stub_blocks={n_stub}")
+        if n_loadable < n_actual:
+            notes.append(f"unloadable_blocks={n_actual - n_loadable}")
+        if not schema_ok:
+            notes.append("chns_names schema inconsistent across blocks")
+    if n_seizures < 2 and n_actual > 0:
+        notes.append(f"n_seizures={n_seizures} < 2")
+    if not soz_eligible and n_actual > 0:
+        notes.append(f"n_clinical_matched={int(row['n_clinical_matched'])} < 1")
+    row["notes"] = "; ".join(notes)
+
+
 def build_epilepsiae_row(
     subject: str,
-    subject_dir: Path,
     block_rows: Optional[List[Dict[str, str]]],
     seizure_count: int,
     soz_map: Dict[str, List[str]],
 ) -> Dict[str, str]:
     notes: List[str] = []
-    npz_files = list_npz_blocks(subject_dir)
-    n_actual = len(npz_files)
-    n_stub = sum(1 for p in npz_files if p.stat().st_size < 1024)
-    hfo_npz_ok = n_actual > 0 and n_stub == 0
+    row = _empty_row("epilepsiae", subject)
+    subject_dir = HFO_DETECTION_DIR / subject
 
-    # Cross-reference: only blocks where sample_rate_sql >= min_sfreq=500 are
-    # expected to have an npz (per scripts/run_hfo_detection.py).
-    expected_blocks = []
+    scan = _scan_subject_blocks(subject_dir)
+    row["n_blocks_actual"] = scan["n_blocks_actual"]
+    row["n_blocks_stub"] = scan["n_blocks_stub"]
+    row["n_blocks_loadable"] = scan["n_blocks_loadable"]
+    schema = scan["schema_consistency"]
+    row["schema_consistent"] = int(bool(schema["all_consistent"]))
+    row["schema_n_channels_min"] = schema["n_channels_min"]
+    row["schema_n_channels_max"] = schema["n_channels_max"]
+
+    # Cross-reference inventory: only blocks where sample_rate_sql >=
+    # HFO_DETECTION_MIN_SFREQ (=500) are expected to have an npz.
+    expected_blocks: List[str] = []
     inv_sfreq_by_stem: Dict[str, float] = {}
     if block_rows:
         for r in block_rows:
@@ -225,178 +393,97 @@ def build_epilepsiae_row(
             except Exception:
                 sf = 0.0
             inv_sfreq_by_stem[r["block_stem"]] = sf
-            if sf >= 500.0:
+            if sf >= HFO_DETECTION_MIN_SFREQ:
                 expected_blocks.append(r["block_stem"])
-    n_expected = len(expected_blocks) if block_rows else -1
+    n_expected = len(expected_blocks) if block_rows is not None else -1
+    row["n_blocks_expected"] = n_expected if n_expected >= 0 else ""
 
-    # Collect sfreqs of *retained* npz blocks (cross-ref via block_stem).
+    # Sfreqs of *retained* npz blocks.
     retained_sfreqs: List[float] = []
-    for npz in npz_files:
-        stem = npz_block_stem(npz)
-        sf = inv_sfreq_by_stem.get(stem, 0.0)
+    for npz in list_npz_blocks(subject_dir):
+        sf = inv_sfreq_by_stem.get(npz_block_stem(npz), 0.0)
         if sf > 0:
             retained_sfreqs.append(sf)
     if retained_sfreqs:
-        sfreq_min = min(retained_sfreqs)
-        sfreq_max = max(retained_sfreqs)
-        sfreq_source = "block_inventory.sample_rate_sql"
+        row["sfreq_min"] = min(retained_sfreqs)
+        row["sfreq_max"] = max(retained_sfreqs)
+        row["sfreq_source"] = "block_inventory.sample_rate_sql"
+        row["m2_eligible"] = int(min(retained_sfreqs) >= M2_MIN_SFREQ)
     else:
-        sfreq_min = sfreq_max = float("nan")
-        sfreq_source = "missing"
-        notes.append("no retained block sfreq found")
+        row["sfreq_source"] = "missing" if scan["n_blocks_actual"] == 0 else "no_inventory_match"
+        if scan["n_blocks_actual"] > 0:
+            notes.append("no inventory sfreq for retained blocks")
 
-    m2_eligible = bool(retained_sfreqs) and sfreq_min >= M2_MIN_SFREQ
+    if n_expected >= 0:
+        match = (n_expected == scan["n_blocks_actual"])
+        row["block_count_match"] = int(match)
+        if not match:
+            notes.append(
+                f"block_count mismatch actual={scan['n_blocks_actual']} expected={n_expected}"
+            )
 
-    block_count_match = (n_expected == n_actual) if n_expected >= 0 else False
-    if not block_count_match and n_expected >= 0:
-        notes.append(f"block_count mismatch: actual={n_actual} expected={n_expected}")
+    row["n_seizures"] = seizure_count
 
-    # Channels + clinical SOZ matching.
-    if n_actual == 0 or not hfo_npz_ok:
-        n_channels = 0
-        ann: Dict[str, str] = {}
-        notes.append("hfo npz missing or stub")
-    else:
-        analysis_channels = load_npz_channels(npz_files[0])
-        n_channels = len(analysis_channels)
-        ann = annotate_clinical_soz(analysis_channels, soz_map.get(subject, []))
+    clinical = soz_map.get(subject, []) or []
+    row["n_clinical_total"] = len(clinical)
+    if scan["channel_lists"]:
+        _, n_matched_ch, n_unknown, n_unmatched, unmatched = _annotate_clinical(
+            scan["channel_lists"], clinical
+        )
+        row["n_clinical_matched"] = n_matched_ch
+        row["n_unknown_channels"] = n_unknown
+        row["n_clinical_unmatched"] = n_unmatched
+        row["unmatched_clinical_names"] = "|".join(unmatched)
 
-    n_unknown = sum(1 for v in ann.values() if v == UNKNOWN_LABEL)
-    n_matched = sum(1 for v in ann.values() if v == SOZ_LABEL)
-    n_clinical_total = len(soz_map.get(subject, []))
-
-    soz_set_norm = {s.strip().upper() for s in soz_map.get(subject, [])}
-    matched_contacts: set = set()
-    for ch, label in ann.items():
-        if label != SOZ_LABEL:
-            continue
-        norm = ch.strip().upper()
-        for prefix in ("EEG ", "EEG_"):
-            if norm.startswith(prefix):
-                norm = norm[len(prefix):]
-        for part in (p.strip() for p in norm.split("-")):
-            if part in soz_set_norm:
-                matched_contacts.add(part)
-    unmatched_names = sorted(soz_set_norm - matched_contacts)
-    n_unmatched = len(unmatched_names)
-
-    soz_eligible = n_matched >= 1
-    audit_eligible = hfo_npz_ok and seizure_count >= 2 and soz_eligible
-    if seizure_count < 2:
-        notes.append(f"n_seizures={seizure_count} < 2")
-    if not soz_eligible:
-        notes.append(f"n_clinical_matched={n_matched} < 1")
-
-    return {
-        "dataset": "epilepsiae",
-        "subject": subject,
-        "n_blocks_actual": n_actual,
-        "n_blocks_expected": n_expected if n_expected >= 0 else "",
-        "n_blocks_stub": n_stub,
-        "hfo_npz_ok": int(hfo_npz_ok),
-        "block_count_match": int(block_count_match) if n_expected >= 0 else "",
-        "n_seizures": seizure_count,
-        "sfreq_min": "" if np.isnan(sfreq_min) else sfreq_min,
-        "sfreq_max": "" if np.isnan(sfreq_max) else sfreq_max,
-        "sfreq_source": sfreq_source,
-        "m2_eligible": int(m2_eligible),
-        "n_analysis_channels": n_channels,
-        "n_clinical_total": n_clinical_total,
-        "n_clinical_matched": n_matched,
-        "n_clinical_unmatched": n_unmatched,
-        "n_unknown_channels": n_unknown,
-        "unmatched_clinical_names": "|".join(unmatched_names),
-        "soz_eligible": int(soz_eligible),
-        "audit_eligible": int(audit_eligible),
-        "notes": "; ".join(notes),
-    }
+    _finalize_eligibility(row, notes)
+    return row
 
 
 def build_yuquan_row(
     subject: str,
-    subject_dir: Path,
     soz_map: Dict[str, List[str]],
 ) -> Dict[str, str]:
     notes: List[str] = []
-    npz_files = list_npz_blocks(subject_dir)
-    n_actual = len(npz_files)
-    n_stub = sum(1 for p in npz_files if p.stat().st_size < 1024)
-    hfo_npz_ok = n_actual > 0 and n_stub == 0
+    row = _empty_row("yuquan", subject)
+    subject_dir = HFO_DETECTION_DIR / subject
+
+    scan = _scan_subject_blocks(subject_dir)
+    row["n_blocks_actual"] = scan["n_blocks_actual"]
+    row["n_blocks_stub"] = scan["n_blocks_stub"]
+    row["n_blocks_loadable"] = scan["n_blocks_loadable"]
+    schema = scan["schema_consistency"]
+    row["schema_consistent"] = int(bool(schema["all_consistent"]))
+    row["schema_n_channels_min"] = schema["n_channels_min"]
+    row["schema_n_channels_max"] = schema["n_channels_max"]
 
     seizure_count = load_yuquan_seizure_count(subject)
     if seizure_count is None:
         seizure_count = 0
         notes.append("missing pr1_seizure JSON")
+    row["n_seizures"] = seizure_count
 
     sf = probe_yuquan_sfreq(subject)
-    if sf is None:
-        sfreq_min = sfreq_max = float("nan")
-        sfreq_source = "missing"
+    if sf is not None:
+        row["sfreq_min"] = sf
+        row["sfreq_max"] = sf
+        row["sfreq_source"] = "edf_probe_first_record"
+        row["m2_eligible"] = int(sf >= M2_MIN_SFREQ)
+    else:
         notes.append("could not probe EDF sfreq")
-    else:
-        sfreq_min = sfreq_max = sf
-        sfreq_source = "edf_probe_first_record"
 
-    m2_eligible = (sf is not None) and sf >= M2_MIN_SFREQ
+    clinical = soz_map.get(subject, []) or []
+    row["n_clinical_total"] = len(clinical)
+    if scan["channel_lists"]:
+        _, n_matched_ch, n_unknown, n_unmatched, unmatched = _annotate_clinical(
+            scan["channel_lists"], clinical
+        )
+        row["n_clinical_matched"] = n_matched_ch
+        row["n_unknown_channels"] = n_unknown
+        row["n_clinical_unmatched"] = n_unmatched
+        row["unmatched_clinical_names"] = "|".join(unmatched)
 
-    if n_actual == 0 or not hfo_npz_ok:
-        n_channels = 0
-        ann: Dict[str, str] = {}
-        notes.append("hfo npz missing or stub")
-    else:
-        analysis_channels = load_npz_channels(npz_files[0])
-        n_channels = len(analysis_channels)
-        ann = annotate_clinical_soz(analysis_channels, soz_map.get(subject, []))
-
-    n_unknown = sum(1 for v in ann.values() if v == UNKNOWN_LABEL)
-    n_matched = sum(1 for v in ann.values() if v == SOZ_LABEL)
-    n_clinical_total = len(soz_map.get(subject, []))
-
-    soz_set_norm = {s.strip().upper() for s in soz_map.get(subject, [])}
-    matched_contacts: set = set()
-    for ch, label in ann.items():
-        if label != SOZ_LABEL:
-            continue
-        norm = ch.strip().upper()
-        for prefix in ("EEG ", "EEG_"):
-            if norm.startswith(prefix):
-                norm = norm[len(prefix):]
-        for part in (p.strip() for p in norm.split("-")):
-            if part in soz_set_norm:
-                matched_contacts.add(part)
-    unmatched_names = sorted(soz_set_norm - matched_contacts)
-    n_unmatched = len(unmatched_names)
-
-    soz_eligible = n_matched >= 1
-    audit_eligible = hfo_npz_ok and seizure_count >= 2 and soz_eligible
-    if seizure_count < 2:
-        notes.append(f"n_seizures={seizure_count} < 2")
-    if not soz_eligible:
-        notes.append(f"n_clinical_matched={n_matched} < 1")
-
-    return {
-        "dataset": "yuquan",
-        "subject": subject,
-        "n_blocks_actual": n_actual,
-        "n_blocks_expected": "",  # no per-block inventory for yuquan
-        "n_blocks_stub": n_stub,
-        "hfo_npz_ok": int(hfo_npz_ok),
-        "block_count_match": "",
-        "n_seizures": seizure_count,
-        "sfreq_min": "" if np.isnan(sfreq_min) else sfreq_min,
-        "sfreq_max": "" if np.isnan(sfreq_max) else sfreq_max,
-        "sfreq_source": sfreq_source,
-        "m2_eligible": int(m2_eligible),
-        "n_analysis_channels": n_channels,
-        "n_clinical_total": n_clinical_total,
-        "n_clinical_matched": n_matched,
-        "n_clinical_unmatched": n_unmatched,
-        "n_unknown_channels": n_unknown,
-        "unmatched_clinical_names": "|".join(unmatched_names),
-        "soz_eligible": int(soz_eligible),
-        "audit_eligible": int(audit_eligible),
-        "notes": "; ".join(notes),
-    }
+    _finalize_eligibility(row, notes)
+    return row
 
 
 # ---------------------------------------------------------------------------
@@ -408,12 +495,13 @@ def run_audit(output_dir: Path) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     audit_csv = output_dir / "audit.csv"
 
-    print("[audit] enumerating subjects under", HFO_DETECTION_DIR, flush=True)
-    subjects = list_subject_dirs(HFO_DETECTION_DIR)
-    print(f"[audit] found {len(subjects)} subjects "
-          f"({sum(1 for d, _, _ in subjects if d == 'epilepsiae')} epilepsiae, "
-          f"{sum(1 for d, _, _ in subjects if d == 'yuquan')} yuquan)",
-          flush=True)
+    epi_subjects = expected_epilepsiae_subjects(EPILEPSIAE_SUBJECT_INVENTORY)
+    yu_subjects = expected_yuquan_subjects(YUQUAN_DATA_ROOT)
+    print(
+        f"[audit] expected cohort: {len(epi_subjects)} epilepsiae "
+        f"+ {len(yu_subjects)} yuquan = {len(epi_subjects) + len(yu_subjects)}",
+        flush=True,
+    )
 
     print("[audit] loading inventories ...", flush=True)
     epi_blocks = load_epilepsiae_block_inventory(EPILEPSIAE_BLOCK_INVENTORY)
@@ -425,31 +513,38 @@ def run_audit(output_dir: Path) -> Path:
 
     rows: List[Dict[str, str]] = []
     t0 = time.time()
-    for dataset, subject, sub_dir in subjects:
+    for subject in epi_subjects:
         t_sub = time.time()
-        if dataset == "epilepsiae":
-            row = build_epilepsiae_row(
-                subject=subject,
-                subject_dir=sub_dir,
-                block_rows=epi_blocks.get(subject),
-                seizure_count=epi_seizures.get(subject, 0),
-                soz_map=epi_soz,
-            )
-        else:
-            row = build_yuquan_row(
-                subject=subject,
-                subject_dir=sub_dir,
-                soz_map=yuquan_soz,
-            )
+        row = build_epilepsiae_row(
+            subject=subject,
+            block_rows=epi_blocks.get(subject),
+            seizure_count=epi_seizures.get(subject, 0),
+            soz_map=epi_soz,
+        )
         rows.append(row)
-        elapsed = time.time() - t_sub
         print(
-            f"[audit] {dataset}/{subject}: "
-            f"npz={row['n_blocks_actual']} "
+            f"[audit] epilepsiae/{subject}: "
+            f"npz={row['n_blocks_actual']}/{row['n_blocks_expected']} "
+            f"loadable={row['n_blocks_loadable']} "
+            f"schema_ok={row['schema_consistent']} "
             f"sz={row['n_seizures']} "
             f"clin_matched={row['n_clinical_matched']}/{row['n_clinical_total']} "
-            f"m2={row['m2_eligible']} "
-            f"({elapsed:.1f}s)",
+            f"m2={row['m2_eligible']} ({time.time() - t_sub:.1f}s)",
+            flush=True,
+        )
+
+    for subject in yu_subjects:
+        t_sub = time.time()
+        row = build_yuquan_row(subject=subject, soz_map=yuquan_soz)
+        rows.append(row)
+        print(
+            f"[audit] yuquan/{subject}: "
+            f"npz={row['n_blocks_actual']} "
+            f"loadable={row['n_blocks_loadable']} "
+            f"schema_ok={row['schema_consistent']} "
+            f"sz={row['n_seizures']} "
+            f"clin_matched={row['n_clinical_matched']}/{row['n_clinical_total']} "
+            f"m2={row['m2_eligible']} ({time.time() - t_sub:.1f}s)",
             flush=True,
         )
 
@@ -460,13 +555,13 @@ def run_audit(output_dir: Path) -> Path:
         writer.writerows(rows)
     print(f"[audit] done in {time.time() - t0:.1f}s; {len(rows)} rows", flush=True)
 
-    # Cohort summary print.
     n_total = len(rows)
-    n_eligible = sum(int(bool(r["audit_eligible"])) for r in rows)
-    n_m2 = sum(int(bool(r["m2_eligible"])) for r in rows)
+    n_eligible = sum(int(r["audit_eligible"] or 0) for r in rows)
+    n_m2 = sum(int(r["m2_eligible"] or 0) for r in rows)
+    n_no_hfo = sum(1 for r in rows if int(r["n_blocks_actual"] or 0) == 0)
     print(
         f"[audit] cohort: total={n_total} audit_eligible={n_eligible} "
-        f"m2_eligible={n_m2}",
+        f"m2_eligible={n_m2} hfo_missing={n_no_hfo}",
         flush=True,
     )
     return audit_csv

@@ -18,7 +18,10 @@ import pytest
 from src.data_driven_soz import (
     aggregate_consensus,
     aggregate_median_rank,
+    annotate_clinical_soz,
+    check_channel_schema_consistency,
     compute_hfo_onset_metrics,
+    matched_clinical_contacts,
     rank_top_k_per_seizure,
 )
 
@@ -136,6 +139,26 @@ def test_t6_rank_top_k_nan_bottom():
     assert top3 == ["d", "c", "a"]
 
 
+def test_t6b_rank_top_k_nan_tail_when_k_exceeds_finite_count():
+    """Plan §3.5 ``rank_last`` contract: NaN scores rank LAST, not dropped.
+
+    If ``k`` exceeds the number of finite-score channels, the NaN
+    channels must fill the tail in alphabetical order — otherwise the
+    size-matched primary k = ``|clinical_matched|`` (plan §3.6) would
+    silently truncate when many channels have zero baseline rate.
+    """
+    scores = {"a": 1.0, "b": float("nan"), "c": 3.0, "d": 4.0, "e": float("nan")}
+    top5 = rank_top_k_per_seizure(scores, k=5)
+    # Finite descending: d (4), c (3), a (1); NaN tail alphabetical: b, e
+    assert top5 == ["d", "c", "a", "b", "e"]
+
+
+def test_t6c_rank_top_k_only_nan_returns_alphabetical_tail():
+    scores = {"zeta": float("nan"), "alpha": float("nan"), "delta": float("nan")}
+    top2 = rank_top_k_per_seizure(scores, k=2)
+    assert top2 == ["alpha", "delta"]
+
+
 # ---------------------------------------------------------------------------
 # T7 — tie-break deterministic by ascending channel name
 # ---------------------------------------------------------------------------
@@ -205,6 +228,87 @@ def test_t10_aggregate_median_rank():
     assert "D" in top3
     assert "B" in top3
     assert top3 == {"A", "B", "D"}
+
+
+# ---------------------------------------------------------------------------
+# Audit helpers (Step 0 hardening)
+# ---------------------------------------------------------------------------
+
+
+def test_matched_clinical_contacts_bipolar_partial_overlap():
+    """Plan §3.2: matched contacts are clinical SOZ entries that touch
+    at least one analysis channel. Contacts with no matching pair are
+    reported via the unmatched complement.
+    """
+    analysis = ["A1-A2", "A2-A3", "B1-B2"]
+    clinical = ["A1", "A3", "C1"]  # C1 not present anywhere
+    matched = matched_clinical_contacts(analysis, clinical)
+    assert matched == {"A1", "A3"}
+
+
+def test_matched_clinical_contacts_normalizes_eeg_prefix():
+    """``_normalize_channel_name`` strips ``EEG `` / ``EEG_`` and
+    upper-cases. Reusing it for the unmatched stat keeps Step 0 audit
+    aligned with the canonical matcher (plan §3.2 hard requirement).
+    """
+    analysis = ["EEG A1-EEG A2", "eeg_a3-eeg_a4"]
+    clinical = ["A1", "a4"]
+    matched = matched_clinical_contacts(analysis, clinical)
+    assert matched == {"A1", "A4"}
+
+
+def test_matched_clinical_contacts_car_channel():
+    """CAR / monopolar analysis channels: single contact per channel."""
+    analysis = ["GA1", "GA2", "GA3"]
+    clinical = ["GA2"]
+    matched = matched_clinical_contacts(analysis, clinical)
+    assert matched == {"GA2"}
+
+
+def test_annotate_clinical_soz_unknown_for_malformed_bipolar():
+    """Plan §3.2: ``X-`` (empty side) → unknown."""
+    analysis = ["A1-A2", "B1-", "-C2", "A1"]
+    clinical = ["A1"]
+    labels = annotate_clinical_soz(analysis, clinical)
+    assert labels["A1-A2"] == "soz"
+    assert labels["B1-"] == "unknown"
+    assert labels["-C2"] == "unknown"
+    assert labels["A1"] == "soz"
+
+
+def test_check_channel_schema_consistency_consistent():
+    blocks = [["A1", "A2", "A3"], ["A1", "A2", "A3"]]
+    res = check_channel_schema_consistency(blocks)
+    assert res["all_consistent"] is True
+    assert res["mismatched_block_indices"] == []
+    assert res["n_channels_min"] == 3
+    assert res["n_channels_max"] == 3
+
+
+def test_check_channel_schema_consistency_order_mismatch():
+    """Channel ordering mismatch is a real problem because every other
+    artifact in the pipeline indexes by position. Must flag, not silent."""
+    blocks = [["A1", "A2", "A3"], ["A2", "A1", "A3"]]
+    res = check_channel_schema_consistency(blocks)
+    assert res["all_consistent"] is False
+    assert res["mismatched_block_indices"] == [1]
+
+
+def test_check_channel_schema_consistency_partial_blocks():
+    blocks = [["A1", "A2", "A3"], ["A1", "A2"]]
+    res = check_channel_schema_consistency(blocks)
+    assert res["all_consistent"] is False
+    assert res["n_channels_min"] == 2
+    assert res["n_channels_max"] == 3
+    assert res["mismatched_block_indices"] == [1]
+
+
+def test_check_channel_schema_consistency_empty():
+    res = check_channel_schema_consistency([])
+    assert res["all_consistent"] is True
+    assert res["mismatched_block_indices"] == []
+    assert res["n_channels_min"] == 0
+    assert res["n_channels_max"] == 0
 
 
 def test_t10b_aggregate_median_rank_missing_seizure_goes_to_bottom():

@@ -38,6 +38,84 @@ NON_SOZ_LABEL = "non_soz"
 UNKNOWN_LABEL = "unknown"
 
 
+def matched_clinical_contacts(
+    analysis_channels: Iterable[str],
+    clinical_soz: Iterable[str],
+) -> Set[str]:
+    """Set of normalized clinical SOZ contacts that touch ≥1 analysis channel.
+
+    Reuses ``_normalize_channel_name`` so the unmatched complement is
+    consistent with ``annotate_clinical_soz`` (plan §3.2). For bipolar
+    channels ``X-Y``, both contacts are checked. For CAR / monopolar
+    ``X``, the single contact is checked.
+
+    Empty / whitespace-only contact parts (malformed names) are skipped
+    rather than silently producing a spurious match.
+    """
+    norm_soz = {_normalize_channel_name(s) for s in clinical_soz if s}
+    matched: Set[str] = set()
+    for ch in analysis_channels:
+        if not ch:
+            continue
+        normalized = _normalize_channel_name(ch)
+        for raw_part in normalized.split("-"):
+            # Re-normalize each side so a dual-prefix bipolar like
+            # "EEG A1-EEG A2" resolves both contacts (the top-level
+            # ``_normalize_channel_name`` only strips the leading prefix).
+            p = _normalize_channel_name(raw_part)
+            if not p:
+                continue
+            if p in norm_soz:
+                matched.add(p)
+    return matched
+
+
+def check_channel_schema_consistency(
+    channel_lists: Sequence[Sequence[str]],
+) -> Dict[str, object]:
+    """Verify ``chns_names`` schema is consistent across blocks.
+
+    Plan §3.2 requires HFO npz channel order to be aligned across blocks
+    of the same subject; the per-subject runner concatenates events
+    across blocks and indexes by channel position, so an order mismatch
+    in even one block silently corrupts every downstream metric.
+
+    Returns
+    -------
+    dict
+        ``{"n_blocks": int, "all_consistent": bool,
+        "mismatched_block_indices": list[int], "n_channels_min": int,
+        "n_channels_max": int}``.
+    """
+    n_blocks = len(channel_lists)
+    if n_blocks == 0:
+        return {
+            "n_blocks": 0,
+            "all_consistent": True,
+            "mismatched_block_indices": [],
+            "n_channels_min": 0,
+            "n_channels_max": 0,
+        }
+    reference = list(channel_lists[0])
+    mismatched: List[int] = []
+    n_min = n_max = len(reference)
+    for i, channels in enumerate(channel_lists):
+        ch_list = list(channels)
+        n_min = min(n_min, len(ch_list))
+        n_max = max(n_max, len(ch_list))
+        if i == 0:
+            continue
+        if ch_list != reference:
+            mismatched.append(i)
+    return {
+        "n_blocks": n_blocks,
+        "all_consistent": not mismatched,
+        "mismatched_block_indices": mismatched,
+        "n_channels_min": n_min,
+        "n_channels_max": n_max,
+    }
+
+
 def annotate_clinical_soz(
     analysis_channels: Iterable[str],
     clinical_soz: Iterable[str],
@@ -161,10 +239,14 @@ def rank_top_k_per_seizure(
 ) -> List[str]:
     """Top-k channels by ``per_channel_score`` (plan §3.5).
 
-    Sort key is ``(-score, channel_name_ascending)`` so ties resolve
-    deterministically by alphabetical channel name. NaN scores are routed
-    to the bottom regardless of ``nan_handling`` (the parameter is kept
-    for forward compatibility — only ``"rank_last"`` is implemented).
+    Finite scores rank first (descending score, ties broken by
+    ascending channel name). NaN-score channels fill the tail in
+    ascending channel-name order. The truncation to ``k`` happens after
+    both groups are concatenated, so size-matched primary k =
+    ``|clinical_matched|`` (plan §3.6) returns exactly ``k`` channels
+    even when many channels have NaN scores (e.g. zero-baseline
+    Poisson z that the implementation might emit). Only the
+    ``"rank_last"`` policy is implemented.
     """
     if k <= 0:
         return []
@@ -173,13 +255,17 @@ def rank_top_k_per_seizure(
             f"unsupported nan_handling={nan_handling!r}; only 'rank_last' is supported"
         )
     finite_items: List[tuple] = []
+    nan_channels: List[str] = []
     for ch, score in per_channel_score.items():
         s = float(score)
         if math.isnan(s):
-            continue
-        finite_items.append((ch, s))
+            nan_channels.append(ch)
+        else:
+            finite_items.append((ch, s))
     finite_items.sort(key=lambda x: (-x[1], x[0]))
-    return [ch for ch, _ in finite_items[:k]]
+    nan_channels.sort()
+    ordered = [ch for ch, _ in finite_items] + nan_channels
+    return ordered[:k]
 
 
 def aggregate_consensus(
@@ -231,6 +317,8 @@ def aggregate_median_rank(
 
 __all__ = [
     "annotate_clinical_soz",
+    "matched_clinical_contacts",
+    "check_channel_schema_consistency",
     "SOZ_LABEL",
     "NON_SOZ_LABEL",
     "UNKNOWN_LABEL",
