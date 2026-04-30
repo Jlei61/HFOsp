@@ -15,8 +15,10 @@ Plan: docs/archive/epilepsiae_lagpat/epilepsiae_lagpat_backfill_plan_2026-04-29.
 from __future__ import annotations
 
 import argparse
+import csv
 import datetime
 import json
+import signal
 import sys
 import time
 from functools import lru_cache
@@ -37,6 +39,21 @@ OUTPUT_ROOT = Path("results/epilepsiae_lagpat_backfill")
 RIPPLE_BAND = (80.0, 250.0)
 NYQUIST_GATE_HZ = 2.0 * RIPPLE_BAND[1]  # 500 Hz; 256 Hz blocks fail this
 SEGMENT_SEC = 200.0  # mirrors Yuquan stitched-segment legacy semantics
+DEFAULT_MAX_RECORD_SEC = 1800  # plan §3 B.5: per-record wall-clock cap
+
+# Canonical 20-subject cohort (plan §3 Task B.5 Step 4 wrapper script).
+COHORT_SUBJECTS: Tuple[str, ...] = (
+    "253", "548", "139", "384", "1077", "1084", "442", "818", "916", "922",
+    "958", "583", "590", "620", "635", "1073", "1096", "1125", "1146", "1150",
+)
+
+
+class _RecordTimeout(Exception):
+    """Raised by the SIGALRM handler when a single record exceeds max_record_sec."""
+
+
+def _alarm_handler(signum, frame):  # noqa: ARG001
+    raise _RecordTimeout()
 
 
 def _refine_path_for_subject(subject: str) -> Path:
@@ -389,13 +406,22 @@ def process_subject(
     subject: str,
     *,
     force: bool = False,
+    max_record_sec: int = DEFAULT_MAX_RECORD_SEC,
 ) -> Dict[str, Any]:
     """Run pack + lagPat for every record of a subject, with per-record logging.
 
     Failure-tolerant: if one record raises, log the failure and continue. The
     log is flushed atomically after every record so a crash leaves a usable
     state for resume on the next invocation.
+
+    Per-record wall-clock cap (`max_record_sec`, default 1800 = 30 min, plan
+    §3 B.5). Implemented with SIGALRM — main-thread + Linux only, which holds
+    for the GNU parallel wrapper (each subject is its own process). Pass 0 to
+    disable the timeout.
     """
+    if max_record_sec < 0:
+        raise ValueError("max_record_sec must be >= 0 (0 disables the timeout)")
+
     out_dir = OUTPUT_ROOT / subject
     out_dir.mkdir(parents=True, exist_ok=True)
     log_path = out_dir / "_backfill_log.json"
@@ -415,22 +441,45 @@ def process_subject(
     }
     _atomic_write_json(log_path, log)
 
-    for rec in records:
-        stem = rec["stem"]
-        try:
-            result = process_one_record(subject, stem, force=force)
-            if result.get("skipped"):
-                log["n_skipped_existing"] += 1
-            else:
-                log["n_records_done"] += 1
-                log["per_record_seconds"][stem] = float(result["runtime_sec"])
-        except Exception as exc:
-            log["n_failed"] += 1
-            log["failures"].append(
-                {"stem": stem, "type": type(exc).__name__, "error": str(exc)}
-            )
-            print(f"  FAIL {stem}: {type(exc).__name__}: {exc}")
-        _atomic_write_json(log_path, log)
+    use_timeout = max_record_sec > 0
+    prev_handler = (
+        signal.signal(signal.SIGALRM, _alarm_handler) if use_timeout else None
+    )
+    try:
+        for rec in records:
+            stem = rec["stem"]
+            if use_timeout:
+                signal.alarm(int(max_record_sec))
+            try:
+                result = process_one_record(subject, stem, force=force)
+                if result.get("skipped"):
+                    log["n_skipped_existing"] += 1
+                else:
+                    log["n_records_done"] += 1
+                    log["per_record_seconds"][stem] = float(result["runtime_sec"])
+            except _RecordTimeout:
+                log["n_failed"] += 1
+                log["failures"].append(
+                    {
+                        "stem": stem,
+                        "type": "TimeoutError",
+                        "error": f"exceeded {max_record_sec}s wall-clock cap",
+                    }
+                )
+                print(f"  TIMEOUT {stem}: exceeded {max_record_sec}s")
+            except Exception as exc:
+                log["n_failed"] += 1
+                log["failures"].append(
+                    {"stem": stem, "type": type(exc).__name__, "error": str(exc)}
+                )
+                print(f"  FAIL {stem}: {type(exc).__name__}: {exc}")
+            finally:
+                if use_timeout:
+                    signal.alarm(0)
+            _atomic_write_json(log_path, log)
+    finally:
+        if use_timeout and prev_handler is not None:
+            signal.signal(signal.SIGALRM, prev_handler)
 
     if log["per_record_seconds"]:
         log["median_record_seconds"] = float(
@@ -439,6 +488,72 @@ def process_subject(
     log["completed_at"] = datetime.datetime.now().isoformat(timespec="seconds")
     _atomic_write_json(log_path, log)
     return log
+
+
+def _aggregate_cohort_summary(
+    subjects: Tuple[str, ...] = COHORT_SUBJECTS,
+    *,
+    output_root: Optional[Path] = None,
+    csv_path: Optional[Path] = None,
+) -> Path:
+    """Walk per-subject ``_backfill_log.json`` files into ``cohort_summary.csv``.
+
+    Always emits one row per subject in ``subjects`` (the canonical 20-subject
+    cohort by default). Subjects with no log yet show ``status='not_started'``
+    so a partial-cohort run does not silently undercount.
+    """
+    root = output_root if output_root is not None else OUTPUT_ROOT
+    target = csv_path if csv_path is not None else root / "cohort_summary.csv"
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    fields = [
+        "subject",
+        "status",
+        "started_at",
+        "completed_at",
+        "n_records_total",
+        "n_records_done",
+        "n_skipped_existing",
+        "n_failed",
+        "median_record_seconds",
+        "has_failures",
+    ]
+    rows: List[Dict[str, Any]] = []
+    for subj in subjects:
+        log_path = root / subj / "_backfill_log.json"
+        if not log_path.exists():
+            rows.append({"subject": subj, "status": "not_started"})
+            continue
+        try:
+            with open(log_path) as fh:
+                data = json.load(fh)
+        except Exception as exc:
+            rows.append({"subject": subj, "status": f"log_unreadable: {exc}"})
+            continue
+        status = "completed" if data.get("completed_at") else "in_progress"
+        rows.append(
+            {
+                "subject": subj,
+                "status": status,
+                "started_at": data.get("started_at"),
+                "completed_at": data.get("completed_at"),
+                "n_records_total": data.get("n_records_total"),
+                "n_records_done": data.get("n_records_done"),
+                "n_skipped_existing": data.get("n_skipped_existing"),
+                "n_failed": data.get("n_failed"),
+                "median_record_seconds": data.get("median_record_seconds"),
+                "has_failures": bool(data.get("failures")),
+            }
+        )
+
+    tmp = target.with_suffix(target.suffix + ".tmp")
+    with open(tmp, "w", newline="") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fields)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({k: row.get(k, "") for k in fields})
+    tmp.replace(target)
+    return target
 
 
 def _smoke_print(subject: str) -> None:
@@ -470,14 +585,40 @@ def _smoke_print(subject: str) -> None:
     print("[smoke] (no files written)")
 
 
+def _print_subject_summary(subject: str, log: Dict[str, Any]) -> None:
+    median = log.get("median_record_seconds")
+    median_str = f"{median:.1f}s" if median is not None else "n/a"
+    print(
+        f"[backfill] subject={subject}  "
+        f"done={log['n_records_done']}/{log['n_records_total']}  "
+        f"skipped={log['n_skipped_existing']}  failed={log['n_failed']}  "
+        f"median_runtime={median_str}"
+    )
+    if log["failures"]:
+        print(f"  first {min(5, len(log['failures']))} failures:")
+        for f in log["failures"][:5]:
+            print(f"    {f['stem']}: {f['type']}: {f['error']}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Epilepsiae new-pipeline pack + lagPat backfill (Stage A skeleton).",
+        description="Epilepsiae new-pipeline pack + lagPat backfill driver (Stage A/B).",
     )
     parser.add_argument("--subject", type=str, default=None)
     parser.add_argument("--stem", type=str, default=None,
                         help="Process a single record stem (B.4.a single-record mode).")
-    parser.add_argument("--all", action="store_true")
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Run process_subject sequentially over the canonical 20-subject cohort. "
+             "For parallel execution use scripts/run_epilepsiae_lagpat_backfill_parallel.sh.",
+    )
+    parser.add_argument(
+        "--aggregate-cohort-summary",
+        action="store_true",
+        help="Walk per-subject _backfill_log.json files into cohort_summary.csv "
+             "(20 rows, one per canonical subject).",
+    )
     parser.add_argument(
         "--smoke",
         action="store_true",
@@ -488,7 +629,19 @@ def main() -> None:
         action="store_true",
         help="Re-run even if output files already exist (overwrite).",
     )
+    parser.add_argument(
+        "--max-record-sec",
+        type=int,
+        default=DEFAULT_MAX_RECORD_SEC,
+        help=f"Per-record wall-clock cap in seconds (default {DEFAULT_MAX_RECORD_SEC}). "
+             "Pass 0 to disable.",
+    )
     args = parser.parse_args()
+
+    if args.aggregate_cohort_summary:
+        out = _aggregate_cohort_summary()
+        print(f"[backfill] cohort_summary.csv -> {out}")
+        return
 
     if args.smoke:
         if not args.subject:
@@ -519,28 +672,27 @@ def main() -> None:
         return
 
     if args.subject:
-        log = process_subject(args.subject, force=args.force)
-        median = log.get("median_record_seconds")
-        median_str = f"{median:.1f}s" if median is not None else "n/a"
-        print(
-            f"[B.4.b] subject={args.subject}  "
-            f"done={log['n_records_done']}/{log['n_records_total']}  "
-            f"skipped={log['n_skipped_existing']}  failed={log['n_failed']}  "
-            f"median_runtime={median_str}"
+        log = process_subject(
+            args.subject, force=args.force, max_record_sec=args.max_record_sec
         )
-        if log["failures"]:
-            print(f"  first {min(5, len(log['failures']))} failures:")
-            for f in log["failures"][:5]:
-                print(f"    {f['stem']}: {f['type']}: {f['error']}")
+        _print_subject_summary(args.subject, log)
         return
 
     if args.all:
-        raise NotImplementedError(
-            "Cohort batch driver (Stage B.5) not implemented yet. "
-            "Run --subject <X> per subject; cross-subject parallel comes in B.5."
-        )
+        for subj in COHORT_SUBJECTS:
+            print(f"[backfill] === subject {subj} ===")
+            log = process_subject(
+                subj, force=args.force, max_record_sec=args.max_record_sec
+            )
+            _print_subject_summary(subj, log)
+        out = _aggregate_cohort_summary()
+        print(f"[backfill] cohort_summary.csv -> {out}")
+        return
 
-    parser.error("provide one of --subject, --subject --stem, or --smoke")
+    parser.error(
+        "provide one of --subject, --subject --stem, --smoke, --all, "
+        "or --aggregate-cohort-summary"
+    )
 
 
 if __name__ == "__main__":

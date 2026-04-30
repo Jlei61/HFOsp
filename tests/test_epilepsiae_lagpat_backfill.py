@@ -182,6 +182,158 @@ def test_process_subject_writes_log_with_required_keys(tmp_path, monkeypatch):
     assert log["n_records_done"] == 0
 
 
+def test_process_subject_skip_existing_log_accounting(tmp_path, monkeypatch):
+    """Skip-existing default: pre-existing record is logged as skipped, not done.
+
+    Patches ``process_one_record`` so the test does not touch real Epilepsiae
+    data; the unit under test is ``process_subject``'s log accounting.
+    """
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    monkeypatch.setattr(mod, "OUTPUT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        mod,
+        "_discover_records",
+        lambda subject: [{"stem": "FAKE_0000"}, {"stem": "FAKE_0001"}],
+    )
+
+    def fake_one(subject, stem, *, force):
+        if stem == "FAKE_0000":
+            return {"stem": stem, "skipped": True, "reason": "outputs exist (loadable)"}
+        return {
+            "stem": stem,
+            "skipped": False,
+            "n_events": 0,
+            "n_channels": 0,
+            "n_packed": 0,
+            "start_t": 1e9,
+            "runtime_sec": 0.01,
+            "pt_path": "x",
+            "lag_path": "y",
+        }
+
+    monkeypatch.setattr(mod, "process_one_record", fake_one)
+    log = mod.process_subject("FAKE", max_record_sec=0)
+    assert log["n_records_done"] == 1
+    assert log["n_skipped_existing"] == 1
+    assert log["n_failed"] == 0
+    assert "FAKE_0001" in log["per_record_seconds"]
+
+
+def test_process_subject_force_flag_propagates(tmp_path, monkeypatch):
+    """``--force`` reaches ``process_one_record`` so existing files do get re-run."""
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    monkeypatch.setattr(mod, "OUTPUT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        mod, "_discover_records", lambda subject: [{"stem": "FAKE_0000"}]
+    )
+
+    seen_force = []
+
+    def fake_one(subject, stem, *, force):
+        seen_force.append(force)
+        return {
+            "stem": stem,
+            "skipped": False,
+            "n_events": 0,
+            "n_channels": 0,
+            "n_packed": 0,
+            "start_t": 1e9,
+            "runtime_sec": 0.01,
+            "pt_path": "x",
+            "lag_path": "y",
+        }
+
+    monkeypatch.setattr(mod, "process_one_record", fake_one)
+    mod.process_subject("FAKE", force=True, max_record_sec=0)
+    assert seen_force == [True]
+
+
+def test_process_subject_per_record_timeout(tmp_path, monkeypatch):
+    """A record that exceeds ``max_record_sec`` is marked TimeoutError, run continues.
+
+    Uses SIGALRM (Linux main-thread); pytest does not pre-install a SIGALRM
+    handler, so the patched ``process_one_record`` sleeping for 2 s with a 1 s
+    cap reliably trips the alarm.
+    """
+    import time as _time
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    monkeypatch.setattr(mod, "OUTPUT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        mod,
+        "_discover_records",
+        lambda subject: [{"stem": "SLOW_0000"}, {"stem": "FAST_0001"}],
+    )
+
+    def fake_one(subject, stem, *, force):
+        if stem == "SLOW_0000":
+            _time.sleep(2)  # exceeds 1 s timeout
+        return {
+            "stem": stem,
+            "skipped": False,
+            "n_events": 0,
+            "n_channels": 0,
+            "n_packed": 0,
+            "start_t": 1e9,
+            "runtime_sec": 0.01,
+            "pt_path": "x",
+            "lag_path": "y",
+        }
+
+    monkeypatch.setattr(mod, "process_one_record", fake_one)
+    log = mod.process_subject("FAKE", max_record_sec=1)
+    assert log["n_failed"] == 1
+    assert log["n_records_done"] == 1
+    assert log["failures"][0]["stem"] == "SLOW_0000"
+    assert log["failures"][0]["type"] == "TimeoutError"
+    assert "FAST_0001" in log["per_record_seconds"]
+
+
+def test_aggregate_cohort_summary_emits_one_row_per_canonical_subject(tmp_path):
+    """``cohort_summary.csv`` always has 20 rows (one per canonical subject).
+
+    Subjects with no log show ``status='not_started'`` so a partial run does
+    not silently undercount. Plan §3 B.5 Step 6 contract: "20 行".
+    """
+    import csv as _csv
+    import json as _json
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    seeded = {"253", "548"}
+    for subj in seeded:
+        d = tmp_path / subj
+        d.mkdir(parents=True)
+        with open(d / "_backfill_log.json", "w") as fh:
+            _json.dump(
+                {
+                    "subject": subj,
+                    "started_at": "2026-04-30T00:00:00",
+                    "completed_at": "2026-04-30T01:00:00",
+                    "n_records_total": 10,
+                    "n_records_done": 10,
+                    "n_skipped_existing": 0,
+                    "n_failed": 0,
+                    "failures": [],
+                    "median_record_seconds": 12.3,
+                },
+                fh,
+            )
+
+    out = mod._aggregate_cohort_summary(output_root=tmp_path)
+    assert out.name == "cohort_summary.csv"
+    with open(out) as fh:
+        rows = list(_csv.DictReader(fh))
+    assert len(rows) == len(mod.COHORT_SUBJECTS)
+    by_subject = {r["subject"]: r for r in rows}
+    assert by_subject["253"]["status"] == "completed"
+    assert by_subject["253"]["n_records_done"] == "10"
+    not_started = {s for s in mod.COHORT_SUBJECTS if s not in seeded}
+    for s in not_started:
+        assert by_subject[s]["status"] == "not_started"
+
+
 def test_smoke_does_not_create_output_files():
     """--smoke must not create any files under OUTPUT_ROOT.
 
