@@ -5,6 +5,9 @@ Step 0 helpers:
 - ``annotate_clinical_soz``: 3-state (SOZ/nonSOZ/unknown) annotation of an
   analysis channel set against a clinical SOZ list, using the canonical
   bipolar-to-any matcher from ``src.event_periodicity``.
+- ``matched_clinical_contacts`` / ``check_channel_schema_consistency``:
+  unmatched-name normalization and cross-block schema validation
+  helpers used by the audit script.
 
 Step 1 helpers (M1 — HFO-onset rate enrichment):
 
@@ -17,8 +20,17 @@ Step 1 helpers (M1 — HFO-onset rate enrichment):
 - ``aggregate_median_rank``: median rank across seizures (channels
   missing in a seizure receive the worst rank), top-k smallest medians.
 
-Step 2 (M2 ER-log-ratio + Nyquist / filter padding guards) lives in a
-later commit.
+Step 2 helpers (M2 — band-power log-ratio enrichment):
+
+- ``_bandpass_power``: Butter order 4 + ``filtfilt`` zero-phase →
+  instantaneous (per-sample) power. Raises
+  ``NyquistGuardError`` / ``FilterPaddingError`` when the signal can't
+  support the requested band.
+- ``compute_er_logratio``: per-channel ER log-ratio (post / pre band
+  power) with edge-buffer windows, per-channel ε floor, and the
+  Nyquist guard at the contract boundary.
+- ``estimate_per_channel_eps``: 1st-percentile-across-seizures noise
+  floor per channel, lower-bounded by ``floor`` (default ``1e-18``).
 
 See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
 """
@@ -26,7 +38,7 @@ See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
 from __future__ import annotations
 
 import math
-from typing import Dict, Iterable, List, Mapping, Sequence, Set
+from typing import Callable, Dict, Iterable, List, Mapping, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -315,6 +327,248 @@ def aggregate_median_rank(
     return {ch for ch, _ in sorted_channels[:k]}
 
 
+# ---------------------------------------------------------------------------
+# Step 2 — M2 (ER log-ratio + Nyquist / filter padding guards)
+# ---------------------------------------------------------------------------
+
+
+class NyquistGuardError(ValueError):
+    """Raised when ``sfreq / 2`` is below the M2 band's safety-margined
+    upper edge (plan §3.4: ``sfreq >= band[1] * 2.1``).
+    """
+
+
+class FilterPaddingError(ValueError):
+    """Raised when the input signal is shorter than the ``filtfilt``
+    padding required for the requested band's lowest cutoff (plan §3.4:
+    ``padlen >= int(1.5 * sfreq / band[0])``).
+    """
+
+
+def _bandpass_power(
+    signal_2d: np.ndarray,
+    sfreq: float,
+    band: Tuple[float, float],
+) -> np.ndarray:
+    """Bandpass-filter a 2D signal and return per-sample instantaneous power.
+
+    Parameters
+    ----------
+    signal_2d
+        ``(n_samples, n_channels)`` array.
+    sfreq
+        Sampling rate (Hz).
+    band
+        ``(low_hz, high_hz)``. The Nyquist guard here prevents
+        scipy.signal.butter from blowing up on its own; the user-facing
+        guard raised by ``compute_er_logratio`` is the contractual one.
+
+    Returns
+    -------
+    np.ndarray
+        ``(n_samples, n_channels)`` array of squared filtered samples
+        (``filtered ** 2``). Callers compute window-mean to get power
+        per pre/post window — keeping the per-sample resolution lets
+        downstream callers slice arbitrary windows from a single filter
+        pass.
+
+    Raises
+    ------
+    NyquistGuardError
+        If ``band[1] >= sfreq / 2`` (the upstream contract is to call
+        this only after the user-facing Nyquist guard, but the cheap
+        check defends against direct callers).
+    FilterPaddingError
+        If ``n_samples <= padlen`` where
+        ``padlen = max(filtfilt_default, int(1.5 * sfreq / band[0]))``.
+    """
+    from scipy.signal import butter, filtfilt
+
+    if signal_2d.ndim != 2:
+        raise ValueError(
+            f"signal_2d must be 2D (n_samples, n_channels), got shape {signal_2d.shape}"
+        )
+
+    band_lo, band_hi = float(band[0]), float(band[1])
+    sfreq = float(sfreq)
+    nyq = sfreq / 2.0
+    if band_hi >= nyq:
+        raise NyquistGuardError(
+            f"sfreq={sfreq} too low for band {band}; need sfreq >= {band_hi * 2.1}"
+        )
+    if band_lo <= 0 or band_hi <= band_lo:
+        raise ValueError(f"invalid band {band}: must satisfy 0 < lo < hi < nyq")
+
+    b, a = butter(4, [band_lo / nyq, band_hi / nyq], btype="bandpass")
+
+    # filtfilt's default padlen is ``3 * max(len(a), len(b))``.
+    # Plan §3.4: also require ``int(1.5 * sfreq / band[0])`` cycles of
+    # the lowest-frequency edge so the IIR settles before the data
+    # window starts.
+    default_padlen = 3 * max(len(a), len(b))
+    band_padlen = int(1.5 * sfreq / band_lo)
+    required_padlen = max(default_padlen, band_padlen)
+    n_samples = signal_2d.shape[0]
+    if n_samples <= required_padlen:
+        raise FilterPaddingError(
+            f"signal too short for filter padding: n_samples={n_samples}, "
+            f"required > {required_padlen} (band={band}, sfreq={sfreq})"
+        )
+
+    filtered = filtfilt(b, a, signal_2d, axis=0, padlen=required_padlen)
+    return filtered ** 2
+
+
+SignalLoader = Callable[[float, float, Sequence[str]], Tuple[np.ndarray, float]]
+
+
+def compute_er_logratio(
+    signal_loader: SignalLoader,
+    channels: Sequence[str],
+    seizure_onset: float,
+    eps_per_channel: Mapping[str, float],
+    w_pre: float = 30.0,
+    w_post: float = 10.0,
+    edge_buffer: float = 2.0,
+    band: Tuple[float, float] = (80.0, 250.0),
+) -> Dict[str, float]:
+    """Per-channel ER log-ratio: ``log(P_post + ε) − log(P_pre + ε)`` (plan §3.4).
+
+    Parameters
+    ----------
+    signal_loader
+        Callable ``(t_start, t_end, channels) -> (signal[T, C], sfreq)``.
+        ``signal`` must be a 2D array with ``shape[1] == len(channels)``
+        and channel order matching the requested ``channels`` list.
+    channels
+        Channel names to score.
+    seizure_onset
+        Absolute time of the seizure onset (same time base as the
+        loader).
+    eps_per_channel
+        Per-channel noise floor (typically from
+        ``estimate_per_channel_eps``). Channels not present in the
+        mapping fall back to ``1e-18`` (plan §3.4 floor).
+    w_pre, w_post
+        Pre / post window length in seconds.
+    edge_buffer
+        Seconds to skip on each side of the onset to avoid
+        bandpass-filter ringing leaking into either window.
+    band
+        ``(lo, hi)`` for the Butter passband; primary M2 is
+        ``(80, 250)`` Hz.
+
+    Returns
+    -------
+    dict[str, float]
+        Per-channel log-ratio.
+
+    Raises
+    ------
+    NyquistGuardError
+        If ``sfreq / 2 < band[1] * 1.05``.
+    FilterPaddingError
+        If the loaded signal is too short for ``filtfilt``.
+
+    Notes
+    -----
+    - ``compute_er_logratio`` is the user-facing entry point for the
+      Nyquist guard, mirroring plan §3.4. The check happens *before*
+      the bandpass call so a low-sfreq subject is rejected with the
+      domain-specific exception rather than a numpy / scipy
+      ``ValueError``.
+    - Plan T15: ``power_pre = 0`` falls back to ``log(P_post + ε) -
+      log(0 + ε)``, which is finite and large but never inf / NaN.
+    """
+    if w_pre <= 0 or w_post <= 0 or edge_buffer < 0:
+        raise ValueError(
+            f"w_pre/w_post must be positive and edge_buffer >= 0; "
+            f"got w_pre={w_pre}, w_post={w_post}, edge_buffer={edge_buffer}"
+        )
+    if not channels:
+        return {}
+
+    band_lo, band_hi = float(band[0]), float(band[1])
+
+    t_start = float(seizure_onset) - w_pre - edge_buffer
+    t_end = float(seizure_onset) + w_post + edge_buffer
+
+    signal, sfreq = signal_loader(t_start, t_end, list(channels))
+    signal = np.asarray(signal, dtype=float)
+    if signal.ndim != 2 or signal.shape[1] != len(channels):
+        raise ValueError(
+            f"signal_loader returned shape {signal.shape}; "
+            f"expected (T, {len(channels)})"
+        )
+    sfreq = float(sfreq)
+
+    # User-facing Nyquist guard (plan §3.4 — band[1] * 1.05 safety margin).
+    if sfreq / 2.0 < band_hi * 1.05:
+        raise NyquistGuardError(
+            f"sfreq={sfreq} too low for band {band}; need sfreq >= {band_hi * 2.1}"
+        )
+
+    inst_power = _bandpass_power(signal, sfreq, band)
+
+    # Window indices relative to t_start (signal sample 0 corresponds to
+    # ``seizure_onset - w_pre - edge_buffer``).
+    pre_start = 0
+    pre_end = int(round(w_pre * sfreq))
+    post_start = int(round((w_pre + 2 * edge_buffer) * sfreq))
+    post_end = int(round((w_pre + 2 * edge_buffer + w_post) * sfreq))
+
+    if post_end > inst_power.shape[0]:
+        raise ValueError(
+            f"signal_loader returned {inst_power.shape[0]} samples; "
+            f"need at least {post_end} for the post window to fit"
+        )
+
+    out: Dict[str, float] = {}
+    for i, ch in enumerate(channels):
+        eps = float(eps_per_channel.get(ch, 1e-18))
+        if eps <= 0:
+            raise ValueError(f"eps for {ch!r} must be positive, got {eps}")
+        power_pre = float(np.mean(inst_power[pre_start:pre_end, i]))
+        power_post = float(np.mean(inst_power[post_start:post_end, i]))
+        out[ch] = math.log(power_post + eps) - math.log(power_pre + eps)
+    return out
+
+
+def estimate_per_channel_eps(
+    power_pre_matrix: np.ndarray,
+    floor: float = 1e-18,
+) -> np.ndarray:
+    """Per-channel noise floor estimate (plan §3.4).
+
+    Parameters
+    ----------
+    power_pre_matrix
+        Shape ``(n_seizures, n_channels)``. Element ``[s, ch]`` is the
+        pre-window band-power for seizure ``s``, channel ``ch`` (output
+        of ``np.mean(_bandpass_power(...)[pre_window], axis=0)``).
+    floor
+        Lower bound for the returned eps. A channel with zero power
+        across every seizure (``percentile == 0``) gets bumped to
+        ``floor``. The Step 3 runner is responsible for flagging such
+        channels as ineligible — this helper only ensures the
+        log-ratio formula stays finite.
+
+    Returns
+    -------
+    np.ndarray
+        Shape ``(n_channels,)`` of per-channel ε values.
+    """
+    arr = np.asarray(power_pre_matrix, dtype=float)
+    if arr.ndim != 2:
+        raise ValueError(
+            f"power_pre_matrix must be 2D (n_seizures, n_channels), got shape {arr.shape}"
+        )
+    if arr.size == 0:
+        return np.empty((arr.shape[1] if arr.ndim == 2 else 0,), dtype=float)
+    pct = np.percentile(arr, 1, axis=0)
+    return np.maximum(pct, float(floor))
+
+
 __all__ = [
     "annotate_clinical_soz",
     "matched_clinical_contacts",
@@ -326,4 +580,9 @@ __all__ = [
     "rank_top_k_per_seizure",
     "aggregate_consensus",
     "aggregate_median_rank",
+    "NyquistGuardError",
+    "FilterPaddingError",
+    "_bandpass_power",
+    "compute_er_logratio",
+    "estimate_per_channel_eps",
 ]

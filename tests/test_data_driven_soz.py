@@ -1,8 +1,10 @@
 """TDD tests for PR-T3-1 ``src/data_driven_soz.py``.
 
-Step 1 covers M1 (HFO-onset rate) three variants + ranking + aggregation:
-T1–T10. Step 2 will add T11–T18 for M2 (ER log-ratio) and Nyquist /
-filter padding guards.
+- Step 1 covers M1 (HFO-onset rate) three variants + ranking +
+  aggregation: T1–T10 (plus follow-up T6b/T6c for the ``rank_last``
+  contract + T10b for missing-seizure rank).
+- Step 2 covers M2 (ER log-ratio) + Nyquist / filter padding guards
+  + per-channel eps: T11–T18.
 
 See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``
 §10 for the full TDD list.
@@ -16,11 +18,16 @@ import numpy as np
 import pytest
 
 from src.data_driven_soz import (
+    FilterPaddingError,
+    NyquistGuardError,
+    _bandpass_power,
     aggregate_consensus,
     aggregate_median_rank,
     annotate_clinical_soz,
     check_channel_schema_consistency,
+    compute_er_logratio,
     compute_hfo_onset_metrics,
+    estimate_per_channel_eps,
     matched_clinical_contacts,
     rank_top_k_per_seizure,
 )
@@ -323,3 +330,322 @@ def test_t10b_aggregate_median_rank_missing_seizure_goes_to_bottom():
     top3 = aggregate_median_rank(per_seizure_ranks, k=3)
     # Y median 1.5, Z median 2, W median 3, X median ≈ 4 → top3 = Y/Z/W
     assert top3 == {"Y", "Z", "W"}
+
+
+# ===========================================================================
+# Step 2 — M2 (ER log-ratio + Nyquist + per-channel eps)
+# ===========================================================================
+
+
+W_PRE = 30.0
+W_POST = 10.0
+EDGE_BUFFER = 2.0
+
+
+def _make_const_loader(signal_array: np.ndarray, sfreq: float):
+    """Return a ``signal_loader(t_start, t_end, channels)`` that always
+    returns the same ``(signal_array, sfreq)`` tuple regardless of the
+    requested time range. Useful for tests that pre-compute a windowed
+    signal aligned to ``t_start = seizure_onset - W_PRE - EDGE_BUFFER``.
+    """
+
+    def loader(t_start, t_end, channels):  # noqa: ARG001
+        return signal_array, sfreq
+
+    return loader
+
+
+def _build_pre_post_signal(
+    sfreq: float,
+    n_channels: int,
+    *,
+    rng_seed: int,
+    pre_factory=None,
+    burst_window=None,
+    burst_factory=None,
+    post_factory=None,
+) -> np.ndarray:
+    """Synthesize a (T, n_channels) signal that spans
+    ``[seizure_onset - W_PRE - EDGE_BUFFER, seizure_onset + W_POST + EDGE_BUFFER]``
+    so the pre window is samples [0 : W_PRE * sfreq], the post window is
+    samples [(W_PRE + 2*EDGE_BUFFER) * sfreq : ...], and the edge buffer
+    (the W_PRE..W_PRE+2*EDGE_BUFFER samples) sits in the middle.
+
+    Each *factory* receives ``(rng, n_samples_in_window)`` and returns a
+    ``(n_samples, n_channels)`` block to overwrite that window. Anything
+    not overwritten stays at the rng-generated baseline (white noise).
+    """
+    rng = np.random.default_rng(rng_seed)
+    n_total = int(round((W_PRE + 2 * EDGE_BUFFER + W_POST) * sfreq))
+    sig = rng.standard_normal((n_total, n_channels))
+
+    pre_end = int(round(W_PRE * sfreq))
+    edge_end = int(round((W_PRE + 2 * EDGE_BUFFER) * sfreq))
+
+    if pre_factory is not None:
+        sig[:pre_end, :] = pre_factory(rng, pre_end)
+    if post_factory is not None:
+        sig[edge_end:, :] = post_factory(rng, n_total - edge_end)
+    if burst_window is not None and burst_factory is not None:
+        b_start_t, b_end_t = burst_window
+        # Convert from "seconds since t_start" to sample indices.
+        b_start = int(round(b_start_t * sfreq))
+        b_end = int(round(b_end_t * sfreq))
+        sig[b_start:b_end, :] = burst_factory(rng, b_end - b_start)
+
+    return sig
+
+
+# ---------------------------------------------------------------------------
+# T11 — _bandpass_power: in-band sine has high power, out-of-band ~0
+# ---------------------------------------------------------------------------
+
+
+def test_t11_bandpass_power_in_band_vs_out_of_band():
+    """Plan §3.4: filter is Butter order 4 + filtfilt zero-phase. An
+    in-band 150 Hz sine is preserved (mean power ~ 0.5 for unit
+    amplitude); an out-of-band 5 Hz sine is suppressed (mean power
+    < 0.05).
+    """
+    sfreq = 1000.0
+    n = int(5 * sfreq)
+    t = np.arange(n) / sfreq
+    in_band = np.sin(2 * np.pi * 150 * t)
+    out_band = np.sin(2 * np.pi * 5 * t)
+    signal = np.column_stack([in_band, out_band])
+
+    inst_power = _bandpass_power(signal, sfreq, (80.0, 250.0))
+
+    p_in = float(np.mean(inst_power[:, 0]))
+    p_out = float(np.mean(inst_power[:, 1]))
+    assert p_in > 0.4, f"in-band power={p_in:.3f}, expected > 0.4"
+    assert p_out < 0.05, f"out-of-band power={p_out:.3f}, expected < 0.05"
+
+
+# ---------------------------------------------------------------------------
+# T12 — compute_er_logratio: post burst → logratio > log(10) ≈ 2.3
+# ---------------------------------------------------------------------------
+
+
+def test_t12_compute_er_logratio_post_burst_drives_high_logratio():
+    sfreq = 1000.0
+    seizure_onset = 100.0
+    eps = 1e-12
+
+    def post_burst(rng, n_samples):
+        t = np.arange(n_samples) / sfreq
+        burst = 5.0 * np.sin(2 * np.pi * 150 * t)
+        return burst[:, None]
+
+    signal = _build_pre_post_signal(
+        sfreq=sfreq,
+        n_channels=1,
+        rng_seed=0,
+        post_factory=post_burst,
+    )
+    out = compute_er_logratio(
+        signal_loader=_make_const_loader(signal, sfreq),
+        channels=["ch0"],
+        seizure_onset=seizure_onset,
+        eps_per_channel={"ch0": eps},
+    )
+    assert out["ch0"] > math.log(10), (
+        f"expected logratio > {math.log(10):.3f}, got {out['ch0']:.3f}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# T13 — compute_er_logratio: same-distribution noise → logratio ≈ 0
+# ---------------------------------------------------------------------------
+
+
+def test_t13_compute_er_logratio_same_noise_returns_near_zero():
+    sfreq = 1000.0
+    seizure_onset = 100.0
+    eps = 1e-9
+
+    signal = _build_pre_post_signal(
+        sfreq=sfreq,
+        n_channels=1,
+        rng_seed=42,
+    )
+    out = compute_er_logratio(
+        signal_loader=_make_const_loader(signal, sfreq),
+        channels=["ch0"],
+        seizure_onset=seizure_onset,
+        eps_per_channel={"ch0": eps},
+    )
+    assert abs(out["ch0"]) < 0.5, (
+        f"expected |logratio| < 0.5 for same-noise pre/post, got {out['ch0']:.3f}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# T14 — edge buffer honored: burst inside ±edge_buffer doesn't enter windows
+# ---------------------------------------------------------------------------
+
+
+def test_t14_compute_er_logratio_edge_buffer_excludes_burst():
+    """Plan §3.4: edge_buffer keeps onset filter ringing out of pre/post
+    windows. A 1-second burst centered on onset must NOT raise either
+    power estimate above the surrounding noise floor.
+    """
+    sfreq = 1000.0
+    seizure_onset = 100.0
+    eps = 1e-9
+
+    # Burst lives at [t_s - 0.5, t_s + 0.5] = [99.5, 100.5] sec, fully
+    # inside the 4-sec edge buffer band. In "seconds since t_start"
+    # (where t_start = 100 - 30 - 2 = 68 sec) this is [31.5, 32.5].
+    def burst_factory(rng, n_samples):  # noqa: ARG001
+        t = np.arange(n_samples) / sfreq
+        return (50.0 * np.sin(2 * np.pi * 150 * t))[:, None]
+
+    signal = _build_pre_post_signal(
+        sfreq=sfreq,
+        n_channels=1,
+        rng_seed=7,
+        burst_window=(31.5, 32.5),
+        burst_factory=burst_factory,
+    )
+    out = compute_er_logratio(
+        signal_loader=_make_const_loader(signal, sfreq),
+        channels=["ch0"],
+        seizure_onset=seizure_onset,
+        eps_per_channel={"ch0": eps},
+    )
+    # Without edge buffer the burst would dominate the post window and
+    # drive logratio above 5. With edge buffer honored the result must
+    # stay near baseline (similar to the same-noise T13 case).
+    assert abs(out["ch0"]) < 1.0, (
+        f"edge buffer not honored: logratio={out['ch0']:.3f}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# T15 — power_pre[ch] = 0 → eps_ch fallback, finite result, no inf/NaN
+# ---------------------------------------------------------------------------
+
+
+def test_t15_compute_er_logratio_zero_pre_falls_back_to_eps():
+    sfreq = 1000.0
+    seizure_onset = 100.0
+    eps = 1e-9
+
+    def zero_pre(rng, n_samples):  # noqa: ARG001
+        return np.zeros((n_samples, 1))
+
+    def post_burst(rng, n_samples):  # noqa: ARG001
+        t = np.arange(n_samples) / sfreq
+        return (1.0 * np.sin(2 * np.pi * 150 * t))[:, None]
+
+    signal = _build_pre_post_signal(
+        sfreq=sfreq,
+        n_channels=1,
+        rng_seed=0,
+        pre_factory=zero_pre,
+        post_factory=post_burst,
+    )
+    out = compute_er_logratio(
+        signal_loader=_make_const_loader(signal, sfreq),
+        channels=["ch0"],
+        seizure_onset=seizure_onset,
+        eps_per_channel={"ch0": eps},
+    )
+    val = out["ch0"]
+    assert math.isfinite(val), f"logratio not finite: {val!r}"
+    # power_post is ~0.5 (unit sine), so logratio = log((0.5 + eps)/eps)
+    # ≈ log(0.5 / 1e-9) ≈ log(5e8) ≈ 20.
+    assert val > 5.0, f"expected large positive logratio, got {val:.3f}"
+
+
+# ---------------------------------------------------------------------------
+# T16 — Nyquist guard: sfreq=512 with band=(80,250) → NyquistGuardError
+# ---------------------------------------------------------------------------
+
+
+def test_t16_compute_er_logratio_nyquist_guard():
+    """sfreq/2 = 256 < 250 * 1.05 = 262.5 → must raise."""
+    sfreq = 512.0
+    seizure_onset = 100.0
+
+    def loader(t_start, t_end, channels):  # noqa: ARG001
+        n = int(round((t_end - t_start) * sfreq))
+        return np.zeros((n, len(channels))), sfreq
+
+    with pytest.raises(NyquistGuardError):
+        compute_er_logratio(
+            signal_loader=loader,
+            channels=["ch0"],
+            seizure_onset=seizure_onset,
+            eps_per_channel={"ch0": 1e-12},
+        )
+
+
+# ---------------------------------------------------------------------------
+# T17 — filter padding: signal too short → FilterPaddingError
+# ---------------------------------------------------------------------------
+
+
+def test_t17_bandpass_power_filter_padding_too_short():
+    sfreq = 1000.0
+    band = (80.0, 250.0)
+    # Required padlen = max(default=15, int(1.5 * 1000 / 80) = 18) = 18.
+    # 10 samples is below that → must raise.
+    short_signal = np.zeros((10, 1))
+    with pytest.raises(FilterPaddingError):
+        _bandpass_power(short_signal, sfreq, band)
+
+
+def test_t17b_compute_er_logratio_filter_padding_propagates():
+    """A pathological loader returning 5 samples must surface
+    FilterPaddingError, not silently corrupt the per-seizure metric."""
+    sfreq = 1000.0
+
+    def short_loader(t_start, t_end, channels):  # noqa: ARG001
+        return np.zeros((5, len(channels))), sfreq
+
+    with pytest.raises(FilterPaddingError):
+        compute_er_logratio(
+            signal_loader=short_loader,
+            channels=["ch0"],
+            seizure_onset=100.0,
+            eps_per_channel={"ch0": 1e-12},
+        )
+
+
+# ---------------------------------------------------------------------------
+# T18 — estimate_per_channel_eps: 1st percentile per channel, floor
+# ---------------------------------------------------------------------------
+
+
+def test_t18_estimate_per_channel_eps_basic_percentile():
+    rng = np.random.default_rng(0)
+    n_seizures = 50
+    n_channels = 3
+    pre_matrix = np.empty((n_seizures, n_channels))
+    pre_matrix[:, 0] = rng.uniform(1e-6, 1e-3, n_seizures)
+    pre_matrix[:, 1] = rng.uniform(1.0, 2.0, n_seizures)
+    pre_matrix[:, 2] = rng.uniform(0.0, 1e-12, n_seizures)
+
+    eps = estimate_per_channel_eps(pre_matrix, floor=1e-18)
+
+    assert eps.shape == (3,)
+    np.testing.assert_allclose(eps[0], np.percentile(pre_matrix[:, 0], 1))
+    np.testing.assert_allclose(eps[1], np.percentile(pre_matrix[:, 1], 1))
+    np.testing.assert_allclose(eps[2], np.percentile(pre_matrix[:, 2], 1))
+
+
+def test_t18b_estimate_per_channel_eps_all_zero_channel_floored():
+    """All-zero channel: 1st percentile is 0, floor is 1e-18."""
+    pre_matrix = np.zeros((10, 2))
+    pre_matrix[:, 1] = 1.0  # other channel non-zero
+    eps = estimate_per_channel_eps(pre_matrix, floor=1e-18)
+    assert eps[0] == 1e-18
+    assert eps[1] == 1.0
+
+
+def test_t18c_estimate_per_channel_eps_custom_floor():
+    pre_matrix = np.full((5, 1), 1e-20)  # below default floor
+    eps = estimate_per_channel_eps(pre_matrix, floor=1e-15)
+    assert eps[0] == 1e-15
