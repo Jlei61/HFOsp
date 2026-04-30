@@ -38,7 +38,7 @@ See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
 from __future__ import annotations
 
 import math
-from typing import Callable, Dict, Iterable, List, Mapping, Sequence, Set, Tuple
+from typing import Callable, Dict, Iterable, List, Mapping, NamedTuple, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -359,9 +359,7 @@ def _bandpass_power(
     sfreq
         Sampling rate (Hz).
     band
-        ``(low_hz, high_hz)``. The Nyquist guard here prevents
-        scipy.signal.butter from blowing up on its own; the user-facing
-        guard raised by ``compute_er_logratio`` is the contractual one.
+        ``(low_hz, high_hz)``.
 
     Returns
     -------
@@ -375,9 +373,10 @@ def _bandpass_power(
     Raises
     ------
     NyquistGuardError
-        If ``band[1] >= sfreq / 2`` (the upstream contract is to call
-        this only after the user-facing Nyquist guard, but the cheap
-        check defends against direct callers).
+        If ``sfreq / 2 < band[1] * 1.05`` — the same plan-§3.4 5%
+        safety margin enforced by ``compute_er_logratio``. The helper
+        replicates it so Step 3 power-pre precomputation paths cannot
+        silently bypass the contract.
     FilterPaddingError
         If ``n_samples <= padlen`` where
         ``padlen = max(filtfilt_default, int(1.5 * sfreq / band[0]))``.
@@ -392,9 +391,10 @@ def _bandpass_power(
     band_lo, band_hi = float(band[0]), float(band[1])
     sfreq = float(sfreq)
     nyq = sfreq / 2.0
-    if band_hi >= nyq:
+    if nyq < band_hi * 1.05:
         raise NyquistGuardError(
-            f"sfreq={sfreq} too low for band {band}; need sfreq >= {band_hi * 2.1}"
+            f"sfreq={sfreq} below 5% Nyquist safety margin for band {band}; "
+            f"need sfreq >= {band_hi * 2.1}"
         )
     if band_lo <= 0 or band_hi <= band_lo:
         raise ValueError(f"invalid band {band}: must satisfy 0 < lo < hi < nyq")
@@ -447,8 +447,11 @@ def compute_er_logratio(
         loader).
     eps_per_channel
         Per-channel noise floor (typically from
-        ``estimate_per_channel_eps``). Channels not present in the
-        mapping fall back to ``1e-18`` (plan §3.4 floor).
+        ``estimate_per_channel_eps``). **Every queried channel must
+        have an entry**; missing entries raise ``ValueError`` so a
+        caller bug (forgetting to estimate eps for a freshly-added
+        channel) cannot silently produce a plausible-looking
+        log-ratio via the floor.
     w_pre, w_post
         Pre / post window length in seconds.
     edge_buffer
@@ -523,9 +526,17 @@ def compute_er_logratio(
             f"need at least {post_end} for the post window to fit"
         )
 
+    missing_eps = [ch for ch in channels if ch not in eps_per_channel]
+    if missing_eps:
+        raise ValueError(
+            f"eps_per_channel missing entries for {missing_eps}; "
+            f"estimate eps via estimate_per_channel_eps() and pass "
+            f"every queried channel"
+        )
+
     out: Dict[str, float] = {}
     for i, ch in enumerate(channels):
-        eps = float(eps_per_channel.get(ch, 1e-18))
+        eps = float(eps_per_channel[ch])
         if eps <= 0:
             raise ValueError(f"eps for {ch!r} must be positive, got {eps}")
         power_pre = float(np.mean(inst_power[pre_start:pre_end, i]))
@@ -534,10 +545,39 @@ def compute_er_logratio(
     return out
 
 
+class PerChannelEps(NamedTuple):
+    """Result of ``estimate_per_channel_eps`` (plan §3.4).
+
+    Attributes
+    ----------
+    eps
+        Shape ``(n_channels,)``. ``max(raw_percentile, floor)`` per
+        channel — pass directly to ``compute_er_logratio`` for
+        eligible channels.
+    m2_ineligible
+        Shape ``(n_channels,)``, bool. ``True`` for channels whose
+        pre-power is **strictly zero across every seizure** — these
+        must be dropped per plan §3.4 ("如果某通道全 cohort 都 0，
+        drop 该通道, 写入 ineligible_channels"). The Step 3 runner
+        consumes this mask to populate ``m2_ineligible_channels``
+        instead of letting the floor mechanism produce a spurious
+        ``log(P_post / 1e-18) ≈ +40`` log-ratio that would dominate
+        top-k ranking.
+    raw_percentile
+        Shape ``(n_channels,)``. The unclamped 1st percentile —
+        useful for diagnostics and for the audit doc to report the
+        actual noise-floor distribution before the floor is applied.
+    """
+
+    eps: np.ndarray
+    m2_ineligible: np.ndarray
+    raw_percentile: np.ndarray
+
+
 def estimate_per_channel_eps(
     power_pre_matrix: np.ndarray,
     floor: float = 1e-18,
-) -> np.ndarray:
+) -> PerChannelEps:
     """Per-channel noise floor estimate (plan §3.4).
 
     Parameters
@@ -547,26 +587,43 @@ def estimate_per_channel_eps(
         pre-window band-power for seizure ``s``, channel ``ch`` (output
         of ``np.mean(_bandpass_power(...)[pre_window], axis=0)``).
     floor
-        Lower bound for the returned eps. A channel with zero power
-        across every seizure (``percentile == 0``) gets bumped to
-        ``floor``. The Step 3 runner is responsible for flagging such
-        channels as ineligible — this helper only ensures the
-        log-ratio formula stays finite.
+        Lower bound for the returned eps (plan §3.4: ``1e-18``).
 
     Returns
     -------
-    np.ndarray
-        Shape ``(n_channels,)`` of per-channel ε values.
+    PerChannelEps
+        See class docstring. Critically: ``m2_ineligible`` is the
+        **strict drop signal** (every pre-power value == 0), not the
+        weaker "floor activated" condition (raw 1st percentile <
+        floor). The floor still kicks in for floor-active channels so
+        ``eps`` stays positive for any caller that indexes without
+        first filtering by ``m2_ineligible``.
+
+    Raises
+    ------
+    ValueError
+        If ``power_pre_matrix`` is not 2D, or if it has zero rows
+        (``np.percentile`` on an empty axis would silently return NaN).
     """
     arr = np.asarray(power_pre_matrix, dtype=float)
     if arr.ndim != 2:
         raise ValueError(
             f"power_pre_matrix must be 2D (n_seizures, n_channels), got shape {arr.shape}"
         )
-    if arr.size == 0:
-        return np.empty((arr.shape[1] if arr.ndim == 2 else 0,), dtype=float)
-    pct = np.percentile(arr, 1, axis=0)
-    return np.maximum(pct, float(floor))
+    if arr.shape[0] == 0:
+        raise ValueError(
+            f"power_pre_matrix has 0 rows (no seizures); cannot estimate eps"
+        )
+
+    raw_percentile = np.percentile(arr, 1, axis=0)
+    floor_val = float(floor)
+    eps = np.maximum(raw_percentile, floor_val)
+    m2_ineligible = np.all(arr == 0.0, axis=0)
+    return PerChannelEps(
+        eps=eps,
+        m2_ineligible=m2_ineligible,
+        raw_percentile=raw_percentile,
+    )
 
 
 __all__ = [
@@ -582,6 +639,7 @@ __all__ = [
     "aggregate_median_rank",
     "NyquistGuardError",
     "FilterPaddingError",
+    "PerChannelEps",
     "_bandpass_power",
     "compute_er_logratio",
     "estimate_per_channel_eps",

@@ -20,6 +20,7 @@ import pytest
 from src.data_driven_soz import (
     FilterPaddingError,
     NyquistGuardError,
+    PerChannelEps,
     _bandpass_power,
     aggregate_consensus,
     aggregate_median_rank,
@@ -620,6 +621,11 @@ def test_t17b_compute_er_logratio_filter_padding_propagates():
 
 
 def test_t18_estimate_per_channel_eps_basic_percentile():
+    """Plan §3.4 contract: 1st percentile per channel, floored at
+    ``floor``. The result is a ``PerChannelEps`` NamedTuple so the
+    Step 3 runner can also see (a) which channels were floor-active
+    (raw < floor) and (b) which channels are strictly M2-ineligible
+    (every pre-power value == 0)."""
     rng = np.random.default_rng(0)
     n_seizures = 50
     n_channels = 3
@@ -628,24 +634,94 @@ def test_t18_estimate_per_channel_eps_basic_percentile():
     pre_matrix[:, 1] = rng.uniform(1.0, 2.0, n_seizures)
     pre_matrix[:, 2] = rng.uniform(0.0, 1e-12, n_seizures)
 
-    eps = estimate_per_channel_eps(pre_matrix, floor=1e-18)
+    result = estimate_per_channel_eps(pre_matrix, floor=1e-18)
 
-    assert eps.shape == (3,)
-    np.testing.assert_allclose(eps[0], np.percentile(pre_matrix[:, 0], 1))
-    np.testing.assert_allclose(eps[1], np.percentile(pre_matrix[:, 1], 1))
-    np.testing.assert_allclose(eps[2], np.percentile(pre_matrix[:, 2], 1))
+    assert isinstance(result, PerChannelEps)
+    assert result.eps.shape == (3,)
+    assert result.m2_ineligible.shape == (3,)
+    assert result.raw_percentile.shape == (3,)
+    np.testing.assert_allclose(result.eps[0], np.percentile(pre_matrix[:, 0], 1))
+    np.testing.assert_allclose(result.eps[1], np.percentile(pre_matrix[:, 1], 1))
+    np.testing.assert_allclose(result.eps[2], np.percentile(pre_matrix[:, 2], 1))
+    # None of these channels are strictly all-zero → none are
+    # M2-ineligible (the strict drop criterion). channel 2 is
+    # floor-active (raw 1st percentile may be ~ 0 but not strictly
+    # all-zero), but that's not the same as ineligible.
+    assert not result.m2_ineligible.any()
 
 
-def test_t18b_estimate_per_channel_eps_all_zero_channel_floored():
-    """All-zero channel: 1st percentile is 0, floor is 1e-18."""
-    pre_matrix = np.zeros((10, 2))
-    pre_matrix[:, 1] = 1.0  # other channel non-zero
-    eps = estimate_per_channel_eps(pre_matrix, floor=1e-18)
-    assert eps[0] == 1e-18
-    assert eps[1] == 1.0
+def test_t18b_estimate_per_channel_eps_all_zero_channel_marked_ineligible():
+    """Plan §3.4: a channel whose pre-power is zero across every
+    seizure must be flagged ``m2_ineligible=True`` so the per-subject
+    runner can drop it. Floor still kicks in to keep the eps array
+    finite for any callers that index without filtering, but the test
+    must verify the **drop signal**, not just the floored value, so
+    Step 3 can route the channel into ``m2_ineligible_channels`` per
+    plan §3.4 ("如果某通道全 cohort 都 0，drop 该通道").
+    """
+    pre_matrix = np.zeros((10, 3))
+    pre_matrix[:, 1] = 1.0          # healthy
+    pre_matrix[5, 2] = 1e-15        # tiny but non-zero on one seizure
+    result = estimate_per_channel_eps(pre_matrix, floor=1e-18)
+
+    # Channel 0 (all-zero across cohort) is the only ineligible one.
+    np.testing.assert_array_equal(result.m2_ineligible, [True, False, False])
+    # Floor still applied for safety (eps must remain positive).
+    assert result.eps[0] == 1e-18
+    # Raw percentile should be zero for ch0; healthy values for ch1.
+    assert result.raw_percentile[0] == 0.0
+    assert result.raw_percentile[1] == 1.0
 
 
 def test_t18c_estimate_per_channel_eps_custom_floor():
+    """Floor honored when raw percentile falls below it. Channel is
+    floor-active but not strictly ineligible (one seizure had a
+    non-zero pre-power)."""
     pre_matrix = np.full((5, 1), 1e-20)  # below default floor
-    eps = estimate_per_channel_eps(pre_matrix, floor=1e-15)
-    assert eps[0] == 1e-15
+    pre_matrix[2, 0] = 1e-19             # one non-zero, still below custom floor
+    result = estimate_per_channel_eps(pre_matrix, floor=1e-15)
+    assert result.eps[0] == 1e-15
+    # Not strictly all-zero, so not M2-ineligible by the drop rule.
+    assert not result.m2_ineligible[0]
+
+
+def test_t18d_estimate_per_channel_eps_zero_seizures_raises():
+    """Defensive: estimating eps from an empty seizure list is a
+    usage error in the runner pipeline, not a silent no-op."""
+    with pytest.raises(ValueError, match="0 rows"):
+        estimate_per_channel_eps(np.empty((0, 5)))
+
+
+# ---------------------------------------------------------------------------
+# Helper-level Nyquist safety + missing-eps strictness (Step 2 hardening)
+# ---------------------------------------------------------------------------
+
+
+def test_t16b_bandpass_power_nyquist_safety_margin():
+    """Plan §3.4 5% safety margin must hold at the helper level too —
+    Step 3 will pre-compute power_pre_matrix by calling _bandpass_power
+    directly, and a soft-Nyquist subject (e.g. sfreq=510 with
+    band=(80,250): nyq=255 > band_hi=250 but < band_hi*1.05=262.5)
+    must NOT silently slip past the helper.
+    """
+    signal = np.zeros((50000, 1))
+    with pytest.raises(NyquistGuardError):
+        _bandpass_power(signal, sfreq=510.0, band=(80.0, 250.0))
+
+
+def test_compute_er_logratio_missing_eps_raises_value_error():
+    """compute_er_logratio must require an eps entry for every queried
+    channel. Silently falling back to ``1e-18`` would let a Step 3 bug
+    (forgetting to estimate eps for a freshly-added channel) produce
+    plausible-looking science output. Plan §3.4: eps is per-channel
+    contract input, not optional.
+    """
+    sfreq = 1000.0
+    signal = _build_pre_post_signal(sfreq=sfreq, n_channels=2, rng_seed=0)
+    with pytest.raises(ValueError, match="eps_per_channel"):
+        compute_er_logratio(
+            signal_loader=_make_const_loader(signal, sfreq),
+            channels=["ch0", "ch1"],
+            seizure_onset=100.0,
+            eps_per_channel={"ch0": 1e-12},  # ch1 missing
+        )
