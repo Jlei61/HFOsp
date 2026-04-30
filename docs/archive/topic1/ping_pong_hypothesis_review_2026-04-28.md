@@ -153,12 +153,29 @@ Conditional on PR-7 结果：
 - ~~"We demonstrate that forward HFO propagation triggers an inhibitory rebound"~~
 - ~~"The reverse template represents firing of the inhibitory restraint wall"~~
 
-### 7.2 PR-7 NULL（H1 cohort excess(10s) p > 0.10）
+### 7.2 PR-7 NULL（实际结果，2026-04-30 lock）
 
-写：
-- "Forward and reverse templates coexist as bidirectional traveling waves with no measurable short-range temporal coupling"
-- "The two propagation directions are independently slow-modulated streams; their concurrent stability does not imply functional pairing"
-- 删除整篇 Ping-Pong / 乒乓球 metaphor
+PR-7 H1 三条 metric 全部 NULL 已验收（详见 `pr7_template_pairing_results_2026-04-29.md` §17 + topic1 §7.11）。**预先写在本节的 framing（"independent slow-modulated streams" / "删除整篇 Ping-Pong metaphor"）2026-04-30 user review 推翻——太强**。
+
+正确写法（locked across §17 / topic1 §7.11）：
+
+✅ **可以写**：
+- "Forward/reverse propagation geometries coexist (PR-6 source/sink swap, n=6 sign-test p=0.031), but their event timing shows no robust short-window reciprocal coupling at Δt ∈ [10s, 30s] (Step 3 NULL on N2 + N3 + window sweep)"
+- "No same-template persistence detected at no-ISI-threshold run scale (Step 3.5)"
+- "At these tested scales the data are **compatible with mark-independent sampling** as the most parsimonious description; this is not proof of independence"
+- "The bouncing-back / short-range reciprocal version of Ping-Pong is rejected; geometric coupling is preserved"
+
+❌ **不**写：
+- ~~"Two templates are independent slow-modulated streams"~~（等于"无关"）
+- ~~"Mark sequences are mark-independent"~~（NULL ≠ proof of independence）
+- ~~"删除整篇 Ping-Pong metaphor"~~——只撤回"短时接力"叙事，几何相关性 + 慢时间尺度 ping-pong（form 4/5）仍然开放
+- ~~把 548 outlier 升级为 cohort claim~~
+
+**未测**（archive results §11 / §17 + topic1 §7.11 锁死）：
+- alternative burst definitions（ISI-threshold-based bursts）
+- rate-state switching、seizure-proximity switching
+- form (4) latent-state coupling
+- history-dependent regression on `next_label ~ previous_label + recent_rate + time_since_last + block / state`
 
 ### 7.3 PR-7 H2 FAIL（non-fwdrev cohort 也显著）
 
@@ -189,4 +206,132 @@ Conditional on PR-7 结果：
 ## 10. 当前 commit 与版本
 
 - 2026-04-28：本 review + PR-7 plan-of-record 同步落盘
-- PR-7 Step 0（主文档 §7 占位回写）尚未启动；用户确认后开 Step 0
+- 2026-04-29：PR-7 Step 0–3 完成；H1 cohort NULL 已封；新增 archive results doc + Step 3.5 burst diagnostic plan
+- 2026-04-30：PR-7 Step 3.5 / 5 / 6 完成 + 验收；framing locked across §17 / topic1 §7.11 / 本文 §7.2；PR-7 主线封板。本 review §6 提到的 PR-8 / PR-9 candidates **未启动**；后续 follow-up 改名为 history-dependent marked point process model（与 PR-8 candidate 不重叠）
+
+---
+
+## 11. PR-7 收口后的状态判读（2026-04-30）
+
+### 11.1 已被 PR-7 否定的具体形式
+
+仅一种：**event-level fixed-window opposite-template excess at Δt ∈ [10s, 30s]**。这是 user 原始 ping-pong 假说中的"短时接力"版本。
+
+### 11.2 PR-7 NULL **不**否定的 6 类时间结构
+
+archive results §11 marked-point-process taxonomy + §17 final conclusion 列出了**仍开放**的所有时间耦合形式：
+
+| 形式 | 是否被 PR-7 测过 |
+|---|---|
+| (1) short-window cross-excitation at 10s/30s | ✅ NULL（H1） |
+| (2) short-window persistence (run length / lag-1) | ✅ NULL（Step 3.5）但仅在**无 ISI 阈值 same-label run** 定义下 |
+| (3) burst-level switching at hours/days | ❌ 未测 |
+| (4) latent-state coupling（rate-state / vigilance / seizure proximity） | ❌ 未测 |
+| (5) geometry-correlated mark-independent | 当前数据 compatible（最简洁解释，非证明） |
+| **NEW**：spatial within-event dynamics（intra-event SOZ → non-SOZ ping-pong）| ❌ 未测，本 review 11.3 提出 |
+| **NEW**：长时间尺度 template ratio 趋势（peri-seizure）| ❌ 未测，PR-2.7 + PR-5 数据可重用 |
+
+### 11.3 user 原始 ping-pong 直觉的多层结构
+
+**重新读 §1 假说陈述，user 直觉实际包含至少 4 个独立 testable 层级**：
+
+1. **现象学（已建）**：fwd/rev template 几何上对偶 — PR-6 source/sink swap geometry
+2. **短时功能耦合（已测 NULL）**：T_a 与 T_b 在 ≤ 1min 上 reciprocal triggering — PR-7 Step 3
+3. **长时系统动力学（未测）**：随时间推进，Ping-Pong "回合速度" 加快 → 越接近发作越频繁切换 → 抑制崩溃 → seizure
+4. **空间内耦合（未测）**：单次事件内部，SOZ 通道兴奋 → 抑制 wall 通道反弹（intra-event spatial dynamics）
+
+PR-7 NULL **仅否定了 #2**。user 的 *system claim* 包含 #3 和 #4，这两层根本没测。
+
+---
+
+## 12. 后续实验建议（第一性原理）
+
+### 12.1 优先级最高：history-dependent marked point process model
+
+> Already named as next-step in topic1 §7.11 + archive results §17。
+
+**核心检验**：把"两类模板时间耦合"从 fixed-window metric 升级到 likelihood ratio：
+
+```
+M_full:    P(next_label | previous_label, recent_rate, time_since_last, block_id, state) 
+M_reduced: P(next_label | recent_rate, time_since_last, block_id, state)   (drop previous_label)
+
+LRT: Δ deviance = -2 (logL(M_reduced) - logL(M_full))  ~ χ²(df = #removed terms)
+```
+
+**为什么这个更好**：
+- 不依赖单一 fixed window；自然包含多 timescale
+- 同时检验 form (1) + (2) + (4)；如果 `previous_label` 显著贡献 → 时间依赖存在
+- 可加 `interaction(previous_label, time_since_last)` → 检验依赖在哪个时间尺度
+- `recent_rate` / `state` 控制慢调制 confound
+
+**失败合同**：cohort-level LRT 不显著且 `previous_label` 系数 cohort 集中在 0 → 与 PR-7 NULL 一致。预算：~3 d。**独立 PR**，不绑 PR-7。
+
+### 12.2 第二优先：长时系统动力学（peri-seizure template ratio）
+
+**核心检验**：user 直觉 #3——"回合速度随发作邻近加快"。
+
+**操作化**：
+- 对每 seizure，画 [-12h, +12h] 时间窗口内每 5-min bin 的 (T_a count, T_b count)
+- 计算每 bin `template_ratio = T_a / (T_a + T_b)`
+- 检验：peri-seizure 是否 ratio 偏移（向 T_a 或 T_b 倾斜）？是否 variance 增大（cycle 速度加快）？
+- Cohort：跨 subject paired comparison `pre_ictal vs baseline ratio` 与 `pre_ictal vs baseline variance`
+
+**与已有 PR 的边界**：
+- PR-5 已发现 dominant template post-ictal rate ↑（绝对率），**未拆 ratio**
+- PR-2.7 已发现 seizure-centered broad rate elevation
+- 本检验把这两个发现联动：rate 升 ≠ ratio 偏 ≠ variance 升，三者独立测才能说"ping-pong cycle speeds up"
+
+**失败合同**：cohort-level paired test 不显著 → user 直觉 #3 不成立；rate elevation 由共同 driver 拉升。预算：~1.5 d，复用 PR-2.7 / PR-5 数据。**独立 PR**。
+
+### 12.3 第三优先：548 单 subject 深度 case-study
+
+**理由**：548 是 cohort 中**唯一**显示一致 burst 方向的 subject（Step 3.5 三 metric 都正向，PR-7 sweep 上 magnitude 单调放大 1×→3×）。但 PR-7 cohort 把它平均掉了。
+
+**操作化**：
+- 单独画 548 的 lagPat raster（30 min 局部窗口） + 时间轴上 T_a/T_b 着色
+- 看是不是真存在 "burst of T_a, then burst of T_b" 这种模式
+- 如果存在，按 burst 间隔时间分布做 inter-burst ISI distribution
+- 可能能直接看到 "ping-pong cycle period"
+
+**性质**：**case-study only**，**不**升级 cohort claim。论文层面写法：
+> "Single-subject 548 exhibits a burst-clustered template structure consistent with the user's hypothesis at the within-cohort outlier level; this is exemplary, not generalizable."
+
+预算：~0.5 d。
+
+### 12.4 第四优先：intra-event spatial dynamics（user 直觉 #4 的最直接形式）
+
+**核心检验**：在**单次群体事件内部**，SOZ 通道激发是否在时间上**领先**于非 SOZ 通道？
+
+**操作化**：
+- 取每个 group event 的 lagPatRaw（每通道在事件内的相对时间）
+- 用 PR-6 已建的 SOZ vs non-SOZ matched_bipolar 划分
+- 计算 `Δ_event = mean(lag_SOZ_channels) - mean(lag_nonSOZ_channels)`
+- 如果 `Δ_event < 0` → SOZ 领先（"Ping" from SOZ）
+- 如果 fwd template 上 `Δ_event < 0` 且 reverse template 上 `Δ_event > 0` → **直接 ping-pong 几何**
+
+**为什么这是 user 直觉的最直接形式**：
+- user 原话："SOZ 内部产生兴奋性冲动 → 高墙反弹"
+- 如果 fwd = SOZ-first 且 reverse = SOZ-last，那 reverse template 就是空间上"从外向内的反弹波"
+- 这是 *intra-event* 的 ping-pong，不是 *inter-event*；PR-7 测的是后者
+
+**与 PR-6 的边界**：
+- PR-6 H1 测 endpoint 是不是 SOZ（cohort NULL）
+- 本检验测 endpoint 在事件内的**时间顺序**（lagPatRaw 极性 vs SOZ 标注）
+- 数据完全不同：PR-6 用 centroid rank（averaged across events），本检验用 per-event lag
+
+**失败合同**：cohort 上 `Δ_event` 不区分 fwd 和 reverse → user 直觉 #4 不成立。预算：~2 d。**独立 PR**。
+
+### 12.5 不再做的方向
+
+- ~~PR-8 candidate（continuous signed displacement）~~：现在没必要——PR-6 Step 4b 离散计数已足，连续版只是 visual 上更精细，不会改变 cohort verdict
+- ~~PR-9 candidate（subject typology × PR-5）~~：现在没必要——PR-7 NULL + Step 3.5 NULL 已经表明 fwd/rev 不是有意义的 cohort split
+- ~~longitudinal SOZ expansion~~：数据时长不足
+- ~~重启 short-window reciprocal coupling 的更细粒度版本~~：plan §17 已封禁
+- ~~burst-level reciprocal coupling 测试~~：trivial（run 边界恒为 switch）
+
+### 12.6 综合建议
+
+**真正的 follow-up paper （或 PR）应该做**：12.1（history-dependent regression） + 12.2（peri-seizure ratio） + 12.4（intra-event spatial dynamics）。三个互相独立、互相互补，**任一**显著都重新打开 ping-pong 叙事的某个特定层级。三个都 NULL 才能真正 close the door。
+
+**论文写作策略**：当前 PR-7 NULL 保留 PR-6 几何 + PR-5 rate 结论；下一个工作把这三个 follow-up 任意 1–2 个跑完后写新文章。**不把当前 PR-7 NULL 当作 "ping-pong 死亡证明"**，仅当作"短时接力签名不成立"。
