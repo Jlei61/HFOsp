@@ -361,3 +361,103 @@ N2 与 N1 在所有 6 subject 上**几乎完全一致**（差 < 0.005）→ robu
 | Step 5/6/7 PR-7 收口 | 中 | Step 5 robustness（N2 window sweep）+ Step 6 主图 2/3/4 + Step 7 最终 archive doc |
 | 独立 follow-up PR：history-dependent regression | 低（不绑 PR-7 主线）| 测 form (1)+(2)+(4) 一并；按 archive §12.2 草案 |
 | 进一步 case-series 看 548 | 低 | 检查 548 cluster 定义内部是否有 sub-template 结构；不进 PR-7 主线 |
+
+---
+
+## 15. Step 5 — N2 window sweep robustness（H1 cohort）
+
+> 状态：plan §7 Step 5 deliverable
+> 数据：`results/interictal_propagation/template_pairing/per_subject_n2_sweep/<dataset>_<subject>_w{10,30,60}min.json`
+> 图：`figures/appendix1_window_sweep.png`
+
+### 15.1 设计
+
+- N2 主 null 在窗口 ∈ {10, 30, 60} min 三个尺度上重跑（Step 3 主跑用 30 min 默认）
+- N0/N1/N3 不需要重跑——它们不消耗 `n2_window_seconds` 参数
+- N4 conditional follow-up **不触发**：Step 3 已经验证 N2/N3 一致（5/6 subject 同号），无 disagreement
+- n_perm=1000，seed=0；同 H1 primary cohort（n=6）
+
+### 15.2 Cohort 结果（plan §3.2 triple-gate 在每个 window 重跑）
+
+| Window | Wilcoxon(10s, greater) p | sign(10s) p | median(10s) | median(30s) | PASS |
+|---|---:|---:|---:|---:|---|
+| 10 min  | **0.7812** | **0.6562** | **−0.0020** | **−0.0024** | **NULL** |
+| 30 min（与 Step 3 一致）| 0.8438 | 0.6562 | −0.0180 | −0.0149 | NULL |
+| 60 min  | **0.8906** | **0.8906** | **−0.0291** | **−0.0291** | **NULL** |
+
+**Cohort verdict robust**：三个 window 上 H1 triple-gate 都 NULL（Wilcoxon p ∈ [0.78, 0.89]，median(30s) 始终为负）。**注意**：cohort median 量级在 w=60 比 w=10 大 ~14 倍（−0.029 vs −0.002），方向一致但绝对量级随 window 单调放大；个别 subject 量级随 window 变化更显著（见 §15.3，尤其 548）。
+
+**正确措辞**：cohort verdict 跨 window 稳健，但**不**应说 "三条曲线高度重合"——曲线之间在 10s/30s 尺度上分歧 ~0.025 cohort median；只是分歧的方向都同样 ≤ 0，没有跨越 PASS gate。
+
+### 15.3 Per-subject `excess(10s)` 数字（sweep 全跑完，n_perm=1000, seed=0）
+
+| Subject | window=10min | window=30min | window=60min |
+|---|---:|---:|---:|
+| epilepsiae/1073 | +0.0141 | +0.0084 | −0.0009 |
+| epilepsiae/139  | −0.0180 | −0.0482 | −0.0683 |
+| **epilepsiae/548** | **−0.0964** | **−0.2012** | **−0.2958** |
+| epilepsiae/635  | +0.0275 | +0.0288 | +0.0251 |
+| epilepsiae/958  | −0.0288 | −0.0444 | −0.0573 |
+| yuquan/chenziyang | +0.0142 | +0.0144 | +0.0127 |
+| **n positive** | 3 | 3 | 2 |
+| **cohort median** | **−0.0020** | **−0.0180** | **−0.0291** |
+
+**548 magnitude 对 window 高敏感**：随 window 从 10 → 30 → 60 min 单调放大 1× → 2× → 3× (−0.096 → −0.201 → −0.296)。这与 §14.4 burst diagnostic 一致：548 的 same-template burst 在 ~10–60 min 时间尺度上结构最强；window 越大，N2 null 越能在 window 内消除 burst clustering，empirical 与 null 的差异 (excess) 量级越大。
+
+其它 5 subject 的 magnitude 比 548 小一个数量级，对 window 的依赖也弱：1073 / 635 / chenziyang 几乎不变（< 0.01 差异），139 / 958 单调小幅变负。所以 cohort 行为由 548 outlier 主导。
+
+### 15.4 N4 conditional follow-up：未触发
+
+按 plan §4.1 / §9.6，N4 仅在 N2 阳性但 N3 不一致时作 follow-up。Step 3 已经显示 N2 与 N3 在 5/6 subject 同号，且都 NULL → **触发条件不满足**，N4 跳过。`resample_isi_per_cluster` 仍按 plan §6.1 故意 raise NotImplementedError 状态保留（避免静默使用）。
+
+---
+
+## 16. Step 6 — 完整图集（main 1/2/3/4/5 + appendix 1/3）
+
+> 状态：plan §7 Step 6 + plan §6.5 visualization spec deliverable
+> 输出：`results/interictal_propagation/template_pairing/figures/`
+
+| 文件 | 内容 | 来源 |
+|---|---|---|
+| `fig1_cohort_excess_curve.png` | cohort 主结论：H1 fwd/rev N2+N3 + H2 灰对照（H2 待跑）+ 1s/5s 黄区 + 30min/1h 蓝区 + verdict 文本框 | plan §6.5 主图 1 |
+| `fig2_per_subject_null_grid.png` | 6-panel 网格：每 subject 在 N0/N1/N2/N3 下的 excess(Δt) 曲线 | plan §6.5 主图 2 |
+| `fig3_direction_and_transition.png` | (a) H1b a→b vs b→a lift 散点 + (b) 次事件 transition_odds vs i.i.d. baseline | plan §6.5 主图 3 |
+| `fig4_exemplars.png` | 两个 exemplar：548（最负）+ 635（最正），带 N2 null IQR envelope | plan §6.5 主图 4（简化版，未含 raster） |
+| `fig5_burst_diagnostic.png` | Step 3.5 三 metric 散点（run_length / gap_iei / lag1_excess），N2 + N1 双 marker | Step 3.5 §14 |
+| `appendix1_window_sweep.png` | N2 window {10,30,60} min cohort excess(Δt) 中位数三线对比 | plan §6.5 appendix 1 |
+| `appendix3_cohort_audit.png` | 30 subject audit 表格（绿=H1, 蓝=H2, 灰=excluded）| plan §6.5 appendix 3 |
+| `per_subject/<subject>_excess.png` | 每 H1 subject 的 N0–N3 excess(Δt) 单图（QC）| plan §6.5 per_subject grid 简化为单图 |
+| `figures/README.md` | 中文图说（每图 2–4 句 + "**关注点**:" 行）| AGENTS.md 规范 |
+
+### 16.1 简化决策与 plan §6.5 的差异
+
+按 plan §6.5 vs 实际产物：
+- **fig4 简化为 "exemplar curves with null IQR"，没做 raster + transition arrows**：raster 需要重新加载 raw events（10K–193K events/subject），且 30min raster 在 8×5 inch 画布上密度过高，readability 差。改为"两个 exemplar 的 excess(Δt) 曲线 + N2 null IQR envelope"，仍能 visual ize "even at extreme cohort ends, signals are within or near null bands"，足以承担 plan §6.5 fig4 的"故事性"角色。**这是工程简化，不影响科学结论**。
+- **appendix 2 (packing window sensitivity) 跳过**：plan §9.4 触发条件 = "1s/5s 显著正 + 10s/30s ≈ 0 或反向"。实际数据（fig2 / fig4）显示 1s/5s cohort 极端值并不一致正向，部分 subject 全段负值（548, 139）。confound profile B **未触发**，appendix 2 跳过。
+- **fig2 绑定 6 subject H1**（H2 cohort 没跑），plan §6.5 fig2 默认就是 H1 grid，无变更。
+
+### 16.2 论文 framing 一句话
+
+完整图集就位后，可以引用：
+
+> "The H1 cohort shows triple-gate NULL on the N2 main null (Wilcoxon p=0.84, sign 3/6, median(30s)=−0.015) and the N3 robustness null (p=0.89). The cohort NULL verdict is robust across N2 window choices ∈ {10, 30, 60} min (all three windows yield triple-gate NULL with cohort median(30s) ∈ [−0.029, −0.002]; Appendix 1). Magnitude is window-sensitive — driven primarily by the single-subject outlier 548 (excess(10s) at window=10/30/60 min = −0.10 / −0.20 / −0.30) — but the cohort verdict and direction (median ≤ 0, n_positive ∈ {2, 3}) are not. Direction symmetry (fig3a) and next-event transition odds (fig3b) are consistent with the cohort NULL except for subject 548."
+
+---
+
+## 17. PR-7 最终结论（locked）
+
+> **几何上相关，已测试时间尺度上未见 mark dependence。**
+
+完整长版（与 plan §9.1 / §14.6 / §15.2 / §16.2 一致）：
+
+> "PR-6 establishes that forward/reverse propagation templates share the same underlying network geometry (n=6 sign-test p=0.031, source/sink swap). PR-7 tests temporal coupling between these template marks at three classes of metric: event-level fixed-window opposite-template excess at Δt ∈ [10s, 30s] (Step 3 H1 primary), event-level direction asymmetry and next-event transition odds (Step 3 secondary), and run-based persistence (no-ISI-threshold same-label runs, lag-1 same-label, run gap-to-IEI ratio; Step 3.5 post-hoc). The H1 triple-gate is NULL on the N2 main null (Wilcoxon p=0.84, sign 3/6, median(30s)=−0.015), the N3 robustness null (p=0.89), and the N2 sweep across window ∈ {10, 30, 60} min (all three NULL). Step 3.5 finds no same-template persistence (cohort run_length_lift median=0.977, lag1_same_excess median=−0.013). At these tested scales the data are compatible with mark-independent sampling as the most parsimonious description; this is not proof of independence. The bouncing-back / short-range reciprocal version of Ping-Pong is rejected; geometric coupling is preserved. Slower-state switching, rate-state coupling, seizure-proximity coupling, alternative burst definitions, and history-dependent regression remain untested and are deferred to independent follow-ups."
+
+**禁止措辞**（重申）：
+- ❌ "Two templates are time-independent / no causal coupling"
+- ❌ "Burst-level reciprocal coupling restores Ping-Pong"
+- ❌ "Mark sequences are mark-independent"（应说 "compatible with mark-independent sampling at tested scales"）
+- ❌ 任何把 548 outlier 升级为 cohort claim 的措辞
+
+**下一步**（**不在 PR-7 内**）：
+- **History-dependent marked point process model**：`next_label ~ previous_label + recent_rate + time_since_last + block / state`，可以一并测 form (1) + (2) + (4) 不依赖 fixed-window metric。独立 PR，编号待定。
+- **H2 negative control（n=17）**：完整性补强。优先级低于 history model 因为不会改变 H1 NULL verdict。

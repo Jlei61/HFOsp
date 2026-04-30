@@ -182,6 +182,7 @@ EPILEPSIAE_RAW_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data
 OUT_DIR = ROOT / "results" / "interictal_propagation" / "template_pairing"
 PER_SUBJECT_OUT = OUT_DIR / "per_subject"
 PER_SUBJECT_BURST_OUT = OUT_DIR / "per_subject_burst"
+PER_SUBJECT_SWEEP_OUT = OUT_DIR / "per_subject_n2_sweep"
 AUDIT_CSV = OUT_DIR / "pr7_cohort_audit.csv"
 COHORT_SUMMARY_JSON = OUT_DIR / "cohort_summary.json"
 
@@ -618,6 +619,167 @@ def run_per_subject(
 
 
 # ---------------------------------------------------------------------------
+# Step 5 N2 window sweep — robustness (only N2 main null; N0/N1/N3 unchanged
+# because they don't depend on n2_window_seconds).
+# ---------------------------------------------------------------------------
+def _run_one_subject_n2_sweep(
+    subject_id: str,
+    dataset: str,
+    window_seconds: float,
+    n_perm: int,
+    delta_t_grid: Tuple[float, ...],
+    seed: int,
+) -> Optional[Dict[str, Any]]:
+    json_path = _per_subject_json_path(dataset, subject_id)
+    if not json_path.exists():
+        print(f"  [skip] {dataset}/{subject_id}: missing per-subject JSON")
+        return None
+    with json_path.open() as fh:
+        psj = json.load(fh)
+    labels = np.asarray(
+        psj.get("adaptive_cluster", {}).get("labels", []), dtype=int
+    )
+    subject_dir = _resolve_subject_dir(dataset, subject_id)
+    if subject_dir is None:
+        print(f"  [skip] {dataset}/{subject_id}: raw data root unmounted")
+        return None
+    loaded = _load_subject_with_freqcent(subject_dir)
+    if loaded is None:
+        print(f"  [skip] {dataset}/{subject_id}: no *_lagPat_withFreqCent.npz")
+        return None
+    raw_times = np.asarray(loaded["event_abs_times"], dtype=float)
+    bools = np.asarray(loaded["bools"], dtype=int)
+    block_time_ranges = [tuple(b) for b in loaded.get("block_time_ranges", [])]
+
+    valid_idx = _valid_event_indices(bools, min_participating=3)
+    if valid_idx.size != labels.size:
+        print(
+            f"  [skip] {dataset}/{subject_id}: valid_event_count {valid_idx.size} "
+            f"!= label count {labels.size}"
+        )
+        return None
+    times = raw_times[valid_idx]
+    finite_mask = np.isfinite(times) & (labels >= 0)
+    times = times[finite_mask]
+    labels = labels[finite_mask]
+    if times.size == 0:
+        return None
+
+    t0 = time.time()
+    out = compute_pairing_with_nulls(
+        event_abs_times=times,
+        cluster_labels=labels,
+        block_time_ranges=block_time_ranges,
+        delta_t_grid=delta_t_grid,
+        n_perm=n_perm,
+        nulls=("N2",),  # only N2 — others don't depend on window
+        n2_window_seconds=window_seconds,
+        seed=seed,
+    )
+    elapsed = time.time() - t0
+
+    def _to_jsonable(x: Any) -> Any:
+        if isinstance(x, dict):
+            return {str(k): _to_jsonable(v) for k, v in x.items()}
+        if isinstance(x, list):
+            return [_to_jsonable(v) for v in x]
+        if isinstance(x, tuple):
+            return [_to_jsonable(v) for v in x]
+        if isinstance(x, np.ndarray):
+            return x.tolist()
+        if isinstance(x, (np.integer,)):
+            return int(x)
+        if isinstance(x, (np.floating,)):
+            return float(x)
+        return x
+
+    record = {
+        "subject_id": subject_id,
+        "dataset": dataset,
+        "n_events_used": int(times.size),
+        "n2_window_seconds": float(window_seconds),
+        "n2_window_minutes": float(window_seconds / 60.0),
+        "n_perm": int(n_perm),
+        "delta_t_grid": list(delta_t_grid),
+        "pairing_with_nulls": _to_jsonable(out),
+        "elapsed_seconds": float(elapsed),
+    }
+
+    PER_SUBJECT_SWEEP_OUT.mkdir(parents=True, exist_ok=True)
+    out_path = (
+        PER_SUBJECT_SWEEP_OUT
+        / f"{dataset}_{subject_id}_w{int(window_seconds / 60.0)}min.json"
+    )
+    with out_path.open("w") as fh:
+        json.dump(record, fh, indent=2)
+    # `out` uses float keys for Δt; access via float, not string.
+    e10 = out["lift"]["N2"][10.0]["excess"]
+    e30 = out["lift"]["N2"][30.0]["excess"]
+    print(
+        f"  [done] {dataset}/{subject_id} w={window_seconds/60:.0f}min "
+        f"in {elapsed:.1f}s (N2 excess: 10s={e10:+.4f}, 30s={e30:+.4f})"
+    )
+    return record
+
+
+def run_n2_window_sweep(
+    cohort: str = "h1_primary",
+    windows_minutes: Tuple[float, ...] = (10.0, 30.0, 60.0),
+    n_perm: int = 1000,
+    delta_t_grid: Tuple[float, ...] = (1.0, 5.0, 10.0, 30.0, 60.0, 300.0, 1800.0, 3600.0),
+    seed: int = 0,
+    only: Optional[List[str]] = None,
+) -> List[Dict[str, Any]]:
+    """Step 5 sensitivity sweep: rerun N2 main null at windows ∈ {10, 30, 60} min.
+
+    Per archive plan §4.2 / §7 Step 5. N0/N1/N3 unchanged across windows because
+    they do not consume n2_window_seconds; only N2 needs to be re-permuted.
+    """
+    if not AUDIT_CSV.exists():
+        raise FileNotFoundError(
+            f"PR-7 audit CSV not found at {AUDIT_CSV}; run --audit first."
+        )
+    with AUDIT_CSV.open() as fh:
+        rows = list(csv.DictReader(fh))
+
+    def _is_target(row: Dict[str, str]) -> bool:
+        if cohort == "h1_primary":
+            return row.get("h1_primary_pass") == "True"
+        if cohort == "h2_negative":
+            return row.get("h2_negative_pass") == "True"
+        return (
+            row.get("h1_primary_pass") == "True"
+            or row.get("h2_negative_pass") == "True"
+        )
+
+    targets = [r for r in rows if _is_target(r)]
+    if only:
+        only_set = set(only)
+        targets = [r for r in targets if r["subject_id"] in only_set]
+
+    print(
+        f"N2 window sweep on cohort='{cohort}' across windows "
+        f"{tuple(int(w) for w in windows_minutes)} min "
+        f"({len(targets)} subjects, n_perm={n_perm})"
+    )
+    results: List[Dict[str, Any]] = []
+    for w_min in windows_minutes:
+        print(f"  --- window = {w_min:.0f} min ---")
+        for r in targets:
+            rec = _run_one_subject_n2_sweep(
+                subject_id=r["subject_id"],
+                dataset=r["dataset"],
+                window_seconds=w_min * 60.0,
+                n_perm=n_perm,
+                delta_t_grid=delta_t_grid,
+                seed=seed,
+            )
+            if rec is not None:
+                results.append(rec)
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Step 3.5 burst-level diagnostic — per-subject + cohort aggregation
 # ---------------------------------------------------------------------------
 def _run_one_subject_burst(
@@ -966,6 +1128,69 @@ def aggregate_cohort(
             }
         summary["burst_diagnostic_per_cohort"][cohort_name] = cohort_burst_summary
 
+    # Step 5 N2 window sweep block (per-cohort), if available
+    summary["n2_window_sweep_per_cohort"] = {}
+    if PER_SUBJECT_SWEEP_OUT.exists():
+        sweep_files = sorted(PER_SUBJECT_SWEEP_OUT.glob("*.json"))
+        if sweep_files:
+            for cohort_name, members in cohorts.items():
+                if not members:
+                    continue
+                member_keys = {f"{ds}_{sid}" for ds, sid in members}
+                # gather sweep records keyed by (subject_key, window_min)
+                by_window: Dict[str, Dict[str, Dict[str, Any]]] = {}
+                for f in sweep_files:
+                    with f.open() as fh:
+                        rec = json.load(fh)
+                    skey = f"{rec['dataset']}_{rec['subject_id']}"
+                    if skey not in member_keys:
+                        continue
+                    w = str(int(round(rec["n2_window_minutes"])))
+                    by_window.setdefault(w, {})[skey] = {
+                        "lift_n2": rec["pairing_with_nulls"]["lift"]["N2"],
+                        "n_events_used": rec["n_events_used"],
+                    }
+                if not by_window:
+                    continue
+                cohort_sweep_summary: Dict[str, Any] = {
+                    "windows_minutes_run": sorted(int(w) for w in by_window.keys()),
+                    "by_window": {},
+                }
+                for w_str, per_subject in by_window.items():
+                    cohort_sweep_summary["by_window"][w_str] = {
+                        "n_subjects": len(per_subject),
+                        "per_subject_excess_10s": {
+                            k: v["lift_n2"]["10.0"]["excess"]
+                            for k, v in per_subject.items()
+                        },
+                        "per_subject_excess_30s": {
+                            k: v["lift_n2"]["30.0"]["excess"]
+                            for k, v in per_subject.items()
+                        },
+                    }
+                # Triple-gate per window
+                triple_per_w: Dict[str, Any] = {}
+                for w_str, per_subject in by_window.items():
+                    e10 = {
+                        k: v["lift_n2"]["10.0"]["excess"]
+                        for k, v in per_subject.items()
+                    }
+                    e30 = {
+                        k: v["lift_n2"]["30.0"]["excess"]
+                        for k, v in per_subject.items()
+                    }
+                    if not e10 or not e30:
+                        triple_per_w[w_str] = {"skipped": "missing data"}
+                        continue
+                    try:
+                        triple_per_w[w_str] = evaluate_pass_criteria(e10, e30)
+                    except ValueError as exc:
+                        triple_per_w[w_str] = {"skipped": str(exc)}
+                cohort_sweep_summary["triple_gate_per_window"] = triple_per_w
+                summary["n2_window_sweep_per_cohort"][cohort_name] = (
+                    cohort_sweep_summary
+                )
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     with COHORT_SUMMARY_JSON.open("w") as fh:
         json.dump(summary, fh, indent=2)
@@ -1010,6 +1235,11 @@ def main() -> None:
         action="store_true",
         help="Step 3.5 burst-level diagnostic on a cohort (post-hoc exploratory)",
     )
+    parser.add_argument(
+        "--n2-window-sweep",
+        action="store_true",
+        help="Step 5 robustness — rerun N2 main null at windows {10, 30, 60} min",
+    )
     parser.add_argument("--all", action="store_true", help="Audit then per-subject")
     parser.add_argument(
         "--cohort",
@@ -1041,11 +1271,12 @@ def main() -> None:
         or args.per_subject
         or args.cohort_stats
         or args.burst_diagnostic
+        or args.n2_window_sweep
         or args.all
     ):
         parser.error(
             "Must specify one of --audit / --per-subject / --cohort-stats "
-            "/ --burst-diagnostic / --all"
+            "/ --burst-diagnostic / --n2-window-sweep / --all"
         )
 
     if args.audit or args.all:
@@ -1071,6 +1302,18 @@ def main() -> None:
             cohort=args.cohort,
             n_perm=args.burst_n_perm,
             n2_window_seconds=args.n2_window_min * 60.0,
+            seed=args.seed,
+            only=only_list,
+        )
+
+    if args.n2_window_sweep:
+        only_list = (
+            [s.strip() for s in args.only.split(",")] if args.only else None
+        )
+        run_n2_window_sweep(
+            cohort=args.cohort,
+            windows_minutes=(10.0, 30.0, 60.0),
+            n_perm=args.n_perm,
             seed=args.seed,
             only=only_list,
         )

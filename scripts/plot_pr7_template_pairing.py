@@ -292,6 +292,265 @@ def plot_per_subject_curves() -> List[Path]:
 
 
 # ---------------------------------------------------------------------------
+# Step 6 main figure 2 — Per-Subject Null Comparison Grid
+# ---------------------------------------------------------------------------
+def plot_main_fig2_per_subject_null_grid() -> Optional[Path]:
+    """6-panel grid (2x3) for H1 cohort: per-subject excess(Δt) under all 4 nulls."""
+    files = sorted(PER_SUBJECT_DIR.glob("*.json"))
+    if not files:
+        print("No per-subject JSONs; skipping fig2.")
+        return None
+
+    fig, axes = new_figure(nrows=2, ncols=3, figsize=(15.0, 8.5))
+    axes_flat = axes.flatten()
+    null_color_map = {
+        "N0": COL_NEUTRAL,
+        "N1": COL_YUQUAN,
+        "N2": COL_SIG,
+        "N3": COL_EPILEPSIAE,
+    }
+
+    for idx, f in enumerate(files[:6]):
+        ax = axes_flat[idx]
+        with f.open() as fh:
+            rec = json.load(fh)
+        dt_grid = tuple(rec["delta_t_grid"])
+        lift = rec["pairing_with_nulls"]["lift"]
+        for null_id in ["N0", "N1", "N2", "N3"]:
+            if null_id not in lift:
+                continue
+            ex = [lift[null_id][f"{dt}"]["excess"] for dt in dt_grid]
+            ax.plot(
+                dt_grid, ex, "-o",
+                color=null_color_map[null_id],
+                linewidth=2.0 if null_id == "N2" else 1.0,
+                markersize=5 if null_id == "N2" else 3,
+                alpha=1.0 if null_id == "N2" else 0.6,
+                label=null_id + (" (main)" if null_id == "N2" else ""),
+            )
+        ax.axhline(0.0, color="black", linestyle=":", linewidth=0.7, alpha=0.5)
+        ax.axvline(10.0, color=COL_SIG, linestyle="--", linewidth=0.8, alpha=0.4)
+        ax.axvline(30.0, color=COL_SIG, linestyle="--", linewidth=0.8, alpha=0.25)
+        _format_xticks(ax, dt_grid)
+        ax.set_xlabel("Δt", fontsize=FS_LABEL - 2)
+        ax.set_ylabel("excess", fontsize=FS_LABEL - 2)
+        sid = f"{rec['dataset']}/{rec['subject_id']}"
+        ax.set_title(
+            f"{sid}  (N={rec['n_events_used']})", fontsize=FS_TITLE - 2,
+        )
+        if idx == 0:
+            ax.legend(loc="best", fontsize=8)
+
+    fig.suptitle(
+        "PR-7 fig2 — per-subject excess(Δt) under N0/N1/N2/N3 nulls (H1 cohort)",
+        fontsize=FS_TITLE,
+    )
+    plt.tight_layout()
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    out = FIG_DIR / "fig2_per_subject_null_grid.png"
+    savefig_pub(fig, out, dpi=DPI_PUB)
+    plt.close(fig)
+    print(f"Wrote {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Step 6 main figure 3 — Direction Asymmetry & Transition Odds
+# ---------------------------------------------------------------------------
+def plot_main_fig3_direction_and_transition() -> Optional[Path]:
+    """Two-panel scatter: (a) direction symmetry (a→b lift vs b→a lift at Δt=10s),
+    (b) transition_odds vs baseline_odds. Each point = one H1 subject.
+    """
+    files = sorted(PER_SUBJECT_DIR.glob("*.json"))
+    if not files:
+        return None
+
+    a_to_b: Dict[str, float] = {}
+    b_to_a: Dict[str, float] = {}
+    trans_odds: Dict[str, float] = {}
+    base_odds: Dict[str, float] = {}
+    for f in files:
+        with f.open() as fh:
+            rec = json.load(fh)
+        sid = f"{rec['dataset']}/{rec['subject_id']}"
+        n2_10 = rec["pairing_with_nulls"]["lift"].get("N2", {}).get("10.0", {})
+        a_to_b[sid] = n2_10.get("a_to_b_lift", float("nan"))
+        b_to_a[sid] = n2_10.get("b_to_a_lift", float("nan"))
+        trans_odds[sid] = rec["transition_odds"].get("transition_odds", float("nan"))
+        base_odds[sid] = rec["transition_odds"].get("baseline_odds", float("nan"))
+
+    fig, axes = new_figure(nrows=1, ncols=2, figsize=(12.0, 5.5))
+
+    # (a) Direction asymmetry — diagonal-symmetric scatter at Δt=10s under N2
+    ax = axes[0]
+    sids = sorted(a_to_b.keys())
+    short = [s.replace("epilepsiae/", "E:").replace("yuquan/", "Y:") for s in sids]
+    xs = [a_to_b[s] for s in sids]
+    ys = [b_to_a[s] for s in sids]
+    ax.scatter(
+        xs, ys, s=130, marker="o",
+        facecolor=COL_SIG, edgecolor="black", zorder=3,
+    )
+    for x, y, lab in zip(xs, ys, short):
+        ax.annotate(lab, (x, y), fontsize=9,
+                    textcoords="offset points", xytext=(6, 6))
+    if xs and ys:
+        lim_lo = min(min(xs), min(ys), 0.5)
+        lim_hi = max(max(xs), max(ys), 1.5)
+        ax.plot([lim_lo, lim_hi], [lim_lo, lim_hi],
+                color="black", linestyle=":", linewidth=1.0, alpha=0.5,
+                label="symmetric (y=x)")
+        ax.set_xlim(lim_lo - 0.05, lim_hi + 0.05)
+        ax.set_ylim(lim_lo - 0.05, lim_hi + 0.05)
+    ax.axhline(1.0, color=COL_NONSIG, linestyle="--", linewidth=0.7, alpha=0.6)
+    ax.axvline(1.0, color=COL_NONSIG, linestyle="--", linewidth=0.7, alpha=0.6)
+    ax.set_xlabel("opposite_lift (a→b) at Δt=10s, N2 null", fontsize=FS_LABEL)
+    ax.set_ylabel("opposite_lift (b→a) at Δt=10s, N2 null", fontsize=FS_LABEL)
+    ax.set_title("(a) H1b direction symmetry", fontsize=FS_TITLE)
+    ax.grid(True, alpha=0.25, linestyle=":")
+    ax.legend(loc="best", fontsize=10)
+
+    # (b) Transition odds vs baseline odds
+    ax = axes[1]
+    xs = [base_odds[s] for s in sids]
+    ys = [trans_odds[s] for s in sids]
+    ax.scatter(
+        xs, ys, s=130, marker="o",
+        facecolor=COL_SIG, edgecolor="black", zorder=3,
+    )
+    for x, y, lab in zip(xs, ys, short):
+        ax.annotate(lab, (x, y), fontsize=9,
+                    textcoords="offset points", xytext=(6, 6))
+    if xs and ys:
+        lim_lo = min(min(xs), min(ys), 0.0)
+        lim_hi = max(max(xs), max(ys), 1.5)
+        ax.plot([lim_lo, lim_hi], [lim_lo, lim_hi],
+                color="black", linestyle=":", linewidth=1.0, alpha=0.5,
+                label="independent (y=x)")
+        ax.set_xlim(lim_lo - 0.05, lim_hi + 0.05)
+        ax.set_ylim(lim_lo - 0.05, lim_hi + 0.05)
+    ax.set_xlabel("i.i.d. baseline_odds (next-event)", fontsize=FS_LABEL)
+    ax.set_ylabel("empirical transition_odds (next-event)", fontsize=FS_LABEL)
+    ax.set_title("(b) next-event transition vs baseline", fontsize=FS_TITLE)
+    ax.grid(True, alpha=0.25, linestyle=":")
+    ax.legend(loc="best", fontsize=10)
+
+    fig.suptitle(
+        "PR-7 fig3 — direction symmetry & next-event transition (H1 cohort)",
+        fontsize=FS_TITLE,
+    )
+    plt.tight_layout()
+    out = FIG_DIR / "fig3_direction_and_transition.png"
+    savefig_pub(fig, out, dpi=DPI_PUB)
+    plt.close(fig)
+    print(f"Wrote {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Step 6 main figure 4 — Two Exemplar Subjects with N2 null distribution band
+# ---------------------------------------------------------------------------
+def plot_main_fig4_exemplars() -> Optional[Path]:
+    """Two exemplar subjects: strongest negative + strongest positive at Δt=10s.
+    Each panel: empirical excess(Δt) curve overlaid with N2 null distribution
+    [25, 75] envelope + median.
+    """
+    files = sorted(PER_SUBJECT_DIR.glob("*.json"))
+    if not files:
+        return None
+
+    # Find strongest negative and strongest positive at 10s
+    ex10: Dict[str, Tuple[float, str]] = {}
+    for f in files:
+        with f.open() as fh:
+            rec = json.load(fh)
+        sid = f"{rec['dataset']}/{rec['subject_id']}"
+        ex10[sid] = (
+            rec["pairing_with_nulls"]["lift"]["N2"]["10.0"]["excess"],
+            str(f),
+        )
+    strongest_neg = min(ex10.items(), key=lambda kv: kv[1][0])
+    strongest_pos = max(ex10.items(), key=lambda kv: kv[1][0])
+
+    chosen = [strongest_neg, strongest_pos]
+    titles = [
+        f"(a) strongest negative: {strongest_neg[0]} (excess(10s)={strongest_neg[1][0]:+.3f})",
+        f"(b) strongest positive: {strongest_pos[0]} (excess(10s)={strongest_pos[1][0]:+.3f})",
+    ]
+
+    fig, axes = new_figure(nrows=1, ncols=2, figsize=(13.0, 5.0))
+    if not isinstance(axes, np.ndarray):
+        axes = np.array([axes])
+    axes = axes.flatten()
+
+    for idx, ((sid, (val, fpath)), title) in enumerate(zip(chosen, titles)):
+        ax = axes[idx]
+        with open(fpath) as fh:
+            rec = json.load(fh)
+        dt_grid = tuple(rec["delta_t_grid"])
+        # Build empirical excess and N2 null distribution per Δt
+        emp_ex = []
+        null_lo = []
+        null_hi = []
+        null_med = []
+        n2_lift = rec["pairing_with_nulls"]["lift"]["N2"]
+        n2_null = rec["pairing_with_nulls"]["null"]["N2"]
+        for dt in dt_grid:
+            emp_ex.append(n2_lift[f"{dt}"]["excess"])
+            opp_dist = np.asarray(n2_null[f"{dt}"]["p_opposite_dist"], dtype=float)
+            same_dist = np.asarray(n2_null[f"{dt}"]["p_same_dist"], dtype=float)
+            null_p_opp = float(np.mean(opp_dist))
+            null_p_same = float(np.mean(same_dist))
+            opp_lift_dist = (
+                opp_dist / max(null_p_opp, 1e-12)
+                if null_p_opp > 0 else opp_dist
+            )
+            same_lift_dist = (
+                same_dist / max(null_p_same, 1e-12)
+                if null_p_same > 0 else same_dist
+            )
+            ex_dist = opp_lift_dist - same_lift_dist
+            null_lo.append(np.percentile(ex_dist, 25))
+            null_hi.append(np.percentile(ex_dist, 75))
+            null_med.append(np.median(ex_dist))
+
+        ax.fill_between(
+            dt_grid, null_lo, null_hi,
+            color=COL_NEUTRAL, alpha=0.3, label="N2 null IQR",
+        )
+        ax.plot(
+            dt_grid, null_med, ":",
+            color=COL_NEUTRAL, linewidth=1.4, alpha=0.8,
+            label="N2 null median",
+        )
+        ax.plot(
+            dt_grid, emp_ex, "-o",
+            color=COL_SIG, linewidth=2.2, markersize=6, zorder=4,
+            label="empirical",
+        )
+        ax.axhline(0.0, color="black", linestyle=":", linewidth=0.8, alpha=0.6)
+        ax.axvline(10.0, color=COL_SIG, linestyle="--", linewidth=1.0, alpha=0.5)
+        ax.axvline(30.0, color=COL_SIG, linestyle="--", linewidth=1.0, alpha=0.3)
+        _format_xticks(ax, dt_grid)
+        ax.set_xlabel("Δt", fontsize=FS_LABEL)
+        ax.set_ylabel("excess", fontsize=FS_LABEL)
+        ax.set_title(title, fontsize=FS_TITLE - 2)
+        ax.legend(loc="best", fontsize=10)
+        ax.grid(True, alpha=0.2, linestyle=":")
+
+    fig.suptitle(
+        "PR-7 fig4 — exemplars (strongest neg + strongest pos) with N2 null IQR",
+        fontsize=FS_TITLE,
+    )
+    plt.tight_layout()
+    out = FIG_DIR / "fig4_exemplars.png"
+    savefig_pub(fig, out, dpi=DPI_PUB)
+    plt.close(fig)
+    print(f"Wrote {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Step 3.5 burst-level diagnostic main figure (fig5)
 # ---------------------------------------------------------------------------
 def plot_main_fig5_burst_diagnostic(summary: Dict[str, Any]) -> Optional[Path]:
@@ -370,6 +629,165 @@ def plot_main_fig5_burst_diagnostic(summary: Dict[str, Any]) -> Optional[Path]:
 
 
 # ---------------------------------------------------------------------------
+# Step 6 appendix 1 — N2 window sweep (10/30/60 min) cohort excess curves
+# ---------------------------------------------------------------------------
+SWEEP_DIR = (
+    ROOT
+    / "results"
+    / "interictal_propagation"
+    / "template_pairing"
+    / "per_subject_n2_sweep"
+)
+
+
+def plot_appendix1_window_sweep() -> Optional[Path]:
+    """Three cohort excess(Δt) curves overlaid for N2 window ∈ {10, 30, 60} min."""
+    if not SWEEP_DIR.exists():
+        print("No sweep dir; skipping appendix 1.")
+        return None
+    sweep_files = sorted(SWEEP_DIR.glob("*.json"))
+    if not sweep_files:
+        print("No sweep JSONs; skipping appendix 1.")
+        return None
+
+    by_window: Dict[int, Dict[str, Dict[str, Any]]] = {}
+    for f in sweep_files:
+        with f.open() as fh:
+            rec = json.load(fh)
+        w = int(round(rec["n2_window_minutes"]))
+        sid = f"{rec['dataset']}/{rec['subject_id']}"
+        by_window.setdefault(w, {})[sid] = rec
+
+    if not by_window:
+        return None
+
+    sorted_windows = sorted(by_window.keys())
+    fig, ax = new_figure(nrows=1, ncols=1, figsize=(8.0, 5.5))
+    color_for_window = {10: "#A35E48", 30: "#6F8FA8", 60: "#9DAA90"}
+    for w in sorted_windows:
+        # cohort median excess(Δt)
+        records = list(by_window[w].values())
+        if not records:
+            continue
+        dt_grid = records[0]["delta_t_grid"]
+        cohort_excess: List[List[float]] = []
+        for rec in records:
+            n2 = rec["pairing_with_nulls"]["lift"]["N2"]
+            cohort_excess.append([n2[f"{dt}"]["excess"] for dt in dt_grid])
+        arr = np.asarray(cohort_excess)
+        med = np.median(arr, axis=0)
+        ax.plot(
+            dt_grid, med, "-o",
+            color=color_for_window.get(w, "gray"),
+            linewidth=2.0, markersize=6,
+            label=f"window = {w} min",
+        )
+    ax.axhline(0.0, color="black", linestyle=":", linewidth=0.8, alpha=0.6)
+    ax.axvline(10.0, color=COL_SIG, linestyle="--", linewidth=1.0, alpha=0.5)
+    ax.axvline(30.0, color=COL_SIG, linestyle="--", linewidth=1.0, alpha=0.3)
+    _format_xticks(ax, dt_grid)
+    ax.set_xlabel("Δt", fontsize=FS_LABEL)
+    ax.set_ylabel("cohort median excess", fontsize=FS_LABEL)
+    ax.set_title(
+        "Appendix 1 — N2 window sweep robustness (H1 cohort, n=6)",
+        fontsize=FS_TITLE,
+    )
+    ax.legend(loc="best", fontsize=11)
+    ax.grid(True, alpha=0.25, linestyle=":")
+
+    out = FIG_DIR / "appendix1_window_sweep.png"
+    savefig_pub(fig, out, dpi=DPI_PUB)
+    plt.close(fig)
+    print(f"Wrote {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Step 6 appendix 3 — Cohort audit transparency table
+# ---------------------------------------------------------------------------
+AUDIT_CSV_PATH = (
+    ROOT
+    / "results"
+    / "interictal_propagation"
+    / "template_pairing"
+    / "pr7_cohort_audit.csv"
+)
+
+
+def plot_appendix3_audit_table() -> Optional[Path]:
+    """Render the audit CSV as a colored table figure for transparency."""
+    import csv as _csv
+
+    if not AUDIT_CSV_PATH.exists():
+        print("No audit CSV; skipping appendix 3.")
+        return None
+    with AUDIT_CSV_PATH.open() as fh:
+        rows = list(_csv.DictReader(fh))
+    if not rows:
+        return None
+
+    cols = [
+        "subject_id",
+        "dataset",
+        "n_events_total",
+        "min_cluster_n",
+        "n_blocks",
+        "total_coverage_hours",
+        "forward_reverse_reproduced",
+        "h1_primary_pass",
+        "h2_negative_pass",
+        "exit_reason",
+    ]
+
+    cell_text = []
+    cell_colors = []
+    for r in rows:
+        cell = [r.get(c, "") for c in cols]
+        cov = r.get("total_coverage_hours", "")
+        if cov:
+            try:
+                cell[5] = f"{float(cov):.1f}"
+            except ValueError:
+                pass
+        cell_text.append(cell)
+        if r.get("h1_primary_pass") == "True":
+            row_color = "#D4E5DC"
+        elif r.get("h2_negative_pass") == "True":
+            row_color = "#E5EDF1"
+        else:
+            row_color = "#F0F0F0"
+        cell_colors.append([row_color] * len(cols))
+
+    fig_height = max(6.0, 0.27 * (len(rows) + 2))
+    fig, ax = new_figure(nrows=1, ncols=1, figsize=(15.5, fig_height))
+    ax.axis("off")
+    table = ax.table(
+        cellText=cell_text,
+        colLabels=cols,
+        cellColours=cell_colors,
+        cellLoc="center",
+        loc="center",
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(8)
+    table.scale(1.0, 1.25)
+    for j, _ in enumerate(cols):
+        cell = table[(0, j)]
+        cell.set_text_props(weight="bold", color="white")
+        cell.set_facecolor("#5A6A78")
+
+    fig.suptitle(
+        "Appendix 3 — PR-7 cohort audit (green=H1 primary, blue=H2 negative, gray=excluded)",
+        fontsize=FS_TITLE,
+    )
+    out = FIG_DIR / "appendix3_cohort_audit.png"
+    savefig_pub(fig, out, dpi=DPI_PUB)
+    plt.close(fig)
+    print(f"Wrote {out}")
+    return out
+
+
+# ---------------------------------------------------------------------------
 # README.md for figures dir (AGENTS.md spec)
 # ---------------------------------------------------------------------------
 def write_figures_readme(summary: Dict[str, Any]) -> None:
@@ -389,6 +807,15 @@ def write_figures_readme(summary: Dict[str, Any]) -> None:
     lag1_med = burst_n2.get("median_lag1_same_excess", float("nan"))
     lag1_pos = burst_n2.get("n_subjects_lag1_excess_positive")
 
+    burst_block = summary.get("burst_diagnostic_per_cohort", {}).get("h1_primary", {})
+    burst_n2 = burst_block.get("by_null", {}).get("N2", {}) if burst_block else {}
+    rll_med = burst_n2.get("median_run_length_lift", float("nan")) if burst_n2 else float("nan")
+    rll_pos = burst_n2.get("n_subjects_run_length_lift_gt_1") if burst_n2 else None
+    git_med = burst_n2.get("median_gap_to_iei_lift", float("nan")) if burst_n2 else float("nan")
+    git_pos = burst_n2.get("n_subjects_gap_to_iei_lift_gt_1") if burst_n2 else None
+    lag1_med = burst_n2.get("median_lag1_same_excess", float("nan")) if burst_n2 else float("nan")
+    lag1_pos = burst_n2.get("n_subjects_lag1_excess_positive") if burst_n2 else None
+
     md = f"""# PR-7 Template Antagonistic Temporal Pairing 图集
 
 ## 主图
@@ -407,6 +834,39 @@ sign p={sign:.3f}、median(30s)={med30:+.3f}）。短窗 10s/30s 上没有
 共驱不是 confound。仅否定 short-window reciprocal coupling，**不**否定
 PR-6 已建立的 fwd/rev 几何相关性，**不**否定其它形式的因果耦合。
 
+### fig2_per_subject_null_grid.png
+
+6-panel 网格：每 subject 一个子图，叠加 N0/N1/N2/N3 四个 null 下的
+excess(Δt) 曲线，N2 主 null 加粗。10s/30s 双门用红色虚直线标注。
+
+**关注点**：N2 与 N1 应方向一致（robustness 守住）；当前 cohort 6/6
+都成立。N3 在多数 subject 上接近 N2，仅个别 subject（1073）N3 比 N2
+更负——但量级仍小，不影响 H1 NULL 判读。
+
+### fig3_direction_and_transition.png
+
+(a) H1b direction symmetry：散点 (a→b lift, b→a lift) at Δt=10s, N2 null。
+对角 y=x 表示对称。
+(b) next-event transition odds vs i.i.d. baseline_odds：散点。对角 y=x
+表示独立 mark draw。
+
+**关注点**：(a) 多数 subject 接近对角，没有方向偏好；548 显著偏离
+y=x（a→b 比 b→a 更稀缺）。(b) 5 个 subject 接近 y=x（独立抽样），
+548 是唯一显著偏离的——transition_odds 远低于 baseline，说明 next-event
+更倾向同 cluster（burst-style 但量级有限）。
+
+### fig4_exemplars.png
+
+cohort 中两个极端 subject：(a) 最强负向 epilepsiae/548（excess(10s)=−0.20）；
+(b) 最强正向 epilepsiae/635（excess(10s)=+0.03）。每子图叠加 N2 null
+分布的 [25, 75] envelope（灰色阴影）+ null median（点线）+ empirical
+曲线（红色实心）。
+
+**关注点**：548 在短窗位于 N2 null IQR 之外（**single-subject outlier /
+exploratory signal**——IQR 不是显著性边界，仅作可视化分布参考）；635
+短窗轻微高于 null IQR，但量级远小于 548 的负向。两者共同 cohort 中位仍
+接近 0。报告为 case-series exemplars，**不**升级为 cohort claim。
+
 ### fig5_burst_diagnostic.png
 
 PR-7 Step 3.5 post-hoc exploratory diagnostic。三个 panel 分别画
@@ -423,6 +883,31 @@ excess=0），虚线为 cohort 中位数（N2）。
 - 中位 `lag1_same_excess` (N2) = {lag1_med:+.4f}，
   {lag1_pos}/{n_h1} > 0
 本 figure **不**进 H1 PASS 判据；仅作 H1 NULL 的机制解释。
+
+## Appendix
+
+### appendix1_window_sweep.png
+
+PR-7 Step 5 robustness：N2 主 null 在窗口 {{10, 30, 60}} min 三个尺度上重跑，
+画 H1 cohort excess(Δt) 中位数。
+
+**关注点**：三个 window 上 cohort triple-gate verdict 一致 NULL（Wilcoxon
+p ∈ [0.78, 0.89]，所有 median(30s) < 0），方向稳健；**但**绝对量级随
+window 单调放大（cohort median(30s) 在 w=10/30/60 min 分别 = −0.002 /
+−0.015 / −0.029），主要由单一 subject 548 驱动（−0.10 / −0.20 / −0.30）。
+**不应**说"三条曲线高度重合"——cohort 在 10s/30s 上 spread ~0.025；要写
+的口径是"cohort verdict robust，但 magnitude window-sensitive，548 outlier
+对 window 选择高敏感（与该 subject 同模板 burst 在 10–60 min 时间尺度上
+的结构一致）"。
+
+### appendix3_cohort_audit.png
+
+完整 cohort audit 表格：30 个候选 subject，列出 n_events / min_cluster_n /
+n_blocks / coverage / forward_reverse_reproduced / 5 条入选条件 / 退出原因。
+
+**关注点**：绿色行 = H1 primary cohort（6 subject），蓝色行 = H2 negative
+cohort（17 subject），灰色 = excluded（7 subject）。可独立验证 inclusion
+逻辑。
 
 ## per_subject/
 
@@ -452,8 +937,13 @@ def main() -> None:
         summary = json.load(fh)
 
     plot_main_fig1(summary)
-    plot_per_subject_curves()
+    plot_main_fig2_per_subject_null_grid()
+    plot_main_fig3_direction_and_transition()
+    plot_main_fig4_exemplars()
     plot_main_fig5_burst_diagnostic(summary)
+    plot_per_subject_curves()
+    plot_appendix1_window_sweep()
+    plot_appendix3_audit_table()
     write_figures_readme(summary)
 
 

@@ -356,7 +356,35 @@ PR-7 是 Ping-Pong 假说能否成立的最直接可证伪检验。失败（lift
 
 **显式不做**：不重做 cluster 算法（KMeans k=2 锁死）；不做节点级 signed displacement（→ PR-8 candidate）；不做 subject typology × PR-5 split（→ PR-9 candidate）；不做发作邻近窗口（PR-4C 已封板 null）。
 
-**当前状态（2026-04-30）**：Step 0–3.5 已完成。Step 1 代码层 22/22 TDD 全绿（含 16 event-level + 6 burst-level）；Step 2 audit n=6 H1 primary cohort + n=17 H2 negative cohort，H1 per-subject n_perm=1000 跑齐（~1h50m）；**Step 3 H1 cohort NULL 已封**：N2 主 null Wilcoxon(10s, greater) p=0.844、sign p=0.656、median(30s)=−0.015，三条 PASS gate 全部 fail；N3 robustness 一致 NULL（Wilcoxon p=0.891，与 N2 在 5/6 subject 同号）；长尺度（≥30min）正确归零（slow-drive confound 排除）。**Step 3.5 burst-level diagnostic（post-hoc exploratory）—— 在无 ISI 阈值的 same-label run 定义下未见 persistence**：cohort 中位 `run_length_lift` = 0.977 / `gap_to_iei_lift` = 1.008 / `lag1_same_excess` = −0.013（N2 + N1 一致）；2/6 subject `run_length_lift > 1`，magnitudes ≤ 1.05；548 event-level 强反向 excess(−0.20) **不能**由 burst persistence 完全解释（其 burst 量级 ≤ 20% above null）；在已测尺度上数据**与 mark-independent sampling compatible**（最简洁解释，**不等于证明独立**）。**精确 framing**：仅在两个**特定**时间签名上没有检测到依赖——"short-window opposite-template excess at Δt ∈ [10s, 30s]" 与 "no-ISI-threshold same-label run + lag-1 same-label persistence"；**不**否定 PR-6 已建立的 fwd/rev 几何相关性、因果性本身、其它 burst 定义、rate-state / seizure-proximity switching、或 form (4) latent-state coupling（均未测）。详见 `docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md` §14。Step 4 H2 negative control（n=17）+ Step 5 robustness + Step 6 完整图集 + Step 7 最终封口待续；history-dependent marked point process model（previous_label + recent_rate + time_since_last + state/block）+ form (4) latent-state 留作独立 follow-up PR。
+**当前状态（2026-04-30，Step 0–6 收口）**：
+
+**最终结论（locked）**：**几何上相关，已测试时间尺度上未见 mark dependence。**
+
+PR-6 已建立 forward/reverse template 共享同一网络几何（n=6 sign-test p=0.031，source/sink swap）；PR-7 在三类 metric 上检验 mark dependence：(i) event-level fixed-window opposite-template excess at Δt ∈ [10s, 30s]（Step 3）；(ii) event-level direction asymmetry + next-event transition odds（Step 3 secondary）；(iii) run-based persistence（无 ISI 阈值 same-label run + lag-1 + gap-to-IEI；Step 3.5 post-hoc）。三类 metric **全部 NULL**：
+
+| 检验 | 数字 | 结果 |
+|---|---|---|
+| Step 3 H1 N2 主 null | Wilcoxon(10s, greater) p=0.844, sign 3/6, median(30s)=−0.015 | NULL |
+| Step 3 H1 N3 robustness | Wilcoxon p=0.891, sign 2/6, median(30s)=−0.012 | NULL |
+| Step 3.5 burst diagnostic（cohort N2）| run_length_lift median=0.977, lag1_same_excess median=−0.013, 2/6 above null | **未见 persistence** |
+| Step 5 N2 window sweep {10/30/60 min} | Wilcoxon ∈ [0.78, 0.89], median(30s) ∈ [−0.029, −0.002], 全部 NULL | **cohort verdict robust** across window |
+
+Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高度重合"）；magnitude 由 548 outlier 主导，548 magnitude 跨 window 1× → 2× → 3× 单调放大（−0.10 → −0.20 → −0.30）。
+
+**精确 framing**：在已测试 metric 上数据 **compatible with mark-independent sampling**（最简洁描述，**不等于证明独立**）。**未测**：alternative burst definitions、rate-state / seizure-proximity switching、form (4) latent-state coupling、history-dependent regression。
+
+**禁止措辞**：
+- ❌ "Two templates are time-independent / no causal coupling"
+- ❌ "Mark sequences are mark-independent"
+- ❌ 把 548 outlier 升级为 cohort claim
+- ❌ "Burst-level reciprocal coupling restores Ping-Pong"
+- ❌ 删除 PR-6 几何 narrative
+
+详见 `docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md` §1–§17。完整图集：`results/interictal_propagation/template_pairing/figures/`（fig1–5 + appendix 1/3）。
+
+**下一步**（**不在 PR-7 内**）：
+- 独立 follow-up PR：history-dependent marked point process model（`next_label ~ previous_label + recent_rate + time_since_last + block / state`），可一并测 form (1) + (2) + (4) 不依赖 fixed-window metric
+- H2 negative control（n=17）：完整性补强；优先级低，不会改变 H1 NULL verdict
 
 ---
 
