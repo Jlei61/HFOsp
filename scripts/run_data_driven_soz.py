@@ -791,33 +791,26 @@ def yuquan_signal_loader_factory(
     """
     edf_dir = YUQUAN_DATA_ROOT / subject_dir.name
     block_items = sorted(block_windows.items(), key=lambda x: x[1][0])
-    cache: Dict[str, Tuple[np.ndarray, float, List[str]]] = {}
-
-    def _load_block(stem: str) -> Tuple[np.ndarray, float, List[str]]:
-        if stem in cache:
-            return cache[stem]
-        edf_path = edf_dir / f"{stem}.edf"
-        import mne
-        raw = mne.io.read_raw_edf(
-            str(edf_path), preload=True, verbose=False, encoding="latin1"
-        )
-        data = raw.get_data()
-        sfreq_local = float(raw.info["sfreq"])
-        ch_names_raw = list(raw.ch_names)
-        cache.clear()
-        cache[stem] = (data, sfreq_local, ch_names_raw)
-        return cache[stem]
 
     def loader(t_start: float, t_end: float, channels: List[str]):
         for stem, (b0, b1) in block_items:
             if t_start >= b0 and t_end <= b1:
                 rel_start = float(t_start) - b0
                 rel_end = float(t_end) - b0
-                data, sfreq_local, ch_names_raw = _load_block(stem)
-                s0 = max(0, int(round(rel_start * sfreq_local)))
-                s1 = int(round(rel_end * sfreq_local))
+                edf_path = edf_dir / f"{stem}.edf"
+                import mne
+                # preload=False + crop + load_data reads only the
+                # requested time range (~ 44 s of a ~ 2 h block) instead
+                # of the full block. Cuts per-load from ~ 25 s to ~ 1-2 s.
+                raw = mne.io.read_raw_edf(
+                    str(edf_path), preload=False, verbose=False, encoding="latin1"
+                )
+                raw.crop(tmin=rel_start, tmax=rel_end)
+                raw.load_data()
+                window = raw.get_data()  # (n_channels, n_samples_window)
+                sfreq_local = float(raw.info["sfreq"])
+                ch_names_raw = list(raw.ch_names)
                 ch_to_idx = {c: i for i, c in enumerate(ch_names_raw)}
-                window = data[:, s0:s1]
                 out = np.zeros((window.shape[1], len(channels)), dtype=float)
                 for j, ch in enumerate(channels):
                     if "-" not in ch:
