@@ -532,7 +532,12 @@ def _write_per_subject_csv(rows: List[Dict[str, object]], path: Path) -> None:
     _write_per_record_csv(rows, path)
 
 
-def _write_cohort_summary_json(per_subject: List[Dict[str, object]], path: Path) -> None:
+def _write_cohort_summary_json(
+    per_subject: List[Dict[str, object]],
+    path: Path,
+    *,
+    all_records: Optional[List[Dict[str, object]]] = None,
+) -> None:
     buckets: Dict[str, List[str]] = {"stable": [], "moderate_drift": [], "large_drift": []}
     for s in per_subject:
         b = str(s["subject_bucket"])
@@ -544,7 +549,7 @@ def _write_cohort_summary_json(per_subject: List[Dict[str, object]], path: Path)
         moderate=counts.get("moderate_drift", 0),
         large=counts.get("large_drift", 0),
     )
-    # Cohort-level coverage stats (advisor 2026-04-30: low Jaccard is asymmetric)
+    # Cohort-level coverage stats — interpretation is data-driven, not hardcoded.
     cov_l_in_n_meds = [
         s.get("cov_legacy_in_new_med") for s in per_subject
         if s.get("cov_legacy_in_new_med") is not None
@@ -553,10 +558,32 @@ def _write_cohort_summary_json(per_subject: List[Dict[str, object]], path: Path)
         s.get("cov_new_in_legacy_med") for s in per_subject
         if s.get("cov_new_in_legacy_med") is not None
     ]
-    n_full_subset = sum(
+    n_subjects_legacy_subset_of_new = sum(
         1 for v in cov_l_in_n_meds
         if v is not None and float(v) >= 0.999
     )
+    n_subjects_new_subset_of_legacy = sum(
+        1 for v in cov_n_in_l_meds
+        if v is not None and float(v) >= 0.999
+    )
+    # Fraction of paired-eligible records with exact chn-set match.
+    if all_records is None:
+        n_paired_eligible = 0
+        n_exact_chn_match = 0
+    else:
+        paired_for_match = [
+            r for r in all_records
+            if r.get("record_status") == "paired"
+            and r.get("chn_overlap_jaccard_eligible") is True
+            and r.get("cov_legacy_in_new") is not None
+            and r.get("cov_new_in_legacy") is not None
+        ]
+        n_paired_eligible = len(paired_for_match)
+        n_exact_chn_match = sum(
+            1 for r in paired_for_match
+            if float(r["cov_legacy_in_new"]) == 1.0
+            and float(r["cov_new_in_legacy"]) == 1.0
+        )
 
     summary = {
         "n_subjects_audited": len(per_subject),
@@ -572,8 +599,10 @@ def _write_cohort_summary_json(per_subject: List[Dict[str, object]], path: Path)
             "*_eligible flag. Zero-event and unpaired records are tracked in the "
             "n_records_* counts but excluded from medians."
         ),
-        "asymmetry_observation": {
-            "n_subjects_with_legacy_subset_of_new": n_full_subset,
+        "channel_coverage_observation": {
+            "n_subjects_with_legacy_med_subset_of_new": n_subjects_legacy_subset_of_new,
+            "n_subjects_with_new_med_subset_of_legacy": n_subjects_new_subset_of_legacy,
+            "n_subjects_total": len(per_subject),
             "cov_legacy_in_new_cohort_median": (
                 float(np.median(np.array(cov_l_in_n_meds, dtype=float)))
                 if cov_l_in_n_meds else None
@@ -582,12 +611,17 @@ def _write_cohort_summary_json(per_subject: List[Dict[str, object]], path: Path)
                 float(np.median(np.array(cov_n_in_l_meds, dtype=float)))
                 if cov_n_in_l_meds else None
             ),
-            "interpretation": (
-                "cov_legacy_in_new == 1.0 cohort-wide means legacy chnNames is a "
-                "strict subset of new. The low chn_overlap_jaccard reflects new "
-                "having added channels, NOT new picking different channels. "
-                "Stage D consumers that expect the legacy 8-9 chn schema cannot "
-                "consume new lagPat without a channel-restriction step."
+            "n_paired_eligible_records": n_paired_eligible,
+            "n_records_with_exact_chn_match": n_exact_chn_match,
+            "fraction_records_exact_chn_match": (
+                float(n_exact_chn_match) / n_paired_eligible
+                if n_paired_eligible else None
+            ),
+            "field_definitions": (
+                "cov_legacy_in_new = |legacy ∩ new| / |legacy| (fraction of legacy "
+                "chns kept in new core); cov_new_in_legacy = |legacy ∩ new| / |new| "
+                "(fraction of new chns kept in legacy core). Read both directions "
+                "before drawing conclusions about asymmetry."
             ),
         },
     }
@@ -612,7 +646,11 @@ def run_cohort(subjects: Tuple[str, ...]) -> None:
 
     _write_per_record_csv(all_records, AUDIT_OUTPUT_ROOT / "per_record_audit.csv")
     _write_per_subject_csv(all_summaries, AUDIT_OUTPUT_ROOT / "per_subject_audit.csv")
-    _write_cohort_summary_json(all_summaries, AUDIT_OUTPUT_ROOT / "cohort_audit_summary.json")
+    _write_cohort_summary_json(
+        all_summaries,
+        AUDIT_OUTPUT_ROOT / "cohort_audit_summary.json",
+        all_records=all_records,
+    )
     print(f"[audit] wrote {AUDIT_OUTPUT_ROOT}/", flush=True)
 
 
