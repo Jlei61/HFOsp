@@ -725,3 +725,123 @@ def test_compute_er_logratio_missing_eps_raises_value_error():
             seizure_onset=100.0,
             eps_per_channel={"ch0": 1e-12},  # ch1 missing
         )
+
+
+# ---------------------------------------------------------------------------
+# Step 2 acceptance v2 — matcher consistency, consensus output size, and
+# m2_ineligible enforcement helper. These three were flagged after the
+# initial Step 2 commit and must hold before Step 3 builds on them.
+# ---------------------------------------------------------------------------
+
+
+def test_annotate_clinical_soz_dual_prefix_bipolar_matches_audit():
+    """``annotate_clinical_soz`` must agree with ``matched_clinical_contacts``
+    on dual-prefix bipolar names like ``EEG A1-EEG A2``. Otherwise audit
+    rows can report ``n_clinical_unmatched=0`` (matched_clinical_contacts
+    found ``A2``) while annotate_clinical_soz silently labels the channel
+    ``non_soz`` because ``match_bipolar_soz`` only strips the leading
+    prefix from the whole string. The two paths must use the same
+    per-endpoint normalization.
+    """
+    analysis = ["EEG A1-EEG A2", "EEG B1-EEG B2"]
+    clinical = ["A2"]
+    matched = matched_clinical_contacts(analysis, clinical)
+    assert "A2" in matched
+    labels = annotate_clinical_soz(analysis, clinical)
+    assert labels["EEG A1-EEG A2"] == "soz"
+    assert labels["EEG B1-EEG B2"] == "non_soz"
+
+
+def test_annotate_clinical_soz_lowercase_dual_prefix():
+    """Same matcher contract as above but the bipolar uses ``eeg_`` and
+    lowercase per-endpoint — covers the second normalize path through
+    ``_normalize_channel_name`` (uppercase + ``EEG_`` strip).
+    """
+    analysis = ["eeg_a1-eeg_a2"]
+    clinical = ["A1"]
+    labels = annotate_clinical_soz(analysis, clinical)
+    assert labels["eeg_a1-eeg_a2"] == "soz"
+
+
+def test_aggregate_consensus_output_can_be_smaller_than_topk_size():
+    """Plan §3.5 enrichment uses ``len(B)``, not the per-seizure ``k``.
+    Demonstrate the consensus rule can return fewer than ``k`` channels:
+    only ``A`` clears the 50% threshold even though every per-seizure
+    list has ``k=3`` members.
+    """
+    per_seizure = [["A", "B", "C"], ["A", "D", "E"], ["A", "F", "G"]]
+    out = aggregate_consensus(per_seizure, min_seizure_fraction=0.5)
+    assert out == {"A"}
+    assert len(out) == 1  # NOT 3 (k)
+
+
+def test_aggregate_consensus_output_can_be_larger_than_topk_size():
+    """The other direction: per-seizure top-3 lists can yield a larger
+    consensus set when many channels are stable. Step 3/4 enrichment
+    must use ``len(B)`` (= 4 here), NOT some fixed ``k``.
+    """
+    # k=3 per seizure, but channels stable enough to clear 50%:
+    #   A,B,C appear 3/3; D appears 2/3 (clears 0.5).
+    per_seizure = [["A", "B", "C"], ["A", "B", "D"], ["A", "C", "D"]]
+    out = aggregate_consensus(per_seizure, min_seizure_fraction=0.5)
+    assert out == {"A", "B", "C", "D"}
+    assert len(out) == 4  # NOT 3 (k)
+
+
+def test_select_m2_eligible_channels_drops_ineligible():
+    """Step 3 must filter channels by ``PerChannelEps.m2_ineligible``
+    BEFORE calling ``compute_er_logratio``. Otherwise the 1e-18 floor
+    on a strictly-zero-pre-power channel produces ``log(P_post / 1e-18)
+    ≈ +40`` and dominates the M2 ranking. The helper formalises that
+    contract so Step 3 cannot accidentally feed an ineligible channel
+    into the log-ratio.
+    """
+    from src.data_driven_soz import select_m2_eligible_channels
+
+    eps_result = PerChannelEps(
+        eps=np.array([1e-18, 1e-12, 1e-18]),
+        m2_ineligible=np.array([True, False, False]),
+        raw_percentile=np.array([0.0, 1e-12, 0.0]),
+    )
+    channel_index = {"chA": 0, "chB": 1, "chC": 2}
+    eligible, dropped = select_m2_eligible_channels(
+        ["chA", "chB", "chC"], eps_result, channel_index
+    )
+    assert eligible == ["chB", "chC"]
+    assert dropped == ["chA"]
+
+
+def test_select_m2_eligible_channels_preserves_input_order():
+    """Eligible channel order must match the input order — Step 3 indexes
+    downstream M2 outputs by this list, so silent re-ordering would
+    corrupt the per-channel score map.
+    """
+    from src.data_driven_soz import select_m2_eligible_channels
+
+    eps_result = PerChannelEps(
+        eps=np.array([1e-12, 1e-18, 1e-12, 1e-18]),
+        m2_ineligible=np.array([False, True, False, True]),
+        raw_percentile=np.array([1e-12, 0.0, 1e-12, 0.0]),
+    )
+    channel_index = {"d": 0, "c": 1, "b": 2, "a": 3}
+    eligible, dropped = select_m2_eligible_channels(
+        ["d", "c", "b", "a"], eps_result, channel_index
+    )
+    assert eligible == ["d", "b"]
+    assert dropped == ["c", "a"]
+
+
+def test_select_m2_eligible_channels_unknown_channel_raises():
+    """A channel name missing from ``channel_index`` is a Step 3 caller
+    bug — fail loudly rather than silently dropping the channel."""
+    from src.data_driven_soz import select_m2_eligible_channels
+
+    eps_result = PerChannelEps(
+        eps=np.array([1e-12]),
+        m2_ineligible=np.array([False]),
+        raw_percentile=np.array([1e-12]),
+    )
+    with pytest.raises(KeyError, match="not_in_index"):
+        select_m2_eligible_channels(
+            ["not_in_index"], eps_result, {"present": 0}
+        )

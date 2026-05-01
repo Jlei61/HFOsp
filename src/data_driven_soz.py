@@ -42,7 +42,7 @@ from typing import Callable, Dict, Iterable, List, Mapping, NamedTuple, Sequence
 
 import numpy as np
 
-from src.event_periodicity import _normalize_channel_name, match_bipolar_soz
+from src.event_periodicity import _normalize_channel_name
 
 
 SOZ_LABEL = "soz"
@@ -142,22 +142,33 @@ def annotate_clinical_soz(
       → ``"unknown"``.
     - CAR / monopolar ``X``: same logic with single contact.
 
-    The matcher reuses ``src.event_periodicity.match_bipolar_soz`` for the
-    SOZ vs nonSOZ branch but adds the ``"unknown"`` branch the plan
-    requires.
+    Per-endpoint normalization is applied to each side after splitting on
+    ``-``. This matches ``matched_clinical_contacts`` so audit rows stay
+    consistent with annotation: a dual-prefix bipolar like
+    ``EEG A1-EEG A2`` resolves both contacts via
+    ``_normalize_channel_name`` (the canonical helper only strips the
+    *leading* prefix from the whole string, leaving the second side
+    prefixed). Delegating to ``match_bipolar_soz`` would silently
+    mis-label this case as ``non_soz`` even though the audit reports
+    ``A2`` as matched — exactly the inconsistency the audit was added
+    to prevent.
 
     Returns ``{channel_name: label}`` preserving the input ordering of
     ``analysis_channels``.
     """
-    soz_set = {_normalize_channel_name(s) for s in clinical_soz}
+    soz_set = {_normalize_channel_name(s) for s in clinical_soz if s}
     out: Dict[str, str] = {}
     for ch in analysis_channels:
         normalized = _normalize_channel_name(ch)
-        parts = [p.strip() for p in normalized.split("-")]
-        if any(not p for p in parts):
+        raw_parts = [p.strip() for p in normalized.split("-")]
+        if any(not p for p in raw_parts):
             out[ch] = UNKNOWN_LABEL
             continue
-        out[ch] = match_bipolar_soz(ch, soz_set)
+        parts = [_normalize_channel_name(p) for p in raw_parts]
+        if any(p in soz_set for p in parts):
+            out[ch] = SOZ_LABEL
+        else:
+            out[ch] = NON_SOZ_LABEL
     return out
 
 
@@ -286,6 +297,19 @@ def aggregate_consensus(
 ) -> Set[str]:
     """Channels appearing in ≥ ``min_seizure_fraction`` of per-seizure top-k
     lists (plan §3.5).
+
+    .. warning::
+
+        **Output size is data-dependent and does NOT equal the per-seizure
+        ``k``.** It can be smaller (no channel meets the threshold) or
+        larger (many channels are stable enough to clear it). Step 3/4
+        enrichment (Fisher / hypergeometric / random expected overlap)
+        must compute basket size as ``len(B)``, not as the input ``k``.
+        Computing expected overlap as ``k * |annotated_soz| / n_channels``
+        is a contract violation; use ``len(B) * |annotated_soz| /
+        n_channels``. If a fixed-size basket is required, post-process
+        with a deterministic tie-break, do not assume the consensus
+        rule already enforces it.
     """
     n_seizures = len(per_seizure_topk)
     if n_seizures == 0:
@@ -626,6 +650,61 @@ def estimate_per_channel_eps(
     )
 
 
+def select_m2_eligible_channels(
+    channels: Sequence[str],
+    eps_result: PerChannelEps,
+    channel_index: Mapping[str, int],
+) -> Tuple[List[str], List[str]]:
+    """Filter ``channels`` by ``eps_result.m2_ineligible`` (plan §3.4).
+
+    Step 3 must call this **before** passing channels into
+    ``compute_er_logratio``. Without it, an ineligible channel (every
+    pre-power == 0 across every seizure) gets the ``1e-18`` floor as
+    its eps and ``log(P_post / 1e-18)`` ≈ +40, dominating the M2
+    ranking with a noise-floor artefact. The dropped list goes into
+    the per-subject JSON's ``m2_ineligible_channels`` field so the
+    audit / cohort summary can report it.
+
+    Parameters
+    ----------
+    channels
+        Names to filter. Order is preserved in the eligible list.
+    eps_result
+        Output of ``estimate_per_channel_eps`` (cohort pre-power).
+    channel_index
+        Map from channel name to its row index in the cohort
+        ``power_pre_matrix`` that produced ``eps_result``.
+
+    Returns
+    -------
+    (eligible, dropped) : tuple[list[str], list[str]]
+        Both lists preserve the input ``channels`` order. Channels
+        with ``m2_ineligible[channel_index[ch]] == True`` go into
+        ``dropped``; the rest into ``eligible``.
+
+    Raises
+    ------
+    KeyError
+        If a queried channel is missing from ``channel_index`` —
+        this is a Step 3 caller bug (cohort mismatch); fail loudly
+        rather than silently dropping.
+    """
+    eligible: List[str] = []
+    dropped: List[str] = []
+    mask = np.asarray(eps_result.m2_ineligible, dtype=bool)
+    for ch in channels:
+        if ch not in channel_index:
+            raise KeyError(
+                f"channel {ch!r} not in channel_index; "
+                f"cohort eps was estimated on a different channel set"
+            )
+        if bool(mask[channel_index[ch]]):
+            dropped.append(ch)
+        else:
+            eligible.append(ch)
+    return eligible, dropped
+
+
 __all__ = [
     "annotate_clinical_soz",
     "matched_clinical_contacts",
@@ -643,4 +722,5 @@ __all__ = [
     "_bandpass_power",
     "compute_er_logratio",
     "estimate_per_channel_eps",
+    "select_m2_eligible_channels",
 ]
