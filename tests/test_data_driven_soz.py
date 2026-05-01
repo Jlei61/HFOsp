@@ -1226,6 +1226,80 @@ def test_epilepsiae_partial_window_loader_against_synthetic_data(tmp_path):
     assert np.allclose(sig, expected_car, atol=1e-4)
 
 
+def test_per_subject_runner_drops_low_sfreq_blocks_from_m2_only():
+    """A subject whose blocks have mixed sample rates (e.g. epilepsiae 583
+    has both 1024 Hz and 256 Hz blocks) is currently audit-eligible
+    because the cohort sfreq_min restricts to retained blocks. But
+    seizures landing inside the 256 Hz blocks fail the 525 Hz Nyquist
+    guard inside compute_er_logratio. The orchestrator must drop those
+    seizures **from M2 only** (M1 doesn't need signal) via a forward
+    block-sfreq check, NOT by catching NyquistGuardError.
+    """
+    from src.data_driven_soz import compute_per_subject_audit
+
+    sfreq = 1000.0
+    block_len_sec = 100.0
+    n_samples = int(block_len_sec * sfreq)
+    rng = np.random.default_rng(0)
+
+    block_windows = {
+        "BLK_HI": (0.0, block_len_sec),
+        "BLK_LO": (200.0, 200.0 + block_len_sec),
+    }
+    block_sfreqs = {"BLK_HI": 1000.0, "BLK_LO": 256.0}  # LO is M2-ineligible
+
+    block_signals = {
+        "BLK_HI": rng.normal(0, 1, (n_samples, 2)),
+    }
+
+    loader_calls = []
+
+    def signal_loader(t_start, t_end, channels):
+        loader_calls.append((t_start, t_end, tuple(channels)))
+        for blk, (b0, b1) in block_windows.items():
+            if t_start >= b0 and t_end <= b1:
+                if blk != "BLK_HI":
+                    raise AssertionError(
+                        f"loader was called for low-sfreq block {blk!r} — "
+                        f"the orchestrator should have dropped this seizure "
+                        f"from the M2 path before any signal load"
+                    )
+                s0 = int(round((t_start - b0) * sfreq))
+                s1 = int(round((t_end - b0) * sfreq))
+                ch_idx = {"chA": 0, "chB": 1}
+                cols = [ch_idx[ch] for ch in channels]
+                return block_signals[blk][s0:s1, cols], sfreq
+        raise ValueError(f"window {t_start}-{t_end} doesn't fit any block")
+
+    hfo_events = {
+        "chA": np.array([45.0, 50.5, 55.0, 245.0, 250.5, 255.0]),
+        "chB": np.array([46.0, 51.0, 56.0, 246.0, 251.0, 256.0]),
+    }
+    res = compute_per_subject_audit(
+        dataset="testset",
+        subject="mixed_sfreq",
+        seizure_onsets=[50.0, 250.0],
+        seizure_block_ids=["BLK_HI", "BLK_LO"],
+        block_windows=block_windows,
+        block_sfreqs=block_sfreqs,
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=1000.0,
+        clinical_soz=["chA"],
+        analysis_channels=["chA", "chB"],
+        m2_eligible=True,
+        null_n_iter=0,
+    )
+    # M1 must still cover BOTH seizures (no signal load needed).
+    assert res["n_seizures_used"] == 2
+    # The loader should never have been called for the low-sfreq block.
+    for t_start, t_end, _ in loader_calls:
+        assert t_start < block_windows["BLK_LO"][0] or t_end > block_windows["BLK_LO"][1]
+    # The drop must be reported in the JSON for downstream cohort tracking.
+    assert "n_seizures_m2_dropped_low_sfreq" in res
+    assert res["n_seizures_m2_dropped_low_sfreq"] == 1
+
+
 def test_epilepsiae_partial_window_loader_short_read_raises(tmp_path):
     """A request beyond the file's sample count must raise — never
     silently truncate (would corrupt M2 windows)."""

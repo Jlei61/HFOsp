@@ -1099,6 +1099,7 @@ def compute_per_subject_audit(
     clinical_soz: Sequence[str],
     analysis_channels: Sequence[str],
     m2_eligible: bool,
+    block_sfreqs: Optional[Mapping[str, float]] = None,
     band: Tuple[float, float] = (80.0, 250.0),
     w_pre: float = 30.0,
     w_post: float = 10.0,
@@ -1184,12 +1185,30 @@ def compute_per_subject_audit(
 
     # ----- M2 per seizure (eligible-channel-filtered) -----
     m2_ineligible_channels: List[str] = []
-    if m2_eligible and signal_loader is not None and kept_onsets:
-        # Cohort power_pre matrix (n_seizures, n_channels) over the full
+    n_seizures_m2_dropped_low_sfreq = 0
+    band_hi_with_safety = float(band[1]) * 2.1  # plan §3.4 5% Nyquist margin
+    # Per-seizure M2 eligibility: a seizure landing inside a low-sfreq
+    # block (e.g. epilepsiae 583 has both 1024 Hz and 256 Hz blocks)
+    # would fail compute_er_logratio's NyquistGuardError. Drop those
+    # seizures from M2 BEFORE any signal load — M1 still runs because
+    # it doesn't need the signal. This forward gate is the M2-side
+    # analog of prefilter_seizures_by_block_window.
+    if block_sfreqs is not None:
+        m2_kept_seizure_indices = [
+            i for i, blk in enumerate(kept_block_ids)
+            if float(block_sfreqs.get(blk, 0.0)) >= band_hi_with_safety
+        ]
+        n_seizures_m2_dropped_low_sfreq = len(kept_onsets) - len(m2_kept_seizure_indices)
+    else:
+        m2_kept_seizure_indices = list(range(len(kept_onsets)))
+    m2_kept_onsets = [kept_onsets[i] for i in m2_kept_seizure_indices]
+
+    if m2_eligible and signal_loader is not None and m2_kept_onsets:
+        # Cohort power_pre matrix (n_m2_seizures, n_channels) over the full
         # analysis_channels set so eps_per_channel covers every channel.
-        n_kept = len(kept_onsets)
-        power_pre_matrix = np.zeros((n_kept, n_channels_total), dtype=float)
-        for s_idx, t_s in enumerate(kept_onsets):
+        n_m2_kept = len(m2_kept_onsets)
+        power_pre_matrix = np.zeros((n_m2_kept, n_channels_total), dtype=float)
+        for s_idx, t_s in enumerate(m2_kept_onsets):
             t_start = float(t_s) - w_pre - edge_buffer
             t_end = float(t_s) + w_post + edge_buffer
             sig, sfreq_ret = signal_loader(t_start, t_end, list(analysis_channels))
@@ -1209,7 +1228,7 @@ def compute_per_subject_audit(
         )
         eps_map = {ch: float(eps_result.eps[channel_index[ch]]) for ch in eligible_channels}
         per_seizure_m2: List[Dict[str, float]] = []
-        for t_s in kept_onsets:
+        for t_s in m2_kept_onsets:
             scores = compute_er_logratio(
                 signal_loader=signal_loader,
                 channels=eligible_channels,
@@ -1224,7 +1243,7 @@ def compute_per_subject_audit(
         per_seizure_scores_by_method["M2_logratio"] = per_seizure_m2
     else:
         per_seizure_scores_by_method["M2_logratio"] = [
-            {} for _ in kept_onsets
+            {} for _ in m2_kept_onsets
         ]
 
     # ----- Aggregation grid + overlap -----
@@ -1347,6 +1366,7 @@ def compute_per_subject_audit(
         "n_seizures_used": len(kept_onsets),
         "n_seizures_dropped": len(dropped_idx),
         "dropped_seizure_reasons": [drop_reasons[i] for i in dropped_idx],
+        "n_seizures_m2_dropped_low_sfreq": int(n_seizures_m2_dropped_low_sfreq),
         "n_channels_total": n_channels_total,
         "sfreq": float(sfreq),
         "m2_eligible": bool(m2_eligible),

@@ -666,6 +666,23 @@ def epilepsiae_block_windows_from_inventory(
     return out
 
 
+def epilepsiae_block_sfreqs_from_inventory(
+    block_rows: List[Dict[str, str]],
+) -> Dict[str, float]:
+    """Map block_stem → sample_rate_sql for per-block M2 eligibility
+    (some Epilepsiae subjects mix 256 / 512 / 1024 Hz blocks within the
+    same recording — the cohort sfreq_min hides this when only 1024 Hz
+    blocks are retained for HFO detection)."""
+    out: Dict[str, float] = {}
+    for r in block_rows:
+        try:
+            sf = float(r.get("sample_rate_sql") or 0.0)
+        except (TypeError, ValueError):
+            continue
+        out[r["block_stem"]] = sf
+    return out
+
+
 def epilepsiae_seizures_from_inventory(
     inventory_csv: Path, subject: str
 ) -> Tuple[List[float], List[str]]:
@@ -1078,6 +1095,7 @@ def run_subject(
     if dataset == "epilepsiae":
         block_rows = epi_blocks.get(subject, [])
         block_windows = epilepsiae_block_windows_from_inventory(block_rows)
+        block_sfreqs = epilepsiae_block_sfreqs_from_inventory(block_rows)
         all_seizure_onsets, _ = epilepsiae_seizures_from_inventory(
             EPILEPSIAE_SEIZURE_INVENTORY, subject
         )
@@ -1106,6 +1124,8 @@ def run_subject(
         sfreq = probe_yuquan_sfreq(subject) or 0.0
         m2_eligible = bool(sfreq >= M2_MIN_SFREQ)
         clinical_soz = yuquan_soz.get(subject, []) or []
+        # All Yuquan blocks of one subject share the EDF sfreq.
+        block_sfreqs = {stem: sfreq for stem in block_windows}
         if m2_eligible:
             signal_loader = yuquan_signal_loader_factory(
                 subject_dir, [], block_windows
@@ -1141,6 +1161,7 @@ def run_subject(
         seizure_onsets=seizure_onsets,
         seizure_block_ids=seizure_block_ids,
         block_windows=block_windows,
+        block_sfreqs=block_sfreqs,
         hfo_event_times_per_channel=hfo_events,
         signal_loader=signal_loader,
         sfreq=sfreq,
@@ -1158,6 +1179,7 @@ def run_subject(
     print(
         f"[run] {dataset}/{subject}: kept={res['n_seizures_used']} "
         f"dropped={res['n_seizures_dropped']} "
+        f"m2_dropped_lo={res.get('n_seizures_m2_dropped_low_sfreq', 0)} "
         f"k_primary={res['k_primary_size_matched']} "
         f"H_M1={res['headline_primary'].get('H_M1_pois_medianrank_size_matched'):.3f} "
         f"H_M2={res['headline_primary'].get('H_M2_logratio_medianrank_size_matched'):.3f} "
