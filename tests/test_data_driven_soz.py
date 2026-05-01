@@ -1178,3 +1178,79 @@ def test_cohort_overlap_still_raises_not_implemented():
     assert proc.returncode != 0
     combined = (proc.stdout or "") + (proc.stderr or "")
     assert "NotImplementedError" in combined or "not implemented" in combined.lower()
+
+
+def test_epilepsiae_partial_window_loader_against_synthetic_data(tmp_path):
+    """Write a synthetic .data + .head and verify the partial loader
+    extracts the right sample count, applies CAR, and uses
+    intracranial-only channels.
+    """
+    from scripts.run_data_driven_soz import _epilepsiae_partial_window_loader
+
+    sfreq = 1000.0
+    n_channels = 4
+    duration_sec = 10.0
+    n_samples = int(sfreq * duration_sec)
+    # 2 intracranial (HLA1, HLA2), 2 scalp (EEG/EMG markers in the
+    # EPILEPSIAE_SCALP_AUX_CHANNELS set).
+    ch_names = ["HLA1", "HLA2", "FZ", "ECG"]
+    # Synthetic int16 signal: known per-channel patterns.
+    rng = np.random.default_rng(42)
+    raw = rng.integers(-1000, 1000, size=(n_samples, n_channels), dtype=np.int16)
+
+    head_path = tmp_path / "synth.head"
+    data_path = tmp_path / "synth.data"
+    head_path.write_text(
+        "num_channels=4\n"
+        f"sample_freq={sfreq}\n"
+        f"duration_in_sec={duration_sec}\n"
+        f"num_samples={n_samples}\n"
+        "sample_bytes=2\n"
+        "conversion_factor=1.0\n"
+        f"elec_names=[{','.join(ch_names)}]\n"
+    )
+    data_path.write_bytes(raw.tobytes())
+
+    # Read the middle 2 seconds.
+    sig, sfreq_ret, ch_ret = _epilepsiae_partial_window_loader(
+        str(data_path), str(head_path), rel_start_sec=4.0, rel_end_sec=6.0
+    )
+    assert sfreq_ret == sfreq
+    assert ch_ret == ["HLA1", "HLA2"]      # scalp/aux dropped
+    assert sig.shape == (2000, 2)          # 2 s × 1000 Hz, 2 intracranial ch
+    # CAR property: row mean across kept channels is ≈ 0.
+    assert np.allclose(sig.mean(axis=1), 0.0, atol=1e-6)
+    # The conversion sign (-1.0 * factor) must be applied.
+    expected_intra = raw[4000:6000, :2].astype(np.float32) * np.float32(-1.0)
+    expected_car = expected_intra - expected_intra.mean(axis=1, keepdims=True)
+    assert np.allclose(sig, expected_car, atol=1e-4)
+
+
+def test_epilepsiae_partial_window_loader_short_read_raises(tmp_path):
+    """A request beyond the file's sample count must raise — never
+    silently truncate (would corrupt M2 windows)."""
+    from scripts.run_data_driven_soz import _epilepsiae_partial_window_loader
+
+    sfreq = 1000.0
+    n_channels = 2
+    duration_sec = 1.0
+    n_samples = int(sfreq * duration_sec)
+    ch_names = ["HLA1", "HLA2"]
+    raw = np.zeros((n_samples, n_channels), dtype=np.int16)
+
+    head_path = tmp_path / "short.head"
+    data_path = tmp_path / "short.data"
+    head_path.write_text(
+        "num_channels=2\n"
+        f"sample_freq={sfreq}\n"
+        f"duration_in_sec={duration_sec}\n"
+        f"num_samples={n_samples}\n"
+        "sample_bytes=2\n"
+        "conversion_factor=1.0\n"
+        f"elec_names=[{','.join(ch_names)}]\n"
+    )
+    data_path.write_bytes(raw.tobytes())
+    with pytest.raises(ValueError, match="short read"):
+        _epilepsiae_partial_window_loader(
+            str(data_path), str(head_path), rel_start_sec=0.0, rel_end_sec=2.0
+        )

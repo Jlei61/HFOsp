@@ -876,23 +876,138 @@ def _yuquan_find_channel_idx(name: str, ch_to_idx: Dict[str, int]) -> Optional[i
     return None
 
 
+def _epilepsiae_partial_window_loader(
+    data_path: str,
+    head_path: str,
+    rel_start_sec: float,
+    rel_end_sec: float,
+) -> Tuple[np.ndarray, float, List[str]]:
+    """Read only the requested time window from an Epilepsiae .data file.
+
+    Bypasses ``load_epilepsiae_block``'s full-block read + notch filter
+    so M2 windows (~ 44 s of a ~ 1 h block) take seconds instead of
+    minutes. The .data file is little-endian int16 interleaved by
+    sample (n_channels samples per "frame"), so byte offsets are
+    deterministic from the head's ``num_channels`` + ``sample_freq``.
+
+    CAR is applied across the **intracranial** subset (same as
+    ``load_epilepsiae_block(reference='car')``), but with no notch
+    filter — for the M2 (80 - 250 Hz) bandpass the 50 / 100 / 150 / 200
+    Hz harmonics fall partly inside the band but the contribution is
+    small relative to broadband HFO and gets evened out by the post /
+    pre log-ratio. The full-block reference path remains available via
+    ``epilepsiae_signal_loader_factory`` for callers that need notch
+    behaviour.
+
+    Returns
+    -------
+    (window_signal, sfreq, intracranial_channel_names) where
+    window_signal has shape ``(n_samples, n_intracranial_channels)``.
+    """
+    from src.preprocessing import (
+        _read_epilepsiae_head_for_streaming,
+        _epilepsiae_intracranial_indices,
+    )
+
+    head = _read_epilepsiae_head_for_streaming(Path(head_path))
+    sfreq = float(head["sample_freq"])
+    n_ch_total = int(head["num_channels"])
+    sample_bytes = int(head["sample_bytes"])
+    if sample_bytes != 2:
+        raise ValueError(
+            f"_epilepsiae_partial_window_loader: sample_bytes={sample_bytes} "
+            f"unsupported (expected 2)"
+        )
+    conversion = -1.0 * float(head["conversion_factor"])
+    ch_names = list(head["channel_names"])
+
+    s0 = max(0, int(round(float(rel_start_sec) * sfreq)))
+    s1 = max(s0, int(round(float(rel_end_sec) * sfreq)))
+    n_samples_window = s1 - s0
+    bytes_per_frame = sample_bytes * n_ch_total
+    byte_offset = s0 * bytes_per_frame
+    bytes_to_read = n_samples_window * bytes_per_frame
+
+    with open(data_path, "rb") as fh:
+        fh.seek(byte_offset)
+        raw_bytes = fh.read(bytes_to_read)
+    if len(raw_bytes) < bytes_to_read:
+        raise ValueError(
+            f"_epilepsiae_partial_window_loader: short read "
+            f"({len(raw_bytes)} of {bytes_to_read}) from {data_path} "
+            f"at offset {byte_offset}"
+        )
+    raw_i16 = np.frombuffer(raw_bytes, dtype="<i2").reshape(
+        n_samples_window, n_ch_total
+    )
+    physical = raw_i16.astype(np.float32) * np.float32(conversion)
+
+    keep_idx = _epilepsiae_intracranial_indices(ch_names)
+    if not keep_idx:
+        raise ValueError(
+            f"_epilepsiae_partial_window_loader: no intracranial channels in "
+            f"{head_path}"
+        )
+    intracranial = physical[:, keep_idx]
+    car = intracranial - intracranial.mean(axis=1, keepdims=True)
+    keep_labels = [ch_names[i] for i in keep_idx]
+    return car, sfreq, keep_labels
+
+
 def epilepsiae_signal_loader_factory(
     block_rows: List[Dict[str, str]],
     analysis_channels: List[str],
+    use_partial_loader: bool = True,
 ) -> "SignalLoader":
     """Return a signal_loader for an Epilepsiae subject (CAR montage).
 
-    For each window, identifies the containing block via
-    ``block_start_epoch`` / ``block_end_epoch``, opens the .data + .head
-    via ``load_epilepsiae_block``, slices, applies CAR (already done by
-    load_epilepsiae_block when reference="car"), and returns the sliced
-    array aligned to ``analysis_channels``.
+    Two paths:
 
-    Single-block cache (same rationale as the Yuquan loader): power_pre
-    precompute + compute_er_logratio for the same seizure both hit the
-    same block.
+    - ``use_partial_loader=True`` (default): byte-seek + read only the
+      requested window from the .data file. Cuts per-load time from
+      ~ 135 s (full block) to a few seconds. Skips notch filtering;
+      see ``_epilepsiae_partial_window_loader`` for the rationale.
+
+    - ``use_partial_loader=False``: legacy path using
+      ``load_epilepsiae_block`` (full block + notch filter), with a
+      single-block cache.
     """
     by_stem = {r["block_stem"]: r for r in block_rows}
+
+    if use_partial_loader:
+        def loader(t_start: float, t_end: float, channels: List[str]):
+            for stem, r in by_stem.items():
+                try:
+                    b0 = float(r["block_start_epoch"])
+                    b1 = float(r["block_end_epoch"])
+                except (KeyError, ValueError):
+                    continue
+                if t_start >= b0 and t_end <= b1:
+                    sig, sfreq_local, ch_names_raw = _epilepsiae_partial_window_loader(
+                        data_path=r["data_path"],
+                        head_path=r["head_path"],
+                        rel_start_sec=t_start - b0,
+                        rel_end_sec=t_end - b0,
+                    )
+                    ch_to_idx = {c: i for i, c in enumerate(ch_names_raw)}
+                    out = np.zeros((sig.shape[0], len(channels)), dtype=float)
+                    for j, ch in enumerate(channels):
+                        if ch in ch_to_idx:
+                            out[:, j] = sig[:, ch_to_idx[ch]]
+                        else:
+                            raise ValueError(
+                                f"epilepsiae_signal_loader (partial): channel {ch} "
+                                f"not in intracranial set; first 5 raw: "
+                                f"{ch_names_raw[:5]}"
+                            )
+                    return out, sfreq_local
+            raise ValueError(
+                f"epilepsiae_signal_loader: window [{t_start}, {t_end}] does not "
+                f"fit any block"
+            )
+        return loader
+
+    # Legacy full-block + notch path with single-block cache.
     cache: Dict[str, Tuple[np.ndarray, float, List[str]]] = {}
 
     def _load_block(stem: str, r: Dict[str, str]):
@@ -909,7 +1024,7 @@ def epilepsiae_signal_loader_factory(
         cache[stem] = (result.data, float(result.sfreq), list(result.ch_names))
         return cache[stem]
 
-    def loader(t_start: float, t_end: float, channels: List[str]):
+    def legacy_loader(t_start: float, t_end: float, channels: List[str]):
         for stem, r in by_stem.items():
             try:
                 b0 = float(r["block_start_epoch"])
@@ -920,7 +1035,7 @@ def epilepsiae_signal_loader_factory(
                 full_data, sfreq_local, ch_names_raw = _load_block(stem, r)
                 s0 = max(0, int(round((t_start - b0) * sfreq_local)))
                 s1 = int(round((t_end - b0) * sfreq_local))
-                window = full_data[:, s0:s1].T  # (T, n_channels_loaded)
+                window = full_data[:, s0:s1].T
                 ch_to_idx = {c: i for i, c in enumerate(ch_names_raw)}
                 out = np.zeros((window.shape[0], len(channels)), dtype=float)
                 for j, ch in enumerate(channels):
@@ -928,16 +1043,16 @@ def epilepsiae_signal_loader_factory(
                         out[:, j] = window[:, ch_to_idx[ch]]
                     else:
                         raise ValueError(
-                            f"epilepsiae_signal_loader: channel {ch} not in "
-                            f"loaded CAR set; first 5 raw: {ch_names_raw[:5]}"
+                            f"epilepsiae_signal_loader (legacy): channel {ch} "
+                            f"not in loaded CAR set; first 5 raw: "
+                            f"{ch_names_raw[:5]}"
                         )
                 return out, sfreq_local
         raise ValueError(
             f"epilepsiae_signal_loader: window [{t_start}, {t_end}] does not "
             f"fit any block"
         )
-
-    return loader
+    return legacy_loader
 
 
 # ---------------------------------------------------------------------------
@@ -954,6 +1069,7 @@ def run_subject(
     yuquan_soz: Dict[str, List[str]],
     null_n_iter: int = 200,
     null_rng_seed: int = 0,
+    use_legacy_epilepsiae_loader: bool = False,
 ) -> Optional[Path]:
     """Run one subject end-to-end and write per-subject JSON."""
     subject_dir = HFO_DETECTION_DIR / subject
@@ -984,7 +1100,11 @@ def run_subject(
         m2_eligible = bool(sfreq >= M2_MIN_SFREQ)
         clinical_soz = epi_soz.get(subject, []) or []
         signal_loader = (
-            epilepsiae_signal_loader_factory(block_rows, channel_names)
+            epilepsiae_signal_loader_factory(
+                block_rows,
+                channel_names,
+                use_partial_loader=not use_legacy_epilepsiae_loader,
+            )
             if m2_eligible else None
         )
     elif dataset == "yuquan":
@@ -1072,8 +1192,15 @@ def run_per_subject(
     subject_filter: Optional[str] = None,
     null_n_iter: int = 200,
     null_rng_seed: int = 0,
+    skip_existing: bool = False,
+    use_legacy_epilepsiae_loader: bool = False,
 ) -> int:
-    """Iterate audit_eligible subjects and write per-subject JSON each."""
+    """Iterate audit_eligible subjects and write per-subject JSON each.
+
+    ``skip_existing=True`` short-circuits subjects whose JSON already
+    exists under ``output_dir/per_subject/``. Useful when resuming
+    after a partial cohort run.
+    """
     audit_csv = output_dir / "audit.csv"
     if not audit_csv.exists():
         print(f"[run] audit.csv missing at {audit_csv}; run --audit first", flush=True)
@@ -1087,6 +1214,21 @@ def run_per_subject(
         print("[run] no audit_eligible subjects to run", flush=True)
         return 1
 
+    per_subject_dir = output_dir / "per_subject"
+    if skip_existing:
+        before = len(rows)
+        rows = [
+            r for r in rows
+            if not (per_subject_dir / f"{r['dataset']}_{r['subject']}.json").exists()
+        ]
+        print(
+            f"[run] --skip-existing: {before - len(rows)} subjects already done, "
+            f"{len(rows)} remaining",
+            flush=True,
+        )
+        if not rows:
+            return 0
+
     epi_blocks = load_epilepsiae_block_inventory(EPILEPSIAE_BLOCK_INVENTORY)
     with EPILEPSIAE_SOZ_JSON.open() as f:
         epi_soz = json.load(f)
@@ -1095,7 +1237,8 @@ def run_per_subject(
 
     print(
         f"[run] processing {len(rows)} audit_eligible subjects "
-        f"(null_n_iter={null_n_iter})",
+        f"(null_n_iter={null_n_iter}, "
+        f"use_legacy_epilepsiae_loader={use_legacy_epilepsiae_loader})",
         flush=True,
     )
     written = 0
@@ -1110,6 +1253,7 @@ def run_per_subject(
                 yuquan_soz=yuquan_soz,
                 null_n_iter=null_n_iter,
                 null_rng_seed=null_rng_seed,
+                use_legacy_epilepsiae_loader=use_legacy_epilepsiae_loader,
             )
             if out is not None:
                 written += 1
@@ -1155,6 +1299,19 @@ def main() -> int:
         help="Time-shifted null RNG seed (default 0).",
     )
     parser.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help="Skip subjects whose per-subject JSON already exists "
+             "(useful for resuming a partial cohort run).",
+    )
+    parser.add_argument(
+        "--use-legacy-epilepsiae-loader",
+        action="store_true",
+        help="Use load_epilepsiae_block (full block + notch) instead of the "
+             "fast partial-window .data reader. Default is the partial loader "
+             "(no notch; 80-250 Hz bandpass already excludes line noise).",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=OUTPUT_DIR,
@@ -1171,6 +1328,8 @@ def main() -> int:
             subject_filter=args.subject,
             null_n_iter=args.null_n_iter,
             null_rng_seed=args.null_rng_seed,
+            skip_existing=args.skip_existing,
+            use_legacy_epilepsiae_loader=args.use_legacy_epilepsiae_loader,
         )
     if args.cohort_overlap:
         raise NotImplementedError(
