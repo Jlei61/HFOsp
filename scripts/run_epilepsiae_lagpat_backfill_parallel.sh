@@ -21,6 +21,11 @@ cd "$(dirname "$0")/.."
 
 N_JOBS=${N_JOBS:-5}
 SUBJECTS="${SUBJECTS:-253 548 139 384 1077 1084 442 818 916 922 958 583 590 620 635 1073 1096 1125 1146 1150}"
+# Set FORCE=1 to overwrite existing lagPat outputs (e.g. after a Stage B fix).
+FORCE_FLAG=""
+if [[ "${FORCE:-0}" == "1" ]]; then
+    FORCE_FLAG="--force"
+fi
 
 mkdir -p results/epilepsiae_lagpat_backfill
 
@@ -28,11 +33,12 @@ worker() {
     local subj="$1"
     local out_dir="results/epilepsiae_lagpat_backfill/${subj}"
     mkdir -p "$out_dir"
-    python scripts/run_epilepsiae_lagpat_backfill.py --subject "$subj" \
+    python scripts/run_epilepsiae_lagpat_backfill.py --subject "$subj" ${FORCE_FLAG} \
         >>"${out_dir}/_console.log" 2>&1
     echo "[backfill] subject=${subj} done"
 }
 export -f worker
+export FORCE_FLAG
 
 # shellcheck disable=SC2086
 printf '%s\n' $SUBJECTS \

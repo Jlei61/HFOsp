@@ -69,6 +69,59 @@ def test_load_refine_chns_for_subject_returns_tuple():
     assert chns == chns2
 
 
+def test_select_core_indices_mean_plus_std_matches_legacy_formula():
+    """Core selector implements legacy `events_count > mean + 1*std`.
+
+    Legacy reference:
+        all_chnCounts = refine_counts
+        pickChns_index = np.where(all_chnCounts > mean + 1 * std)[0]
+    """
+    import numpy as np
+
+    from scripts.run_epilepsiae_lagpat_backfill import (
+        _select_core_indices_mean_plus_std,
+    )
+
+    ec = np.array([1.0, 1.0, 1.0, 1.0, 100.0], dtype=float)
+    # mean = 20.8, std ≈ 39.5; threshold ≈ 60.3; only the 100 passes.
+    out = _select_core_indices_mean_plus_std(ec)
+    assert out.tolist() == [4]
+
+    # All-equal: nothing exceeds mean+std.
+    ec2 = np.array([7.0] * 10, dtype=float)
+    assert _select_core_indices_mean_plus_std(ec2).tolist() == []
+
+    # Empty array yields empty index array (no crash).
+    assert _select_core_indices_mean_plus_std(np.array([], dtype=float)).size == 0
+
+
+def test_load_refine_chns_strategy_default_is_mean_plus_std():
+    """Default strategy must apply core selector; refine_all is opt-in only.
+
+    Regression guard: a previous version returned the raw _refineGpu chns_names
+    (full set), which inflated chnNames cohort-wide and made packing thresholds
+    too strict (Stage C audit 2026-04-30 surfaced count_ratio_med = 0.056).
+    """
+    import numpy as np
+
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    mod.load_refine_chns_for_subject.cache_clear()
+    default = mod.load_refine_chns_for_subject("253")
+    refine_all = mod.load_refine_chns_for_subject("253", strategy="refine_all")
+    assert len(default) <= len(refine_all)
+    # On real subject 253, refine_all has 29 chns; core has 4 (verified 2026-04-30)
+    assert len(refine_all) >= len(default)
+    # Default core must match _select_core_indices_mean_plus_std applied directly
+    z = np.load(mod._refine_path_for_subject("253"), allow_pickle=True)
+    all_names = np.asarray([str(c) for c in z["chns_names"]])
+    ec = np.asarray(z["events_count"], dtype=float)
+    expected = tuple(
+        str(c) for c in all_names[mod._select_core_indices_mean_plus_std(ec)]
+    )
+    assert default == expected
+
+
 def test_whole_dets_units_are_seconds():
     """Defensive: probe whole_dets max value is in seconds, not samples.
 

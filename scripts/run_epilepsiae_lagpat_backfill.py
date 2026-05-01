@@ -66,12 +66,35 @@ def _refine_path_for_subject(subject: str) -> Path:
     return NEW_GPU_ROOT / subject / "_refineGpu.npz"
 
 
-@lru_cache(maxsize=32)
-def load_refine_chns_for_subject(subject: str) -> Tuple[str, ...]:
-    """Read subject-level refined channel names (cached per subject).
+def _select_core_indices_mean_plus_std(events_count: np.ndarray) -> np.ndarray:
+    """Legacy Epilepsiae pack uses `events_count > mean + 1*std` as core mask.
 
-    Returns a tuple (immutable) so lru_cache is safe; convert to list at call
-    site if mutation is needed.
+    Source: legacy `p16_packGroupEvents_*.py` Epilepsiae path:
+        all_chnCounts = refine_counts
+        pickChns_index = np.where(all_chnCounts > mean + 1 * std)[0]
+    Implementation must match this exactly so Stage C audit measures pipeline
+    drift, not selector drift.
+    """
+    arr = np.asarray(events_count, dtype=float)
+    if arr.size == 0:
+        return np.empty((0,), dtype=int)
+    thr = arr.mean() + arr.std()
+    return np.where(arr > thr)[0]
+
+
+@lru_cache(maxsize=32)
+def load_refine_chns_for_subject(
+    subject: str, strategy: str = "mean_plus_std"
+) -> Tuple[str, ...]:
+    """Subject-level pickChns names matching legacy semantics.
+
+    Strategies:
+      - "mean_plus_std" (default; LEGACY-MATCHING): apply `events_count > mean+std`
+        on top of `_refineGpu.npz['chns_names']` to recover legacy core subset.
+      - "refine_all": return full chns_names from _refineGpu.npz unchanged.
+        Kept only for diagnostic comparison; do NOT use in production.
+
+    Returns tuple (immutable) so lru_cache is safe; convert to list at call site.
     """
     refine_path = _refine_path_for_subject(subject)
     if not refine_path.exists():
@@ -80,7 +103,26 @@ def load_refine_chns_for_subject(subject: str) -> Tuple[str, ...]:
             "Expected file produced by scripts/run_hfo_detection.py."
         )
     z = np.load(refine_path, allow_pickle=True)
-    return tuple(str(c) for c in z["chns_names"])
+    all_names = np.asarray([str(c) for c in z["chns_names"]])
+    if strategy == "refine_all":
+        return tuple(str(c) for c in all_names)
+    if strategy == "mean_plus_std":
+        if "events_count" not in z.files:
+            raise KeyError(
+                f"_refineGpu.npz at {refine_path} lacks 'events_count'; "
+                "cannot compute legacy core selector."
+            )
+        ec = np.asarray(z["events_count"], dtype=float)
+        if ec.shape[0] != all_names.shape[0]:
+            raise ValueError(
+                f"chns_names ({all_names.shape[0]}) and events_count "
+                f"({ec.shape[0]}) length mismatch in {refine_path}"
+            )
+        core_idx = _select_core_indices_mean_plus_std(ec)
+        return tuple(str(c) for c in all_names[core_idx])
+    raise ValueError(
+        f"Unknown core-chns strategy {strategy!r}; expected 'mean_plus_std' or 'refine_all'."
+    )
 
 
 def _discover_records(subject: str) -> List[Dict]:
