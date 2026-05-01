@@ -845,3 +845,336 @@ def test_select_m2_eligible_channels_unknown_channel_raises():
         select_m2_eligible_channels(
             ["not_in_index"], eps_result, {"present": 0}
         )
+
+
+# ---------------------------------------------------------------------------
+# Step 3 — per-subject runner contract tests (TDD before implementation).
+#
+# Acceptance gates the user enumerated:
+#   (a) seizure window block-boundary prefilter via inventory timestamps,
+#       NOT by catching FilterPaddingError inside compute_er_logratio
+#   (b) per-subject runner invokes select_m2_eligible_channels and writes
+#       the dropped set to the JSON's "m2_ineligible_channels" field
+#   (c) overlap enrichment uses len(B) (consensus may yield != k)
+#   (d) per-subject JSON schema contains "m2_ineligible_channels"
+#   (e) --cohort-overlap still raises NotImplementedError
+# ---------------------------------------------------------------------------
+
+
+def test_prefilter_seizures_by_block_window_keeps_centered_drops_edges():
+    """Plan §3.4 says the M2 window is [t_s − W_pre − edge, t_s + W_post + edge].
+    A seizure within ``W_pre + edge`` of the block start, or within
+    ``W_post + edge`` of the block end, has no signal to load. The
+    correct gate is a forward inventory check, NOT catching
+    ``FilterPaddingError`` inside compute_er_logratio (which would only
+    trigger after a wasted partial signal load and would conflate
+    boundary failures with sfreq problems).
+    """
+    from src.data_driven_soz import prefilter_seizures_by_block_window
+
+    block_windows = {"BLK0": (1000.0, 4600.0)}  # 1 hour block
+    # W_pre + edge = 32 s → onsets must be > 1032; W_post + edge = 12 s → < 4588
+    seizure_onsets = [
+        1010.0,  # too close to block start (1010 - 32 < 1000) → drop
+        1100.0,  # safely inside → keep
+        2500.0,  # safely inside → keep
+        4595.0,  # too close to block end (4595 + 12 > 4600) → drop
+    ]
+    seizure_block_ids = ["BLK0", "BLK0", "BLK0", "BLK0"]
+    kept, dropped, reasons = prefilter_seizures_by_block_window(
+        seizure_onsets,
+        seizure_block_ids,
+        block_windows,
+        w_pre=30.0,
+        w_post=10.0,
+        edge_buffer=2.0,
+    )
+    assert kept == [1, 2]
+    assert dropped == [0, 3]
+    assert reasons[0].startswith("boundary_pre")
+    assert reasons[3].startswith("boundary_post")
+
+
+def test_prefilter_seizures_by_block_window_missing_block_dropped():
+    """A seizure whose ``block_id`` is not in ``block_windows`` (block
+    inventory missing for that recording) is dropped with a distinct
+    reason — silently keeping it would feed an unbounded window into
+    the loader."""
+    from src.data_driven_soz import prefilter_seizures_by_block_window
+
+    block_windows = {"BLK0": (1000.0, 4600.0)}
+    kept, dropped, reasons = prefilter_seizures_by_block_window(
+        seizure_onsets=[1100.0, 9000.0],
+        seizure_block_ids=["BLK0", "BLK_MISSING"],
+        block_windows=block_windows,
+        w_pre=30.0,
+        w_post=10.0,
+        edge_buffer=2.0,
+    )
+    assert kept == [0]
+    assert dropped == [1]
+    assert reasons[1] == "missing_block"
+
+
+def test_random_expected_jaccard_closed_form():
+    """Random expected Jaccard for two uniform random subsets of
+    [n_total] of sizes ``a_size`` and ``b_size``: the helper must use
+    the analytical formula, not the per-seizure ``k`` (Step 3/4
+    enrichment depends on this).
+    """
+    from src.data_driven_soz import random_expected_jaccard
+
+    # |A|*|B|/N expected intersection / (|A|+|B|-|A|*|B|/N) expected union
+    # |A|=10, |B|=10, N=100 → expected intersection 1, union 19, jaccard ≈ 1/19
+    j = random_expected_jaccard(10, 10, 100)
+    assert abs(j - 1.0 / 19.0) < 1e-6
+    # Edge: empty B → jaccard 0
+    assert random_expected_jaccard(5, 0, 100) == 0.0
+    # Edge: B == N → jaccard = a/N
+    assert random_expected_jaccard(7, 100, 100) == pytest.approx(7.0 / 100.0)
+
+
+def test_compute_overlap_enrichment_uses_len_B_not_k():
+    """Plan §3.7 enrichment = observed_intersection / random_expected_intersection
+    where random_expected_intersection = |A| * |B| / n_total. ``|B|`` is
+    the actual basket size (consensus rule may yield != k). The helper
+    must NOT take ``k`` as an argument and must not bake it in.
+    """
+    from src.data_driven_soz import compute_overlap
+
+    A = {"x", "y", "z"}              # |A| = 3
+    B = {"x", "y"}                   # |B| = 2 (consensus may shrink)
+    n_total = 30
+    res = compute_overlap(A, B, n_total)
+    # observed_intersection = 2
+    assert res["observed_intersection"] == 2
+    # expected = |A| * |B| / n_total = 3 * 2 / 30 = 0.2
+    assert res["random_expected_intersection"] == pytest.approx(0.2)
+    # enrichment = observed / max(expected, 0.5) = 2 / 0.5 = 4.0
+    # (plan §3.7 floor: max(expected_intersection, 0.5) prevents inf)
+    assert res["enrichment"] == pytest.approx(2.0 / 0.5)
+    # If we ran the same A against a consensus of size 5 instead, the
+    # expected intersection would be 0.5 — different number — same
+    # helper must give the right answer.
+    res5 = compute_overlap(A, set("xyzab"), n_total)
+    assert res5["random_expected_intersection"] == pytest.approx(0.5)
+
+
+def test_compute_overlap_returns_jaccard_precision_recall_f1():
+    """Per plan §3.7, the helper returns the full overlap quartet."""
+    from src.data_driven_soz import compute_overlap
+
+    A = {"a", "b", "c", "d"}    # |A| = 4
+    B = {"c", "d", "e"}         # |B| = 3, A ∩ B = {c, d}
+    res = compute_overlap(A, B, 20)
+    assert res["jaccard"] == pytest.approx(2.0 / 5.0)
+    assert res["precision"] == pytest.approx(2.0 / 3.0)
+    assert res["recall"] == pytest.approx(2.0 / 4.0)
+    expected_f1 = 2 * (2 / 3) * (2 / 4) / ((2 / 3) + (2 / 4))
+    assert res["f1"] == pytest.approx(expected_f1)
+
+
+def test_per_subject_runner_drops_m2_ineligible_channels_from_ranking():
+    """The orchestrator MUST call select_m2_eligible_channels before
+    compute_er_logratio. A channel whose pre-power is strictly zero
+    across every seizure must NOT appear in any M2 ranking and MUST
+    appear in the JSON's ``m2_ineligible_channels`` list. This is the
+    tactical guard against the 1e-18 floor producing log(P_post/1e-18) ≈
+    +40 noise-floor rankings.
+    """
+    from src.data_driven_soz import compute_per_subject_audit
+
+    sfreq = 1000.0
+    # Use 100 s blocks so seizures at t=50 (relative) sit safely inside
+    # the [w_pre+edge, block_len - w_post - edge] = [32, 88] safe band.
+    block_len_sec = 100.0
+    n_samples = int(block_len_sec * sfreq)
+
+    def make_signal(rng_seed: int) -> np.ndarray:
+        rng_local = np.random.default_rng(rng_seed)
+        sig = rng_local.normal(0, 1, (n_samples, 3))
+        sig[:, 2] = 0.0
+        return sig
+
+    block_signals = {
+        "BLK0": make_signal(1),
+        "BLK1": make_signal(2),
+    }
+    block_windows = {
+        "BLK0": (0.0, block_len_sec),
+        "BLK1": (200.0, 200.0 + block_len_sec),
+    }
+
+    def signal_loader(t_start, t_end, channels):
+        for blk, (b0, b1) in block_windows.items():
+            if t_start >= b0 and t_end <= b1:
+                s0 = int(round((t_start - b0) * sfreq))
+                s1 = int(round((t_end - b0) * sfreq))
+                ch_idx = {"chA": 0, "chB": 1, "chC": 2}
+                cols = [ch_idx[ch] for ch in channels]
+                return block_signals[blk][s0:s1, cols], sfreq
+        raise ValueError(f"window {t_start}-{t_end} doesn't fit any block")
+
+    hfo_events = {
+        "chA": np.array([45.0, 50.5, 55.0, 245.0, 250.5, 255.0]),
+        "chB": np.array([46.0, 51.0, 56.0, 246.0, 251.0, 256.0]),
+        "chC": np.array([47.0, 52.0, 57.0, 247.0, 252.0, 257.0]),
+    }
+    seizure_onsets = [50.0, 250.0]
+    seizure_block_ids = ["BLK0", "BLK1"]
+
+    res = compute_per_subject_audit(
+        dataset="testset",
+        subject="synth",
+        seizure_onsets=seizure_onsets,
+        seizure_block_ids=seizure_block_ids,
+        block_windows=block_windows,
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=sfreq,
+        clinical_soz=["chA"],
+        analysis_channels=["chA", "chB", "chC"],
+        m2_eligible=True,
+        null_n_iter=0,   # skip null surrogate for speed in this unit test
+    )
+    assert "m2_ineligible_channels" in res
+    assert res["m2_ineligible_channels"] == ["chC"]
+    # chC must NOT appear in any M2 ranking output.
+    m2_results = res["results"]["M2_logratio"]
+    for agg, by_k in m2_results.items():
+        for k_label, ranking in by_k.items():
+            assert "chC" not in ranking, (
+                f"M2 ranking {agg}/{k_label} contained ineligible channel: {ranking}"
+            )
+
+
+def test_per_subject_runner_json_schema_contains_required_fields():
+    """Plan §9 Step 3.3 locks the per-subject JSON schema. Verify the
+    orchestrator emits all the required top-level fields, including
+    ``m2_ineligible_channels`` (Step 2 acceptance v2 addition)."""
+    from src.data_driven_soz import compute_per_subject_audit
+
+    sfreq = 1000.0
+    block_len_sec = 100.0
+    n_samples = int(block_len_sec * sfreq)
+    rng = np.random.default_rng(0)
+    block_windows = {
+        "BLK0": (0.0, block_len_sec),
+        "BLK1": (200.0, 200.0 + block_len_sec),
+    }
+    block_signals = {
+        b: rng.normal(0, 1, (n_samples, 2)) for b in block_windows
+    }
+
+    def signal_loader(t_start, t_end, channels):
+        for blk, (b0, b1) in block_windows.items():
+            if t_start >= b0 and t_end <= b1:
+                s0 = int(round((t_start - b0) * sfreq))
+                s1 = int(round((t_end - b0) * sfreq))
+                ch_idx = {"chA": 0, "chB": 1}
+                cols = [ch_idx[ch] for ch in channels]
+                return block_signals[blk][s0:s1, cols], sfreq
+        raise ValueError(f"window {t_start}-{t_end} doesn't fit any block")
+
+    hfo_events = {
+        "chA": np.array([45.0, 50.5, 55.0, 245.0, 250.5, 255.0]),
+        "chB": np.array([46.0, 51.0, 56.0, 246.0, 251.0, 256.0]),
+    }
+    res = compute_per_subject_audit(
+        dataset="testset",
+        subject="synth",
+        seizure_onsets=[50.0, 250.0],
+        seizure_block_ids=["BLK0", "BLK1"],
+        block_windows=block_windows,
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=sfreq,
+        clinical_soz=["chA"],
+        analysis_channels=["chA", "chB"],
+        m2_eligible=True,
+        null_n_iter=0,
+    )
+    required_top_level = {
+        "dataset", "subject", "n_seizures_used", "n_channels_total", "sfreq",
+        "m2_eligible", "channel_matching", "baseline_rate_per_channel",
+        "k_primary_size_matched", "results", "overlap_with_clinical",
+        "headline_primary", "per_seizure_consistency", "time_shifted_null",
+        "m2_ineligible_channels", "n_seizures_dropped", "dropped_seizure_reasons",
+    }
+    missing = required_top_level - set(res.keys())
+    assert not missing, f"per-subject JSON missing required keys: {missing}"
+    # No verdict-style keys — plan §3.9.
+    forbidden = {"verdict", "broadly_consistent", "partially_consistent",
+                 "unreliable", "ground_truth", "true_soz"}
+    leaks = forbidden & set(res.keys())
+    assert not leaks, f"per-subject JSON leaked verdict-style keys: {leaks}"
+
+
+def test_per_subject_runner_uses_inventory_prefilter_not_filter_padding_error():
+    """If a seizure is too close to a block boundary, the orchestrator
+    must drop it via ``prefilter_seizures_by_block_window`` BEFORE
+    invoking ``compute_er_logratio``. This means: ``signal_loader`` is
+    never called for the dropped seizure (so we cannot rely on
+    ``FilterPaddingError`` to catch it).
+    """
+    from src.data_driven_soz import compute_per_subject_audit
+
+    sfreq = 1000.0
+    block_len_sec = 100.0
+    n_samples = int(block_len_sec * sfreq)
+    rng = np.random.default_rng(0)
+    block_signals = {"BLK0": rng.normal(0, 1, (n_samples, 1))}
+    block_windows = {"BLK0": (0.0, block_len_sec)}
+    loader_calls = []
+
+    def signal_loader(t_start, t_end, channels):
+        loader_calls.append((t_start, t_end))
+        s0 = int(round(t_start * sfreq))
+        s1 = int(round(t_end * sfreq))
+        return block_signals["BLK0"][s0:s1, [0]], sfreq
+
+    hfo_events = {"chA": np.array([5.0, 50.0, 95.0])}
+
+    # One seizure at t=50 fits the [32, 88] safe band; a second at t=5
+    # does NOT (5 - 32 < 0 = boundary_pre).
+    res = compute_per_subject_audit(
+        dataset="testset",
+        subject="synth",
+        seizure_onsets=[50.0, 5.0],
+        seizure_block_ids=["BLK0", "BLK0"],
+        block_windows=block_windows,
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=sfreq,
+        clinical_soz=["chA"],
+        analysis_channels=["chA"],
+        m2_eligible=True,
+        null_n_iter=0,
+    )
+    assert res["n_seizures_used"] == 1
+    assert res["n_seizures_dropped"] == 1
+    # Loader must have been called once for power_pre precompute and
+    # once for the kept seizure's compute_er_logratio (= 2 calls). The
+    # boundary-violating seizure must NOT trigger any loader call —
+    # if the runner relied on FilterPaddingError, loader_calls would
+    # contain a 3rd entry for the dropped seizure's t=5 window.
+    assert len(loader_calls) == 2
+    for t0, t1 in loader_calls:
+        assert t0 < 50 < t1, f"loader window {t0}-{t1} should be centered on t=50"
+
+
+def test_cohort_overlap_still_raises_not_implemented():
+    """Step 3 only adds --per-subject. --cohort-overlap stays
+    NotImplementedError until Step 4 lands."""
+    import subprocess
+    import sys as _sys
+
+    proc = subprocess.run(
+        [_sys.executable, "scripts/run_data_driven_soz.py", "--cohort-overlap"],
+        capture_output=True,
+        text=True,
+        cwd=str(__import__("pathlib").Path(__file__).resolve().parents[1]),
+    )
+    assert proc.returncode != 0
+    combined = (proc.stdout or "") + (proc.stderr or "")
+    assert "NotImplementedError" in combined or "not implemented" in combined.lower()

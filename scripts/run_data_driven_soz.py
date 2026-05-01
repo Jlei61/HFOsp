@@ -54,6 +54,7 @@ from src.data_driven_soz import (  # noqa: E402
     UNKNOWN_LABEL,
     annotate_clinical_soz,
     check_channel_schema_consistency,
+    compute_per_subject_audit,
     matched_clinical_contacts,
 )
 
@@ -567,6 +568,557 @@ def run_audit(output_dir: Path) -> Path:
     return audit_csv
 
 
+# ---------------------------------------------------------------------------
+# Step 3 — per-subject runner support (HFO event extraction, signal loaders,
+# block window builders)
+# ---------------------------------------------------------------------------
+
+
+def load_subject_hfo_events(subject_dir: Path) -> Tuple[
+    Dict[str, np.ndarray],
+    List[str],
+    Dict[str, Tuple[float, float]],
+    Optional[float],
+]:
+    """Load every block npz under ``subject_dir`` and return concatenated
+    HFO event onset times per channel (absolute epoch seconds) along with
+    the channel name list, per-block windows, and the inferred sfreq from
+    block start_times.
+
+    Each block npz contains:
+
+    - ``chns_names`` : list of channel names (len = n_channels)
+    - ``whole_dets`` : object array of shape (n_channels,), each element
+      an ndarray of shape (n_events, 2) with start_sec / end_sec
+    - ``start_time`` : absolute epoch seconds (block start)
+
+    HFO event onset = ``start_sec`` (the first column) + ``start_time``.
+
+    Returns
+    -------
+    (hfo_times_per_channel, channel_names, block_windows, sfreq_or_None)
+        ``block_windows`` maps ``block_stem`` to ``(block_start_epoch,
+        block_end_epoch)``. Block end is inferred from the maximum
+        observed event end_sec (fallback to start_sec). Subjects whose
+        npz lacks an explicit duration field still get a usable window
+        because seizures inside the window must already have hfo events
+        nearby to matter for M1.
+    """
+    npz_files = sorted(subject_dir.glob("*_gpu.npz"))
+    if not npz_files:
+        return {}, [], {}, None
+
+    channel_names: List[str] = []
+    hfo_times: Dict[str, List[float]] = defaultdict(list)
+    block_windows: Dict[str, Tuple[float, float]] = {}
+
+    for npz_path in npz_files:
+        if npz_path.stat().st_size < 1024:
+            continue
+        with np.load(npz_path, allow_pickle=True) as data:
+            chs = list(data["chns_names"].tolist())
+            wd = data["whole_dets"]
+            start_time = float(data["start_time"])
+            block_stem = npz_path.name[: -len("_gpu.npz")]
+
+            if not channel_names:
+                channel_names = chs
+            elif chs != channel_names:
+                raise ValueError(
+                    f"channel name schema mismatch in {npz_path.name}: "
+                    f"got {chs[:3]}... expected {channel_names[:3]}..."
+                )
+
+            block_max_end = 0.0
+            for ch_idx, ch in enumerate(chs):
+                events = wd[ch_idx]
+                if events is None or len(events) == 0:
+                    continue
+                arr = np.asarray(events, dtype=float)
+                if arr.ndim == 2 and arr.shape[1] >= 1:
+                    starts = arr[:, 0]
+                    hfo_times[ch].extend((starts + start_time).tolist())
+                    if arr.shape[1] >= 2:
+                        block_max_end = max(block_max_end, float(arr[:, 1].max()))
+                    else:
+                        block_max_end = max(block_max_end, float(starts.max()))
+            block_windows[block_stem] = (start_time, start_time + block_max_end)
+
+    hfo_arrays = {ch: np.asarray(sorted(times), dtype=float) for ch, times in hfo_times.items()}
+    for ch in channel_names:
+        hfo_arrays.setdefault(ch, np.array([], dtype=float))
+    return hfo_arrays, channel_names, block_windows, None
+
+
+def epilepsiae_block_windows_from_inventory(
+    block_rows: List[Dict[str, str]],
+) -> Dict[str, Tuple[float, float]]:
+    """Map block_stem → (block_start_epoch, block_end_epoch) from the
+    block inventory CSV. Inventory row has both fields directly."""
+    out: Dict[str, Tuple[float, float]] = {}
+    for r in block_rows:
+        try:
+            t0 = float(r["block_start_epoch"])
+            t1 = float(r["block_end_epoch"])
+        except (KeyError, ValueError):
+            continue
+        out[r["block_stem"]] = (t0, t1)
+    return out
+
+
+def epilepsiae_seizures_from_inventory(
+    inventory_csv: Path, subject: str
+) -> Tuple[List[float], List[str]]:
+    """Read seizure_inventory.csv for a subject. Returns parallel lists of
+    (eeg_onset_epoch, block_stem). Block_stem is recovered by joining
+    recording_id with block_id (last 4 digits of block_id are block_no)
+    or by looking up the seizure's containing block via timestamp.
+
+    Simpler: we only need block_stem to look up block_windows. Use
+    block_id → block_stem via the block inventory.
+    """
+    rows: List[Tuple[float, str]] = []
+    with inventory_csv.open() as f:
+        rdr = csv.DictReader(f)
+        for r in rdr:
+            if r.get("subject") != subject:
+                continue
+            try:
+                onset = float(r["eeg_onset_epoch"])
+            except (KeyError, ValueError):
+                continue
+            rec_id = r.get("recording_id", "")
+            block_id = r.get("block_id", "")
+            # Epilepsiae block_stem format: <recording_id>_<NNNN>
+            # block_id in inventory is e.g. 107300000102; last 4 of the
+            # numeric tail aren't trivially the block_no, so we infer
+            # block_stem at the runner level by matching onset to
+            # block_inventory's [block_start_epoch, block_end_epoch].
+            rows.append((onset, f"{rec_id}|{block_id}"))
+    return [t for t, _ in rows], [b for _, b in rows]
+
+
+def epilepsiae_assign_seizures_to_blocks(
+    seizure_onsets: List[float],
+    block_windows: Dict[str, Tuple[float, float]],
+) -> List[str]:
+    """Assign each Epilepsiae seizure onset to the block whose
+    ``[start, end]`` window contains it. Returns parallel list of
+    block_stem (or empty string when no block contains the onset)."""
+    out: List[str] = []
+    items = sorted(block_windows.items(), key=lambda x: x[1][0])
+    for t in seizure_onsets:
+        match = ""
+        for stem, (b0, b1) in items:
+            if b0 <= t <= b1:
+                match = stem
+                break
+        out.append(match)
+    return out
+
+
+def yuquan_seizures_from_pr1_json(subject: str) -> Tuple[
+    List[float], List[str]
+]:
+    """Read pr1_seizure_<subject>.json, extract per-record seizure
+    onset epochs and use the record name as the block stem."""
+    p = YUQUAN_SEIZURE_DIR / f"pr1_seizure_{subject}.json"
+    if not p.exists():
+        return [], []
+    with p.open() as f:
+        data = json.load(f)
+    onsets: List[float] = []
+    block_stems: List[str] = []
+    for rec in data.get("files", []) or []:
+        for sz in rec.get("seizure_intervals", []) or []:
+            try:
+                onsets.append(float(sz["onset_epoch"]))
+                block_stems.append(rec["record"])
+            except (KeyError, ValueError, TypeError):
+                continue
+    return onsets, block_stems
+
+
+def yuquan_block_windows_from_npz(subject_dir: Path) -> Dict[str, Tuple[float, float]]:
+    """Yuquan block_stem (= EDF record name) → (start_time, start_time + duration_inferred).
+
+    Duration is inferred from the EDF file by reading just the header
+    via MNE preload=False. We avoid reading samples for speed.
+    """
+    out: Dict[str, Tuple[float, float]] = {}
+    npz_files = sorted(subject_dir.glob("*_gpu.npz"))
+    if not npz_files:
+        return out
+    edf_dir = YUQUAN_DATA_ROOT / subject_dir.name
+    for npz_path in npz_files:
+        if npz_path.stat().st_size < 1024:
+            continue
+        stem = npz_path.name[: -len("_gpu.npz")]
+        with np.load(npz_path, allow_pickle=True) as data:
+            start_time = float(data["start_time"])
+        edf_path = edf_dir / f"{stem}.edf"
+        if not edf_path.exists():
+            continue
+        try:
+            import mne
+            raw = mne.io.read_raw_edf(
+                str(edf_path), preload=False, verbose=False, encoding="latin1"
+            )
+            duration = float(raw.times[-1])
+        except Exception:
+            continue
+        out[stem] = (start_time, start_time + duration)
+    return out
+
+
+def yuquan_signal_loader_factory(
+    subject_dir: Path,
+    bipolar_pairs: List[Tuple[str, str]],
+    block_windows: Dict[str, Tuple[float, float]],
+) -> "SignalLoader":
+    """Return a signal_loader that handles a Yuquan subject.
+
+    For each [t_start, t_end] window, identify which block contains it,
+    open the corresponding EDF, slice the signal, and apply bipolar
+    referencing matching the HFO npz channel order.
+
+    The loader keeps a **single-block cache**: each distinct EDF is read
+    from disk at most once per per-subject run. M2 calls per seizure go
+    in pairs (power_pre precompute + compute_er_logratio), so caching
+    cuts disk I/O roughly in half. The cache holds the full block in
+    memory (~ 200 MB for 2h × 1024 Hz × ~30 ch × float64); freed when a
+    different block is requested.
+    """
+    edf_dir = YUQUAN_DATA_ROOT / subject_dir.name
+    block_items = sorted(block_windows.items(), key=lambda x: x[1][0])
+    cache: Dict[str, Tuple[np.ndarray, float, List[str]]] = {}
+
+    def _load_block(stem: str) -> Tuple[np.ndarray, float, List[str]]:
+        if stem in cache:
+            return cache[stem]
+        edf_path = edf_dir / f"{stem}.edf"
+        import mne
+        raw = mne.io.read_raw_edf(
+            str(edf_path), preload=True, verbose=False, encoding="latin1"
+        )
+        data = raw.get_data()
+        sfreq_local = float(raw.info["sfreq"])
+        ch_names_raw = list(raw.ch_names)
+        cache.clear()
+        cache[stem] = (data, sfreq_local, ch_names_raw)
+        return cache[stem]
+
+    def loader(t_start: float, t_end: float, channels: List[str]):
+        for stem, (b0, b1) in block_items:
+            if t_start >= b0 and t_end <= b1:
+                rel_start = float(t_start) - b0
+                rel_end = float(t_end) - b0
+                data, sfreq_local, ch_names_raw = _load_block(stem)
+                s0 = max(0, int(round(rel_start * sfreq_local)))
+                s1 = int(round(rel_end * sfreq_local))
+                ch_to_idx = {c: i for i, c in enumerate(ch_names_raw)}
+                window = data[:, s0:s1]
+                out = np.zeros((window.shape[1], len(channels)), dtype=float)
+                for j, ch in enumerate(channels):
+                    if "-" not in ch:
+                        idx = _yuquan_find_channel_idx(ch, ch_to_idx)
+                        if idx is None:
+                            raise ValueError(
+                                f"yuquan_signal_loader: cannot find {ch}"
+                            )
+                        out[:, j] = window[idx]
+                        continue
+                    a, b = ch.split("-", 1)
+                    a_idx = _yuquan_find_channel_idx(a, ch_to_idx)
+                    b_idx = _yuquan_find_channel_idx(b, ch_to_idx)
+                    if a_idx is None or b_idx is None:
+                        raise ValueError(
+                            f"yuquan_signal_loader: could not find both contacts of {ch} "
+                            f"(a={a}, b={b}); raw EDF channels include "
+                            f"{ch_names_raw[:5]}..."
+                        )
+                    out[:, j] = window[a_idx] - window[b_idx]
+                return out, sfreq_local
+        raise ValueError(
+            f"yuquan_signal_loader: window [{t_start}, {t_end}] does not fit any block"
+        )
+
+    return loader
+
+
+def _yuquan_normalize_edf_chname(raw: str) -> str:
+    """Strip EDF montage decoration so 'EEG A1-Ref', 'POL A1', 'A1' all
+    normalize to 'A1' for matching against HFO npz channel names.
+    Handles common prefixes ('EEG ', 'POL ', 'EEG_', 'POL_') and the
+    Yuquan referential suffix ('-REF', '-Ref')."""
+    s = raw.strip().upper()
+    for prefix in ("EEG ", "POL ", "EEG_", "POL_"):
+        if s.startswith(prefix):
+            s = s[len(prefix):]
+            break
+    for suffix in ("-REF", "_REF"):
+        if s.endswith(suffix):
+            s = s[: -len(suffix)]
+            break
+    return s
+
+
+def _yuquan_find_channel_idx(name: str, ch_to_idx: Dict[str, int]) -> Optional[int]:
+    """Yuquan EDFs use mixed labelings ('EEG A1-Ref' for referential
+    contacts, 'POL A2' for polarity contacts, sometimes bare 'A3').
+    HFO npz strips these. Normalize both sides via
+    ``_yuquan_normalize_edf_chname`` so matching works across all
+    three forms."""
+    name_norm = _yuquan_normalize_edf_chname(name)
+    for key, idx in ch_to_idx.items():
+        if _yuquan_normalize_edf_chname(key) == name_norm:
+            return idx
+    return None
+
+
+def epilepsiae_signal_loader_factory(
+    block_rows: List[Dict[str, str]],
+    analysis_channels: List[str],
+) -> "SignalLoader":
+    """Return a signal_loader for an Epilepsiae subject (CAR montage).
+
+    For each window, identifies the containing block via
+    ``block_start_epoch`` / ``block_end_epoch``, opens the .data + .head
+    via ``load_epilepsiae_block``, slices, applies CAR (already done by
+    load_epilepsiae_block when reference="car"), and returns the sliced
+    array aligned to ``analysis_channels``.
+
+    Single-block cache (same rationale as the Yuquan loader): power_pre
+    precompute + compute_er_logratio for the same seizure both hit the
+    same block.
+    """
+    by_stem = {r["block_stem"]: r for r in block_rows}
+    cache: Dict[str, Tuple[np.ndarray, float, List[str]]] = {}
+
+    def _load_block(stem: str, r: Dict[str, str]):
+        if stem in cache:
+            return cache[stem]
+        from src.preprocessing import load_epilepsiae_block
+        result = load_epilepsiae_block(
+            data_path=r["data_path"],
+            head_path=r["head_path"],
+            reference="car",
+            segment_sec=200.0,
+        )
+        cache.clear()
+        cache[stem] = (result.data, float(result.sfreq), list(result.ch_names))
+        return cache[stem]
+
+    def loader(t_start: float, t_end: float, channels: List[str]):
+        for stem, r in by_stem.items():
+            try:
+                b0 = float(r["block_start_epoch"])
+                b1 = float(r["block_end_epoch"])
+            except (KeyError, ValueError):
+                continue
+            if t_start >= b0 and t_end <= b1:
+                full_data, sfreq_local, ch_names_raw = _load_block(stem, r)
+                s0 = max(0, int(round((t_start - b0) * sfreq_local)))
+                s1 = int(round((t_end - b0) * sfreq_local))
+                window = full_data[:, s0:s1].T  # (T, n_channels_loaded)
+                ch_to_idx = {c: i for i, c in enumerate(ch_names_raw)}
+                out = np.zeros((window.shape[0], len(channels)), dtype=float)
+                for j, ch in enumerate(channels):
+                    if ch in ch_to_idx:
+                        out[:, j] = window[:, ch_to_idx[ch]]
+                    else:
+                        raise ValueError(
+                            f"epilepsiae_signal_loader: channel {ch} not in "
+                            f"loaded CAR set; first 5 raw: {ch_names_raw[:5]}"
+                        )
+                return out, sfreq_local
+        raise ValueError(
+            f"epilepsiae_signal_loader: window [{t_start}, {t_end}] does not "
+            f"fit any block"
+        )
+
+    return loader
+
+
+# ---------------------------------------------------------------------------
+# Per-subject driver
+# ---------------------------------------------------------------------------
+
+
+def run_subject(
+    dataset: str,
+    subject: str,
+    output_dir: Path,
+    epi_blocks: Dict[str, List[Dict[str, str]]],
+    epi_soz: Dict[str, List[str]],
+    yuquan_soz: Dict[str, List[str]],
+    null_n_iter: int = 200,
+    null_rng_seed: int = 0,
+) -> Optional[Path]:
+    """Run one subject end-to-end and write per-subject JSON."""
+    subject_dir = HFO_DETECTION_DIR / subject
+    if not subject_dir.exists():
+        print(f"[run] {dataset}/{subject}: HFO dir missing", flush=True)
+        return None
+
+    hfo_events, channel_names, hfo_block_windows, _ = load_subject_hfo_events(subject_dir)
+    if not channel_names:
+        print(f"[run] {dataset}/{subject}: no usable HFO blocks", flush=True)
+        return None
+
+    if dataset == "epilepsiae":
+        block_rows = epi_blocks.get(subject, [])
+        block_windows = epilepsiae_block_windows_from_inventory(block_rows)
+        all_seizure_onsets, _ = epilepsiae_seizures_from_inventory(
+            EPILEPSIAE_SEIZURE_INVENTORY, subject
+        )
+        seizure_block_ids = epilepsiae_assign_seizures_to_blocks(
+            all_seizure_onsets, block_windows
+        )
+        sf_iter = [
+            float(r.get("sample_rate_sql") or 0.0)
+            for r in block_rows
+            if float(r.get("sample_rate_sql") or 0.0) >= HFO_DETECTION_MIN_SFREQ
+        ]
+        sfreq = min(sf_iter) if sf_iter else 0.0
+        m2_eligible = bool(sfreq >= M2_MIN_SFREQ)
+        clinical_soz = epi_soz.get(subject, []) or []
+        signal_loader = (
+            epilepsiae_signal_loader_factory(block_rows, channel_names)
+            if m2_eligible else None
+        )
+    elif dataset == "yuquan":
+        block_windows = yuquan_block_windows_from_npz(subject_dir)
+        all_seizure_onsets, seizure_block_ids = yuquan_seizures_from_pr1_json(subject)
+        sfreq = probe_yuquan_sfreq(subject) or 0.0
+        m2_eligible = bool(sfreq >= M2_MIN_SFREQ)
+        clinical_soz = yuquan_soz.get(subject, []) or []
+        if m2_eligible:
+            signal_loader = yuquan_signal_loader_factory(
+                subject_dir, [], block_windows
+            )
+        else:
+            signal_loader = None
+    else:
+        raise ValueError(f"unknown dataset {dataset!r}")
+
+    if not all_seizure_onsets:
+        print(f"[run] {dataset}/{subject}: no seizures", flush=True)
+        return None
+
+    # Drop seizures whose block_id couldn't be matched (Epilepsiae
+    # outside-block onsets / Yuquan record-name mismatches).
+    paired = [
+        (t, blk) for t, blk in zip(all_seizure_onsets, seizure_block_ids)
+        if blk and blk in block_windows
+    ]
+    if not paired:
+        print(
+            f"[run] {dataset}/{subject}: no seizures with valid block mapping",
+            flush=True,
+        )
+        return None
+    seizure_onsets = [t for t, _ in paired]
+    seizure_block_ids = [blk for _, blk in paired]
+
+    t0 = time.time()
+    res = compute_per_subject_audit(
+        dataset=dataset,
+        subject=subject,
+        seizure_onsets=seizure_onsets,
+        seizure_block_ids=seizure_block_ids,
+        block_windows=block_windows,
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=sfreq,
+        clinical_soz=clinical_soz,
+        analysis_channels=channel_names,
+        m2_eligible=m2_eligible,
+        null_n_iter=null_n_iter,
+        null_rng_seed=null_rng_seed,
+    )
+    out_dir = output_dir / "per_subject"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{dataset}_{subject}.json"
+    with out_path.open("w") as f:
+        json.dump(res, f, indent=2, default=_json_default)
+    print(
+        f"[run] {dataset}/{subject}: kept={res['n_seizures_used']} "
+        f"dropped={res['n_seizures_dropped']} "
+        f"k_primary={res['k_primary_size_matched']} "
+        f"H_M1={res['headline_primary'].get('H_M1_pois_medianrank_size_matched'):.3f} "
+        f"H_M2={res['headline_primary'].get('H_M2_logratio_medianrank_size_matched'):.3f} "
+        f"({time.time() - t0:.1f}s)",
+        flush=True,
+    )
+    return out_path
+
+
+def _json_default(obj):
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        v = float(obj)
+        if math.isnan(v) or math.isinf(v):
+            return None
+        return v
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    raise TypeError(f"unserializable {type(obj).__name__}")
+
+
+def run_per_subject(
+    output_dir: Path,
+    subject_filter: Optional[str] = None,
+    null_n_iter: int = 200,
+    null_rng_seed: int = 0,
+) -> int:
+    """Iterate audit_eligible subjects and write per-subject JSON each."""
+    audit_csv = output_dir / "audit.csv"
+    if not audit_csv.exists():
+        print(f"[run] audit.csv missing at {audit_csv}; run --audit first", flush=True)
+        return 1
+    with audit_csv.open() as f:
+        rdr = csv.DictReader(f)
+        rows = [r for r in rdr if int(r["audit_eligible"] or 0) == 1]
+    if subject_filter:
+        rows = [r for r in rows if r["subject"] == subject_filter]
+    if not rows:
+        print("[run] no audit_eligible subjects to run", flush=True)
+        return 1
+
+    epi_blocks = load_epilepsiae_block_inventory(EPILEPSIAE_BLOCK_INVENTORY)
+    with EPILEPSIAE_SOZ_JSON.open() as f:
+        epi_soz = json.load(f)
+    with YUQUAN_SOZ_JSON.open() as f:
+        yuquan_soz = json.load(f)
+
+    print(
+        f"[run] processing {len(rows)} audit_eligible subjects "
+        f"(null_n_iter={null_n_iter})",
+        flush=True,
+    )
+    written = 0
+    for r in rows:
+        try:
+            out = run_subject(
+                dataset=r["dataset"],
+                subject=r["subject"],
+                output_dir=output_dir,
+                epi_blocks=epi_blocks,
+                epi_soz=epi_soz,
+                yuquan_soz=yuquan_soz,
+                null_n_iter=null_n_iter,
+                null_rng_seed=null_rng_seed,
+            )
+            if out is not None:
+                written += 1
+        except Exception as exc:
+            print(f"[run] {r['dataset']}/{r['subject']}: FAILED — {exc}", flush=True)
+    print(f"[run] wrote {written}/{len(rows)} per-subject JSONs", flush=True)
+    return 0 if written > 0 else 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -577,12 +1129,30 @@ def main() -> int:
     parser.add_argument(
         "--per-subject",
         action="store_true",
-        help="Step 3 per-subject runner (NOT IMPLEMENTED in PR-T3-1 Step 0/1).",
+        help="Step 3 per-subject runner (writes per_subject/<dataset>_<subject>.json).",
     )
     parser.add_argument(
         "--cohort-overlap",
         action="store_true",
-        help="Step 4 cohort overlap summary (NOT IMPLEMENTED in PR-T3-1 Step 0/1).",
+        help="Step 4 cohort overlap summary (NOT IMPLEMENTED in PR-T3-1 Step 3).",
+    )
+    parser.add_argument(
+        "--subject",
+        type=str,
+        default=None,
+        help="Restrict --per-subject to a single subject name.",
+    )
+    parser.add_argument(
+        "--null-n-iter",
+        type=int,
+        default=200,
+        help="Time-shifted null iterations (default 200, plan §5.1 / §9 Step 3.4).",
+    )
+    parser.add_argument(
+        "--null-rng-seed",
+        type=int,
+        default=0,
+        help="Time-shifted null RNG seed (default 0).",
     )
     parser.add_argument(
         "--output-dir",
@@ -595,9 +1165,16 @@ def main() -> int:
     if args.audit:
         run_audit(args.output_dir)
         return 0
-    if args.per_subject or args.cohort_overlap:
+    if args.per_subject:
+        return run_per_subject(
+            output_dir=args.output_dir,
+            subject_filter=args.subject,
+            null_n_iter=args.null_n_iter,
+            null_rng_seed=args.null_rng_seed,
+        )
+    if args.cohort_overlap:
         raise NotImplementedError(
-            "per-subject / cohort-overlap modes are added in PR-T3-1 Step 3/4"
+            "cohort-overlap mode is added in PR-T3-1 Step 4"
         )
 
     parser.print_help()

@@ -38,7 +38,19 @@ See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
 from __future__ import annotations
 
 import math
-from typing import Callable, Dict, Iterable, List, Mapping, NamedTuple, Sequence, Set, Tuple
+from collections import defaultdict
+from typing import (
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+)
 
 import numpy as np
 
@@ -705,6 +717,658 @@ def select_m2_eligible_channels(
     return eligible, dropped
 
 
+# ---------------------------------------------------------------------------
+# Step 3 — per-subject orchestrator + supporting helpers
+# ---------------------------------------------------------------------------
+
+
+def prefilter_seizures_by_block_window(
+    seizure_onsets: Sequence[float],
+    seizure_block_ids: Sequence[str],
+    block_windows: Mapping[str, Tuple[float, float]],
+    w_pre: float = 30.0,
+    w_post: float = 10.0,
+    edge_buffer: float = 2.0,
+) -> Tuple[List[int], List[int], List[str]]:
+    """Drop seizures whose M2 window does not fit in their containing block.
+
+    Plan §3.4 + §6 step-3 carry-over: the M2 window is
+    ``[t_s − W_pre − edge_buffer, t_s + W_post + edge_buffer]``. Any
+    seizure within ``W_pre + edge_buffer`` of its block start, or within
+    ``W_post + edge_buffer`` of its block end, has no signal to load.
+    The runner must drop these via this **forward inventory check** —
+    NOT by catching ``FilterPaddingError`` inside ``compute_er_logratio``
+    (which would conflate boundary failure with sfreq problems and waste
+    a partial signal load).
+
+    Parameters
+    ----------
+    seizure_onsets
+        Absolute epoch seconds, parallel to ``seizure_block_ids``.
+    seizure_block_ids
+        Block stem (e.g. ``"107300102_0000"`` for Epilepsiae or the
+        Yuquan record name) for each seizure.
+    block_windows
+        ``{block_id: (block_start_epoch, block_end_epoch)}`` from
+        ``epilepsiae_block_inventory.csv`` or the Yuquan EDF
+        ``start_time + duration``.
+    w_pre, w_post, edge_buffer
+        Same defaults as the M2 contract.
+
+    Returns
+    -------
+    (kept_indices, dropped_indices, reasons) : tuple
+        Indices into the input ``seizure_onsets`` list. ``reasons`` is
+        parallel to the input length; entries for kept seizures are
+        empty strings. Drop reasons are ``"missing_block"``,
+        ``"boundary_pre"``, or ``"boundary_post"``.
+    """
+    n = len(seizure_onsets)
+    if len(seizure_block_ids) != n:
+        raise ValueError(
+            f"length mismatch: seizure_onsets ({n}) vs "
+            f"seizure_block_ids ({len(seizure_block_ids)})"
+        )
+    if w_pre <= 0 or w_post <= 0 or edge_buffer < 0:
+        raise ValueError(
+            f"w_pre/w_post must be positive and edge_buffer >= 0; "
+            f"got w_pre={w_pre}, w_post={w_post}, edge_buffer={edge_buffer}"
+        )
+
+    pre_pad = float(w_pre) + float(edge_buffer)
+    post_pad = float(w_post) + float(edge_buffer)
+    kept: List[int] = []
+    dropped: List[int] = []
+    reasons: List[str] = [""] * n
+    for i, (t_s, blk) in enumerate(zip(seizure_onsets, seizure_block_ids)):
+        if blk not in block_windows:
+            dropped.append(i)
+            reasons[i] = "missing_block"
+            continue
+        b0, b1 = block_windows[blk]
+        if t_s - pre_pad < b0:
+            dropped.append(i)
+            reasons[i] = (
+                f"boundary_pre (onset={t_s} block_start={b0} need_pad={pre_pad})"
+            )
+            continue
+        if t_s + post_pad > b1:
+            dropped.append(i)
+            reasons[i] = (
+                f"boundary_post (onset={t_s} block_end={b1} need_pad={post_pad})"
+            )
+            continue
+        kept.append(i)
+    return kept, dropped, reasons
+
+
+def random_expected_jaccard(a_size: int, b_size: int, n_total: int) -> float:
+    """Expected Jaccard for two uniform random subsets of ``[n_total]``.
+
+    Closed-form approximation:
+
+    .. math::
+
+        E[J] \\approx \\frac{|A||B|/N}{|A| + |B| - |A||B|/N}
+
+    Plan §3.7: this is the random null for the Jaccard, not for the raw
+    intersection — keep it separate from ``random_expected_intersection``
+    (which the enrichment uses).
+    """
+    if a_size < 0 or b_size < 0 or n_total <= 0:
+        raise ValueError(
+            f"sizes must be >= 0 and n_total > 0; got "
+            f"a={a_size}, b={b_size}, n_total={n_total}"
+        )
+    if a_size == 0 or b_size == 0:
+        return 0.0
+    e_inter = a_size * b_size / n_total
+    e_union = a_size + b_size - e_inter
+    if e_union <= 0:
+        return 0.0
+    return e_inter / e_union
+
+
+def compute_overlap(
+    a: Set[str],
+    b: Set[str],
+    n_total: int,
+    enrichment_floor: float = 0.5,
+) -> Dict[str, float]:
+    """Compute Jaccard / precision / recall / F1 + enrichment for two sets.
+
+    Plan §3.7 contract — ``|B|`` is the *actual* size of the second set,
+    which for the consensus aggregation may not equal ``k``. The helper
+    intentionally takes no ``k`` argument so callers cannot accidentally
+    use it.
+
+    Parameters
+    ----------
+    a, b
+        Compared channel sets. ``a`` is typically ``clinical_matched``,
+        ``b`` is the data-driven top-k (medianrank) or consensus.
+    n_total
+        ``|analysis_channel_set|``.
+    enrichment_floor
+        Plan §3.4: ``enrichment = observed / max(expected, floor)`` so
+        a denominator near zero (e.g. tiny |A|) does not produce inf.
+
+    Returns
+    -------
+    dict with keys: ``jaccard``, ``precision``, ``recall``, ``f1``,
+    ``observed_intersection``, ``random_expected_intersection``,
+    ``enrichment``, ``random_expected_jaccard``.
+    """
+    if n_total <= 0:
+        raise ValueError(f"n_total must be > 0, got {n_total}")
+    a_set = set(a)
+    b_set = set(b)
+    inter = a_set & b_set
+    union = a_set | b_set
+    n_inter = len(inter)
+    n_union = len(union)
+    a_size = len(a_set)
+    b_size = len(b_set)
+    if a_size == 0 or b_size == 0:
+        precision = 0.0
+        recall = 0.0
+        f1 = 0.0
+    else:
+        precision = n_inter / b_size
+        recall = n_inter / a_size
+        if precision + recall <= 0:
+            f1 = 0.0
+        else:
+            f1 = 2 * precision * recall / (precision + recall)
+    jaccard = n_inter / n_union if n_union else 0.0
+    e_inter = a_size * b_size / n_total
+    enrichment = n_inter / max(e_inter, float(enrichment_floor))
+    return {
+        "jaccard": float(jaccard),
+        "precision": float(precision),
+        "recall": float(recall),
+        "f1": float(f1),
+        "observed_intersection": int(n_inter),
+        "random_expected_intersection": float(e_inter),
+        "enrichment": float(enrichment),
+        "random_expected_jaccard": random_expected_jaccard(
+            a_size, b_size, n_total
+        ),
+    }
+
+
+def _per_seizure_topk_for_method(
+    per_seizure_scores: Sequence[Mapping[str, float]],
+    k: int,
+) -> List[List[str]]:
+    """Build the per-seizure top-k list for a single method.
+
+    Each seizure has ``{ch: score}`` (NaN scores routed to the bottom
+    via ``rank_top_k_per_seizure``).
+    """
+    return [rank_top_k_per_seizure(scores, k) for scores in per_seizure_scores]
+
+
+def _per_seizure_rank_for_method(
+    per_seizure_scores: Sequence[Mapping[str, float]],
+    n_channels: int,
+) -> List[Dict[str, int]]:
+    """Convert per-seizure scores to per-seizure ``{channel: rank}``
+    dicts for ``aggregate_median_rank``. Channels with NaN scores get
+    rank ``n_channels`` (worst).
+    """
+    out: List[Dict[str, int]] = []
+    for scores in per_seizure_scores:
+        ordered = rank_top_k_per_seizure(scores, n_channels)
+        rank_map = {ch: i + 1 for i, ch in enumerate(ordered)}
+        out.append(rank_map)
+    return out
+
+
+def _aggregate_topk(
+    per_seizure_scores: Sequence[Mapping[str, float]],
+    k: int,
+    n_channels: int,
+    aggregation: str,
+    min_seizure_fraction: float = 0.5,
+) -> Set[str]:
+    """Cross-seizure aggregation. ``aggregation`` ∈ {``medianrank``, ``consensus``}.
+
+    Note: consensus output size is data-dependent and may not equal ``k``.
+    """
+    if aggregation == "medianrank":
+        ranks = _per_seizure_rank_for_method(per_seizure_scores, n_channels)
+        return aggregate_median_rank(ranks, k)
+    if aggregation == "consensus":
+        topks = _per_seizure_topk_for_method(per_seizure_scores, k)
+        return aggregate_consensus(topks, min_seizure_fraction=min_seizure_fraction)
+    raise ValueError(
+        f"unknown aggregation {aggregation!r}; expected 'medianrank' or 'consensus'"
+    )
+
+
+def _per_seizure_consistency(
+    per_seizure_scores: Sequence[Mapping[str, float]],
+    k: int,
+) -> float:
+    """Median pairwise Jaccard of per-seizure top-k lists (plan §3.8)."""
+    topks = [
+        set(rank_top_k_per_seizure(scores, k))
+        for scores in per_seizure_scores
+    ]
+    if len(topks) < 2:
+        return float("nan")
+    pair_jaccards: List[float] = []
+    for i in range(len(topks)):
+        for j in range(i + 1, len(topks)):
+            inter = topks[i] & topks[j]
+            union = topks[i] | topks[j]
+            pair_jaccards.append(len(inter) / len(union) if union else 0.0)
+    return float(np.median(pair_jaccards)) if pair_jaccards else float("nan")
+
+
+def time_shifted_seizure_onsets(
+    seizure_onsets: Sequence[float],
+    seizure_block_ids: Sequence[str],
+    block_windows: Mapping[str, Tuple[float, float]],
+    w_pre: float,
+    w_post: float,
+    edge_buffer: float,
+    n_iter: int,
+    rng_seed: int,
+    exclusion_radius_sec: float = 300.0,
+) -> np.ndarray:
+    """Generate ``n_iter`` shifted onset matrices (plan §5.1).
+
+    For each seizure, draw ``n_iter`` random onsets uniformly inside the
+    block's safe window ``[block_start + W_pre + edge,
+    block_end - W_post - edge]`` while avoiding ± ``exclusion_radius_sec``
+    of any true seizure in the same block.
+
+    Returns
+    -------
+    np.ndarray
+        Shape ``(n_iter, n_seizures)`` of shifted absolute-epoch onsets.
+        If a block has no admissible window for a given seizure (very
+        short block or every shifted draw rejected), that seizure column
+        falls back to the original onset (so downstream M1/M2 still get
+        a defined value but the surrogate is essentially identity for
+        that seizure).
+    """
+    n_sz = len(seizure_onsets)
+    if len(seizure_block_ids) != n_sz:
+        raise ValueError("seizure_onsets and seizure_block_ids length mismatch")
+    if n_iter <= 0:
+        return np.empty((0, n_sz), dtype=float)
+    rng = np.random.default_rng(int(rng_seed))
+    pre_pad = float(w_pre) + float(edge_buffer)
+    post_pad = float(w_post) + float(edge_buffer)
+    excl = float(exclusion_radius_sec)
+    out = np.empty((int(n_iter), n_sz), dtype=float)
+    by_block: Dict[str, List[float]] = defaultdict(list)
+    for t, blk in zip(seizure_onsets, seizure_block_ids):
+        by_block[blk].append(float(t))
+    for j, (t_s, blk) in enumerate(zip(seizure_onsets, seizure_block_ids)):
+        if blk not in block_windows:
+            out[:, j] = float(t_s)
+            continue
+        b0, b1 = block_windows[blk]
+        lo = b0 + pre_pad
+        hi = b1 - post_pad
+        if hi <= lo:
+            out[:, j] = float(t_s)
+            continue
+        block_seizures = by_block[blk]
+        for it in range(int(n_iter)):
+            for _ in range(50):
+                cand = rng.uniform(lo, hi)
+                if all(abs(cand - st) > excl for st in block_seizures):
+                    out[it, j] = cand
+                    break
+            else:
+                out[it, j] = float(t_s)
+    return out
+
+
+def _build_per_method_results(
+    per_seizure_scores_by_method: Mapping[str, Sequence[Mapping[str, float]]],
+    k_grid: Sequence[Tuple[str, int]],
+    n_channels_in_ranking: int,
+) -> Dict[str, Dict[str, Dict[str, List[str]]]]:
+    """Compute all (method × aggregation × k) top-k sets.
+
+    Returns
+    -------
+    dict
+        ``results[method][aggregation][k_label] -> sorted list[str]``.
+    """
+    out: Dict[str, Dict[str, Dict[str, List[str]]]] = {}
+    for method, per_seizure_scores in per_seizure_scores_by_method.items():
+        out[method] = {"medianrank": {}, "consensus": {}}
+        for k_label, k in k_grid:
+            for agg in ("medianrank", "consensus"):
+                topk = _aggregate_topk(
+                    per_seizure_scores, k, n_channels_in_ranking, agg
+                )
+                out[method][agg][k_label] = sorted(topk)
+    return out
+
+
+def _build_overlap_table(
+    method_results: Mapping[str, Mapping[str, Mapping[str, List[str]]]],
+    clinical_matched_set: Set[str],
+    n_total: int,
+) -> Dict[str, Dict[str, float]]:
+    """Compute overlap metrics for every (method × aggregation × k).
+
+    Key format: ``{method}_{aggregation}_{k_label}`` (plan §9 schema).
+    """
+    out: Dict[str, Dict[str, float]] = {}
+    for method, by_agg in method_results.items():
+        for agg, by_k in by_agg.items():
+            for k_label, ranking in by_k.items():
+                key = f"{method}_{agg}_{k_label}"
+                out[key] = compute_overlap(
+                    clinical_matched_set, set(ranking), n_total
+                )
+    return out
+
+
+def _baseline_rate_per_channel(
+    per_seizure_m1: Sequence[Mapping[str, Mapping[str, float]]],
+    channels: Sequence[str],
+) -> Dict[str, float]:
+    """Mean ``rate_pre`` per channel across seizures (plan §3.3)."""
+    out: Dict[str, float] = {}
+    for ch in channels:
+        rates = [m[ch]["rate_pre"] for m in per_seizure_m1 if ch in m]
+        out[ch] = float(np.mean(rates)) if rates else 0.0
+    return out
+
+
+def compute_per_subject_audit(
+    *,
+    dataset: str,
+    subject: str,
+    seizure_onsets: Sequence[float],
+    seizure_block_ids: Sequence[str],
+    block_windows: Mapping[str, Tuple[float, float]],
+    hfo_event_times_per_channel: Mapping[str, np.ndarray],
+    signal_loader: Optional[SignalLoader],
+    sfreq: float,
+    clinical_soz: Sequence[str],
+    analysis_channels: Sequence[str],
+    m2_eligible: bool,
+    band: Tuple[float, float] = (80.0, 250.0),
+    w_pre: float = 30.0,
+    w_post: float = 10.0,
+    edge_buffer: float = 2.0,
+    null_n_iter: int = 200,
+    null_rng_seed: int = 0,
+    null_exclusion_radius_sec: float = 300.0,
+) -> Dict[str, object]:
+    """Step 3 orchestrator (plan §9 Step 3.2 / §3.3 schema).
+
+    The runner:
+
+    1. **Block-boundary prefilter** via ``prefilter_seizures_by_block_window``
+       BEFORE any signal load (plan §3.4 + §6 carry-over).
+    2. Annotates ``analysis_channels`` against ``clinical_soz`` 3-state.
+    3. If ``m2_eligible``, pre-computes the cohort ``power_pre_matrix``
+       across kept seizures, runs ``estimate_per_channel_eps`` and
+       ``select_m2_eligible_channels`` to drop strict-zero channels.
+    4. Per kept seizure: ``compute_hfo_onset_metrics`` (M1 three variants)
+       and (if M2) ``compute_er_logratio`` over eligible channels only.
+    5. Cross-seizure aggregation: medianrank (primary) + consensus
+       (sensitivity) at multiple k values centered on
+       ``k_primary = n_clinical_matched``.
+    6. Overlap with clinical: jaccard / precision / recall / f1 +
+       enrichment using ``len(B)``, NOT k.
+    7. Per-seizure consistency (median pairwise Jaccard).
+    8. Time-shifted null surrogate (n_iter draws per seizure).
+
+    Returns the per-subject JSON dict (plan §9 Step 3.3 locked schema).
+    NO verdict-style fields, NO replacement of ``soz_core_channels.json``.
+    """
+    if len(seizure_onsets) != len(seizure_block_ids):
+        raise ValueError(
+            f"seizure_onsets ({len(seizure_onsets)}) vs seizure_block_ids "
+            f"({len(seizure_block_ids)}) length mismatch"
+        )
+
+    annotation = annotate_clinical_soz(analysis_channels, clinical_soz)
+    matched_set = matched_clinical_contacts(analysis_channels, clinical_soz)
+    norm_clinical = {_normalize_channel_name(s) for s in clinical_soz if s}
+    unmatched = sorted(norm_clinical - matched_set)
+    n_clinical_matched = sum(1 for v in annotation.values() if v == SOZ_LABEL)
+    clinical_matched_channels = [
+        ch for ch, lab in annotation.items() if lab == SOZ_LABEL
+    ]
+
+    kept_idx, dropped_idx, drop_reasons = prefilter_seizures_by_block_window(
+        seizure_onsets,
+        seizure_block_ids,
+        block_windows,
+        w_pre=w_pre,
+        w_post=w_post,
+        edge_buffer=edge_buffer,
+    )
+    kept_onsets = [seizure_onsets[i] for i in kept_idx]
+    kept_block_ids = [seizure_block_ids[i] for i in kept_idx]
+
+    n_channels_total = len(analysis_channels)
+
+    # ----- M1 per seizure (three variants) -----
+    per_seizure_m1: List[Dict[str, Dict[str, float]]] = []
+    for t_s in kept_onsets:
+        per_seizure_m1.append(
+            compute_hfo_onset_metrics(
+                hfo_event_times_per_channel,
+                seizure_onset=float(t_s),
+                w_pre=w_pre,
+                w_post=w_post,
+            )
+        )
+
+    def _scores_for(metric: str) -> List[Dict[str, float]]:
+        return [
+            {ch: vals[metric] for ch, vals in m.items()}
+            for m in per_seizure_m1
+        ]
+
+    per_seizure_scores_by_method: Dict[str, List[Dict[str, float]]] = {
+        "M1_raw": _scores_for("M1_raw"),
+        "M1_log": _scores_for("M1_log"),
+        "M1_pois": _scores_for("M1_pois"),
+    }
+
+    # ----- M2 per seizure (eligible-channel-filtered) -----
+    m2_ineligible_channels: List[str] = []
+    if m2_eligible and signal_loader is not None and kept_onsets:
+        # Cohort power_pre matrix (n_seizures, n_channels) over the full
+        # analysis_channels set so eps_per_channel covers every channel.
+        n_kept = len(kept_onsets)
+        power_pre_matrix = np.zeros((n_kept, n_channels_total), dtype=float)
+        for s_idx, t_s in enumerate(kept_onsets):
+            t_start = float(t_s) - w_pre - edge_buffer
+            t_end = float(t_s) + w_post + edge_buffer
+            sig, sfreq_ret = signal_loader(t_start, t_end, list(analysis_channels))
+            sig = np.asarray(sig, dtype=float)
+            if sig.shape[1] != n_channels_total:
+                raise ValueError(
+                    f"signal_loader returned {sig.shape[1]} channels, "
+                    f"expected {n_channels_total}"
+                )
+            inst_power = _bandpass_power(sig, float(sfreq_ret), band)
+            pre_end = int(round(w_pre * float(sfreq_ret)))
+            power_pre_matrix[s_idx, :] = np.mean(inst_power[:pre_end, :], axis=0)
+        eps_result = estimate_per_channel_eps(power_pre_matrix)
+        channel_index = {ch: i for i, ch in enumerate(analysis_channels)}
+        eligible_channels, m2_ineligible_channels = select_m2_eligible_channels(
+            list(analysis_channels), eps_result, channel_index
+        )
+        eps_map = {ch: float(eps_result.eps[channel_index[ch]]) for ch in eligible_channels}
+        per_seizure_m2: List[Dict[str, float]] = []
+        for t_s in kept_onsets:
+            scores = compute_er_logratio(
+                signal_loader=signal_loader,
+                channels=eligible_channels,
+                seizure_onset=float(t_s),
+                eps_per_channel=eps_map,
+                w_pre=w_pre,
+                w_post=w_post,
+                edge_buffer=edge_buffer,
+                band=band,
+            )
+            per_seizure_m2.append(scores)
+        per_seizure_scores_by_method["M2_logratio"] = per_seizure_m2
+    else:
+        per_seizure_scores_by_method["M2_logratio"] = [
+            {} for _ in kept_onsets
+        ]
+
+    # ----- Aggregation grid + overlap -----
+    k_primary = max(int(n_clinical_matched), 1)
+    k_grid: List[Tuple[str, int]] = [
+        ("k3", 3),
+        ("k5", 5),
+        ("k10", 10),
+        ("k_primary", k_primary),
+        ("k_primary_minus2", max(1, k_primary - 2)),
+        ("k_primary_plus2", k_primary + 2),
+    ]
+    method_results = _build_per_method_results(
+        per_seizure_scores_by_method, k_grid, n_channels_total
+    )
+    clinical_matched_set = set(clinical_matched_channels)
+    overlap_table = _build_overlap_table(
+        method_results, clinical_matched_set, n_channels_total
+    )
+
+    headline_primary = {
+        "H_M1_pois_medianrank_size_matched": overlap_table.get(
+            "M1_pois_medianrank_k_primary", {}
+        ).get("enrichment", float("nan")),
+        "H_M2_logratio_medianrank_size_matched": overlap_table.get(
+            "M2_logratio_medianrank_k_primary", {}
+        ).get("enrichment", float("nan")),
+    }
+    if "M2_logratio" in per_seizure_scores_by_method and m2_eligible:
+        m1_topk = set(method_results["M1_pois"]["medianrank"]["k_primary"])
+        m2_topk = set(method_results["M2_logratio"]["medianrank"]["k_primary"])
+        concord = m1_topk & m2_topk
+        concord_overlap = compute_overlap(
+            clinical_matched_set, concord, n_channels_total
+        )
+        headline_primary["H_concord_M1_M2_size_matched"] = concord_overlap[
+            "enrichment"
+        ]
+    else:
+        headline_primary["H_concord_M1_M2_size_matched"] = float("nan")
+
+    # ----- Per-seizure consistency -----
+    per_seizure_consistency = {
+        "M1_pois_kPrimary": _per_seizure_consistency(
+            per_seizure_scores_by_method["M1_pois"], k_primary
+        ),
+        "M2_logratio_kPrimary": _per_seizure_consistency(
+            per_seizure_scores_by_method["M2_logratio"], k_primary
+        ) if m2_eligible else float("nan"),
+    }
+
+    # ----- Time-shifted null -----
+    if null_n_iter > 0 and kept_onsets:
+        shifted = time_shifted_seizure_onsets(
+            kept_onsets,
+            kept_block_ids,
+            block_windows,
+            w_pre=w_pre,
+            w_post=w_post,
+            edge_buffer=edge_buffer,
+            n_iter=null_n_iter,
+            rng_seed=null_rng_seed,
+            exclusion_radius_sec=null_exclusion_radius_sec,
+        )
+        shift_enrich_m1: List[float] = []
+        shift_enrich_m2: List[float] = []
+        for it in range(null_n_iter):
+            shifted_onsets = shifted[it].tolist()
+            null_m1 = [
+                compute_hfo_onset_metrics(
+                    hfo_event_times_per_channel, seizure_onset=float(t),
+                    w_pre=w_pre, w_post=w_post,
+                )
+                for t in shifted_onsets
+            ]
+            null_scores_pois = [
+                {ch: vals["M1_pois"] for ch, vals in m.items()}
+                for m in null_m1
+            ]
+            null_topk_m1 = _aggregate_topk(
+                null_scores_pois, k_primary, n_channels_total, "medianrank"
+            )
+            ov = compute_overlap(
+                clinical_matched_set, null_topk_m1, n_channels_total
+            )
+            shift_enrich_m1.append(ov["enrichment"])
+        H_M1_obs = headline_primary["H_M1_pois_medianrank_size_matched"]
+        H_M1_shift_med = float(np.median(shift_enrich_m1)) if shift_enrich_m1 else float("nan")
+        true_over_shift_m1 = (
+            H_M1_obs / H_M1_shift_med
+            if (H_M1_shift_med and not math.isnan(H_M1_shift_med))
+            else float("nan")
+        )
+        time_shifted_null_dict: Dict[str, object] = {
+            "n_iter": null_n_iter,
+            "rng_seed": null_rng_seed,
+            "exclusion_radius_sec": null_exclusion_radius_sec,
+            "H_M1_pois_shifted_median": H_M1_shift_med,
+            "enrichment_true_over_shift_M1_pois": true_over_shift_m1,
+        }
+        if m2_eligible:
+            time_shifted_null_dict[
+                "enrichment_true_over_shift_M2_logratio"
+            ] = float("nan")
+            time_shifted_null_dict["note_M2"] = (
+                "M2 surrogate skipped: each shifted draw would re-load + "
+                "re-bandpass the full block; computed only at the cohort "
+                "level in Step 4 if needed"
+            )
+    else:
+        time_shifted_null_dict = {
+            "n_iter": int(null_n_iter),
+            "rng_seed": int(null_rng_seed),
+            "skipped": "null_n_iter == 0 or no kept seizures",
+        }
+
+    return {
+        "dataset": dataset,
+        "subject": subject,
+        "n_seizures_used": len(kept_onsets),
+        "n_seizures_dropped": len(dropped_idx),
+        "dropped_seizure_reasons": [drop_reasons[i] for i in dropped_idx],
+        "n_channels_total": n_channels_total,
+        "sfreq": float(sfreq),
+        "m2_eligible": bool(m2_eligible),
+        "channel_matching": {
+            "n_clinical_total": len(list(clinical_soz)),
+            "n_clinical_matched": int(n_clinical_matched),
+            "n_clinical_unmatched": len(unmatched),
+            "unmatched_clinical_names": unmatched,
+        },
+        "baseline_rate_per_channel": _baseline_rate_per_channel(
+            per_seizure_m1, analysis_channels
+        ),
+        "k_primary_size_matched": int(k_primary),
+        "results": method_results,
+        "overlap_with_clinical": overlap_table,
+        "headline_primary": headline_primary,
+        "per_seizure_consistency": per_seizure_consistency,
+        "time_shifted_null": time_shifted_null_dict,
+        "m2_ineligible_channels": m2_ineligible_channels,
+    }
+
+
 __all__ = [
     "annotate_clinical_soz",
     "matched_clinical_contacts",
@@ -723,4 +1387,9 @@ __all__ = [
     "compute_er_logratio",
     "estimate_per_channel_eps",
     "select_m2_eligible_channels",
+    "prefilter_seizures_by_block_window",
+    "random_expected_jaccard",
+    "compute_overlap",
+    "time_shifted_seizure_onsets",
+    "compute_per_subject_audit",
 ]
