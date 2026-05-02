@@ -1,38 +1,56 @@
-"""Data-driven ictal-onset SOZ audit (PR-T3-1).
+"""Data-driven ictal-onset SOZ audit — PR-T3-1 v1.1 (SUPERSEDED).
 
-Step 0 helpers:
+⚠️  **OBSOLETE 2026-05-03**: PR-T3-1 v1.1 is superseded by v2.1 pivot
+(``docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``).
+The v1.1 M1 (HFO rate) + M2 (HFO band-power log-ratio) helpers in this
+module are KEPT BUT MARKED OBSOLETE — they remain importable so the
+24-subject v1.1 cohort run can be reproduced from
+``per_subject_hfo_rate_obsolete_v1_1/`` if needed for audit.
 
-- ``annotate_clinical_soz``: 3-state (SOZ/nonSOZ/unknown) annotation of an
-  analysis channel set against a clinical SOZ list, using the canonical
-  bipolar-to-any matcher from ``src.event_periodicity``.
-- ``matched_clinical_contacts`` / ``check_channel_schema_consistency``:
-  unmatched-name normalization and cross-block schema validation
-  helpers used by the audit script.
+The v2.1 pivot introduces a two-layer design:
 
-Step 1 helpers (M1 — HFO-onset rate enrichment):
+- Layer A: ``src/ictal_er_rank.py`` — new ictal ER-rank producer (NOT
+  in this module).
+- Layer B: ``src/data_driven_soz_pivot.py`` — label builder + audit
+  consumer (NOT in this module).
 
-- ``compute_hfo_onset_metrics``: per-seizure / per-channel three M1
-  variants (``M1_raw``, ``M1_log``, ``M1_pois``).
-- ``rank_top_k_per_seizure``: deterministic top-k by score with NaN
-  routed to the bottom and alphabetical tie-break.
-- ``aggregate_consensus``: channel must appear in ≥ ``min_fraction`` of
-  the per-seizure top-k lists.
-- ``aggregate_median_rank``: median rank across seizures (channels
-  missing in a seizure receive the worst rank), top-k smallest medians.
+Helpers in this module split into two groups:
 
-Step 2 helpers (M2 — band-power log-ratio enrichment):
+**KEPT and reused by v2.1** (still primary, no obsolete marker):
 
-- ``_bandpass_power``: Butter order 4 + ``filtfilt`` zero-phase →
-  instantaneous (per-sample) power. Raises
-  ``NyquistGuardError`` / ``FilterPaddingError`` when the signal can't
-  support the requested band.
-- ``compute_er_logratio``: per-channel ER log-ratio (post / pre band
-  power) with edge-buffer windows, per-channel ε floor, and the
-  Nyquist guard at the contract boundary.
-- ``estimate_per_channel_eps``: 1st-percentile-across-seizures noise
-  floor per channel, lower-bounded by ``floor`` (default ``1e-18``).
+- ``annotate_clinical_soz`` — 3-state (SOZ/nonSOZ/unknown) channel
+  matcher (used by both v1.1 audit and v2.1 Layer B).
+- ``matched_clinical_contacts`` — unmatched-name reporter (used by
+  audit.csv schema in both versions).
+- ``check_channel_schema_consistency`` — cross-block channel order
+  validator (still used by the ``--audit`` CLI mode).
+- ``compute_overlap`` / ``random_expected_jaccard`` — overlap metrics
+  (reused by Layer B).
+- ``SOZ_LABEL`` / ``NON_SOZ_LABEL`` / ``UNKNOWN_LABEL`` constants.
 
-See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
+**OBSOLETE (kept for reproducibility, not for new analysis)**:
+
+- ``compute_hfo_onset_metrics`` (M1)
+- ``rank_top_k_per_seizure``
+- ``aggregate_consensus`` / ``aggregate_median_rank``
+- ``_bandpass_power`` / ``compute_er_logratio`` (M2)
+- ``estimate_per_channel_eps`` / ``select_m2_eligible_channels`` /
+  ``PerChannelEps``
+- ``prefilter_seizures_by_block_window``
+- ``time_shifted_seizure_onsets``
+- ``compute_per_subject_audit``
+
+These are NOT to be invoked by new code. They are reachable by tests
+and by the deprecated ``--per-subject`` / ``--cohort-overlap`` /
+``--build-data-driven-soz-labels`` CLI modes (which now print a
+deprecation warning).
+
+See:
+
+- ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``
+  (v1.1 plan, superseded)
+- ``docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``
+  (v2.1 pivot, plan-of-record)
 """
 
 from __future__ import annotations
@@ -195,7 +213,13 @@ def compute_hfo_onset_metrics(
     w_pre: float = 30.0,
     w_post: float = 10.0,
 ) -> Dict[str, Dict[str, float]]:
-    """Per-channel HFO-onset enrichment (plan §3.3).
+    """Per-channel HFO-onset enrichment (PR-T3-1 v1.1 §3.3).
+
+    ⚠️  **OBSOLETE 2026-05-03** — superseded by Layer A in v2.1 pivot
+    (HFO-rate-based proxy is too tightly coupled with HFO event
+    detection; downstream "stereotype-node ↔ SOZ" validation would be
+    circular). Kept importable so the v1.1 cohort is reproducible from
+    ``per_subject_hfo_rate_obsolete_v1_1/``. Do NOT call from new code.
 
     Parameters
     ----------
@@ -272,7 +296,10 @@ def rank_top_k_per_seizure(
     k: int,
     nan_handling: str = "rank_last",
 ) -> List[str]:
-    """Top-k channels by ``per_channel_score`` (plan §3.5).
+    """Top-k channels by ``per_channel_score`` (PR-T3-1 v1.1 §3.5).
+
+    ⚠️  **OBSOLETE 2026-05-03** — Layer A (v2.1) uses
+    ``rank_channels_by_n_d`` instead. Kept for v1.1 reproducibility.
 
     Finite scores rank first (descending score, ties broken by
     ascending channel name). NaN-score channels fill the tail in
@@ -308,7 +335,11 @@ def aggregate_consensus(
     min_seizure_fraction: float = 0.5,
 ) -> Set[str]:
     """Channels appearing in ≥ ``min_seizure_fraction`` of per-seizure top-k
-    lists (plan §3.5).
+    lists (PR-T3-1 v1.1 §3.5).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v2.1 Layer B uses median-rank only as
+    primary aggregation; consensus is no longer reported. Kept for v1.1
+    reproducibility.
 
     .. warning::
 
@@ -338,7 +369,12 @@ def aggregate_median_rank(
     per_seizure_ranks: Sequence[Mapping[str, int]],
     k: int,
 ) -> Set[str]:
-    """Top-k channels by median rank across seizures (plan §3.5).
+    """Top-k channels by median rank across seizures (PR-T3-1 v1.1 §3.5).
+
+    ⚠️  **OBSOLETE 2026-05-03 for v1.1 M1 use case** — kept for v1.1
+    reproducibility; v2.1 Layer A re-implements median-rank in
+    ``compute_per_subject_r_sz`` against per-channel n_d ranks (NOT
+    HFO-rate scores).
 
     Channels missing from a given seizure dict are assigned the worst
     available rank for that seizure (``n_channels``), so a channel that
@@ -370,14 +406,20 @@ def aggregate_median_rank(
 
 class NyquistGuardError(ValueError):
     """Raised when ``sfreq / 2`` is below the M2 band's safety-margined
-    upper edge (plan §3.4: ``sfreq >= band[1] * 2.1``).
+    upper edge (PR-T3-1 v1.1 §3.4: ``sfreq >= band[1] * 2.1``).
+
+    ⚠️  **OBSOLETE 2026-05-03** — only raised by v1.1 M2 path. Layer A
+    in v2.1 enforces Nyquist via PR-6A's already-validated bandpass
+    contract upstream.
     """
 
 
 class FilterPaddingError(ValueError):
     """Raised when the input signal is shorter than the ``filtfilt``
-    padding required for the requested band's lowest cutoff (plan §3.4:
-    ``padlen >= int(1.5 * sfreq / band[0])``).
+    padding required for the requested band's lowest cutoff (PR-T3-1
+    v1.1 §3.4: ``padlen >= int(1.5 * sfreq / band[0])``).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 M2 path only.
     """
 
 
@@ -387,6 +429,10 @@ def _bandpass_power(
     band: Tuple[float, float],
 ) -> np.ndarray:
     """Bandpass-filter a 2D signal and return per-sample instantaneous power.
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 M2 helper. Layer A uses PR-6A
+    Step 0-2's ``compute_er`` (spectrogram-based ER) directly, not
+    Butter+filtfilt power.
 
     Parameters
     ----------
@@ -468,7 +514,12 @@ def compute_er_logratio(
     edge_buffer: float = 2.0,
     band: Tuple[float, float] = (80.0, 250.0),
 ) -> Dict[str, float]:
-    """Per-channel ER log-ratio: ``log(P_post + ε) − log(P_pre + ε)`` (plan §3.4).
+    """Per-channel ER log-ratio: ``log(P_post + ε) − log(P_pre + ε)`` (PR-T3-1 v1.1 §3.4).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 M2 helper. Definition has drifted
+    from PR-6A's validated ER (gamma 60-100 / slow 4-20 with z-score +
+    CUSUM). v2.1 Layer A re-uses PR-6A's ``compute_er`` directly. Do
+    NOT call from new code.
 
     Parameters
     ----------
@@ -582,7 +633,9 @@ def compute_er_logratio(
 
 
 class PerChannelEps(NamedTuple):
-    """Result of ``estimate_per_channel_eps`` (plan §3.4).
+    """Result of ``estimate_per_channel_eps`` (PR-T3-1 v1.1 §3.4).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 M2 helper.
 
     Attributes
     ----------
@@ -614,7 +667,9 @@ def estimate_per_channel_eps(
     power_pre_matrix: np.ndarray,
     floor: float = 1e-18,
 ) -> PerChannelEps:
-    """Per-channel noise floor estimate (plan §3.4).
+    """Per-channel noise floor estimate (PR-T3-1 v1.1 §3.4).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 M2 helper.
 
     Parameters
     ----------
@@ -667,7 +722,9 @@ def select_m2_eligible_channels(
     eps_result: PerChannelEps,
     channel_index: Mapping[str, int],
 ) -> Tuple[List[str], List[str]]:
-    """Filter ``channels`` by ``eps_result.m2_ineligible`` (plan §3.4).
+    """Filter ``channels`` by ``eps_result.m2_ineligible`` (PR-T3-1 v1.1 §3.4).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 M2 helper.
 
     Step 3 must call this **before** passing channels into
     ``compute_er_logratio``. Without it, an ineligible channel (every
@@ -731,6 +788,10 @@ def prefilter_seizures_by_block_window(
     edge_buffer: float = 2.0,
 ) -> Tuple[List[int], List[int], List[str]]:
     """Drop seizures whose M2 window does not fit in their containing block.
+
+    ⚠️  **OBSOLETE 2026-05-03 for v1.1 M2 use case** — Layer A in v2.1
+    re-implements the boundary check against PR-6A's baseline window
+    contract instead. This helper is kept for v1.1 reproducibility.
 
     Plan §3.4 + §6 step-3 carry-over: the M2 window is
     ``[t_s − W_pre − edge_buffer, t_s + W_post + edge_buffer]``. Any
@@ -978,7 +1039,10 @@ def time_shifted_seizure_onsets(
     rng_seed: int,
     exclusion_radius_sec: float = 300.0,
 ) -> np.ndarray:
-    """Generate ``n_iter`` shifted onset matrices (plan §5.1).
+    """Generate ``n_iter`` shifted onset matrices (PR-T3-1 v1.1 §5.1).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 helper. Layer A in v2.1
+    re-implements time-shifted r_sz null inside Step A.2.
 
     For each seizure, draw ``n_iter`` random onsets uniformly inside the
     block's safe window ``[block_start + W_pre + edge,
@@ -1109,7 +1173,13 @@ def compute_per_subject_audit(
     null_exclusion_radius_sec: float = 300.0,
     signal_loader_path: str = "unknown",
 ) -> Dict[str, object]:
-    """Step 3 orchestrator (plan §9 Step 3.2 / §3.3 schema).
+    """Step 3 orchestrator (PR-T3-1 v1.1 §9 Step 3.2 / §3.3 schema).
+
+    ⚠️  **OBSOLETE 2026-05-03** — v1.1 orchestrator. v2.1 splits
+    Layer A (``src/ictal_er_rank.py`` — ER + CUSUM + r_sz) and Layer B
+    (``src/data_driven_soz_pivot.py`` — label builder + audit). Kept
+    importable so the v1.1 cohort can be reproduced from
+    ``per_subject_hfo_rate_obsolete_v1_1/``. Do NOT call from new code.
 
     The runner:
 

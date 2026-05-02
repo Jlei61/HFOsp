@@ -1,5 +1,13 @@
 # PR-T3-1 计划：Data-driven Ictal-Onset SOZ Audit
 
+> ⚠️ **SUPERSEDED 2026-05-03**：本计划 (v1.1) 已被 [`pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md`](pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md) (v2.1 pivot) 取代。
+> 原因（详见 v2.1 §0）：M1 (HFO rate) 与 M2 (HFO band-power log-ratio) 是同源信号的两种统计，不构成独立 proxy；M2 定义已从 PR-6A ER-ratio 漂移；两套都基于 HFO 检测器，对下游"刻板时序节点 ↔ SOZ"类分析存在循环验证风险；HFO-rate-based SOZ AUC 已经在 topic3 PR-1 / PR-2 做过。
+> v1.1 已跑的 24 份 per-subject JSON 归档在 `results/spatial_modulation/data_driven_soz/per_subject_hfo_rate_obsolete_v1_1/`（partial loader 路径）+ `per_subject_hfo_rate_obsolete_v1_1_legacy_full_block/`（legacy full-block + notch 路径），保留作为"为什么 HFO-rate 不能做独立 SOZ 标签"的实证证据，**不**作为 topic3 下游 SOZ 标签来源。
+> v1.1 的代码资产 (`src/data_driven_soz.py` 中 M1/M2/loader helpers) 标记 obsolete 但暂不删除（v2.1 §8.1 phased disposal）。
+> 以下原文档保留作为历史 reference，不再 actionable。
+>
+> ---
+>
 > 状态：plan-of-record，2026-04-30（**v1.1**，整合 2026-04-30 review 8 条修正：size-matched k / 取消三档 verdict / M1 rate-normalized / M2 log-ratio + Nyquist guard / 修正 null abort / canonical channel matcher / 修正数据路径 / "两条 proxy 而非独立通道" framing）
 > 范围：在 Yuquan + Epilepsiae cohort 上，用 HFO-onset rate (M1) 与 ER-ratio (M2) 两条**频段 / 时间对齐高度相关**的数据驱动 proxy，从 SEEG 信号本身派生 ictal-onset SOZ 通道集合，并与现有临床 SOZ 标注做 overlap audit。**v1.1 不出 EI**（推迟 PR-T3-2）；**不替换** `*_soz_core_channels.json`；**不出三档 qualitative verdict**，只出预注册的 cohort 数值表 + null-corrected enrichment。本 PR 的目标**不是**判定 clinical SOZ 谁对谁错，而是回答下游 SOZ-dependent 分析（PR-8 v2 / topic2 SOZ-stratified）是否必须改成 multi-source SOZ 报告。
 > 上游：`docs/topic3_spatial_soz_modulation.md`；`docs/archive/topic3/spatial_modulation_soz_analysis.md`（PR-1 spatial_modulation Yuquan 9/11 valid pairs；§"双极通道的 SOZ 匹配（关键）：必须使用 alias_bipolar_to_any 逻辑"，本 PR 必须遵循）；`results/{epilepsiae,yuquan}_soz_core_channels.json`；`results/epilepsiae_seizure_inventory.csv`；`results/hfo_detection/<subject>/*_gpu.npz`（new pipeline 输出）。

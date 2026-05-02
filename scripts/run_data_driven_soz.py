@@ -1,10 +1,25 @@
 """PR-T3-1 — Data-driven ictal-onset SOZ audit CLI.
 
-Usage:
+⚠️  **v1.1 IS SUPERSEDED 2026-05-03**: ``--per-subject`` and
+``--cohort-overlap`` modes implement the v1.1 HFO-rate-based design,
+which is no longer the plan-of-record. See
+``docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``
+for v2.1 (Layer A producer + Layer B consumer). v1.1 modes here are
+kept ONLY for cohort reproduction from
+``per_subject_hfo_rate_obsolete_v1_1/``.
 
-    python scripts/run_data_driven_soz.py --audit
-    python scripts/run_data_driven_soz.py --per-subject  # Step 3 (not yet)
-    python scripts/run_data_driven_soz.py --cohort-overlap  # Step 4 (not yet)
+Usage (v1.1, deprecated):
+
+    python scripts/run_data_driven_soz.py --audit             # KEPT (v2.1 also uses audit.csv)
+    python scripts/run_data_driven_soz.py --per-subject       # OBSOLETE
+    python scripts/run_data_driven_soz.py --cohort-overlap    # OBSOLETE
+
+Usage (v2.1, in development):
+
+    python scripts/run_ictal_er_rank.py --sentinel             # Layer A sentinel sanity
+    python scripts/run_ictal_er_rank.py --per-subject          # Layer A cohort
+    python scripts/run_data_driven_soz.py --build-labels-from-layer-a   # Layer B labels (TBD)
+    python scripts/run_data_driven_soz.py --cohort-overlap-v2  # Layer B audit (TBD)
 
 Step 0 (``--audit``) enumerates the **expected** cohort
 (``epilepsiae_subject_inventory.csv`` + ``/mnt/yuquan_data/yuquan_24h_edf/``
@@ -1394,6 +1409,16 @@ def main() -> int:
         run_audit(args.output_dir)
         return 0
     if args.per_subject:
+        print(
+            "[deprecated] --per-subject implements PR-T3-1 v1.1 (HFO-rate "
+            "based M1 + M2). v1.1 is SUPERSEDED by v2.1 pivot — see "
+            "docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md. "
+            "v2.1 entry points are scripts/run_ictal_er_rank.py (Layer A) and "
+            "the new --build-labels-from-layer-a / --cohort-overlap-v2 modes "
+            "(Layer B). This mode is kept for v1.1 cohort reproduction only.",
+            file=sys.stderr,
+            flush=True,
+        )
         return run_per_subject(
             output_dir=args.output_dir,
             subject_filter=args.subject,
@@ -1404,7 +1429,9 @@ def main() -> int:
         )
     if args.cohort_overlap:
         raise NotImplementedError(
-            "cohort-overlap mode is added in PR-T3-1 Step 4"
+            "cohort-overlap (v1.1 design) is SUPERSEDED. v2.1 Layer B uses "
+            "--cohort-overlap-v2 against Layer A r_sz output; see "
+            "docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md."
         )
 
     parser.print_help()
