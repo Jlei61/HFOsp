@@ -81,6 +81,32 @@ class NumpyEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
+def _epilepsiae_subject_dir(root: Path, subject: str) -> Path:
+    """Resolve Epilepsiae per-subject lagPat directory.
+
+    Legacy layout: ``<root>/<subject>/all_recs/`` (the canonical
+    `/mnt/epilepsia_data/interilca_inter_results/all_data_lns/` tree).
+
+    Backfill layout: ``<root>/<subject>/`` (the new pipeline writes
+    `<stem>_lagPat.npz` directly under the subject dir, with no intermediate
+    `all_recs`). Used for Stage D sensitivity audits — see
+    `docs/archive/epilepsiae_lagpat/epilepsiae_lagpat_backfill_plan_2026-04-29.md`.
+
+    Probes legacy first (so existing pipelines keep their exact path); falls
+    back to flat layout when `all_recs` doesn't exist.
+    """
+    legacy = root / subject / "all_recs"
+    if legacy.exists():
+        return legacy
+    return root / subject
+
+
+def _subject_dir(dataset: str, root: Path, subject: str) -> Path:
+    if dataset == "yuquan":
+        return root / subject
+    return _epilepsiae_subject_dir(root, subject)
+
+
 def _load_soz(path: Path) -> Dict[str, List[str]]:
     if not path.exists():
         return {}
@@ -106,7 +132,7 @@ def _run_pr25(
 
     for dataset, root, subjects, _soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
             key = f"{dataset}/{subject}"
 
@@ -184,7 +210,7 @@ def _augment_cluster_bias(
 
     for dataset, root, subjects, _soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
             key = f"{dataset}/{subject}"
 
@@ -255,7 +281,7 @@ def _run_pr4a(
 
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
@@ -388,7 +414,7 @@ def _run_pr4a_followup(
 
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
@@ -505,7 +531,7 @@ def _run_pr4b_step0(
 
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
@@ -615,7 +641,7 @@ def _run_pr4b_step1(
 
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
@@ -729,7 +755,7 @@ def _run_pr4b_step23(
 
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
@@ -897,7 +923,7 @@ def _run_pr4c(
 
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
@@ -1064,9 +1090,7 @@ def _run_pr5_gate(
                 )
                 continue
 
-            subject_dir = (
-                root / subject if dataset == "yuquan" else root / subject / "all_recs"
-            )
+            subject_dir = _subject_dir(dataset, root, subject)
             if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
                 logger.warning("PR-5-A skip %s: raw lagPat dir missing", key)
                 continue
@@ -1269,9 +1293,7 @@ def _run_pr5_recruitment(
                 logger.warning("PR-5-B skip %s: adaptive_cluster missing/errored", key)
                 continue
 
-            subject_dir = (
-                root / subject if dataset == "yuquan" else root / subject / "all_recs"
-            )
+            subject_dir = _subject_dir(dataset, root, subject)
             if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
                 logger.warning("PR-5-B skip %s: raw lagPat dir missing", key)
                 continue
@@ -1553,12 +1575,34 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--n-sample", type=int, default=200)
     parser.add_argument("--n-seeds", type=int, default=5)
+    parser.add_argument(
+        "--epilepsiae-root", type=Path, default=None,
+        help=(
+            "Override Epilepsiae lagPat root. Default = canonical legacy tree "
+            "/mnt/epilepsia_data/interilca_inter_results/all_data_lns/. Pass "
+            "results/epilepsiae_lagpat_backfill to consume the new-pipeline "
+            "lagPat in Stage D sensitivity audits."
+        ),
+    )
+    parser.add_argument(
+        "--output-root", type=Path, default=None,
+        help=(
+            "Override the per-subject + cohort summary output directory "
+            "(default = results/interictal_propagation). Required for Stage D "
+            "sensitivity smoke so legacy outputs are not overwritten."
+        ),
+    )
     return parser
 
 
 def main() -> None:
     parser = _build_parser()
     args = parser.parse_args()
+
+    global RESULTS_DIR
+    if args.output_root is not None:
+        RESULTS_DIR = args.output_root
+        logger.info("RESULTS_DIR overridden -> %s", RESULTS_DIR)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     per_subject_dir = RESULTS_DIR / "per_subject"
@@ -1575,11 +1619,15 @@ def main() -> None:
         yq_subjects = YUQUAN_SUBJECTS
         epi_subjects = EPILEPSIAE_SUBJECTS
 
+    epi_root = args.epilepsiae_root if args.epilepsiae_root is not None else EPILEPSIAE_ROOT
+    if args.epilepsiae_root is not None:
+        logger.info("Epilepsiae root overridden -> %s", epi_root)
+
     datasets_list = []
     if args.dataset in ("yuquan", "both"):
         datasets_list.append(("yuquan", YUQUAN_ROOT, yq_subjects, soz_yq))
     if args.dataset in ("epilepsiae", "both"):
-        datasets_list.append(("epilepsiae", EPILEPSIAE_ROOT, epi_subjects, soz_epi))
+        datasets_list.append(("epilepsiae", epi_root, epi_subjects, soz_epi))
 
     if args.pr25:
         _run_pr25(datasets_list, per_subject_dir)
@@ -1682,7 +1730,7 @@ def main() -> None:
     subject_results: Dict[str, Dict[str, Any]] = {}
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
-            subject_dir = root / subject if dataset == "yuquan" else root / subject / "all_recs"
+            subject_dir = _subject_dir(dataset, root, subject)
             if not subject_dir.exists():
                 logger.warning("Skip %s/%s: subject dir missing", dataset, subject)
                 continue

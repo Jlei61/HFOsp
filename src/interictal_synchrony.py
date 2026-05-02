@@ -625,9 +625,19 @@ def run_epilepsiae_interictal_synchrony_from_manifest(
     event_rows: List[Dict[str, object]] = []
     for row in selected:
         subject = str(row["subject"])
-        subject_dir = artifact_dir_root / subject / "all_recs"
-        if not subject_dir.exists():
-            raise ValueError(f"Artifact directory missing for subject {subject}: {subject_dir}")
+        # Layout-tolerant resolution: legacy `<root>/<subj>/all_recs/` first,
+        # fall back to flat `<root>/<subj>/` (Stage D backfill outputs).
+        legacy_layout = artifact_dir_root / subject / "all_recs"
+        flat_layout = artifact_dir_root / subject
+        if legacy_layout.exists():
+            subject_dir = legacy_layout
+        elif flat_layout.exists():
+            subject_dir = flat_layout
+        else:
+            raise ValueError(
+                f"Artifact directory missing for subject {subject}: "
+                f"tried {legacy_layout} and {flat_layout}"
+            )
 
         core_channels = None
         if core_channels_by_subject is not None:

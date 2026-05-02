@@ -239,6 +239,143 @@ def test_run_epilepsiae_interictal_synchrony_from_manifest(tmp_path: Path) -> No
     assert rows[0]["n_events"] == 2.0
 
 
+def test_run_epilepsiae_interictal_synchrony_accepts_flat_layout(tmp_path: Path) -> None:
+    """Stage D backfill outputs land directly in <root>/<subject>/, without an
+    intermediate `all_recs` subdirectory. Verify the function falls back
+    cleanly to the flat layout. Plan reference: §5 D.2 Step 1."""
+    manifest_csv = tmp_path / "manifest.csv"
+    artifact_root = tmp_path / "backfill"
+    # Flat layout: NO `all_recs`.
+    subject_dir = artifact_root / "1073"
+    subject_dir.mkdir(parents=True)
+
+    lagpat_path = subject_dir / "107300102_0000_lagPat.npz"
+    packed_times_path = subject_dir / "107300102_0000_packedTimes.npy"
+    np.savez_compressed(
+        lagpat_path,
+        lagPatRaw=np.array([[0.01, 0.02], [0.03, 0.04]], dtype=np.float64),
+        eventsBool=np.ones((2, 2), dtype=np.float64),
+        chnNames=np.array(["A1", "B1"], dtype=object),
+    )
+    np.save(packed_times_path, np.array([[0.0, 0.5], [1.0, 1.5]], dtype=np.float64))
+
+    manifest_csv.write_text(
+        "subject,patient_code,tier,timezone_name,day_night_rule\n"
+        "1073,FR_1073,ready_full_artifacts,Europe/Berlin,day=08:00-20:00 local\n",
+        encoding="utf-8",
+    )
+
+    fake_inventory = type(
+        "Inventory",
+        (),
+        {
+            "block_rows": [
+                {
+                    "subject": "1073",
+                    "patient_code": "FR_1073",
+                    "recording_id": "107300102",
+                    "block_stem": "107300102_0000",
+                    "block_start_epoch": 123.0,
+                    "block_end_epoch": 483.0,
+                    "block_start_day_night": "day",
+                    "block_end_day_night": "day",
+                    "timezone_name": "Europe/Berlin",
+                }
+            ]
+        },
+    )()
+
+    import src.interictal_synchrony as sync_mod
+
+    original_survey = sync_mod.survey_epilepsiae_dataset
+    sync_mod.survey_epilepsiae_dataset = lambda: fake_inventory
+    try:
+        rows = run_epilepsiae_interictal_synchrony_from_manifest(
+            str(manifest_csv),
+            str(tmp_path / "outputs"),
+            artifact_root=str(artifact_root),
+        )
+    finally:
+        sync_mod.survey_epilepsiae_dataset = original_survey
+
+    assert len(rows) == 1
+    assert rows[0]["subject"] == "1073"
+    assert rows[0]["n_events"] == 2.0
+
+
+def test_run_epilepsiae_interictal_synchrony_legacy_layout_takes_precedence(
+    tmp_path: Path,
+) -> None:
+    """When BOTH legacy `all_recs/` and flat layouts exist, prefer legacy so
+    existing pipelines see no behavior change. Plan reference: §5 D.2 Step 1."""
+    manifest_csv = tmp_path / "manifest.csv"
+    artifact_root = tmp_path / "mixed"
+    legacy_dir = artifact_root / "1073" / "all_recs"
+    legacy_dir.mkdir(parents=True)
+
+    legacy_chns = np.array(["LEGACY_A", "LEGACY_B"], dtype=object)
+    np.savez_compressed(
+        legacy_dir / "107300102_0000_lagPat.npz",
+        lagPatRaw=np.array([[0.1, 0.2], [0.3, 0.4]], dtype=np.float64),
+        eventsBool=np.ones((2, 2), dtype=np.float64),
+        chnNames=legacy_chns,
+    )
+    np.save(
+        legacy_dir / "107300102_0000_packedTimes.npy",
+        np.array([[0.0, 0.5], [1.0, 1.5]], dtype=np.float64),
+    )
+    # Decoy: a flat-layout file that should be IGNORED.
+    decoy = artifact_root / "1073" / "107300102_0000_lagPat.npz"
+    np.savez_compressed(
+        decoy,
+        lagPatRaw=np.zeros((2, 2)),
+        eventsBool=np.zeros((2, 2)),
+        chnNames=np.array(["FLAT_X", "FLAT_Y"], dtype=object),
+    )
+
+    manifest_csv.write_text(
+        "subject,patient_code,tier,timezone_name,day_night_rule\n"
+        "1073,FR_1073,ready_full_artifacts,Europe/Berlin,day=08:00-20:00 local\n",
+        encoding="utf-8",
+    )
+    fake_inventory = type(
+        "Inventory",
+        (),
+        {
+            "block_rows": [
+                {
+                    "subject": "1073",
+                    "patient_code": "FR_1073",
+                    "recording_id": "107300102",
+                    "block_stem": "107300102_0000",
+                    "block_start_epoch": 123.0,
+                    "block_end_epoch": 483.0,
+                    "block_start_day_night": "day",
+                    "block_end_day_night": "day",
+                    "timezone_name": "Europe/Berlin",
+                }
+            ]
+        },
+    )()
+
+    import src.interictal_synchrony as sync_mod
+
+    original_survey = sync_mod.survey_epilepsiae_dataset
+    sync_mod.survey_epilepsiae_dataset = lambda: fake_inventory
+    try:
+        rows = run_epilepsiae_interictal_synchrony_from_manifest(
+            str(manifest_csv),
+            str(tmp_path / "outputs"),
+            artifact_root=str(artifact_root),
+        )
+    finally:
+        sync_mod.survey_epilepsiae_dataset = original_survey
+
+    assert len(rows) == 1
+    # Legacy path should win: the saved npz must come from the legacy lagPat.
+    assert "all_recs" in str(rows[0]["lagpat_npz_path"])
+
+
 def test_run_yuquan_interictal_synchrony(tmp_path: Path) -> None:
     artifact_root = tmp_path / "yuquan"
     subject_dir = artifact_root / "litengsheng"
