@@ -1209,6 +1209,34 @@ def _json_default(obj):
     raise TypeError(f"unserializable {type(obj).__name__}")
 
 
+PER_SUBJECT_REQUIRED_KEYS = {
+    "dataset", "subject", "n_seizures_used", "n_seizures_dropped",
+    "dropped_seizure_reasons", "n_seizures_m2_dropped_low_sfreq",
+    "n_channels_total", "sfreq", "m2_eligible", "channel_matching",
+    "baseline_rate_per_channel", "k_primary_size_matched", "results",
+    "overlap_with_clinical", "headline_primary",
+    "per_seizure_consistency", "time_shifted_null",
+    "m2_ineligible_channels", "preprocessing",
+}
+
+
+def _per_subject_json_is_current(json_path: Path) -> bool:
+    """Returns True iff the existing per-subject JSON has every locked
+    Step 3 schema field. Old-schema files (pre-P1.1 / pre-P1.2 / pre-
+    P2.1) are returned False so --skip-existing re-runs them.
+    """
+    if not json_path.exists():
+        return False
+    try:
+        with json_path.open() as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return False
+    if not isinstance(data, dict):
+        return False
+    return PER_SUBJECT_REQUIRED_KEYS.issubset(set(data.keys()))
+
+
 def run_per_subject(
     output_dir: Path,
     subject_filter: Optional[str] = None,
@@ -1219,9 +1247,12 @@ def run_per_subject(
 ) -> int:
     """Iterate audit_eligible subjects and write per-subject JSON each.
 
-    ``skip_existing=True`` short-circuits subjects whose JSON already
-    exists under ``output_dir/per_subject/``. Useful when resuming
-    after a partial cohort run.
+    ``skip_existing=True`` short-circuits subjects whose JSON **already
+    matches the current locked schema** (P2.2: a stale JSON from a
+    previous run that lacks new required fields is re-run).
+
+    Returns 0 only if (1) at least one subject succeeded AND (2) zero
+    audit-eligible subjects failed (P2.2 strict failure semantics).
     """
     audit_csv = output_dir / "audit.csv"
     if not audit_csv.exists():
@@ -1239,13 +1270,20 @@ def run_per_subject(
     per_subject_dir = output_dir / "per_subject"
     if skip_existing:
         before = len(rows)
-        rows = [
-            r for r in rows
-            if not (per_subject_dir / f"{r['dataset']}_{r['subject']}.json").exists()
-        ]
+        kept_rows = []
+        stale_skipped = 0
+        for r in rows:
+            json_path = per_subject_dir / f"{r['dataset']}_{r['subject']}.json"
+            if _per_subject_json_is_current(json_path):
+                continue
+            if json_path.exists():
+                stale_skipped += 1
+            kept_rows.append(r)
+        rows = kept_rows
         print(
-            f"[run] --skip-existing: {before - len(rows)} subjects already done, "
-            f"{len(rows)} remaining",
+            f"[run] --skip-existing: {before - len(rows)} subjects already done "
+            f"with current schema; {stale_skipped} stale (re-running); "
+            f"{len(rows)} subjects total to process",
             flush=True,
         )
         if not rows:
@@ -1264,6 +1302,7 @@ def run_per_subject(
         flush=True,
     )
     written = 0
+    failed: List[str] = []
     for r in rows:
         try:
             out = run_subject(
@@ -1279,9 +1318,19 @@ def run_per_subject(
             )
             if out is not None:
                 written += 1
+            else:
+                failed.append(f"{r['dataset']}/{r['subject']}")
         except Exception as exc:
             print(f"[run] {r['dataset']}/{r['subject']}: FAILED — {exc}", flush=True)
-    print(f"[run] wrote {written}/{len(rows)} per-subject JSONs", flush=True)
+            failed.append(f"{r['dataset']}/{r['subject']}")
+    print(
+        f"[run] wrote {written}/{len(rows)} per-subject JSONs; "
+        f"{len(failed)} failed",
+        flush=True,
+    )
+    if failed:
+        print(f"[run] FAILED subjects: {', '.join(failed)}", flush=True)
+        return 1
     return 0 if written > 0 else 1
 
 

@@ -1300,6 +1300,117 @@ def test_per_subject_runner_drops_low_sfreq_blocks_from_m2_only():
     assert res["n_seizures_m2_dropped_low_sfreq"] == 1
 
 
+def test_run_per_subject_returns_nonzero_when_any_subject_fails(tmp_path, monkeypatch):
+    """A failing subject must NOT be silently swallowed by run_per_subject:
+    return non-zero so cron / batch wrappers can detect partial cohort
+    failures rather than treat 23/24 as success.
+    """
+    import scripts.run_data_driven_soz as runner
+
+    output_dir = tmp_path / "data_driven_soz"
+    output_dir.mkdir()
+    audit_path = output_dir / "audit.csv"
+    audit_path.write_text(
+        "dataset,subject,audit_eligible\n"
+        "epilepsiae,A,1\n"
+        "epilepsiae,B,1\n"
+    )
+
+    def fake_run_subject(*, dataset, subject, **kwargs):
+        if subject == "A":
+            (output_dir / "per_subject").mkdir(exist_ok=True)
+            (output_dir / "per_subject" / f"{dataset}_{subject}.json").write_text(
+                "{}"
+            )
+            return output_dir / "per_subject" / f"{dataset}_{subject}.json"
+        raise RuntimeError("synthetic failure for B")
+
+    monkeypatch.setattr(runner, "run_subject", fake_run_subject)
+    monkeypatch.setattr(runner, "load_epilepsiae_block_inventory", lambda p: {})
+    monkeypatch.setattr(
+        runner, "EPILEPSIAE_SOZ_JSON",
+        type("FakeJsonPath", (), {"open": staticmethod(lambda: __import__("io").StringIO("{}"))})()
+    )
+    monkeypatch.setattr(
+        runner, "YUQUAN_SOZ_JSON",
+        type("FakeJsonPath", (), {"open": staticmethod(lambda: __import__("io").StringIO("{}"))})()
+    )
+    rc = runner.run_per_subject(
+        output_dir=output_dir,
+        subject_filter=None,
+        null_n_iter=0,
+        null_rng_seed=0,
+    )
+    assert rc != 0, "run_per_subject must return non-zero when any subject fails"
+
+
+def test_skip_existing_revalidates_schema(tmp_path, monkeypatch):
+    """``--skip-existing`` must NOT skip subjects whose existing JSON is
+    missing required schema fields. Otherwise old-schema JSONs (e.g.
+    pre-P1.1 H_M2=0.0 or pre-P2.1 missing ``preprocessing``) get
+    silently consumed by Step 4 even though they need a re-run.
+    """
+    import scripts.run_data_driven_soz as runner
+
+    output_dir = tmp_path / "data_driven_soz"
+    output_dir.mkdir()
+    audit_path = output_dir / "audit.csv"
+    audit_path.write_text(
+        "dataset,subject,audit_eligible\n"
+        "epilepsiae,A,1\n"
+        "epilepsiae,B,1\n"
+    )
+    per_sub = output_dir / "per_subject"
+    per_sub.mkdir()
+    # A: complete schema (every required field present).
+    (per_sub / "epilepsiae_A.json").write_text(__import__("json").dumps({
+        k: None for k in [
+            "dataset", "subject", "n_seizures_used", "n_seizures_dropped",
+            "dropped_seizure_reasons", "n_seizures_m2_dropped_low_sfreq",
+            "n_channels_total", "sfreq", "m2_eligible", "channel_matching",
+            "baseline_rate_per_channel", "k_primary_size_matched", "results",
+            "overlap_with_clinical", "headline_primary",
+            "per_seizure_consistency", "time_shifted_null",
+            "m2_ineligible_channels", "preprocessing",
+        ]
+    }))
+    # B: stale (missing the new "preprocessing" key).
+    (per_sub / "epilepsiae_B.json").write_text(__import__("json").dumps({
+        k: None for k in [
+            "dataset", "subject", "n_seizures_used",
+        ]
+    }))
+
+    seen: List[str] = []
+
+    def fake_run_subject(*, dataset, subject, **kwargs):
+        seen.append(subject)
+        (per_sub / f"{dataset}_{subject}.json").write_text("{}")
+        return per_sub / f"{dataset}_{subject}.json"
+
+    monkeypatch.setattr(runner, "run_subject", fake_run_subject)
+    monkeypatch.setattr(runner, "load_epilepsiae_block_inventory", lambda p: {})
+    monkeypatch.setattr(
+        runner, "EPILEPSIAE_SOZ_JSON",
+        type("FakeJsonPath", (), {"open": staticmethod(lambda: __import__("io").StringIO("{}"))})()
+    )
+    monkeypatch.setattr(
+        runner, "YUQUAN_SOZ_JSON",
+        type("FakeJsonPath", (), {"open": staticmethod(lambda: __import__("io").StringIO("{}"))})()
+    )
+    rc = runner.run_per_subject(
+        output_dir=output_dir,
+        subject_filter=None,
+        null_n_iter=0,
+        null_rng_seed=0,
+        skip_existing=True,
+    )
+    # B was stale → must be re-run. A was complete → skipped.
+    assert "B" in seen, "subject B has stale schema; must be re-run, not skipped"
+    assert "A" not in seen, "subject A has complete schema; should have been skipped"
+    assert rc == 0
+
+
 def test_per_subject_runner_records_preprocessing_metadata():
     """Step 4 sensitivity comparison must distinguish between the
     partial-loader / no-notch path and the legacy full-block + notch
