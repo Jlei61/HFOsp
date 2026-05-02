@@ -2,7 +2,6 @@
   "_schema": "subject_params_v1",
   "_doc": "Per-subject parameter registry. Subject entries inherit from dataset _defaults. Only override what differs.",
   "_pack_doc": "Pack-stage fields (yuquan): `pick_k` here is the pack-stage mean+k*std threshold (legacy P16 sub_pickT_list). `pack_win_sec` is legacy P16 sub_packWL_list (default 0.300). `pack_drop_channels` mirrors legacy P16 module-level `drop_chns`, which is globally empty for every yuquan subject; per-subject `drop_channels` only applies to the detector stage. `pack_top_n` is an explicit per-subject pack-stage cardinality cap; do NOT introduce silently — only present if it has a written justification in docs/archive/yuquan_lagpat/.",
-
   "yuquan": {
     "_defaults": {
       "reference": "bipolar",
@@ -14,48 +13,179 @@
       "min_gap_ms": 20.0,
       "min_last_ms": 50.0,
       "max_last_ms": 200.0,
-      "band": [80, 250],
+      "band": [
+        80,
+        250
+      ],
       "pick_k": 1.0,
       "refine_pick_k": 1.0,
-      "pack_win_sec": 0.300,
+      "pack_win_sec": 0.3,
       "pack_drop_channels": [],
       "legacy_align": true,
-      "notch_freqs": [50, 100, 150, 200, 250],
+      "notch_freqs": [
+        50,
+        100,
+        150,
+        200,
+        250
+      ],
       "chunk_sec": 200.0,
       "data_root": "/mnt/yuquan_data/yuquan_24h_edf",
       "file_format": "edf"
     },
-    "chengshuai":   {"drop_channels": [],         "pack_win_sec": 0.500},
-    "chenziyang":   {"drop_channels": ["H4"]},
-    "hanyuxuan":    {"drop_channels": []},
-    "huanghanwen":  {"drop_channels": ["A7"],     "pack_win_sec": 0.200},
-    "huangwanling": {"drop_channels": ["J7"],     "pick_k": 3.0},
-    "litengsheng":  {"drop_channels": ["H5"]},
-    "liyouran":     {"drop_channels": ["B6"],     "pack_win_sec": 0.250},
-    "pengzihang":   {"drop_channels": ["C'5"],    "pack_win_sec": 0.500},
-    "songzishuo":   {"drop_channels": ["G4"]},
-    "xuxinyi":      {"drop_channels": ["B5"],     "pick_k": 0.7, "pack_win_sec": 0.200},
-    "zhangbichen":  {"drop_channels": [],         "pick_k": 0.5},
-    "zhangjiaqi":   {"drop_channels": ["E6"],     "pick_k": 1.7, "pack_win_sec": 0.150},
-    "zhaochenxi":   {"drop_channels": ["H6"],     "pick_k": 0.5},
-    "zhaojinrui":   {"drop_channels": ["L7", "K13"]},
-    "zhourongxuan": {"drop_channels": ["A6"],     "pack_win_sec": 0.200},
-    "zhangkexuan":  {"drop_channels": [],         "pick_k": 0.5, "pack_win_sec": 0.500},
-    "zhangjinhan":  {"drop_channels": ["A8"],     "pack_win_sec": 0.200},
-    "gaolan":       {"drop_channels": ["B'4"],    "pick_k": 1.9},
-    "wangyiyang":   {"drop_channels": [],         "pack_win_sec": 0.250, "pack_top_n": 22, "_pack_top_n_status": "explicit_per_subject_pack_cap (option-A in plan resolve-special-cases). Caps the pack-stage picked alias set to legacy cardinality (22) so that chns_thr=0.5 keeps group-window threshold at 11 instead of 12 once new refine drift admits 2 extra channels. Without the cap one real legacy-covered edge event in FA0012PF disappears. Removing this cap and re-quantifying drift is option-B and is recorded as a follow-up in docs/archive/yuquan_lagpat/wangyiyang_pack_top_n_decision.md."},
-    "sunyuanxin":   {"drop_channels": [],         "pack_win_sec": 0.250},
-    "dongyiming":   {"drop_channels": [],         "pick_k": 0.5, "pack_win_sec": 0.220},
-    "fengling":     {"drop_channels": []},
-    "wangyaobei":   {"drop_channels": ["C8"]},
-    "weiwei":       {"drop_channels": ["A9", "D1", "D2", "D3", "D4"]},
-    "xingjiale":    {"drop_channels": []},
-    "yangyuxuan":   {"drop_channels": []},
-    "zhaijiaxu":    {"drop_channels": ["K9"]},
-    "zhouwenxin":   {"drop_channels": ["H'7"]},
-    "gengzishuo":   {"drop_channels": ["A8"]}
+    "chengshuai": {
+      "drop_channels": [],
+      "pack_win_sec": 0.5
+    },
+    "chenziyang": {
+      "drop_channels": [
+        "H4"
+      ]
+    },
+    "hanyuxuan": {
+      "drop_channels": []
+    },
+    "huanghanwen": {
+      "drop_channels": [
+        "A7"
+      ],
+      "pack_win_sec": 0.2
+    },
+    "huangwanling": {
+      "drop_channels": [
+        "J7"
+      ],
+      "pick_k": 3.0
+    },
+    "litengsheng": {
+      "drop_channels": [
+        "H5"
+      ]
+    },
+    "liyouran": {
+      "drop_channels": [
+        "B6"
+      ],
+      "pack_win_sec": 0.25
+    },
+    "pengzihang": {
+      "drop_channels": [
+        "C'5"
+      ],
+      "pack_win_sec": 0.5
+    },
+    "songzishuo": {
+      "drop_channels": [
+        "G4"
+      ]
+    },
+    "xuxinyi": {
+      "drop_channels": [
+        "B5"
+      ],
+      "pick_k": 0.7,
+      "pack_win_sec": 0.2
+    },
+    "zhangbichen": {
+      "drop_channels": [],
+      "pick_k": 0.5
+    },
+    "zhangjiaqi": {
+      "drop_channels": [
+        "E6"
+      ],
+      "pick_k": 1.7,
+      "pack_win_sec": 0.15
+    },
+    "zhaochenxi": {
+      "drop_channels": [
+        "H6"
+      ],
+      "pick_k": 0.5
+    },
+    "zhaojinrui": {
+      "drop_channels": [
+        "L7",
+        "K13"
+      ]
+    },
+    "zhourongxuan": {
+      "drop_channels": [
+        "A6"
+      ],
+      "pack_win_sec": 0.2
+    },
+    "zhangkexuan": {
+      "drop_channels": [],
+      "pick_k": 0.5,
+      "pack_win_sec": 0.5
+    },
+    "zhangjinhan": {
+      "drop_channels": [
+        "A8"
+      ],
+      "pack_win_sec": 0.2
+    },
+    "gaolan": {
+      "drop_channels": [
+        "B'4"
+      ],
+      "pick_k": 1.9
+    },
+    "wangyiyang": {
+      "drop_channels": [],
+      "pack_win_sec": 0.25,
+      "pack_top_n": 22,
+      "_pack_top_n_status": "explicit_per_subject_pack_cap (option-A in plan resolve-special-cases). Caps the pack-stage picked alias set to legacy cardinality (22) so that chns_thr=0.5 keeps group-window threshold at 11 instead of 12 once new refine drift admits 2 extra channels. Without the cap one real legacy-covered edge event in FA0012PF disappears. Removing this cap and re-quantifying drift is option-B and is recorded as a follow-up in docs/archive/yuquan_lagpat/wangyiyang_pack_top_n_decision.md."
+    },
+    "sunyuanxin": {
+      "drop_channels": [],
+      "pack_win_sec": 0.25
+    },
+    "dongyiming": {
+      "drop_channels": [],
+      "pick_k": 0.5,
+      "pack_win_sec": 0.22
+    },
+    "fengling": {
+      "drop_channels": []
+    },
+    "wangyaobei": {
+      "drop_channels": [
+        "C8"
+      ]
+    },
+    "weiwei": {
+      "drop_channels": [
+        "A9",
+        "D1",
+        "D2",
+        "D3",
+        "D4"
+      ]
+    },
+    "xingjiale": {
+      "drop_channels": []
+    },
+    "yangyuxuan": {
+      "drop_channels": []
+    },
+    "zhaijiaxu": {
+      "drop_channels": [
+        "K9"
+      ]
+    },
+    "zhouwenxin": {
+      "drop_channels": [
+        "H'7"
+      ]
+    },
+    "gengzishuo": {
+      "drop_channels": [
+        "A8"
+      ]
+    }
   },
-
   "epilepsiae": {
     "_defaults": {
       "reference": "car",
@@ -66,31 +196,146 @@
       "min_gap_ms": 20.0,
       "min_last_ms": 50.0,
       "max_last_ms": 200.0,
-      "band": [80, 250],
+      "band": [
+        80,
+        250
+      ],
       "pick_k": 1.0,
       "data_root": "/mnt/epilepsia_data",
       "file_format": "data_head",
-      "min_sfreq": 500
+      "min_sfreq": 500,
+      "pack_win_sec": 0.3,
+      "refine_pick_k": 1.0
     },
-    "253":  {"drop_channels": ["HRC5"]},
-    "1146": {"drop_channels": []},
-    "1096": {"drop_channels": ["HL1"]},
-    "1084": {"drop_channels": ["FL2", "FL3", "M1", "M2", "GC1"]},
-    "958":  {"drop_channels": []},
-    "922":  {"drop_channels": []},
-    "916":  {"drop_channels": ["PB13", "PB14", "PB15", "TB13", "TB14", "TB15", "AM15", "TS9", "TS10", "TS11", "TS12"]},
-    "620":  {"drop_channels": []},
-    "590":  {"drop_channels": ["GB8", "GB7", "BLC1"]},
-    "583":  {"drop_channels": []},
-    "548":  {"drop_channels": ["GB8"]},
-    "384":  {"drop_channels": ["GH8"]},
-    "139":  {"drop_channels": []},
-    "1150": {"drop_channels": []},
-    "442":  {"drop_channels": []},
-    "1125": {"drop_channels": []},
-    "1077": {"drop_channels": []},
-    "1073": {"drop_channels": []},
-    "818":  {"drop_channels": []},
-    "635":  {"drop_channels": []}
+    "253": {
+      "drop_channels": [
+        "HRC5"
+      ],
+      "pick_k": 0.2,
+      "pack_win_sec": 0.3
+    },
+    "1146": {
+      "drop_channels": [],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.25
+    },
+    "1096": {
+      "drop_channels": [
+        "HL1"
+      ],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.18
+    },
+    "1084": {
+      "drop_channels": [
+        "FL2",
+        "FL3",
+        "M1",
+        "M2",
+        "GC1"
+      ],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.18
+    },
+    "958": {
+      "drop_channels": [],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.25
+    },
+    "922": {
+      "drop_channels": [],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.2
+    },
+    "916": {
+      "drop_channels": [
+        "PB13",
+        "PB14",
+        "PB15",
+        "TB13",
+        "TB14",
+        "TB15",
+        "AM15",
+        "TS9",
+        "TS10",
+        "TS11",
+        "TS12"
+      ],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.15
+    },
+    "620": {
+      "drop_channels": [],
+      "pick_k": 0.5,
+      "pack_win_sec": 0.22
+    },
+    "590": {
+      "drop_channels": [
+        "GB8",
+        "GB7",
+        "BLC1"
+      ],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.5
+    },
+    "583": {
+      "drop_channels": [],
+      "pick_k": 0.6,
+      "pack_win_sec": 0.22
+    },
+    "548": {
+      "drop_channels": [
+        "GB8"
+      ],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.3
+    },
+    "384": {
+      "drop_channels": [
+        "GH8"
+      ],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.4
+    },
+    "139": {
+      "drop_channels": [],
+      "pick_k": 0.5,
+      "pack_win_sec": 0.2
+    },
+    "1150": {
+      "drop_channels": [],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.3
+    },
+    "442": {
+      "drop_channels": [],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.3
+    },
+    "1125": {
+      "drop_channels": [],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.15
+    },
+    "1077": {
+      "drop_channels": [],
+      "pick_k": 0.5,
+      "pack_win_sec": 0.2
+    },
+    "1073": {
+      "drop_channels": [],
+      "pick_k": 1.5,
+      "pack_win_sec": 0.11
+    },
+    "818": {
+      "drop_channels": [],
+      "pick_k": 1.0,
+      "pack_win_sec": 0.25
+    },
+    "635": {
+      "drop_channels": [],
+      "pick_k": 0.5,
+      "pack_win_sec": 0.2
+    }
   }
 }

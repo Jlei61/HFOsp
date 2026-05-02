@@ -855,6 +855,101 @@ def _count_overlapping_windows_per_channel(
     return out
 
 
+def refine_packed_windows_by_all_bool(
+    packed_windows: Sequence[EventWindow],
+    all_detections: Mapping[str, np.ndarray],
+    *,
+    fs: float = 500.0,
+    thresh: float = 0.7,
+) -> List[EventWindow]:
+    """Reject packed windows where >= ``thresh`` fraction of ALL channels have events.
+
+    Literal port of legacy ``hfo_net.py::refine_packedEvents_byAllBool``
+    (see ReplayIED/inter_events/epilepsiae_interictal/hfo_net.py:559). Such
+    windows are typically synchronized noise (movement, EMG, ictal spread)
+    rather than localized HFO group activity.
+
+    Parameters
+    ----------
+    packed_windows
+        EventWindow list output by :func:`build_windows_from_detections` (or
+        equivalent). Untouched if all windows are kept.
+    all_detections
+        Per-channel detection arrays for **all** channels — not just the
+        picked / core subset. Each value is a (n_dets, 2) seconds array.
+    fs
+        Time-axis sampling rate for the boolean rasterization. Legacy uses
+        500 Hz.
+    thresh
+        Drop windows where ``bool_sum >= thresh * n_channels``. Legacy default
+        is 0.7.
+
+    Returns
+    -------
+    list of EventWindow
+        Filtered windows (subset of input). Indices are renumbered 0..N-1.
+    """
+    if len(packed_windows) == 0:
+        return []
+    n_ch = len(all_detections)
+    if n_ch == 0:
+        return list(packed_windows)
+    if not (0.0 < thresh <= 1.0):
+        raise ValueError("thresh must be in (0, 1]")
+
+    packed_arr = np.asarray(
+        [[float(w.start), float(w.end)] for w in packed_windows], dtype=np.float64
+    )
+
+    # Rasterize all channels onto a single boolean grid (legacy index_matrix).
+    all_arrs: List[np.ndarray] = []
+    t_max = 0.0
+    for _, dets in all_detections.items():
+        arr = np.asarray(dets, dtype=np.float64) if dets is not None else np.zeros((0, 2))
+        if arr.size == 0:
+            all_arrs.append(np.zeros((0, 2), dtype=np.float64))
+            continue
+        arr = _ensure_2col_times(arr)
+        all_arrs.append(arr)
+        t_max = max(t_max, float(np.max(arr[:, 1])))
+
+    t_max = max(t_max, float(np.max(packed_arr)))
+    n_bins = int((t_max + 1.0) * float(fs))
+    if n_bins <= 0:
+        return list(packed_windows)
+
+    # Per-channel boolean: did this channel have ANY event during this packed window?
+    bool_matrix = np.zeros((n_ch, len(packed_windows)), dtype=np.uint8)
+    for ci, arr in enumerate(all_arrs):
+        if arr.size == 0:
+            continue
+        ch_bool = np.zeros((n_bins,), dtype=np.uint8)
+        for s, e in arr:
+            i0 = int(float(s) * float(fs))
+            i1 = int(float(e) * float(fs))
+            i0 = max(0, min(n_bins, i0))
+            i1 = max(0, min(n_bins, i1))
+            if i1 > i0:
+                ch_bool[i0:i1] = 1
+        for ti, (ws, we) in enumerate(packed_arr):
+            wi0 = int(float(ws) * float(fs))
+            wi1 = int(float(we) * float(fs))
+            wi0 = max(0, min(n_bins, wi0))
+            wi1 = max(0, min(n_bins, wi1))
+            if wi1 > wi0 and np.any(ch_bool[wi0:wi1]):
+                bool_matrix[ci, ti] = 1
+
+    bool_sum = np.sum(bool_matrix, axis=0)
+    keep_mask = bool_sum < (float(thresh) * float(n_ch))
+    out: List[EventWindow] = []
+    new_idx = 0
+    for w, keep in zip(packed_windows, keep_mask):
+        if keep:
+            out.append(EventWindow(float(w.start), float(w.end), event_id=int(new_idx)))
+            new_idx += 1
+    return out
+
+
 def _legacy_rehist_events_by_packing(
     detections: Mapping[str, np.ndarray],
     packed_windows: Sequence[EventWindow],
@@ -920,6 +1015,7 @@ def legacy_refine_counts_from_detection_sets(
     refine_chns_thr: float = 0.5,
     refine_time_axis_hz: float = 500.0,
     refine_max_window_sec: float = 2.0,
+    refine_all_bool_thresh: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     Reproduce subject-level `_refineGpu.npz` logic from the legacy Yuquan pipeline.
@@ -989,6 +1085,16 @@ def legacy_refine_counts_from_detection_sets(
             max_window_sec=float(refine_max_window_sec),
             t_max_sec=None,
         )
+        # Δ1 (legacy contract): drop synchronized-noise windows where >= thresh
+        # fraction of ALL channels have events. Reference: legacy synRefine
+        # epilepsiae_synRefine_supressAllSyn.py:96.
+        if refine_all_bool_thresh is not None and len(windows) > 0:
+            windows = refine_packed_windows_by_all_bool(
+                windows,
+                dets,
+                fs=float(refine_time_axis_hz),
+                thresh=float(refine_all_bool_thresh),
+            )
         windows_by_file.append(
             np.asarray([[float(w.start), float(w.end)] for w in windows], dtype=np.float64)
         )
@@ -1028,6 +1134,7 @@ def legacy_refine_counts_from_gpu_npz_paths(
     refine_chns_thr: float = 0.5,
     refine_time_axis_hz: float = 500.0,
     refine_max_window_sec: float = 2.0,
+    refine_all_bool_thresh: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Recompute legacy `_refineGpu` counts from existing per-record `*_gpu.npz` files."""
     paths = [str(p) for p in gpu_npz_paths]
@@ -1066,6 +1173,7 @@ def legacy_refine_counts_from_gpu_npz_paths(
         refine_chns_thr=float(refine_chns_thr),
         refine_time_axis_hz=float(refine_time_axis_hz),
         refine_max_window_sec=float(refine_max_window_sec),
+        refine_all_bool_thresh=refine_all_bool_thresh,
     )
     out["gpu_npz_paths"] = paths
     return out
@@ -1081,6 +1189,7 @@ def save_refine_gpu_npz(
     refine_chns_thr: float = 0.5,
     refine_time_axis_hz: float = 500.0,
     refine_max_window_sec: float = 2.0,
+    refine_all_bool_thresh: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Produce and save ``_refineGpu.npz`` from per-record ``*_gpu.npz`` files.
 
@@ -1101,6 +1210,7 @@ def save_refine_gpu_npz(
         refine_chns_thr=refine_chns_thr,
         refine_time_axis_hz=refine_time_axis_hz,
         refine_max_window_sec=refine_max_window_sec,
+        refine_all_bool_thresh=refine_all_bool_thresh,
     )
 
     np.savez(

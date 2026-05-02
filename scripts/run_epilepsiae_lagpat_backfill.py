@@ -66,20 +66,43 @@ def _refine_path_for_subject(subject: str) -> Path:
     return NEW_GPU_ROOT / subject / "_refineGpu.npz"
 
 
-def _select_core_indices_mean_plus_std(events_count: np.ndarray) -> np.ndarray:
-    """Legacy Epilepsiae pack uses `events_count > mean + 1*std` as core mask.
+def _select_core_indices_mean_plus_k_std(events_count: np.ndarray, k: float = 1.0) -> np.ndarray:
+    """Legacy Epilepsiae pack uses `events_count > mean + k*std` as core mask.
 
-    Source: legacy `p16_packGroupEvents_*.py` Epilepsiae path:
-        all_chnCounts = refine_counts
-        pickChns_index = np.where(all_chnCounts > mean + 1 * std)[0]
-    Implementation must match this exactly so Stage C audit measures pipeline
-    drift, not selector drift.
+    Source: legacy `epilepsiae_packGroupEvents_supressAllSyn_withFreqCenter.py:275`:
+        pickChns_index = np.where(all_chnCounts > (all_chnCounts_mean + pickChn_thresh*all_chnCounts_std))[0]
+    Where ``pickChn_thresh`` is per-subject (legacy ``sub_pickT_list`` ranges 0.2–1.5).
     """
     arr = np.asarray(events_count, dtype=float)
     if arr.size == 0:
         return np.empty((0,), dtype=int)
-    thr = arr.mean() + arr.std()
+    thr = arr.mean() + float(k) * arr.std()
     return np.where(arr > thr)[0]
+
+
+# Backwards-compatible alias for k=1.0 (used elsewhere; equivalent to legacy default).
+def _select_core_indices_mean_plus_std(events_count: np.ndarray) -> np.ndarray:
+    return _select_core_indices_mean_plus_k_std(events_count, k=1.0)
+
+
+@lru_cache(maxsize=64)
+def _load_subject_pack_params(subject: str) -> Tuple[float, float]:
+    """Read per-subject pack-stage hyperparameters from config/subject_params.json.
+
+    Returns ``(pick_k, pack_win_sec)``. Falls back to dataset _defaults
+    (pick_k=1.0, pack_win_sec=0.3) if subject is missing.
+    Plan reference: docs/archive/epilepsiae_lagpat/legacy_replication_audit_2026-05-03.md
+    Δ2 + Δ3.
+    """
+    config_path = Path("config/subject_params.json")
+    with open(config_path) as fh:
+        cfg = json.load(fh)
+    epi = cfg.get("epilepsiae", {})
+    defaults = epi.get("_defaults", {})
+    sub = epi.get(str(subject), {})
+    pick_k = float(sub.get("pick_k", defaults.get("pick_k", 1.0)))
+    pack_win_sec = float(sub.get("pack_win_sec", defaults.get("pack_win_sec", 0.3)))
+    return pick_k, pack_win_sec
 
 
 @lru_cache(maxsize=32)
@@ -118,7 +141,9 @@ def load_refine_chns_for_subject(
                 f"chns_names ({all_names.shape[0]}) and events_count "
                 f"({ec.shape[0]}) length mismatch in {refine_path}"
             )
-        core_idx = _select_core_indices_mean_plus_std(ec)
+        # Apply per-subject pick_k (legacy sub_pickT_list); falls back to 1.0.
+        pick_k, _ = _load_subject_pack_params(subject)
+        core_idx = _select_core_indices_mean_plus_k_std(ec, k=pick_k)
         return tuple(str(c) for c in all_names[core_idx])
     raise ValueError(
         f"Unknown core-chns strategy {strategy!r}; expected 'mean_plus_std' or 'refine_all'."
@@ -177,7 +202,10 @@ def pack_record(subject: str, stem: str) -> np.ndarray:
     empty (0, 2) array if there are no participating channels or no surviving
     windows.
     """
-    from src.group_event_analysis import build_windows_from_detections
+    from src.group_event_analysis import (
+        build_windows_from_detections,
+        refine_packed_windows_by_all_bool,
+    )
 
     gpu_path = NEW_GPU_ROOT / subject / f"{stem}_gpu.npz"
     z = np.load(gpu_path, allow_pickle=True)
@@ -186,27 +214,46 @@ def pack_record(subject: str, stem: str) -> np.ndarray:
 
     refine_chns_set = set(load_refine_chns_for_subject(subject))
 
+    # Per-subject pack window length (legacy sub_packWL_list, 110-500ms).
+    _, pack_win_sec = _load_subject_pack_params(subject)
+
+    # Build BOTH the picked dict (drives packing) and the all-channel dict
+    # (drives synchronized-noise rejection per legacy contract Δ1).
     detections: Dict[str, np.ndarray] = {}
+    all_detections: Dict[str, np.ndarray] = {}
     for i, ch in enumerate(chns_names):
-        if ch not in refine_chns_set:
-            continue
         arr = np.atleast_2d(np.asarray(whole_dets[i], dtype=float))
         if arr.size == 0:
             continue
-        detections[ch] = arr
+        all_detections[ch] = arr
+        if ch in refine_chns_set:
+            detections[ch] = arr
 
     if not detections:
         return np.empty((0, 2), dtype=float)
 
     windows = build_windows_from_detections(
         detections,
-        window_sec=0.5,
+        window_sec=float(pack_win_sec),
         chns_thr=0.5,
         ext_ms=30.0,
         time_axis_hz=500.0,
     )
     if not windows:
         return np.empty((0, 2), dtype=float)
+
+    # Δ1 (legacy contract): drop synchronized-noise windows where >=70% of ALL
+    # channels (not just the picked subset) have events. Reference:
+    # ReplayIED/inter_events/epilepsiae_interictal/epilepsiae_packGroupEvents_supressAllSyn_withFreqCenter.py:297
+    windows = refine_packed_windows_by_all_bool(
+        windows,
+        all_detections,
+        fs=500.0,
+        thresh=0.7,
+    )
+    if not windows:
+        return np.empty((0, 2), dtype=float)
+
     return np.array([(w.start, w.end) for w in windows], dtype=float)
 
 

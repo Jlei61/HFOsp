@@ -107,19 +107,56 @@ def test_load_refine_chns_strategy_default_is_mean_plus_std():
     import scripts.run_epilepsiae_lagpat_backfill as mod
 
     mod.load_refine_chns_for_subject.cache_clear()
-    default = mod.load_refine_chns_for_subject("253")
-    refine_all = mod.load_refine_chns_for_subject("253", strategy="refine_all")
+    mod._load_subject_pack_params.cache_clear()
+    # Pick a subject with pick_k=1.0 so the test stays anchored to the legacy
+    # mean+std formula (subject 1084 has legacy pick_k=1.0).
+    default = mod.load_refine_chns_for_subject("1084")
+    refine_all = mod.load_refine_chns_for_subject("1084", strategy="refine_all")
     assert len(default) <= len(refine_all)
-    # On real subject 253, refine_all has 29 chns; core has 4 (verified 2026-04-30)
-    assert len(refine_all) >= len(default)
-    # Default core must match _select_core_indices_mean_plus_std applied directly
-    z = np.load(mod._refine_path_for_subject("253"), allow_pickle=True)
+    z = np.load(mod._refine_path_for_subject("1084"), allow_pickle=True)
     all_names = np.asarray([str(c) for c in z["chns_names"]])
     ec = np.asarray(z["events_count"], dtype=float)
     expected = tuple(
         str(c) for c in all_names[mod._select_core_indices_mean_plus_std(ec)]
     )
     assert default == expected
+
+
+def test_load_subject_pack_params_reads_per_subject_overrides():
+    """Per-subject pick_k and pack_win_sec must reflect subject_params.json.
+
+    Legacy contract: epilepsiae_packGroupEvents_supressAllSyn_withFreqCenter.py:459
+    sub_pickT_list = {'253':0.2, '1073':1.5, ...}
+    sub_packWL_list = {'253':0.300, '1073':0.110, ...}
+    """
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    mod._load_subject_pack_params.cache_clear()
+    pick_k_253, pack_win_253 = mod._load_subject_pack_params("253")
+    assert pick_k_253 == 0.2
+    assert abs(pack_win_253 - 0.3) < 1e-9
+
+    pick_k_1073, pack_win_1073 = mod._load_subject_pack_params("1073")
+    assert pick_k_1073 == 1.5
+    assert abs(pack_win_1073 - 0.11) < 1e-9
+
+
+def test_select_core_indices_uses_per_subject_pick_k_for_subject_253():
+    """Subject 253 uses pick_k=0.2 -> picks more channels than the global k=1.0
+    default. Anchors Δ2 of legacy_replication_audit_2026-05-03.md."""
+    import numpy as np
+
+    import scripts.run_epilepsiae_lagpat_backfill as mod
+
+    mod.load_refine_chns_for_subject.cache_clear()
+    mod._load_subject_pack_params.cache_clear()
+    default = mod.load_refine_chns_for_subject("253")  # k=0.2
+    z = np.load(mod._refine_path_for_subject("253"), allow_pickle=True)
+    ec = np.asarray(z["events_count"], dtype=float)
+    n_at_k_02 = int(np.sum(ec > ec.mean() + 0.2 * ec.std()))
+    n_at_k_10 = int(np.sum(ec > ec.mean() + 1.0 * ec.std()))
+    assert len(default) == n_at_k_02
+    assert len(default) >= n_at_k_10  # k=0.2 must pick at least as many as k=1.0
 
 
 def test_whole_dets_units_are_seconds():

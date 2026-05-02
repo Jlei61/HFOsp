@@ -415,10 +415,16 @@ def run_epilepsiae_subject(
         t0 = time.time()
 
         try:
+            # Epilepsiae legacy synRefine contract:
+            #   - refine_window_sec = 0.4 (legacy epilepsiae_synRefine_supressAllSyn:32 packWinLen=400e-3)
+            #   - refine_all_bool_thresh = 0.7 (legacy refine_packedEvents_byAllBool, missing pre-2026-05-03)
+            # See docs/archive/epilepsiae_lagpat/legacy_replication_audit_2026-05-03.md Δ1 + Δ4.
             refine_out = save_refine_gpu_npz(
                 [str(p) for p in gpu_paths],
                 refine_path,
                 pick_k=pick_k,
+                refine_window_sec=0.4,
+                refine_all_bool_thresh=0.7,
             )
             elapsed = time.time() - t0
             n_refined = len(refine_out.get("refined_channels", []))
