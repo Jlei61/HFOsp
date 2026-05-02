@@ -1118,6 +1118,11 @@ def run_subject(
             )
             if m2_eligible else None
         )
+        signal_loader_path = (
+            "epilepsiae_legacy_full_block_with_notch"
+            if use_legacy_epilepsiae_loader
+            else "epilepsiae_partial_no_notch"
+        )
     elif dataset == "yuquan":
         block_windows = yuquan_block_windows_from_npz(subject_dir)
         all_seizure_onsets, seizure_block_ids = yuquan_seizures_from_pr1_json(subject)
@@ -1132,6 +1137,7 @@ def run_subject(
             )
         else:
             signal_loader = None
+        signal_loader_path = "yuquan_mne_crop_load_bipolar"
     else:
         raise ValueError(f"unknown dataset {dataset!r}")
 
@@ -1168,6 +1174,7 @@ def run_subject(
         clinical_soz=clinical_soz,
         analysis_channels=channel_names,
         m2_eligible=m2_eligible,
+        signal_loader_path=signal_loader_path,
         null_n_iter=null_n_iter,
         null_rng_seed=null_rng_seed,
     )

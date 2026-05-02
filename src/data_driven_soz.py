@@ -1107,6 +1107,7 @@ def compute_per_subject_audit(
     null_n_iter: int = 200,
     null_rng_seed: int = 0,
     null_exclusion_radius_sec: float = 300.0,
+    signal_loader_path: str = "unknown",
 ) -> Dict[str, object]:
     """Step 3 orchestrator (plan §9 Step 3.2 / §3.3 schema).
 
@@ -1396,6 +1397,18 @@ def compute_per_subject_audit(
             "enrichment_true_over_shift_M2_logratio": None,
         }
 
+    # P2.1: record the preprocessing path the runner actually used so
+    # Step 4 sensitivity comparisons (partial-loader / no-notch vs
+    # legacy / full-block + notch) can split deterministically without
+    # relying on directory names.
+    preprocessing_meta = {
+        "signal_loader_path": str(signal_loader_path),
+        "band": [float(band[0]), float(band[1])],
+        "w_pre": float(w_pre),
+        "w_post": float(w_post),
+        "edge_buffer": float(edge_buffer),
+    }
+
     return {
         "dataset": dataset,
         "subject": subject,
@@ -1403,6 +1416,7 @@ def compute_per_subject_audit(
         "n_seizures_dropped": len(dropped_idx),
         "dropped_seizure_reasons": [drop_reasons[i] for i in dropped_idx],
         "n_seizures_m2_dropped_low_sfreq": int(n_seizures_m2_dropped_low_sfreq),
+        "preprocessing": preprocessing_meta,
         "n_channels_total": n_channels_total,
         "sfreq": float(sfreq),
         "m2_eligible": bool(m2_eligible),

@@ -1300,6 +1300,53 @@ def test_per_subject_runner_drops_low_sfreq_blocks_from_m2_only():
     assert res["n_seizures_m2_dropped_low_sfreq"] == 1
 
 
+def test_per_subject_runner_records_preprocessing_metadata():
+    """Step 4 sensitivity comparison must distinguish between the
+    partial-loader / no-notch path and the legacy full-block + notch
+    path. The orchestrator records this via a ``preprocessing`` dict
+    with stable keys; downstream Step 4 code splits the cohort by
+    ``preprocessing['signal_loader_path']`` rather than relying on
+    directory names.
+    """
+    from src.data_driven_soz import compute_per_subject_audit
+
+    sfreq = 1000.0
+    n_samples = int(60 * sfreq)
+    rng = np.random.default_rng(0)
+    block_signals = {"BLK0": rng.normal(0, 1, (n_samples, 1))}
+    block_windows = {"BLK0": (0.0, 60.0)}
+
+    def signal_loader(t_start, t_end, channels):
+        s0 = int(round(t_start * sfreq))
+        s1 = int(round(t_end * sfreq))
+        return block_signals["BLK0"][s0:s1, [0]], sfreq
+
+    hfo_events = {"chA": np.array([])}
+    res = compute_per_subject_audit(
+        dataset="testset",
+        subject="meta_test",
+        seizure_onsets=[],
+        seizure_block_ids=[],
+        block_windows=block_windows,
+        block_sfreqs={"BLK0": sfreq},
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=sfreq,
+        clinical_soz=["chA"],
+        analysis_channels=["chA"],
+        m2_eligible=True,
+        null_n_iter=0,
+        signal_loader_path="partial_no_notch",
+    )
+    assert "preprocessing" in res
+    pp = res["preprocessing"]
+    assert pp["signal_loader_path"] == "partial_no_notch"
+    assert pp["band"] == [80.0, 250.0]
+    assert pp["w_pre"] == 30.0
+    assert pp["w_post"] == 10.0
+    assert pp["edge_buffer"] == 2.0
+
+
 def test_time_shifted_null_m2_skip_is_structured_flag():
     """The M2 surrogate is intentionally skipped per-subject (each
     shifted draw would re-bandpass the full block; deferred to cohort
