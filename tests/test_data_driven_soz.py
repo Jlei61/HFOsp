@@ -1300,6 +1300,80 @@ def test_per_subject_runner_drops_low_sfreq_blocks_from_m2_only():
     assert res["n_seizures_m2_dropped_low_sfreq"] == 1
 
 
+def test_per_subject_runner_m2_ineligible_subject_emits_nan_not_zero():
+    """When ``m2_eligible=False`` (e.g. epilepsiae 139 / 253 with 256 / 512
+    Hz blocks), M2 was never computed. The previous behavior reported
+    H_M2=0.0 and empty top-k lists, which Step 4 cohort code would
+    average as a real zero into the M2 median — silently dragging the
+    cohort headline down.
+
+    The fix: emit ``None`` (JSON ``null``) for every M2-derived field
+    when M2 was not run. Step 4 must skip these subjects from the M2
+    distribution rather than treat them as observed zeros.
+    """
+    from src.data_driven_soz import compute_per_subject_audit
+
+    sfreq_hi = 1000.0
+    block_len_sec = 100.0
+    n_samples = int(block_len_sec * sfreq_hi)
+    rng = np.random.default_rng(0)
+
+    block_windows = {"BLK0": (0.0, block_len_sec)}
+    block_signals = {"BLK0": rng.normal(0, 1, (n_samples, 2))}
+
+    def signal_loader(t_start, t_end, channels):  # never called
+        raise AssertionError(
+            "signal_loader must NOT be called when m2_eligible=False"
+        )
+
+    hfo_events = {
+        "chA": np.array([45.0, 50.5, 55.0]),
+        "chB": np.array([46.0, 51.0, 56.0]),
+    }
+    res = compute_per_subject_audit(
+        dataset="testset",
+        subject="m2_ineligible_subj",
+        seizure_onsets=[50.0],
+        seizure_block_ids=["BLK0"],
+        block_windows=block_windows,
+        block_sfreqs={"BLK0": 256.0},   # below 525 Hz
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=256.0,
+        clinical_soz=["chA"],
+        analysis_channels=["chA", "chB"],
+        m2_eligible=False,             # subject-level skip
+        null_n_iter=0,
+    )
+
+    # H_M2 and H_concord must be None (JSON null), NOT 0.0.
+    assert res["headline_primary"]["H_M2_logratio_medianrank_size_matched"] is None
+    assert res["headline_primary"]["H_concord_M1_M2_size_matched"] is None
+    # H_M1 still a real number (M1 ran).
+    h_m1 = res["headline_primary"]["H_M1_pois_medianrank_size_matched"]
+    assert h_m1 is not None and isinstance(h_m1, float)
+
+    # M2 results dict must be None (or every k-list None), not empty.
+    m2_results = res["results"]["M2_logratio"]
+    for agg, by_k in m2_results.items():
+        for k_label, ranking in by_k.items():
+            assert ranking is None, (
+                f"results.M2_logratio.{agg}.{k_label} must be None for "
+                f"m2_eligible=False subject, got {ranking!r}"
+            )
+
+    # overlap_with_clinical M2 entries must be None.
+    for key, ov in res["overlap_with_clinical"].items():
+        if key.startswith("M2_logratio"):
+            assert ov is None, (
+                f"overlap_with_clinical.{key} must be None for "
+                f"m2_eligible=False subject, got {ov!r}"
+            )
+
+    # Per-seizure consistency M2 must be None.
+    assert res["per_seizure_consistency"]["M2_logratio_kPrimary"] is None
+
+
 def test_epilepsiae_partial_window_loader_short_read_raises(tmp_path):
     """A request beyond the file's sample count must raise — never
     silently truncate (would corrupt M2 windows)."""

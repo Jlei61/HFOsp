@@ -1203,7 +1203,13 @@ def compute_per_subject_audit(
         m2_kept_seizure_indices = list(range(len(kept_onsets)))
     m2_kept_onsets = [kept_onsets[i] for i in m2_kept_seizure_indices]
 
-    if m2_eligible and signal_loader is not None and m2_kept_onsets:
+    # Track whether M2 actually ran. ``m2_ran=False`` triggers the NaN /
+    # None propagation through every M2-derived field below — Step 4
+    # cohort code must be able to distinguish "M2 not run" from
+    # "M2 ran and found zero overlap" (P1.1 review fix).
+    m2_ran = bool(m2_eligible and signal_loader is not None and m2_kept_onsets)
+
+    if m2_ran:
         # Cohort power_pre matrix (n_m2_seizures, n_channels) over the full
         # analysis_channels set so eps_per_channel covers every channel.
         n_m2_kept = len(m2_kept_onsets)
@@ -1264,15 +1270,29 @@ def compute_per_subject_audit(
         method_results, clinical_matched_set, n_channels_total
     )
 
+    # P1.1: when M2 didn't actually run, replace every M2-derived ranking
+    # / overlap entry with None so Step 4 cohort code can distinguish
+    # "M2 not computed" from "M2 ran and overlapped zero channels".
+    # Returning 0.0 for these subjects would silently drag the cohort
+    # M2 median toward 0.
+    if not m2_ran:
+        for agg in method_results["M2_logratio"]:
+            for k_label in method_results["M2_logratio"][agg]:
+                method_results["M2_logratio"][agg][k_label] = None
+        for key in list(overlap_table):
+            if key.startswith("M2_logratio"):
+                overlap_table[key] = None
+
     headline_primary = {
         "H_M1_pois_medianrank_size_matched": overlap_table.get(
             "M1_pois_medianrank_k_primary", {}
         ).get("enrichment", float("nan")),
-        "H_M2_logratio_medianrank_size_matched": overlap_table.get(
-            "M2_logratio_medianrank_k_primary", {}
-        ).get("enrichment", float("nan")),
     }
-    if "M2_logratio" in per_seizure_scores_by_method and m2_eligible:
+    if m2_ran:
+        m2_overlap = overlap_table.get("M2_logratio_medianrank_k_primary")
+        headline_primary["H_M2_logratio_medianrank_size_matched"] = (
+            m2_overlap["enrichment"] if m2_overlap is not None else None
+        )
         m1_topk = set(method_results["M1_pois"]["medianrank"]["k_primary"])
         m2_topk = set(method_results["M2_logratio"]["medianrank"]["k_primary"])
         concord = m1_topk & m2_topk
@@ -1283,16 +1303,21 @@ def compute_per_subject_audit(
             "enrichment"
         ]
     else:
-        headline_primary["H_concord_M1_M2_size_matched"] = float("nan")
+        headline_primary["H_M2_logratio_medianrank_size_matched"] = None
+        headline_primary["H_concord_M1_M2_size_matched"] = None
 
     # ----- Per-seizure consistency -----
+    # P1.1: M2 consistency must be None (not NaN/0) when M2 didn't run.
     per_seizure_consistency = {
         "M1_pois_kPrimary": _per_seizure_consistency(
             per_seizure_scores_by_method["M1_pois"], k_primary
         ),
-        "M2_logratio_kPrimary": _per_seizure_consistency(
-            per_seizure_scores_by_method["M2_logratio"], k_primary
-        ) if m2_eligible else float("nan"),
+        "M2_logratio_kPrimary": (
+            _per_seizure_consistency(
+                per_seizure_scores_by_method["M2_logratio"], k_primary
+            )
+            if m2_ran else None
+        ),
     }
 
     # ----- Time-shifted null -----
