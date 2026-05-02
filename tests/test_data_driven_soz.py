@@ -1300,6 +1300,60 @@ def test_per_subject_runner_drops_low_sfreq_blocks_from_m2_only():
     assert res["n_seizures_m2_dropped_low_sfreq"] == 1
 
 
+def test_time_shifted_null_m2_skip_is_structured_flag():
+    """The M2 surrogate is intentionally skipped per-subject (each
+    shifted draw would re-bandpass the full block; deferred to cohort
+    level). Step 4 must be able to gate M2 true-vs-shifted reporting
+    deterministically — a structured boolean flag, not a free-text
+    note. Replace the legacy ``time_shifted_null['note_M2']`` string
+    with a typed ``m2_surrogate_skipped`` boolean and a stable
+    ``skip_reason`` string.
+    """
+    from src.data_driven_soz import compute_per_subject_audit
+
+    sfreq = 1000.0
+    block_len_sec = 100.0
+    n_samples = int(block_len_sec * sfreq)
+    rng = np.random.default_rng(0)
+    block_windows = {"BLK0": (0.0, block_len_sec)}
+    block_signals = {"BLK0": rng.normal(0, 1, (n_samples, 2))}
+
+    def signal_loader(t_start, t_end, channels):
+        s0 = int(round(t_start * sfreq))
+        s1 = int(round(t_end * sfreq))
+        ch_idx = {"chA": 0, "chB": 1}
+        cols = [ch_idx[ch] for ch in channels]
+        return block_signals["BLK0"][s0:s1, cols], sfreq
+
+    hfo_events = {
+        "chA": np.array([45.0, 50.5, 55.0]),
+        "chB": np.array([46.0, 51.0, 56.0]),
+    }
+    res = compute_per_subject_audit(
+        dataset="testset",
+        subject="m2_surrogate_test",
+        seizure_onsets=[50.0],
+        seizure_block_ids=["BLK0"],
+        block_windows=block_windows,
+        block_sfreqs={"BLK0": sfreq},
+        hfo_event_times_per_channel=hfo_events,
+        signal_loader=signal_loader,
+        sfreq=sfreq,
+        clinical_soz=["chA"],
+        analysis_channels=["chA", "chB"],
+        m2_eligible=True,
+        null_n_iter=5,
+    )
+    null = res["time_shifted_null"]
+    # Required structured fields:
+    assert null["m2_surrogate_skipped"] is True
+    assert isinstance(null.get("m2_skip_reason"), str)
+    assert null["m2_skip_reason"]  # non-empty
+    # M2 enrichment must be None (not NaN), so JSON serializes to null
+    # and Step 4 can use ``is None`` checks.
+    assert null["enrichment_true_over_shift_M2_logratio"] is None
+
+
 def test_per_subject_runner_m2_ineligible_subject_emits_nan_not_zero():
     """When ``m2_eligible=False`` (e.g. epilepsiae 139 / 253 with 256 / 512
     Hz blocks), M2 was never computed. The previous behavior reported

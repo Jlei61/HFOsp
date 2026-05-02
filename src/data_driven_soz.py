@@ -1362,27 +1362,38 @@ def compute_per_subject_audit(
             if (H_M1_shift_med and not math.isnan(H_M1_shift_med))
             else float("nan")
         )
+        # P1.2: M2 surrogate is intentionally skipped at the per-subject
+        # level — each shifted draw would re-bandpass the full block,
+        # multiplying the per-seizure load count by ``n_iter`` (= 200
+        # by default). The user-flagged review accepted this as a Step 3
+        # engineering trade-off but requires a structured boolean flag
+        # so Step 4 cohort code can deterministically gate the M2
+        # true-vs-shifted reporting (the previous free-text "note_M2"
+        # required string parsing).
         time_shifted_null_dict: Dict[str, object] = {
             "n_iter": null_n_iter,
             "rng_seed": null_rng_seed,
             "exclusion_radius_sec": null_exclusion_radius_sec,
             "H_M1_pois_shifted_median": H_M1_shift_med,
             "enrichment_true_over_shift_M1_pois": true_over_shift_m1,
+            "m2_surrogate_skipped": True,
+            "m2_skip_reason": (
+                "per-subject M2 surrogate not computed: each iteration "
+                "would re-bandpass the full window for every seizure "
+                "(n_iter * n_seizures additional loads); deferred to "
+                "Step 4 cohort-level computation if needed"
+            ),
+            "enrichment_true_over_shift_M2_logratio": None,
         }
-        if m2_eligible:
-            time_shifted_null_dict[
-                "enrichment_true_over_shift_M2_logratio"
-            ] = float("nan")
-            time_shifted_null_dict["note_M2"] = (
-                "M2 surrogate skipped: each shifted draw would re-load + "
-                "re-bandpass the full block; computed only at the cohort "
-                "level in Step 4 if needed"
-            )
     else:
         time_shifted_null_dict = {
             "n_iter": int(null_n_iter),
             "rng_seed": int(null_rng_seed),
             "skipped": "null_n_iter == 0 or no kept seizures",
+            "m2_surrogate_skipped": True,
+            "m2_skip_reason": "M1 surrogate also skipped (no kept seizures or null_n_iter == 0)",
+            "enrichment_true_over_shift_M1_pois": None,
+            "enrichment_true_over_shift_M2_logratio": None,
         }
 
     return {
