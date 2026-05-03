@@ -11,8 +11,13 @@ This module implements Layer A of the v2.1 pivot
   (``ok`` / ``onset_tied`` / ``onset_unreached`` / ``baseline_invalid``).
 - Cross-seizure ``r_sz`` (median rank per channel) and stability
   ``s_sz`` (median pairwise Spearman of rank vectors).
-- Time-shifted ``r_sz`` null surrogate (shifted onsets inside baseline
-  window, avoiding real seizures by ± exclusion radius).
+- **Blockwise pseudo-onset** ``r_sz`` null surrogate (pseudo-onsets
+  drawn from anywhere in the same block whose own resolved baseline
+  fits in-block, avoiding the real seizures by ± exclusion radius).
+  Note this is NOT "shift inside the original baseline window";
+  block-wide pseudo-onsets give a stronger null because they sample
+  the full non-seizure portion of the block, not just the 5 min
+  immediately before the real onset.
 
 **SCOPE-RESTRICTED**: Layer A is SOZ-purpose only. It does NOT
 implement template-ictal alignment / Smith 2022 H1 / H1' / r_template
@@ -58,6 +63,7 @@ __all__ = [
     "compute_seizure_status",
     "SeizureStatus",
     "compute_per_subject_r_sz",
+    "compute_per_channel_rsz_coverage",
     "compute_stability_s_sz",
     "time_shifted_seizure_onsets",
     "QUALIFYING_SEIZURE_STATUSES",
@@ -477,6 +483,65 @@ def compute_per_subject_r_sz(
     return out
 
 
+def compute_per_channel_rsz_coverage(
+    per_seizure_ranks: Sequence[Mapping[str, Optional[float]]],
+    *,
+    seizure_statuses: Sequence[str],
+) -> Dict[str, int]:
+    """Per-channel coverage = number of qualifying seizures with finite rank.
+
+    Plan §3.5 schema field ``r_sz_valid_count`` (added 2026-05-03 per
+    review). Without this, ``compute_per_subject_r_sz`` would let a
+    channel that activated in only 1 of 10 qualifying seizures get a
+    very early r_sz (median of one number = that number) and Layer B
+    would treat it as a top-k SOZ candidate. Layer B and downstream
+    sensitivity analysis MUST cross-reference this coverage to filter
+    spurious low-coverage early-firers.
+
+    Parameters
+    ----------
+    per_seizure_ranks
+        Per-seizure ``{channel_name: rank_or_None}`` from
+        ``rank_channels_by_n_d``.
+    seizure_statuses
+        Parallel list of per-seizure status strings.
+
+    Returns
+    -------
+    dict
+        ``{channel_name: int_count}`` over the union of all channel
+        keys appearing in any qualifying seizure's rank dict. Channels
+        missing from every qualifying seizure get count 0.
+    """
+    if len(per_seizure_ranks) != len(seizure_statuses):
+        raise ValueError(
+            f"length mismatch: per_seizure_ranks ({len(per_seizure_ranks)}) "
+            f"vs seizure_statuses ({len(seizure_statuses)})"
+        )
+    keep_idx = _qualifying_indices(seizure_statuses)
+    qualifying = [per_seizure_ranks[i] for i in keep_idx]
+
+    all_channels = set()
+    for r in per_seizure_ranks:
+        all_channels.update(r.keys())
+
+    out: Dict[str, int] = {}
+    for ch in all_channels:
+        n = 0
+        for r in qualifying:
+            v = r.get(ch)
+            if v is None:
+                continue
+            try:
+                vf = float(v)
+            except (TypeError, ValueError):
+                continue
+            if np.isfinite(vf):
+                n += 1
+        out[ch] = n
+    return out
+
+
 def _spearman_on_intersection(
     rank_a: Mapping[str, Optional[float]],
     rank_b: Mapping[str, Optional[float]],
@@ -570,19 +635,33 @@ def time_shifted_seizure_onsets(
     rng_seed: int = 0,
     max_resample_attempts: int = 200,
 ) -> np.ndarray:
-    """Generate ``n_iter`` shifted onset matrices for the null surrogate
-    (plan §5.1).
+    """**Blockwise pseudo-onset null** generator for ``r_sz`` (plan §5.1).
 
-    Each shifted onset must satisfy:
+    Renaming note (2026-05-03 review): an earlier draft of plan §5.1
+    described this as "shift inside baseline window" — that wording was
+    inaccurate. The actual contract is:
 
-    1. ``onset - baseline_pre_sec >= block_start_sec``
-       (the resolved baseline window fits inside the block on the left)
-    2. ``onset + baseline_buffer_sec <= block_end_sec``
-       (the post-onset buffer fits inside the block on the right —
-       Layer A doesn't need a long post window for r_sz, but a short
-       buffer prevents the shifted draw from running past block end)
-    3. ``|onset - real_onset| >= exclusion_radius_sec`` for every real
-       onset in the block (avoids re-sampling the actual seizure).
+        Sample pseudo-onsets uniformly from anywhere in the same block
+        whose own resolved baseline window fits in-block, while keeping
+        ± ``exclusion_radius_sec`` of every real onset.
+
+    This is a stronger null than "draw inside the original 5-min
+    pre-ictal window" because it samples the full non-seizure portion
+    of the block (including post-ictal stretches and any time far from
+    any seizure). The function name is kept for API stability; treat
+    it as ``generate_blockwise_pseudo_onsets`` semantically.
+
+    Each pseudo-onset must satisfy:
+
+    1. ``pseudo_onset - baseline_pre_sec >= block_start_sec``
+       (its OWN baseline window fits inside the block on the left)
+    2. ``pseudo_onset + baseline_buffer_sec <= block_end_sec``
+       (its OWN post-onset buffer fits inside the block on the right
+       — Layer A doesn't need a long post window for r_sz, but a short
+       buffer prevents the draw from running past block end)
+    3. ``|pseudo_onset - real_onset| >= exclusion_radius_sec`` for
+       every real onset in the block (avoids re-sampling the actual
+       seizure).
 
     For draws where the feasible set is empty (block too short, or
     every real-seizure exclusion zone covers it), the corresponding
@@ -593,8 +672,8 @@ def time_shifted_seizure_onsets(
     Returns
     -------
     np.ndarray
-        Shape ``(n_iter, len(real_onsets))`` of shifted absolute-epoch
-        onsets, with NaN where no valid draw was found within
+        Shape ``(n_iter, len(real_onsets))`` of pseudo-onset absolute-
+        epoch values, with NaN where no valid draw was found within
         ``max_resample_attempts`` tries.
     """
     if n_iter <= 0:

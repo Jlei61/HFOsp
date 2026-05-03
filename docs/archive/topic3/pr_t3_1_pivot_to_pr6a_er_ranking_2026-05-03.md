@@ -184,8 +184,15 @@ Layer A 在跑 cohort 前先在 sentinel 上目视检查：
 
 - z-ER trace 图（focal vs non-focal pre30s / post30s 中位 max）已由 PR-6A Step 2 产出，路径 `results/interictal_propagation/ictal_alignment/_sentinel_step2/<subject>_<seizure_idx>_<er>.png` —— **复用作为已知 baseline**
 - v2.1 新加：sentinel 上的 CUSUM 报警时刻 `n_d` per channel + per-subject `r_sz` + `s_sz` —— 由 v2.1 Layer A 新跑
+- v2.1 新加（2026-05-03 review）：sentinel 报告必须包含 `r_sz_valid_count` 分布——focal vs non-focal 通道的覆盖率应大致相当；若 focal 通道平均 coverage 显著低于 non-focal（提示 SOZ 通道在 sentinel 上反而不容易被 CUSUM 抓到），sentinel 写"focal coverage 偏低" 警告，配合 Wilcoxon 一起判读
 
-如果 sentinel `r_sz` 上 focal 通道的 rank 中位数 不显著早于 non-focal （Wilcoxon p > 0.1），Layer A pipeline 标可疑，写 archive sentinel report，**不进 cohort run**。
+Sentinel 判据（**全部满足才放行**）：
+
+1. focal 通道 `r_sz` 中位数显著早于 non-focal（Wilcoxon one-sided, p < 0.1），per ER config
+2. sentinel 至少 3 个 seizure 状态为 `ok`（不能全是 `onset_tied` / `onset_unreached`）
+3. focal 通道平均 `r_sz_valid_count` ≥ non-focal 平均 `r_sz_valid_count` × 0.5（focal 的 coverage 不能比 non-focal 小一半以上）
+
+任一条件不满足 → archive sentinel report，**不进 cohort run**。
 
 ### 3.5 Layer A — per-subject JSON schema（v2.1 锁定）
 
@@ -206,9 +213,13 @@ Layer A 在跑 cohort 前先在 sentinel 上目视检查：
     "cohort_assignment_broad":  "strict" | "relaxed" | "dropped"
   },
   "r_sz": {
-    "gamma_ER": {"<channel>": float, ...},
+    "gamma_ER": {"<channel>": float, ...},     # null when channel never had finite rank
     "broad_ER": {"<channel>": float, ...}
   },
+  "r_sz_valid_count": {                # added 2026-05-03 per review (§10 A8c)
+    "gamma_ER": {"<channel>": int, ...},      # # qualifying seizures with finite rank
+    "broad_ER": {"<channel>": int, ...}       # Layer B uses this to filter low-coverage
+  },                                          # spurious early-firers from top-k
   "n_d_per_seizure": {                # detection times for downstream sanity / re-rank
     "gamma_ER": [{"seizure_id": str, "<channel>": float|null, ...}, ...],
     "broad_ER": [...]
@@ -268,6 +279,7 @@ data_driven_top_k = sorted(channels by r_sz)[:k]   # r_sz 升序
       "data_driven_soz_channels": [str, ...],
       "k_primary": int,
       "rsz_full_rank": {"<channel>": float, ...},
+      "rsz_valid_count": {"<channel>": int, ...},   # added 2026-05-03 per review
       "stability_score": float
     },
     ...
@@ -357,13 +369,15 @@ cohort 报告：`enrichment` 中位数 + IQR + 直方图 per (ER_config × stabi
 
 ## 5. Surrogate / null（v2.1 简化）
 
-### 5.1 Time-shifted r_sz null（Layer A 内）
+### 5.1 Blockwise pseudo-onset r_sz null（Layer A 内）
 
-每 subject × 每套 ER 配置：把 seizure onset 在 baseline window 内随机平移 `n_iter = 100` 次（避开真 seizure ± 5 min），重跑 ER + z-score + CUSUM + n_d，得到 shifted r_sz。
+修订自 2026-05-03 review：原 v2.1 plan 草稿写"在 baseline window 内随机平移"是错的；实际合同与实现都是 **blockwise pseudo-onset null**——在同一 block 内任意位置采样 `n_iter = 100` 个伪 onset，要求每个伪 onset 自身的 baseline window 能完整落在 block 内（`pseudo_onset - baseline_pre_sec >= block_start` 且 `pseudo_onset + baseline_buffer_sec <= block_end`），并避开所有真 seizure ± 5 min。这比"在原 onset 前 5 min 内平移" 更强：采样的是同一 block 的全部非 seizure 时间（含 post-ictal stretch 与远离任何 seizure 的段），不是预先就邻近 onset 的窗口。
+
+每个 pseudo onset 重跑 ER + z-score + CUSUM + n_d，得到 shifted r_sz。
 
 `enrichment_true_over_shift_<er> = enrichment(true_r_sz, clinical) / median(enrichment(shifted_r_sz_iter, clinical))`
 
-写入 Layer A per-subject JSON `null_surrogate` 字段。
+写入 Layer A per-subject JSON `null_surrogate` 字段。NaN 抽样（feasible 集为空）必须被 downstream 跳过；若 fallback 到 real onset 会让 null 偏向观测 enrichment——合同禁止。
 
 ### 5.2 v2.1 报告口径
 
@@ -602,11 +616,12 @@ Layer B Step B.1 之前必须 check：
 | A6 | `test_seizure_status_tied` | >60% 通道 n_d 在 [onset, onset+1s] → "onset_tied" |
 | A7 | `test_seizure_status_unreached` | <30% 通道有 valid n_d → "onset_unreached" |
 | A8 | `test_compute_per_subject_r_sz_median_rank` | 3 seizures × 4 channels：r_sz = median rank per channel |
-| A8b | `test_compute_per_subject_r_sz_excludes_baseline_invalid_seizures` | baseline-invalid seizure（baseline_end - baseline_start < 60 s 或 EEG-aware clip 后 < 60 s 有效样本）必须从 median rank 输入中预先剔除；只剩 ok / onset_tied / onset_unreached 进 r_sz 计算（onset_tied / onset_unreached 仍按 v1.1 plan §3.4 的规则单独剔除）|
+| A8b | `test_compute_per_subject_r_sz_excludes_baseline_invalid_seizures` | **只有 status=="ok" 的 seizure 进 r_sz / s_sz 计算**；`baseline_invalid` / `onset_tied` / `onset_unreached` 三种状态全部剔除（合同源 `QUALIFYING_SEIZURE_STATUSES = {"ok"}`，A8b 与 A9b 共享同一过滤口径）|
+| A8c | `test_per_channel_rsz_coverage_*` | **新增 2026-05-03 per review**：`compute_per_channel_rsz_coverage` 报告每通道在 qualifying seizures 中有 finite rank 的次数。Layer B / 下游 sensitivity 必须用此字段过滤"只在 1 次 seizure 偶然早发" 的低覆盖通道，避免被当 SOZ candidate（5 个 sub-test：基本 count / 全 None → 0 / 仅出现在 excluded seizure → 0 / 零 qualifying → 全 0 / length mismatch raise）|
 | A9 | `test_compute_stability_s_sz_pairwise_spearman` | 高一致性 ranks → s_sz 接近 1；随机 ranks → s_sz 接近 0 |
 | A9b | `test_compute_stability_s_sz_excludes_baseline_invalid_seizures` | baseline-invalid seizure 不进 pairwise Spearman 计算（与 A8b 合同对齐）|
-| A10 | `test_time_shifted_r_sz_avoids_real_seizures` | shifted onset 与真 seizure 距离 ≥ 5 min |
-| A11 | `test_time_shifted_r_sz_inside_baseline_window` | shifted onset 在 baseline 内（不漂出 [-300s, baseline_end]）|
+| A10 | `test_blockwise_pseudo_onsets_avoid_real_seizures` | pseudo-onset 与真 seizure 距离 ≥ 5 min（blockwise pseudo-onset null，非"baseline window 内平移"）|
+| A11 | `test_blockwise_pseudo_onsets_keep_their_own_baseline_in_block` | 每个 pseudo-onset **自己**的 resolved baseline window 必须落在 block 内（不是 shift inside the original real-onset baseline window） |
 | A12 | `test_layer_a_orchestrator_schema_lock` | per-subject JSON 含全部 §3.5 字段 |
 | A13 | `test_layer_a_no_template_alignment_fields` | grep `template_alignment` / `r_template_corr` / `winning_template_id` 不在 Layer A JSON 出现 |
 | A14 | `test_layer_a_dual_er_independent` | gamma_ER cohort 决定不影响 broad_ER cohort 决定 |

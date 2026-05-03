@@ -11,8 +11,15 @@ Covers Step A.1 + Step A.2 of the v2.1 pivot plan:
   baseline_invalid exclusion (A8, A8b)
 - ``compute_stability_s_sz``: pairwise Spearman over qualifying
   seizures, baseline_invalid excluded (A9, A9b)
-- ``time_shifted_seizure_onsets``: shifted onsets inside baseline
-  window avoiding real seizures (A10, A11)
+- ``time_shifted_seizure_onsets``: blockwise pseudo-onset null —
+  pseudo-onsets sampled from anywhere in the same block whose own
+  resolved baseline fits in-block, avoiding real seizures by ±
+  exclusion radius (A10, A11). Earlier draft of plan §5.1 called this
+  "shift inside baseline window" — that wording was inaccurate; the
+  contract is block-wide pseudo-onset, not pre-ictal-window shift.
+- ``compute_per_channel_rsz_coverage``: per-channel valid-rank count
+  across qualifying seizures (added 2026-05-03 per review; flags
+  low-coverage channels Layer B might over-trust).
 """
 
 from __future__ import annotations
@@ -23,6 +30,7 @@ import pytest
 from src.ictal_er_rank import (
     calibrate_lambda_per_subject,
     compute_cusum_n_d,
+    compute_per_channel_rsz_coverage,
     compute_per_subject_r_sz,
     compute_seizure_status,
     compute_stability_s_sz,
@@ -543,9 +551,10 @@ def test_compute_stability_s_sz_excludes_baseline_invalid_seizures():
 # ---------------------------------------------------------------------------
 
 
-def test_time_shifted_onsets_avoid_real_seizures():
-    """Plan §5.1: shifted onset must be ≥ exclusion_radius_sec from
-    every real seizure in the same block."""
+def test_blockwise_pseudo_onsets_avoid_real_seizures():
+    """Plan §5.1 (renamed 2026-05-03): pseudo-onset must be ≥
+    exclusion_radius_sec from every real seizure in the same block.
+    """
     real_onsets = [1500.0, 3000.0]
     block_start = 0.0
     block_end = 4500.0
@@ -571,11 +580,14 @@ def test_time_shifted_onsets_avoid_real_seizures():
                 assert abs(onset - real) >= 300.0
 
 
-def test_time_shifted_onsets_inside_baseline_window():
-    """Plan §3.3 baseline window is [-baseline_pre_sec,
-    -baseline_buffer_sec] relative to onset. Shifted onsets must keep
-    the resolved baseline inside the block (so re-running CUSUM on the
-    shifted draw has a valid baseline)."""
+def test_blockwise_pseudo_onsets_keep_their_own_baseline_in_block():
+    """The contract is "blockwise pseudo-onset" — each pseudo-onset
+    must keep its OWN resolved baseline window inside the block, so
+    re-running CUSUM on the pseudo-onset has a valid baseline. This is
+    NOT "shift inside the original real-onset baseline window" (the
+    old plan wording was inaccurate; pseudo-onsets in this test land
+    far from the real onset's baseline).
+    """
     real_onsets = [2000.0]
     block_start = 0.0
     block_end = 3600.0
@@ -603,10 +615,11 @@ def test_time_shifted_onsets_inside_baseline_window():
             assert onset + baseline_buffer_sec <= block_end
 
 
-def test_time_shifted_onsets_rejects_too_short_block():
-    """Block too short to fit even a single shifted onset (after
-    excluding real onsets ± radius and respecting baseline) → return
-    empty array per real onset (NOT silent success)."""
+def test_blockwise_pseudo_onsets_reject_too_short_block():
+    """Block too short to fit a single pseudo-onset (after baseline
+    constraints) → return all-NaN matrix (NOT silent success). Caller
+    must skip NaN downstream rather than fall back to real onset.
+    """
     real_onsets = [200.0]
     # Block too short: feasible onset range is
     # [baseline_pre_sec, block_end - baseline_buffer_sec] = [300, 240]
@@ -626,8 +639,8 @@ def test_time_shifted_onsets_rejects_too_short_block():
     assert np.all(np.isnan(shifted))
 
 
-def test_time_shifted_onsets_deterministic_under_seed():
-    """Same rng_seed → identical shifted matrix."""
+def test_blockwise_pseudo_onsets_deterministic_under_seed():
+    """Same rng_seed → identical pseudo-onset matrix."""
     real_onsets = [1500.0]
     args = dict(
         real_onsets=real_onsets,
@@ -643,3 +656,81 @@ def test_time_shifted_onsets_deterministic_under_seed():
     assert np.array_equal(a, b)
     c = time_shifted_seizure_onsets(rng_seed=43, **args)
     assert not np.array_equal(a, c)
+
+
+# ---------------------------------------------------------------------------
+# A8c. compute_per_channel_rsz_coverage (review-driven addition 2026-05-03)
+# ---------------------------------------------------------------------------
+
+
+def test_per_channel_rsz_coverage_counts_finite_ranks_in_qualifying_seizures():
+    """Coverage = number of qualifying seizures (status=="ok") in which
+    the channel has a finite rank. baseline_invalid / onset_tied /
+    onset_unreached seizures are excluded from the count, matching r_sz
+    contract."""
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0, "c": None},
+        {"a": 0.0, "b": 1.0, "c": 2.0},
+        {"a": 99.0, "b": None, "c": None},   # baseline_invalid → ignored
+    ]
+    coverage = compute_per_channel_rsz_coverage(
+        per_seizure_ranks,
+        seizure_statuses=["ok", "ok", "baseline_invalid"],
+    )
+    # Only seizures 0 and 1 qualify. a is finite in both → 2; b is
+    # finite in both → 2; c is finite only in seizure 1 → 1.
+    assert coverage["a"] == 2
+    assert coverage["b"] == 2
+    assert coverage["c"] == 1
+
+
+def test_per_channel_rsz_coverage_zero_for_never_active_channel():
+    """A channel that never has a finite rank in any qualifying seizure
+    must get coverage=0 — Layer B uses this to drop the channel from
+    top-k consideration."""
+    per_seizure_ranks = [
+        {"a": 0.0, "b": None},
+        {"a": 1.0, "b": None},
+    ]
+    coverage = compute_per_channel_rsz_coverage(
+        per_seizure_ranks, seizure_statuses=["ok", "ok"]
+    )
+    assert coverage["a"] == 2
+    assert coverage["b"] == 0
+
+
+def test_per_channel_rsz_coverage_includes_channels_only_in_excluded_seizures():
+    """A channel that only appears in a non-qualifying seizure (e.g.
+    baseline_invalid) gets coverage=0 — but the key is still present
+    in the returned dict, so Layer B sees the channel exists."""
+    per_seizure_ranks = [
+        {"a": 0.0},               # ok seizure
+        {"a": 1.0, "z": 0.0},     # baseline_invalid → "z" ignored
+    ]
+    coverage = compute_per_channel_rsz_coverage(
+        per_seizure_ranks,
+        seizure_statuses=["ok", "baseline_invalid"],
+    )
+    assert coverage["a"] == 1
+    assert coverage["z"] == 0
+
+
+def test_per_channel_rsz_coverage_zero_qualifying_seizures():
+    """No "ok" seizures → every channel coverage 0 (no contamination
+    from the excluded seizures' rank dicts)."""
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0},
+        {"a": 1.0, "b": 0.0},
+    ]
+    coverage = compute_per_channel_rsz_coverage(
+        per_seizure_ranks,
+        seizure_statuses=["onset_tied", "baseline_invalid"],
+    )
+    assert coverage == {"a": 0, "b": 0}
+
+
+def test_per_channel_rsz_coverage_rejects_length_mismatch():
+    with pytest.raises(ValueError, match="length"):
+        compute_per_channel_rsz_coverage(
+            [{"a": 0.0}, {"a": 1.0}], seizure_statuses=["ok"]
+        )
