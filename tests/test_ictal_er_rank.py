@@ -1,12 +1,18 @@
 """TDD tests for PR-T3-1 v2.1 Layer A — ictal ER-rank producer.
 
-Covers Step A.1 of the v2.1 pivot plan:
+Covers Step A.1 + Step A.2 of the v2.1 pivot plan:
 
 - ``compute_cusum_n_d``: Page-Hinkley alarm time on z-ER (A1, A2)
 - ``calibrate_lambda_per_subject``: per-subject λ calibration (A3)
 - ``rank_channels_by_n_d``: fractional rank with NaN tail + ties (A4)
 - ``compute_seizure_status``: 3-state ok / onset_tied / onset_unreached
   (A5, A6, A7)
+- ``compute_per_subject_r_sz``: cross-seizure median rank with
+  baseline_invalid exclusion (A8, A8b)
+- ``compute_stability_s_sz``: pairwise Spearman over qualifying
+  seizures, baseline_invalid excluded (A9, A9b)
+- ``time_shifted_seizure_onsets``: shifted onsets inside baseline
+  window avoiding real seizures (A10, A11)
 """
 
 from __future__ import annotations
@@ -17,8 +23,11 @@ import pytest
 from src.ictal_er_rank import (
     calibrate_lambda_per_subject,
     compute_cusum_n_d,
+    compute_per_subject_r_sz,
     compute_seizure_status,
+    compute_stability_s_sz,
     rank_channels_by_n_d,
+    time_shifted_seizure_onsets,
 )
 
 
@@ -309,3 +318,328 @@ def test_seizure_status_onset_unreached_for_sparse_activation():
 def test_seizure_status_rejects_zero_n_total():
     with pytest.raises(ValueError, match="n_total"):
         compute_seizure_status({}, n_total=0, onset_idx=0)
+
+
+# ---------------------------------------------------------------------------
+# A8. compute_per_subject_r_sz: cross-seizure median rank
+# ---------------------------------------------------------------------------
+
+
+def test_compute_per_subject_r_sz_median_rank():
+    """3 seizures × 4 channels: r_sz = median rank per channel.
+
+    Per-seizure ranks (NaN for unreached / non-finite):
+        seizure 0: a=0, b=1, c=2, d=3
+        seizure 1: a=0, b=2, c=1, d=3
+        seizure 2: a=1, b=0, c=2, d=3
+    median per channel: a=0, b=1, c=2, d=3
+    """
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0, "c": 2.0, "d": 3.0},
+        {"a": 0.0, "b": 2.0, "c": 1.0, "d": 3.0},
+        {"a": 1.0, "b": 0.0, "c": 2.0, "d": 3.0},
+    ]
+    seizure_statuses = ["ok", "ok", "ok"]
+    r_sz = compute_per_subject_r_sz(
+        per_seizure_ranks, seizure_statuses=seizure_statuses
+    )
+    assert r_sz["a"] == pytest.approx(0.0)
+    assert r_sz["b"] == pytest.approx(1.0)
+    assert r_sz["c"] == pytest.approx(2.0)
+    assert r_sz["d"] == pytest.approx(3.0)
+
+
+def test_compute_per_subject_r_sz_handles_none_ranks():
+    """A channel that's None in some seizures contributes only its
+    finite ranks to the median (does NOT get penalty rank n_channels).
+
+    seizure 0: a=0, b=None, c=2
+    seizure 1: a=1, b=0, c=None
+    seizure 2: a=2, b=1, c=1
+    medians: a = median(0,1,2) = 1.0; b = median(0,1) = 0.5;
+             c = median(2,1) = 1.5
+    """
+    per_seizure_ranks = [
+        {"a": 0.0, "b": None, "c": 2.0},
+        {"a": 1.0, "b": 0.0, "c": None},
+        {"a": 2.0, "b": 1.0, "c": 1.0},
+    ]
+    seizure_statuses = ["ok", "ok", "ok"]
+    r_sz = compute_per_subject_r_sz(
+        per_seizure_ranks, seizure_statuses=seizure_statuses
+    )
+    assert r_sz["a"] == pytest.approx(1.0)
+    assert r_sz["b"] == pytest.approx(0.5)
+    assert r_sz["c"] == pytest.approx(1.5)
+
+
+def test_compute_per_subject_r_sz_channel_never_active_returns_none():
+    """A channel that is None in EVERY seizure must get None r_sz, not 0
+    or NaN — Layer B must treat such channels as missing, not as the
+    earliest-onset rank."""
+    per_seizure_ranks = [
+        {"a": 0.0, "b": None},
+        {"a": 1.0, "b": None},
+    ]
+    r_sz = compute_per_subject_r_sz(
+        per_seizure_ranks, seizure_statuses=["ok", "ok"]
+    )
+    assert r_sz["a"] == pytest.approx(0.5)
+    assert r_sz["b"] is None
+
+
+# ---------------------------------------------------------------------------
+# A8b. baseline_invalid seizures excluded from r_sz input
+# ---------------------------------------------------------------------------
+
+
+def test_compute_per_subject_r_sz_excludes_baseline_invalid_seizures():
+    """Plan §10 A8b: baseline_invalid seizures (resolve_baseline_window
+    found < 60 s of valid samples) must NEVER enter the median rank
+    pool. Without this exclusion, ranks built on truncated baselines
+    would leak into r_sz.
+    """
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0},   # ok
+        {"a": 1.0, "b": 0.0},   # baseline_invalid → must be ignored
+        {"a": 0.0, "b": 1.0},   # ok
+    ]
+    seizure_statuses = ["ok", "baseline_invalid", "ok"]
+    r_sz = compute_per_subject_r_sz(
+        per_seizure_ranks, seizure_statuses=seizure_statuses
+    )
+    # If baseline_invalid had been kept: median(0, 1, 0) = 0 for a;
+    # since it's excluded: median(0, 0) = 0 for a; median(1, 1) = 1 for b.
+    assert r_sz["a"] == pytest.approx(0.0)
+    assert r_sz["b"] == pytest.approx(1.0)
+
+
+def test_compute_per_subject_r_sz_also_excludes_onset_tied_and_unreached():
+    """Plan §3.3 main analysis exclusion: onset_tied + onset_unreached
+    seizures stay out of r_sz median (ranks are noise-dominated /
+    undefined). Combined with baseline_invalid, only "ok" feeds r_sz.
+    """
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0},   # ok
+        {"a": 99.0, "b": 0.0},   # onset_tied (would skew if kept)
+        {"a": 99.0, "b": 0.0},   # onset_unreached (would skew if kept)
+        {"a": 0.0, "b": 1.0},   # ok
+    ]
+    seizure_statuses = ["ok", "onset_tied", "onset_unreached", "ok"]
+    r_sz = compute_per_subject_r_sz(
+        per_seizure_ranks, seizure_statuses=seizure_statuses
+    )
+    assert r_sz["a"] == pytest.approx(0.0)
+    assert r_sz["b"] == pytest.approx(1.0)
+
+
+def test_compute_per_subject_r_sz_zero_qualifying_seizures_returns_all_none():
+    """If every seizure is non-ok, every channel gets None r_sz.
+    Subject-level downstream code must treat this as the strongest
+    drop signal."""
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0},
+        {"a": 1.0, "b": 0.0},
+    ]
+    r_sz = compute_per_subject_r_sz(
+        per_seizure_ranks,
+        seizure_statuses=["onset_tied", "baseline_invalid"],
+    )
+    assert r_sz["a"] is None
+    assert r_sz["b"] is None
+
+
+def test_compute_per_subject_r_sz_rejects_length_mismatch():
+    with pytest.raises(ValueError, match="length"):
+        compute_per_subject_r_sz(
+            [{"a": 0.0}, {"a": 1.0}], seizure_statuses=["ok"]
+        )
+
+
+# ---------------------------------------------------------------------------
+# A9. compute_stability_s_sz: pairwise Spearman across seizures
+# ---------------------------------------------------------------------------
+
+
+def test_compute_stability_s_sz_high_for_identical_ranks():
+    """Identical rank vectors across seizures → s_sz = 1.0 (perfect
+    Spearman in every pair).
+    """
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0, "c": 2.0, "d": 3.0},
+        {"a": 0.0, "b": 1.0, "c": 2.0, "d": 3.0},
+        {"a": 0.0, "b": 1.0, "c": 2.0, "d": 3.0},
+    ]
+    s_sz = compute_stability_s_sz(
+        per_seizure_ranks, seizure_statuses=["ok", "ok", "ok"]
+    )
+    assert s_sz == pytest.approx(1.0)
+
+
+def test_compute_stability_s_sz_low_for_anticorrelated_ranks():
+    """One seizure with reversed ranks → some pairs have negative
+    Spearman; median is depressed.
+    """
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0, "c": 2.0, "d": 3.0},
+        {"a": 3.0, "b": 2.0, "c": 1.0, "d": 0.0},   # reversed
+        {"a": 0.0, "b": 1.0, "c": 2.0, "d": 3.0},
+    ]
+    s_sz = compute_stability_s_sz(
+        per_seizure_ranks, seizure_statuses=["ok", "ok", "ok"]
+    )
+    # Pairs: (0,1)=-1, (0,2)=+1, (1,2)=-1 → median = -1.
+    assert s_sz == pytest.approx(-1.0)
+
+
+def test_compute_stability_s_sz_returns_nan_on_single_seizure():
+    """Stability requires ≥ 2 qualifying seizures (need pairs)."""
+    s_sz = compute_stability_s_sz(
+        [{"a": 0.0, "b": 1.0}], seizure_statuses=["ok"]
+    )
+    assert s_sz is None
+
+
+def test_compute_stability_s_sz_skips_channels_with_none_in_either():
+    """Spearman per pair is computed over the channel intersection
+    (both seizures must have a finite rank for that channel)."""
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0, "c": 2.0},
+        {"a": 0.0, "b": None, "c": 2.0},   # b dropped from this pair
+    ]
+    s_sz = compute_stability_s_sz(
+        per_seizure_ranks, seizure_statuses=["ok", "ok"]
+    )
+    # Pair (a, c): ranks (0,2) vs (0,2) → Spearman = 1.0.
+    assert s_sz == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# A9b. baseline_invalid seizures excluded from s_sz input
+# ---------------------------------------------------------------------------
+
+
+def test_compute_stability_s_sz_excludes_baseline_invalid_seizures():
+    """Plan §10 A9b: baseline_invalid seizures must NOT enter pairwise
+    Spearman. If kept, the noisy rank vector from a truncated baseline
+    would deflate s_sz."""
+    per_seizure_ranks = [
+        {"a": 0.0, "b": 1.0},                # ok
+        {"a": 1.0, "b": 0.0},                # baseline_invalid (reversed)
+        {"a": 0.0, "b": 1.0},                # ok
+    ]
+    s_sz = compute_stability_s_sz(
+        per_seizure_ranks,
+        seizure_statuses=["ok", "baseline_invalid", "ok"],
+    )
+    # With baseline_invalid kept: pairs (0,1) corr=-1, (0,2) corr=+1,
+    # (1,2) corr=-1 → median = -1. With baseline_invalid excluded:
+    # only pair (0,2) corr=+1 → median = +1.
+    assert s_sz == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# A10 / A11. time_shifted_seizure_onsets
+# ---------------------------------------------------------------------------
+
+
+def test_time_shifted_onsets_avoid_real_seizures():
+    """Plan §5.1: shifted onset must be ≥ exclusion_radius_sec from
+    every real seizure in the same block."""
+    real_onsets = [1500.0, 3000.0]
+    block_start = 0.0
+    block_end = 4500.0
+    baseline_pre_sec = 300.0
+    baseline_buffer_sec = 60.0
+
+    shifted = time_shifted_seizure_onsets(
+        real_onsets=real_onsets,
+        block_start_sec=block_start,
+        block_end_sec=block_end,
+        baseline_pre_sec=baseline_pre_sec,
+        baseline_buffer_sec=baseline_buffer_sec,
+        exclusion_radius_sec=300.0,
+        n_iter=50,
+        rng_seed=0,
+    )
+    # Returned shape: (n_iter, n_real_onsets)
+    assert shifted.shape == (50, 2)
+    # Every shifted onset must be ≥ 300 s away from BOTH real onsets.
+    for it in range(50):
+        for onset in shifted[it]:
+            for real in real_onsets:
+                assert abs(onset - real) >= 300.0
+
+
+def test_time_shifted_onsets_inside_baseline_window():
+    """Plan §3.3 baseline window is [-baseline_pre_sec,
+    -baseline_buffer_sec] relative to onset. Shifted onsets must keep
+    the resolved baseline inside the block (so re-running CUSUM on the
+    shifted draw has a valid baseline)."""
+    real_onsets = [2000.0]
+    block_start = 0.0
+    block_end = 3600.0
+    baseline_pre_sec = 300.0
+    baseline_buffer_sec = 60.0
+
+    shifted = time_shifted_seizure_onsets(
+        real_onsets=real_onsets,
+        block_start_sec=block_start,
+        block_end_sec=block_end,
+        baseline_pre_sec=baseline_pre_sec,
+        baseline_buffer_sec=baseline_buffer_sec,
+        exclusion_radius_sec=0.0,
+        n_iter=50,
+        rng_seed=0,
+    )
+    # Every shifted onset must satisfy:
+    #   onset - baseline_pre_sec >= block_start
+    #   onset - baseline_buffer_sec <= block_end (window doesn't fall off the right)
+    for it in range(50):
+        for onset in shifted[it]:
+            assert onset - baseline_pre_sec >= block_start
+            # We need at least baseline_buffer_sec after the onset for
+            # the post window to be valid.
+            assert onset + baseline_buffer_sec <= block_end
+
+
+def test_time_shifted_onsets_rejects_too_short_block():
+    """Block too short to fit even a single shifted onset (after
+    excluding real onsets ± radius and respecting baseline) → return
+    empty array per real onset (NOT silent success)."""
+    real_onsets = [200.0]
+    # Block too short: feasible onset range is
+    # [baseline_pre_sec, block_end - baseline_buffer_sec] = [300, 240]
+    # which is empty.
+    shifted = time_shifted_seizure_onsets(
+        real_onsets=real_onsets,
+        block_start_sec=0.0,
+        block_end_sec=300.0,
+        baseline_pre_sec=300.0,
+        baseline_buffer_sec=60.0,
+        exclusion_radius_sec=0.0,
+        n_iter=50,
+        rng_seed=0,
+    )
+    # Returned shape (n_iter, n_real_onsets) where missing draws are NaN.
+    assert shifted.shape == (50, 1)
+    assert np.all(np.isnan(shifted))
+
+
+def test_time_shifted_onsets_deterministic_under_seed():
+    """Same rng_seed → identical shifted matrix."""
+    real_onsets = [1500.0]
+    args = dict(
+        real_onsets=real_onsets,
+        block_start_sec=0.0,
+        block_end_sec=3600.0,
+        baseline_pre_sec=300.0,
+        baseline_buffer_sec=60.0,
+        exclusion_radius_sec=300.0,
+        n_iter=20,
+    )
+    a = time_shifted_seizure_onsets(rng_seed=42, **args)
+    b = time_shifted_seizure_onsets(rng_seed=42, **args)
+    assert np.array_equal(a, b)
+    c = time_shifted_seizure_onsets(rng_seed=43, **args)
+    assert not np.array_equal(a, c)

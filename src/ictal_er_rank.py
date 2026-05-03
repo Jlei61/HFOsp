@@ -57,10 +57,21 @@ __all__ = [
     "rank_channels_by_n_d",
     "compute_seizure_status",
     "SeizureStatus",
+    "compute_per_subject_r_sz",
+    "compute_stability_s_sz",
+    "time_shifted_seizure_onsets",
+    "QUALIFYING_SEIZURE_STATUSES",
 ]
 
 
 SeizureStatus = str  # one of: "ok" / "onset_tied" / "onset_unreached" / "baseline_invalid"
+
+# Plan §3.3 + §10 A8b/A9b: only "ok" seizures contribute to r_sz / s_sz.
+# "onset_tied" and "onset_unreached" are sensitivity-only (kept in
+# Layer A JSON for diagnostics but excluded from main rank aggregation).
+# "baseline_invalid" is dropped everywhere — the rank vector was built
+# on a truncated baseline and is unreliable.
+QUALIFYING_SEIZURE_STATUSES = frozenset({"ok"})
 
 
 def compute_cusum_n_d(
@@ -384,3 +395,241 @@ def compute_seizure_status(
         n_total=int(n_total),
         fast_recruit_fraction=fast_recruit_fraction,
     )
+
+
+def _qualifying_indices(seizure_statuses: Sequence[str]) -> List[int]:
+    """Indices of seizures whose status is in QUALIFYING_SEIZURE_STATUSES."""
+    return [
+        i for i, s in enumerate(seizure_statuses)
+        if str(s) in QUALIFYING_SEIZURE_STATUSES
+    ]
+
+
+def compute_per_subject_r_sz(
+    per_seizure_ranks: Sequence[Mapping[str, Optional[float]]],
+    *,
+    seizure_statuses: Sequence[str],
+) -> Dict[str, Optional[float]]:
+    """Median rank per channel across qualifying seizures (plan §3.5).
+
+    Per plan §3.3 main analysis exclusion + §10 A8b: only seizures with
+    ``status == "ok"`` contribute to the median. ``baseline_invalid`` /
+    ``onset_tied`` / ``onset_unreached`` are dropped — keeping them
+    would either contaminate r_sz with truncated-baseline noise (the
+    baseline_invalid case) or with rank vectors dominated by tie /
+    sparse-detection noise (the other two).
+
+    A channel that is ``None`` in some qualifying seizures contributes
+    only its finite ranks to the median (we do NOT impute a worst-rank
+    penalty — Layer B treats ``None`` r_sz as "missing" rather than
+    "earliest"). A channel that is ``None`` in EVERY qualifying seizure
+    receives ``None`` r_sz.
+
+    Parameters
+    ----------
+    per_seizure_ranks
+        Per-seizure ``{channel_name: rank_or_None}`` from
+        ``rank_channels_by_n_d``.
+    seizure_statuses
+        Parallel list of per-seizure status strings.
+
+    Returns
+    -------
+    dict
+        ``{channel_name: median_rank_or_None}`` over the union of all
+        channel keys appearing in any qualifying seizure's rank dict.
+    """
+    if len(per_seizure_ranks) != len(seizure_statuses):
+        raise ValueError(
+            f"length mismatch: per_seizure_ranks ({len(per_seizure_ranks)}) "
+            f"vs seizure_statuses ({len(seizure_statuses)})"
+        )
+
+    keep_idx = _qualifying_indices(seizure_statuses)
+    qualifying_ranks = [per_seizure_ranks[i] for i in keep_idx]
+    if not qualifying_ranks:
+        # Even with zero qualifying seizures, return one entry per
+        # channel that appears anywhere — Layer B downstream wants the
+        # full channel list with None values, not a missing key.
+        all_channels = set()
+        for r in per_seizure_ranks:
+            all_channels.update(r.keys())
+        return {ch: None for ch in all_channels}
+
+    all_channels = set()
+    for r in qualifying_ranks:
+        all_channels.update(r.keys())
+
+    out: Dict[str, Optional[float]] = {}
+    for ch in all_channels:
+        vals: List[float] = []
+        for r in qualifying_ranks:
+            if ch not in r:
+                continue
+            v = r[ch]
+            if v is None:
+                continue
+            vf = float(v)
+            if not np.isfinite(vf):
+                continue
+            vals.append(vf)
+        out[ch] = float(np.median(vals)) if vals else None
+    return out
+
+
+def _spearman_on_intersection(
+    rank_a: Mapping[str, Optional[float]],
+    rank_b: Mapping[str, Optional[float]],
+) -> Optional[float]:
+    """Spearman ρ over channels that have a finite rank in BOTH dicts.
+
+    Returns ``None`` if fewer than 2 channels are common (Spearman
+    undefined). Spearman is computed on raw ranks (we treat the input
+    rank values as the rank statistic itself).
+    """
+    common: List[Tuple[float, float]] = []
+    for ch in rank_a:
+        if ch not in rank_b:
+            continue
+        a, b = rank_a[ch], rank_b[ch]
+        if a is None or b is None:
+            continue
+        af, bf = float(a), float(b)
+        if not (np.isfinite(af) and np.isfinite(bf)):
+            continue
+        common.append((af, bf))
+    if len(common) < 2:
+        return None
+    arr_a = np.asarray([x[0] for x in common], dtype=float)
+    arr_b = np.asarray([x[1] for x in common], dtype=float)
+    # Re-rank within the intersection (Spearman = Pearson on ranks of
+    # ranks) so the result handles partially-missing inputs correctly.
+    from scipy.stats import rankdata
+
+    ra = rankdata(arr_a)
+    rb = rankdata(arr_b)
+    if ra.std() == 0 or rb.std() == 0:
+        return None
+    return float(np.corrcoef(ra, rb)[0, 1])
+
+
+def compute_stability_s_sz(
+    per_seizure_ranks: Sequence[Mapping[str, Optional[float]]],
+    *,
+    seizure_statuses: Sequence[str],
+) -> Optional[float]:
+    """Median pairwise Spearman ρ of per-seizure rank vectors (plan §3.5).
+
+    Stability gate (plan §3.5):
+    - ``s_sz >= 0.5`` → strict cohort
+    - ``0.3 <= s_sz < 0.5`` → relaxed cohort
+    - ``s_sz < 0.3`` → drop subject
+
+    Per plan §10 A9b, baseline_invalid / onset_tied / onset_unreached
+    seizures are excluded from pairwise computation. Per pair, Spearman
+    is computed on the channel intersection (both seizures must have a
+    finite rank for that channel).
+
+    Returns
+    -------
+    float or None
+        Median Spearman ρ. ``None`` when fewer than 2 qualifying
+        seizures or when no pair yields a defined ρ.
+    """
+    if len(per_seizure_ranks) != len(seizure_statuses):
+        raise ValueError(
+            f"length mismatch: per_seizure_ranks ({len(per_seizure_ranks)}) "
+            f"vs seizure_statuses ({len(seizure_statuses)})"
+        )
+
+    keep_idx = _qualifying_indices(seizure_statuses)
+    qualifying = [per_seizure_ranks[i] for i in keep_idx]
+    if len(qualifying) < 2:
+        return None
+
+    pair_corrs: List[float] = []
+    for i in range(len(qualifying)):
+        for j in range(i + 1, len(qualifying)):
+            rho = _spearman_on_intersection(qualifying[i], qualifying[j])
+            if rho is not None:
+                pair_corrs.append(rho)
+    if not pair_corrs:
+        return None
+    return float(np.median(pair_corrs))
+
+
+def time_shifted_seizure_onsets(
+    *,
+    real_onsets: Sequence[float],
+    block_start_sec: float,
+    block_end_sec: float,
+    baseline_pre_sec: float,
+    baseline_buffer_sec: float,
+    exclusion_radius_sec: float = 300.0,
+    n_iter: int = 100,
+    rng_seed: int = 0,
+    max_resample_attempts: int = 200,
+) -> np.ndarray:
+    """Generate ``n_iter`` shifted onset matrices for the null surrogate
+    (plan §5.1).
+
+    Each shifted onset must satisfy:
+
+    1. ``onset - baseline_pre_sec >= block_start_sec``
+       (the resolved baseline window fits inside the block on the left)
+    2. ``onset + baseline_buffer_sec <= block_end_sec``
+       (the post-onset buffer fits inside the block on the right —
+       Layer A doesn't need a long post window for r_sz, but a short
+       buffer prevents the shifted draw from running past block end)
+    3. ``|onset - real_onset| >= exclusion_radius_sec`` for every real
+       onset in the block (avoids re-sampling the actual seizure).
+
+    For draws where the feasible set is empty (block too short, or
+    every real-seizure exclusion zone covers it), the corresponding
+    ``shifted[it, j]`` is ``NaN``. Downstream null computation MUST
+    skip NaN draws; the alternative ("fall back to real onset") would
+    silently bias the null toward the observed enrichment.
+
+    Returns
+    -------
+    np.ndarray
+        Shape ``(n_iter, len(real_onsets))`` of shifted absolute-epoch
+        onsets, with NaN where no valid draw was found within
+        ``max_resample_attempts`` tries.
+    """
+    if n_iter <= 0:
+        raise ValueError(f"n_iter must be positive, got {n_iter}")
+    if baseline_pre_sec <= 0:
+        raise ValueError(f"baseline_pre_sec must be positive, got {baseline_pre_sec}")
+    if baseline_buffer_sec < 0:
+        raise ValueError(
+            f"baseline_buffer_sec must be >= 0, got {baseline_buffer_sec}"
+        )
+    if exclusion_radius_sec < 0:
+        raise ValueError(
+            f"exclusion_radius_sec must be >= 0, got {exclusion_radius_sec}"
+        )
+
+    real_arr = np.asarray(real_onsets, dtype=float)
+    n_real = real_arr.shape[0]
+    out = np.full((int(n_iter), n_real), np.nan, dtype=float)
+    if n_real == 0:
+        return out
+
+    feasible_lo = float(block_start_sec) + float(baseline_pre_sec)
+    feasible_hi = float(block_end_sec) - float(baseline_buffer_sec)
+    if feasible_hi <= feasible_lo:
+        # Block too short to fit a baseline window; every draw NaN.
+        return out
+
+    rng = np.random.default_rng(int(rng_seed))
+    excl = float(exclusion_radius_sec)
+    for it in range(int(n_iter)):
+        for j in range(n_real):
+            for _ in range(int(max_resample_attempts)):
+                cand = float(rng.uniform(feasible_lo, feasible_hi))
+                if all(abs(cand - r) >= excl for r in real_arr):
+                    out[it, j] = cand
+                    break
+            # else: leave as NaN (caller skips NaN draws downstream)
+    return out
