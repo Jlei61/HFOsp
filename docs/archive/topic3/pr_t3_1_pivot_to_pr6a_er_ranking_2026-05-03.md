@@ -158,8 +158,8 @@ contract:
 
 Layer A 新加层（v2.1 自己实现，禁止从 PR-6A H1/H1' 主线借）：
 
-- Page-Hinkley CUSUM：`U[n] = max(0, U[n-1] + z_ER[n] - bias)`，`bias = 0.5`，`M[n] = max_{k≤n} U[k]`，alarm `n_d` = first n where `M[n] - U[n] >= λ`
-- λ 通过 per-subject permutation 在 baseline window 上滚动跑 CUSUM 取 `False positive rate < 1/hour` 的 λ
+- Page-Hinkley CUSUM (clamped, upward-change form)：`U[n] = max(0, U[n-1] + z_ER[n] - bias)`，`bias = 0.5`，alarm `n_d` = first n where `U[n] >= λ`（修订自 2026-05-03 implementation：原 plan 草稿写的 `M[n] - U[n] >= λ` 形式对持续上行 step 不会触发——step 期间 U 单调非减、M = U、M - U = 0；`U >= λ` 是 PR-6A `detect_er_onset_preview` 已经使用的可工作形式，对 unclamped `S = sum(z - bias)` 等价于 `S - min(S[k≤n]) >= λ`）
+- λ 通过 per-subject **baseline re-armed CUSUM budget** 校准（修订自 2026-05-03：原 "permutation" 描述与实际实现不符）：在 baseline window 上对每通道跑 clamped CUSUM，每次 `U >= λ` 触发即计 1 次假阳报警并将 `U` 重置为 0（re-armed），对所有通道求和；λ 取 grid 上最小满足 `pooled_alarms ≤ fpr_target_per_hour × baseline_hours` 的值。Default fpr_target = 1/hour（plan §3.3 与 v1.1 一致）。Pooled across-channel 合同：subject-level FPR 对齐 cohort 报告口径，per-channel FPR 不写入接口
 - detection window：`[clinical_onset - 5 s, clinical_onset + 30 s]`
 - Tie-handling：fractional rank for ties (Δt < 50 ms)；`>60%` channels detected within `[onset, onset + 1 s]` → seizure 标 `onset_tied`，剔除主分析；`<30%` channels valid n_d → seizure 标 `onset_unreached`，剔除
 - per-subject `r_sz` = median rank per channel across qualifying seizures
@@ -602,7 +602,9 @@ Layer B Step B.1 之前必须 check：
 | A6 | `test_seizure_status_tied` | >60% 通道 n_d 在 [onset, onset+1s] → "onset_tied" |
 | A7 | `test_seizure_status_unreached` | <30% 通道有 valid n_d → "onset_unreached" |
 | A8 | `test_compute_per_subject_r_sz_median_rank` | 3 seizures × 4 channels：r_sz = median rank per channel |
+| A8b | `test_compute_per_subject_r_sz_excludes_baseline_invalid_seizures` | baseline-invalid seizure（baseline_end - baseline_start < 60 s 或 EEG-aware clip 后 < 60 s 有效样本）必须从 median rank 输入中预先剔除；只剩 ok / onset_tied / onset_unreached 进 r_sz 计算（onset_tied / onset_unreached 仍按 v1.1 plan §3.4 的规则单独剔除）|
 | A9 | `test_compute_stability_s_sz_pairwise_spearman` | 高一致性 ranks → s_sz 接近 1；随机 ranks → s_sz 接近 0 |
+| A9b | `test_compute_stability_s_sz_excludes_baseline_invalid_seizures` | baseline-invalid seizure 不进 pairwise Spearman 计算（与 A8b 合同对齐）|
 | A10 | `test_time_shifted_r_sz_avoids_real_seizures` | shifted onset 与真 seizure 距离 ≥ 5 min |
 | A11 | `test_time_shifted_r_sz_inside_baseline_window` | shifted onset 在 baseline 内（不漂出 [-300s, baseline_end]）|
 | A12 | `test_layer_a_orchestrator_schema_lock` | per-subject JSON 含全部 §3.5 字段 |
