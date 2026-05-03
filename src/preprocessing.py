@@ -457,6 +457,7 @@ def load_epilepsiae_block(
     drop_channels: Optional[List[str]] = None,
     segment_sec: Optional[float] = 200.0,
     notch_freqs: Optional[List[float]] = None,
+    notch_filter_kind: str = "iir",
 ) -> "PreprocessingResult":
     """Load an Epilepsiae raw block (.data + .head) for HFO detection.
 
@@ -475,12 +476,27 @@ def load_epilepsiae_block(
         If not None, read in segments of this length to limit peak memory.
         None = read entire block at once.
     notch_freqs : list of float, optional
-        Frequencies for IIR notch filter (Hz).  Default: [50, 100, 150, 200]
+        Frequencies for notch filter (Hz). Default: [50, 100, 150, 200]
         (50 Hz power line and harmonics within the ripple band).
-        Pass an empty list to skip notch filtering.
+        Pass ``[50, 100, 150, 200, 250]`` (5 frequencies) to match legacy
+        Epilepsiae detector. Pass empty list to skip notch filtering.
+    notch_filter_kind : str
+        Notch filter implementation:
+          - ``"iir"`` (default): ``iirnotch(Q=30) + filtfilt``, zero-phase, Q
+            constant across all freqs.
+          - ``"fir_legacy"``: ``firwin(801, [(f-1)/nyq, (f+1)/nyq], pass_zero=True)
+            + fftconvolve`` (single-pass forward), matches legacy
+            ``epilepsiae_detectHFOs.py:79`` exactly. 2 Hz fixed bandwidth -> Q
+            scales with f (narrower at higher harmonics).
+        See docs/archive/epilepsiae_lagpat/detector_drift_root_cause_2026-05-03.md
+        for the rationale (Δ7).
     """
     if notch_freqs is None:
         notch_freqs = [50.0, 100.0, 150.0, 200.0]
+    if notch_filter_kind not in ("iir", "fir_legacy"):
+        raise ValueError(
+            f"notch_filter_kind must be 'iir' or 'fir_legacy', got {notch_filter_kind!r}"
+        )
     data_path = Path(data_path)
     head_path = Path(head_path)
     if not data_path.exists():
@@ -584,12 +600,24 @@ def load_epilepsiae_block(
         ch_names_out = list(keep_labels)
         ref_type = "none"
 
-    # Notch filter for power line harmonics (same as SEEGPreprocessor path)
+    # Notch filter for power line harmonics. Two implementations:
+    #   - "iir": Q=30 zero-phase, matches SEEGPreprocessor default.
+    #   - "fir_legacy": firwin(801, ...) forward fftconvolve, matches legacy
+    #     epilepsiae_detectHFOs.py:79 verbatim.
     nyq = sfreq / 2.0
-    for freq in notch_freqs:
-        if freq < nyq:
-            b, a = iirnotch(freq, 30, sfreq)
-            data = filtfilt(b, a, data, axis=-1)
+    if notch_filter_kind == "iir":
+        for freq in notch_freqs:
+            if freq < nyq:
+                b, a = iirnotch(freq, 30, sfreq)
+                data = filtfilt(b, a, data, axis=-1)
+    else:  # "fir_legacy"
+        from scipy.signal import firwin, fftconvolve
+        for freq in notch_freqs:
+            if freq + 1 >= nyq:
+                # Skip if upper transition is at/above Nyquist (legacy would crash).
+                continue
+            b = firwin(801, [(freq - 1) / nyq, (freq + 1) / nyq], pass_zero=True)
+            data = fftconvolve(data, b[None, :], mode="same", axes=-1)
 
     return PreprocessingResult(
         data=data,

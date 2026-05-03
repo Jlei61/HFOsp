@@ -309,7 +309,17 @@ def run_epilepsiae_subject(
     min_sfreq = float(params.get("min_sfreq", 500))
 
     band_range = params.get("band", [80, 250])
-    gpu_chunk = 600.0 if use_gpu else 50.0
+    # Epilepsiae legacy detector contract (epilepsiae_detectHFOs.py + hfo_net.py):
+    #   - 200s chunks, no overlap, back-to-back (segment_time=200, tranges from
+    #     np.arange(0, file_tLen, segment_time))
+    #   - FIR firwin(201) bandpass forward fftconvolve (legacy_align=True)
+    #   - chunk-edge events (both sides empty) -> rejected (legacy_align=True)
+    # Notch (50/100/150/200/250 Hz, 5 freqs, FIR-801) is applied upstream in
+    # load_epilepsiae_block(notch_filter_kind="fir_legacy", notch_freqs=[...]).
+    # Reference: docs/archive/epilepsiae_lagpat/detector_drift_root_cause_2026-05-03.md
+    legacy_align = bool(params.get("legacy_align", True))
+    chunk_sec = float(params.get("chunk_sec", 200.0))
+    chunk_overlap_sec = 0.0 if legacy_align else float(params.get("chunk_overlap_sec", 2.0))
     hfo_cfg = HFODetectionConfig(
         band="ripple",
         bandpass=tuple(band_range) if band_range else None,
@@ -319,12 +329,16 @@ def run_epilepsiae_subject(
         min_gap_ms=float(params.get("min_gap_ms", 20.0)),
         min_last_ms=float(params.get("min_last_ms", 50.0)),
         max_last_ms=float(params.get("max_last_ms", 200.0)),
-        chunk_sec=gpu_chunk,
-        chunk_overlap_sec=2.0,
+        chunk_sec=chunk_sec,
+        chunk_overlap_sec=chunk_overlap_sec,
         n_jobs=1,
         use_gpu=use_gpu,
+        legacy_align=legacy_align,
     )
     detector = HFODetector(hfo_cfg)
+    # Notch params for the upstream loader (Δ5 + Δ7).
+    notch_freqs = list(params.get("notch_freqs", [50.0, 100.0, 150.0, 200.0, 250.0]))
+    notch_filter_kind = str(params.get("notch_filter_kind", "fir_legacy"))
 
     gpu_paths: List[Path] = []
     summary: Dict[str, Any] = {
@@ -356,6 +370,8 @@ def run_epilepsiae_subject(
                 data_path, head_path,
                 reference=reference,
                 drop_channels=drop_channels,
+                notch_freqs=notch_freqs,
+                notch_filter_kind=notch_filter_kind,
             )
         except Exception as exc:
             print(f"  [SKIP] {stem}: load error: {exc}")
