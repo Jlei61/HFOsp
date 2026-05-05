@@ -39,7 +39,8 @@ worker() {
         python scripts/run_hfo_detection.py \
             --dataset epilepsiae \
             --subject "$subj" \
-            --output-dir "$OUTPUT_DIR"
+            --output-dir "$OUTPUT_DIR" \
+            --skip-existing
         echo "[detect] subject=${subj} done $(date)"
     } >>"$log" 2>&1
     echo "[detect] subject=${subj} done"
