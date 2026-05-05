@@ -1,20 +1,35 @@
-"""PR-T3-1 v2.1 Layer A driver — ictal ER-rank producer.
+"""PR-T3-1 v2.2 Layer A driver — ictal ER-rank producer.
 
-CLI modes (per pivot plan v2.1 §9):
+CLI modes (per pivot plan v2.2 §9):
 
   --sentinel    Step A.3: sentinel sanity on epilepsiae/548 + 916.
                 Produces per-sentinel JSON + sanity_report.json. If
-                sanity FAIL → archive note, do NOT touch cohort.
+                no sentinel cell reaches `producer_health == "stable"`
+                → archive note, do NOT touch cohort.
 
   --per-subject Step A.4: cohort run (audit_eligible 24). Blocked
                 until --sentinel passes. (Not yet implemented.)
 
-Sentinel sanity gate (plan §3.4, three pass criteria, all required):
+v2.2 sentinel gate (plan §3.4, rewritten 2026-05-04):
 
-  1. focal r_sz median earlier than non-focal (Wilcoxon one-sided
-     p < 0.1) per ER config
-  2. ≥ 3 ok-status seizures per (subject × ER config)
-  3. focal mean r_sz_valid_count ≥ 0.5 × non-focal mean
+  Two **independent** classifications per (subject × ER config),
+  computed via :func:`src.ictal_er_rank.classify_producer_health` /
+  :func:`classify_clinical_concordance`:
+
+  - `producer_health` ∈ {stable, moderate, unstable, insufficient}:
+    decides whether the data-driven r_sz is usable on this cell.
+  - `clinical_concordance` ∈ {concordant, partial, discordant,
+    not_assessable}: METADATA-ONLY; does NOT gate any pipeline
+    decision. Reports whether r_sz aligns with clinical i-label.
+
+  A.4 unblock condition (v2.2): at least 1 sentinel × ER cell is
+  `producer_health == "stable"`. Old v2.1 three-criterion hard gate
+  (Wilcoxon p<0.1 + n_ok≥3 + focal_cov_ratio) is superseded; see
+  plan §3.4.3 for the strikethrough.
+
+Output schema (per-subject JSON + sanity_report.json) follows
+plan §3.5 v2.2 — `producer_health` / `clinical_concordance` blocks
+nested as `{gamma_ER, broad_ER, details}`.
 
 Each sentinel subject is processed for both gamma_ER and broad_ER
 independently. Output:
@@ -43,11 +58,15 @@ if str(ROOT) not in sys.path:
 
 from src.ictal_er_rank import (  # noqa: E402
     calibrate_lambda_per_subject,
+    classify_clinical_concordance,
+    classify_producer_health,
     compute_cusum_n_d,
+    compute_focal_in_topk,
     compute_per_channel_rsz_coverage,
     compute_per_subject_r_sz,
     compute_seizure_status,
     compute_stability_s_sz,
+    compute_top10_coverage_list,
     rank_channels_by_n_d,
 )
 from src.ictal_onset_extraction import (  # noqa: E402
@@ -72,10 +91,12 @@ DETECTION_POST_SEC = 30.0
 LAMBDA_FPR_PER_HOUR = 1.0
 SENTINEL_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" / "_sentinel"
 
-# Sentinel sanity thresholds (plan §3.4).
-SANITY_WILCOXON_ALPHA = 0.1
-SANITY_MIN_OK_SEIZURES = 3
-SANITY_FOCAL_COVERAGE_RATIO_MIN = 0.5
+# v2.2 unblock threshold (plan §3.4.1, 2026-05-04). At least 1 cell
+# (sentinel × ER) must reach `producer_health == "stable"` to unblock A.4.
+SENTINEL_MIN_STABLE_CELLS = 1
+
+# Top-K used by classify_producer_health / classify_clinical_concordance.
+TOPK_FOR_TAGS = 10
 
 
 def _focus_rel_path() -> Path:
@@ -416,57 +437,124 @@ def _coverage_focal_vs_nonfocal(
     }
 
 
-def _evaluate_sanity(per_subject: Dict) -> Dict:
-    """Apply 3 sentinel sanity criteria per (subject × ER config)."""
+def _build_v2_2_tags(per_subject: Dict) -> Dict[str, Dict]:
+    """v2.2 tags per (subject × ER config) — plan §3.4.1 / §3.4.2 / §3.5.
+
+    Returns a 2-key dict matching the per-subject schema in plan §3.5:
+
+        {
+          "producer_health": {
+            "gamma_ER": "stable" | "moderate" | "unstable" | "insufficient",
+            "broad_ER": ...,
+            "details": {"gamma_ER": {...}, "broad_ER": {...}},
+          },
+          "clinical_concordance": {
+            "gamma_ER": "concordant" | "partial" | "discordant" | "not_assessable",
+            "broad_ER": ...,
+            "details": {"gamma_ER": {...}, "broad_ER": {...}},
+          },
+        }
+
+    Old v2.1 :func:`_evaluate_sanity` (3 hard criteria) is superseded;
+    `_wilcoxon_focal_vs_nonfocal` + `_coverage_focal_vs_nonfocal` are
+    still used here as inputs to ``classify_clinical_concordance`` and
+    for the human-readable sanity_brief output, but they no longer
+    decide a hard pass/fail.
+    """
     focal_set = set(per_subject.get("focal_channels", []))
-    sanity: Dict = {}
+    ph_tags: Dict[str, str] = {}
+    ph_details: Dict[str, Dict] = {}
+    cc_tags: Dict[str, str] = {}
+    cc_details: Dict[str, Dict] = {}
+
     for er_key in ("gamma_ER", "broad_ER"):
-        if er_key not in per_subject["per_er"]:
+        if er_key not in per_subject.get("per_er", {}):
             continue
         rec = per_subject["per_er"][er_key]
         if "fail_reason" in rec:
-            sanity[er_key] = {"pass": False, "fail_reason": rec["fail_reason"]}
+            ph_tags[er_key] = "insufficient"
+            ph_details[er_key] = {"fail_reason": rec["fail_reason"]}
+            cc_tags[er_key] = "not_assessable"
+            cc_details[er_key] = {"fail_reason": rec["fail_reason"]}
             continue
 
-        wilcox = _wilcoxon_focal_vs_nonfocal(
-            rec["r_sz"], rec["r_sz_valid_count"], focal_set,
+        n_ok = int(rec.get("n_seizures_ok") or 0)
+        s_sz = rec.get("s_sz")
+        r_sz: Dict[str, Optional[float]] = rec.get("r_sz") or {}
+        coverage: Dict[str, int] = rec.get("r_sz_valid_count") or {}
+
+        # producer_health
+        cov_threshold = max(3.0, 0.5 * float(n_ok))
+        top10_cov = compute_top10_coverage_list(r_sz, coverage, top_k=TOPK_FOR_TAGS)
+        cov_pass = sum(1 for c in top10_cov if c >= cov_threshold)
+        ph_tag, ph_d = classify_producer_health(
+            n_ok=n_ok,
+            s_sz=s_sz,
+            top10_cov_pass_count=cov_pass,
+            top10_cov_threshold=cov_threshold,
         )
-        cov = _coverage_focal_vs_nonfocal(
-            rec["r_sz_valid_count"], focal_set,
+        ph_tags[er_key] = ph_tag
+        ph_details[er_key] = ph_d
+
+        # clinical_concordance — METADATA ONLY (not a gate)
+        focal_top, top_total = compute_focal_in_topk(
+            r_sz, focal_set, top_k=TOPK_FOR_TAGS
         )
-        c1 = (
-            wilcox["mannwhitney_p_one_sided"] is not None
-            and wilcox["mannwhitney_p_one_sided"] < SANITY_WILCOXON_ALPHA
+        wilcox = _wilcoxon_focal_vs_nonfocal(r_sz, coverage, focal_set)
+        cc_tag, cc_d = classify_clinical_concordance(
+            wilcoxon_p_one_sided=wilcox["mannwhitney_p_one_sided"],
+            focal_in_top10_count=focal_top,
+            top10_total=top_total,
+            n_focal_with_finite_rsz=wilcox["n_focal_with_finite_rsz"],
+            n_nonfocal_with_finite_rsz=wilcox["n_nonfocal_with_finite_rsz"],
+            focal_rsz_median=wilcox["focal_rsz_median"],
+            nonfocal_rsz_median=wilcox["nonfocal_rsz_median"],
+            producer_health=ph_tag,
         )
-        c2 = rec["n_seizures_ok"] >= SANITY_MIN_OK_SEIZURES
-        c3 = (
-            cov["nonfocal_coverage_mean"] == 0
-            or cov["focal_coverage_mean"] >= SANITY_FOCAL_COVERAGE_RATIO_MIN * cov["nonfocal_coverage_mean"]
-        )
-        sanity[er_key] = {
-            "pass": bool(c1 and c2 and c3),
-            "criterion_1_wilcoxon_p_lt_alpha": bool(c1),
-            "criterion_2_min_ok_seizures": bool(c2),
-            "criterion_3_focal_coverage_ratio": bool(c3),
-            "wilcoxon_focal_lt_nonfocal": wilcox,
-            "coverage_focal_vs_nonfocal": cov,
-        }
-    return sanity
+        cc_tags[er_key] = cc_tag
+        cc_details[er_key] = cc_d
+
+    return {
+        "producer_health": {**ph_tags, "details": ph_details},
+        "clinical_concordance": {**cc_tags, "details": cc_details},
+    }
+
+
+def _count_stable_cells(per_subject_list: List[Dict]) -> Tuple[int, int, int, int]:
+    """Cohort-level tag counter — count cells per producer_health tag."""
+    n_stable = n_moderate = n_unstable = n_insufficient = 0
+    for s in per_subject_list:
+        ph = s.get("producer_health", {})
+        for er_key in ("gamma_ER", "broad_ER"):
+            if er_key not in ph:
+                continue
+            t = ph[er_key]
+            if t == "stable":
+                n_stable += 1
+            elif t == "moderate":
+                n_moderate += 1
+            elif t == "unstable":
+                n_unstable += 1
+            elif t == "insufficient":
+                n_insufficient += 1
+    return n_stable, n_moderate, n_unstable, n_insufficient
 
 
 def _run_sentinel(out_dir: Path) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     focus_rel = _load_focus_rel()
     summary: Dict = {
-        "step": "Layer A Step A.3 sentinel sanity",
+        "step": "Layer A Step A.3 sentinel sanity (v2.2)",
+        "schema_version": "pr_t3_1_layer_a_v2_2",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "alpha_wilcoxon": SANITY_WILCOXON_ALPHA,
-        "min_ok_seizures": SANITY_MIN_OK_SEIZURES,
-        "focal_coverage_ratio_min": SANITY_FOCAL_COVERAGE_RATIO_MIN,
         "lambda_fpr_per_hour": LAMBDA_FPR_PER_HOUR,
+        "topk_for_tags": TOPK_FOR_TAGS,
+        "unblock_threshold": {
+            "rule": "at least N (subject × ER) cells with producer_health == 'stable'",
+            "min_stable_cells": SENTINEL_MIN_STABLE_CELLS,
+        },
         "subjects": [],
     }
-    any_fail = False
 
     for subject in SENTINEL_SUBJECTS:
         focal = _focal_channels(subject, focus_rel)
@@ -496,7 +584,10 @@ def _run_sentinel(out_dir: Path) -> int:
             )
         print(f"  total subject elapsed: {elapsed:.1f}s", flush=True)
 
-        per_subject["sanity"] = _evaluate_sanity(per_subject)
+        # v2.2 tags — producer_health + clinical_concordance.
+        v2_2 = _build_v2_2_tags(per_subject)
+        per_subject.update(v2_2)
+
         # Per-sentinel JSON.
         sid_under = subject.replace("/", "_")
         out_path = out_dir / f"{sid_under}.json"
@@ -504,43 +595,78 @@ def _run_sentinel(out_dir: Path) -> int:
             json.dump(per_subject, f, indent=2, default=_json_default)
         print(f"  wrote {out_path}", flush=True)
 
-        sanity_brief = {
-            er_key: {
-                "pass": s["pass"],
-                "p_one_sided": s.get("wilcoxon_focal_lt_nonfocal", {}).get(
-                    "mannwhitney_p_one_sided"
-                ),
+        # Brief for sanity_report (one row per ER cell).
+        brief = {}
+        for er_key in ("gamma_ER", "broad_ER"):
+            if er_key not in per_subject["per_er"]:
+                continue
+            ph = per_subject["producer_health"].get(er_key)
+            cc = per_subject["clinical_concordance"].get(er_key)
+            ph_d = per_subject["producer_health"]["details"].get(er_key, {})
+            cc_d = per_subject["clinical_concordance"]["details"].get(er_key, {})
+            brief[er_key] = {
+                "producer_health": ph,
+                "clinical_concordance": cc,
                 "n_ok": per_subject["per_er"][er_key].get("n_seizures_ok"),
-                "focal_cov_mean": s.get("coverage_focal_vs_nonfocal", {}).get(
-                    "focal_coverage_mean"
-                ),
-                "nonfocal_cov_mean": s.get("coverage_focal_vs_nonfocal", {}).get(
-                    "nonfocal_coverage_mean"
-                ),
+                "s_sz": per_subject["per_er"][er_key].get("s_sz"),
+                "top10_cov_pass": ph_d.get("top10_cov_pass_count"),
+                "top10_cov_threshold": ph_d.get("top10_cov_threshold"),
+                "wilcoxon_p_one_sided": cc_d.get("wilcoxon_one_sided_p"),
+                "focal_in_top10": cc_d.get("focal_in_top10_count"),
+                "focal_in_top10_fraction": cc_d.get("focal_in_top10_fraction"),
             }
-            for er_key, s in per_subject["sanity"].items()
-        }
-        summary["subjects"].append({
-            "subject": subject,
-            "sanity": sanity_brief,
-        })
-        if any(not s["pass"] for s in per_subject["sanity"].values()):
-            any_fail = True
+            print(
+                f"  [{er_key}] producer_health={ph}  clinical_concordance={cc}",
+                flush=True,
+            )
+        summary["subjects"].append({"subject": subject, "tags": brief})
 
-    summary["overall_pass"] = not any_fail
-    summary["next_step_unblocked"] = not any_fail and len(summary["subjects"]) == len(SENTINEL_SUBJECTS)
+    # v2.2 unblock decision: count `stable` cells across all sentinels × ER.
+    n_stable, n_moderate, n_unstable, n_insufficient = _count_stable_cells([
+        {
+            "producer_health": {
+                er_key: row["producer_health"]
+                for er_key, row in s["tags"].items()
+            }
+        }
+        for s in summary["subjects"]
+    ])
+    summary["cohort_distribution"] = {
+        "n_stable_cells": n_stable,
+        "n_moderate_cells": n_moderate,
+        "n_unstable_cells": n_unstable,
+        "n_insufficient_cells": n_insufficient,
+    }
+    unblock = n_stable >= SENTINEL_MIN_STABLE_CELLS
+    summary["next_step_unblocked"] = bool(unblock)
+    summary["unblock_decision"] = (
+        f"{n_stable} stable cell(s) ≥ {SENTINEL_MIN_STABLE_CELLS} → "
+        f"{'UNBLOCK' if unblock else 'BLOCK'} A.4 cohort run"
+    )
+
     sanity_path = out_dir / "sanity_report.json"
     with sanity_path.open("w") as f:
         json.dump(summary, f, indent=2, default=_json_default)
     print(f"\n[sentinel] sanity report → {sanity_path}", flush=True)
-    if not summary["overall_pass"]:
+    print(
+        f"[sentinel] producer_health distribution: "
+        f"stable={n_stable} moderate={n_moderate} "
+        f"unstable={n_unstable} insufficient={n_insufficient}",
+        flush=True,
+    )
+    if not unblock:
         print(
-            "[sentinel] OVERALL FAIL — Step A.4 cohort run blocked. "
-            "Review sentinel JSON + sanity_report.json before proceeding.",
+            f"[sentinel] BLOCK — fewer than {SENTINEL_MIN_STABLE_CELLS} "
+            f"stable cell(s). Review sentinel JSON + sanity_report.json "
+            f"before changing parameters.",
             flush=True,
         )
         return 1
-    print("[sentinel] OVERALL PASS — Step A.4 cohort run unblocked.", flush=True)
+    print(
+        f"[sentinel] UNBLOCK — {n_stable} stable cell(s) ≥ "
+        f"{SENTINEL_MIN_STABLE_CELLS}. Step A.4 cohort run unblocked.",
+        flush=True,
+    )
     return 0
 
 

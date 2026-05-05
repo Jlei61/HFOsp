@@ -29,11 +29,15 @@ import pytest
 
 from src.ictal_er_rank import (
     calibrate_lambda_per_subject,
+    classify_clinical_concordance,
+    classify_producer_health,
     compute_cusum_n_d,
+    compute_focal_in_topk,
     compute_per_channel_rsz_coverage,
     compute_per_subject_r_sz,
     compute_seizure_status,
     compute_stability_s_sz,
+    compute_top10_coverage_list,
     rank_channels_by_n_d,
     time_shifted_seizure_onsets,
 )
@@ -734,3 +738,213 @@ def test_per_channel_rsz_coverage_rejects_length_mismatch():
         compute_per_channel_rsz_coverage(
             [{"a": 0.0}, {"a": 1.0}], seizure_statuses=["ok"]
         )
+
+
+# ---------------------------------------------------------------------------
+# A18 / A19 / A20. v2.2 tag helpers — producer_health + clinical_concordance
+# (added 2026-05-04 per plan §3.4.1 / §3.4.2)
+# ---------------------------------------------------------------------------
+
+
+# A18 — classify_producer_health threshold/branch matrix
+def test_classify_producer_health_insufficient_when_n_ok_lt_3():
+    tag, details = classify_producer_health(
+        n_ok=2, s_sz=0.9, top10_cov_pass_count=10, top10_cov_threshold=1.0
+    )
+    assert tag == "insufficient"
+    assert details["n_ok"] == 2
+
+
+def test_classify_producer_health_unstable_when_s_sz_below_0_3():
+    tag, _ = classify_producer_health(
+        n_ok=10, s_sz=0.29, top10_cov_pass_count=10, top10_cov_threshold=5.0
+    )
+    assert tag == "unstable"
+
+
+def test_classify_producer_health_unstable_when_s_sz_is_none():
+    # s_sz None happens when fewer than 2 qualifying seizures yield
+    # any defined pairwise Spearman; treat as below-threshold.
+    tag, _ = classify_producer_health(
+        n_ok=3, s_sz=None, top10_cov_pass_count=10, top10_cov_threshold=1.5
+    )
+    assert tag == "unstable"
+
+
+def test_classify_producer_health_moderate_when_s_sz_in_0_3_to_0_5():
+    tag, _ = classify_producer_health(
+        n_ok=10, s_sz=0.3, top10_cov_pass_count=10, top10_cov_threshold=5.0
+    )
+    assert tag == "moderate"
+    tag2, _ = classify_producer_health(
+        n_ok=10, s_sz=0.49, top10_cov_pass_count=10, top10_cov_threshold=5.0
+    )
+    assert tag2 == "moderate"
+
+
+def test_classify_producer_health_stable_when_s_sz_ge_0_5_and_cov_ok():
+    tag, _ = classify_producer_health(
+        n_ok=10, s_sz=0.5, top10_cov_pass_count=10, top10_cov_threshold=5.0
+    )
+    assert tag == "stable"
+
+
+def test_classify_producer_health_demoted_when_top10_cov_lt_7():
+    # s_sz strong but only 6/10 top channels pass cov threshold → demote
+    # stable → moderate.
+    tag, _ = classify_producer_health(
+        n_ok=10, s_sz=0.7, top10_cov_pass_count=6, top10_cov_threshold=5.0
+    )
+    assert tag == "moderate"
+    # 0.3 ≤ s_sz < 0.5 with cov<7 → demote moderate → unstable.
+    tag2, _ = classify_producer_health(
+        n_ok=10, s_sz=0.4, top10_cov_pass_count=6, top10_cov_threshold=5.0
+    )
+    assert tag2 == "unstable"
+
+
+def test_classify_producer_health_details_echoes_inputs():
+    _, details = classify_producer_health(
+        n_ok=15, s_sz=0.6, top10_cov_pass_count=8, top10_cov_threshold=7.5
+    )
+    assert details["n_ok"] == 15
+    assert details["s_sz"] == 0.6
+    assert details["top10_cov_pass_count"] == 8
+    assert details["top10_cov_threshold"] == 7.5
+
+
+# A19 — classify_clinical_concordance branches; metadata-only contract
+def test_classify_clinical_concordance_not_assessable_when_producer_insufficient():
+    tag, _ = classify_clinical_concordance(
+        wilcoxon_p_one_sided=0.001,
+        focal_in_top10_count=5,
+        top10_total=10,
+        n_focal_with_finite_rsz=5,
+        n_nonfocal_with_finite_rsz=5,
+        focal_rsz_median=10.0,
+        nonfocal_rsz_median=20.0,
+        producer_health="insufficient",
+    )
+    # producer_health insufficient supersedes everything → not_assessable.
+    assert tag == "not_assessable"
+
+
+def test_classify_clinical_concordance_not_assessable_when_too_few_focal():
+    tag, _ = classify_clinical_concordance(
+        wilcoxon_p_one_sided=0.01,
+        focal_in_top10_count=1,
+        top10_total=10,
+        n_focal_with_finite_rsz=1,
+        n_nonfocal_with_finite_rsz=10,
+        focal_rsz_median=5.0,
+        nonfocal_rsz_median=20.0,
+        producer_health="stable",
+    )
+    assert tag == "not_assessable"
+
+
+def test_classify_clinical_concordance_concordant_when_p_lt_0_1_and_top10_ge_30pct():
+    tag, _ = classify_clinical_concordance(
+        wilcoxon_p_one_sided=0.05,
+        focal_in_top10_count=4,
+        top10_total=10,
+        n_focal_with_finite_rsz=6,
+        n_nonfocal_with_finite_rsz=70,
+        focal_rsz_median=12.0,
+        nonfocal_rsz_median=25.0,
+        producer_health="moderate",
+    )
+    assert tag == "concordant"
+
+
+def test_classify_clinical_concordance_partial_when_only_one_criterion():
+    # Only Wilcoxon ok, focal in top-10 < 30%
+    tag_p, _ = classify_clinical_concordance(
+        wilcoxon_p_one_sided=0.05,
+        focal_in_top10_count=2,
+        top10_total=10,
+        n_focal_with_finite_rsz=6,
+        n_nonfocal_with_finite_rsz=70,
+        focal_rsz_median=15.0,
+        nonfocal_rsz_median=20.0,
+        producer_health="stable",
+    )
+    assert tag_p == "partial"
+    # Only top-10 ok, Wilcoxon not significant
+    tag_f, _ = classify_clinical_concordance(
+        wilcoxon_p_one_sided=0.5,
+        focal_in_top10_count=4,
+        top10_total=10,
+        n_focal_with_finite_rsz=6,
+        n_nonfocal_with_finite_rsz=70,
+        focal_rsz_median=18.0,
+        nonfocal_rsz_median=20.0,
+        producer_health="stable",
+    )
+    assert tag_f == "partial"
+
+
+def test_classify_clinical_concordance_discordant_when_neither_criterion():
+    tag, _ = classify_clinical_concordance(
+        wilcoxon_p_one_sided=0.583,
+        focal_in_top10_count=0,
+        top10_total=10,
+        n_focal_with_finite_rsz=8,
+        n_nonfocal_with_finite_rsz=70,
+        focal_rsz_median=34.5,
+        nonfocal_rsz_median=32.0,
+        producer_health="stable",
+    )
+    assert tag == "discordant"
+
+
+def test_classify_clinical_concordance_handles_missing_wilcoxon():
+    # Edge: scipy returned None (e.g. all values identical)
+    tag, _ = classify_clinical_concordance(
+        wilcoxon_p_one_sided=None,
+        focal_in_top10_count=4,
+        top10_total=10,
+        n_focal_with_finite_rsz=6,
+        n_nonfocal_with_finite_rsz=70,
+        focal_rsz_median=10.0,
+        nonfocal_rsz_median=20.0,
+        producer_health="stable",
+    )
+    # frac_ok=True, p_ok=False → partial
+    assert tag == "partial"
+
+
+# A20 — top-10 coverage helper + focal-in-top-K helper (drive new tags)
+def test_compute_top10_coverage_list_sorts_by_r_sz_ascending():
+    r_sz = {"a": 5.0, "b": 1.0, "c": 3.0, "d": 2.0, "e": None, "f": 4.0}
+    coverage = {"a": 10, "b": 1, "c": 8, "d": 2, "e": 0, "f": 7}
+    top_cov = compute_top10_coverage_list(r_sz, coverage)
+    # Sorted: b(1.0), d(2.0), c(3.0), f(4.0), a(5.0); e=None excluded
+    assert top_cov == [1, 2, 8, 7, 10]
+
+
+def test_compute_top10_coverage_list_truncates_to_top_k():
+    r_sz = {f"ch{i}": float(i) for i in range(20)}
+    coverage = {f"ch{i}": 100 - i for i in range(20)}
+    top_cov = compute_top10_coverage_list(r_sz, coverage, top_k=10)
+    assert len(top_cov) == 10
+    # Top 10 by r_sz are ch0..ch9 with cov 100..91
+    assert top_cov == [100 - i for i in range(10)]
+
+
+def test_compute_focal_in_topk_counts_focal_intersection():
+    r_sz = {"f1": 1.0, "f2": 2.0, "n1": 3.0, "n2": 4.0, "f3": 5.0, "n3": 6.0}
+    focal = {"f1", "f2", "f3", "f4_not_present"}
+    n_focal, n_top = compute_focal_in_topk(r_sz, focal, top_k=4)
+    # Top-4: f1, f2, n1, n2 → 2 focal in top-4
+    assert n_focal == 2
+    assert n_top == 4
+
+
+def test_compute_focal_in_topk_handles_top_k_larger_than_finite():
+    r_sz = {"a": 1.0, "b": None, "c": 2.0}
+    focal = {"a"}
+    n_focal, n_top = compute_focal_in_topk(r_sz, focal, top_k=10)
+    # Only 2 finite; top_k=10 returns all 2
+    assert n_focal == 1
+    assert n_top == 2
