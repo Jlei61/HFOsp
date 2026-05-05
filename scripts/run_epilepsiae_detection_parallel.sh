@@ -13,9 +13,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-N_JOBS=${N_JOBS:-4}
+N_JOBS=${N_JOBS:-1}  # v2: GPU 单卡，串行最稳；多卡可调
 SUBJECTS="${SUBJECTS:-253 548 139 384 1077 1084 442 818 916 922 958 583 590 620 635 1073 1096 1125 1146 1150}"
-OUTPUT_DIR="${OUTPUT_DIR:-results/hfo_detection}"
+OUTPUT_DIR="${OUTPUT_DIR:-results/hfo_detector_v2}"
 
 # Hard-fail if OUTPUT_DIR points anywhere under /mnt/epilepsia_data — that
 # would risk overwriting legacy 2021 _gpu.npz files.
