@@ -23,6 +23,6 @@ The recursive Path A diagnostics (commits 6027281, 85f5a29) confirmed the
 21 年 results cannot be bit-reproduced on modern stacks. Detector v2 is the
 forward-going main pipeline. See:
 
-- `docs/archive/hfo_detector_v2/v2_specification.md` *(Phase 1, planned)*
-- `docs/archive/hfo_detector_v2/v2_validation_contract.md` *(Phase 1, planned)*
+- `docs/archive/hfo_detector_v2/v2_specification.md`
+- `docs/archive/hfo_detector_v2/v2_validation_contract.md`
 - `docs/archive/hfo_detector_v2/v2_cohort_rebuild_plan_2026-05-05.md`

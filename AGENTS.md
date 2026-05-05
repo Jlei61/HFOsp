@@ -254,8 +254,8 @@ Read `docs/epilepsiae_dataset_structure.md` before answering any Epilepsiae ques
 ## HFO Detector v2 (canonical pipeline since 2026-05-05)
 
 **Read these before tracing any 2026+ Epilepsiae detection result:**
-- `docs/archive/hfo_detector_v2/v2_specification.md` — algorithmic definition *(Phase 1, planned)*
-- `docs/archive/hfo_detector_v2/v2_validation_contract.md` — 3-layer acceptance *(Phase 1, planned)*
+- `docs/archive/hfo_detector_v2/v2_specification.md` — algorithmic definition
+- `docs/archive/hfo_detector_v2/v2_validation_contract.md` — 3-layer acceptance
 - `docs/archive/hfo_detector_v2/v2_cohort_rebuild_plan_2026-05-05.md` — execution log
 
 Canonical artifact root: `results/hfo_detector_v2/`. Do NOT compare v2 events
