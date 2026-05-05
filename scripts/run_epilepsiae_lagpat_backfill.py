@@ -1,11 +1,15 @@
 """Epilepsiae new-pipeline pack + lagPat backfill driver.
 
-Reads:  results/hfo_detection/<subject>/*_gpu.npz       (whole_dets, chns_names, start_time)
-        results/hfo_detection/<subject>/_refineGpu.npz   (subject-level refined channel list)
+Reads:  <gpu_root>/<subject>/*_gpu.npz       (whole_dets, chns_names, start_time)
+        <gpu_root>/<subject>/_refineGpu.npz   (subject-level refined channel list)
         Raw .data + .head via load_epilepsiae_block       (CAR signal, variable sfreq)
-Writes: results/epilepsiae_lagpat_backfill/<subject>/<stem>_packedTimes.npy
-        results/epilepsiae_lagpat_backfill/<subject>/<stem>_lagPat.npz
-        results/epilepsiae_lagpat_backfill/<subject>/_backfill_log.json
+Writes: <output_root>/<subject>/<stem>_packedTimes.npy
+        <output_root>/<subject>/<stem>_lagPat.npz
+        <output_root>/<subject>/_backfill_log.json
+
+Both <gpu_root> and <output_root> are CLI-configurable via --gpu-root and
+--output-root. Defaults preserve legacy behavior; v2 invokes with
+--gpu-root results/hfo_detector_v2 --output-root results/hfo_detector_v2/lagpat.
 
 NOT a Track B replay: legacy *_gpu.npz are 216-byte stubs (per artifact census 2026-04-27).
 Output is a NEW pack/lag artifact for sensitivity-audit purposes only.
@@ -725,7 +729,22 @@ def main() -> None:
         help=f"Per-record wall-clock cap in seconds (default {DEFAULT_MAX_RECORD_SEC}). "
              "Pass 0 to disable.",
     )
+    parser.add_argument(
+        "--gpu-root", type=Path, default=Path("results/hfo_detection"),
+        help="Override input gpu.npz root (default: results/hfo_detection). "
+             "v2 default: results/hfo_detector_v2",
+    )
+    parser.add_argument(
+        "--output-root", type=Path, default=Path("results/epilepsiae_lagpat_backfill"),
+        help="Override pack/lagPat output root "
+             "(default: results/epilepsiae_lagpat_backfill). "
+             "v2: results/hfo_detector_v2/lagpat",
+    )
     args = parser.parse_args()
+
+    global NEW_GPU_ROOT, OUTPUT_ROOT
+    NEW_GPU_ROOT = args.gpu_root
+    OUTPUT_ROOT = args.output_root
 
     if args.aggregate_cohort_summary:
         out = _aggregate_cohort_summary()

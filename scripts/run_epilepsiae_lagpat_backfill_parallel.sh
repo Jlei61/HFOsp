@@ -21,27 +21,31 @@ cd "$(dirname "$0")/.."
 
 N_JOBS=${N_JOBS:-5}
 SUBJECTS="${SUBJECTS:-253 548 139 384 1077 1084 442 818 916 922 958 583 590 620 635 1073 1096 1125 1146 1150}"
+GPU_ROOT="${GPU_ROOT:-results/hfo_detection}"
+LAGPAT_OUTPUT_ROOT="${LAGPAT_OUTPUT_ROOT:-results/epilepsiae_lagpat_backfill}"
 # Set FORCE=1 to overwrite existing lagPat outputs (e.g. after a Stage B fix).
 FORCE_FLAG=""
 if [[ "${FORCE:-0}" == "1" ]]; then
     FORCE_FLAG="--force"
 fi
 
-mkdir -p results/epilepsiae_lagpat_backfill
+mkdir -p "${LAGPAT_OUTPUT_ROOT}"
 
 worker() {
     local subj="$1"
-    local out_dir="results/epilepsiae_lagpat_backfill/${subj}"
+    local out_dir="${LAGPAT_OUTPUT_ROOT}/${subj}"
     mkdir -p "$out_dir"
     python scripts/run_epilepsiae_lagpat_backfill.py --subject "$subj" ${FORCE_FLAG} \
+        --gpu-root "$GPU_ROOT" --output-root "$LAGPAT_OUTPUT_ROOT" \
         >>"${out_dir}/_console.log" 2>&1
     echo "[backfill] subject=${subj} done"
 }
 export -f worker
-export FORCE_FLAG
+export FORCE_FLAG GPU_ROOT LAGPAT_OUTPUT_ROOT
 
 # shellcheck disable=SC2086
 printf '%s\n' $SUBJECTS \
     | xargs -n1 -P "$N_JOBS" -I {} bash -c 'worker "$@"' _ {}
 
-python scripts/run_epilepsiae_lagpat_backfill.py --aggregate-cohort-summary
+python scripts/run_epilepsiae_lagpat_backfill.py --aggregate-cohort-summary \
+    --gpu-root "$GPU_ROOT" --output-root "$LAGPAT_OUTPUT_ROOT"
