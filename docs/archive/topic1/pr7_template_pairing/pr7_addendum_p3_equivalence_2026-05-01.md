@@ -193,7 +193,7 @@ leave-548-out 综合 = **不 PASS**（因 T3 结构性 fail）。按 v1.1.1 §5.
 ## 9. 链接
 
 - 上游 framework：`docs/paper1_framework_sba.md` v1.1.2 §5.3
-- PR-7 主结果：`docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md` §17
+- PR-7 主结果：`docs/archive/topic1/pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md` §17
 - 代码：`scripts/pr7_addendum_p3_equivalence.py`
 - 数值结果：`results/interictal_propagation/template_pairing/pr7_addendum_p3.json`
 - topic 主文档：`docs/topic1_within_event_dynamics.md` §2

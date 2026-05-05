@@ -6,7 +6,7 @@
 - Step 2 covers M2 (ER log-ratio) + Nyquist / filter padding guards
   + per-channel eps: T11–T18.
 
-See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``
+See ``docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``
 §10 for the full TDD list.
 """
 

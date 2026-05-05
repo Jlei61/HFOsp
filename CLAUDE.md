@@ -140,6 +140,48 @@ behavior (does it return a number? does it permute?) miss invariants. Each
 science-contract clause needs its own test that would fail if that specific
 clause were violated.
 
+## 7. Multi-Panel Figure Discipline
+
+This rule comes from a 2026-05-06 review (cluster geometry viz, Plan A → A').
+Plan A had 3 per-subject panels where panel c (native `d_to_T0` vs `d_to_T1`)
+was a rotated view of panel a (MDS scatter), and a 4-panel cohort summary
+where the silhouette panel and the within/between distance ratio panel
+measured the same construct. The user caught it before any code was written.
+Existing §1–§6 cover code discipline; none cover figure design hygiene.
+
+**Each panel must answer one independent scientific question. Two panels
+showing the same construct from different angles is redundancy, not coverage.**
+
+When designing a multi-panel figure (paper figure, cohort summary,
+per-subject diagnostic):
+
+- **List the questions first, not the data.** Don't enumerate "what data
+  do we have to display"; enumerate "what independent questions must this
+  figure answer". Each panel = one question. If two candidate panels collapse
+  to the same underlying construct, pick the most direct one and drop or
+  replace the other.
+- **Marginals + joint, not marginals twice.** If a cohort summary already
+  shows marginal X and marginal Y as separate panels, an additional joint
+  scatter X-vs-Y is justified only if the joint reveals coupling that the
+  marginals cannot. Drawing both marginals twice (e.g., silhouette and
+  within/between distance ratio side-by-side) is wasted real estate.
+- **Pick the most direct representation.** Silhouette is the standard
+  cluster-validity number; if you also want a distance distribution panel,
+  ask whether you're answering a different question (per-event misclassification,
+  distribution shape, presence of negative-silhouette outliers) or just
+  re-quoting the same construct. Same-question = redundant.
+- **MDS / PCA scatter + native-coordinate scatter for k=2 is one panel,
+  not two.** In a masked-Euclidean two-template space, MDS-2D and
+  `(d_to_T0, d_to_T1)` differ only by rotation; either alone is enough.
+- **Resist "more = better".** A 3-panel figure where every panel is
+  independent beats a 6-panel figure where panels c–f are reformulations
+  of a–b.
+
+The unifying principle: a good multi-panel figure is a partition over the
+question space, not a montage over the data space. Before drawing, write
+down the question each panel answers; if any two questions collapse to the
+same construct, the figure has redundancy and one panel must be replaced.
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying questions come before implementation rather than after mistakes, and helpers handle every plan-specified invariant on the first pass.

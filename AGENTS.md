@@ -156,7 +156,7 @@ Important drift:
   - `scripts/plot_interictal_propagation.py` — per-subject propagation heatmaps (`--pr3`), per-subject MI distributions (`--mi`), 6-panel cohort summary (`--cohort`), PR-4A occupancy timelines + day/night group summary (`--pr4a`)
   - `tests/test_interictal_propagation.py` — unit tests for centered-rank handling, mixture detection, source-node diagnostics, and temporal dynamics
   - `docs/topic1_within_event_dynamics.md` — current formal entry for within-event dynamics
-  - `docs/archive/topic1/interictal_group_event_internal_propagation.md` — detailed internal-propagation result note
+  - `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` — detailed internal-propagation result note
   - `results/interictal_propagation/` — per-subject JSON, cohort summary, and figures
   - Current accepted bottom line: `30/30` subjects have stable adaptive solutions with `stable_k` distribution `27x k=2`, `2x k=4`, `1x k=6`; PR-2.5 adds split-half / odd-even block reproducibility with `23 strong / 7 moderate / 0 weak` and `8/9` forward/reverse subjects reproduced. `stable_k` remains descriptive compression, not a claim about the true number of modes.
   - PR-3 visualization completed (2026-04-12): 30/30 per-subject propagation heatmaps, 30/30 per-subject MI distribution plots (Fig.2B style with cluster-level permutation tests), 6-panel cohort summary. MI significant for `30/30` (median 0.229, range 0.067–0.515). Within-cluster τ median = 0.252 vs overall τ = 0.089.
@@ -168,7 +168,7 @@ Important drift:
   - PR-4C planned: seizure proximity L1+L2+L3. Reuses PR-4B's `compute_rate_state_coupling` framework with seizure-proximity windows. See `docs/topic1_within_event_dynamics.md` §7.2.
 - Spatial modulation / SOZ analysis (Where question):
   - `docs/topic3_spatial_soz_modulation.md` — current formal entry for where / SOZ spatial attribution
-  - `docs/archive/topic3/spatial_modulation_soz_analysis.md` — detailed plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
+  - `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md` — detailed plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
   - `scripts/audit_gpu_npz.py` — Step 0 data audit (Yuquan PASS 11/18, Epilepsiae FAIL 0/20)
   - `scripts/run_spatial_modulation.py` — PR-1 batch driver (Yuquan-only, 9 valid pairs)
   - `scripts/plot_refine_soz_validation.py` — Refine-SOZ validation figure (legacy Fig1/S12 equivalent, AUC + bar charts)
@@ -189,7 +189,7 @@ Do not assume current plotting covers all legacy paper figures. Many old paper f
 ## Interictal Synchrony Analysis — Current Status (2026-04-04)
 
 **Read `docs/topic1_within_event_dynamics.md` first for the current formal summary.**
-Use `docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md` for the full statistical report.
+Use `docs/archive/topic1/synchrony/interictal_synchrony_preliminary_report_2026-04-03.md` for the full statistical report.
 
 - PR4–PR6 **completed for both Epilepsiae + Yuquan**. Overall conclusion: **population-level null** for phase synchrony.
   - Combined: 29 subjects / 1,468,780 event rows / 253 intervals / 141 fixed-window intervals
@@ -287,13 +287,13 @@ Stop and ask the user instead of guessing when:
 
 When a downstream PR consumes a field defined by an earlier PR, look up the accepted definition in the earlier PR's archive doc before using it — the JSON field name alone is not the contract. Frequent lookups follow.
 
-**`forward_reverse_reproduced` (PR-2.5)** — accepted rule is **split-half OR odd-even** (8/9 subjects). The per-subject JSON exposes both `time_split_reproducibility.splits.first_half_second_half.forward_reverse_reproduced` and `splits.odd_even_block.forward_reverse_reproduced`; downstream consumers must take the OR. Checking only split-half undercounts. Source: `docs/archive/topic1/interictal_group_event_internal_propagation.md` PR-2.5 section.
+**`forward_reverse_reproduced` (PR-2.5)** — accepted rule is **split-half OR odd-even** (8/9 subjects). The per-subject JSON exposes both `time_split_reproducibility.splits.first_half_second_half.forward_reverse_reproduced` and `splits.odd_even_block.forward_reverse_reproduced`; downstream consumers must take the OR. Checking only split-half undercounts. Source: `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` PR-2.5 section.
 
 **`template_rank` (PR-2 adaptive cluster)** — `adaptive_cluster.clusters[k].template_rank` is `argsort(argsort(template))`. Channels that never participate in this cluster's events still get a rank because `_legacy_hist_mean_rank` fallback assigns `template[ci] = ci`. Downstream code that picks rank extremes (source/sink, top-N) **must** derive a per-cluster `valid_mask` from raw bools and exclude non-participating channels — otherwise non-participating channels can be silently picked as endpoint members. Use `_load_bools_and_channels` (or `load_subject_propagation_events`) on the **`*_lagPat_withFreqCent.npz`** files (10ch full set), not `*_lagPat.npz` (older 7ch legacy slice).
 
 **`channel_names` ordering** — JSON `channel_names` and any downstream `template_rank` / `template_valid_mask` indices are aligned to the same channel ordering, but raw lagPat NPZ may order them differently per block. Always re-derive the union ordering and compare against JSON `channel_names` before indexing. Mismatch means template_rank indices map to the wrong channels.
 
-**Pre-registered hypothesis tier** — every PR plan archive declares hypothesis tiers (primary / secondary / mechanism sanity / sensitivity). Look up the tier in the plan archive when writing results; do not infer it from the data's strength. PR-6 H2 forward/reverse swap is registered as **directional mechanism sanity, not cohort claim** in `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §3.3 — never report it as "independent finding" regardless of swap_score magnitude.
+**Pre-registered hypothesis tier** — every PR plan archive declares hypothesis tiers (primary / secondary / mechanism sanity / sensitivity). Look up the tier in the plan archive when writing results; do not infer it from the data's strength. PR-6 H2 forward/reverse swap is registered as **directional mechanism sanity, not cohort claim** in `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §3.3 — never report it as "independent finding" regardless of swap_score magnitude.
 
 **`valid_mask` semantics in PR-6 helpers** — `extract_endpoint_middle` and `compute_template_anchoring` accept `valid_mask`. Two consumer modes: split-half consumers pass `-1` sentinels in the rank vector and rely on the default mask derivation; full-data consumers must compute `valid_mask` per cluster from raw bools and pass it explicitly. **Default `valid_mask=None` for full-data input restores the buggy "all channels valid" path** — this is silent and only catchable by audit.
 
@@ -303,7 +303,7 @@ When a downstream PR consumes a field defined by an earlier PR, look up the acce
 
 - "What did the interictal synchrony analysis find?"
   - Read `docs/topic1_within_event_dynamics.md` first
-  - Then read `docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md` for detailed stats
+  - Then read `docs/archive/topic1/synchrony/interictal_synchrony_preliminary_report_2026-04-03.md` for detailed stats
   - Short answer: **population-level null** on 29 subjects (Epilepsiae + Yuquan); individual heterogeneity dominates
   - **One exploratory finding**: extra-focal (`e`) phase synchrony is pre > post (p=0.012, r=0.31); SOZ (`i`) and lesion (`l`) show no effect
   - Paper 548/E14 reproduced exactly; not generalizable to cohort
@@ -357,7 +357,7 @@ When a downstream PR consumes a field defined by an earlier PR, look up the acce
 
 - "Where does the slow IEI modulation occur? Is it SOZ-specific?"
   - Read `docs/topic3_spatial_soz_modulation.md` first
-  - Then read `docs/archive/topic3/spatial_modulation_soz_analysis.md`
+  - Then read `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md`
   - Short answer: **PR-1 completed (Yuquan-only, n=9)**. Raw serial corr shows **no SOZ difference** (p=1.0). But **detrend_fraction is lower in SOZ** (7/9 subjects, p=0.129) — SOZ channels have more short-range memory, less slow drift. SOZ median IEI is shorter (p=0.055, marginal).
    - Epilepsiae gpu.npz are all corrupt stubs (216 bytes); per-channel analysis requires HFO re-detection via `scripts/run_hfo_detection.py --dataset epilepsiae --all`
   - Per-channel approach (relaxed refine k=0.0) successfully expands channel set from lagPat ~10 to ~33, with 9/11 subjects forming valid SOZ/nonSOZ pairs

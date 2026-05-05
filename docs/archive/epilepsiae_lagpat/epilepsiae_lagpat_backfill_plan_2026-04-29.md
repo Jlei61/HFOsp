@@ -9,8 +9,8 @@
 > 创建：2026-04-29
 > 前序：
 > - Yuquan dual-track audit 完成（`docs/archive/yuquan_lagpat/dual_track_audit_2026-04-26.md`，6/14 strict pass + 8 refine drift）
-> - Epilepsiae artifact census 完成（`docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md`，0/20 legacy gpu replay-eligible，20/20 新 pipeline `_gpu.npz`+`_refineGpu.npz` ready）
-> - Topic 3 PR-2 per-channel relaxed-refine 完成（`docs/archive/topic3/epilepsiae_three_tier_pr2_2026-04-27.md`），不依赖 lagPat。
+> - Epilepsiae artifact census 完成（`docs/archive/topic3/pr1_spatial_modulation/epilepsiae_artifact_census_2026-04-27.md`，0/20 legacy gpu replay-eligible，20/20 新 pipeline `_gpu.npz`+`_refineGpu.npz` ready）
+> - Topic 3 PR-2 per-channel relaxed-refine 完成（`docs/archive/topic3/pr1_spatial_modulation/epilepsiae_three_tier_pr2_2026-04-27.md`），不依赖 lagPat。
 >
 > **本计划不是 Track B replay**（缺老 gpu 冻结条件，不可能 strict numerical parity）。
 > **本计划不是数据覆盖**（绝不写回 `/mnt/epilepsia_data/.../all_recs/`）。

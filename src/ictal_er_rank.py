@@ -1,7 +1,7 @@
 """PR-T3-1 v2.1 — Layer A: Ictal ER-rank producer (scope-restricted).
 
 This module implements Layer A of the v2.1 pivot
-(`docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md`):
+(`docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md`):
 
 - Per-channel Page-Hinkley CUSUM alarm time ``n_d`` against PR-6A's
   baseline-z-scored ER (gamma_ER + broad_ER).

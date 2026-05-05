@@ -53,7 +53,7 @@
 | C6 | Forward / reverse template 在 1s–1h 时间窗内**未见 mark dependence**（mark-independent 兼容） | PR-7 | n=6 |
 | C7 | 间期事件几何在发作邻近窗口上无稳健变化（cohort null） | PR-4C | 30/30 |
 
-C6 是最强约束：naive 对称 Hebbian-coupled bidirectional storage 几乎都预测短窗 reciprocity；PR-7 addendum (2026-05-01) verdict = INCONCLUSIVE，**1800s window + lag1_same_excess null-relative 干净 PASS**，10/30/60s + run_length_lift cohort CI underpowered at n=6 with structural outliers。**精确措辞**："数据 compatible with mark-independent retrieval；目前的证据不足以正面排除强短窗 reciprocity 模型，但也未观察到支持它的 cohort 信号"——**不**写"直接淘汰一类模型"或"ping-pong 假说被证伪"。任何后继 framework 仍应显式包含让两 attractor 独立调用的机制项（与 1800s + lag1 PASS 一致）。详见 `docs/archive/topic1/pr7_addendum_p3_equivalence_2026-05-01.md`。
+C6 是最强约束：naive 对称 Hebbian-coupled bidirectional storage 几乎都预测短窗 reciprocity；PR-7 addendum (2026-05-01) verdict = INCONCLUSIVE，**1800s window + lag1_same_excess null-relative 干净 PASS**，10/30/60s + run_length_lift cohort CI underpowered at n=6 with structural outliers。**精确措辞**："数据 compatible with mark-independent retrieval；目前的证据不足以正面排除强短窗 reciprocity 模型，但也未观察到支持它的 cohort 信号"——**不**写"直接淘汰一类模型"或"ping-pong 假说被证伪"。任何后继 framework 仍应显式包含让两 attractor 独立调用的机制项（与 1800s + lag1 PASS 一致）。详见 `docs/archive/topic1/pr7_template_pairing/pr7_addendum_p3_equivalence_2026-05-01.md`。
 
 ---
 
@@ -173,7 +173,7 @@ T5 与 (T6 + T7) 是 toy 阶段的内部 sanity：T5 证明两过程解耦合理
 - **NULL**：< 25/30。
 - **FAIL（与 SBA 矛盾）**：< 15/30，意味着 subject 内部根本没有可识别的稳定模板，整个 framework 拒绝。
 - **Verdict (PR-2.5)**：23 strong + 7 moderate + 0 weak / 30，**PASS**。
-- **数据来源**：`docs/archive/topic1/interictal_group_event_internal_propagation.md` PR-2.5 节。
+- **数据来源**：`docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` PR-2.5 节。
 
 ### 5.2 P2 — Bidirectional pair 共享几何骨架（DONE）
 
@@ -184,7 +184,7 @@ T5 与 (T6 + T7) 是 toy 阶段的内部 sanity：T5 证明两过程解耦合理
 - **FAIL（与 SBA 矛盾）**：swap geometry 反向（即 source(forward) ≈ source(reverse)），意味着两 template 不是 Hebbian 对称存储下的 fixed-point pair，要求改 framework。
 - **Verdict (PR-6 Step 4b, fwd/rev cohort n=6)**：6/6 positive sign，sign-test p=0.031；Wilcoxon p=0.031，median +2 swap-vs-same node count → **PASS**。
 - **附注**：cohort-wide n=21 上 Wilcoxon p=0.012 但 sign-test p=0.12（粗 cohort 上证据弱），主 framework claim 在 fwd/rev subset 上立得住。
-- **数据来源**：`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15 Step 4b。
+- **数据来源**：`docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15 Step 4b。
 
 ### 5.3 P3 — 短窗 attractor 调用 ≈ mark-independent（v1.1.1：cohort-level TOST + 现实功效声明）
 
@@ -245,7 +245,7 @@ T5 与 (T6 + T7) 是 toy 阶段的内部 sanity：T5 证明两过程解耦合理
 
 - 原 PR-7 v1 仅报告 Wilcoxon p, 未做 TOST + bootstrap CI
 - v1.0 PASS verdict **撤回**
-- PR-7 addendum 已执行 2026-05-01：`scripts/pr7_addendum_p3_equivalence.py` + `results/interictal_propagation/template_pairing/pr7_addendum_p3.json` + `docs/archive/topic1/pr7_addendum_p3_equivalence_2026-05-01.md`
+- PR-7 addendum 已执行 2026-05-01：`scripts/pr7_addendum_p3_equivalence.py` + `results/interictal_propagation/template_pairing/pr7_addendum_p3.json` + `docs/archive/topic1/pr7_template_pairing/pr7_addendum_p3_equivalence_2026-05-01.md`
 - **Verdict = INCONCLUSIVE**（compatible with mark-independent within tested precision；TOST(δ=0.05) cohort CI underpowered at n=6 with structural outliers）
 
 **Addendum 主结果摘要**：
@@ -261,7 +261,7 @@ T5 与 (T6 + T7) 是 toy 阶段的内部 sanity：T5 证明两过程解耦合理
 
 **Outlier 结构**：T1 短窗 INCONCLUSIVE 完全由 548 单独 driving（leave-548-out 全 PASS）；T3 run_length_lift INCONCLUSIVE 是结构性的（1073=0.93, 635=0.95, 548=1.05 三方向 outlier，leave-any-one 仍 fail）。SENSITIVITY-only 档位**未触发**（T3 leave-out 仍 fail）。
 
-**SBA framework 状态**：H₀ 单核心假设 + toy model 不受 INCONCLUSIVE 影响；INCONCLUSIVE ≠ falsified；NULL 档位**未触发**。Paper 1 P3 status 写法 lock 为 **"compatible with mark-independent within tested precision (TOST(δ=0.05) cohort CI underpowered at n=6 with structural outliers; 1800s window + lag1 null-relative excess clean PASS)"**——**禁止**写 PASS。详见 `docs/archive/topic1/pr7_addendum_p3_equivalence_2026-05-01.md` §5–§6。
+**SBA framework 状态**：H₀ 单核心假设 + toy model 不受 INCONCLUSIVE 影响；INCONCLUSIVE ≠ falsified；NULL 档位**未触发**。Paper 1 P3 status 写法 lock 为 **"compatible with mark-independent within tested precision (TOST(δ=0.05) cohort CI underpowered at n=6 with structural outliers; 1800s window + lag1 null-relative excess clean PASS)"**——**禁止**写 PASS。详见 `docs/archive/topic1/pr7_template_pairing/pr7_addendum_p3_equivalence_2026-05-01.md` §5–§6。
 
 #### 重要 framing 纪律
 
@@ -269,7 +269,7 @@ T5 与 (T6 + T7) 是 toy 阶段的内部 sanity：T5 证明两过程解耦合理
 - P3 INCONCLUSIVE 是 honest 不确定，不是负面结果；写为 "compatible with mark-independent"
 - 任何"用 leave-548-out 替代主判据"的写法都是 rule fitting，违反框架
 - **未测**：alternative burst definitions、rate-state 切换、history-dependent regression、form-(4) latent-state coupling——这些列入 Paper 3 候选 follow-up，**不**进 Paper 1
-- **数据来源**：`docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md` §17 + 待补 PR-7 addendum
+- **数据来源**：`docs/archive/topic1/pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md` §17 + 待补 PR-7 addendum
 
 ### 5.4 P4 — Attractor 角色节点解剖锚定多源 SOZ proxy（TODO）
 

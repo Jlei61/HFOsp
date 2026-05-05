@@ -1,14 +1,14 @@
-> **SUPERSEDED 2026-04-25**：本计划（single ictal anchor + Smith 2022 重现的 H1/H1' 主线）已被 PR-6 主线 pivot 取代。Sentinel `548/916` 已经把“跨 seizure 稳定 ictal onset rank”这条假设证伪（详见 `pr6a_step0-2_step3preview_review_2026-04-23.md` Step3-preview），并且文献（Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021）也指出该方向在领域内本身高风险。**正式 plan-of-record**：[`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`](pr6_template_endpoint_anchoring_plan_2026-04-25.md)。本文档保留作为 pivot 前的科学背景与方法学讨论，但不再作为 PR-6-A 执行路径，§3-§9 中的 ER pipeline / CUSUM / sanity check 不再启动。
+> **SUPERSEDED 2026-04-25**：本计划（single ictal anchor + Smith 2022 重现的 H1/H1' 主线）已被 PR-6 主线 pivot 取代。Sentinel `548/916` 已经把“跨 seizure 稳定 ictal onset rank”这条假设证伪（详见 `pr6a_step0-2_step3preview_review_2026-04-23.md` Step3-preview），并且文献（Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021）也指出该方向在领域内本身高风险。**正式 plan-of-record**：[`docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`](pr6_template_endpoint_anchoring_plan_2026-04-25.md)。本文档保留作为 pivot 前的科学背景与方法学讨论，但不再作为 PR-6-A 执行路径，§3-§9 中的 ER pipeline / CUSUM / sanity check 不再启动。
 
 ---
 
 # PR-6-A：Interictal Template Semantic Alignment via Seizure Onset Propagation
 
-先说一下文档定位：下面这份是对标 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` 的合同级计划，落盘后应放在 `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-xx.md`。Topic 1 主文档 §7 增加 PR-6-A 条目；§7.9 的 KONWAC placeholder 已剥离为「未来模型层（不绑 PR 编号）」。
+先说一下文档定位：下面这份是对标 `docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md` 的合同级计划，落盘后应放在 `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-xx.md`。Topic 1 主文档 §7 增加 PR-6-A 条目；§7.9 的 KONWAC placeholder 已剥离为「未来模型层（不绑 PR 编号）」。
 
 > 本计划占用 PR-6A 编号；PR-6 编号空间从此对应 PR-6A/B/C/D/E 数据发现序列；KONWAC v2 已剥离到主文档 §7.9 未来模型层，不绑 PR 编号。
 >
-> 2026-04-23 阶段性执行/审阅状态见 `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md`：Step0-2（EEG-aware baseline clip + sentinel Step2 图）有条件验收通过；Step3 `t_ER_onset` 当前只接受为 preview-only，不进入 H1/H1' / sanity 正式叙事。
+> 2026-04-23 阶段性执行/审阅状态见 `docs/archive/topic1/pr6_template_anchoring/pr6a_step0-2_step3preview_review_2026-04-23.md`：Step0-2（EEG-aware baseline clip + sentinel Step2 图）有条件验收通过；Step3 `t_ER_onset` 当前只接受为 preview-only，不进入 H1/H1' / sanity 正式叙事。
 
 ---
 

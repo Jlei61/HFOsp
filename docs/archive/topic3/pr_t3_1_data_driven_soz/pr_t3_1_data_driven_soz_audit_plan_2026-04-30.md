@@ -10,14 +10,14 @@
 >
 > 状态：plan-of-record，2026-04-30（**v1.1**，整合 2026-04-30 review 8 条修正：size-matched k / 取消三档 verdict / M1 rate-normalized / M2 log-ratio + Nyquist guard / 修正 null abort / canonical channel matcher / 修正数据路径 / "两条 proxy 而非独立通道" framing）
 > 范围：在 Yuquan + Epilepsiae cohort 上，用 HFO-onset rate (M1) 与 ER-ratio (M2) 两条**频段 / 时间对齐高度相关**的数据驱动 proxy，从 SEEG 信号本身派生 ictal-onset SOZ 通道集合，并与现有临床 SOZ 标注做 overlap audit。**v1.1 不出 EI**（推迟 PR-T3-2）；**不替换** `*_soz_core_channels.json`；**不出三档 qualitative verdict**，只出预注册的 cohort 数值表 + null-corrected enrichment。本 PR 的目标**不是**判定 clinical SOZ 谁对谁错，而是回答下游 SOZ-dependent 分析（PR-8 v2 / topic2 SOZ-stratified）是否必须改成 multi-source SOZ 报告。
-> 上游：`docs/topic3_spatial_soz_modulation.md`；`docs/archive/topic3/spatial_modulation_soz_analysis.md`（PR-1 spatial_modulation Yuquan 9/11 valid pairs；§"双极通道的 SOZ 匹配（关键）：必须使用 alias_bipolar_to_any 逻辑"，本 PR 必须遵循）；`results/{epilepsiae,yuquan}_soz_core_channels.json`；`results/epilepsiae_seizure_inventory.csv`；`results/hfo_detection/<subject>/*_gpu.npz`（new pipeline 输出）。
+> 上游：`docs/topic3_spatial_soz_modulation.md`；`docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md`（PR-1 spatial_modulation Yuquan 9/11 valid pairs；§"双极通道的 SOZ 匹配（关键）：必须使用 alias_bipolar_to_any 逻辑"，本 PR 必须遵循）；`results/{epilepsiae,yuquan}_soz_core_channels.json`；`results/epilepsiae_seizure_inventory.csv`；`results/hfo_detection/<subject>/*_gpu.npz`（new pipeline 输出）。
 > 下游：本 PR 输出 `results/spatial_modulation/data_driven_soz/<dataset>_<subject>.json`，被 topic1 PR-8 v2（**deferred pending PR-T3-1**）与 topic2 SOZ-stratified PR 共同消费。
 
 ---
 
 ## 1. Context — 为什么这是 PR-8 的先决条件
 
-PR-8 plan v1 已 deferred（`docs/archive/topic1/pr8_intra_event_spatial_polarity_plan_2026-04-30.md` §15）。其核心因变量"SOZ-first / SOZ-last"完全依赖 SOZ 标签的质量；clinical 'i' / 'l' / 'e' 在当前 cohort 上的可靠性是**未量化的**前置变量。
+PR-8 plan v1 已 deferred（`docs/archive/topic1/pr8_intra_event_spatial_polarity/pr8_intra_event_spatial_polarity_plan_2026-04-30.md` §15）。其核心因变量"SOZ-first / SOZ-last"完全依赖 SOZ 标签的质量；clinical 'i' / 'l' / 'e' 在当前 cohort 上的可靠性是**未量化的**前置变量。
 
 **重要的 framing 校正（本 v1.1 比 v1 收紧）**：
 
@@ -63,7 +63,7 @@ PR-8 plan v1 已 deferred（`docs/archive/topic1/pr8_intra_event_spatial_polarit
 - **HFO npz channel_names ↔ signal loader channel_set**：**严格对齐**（顺序与名字一致），不一致 raise ValueError；不允许 default-by-index alignment
 - **Clinical SOZ → analysis_channel_set 的标注**：用 canonical matcher，**逐通道**标注 `SOZ / nonSOZ / unknown` 三态：
   - 调用 `src/event_periodicity.py::match_bipolar_soz` 或等价逻辑：对双极通道 `X-Y`，X ∈ clinical_soz 或 Y ∈ clinical_soz → SOZ；都不在 → nonSOZ；任一端为名字残缺 / 空 → unknown
-  - **禁止**用 `alias_bipolar_to_left` 作为最终 matcher（参见 `docs/archive/topic3/spatial_modulation_soz_analysis.md` §"双极通道的 SOZ 匹配（关键）"）
+  - **禁止**用 `alias_bipolar_to_left` 作为最终 matcher（参见 `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md` §"双极通道的 SOZ 匹配（关键）"）
   - **禁止**做 set-equality 严格对齐（即"clinical_soz set == analysis_channel_set 子集"），因 clinical SOZ 通常是单极而 analysis_channel_set 是双极 / CAR
 - **Audit 透明性要求**：每 subject 报告 `n_clinical_soz_total`（原始 clinical SOZ 通道数）、`n_clinical_matched`（成功标注为 SOZ 的 analysis channels 数）、`n_clinical_unmatched`（找不到匹配的原始 clinical SOZ）。`unmatched_count > 0` 不 raise，但写入 audit.csv 供人眼复核
 

@@ -6,7 +6,7 @@ per-channel baseline z-score normalizer, and a thin loader that crops a
 seizure-centered intracranial signal block.
 
 Design contract (locked in
-``docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md``):
+``docs/archive/topic1/pr6_template_anchoring/pr6a_template_ictal_alignment_plan_2026-04-21.md``):
 
 * Two ER configurations run *in parallel* from Step 2 onward:
     - ``gamma_ER`` (fast=60-100 Hz, slow=4-20 Hz) — primary, HFO-centered.

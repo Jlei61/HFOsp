@@ -11,10 +11,10 @@
 
 旧 PR-6-A 把 “stable interictal template 命名” 绑在 “每次 seizure 之间稳定的 ictal channel-wise anchor” 上。三份 archive 已经把这条路证伪：
 
-- `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md` — single ictal anchor 主线
-- `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` — Step3 `t_ER_onset` 在 sentinel 上 cross-seizure top10 overlap=0、cross-band ρ=−0.21；正式冻结为 preview-only
-- `docs/archive/topic1/pr6a-1.md` — multi-anchor consensus 用 5 个弱 anchor 救一个不稳的 anchor，方法学辩论盖过生物问题
-- `docs/archive/topic1/pr6_direction_brainstorm_2026-04-25.md` — Obs 3（identity-bias 86% 来自少数 hub）+ Topic 3 §7 source/sink stub 指向更干净入口
+- `docs/archive/topic1/pr6_template_anchoring/pr6a_template_ictal_alignment_plan_2026-04-21.md` — single ictal anchor 主线
+- `docs/archive/topic1/pr6_template_anchoring/pr6a_step0-2_step3preview_review_2026-04-23.md` — Step3 `t_ER_onset` 在 sentinel 上 cross-seizure top10 overlap=0、cross-band ρ=−0.21；正式冻结为 preview-only
+- `docs/archive/topic1/pr6_template_anchoring/pr6a-1.md` — multi-anchor consensus 用 5 个弱 anchor 救一个不稳的 anchor，方法学辩论盖过生物问题
+- `docs/archive/topic1/pr6_template_anchoring/pr6_direction_brainstorm_2026-04-25.md` — Obs 3（identity-bias 86% 来自少数 hub）+ Topic 3 §7 source/sink stub 指向更干净入口
 
 文献：Smith 2022 / Korzeniewska 2014 给 spatial recapitulation 的强先验；Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021 一起说 “稳定 ictal anchor 在领域里已知不 work”。
 
@@ -360,9 +360,9 @@ T8. test_cohort_exit_audit:
 | `scripts/run_pr6_template_anchoring.py` | 新建，支持 `--audit / --per-subject / --cohort / --coreness` |
 | `scripts/plot_pr6_template_anchoring.py` | 新建，输出主图 + figures/README.md |
 | `tests/test_pr6_template_anchoring.py` | 新建（T1–T8） |
-| `docs/archive/topic1/pr6a-1.md` | 顶部加 SUPERSEDED 块 |
-| `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md` | 顶部加 SUPERSEDED 块 |
-| `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` | 顶部加 SUPERSEDED 块 |
+| `docs/archive/topic1/pr6_template_anchoring/pr6a-1.md` | 顶部加 SUPERSEDED 块 |
+| `docs/archive/topic1/pr6_template_anchoring/pr6a_template_ictal_alignment_plan_2026-04-21.md` | 顶部加 SUPERSEDED 块 |
+| `docs/archive/topic1/pr6_template_anchoring/pr6a_step0-2_step3preview_review_2026-04-23.md` | 顶部加 SUPERSEDED 块 |
 | `docs/topic1_within_event_dynamics.md` §7 | PR-6 条目改写为新主线一句话 + 链接 |
 | `docs/topic3_spatial_soz_modulation.md` §7 | source/sink stub 改写为 “正式实现于 PR-6 新计划” |
 | `results/interictal_propagation/template_anchoring/` | 新建（含 `cohort_audit.csv` / `per_subject/` / `figures/README.md` / `cohort_summary.json`） |

@@ -295,4 +295,4 @@ PR-6-E 作为 P1，硬前置是 PR-6-A（至少完成语义对齐，才能谈 "b
 
 ---
 
-需要我接下来具体起草 PR-6-A 或 PR-6-C 的详细实验合同 md（对标 `pr5_template_recruitment_plan_2026-04-20.md` 的格式，包含 hypothesis / fail contract / TDD cases / 代码入口）吗？或者你想先和我进一步辩论上面的某一条分类判断？
+需要我接下来具体起草 PR-6-A 或 PR-6-C 的详细实验合同 md（对标 `../pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md` 的格式，包含 hypothesis / fail contract / TDD cases / 代码入口）吗？或者你想先和我进一步辩论上面的某一条分类判断？

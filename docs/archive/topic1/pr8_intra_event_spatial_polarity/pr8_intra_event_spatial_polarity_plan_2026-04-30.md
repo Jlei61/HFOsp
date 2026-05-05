@@ -1,11 +1,11 @@
 # PR-8 计划：Intra-Event Spatial Polarity（SOZ-first / SOZ-last）
 
-> **状态：DEFERRED pending PR-T3-1**（2026-04-30 决定）。原因：本 PR 核心因变量"SOZ-first / SOZ-last"完全依赖 SOZ 标签质量；在 `docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md`（data-driven ictal-onset SOZ audit）完成、产出 `results/spatial_modulation/data_driven_soz/<dataset>_<subject>.json` 之前，本 plan 的 H1 / H1' 检验在 clinical SOZ 单一定义下都不具备 publishable 价值。
+> **状态：DEFERRED pending PR-T3-1**（2026-04-30 决定）。原因：本 PR 核心因变量"SOZ-first / SOZ-last"完全依赖 SOZ 标签质量；在 `docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md`（data-driven ictal-onset SOZ audit）完成、产出 `results/spatial_modulation/data_driven_soz/<dataset>_<subject>.json` 之前，本 plan 的 H1 / H1' 检验在 clinical SOZ 单一定义下都不具备 publishable 价值。
 >
 > v1（本文件）保留**作为历史记录**，**不执行**。PR-T3-1 完成后回写 v2，把 §3.4 H2 sensitivity 重构为 multi-source SOZ 协同检验（clinical + M1 + M2 并列报告），并合并 §16 列出的 9 条修订点。
 >
 > v1 范围：在 PR-2.5 forward/reverse-reproduced cohort 上，以**单 event 内的空间结构**（参与通道的相对 lag）为对象，检验 forward / reverse template 在 SOZ-内外是否呈极性。这是 Ping-Pong 假说 L4 层（intra-event 空间极性）的可证伪检验，**不**承担机制层（兴奋-抑制）论断，**不**承担 PR-7 已封的短窗时间耦合层。
-> 上游：`docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` §11.4 + §12.4；`docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md` §17（locked NULL）；PR-2.5 forward/reverse 8/9；PR-6 endpoint anchoring per-template source/sink。
+> 上游：`docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` §11.4 + §12.4；`docs/archive/topic1/pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md` §17（locked NULL）；PR-2.5 forward/reverse 8/9；PR-6 endpoint anchoring per-template source/sink。
 > 下游：本 PR 只验证 L4 空间极性。无论 PASS / NULL，均**不**回开 PR-7 已封的 L2 时间耦合层。
 
 ---
@@ -429,7 +429,7 @@ def shuffle_label_null_per_subject(
 ### Step 5 — Sensitivity: alternative SOZ definitions
 
 - [ ] **5.1** 列三种替代 SOZ 来源，**逐一**对接，不存在的 raise NotImplementedError：
-  - **Alt-1**: PR-1 spatial_modulation 已对接的 ER-leading 通道（仅 Yuquan，9 valid pairs，参见 `docs/archive/topic3/spatial_modulation_soz_analysis.md`）
+  - **Alt-1**: PR-1 spatial_modulation 已对接的 ER-leading 通道（仅 Yuquan，9 valid pairs，参见 `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md`）
   - **Alt-2**: per-seizure onset 通道（来自 `src/preprocessing.py::detect_seizure_by_spatial_extent` 的 onset detection；如果当前 cohort 的 per-seizure onset 通道尚未导出 JSON，stub `raise NotImplementedError`）
   - **Alt-3**: Epilepsiae focus_rel = 'i' + 'l'（合并 SOZ 与 lesion，看是否扩大 SOZ 集合后 Δ 仍同号）
 - [ ] **5.2** 对每种 alt SOZ 重跑 §3.2–§3.4；输出 `results/intra_event_spatial/sensitivity_alt_soz.json`，含 `alt1_yuquan_only / alt2_per_seizure_onset / alt3_focus_rel_il` 三个字段，每个字段含 `n_subjects, median_diff, wilcoxon_p_one_sided, sign_p, verdict_consistency_with_main`。
@@ -552,7 +552,7 @@ PR-8 只检验"在 PR-2.5 fwd/rev cohort 上，forward template 是否 SOZ-leadi
 - v1 H1 / H1' 在 clinical SOZ 单一定义下 NULL → 杀伤力弱（"以临床主观标签未观察到极性"，不能推及机制层）
 - v1 H1 / H1' PASS → 也可能是 PR-6 anchoring 的 rank-based 结论被 raw-time-based 重新包装（partial circularity，§16.1）
 
-**先做 PR-T3-1**（`docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md`）：用 HFO-onset rate (M1) + ER-ratio (M2) 派生数据驱动 SOZ，量化 clinical SOZ 在当前 cohort 上的可靠性。PR-T3-1 完成后回写 PR-8 v2，§3.4 H2 sensitivity 重构为 multi-source 协同检验（clinical + M1 + M2 并列；多源同向才支持 strong claim，分歧降级为 source-dependent）。
+**先做 PR-T3-1**（`docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md`）：用 HFO-onset rate (M1) + ER-ratio (M2) 派生数据驱动 SOZ，量化 clinical SOZ 在当前 cohort 上的可靠性。PR-T3-1 完成后回写 PR-8 v2，§3.4 H2 sensitivity 重构为 multi-source 协同检验（clinical + M1 + M2 并列；多源同向才支持 strong claim，分歧降级为 source-dependent）。
 
 回写 v2 时**必须**合并下面 §16 的 9 条修订点。
 

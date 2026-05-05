@@ -641,5 +641,5 @@ T16. test_resample_isi_per_cluster_raises:
 ## 13. 历史链接
 
 - `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` — 整体假说审阅与 roadmap，PR-7 是其中第一刀
-- `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — PR-6 cluster centroid 几何（PR-7 输入合同的来源）
-- `docs/archive/topic1/interictal_group_event_internal_propagation.md` — PR-2 / PR-2.5 forward/reverse candidate 完整结果
+- `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — PR-6 cluster centroid 几何（PR-7 输入合同的来源）
+- `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` — PR-2 / PR-2.5 forward/reverse candidate 完整结果

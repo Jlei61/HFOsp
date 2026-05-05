@@ -29,7 +29,7 @@
 
 跨数据集 SOZ-AUC 验证证实新 pipeline 的检测质量与老论文一致：Yuquan refined AUC 0.874（老论文 0.857），Epilepsiae refined AUC 0.952。
 
-**Topic 1 × Topic 3 桥（PR-6，2026-04-25 重启）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 已冻结归档（sentinel 证伪 + 文献负面）；新主线 = 检验 stable template centroid rank 的 **endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel-i**。详见 §7 + `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`。
+**Topic 1 × Topic 3 桥（PR-6，2026-04-25 重启）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 已冻结归档（sentinel 证伪 + 文献负面）；新主线 = 检验 stable template centroid rank 的 **endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel-i**。详见 §7 + `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`。
 
 ---
 
@@ -213,9 +213,9 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 ## 6. 仍未解决的问题 / 下一步
 
 - **Epilepsiae PR-2 已运行（2026-04-27）— 三层结构性不可执行 + 二元 fallback null**：
-  - Stage 0 artifact census：20/20 subject 的 legacy `*_gpu.npz` 全是 216 byte stub → Track B replay hard-impossible；20/20 subject 的新 pipeline `results/hfo_detection/<subject>/` 全 ready。**PR-2 走新 pipeline，不声明 legacy lagPat 数值 parity**。详见 `docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md`。
+  - Stage 0 artifact census：20/20 subject 的 legacy `*_gpu.npz` 全是 216 byte stub → Track B replay hard-impossible；20/20 subject 的新 pipeline `results/hfo_detection/<subject>/` 全 ready。**PR-2 走新 pipeline，不声明 legacy lagPat 数值 parity**。详见 `docs/archive/topic3/pr1_spatial_modulation/epilepsiae_artifact_census_2026-04-27.md`。
   - PR-2 i/l/e 三层 cohort: **n=1 valid (`253`)**，全 metric SKIPPED (n<3)。8/16 subject 的 `focus_rel.l` 列表为空（lesion 标注缺），其余 7 subject 在活动门槛后单一区域 < 3 通道。
-  - 二元 i vs e fallback (n=8): `iei_detrended_r` greater p=0.19 (6/8 i>e), `iei_median` less p=0.37 (方向同 Yuquan PR-1), `event_rate` 7/8 i>e p=0.078 (**确认 SOZ rate confound**)。整体 underpowered null + 弱方向一致。详见 `docs/archive/topic3/epilepsiae_three_tier_pr2_2026-04-27.md`。
+  - 二元 i vs e fallback (n=8): `iei_detrended_r` greater p=0.19 (6/8 i>e), `iei_median` less p=0.37 (方向同 Yuquan PR-1), `event_rate` 7/8 i>e p=0.078 (**确认 SOZ rate confound**)。整体 underpowered null + 弱方向一致。详见 `docs/archive/topic3/pr1_spatial_modulation/epilepsiae_three_tier_pr2_2026-04-27.md`。
 - **可继续的方向**：
   - 补 8 subject 的 `focus_rel.l` 标注（数据合同问题，找 SQL / 临床团队）
   - sensitivity at 更松的 min_count / min_rate 看能否把 borderline subject 推过门槛
@@ -228,7 +228,7 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 ## 7. 稳定传播模板的空间锚定（Topic 1 × Topic 3 PR-6 桥）
 
 > **状态升级（2026-04-25）**：本方向已**正式立为 Topic 1 PR-6 主线**（P0），不再是 “可选 / P1 候选”。
-> **正式入口（plan-of-record）**：[`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`](archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md)。
+> **正式入口（plan-of-record）**：[`docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`](archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md)。
 > 本节只保留科学问题陈述与与 Topic 3 PR-1/PR-2 的边界；阈值 / metric 定义 / 失败合同 / TDD / 工作量全部在 archive 单源管理（避免双源漂移）。
 
 **科学问题**：Topic 1 已稳健建立刻板传播模板（30/30 stable adaptive solutions、`23/30 strong` + `7/30 moderate` 跨时间复现、`8/9` forward/reverse subject 跨时间分裂可复现）。按假设这套模板反映的是结构性病理网络，那么 centroid rank 的极端通道（**endpoint = source ∪ sink**）应当在解剖上富集到 SOZ / focus_rel-i，而不是均匀分布。这条路把 Topic 1 的"刻板"直接挂到 Topic 3 的"病理空间"，**不依赖发作邻近窗口的功效**（后者已被 PR-4C 在 2026-04-19 复跑证伪）。
@@ -251,9 +251,9 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 ## 8. 代码与结果入口
 
-- 主文档：`docs/archive/topic3/spatial_modulation_soz_analysis.md`
-- **Stage 0 artifact census（2026-04-27）**：`docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md` + `results/spatial_modulation/epilepsiae_artifact_census.csv`
-- **PR-2 三层 i/l/e（2026-04-27）**：`docs/archive/topic3/epilepsiae_three_tier_pr2_2026-04-27.md` + `results/spatial_modulation/soz_comparison/epilepsiae/`
+- 主文档：`docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md`
+- **Stage 0 artifact census（2026-04-27）**：`docs/archive/topic3/pr1_spatial_modulation/epilepsiae_artifact_census_2026-04-27.md` + `results/spatial_modulation/epilepsiae_artifact_census.csv`
+- **PR-2 三层 i/l/e（2026-04-27）**：`docs/archive/topic3/pr1_spatial_modulation/epilepsiae_three_tier_pr2_2026-04-27.md` + `results/spatial_modulation/soz_comparison/epilepsiae/`
 - HFO 检测脚本：`scripts/run_hfo_detection.py`（支持 `--dataset yuquan/epilepsiae --all --gpu`）
 - 检测参数：`config/subject_params.json`
 - SOZ-AUC 验证脚本：`scripts/plot_refine_soz_validation.py`（支持 `--dataset yuquan/epilepsiae`）
@@ -278,11 +278,11 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 ## 10. 历史文档索引
 
 - `docs/paper1_framework_sba.md` — **Paper 1 架构性 framework（最高优先级 pre-registration）**：本 topic 在 Paper 1 中承担 P4 prediction（attractor 角色节点解剖锚定多源 SOZ proxy）；PR-T3-1 / PR-8 v2 直接受其统辖。
-- `docs/archive/topic3/spatial_modulation_soz_analysis.md`
+- `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md`
   - 保留完整的计划、执行过程、基础设施与阶段结果
-- `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
+- `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
   - Topic 1 × Topic 3 桥：PR-6 stable template endpoint anatomical anchoring 的 plan-of-record（H1 endpoint vs middle / H1b polarity / H2 forward-reverse swap / H3 i/l/e sensitivity）。Topic 3 §2 / §7 引用本文件
-- `docs/archive/topic1/pr6_direction_brainstorm_2026-04-25.md`
+- `docs/archive/topic1/pr6_template_anchoring/pr6_direction_brainstorm_2026-04-25.md`
   - PR-6 pivot 决策的 brainstorm：从 ictal-onset alignment 转向 endpoint anchoring 的科学讨论与文献整理
 
 当前正式口径以本文件为准。

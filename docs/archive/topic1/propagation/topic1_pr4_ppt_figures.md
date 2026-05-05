@@ -93,7 +93,7 @@ suptitle 与图体之间留出大间距。
   招募得更多。
 
   **正式归属**：本现象的正式分析在 **PR-5-B §4.5 secondary composition
-  diagnostic**（详见 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md`
+  diagnostic**（详见 `docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md`
   §4.5），口径不同：那里用与 PR-5-A gate 相同的 gate-eligible 事件池、
   PR-4C 离散三段窗口（baseline/pre/post）、subject-level paired Wilcoxon。
   本图的 cohort 26 个 ρ 与 panel d Wilcoxon p=0.041 **不再**被引用为

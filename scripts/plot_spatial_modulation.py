@@ -409,7 +409,7 @@ def write_readme_epilepsiae(cohort: dict) -> None:
     lines = [
         "# 空间调制 PR-2 — Epilepsiae i/l/e 三层梯度图表说明\n",
         f"> 有效配对被试数：{n_valid}（含 i / l / e 各 ≥3 通道；共 {len(subjects)} 个：{', '.join(subjects)}）\n",
-        f"> 数据合同：新 pipeline `results/hfo_detection/<subject>/`（legacy gpu_npz 全 stub，详见 `docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md`）\n",
+        f"> 数据合同：新 pipeline `results/hfo_detection/<subject>/`（legacy gpu_npz 全 stub，详见 `docs/archive/topic3/pr1_spatial_modulation/epilepsiae_artifact_census_2026-04-27.md`）\n",
         "",
         "## 图说",
         "",

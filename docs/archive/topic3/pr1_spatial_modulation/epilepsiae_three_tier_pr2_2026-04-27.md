@@ -156,4 +156,4 @@ valid subjects: `1150 / 139 / 253 / 583 / 590 / 620 / 635 / 958` (n=8)
 - 图 + 中文 README：`results/spatial_modulation/figures/epilepsiae/`
 - per-subject JSON: `results/spatial_modulation/per_channel_metrics/epilepsiae/<subject>_perchannel.json`
 - Cohort: `results/spatial_modulation/soz_comparison/epilepsiae/{cohort_three_tier_statistics.json, cohort_i_l_e.csv, cohort_binary_i_vs_e.json, cohort_three_tier_statistics_min_group_2.json}`
-- Census 前序: `docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md`
+- Census 前序: `docs/archive/topic3/pr1_spatial_modulation/epilepsiae_artifact_census_2026-04-27.md`

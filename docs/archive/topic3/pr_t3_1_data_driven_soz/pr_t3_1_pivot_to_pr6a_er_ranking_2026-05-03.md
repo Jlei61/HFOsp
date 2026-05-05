@@ -1,7 +1,7 @@
 # PR-T3-1 Pivot — Layer A ictal ER-rank producer + Layer B data-driven SOZ label & overlap audit
 
 > 状态：plan-of-record（**v2.1 pivot, post-review**），2026-05-03
-> 取代：`docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md` (v1.1)
+> 取代：`docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md` (v1.1)
 > v2.0 → v2.1 修订（基于 2026-05-03 用户审阅）：
 > - 明确 PR-6A **superseded**，仅 Step 0-2 落定为 preview 经验；本 PR **不**继承 PR-6A H1/H1' 主线，**不**重做 Smith 2022 template-ictal alignment。
 > - 把 PR-T3-1 v2 拆成两层：**Layer A**（新建的、范围受限的 ictal ER-rank producer）+ **Layer B**（label consumer + audit）。
@@ -31,7 +31,7 @@ v1.1 §3.3 / §3.4：
 
 ### 0.2 M2 的 ER-ratio 定义已经从 PR-6A 漂移
 
-PR-6A (`docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md`) 已经在 Step 0-2 落定并 sentinel 验证过 ER 提取层（gamma 60–100 / 4–20 主，broad 12–127 / 4–20 sensitivity，4–250 Hz bandpass + 1 s 滑窗 + log ratio + per-channel z-score against pre-ictal baseline）；Step 3+ (Page-Hinkley CUSUM, n_d, r_sz, stability gate) 在 sentinel 暴露跨 seizure 稳定性问题后**未进入正式 H1/H1' 主线**，PR-6A 整体 superseded。
+PR-6A (`docs/archive/topic1/pr6_template_anchoring/pr6a_template_ictal_alignment_plan_2026-04-21.md`) 已经在 Step 0-2 落定并 sentinel 验证过 ER 提取层（gamma 60–100 / 4–20 主，broad 12–127 / 4–20 sensitivity，4–250 Hz bandpass + 1 s 滑窗 + log ratio + per-channel z-score against pre-ictal baseline）；Step 3+ (Page-Hinkley CUSUM, n_d, r_sz, stability gate) 在 sentinel 暴露跨 seizure 稳定性问题后**未进入正式 H1/H1' 主线**，PR-6A 整体 superseded。
 
 v1.1 的 M2 完全没有这套 z-score / CUSUM / stability gate，只是简单 80–250 Hz 带功率 post/pre log-ratio。这个量没有被任何工作验证作为 SOZ 排序信号。
 
@@ -191,7 +191,7 @@ Layer A 在跑 cohort 前先在 sentinel 上目视检查：
 - z-ER trace 图（focal vs non-focal pre30s / post30s 中位 max）已由 PR-6A Step 2 产出，路径 `results/interictal_propagation/ictal_alignment/_sentinel_step2/<subject>_<seizure_idx>_<er>.png` —— **复用作为已知 baseline**
 - v2.1 新加：sentinel 上的 CUSUM 报警时刻 `n_d` per channel + per-subject `r_sz` + `s_sz` —— 由 v2.1 Layer A 新跑
 - v2.1 新加（2026-05-03 review）：sentinel 报告必须包含 `r_sz_valid_count` 分布——focal vs non-focal 通道的覆盖率应大致相当
-- v2.2 新加（2026-05-04）：sentinel 报告必须**同时**写入 `producer_health` + `clinical_concordance` 两个 tag（per subject × per ER config），并归档到 `docs/archive/topic3/per_subject_ictal_er_atlas.md`
+- v2.2 新加（2026-05-04）：sentinel 报告必须**同时**写入 `producer_health` + `clinical_concordance` 两个 tag（per subject × per ER config），并归档到 `docs/archive/topic3/pr_t3_1_data_driven_soz/per_subject_ictal_er_atlas.md`
 
 #### 3.4.1 producer-health gate（控制 A.4 cohort run 是否放行 + 决定每个 subject × ER 的 Layer B 准入）
 
@@ -298,7 +298,7 @@ Layer A 在跑 cohort 前先在 sentinel 上目视检查：
   "provenance": {
     "pr6a_module_used": "src/ictal_onset_extraction.py",
     "layer_a_module": "src/ictal_er_rank.py",
-    "plan_doc": "docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md"
+    "plan_doc": "docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md"
   }
 }
 ```
@@ -355,7 +355,7 @@ data_driven_top_k = sorted(channels by r_sz)[:k]   # r_sz 升序
       "yuquan": "results/yuquan_soz_core_channels.json"
     },
     "layer_b_module": "src/data_driven_soz_pivot.py",
-    "plan_doc": "docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md"
+    "plan_doc": "docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md"
   }
 }
 ```
@@ -475,7 +475,7 @@ Layer B Step B.1 之前必须 check：
 
 - [ ] Layer A 跑完 cohort（all audit_eligible 24 + sentinel）
 - [ ] Layer A sentinel `producer_health` 至少 1 cell `stable`（v2.2 替代旧 sentinel sanity；§3.4.1）
-- [ ] **新加 v2.2**：cohort 全 24+2 subject × 2 ER config 共 52 cell 的 `(producer_health, clinical_concordance)` 二维分布人工审核完毕，审核结论归档到 `docs/archive/topic3/per_subject_ictal_er_atlas.md` 末尾的 cohort summary 章节
+- [ ] **新加 v2.2**：cohort 全 24+2 subject × 2 ER config 共 52 cell 的 `(producer_health, clinical_concordance)` 二维分布人工审核完毕，审核结论归档到 `docs/archive/topic3/pr_t3_1_data_driven_soz/per_subject_ictal_er_atlas.md` 末尾的 cohort summary 章节
 - [ ] **新加 v2.2**：Layer B 准入策略明文写入 atlas（如 "(stable + moderate) × all concordance 进 label，(unstable, concordant) 进 sensitivity-only label，其它 drop"，具体阈值由 cohort 分布决定）
 - [ ] §6.2 abort 条件未触发
 - [ ] Layer A 输出的 per-subject JSON schema 通过 §3.5 schema 校验
@@ -571,7 +571,7 @@ Layer B Step B.1 之前必须 check：
 
 - [ ] **0.1** `mv results/spatial_modulation/data_driven_soz/per_subject results/spatial_modulation/data_driven_soz/per_subject_hfo_rate_obsolete_v1_1`
 - [ ] **0.2** `mv results/spatial_modulation/data_driven_soz/per_subject_legacy_full_block results/spatial_modulation/data_driven_soz/per_subject_hfo_rate_obsolete_v1_1_legacy_full_block`
-- [ ] **0.3** 在 `docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md` 顶部加 superseded banner
+- [ ] **0.3** 在 `docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md` 顶部加 superseded banner
 - [ ] **0.4** 在 v1.1 obsolete helpers (`src/data_driven_soz.py` 内的 M1/M2/loader 一组) 函数 docstring 顶加 `OBSOLETE: superseded by Layer A in PR-T3-1 v2.1`，模块顶部加 banner
 - [ ] **0.5** 主线 `scripts/run_data_driven_soz.py` 的 `--per-subject` / `--cohort-overlap` / `--build-data-driven-soz-labels` mode 在 stdout 加 deprecation warning（仍可跑，但提示用 v2.1 新 CLI）
 - [ ] **0.6** Commit：`chore(pr-t3-1): v1.1 phase-1 archive — banners, dir rename, obsolete docstrings (no code deletion)`

@@ -1,4 +1,4 @@
-> **SUPERSEDED 2026-04-25**：本文档（multi-anchor consensus probe）已被 PR-6 主线 pivot 取代。新主线把问题从“给 template 找 cohort-level ictal-onset anchor + 命名”改为“stable template 的 endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel”。**正式 plan-of-record**：[`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`](pr6_template_endpoint_anchoring_plan_2026-04-25.md)。本文档保留作为 pivot 决策证据：multi-anchor consensus 的设计动机仍可读，但**不再作为 PR-6-A 的执行路径**。
+> **SUPERSEDED 2026-04-25**：本文档（multi-anchor consensus probe）已被 PR-6 主线 pivot 取代。新主线把问题从“给 template 找 cohort-level ictal-onset anchor + 命名”改为“stable template 的 endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel”。**正式 plan-of-record**：[`docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`](pr6_template_endpoint_anchoring_plan_2026-04-25.md)。本文档保留作为 pivot 决策证据：multi-anchor consensus 的设计动机仍可读，但**不再作为 PR-6-A 的执行路径**。
 
 ---
 

@@ -3,8 +3,8 @@
 > 状态：plan-of-record，2026-04-29（v1）
 > 性质：**post-hoc exploratory diagnostic**——解释 H1 cohort NULL 的 etiology，不改判 H1 verdict，不进任何 PASS / FAIL 判据
 > 范围：仅在 PR-7 H1 primary cohort（n=6 fwd/rev reproduced）上跑；H2 推广留作后续条件性决定
-> 上游：`docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md`（PR-7 主 plan-of-record）
-> 上游结果：`docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md`（H1 NULL 已封）
+> 上游：`docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md`（PR-7 主 plan-of-record）
+> 上游结果：`docs/archive/topic1/pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md`（H1 NULL 已封）
 
 ---
 

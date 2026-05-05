@@ -2,7 +2,7 @@
 """PR-6 Template Endpoint Anatomical Anchoring runner.
 
 Step 2 deliverable (audit + per-subject) and Step 3+ (cohort statistics).
-Plan: docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md
+Plan: docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md
 
 Usage:
     # Cohort audit -> cohort_audit.csv

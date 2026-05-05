@@ -1609,7 +1609,7 @@ def test_runner_parser_exposes_pr4c_auxiliary_flag() -> None:
 # PR-5-A: novel-template falsification gate
 # ---------------------------------------------------------------------------
 #
-# Contract reference: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md
+# Contract reference: docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md
 #   §3.2 data contract, §3.3 metric definitions, §3.5 PASS/FAIL thresholds,
 #   §5.3 tests 1-3.
 #
@@ -1961,7 +1961,7 @@ def test_pr5_gate_summary_fails_when_gap_is_significantly_lower() -> None:
 # =============================================================================
 # PR-5-B: compute_template_recruitment_shift
 #
-# Spec: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md §4 / §5.3
+# Spec: docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md §4 / §5.3
 # tests #4-#9. Tests #1-#3 above already cover PR-5-A gate; PR-5-B adds 6 tests
 # for: same gate-eligible event pool, gap-aware coverage, multi-window weighting,
 # runner gate-prerequisite check, dual dominant definitions, and composition

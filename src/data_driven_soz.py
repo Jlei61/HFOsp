@@ -1,7 +1,7 @@
 """Data-driven ictal-onset SOZ audit — PR-T3-1 v1.1 (SUPERSEDED).
 
 ⚠️  **OBSOLETE 2026-05-03**: PR-T3-1 v1.1 is superseded by v2.1 pivot
-(``docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``).
+(``docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``).
 The v1.1 M1 (HFO rate) + M2 (HFO band-power log-ratio) helpers in this
 module are KEPT BUT MARKED OBSOLETE — they remain importable so the
 24-subject v1.1 cohort run can be reproduced from
@@ -47,9 +47,9 @@ deprecation warning).
 
 See:
 
-- ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``
+- ``docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``
   (v1.1 plan, superseded)
-- ``docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``
+- ``docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``
   (v2.1 pivot, plan-of-record)
 """
 

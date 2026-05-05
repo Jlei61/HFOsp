@@ -7,17 +7,17 @@ findings 已归档到 `docs/archive/topic3/`，本目录脚本仅历史复现用
 
 | 脚本 | 用途 | 对应归档 doc |
 |---|---|---|
-| `sentinel_t_er_onset_preview.py` | PR-T Step 2 sentinel 上 per-channel ER onset 时序 preview（不实现完整 Step 3 合同） | `docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md`、`docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md` |
+| `sentinel_t_er_onset_preview.py` | PR-T Step 2 sentinel 上 per-channel ER onset 时序 preview（不实现完整 Step 3 合同） | `docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md`、`docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md` |
 
 ## 相关产出文档（建议先读）
 
 - `docs/topic3_spatial_soz_modulation.md` — 当前主入口
-- `docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md` — PR-T-3-1 plan v2.2
-- `docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md` — pivot 决策
-- `docs/archive/topic3/per_subject_ictal_er_atlas.md` — per-subject ictal ER atlas
-- `docs/archive/topic3/spatial_modulation_soz_analysis.md` — PR-1 (Yuquan) 结果
-- `docs/archive/topic3/epilepsiae_three_tier_pr2_2026-04-27.md` — i/l/e 三层
-- `docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md` — Epilepsiae 数据健康审计
+- `docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md` — PR-T-3-1 plan v2.2
+- `docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md` — pivot 决策
+- `docs/archive/topic3/pr_t3_1_data_driven_soz/per_subject_ictal_er_atlas.md` — per-subject ictal ER atlas
+- `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md` — PR-1 (Yuquan) 结果
+- `docs/archive/topic3/pr1_spatial_modulation/epilepsiae_three_tier_pr2_2026-04-27.md` — i/l/e 三层
+- `docs/archive/topic3/pr1_spatial_modulation/epilepsiae_artifact_census_2026-04-27.md` — Epilepsiae 数据健康审计
 
 ## 状态
 

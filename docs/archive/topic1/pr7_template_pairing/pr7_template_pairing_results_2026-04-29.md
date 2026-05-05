@@ -2,7 +2,7 @@
 
 > 状态：Step 3 deliverable，2026-04-29（v1）
 > 范围：H1 primary cohort（fwd/rev reproduced ∩ 5 conds，n=6）的 cohort 级 triple-gate 判读 + N3 robustness 一致性。**H2 negative control（n=17）尚未跑，Step 4 完成后追加**。
-> 上游：`docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md`（plan-of-record）
+> 上游：`docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md`（plan-of-record）
 > 数据：`results/interictal_propagation/template_pairing/`
 
 ---
