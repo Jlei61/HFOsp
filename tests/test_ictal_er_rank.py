@@ -948,3 +948,50 @@ def test_compute_focal_in_topk_handles_top_k_larger_than_finite():
     # Only 2 finite; top_k=10 returns all 2
     assert n_focal == 1
     assert n_top == 2
+
+
+# A21 — deterministic tie-break on r_sz (added 2026-05-06; v2.2.1 fix)
+# Bug: 548 cohort vs sentinel-rebuild produced different focal_in_top10
+# (3 vs 2) because top-K cut at a tied r_sz value depended on dict
+# iteration order. Fix: secondary alphabetical sort on channel name.
+def test_compute_top10_coverage_list_breaks_ties_alphabetically():
+    # 4 channels tied at r_sz=12.5 — only 3 should make top-3
+    r_sz_a = {"HL7": 12.5, "HL6": 12.5, "TBLC6": 12.5, "TBLB4": 12.5,
+              "HL9": 11.0, "TBRC1": 12.0}
+    r_sz_b = {"TBLC6": 12.5, "TBLB4": 12.5, "HL7": 12.5, "HL6": 12.5,
+              "HL9": 11.0, "TBRC1": 12.0}  # same data, different insertion order
+    cov = {ch: 10 for ch in {"HL7", "HL6", "TBLC6", "TBLB4", "HL9", "TBRC1"}}
+    out_a = compute_top10_coverage_list(r_sz_a, cov, top_k=3)
+    out_b = compute_top10_coverage_list(r_sz_b, cov, top_k=3)
+    assert out_a == out_b  # determinism
+
+
+def test_compute_focal_in_topk_breaks_ties_alphabetically():
+    # 548-style: HL7 (focal), HL6 (non), TBLB4 (non), TBLC6 (non) tied at
+    # 12.5. With top_k=4 alphabetical wins → HL6, HL7, TBLB4, TBLC6;
+    # focal in top-4 = 1 (HL7).
+    r_sz = {"HL7": 12.5, "HL6": 12.5, "TBLC6": 12.5, "TBLB4": 12.5,
+            "HL9": 11.0, "TBRC1": 12.0}
+    focal = {"HL7", "HL9"}
+    # top-2 covers HL9 (11.0) + TBRC1 (12.0) → 1 focal
+    n_focal_2, _ = compute_focal_in_topk(r_sz, focal, top_k=2)
+    assert n_focal_2 == 1
+    # top-3 picks HL9 + TBRC1 + HL6 (alphabetically first among ties at 12.5)
+    # → still 1 focal (HL9)
+    n_focal_3, _ = compute_focal_in_topk(r_sz, focal, top_k=3)
+    assert n_focal_3 == 1
+    # top-4 picks HL9 + TBRC1 + HL6 + HL7 (alphabetically next tie) → 2 focal
+    n_focal_4, _ = compute_focal_in_topk(r_sz, focal, top_k=4)
+    assert n_focal_4 == 2
+
+
+def test_compute_focal_in_topk_deterministic_across_dict_orders():
+    """Same r_sz numerical values, different dict iteration order → same count."""
+    base = {"a": 5.0, "b": 5.0, "c": 5.0, "d": 5.0, "e": 1.0}
+    focal = {"a", "c"}
+    permuted = {k: base[k] for k in ("e", "d", "b", "c", "a")}
+    n1, _ = compute_focal_in_topk(base, focal, top_k=3)
+    n2, _ = compute_focal_in_topk(permuted, focal, top_k=3)
+    assert n1 == n2
+    # Top-3: e (1.0), then alphabetically a, b → 1 focal (a)
+    assert n1 == 1

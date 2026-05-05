@@ -239,11 +239,96 @@ gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, 
 
 ---
 
-## 待办（cohort 跑完后回填）
+## Cohort summary (A.4 v2.2 — 16 epilepsiae subjects, 完成 2026-05-06)
 
-- [ ] 24 audit_eligible subjects 各填一节（schema 同上）
-- [ ] cohort summary：`(producer_health, clinical_concordance)` 二维分布表
-- [ ] cohort summary：subject-level type 分类（数量 + 子类典型 case 链接）
-- [ ] λ-cap 现象 cohort 分布：是否所有 subject 都撞顶 100，还是 sentinel-only 现象
-- [ ] gamma vs broad 两套 ER 的 producer_health 一致性 cohort 表
-- [ ] 决定 Layer B 准入策略：(stable, *) ∪ (moderate, concordant) 还是更宽？等 cohort 分布出来再定
+**Run**: 11.3h wall (2026-05-05 18:32 → 2026-05-06 05:51), 16/16 epilepsiae subjects (15 audit_eligible + sentinel 916), 9 yuquan 已 excluded（见上文 cohort scope 注）。
+
+**Run config**: λ_max=100 (撞顶判 stable), bias=0.5, fpr=1/h, hop=0.1s, detection [-5s,+30s], baseline [-300s, min(0,eeg_onset)-60s]。helper v2.2.1 fix (2026-05-06): top-K 在 r_sz tie 时按 channel 名 alphabetical 二级排序，cohort vs sentinel 跨运行确定性保证。
+
+### 全 cohort per-subject 一览
+
+| subject | n_sz | n_focal | g_n_ok | g_s_sz | g_ph | g_cc | g_p | g_ftk | b_n_ok | b_s_sz | b_ph | b_cc | b_p | b_ftk |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1073 | 20 | 5 | 9 | 0.17 | unstable | discordant | 0.963 | 0 | 4 | 0.31 | unstable | discordant | 0.915 | 0 |
+| 1077 | 9 | 8 | 3 | 0.02 | unstable | discordant | 0.263 | 1 | 2 | -0.34 | insufficient | not_assessable | - | - |
+| 1084 | 94 | **0** | 22 | 0.38 | unstable | not_assessable | - | - | 36 | 0.49 | moderate | not_assessable | - | - |
+| 1096 | 9 | 8 | 7 | 0.45 | unstable | discordant | 0.995 | 0 | 8 | 0.19 | unstable | discordant | 0.911 | 1 |
+| 1146 | 26 | **0** | 5 | -0.04 | unstable | not_assessable | - | - | 7 | 0.12 | unstable | not_assessable | - | - |
+| 1150 | 9 | 6 | 5 | -0.07 | unstable | discordant | 0.424 | 1 | 6 | -0.09 | unstable | partial | 0.051 | 2 |
+| 139 | 6 | 8 | 4 | 0.08 | unstable | discordant | 0.588 | 2 | 4 | 0.35 | **moderate** | **concordant** | <0.001 | 5 |
+| 253 | 7 | 3 | 5 | -0.15 | unstable | not_assessable | - | - | 5 | 0.38 | **moderate** | discordant | 0.787 | 1 |
+| 442 | 22 | **0** | 16 | 0.37 | unstable | not_assessable | - | - | 16 | 0.45 | unstable | not_assessable | - | - |
+| 548 | 31 | 7 | 15 | 0.16 | unstable | concordant | 0.006 | 3 | 19 | 0.10 | unstable | concordant | 0.012 | 4 |
+| 583 | 23 | 15 | 22 | 0.45 | **moderate** | **concordant** | 0.002 | 8 | 21 | 0.62 | **stable** | **concordant** | 0.001 | 7 |
+| 590 | 13 | 17 | 7 | 0.15 | unstable | partial | 0.075 | 2 | 9 | 0.17 | unstable | concordant | 0.092 | 3 |
+| 635 | 20 | 22 | 10 | 0.03 | unstable | discordant | 0.554 | 2 | 13 | 0.06 | unstable | concordant | <0.001 | 7 |
+| 916 | 51 | 11 | 26 | 0.83 | **stable** | discordant | 0.583 | 0 | 2 | 0.59 | insufficient | not_assessable | - | - |
+| 922 | 30 | 19 | 24 | 0.16 | unstable | discordant | 0.976 | 2 | 25 | 0.13 | unstable | concordant | 0.001 | 6 |
+| 958 | 16 | 21 | 14 | 0.04 | unstable | concordant | 0.078 | 3 | 14 | 0.22 | unstable | partial | 0.012 | 2 |
+
+`g_/b_` = gamma_ER / broad_ER；`n_ok` = 进 r_sz 的 seizure 数；`s_sz` = 跨 seizure 排序中位 Spearman；`ph` = producer_health；`cc` = clinical_concordance；`p` = focal vs nonfocal Wilcoxon one-sided；`ftk` = focal channels 在 top-10 数。**0 标灰**的 subject 临床 SOZ 全为 0（focus_rel 中 i+l+e 全空），cc 自动 not_assessable。
+
+### `(producer_health × clinical_concordance)` 二维分布
+
+**gamma_ER（16 cells）**：
+
+| ph \ cc | concordant | partial | discordant | not_assessable | 行总 |
+|---|---|---|---|---|---|
+| stable | 0 | 0 | **1** (916) | 0 | 1 |
+| moderate | **1** (583) | 0 | 0 | 0 | 1 |
+| unstable | 2 (548, 958) | 1 (590) | 7 | 4 | 14 |
+| insufficient | 0 | 0 | 0 | 0 | 0 |
+| **列总** | **3** | **1** | **8** | **4** | **16** |
+
+**broad_ER（16 cells）**：
+
+| ph \ cc | concordant | partial | discordant | not_assessable | 行总 |
+|---|---|---|---|---|---|
+| stable | **1** (583) | 0 | 0 | 0 | 1 |
+| moderate | **1** (139) | 0 | 1 (253) | 1 (1084) | 3 |
+| unstable | 4 (548, 590, 635, 922) | 2 (1150, 958) | 2 | 2 | 10 |
+| insufficient | 0 | 0 | 0 | 2 (1077, 916) | 2 |
+| **列总** | **6** | **2** | **3** | **5** | **16** |
+
+### Cohort 关键观察
+
+1. **λ-cap 普遍性**：32/32 cells 撞顶 λ=100。整 cohort baseline ER 噪声超过 1/h FPR 预算 at λ=100。**不要把 λ 数值当 producer 区分维度**——λ_max 是上限，不是峰值。
+2. **broad_ER 整体 producer health 优于 gamma_ER**：
+   - broad: 1 stable + 3 moderate + 10 unstable + 2 insufficient
+   - gamma: 1 stable + 1 moderate + 14 unstable + 0 insufficient
+   - broad 跨 seizure 排序更可重复（更多 spectral mass → 更平滑 z-score）。代价是高频特异性下降。
+3. **broad_ER concordance 也比 gamma 多**：6 vs 3 concordant cells。可能反映 broad band 包含的低频 ictal recruitment 信号在空间上更紧密对齐 clinical SOZ；或是 gamma 在多 seizure 内变异大，median 排序无法稳定锁定 SOZ。
+4. **唯一双 ER 都 stable/moderate 的 subject = 583**：gamma moderate+concordant + broad stable+concordant，是 cohort 的 "model case"。
+5. **3/16 (1084, 1146, 442) 临床 SOZ 全空**：cc 维度无意义，仅 producer health 可评估。
+6. **2/16 (1077, 916) broad_ER insufficient**（n_ok=2 < 3）：broad band 在某些 subject 上 ictal recruitment 触发率极低（47/49 onset_unreached）。1077 同时 gamma s_sz=0.02（基本随机），整体不可用。
+7. **`(stable, discordant)` 仅 916 一例**：与本文 916 节的"data-driven r_sz 与 clinical i 标注不一致 但 cohort 内部高度可重复"的现象一致；不是 sentinel-specific 异常，而是 cohort 中可观察但稀有的 case。
+8. **gamma 上 producer health 与 clinical concordance 弱相关**：3 个 concordant 中只有 583 是 moderate；548、958 都 unstable。说明"focal channel 在排序前段"有时**不需要** producer 内部稳定也能 statistically 显示。
+
+### Layer B 准入策略候选（待用户拍板）
+
+cohort 16 cells × 2 ER = 32 cells 已落定，需要选一档准入策略明文写入 plan §6.3：
+
+| 策略 | per ER 入选条件 | gamma 入选 | broad 入选 | unique 总数 | 评 |
+|---|---|---|---|---|---|
+| **α 严格** | 仅 `stable` | 1 (916) | 1 (583) | **2** | 最防御性；下游样本极少；丢弃所有 moderate 即使 concordant |
+| **β 中度** | `stable` ∪ `moderate` | 2 (916, 583) | 4 (583, 139, 253, 1084) | **5** | 平衡；含 (moderate, concordant) 强信号 + (moderate, not_assessable) 不便对照 |
+| **γ_a 加 sensitivity** | `stable` ∪ `moderate` 进主标签；`(unstable, concordant)` 进 sensitivity | g 主 2 + 敏 2 (548, 958)；b 主 4 + 敏 4 (548, 590, 635, 922) | 8 unique 跨双 ER | 区分主/敏；让下游决定是否纳入；写两套 JSON | 推荐 |
+| **γ_b 全 sufficient** | 所有 `n_ok ≥ 3` cell；带 producer_health tag | gamma 16；broad 14 | 16 unique | 最大覆盖；下游负责按 tag 过滤 | 风险：unstable cells 标签噪声大可能污染下游 |
+
+**我的建议：γ_a**（主标签紧 + sensitivity 标签宽）。理由：
+
+1. (stable + moderate, concordant) 是最强证据 cell，进主标签合理（4 subjects: 583 双 ER + 139 broad + 916 gamma）
+2. (unstable, concordant) 是有趣但需谨慎的 case：producer 内部不稳但 median 仍偏向 clinical SOZ → 可能 within-subject 多 seizure type 但仍有 SOZ-favoring 倾向。当 sensitivity 报，下游 PR 自己决定是否信
+3. `not_assessable`（含 0-focal subjects + insufficient）和 `discordant` 在 v2.2 第一版都不进 Layer B：discordant 意味着 data-driven 与 clinical 给出截然不同的 SOZ，需要先在 case-by-case 上人工解读（如 916），不适合作为 cohort label
+4. Layer B 在 stability_cohort 字段直接编码 strict/relaxed/sensitivity 三档，符合 plan §3.5 已有 schema
+
+**待用户拍板**后：把策略 commit 进 plan §6.3 + 进入 Step B.1 Layer B label builder 实现。
+
+---
+
+## 待办
+
+- [ ] 用户选定 Layer B 准入策略（α / β / γ_a / γ_b）
+- [ ] 选定后：commit 策略到 `pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md` §6.3
+- [ ] 进 Step B.1：实现 `src/data_driven_soz_pivot.py` label builder + TDD B1-B12
+- [ ] yuquan 9 subject 等 yuquan extract_seizure_window 后追跑（独立 PR，task #24）

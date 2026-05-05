@@ -878,12 +878,16 @@ def compute_top10_coverage_list(
     None r_sz channels are excluded (they never had a finite rank).
     Returned list length = ``min(top_k, n_finite)``; fewer than
     ``top_k`` entries when fewer than ``top_k`` channels have finite
-    r_sz. Tie-breaking on r_sz is the dict iteration order (stable
-    sort), which is fine — top-K identity is not the focus, the cov
-    distribution is.
+    r_sz.
+
+    **Tie-break (v2.2.1 fix, 2026-05-06)**: when two channels share
+    the same r_sz, the one with the alphabetically-smaller channel
+    name wins. This keeps top-K identity deterministic across runs;
+    earlier versions left tie order to dict iteration, which differs
+    between fresh-compute and JSON-rebuild paths.
     """
     finite = [(ch, float(v)) for ch, v in r_sz.items() if v is not None]
-    finite.sort(key=lambda kv: kv[1])
+    finite.sort(key=lambda kv: (kv[1], kv[0]))
     top = finite[: int(top_k)]
     return [int(coverage.get(ch, 0)) for ch, _ in top]
 
@@ -896,6 +900,9 @@ def compute_focal_in_topk(
 ) -> Tuple[int, int]:
     """Count focal channels in top-K by r_sz ascending.
 
+    Tie-break on r_sz is alphabetical channel name (v2.2.1 fix); see
+    :func:`compute_top10_coverage_list` for rationale.
+
     Returns
     -------
     (n_focal_in_topk, n_topk_actual)
@@ -904,7 +911,7 @@ def compute_focal_in_topk(
         ``n_focal_in_topk / max(1, n_topk_actual)`` to get the fraction.
     """
     finite = [(ch, float(v)) for ch, v in r_sz.items() if v is not None]
-    finite.sort(key=lambda kv: kv[1])
+    finite.sort(key=lambda kv: (kv[1], kv[0]))
     top_chs = [ch for ch, _ in finite[: int(top_k)]]
     n_focal = sum(1 for ch in top_chs if ch in focal_set)
     return n_focal, len(top_chs)
