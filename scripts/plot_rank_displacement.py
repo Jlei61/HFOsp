@@ -368,6 +368,75 @@ def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
     plt.close(fig)
 
 
+def plot_per_subject_strip(record: dict, out_path: Path) -> None:
+    pair = record["primary_pair"]
+    delta = np.asarray(pair["signed_displacement_full"], dtype=float)
+    joint = np.asarray(pair["joint_valid"], dtype=bool)
+    soz_mask = np.asarray(
+        pair.get("soz_mask", [False] * len(delta)), dtype=bool
+    )
+    rank_a_dense_full = np.asarray(pair["rank_a_dense_full"], dtype=float)
+    channel_names = record["channel_names"]
+    valid_idx = np.where(joint)[0]
+    if len(valid_idx) == 0:
+        return
+    delta_v = delta[valid_idx]
+    chs_v = [channel_names[i] for i in valid_idx]
+    soz_v = soz_mask[valid_idx]
+    rank_a_v = rank_a_dense_full[valid_idx]
+    # Sort by rank_T_a_dense (T_a source -> sink), NOT by Δr — anti-bias rule.
+    order = np.argsort(rank_a_v)
+    delta_sorted = delta_v[order]
+    chs_sorted = [chs_v[i] for i in order]
+    soz_sorted = soz_v[order]
+
+    n_ch = len(delta_sorted)
+    vmax = float(np.max(np.abs(delta_sorted))) if n_ch > 0 else 1.0
+    vmax = max(vmax, 1e-6)
+    norm = TwoSlopeNorm(vcenter=0.0, vmin=-vmax, vmax=vmax)
+
+    fig, ax = plt.subplots(figsize=(max(6.0, 0.5 * n_ch), 2.4))
+    im = ax.imshow(
+        delta_sorted[None, :],
+        aspect="auto",
+        cmap="RdBu_r",
+        norm=norm,
+    )
+    for j, is_soz in enumerate(soz_sorted):
+        if is_soz:
+            ax.add_patch(
+                mpatches.Rectangle(
+                    (j - 0.5, -0.5),
+                    1,
+                    1,
+                    fill=False,
+                    edgecolor="black",
+                    linewidth=1.0,
+                )
+            )
+    ax.set_xticks(range(n_ch))
+    ax.set_xticklabels(
+        chs_sorted, rotation=60, fontsize=FS_TICK - 4, ha="right"
+    )
+    ax.set_yticks([])
+    sub_label = f"{record['dataset']} {record['subject']}"
+    fwd = "✓" if record.get("fwd_rev_reproduced") else "✗"
+    tau = pair.get("kendall_tau", float("nan"))
+    f_norm = pair.get("footrule_normalized", float("nan"))
+    ax.set_title(
+        f"{sub_label}  |  k={record.get('stable_k')}  |  "
+        f"fwd/rev={fwd}  |  τ={tau:.3f}  |  F_norm={f_norm:.3f}\n"
+        f"channels arranged by rank_T_a (source → sink)",
+        fontsize=FS_LABEL - 2,
+    )
+    cb = fig.colorbar(im, ax=ax, fraction=0.05, pad=0.02)
+    cb.set_label("Δr", fontsize=FS_LABEL - 4)
+    cb.ax.tick_params(labelsize=FS_TICK - 4)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=DPI_PUB, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -389,6 +458,14 @@ def main() -> None:
     if args.what in ("all", "summary"):
         plot_footrule_summary(records, FIG_DIR / "footrule_kendall_summary")
         print("Wrote footrule_kendall_summary.{png,pdf}")
+
+    if args.what in ("all", "per_subject"):
+        for r in records:
+            stem = f"{r['dataset']}_{r['subject']}"
+            plot_per_subject_strip(
+                r, PER_SUB_FIG_DIR / f"{stem}_displacement.png"
+            )
+        print(f"Wrote per-subject strips for {len(records)} subjects")
 
 
 if __name__ == "__main__":
