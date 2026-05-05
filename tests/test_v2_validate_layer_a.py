@@ -9,6 +9,7 @@ from scripts.v2_validate_layer_a import (
     compute_threshold_margin,
     _window_starts_for_record,
     _find_first_record_dir,
+    _find_record_dirs_for_subject,
     CHUNK_SEC,
     N_WINDOWS_PER_RECORD,
 )
@@ -108,3 +109,22 @@ def test_find_first_record_dir_none_for_unknown_subject(tmp_path):
     (raw / "inv2" / "pat_99902" / "adm_x" / "rec_x").mkdir(parents=True)
     assert _find_first_record_dir(raw, "999") is not None  # finds it
     assert _find_first_record_dir(raw, "404") is None  # doesn't exist
+
+
+def test_find_record_dirs_for_subject_returns_all(tmp_path):
+    raw = tmp_path / "raw"
+    rec1 = raw / "inv2" / "pat_63502" / "adm_635102" / "rec_63500102"
+    rec2 = raw / "inv2" / "pat_63502" / "adm_635102" / "rec_63500103"
+    rec3 = raw / "inv2" / "pat_63502" / "adm_635202" / "rec_63500202"
+    for r in (rec1, rec2, rec3):
+        r.mkdir(parents=True)
+    found = _find_record_dirs_for_subject(raw, "635")
+    assert len(found) == 3
+    assert all(r.is_dir() for r in found)
+
+
+def test_find_record_dirs_for_subject_empty_when_missing(tmp_path):
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    assert _find_record_dirs_for_subject(raw, "635") == []
+    assert _find_record_dirs_for_subject(tmp_path / "nonexistent", "635") == []

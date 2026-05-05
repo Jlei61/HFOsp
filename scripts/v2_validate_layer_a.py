@@ -122,6 +122,28 @@ def _find_first_record_dir(raw_root: Path, subject: str) -> Path | None:
     return None
 
 
+def _find_record_dirs_for_subject(raw_root: Path, subject: str) -> list[Path]:
+    """Return all rec_* dirs for `pat_<subject>02` across inv*/adm_* subtrees,
+    sorted. Empty list if subject not found.
+    """
+    out: list[Path] = []
+    if not raw_root.exists():
+        return out
+    for inv_dir in sorted(raw_root.iterdir()):
+        if not inv_dir.is_dir() or not inv_dir.name.startswith("inv"):
+            continue
+        for pat_dir in sorted(inv_dir.iterdir()):
+            if not pat_dir.is_dir() or pat_dir.name != f"pat_{subject}02":
+                continue
+            for adm_dir in sorted(pat_dir.iterdir()):
+                if not adm_dir.is_dir():
+                    continue
+                for rec_dir in sorted(adm_dir.iterdir()):
+                    if rec_dir.is_dir() and rec_dir.name.startswith("rec_"):
+                        out.append(rec_dir)
+    return out
+
+
 def check_determinism(subject_dir: Path) -> dict:
     """Run v2 detection twice on first record's first chunk; verify bit-identical
     output. PASS condition: count_match=True AND max_timestamp_diff_sec=0.0.
@@ -178,9 +200,15 @@ def check_determinism(subject_dir: Path) -> dict:
     }
 
 
-def extract_layer_a_per_subject(subject_dir: Path, output_dir: Path) -> dict:
-    """Iterate v2 detection *_gpu.npz under subject_dir and recompute envelope+
-    threshold metrics on first/middle/last 200s windows of each record.
+def extract_layer_a_per_subject(
+    subject_dir: Path,
+    raw_root: Path,
+    subject: str,
+    output_dir: Path,
+) -> dict:
+    """Iterate v2 detection *_gpu.npz under subject_dir; resolve each record's
+    raw .head/.data via raw_root (walks /mnt/epilepsia_data style tree);
+    recompute envelope+threshold metrics on first/middle/last 200s windows.
 
     ⚠️ DETECTOR-PARAM COUPLING: The BQKDetector instantiation below MUST match
     the params used by the producing detection script (currently
@@ -197,13 +225,36 @@ def extract_layer_a_per_subject(subject_dir: Path, output_dir: Path) -> dict:
     from src.preprocessing import load_epilepsiae_block
     from src.utils.bqk_utils import BQKDetector
 
+    # Build stem -> raw_record_dir index for this subject's tree
+    rec_dirs = _find_record_dirs_for_subject(raw_root, subject)
+    stem_to_rec: dict[str, Path] = {}
+    for rd in rec_dirs:
+        for head in rd.glob("*.head"):
+            stem_to_rec[head.stem] = rd
+    if not stem_to_rec:
+        return {
+            "records": [],
+            "skipped": [],
+            "error": f"no raw records under {raw_root} for subject {subject}",
+        }
+
     metrics_per_record = []
     skipped = []
     for gpu_path in sorted(subject_dir.glob("*_gpu.npz")):
-        head_path = gpu_path.parent / (gpu_path.stem.replace("_gpu", "") + ".head")
-        data_path = head_path.with_suffix(".data")
+        rec_stem = gpu_path.stem.replace("_gpu", "")
+        if rec_stem not in stem_to_rec:
+            skipped.append({
+                "record": gpu_path.name,
+                "error": f"no raw .head/.data found in raw_root for stem={rec_stem}",
+            })
+            continue
+        head_path = stem_to_rec[rec_stem] / f"{rec_stem}.head"
+        data_path = stem_to_rec[rec_stem] / f"{rec_stem}.data"
         if not (head_path.exists() and data_path.exists()):
-            skipped.append({"record": gpu_path.name, "error": "raw .head/.data not adjacent"})
+            skipped.append({
+                "record": gpu_path.name,
+                "error": f"head/data missing under {stem_to_rec[rec_stem]}",
+            })
             continue
         npz = np.load(gpu_path, allow_pickle=True)
         chns = list(npz["chns_names"])
@@ -238,7 +289,7 @@ def extract_layer_a_per_subject(subject_dir: Path, output_dir: Path) -> dict:
             windows_used.append({"start_sec": t_lo, "end_sec": t_hi, "whole_data_median": whole_med})
 
             for ci, ch in enumerate(chns):
-                evts_full = whole_dets[ci] if isinstance(whole_dets[ci], list) else []
+                evts_full = whole_dets[ci] if hasattr(whole_dets[ci], "__len__") else []
                 # Filter to events inside this window (using global recording time)
                 evts_in = np.asarray([e for e in evts_full if t_lo <= e[0] < t_hi], dtype=float)
                 if len(evts_in) == 0:
@@ -321,7 +372,12 @@ def main():
     if not subject_dir.exists():
         print(f"ERROR: subject_dir does not exist: {subject_dir}", file=sys.stderr)
         sys.exit(1)
-    res = extract_layer_a_per_subject(subject_dir, out_dir)
+    res = extract_layer_a_per_subject(
+        subject_dir=subject_dir,
+        raw_root=args.raw_root,
+        subject=args.subject,
+        output_dir=out_dir,
+    )
     out = out_dir / f"layer_a_{args.subject}.json"
     out.write_text(json.dumps(res, indent=2))
     print(f"wrote {out}")
