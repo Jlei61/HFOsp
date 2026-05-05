@@ -128,3 +128,93 @@ def compute_signed_rank_displacement(
         }
     )
     return out
+
+
+def aggregate_pair_metrics(
+    rank_a: np.ndarray,
+    rank_b: np.ndarray,
+    valid_mask_a: np.ndarray,
+    valid_mask_b: np.ndarray,
+    channel_names: Sequence[str],
+    soz_channels: Optional[set] = None,
+) -> Dict[str, object]:
+    """Wrap compute_signed_rank_displacement with baseline-corrected SOZ split.
+
+    Outputs (descriptive only, no PASS gate):
+      - soz_channel_fraction       (chance baseline for contribution_fraction)
+      - soz_contribution_fraction  (Σ|Δr|_SOZ / footrule)
+      - nonsoz_contribution_fraction
+      - soz_contribution_excess    (= contribution_fraction − channel_fraction)
+      - soz_abs_mean, nonsoz_abs_mean    (per-channel |Δr| means; count-confound free)
+      - soz_minus_nonsoz_abs_mean
+
+    Does NOT export signed_displacement_mean_soz / nonsoz - those are anchor-
+    dependent and per plan §3.0 cannot be aggregated across subjects.
+    """
+    base = compute_signed_rank_displacement(
+        rank_a=rank_a,
+        rank_b=rank_b,
+        valid_mask_a=valid_mask_a,
+        valid_mask_b=valid_mask_b,
+        channel_names=channel_names,
+    )
+    if base["exit_reason"] != "ok":
+        return base
+
+    delta_full = np.asarray(base["signed_displacement_full"], dtype=float)
+    joint_valid = np.asarray(base["joint_valid"], dtype=bool)
+    soz_set = set(soz_channels or [])
+    soz_mask = np.array([ch in soz_set for ch in channel_names], dtype=bool)
+    soz_joint = soz_mask & joint_valid
+    nonsoz_joint = (~soz_mask) & joint_valid
+
+    n_soz_joint = int(soz_joint.sum())
+    n_nonsoz_joint = int(nonsoz_joint.sum())
+    n_valid = n_soz_joint + n_nonsoz_joint
+    footrule = float(base["footrule"])
+    abs_full = np.abs(delta_full)
+    nan = float("nan")
+
+    soz_channel_fraction = (n_soz_joint / n_valid) if n_valid > 0 else nan
+    soz_contribution = (
+        float(np.nansum(abs_full[soz_joint]) / footrule)
+        if footrule > 0 and n_soz_joint > 0
+        else nan
+    )
+    nonsoz_contribution = (
+        float(np.nansum(abs_full[nonsoz_joint]) / footrule)
+        if footrule > 0 and n_nonsoz_joint > 0
+        else nan
+    )
+    soz_excess = (
+        soz_contribution - soz_channel_fraction
+        if not (np.isnan(soz_contribution) or np.isnan(soz_channel_fraction))
+        else nan
+    )
+    soz_abs_mean = (
+        float(np.nanmean(abs_full[soz_joint])) if n_soz_joint > 0 else nan
+    )
+    nonsoz_abs_mean = (
+        float(np.nanmean(abs_full[nonsoz_joint])) if n_nonsoz_joint > 0 else nan
+    )
+    soz_minus_nonsoz_abs_mean = (
+        soz_abs_mean - nonsoz_abs_mean
+        if not (np.isnan(soz_abs_mean) or np.isnan(nonsoz_abs_mean))
+        else nan
+    )
+
+    base.update(
+        {
+            "soz_mask": soz_mask.tolist(),
+            "n_soz_joint": n_soz_joint,
+            "n_nonsoz_joint": n_nonsoz_joint,
+            "soz_channel_fraction": soz_channel_fraction,
+            "soz_contribution_fraction": soz_contribution,
+            "nonsoz_contribution_fraction": nonsoz_contribution,
+            "soz_contribution_excess": soz_excess,
+            "soz_abs_mean": soz_abs_mean,
+            "nonsoz_abs_mean": nonsoz_abs_mean,
+            "soz_minus_nonsoz_abs_mean": soz_minus_nonsoz_abs_mean,
+        }
+    )
+    return base
