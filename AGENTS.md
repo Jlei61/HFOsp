@@ -251,6 +251,19 @@ Read `docs/epilepsiae_dataset_structure.md` before answering any Epilepsiae ques
   - do not invent sub-block seizure / post-ictal / day-night labels
   - if an event's parent block crosses seizure, post-ictal, day-night, or nontrivial gap boundaries, exclude the event instead of force-assigning it
 
+## HFO Detector v2 (canonical pipeline since 2026-05-05)
+
+**Read these before tracing any 2026+ Epilepsiae detection result:**
+- `docs/archive/hfo_detector_v2/v2_specification.md` — algorithmic definition
+- `docs/archive/hfo_detector_v2/v2_validation_contract.md` — 3-layer acceptance
+- `docs/archive/hfo_detector_v2/v2_cohort_rebuild_plan_2026-05-05.md` — execution log
+
+Canonical artifact root: `results/hfo_detector_v2/`. Do NOT compare v2 events
+1:1 against `results/_legacy_2021_readonly/` — that backup is historical
+citation only. The v2 detector is deterministic on modern stacks (CPU=GPU,
+float32=float64); the 21 年 cusignal vintage cannot be bit-reproduced and is
+not a parity target.
+
 ## Source-of-Truth Order
 
 When answers conflict, trust them in this order:
