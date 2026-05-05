@@ -286,10 +286,15 @@ def run_epilepsiae_subject(
     *,
     skip_existing: bool = False,
     smoke: bool = False,
-    use_gpu: bool = False,
+    use_gpu: bool | None = None,
     output_root: "Path | None" = None,
 ) -> Dict[str, Any]:
     """Run HFO detection on all blocks for an Epilepsiae subject."""
+    # v2 cohort default: Epilepsiae uses GPU (cusignal). Caller can pass
+    # use_gpu=False explicitly to override; params.get("use_gpu", True)
+    # honors any per-subject override in config/subject_params.json.
+    if use_gpu is None:
+        use_gpu = bool(params.get("use_gpu", True))   # v2 default GPU
     data_root = Path(params.get("data_root", "/mnt/epilepsia_data"))
 
     subject_pat = f"pat_{subject}02"
@@ -480,8 +485,10 @@ def main() -> None:
                         help="Process only first record, no refine (sanity check)")
     parser.add_argument("--output-summary", type=str, default=None,
                         help="Save JSON summary to this path")
-    parser.add_argument("--gpu", action="store_true",
-                        help="Use GPU acceleration (requires CuPy+cusignal)")
+    parser.add_argument("--gpu", action=argparse.BooleanOptionalAction,
+                        default=None,
+                        help="Use GPU acceleration (requires CuPy+cusignal). "
+                             "Default: Yuquan=False, Epilepsiae=True (v2).")
     parser.add_argument("--output-dir", type=str, default=None,
                         help="Write gpu.npz / _refineGpu.npz to this directory "
                              "instead of alongside raw data (RECOMMENDED)")
@@ -522,19 +529,21 @@ def main() -> None:
 
         try:
             if args.dataset == "yuquan":
+                # Yuquan keeps CPU baseline: default to False if --gpu not given.
                 s = run_yuquan_subject(
                     subject, params,
                     skip_existing=args.skip_existing,
                     smoke=args.smoke,
-                    use_gpu=args.gpu,
+                    use_gpu=bool(args.gpu) if args.gpu is not None else False,
                     output_root=output_root,
                 )
             else:
+                # Epilepsiae v2 default: GPU. CLI --no-gpu / --gpu still wins.
                 s = run_epilepsiae_subject(
                     subject, params,
                     skip_existing=args.skip_existing,
                     smoke=args.smoke,
-                    use_gpu=args.gpu,
+                    use_gpu=args.gpu,  # None -> run_epilepsiae_subject defaults via params
                     output_root=output_root,
                 )
             all_summaries.append(s)
