@@ -64,6 +64,21 @@
 - **结论口径**：模板稳定，但占比的昼夜漂移整体较弱。**这是描述层结果，不是强机制结论**
 - occupancy 在低 rate 时段天然高方差，不适合直接承担 PR-4C 的主统计读数 → PR-4D 已把这层补强成 `rate×type`
 
+### 3.1d Cluster geometry 可视化（template-matching metric，2026-05-06）
+
+PR-2 / PR-2.5 cluster decomposition 的描述性补强：在 **shared-channel mean squared deviation**（与 `assign_events_to_templates` 一致的距离）下做 classical MDS，把 PR-2 的 KMeans label 在二维平面上画出来，加上模板大星 + boundary events 高亮。每个 subject 三 panel：(a) MDS scatter，(b) per-event silhouette 排序，(c) cluster template profile（结构层补强，能直接看 forward/reverse）。
+
+- **入选 cohort = 20 Epilepsiae subjects**（18 Yuquan 因 PR-2 labels 与当前 lagPat data 不对齐被跳过，**data freshness 问题不在本 PR 范围**，列为 P0 follow-up：在最新数据上重跑 PR-2 / PR-2.5）
+- **958 直接复现老论文 E3 的 forward/reverse**：cluster 0 与 cluster 1 在 panel c 模板剖面上完全反向（panel a 两类事件云干净分开）；**818 复现 k=4 多模态**——本 PR 首次在二维平面上把这两件事画出来
+- **关键 cohort 数字**：silhouette median = **0.460**（range 0.182–0.671），KMeans-vs-template-matching agreement median = **0.892**（range 0.769–0.955），与用户先前 audit 完全一致
+- **新规律**：silhouette 与 agreement **Spearman ρ = 0.889（p = 1.65e-07, n=20）—— 极强正相关**；cluster validity 弱的 subject 同时是 metric drift 高的 subject，两类问题不是独立的
+- **Metric drift 来源**：boundary fraction by n_participating 单调下降 `0.135 → 0.097 → 0.046`（3-4 / 5-8 / 9+ 通道事件）—— 主要发生在低 n_participating 事件
+- **不推翻**任何 PR-2/2.5/3/4/5/6/7 主结论（核心结论都不依赖 masked metric 单独成立），但 boundary events 的几何解释 metric 敏感
+- **不是新假设、不进 SBA framework P1–P5**；纯描述层，作为 Paper 1 候选主图的视觉论证
+- 详细数字、机制层差异清单、follow-up：
+  - Plan：`docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md`
+  - Results：`docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md`
+
 ### 3.2 Identity bias 不是小问题，在簇内水平更高
 
 | 层 | raw τ | centered τ | bias fraction |
@@ -439,6 +454,8 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 - `docs/archive/topic1/pr6_supplementary_rank_displacement_results_2026-05-06.md` — PR-6 supplementary results：cohort n=23（stable_k=2 ∩ PR-6 endpoint-defined）；reproduced n=6 (Kendall τ median = −0.495, F_norm = 0.964) vs not reproduced n=17 (τ = −0.048, F_norm = 0.688)。Reproduced 6/6 subject τ < 0，与 PR-6 离散 swap geometry 同向。SOZ contribution_excess ≈0（descriptive only，无 enrichment claim）。Topic 1 §7.10 / §10 引用本文件。
 - `docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 正式入口（plan-of-record）**：H1 triple gate (10s primary + 30s sensitivity + sign test) / H1b direction symmetry / H2 non-fwdrev negative control / N0–N4 surrogate hierarchy（N2 主 null + N3 robustness + N4 conditional）/ cohort 5 条 pre-registered 入选门槛 / 10 项 TDD / §6.5 可视化方案 / 7 类失败合同。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
 - `docs/archive/topic1/propagation/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
+- `docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md` — Cluster geometry 可视化 plan-of-record（template-matching metric / 数据合同 / 失败合同 / panel layout / TDD 合同）。Topic 1 §3.1d / §10 引用本文件。
+- `docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md` — Cluster geometry 验收 results（cohort 数字 / showcase 叙事 / KMeans-vs-template-matching audit / follow-up）。Topic 1 §3.1d / §10 引用本文件。
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。
 
