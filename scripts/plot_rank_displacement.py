@@ -242,6 +242,132 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     plt.close(fig)
 
 
+def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
+    """2-panel descriptive: F_norm violin + Kendall tau strip plot."""
+    fwd_yes, fwd_no = [], []
+    tau_yes, tau_no = [], []
+    for r in records:
+        f_norm = r["primary_pair"].get("footrule_normalized")
+        tau = r["primary_pair"].get("kendall_tau")
+        if (
+            f_norm is None or tau is None
+            or (isinstance(f_norm, float) and np.isnan(f_norm))
+            or (isinstance(tau, float) and np.isnan(tau))
+        ):
+            continue
+        if r.get("fwd_rev_reproduced"):
+            fwd_yes.append(f_norm)
+            tau_yes.append(tau)
+        else:
+            fwd_no.append(f_norm)
+            tau_no.append(tau)
+
+    fig, axes = plt.subplots(1, 2, figsize=(9, 4.5))
+
+    # Panel B: footrule normalized split
+    ax = axes[0]
+    positions = [0, 1]
+    parts = ax.violinplot(
+        [fwd_yes, fwd_no],
+        positions=positions,
+        widths=0.7,
+        showmeans=False,
+        showmedians=True,
+        showextrema=False,
+    )
+    for pc, col in zip(parts["bodies"], [COL_SIG, COL_NONSIG]):
+        pc.set_facecolor(col)
+        pc.set_edgecolor("black")
+        pc.set_alpha(0.55)
+    parts["cmedians"].set_color("black")
+    rng = np.random.default_rng(42)
+    for pos, vals, col in zip(
+        positions, [fwd_yes, fwd_no], [COL_SIG, COL_NONSIG]
+    ):
+        if not vals:
+            continue
+        jitter = rng.uniform(-0.12, 0.12, size=len(vals))
+        ax.scatter(
+            np.array([pos] * len(vals)) + jitter,
+            vals,
+            color=col,
+            edgecolors="black",
+            linewidths=0.4,
+            s=28,
+            zorder=3,
+        )
+    # Diaconis-Graham F_norm has *asymptotic* random expectation 2/3 (n -> inf).
+    # Finite-n random expectation is slightly below; this is a reference, not a gate.
+    ax.axhline(2 / 3, color="gray", linewidth=0.6, linestyle=":")
+    ax.text(
+        1.45,
+        2 / 3,
+        "asymptotic random\nreference (≈ 2/3)",
+        fontsize=FS_TICK - 4,
+        va="center",
+        color="gray",
+    )
+    ax.set_xticks(positions)
+    ax.set_xticklabels(
+        [
+            f"reproduced\n(n={len(fwd_yes)})",
+            f"not reproduced\n(n={len(fwd_no)})",
+        ],
+        fontsize=FS_TICK - 2,
+    )
+    ax.set_ylabel(
+        "Footrule (Diaconis-Graham normalized)", fontsize=FS_LABEL
+    )
+    ax.set_ylim(0, 1.05)
+    style_panel(ax, label="b")
+
+    # Panel C: Kendall tau strip
+    ax = axes[1]
+    if tau_yes:
+        ax.scatter(
+            tau_yes,
+            np.zeros(len(tau_yes)) + 1.0,
+            color=COL_SIG,
+            edgecolors="black",
+            linewidths=0.4,
+            s=44,
+            zorder=3,
+            label=f"reproduced (n={len(tau_yes)})",
+        )
+    if tau_no:
+        ax.scatter(
+            tau_no,
+            np.zeros(len(tau_no)) + 0.0,
+            color=COL_NONSIG,
+            edgecolors="black",
+            linewidths=0.4,
+            s=44,
+            zorder=3,
+            label=f"not reproduced (n={len(tau_no)})",
+        )
+    ax.axvline(0, color="gray", linewidth=0.6)
+    ax.axvline(-0.5, color="gray", linewidth=0.4, linestyle="--")
+    ax.axvline(0.5, color="gray", linewidth=0.4, linestyle="--")
+    ax.set_xlim(-1.05, 1.05)
+    ax.set_xticks([-1, -0.5, 0, 0.5, 1])
+    ax.tick_params(axis="x", labelsize=FS_TICK - 2)
+    ax.set_yticks([0, 1])
+    ax.set_yticklabels(
+        ["not\nreproduced", "reproduced"], fontsize=FS_TICK - 2
+    )
+    ax.set_xlabel(
+        "Kendall τ between Tₐ and T_b ranks", fontsize=FS_LABEL
+    )
+    ax.set_ylim(-0.7, 1.7)
+    style_panel(ax, label="c")
+    ax.legend(loc="upper left", fontsize=FS_TICK - 4, frameon=False)
+
+    fig.tight_layout()
+    fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
+    fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument(
@@ -259,6 +385,10 @@ def main() -> None:
     if args.what in ("all", "cohort"):
         plot_cohort_heatmap(records, FIG_DIR / "cohort_displacement_heatmap")
         print("Wrote cohort_displacement_heatmap.{png,pdf}")
+
+    if args.what in ("all", "summary"):
+        plot_footrule_summary(records, FIG_DIR / "footrule_kendall_summary")
+        print("Wrote footrule_kendall_summary.{png,pdf}")
 
 
 if __name__ == "__main__":
