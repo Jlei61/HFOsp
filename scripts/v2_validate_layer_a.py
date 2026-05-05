@@ -108,7 +108,7 @@ def _find_first_record_dir(raw_root: Path, subject: str) -> Path | None:
         if not inv_dir.is_dir() or not inv_dir.name.startswith("inv"):
             continue
         for pat_dir in inv_dir.iterdir():
-            if not pat_dir.is_dir() or not pat_dir.name.startswith(f"pat_{subject}"):
+            if not pat_dir.is_dir() or pat_dir.name != f"pat_{subject}02":
                 continue
             for adm_dir in sorted(pat_dir.iterdir()):
                 if not adm_dir.is_dir():
