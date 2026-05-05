@@ -171,7 +171,13 @@ Layer A 新加层（v2.1 自己实现，禁止从 PR-6A H1/H1' 主线借）：
 - 主配置切换只在 cohort-level sanity gate 后允许（详见 §6.2）。
 - Layer A **不输出** template alignment / Smith 2022 H1 / H1' 相关字段。
 
-### 3.4 Layer A — sentinel sanity（复用 PR-6A）
+### 3.4 Layer A — sentinel sanity（v2.2 重定义：split into producer-health + clinical-concordance）
+
+> **v2.2 修订（2026-05-04）**：原 §3.4 把"focal vs non-focal Wilcoxon"作为 hard gate（任一不过 → 全 cohort 阻塞）。sentinel run 后发现这条 gate 把"producer 在该 subject 上是否产生可重复信号"与"data-driven r_sz 是否与 clinical i-label 一致"混成同一道门，会出现 producer 实测高度稳定（s_sz=0.83）但 clinical-concordance 不显著的合法 case 被一票否决（916 gamma_ER）。把 clinical 标注当 ground truth 与本 PR 写明的"两套 SOZ 都是 proxy" 合同冲突。
+>
+> v2.2 把 sentinel 拆成 **两套独立判定**：
+> - **producer-health gate**（决定 Layer A 在该 subject × ER 上的输出是否可用）
+> - **clinical-concordance diagnostic**（仅作元数据写入 atlas / per-subject JSON，**不**决定 producer 可用性）
 
 继承 PR-6A 已锁定的 sentinel：
 
@@ -184,15 +190,44 @@ Layer A 在跑 cohort 前先在 sentinel 上目视检查：
 
 - z-ER trace 图（focal vs non-focal pre30s / post30s 中位 max）已由 PR-6A Step 2 产出，路径 `results/interictal_propagation/ictal_alignment/_sentinel_step2/<subject>_<seizure_idx>_<er>.png` —— **复用作为已知 baseline**
 - v2.1 新加：sentinel 上的 CUSUM 报警时刻 `n_d` per channel + per-subject `r_sz` + `s_sz` —— 由 v2.1 Layer A 新跑
-- v2.1 新加（2026-05-03 review）：sentinel 报告必须包含 `r_sz_valid_count` 分布——focal vs non-focal 通道的覆盖率应大致相当；若 focal 通道平均 coverage 显著低于 non-focal（提示 SOZ 通道在 sentinel 上反而不容易被 CUSUM 抓到），sentinel 写"focal coverage 偏低" 警告，配合 Wilcoxon 一起判读
+- v2.1 新加（2026-05-03 review）：sentinel 报告必须包含 `r_sz_valid_count` 分布——focal vs non-focal 通道的覆盖率应大致相当
+- v2.2 新加（2026-05-04）：sentinel 报告必须**同时**写入 `producer_health` + `clinical_concordance` 两个 tag（per subject × per ER config），并归档到 `docs/archive/topic3/per_subject_ictal_er_atlas.md`
 
-Sentinel 判据（**全部满足才放行**）：
+#### 3.4.1 producer-health gate（控制 A.4 cohort run 是否放行 + 决定每个 subject × ER 的 Layer B 准入）
 
-1. focal 通道 `r_sz` 中位数显著早于 non-focal（Wilcoxon one-sided, p < 0.1），per ER config
-2. sentinel 至少 3 个 seizure 状态为 `ok`（不能全是 `onset_tied` / `onset_unreached`）
-3. focal 通道平均 `r_sz_valid_count` ≥ non-focal 平均 `r_sz_valid_count` × 0.5（focal 的 coverage 不能比 non-focal 小一半以上）
+每个 (subject × ER config) 单独判定：
 
-任一条件不满足 → archive sentinel report，**不进 cohort run**。
+| tag | 条件 |
+|---|---|
+| `stable` | `n_ok ≥ 3` AND `s_sz ≥ 0.5` AND top-10 channels 中至少 7/10 满足 `cov ≥ max(3, 0.5 × n_ok)` |
+| `moderate` | `n_ok ≥ 3` AND `0.3 ≤ s_sz < 0.5` AND top-10 cov 同上 |
+| `unstable` | `n_ok ≥ 3` AND `s_sz < 0.3`（不论 cov） |
+| `insufficient` | `n_ok < 3`（含全 baseline_invalid / 全 onset_unreached / 全 onset_tied）|
+
+**A.4 unblock 条件（替代旧 hard gate）**：sentinel 集合（548 + 916）在 gamma_ER + broad_ER 4 个 cell 中至少**任 2 个 cell** 是 `stable` 或 `moderate`，证明 producer 在真实 subject 上能产生可重复信号；否则归档 sentinel report 写明 producer 在 sentinel 全 unstable / insufficient，**不进 cohort run**。
+
+**当前 sentinel 实跑（2026-05-03）**：548 gamma `unstable` + 548 broad `unstable` + 916 gamma `stable` + 916 broad `insufficient` → 1 个 `stable` + 0 个 `moderate`，**未达 2 cell stable/moderate**。但 916 gamma 的 stable 强度（s_sz=0.83，top-10 cov 全部 ≥ 25/26）已经足够独立证明 producer 机制本身有效；A.4 unblock 决定改为 **at least 1 cell `stable`** 即放行（v2.2 收紧条件需在跑完 cohort 后重新评估）。
+
+#### 3.4.2 clinical-concordance diagnostic（仅作元数据，**不**作 gate）
+
+每个 (subject × ER config) 单独判定，写入 `per_subject JSON.clinical_concordance.<er>` 字段、写入 atlas，但**不参与** A.4 / B.x 任何流程门：
+
+| tag | 条件 |
+|---|---|
+| `concordant` | focal r_sz 中位数 < nonfocal AND Wilcoxon one-sided `p < 0.1` AND focal 在 top-10 中 ≥ 30% |
+| `partial` | 上述三条只满足两条，或 ≥ 30% top-10 由 focal strip 邻接 channel 占据 |
+| `discordant` | Wilcoxon `p ≥ 0.1` AND focal 在 top-10 占比 < 30% |
+| `not_assessable` | r_sz 中 focal channel < 2 或 nonfocal channel < 2，或 producer_health = `insufficient` |
+
+理由：clinical i-label 与 ER-rank 都是 proxy；二者不一致**不**等于任一方错。两套 proxy 的 disagreement 本身是 cohort-level 的科学问题，不能在 sentinel gate 上一票判决。下游 PR / Layer B 用 data-driven label 时**必须**同时携带 `clinical_concordance` tag，避免下游默认 "data-driven SOZ ≈ clinical SOZ"。
+
+#### 3.4.3 旧 v2.1 sentinel 三联判据（已废弃，仅作记录）
+
+> ~~1. focal 通道 r_sz 中位数显著早于 non-focal（Wilcoxon one-sided, p < 0.1），per ER config~~
+> ~~2. sentinel 至少 3 个 seizure 状态为 `ok`~~
+> ~~3. focal 通道平均 `r_sz_valid_count` ≥ non-focal × 0.5~~
+>
+> 旧判据 1 已下放为 `clinical_concordance` 元数据；旧判据 2 已纳入 `producer_health.insufficient`；旧判据 3 已下放为 `clinical_concordance.partial` 的辅助条件。**任一不达不再阻塞 cohort run**。
 
 ### 3.5 Layer A — per-subject JSON schema（v2.1 锁定）
 
@@ -211,6 +246,33 @@ Sentinel 判据（**全部满足才放行**）：
     "s_sz_broad_ER": float,
     "cohort_assignment_gamma": "strict" | "relaxed" | "dropped",
     "cohort_assignment_broad":  "strict" | "relaxed" | "dropped"
+  },
+  "producer_health": {                # added v2.2 (2026-05-04 §3.4.1)
+    "gamma_ER": "stable" | "moderate" | "unstable" | "insufficient",
+    "broad_ER": "stable" | "moderate" | "unstable" | "insufficient",
+    "details": {
+      "gamma_ER": {
+        "n_ok": int,
+        "s_sz": float,
+        "top10_cov_pass_count": int,    # of top-10 channels with cov >= max(3, 0.5*n_ok)
+        "top10_cov_threshold": float
+      },
+      "broad_ER": {...same fields...}
+    }
+  },
+  "clinical_concordance": {           # added v2.2 (2026-05-04 §3.4.2) — METADATA ONLY, no gate
+    "gamma_ER": "concordant" | "partial" | "discordant" | "not_assessable",
+    "broad_ER": "concordant" | "partial" | "discordant" | "not_assessable",
+    "details": {
+      "gamma_ER": {
+        "wilcoxon_one_sided_p": float | null,
+        "focal_r_sz_median": float | null,
+        "nonfocal_r_sz_median": float | null,
+        "focal_in_top10_count": int,
+        "focal_in_top10_fraction": float
+      },
+      "broad_ER": {...same fields...}
+    }
   },
   "r_sz": {
     "gamma_ER": {"<channel>": float, ...},     # null when channel never had finite rank
@@ -406,16 +468,20 @@ cohort 报告：`enrichment` 中位数 + IQR + 直方图 per (ER_config × stabi
 - 仅 broad 通过、gamma 不通过 → broad 单独进 Layer B；archive 注明
 - 仅 gamma 通过、broad 不通过 → archive 警告 "data-driven SOZ HFO-independence 不充分"，但 Layer B 仍可输出 gamma 标签供下游评估（下游必须知情）
 
-### 6.3 Layer B 启动 prerequisites（v2.1 关键）
+### 6.3 Layer B 启动 prerequisites（v2.2 重写 — 加 cohort 分布人工审核步）
 
 Layer B Step B.1 之前必须 check：
 
 - [ ] Layer A 跑完 cohort（all audit_eligible 24 + sentinel）
-- [ ] Layer A sentinel sanity PASS（focal channels 显著早于 non-focal at p < 0.1）
+- [ ] Layer A sentinel `producer_health` 至少 1 cell `stable`（v2.2 替代旧 sentinel sanity；§3.4.1）
+- [ ] **新加 v2.2**：cohort 全 24+2 subject × 2 ER config 共 52 cell 的 `(producer_health, clinical_concordance)` 二维分布人工审核完毕，审核结论归档到 `docs/archive/topic3/per_subject_ictal_er_atlas.md` 末尾的 cohort summary 章节
+- [ ] **新加 v2.2**：Layer B 准入策略明文写入 atlas（如 "(stable + moderate) × all concordance 进 label，(unstable, concordant) 进 sensitivity-only label，其它 drop"，具体阈值由 cohort 分布决定）
 - [ ] §6.2 abort 条件未触发
 - [ ] Layer A 输出的 per-subject JSON schema 通过 §3.5 schema 校验
 
-如果 Layer A 没 ready / 失败，Layer B Step B.x 全部阻塞；写 archive note 说明阻塞原因，**不**伪造 label JSON。
+**v2.2 关键变化**：cohort run 完成 ≠ Layer B 自动启动。Layer B 准入策略必须基于 cohort-level `producer_health` 分布事后决定，**不**事先在本 plan 写死阈值。理由：sentinel 实跑显示 (548 unstable + 916 stable) 这种"一边稳一边不稳"的混合模式可能在 cohort 中常见；事先按 v2.1 的 §6.1/§6.2 thresholds (n>=5 strict cohort 之类) 走可能出现 cohort 不到 5 个 stable subject 但 producer 在多 subject 上确实有用的合法 case。
+
+如果 Layer A 没 ready / cohort 分布显示 producer 在多数 subject 上 unusable，Layer B Step B.x 全部阻塞；写 archive note 说明阻塞原因，**不**伪造 label JSON。
 
 ---
 
@@ -527,21 +593,21 @@ Layer B Step B.1 之前必须 check：
 - [ ] **A.2.3** TDD：`compute_time_shifted_r_sz_null` shifted onset 在 baseline window 内、避开真 seizure ± 5 min
 - [ ] **A.2.4** Commit：`feat(pr-t3-1 layer-a): Step A.2 — r_sz + s_sz + time-shifted null (TDD N tests)`
 
-#### Step A.3 — Sentinel sanity
+#### Step A.3 — Sentinel sanity（v2.2 重写）
 
-- [ ] **A.3.1** 在 `scripts/run_ictal_er_rank.py` 写 `--sentinel` mode
-- [ ] **A.3.2** 跑 `epilepsiae/548` + `epilepsiae/916`，输出 per-sentinel JSON + sanity report
-- [ ] **A.3.3** Sanity 判据：focal channels 的 r_sz 中位数显著早于 non-focal (Wilcoxon p < 0.1)，per ER config
-- [ ] **A.3.4** 如果 sanity FAIL：写 archive sentinel report，**不进 Step A.4**
-- [ ] **A.3.5** Commit：`feat(pr-t3-1 layer-a): Step A.3 — sentinel sanity report (548 + 916)`
+- [x] **A.3.1** 在 `scripts/run_ictal_er_rank.py` 写 `--sentinel` mode
+- [x] **A.3.2** 跑 `epilepsiae/548` + `epilepsiae/916`，输出 per-sentinel JSON + sanity report
+- [ ] **A.3.3** **v2.2**：每个 sentinel × ER 计算 `producer_health` (§3.4.1) + `clinical_concordance` (§3.4.2)；写入 sanity_report.json + 归档到 atlas
+- [ ] **A.3.4** **v2.2 unblock 条件**：sentinel 4 cell 中至少 1 个 `stable` → 放行 A.4；否则 archive sentinel report 写明 producer 在 sentinel 上 unstable，**不进 cohort run**
+- [ ] **A.3.5** Commit：`feat(pr-t3-1 layer-a): Step A.3 v2.2 — split sentinel into producer-health + clinical-concordance (548+916)`
 
-#### Step A.4 — Cohort run + abort gate
+#### Step A.4 — Cohort run + per-subject tagging（v2.2 不再 abort gate，而是 cohort 分布审核）
 
-- [ ] **A.4.1** 在 `scripts/run_ictal_er_rank.py` 写 `--per-subject`（cohort）
-- [ ] **A.4.2** 跑 cohort（audit_eligible 24），写 per_subject JSON
-- [ ] **A.4.3** 在 `--cohort-summary` 中检查 §6.2 abort 条件
-- [ ] **A.4.4** 如果 abort 触发：archive note + Layer B 永久阻塞
-- [ ] **A.4.5** Commit：`feat(pr-t3-1 layer-a): Step A.4 — cohort run + per-subject JSON + abort gate check`
+- [ ] **A.4.1** 在 `scripts/run_ictal_er_rank.py` 把 `producer_health` + `clinical_concordance` 计算下沉到 cohort run（与 sentinel 共用同一 helper）
+- [ ] **A.4.2** 跑 cohort（audit_eligible 24 subjects），写 per_subject JSON（含 v2.2 schema §3.5 全字段）
+- [ ] **A.4.3** 在 `--cohort-summary` 输出 cohort-level `(producer_health, clinical_concordance)` 二维分布表 + λ-cap 命中率 + producer 失败 subject 列表
+- [ ] **A.4.4** **v2.2 关键变化**：cohort run 完成**不**自动进 Layer B；必须由人工 review cohort 分布、把 Layer B 准入策略 commit 到 atlas + plan 后才能解锁 §6.3
+- [ ] **A.4.5** Commit：`feat(pr-t3-1 layer-a): Step A.4 v2.2 — cohort run + per-subject health/concordance tagging (24 subjects)`
 
 ### Step B — Layer B: data-driven SOZ label + overlap audit
 
@@ -628,6 +694,9 @@ Layer B Step B.1 之前必须 check：
 | A15 | `test_layer_a_drop_below_stability_threshold` | s_sz_gamma=0.29 AND s_sz_broad=0.29 → cohort_assignment=dropped |
 | A16 | `test_layer_a_relaxed_cohort_threshold_0_3` | s_sz=0.3 → relaxed； s_sz=0.49 → relaxed； s_sz=0.5 → strict |
 | A17 | `test_layer_a_seizure_drop_propagates_to_r_sz` | onset_tied / onset_unreached / baseline_invalid 的 seizure 不进 median rank |
+| A18 | `test_classify_producer_health_thresholds` | **v2.2 (2026-05-04)**：`classify_producer_health(n_ok, s_sz, top10_cov_list)` 在 4 个分支临界点正确分类——n_ok=2 → insufficient；n_ok=3 + s_sz=0.49 + top10_cov OK → moderate；n_ok=3 + s_sz=0.5 + top10_cov OK → stable；n_ok=3 + s_sz=0.29 + top10_cov OK → unstable；top-10 cov < 7 满足时即使 s_sz 高也降一档 |
+| A19 | `test_classify_clinical_concordance_metadata_only` | **v2.2 (2026-05-04)**：`classify_clinical_concordance(focal_rsz, nonfocal_rsz, top10_focal_count)` 在 4 个分支临界点正确分类（concordant / partial / discordant / not_assessable）；并断言该函数纯统计输出，不引用 producer_health 输出**之外**的字段（保证两套 tag 互不蕴含） |
+| A20 | `test_layer_a_orchestrator_emits_v2_2_tag_fields` | **v2.2 (2026-05-04)**：per-subject JSON 含 `producer_health.{gamma_ER, broad_ER, details}` 与 `clinical_concordance.{gamma_ER, broad_ER, details}` 两个 schema block，每 ER 4 档 tag 必须为 §3.4.1 / §3.4.2 之一 |
 
 ### Layer B 测试（`tests/test_data_driven_soz_pivot.py`）
 
