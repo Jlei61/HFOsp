@@ -140,8 +140,16 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     vmax = max(vmax, 1e-6)
     norm = TwoSlopeNorm(vcenter=0.0, vmin=-vmax, vmax=vmax)
 
-    fig = plt.figure(figsize=(11, max(6, 0.36 * n_sub)))
-    gs = fig.add_gridspec(1, 3, width_ratios=[8, 1.2, 0.4], wspace=0.05)
+    fig = plt.figure(figsize=(12, max(6.5, 0.42 * n_sub) + 1.2))
+    gs = fig.add_gridspec(
+        1, 3,
+        width_ratios=[8, 1.2, 0.35],
+        wspace=0.10,
+        top=0.86,
+        bottom=0.10,
+        left=0.10,
+        right=0.94,
+    )
     ax_h = fig.add_subplot(gs[0])
     ax_tau = fig.add_subplot(gs[1], sharey=ax_h)
     ax_cb = fig.add_subplot(gs[2])
@@ -184,12 +192,13 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK - 4)
     ax_h.set_xticks([0, n_ch - 1])
     ax_h.set_xticklabels(
-        ["T_a source\n(earliest in T_a)", "T_a sink\n(latest in T_a)"],
-        fontsize=FS_TICK - 2,
+        ["source\n(earliest in T_a)", "sink\n(latest in T_a)"],
+        fontsize=FS_TICK - 4,
     )
     ax_h.set_xlabel(
-        "Channel position along T_a's source→sink axis",
-        fontsize=FS_LABEL,
+        "Channel position along T_a (source → sink)",
+        fontsize=FS_LABEL - 2,
+        labelpad=8,
     )
     ax_h.set_title("a", fontsize=FS_PANEL_LETTER, loc="left", pad=10, fontweight="bold")
     ax_h.spines["top"].set_visible(False)
@@ -207,7 +216,7 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_tau.set_xticks([-1, 0, 1])
     ax_tau.tick_params(axis="x", labelsize=FS_TICK - 4)
     plt.setp(ax_tau.get_yticklabels(), visible=False)
-    ax_tau.set_xlabel("Kendall τ", fontsize=FS_LABEL - 2)
+    ax_tau.set_xlabel("Kendall τ", fontsize=FS_LABEL - 2, labelpad=8)
     ax_tau.spines["top"].set_visible(False)
     ax_tau.spines["right"].set_visible(False)
 
@@ -222,21 +231,19 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         mpatches.Patch(color=COL_NONSIG, label="not reproduced / not testable"),
         mpatches.Patch(facecolor="white", edgecolor="black", label="SOZ channel"),
     ]
+    fig.suptitle(
+        f"Per-channel signed rank displacement — stable_k=2 cohort (n={n_sub})",
+        fontsize=FS_TITLE,
+        y=0.97,
+    )
     fig.legend(
         handles=legend_handles,
         loc="upper center",
         ncol=3,
         fontsize=FS_TICK - 2,
         frameon=False,
-        bbox_to_anchor=(0.5, 1.005),
+        bbox_to_anchor=(0.5, 0.93),
     )
-
-    fig.suptitle(
-        f"Per-channel signed rank displacement, stable_k=2 cohort (n={n_sub})",
-        fontsize=FS_TITLE,
-        y=0.995,
-    )
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
     fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
@@ -262,7 +269,7 @@ def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
             fwd_no.append(f_norm)
             tau_no.append(tau)
 
-    fig, axes = plt.subplots(1, 2, figsize=(9, 4.5))
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.8))
 
     # Panel B: footrule normalized split
     ax = axes[0]

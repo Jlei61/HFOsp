@@ -63,6 +63,8 @@ reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`
 
 → **continuous metric 与 PR-6 离散 swap_node 同向，6/6 subject 一致**。这不是新的独立检验（同一 cohort），是对 PR-6 离散结果的 continuous-axis 补充。
 
+**Independent cohort sanity**：本 supplementary 的 reproduced n=6 是从 PR-2 / PR-2.5 `time_split_reproducibility.splits` (OR rule) 与 PR-6 `template_anchoring/per_subject/*.json` 的 `valid_mask` 交集独立 derive 出来的，**与 PR-6 plan §15 H2 cohort 定义** (`endpoint_defined ∩ forward_reverse_reproduced`) **完全相同**（PR-6 plan 中 "forward/reverse-reproduced subset n=6" 在 §15 Step 4b）。这是对 cluster_id × valid_mask alignment 合同正确性的 cross-check —— 两个独立 runner 在不同字段路径上聚到同一个 6 subject cohort。
+
 per-subject Δr 痕迹（按 Kendall τ 升序，沿 T_a source→sink 排序）：
 
 ```
