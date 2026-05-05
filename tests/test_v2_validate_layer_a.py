@@ -50,3 +50,34 @@ def test_window_starts_no_overlap_at_minimum_dur():
     starts = _window_starts_for_record(3 * CHUNK_SEC)
     assert starts[0] == 0.0
     assert starts[-1] > 0.0
+
+def test_threshold_margin_zero_width_event_returns_nan():
+    fs = 1024.0
+    env = np.ones(2048) * 5.0
+    # zero-width event: t0 == t1
+    events = np.array([[1.0, 1.0]])
+    margins = compute_threshold_margin(env, events, fs, threshold=4.0)
+    assert len(margins) == 1
+    assert np.isnan(margins[0])
+
+def test_peak_side_ratio_event_at_recording_start_returns_nan():
+    fs = 1024.0
+    env = np.ones(2048) * 5.0
+    env[100:202] = 20.0
+    # event at t0=0 (or near enough that pre-side has zero samples)
+    events = np.array([[0.0, 0.1]])
+    ratios = compute_peak_side_ratio(env, events, fs)
+    assert len(ratios) == 1
+    assert np.isnan(ratios[0])  # one-sided edge → NaN per the new contract
+
+def test_peak_side_ratio_event_at_recording_end_returns_nan():
+    fs = 1024.0
+    n = 2048
+    env = np.ones(n) * 5.0
+    # event at end: t0 = (n - 50)/fs, t1 = n/fs → post-side has zero samples
+    t0 = (n - 50) / fs
+    t1 = n / fs
+    events = np.array([[t0, t1]])
+    ratios = compute_peak_side_ratio(env, events, fs)
+    assert len(ratios) == 1
+    assert np.isnan(ratios[0])

@@ -397,6 +397,8 @@ git commit -m "docs(v2): define 3-layer acceptance contract for cohort rebuild"
 
 ## Phase 2: 验收工具实现 (TDD)
 
+> **历史记录（traceability）**：Task 2.1 的初始模块 + 测试在执行时被并发的 user-side 仓库整理一起 commit 进了 `e7fdbd0`（"chore(archive): hierarchical PR-series subdirs + topic4 model folder"），未单独走 `feat(v2): Layer A validation — core metrics + multi-window helpers (TDD)` 的提交标题。Task 2.2 (CLI 驱动) 走的独立 commit 是 `ef4b27e`。后续做 git archeology 找 Layer A 模块引入历史时请直接看 `git log --follow scripts/v2_validate_layer_a.py`。
+
 ### Task 2.1: Layer A 提取器
 
 **Files:**
