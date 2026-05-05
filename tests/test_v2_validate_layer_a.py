@@ -8,6 +8,7 @@ from scripts.v2_validate_layer_a import (
     compute_peak_side_ratio,
     compute_threshold_margin,
     _window_starts_for_record,
+    _find_first_record_dir,
     CHUNK_SEC,
     N_WINDOWS_PER_RECORD,
 )
@@ -81,3 +82,18 @@ def test_peak_side_ratio_event_at_recording_end_returns_nan():
     ratios = compute_peak_side_ratio(env, events, fs)
     assert len(ratios) == 1
     assert np.isnan(ratios[0])
+
+
+def test_find_first_record_dir(tmp_path):
+    raw = tmp_path / "raw"
+    rec_dir = raw / "inv2" / "pat_635xx" / "adm_635102" / "rec_63500102"
+    rec_dir.mkdir(parents=True)
+    found = _find_first_record_dir(raw, "635")
+    assert found == rec_dir
+
+
+def test_find_first_record_dir_none_for_unknown_subject(tmp_path):
+    raw = tmp_path / "raw"
+    (raw / "inv2" / "pat_999xx" / "adm_x" / "rec_x").mkdir(parents=True)
+    assert _find_first_record_dir(raw, "999") is not None  # finds it
+    assert _find_first_record_dir(raw, "404") is None  # doesn't exist

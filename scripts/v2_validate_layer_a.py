@@ -97,6 +97,87 @@ def _window_starts_for_record(rec_duration_sec: float) -> list[float]:
     return starts
 
 
+def _find_first_record_dir(raw_root: Path, subject: str) -> Path | None:
+    """Walk Epilepsiae raw root inv*/pat_<subject>*/adm_*/rec_* and return the
+    first rec_* directory (sorted) for the given subject id. Returns None when
+    no matching subject directory exists.
+    """
+    if not raw_root.exists():
+        return None
+    for inv_dir in raw_root.iterdir():
+        if not inv_dir.is_dir() or not inv_dir.name.startswith("inv"):
+            continue
+        for pat_dir in inv_dir.iterdir():
+            if not pat_dir.is_dir() or not pat_dir.name.startswith(f"pat_{subject}"):
+                continue
+            for adm_dir in sorted(pat_dir.iterdir()):
+                if not adm_dir.is_dir():
+                    continue
+                rec_dirs = sorted(
+                    d for d in adm_dir.iterdir()
+                    if d.is_dir() and d.name.startswith("rec_")
+                )
+                if rec_dirs:
+                    return rec_dirs[0]
+    return None
+
+
+def check_determinism(subject_dir: Path) -> dict:
+    """Run v2 detection twice on first record's first chunk; verify bit-identical
+    output. PASS condition: count_match=True AND max_timestamp_diff_sec=0.0.
+
+    Used as Layer A's `timestamp_jitter_p99` and `strong_chn_count_match` PASS
+    gate (validation contract). Determinism is a property of the detector code,
+    not of any single recording — but we anchor on real .data so the test
+    exercises the actual production path (not a synthetic input).
+    """
+    from src.preprocessing import load_epilepsiae_block
+    from src.hfo_detector import HFODetector, HFODetectionConfig
+
+    head_paths = sorted(subject_dir.glob("*.head"))
+    if not head_paths:
+        return {
+            "error": f"no .head found in {subject_dir} — check raw Epilepsiae path",
+            "deterministic": False,
+        }
+    head_path = head_paths[0]
+    data_path = head_path.with_suffix('.data')
+    if not data_path.exists():
+        return {"error": f"missing .data for {head_path.name}", "deterministic": False}
+
+    pre = load_epilepsiae_block(
+        data_path, head_path, reference="car",
+        notch_freqs=[50.0, 100.0, 150.0, 200.0, 250.0],
+        notch_filter_kind="fir_legacy",
+    )
+    cfg = HFODetectionConfig(
+        rel_thresh=2.0, abs_thresh=2.0, side_thresh=2.0,
+        min_gap_ms=20, min_last_ms=50, max_last_ms=200,
+        chunk_sec=200, chunk_overlap_sec=0,
+        legacy_align=True, use_gpu=True, n_jobs=1,
+    )
+    det = HFODetector(cfg)
+    r1 = det.detect(pre)
+    r2 = det.detect(pre)
+
+    count_match = bool(np.array_equal(r1.events_count, r2.events_count))
+    max_t_diff = 0.0
+    for ev1, ev2 in zip(r1.events_by_channel, r2.events_by_channel):
+        if ev1.shape != ev2.shape:
+            count_match = False
+            continue
+        if len(ev1) > 0:
+            max_t_diff = max(max_t_diff, float(np.max(np.abs(ev1 - ev2))))
+    return {
+        "head_path": str(head_path.name),
+        "n_channels": int(pre.data.shape[0]),
+        "rec_seconds": float(pre.data.shape[1] / pre.sfreq),
+        "count_match": count_match,
+        "max_timestamp_diff_sec": max_t_diff,
+        "deterministic": count_match and max_t_diff == 0.0,
+    }
+
+
 def extract_layer_a_per_subject(subject_dir: Path, output_dir: Path) -> dict:
     """Iterate v2 detection *_gpu.npz under subject_dir and recompute envelope+
     threshold metrics on first/middle/last 200s windows of each record.
@@ -207,11 +288,36 @@ def main():
     p.add_argument("--subject", required=True, help="e.g. 635")
     p.add_argument("--detection-root", default="results/hfo_detector_v2")
     p.add_argument("--output-dir", default="results/hfo_detector_v2/validation")
+    p.add_argument(
+        "--check-determinism", action="store_true",
+        help="Run determinism / twice-run jitter check instead of metric extraction.",
+    )
+    p.add_argument(
+        "--raw-root", type=Path, default=Path("/mnt/epilepsia_data"),
+        help="Epilepsiae raw root with inv*/pat_*/adm_*/rec_*/*.{head,data} layout.",
+    )
     args = p.parse_args()
 
-    subject_dir = Path(args.detection_root) / args.subject
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    if args.check_determinism:
+        rec_dir = _find_first_record_dir(args.raw_root, args.subject)
+        if rec_dir is None:
+            print(
+                f"ERROR: no rec_* dir found under {args.raw_root} for subject {args.subject}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        det_res = check_determinism(rec_dir)
+        det_res["raw_record_dir"] = str(rec_dir)
+        out = out_dir / f"layer_a_determinism_{args.subject}.json"
+        out.write_text(json.dumps(det_res, indent=2))
+        print(json.dumps(det_res, indent=2))
+        print(f"wrote {out}")
+        sys.exit(0 if det_res.get("deterministic") else 1)
+
+    subject_dir = Path(args.detection_root) / args.subject
     if not subject_dir.exists():
         print(f"ERROR: subject_dir does not exist: {subject_dir}", file=sys.stderr)
         sys.exit(1)
