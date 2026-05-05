@@ -335,6 +335,8 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 **Step 6 / archive results doc 推迟**：等 §1 或 §2 中的下一步验证有结果后再写正式归档 doc 与主文档一句话回写；当前 PR-6 主线（Step 1–5b + 4 + 4b + 3）所有结果归档到 `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15。
 
+**Continuous-version supplementary（2026-05-06）**：把 PR-6 Step 4b 离散 swap_node count 升级到逐通道 signed rank displacement（Δr = rank_T_b − rank_T_a），并加 Spearman footrule + Diaconis-Graham 归一化 + Kendall τ + baseline-corrected SOZ split。**不**立独立 PR、**不**开 cohort gate；只产出 supplementary fig（cohort heatmap 行按 τ 排序、列按 rank_T_a_dense 排序避免 sorting bias）。Cohort n=23（stable_k=2 ∩ PR-6 endpoint-defined），fwd/rev-reproduced 6 个 subject 的 Kendall τ 全部 < 0（6/6 一致，median = −0.495；F_norm median = 0.964），与 PR-6 离散 swap geometry sign-test n=6 p=0.031 同向。详见 `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` 与 `pr6_supplementary_rank_displacement_results_2026-05-06.md`。
+
 ---
 
 ### 7.11 PR-7：Template Antagonistic Temporal Pairing（Ping-Pong 功能耦合层）
@@ -433,6 +435,8 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 - `docs/archive/topic1/pr6_template_anchoring/pr6_direction_brainstorm_2026-04-25.md` — PR-6 pivot 决策的 brainstorm 文档：Obs 1–4 分类、文献整理、Topic 1 × Topic 3 桥的提出；驱动了 PR-6 主线从 ictal alignment 转向 endpoint anatomical anchoring。
 - `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — **PR-6 正式入口（plan-of-record）**：H1 endpoint vs middle / H1b polarity / H2 forward-reverse swap / H3 i-l-e sensitivity / cohort audit-derived / 8 项 TDD / 失败合同。Topic 1 §2 / §5 / §7.5 / §7.10 / §10 都引用本文件。
 - `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` — Ping-Pong 假说整体审阅：三层分离（现象学 A / 功能耦合 B / 机制 C）+ user 提议实验逐项对账 + PR roadmap（PR-7 → PR-8 candidate → PR-9 candidate）。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
+- `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` — PR-6 supplementary plan：把离散 swap_node count 升级到逐通道 signed rank displacement + Diaconis-Graham 归一化 footrule + Kendall τ + baseline-corrected SOZ split。Pre-registered 反 sorting bias（列按 rank_T_a_dense 排）+ sign anchor 合同（Δr 仅 subject 内部有效）+ n_available 不预承诺。Topic 1 §7.10 / §10 引用本文件。
+- `docs/archive/topic1/pr6_supplementary_rank_displacement_results_2026-05-06.md` — PR-6 supplementary results：cohort n=23（stable_k=2 ∩ PR-6 endpoint-defined）；reproduced n=6 (Kendall τ median = −0.495, F_norm = 0.964) vs not reproduced n=17 (τ = −0.048, F_norm = 0.688)。Reproduced 6/6 subject τ < 0，与 PR-6 离散 swap geometry 同向。SOZ contribution_excess ≈0（descriptive only，无 enrichment claim）。Topic 1 §7.10 / §10 引用本文件。
 - `docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 正式入口（plan-of-record）**：H1 triple gate (10s primary + 30s sensitivity + sign test) / H1b direction symmetry / H2 non-fwdrev negative control / N0–N4 surrogate hierarchy（N2 主 null + N3 robustness + N4 conditional）/ cohort 5 条 pre-registered 入选门槛 / 10 项 TDD / §6.5 可视化方案 / 7 类失败合同。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
 - `docs/archive/topic1/propagation/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
 
