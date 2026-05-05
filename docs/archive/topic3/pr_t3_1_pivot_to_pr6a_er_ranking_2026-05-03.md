@@ -456,6 +456,7 @@ cohort 报告：`enrichment` 中位数 + IQR + 直方图 per (ER_config × stabi
 | 条件 | 出 | 备注 |
 |---|---|---|
 | Subject 不在 audit_eligible (v1.1 已锁) | drop | 缺前置 |
+| **Subject 在 yuquan dataset（v2.2 暂限制）** | **drop** | **`extract_seizure_window` (src/ictal_onset_extraction.py:273) 仅支持 epilepsiae；yuquan SeizureWindow extractor 是独立的后续 PR**。当前 v2.2 cohort = epilepsiae 15 (audit_eligible) + epilepsiae/916 (sentinel-only) = 16 subjects；audit_eligible 中 9 个 yuquan subject 暂不进 Layer A，待 yuquan extractor PR 落地后追跑 |
 | `n_clinical_matched` < 1 | drop | 无 audit baseline |
 | Subject seizures 通过 Layer A 标 `onset_tied` 或 `onset_unreached` 比例 > 70% | drop | r_sz 不可靠 |
 | `s_sz_gamma_ER` < 0.3 AND `s_sz_broad_ER` < 0.3 | drop | 两套 ER stability 都不达 |

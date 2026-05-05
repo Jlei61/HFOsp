@@ -48,7 +48,25 @@
 - `epilepsiae/548` — sentinel
 - `epilepsiae/916` — sentinel
 
-cohort 24 subject 待 §3.4 doc-fix 完成、A.4 cohort run 跑完后逐个回填。
+cohort 16 epilepsiae subject 待 A.4 cohort run 跑完后逐个回填（plan §6.1 v2.2 doc-fix 后 cohort 限定 epilepsiae，详见下文 cohort scope 注）。
+
+---
+
+## v2.2 cohort scope 注（2026-05-04）
+
+**当前 v2.2 cohort = epilepsiae only（15 audit_eligible + 916 sentinel-only = 16 subjects）。**
+
+**为什么**：`extract_seizure_window` 在 `src/ictal_onset_extraction.py:273` 显式 raise 非 epilepsiae。这是 PR-6A 阶段的既有约束。Layer A 的 SeizureWindow 加载链 (`extract_seizure_window` → ER 计算 → CUSUM → r_sz) 完全建立在 PR-6A 接口上，因此 v2.2 cohort 自然继承这个限制。
+
+**audit_eligible 24 subject 中被排除的 9 个 yuquan subject**：
+gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, zhangkexuan, zhaojinrui
+
+**追跑路径（独立后续 PR）**：实现 yuquan 版本的 `extract_seizure_window`（加载 yuquan EDF + clinical onset 切窗 + baseline 解析 + SOZ channel 通过 `yuquan_soz_core_channels.json` 而非 `focus_rel`）。落地后用相同 `_run_subject_all_ers` + `_build_v2_2_tags` 接口跑完 9 yuquan subject，per-subject JSON 落到同一 `per_subject/` 目录，cohort summary 自动 pickup。
+
+**对当前 cohort 结论的影响**：
+- 16 epilepsiae cohort 已经能给出 (producer_health × clinical_concordance) 二维分布的代表性样本；不会因缺 yuquan 而无法判断 v2.2 框架是否 work
+- Layer B 初版标签**只覆盖 epilepsiae**；下游 PR (Layer B → topic3 cross-validation) 需要 propagate "yuquan label pending" 标志，避免误以为 yuquan 没有 ER-driven SOZ
+- atlas cohort summary 末尾会单列 yuquan 状态行，明确写"待 yuquan extract_seizure_window 后追跑"
 
 ---
 

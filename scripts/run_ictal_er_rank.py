@@ -90,6 +90,15 @@ DETECTION_PRE_SEC = 5.0                          # plan §3.3: detection [-5s, +
 DETECTION_POST_SEC = 30.0
 LAMBDA_FPR_PER_HOUR = 1.0
 SENTINEL_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" / "_sentinel"
+COHORT_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" / "per_subject"
+AUDIT_CSV_PATH = ROOT / "results" / "spatial_modulation" / "data_driven_soz" / "audit.csv"
+SENTINEL_ONLY_SUBJECTS = ["epilepsiae/916"]  # 916 NOT in audit_eligible 24; sentinel only
+
+# v2.2 (2026-05-04) — known cohort scope constraint:
+# extract_seizure_window in src/ictal_onset_extraction.py:273 only
+# supports dataset == "epilepsiae" (existing limitation from PR-6A).
+# Yuquan SeizureWindow extractor is a separate future PR.
+SUPPORTED_DATASETS = frozenset({"epilepsiae"})
 
 # v2.2 unblock threshold (plan §3.4.1, 2026-05-04). At least 1 cell
 # (sentinel × ER) must reach `producer_health == "stable"` to unblock A.4.
@@ -670,6 +679,240 @@ def _run_sentinel(out_dir: Path) -> int:
     return 0
 
 
+def _load_audit_eligible_subjects() -> List[str]:
+    """Read audit.csv; return list of "<dataset>/<subject>" with audit_eligible=1."""
+    out: List[str] = []
+    with AUDIT_CSV_PATH.open() as f:
+        for row in csv.DictReader(f):
+            if int(row.get("audit_eligible") or 0):
+                out.append(f"{row['dataset']}/{row['subject']}")
+    return out
+
+
+def _cohort_subject_list() -> Tuple[List[str], List[str]]:
+    """v2.2 cohort = audit_eligible ∩ SUPPORTED_DATASETS + sentinel-only (916).
+
+    Yuquan subjects are EXCLUDED in v2.2 because
+    ``extract_seizure_window`` (src/ictal_onset_extraction.py:273) only
+    supports ``dataset == "epilepsiae"``. Yuquan SeizureWindow
+    extraction is a separate future PR.
+
+    Returns
+    -------
+    (included, excluded)
+        ``included`` is the cohort to actually run.
+        ``excluded`` is the audit_eligible subjects skipped due to
+        unsupported dataset (logged + recorded in cohort_summary so the
+        scope constraint is auditable, not silent).
+    """
+    eligible = _load_audit_eligible_subjects()
+    included: List[str] = []
+    excluded: List[str] = []
+    for s in eligible:
+        ds = s.split("/", 1)[0]
+        if ds in SUPPORTED_DATASETS:
+            included.append(s)
+        else:
+            excluded.append(s)
+    extra = [s for s in SENTINEL_ONLY_SUBJECTS if s not in included]
+    return included + extra, excluded
+
+
+def _per_subject_json_path(out_dir: Path, subject: str) -> Path:
+    sid_under = subject.replace("/", "_")
+    return out_dir / f"{sid_under}.json"
+
+
+def _is_v2_2_per_subject_json(path: Path) -> bool:
+    """Check whether an existing per-subject JSON already has v2.2 tags."""
+    if not path.exists():
+        return False
+    try:
+        d = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    return ("producer_health" in d and "clinical_concordance" in d
+            and "per_er" in d)
+
+
+def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
+    """Step A.4 — cohort run on audit_eligible 24 + sentinel-only 916.
+
+    Reuses the same _run_subject_all_ers + _build_v2_2_tags pipeline as
+    sentinel; per-subject JSONs land in ``out_dir`` with v2.2 schema.
+
+    Per plan §3.4 unblock contract, this should ONLY be invoked after
+    sentinel sanity passed (sentinel sanity_report.json
+    ``next_step_unblocked == True``). The CLI checks that automatically
+    unless ``--force`` is passed.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    focus_rel = _load_focus_rel()
+    subjects, excluded = _cohort_subject_list()
+    if excluded:
+        print(
+            f"\n[cohort] EXCLUDED (yuquan extract_seizure_window not yet supported): "
+            f"{len(excluded)} subjects → {', '.join(excluded)}",
+            flush=True,
+        )
+    print(
+        f"\n[cohort] starting v2.2 cohort run on {len(subjects)} subjects "
+        f"(skip_existing={skip_existing})",
+        flush=True,
+    )
+
+    n_done = 0
+    n_skipped = 0
+    n_new = 0
+    t_start = time.time()
+    for subject in subjects:
+        out_path = _per_subject_json_path(out_dir, subject)
+        if skip_existing and _is_v2_2_per_subject_json(out_path):
+            n_skipped += 1
+            n_done += 1
+            continue
+
+        focal = _focal_channels(subject, focus_rel)
+        n_sz = _count_seizures(subject)
+        if n_sz == 0:
+            print(f"\n=== {subject}  SKIP (no seizures in inventory) ===", flush=True)
+            n_done += 1
+            continue
+        print(
+            f"\n=== {subject}  focal(i)={len(focal)}  n_seizures={n_sz} "
+            f"  [{n_done+1}/{len(subjects)}] ===",
+            flush=True,
+        )
+        per_subject: Dict = {
+            "subject": subject,
+            "n_seizures_total": n_sz,
+            "focal_channels": sorted(focal),
+            "per_er": {},
+        }
+        t_sub = time.time()
+        per_er = _run_subject_all_ers(subject, n_seizures=n_sz, er_configs=ER_CONFIGS)
+        per_subject["per_er"] = per_er
+        elapsed = time.time() - t_sub
+        for er_key, rec in per_er.items():
+            print(
+                f"  [{er_key}] ok={rec.get('n_seizures_ok')} "
+                f"bi={rec.get('n_seizures_baseline_invalid')} "
+                f"tied={rec.get('n_seizures_onset_tied')} "
+                f"ur={rec.get('n_seizures_onset_unreached')} "
+                f"s_sz={rec.get('s_sz')} λ={rec.get('lambda')}",
+                flush=True,
+            )
+
+        v2_2 = _build_v2_2_tags(per_subject)
+        per_subject.update(v2_2)
+        with out_path.open("w") as f:
+            json.dump(per_subject, f, indent=2, default=_json_default)
+        for er_key in ("gamma_ER", "broad_ER"):
+            if er_key in per_subject["producer_health"]:
+                ph = per_subject["producer_health"][er_key]
+                cc = per_subject["clinical_concordance"][er_key]
+                print(f"  [{er_key}] producer_health={ph}  clinical_concordance={cc}", flush=True)
+        print(f"  total subject elapsed: {elapsed:.1f}s  → {out_path}", flush=True)
+        n_done += 1
+        n_new += 1
+
+    elapsed_total = time.time() - t_start
+    print(
+        f"\n[cohort] DONE — {n_done}/{len(subjects)} subjects "
+        f"({n_new} newly computed, {n_skipped} skip_existing) "
+        f"in {elapsed_total/60:.1f} min",
+        flush=True,
+    )
+    _write_cohort_summary(out_dir)
+    return 0
+
+
+def _write_cohort_summary(out_dir: Path) -> None:
+    """Build cohort_summary.json from per-subject JSONs in ``out_dir``."""
+    rows: List[Dict] = []
+    for path in sorted(out_dir.glob("*.json")):
+        if path.name == "cohort_summary.json":
+            continue
+        try:
+            d = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if "producer_health" not in d:
+            continue
+        rows.append(d)
+
+    n_subjects = len(rows)
+    # 2D table: (producer_health × clinical_concordance) per ER config
+    table: Dict[str, Dict[Tuple[str, str], int]] = {
+        "gamma_ER": {},
+        "broad_ER": {},
+    }
+    lambda_cap_count = {"gamma_ER": 0, "broad_ER": 0}
+    producer_fail_subjects = {"gamma_ER": [], "broad_ER": []}
+    for d in rows:
+        for er_key in ("gamma_ER", "broad_ER"):
+            if er_key not in d.get("producer_health", {}):
+                continue
+            ph = d["producer_health"][er_key]
+            cc = d["clinical_concordance"][er_key]
+            key = (ph, cc)
+            table[er_key][key] = table[er_key].get(key, 0) + 1
+            rec = d.get("per_er", {}).get(er_key, {})
+            lam = rec.get("lambda")
+            if isinstance(lam, (int, float)) and lam >= 100.0:
+                lambda_cap_count[er_key] += 1
+            if ph in ("insufficient", "unstable"):
+                producer_fail_subjects[er_key].append(d["subject"])
+
+    # Convert tuple keys to strings for JSON
+    table_serializable = {
+        er_key: {f"{ph}|{cc}": cnt for (ph, cc), cnt in cells.items()}
+        for er_key, cells in table.items()
+    }
+
+    _, excluded = _cohort_subject_list()
+    summary = {
+        "step": "Layer A Step A.4 cohort summary (v2.2)",
+        "schema_version": "pr_t3_1_layer_a_v2_2",
+        "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "n_subjects": n_subjects,
+        "subjects": [d["subject"] for d in rows],
+        "excluded_subjects": {
+            "list": excluded,
+            "reason": "extract_seizure_window in src/ictal_onset_extraction.py:273 only supports dataset='epilepsiae'; yuquan SeizureWindow extractor is a separate future PR",
+        },
+        "two_d_distribution": table_serializable,
+        "lambda_cap_count": lambda_cap_count,
+        "producer_fail_subjects": producer_fail_subjects,
+    }
+    summary_path = out_dir / "cohort_summary.json"
+    with summary_path.open("w") as f:
+        json.dump(summary, f, indent=2, default=_json_default)
+    print(f"\n[cohort] summary → {summary_path}", flush=True)
+    print(f"[cohort] (producer_health, clinical_concordance) 2D table:", flush=True)
+    for er_key in ("gamma_ER", "broad_ER"):
+        print(f"  {er_key}:", flush=True)
+        for key, cnt in sorted(table_serializable[er_key].items()):
+            print(f"    {key:<40} {cnt}", flush=True)
+    print(
+        f"[cohort] λ-cap count (cells with λ>=100): "
+        f"gamma={lambda_cap_count['gamma_ER']} broad={lambda_cap_count['broad_ER']}",
+        flush=True,
+    )
+
+
+def _check_sentinel_unblock() -> bool:
+    """Read sanity_report.json; return next_step_unblocked flag."""
+    sanity_path = SENTINEL_OUT_DIR / "sanity_report.json"
+    if not sanity_path.exists():
+        return False
+    try:
+        d = json.loads(sanity_path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    return bool(d.get("next_step_unblocked"))
+
+
 def _json_default(obj):
     if isinstance(obj, (np.integer,)):
         return int(obj)
@@ -689,18 +932,46 @@ def main() -> int:
     )
     parser.add_argument(
         "--per-subject", action="store_true",
-        help="Cohort run (Step A.4). Blocked until sentinel passes.",
+        help="Cohort run (Step A.4). Blocked until sentinel sanity passes.",
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=SENTINEL_OUT_DIR,
-        help="Output directory (default: %(default)s).",
+        "--cohort-summary-only", action="store_true",
+        help="(Re)build cohort_summary.json from existing per-subject JSONs.",
+    )
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Skip sentinel-unblock check before cohort run.",
+    )
+    parser.add_argument(
+        "--no-skip-existing", action="store_true",
+        help="Re-run subjects even if a v2.2-schema per-subject JSON exists.",
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, default=None,
+        help="Output dir override (sentinel default: %(default)s; cohort default: per_subject/).",
     )
     args = parser.parse_args()
 
     if args.sentinel:
-        return _run_sentinel(args.output_dir)
+        out_dir = args.output_dir or SENTINEL_OUT_DIR
+        return _run_sentinel(out_dir)
+
     if args.per_subject:
-        raise NotImplementedError("Step A.4 cohort run not yet implemented")
+        out_dir = args.output_dir or COHORT_OUT_DIR
+        if not args.force and not _check_sentinel_unblock():
+            print(
+                "[cohort] BLOCKED — sentinel sanity_report.json missing or "
+                "next_step_unblocked=False. Run --sentinel first or pass --force.",
+                flush=True,
+            )
+            return 1
+        return _run_cohort(out_dir, skip_existing=not args.no_skip_existing)
+
+    if args.cohort_summary_only:
+        out_dir = args.output_dir or COHORT_OUT_DIR
+        _write_cohort_summary(out_dir)
+        return 0
+
     parser.print_help()
     return 1
 
