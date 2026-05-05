@@ -2,6 +2,7 @@
 
 > 状态：**Epilepsiae 基础设施已解锁** — 2026-04-15 更新
 > 范围：只讨论慢调制和时序差异在空间上发生在哪里，尤其是 SOZ / non-SOZ 的分离。
+> **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + BHPN-toy/fit + 5 dumb baselines + 失败模式）。本 topic 的 PR-T3-1（数据驱动 SOZ audit）+ PR-8 v2（与 Topic 1 桥接的 endpoint anatomical anchoring）受 framework 中 P4 prediction 统辖；PR-T3-1 verdict 决定 P4 的 multi-source SOZ 协同检验如何落地。
 
 ---
 
@@ -23,7 +24,8 @@
 
 ## 2. 一句话当前结论
 
-lagPat 群体事件框架中的 SOZ / non-SOZ 对比被结构性选择偏差严重污染。转到 per-channel relaxed-refine 后，raw serial correlation 的 SOZ 优势基本消失；更可信的信号是：**SOZ 通道在全局慢调制之上，可能额外保留了更强的局部短程记忆。**
+- **Paper 1 framework（SBA）下的 Topic 3 角色**：本 topic 承担 P4 prediction（attractor 角色节点解剖锚定多源 SOZ proxy），通过 PR-T3-1（数据驱动 SOZ audit）+ PR-8 v2（held-out + multi-source SOZ）联合检验。Framework + 锁定的 PASS/NULL/FAIL 判据见 `docs/paper1_framework_sba.md` §5.4。
+- lagPat 群体事件框架中的 SOZ / non-SOZ 对比被结构性选择偏差严重污染。转到 per-channel relaxed-refine 后，raw serial correlation 的 SOZ 优势基本消失；更可信的信号是：**SOZ 通道在全局慢调制之上，可能额外保留了更强的局部短程记忆。**
 
 跨数据集 SOZ-AUC 验证证实新 pipeline 的检测质量与老论文一致：Yuquan refined AUC 0.874（老论文 0.857），Epilepsiae refined AUC 0.952。
 
@@ -275,6 +277,7 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 
 ## 10. 历史文档索引
 
+- `docs/paper1_framework_sba.md` — **Paper 1 架构性 framework（最高优先级 pre-registration）**：本 topic 在 Paper 1 中承担 P4 prediction（attractor 角色节点解剖锚定多源 SOZ proxy）；PR-T3-1 / PR-8 v2 直接受其统辖。
 - `docs/archive/topic3/spatial_modulation_soz_analysis.md`
   - 保留完整的计划、执行过程、基础设施与阶段结果
 - `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`

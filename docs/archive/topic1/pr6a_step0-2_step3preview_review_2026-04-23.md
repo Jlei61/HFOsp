@@ -27,7 +27,7 @@
   - `<60s` baseline-invalid，不回退 legacy `[−300, −60]`
 - `tests/test_pr6a_ictal_onset.py`
   - baseline clip / invalid / preview 原语单测
-- `scripts/sentinel_pr6a_step2.py`
+- `scripts/archive/topic1/sentinel_pr6a_step2.py`
   - raw panel + 单一 `cluster1` 风格 ER panel + heatmap
   - `[-200, 200]s` 可视化
   - `High-HI index` / `High-HI ∩ ictal` 语义层
@@ -40,7 +40,7 @@
   - `resolve_detection_window()`
   - `detect_er_onset_preview()`
   - `preview_threshold_from_baseline()`
-- `scripts/sentinel_t_er_onset_preview.py`
+- `scripts/archive/topic3/sentinel_t_er_onset_preview.py`
   - 对 `548/916`、`gamma_ER+broad_ER` 导出 per-channel `t_ER_onset`
 - `results/seizure_onset/er_onset_preview/`
   - `sentinel_t_er_onset_preview.csv`

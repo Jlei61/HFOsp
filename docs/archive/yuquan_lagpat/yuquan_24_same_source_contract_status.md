@@ -37,7 +37,7 @@ detector level (≈ +7.5 ms global onset shift, 0.2% tight match) and is
 explicitly excluded from the Track A detector-equivalence claim. See
 `dual_track_audit_2026-04-26.md` §2.5 for full evidence.
 
-`scripts/_phaseE2_run_packing.sh --list` prints this list at runtime
+`scripts/archive/yuquan_lagpat/_phaseE2_run_packing.sh --list` prints this list at runtime
 (updated to reflect the corrected cohort split).
 
 ## What changed in this closure pass
@@ -95,7 +95,7 @@ explicitly excluded from the Track A detector-equivalence claim. See
 
 ### 5. `scale-to-24-yuquan`
 
-- `scripts/_phaseE2_run_packing.sh` now drives off
+- `scripts/archive/yuquan_lagpat/_phaseE2_run_packing.sh` now drives off
   `YUQUAN_SAME_SOURCE_SUBJECTS` (21 subjects), supports `DRY_RUN=1` /
   `ONLY_SUBJECTS="..."` env vars, continues past per-subject failure but
   exits non-zero on any failure, and supports `--list` for inspection.
@@ -292,7 +292,7 @@ operational, not structural:
 2. Run the full 21-subject batch in production mode:
 
    ```bash
-   bash scripts/_phaseE2_run_packing.sh
+   bash scripts/archive/yuquan_lagpat/_phaseE2_run_packing.sh
    ```
 
    This will write to each subject's raw EDF dir (with `.legacy_backup/`

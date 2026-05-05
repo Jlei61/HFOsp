@@ -2,6 +2,7 @@
 
 > 状态：当前正式入口
 > 范围：只讨论单个间期群体事件内部的时序组织，包括传播刻板性与事件级同步性。
+> **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + BHPN-toy/fit + 5 dumb baselines + 失败模式）。本 topic 的 PR-2 / PR-2.5 / PR-6 / PR-7 / 待立 PR-T4-1/T4-2/9 全部受该框架统辖；任何与 framework 中已 lock 的 prediction 判据冲突的修改必须先改 framework。
 
 ---
 
@@ -21,6 +22,7 @@
 
 ## 2. 一句话当前结论
 
+- **Paper 1 framework（SBA, v1.1.2 lock 2026-04-30 / PR-7 addendum 2026-05-01）**：单核心假设 + 5 sharp predictions（P1 时间稳定 / P2 共享几何骨架 / P3 短窗 mark-independent cohort-level TOST equivalence / P4 解剖锚定 / P5 间期→发作 directionality）；**P1 + P2 PASS**（PR-2.5 / PR-6 Step 4b），**P3 INCONCLUSIVE-locked**（PR-7 addendum 完成：1800s window + lag1_same_excess null-relative 干净 PASS；10/30/60s + run_length_lift cohort CI underpowered at n=6 with structural outliers；SBA 不被 falsified；写法限定 "compatible with mark-independent within tested precision"，禁止写 PASS）；P4–P5 待执行（PR-T3-1 → PR-8 v2 / 新立 PR-9，directional predictor `D_ij = sin(φ_j*−φ_i*)`，**不**用 cos-based A_ij）。Toy model BHPN-toy（s_rate(t) 与 ε_id 两过程统计独立；T3 验证走 large-N simulation 而非 PR-7 anchor）+ fitted BHPN-fit（仅 aggregate + conditional predictions）+ 5 dumb baseline 设计 lock 在 `docs/paper1_framework_sba.md`。详见 `docs/archive/topic1/pr7_addendum_p3_equivalence_2026-05-01.md`。
 - **传播刻板性**：内部传播真实存在但不是单一模板；`k=2` 是主导压缩，少数 subject 有 `k=4`/`k=6` 多模态；模板在 split-half / blockwise 上 `23/30 strong` + `7/30 moderate` + `0 weak`。Identity-bias 在簇内高达 86%，必须并列报告 raw 与 centered。
 - **慢调制（PR-4B）**：模板混合（L1）与模板内顺序一致性（L2）cohort 全 null；模板内相对时延结构（L3）在全 cohort 上证据不足，仅在 8 个高置信子集（`dom_r > 0.7`）的 Pearson r 上探索性显著（p=0.016, 7/8）。详见 `docs/archive/topic1/interictal_group_event_internal_propagation.md`。
 - **发作邻近（PR-4C）**：propagation pattern 五指标 cohort Wilcoxon 在主+辅两配置下均 null（主 1/15 / 辅 1/15 名义显著且跨配置不一致）→ **模板内部几何无稳健发作邻近调制，正式封板为阴性**。唯一稳健信号在 `rate_by_template`（post_ictal vs baseline 主 p=0.0009、辅 p=0.0067）。详见 `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` §9。
@@ -249,7 +251,7 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 - 高对称 subject `dom_agreement < 0.5`（main 7 / aux 5）按 sensitivity gate `medium` 判读路径，不剔除
 - share 与 absolute rate 数学耦合 → 机制层不展开，留未来模型层（§7.9）
 
-**与 PR-4C / PR-4D 的边界**：PR-4C 五指标几何 cohort null 保持封板；PR-4D `rate×type` 描述层保持原状。PR-5 不涉及 SOZ 解剖锚定（属于 Topic 3 §7 独立 P1 候选）。PR-4 PPT panel d（`scripts/plot_topic1_pr4_ppt.py` fig 2d）已在 `docs/topic1_pr4_ppt_figures.md` 与 archive plan §6 同步降级为"历史 motivation / 描述层"，正式归属一律指向 §4.5。
+**与 PR-4C / PR-4D 的边界**：PR-4C 五指标几何 cohort null 保持封板；PR-4D `rate×type` 描述层保持原状。PR-5 不涉及 SOZ 解剖锚定（属于 Topic 3 §7 独立 P1 候选）。PR-4 PPT panel d（`scripts/plot_topic1_pr4_ppt.py` fig 2d）已在 `docs/archive/topic1/topic1_pr4_ppt_figures.md` 与 archive plan §6 同步降级为"历史 motivation / 描述层"，正式归属一律指向 §4.5。
 
 **验收意见（2026-04-20）**：
 
@@ -417,6 +419,9 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 
 ## 10. 历史文档索引
 
+- `docs/paper1_framework_sba.md` — **Paper 1 架构性 framework（最高优先级 pre-registration）**：SBA 单核心假设 + 5 sharp predictions（P1–P5）+ BHPN-toy/fit 数学合同 + 5 dumb baseline + 失败模式表 + 命名/范围/Out of scope。本 topic 的 PR-2 / PR-2.5 / PR-6 / PR-7 / 待立 PR-T4-1/T4-2 / PR-9 全部受其统辖。
+- `docs/archive/topic1/pr7_addendum_p3_equivalence_2026-05-01.md` — PR-7 addendum：P3 cohort-level equivalence test (TOST + bootstrap CI + leave-one-out + leave-548-out)。verdict = INCONCLUSIVE；1800s + lag1_same_excess PASS，短窗 + run_length_lift CI underpowered。SBA 不被 falsified。
+- `docs/archive/topic1/pr_t4_1_bhpn_toy_plan_2026-05-01.md` — **PR-T4-1 BHPN-toy plan-of-record**（继承 framework v1.1.2）：toy model 实现 + 14 项 TDD + T1–T7 内部 sanity（large-N simulation, **不**以 PR-7 实证 cohort 为 anchor）+ TT14 toy-validate framework δ_excess scientific 推理。下游 PR-T4-2 BHPN-fit 等 PR-T4-1 + PR-T3-1 完成后启动。
 - `docs/archive/topic1/interictal_group_event_internal_propagation.md` — 内部传播线的详细结果与合同文档
 - `docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md` — PR4–PR6 的统计报告
 - `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` — PR-4C 主+辅助配置全量审阅。§1-§8 是 2026-04-17 第一轮审阅（cohort 数值表 / 三处实现合同问题 / P0/P1/P2/P3 路线）；**§9 是 2026-04-19 P0 修复完成后的复跑数值与正式封板结论**。Topic 1 §3.1c / §5 / §7.2 / §7.6 / §7.7 都引用本文件。
@@ -437,4 +442,4 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 
 ## 11. 文档整理里程碑
 
-- **2026-04-20**：主文档大幅瘦身（442 行 → ~270 行），按"主文档只放正式口径，过程性细节回链 archive"原则重写。所有 §-锚点保留；PR-4B / PR-4C / PR-5 的完整数值表、阈值、metric 公式、测试合同、复跑过程已下沉到对应 archive。同步把 `docs/plans/` 下已完成的 yuquan_lagpat 系列（6 个文件）归档到 `docs/archive/yuquan_lagpat/`，event_periodicity Phase 2 plan 归档到 `docs/archive/topic2/plans/`；`interictal_synchrony_analysis_v4.plan.md` 仍有 pending 项，保留在 `docs/plans/`。
+- **2026-04-20**：主文档大幅瘦身（442 行 → ~270 行），按"主文档只放正式口径，过程性细节回链 archive"原则重写。所有 §-锚点保留；PR-4B / PR-4C / PR-5 的完整数值表、阈值、metric 公式、测试合同、复跑过程已下沉到对应 archive。同步把 `docs/plans/` 下已完成的 yuquan_lagpat 系列（6 个文件）归档到 `docs/archive/yuquan_lagpat/`，event_periodicity Phase 2 plan 归档到 `docs/archive/topic2/plans/`；`interictal_synchrony_analysis_v4.plan.md` 仍有 pending 项，2026-05-05 整体迁入 `docs/archive/topic1/plans/`。

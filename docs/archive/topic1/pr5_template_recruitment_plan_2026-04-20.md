@@ -288,7 +288,7 @@ PR-4C `rate_by_template` 已经看到主 + 辅两配置都给出 `post > baselin
 - PR-4D `rate×type` 描述层保持原状；PR-5-B 是把其中"哪个模板被招募更多"的次级信号尝试正式化为 Topic 1 × Topic 2 桥接结论，不替代 PR-4D 的描述图。
 - PR-5-B 的 rate summary **不直接复用 PR-4C 原始 all-event `rate_by_template` 数值**；它只复用 PR-4C 的 windows / usability / coverage 合同，并在与 PR-5-A 相同的 gate-eligible 事件池上重算。
 - PR-5 不涉及 SOZ 解剖锚定（那条线属于 Topic 3 §7，独立 P1 候选，与本 PR 并行）。
-- PR-4 PPT 图（`scripts/plot_topic1_pr4_ppt.py` 输出 + `docs/topic1_pr4_ppt_figures.md` 注释）只保留为 §4.5 secondary composition diagnostic 的**历史 motivation / 补充现象**层；panel d 的 cohort 26 个 ρ 与 Wilcoxon p=0.041 不再被引用为正式结论，正式口径以 §4.5 离散三段窗口的 subject-level paired Wilcoxon 为准。任何后续涉及 dominant share 的论述必须引用 §4.5 的 `composition_diagnostic` 字段，禁止跨文件二次解读 panel d 数值。
+- PR-4 PPT 图（`scripts/plot_topic1_pr4_ppt.py` 输出 + `docs/archive/topic1/topic1_pr4_ppt_figures.md` 注释）只保留为 §4.5 secondary composition diagnostic 的**历史 motivation / 补充现象**层；panel d 的 cohort 26 个 ρ 与 Wilcoxon p=0.041 不再被引用为正式结论，正式口径以 §4.5 离散三段窗口的 subject-level paired Wilcoxon 为准。任何后续涉及 dominant share 的论述必须引用 §4.5 的 `composition_diagnostic` 字段，禁止跨文件二次解读 panel d 数值。
 
 ---
 

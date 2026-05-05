@@ -95,6 +95,30 @@ SENTINEL_COHORT = [
 OUT_DIR = _PROJECT_ROOT / "results" / "interictal_propagation" / "ictal_alignment" / "_sentinel_step2"
 
 
+def _discover_full_cohort() -> List[Dict[str, str]]:
+    """All Epilepsiae subjects with a PR-1 per-subject JSON.
+
+    `extract_seizure_window` only supports Epilepsiae, so Yuquan subjects are
+    excluded. Sentinel ordering is preserved: 548, 916 first, the rest sorted.
+    """
+
+    ps_dir = _PROJECT_ROOT / "results" / "interictal_propagation" / "per_subject"
+    sids = sorted(
+        p.stem.removeprefix("epilepsiae_")
+        for p in ps_dir.glob("epilepsiae_*.json")
+    )
+    sentinel_sids = ["548", "916"]
+    ordered = [s for s in sentinel_sids if s in sids] + [s for s in sids if s not in sentinel_sids]
+    return [
+        {
+            "key": f"cohort_{sid}",
+            "subject": f"epilepsiae/{sid}",
+            "rationale": "PR-6-A full-cohort backfill (Epilepsiae per_subject JSON present)",
+        }
+        for sid in ordered
+    ]
+
+
 def _load_focus_rel() -> dict:
     path = _PROJECT_ROOT / "results" / "epilepsiae_electrode_focus_rel.json"
     with open(path, "r", encoding="utf-8") as fh:
@@ -794,20 +818,52 @@ def main() -> int:
                         help="Skip seizures whose pre/post window crosses block boundary; try up to this many")
     parser.add_argument("--pre-sec", type=float, default=300.0)
     parser.add_argument("--post-sec", type=float, default=300.0)
+    parser.add_argument(
+        "--cohort",
+        choices=("sentinel", "full"),
+        default="sentinel",
+        help="`sentinel` (default) keeps the original 548/916 sentinel pair; "
+        "`full` runs every Epilepsiae subject with a PR-1 per_subject JSON.",
+    )
+    parser.add_argument(
+        "--subjects",
+        nargs="*",
+        default=None,
+        help="Optional explicit Epilepsiae subject IDs (e.g. 442 583); "
+        "intersects the chosen cohort. Useful for resuming an interrupted run.",
+    )
     args = parser.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     focus_rel = _load_focus_rel()
 
+    if args.cohort == "full":
+        cohort = _discover_full_cohort()
+        step_label = "PR-6-A Step 2 full-cohort ER + baseline z-score backfill"
+        summary_path = OUT_DIR / "step2_full_cohort_summary.json"
+    else:
+        cohort = SENTINEL_COHORT
+        step_label = "PR-6-A Step 2 sentinel ER + baseline z-score visual inspection"
+        summary_path = OUT_DIR / "sentinel_step2_summary.json"
+
+    if args.subjects:
+        keep = set(args.subjects)
+        cohort = [c for c in cohort if c["subject"].split("/", 1)[1] in keep]
+        if not cohort:
+            raise SystemExit(f"--subjects {args.subjects} matched nothing in cohort={args.cohort}")
+        summary_path = summary_path.with_name(summary_path.stem + "_subset.json")
+
     summary = {
-        "step": "PR-6-A Step 2 sentinel ER + baseline z-score visual inspection",
+        "step": step_label,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "cohort_mode": args.cohort,
+        "n_subjects": len(cohort),
         "sentinels": [],
     }
 
     bands = (GAMMA_ER_BANDS, BROAD_ER_BANDS)
 
-    for sentinel in SENTINEL_COHORT:
+    for sentinel in cohort:
         subj = sentinel["subject"]
         focal_set = set(_focal_channels(subj, focus_rel))
         lagpat_channels, clusters = _load_lagpat(subj)
@@ -948,7 +1004,6 @@ def main() -> int:
 
         summary["sentinels"].append(sentinel_log)
 
-    summary_path = OUT_DIR / "sentinel_step2_summary.json"
     with open(summary_path, "w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=2, ensure_ascii=False)
     print(f"\nSummary -> {summary_path}")
