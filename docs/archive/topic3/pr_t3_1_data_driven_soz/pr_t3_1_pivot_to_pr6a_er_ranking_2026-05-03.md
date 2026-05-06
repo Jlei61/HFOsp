@@ -210,13 +210,19 @@ Layer A 在跑 cohort 前先在 sentinel 上目视检查：
 
 #### 3.4.2 clinical-concordance diagnostic（仅作元数据，**不**作 gate）
 
-每个 (subject × ER config) 单独判定，写入 `per_subject JSON.clinical_concordance.<er>` 字段、写入 atlas，但**不参与** A.4 / B.x 任何流程门：
+每个 (subject × ER config) 单独判定，写入 `per_subject JSON.clinical_concordance.<er>` 字段、写入 atlas，但**不参与** A.4 / B.x 任何流程门。
 
-| tag | 条件 |
+**统计契约（v2.2.2 doc-fix, 2026-05-06）**：
+
+- 实测使用 **Mann-Whitney U one-sided** (focal stochastically less than nonfocal)，scipy `mannwhitneyu(focal, nonfocal, alternative="less")`。这是 rank-sum 家族对 two-independent-samples 的标准实现；早期 plan 文字写 "Wilcoxon" 是 loose 用语，rank-sum 与 Mann-Whitney U 数值等价。
+- "focal r_sz 中位数 < nonfocal" 不是独立 AND 子句，而是 one-sided "less" alternative 的隐含结论（拒绝 H0 = stochastic dominance，通常对应 median 偏移）。**实现**只检验 2 条 AND，不强制 median 子句。
+- top-K 选择 v2.2.2 改为 **tie-inclusive**：当第 K 名的 r_sz 与第 K+1 名相同时，所有同 rank channel 全部纳入；返回 size 可 > K，并在 details 中带 `boundary_tie_inclusive: bool` 标志。早期 v2.2.1 用 alphabetical 二级排序是工程确定性 hack，让 channel 名字决定科学分类（548 gamma 因此从 partial 变 concordant）；v2.2.2 改为 inclusive 后 548 gamma 回归 partial（focal_in_topk=3, topk_total=11, 3/11≈27.3% < 30%）。
+
+| tag | 实测条件（per ER config）|
 |---|---|
-| `concordant` | focal r_sz 中位数 < nonfocal AND Wilcoxon one-sided `p < 0.1` AND focal 在 top-10 中 ≥ 30% |
-| `partial` | 上述三条只满足两条，或 ≥ 30% top-10 由 focal strip 邻接 channel 占据 |
-| `discordant` | Wilcoxon `p ≥ 0.1` AND focal 在 top-10 占比 < 30% |
+| `concordant` | `MWU p < 0.1` **AND** `focal_in_topk_count / topk_total ≥ 0.3`（topk_total 是 tie-inclusive 后的实际大小）|
+| `partial` | 上述两条只满足一条 |
+| `discordant` | 两条都不满足 |
 | `not_assessable` | r_sz 中 focal channel < 2 或 nonfocal channel < 2，或 producer_health = `insufficient` |
 
 理由：clinical i-label 与 ER-rank 都是 proxy；二者不一致**不**等于任一方错。两套 proxy 的 disagreement 本身是 cohort-level 的科学问题，不能在 sentinel gate 上一票判决。下游 PR / Layer B 用 data-driven label 时**必须**同时携带 `clinical_concordance` tag，避免下游默认 "data-driven SOZ ≈ clinical SOZ"。
@@ -469,18 +475,46 @@ cohort 报告：`enrichment` 中位数 + IQR + 直方图 per (ER_config × stabi
 - 仅 broad 通过、gamma 不通过 → broad 单独进 Layer B；archive 注明
 - 仅 gamma 通过、broad 不通过 → archive 警告 "data-driven SOZ HFO-independence 不充分"，但 Layer B 仍可输出 gamma 标签供下游评估（下游必须知情）
 
-### 6.3 Layer B 启动 prerequisites（v2.2 重写 — 加 cohort 分布人工审核步）
+### 6.3 Layer B 启动 prerequisites + 准入策略（v2.2.2 锁定 — 2026-05-06）
 
 Layer B Step B.1 之前必须 check：
 
-- [ ] Layer A 跑完 cohort（all audit_eligible 24 + sentinel）
-- [ ] Layer A sentinel `producer_health` 至少 1 cell `stable`（v2.2 替代旧 sentinel sanity；§3.4.1）
-- [ ] **新加 v2.2**：cohort 全 24+2 subject × 2 ER config 共 52 cell 的 `(producer_health, clinical_concordance)` 二维分布人工审核完毕，审核结论归档到 `docs/archive/topic3/pr_t3_1_data_driven_soz/per_subject_ictal_er_atlas.md` 末尾的 cohort summary 章节
-- [ ] **新加 v2.2**：Layer B 准入策略明文写入 atlas（如 "(stable + moderate) × all concordance 进 label，(unstable, concordant) 进 sensitivity-only label，其它 drop"，具体阈值由 cohort 分布决定）
-- [ ] §6.2 abort 条件未触发
+- [x] Layer A 跑完 cohort（v2.2: 16 epilepsiae，9 yuquan 暂 excluded，详见 §6.1）
+- [x] Layer A sentinel `producer_health` 至少 1 cell `stable`（916 gamma；v2.2 替代旧 sentinel sanity；§3.4.1）
+- [x] cohort 32 cell（16 subject × 2 ER）的 `(producer_health, clinical_concordance)` 二维分布人工审核完毕，记录在 `docs/archive/topic3/pr_t3_1_data_driven_soz/per_subject_ictal_er_atlas.md`
+- [x] **v2.2.2 锁定 γ_a 准入策略**（详见下方）
+- [ ] §6.2 abort 条件未触发（cohort 16 cell 中 1 stable + 1 moderate gamma；1 stable + 3 moderate broad → 双 ER 都至少 1 cell 进主标签 → not aborted）
 - [ ] Layer A 输出的 per-subject JSON schema 通过 §3.5 schema 校验
 
-**v2.2 关键变化**：cohort run 完成 ≠ Layer B 自动启动。Layer B 准入策略必须基于 cohort-level `producer_health` 分布事后决定，**不**事先在本 plan 写死阈值。理由：sentinel 实跑显示 (548 unstable + 916 stable) 这种"一边稳一边不稳"的混合模式可能在 cohort 中常见；事先按 v2.1 的 §6.1/§6.2 thresholds (n>=5 strict cohort 之类) 走可能出现 cohort 不到 5 个 stable subject 但 producer 在多 subject 上确实有用的合法 case。
+#### 6.3.1 Layer B 准入策略（v2.2.2 γ_a，锁定）
+
+**核心原则（重申 v2.2 metadata-only 合同）**：`producer_health` 决定 cell 进不进 Layer B；`clinical_concordance` **不**作 gate，但每个进入的 label 必须**强制携带** cc tag，让下游 PR 看到 concordance 状态自行决定是否信任。
+
+| 准入分层 | 入选条件（per ER, per subject）|
+|---|---|
+| **primary**（主标签）| `producer_health ∈ {stable, moderate}`，**不论** clinical_concordance |
+| **sensitivity**（敏感性标签）| `producer_health == "unstable"` **AND** `clinical_concordance == "concordant"`（producer 内部不稳但 median 仍偏向 clinical SOZ；当作探索 case 报，不当主结论）|
+| **drop**（不进 Layer B）| `producer_health == "insufficient"`（n_ok<3，无法形成可靠 r_sz），或 `producer_health == "unstable"` 且 cc ∈ {discordant, partial, not_assessable}（producer 不稳且无 clinical 一致信号）|
+
+**实测 cohort（16 subject × 2 ER = 32 cell）应用结果**：
+
+| ER | primary | sensitivity | drop |
+|---|---|---|---|
+| gamma_ER | 2 cells (916 stable+discordant, 583 moderate+concordant) | 1 cell (958 unstable+concordant) | 13 cells (含 1 partial 590, 1 concordant 548 ← 见下方 v2.2.2 校正) |
+| broad_ER | 4 cells (583 stable+concordant, 139 moderate+concordant, 253 moderate+discordant, 1084 moderate+not_assessable) | 4 cells (548, 590, 635, 922 unstable+concordant) | 8 cells |
+
+**v2.2.2 校正**：548 gamma 在 v2.2.1 alphabetical fix 下被错标 concordant，v2.2.2 tie-inclusive 改回 partial（focal_in_topk=3, topk_total=11 due to 14.5 boundary tie；3/11<0.3）→ 548 gamma 现在落入 drop（unstable+partial）。这只影响 548 gamma 一个 cell；548 broad 仍是 sensitivity (unstable+concordant)。
+
+**Layer B 输出 JSON 数量（v2.2 §3.8 锁定 4 份）**：
+
+- `data_driven_soz_core_channels_gamma_ER_primary.json`：2 subjects（916, 583），每个 entry 携带其 cc tag
+- `data_driven_soz_core_channels_gamma_ER_sensitivity.json`：1 subject（958）
+- `data_driven_soz_core_channels_broad_ER_primary.json`：4 subjects
+- `data_driven_soz_core_channels_broad_ER_sensitivity.json`：4 subjects
+
+每个 subject entry schema：`{channels: [...], producer_health: ..., clinical_concordance: ..., n_ok: ..., s_sz: ..., topk_total: ..., boundary_tie_inclusive: ...}`。
+
+**下游 PR 使用合同**：dual-label loader 必须 expose 上述 metadata，下游 PR 写"用 data-driven SOZ"时**必须**说明用的是 primary 还是 sensitivity，且**不能**默认 data-driven == clinical（916 gamma stable+**discordant** 是反例：data-driven SOZ 与 clinical i-label 显著不一致但 producer 内部高度可重复）。
 
 如果 Layer A 没 ready / cohort 分布显示 producer 在多数 subject 上 unusable，Layer B Step B.x 全部阻塞；写 archive note 说明阻塞原因，**不**伪造 label JSON。
 
@@ -695,9 +729,9 @@ Layer B Step B.1 之前必须 check：
 | A15 | `test_layer_a_drop_below_stability_threshold` | s_sz_gamma=0.29 AND s_sz_broad=0.29 → cohort_assignment=dropped |
 | A16 | `test_layer_a_relaxed_cohort_threshold_0_3` | s_sz=0.3 → relaxed； s_sz=0.49 → relaxed； s_sz=0.5 → strict |
 | A17 | `test_layer_a_seizure_drop_propagates_to_r_sz` | onset_tied / onset_unreached / baseline_invalid 的 seizure 不进 median rank |
-| A18 | `test_classify_producer_health_thresholds` | **v2.2 (2026-05-04)**：`classify_producer_health(n_ok, s_sz, top10_cov_list)` 在 4 个分支临界点正确分类——n_ok=2 → insufficient；n_ok=3 + s_sz=0.49 + top10_cov OK → moderate；n_ok=3 + s_sz=0.5 + top10_cov OK → stable；n_ok=3 + s_sz=0.29 + top10_cov OK → unstable；top-10 cov < 7 满足时即使 s_sz 高也降一档 |
-| A19 | `test_classify_clinical_concordance_metadata_only` | **v2.2 (2026-05-04)**：`classify_clinical_concordance(focal_rsz, nonfocal_rsz, top10_focal_count)` 在 4 个分支临界点正确分类（concordant / partial / discordant / not_assessable）；并断言该函数纯统计输出，不引用 producer_health 输出**之外**的字段（保证两套 tag 互不蕴含） |
-| A20 | `test_layer_a_orchestrator_emits_v2_2_tag_fields` | **v2.2 (2026-05-04)**：per-subject JSON 含 `producer_health.{gamma_ER, broad_ER, details}` 与 `clinical_concordance.{gamma_ER, broad_ER, details}` 两个 schema block，每 ER 4 档 tag 必须为 §3.4.1 / §3.4.2 之一 |
+| A18 | `test_classify_producer_health_thresholds` | **v2.2.2 (2026-05-06)**：`classify_producer_health(n_ok, s_sz, topk_cov_pass_count, topk_total, ...)` 在 4 个分支临界点正确分类。Cov 判据从 v2.2.1 的"absolute count ≥ 7"改为 v2.2.2 的 **fraction-based "topk_cov_pass_count / topk_total ≥ 0.7"**，配合 tie-inclusive top-K 的可变 topk_total（boundary tie 时可 > 10），仍正确判定 stable/moderate/unstable/insufficient。专门测试 boundary_tie 拓宽到 12 时 8/12=0.67<0.7 → moderate（同 8/10=0.8 ≥ 0.7 → stable 形成对比）|
+| A19 | `test_classify_clinical_concordance_metadata_only` | **v2.2.2 (2026-05-06)**：`classify_clinical_concordance(mannwhitney_u_p_one_sided, focal_in_topk_count, topk_total, ...)` 在 4 个分支临界点正确分类。统计契约用 **Mann-Whitney U one-sided** (rank-sum 家族；早期 plan/atlas 写 "Wilcoxon" 是 loose 用语)，concordant 判据为 `MWU p < 0.1` AND `focal_in_topk_count / topk_total ≥ 0.3`（topk_total 是 tie-inclusive 后的实际大小，不是固定 10）。"focal median < nonfocal" 不作独立 AND，而是 one-sided "less" alternative 的隐含；并断言该函数纯统计输出，不引用 producer_health 输出**之外**的字段（保证两套 tag 互不蕴含）|
+| A20 | `test_compute_topk_inclusive_*` + `test_layer_a_orchestrator_emits_v2_2_tag_fields` | **v2.2.2 (2026-05-06)**：top-K helpers (`compute_top10_coverage_list`, `compute_focal_in_topk`) 返回 `(values, expanded_due_to_tie)` tuple；当 K-th boundary 有 tie 时所有同 rank channel 全部纳入，`expanded=True`；返回 size 可 > K。集成测试用 548 gamma 真实 fixture（K=10 边界 r_sz=14.5 三 channel tie，含 focal HL8）验证 inclusive set 给出 partial（focal_in_topk=3/topk_total=11，3/11<0.3，MWU p=0.006<0.1，只满足 1 条 → partial）；同 fixture 在 v2.2.1 alphabetical 下错误给出 concordant，证明 v2.2.2 修复了 channel 名字决定科学分类的 bug。per-subject JSON 含 `producer_health.{gamma_ER, broad_ER, details}` 与 `clinical_concordance.{gamma_ER, broad_ER, details}` 两个 schema block + `details.boundary_tie_inclusive: bool` 字段 |
 
 ### Layer B 测试（`tests/test_data_driven_soz_pivot.py`）
 

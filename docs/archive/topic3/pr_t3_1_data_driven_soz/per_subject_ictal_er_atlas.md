@@ -258,7 +258,7 @@ gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, 
 | 139 | 6 | 8 | 4 | 0.08 | unstable | discordant | 0.588 | 2 | 4 | 0.35 | **moderate** | **concordant** | <0.001 | 5 |
 | 253 | 7 | 3 | 5 | -0.15 | unstable | not_assessable | - | - | 5 | 0.38 | **moderate** | discordant | 0.787 | 1 |
 | 442 | 22 | **0** | 16 | 0.37 | unstable | not_assessable | - | - | 16 | 0.45 | unstable | not_assessable | - | - |
-| 548 | 31 | 7 | 15 | 0.16 | unstable | concordant | 0.006 | 3 | 19 | 0.10 | unstable | concordant | 0.012 | 4 |
+| 548 | 31 | 7 | 15 | 0.16 | unstable | partial† | 0.006 | 3/11 | 19 | 0.10 | unstable | concordant | 0.012 | 4/12 |
 | 583 | 23 | 15 | 22 | 0.45 | **moderate** | **concordant** | 0.002 | 8 | 21 | 0.62 | **stable** | **concordant** | 0.001 | 7 |
 | 590 | 13 | 17 | 7 | 0.15 | unstable | partial | 0.075 | 2 | 9 | 0.17 | unstable | concordant | 0.092 | 3 |
 | 635 | 20 | 22 | 10 | 0.03 | unstable | discordant | 0.554 | 2 | 13 | 0.06 | unstable | concordant | <0.001 | 7 |
@@ -266,19 +266,21 @@ gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, 
 | 922 | 30 | 19 | 24 | 0.16 | unstable | discordant | 0.976 | 2 | 25 | 0.13 | unstable | concordant | 0.001 | 6 |
 | 958 | 16 | 21 | 14 | 0.04 | unstable | concordant | 0.078 | 3 | 14 | 0.22 | unstable | partial | 0.012 | 2 |
 
-`g_/b_` = gamma_ER / broad_ER；`n_ok` = 进 r_sz 的 seizure 数；`s_sz` = 跨 seizure 排序中位 Spearman；`ph` = producer_health；`cc` = clinical_concordance；`p` = focal vs nonfocal Wilcoxon one-sided；`ftk` = focal channels 在 top-10 数。**0 标灰**的 subject 临床 SOZ 全为 0（focus_rel 中 i+l+e 全空），cc 自动 not_assessable。
+`g_/b_` = gamma_ER / broad_ER；`n_ok` = 进 r_sz 的 seizure 数；`s_sz` = 跨 seizure 排序中位 Spearman；`ph` = producer_health；`cc` = clinical_concordance；`p` = focal vs nonfocal **Mann-Whitney U** one-sided（注：rank-sum 家族，以前 plan/atlas 写 "Wilcoxon" 是 loose 用语）；`ftk` = focal_in_topk_count / topk_total（v2.2.2 起为 tie-inclusive，tie 边界扩展时 topk_total 可 > 10）。**0 标灰**的 subject 临床 SOZ 全为 0（focus_rel 中 i+l+e 全空），cc 自动 not_assessable。
+
+†548 gamma 在 v2.2.1 alphabetical-tie-break 下被错标 concordant；v2.2.2 改用 tie-inclusive 后回归 partial（topk_total=11，focal=3，3/11≈27.3% < 30%，但 MWU p=0.006<0.1 仍满足）。这正是 reviewer 指出的 "alphabetical 让 channel 名字决定科学分类" 的具体表现。
 
 ### `(producer_health × clinical_concordance)` 二维分布
 
-**gamma_ER（16 cells）**：
+**gamma_ER（16 cells, v2.2.2 tie-inclusive）**：
 
 | ph \ cc | concordant | partial | discordant | not_assessable | 行总 |
 |---|---|---|---|---|---|
 | stable | 0 | 0 | **1** (916) | 0 | 1 |
 | moderate | **1** (583) | 0 | 0 | 0 | 1 |
-| unstable | 2 (548, 958) | 1 (590) | 7 | 4 | 14 |
+| unstable | 1 (958) | 2 (548†, 590) | 7 | 4 | 14 |
 | insufficient | 0 | 0 | 0 | 0 | 0 |
-| **列总** | **3** | **1** | **8** | **4** | **16** |
+| **列总** | **2** | **2** | **8** | **4** | **16** |
 
 **broad_ER（16 cells）**：
 
@@ -304,31 +306,53 @@ gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, 
 7. **`(stable, discordant)` 仅 916 一例**：与本文 916 节的"data-driven r_sz 与 clinical i 标注不一致 但 cohort 内部高度可重复"的现象一致；不是 sentinel-specific 异常，而是 cohort 中可观察但稀有的 case。
 8. **gamma 上 producer health 与 clinical concordance 弱相关**：3 个 concordant 中只有 583 是 moderate；548、958 都 unstable。说明"focal channel 在排序前段"有时**不需要** producer 内部稳定也能 statistically 显示。
 
-### Layer B 准入策略候选（待用户拍板）
+### Layer B 准入策略 — γ_a 锁定（v2.2.2, 2026-05-06）
 
-cohort 16 cells × 2 ER = 32 cells 已落定，需要选一档准入策略明文写入 plan §6.3：
+**核心原则（重申 v2.2 metadata-only 合同）**：`producer_health` 决定 cell 进不进 Layer B；`clinical_concordance` **不**作 gate，但每个进入的 label 必须**强制携带** cc tag，让下游 PR 看到 concordance 状态自行决定是否信任。
 
-| 策略 | per ER 入选条件 | gamma 入选 | broad 入选 | unique 总数 | 评 |
-|---|---|---|---|---|---|
-| **α 严格** | 仅 `stable` | 1 (916) | 1 (583) | **2** | 最防御性；下游样本极少；丢弃所有 moderate 即使 concordant |
-| **β 中度** | `stable` ∪ `moderate` | 2 (916, 583) | 4 (583, 139, 253, 1084) | **5** | 平衡；含 (moderate, concordant) 强信号 + (moderate, not_assessable) 不便对照 |
-| **γ_a 加 sensitivity** | `stable` ∪ `moderate` 进主标签；`(unstable, concordant)` 进 sensitivity | g 主 2 + 敏 2 (548, 958)；b 主 4 + 敏 4 (548, 590, 635, 922) | 8 unique 跨双 ER | 区分主/敏；让下游决定是否纳入；写两套 JSON | 推荐 |
-| **γ_b 全 sufficient** | 所有 `n_ok ≥ 3` cell；带 producer_health tag | gamma 16；broad 14 | 16 unique | 最大覆盖；下游负责按 tag 过滤 | 风险：unstable cells 标签噪声大可能污染下游 |
+> **v2.2.1 → v2.2.2 Layer B 框架修正**：之前 atlas/plan 的 γ_a 条目内部矛盾——一处写"主标签 = stable ∪ moderate"（这会包含 916 stable+discordant、253 moderate+discordant、1084 moderate+not_assessable），另一处又写"discordant/not_assessable 不进 Layer B"。reviewer 指出这是实质性错误：v2.2 合同明文 cc 只是 metadata，cc 不能既当 gate 又当 metadata。v2.2.2 锁定的 γ_a 改为：**producer_health 单独 gate + cc 永远 tag**。
 
-**我的建议：γ_a**（主标签紧 + sensitivity 标签宽）。理由：
+**γ_a 准入分层定义**：
 
-1. (stable + moderate, concordant) 是最强证据 cell，进主标签合理（4 subjects: 583 双 ER + 139 broad + 916 gamma）
-2. (unstable, concordant) 是有趣但需谨慎的 case：producer 内部不稳但 median 仍偏向 clinical SOZ → 可能 within-subject 多 seizure type 但仍有 SOZ-favoring 倾向。当 sensitivity 报，下游 PR 自己决定是否信
-3. `not_assessable`（含 0-focal subjects + insufficient）和 `discordant` 在 v2.2 第一版都不进 Layer B：discordant 意味着 data-driven 与 clinical 给出截然不同的 SOZ，需要先在 case-by-case 上人工解读（如 916），不适合作为 cohort label
-4. Layer B 在 stability_cohort 字段直接编码 strict/relaxed/sensitivity 三档，符合 plan §3.5 已有 schema
+| 准入分层 | per (subject × ER) 入选条件 |
+|---|---|
+| **primary**（主标签）| `producer_health ∈ {stable, moderate}`，**不论** clinical_concordance |
+| **sensitivity**（敏感性标签）| `producer_health == "unstable"` **AND** `clinical_concordance == "concordant"` |
+| **drop**（不进 Layer B）| `producer_health == "insufficient"`，或 `producer_health == "unstable"` 且 cc ∈ {discordant, partial, not_assessable} |
 
-**待用户拍板**后：把策略 commit 进 plan §6.3 + 进入 Step B.1 Layer B label builder 实现。
+**实测 cohort 应用结果（v2.2.2 tie-inclusive）**：
+
+| ER | primary cells | sensitivity cells | drop cells |
+|---|---|---|---|
+| **gamma_ER** | 2: 916 (stable+discordant), 583 (moderate+concordant) | 1: 958 (unstable+concordant) | 13 (含 548† unstable+partial 因 v2.2.2 tie-inclusive 改判) |
+| **broad_ER** | 4: 583 (stable+concordant), 139 (moderate+concordant), 253 (moderate+discordant), 1084 (moderate+not_assessable) | 4: 548, 590, 635, 922 (unstable+concordant) | 8 |
+
+**Layer B 输出 4 份 JSON**（每份 entry 必须携带其 cc tag + producer detail）：
+
+| 文件 | n_subjects | subjects |
+|---|---|---|
+| `data_driven_soz_core_channels_gamma_ER_primary.json` | 2 | 916, 583 |
+| `data_driven_soz_core_channels_gamma_ER_sensitivity.json` | 1 | 958 |
+| `data_driven_soz_core_channels_broad_ER_primary.json` | 4 | 583, 139, 253, 1084 |
+| `data_driven_soz_core_channels_broad_ER_sensitivity.json` | 4 | 548, 590, 635, 922 |
+
+**Unique subjects 跨双 ER**：{916, 583, 139, 253, 1084, 548, 958, 590, 635, 922} = 10 subjects 至少在某个 (ER × tier) 进 Layer B。其余 6 epilepsiae subjects (1073, 1077, 1084 gamma 那边, 1096, 1146, 1150, 442) 全部 drop（producer 在 cohort 上不可用）。
+
+**重要 narrative 约束**：
+
+1. **916 gamma 是 stable + discordant**：进 primary，但携带 `clinical_concordance=discordant` tag。下游 PR 看到这条 label 时**必须**意识到 data-driven SOZ 与 clinical i-label 显著不一致（详见本文 916 节）。"用 916 gamma label 进 cross-validation" **不**等于 "用 clinical SOZ"。
+2. **253 broad 是 moderate + discordant**：与 916 类似但 producer 较弱。下游 PR 同样需 propagate cc。
+3. **1084 broad 是 moderate + not_assessable**：1084 临床 i 标注全空（n_focal=0），cc 无法评估。下游 PR 用 1084 broad label 时只能当"无 clinical 对照的 data-driven SOZ"。
+4. **(unstable, concordant) 进 sensitivity 而非 primary**：producer 内部不稳但 median 仍偏向 clinical SOZ，是一个**值得看但不当主结论**的 case；sensitivity JSON 的命名 + 文档说明必须明确提示下游"探索用，不当 primary"。
+
+**进入 Step B.1**：实现 `src/data_driven_soz_pivot.py` label builder（plan §3.8 / §10 B1-B12 TDD）。准入规则、文件命名、entry schema 已锁定，可以直接对接 TDD。
 
 ---
 
 ## 待办
 
-- [ ] 用户选定 Layer B 准入策略（α / β / γ_a / γ_b）
-- [ ] 选定后：commit 策略到 `pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md` §6.3
-- [ ] 进 Step B.1：实现 `src/data_driven_soz_pivot.py` label builder + TDD B1-B12
+- [x] 用户选定 Layer B 准入策略：**γ_a 锁定**（2026-05-06）
+- [x] 准入策略 commit 到 plan §6.3.1（v2.2.2）
+- [x] reviewer fixes commit（tie-inclusive top-K + MWU 命名 + atlas Layer B framing 一致 + 测试覆盖 tie 路径）
+- [ ] 进 Step B.1：实现 `src/data_driven_soz_pivot.py` label builder + TDD B1-B12（per plan §3.8 + §10）
 - [ ] yuquan 9 subject 等 yuquan extract_seizure_window 后追跑（独立 PR，task #24）

@@ -492,33 +492,38 @@ def _build_v2_2_tags(per_subject: Dict) -> Dict[str, Dict]:
         r_sz: Dict[str, Optional[float]] = rec.get("r_sz") or {}
         coverage: Dict[str, int] = rec.get("r_sz_valid_count") or {}
 
-        # producer_health
+        # producer_health (tie-inclusive top-K, v2.2.2)
         cov_threshold = max(3.0, 0.5 * float(n_ok))
-        top10_cov = compute_top10_coverage_list(r_sz, coverage, top_k=TOPK_FOR_TAGS)
-        cov_pass = sum(1 for c in top10_cov if c >= cov_threshold)
+        topk_cov, ph_expanded = compute_top10_coverage_list(
+            r_sz, coverage, top_k=TOPK_FOR_TAGS
+        )
+        cov_pass = sum(1 for c in topk_cov if c >= cov_threshold)
         ph_tag, ph_d = classify_producer_health(
             n_ok=n_ok,
             s_sz=s_sz,
-            top10_cov_pass_count=cov_pass,
-            top10_cov_threshold=cov_threshold,
+            topk_cov_pass_count=cov_pass,
+            topk_total=len(topk_cov),
+            topk_cov_threshold=cov_threshold,
+            boundary_tie_inclusive=ph_expanded,
         )
         ph_tags[er_key] = ph_tag
         ph_details[er_key] = ph_d
 
         # clinical_concordance — METADATA ONLY (not a gate)
-        focal_top, top_total = compute_focal_in_topk(
+        focal_top, topk_total_cc, cc_expanded = compute_focal_in_topk(
             r_sz, focal_set, top_k=TOPK_FOR_TAGS
         )
         wilcox = _wilcoxon_focal_vs_nonfocal(r_sz, coverage, focal_set)
         cc_tag, cc_d = classify_clinical_concordance(
-            wilcoxon_p_one_sided=wilcox["mannwhitney_p_one_sided"],
-            focal_in_top10_count=focal_top,
-            top10_total=top_total,
+            mannwhitney_u_p_one_sided=wilcox["mannwhitney_p_one_sided"],
+            focal_in_topk_count=focal_top,
+            topk_total=topk_total_cc,
             n_focal_with_finite_rsz=wilcox["n_focal_with_finite_rsz"],
             n_nonfocal_with_finite_rsz=wilcox["n_nonfocal_with_finite_rsz"],
             focal_rsz_median=wilcox["focal_rsz_median"],
             nonfocal_rsz_median=wilcox["nonfocal_rsz_median"],
             producer_health=ph_tag,
+            boundary_tie_inclusive=cc_expanded,
         )
         cc_tags[er_key] = cc_tag
         cc_details[er_key] = cc_d
