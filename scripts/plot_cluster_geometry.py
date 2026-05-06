@@ -16,8 +16,15 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 import numpy as np
 from scipy.stats import spearmanr
+from sklearn.mixture import GaussianMixture
+
+try:
+    from diptest import diptest as hartigan_diptest
+except Exception:  # pragma: no cover
+    hartigan_diptest = None
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -365,8 +372,128 @@ def plot_template_distance_plane(
         logger.warning("Skip %s: degenerate template-template distance d_ab=%s", subject, d_ab)
         return output_path
 
-    figsize = (9.5, 8.0) if not is_showcase else (12, 10)
-    fig, ax = new_figure(nrows=1, ncols=1, figsize=figsize)
+    # Pre-compute trilateration coords + labels for ALL events (used by both
+    # the main scatter and the marginal-x density panel).
+    all_x: List[float] = []
+    all_y: List[float] = []
+    all_mlabel: List[int] = []
+    all_agreement: List[bool] = []
+    n_offplane_pre = 0
+    for ev in events:
+        d_each = ev.get("d_to_each_template")
+        if d_each is None or len(d_each) <= max(ax_a, ax_b):
+            continue
+        xe, ye, on_plane = _trilaterate_xy(d_each[ax_a], d_each[ax_b], d_ab)
+        if not np.isfinite(xe) or not np.isfinite(ye):
+            continue
+        if not on_plane:
+            n_offplane_pre += 1
+        all_x.append(xe)
+        all_y.append(ye)
+        all_mlabel.append(int(ev.get("matching_label", -1)))
+        all_agreement.append(bool(ev.get("agreement", True)))
+    all_x_arr = np.asarray(all_x, dtype=float)
+    all_mlabel_arr = np.asarray(all_mlabel, dtype=int)
+
+    # Bimodality test on the x-axis projection (the question: are events
+    # actually bimodally distributed along the T_a-T_b axis, or do they
+    # form a continuous spectrum?).
+    dip_p_x = float("nan")
+    if hartigan_diptest is not None and all_x_arr.size >= 20:
+        # For very large arrays, subsample to speed up dip test
+        if all_x_arr.size > 20000:
+            rng = np.random.default_rng(0)
+            sample_idx = rng.choice(all_x_arr.size, 20000, replace=False)
+            x_for_dip = all_x_arr[sample_idx]
+        else:
+            x_for_dip = all_x_arr
+        try:
+            _, dip_p_x = hartigan_diptest(np.asarray(x_for_dip, dtype=float))
+            dip_p_x = float(dip_p_x)
+        except Exception:
+            dip_p_x = float("nan")
+
+    # GMM BIC: does k=2 fit the marginal-x distribution better than k=1?
+    bic_k1 = float("nan")
+    bic_k2 = float("nan")
+    if all_x_arr.size >= 50:
+        try:
+            x_2d = all_x_arr.reshape(-1, 1)
+            gm1 = GaussianMixture(n_components=1, random_state=0).fit(x_2d)
+            gm2 = GaussianMixture(n_components=2, random_state=0).fit(x_2d)
+            bic_k1 = float(gm1.bic(x_2d))
+            bic_k2 = float(gm2.bic(x_2d))
+        except Exception:
+            pass
+
+    figsize = (10, 9.5) if not is_showcase else (13, 12)
+    fig = plt.figure(figsize=figsize)
+    fig.patch.set_facecolor("white")
+    gs = gridspec.GridSpec(
+        2, 1, height_ratios=[1, 4], hspace=0.05, figure=fig,
+    )
+    ax_marg = fig.add_subplot(gs[0])
+    ax = fig.add_subplot(gs[1], sharex=ax_marg)
+
+    # Marginal-x density per matching cluster
+    if all_x_arr.size >= 10:
+        x_min, x_max = float(all_x_arr.min()), float(all_x_arr.max())
+        # Pad slightly so KDE doesn't crop at extremes
+        pad = (x_max - x_min) * 0.05 if x_max > x_min else 1.0
+        x_grid = np.linspace(x_min - pad, x_max + pad, 400)
+        from scipy.stats import gaussian_kde
+        for k in range(chosen_k):
+            mask = all_mlabel_arr == k
+            if int(mask.sum()) < 5:
+                continue
+            xs_k = all_x_arr[mask]
+            try:
+                kde = gaussian_kde(xs_k, bw_method="silverman")
+                density = kde(x_grid)
+                col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
+                ax_marg.fill_between(x_grid, 0, density, color=col, alpha=0.35,
+                                     linewidth=0)
+                ax_marg.plot(x_grid, density, color=col, lw=1.4, alpha=0.9)
+            except Exception:
+                pass
+        # Overall density (gray, dashed) — answers the bimodality question
+        try:
+            kde_all = gaussian_kde(all_x_arr, bw_method="silverman")
+            density_all = kde_all(x_grid)
+            ax_marg.plot(x_grid, density_all, color="#444444", lw=1.0,
+                         ls="--", alpha=0.7, label="overall")
+        except Exception:
+            pass
+    ax_marg.axvline(d_ab / 2.0, color="#999999", lw=0.8, ls="--", alpha=0.5)
+    ax_marg.axvline(0.0, color="black", lw=0.6, alpha=0.4)
+    ax_marg.axvline(d_ab, color="black", lw=0.6, alpha=0.4)
+    ax_marg.set_ylabel("density(x)", fontsize=FS_TICK)
+    ax_marg.tick_params(labelbottom=False, labelsize=FS_TICK - 2)
+    for spine in ("top", "right"):
+        ax_marg.spines[spine].set_visible(False)
+    ax_marg.spines["left"].set_linewidth(1.0)
+    ax_marg.spines["bottom"].set_linewidth(1.0)
+    ax_marg.set_yticks([])
+
+    # Bimodality verdict on marginal x
+    bic_diff = bic_k1 - bic_k2  # positive = k=2 better
+    if np.isfinite(dip_p_x) and np.isfinite(bic_diff):
+        if dip_p_x < 0.05 and bic_diff > 10:
+            modality_verdict = (
+                f"marginal-x BIMODAL: dip p={dip_p_x:.2g}, ΔBIC(k1−k2)=+{bic_diff:.0f}"
+            )
+        elif dip_p_x >= 0.05 and bic_diff < 10:
+            modality_verdict = (
+                f"marginal-x UNIMODAL / continuous: dip p={dip_p_x:.2g}, ΔBIC=+{bic_diff:.0f}"
+            )
+        else:
+            modality_verdict = (
+                f"marginal-x AMBIGUOUS: dip p={dip_p_x:.2g}, ΔBIC=+{bic_diff:.0f}"
+            )
+    else:
+        modality_verdict = "marginal-x test unavailable"
+    ax_marg.set_title(modality_verdict, fontsize=FS_TITLE - 5, loc="left")
+
     style_panel(ax, label="", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
 
