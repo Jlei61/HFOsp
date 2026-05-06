@@ -89,6 +89,11 @@ POST_SEC = 30.0                                  # 30 s post-onset
 DETECTION_PRE_SEC = 5.0                          # plan §3.3: detection [-5s, +30s]
 DETECTION_POST_SEC = 30.0
 LAMBDA_FPR_PER_HOUR = 1.0
+# v2.2.3 (2026-05-06) — module-level overrides settable from CLI for the
+# Phase 2 λ_max relaxation sweep. Kept as module globals so the existing
+# _run_subject_all_ers signature stays stable.
+LAMBDA_MAX_OVERRIDE = 100.0    # default: same as v2.2.2
+LAMBDA_N_GRID_OVERRIDE = 199
 SENTINEL_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" / "_sentinel"
 COHORT_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" / "per_subject"
 AUDIT_CSV_PATH = ROOT / "results" / "spatial_modulation" / "data_driven_soz" / "audit.csv"
@@ -295,8 +300,10 @@ def _run_subject_all_ers(
         lam = calibrate_lambda_per_subject(
             pooled, fpr_target_per_hour=LAMBDA_FPR_PER_HOUR,
             bias=0.5, hop_sec=HOP_SEC,
+            lambda_max=LAMBDA_MAX_OVERRIDE,
+            lambda_n_grid=LAMBDA_N_GRID_OVERRIDE,
         )
-        print(f"  [{er_key}] λ = {lam:.2f}", flush=True)
+        print(f"  [{er_key}] λ = {lam:.2f} (lambda_max={LAMBDA_MAX_OVERRIDE})", flush=True)
 
         per_seizure_ranks: List[Dict[str, Optional[float]]] = []
         seizure_statuses: List[str] = []
@@ -955,7 +962,21 @@ def main() -> int:
         "--output-dir", type=Path, default=None,
         help="Output dir override (sentinel default: %(default)s; cohort default: per_subject/).",
     )
+    parser.add_argument(
+        "--lambda-max", type=float, default=100.0,
+        help="Cap for λ calibration grid (v2.2.3 sweep mode; default 100). "
+             "Phase 2: try 500 to find cells where current cap is artificially restrictive.",
+    )
+    parser.add_argument(
+        "--lambda-n-grid", type=int, default=199,
+        help="λ grid resolution (default 199). Scale up with --lambda-max to keep step size.",
+    )
     args = parser.parse_args()
+
+    # v2.2.3: plumb λ overrides via module globals (keeps inner functions stable)
+    global LAMBDA_MAX_OVERRIDE, LAMBDA_N_GRID_OVERRIDE
+    LAMBDA_MAX_OVERRIDE = float(args.lambda_max)
+    LAMBDA_N_GRID_OVERRIDE = int(args.lambda_n_grid)
 
     if args.sentinel:
         out_dir = args.output_dir or SENTINEL_OUT_DIR

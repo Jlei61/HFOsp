@@ -239,6 +239,91 @@ gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, 
 
 ---
 
+## epilepsiae/583
+
+**Cohort role**：γ_a primary 双 ER（model case — 唯一双 ER 都 stable/moderate + concordant 的 subject）
+
+**Clinical SOZ (`focus_rel == 'i'`, n=15)**：
+- HL strip 浅端：HL1, HL2, HL3, HL5, HL6（HL4 是 e；HL7-10 都是 e）
+- TBA strip 深端：TBA1, TBA2（TBA3, TBA4 是 e）
+- TBB strip 顶端：TBB1（TBB2-4 是 e）
+- TLA strip 深端：TLA1, TLA2, TLA3, TLA4（TLA5-6 是 e）
+- TLB strip：TLB1, TLB2, TLB7（TLB3-6, TLB8-12 是 e）
+
+(`l` = 0；`e` n=46，含 5 strip 的非 i 触点 + 全部 scalp + TBC strip 全部)
+
+### Layer A producer 输出
+
+| ER | λ (capped?) | n_total | n_loaded | n_ok | n_ur | n_tied | s_sz |
+|---|---|---|---|---|---|---|---|
+| gamma_ER | 100.0 (capped) | 23 | 23 | 22 | 1 | 0 | **0.448** |
+| broad_ER | 100.0 (capped) | 23 | 23 | 21 | 2 | 0 | **0.625** |
+
+**Top-15 earliest channels — gamma_ER**（topk_total=13 due to boundary tie at r_sz=11.5）
+
+| rank | ch | r_sz | cov / n_ok | F/N |
+|---|---|---|---|---|
+| 1 | TLB1 | 1.75 | 22/22 | **F** |
+| 2 | TBA2 | 6.00 | 21/22 | **F** |
+| 3 | TLB7 | 6.50 | 22/22 | **F** |
+| 4 | TBB3 | 6.50 | 21/22 | N |
+| 5 | TLA2 | 7.25 | 22/22 | **F** |
+| 6 | TLA3 | 7.25 | 22/22 | **F** |
+| 7 | TBA1 | 7.50 | 21/22 | **F** |
+| 8 | HL1 | 8.75 | 20/22 | **F** |
+| 9 | HL4 | 11.00 | 21/22 | N |
+| 10–13 | HL5 / HL9 / TBA3 / HL8 | 11.50 | 14/22, 17/22, 22/22, 17/22 | F / N / N / N |
+| 14 | HL2 | 12.50 | 20/22 | **F** |
+| 15 | TLB2 | 14.00 | 21/22 | **F** |
+
+(rank 10-13 是 r_sz=11.5 4-way tie，全部纳入 → topk_total=13；HL5 是这 4 个中唯一 focal)
+
+**Top-10 earliest channels — broad_ER**（无 boundary tie，topk_total=10）
+
+| rank | ch | r_sz | cov / n_ok | F/N |
+|---|---|---|---|---|
+| 1 | TBA2 | 1.50 | 21/21 | **F** |
+| 2 | TBB3 | 3.50 | 21/21 | N |
+| 3 | TLA3 | 4.00 | 21/21 | **F** |
+| 4 | TLB7 | 4.00 | 21/21 | **F** |
+| 5 | TBA1 | 4.00 | 21/21 | **F** |
+| 6 | TLB1 | 5.25 | 20/21 | **F** |
+| 7 | TBA3 | 6.00 | 21/21 | N |
+| 8 | HL1 | 6.00 | 19/21 | **F** |
+| 9 | HL2 | 9.75 | 20/21 | **F** |
+| 10 | TBB4 | 11.50 | 21/21 | N |
+
+**Focal channel ranks (broad_ER, 完整序)**：
+
+TBA2 (1) · TLA3 (3) · TLB7 (4) · TBA1 (5) · TLB1 (6) · HL1 (8) · HL2 (9) · TLA2 (11) · TLB2 (12) · HL5 (13) · HL3 (19) · HL6 (23) · TLA4 (25) · TBB1 (28, cov 9/21) · TLA1 (29)
+
+### Tag 分类
+
+| ER | producer_health | clinical_concordance |
+|---|---|---|
+| gamma_ER | **moderate** (n_ok=22, s_sz=0.45 ∈ [0.3, 0.5), top-10 cov 全 ≥ 11) | **concordant** (MWU p=0.0016, focal_in_topk=8/13=61.5%) |
+| broad_ER | **stable** (n_ok=21, s_sz=0.625 ≥ 0.5, top-10 cov 全 ≥ 19) | **concordant** (MWU p=0.0013, focal_in_topk=7/10=70%) |
+
+### Spatial / 解剖描述（中性）
+
+- **5 个 focal strip 全部在 ER-rank top-15 出现**：TLB (TLB1=#1, TLB7=#3, TLB2=#15)、TBA (TBA1, TBA2)、TLA (TLA2, TLA3)、HL (HL1, HL5, HL2)、TBB (TBB1 在 broad rank=28, 但 cov=9/21 较低)。
+- gamma 与 broad 双 ER **top 通道高度重合**：TLB1, TBA2, TLB7, TLA2/3, TBA1, HL1, HL2 都在双 ER top-10/13 内。
+- "Top-K 中的非 focal 通道" 全为 focal-strip 邻接触点：TBB3 (focal=TBB1), HL4/8/9 (focal HL1-3,5-6), TBA3 (focal TBA1-2), TBB4 (focal TBB1)。换句话说 ER-rank 的 top set ≈ clinical i-set 的物理 strip 邻域，没有"远端 outlier"。
+- 焦点 channel 中 **TBB1, TLA1, HL6 排序较晚**（rank > 20-30 在 broad，cov 较低）。这些可能是 within-subject seizure 间起源不一致的少数 channel。
+
+### Label assessment（下游可用性）
+
+- **强证据 model case**：双 ER 都 (stable / moderate) + concordant，s_sz、p、focal fraction 全过线。
+- 两套 SOZ proxy 在 583 上**广泛同意**：data-driven top-K 几乎完全覆盖 clinical i 的 5 个深部 strip 主体。
+- top-K 选 k = |clinical_matched| = 15 → broad 会选出 top-15 全部即 7 focal + 8 非 focal-strip-adjacent。下游若用 broad primary，对照 clinical 时大致一致。
+- **缓冲**：不是 1:1 重合 — 焦点 TBB1/TLA1/HL6 排得晚，data-driven label 会 miss 它们；同时会 include strip 邻接的 TBB3/HL4/8/9。下游不应把"data-driven 多出来的 channel"或"data-driven 漏掉的 focal"当 ground truth 偏差，只能当两套 proxy 的边界差异。
+
+### Subject-type cohort 候选 tag
+
+`(stable, concordant)` model case：data-driven r_sz 与 clinical i-label 在主体 region 上一致，且 producer 跨 seizure 高度可重复。在 cohort 里是少数（双 ER 同时 stable/moderate + concordant 唯一 case）。
+
+---
+
 ## Cohort summary (A.4 v2.2 — 16 epilepsiae subjects, 完成 2026-05-06)
 
 **Run**: 11.3h wall (2026-05-05 18:32 → 2026-05-06 05:51), 16/16 epilepsiae subjects (15 audit_eligible + sentinel 916), 9 yuquan 已 excluded（见上文 cohort scope 注）。
