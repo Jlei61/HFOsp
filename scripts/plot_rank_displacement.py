@@ -203,15 +203,15 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     #   [ horizontal colorbar   | SOZ legend   ]   <- bottom row
     # τ track removed (highly collinear with F_norm: ρ ≈ -0.92);
     # SOZ track removed (lagPat / SOZ coverage not yet stable for paper).
-    fig = plt.figure(figsize=(11.5, max(8.0, 0.42 * n_sub) + 2.0))
+    fig = plt.figure(figsize=(13.5, max(8.5, 0.46 * n_sub) + 2.0))
     gs = fig.add_gridspec(
         2, 2,
-        width_ratios=[7.5, 1.2],
+        width_ratios=[7.0, 1.3],
         height_ratios=[1.0, 0.045],
-        wspace=0.08,
-        hspace=0.22,
-        top=0.83,
-        bottom=0.10,
+        wspace=0.14,
+        hspace=0.06,
+        top=0.85,
+        bottom=0.08,
         left=0.11,
         right=0.97,
     )
@@ -256,7 +256,7 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
                 )
 
     ax_h.set_yticks(range(n_sub))
-    ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK - 4)
+    ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK - 1)
     # Move heatmap x-axis (ticks + label) to the TOP, since the bottom row
     # is now occupied by the horizontal colorbar.
     ax_h.xaxis.tick_top()
@@ -264,12 +264,12 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h.set_xticks([0, n_ch - 1])
     ax_h.set_xticklabels(
         ["source\n(earliest in T_a)", "sink\n(latest in T_a)"],
-        fontsize=FS_TICK - 4,
+        fontsize=FS_TICK - 1,
     )
     ax_h.set_xlabel(
         "Channel position along T_a (source → sink)",
-        fontsize=FS_LABEL - 2,
-        labelpad=8,
+        fontsize=FS_LABEL,
+        labelpad=10,
     )
     # Spines: now bottom is "interior" (next to colorbar), keep all 4
     # but turn off top labels duplicate
@@ -284,44 +284,43 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         range(n_sub), f_norms,
         color=COL_NEUTRAL, edgecolor="black", linewidth=0.4,
     )
-    ax_F.axvline(2 / 3, color="gray", linewidth=0.7, linestyle="--")
+    ax_F.axvline(2 / 3, color="gray", linewidth=0.9, linestyle="--")
     ax_F.set_xlim(0, 1.05)
     ax_F.set_xticks([0, 2 / 3, 1])
-    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK - 4)
+    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK - 1)
     # Match heatmap: x-axis at top
     ax_F.xaxis.tick_top()
     ax_F.xaxis.set_label_position("top")
     ax_F.tick_params(axis="x", which="both", bottom=False, top=True)
     plt.setp(ax_F.get_yticklabels(), visible=False)
-    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL - 2, labelpad=8)
+    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL, labelpad=10)
     ax_F.spines["right"].set_visible(False)
 
-    # Horizontal colorbar under heatmap
+    # Horizontal colorbar directly under heatmap (close, not separated)
     cb = fig.colorbar(im, cax=ax_cb, orientation="horizontal")
     cb.set_label("Signed Δr  (= rank_T_b − rank_T_a)",
-                 fontsize=FS_LABEL - 2, labelpad=4)
-    cb.ax.tick_params(labelsize=FS_TICK - 3)
+                 fontsize=FS_LABEL, labelpad=2)
+    cb.ax.tick_params(labelsize=FS_TICK - 1)
 
     # SOZ channel mini-legend in the bottom-right cell (under F_norm track,
-    # next to the colorbar). Drawn directly into ax_legend so positioning
-    # doesn't depend on figure-level coordinates.
+    # next to the colorbar).
     ax_legend.add_patch(
         mpatches.Rectangle(
-            (0.05, 0.30), 0.18, 0.40,
+            (0.05, 0.32), 0.20, 0.36,
             transform=ax_legend.transAxes,
-            facecolor="white", edgecolor="black", linewidth=1.2,
+            facecolor="white", edgecolor="black", linewidth=1.4,
         )
     )
     ax_legend.text(
-        0.30, 0.50, "SOZ channel",
+        0.32, 0.50, "SOZ channel",
         transform=ax_legend.transAxes,
-        fontsize=FS_TICK - 2, va="center", ha="left",
+        fontsize=FS_LABEL, va="center", ha="left",
     )
 
     fig.suptitle(
         f"Per-channel signed rank displacement — two-template subjects (n={n_sub})",
-        fontsize=FS_TITLE,
-        y=0.95,
+        fontsize=FS_TITLE + 2,
+        y=0.96,
     )
     fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
     fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
