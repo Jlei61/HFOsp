@@ -114,6 +114,14 @@ def sort_by_kendall_tau(records: List[dict]) -> List[dict]:
     return sorted(records, key=lambda r: r["primary_pair"].get("kendall_tau", 0.0))
 
 
+def sort_by_footrule_desc(records: List[dict]) -> List[dict]:
+    """Most reversal at top: F_norm descending."""
+    return sorted(
+        records,
+        key=lambda r: -r["primary_pair"].get("footrule_normalized", 0.0),
+    )
+
+
 def build_heatmap_matrix(
     records: List[dict],
 ) -> Tuple[np.ndarray, List[str], np.ndarray]:
@@ -154,12 +162,40 @@ def build_heatmap_matrix(
 
 
 def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
-    sorted_records = sort_by_kendall_tau(records)
+    """Single paper-level supplementary figure.
+
+    Main heatmap: per-channel Δr across two-template subjects.
+    Three right-side summary tracks (sharing the same y-axis = subject):
+        - F_norm (Diaconis-Graham normalized footrule), with 2/3 reference
+        - Kendall τ between Tₐ and T_b ranks, with τ = 0 reference
+        - SOZ contribution_excess, with excess = 0 reference (chance baseline)
+
+    Each row of the entire panel is one subject - reader sees the channel-
+    level pattern, overall reversal magnitude, and SOZ contribution all
+    in the same coordinate system.
+
+    No PR-2.5 internal classifications, no group colors. Subjects sorted
+    by F_norm descending (most reversal at top).
+    """
+    sorted_records = sort_by_footrule_desc(records)
     matrix, _, soz_overlay = build_heatmap_matrix(sorted_records)
     sub_labels = [f"{r['dataset'][:3]}_{r['subject']}" for r in sorted_records]
     n_sub, n_ch = matrix.shape
     taus = np.array(
         [r["primary_pair"]["kendall_tau"] for r in sorted_records], dtype=float
+    )
+    f_norms = np.array(
+        [r["primary_pair"]["footrule_normalized"] for r in sorted_records],
+        dtype=float,
+    )
+    soz_excess = np.array(
+        [
+            r["primary_pair"].get("soz_contribution_excess")
+            if r["primary_pair"].get("soz_contribution_excess") is not None
+            else np.nan
+            for r in sorted_records
+        ],
+        dtype=float,
     )
 
     finite = matrix[np.isfinite(matrix)]
@@ -167,19 +203,21 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     vmax = max(vmax, 1e-6)
     norm = TwoSlopeNorm(vcenter=0.0, vmin=-vmax, vmax=vmax)
 
-    fig = plt.figure(figsize=(12, max(6.5, 0.42 * n_sub) + 1.2))
+    fig = plt.figure(figsize=(15, max(7.0, 0.42 * n_sub) + 1.2))
     gs = fig.add_gridspec(
-        1, 3,
-        width_ratios=[8, 1.2, 0.35],
+        1, 5,
+        width_ratios=[7.0, 1.0, 1.2, 1.2, 0.30],
         wspace=0.10,
         top=0.86,
         bottom=0.10,
-        left=0.10,
-        right=0.94,
+        left=0.08,
+        right=0.96,
     )
     ax_h = fig.add_subplot(gs[0])
-    ax_tau = fig.add_subplot(gs[1], sharey=ax_h)
-    ax_cb = fig.add_subplot(gs[2])
+    ax_F = fig.add_subplot(gs[1], sharey=ax_h)
+    ax_tau = fig.add_subplot(gs[2], sharey=ax_h)
+    ax_soz = fig.add_subplot(gs[3], sharey=ax_h)
+    ax_cb = fig.add_subplot(gs[4])
 
     im = ax_h.imshow(
         matrix,
@@ -227,20 +265,34 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         fontsize=FS_LABEL - 2,
         labelpad=8,
     )
-    ax_h.set_title("a", fontsize=FS_PANEL_LETTER, loc="left", pad=10, fontweight="bold")
+    # No panel letter — this is a single composite supplementary figure
     ax_h.spines["top"].set_visible(False)
     ax_h.spines["right"].set_visible(False)
 
-    # Kendall τ side panel — bar length encodes τ, single neutral color
-    # (paper-level: no binary classification overlay; the rank-ordering
-    # of rows + bar length together convey the continuous spectrum).
+    # === Right-side summary tracks (share y-axis with heatmap) ===
+    # All three tracks: single neutral color, dashed reference line.
+    # No grouping, no classification colors — paper-level continuous spectrum.
+
+    # Track 1: F_norm horizontal mini-bars (range 0..1, ref at 2/3)
+    ax_F.barh(
+        range(n_sub), f_norms,
+        color=COL_NEUTRAL, edgecolor="black", linewidth=0.4,
+    )
+    ax_F.axvline(2 / 3, color="gray", linewidth=0.7, linestyle="--")
+    ax_F.set_xlim(0, 1.05)
+    ax_F.set_xticks([0, 2 / 3, 1])
+    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK - 4)
+    plt.setp(ax_F.get_yticklabels(), visible=False)
+    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL - 2, labelpad=8)
+    ax_F.spines["top"].set_visible(False)
+    ax_F.spines["right"].set_visible(False)
+
+    # Track 2: Kendall τ horizontal mini-bars (range -1..+1, ref at 0)
     ax_tau.barh(
         range(n_sub), taus,
         color=COL_NEUTRAL, edgecolor="black", linewidth=0.4,
     )
-    ax_tau.axvline(0, color="gray", linewidth=0.6)
-    ax_tau.axvline(-0.5, color="gray", linewidth=0.4, linestyle="--")
-    ax_tau.axvline(0.5, color="gray", linewidth=0.4, linestyle="--")
+    ax_tau.axvline(0, color="gray", linewidth=0.7, linestyle="--")
     ax_tau.set_xlim(-1.05, 1.05)
     ax_tau.set_xticks([-1, 0, 1])
     ax_tau.tick_params(axis="x", labelsize=FS_TICK - 4)
@@ -248,6 +300,32 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_tau.set_xlabel("Kendall τ", fontsize=FS_LABEL - 2, labelpad=8)
     ax_tau.spines["top"].set_visible(False)
     ax_tau.spines["right"].set_visible(False)
+
+    # Track 3: SOZ contribution_excess horizontal mini-bars (ref at 0)
+    finite_excess = np.isfinite(soz_excess)
+    excess_for_plot = np.where(finite_excess, soz_excess, 0.0)
+    bar_colors_soz = [
+        COL_NEUTRAL if finite_excess[i] else "lightgray"
+        for i in range(n_sub)
+    ]
+    ax_soz.barh(
+        range(n_sub), excess_for_plot,
+        color=bar_colors_soz, edgecolor="black", linewidth=0.4,
+    )
+    ax_soz.axvline(0, color="gray", linewidth=0.7, linestyle="--")
+    excess_max = float(np.nanmax(np.abs(soz_excess[finite_excess]))) if finite_excess.any() else 0.4
+    soz_xlim = max(0.4, excess_max + 0.05)
+    ax_soz.set_xlim(-soz_xlim, soz_xlim)
+    ax_soz.set_xticks([-soz_xlim + 0.05, 0, soz_xlim - 0.05])
+    ax_soz.set_xticklabels([f"{-soz_xlim+0.05:.2f}", "0", f"{soz_xlim-0.05:.2f}"],
+                           fontsize=FS_TICK - 4)
+    plt.setp(ax_soz.get_yticklabels(), visible=False)
+    ax_soz.set_xlabel(
+        "SOZ excess\n(contribution − channel fraction)",
+        fontsize=FS_LABEL - 3, labelpad=8,
+    )
+    ax_soz.spines["top"].set_visible(False)
+    ax_soz.spines["right"].set_visible(False)
 
     # Colorbar
     cb = fig.colorbar(im, cax=ax_cb)
@@ -275,161 +353,6 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
-
-def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
-    """Paper-level 2-panel summary of cohort rank-displacement geometry.
-
-    Panel B - Reversal spectrum:
-        x = subjects ranked by F_norm (descending)
-        y = F_norm (Diaconis-Graham normalized footrule)
-        Shows that the cohort is a CONTINUOUS spectrum, not a binary.
-        The 2/3 horizontal line is annotated as the asymptotic
-        random-permutation reference (Diaconis-Graham 1977, n→∞ expectation),
-        descriptive only - NOT a classifier threshold.
-
-    Panel C - SOZ contribution vs reversal strength:
-        x = F_norm
-        y = soz_contribution_excess (baseline-corrected)
-        Spearman ρ summary; near-zero correlation = honest negative finding.
-        Marker shape = dataset (epilepsiae circle, yuquan square),
-        purely for visual disambiguation, not for grouping.
-
-    NO PR-2.5 internal-workflow language anywhere on this figure (no
-    'reproduced', 'candidate-fail', 'non-candidate', 'PR-2.5 gate',
-    'PR-2.5 missed'). Those classifications belong in the methods archive,
-    not on a paper-level figure. The figure tells one story:
-    template-pair rank reversal is a cohort-level continuous spectrum,
-    and SOZ channel involvement does NOT explain that spectrum.
-    """
-    from scipy.stats import spearmanr
-
-    # Build per-subject vectors
-    subjects, labels, F_arr, tau_arr, excess_arr, datasets = (
-        [], [], [], [], [], []
-    )
-    for r in records:
-        pair = r["primary_pair"]
-        f_norm = pair.get("footrule_normalized")
-        tau = pair.get("kendall_tau")
-        excess = pair.get("soz_contribution_excess")
-        if (
-            f_norm is None or tau is None
-            or (isinstance(f_norm, float) and np.isnan(f_norm))
-            or (isinstance(tau, float) and np.isnan(tau))
-        ):
-            continue
-        subjects.append(r)
-        labels.append(f"{r['dataset'][:3]}_{r['subject']}")
-        F_arr.append(f_norm)
-        tau_arr.append(tau)
-        excess_arr.append(excess if excess is not None else float("nan"))
-        datasets.append(r.get("dataset", "unknown"))
-
-    F_arr = np.array(F_arr, dtype=float)
-    tau_arr = np.array(tau_arr, dtype=float)
-    excess_arr = np.array(excess_arr, dtype=float)
-    n = len(F_arr)
-
-    # Sort for spectrum panel (descending F_norm)
-    order = np.argsort(-F_arr)
-    F_sorted = F_arr[order]
-    tau_sorted = tau_arr[order]
-    labels_sorted = [labels[i] for i in order]
-    datasets_sorted = [datasets[i] for i in order]
-
-    # Spearman correlation for Panel C
-    excess_finite = np.isfinite(excess_arr)
-    if excess_finite.sum() >= 4:
-        rho_FC, p_FC = spearmanr(F_arr[excess_finite], excess_arr[excess_finite])
-    else:
-        rho_FC, p_FC = float("nan"), float("nan")
-
-    fig, axes = plt.subplots(1, 2, figsize=(16, 7.0),
-                              gridspec_kw={"width_ratios": [1.7, 1.0]})
-
-    # ====== Panel B: Ranked F_norm spectrum (cohort continuous spectrum) ======
-    ax = axes[0]
-    x_positions = np.arange(n)
-    ax.bar(
-        x_positions, F_sorted,
-        color=COL_NEUTRAL, edgecolor="black", linewidth=0.4, width=0.78,
-        zorder=3,
-    )
-    # 2/3 reference line, annotated descriptively
-    ax.axhline(2 / 3, color="gray", linewidth=0.7, linestyle="--", zorder=2)
-    ax.text(
-        n - 0.5, 2 / 3 + 0.012,
-        "2/3 — asymptotic random-permutation reference (Diaconis-Graham 1977, n→∞)",
-        fontsize=FS_TICK - 4, ha="right", va="bottom", color="gray",
-    )
-    # Subject labels along x
-    ax.set_xticks(x_positions)
-    ax.set_xticklabels(labels_sorted, rotation=70, fontsize=FS_TICK - 4, ha="right")
-    ax.set_xlim(-0.7, n - 0.3)
-    ax.set_ylim(0, 1.10)
-    ax.set_xlabel("subjects, ranked by F_norm (descending)",
-                  fontsize=FS_LABEL - 1, labelpad=8)
-    ax.set_ylabel("F_norm  (Diaconis-Graham normalized footrule)",
-                  fontsize=FS_LABEL - 1)
-    style_panel(ax, label="b")
-
-    # ====== Panel C: F_norm vs soz_contribution_excess ======
-    ax = axes[1]
-    ax.axvline(2 / 3, color="lightgray", linewidth=0.7, linestyle="--", zorder=1)
-    ax.axhline(0, color="lightgray", linewidth=0.8, linestyle="-", zorder=1)
-    for x, y, ds in zip(F_arr, excess_arr, datasets):
-        if not np.isfinite(y):
-            continue
-        marker = "o" if ds == "epilepsiae" else "s"
-        ax.scatter([x], [y], color=COL_NEUTRAL, edgecolors="black",
-                   linewidths=0.5, s=64, zorder=3, marker=marker)
-    # Set explicit y-limits to give room for reference text
-    finite_excess = excess_arr[excess_finite]
-    y_pad = 0.04
-    y_lo = float(np.min(finite_excess)) - y_pad
-    y_hi = float(np.max(finite_excess)) + y_pad
-    ax.set_ylim(y_lo, y_hi)
-    ax.set_xlim(0.35, 1.05)
-    # Reference labels (small, gray, FYI), placed in low-density corners
-    ax.text(2 / 3 + 0.005, y_lo + 0.005,
-            "F = 2/3 (random ref)",
-            fontsize=FS_TICK - 5, ha="left", va="bottom", color="gray")
-    ax.text(0.36, 0.005, "SOZ at chance",
-            fontsize=FS_TICK - 5, ha="left", va="bottom", color="gray")
-    ax.set_xlabel("F_norm  (Diaconis-Graham normalized footrule)",
-                  fontsize=FS_LABEL - 1, labelpad=8)
-    ax.set_ylabel(
-        "SOZ contribution_excess\n"
-        "(SOZ contribution_fraction − channel_fraction)",
-        fontsize=FS_LABEL - 2,
-    )
-    info = (
-        f"Spearman ρ = {rho_FC:.3f}, p = {p_FC:.2g}, n = {int(excess_finite.sum())}"
-    )
-    ax.text(0.5, 1.025, info, transform=ax.transAxes,
-            fontsize=FS_TICK - 2, ha="center", color="black")
-    # Dataset legend (purely shape disambiguation)
-    legend_handles = [
-        plt.Line2D([0], [0], marker="o", color="w",
-                   markerfacecolor=COL_NEUTRAL, markeredgecolor="black",
-                   markersize=8, label="Epilepsiae"),
-        plt.Line2D([0], [0], marker="s", color="w",
-                   markerfacecolor=COL_NEUTRAL, markeredgecolor="black",
-                   markersize=8, label="Yuquan"),
-    ]
-    ax.legend(handles=legend_handles, loc="lower right",
-              fontsize=FS_TICK - 3, frameon=False, title="dataset",
-              title_fontsize=FS_TICK - 3)
-    style_panel(ax, label="c")
-
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
-    fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
-    fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
-    plt.close(fig)
-
-    # Stdout summary
-    print(f"  Panel B (spectrum): n={n}, F_norm range = [{F_sorted.min():.3f}, {F_sorted.max():.3f}]")
-    print(f"  Panel C Spearman ρ(F_norm, SOZ excess) = {rho_FC:.3f}, p = {p_FC:.3g}, n = {int(excess_finite.sum())}")
 
 
 def plot_per_subject_strip(record: dict, out_path: Path) -> None:
@@ -506,7 +429,7 @@ def main() -> None:
     ap.add_argument(
         "--what",
         default="all",
-        choices=["all", "cohort", "summary", "per_subject"],
+        choices=["all", "cohort", "per_subject"],
     )
     args = ap.parse_args()
 
@@ -518,10 +441,6 @@ def main() -> None:
     if args.what in ("all", "cohort"):
         plot_cohort_heatmap(records, FIG_DIR / "cohort_displacement_heatmap")
         print("Wrote cohort_displacement_heatmap.{png,pdf}")
-
-    if args.what in ("all", "summary"):
-        plot_footrule_summary(records, FIG_DIR / "footrule_kendall_summary")
-        print("Wrote footrule_kendall_summary.{png,pdf}")
 
     if args.what in ("all", "per_subject"):
         for r in records:
