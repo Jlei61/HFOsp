@@ -107,16 +107,26 @@ def _scatter_metric_panel(
     chosen_k: int,
     x_field: str,
     y_field: str,
-) -> int:
-    """Render a 2D scatter (PCA or MDS) of events + templates.
+    bin_decimals: int = 3,
+) -> Tuple[int, int]:
+    """Render a 2D density-aware scatter (PCA or MDS) of events + templates.
 
-    Returns the number of events with finite coords (visible in this panel).
+    Identical (x, y) coordinates within ``bin_decimals`` rounding precision
+    are aggregated into a single marker whose size scales with the count
+    (sqrt scaling so a 100x denser bin is 10x the area). This is essential
+    for low-n_ch subjects whose discrete rank vectors collide heavily
+    (e.g. 818 has 120 unique PCA coords for 11337 events).
+
+    Returns (n_events_visible, n_unique_bins).
     """
-    visible = 0
+    bin_key = lambda x, y: (round(x, bin_decimals), round(y, bin_decimals))
+
+    n_visible = 0
+    n_unique_bins = 0
     for k in range(chosen_k):
         col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
-        agree_pts = []
-        bound_pts = []
+        agree_counts: Dict[Tuple[float, float], int] = {}
+        bound_counts: Dict[Tuple[float, float], int] = {}
         for ev in events:
             if ev["kmeans_label"] != k:
                 continue
@@ -124,18 +134,28 @@ def _scatter_metric_panel(
             y = ev.get(y_field)
             if x is None or y is None or not np.isfinite(x) or not np.isfinite(y):
                 continue
-            visible += 1
+            n_visible += 1
+            key = bin_key(x, y)
             if ev.get("agreement", True):
-                agree_pts.append((x, y))
+                agree_counts[key] = agree_counts.get(key, 0) + 1
             else:
-                bound_pts.append((x, y))
-        if agree_pts:
-            xs, ys = zip(*agree_pts)
-            ax.scatter(xs, ys, s=EVENT_MARKER_SIZE, c=col, alpha=0.55,
+                bound_counts[key] = bound_counts.get(key, 0) + 1
+
+        n_unique_bins += len(agree_counts) + len(bound_counts)
+
+        if agree_counts:
+            xs = [k[0] for k in agree_counts.keys()]
+            ys = [k[1] for k in agree_counts.keys()]
+            counts = np.array(list(agree_counts.values()), dtype=float)
+            sizes = EVENT_MARKER_SIZE * np.sqrt(counts)
+            ax.scatter(xs, ys, s=sizes, c=col, alpha=0.55,
                        edgecolors="none", zorder=2)
-        if bound_pts:
-            xs, ys = zip(*bound_pts)
-            ax.scatter(xs, ys, s=BOUNDARY_MARKER_SIZE, facecolors="none",
+        if bound_counts:
+            xs = [k[0] for k in bound_counts.keys()]
+            ys = [k[1] for k in bound_counts.keys()]
+            counts = np.array(list(bound_counts.values()), dtype=float)
+            sizes = BOUNDARY_MARKER_SIZE * np.sqrt(counts)
+            ax.scatter(xs, ys, s=sizes, facecolors="none",
                        edgecolors=col, linewidths=1.3, alpha=0.9, zorder=3)
 
     for k, tmpl in enumerate(templates):
@@ -146,7 +166,268 @@ def _scatter_metric_panel(
             continue
         ax.scatter([tx], [ty], marker="*", s=TEMPLATE_MARKER_SIZE,
                    c=col, edgecolors="black", linewidths=1.5, zorder=4)
-    return visible
+    return n_visible, n_unique_bins
+
+
+def _load_pr2_validity(dataset: str, subject: str) -> Dict[str, Any]:
+    """Pull cluster-validity numbers from PR-2's pr1_subject_summary.json
+    for the figure's stats annotation. Returns {} if not available.
+    """
+    pr2_path = Path("results/interictal_propagation/per_subject") / f"{dataset}_{subject}.json"
+    if not pr2_path.exists():
+        return {}
+    try:
+        with pr2_path.open() as f:
+            d = json.load(f)
+    except Exception:
+        return {}
+
+    out: Dict[str, Any] = {}
+    mix = d.get("mixture", {})
+    out["dip_p"] = mix.get("dip_p")
+    out["silhouette_k2_diptest"] = mix.get("silhouette_k2")
+    ac = d.get("adaptive_cluster", {})
+    out["overall_tau"] = ac.get("overall_tau")
+    out["within_cluster_tau_mean"] = ac.get("within_cluster_tau_mean")
+    out["uplift"] = ac.get("uplift")
+    icc = ac.get("inter_cluster_corr_matrix")
+    if icc:
+        arr = np.array(icc, dtype=float)
+        n = arr.shape[0]
+        off = [arr[i, j] for i in range(n) for j in range(i + 1, n) if np.isfinite(arr[i, j])]
+        out["inter_cluster_min_r"] = float(np.min(off)) if off else None
+        out["inter_cluster_max_r"] = float(np.max(off)) if off else None
+    out["adaptive_ami_at_chosen_k"] = next(
+        (s.get("median_ami") for s in ac.get("scan", []) if s.get("k") == ac.get("chosen_k")),
+        None,
+    )
+    out["adaptive_silhouette_at_chosen_k"] = next(
+        (s.get("median_silhouette") for s in ac.get("scan", []) if s.get("k") == ac.get("chosen_k")),
+        None,
+    )
+    rp = d.get("time_split_reproducibility", {})
+    out["pr25_grade"] = rp.get("reproducibility_grade")
+    splits = rp.get("splits", {})
+    halfsplit = splits.get("first_half_second_half", {})
+    out["pr25_template_corr_first_second"] = halfsplit.get("mean_match_corr")
+    out["pr25_assignment_first_second"] = halfsplit.get("assignment_agreement")
+    odd = splits.get("odd_even_block", {})
+    out["pr25_template_corr_odd_even"] = odd.get("mean_match_corr")
+    mi = d.get("legacy_mi", {})
+    out["mi_permutation_p"] = mi.get("p_value")
+    return out
+
+
+def _validity_subtitle(v: Dict[str, Any]) -> str:
+    """One-line summary of PR-2 cluster validity numbers for figure suptitle."""
+    if not v:
+        return ""
+    parts = []
+    dip_p = v.get("dip_p")
+    if dip_p is not None:
+        parts.append(f"dip p<{1e-3:.0e}" if dip_p < 1e-3 else f"dip p={dip_p:.3g}")
+    ami = v.get("adaptive_ami_at_chosen_k")
+    if ami is not None and np.isfinite(ami):
+        parts.append(f"AMI={ami:.2f}")
+    sil = v.get("adaptive_silhouette_at_chosen_k")
+    if sil is not None and np.isfinite(sil):
+        parts.append(f"sil(KMeans)={sil:.2f}")
+    icr_min = v.get("inter_cluster_min_r")
+    icr_max = v.get("inter_cluster_max_r")
+    if icr_min is not None and icr_max is not None:
+        if abs(icr_min) >= abs(icr_max):
+            parts.append(f"inter-cluster r={icr_min:.2f}")
+        else:
+            parts.append(f"inter-cluster r={icr_max:.2f}")
+    grade = v.get("pr25_grade")
+    if grade:
+        parts.append(f"PR-2.5 {grade}")
+    mi_p = v.get("mi_permutation_p")
+    if mi_p is not None:
+        if mi_p < 1e-3:
+            parts.append(f"MI perm p<0.001")
+        else:
+            parts.append(f"MI perm p={mi_p:.3g}")
+    uplift = v.get("uplift")
+    if uplift is not None and np.isfinite(uplift):
+        parts.append(f"τ uplift +{uplift:.2f}")
+    return " · ".join(parts)
+
+
+def _select_axis_cluster_pair(
+    data: Dict[str, Any],
+) -> Tuple[int, int]:
+    """Pick (a, b) cluster IDs whose templates form the figure's x/y axes.
+
+    Strategy: choose the most anti-correlated template pair (lowest
+    inter-cluster Spearman r). If no inter-cluster matrix or only k=2,
+    fall back to clusters 0 and 1 (or 0 and the next largest).
+    """
+    chosen_k = int(data["chosen_k"])
+    if chosen_k < 2:
+        return 0, 0  # degenerate
+
+    icc = data.get("inter_cluster_corr_matrix")
+    if icc is not None:
+        arr = np.array(icc, dtype=float)
+        n = arr.shape[0]
+        best_r = float("inf")
+        best_pair = (0, 1)
+        for i in range(n):
+            for j in range(i + 1, n):
+                r = arr[i, j]
+                if r is not None and np.isfinite(r) and r < best_r:
+                    best_r = r
+                    best_pair = (i, j)
+        if np.isfinite(best_r):
+            return best_pair
+
+    # Fallback: largest two clusters
+    counts = [(int(t.get("cluster_id", k)), 0) for k, t in enumerate(data.get("templates", []))]
+    return 0, 1
+
+
+def plot_template_distance_plane(
+    data: Dict[str, Any],
+    output_path: Path,
+    is_showcase: bool = False,
+) -> Path:
+    """Single-panel per-subject figure in fixed template-distance coords.
+
+    x = d(event, T_a), y = d(event, T_b) where (a, b) is the most
+    anti-correlated template pair (Spearman r). Axes have universal
+    semantics across all subjects with k>=2:
+      - origin = "event matches both T_a and T_b" (impossible unless T_a==T_b)
+      - on x-axis = "event matches T_b exactly"
+      - on y-axis = "event matches T_a exactly"
+      - diagonal y=x = decision boundary (equidistant)
+      - far from origin = "event is dissimilar to both" (off-mode)
+
+    Templates land at fixed positions:
+      - T_a at (0, d(T_a, T_b))
+      - T_b at (d(T_a, T_b), 0)
+      - T_other at (d(T_a, T_other), d(T_b, T_other))
+
+    Density-aware: marker size proportional to count of identical
+    (x, y) within rounding precision.
+    """
+    if data.get("status") != "ok":
+        logger.warning("Skip %s: status=%s", data.get("subject"), data.get("status"))
+        return output_path
+
+    dataset = data.get("dataset", "")
+    subject = data.get("subject", "")
+    chosen_k = int(data["chosen_k"])
+    events = data["events"]
+    templates = data["templates"]
+    D_tt = np.array(data.get("template_template_distance", [[]]), dtype=float)
+
+    ax_a, ax_b = _select_axis_cluster_pair(data)
+    if ax_a == ax_b:
+        logger.warning("Skip %s: degenerate axis pair (k=%d)", subject, chosen_k)
+        return output_path
+
+    icc = np.array(data.get("inter_cluster_corr_matrix", [[1.0]]), dtype=float)
+    pair_r = float(icc[ax_a, ax_b]) if ax_a < icc.shape[0] and ax_b < icc.shape[1] else float("nan")
+
+    figsize = (8.5, 8.0) if not is_showcase else (11, 10)
+    fig, ax = new_figure(nrows=1, ncols=1, figsize=figsize)
+    style_panel(ax, label="", label_x=-0.10, label_y=1.04)
+    ax.set_facecolor("#FAFAFA")
+
+    # Aggregate (d_to_T_a, d_to_T_b) per cluster, density-aware
+    bin_decimals = 3
+    n_visible = 0
+    n_unique_bins = 0
+    for k in range(chosen_k):
+        col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
+        agree_counts: Dict[Tuple[float, float], int] = {}
+        bound_counts: Dict[Tuple[float, float], int] = {}
+        for ev in events:
+            if ev["kmeans_label"] != k:
+                continue
+            d_each = ev.get("d_to_each_template")
+            if d_each is None or len(d_each) <= max(ax_a, ax_b):
+                continue
+            xv = d_each[ax_a]
+            yv = d_each[ax_b]
+            if xv is None or yv is None or not np.isfinite(xv) or not np.isfinite(yv):
+                continue
+            n_visible += 1
+            key = (round(xv, bin_decimals), round(yv, bin_decimals))
+            if ev.get("agreement", True):
+                agree_counts[key] = agree_counts.get(key, 0) + 1
+            else:
+                bound_counts[key] = bound_counts.get(key, 0) + 1
+        n_unique_bins += len(agree_counts) + len(bound_counts)
+
+        if agree_counts:
+            xs = [p[0] for p in agree_counts.keys()]
+            ys = [p[1] for p in agree_counts.keys()]
+            counts = np.array(list(agree_counts.values()), dtype=float)
+            sizes = EVENT_MARKER_SIZE * np.sqrt(counts)
+            ax.scatter(xs, ys, s=sizes, c=col, alpha=0.55,
+                       edgecolors="none", zorder=2,
+                       label=f"cluster {k}" if k in (ax_a, ax_b) else f"cluster {k} (off-axis)")
+        if bound_counts:
+            xs = [p[0] for p in bound_counts.keys()]
+            ys = [p[1] for p in bound_counts.keys()]
+            counts = np.array(list(bound_counts.values()), dtype=float)
+            sizes = BOUNDARY_MARKER_SIZE * np.sqrt(counts)
+            ax.scatter(xs, ys, s=sizes, facecolors="none",
+                       edgecolors=col, linewidths=1.3, alpha=0.85, zorder=3)
+
+    # Plot all templates at their fixed positions in this plane
+    if D_tt.size > 0:
+        for k in range(chosen_k):
+            col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
+            tx = D_tt[ax_a, k] if ax_a < D_tt.shape[0] and k < D_tt.shape[1] else float("nan")
+            ty = D_tt[ax_b, k] if ax_b < D_tt.shape[0] and k < D_tt.shape[1] else float("nan")
+            if np.isfinite(tx) and np.isfinite(ty):
+                ax.scatter([tx], [ty], marker="*", s=TEMPLATE_MARKER_SIZE,
+                           c=col, edgecolors="black", linewidths=1.5, zorder=5)
+                ax.annotate(f"T{k}", (tx, ty), xytext=(8, 8),
+                            textcoords="offset points", fontsize=FS_TICK,
+                            fontweight="bold")
+
+    # Decision boundary y=x (light line)
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+    diag_lo = max(0.0, min(xmin, ymin))
+    diag_hi = max(xmax, ymax)
+    ax.plot([diag_lo, diag_hi], [diag_lo, diag_hi], color="#999999",
+            lw=1.0, ls="--", alpha=0.6, zorder=1, label="y=x decision boundary")
+    ax.set_xlim(0, xmax)
+    ax.set_ylim(0, ymax)
+
+    ax.set_xlabel(f"d(event, T{ax_a})  [shared-channel RMS rank deviation]", fontsize=FS_LABEL)
+    ax.set_ylabel(f"d(event, T{ax_b})", fontsize=FS_LABEL)
+
+    n_total = data["n_events_total"]
+    agreement = data["agreement_overall"]
+    sil_med = data["silhouette_median"]
+    extra_clusters = chosen_k - 2
+    extra_note = f" + {extra_clusters} off-axis cluster(s)" if extra_clusters > 0 else ""
+    panel_title = (
+        f"Template-distance plane: T{ax_a} vs T{ax_b}  "
+        f"(inter-cluster r={pair_r:.2f})\n"
+        f"{n_visible:,} events on {n_unique_bins} unique rank vectors "
+        f"(k={chosen_k}{extra_note}, agreement={agreement:.3f}, sil={sil_med:.3f})"
+    )
+    ax.set_title(panel_title, fontsize=FS_TITLE - 3, loc="left")
+    ax.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=False)
+
+    # Suptitle: subject id + validity stats
+    validity = _load_pr2_validity(dataset, subject)
+    validity_subtitle = _validity_subtitle(validity)
+    fig.suptitle(
+        f"{dataset.capitalize()} · {subject} — fixed template-distance plane\n"
+        f"{validity_subtitle}",
+        fontsize=FS_TITLE,
+        y=0.998,
+    )
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
+    return savefig_pub(fig, output_path)
 
 
 def plot_per_subject_geometry(
@@ -182,7 +463,7 @@ def plot_per_subject_geometry(
     ax = axes[0, 0]
     style_panel(ax, label="a", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
-    n_pca_visible = _scatter_metric_panel(
+    n_pca_visible, n_pca_bins = _scatter_metric_panel(
         ax, events, templates, chosen_k, x_field="pca_x", y_field="pca_y",
     )
     evr = data.get("pca_explained_variance_ratio", [None, None])
@@ -197,7 +478,10 @@ def plot_per_subject_geometry(
     sil_med = data["silhouette_median"]
     agreement = data["agreement_overall"]
     stress = data["stress"]
-    title_a = f"PCA · all {n_pca_visible} events  (k={chosen_k}  agreement={agreement:.3f})"
+    title_a = (
+        f"PCA · {n_pca_visible:,} events on {n_pca_bins} unique rank vectors  "
+        f"(k={chosen_k}  agreement={agreement:.3f})"
+    )
     ax.set_title(title_a, fontsize=FS_TITLE - 4, loc="left")
 
     # -----------------------------------------------------------------------
@@ -367,25 +651,31 @@ def plot_per_subject_geometry(
     ax = axes[1, 1]
     style_panel(ax, label="d", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
-    n_mds_visible = _scatter_metric_panel(
+    n_mds_visible, n_mds_bins = _scatter_metric_panel(
         ax, events, templates, chosen_k, x_field="mds_x", y_field="mds_y",
     )
     ax.set_xlabel("MDS-1 (template-matching metric)", fontsize=FS_LABEL)
     ax.set_ylabel("MDS-2", fontsize=FS_LABEL)
-    title_d = f"MDS · {n_mds_visible} subsample events  (sil_med={sil_med:.3f}  stress={stress:.2f})"
+    title_d = (
+        f"MDS · {n_mds_visible:,} subsample events  "
+        f"(sil_med={sil_med:.3f}  stress={stress:.2f})"
+    )
     if data.get("stress_warning") or data.get("imputation_warning"):
         title_d += "  ⚠"
     if data.get("subsampled"):
-        title_d += f"\n(subsampled from {n_total})"
+        title_d += f"\n(subsampled from {n_total:,})"
     ax.set_title(title_d, fontsize=FS_TITLE - 4, loc="left")
 
+    validity = _load_pr2_validity(dataset, subject)
+    validity_subtitle = _validity_subtitle(validity)
     fig.suptitle(
         f"{dataset.capitalize()} · {subject} — cluster geometry "
-        f"(KMeans-native PCA + template-matching MDS audit)",
+        f"(KMeans-native PCA + template-matching MDS audit)\n"
+        f"{validity_subtitle}",
         fontsize=FS_TITLE,
-        y=0.995,
+        y=0.997,
     )
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.94))
     return savefig_pub(fig, output_path)
 
 
@@ -698,8 +988,9 @@ def main() -> None:
             sub = data.get("subject", path.stem)
             if args.subjects and sub not in args.subjects:
                 continue
+            # Single-panel template-distance plane (default per user 2026-05-06 review)
             out = PER_SUBJECT_FIG_DIR / f"{ds}_{sub}_geometry.png"
-            plot_per_subject_geometry(data, out, is_showcase=False)
+            plot_template_distance_plane(data, out, is_showcase=False)
 
     if args.showcase:
         cohort = _load_cohort_summary()
@@ -731,7 +1022,7 @@ def main() -> None:
                 logger.warning("Showcase skip %s/%s: no geometry data", ds, sub)
                 continue
             out = SHOWCASE_FIG_DIR / f"{sub}_geometry_showcase.png"
-            plot_per_subject_geometry(data, out, is_showcase=True)
+            plot_template_distance_plane(data, out, is_showcase=True)
             showcase_picks.append((ds, sub))
 
     if args.cohort:

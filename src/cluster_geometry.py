@@ -544,10 +544,11 @@ def compute_subject_geometry(
     agreement_mask = matching_labels == labels
     agreement_overall = float(agreement_mask.mean()) if agreement_mask.size else float("nan")
 
-    # Step 3: event-template distances + per-event readout
+    # Step 3: event-template distances + template-template distances + per-event readout
     D_et = compute_event_template_distances(
         sub_ranks, sub_bools, templates_real, min_shared=min_shared
     )  # (E, k)
+    D_tt = compute_template_template_distances(templates_real, min_shared=min_shared)  # (k, k)
     n_events_valid = D_et.shape[0]
 
     d_within = np.full(n_events_valid, np.nan, dtype=np.float32)
@@ -643,6 +644,7 @@ def compute_subject_geometry(
                 "agreement": bool(agreement_mask[i]),
                 "d_within": _safe_float(d_within[i]),
                 "d_min_other": _safe_float(d_min_other[i]),
+                "d_to_each_template": [_safe_float(v) for v in D_et[i].tolist()],
                 "silhouette": _safe_float(silhouette[i]),
                 "n_participating": int(n_participating[i]),
                 "pca_x": _safe_float(pca_Y_events[i, 0]),
@@ -719,6 +721,7 @@ def compute_subject_geometry(
         "events": events_records,
         "templates": templates_records,
         "templates_real": templates_real.tolist(),
+        "template_template_distance": D_tt.tolist(),
         "inter_cluster_corr_matrix": inter_corr.tolist(),
         "low_coverage_mds_indices": mds_out["low_coverage_indices"],
     }
