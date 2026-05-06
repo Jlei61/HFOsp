@@ -188,36 +188,36 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         [r["primary_pair"]["footrule_normalized"] for r in sorted_records],
         dtype=float,
     )
-    soz_excess = np.array(
-        [
-            r["primary_pair"].get("soz_contribution_excess")
-            if r["primary_pair"].get("soz_contribution_excess") is not None
-            else np.nan
-            for r in sorted_records
-        ],
-        dtype=float,
-    )
+    # SOZ contribution_excess is intentionally NOT plotted on the figure -
+    # SOZ definition / channel coverage in the lagPat selected set is not
+    # yet stable enough for a paper-level claim (see archive doc §5.1, §6).
 
     finite = matrix[np.isfinite(matrix)]
     vmax = float(np.nanmax(np.abs(finite))) if finite.size else 1.0
     vmax = max(vmax, 1e-6)
     norm = TwoSlopeNorm(vcenter=0.0, vmin=-vmax, vmax=vmax)
 
-    fig = plt.figure(figsize=(15, max(7.0, 0.42 * n_sub) + 1.2))
+    # Layout:
+    #   [ heatmap (wide)    | F_norm track | Kendall τ track ]   <- main row
+    #   [ horizontal cbar   |              |                 ]   <- cbar under heatmap
+    # SOZ contribution_excess track removed (SOZ definition not yet stable
+    # in this cohort's selected channel set; archive doc §6).
+    fig = plt.figure(figsize=(13, max(7.5, 0.42 * n_sub) + 1.6))
     gs = fig.add_gridspec(
-        1, 5,
-        width_ratios=[7.0, 1.0, 1.2, 1.2, 0.30],
+        2, 3,
+        width_ratios=[7.5, 1.1, 1.1],
+        height_ratios=[1.0, 0.045],
         wspace=0.10,
-        top=0.86,
+        hspace=0.22,
+        top=0.92,
         bottom=0.10,
-        left=0.08,
-        right=0.96,
+        left=0.10,
+        right=0.97,
     )
-    ax_h = fig.add_subplot(gs[0])
-    ax_F = fig.add_subplot(gs[1], sharey=ax_h)
-    ax_tau = fig.add_subplot(gs[2], sharey=ax_h)
-    ax_soz = fig.add_subplot(gs[3], sharey=ax_h)
-    ax_cb = fig.add_subplot(gs[4])
+    ax_h = fig.add_subplot(gs[0, 0])
+    ax_F = fig.add_subplot(gs[0, 1], sharey=ax_h)
+    ax_tau = fig.add_subplot(gs[0, 2], sharey=ax_h)
+    ax_cb = fig.add_subplot(gs[1, 0])  # horizontal colorbar under heatmap
 
     im = ax_h.imshow(
         matrix,
@@ -301,36 +301,11 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_tau.spines["top"].set_visible(False)
     ax_tau.spines["right"].set_visible(False)
 
-    # Track 3: SOZ contribution_excess horizontal mini-bars (ref at 0)
-    finite_excess = np.isfinite(soz_excess)
-    excess_for_plot = np.where(finite_excess, soz_excess, 0.0)
-    bar_colors_soz = [
-        COL_NEUTRAL if finite_excess[i] else "lightgray"
-        for i in range(n_sub)
-    ]
-    ax_soz.barh(
-        range(n_sub), excess_for_plot,
-        color=bar_colors_soz, edgecolor="black", linewidth=0.4,
-    )
-    ax_soz.axvline(0, color="gray", linewidth=0.7, linestyle="--")
-    excess_max = float(np.nanmax(np.abs(soz_excess[finite_excess]))) if finite_excess.any() else 0.4
-    soz_xlim = max(0.4, excess_max + 0.05)
-    ax_soz.set_xlim(-soz_xlim, soz_xlim)
-    ax_soz.set_xticks([-soz_xlim + 0.05, 0, soz_xlim - 0.05])
-    ax_soz.set_xticklabels([f"{-soz_xlim+0.05:.2f}", "0", f"{soz_xlim-0.05:.2f}"],
-                           fontsize=FS_TICK - 4)
-    plt.setp(ax_soz.get_yticklabels(), visible=False)
-    ax_soz.set_xlabel(
-        "SOZ excess\n(contribution − channel fraction)",
-        fontsize=FS_LABEL - 3, labelpad=8,
-    )
-    ax_soz.spines["top"].set_visible(False)
-    ax_soz.spines["right"].set_visible(False)
-
-    # Colorbar
-    cb = fig.colorbar(im, cax=ax_cb)
-    cb.set_label("Signed Δr (= rank_Tb − rank_Ta)", fontsize=FS_LABEL - 2)
-    cb.ax.tick_params(labelsize=FS_TICK - 4)
+    # Horizontal colorbar under heatmap
+    cb = fig.colorbar(im, cax=ax_cb, orientation="horizontal")
+    cb.set_label("Signed Δr  (= rank_T_b − rank_T_a)",
+                 fontsize=FS_LABEL - 2, labelpad=4)
+    cb.ax.tick_params(labelsize=FS_TICK - 3)
 
     # Legend — paper-level: only the displacement colorbar and SOZ outline
     legend_handles = [

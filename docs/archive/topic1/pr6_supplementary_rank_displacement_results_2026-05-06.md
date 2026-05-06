@@ -73,17 +73,17 @@ reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`
 
 | 元素 | 内容 |
 |---|---|
-| 主热图（左）| 23 subject × 通道 Δr 热图，行按 **F_norm 降序**（最反向在最上），列按 rank_T_a_dense（T_a source → sink），SOZ 通道黑框 |
-| Track 1 — F_norm | 水平 mini-bar，范围 [0, 1]，虚线参考 **2/3 (Diaconis-Graham 渐近随机期望)** |
-| Track 2 — Kendall τ | 水平 mini-bar，范围 [−1, +1]，虚线参考 **τ=0** |
-| Track 3 — SOZ contribution_excess | 水平 mini-bar，范围 ±0.36，虚线参考 **excess=0**（SOZ 在 chance baseline），NaN 浅灰 |
-| Colorbar（最右）| Signed Δr (= rank_T_b − rank_T_a) 量级 |
+| 主热图（左上）| 23 subject × 通道 Δr 热图，行按 **F_norm 降序**（最反向在最上），列按 rank_T_a_dense（T_a source → sink），SOZ 通道黑框 |
+| Track 1 — F_norm（右）| 水平 mini-bar，范围 [0, 1]，虚线参考 **2/3 (Diaconis-Graham 渐近随机期望)** |
+| Track 2 — Kendall τ（右）| 水平 mini-bar，范围 [−1, +1]，虚线参考 **τ=0** |
+| Colorbar（主热图正下方，水平）| Signed Δr (= rank_T_b − rank_T_a) 量级 |
 
-### 3.2 三条线性叙事（每一行同时讲三件事）
+**SOZ contribution_excess 不画在主图上**：lagPat 通道集对 SOZ 的覆盖与 SOZ 标注本身（i/l/e 边界）在本 cohort 上还没稳定到能进 paper 图的程度，§3.3 / §5.1 详述。SOZ 统计存在 archive，但不进 paper-level supplementary。
 
-1. **Cohort 是连续谱（不是离散二分）**：F_norm Track 从顶部 1.00（`epi_1073, epi_139`）单调递减到底部 0.39（`epi_442`），中间没有自然分界。Kendall τ Track 镜像一致（−0.77 到 +0.43）。Spearman ρ(F_norm, Kendall τ) = −0.92，两个指标基本测量同一件事。
+### 3.2 两条线性叙事（每一行同时讲两件事）
+
+1. **Cohort 是连续谱（不是离散二分）**：F_norm Track 从顶部 1.00（`epi_1073, epi_139`）单调递减到底部 0.39（`epi_442`），中间没有自然分界。Kendall τ Track 镜像一致（−0.77 到 +0.43）。Spearman ρ(F_norm, Kendall τ) = −0.92，两个指标基本测量同一件事——τ 提供 sign + rank-pair 解读，F_norm 提供 L1 magnitude 解读。
 2. **真反向看主热图梯度**：最上几行（F_norm > 0.92, τ < −0.5）呈"红→蓝单调梯度"——因为列轴严格按 rank_T_a_dense 排序，梯度只来自数据本身、不是排序伪影。中段 τ ≈ 0 的几行颜色散乱、无单调梯度。
-3. **SOZ 不解释反向强度**：Track 3 的 bar 在 0 附近散乱，**没有**随 F_norm 单调。Spearman ρ(F_norm, soz_contribution_excess) = **0.193, p = 0.376, n=23** —— rank reversal 强的 subject 并没有系统性的 SOZ enrichment。
 
 ### 3.3 关键数字（cohort-level）
 
@@ -91,8 +91,13 @@ reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`
 |---|---|---|---|
 | F_norm | [0.393, 1.000] | ≈ 0.78 | Diaconis-Graham 渐近随机参考点 = 2/3 |
 | Kendall τ | [−0.767, +0.429] | ≈ −0.20 | τ = 0 为零相关参考 |
-| soz_contribution_excess | [−0.357, +0.190] | ≈ 0 | excess = 0 为 chance baseline |
-| soz_channel_fraction | [0.16, 0.95] | ≈ 0.55 | cohort 通道集大约 55% 是 SOZ |
+
+**SOZ 相关数字（不进 paper figure，仅记录）**：
+- soz_contribution_excess 范围 [−0.357, +0.190]，median ≈ 0
+- soz_channel_fraction median ≈ 0.55（cohort 通道集大约 55% 是 SOZ）
+- Spearman ρ(F_norm, soz_contribution_excess) = 0.193, p = 0.376, n=23 — 几乎不相关
+
+但 lagPat 通道选择本身 + SOZ 标注 i/l/e 边界都还没稳定（§5.1, §6）；这些数字是 descriptive only，**不**进 paper-level conclusion。
 
 per-subject Δr 痕迹（按 Kendall τ 升序，沿 T_a source→sink 排序）：
 
@@ -109,7 +114,7 @@ epilepsiae_548     τ=-0.394  Δr = [+11, +7, +8, +6, -1, -4, -4, -3, -2, -4, -3
 
 ### 3.4 通道选择 caveat（必带）
 
-通道选择本身已把"全脑"裁剪过了（lagPat 来自 high-HI gate + 高 HFO rate），所以 §3.2 的 SOZ 阴性发现 **不能**推到"SOZ 在全脑层面不参与反向"的强声明。详见 §5.1。
+lagPat 通道集来自 legacy high-HI gate + 高 HFO rate；F_norm 与 Kendall τ 度量的是该选定通道集**之内**的 ranking，不是真实全脑反向程度。SOZ contribution_excess 同理——`soz_channel_fraction ≈ 0.55` 已经反映这种采样偏差，所以 SOZ vs nonSOZ 的对比 **没有进入 paper figure**。详见 §5.1。
 
 ## 4. 图
 
@@ -205,9 +210,10 @@ PR-2.5 候选门槛 ρ_inter < −0.5 在这些 subject 上一刀切，把它们
 3. v3：F_norm > 2/3 binary violin → user 指出按 F_norm 分组再画 F_norm violin 是循环展示
 4. v4：ρ_inter vs F_norm + F_norm vs SOZ excess 双 scatter → user 指出 Panel B 的 PR-2.5 内部 workflow 不该出现在 paper 图
 5. v5：ranked F_norm spectrum + F_norm vs SOZ excess scatter，去 PR-2.5 → user 指出仍把 cohort heatmap 与 reversal/SOZ 拆成两图，信息散在三个坐标系，不够干净
-6. **v6（当前）**：**单张 composite figure** —— cohort heatmap 主体 + 右侧三条共享 y 轴 summary track（F_norm, Kendall τ, SOZ excess）。每一行 = 一个 subject，所有信息在同一坐标系。完全去 PR-2.5 内部分类，paper-level 只讲连续谱与 SOZ 阴性发现。
+6. v6：单张 composite figure —— cohort heatmap + 三条共享 y 轴 summary track（F_norm, Kendall τ, SOZ excess）+ 右侧 vertical colorbar → user 指出 SOZ 列在本 cohort 上还没稳定，不该进 paper 图；同时建议 colorbar 移到主热图正下方
+7. **v7（当前）**：单张 composite figure，**只保留两条 summary track**（F_norm + Kendall τ），SOZ 列移除；colorbar **水平放置在主热图下方**。SOZ 统计仍在 archive 文档作 descriptive 记录，但不进 paper-level conclusion。
 
-每一轮的具体批评见 worktree git log；当前归档文档与 figure 已收敛到 v6。
+每一轮的具体批评见 worktree git log；当前归档文档与 figure 已收敛到 v7。
 
 ## 7. 历史链接
 
