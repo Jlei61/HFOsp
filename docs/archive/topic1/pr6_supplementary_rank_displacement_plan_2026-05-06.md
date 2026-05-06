@@ -24,8 +24,8 @@
 1. 逐通道有符号位移 Δr(ch) = rank_Tb(ch) − rank_Ta(ch)
 2. 整体 Spearman footrule F = Σ|Δr| 与 Diaconis–Graham 归一化 F/F_max
 3. 整体 Kendall τ(rank_Ta, rank_Tb)
-4. PR-6 supplementary cohort（≤23 subject）× channel 谱系热图（rows 按 τ 排序）
-5. footrule cohort 分布（按 PR-2.5 候选门槛 ρ_inter < −0.5 划分：候选 cohort = TRUE+FALSE，非候选 = None）
+4. PR-6 supplementary cohort（≤23 subject）× channel 谱系热图（rows 按 τ 排序，bars 颜色按 F_norm > 2/3 分组）
+5. footrule cohort 分布（按**本 supplementary 自己的 F_norm 在 D-G 渐近随机参考点 2/3 处**分组：F_norm > 2/3 vs F_norm ≤ 2/3；**不**用任何 PR-2.5 派生阈值）。Panel B 不做 MW-U on F_norm（循环论证），改用 Spearman ρ(F_norm, τ) 作 continuous 统计；Panel C 做 MW-U on τ（descriptive only）
 6. supplementary archive doc + 顶刊风格 figure (PNG + PDF)
 
 **不做**（违反则任务失败）：
