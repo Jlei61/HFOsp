@@ -65,37 +65,46 @@ reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`
 
 ## 3. 主结果（按本 supplementary 自己的指标分组，含 Mann-Whitney U）
 
-**分组合同（pre-registered，写死）**：弃用任何 PR-2.5 派生的硬阈值（`reproduced/not-reproduced` 是 PR-2.5 二步嵌套的 binary；`ρ_inter < −0.5` 是 PR-2.5 候选门槛——都是另一个 PR 的硬阈值）。改为按**本 supplementary 自己计算的 footrule** 在 **Diaconis-Graham 渐近随机参考点 2/3** 处分组：
+**Visualization contract（post-hoc，不是 pre-registered）**：本节描述 figure 的展示选择。设计经过两轮 user review 后从二分 violin 改为连续 scatter，目的是避免任何"循环展示"——即按一个阈值分组之后再画该指标的 violin（信息量等于 if-条件可视化）。当前 figure 的设计如下。
 
-| group | 定义 | n |
+**Panel B —— ρ_inter vs F_norm scatter**（回答 "PR-2.5 硬阈值 ρ < −0.5 漏掉了哪些 continuous high-reversal subject"）：
+
+- x 轴：`inter_cluster_corr_matrix` Spearman ρ_inter（PR-2.5 metric）
+- y 轴：F_norm（D-G 归一化 footrule）
+- 参考线：x = −0.5（PR-2.5 候选门槛，FYI），y = 2/3（D-G 渐近随机参考，FYI）—— **都是描述性参考，不是决策规则**
+- marker：圆 = PR-2.5 reproduced (n=6)，X = candidate-fail (n=1, `huanghanwen`)，方 = non-candidate (n=16)
+
+23 个 subject 的象限分布：
+
+| 象限 | 含义 | n |
 |---|---|---|
-| F_norm > 2/3（above asymptotic random）| 比纯随机排列的 D-G 渐近期望（≈2/3）更大的归一化 footrule | **15** |
-| F_norm ≤ 2/3（around random）| 在或低于 D-G 渐近随机参考点 | **8** |
+| TL（ρ < −0.5 ∩ F > 2/3）| 两个指标都判"高反向" | **7** (6 reproduced + 1 candidate-fail) |
+| **TR（ρ ≥ −0.5 ∩ F > 2/3）** | **PR-2.5 硬阈值漏掉的 borderline subject** | **8** (`epi_1150, 1146, 583, hanyuxuan, 1077, liyouran, 590, chengshuai`) |
+| BR（ρ ≥ −0.5 ∩ F ≤ 2/3）| 两个指标都判"around random" | 8 |
+| BL（ρ < −0.5 ∩ F ≤ 2/3）| 异常情况（无） | 0 |
 
-**为什么用 2/3 而不是 ρ_inter < −0.5 / `forward_reverse_reproduced`**：
-- 2/3 是 Spearman footrule 在均匀随机置换下 n→∞ 的渐近期望（Diaconis-Graham 1977）—— **数学上的自然参考点**，不依赖任何 PR 的人为阈值
-- ρ_inter < −0.5 是 PR-2.5 候选门槛，本质上是另一个 PR 的硬阈值；borderline subject（ρ_inter ∈ [−0.5, −0.3]）会被错误划到"非候选"组
-- `forward_reverse_reproduced` 是 PR-2.5 在候选门槛之上又叠了一个 reproducibility 测试，**两步嵌套**让"未测候选"和"测了不过"在同一个 None bucket，更糟
+Spearman ρ(ρ_inter, F_norm) = **−0.963, p = 1.8e−13, n=23** — 两个 anti-correlation 指标共线性极高（这是 expected：都测两个 cluster template 的相反程度），所以 Panel B 的核心信息**不是** "ρ_inter 与 F_norm 谁更好"，而是 **"PR-2.5 在 ρ = −0.5 处砍一刀，正好砍掉了 8 个 F_norm 仍 > 2/3 的 subject"**。
 
-| 指标 | F_norm > 2/3 (n=15) | F_norm ≤ 2/3 (n=8) | 统计 |
-|---|---|---|---|
-| F_norm 中位数 | **0.880** | 0.491 | (按 F_norm 分组测 F_norm 是循环论证，**不**做 MW-U) |
-| Kendall τ 中位数 | **−0.333** | +0.295 | **MW-U U=6.0, p = 0.000548**（descriptive，非 PASS gate）|
-| `soz_contribution_excess` 中位数 | +0.067 | −0.055 | MW-U p ≈ 0.048（borderline，descriptive only）|
+**重要边界**：F_norm > 2/3 不是 "明确呈现真反向" —— 2/3 是 Diaconis-Graham 渐近随机期望（n→∞），**不是显著性阈值**。"F_norm > 2/3" 的正确读法是 "**比均匀随机置换的渐近期望更大的归一化 footrule**"，可作连续谱上的描述性切分点，**不**作"reversal 是否真存在"的判定。
 
-**Spearman ρ(F_norm, Kendall τ) = −0.924, p = 3.4e−10, n=23**（continuous，principled）—— 两个指标高度反向相关，证明它们捕捉同一个底层几何（rank reversal degree）。
+**Panel C —— F_norm vs soz_contribution_excess scatter**（回答 "rank reversal 强的 subject 是否更 SOZ-driven"）：
 
-### 3.1 高 F_norm 组（n=15）的 PR-2.5 状态混合
+- x 轴：F_norm
+- y 轴：`soz_contribution_excess` (= contribution_fraction − channel_fraction，baseline-corrected)
+- 参考线：x = 2/3（D-G 渐近随机，FYI），y = 0（SOZ 在 chance baseline，FYI）
+- marker 同 Panel B
 
-PR-2.5 status 在 F_norm > 2/3 组内的分布：
+Spearman ρ(F_norm, soz_contribution_excess) = **0.193, p = 0.376, n=23** — 几乎不相关。
 
-- 6 reproduced（PR-2.5 候选 + reproducibility 通过）：`epi_1073, 139, 958, chenziyang, 635, 548`
-- 1 candidate-fail（PR-2.5 候选但 reproducibility 失败）：`yuq_huanghanwen`
-- 8 non-candidate（PR-2.5 ρ_inter ≥ −0.5）：`epi_1150, 1146, 583, hanyuxuan, 1077, liyouran, 590, chengshuai`
+**这是诚实的 negative finding**：rank reversal 强（F_norm 高）的 subject **并没有**系统性地更高 SOZ enrichment。即使在 F_norm > 2/3 的 15 个 subject 中，soz_contribution_excess 也散布在 [−0.07, +0.19]，median ≈ +0.07，effect size 小。
 
-**这正是按 PR-2.5 阈值分组的盲点**：8 个 non-candidate subject 在我们指标上明确呈现"高于随机的 reversal"（F_norm > 2/3），但 PR-2.5 候选门槛把他们划在外面。borderline ρ_inter（如 `epi_1146` ρ=−0.464, `yuq_liyouran` ρ=−0.404, `epi_1077` ρ=−0.371）的 subject 仍带显著反向几何，只是没过 PR-2.5 二分门槛。
+**正确读法**：
 
-**重要 caveat**：MW-U p = 0.000548 并非 PASS gate；§0 禁区第 1 条写死本 supplementary 不开 cohort PASS 检验。这里只作描述。Spearman ρ = −0.924 反映 F_norm 与 Kendall τ 在本 cohort 上的高度共线性——两个指标基本测量同一件事（rank displacement / inverse rank concordance），所以"按 F_norm 分组测 τ"的 MW-U 在 effect size 上是基本可预测的，**不是独立证据**。它的意义在于：把分组从 PR-2.5 阈值移到 D-G 渐近参考之后，多了 8 个 borderline subject 进入"高反向"组，而这些 subject 的 τ 同样显著偏负。
+✅ "Geometry reversal 在 cohort 上呈现连续谱（F_norm 0.39 → 1.00），PR-2.5 候选门槛 ρ < −0.5 把谱在 7 vs 16 处一刀切，漏掉 8 个 F_norm > 2/3 的 borderline subject"
+✅ "高反向 subject 与 SOZ enrichment 之间无强关联（Spearman ρ = 0.19, p = 0.38）；在 lagPat 选定通道集内，rank reversal 不能由 SOZ-vs-nonSOZ 通道占比来解释"
+
+❌ ~~"F_norm > 2/3 = 真实反向"~~ —— 2/3 是渐近随机期望，不是显著性阈值
+❌ ~~"PR-2.5 cohort 与 non-candidate 在 F_norm 上显著分离（MW-U p ~ 1e−4）"~~ —— 按 F_norm 分组再测 F_norm 是循环论证，不要这样写
 
 ### 3.2 与 PR-6 离散 swap_node 一致性 cross-check
 
@@ -122,15 +131,19 @@ epilepsiae_548     τ=-0.394  Δr = [+11, +7, +8, +6, -1, -4, -4, -3, -2, -4, -3
 
 每行单调"红→蓝"梯度都来自数据本身，**不是** sorting bias —— 列轴严格按 rank_T_a_dense 排序。τ ≈ 0 的 subject（如 `yuquan_chengshuai` τ=0.000, `epilepsiae_922` τ=+0.429）在同一排序规则下颜色散乱无梯度，是反 sorting bias 的实证。
 
-### 3.3 SOZ enrichment（baseline-corrected, descriptive only）
+### 3.3 SOZ enrichment vs reversal（continuous，无分组）
 
-| 指标 | F_norm > 2/3 (n=15) | F_norm ≤ 2/3 (n=8) | MW-U p（descriptive）|
-|---|---|---|---|
-| `soz_contribution_excess` 中位数 | +0.067 | −0.055 | p ≈ 0.048（borderline）|
-| `soz_minus_nonsoz_abs_mean` 中位数 | +1.500 | +1.250 | — |
-| `soz_channel_fraction` 中位数 | 0.500 | 0.578 | — |
+cohort 上 23 个 subject 的 (F_norm, soz_contribution_excess) 散布范围：
 
-**`soz_contribution_excess` borderline 高于 0 in F_norm > 2/3 组**：descriptive 提示在"高反向"组中，SOZ 通道在 Δr 上参与略高于其通道占比，但 effect size 很小（中位数差 ~0.12）且在 F_norm ≤ 2/3 组中反向（−0.055）。**不**作为 SOZ enrichment 的独立证据；§5.1 的通道选择 caveat 直接限制了任何 SOZ-vs-nonSOZ 比较的解读力度。
+- F_norm 范围：[0.39, 1.00]
+- soz_contribution_excess 范围：[−0.36, +0.19]，median ≈ 0
+- soz_channel_fraction median ≈ 0.55（cohort 通道集大约 55% 是 SOZ）
+
+**Spearman ρ(F_norm, soz_contribution_excess) = 0.193, p = 0.376, n=23** —— 几乎不相关。
+
+诚实结论：**rank reversal 强的 subject 并没有系统性的 SOZ enrichment**。即使在高 F_norm 端（F > 2/3, n=15），soz_contribution_excess 散布在 [−0.07, +0.19]，median ≈ +0.07，effect size 小且方向不齐。这意味着在 lagPat 选定通道集内，rank reversal 程度不能由 SOZ-vs-nonSOZ 通道占比解释。Panel C 把这个 negative finding 可视化清楚。
+
+§5.1 的通道选择 caveat 直接限制了任何 SOZ-vs-nonSOZ 比较的解读力度——本 supplementary 用的 lagPat 通道集是 high-HI gate + 高 HFO rate 选出的，**不是**全脑或随机抽样，所以 SOZ vs nonSOZ 的 contribution_excess 反映的是该选定通道集内部的对比，**不是** "SOZ 是不是真的驱动反向"。
 
 ## 4. 图
 
@@ -174,19 +187,19 @@ PR-2.5 `forward_reverse_reproduced` flag 的逻辑是**两步嵌套**：
 
 这些 subject 都是 **borderline**：ρ_inter 在 [−0.5, −0.3] 之间，没过 PR-2.5 候选门槛但仍带明显反向几何。把它们与 ρ_inter ≈ 0 的真随机 subject（如 `yuquan_litengsheng` ρ=−0.141）一起塞进"non-reproduced"组会产生伪 bimodality。
 
-**正确分组（采用）**：
-- **Group A — 候选 cohort（ρ_inter < −0.5）**：n=7 = 6 TRUE + 1 FALSE（`yuquan_huanghanwen` ρ=−0.527）
-- **Group B — 非候选（ρ_inter ≥ −0.5）**：n=16
+**当前 figure 的处理（visualization contract，详见 §3）**：弃用任何 binary 分组——既不用 PR-2.5 派生阈值（reproduced/not-reproduced 或 ρ_inter < −0.5），也不用本 supplementary 自己的 F_norm > 2/3 作为分组逻辑（按 F_norm 分组再画 F_norm violin 是循环展示）。改为 ρ_inter vs F_norm 与 F_norm vs SOZ excess 两张连续 scatter，PR-2.5 status 仅作 marker shape 描述性 overlay。这种设计避免了任何 "把 if 条件画一遍" 的低信息量展示。
 
-非候选组里包含几个 borderline subject (ρ_inter ∈ [−0.5, −0.3])，他们的 F_norm 偏高是数据本身的连续谱使然，**不是分组错误**。对感兴趣 borderline subject 的更细分析需要绕开 PR-2.5 二分门槛，做 continuous metric vs continuous outcome 比较，本 supplementary 不做。
+borderline subject (ρ_inter ∈ [−0.5, −0.3]，F_norm > 2/3) 在 Panel B 的 TR 象限自然现身（`epi_1150, 1146, 583, hanyuxuan, 1077, liyouran, 590, chengshuai`，n=8），无需任何 binary 操作就能可视化"PR-2.5 硬阈值漏掉了哪些 continuous high-reversal subject"。
+
+更细致的 borderline 分析（continuous metric vs continuous outcome 回归、bootstrap CI、per-subject case series 等）属于另一个 PR 的范围，本 supplementary 不做。
 
 ### 5.3 可以说 / 不可以说
 
 可以说：
 - "Continuous-version footrule + Kendall τ 与 PR-6 离散 swap_node 同向，6/6 fwd/rev-reproduced subject 一致"
-- "Forward/reverse-reproduced subject 的 Kendall τ 中位数 = −0.495，集中在 [−0.77, −0.39]；F_norm 中位数 = 0.964（接近完全反向）"
-- "Not reproduced subject 的 F_norm 中位数 = 0.688，接近 asymptotic random reference（≈ 2/3，n→∞ 渐近）"
-- "SOZ `contribution_excess` 中位数 reproduced = +0.018, not reproduced = +0.040 —— SOZ 在两组中都没有明显 enrichment（descriptive only）"
+- "Geometry reversal 在 cohort 上呈现连续谱（F_norm 0.39 → 1.00），上至 1.00（完全反向边界）下至 0.39（低于 D-G 渐近随机参考 2/3）"
+- "PR-2.5 候选门槛 ρ_inter < −0.5 把谱一刀切为 7 vs 16，**漏掉 8 个 F_norm 仍高于 D-G 渐近参考的 borderline subject**（`epi_1150, 1146, 583, hanyuxuan, 1077, liyouran, 590, chengshuai`）"
+- "高反向 subject 与 SOZ enrichment 之间无强关联（Spearman ρ(F_norm, soz_contribution_excess) = 0.19, p = 0.38, n=23）；在 lagPat 选定通道集内，rank reversal 程度不能由 SOZ-vs-nonSOZ 通道占比解释"
 
 **不**可以说：
 - ~~"反向 template 是抑制墙的反弹"~~ — HFO 80–250 Hz 不区分 E/I

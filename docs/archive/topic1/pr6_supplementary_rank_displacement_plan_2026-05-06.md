@@ -18,7 +18,9 @@
 
 ---
 
-## 0. 范围与禁区（pre-registered，写死）
+## 0. 范围与禁区（visualization + analysis contract，post-hoc 修订过两轮，写死）
+
+> **诚实标注**：本节最初按 pre-registered 风格写，但 §0 第 5、6、7、8 条与 §3.0 sign anchor 合同、§3.3 SOZ baseline correction、Panel B/C scatter 设计都是在 user review 之后加入或重写的。所以这是 **post-hoc visualization + analysis contract**，不是真正意义的 pre-registration。当前版本是经过两轮 review 收敛后的写死版本——后续不再放宽，但放在 archive 而非 main doc 是为了保留 review 演化痕迹。
 
 **做**：
 1. 逐通道有符号位移 Δr(ch) = rank_Tb(ch) − rank_Ta(ch)
