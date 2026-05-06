@@ -287,29 +287,60 @@ def _select_axis_cluster_pair(
     return 0, 1
 
 
+def _trilaterate_xy(d_a: float, d_b: float, d_ab: float) -> Tuple[float, float, bool]:
+    """Place event at (x, y) given distances to two reference templates T_a, T_b.
+
+    Geometry: T_a at (0, 0), T_b at (d_ab, 0). Event at (x, y) consistent with
+    ||event - T_a|| = d_a and ||event - T_b|| = d_b:
+        x = (d_a² - d_b² + d_ab²) / (2 d_ab)
+        y = sqrt(max(0, d_a² - x²))
+
+    For Euclidean metrics this is exact (a unique solution up to y-sign).
+    For masked-Euclidean metrics the law of cosines may not hold strictly
+    (the per-pair shared channel sets differ), in which case d_a² < x²
+    and we collapse y -> 0 and report on_plane=False.
+    """
+    if not (np.isfinite(d_a) and np.isfinite(d_b) and np.isfinite(d_ab)):
+        return float("nan"), float("nan"), False
+    if d_ab <= 1e-9:
+        return float("nan"), float("nan"), False
+    x = (d_a * d_a - d_b * d_b + d_ab * d_ab) / (2.0 * d_ab)
+    y_sq = d_a * d_a - x * x
+    on_plane = y_sq >= -1e-9
+    y = float(np.sqrt(max(0.0, y_sq)))
+    return float(x), y, bool(on_plane)
+
+
 def plot_template_distance_plane(
     data: Dict[str, Any],
     output_path: Path,
     is_showcase: bool = False,
 ) -> Path:
-    """Single-panel per-subject figure in fixed template-distance coords.
+    """Single-panel per-subject figure in trilateration coords with two
+    reference templates.
 
-    x = d(event, T_a), y = d(event, T_b) where (a, b) is the most
-    anti-correlated template pair (Spearman r). Axes have universal
-    semantics across all subjects with k>=2:
-      - origin = "event matches both T_a and T_b" (impossible unless T_a==T_b)
-      - on x-axis = "event matches T_b exactly"
-      - on y-axis = "event matches T_a exactly"
-      - diagonal y=x = decision boundary (equidistant)
-      - far from origin = "event is dissimilar to both" (off-mode)
-
-    Templates land at fixed positions:
-      - T_a at (0, d(T_a, T_b))
+    For each event we solve the 2D position consistent with its distances
+    to two reference templates T_a and T_b:
+      - T_a at (0, 0)
       - T_b at (d(T_a, T_b), 0)
-      - T_other at (d(T_a, T_other), d(T_b, T_other))
+      - x = projection along T_a-T_b axis
+      - y = perpendicular off-axis distance (>= 0)
 
-    Density-aware: marker size proportional to count of identical
-    (x, y) within rounding precision.
+    Templates therefore sit AT cluster centers (events of matching cluster
+    a actually cluster around T_a at the origin; events of cluster b
+    cluster around T_b at (d_ab, 0)). The matching argmin decision
+    boundary is the perpendicular bisector x = d_ab/2 (vertical line),
+    not tautological with the color: events on either side of x=d_ab/2
+    can carry independent y variability that reflects how off-axis their
+    rank pattern is.
+
+    For k>2 the off-axis matching clusters are placed at their natural
+    trilateration positions (using their distances to T_a and T_b);
+    they typically appear off the x-axis at y > 0.
+
+    The fraction of events with on_plane=False (masked-metric triangle
+    violation) is reported in the panel title — this measures how
+    Euclidean-consistent the masked metric is for each subject.
     """
     if data.get("status") != "ok":
         logger.warning("Skip %s: status=%s", data.get("subject"), data.get("status"))
@@ -329,25 +360,27 @@ def plot_template_distance_plane(
 
     icc = np.array(data.get("inter_cluster_corr_matrix", [[1.0]]), dtype=float)
     pair_r = float(icc[ax_a, ax_b]) if ax_a < icc.shape[0] and ax_b < icc.shape[1] else float("nan")
+    d_ab = float(D_tt[ax_a, ax_b]) if ax_a < D_tt.shape[0] and ax_b < D_tt.shape[1] else float("nan")
+    if not np.isfinite(d_ab) or d_ab <= 1e-9:
+        logger.warning("Skip %s: degenerate template-template distance d_ab=%s", subject, d_ab)
+        return output_path
 
-    figsize = (8.5, 8.0) if not is_showcase else (11, 10)
+    figsize = (9.5, 8.0) if not is_showcase else (12, 10)
     fig, ax = new_figure(nrows=1, ncols=1, figsize=figsize)
     style_panel(ax, label="", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
 
-    # Color events by **matching_label** so that, by construction, all
-    # blue events have d_to_T_a < d_to_T_b (above diagonal y>x) and all
-    # rust events have d_to_T_b < d_to_T_a (below). y=x then is the strict
-    # decision boundary for matching's argmin rule (k=2 case; for k>2 it
-    # is the T_a-vs-T_b slice, with off-axis matching clusters falling on
-    # either side depending on which axis their template is closer to).
-    # Open circles flag events where KMeans's full-rank decision disagrees
-    # with matching's masked-distance decision (metric drift).
+    # Trilaterate each event into 2D using its distances to T_a and T_b.
+    # Color by matching_label so the matching decision boundary x=d_ab/2 is
+    # consistent with color (cluster a left of bisector, cluster b right);
+    # but the y axis carries independent off-axis information so the figure
+    # is NOT tautological with the coloring.
     bin_decimals = 3
     n_visible = 0
     n_unique_bins = 0
     n_unassigned = 0
     n_disagree = 0
+    n_offplane = 0
 
     for k in range(chosen_k):
         col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
@@ -360,12 +393,13 @@ def plot_template_distance_plane(
             d_each = ev.get("d_to_each_template")
             if d_each is None or len(d_each) <= max(ax_a, ax_b):
                 continue
-            xv = d_each[ax_a]
-            yv = d_each[ax_b]
-            if xv is None or yv is None or not np.isfinite(xv) or not np.isfinite(yv):
+            xe, ye, on_plane = _trilaterate_xy(d_each[ax_a], d_each[ax_b], d_ab)
+            if not np.isfinite(xe) or not np.isfinite(ye):
                 continue
+            if not on_plane:
+                n_offplane += 1
             n_visible += 1
-            key = (round(xv, bin_decimals), round(yv, bin_decimals))
+            key = (round(xe, bin_decimals), round(ye, bin_decimals))
             if ev.get("agreement", True):
                 agree_counts[key] = agree_counts.get(key, 0) + 1
             else:
@@ -391,9 +425,7 @@ def plot_template_distance_plane(
             ax.scatter(xs, ys, s=sizes, facecolors="none",
                        edgecolors=col, linewidths=1.3, alpha=0.85, zorder=3)
 
-    # Plot unassigned (matching_label = -1) events in neutral gray for
-    # honesty — they cannot be argmin'd because no template has enough
-    # shared channels.
+    # Plot unassigned (matching_label = -1) events in neutral gray.
     unassigned_counts: Dict[Tuple[float, float], int] = {}
     for ev in events:
         if ev.get("matching_label", -1) != -1:
@@ -401,13 +433,14 @@ def plot_template_distance_plane(
         d_each = ev.get("d_to_each_template")
         if d_each is None:
             continue
-        xv = d_each[ax_a] if len(d_each) > ax_a else None
-        yv = d_each[ax_b] if len(d_each) > ax_b else None
-        if xv is None or yv is None or not np.isfinite(xv) or not np.isfinite(yv):
+        if len(d_each) <= max(ax_a, ax_b):
+            continue
+        xe, ye, _ = _trilaterate_xy(d_each[ax_a], d_each[ax_b], d_ab)
+        if not np.isfinite(xe) or not np.isfinite(ye):
             continue
         n_visible += 1
         n_unassigned += 1
-        key = (round(xv, bin_decimals), round(yv, bin_decimals))
+        key = (round(xe, bin_decimals), round(ye, bin_decimals))
         unassigned_counts[key] = unassigned_counts.get(key, 0) + 1
     if unassigned_counts:
         xs = [p[0] for p in unassigned_counts.keys()]
@@ -418,31 +451,38 @@ def plot_template_distance_plane(
                    edgecolors="none", zorder=2,
                    label=f"unassigned (n={n_unassigned})")
 
-    # Plot all templates at their fixed positions in this plane
-    if D_tt.size > 0:
-        for k in range(chosen_k):
-            col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
-            tx = D_tt[ax_a, k] if ax_a < D_tt.shape[0] and k < D_tt.shape[1] else float("nan")
-            ty = D_tt[ax_b, k] if ax_b < D_tt.shape[0] and k < D_tt.shape[1] else float("nan")
-            if np.isfinite(tx) and np.isfinite(ty):
-                ax.scatter([tx], [ty], marker="*", s=TEMPLATE_MARKER_SIZE,
-                           c=col, edgecolors="black", linewidths=1.5, zorder=5)
-                ax.annotate(f"T{k}", (tx, ty), xytext=(8, 8),
-                            textcoords="offset points", fontsize=FS_TICK,
-                            fontweight="bold")
+    # Place all templates by trilateration.
+    # T_a -> (0, 0), T_b -> (d_ab, 0). T_other (k != ax_a, ax_b) placed
+    # by trilaterating its distances to T_a and T_b.
+    for k in range(chosen_k):
+        col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
+        if k == ax_a:
+            tx, ty = 0.0, 0.0
+        elif k == ax_b:
+            tx, ty = d_ab, 0.0
+        else:
+            d_a_k = float(D_tt[ax_a, k]) if k < D_tt.shape[1] else float("nan")
+            d_b_k = float(D_tt[ax_b, k]) if k < D_tt.shape[1] else float("nan")
+            tx, ty, _ = _trilaterate_xy(d_a_k, d_b_k, d_ab)
+        if np.isfinite(tx) and np.isfinite(ty):
+            ax.scatter([tx], [ty], marker="*", s=TEMPLATE_MARKER_SIZE,
+                       c=col, edgecolors="black", linewidths=1.5, zorder=5)
+            ax.annotate(f"T{k}", (tx, ty), xytext=(8, 8),
+                        textcoords="offset points", fontsize=FS_TICK,
+                        fontweight="bold")
 
-    # Decision boundary y=x (light line)
-    xmin, xmax = ax.get_xlim()
-    ymin, ymax = ax.get_ylim()
-    diag_lo = max(0.0, min(xmin, ymin))
-    diag_hi = max(xmax, ymax)
-    ax.plot([diag_lo, diag_hi], [diag_lo, diag_hi], color="#999999",
-            lw=1.0, ls="--", alpha=0.6, zorder=1, label="y=x decision boundary")
-    ax.set_xlim(0, xmax)
-    ax.set_ylim(0, ymax)
+    # Matching decision boundary: perpendicular bisector x = d_ab/2 (vertical)
+    ymin_data, ymax_data = ax.get_ylim()
+    bisector_y_top = ymax_data * 1.05 if ymax_data > 0 else 1.0
+    ax.axvline(d_ab / 2.0, color="#999999", lw=1.0, ls="--", alpha=0.6,
+               zorder=1, label=f"x={d_ab/2:.2f} matching argmin boundary")
 
-    ax.set_xlabel(f"d(event, T{ax_a})  [shared-channel RMS rank deviation]", fontsize=FS_LABEL)
-    ax.set_ylabel(f"d(event, T{ax_b})", fontsize=FS_LABEL)
+    ax.set_xlabel(
+        f"projection onto T{ax_a}–T{ax_b} axis "
+        f"[T{ax_a}=(0,0), T{ax_b}=({d_ab:.2f},0)]",
+        fontsize=FS_LABEL,
+    )
+    ax.set_ylabel("perpendicular off-axis distance", fontsize=FS_LABEL)
 
     n_total = data["n_events_total"]
     agreement = data["agreement_overall"]
@@ -450,19 +490,21 @@ def plot_template_distance_plane(
     extra_clusters = chosen_k - 2
     extra_note = f" + {extra_clusters} off-axis matching cluster(s)" if extra_clusters > 0 else ""
     boundary_kind = (
-        "y=x is the strict matching argmin boundary"
+        f"x={d_ab/2:.2f} (perpendicular bisector) is the strict matching argmin boundary"
         if chosen_k == 2
-        else f"y=x is the T{ax_a} vs T{ax_b} slice (off-axis clusters not bound by it)"
+        else f"x={d_ab/2:.2f} is the T{ax_a}-vs-T{ax_b} bisector (off-axis clusters can fall on either side based on their own distances)"
     )
+    offplane_frac = n_offplane / max(n_visible, 1)
     panel_title = (
-        f"Template-distance plane: T{ax_a} vs T{ax_b}  "
-        f"(inter-cluster r={pair_r:.2f})\n"
-        f"{n_visible:,} events on {n_unique_bins} unique rank vectors "
+        f"Trilateration in T{ax_a}–T{ax_b} reference frame  "
+        f"(inter-cluster r={pair_r:.2f}, d(T{ax_a},T{ax_b})={d_ab:.2f})\n"
+        f"{n_visible:,} events on {n_unique_bins} unique trilateration coords "
         f"(k={chosen_k}{extra_note}, agreement={agreement:.3f}, sil={sil_med:.3f})\n"
-        f"{boundary_kind}; "
-        f"open circles = {n_disagree:,} events ({n_disagree / max(n_visible,1):.1%}) where KMeans disagrees with matching"
+        f"{boundary_kind}\n"
+        f"open circles = {n_disagree:,} ({n_disagree / max(n_visible,1):.1%}) KMeans-vs-matching drift; "
+        f"{n_offplane:,} ({offplane_frac:.1%}) off-plane (masked-metric triangle violation, collapsed to y=0)"
     )
-    ax.set_title(panel_title, fontsize=FS_TITLE - 4, loc="left")
+    ax.set_title(panel_title, fontsize=FS_TITLE - 5, loc="left")
     ax.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=False)
 
     # Suptitle: subject id + validity stats
