@@ -1,55 +1,90 @@
 # v2 cohort results (in progress)
 
-Phase 3 cohort rebuild — single-subject smoke gate before full 20-subject run.
-
-| subject | sfreq | records (smoke) | total_events | layer A | layer B | layer C | notes |
-|---------|-------|-----------------|--------------|---------|---------|---------|-------|
-| 635     | 1024  | 1 (`63500102_0000`) | 2866    | SKIPPED (raw not adjacent) | (pending) | (pending) | smoke 2026-05-06; GPU; 97.6s wall (1h record, 57 ch CAR) |
-
-Subject 635 actually has **123 records** (~123h continuous, 1h each). Task 3.3
-ran with `--smoke` to exercise the pipeline plumbing (output dir routing, GPU
-default, NPZ format) on the first record only; the full 123-record run is
-deferred to Task 3.4 cohort dispatch.
+Phase 3 cohort rebuild — Phase 3.4 not yet completed (CPU-fallback incident; see §3 below).
 
 ## Phase 3 status
 
 - Task 3.1 ✅ — parallel script defaults updated (`results/hfo_detector_v2/`, `N_JOBS=1`)
 - Task 3.2 ✅ — Epilepsiae GPU default set (`--gpu/--no-gpu` tristate; Yuquan stays CPU)
-- Task 3.3 ✅ — 635 single-record smoke run completed
-- Task 3.4 ⏳ — cohort run pending (separate background dispatch)
+- Task 3.3 ✅ — 635 single-record smoke run completed (1 record, 97.6s wall, GPU verified via `conda run -n cuda_env`)
+- Task 3.4 ❌ **未完成** — 第一次启动时被 CPU fallback 污染，已 quarantine 并修复 wrapper（见 §3）；正在等待 GPU 验证后重启。
 
-## Task 3.3 smoke deviations from plan
+## §1. 验证已确立的事实
 
-1. **Used `--smoke` flag.** Plan estimated 1–12 records / ~30–60min for subject 635;
-   actual is 123 records (~10h) which is full-cohort scale, not smoke. Per advisor
-   review, ran `--smoke` (1 record, 97.6s) since Phase 2 Task 2.3 already
-   confirmed determinism on 635 (`count_match=true, max_t_diff=0.0`).
-2. **No `_refineGpu.npz` produced.** `--smoke` skips refine. Refine path will be
-   exercised by Task 3.4 cohort run on all 20 subjects (including 635 full).
-3. **Layer A extractor returned `records: []` (1 skipped).** Reason:
-   `raw .head/.data not adjacent` to v2 gpu.npz output (now under
-   `results/hfo_detector_v2/635/`, not `/mnt/epilepsia_data/...`). This is the
-   known Phase 3 design issue documented in Phase 2 Task 2.2 docstring; the
-   Layer A extractor's path-resolution refactor is deferred to Phase 4.
+| 事项 | 结果 | 来源 |
+|------|------|------|
+| 635 smoke detection produces well-formed `*_gpu.npz` | ✅ | Task 3.3 |
+| 635 twice-run GPU determinism | `count_match=True`, `max_t_diff=0.0` | Phase 2 Task 2.3 (`results/hfo_detector_v2/validation/layer_a_determinism_635.json`) |
+| 635 Layer A on smoke (3-window sample, 600s/3600s) | TLA1 `n=3, ratio_p25=2.108 ≥2.0 ✅`, `margin_p50=0.495` 边缘 fail (≥0.5) | `results/hfo_detector_v2/validation/layer_a_635.json` |
+| Layer A path-resolution gap fixed | 635 records 1, skipped 0 | commit `c43c48d` |
+| 29-test cohort regression suite | passed | commits `1adad11`, `d8e30d7` |
 
-## Smoke output
+## §2. 真实运行时间预估（plan 10h 误差 11×）
 
-- `results/hfo_detector_v2/635/63500102_0000_gpu.npz` (51.6 KB)
-  - keys: `whole_dets`, `chns_names`, `events_count`, `start_time`,
-    `reference_type`, `bipolar_pairs`
-  - reference_type=`car`, 57 channels, 2866 events total
-  - top-5 events_count = `[133, 33, 17, 22, 22]`
-  - start_time = 1250773219.0 (matches `start_ts=2009-08-20 13:00:19.000`)
-- `results/hfo_detector_v2/validation/layer_a_635.json`
-  - `records: 0`, `skipped: 1` (`error: 'raw .head/.data not adjacent'`)
+`/mnt/epilepsia_data` 上 20 个 subject 的实际 record 数：
 
-## Determinism
+| subject | records | subject | records | subject | records | subject | records |
+|---------|---------|---------|---------|---------|---------|---------|---------|
+| 253 | 268 | 916 | 435 | 590 | 254 | 1096 | 165 |
+| 548 | 147 | 922 | 114 | 620 | 256 | 1125 | 160 |
+| 139 | 173 | 958 | 225 | 635 | 123 | 1146 | 117 |
+| 384 | 130 | 583 | 206 | 1073 | 231 | 1150 | 161 |
+| 1077 | 189 | 442 | 178 | 818 | 255 | 1084 | 252 |
 
-Phase 2 Task 2.3 already verified twice-run determinism on 635:
-`count_match=True, max_t_diff=0.0`. Not re-run for Task 3.3 smoke.
+**Total: 4,039 records**。GPU 单卡（RTX 3090）单 record ≈ 100 s（基于 635 smoke 97.6s/record + Task 2.3 整段重检约 24.9 s/record 推算上界）。
 
-## Next: Task 3.4
+**Wall clock 估计 ≈ 4,039 × 100 / 3600 ≈ 112 h ≈ 5 days**（不是 plan 写的 10h）。最大单 subject (916) 单跑 ≈ 12 h。
 
-Wrapper script: `scripts/run_epilepsiae_detection_parallel.sh` with defaults
-already routed to `results/hfo_detector_v2/`, N_JOBS=1. Full 20-subject cohort
-expected wall clock ~10h; dispatch as background job.
+## §3. 2026-05-06 CPU-fallback 事故
+
+### 问题
+
+Task 3.4 第一次启动时，`scripts/run_epilepsiae_detection_parallel.sh` 的 worker 用裸 `python` 调用 detection，但当前 shell PATH 上的 `python` (`/home/honglab/leijiaxin/anaconda3/bin/python`) **没有 cupy / cusignal**——`cuda_env` 才有。结果：
+
+- `src/utils/bqk_utils.py:329` 触发 `RuntimeWarning: GPU requested but CuPy/cusignal not available. Using CPU.`
+- 跑了 9 h 57 m 全部走 CPU fallback（`nvidia-smi` 0% GPU 使用率，仅 15 MiB GPU 内存）。
+- 实际产物：subject 253 完整跑完 (268 records + `_refineGpu.npz`, 13645 s)，subject 548 部分 (53/147 records)，subject 139 启动后立即被 kill。
+
+### CPU vs GPU 等价性验证
+
+对同一 record `253/25300102_0000` 用 cuda_env GPU 重跑 (24.9 s)，对比已有的 CPU 产物：
+
+- CPU: 29 channels, 4003 events
+- GPU: **30 channels**, **4303 events** (+7.5%)
+- count drift: **26 / 29 channels 不一致**（差值 -8 ~ +9）
+- 即便 top-3 channels（HLC1, HRB1, HRB2），event count 都对不上 → shape 直接不匹配，无法做 timestamp diff
+
+**结论：CPU 路径与 GPU 路径在 Epilepsiae 数据上不是 bit-equivalent。** Phase 1 spec (`v2_specification.md`) §4 的"GPU=CPU=float32=float64 deterministic 等价"基于 635 chunk 0 的 Path A 诊断（427/43 完全一致），但在 253 上失效。这条等价性声明的 generalization 范围比 spec 写的窄；不能用 CPU 产物当 v2 cohort 输入。
+
+### 处置
+
+- CPU 产物 quarantine 到 `results/_diag_quarantine/{253,548,139}_cpu_fallback_2026-05-06/`，**不保留为 v2 cohort 输入**。
+- Wrapper 修补（`scripts/run_epilepsiae_detection_parallel.sh`）：
+  1. PREFLIGHT 段——脚本启动前 `conda run -n cuda_env python -c "import cupy, cusignal"`，失败立即 `exit 2`。
+  2. worker 用 `conda run -n cuda_env --no-capture-output python` 而非裸 `python`，确保子进程命中 cuda_env。
+  3. 新增 `CONDA_ENV` 环境变量（默认 `cuda_env`），可显式覆盖。
+- 645 smoke 的 GPU 产物保留：`results/hfo_detector_v2/635/63500102_0000_gpu.npz` 是用 `conda run -n cuda_env python ...` 显式启动的，cupy/cusignal 都已 import 到位，确认是 GPU 输出。`--skip-existing` 会跳过它。
+
+### 启动前检查清单（写给后续 agent）
+
+启动 cohort 前必须验证：
+
+```bash
+conda run -n cuda_env python -c "import cupy, cusignal; print('OK', cupy.__version__, cusignal.__version__)"
+```
+
+返回 `OK 13.6.0 23.08.00` 才能启动。如果换机器 / 换环境，重跑这条 check。Wrapper PREFLIGHT 段会自动 enforce，但人工再确认一次。
+
+启动后 1 分钟内必须验证：
+
+```bash
+nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv
+```
+
+GPU 利用率 > 0%、内存使用 > 200 MiB 才算正常 GPU 跑动；都为 0 / 极低值就是 fallback 复发，立刻停。
+
+## §4. 下一步
+
+- 不再做 Phase 5 / 6 / 7 的科学结论。Layer B / Layer C cohort 数字一律待 Phase 3.4 GPU cohort 完成后再产生。
+- Phase 4 Layer A cohort 也只在 GPU cohort 完整后启动（per-subject 进度可滚动跑，但 cohort PASS rate 在 cohort 完成前无意义）。
+- v2_specification.md §4 的"GPU=CPU 等价性"声明需要在 cohort 跑完后修订：appendix 加 "Empirical equivalence verified on 635 chunk 0; on 253 record 0 we observe channel-set + count drift" 的限定。这是真实数据上的 calibration，不是 retrospective 找借口。
