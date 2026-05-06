@@ -432,12 +432,12 @@ def plot_template_distance_plane(
     FS_TITLE_L = FS_TITLE + 4  # 20
     FS_SUPTITLE_L = FS_TITLE + 8  # 24
 
-    figsize = (13, 12) if not is_showcase else (16, 14)
+    figsize = (13, 11) if not is_showcase else (16, 13)
     fig = plt.figure(figsize=figsize)
     fig.patch.set_facecolor("white")
     gs = gridspec.GridSpec(
         2, 1, height_ratios=[1, 4], hspace=0.08, figure=fig,
-        top=0.83, bottom=0.08, left=0.10, right=0.97,
+        top=0.95, bottom=0.08, left=0.10, right=0.97,
     )
     ax_marg = fig.add_subplot(gs[0])
     ax = fig.add_subplot(gs[1], sharex=ax_marg)
@@ -668,42 +668,16 @@ def plot_template_distance_plane(
     extra_clusters = chosen_k - 2
     offplane_frac = n_offplane / max(n_visible, 1)
 
-    # Legend (top-right of main panel)
+    # Legend (top-right of main panel) — only header element retained
     ax.legend(loc="upper right", fontsize=FS_TICK_L - 1, frameon=False)
 
-    # ---- Header block (above the gridspec) ----
-    # Line 1 (suptitle): subject id, big bold
-    fig.suptitle(
-        f"{dataset.capitalize()} · {subject} — cluster geometry trilateration  (k={chosen_k})",
-        fontsize=FS_SUPTITLE_L,
-        y=0.965,
-        fontweight="bold",
-    )
-    # Line 2: PR-2 validity one-liner
-    validity = _load_pr2_validity(dataset, subject)
-    validity_subtitle = _validity_subtitle(validity)
-    fig.text(
-        0.10, 0.925, validity_subtitle,
-        fontsize=FS_TITLE_L - 2, ha="left", va="top",
-    )
-    # Line 3: this-figure stats (n events, agreement, sil, drift, off-plane,
-    # modality dip+BIC) — no footer at bottom anymore
-    if np.isfinite(dip_p_x) and np.isfinite(bic_diff):
-        dip_str = f"dip p={dip_p_x:.2g}" if dip_p_x >= 1e-3 else "dip p<1e-3"
-        modality_full = f"{dip_str} · ΔBIC(k1−k2)={bic_diff:+.0f}"
-    else:
-        modality_full = "modality n/a"
-    line3 = (
-        f"n={n_visible:,} events · inter-cluster r={pair_r:.2f} · "
-        f"d(T{ax_a},T{ax_b})={d_ab:.2f} · agreement={agreement:.3f} · sil={sil_med:.3f}\n"
-        f"KMeans-vs-matching drift = {n_disagree / max(n_visible,1):.1%} ({n_disagree:,}); "
-        f"off-plane = {offplane_frac:.1%} ({n_offplane:,}); "
-        f"marginal-x  {modality_full}"
-    )
-    fig.text(
-        0.10, 0.895, line3,
-        fontsize=FS_TICK_L - 1, ha="left", va="top", color="#444444",
-    )
+    # NOTE: per user 2026-05-06 review, the 3-line figure header
+    # (suptitle subject id + validity stats + this-figure stats) was
+    # removed entirely. Detail numbers live in:
+    #   - per_subject JSON (machine-readable)
+    #   - figures/README.md (human-readable cohort overview)
+    #   - cohort_summary.json (cohort aggregate)
+    # The figure's purpose is the geometry visualization itself.
 
     return savefig_pub(fig, output_path)
 
