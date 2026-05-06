@@ -97,9 +97,9 @@ PR-2.5 status 在 F_norm > 2/3 组内的分布：
 
 **重要 caveat**：MW-U p = 0.000548 并非 PASS gate；§0 禁区第 1 条写死本 supplementary 不开 cohort PASS 检验。这里只作描述。Spearman ρ = −0.924 反映 F_norm 与 Kendall τ 在本 cohort 上的高度共线性——两个指标基本测量同一件事（rank displacement / inverse rank concordance），所以"按 F_norm 分组测 τ"的 MW-U 在 effect size 上是基本可预测的，**不是独立证据**。它的意义在于：把分组从 PR-2.5 阈值移到 D-G 渐近参考之后，多了 8 个 borderline subject 进入"高反向"组，而这些 subject 的 τ 同样显著偏负。
 
-### 3.2 SOZ-related 数字（参考 §3.5 解读边界）
+### 3.2 与 PR-6 离散 swap_node 一致性 cross-check
 
-**与 PR-6 离散 swap_node 一致性 cross-check**：PR-6 Step 4b sign-test n=6, p=0.031（fwd/rev-reproduced subset 上）。本 supplementary 在同一 6 个 subject 上的 Kendall τ：
+PR-6 Step 4b sign-test n=6, p=0.031（fwd/rev-reproduced subset 上）。本 supplementary 在同一 6 个 subject 上的 Kendall τ：
 
 - 6/6 subject Kendall τ < 0（100% direction consistency）
 - median τ = −0.495；range = [−0.767, −0.394]
@@ -121,6 +121,16 @@ epilepsiae_548     τ=-0.394  Δr = [+11, +7, +8, +6, -1, -4, -4, -3, -2, -4, -3
 ```
 
 每行单调"红→蓝"梯度都来自数据本身，**不是** sorting bias —— 列轴严格按 rank_T_a_dense 排序。τ ≈ 0 的 subject（如 `yuquan_chengshuai` τ=0.000, `epilepsiae_922` τ=+0.429）在同一排序规则下颜色散乱无梯度，是反 sorting bias 的实证。
+
+### 3.3 SOZ enrichment（baseline-corrected, descriptive only）
+
+| 指标 | F_norm > 2/3 (n=15) | F_norm ≤ 2/3 (n=8) | MW-U p（descriptive）|
+|---|---|---|---|
+| `soz_contribution_excess` 中位数 | +0.067 | −0.055 | p ≈ 0.048（borderline）|
+| `soz_minus_nonsoz_abs_mean` 中位数 | +1.500 | +1.250 | — |
+| `soz_channel_fraction` 中位数 | 0.500 | 0.578 | — |
+
+**`soz_contribution_excess` borderline 高于 0 in F_norm > 2/3 组**：descriptive 提示在"高反向"组中，SOZ 通道在 Δr 上参与略高于其通道占比，但 effect size 很小（中位数差 ~0.12）且在 F_norm ≤ 2/3 组中反向（−0.055）。**不**作为 SOZ enrichment 的独立证据；§5.1 的通道选择 caveat 直接限制了任何 SOZ-vs-nonSOZ 比较的解读力度。
 
 ## 4. 图
 
