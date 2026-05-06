@@ -67,6 +67,31 @@ FIG_DIR = RES_DIR / "figures"
 PER_SUB_FIG_DIR = FIG_DIR / "per_subject"
 
 
+CANDIDATE_RHO_THRESHOLD = -0.5  # PR-2.5 fwd/rev candidate gate on inter_cluster_corr_matrix
+
+def _classify_pr25_status(record: dict) -> str:
+    """Return one of 'reproduced' (TRUE), 'candidate_fail' (FALSE),
+    'non_candidate' (None). Falls back to 'non_candidate' if PR-2.5
+    fields are missing.
+
+    The classification is based directly on PR-2.5 outputs - we do NOT
+    re-derive the candidate threshold from inter_cluster_corr_matrix here,
+    because PR-2.5 might use additional criteria beyond the bare ρ<-0.5 cut.
+    """
+    flag = record.get("fwd_rev_reproduced")
+    if flag is True:
+        return "reproduced"
+    if flag is False:
+        return "candidate_fail"
+    return "non_candidate"
+
+
+def _is_pr25_candidate(record: dict) -> bool:
+    """Group A = PR-2.5 fwd/rev cohort (TRUE + FALSE = candidates that
+    were tested). Group B = non-candidate (None)."""
+    return _classify_pr25_status(record) in ("reproduced", "candidate_fail")
+
+
 def load_cohort_records() -> List[dict]:
     """Load per-subject JSONs; only stable_k=2 with one valid pair."""
     records: List[dict] = []
@@ -78,6 +103,8 @@ def load_cohort_records() -> List[dict]:
         if len(valid_pairs) != 1:
             continue
         d["primary_pair"] = valid_pairs[0]
+        d["pr25_status"] = _classify_pr25_status(d)
+        d["is_candidate"] = _is_pr25_candidate(d)
         records.append(d)
     return records
 
@@ -133,7 +160,7 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     taus = np.array(
         [r["primary_pair"]["kendall_tau"] for r in sorted_records], dtype=float
     )
-    fwd_rev_flags = [bool(r.get("fwd_rev_reproduced")) for r in sorted_records]
+    pr25_status = [r["pr25_status"] for r in sorted_records]
 
     finite = matrix[np.isfinite(matrix)]
     vmax = float(np.nanmax(np.abs(finite))) if finite.size else 1.0
@@ -204,11 +231,20 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h.spines["top"].set_visible(False)
     ax_h.spines["right"].set_visible(False)
 
-    # Kendall τ side panel
-    bar_colors = [COL_SIG if f else COL_NONSIG for f in fwd_rev_flags]
-    ax_tau.barh(
+    # Kendall τ side panel — color by PR-2.5 candidate status
+    # rust = candidate cohort (TRUE + FALSE), gray = non-candidate (None)
+    # Candidate-fail subject (FALSE) gets a hatched fill to distinguish from reproduced.
+    bar_colors = [
+        COL_SIG if s in ("reproduced", "candidate_fail") else COL_NONSIG
+        for s in pr25_status
+    ]
+    bars = ax_tau.barh(
         range(n_sub), taus, color=bar_colors, edgecolor="black", linewidth=0.4
     )
+    for bar, status in zip(bars, pr25_status):
+        if status == "candidate_fail":
+            bar.set_hatch("///")
+            bar.set_edgecolor("black")
     ax_tau.axvline(0, color="gray", linewidth=0.6)
     ax_tau.axvline(-0.5, color="gray", linewidth=0.4, linestyle="--")
     ax_tau.axvline(0.5, color="gray", linewidth=0.4, linestyle="--")
@@ -225,10 +261,12 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     cb.set_label("Signed Δr (= rank_Tb − rank_Ta)", fontsize=FS_LABEL - 2)
     cb.ax.tick_params(labelsize=FS_TICK - 4)
 
-    # Legend
+    # Legend — three categories matching the right-side bar colors
     legend_handles = [
-        mpatches.Patch(color=COL_SIG, label="forward/reverse reproduced (OR rule)"),
-        mpatches.Patch(color=COL_NONSIG, label="not reproduced / not testable"),
+        mpatches.Patch(color=COL_SIG, label="PR-2.5 fwd/rev cohort: reproduced"),
+        mpatches.Patch(facecolor=COL_SIG, edgecolor="black", hatch="///",
+                       label="PR-2.5 fwd/rev cohort: candidate-fail"),
+        mpatches.Patch(color=COL_NONSIG, label="non-candidate (ρ_inter ≥ −0.5)"),
         mpatches.Patch(facecolor="white", edgecolor="black", label="SOZ channel"),
     ]
     fig.suptitle(
@@ -239,8 +277,8 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     fig.legend(
         handles=legend_handles,
         loc="upper center",
-        ncol=3,
-        fontsize=FS_TICK - 2,
+        ncol=4,
+        fontsize=FS_TICK - 4,
         frameon=False,
         bbox_to_anchor=(0.5, 0.93),
     )
@@ -250,9 +288,24 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
 
 
 def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
-    """2-panel descriptive: F_norm violin + Kendall tau strip plot."""
-    fwd_yes, fwd_no = [], []
-    tau_yes, tau_no = [], []
+    """2-panel descriptive: F_norm violin + Kendall tau strip plot.
+
+    Grouping (per archive doc §5.2): PR-2.5 fwd/rev cohort
+    (candidates that passed the ρ_inter < -0.5 gate, TRUE + FALSE = n=7)
+    vs non-candidates (None = n=16). Within the candidate cohort,
+    candidate-fail (FALSE) is shown with a hatched marker so the
+    reader can tell reproduced (TRUE) from candidate-fail.
+
+    Mann-Whitney U test between groups is annotated above each panel.
+    Asymptotic 2/3 reference is a Diaconis-Graham n->inf expectation
+    (NOT a precise baseline, never used as a PASS gate).
+    """
+    from scipy.stats import mannwhitneyu
+
+    cand_F, noncand_F = [], []
+    cand_T, noncand_T = [], []
+    cand_subjects, noncand_subjects = [], []  # for hatch marking
+    cand_status = []  # 'reproduced' or 'candidate_fail'
     for r in records:
         f_norm = r["primary_pair"].get("footrule_normalized")
         tau = r["primary_pair"].get("kendall_tau")
@@ -262,20 +315,35 @@ def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
             or (isinstance(tau, float) and np.isnan(tau))
         ):
             continue
-        if r.get("fwd_rev_reproduced"):
-            fwd_yes.append(f_norm)
-            tau_yes.append(tau)
+        if r["is_candidate"]:
+            cand_F.append(f_norm)
+            cand_T.append(tau)
+            cand_subjects.append(f"{r['dataset']}_{r['subject']}")
+            cand_status.append(r["pr25_status"])
         else:
-            fwd_no.append(f_norm)
-            tau_no.append(tau)
+            noncand_F.append(f_norm)
+            noncand_T.append(tau)
+            noncand_subjects.append(f"{r['dataset']}_{r['subject']}")
 
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.8))
+    n_cand = len(cand_F)
+    n_noncand = len(noncand_F)
 
-    # Panel B: footrule normalized split
+    def _mw(a: list, b: list) -> Tuple[float, float]:
+        if len(a) < 2 or len(b) < 2:
+            return float("nan"), float("nan")
+        res = mannwhitneyu(a, b, alternative="two-sided")
+        return float(res.statistic), float(res.pvalue)
+
+    F_U, F_p = _mw(cand_F, noncand_F)
+    T_U, T_p = _mw(cand_T, noncand_T)
+
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 5.2))
+
+    # Panel B: footrule normalized
     ax = axes[0]
     positions = [0, 1]
     parts = ax.violinplot(
-        [fwd_yes, fwd_no],
+        [cand_F, noncand_F],
         positions=positions,
         widths=0.7,
         showmeans=False,
@@ -288,69 +356,75 @@ def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
         pc.set_alpha(0.55)
     parts["cmedians"].set_color("black")
     rng = np.random.default_rng(42)
-    for pos, vals, col in zip(
-        positions, [fwd_yes, fwd_no], [COL_SIG, COL_NONSIG]
-    ):
-        if not vals:
-            continue
-        jitter = rng.uniform(-0.12, 0.12, size=len(vals))
+    # Candidate cohort: hatch-mark candidate_fail subjects
+    if cand_F:
+        cand_jitter = rng.uniform(-0.12, 0.12, size=len(cand_F))
+        for x, y, status in zip(cand_jitter, cand_F, cand_status):
+            if status == "candidate_fail":
+                ax.scatter(
+                    [x], [y],
+                    facecolor=COL_SIG, edgecolors="black",
+                    linewidths=0.8, s=48, zorder=4,
+                    marker="X",
+                )
+            else:
+                ax.scatter(
+                    [x], [y],
+                    color=COL_SIG, edgecolors="black",
+                    linewidths=0.4, s=32, zorder=3,
+                )
+    if noncand_F:
+        noncand_jitter = rng.uniform(-0.12, 0.12, size=len(noncand_F))
         ax.scatter(
-            np.array([pos] * len(vals)) + jitter,
-            vals,
-            color=col,
-            edgecolors="black",
-            linewidths=0.4,
-            s=28,
-            zorder=3,
+            noncand_jitter + 1.0,
+            noncand_F,
+            color=COL_NONSIG, edgecolors="black",
+            linewidths=0.4, s=32, zorder=3,
         )
-    # Diaconis-Graham F_norm has *asymptotic* random expectation 2/3 (n -> inf).
-    # Finite-n random expectation is slightly below; this is a reference, not a gate.
     ax.axhline(2 / 3, color="gray", linewidth=0.6, linestyle=":")
     ax.text(
-        1.45,
-        2 / 3,
-        "asymptotic random\nreference (≈ 2/3)",
-        fontsize=FS_TICK - 4,
-        va="center",
-        color="gray",
+        1.55, 2 / 3, "asymptotic random\nreference (≈ 2/3)",
+        fontsize=FS_TICK - 4, va="center", color="gray",
     )
     ax.set_xticks(positions)
     ax.set_xticklabels(
-        [
-            f"reproduced\n(n={len(fwd_yes)})",
-            f"not reproduced\n(n={len(fwd_no)})",
-        ],
-        fontsize=FS_TICK - 2,
+        [f"PR-2.5 cohort\n(n={n_cand})", f"non-candidate\n(n={n_noncand})"],
+        fontsize=FS_TICK - 3,
     )
-    ax.set_ylabel(
-        "Footrule (Diaconis-Graham normalized)", fontsize=FS_LABEL
-    )
-    ax.set_ylim(0, 1.05)
+    ax.set_ylabel("Footrule (Diaconis-Graham normalized)", fontsize=FS_LABEL - 2)
+    ax.set_ylim(0, 1.10)
+    ax.set_xlim(-0.6, 1.6)
+    # MW-U annotation + grouping rule
+    p_str = (
+        f"groups split by PR-2.5 candidate gate (ρ_inter < −0.5)\n"
+        f"Mann-Whitney U  p = {F_p:.3g}"
+    ) if not np.isnan(F_p) else ""
+    ax.text(0.5, 1.06, p_str, transform=ax.transAxes,
+            fontsize=FS_TICK - 4, ha="center", color="black")
     style_panel(ax, label="b")
 
     # Panel C: Kendall tau strip
     ax = axes[1]
-    if tau_yes:
+    if cand_T:
+        for tau_v, status in zip(cand_T, cand_status):
+            if status == "candidate_fail":
+                ax.scatter(
+                    [tau_v], [1.0],
+                    facecolor=COL_SIG, edgecolors="black",
+                    linewidths=0.8, s=58, zorder=4, marker="X",
+                )
+            else:
+                ax.scatter(
+                    [tau_v], [1.0],
+                    color=COL_SIG, edgecolors="black",
+                    linewidths=0.4, s=44, zorder=3,
+                )
+    if noncand_T:
         ax.scatter(
-            tau_yes,
-            np.zeros(len(tau_yes)) + 1.0,
-            color=COL_SIG,
-            edgecolors="black",
-            linewidths=0.4,
-            s=44,
-            zorder=3,
-            label=f"reproduced (n={len(tau_yes)})",
-        )
-    if tau_no:
-        ax.scatter(
-            tau_no,
-            np.zeros(len(tau_no)) + 0.0,
-            color=COL_NONSIG,
-            edgecolors="black",
-            linewidths=0.4,
-            s=44,
-            zorder=3,
-            label=f"not reproduced (n={len(tau_no)})",
+            noncand_T,
+            np.zeros(len(noncand_T)) + 0.0,
+            color=COL_NONSIG, edgecolors="black",
+            linewidths=0.4, s=44, zorder=3,
         )
     ax.axvline(0, color="gray", linewidth=0.6)
     ax.axvline(-0.5, color="gray", linewidth=0.4, linestyle="--")
@@ -360,19 +434,40 @@ def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
     ax.tick_params(axis="x", labelsize=FS_TICK - 2)
     ax.set_yticks([0, 1])
     ax.set_yticklabels(
-        ["not\nreproduced", "reproduced"], fontsize=FS_TICK - 2
+        [f"non-candidate\n(n={n_noncand})", f"PR-2.5 cohort\n(n={n_cand})"],
+        fontsize=FS_TICK - 4,
     )
-    ax.set_xlabel(
-        "Kendall τ between Tₐ and T_b ranks", fontsize=FS_LABEL
-    )
+    ax.set_xlabel("Kendall τ between Tₐ and T_b ranks", fontsize=FS_LABEL - 2)
     ax.set_ylim(-0.7, 1.7)
+    p_str = f"Mann-Whitney U  p = {T_p:.3g}" if not np.isnan(T_p) else ""
+    ax.text(0.5, 1.04, p_str, transform=ax.transAxes,
+            fontsize=FS_TICK - 3, ha="center", color="black")
+    # custom legend with X marker for candidate_fail
+    legend_handles = [
+        mpatches.Patch(color=COL_SIG, label="PR-2.5 cohort: reproduced"),
+        plt.Line2D([0], [0], marker="X", color="w",
+                   markerfacecolor=COL_SIG, markeredgecolor="black",
+                   markersize=8, label="candidate-fail (huanghanwen)"),
+        mpatches.Patch(color=COL_NONSIG, label="non-candidate (ρ_inter ≥ −0.5)"),
+    ]
+    ax.legend(handles=legend_handles, loc="upper left",
+              fontsize=FS_TICK - 5, frameon=False)
     style_panel(ax, label="c")
-    ax.legend(loc="upper left", fontsize=FS_TICK - 4, frameon=False)
 
     fig.tight_layout()
     fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
     fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
+    # Print test results to stdout for archive doc fill-in
+    print(
+        f"  MW-U F_norm:  U={F_U:.3f}  p={F_p:.4g}   "
+        f"medians: cand={np.median(cand_F):.3f} (n={n_cand}) vs "
+        f"noncand={np.median(noncand_F):.3f} (n={n_noncand})"
+    )
+    print(
+        f"  MW-U Kendall: U={T_U:.3f}  p={T_p:.4g}   "
+        f"medians: cand={np.median(cand_T):.3f} vs noncand={np.median(noncand_T):.3f}"
+    )
 
 
 def plot_per_subject_strip(record: dict, out_path: Path) -> None:

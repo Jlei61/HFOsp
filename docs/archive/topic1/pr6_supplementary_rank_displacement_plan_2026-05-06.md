@@ -8,7 +8,9 @@
 >
 > **下游归属**：在 `docs/topic1_within_event_dynamics.md` §7 内"PR-6 几何合同"位置加一行 supplementary 链接，**不**升级 main doc 结论。
 
-**Goal:** 把 PR-6 离散 swap_node count 升级到逐通道连续 signed rank displacement，并产出顶刊风格 supplementary figure（stable_k=2 ∩ PR-6 endpoint-defined cohort，n_available 由 Task 4 跑数后报告 — 上限 23，不预承诺；列：footrule + Kendall τ 描述性分布），不引入新的 cohort claim。
+**Goal:** 把 PR-6 离散 swap_node count 升级到逐通道连续 signed rank displacement，并产出顶刊风格 supplementary figure（**PR-6 supplementary cohort = stable_k=2 ∩ PR-6 endpoint-defined**，n_available 由 Task 4 跑数后报告 — 上限 23 = PR-6 anchoring per_subject JSON 实际数；不预承诺；列：footrule + Kendall τ 描述性分布），不引入新的 cohort claim。
+
+**Scientific boundary（写死）**：PR-2 stable_k 实际分布 = `{2: 27, 4: 2, 6: 1}`；本 supplementary 覆盖 stable_k=2 ∩ PR-6 endpoint-defined（n≤23），**不是**完整 27-subject stable_k=2 rank-geometry 分析。4 个 stable_k=2 subject（无 PR-6 anchoring：`epilepsiae_1125, 384, 620, 916`）被排除；3 个 stable_k≠2 subject（`epilepsiae_818, yuquan_huangwanling, yuquan_zhangjinhan`）不在范围。这个选择是为了与 PR-6 离散 swap_node 同 cohort 比较，**不能**包装成"全 stable_k=2 cohort"。
 
 **Architecture:** 新增独立 stat helper 模块 `src/rank_displacement.py`（与 PR-6 anchoring 解耦），以 PR-2 cluster JSON 与 PR-6 anchoring JSON 为唯一输入；新增 batch runner + figure script；写一份 supplementary archive doc，回链 PR-6 plan 与 ping-pong review。
 
@@ -22,8 +24,8 @@
 1. 逐通道有符号位移 Δr(ch) = rank_Tb(ch) − rank_Ta(ch)
 2. 整体 Spearman footrule F = Σ|Δr| 与 Diaconis–Graham 归一化 F/F_max
 3. 整体 Kendall τ(rank_Ta, rank_Tb)
-4. 27 stable_k=2 subject × channel 谱系热图（rows 按 τ 排序）
-5. footrule cohort 分布（按 PR-2.5 forward/reverse-reproduced OR 规则分组）
+4. PR-6 supplementary cohort（≤23 subject）× channel 谱系热图（rows 按 τ 排序）
+5. footrule cohort 分布（按 PR-2.5 候选门槛 ρ_inter < −0.5 划分：候选 cohort = TRUE+FALSE，非候选 = None）
 6. supplementary archive doc + 顶刊风格 figure (PNG + PDF)
 
 **不做**（违反则任务失败）：

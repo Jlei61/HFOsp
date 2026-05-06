@@ -31,31 +31,62 @@
 
 完整数学定义见 plan §3。
 
-## 2. Cohort
+## 2. Cohort（**PR-6 supplementary cohort，不是完整 stable_k=2 cohort**）
 
-主可视化 cohort = `stable_k == 2` ∩ PR-6 anchoring 有 valid_mask 的 subject。**n_available = 23**（PR-6 anchoring per_subject JSON 实际数；30 个 PR-2 stable_k=2 subject 中 7 个 `pr6_missing`）。
+> **Scientific boundary（写死）**：本 supplementary 依赖 PR-6 endpoint-defined artifacts（`per_template[k].valid_mask`），**不是**完整 27 subject stable_k=2 rank-geometry 分析。这个选择是为了与 PR-6 离散 swap_node 同 cohort 比较（cross-check 需要），可以接受，**但不能包装成全 stable_k=2 cohort**。
 
-forward/reverse-reproduced 标签用 OR 规则（`first_half_second_half OR odd_even_block`，CLAUDE.md cross-PR contract lookup）：
+PR-2 cohort 全景（30 subject）：
 
-| group | n |
-|---|---|
-| reproduced (`OR` rule = True) | 6 |
-| not reproduced / not testable | 17 |
-| **total** | **23** |
+| stable_k | n | subject 列表 |
+|---|---|---|
+| 2 | **27** | `epilepsiae_{1073, 1077, 1084, 1096, 1125, 1146, 1150, 139, 253, 384, 442, 548, 583, 590, 620, 635, 916, 922, 958}`（19 个）+ `yuquan_{chengshuai, chenziyang, hanyuxuan, huanghanwen, litengsheng, liyouran, sunyuanxin, xuxinyi}`（8 个）|
+| 4 | 2 | `epilepsiae_818`, `yuquan_huangwanling` |
+| 6 | 1 | `yuquan_zhangjinhan` |
 
-reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`, `epilepsiae_635`, `epilepsiae_958`, `yuquan_chenziyang`。
+本 supplementary cohort = stable_k=2 ∩ PR-6 endpoint-defined → **n=23 / 27**：
 
-## 3. 主结果
+- **23 nominal cohort**：PR-6 `template_anchoring/per_subject/*.json` 已有，本 supplementary consume
+- **4 个 stable_k=2 subject 被排除**（PR-6 anchoring 缺失，原因可能是 SOZ JSON 空 / n_ch < 6）：`epilepsiae_1125`, `epilepsiae_384`, `epilepsiae_620`, `epilepsiae_916`
+- **3 个 stable_k≠2 subject 不在范围内**：`epilepsiae_818` (k=4), `yuquan_huangwanling` (k=4), `yuquan_zhangjinhan` (k=6)
 
-| 指标 | reproduced (n=6) | not reproduced (n=17) | 备注 |
+**这是 PR-6 supplementary cohort，覆盖 23/27 = 85% 的 stable_k=2 subject。** 完整 27-subject stable_k=2 rank geometry 需要绕过 PR-6 endpoint 合同 (例如直接用 PR-2 raw bools 推导 valid_mask)，那是另一个 PR 的工作，本 supplementary **不**做。
+
+forward/reverse-reproduced 在 PR-2.5 内有三种 outcome（不是简单二分）：
+
+| PR-2.5 outcome | 含义 | n |
+|---|---|---|
+| **TRUE** | `inter_cluster_corr_matrix` Spearman ρ < −0.5（候选）AND split-half OR odd-even reproducibility 通过 | **6** |
+| **FALSE** | 候选（ρ < −0.5）但 reproducibility 测试失败 | 1（`yuquan_huanghanwen`，ρ = −0.527）|
+| **None** | 非候选（ρ ≥ −0.5），未跑 reproducibility 测试 | 16 |
+
+**关键**：本 supplementary 的 cohort 划分按 **PR-2.5 候选门槛**（fwd/rev cohort = TRUE+FALSE = n=7）vs **非候选**（None, n=16），**不**按裸的 reproduced/not-reproduced binary 划分（plan 早期版本采用过的错误划分会让 borderline ρ ≈ −0.4 但 F_norm ≈ 0.8 的 subject 错误归到"未反向"组）。
+
+reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`, `epilepsiae_635`, `epilepsiae_958`, `yuquan_chenziyang`。candidate-fail 1 个：`yuquan_huanghanwen`。
+
+## 3. 主结果（candidate vs non-candidate 分组，含 Mann-Whitney U）
+
+**正确分组（避开 reproduced/not-reproduced 伪 binary）**：
+
+| group | 定义 | n |
+|---|---|---|
+| PR-2.5 cohort（候选）| `inter_cluster_corr_matrix` Spearman ρ < −0.5（PR-2.5 候选门槛通过）| **7** = 6 reproduced + 1 candidate-fail (`huanghanwen`) |
+| 非候选 | ρ_inter ≥ −0.5（未跑 reproducibility 测试）| **16** |
+
+| 指标 | PR-2.5 cohort (n=7) | 非候选 (n=16) | Mann-Whitney U p（descriptive，非 PASS gate）|
 |---|---|---|---|
-| Kendall τ 中位数 | **−0.495** | −0.048 | reproduced 中位数远偏负（接近 −0.5）；not reproduced 中位数靠近 0 |
-| F_norm 中位数 | **0.964** | 0.688 | reproduced 接近 1.0（完全反向）；not reproduced 接近 asymptotic random reference (≈ 2/3，**非精确基线**) |
-| `soz_contribution_excess` 中位数 | +0.018 | +0.040 | 都接近 0；SOZ 在 Δr 上参与与通道占比一致，无明显 enrichment |
-| `soz_minus_nonsoz_abs_mean` 中位数 | +1.200 | +1.750 | 单 SOZ 通道平均 \|Δr\| 略高于单 non-SOZ；两组同向，descriptive only |
-| `soz_channel_fraction` 中位数 | 0.450 | 0.636 | 两组 SOZ 通道占比都 ≥45%；Yuquan SOZ 列表更宽是已知事实 |
+| Kendall τ 中位数 | **−0.467** | −0.024 | **p = 0.000394** |
+| F_norm 中位数 | **0.960** | 0.677 | **p = 0.000347** |
+| `soz_contribution_excess` 中位数 | +0.018 | +0.040 | — |
+| `soz_minus_nonsoz_abs_mean` 中位数 | +1.200 | +1.750 | — |
+| `soz_channel_fraction` 中位数 | 0.450 | 0.636 | — |
 
-**与 PR-6 离散 swap_node 一致性**：PR-6 Step 4b sign-test n=6, p=0.031（fwd/rev-reproduced subset 上）。本 supplementary 在同一 6 个 subject 上的 Kendall τ：
+**两组在 footrule 与 Kendall τ 上分离都很强**（MW-U p ~ 4e-4，两侧 effect size 与方向一致），与 PR-6 离散 swap_node 同向。
+
+**重要 caveat 1**：MW-U p = 4e-4 并非 PASS gate；§0 禁区第 1 条写死本 supplementary 不开 cohort PASS 检验。这里只作描述，意义是"PR-2.5 候选门槛把 footrule / τ 划分得很干净"——这是 PR-2.5 candidate filter 的内禀结构，不是新的独立证据。
+
+**重要 caveat 2**：非候选组中存在 borderline subject（ρ_inter ∈ [−0.5, −0.3]）F_norm 偏高（参见 §5.2 列表），这些 subject 的几何介于"完全反向"和"完全独立"之间，PR-2.5 二分门槛把他们划在外面。MW-U 本身不能区分"门槛附近聚集"vs"真正双峰"——单看分布形状，非候选组更像广分布而非次峰。
+
+**与 PR-6 离散 swap_node 一致性 cross-check**：PR-6 Step 4b sign-test n=6, p=0.031（fwd/rev-reproduced subset 上）。本 supplementary 在同一 6 个 subject 上的 Kendall τ：
 
 - 6/6 subject Kendall τ < 0（100% direction consistency）
 - median τ = −0.495；range = [−0.767, −0.394]
@@ -86,6 +117,47 @@ epilepsiae_548     τ=-0.394  Δr = [+11, +7, +8, +6, -1, -4, -4, -3, -2, -4, -3
 - `.../figures/README.md` — 中文图说明
 
 ## 5. 解读边界（写死）
+
+### 5.1 通道选择 caveat（关键方法学边界）
+
+**lagPat npz 的通道集不是"该 subject 所有 SEEG/ECoG 通道"**，而是 legacy yuquan 高-HI gate + 高 HFO rate 选出来的子集（每 subject 通常 n_ch ∈ [6, 24]）。这意味着：
+
+- footrule 和 Kendall τ 度量的是**该选定通道集之内**的 rank 排序，不是"真实"全脑反向程度
+- 通道选择**偏宽**（混入旁观非病理通道）→ 旁观通道在两个 template 间的 Δr 接近随机 → footrule 偏低、方差偏大、F_norm 被稀释
+- 通道选择**偏窄**（漏掉真传播通道）→ 反向几何被欠反映，Kendall τ 可能比真值更接近 0
+
+**所以 footrule 和 Kendall τ 不一定能"正确反映该 subject 的正反向程度"**：它们反映的是 lagPat 选定通道集**之内**的两个 template 排序差异。在解读单 subject 数字时，这个 caveat 必须保留：
+
+- 同一 subject 不同通道选择策略（例如改用 PR-1 ER-leading 通道、Topic 3 SOZ-audit 通道、或更严格的 high-HI 阈值）下的 F_norm 与 Kendall τ 会变化
+- 跨 subject 比较 F_norm 时，通道集 size（n_valid）与 type（病理 vs 旁观比例）的差异是 confound，不能用单个 footrule 数字断言"A subject 比 B subject 更反向"
+
+**本 supplementary 不重新选通道**（重新选属于另一个 PR 的工作），只在 lagPat 既定通道集之内做 supplementary 描述。任何 cohort-level claim 都必须在文字中带上这个 caveat。
+
+### 5.2 二分组的方法学风险（Panel B/C 分组合同）
+
+PR-2.5 `forward_reverse_reproduced` flag 的逻辑是**两步嵌套**：
+
+1. 候选门槛：`inter_cluster_corr_matrix` Spearman ρ < −0.5 → 候选
+2. 候选 subject 跑 reproducibility 测试（split-half + odd-even）→ TRUE / FALSE
+3. 非候选 subject **未跑 reproducibility 测试** → flag = None
+
+**早期版本的 plan / 第一版图把 `True` 与 `False ∪ None` 二分，会把"未测候选 + 测了不过"两类混淆**。在 cohort 数据中：
+
+- `epilepsiae_1146` (ρ_inter=−0.464, F_norm=0.857, n_v=15) — 非候选，flag=None
+- `epilepsiae_583` (ρ_inter=−0.286, F_norm=0.833, n_v=7) — 非候选
+- `yuquan_hanyuxuan` (ρ_inter=−0.380, F_norm=0.810, n_v=22) — 非候选
+- `epilepsiae_1077` (ρ_inter=−0.371, F_norm=0.778, n_v=6) — 非候选
+- `yuquan_liyouran` (ρ_inter=−0.404, F_norm=0.764, n_v=17) — 非候选
+
+这些 subject 都是 **borderline**：ρ_inter 在 [−0.5, −0.3] 之间，没过 PR-2.5 候选门槛但仍带明显反向几何。把它们与 ρ_inter ≈ 0 的真随机 subject（如 `yuquan_litengsheng` ρ=−0.141）一起塞进"non-reproduced"组会产生伪 bimodality。
+
+**正确分组（采用）**：
+- **Group A — 候选 cohort（ρ_inter < −0.5）**：n=7 = 6 TRUE + 1 FALSE（`yuquan_huanghanwen` ρ=−0.527）
+- **Group B — 非候选（ρ_inter ≥ −0.5）**：n=16
+
+非候选组里包含几个 borderline subject (ρ_inter ∈ [−0.5, −0.3])，他们的 F_norm 偏高是数据本身的连续谱使然，**不是分组错误**。对感兴趣 borderline subject 的更细分析需要绕开 PR-2.5 二分门槛，做 continuous metric vs continuous outcome 比较，本 supplementary 不做。
+
+### 5.3 可以说 / 不可以说
 
 可以说：
 - "Continuous-version footrule + Kendall τ 与 PR-6 离散 swap_node 同向，6/6 fwd/rev-reproduced subject 一致"
