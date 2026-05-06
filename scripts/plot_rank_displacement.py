@@ -161,14 +161,6 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     taus = np.array(
         [r["primary_pair"]["kendall_tau"] for r in sorted_records], dtype=float
     )
-    f_norms = np.array(
-        [r["primary_pair"]["footrule_normalized"] for r in sorted_records],
-        dtype=float,
-    )
-    pr25_status = [r["pr25_status"] for r in sorted_records]
-    # Color by F_norm > 2/3 grouping (NOT by PR-2.5 status — see Panel B/C
-    # design: PR-2.5 ρ_inter < -0.5 is another PR's hard threshold).
-    THRESH = 2 / 3
 
     finite = matrix[np.isfinite(matrix)]
     vmax = float(np.nanmax(np.abs(finite))) if finite.size else 1.0
@@ -239,13 +231,12 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h.spines["top"].set_visible(False)
     ax_h.spines["right"].set_visible(False)
 
-    # Kendall τ side panel — color by F_norm > 2/3 grouping (consistent
-    # with Panel B/C). PR-2.5 status (reproduced / cand-fail / non-cand)
-    # is shown only as marker shape on Panel B/C, not on this bar chart
-    # (would clutter the side panel).
-    bar_colors = [COL_SIG if f > THRESH else COL_NONSIG for f in f_norms]
-    bars = ax_tau.barh(
-        range(n_sub), taus, color=bar_colors, edgecolor="black", linewidth=0.4
+    # Kendall τ side panel — bar length encodes τ, single neutral color
+    # (paper-level: no binary classification overlay; the rank-ordering
+    # of rows + bar length together convey the continuous spectrum).
+    ax_tau.barh(
+        range(n_sub), taus,
+        color=COL_NEUTRAL, edgecolor="black", linewidth=0.4,
     )
     ax_tau.axvline(0, color="gray", linewidth=0.6)
     ax_tau.axvline(-0.5, color="gray", linewidth=0.4, linestyle="--")
@@ -263,261 +254,182 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     cb.set_label("Signed Δr (= rank_Tb − rank_Ta)", fontsize=FS_LABEL - 2)
     cb.ax.tick_params(labelsize=FS_TICK - 4)
 
-    # Legend — bars colored by F_norm > 2/3 grouping
+    # Legend — paper-level: only the displacement colorbar and SOZ outline
     legend_handles = [
-        mpatches.Patch(color=COL_SIG, label=f"F_norm > 2/3 (above asymptotic random)"),
-        mpatches.Patch(color=COL_NONSIG, label=f"F_norm ≤ 2/3 (around random)"),
         mpatches.Patch(facecolor="white", edgecolor="black", label="SOZ channel"),
     ]
     fig.suptitle(
-        f"Per-channel signed rank displacement — stable_k=2 cohort (n={n_sub})",
+        f"Per-channel signed rank displacement — two-template subjects (n={n_sub})",
         fontsize=FS_TITLE,
         y=0.97,
     )
     fig.legend(
         handles=legend_handles,
-        loc="upper center",
-        ncol=3,
-        fontsize=FS_TICK - 3,
+        loc="upper right",
+        ncol=1,
+        fontsize=FS_TICK - 2,
         frameon=False,
-        bbox_to_anchor=(0.5, 0.93),
+        bbox_to_anchor=(0.96, 0.93),
     )
     fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
     fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
 
-def _pr25_marker(status: str) -> Tuple[str, float]:
-    """Marker shape + size for PR-2.5 status overlay."""
-    return {
-        "reproduced": ("o", 56),
-        "candidate_fail": ("X", 90),
-        "non_candidate": ("s", 56),
-    }.get(status, ("o", 56))
-
-
-def _draw_pr25_scatter(ax, xs, ys, statuses, base_col, edgecolor="black"):
-    """Scatter with marker shape encoding PR-2.5 status."""
-    for x, y, st in zip(xs, ys, statuses):
-        m, s = _pr25_marker(st)
-        ax.scatter(
-            [x], [y],
-            color=base_col,
-            edgecolors=edgecolor,
-            linewidths=0.6 if st != "candidate_fail" else 1.0,
-            s=s, zorder=3, marker=m,
-        )
-
-
-def _label_subjects_in_box(ax, xs, ys, labels, x_range, y_range, fontsize):
-    """Annotate subjects whose (x, y) falls in the given box."""
-    x_lo, x_hi = x_range
-    y_lo, y_hi = y_range
-    for x, y, lbl in zip(xs, ys, labels):
-        if x_lo <= x <= x_hi and y_lo <= y <= y_hi:
-            ax.annotate(
-                lbl,
-                xy=(x, y),
-                xytext=(4, 4),
-                textcoords="offset points",
-                fontsize=fontsize,
-                color="black",
-                alpha=0.85,
-            )
-
-
 def plot_footrule_summary(records: List[dict], out_stem: Path) -> None:
-    """2-panel scatter visualization (visualization contract, post-hoc).
+    """Paper-level 2-panel summary of cohort rank-displacement geometry.
 
-    Panel B (where does PR-2.5's hard threshold miss continuous reversal?):
-        x = ρ_inter (PR-2.5 inter_cluster_corr_matrix Spearman)
-        y = F_norm (this supplementary's Diaconis-Graham normalized footrule)
-        reference lines: x = -0.5 (PR-2.5 candidate gate, FYI only)
-                         y = 2/3 (D-G asymptotic random expectation, FYI only)
-        Subjects in the upper-right quadrant (ρ_inter ≥ -0.5 AND F_norm > 2/3)
-        are precisely the ones missed by PR-2.5's hard cut yet flagged by the
-        continuous metric.
+    Panel B - Reversal spectrum:
+        x = subjects ranked by F_norm (descending)
+        y = F_norm (Diaconis-Graham normalized footrule)
+        Shows that the cohort is a CONTINUOUS spectrum, not a binary.
+        The 2/3 horizontal line is annotated as the asymptotic
+        random-permutation reference (Diaconis-Graham 1977, n→∞ expectation),
+        descriptive only - NOT a classifier threshold.
 
-    Panel C (does reversal degree predict SOZ enrichment?):
+    Panel C - SOZ contribution vs reversal strength:
         x = F_norm
-        y = soz_contribution_excess (= contribution_fraction - channel_fraction)
-        reference lines: x = 2/3 (D-G asymptotic random, FYI only)
-                         y = 0   (SOZ at chance, FYI only)
-        Spearman ρ summary - a near-zero ρ means reversal degree does NOT
-        predict SOZ enrichment in this cohort.
+        y = soz_contribution_excess (baseline-corrected)
+        Spearman ρ summary; near-zero correlation = honest negative finding.
+        Marker shape = dataset (epilepsiae circle, yuquan square),
+        purely for visual disambiguation, not for grouping.
 
-    Both panels use marker shape for PR-2.5 status (circle/X/square) as
-    pure descriptive overlay; no panel uses categorical grouping or
-    between-group MW-U. The reference lines are explicitly labeled
-    'reference, FYI only' - they are NOT decision rules.
+    NO PR-2.5 internal-workflow language anywhere on this figure (no
+    'reproduced', 'candidate-fail', 'non-candidate', 'PR-2.5 gate',
+    'PR-2.5 missed'). Those classifications belong in the methods archive,
+    not on a paper-level figure. The figure tells one story:
+    template-pair rank reversal is a cohort-level continuous spectrum,
+    and SOZ channel involvement does NOT explain that spectrum.
     """
     from scipy.stats import spearmanr
 
     # Build per-subject vectors
-    subjects, labels, F_arr, tau_arr, rho_inter_arr, excess_arr = [], [], [], [], [], []
-    pr25 = []
+    subjects, labels, F_arr, tau_arr, excess_arr, datasets = (
+        [], [], [], [], [], []
+    )
     for r in records:
         pair = r["primary_pair"]
         f_norm = pair.get("footrule_normalized")
         tau = pair.get("kendall_tau")
         excess = pair.get("soz_contribution_excess")
-        iccm = r.get("inter_cluster_corr_matrix")
-        rho_inter = (
-            iccm[0][1] if iccm and len(iccm) >= 2 and len(iccm[0]) >= 2 else None
-        )
         if (
-            f_norm is None or tau is None or rho_inter is None
+            f_norm is None or tau is None
             or (isinstance(f_norm, float) and np.isnan(f_norm))
             or (isinstance(tau, float) and np.isnan(tau))
-            or (isinstance(rho_inter, float) and np.isnan(rho_inter))
         ):
             continue
         subjects.append(r)
         labels.append(f"{r['dataset'][:3]}_{r['subject']}")
         F_arr.append(f_norm)
         tau_arr.append(tau)
-        rho_inter_arr.append(rho_inter)
         excess_arr.append(excess if excess is not None else float("nan"))
-        pr25.append(r["pr25_status"])
+        datasets.append(r.get("dataset", "unknown"))
 
     F_arr = np.array(F_arr, dtype=float)
-    rho_inter_arr = np.array(rho_inter_arr, dtype=float)
+    tau_arr = np.array(tau_arr, dtype=float)
     excess_arr = np.array(excess_arr, dtype=float)
     n = len(F_arr)
 
-    # Color subjects by PR-2.5 status for visual separation
-    def _color_for(st: str) -> str:
-        return COL_SIG if st in ("reproduced", "candidate_fail") else COL_NONSIG
+    # Sort for spectrum panel (descending F_norm)
+    order = np.argsort(-F_arr)
+    F_sorted = F_arr[order]
+    tau_sorted = tau_arr[order]
+    labels_sorted = [labels[i] for i in order]
+    datasets_sorted = [datasets[i] for i in order]
 
-    point_colors = [_color_for(st) for st in pr25]
-
-    # Continuous summaries
-    rho_FB, p_FB = spearmanr(rho_inter_arr, F_arr)
+    # Spearman correlation for Panel C
     excess_finite = np.isfinite(excess_arr)
     if excess_finite.sum() >= 4:
         rho_FC, p_FC = spearmanr(F_arr[excess_finite], excess_arr[excess_finite])
     else:
         rho_FC, p_FC = float("nan"), float("nan")
 
-    fig, axes = plt.subplots(1, 2, figsize=(13.5, 6.0))
+    fig, axes = plt.subplots(1, 2, figsize=(16, 7.0),
+                              gridspec_kw={"width_ratios": [1.7, 1.0]})
 
-    # ====== Panel B: ρ_inter vs F_norm ======
+    # ====== Panel B: Ranked F_norm spectrum (cohort continuous spectrum) ======
     ax = axes[0]
-    # Reference lines (FYI only, NOT decision rules)
-    ax.axvline(-0.5, color="gray", linewidth=0.7, linestyle="--", zorder=1)
-    ax.axhline(2 / 3, color="gray", linewidth=0.7, linestyle="--", zorder=1)
-    # Quadrant shading: upper-right = "PR-2.5 missed but F_norm flags"
-    ax.axvspan(-0.5, 1.0, ymin=(2/3 - 0) / 1.0,
-               ymax=1.0, color=COL_SIG, alpha=0.06, zorder=0)
-    # Scatter, colored by PR-2.5 status, marker by status
-    for x, y, st, col in zip(rho_inter_arr, F_arr, pr25, point_colors):
-        m, s = _pr25_marker(st)
-        ax.scatter([x], [y], color=col, edgecolors="black",
-                   linewidths=0.8 if st == "candidate_fail" else 0.5,
-                   s=s, zorder=3, marker=m)
-    # Label TR-quadrant subjects (PR-2.5 missed but F > 2/3)
-    _label_subjects_in_box(
-        ax, rho_inter_arr, F_arr, labels,
-        x_range=(-0.5, 1.0), y_range=(2 / 3, 1.05),
-        fontsize=FS_TICK - 5,
+    x_positions = np.arange(n)
+    ax.bar(
+        x_positions, F_sorted,
+        color=COL_NEUTRAL, edgecolor="black", linewidth=0.4, width=0.78,
+        zorder=3,
     )
-    # Reference text
-    ax.text(-0.51, 0.05, "ρ = −0.5\n(PR-2.5 gate, FYI)",
-            fontsize=FS_TICK - 5, ha="right", va="bottom", color="gray")
-    ax.text(0.95, 2 / 3 + 0.02, "F = 2/3 (D-G asymptotic random, FYI)",
-            fontsize=FS_TICK - 5, ha="right", va="bottom", color="gray")
-    # Quadrant annotation (corner labels)
-    ax.text(0.95, 0.97, "PR-2.5 missed\n(ρ ≥ −0.5, F > 2/3)",
-            fontsize=FS_TICK - 4, ha="right", va="top",
-            color=COL_SIG, fontweight="bold")
-    ax.text(-0.95, 0.97, "both flag high",
-            fontsize=FS_TICK - 4, ha="left", va="top", color="black")
-    ax.text(0.95, 0.05, "both around random",
-            fontsize=FS_TICK - 4, ha="right", va="bottom", color="gray")
-
-    ax.set_xlim(-1.0, 1.0)
-    ax.set_ylim(0, 1.05)
-    ax.set_xlabel("ρ_inter  (PR-2.5 inter_cluster_corr_matrix Spearman)",
-                  fontsize=FS_LABEL - 2)
+    # 2/3 reference line, annotated descriptively
+    ax.axhline(2 / 3, color="gray", linewidth=0.7, linestyle="--", zorder=2)
+    ax.text(
+        n - 0.5, 2 / 3 + 0.012,
+        "2/3 — asymptotic random-permutation reference (Diaconis-Graham 1977, n→∞)",
+        fontsize=FS_TICK - 4, ha="right", va="bottom", color="gray",
+    )
+    # Subject labels along x
+    ax.set_xticks(x_positions)
+    ax.set_xticklabels(labels_sorted, rotation=70, fontsize=FS_TICK - 4, ha="right")
+    ax.set_xlim(-0.7, n - 0.3)
+    ax.set_ylim(0, 1.10)
+    ax.set_xlabel("subjects, ranked by F_norm (descending)",
+                  fontsize=FS_LABEL - 1, labelpad=8)
     ax.set_ylabel("F_norm  (Diaconis-Graham normalized footrule)",
-                  fontsize=FS_LABEL - 2)
-    info = (
-        f"Spearman ρ(ρ_inter, F_norm) = {rho_FB:.3f}, p = {p_FB:.2g}, n = {n}\n"
-        f"reference lines are descriptive (FYI), not decision rules"
-    )
-    ax.text(0.5, 1.04, info, transform=ax.transAxes,
-            fontsize=FS_TICK - 4, ha="center", color="black")
+                  fontsize=FS_LABEL - 1)
     style_panel(ax, label="b")
 
     # ====== Panel C: F_norm vs soz_contribution_excess ======
     ax = axes[1]
-    ax.axvline(2 / 3, color="gray", linewidth=0.7, linestyle="--", zorder=1)
-    ax.axhline(0, color="gray", linewidth=0.7, linestyle="-", zorder=1)
-    for x, y, st, col in zip(F_arr, excess_arr, pr25, point_colors):
+    ax.axvline(2 / 3, color="lightgray", linewidth=0.7, linestyle="--", zorder=1)
+    ax.axhline(0, color="lightgray", linewidth=0.8, linestyle="-", zorder=1)
+    for x, y, ds in zip(F_arr, excess_arr, datasets):
         if not np.isfinite(y):
             continue
-        m, s = _pr25_marker(st)
-        ax.scatter([x], [y], color=col, edgecolors="black",
-                   linewidths=0.8 if st == "candidate_fail" else 0.5,
-                   s=s, zorder=3, marker=m)
-    # SOZ at chance reference label (placed near top-left so it doesn't crowd points)
-    ax.text(0.40, 0.005, "SOZ at chance (excess = 0, FYI)",
+        marker = "o" if ds == "epilepsiae" else "s"
+        ax.scatter([x], [y], color=COL_NEUTRAL, edgecolors="black",
+                   linewidths=0.5, s=64, zorder=3, marker=marker)
+    # Set explicit y-limits to give room for reference text
+    finite_excess = excess_arr[excess_finite]
+    y_pad = 0.04
+    y_lo = float(np.min(finite_excess)) - y_pad
+    y_hi = float(np.max(finite_excess)) + y_pad
+    ax.set_ylim(y_lo, y_hi)
+    ax.set_xlim(0.35, 1.05)
+    # Reference labels (small, gray, FYI), placed in low-density corners
+    ax.text(2 / 3 + 0.005, y_lo + 0.005,
+            "F = 2/3 (random ref)",
             fontsize=FS_TICK - 5, ha="left", va="bottom", color="gray")
-    ax.text(2 / 3 + 0.005, ax.get_ylim()[1] - 0.01,
-            "F = 2/3\n(D-G ref, FYI)",
-            fontsize=FS_TICK - 5, ha="left", va="top", color="gray")
+    ax.text(0.36, 0.005, "SOZ at chance",
+            fontsize=FS_TICK - 5, ha="left", va="bottom", color="gray")
     ax.set_xlabel("F_norm  (Diaconis-Graham normalized footrule)",
-                  fontsize=FS_LABEL - 2)
+                  fontsize=FS_LABEL - 1, labelpad=8)
     ax.set_ylabel(
-        "soz_contribution_excess\n(= SOZ contribution_fraction − channel_fraction)",
-        fontsize=FS_LABEL - 3,
+        "SOZ contribution_excess\n"
+        "(SOZ contribution_fraction − channel_fraction)",
+        fontsize=FS_LABEL - 2,
     )
     info = (
-        f"Spearman ρ(F_norm, SOZ excess) = {rho_FC:.3f}, p = {p_FC:.2g}, "
-        f"n = {int(excess_finite.sum())}\n"
-        f"low |ρ| ⇒ reversal degree does NOT predict SOZ enrichment"
+        f"Spearman ρ = {rho_FC:.3f}, p = {p_FC:.2g}, n = {int(excess_finite.sum())}"
     )
-    ax.text(0.5, 1.04, info, transform=ax.transAxes,
-            fontsize=FS_TICK - 4, ha="center", color="black")
-    style_panel(ax, label="c")
-
-    # Combined legend at the bottom
+    ax.text(0.5, 1.025, info, transform=ax.transAxes,
+            fontsize=FS_TICK - 2, ha="center", color="black")
+    # Dataset legend (purely shape disambiguation)
     legend_handles = [
         plt.Line2D([0], [0], marker="o", color="w",
-                   markerfacecolor=COL_SIG, markeredgecolor="black",
-                   markersize=8, label="PR-2.5 reproduced (n=6)"),
-        plt.Line2D([0], [0], marker="X", color="w",
-                   markerfacecolor=COL_SIG, markeredgecolor="black",
-                   markersize=11, label="PR-2.5 candidate-fail (n=1, huanghanwen)"),
+                   markerfacecolor=COL_NEUTRAL, markeredgecolor="black",
+                   markersize=8, label="Epilepsiae"),
         plt.Line2D([0], [0], marker="s", color="w",
-                   markerfacecolor=COL_NONSIG, markeredgecolor="black",
-                   markersize=8, label="PR-2.5 non-candidate (n=16)"),
+                   markerfacecolor=COL_NEUTRAL, markeredgecolor="black",
+                   markersize=8, label="Yuquan"),
     ]
-    fig.legend(
-        handles=legend_handles,
-        loc="lower center",
-        ncol=3,
-        fontsize=FS_TICK - 3,
-        frameon=False,
-        bbox_to_anchor=(0.5, -0.04),
-    )
+    ax.legend(handles=legend_handles, loc="lower right",
+              fontsize=FS_TICK - 3, frameon=False, title="dataset",
+              title_fontsize=FS_TICK - 3)
+    style_panel(ax, label="c")
 
-    fig.tight_layout()
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
     fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
     fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
 
-    # Stdout summary for archive doc fill-in
-    print(f"  Panel B Spearman ρ(ρ_inter, F_norm) = {rho_FB:.3f}, p = {p_FB:.3g}, n = {n}")
+    # Stdout summary
+    print(f"  Panel B (spectrum): n={n}, F_norm range = [{F_sorted.min():.3f}, {F_sorted.max():.3f}]")
     print(f"  Panel C Spearman ρ(F_norm, SOZ excess) = {rho_FC:.3f}, p = {p_FC:.3g}, n = {int(excess_finite.sum())}")
-    # Quadrant counts for Panel B
-    tr_count = int(((rho_inter_arr >= -0.5) & (F_arr > 2/3)).sum())
-    tl_count = int(((rho_inter_arr < -0.5) & (F_arr > 2/3)).sum())
-    br_count = int(((rho_inter_arr >= -0.5) & (F_arr <= 2/3)).sum())
-    bl_count = int(((rho_inter_arr < -0.5) & (F_arr <= 2/3)).sum())
-    print(f"  Panel B quadrants: TL (both flag high)={tl_count}  "
-          f"TR (PR-2.5 missed)={tr_count}  "
-          f"BR (both low)={br_count}  BL (anomalous)={bl_count}")
 
 
 def plot_per_subject_strip(record: dict, out_path: Path) -> None:
