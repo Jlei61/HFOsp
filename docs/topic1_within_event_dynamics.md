@@ -64,17 +64,17 @@
 - **结论口径**：模板稳定，但占比的昼夜漂移整体较弱。**这是描述层结果，不是强机制结论**
 - occupancy 在低 rate 时段天然高方差，不适合直接承担 PR-4C 的主统计读数 → PR-4D 已把这层补强成 `rate×type`
 
-### 3.1d Cluster geometry 可视化（template-matching metric，2026-05-06）
+### 3.1d Cluster geometry 可视化（PCA + MDS 双视图，2026-05-06）
 
-PR-2 / PR-2.5 cluster decomposition 的描述性补强：在 **shared-channel mean squared deviation**（与 `assign_events_to_templates` 一致的距离）下做 classical MDS，把 PR-2 的 KMeans label 在二维平面上画出来，加上模板大星 + boundary events 高亮。每个 subject 三 panel：(a) MDS scatter，(b) per-event silhouette 排序，(c) cluster template profile（结构层补强，能直接看 forward/reverse）。
+PR-2 / PR-2.5 cluster decomposition 的描述性补强。每 subject 一张 2×2 图：(a) **PCA on KMeans 训练用的全 rank feature matrix**（KMeans-native 视图，所有事件展示），(b) per-event silhouette 排序（template-matching metric 下），(c) cluster template profile（channel-rank 折线，能直接看 forward/reverse），(d) classical MDS on template-matching distance（audit 视图，subsample）。两种 metric 视图（panel a 与 d）并列展示同一 cohort 在两种距离下不一定相同的几何。
 
-- **入选 cohort = 20 Epilepsiae subjects**（18 Yuquan 因 PR-2 labels 与当前 lagPat data 不对齐被跳过，**data freshness 问题不在本 PR 范围**，列为 P0 follow-up：在最新数据上重跑 PR-2 / PR-2.5）
-- **958 直接复现老论文 E3 的 forward/reverse**：cluster 0 与 cluster 1 在 panel c 模板剖面上完全反向（panel a 两类事件云干净分开）；**818 复现 k=4 多模态**——本 PR 首次在二维平面上把这两件事画出来
-- **关键 cohort 数字**：silhouette median = **0.460**（range 0.182–0.671），KMeans-vs-template-matching agreement median = **0.892**（range 0.769–0.955），与用户先前 audit 完全一致
-- **新规律**：silhouette 与 agreement **Spearman ρ = 0.889（p = 1.65e-07, n=20）—— 极强正相关**；cluster validity 弱的 subject 同时是 metric drift 高的 subject，两类问题不是独立的
-- **Metric drift 来源**：boundary fraction by n_participating 单调下降 `0.135 → 0.097 → 0.046`（3-4 / 5-8 / 9+ 通道事件）—— 主要发生在低 n_participating 事件
-- **不推翻**任何 PR-2/2.5/3/4/5/6/7 主结论（核心结论都不依赖 masked metric 单独成立），但 boundary events 的几何解释 metric 敏感
-- **不是新假设、不进 SBA framework P1–P5**；纯描述层，作为 Paper 1 候选主图的视觉论证
+- **入选 cohort = 20 Epilepsiae subjects**；**18 Yuquan 排除**（PR-2 saved labels 与当前 lagPat valid_events 数量不对齐 / 缺 adaptive_cluster JSON）—— **data freshness 问题不在本 PR 范围**，列为 P0 follow-up：在最新 lagPat 上重跑 PR-2 / PR-2.5
+- **关键 cohort 数字**：silhouette median = **0.460**（range 0.182–0.671，5/20 < 0.3），KMeans-vs-template-matching agreement median = **0.892**（range 0.769–0.955，8/20 < 0.85），与用户先前 audit 完全一致
+- **Metric drift 集中在低 n_participating 事件**：boundary fraction by n_part bin 单调下降 `0.135 → 0.097 → 0.046`（3-4 / 5-8 / 9+）。**真实差异是 KMeans 用全 rank 向量（含非参与通道的 fallback rank）vs matching 只用共享通道**——之前文档"NaN→0"描述错，已修正
+- **Showcase 三张**：`958` (k=2 forward/reverse，老论文 E3 复现) / `818` (k=4 多模态，cohort 最低 agreement) / `253` (auto-pick，低 cluster validity caveat)
+- **Silhouette × agreement Spearman ρ = 0.889** ——consistency check / sanity，**不是独立 finding**（两者都派生自同一组 d_within / d_min_other 距离差，cohort 上正相关本来就是定义上预期）
+- **不推翻**任何 PR-2/2.5/3/4/5/6/7 主结论（核心结论都不依赖 matching metric 单独成立），但 boundary events 的几何解释 metric 选择敏感
+- **不是新假设、不进 SBA framework P1–P5**；纯描述层
 - 详细数字、机制层差异清单、follow-up：
   - Plan：`docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md`
   - Results：`docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md`

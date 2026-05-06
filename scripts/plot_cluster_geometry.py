@@ -100,16 +100,66 @@ def _list_per_subject_files() -> List[Path]:
 # ---------------------------------------------------------------------------
 
 
+def _scatter_metric_panel(
+    ax: plt.Axes,
+    events: List[Dict[str, Any]],
+    templates: List[Dict[str, Any]],
+    chosen_k: int,
+    x_field: str,
+    y_field: str,
+) -> int:
+    """Render a 2D scatter (PCA or MDS) of events + templates.
+
+    Returns the number of events with finite coords (visible in this panel).
+    """
+    visible = 0
+    for k in range(chosen_k):
+        col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
+        agree_pts = []
+        bound_pts = []
+        for ev in events:
+            if ev["kmeans_label"] != k:
+                continue
+            x = ev.get(x_field)
+            y = ev.get(y_field)
+            if x is None or y is None or not np.isfinite(x) or not np.isfinite(y):
+                continue
+            visible += 1
+            if ev.get("agreement", True):
+                agree_pts.append((x, y))
+            else:
+                bound_pts.append((x, y))
+        if agree_pts:
+            xs, ys = zip(*agree_pts)
+            ax.scatter(xs, ys, s=EVENT_MARKER_SIZE, c=col, alpha=0.55,
+                       edgecolors="none", zorder=2)
+        if bound_pts:
+            xs, ys = zip(*bound_pts)
+            ax.scatter(xs, ys, s=BOUNDARY_MARKER_SIZE, facecolors="none",
+                       edgecolors=col, linewidths=1.3, alpha=0.9, zorder=3)
+
+    for k, tmpl in enumerate(templates):
+        col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
+        tx = tmpl.get(x_field)
+        ty = tmpl.get(y_field)
+        if tx is None or ty is None or not np.isfinite(tx) or not np.isfinite(ty):
+            continue
+        ax.scatter([tx], [ty], marker="*", s=TEMPLATE_MARKER_SIZE,
+                   c=col, edgecolors="black", linewidths=1.5, zorder=4)
+    return visible
+
+
 def plot_per_subject_geometry(
     data: Dict[str, Any],
     output_path: Path,
     is_showcase: bool = False,
 ) -> Path:
-    """Produce the 3-panel per-subject figure described in §5.1.
+    """Produce the 4-panel (2x2) per-subject figure.
 
-    Panel a: MDS scatter + boundary events + templates as stars
-    Panel b: per-event silhouette ranked bar (cluster-blocked, sil-sorted)
+    Panel a: PCA scatter on KMeans feature matrix — all events, KMeans-native view
+    Panel b: per-event silhouette ranked (template-matching metric, audit)
     Panel c: cluster template profile (channel-rank lines + IQR band)
+    Panel d: MDS scatter under template-matching distance — subsample audit
     """
     if data.get("status") != "ok":
         logger.warning("Skip %s: status=%s", data.get("subject"), data.get("status"))
@@ -123,71 +173,38 @@ def plot_per_subject_geometry(
     channel_names = data.get("channel_names", [])
     n_ch = len(channel_names)
 
-    figsize = (18, 5.5) if not is_showcase else (22, 7)
-    fig, axes = new_figure(nrows=1, ncols=3, figsize=figsize)
+    figsize = (16, 11) if not is_showcase else (20, 13)
+    fig, axes = new_figure(nrows=2, ncols=2, figsize=figsize)
 
     # -----------------------------------------------------------------------
-    # Panel a: MDS scatter + boundary + templates
+    # Panel a: PCA scatter — KMeans-native, ALL events
     # -----------------------------------------------------------------------
-    ax = axes[0]
-    style_panel(ax, label="a", label_x=-0.16, label_y=1.06)
+    ax = axes[0, 0]
+    style_panel(ax, label="a", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
-
-    for k in range(chosen_k):
-        col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
-        agree_pts = [
-            (ev["mds_x"], ev["mds_y"])
-            for ev in events
-            if ev["kmeans_label"] == k
-            and ev.get("agreement", True)
-            and ev["mds_x"] is not None
-            and np.isfinite(ev["mds_x"])
-        ]
-        bound_pts = [
-            (ev["mds_x"], ev["mds_y"])
-            for ev in events
-            if ev["kmeans_label"] == k
-            and not ev.get("agreement", True)
-            and ev["mds_x"] is not None
-            and np.isfinite(ev["mds_x"])
-        ]
-        if agree_pts:
-            xs, ys = zip(*agree_pts)
-            ax.scatter(xs, ys, s=EVENT_MARKER_SIZE, c=col, alpha=0.55,
-                       edgecolors="none", label=f"cluster {k}", zorder=2)
-        if bound_pts:
-            xs, ys = zip(*bound_pts)
-            ax.scatter(xs, ys, s=BOUNDARY_MARKER_SIZE, facecolors="none",
-                       edgecolors=col, linewidths=1.3, alpha=0.9,
-                       zorder=3)
-
-    # Template stars
-    for k, tmpl in enumerate(templates):
-        col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
-        ax.scatter([tmpl["mds_x"]], [tmpl["mds_y"]],
-                   marker="*", s=TEMPLATE_MARKER_SIZE,
-                   c=col, edgecolors="black", linewidths=1.5,
-                   zorder=4, label=f"T{k}")
-
-    ax.set_xlabel("MDS-1 (template-matching metric)", fontsize=FS_LABEL)
-    ax.set_ylabel("MDS-2", fontsize=FS_LABEL)
+    n_pca_visible = _scatter_metric_panel(
+        ax, events, templates, chosen_k, x_field="pca_x", y_field="pca_y",
+    )
+    evr = data.get("pca_explained_variance_ratio", [None, None])
+    evr_str = ""
+    if evr and all(v is not None for v in evr[:2]):
+        evr_str = f"  EVR={evr[0]:.2f},{evr[1]:.2f}"
+    ax.set_xlabel(f"PC1 (KMeans feature space){evr_str}", fontsize=FS_LABEL)
+    ax.set_ylabel("PC2", fontsize=FS_LABEL)
 
     n_total = data["n_events_total"]
     n_used = data["n_events_used_for_mds"]
     sil_med = data["silhouette_median"]
     agreement = data["agreement_overall"]
     stress = data["stress"]
-    line1 = f"n={n_total}  k={chosen_k}  sil={sil_med:.3f}  agreement={agreement:.3f}"
-    line2 = f"MDS on {n_used} subsample" if data.get("subsampled") else f"MDS on full {n_used} events"
-    if data.get("stress_warning") or data.get("imputation_warning"):
-        line2 += f"   ⚠ stress={stress:.2f}"
-    ax.set_title(f"{line1}\n{line2}", fontsize=FS_TITLE - 4, loc="left")
+    title_a = f"PCA · all {n_pca_visible} events  (k={chosen_k}  agreement={agreement:.3f})"
+    ax.set_title(title_a, fontsize=FS_TITLE - 4, loc="left")
 
     # -----------------------------------------------------------------------
     # Panel b: per-event silhouette ranked bar
     # -----------------------------------------------------------------------
-    ax = axes[1]
-    style_panel(ax, label="b", label_x=-0.12, label_y=1.06)
+    ax = axes[0, 1]
+    style_panel(ax, label="b", label_x=-0.10, label_y=1.04)
 
     # Group by cluster, sort sils within cluster (desc); plot as filled curves
     cluster_block_centers: List[Tuple[int, float]] = []
@@ -257,8 +274,8 @@ def plot_per_subject_geometry(
     # -----------------------------------------------------------------------
     # Panel c: cluster template profile
     # -----------------------------------------------------------------------
-    ax = axes[2]
-    style_panel(ax, label="c", label_x=-0.12, label_y=1.06)
+    ax = axes[1, 0]
+    style_panel(ax, label="c", label_x=-0.10, label_y=1.04)
 
     templates_real = np.asarray(data["templates_real"], dtype=float)  # (k, n_ch)
 
@@ -344,12 +361,31 @@ def plot_per_subject_geometry(
             rotation=45, ha="right", fontsize=FS_TICK - 2,
         )
 
-    fig.suptitle(
-        f"{dataset.capitalize()} · {subject} — cluster geometry (template-matching metric)",
-        fontsize=FS_TITLE,
-        y=0.99,
+    # -----------------------------------------------------------------------
+    # Panel d: MDS scatter — template-matching audit (subsample)
+    # -----------------------------------------------------------------------
+    ax = axes[1, 1]
+    style_panel(ax, label="d", label_x=-0.10, label_y=1.04)
+    ax.set_facecolor("#FAFAFA")
+    n_mds_visible = _scatter_metric_panel(
+        ax, events, templates, chosen_k, x_field="mds_x", y_field="mds_y",
     )
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
+    ax.set_xlabel("MDS-1 (template-matching metric)", fontsize=FS_LABEL)
+    ax.set_ylabel("MDS-2", fontsize=FS_LABEL)
+    title_d = f"MDS · {n_mds_visible} subsample events  (sil_med={sil_med:.3f}  stress={stress:.2f})"
+    if data.get("stress_warning") or data.get("imputation_warning"):
+        title_d += "  ⚠"
+    if data.get("subsampled"):
+        title_d += f"\n(subsampled from {n_total})"
+    ax.set_title(title_d, fontsize=FS_TITLE - 4, loc="left")
+
+    fig.suptitle(
+        f"{dataset.capitalize()} · {subject} — cluster geometry "
+        f"(KMeans-native PCA + template-matching MDS audit)",
+        fontsize=FS_TITLE,
+        y=0.995,
+    )
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
     return savefig_pub(fig, output_path)
 
 
@@ -550,53 +586,67 @@ def _select_low_agreement_showcase(
 # ---------------------------------------------------------------------------
 
 
-def _write_figures_readme() -> None:
+def _write_figures_readme(showcase_picks: Optional[List[Tuple[str, str]]] = None) -> None:
     readme = FIGURES_DIR / "README.md"
     readme.parent.mkdir(parents=True, exist_ok=True)
-    text = """# 间期事件 cluster geometry 可视化（template-matching metric）
+
+    showcase_lines = []
+    for ds, sub in (showcase_picks or []):
+        showcase_lines.append(f"- `{sub}_geometry_showcase.png` ({ds})")
+    showcase_block = "\n".join(showcase_lines) if showcase_lines else "（cohort 跑完后由 plot 脚本动态决定）"
+
+    text = f"""# 间期事件 cluster geometry 可视化
 
 > 设计文档：`docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md`
-> 距离定义：shared-channel mean squared deviation（与 `assign_events_to_templates` 一致；不是 KMeans 训练时用的 NaN→0 距离）
+> 结果文档：`docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md`
+>
+> 每张 per-subject 图同时展示两种距离 metric 下的几何：
+> - **PCA**（panel a）= sklearn PCA on KMeans 训练用的全 rank feature matrix；KMeans 的"原生"距离视图，**所有事件**展示
+> - **MDS**（panel d）= classical MDS on `assign_events_to_templates` 的 shared-channel mean squared deviation；template-matching 距离的 audit 视图，subsample 到 8000 events
+>
+> 注意：lagPatRank 在非参与通道上**不是 NaN/0**，而是 legacy `return_massCenterPat` 给出的有限 fallback rank。KMeans 用全 rank 向量算欧氏距离；matching 只用共享通道。
 
 ## per_subject/
 
-每个 subject 一张 1×3 图。
+每 subject 一张 2×2 图（status=ok 的 subject 才出图）。
 
 ### `<dataset>_<subject>_geometry.png`
 
-- **Panel a**：MDS 散点图。事件按 PR-2 KMeans label 上色；模板用大星黑边突出；KMeans label 与 template-matching reassign 不一致的事件叠加空心圆。Title 写 `n=… k=… sil=… agreement=…`，stress 超阈或 imputation 比例过高时挂 ⚠️。
-- **Panel b**：每事件 silhouette（template-matching metric 下）排序条。按 cluster 分块、cluster 内按 silhouette 降序。silhouette < 0 的事件用 Morandi rust 高亮——这些事件被 KMeans 归到本簇，但在 template-matching metric 下离对家更近。
-- **Panel c**：cluster template profile。横轴 = 通道（按 dominant cluster 的 template rank 升序），纵轴 = template mean rank；每 cluster 一条折线。直接展示每个传播模式的"哪些通道早 / 哪些通道晚"，是 panel a 的 MDS 视图无法替代的结构层信息。
+- **Panel a (top-left, KMeans-native PCA)**：PCA(2) on 全 rank feature matrix；事件按 PR-2 KMeans label 上色；模板用大星黑边突出；KMeans label 与 template-matching reassign 不一致的事件叠加空心圆。**所有事件**展示，title 写 `EVR=...,...`（前两 PC 解释方差比）。
+- **Panel b (top-right, silhouette ranked)**：每事件 silhouette（template-matching metric 下）排序条。按 cluster 分块、cluster 内按 silhouette 降序。silhouette < 0 的事件用 Morandi rust 高亮——KMeans 归到本簇，但在 template-matching metric 下离对家更近。
+- **Panel c (bottom-left, template profile)**：横轴 = 通道（按 dominant cluster 的 template rank 升序），纵轴 = template mean rank；每 cluster 一条折线 + 半透明 IQR 带。直接展示每个传播模式的"哪些通道早 / 哪些通道晚"，是 panel a/d 的 2D 视图无法替代的结构层信息。
+- **Panel d (bottom-right, template-matching MDS audit)**：MDS scatter，subsample 到 8000 events + 全部模板；事件颜色与 panel a 一致；title 写 `sil_med=... stress=...`。stress > 0.30 或 imputation > 0.20 挂 ⚠️。
 
-**关注点**：
-- Panel a 的两类事件云是否明显分开；模板大星是否落在各自事件云的"中心"
-- Panel b 的 silhouette 分布是否大部分为正；负 silhouette 的比例
-- Panel c 的两条 template 折线是否反向（forward/reverse）或重合（纯 identity bias）
+**关注点（per-subject）**：
+- Panel a / d 的事件云分离形态在 KMeans-native vs matching 两种 metric 下是否一致
+- Panel b 的 silhouette 分布是否大部分为正；负 silhouette 比例 = boundary-event 比例
+- Panel c 两条 template 折线是否反向（forward/reverse）或近重合（identity-dominated）
+- Panel d 的 stress：> 0.30 表示 2D 不能完全保留 metric 距离结构（k≥3 多 cluster 时常见，不是 cluster validity 问题）
 
 ## showcase/
 
-3 张精修单图，相同 panel 结构：
+3 张精修大图，与 per_subject 同 4-panel 结构、figsize 加大：
 
-- `958_geometry_showcase.png` —— k=2 forward/reverse 的教科书 case（老论文 E3 复现）
-- `huangwanling_geometry_showcase.png` —— k=4 多模态最干净的 subject（raw_tau ≈ centered_tau）
-- `<low_agreement>_geometry_showcase.png` —— cohort 跑完后 agreement 最低的 subject 之一，用来诚实展示 metric drift 的真实长相
+{showcase_block}
 
-**关注点**：每张图的 panel a 和 panel c 应能一眼看出该 subject 的传播模式是 forward/reverse 互逆还是完全独立的多模态。
+> 第一张通常是 `958`（k=2 forward/reverse 案例）；第二张是多模态例子（按 fallback chain 从 huangwanling 开始挑第一个 status=ok 的）；第三张由 plot 脚本从 cohort 中 auto-pick `agreement < 0.85 ∩ n_events ≥ 200` 的 silhouette-最低 subject。
+
+**关注点（showcase）**：每张图通过 panel c 直接看该 subject 的"传播模式骨架"，通过 panel a vs d 看两种 metric 的几何是否一致。
 
 ## cohort_geometry_summary.png
 
 一张 2×2 大图。
 
 - **Panel a**：per-subject silhouette median 排序条；YQ 蓝、EPI 赭，stable_k 用形状区分（圆 / 三角 / 方）
-- **Panel b**：per-subject KMeans-matching agreement 排序条；agreement < 0.85 用 Morandi rust 高亮，标 0.85 dashed line
-- **Panel c**：silhouette median vs agreement joint scatter；Spearman ρ + p 值在 title；marker shape = stable_k，color = dataset
-- **Panel d**：boundary-event fraction（agreement = False 的比例）按 n_participating bin（3-4 / 5-8 / 9+）做 box + scatter，看 metric drift 是否集中在低参与事件
+- **Panel b**：per-subject KMeans-matching agreement 排序条；agreement < 0.85 用 Morandi rust 高亮，0.85 dashed line
+- **Panel c (consistency check, 不是独立科学发现)**：silhouette median vs agreement joint scatter；Spearman ρ + p 在 title；marker shape = stable_k，color = dataset。**注**：silhouette 与 agreement 都源自同一组 d_within / d_min_other 距离差，cohort 上 ρ 强正本来就是定义上预期，**不**当作独立 finding，仅作 sanity check（反向相关 / 无关才需要担心 pipeline）。
+- **Panel d**：boundary-event fraction（agreement = False 比例）按 n_participating bin（3-4 / 5-8 / 9+）做 box + scatter；cohort 每 subject 一个数据点
 
-**关注点**：
-- Panel a 的 silhouette 中位数是否大体 > 0.3（cluster validity 整体成立）
-- Panel b 的 agreement 是否大部分 > 0.85（PR-2 决策稳定）
-- Panel c 的 ρ 反映两个问题（cluster validity 弱 / metric drift 大）是否耦合
-- Panel d 的箱体如果在 3-4 显著高、9+ 显著低，则 metric drift 的源头 = 低 n_participating 事件
+**关注点（cohort）**：
+- Panel a：cohort silhouette 范围与中位（大致衡量 cluster 在 matching metric 下的分离强度）
+- Panel b：低 agreement subject 数量（caveat 候选）
+- Panel c：sanity（ρ 应正）
+- Panel d：箱体若 3-4 显著高、9+ 显著低，metric drift 主要源于低 n_participating 事件——主要的机制候选
 """
     readme.write_text(text)
     logger.info("Wrote %s", readme)
@@ -631,6 +681,8 @@ def main() -> None:
 
     PER_SUBJECT_FIG_DIR.mkdir(parents=True, exist_ok=True)
     SHOWCASE_FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+    showcase_picks: List[Tuple[str, str]] = []
 
     files = _list_per_subject_files()
     if not files:
@@ -680,6 +732,7 @@ def main() -> None:
                 continue
             out = SHOWCASE_FIG_DIR / f"{sub}_geometry_showcase.png"
             plot_per_subject_geometry(data, out, is_showcase=True)
+            showcase_picks.append((ds, sub))
 
     if args.cohort:
         cohort = _load_cohort_summary()
@@ -689,7 +742,7 @@ def main() -> None:
             out = FIGURES_DIR / "cohort_geometry_summary.png"
             plot_cohort_summary(cohort, out)
 
-    _write_figures_readme()
+    _write_figures_readme(showcase_picks=showcase_picks)
 
 
 if __name__ == "__main__":

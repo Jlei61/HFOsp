@@ -1,14 +1,27 @@
-"""Topic 1 cluster geometry visualization (template-matching metric).
+"""Topic 1 cluster geometry visualization.
 
-Implements a unified masked shared-channel mean-squared-deviation distance and
-classical MDS embedding for visualizing PR-2 / PR-2.5 cluster decomposition.
+Provides two embedding views of PR-2 / PR-2.5 cluster decomposition:
 
-The metric here is the same one used by
-``interictal_propagation.assign_events_to_templates`` (sqrt of mean squared
-deviation over channels participating in BOTH the event and the template).
-This is intentionally NOT identical to the KMeans clustering metric used in
-``compute_adaptive_cluster_stereotypy`` (NaN→0 Euclidean) — see archive
-``cluster_geometry_viz_plan_2026-05-06.md`` §6 for the audit-finding.
+1. **PCA on the KMeans feature matrix** (``compute_pca_embedding``) —
+   the all-events native view in the space KMeans actually clustered.
+   Uses the full ``lagPatRank`` matrix that KMeans was trained on
+   (non-participating channels keep their legacy fallback ranks; the
+   ``np.where(isfinite, ..., 0.0)`` in ``compute_adaptive_cluster_stereotypy``
+   is a defensive no-op for cohort subjects whose lagPatRank is all-finite).
+2. **Classical MDS on the template-matching distance** (``classical_mds``) —
+   audit view under the masked shared-channel mean squared deviation
+   identical to ``interictal_propagation.assign_events_to_templates``.
+   Computed on a subsample for memory.
+
+The two metrics are intentionally NOT identical:
+
+* KMeans Euclidean uses **all** channels' ranks (including non-participating
+  positions' fallback ranks from the legacy lagPat producer); the metric is
+  ``sum_c (rank_x[c] - rank_y[c])²`` over all ``n_ch`` channels.
+* Template matching uses **only** channels participating in BOTH inputs;
+  the metric is ``mean_{c shared} (rank_x[c] - rank_y[c])²``.
+
+Their disagreement on per-event cluster assignment is the audit signal.
 
 Design doc: docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md
 """
@@ -19,6 +32,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 from scipy.linalg import eigh
 from scipy.stats import spearmanr
+from sklearn.decomposition import PCA
 
 from src.interictal_propagation import (
     _valid_event_indices,
@@ -359,6 +373,63 @@ def classical_mds(
 
 
 # ---------------------------------------------------------------------------
+# PCA on the KMeans feature matrix (all-events native view)
+# ---------------------------------------------------------------------------
+
+
+def compute_pca_embedding(
+    ranks: np.ndarray,
+    valid_event_indices: Sequence[int],
+    templates_real: np.ndarray,
+    n_components: int = 2,
+) -> Dict[str, Any]:
+    """PCA on the same feature matrix KMeans was trained on.
+
+    Reproduces the imputation that ``compute_adaptive_cluster_stereotypy``
+    uses (``np.where(isfinite, x, 0.0)``); for cohort subjects whose
+    lagPatRank is all-finite (the typical case), this is a no-op.
+
+    Templates are projected as additional rows in the same feature space;
+    template NaN values are imputed to 0 (matching KMeans's defensive
+    fallback). All events are embedded — no subsampling.
+
+    Returns
+    -------
+    dict with keys ``Y_events`` (n_events, n_components),
+    ``Y_templates`` (n_clusters, n_components), and
+    ``explained_variance_ratio`` (n_components,).
+    """
+    ranks = np.asarray(ranks, dtype=float)
+    idx = np.asarray(valid_event_indices, dtype=int)
+
+    feat_events = ranks[:, idx].T  # (n_events, n_ch)
+    feat_events = np.where(np.isfinite(feat_events), feat_events, 0.0)
+
+    feat_templates = np.asarray(templates_real, dtype=float).copy()  # (k, n_ch)
+    feat_templates = np.where(np.isfinite(feat_templates), feat_templates, 0.0)
+
+    n_events = feat_events.shape[0]
+    if n_events < n_components + 1:
+        Y_events = np.zeros((n_events, n_components), dtype=np.float64)
+        Y_templates = np.zeros((feat_templates.shape[0], n_components), dtype=np.float64)
+        return {
+            "Y_events": Y_events,
+            "Y_templates": Y_templates,
+            "explained_variance_ratio": np.zeros(n_components, dtype=np.float64),
+        }
+
+    pca = PCA(n_components=n_components, random_state=0)
+    Y_events = pca.fit_transform(feat_events)
+    Y_templates = pca.transform(feat_templates)
+
+    return {
+        "Y_events": Y_events,
+        "Y_templates": Y_templates,
+        "explained_variance_ratio": pca.explained_variance_ratio_,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Per-event silhouette (template-prototype version)
 # ---------------------------------------------------------------------------
 
@@ -510,7 +581,17 @@ def compute_subject_geometry(
         else:
             boundary_fraction[name] = None
 
-    # Step 4: build augmented distance matrix; subsample if needed
+    # Step 4a: PCA on the KMeans feature matrix (all events, no subsample)
+    pca_out = compute_pca_embedding(
+        ranks=ranks,
+        valid_event_indices=valid_idx,
+        templates_real=templates_real,
+        n_components=2,
+    )
+    pca_Y_events = pca_out["Y_events"]
+    pca_Y_templates = pca_out["Y_templates"]
+
+    # Step 4b: build augmented distance matrix; subsample if needed
     rng = np.random.default_rng(subsample_seed)
     if n_events_valid > max_events_for_mds:
         mds_event_local_idx = np.sort(
@@ -564,6 +645,8 @@ def compute_subject_geometry(
                 "d_min_other": _safe_float(d_min_other[i]),
                 "silhouette": _safe_float(silhouette[i]),
                 "n_participating": int(n_participating[i]),
+                "pca_x": _safe_float(pca_Y_events[i, 0]),
+                "pca_y": _safe_float(pca_Y_events[i, 1]),
                 "mds_x": _safe_float(mds_x[i]),
                 "mds_y": _safe_float(mds_y[i]),
                 "block_id": int(blk_ids[full_idx]) if 0 <= full_idx < blk_ids.size else -1,
@@ -591,6 +674,8 @@ def compute_subject_geometry(
     templates_records = [
         {
             "cluster_id": int(k),
+            "pca_x": float(pca_Y_templates[k, 0]),
+            "pca_y": float(pca_Y_templates[k, 1]),
             "mds_x": float(Y_templates[k, 0]),
             "mds_y": float(Y_templates[k, 1]),
             "template_rank_real": templates_real[k].tolist(),
@@ -625,6 +710,7 @@ def compute_subject_geometry(
             mds_out["imputed_fraction"] > DEFAULT_IMPUTATION_WARN_THRESHOLD
         ),
         "stress_warning": bool(mds_out["stress"] > DEFAULT_STRESS_WARN_THRESHOLD),
+        "pca_explained_variance_ratio": [float(x) for x in pca_out["explained_variance_ratio"]],
         "silhouette_median": sil_median,
         "silhouette_iqr": sil_iqr,
         "agreement_overall": agreement_overall,

@@ -63,13 +63,42 @@ EPILEPSIAE_SUBJECTS = [
 ]
 
 
+def _sanitize_json_floats(obj: Any) -> Any:
+    """Recursively replace NaN / Inf with None so output is standard JSON.
+
+    Python's ``json.dump(..., allow_nan=True)`` emits non-standard literals
+    ``NaN`` / ``Infinity`` that break non-Python parsers (jq, browser
+    JSON.parse, Go encoding/json, etc.). We pre-walk the structure and
+    coerce non-finite floats to ``null`` (`None` in Python).
+    """
+    if isinstance(obj, dict):
+        return {k: _sanitize_json_floats(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize_json_floats(v) for v in obj]
+    if isinstance(obj, np.ndarray):
+        return _sanitize_json_floats(obj.tolist())
+    if isinstance(obj, (np.floating, float)):
+        f = float(obj)
+        if not np.isfinite(f):
+            return None
+        return f
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.bool_,)):
+        return bool(obj)
+    return obj
+
+
 class NumpyEncoder(json.JSONEncoder):
+    """Backward-compat encoder; data should be pre-sanitized via
+    ``_sanitize_json_floats`` so this only handles numpy scalars."""
+
     def default(self, obj: Any) -> Any:
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         if isinstance(obj, (np.floating,)):
             v = float(obj)
-            return v
+            return v if np.isfinite(v) else None
         if isinstance(obj, (np.integer,)):
             return int(obj)
         if isinstance(obj, (np.bool_,)):
@@ -96,8 +125,9 @@ def _per_subject_json_path(dataset: str, subject: str) -> Path:
 
 def _save(data: Any, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    sanitized = _sanitize_json_floats(data)
     with path.open("w") as f:
-        json.dump(data, f, cls=NumpyEncoder, indent=2, allow_nan=True)
+        json.dump(sanitized, f, cls=NumpyEncoder, indent=2, allow_nan=False)
     logger.info("Saved %s", path)
 
 
@@ -128,6 +158,19 @@ def _load_adaptive_cluster(dataset: str, subject: str) -> Optional[Dict[str, Any
     return ac
 
 
+def _excluded_record(dataset: str, subject: str, reason: str, **extra: Any) -> Dict[str, Any]:
+    """Build a per-subject stub for skipped subjects so cohort_summary
+    can roll them into the excluded list (instead of silently dropping)."""
+    rec = {
+        "status": "excluded",
+        "excluded_reason": reason,
+        "dataset": dataset,
+        "subject": subject,
+    }
+    rec.update(extra)
+    return rec
+
+
 def _run_one(
     dataset: str,
     subject: str,
@@ -138,48 +181,59 @@ def _run_one(
 ) -> Optional[Dict[str, Any]]:
     key = f"{dataset}/{subject}"
     subject_dir = _subject_dir(dataset, subject)
+    out: Optional[Dict[str, Any]] = None
+
     if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
         logger.warning("Skip %s: no *_lagPat.npz at %s", key, subject_dir)
+        out = _excluded_record(dataset, subject, "no_lagpat_npz",
+                               subject_dir=str(subject_dir))
+    else:
+        ac = _load_adaptive_cluster(dataset, subject)
+        if ac is None:
+            logger.warning("Skip %s: adaptive_cluster missing in per-subject JSON", key)
+            out = _excluded_record(dataset, subject, "adaptive_cluster_missing")
+
+        elif dry_run:
+            logger.info("[dry-run] would run %s (chosen_k=%s n_valid=%s)",
+                        key, ac.get("chosen_k"), ac.get("n_valid_events"))
+            return None
+        else:
+            logger.info("Running %s ...", key)
+            loaded = load_subject_propagation_events(subject_dir)
+            valid_events = _valid_event_indices(loaded["bools"], min_participating=min_shared)
+            labels = np.asarray(ac["labels"], dtype=int)
+            chosen_k = int(ac["chosen_k"])
+
+            if valid_events.size != labels.size:
+                logger.error(
+                    "Skip %s: valid_events size %d != labels size %d",
+                    key, valid_events.size, labels.size,
+                )
+                out = _excluded_record(
+                    dataset, subject, "label_size_mismatch",
+                    n_valid_events_now=int(valid_events.size),
+                    n_pr2_labels=int(labels.size),
+                    note="PR-2 saved labels size differs from current lagPat valid_events; rerun PR-2/PR-2.5 on latest lagPat",
+                )
+            else:
+                out = compute_subject_geometry(
+                    ranks=loaded["ranks"],
+                    bools=loaded["bools"],
+                    channel_names=loaded["channel_names"],
+                    adaptive_labels=labels,
+                    chosen_k=chosen_k,
+                    valid_event_indices=valid_events,
+                    event_abs_times=loaded["event_abs_times"],
+                    block_ids=loaded["block_ids"],
+                    min_shared=min_shared,
+                    max_events_for_mds=max_events_for_mds,
+                    subsample_seed=subsample_seed,
+                )
+                out["dataset"] = dataset
+                out["subject"] = subject
+
+    if out is None:
         return None
-
-    ac = _load_adaptive_cluster(dataset, subject)
-    if ac is None:
-        logger.warning("Skip %s: adaptive_cluster missing in per-subject JSON", key)
-        return None
-
-    if dry_run:
-        logger.info("[dry-run] would run %s (chosen_k=%s n_valid=%s)",
-                    key, ac.get("chosen_k"), ac.get("n_valid_events"))
-        return None
-
-    logger.info("Running %s ...", key)
-    loaded = load_subject_propagation_events(subject_dir)
-    valid_events = _valid_event_indices(loaded["bools"], min_participating=min_shared)
-    labels = np.asarray(ac["labels"], dtype=int)
-    chosen_k = int(ac["chosen_k"])
-
-    if valid_events.size != labels.size:
-        logger.error(
-            "Skip %s: valid_events size %d != labels size %d",
-            key, valid_events.size, labels.size,
-        )
-        return None
-
-    out = compute_subject_geometry(
-        ranks=loaded["ranks"],
-        bools=loaded["bools"],
-        channel_names=loaded["channel_names"],
-        adaptive_labels=labels,
-        chosen_k=chosen_k,
-        valid_event_indices=valid_events,
-        event_abs_times=loaded["event_abs_times"],
-        block_ids=loaded["block_ids"],
-        min_shared=min_shared,
-        max_events_for_mds=max_events_for_mds,
-        subsample_seed=subsample_seed,
-    )
-    out["dataset"] = dataset
-    out["subject"] = subject
 
     json_path = PER_SUBJECT_DIR / f"{dataset}_{subject}.json"
     _save(out, json_path)
