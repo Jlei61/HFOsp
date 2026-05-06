@@ -181,13 +181,14 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     matrix, _, soz_overlay = build_heatmap_matrix(sorted_records)
     sub_labels = [f"{r['dataset'][:3]}_{r['subject']}" for r in sorted_records]
     n_sub, n_ch = matrix.shape
-    taus = np.array(
-        [r["primary_pair"]["kendall_tau"] for r in sorted_records], dtype=float
-    )
     f_norms = np.array(
         [r["primary_pair"]["footrule_normalized"] for r in sorted_records],
         dtype=float,
     )
+    # Kendall τ track removed: ρ(F_norm, τ) ≈ -0.92 in this cohort, the
+    # τ bars are visually a mirror of the F_norm bars and add no new info.
+    # τ values still computed in run_rank_displacement and recorded in
+    # per-subject JSON / archive doc.
     # SOZ contribution_excess is intentionally NOT plotted on the figure -
     # SOZ definition / channel coverage in the lagPat selected set is not
     # yet stable enough for a paper-level claim (see archive doc §5.1, §6).
@@ -198,26 +199,27 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     norm = TwoSlopeNorm(vcenter=0.0, vmin=-vmax, vmax=vmax)
 
     # Layout:
-    #   [ heatmap (wide)    | F_norm track | Kendall τ track ]   <- main row
-    #   [ horizontal cbar   |              |                 ]   <- cbar under heatmap
-    # SOZ contribution_excess track removed (SOZ definition not yet stable
-    # in this cohort's selected channel set; archive doc §6).
-    fig = plt.figure(figsize=(13, max(7.5, 0.42 * n_sub) + 1.6))
+    #   [ heatmap (top x-axis)  | F_norm track ]   <- main row
+    #   [ horizontal colorbar   | SOZ legend   ]   <- bottom row
+    # τ track removed (highly collinear with F_norm: ρ ≈ -0.92);
+    # SOZ track removed (lagPat / SOZ coverage not yet stable for paper).
+    fig = plt.figure(figsize=(11.5, max(8.0, 0.42 * n_sub) + 2.0))
     gs = fig.add_gridspec(
-        2, 3,
-        width_ratios=[7.5, 1.1, 1.1],
+        2, 2,
+        width_ratios=[7.5, 1.2],
         height_ratios=[1.0, 0.045],
-        wspace=0.10,
+        wspace=0.08,
         hspace=0.22,
-        top=0.92,
+        top=0.83,
         bottom=0.10,
-        left=0.10,
+        left=0.11,
         right=0.97,
     )
     ax_h = fig.add_subplot(gs[0, 0])
     ax_F = fig.add_subplot(gs[0, 1], sharey=ax_h)
-    ax_tau = fig.add_subplot(gs[0, 2], sharey=ax_h)
     ax_cb = fig.add_subplot(gs[1, 0])  # horizontal colorbar under heatmap
+    ax_legend = fig.add_subplot(gs[1, 1])  # SOZ channel mini-legend
+    ax_legend.axis("off")
 
     im = ax_h.imshow(
         matrix,
@@ -255,6 +257,10 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
 
     ax_h.set_yticks(range(n_sub))
     ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK - 4)
+    # Move heatmap x-axis (ticks + label) to the TOP, since the bottom row
+    # is now occupied by the horizontal colorbar.
+    ax_h.xaxis.tick_top()
+    ax_h.xaxis.set_label_position("top")
     ax_h.set_xticks([0, n_ch - 1])
     ax_h.set_xticklabels(
         ["source\n(earliest in T_a)", "sink\n(latest in T_a)"],
@@ -265,15 +271,15 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         fontsize=FS_LABEL - 2,
         labelpad=8,
     )
-    # No panel letter — this is a single composite supplementary figure
-    ax_h.spines["top"].set_visible(False)
+    # Spines: now bottom is "interior" (next to colorbar), keep all 4
+    # but turn off top labels duplicate
     ax_h.spines["right"].set_visible(False)
+    ax_h.tick_params(axis="x", which="both", bottom=False, top=True)
 
-    # === Right-side summary tracks (share y-axis with heatmap) ===
-    # All three tracks: single neutral color, dashed reference line.
-    # No grouping, no classification colors — paper-level continuous spectrum.
-
-    # Track 1: F_norm horizontal mini-bars (range 0..1, ref at 2/3)
+    # === F_norm summary track (right of heatmap, shared y) ===
+    # Single neutral color; bar length itself encodes continuous F_norm.
+    # Dashed line at 2/3 = Diaconis-Graham asymptotic random reference
+    # (descriptive only; NOT a classification threshold).
     ax_F.barh(
         range(n_sub), f_norms,
         color=COL_NEUTRAL, edgecolor="black", linewidth=0.4,
@@ -282,24 +288,13 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_F.set_xlim(0, 1.05)
     ax_F.set_xticks([0, 2 / 3, 1])
     ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK - 4)
+    # Match heatmap: x-axis at top
+    ax_F.xaxis.tick_top()
+    ax_F.xaxis.set_label_position("top")
+    ax_F.tick_params(axis="x", which="both", bottom=False, top=True)
     plt.setp(ax_F.get_yticklabels(), visible=False)
     ax_F.set_xlabel("F_norm", fontsize=FS_LABEL - 2, labelpad=8)
-    ax_F.spines["top"].set_visible(False)
     ax_F.spines["right"].set_visible(False)
-
-    # Track 2: Kendall τ horizontal mini-bars (range -1..+1, ref at 0)
-    ax_tau.barh(
-        range(n_sub), taus,
-        color=COL_NEUTRAL, edgecolor="black", linewidth=0.4,
-    )
-    ax_tau.axvline(0, color="gray", linewidth=0.7, linestyle="--")
-    ax_tau.set_xlim(-1.05, 1.05)
-    ax_tau.set_xticks([-1, 0, 1])
-    ax_tau.tick_params(axis="x", labelsize=FS_TICK - 4)
-    plt.setp(ax_tau.get_yticklabels(), visible=False)
-    ax_tau.set_xlabel("Kendall τ", fontsize=FS_LABEL - 2, labelpad=8)
-    ax_tau.spines["top"].set_visible(False)
-    ax_tau.spines["right"].set_visible(False)
 
     # Horizontal colorbar under heatmap
     cb = fig.colorbar(im, cax=ax_cb, orientation="horizontal")
@@ -307,22 +302,26 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
                  fontsize=FS_LABEL - 2, labelpad=4)
     cb.ax.tick_params(labelsize=FS_TICK - 3)
 
-    # Legend — paper-level: only the displacement colorbar and SOZ outline
-    legend_handles = [
-        mpatches.Patch(facecolor="white", edgecolor="black", label="SOZ channel"),
-    ]
+    # SOZ channel mini-legend in the bottom-right cell (under F_norm track,
+    # next to the colorbar). Drawn directly into ax_legend so positioning
+    # doesn't depend on figure-level coordinates.
+    ax_legend.add_patch(
+        mpatches.Rectangle(
+            (0.05, 0.30), 0.18, 0.40,
+            transform=ax_legend.transAxes,
+            facecolor="white", edgecolor="black", linewidth=1.2,
+        )
+    )
+    ax_legend.text(
+        0.30, 0.50, "SOZ channel",
+        transform=ax_legend.transAxes,
+        fontsize=FS_TICK - 2, va="center", ha="left",
+    )
+
     fig.suptitle(
         f"Per-channel signed rank displacement — two-template subjects (n={n_sub})",
         fontsize=FS_TITLE,
-        y=0.97,
-    )
-    fig.legend(
-        handles=legend_handles,
-        loc="upper right",
-        ncol=1,
-        fontsize=FS_TICK - 2,
-        frameon=False,
-        bbox_to_anchor=(0.96, 0.93),
+        y=0.95,
     )
     fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
     fig.savefig(out_stem.with_suffix(".pdf"), bbox_inches="tight")

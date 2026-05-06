@@ -73,17 +73,19 @@ reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`
 
 | 元素 | 内容 |
 |---|---|
-| 主热图（左上）| 23 subject × 通道 Δr 热图，行按 **F_norm 降序**（最反向在最上），列按 rank_T_a_dense（T_a source → sink），SOZ 通道黑框 |
-| Track 1 — F_norm（右）| 水平 mini-bar，范围 [0, 1]，虚线参考 **2/3 (Diaconis-Graham 渐近随机期望)** |
-| Track 2 — Kendall τ（右）| 水平 mini-bar，范围 [−1, +1]，虚线参考 **τ=0** |
+| 主热图（左）| 23 subject × 通道 Δr 热图，行按 **F_norm 降序**（最反向在最上），列按 rank_T_a_dense（T_a source → sink），SOZ 通道黑框。**x-axis ticks 与 xlabel 在上方**（下方留给 colorbar）|
+| F_norm track（右）| 水平 mini-bar，范围 [0, 1]，虚线参考 **2/3 (Diaconis-Graham 渐近随机期望)**，x-axis 也在上方 |
 | Colorbar（主热图正下方，水平）| Signed Δr (= rank_T_b − rank_T_a) 量级 |
+| SOZ legend（colorbar 右侧）| 白底黑框小方块 + "SOZ channel" 文字 |
+
+**Kendall τ 不画在主图上**：τ 与 F_norm 在本 cohort Spearman ρ = −0.92，τ bars 与 F_norm bars 视觉镜像一致，信息冗余。τ 数值仍保留在 per-subject JSON、cohort_summary.json 与 archive 文档作 cross-check 用，但不进 paper figure。
 
 **SOZ contribution_excess 不画在主图上**：lagPat 通道集对 SOZ 的覆盖与 SOZ 标注本身（i/l/e 边界）在本 cohort 上还没稳定到能进 paper 图的程度，§3.3 / §5.1 详述。SOZ 统计存在 archive，但不进 paper-level supplementary。
 
 ### 3.2 两条线性叙事（每一行同时讲两件事）
 
-1. **Cohort 是连续谱（不是离散二分）**：F_norm Track 从顶部 1.00（`epi_1073, epi_139`）单调递减到底部 0.39（`epi_442`），中间没有自然分界。Kendall τ Track 镜像一致（−0.77 到 +0.43）。Spearman ρ(F_norm, Kendall τ) = −0.92，两个指标基本测量同一件事——τ 提供 sign + rank-pair 解读，F_norm 提供 L1 magnitude 解读。
-2. **真反向看主热图梯度**：最上几行（F_norm > 0.92, τ < −0.5）呈"红→蓝单调梯度"——因为列轴严格按 rank_T_a_dense 排序，梯度只来自数据本身、不是排序伪影。中段 τ ≈ 0 的几行颜色散乱、无单调梯度。
+1. **Cohort 是连续谱（不是离散二分）**：F_norm Track 从顶部 1.00（`epi_1073, epi_139`）单调递减到底部 0.39（`epi_442`），中间没有自然分界。
+2. **真反向看主热图梯度**：最上几行（F_norm > 0.92）呈"红→蓝单调梯度"——因为列轴严格按 rank_T_a_dense 排序，梯度只来自数据本身、不是排序伪影。中段 F_norm ≈ 2/3 的几行颜色散乱、无单调梯度；底部 F_norm < 0.5 的几行 pale，反映两个 template 几乎一致或弱差异。
 
 ### 3.3 关键数字（cohort-level）
 
@@ -211,9 +213,10 @@ PR-2.5 候选门槛 ρ_inter < −0.5 在这些 subject 上一刀切，把它们
 4. v4：ρ_inter vs F_norm + F_norm vs SOZ excess 双 scatter → user 指出 Panel B 的 PR-2.5 内部 workflow 不该出现在 paper 图
 5. v5：ranked F_norm spectrum + F_norm vs SOZ excess scatter，去 PR-2.5 → user 指出仍把 cohort heatmap 与 reversal/SOZ 拆成两图，信息散在三个坐标系，不够干净
 6. v6：单张 composite figure —— cohort heatmap + 三条共享 y 轴 summary track（F_norm, Kendall τ, SOZ excess）+ 右侧 vertical colorbar → user 指出 SOZ 列在本 cohort 上还没稳定，不该进 paper 图；同时建议 colorbar 移到主热图正下方
-7. **v7（当前）**：单张 composite figure，**只保留两条 summary track**（F_norm + Kendall τ），SOZ 列移除；colorbar **水平放置在主热图下方**。SOZ 统计仍在 archive 文档作 descriptive 记录，但不进 paper-level conclusion。
+7. v7：单张 composite figure，保留两条 summary track（F_norm + Kendall τ），SOZ 列移除；colorbar 水平放置在主热图下方 → user 进一步指出 τ 与 F_norm 共线、track 冗余；同时 SOZ legend 与 τ 列重叠；colorbar 在下方了所以 heatmap x-axis 应移到上方
+8. **v8（当前）**：单张 composite figure，**只保留 F_norm 一条 track**（τ 列也去掉）；heatmap x-axis ticks + xlabel **移到主热图上方**；SOZ legend 移到 colorbar 右侧（不再与 summary track 重叠）。τ 数值仍在 archive 文档作 cross-check 保留。
 
-每一轮的具体批评见 worktree git log；当前归档文档与 figure 已收敛到 v7。
+每一轮的具体批评见 worktree git log；当前归档文档与 figure 已收敛到 v8。
 
 ## 7. 历史链接
 
