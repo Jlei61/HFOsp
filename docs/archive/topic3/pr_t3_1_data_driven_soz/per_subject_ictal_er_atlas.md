@@ -543,6 +543,66 @@ ER-asymmetric case：broad band 给 textbook focal cluster，gamma band 给 mult
 
 ---
 
+## epilepsiae/958 — γ_a sensitivity 双 ER
+
+**Clinical SOZ (n=21)**：GD3-4, GD8, GE3-4, GE8, GF8, GG6, GH6, OPL3-6, TBB2, TBC4-5, TBD4-6 — 跨 G strip 中段 + OPL + TBB/TBC/TBD strip。
+
+| ER | tags | n_ok | s_sz | top-10 focal in | MWU p | 注 |
+|---|---|---|---|---|---|---|
+| gamma | unstable+concordant (sensitivity) | 14 | 0.04 | 3/10 (TBC4 #5, GE4 #6, TBC5 #7) | 0.078 | s_sz≈0 表示跨 seizure 排序基本随机；但 median 仍把 3 个 focal 推到 top-10 |
+| broad | unstable+partial (drop) | 14 | 0.22 | 2/10 (TBD4 #1, OPL3 #3) | 0.012 | partial: p ok 但 frac < 30% |
+
+**Spatial 描述**：958 是大 montage 多 strip subject，clinical SOZ 跨 G strip 中段 + OPL + TBB/C/D。gamma 的 top-10 落在 G/TBC region 但与 broad 的 top-10 (TBD/OPL/G) 几乎不重叠，提示 ER-band sensitivity 不同。
+
+**Label assessment**：gamma sensitivity 可用但 s_sz≈0 是红旗——意味着 r_sz 是单 seizure noise 的"幸运 median"，下游用要带 strong caveat。建议下游 PR 对 958 gamma sensitivity label 加额外 stability override（例如要求 cov ≥ 0.5×n_ok 才进 top-K）。broad partial 不进 Layer B (drop)。
+
+---
+
+## epilepsiae/590 — γ_a sensitivity broad 单 ER
+
+**Clinical SOZ (n=17)**：BLA1-3, BLB1-3, BRA1-3, GC1-2, GD1, HR1-4, GD2 — 跨 BLA + BLB + BRA + GC + GD + HR strip 多触点。
+
+| ER | tags | n_ok | s_sz | top-10 focal in | MWU p | 注 |
+|---|---|---|---|---|---|---|
+| gamma | unstable+partial (drop) | 7 | 0.15 | 2/10 (GD1 #3, HR1 #4) | 0.075 | 边界 partial; 7 ok seizure 单薄 |
+| broad | unstable+concordant (sensitivity) | 9 | 0.17 | 3/10 (BLB1 #4, GC2 #9, GD1 #10) | 0.092 | borderline concordant |
+
+**Spatial 描述**：broad top-10 含 GC1-2/GD1 (focal G strip) + BLB1 + 多个 r_sz=1 cov 的孤立 channel (BRC5, HR7, TRC5)。broad 把焦点 G strip 顶端揉进 top-10，但前 3 名都是 cov=1 的"单 seizure 早起" channel。
+
+**Label assessment**：broad sensitivity 标签**强烈推荐 cov 过滤**——top 3 BRC5/HR7/TRC5 都是 cov=1/9 的 single-seizure outlier，会污染 top-K。Layer B 应在 entry 加 `topk_min_cov_threshold=2` 之类的保护，否则 590 的 label 几乎都是噪声。
+
+---
+
+## epilepsiae/635 — γ_a sensitivity broad 单 ER（broad 强 concordance）
+
+**Clinical SOZ (n=22)**：HL strip 1-14 (除 HL11-12 是 e) + 其它 strip 余 8 通道。HL strip 大段 focal。
+
+| ER | tags | n_ok | s_sz | top-10 focal in | MWU p | 注 |
+|---|---|---|---|---|---|---|
+| gamma | unstable+discordant (drop) | 10 | 0.03 | 2/10 (TBA2 #3, HL1 #8) | 0.554 | 多孤立 cov=1-3 channel 进 top |
+| broad | unstable+concordant (sensitivity) | 13 | 0.06 | **7/10** (TBA2/TBA1/HL1/HRA2/HL2/HL7/HL3) | **8.3e-6** | 极强 concordance 但 s_sz 低 |
+
+**Spatial 描述**：broad top-10 的 7/10 都是 focal，剩 3 个 (HRA5, HRA3, TLA1) 也是 focal-strip 邻接 (HRA, TLA)。MWU p ~ 1e-5 的强统计显著性。但 s_sz=0.06 表示**跨 seizure 不同次的 median 比较稳，但任两 seizure 排序基本独立**。这是个矛盾的 case：cohort-level focal 偏向强，但 within-cohort 没有 stable 排序。
+
+**Label assessment**：broad sensitivity label 信号强但 producer 不稳。建议下游 PR 把 635 broad 当 "high-concordance but low-stability label"，可作 "看 cohort-level data-driven SOZ 是否聚焦在 clinical region"的统计证据，不适合作 "single-subject case study" 的逐通道判定。
+
+---
+
+## epilepsiae/922 — γ_a sensitivity broad 单 ER
+
+**Clinical SOZ (n=19)**：GA2-5, GB1-4, GC1-4, GD1-2 + 余 — G strip 顶端 (rows A-D, columns 1-5) 矩形 cluster。
+
+| ER | tags | n_ok | s_sz | top-10 focal in | MWU p | 注 |
+|---|---|---|---|---|---|---|
+| gamma | unstable+discordant (drop) | 24 | 0.16 | 2/10 (GA5 #2, GA4 #3) | 0.976 | 排序整体偏向非 focal grid |
+| broad | unstable+concordant (sensitivity) | 25 | 0.13 | **6/10** (GC1, GA5, GC2, GA4, GC3, GD1) | 0.0010 | 干净 G-strip cluster |
+
+**Spatial 描述**：broad top-10 的 6/10 都在 GA + GC + GD（与 clinical i-cluster 完全重合的 G strip 行）。non-focal 3/10 在 top 是 GH8, GG8, GH6/7 — G strip 别处的 grid contact，不是远端 outlier。
+
+**Label assessment**：与 635 类似 (高 concordance + 低 s_sz)，但 922 cov 更扎实 (top-10 多 ≥ 18/25)，更可信。下游使用 broad sensitivity 时风险低。
+
+---
+
 ## Cohort summary (A.4 v2.2 — 16 epilepsiae subjects, 完成 2026-05-06)
 
 **Run**: 11.3h wall (2026-05-05 18:32 → 2026-05-06 05:51), 16/16 epilepsiae subjects (15 audit_eligible + sentinel 916), 9 yuquan 已 excluded（见上文 cohort scope 注）。
