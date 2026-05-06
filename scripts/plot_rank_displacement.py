@@ -252,7 +252,7 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
                 )
 
     ax_h.set_yticks(range(n_sub))
-    ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK - 1)
+    ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK)
     # Move heatmap x-axis (ticks + label) to the TOP, since the bottom row
     # is now occupied by the horizontal colorbar.
     ax_h.xaxis.tick_top()
@@ -260,11 +260,11 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h.set_xticks([0, n_ch - 1])
     ax_h.set_xticklabels(
         ["source\n(earliest in T_a)", "sink\n(latest in T_a)"],
-        fontsize=FS_TICK - 1,
+        fontsize=FS_TICK + 1,
     )
     ax_h.set_xlabel(
         "Channel position along T_a (source → sink)",
-        fontsize=FS_LABEL,
+        fontsize=FS_LABEL + 1,
         labelpad=10,
     )
     # Spines: now bottom is "interior" (next to colorbar), keep all 4
@@ -273,24 +273,38 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h.tick_params(axis="x", which="both", bottom=False, top=True)
 
     # === F_norm summary track (right of heatmap, shared y) ===
-    # Single neutral color; bar length itself encodes continuous F_norm.
-    # Dashed line at 2/3 = Diaconis-Graham asymptotic random reference
-    # (descriptive only; NOT a classification threshold).
+    # Bar length encodes continuous F_norm. To make 2/3 visible as the
+    # asymptotic random null (Diaconis-Graham 1977), shade the [0, 2/3]
+    # range as a soft "null zone" background — bars whose tip lies inside
+    # the shaded band are at-or-below random; bars extending past it are
+    # above random expectation. NOT a per-subject classification: the
+    # bars themselves are still single-color.
+    ax_F.axvspan(0, 2 / 3, color="lightgray", alpha=0.45, zorder=0)
     ax_F.barh(
         range(n_sub), f_norms,
-        color=COL_NEUTRAL, edgecolor="black", linewidth=0.4,
+        color=COL_NEUTRAL, edgecolor="black", linewidth=0.5,
+        zorder=2,
     )
-    ax_F.axvline(2 / 3, color="gray", linewidth=0.9, linestyle="--")
+    # Prominent 2/3 reference line (rust accent so it reads as the null)
+    ax_F.axvline(2 / 3, color=COL_SIG, linewidth=1.6, linestyle="--",
+                 zorder=3)
     ax_F.set_xlim(0, 1.05)
     ax_F.set_xticks([0, 2 / 3, 1])
-    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK - 1)
+    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK)
     # Match heatmap: x-axis at top
     ax_F.xaxis.tick_top()
     ax_F.xaxis.set_label_position("top")
     ax_F.tick_params(axis="x", which="both", bottom=False, top=True)
     plt.setp(ax_F.get_yticklabels(), visible=False)
-    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL, labelpad=10)
+    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL + 1, labelpad=10)
     ax_F.spines["right"].set_visible(False)
+    # Tiny annotation labeling the shaded band as the random null
+    ax_F.text(
+        2 / 3 / 2, n_sub - 0.5,
+        "random null\n(F ≤ 2/3)",
+        ha="center", va="top",
+        fontsize=FS_TICK - 2, color="dimgray", style="italic",
+    )
 
     # Horizontal colorbar directly under heatmap (close, not separated)
     cb = fig.colorbar(im, cax=ax_cb, orientation="horizontal")
