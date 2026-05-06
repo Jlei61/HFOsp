@@ -7,7 +7,7 @@ Phase 3 cohort rebuild — Phase 3.4 not yet completed (CPU-fallback incident; s
 - Task 3.1 ✅ — parallel script defaults updated (`results/hfo_detector_v2/`, `N_JOBS=1`)
 - Task 3.2 ✅ — Epilepsiae GPU default set (`--gpu/--no-gpu` tristate; Yuquan stays CPU)
 - Task 3.3 ✅ — 635 single-record smoke run completed (1 record, 97.6s wall, GPU verified via `conda run -n cuda_env`)
-- Task 3.4 ❌ **未完成** — 第一次启动时被 CPU fallback 污染，已 quarantine 并修复 wrapper（见 §3）；正在等待 GPU 验证后重启。
+- Task 3.4 ⏳ **进行中** — 第一次启动 CPU fallback 已 quarantine + 修复 wrapper（见 §3）。**第二次启动 (2026-05-06 11:23 CST，PID 906605) 已确认 GPU**：cupy/cusignal preflight passed、bash → conda run → python 链路工作、GPU 利用率 sampling 看到 72% spike + 425–519 MiB memory engaged、12 records 完成于 6 min (= 30 s/record)。预计 ~33h cohort 完成。
 
 ## §1. 验证已确立的事实
 
@@ -31,9 +31,17 @@ Phase 3 cohort rebuild — Phase 3.4 not yet completed (CPU-fallback incident; s
 | 384 | 130 | 583 | 206 | 1073 | 231 | 1150 | 161 |
 | 1077 | 189 | 442 | 178 | 818 | 255 | 1084 | 252 |
 
-**Total: 4,039 records**。GPU 单卡（RTX 3090）单 record ≈ 100 s（基于 635 smoke 97.6s/record + Task 2.3 整段重检约 24.9 s/record 推算上界）。
+**Total: 4,039 records**。GPU 单卡（RTX 3090）实测 throughput：
 
-**Wall clock 估计 ≈ 4,039 × 100 / 3600 ≈ 112 h ≈ 5 days**（不是 plan 写的 10h）。最大单 subject (916) 单跑 ≈ 12 h。
+- **Single-record cold start (635 smoke, --smoke flag)**: 97.6 s（包含 cusignal 初始化 + 单 record 完整 detect）
+- **Single-record warm rerun (Task 2.3 determinism, full 3600s record)**: 24.9 s
+- **Cohort steady-state (subject 253 relaunch 2026-05-06, 12 records in 360 s)**: **30 s / record**
+
+GPU 利用率 sampling at 1 Hz：5% (data load) → 72% spike (envelope+Hilbert kernel) → 0% (between records)。Memory 425–519 MiB（cusignal warm）。
+
+**Wall clock 估计 ≈ 4,039 × 30 / 3600 ≈ 33 h ≈ 1.4 days**（plan 写的 10h 仍乐观，但比上次估算的 112h 大幅修正）。
+
+> Note：原先 100s/record 估计来自 635 smoke 与 Task 2.3 单 record 重检的上界，**包含了 cusignal 初次 import 的开销**。Cohort steady-state 的初始化开销摊到所有 records 上后实际 throughput 是 30 s/record。最大单 subject (916, 435 records) ≈ 3.6 h。
 
 ## §3. 2026-05-06 CPU-fallback 事故
 
