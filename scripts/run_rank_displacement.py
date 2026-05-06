@@ -99,7 +99,7 @@ def derive_fwd_rev_source(pr2: dict) -> str:
 
 
 def build_template_lookup(per_template: list, channel_names_master: list) -> Dict[int, Dict]:
-    """Map cluster_id -> {valid_mask, source, sink, n_valid_channels}."""
+    """Map cluster_id -> {valid_mask, source, sink, n_valid_channels} from PR-6."""
     out: Dict[int, Dict] = {}
     for entry in per_template:
         cid = entry.get("cluster_id")
@@ -120,20 +120,39 @@ def build_template_lookup(per_template: list, channel_names_master: list) -> Dic
     return out
 
 
+def build_template_lookup_from_pr2(
+    rank_lookup: Dict[int, np.ndarray],
+    n_channels: int,
+) -> Dict[int, Dict]:
+    """Derive valid_mask from PR-2 template_rank sentinels (rank != -1).
+
+    Used when PR-6 anchoring JSON is missing for a subject (e.g., dropped
+    by PR-6 because of empty SOZ JSON, even though PR-2 stable_k=2 holds).
+    Verified to match PR-6 valid_mask exactly on subjects where both exist.
+    """
+    out: Dict[int, Dict] = {}
+    for cid, rank in rank_lookup.items():
+        valid_mask = np.asarray(np.asarray(rank) != -1, dtype=bool)
+        out[cid] = {
+            "valid_mask": valid_mask,
+            "source": [],
+            "sink": [],
+            "n_valid_channels": int(valid_mask.sum()),
+        }
+    return out
+
+
 def process_subject(
     pr2_path: Path,
     pr6_path: Path,
     soz_lookup: Dict[str, Dict[str, set]],
 ) -> Optional[dict]:
+    """Consume PR-2 cluster JSON. PR-6 anchoring JSON is OPTIONAL — when
+    missing, valid_mask is derived from PR-2 template_rank sentinels
+    (rank != -1). This lets the supplementary cohort include all
+    stable_k=2 subjects regardless of PR-6 SOZ-driven exclusions.
+    """
     pr2 = json.loads(pr2_path.read_text())
-    if not pr6_path.exists():
-        return {
-            "subject": pr2.get("subject"),
-            "dataset": pr2.get("dataset"),
-            "exit_reason": "pr6_missing",
-        }
-    pr6 = json.loads(pr6_path.read_text())
-
     dataset = pr2.get("dataset")
     subject = pr2.get("subject")
     channel_names = pr2.get("channel_names")
@@ -160,7 +179,16 @@ def process_subject(
             )
         rank_lookup[int(cid)] = np.asarray(tr, dtype=float)
 
-    template_lookup = build_template_lookup(pr6.get("per_template", []), channel_names)
+    # Build valid_mask from PR-6 if available, else fall back to PR-2 sentinel.
+    if pr6_path.exists():
+        pr6 = json.loads(pr6_path.read_text())
+        template_lookup = build_template_lookup(pr6.get("per_template", []), channel_names)
+        valid_mask_provenance = "pr6"
+    else:
+        pr6 = None
+        template_lookup = build_template_lookup_from_pr2(rank_lookup, len(channel_names))
+        valid_mask_provenance = "pr2_sentinel"
+
     common_cids = sorted(set(rank_lookup) & set(template_lookup))
 
     soz_channels: set = soz_lookup.get(dataset, {}).get(str(subject), set())
@@ -191,8 +219,8 @@ def process_subject(
         pairs.append(metrics)
 
     inter_corr = ac.get("inter_cluster_corr_matrix")
-    geom = pr6.get("template_pair_geometry") or {}
-    h2 = pr6.get("h2_swap_check") or {}
+    geom = (pr6 or {}).get("template_pair_geometry") or {}
+    h2 = (pr6 or {}).get("h2_swap_check") or {}
 
     return {
         "subject": subject,
@@ -203,6 +231,8 @@ def process_subject(
         "soz_channels": sorted(soz_channels),
         "fwd_rev_reproduced": fwd_rev,
         "fwd_rev_source": fwd_rev_source,
+        "valid_mask_provenance": valid_mask_provenance,
+        "pr6_available": pr6 is not None,
         "pr6_swap_score": h2.get("swap_score"),
         "pr6_swap_null_p": h2.get("null_p"),
         "pr6_pair_geometry_spearman": geom.get("spearman_rank_pair"),

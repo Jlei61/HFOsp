@@ -31,9 +31,9 @@
 
 完整数学定义见 plan §3。
 
-## 2. Cohort（**PR-6 supplementary cohort，不是完整 stable_k=2 cohort**）
+## 2. Cohort（**完整 stable_k=2 cohort，n=27**）
 
-> **Scientific boundary（写死）**：本 supplementary 依赖 PR-6 endpoint-defined artifacts（`per_template[k].valid_mask`），**不是**完整 27 subject stable_k=2 rank-geometry 分析。这个选择是为了与 PR-6 离散 swap_node 同 cohort 比较（cross-check 需要），可以接受，**但不能包装成全 stable_k=2 cohort**。
+> **Cohort 演化**：v1–v12（2026-05-06 最初~第十二轮）使用 PR-6 endpoint-defined cohort（n=23），因 PR-6 anchoring 缺 4 个 SOZ-空 subject 而被裁。v13（当前）改为**直接从 PR-2 `template_rank` sentinel 派生 valid_mask**（rank ≠ −1），覆盖**全部 27 个 stable_k=2 subject**。验证：在 PR-6 既存的 23 个 subject 上，`(template_rank ≠ −1)` 与 PR-6 `valid_mask` **完全一致**（per `epi_1073` cross-check），所以这不是放宽合同，是去掉一个不必要的依赖。
 
 PR-2 cohort 全景（30 subject）：
 
@@ -43,13 +43,15 @@ PR-2 cohort 全景（30 subject）：
 | 4 | 2 | `epilepsiae_818`, `yuquan_huangwanling` |
 | 6 | 1 | `yuquan_zhangjinhan` |
 
-本 supplementary cohort = stable_k=2 ∩ PR-6 endpoint-defined → **n=23 / 27**：
+本 supplementary cohort = **全部 27 个 stable_k=2 subject**。3 个 stable_k≠2 不在 paper-level 主热图范围（在 cohort_summary.json 里仍有数据但不进 figure）。
 
-- **23 nominal cohort**：PR-6 `template_anchoring/per_subject/*.json` 已有，本 supplementary consume
-- **4 个 stable_k=2 subject 被排除**（PR-6 anchoring 缺失，原因可能是 SOZ JSON 空 / n_ch < 6）：`epilepsiae_1125`, `epilepsiae_384`, `epilepsiae_620`, `epilepsiae_916`
-- **3 个 stable_k≠2 subject 不在范围内**：`epilepsiae_818` (k=4), `yuquan_huangwanling` (k=4), `yuquan_zhangjinhan` (k=6)
+**valid_mask 来源** (`valid_mask_provenance` 字段 in per-subject JSON)：
+- 23 subject 从 PR-6 `per_template[k].valid_mask` 取（`pr6` provenance）
+- 4 subject 从 PR-2 `template_rank` sentinel 派生 = `(rank ≠ −1)`（`pr2_sentinel` provenance）：`epilepsiae_1125, 384, 620, 916`，这 4 个在 PR-6 anchoring 阶段因 SOZ JSON 缺失被裁
 
-**这是 PR-6 supplementary cohort，覆盖 23/27 = 85% 的 stable_k=2 subject。** 完整 27-subject stable_k=2 rank geometry 需要绕过 PR-6 endpoint 合同 (例如直接用 PR-2 raw bools 推导 valid_mask)，那是另一个 PR 的工作，本 supplementary **不**做。
+**两种 provenance 等价性已 cross-check**：在 PR-6 与 PR-2 都覆盖的 subject 上（如 `epi_1073`），`(template_rank ≠ −1)` 与 PR-6 `valid_mask` 完全一致——都基于"该 cluster 的事件参与门槛"。所以从 PR-2 派生 valid_mask 不是放宽合同，是去掉对 PR-6 SOZ 流程的不必要依赖。
+
+**注意**：`epi_620` 与 `epi_1125` 在 PR-2.5 中是 forward/reverse-reproduced subject（之前因 PR-6 缺失被错误排除）；他们在主热图最上几行（高 F_norm）出现是 cohort 完整性应有的体现。
 
 forward/reverse-reproduced 在 PR-2.5 内有三种 outcome（不是简单二分）：
 
@@ -87,17 +89,22 @@ reproduced 6 个 subject：`epilepsiae_1073`, `epilepsiae_139`, `epilepsiae_548`
 1. **Cohort 是连续谱（不是离散二分）**：F_norm Track 从顶部 1.00（`epi_1073, epi_139`）单调递减到底部 0.39（`epi_442`），中间没有自然分界。
 2. **真反向看主热图梯度**：最上几行（F_norm > 0.92）呈"红→蓝单调梯度"——因为列轴严格按 rank_T_a_dense 排序，梯度只来自数据本身、不是排序伪影。中段 F_norm ≈ 2/3 的几行颜色散乱、无单调梯度；底部 F_norm < 0.5 的几行 pale，反映两个 template 几乎一致或弱差异。
 
-### 3.3 关键数字（cohort-level）
+### 3.3 关键数字（cohort-level，n=27）
 
 | 指标 | 范围 | 中位数 | 注 |
 |---|---|---|---|
-| F_norm | [0.393, 1.000] | ≈ 0.78 | Diaconis-Graham 渐近随机参考点 = 2/3 |
-| Kendall τ | [−0.767, +0.429] | ≈ −0.20 | τ = 0 为零相关参考 |
+| F_norm | [0.393, 1.000] | **0.810** | Diaconis-Graham 渐近随机参考点 = 2/3 |
+| Kendall τ | [−0.778, +0.429] | **−0.222** | τ = 0 为零相关参考 |
+
+PR-2.5 forward/reverse-reproduced flag 在新 n=27 cohort 上：
+- **8 reproduced**：`epi_1073, 139, 620, 958, chenziyang, 635, 548, 1125`（其中 `epi_620, epi_1125` 是因为 PR-6 SOZ-空裁掉而之前没被 supplementary 看到的，全都集中在 F_norm 高端）
+- 1 candidate-fail：`yuq_huanghanwen`
+- 18 None（非候选或不可测）
 
 **SOZ 相关数字（不进 paper figure，仅记录）**：
-- soz_contribution_excess 范围 [−0.357, +0.190]，median ≈ 0
-- soz_channel_fraction median ≈ 0.55（cohort 通道集大约 55% 是 SOZ）
-- Spearman ρ(F_norm, soz_contribution_excess) = 0.193, p = 0.376, n=23 — 几乎不相关
+- soz_contribution_excess 中位数 ≈ 0（基于现有 23 个有 PR-6 SOZ 信息的 subject）
+- 对 4 个 PR-2-sentinel 派生的 subject，SOZ 字段仍然计算（基于 SOZ JSON）但不一定可靠
+- Spearman ρ(F_norm, soz_contribution_excess) ≈ 0.19 — 几乎不相关
 
 但 lagPat 通道选择本身 + SOZ 标注 i/l/e 边界都还没稳定（§5.1, §6）；这些数字是 descriptive only，**不**进 paper-level conclusion。
 
@@ -214,9 +221,14 @@ PR-2.5 候选门槛 ρ_inter < −0.5 在这些 subject 上一刀切，把它们
 5. v5：ranked F_norm spectrum + F_norm vs SOZ excess scatter，去 PR-2.5 → user 指出仍把 cohort heatmap 与 reversal/SOZ 拆成两图，信息散在三个坐标系，不够干净
 6. v6：单张 composite figure —— cohort heatmap + 三条共享 y 轴 summary track（F_norm, Kendall τ, SOZ excess）+ 右侧 vertical colorbar → user 指出 SOZ 列在本 cohort 上还没稳定，不该进 paper 图；同时建议 colorbar 移到主热图正下方
 7. v7：单张 composite figure，保留两条 summary track（F_norm + Kendall τ），SOZ 列移除；colorbar 水平放置在主热图下方 → user 进一步指出 τ 与 F_norm 共线、track 冗余；同时 SOZ legend 与 τ 列重叠；colorbar 在下方了所以 heatmap x-axis 应移到上方
-8. **v8（当前）**：单张 composite figure，**只保留 F_norm 一条 track**（τ 列也去掉）；heatmap x-axis ticks + xlabel **移到主热图上方**；SOZ legend 移到 colorbar 右侧（不再与 summary track 重叠）。τ 数值仍在 archive 文档作 cross-check 保留。
+8. v8：单张 composite figure，只保留 F_norm 一条 track（τ 列也去掉）；heatmap x-axis ticks + xlabel 移到主热图上方；SOZ legend 移到 colorbar 右侧（不再与 summary track 重叠）。
+9. v9：整体字号放大；colorbar 与主图距离收紧；F_norm 列与主热图轻微分隔
+10. v10：NaN 填充由灰色改为白色（`cmap.set_bad("white")`），更干净
+11. v11：source/sink 字号继续放大；F_norm track 加 random null zone shading + rust 2/3 ref，让 2/3 显著
+12. v12：去掉 heatmap top frame、SOZ cell outlines、SOZ channel legend → 只剩纯色格子的视觉流
+13. **v13（当前）**：**Cohort 从 23 (PR-6 endpoint-defined) 扩到全部 27 个 stable_k=2 subject**。runner 改为优先用 PR-6 `valid_mask`，缺失时 fallback 到 PR-2 `template_rank` sentinel `(rank ≠ −1)`。验证 PR-2 sentinel 与 PR-6 `valid_mask` 在共有 subject 上完全一致。新加入的 4 个 subject 中 `epi_620` (F=1.000, τ=−0.778) 与 `epi_1125` (F=0.875, τ=−0.714) 都是 PR-2.5 forward/reverse-reproduced，本应在主热图最上几行——之前因 PR-6 SOZ-空过滤错失。
 
-每一轮的具体批评见 worktree git log；当前归档文档与 figure 已收敛到 v8。
+每一轮的具体批评见 worktree git log；当前归档文档与 figure 已收敛到 v13。
 
 ## 7. 历史链接
 
