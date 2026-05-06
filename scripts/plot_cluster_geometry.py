@@ -426,11 +426,18 @@ def plot_template_distance_plane(
         except Exception:
             pass
 
-    figsize = (10, 9.5) if not is_showcase else (13, 12)
+    # Local font sizes — bigger than plot_style defaults for legibility.
+    FS_TICK_L = FS_TICK + 4    # 18
+    FS_LABEL_L = FS_LABEL + 6  # 20
+    FS_TITLE_L = FS_TITLE + 4  # 20
+    FS_SUPTITLE_L = FS_TITLE + 8  # 24
+
+    figsize = (13, 12) if not is_showcase else (16, 14)
     fig = plt.figure(figsize=figsize)
     fig.patch.set_facecolor("white")
     gs = gridspec.GridSpec(
-        2, 1, height_ratios=[1, 4], hspace=0.05, figure=fig,
+        2, 1, height_ratios=[1, 4], hspace=0.08, figure=fig,
+        top=0.83, bottom=0.08, left=0.10, right=0.97,
     )
     ax_marg = fig.add_subplot(gs[0])
     ax = fig.add_subplot(gs[1], sharex=ax_marg)
@@ -467,35 +474,33 @@ def plot_template_distance_plane(
     ax_marg.axvline(d_ab / 2.0, color="#999999", lw=0.8, ls="--", alpha=0.5)
     ax_marg.axvline(0.0, color="black", lw=0.6, alpha=0.4)
     ax_marg.axvline(d_ab, color="black", lw=0.6, alpha=0.4)
-    ax_marg.set_ylabel("density(x)", fontsize=FS_TICK)
-    ax_marg.tick_params(labelbottom=False, labelsize=FS_TICK - 2)
+    ax_marg.set_ylabel("density(x)", fontsize=FS_LABEL_L)
+    ax_marg.tick_params(labelbottom=False, labelsize=FS_TICK_L - 2)
     for spine in ("top", "right"):
         ax_marg.spines[spine].set_visible(False)
     ax_marg.spines["left"].set_linewidth(1.0)
     ax_marg.spines["bottom"].set_linewidth(1.0)
     ax_marg.set_yticks([])
 
-    # Bimodality verdict on marginal x
+    # Short bimodality verdict — only the label, full numbers in subtitle
     bic_diff = bic_k1 - bic_k2  # positive = k=2 better
     if np.isfinite(dip_p_x) and np.isfinite(bic_diff):
         if dip_p_x < 0.05 and bic_diff > 10:
-            modality_verdict = (
-                f"marginal-x BIMODAL: dip p={dip_p_x:.2g}, ΔBIC(k1−k2)=+{bic_diff:.0f}"
-            )
+            modality_verdict = "BIMODAL"
         elif dip_p_x >= 0.05 and bic_diff < 10:
-            modality_verdict = (
-                f"marginal-x UNIMODAL / continuous: dip p={dip_p_x:.2g}, ΔBIC=+{bic_diff:.0f}"
-            )
+            modality_verdict = "UNIMODAL (continuous)"
         else:
-            modality_verdict = (
-                f"marginal-x AMBIGUOUS: dip p={dip_p_x:.2g}, ΔBIC=+{bic_diff:.0f}"
-            )
+            modality_verdict = "AMBIGUOUS"
     else:
-        modality_verdict = "marginal-x test unavailable"
-    ax_marg.set_title(modality_verdict, fontsize=FS_TITLE - 5, loc="left")
+        modality_verdict = "n/a"
+    ax_marg.set_title(f"marginal-x  ·  {modality_verdict}",
+                      fontsize=FS_TITLE_L, loc="left",
+                      pad=10, fontweight="bold")
 
     style_panel(ax, label="", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
+    # Bump tick labels on main panel
+    ax.tick_params(labelsize=FS_TICK_L)
 
     # Build per-cluster (x, y) arrays ONCE from pre-computed all_x/all_y/etc.
     bin_decimals = 3
@@ -639,10 +644,10 @@ def plot_template_distance_plane(
             d_b_k = float(D_tt[ax_b, k]) if k < D_tt.shape[1] else float("nan")
             tx, ty, _ = _trilaterate_xy(d_a_k, d_b_k, d_ab)
         if np.isfinite(tx) and np.isfinite(ty):
-            ax.scatter([tx], [ty], marker="*", s=TEMPLATE_MARKER_SIZE,
-                       c=col, edgecolors="black", linewidths=1.5, zorder=5)
-            ax.annotate(f"T{k}", (tx, ty), xytext=(8, 8),
-                        textcoords="offset points", fontsize=FS_TICK,
+            ax.scatter([tx], [ty], marker="*", s=TEMPLATE_MARKER_SIZE * 1.3,
+                       c=col, edgecolors="black", linewidths=1.8, zorder=5)
+            ax.annotate(f"T{k}", (tx, ty), xytext=(10, 10),
+                        textcoords="offset points", fontsize=FS_LABEL_L,
                         fontweight="bold")
 
     # Matching decision boundary: perpendicular bisector x = d_ab/2 (vertical)
@@ -652,45 +657,54 @@ def plot_template_distance_plane(
                zorder=1, label=f"x={d_ab/2:.2f} matching argmin boundary")
 
     ax.set_xlabel(
-        f"projection onto T{ax_a}–T{ax_b} axis "
-        f"[T{ax_a}=(0,0), T{ax_b}=({d_ab:.2f},0)]",
-        fontsize=FS_LABEL,
+        f"projection onto T{ax_a}–T{ax_b} axis  [d(T{ax_a},T{ax_b})={d_ab:.2f}]",
+        fontsize=FS_LABEL_L,
     )
-    ax.set_ylabel("perpendicular off-axis distance", fontsize=FS_LABEL)
+    ax.set_ylabel("perpendicular off-axis distance", fontsize=FS_LABEL_L)
 
     n_total = data["n_events_total"]
     agreement = data["agreement_overall"]
     sil_med = data["silhouette_median"]
     extra_clusters = chosen_k - 2
-    extra_note = f" + {extra_clusters} off-axis matching cluster(s)" if extra_clusters > 0 else ""
-    boundary_kind = (
-        f"x={d_ab/2:.2f} (perpendicular bisector) is the strict matching argmin boundary"
-        if chosen_k == 2
-        else f"x={d_ab/2:.2f} is the T{ax_a}-vs-T{ax_b} bisector (off-axis clusters can fall on either side based on their own distances)"
-    )
     offplane_frac = n_offplane / max(n_visible, 1)
-    panel_title = (
-        f"Trilateration in T{ax_a}–T{ax_b} reference frame  "
-        f"(inter-cluster r={pair_r:.2f}, d(T{ax_a},T{ax_b})={d_ab:.2f})\n"
-        f"{n_visible:,} events on {n_unique_bins} unique trilateration coords "
-        f"(k={chosen_k}{extra_note}, agreement={agreement:.3f}, sil={sil_med:.3f})\n"
-        f"{boundary_kind}\n"
-        f"open circles = {n_disagree:,} ({n_disagree / max(n_visible,1):.1%}) KMeans-vs-matching drift; "
-        f"{n_offplane:,} ({offplane_frac:.1%}) off-plane (masked-metric triangle violation, collapsed to y=0)"
-    )
-    ax.set_title(panel_title, fontsize=FS_TITLE - 5, loc="left")
-    ax.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=False)
 
-    # Suptitle: subject id + validity stats
+    # Legend (top-right of main panel)
+    ax.legend(loc="upper right", fontsize=FS_TICK_L - 1, frameon=False)
+
+    # ---- Header block (above the gridspec) ----
+    # Line 1 (suptitle): subject id, big bold
+    fig.suptitle(
+        f"{dataset.capitalize()} · {subject} — cluster geometry trilateration  (k={chosen_k})",
+        fontsize=FS_SUPTITLE_L,
+        y=0.965,
+        fontweight="bold",
+    )
+    # Line 2: PR-2 validity one-liner
     validity = _load_pr2_validity(dataset, subject)
     validity_subtitle = _validity_subtitle(validity)
-    fig.suptitle(
-        f"{dataset.capitalize()} · {subject} — fixed template-distance plane\n"
-        f"{validity_subtitle}",
-        fontsize=FS_TITLE,
-        y=0.998,
+    fig.text(
+        0.10, 0.925, validity_subtitle,
+        fontsize=FS_TITLE_L - 2, ha="left", va="top",
     )
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.93))
+    # Line 3: this-figure stats (n events, agreement, sil, drift, off-plane,
+    # modality dip+BIC) — no footer at bottom anymore
+    if np.isfinite(dip_p_x) and np.isfinite(bic_diff):
+        dip_str = f"dip p={dip_p_x:.2g}" if dip_p_x >= 1e-3 else "dip p<1e-3"
+        modality_full = f"{dip_str} · ΔBIC(k1−k2)={bic_diff:+.0f}"
+    else:
+        modality_full = "modality n/a"
+    line3 = (
+        f"n={n_visible:,} events · inter-cluster r={pair_r:.2f} · "
+        f"d(T{ax_a},T{ax_b})={d_ab:.2f} · agreement={agreement:.3f} · sil={sil_med:.3f}\n"
+        f"KMeans-vs-matching drift = {n_disagree / max(n_visible,1):.1%} ({n_disagree:,}); "
+        f"off-plane = {offplane_frac:.1%} ({n_offplane:,}); "
+        f"marginal-x  {modality_full}"
+    )
+    fig.text(
+        0.10, 0.895, line3,
+        fontsize=FS_TICK_L - 1, ha="left", va="top", color="#444444",
+    )
+
     return savefig_pub(fig, output_path)
 
 
