@@ -603,6 +603,27 @@ ER-asymmetric case：broad band 给 textbook focal cluster，gamma band 给 mult
 
 ---
 
+## Drop subjects 集合 — 6 subjects (1073, 1077, 1096, 1146, 1150, 442)
+
+这 6 subject 在 v2.2.2 γ_a 准入下双 ER 都进 drop 篮子。共同特征：producer_health ∈ {unstable, insufficient} 且 clinical_concordance ∈ {discordant, partial, not_assessable}（不满足 sensitivity 进入条件）。**不进 Layer B**，仅作 cohort 完整性记录。
+
+| sub | n_focal | gamma cells (n_ok / s_sz / tag) | broad cells (n_ok / s_sz / tag) | 主要驱动 |
+|---|---|---|---|---|
+| 1073 | 5 | 9 / 0.17 / unstable+discordant | 4 / 0.31 / unstable+discordant | gamma 焦点 (HL3, HL5) 排末尾；broad MWU p=0.92 |
+| 1077 | 8 | 3 / 0.02 / unstable+discordant | 2 / -0.34 / **insufficient**+not_assessable | n_ok 极少；broad s_sz 负 = 排序反向 |
+| 1096 | 8 | 7 / 0.45 / unstable+discordant | 8 / 0.19 / unstable+discordant | gamma s_sz 接近 moderate threshold 但 cc 强 discordant；broad p=0.91 |
+| 1146 | **0** | 5 / -0.04 / unstable+not_assessable | 7 / 0.12 / unstable+not_assessable | clinical SOZ 全空（同 1084/442），无 cc 评估 + producer 不稳 |
+| 1150 | 6 | 5 / -0.07 / unstable+discordant | 6 / -0.09 / unstable+partial | 双 ER s_sz 负；broad partial 仅靠 frac (focal_in_top=2/10) |
+| 442 | **0** | 16 / 0.37 / unstable+not_assessable | 16 / 0.45 / unstable+not_assessable | clinical SOZ 全空 + s_sz 接近 moderate；类似 1084/1146 但 n_ok 较高 |
+
+**3 个无 clinical SOZ 的 subject (1146, 442, 1084)** 形成独立子类：producer 在没有 clinical 标注的 epilepsiae 录入上仍能跑出 r_sz，但**永远不能 cross-validate clinical**。1084 进 broad primary（n_focal=0 不影响 producer-health 评估）；1146 + 442 因 producer 不稳 drop。
+
+**1077 是唯一 broad insufficient 的 cohort subject**（916 broad 也 insufficient 但 916 是 sentinel-only 不在 cohort audit_eligible）。两者共同点：broad band 在 baseline 噪声 + ictal 信号下都难以稳定校准。
+
+**1073 + 1096 是 producer "几乎 moderate" 的边界 case**（gamma s_sz 0.17 / 0.45）。raise λ_max 不一定救它们（1073 实测 broad 在 λ_max=500 下从 unstable 降到 insufficient，见 Phase 2 早期发现）。
+
+---
+
 ## Cohort summary (A.4 v2.2 — 16 epilepsiae subjects, 完成 2026-05-06)
 
 **Run**: 11.3h wall (2026-05-05 18:32 → 2026-05-06 05:51), 16/16 epilepsiae subjects (15 audit_eligible + sentinel 916), 9 yuquan 已 excluded（见上文 cohort scope 注）。
