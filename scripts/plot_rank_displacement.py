@@ -218,14 +218,12 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h = fig.add_subplot(gs[0, 0])
     ax_F = fig.add_subplot(gs[0, 1], sharey=ax_h)
     ax_cb = fig.add_subplot(gs[1, 0])  # horizontal colorbar under heatmap
-    ax_legend = fig.add_subplot(gs[1, 1])  # SOZ channel mini-legend
-    ax_legend.axis("off")
+    # gs[1, 1] (under F_norm track) intentionally left empty — no SOZ legend
 
     # NaN cells (channels beyond a subject's n_valid) render as white via
-    # cmap.set_bad("white"). Cleaner than gray fill, and the cell-by-cell
-    # SOZ borders + the divergent palette around 0 (light pink/blue near
-    # zero, NOT pure white) keep NaN regions visually distinguishable
-    # from actual zero-Δr data cells.
+    # cmap.set_bad("white"). The divergent palette around 0 is light
+    # pink/blue (not pure white), so data and NaN regions remain
+    # visually distinguishable.
     cmap = plt.cm.RdBu_r.copy()
     cmap.set_bad(color="white")
     im = ax_h.imshow(
@@ -236,20 +234,9 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         interpolation="nearest",
     )
 
-    # SOZ overlay: black border on cells
-    for i in range(n_sub):
-        for j in range(n_ch):
-            if soz_overlay[i, j]:
-                ax_h.add_patch(
-                    mpatches.Rectangle(
-                        (j - 0.5, i - 0.5),
-                        1,
-                        1,
-                        fill=False,
-                        edgecolor="black",
-                        linewidth=0.7,
-                    )
-                )
+    # SOZ overlay deliberately removed: SOZ definition / lagPat coverage
+    # not stable enough for paper-level annotation. soz_overlay is still
+    # computed in build_heatmap_matrix and recorded in per-subject JSON.
 
     ax_h.set_yticks(range(n_sub))
     ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK)
@@ -267,8 +254,8 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         fontsize=FS_LABEL + 1,
         labelpad=10,
     )
-    # Spines: now bottom is "interior" (next to colorbar), keep all 4
-    # but turn off top labels duplicate
+    # Hide top + right spines (cleaner paper-style; xticks at top still draw)
+    ax_h.spines["top"].set_visible(False)
     ax_h.spines["right"].set_visible(False)
     ax_h.tick_params(axis="x", which="both", bottom=False, top=True)
 
@@ -297,6 +284,7 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_F.tick_params(axis="x", which="both", bottom=False, top=True)
     plt.setp(ax_F.get_yticklabels(), visible=False)
     ax_F.set_xlabel("F_norm", fontsize=FS_LABEL + 1, labelpad=10)
+    ax_F.spines["top"].set_visible(False)
     ax_F.spines["right"].set_visible(False)
     # Tiny annotation labeling the shaded band as the random null
     ax_F.text(
@@ -312,20 +300,7 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
                  fontsize=FS_LABEL, labelpad=2)
     cb.ax.tick_params(labelsize=FS_TICK - 1)
 
-    # SOZ channel mini-legend in the bottom-right cell (under F_norm track,
-    # next to the colorbar).
-    ax_legend.add_patch(
-        mpatches.Rectangle(
-            (0.05, 0.32), 0.20, 0.36,
-            transform=ax_legend.transAxes,
-            facecolor="white", edgecolor="black", linewidth=1.4,
-        )
-    )
-    ax_legend.text(
-        0.32, 0.50, "SOZ channel",
-        transform=ax_legend.transAxes,
-        fontsize=FS_LABEL, va="center", ha="left",
-    )
+    # SOZ legend deliberately removed (no SOZ outlines on heatmap).
 
     fig.suptitle(
         f"Per-channel signed rank displacement — two-template subjects (n={n_sub})",
