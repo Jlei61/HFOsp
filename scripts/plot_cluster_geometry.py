@@ -335,16 +335,27 @@ def plot_template_distance_plane(
     style_panel(ax, label="", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
 
-    # Aggregate (d_to_T_a, d_to_T_b) per cluster, density-aware
+    # Color events by **matching_label** so that, by construction, all
+    # blue events have d_to_T_a < d_to_T_b (above diagonal y>x) and all
+    # rust events have d_to_T_b < d_to_T_a (below). y=x then is the strict
+    # decision boundary for matching's argmin rule (k=2 case; for k>2 it
+    # is the T_a-vs-T_b slice, with off-axis matching clusters falling on
+    # either side depending on which axis their template is closer to).
+    # Open circles flag events where KMeans's full-rank decision disagrees
+    # with matching's masked-distance decision (metric drift).
     bin_decimals = 3
     n_visible = 0
     n_unique_bins = 0
+    n_unassigned = 0
+    n_disagree = 0
+
     for k in range(chosen_k):
         col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
         agree_counts: Dict[Tuple[float, float], int] = {}
         bound_counts: Dict[Tuple[float, float], int] = {}
         for ev in events:
-            if ev["kmeans_label"] != k:
+            mlabel = ev.get("matching_label", -1)
+            if mlabel != k:
                 continue
             d_each = ev.get("d_to_each_template")
             if d_each is None or len(d_each) <= max(ax_a, ax_b):
@@ -359,6 +370,7 @@ def plot_template_distance_plane(
                 agree_counts[key] = agree_counts.get(key, 0) + 1
             else:
                 bound_counts[key] = bound_counts.get(key, 0) + 1
+                n_disagree += 1
         n_unique_bins += len(agree_counts) + len(bound_counts)
 
         if agree_counts:
@@ -368,7 +380,9 @@ def plot_template_distance_plane(
             sizes = EVENT_MARKER_SIZE * np.sqrt(counts)
             ax.scatter(xs, ys, s=sizes, c=col, alpha=0.55,
                        edgecolors="none", zorder=2,
-                       label=f"cluster {k}" if k in (ax_a, ax_b) else f"cluster {k} (off-axis)")
+                       label=f"matching cluster {k}"
+                             if k in (ax_a, ax_b)
+                             else f"matching cluster {k} (off-axis)")
         if bound_counts:
             xs = [p[0] for p in bound_counts.keys()]
             ys = [p[1] for p in bound_counts.keys()]
@@ -376,6 +390,33 @@ def plot_template_distance_plane(
             sizes = BOUNDARY_MARKER_SIZE * np.sqrt(counts)
             ax.scatter(xs, ys, s=sizes, facecolors="none",
                        edgecolors=col, linewidths=1.3, alpha=0.85, zorder=3)
+
+    # Plot unassigned (matching_label = -1) events in neutral gray for
+    # honesty — they cannot be argmin'd because no template has enough
+    # shared channels.
+    unassigned_counts: Dict[Tuple[float, float], int] = {}
+    for ev in events:
+        if ev.get("matching_label", -1) != -1:
+            continue
+        d_each = ev.get("d_to_each_template")
+        if d_each is None:
+            continue
+        xv = d_each[ax_a] if len(d_each) > ax_a else None
+        yv = d_each[ax_b] if len(d_each) > ax_b else None
+        if xv is None or yv is None or not np.isfinite(xv) or not np.isfinite(yv):
+            continue
+        n_visible += 1
+        n_unassigned += 1
+        key = (round(xv, bin_decimals), round(yv, bin_decimals))
+        unassigned_counts[key] = unassigned_counts.get(key, 0) + 1
+    if unassigned_counts:
+        xs = [p[0] for p in unassigned_counts.keys()]
+        ys = [p[1] for p in unassigned_counts.keys()]
+        counts = np.array(list(unassigned_counts.values()), dtype=float)
+        sizes = EVENT_MARKER_SIZE * np.sqrt(counts)
+        ax.scatter(xs, ys, s=sizes, c="#BDBDBD", alpha=0.55,
+                   edgecolors="none", zorder=2,
+                   label=f"unassigned (n={n_unassigned})")
 
     # Plot all templates at their fixed positions in this plane
     if D_tt.size > 0:
@@ -407,14 +448,21 @@ def plot_template_distance_plane(
     agreement = data["agreement_overall"]
     sil_med = data["silhouette_median"]
     extra_clusters = chosen_k - 2
-    extra_note = f" + {extra_clusters} off-axis cluster(s)" if extra_clusters > 0 else ""
+    extra_note = f" + {extra_clusters} off-axis matching cluster(s)" if extra_clusters > 0 else ""
+    boundary_kind = (
+        "y=x is the strict matching argmin boundary"
+        if chosen_k == 2
+        else f"y=x is the T{ax_a} vs T{ax_b} slice (off-axis clusters not bound by it)"
+    )
     panel_title = (
         f"Template-distance plane: T{ax_a} vs T{ax_b}  "
         f"(inter-cluster r={pair_r:.2f})\n"
         f"{n_visible:,} events on {n_unique_bins} unique rank vectors "
-        f"(k={chosen_k}{extra_note}, agreement={agreement:.3f}, sil={sil_med:.3f})"
+        f"(k={chosen_k}{extra_note}, agreement={agreement:.3f}, sil={sil_med:.3f})\n"
+        f"{boundary_kind}; "
+        f"open circles = {n_disagree:,} events ({n_disagree / max(n_visible,1):.1%}) where KMeans disagrees with matching"
     )
-    ax.set_title(panel_title, fontsize=FS_TITLE - 3, loc="left")
+    ax.set_title(panel_title, fontsize=FS_TITLE - 4, loc="left")
     ax.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=False)
 
     # Suptitle: subject id + validity stats
