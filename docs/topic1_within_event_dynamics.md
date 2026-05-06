@@ -64,18 +64,19 @@
 - **结论口径**：模板稳定，但占比的昼夜漂移整体较弱。**这是描述层结果，不是强机制结论**
 - occupancy 在低 rate 时段天然高方差，不适合直接承担 PR-4C 的主统计读数 → PR-4D 已把这层补强成 `rate×type`
 
-### 3.1d Cluster geometry 可视化（PCA + MDS 双视图，2026-05-06）
+### 3.1d Cluster geometry 可视化（trilateration plane + bimodality audit，2026-05-06）
 
-PR-2 / PR-2.5 cluster decomposition 的描述性补强。每 subject 一张 2×2 图：(a) **PCA on KMeans 训练用的全 rank feature matrix**（KMeans-native 视图，所有事件展示），(b) per-event silhouette 排序（template-matching metric 下），(c) cluster template profile（channel-rank 折线，能直接看 forward/reverse），(d) classical MDS on template-matching distance（audit 视图，subsample）。两种 metric 视图（panel a 与 d）并列展示同一 cohort 在两种距离下不一定相同的几何。
+PR-2 / PR-2.5 cluster decomposition 的描述性补强。每 subject 一张 trilateration 图——把每事件按它到两个最反向模板 T_a / T_b 的距离做 2D 三边定位（T_a→(0,0)、T_b→(d_ab,0)、event 解 ‖event−T_a‖=d_a 且 ‖event−T_b‖=d_b 的 (x, y)）。每 cluster 用 2D KDE 等密度填充加散点叠加，模板钉在 cluster 中心；上方加 marginal-x 密度面板做 bimodality 直接检验。
 
 - **入选 cohort = 20 Epilepsiae subjects**；**18 Yuquan 排除**（PR-2 saved labels 与当前 lagPat valid_events 数量不对齐 / 缺 adaptive_cluster JSON）—— **data freshness 问题不在本 PR 范围**，列为 P0 follow-up：在最新 lagPat 上重跑 PR-2 / PR-2.5
 - **关键 cohort 数字**：silhouette median = **0.460**（range 0.182–0.671，5/20 < 0.3），KMeans-vs-template-matching agreement median = **0.892**（range 0.769–0.955，8/20 < 0.85），与用户先前 audit 完全一致
-- **Metric drift 集中在低 n_participating 事件**：boundary fraction by n_part bin 单调下降 `0.135 → 0.097 → 0.046`（3-4 / 5-8 / 9+）。**真实差异是 KMeans 用全 rank 向量（含非参与通道的 fallback rank）vs matching 只用共享通道**——之前文档"NaN→0"描述错，已修正
-- **Showcase 三张**：`958` (k=2 forward/reverse，老论文 E3 复现) / `818` (k=4 多模态，cohort 最低 agreement) / `253` (auto-pick，低 cluster validity caveat)
-- **Silhouette × agreement Spearman ρ = 0.889** ——consistency check / sanity，**不是独立 finding**（两者都派生自同一组 d_within / d_min_other 距离差，cohort 上正相关本来就是定义上预期）
-- **不推翻**任何 PR-2/2.5/3/4/5/6/7 主结论（核心结论都不依赖 matching metric 单独成立），但 boundary events 的几何解释 metric 选择敏感
-- **不是新假设、不进 SBA framework P1–P5**；纯描述层
-- 详细数字、机制层差异清单、follow-up：
+- **Metric drift 集中在低 n_participating 事件**：boundary fraction by n_part bin 单调下降 `0.135 → 0.097 → 0.046`
+- **新审阅发现 — Marginal-x bimodality**（archive §3.5）：cohort 在 cluster discreteness 上**不是同质的**——dip + GMM BIC 给出 **11/20 BIMODAL（清晰双模）/ 8/20 AMBIGUOUS（dip 与 BIC 矛盾）/ 1/20 UNIMODAL（`442`：KMeans 在切单峰连续分布）**。PR-2 archive 的"30/30 multimodal via pairwise τ dip"是必要不充分条件——pairwise τ dip 不能区分"双 cluster"和"1D 连续谱"（连续谱端点对端点的 τ 也会双峰）。**保留 KMeans 2-cluster 主线作论文叙事**，但 cohort 异质性必须并列报告，特别 `442`。**continuous-spectrum reframe（principal-curve / 1D manifold）留给后续论文，本论文不动 KMeans 主线**
+- **Showcase**：`958`（BIMODAL k=2 forward/reverse）/ `818`（BIMODAL k=4）/ `253`（AMBIGUOUS k=2 弱 cluster）/ **`442`（UNIMODAL counter-example，必须报告）**
+- **Silhouette × agreement Spearman ρ = 0.889**——consistency check / sanity，**不是独立 finding**（两者都派生自同一组 d_within / d_min_other 距离差）
+- **不推翻**任何 PR-2/2.5/3/4/5/6/7 主结论
+- **不进 SBA framework P1–P5**；纯描述层
+- 详细数字、bimodality 检验机制、failure 合同、follow-up：
   - Plan：`docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md`
   - Results：`docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md`
 

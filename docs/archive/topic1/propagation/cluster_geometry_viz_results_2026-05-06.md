@@ -9,9 +9,11 @@
 
 ## 1. 一句话结论（已降调）
 
-在 template-matching metric（shared-channel mean squared deviation，与 `assign_events_to_templates` 一致）下做 classical MDS、并在 KMeans-native feature space 做 PCA 互为对照，PR-2 给出的 stable_k 簇结构在入选 Epilepsiae cohort 上**整体可解释**，但存在**明确的 boundary-event drift**：silhouette 中位 = 0.460（range 0.182–0.671，5/20 < 0.3），KMeans 与 template-matching reassign 的事件级一致率中位 = 0.892（range 0.769–0.955，8/20 < 0.85）。drift 主要集中在低 n_participating 事件上（boundary fraction 单调下降 0.135 → 0.097 → 0.046）。
+在 trilateration 平面（每事件按它到两个最反向模板 T_a/T_b 的距离做 2D 三边定位，T_a→(0,0)、T_b→(d_ab,0)）下做 cluster geometry 可视化，PR-2 给出的 stable_k 簇结构在入选 Epilepsiae cohort 上**整体可解释**，但存在**明确的 boundary-event drift**：silhouette 中位 = 0.460（range 0.182–0.671，5/20 < 0.3），KMeans 与 template-matching reassign 的事件级一致率中位 = 0.892（range 0.769–0.955，8/20 < 0.85）。drift 主要集中在低 n_participating 事件上（boundary fraction 单调下降 0.135 → 0.097 → 0.046）。
 
-**958（k=2 forward/reverse）的 panel c 模板剖面、818（k=4 多模态）的 4-panel 结构、253（k=2 低-validity）的 boundary 重叠**——三张 showcase 各自展示一种典型情况，是这次 PR 的描述性贡献；不构成对 PR-2/2.5 主结论的推翻或新生物 finding。
+**新增审阅发现（§3.5 marginal-x bimodality test，2026-05-06）**：cohort 在 cluster discreteness 上**不是同质的**——沿 T_a-T_b 轴的 marginal density 检验给出 **11/20 BIMODAL（清晰双峰）/ 8/20 AMBIGUOUS（dip 与 GMM BIC 矛盾）/ 1/20 UNIMODAL（442：KMeans 在切单峰连续分布）**。本 PR **保留 KMeans 2-cluster 主线**作为论文叙事，但在 §3.5 落档 cohort 异质性，明确 PR-2 archive 的"30/30 multimodal via pairwise τ dip"是必要不充分条件——pairwise τ dip 不能区分"双 cluster"和"1D 连续谱"，连续谱端点对端点的 τ 也会双峰。**continuous-spectrum 的更深入 reframe 留给后续论文**。
+
+**958（k=2 forward/reverse）/ 818（k=4 多模态）/ 442（UNIMODAL counter-case）/ 253（AMBIGUOUS）**——四种典型情况是这次 PR 的描述性贡献；不构成对 PR-2/2.5 主结论的推翻或新生物 finding。
 
 **18 个 Yuquan subjects** 因 PR-2 saved labels 与当前 lagPat valid_events 数量不一致（10）或缺 adaptive_cluster JSON（8），在最新 lagPat data 上无法直接复用 PR-2 标签——本 PR **不在该 cohort 上提供完整 Topic 1 cohort 图**；这是 upstream data freshness 问题，列为 P0 follow-up（在最新 lagPat 上重跑 PR-2 / PR-2.5）。
 
@@ -91,6 +93,51 @@
 4. **min_shared gate**：matching 有硬门槛（默认 3），KMeans 没有
 
 **实测一致率**：cohort 中位 0.892、最低 0.769（与用户先前 audit 完全一致）。**不推翻** PR-2/2.5/3/4/5/6/7 任何核心结论（这些结论都不依赖 matching metric 单独成立），但 boundary events 的几何解释 metric 选择敏感。
+
+---
+
+## 3.5 审阅发现 II：marginal-x bimodality 检验暴露 cohort 异质性
+
+**问题来源**：trilateration 散点上事件看起来像从 T_a 到 T_b 的连续扇形，让人怀疑 PR-2 是否在切一个连续谱。重审 PR-2 archive 的"30/30 multimodal via pairwise τ Hartigan dip test"——此检验是必要不充分：1D 连续谱里端点对端点的 τ 也会双模态（端点相似度高 vs 跨端相似度低）。所以 PR-2 dip test 不能区分"两 cluster"和"1D 连续谱"。
+
+**直接判别**：每事件沿 T_a–T_b 轴的投影 `x_e = (d_a² − d_b² + d_ab²) / (2 d_ab)`（trilateration x 分量）。对这个 1D 边际分布做 Hartigan dip test + GMM(k=1) vs GMM(k=2) BIC 比较。Verdict 三态：
+
+| Verdict | 判定 | 含义 |
+|---|---|---|
+| **BIMODAL** | dip p<0.05 **AND** ΔBIC(k1−k2)>+10 | 沿 cluster 轴有双峰 → 两 cluster 真实 |
+| **UNIMODAL** | dip p≥0.05 **AND** ΔBIC<+10 | 沿 cluster 轴单峰 → KMeans 在切连续分布 |
+| **AMBIGUOUS** | 两测试矛盾 | 边界 case，dip 和 BIC 不一致 |
+
+### Cohort 分布（n=20 Epilepsiae）
+
+| Verdict | n | Subjects | 解读 |
+|---|---|---|---|
+| **BIMODAL** | **11/20** | 1073, 1077, 1125, 139, 384, 583, 590, 818, 916, 922, 958 | KMeans 2-cluster 是真实双峰结构的 honest 总结 |
+| **AMBIGUOUS** | **8/20** | 1084, 1096, 1146, 1150, **253**, 548, 620, 635 | dip 不显著 / BIC 倾向 k=2 不一致；位于双模-连续谱边界 |
+| **UNIMODAL** | **1/20** | **442**（dip p=1.000, ΔBIC=−57） | KMeans 在切单峰连续分布；论文应特别报告 |
+
+### 关键 case 数字（marginal-x test）
+
+| Subject | dip p | ΔBIC(k1−k2) | inter-cluster r | Verdict |
+|---|---|---|---|---|
+| 958 | 0.0036 | **+21628** | −0.91 | BIMODAL（强双模） |
+| 1073 | 0.0000 | +44888 | −0.71 | BIMODAL（最强 ΔBIC） |
+| 590 | 0.0002 | +1310 | −0.07 | BIMODAL（即便模板近正交） |
+| 253 | 0.7315 | +2962 | +0.31 | AMBIGUOUS（dip vs BIC 矛盾） |
+| 1146 | 0.0965 | +20898 | −0.46 | AMBIGUOUS（dip 边界 + BIC 强） |
+| **442** | **1.0000** | **−57** | +0.46 | **UNIMODAL（counter-case）** |
+| 818 | 0.0000 | +43 | −0.70 | BIMODAL 但 ΔBIC 极小（k=4 在 T0-T3 切片下测不全） |
+
+### 论文级口径建议（保持 KMeans 2-cluster 主线）
+
+- 主结论保留："PR-2 KMeans 2-cluster decomposition 在 cohort 上整体可解释"
+- 加一段 cohort heterogeneity caveat："bimodality test on T_a-T_b axis projection: 11/20 strict bimodal, 8/20 ambiguous, 1/20 unimodal (subject 442). KMeans 2-cluster is a useful summary for the bimodal majority but should not be over-interpreted as discrete clusters in the ambiguous and unimodal subset."
+- **442 必须特别报告**：单点 counter-example，不能塞进"30/30 multimodal"统一叙事
+- continuous-spectrum reframe（如 principal-curve / 1D-manifold）**留给后续论文**，本 PR / 本论文不动 KMeans 主线
+
+### Code
+
+测试在 `scripts/plot_cluster_geometry.py::plot_template_distance_plane` 内 inline 计算并标注到每张 per-subject 图的 marginal density panel；cohort-level 表通过 `python scripts/plot_cluster_geometry.py` 间接生成（每 subject JSON 不存 verdict 字段，需要时跑离线 script 重计算）。
 
 ---
 

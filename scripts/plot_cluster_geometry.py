@@ -497,60 +497,107 @@ def plot_template_distance_plane(
     style_panel(ax, label="", label_x=-0.10, label_y=1.04)
     ax.set_facecolor("#FAFAFA")
 
-    # Trilaterate each event into 2D using its distances to T_a and T_b.
-    # Color by matching_label so the matching decision boundary x=d_ab/2 is
-    # consistent with color (cluster a left of bisector, cluster b right);
-    # but the y axis carries independent off-axis information so the figure
-    # is NOT tautological with the coloring.
+    # Build per-cluster (x, y) arrays ONCE from pre-computed all_x/all_y/etc.
     bin_decimals = 3
     n_visible = 0
     n_unique_bins = 0
     n_unassigned = 0
     n_disagree = 0
-    n_offplane = 0
+    n_offplane = n_offplane_pre
 
+    cluster_xy: Dict[int, Dict[str, Any]] = {}
+    for idx in range(len(all_x)):
+        mlabel = all_mlabel[idx]
+        if mlabel < 0 or mlabel >= chosen_k:
+            continue
+        xe, ye = all_x[idx], all_y[idx]
+        if not np.isfinite(xe) or not np.isfinite(ye):
+            continue
+        rec = cluster_xy.setdefault(
+            mlabel, {"agree_xy": [], "bound_xy": []}
+        )
+        if all_agreement[idx]:
+            rec["agree_xy"].append((xe, ye))
+        else:
+            rec["bound_xy"].append((xe, ye))
+            n_disagree += 1
+        n_visible += 1
+
+    # Compute global y range first so we can size KDE evaluation grid
+    if all_x and all_y:
+        x_all = np.asarray(all_x, dtype=float)
+        y_all = np.asarray(all_y, dtype=float)
+        x_lo, x_hi = float(x_all.min()), float(x_all.max())
+        y_lo, y_hi = 0.0, float(y_all.max())
+    else:
+        x_lo, x_hi, y_lo, y_hi = 0.0, d_ab, 0.0, d_ab
+    x_pad = (x_hi - x_lo) * 0.05 if x_hi > x_lo else 0.5
+    y_pad = (y_hi - y_lo) * 0.05 if y_hi > y_lo else 0.5
+    grid_n = 100
+    x_grid_main = np.linspace(x_lo - x_pad, x_hi + x_pad, grid_n)
+    y_grid_main = np.linspace(y_lo, y_hi + y_pad, grid_n)
+    XX, YY = np.meshgrid(x_grid_main, y_grid_main)
+
+    # Per-cluster: filled 2D KDE contour (cluster cores) + faint scatter
+    # The contour fill makes each cluster look like a distinct density
+    # island instead of a continuous arc.
+    from scipy.stats import gaussian_kde as _gkde
     for k in range(chosen_k):
         col = CLUSTER_PALETTE[k % len(CLUSTER_PALETTE)]
-        agree_counts: Dict[Tuple[float, float], int] = {}
-        bound_counts: Dict[Tuple[float, float], int] = {}
-        for ev in events:
-            mlabel = ev.get("matching_label", -1)
-            if mlabel != k:
-                continue
-            d_each = ev.get("d_to_each_template")
-            if d_each is None or len(d_each) <= max(ax_a, ax_b):
-                continue
-            xe, ye, on_plane = _trilaterate_xy(d_each[ax_a], d_each[ax_b], d_ab)
-            if not np.isfinite(xe) or not np.isfinite(ye):
-                continue
-            if not on_plane:
-                n_offplane += 1
-            n_visible += 1
-            key = (round(xe, bin_decimals), round(ye, bin_decimals))
-            if ev.get("agreement", True):
-                agree_counts[key] = agree_counts.get(key, 0) + 1
-            else:
-                bound_counts[key] = bound_counts.get(key, 0) + 1
-                n_disagree += 1
-        n_unique_bins += len(agree_counts) + len(bound_counts)
+        rec = cluster_xy.get(k, {"agree_xy": [], "bound_xy": []})
+        all_pts = rec["agree_xy"] + rec["bound_xy"]
+        n_unique_bins += len(set([(round(p[0], bin_decimals), round(p[1], bin_decimals))
+                                  for p in all_pts]))
+        if not all_pts:
+            continue
+        pts_x = np.array([p[0] for p in all_pts], dtype=float)
+        pts_y = np.array([p[1] for p in all_pts], dtype=float)
 
-        if agree_counts:
-            xs = [p[0] for p in agree_counts.keys()]
-            ys = [p[1] for p in agree_counts.keys()]
-            counts = np.array(list(agree_counts.values()), dtype=float)
-            sizes = EVENT_MARKER_SIZE * np.sqrt(counts)
-            ax.scatter(xs, ys, s=sizes, c=col, alpha=0.55,
-                       edgecolors="none", zorder=2,
-                       label=f"matching cluster {k}"
-                             if k in (ax_a, ax_b)
-                             else f"matching cluster {k} (off-axis)")
-        if bound_counts:
-            xs = [p[0] for p in bound_counts.keys()]
-            ys = [p[1] for p in bound_counts.keys()]
-            counts = np.array(list(bound_counts.values()), dtype=float)
-            sizes = BOUNDARY_MARKER_SIZE * np.sqrt(counts)
-            ax.scatter(xs, ys, s=sizes, facecolors="none",
-                       edgecolors=col, linewidths=1.3, alpha=0.85, zorder=3)
+        # 2D KDE fill — limit to <= 5000 sample points for KDE speed
+        if pts_x.size > 5000:
+            sub_idx = np.random.default_rng(0).choice(pts_x.size, 5000, replace=False)
+            kx = pts_x[sub_idx]
+            ky = pts_y[sub_idx]
+        else:
+            kx = pts_x
+            ky = pts_y
+        if kx.size >= 5 and (kx.std() > 1e-9 or ky.std() > 1e-9):
+            try:
+                kde2 = _gkde(np.vstack([kx, ky]), bw_method="silverman")
+                ZZ = kde2(np.vstack([XX.ravel(), YY.ravel()])).reshape(XX.shape)
+                # Normalize per-cluster so each shows its own internal
+                # density structure
+                if ZZ.max() > 0:
+                    ZZ_norm = ZZ / ZZ.max()
+                    levels = [0.10, 0.30, 0.55, 0.80]
+                    ax.contourf(XX, YY, ZZ_norm, levels=levels,
+                                colors=[col]*len(levels),
+                                alpha=0.18, zorder=1.5)
+                    # Outer contour with crisp line for cluster boundary
+                    ax.contour(XX, YY, ZZ_norm, levels=[0.10],
+                               colors=[col], linewidths=1.2,
+                               alpha=0.7, zorder=1.7)
+            except Exception:
+                pass
+
+        # Faint scatter on top so individual events remain visible without
+        # dominating the density story
+        ax.scatter(
+            pts_x, pts_y,
+            s=EVENT_MARKER_SIZE * 0.4,
+            c=col, alpha=0.18, edgecolors="none", zorder=2,
+            label=(f"matching cluster {k}"
+                   if k in (ax_a, ax_b)
+                   else f"matching cluster {k} (off-axis)"),
+        )
+
+        # Boundary events (KMeans disagrees) — same color but open marker
+        if rec["bound_xy"]:
+            bx = np.array([p[0] for p in rec["bound_xy"]])
+            by = np.array([p[1] for p in rec["bound_xy"]])
+            ax.scatter(bx, by, s=BOUNDARY_MARKER_SIZE * 0.6,
+                       facecolors="none", edgecolors=col,
+                       linewidths=1.0, alpha=0.45, zorder=3)
 
     # Plot unassigned (matching_label = -1) events in neutral gray.
     unassigned_counts: Dict[Tuple[float, float], int] = {}
