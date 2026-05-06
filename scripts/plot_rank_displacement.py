@@ -221,24 +221,20 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_legend = fig.add_subplot(gs[1, 1])  # SOZ channel mini-legend
     ax_legend.axis("off")
 
+    # NaN cells (channels beyond a subject's n_valid) render as white via
+    # cmap.set_bad("white"). Cleaner than gray fill, and the cell-by-cell
+    # SOZ borders + the divergent palette around 0 (light pink/blue near
+    # zero, NOT pure white) keep NaN regions visually distinguishable
+    # from actual zero-Δr data cells.
+    cmap = plt.cm.RdBu_r.copy()
+    cmap.set_bad(color="white")
     im = ax_h.imshow(
         matrix,
         aspect="auto",
-        cmap="RdBu_r",
+        cmap=cmap,
         norm=norm,
         interpolation="nearest",
     )
-    # Gray hatch for NaN cells (channels beyond a subject's n_valid)
-    nan_mask = ~np.isfinite(matrix)
-    if nan_mask.any():
-        ax_h.imshow(
-            np.ma.masked_where(~nan_mask, np.ones_like(matrix)),
-            aspect="auto",
-            cmap="Greys",
-            vmin=0,
-            vmax=2,
-            interpolation="nearest",
-        )
 
     # SOZ overlay: black border on cells
     for i in range(n_sub):
