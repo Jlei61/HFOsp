@@ -58,6 +58,8 @@ from src.ictal_onset_extraction import (
 
 __all__ = [
     "compute_cusum_n_d",
+    "compute_cusum_n_d_with_time",
+    "CusumOnsetResult",
     "calibrate_lambda_per_subject",
     "rank_channels_by_n_d",
     "compute_seizure_status",
@@ -158,6 +160,49 @@ def compute_cusum_n_d(
         if i0 <= idx < i1 and stat >= lam:
             return int(idx)
     return None
+
+
+# ---------------------------------------------------------------------------
+# v2.3 timing wrapper — pairs frame_idx with t_onset_sec for atlas use.
+#
+# Spec §6.2 contract: this MUST be a literal wrapper of compute_cusum_n_d
+# (no copy of the loop body). No-drift by construction, not by testimony.
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class CusumOnsetResult:
+    """Output of ``compute_cusum_n_d_with_time`` (v2.3)."""
+    frame_idx: Optional[int]      # CUSUM first-cross index; None if not triggered
+    t_onset_sec: Optional[float]  # frame_idx*hop + win/2 - pre, or None
+
+
+def compute_cusum_n_d_with_time(
+    z_er_1d: np.ndarray,
+    lambda_thresh: float,
+    *,
+    bias: float = 0.5,
+    detection_idx_window: Optional[Tuple[int, int]] = None,
+    hop_sec: float,
+    win_sec: float,
+    pre_sec: float,
+) -> CusumOnsetResult:
+    """Literal wrapper of :func:`compute_cusum_n_d` + time conversion.
+
+    Computes the same Page-Hinkley alarm frame index, then attaches
+    ``t_onset_sec = frame_idx * hop_sec + win_sec/2 - pre_sec``.
+
+    The implementation MUST NOT duplicate the CUSUM loop — it calls
+    :func:`compute_cusum_n_d` directly so that any future fix to the
+    detector logic propagates automatically. Tests assert no-drift.
+    """
+    idx = compute_cusum_n_d(
+        z_er_1d, lambda_thresh,
+        bias=bias, detection_idx_window=detection_idx_window,
+    )
+    if idx is None:
+        return CusumOnsetResult(None, None)
+    t_sec = float(idx) * float(hop_sec) + float(win_sec) / 2.0 - float(pre_sec)
+    return CusumOnsetResult(int(idx), t_sec)
 
 
 def calibrate_lambda_per_subject(

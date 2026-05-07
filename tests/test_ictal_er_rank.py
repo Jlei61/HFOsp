@@ -1086,3 +1086,133 @@ def test_compute_focal_in_topk_548_gamma_partial_under_inclusive_semantics():
     assert expanded is True
     # Sanity: 3/11 < 0.3, so frac_ok would be False (548 gamma → partial)
     assert n_focal / total < 0.3
+
+
+# ---------------------------------------------------------------------------
+# v2.3: compute_cusum_n_d_with_time wrapper
+# Hard-tests for the [-120, +30]s detection window expansion.
+# ---------------------------------------------------------------------------
+
+def _v23_synthetic_z_er(target_sec: float, *, height: float = 10.0,
+                         n_frames: int = 3300, hop_sec: float = 0.1,
+                         win_sec: float = 1.0, pre_sec: float = 300.0,
+                         seed: int = 0) -> np.ndarray:
+    """Synthetic z-ER trace: gaussian noise σ=1 + step at ``target_sec``."""
+    rng = np.random.default_rng(seed)
+    z = rng.standard_normal(n_frames)
+    # step starts at frame index s.t. t_onset_sec ≈ target_sec
+    target_frame = int(round((target_sec + pre_sec - win_sec / 2.0) / hop_sec))
+    z[target_frame:] += height
+    return z
+
+
+def test_compute_cusum_n_d_with_time_step_at_neg30s():
+    """Linus 验收: step at -30s → t_onset_sec ≈ -30s ± 2s."""
+    from src.ictal_er_rank import compute_cusum_n_d_with_time
+
+    z = _v23_synthetic_z_er(target_sec=-30.0)
+    # detection window [-120, +30]s in frame indices (pre_sec=300, hop=0.1)
+    # frame_at(-120s) = (-120 + 300 - 0.5) / 0.1 = 1795
+    # frame_at(+30s) = (30 + 300 - 0.5) / 0.1 = 3295
+    result = compute_cusum_n_d_with_time(
+        z, lambda_thresh=10.0, bias=0.5,
+        detection_idx_window=(1795, 3295),
+        hop_sec=0.1, win_sec=1.0, pre_sec=300.0,
+    )
+    assert result.t_onset_sec is not None
+    assert -32.0 <= result.t_onset_sec <= -28.0, (
+        f"expected ≈-30s, got {result.t_onset_sec}"
+    )
+    assert result.frame_idx is not None and result.frame_idx > 0
+
+
+def test_compute_cusum_n_d_with_time_step_at_neg100s():
+    """Linus 验收 #2: step at -100s → t_onset_sec ≈ -100s.
+
+    advisor: -30s alone cannot tell if the window reached -50 vs truly
+    -120; also testing -100s proves the floor expanded all the way.
+    """
+    from src.ictal_er_rank import compute_cusum_n_d_with_time
+
+    z = _v23_synthetic_z_er(target_sec=-100.0)
+    result = compute_cusum_n_d_with_time(
+        z, lambda_thresh=10.0, bias=0.5,
+        detection_idx_window=(1795, 3295),
+        hop_sec=0.1, win_sec=1.0, pre_sec=300.0,
+    )
+    assert result.t_onset_sec is not None
+    assert -102.0 <= result.t_onset_sec <= -98.0, (
+        f"expected ≈-100s, got {result.t_onset_sec}"
+    )
+
+
+def test_compute_cusum_n_d_with_time_pure_noise_returns_none():
+    """No step → CUSUM should not exceed λ on σ=1 noise → returns (None,None)."""
+    from src.ictal_er_rank import compute_cusum_n_d_with_time
+
+    rng = np.random.default_rng(42)
+    z = rng.standard_normal(3300)
+    result = compute_cusum_n_d_with_time(
+        z, lambda_thresh=50.0, bias=0.5,
+        detection_idx_window=(1795, 3295),
+        hop_sec=0.1, win_sec=1.0, pre_sec=300.0,
+    )
+    assert result.frame_idx is None
+    assert result.t_onset_sec is None
+
+
+def test_compute_cusum_n_d_with_time_no_drift_vs_compute_cusum_n_d():
+    """Wrapper must return identical frame_idx to compute_cusum_n_d.
+
+    No-drift by construction: any divergence means the wrapper copied
+    the loop body instead of calling the original (spec §6.2 contract).
+    """
+    from src.ictal_er_rank import compute_cusum_n_d, compute_cusum_n_d_with_time
+
+    for seed in range(5):
+        z = _v23_synthetic_z_er(target_sec=-50.0, seed=seed)
+        idx_orig = compute_cusum_n_d(
+            z, lambda_thresh=10.0, bias=0.5,
+            detection_idx_window=(1795, 3295),
+        )
+        wrapped = compute_cusum_n_d_with_time(
+            z, lambda_thresh=10.0, bias=0.5,
+            detection_idx_window=(1795, 3295),
+            hop_sec=0.1, win_sec=1.0, pre_sec=300.0,
+        )
+        assert wrapped.frame_idx == idx_orig, (
+            f"seed={seed}: wrapper drifted from original (frame_idx)"
+        )
+
+
+def test_compute_cusum_n_d_with_time_t_onset_formula():
+    """t_onset_sec = frame_idx * hop_sec + win_sec/2 - pre_sec exactly."""
+    from src.ictal_er_rank import compute_cusum_n_d_with_time
+
+    z = _v23_synthetic_z_er(target_sec=-30.0, seed=7)
+    result = compute_cusum_n_d_with_time(
+        z, lambda_thresh=10.0, bias=0.5,
+        detection_idx_window=(1795, 3295),
+        hop_sec=0.1, win_sec=1.0, pre_sec=300.0,
+    )
+    assert result.frame_idx is not None
+    expected = float(result.frame_idx) * 0.1 + 1.0 / 2.0 - 300.0
+    assert abs(result.t_onset_sec - expected) < 1e-9
+
+
+def test_compute_cusum_n_d_with_time_returns_dataclass():
+    """Result type must be CusumOnsetResult (frozen dataclass)."""
+    from src.ictal_er_rank import (
+        CusumOnsetResult, compute_cusum_n_d_with_time,
+    )
+
+    z = _v23_synthetic_z_er(target_sec=-30.0)
+    result = compute_cusum_n_d_with_time(
+        z, lambda_thresh=10.0, bias=0.5,
+        detection_idx_window=(1795, 3295),
+        hop_sec=0.1, win_sec=1.0, pre_sec=300.0,
+    )
+    assert isinstance(result, CusumOnsetResult)
+    # Frozen: assignment should fail
+    with pytest.raises((AttributeError, Exception)):
+        result.frame_idx = 999

@@ -56,11 +56,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.atomic_io import purge_stale_tmp, write_json_atomic  # noqa: E402
 from src.ictal_er_rank import (  # noqa: E402
     calibrate_lambda_per_subject,
     classify_clinical_concordance,
     classify_producer_health,
     compute_cusum_n_d,
+    compute_cusum_n_d_with_time,
     compute_focal_in_topk,
     compute_per_channel_rsz_coverage,
     compute_per_subject_r_sz,
@@ -86,8 +88,12 @@ HOP_SEC = 0.1
 WIN_SEC = 1.0
 PRE_SEC = float(BASELINE_PRE_SEC)              # 300 s pre-onset
 POST_SEC = 30.0                                  # 30 s post-onset
-DETECTION_PRE_SEC = 5.0                          # plan §3.3: detection [-5s, +30s]
+# v2.3 (2026-05-08): detection window [-120s, +30s] (was [-5s, +30s] in v2.2).
+# This is a science contract change — r_sz / s_sz / tags will be recomputed
+# across the cohort. v2.2 JSON is incompatible and lives in per_subject_v2_2/.
+DETECTION_PRE_SEC = 120.0                        # was 5.0 in v2.2
 DETECTION_POST_SEC = 30.0
+SCHEMA_VERSION = "pr_t3_1_layer_a_v2_3_timing"   # v2.3 (2026-05-08)
 LAMBDA_FPR_PER_HOUR = 1.0
 # v2.2.3 (2026-05-06) — module-level overrides settable from CLI for the
 # Phase 2 λ_max relaxation sweep. Kept as module globals so the existing
@@ -330,14 +336,23 @@ def _run_subject_all_ers(
             n_t = er_rec["n_t_frames"]
             det_window = _detection_idx_window(n_t)
             n_d_per_ch: Dict[str, Optional[float]] = {}
+            channel_onsets: Dict[str, Dict[str, Optional[float]]] = {}
             for ch_idx, ch in enumerate(ch_names):
                 if ch_idx >= z_er.shape[0]:
                     continue
-                n_d = compute_cusum_n_d(
+                # v2.3: get both frame_idx (for ranks) AND t_onset_sec (for atlas).
+                onset = compute_cusum_n_d_with_time(
                     z_er[ch_idx], lambda_thresh=lam,
                     bias=0.5, detection_idx_window=det_window,
+                    hop_sec=HOP_SEC, win_sec=WIN_SEC, pre_sec=PRE_SEC,
                 )
-                n_d_per_ch[ch] = float(n_d) if n_d is not None else None
+                n_d_per_ch[ch] = (
+                    float(onset.frame_idx) if onset.frame_idx is not None else None
+                )
+                channel_onsets[ch] = {
+                    "frame_idx": int(onset.frame_idx) if onset.frame_idx is not None else None,
+                    "t_onset_sec": float(onset.t_onset_sec) if onset.t_onset_sec is not None else None,
+                }
 
             ranks = rank_channels_by_n_d(n_d_per_ch)
             status_res = compute_seizure_status(
@@ -353,6 +368,7 @@ def _run_subject_all_ers(
                 "n_total": status_res.n_total,
                 "fast_recruit_fraction": status_res.fast_recruit_fraction,
                 "baseline_window_sec": er_rec["baseline_window_sec"],
+                "channel_onsets": channel_onsets,   # v2.3: per-channel onset for atlas
             })
 
         r_sz = compute_per_subject_r_sz(
@@ -565,8 +581,9 @@ def _run_sentinel(out_dir: Path) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     focus_rel = _load_focus_rel()
     summary: Dict = {
-        "step": "Layer A Step A.3 sentinel sanity (v2.2)",
-        "schema_version": "pr_t3_1_layer_a_v2_2",
+        "step": "Layer A Step A.3 sentinel sanity (v2.3 timing)",
+        "schema_version": SCHEMA_VERSION,
+        "detection_window_sec": [-DETECTION_PRE_SEC, DETECTION_POST_SEC],
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "lambda_fpr_per_hour": LAMBDA_FPR_PER_HOUR,
         "topk_for_tags": TOPK_FOR_TAGS,
@@ -585,6 +602,8 @@ def _run_sentinel(out_dir: Path) -> int:
             flush=True,
         )
         per_subject: Dict = {
+            "schema_version": SCHEMA_VERSION,
+            "detection_window_sec": [-DETECTION_PRE_SEC, DETECTION_POST_SEC],
             "subject": subject,
             "n_seizures_total": n_sz,
             "focal_channels": sorted(focal),
@@ -612,8 +631,7 @@ def _run_sentinel(out_dir: Path) -> int:
         # Per-sentinel JSON.
         sid_under = subject.replace("/", "_")
         out_path = out_dir / f"{sid_under}.json"
-        with out_path.open("w") as f:
-            json.dump(per_subject, f, indent=2, default=_json_default)
+        write_json_atomic(out_path, per_subject, default=_json_default)
         print(f"  wrote {out_path}", flush=True)
 
         # Brief for sanity_report (one row per ER cell).
@@ -666,8 +684,7 @@ def _run_sentinel(out_dir: Path) -> int:
     )
 
     sanity_path = out_dir / "sanity_report.json"
-    with sanity_path.open("w") as f:
-        json.dump(summary, f, indent=2, default=_json_default)
+    write_json_atomic(sanity_path, summary, default=_json_default)
     print(f"\n[sentinel] sanity report → {sanity_path}", flush=True)
     print(
         f"[sentinel] producer_health distribution: "
@@ -735,16 +752,19 @@ def _per_subject_json_path(out_dir: Path, subject: str) -> Path:
     return out_dir / f"{sid_under}.json"
 
 
-def _is_v2_2_per_subject_json(path: Path) -> bool:
-    """Check whether an existing per-subject JSON already has v2.2 tags."""
+def _is_current_schema_per_subject_json(path: Path) -> bool:
+    """v2.3: skip-existing only matches the active schema_version.
+
+    Stale v2.2 JSONs are NOT accepted; backup them to per_subject_v2_2/
+    before rerunning so this check correctly forces a recompute.
+    """
     if not path.exists():
         return False
     try:
         d = json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
         return False
-    return ("producer_health" in d and "clinical_concordance" in d
-            and "per_er" in d)
+    return d.get("schema_version") == SCHEMA_VERSION
 
 
 def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
@@ -779,7 +799,7 @@ def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
     t_start = time.time()
     for subject in subjects:
         out_path = _per_subject_json_path(out_dir, subject)
-        if skip_existing and _is_v2_2_per_subject_json(out_path):
+        if skip_existing and _is_current_schema_per_subject_json(out_path):
             n_skipped += 1
             n_done += 1
             continue
@@ -796,6 +816,8 @@ def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
             flush=True,
         )
         per_subject: Dict = {
+            "schema_version": SCHEMA_VERSION,
+            "detection_window_sec": [-DETECTION_PRE_SEC, DETECTION_POST_SEC],
             "subject": subject,
             "n_seizures_total": n_sz,
             "focal_channels": sorted(focal),
@@ -817,8 +839,7 @@ def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
 
         v2_2 = _build_v2_2_tags(per_subject)
         per_subject.update(v2_2)
-        with out_path.open("w") as f:
-            json.dump(per_subject, f, indent=2, default=_json_default)
+        write_json_atomic(out_path, per_subject, default=_json_default)
         for er_key in ("gamma_ER", "broad_ER"):
             if er_key in per_subject["producer_health"]:
                 ph = per_subject["producer_health"][er_key]
@@ -889,8 +910,9 @@ def _write_cohort_summary(out_dir: Path) -> None:
 
     _, excluded = _cohort_subject_list()
     summary = {
-        "step": "Layer A Step A.4 cohort summary (v2.2.3)",
-        "schema_version": "pr_t3_1_layer_a_v2_2_3",
+        "step": "Layer A Step A.4 cohort summary (v2.3 timing)",
+        "schema_version": SCHEMA_VERSION,
+        "detection_window_sec": [-DETECTION_PRE_SEC, DETECTION_POST_SEC],
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "n_subjects": n_subjects,
         "subjects": [d["subject"] for d in rows],
@@ -904,8 +926,7 @@ def _write_cohort_summary(out_dir: Path) -> None:
         "producer_fail_subjects": producer_fail_subjects,
     }
     summary_path = out_dir / "cohort_summary.json"
-    with summary_path.open("w") as f:
-        json.dump(summary, f, indent=2, default=_json_default)
+    write_json_atomic(summary_path, summary, default=_json_default)
     print(f"\n[cohort] summary → {summary_path}", flush=True)
     print(f"[cohort] (producer_health, clinical_concordance) 2D table:", flush=True)
     for er_key in ("gamma_ER", "broad_ER"):
@@ -983,6 +1004,13 @@ def main() -> int:
     global LAMBDA_MAX_OVERRIDE, LAMBDA_N_GRID_OVERRIDE
     LAMBDA_MAX_OVERRIDE = float(args.lambda_max)
     LAMBDA_N_GRID_OVERRIDE = int(args.lambda_n_grid)
+
+    # v2.3: scrub leftover *.json.tmp from a previous interrupted run
+    for candidate in (SENTINEL_OUT_DIR, COHORT_OUT_DIR, args.output_dir):
+        if candidate is not None:
+            n_purged = purge_stale_tmp(candidate)
+            if n_purged:
+                print(f"[startup] purged {n_purged} stale .json.tmp in {candidate}", flush=True)
 
     if args.sentinel:
         out_dir = args.output_dir or SENTINEL_OUT_DIR
