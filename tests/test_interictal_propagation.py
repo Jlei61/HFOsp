@@ -2172,7 +2172,8 @@ def test_pr5_recruitment_filters_to_gate_retained_subset_per_config(
     for subject in subjects:
         subject_dir = root / subject
         subject_dir.mkdir()
-        (subject_dir / f"{subject}_lagPat.npz").write_text("stub")
+        # Yuquan gate (`_has_propagation_inputs`) requires `_lagPat_withFreqCent.npz`.
+        (subject_dir / f"{subject}_lagPat_withFreqCent.npz").write_text("stub")
         (per_subject_dir / f"yuquan_{subject}.json").write_text(
             json.dumps(
                 {

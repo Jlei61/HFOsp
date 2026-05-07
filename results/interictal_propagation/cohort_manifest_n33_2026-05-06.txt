@@ -1,0 +1,45 @@
+# PR-1 / PR-2 cohort manifest, frozen 2026-05-06 after Slice A1.
+# Use with: python scripts/aggregate_propagation_cohort.py \
+#   --manifest results/interictal_propagation/cohort_manifest_n33_2026-05-06.txt
+#
+# Yuquan: 13 subjects (10 original + 3 added by Slice A1)
+# Epilepsiae: 20 subjects (unchanged from 2026-04-12 baseline)
+# Total: n=33
+#
+# Adding/removing entries here changes the cohort. Do NOT silently
+# rely on directory glob — Slice A1 archive
+# (docs/archive/topic1/propagation/cohort_slice_a1_2026-05-06.md) §4
+# explains why aggregator must be manifest-driven.
+yuquan/chengshuai
+yuquan/chenziyang
+yuquan/gaolan
+yuquan/hanyuxuan
+yuquan/huanghanwen
+yuquan/huangwanling
+yuquan/litengsheng
+yuquan/liyouran
+yuquan/sunyuanxin
+yuquan/wangyiyang
+yuquan/xuxinyi
+yuquan/zhangjiaqi
+yuquan/zhangjinhan
+epilepsiae/139
+epilepsiae/253
+epilepsiae/384
+epilepsiae/442
+epilepsiae/548
+epilepsiae/583
+epilepsiae/590
+epilepsiae/620
+epilepsiae/635
+epilepsiae/818
+epilepsiae/916
+epilepsiae/922
+epilepsiae/958
+epilepsiae/1073
+epilepsiae/1077
+epilepsiae/1084
+epilepsiae/1096
+epilepsiae/1125
+epilepsiae/1146
+epilepsiae/1150

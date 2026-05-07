@@ -1,0 +1,73 @@
+# PR-1 / PR-2 cohort manifest (extended), frozen 2026-05-07 after Slice A2.
+# Use with: python scripts/aggregate_propagation_cohort.py \
+#   --manifest results/interictal_propagation/cohort_manifest_n40_2026-05-07.txt \
+#   --out-summary results/interictal_propagation/pr1_subject_summary_n40.json \
+#   --out-cohort  results/interictal_propagation/pr1_cohort_summary_n40.json
+#
+# Yuquan: 20 subjects = 10 original + 3 Slice A1 (lineage-adjacent) + 7 Slice A2 (legacy variant)
+# Epilepsiae: 20 subjects (unchanged)
+# Total: n=40
+#
+# This is the EXTENDED cohort. The PRIMARY cohort (n=33, withFreqCent uniform)
+# is in cohort_manifest_n33_2026-05-06.txt.
+#
+# Lineage strata:
+#   primary_withFreqCent (n=33): all subjects with `*_lagPat_withFreqCent.npz`
+#     - 10 Yuquan original (cusignal vintage 2021)
+#     - 3 Yuquan Slice A1 (cusignal vintage 2021 detect/refine + cuda_env 2026 pack; lineage-adjacent)
+#     - 20 Epilepsiae (cusignal vintage 2021)
+#   legacy_variant (n=7): Yuquan subjects with only `*_lagPat.npz` (no freqCenter)
+#     - zhangkexuan, pengzihang, songzishuo, zhangbichen, zhaochenxi,
+#       zhaojinrui, zhourongxuan
+#     - older pack script (no lagPatFreq), different pickChn_thresh / packWinLen
+#     - cohort report MUST stratify when comparing extended vs primary
+#
+# See docs/archive/topic1/propagation/cohort_slice_a2_legacy_variant_2026-05-07.md
+# for the lineage caveat and double-track reporting protocol.
+#
+# Adding/removing entries here changes the cohort. Do NOT silently rely on
+# directory glob — manifest is the single source of truth.
+
+# === primary_withFreqCent (n=33) ===
+yuquan/chengshuai
+yuquan/chenziyang
+yuquan/gaolan
+yuquan/hanyuxuan
+yuquan/huanghanwen
+yuquan/huangwanling
+yuquan/litengsheng
+yuquan/liyouran
+yuquan/sunyuanxin
+yuquan/wangyiyang
+yuquan/xuxinyi
+yuquan/zhangjiaqi
+yuquan/zhangjinhan
+epilepsiae/139
+epilepsiae/253
+epilepsiae/384
+epilepsiae/442
+epilepsiae/548
+epilepsiae/583
+epilepsiae/590
+epilepsiae/620
+epilepsiae/635
+epilepsiae/818
+epilepsiae/916
+epilepsiae/922
+epilepsiae/958
+epilepsiae/1073
+epilepsiae/1077
+epilepsiae/1084
+epilepsiae/1096
+epilepsiae/1125
+epilepsiae/1146
+epilepsiae/1150
+
+# === legacy_variant (n=7, Slice A2 / Path D, 2026-05-07) ===
+yuquan/zhangkexuan
+yuquan/pengzihang
+yuquan/songzishuo
+yuquan/zhangbichen
+yuquan/zhaochenxi
+yuquan/zhaojinrui
+yuquan/zhourongxuan

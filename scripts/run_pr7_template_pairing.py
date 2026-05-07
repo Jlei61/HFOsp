@@ -50,10 +50,24 @@ from src.template_temporal_pairing import (  # noqa: E402
 # Loader for *_lagPat_withFreqCent.npz (matches PR-2 adaptive_cluster JSONs)
 # ---------------------------------------------------------------------------
 def _record_name_from_freqcent(path: Path) -> str:
-    """Strip suffix `_lagPat_withFreqCent` from filename stem."""
-    stem = path.stem  # e.g. FC1047XY_lagPat_withFreqCent
-    suffix = "_lagPat_withFreqCent"
-    return stem[: -len(suffix)] if stem.endswith(suffix) else stem
+    """Strip lagPat suffix from filename stem (FreqCent or plain variant)."""
+    stem = path.stem  # e.g. FC1047XY_lagPat_withFreqCent or FC1047XY_lagPat
+    for suffix in ("_lagPat_withFreqCent", "_lagPat"):
+        if stem.endswith(suffix):
+            return stem[: -len(suffix)]
+    return stem
+
+
+# Slice A2 Path D legacy variant subjects: only `_lagPat.npz` exists (no
+# withFreqCent variant produced for these). Cluster labels in their
+# adaptive_cluster JSONs were generated from the same plain `_lagPat.npz`
+# (load_subject_propagation_events fallback after Slice A1 fix), so PR-7
+# loading from `_lagPat.npz` is consistent with stored labels for these
+# subjects only. See docs/archive/topic1/propagation/cohort_slice_a2_legacy_variant_2026-05-07.md.
+PR7_LEGACY_VARIANT_ALLOWLIST = frozenset({
+    "zhangkexuan", "pengzihang", "songzishuo", "zhangbichen",
+    "zhaochenxi", "zhaojinrui", "zhourongxuan",
+})
 
 
 def _safe_float_scalar(value: Any) -> float:
@@ -77,8 +91,17 @@ def _load_subject_with_freqcent(subject_dir: Path) -> Optional[Dict[str, Any]]:
     """
     subject_dir = Path(subject_dir)
     files = sorted(subject_dir.glob("*_lagPat_withFreqCent.npz"))
+    use_freqcent = bool(files)
     if not files:
-        return None
+        # Path D fallback: only enabled for explicit allowlist (Slice A2
+        # legacy variant subjects). Their adaptive_cluster labels were
+        # produced from `_lagPat.npz` so loader output aligns with stored
+        # labels. Other subjects without FreqCent stay skipped to avoid
+        # silent contract violation.
+        if subject_dir.name in PR7_LEGACY_VARIANT_ALLOWLIST:
+            files = sorted(subject_dir.glob("*_lagPat.npz"))
+        if not files:
+            return None
 
     channel_names: List[str] = []
     channel_index: Dict[str, int] = {}
@@ -102,7 +125,11 @@ def _load_subject_with_freqcent(subject_dir: Path) -> Optional[Dict[str, Any]]:
         chns = chns[:n_ch]
 
         record = _record_name_from_freqcent(npz_path)
-        packed_path = npz_path.with_name(f"{record}_packedTimes_withFreqCent.npy")
+        # Match packedTimes naming to lagPat variant (withFreqCent vs plain).
+        packed_suffix = (
+            "_packedTimes_withFreqCent.npy" if use_freqcent else "_packedTimes.npy"
+        )
+        packed_path = npz_path.with_name(f"{record}{packed_suffix}")
         event_rel_times = np.full(n_ev, np.nan, dtype=float)
         event_abs_times = np.full(n_ev, np.nan, dtype=float)
         if packed_path.exists():
@@ -478,7 +505,7 @@ def _run_one_subject_pairing(
     # `*_lagPat.npz` 7ch slice does NOT align with stored labels.
     loaded = _load_subject_with_freqcent(subject_dir)
     if loaded is None:
-        print(f"  [skip] {dataset}/{subject_id}: no *_lagPat_withFreqCent.npz")
+        print(f"  [skip] {dataset}/{subject_id}: no eligible *_lagPat*.npz (FreqCent or path-D allowlist)")
         return None
     raw_times = np.asarray(loaded["event_abs_times"], dtype=float)
     bools = np.asarray(loaded["bools"], dtype=int)
@@ -645,7 +672,7 @@ def _run_one_subject_n2_sweep(
         return None
     loaded = _load_subject_with_freqcent(subject_dir)
     if loaded is None:
-        print(f"  [skip] {dataset}/{subject_id}: no *_lagPat_withFreqCent.npz")
+        print(f"  [skip] {dataset}/{subject_id}: no eligible *_lagPat*.npz (FreqCent or path-D allowlist)")
         return None
     raw_times = np.asarray(loaded["event_abs_times"], dtype=float)
     bools = np.asarray(loaded["bools"], dtype=int)
@@ -806,7 +833,7 @@ def _run_one_subject_burst(
         return None
     loaded = _load_subject_with_freqcent(subject_dir)
     if loaded is None:
-        print(f"  [skip] {dataset}/{subject_id}: no *_lagPat_withFreqCent.npz")
+        print(f"  [skip] {dataset}/{subject_id}: no eligible *_lagPat*.npz (FreqCent or path-D allowlist)")
         return None
     raw_times = np.asarray(loaded["event_abs_times"], dtype=float)
     bools = np.asarray(loaded["bools"], dtype=int)

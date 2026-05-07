@@ -36,9 +36,23 @@
 
 ## 3. 核心证据链
 
-### 3.1 内部传播刻板性
+> ### Cohort tier 注解（2026-05-07 起强制双轨/三层口径）
+>
+> 本 topic 现在共有 **三个 cohort 层**，下面 §3.1–§3.2 任何具体数字读到时**必须先识别它属于哪一层**：
+>
+> | 层 | n | 谱系 | 来源 | 适用范围 |
+> |---|---|---|---|---|
+> | **Tier 0 — 原 30-subject** | 30 | 21 年 cusignal vintage 全链 | PR-1/PR-2/PR-2.5/PR-3/PR-4*/PR-5/PR-6/PR-7 全部主线（pre-2026-05-06） | §3.1 / §3.1b 所有原始 PASS 比例（如 `23/30 strong`、`27 × k=2`、`30/30 MI permutation`、PR-4A `3/30 < 0.8`、PR-4B 的 `dom_r > 0.7` 集等）；PR-4C / PR-5 / PR-7 全部统计；§4 同步性 cohort 统计 |
+> | **Tier 1 — n=33 primary** | 33 | 30 vintage + 3 lineage-adjacent (cuda_env pack) | Slice A1 (2026-05-06) + Slice A2 (2026-05-07) 把 PR-1/PR-2/PR-2.5/PR-6 cohort 重算后落 `pr1_cohort_summary.json` default、`template_anchoring/cohort_summary_n33.json`；A1/A2 follow-up 又把 PR-3 cohort 6-panel `cohort_propagation_summary_n33.png` 与 PR-7 cohort summary 也重算到 n=9 h1_primary | **新增**：从 2026-05-07 起 PR-1/PR-2 mixture/τ/bias/stable_k 主表、PR-2.5 forward_reverse 主表、PR-6 H1/H2/H3 主表、**PR-3 cohort 6-panel n=33 主图**、**PR-7 mark-independence n=9 主表**都用此层。PR-4* / PR-5 **未**重算 |
+> | **Tier 2 — n=40 extended** | 40 | Tier 1 33 + 7 legacy variant（仅 `_lagPat.npz`，不可考 pack 参数） | Slice A2 双轨第二轨；落 `pr1_cohort_summary_n40.json`、`template_anchoring/cohort_summary_n40.json`、**`cohort_propagation_summary_n40.png`** | **sensitivity / case-extended only**。任何 cohort 主张写到 paper 不允许只引此层。Tier 1 与 Tier 2 数字差异本身是 lineage robustness 检验，不是新 cohort 信号。PR-7 不分 Tier 2（per_subject 仍按 cohort 流程汇总到一份 cohort_summary，n=9 / n=21 已含 path-D）|
+>
+> **重要**：Tier 0 ↔ Tier 1 ↔ Tier 2 之间的数字差异要么由"cohort 增加 / 谱系变化"驱动，要么由"重新 aggregate 时函数版本变化"驱动。如果 Tier 0 与 Tier 1 在某个共同 subject 上数字不一致，先怀疑 aggregator 版本，不要默认 cohort 大小是唯一变量。一个 already-known mass：`epilepsiae/1096` 在 Tier 1/Tier 2 的 PR-6 H1 pooled 都有 `valid_mask_source=fallback_all_valid` 的 pre-existing contamination，inherits 进两轨 H1 p 值；要 fix 需要单独 sensitivity PR。
+>
+> **写作合同**：本 topic 的 paper-level 论述按 priority **Tier 1 > Tier 0 > Tier 2** 引用（Tier 1 是当前主表，Tier 0 是历史 framework lock 时刻的 cohort，Tier 2 仅作 lineage robustness 注脚）。任何 mixed-tier 引用必须显式标注 "(Tier 0)" / "(Tier 1)" / "(Tier 2)"，不允许裸写 `30/30` 或 `28/40` 让读者猜。
 
-来自 `lagPatRank + eventsBool + chnNames` 的 cluster-aware 分析：
+### 3.1 内部传播刻板性（**Tier 0 = 原 30-subject framework lock**）
+
+来自 `lagPatRank + eventsBool + chnNames` 的 cluster-aware 分析。**这一节的全部比例都是 Tier 0 cohort（n=30）**——SBA framework P1/P2 的 lock 时刻引用的就是这些数字，**不要替换成 Tier 1**：
 
 - `30/30` subject 的 pairwise Kendall `τ` 分布呈多模态
 - KMeans(`k=2`) 后，簇内 `τ` 中位数 `0.250` 显著高于整体 `τ = 0.089`
@@ -47,7 +61,9 @@
 
 合理口径：**一个 subject 常常有多条主要传播路径，每条路径内部仍然刻板。**
 
-### 3.1b 数据合同、聚类稳定性与跨时间复现（PR-2a/2b/2.5）
+### 3.1b 数据合同、聚类稳定性与跨时间复现（PR-2a/2b/2.5，**Tier 0**）
+
+**全部 Tier 0（n=30）数字**——PR-2.5 的"strong/moderate/weak" 分级合同与 SBA P1 PASS 判据都钉在这一层：
 
 - 全量 `30/30` subject 都找到 `stable_k`，零 fallback；`stable_k` 分布 `27 × k=2`、`2 × k=4`、`1 × k=6`
 - Adaptive within-cluster `τ` 中位数 `0.252`，相对整体 uplift 中位数 `+0.100`
@@ -56,10 +72,32 @@
 
 完整数值表与算法合同见 archive `interictal_group_event_internal_propagation.md`。
 
-### 3.1c PR-3 / PR-4A：固定模板可视化与 occupancy 漂移
+#### 3.1b.1 Tier 1 / Tier 2 当前 cohort 数字（2026-05-07 起 PR-1/PR-2/PR-2.5/PR-6 主表）
 
-- PR-3 论文级 6-panel cohort 图已固定；新增簇内 identity-bias 计算（median = 86%）
-- PR-4A 在固定模板投射前提下做 day/night occupancy timeline：dominant fraction Wilcoxon `p=0.124`、entropy `p=0.245`、TV distance median `0.019`
+| 指标 | Tier 1 (n=33 primary) | Tier 2 (n=40 extended) |
+|---|---|---|
+| `n_strict_mixture` | 30 | **30**（不变，7 个 path-D 全是 possible mixture） |
+| `n_possible_mixture` | 3 | 10 |
+| `mean_tau_median` | 0.0884 | 0.0845 |
+| `bias_fraction_median` | 0.6568 | 0.7110 |
+| `stable_k_distribution` | `{2:30, 4:2, 6:1}` | `{2:35, 4:2, 5:2, 6:1}`（+2 个 stable_k=5 是 zhaojinrui/zhourongxuan 单电极 4ch case） |
+| PR-2.5 grade | strong=26, moderate=7 | strong=31, moderate=9 |
+| PR-2.5 forward_reverse `n_with_pairs / n_reproduced` | 14 / 13 | 17 / 16 |
+| PR-6 H1 pooled wilcoxon_greater p | 0.388 (n=23 eligible) | 0.223 (n=28 eligible) |
+| PR-6 H1 Yuquan-only p | 0.344 (n=10) | **0.107 (n=15)**（5 个 path-D 把 median 从 0.031 推到 0.0625, marginal trend not α=0.05） |
+
+**关键叙事**：从 Tier 0 → Tier 1，3 个 Slice A1 subject 全是 possible mixture 不是 strict；从 Tier 1 → Tier 2，7 个 path-D 也全是 possible mixture，**主流 stable_k=2 仍占 35/40**。`mean_tau_median` 略降反映 path-D 中两个 4ch outlier；`bias_fraction_median` 提升反映 path-D 多数高 bias。**Tier 1 → Tier 2 的 PR-6 H1 Yuquan p 从 0.344 降到 0.107 是 lineage robustness 提示而不是新发现**——5 个 path-D 把 median delta 从 0.031 翻到 0.0625，方向上跟 framework P4 假设一致但 effect size 仍未达 α=0.05。
+
+历史与详细数值见两个 archive（按时间序）：
+- Slice A1（lineage-adjacent，3 subject）：[`docs/archive/topic1/propagation/cohort_slice_a1_2026-05-06.md`](archive/topic1/propagation/cohort_slice_a1_2026-05-06.md)
+- Slice A2（legacy variant，7 subject + 双轨报告）：[`docs/archive/topic1/propagation/cohort_slice_a2_legacy_variant_2026-05-07.md`](archive/topic1/propagation/cohort_slice_a2_legacy_variant_2026-05-07.md)
+
+### 3.1c PR-3 / PR-4A：固定模板可视化与 occupancy 漂移（**Tier 0** — 未重算）
+
+**这一节多数数字仍是 Tier 0 (n=30)**——PR-4A occupancy / PR-4B 全 cohort / PR-4C / PR-5 在 Slice A1/A2 后**没有重算**，要扩到 Tier 1 / Tier 2 必须各自单独发 PR。**例外**：PR-3 cohort 6-panel 与 PR-7 cohort summary 已经在 2026-05-07 follow-up 中跟着 Slice A2 一起重做（PR-3 双轨 figures、PR-7 cohort 增至 n=9 h1_primary / n=21 h2_negative），但下面三个 PR-4A 数字仍然是 framework lock 时的 Tier 0：
+
+- PR-3 论文级 6-panel cohort 图已固定（n=30 framework lock 版）；新增簇内 identity-bias 计算（median = 86%）。**2026-05-07 follow-up**：双轨重画 `cohort_propagation_summary_n33.png` (Tier 1) + `cohort_propagation_summary_n40.png` (Tier 2)；default `cohort_propagation_summary.png` 留 Tier 1。10 个新 subject 全部出 `per_subject/<sub>_propagation.png` + `per_subject_mi/<sub>_mi_distribution.png`
+- PR-4A 在固定模板投射前提下做 day/night occupancy timeline：dominant fraction Wilcoxon `p=0.124`、entropy `p=0.245`、TV distance median `0.019`（n=30）
 - 模板投射 agreement 中位数 `0.888`；只有 `3/30`（`chengshuai`、`253`、`818`）低于 `0.8`
 - **结论口径**：模板稳定，但占比的昼夜漂移整体较弱。**这是描述层结果，不是强机制结论**
 - occupancy 在低 rate 时段天然高方差，不适合直接承担 PR-4C 的主统计读数 → PR-4D 已把这层补强成 `rate×type`

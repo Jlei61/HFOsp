@@ -134,9 +134,20 @@ PR-1 的目标：
 - 但它现在只算**历史探索版前身**
 - 新的正式入口与后续迭代，都以 `results/interictal_propagation/` 为准
 
-## 7. PR-1 / PR-2 结果（2026-04-12，30 subjects full-batch accepted）
+## 7. PR-1 / PR-2 结果（2026-04-12，30 subjects full-batch accepted；2026-05-06 扩到 33）
 
 **Status: COMPLETED**
+
+> **2026-05-06 update — Slice A1 cohort 扩容（仅 PR-1 / PR-2 cluster / PR-3 viz）**：补加 `zhangjiaqi`、`gaolan`、`wangyiyang` 3 个 Yuquan subject，cohort 30 → 33。同时修复了 `load_subject_propagation_events` 不读 `_lagPat_withFreqCent.npz` 的源头 bug（cohort 缓存 JSON 是从 withFreqCent 出的，loader 一直 glob `_lagPat.npz`，loader 修复后 6 个 sample subject loader vs 缓存 channel/event count 完全匹配，56 测试全过）。
+> **Mixture screen：`n_strict_mixture` 仍是 30**（3 个新 subject 都是 possible mixture，不是 strict），不能写成"33/33 strict multimodal"。
+> **本次范围只覆盖 PR-1 / PR-2 cluster / PR-3 viz**。本 archive §7 / §7.2 / §7.3 / §7.4 涉及的 PR-2.5 / PR-4A / PR-4B / PR-6 cohort-level p 值、Wilcoxon、Spearman、forward/reverse 占比、deltas 中位数 **均未重算**——这些数仍然是原 30-subject cohort 的结果。当前 `pr1_cohort_summary.json` 里这些字段是 aggregator 简单合并 per-subject 字段得到的，不是统一 PR-2.5+/PR-4+/PR-5/PR-6 流程重跑。引用 `n=33` 做下游 cohort 主张前必须单独发 PR（推荐顺序 PR-2.5 → PR-4A → PR-4B → PR-6）。
+> 详见 [`docs/archive/topic1/propagation/cohort_slice_a1_2026-05-06.md`](cohort_slice_a1_2026-05-06.md) §4 / §7 / §8。
+> Lineage caveat：cuda_env 的 cusignal 23.08.00 ≠ 2021 vintage，新 pack 输出与 2021 cohort **lineage-adjacent 而非 bit-replicate**。
+
+> **2026-05-07 update — Slice A2 cohort 扩展（Path D legacy variant，双轨 n=33 / n=40）**：之前 Slice A1 标注的 7 个 silent-failure subject (`zhangkexuan, pengzihang, songzishuo, zhangbichen, zhaochenxi, zhaojinrui, zhourongxuan`) 经审计发现**老 `_lagPat.npz` 全部 schema-complete**（含 `lagPatRaw / lagPatRank / eventsBool / chnNames / start_t`，唯独缺 `lagPatFreq`），且与 `_packedTimes.npy` 100% 配对。Path D 决定：runner gate 改成 primary（withFreqCent 强制）+ allow-list（这 7 个 subject 接受老 `_lagPat.npz` 作为独立 lineage stratum），**双轨报告 n=33 / n=40**。
+> **跑完结果**：`n_strict_mixture` 30 / 30（不变）、`n_possible_mixture` 3 / 10、`mean_tau_median` 0.0884 / 0.0845、`bias_fraction_median` 0.6568 / 0.7110、`stable_k_distribution` `{2:30, 4:2, 6:1}` / `{2:35, 4:2, 5:2, 6:1}`。PR-2.5 forward_reverse 13/14 → 16/17。PR-6 H1 pooled wilcoxon p 0.388 → 0.223（Yuquan-only p 0.344 → 0.107，趋势上 path-D 增大 effect size，但仍 marginal）。`valid_mask_source` 审计：5 个 path-D `h1_eligible` 全 `raw_bools`，0 个 fallback 污染。
+> 本次范围 = **PR-1 / PR-2 cluster + PR-2.5 reproducibility + PR-6 anchoring 的 cohort 重算**（数字见 cohort_slice_a2 archive §5 / §5.1–5.5）。本 archive §7 / §7.2 / §7.3 / §7.4 的 PR-4* / PR-5 cohort 字段**仍只反映原 30 subject 阶段**——n=33 主表也没在 Slice A2 之前重算，扩容到 n=40 必须等单独发 PR。
+> 详见 [`cohort_slice_a2_legacy_variant_2026-05-07.md`](cohort_slice_a2_legacy_variant_2026-05-07.md) §3 / §5。
 
 ### 7.1 Mixture screen
 
