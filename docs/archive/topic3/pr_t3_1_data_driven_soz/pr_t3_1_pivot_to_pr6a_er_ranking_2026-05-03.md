@@ -518,6 +518,18 @@ Layer B Step B.1 之前必须 check：
 
 如果 Layer A 没 ready / cohort 分布显示 producer 在多数 subject 上 unusable，Layer B Step B.x 全部阻塞；写 archive note 说明阻塞原因，**不**伪造 label JSON。
 
+#### 6.3.2 λ_max sensitivity 注释（Phase 2，2026-05-07）
+
+baseline run 32/32 cells 撞 λ_max=100 cap。Phase 2 sweep（λ_max=500）跑完 16 subject × 2 ER = 32 cell，结果归档 `phase2_lambda_max_sensitivity_2026-05-07.md`。
+
+**净评判**：负面 19/32 (59%) > 正面 8/32 (25%) > 中性 5/32 (16%)。raise λ_max 是 net negative：50% cells (16/32) 从有意义状态崩溃为 insufficient（baseline λ_calibrated 270-500 时 ictal 信号 accumulate 不到）。
+
+**对 §6.3.1 γ_a 锁定的影响**：**无**。primary tier 仍以 baseline λ100 producer_health ∈ {stable, moderate} 为准；sensitivity tier 仍以 baseline λ100 unstable+concordant 为准。Phase 2 不修改 γ_a 决策。
+
+**例外案例（仅记录，不进 γ_a 锁定）**：1096 双 ER + 922 gamma + 958 broad 在 λ500 下 producer_health 升档（unstable→moderate）。这些是 "λ-cap 真实压制" 的 unique case，但当前 v2.2 走全局 λ_max=100 不实施 per-subject 决策。未来 PR 如需扩 cohort，可考虑 "λ500_rescued" 子 tier 把这 4 cell 列入 sensitivity；当前不动。
+
+**对 916 gamma 主标签的修订（重要）**：916 gamma 在 baseline λ100 是 cohort 唯一 stable+gamma cell（s_sz=0.83），按 §6.3.1 γ_a 进 primary。Phase 2 显示 916 gamma 在 λ500 下完全崩溃为 insufficient，机制是 916 baseline 噪声极大（pooled 195min），λ100 cap 让 baseline 警报阈值人工压低 → "假阳性 stable"。**Layer B 输出 entry 必须额外携带 `lambda_fragile=true` flag**，下游 PR 用 916 gamma label 时除了 cc=discordant 外还要意识到 stable tag 对 λ_max 选择脆弱。
+
 ---
 
 ## 7. 实现合同检查清单（v2.1）

@@ -734,10 +734,81 @@ ER-asymmetric case：broad band 给 textbook focal cluster，gamma band 给 mult
 
 ---
 
+## Phase 2 — λ_max sensitivity sweep（2026-05-07）
+
+**完整数据归档**：[`phase2_lambda_max_sensitivity_2026-05-07.md`](./phase2_lambda_max_sensitivity_2026-05-07.md)
+**Sweep 输出**：`results/data_driven_soz/layer_a_ictal_er_rank/per_subject_lambda500/`（16 subject × 2 ER + cohort_summary.json）。
+**复现命令**：`python scripts/run_ictal_er_rank.py --per-subject --force --lambda-max 500 --output-dir results/data_driven_soz/layer_a_ictal_er_rank/per_subject_lambda500`
+
+### 起因
+
+baseline run 32/32 cells 全部撞 λ_max=100 cap，意味着真实校准 λ > 100。是否被 cap 截断的 cell 在 raise cap 后会从 unstable → moderate？做 λ_max=500 sweep 验证。
+
+### 32-cell verdict 分布
+
+| 类别 | 数量 | 含义 |
+|---|---|---|
+| **collapse_to_insufficient** | **16** (50%) | tag 从有意义状态崩溃为 insufficient |
+| degrade（tag 同 rank, s_sz↓ > 0.05） | 3 | 内部一致性下降 |
+| hold（tag 同 rank, |Δs_sz|<0.05） | 3 | 不变 |
+| unchanged_insufficient | 2 | baseline 已 insufficient |
+| **s_sz_up（tag 同, s_sz↑ > 0.05）** | **4** | 一致性提升 |
+| **tag_up（producer_health rank↑）** | **4** | 真正的 raise-λ rescue |
+
+**净评判**：负面 19/32 (59%) > 正面 8/32 (25%) > 中性 5/32 (16%)。**全局 raise λ_max 是 net negative**。
+
+### 8 个改善 cell（raise-λ rescue + s_sz 提升）
+
+| subject/ER | baseline → λ500 | tag 变化 | 备注 |
+|---|---|---|---|
+| **1096 gamma** | s_sz 0.46 → 0.63 | unstable/disc → **moderate**/disc | 唯一双 ER 都 tag↑ 的 subject |
+| **1096 broad** | s_sz 0.19 → 0.49 | unstable/disc → **moderate**/disc | |
+| **922 gamma** | s_sz 0.16 → 0.35 | unstable/disc → **moderate**/partial | |
+| **958 broad** | s_sz 0.22 → 0.43 | unstable/partial → **moderate**/disc | |
+| 583 broad | s_sz 0.63 → 0.75 | stable/conc 不变 | strong-signal 案例，λ 不影响 |
+| 583 gamma | s_sz 0.45 → 0.48 | moderate/conc 不变 | |
+| 1150 gamma | s_sz -0.07 → 0.22 | unstable/disc 不变 | s_sz 翻正但仍 unstable |
+| 1150 broad | s_sz -0.10 → 0.05 | unstable/partial → unstable/disc | |
+
+### 16 个 collapse cell
+
+集中在 baseline 信号弱 (s_sz < 0.4) 的 cell：1073/1077/1084/139/253/442/548/590/635/916/958 的某个或全部 ER。**机制**：raise λ_max 后真实 λ_calibrated 跳到 270-500，ictal 期 z 累积达不到此阈值 → onset_unreached 暴涨 → n_ok 跌破 3 → insufficient。
+
+### 关键 case 修订
+
+1. **916 gamma：stable tag 对 λ_max 选择脆弱**
+   - baseline λ100：s_sz=0.83, **stable**/discordant（cohort 唯一 stable gamma）
+   - λ500：s_sz=None, **insufficient**（n_ok=1/51）
+   - 机制：916 baseline 噪声极大（pooled 195 min），λ100 时 baseline 频繁撞警报阈值 → CUSUM accumulator reset 慢 → ictal 期低 z 也能跨过低阈值；raise λ → ictal 累积达不到。
+   - **对 atlas 916 entry 的修正**：本文 §"全 cohort per-subject 一览" 把 916 gamma 标 stable，但 Phase 2 表明这是 **λ-cap 假阳性 stable**。Layer B 用 916 gamma label 时除了已注明的 cc=discordant tag 外，还应携带 "λ-fragile" sensitivity flag。
+
+2. **548 broad：small-n strong signal 边缘案例**
+   - baseline λ100：n_ok=19, s_sz=0.10, unstable/concordant
+   - λ500：n_ok=2, s_sz=**0.53**, **insufficient**（n_ok < 3 触发 producer_health 阈值）
+   - s_sz 飙升说明仅存的 2 个 seizure 内部 r_sz 一致性极高，但 v2.2 的 n_ok ≥ 3 阈值正确判 insufficient。**这是 v2.2 producer_health 阈值的设计权衡**，不是 bug。
+   - **对 Layer B 的提示**：未来 PR 如需 small_n_strong tier，548 broad 是候选 anchor。
+
+3. **1096 是唯一 raise-λ 真实 rescue 案例**
+   - baseline 双 ER unstable/discordant；λ500 双 ER moderate/discordant，s_sz 显著上升
+   - **机制**：1096 baseline 噪声适中（n_unr 几乎 0）+ ictal 信号够强；λ100 cap 截断真实 baseline 噪声 → 校准 λ 太低 → baseline 假警报多 → CUSUM 在 ictal 期已有 noise floor → ictal 信号 marginal 显著
+   - **对 Layer B 的提示**：1096 在 γ_a primary 集合候选中权重应提升一档（Phase 2 unique rescue case），但当前 γ_a 锁定的 primary 入选基于 baseline λ100 producer_health == {stable, moderate}，1096 baseline 是 unstable，所以**不**自动进 primary。
+   - **二次评判选项**（仅记录，不修改 γ_a 锁定）：若 Phase 2 改善证据强到要纳入，可加 sensitivity tier 子集 "λ500_rescued" 把 1096 双 + 922 gamma + 958 broad 列入；但这需要重新协调 γ_a 锁定文档。
+
+### 主结论
+
+1. **λ_max=100 是合理的全局默认**，不要 raise。Net 18/32 cells 在 λ100 下状态更好。
+2. **真正的 metric bottleneck 不是 λ**：50% collapse rate 说明 baseline noise > ictal effect size 是多数 subject 的 ground truth；λ 不能改这个。
+3. **接受 v2.2 现状进 Step B.1**：γ_a primary (5 cells) + sensitivity (5 cells) 已是当前最合理的下游可用集合。raise λ_max 不会扩大可用集合。
+4. **Phase 2 sweep 数据保留**作为 sensitivity arm 永久 archive；未来若需 per-subject λ_max 决策可直接对接。
+5. **Phase 2-redesign 候选（A. fpr_target 放宽 / B. 调 detection window / C. 改 detector 范式）暂不实施**：所有候选都是 detector 重构，需新一轮 TDD + 全 cohort 重跑（~24h compute），无先验数据支持收益 > 风险。
+
+---
+
 ## 待办
 
 - [x] 用户选定 Layer B 准入策略：**γ_a 锁定**（2026-05-06）
 - [x] 准入策略 commit 到 plan §6.3.1（v2.2.2）
 - [x] reviewer fixes commit（tie-inclusive top-K + MWU 命名 + atlas Layer B framing 一致 + 测试覆盖 tie 路径）
+- [x] **Phase 2 λ_max sensitivity sweep 完成（2026-05-07）**：16/16 subject 跑完，结论 raise-λ net negative，归档 `phase2_lambda_max_sensitivity_2026-05-07.md`
 - [ ] 进 Step B.1：实现 `src/data_driven_soz_pivot.py` label builder + TDD B1-B12（per plan §3.8 + §10）
 - [ ] yuquan 9 subject 等 yuquan extract_seizure_window 后追跑（独立 PR，task #24）
