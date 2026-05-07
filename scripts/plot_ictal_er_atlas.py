@@ -242,7 +242,9 @@ def _draw_onset_matrix_band(
     ax.set_ylim(n_ch - 0.5, -0.5)
     ax.set_ylabel(band_label, fontsize=FS_LABEL)
     if not show_x_ticks:
-        ax.set_xticks([])
+        # sharex prevents removing ticks; hide labels instead so the
+        # status strip below is the only x-axis labelled.
+        plt.setp(ax.get_xticklabels(), visible=False)
     return im
 
 
@@ -278,11 +280,13 @@ def _draw_cov_bar(
     ax.barh(np.arange(n_ch), fractions, color="#27ae60", height=0.85)
     ax.set_xlim(0, 1)
     ax.set_ylim(n_ch - 0.5, -0.5)
-    ax.set_yticks([])
-    ax.set_xticks([0, 0.5, 1.0])
-    ax.set_xticklabels(["0", ".5", "1"], fontsize=FS_TICK - 4)
-    ax.set_title(f"cov / n_ok\n({band_label.split('_')[0]}, n_ok={n_ok})",
-                  fontsize=FS_TICK - 2)
+    # sharey with heatmap means we can't permanently empty the y-ticks;
+    # explicitly suppress the labels on cov bar's left side.
+    ax.tick_params(axis="y", left=False, labelleft=False)
+    ax.set_xticks([0, 1.0])
+    ax.set_xticklabels(["0", "1"], fontsize=FS_TICK - 5)
+    ax.tick_params(axis="x", pad=1)
+    ax.set_xlabel(f"cov/{n_ok}", fontsize=FS_TICK - 4, labelpad=1)
 
 
 def _format_subject_title(per_subject: Dict, sort_band: str) -> str:
@@ -319,21 +323,20 @@ def render_per_subject(per_subject: Dict, out_path: Path) -> Path:
     seizure_records = per_subject["per_er"].get(sort_band, {}).get("seizure_records", [])
     n_sz = max(n_sz, len(seizure_records))
 
-    fig_w = max(12.0, 8.0 + 0.3 * n_sz)
+    # Spec §5.4: scale to fit [12,30] width and [8,30] height.
+    fig_w = max(14.0, 8.0 + 0.35 * n_sz)
     fig_w = min(fig_w, 30.0)
-    fig_h = max(8.0, 0.18 * n_ch * 2 + 4)
+    fig_h = max(9.0, 0.20 * n_ch * 2 + 4)
     fig_h = min(fig_h, 30.0)
 
     fig = plt.figure(figsize=(fig_w, fig_h), facecolor="white")
-    # 4-row layout per band: title row taken by suptitle; 2 band heatmaps;
-    # 1 status strip. Plus a left column for channel ticks and right for cov.
     gs = mgs.GridSpec(
         nrows=3, ncols=3,
         figure=fig,
-        height_ratios=[1.0, 1.0, 0.06],
-        width_ratios=[0.04, 1.0, 0.10],
-        left=0.05, right=0.97, top=0.92, bottom=0.07,
-        hspace=0.10, wspace=0.04,
+        height_ratios=[1.0, 1.0, 0.05],
+        width_ratios=[0.02, 1.0, 0.07],
+        left=0.07, right=0.95, top=0.90, bottom=0.10,
+        hspace=0.18, wspace=0.025,
     )
 
     ax_g = fig.add_subplot(gs[0, 1])
@@ -385,15 +388,15 @@ def render_per_subject(per_subject: Dict, out_path: Path) -> Path:
             tick.set_color(_channel_tick_color(_channel_role(ch, focal_set)))
 
     # --- shared horizontal colorbar at bottom ---
-    cbar_ax = fig.add_axes([0.20, 0.02, 0.6, 0.012])
+    cbar_ax = fig.add_axes([0.25, 0.025, 0.5, 0.010])
     cbar = fig.colorbar(im_g, cax=cbar_ax, orientation="horizontal")
     cbar.set_label("t_ER_onset (s, relative to clinical onset)",
-                    fontsize=FS_TICK - 1)
-    cbar.ax.tick_params(labelsize=FS_TICK - 3)
+                    fontsize=FS_TICK - 2)
+    cbar.ax.tick_params(labelsize=FS_TICK - 4)
 
     # --- title ---
     fig.suptitle(_format_subject_title(per_subject, sort_band),
-                  fontsize=FS_TITLE, y=0.985)
+                  fontsize=FS_TITLE - 2, y=0.97)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     savefig_pub(fig, out_path, dpi=150)
