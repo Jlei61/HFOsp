@@ -10,6 +10,7 @@ from scripts.plot_ictal_er_atlas import (
     _build_onset_matrix,
     _channel_order,
     _channel_role,
+    _row_order_per_seizure,
     _select_sort_band,
     _sort_band_unreliable,
 )
@@ -182,3 +183,42 @@ def test_build_onset_matrix_unknown_channel_yields_nan():
 def test_required_schema_constant_matches_spec():
     """Hard-fail if anyone bumps the schema name without updating both files."""
     assert REQUIRED_SCHEMA == "pr_t3_1_layer_a_v2_3_timing"
+
+
+# ---------------------------------------------------------------------------
+# Per-seizure row ordering (spec §4.1)
+
+
+def test_row_order_per_seizure_soz_first_then_by_onset():
+    chs = ["HRA1", "HL3", "HL2", "TBA1", "GA1", "HL5"]
+    focal = {"HL3", "HL2", "TBA1"}
+    onsets = {
+        "HRA1": +5.0,    # non-SOZ, t=5
+        "HL3":  -45.0,   # SOZ, t=-45
+        "HL2":  -25.0,   # SOZ, t=-25
+        "TBA1": -10.0,   # SOZ, t=-10
+        "GA1":  None,    # non-SOZ, no onset
+        "HL5":  -8.0,    # non-SOZ, t=-8
+    }
+    order = _row_order_per_seizure(chs, focal, onsets)
+    ordered_chs = [chs[i] for i in order]
+    # SOZ tier first (HL3 -45 < HL2 -25 < TBA1 -10), then non-SOZ
+    # (HL5 -8 < HRA1 +5 < GA1 NaN)
+    assert ordered_chs == ["HL3", "HL2", "TBA1", "HL5", "HRA1", "GA1"]
+
+
+def test_row_order_per_seizure_no_focal_pure_onset_sort():
+    chs = ["A", "B", "C", "D"]
+    onsets = {"A": +20.0, "B": -10.0, "C": None, "D": -50.0}
+    order = _row_order_per_seizure(chs, focal_set=set(), onsets=onsets)
+    # All same tier; sort by onset asc, NaN at end: D (-50), B (-10), A (+20), C
+    assert [chs[i] for i in order] == ["D", "B", "A", "C"]
+
+
+def test_row_order_per_seizure_returns_permutation():
+    chs = ["a", "b", "c", "d", "e"]
+    order = _row_order_per_seizure(chs, focal_set={"b"}, onsets={})
+    # Output is a permutation of [0..4]
+    assert sorted(order) == [0, 1, 2, 3, 4]
+    # 'b' (focal) must be first
+    assert chs[order[0]] == "b"

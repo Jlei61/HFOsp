@@ -202,6 +202,28 @@ def _channel_tick_color(role: str) -> str:
     }.get(role, COL_TICK_OTHER)
 
 
+def _row_order_per_seizure(
+    ch_names: Sequence[str],
+    focal_set: set,
+    onsets: Dict[str, Optional[float]],
+) -> List[int]:
+    """Heatmap row order for per-seizure figure (spec §4.1).
+
+    Tier 1: SOZ (focal_set membership), Tier 2: non-SOZ.
+    Within each tier: sorted by t_ER_onset asc; NaN/None at the end of
+    its tier. Returns a permutation of ``range(len(ch_names))``.
+    """
+    big = float("inf")
+    rows = []
+    for i, ch in enumerate(ch_names):
+        tier = 0 if ch in focal_set else 1
+        t = onsets.get(ch)
+        t_key = t if (t is not None and np.isfinite(t)) else big
+        rows.append((tier, t_key, i))
+    rows.sort()
+    return [r[2] for r in rows]
+
+
 # ---------------------------------------------------------------------------
 # Per-subject summary figure
 
@@ -514,21 +536,32 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
         plt.setp(ax_raw.get_xticklabels(), visible=False)
 
         # --- Heatmap row ---
+        # Spec §4.1: rows grouped by SOZ role; within group sorted by
+        # t_ER_onset asc; NaN at end. Both bands share the same row order
+        # (gamma's ordering applies to broad).
         n_ch = z.shape[0]
+        onsets = _channel_onsets_for_seizure(band_key)
+        if col == 0:
+            order = _row_order_per_seizure(
+                sw.ch_names[:n_ch], focal_set, onsets,
+            )
+            shared_row_order = order
+        else:
+            order = shared_row_order  # noqa: F821 — set on col=0
+        z_ord = z[order]
+        ch_ord = [sw.ch_names[i] for i in order]
+
         norm = TwoSlopeNorm(vmin=-3.0, vcenter=0.0, vmax=3.0)
         im = ax_heat.imshow(
-            z, aspect="auto", origin="upper", cmap="RdBu_r",
+            z_ord, aspect="auto", origin="upper", cmap="RdBu_r",
             norm=norm, interpolation="nearest",
             extent=[t_axis[0], t_axis[-1], n_ch - 0.5, -0.5],
         )
-        # onset markers per channel
-        onsets = _channel_onsets_for_seizure(band_key)
-        for ci, ch in enumerate(sw.ch_names):
-            if ci >= n_ch:
-                continue
+        # onset markers per channel (in the same row ordering)
+        for new_ci, ch in enumerate(ch_ord):
             t_on = onsets.get(ch)
             if t_on is not None and np.isfinite(t_on):
-                ax_heat.plot(t_on, ci, marker="*", markersize=4,
+                ax_heat.plot(t_on, new_ci, marker="*", markersize=4,
                               color="white", markeredgecolor="black",
                               markeredgewidth=0.4)
         ax_heat.axvline(0.0, color="black", lw=1.5)
@@ -540,8 +573,8 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
         ax_heat.set_xlabel("time relative to clinical onset (s)",
                             fontsize=FS_LABEL)
         ax_heat.set_yticks(np.arange(n_ch))
-        ax_heat.set_yticklabels(sw.ch_names, fontsize=FS_TICK - 5)
-        for tick, ch in zip(ax_heat.get_yticklabels(), sw.ch_names):
+        ax_heat.set_yticklabels(ch_ord, fontsize=FS_TICK - 5)
+        for tick, ch in zip(ax_heat.get_yticklabels(), ch_ord):
             tick.set_color(_channel_tick_color(
                 _channel_role(ch, focal_set)))
         if col == 1:
