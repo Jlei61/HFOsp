@@ -859,7 +859,12 @@ def _write_cohort_summary(out_dir: Path) -> None:
         "gamma_ER": {},
         "broad_ER": {},
     }
-    lambda_cap_count = {"gamma_ER": 0, "broad_ER": 0}
+    # v2.2.3 fix (2026-05-07): "at-cap" must reference the *actual* λ_max in this run,
+    # not the historical 100. Compare against LAMBDA_MAX_OVERRIDE (the cap used in
+    # the just-finished run). Use a small tolerance for float-grid endpoint.
+    lambda_at_cap_count = {"gamma_ER": 0, "broad_ER": 0}
+    cap_value = float(LAMBDA_MAX_OVERRIDE)
+    cap_tol = max(1e-6, cap_value * 1e-4)
     producer_fail_subjects = {"gamma_ER": [], "broad_ER": []}
     for d in rows:
         for er_key in ("gamma_ER", "broad_ER"):
@@ -871,8 +876,8 @@ def _write_cohort_summary(out_dir: Path) -> None:
             table[er_key][key] = table[er_key].get(key, 0) + 1
             rec = d.get("per_er", {}).get(er_key, {})
             lam = rec.get("lambda")
-            if isinstance(lam, (int, float)) and lam >= 100.0:
-                lambda_cap_count[er_key] += 1
+            if isinstance(lam, (int, float)) and abs(lam - cap_value) <= cap_tol:
+                lambda_at_cap_count[er_key] += 1
             if ph in ("insufficient", "unstable"):
                 producer_fail_subjects[er_key].append(d["subject"])
 
@@ -884,8 +889,8 @@ def _write_cohort_summary(out_dir: Path) -> None:
 
     _, excluded = _cohort_subject_list()
     summary = {
-        "step": "Layer A Step A.4 cohort summary (v2.2)",
-        "schema_version": "pr_t3_1_layer_a_v2_2",
+        "step": "Layer A Step A.4 cohort summary (v2.2.3)",
+        "schema_version": "pr_t3_1_layer_a_v2_2_3",
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         "n_subjects": n_subjects,
         "subjects": [d["subject"] for d in rows],
@@ -894,7 +899,8 @@ def _write_cohort_summary(out_dir: Path) -> None:
             "reason": "extract_seizure_window in src/ictal_onset_extraction.py:273 only supports dataset='epilepsiae'; yuquan SeizureWindow extractor is a separate future PR",
         },
         "two_d_distribution": table_serializable,
-        "lambda_cap_count": lambda_cap_count,
+        "lambda_max_cap": cap_value,
+        "lambda_at_cap_count": lambda_at_cap_count,
         "producer_fail_subjects": producer_fail_subjects,
     }
     summary_path = out_dir / "cohort_summary.json"
@@ -907,8 +913,8 @@ def _write_cohort_summary(out_dir: Path) -> None:
         for key, cnt in sorted(table_serializable[er_key].items()):
             print(f"    {key:<40} {cnt}", flush=True)
     print(
-        f"[cohort] λ-cap count (cells with λ>=100): "
-        f"gamma={lambda_cap_count['gamma_ER']} broad={lambda_cap_count['broad_ER']}",
+        f"[cohort] λ-at-cap count (cells with λ == cap={cap_value:.1f}): "
+        f"gamma={lambda_at_cap_count['gamma_ER']} broad={lambda_at_cap_count['broad_ER']}",
         flush=True,
     )
 

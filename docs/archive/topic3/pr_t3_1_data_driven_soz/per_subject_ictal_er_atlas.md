@@ -776,11 +776,12 @@ baseline run 32/32 cells 全部撞 λ_max=100 cap，意味着真实校准 λ > 1
 
 ### 关键 case 修订
 
-1. **916 gamma：stable tag 对 λ_max 选择脆弱**
+1. **916 gamma：λ100 cap-sensitive / λ-fragile stable**
    - baseline λ100：s_sz=0.83, **stable**/discordant（cohort 唯一 stable gamma）
    - λ500：s_sz=None, **insufficient**（n_ok=1/51）
    - 机制：916 baseline 噪声极大（pooled 195 min），λ100 时 baseline 频繁撞警报阈值 → CUSUM accumulator reset 慢 → ictal 期低 z 也能跨过低阈值；raise λ → ictal 累积达不到。
-   - **对 atlas 916 entry 的修正**：本文 §"全 cohort per-subject 一览" 把 916 gamma 标 stable，但 Phase 2 表明这是 **λ-cap 假阳性 stable**。Layer B 用 916 gamma label 时除了已注明的 cc=discordant tag 外，还应携带 "λ-fragile" sensitivity flag。
+   - **口径修订（2026-05-07 review）**：先前措辞写 "λ-cap 假阳性 stable" 太重——它**不**等于"生理信号是假"，只说明该 stable tag 对 λ_max 选择脆弱。正确说法：**916 gamma 在 λ_max=100 下 stable，在 λ_max=500 下 insufficient；其 stable tag 对阈值选择敏感**。这是 metric 层面的脆弱性，与 916 ictal 期是否真有 gamma 升高是独立两个问题。
+   - **对 atlas 916 entry 的修正**：本文 §"全 cohort per-subject 一览" 把 916 gamma 标 stable，是 baseline λ100 下的事实。Layer B 用 916 gamma label 时除了已注明的 cc=discordant tag 外，还应携带 `lambda_fragile=true` provenance flag。schema + TDD 见 plan §3.8（v2.2.3 修订）。
 
 2. **548 broad：small-n strong signal 边缘案例**
    - baseline λ100：n_ok=19, s_sz=0.10, unstable/concordant
@@ -796,11 +797,22 @@ baseline run 32/32 cells 全部撞 λ_max=100 cap，意味着真实校准 λ > 1
 
 ### 主结论
 
-1. **λ_max=100 是合理的全局默认**，不要 raise。Net 18/32 cells 在 λ100 下状态更好。
-2. **真正的 metric bottleneck 不是 λ**：50% collapse rate 说明 baseline noise > ictal effect size 是多数 subject 的 ground truth；λ 不能改这个。
-3. **接受 v2.2 现状进 Step B.1**：γ_a primary (5 cells) + sensitivity (5 cells) 已是当前最合理的下游可用集合。raise λ_max 不会扩大可用集合。
+1. **λ_max=100 是当前 v2.2 的实用默认，不是完美统计真理**。Net 18/32 cells 在 λ100 下状态更好；λ500 作为 sensitivity archive 保留即可。**不要全局 raise 到 500**。
+2. **bottleneck 表述（口径修订）**：50% cells 在 λ500 下 collapse 说明——**在当前 ER + CUSUM + FPR (1/h) calibration 合同下，多数 subject 的 ictal accumulation 支撑不了更高阈值**。这不等同于"baseline noise > ictal effect size 是 ground truth"——前者是 metric-合同层的现象，后者是生理层的因果断言；本 sweep 不能跨越这个推断。
+3. **接受 v2.2 现状进 Step B.1**：γ_a primary (6 cells) + sensitivity (5 cells) 已是当前最合理的下游可用集合。raise λ_max 不会扩大可用集合。
 4. **Phase 2 sweep 数据保留**作为 sensitivity arm 永久 archive；未来若需 per-subject λ_max 决策可直接对接。
 5. **Phase 2-redesign 候选（A. fpr_target 放宽 / B. 调 detection window / C. 改 detector 范式）暂不实施**：所有候选都是 detector 重构，需新一轮 TDD + 全 cohort 重跑（~24h compute），无先验数据支持收益 > 风险。
+
+### Cap-hit count 校正（v2.2.3, 2026-05-07）
+
+`cohort_summary.json` 之前写的 `lambda_cap_count` 用 `lam >= 100.0` 硬编码，在 λ_max=500 sweep 下不再表示"撞 cap"。已修为 `lambda_at_cap_count`（与 `LAMBDA_MAX_OVERRIDE` 比较，含 1e-4 相对容差），重生成两份 cohort_summary：
+
+| run | gamma at-cap | broad at-cap |
+|---|---|---|
+| baseline λ_max=100 | **16/16** | **16/16** | (整 cohort baseline 噪声超过 1/h FPR 预算 at λ=100) |
+| sweep λ_max=500 | **4/16** (1096, 548, 635, 916) | **1/16** (635) | (raise cap 后只剩极少数 cell 被 cap 截断) |
+
+旧表述 "32/32 cells 撞 cap" 仅在 baseline λ100 上下文里正确，**不能挪到 λ500 描述**。对应代码修复在 `scripts/run_ictal_er_rank.py:864-885`。
 
 ---
 
