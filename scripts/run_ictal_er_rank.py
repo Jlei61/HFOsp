@@ -89,6 +89,11 @@ POST_SEC = 30.0                                  # 30 s post-onset
 DETECTION_PRE_SEC = 5.0                          # plan §3.3: detection [-5s, +30s]
 DETECTION_POST_SEC = 30.0
 LAMBDA_FPR_PER_HOUR = 1.0
+# v2.2.3 (2026-05-06) — module-level overrides settable from CLI for the
+# Phase 2 λ_max relaxation sweep. Kept as module globals so the existing
+# _run_subject_all_ers signature stays stable.
+LAMBDA_MAX_OVERRIDE = 100.0    # default: same as v2.2.2
+LAMBDA_N_GRID_OVERRIDE = 199
 SENTINEL_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" / "_sentinel"
 COHORT_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" / "per_subject"
 AUDIT_CSV_PATH = ROOT / "results" / "spatial_modulation" / "data_driven_soz" / "audit.csv"
@@ -295,8 +300,10 @@ def _run_subject_all_ers(
         lam = calibrate_lambda_per_subject(
             pooled, fpr_target_per_hour=LAMBDA_FPR_PER_HOUR,
             bias=0.5, hop_sec=HOP_SEC,
+            lambda_max=LAMBDA_MAX_OVERRIDE,
+            lambda_n_grid=LAMBDA_N_GRID_OVERRIDE,
         )
-        print(f"  [{er_key}] λ = {lam:.2f}", flush=True)
+        print(f"  [{er_key}] λ = {lam:.2f} (lambda_max={LAMBDA_MAX_OVERRIDE})", flush=True)
 
         per_seizure_ranks: List[Dict[str, Optional[float]]] = []
         seizure_statuses: List[str] = []
@@ -492,33 +499,38 @@ def _build_v2_2_tags(per_subject: Dict) -> Dict[str, Dict]:
         r_sz: Dict[str, Optional[float]] = rec.get("r_sz") or {}
         coverage: Dict[str, int] = rec.get("r_sz_valid_count") or {}
 
-        # producer_health
+        # producer_health (tie-inclusive top-K, v2.2.2)
         cov_threshold = max(3.0, 0.5 * float(n_ok))
-        top10_cov = compute_top10_coverage_list(r_sz, coverage, top_k=TOPK_FOR_TAGS)
-        cov_pass = sum(1 for c in top10_cov if c >= cov_threshold)
+        topk_cov, ph_expanded = compute_top10_coverage_list(
+            r_sz, coverage, top_k=TOPK_FOR_TAGS
+        )
+        cov_pass = sum(1 for c in topk_cov if c >= cov_threshold)
         ph_tag, ph_d = classify_producer_health(
             n_ok=n_ok,
             s_sz=s_sz,
-            top10_cov_pass_count=cov_pass,
-            top10_cov_threshold=cov_threshold,
+            topk_cov_pass_count=cov_pass,
+            topk_total=len(topk_cov),
+            topk_cov_threshold=cov_threshold,
+            boundary_tie_inclusive=ph_expanded,
         )
         ph_tags[er_key] = ph_tag
         ph_details[er_key] = ph_d
 
         # clinical_concordance — METADATA ONLY (not a gate)
-        focal_top, top_total = compute_focal_in_topk(
+        focal_top, topk_total_cc, cc_expanded = compute_focal_in_topk(
             r_sz, focal_set, top_k=TOPK_FOR_TAGS
         )
         wilcox = _wilcoxon_focal_vs_nonfocal(r_sz, coverage, focal_set)
         cc_tag, cc_d = classify_clinical_concordance(
-            wilcoxon_p_one_sided=wilcox["mannwhitney_p_one_sided"],
-            focal_in_top10_count=focal_top,
-            top10_total=top_total,
+            mannwhitney_u_p_one_sided=wilcox["mannwhitney_p_one_sided"],
+            focal_in_topk_count=focal_top,
+            topk_total=topk_total_cc,
             n_focal_with_finite_rsz=wilcox["n_focal_with_finite_rsz"],
             n_nonfocal_with_finite_rsz=wilcox["n_nonfocal_with_finite_rsz"],
             focal_rsz_median=wilcox["focal_rsz_median"],
             nonfocal_rsz_median=wilcox["nonfocal_rsz_median"],
             producer_health=ph_tag,
+            boundary_tie_inclusive=cc_expanded,
         )
         cc_tags[er_key] = cc_tag
         cc_details[er_key] = cc_d
@@ -950,7 +962,21 @@ def main() -> int:
         "--output-dir", type=Path, default=None,
         help="Output dir override (sentinel default: %(default)s; cohort default: per_subject/).",
     )
+    parser.add_argument(
+        "--lambda-max", type=float, default=100.0,
+        help="Cap for λ calibration grid (v2.2.3 sweep mode; default 100). "
+             "Phase 2: try 500 to find cells where current cap is artificially restrictive.",
+    )
+    parser.add_argument(
+        "--lambda-n-grid", type=int, default=199,
+        help="λ grid resolution (default 199). Scale up with --lambda-max to keep step size.",
+    )
     args = parser.parse_args()
+
+    # v2.2.3: plumb λ overrides via module globals (keeps inner functions stable)
+    global LAMBDA_MAX_OVERRIDE, LAMBDA_N_GRID_OVERRIDE
+    LAMBDA_MAX_OVERRIDE = float(args.lambda_max)
+    LAMBDA_N_GRID_OVERRIDE = int(args.lambda_n_grid)
 
     if args.sentinel:
         out_dir = args.output_dir or SENTINEL_OUT_DIR

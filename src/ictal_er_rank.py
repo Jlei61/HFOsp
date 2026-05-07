@@ -744,8 +744,10 @@ def classify_producer_health(
     *,
     n_ok: int,
     s_sz: Optional[float],
-    top10_cov_pass_count: int,
-    top10_cov_threshold: float,
+    topk_cov_pass_count: int,
+    topk_total: int,
+    topk_cov_threshold: float,
+    boundary_tie_inclusive: bool = False,
 ) -> Tuple[str, Dict[str, object]]:
     """Classify (subject × ER) producer health (plan §3.4.1).
 
@@ -753,7 +755,7 @@ def classify_producer_health(
     ------------
     - ``n_ok < 3`` → ``"insufficient"`` (regardless of s_sz / cov)
     - ``s_sz is None`` or ``s_sz < 0.3`` → ``"unstable"``
-    - top-10 cov OK = ``top10_cov_pass_count >= 7``
+    - top-K cov OK = ``topk_cov_pass_count / max(1, topk_total) >= 0.7``
     - ``s_sz >= 0.5``:  cov OK → ``"stable"``,  else demote → ``"moderate"``
     - ``0.3 <= s_sz < 0.5``: cov OK → ``"moderate"``, else demote → ``"unstable"``
 
@@ -763,11 +765,18 @@ def classify_producer_health(
         Number of seizures with status == "ok".
     s_sz
         Median pairwise Spearman ρ across qualifying seizures (or None).
-    top10_cov_pass_count
-        Number of top-10 (by r_sz ascending) channels whose
-        ``r_sz_valid_count`` ≥ ``top10_cov_threshold``.
-    top10_cov_threshold
+    topk_cov_pass_count
+        Number of top-K (tie-inclusive) channels whose
+        ``r_sz_valid_count`` ≥ ``topk_cov_threshold``.
+    topk_total
+        Actual size of the top-K set after tie-inclusive expansion
+        (may exceed ``top_k=10`` when boundary ties expand the set;
+        see :func:`compute_top10_coverage_list`).
+    topk_cov_threshold
         ``max(3, 0.5 * n_ok)`` — recorded for reproducibility.
+    boundary_tie_inclusive
+        ``True`` if the top-K set was expanded due to ties at the
+        K-th boundary; recorded in details for downstream diagnostics.
 
     Returns
     -------
@@ -776,17 +785,23 @@ def classify_producer_health(
         ``"insufficient"``}; ``details`` echoes the inputs for
         downstream auditability.
     """
+    cov_pass_fraction = (
+        float(topk_cov_pass_count) / max(1, int(topk_total)) if int(topk_total) > 0 else 0.0
+    )
     details: Dict[str, object] = {
         "n_ok": int(n_ok),
         "s_sz": (None if s_sz is None else float(s_sz)),
-        "top10_cov_pass_count": int(top10_cov_pass_count),
-        "top10_cov_threshold": float(top10_cov_threshold),
+        "topk_cov_pass_count": int(topk_cov_pass_count),
+        "topk_total": int(topk_total),
+        "topk_cov_threshold": float(topk_cov_threshold),
+        "topk_cov_pass_fraction": float(cov_pass_fraction),
+        "boundary_tie_inclusive": bool(boundary_tie_inclusive),
     }
     if int(n_ok) < 3:
         return "insufficient", details
     if s_sz is None or float(s_sz) < 0.3:
         return "unstable", details
-    cov_ok = int(top10_cov_pass_count) >= 7
+    cov_ok = cov_pass_fraction >= 0.7
     if float(s_sz) < 0.5:
         return ("moderate" if cov_ok else "unstable"), details
     return ("stable" if cov_ok else "moderate"), details
@@ -794,14 +809,15 @@ def classify_producer_health(
 
 def classify_clinical_concordance(
     *,
-    wilcoxon_p_one_sided: Optional[float],
-    focal_in_top10_count: int,
-    top10_total: int,
+    mannwhitney_u_p_one_sided: Optional[float],
+    focal_in_topk_count: int,
+    topk_total: int,
     n_focal_with_finite_rsz: int,
     n_nonfocal_with_finite_rsz: int,
     focal_rsz_median: Optional[float],
     nonfocal_rsz_median: Optional[float],
     producer_health: str,
+    boundary_tie_inclusive: bool = False,
 ) -> Tuple[str, Dict[str, object]]:
     """Classify clinical concordance — METADATA ONLY (plan §3.4.2).
 
@@ -811,6 +827,17 @@ def classify_clinical_concordance(
     consumers) propagate the tag and never default to "data-driven SOZ
     ≈ clinical SOZ".
 
+    **Statistical contract (v2.2.2 doc-fix, 2026-05-06)**: the test is
+    **Mann-Whitney U one-sided** (focal stochastically less than
+    nonfocal) — the rank-sum equivalent of one-sided Wilcoxon for two
+    independent samples. Earlier docs in plan §3.4.2 said
+    "Wilcoxon ... + focal median < nonfocal median" as a 3-clause
+    AND, but the implementation only checks two: MWU p < 0.1 AND
+    fraction. The "median <" clause is implicit in the one-sided
+    "less" alternative (rejecting H0 means stochastic dominance, which
+    typically aligns with a smaller median); we do NOT impose it as a
+    separate gate.
+
     Branch logic
     ------------
     - ``producer_health == "insufficient"`` → ``"not_assessable"``
@@ -818,25 +845,24 @@ def classify_clinical_concordance(
       to compare against).
     - ``n_focal_with_finite_rsz < 2`` or ``n_nonfocal_with_finite_rsz < 2``
       → ``"not_assessable"`` (statistical comparison undefined).
-    - ``p_ok`` = ``wilcoxon_p_one_sided is not None and < 0.1``
-    - ``frac_ok`` = ``focal_in_top10_count / max(1, top10_total) >= 0.3``
-    - both → ``"concordant"``
-    - one  → ``"partial"``
-    - none → ``"discordant"``
+    - ``p_ok`` = ``mannwhitney_u_p_one_sided is not None and < 0.1``
+    - ``frac_ok`` = ``focal_in_topk_count / max(1, topk_total) >= 0.3``
+      where ``topk_total`` is the **tie-inclusive** size (may exceed K
+      when boundary ties expand; see ``compute_focal_in_topk``).
+    - both → ``"concordant"``; one → ``"partial"``; none → ``"discordant"``
 
-    The function is intentionally pure: it does NOT recompute Wilcoxon
-    or top-10 counts internally — caller is responsible for those, so
-    the function stays cheap to test and exercises the **decision
-    surface only**.
+    The function is intentionally pure: caller is responsible for
+    computing MWU + tie-inclusive top-K, so this function exercises
+    the **decision surface only**.
     """
-    focal_in_top10_fraction = (
-        float(focal_in_top10_count) / max(1.0, float(top10_total))
-        if top10_total > 0
+    focal_in_topk_fraction = (
+        float(focal_in_topk_count) / max(1.0, float(topk_total))
+        if topk_total > 0
         else 0.0
     )
     details: Dict[str, object] = {
-        "wilcoxon_one_sided_p": (
-            None if wilcoxon_p_one_sided is None else float(wilcoxon_p_one_sided)
+        "mannwhitney_u_p_one_sided": (
+            None if mannwhitney_u_p_one_sided is None else float(mannwhitney_u_p_one_sided)
         ),
         "focal_r_sz_median": (
             None if focal_rsz_median is None else float(focal_rsz_median)
@@ -844,10 +870,12 @@ def classify_clinical_concordance(
         "nonfocal_r_sz_median": (
             None if nonfocal_rsz_median is None else float(nonfocal_rsz_median)
         ),
-        "focal_in_top10_count": int(focal_in_top10_count),
-        "focal_in_top10_fraction": float(focal_in_top10_fraction),
+        "focal_in_topk_count": int(focal_in_topk_count),
+        "topk_total": int(topk_total),
+        "focal_in_topk_fraction": float(focal_in_topk_fraction),
         "n_focal_with_finite_rsz": int(n_focal_with_finite_rsz),
         "n_nonfocal_with_finite_rsz": int(n_nonfocal_with_finite_rsz),
+        "boundary_tie_inclusive": bool(boundary_tie_inclusive),
     }
 
     if producer_health == "insufficient":
@@ -856,9 +884,10 @@ def classify_clinical_concordance(
         return "not_assessable", details
 
     p_ok = (
-        wilcoxon_p_one_sided is not None and float(wilcoxon_p_one_sided) < 0.1
+        mannwhitney_u_p_one_sided is not None
+        and float(mannwhitney_u_p_one_sided) < 0.1
     )
-    frac_ok = focal_in_top10_fraction >= 0.3
+    frac_ok = focal_in_topk_fraction >= 0.3
 
     if p_ok and frac_ok:
         return "concordant", details
@@ -872,20 +901,31 @@ def compute_top10_coverage_list(
     coverage: Mapping[str, int],
     *,
     top_k: int = 10,
-) -> List[int]:
-    """Return cov values for top-K channels (by r_sz ascending).
+) -> Tuple[List[int], bool]:
+    """Return cov values for top-K channels (tie-inclusive by r_sz).
+
+    **Tie-aware semantics (v2.2.2, 2026-05-06)**: when the K-th
+    smallest r_sz is shared by additional channels past index K-1,
+    those channels are included too. The actual returned size may
+    therefore exceed ``top_k``. This is the science-correct answer:
+    "top-K earliest channels" must not exclude a channel with the
+    same rank as one included. Earlier versions used alphabetical
+    secondary sort which made tag outcomes depend on channel naming
+    rather than data.
 
     None r_sz channels are excluded (they never had a finite rank).
-    Returned list length = ``min(top_k, n_finite)``; fewer than
-    ``top_k`` entries when fewer than ``top_k`` channels have finite
-    r_sz. Tie-breaking on r_sz is the dict iteration order (stable
-    sort), which is fine — top-K identity is not the focus, the cov
-    distribution is.
+
+    Returns
+    -------
+    (cov_list, expanded_due_to_tie)
+        ``cov_list`` length = number of channels with r_sz ≤ K-th
+        smallest. ``expanded_due_to_tie`` is True iff returned size
+        exceeds ``top_k`` because of ties at the boundary; downstream
+        callers should propagate this as a ``boundary_tie_inclusive``
+        diagnostic flag in per-subject JSON / atlas.
     """
-    finite = [(ch, float(v)) for ch, v in r_sz.items() if v is not None]
-    finite.sort(key=lambda kv: kv[1])
-    top = finite[: int(top_k)]
-    return [int(coverage.get(ch, 0)) for ch, _ in top]
+    chs, expanded = _topk_inclusive_channels(r_sz, top_k=top_k)
+    return [int(coverage.get(ch, 0)) for ch in chs], expanded
 
 
 def compute_focal_in_topk(
@@ -893,18 +933,49 @@ def compute_focal_in_topk(
     focal_set: set,
     *,
     top_k: int = 10,
-) -> Tuple[int, int]:
-    """Count focal channels in top-K by r_sz ascending.
+) -> Tuple[int, int, bool]:
+    """Count focal channels in top-K (tie-inclusive) by r_sz ascending.
+
+    See :func:`compute_top10_coverage_list` for tie-aware semantics
+    rationale (v2.2.2).
 
     Returns
     -------
-    (n_focal_in_topk, n_topk_actual)
+    (n_focal_in_topk, n_topk_actual, expanded_due_to_tie)
         ``n_topk_actual`` may be ``< top_k`` if the subject has fewer
-        than ``top_k`` channels with finite r_sz; caller divides
-        ``n_focal_in_topk / max(1, n_topk_actual)`` to get the fraction.
+        than ``top_k`` channels with finite r_sz, or ``> top_k`` if
+        ties at the K-th boundary expand the set. Caller computes
+        ``n_focal_in_topk / max(1, n_topk_actual)`` for the fraction.
+    """
+    chs, expanded = _topk_inclusive_channels(r_sz, top_k=top_k)
+    n_focal = sum(1 for ch in chs if ch in focal_set)
+    return n_focal, len(chs), expanded
+
+
+def _topk_inclusive_channels(
+    r_sz: Mapping[str, Optional[float]],
+    *,
+    top_k: int,
+) -> Tuple[List[str], bool]:
+    """Internal: inclusive-tie top-K channel selection by r_sz ascending.
+
+    When n_finite ≤ top_k, returns all finite channels (no expansion).
+    When n_finite > top_k, expands the cut to include every channel
+    whose r_sz equals the K-th smallest value (so tied channels at
+    boundary all enter).
+
+    Within ties, sort order is by channel name alphabetical for
+    determinism *inside* the returned set, but the SET membership
+    itself does not depend on alphabetical order — every tied channel
+    is included.
     """
     finite = [(ch, float(v)) for ch, v in r_sz.items() if v is not None]
-    finite.sort(key=lambda kv: kv[1])
-    top_chs = [ch for ch, _ in finite[: int(top_k)]]
-    n_focal = sum(1 for ch in top_chs if ch in focal_set)
-    return n_focal, len(top_chs)
+    finite.sort(key=lambda kv: (kv[1], kv[0]))
+    if len(finite) <= int(top_k):
+        return [ch for ch, _ in finite], False
+    kth_val = finite[int(top_k) - 1][1]
+    end_idx = int(top_k)
+    while end_idx < len(finite) and finite[end_idx][1] == kth_val:
+        end_idx += 1
+    expanded = end_idx > int(top_k)
+    return [ch for ch, _ in finite[:end_idx]], expanded

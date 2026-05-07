@@ -747,9 +747,12 @@ def test_per_channel_rsz_coverage_rejects_length_mismatch():
 
 
 # A18 — classify_producer_health threshold/branch matrix
+# v2.2.2 (2026-05-06): cov criterion is now FRACTION-based (≥0.7) not
+# absolute count, to handle tie-inclusive top-K expansion (topk_total
+# may exceed 10 when boundary ties expand).
 def test_classify_producer_health_insufficient_when_n_ok_lt_3():
     tag, details = classify_producer_health(
-        n_ok=2, s_sz=0.9, top10_cov_pass_count=10, top10_cov_threshold=1.0
+        n_ok=2, s_sz=0.9, topk_cov_pass_count=10, topk_total=10, topk_cov_threshold=1.0
     )
     assert tag == "insufficient"
     assert details["n_ok"] == 2
@@ -757,7 +760,7 @@ def test_classify_producer_health_insufficient_when_n_ok_lt_3():
 
 def test_classify_producer_health_unstable_when_s_sz_below_0_3():
     tag, _ = classify_producer_health(
-        n_ok=10, s_sz=0.29, top10_cov_pass_count=10, top10_cov_threshold=5.0
+        n_ok=10, s_sz=0.29, topk_cov_pass_count=10, topk_total=10, topk_cov_threshold=5.0
     )
     assert tag == "unstable"
 
@@ -766,59 +769,84 @@ def test_classify_producer_health_unstable_when_s_sz_is_none():
     # s_sz None happens when fewer than 2 qualifying seizures yield
     # any defined pairwise Spearman; treat as below-threshold.
     tag, _ = classify_producer_health(
-        n_ok=3, s_sz=None, top10_cov_pass_count=10, top10_cov_threshold=1.5
+        n_ok=3, s_sz=None, topk_cov_pass_count=10, topk_total=10, topk_cov_threshold=1.5
     )
     assert tag == "unstable"
 
 
 def test_classify_producer_health_moderate_when_s_sz_in_0_3_to_0_5():
     tag, _ = classify_producer_health(
-        n_ok=10, s_sz=0.3, top10_cov_pass_count=10, top10_cov_threshold=5.0
+        n_ok=10, s_sz=0.3, topk_cov_pass_count=10, topk_total=10, topk_cov_threshold=5.0
     )
     assert tag == "moderate"
     tag2, _ = classify_producer_health(
-        n_ok=10, s_sz=0.49, top10_cov_pass_count=10, top10_cov_threshold=5.0
+        n_ok=10, s_sz=0.49, topk_cov_pass_count=10, topk_total=10, topk_cov_threshold=5.0
     )
     assert tag2 == "moderate"
 
 
 def test_classify_producer_health_stable_when_s_sz_ge_0_5_and_cov_ok():
     tag, _ = classify_producer_health(
-        n_ok=10, s_sz=0.5, top10_cov_pass_count=10, top10_cov_threshold=5.0
+        n_ok=10, s_sz=0.5, topk_cov_pass_count=10, topk_total=10, topk_cov_threshold=5.0
     )
     assert tag == "stable"
 
 
-def test_classify_producer_health_demoted_when_top10_cov_lt_7():
-    # s_sz strong but only 6/10 top channels pass cov threshold → demote
-    # stable → moderate.
+def test_classify_producer_health_demoted_when_topk_cov_fraction_lt_0_7():
+    # s_sz strong but only 6/10 top channels pass cov threshold (0.6 < 0.7)
+    # → demote stable → moderate.
     tag, _ = classify_producer_health(
-        n_ok=10, s_sz=0.7, top10_cov_pass_count=6, top10_cov_threshold=5.0
+        n_ok=10, s_sz=0.7, topk_cov_pass_count=6, topk_total=10, topk_cov_threshold=5.0
     )
     assert tag == "moderate"
-    # 0.3 ≤ s_sz < 0.5 with cov<7 → demote moderate → unstable.
+    # 0.3 ≤ s_sz < 0.5 with cov fraction 0.6 → demote moderate → unstable.
     tag2, _ = classify_producer_health(
-        n_ok=10, s_sz=0.4, top10_cov_pass_count=6, top10_cov_threshold=5.0
+        n_ok=10, s_sz=0.4, topk_cov_pass_count=6, topk_total=10, topk_cov_threshold=5.0
     )
     assert tag2 == "unstable"
 
 
+def test_classify_producer_health_fraction_handles_tie_expansion():
+    # v2.2.2 path: tie-inclusive top-K expanded to 12 channels.
+    # 8/12 = 0.667 < 0.7 → cov_NOT_ok → demoted from stable to moderate
+    tag, details = classify_producer_health(
+        n_ok=10, s_sz=0.6, topk_cov_pass_count=8, topk_total=12,
+        topk_cov_threshold=5.0, boundary_tie_inclusive=True,
+    )
+    assert tag == "moderate"
+    assert details["topk_total"] == 12
+    assert details["boundary_tie_inclusive"] is True
+    # Same numerator (8) at K=10 (no expansion) → 8/10 = 0.8 ≥ 0.7 → stable
+    tag2, _ = classify_producer_health(
+        n_ok=10, s_sz=0.6, topk_cov_pass_count=8, topk_total=10,
+        topk_cov_threshold=5.0, boundary_tie_inclusive=False,
+    )
+    assert tag2 == "stable"
+
+
 def test_classify_producer_health_details_echoes_inputs():
     _, details = classify_producer_health(
-        n_ok=15, s_sz=0.6, top10_cov_pass_count=8, top10_cov_threshold=7.5
+        n_ok=15, s_sz=0.6, topk_cov_pass_count=8, topk_total=10, topk_cov_threshold=7.5
     )
     assert details["n_ok"] == 15
     assert details["s_sz"] == 0.6
-    assert details["top10_cov_pass_count"] == 8
-    assert details["top10_cov_threshold"] == 7.5
+    assert details["topk_cov_pass_count"] == 8
+    assert details["topk_total"] == 10
+    assert details["topk_cov_threshold"] == 7.5
+    assert details["topk_cov_pass_fraction"] == 0.8
+    assert details["boundary_tie_inclusive"] is False
 
 
 # A19 — classify_clinical_concordance branches; metadata-only contract
+# v2.2.2 (2026-05-06): renamed wilcoxon_p_one_sided → mannwhitney_u_p_one_sided
+# (Mann-Whitney U is the actual scipy implementation; "Wilcoxon" was loose
+# naming for the rank-sum family). focal_in_top10_count → focal_in_topk_count
+# and top10_total → topk_total to reflect tie-inclusive expansion.
 def test_classify_clinical_concordance_not_assessable_when_producer_insufficient():
     tag, _ = classify_clinical_concordance(
-        wilcoxon_p_one_sided=0.001,
-        focal_in_top10_count=5,
-        top10_total=10,
+        mannwhitney_u_p_one_sided=0.001,
+        focal_in_topk_count=5,
+        topk_total=10,
         n_focal_with_finite_rsz=5,
         n_nonfocal_with_finite_rsz=5,
         focal_rsz_median=10.0,
@@ -831,9 +859,9 @@ def test_classify_clinical_concordance_not_assessable_when_producer_insufficient
 
 def test_classify_clinical_concordance_not_assessable_when_too_few_focal():
     tag, _ = classify_clinical_concordance(
-        wilcoxon_p_one_sided=0.01,
-        focal_in_top10_count=1,
-        top10_total=10,
+        mannwhitney_u_p_one_sided=0.01,
+        focal_in_topk_count=1,
+        topk_total=10,
         n_focal_with_finite_rsz=1,
         n_nonfocal_with_finite_rsz=10,
         focal_rsz_median=5.0,
@@ -843,11 +871,11 @@ def test_classify_clinical_concordance_not_assessable_when_too_few_focal():
     assert tag == "not_assessable"
 
 
-def test_classify_clinical_concordance_concordant_when_p_lt_0_1_and_top10_ge_30pct():
+def test_classify_clinical_concordance_concordant_when_p_lt_0_1_and_topk_ge_30pct():
     tag, _ = classify_clinical_concordance(
-        wilcoxon_p_one_sided=0.05,
-        focal_in_top10_count=4,
-        top10_total=10,
+        mannwhitney_u_p_one_sided=0.05,
+        focal_in_topk_count=4,
+        topk_total=10,
         n_focal_with_finite_rsz=6,
         n_nonfocal_with_finite_rsz=70,
         focal_rsz_median=12.0,
@@ -858,11 +886,11 @@ def test_classify_clinical_concordance_concordant_when_p_lt_0_1_and_top10_ge_30p
 
 
 def test_classify_clinical_concordance_partial_when_only_one_criterion():
-    # Only Wilcoxon ok, focal in top-10 < 30%
+    # Only MWU ok, focal in top-K < 30%
     tag_p, _ = classify_clinical_concordance(
-        wilcoxon_p_one_sided=0.05,
-        focal_in_top10_count=2,
-        top10_total=10,
+        mannwhitney_u_p_one_sided=0.05,
+        focal_in_topk_count=2,
+        topk_total=10,
         n_focal_with_finite_rsz=6,
         n_nonfocal_with_finite_rsz=70,
         focal_rsz_median=15.0,
@@ -870,11 +898,11 @@ def test_classify_clinical_concordance_partial_when_only_one_criterion():
         producer_health="stable",
     )
     assert tag_p == "partial"
-    # Only top-10 ok, Wilcoxon not significant
+    # Only top-K ok, MWU not significant
     tag_f, _ = classify_clinical_concordance(
-        wilcoxon_p_one_sided=0.5,
-        focal_in_top10_count=4,
-        top10_total=10,
+        mannwhitney_u_p_one_sided=0.5,
+        focal_in_topk_count=4,
+        topk_total=10,
         n_focal_with_finite_rsz=6,
         n_nonfocal_with_finite_rsz=70,
         focal_rsz_median=18.0,
@@ -886,9 +914,9 @@ def test_classify_clinical_concordance_partial_when_only_one_criterion():
 
 def test_classify_clinical_concordance_discordant_when_neither_criterion():
     tag, _ = classify_clinical_concordance(
-        wilcoxon_p_one_sided=0.583,
-        focal_in_top10_count=0,
-        top10_total=10,
+        mannwhitney_u_p_one_sided=0.583,
+        focal_in_topk_count=0,
+        topk_total=10,
         n_focal_with_finite_rsz=8,
         n_nonfocal_with_finite_rsz=70,
         focal_rsz_median=34.5,
@@ -898,12 +926,12 @@ def test_classify_clinical_concordance_discordant_when_neither_criterion():
     assert tag == "discordant"
 
 
-def test_classify_clinical_concordance_handles_missing_wilcoxon():
+def test_classify_clinical_concordance_handles_missing_mwu():
     # Edge: scipy returned None (e.g. all values identical)
     tag, _ = classify_clinical_concordance(
-        wilcoxon_p_one_sided=None,
-        focal_in_top10_count=4,
-        top10_total=10,
+        mannwhitney_u_p_one_sided=None,
+        focal_in_topk_count=4,
+        topk_total=10,
         n_focal_with_finite_rsz=6,
         n_nonfocal_with_finite_rsz=70,
         focal_rsz_median=10.0,
@@ -914,37 +942,147 @@ def test_classify_clinical_concordance_handles_missing_wilcoxon():
     assert tag == "partial"
 
 
-# A20 — top-10 coverage helper + focal-in-top-K helper (drive new tags)
+def test_classify_clinical_concordance_fraction_uses_inclusive_topk_total():
+    # v2.2.2: when boundary_tie_inclusive expands top-K to 11, frac is
+    # focal/11 not focal/10. 3/10 ≥ 0.3 (concordant by frac); 3/11 < 0.3
+    # (NOT concordant by frac).
+    tag_no_exp, det_no_exp = classify_clinical_concordance(
+        mannwhitney_u_p_one_sided=0.05,
+        focal_in_topk_count=3, topk_total=10,
+        n_focal_with_finite_rsz=6, n_nonfocal_with_finite_rsz=70,
+        focal_rsz_median=12.0, nonfocal_rsz_median=25.0,
+        producer_health="stable", boundary_tie_inclusive=False,
+    )
+    assert tag_no_exp == "concordant"
+    assert det_no_exp["focal_in_topk_fraction"] == 0.3
+    tag_exp, det_exp = classify_clinical_concordance(
+        mannwhitney_u_p_one_sided=0.05,
+        focal_in_topk_count=3, topk_total=11,
+        n_focal_with_finite_rsz=6, n_nonfocal_with_finite_rsz=70,
+        focal_rsz_median=12.0, nonfocal_rsz_median=25.0,
+        producer_health="stable", boundary_tie_inclusive=True,
+    )
+    assert tag_exp == "partial"  # only p_ok, not frac_ok
+    assert det_exp["boundary_tie_inclusive"] is True
+
+
+# A20 — top-10 coverage helper + focal-in-top-K helper
+# v2.2.2 (2026-05-06): both helpers now return a tie-inclusive set
+# (size may exceed top_k when boundary ties expand) + an
+# `expanded_due_to_tie` boolean flag.
 def test_compute_top10_coverage_list_sorts_by_r_sz_ascending():
     r_sz = {"a": 5.0, "b": 1.0, "c": 3.0, "d": 2.0, "e": None, "f": 4.0}
     coverage = {"a": 10, "b": 1, "c": 8, "d": 2, "e": 0, "f": 7}
-    top_cov = compute_top10_coverage_list(r_sz, coverage)
+    top_cov, expanded = compute_top10_coverage_list(r_sz, coverage)
     # Sorted: b(1.0), d(2.0), c(3.0), f(4.0), a(5.0); e=None excluded
     assert top_cov == [1, 2, 8, 7, 10]
+    assert expanded is False  # all 5 finite ≤ top_k=10, no boundary cut
 
 
-def test_compute_top10_coverage_list_truncates_to_top_k():
-    r_sz = {f"ch{i}": float(i) for i in range(20)}
-    coverage = {f"ch{i}": 100 - i for i in range(20)}
-    top_cov = compute_top10_coverage_list(r_sz, coverage, top_k=10)
+def test_compute_top10_coverage_list_truncates_to_top_k_no_ties():
+    r_sz = {f"ch{i:02d}": float(i) for i in range(20)}
+    coverage = {f"ch{i:02d}": 100 - i for i in range(20)}
+    top_cov, expanded = compute_top10_coverage_list(r_sz, coverage, top_k=10)
     assert len(top_cov) == 10
-    # Top 10 by r_sz are ch0..ch9 with cov 100..91
+    assert expanded is False
     assert top_cov == [100 - i for i in range(10)]
 
 
 def test_compute_focal_in_topk_counts_focal_intersection():
     r_sz = {"f1": 1.0, "f2": 2.0, "n1": 3.0, "n2": 4.0, "f3": 5.0, "n3": 6.0}
     focal = {"f1", "f2", "f3", "f4_not_present"}
-    n_focal, n_top = compute_focal_in_topk(r_sz, focal, top_k=4)
-    # Top-4: f1, f2, n1, n2 → 2 focal in top-4
+    n_focal, n_top, expanded = compute_focal_in_topk(r_sz, focal, top_k=4)
+    # No ties in this fixture; top-4 = f1, f2, n1, n2 → 2 focal
     assert n_focal == 2
     assert n_top == 4
+    assert expanded is False
 
 
 def test_compute_focal_in_topk_handles_top_k_larger_than_finite():
     r_sz = {"a": 1.0, "b": None, "c": 2.0}
     focal = {"a"}
-    n_focal, n_top = compute_focal_in_topk(r_sz, focal, top_k=10)
-    # Only 2 finite; top_k=10 returns all 2
+    n_focal, n_top, expanded = compute_focal_in_topk(r_sz, focal, top_k=10)
+    # Only 2 finite; top_k=10 returns all 2; not "expanded" (no truncation
+    # happened, just fewer-than-K available).
     assert n_focal == 1
     assert n_top == 2
+    assert expanded is False
+
+
+# A21 — tie-inclusive top-K (v2.2.2 fix, 2026-05-06; supersedes
+# v2.2.1 alphabetical-secondary-sort which was engineering-only and
+# let channel naming decide the science). Reviewer point: when the
+# K-th boundary is a tie, include all tied channels (size ≥ K) and
+# expose a `boundary_tie_inclusive` flag.
+def test_compute_top10_coverage_list_expands_when_boundary_tie():
+    # 5 finite, top_k=3: boundary at r_sz=12.5 has 4-way tie among
+    # HL6, HL7, TBLB4, TBLC6. With inclusive expansion, all 4 enter
+    # → returned size = 6 (HL9, TBRC1, then 4 tied at 12.5).
+    r_sz = {"HL7": 12.5, "HL6": 12.5, "TBLC6": 12.5, "TBLB4": 12.5,
+            "HL9": 11.0, "TBRC1": 12.0}
+    # DISTINCT cov values per channel — reviewer pointed out the
+    # earlier uniform-cov test would pass even under broken impl.
+    cov = {"HL9": 91, "TBRC1": 92, "HL6": 93, "HL7": 94,
+           "TBLB4": 95, "TBLC6": 96}
+    out, expanded = compute_top10_coverage_list(r_sz, cov, top_k=3)
+    # The sorted, in-set order: HL9, TBRC1, HL6, HL7, TBLB4, TBLC6
+    # (ties broken alphabetically WITHIN the returned set for stable
+    # output ordering, but set MEMBERSHIP does not depend on alpha)
+    assert out == [91, 92, 93, 94, 95, 96]
+    assert expanded is True
+
+
+def test_compute_top10_coverage_list_no_expansion_when_no_boundary_tie():
+    # Same channels but boundary at r_sz=11.0 (HL9 alone) — no tie at K=1.
+    r_sz = {"HL9": 11.0, "TBRC1": 12.0, "HL7": 12.5, "HL6": 12.5,
+            "TBLC6": 12.5, "TBLB4": 12.5}
+    cov = {"HL9": 50, "TBRC1": 60, "HL6": 70, "HL7": 80,
+           "TBLB4": 90, "TBLC6": 100}
+    out, expanded = compute_top10_coverage_list(r_sz, cov, top_k=1)
+    assert out == [50]
+    assert expanded is False
+
+
+def test_compute_focal_in_topk_set_membership_independent_of_dict_order():
+    # 548-style ties at r_sz=12.5 (HL7=focal, plus HL6, TBLB4, TBLC6)
+    # at boundary K=3: tied set must include ALL 4, so focal_count
+    # picks up HL7 regardless of dict iteration.
+    r_sz_a = {"HL7": 12.5, "HL6": 12.5, "TBLC6": 12.5, "TBLB4": 12.5,
+              "HL9": 11.0, "TBRC1": 12.0}
+    r_sz_b = {"TBLB4": 12.5, "TBLC6": 12.5, "HL6": 12.5, "HL7": 12.5,
+              "TBRC1": 12.0, "HL9": 11.0}  # permuted
+    focal = {"HL9", "HL7"}
+    n_a, total_a, exp_a = compute_focal_in_topk(r_sz_a, focal, top_k=3)
+    n_b, total_b, exp_b = compute_focal_in_topk(r_sz_b, focal, top_k=3)
+    assert (n_a, total_a, exp_a) == (n_b, total_b, exp_b)
+    # Both focal channels (HL9 ranked #1, HL7 in expanded tie at #3-#6) → 2
+    assert n_a == 2
+    assert total_a == 6  # 1 + 1 + 4 tied
+    assert exp_a is True
+
+
+def test_compute_focal_in_topk_548_gamma_partial_under_inclusive_semantics():
+    # Real 548 gamma top-10 boundary case: K=10 ends at r_sz=14.5 with
+    # 3-way tie (TBRC2, TBLC5, HL8=focal). Inclusive expansion → top-11.
+    # Per reviewer: HL8 IS included (no alphabetical exclusion), but
+    # the fraction calculation uses 11 in the denominator.
+    # For verification of the science-correct outcome on real fixture,
+    # the 548 gamma tag should be 'partial' under inclusive semantics
+    # (focal_count=3 from HL9+HL7+HL8; 3/11 ≈ 0.273 < 0.3).
+    r_sz = {
+        "HL9": 11.0, "TBRC1": 12.0,
+        "HL7": 12.5, "HL6": 12.5, "TBLC6": 12.5, "TBLB4": 12.5,
+        "HL3": 12.75, "TLRB1": 14.0,
+        # K=10 boundary tie at 14.5
+        "TBRC2": 14.5, "TBLC5": 14.5, "HL8": 14.5,
+        "GC7": 15.0,
+    }
+    focal = {"HL7", "HL8", "HL9", "HL10", "TBLA1", "TBLA2", "TBLA3"}
+    n_focal, total, expanded = compute_focal_in_topk(r_sz, focal, top_k=10)
+    # HL9 (#1) + HL7 (#3-6 tie) + HL8 (#9-11 tie expanded) = 3 focal
+    assert n_focal == 3
+    # Top-10 expands to include all three at 14.5 → 11 channels
+    assert total == 11
+    assert expanded is True
+    # Sanity: 3/11 < 0.3, so frac_ok would be False (548 gamma → partial)
+    assert n_focal / total < 0.3
