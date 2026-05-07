@@ -103,7 +103,7 @@ def _resolve_subject_dir(subject: str, dataset: str) -> Path:
     if dataset == "epilepsiae":
         # Stage 0 census (2026-04-27) confirmed legacy gpu_npz are corrupt stubs
         # for all 20 subjects; Stage 2 reads the new pipeline output instead.
-        # See docs/archive/topic3/epilepsiae_artifact_census_2026-04-27.md.
+        # See docs/archive/topic3/pr1_spatial_modulation/epilepsiae_artifact_census_2026-04-27.md.
         return EPILEPSIAE_NEW_GPU_ROOT / subject
     raise ValueError(f"Unknown dataset: {dataset}")
 

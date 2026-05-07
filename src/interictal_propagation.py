@@ -4752,7 +4752,7 @@ def _summarize_adaptive_clusters(valid: List[Dict[str, Any]]) -> Dict[str, Any]:
 # PR-5-A: novel-template falsification gate
 # ---------------------------------------------------------------------------
 #
-# Contract: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md
+# Contract: docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md
 #   §3.2 data, §3.3 metrics, §3.5 PASS/FAIL thresholds, §5.2 code entry.
 #
 # The gate decides whether peri-ictal events are still in-distribution under
@@ -5219,7 +5219,7 @@ def summarize_pr5_novel_template_gate(
 # ---------------------------------------------------------------------------
 # PR-5-B: template recruitment shift
 #
-# Spec: docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md §4
+# Spec: docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md §4
 # Three layers:
 #   1. ``compute_template_recruitment_shift`` — per-subject computation, runs
 #      on the same gate-eligible event pool as PR-5-A, recomputes per-window

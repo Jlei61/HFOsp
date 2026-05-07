@@ -2,6 +2,7 @@
 
 > 状态：当前正式入口
 > 范围：只讨论单个间期群体事件内部的时序组织，包括传播刻板性与事件级同步性。
+> **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + BHPN-toy/fit + 5 dumb baselines + 失败模式）。本 topic 的 PR-2 / PR-2.5 / PR-6 / PR-7 / 待立 PR-T4-1/T4-2/9 全部受该框架统辖；任何与 framework 中已 lock 的 prediction 判据冲突的修改必须先改 framework。
 
 ---
 
@@ -21,12 +22,13 @@
 
 ## 2. 一句话当前结论
 
+- **Paper 1 framework（SBA, v1.1.2 lock 2026-04-30 / PR-7 addendum 2026-05-01）**：单核心假设 + 5 sharp predictions（P1 时间稳定 / P2 共享几何骨架 / P3 短窗 mark-independent cohort-level TOST equivalence / P4 解剖锚定 / P5 间期→发作 directionality）；**P1 + P2 PASS**（PR-2.5 / PR-6 Step 4b），**P3 INCONCLUSIVE-locked**（PR-7 addendum 完成：1800s window + lag1_same_excess null-relative 干净 PASS；10/30/60s + run_length_lift cohort CI underpowered at n=6 with structural outliers；SBA 不被 falsified；写法限定 "compatible with mark-independent within tested precision"，禁止写 PASS）；P4–P5 待执行（PR-T3-1 → PR-8 v2 / 新立 PR-9，directional predictor `D_ij = sin(φ_j*−φ_i*)`，**不**用 cos-based A_ij）。Toy model BHPN-toy（s_rate(t) 与 ε_id 两过程统计独立；T3 验证走 large-N simulation 而非 PR-7 anchor）+ fitted BHPN-fit（仅 aggregate + conditional predictions）+ 5 dumb baseline 设计 lock 在 `docs/paper1_framework_sba.md`。详见 `docs/archive/topic1/pr7_template_pairing/pr7_addendum_p3_equivalence_2026-05-01.md`。
 - **传播刻板性**：内部传播真实存在但不是单一模板；`k=2` 是主导压缩，少数 subject 有 `k=4`/`k=6` 多模态；模板在 split-half / blockwise 上 `23/30 strong` + `7/30 moderate` + `0 weak`。Identity-bias 在簇内高达 86%，必须并列报告 raw 与 centered。
-- **慢调制（PR-4B）**：模板混合（L1）与模板内顺序一致性（L2）cohort 全 null；模板内相对时延结构（L3）在全 cohort 上证据不足，仅在 8 个高置信子集（`dom_r > 0.7`）的 Pearson r 上探索性显著（p=0.016, 7/8）。详见 `docs/archive/topic1/interictal_group_event_internal_propagation.md`。
-- **发作邻近（PR-4C）**：propagation pattern 五指标 cohort Wilcoxon 在主+辅两配置下均 null（主 1/15 / 辅 1/15 名义显著且跨配置不一致）→ **模板内部几何无稳健发作邻近调制，正式封板为阴性**。唯一稳健信号在 `rate_by_template`（post_ictal vs baseline 主 p=0.0009、辅 p=0.0067）。详见 `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` §9。
-- **模板招募（PR-5）— 核心科学结论（已验收 2026-04-20）**：在 PR-5-A novel-template gate 已 PASS（main n=23 / aux n=22，未观察到 `H_OOD` 或 `H_assignment_drift` 的 cohort-level 证据）的前提下，PR-5-B 把 PR-4C `rate_by_template` 的描述层信号正式升级为推断结论：**dominant template 的绝对事件率（events/h）在 post-ictal 相对 baseline 出现 cohort-level 系统升高**（候选 A `dominant_global` `post_minus_baseline` median main `+65.46` / aux `+42.43` events/h；main p=0.00128 Bonferroni-pass α=0.0083，aux p=0.0115 nominal-pass，方向一致；候选 B main p=0.00214 同向支持 → §4.4 sensitivity gate `overall_strong=True`）。**§4.5 composition diagnostic 在 PR-5 合同下未复制 panel d**：`share_post_minus_baseline` 两配置都是 nominal-positive 但**与 panel d 预期方向相反**（main `+0.0156`, p=0.0149，direction-consistent 6/23；aux `+0.0328`, p=0.0301，direction-consistent 5/22）→ panel d 信号不在 PR-5 cohort 复现，且不为主结论背书。验收口径：PR-5-A PASS / PR-5-B STRONG；`pre_minus_baseline`、`post_minus_pre` 仅留为次级描述层。详见 `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` §11。
-- **PR-6（2026-04-25 重启）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 主线**全部冻结归档**（sentinel `548/916` 已经把“稳定 ictal onset rank”证伪：cross-seizure top10 overlap=0、cross-band ρ=−0.21、early channels 大量落在 `other`），文献亦指明该方向在领域内高风险（Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021）。**新主线 = stable template endpoint (source ∪ sink) anatomical anchoring**：H1 检验 `frac_SOZ(endpoint) − frac_SOZ(middle)` 的 subject-level cohort Wilcoxon，subset polarity（H1b）+ forward/reverse swap（H2）+ Epilepsiae focus_rel i/l/e（H3）作为方向性 / 机制 / 解剖三类 sensitivity。复用 `match_bipolar_soz` / `match_bipolar_focus_rel` 与已有 `template_rank`，cohort 从 audit 推导不预写 N。详见正式 plan-of-record：`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`；老 PR-6-A 三份 doc 顶部已加 SUPERSEDED 块。
-- **PR-7 Template Antagonistic Temporal Pairing（已验收 2026-04-30）**：检验 forward/reverse template 的时间耦合签名。**核心结论 = 几何上相关，已测试时间尺度上未见 mark dependence**：H1 主检验三条 metric 全部 NULL——event-level Δt ∈ [10s, 30s] opposite-template excess（N2 主 null Wilcoxon p=0.844，sign 3/6, median(30s)=−0.015）；N3 robustness 一致 NULL（p=0.891）；N2 window sweep {10/30/60 min} 三个尺度全部 NULL（p ∈ [0.78, 0.89]）。Step 3.5 burst diagnostic 在无 ISI 阈值 same-label run 定义下未见 persistence（cohort run_length_lift median=0.977）。**精确 framing**：在已测试的 event-level fixed-window + lag-1 + run-based 三类 metric 上数据 **compatible with mark-independent sampling**（最简洁描述，**不等于证明独立**）。PR-6 已建立的 fwd/rev 几何相关性**保留**；bouncing-back / 短时接力版本 Ping-Pong 撤回。**未测**：alternative burst definitions、rate-state / seizure-proximity switching、form (4) latent-state coupling、history-dependent regression。详见 `docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md` §17。
+- **慢调制（PR-4B）**：模板混合（L1）与模板内顺序一致性（L2）cohort 全 null；模板内相对时延结构（L3）在全 cohort 上证据不足，仅在 8 个高置信子集（`dom_r > 0.7`）的 Pearson r 上探索性显著（p=0.016, 7/8）。详见 `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md`。
+- **发作邻近（PR-4C）**：propagation pattern 五指标 cohort Wilcoxon 在主+辅两配置下均 null（主 1/15 / 辅 1/15 名义显著且跨配置不一致）→ **模板内部几何无稳健发作邻近调制，正式封板为阴性**。唯一稳健信号在 `rate_by_template`（post_ictal vs baseline 主 p=0.0009、辅 p=0.0067）。详见 `docs/archive/topic1/propagation/pr4c_seizure_proximity_review_2026-04-17.md` §9。
+- **模板招募（PR-5）— 核心科学结论（已验收 2026-04-20）**：在 PR-5-A novel-template gate 已 PASS（main n=23 / aux n=22，未观察到 `H_OOD` 或 `H_assignment_drift` 的 cohort-level 证据）的前提下，PR-5-B 把 PR-4C `rate_by_template` 的描述层信号正式升级为推断结论：**dominant template 的绝对事件率（events/h）在 post-ictal 相对 baseline 出现 cohort-level 系统升高**（候选 A `dominant_global` `post_minus_baseline` median main `+65.46` / aux `+42.43` events/h；main p=0.00128 Bonferroni-pass α=0.0083，aux p=0.0115 nominal-pass，方向一致；候选 B main p=0.00214 同向支持 → §4.4 sensitivity gate `overall_strong=True`）。**§4.5 composition diagnostic 在 PR-5 合同下未复制 panel d**：`share_post_minus_baseline` 两配置都是 nominal-positive 但**与 panel d 预期方向相反**（main `+0.0156`, p=0.0149，direction-consistent 6/23；aux `+0.0328`, p=0.0301，direction-consistent 5/22）→ panel d 信号不在 PR-5 cohort 复现，且不为主结论背书。验收口径：PR-5-A PASS / PR-5-B STRONG；`pre_minus_baseline`、`post_minus_pre` 仅留为次级描述层。详见 `docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md` §11。
+- **PR-6（2026-04-25 重启）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 主线**全部冻结归档**（sentinel `548/916` 已经把“稳定 ictal onset rank”证伪：cross-seizure top10 overlap=0、cross-band ρ=−0.21、early channels 大量落在 `other`），文献亦指明该方向在领域内高风险（Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021）。**新主线 = stable template endpoint (source ∪ sink) anatomical anchoring**：H1 检验 `frac_SOZ(endpoint) − frac_SOZ(middle)` 的 subject-level cohort Wilcoxon，subset polarity（H1b）+ forward/reverse swap（H2）+ Epilepsiae focus_rel i/l/e（H3）作为方向性 / 机制 / 解剖三类 sensitivity。复用 `match_bipolar_soz` / `match_bipolar_focus_rel` 与已有 `template_rank`，cohort 从 audit 推导不预写 N。详见正式 plan-of-record：`docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`；老 PR-6-A 三份 doc 顶部已加 SUPERSEDED 块。
+- **PR-7 Template Antagonistic Temporal Pairing（已验收 2026-04-30）**：检验 forward/reverse template 的时间耦合签名。**核心结论 = 几何上相关，已测试时间尺度上未见 mark dependence**：H1 主检验三条 metric 全部 NULL——event-level Δt ∈ [10s, 30s] opposite-template excess（N2 主 null Wilcoxon p=0.844，sign 3/6, median(30s)=−0.015）；N3 robustness 一致 NULL（p=0.891）；N2 window sweep {10/30/60 min} 三个尺度全部 NULL（p ∈ [0.78, 0.89]）。Step 3.5 burst diagnostic 在无 ISI 阈值 same-label run 定义下未见 persistence（cohort run_length_lift median=0.977）。**精确 framing**：在已测试的 event-level fixed-window + lag-1 + run-based 三类 metric 上数据 **compatible with mark-independent sampling**（最简洁描述，**不等于证明独立**）。PR-6 已建立的 fwd/rev 几何相关性**保留**；bouncing-back / 短时接力版本 Ping-Pong 撤回。**未测**：alternative burst definitions、rate-state / seizure-proximity switching、form (4) latent-state coupling、history-dependent regression。详见 `docs/archive/topic1/pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md` §17。
 - **未来模型层（§7.9）** 维持冻结：当前不绑 PR 编号。
 - **同步性**：cohort-level interictal synchrony 总体为 null。唯一探索性信号是 extra-focal `phase_e` 的 `pre > post`（p=0.012, r=0.31）。
 
@@ -126,7 +128,7 @@ Epilepsiae 的区域分层分析中：
 - **PR-4B 高置信子集 H2 探索性支持的功效极有限**：n=8 Wilcoxon 最小可能 p = 0.004，当前 p=0.016（W=1）；不能据此做 population-level 结论。`huangwanling` 在 L3 读数上完全 ineligible（n=29）
 - **PR-4C 阴性已封板**（2026-04-19，三处合同 P0 修复后复跑两套配置）。原本怀疑被合同 bug 掩盖的 `pre_ictal vs baseline raw_tau aux` 在修复后也消失（p=0.0005 → p=0.141），印证旧版那条信号是 bug 制品
 - **PR-5 已完成**：完整阈值 / 失败合同 / sensitivity gate 三态以 archive `pr5_template_recruitment_plan_2026-04-20.md` 为单一来源；本文档只保留判定摘要。已知边界：PR-5-B cohort 必须严格限定在 PR-5-A retained subset（main n=23 / aux n=22）；`pre_minus_baseline` / `post_minus_pre` 主配置未通过 Bonferroni（次级描述层）；§4.5 composition diagnostic `share_post_minus_baseline` 在两配置下都 nominal-significant 但方向与 panel d 预期反向 → panel d 未在 PR-5 合同下复制，且不能为主结论背书
-- **PR-6 已 pivot（2026-04-25）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 三份 doc（`pr6a-1.md`、`pr6a_template_ictal_alignment_plan_2026-04-21.md`、`pr6a_step0-2_step3preview_review_2026-04-23.md`）已冻结归档；不再继续推 ER pipeline / CUSUM / `t_ER_onset` 封板。新主线见 §7.10 + `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`。新主线的已知风险：(a) cohort audit 后实际 n 可能 < 10（Yuquan SOZ JSON coverage 限）→ 需要先看 audit 再判 PASS/null；(b) Epilepsiae focus_rel `e` 在多 subject 上 list 为空 → H3 的 negative control 可能 underpowered；(c) split-half 通道稳定性 Jaccard < 0.4 时 H1 解读必须加 caveat。
+- **PR-6 已 pivot（2026-04-25）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 三份 doc（`pr6a-1.md`、`pr6a_template_ictal_alignment_plan_2026-04-21.md`、`pr6a_step0-2_step3preview_review_2026-04-23.md`）已冻结归档；不再继续推 ER pipeline / CUSUM / `t_ER_onset` 封板。新主线见 §7.10 + `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`。新主线的已知风险：(a) cohort audit 后实际 n 可能 < 10（Yuquan SOZ JSON coverage 限）→ 需要先看 audit 再判 PASS/null；(b) Epilepsiae focus_rel `e` 在多 subject 上 list 为空 → H3 的 negative control 可能 underpowered；(c) split-half 通道稳定性 Jaccard < 0.4 时 H1 解读必须加 caveat。
 - **未来模型层尚未启动**：硬前置见 §7.9；当前数据发现序列尚未给出已封板的几何/招募一致性结论，模型层维持冻结，不进主线工作量
 
 ---
@@ -144,7 +146,7 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 三类读数的**数据合同**（per-event min-subtraction、`min_participating ≥ 5` 的 Pearson r 门槛、为何不能用 MI、为何不重新聚类、L3 读数的灵敏度论证）已写入：
 
 - `.cursor/rules/topic1-within-event-dynamics.mdc` "L1/L2/L3 three-layer modulation guardrails"
-- `docs/archive/topic1/interictal_group_event_internal_propagation.md`
+- `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md`
 
 主文档不再重述。
 
@@ -202,8 +204,8 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 3. ~~**PR-4D**（P1）~~ — DONE / ACCEPTED（2026-04-16）
 4. **高 k 复核**（P1）：可并行
 5. ~~**PR-5**（P0）~~ — DONE（2026-04-20，PR-5-A PASS + PR-5-B STRONG）；详见 §7.8
-6. **PR-6 Stable Template Endpoint Anatomical Anchoring**（**P0，2026-04-25 重启**）：原 PR-6-A 三份 doc 冻结归档；新主线问 "stable template endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel-i"；详见 §7.10 + `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
-7. **PR-7 Template Antagonistic Temporal Pairing**（**P0，2026-04-28 立项**）：检验 forward/reverse template 在短时间尺度上是否构成"拮抗性配对"（Ping-Pong 假说的功能耦合层）。Pre-registered triple-gate PASS（10s Wilcoxon + 10s sign + 30s 同方向）；主 null = N2 local-window 30 min；详见 §7.11 + `docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md` + `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md`
+6. **PR-6 Stable Template Endpoint Anatomical Anchoring**（**P0，2026-04-25 重启**）：原 PR-6-A 三份 doc 冻结归档；新主线问 "stable template endpoint (source ∪ sink) 是否解剖锚定 SOZ / focus_rel-i"；详见 §7.10 + `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
+7. **PR-7 Template Antagonistic Temporal Pairing**（**P0，2026-04-28 立项**）：检验 forward/reverse template 在短时间尺度上是否构成"拮抗性配对"（Ping-Pong 假说的功能耦合层）。Pre-registered triple-gate PASS（10s Wilcoxon + 10s sign + 30s 同方向）；主 null = N2 local-window 30 min；详见 §7.11 + `docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md` + `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md`
 8. **§7.6 / §7.7 可选方向**：§7.6 已被 PR-5 吸收为正式分析，§7.7 仍维持 exploratory 子集
 9. **未来模型层（§7.9）**：硬前置未达成，维持冻结；不绑 PR 编号
 
@@ -232,8 +234,8 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 ### 7.8 PR-5：Template Recruitment Around Seizures
 
-> 完整合同（数据/假设/失败合同/代码入口/测试合同/工作量）+ §11 复跑结论：`docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md`
-> PR-5-A gate 中间报告：`docs/archive/topic1/pr5a_novel_template_gate_2026-04-20.md`
+> 完整合同（数据/假设/失败合同/代码入口/测试合同/工作量）+ §11 复跑结论：`docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md`
+> PR-5-A gate 中间报告：`docs/archive/topic1/pr5_template_recruitment/pr5a_novel_template_gate_2026-04-20.md`
 > 性质：正式入口。本节只保留**判定摘要**，不重述阈值与 metric 定义（避免与 archive 双源漂移）。
 
 **当前状态（2026-04-20 复跑）**：
@@ -249,7 +251,7 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 - 高对称 subject `dom_agreement < 0.5`（main 7 / aux 5）按 sensitivity gate `medium` 判读路径，不剔除
 - share 与 absolute rate 数学耦合 → 机制层不展开，留未来模型层（§7.9）
 
-**与 PR-4C / PR-4D 的边界**：PR-4C 五指标几何 cohort null 保持封板；PR-4D `rate×type` 描述层保持原状。PR-5 不涉及 SOZ 解剖锚定（属于 Topic 3 §7 独立 P1 候选）。PR-4 PPT panel d（`scripts/plot_topic1_pr4_ppt.py` fig 2d）已在 `docs/topic1_pr4_ppt_figures.md` 与 archive plan §6 同步降级为"历史 motivation / 描述层"，正式归属一律指向 §4.5。
+**与 PR-4C / PR-4D 的边界**：PR-4C 五指标几何 cohort null 保持封板；PR-4D `rate×type` 描述层保持原状。PR-5 不涉及 SOZ 解剖锚定（属于 Topic 3 §7 独立 P1 候选）。PR-4 PPT panel d（`scripts/plot_topic1_pr4_ppt.py` fig 2d）已在 `docs/archive/topic1/propagation/topic1_pr4_ppt_figures.md` 与 archive plan §6 同步降级为"历史 motivation / 描述层"，正式归属一律指向 §4.5。
 
 **验收意见（2026-04-20）**：
 
@@ -277,14 +279,14 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 ### 7.10 PR-6：Stable Template Endpoint Anatomical Anchoring（Topic 1 × Topic 3 桥）
 
-> 完整合同（数据/假设/失败合同/代码入口/测试合同/工作量）+ §11 复跑结论：`docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
+> 完整合同（数据/假设/失败合同/代码入口/测试合同/工作量）+ §11 复跑结论：`docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`
 > 性质：正式入口。本节只保留**判定摘要 + pivot 来源**，不重述阈值与 metric 定义（避免与 archive 双源漂移）。
 
 **Pivot 来源（2026-04-25）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 已冻结归档：
-- `docs/archive/topic1/pr6a-1.md` — multi-anchor consensus probe 计划（5 anchor voting）
-- `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md` — single ictal anchor 主线
-- `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` — Step3 `t_ER_onset` preview-only 审阅
-- `docs/archive/topic1/pr6_direction_brainstorm_2026-04-25.md` — pivot 决策的 brainstorm（Obs 1–4 + 文献分类 + Topic 1 × Topic 3 桥的提出）
+- `docs/archive/topic1/pr6_template_anchoring/pr6a-1.md` — multi-anchor consensus probe 计划（5 anchor voting）
+- `docs/archive/topic1/pr6_template_anchoring/pr6a_template_ictal_alignment_plan_2026-04-21.md` — single ictal anchor 主线
+- `docs/archive/topic1/pr6_template_anchoring/pr6a_step0-2_step3preview_review_2026-04-23.md` — Step3 `t_ER_onset` preview-only 审阅
+- `docs/archive/topic1/pr6_template_anchoring/pr6_direction_brainstorm_2026-04-25.md` — pivot 决策的 brainstorm（Obs 1–4 + 文献分类 + Topic 1 × Topic 3 桥的提出）
 
 三份 PR-6-A doc 顶部已加 `> SUPERSEDED 2026-04-25` 块。Pivot 的实证基础：sentinel `548/916` 跨 seizure 顶部通道 overlap=0、cross-band ρ=−0.21、early channels 被 `other` 主导；文献基础：Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021 一起说 “稳定 ictal anchor 在领域里已知不 work”。
 
@@ -331,13 +333,15 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 **显式不做**：不在当前数据上重新调 endpoint 定义（top-3 / coreness / median 之外）；不重做 PR-2/3/4/4B 核心 cluster pipeline；不引入 ictal anchor / ER / CUSUM。
 
-**Step 6 / archive results doc 推迟**：等 §1 或 §2 中的下一步验证有结果后再写正式归档 doc 与主文档一句话回写；当前 PR-6 主线（Step 1–5b + 4 + 4b + 3）所有结果归档到 `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15。
+**Step 6 / archive results doc 推迟**：等 §1 或 §2 中的下一步验证有结果后再写正式归档 doc 与主文档一句话回写；当前 PR-6 主线（Step 1–5b + 4 + 4b + 3）所有结果归档到 `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15。
+
+**Continuous-version supplementary（2026-05-06）**：把 PR-6 Step 4b 离散 swap_node count 升级到逐通道 signed rank displacement（Δr = rank_T_b − rank_T_a），加 Spearman footrule + Diaconis-Graham 归一化 + Kendall τ + baseline-corrected SOZ contribution split。**不**立独立 PR、**不**开 cohort gate。**Cohort = 全部 27 个 stable_k=2 subject**（PR-2 stable_k 分布 `{2:27, 4:2, 6:1}`）。valid_mask 优先用 PR-6 `valid_mask`（23 subject），PR-6 缺失时 fallback 到 PR-2 `(template_rank ≠ −1)` sentinel（4 subject：`1125/384/620/916`，PR-6 SOZ-空过滤掉的）。两 provenance 在共有 subject 上完全一致。**Paper-level deliverable 是单张 composite supplementary figure**：cohort heatmap 主体（行按 F_norm 降序，列按 rank_T_a_dense，SOZ 黑框，x-axis 在上方）+ 一条 F_norm summary track（带 2/3 ref）+ 主热图正下方水平 Δr colorbar + colorbar 旁的 SOZ channel mini-legend。Kendall τ 与 SOZ contribution_excess **均不进 paper figure**：τ 与 F_norm 在本 cohort Spearman ρ = −0.92 共线，track 冗余；SOZ 在 lagPat 通道集上覆盖与 i/l/e 边界尚未稳定。τ 与 SOZ 数字均保留在 archive 作 descriptive cross-check。结论：(a) cohort 在 F_norm 范围 [0.39, 1.00] 上呈连续谱，不是离散二分（n=27，median F_norm=0.81）；(b) 与 PR-6 离散 swap_node 同向（PR-2.5 fwd/rev-reproduced 8 subject 的 Kendall τ 全部 < 0；其中 PR-6 cohort n=6 sign-test p=0.031）。新加入的 4 个 subject 中 `epi_620` (F=1.00, τ=−0.78) 与 `epi_1125` (F=0.88, τ=−0.71) 都是 PR-2.5 fwd/rev-reproduced subject——之前因 PR-6 SOZ-空过滤错失。详见 `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` 与 `pr6_supplementary_rank_displacement_results_2026-05-06.md`。
 
 ---
 
 ### 7.11 PR-7：Template Antagonistic Temporal Pairing（Ping-Pong 功能耦合层）
 
-> 完整合同（数据/假设/失败合同/代码入口/测试合同/可视化方案/工作量）：`docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md`
+> 完整合同（数据/假设/失败合同/代码入口/测试合同/可视化方案/工作量）：`docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md`
 > 整体假说审阅与 PR roadmap：`docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md`
 > 性质：正式入口，**plan-of-record 已落盘 2026-04-28**。本节只保留**判定摘要**与 pivot 来源，不重述阈值与 metric 定义（避免与 archive 双源漂移）。
 
@@ -381,7 +385,7 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 - ❌ "Burst-level reciprocal coupling restores Ping-Pong"
 - ❌ 删除 PR-6 几何 narrative
 
-详见 `docs/archive/topic1/pr7_template_pairing_results_2026-04-29.md` §1–§17。完整图集：`results/interictal_propagation/template_pairing/figures/`（fig1–5 + appendix 1/3）。
+详见 `docs/archive/topic1/pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md` §1–§17。完整图集：`results/interictal_propagation/template_pairing/figures/`（fig1–5 + appendix 1/3）。
 
 **下一步**（**不在 PR-7 内**）：
 - 独立 follow-up PR：history-dependent marked point process model（`next_label ~ previous_label + recent_rate + time_since_last + block / state`），可一并测 form (1) + (2) + (4) 不依赖 fixed-window metric
@@ -393,14 +397,14 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 
 ### 内部传播
 
-- 文档：`docs/archive/topic1/interictal_group_event_internal_propagation.md`
+- 文档：`docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md`
 - 代码：`src/interictal_propagation.py`
 - 脚本：`scripts/run_interictal_propagation.py`、`scripts/plot_interictal_propagation.py`、`scripts/plot_topic1_pr4_ppt.py`
 - 结果：`results/interictal_propagation/`
 
 ### 事件级同步性
 
-- 文档：`docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md`
+- 文档：`docs/archive/topic1/synchrony/interictal_synchrony_preliminary_report_2026-04-03.md`
 - 代码：`src/interictal_synchrony.py`、`src/interictal_synchrony_aggregation.py`、`src/interictal_synchrony_analysis.py`
 - 脚本：`scripts/pr6_interictal_sync_figures.py`
 - 结果：`results/interictal_synchrony/analysis/combined/`
@@ -417,19 +421,24 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 
 ## 10. 历史文档索引
 
-- `docs/archive/topic1/interictal_group_event_internal_propagation.md` — 内部传播线的详细结果与合同文档
-- `docs/archive/topic1/interictal_synchrony_preliminary_report_2026-04-03.md` — PR4–PR6 的统计报告
-- `docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md` — PR-4C 主+辅助配置全量审阅。§1-§8 是 2026-04-17 第一轮审阅（cohort 数值表 / 三处实现合同问题 / P0/P1/P2/P3 路线）；**§9 是 2026-04-19 P0 修复完成后的复跑数值与正式封板结论**。Topic 1 §3.1c / §5 / §7.2 / §7.6 / §7.7 都引用本文件。
-- `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 完整计划合同：科学问题 / 主+备择假设 / 失败合同 / PR-5-A novel-template gate / PR-5-B recruitment shift（含 §4.5 secondary composition diagnostic 独立合同）/ 9 项 TDD 测试合同 / §9 未来模型层占位（不绑 PR 编号，对应主文档 §7.9）/ §11 复跑结论。Topic 1 §5 / §7.5 / §7.6 / §7.8 / §7.9 / §10 都引用本文件。
-- `docs/archive/topic1/pr5a_novel_template_gate_2026-04-20.md` — PR-5-A gate 全 cohort 跑数与判定中间报告。
-- `docs/archive/topic1/pr6a_step0-2_step3preview_review_2026-04-23.md` — **SUPERSEDED 2026-04-25**：PR-6A Step0-2 / Step3-preview 阶段性审阅；保留作为 pivot 决策的实证证据（sentinel `548/916` 跨 seizure top10 overlap=0 / cross-band ρ=−0.21）。当前正式入口：`pr6_template_endpoint_anchoring_plan_2026-04-25.md`。
-- `docs/archive/topic1/pr6a_template_ictal_alignment_plan_2026-04-21.md` — **SUPERSEDED 2026-04-25**：原 PR-6-A single ictal anchor + Smith 2022 重现的合同级计划；保留作为科学背景与方法学讨论。
-- `docs/archive/topic1/pr6a-1.md` — **SUPERSEDED 2026-04-25**：原 PR-6-A multi-anchor consensus probe 计划（5 anchor voting）；保留作为 pivot 决策证据。
-- `docs/archive/topic1/pr6_direction_brainstorm_2026-04-25.md` — PR-6 pivot 决策的 brainstorm 文档：Obs 1–4 分类、文献整理、Topic 1 × Topic 3 桥的提出；驱动了 PR-6 主线从 ictal alignment 转向 endpoint anatomical anchoring。
-- `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — **PR-6 正式入口（plan-of-record）**：H1 endpoint vs middle / H1b polarity / H2 forward-reverse swap / H3 i-l-e sensitivity / cohort audit-derived / 8 项 TDD / 失败合同。Topic 1 §2 / §5 / §7.5 / §7.10 / §10 都引用本文件。
+- `docs/paper1_framework_sba.md` — **Paper 1 架构性 framework（最高优先级 pre-registration）**：SBA 单核心假设 + 5 sharp predictions（P1–P5）+ BHPN-toy/fit 数学合同 + 5 dumb baseline + 失败模式表 + 命名/范围/Out of scope。本 topic 的 PR-2 / PR-2.5 / PR-6 / PR-7 / 待立 PR-T4-1/T4-2 / PR-9 全部受其统辖。
+- `docs/archive/topic1/pr7_template_pairing/pr7_addendum_p3_equivalence_2026-05-01.md` — PR-7 addendum：P3 cohort-level equivalence test (TOST + bootstrap CI + leave-one-out + leave-548-out)。verdict = INCONCLUSIVE；1800s + lag1_same_excess PASS，短窗 + run_length_lift CI underpowered。SBA 不被 falsified。
+- `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` — **PR-T4-1 BHPN-toy plan-of-record**（继承 framework v1.1.2）：toy model 实现 + 14 项 TDD + T1–T7 内部 sanity（large-N simulation, **不**以 PR-7 实证 cohort 为 anchor）+ TT14 toy-validate framework δ_excess scientific 推理。下游 PR-T4-2 BHPN-fit 等 PR-T4-1 + PR-T3-1 完成后启动。
+- `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` — 内部传播线的详细结果与合同文档
+- `docs/archive/topic1/synchrony/interictal_synchrony_preliminary_report_2026-04-03.md` — PR4–PR6 的统计报告
+- `docs/archive/topic1/propagation/pr4c_seizure_proximity_review_2026-04-17.md` — PR-4C 主+辅助配置全量审阅。§1-§8 是 2026-04-17 第一轮审阅（cohort 数值表 / 三处实现合同问题 / P0/P1/P2/P3 路线）；**§9 是 2026-04-19 P0 修复完成后的复跑数值与正式封板结论**。Topic 1 §3.1c / §5 / §7.2 / §7.6 / §7.7 都引用本文件。
+- `docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 完整计划合同：科学问题 / 主+备择假设 / 失败合同 / PR-5-A novel-template gate / PR-5-B recruitment shift（含 §4.5 secondary composition diagnostic 独立合同）/ 9 项 TDD 测试合同 / §9 未来模型层占位（不绑 PR 编号，对应主文档 §7.9）/ §11 复跑结论。Topic 1 §5 / §7.5 / §7.6 / §7.8 / §7.9 / §10 都引用本文件。
+- `docs/archive/topic1/pr5_template_recruitment/pr5a_novel_template_gate_2026-04-20.md` — PR-5-A gate 全 cohort 跑数与判定中间报告。
+- `docs/archive/topic1/pr6_template_anchoring/pr6a_step0-2_step3preview_review_2026-04-23.md` — **SUPERSEDED 2026-04-25**：PR-6A Step0-2 / Step3-preview 阶段性审阅；保留作为 pivot 决策的实证证据（sentinel `548/916` 跨 seizure top10 overlap=0 / cross-band ρ=−0.21）。当前正式入口：`pr6_template_endpoint_anchoring_plan_2026-04-25.md`。
+- `docs/archive/topic1/pr6_template_anchoring/pr6a_template_ictal_alignment_plan_2026-04-21.md` — **SUPERSEDED 2026-04-25**：原 PR-6-A single ictal anchor + Smith 2022 重现的合同级计划；保留作为科学背景与方法学讨论。
+- `docs/archive/topic1/pr6_template_anchoring/pr6a-1.md` — **SUPERSEDED 2026-04-25**：原 PR-6-A multi-anchor consensus probe 计划（5 anchor voting）；保留作为 pivot 决策证据。
+- `docs/archive/topic1/pr6_template_anchoring/pr6_direction_brainstorm_2026-04-25.md` — PR-6 pivot 决策的 brainstorm 文档：Obs 1–4 分类、文献整理、Topic 1 × Topic 3 桥的提出；驱动了 PR-6 主线从 ictal alignment 转向 endpoint anatomical anchoring。
+- `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — **PR-6 正式入口（plan-of-record）**：H1 endpoint vs middle / H1b polarity / H2 forward-reverse swap / H3 i-l-e sensitivity / cohort audit-derived / 8 项 TDD / 失败合同。Topic 1 §2 / §5 / §7.5 / §7.10 / §10 都引用本文件。
 - `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` — Ping-Pong 假说整体审阅：三层分离（现象学 A / 功能耦合 B / 机制 C）+ user 提议实验逐项对账 + PR roadmap（PR-7 → PR-8 candidate → PR-9 candidate）。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
-- `docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 正式入口（plan-of-record）**：H1 triple gate (10s primary + 30s sensitivity + sign test) / H1b direction symmetry / H2 non-fwdrev negative control / N0–N4 surrogate hierarchy（N2 主 null + N3 robustness + N4 conditional）/ cohort 5 条 pre-registered 入选门槛 / 10 项 TDD / §6.5 可视化方案 / 7 类失败合同。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
-- `docs/archive/topic1/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
+- `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` — PR-6 supplementary plan：把离散 swap_node count 升级到逐通道 signed rank displacement + Diaconis-Graham 归一化 footrule + Kendall τ + baseline-corrected SOZ split。Pre-registered 反 sorting bias（列按 rank_T_a_dense 排）+ sign anchor 合同（Δr 仅 subject 内部有效）+ n_available 不预承诺。Topic 1 §7.10 / §10 引用本文件。
+- `docs/archive/topic1/pr6_supplementary_rank_displacement_results_2026-05-06.md` — PR-6 supplementary results：cohort n=23（stable_k=2 ∩ PR-6 endpoint-defined）；reproduced n=6 (Kendall τ median = −0.495, F_norm = 0.964) vs not reproduced n=17 (τ = −0.048, F_norm = 0.688)。Reproduced 6/6 subject τ < 0，与 PR-6 离散 swap geometry 同向。SOZ contribution_excess ≈0（descriptive only，无 enrichment claim）。Topic 1 §7.10 / §10 引用本文件。
+- `docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 正式入口（plan-of-record）**：H1 triple gate (10s primary + 30s sensitivity + sign test) / H1b direction symmetry / H2 non-fwdrev negative control / N0–N4 surrogate hierarchy（N2 主 null + N3 robustness + N4 conditional）/ cohort 5 条 pre-registered 入选门槛 / 10 项 TDD / §6.5 可视化方案 / 7 类失败合同。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
+- `docs/archive/topic1/propagation/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。
 
@@ -437,4 +446,4 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 
 ## 11. 文档整理里程碑
 
-- **2026-04-20**：主文档大幅瘦身（442 行 → ~270 行），按"主文档只放正式口径，过程性细节回链 archive"原则重写。所有 §-锚点保留；PR-4B / PR-4C / PR-5 的完整数值表、阈值、metric 公式、测试合同、复跑过程已下沉到对应 archive。同步把 `docs/plans/` 下已完成的 yuquan_lagpat 系列（6 个文件）归档到 `docs/archive/yuquan_lagpat/`，event_periodicity Phase 2 plan 归档到 `docs/archive/topic2/plans/`；`interictal_synchrony_analysis_v4.plan.md` 仍有 pending 项，保留在 `docs/plans/`。
+- **2026-04-20**：主文档大幅瘦身（442 行 → ~270 行），按"主文档只放正式口径，过程性细节回链 archive"原则重写。所有 §-锚点保留；PR-4B / PR-4C / PR-5 的完整数值表、阈值、metric 公式、测试合同、复跑过程已下沉到对应 archive。同步把 `docs/plans/` 下已完成的 yuquan_lagpat 系列（6 个文件）归档到 `docs/archive/yuquan_lagpat/`，event_periodicity Phase 2 plan 归档到 `docs/archive/topic2/plans/`；`interictal_synchrony_analysis_v4.plan.md` 仍有 pending 项，2026-05-05 整体迁入 `docs/archive/topic1/plans/`。

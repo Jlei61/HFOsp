@@ -1,7 +1,7 @@
 """PR-T3-1 v2.1 — Layer A: Ictal ER-rank producer (scope-restricted).
 
 This module implements Layer A of the v2.1 pivot
-(`docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md`):
+(`docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md`):
 
 - Per-channel Page-Hinkley CUSUM alarm time ``n_d`` against PR-6A's
   baseline-z-scored ER (gamma_ER + broad_ER).
@@ -67,6 +67,12 @@ __all__ = [
     "compute_stability_s_sz",
     "time_shifted_seizure_onsets",
     "QUALIFYING_SEIZURE_STATUSES",
+    # v2.2 (2026-05-04) — producer_health + clinical_concordance tags
+    # per plan §3.4.1 / §3.4.2.
+    "classify_producer_health",
+    "classify_clinical_concordance",
+    "compute_top10_coverage_list",
+    "compute_focal_in_topk",
 ]
 
 
@@ -712,3 +718,193 @@ def time_shifted_seizure_onsets(
                     break
             # else: leave as NaN (caller skips NaN draws downstream)
     return out
+
+
+# ---------------------------------------------------------------------------
+# v2.2 (2026-05-04) — producer_health + clinical_concordance tag helpers
+#
+# Plan §3.4 was rewritten on 2026-05-04 to split the original single
+# sentinel hard gate into two independent classifications:
+#
+#   - producer_health:      decides whether the data-driven r_sz is usable
+#                           on this (subject × ER) cell. Drives A.4 unblock
+#                           and Layer B per-subject inclusion.
+#   - clinical_concordance: METADATA-ONLY. Reports whether the data-driven
+#                           r_sz aligns with clinical i-label. Does NOT
+#                           gate any pipeline decision; downstream PRs
+#                           must propagate this tag alongside the label.
+#
+# Two independent classifications: (high producer_health, low concordance)
+# and (low producer_health, high concordance) are both legal and observed
+# (548 broad = unstable+concordant; 916 gamma = stable+discordant).
+# ---------------------------------------------------------------------------
+
+
+def classify_producer_health(
+    *,
+    n_ok: int,
+    s_sz: Optional[float],
+    top10_cov_pass_count: int,
+    top10_cov_threshold: float,
+) -> Tuple[str, Dict[str, object]]:
+    """Classify (subject × ER) producer health (plan §3.4.1).
+
+    Branch logic
+    ------------
+    - ``n_ok < 3`` → ``"insufficient"`` (regardless of s_sz / cov)
+    - ``s_sz is None`` or ``s_sz < 0.3`` → ``"unstable"``
+    - top-10 cov OK = ``top10_cov_pass_count >= 7``
+    - ``s_sz >= 0.5``:  cov OK → ``"stable"``,  else demote → ``"moderate"``
+    - ``0.3 <= s_sz < 0.5``: cov OK → ``"moderate"``, else demote → ``"unstable"``
+
+    Parameters
+    ----------
+    n_ok
+        Number of seizures with status == "ok".
+    s_sz
+        Median pairwise Spearman ρ across qualifying seizures (or None).
+    top10_cov_pass_count
+        Number of top-10 (by r_sz ascending) channels whose
+        ``r_sz_valid_count`` ≥ ``top10_cov_threshold``.
+    top10_cov_threshold
+        ``max(3, 0.5 * n_ok)`` — recorded for reproducibility.
+
+    Returns
+    -------
+    (tag, details)
+        ``tag`` in {``"stable"``, ``"moderate"``, ``"unstable"``,
+        ``"insufficient"``}; ``details`` echoes the inputs for
+        downstream auditability.
+    """
+    details: Dict[str, object] = {
+        "n_ok": int(n_ok),
+        "s_sz": (None if s_sz is None else float(s_sz)),
+        "top10_cov_pass_count": int(top10_cov_pass_count),
+        "top10_cov_threshold": float(top10_cov_threshold),
+    }
+    if int(n_ok) < 3:
+        return "insufficient", details
+    if s_sz is None or float(s_sz) < 0.3:
+        return "unstable", details
+    cov_ok = int(top10_cov_pass_count) >= 7
+    if float(s_sz) < 0.5:
+        return ("moderate" if cov_ok else "unstable"), details
+    return ("stable" if cov_ok else "moderate"), details
+
+
+def classify_clinical_concordance(
+    *,
+    wilcoxon_p_one_sided: Optional[float],
+    focal_in_top10_count: int,
+    top10_total: int,
+    n_focal_with_finite_rsz: int,
+    n_nonfocal_with_finite_rsz: int,
+    focal_rsz_median: Optional[float],
+    nonfocal_rsz_median: Optional[float],
+    producer_health: str,
+) -> Tuple[str, Dict[str, object]]:
+    """Classify clinical concordance — METADATA ONLY (plan §3.4.2).
+
+    This function is **not** consulted by any pipeline gate. It exists
+    solely to write a per-(subject × ER) concordance label into the
+    Layer A JSON / atlas so downstream PRs (Layer B + dual-label
+    consumers) propagate the tag and never default to "data-driven SOZ
+    ≈ clinical SOZ".
+
+    Branch logic
+    ------------
+    - ``producer_health == "insufficient"`` → ``"not_assessable"``
+      (producer-health gate already declared the cell unusable; nothing
+      to compare against).
+    - ``n_focal_with_finite_rsz < 2`` or ``n_nonfocal_with_finite_rsz < 2``
+      → ``"not_assessable"`` (statistical comparison undefined).
+    - ``p_ok`` = ``wilcoxon_p_one_sided is not None and < 0.1``
+    - ``frac_ok`` = ``focal_in_top10_count / max(1, top10_total) >= 0.3``
+    - both → ``"concordant"``
+    - one  → ``"partial"``
+    - none → ``"discordant"``
+
+    The function is intentionally pure: it does NOT recompute Wilcoxon
+    or top-10 counts internally — caller is responsible for those, so
+    the function stays cheap to test and exercises the **decision
+    surface only**.
+    """
+    focal_in_top10_fraction = (
+        float(focal_in_top10_count) / max(1.0, float(top10_total))
+        if top10_total > 0
+        else 0.0
+    )
+    details: Dict[str, object] = {
+        "wilcoxon_one_sided_p": (
+            None if wilcoxon_p_one_sided is None else float(wilcoxon_p_one_sided)
+        ),
+        "focal_r_sz_median": (
+            None if focal_rsz_median is None else float(focal_rsz_median)
+        ),
+        "nonfocal_r_sz_median": (
+            None if nonfocal_rsz_median is None else float(nonfocal_rsz_median)
+        ),
+        "focal_in_top10_count": int(focal_in_top10_count),
+        "focal_in_top10_fraction": float(focal_in_top10_fraction),
+        "n_focal_with_finite_rsz": int(n_focal_with_finite_rsz),
+        "n_nonfocal_with_finite_rsz": int(n_nonfocal_with_finite_rsz),
+    }
+
+    if producer_health == "insufficient":
+        return "not_assessable", details
+    if int(n_focal_with_finite_rsz) < 2 or int(n_nonfocal_with_finite_rsz) < 2:
+        return "not_assessable", details
+
+    p_ok = (
+        wilcoxon_p_one_sided is not None and float(wilcoxon_p_one_sided) < 0.1
+    )
+    frac_ok = focal_in_top10_fraction >= 0.3
+
+    if p_ok and frac_ok:
+        return "concordant", details
+    if p_ok or frac_ok:
+        return "partial", details
+    return "discordant", details
+
+
+def compute_top10_coverage_list(
+    r_sz: Mapping[str, Optional[float]],
+    coverage: Mapping[str, int],
+    *,
+    top_k: int = 10,
+) -> List[int]:
+    """Return cov values for top-K channels (by r_sz ascending).
+
+    None r_sz channels are excluded (they never had a finite rank).
+    Returned list length = ``min(top_k, n_finite)``; fewer than
+    ``top_k`` entries when fewer than ``top_k`` channels have finite
+    r_sz. Tie-breaking on r_sz is the dict iteration order (stable
+    sort), which is fine — top-K identity is not the focus, the cov
+    distribution is.
+    """
+    finite = [(ch, float(v)) for ch, v in r_sz.items() if v is not None]
+    finite.sort(key=lambda kv: kv[1])
+    top = finite[: int(top_k)]
+    return [int(coverage.get(ch, 0)) for ch, _ in top]
+
+
+def compute_focal_in_topk(
+    r_sz: Mapping[str, Optional[float]],
+    focal_set: set,
+    *,
+    top_k: int = 10,
+) -> Tuple[int, int]:
+    """Count focal channels in top-K by r_sz ascending.
+
+    Returns
+    -------
+    (n_focal_in_topk, n_topk_actual)
+        ``n_topk_actual`` may be ``< top_k`` if the subject has fewer
+        than ``top_k`` channels with finite r_sz; caller divides
+        ``n_focal_in_topk / max(1, n_topk_actual)`` to get the fraction.
+    """
+    finite = [(ch, float(v)) for ch, v in r_sz.items() if v is not None]
+    finite.sort(key=lambda kv: kv[1])
+    top_chs = [ch for ch, _ in finite[: int(top_k)]]
+    n_focal = sum(1 for ch in top_chs if ch in focal_set)
+    return n_focal, len(top_chs)

@@ -4,7 +4,7 @@
 > 目的：把当前 Topic 1 已经建立的 forward/reverse template 现象，与"间期事件作为 SOZ 兴奋-抑制对偶的 biomarker" 这一更进一步的机制叙事对齐；明确哪些已被支撑、哪些是工作假说、哪些必须靠新实验验证。
 > 性质：roadmap，不是结论；后续 PR 的 plan-of-record 单独归档（参见 §6）。
 > 上游：`docs/topic1_within_event_dynamics.md` §3 / §7
-> 下游：`docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md`（PR-7 Antagonistic Temporal Pairing）
+> 下游：`docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md`（PR-7 Antagonistic Temporal Pairing）
 
 ---
 
@@ -43,8 +43,8 @@
 
 | user 回忆 | 当前文档实际 | 来源 |
 |---|---|---|
-| ~10 subject 完全反向模板 | candidate forward/reverse = **11–12/30**（inter-cluster r<−0.5 of which **6–8/30 跨时间复现**） | `interictal_group_event_internal_propagation.md` §7.3 + PR-2.5 |
-| 7 个 subject "前三反向" 显著 | **PR-6 H2 forward/reverse-reproduced subset n=6**（OR 规则），swap geometry sign-test p=0.031 ✓ | `pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15 Step 4b |
+| ~10 subject 完全反向模板 | candidate forward/reverse = **11–12/30**（inter-cluster r<−0.5 of which **6–8/30 跨时间复现**） | `propagation/interictal_group_event_internal_propagation.md` §7.3 + PR-2.5 |
+| 7 个 subject "前三反向" 显著 | **PR-6 H2 forward/reverse-reproduced subset n=6**（OR 规则），swap geometry sign-test p=0.031 ✓ | `pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` §15 Step 4b |
 | post-ictal rate 提高 | dominant template post-ictal rate elevation Bonferroni-pass | PR-5 §11 |
 | SOZ 解剖锚定 | H1 cohort NULL（p=0.42, n=21）；endpoint vs middle SOZ frac 不显著 | PR-6 Step 3 |
 
@@ -82,7 +82,7 @@
 
 ## 5. 主要新实验：PR-7 Surrogate 设计要点（来自 user 2026-04-28 的 push back）
 
-PR-7 完整合同见 `pr7_template_antagonistic_pairing_plan_2026-04-28.md`。这里只摘要 surrogate 设计原则，避免双源漂移。
+PR-7 完整合同见 `pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md`。这里只摘要 surrogate 设计原则，避免双源漂移。
 
 **核心问题**：单纯"固定时间戳 + shuffle template label"太弱 — 总事件率有 burst 和慢漂移，全局 label shuffle 会把"高 rate 时段事件天然更密"误判成 T_a → T_b 配对。
 
@@ -155,7 +155,7 @@ Conditional on PR-7 结果：
 
 ### 7.2 PR-7 NULL（实际结果，2026-04-30 lock）
 
-PR-7 H1 三条 metric 全部 NULL 已验收（详见 `pr7_template_pairing_results_2026-04-29.md` §17 + topic1 §7.11）。**预先写在本节的 framing（"independent slow-modulated streams" / "删除整篇 Ping-Pong metaphor"）2026-04-30 user review 推翻——太强**。
+PR-7 H1 三条 metric 全部 NULL 已验收（详见 `pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md` §17 + topic1 §7.11）。**预先写在本节的 framing（"independent slow-modulated streams" / "删除整篇 Ping-Pong metaphor"）2026-04-30 user review 推翻——太强**。
 
 正确写法（locked across §17 / topic1 §7.11）：
 
@@ -196,10 +196,10 @@ PR-7 H1 三条 metric 全部 NULL 已验收（详见 `pr7_template_pairing_resul
 ## 9. 历史链接
 
 - `docs/topic1_within_event_dynamics.md` — Topic 1 主文档
-- `docs/archive/topic1/interictal_group_event_internal_propagation.md` — PR-2 / PR-2.5 完整结果
-- `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — PR-6 cluster centroid 几何（PR-7 输入合同的来源）
-- `docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 plan-of-record**
-- `docs/archive/topic1/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 dominant template post-ictal rate elevation（PR-9 candidate 依赖）
+- `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` — PR-2 / PR-2.5 完整结果
+- `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — PR-6 cluster centroid 几何（PR-7 输入合同的来源）
+- `docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 plan-of-record**
+- `docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md` — PR-5 dominant template post-ictal rate elevation（PR-9 candidate 依赖）
 
 ---
 

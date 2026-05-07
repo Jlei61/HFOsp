@@ -1,6 +1,6 @@
 """TDD tests for PR-6 template endpoint anatomical anchoring.
 
-Contract: docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md §9.
+Contract: docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md §9.
 """
 
 from __future__ import annotations

@@ -4,7 +4,7 @@
 Step 2 deliverable: cohort audit (`--audit`) + per-subject pairing/null
 analysis (`--per-subject`).
 
-Plan: docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md.
+Plan: docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md.
 The audit reuses PR-6's `cohort_audit.csv` (forward_reverse_reproduced OR
 rule) and augments with PR-7-specific eligibility fields:
   - n_events_total, n_T_a, n_T_b, min_cluster_n

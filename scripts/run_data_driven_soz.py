@@ -3,7 +3,7 @@
 ⚠️  **v1.1 IS SUPERSEDED 2026-05-03**: ``--per-subject`` and
 ``--cohort-overlap`` modes implement the v1.1 HFO-rate-based design,
 which is no longer the plan-of-record. See
-``docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``
+``docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md``
 for v2.1 (Layer A producer + Layer B consumer). v1.1 modes here are
 kept ONLY for cohort reproduction from
 ``per_subject_hfo_rate_obsolete_v1_1/``.
@@ -41,7 +41,7 @@ Per-subject the script:
 
 Output: ``results/spatial_modulation/data_driven_soz/audit.csv``.
 
-See ``docs/archive/topic3/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
+See ``docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_data_driven_soz_audit_plan_2026-04-30.md``.
 """
 
 from __future__ import annotations
@@ -1412,7 +1412,7 @@ def main() -> int:
         print(
             "[deprecated] --per-subject implements PR-T3-1 v1.1 (HFO-rate "
             "based M1 + M2). v1.1 is SUPERSEDED by v2.1 pivot — see "
-            "docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md. "
+            "docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md. "
             "v2.1 entry points are scripts/run_ictal_er_rank.py (Layer A) and "
             "the new --build-labels-from-layer-a / --cohort-overlap-v2 modes "
             "(Layer B). This mode is kept for v1.1 cohort reproduction only.",
@@ -1431,7 +1431,7 @@ def main() -> int:
         raise NotImplementedError(
             "cohort-overlap (v1.1 design) is SUPERSEDED. v2.1 Layer B uses "
             "--cohort-overlap-v2 against Layer A r_sz output; see "
-            "docs/archive/topic3/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md."
+            "docs/archive/topic3/pr_t3_1_data_driven_soz/pr_t3_1_pivot_to_pr6a_er_ranking_2026-05-03.md."
         )
 
     parser.print_help()

@@ -1,3 +1,9 @@
+> **⚠️ 已退役措辞 ⚠️**：本文档语境为"对齐 21 年 cusignal 输出"。该目标在 2026-05-05 被放弃——
+> 见 `docs/archive/hfo_detector_v2/v2_cohort_rebuild_plan_2026-05-05.md`。21 年 gpu.npz 现已锁为
+> 只读历史参照（`results/_legacy_2021_readonly/`）。本文档 detector 层结论仍可参考，但
+> "100% 复刻 / verbatim port" 措辞在 v2 上下文中不再成立——v2 是 modern stack
+> deterministic detector，不与 21 年 1:1 比对。
+
 # Detector 层 5% 残差根因 — 深挖审计（2026-05-03）
 
 > 计划：[`epilepsiae_lagpat_backfill_plan_2026-04-29.md`](./epilepsiae_lagpat_backfill_plan_2026-04-29.md)

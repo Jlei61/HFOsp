@@ -969,7 +969,7 @@ def plot_fig4():
     """PR-4C: cohort propagation geometry is null around seizures, but
     fixed-template event rate (rate_by_template) is robustly elevated post-ictally.
 
-    Numbers come from ``docs/archive/topic1/pr4c_seizure_proximity_review_2026-04-17.md``
+    Numbers come from ``docs/archive/topic1/propagation/pr4c_seizure_proximity_review_2026-04-17.md``
     §9 (P0 fix re-run, both main + auxiliary configs).
     """
     print("Plotting Fig 4: PR-4C seizure proximity ...")

@@ -4,7 +4,7 @@ Pure statistical layer. Tests whether forward/reverse template pairs
 (PR-2.5 + PR-6 Step 4) are temporally coupled at short scales, or whether
 they coexist as independent slow-modulated streams.
 
-Contract: docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md.
+Contract: docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md.
 """
 
 from __future__ import annotations
@@ -554,7 +554,7 @@ def evaluate_pass_criteria(
 
 # ---------------------------------------------------------------------------
 # Step 3.5 — Burst-level run diagnostic (post-hoc exploratory)
-# Plan: docs/archive/topic1/pr7_step3p5_burst_diagnostic_plan_2026-04-29.md.
+# Plan: docs/archive/topic1/pr7_template_pairing/pr7_step3p5_burst_diagnostic_plan_2026-04-29.md.
 # Does NOT change H1 verdict; not a PASS/FAIL gate.
 # ---------------------------------------------------------------------------
 def compute_runs(

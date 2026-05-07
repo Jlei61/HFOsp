@@ -235,3 +235,14 @@ docs/archive/**/_artifacts/
 # Local paper markdown / MinerU extractions (not tracked)
 docs/paper/
 .worktrees/
+
+# v2 cohort rebuild — track read-only legacy manifests + README
+# (parent re-includes are required so git's "ignored parent" rule
+# does not block the explicit file negations below)
+!results/
+results/*
+!results/_legacy_2021_readonly/
+results/_legacy_2021_readonly/*
+!results/_legacy_2021_readonly/README.md
+!results/_legacy_2021_readonly/_manifest.csv
+!results/_legacy_2021_readonly/_manifest_v2.csv

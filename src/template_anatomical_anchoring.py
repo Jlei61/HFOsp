@@ -2,7 +2,7 @@
 
 Pure statistical layer.
 
-Contract: docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md.
+Contract: docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md.
 Reuses match_bipolar_soz / match_bipolar_focus_rel from src.event_periodicity for
 channel-name alignment (Yuquan bipolar endpoint match + Epilepsiae CAR direct match).
 """

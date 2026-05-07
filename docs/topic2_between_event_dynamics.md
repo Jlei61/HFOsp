@@ -2,6 +2,7 @@
 
 > 状态：当前正式入口
 > 范围：只讨论群体事件作为一个点过程，在事件与事件之间表现出的时间结构。
+> **与 Paper 1 framework 的关系**：本 topic **不**进 Paper 1；Paper 1 架构性 framework `docs/paper1_framework_sba.md` 在 §10.3 Out of scope 显式排除事件间 ~2 Hz / power-law IEI / refractory + slow modulation 解释，这些归独立 Paper 2。Paper 2 的现象学口径以本文件为准。
 
 ---
 
@@ -157,6 +158,7 @@ PR-2.7 的 seizure-triggered rate average：
 
 ## 8. 历史文档索引
 
+- `docs/paper1_framework_sba.md` — **Paper 1 架构性 framework**：与本 topic 边界明确，本 topic **不**进 Paper 1（Paper 1 的 Out of scope §10.3 显式排除事件间周期性 / power-law IEI / refractory + slow modulation 解释，归独立 Paper 2）。
 - `docs/archive/topic2/event_periodicity_analysis.md`
   - 当前最完整的结果与代码地图
 - `docs/archive/topic2/interictal_population_event_methodological_review.md`

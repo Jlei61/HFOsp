@@ -1,6 +1,6 @@
 """TDD tests for PR-7 template antagonistic temporal pairing.
 
-Contract: docs/archive/topic1/pr7_template_antagonistic_pairing_plan_2026-04-28.md §8.
+Contract: docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md §8.
 Includes T11–T15 added 2026-04-28 in response to scientific-contract review:
 - T11: N2 50% overlap + first-covering-window partition behavior
 - T12: N2 must not cross block boundaries
