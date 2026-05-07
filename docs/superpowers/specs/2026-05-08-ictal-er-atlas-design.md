@@ -267,6 +267,8 @@ sort_band selection (rank stable > moderate > unstable > insufficient):
 
 ### 6.2 `compute_cusum_n_d_with_time`（双存 frame_idx + sec）
 
+**实现必须是字面 wrapper**（advisor 建议：no-drift 由结构保证，不靠测试）：
+
 ```python
 @dataclass(frozen=True)
 class CusumOnsetResult:
@@ -283,14 +285,21 @@ def compute_cusum_n_d_with_time(
     win_sec: float,
     pre_sec: float,
 ) -> CusumOnsetResult:
-    """与 compute_cusum_n_d 共用核心算法，仅在外层附加时间转换."""
+    """字面 wrapper of compute_cusum_n_d + 时间转换. 不复制循环体."""
+    idx = compute_cusum_n_d(
+        z_er_1d, lambda_thresh,
+        bias=bias, detection_idx_window=detection_idx_window,
+    )
+    if idx is None:
+        return CusumOnsetResult(None, None)
+    t_sec = float(idx) * float(hop_sec) + float(win_sec) / 2.0 - float(pre_sec)
+    return CusumOnsetResult(idx, t_sec)
 ```
 
 **契约要求**：
+- 实现严禁复制 `compute_cusum_n_d` 的循环体；必须直接调用它
 - 当 `compute_cusum_n_d` 返回 None 时，`CusumOnsetResult(None, None)`
 - 当返回有效 idx 时，`t_onset_sec = float(frame_idx) * hop_sec + win_sec / 2.0 - pre_sec`
-- 行为完全等同 `compute_cusum_n_d`（NaN reset / window clamp 等），仅多一个时间字段
-- **不允许** `compute_cusum_n_d_with_time` 自带不同的 NaN/window 处理（避免行为漂移）
 
 ### 6.3 `seizure_records[i].channel_onsets` 持久化格式
 
@@ -328,6 +337,8 @@ def _write_subject_json_atomic(out_path: Path, payload: dict) -> None:
 ```
 
 替换 `scripts/run_ictal_er_rank.py` 中所有 `with open(out_path, "w")` 写入点。
+
+**Stale .tmp 清理**（advisor 建议）：在 runner 任意 mode 启动时扫描 `output_dir / "*.json.tmp"` 并 unlink，避免上次中断留下的 .tmp 在后续 debug 中混淆视听。约 3 行。
 
 ### 6.5 atlas 脚本 CLI（修正：与 Layer A runner 风格对齐）
 
@@ -367,6 +378,7 @@ python scripts/plot_ictal_er_atlas.py cohort [--include-seizures]
 | 3 | TDD: schema_version 顶层 + detection_window_sec 持久化测试 | `tests/test_ictal_er_rank.py` | +30 |
 | 4 | Augment `_process_one_seizure_all_ers` 写 `channel_onsets`（双存）；改 `DETECTION_PRE_SEC = 120.0`；`_run_subject_all_ers` 输出 payload 顶层加 `schema_version` + `detection_window_sec` | `scripts/run_ictal_er_rank.py` | +30 |
 | 5 | 一次性手动 rename `per_subject/ → per_subject_v2_2/`（保留 v2.2 备份），再 mkdir 新 `per_subject/` | bash one-liner | 0 |
+| 5.5 | **Sentinel canary**：跑 `--sentinel`（548 + 916, ~10min）；硬验证 (a) 顶层 `schema_version` 存在 (b) `detection_window_sec == [-120, 30]` (c) `channel_onsets` 双键 dict (d) **至少一个 channel 的 `t_onset_sec < -5`**（证明窗口真扩展）。任一项失败立即停，不进 Step 6 | bash | 0 |
 | 6 | 重跑 Layer A on 16 epilepsiae（`--per-subject`），1-3h | bash | 0 |
 | 7 | 验证 16 个 v2.3 JSON 都包含 `schema_version` + `detection_window_sec=[-120,30]` + `channel_onsets` | bash one-liner | 0 |
 | 8 | 新建 `scripts/plot_ictal_er_atlas.py` 框架 + 通用 helpers | 新文件 | +150 |
@@ -388,11 +400,21 @@ python scripts/plot_ictal_er_atlas.py cohort [--include-seizures]
 
 ### 8.2 合成 step 硬测试 ⚠️ Linus 验收
 ```python
-# 合成 z-ER：在 t = -30s 注入 step（baseline σ=1，step=10），检测窗 [-120, +30]
-result = compute_cusum_n_d_with_time(synthetic_z, lambda_thresh=10, ...)
+# 测试 1: step at t=-30s
+result = compute_cusum_n_d_with_time(synthetic_z_step_at_neg30, lambda_thresh=10, ...)
 assert result.t_onset_sec is not None
 assert -32.0 <= result.t_onset_sec <= -28.0   # ≈ -30s ± 2s tolerance
-# 若 detection 仍只搜 [-5, +30] → result.t_onset_sec ≈ -5s 或 None → 整套 atlas 判失败
+
+# 测试 2: step at t=-100s（advisor 建议：仅 -30s 不能区分窗口扩到 -50 还是真扩到 -120）
+result = compute_cusum_n_d_with_time(synthetic_z_step_at_neg100, lambda_thresh=10, ...)
+assert result.t_onset_sec is not None
+assert -102.0 <= result.t_onset_sec <= -98.0   # ≈ -100s ± 2s tolerance
+
+# 测试 3: noise-only baseline（不应触发）
+result = compute_cusum_n_d_with_time(synthetic_z_pure_noise, lambda_thresh=10, ...)
+assert result.t_onset_sec is None and result.frame_idx is None
+
+# 若任一失败 → 整套 atlas 判失败；尤其测试 2 失败说明窗口扩展不彻底
 ```
 
 ### 8.3 JSON schema 门
@@ -425,6 +447,7 @@ assert -32.0 <= result.t_onset_sec <= -28.0   # ≈ -30s ± 2s tolerance
 | ~400 PNG × ~500 KB = 200 MB | 不进 git；`.gitignore` 加 `results/data_driven_soz/.../atlas_v2_3/` |
 | epilepsiae channel 数 60-130，per-subject 矩阵高度可能溢出 30 inch | 高度 clip 到 30；channel-row 高度 = `min(0.18, 30 / (2 × n_ch + 4))` 自适应 |
 | 扩展检测窗后 baseline 段被吃掉（baseline_end_sec 离 onset 太近） | `resolve_baseline_window` 已实现 `eeg_onset_rel_sec` clamping；额外加 assert：`baseline_end_sec <= -120s + buffer_sec`，否则 seizure 标 `baseline_invalid` |
+| **Baseline squeeze**（advisor 警告）：`pre_sec=300` + `start_floor_sec=-120` + `buffer_sec=60` ⇒ baseline 仅剩 `[t_start, ~-180s]` ≈ 120s 而 v2.2 是 ~235s | sentinel canary (Step 5.5) 验证 548 baseline 仍 ≥ 80% valid；若 baseline_invalid 比例从 v2.2 暴涨，临时把 `pre_sec` 调到 360 重做 sentinel 再决策 |
 
 **回滚路径**：
 - Step 0-2 出问题：v2.2 JSON 未动，atlas 未生成 → 0 影响
