@@ -102,6 +102,22 @@
 - **结论口径**：模板稳定，但占比的昼夜漂移整体较弱。**这是描述层结果，不是强机制结论**
 - occupancy 在低 rate 时段天然高方差，不适合直接承担 PR-4C 的主统计读数 → PR-4D 已把这层补强成 `rate×type`
 
+### 3.1d Cluster geometry 可视化（trilateration plane + bimodality audit，2026-05-06）
+
+PR-2 / PR-2.5 cluster decomposition 的描述性补强。每 subject 一张 trilateration 图——把每事件按它到两个最反向模板 T_a / T_b 的距离做 2D 三边定位（T_a→(0,0)、T_b→(d_ab,0)、event 解 ‖event−T_a‖=d_a 且 ‖event−T_b‖=d_b 的 (x, y)）。每 cluster 用 2D KDE 等密度填充加散点叠加，模板钉在 cluster 中心；上方加 marginal-x 密度面板做 bimodality 直接检验。
+
+- **入选 cohort = 20 Epilepsiae subjects**；**18 Yuquan 排除**（PR-2 saved labels 与当前 lagPat valid_events 数量不对齐 / 缺 adaptive_cluster JSON）—— **data freshness 问题不在本 PR 范围**，列为 P0 follow-up：在最新 lagPat 上重跑 PR-2 / PR-2.5
+- **关键 cohort 数字**：silhouette median = **0.460**（range 0.182–0.671，5/20 < 0.3），KMeans-vs-template-matching agreement median = **0.892**（range 0.769–0.955，8/20 < 0.85），与用户先前 audit 完全一致
+- **Metric drift 集中在低 n_participating 事件**：boundary fraction by n_part bin 单调下降 `0.135 → 0.097 → 0.046`
+- **新审阅发现 — Marginal-x bimodality**（archive §3.5）：cohort 在 cluster discreteness 上**不是同质的**——dip + GMM BIC 给出 **11/20 BIMODAL（清晰双模）/ 8/20 AMBIGUOUS（dip 与 BIC 矛盾）/ 1/20 UNIMODAL（`442`：KMeans 在切单峰连续分布）**。PR-2 archive 的"30/30 multimodal via pairwise τ dip"是必要不充分条件——pairwise τ dip 不能区分"双 cluster"和"1D 连续谱"（连续谱端点对端点的 τ 也会双峰）。**保留 KMeans 2-cluster 主线作论文叙事**，但 cohort 异质性必须并列报告，特别 `442`。**continuous-spectrum reframe（principal-curve / 1D manifold）留给后续论文，本论文不动 KMeans 主线**
+- **Showcase**：`958`（BIMODAL k=2 forward/reverse）/ `818`（BIMODAL k=4）/ `253`（AMBIGUOUS k=2 弱 cluster）/ **`442`（UNIMODAL counter-example，必须报告）**
+- **Silhouette × agreement Spearman ρ = 0.889**——consistency check / sanity，**不是独立 finding**（两者都派生自同一组 d_within / d_min_other 距离差）
+- **不推翻**任何 PR-2/2.5/3/4/5/6/7 主结论
+- **不进 SBA framework P1–P5**；纯描述层
+- 详细数字、bimodality 检验机制、failure 合同、follow-up：
+  - Plan：`docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md`
+  - Results：`docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md`
+
 ### 3.2 Identity bias 不是小问题，在簇内水平更高
 
 | 层 | raw τ | centered τ | bias fraction |
@@ -477,6 +493,8 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 - `docs/archive/topic1/pr6_supplementary_rank_displacement_results_2026-05-06.md` — PR-6 supplementary results：cohort n=23（stable_k=2 ∩ PR-6 endpoint-defined）；reproduced n=6 (Kendall τ median = −0.495, F_norm = 0.964) vs not reproduced n=17 (τ = −0.048, F_norm = 0.688)。Reproduced 6/6 subject τ < 0，与 PR-6 离散 swap geometry 同向。SOZ contribution_excess ≈0（descriptive only，无 enrichment claim）。Topic 1 §7.10 / §10 引用本文件。
 - `docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 正式入口（plan-of-record）**：H1 triple gate (10s primary + 30s sensitivity + sign test) / H1b direction symmetry / H2 non-fwdrev negative control / N0–N4 surrogate hierarchy（N2 主 null + N3 robustness + N4 conditional）/ cohort 5 条 pre-registered 入选门槛 / 10 项 TDD / §6.5 可视化方案 / 7 类失败合同。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
 - `docs/archive/topic1/propagation/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
+- `docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md` — Cluster geometry 可视化 plan-of-record（template-matching metric / 数据合同 / 失败合同 / panel layout / TDD 合同）。Topic 1 §3.1d / §10 引用本文件。
+- `docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md` — Cluster geometry 验收 results（cohort 数字 / showcase 叙事 / KMeans-vs-template-matching audit / follow-up）。Topic 1 §3.1d / §10 引用本文件。
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。
 

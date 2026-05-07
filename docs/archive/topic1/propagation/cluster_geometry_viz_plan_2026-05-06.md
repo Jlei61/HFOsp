@@ -28,14 +28,20 @@ PR-2 用 KMeans 在 `(events × n_ch)` rank 矩阵上做了 stable_k 聚类；PR
 
 | 阶段 | 距离 |
 |---|---|
-| PR-2 KMeans 聚类 | `np.where(isfinite, rank, 0.0)` 后做 sklearn KMeans → **NaN→0 后的欧氏距离 sum**（非参与通道当 rank=0） |
-| `assign_events_to_templates` 模板匹配 | `masked_ranks = np.where(bools>0, ranks, NaN)` → **shared-channel mean squared deviation**（只在两边都参与的通道上算） |
+| PR-2 KMeans 聚类 | sklearn KMeans 在 `(events × n_ch)` 全 rank 矩阵上做欧氏距离 sum；非参与通道在 lagPatRank 里**已是有限 fallback rank（0..n_ch-1）**，由 legacy `return_massCenterPat` 在通道未参与时给出占位值，**不是 NaN/0**。代码里 `np.where(isfinite, rank, 0.0)` 是防御性 no-op（对当前 cohort 的 lagPat 全是 finite）。所以 KMeans 实际是在"全长度 rank 向量（含 fallback rank）"上算欧氏距离 |
+| `assign_events_to_templates` 模板匹配 | `masked_ranks = np.where(bools>0, ranks, NaN)` → **shared-channel mean squared deviation**（只在两边都参与且都 finite 的通道上算） |
 
-实证核对（用户先行验证）：用当前全局模板把事件重新 assign 回模板，与原始 KMeans label 的一致率 cohort 中位 **0.892**，最低 **0.769**。这说明 metric 不一致**会**影响边界事件和少数 subject 的图形解读，但 Topic 1 主结论仍稳定（stable_k、within-cluster τ、PR-2.5 split-half 模板 Spearman 都不依赖这个 masked metric 单独成立）。
+差异本质：KMeans 把所有 `n_ch` 个 rank 算进距离（含 non-participating 的 fallback rank）；matching 只看 `bool=True` 的共享通道。两者的边界事件归属判定可以不同。
+
+实证核对（用户先行验证 + 本次 cohort 跑数确认）：用当前模板把事件重新 assign 回模板，与原始 KMeans label 的一致率 cohort 中位 **0.892**，最低 **0.769**。这说明 metric 不一致**会**影响边界事件和少数 subject 的图形解读，但 Topic 1 主结论仍稳定（stable_k、within-cluster τ、PR-2.5 split-half 模板 Spearman 都不依赖这个 matching metric 单独成立）。
 
 本 PR 的两件事：
-1. **主交付物**：在 template-matching metric 下做 cluster geometry 可视化（per-subject + cohort + showcase）
-2. **审阅落档**：把 metric drift 现象作为 audit finding 写进 archive §6，列为后续独立工作；本 PR 不深挖
+1. **主交付物（per-subject 4-panel 2×2）**：
+   - **Panel a（KMeans-native）**：PCA on KMeans 训练用的 feature matrix，**展示所有事件**——这是 KMeans 决策真正生活的空间
+   - **Panel b**：per-event silhouette 排序条（template-matching metric 下）
+   - **Panel c**：cluster template profile（结构层）
+   - **Panel d（audit）**：classical MDS on template-matching distance（subsample），与 panel a 并列展示两种 metric 给出的几何
+2. **审阅落档**：把 KMeans/matching metric drift 作为 audit finding 写进 archive §6，列为后续独立工作；本 PR 不深挖
 
 ---
 
@@ -88,9 +94,10 @@ d(x, y) = sqrt( mean over channels c where bool_x[c]=1 AND bool_y[c]=1 of (rank_
 **Classical MDS** on 增广 `(E + k) × (E + k)` 距离矩阵（事件 + 模板都参与）。算法选择：
 
 - 距离矩阵对角线强制为 0（任何点到自身距离 = 0）
-- 缺失 off-diagonal pair（`d = NaN`，由 `min_shared_channels` gate 触发）的 imputation 规则：
-  1. 先剔除 `valid_distance_fraction < 0.5` 的整行/整列对应的 events（这些 events 共享通道太稀，无法稳定嵌入；写入 `excluded_events` 列表）
-  2. 剩下矩阵里仍有 NaN 的，用**中位 pairwise 距离**替代（cohort 内每 subject 自己算自己的中位数；不用全局），中位数比均值对异常稀疏 pair 不敏感
+- 缺失 off-diagonal pair（`d = NaN`，由 `min_shared_channels` gate 触发）的处理规则（**flag-and-impute，不剔除**）：
+  1. 标记 `valid_distance_fraction < 0.5` 的行索引为 `low_coverage_indices`（写进 JSON），但**仍保留在矩阵里嵌入**——避免主图上事件被无声丢失。需要严格 cluster validity 数字时按这个 list 过滤
+  2. 所有 NaN off-diagonal 用**该 subject 自己的中位 pairwise 距离**替代；中位数比均值对异常稀疏 pair 更鲁棒
+  3. `imputed_fraction` 写进 JSON；超阈值（默认 0.20）触发 `imputation_warning`
 - 输出 2D 坐标 `Y` 形状 `(E + k, 2)`，其中前 E 行是事件、后 k 行是模板
 - **Stress** 报告：`stress = sqrt(sum((D - D_Y)²) / sum(D²))`，其中 `D_Y` 是 2D 重建距离；`D` 用 imputation 后的矩阵计算（与 MDS 内部一致）；记入 cohort summary
 - **Reproducibility**：classical MDS 是 closed-form，无随机种子依赖；唯一的随机性来自 §3.5 subsample 步骤（已 seed）
@@ -130,13 +137,16 @@ Silhouette 这里用的是 **template-prototype 版本**（每事件比对自己
 
 ## 5. Panel 设计（Plan A'，每 panel 答一个独立问题）
 
-### 5.1 Per-subject（30 张，1×3 行；输出 `figures/per_subject/<subject>_geometry.png`）
+### 5.1 Per-subject（每 subject 一张 2×2 图，输出 `figures/per_subject/<dataset>_<subject>_geometry.png`）
 
 | Panel | 答的问题 | 内容 |
 |---|---|---|
-| **a** | 事件在距离空间长什么样？哪些事件 KMeans/matching 不一致？ | MDS scatter；事件按 `kmeans_label` 上色（Morandi blue/rust/sage…，按 stable_k 取调色板）；模板用大星黑边突出；`agreement = False` 事件用空心圆叠加；title 写 `subject n=… k=… sil_med=… stress=…` |
-| **b** | 簇间分离的数值有多强？哪些事件归属可疑？ | Per-event silhouette 排序条；x = event index re-ordered 按 cluster + cluster 内按 sil 降序；y = silhouette；负 sil 用 Morandi rust 高亮；cluster 边界 vertical separator |
-| **c** | 两类簇结构是什么意思？哪些通道早 / 晚？ | Cluster template profile：x = channel idx（**按 dominant cluster（n_events 最大那个）的 template rank 排序；并列时按 cluster_id 字典序**，cohort 内每 subject 自己定），y = template rank；每 cluster 一条折线 + 半透明 IQR 带（IQR 由 cluster 内事件的 rank 在每通道上的 25/75 分位计算）；非参与通道（template = NaN）的通道在该 cluster 折线上断开（不连线） |
+| **a (top-left, KMeans-native)** | 在 KMeans 实际训练的 feature space 里，所有事件长什么样？ | PCA(2) on 全长度 rank 矩阵 (events × n_ch)；**所有事件**展示，不 subsample；事件按 `kmeans_label` 上色；模板（`templates_real` 投到同一 PCA basis）用大星黑边突出；`agreement = False` 事件用空心圆叠加；title 显示 `EVR=...,...` |
+| **b (top-right)** | 簇间分离的数值有多强？哪些事件归属可疑？ | Per-event silhouette 排序条（template-matching metric 下，全 cohort events）；按 cluster 分块、cluster 内按 sil 降序；负 sil 用 Morandi rust 高亮；title 写负 sil 比例 |
+| **c (bottom-left)** | 两类簇结构是什么意思？哪些通道早 / 晚？ | Cluster template profile：x = channel idx（按 dominant cluster 的 template rank 升序，cohort 内每 subject 自己定），y = template rank；每 cluster 一条折线 + 半透明 IQR 带；非参与通道（template = NaN）在该 cluster 折线上断开 |
+| **d (bottom-right, audit)** | 切换到 template-matching 距离后，几何会怎么变？stress 多大？ | Classical MDS scatter，subsample（最多 8000 events）+ 全部模板；事件颜色与 panel a 一致；title 写 `sil_med=... stress=...`；如 stress > 0.30 或 imputed_fraction > 0.20 挂 ⚠ |
+
+注：**a 和 d 不是同一信息**——a 是 KMeans 训练时实际优化的 feature space 投影（all events），d 是 matching 距离下的二维嵌入（subsample）；二者用同一 cluster label 上色，并列展示**同一 cohort 在两种距离下不一定相同的几何**。
 
 ### 5.2 Cohort summary（1 张，2×2；输出 `figures/cohort_geometry_summary.png`）
 
@@ -144,17 +154,17 @@ Silhouette 这里用的是 **template-prototype 版本**（每事件比对自己
 |---|---|---|
 | **a** | Cohort 上每 subject 的 cluster validity（template-matching metric 下）？ | Per-subject silhouette median 排序 bar；dataset 上色（YQ blue / EPI terracotta）；shape: stable_k=2 圆 / 4 三角 / 6 方 |
 | **b** | KMeans/matching 一致率每 subject 多少？ | Per-subject agreement ranked bar（subject 顺序与 a 不同，按 agreement 排）；< 0.85 用 Morandi rust 高亮 |
-| **c** | silhouette 和 agreement 是否相关？ | Joint scatter `silhouette_med vs agreement`；marker shape = stable_k；Spearman ρ + p 在角落；颜色按 dataset |
+| **c (consistency check)** | silhouette 与 agreement 在 cohort 上是否一致？ | Joint scatter `silhouette_med vs agreement`；marker shape = stable_k；Spearman ρ + p 在角落；颜色按 dataset。**注：silhouette 与 agreement 都派生自同一组 d_within / d_min_other 距离差，cohort 上 ρ 强正本来就是定义上预期，不当作独立生物 finding；该 panel 的角色是 cohort 层 sanity（如果反向相关或无关，反而说明 pipeline 有问题）** |
 | **d** | metric drift 主要发生在低 n_participating 事件上吗？ | Cohort-level boundary-event fraction（agreement = False 的事件比例），按 n_participating bin（3-4 / 5-8 / 9+）做 violin + scatter；cohort 内每 subject 一个数据点 |
 
 ### 5.3 Showcase（3 张大图；输出 `figures/showcase/<subject>_geometry_showcase.png`）
 
-每张 = 单个 subject 的 §5.1 三 panel 放大版，加更密的轴标 + 模板形状注释。
+每张 = 单个 subject 的 §5.1 四 panel 放大版（figsize 加大、轴标更密）。
 
 候选：
-- **`958`**：k=2、inter-cluster r = −0.91，老论文 E3 的 forward/reverse 复现，作为"教科书 case"
-- **`huangwanling`**：k=4、raw_tau ≈ centered_tau（identity bias = 0），多模态最干净
-- **第三个 subject 在 cohort 跑完后选**：取 `agreement < 0.80 ∩ n_events ≥ 200` 中 silhouette 最低的一个（突出 metric drift caveat 的真实案例）
+- **`958`**：k=2、inter-cluster r ≈ −0.91，老论文 E3 的 forward/reverse 案例
+- **多模态 fallback chain**：原计划的 `huangwanling` 若被 data freshness 排除（PR-2 labels 与当前 lagPat valid_events 数量不一致），按 `[huangwanling → epilepsiae/818 → epilepsiae/1077 → yuquan/zhangjinhan]` 顺序找第一个 status=ok 的 subject 顶替——k≠2 的多模态例子
+- **第三个 subject 在 cohort 跑完后 auto-pick**：从入选 cohort 中取 `agreement < 0.85 ∩ n_events ≥ 200` 的 subject，silhouette 最低者；用来展示 metric drift caveat 的真实长相
 
 ---
 
