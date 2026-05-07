@@ -130,6 +130,184 @@ def compute_signed_rank_displacement(
     return out
 
 
+def compute_swap_score_at_k(
+    rank_a: np.ndarray,
+    rank_b: np.ndarray,
+    valid_mask_a: np.ndarray,
+    valid_mask_b: np.ndarray,
+    k: int,
+) -> float:
+    """Variable-k generalization of PR-6 swap_score (top-3-fixed).
+
+    swap_score(k) = mean( Jaccard(top_k_T_a, bottom_k_T_b),
+                          Jaccard(bottom_k_T_a, top_k_T_b) )
+
+    Top/bottom are taken on the joint-valid subset under dense ranks.
+    Returns 0.0 if 2*k > n_valid (top and bottom would overlap inside
+    one template).
+    """
+    rank_a = np.asarray(rank_a, dtype=float)
+    rank_b = np.asarray(rank_b, dtype=float)
+    joint_valid = np.asarray(valid_mask_a, dtype=bool) & np.asarray(
+        valid_mask_b, dtype=bool
+    )
+    n_valid = int(joint_valid.sum())
+    if n_valid < 4 or 2 * k > n_valid or k < 1:
+        return 0.0
+
+    # Stable argsort for deterministic tie-breaking on the joint subset
+    valid_idx = np.flatnonzero(joint_valid)
+    r_a = rank_a[valid_idx]
+    r_b = rank_b[valid_idx]
+    order_a = np.argsort(r_a, kind="stable")
+    order_b = np.argsort(r_b, kind="stable")
+    bot_a = set(valid_idx[order_a[:k]].tolist())
+    top_a = set(valid_idx[order_a[-k:]].tolist())
+    bot_b = set(valid_idx[order_b[:k]].tolist())
+    top_b = set(valid_idx[order_b[-k:]].tolist())
+
+    def _jaccard(s1: set, s2: set) -> float:
+        u = s1 | s2
+        return (len(s1 & s2) / len(u)) if u else 0.0
+
+    return 0.5 * (_jaccard(top_a, bot_b) + _jaccard(bot_a, top_b))
+
+
+def compute_swap_score_sweep(
+    rank_a: np.ndarray,
+    rank_b: np.ndarray,
+    valid_mask_a: np.ndarray,
+    valid_mask_b: np.ndarray,
+    n_perm: int = 1000,
+    seed: int = 0,
+    alpha_fw: float = 0.05,
+    alpha_candidate: float = 0.20,
+    score_floor: float = 0.5,
+) -> Dict[str, object]:
+    """Sweep k = 2 .. floor(n_valid/2), test max-k swap with family-wise null.
+
+    Per-permutation statistic (mirrors observed):
+        T_perm[i] = max_k swap_score_perm[i, k]
+        T_obs    = max_k swap_score_obs(k)
+        decision_k = argmin_k k subject to swap_score_obs(k) == T_obs
+
+    Family-wise p-value (single test on max statistic):
+        p_fw = (1 + sum(T_perm >= T_obs)) / (n_perm + 1)
+
+    Dual-tier decision (user-locked 2026-05-07):
+        swap_class = "strict"    if T_obs >= score_floor AND p_fw < alpha_fw
+                   = "candidate" if T_obs >= score_floor AND alpha_fw <= p_fw < alpha_candidate
+                   = "none"      otherwise
+        has_swap   = (swap_class == "strict")  # backward compat alias
+
+    Strict tier supports subject-level binary label and channel-level
+    swap_endpoint_candidate label (with split-half validation if reused
+    downstream). Candidate tier is descriptive / exploratory only - geometry
+    suggests swap but FW evidence does not clear standard alpha.
+
+    Per-k swap_score + per-k null_95th are still reported as descriptive
+    inputs to the subject x k visualization, but the decision lives on
+    the max statistic only - per-k thresholds are NOT used as a decision
+    gate (would break FW control).
+
+    Determinism: rng = numpy default_rng(seed); seed and n_perm are
+    persisted in the output dict so reruns are bit-reproducible.
+    """
+    rank_a = np.asarray(rank_a, dtype=float)
+    rank_b = np.asarray(rank_b, dtype=float)
+    joint_valid = np.asarray(valid_mask_a, dtype=bool) & np.asarray(
+        valid_mask_b, dtype=bool
+    )
+    n_valid = int(joint_valid.sum())
+    out: Dict[str, object] = {
+        "n_valid": n_valid,
+        "k_max": 0,
+        "swap_score_by_k": {},
+        "null_95th_by_k": {},
+        "T_obs": float("nan"),
+        "p_fw": float("nan"),
+        "decision_k": None,
+        "decision_swap_score": float("nan"),
+        "swap_class": "none",
+        "has_swap": False,
+        "decision_rule": (
+            "T_obs=max_k swap_score(k); p_fw vs max-null; "
+            "swap_class=strict iff T_obs>=score_floor AND p_fw<alpha_fw; "
+            "swap_class=candidate iff T_obs>=score_floor AND alpha_fw<=p_fw<alpha_candidate"
+        ),
+        "score_floor": float(score_floor),
+        "alpha_fw": float(alpha_fw),
+        "alpha_candidate": float(alpha_candidate),
+        "n_perm": int(n_perm),
+        "seed": int(seed),
+        "exit_reason": "ok",
+    }
+    if n_valid < 4:
+        out["exit_reason"] = f"n_valid<4 (got {n_valid})"
+        return out
+
+    k_max = n_valid // 2
+    out["k_max"] = k_max
+
+    valid_idx = np.flatnonzero(joint_valid)
+    r_a = rank_a[valid_idx]
+    r_b = rank_b[valid_idx]
+
+    def _swap_inner(ra: np.ndarray, rb: np.ndarray, k: int) -> float:
+        order_a = np.argsort(ra, kind="stable")
+        order_b = np.argsort(rb, kind="stable")
+        bot_a = set(order_a[:k].tolist())
+        top_a = set(order_a[-k:].tolist())
+        bot_b = set(order_b[:k].tolist())
+        top_b = set(order_b[-k:].tolist())
+
+        def _jacc(s1: set, s2: set) -> float:
+            u = s1 | s2
+            return (len(s1 & s2) / len(u)) if u else 0.0
+
+        return 0.5 * (_jacc(top_a, bot_b) + _jacc(bot_a, top_b))
+
+    rng = np.random.default_rng(seed)
+    n_k = k_max - 1
+    null_table = np.empty((n_perm, n_k), dtype=float)
+    for i in range(n_perm):
+        rb_shuf = rng.permutation(r_b)
+        for ki, k in enumerate(range(2, k_max + 1)):
+            null_table[i, ki] = _swap_inner(r_a, rb_shuf, k)
+
+    swap_by_k: Dict[int, float] = {}
+    null_95: Dict[int, float] = {}
+    for ki, k in enumerate(range(2, k_max + 1)):
+        swap_by_k[k] = float(_swap_inner(r_a, r_b, k))
+        null_95[k] = float(np.percentile(null_table[:, ki], 95))
+
+    T_obs = float(max(swap_by_k.values()))
+    decision_k = min(k for k, v in swap_by_k.items() if v == T_obs)
+    T_perm = null_table.max(axis=1)
+    p_fw = float((1 + np.sum(T_perm >= T_obs)) / (n_perm + 1))
+
+    if T_obs >= score_floor and p_fw < alpha_fw:
+        swap_class = "strict"
+    elif T_obs >= score_floor and p_fw < alpha_candidate:
+        swap_class = "candidate"
+    else:
+        swap_class = "none"
+
+    out.update(
+        {
+            "swap_score_by_k": {str(k): v for k, v in swap_by_k.items()},
+            "null_95th_by_k": {str(k): v for k, v in null_95.items()},
+            "T_obs": T_obs,
+            "p_fw": p_fw,
+            "decision_k": int(decision_k),
+            "decision_swap_score": float(T_obs),
+            "swap_class": swap_class,
+            "has_swap": bool(swap_class == "strict"),
+        }
+    )
+    return out
+
+
 def aggregate_pair_metrics(
     rank_a: np.ndarray,
     rank_b: np.ndarray,

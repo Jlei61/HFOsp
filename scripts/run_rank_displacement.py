@@ -46,7 +46,10 @@ def _canonical_data_root() -> Path:
 WORKTREE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(WORKTREE_ROOT))
 
-from src.rank_displacement import aggregate_pair_metrics  # noqa: E402
+from src.rank_displacement import (  # noqa: E402
+    aggregate_pair_metrics,
+    compute_swap_score_sweep,
+)
 
 # Data root for shared results (read PR-2/PR-6 inputs, write rank_displacement outputs)
 DATA_ROOT = _canonical_data_root()
@@ -216,6 +219,14 @@ def process_subject(
         )
         metrics["cluster_id_a"] = int(cid_a)
         metrics["cluster_id_b"] = int(cid_b)
+        metrics["swap_sweep"] = compute_swap_score_sweep(
+            rank_a=rank_a,
+            rank_b=rank_b,
+            valid_mask_a=v_a,
+            valid_mask_b=v_b,
+            n_perm=1000,
+            seed=0,
+        )
         pairs.append(metrics)
 
     inter_corr = ac.get("inter_cluster_corr_matrix")
