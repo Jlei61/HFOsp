@@ -53,6 +53,9 @@ YUQUAN_SUBJECTS = [
     "zhaojinrui", "zhourongxuan", "zhangjiaqi",
     "chenziyang", "hanyuxuan", "huanghanwen", "litengsheng",
     "xuxinyi", "zhangjinhan", "sunyuanxin",
+    # 2026-05-06 Slice A1 additions: lineage-adjacent (cusignal 23.08 vs 2021).
+    # See docs/archive/topic1/propagation/cohort_slice_a1_2026-05-06.md
+    "gaolan", "wangyiyang",
 ]
 
 EPILEPSIAE_SUBJECTS = [
@@ -107,6 +110,42 @@ def _subject_dir(dataset: str, root: Path, subject: str) -> Path:
     return _epilepsiae_subject_dir(root, subject)
 
 
+# Path D (2026-05-07): Yuquan subjects accepted under legacy `_lagPat.npz` only.
+# These 7 lacked complete `_gpu.npz`/`_refineGpu.npz` and so cannot be re-packed
+# under the canonical `_lagPat_withFreqCent.npz` lineage without full re-detect.
+# Their existing `_lagPat.npz` + `_packedTimes.npy` pairs are loadable but come
+# from an older pack script (no `lagPatFreq`, different `pickChn_thresh` /
+# `packWinLen`). Treated as a separate cohort stratum for double-track reporting.
+# Archive: docs/archive/topic1/propagation/cohort_slice_a2_legacy_variant_2026-05-07.md
+YUQUAN_LEGACY_VARIANT_SUBJECTS = frozenset({
+    "zhangkexuan", "pengzihang", "songzishuo", "zhangbichen",
+    "zhaochenxi", "zhaojinrui", "zhourongxuan",
+})
+
+
+def _has_propagation_inputs(dataset: str, subject_dir: Path) -> bool:
+    """Gate for whether a subject is eligible for PR-1+ propagation analysis.
+
+    For Yuquan: prefer ``*_lagPat_withFreqCent.npz`` (10ch full set per cross-PR
+    contract). Subjects in ``YUQUAN_LEGACY_VARIANT_SUBJECTS`` are additionally
+    accepted with ``*_lagPat.npz`` only (Path D). All other Yuquan subjects
+    without the withFreqCent variant remain gated to prevent silent
+    heterogeneous fallback.
+
+    For Epilepsiae: keep the lenient gate (both files exist for cohort subjects;
+    backfill subjects under flat layout only have ``*_lagPat.npz``).
+    """
+    if not subject_dir.exists():
+        return False
+    if dataset == "yuquan":
+        if list(subject_dir.glob("*_lagPat_withFreqCent.npz")):
+            return True
+        if subject_dir.name in YUQUAN_LEGACY_VARIANT_SUBJECTS:
+            return bool(list(subject_dir.glob("*_lagPat.npz")))
+        return False
+    return bool(list(subject_dir.glob("*_lagPat.npz")))
+
+
 def _load_soz(path: Path) -> Dict[str, List[str]]:
     if not path.exists():
         return {}
@@ -149,7 +188,7 @@ def _run_pr25(
                 all_results[key] = existing
                 continue
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data dir missing", key)
                 all_results[key] = existing
                 continue
@@ -227,7 +266,7 @@ def _augment_cluster_bias(
                 all_results[key] = existing
                 continue
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data missing", key)
                 all_results[key] = existing
                 continue
@@ -285,7 +324,7 @@ def _run_pr4a(
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data dir missing", key)
                 continue
 
@@ -418,7 +457,7 @@ def _run_pr4a_followup(
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data dir missing", key)
                 continue
 
@@ -535,7 +574,7 @@ def _run_pr4b_step0(
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data dir missing", key)
                 continue
 
@@ -645,7 +684,7 @@ def _run_pr4b_step1(
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data dir missing", key)
                 continue
 
@@ -759,7 +798,7 @@ def _run_pr4b_step23(
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data dir missing", key)
                 continue
 
@@ -927,7 +966,7 @@ def _run_pr4c(
             key = f"{dataset}/{subject}"
             json_path = per_subject_dir / f"{dataset}_{subject}.json"
 
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("Skip %s: raw data dir missing", key)
                 continue
 
@@ -1091,7 +1130,7 @@ def _run_pr5_gate(
                 continue
 
             subject_dir = _subject_dir(dataset, root, subject)
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("PR-5-A skip %s: raw lagPat dir missing", key)
                 continue
 
@@ -1294,7 +1333,7 @@ def _run_pr5_recruitment(
                 continue
 
             subject_dir = _subject_dir(dataset, root, subject)
-            if not subject_dir.exists() or not list(subject_dir.glob("*_lagPat.npz")):
+            if not _has_propagation_inputs(dataset, subject_dir):
                 logger.warning("PR-5-B skip %s: raw lagPat dir missing", key)
                 continue
 
@@ -1731,11 +1770,12 @@ def main() -> None:
     for dataset, root, subjects, soz_map in datasets_list:
         for subject in subjects:
             subject_dir = _subject_dir(dataset, root, subject)
-            if not subject_dir.exists():
-                logger.warning("Skip %s/%s: subject dir missing", dataset, subject)
-                continue
-            if not list(subject_dir.glob("*_lagPat.npz")):
-                logger.warning("Skip %s/%s: no lagPat", dataset, subject)
+            if not _has_propagation_inputs(dataset, subject_dir):
+                logger.warning(
+                    "Skip %s/%s: no eligible *_lagPat*.npz under %s "
+                    "(Yuquan requires *_lagPat_withFreqCent.npz)",
+                    dataset, subject, subject_dir,
+                )
                 continue
 
             key = f"{dataset}/{subject}"

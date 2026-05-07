@@ -20,9 +20,22 @@ except Exception:  # pragma: no cover - optional import guard
 
 def _record_name_from_lagpat_path(path: Path) -> str:
     name = path.name
+    if name.endswith("_lagPat_withFreqCent.npz"):
+        return name[: -len("_lagPat_withFreqCent.npz")]
     if name.endswith("_lagPat.npz"):
         return name[: -len("_lagPat.npz")]
     return path.stem
+
+
+def _record_name_to_packed_paths(lp_file: Path, record_name: str) -> Path:
+    """Pick the packedTimes path that matches the lagPat variant.
+
+    `*_lagPat_withFreqCent.npz` -> `*_packedTimes_withFreqCent.npy`
+    `*_lagPat.npz`              -> `*_packedTimes.npy`
+    """
+    if lp_file.name.endswith("_lagPat_withFreqCent.npz"):
+        return lp_file.with_name(f"{record_name}_packedTimes_withFreqCent.npy")
+    return lp_file.with_name(f"{record_name}_packedTimes.npy")
 
 
 def _safe_float_scalar(value: Any) -> float:
@@ -303,9 +316,15 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
     Event absolute time is reconstructed as `packedTimes[:, 0] + start_t`.
     """
     subject_dir = Path(subject_dir)
-    lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
+    # Prefer withFreqCent (10ch full set per cross-PR contract in
+    # docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md);
+    # fall back to the older 7ch *_lagPat.npz when withFreqCent is absent (e.g.
+    # Epilepsiae backfill where both files contain identical data).
+    lagpat_files = sorted(subject_dir.glob("*_lagPat_withFreqCent.npz"))
     if not lagpat_files:
-        raise FileNotFoundError(f"No *_lagPat.npz in {subject_dir}")
+        lagpat_files = sorted(subject_dir.glob("*_lagPat.npz"))
+    if not lagpat_files:
+        raise FileNotFoundError(f"No *_lagPat*.npz in {subject_dir}")
 
     raw_blocks: List[Dict[str, Any]] = []
     channel_names: List[str] = []
@@ -343,7 +362,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
                 channel_names.append(ch)
 
         record_name = _record_name_from_lagpat_path(lp_file)
-        packed_path = lp_file.with_name(f"{record_name}_packedTimes.npy")
+        packed_path = _record_name_to_packed_paths(lp_file, record_name)
         packed = None
         event_rel_times = np.full(n_ev, np.nan, dtype=float)
         event_abs_times = np.full(n_ev, np.nan, dtype=float)
@@ -355,6 +374,7 @@ def load_subject_propagation_events(subject_dir: Path) -> Dict[str, Any]:
             if packed.ndim == 2 and packed.shape[1] >= 1:
                 n_ev = min(n_ev, packed.shape[0])
                 ranks = ranks[:, :n_ev]
+                lag_raw = lag_raw[:, :n_ev]
                 bools = bools[:, :n_ev]
                 event_rel_times = packed[:n_ev, 0].astype(float, copy=False)
                 if packed.shape[1] >= 2:
