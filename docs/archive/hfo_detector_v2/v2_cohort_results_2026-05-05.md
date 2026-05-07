@@ -91,8 +91,66 @@ nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv
 
 GPU 利用率 > 0%、内存使用 > 200 MiB 才算正常 GPU 跑动；都为 0 / 极低值就是 fallback 复发，立刻停。
 
-## §4. 下一步
+## §4. 滚动 Layer A 描述（per-subject，**不计 cohort PASS rate**）
+
+只记录单 subject 已完成的 Layer A 数字，不做 cohort PASS/FAIL 判定（按 user directive 留给 Phase 4 全 cohort 跑完后再做）。
+
+### subject 253（2026-05-06 15:24 写入 `validation/layer_a_253.json`）
+
+- 取样：268 records，每 record first/middle/last × 200s 三窗
+- channels-with-events 总数：7,646（跨 record × ch）
+- 总 events（去 NaN）：379,549；channels-with-events 中位 events/ch = 20
+
+| metric | 中位 | p10 | per-channel pass rate (vs PASS 阈值) | 备注 |
+|---|---|---|---|---|
+| `dur_in_band_frac` | 1.000 | — | 97.8% (≥0.95) | 主带占比健康 |
+| `peak_side_ratio_p25` (去 NaN) | 2.137 | 0.988 | 62.4% (≥2.0) | NaN 154/7646 = 2.0%，是 chunk 边界 edge events 的预期空值 |
+| `threshold_margin_p50` | 0.917 | −0.283 | 74.4% (≥0.5) | 中位健康，但 10 分位为负 → 部分通道事件刚好压在 detector 阈值边缘 |
+
+### subject 548（2026-05-07 11:47 写入 `validation/layer_a_548.json`，reboot 后重跑）
+
+- 取样：147 records × 三窗
+- channels-with-events 总数：10,164
+- 总 events：294,348；中位 events/ch = 8
+
+| metric | 中位 | p10 | per-channel pass rate | 备注 |
+|---|---|---|---|---|
+| `dur_in_band_frac` | 1.000 | — | 100% (≥0.95) | perfect |
+| `peak_side_ratio_p25` (去 NaN) | **1.710** | 0.936 | 40.0% (≥2.0) | **中位低于 PASS 阈值 2.0**；NaN 19/10164 = 0.2% |
+| `threshold_margin_p50` | 0.579 | −0.393 | 52.7% (≥0.5) | 中位刚过线 |
+
+**观察**：548 信号质量比 253 低一档（ratio 1.710 vs 2.137，margin 0.579 vs 0.917）。83 ch 中有大量低 SNR 通道，median events/ch 也低（8 vs 20）。属真实 per-subject 差异，不是 bug；**Phase 4 是否将 548 计入 PASS 还需契约决策**（per-channel 中位 vs subject-level 中位 vs events-weighted）。
+
+**观察（非结论）**：
+- 中位线全部满足 PASS 阈值（dur≥0.95, ratio≥2.0, margin≥0.5）。
+- per-channel pass rate 60–75% 区间，**这是按"每个通道是一个评估单元"统计**；很多 low-event 通道（< 5 events）的 ratio_p25 / margin_p50 估计本身就噪。
+- Phase 4 cohort 框架需要**先锁定 PASS rate 的统计单位**：per-subject 中位 vs per-channel pass fraction vs weighted-by-events。这是 Phase 4 入口决策，**不在这里下定**。
+
+### 待补 subject
+
+- 384 进行中（21:07:38 启动）
+- Layer A 548 滚动验证仍在跑（CPU 81 min+，预计 ~10 min 内完成）
+- Layer A 139 待 548 完成后启动
+- 其余 16 subject 排队中
+
+### 滚动 cohort 进度表（per-subject 实测）
+
+| subj | head on disk | processed | skipped | skip 原因 | ch | wall (s) | s/record |
+|---|---|---|---|---|---|---|---|
+| 253 | 268 | 268 | 0 | — | 29 | 8,646 | 32 |
+| 548 | 147 | 147 | 0 | — | 83 | 21,084 | 143 |
+| 139 | 173 | 130 | 43 | sfreq=256 Hz < 500 Hz Nyquist 下限 | 41 | 5,229 | 40 |
+| 384 | 130 | ⏳ | — | — | — | — | — |
+
+**关键观察**：
+- s/record 主要由 **channel 数 × 持续时间** 决定，channel 数最大权重（253 vs 548 = 4.5× s/record gap 对应 ~2.9× channel gap）。
+- **139 的 43 records skip 是合理 Nyquist 拒绝**，不是 bug：这些 records 在 `pat_13900*` 子树（不同 recording session），sfreq=256 Hz 不能满足 ripple band (80–200 Hz) Nyquist 下限。Detector hard-gate 在 `scripts/run_hfo_detection.py:386–392` 正确触发。
+- Phase 4 Layer A cohort 应该以 **processed records** 为基底，不要把 Nyquist-skipped records 算进 PASS rate。
+- v2_specification.md §4 GPU=CPU 等价性声明需要进一步验证（253 的 CPU vs GPU drift 已在 §3 记录）。
+
+## §5. 下一步
 
 - 不再做 Phase 5 / 6 / 7 的科学结论。Layer B / Layer C cohort 数字一律待 Phase 3.4 GPU cohort 完成后再产生。
-- Phase 4 Layer A cohort 也只在 GPU cohort 完整后启动（per-subject 进度可滚动跑，但 cohort PASS rate 在 cohort 完成前无意义）。
+- Phase 4 Layer A cohort 也只在 GPU cohort 完整后启动（per-subject 描述可滚动跑，cohort PASS rate 在 cohort 完成前无意义）。
+- Phase 4 入口需要先锁定：per-subject Layer A 的 PASS 单元（per-channel / per-subject-median / events-weighted）。当前只记录 raw numbers。
 - v2_specification.md §4 的"GPU=CPU 等价性"声明需要在 cohort 跑完后修订：appendix 加 "Empirical equivalence verified on 635 chunk 0; on 253 record 0 we observe channel-set + count drift" 的限定。这是真实数据上的 calibration，不是 retrospective 找借口。
