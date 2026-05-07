@@ -458,14 +458,16 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
     )
     focal_set = set(per_subject_json.get("focal_channels") or [])
 
-    fig_w = 24.0
-    fig_h = 12.0
+    # Layout: 2 rows (raw thin, heatmap thick) x 2 cols (gamma | broad).
+    # Heatmap dominates vertically because it carries the per-row onset markers.
+    fig_w = 22.0
+    fig_h = 14.0
     fig = plt.figure(figsize=(fig_w, fig_h), facecolor="white")
     gs = mgs.GridSpec(
         nrows=2, ncols=2, figure=fig,
-        height_ratios=[1.0, 2.0], width_ratios=[1.0, 1.0],
-        left=0.05, right=0.97, top=0.92, bottom=0.08,
-        hspace=0.18, wspace=0.10,
+        height_ratios=[1.0, 4.0], width_ratios=[1.0, 1.0],
+        left=0.07, right=0.94, top=0.93, bottom=0.07,
+        hspace=0.10, wspace=0.12,
     )
 
     bands = (GAMMA_ER_BANDS, BROAD_ER_BANDS)
@@ -516,13 +518,15 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
             if ch in sw.ch_names:
                 ci = sw.ch_names.index(ch)
                 trace = sw.signal[ci]
-                # robust scale
                 scale = np.nanstd(trace) or 1.0
                 t_raw = np.arange(trace.shape[0]) / sw.fs - sw.pre_sec
                 ax_raw.plot(t_raw, trace / scale + offset,
                              color=COL_TICK_SOZ if ch in focal_set else COL_TICK_OTHER,
                              lw=0.5, alpha=0.85)
-                ax_raw.text(t_axis[0] - 1.0, offset, ch,
+                # axis-fraction coords for the channel label so it sits
+                # at the left edge regardless of xlim.
+                ax_raw.text(-0.005, offset, ch,
+                             transform=ax_raw.get_yaxis_transform(),
                              fontsize=FS_TICK - 4, ha="right", va="center",
                              color=COL_TICK_SOZ if ch in focal_set else COL_TICK_OTHER)
             offset += 4.0
@@ -557,13 +561,14 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
             norm=norm, interpolation="nearest",
             extent=[t_axis[0], t_axis[-1], n_ch - 0.5, -0.5],
         )
-        # onset markers per channel (in the same row ordering)
+        # onset markers per channel (in the same row ordering); larger
+        # markers + stronger edge so they read against the dense heatmap.
         for new_ci, ch in enumerate(ch_ord):
             t_on = onsets.get(ch)
             if t_on is not None and np.isfinite(t_on):
-                ax_heat.plot(t_on, new_ci, marker="*", markersize=4,
+                ax_heat.plot(t_on, new_ci, marker="*", markersize=8,
                               color="white", markeredgecolor="black",
-                              markeredgewidth=0.4)
+                              markeredgewidth=0.8, zorder=10)
         ax_heat.axvline(0.0, color="black", lw=1.5)
         if eeg_rel is not None and abs(eeg_rel) > 0.5:
             ax_heat.axvline(eeg_rel, color="#8b0000", linestyle="--", lw=1.0)
