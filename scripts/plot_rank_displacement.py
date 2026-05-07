@@ -389,6 +389,13 @@ def main() -> None:
         default="all",
         choices=["all", "cohort", "per_subject"],
     )
+    ap.add_argument(
+        "--exclude",
+        nargs="*",
+        default=[],
+        help="Subject stems (<dataset>_<subject>) to exclude from cohort heatmap. "
+             "Output filename gets a _excl_<slug> suffix; per_subject strips unaffected.",
+    )
     args = ap.parse_args()
 
     FIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -397,8 +404,16 @@ def main() -> None:
     print(f"Loaded {len(records)} stable_k=2 subjects")
 
     if args.what in ("all", "cohort"):
-        plot_cohort_heatmap(records, FIG_DIR / "cohort_displacement_heatmap")
-        print("Wrote cohort_displacement_heatmap.{png,pdf}")
+        if args.exclude:
+            excl = set(args.exclude)
+            kept = [r for r in records if f"{r['dataset']}_{r['subject']}" not in excl]
+            slug = "_".join(s.split("_", 1)[1] for s in sorted(excl))
+            out_stem = FIG_DIR / f"cohort_displacement_heatmap_excl_{slug}"
+            plot_cohort_heatmap(kept, out_stem)
+            print(f"Wrote {out_stem.name}.{{png,pdf}} (n={len(kept)}, excluded {sorted(excl)})")
+        else:
+            plot_cohort_heatmap(records, FIG_DIR / "cohort_displacement_heatmap")
+            print("Wrote cohort_displacement_heatmap.{png,pdf}")
 
     if args.what in ("all", "per_subject"):
         for r in records:
