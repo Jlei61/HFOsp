@@ -8,6 +8,8 @@ from scripts.v2_validate_layer_a import (
     compute_peak_side_ratio,
     compute_threshold_margin,
     _window_starts_for_record,
+    _find_first_record_dir,
+    _find_record_dirs_for_subject,
     CHUNK_SEC,
     N_WINDOWS_PER_RECORD,
 )
@@ -81,3 +83,48 @@ def test_peak_side_ratio_event_at_recording_end_returns_nan():
     ratios = compute_peak_side_ratio(env, events, fs)
     assert len(ratios) == 1
     assert np.isnan(ratios[0])
+
+
+def test_find_first_record_dir(tmp_path):
+    raw = tmp_path / "raw"
+    rec_dir = raw / "inv2" / "pat_63502" / "adm_635102" / "rec_63500102"
+    rec_dir.mkdir(parents=True)
+    found = _find_first_record_dir(raw, "635")
+    assert found == rec_dir
+
+
+def test_find_first_record_dir_no_prefix_collision(tmp_path):
+    """Subject '115' must NOT match dir 'pat_115002' (subject 1150's dir)."""
+    raw = tmp_path / "raw"
+    (raw / "inv" / "pat_11502" / "adm_x" / "rec_x").mkdir(parents=True)
+    (raw / "inv" / "pat_115002" / "adm_x" / "rec_x").mkdir(parents=True)
+    found_115 = _find_first_record_dir(raw, "115")
+    found_1150 = _find_first_record_dir(raw, "1150")
+    assert found_115 is not None and "pat_11502" in str(found_115)
+    assert found_1150 is not None and "pat_115002" in str(found_1150)
+
+
+def test_find_first_record_dir_none_for_unknown_subject(tmp_path):
+    raw = tmp_path / "raw"
+    (raw / "inv2" / "pat_99902" / "adm_x" / "rec_x").mkdir(parents=True)
+    assert _find_first_record_dir(raw, "999") is not None  # finds it
+    assert _find_first_record_dir(raw, "404") is None  # doesn't exist
+
+
+def test_find_record_dirs_for_subject_returns_all(tmp_path):
+    raw = tmp_path / "raw"
+    rec1 = raw / "inv2" / "pat_63502" / "adm_635102" / "rec_63500102"
+    rec2 = raw / "inv2" / "pat_63502" / "adm_635102" / "rec_63500103"
+    rec3 = raw / "inv2" / "pat_63502" / "adm_635202" / "rec_63500202"
+    for r in (rec1, rec2, rec3):
+        r.mkdir(parents=True)
+    found = _find_record_dirs_for_subject(raw, "635")
+    assert len(found) == 3
+    assert all(r.is_dir() for r in found)
+
+
+def test_find_record_dirs_for_subject_empty_when_missing(tmp_path):
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    assert _find_record_dirs_for_subject(raw, "635") == []
+    assert _find_record_dirs_for_subject(tmp_path / "nonexistent", "635") == []

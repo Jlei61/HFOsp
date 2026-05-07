@@ -1109,7 +1109,7 @@ def extract_layer_c(per_subject_json: Path,
     d = json.loads(per_subject_json.read_text())
     tsr = d.get("time_split_reproducibility", {})
     ac = d.get("adaptive_cluster", {})
-    grade = tsr.get("grade", "unknown")
+    grade = tsr.get("reproducibility_grade", "unknown")
     splits = tsr.get("splits", {})
     fwd_rev_split = bool(splits.get("first_half_second_half", {})
                               .get("forward_reverse_reproduced"))
