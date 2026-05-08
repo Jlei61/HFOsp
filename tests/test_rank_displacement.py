@@ -457,3 +457,239 @@ def test_aggregate_does_not_export_signed_soz_mean():
     )
     assert "signed_displacement_mean_soz" not in result
     assert "signed_displacement_mean_nonsoz" not in result
+
+
+# =============================================================================
+# §9 Clinical SOZ set-relationship tests
+# Plan: docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md
+# =============================================================================
+
+def test_derive_swap_endpoint_top_bottom_dk():
+    """endpoint = top dk ∪ bottom dk channels by rank_a_dense ascending order.
+
+    rank_a_dense = [0, 1, 2, 3, 4, 5] with channel_names = [A..F].
+    decision_k = 2 → top dk channels = {A, B} (lowest ranks = source side),
+    bottom dk channels = {E, F} (highest ranks = sink side).
+    """
+    from src.rank_displacement import derive_swap_endpoint
+
+    channel_names = ["A", "B", "C", "D", "E", "F"]
+    rank_a_dense = np.array([0, 1, 2, 3, 4, 5], dtype=float)
+    endpoint = derive_swap_endpoint(
+        channel_names=channel_names,
+        rank_a_dense=rank_a_dense,
+        decision_k=2,
+    )
+    assert set(endpoint) == {"A", "B", "E", "F"}
+
+
+def test_derive_swap_endpoint_handles_unsorted_rank():
+    """rank_a_dense is the dense rank vector aligned with channel_names; not
+    necessarily monotone. derive_swap_endpoint must sort indices by rank.
+
+    channel_names = [P, Q, R, S], rank_a_dense = [3, 0, 2, 1]. Sorted by rank:
+      Q (rank 0) < S (rank 1) < R (rank 2) < P (rank 3).
+    decision_k = 1 → endpoint = {Q (top), P (bottom)}.
+    """
+    from src.rank_displacement import derive_swap_endpoint
+
+    channel_names = ["P", "Q", "R", "S"]
+    rank_a_dense = np.array([3, 0, 2, 1], dtype=float)
+    endpoint = derive_swap_endpoint(
+        channel_names=channel_names,
+        rank_a_dense=rank_a_dense,
+        decision_k=1,
+    )
+    assert set(endpoint) == {"Q", "P"}
+
+
+def test_set_relation_intermediate_universe():
+    """0 < |S| < |L| AND |E| < |L| → all fields well-defined, informative=True."""
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D", "E", "F"]   # |L| = 6
+    endpoint_chs = ["A", "B", "F"]                # |E| = 3
+    soz_chs = ["A", "B", "C"]                     # |S in L| = 3
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["n_E"] == 3
+    assert out["n_S"] == 3
+    assert out["n_L"] == 6
+    assert out["n_E_inter_S"] == 2  # A, B
+    assert out["precision"] == pytest.approx(2 / 3)
+    assert out["recall_within_lagPat"] == pytest.approx(2 / 3)
+    assert out["coverage"] == pytest.approx(0.5)
+    assert out["lagpat_baseline"] == pytest.approx(0.5)
+    assert out["enrichment_over_lagPat"] == pytest.approx(2 / 3 - 0.5)
+    assert out["typology"] == "partial"
+    assert out["informative"] is True
+
+
+def test_set_relation_saturated_universe():
+    """|S| == |L| → typology='degenerate', informative=False, enrichment≈0."""
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D"]
+    endpoint_chs = ["A", "B"]
+    soz_chs = ["A", "B", "C", "D"]   # all of valid is SOZ
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["typology"] == "degenerate"
+    assert out["informative"] is False
+    # enrichment should still compute (not None) but equals 0
+    assert out["lagpat_baseline"] == pytest.approx(1.0)
+    assert out["precision"] == pytest.approx(1.0)
+    assert out["enrichment_over_lagPat"] == pytest.approx(0.0)
+
+
+def test_set_relation_empty_soz_universe():
+    """|S| == 0 → typology='degenerate', recall=None, informative=False."""
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D", "E"]
+    endpoint_chs = ["A", "B"]
+    soz_chs: list[str] = []  # no SOZ in lagPat
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["typology"] == "degenerate"
+    assert out["informative"] is False
+    assert out["recall_within_lagPat"] is None
+    assert out["enrichment_over_lagPat"] is None  # baseline undefined when |S|=0
+
+
+def test_set_relation_full_coverage():
+    """|E| == |L| → typology='degenerate', precision == lagpat_baseline,
+    enrichment ≡ 0 by construction."""
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D"]
+    endpoint_chs = ["A", "B", "C", "D"]   # endpoint = entire universe
+    soz_chs = ["A", "B"]                   # half SOZ
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["typology"] == "degenerate"
+    assert out["informative"] is False
+    assert out["precision"] == pytest.approx(0.5)
+    assert out["lagpat_baseline"] == pytest.approx(0.5)
+    assert out["enrichment_over_lagPat"] == pytest.approx(0.0)
+
+
+def test_set_relation_E_subset_S():
+    """E ⊂ S strictly → typology='E_subset_S', precision=1, recall<1."""
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D", "E", "F"]
+    endpoint_chs = ["A", "B"]            # E = {A, B}
+    soz_chs = ["A", "B", "C", "D"]        # S = {A, B, C, D} ⊃ E (in lagPat)
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["typology"] == "E_subset_S"
+    assert out["informative"] is True
+    assert out["precision"] == pytest.approx(1.0)
+    assert out["recall_within_lagPat"] == pytest.approx(0.5)
+    # enrichment = 1.0 - 4/6 = 1/3
+    assert out["enrichment_over_lagPat"] == pytest.approx(1.0 - 4 / 6)
+
+
+def test_set_relation_S_subset_E():
+    """S ⊂ E strictly → typology='S_subset_E', recall=1, precision<1."""
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D", "E", "F"]
+    endpoint_chs = ["A", "B", "C", "D"]   # E = {A, B, C, D}
+    soz_chs = ["A", "B"]                   # S = {A, B} ⊂ E
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["typology"] == "S_subset_E"
+    assert out["informative"] is True
+    assert out["recall_within_lagPat"] == pytest.approx(1.0)
+    assert out["precision"] == pytest.approx(0.5)
+    # enrichment = 0.5 - 2/6 = 1/6
+    assert out["enrichment_over_lagPat"] == pytest.approx(0.5 - 2 / 6)
+
+
+def test_set_relation_disjoint():
+    """E ∩ S == ∅ → typology='disjoint', precision=0, recall=0,
+    enrichment = -lagpat_baseline."""
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D", "E", "F"]
+    endpoint_chs = ["E", "F"]            # E = {E, F}
+    soz_chs = ["A", "B"]                  # S = {A, B}, disjoint from E
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["typology"] == "disjoint"
+    assert out["informative"] is True
+    assert out["precision"] == pytest.approx(0.0)
+    assert out["recall_within_lagPat"] == pytest.approx(0.0)
+    assert out["enrichment_over_lagPat"] == pytest.approx(-2 / 6)
+
+
+def test_enrichment_zero_when_E_uniform_sample_of_L():
+    """E is a uniform sample of L w.r.t. SOZ proportion → enrichment ≈ 0.
+
+    valid = 8 chs, half SOZ; endpoint = 4 chs evenly split SOZ/non-SOZ →
+    precision = 0.5 = lagpat_baseline → enrichment = 0.
+    """
+    from src.rank_displacement import compute_clinical_soz_set_relation
+
+    valid_chs = ["A", "B", "C", "D", "E", "F", "G", "H"]
+    soz_chs = ["A", "B", "C", "D"]   # 4/8 SOZ
+    endpoint_chs = ["A", "B", "E", "F"]   # 2 SOZ, 2 non-SOZ
+    out = compute_clinical_soz_set_relation(
+        valid_chs=valid_chs, endpoint_chs=endpoint_chs, soz_chs=soz_chs,
+    )
+    assert out["precision"] == pytest.approx(0.5)
+    assert out["lagpat_baseline"] == pytest.approx(0.5)
+    assert out["enrichment_over_lagPat"] == pytest.approx(0.0)
+
+
+def test_cohort_sign_test_excludes_degenerate():
+    """Mixed cohort: 3 degenerate + 5 informative → sign test runs on n=5 only."""
+    from src.rank_displacement import cohort_sign_test_enrichment
+
+    enrichments = [0.20, 0.10, -0.05, 0.30, 0.15, None, None, None]  # last 3 degenerate
+    out = cohort_sign_test_enrichment(
+        enrichments=enrichments, n_boot=500, seed=0,
+    )
+    assert out["n_informative"] == 5
+    assert out["n_positive"] == 4   # 0.20, 0.10, 0.30, 0.15 positive; -0.05 negative
+    # one-sided binomial p for 4/5 > 0.5
+    assert out["sign_test_p"] < 0.5
+
+
+def test_cohort_bootstrap_reproducible():
+    """seed=0, n_boot=2000 → CI deterministic across runs."""
+    from src.rank_displacement import cohort_sign_test_enrichment
+
+    enrichments = [0.10, 0.20, 0.05, -0.05, 0.30, 0.15, 0.00, 0.25]
+    a = cohort_sign_test_enrichment(
+        enrichments=enrichments, n_boot=2000, seed=0,
+    )
+    b = cohort_sign_test_enrichment(
+        enrichments=enrichments, n_boot=2000, seed=0,
+    )
+    assert a["bootstrap_ci_lo"] == pytest.approx(b["bootstrap_ci_lo"])
+    assert a["bootstrap_ci_hi"] == pytest.approx(b["bootstrap_ci_hi"])
+    assert a["median_enrichment"] == pytest.approx(b["median_enrichment"])
+    # CI brackets the median
+    assert a["bootstrap_ci_lo"] <= a["median_enrichment"] <= a["bootstrap_ci_hi"]
+
+
+def test_cohort_sign_test_all_degenerate_returns_empty():
+    """All None enrichments → n_informative=0, p undefined (None or 1.0 by convention)."""
+    from src.rank_displacement import cohort_sign_test_enrichment
+
+    out = cohort_sign_test_enrichment(
+        enrichments=[None, None, None], n_boot=500, seed=0,
+    )
+    assert out["n_informative"] == 0
+    assert out["sign_test_p"] is None or out["sign_test_p"] == 1.0
+    assert out["median_enrichment"] is None

@@ -449,9 +449,206 @@ ER-leading / Topic 3 SOZ audit / 更严 high-HI 阈值）后 decision_k、swap_c
 caveat，**且 figure caption / 正文紧邻 decision_k 数字处必须重述这条 caveat**
 （不只是放在远处的方法学段）。
 
+## 9. Swap × Clinical SOZ Set-Relationship（2026-05-08 增量）
+
+> **Plan**：`docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md`
+>
+> **状态**：descriptive primary + mechanism-sanity tier；**不**升级 main doc 结论。是
+> PR-6 H1（hard-coded `k=3` swap_node × template-specific SOZ frac，paired Wilcoxon
+> p=0.19 NULL prior）的方法学改进 retest，**主结论形态从"cohort p-value"改为
+> "cohort typology distribution + sign test on enrichment_over_lagPat"**。
+
+### 9.0 Framing 与 caveat（每个数字旁边都要带）
+
+- 是 paper1_framework_sba H1 三源（clinical / M1=HFO-onset rate / M2=ER-ratio）协同
+  预言的 **clinical 单源首发**。M1/M2 sensitivity 等 PR-T3-1 producer 重设计后单独
+  补 §9.5（broad_ER 当前 cohort 16 subject 中只 6/16 concordant，未 cohort-stable）
+- **circular caveat 不可省略**：lagPat universe 由 high-HI / high-HFO-rate 阈值选出，
+  本身已对 SOZ 富集。本 §9 量化的是"在 high-HI 区内 swap_endpoint 是否进一步富集
+  SOZ"，**不是**全脑 swap-vs-SOZ 关系
+- **outcome × partition 检验（HFO rate / detrend_fraction / cluster participation
+  × 4-cell partition）属于 Topic 1 Part 2 演化故事 PR**，不在本 §9 空间收束范围
+- **Cohort 数小幅口径差异（与 §8.3 / §8.4 对照）**：本 §9 跑数时 `cohort_summary.json`
+  显示 candidate **n=9**（多了 `yuq_zhourongxuan`，dk=2，T_obs=1.000，p_fw=0.152），
+  而 §8.3 / §8.4 列表写的是 "candidate **n=8**"（v3 dual-tier 第一次落档时的 cohort
+  快照，发生在 yuquan v14 cohort 收尾的几个小时之内）。**两份数字都是数据驱动的，
+  没有手动剔除任何 subject**；差别只是不同跑次的 cohort 快照点。§9 cohort 数
+  (strict 10 + candidate 9 + none 16 = 35 stable_k=2，全 cohort 40) 是**当前**口径。
+  §8 数字未追溯重写，避免改动已落档的方法学陈述
+
+### 9.1 Schema + cohort 划分
+
+每 pair 写入 `clinical_soz_set_relation`（plan §2 schema）：`n_E, n_S, n_L, n_E_inter_S,
+precision, recall_within_lagPat, coverage, lagpat_baseline, enrichment_over_lagPat,
+typology, informative, exit_reason`。`E = swap_endpoint = top decision_k ∪ bottom
+decision_k`（按 `rank_T_a_dense` 排序，与 §8 主图圈位一致）；`S = SOZ ∩ valid_chs`；
+`L = lagPat valid set`。
+
+**Typology 决策树**（plan §2，写死）：
+1. `degenerate` if `n_S == 0 OR n_S == n_L OR n_E == n_L`
+2. `disjoint` if `n_E_inter_S == 0`
+3. `E_subset_S` if `n_E_inter_S == n_E AND n_E_inter_S < n_S`
+4. `S_subset_E` if `n_E_inter_S == n_S AND n_E_inter_S < n_E`
+5. `partial` else
+
+**Cohort 划分**（plan §3，pre-registered）：
+
+| Tier | 来源 | §9 用途 |
+|---|---|---|
+| Primary | `swap_class == "strict"` ∩ `informative == true` | sign test on `enrichment > 0` + median + bootstrap CI |
+| Sensitivity | `swap_class == "candidate"` ∩ `informative == true` | 同样 stat（**不**合并入 primary） |
+| Descriptive only | degenerate (任 tier) + `none ∩ informative` | typology 分布 + scatter 上画但不进 sign test |
+
+informative gate：`0 < n_S < n_L AND n_E < n_L`（plan §1，pre-registered）。
+
+### 9.2 Primary cohort 主结果（strict ∩ informative）
+
+**先看可用样本 — strict tier n_middle 退化是结构性的**（advisor 2026-05-08 catch）：
+strict tier dual-tier swap_class 倾向 `decision_k ≈ ⌊n_valid/2⌋`（FW max-null 偏好整体
+反转），所以 `n_E = 2 · decision_k ≈ n_valid`，coverage 接近 1，**informative 子集
+collapse 到 5/10**：`epi_1073, yuq_wangyiyang` 是 full coverage（typology=degenerate）；
+`epi_635, yuq_zhangjiaqi` 是 saturated universe（n_S=n_L）；`epi_620` 是
+no_clinical_soz（不在 SOZ JSON）。primary cohort 实际 n=5。
+
+**Sign test + bootstrap CI（plan §4）**：
+
+| 量 | 值 |
+|---|---|
+| n_informative | **5** (`epi_958, epi_139, epi_1146, yuq_hanyuxuan, yuq_zhaochenxi`) |
+| n_positive (enrichment > 0) | **3** |
+| Sign test p (one-sided binomial) | **0.500** |
+| Median enrichment | **+0.042** |
+| Bootstrap 95% CI (seed=0, n_boot=2000) | **[−0.071, +0.098]** |
+
+**结论：strict primary cohort = NULL**，CI 横跨 0。这与 PR-6 H1 hard-coded `k=3`
+Wilcoxon `p=0.19` NULL prior 一致 — **更精细的 dual-tier swap_class 没有把 NULL
+翻号**。
+
+### 9.3 Sensitivity cohort（candidate ∩ informative）
+
+| 量 | 值 |
+|---|---|
+| n_informative | **5** (`epi_1150, epi_548, yuq_liyouran, yuq_chenziyang, yuq_huanghanwen`) |
+| n_positive | **4** |
+| Sign test p (one-sided binomial) | **0.1875** |
+| Median enrichment | **+0.127** |
+| Bootstrap 95% CI | **[0.000, +0.167]** |
+
+candidate tier 4/5 informative subject 显示正向（only `yuq_huanghanwen` enrichment=0），
+median +0.127。CI 下界刚好接触 0。**直观上有方向但 underpowered**（n=5）；不算 cohort
+显著结果。candidate 与 strict 的 effect size 不一致（candidate +0.127 vs strict +0.042）
+是 swap_class 双轨在不同 construct 上的预期分歧（参 §8.3），**不**作为 strict/candidate
+合并的依据。
+
+### 9.4 Typology 分布（descriptive 主读数）
+
+`results/interictal_propagation/rank_displacement/clinical_soz_set_relation_summary.json`
+完整字段；分布表：
+
+| typology | strict | candidate | none | 含义 |
+|---|---|---|---|---|
+| **E_subset_S** | **0** | **0** | **0** | swap 严格 ⊂ SOZ（"refined SOZ candidate"）—— 全 cohort 0 个 |
+| **S_subset_E** | 1 | 3 | 0 | swap ⊃ SOZ + extras（"extended SOZ candidate"）—— **strict ∪ candidate 共 4 个**：`yuq_zhaochenxi (strict, +0.067), epi_1150 (cand, +0.167), epi_548 (cand, +0.167), yuq_chenziyang (cand, +0.100)` |
+| partial | 4 | 2 | 8 | 真重叠（part of swap 在 SOZ，part 不在）—— 最常见 |
+| disjoint | 0 | 0 | 1 | swap 完全在 SOZ 外（`epi_253` none tier，case-level） |
+| degenerate | 4 | 2 | 10 | universe 退化 |
+| missing (no clinical SOZ) | 1 | 2 | 2 | `epi_620, 1125, 384, 818, 916` 不在 SOZ JSON |
+
+**关键 descriptive 发现**（不同于 §9.2 sign test 的 NULL）：
+
+- **0/35 subject 是 `E_subset_S`** — swap_endpoint 在本 cohort 里**从不严格小于 clinical
+  SOZ**。"swap 是 SOZ 的精炼子集"这一假设方向 **不**被支持
+- **4/35 subject 是 `S_subset_E`** — swap_endpoint **包含**全部 clinical SOZ + 额外通道。
+  方向上"swap 范围比 clinical SOZ 大"是有 case-level 信号的（4 个 informative subject）
+- **6 partial（strict + candidate）+ 8 partial（none）** — 多数 informative subject 是
+  真重叠
+
+**descriptive 叙事**（**不**作为 paper-level cohort claim）：
+swap_endpoint 在 lagPat 内的几何分布相对 clinical SOZ **倾向于"覆盖且包含"而非"被
+包含"** — 即在 lagPat 选出的 high-HI 候选中，swap 几何挑出的端点候选更宽于、而不是
+更窄于、临床 SOZ 标注。这与 user 在设计阶段的 "swap 范围比临床更大可能是补充信息"
+直觉方向一致，但**仅作为 descriptive cohort pattern 报告，不作为 cohort claim**。
+
+### 9.5 Per-subject 数字表（strict ∪ candidate informative）
+
+| subject | tier | dk | n_E | n_S | n_L | n∩ | precision | recall_lagPat | enrichment | typology |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `yuq_hanyuxuan` | strict | 6 | 12 | 7 | 22 | 5 | 0.417 | 0.714 | **+0.098** | partial |
+| `yuq_zhaochenxi` | strict | 12 | 24 | 21 | 26 | 21 | 0.875 | 1.000 | +0.067 | **S_subset_E** |
+| `epi_958` | strict | 6 | 12 | 6 | 16 | 5 | 0.417 | 0.833 | +0.042 | partial |
+| `epi_1146` | strict | 7 | 14 | 14 | 15 | 13 | 0.929 | 0.929 | −0.005 | partial |
+| `epi_139` | strict | 3 | 6 | 4 | 7 | 3 | 0.500 | 0.750 | −0.071 | partial |
+| `epi_1150` | candidate | 3 | 6 | 3 | 9 | 3 | 0.500 | 1.000 | **+0.167** | **S_subset_E** |
+| `epi_548` | candidate | 4 | 8 | 4 | 12 | 4 | 0.500 | 1.000 | **+0.167** | **S_subset_E** |
+| `yuq_liyouran` | candidate | 3 | 6 | 12 | 17 | 5 | 0.833 | 0.417 | **+0.127** | partial |
+| `yuq_chenziyang` | candidate | 4 | 8 | 4 | 10 | 4 | 0.500 | 1.000 | **+0.100** | **S_subset_E** |
+| `yuq_huanghanwen` | candidate | 4 | 8 | 5 | 10 | 4 | 0.500 | 0.800 | +0.000 | partial |
+
+### 9.6 退化 / missing subject 列名
+
+- **strict degenerate**: `epi_1073` (full coverage, n_E=n_L=6), `epi_635` (saturated, n_S=n_L=10), `yuq_wangyiyang` (saturated, n_S=21/n_L=22, full coverage), `yuq_zhangjiaqi` (saturated, n_S=n_L=7)
+- **strict missing**: `epi_620` (`exit_reason=no_clinical_soz`)
+- **candidate degenerate**: `yuq_zhangkexuan` (full coverage), `yuq_zhourongxuan` (full coverage)
+- **candidate missing**: `epi_1125, epi_384` (`exit_reason=no_clinical_soz`)
+
+### 9.7 Figure
+
+`results/interictal_propagation/rank_displacement/figures/swap_clinical_soz_set_relation.{png,pdf}`：
+3-panel layout（plan §5）：
+- **Panel A**: precision × recall_within_lagPat scatter (informative only)；strict
+  实心黑、candidate 空心灰、none 浅三角；`(1, 1)` 是 E≡S 重合点；上边缘 (precision=1)
+  = E ⊂ S；右边缘 (recall=1) = S ⊂ E
+- **Panel B**: enrichment_over_lagPat × coverage scatter；`y=0` 横虚线；右下角注
+  "→ 0 as cov→1 (structural)" 表示 saturation 边界
+- **Panel C**: typology stacked bar by tier；strict / candidate / none 三柱，按
+  typology 颜色分层（teal=E_subset_S, rust=S_subset_E, olive=partial,
+  brick=disjoint, light grey=degenerate, near-white=missing）；柱顶标 `info=k/N`
+
+caption / 正文必须紧邻数字重述 §9.0 circular caveat。
+
+### 9.8 不可以说
+
+- ~~"strict primary cohort sign test p=0.5 ⇒ swap_endpoint 与 clinical SOZ 无关"~~ —
+  prior PR-6 H1 NULL 的方向上 retest 仍 NULL，**但 candidate cohort 4/5 正向 +0.127**
+  表明方向信号存在，是 **underpowered**，不是 "无关"
+- ~~"strict ∪ candidate 4/35 是 S_subset_E ⇒ swap 在 cohort 上扩展 clinical SOZ"~~ —
+  4/35 ≈ 11% 是 case-level 信号，不是 cohort claim；其余 informative subject 多数
+  是 partial
+- ~~"§9 主图上的圈圈/点点 ⇒ swap_endpoint 是该 subject 的真实病理通道"~~ — 通道选择
+  caveat 与 §8.7 channel-label 合同同时生效；strict tier 通道仅可作
+  `swap_endpoint_candidate` label，使用前需 split-half 验证（本 §9 不依赖 label
+  generalization，§8.7 split-half 要求**对 §9 deliverable 不触发**，但任何把 §9
+  channel set 拿到 Part 2 outcome 检验前**必须**先做 split-half）
+- ~~"PR-6 H1 NULL prior + §9 strict primary NULL ⇒ swap geometry 与 SOZ 独立 / 排斥"~~
+  — 多源（M1/M2）协同未跑前不可声明；paper1_framework_sba H1 三源条件未满足；§9 是
+  clinical 单源首发的 NULL，不是三源协同的 NULL
+- ~~"candidate cohort median +0.127 ⇒ candidate tier 比 strict tier 更接近临床 SOZ"~~
+  — strict / candidate 测的是不同 construct（§8.3），enrichment 数字 cross-tier 比较
+  不成立；candidate 的方向信号要等 n 变大或 outcome 验证
+
+### 9.9 后续（不在本 §9 范围）
+
+- **Part 2 PR（temporal evolution）**：detrend_fraction (n=31, yuquan 11 + epilepsiae 20，
+  PR-1 已发现 SOZ < nonSOZ trend p=0.129) × 4-cell (swap × SOZ) partition 检验；
+  swap direction × seizure proximity rate elevation (PR-2.7 已有 [-6h,-1h] 增强 16/21
+  p=0.019)。**这是 Topic 1 论文第二部分"间期刻板时序是癫痫病理网络演化的指示器"
+  的主入口**，不在本 §9 空间收束范围
+- **§9.5 multi-source SOZ sensitivity**：等 PR-T3-1 producer 重设计（当前 broad_ER
+  6/16 concordant，gamma_ER 3/16 concordant，cohort 未稳定）。补 M1=HFO-onset rate
+  与 M2=ER-rank 两套 SOZ 的 set-relationship readout，paper1_framework_sba H1 三源
+  协同条件具备时再升级
+- **swap_endpoint channel label 的 split-half 验证**：当 §9 的 swap_endpoint 通道集
+  作为 Part 2 outcome 检验的 input 时（即从"set-relationship 描述"变成"作为 label
+  跑 outcome 富集"），必须按 §8.7 channel-label 安全合同先做事件二分 → A 半 derive
+  swap_class → B 半验证 outcome
+- **case study**：`yuq_hanyuxuan` (strict, partial, +0.098)、`yuq_zhaochenxi` (strict,
+  S_subset_E, +0.067)、`epi_1150 / 548 / yuq_chenziyang` (candidate, S_subset_E,
+  +0.10–0.17) 是 §9 中信号最强的 case，可作为方法学示例进 paper figure 1 / 主文档
+
 ## 7. 历史链接
 
 - `docs/topic1_within_event_dynamics.md` §7 — Topic 1 主文档
 - `docs/archive/topic1/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — PR-6 plan（上游 swap_node 离散合同）
 - `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` — PR-8 candidate 来源
-- `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` — 本 supplementary 的 plan
+- `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` — 本 supplementary 的 plan（§1–§8）
+- `docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md` — §9 的 plan（swap × clinical SOZ set-relationship）

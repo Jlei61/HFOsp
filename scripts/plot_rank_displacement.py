@@ -586,12 +586,163 @@ def plot_swap_cardinality_heatmap(records: List[dict], out_stem: Path) -> None:
     plt.close(fig)
 
 
+def plot_clinical_soz_set_relation(
+    summary_path: Path, out_stem: Path
+) -> None:
+    """3-panel paper-level supplementary figure for §9 swap × clinical SOZ.
+
+    Plan: docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md §5
+
+    Panel A: precision × recall_within_lagPat scatter (informative subjects only)
+    Panel B: enrichment_over_lagPat × coverage scatter
+    Panel C: typology stacked bar by tier (strict / candidate / none)
+
+    Markers: strict = filled black, candidate = open grey, none = pale grey △.
+    Reference lines: A precision=1 + recall=1; B enrichment=0.
+    No p-value annotation on any panel — cohort sign-test goes in caption / archive doc.
+    """
+    summary = json.loads(summary_path.read_text())
+    rows = summary.get("per_subject", [])
+
+    fig, axes = plt.subplots(
+        1, 3, figsize=(15.5, 5.0), gridspec_kw={"width_ratios": [1.05, 1.05, 1.0]}
+    )
+    ax_a, ax_b, ax_c = axes
+
+    def _select(rows, predicate):
+        return [r for r in rows if predicate(r)]
+
+    informative = _select(rows, lambda r: r.get("informative") is True)
+    strict_inf = _select(informative, lambda r: r["swap_class"] == "strict")
+    cand_inf = _select(informative, lambda r: r["swap_class"] == "candidate")
+    none_inf = _select(informative, lambda r: r["swap_class"] == "none")
+
+    # ---------------- Panel A: precision × recall ----------------
+    def _scatter_pr(ax, subjects, marker, face, edge, lw, size, label):
+        x = [r["recall_within_lagPat"] for r in subjects if r["recall_within_lagPat"] is not None]
+        y = [r["precision"] for r in subjects if r["precision"] is not None]
+        ax.scatter(
+            x, y, marker=marker, s=size, facecolors=face, edgecolors=edge,
+            linewidths=lw, label=label, zorder=4,
+        )
+
+    _scatter_pr(ax_a, none_inf, "^", "0.85", "0.55", 0.7, 44, "none")
+    _scatter_pr(ax_a, cand_inf, "o", "none", "0.30", 1.4, 110, "candidate")
+    _scatter_pr(ax_a, strict_inf, "o", "black", "black", 0.8, 110, "strict")
+    # Annotate strict subjects by short name
+    for r in strict_inf:
+        if r["precision"] is None or r["recall_within_lagPat"] is None:
+            continue
+        sub = str(r["subject"])
+        short = sub if len(sub) <= 6 else sub[:6]
+        ax_a.annotate(
+            short, xy=(r["recall_within_lagPat"], r["precision"]),
+            xytext=(4, 4), textcoords="offset points",
+            fontsize=FS_TICK - 1, color="black", zorder=5,
+        )
+    # Reference lines
+    ax_a.axhline(1.0, color="0.65", linestyle=":", linewidth=0.9, zorder=1)
+    ax_a.axvline(1.0, color="0.65", linestyle=":", linewidth=0.9, zorder=1)
+    ax_a.set_xlim(-0.05, 1.10)
+    ax_a.set_ylim(-0.05, 1.10)
+    ax_a.set_xlabel("Recall within lagPat  |E ∩ S| / |S|", fontsize=FS_LABEL)
+    ax_a.set_ylabel("Precision  |E ∩ S| / |E|", fontsize=FS_LABEL)
+    ax_a.set_title("(A) precision × recall", fontsize=FS_TITLE, loc="left")
+    ax_a.legend(loc="lower left", fontsize=FS_TICK, frameon=False)
+    style_panel(ax_a)
+
+    # ---------------- Panel B: enrichment × coverage ----------------
+    def _scatter_ec(ax, subjects, marker, face, edge, lw, size, label):
+        x = [r["coverage"] for r in subjects if r["coverage"] is not None]
+        y = [r["enrichment_over_lagPat"] for r in subjects if r["enrichment_over_lagPat"] is not None]
+        ax.scatter(
+            x, y, marker=marker, s=size, facecolors=face, edgecolors=edge,
+            linewidths=lw, label=label, zorder=4,
+        )
+
+    _scatter_ec(ax_b, none_inf, "^", "0.85", "0.55", 0.7, 44, "none")
+    _scatter_ec(ax_b, cand_inf, "o", "none", "0.30", 1.4, 110, "candidate")
+    _scatter_ec(ax_b, strict_inf, "o", "black", "black", 0.8, 110, "strict")
+    for r in strict_inf:
+        if r["coverage"] is None or r["enrichment_over_lagPat"] is None:
+            continue
+        sub = str(r["subject"])
+        short = sub if len(sub) <= 6 else sub[:6]
+        ax_b.annotate(
+            short, xy=(r["coverage"], r["enrichment_over_lagPat"]),
+            xytext=(4, 4), textcoords="offset points",
+            fontsize=FS_TICK - 1, color="black", zorder=5,
+        )
+    ax_b.axhline(0.0, color="0.45", linestyle="--", linewidth=1.2, zorder=2)
+    ax_b.set_xlim(-0.02, 1.05)
+    ax_b.set_xlabel("Coverage  |E| / |L|", fontsize=FS_LABEL)
+    ax_b.set_ylabel("Enrichment over lagPat  precision − |S|/|L|", fontsize=FS_LABEL)
+    ax_b.set_title("(B) enrichment × coverage", fontsize=FS_TITLE, loc="left")
+    # Annotate the structural fact at coverage→1
+    ax_b.text(
+        0.99, 0.0, "→ 0 as cov→1\n(structural)",
+        ha="right", va="bottom", fontsize=FS_TICK - 1, color="0.45",
+        transform=ax_b.transData,
+    )
+    ax_b.legend(loc="lower left", fontsize=FS_TICK, frameon=False)
+    style_panel(ax_b)
+
+    # ---------------- Panel C: typology stacked bar ----------------
+    typ_dist = summary.get("typology_distribution", {})
+    tiers = ["strict", "candidate", "none"]
+    typ_order = ["E_subset_S", "S_subset_E", "partial", "disjoint", "degenerate", "missing"]
+    typ_colors = {
+        "E_subset_S": "#3F7A88",   # teal — refined SOZ candidate
+        "S_subset_E": "#C77E48",   # rust — extended SOZ candidate
+        "partial":    "#9B9B6F",   # olive
+        "disjoint":   "#7A4F4F",   # brick
+        "degenerate": "0.75",
+        "missing":    "0.90",
+    }
+    bottoms = np.zeros(len(tiers), dtype=float)
+    bar_x = np.arange(len(tiers))
+    for typ in typ_order:
+        heights = np.array([typ_dist.get(t, {}).get(typ, 0) for t in tiers], dtype=float)
+        ax_c.bar(
+            bar_x, heights, bottom=bottoms,
+            color=typ_colors[typ], edgecolor="white", linewidth=0.5,
+            label=typ,
+        )
+        bottoms = bottoms + heights
+    ax_c.set_xticks(bar_x)
+    ax_c.set_xticklabels(tiers, fontsize=FS_TICK)
+    ax_c.set_ylabel("Subject count", fontsize=FS_LABEL)
+    ax_c.set_title("(C) typology by swap_class", fontsize=FS_TITLE, loc="left")
+    # Annotate informative count above each bar
+    for x, t in zip(bar_x, tiers):
+        n_inf = sum(typ_dist.get(t, {}).get(typ, 0) for typ in typ_order if typ != "degenerate" and typ != "missing")
+        n_total = sum(typ_dist.get(t, {}).get(typ, 0) for typ in typ_order)
+        ax_c.text(
+            x, n_total + 0.4, f"info={n_inf}/{n_total}",
+            ha="center", va="bottom", fontsize=FS_TICK - 1,
+        )
+    ax_c.legend(
+        loc="upper right", fontsize=FS_TICK - 1, frameon=False,
+        ncol=1, bbox_to_anchor=(1.0, 1.0),
+    )
+    style_panel(ax_c)
+
+    fig.suptitle(
+        "Swap_endpoint × clinical SOZ within lagPat universe",
+        fontsize=FS_TITLE + 1, y=0.99,
+    )
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    for ext in ("png", "pdf"):
+        fig.savefig(f"{out_stem}.{ext}", dpi=DPI_PUB, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument(
         "--what",
         default="all",
-        choices=["all", "cohort", "per_subject", "swap"],
+        choices=["all", "cohort", "per_subject", "swap", "clinical-soz-set-relation"],
     )
     ap.add_argument(
         "--exclude",
@@ -626,6 +777,15 @@ def main() -> None:
                 r, PER_SUB_FIG_DIR / f"{stem}_displacement.png"
             )
         print(f"Wrote per-subject strips for {len(records)} subjects")
+
+    if args.what in ("all", "clinical-soz-set-relation"):
+        summary_path = (
+            DATA_ROOT / "results" / "interictal_propagation" /
+            "rank_displacement" / "clinical_soz_set_relation_summary.json"
+        )
+        out_stem = FIG_DIR / "swap_clinical_soz_set_relation"
+        plot_clinical_soz_set_relation(summary_path, out_stem)
+        print(f"Wrote {out_stem.name}.{{png,pdf}}")
 
     if args.what in ("all", "swap"):
         plot_swap_cardinality_heatmap(

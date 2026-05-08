@@ -36,9 +36,23 @@
 
 ## 3. 核心证据链
 
-### 3.1 内部传播刻板性
+> ### Cohort tier 注解（2026-05-07 起强制双轨/三层口径）
+>
+> 本 topic 现在共有 **三个 cohort 层**，下面 §3.1–§3.2 任何具体数字读到时**必须先识别它属于哪一层**：
+>
+> | 层 | n | 谱系 | 来源 | 适用范围 |
+> |---|---|---|---|---|
+> | **Tier 0 — 原 30-subject** | 30 | 21 年 cusignal vintage 全链 | PR-1/PR-2/PR-2.5/PR-3/PR-4*/PR-5/PR-6/PR-7 全部主线（pre-2026-05-06） | §3.1 / §3.1b 所有原始 PASS 比例（如 `23/30 strong`、`27 × k=2`、`30/30 MI permutation`、PR-4A `3/30 < 0.8`、PR-4B 的 `dom_r > 0.7` 集等）；PR-4C / PR-5 / PR-7 全部统计；§4 同步性 cohort 统计 |
+> | **Tier 1 — n=33 primary** | 33 | 30 vintage + 3 lineage-adjacent (cuda_env pack) | Slice A1 (2026-05-06) + Slice A2 (2026-05-07) 把 PR-1/PR-2/PR-2.5/PR-6 cohort 重算后落 `pr1_cohort_summary.json` default、`template_anchoring/cohort_summary_n33.json`；A1/A2 follow-up 又把 PR-3 cohort 6-panel `cohort_propagation_summary_n33.png` 与 PR-7 cohort summary 也重算到 n=9 h1_primary | **新增**：从 2026-05-07 起 PR-1/PR-2 mixture/τ/bias/stable_k 主表、PR-2.5 forward_reverse 主表、PR-6 H1/H2/H3 主表、**PR-3 cohort 6-panel n=33 主图**、**PR-7 mark-independence n=9 主表**都用此层。PR-4* / PR-5 **未**重算 |
+> | **Tier 2 — n=40 extended** | 40 | Tier 1 33 + 7 legacy variant（仅 `_lagPat.npz`，不可考 pack 参数） | Slice A2 双轨第二轨；落 `pr1_cohort_summary_n40.json`、`template_anchoring/cohort_summary_n40.json`、**`cohort_propagation_summary_n40.png`** | **sensitivity / case-extended only**。任何 cohort 主张写到 paper 不允许只引此层。Tier 1 与 Tier 2 数字差异本身是 lineage robustness 检验，不是新 cohort 信号。PR-7 不分 Tier 2（per_subject 仍按 cohort 流程汇总到一份 cohort_summary，n=9 / n=21 已含 path-D）|
+>
+> **重要**：Tier 0 ↔ Tier 1 ↔ Tier 2 之间的数字差异要么由"cohort 增加 / 谱系变化"驱动，要么由"重新 aggregate 时函数版本变化"驱动。如果 Tier 0 与 Tier 1 在某个共同 subject 上数字不一致，先怀疑 aggregator 版本，不要默认 cohort 大小是唯一变量。一个 already-known mass：`epilepsiae/1096` 在 Tier 1/Tier 2 的 PR-6 H1 pooled 都有 `valid_mask_source=fallback_all_valid` 的 pre-existing contamination，inherits 进两轨 H1 p 值；要 fix 需要单独 sensitivity PR。
+>
+> **写作合同**：本 topic 的 paper-level 论述按 priority **Tier 1 > Tier 0 > Tier 2** 引用（Tier 1 是当前主表，Tier 0 是历史 framework lock 时刻的 cohort，Tier 2 仅作 lineage robustness 注脚）。任何 mixed-tier 引用必须显式标注 "(Tier 0)" / "(Tier 1)" / "(Tier 2)"，不允许裸写 `30/30` 或 `28/40` 让读者猜。
 
-来自 `lagPatRank + eventsBool + chnNames` 的 cluster-aware 分析：
+### 3.1 内部传播刻板性（**Tier 0 = 原 30-subject framework lock**）
+
+来自 `lagPatRank + eventsBool + chnNames` 的 cluster-aware 分析。**这一节的全部比例都是 Tier 0 cohort（n=30）**——SBA framework P1/P2 的 lock 时刻引用的就是这些数字，**不要替换成 Tier 1**：
 
 - `30/30` subject 的 pairwise Kendall `τ` 分布呈多模态
 - KMeans(`k=2`) 后，簇内 `τ` 中位数 `0.250` 显著高于整体 `τ = 0.089`
@@ -47,7 +61,9 @@
 
 合理口径：**一个 subject 常常有多条主要传播路径，每条路径内部仍然刻板。**
 
-### 3.1b 数据合同、聚类稳定性与跨时间复现（PR-2a/2b/2.5）
+### 3.1b 数据合同、聚类稳定性与跨时间复现（PR-2a/2b/2.5，**Tier 0**）
+
+**全部 Tier 0（n=30）数字**——PR-2.5 的"strong/moderate/weak" 分级合同与 SBA P1 PASS 判据都钉在这一层：
 
 - 全量 `30/30` subject 都找到 `stable_k`，零 fallback；`stable_k` 分布 `27 × k=2`、`2 × k=4`、`1 × k=6`
 - Adaptive within-cluster `τ` 中位数 `0.252`，相对整体 uplift 中位数 `+0.100`
@@ -56,13 +72,51 @@
 
 完整数值表与算法合同见 archive `interictal_group_event_internal_propagation.md`。
 
-### 3.1c PR-3 / PR-4A：固定模板可视化与 occupancy 漂移
+#### 3.1b.1 Tier 1 / Tier 2 当前 cohort 数字（2026-05-07 起 PR-1/PR-2/PR-2.5/PR-6 主表）
 
-- PR-3 论文级 6-panel cohort 图已固定；新增簇内 identity-bias 计算（median = 86%）
-- PR-4A 在固定模板投射前提下做 day/night occupancy timeline：dominant fraction Wilcoxon `p=0.124`、entropy `p=0.245`、TV distance median `0.019`
+| 指标 | Tier 1 (n=33 primary) | Tier 2 (n=40 extended) |
+|---|---|---|
+| `n_strict_mixture` | 30 | **30**（不变，7 个 path-D 全是 possible mixture） |
+| `n_possible_mixture` | 3 | 10 |
+| `mean_tau_median` | 0.0884 | 0.0845 |
+| `bias_fraction_median` | 0.6568 | 0.7110 |
+| `stable_k_distribution` | `{2:30, 4:2, 6:1}` | `{2:35, 4:2, 5:2, 6:1}`（+2 个 stable_k=5 是 zhaojinrui/zhourongxuan 单电极 4ch case） |
+| PR-2.5 grade | strong=26, moderate=7 | strong=31, moderate=9 |
+| PR-2.5 forward_reverse `n_with_pairs / n_reproduced` | 14 / 13 | 17 / 16 |
+| PR-6 H1 pooled wilcoxon_greater p | 0.388 (n=23 eligible) | 0.223 (n=28 eligible) |
+| PR-6 H1 Yuquan-only p | 0.344 (n=10) | **0.107 (n=15)**（5 个 path-D 把 median 从 0.031 推到 0.0625, marginal trend not α=0.05） |
+
+**关键叙事**：从 Tier 0 → Tier 1，3 个 Slice A1 subject 全是 possible mixture 不是 strict；从 Tier 1 → Tier 2，7 个 path-D 也全是 possible mixture，**主流 stable_k=2 仍占 35/40**。`mean_tau_median` 略降反映 path-D 中两个 4ch outlier；`bias_fraction_median` 提升反映 path-D 多数高 bias。**Tier 1 → Tier 2 的 PR-6 H1 Yuquan p 从 0.344 降到 0.107 是 lineage robustness 提示而不是新发现**——5 个 path-D 把 median delta 从 0.031 翻到 0.0625，方向上跟 framework P4 假设一致但 effect size 仍未达 α=0.05。
+
+历史与详细数值见两个 archive（按时间序）：
+- Slice A1（lineage-adjacent，3 subject）：[`docs/archive/topic1/propagation/cohort_slice_a1_2026-05-06.md`](archive/topic1/propagation/cohort_slice_a1_2026-05-06.md)
+- Slice A2（legacy variant，7 subject + 双轨报告）：[`docs/archive/topic1/propagation/cohort_slice_a2_legacy_variant_2026-05-07.md`](archive/topic1/propagation/cohort_slice_a2_legacy_variant_2026-05-07.md)
+
+### 3.1c PR-3 / PR-4A：固定模板可视化与 occupancy 漂移（**Tier 0** — 未重算）
+
+**这一节多数数字仍是 Tier 0 (n=30)**——PR-4A occupancy / PR-4B 全 cohort / PR-4C / PR-5 在 Slice A1/A2 后**没有重算**，要扩到 Tier 1 / Tier 2 必须各自单独发 PR。**例外**：PR-3 cohort 6-panel 与 PR-7 cohort summary 已经在 2026-05-07 follow-up 中跟着 Slice A2 一起重做（PR-3 双轨 figures、PR-7 cohort 增至 n=9 h1_primary / n=21 h2_negative），但下面三个 PR-4A 数字仍然是 framework lock 时的 Tier 0：
+
+- PR-3 论文级 6-panel cohort 图已固定（n=30 framework lock 版）；新增簇内 identity-bias 计算（median = 86%）。**2026-05-07 follow-up**：双轨重画 `cohort_propagation_summary_n33.png` (Tier 1) + `cohort_propagation_summary_n40.png` (Tier 2)；default `cohort_propagation_summary.png` 留 Tier 1。10 个新 subject 全部出 `per_subject/<sub>_propagation.png` + `per_subject_mi/<sub>_mi_distribution.png`
+- PR-4A 在固定模板投射前提下做 day/night occupancy timeline：dominant fraction Wilcoxon `p=0.124`、entropy `p=0.245`、TV distance median `0.019`（n=30）
 - 模板投射 agreement 中位数 `0.888`；只有 `3/30`（`chengshuai`、`253`、`818`）低于 `0.8`
 - **结论口径**：模板稳定，但占比的昼夜漂移整体较弱。**这是描述层结果，不是强机制结论**
 - occupancy 在低 rate 时段天然高方差，不适合直接承担 PR-4C 的主统计读数 → PR-4D 已把这层补强成 `rate×type`
+
+### 3.1d Cluster geometry 可视化（trilateration plane + bimodality audit，2026-05-06）
+
+PR-2 / PR-2.5 cluster decomposition 的描述性补强。每 subject 一张 trilateration 图——把每事件按它到两个最反向模板 T_a / T_b 的距离做 2D 三边定位（T_a→(0,0)、T_b→(d_ab,0)、event 解 ‖event−T_a‖=d_a 且 ‖event−T_b‖=d_b 的 (x, y)）。每 cluster 用 2D KDE 等密度填充加散点叠加，模板钉在 cluster 中心；上方加 marginal-x 密度面板做 bimodality 直接检验。
+
+- **入选 cohort = 20 Epilepsiae subjects**；**18 Yuquan 排除**（PR-2 saved labels 与当前 lagPat valid_events 数量不对齐 / 缺 adaptive_cluster JSON）—— **data freshness 问题不在本 PR 范围**，列为 P0 follow-up：在最新 lagPat 上重跑 PR-2 / PR-2.5
+- **关键 cohort 数字**：silhouette median = **0.460**（range 0.182–0.671，5/20 < 0.3），KMeans-vs-template-matching agreement median = **0.892**（range 0.769–0.955，8/20 < 0.85），与用户先前 audit 完全一致
+- **Metric drift 集中在低 n_participating 事件**：boundary fraction by n_part bin 单调下降 `0.135 → 0.097 → 0.046`
+- **新审阅发现 — Marginal-x bimodality**（archive §3.5）：cohort 在 cluster discreteness 上**不是同质的**——dip + GMM BIC 给出 **11/20 BIMODAL（清晰双模）/ 8/20 AMBIGUOUS（dip 与 BIC 矛盾）/ 1/20 UNIMODAL（`442`：KMeans 在切单峰连续分布）**。PR-2 archive 的"30/30 multimodal via pairwise τ dip"是必要不充分条件——pairwise τ dip 不能区分"双 cluster"和"1D 连续谱"（连续谱端点对端点的 τ 也会双峰）。**保留 KMeans 2-cluster 主线作论文叙事**，但 cohort 异质性必须并列报告，特别 `442`。**continuous-spectrum reframe（principal-curve / 1D manifold）留给后续论文，本论文不动 KMeans 主线**
+- **Showcase**：`958`（BIMODAL k=2 forward/reverse）/ `818`（BIMODAL k=4）/ `253`（AMBIGUOUS k=2 弱 cluster）/ **`442`（UNIMODAL counter-example，必须报告）**
+- **Silhouette × agreement Spearman ρ = 0.889**——consistency check / sanity，**不是独立 finding**（两者都派生自同一组 d_within / d_min_other 距离差）
+- **不推翻**任何 PR-2/2.5/3/4/5/6/7 主结论
+- **不进 SBA framework P1–P5**；纯描述层
+- 详细数字、bimodality 检验机制、failure 合同、follow-up：
+  - Plan：`docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md`
+  - Results：`docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md`
 
 ### 3.2 Identity bias 不是小问题，在簇内水平更高
 
@@ -337,6 +391,10 @@ PR-4 系列的核心问题：**固定传播模板受到什么慢调控？**
 
 **Continuous-version supplementary（2026-05-06）**：把 PR-6 Step 4b 离散 swap_node count 升级到逐通道 signed rank displacement（Δr = rank_T_b − rank_T_a），加 Spearman footrule + Diaconis-Graham 归一化 + Kendall τ + baseline-corrected SOZ contribution split。**不**立独立 PR、**不**开 cohort gate。**Cohort = 全部 27 个 stable_k=2 subject**（PR-2 stable_k 分布 `{2:27, 4:2, 6:1}`）。valid_mask 优先用 PR-6 `valid_mask`（23 subject），PR-6 缺失时 fallback 到 PR-2 `(template_rank ≠ −1)` sentinel（4 subject：`1125/384/620/916`，PR-6 SOZ-空过滤掉的）。两 provenance 在共有 subject 上完全一致。**Paper-level deliverable 是单张 composite supplementary figure**：cohort heatmap 主体（行按 F_norm 降序，列按 rank_T_a_dense，SOZ 黑框，x-axis 在上方）+ 一条 F_norm summary track（带 2/3 ref）+ 主热图正下方水平 Δr colorbar + colorbar 旁的 SOZ channel mini-legend。Kendall τ 与 SOZ contribution_excess **均不进 paper figure**：τ 与 F_norm 在本 cohort Spearman ρ = −0.92 共线，track 冗余；SOZ 在 lagPat 通道集上覆盖与 i/l/e 边界尚未稳定。τ 与 SOZ 数字均保留在 archive 作 descriptive cross-check。结论：(a) cohort 在 F_norm 范围 [0.39, 1.00] 上呈连续谱，不是离散二分（n=27，median F_norm=0.81）；(b) 与 PR-6 离散 swap_node 同向（PR-2.5 fwd/rev-reproduced 8 subject 的 Kendall τ 全部 < 0；其中 PR-6 cohort n=6 sign-test p=0.031）。新加入的 4 个 subject 中 `epi_620` (F=1.00, τ=−0.78) 与 `epi_1125` (F=0.88, τ=−0.71) 都是 PR-2.5 fwd/rev-reproduced subject——之前因 PR-6 SOZ-空过滤错失。详见 `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` 与 `pr6_supplementary_rank_displacement_results_2026-05-06.md`。
 
+**Variable-k swap classifier（2026-05-07，supplementary §8，v3 dual-tier）**：在 continuous-version 之上加一个二级 deliverable，把 PR-6 H2 swap_score 公式从 hard-coded `k=3` 改成数据驱动扫描 `k ∈ {2 .. ⌊n_valid/2⌋}`，用 family-wise max-null（1000 perm，seed=0）做单一统计量检验：`T_obs = max_k swap_score(k)`。**双轨 decision rule**：`swap_class = strict iff T_obs ≥ 0.5 AND p_fw < 0.05`（n=10/35），`candidate iff T_obs ≥ 0.5 AND 0.05 ≤ p_fw < 0.20`（n=8/35），`none` 其他（n=17/35）。strict ∪ candidate = 18/35 ≈ 51% subject 进入 label tier。**仍是 mechanism-sanity tier，不开新 cohort claim**；channel-level label 只 strict tier 允许且必须 split-half 验证（详见 §8.7 channel-label 合同）。strict 10 个里 8 个落在 PR-2.5 fwd/rev-reproduced，2 个 PR-2.5 非候选通过（`epi_1146 dk=7, yuq_hanyuxuan dk=6`）；candidate 8 个里 3 个是 PR-2.5 fwd/rev-reproduced 但 FW 力不足（`epi_1125, epi_548, yuq_chenziyang`）。user motivation "2 节点 swap" 在 strict tier 无显著支持，在 candidate tier 有 2 例 exploratory 信号（`epi_1125 dk=2, epi_384 dk=2`）。**Variable-k swap markers 已整合进主图 `cohort_displacement_heatmap.{png,pdf}`**：每行在 column = decision_k − 1 与 column = n_valid − decision_k 两个 cell 上分别画 `>` 与 `<` 三角（`> ... <` = inward swap）；strict = 实心黑三角，candidate = 空心灰三角；读者用"离边几格"读 decision_k。Legend 在 suptitle 与 heatmap 之间的顶部条带，2/3 random-null 红虚线加粗。Supplementary 详图 `swap_cardinality_heatmap.{png,pdf}` 给出 subject × k swap_score 全图。**PR-2.5 fwd/rev-reproduced 不是 ground truth**，分歧不应解读为 classifier "validation"。详见 archive doc §8。
+
+**Topic 1 论文第一部分空间收束 — Swap × Clinical SOZ Set-Relationship（2026-05-08，supplementary §9）**：在 §8 dual-tier swap_class 之上做 lagPat universe 内的 set-relationship 描述，把 swap_endpoint 与 clinical SOZ 的几何关系作为"间期刻板时序是癫痫病理网络指示器"这条主线的最后一块**空间证据**。**主统计形态从"cohort p-value"改为"cohort typology distribution + sign test on enrichment_over_lagPat"**，避开 advisor 抓到的 paired Δ n_middle 结构性退化（strict tier `decision_k ≈ ⌊n_valid/2⌋`，coverage→1 → middle 挤空）。Per-pair schema：`precision = |E ∩ S| / |E|, recall_within_lagPat = |E ∩ S| / |S|, coverage = |E| / |L|, lagpat_baseline = |S| / |L|, enrichment_over_lagPat = precision − lagpat_baseline, typology ∈ {E_subset_S, S_subset_E, partial, disjoint, degenerate}`。informative gate `0 < n_S < n_L AND n_E < n_L`。**Primary cohort = strict ∩ informative (n=5)**：sign test p=0.500，median enrichment +0.042，bootstrap 95% CI [−0.071, +0.098] —— **NULL，与 PR-6 H1 hard-coded `k=3` Wilcoxon p=0.19 NULL prior 一致**，refined dual-tier swap_class 没把 NULL 翻号。**Sensitivity = candidate ∩ informative (n=5)**：4/5 positive，median +0.127，CI [0.000, +0.167] —— underpowered 但方向上正向。**Typology descriptive 主读数（不算 cohort claim）**：`E_subset_S` (swap ⊊ SOZ, "refined SOZ candidate") **全 cohort = 0**；`S_subset_E` (swap ⊋ SOZ, "extended SOZ candidate") strict 1 + candidate 3 = 4 个；`partial` 多数。方向上 swap_endpoint **倾向"覆盖且包含"clinical SOZ 而非"被包含于"**，与 user 设计阶段 "swap 范围比临床更大可能是补充信息" 直觉一致。**Channel-selection circular caveat**：lagPat 已对 SOZ 富集（high-HI / high-HFO-rate gate），本 §9 量化的是 high-HI 区内 swap 是否进一步富集 SOZ，**不是**全脑关系；任何 paper-level 表述必须紧邻数字带 caveat。Paper-level deliverable: `swap_clinical_soz_set_relation.{png,pdf}` 3-panel（A precision×recall scatter + B enrichment×coverage scatter + C typology stacked bar）。M1=HFO-onset rate / M2=ER-rank multi-source sensitivity 等 PR-T3-1 producer 重设计后单独补 §9.5；outcome × partition 检验 (HFO rate / detrend_fraction / cluster participation × 4-cell) 属于 Topic 1 Part 2 演化故事 PR，不在本 §9。详见 `docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md` 与 `pr6_supplementary_rank_displacement_results_2026-05-06.md` §9。
+
 ---
 
 ### 7.11 PR-7：Template Antagonistic Temporal Pairing（Ping-Pong 功能耦合层）
@@ -436,9 +494,12 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 - `docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md` — **PR-6 正式入口（plan-of-record）**：H1 endpoint vs middle / H1b polarity / H2 forward-reverse swap / H3 i-l-e sensitivity / cohort audit-derived / 8 项 TDD / 失败合同。Topic 1 §2 / §5 / §7.5 / §7.10 / §10 都引用本文件。
 - `docs/archive/topic1/ping_pong_hypothesis_review_2026-04-28.md` — Ping-Pong 假说整体审阅：三层分离（现象学 A / 功能耦合 B / 机制 C）+ user 提议实验逐项对账 + PR roadmap（PR-7 → PR-8 candidate → PR-9 candidate）。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
 - `docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md` — PR-6 supplementary plan：把离散 swap_node count 升级到逐通道 signed rank displacement + Diaconis-Graham 归一化 footrule + Kendall τ + baseline-corrected SOZ split。Pre-registered 反 sorting bias（列按 rank_T_a_dense 排）+ sign anchor 合同（Δr 仅 subject 内部有效）+ n_available 不预承诺。Topic 1 §7.10 / §10 引用本文件。
-- `docs/archive/topic1/pr6_supplementary_rank_displacement_results_2026-05-06.md` — PR-6 supplementary results：cohort n=23（stable_k=2 ∩ PR-6 endpoint-defined）；reproduced n=6 (Kendall τ median = −0.495, F_norm = 0.964) vs not reproduced n=17 (τ = −0.048, F_norm = 0.688)。Reproduced 6/6 subject τ < 0，与 PR-6 离散 swap geometry 同向。SOZ contribution_excess ≈0（descriptive only，无 enrichment claim）。Topic 1 §7.10 / §10 引用本文件。
+- `docs/archive/topic1/pr6_supplementary_rank_displacement_results_2026-05-06.md` — PR-6 supplementary results：cohort n=23（stable_k=2 ∩ PR-6 endpoint-defined）；reproduced n=6 (Kendall τ median = −0.495, F_norm = 0.964) vs not reproduced n=17 (τ = −0.048, F_norm = 0.688)。Reproduced 6/6 subject τ < 0，与 PR-6 离散 swap geometry 同向。SOZ contribution_excess ≈0（descriptive only，无 enrichment claim）。**§8 (2026-05-07) variable-k swap classifier dual-tier**（strict/candidate/none）+ **§9 (2026-05-08) swap × clinical SOZ set-relationship**（precision/recall/coverage/enrichment_over_lagPat + typology；strict primary NULL, candidate sensitivity directional, S_subset_E 4/35）继续在本 doc 内更新。Topic 1 §7.10 / §10 引用本文件。
+- `docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md` — §9 plan: swap × clinical SOZ set-relationship within lagPat universe (n=35)；pre-registered informative gate / dual-tier cohort / sign test on enrichment_over_lagPat + bootstrap CI / 11 TDD / 3-panel figure spec / channel-selection circular caveat 写死。Topic 1 §7.10 / §10 引用本文件。
 - `docs/archive/topic1/pr7_template_pairing/pr7_template_antagonistic_pairing_plan_2026-04-28.md` — **PR-7 正式入口（plan-of-record）**：H1 triple gate (10s primary + 30s sensitivity + sign test) / H1b direction symmetry / H2 non-fwdrev negative control / N0–N4 surrogate hierarchy（N2 主 null + N3 robustness + N4 conditional）/ cohort 5 条 pre-registered 入选门槛 / 10 项 TDD / §6.5 可视化方案 / 7 类失败合同。Topic 1 §7.5 / §7.11 / §10 都引用本文件。
 - `docs/archive/topic1/propagation/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
+- `docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md` — Cluster geometry 可视化 plan-of-record（template-matching metric / 数据合同 / 失败合同 / panel layout / TDD 合同）。Topic 1 §3.1d / §10 引用本文件。
+- `docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md` — Cluster geometry 验收 results（cohort 数字 / showcase 叙事 / KMeans-vs-template-matching audit / follow-up）。Topic 1 §3.1d / §10 引用本文件。
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。
 

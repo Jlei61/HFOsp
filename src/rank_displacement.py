@@ -396,3 +396,168 @@ def aggregate_pair_metrics(
         }
     )
     return base
+
+
+# =============================================================================
+# §9 — Swap × clinical SOZ set-relationship
+# Plan: docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md
+# =============================================================================
+
+
+def derive_swap_endpoint(
+    channel_names: Sequence[str],
+    rank_a_dense: np.ndarray,
+    decision_k: int,
+) -> list:
+    """Pick top decision_k ∪ bottom decision_k channels by rank_a_dense ascending.
+
+    "top" = lowest dense ranks = source side in T_a;
+    "bottom" = highest dense ranks = sink side in T_a.
+
+    Per §8 main figure swap-marker convention (column = decision_k - 1 left
+    triangle, column = n_v - decision_k right triangle when columns sorted
+    by rank_a_dense ascending).
+    """
+    rank_a_dense = np.asarray(rank_a_dense, dtype=float)
+    if rank_a_dense.shape != (len(channel_names),):
+        raise ValueError(
+            f"rank_a_dense shape {rank_a_dense.shape} != n_channels "
+            f"({len(channel_names)})"
+        )
+    if 2 * decision_k > len(channel_names):
+        raise ValueError(
+            f"2*decision_k ({2 * decision_k}) > n_channels "
+            f"({len(channel_names)})"
+        )
+    order = np.argsort(rank_a_dense, kind="stable")
+    top_idx = order[:decision_k]
+    bottom_idx = order[-decision_k:]
+    endpoint_idx = sorted(set(top_idx.tolist()) | set(bottom_idx.tolist()))
+    return [channel_names[i] for i in endpoint_idx]
+
+
+def compute_clinical_soz_set_relation(
+    valid_chs: Sequence[str],
+    endpoint_chs: Sequence[str],
+    soz_chs: Sequence[str],
+) -> Dict[str, object]:
+    """Set-relationship readouts of swap_endpoint vs clinical SOZ within lagPat.
+
+    Universe = valid_chs (lagPat valid set). SOZ is restricted to lagPat
+    (n_S = |soz ∩ valid|). Endpoint is required ⊆ valid (caller's contract;
+    derive_swap_endpoint guarantees this).
+
+    Decision tree for typology (first match wins):
+      degenerate    if n_S == 0 OR n_S == n_L OR n_E == n_L
+      disjoint      if n_E_inter_S == 0
+      E_subset_S    if n_E_inter_S == n_E AND n_E_inter_S < n_S
+      S_subset_E    if n_E_inter_S == n_S AND n_E_inter_S < n_E
+      partial       otherwise
+
+    Returned schema is pre-registered in plan §2; do not silently add or drop
+    fields. enrichment_over_lagPat = precision − lagpat_baseline; null when
+    n_S == 0 or n_L == 0.
+    """
+    valid_set = set(valid_chs)
+    endpoint_set = set(endpoint_chs)
+    soz_in_lagpat = set(soz_chs) & valid_set
+
+    if not endpoint_set <= valid_set:
+        raise ValueError(
+            f"endpoint_chs has {len(endpoint_set - valid_set)} channels "
+            f"outside valid_chs; derive_swap_endpoint should have prevented this"
+        )
+
+    n_L = len(valid_set)
+    n_E = len(endpoint_set)
+    n_S = len(soz_in_lagpat)
+    n_E_inter_S = len(endpoint_set & soz_in_lagpat)
+
+    precision: Optional[float] = (n_E_inter_S / n_E) if n_E > 0 else None
+    recall: Optional[float] = (n_E_inter_S / n_S) if n_S > 0 else None
+    coverage: Optional[float] = (n_E / n_L) if n_L > 0 else None
+    lagpat_baseline: Optional[float] = (n_S / n_L) if n_L > 0 else None
+    if precision is None or lagpat_baseline is None or n_S == 0:
+        enrichment: Optional[float] = None
+    else:
+        enrichment = precision - lagpat_baseline
+
+    if n_S == 0 or n_S == n_L or n_E == n_L:
+        typology = "degenerate"
+    elif n_E_inter_S == 0:
+        typology = "disjoint"
+    elif n_E_inter_S == n_E and n_E_inter_S < n_S:
+        typology = "E_subset_S"
+    elif n_E_inter_S == n_S and n_E_inter_S < n_E:
+        typology = "S_subset_E"
+    else:
+        typology = "partial"
+
+    return {
+        "soz_source": "clinical",
+        "n_E": n_E,
+        "n_S": n_S,
+        "n_L": n_L,
+        "n_E_inter_S": n_E_inter_S,
+        "precision": precision,
+        "recall_within_lagPat": recall,
+        "coverage": coverage,
+        "lagpat_baseline": lagpat_baseline,
+        "enrichment_over_lagPat": enrichment,
+        "typology": typology,
+        "informative": typology != "degenerate",
+        "exit_reason": None,
+    }
+
+
+def cohort_sign_test_enrichment(
+    enrichments: Sequence[Optional[float]],
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> Dict[str, object]:
+    """One-sided binomial sign test on enrichment_over_lagPat > 0 + bootstrap CI.
+
+    None entries (degenerate subjects) are dropped before stat. n_informative
+    = number of non-None entries. Sign test counts strictly positive (> 0)
+    against (== 0 OR < 0); ties at 0 are conservatively treated as
+    non-positive.
+
+    Bootstrap: percentile method on the median, n_boot resamples with seed-
+    deterministic numpy default_rng. CI = [2.5th, 97.5th] percentile.
+
+    Returns a dict containing all primary statistics (no PASS gate).
+    """
+    informative = [v for v in enrichments if v is not None]
+    n_inf = len(informative)
+    if n_inf == 0:
+        return {
+            "n_informative": 0,
+            "n_positive": 0,
+            "sign_test_p": None,
+            "median_enrichment": None,
+            "bootstrap_ci_lo": None,
+            "bootstrap_ci_hi": None,
+            "n_boot": int(n_boot),
+            "seed": int(seed),
+        }
+    arr = np.asarray(informative, dtype=float)
+    n_pos = int(np.sum(arr > 0))
+    sign_p = float(stats.binomtest(n_pos, n_inf, p=0.5, alternative="greater").pvalue)
+    median = float(np.median(arr))
+    rng = np.random.default_rng(seed)
+    boot_medians = np.empty(n_boot, dtype=float)
+    for i in range(n_boot):
+        sample = rng.choice(arr, size=n_inf, replace=True)
+        boot_medians[i] = np.median(sample)
+    ci_lo = float(np.percentile(boot_medians, 2.5))
+    ci_hi = float(np.percentile(boot_medians, 97.5))
+    return {
+        "n_informative": n_inf,
+        "n_positive": n_pos,
+        "sign_test_p": sign_p,
+        "median_enrichment": median,
+        "bootstrap_ci_lo": ci_lo,
+        "bootstrap_ci_hi": ci_hi,
+        "n_boot": int(n_boot),
+        "seed": int(seed),
+    }
