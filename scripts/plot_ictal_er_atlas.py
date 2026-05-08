@@ -43,15 +43,21 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from src.atlas_loading import (  # noqa: E402  topic5 PR-1 dep-direction fix
+    LAYER_A_DIR,
+    PER_SUBJECT_DIR,
+    REQUIRED_SCHEMA,
+    SENTINEL_DIR,
+    build_onset_matrix as _build_onset_matrix_impl,
+    list_cohort_subjects as _list_cohort_subjects_impl,
+    load_per_subject_json as _load_per_subject_json_impl,
+    seizure_idx_in_order as _seizure_idx_in_order_impl,
+)
 from src.plot_style import FS_LABEL, FS_TICK, FS_TITLE, savefig_pub  # noqa: E402
 
 # ---------------------------------------------------------------------------
-# Schema / paths
+# Atlas-specific output paths
 
-REQUIRED_SCHEMA = "pr_t3_1_layer_a_v2_3_timing"
-LAYER_A_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank"
-PER_SUBJECT_DIR = LAYER_A_DIR / "per_subject"
-SENTINEL_DIR = LAYER_A_DIR / "_sentinel"
 ATLAS_OUT_DIR = LAYER_A_DIR / "atlas_v2_3" / "figures"
 PER_SUBJECT_OUT_DIR = ATLAS_OUT_DIR / "per_subject"
 PER_SEIZURE_OUT_DIR = ATLAS_OUT_DIR / "per_seizure"
@@ -75,87 +81,30 @@ STATUS_COLORS = {
 }
 
 # ---------------------------------------------------------------------------
-# Data loading
+# Backward-compat shims to src.atlas_loading (keeps existing tests / callers
+# that import the underscore-prefixed names from this module).
 
 
 def _load_per_subject_json(subject: str, *, source: str = "per_subject",
                             schema_required: bool = True) -> Dict:
-    """Load v2.3 per-subject JSON. ``source`` ∈ {per_subject, _sentinel}."""
-    sid = subject.replace("/", "_")
-    if source == "per_subject":
-        path = PER_SUBJECT_DIR / f"{sid}.json"
-    elif source == "_sentinel":
-        path = SENTINEL_DIR / f"{sid}.json"
-    else:
-        raise ValueError(f"unknown source={source}")
-    if not path.exists():
-        raise FileNotFoundError(f"per-subject JSON missing: {path}")
-
-    with open(path, "r") as fh:
-        d = json.load(fh)
-    if schema_required:
-        sv = d.get("schema_version")
-        if sv != REQUIRED_SCHEMA:
-            raise ValueError(
-                f"{path} schema_version={sv!r}, expected {REQUIRED_SCHEMA!r}. "
-                f"v2.2 JSON is not consumable by atlas_v2_3 — backup is in "
-                f"per_subject_v2_2/."
-            )
-    return d
+    return _load_per_subject_json_impl(
+        subject, source=source, schema_required=schema_required,
+    )
 
 
 def _list_cohort_subjects(*, source: str = "per_subject") -> List[str]:
-    """All subjects with a v2.3 per-subject JSON."""
-    src_dir = PER_SUBJECT_DIR if source == "per_subject" else SENTINEL_DIR
-    if not src_dir.exists():
-        return []
-    out: List[str] = []
-    for p in sorted(src_dir.glob("*.json")):
-        if p.name in {"cohort_summary.json", "sanity_report.json"}:
-            continue
-        try:
-            d = json.loads(p.read_text())
-        except (OSError, json.JSONDecodeError):
-            continue
-        if d.get("schema_version") == REQUIRED_SCHEMA:
-            out.append(d["subject"])
-    return out
-
-
-# ---------------------------------------------------------------------------
-# Per-subject matrix construction
+    return _list_cohort_subjects_impl(source=source)
 
 
 def _seizure_idx_in_order(per_er_record: Dict) -> List[int]:
-    return [int(r["seizure_idx"]) for r in per_er_record.get("seizure_records", [])]
+    return _seizure_idx_in_order_impl(per_er_record)
 
 
 def _build_onset_matrix(
     per_er_record: Dict,
     channels: Sequence[str],
 ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
-    """Return (onset_matrix [n_ch, n_sz], status_array [n_sz], seizure_ids).
-
-    onset_matrix cells: t_onset_sec (float) or NaN (CUSUM not triggered /
-    seizure status != ok).
-    """
-    sz_records = per_er_record.get("seizure_records", [])
-    n_sz = len(sz_records)
-    onset = np.full((len(channels), n_sz), np.nan, dtype=np.float64)
-    statuses: List[str] = []
-    seizure_ids: List[str] = []
-    for j, rec in enumerate(sz_records):
-        statuses.append(rec.get("status", "unknown"))
-        seizure_ids.append(rec.get("seizure_id", str(rec.get("seizure_idx", j))))
-        co = rec.get("channel_onsets") or {}
-        for i, ch in enumerate(channels):
-            entry = co.get(ch)
-            if not entry:
-                continue
-            t = entry.get("t_onset_sec")
-            if t is not None and np.isfinite(t):
-                onset[i, j] = float(t)
-    return onset, np.array(statuses), seizure_ids
+    return _build_onset_matrix_impl(per_er_record, channels)
 
 
 def _select_sort_band(per_subject: Dict) -> str:
