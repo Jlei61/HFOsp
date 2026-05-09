@@ -130,6 +130,184 @@ def compute_signed_rank_displacement(
     return out
 
 
+def compute_swap_score_at_k(
+    rank_a: np.ndarray,
+    rank_b: np.ndarray,
+    valid_mask_a: np.ndarray,
+    valid_mask_b: np.ndarray,
+    k: int,
+) -> float:
+    """Variable-k generalization of PR-6 swap_score (top-3-fixed).
+
+    swap_score(k) = mean( Jaccard(top_k_T_a, bottom_k_T_b),
+                          Jaccard(bottom_k_T_a, top_k_T_b) )
+
+    Top/bottom are taken on the joint-valid subset under dense ranks.
+    Returns 0.0 if 2*k > n_valid (top and bottom would overlap inside
+    one template).
+    """
+    rank_a = np.asarray(rank_a, dtype=float)
+    rank_b = np.asarray(rank_b, dtype=float)
+    joint_valid = np.asarray(valid_mask_a, dtype=bool) & np.asarray(
+        valid_mask_b, dtype=bool
+    )
+    n_valid = int(joint_valid.sum())
+    if n_valid < 4 or 2 * k > n_valid or k < 1:
+        return 0.0
+
+    # Stable argsort for deterministic tie-breaking on the joint subset
+    valid_idx = np.flatnonzero(joint_valid)
+    r_a = rank_a[valid_idx]
+    r_b = rank_b[valid_idx]
+    order_a = np.argsort(r_a, kind="stable")
+    order_b = np.argsort(r_b, kind="stable")
+    bot_a = set(valid_idx[order_a[:k]].tolist())
+    top_a = set(valid_idx[order_a[-k:]].tolist())
+    bot_b = set(valid_idx[order_b[:k]].tolist())
+    top_b = set(valid_idx[order_b[-k:]].tolist())
+
+    def _jaccard(s1: set, s2: set) -> float:
+        u = s1 | s2
+        return (len(s1 & s2) / len(u)) if u else 0.0
+
+    return 0.5 * (_jaccard(top_a, bot_b) + _jaccard(bot_a, top_b))
+
+
+def compute_swap_score_sweep(
+    rank_a: np.ndarray,
+    rank_b: np.ndarray,
+    valid_mask_a: np.ndarray,
+    valid_mask_b: np.ndarray,
+    n_perm: int = 1000,
+    seed: int = 0,
+    alpha_fw: float = 0.05,
+    alpha_candidate: float = 0.20,
+    score_floor: float = 0.5,
+) -> Dict[str, object]:
+    """Sweep k = 2 .. floor(n_valid/2), test max-k swap with family-wise null.
+
+    Per-permutation statistic (mirrors observed):
+        T_perm[i] = max_k swap_score_perm[i, k]
+        T_obs    = max_k swap_score_obs(k)
+        decision_k = argmin_k k subject to swap_score_obs(k) == T_obs
+
+    Family-wise p-value (single test on max statistic):
+        p_fw = (1 + sum(T_perm >= T_obs)) / (n_perm + 1)
+
+    Dual-tier decision (user-locked 2026-05-07):
+        swap_class = "strict"    if T_obs >= score_floor AND p_fw < alpha_fw
+                   = "candidate" if T_obs >= score_floor AND alpha_fw <= p_fw < alpha_candidate
+                   = "none"      otherwise
+        has_swap   = (swap_class == "strict")  # backward compat alias
+
+    Strict tier supports subject-level binary label and channel-level
+    swap_endpoint_candidate label (with split-half validation if reused
+    downstream). Candidate tier is descriptive / exploratory only - geometry
+    suggests swap but FW evidence does not clear standard alpha.
+
+    Per-k swap_score + per-k null_95th are still reported as descriptive
+    inputs to the subject x k visualization, but the decision lives on
+    the max statistic only - per-k thresholds are NOT used as a decision
+    gate (would break FW control).
+
+    Determinism: rng = numpy default_rng(seed); seed and n_perm are
+    persisted in the output dict so reruns are bit-reproducible.
+    """
+    rank_a = np.asarray(rank_a, dtype=float)
+    rank_b = np.asarray(rank_b, dtype=float)
+    joint_valid = np.asarray(valid_mask_a, dtype=bool) & np.asarray(
+        valid_mask_b, dtype=bool
+    )
+    n_valid = int(joint_valid.sum())
+    out: Dict[str, object] = {
+        "n_valid": n_valid,
+        "k_max": 0,
+        "swap_score_by_k": {},
+        "null_95th_by_k": {},
+        "T_obs": float("nan"),
+        "p_fw": float("nan"),
+        "decision_k": None,
+        "decision_swap_score": float("nan"),
+        "swap_class": "none",
+        "has_swap": False,
+        "decision_rule": (
+            "T_obs=max_k swap_score(k); p_fw vs max-null; "
+            "swap_class=strict iff T_obs>=score_floor AND p_fw<alpha_fw; "
+            "swap_class=candidate iff T_obs>=score_floor AND alpha_fw<=p_fw<alpha_candidate"
+        ),
+        "score_floor": float(score_floor),
+        "alpha_fw": float(alpha_fw),
+        "alpha_candidate": float(alpha_candidate),
+        "n_perm": int(n_perm),
+        "seed": int(seed),
+        "exit_reason": "ok",
+    }
+    if n_valid < 4:
+        out["exit_reason"] = f"n_valid<4 (got {n_valid})"
+        return out
+
+    k_max = n_valid // 2
+    out["k_max"] = k_max
+
+    valid_idx = np.flatnonzero(joint_valid)
+    r_a = rank_a[valid_idx]
+    r_b = rank_b[valid_idx]
+
+    def _swap_inner(ra: np.ndarray, rb: np.ndarray, k: int) -> float:
+        order_a = np.argsort(ra, kind="stable")
+        order_b = np.argsort(rb, kind="stable")
+        bot_a = set(order_a[:k].tolist())
+        top_a = set(order_a[-k:].tolist())
+        bot_b = set(order_b[:k].tolist())
+        top_b = set(order_b[-k:].tolist())
+
+        def _jacc(s1: set, s2: set) -> float:
+            u = s1 | s2
+            return (len(s1 & s2) / len(u)) if u else 0.0
+
+        return 0.5 * (_jacc(top_a, bot_b) + _jacc(bot_a, top_b))
+
+    rng = np.random.default_rng(seed)
+    n_k = k_max - 1
+    null_table = np.empty((n_perm, n_k), dtype=float)
+    for i in range(n_perm):
+        rb_shuf = rng.permutation(r_b)
+        for ki, k in enumerate(range(2, k_max + 1)):
+            null_table[i, ki] = _swap_inner(r_a, rb_shuf, k)
+
+    swap_by_k: Dict[int, float] = {}
+    null_95: Dict[int, float] = {}
+    for ki, k in enumerate(range(2, k_max + 1)):
+        swap_by_k[k] = float(_swap_inner(r_a, r_b, k))
+        null_95[k] = float(np.percentile(null_table[:, ki], 95))
+
+    T_obs = float(max(swap_by_k.values()))
+    decision_k = min(k for k, v in swap_by_k.items() if v == T_obs)
+    T_perm = null_table.max(axis=1)
+    p_fw = float((1 + np.sum(T_perm >= T_obs)) / (n_perm + 1))
+
+    if T_obs >= score_floor and p_fw < alpha_fw:
+        swap_class = "strict"
+    elif T_obs >= score_floor and p_fw < alpha_candidate:
+        swap_class = "candidate"
+    else:
+        swap_class = "none"
+
+    out.update(
+        {
+            "swap_score_by_k": {str(k): v for k, v in swap_by_k.items()},
+            "null_95th_by_k": {str(k): v for k, v in null_95.items()},
+            "T_obs": T_obs,
+            "p_fw": p_fw,
+            "decision_k": int(decision_k),
+            "decision_swap_score": float(T_obs),
+            "swap_class": swap_class,
+            "has_swap": bool(swap_class == "strict"),
+        }
+    )
+    return out
+
+
 def aggregate_pair_metrics(
     rank_a: np.ndarray,
     rank_b: np.ndarray,
@@ -218,3 +396,168 @@ def aggregate_pair_metrics(
         }
     )
     return base
+
+
+# =============================================================================
+# §9 — Swap × clinical SOZ set-relationship
+# Plan: docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md
+# =============================================================================
+
+
+def derive_swap_endpoint(
+    channel_names: Sequence[str],
+    rank_a_dense: np.ndarray,
+    decision_k: int,
+) -> list:
+    """Pick top decision_k ∪ bottom decision_k channels by rank_a_dense ascending.
+
+    "top" = lowest dense ranks = source side in T_a;
+    "bottom" = highest dense ranks = sink side in T_a.
+
+    Per §8 main figure swap-marker convention (column = decision_k - 1 left
+    triangle, column = n_v - decision_k right triangle when columns sorted
+    by rank_a_dense ascending).
+    """
+    rank_a_dense = np.asarray(rank_a_dense, dtype=float)
+    if rank_a_dense.shape != (len(channel_names),):
+        raise ValueError(
+            f"rank_a_dense shape {rank_a_dense.shape} != n_channels "
+            f"({len(channel_names)})"
+        )
+    if 2 * decision_k > len(channel_names):
+        raise ValueError(
+            f"2*decision_k ({2 * decision_k}) > n_channels "
+            f"({len(channel_names)})"
+        )
+    order = np.argsort(rank_a_dense, kind="stable")
+    top_idx = order[:decision_k]
+    bottom_idx = order[-decision_k:]
+    endpoint_idx = sorted(set(top_idx.tolist()) | set(bottom_idx.tolist()))
+    return [channel_names[i] for i in endpoint_idx]
+
+
+def compute_clinical_soz_set_relation(
+    valid_chs: Sequence[str],
+    endpoint_chs: Sequence[str],
+    soz_chs: Sequence[str],
+) -> Dict[str, object]:
+    """Set-relationship readouts of swap_endpoint vs clinical SOZ within lagPat.
+
+    Universe = valid_chs (lagPat valid set). SOZ is restricted to lagPat
+    (n_S = |soz ∩ valid|). Endpoint is required ⊆ valid (caller's contract;
+    derive_swap_endpoint guarantees this).
+
+    Decision tree for typology (first match wins):
+      degenerate    if n_S == 0 OR n_S == n_L OR n_E == n_L
+      disjoint      if n_E_inter_S == 0
+      E_subset_S    if n_E_inter_S == n_E AND n_E_inter_S < n_S
+      S_subset_E    if n_E_inter_S == n_S AND n_E_inter_S < n_E
+      partial       otherwise
+
+    Returned schema is pre-registered in plan §2; do not silently add or drop
+    fields. enrichment_over_lagPat = precision − lagpat_baseline; null when
+    n_S == 0 or n_L == 0.
+    """
+    valid_set = set(valid_chs)
+    endpoint_set = set(endpoint_chs)
+    soz_in_lagpat = set(soz_chs) & valid_set
+
+    if not endpoint_set <= valid_set:
+        raise ValueError(
+            f"endpoint_chs has {len(endpoint_set - valid_set)} channels "
+            f"outside valid_chs; derive_swap_endpoint should have prevented this"
+        )
+
+    n_L = len(valid_set)
+    n_E = len(endpoint_set)
+    n_S = len(soz_in_lagpat)
+    n_E_inter_S = len(endpoint_set & soz_in_lagpat)
+
+    precision: Optional[float] = (n_E_inter_S / n_E) if n_E > 0 else None
+    recall: Optional[float] = (n_E_inter_S / n_S) if n_S > 0 else None
+    coverage: Optional[float] = (n_E / n_L) if n_L > 0 else None
+    lagpat_baseline: Optional[float] = (n_S / n_L) if n_L > 0 else None
+    if precision is None or lagpat_baseline is None or n_S == 0:
+        enrichment: Optional[float] = None
+    else:
+        enrichment = precision - lagpat_baseline
+
+    if n_S == 0 or n_S == n_L or n_E == n_L:
+        typology = "degenerate"
+    elif n_E_inter_S == 0:
+        typology = "disjoint"
+    elif n_E_inter_S == n_E and n_E_inter_S < n_S:
+        typology = "E_subset_S"
+    elif n_E_inter_S == n_S and n_E_inter_S < n_E:
+        typology = "S_subset_E"
+    else:
+        typology = "partial"
+
+    return {
+        "soz_source": "clinical",
+        "n_E": n_E,
+        "n_S": n_S,
+        "n_L": n_L,
+        "n_E_inter_S": n_E_inter_S,
+        "precision": precision,
+        "recall_within_lagPat": recall,
+        "coverage": coverage,
+        "lagpat_baseline": lagpat_baseline,
+        "enrichment_over_lagPat": enrichment,
+        "typology": typology,
+        "informative": typology != "degenerate",
+        "exit_reason": None,
+    }
+
+
+def cohort_sign_test_enrichment(
+    enrichments: Sequence[Optional[float]],
+    n_boot: int = 2000,
+    seed: int = 0,
+) -> Dict[str, object]:
+    """One-sided binomial sign test on enrichment_over_lagPat > 0 + bootstrap CI.
+
+    None entries (degenerate subjects) are dropped before stat. n_informative
+    = number of non-None entries. Sign test counts strictly positive (> 0)
+    against (== 0 OR < 0); ties at 0 are conservatively treated as
+    non-positive.
+
+    Bootstrap: percentile method on the median, n_boot resamples with seed-
+    deterministic numpy default_rng. CI = [2.5th, 97.5th] percentile.
+
+    Returns a dict containing all primary statistics (no PASS gate).
+    """
+    informative = [v for v in enrichments if v is not None]
+    n_inf = len(informative)
+    if n_inf == 0:
+        return {
+            "n_informative": 0,
+            "n_positive": 0,
+            "sign_test_p": None,
+            "median_enrichment": None,
+            "bootstrap_ci_lo": None,
+            "bootstrap_ci_hi": None,
+            "n_boot": int(n_boot),
+            "seed": int(seed),
+        }
+    arr = np.asarray(informative, dtype=float)
+    n_pos = int(np.sum(arr > 0))
+    sign_p = float(stats.binomtest(n_pos, n_inf, p=0.5, alternative="greater").pvalue)
+    median = float(np.median(arr))
+    rng = np.random.default_rng(seed)
+    boot_medians = np.empty(n_boot, dtype=float)
+    for i in range(n_boot):
+        sample = rng.choice(arr, size=n_inf, replace=True)
+        boot_medians[i] = np.median(sample)
+    ci_lo = float(np.percentile(boot_medians, 2.5))
+    ci_hi = float(np.percentile(boot_medians, 97.5))
+    return {
+        "n_informative": n_inf,
+        "n_positive": n_pos,
+        "sign_test_p": sign_p,
+        "median_enrichment": median,
+        "bootstrap_ci_lo": ci_lo,
+        "bootstrap_ci_hi": ci_hi,
+        "n_boot": int(n_boot),
+        "seed": int(seed),
+    }

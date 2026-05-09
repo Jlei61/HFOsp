@@ -22,6 +22,7 @@ import argparse
 import json
 import subprocess
 import sys
+from datetime import datetime, timezone
 from itertools import combinations
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -46,7 +47,13 @@ def _canonical_data_root() -> Path:
 WORKTREE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(WORKTREE_ROOT))
 
-from src.rank_displacement import aggregate_pair_metrics  # noqa: E402
+from src.rank_displacement import (  # noqa: E402
+    aggregate_pair_metrics,
+    cohort_sign_test_enrichment,
+    compute_clinical_soz_set_relation,
+    compute_swap_score_sweep,
+    derive_swap_endpoint,
+)
 
 # Data root for shared results (read PR-2/PR-6 inputs, write rank_displacement outputs)
 DATA_ROOT = _canonical_data_root()
@@ -142,6 +149,58 @@ def build_template_lookup_from_pr2(
     return out
 
 
+def _empty_set_relation(exit_reason: str) -> dict:
+    return {
+        "soz_source": "clinical",
+        "n_E": None, "n_S": None, "n_L": None, "n_E_inter_S": None,
+        "precision": None, "recall_within_lagPat": None,
+        "coverage": None, "lagpat_baseline": None,
+        "enrichment_over_lagPat": None,
+        "typology": None, "informative": False,
+        "exit_reason": exit_reason,
+    }
+
+
+def _compute_pair_set_relation(
+    metrics: dict,
+    soz_channels: set,
+    soz_present: bool,
+) -> dict:
+    """Per-pair clinical SOZ set-relationship readout.
+
+    Drops endpoint derivation when swap_sweep aborted; returns exit_reason
+    accordingly. Spec §1: SOZ JSON 缺 subject → exit_reason='no_clinical_soz';
+    swap_sweep ok with non-trivial decision_k → compute set_relation.
+    """
+    if not soz_present:
+        return _empty_set_relation("no_clinical_soz")
+
+    sw = metrics.get("swap_sweep") or {}
+    if sw.get("exit_reason") != "ok" or sw.get("decision_k") is None:
+        return _empty_set_relation("swap_sweep_unavailable")
+
+    joint_valid = np.asarray(metrics["joint_valid"], dtype=bool)
+    channel_names = metrics["channel_names"]
+    rank_a_dense_full = np.asarray(metrics["rank_a_dense_full"], dtype=float)
+    joint_chs = [ch for ch, v in zip(channel_names, joint_valid) if v]
+    joint_dense = rank_a_dense_full[joint_valid]
+    decision_k = int(sw["decision_k"])
+    if 2 * decision_k > len(joint_chs):
+        return _empty_set_relation("decision_k_exceeds_n_valid")
+
+    endpoint_chs = derive_swap_endpoint(
+        channel_names=joint_chs,
+        rank_a_dense=joint_dense,
+        decision_k=decision_k,
+    )
+    soz_in_lagpat = list(soz_channels & set(joint_chs))
+    return compute_clinical_soz_set_relation(
+        valid_chs=joint_chs,
+        endpoint_chs=endpoint_chs,
+        soz_chs=soz_in_lagpat,
+    )
+
+
 def process_subject(
     pr2_path: Path,
     pr6_path: Path,
@@ -191,9 +250,11 @@ def process_subject(
 
     common_cids = sorted(set(rank_lookup) & set(template_lookup))
 
-    soz_channels: set = soz_lookup.get(dataset, {}).get(str(subject), set())
+    soz_dict_for_dataset = soz_lookup.get(dataset, {})
+    soz_present = (str(subject) in soz_dict_for_dataset) or (subject in soz_dict_for_dataset)
+    soz_channels: set = soz_dict_for_dataset.get(str(subject), set())
     if not soz_channels:
-        soz_channels = soz_lookup.get(dataset, {}).get(subject, set())
+        soz_channels = soz_dict_for_dataset.get(subject, set())
 
     fwd_rev = derive_fwd_rev_reproduced(pr2)
     fwd_rev_source = derive_fwd_rev_source(pr2)
@@ -216,6 +277,19 @@ def process_subject(
         )
         metrics["cluster_id_a"] = int(cid_a)
         metrics["cluster_id_b"] = int(cid_b)
+        metrics["swap_sweep"] = compute_swap_score_sweep(
+            rank_a=rank_a,
+            rank_b=rank_b,
+            valid_mask_a=v_a,
+            valid_mask_b=v_b,
+            n_perm=1000,
+            seed=0,
+        )
+        metrics["clinical_soz_set_relation"] = _compute_pair_set_relation(
+            metrics=metrics,
+            soz_channels=soz_channels,
+            soz_present=soz_present,
+        )
         pairs.append(metrics)
 
     inter_corr = ac.get("inter_cluster_corr_matrix")
@@ -306,6 +380,104 @@ def main() -> None:
     cohort_path = OUT_DIR / "cohort_summary.json"
     cohort_path.write_text(json.dumps(cohort, indent=2, ensure_ascii=False))
     print(f"\nWrote {cohort_path} with {len(cohort)} subjects")
+
+    # §9 clinical SOZ set-relationship summary
+    soz_summary = compute_clinical_soz_summary(cohort)
+    soz_summary_path = OUT_DIR / "clinical_soz_set_relation_summary.json"
+    soz_summary_path.write_text(json.dumps(soz_summary, indent=2, ensure_ascii=False))
+    print(
+        f"Wrote {soz_summary_path}: strict_informative n="
+        f"{soz_summary['strict_informative']['n_informative']}, "
+        f"sign_p={soz_summary['strict_informative']['sign_test_p']}, "
+        f"median_enrichment={soz_summary['strict_informative']['median_enrichment']}"
+    )
+
+
+def compute_clinical_soz_summary(cohort: list) -> dict:
+    """Aggregate per-subject set_relation across cohort.
+
+    Per spec §3 cohort divisioning:
+      Primary cohort     = strict ∩ informative
+      Sensitivity cohort = candidate ∩ informative
+      Descriptive only   = degenerate (any class) + none ∩ informative
+
+    Reports:
+      - per-tier × per-typology counts (typology_distribution)
+      - strict_informative / candidate_informative sign test + bootstrap CI
+      - per-subject array (for figure: precision/recall/coverage/enrichment + tier)
+    """
+    rows = []  # [{dataset, subject, swap_class, set_rel, ...}]
+    for record in cohort:
+        if record.get("exit_reason") != "ok" or not record.get("pairs"):
+            continue
+        primary_pair = record["pairs"][0]
+        sw = primary_pair.get("swap_sweep") or {}
+        sr = primary_pair.get("clinical_soz_set_relation") or {}
+        rows.append({
+            "dataset": record.get("dataset"),
+            "subject": record.get("subject"),
+            "swap_class": sw.get("swap_class", "unknown"),
+            "decision_k": sw.get("decision_k"),
+            "set_rel": sr,
+        })
+
+    typology_distribution = {}  # tier -> typology -> count
+    for tier in ("strict", "candidate", "none"):
+        typology_distribution[tier] = {
+            t: 0 for t in ("E_subset_S", "S_subset_E", "partial", "disjoint", "degenerate", "missing")
+        }
+    for r in rows:
+        tier = r["swap_class"]
+        if tier not in typology_distribution:
+            continue
+        sr = r["set_rel"] or {}
+        if sr.get("exit_reason"):
+            typology_distribution[tier]["missing"] += 1
+        else:
+            t = sr.get("typology") or "missing"
+            typology_distribution[tier][t] = typology_distribution[tier].get(t, 0) + 1
+
+    def _enr_for(tier: str) -> list:
+        out = []
+        for r in rows:
+            if r["swap_class"] != tier:
+                continue
+            sr = r["set_rel"] or {}
+            if sr.get("exit_reason"):
+                continue
+            if not sr.get("informative"):
+                continue
+            v = sr.get("enrichment_over_lagPat")
+            if v is None:
+                continue
+            out.append(float(v))
+        return out
+
+    strict_enr = _enr_for("strict")
+    candidate_enr = _enr_for("candidate")
+
+    return {
+        "schema_version": 1,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "n_subjects_total": len(rows),
+        "typology_distribution": typology_distribution,
+        "strict_informative": cohort_sign_test_enrichment(
+            enrichments=strict_enr, n_boot=2000, seed=0,
+        ),
+        "candidate_informative": cohort_sign_test_enrichment(
+            enrichments=candidate_enr, n_boot=2000, seed=0,
+        ),
+        "per_subject": [
+            {
+                "dataset": r["dataset"],
+                "subject": r["subject"],
+                "swap_class": r["swap_class"],
+                "decision_k": r["decision_k"],
+                **(r["set_rel"] or {}),
+            }
+            for r in rows
+        ],
+    }
 
 
 if __name__ == "__main__":

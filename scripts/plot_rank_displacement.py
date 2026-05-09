@@ -204,21 +204,29 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     # τ track removed (highly collinear with F_norm: ρ ≈ -0.92);
     # SOZ track removed (lagPat / SOZ coverage not yet stable for paper).
     fig = plt.figure(figsize=(13.5, max(8.5, 0.46 * n_sub) + 2.0))
+    # Two-row layout: heatmap+F_norm / colorbar.
+    # Legend is placed as a separate axes above the heatmap (between
+    # suptitle and the heatmap's top xticks) so it sits at the natural
+    # entry point of the reader's gaze.
     gs = fig.add_gridspec(
         2, 2,
         width_ratios=[7.0, 1.3],
         height_ratios=[1.0, 0.045],
         wspace=0.14,
         hspace=0.06,
-        top=0.85,
-        bottom=0.08,
+        top=0.84,
+        bottom=0.07,
         left=0.11,
         right=0.97,
     )
     ax_h = fig.add_subplot(gs[0, 0])
     ax_F = fig.add_subplot(gs[0, 1], sharey=ax_h)
     ax_cb = fig.add_subplot(gs[1, 0])  # horizontal colorbar under heatmap
-    # gs[1, 1] (under F_norm track) intentionally left empty — no SOZ legend
+    # Legend axes positioned in the gap between suptitle (y~0.96) and
+    # the heatmap top xticks/xlabel (top edge of heatmap = 0.84). Centered
+    # on the heatmap column [0.11, 0.78].
+    ax_legend = fig.add_axes([0.20, 0.91, 0.55, 0.035])
+    ax_legend.axis("off")
 
     # NaN cells (channels beyond a subject's n_valid) render as white via
     # cmap.set_bad("white"). The divergent palette around 0 is light
@@ -238,8 +246,48 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     # not stable enough for paper-level annotation. soz_overlay is still
     # computed in build_heatmap_matrix and recorded in per-subject JSON.
 
+    # === Variable-k swap endpoint markers (FW max-null dual-tier) ===
+    # Triangle markers at the decision_k boundary cells:
+    #   left  marker at column = decision_k - 1   ('>' pointing rightward)
+    #   right marker at column = n_valid - decision_k ('<' pointing leftward)
+    # Together '> ... <' visually signals the inward exchange = swap.
+    # Strict (p_fw < 0.05)    -> filled black '>' / '<'
+    # Candidate (p_fw < 0.20) -> open grey '>' / '<'
+    # Asterisks deliberately NOT used: '*' / '**' are the statistical
+    # convention for p<0.05 / p<0.01, and our candidate threshold (p<0.20)
+    # would mislead readers if mapped to '*'.
+    n_strict_drawn = 0
+    n_cand_drawn = 0
+    for row_i, r in enumerate(sorted_records):
+        sw = r["primary_pair"].get("swap_sweep") or {}
+        if sw.get("exit_reason") != "ok":
+            continue
+        cls = sw.get("swap_class", "none")
+        if cls == "none":
+            continue
+        dk = int(sw["decision_k"])
+        n_v = int(sw["n_valid"])
+        if 2 * dk > n_v:
+            continue
+        if cls == "strict":
+            face, edge, lw, marker_size = "black", "black", 0.8, 100
+            n_strict_drawn += 1
+        else:  # candidate
+            face, edge, lw, marker_size = "none", "0.30", 1.5, 90
+            n_cand_drawn += 1
+        # Left boundary: ">" pointing rightward (toward center)
+        ax_h.scatter(
+            [dk - 1], [row_i], marker=">", s=marker_size,
+            facecolors=face, edgecolors=edge, linewidths=lw, zorder=6,
+        )
+        # Right boundary: "<" pointing leftward (toward center)
+        ax_h.scatter(
+            [n_v - dk], [row_i], marker="<", s=marker_size,
+            facecolors=face, edgecolors=edge, linewidths=lw, zorder=6,
+        )
+
     ax_h.set_yticks(range(n_sub))
-    ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK)
+    ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK + 2)
     # Move heatmap x-axis (ticks + label) to the TOP, since the bottom row
     # is now occupied by the horizontal colorbar.
     ax_h.xaxis.tick_top()
@@ -247,12 +295,12 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     ax_h.set_xticks([0, n_ch - 1])
     ax_h.set_xticklabels(
         ["source\n(earliest in T_a)", "sink\n(latest in T_a)"],
-        fontsize=FS_TICK + 1,
+        fontsize=FS_TICK + 4,
     )
     ax_h.set_xlabel(
         "Channel position along T_a (source → sink)",
-        fontsize=FS_LABEL + 1,
-        labelpad=10,
+        fontsize=FS_LABEL + 3,
+        labelpad=12,
     )
     # Hide top + right spines (cleaner paper-style; xticks at top still draw)
     ax_h.spines["top"].set_visible(False)
@@ -272,39 +320,65 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         color=COL_NEUTRAL, edgecolor="black", linewidth=0.5,
         zorder=2,
     )
-    # Prominent 2/3 reference line (rust accent so it reads as the null)
-    ax_F.axvline(2 / 3, color=COL_SIG, linewidth=1.6, linestyle="--",
+    # Prominent 2/3 reference line (thicker rust dashed for paper-level clarity)
+    ax_F.axvline(2 / 3, color=COL_SIG, linewidth=3.2, linestyle="--",
                  zorder=3)
     ax_F.set_xlim(0, 1.05)
     ax_F.set_xticks([0, 2 / 3, 1])
-    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK)
+    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK + 2)
     # Match heatmap: x-axis at top
     ax_F.xaxis.tick_top()
     ax_F.xaxis.set_label_position("top")
     ax_F.tick_params(axis="x", which="both", bottom=False, top=True)
     plt.setp(ax_F.get_yticklabels(), visible=False)
-    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL + 1, labelpad=10)
+    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL + 3, labelpad=12)
     ax_F.spines["top"].set_visible(False)
     ax_F.spines["right"].set_visible(False)
-    # Tiny annotation labeling the shaded band as the random null
-    ax_F.text(
-        2 / 3 / 2, n_sub - 0.5,
-        "random null\n(F ≤ 2/3)",
-        ha="center", va="top",
-        fontsize=FS_TICK - 2, color="dimgray", style="italic",
-    )
+    # Random-null annotation removed: redundant with the dashed 2/3 reference,
+    # the "2/3" xtick label, and the shaded null zone — three signals already
+    # convey the same meaning. Removing the inline text frees the bottom
+    # corner for the swap legend without overlap.
 
     # Horizontal colorbar directly under heatmap (close, not separated)
     cb = fig.colorbar(im, cax=ax_cb, orientation="horizontal")
     cb.set_label("Signed Δr  (= rank_T_b − rank_T_a)",
-                 fontsize=FS_LABEL, labelpad=2)
-    cb.ax.tick_params(labelsize=FS_TICK - 1)
+                 fontsize=FS_LABEL + 2, labelpad=4)
+    cb.ax.tick_params(labelsize=FS_TICK + 1)
 
-    # SOZ legend deliberately removed (no SOZ outlines on heatmap).
+    # Swap marker legend at top of figure (between suptitle and heatmap
+    # xticks). Single horizontal row: "> < strict (n, p<0.05)  > < candidate (n, p<0.20)".
+    # Markers are plotted via scatter at fixed x positions inside ax_legend
+    # so the visual mirrors what appears on the heatmap.
+    ax_legend.set_xlim(0, 1)
+    ax_legend.set_ylim(0, 1)
+    # Strict swatch (filled black > <) + label
+    ax_legend.scatter([0.06], [0.5], marker=">", s=110,
+                      facecolors="black", edgecolors="black",
+                      linewidths=0.8, transform=ax_legend.transAxes)
+    ax_legend.scatter([0.10], [0.5], marker="<", s=110,
+                      facecolors="black", edgecolors="black",
+                      linewidths=0.8, transform=ax_legend.transAxes)
+    ax_legend.text(0.13, 0.5,
+                   f"strict (n={n_strict_drawn},  p_fw < 0.05)",
+                   ha="left", va="center",
+                   fontsize=FS_TICK + 2, fontweight="bold",
+                   transform=ax_legend.transAxes)
+    # Candidate swatch (open grey > <) + label
+    ax_legend.scatter([0.55], [0.5], marker=">", s=100,
+                      facecolors="none", edgecolors="0.30",
+                      linewidths=1.5, transform=ax_legend.transAxes)
+    ax_legend.scatter([0.59], [0.5], marker="<", s=100,
+                      facecolors="none", edgecolors="0.30",
+                      linewidths=1.5, transform=ax_legend.transAxes)
+    ax_legend.text(0.62, 0.5,
+                   f"candidate (n={n_cand_drawn},  p_fw < 0.20)",
+                   ha="left", va="center",
+                   fontsize=FS_TICK + 2, fontweight="bold", color="0.20",
+                   transform=ax_legend.transAxes)
 
     fig.suptitle(
         f"Per-channel signed rank displacement — two-template subjects (n={n_sub})",
-        fontsize=FS_TITLE + 2,
+        fontsize=FS_TITLE + 4,
         y=0.96,
     )
     fig.savefig(out_stem.with_suffix(".png"), dpi=DPI_PUB, bbox_inches="tight")
@@ -382,12 +456,293 @@ def plot_per_subject_strip(record: dict, out_path: Path) -> None:
     plt.close(fig)
 
 
+def plot_swap_cardinality_heatmap(records: List[dict], out_stem: Path) -> None:
+    """Subject × k swap_score heatmap (user-locked design 2026-05-07 v2).
+
+    Layout:
+      - Main heatmap: rows = subjects in F_norm-descending order (matches
+        cohort_displacement_heatmap row ordering exactly); columns = absolute
+        k = 2 .. global_k_max; cell color = swap_score(k); cells with
+        k > floor(n_valid/2) drawn white (NaN; cmap.set_bad).
+      - Black-ring marker on decision_k cell when has_swap=True. decision_k
+        = argmax_k swap_score(k) (smallest-k tie); under FW max-null this
+        is the single k that defines T_obs = max swap_score.
+      - Right narrow F_norm reference track (random null at 2/3).
+      - Bottom horizontal colorbar for swap_score.
+
+    Decision (FW-corrected): has_swap iff T_obs >= score_floor AND p_fw < alpha_fw,
+    where T_obs = max_k swap_score and p_fw uses the max-null distribution
+    over permuted rank_b. Per-k null_95th is descriptive only and NOT a gate.
+    """
+    swap_records = []
+    for r in records:
+        sw = r["primary_pair"].get("swap_sweep") or {}
+        if sw.get("exit_reason") != "ok":
+            continue
+        swap_records.append((r, sw))
+
+    # Row order = F_norm desc (same as Panel A)
+    swap_records.sort(
+        key=lambda rs: -rs[0]["primary_pair"].get("footrule_normalized", 0.0)
+    )
+
+    n_rows = len(swap_records)
+    k_max_global = max(sw["k_max"] for _, sw in swap_records)
+    n_cols = k_max_global - 1  # k = 2 .. k_max_global
+
+    # Build matrix; NaN where k > floor(n_valid/2)
+    matrix = np.full((n_rows, n_cols), np.nan)
+    decision_marks: List[Tuple[int, int]] = []
+    for i, (r, sw) in enumerate(swap_records):
+        for k_str, v in sw["swap_score_by_k"].items():
+            k = int(k_str)
+            matrix[i, k - 2] = v
+        if sw["has_swap"] and sw.get("decision_k") is not None:
+            decision_marks.append((i, int(sw["decision_k"]) - 2))
+
+    sub_labels = [
+        f"{r['dataset'][:3]}_{r['subject']}" for r, _ in swap_records
+    ]
+    f_norm_vals = [
+        r["primary_pair"].get("footrule_normalized", float("nan"))
+        for r, _ in swap_records
+    ]
+
+    fig = plt.figure(figsize=(15, 9.0))
+    gs = fig.add_gridspec(
+        2, 3,
+        width_ratios=[10.0, 1.4, 0.4],
+        height_ratios=[14.0, 0.5],
+        hspace=0.10, wspace=0.10,
+        top=0.86, bottom=0.06, left=0.10, right=0.97,
+    )
+    ax_main = fig.add_subplot(gs[0, 0])
+    ax_fnorm = fig.add_subplot(gs[0, 1], sharey=ax_main)
+    ax_cb = fig.add_subplot(gs[1, 0])
+
+    cmap = plt.get_cmap("Reds").copy()
+    cmap.set_bad("white")
+    norm = plt.Normalize(vmin=0.0, vmax=1.0)
+
+    im = ax_main.imshow(
+        matrix, aspect="auto", cmap=cmap, norm=norm,
+        interpolation="nearest", origin="upper",
+    )
+
+    # decision_k black-ring markers
+    for (row, col) in decision_marks:
+        ax_main.scatter(
+            col, row, s=70,
+            facecolors="none", edgecolors="black", linewidths=1.6,
+            zorder=5,
+        )
+
+    # X axis on top; absolute k tick labels
+    ax_main.xaxis.set_ticks_position("top")
+    ax_main.xaxis.set_label_position("top")
+    ax_main.set_xticks(range(n_cols))
+    ax_main.set_xticklabels(
+        [str(k) for k in range(2, k_max_global + 1)], fontsize=FS_TICK - 1
+    )
+    ax_main.set_xlabel("endpoint cardinality k", fontsize=FS_LABEL)
+    ax_main.set_yticks(range(n_rows))
+    ax_main.set_yticklabels(sub_labels, fontsize=FS_TICK - 1)
+    for spine in ("top", "right"):
+        ax_main.spines[spine].set_visible(False)
+
+    # F_norm right track (shared y) - bar chart
+    ax_fnorm.barh(
+        range(n_rows), f_norm_vals,
+        color=COL_NEUTRAL, edgecolor="black", linewidth=0.4, height=0.82,
+    )
+    ax_fnorm.axvline(2 / 3, ls="--", color="grey", lw=1.0, zorder=2)
+    ax_fnorm.set_xlim(0, 1.05)
+    ax_fnorm.set_xticks([0.0, 0.5, 1.0])
+    ax_fnorm.set_xticklabels(["0", "0.5", "1"], fontsize=FS_TICK - 2)
+    ax_fnorm.xaxis.set_ticks_position("top")
+    ax_fnorm.xaxis.set_label_position("top")
+    ax_fnorm.set_xlabel("F_norm\n(2/3 = null)", fontsize=FS_LABEL - 3)
+    plt.setp(ax_fnorm.get_yticklabels(), visible=False)
+    for spine in ("top", "right", "left"):
+        ax_fnorm.spines[spine].set_visible(False)
+
+    # Bottom horizontal colorbar
+    cb = fig.colorbar(im, cax=ax_cb, orientation="horizontal")
+    cb.set_label("swap_score(k)  ·  black ring = decision_k (has_swap=True)",
+                 fontsize=FS_LABEL - 2)
+    cb.ax.tick_params(labelsize=FS_TICK - 1)
+
+    n_swap = sum(1 for _, sw in swap_records if sw["has_swap"])
+    fig.suptitle(
+        f"Variable-k swap_score per subject — stable_k=2 cohort "
+        f"(n={n_rows}, has_swap = {n_swap})\n"
+        f"FW max-null: T_obs = max_k swap_score(k); has_swap iff "
+        f"T_obs ≥ 0.5 AND p_fw < 0.05  (1000 perm, seed=0)",
+        fontsize=FS_TITLE - 2, y=0.97,
+    )
+    for ext in ("png", "pdf"):
+        fig.savefig(out_stem.with_suffix(f".{ext}"), dpi=DPI_PUB,
+                    bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_clinical_soz_set_relation(
+    summary_path: Path, out_stem: Path
+) -> None:
+    """3-panel paper-level supplementary figure for §9 swap × clinical SOZ.
+
+    Plan: docs/archive/topic1/pr6_supplementary_swap_clinical_soz_plan_2026-05-08.md §5
+
+    Panel A: precision × recall_within_lagPat scatter (informative subjects only)
+    Panel B: enrichment_over_lagPat × coverage scatter
+    Panel C: typology stacked bar by tier (strict / candidate / none)
+
+    Markers: strict = filled black, candidate = open grey, none = pale grey △.
+    Reference lines: A precision=1 + recall=1; B enrichment=0.
+    No p-value annotation on any panel — cohort sign-test goes in caption / archive doc.
+    """
+    summary = json.loads(summary_path.read_text())
+    rows = summary.get("per_subject", [])
+
+    fig, axes = plt.subplots(
+        1, 3, figsize=(15.5, 5.0), gridspec_kw={"width_ratios": [1.05, 1.05, 1.0]}
+    )
+    ax_a, ax_b, ax_c = axes
+
+    def _select(rows, predicate):
+        return [r for r in rows if predicate(r)]
+
+    informative = _select(rows, lambda r: r.get("informative") is True)
+    strict_inf = _select(informative, lambda r: r["swap_class"] == "strict")
+    cand_inf = _select(informative, lambda r: r["swap_class"] == "candidate")
+    none_inf = _select(informative, lambda r: r["swap_class"] == "none")
+
+    # ---------------- Panel A: precision × recall ----------------
+    def _scatter_pr(ax, subjects, marker, face, edge, lw, size, label):
+        x = [r["recall_within_lagPat"] for r in subjects if r["recall_within_lagPat"] is not None]
+        y = [r["precision"] for r in subjects if r["precision"] is not None]
+        ax.scatter(
+            x, y, marker=marker, s=size, facecolors=face, edgecolors=edge,
+            linewidths=lw, label=label, zorder=4,
+        )
+
+    _scatter_pr(ax_a, none_inf, "^", "0.85", "0.55", 0.7, 44, "none")
+    _scatter_pr(ax_a, cand_inf, "o", "none", "0.30", 1.4, 110, "candidate")
+    _scatter_pr(ax_a, strict_inf, "o", "black", "black", 0.8, 110, "strict")
+    # Annotate strict subjects by short name
+    for r in strict_inf:
+        if r["precision"] is None or r["recall_within_lagPat"] is None:
+            continue
+        sub = str(r["subject"])
+        short = sub if len(sub) <= 6 else sub[:6]
+        ax_a.annotate(
+            short, xy=(r["recall_within_lagPat"], r["precision"]),
+            xytext=(4, 4), textcoords="offset points",
+            fontsize=FS_TICK - 1, color="black", zorder=5,
+        )
+    # Reference lines
+    ax_a.axhline(1.0, color="0.65", linestyle=":", linewidth=0.9, zorder=1)
+    ax_a.axvline(1.0, color="0.65", linestyle=":", linewidth=0.9, zorder=1)
+    ax_a.set_xlim(-0.05, 1.10)
+    ax_a.set_ylim(-0.05, 1.10)
+    ax_a.set_xlabel("Recall within lagPat  |E ∩ S| / |S|", fontsize=FS_LABEL)
+    ax_a.set_ylabel("Precision  |E ∩ S| / |E|", fontsize=FS_LABEL)
+    ax_a.set_title("(A) precision × recall", fontsize=FS_TITLE, loc="left")
+    ax_a.legend(loc="lower left", fontsize=FS_TICK, frameon=False)
+    style_panel(ax_a)
+
+    # ---------------- Panel B: enrichment × coverage ----------------
+    def _scatter_ec(ax, subjects, marker, face, edge, lw, size, label):
+        x = [r["coverage"] for r in subjects if r["coverage"] is not None]
+        y = [r["enrichment_over_lagPat"] for r in subjects if r["enrichment_over_lagPat"] is not None]
+        ax.scatter(
+            x, y, marker=marker, s=size, facecolors=face, edgecolors=edge,
+            linewidths=lw, label=label, zorder=4,
+        )
+
+    _scatter_ec(ax_b, none_inf, "^", "0.85", "0.55", 0.7, 44, "none")
+    _scatter_ec(ax_b, cand_inf, "o", "none", "0.30", 1.4, 110, "candidate")
+    _scatter_ec(ax_b, strict_inf, "o", "black", "black", 0.8, 110, "strict")
+    for r in strict_inf:
+        if r["coverage"] is None or r["enrichment_over_lagPat"] is None:
+            continue
+        sub = str(r["subject"])
+        short = sub if len(sub) <= 6 else sub[:6]
+        ax_b.annotate(
+            short, xy=(r["coverage"], r["enrichment_over_lagPat"]),
+            xytext=(4, 4), textcoords="offset points",
+            fontsize=FS_TICK - 1, color="black", zorder=5,
+        )
+    ax_b.axhline(0.0, color="0.45", linestyle="--", linewidth=1.2, zorder=2)
+    ax_b.set_xlim(-0.02, 1.05)
+    ax_b.set_xlabel("Coverage  |E| / |L|", fontsize=FS_LABEL)
+    ax_b.set_ylabel("Enrichment over lagPat  precision − |S|/|L|", fontsize=FS_LABEL)
+    ax_b.set_title("(B) enrichment × coverage", fontsize=FS_TITLE, loc="left")
+    # Annotate the structural fact at coverage→1
+    ax_b.text(
+        0.99, 0.0, "→ 0 as cov→1\n(structural)",
+        ha="right", va="bottom", fontsize=FS_TICK - 1, color="0.45",
+        transform=ax_b.transData,
+    )
+    ax_b.legend(loc="lower left", fontsize=FS_TICK, frameon=False)
+    style_panel(ax_b)
+
+    # ---------------- Panel C: typology stacked bar ----------------
+    typ_dist = summary.get("typology_distribution", {})
+    tiers = ["strict", "candidate", "none"]
+    typ_order = ["E_subset_S", "S_subset_E", "partial", "disjoint", "degenerate", "missing"]
+    typ_colors = {
+        "E_subset_S": "#3F7A88",   # teal — refined SOZ candidate
+        "S_subset_E": "#C77E48",   # rust — extended SOZ candidate
+        "partial":    "#9B9B6F",   # olive
+        "disjoint":   "#7A4F4F",   # brick
+        "degenerate": "0.75",
+        "missing":    "0.90",
+    }
+    bottoms = np.zeros(len(tiers), dtype=float)
+    bar_x = np.arange(len(tiers))
+    for typ in typ_order:
+        heights = np.array([typ_dist.get(t, {}).get(typ, 0) for t in tiers], dtype=float)
+        ax_c.bar(
+            bar_x, heights, bottom=bottoms,
+            color=typ_colors[typ], edgecolor="white", linewidth=0.5,
+            label=typ,
+        )
+        bottoms = bottoms + heights
+    ax_c.set_xticks(bar_x)
+    ax_c.set_xticklabels(tiers, fontsize=FS_TICK)
+    ax_c.set_ylabel("Subject count", fontsize=FS_LABEL)
+    ax_c.set_title("(C) typology by swap_class", fontsize=FS_TITLE, loc="left")
+    # Annotate informative count above each bar
+    for x, t in zip(bar_x, tiers):
+        n_inf = sum(typ_dist.get(t, {}).get(typ, 0) for typ in typ_order if typ != "degenerate" and typ != "missing")
+        n_total = sum(typ_dist.get(t, {}).get(typ, 0) for typ in typ_order)
+        ax_c.text(
+            x, n_total + 0.4, f"info={n_inf}/{n_total}",
+            ha="center", va="bottom", fontsize=FS_TICK - 1,
+        )
+    ax_c.legend(
+        loc="upper right", fontsize=FS_TICK - 1, frameon=False,
+        ncol=1, bbox_to_anchor=(1.0, 1.0),
+    )
+    style_panel(ax_c)
+
+    fig.suptitle(
+        "Swap_endpoint × clinical SOZ within lagPat universe",
+        fontsize=FS_TITLE + 1, y=0.99,
+    )
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    for ext in ("png", "pdf"):
+        fig.savefig(f"{out_stem}.{ext}", dpi=DPI_PUB, bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument(
         "--what",
         default="all",
-        choices=["all", "cohort", "per_subject"],
+        choices=["all", "cohort", "per_subject", "swap", "clinical-soz-set-relation"],
     )
     ap.add_argument(
         "--exclude",
@@ -422,6 +777,35 @@ def main() -> None:
                 r, PER_SUB_FIG_DIR / f"{stem}_displacement.png"
             )
         print(f"Wrote per-subject strips for {len(records)} subjects")
+
+    if args.what in ("all", "clinical-soz-set-relation"):
+        summary_path = (
+            DATA_ROOT / "results" / "interictal_propagation" /
+            "rank_displacement" / "clinical_soz_set_relation_summary.json"
+        )
+        out_stem = FIG_DIR / "swap_clinical_soz_set_relation"
+        plot_clinical_soz_set_relation(summary_path, out_stem)
+        print(f"Wrote {out_stem.name}.{{png,pdf}}")
+
+    if args.what in ("all", "swap"):
+        plot_swap_cardinality_heatmap(
+            records, FIG_DIR / "swap_cardinality_heatmap"
+        )
+        n_swap = sum(
+            1 for r in records
+            if (r["primary_pair"].get("swap_sweep") or {}).get("has_swap")
+        )
+        print(
+            f"Wrote swap_cardinality_heatmap.{{png,pdf}} "
+            f"(n={len(records)}, has_swap = {n_swap})"
+        )
+        # Retire old scatter+curves figure: remove if still on disk
+        old_paths = [
+            FIG_DIR / f"swap_classification.{ext}" for ext in ("png", "pdf")
+        ]
+        for p in old_paths:
+            if p.exists():
+                p.unlink()
 
 
 if __name__ == "__main__":
