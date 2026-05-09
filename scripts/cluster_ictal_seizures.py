@@ -302,7 +302,13 @@ def compute_subject_result(
             }
             kept_idx = [id_to_idx.get(sid, -1) for sid in bres["seizure_ids_kept"]]
             outlier_flag = np.array(bres["outlier_flag"])
-            user_outlier_set = set(spec["user_outliers_seizure_idx"])
+            # Pre-filter: drop user-spec idx that aren't in kept_idx (status≠ok
+            # filter happened upstream). This prevents a false-negative where
+            # user listed sz_25 but it's not in the analysis set anyway.
+            raw_user_set = set(spec["user_outliers_seizure_idx"])
+            user_outlier_set = raw_user_set & set(kept_idx)
+            dropped_by_status = sorted(raw_user_set - user_outlier_set)
+            band_block["user_outliers_dropped_by_status"] = dropped_by_status
             user_main_set = {idx for idx in kept_idx if idx not in user_outlier_set}
             algo_outlier_idx_set = {
                 kept_idx[i] for i in range(len(outlier_flag)) if outlier_flag[i]
