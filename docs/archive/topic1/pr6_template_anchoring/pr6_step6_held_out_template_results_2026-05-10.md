@@ -105,6 +105,28 @@ n = **35** stable_k=2 subject（PR-6 main cohort 23 与 rank_displacement v14 se
 
 swap_class 在 strong tier 100% concordant、在 moderate tier 跌到 31%。原因：variable-k swap_class 标签依赖 1000-perm max-null，N/2 events 下 perm-null 噪声放大，从而把一些 strict / candidate subject 在 second projected 上推到 none，反之亦然。这**不是** PR-6 主线 endpoint 几何不稳，而是 §8 dual-tier label 本身的功率边界 —— 已在 §8 plan 里写死 "mechanism sanity tier，不开新 cohort claim"，本结果不与 §8 既有结论矛盾。
 
+## 4.6 Null floor calibration（2026-05-10 post-hoc，epilepsiae_548）
+
+完成主 cohort + figures 后，advisor review 指出 `template_spearman` 在 hold-out pipeline 下有结构性 selection-bias floor —— `assign_events_to_templates` 总把 second-half event 分到最近 template，导致即便 second-half ranks 完全打乱，cluster 内 mean rank 仍向 template 漂移。在 `epilepsiae_548`（pilot strong subject）上 per-event independent rank-shuffle 50 trials 跑完整 pipeline，得到 null 分布：
+
+| 量 | null median | null p95 | null max | cohort median (n=35) | gain over null |
+|---|---|---|---|---|---|
+| `template_spearman` | **0.747** | 0.845 | 0.906 | 0.922 | +0.175 |
+| `endpoint_position_recall` | **0.667** | 0.796 | 0.917 | 0.833 | +0.166 |
+| `swap_class_concordant` (fraction True) | **0.360** (18/50) | — | — | 0.686 (24/35) | **+33 pp** |
+
+**关键含义**：
+
+1. **plan §7.1 的"strong"阈值（spearman > 0.7、recall > 0.6）跨在 null 分布之上** —— 50% 以上的 null 实例都能"达到"这两个阈值；当前 cohort 的 strong 20 / moderate 13 计数**高估**了实际信号。
+2. **`swap_class_concordant` 是三量里最 informative 的**：cohort 0.686 vs null 0.360，超过 null 33 个百分点；这是 hold-out test 里最干净的判定信号，与正文 §4.5 中"swap_class concordance 是最脆弱的量" 结论**完全相反** —— 那是基于 raw count；calibrated 之下它反而是最 discriminative 的。
+3. **cohort 中位数 spearman 0.922 与 recall 0.833 仍真信号**：null gain ≈ +0.17，**确实 above floor**，但远不是"几乎完美 hold-out"。重新表述应为"在 pipeline 的结构 null 之上 +0.17 spearman / +0.17 recall / +33 pp swap concordance"。
+4. **不重新 re-tier**：tier 阈值是 plan-of-record 一部分，post-hoc 改阈值会引入 fishing 风险。tier 计数保留，但解读 caveat 已加。
+5. **per-subject null floor 异质性**：本 calibration 仅在一个 subject 上；不同 subject 的 n_valid、n_events、cluster ratio 都会改变 null floor。**严格 tier rebalancing 需要 per-subject null** —— 列入 Step 6 follow-up，本批次不做。
+
+文件：`results/interictal_propagation/pr6_step6_held_out_template/null_calibration_epi_548.json`。
+
+**Direction-preserving recall 与 plan 的协调（advisor 2026-05-10）**：plan §7.1 给的 baseline `≈ 6/n_valid` 是 direction-blind（任何端点是否仍处于任意 extreme）；实现中采用 direction-preserving（top→top + bottom→bottom 各自 Jaccard 平均），baseline 退到 `≈ 0.30`（n_valid=10）。Direction-preserving 是更严格的判定，cohort recall 0.833 在它下面意味着 endpoint 在保持端点身份与极性方向上稳健。Plan 的 baseline 公式按"direction-preserving 实现"修订为 `~3/n_valid` 是更准确的描述；图说 / 结果文档保持当前 0.30 baseline，并加 direction-preserving 注。
+
 ## 5. 与 PR-6 主线结论的对照
 
 | PR-6 既有判读 | Step 6 是否冲击 | 理由 |

@@ -1,0 +1,35 @@
+{
+  "calibration_subject": "epilepsiae_548",
+  "method": "per-event independent rank shuffle of second-half events; same pipeline",
+  "n_trials": 50,
+  "rng_seeds": "trial 0..49",
+  "null_distribution": {
+    "template_spearman": {
+      "median": 0.747,
+      "p95": 0.845,
+      "max": 0.906
+    },
+    "endpoint_position_recall": {
+      "median": 0.667,
+      "p95": 0.796,
+      "max": 0.917
+    },
+    "swap_class_concordant_True": {
+      "count": 18,
+      "n_trials": 50,
+      "fraction": 0.36
+    }
+  },
+  "observed_real_data_epilepsiae_548": {
+    "template_spearman": 0.986,
+    "endpoint_position_recall": 0.833,
+    "swap_class_concordant": true
+  },
+  "cohort_median_n35": {
+    "template_spearman": 0.922,
+    "endpoint_position_recall": 0.833,
+    "swap_class_concordant_fraction": 0.686
+  },
+  "interpretation": "Pipeline has a structural null floor due to selection bias in assign_events_to_templates: even on rank-shuffled second-half data, the pipeline returns template_spearman ~0.75 and endpoint_position_recall ~0.67 because random events still get assigned to nearest cluster, and the mean rank of selected events drifts toward that cluster's template. The cohort medians sit ~0.17 above the null floor on these two metrics. swap_class_concordant has the cleanest signal: real 0.686 vs null 0.360 = +33pp. Calibration based on ONE subject (epilepsiae_548); per-subject null floors vary with n_valid_channels and n_events. Order-of-magnitude calibration only — tier rebalancing requires per-subject nulls in a future iteration.",
+  "scope_caveat": "This calibration covers the structural pipeline null. It does NOT address (a) week-month timescale H_drift, (b) channel-selection circularity (lagPat is already high-HI selected), (c) per-subject n_valid heterogeneity."
+}

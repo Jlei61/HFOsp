@@ -27,3 +27,17 @@
 3×3 transition matrix（行 = first-half train 的 swap_class，列 = second-half projected 的 swap_class）。对角线 = 一致；off-diagonal = 跨 tier 漂移。底注给出 concordant 比例。
 
 **关注点**：(a) 对角线占比是否 > 50%（plan §7.2 cohort acceptance 阈值）；(b) strict ↔ none 这种"远跨度"漂移的频次（如果显著则说明 swap_class label 在 hold-out 下不稳）；(c) 当前 cohort concordant = 24/35 = 68.6%，超过阈值。
+
+---
+
+## Null calibration 重要 caveat（advisor 2026-05-10 post-hoc）
+
+`endpoint_position_recall` baseline 标作 0.30，是 **direction-preserving** 实现下的 random baseline，不是 plan §7.1 文字 `≈ 6/n_valid`（direction-blind）。Direction-preserving 更严格。
+
+更重要：`template_spearman` 与 `endpoint_position_recall` 在本 pipeline 下都有 selection-bias 结构底（`assign_events_to_templates` 总把 second-half event 分到最近 template）。`epilepsiae_548` 上 50 trials 的 per-event rank-shuffle null：
+
+- `template_spearman` null median **0.747**（cohort 0.922 → +0.18 above null）
+- `endpoint_position_recall` null median **0.667**（cohort 0.833 → +0.17 above null）
+- `swap_class_concordant` null **36%**（cohort 68.6% → **+33 pp above null**）
+
+阅读图时：plan §7.1 阈值 (spearman > 0.7、recall > 0.6) 跨在 null 分布上方，**图 3 散点位置直觉容易高估实际信号**。**最 informative 的判定信号实际上是图 4 swap_class concordance** —— 与"swap_class 是最脆量"的 raw-count 印象相反。Calibration 文件：`../null_calibration_epi_548.json`；详细解读：archive results doc §4.6。
