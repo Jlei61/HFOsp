@@ -185,6 +185,31 @@ def test_compute_pre_ictal_fingerprint_one_event_switch_nan():
     assert out["last_template"] == 0
 
 
+def test_build_subject_fingerprint_table_442():
+    """442: 17 seizures, 1 outlier (sz_id ending '00102' is index 8 in seizure_ids_kept).
+    All seizures should have fingerprint computed for [-30, -1] min window;
+    expect a tall DataFrame with columns including subtype_label and dropped_reason.
+    """
+    df = bridge.build_subject_fingerprint_table(
+        subject="442",
+        band="gamma_ER",
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+        windows_min=[(-30.0, -1.0)],
+    )
+    assert isinstance(df, pd.DataFrame)
+    assert {
+        "subject", "band", "window_min_min", "window_min_max",
+        "seizure_id", "subtype_label",
+        "n_events", "frac_T0", "switch_rate", "last_template", "dropped_reason",
+    }.issubset(df.columns)
+    # 17 seizures × 1 window = 17 rows
+    assert len(df) == 17
+    # subtype labels: 16x 0 + 1x -1
+    assert (df["subtype_label"] == 0).sum() == 16
+    assert (df["subtype_label"] == -1).sum() == 1
+
+
 def test_compute_pre_ictal_fingerprint_window_boundary_inclusive_left_exclusive_right():
     """Convention: t ∈ [onset + window_min*60, onset + window_max*60).
     A point exactly at the right edge is excluded; at the left edge is included.

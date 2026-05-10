@@ -309,3 +309,61 @@ def compute_pre_ictal_fingerprint(
         "last_template": last_template,
         "dropped_reason": None,
     }
+
+
+def build_subject_fingerprint_table(
+    subject: str,
+    band: str,
+    results_root: Path,
+    artifact_root: Path,
+    windows_min: Sequence[Tuple[float, float]],
+) -> pd.DataFrame:
+    """For one subject and band, compute pre-ictal fingerprint for every
+    seizure × window pair; return long-form DataFrame.
+    """
+    subtypes = load_topic5_subtype_labels(subject, band, results_root)
+    onsets = load_seizure_onsets(subject, results_root)
+    ev = load_topic1_events_with_templates(
+        subject=subject,
+        results_root=results_root,
+        artifact_root=artifact_root,
+    )
+    rows: List[Dict[str, Any]] = []
+    for sid, subtype in subtypes["seizure_id_to_subtype"].items():
+        if sid not in onsets:
+            # No usable onset → skip; record drop in audit later
+            for win_lo, win_hi in windows_min:
+                rows.append({
+                    "subject": subject,
+                    "band": band,
+                    "window_min_min": win_lo,
+                    "window_min_max": win_hi,
+                    "seizure_id": sid,
+                    "subtype_label": int(subtype),
+                    "n_events": 0,
+                    "frac_T0": float("nan"),
+                    "switch_rate": float("nan"),
+                    "last_template": None,
+                    "dropped_reason": "no_onset",
+                })
+            continue
+        for win_lo, win_hi in windows_min:
+            fp = compute_pre_ictal_fingerprint(
+                event_times=ev["event_abs_times"],
+                event_template_ids=ev["template_labels"],
+                seizure_clinical_onset=onsets[sid],
+                window_min_min=win_lo,
+                window_min_max=win_hi,
+                t0_template_id=ev["t0_template_id"],
+                seizure_id=sid,
+            )
+            rows.append({
+                "subject": subject,
+                "band": band,
+                "window_min_min": win_lo,
+                "window_min_max": win_hi,
+                "seizure_id": sid,
+                "subtype_label": int(subtype),
+                **{k: fp[k] for k in ("n_events", "frac_T0", "switch_rate", "last_template", "dropped_reason")},
+            })
+    return pd.DataFrame(rows)
