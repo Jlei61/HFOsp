@@ -88,6 +88,31 @@ def main() -> None:
                   f"frac_T0 p={w['frac_T0'].get('p',1.0):.4f}, eff={w['frac_T0'].get('effect',0.0):+.3f}")
         return
 
+    if args.cmd == "figures":
+        from src.topic1_topic5_bridge import (
+            COHORT_GAMMA, PRIMARY_WINDOW,
+            figure_q1_cohort_count_x_window, figure_q1_effect_distribution,
+            figure_q1_per_subject_strip, figure_q1b_442_sentinel, figure_q3_stratifier,
+        )
+        fig_dir = out_root / "figures"
+        fig_dir.mkdir(parents=True, exist_ok=True)
+        cohort_summary = out_root / "cohort_summary.json"
+        figure_q1_cohort_count_x_window(cohort_summary, fig_dir / "q1_cohort_count_x_window.png")
+        figure_q1_effect_distribution(cohort_summary, fig_dir / "q1_effect_distribution.png")
+        figure_q1_per_subject_strip(
+            per_subject_dir=out_root / "per_subject",
+            cohort=COHORT_GAMMA, band="gamma_ER",
+            primary_window=PRIMARY_WINDOW,
+            out_path=fig_dir / "q1_per_subject_strip.png",
+        )
+        figure_q1b_442_sentinel(
+            out_root / "q1b_442_sentinel.json",
+            fig_dir / "q1b_442_sentinel.png",
+        )
+        figure_q3_stratifier(cohort_summary, fig_dir / "q1_stratified_swap_silhouette.png")
+        print(f"5 figures → {fig_dir}")
+        return
+
     raise NotImplementedError(f"subcommand {args.cmd} pending")
 
 

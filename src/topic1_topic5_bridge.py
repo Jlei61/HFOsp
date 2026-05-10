@@ -782,6 +782,156 @@ def q3_stratifier_table(
 
 
 # ---------------------------------------------------------------------------
+# Figure helpers (Task 14)
+# ---------------------------------------------------------------------------
+
+def _morandi_palette() -> List[str]:
+    """Project-wide Morandi palette; falls back to defaults if src.plot_style missing."""
+    try:
+        from src.plot_style import MORANDI_PALETTE
+        return list(MORANDI_PALETTE)
+    except Exception:
+        return ["#8AA6A3", "#C4A484", "#A9908A", "#7C8B96", "#D4B996"]
+
+
+def figure_q1_cohort_count_x_window(
+    cohort_summary_path: Path, out_path: Path,
+) -> None:
+    import matplotlib.pyplot as plt
+    with cohort_summary_path.open() as fh:
+        d = json.load(fh)
+    windows = list(d["windows"].keys())
+    counts = [d["windows"][w]["n_positive"] for w in windows]
+    denoms = [d["windows"][w]["denom"] for w in windows]
+    pvals = [d["windows"][w]["binomial_p"] for w in windows]
+    fig, ax = plt.subplots(figsize=(6, 3.5), dpi=150)
+    pal = _morandi_palette()
+    ax.bar(range(len(windows)), counts, color=pal[0])
+    for i, (n, dn, p) in enumerate(zip(counts, denoms, pvals)):
+        ax.text(i, n + 0.1, f"{n}/{dn}\np={p:.3f}", ha="center", fontsize=9)
+    ax.set_xticks(range(len(windows)))
+    ax.set_xticklabels(windows)
+    ax.set_ylabel("n subject-positive")
+    ax.set_title(f"Q1 cohort count per window — verdict: {d['cohort_judgement']}")
+    ax.set_ylim(0, max(denoms) + 1)
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def figure_q1_effect_distribution(
+    cohort_summary_path: Path, out_path: Path,
+) -> None:
+    import matplotlib.pyplot as plt
+    with cohort_summary_path.open() as fh:
+        d = json.load(fh)
+    pal = _morandi_palette()
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.5), dpi=150, sharey=True)
+    for ax, (wkey, ps) in zip(axes, d["per_window_subject_results"].items()):
+        effects = [v.get("feature_winner_effect") or 0.0 for v in ps.values()]
+        names = [k.replace("epilepsiae_", "") for k in ps.keys()]
+        ax.bar(range(len(names)), effects, color=pal[1])
+        ax.axhline(EFFECT_MIN, ls="--", color="grey", label=f"effect_min={EFFECT_MIN}")
+        ax.set_xticks(range(len(names)))
+        ax.set_xticklabels(names, rotation=45, fontsize=8)
+        ax.set_title(wkey)
+    axes[0].set_ylabel("|effect_winner|")
+    fig.suptitle("Q1 per-subject feature-winner effect by window")
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def figure_q1_per_subject_strip(
+    per_subject_dir: Path,
+    cohort: Sequence[str],
+    band: str,
+    primary_window: Tuple[float, float],
+    out_path: Path,
+) -> None:
+    import matplotlib.pyplot as plt
+    pal = _morandi_palette()
+    fig, ax = plt.subplots(figsize=(11, 5), dpi=150)
+    wkey = f"[{primary_window[0]},{primary_window[1]}]"
+    plot_subjects = list(cohort) + ["442", "1084"]
+    for i, sid in enumerate(plot_subjects):
+        f = per_subject_dir / f"epilepsiae_{sid}__bridge.json"
+        if not f.exists():
+            continue
+        with f.open() as fh:
+            d = json.load(fh)
+        bw = d.get("bands", {}).get(band, {}).get("windows", {}).get(wkey)
+        if bw is None and "windows" in d:
+            bw = d["windows"].get(wkey)
+        if not bw:
+            continue
+        for row in bw["fingerprint"]:
+            color = pal[2] if (row.get("subtype_label") in (-1, 0)) else pal[3]
+            y = i + (0.1 if row.get("subtype_label") == -1 else 0.0)
+            x = row.get("frac_T0")
+            if x is not None and not (isinstance(x, float) and math.isnan(x)):
+                ax.plot(x, y, "o", color=color, alpha=0.7)
+    ax.set_yticks(range(len(plot_subjects)))
+    ax.set_yticklabels(plot_subjects)
+    ax.set_xlabel("frac_T0 (pre-ictal)")
+    ax.set_xlim(-0.05, 1.05)
+    ax.set_title(f"Q1 per-subject pre-ictal frac_T0 strip — window {wkey}")
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def figure_q1b_442_sentinel(
+    sentinel_path: Path, out_path: Path,
+) -> None:
+    import matplotlib.pyplot as plt
+    with sentinel_path.open() as fh:
+        d = json.load(fh)
+    fig, axes = plt.subplots(1, 3, figsize=(11, 3.5), dpi=150)
+    for ax, (wkey, w) in zip(axes, d["windows"].items()):
+        ax.bar([0, 1], [w["frac_T0"].get("effect", 0.0), w.get("switch_rate", {}).get("effect", 0.0)],
+               color=_morandi_palette()[:2])
+        ax.set_xticks([0, 1])
+        ax.set_xticklabels(["frac_T0", "switch_rate"])
+        ax.set_title(f"{wkey}\n p_frac={w['frac_T0'].get('p', 1.0):.3f}")
+        ax.axhline(0, color="grey", lw=0.5)
+    fig.suptitle("442 sz=9 (outlier) vs main 16 sz — Q1b")
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def figure_q3_stratifier(
+    cohort_summary_path: Path, out_path: Path,
+) -> None:
+    import matplotlib.pyplot as plt
+    df = q3_stratifier_table(cohort_summary_path, band="gamma_ER")
+    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)
+    pal = _morandi_palette()
+    color_map = {"real": pal[0], "none": pal[1]}
+    for swap, sub in df.groupby("swap_class"):
+        ax.scatter(sub["silhouette_class"].map({"low": 0, "high": 1}),
+                   sub["effect_winner"].fillna(0.0),
+                   color=color_map[swap], label=f"swap={swap}", s=60, alpha=0.75)
+        for _, row in sub.iterrows():
+            ax.annotate(row["subject"], (
+                {"low": 0, "high": 1}[row["silhouette_class"]],
+                row["effect_winner"] or 0.0,
+            ), fontsize=8)
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels(["silhouette ≤ 0.5", "silhouette > 0.5"])
+    ax.set_ylabel("|effect_winner| at primary window")
+    ax.axhline(EFFECT_MIN, ls="--", color="grey")
+    ax.legend()
+    ax.set_title("Q3 stratifier: swap × silhouette (descriptive)")
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
 # Per-subject runner — full cohort batch (Task 10)
 # ---------------------------------------------------------------------------
 
