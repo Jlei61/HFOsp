@@ -453,3 +453,23 @@ def test_cohort_overall_judgement_indeterminate():
         "[-60.0,-1.0]": {"per_window_pass": False, "n_positive": 1, "denom": 10},
     }
     assert bridge.cohort_overall_judgement(per_window) == "INDETERMINATE"
+
+
+# ---------------------------------------------------------------------------
+# Task 12: Q1b 442 binary-outlier sentinel exact tests
+# ---------------------------------------------------------------------------
+
+def test_q1b_sentinel_442_runs(tmp_path):
+    """Smoke: q1b_sentinel_442 produces a JSON with sz_9 vs others exact tests."""
+    out = bridge.q1b_sentinel_442(
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+        windows_min=[(-30.0, -1.0)],
+        out_path=tmp_path / "q1b_442.json",
+    )
+    assert "windows" in out
+    w = out["windows"]["[-30.0,-1.0]"]
+    assert "n_outlier" in w and w["n_outlier"] == 1
+    # 16 subtype-0 seizures minus 2 that have zero events in the [-30,-1] window
+    assert "n_main" in w and w["n_main"] == 14
+    assert "frac_T0" in w and "p" in w["frac_T0"]

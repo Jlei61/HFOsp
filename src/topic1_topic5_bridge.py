@@ -657,6 +657,75 @@ def aggregate_cohort_summary(
 
 
 # ---------------------------------------------------------------------------
+# Q1b 442 binary-outlier sentinel (Task 12)
+# ---------------------------------------------------------------------------
+
+def q1b_sentinel_442(
+    results_root: Path,
+    artifact_root: Path,
+    windows_min: Sequence[Tuple[float, float]],
+    out_path: Path,
+    band: str = "gamma_ER",
+) -> Dict[str, Any]:
+    """442 sz=9 (subtype_label=-1) vs other 16 seizures fingerprint comparison.
+
+    Q1b is descriptive case-study, not cohort claim (spec §2.2).
+    """
+    payload: Dict[str, Any] = {
+        "subject": "epilepsiae_442",
+        "band": band,
+        "windows": {},
+    }
+    for win_lo, win_hi in windows_min:
+        df = build_subject_fingerprint_table(
+            subject="442",
+            band=band,
+            results_root=results_root,
+            artifact_root=artifact_root,
+            windows_min=[(win_lo, win_hi)],
+        )
+        # Drop dropped/zero-event rows
+        eff = df[(df["dropped_reason"].isna()) & (df["n_events"] > 0)]
+        outlier = eff[eff["subtype_label"] == -1]
+        main = eff[eff["subtype_label"] == 0]
+        wkey = f"[{win_lo},{win_hi}]"
+        block: Dict[str, Any] = {
+            "n_outlier": int(len(outlier)),
+            "n_main": int(len(main)),
+        }
+        if len(outlier) >= 1 and len(main) >= 2:
+            p_f, eff_f = _mann_whitney_with_effect(
+                outlier["frac_T0"].to_numpy(), main["frac_T0"].to_numpy()
+            )
+            block["frac_T0"] = {"p": p_f, "effect": eff_f}
+            sw_o = outlier["switch_rate"].to_numpy()
+            sw_m = main["switch_rate"].to_numpy()
+            sw_o = sw_o[np.isfinite(sw_o)]
+            sw_m = sw_m[np.isfinite(sw_m)]
+            if sw_o.size and sw_m.size:
+                p_s, eff_s = _mann_whitney_with_effect(sw_o, sw_m)
+                block["switch_rate"] = {"p": p_s, "effect": eff_s}
+            # last_template Fisher 2x2
+            lt_o = outlier["last_template"].dropna().astype(int).tolist()
+            lt_m = main["last_template"].dropna().astype(int).tolist()
+            templates = sorted(set(lt_o + lt_m))
+            if len(templates) == 2:
+                cont = np.array([
+                    [lt_o.count(templates[0]), lt_o.count(templates[1])],
+                    [lt_m.count(templates[0]), lt_m.count(templates[1])],
+                ], dtype=int)
+                p_l, eff_l = _fisher_or_chi2_with_cramer_v(cont)
+                block["last_template"] = {"p": p_l, "effect": eff_l, "contingency": cont.tolist()}
+        else:
+            block["frac_T0"] = {"p": 1.0, "effect": 0.0, "skipped_reason": "insufficient_n"}
+        payload["windows"][wkey] = block
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w") as fh:
+        json.dump(payload, fh, indent=2, default=str)
+    return payload
+
+
+# ---------------------------------------------------------------------------
 # Per-subject runner — full cohort batch (Task 10)
 # ---------------------------------------------------------------------------
 

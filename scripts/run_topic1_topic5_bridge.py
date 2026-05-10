@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def main() -> None:
@@ -68,6 +73,19 @@ def main() -> None:
         print("verdict:", payload["cohort_judgement"])
         for wk, w in payload["windows"].items():
             print(f"  {wk}: {w['n_positive']}/{w['denom']} positive (p={w['binomial_p']:.4f}, pass={w['per_window_pass']})")
+        return
+
+    if args.cmd == "sentinel-442":
+        from src.topic1_topic5_bridge import WINDOWS_MIN, q1b_sentinel_442
+        p = q1b_sentinel_442(
+            results_root=results_root,
+            artifact_root=artifact_root,
+            windows_min=WINDOWS_MIN,
+            out_path=out_root / "q1b_442_sentinel.json",
+        )
+        for wk, w in p["windows"].items():
+            print(f"  {wk}: outlier={w['n_outlier']}, main={w['n_main']}, "
+                  f"frac_T0 p={w['frac_T0'].get('p',1.0):.4f}, eff={w['frac_T0'].get('effect',0.0):+.3f}")
         return
 
     raise NotImplementedError(f"subcommand {args.cmd} pending")
