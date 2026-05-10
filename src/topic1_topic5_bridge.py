@@ -1357,3 +1357,85 @@ def run_q1prime_per_subject(
         out_path = out_dir / f"epilepsiae_{sid}__q1prime.json"
         with out_path.open("w") as fh:
             json.dump(payload, fh, indent=2, default=str)
+
+
+# ---------------------------------------------------------------------------
+# Q1' cohort case-series summary + 3-state verdict (Task 5)
+# ---------------------------------------------------------------------------
+
+def q1prime_cohort_summary(
+    per_subject_results: Dict[str, Any],
+    strict_only: bool = True,
+) -> Dict[str, Any]:
+    """Q1' case-series cohort verdict per spec §10.4.
+
+    CASE-SERIES-PASS = ≥3/4 strict subjects q1prime_positive AND median Cramér V > 0.30
+    NULL-locked      = 0/4 strict positive AND median V ≤ 0.10 AND median AMI ≤ 0.05
+    INDETERMINATE    = otherwise
+    """
+    strict_subjects = {
+        k: v for k, v in per_subject_results.items()
+        if v.get("swap_class") == "strict" and "test" in v
+    }
+    n_strict = len(strict_subjects)
+    pos = [k for k, v in strict_subjects.items() if v["test"].get("q1prime_positive", False)]
+    cv_list = [float(v["test"].get("cramer_v", 0.0)) for v in strict_subjects.values()]
+    ami_list = [float(v["test"].get("ami", 0.0)) for v in strict_subjects.values()]
+    median_cv = float(np.median(cv_list)) if cv_list else 0.0
+    median_ami = float(np.median(ami_list)) if ami_list else 0.0
+    n_pos = len(pos)
+
+    if n_strict >= 1 and n_pos >= max(3, math.ceil(0.75 * n_strict)) and median_cv > 0.30:
+        verdict = "CASE-SERIES-PASS"
+    elif n_pos == 0 and median_cv <= 0.10 and median_ami <= 0.05:
+        verdict = "NULL-locked"
+    else:
+        verdict = "INDETERMINATE"
+
+    return {
+        "cohort_judgement": verdict,
+        "n_strict_total": n_strict,
+        "n_strict_positive": n_pos,
+        "strict_positive_subjects": pos,
+        "median_cramer_v_strict": median_cv,
+        "median_ami_strict": median_ami,
+        "candidate_sentinel": {
+            k: v.get("test", {})
+            for k, v in per_subject_results.items()
+            if v.get("swap_class") == "candidate"
+        },
+        "inadmissible_sentinels": {
+            k: v.get("test", {})
+            for k, v in per_subject_results.items()
+            if v.get("swap_class") == "none"
+        },
+    }
+
+
+def aggregate_q1prime_cohort(
+    per_subject_dir: Path,
+    cohort: Sequence[str],
+    out_path: Path,
+) -> Dict[str, Any]:
+    """Read per-subject q1prime JSONs, aggregate to cohort summary, write JSON."""
+    per_subject: Dict[str, Any] = {}
+    for sid in cohort:
+        f = per_subject_dir / f"epilepsiae_{sid}__q1prime.json"
+        if not f.exists():
+            continue
+        with f.open() as fh:
+            d = json.load(fh)
+        if d.get("status") == "failed":
+            continue
+        per_subject[d.get("subject", f"epilepsiae_{sid}")] = d
+    summary = q1prime_cohort_summary(per_subject)
+    payload = {
+        "schema_version": 1,
+        "cohort": list(cohort),
+        "per_subject": per_subject,
+        **summary,
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w") as fh:
+        json.dump(payload, fh, indent=2, default=str)
+    return payload

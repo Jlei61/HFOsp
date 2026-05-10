@@ -35,6 +35,7 @@ def main() -> None:
     p_q1p = sub.add_parser("q1prime", help="Run Q1' per-subject (channel-rank correspondence)")
     p_q1p.add_argument("--cohort", default="default", help="default = 4 strict + 548 sentinel + 442 (descriptive)")
     p_q1p.add_argument("--band", default="gamma_ER")
+    sub.add_parser("q1prime-cohort", help="Aggregate Q1' cohort + verdict")
     args = parser.parse_args()
 
     repo = Path(__file__).resolve().parent.parent
@@ -148,6 +149,19 @@ def main() -> None:
             out_dir=out_root / "q1prime_per_subject",
         )
         print(f"q1prime per-subject done; {len(cohort)} subjects → {out_root / 'q1prime_per_subject'}")
+        return
+
+    if args.cmd == "q1prime-cohort":
+        from src.topic1_topic5_bridge import aggregate_q1prime_cohort
+        payload = aggregate_q1prime_cohort(
+            per_subject_dir=out_root / "q1prime_per_subject",
+            cohort=["1073", "1146", "635", "958", "548", "442"],
+            out_path=out_root / "q1prime_cohort_summary.json",
+        )
+        print(f"verdict: {payload['cohort_judgement']}")
+        print(f"  strict positive: {payload['n_strict_positive']}/{payload['n_strict_total']}")
+        print(f"  median Cramér V (strict): {payload['median_cramer_v_strict']:.3f}")
+        print(f"  median AMI (strict): {payload['median_ami_strict']:.3f}")
         return
 
     raise NotImplementedError(f"subcommand {args.cmd} pending")

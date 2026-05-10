@@ -704,3 +704,32 @@ def test_run_q1prime_per_subject_writes_json(tmp_path):
     assert "p" in d["test"]
     assert "cramer_v" in d["test"]
     assert "ami" in d["test"]
+
+
+# ---------------------------------------------------------------------------
+# Task 5 — q1prime_cohort_summary + aggregate_q1prime_cohort
+# ---------------------------------------------------------------------------
+
+def test_q1prime_cohort_summary_pass():
+    """4/4 strict subjects positive → CASE-SERIES-PASS."""
+    per_subject = {
+        "epilepsiae_1073": {"swap_class": "strict", "test": {"q1prime_positive": True, "cramer_v": 0.7, "ami": 0.5, "p": 0.01, "n_eligible": 8}},
+        "epilepsiae_1146": {"swap_class": "strict", "test": {"q1prime_positive": True, "cramer_v": 0.6, "ami": 0.4, "p": 0.02, "n_eligible": 5}},
+        "epilepsiae_635":  {"swap_class": "strict", "test": {"q1prime_positive": True, "cramer_v": 0.5, "ami": 0.3, "p": 0.04, "n_eligible": 10}},
+        "epilepsiae_958":  {"swap_class": "strict", "test": {"q1prime_positive": True, "cramer_v": 0.55, "ami": 0.35, "p": 0.03, "n_eligible": 12}},
+    }
+    out = bridge.q1prime_cohort_summary(per_subject, strict_only=True)
+    assert out["cohort_judgement"] == "CASE-SERIES-PASS"
+    assert out["n_strict_positive"] == 4
+    assert out["median_cramer_v_strict"] >= 0.55
+
+
+def test_q1prime_cohort_summary_null():
+    """0/4 strict subjects positive AND median V <= 0.10 AND median AMI <= 0.05 → NULL-locked."""
+    per_subject = {
+        f"epilepsiae_{sid}": {"swap_class": "strict", "test": {"q1prime_positive": False, "cramer_v": 0.05, "ami": 0.02, "p": 0.5, "n_eligible": 8}}
+        for sid in ["1073", "1146", "635", "958"]
+    }
+    out = bridge.q1prime_cohort_summary(per_subject, strict_only=True)
+    assert out["cohort_judgement"] == "NULL-locked"
+    assert out["n_strict_positive"] == 0
