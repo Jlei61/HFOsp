@@ -135,6 +135,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/pr1_seizure_clustering/pr1_zer_cohort_2026-05-10.md` — PR-1 主结果文档（audit-corrected）
 - `results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/README.md` — cohort 视觉骨架文档
 - `docs/superpowers/specs/topic5_pr1_seizure_clustering*.md` — PR-1 plan v2
+- `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1 cohort exploratory result (verdict: NULL-locked, n=9; power floor identified)
 
 ---
 
