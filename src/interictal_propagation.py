@@ -1951,6 +1951,412 @@ def compute_time_split_reproducibility(
     }
 
 
+# ---------------------------------------------------------------------------
+# PR-6 Step 6 — held-out time template stability
+# Plan:
+#   docs/archive/topic1/pr6_template_anchoring/
+#       pr6_step6_held_out_template_plan_2026-05-10.md
+# ---------------------------------------------------------------------------
+
+
+def _split_events_by_time(
+    event_abs_times: np.ndarray,
+    block_time_ranges: Optional[Sequence[Tuple[float, float]]],
+    *,
+    day_night_labels: Optional[np.ndarray] = None,
+    balance_day_night: bool = False,
+) -> Tuple[np.ndarray, np.ndarray, Dict[str, Any]]:
+    """Median-time split into first / second halves.
+
+    Returns
+    -------
+    idx_first, idx_second : np.ndarray[int]
+        Indices into the input ``event_abs_times`` (each sorted ascending).
+    info : dict
+        ``n_first``, ``n_second``, ``median_t``,
+        and (if ``day_night_labels`` is given) ``day_night_ratio_first``,
+        ``day_night_ratio_second``.
+
+    Boundary contract (CLAUDE.md §6): every event ``abs_time`` must lie
+    inside at least one of ``block_time_ranges``; otherwise raise
+    ``ValueError``.
+
+    If ``balance_day_night=True``, day events and night events are split
+    independently at their respective medians, then unioned. Requires
+    ``day_night_labels``.
+    """
+    if block_time_ranges is None:
+        raise ValueError("block_time_ranges is required (no default)")
+
+    times = np.asarray(event_abs_times, dtype=float)
+    n = times.size
+
+    if balance_day_night and day_night_labels is None:
+        raise ValueError(
+            "day_night_labels is required when balance_day_night=True"
+        )
+
+    # Boundary check: every event must lie inside some block_time_range.
+    in_any_block = np.zeros(n, dtype=bool)
+    for lo, hi in block_time_ranges:
+        in_any_block |= (times >= lo) & (times <= hi)
+    if not np.all(in_any_block):
+        bad = np.where(~in_any_block)[0]
+        raise ValueError(
+            f"{int(bad.size)} events have abs_time outside any "
+            f"block_time_range (first bad index {int(bad[0])}, "
+            f"t={float(times[bad[0]]):.2f})"
+        )
+
+    info: Dict[str, Any] = {}
+
+    if balance_day_night:
+        labels = np.asarray(day_night_labels)
+        idx_day = np.where(labels == "day")[0]
+        idx_night = np.where(labels == "night")[0]
+
+        def _median_split(subset: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+            if subset.size == 0:
+                empty = np.array([], dtype=int)
+                return empty, empty
+            t_sub = times[subset]
+            order = np.argsort(t_sub, kind="mergesort")
+            mid = subset.size // 2
+            return subset[order[:mid]], subset[order[mid:]]
+
+        day_first, day_second = _median_split(idx_day)
+        night_first, night_second = _median_split(idx_night)
+        idx_first = np.sort(np.concatenate([day_first, night_first]))
+        idx_second = np.sort(np.concatenate([day_second, night_second]))
+        info["median_t"] = float(np.median(times)) if n > 0 else float("nan")
+    else:
+        order = np.argsort(times, kind="mergesort")
+        n_first = n // 2
+        idx_first = np.sort(order[:n_first])
+        idx_second = np.sort(order[n_first:])
+        info["median_t"] = (
+            float(times[order[n_first - 1]]) if n_first > 0 else float("nan")
+        )
+
+    info["n_first"] = int(idx_first.size)
+    info["n_second"] = int(idx_second.size)
+
+    if day_night_labels is not None:
+        labels = np.asarray(day_night_labels)
+        info["day_night_ratio_first"] = {
+            lab: int(np.sum(labels[idx_first] == lab))
+            for lab in ("day", "night", "unknown")
+        }
+        info["day_night_ratio_second"] = {
+            lab: int(np.sum(labels[idx_second] == lab))
+            for lab in ("day", "night", "unknown")
+        }
+
+    return idx_first, idx_second, info
+
+
+def compute_held_out_endpoint_validation(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    event_abs_times: np.ndarray,
+    block_ids: np.ndarray,
+    block_time_ranges: Optional[Sequence[Tuple[float, float]]],
+    chosen_k: int,
+    valid_event_indices: np.ndarray,
+    channel_names: Sequence[str],
+    soz_channels: Optional[set],
+    *,
+    valid_mask: Optional[np.ndarray] = None,
+    min_shared_channels: int = 3,
+    endpoint_top_n: int = 3,
+    day_night_labels: Optional[np.ndarray] = None,
+    balance_day_night: bool = False,
+    swap_n_perm: int = 1000,
+    swap_seed: int = 0,
+) -> Dict[str, Any]:
+    """PR-6 Step 6 — held-out time validation, asymmetric train/test.
+
+    Train on first half of valid events: KMeans (k=chosen_k) → templates_first
+    → endpoint_first (top-N ∪ bottom-N channels per cluster). Test on second
+    half: project events via ``assign_events_to_templates`` (no recluster, no
+    endpoint redefinition); rebuild ``template_second_projected[k]`` from the
+    mean rank of projected events; compare endpoint set, template Spearman,
+    swap_class.
+
+    Returns dict with keys: ``first_half`` / ``second_half`` / ``validation``
+    / ``h1_descriptive`` / ``split_info`` / ``params``. The validation tier
+    rule (strong/moderate/weak/fail) is per plan §7.1.
+
+    Plan-of-record:
+        docs/archive/topic1/pr6_template_anchoring/
+            pr6_step6_held_out_template_plan_2026-05-10.md
+    """
+    from src.rank_displacement import compute_swap_score_sweep  # local to avoid cycle risk
+
+    if block_time_ranges is None:
+        raise ValueError("block_time_ranges is required (no default)")
+
+    valid_event_indices = np.asarray(valid_event_indices, dtype=int)
+    times_valid = np.asarray(event_abs_times, dtype=float)[valid_event_indices]
+    blocks_valid = np.asarray(block_ids, dtype=int)[valid_event_indices]
+    ranks_valid = ranks[:, valid_event_indices]
+    bools_valid = bools[:, valid_event_indices]
+
+    labels_valid: Optional[np.ndarray] = None
+    if day_night_labels is not None:
+        labels_valid = np.asarray(day_night_labels)[valid_event_indices]
+
+    channel_names_list = list(channel_names)
+    if valid_mask is None:
+        valid_mask_arr = np.any(bools_valid, axis=1)
+    else:
+        valid_mask_arr = np.asarray(valid_mask, dtype=bool)
+    n_valid_channels = int(valid_mask_arr.sum())
+
+    if n_valid_channels < 2 * endpoint_top_n:
+        raise ValueError(
+            f"n_valid={n_valid_channels} is below 2*endpoint_top_n="
+            f"{2 * endpoint_top_n} (PR-6 endpoint_defined contract)"
+        )
+
+    valid_idx = np.where(valid_mask_arr)[0]
+    valid_channel_names = [channel_names_list[i] for i in valid_idx.tolist()]
+    ranks_v = ranks_valid[valid_mask_arr, :]
+    bools_v = bools_valid[valid_mask_arr, :]
+
+    idx_first, idx_second, split_info = _split_events_by_time(
+        times_valid,
+        block_time_ranges,
+        day_night_labels=labels_valid,
+        balance_day_night=balance_day_night,
+    )
+
+    # ---- Train on first half ----
+    ranks_first = ranks_v[:, idx_first]
+    bools_first = bools_v[:, idx_first]
+
+    feat_first = ranks_first.T.copy()
+    feat_first = np.where(np.isfinite(feat_first), feat_first, 0.0)
+    km_first = KMeans(n_clusters=chosen_k, n_init=10, random_state=0)
+    labels_first_arr = km_first.fit_predict(feat_first)
+
+    templates_first = build_cluster_templates(
+        ranks_first, bools_first, labels_first_arr, chosen_k
+    )
+
+    endpoint_first: Dict[int, Dict[str, set]] = {}
+    for k in range(chosen_k):
+        tmpl = templates_first[k]
+        finite = np.where(np.isfinite(tmpl))[0]
+        if finite.size < 2 * endpoint_top_n:
+            endpoint_first[k] = {"top": set(), "bottom": set()}
+            continue
+        order = finite[np.argsort(tmpl[finite], kind="stable")]
+        endpoint_first[k] = {
+            "top": {valid_channel_names[i] for i in order[:endpoint_top_n].tolist()},
+            "bottom": {
+                valid_channel_names[i] for i in order[-endpoint_top_n:].tolist()
+            },
+        }
+
+    swap_first: Optional[Dict[str, Any]] = None
+    if chosen_k == 2:
+        valid_a = np.isfinite(templates_first[0])
+        valid_b = np.isfinite(templates_first[1])
+        if int((valid_a & valid_b).sum()) >= 4:
+            swap_first = compute_swap_score_sweep(
+                templates_first[0],
+                templates_first[1],
+                valid_a,
+                valid_b,
+                n_perm=swap_n_perm,
+                seed=swap_seed,
+            )
+
+    # ---- Test on second half: project, rebuild, compare ----
+    ranks_second = ranks_v[:, idx_second]
+    bools_second = bools_v[:, idx_second]
+
+    assigned_second = assign_events_to_templates(
+        ranks_second, bools_second, templates_first, min_shared_channels
+    )
+    n_assignable_second = int(np.sum(assigned_second >= 0))
+    n_unassignable_second = int(np.sum(assigned_second < 0))
+
+    templates_second_projected = np.full(
+        (chosen_k, n_valid_channels), np.nan, dtype=float
+    )
+    for k in range(chosen_k):
+        mask_k = assigned_second == k
+        if not np.any(mask_k):
+            continue
+        sub_ranks = ranks_second[:, mask_k]
+        sub_bools = bools_second[:, mask_k]
+        sub_labels = np.zeros(int(np.sum(mask_k)), dtype=int)
+        templates_second_projected[k] = build_cluster_templates(
+            sub_ranks, sub_bools, sub_labels, 1
+        )[0]
+
+    swap_second_projected: Optional[Dict[str, Any]] = None
+    if chosen_k == 2:
+        valid_a2 = np.isfinite(templates_second_projected[0])
+        valid_b2 = np.isfinite(templates_second_projected[1])
+        if int((valid_a2 & valid_b2).sum()) >= 4:
+            swap_second_projected = compute_swap_score_sweep(
+                templates_second_projected[0],
+                templates_second_projected[1],
+                valid_a2,
+                valid_b2,
+                n_perm=swap_n_perm,
+                seed=swap_seed,
+            )
+
+    match = _match_templates_across_splits(
+        templates_first, templates_second_projected, min_shared_channels
+    )
+
+    # ---- Validation metrics ----
+    template_spearmans: List[float] = []
+    for k in range(chosen_k):
+        a = templates_first[k]
+        b = templates_second_projected[k]
+        both = np.isfinite(a) & np.isfinite(b)
+        if int(both.sum()) >= min_shared_channels:
+            r, _ = spearmanr(a[both], b[both])
+            if np.isfinite(r):
+                template_spearmans.append(float(r))
+    template_spearman = (
+        float(np.mean(template_spearmans)) if template_spearmans else float("nan")
+    )
+
+    endpoint_recalls: List[float] = []
+    for k in range(chosen_k):
+        ep_k = endpoint_first[k]
+        if not ep_k["top"] and not ep_k["bottom"]:
+            continue
+        tmpl_b = templates_second_projected[k]
+        finite_b = np.where(np.isfinite(tmpl_b))[0]
+        if finite_b.size < 2 * endpoint_top_n:
+            continue
+        order_b = finite_b[np.argsort(tmpl_b[finite_b], kind="stable")]
+        top_b = {valid_channel_names[i] for i in order_b[:endpoint_top_n].tolist()}
+        bot_b = {valid_channel_names[i] for i in order_b[-endpoint_top_n:].tolist()}
+        top_recall_k = (
+            len(ep_k["top"] & top_b) / len(ep_k["top"]) if ep_k["top"] else 0.0
+        )
+        bot_recall_k = (
+            len(ep_k["bottom"] & bot_b) / len(ep_k["bottom"])
+            if ep_k["bottom"]
+            else 0.0
+        )
+        endpoint_recalls.append(0.5 * (top_recall_k + bot_recall_k))
+    endpoint_position_recall = (
+        float(np.mean(endpoint_recalls)) if endpoint_recalls else float("nan")
+    )
+
+    cluster_assignment_purity = (
+        float(n_assignable_second) / float(max(int(idx_second.size), 1))
+    )
+
+    swap_class_concordant: Optional[bool] = None
+    if swap_first is not None and swap_second_projected is not None:
+        swap_class_concordant = bool(
+            swap_first.get("swap_class") == swap_second_projected.get("swap_class")
+        )
+
+    criteria_met = sum(
+        [
+            np.isfinite(template_spearman) and template_spearman > 0.7,
+            np.isfinite(endpoint_position_recall) and endpoint_position_recall > 0.6,
+            swap_class_concordant is True,
+        ]
+    )
+    if criteria_met == 3:
+        tier = "strong"
+    elif criteria_met == 2:
+        tier = "moderate"
+    elif criteria_met == 1:
+        tier = "weak"
+    else:
+        tier = "fail"
+
+    soz_set: set = set(soz_channels) if soz_channels else set()
+    h1_descriptive: Dict[int, Dict[str, float]] = {}
+    for k in range(chosen_k):
+        ep = endpoint_first[k]["top"] | endpoint_first[k]["bottom"]
+        middle = set(valid_channel_names) - ep
+        frac_ep = (
+            len(ep & soz_set) / len(ep) if ep else float("nan")
+        )
+        frac_mid = (
+            len(middle & soz_set) / len(middle) if middle else float("nan")
+        )
+        h1_descriptive[k] = {
+            "frac_soz_endpoint": float(frac_ep),
+            "frac_soz_middle": float(frac_mid),
+            "delta": (
+                float(frac_ep - frac_mid)
+                if np.isfinite(frac_ep) and np.isfinite(frac_mid)
+                else float("nan")
+            ),
+            "n_endpoint": int(len(ep)),
+            "n_middle": int(len(middle)),
+        }
+
+    return {
+        "first_half": {
+            "n_events": int(idx_first.size),
+            "labels": labels_first_arr.tolist(),
+            "templates": templates_first.tolist(),
+            "endpoints": {
+                str(k): {
+                    "top": sorted(endpoint_first[k]["top"]),
+                    "bottom": sorted(endpoint_first[k]["bottom"]),
+                }
+                for k in range(chosen_k)
+            },
+            "swap_class": (swap_first or {}).get("swap_class"),
+            "decision_k": (swap_first or {}).get("decision_k"),
+            "p_fw": (swap_first or {}).get("p_fw"),
+            "T_obs": (swap_first or {}).get("T_obs"),
+        },
+        "second_half": {
+            "n_events": int(idx_second.size),
+            "n_assignable": n_assignable_second,
+            "n_unassignable": n_unassignable_second,
+            "templates_projected": templates_second_projected.tolist(),
+            "swap_class_projected": (swap_second_projected or {}).get(
+                "swap_class"
+            ),
+            "decision_k_projected": (swap_second_projected or {}).get(
+                "decision_k"
+            ),
+            "p_fw_projected": (swap_second_projected or {}).get("p_fw"),
+            "T_obs_projected": (swap_second_projected or {}).get("T_obs"),
+        },
+        "validation": {
+            "template_spearman": template_spearman,
+            "endpoint_position_recall": endpoint_position_recall,
+            "cluster_assignment_purity": cluster_assignment_purity,
+            "swap_class_concordant": swap_class_concordant,
+            "tier": tier,
+            "hungarian_match_corrs": match["matched_corrs"],
+        },
+        "h1_descriptive": h1_descriptive,
+        "split_info": split_info,
+        "channel_names": valid_channel_names,
+        "params": {
+            "chosen_k": int(chosen_k),
+            "endpoint_top_n": int(endpoint_top_n),
+            "min_shared_channels": int(min_shared_channels),
+            "balance_day_night": bool(balance_day_night),
+            "n_valid_channels": int(n_valid_channels),
+            "swap_n_perm": int(swap_n_perm),
+            "swap_seed": int(swap_seed),
+        },
+    }
+
+
 def validate_absolute_lag_clustering(
     ranks: np.ndarray,
     lag_raw: np.ndarray,
