@@ -74,6 +74,37 @@
 
 ---
 
+## 2.1 事件规模统计 (2026-05-10, HFO detector v2 cohort)
+
+20 个 ready cohort subjects（v2 detector 重跑后）按 canonical artifact 实算：
+
+| 指标 | 数值 | 来源 |
+|---|---:|---|
+| Subjects (有 `_gpu.npz` v2) | 20 | `results/hfo_detection/<subject>/` |
+| 记录块总数 (含 `_gpu.npz`) | 3,770 | 累加各 subject record 数 |
+| **GPU 单通道 HFO 事件** | **47,695,060** | 累加所有 `*_gpu.npz::whole_dets` per-channel 列表（已跳过历史 corrupt stub） |
+| **lagPat 群体事件 (`*_packedTimes_withFreqCent.npy`)** | **1,356,578** | `results/topic4_attractor/step0_audit.csv::n_events_total`（20 subjects） |
+| **Seizure 条目数** | **542** | `results/epilepsiae_seizure_inventory.csv`（27 SQL subjects） |
+| 完整 EEG seizure interval | 523 | 同上，`has_complete_eeg_interval=True` |
+| 完整 clinical interval | 539 | 同上，`has_complete_clin_interval=True` |
+
+> 注：旧 21 年 cusignal 时代的 `*_gpu.npz` stub（< 10 KB，存放在 `inv/.../*_gpu.npz`）已不参与统计；当前数字基于 2026-05 v2 detector 重跑结果（详见 `docs/archive/hfo_detector_v2/v2_cohort_rebuild_plan_2026-05-05.md`）。
+
+跨数据集对照（与 Yuquan 联合）：
+
+| 指标 | Yuquan | Epilepsiae | 合计 |
+|---|---:|---:|---:|
+| Subjects | 21 | 20 | 41 |
+| 记录块 | 260 | 3,770 | 4,030 |
+| GPU 单通道 HFO 事件 | 15,467,782 | 47,695,060 | **63,162,842** |
+| lagPat 群体事件 | 414,622 | 1,356,578 | **1,771,200** |
+| Seizure（canonical inventory） | 52 | 542 | **594** |
+
+> ratio: GPU events / lagPat group events ≈ 35.7×，与平均参与通道数量级吻合。
+> 同步性子集 (`29 subjects / 1,468,780 event rows`，CLAUDE.md fast-path) 是 lagPat 群体事件的下游切片（限定有 SOZ JSON 的受试者），不是新口径。
+
+---
+
 ## 3. 原始数据合同
 
 ### 3.1 文件组织

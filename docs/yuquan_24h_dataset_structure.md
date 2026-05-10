@@ -17,15 +17,52 @@
 |------|------|
 | 患者数量 | 21人 |
 | EDF原始文件 | 260个 (约520小时记录) |
-| GPU检测结果 | 176个 |
-| 已检测HFO事件 | 约70万+ |
+| GPU检测结果 | 21/21 subjects 全量完成（详见 §1.1） |
 | 采样率 | 2000 Hz |
 | 单文件时长 | 多数约2小时，但存在截断段 |
 
 **注意**:
-- 有5个患者(pengzihang, songzishuo, zhangbichen, zhangkexuan, zhaochenxi, zhaojinrui, zhourongxuan)只有EDF原始文件，尚未完成GPU检测。
+- 旧版"已检测HFO事件 约70万+"字段已废弃，按 §1.1 实际累计为 **15,467,782** 个单通道 HFO 事件，旧估值差了一个数量级。
+- 旧版"GPU 检测结果 176 个"字段同样已过期；2026-05 全量回填后 21/21 subjects 全部具备 `*_gpu.npz`。
 - **不要硬编码 `12 files == 24h`。** 2026-04-01 按 EDF header 审计后，subject 总时长分布为 `22h / 24h / 26h / 30.9h`；大多数是连续分段记录，但 `litengsheng` 和 `zhangjiaqi` 存在真实时间缺口。
 - 后续任何 day/night、post-ictal、interictal slicing，都必须基于 **EDF header start time + duration** 构建时间轴，而不是文件序号乘以 2h。
+
+---
+
+## 1.1 队列规模统计 (2026-05-10)
+
+按当前 canonical artifact 实算（口径见末尾"复现命令"）：
+
+| 指标 | 数值 | 来源 |
+|---|---:|---|
+| Subjects (有 `_gpu.npz`) | 21 | `results/hfo_detection/<subject>/` |
+| EDF 记录文件总数 | 260 | 同上（去除 corrupt stub） |
+| **GPU 单通道 HFO 事件** | **15,467,782** | 累加所有 `*_gpu.npz::whole_dets` per-channel 列表 |
+| **lagPat 群体事件 (`*_packedTimes_withFreqCent.npy`)** | **414,622** | `results/topic4_attractor/step0_audit.csv::n_events_total`（20 subjects 进入 stable_k cohort，缺 `huangwanling` 一例 L3 不合格） |
+| **Seizure 数 (canonical inventory)** | **52** | `results/dataset_inventory/yuquan_seizure_inventory.csv` (9 subjects with seizures) |
+| Seizure 数 (PR-1 raw 检测) | 54 | `results/seizure_detection/pr1_seizure_all_yuquan_summary.json`（含 2 个未通过 `has_complete_eeg_interval` 的边界片段） |
+
+复现命令：
+
+```bash
+# GPU 事件总数（直接从 npz 累加，跳过 < 10KB 的 corrupt stub）
+python3 -c "
+import os, glob, numpy as np
+total = 0
+for sub in sorted(os.listdir('results/hfo_detection')):
+    for p in glob.glob(f'results/hfo_detection/{sub}/*_gpu.npz'):
+        if '_refineGpu' in p or os.path.getsize(p) < 10_000: continue
+        total += sum(len(x) for x in np.load(p, allow_pickle=True)['whole_dets'])
+print(total)
+"
+
+# lagPat 群体事件 (按 dataset)
+python3 -c "
+import csv
+rows = list(csv.DictReader(open('results/topic4_attractor/step0_audit.csv')))
+print(sum(int(r['n_events_total']) for r in rows if r['dataset']=='yuquan'))
+"
+```
 
 ---
 
