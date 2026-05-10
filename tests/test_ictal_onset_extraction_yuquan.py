@@ -114,6 +114,8 @@ def test_cohort_selector_includes_yuquan_audit_eligible():
     yuquan_in = [s for s in included if s.startswith("yuquan/")]
     epi_in = [s for s in included if s.startswith("epilepsiae/")]
     assert len(yuquan_in) == 9, f"expected 9 yuquan, got {yuquan_in}"
+    # 15 audit_eligible + sentinel-only epilepsiae/916 = 16; locks cohort=25 milestone
+    assert len(epi_in) == 16, f"expected 16 epilepsiae, got {epi_in}"
     assert "yuquan/gaolan" in yuquan_in
     assert "yuquan/zhangjinhan" in yuquan_in
     # No yuquan should be in `excluded` after this PR
