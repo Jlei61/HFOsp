@@ -139,6 +139,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/superpowers/plans/2026-05-10-topic5-pr0_1-yuquan-ictal-cohort-extension.md` — yuquan cohort 扩展 plan (2026-05-10)
 - `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1 cohort exploratory result (verdict: NULL-locked, n=9; power floor identified)
 - `docs/archive/topic5/bridge_q1prime/bridge_q1prime_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1' PIVOT case-series result (verdict: INDETERMINATE, N=4 strict + 548 candidate; 4 strict subjects show consistent positive Cramér V 0.25–0.67 median 0.486 but underpowered on p; channel-rank correspondence × swap-subset)
+- `docs/archive/topic5/bridge_q1prime/q1prime_overnight_exploration_2026-05-10.md` — Q1' overnight 探索：full 25-subject cohort + per-seizure feature × delta_rho/subtype 相关性分析 (verdict: INDETERMINATE/WEAK-SIGNAL; median_onset_latency_sec 有方向性倾向 sign_p=0.039 uncorrected; Stage C 全 NULL; 2 subjects 有大效量 subtype 区分)
 
 ---
 
