@@ -54,6 +54,22 @@ def main() -> None:
         print(f"per-subject done; {len(cohort)} subjects → {out_root / 'per_subject'}")
         return
 
+    if args.cmd == "cohort":
+        from src.topic1_topic5_bridge import (
+            COHORT_GAMMA, WINDOWS_MIN, aggregate_cohort_summary,
+        )
+        payload = aggregate_cohort_summary(
+            per_subject_dir=out_root / "per_subject",
+            band="gamma_ER",
+            windows_min=WINDOWS_MIN,
+            cohort=COHORT_GAMMA,
+            out_path=out_root / "cohort_summary.json",
+        )
+        print("verdict:", payload["cohort_judgement"])
+        for wk, w in payload["windows"].items():
+            print(f"  {wk}: {w['n_positive']}/{w['denom']} positive (p={w['binomial_p']:.4f}, pass={w['per_window_pass']})")
+        return
+
     raise NotImplementedError(f"subcommand {args.cmd} pending")
 
 

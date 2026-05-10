@@ -560,6 +560,103 @@ def q1_per_subject_test(
 
 
 # ---------------------------------------------------------------------------
+# Cohort aggregation + 3-state verdict (Task 11)
+# ---------------------------------------------------------------------------
+
+def q1_cohort_per_window(
+    per_subject_results: Dict[str, Any],
+    p_null: float = P_NULL_BINOMIAL,
+    pass_alpha: float = 0.05,
+) -> Dict[str, Any]:
+    """Cohort PER-WINDOW judgement for one window.
+
+    `per_subject_results` is dict[subject_key → q1_test_dict] for one window.
+    Subjects with passes_eligibility_floor=False are excluded from the denominator.
+    """
+    eligible = {k: v for k, v in per_subject_results.items() if v.get("passes_eligibility_floor", False)}
+    denom = len(eligible)
+    n_positive = sum(1 for v in eligible.values() if v.get("subject_positive", False))
+    if denom == 0:
+        binomial_p = 1.0
+    else:
+        # one-sided binomial: P(X ≥ n_positive | p_null)
+        binomial_p = float(sp_stats.binomtest(n_positive, denom, p_null, alternative="greater").pvalue)
+    return {
+        "denom": int(denom),
+        "n_positive": int(n_positive),
+        "binomial_p": binomial_p,
+        "per_window_pass": bool(binomial_p < pass_alpha and n_positive > 0),
+    }
+
+
+def cohort_overall_judgement(per_window: Dict[str, Dict[str, Any]]) -> str:
+    """3-state cohort verdict per spec §4.4.
+
+    PASS         = ≥ 2/3 windows per_window_pass
+    NULL-locked  = 0/3 windows pass AND all windows count ≤ 1/denom
+    otherwise    = INDETERMINATE
+    """
+    n_windows = len(per_window)
+    n_passed = sum(1 for v in per_window.values() if v.get("per_window_pass", False))
+    if n_passed >= max(2, math.ceil(2 * n_windows / 3)):
+        return "COHORT-EXPLORATORY-PASS"
+    counts = [v.get("n_positive", 0) for v in per_window.values()]
+    if n_passed == 0 and all(c <= 1 for c in counts):
+        return "NULL-locked"
+    return "INDETERMINATE"
+
+
+def aggregate_cohort_summary(
+    per_subject_dir: Path,
+    band: str,
+    windows_min: Sequence[Tuple[float, float]],
+    cohort: Sequence[str],
+    out_path: Path,
+) -> Dict[str, Any]:
+    """Read per-subject JSONs, aggregate per-window cohort, write cohort_summary.json."""
+    per_window: Dict[str, Dict[str, Any]] = {}
+    per_window_subject_results: Dict[str, Dict[str, Any]] = {}
+    for win_lo, win_hi in windows_min:
+        wkey = f"[{win_lo},{win_hi}]"
+        ps_results: Dict[str, Any] = {}
+        for sid in cohort:
+            f = per_subject_dir / f"epilepsiae_{sid}__bridge.json"
+            if not f.exists():
+                continue
+            with f.open() as fh:
+                d = json.load(fh)
+            band_block = d.get("bands", {}).get(band, {}).get("windows", {})
+            if not band_block and "windows" in d:
+                # single-band shortcut
+                band_block = d["windows"]
+            if wkey in band_block:
+                w = band_block[wkey]
+                ps_results[f"epilepsiae_{sid}"] = {
+                    "passes_eligibility_floor": w.get("passes_eligibility_floor", False),
+                    "subject_positive": w.get("subject_positive", False),
+                    "feature_winner": w.get("feature_winner"),
+                    "feature_winner_p": w.get("feature_winner_p"),
+                    "feature_winner_effect": w.get("feature_winner_effect"),
+                    "n_eligible_seizures": w.get("n_eligible_seizures"),
+                }
+        per_window_subject_results[wkey] = ps_results
+        per_window[wkey] = q1_cohort_per_window(ps_results)
+    verdict = cohort_overall_judgement(per_window)
+    payload = {
+        "schema_version": 1,
+        "band": band,
+        "cohort": list(cohort),
+        "windows": per_window,
+        "per_window_subject_results": per_window_subject_results,
+        "cohort_judgement": verdict,
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w") as fh:
+        json.dump(payload, fh, indent=2, default=str)
+    return payload
+
+
+# ---------------------------------------------------------------------------
 # Per-subject runner — full cohort batch (Task 10)
 # ---------------------------------------------------------------------------
 

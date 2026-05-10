@@ -390,3 +390,66 @@ def test_run_per_subject_writes_json(tmp_path):
     assert "fingerprint" in w
     assert "q1_test" in w
     assert "subject_positive" in w
+
+
+# ---------------------------------------------------------------------------
+# Task 11: cohort per-window aggregation + 3-state verdict
+# ---------------------------------------------------------------------------
+
+def test_q1_cohort_per_window_denominator():
+    """3 subjects: 2 pass eligibility floor (denom=2), 1 below (excluded)."""
+    per_subject = {
+        "A": {"passes_eligibility_floor": True, "subject_positive": True,  "feature_winner": "frac_T0"},
+        "B": {"passes_eligibility_floor": True, "subject_positive": False, "feature_winner": None},
+        "C": {"passes_eligibility_floor": False, "subject_positive": False, "feature_winner": None},
+    }
+    out = bridge.q1_cohort_per_window(per_subject, p_null=0.049)
+    assert out["denom"] == 2
+    assert out["n_positive"] == 1
+    assert 0 < out["binomial_p"] < 1
+    # 1/2 with p_null=0.049 → P(≥1) = 1 - 0.951^2 ≈ 0.096; not <0.05
+    assert out["per_window_pass"] is False
+
+
+def test_q1_cohort_per_window_pass():
+    """4 of 10 positive → binomial p tiny, PER-WINDOW-PASS."""
+    per_subject = {f"S{i}": {
+        "passes_eligibility_floor": True,
+        "subject_positive": (i < 4),
+        "feature_winner": "frac_T0" if i < 4 else None,
+    } for i in range(10)}
+    out = bridge.q1_cohort_per_window(per_subject, p_null=0.049)
+    assert out["denom"] == 10
+    assert out["n_positive"] == 4
+    assert out["per_window_pass"] is True
+    assert out["binomial_p"] < 0.001
+
+
+def test_cohort_overall_judgement_pass():
+    """≥2/3 windows pass → COHORT-EXPLORATORY-PASS."""
+    per_window = {
+        "[-30.0,-1.0]": {"per_window_pass": True,  "n_positive": 4, "denom": 10},
+        "[-15.0,-1.0]": {"per_window_pass": True,  "n_positive": 3, "denom": 10},
+        "[-60.0,-1.0]": {"per_window_pass": False, "n_positive": 1, "denom": 10},
+    }
+    assert bridge.cohort_overall_judgement(per_window) == "COHORT-EXPLORATORY-PASS"
+
+
+def test_cohort_overall_judgement_null():
+    """0/3 windows pass + all counts ≤ 1/N → NULL-locked."""
+    per_window = {
+        "[-30.0,-1.0]": {"per_window_pass": False, "n_positive": 0, "denom": 10},
+        "[-15.0,-1.0]": {"per_window_pass": False, "n_positive": 1, "denom": 10},
+        "[-60.0,-1.0]": {"per_window_pass": False, "n_positive": 0, "denom": 10},
+    }
+    assert bridge.cohort_overall_judgement(per_window) == "NULL-locked"
+
+
+def test_cohort_overall_judgement_indeterminate():
+    """1/3 windows pass → INDETERMINATE."""
+    per_window = {
+        "[-30.0,-1.0]": {"per_window_pass": True,  "n_positive": 3, "denom": 10},
+        "[-15.0,-1.0]": {"per_window_pass": False, "n_positive": 2, "denom": 10},
+        "[-60.0,-1.0]": {"per_window_pass": False, "n_positive": 1, "denom": 10},
+    }
+    assert bridge.cohort_overall_judgement(per_window) == "INDETERMINATE"
