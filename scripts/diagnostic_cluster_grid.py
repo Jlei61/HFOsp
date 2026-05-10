@@ -161,18 +161,22 @@ def main() -> int:
     parser.add_argument("--subject", required=True)
     parser.add_argument("--band", default="both",
                          choices=("gamma_ER", "broad_ER", "both"))
+    parser.add_argument("--feature-mode", default="t_onset",
+                         choices=("t_onset", "zer_binned"))
     args = parser.parse_args()
 
     sid = args.subject.replace("/", "_")
-    cluster_json = CLUSTER_OUT_DIR / "per_subject" / f"{sid}.json"
+    suffix = "" if args.feature_mode == "t_onset" else "__zer_binned"
+    cluster_json = CLUSTER_OUT_DIR / "per_subject" / f"{sid}{suffix}.json"
     if not cluster_json.exists():
         print(f"ERROR: cluster JSON missing — run cluster_ictal_seizures.py "
-              f"per-subject --subject {args.subject} first", file=sys.stderr)
+              f"per-subject --subject {args.subject} --feature-mode "
+              f"{args.feature_mode} first", file=sys.stderr)
         return 1
 
     bands = ("gamma_ER", "broad_ER") if args.band == "both" else (args.band,)
     for band in bands:
-        out = DIAG_OUT_DIR / f"{sid}_{band}_cluster_grid.png"
+        out = DIAG_OUT_DIR / f"{sid}_{band}{suffix}_cluster_grid.png"
         try:
             render_diagnostic_grid(args.subject, band, cluster_json, out)
             print(f"  wrote {out}")
