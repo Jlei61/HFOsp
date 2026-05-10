@@ -1,0 +1,85 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 35276,
+      "n_events_kept_k": 4582,
+      "drop_rate_k": 0.8701099897947613,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.13670051290024476,
+      "asymmetry": 0.027304954477865184,
+      "H_p_norm": [
+        0.7655313245521084,
+        0.8169098898980648,
+        0.8759672028879787,
+        0.9386277886047866,
+        0.950589826680661,
+        0.9000443175254147,
+        0.8493371356836179,
+        0.7382263700742432
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.13670051290024476,
+        "endpoint_pair_rank": 28,
+        "endpoint_pair_percentile": 0.03571428571428571,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.03571428571428571,
+        "n_valid": 8
+      }
+    },
+    "1": {
+      "n_events_total_k": 35405,
+      "n_events_kept_k": 6164,
+      "drop_rate_k": 0.8259002965682813,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.08583657824035218,
+      "asymmetry": 0.10519840352167076,
+      "H_p_norm": [
+        0.844592918629461,
+        0.781920779080099,
+        0.8790820434734498,
+        0.9432360781131383,
+        0.9333558660922342,
+        0.8902673535320629,
+        0.8391196503628827,
+        0.7393945151077902
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.0858365782403524,
+        "endpoint_pair_rank": 26,
+        "endpoint_pair_percentile": 0.10714285714285714,
+        "is_endpoint_pair_max": false,
+        "p_N1": 0.9285714285714286,
+        "min_attainable_p_N1": 0.03571428571428571,
+        "n_valid": 8
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 8,
+    "n_perm_N0": 200,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "delta_obs_subject": -0.11126854557029858,
+    "n_combos": 784,
+    "subject_combo_rank": 781,
+    "subject_combo_percentile": 0.00510204081632653,
+    "is_subject_combo_max": false,
+    "p_N1_subject": 0.9961734693877551,
+    "min_attainable_p_N1_subject": 0.0012755102040816326,
+    "subject_eligibility_flag": "ok"
+  },
+  "subject_id": "1125",
+  "dataset": "epilepsiae",
+  "stem": "epilepsiae_1125",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr2_sentinel_union",
+  "n_valid_channels": 8,
+  "swap_class_full": "candidate"
+}

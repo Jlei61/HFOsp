@@ -1,0 +1,85 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 12641,
+      "n_events_kept_k": 837,
+      "drop_rate_k": 0.9337868839490546,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.0571445611920679,
+      "asymmetry": 0.051954598931041485,
+      "H_p_norm": [
+        0.9338877913137668,
+        0.9448002005258274,
+        0.9668221236674333,
+        0.9965836326871066,
+        0.9925818264509138,
+        0.9535977124650139,
+        0.9359448224455883,
+        0.8819331923827253
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.0571445611920679,
+        "endpoint_pair_rank": 28,
+        "endpoint_pair_percentile": 0.03571428571428571,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.03571428571428571,
+        "n_valid": 8
+      }
+    },
+    "1": {
+      "n_events_total_k": 14936,
+      "n_events_kept_k": 975,
+      "drop_rate_k": 0.9347214783074451,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.10105513323443971,
+      "asymmetry": 0.009317484727721759,
+      "H_p_norm": [
+        0.8637004681702565,
+        0.9044314838181665,
+        0.9652556315972008,
+        0.9930931077787086,
+        0.98805307926827,
+        0.9689301596779626,
+        0.9408176921047033,
+        0.8543829834425347
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.10105513323443982,
+        "endpoint_pair_rank": 28,
+        "endpoint_pair_percentile": 0.03571428571428571,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.03571428571428571,
+        "n_valid": 8
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 8,
+    "n_perm_N0": 200,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "delta_obs_subject": -0.07909984721325386,
+    "n_combos": 784,
+    "subject_combo_rank": 784,
+    "subject_combo_percentile": 0.0012755102040816326,
+    "is_subject_combo_max": false,
+    "p_N1_subject": 1.0,
+    "min_attainable_p_N1_subject": 0.0012755102040816326,
+    "subject_eligibility_flag": "ok"
+  },
+  "subject_id": "chengshuai",
+  "dataset": "yuquan",
+  "stem": "yuquan_chengshuai",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr6_union",
+  "n_valid_channels": 8,
+  "swap_class_full": "none"
+}
