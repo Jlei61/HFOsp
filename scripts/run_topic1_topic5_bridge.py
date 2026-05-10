@@ -36,6 +36,7 @@ def main() -> None:
     p_q1p.add_argument("--cohort", default="default", help="default = 4 strict + 548 sentinel + 442 (descriptive)")
     p_q1p.add_argument("--band", default="gamma_ER")
     sub.add_parser("q1prime-cohort", help="Aggregate Q1' cohort + verdict")
+    sub.add_parser("q1prime-figures", help="Render Q1' figures")
     args = parser.parse_args()
 
     repo = Path(__file__).resolve().parent.parent
@@ -162,6 +163,31 @@ def main() -> None:
         print(f"  strict positive: {payload['n_strict_positive']}/{payload['n_strict_total']}")
         print(f"  median Cramér V (strict): {payload['median_cramer_v_strict']:.3f}")
         print(f"  median AMI (strict): {payload['median_ami_strict']:.3f}")
+        return
+
+    if args.cmd == "q1prime-figures":
+        from src.topic1_topic5_bridge import (
+            figure_q1prime_per_subject_scatter,
+            figure_q1prime_cohort_effect,
+            figure_q1prime_assignment_x_subtype,
+        )
+        fig_dir = out_root / "figures"
+        cohort = ["1073", "1146", "635", "958", "548", "442"]
+        figure_q1prime_per_subject_scatter(
+            per_subject_dir=out_root / "q1prime_per_subject",
+            cohort=cohort,
+            out_path=fig_dir / "q1prime_per_subject_scatter.png",
+        )
+        figure_q1prime_cohort_effect(
+            cohort_summary_path=out_root / "q1prime_cohort_summary.json",
+            out_path=fig_dir / "q1prime_cohort_effect.png",
+        )
+        figure_q1prime_assignment_x_subtype(
+            per_subject_dir=out_root / "q1prime_per_subject",
+            cohort=["1073", "1146", "635", "958", "548"],
+            out_path=fig_dir / "q1prime_assignment_x_subtype.png",
+        )
+        print(f"q1prime figures → {fig_dir}")
         return
 
     raise NotImplementedError(f"subcommand {args.cmd} pending")

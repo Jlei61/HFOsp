@@ -26,3 +26,19 @@
 
 Q3 stratifier 散点：x 轴 = silhouette 二分（≤0.5 vs >0.5），y 轴 = primary window 的 effect_winner，颜色 = swap_class（real = strict ∪ candidate vs none）。每点标 subject id。
 **关注点**：Q1 信号是否集中在 swap=real 与 silhouette=high 子集；descriptive only，不开 α。
+
+---
+
+## Q1' (PIVOT 2026-05-10) figures
+
+### q1prime_per_subject_scatter.png
+6-panel (2×3) per-subject (ρ_a, ρ_b) 散点；点颜色按 topic5 z-ER ictal subtype。
+**关注点**：strict subject (1073/1146/635/958) 上 subtype-cluster 是否在 (ρ_a, ρ_b) 平面上分离；reverse-line 上下分布暗示 T0 vs T1 主导。
+
+### q1prime_cohort_effect.png
+6 subject 的 Cramér V + AMI bar；虚线 V_min=0.30 阈值；标题为 cohort verdict。
+**关注点**：strict 4 subject 的 V/AMI 是否集中在阈值之上；548 candidate 的位置；442 (axis collapse) 应近 0。
+
+### q1prime_assignment_x_subtype.png
+strict + candidate (5 subject) 的 assignment × subtype 列联 stacked bar；标题带 Fisher/χ² p。
+**关注点**：assignment {T0, T1} 是否在 subtype 间分布不均；p < 0.05 + V > 0.3 双 gate 通过的 subject。

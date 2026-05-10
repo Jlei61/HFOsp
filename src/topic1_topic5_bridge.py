@@ -1439,3 +1439,122 @@ def aggregate_q1prime_cohort(
     with out_path.open("w") as fh:
         json.dump(payload, fh, indent=2, default=str)
     return payload
+
+
+# ---------------------------------------------------------------------------
+# Q1' figures (Task 6)
+# ---------------------------------------------------------------------------
+
+def figure_q1prime_per_subject_scatter(
+    per_subject_dir: Path,
+    cohort: Sequence[str],
+    out_path: Path,
+) -> None:
+    """For each subject: scatter (ρ_a, ρ_b) per seizure colored by topic5 subtype."""
+    import matplotlib.pyplot as plt
+    pal = _morandi_palette()
+    fig, axes = plt.subplots(2, 3, figsize=(12, 7), dpi=150)
+    axes_flat = axes.flatten()
+    for ax, sid in zip(axes_flat, cohort):
+        f = per_subject_dir / f"epilepsiae_{sid}__q1prime.json"
+        if not f.exists():
+            ax.set_title(f"{sid} — missing")
+            continue
+        with f.open() as fh:
+            d = json.load(fh)
+        if d.get("status") == "failed":
+            ax.set_title(f"{sid} — failed: {d.get('error', '')[:30]}")
+            continue
+        per_sz = d.get("per_seizure", [])
+        if not per_sz:
+            continue
+        rho_a = [s.get("rho_a") for s in per_sz if s.get("rho_a") is not None]
+        rho_b = [s.get("rho_b") for s in per_sz if s.get("rho_b") is not None]
+        subtypes = [
+            s.get("subtype_label") if s.get("subtype_label") is not None else -2
+            for s in per_sz if s.get("rho_a") is not None
+        ]
+        unique = sorted(set(subtypes), key=lambda x: (x is None, x))
+        for k, st in enumerate(unique):
+            xs = [a for a, t in zip(rho_a, subtypes) if t == st]
+            ys = [b for b, t in zip(rho_b, subtypes) if t == st]
+            ax.scatter(xs, ys, color=pal[k % len(pal)], label=f"st={st}", s=40, alpha=0.75)
+        ax.axline((-1, -1), (1, 1), color="grey", lw=0.5, ls="--")
+        ax.set_xlim(-1.05, 1.05)
+        ax.set_ylim(-1.05, 1.05)
+        ax.set_xlabel("ρ_a (vs T0)")
+        ax.set_ylabel("ρ_b (vs T1)")
+        ax.set_title(f"{sid} (swap={d.get('swap_class')}, V={d.get('test', {}).get('cramer_v', 0):.2f})")
+        ax.legend(fontsize=7)
+    fig.suptitle("Q1' per-seizure (ρ_a, ρ_b) — cohort 4 strict + 548 candidate + 442 descriptive")
+    fig.tight_layout()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def figure_q1prime_cohort_effect(
+    cohort_summary_path: Path, out_path: Path,
+) -> None:
+    """Cohort bar of per-subject Cramér V + AMI."""
+    import matplotlib.pyplot as plt
+    with cohort_summary_path.open() as fh:
+        d = json.load(fh)
+    pal = _morandi_palette()
+    subjects = list(d["per_subject"].keys())
+    cv = [d["per_subject"][s].get("test", {}).get("cramer_v", 0.0) for s in subjects]
+    ami = [d["per_subject"][s].get("test", {}).get("ami", 0.0) for s in subjects]
+    fig, ax = plt.subplots(figsize=(8, 4), dpi=150)
+    x = np.arange(len(subjects))
+    ax.bar(x - 0.2, cv, width=0.4, color=pal[0], label="Cramér V")
+    ax.bar(x + 0.2, ami, width=0.4, color=pal[1], label="AMI")
+    ax.axhline(0.30, ls="--", color="grey", lw=0.7, label="V min")
+    ax.set_xticks(x)
+    ax.set_xticklabels([s.replace("epilepsiae_", "") for s in subjects], rotation=45)
+    ax.set_ylabel("effect")
+    ax.set_title(f"Q1' cohort effect — verdict: {d.get('cohort_judgement')}")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
+
+
+def figure_q1prime_assignment_x_subtype(
+    per_subject_dir: Path,
+    cohort: Sequence[str],
+    out_path: Path,
+) -> None:
+    """For each strict + candidate subject: stacked bar of assignment counts by subtype."""
+    import matplotlib.pyplot as plt
+    pal = _morandi_palette()
+    fig, axes = plt.subplots(1, len(cohort), figsize=(3 * len(cohort), 4), dpi=150, sharey=True)
+    if len(cohort) == 1:
+        axes = [axes]
+    for ax, sid in zip(axes, cohort):
+        f = per_subject_dir / f"epilepsiae_{sid}__q1prime.json"
+        if not f.exists():
+            continue
+        with f.open() as fh:
+            d = json.load(fh)
+        if d.get("status") == "failed":
+            continue
+        cont = d.get("test", {}).get("contingency")
+        a_levels = d.get("test", {}).get("a_levels", [])
+        s_levels = d.get("test", {}).get("s_levels", [])
+        if not cont:
+            ax.set_title(f"{sid} no contingency")
+            continue
+        cont = np.array(cont)
+        bottom = np.zeros(len(s_levels))
+        for i, a in enumerate(a_levels):
+            ax.bar(range(len(s_levels)), cont[i], bottom=bottom, color=pal[i % len(pal)], label=a)
+            bottom += cont[i]
+        ax.set_xticks(range(len(s_levels)))
+        ax.set_xticklabels([f"st={s}" for s in s_levels])
+        ax.set_title(f"{sid} (swap={d.get('swap_class')}, p={d.get('test', {}).get('p', 1):.3f})")
+        ax.legend(fontsize=8)
+    axes[0].set_ylabel("n seizures")
+    fig.suptitle("Q1' contingency: assignment × ictal subtype")
+    fig.tight_layout()
+    fig.savefig(out_path)
+    plt.close(fig)
