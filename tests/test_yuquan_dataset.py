@@ -116,3 +116,60 @@ def test_load_yuquan_record_bipolar_reduces_count(tmp_path: Path):
     # 4 contiguous K3..K6 → 3 bipolar pairs K3-K4, K4-K5, K5-K6
     assert pre.data.shape[0] == 3
     assert pre.ch_names == ["K3-K4", "K4-K5", "K5-K6"]
+
+
+def test_load_yuquan_record_raises_on_missing_file(tmp_path: Path):
+    """File-not-found surfaces as FileNotFoundError with the path."""
+    missing = tmp_path / "nonexistent.edf"
+    with pytest.raises(FileNotFoundError):
+        load_yuquan_record(missing)
+
+
+def test_load_yuquan_record_raises_on_unknown_reference(tmp_path: Path):
+    """Unknown reference must raise ValueError listing accepted values."""
+    pytest.importorskip("edfio")
+    edf_path = _make_synthetic_yuquan_edf(tmp_path)
+    with pytest.raises(ValueError, match="reference must be"):
+        load_yuquan_record(edf_path, reference="laplacian")
+
+
+def test_load_yuquan_record_raises_when_no_intracranial_channels(tmp_path: Path):
+    """If filtering removes all channels, raise with diagnostic info."""
+    pytest.importorskip("edfio")
+    import mne
+    sfreq = 200.0
+    n_samples = int(sfreq * 60.0)
+    # All-aux EDF: scalp + DC + EMG, zero intracranial
+    ch_names = ["EEG Fp1-Ref", "EEG C3-Ref", "POL DC01", "POL EMG1"]
+    data = np.random.RandomState(7).randn(len(ch_names), n_samples) * 1e-5
+    info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types="eeg")
+    raw = mne.io.RawArray(data, info, verbose=False)
+    edf_path = tmp_path / "ALLAUX.edf"
+    mne.export.export_raw(str(edf_path), raw, fmt="edf", overwrite=True, verbose=False)
+
+    with pytest.raises(ValueError, match="No intracranial channels"):
+        load_yuquan_record(edf_path, intracranial_only=True)
+
+
+def test_load_yuquan_record_bipolar_keeps_prime_shafts_separate(tmp_path: Path):
+    """A and A' are different SEEG shafts; bipolar must NOT pair across them."""
+    pytest.importorskip("edfio")
+    import mne
+    sfreq = 200.0
+    n_samples = int(sfreq * 60.0)
+    # 2 contacts on shaft A + 2 on shaft A' (prime/contralateral)
+    ch_names = ["POL A1", "POL A2", "POL A'1", "POL A'2"]
+    data = np.random.RandomState(11).randn(len(ch_names), n_samples) * 1e-5
+    info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types="eeg")
+    raw = mne.io.RawArray(data, info, verbose=False)
+    edf_path = tmp_path / "PRIMED.edf"
+    mne.export.export_raw(str(edf_path), raw, fmt="edf", overwrite=True, verbose=False)
+
+    pre = load_yuquan_record(edf_path, reference="bipolar", intracranial_only=True)
+
+    # Expect exactly 2 pairs: A1-A2 and A'1-A'2. No cross-shaft pair.
+    assert pre.data.shape[0] == 2
+    expected_pairs = {"A1-A2", "A'1-A'2"}
+    assert set(pre.ch_names) == expected_pairs, (
+        f"got {pre.ch_names}; cross-prime pair would corrupt this set"
+    )

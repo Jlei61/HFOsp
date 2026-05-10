@@ -100,6 +100,9 @@ def load_yuquan_record(
     reference : str
         'car' (default) for common-average reference (zero-mean per sample),
         'bipolar' for adjacent-contact pairs within each probe.
+    segment_sec : float
+        Accepted for API parity with src.preprocessing.load_epilepsiae_block;
+        ignored because mne preloads the entire EDF in this loader.
     intracranial_only : bool
         If True (default) drop scalp/scalp_ref/aux channels via
         :func:`classify_yuquan_channel`. Yuquan analyses always want this.
