@@ -285,3 +285,42 @@ PNG 在 audit-rerun 完成后会重新渲染（标题里的 `gap=...` 数字会�
 
 - `results/run_logs/cohort_zer_20260509_2104.log` — pre-audit cohort run
 - `results/run_logs/cohort_zer_audit_20260510_1045.log` — audit-rerun (channel-block null + ch-order check)
+
+---
+
+## 6. 2026-05-10 Yuquan Cohort Extension (PR-0.1)
+
+Cohort grew from 16 → 25 by adding 9 yuquan audit_eligible subjects.
+Engineering changes (commit chain `264cc25..fda465c`):
+
+1. `scripts/build_yuquan_block_inventory.py` + `results/dataset_inventory/yuquan_block_inventory.csv` (new) — EDF probe → 115 block rows / 52 seizure rows
+2. `src/yuquan_dataset.load_yuquan_record` — yuquan SEEG loader with intracranial filter (regex `^[A-Z]'?\d{1,3}$`) + CAR/bipolar
+3. `src/ictal_onset_extraction.extract_seizure_window` — dual-dataset routing (replaces 2026-04 NotImplementedError); asymmetric join: yuquan seizure CSV uses `record`, block CSV uses `block_id`, both equal the EDF stem
+4. `scripts/run_ictal_er_rank.py` — `SUPPORTED_DATASETS = {epilepsiae, yuquan}`, branched `_focus_rel_path` / `_count_seizures` / `_load_focus_rel`; `_load_focus_rel("yuquan")` normalizes the flat `{sid: [chans]}` to 3-tier `{i, l, e}` (l/e empty)
+5. Canary on gaolan + huanghanwen — both produce v2.3 schema JSON without exception; both insufficient_n in z-ER (n_ok ≤ 1)
+6. Full cohort run 16 → 25 in 147 min wall time
+7. z-ER subtype rerun on 9 yuquan: 5 ok cells across 4 subjects (litengsheng broad k=2, sunyuanxin broad k=1, zhangkexuan gamma k=2, zhaojinrui gamma k=2 + broad k=1)
+
+stable_k=2 was deliberately NOT used as a cohort gate. zhangjinhan
+(stable_k=6) and zhaojinrui (stable_k=5) are kept because higher
+interictal stable_k is a positive signal for within-subject seizure
+heterogeneity — exactly what z-ER subtyping tests. Outcome confirms:
+zhaojinrui (stable_k=5) is now one of the strongest z-ER cohort members
+(both bands ok, gamma k=2). zhangjinhan came back insufficient_n
+(small n_ok), but inclusion preserved cohort representativeness.
+
+Yuquan SOZ JSON (`results/yuquan_soz_core_channels.json`) is normalized
+into the 3-tier `{i, l, e}` surface that `classify_clinical_concordance`
+expects (l/e empty for yuquan because yuquan has no l/e annotations).
+This means yuquan `clinical_concordance` lands as `not_assessable` for
+most cells — expected behavior, not a bug.
+
+Cohort medians (50 subject-band rows, 33 ok):
+- silhouette_k median = 0.444 (was 0.418 on n=16 pre-extension)
+- gap_perm_k median   = 0.380 (was 0.327)
+- yuquan ok subset (n=5): silhouette=0.495, gap_perm=0.552 — actually
+  HIGHER than epilepsiae ok subset (silhouette=0.418, gap_perm=0.325).
+
+Production-grade z-ER subjects post-extension (chosen_k ≥ 2 in any band):
+- epilepsiae: 15 (1073, 1084, 1096, 1146, 1150, 139, 253, 442, 548, 583, 590, 635, 916, 922, 958)
+- yuquan: 4 (litengsheng, sunyuanxin, zhangkexuan, zhaojinrui)

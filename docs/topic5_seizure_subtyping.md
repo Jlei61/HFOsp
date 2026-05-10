@@ -1,6 +1,6 @@
 # Topic 5：Seizure-related analysis (per-subject subtype + 下游 pre-ictal / outcome)
 
-> 状态：**探索性 (exploratory) — PR-0 + PR-1 落地，audit-rerun 完成 (2026-05-10)**。PR-1 cohort z-ER 聚类有 1 张 cohort 主结果（`figures/per_subject/`，16 subjects），cohort-level "真子型断言" 仍依赖 sensitivity；PR-2+ 未启动。
+> 状态：**探索性 (exploratory) — PR-0 + PR-1 落地，audit-rerun 完成 (2026-05-10)，yuquan 扩展 (2026-05-10 PR-0.1)**。PR-1 cohort z-ER 聚类有 1 张 cohort 主结果（`figures/per_subject/`，25 subjects），cohort-level "真子型断言" 仍依赖 sensitivity；PR-2+ 未启动。
 > 范围：以 ictal seizure 本身为研究对象——subject 内的 seizure subtype carve-out + 下游 pre-ictal / outcome / propagation 关联。
 > **不属于**：interictal 事件内部传播（topic1）、IEI/PSD（topic2）、spatial SOZ 归因（topic3）、模型层（topic4）。
 
@@ -24,8 +24,8 @@
 
 ## 2. 一句话当前结论
 
-- **PR-0 (v2.3 Layer A ictal ER timing atlas)**：每 subject 16 个 epilepsiae 的 cohort 已落 v2.3 schema，per-seizure PNG 全 cohort 渲完。User 视觉巡视暴露 within-subject seizure pattern 异质性（442 sz=9 / 548 {13,14,24,25} / 916 {21,23,25} / 1077 sz=1），是 PR-1 的直接动机。详见 `docs/superpowers/specs/topic5_pr0_*` (待整理) + `results/data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/`。
-- **PR-1 z-ER subtype 聚类（2026-05-10 audit-rerun 完成版）**：16 subjects (全 epilepsiae)，32 subject-band rows，28 ok / 4 insufficient_n。cohort 层面 silhouette 中位 **0.418** ([0.128, 0.573])、gap_perm 中位 **0.325** ([0.094, 0.737])（channel-block null）；**20/28 (71%) subject-bands 找到 ≥2 morphological subtypes**。`over_split_flag` (AND 规则 `gap_perm < 0.10 AND ratio > 0.5`) cohort 命中 **0/32**。Bug-fix 实测影响：cohort 28 个 ok rows 上 Δgap_perm 中位 −0.0007、abs_max 0.061，**0 个 over_split_flag flip**，0 个 sentinel jaccard 变化。
+- **PR-0 (v2.3 Layer A ictal ER timing atlas)**：cohort = 25 (15 epilepsiae audit_eligible + 9 yuquan audit_eligible + sentinel-only epilepsiae/916; topic5 PR-0.1 2026-05-10 yuquan extension)。每 subject v2.3 schema，per-seizure PNG 全 cohort 渲完。User 视觉巡视暴露 within-subject seizure pattern 异质性（442 sz=9 / 548 {13,14,24,25} / 916 {21,23,25} / 1077 sz=1），是 PR-1 的直接动机。详见 `docs/superpowers/specs/topic5_pr0_*` (待整理) + `results/data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/`。
+- **PR-1 z-ER subtype 聚类（2026-05-10 audit-corrected exploratory 版；2026-05-10 yuquan-extended）**：25 subjects (16 epilepsiae + 9 yuquan)，50 subject-band rows，33 ok / 17 insufficient_n。yuquan ok 子集 (n=5 cells, 4 subjects: litengsheng broad k=2, sunyuanxin broad k=1, zhangkexuan gamma k=2, zhaojinrui gamma k=2 + broad k=1) silhouette median 0.495 / gap_perm median 0.552 — 实际优于 epilepsiae ok 子集 (silhouette 0.418 / gap_perm 0.325)。整体 cohort silhouette median 0.444、gap_perm median 0.380。`over_split_flag` (AND 规则 `gap_perm < 0.10 AND ratio > 0.5`) cohort 命中 **0/33 ok**。Bug-fix 实测影响：pre-audit 28 个 ok rows 上 Δgap_perm 中位 −0.0007、abs_max 0.061，**0 个 over_split_flag flip**，0 个 sentinel jaccard 变化。
 - **PR-1 sentinel 视觉裁定**（user 2026-05-09 / 2026-05-10）：
   - 442 (user=[9])：**最干净 sentinel** ✅，gamma+broad 都把 sz=9 单列
   - 548 broad k=3：**基本合理**，user-marked [13,14,24] 落同一 minority 家族
@@ -50,7 +50,7 @@
 每 subject 一张 (gamma+broad) 主 atlas + 每 seizure 一张 per-seizure PNG。
 schema：`pr_t3_1_layer_a_v2_3_timing`，detection_window=[-120, 30]s，
 `channel_onsets[ch] = {frame_idx, t_onset_sec}`。
-cohort：16 epilepsiae subjects（yuquan 未建）。
+cohort：25 subjects (15 epilepsiae audit_eligible + 9 yuquan audit_eligible + sentinel-only 916; topic5 PR-0.1 2026-05-10 yuquan extension; gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, zhangkexuan, zhaojinrui)。
 关键发现：user 视觉巡视暴露 within-subject seizure pattern 异质性，
 直接催生 PR-1 z-ER subtyping。
 
@@ -70,19 +70,21 @@ cohort：16 epilepsiae subjects（yuquan 未建）。
 代码：`src/ictal_zer_features.py` + `src/ictal_seizure_clustering.py`
 驱动：`scripts/cluster_ictal_seizures.py {per-subject, cohort, render}`
 
-**Cohort 数值（最终版，2026-05-10 audit-rerun 后）**：
+**Cohort 数值（n=25, 50 subject-band rows, post yuquan-extension 2026-05-10）**：
 
 | 指标 | 中位 | 范围 |
 |---|---|---|
-| n_eff | 12.5 | [5, 40] |
-| silhouette_k | **0.418** | [0.128, 0.573] |
-| gap_perm_k | **0.325** | [0.094, 0.737] |
+| n_eff | 9.0 | [5, 40] |
+| silhouette_k | **0.444** | [0.128, 0.597] |
+| gap_perm_k | **0.380** | [0.094, 0.737] |
 | n_subtypes | 2.0 | [1, 5] |
 | ari_gamma_vs_broad | — | 多数 ≥ 0.6（双 band 一致度高） |
 
-`over_split_flag` cohort 命中 **0/32** (AND 规则 `gap_perm<0.10 AND ratio>0.5`)。
+yuquan ok cells (n=5): silhouette 0.495, gap_perm 0.552（高于 epilepsiae ok 子集 silhouette 0.418 / gap_perm 0.325）。
 
-**形态层面**：**20/28 (71%) subject-band 找到 ≥2 子型** → within-subject morphological
+`over_split_flag` 在 33 ok cells 中的命中数：**0/33** (AND 规则 `gap_perm<0.10 AND ratio>0.5`)；当前 `cohort_summary__zer_binned.csv` 已可查询 `over_split_flag` 列。
+
+**形态层面**：约 33/50 (66%) subject-bands 落 ok 状态; ok 子集中 **23/33 (70%) 找到 ≥2 morphological subtypes** (基于 n_subtypes ≥ 2 的 subject-band 数 / ok 数) → within-subject morphological
 异质性是 cohort-level 真现象（biological prior 与 Schroeder 2020 *PNAS* pathway-variability
 一致）；cohort-level "真子型率" 的 publication-grade 断言仍需 sensitivity (intersection-only
 mask / bin 设计变化 / bootstrap stability) 才能 commit。
@@ -118,8 +120,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 4. **548 gamma fine subdivision 不能确认真 7 类**：sensitivity battery
    (min_subtype_size=3 / 不同 bin / common channel mask / bootstrap stability)
    是 commit 前必跑项。
-5. **Yuquan 缺席**：当前 cohort 16 个全 epilepsiae，因为 yuquan v2.3 atlas 还没建。
-   下一轮 cohort（含 yuquan）落地后回来更新 §2 / §3.2。
+5. **Yuquan 部分覆盖**：cohort=25 含 9 yuquan audit_eligible (gaolan, huanghanwen, litengsheng, pengzihang, sunyuanxin, xuxinyi, zhangjinhan, zhangkexuan, zhaojinrui)。仍有 12 yuquan 因 n_seizures<2 被排除（chengshuai, dongyiming, hanyuxuan, huangwanling, liyouran, songzishuo, wangyiyang, zhangjiaqi, zhaochenxi, zhourongxuan, chenziyang, zhangbichen），ictal pool 不足以做 within-subject 聚类，无法补救。9 个 yuquan 中 4 个 (litengsheng, sunyuanxin, zhangkexuan, zhaojinrui) 在至少一个 band 上达到 ok 状态；其余 5 个落 insufficient_n（CUSUM 阈值 λ=100 cap 下 onset 未触发）。yuquan ok 子集的 z-ER 聚类质量 (silhouette 0.495 / gap_perm 0.552) 高于 epilepsiae ok 子集 (0.418 / 0.325)，但样本太小不足以做"yuquan vs epi"对比。
 6. **方法溯源严格性**：Schroeder 2020 *PNAS* 是生物先验（within-patient pathway
    variability），**不是 pipeline 复现**。本 PR-1 聚类管道 (1−Spearman + UPGMA +
    silhouette + permutation null + outlier split) 全部本项目实现；Panagiotopoulou
@@ -135,6 +136,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/pr1_seizure_clustering/pr1_zer_cohort_2026-05-10.md` — PR-1 主结果文档（audit-corrected）
 - `results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/README.md` — cohort 视觉骨架文档
 - `docs/superpowers/specs/topic5_pr1_seizure_clustering*.md` — PR-1 plan v2
+- `docs/superpowers/plans/2026-05-10-topic5-pr0_1-yuquan-ictal-cohort-extension.md` — yuquan cohort 扩展 plan (2026-05-10)
 - `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1 cohort exploratory result (verdict: NULL-locked, n=9; power floor identified)
 - `docs/archive/topic5/bridge_q1prime/bridge_q1prime_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1' PIVOT case-series result (verdict: INDETERMINATE, N=4 strict + 548 candidate; 4 strict subjects show consistent positive Cramér V 0.25–0.67 median 0.486 but underpowered on p; channel-rank correspondence × swap-subset)
 
@@ -173,10 +175,10 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 ### 数据 / 图
 
 - `results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/`
-  - `per_subject/*__zer_binned.json` — 16 cohort z-ER cluster results
-  - `cohort_summary__zer_binned.csv` — 32 subject-band rows
-  - `cohort_summary__zer_binned__pre_audit_2026-05-10.csv` — pre-audit 快照
-  - `figures/per_subject/*.png` — 16 per-subject 4-panel PNG
+  - `per_subject/*__zer_binned.json` — 25 cohort z-ER cluster results (16 epilepsiae + 9 yuquan)
+  - `cohort_summary__zer_binned.csv` — 50 subject-band rows
+  - `cohort_summary__zer_binned__pre_audit_2026-05-10.csv` — pre-audit 快照 (n=16, 32 rows)
+  - `figures/per_subject/*.png` — 25 per-subject 4-panel PNG
   - `figures/diagnostic/*.png` — 6 cluster grid 视觉诊断
   - `figures/README.md` — cohort 视觉骨架文档（中文）
 

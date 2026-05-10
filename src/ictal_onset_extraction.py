@@ -251,9 +251,9 @@ def extract_seizure_window(
     Parameters
     ----------
     subject:
-        ``"<dataset>/<id>"``; only the Epilepsiae dataset is supported in
-        Step 2 (Yuquan ictal data lacks per-block onset annotation suitable
-        for this pipeline).
+        ``"<dataset>/<id>"``; supports {"epilepsiae", "yuquan"} (yuquan
+        added in topic5 PR-0.1 2026-05-10). Other datasets raise
+        NotImplementedError.
     seizure_idx:
         Zero-based index into the chronologically sorted list of seizures
         with a complete clinical onset epoch for the subject.
