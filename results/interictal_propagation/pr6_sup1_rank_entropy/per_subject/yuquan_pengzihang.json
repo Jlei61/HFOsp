@@ -1,0 +1,93 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 22214,
+      "n_events_kept_k": 1395,
+      "drop_rate_k": 0.9372017646529216,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.09308500941189901,
+      "asymmetry": 0.0787015819485537,
+      "H_p_norm": [
+        0.8734751129706761,
+        0.8693860872946567,
+        0.8943964214852164,
+        0.9284826605290699,
+        0.9548397676620236,
+        0.976903193529877,
+        0.9809159794091102,
+        0.9607206999519512,
+        0.9428481768728466,
+        0.9033577357100269,
+        0.860242591638204,
+        0.7947735310221224
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.09308500941189946,
+        "endpoint_pair_rank": 64,
+        "endpoint_pair_percentile": 0.045454545454545456,
+        "is_endpoint_pair_max": false,
+        "p_N1": 0.9696969696969697,
+        "min_attainable_p_N1": 0.015151515151515152,
+        "n_valid": 12
+      }
+    },
+    "1": {
+      "n_events_total_k": 23841,
+      "n_events_kept_k": 1470,
+      "drop_rate_k": 0.938341512520448,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.15080230883046286,
+      "asymmetry": 0.16284127659695957,
+      "H_p_norm": [
+        0.8381713117730606,
+        0.8812040093680275,
+        0.9011925527916953,
+        0.9295211535283922,
+        0.9386615366932528,
+        0.9595760808288396,
+        0.9705007936838237,
+        0.9506524408419403,
+        0.923082105695239,
+        0.8451979573619828,
+        0.7759411922572418,
+        0.675330035176101
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.15080230883046286,
+        "endpoint_pair_rank": 65,
+        "endpoint_pair_percentile": 0.030303030303030304,
+        "is_endpoint_pair_max": false,
+        "p_N1": 0.9848484848484849,
+        "min_attainable_p_N1": 0.015151515151515152,
+        "n_valid": 12
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 12,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "delta_obs_subject": -0.12194365912118116,
+    "n_combos": 4356,
+    "subject_combo_rank": 4346,
+    "subject_combo_percentile": 0.0025252525252525255,
+    "is_subject_combo_max": false,
+    "p_N1_subject": 0.9977043158861341,
+    "min_attainable_p_N1_subject": 0.0002295684113865932,
+    "subject_eligibility_flag": "ok"
+  },
+  "subject_id": "pengzihang",
+  "dataset": "yuquan",
+  "stem": "yuquan_pengzihang",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr6_union",
+  "n_valid_channels": 12,
+  "swap_class_full": "none"
+}

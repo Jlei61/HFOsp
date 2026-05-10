@@ -1,0 +1,81 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 118773,
+      "n_events_kept_k": 28633,
+      "drop_rate_k": 0.7589266920933209,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.14085533603424594,
+      "asymmetry": 0.13133907719120097,
+      "H_p_norm": [
+        0.7416251341818478,
+        0.7522879478753113,
+        0.884727396799789,
+        0.8837031754186646,
+        0.7465252063882077,
+        0.6102860569906469
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.14085533603424605,
+        "endpoint_pair_rank": 15,
+        "endpoint_pair_percentile": 0.06666666666666667,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.06666666666666667,
+        "n_valid": 6
+      }
+    },
+    "1": {
+      "n_events_total_k": 74398,
+      "n_events_kept_k": 9031,
+      "drop_rate_k": 0.8786123282883949,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.10432155116952802,
+      "asymmetry": 0.02214156673513057,
+      "H_p_norm": [
+        0.8586407185870051,
+        0.9411513638915694,
+        0.968374129915223,
+        0.9809750304885936,
+        0.9170654212604851,
+        0.8364991518518745
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.10432155116952813,
+        "endpoint_pair_rank": 15,
+        "endpoint_pair_percentile": 0.06666666666666667,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.06666666666666667,
+        "n_valid": 6
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 6,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "delta_obs_subject": -0.12258844360188709,
+    "n_combos": 225,
+    "subject_combo_rank": 225,
+    "subject_combo_percentile": 0.0044444444444444444,
+    "is_subject_combo_max": false,
+    "p_N1_subject": 1.0,
+    "min_attainable_p_N1_subject": 0.0044444444444444444,
+    "subject_eligibility_flag": "ok"
+  },
+  "subject_id": "1073",
+  "dataset": "epilepsiae",
+  "stem": "epilepsiae_1073",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr6_union",
+  "n_valid_channels": 6,
+  "swap_class_full": "strict"
+}

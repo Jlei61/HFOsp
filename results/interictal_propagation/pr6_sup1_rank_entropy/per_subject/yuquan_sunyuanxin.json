@@ -1,0 +1,65 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 1317,
+      "n_events_kept_k": 7,
+      "drop_rate_k": 0.9946848899012908,
+      "eligibility_flag": "excluded_low_kept_events",
+      "delta": NaN,
+      "asymmetry": NaN,
+      "H_p_norm": null,
+      "p_N0": NaN,
+      "N1_cluster": null
+    },
+    "1": {
+      "n_events_total_k": 3768,
+      "n_events_kept_k": 70,
+      "drop_rate_k": 0.9814225053078556,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.1759320714512007,
+      "asymmetry": -0.09780859201841163,
+      "H_p_norm": [
+        0.6320511597893419,
+        0.7456832666102882,
+        0.8249297659146594,
+        0.8042330419681136,
+        0.9508533742671453,
+        0.9095922675939305,
+        0.8728029348704688,
+        0.9306842292916214,
+        0.887353503276135,
+        0.802912929235513,
+        0.8398299594696091,
+        0.7298597518077535
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.1759320714512007,
+        "endpoint_pair_rank": 66,
+        "endpoint_pair_percentile": 0.015151515151515152,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.015151515151515152,
+        "n_valid": 12
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 12,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "subject_eligibility_flag": "excluded_one_or_both_clusters"
+  },
+  "subject_id": "sunyuanxin",
+  "dataset": "yuquan",
+  "stem": "yuquan_sunyuanxin",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr6_union",
+  "n_valid_channels": 12,
+  "swap_class_full": "none"
+}

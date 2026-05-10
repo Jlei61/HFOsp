@@ -1,0 +1,1647 @@
+{
+  "subjects": [
+    {
+      "subject_id": "1073",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1073",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 6,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 118773,
+          "n_events_kept_k": 28633,
+          "drop_rate_k": 0.7589266920933209,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.14085533603424594,
+          "asymmetry": 0.13133907719120097,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.06666666666666667,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.06666666666666667
+        },
+        "1": {
+          "n_events_total_k": 74398,
+          "n_events_kept_k": 9031,
+          "drop_rate_k": 0.8786123282883949,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.10432155116952802,
+          "asymmetry": 0.02214156673513057,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.06666666666666667,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.06666666666666667
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.12258844360188709,
+        "subject_combo_percentile": 0.0044444444444444444,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 1.0,
+        "min_attainable_p_N1_subject": 0.0044444444444444444,
+        "n_combos": 225
+      }
+    },
+    {
+      "subject_id": "1077",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1077",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 6,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 17010,
+          "n_events_kept_k": 489,
+          "drop_rate_k": 0.971252204585538,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.16330790381771498,
+          "asymmetry": 0.17468958610053043,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.06666666666666667,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.06666666666666667
+        },
+        "1": {
+          "n_events_total_k": 37422,
+          "n_events_kept_k": 2025,
+          "drop_rate_k": 0.9458874458874459,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.14769112914493765,
+          "asymmetry": -0.158979422263549,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.06666666666666667,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.06666666666666667
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.15549951648132637,
+        "subject_combo_percentile": 0.0044444444444444444,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 1.0,
+        "min_attainable_p_N1_subject": 0.0044444444444444444,
+        "n_combos": 225
+      }
+    },
+    {
+      "subject_id": "1084",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1084",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 11,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 4618,
+          "n_events_kept_k": 426,
+          "drop_rate_k": 0.9077522737115634,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.08654143873693898,
+          "asymmetry": -0.03649307820138259,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.01818181818181818,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.01818181818181818
+        },
+        "1": {
+          "n_events_total_k": 6551,
+          "n_events_kept_k": 371,
+          "drop_rate_k": 0.9433674248206381,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.13779380974903876,
+          "asymmetry": -0.10342852365453448,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03636363636363636,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9818181818181818,
+          "min_attainable_p_N1": 0.01818181818181818
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.11216762424298887,
+        "subject_combo_percentile": 0.0006611570247933885,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9996694214876033,
+        "min_attainable_p_N1_subject": 0.00033057851239669424,
+        "n_combos": 3025
+      }
+    },
+    {
+      "subject_id": "1096",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1096",
+      "exit_reason": "pr2_labels_len_mismatch (223264 vs valid_idx=223212)"
+    },
+    {
+      "subject_id": "1125",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1125",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr2_sentinel_union",
+      "n_valid_channels": 8,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 35276,
+          "n_events_kept_k": 4582,
+          "drop_rate_k": 0.8701099897947613,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.13670051290024476,
+          "asymmetry": 0.027304954477865184,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03571428571428571,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.03571428571428571
+        },
+        "1": {
+          "n_events_total_k": 35405,
+          "n_events_kept_k": 6164,
+          "drop_rate_k": 0.8259002965682813,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.08583657824035218,
+          "asymmetry": 0.10519840352167076,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.10714285714285714,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9285714285714286,
+          "min_attainable_p_N1": 0.03571428571428571
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.11126854557029858,
+        "subject_combo_percentile": 0.00510204081632653,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9961734693877551,
+        "min_attainable_p_N1_subject": 0.0012755102040816326,
+        "n_combos": 784
+      }
+    },
+    {
+      "subject_id": "1146",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1146",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 15,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 30758,
+          "n_events_kept_k": 8666,
+          "drop_rate_k": 0.7182521620391442,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.16381940530312622,
+          "asymmetry": 0.20856532506913628,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.0380952380952381,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9714285714285714,
+          "min_attainable_p_N1": 0.009523809523809525
+        },
+        "1": {
+          "n_events_total_k": 15925,
+          "n_events_kept_k": 2556,
+          "drop_rate_k": 0.8394976452119309,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.07616904325923035,
+          "asymmetry": -0.0324230853136932,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.009523809523809525,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.009523809523809525
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.11999422428117823,
+        "subject_combo_percentile": 0.006349206349206349,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9937414965986394,
+        "min_attainable_p_N1_subject": 9.070294784580499e-05,
+        "n_combos": 11025
+      }
+    },
+    {
+      "subject_id": "1150",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1150",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 9,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 6056,
+          "n_events_kept_k": 12,
+          "drop_rate_k": 0.9980184940554822,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 6306,
+          "n_events_kept_k": 55,
+          "drop_rate_k": 0.9912781477957501,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.2059854988662606,
+          "asymmetry": 0.15230397633762682,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.05555555555555555,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9722222222222222,
+          "min_attainable_p_N1": 0.027777777777777776
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "139",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_139",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 7,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 8436,
+          "n_events_kept_k": 512,
+          "drop_rate_k": 0.939307728781413,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.16238275840540772,
+          "asymmetry": -0.06945448842931967,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.047619047619047616,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.047619047619047616
+        },
+        "1": {
+          "n_events_total_k": 6002,
+          "n_events_kept_k": 198,
+          "drop_rate_k": 0.9670109963345551,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.05189513001060886,
+          "asymmetry": 0.10348742077293172,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.19047619047619047,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.8571428571428571,
+          "min_attainable_p_N1": 0.047619047619047616
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.10713894420800829,
+        "subject_combo_percentile": 0.009070294784580499,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9931972789115646,
+        "min_attainable_p_N1_subject": 0.0022675736961451248,
+        "n_combos": 441
+      }
+    },
+    {
+      "subject_id": "253",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_253",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 8,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 37755,
+          "n_events_kept_k": 376,
+          "drop_rate_k": 0.9900410541650112,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.32712281231217044,
+          "asymmetry": 0.43079668860182735,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03571428571428571,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.03571428571428571
+        },
+        "1": {
+          "n_events_total_k": 37298,
+          "n_events_kept_k": 364,
+          "drop_rate_k": 0.9902407635798166,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.34644784424358865,
+          "asymmetry": -0.46646736967983865,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03571428571428571,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.03571428571428571
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.33678532827787944,
+        "subject_combo_percentile": 0.0012755102040816326,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 1.0,
+        "min_attainable_p_N1_subject": 0.0012755102040816326,
+        "n_combos": 784
+      }
+    },
+    {
+      "subject_id": "384",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_384",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr2_sentinel_union",
+      "n_valid_channels": 9,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 22363,
+          "n_events_kept_k": 267,
+          "drop_rate_k": 0.9880606358717524,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.2945965019837119,
+          "asymmetry": 0.44784620063801156,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.05555555555555555,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9722222222222222,
+          "min_attainable_p_N1": 0.027777777777777776
+        },
+        "1": {
+          "n_events_total_k": 20170,
+          "n_events_kept_k": 192,
+          "drop_rate_k": 0.9904809122459097,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.3099831987546485,
+          "asymmetry": -0.2065343521694038,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.027777777777777776,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.027777777777777776
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.3022898503691801,
+        "subject_combo_percentile": 0.0015432098765432098,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9992283950617284,
+        "min_attainable_p_N1_subject": 0.0007716049382716049,
+        "n_combos": 1296
+      }
+    },
+    {
+      "subject_id": "442",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_442",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 15,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 3168,
+          "n_events_kept_k": 154,
+          "drop_rate_k": 0.9513888888888888,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.16707860439874567,
+          "asymmetry": -0.04786984813376094,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.02857142857142857,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9809523809523809,
+          "min_attainable_p_N1": 0.009523809523809525
+        },
+        "1": {
+          "n_events_total_k": 3388,
+          "n_events_kept_k": 93,
+          "drop_rate_k": 0.9725501770956316,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.30095212140320227,
+          "asymmetry": -0.03914486456377969,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.009523809523809525,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.009523809523809525
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.23401536290097397,
+        "subject_combo_percentile": 0.00027210884353741496,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9998185941043084,
+        "min_attainable_p_N1_subject": 9.070294784580499e-05,
+        "n_combos": 11025
+      }
+    },
+    {
+      "subject_id": "548",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_548",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 12,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 5060,
+          "n_events_kept_k": 97,
+          "drop_rate_k": 0.9808300395256917,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.06983652772626359,
+          "asymmetry": 0.0017701578864752765,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.015151515151515152,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.015151515151515152
+        },
+        "1": {
+          "n_events_total_k": 20222,
+          "n_events_kept_k": 1741,
+          "drop_rate_k": 0.9139056473148056,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.17716314880407313,
+          "asymmetry": 0.26038576375441075,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.06060606060606061,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9545454545454546,
+          "min_attainable_p_N1": 0.015151515151515152
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.12349983826516836,
+        "subject_combo_percentile": 0.013544536271808998,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9866850321395776,
+        "min_attainable_p_N1_subject": 0.0002295684113865932,
+        "n_combos": 4356
+      }
+    },
+    {
+      "subject_id": "583",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_583",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 7,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 4122,
+          "n_events_kept_k": 233,
+          "drop_rate_k": 0.9434740417273169,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.2537625524362145,
+          "asymmetry": -0.3539256085683458,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.047619047619047616,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.047619047619047616
+        },
+        "1": {
+          "n_events_total_k": 6845,
+          "n_events_kept_k": 190,
+          "drop_rate_k": 0.9722425127830533,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.196282167456044,
+          "asymmetry": -0.0010743860940605199,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.047619047619047616,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.047619047619047616
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.22502235994612924,
+        "subject_combo_percentile": 0.0022675736961451248,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 1.0,
+        "min_attainable_p_N1_subject": 0.0022675736961451248,
+        "n_combos": 441
+      }
+    },
+    {
+      "subject_id": "590",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_590",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 16,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 3758,
+          "n_events_kept_k": 4,
+          "drop_rate_k": 0.9989356040447046,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 3821,
+          "n_events_kept_k": 2,
+          "drop_rate_k": 0.9994765768123528,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "620",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_620",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr2_sentinel_union",
+      "n_valid_channels": 9,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 10571,
+          "n_events_kept_k": 1308,
+          "drop_rate_k": 0.8762652539967837,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.06960195410581904,
+          "asymmetry": 0.017186615519988013,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.027777777777777776,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.027777777777777776
+        },
+        "1": {
+          "n_events_total_k": 20077,
+          "n_events_kept_k": 4197,
+          "drop_rate_k": 0.7909548239278776,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.1246361681762469,
+          "asymmetry": -0.05280842923538531,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.05555555555555555,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9722222222222222,
+          "min_attainable_p_N1": 0.027777777777777776
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.09711906114103297,
+        "subject_combo_percentile": 0.0015432098765432098,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9992283950617284,
+        "min_attainable_p_N1_subject": 0.0007716049382716049,
+        "n_combos": 1296
+      }
+    },
+    {
+      "subject_id": "635",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_635",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 10,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 7250,
+          "n_events_kept_k": 10,
+          "drop_rate_k": 0.9986206896551724,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 6723,
+          "n_events_kept_k": 7,
+          "drop_rate_k": 0.9989587981555853,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "916",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_916",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr2_sentinel_union",
+      "n_valid_channels": 6,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 54558,
+          "n_events_kept_k": 9814,
+          "drop_rate_k": 0.8201180395175776,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.08928767308822161,
+          "asymmetry": -0.07422999406404351,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.13333333333333333,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9333333333333333,
+          "min_attainable_p_N1": 0.06666666666666667
+        },
+        "1": {
+          "n_events_total_k": 38646,
+          "n_events_kept_k": 2029,
+          "drop_rate_k": 0.947497800548569,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.1406746747253349,
+          "asymmetry": -0.01632884469549567,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.06666666666666667,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.06666666666666667
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.11498117390677814,
+        "subject_combo_percentile": 0.008888888888888889,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9955555555555555,
+        "min_attainable_p_N1_subject": 0.0044444444444444444,
+        "n_combos": 225
+      }
+    },
+    {
+      "subject_id": "922",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_922",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 8,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 133426,
+          "n_events_kept_k": 13549,
+          "drop_rate_k": 0.8984530751127966,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.16932844514994982,
+          "asymmetry": -0.14209399702103376,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03571428571428571,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.03571428571428571
+        },
+        "1": {
+          "n_events_total_k": 110564,
+          "n_events_kept_k": 14251,
+          "drop_rate_k": 0.8711063275568901,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.2001280412522951,
+          "asymmetry": -0.10587909342880919,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03571428571428571,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.03571428571428571
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.18472824320112236,
+        "subject_combo_percentile": 0.0012755102040816326,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 1.0,
+        "min_attainable_p_N1_subject": 0.0012755102040816326,
+        "n_combos": 784
+      }
+    },
+    {
+      "subject_id": "958",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_958",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 16,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 79122,
+          "n_events_kept_k": 2122,
+          "drop_rate_k": 0.9731806577184601,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.21967412688049837,
+          "asymmetry": 0.30815118114940776,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.016666666666666666,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9916666666666667,
+          "min_attainable_p_N1": 0.008333333333333333
+        },
+        "1": {
+          "n_events_total_k": 86455,
+          "n_events_kept_k": 4667,
+          "drop_rate_k": 0.946018159736279,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.2235179983278205,
+          "asymmetry": 0.19549936836936244,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.016666666666666666,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9916666666666667,
+          "min_attainable_p_N1": 0.008333333333333333
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.22159606260415943,
+        "subject_combo_percentile": 0.0005555555555555556,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9995138888888889,
+        "min_attainable_p_N1_subject": 6.944444444444444e-05,
+        "n_combos": 14400
+      }
+    },
+    {
+      "subject_id": "chengshuai",
+      "dataset": "yuquan",
+      "stem": "yuquan_chengshuai",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 8,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 12641,
+          "n_events_kept_k": 837,
+          "drop_rate_k": 0.9337868839490546,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.0571445611920679,
+          "asymmetry": 0.051954598931041485,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03571428571428571,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.03571428571428571
+        },
+        "1": {
+          "n_events_total_k": 14936,
+          "n_events_kept_k": 975,
+          "drop_rate_k": 0.9347214783074451,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.10105513323443971,
+          "asymmetry": 0.009317484727721759,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.03571428571428571,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.03571428571428571
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.07909984721325386,
+        "subject_combo_percentile": 0.0012755102040816326,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 1.0,
+        "min_attainable_p_N1_subject": 0.0012755102040816326,
+        "n_combos": 784
+      }
+    },
+    {
+      "subject_id": "chenziyang",
+      "dataset": "yuquan",
+      "stem": "yuquan_chenziyang",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 10,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 4059,
+          "n_events_kept_k": 41,
+          "drop_rate_k": 0.98989898989899,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 5550,
+          "n_events_kept_k": 115,
+          "drop_rate_k": 0.9792792792792793,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.1672147416698503,
+          "asymmetry": 0.5278652356557642,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.2,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.8222222222222222,
+          "min_attainable_p_N1": 0.022222222222222223
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "gaolan",
+      "dataset": "yuquan",
+      "stem": "yuquan_gaolan",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr2_sentinel_union",
+      "n_valid_channels": 12,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 4338,
+          "n_events_kept_k": 131,
+          "drop_rate_k": 0.9698017519594283,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.12685250979858653,
+          "asymmetry": 0.19966730711691738,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.06060606060606061,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9545454545454546,
+          "min_attainable_p_N1": 0.015151515151515152
+        },
+        "1": {
+          "n_events_total_k": 3113,
+          "n_events_kept_k": 50,
+          "drop_rate_k": 0.983938323160938,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.07571568290866204,
+          "asymmetry": -0.067383494869803,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.16666666666666666,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.8484848484848485,
+          "min_attainable_p_N1": 0.015151515151515152
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.1012840963536244,
+        "subject_combo_percentile": 0.03604224058769513,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9641873278236914,
+        "min_attainable_p_N1_subject": 0.0002295684113865932,
+        "n_combos": 4356
+      }
+    },
+    {
+      "subject_id": "hanyuxuan",
+      "dataset": "yuquan",
+      "stem": "yuquan_hanyuxuan",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 22,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 3284,
+          "n_events_kept_k": 47,
+          "drop_rate_k": 0.9856881851400731,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 2184,
+          "n_events_kept_k": 19,
+          "drop_rate_k": 0.9913003663003663,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "huanghanwen",
+      "dataset": "yuquan",
+      "stem": "yuquan_huanghanwen",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 10,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 226,
+          "n_events_kept_k": 0,
+          "drop_rate_k": 1.0,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 258,
+          "n_events_kept_k": 0,
+          "drop_rate_k": 1.0,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "litengsheng",
+      "dataset": "yuquan",
+      "stem": "yuquan_litengsheng",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 24,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 743,
+          "n_events_kept_k": 1,
+          "drop_rate_k": 0.9986541049798116,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 1327,
+          "n_events_kept_k": 3,
+          "drop_rate_k": 0.9977392614920875,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "liyouran",
+      "dataset": "yuquan",
+      "stem": "yuquan_liyouran",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 17,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 1045,
+          "n_events_kept_k": 0,
+          "drop_rate_k": 1.0,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 1301,
+          "n_events_kept_k": 10,
+          "drop_rate_k": 0.9923136049192929,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "pengzihang",
+      "dataset": "yuquan",
+      "stem": "yuquan_pengzihang",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 12,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 22214,
+          "n_events_kept_k": 1395,
+          "drop_rate_k": 0.9372017646529216,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.09308500941189901,
+          "asymmetry": 0.0787015819485537,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.045454545454545456,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9696969696969697,
+          "min_attainable_p_N1": 0.015151515151515152
+        },
+        "1": {
+          "n_events_total_k": 23841,
+          "n_events_kept_k": 1470,
+          "drop_rate_k": 0.938341512520448,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.15080230883046286,
+          "asymmetry": 0.16284127659695957,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.030303030303030304,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9848484848484849,
+          "min_attainable_p_N1": 0.015151515151515152
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.12194365912118116,
+        "subject_combo_percentile": 0.0025252525252525255,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 0.9977043158861341,
+        "min_attainable_p_N1_subject": 0.0002295684113865932,
+        "n_combos": 4356
+      }
+    },
+    {
+      "subject_id": "songzishuo",
+      "dataset": "yuquan",
+      "stem": "yuquan_songzishuo",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 38,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 176,
+          "n_events_kept_k": 0,
+          "drop_rate_k": 1.0,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 271,
+          "n_events_kept_k": 0,
+          "drop_rate_k": 1.0,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "sunyuanxin",
+      "dataset": "yuquan",
+      "stem": "yuquan_sunyuanxin",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 12,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 1317,
+          "n_events_kept_k": 7,
+          "drop_rate_k": 0.9946848899012908,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 3768,
+          "n_events_kept_k": 70,
+          "drop_rate_k": 0.9814225053078556,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.1759320714512007,
+          "asymmetry": -0.09780859201841163,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.015151515151515152,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.015151515151515152
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "wangyiyang",
+      "dataset": "yuquan",
+      "stem": "yuquan_wangyiyang",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 22,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 1072,
+          "n_events_kept_k": 16,
+          "drop_rate_k": 0.9850746268656716,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 847,
+          "n_events_kept_k": 8,
+          "drop_rate_k": 0.9905548996458088,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "xuxinyi",
+      "dataset": "yuquan",
+      "stem": "yuquan_xuxinyi",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 15,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 5847,
+          "n_events_kept_k": 83,
+          "drop_rate_k": 0.9858046861638448,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.4311118606100682,
+          "asymmetry": 0.1830036557455097,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.01904761904761905,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9904761904761905,
+          "min_attainable_p_N1": 0.009523809523809525
+        },
+        "1": {
+          "n_events_total_k": 3799,
+          "n_events_kept_k": 41,
+          "drop_rate_k": 0.9892076862332193,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "zhangbichen",
+      "dataset": "yuquan",
+      "stem": "yuquan_zhangbichen",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 52,
+      "swap_class_full": "none",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 4249,
+          "n_events_kept_k": 5,
+          "drop_rate_k": 0.998823252530007,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 4122,
+          "n_events_kept_k": 1,
+          "drop_rate_k": 0.999757399320718,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "zhangjiaqi",
+      "dataset": "yuquan",
+      "stem": "yuquan_zhangjiaqi",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 7,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 26817,
+          "n_events_kept_k": 4413,
+          "drop_rate_k": 0.8354402058395793,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.13878249117097807,
+          "asymmetry": -0.03277824430096732,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.047619047619047616,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.047619047619047616
+        },
+        "1": {
+          "n_events_total_k": 21460,
+          "n_events_kept_k": 3408,
+          "drop_rate_k": 0.841192917054986,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.1077858891532174,
+          "asymmetry": 0.1025003849744347,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.047619047619047616,
+          "is_endpoint_pair_max": false,
+          "p_N1": 1.0,
+          "min_attainable_p_N1": 0.047619047619047616
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "ok",
+        "delta_obs_subject": -0.12328419016209774,
+        "subject_combo_percentile": 0.0022675736961451248,
+        "is_subject_combo_max": false,
+        "p_N1_subject": 1.0,
+        "min_attainable_p_N1_subject": 0.0022675736961451248,
+        "n_combos": 441
+      }
+    },
+    {
+      "subject_id": "zhangkexuan",
+      "dataset": "yuquan",
+      "stem": "yuquan_zhangkexuan",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 26,
+      "swap_class_full": "candidate",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 2833,
+          "n_events_kept_k": 29,
+          "drop_rate_k": 0.9897635015884222,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 15357,
+          "n_events_kept_k": 629,
+          "drop_rate_k": 0.9590414794556228,
+          "eligibility_flag": "high_drop_rate_warning",
+          "delta": -0.09785848427465615,
+          "asymmetry": -0.08784217847275588,
+          "p_N0": 1.0,
+          "endpoint_pair_percentile": 0.055384615384615386,
+          "is_endpoint_pair_max": false,
+          "p_N1": 0.9476923076923077,
+          "min_attainable_p_N1": 0.003076923076923077
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    },
+    {
+      "subject_id": "zhaochenxi",
+      "dataset": "yuquan",
+      "stem": "yuquan_zhaochenxi",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 26,
+      "swap_class_full": "strict",
+      "clusters": {
+        "0": {
+          "n_events_total_k": 2105,
+          "n_events_kept_k": 1,
+          "drop_rate_k": 0.9995249406175772,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        },
+        "1": {
+          "n_events_total_k": 1709,
+          "n_events_kept_k": 1,
+          "drop_rate_k": 0.9994148624926857,
+          "eligibility_flag": "excluded_low_kept_events",
+          "delta": NaN,
+          "asymmetry": NaN,
+          "p_N0": NaN,
+          "endpoint_pair_percentile": null,
+          "is_endpoint_pair_max": null,
+          "p_N1": null,
+          "min_attainable_p_N1": null
+        }
+      },
+      "subject_level": {
+        "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        "delta_obs_subject": null,
+        "subject_combo_percentile": null,
+        "is_subject_combo_max": null,
+        "p_N1_subject": null,
+        "min_attainable_p_N1_subject": null,
+        "n_combos": null
+      }
+    }
+  ],
+  "cohort_drop_rate_summary": {
+    "n_clusters_total": 68,
+    "drop_rate_median": 0.9800546594024855,
+    "drop_rate_max": 1.0,
+    "n_clusters_high_drop_rate_warning": 43,
+    "n_clusters_excluded_low_kept_events": 25
+  },
+  "stratified_by_swap_class": {
+    "strict": {
+      "n_subjects": 10,
+      "n_eligible": 6,
+      "delta_obs_subject": {
+        "median": -0.12129133394153266,
+        "iqr": [
+          -0.12311025352204508,
+          -0.11035276422630078
+        ]
+      },
+      "subject_combo_percentile": {
+        "median": 0.003356009070294785,
+        "iqr": [
+          0.0017243008314436884,
+          0.005873015873015873
+        ]
+      },
+      "n_subject_combo_max": 0
+    },
+    "candidate": {
+      "n_subjects": 8,
+      "n_eligible": 3,
+      "delta_obs_subject": {
+        "median": -0.12349983826516836,
+        "iqr": null
+      },
+      "subject_combo_percentile": {
+        "median": 0.00510204081632653,
+        "iqr": null
+      },
+      "n_subject_combo_max": 0
+    },
+    "none": {
+      "n_subjects": 16,
+      "n_eligible": 10,
+      "delta_obs_subject": {
+        "median": -0.13872158780125377,
+        "iqr": [
+          -0.21494883075987753,
+          -0.11287101165893619
+        ]
+      },
+      "subject_combo_percentile": {
+        "median": 0.0017715419501133788,
+        "iqr": [
+          0.0012755102040816326,
+          0.003964646464646465
+        ]
+      },
+      "n_subject_combo_max": 0
+    },
+    "unknown": {
+      "n_subjects": 1,
+      "n_eligible": 0,
+      "delta_obs_subject": {
+        "median": null,
+        "iqr": null
+      },
+      "subject_combo_percentile": {
+        "median": null,
+        "iqr": null
+      },
+      "n_subject_combo_max": 0
+    }
+  }
+}

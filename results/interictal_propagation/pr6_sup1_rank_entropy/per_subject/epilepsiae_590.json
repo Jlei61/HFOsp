@@ -1,0 +1,44 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 3758,
+      "n_events_kept_k": 4,
+      "drop_rate_k": 0.9989356040447046,
+      "eligibility_flag": "excluded_low_kept_events",
+      "delta": NaN,
+      "asymmetry": NaN,
+      "H_p_norm": null,
+      "p_N0": NaN,
+      "N1_cluster": null
+    },
+    "1": {
+      "n_events_total_k": 3821,
+      "n_events_kept_k": 2,
+      "drop_rate_k": 0.9994765768123528,
+      "eligibility_flag": "excluded_low_kept_events",
+      "delta": NaN,
+      "asymmetry": NaN,
+      "H_p_norm": null,
+      "p_N0": NaN,
+      "N1_cluster": null
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 16,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "subject_eligibility_flag": "excluded_one_or_both_clusters"
+  },
+  "subject_id": "590",
+  "dataset": "epilepsiae",
+  "stem": "epilepsiae_590",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr6_union",
+  "n_valid_channels": 16,
+  "swap_class_full": "none"
+}

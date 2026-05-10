@@ -1,0 +1,87 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 10571,
+      "n_events_kept_k": 1308,
+      "drop_rate_k": 0.8762652539967837,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.06960195410581904,
+      "asymmetry": 0.017186615519988013,
+      "H_p_norm": [
+        0.8870797114874363,
+        0.9270847957594703,
+        0.9267547937665467,
+        0.9804855067415339,
+        0.9879065743499151,
+        0.9569064356346718,
+        0.9365514390606969,
+        0.9209289595199951,
+        0.8698930959674482
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.06960195410581915,
+        "endpoint_pair_rank": 36,
+        "endpoint_pair_percentile": 0.027777777777777776,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.027777777777777776,
+        "n_valid": 9
+      }
+    },
+    "1": {
+      "n_events_total_k": 20077,
+      "n_events_kept_k": 4197,
+      "drop_rate_k": 0.7909548239278776,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.1246361681762469,
+      "asymmetry": -0.05280842923538531,
+      "H_p_norm": [
+        0.7176914961069302,
+        0.818901121901888,
+        0.8743852138483044,
+        0.9165924058181438,
+        0.9568929904124291,
+        0.9269473514160825,
+        0.8240607682733915,
+        0.7633433006358484,
+        0.7704999253423155
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.12463616817624679,
+        "endpoint_pair_rank": 35,
+        "endpoint_pair_percentile": 0.05555555555555555,
+        "is_endpoint_pair_max": false,
+        "p_N1": 0.9722222222222222,
+        "min_attainable_p_N1": 0.027777777777777776,
+        "n_valid": 9
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 9,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "delta_obs_subject": -0.09711906114103297,
+    "n_combos": 1296,
+    "subject_combo_rank": 1295,
+    "subject_combo_percentile": 0.0015432098765432098,
+    "is_subject_combo_max": false,
+    "p_N1_subject": 0.9992283950617284,
+    "min_attainable_p_N1_subject": 0.0007716049382716049,
+    "subject_eligibility_flag": "ok"
+  },
+  "subject_id": "620",
+  "dataset": "epilepsiae",
+  "stem": "epilepsiae_620",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr2_sentinel_union",
+  "n_valid_channels": 9,
+  "swap_class_full": "strict"
+}

@@ -1,0 +1,93 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 4338,
+      "n_events_kept_k": 131,
+      "drop_rate_k": 0.9698017519594283,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.12685250979858653,
+      "asymmetry": 0.19966730711691738,
+      "H_p_norm": [
+        0.8000953374588086,
+        0.8307826409380118,
+        0.8422469766314234,
+        0.86977451391513,
+        0.8681481560439469,
+        0.8640430865457126,
+        0.8552994644307479,
+        0.889051950070967,
+        0.8974825605343628,
+        0.7372205609092084,
+        0.6170920269698533,
+        0.6004280303418912
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.12685250979858653,
+        "endpoint_pair_rank": 63,
+        "endpoint_pair_percentile": 0.06060606060606061,
+        "is_endpoint_pair_max": false,
+        "p_N1": 0.9545454545454546,
+        "min_attainable_p_N1": 0.015151515151515152,
+        "n_valid": 12
+      }
+    },
+    "1": {
+      "n_events_total_k": 3113,
+      "n_events_kept_k": 50,
+      "drop_rate_k": 0.983938323160938,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.07571568290866204,
+      "asymmetry": -0.067383494869803,
+      "H_p_norm": [
+        0.7457598093675069,
+        0.668533889642961,
+        0.7821474420724044,
+        0.9775551211080153,
+        0.9706088141517442,
+        0.8583542322424944,
+        0.8910368086920124,
+        0.8732479435112683,
+        0.8730683603710035,
+        0.8655339808593575,
+        0.791585804459442,
+        0.8131433042373098
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.07571568290866226,
+        "endpoint_pair_rank": 56,
+        "endpoint_pair_percentile": 0.16666666666666666,
+        "is_endpoint_pair_max": false,
+        "p_N1": 0.8484848484848485,
+        "min_attainable_p_N1": 0.015151515151515152,
+        "n_valid": 12
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 12,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "delta_obs_subject": -0.1012840963536244,
+    "n_combos": 4356,
+    "subject_combo_rank": 4200,
+    "subject_combo_percentile": 0.03604224058769513,
+    "is_subject_combo_max": false,
+    "p_N1_subject": 0.9641873278236914,
+    "min_attainable_p_N1_subject": 0.0002295684113865932,
+    "subject_eligibility_flag": "ok"
+  },
+  "subject_id": "gaolan",
+  "dataset": "yuquan",
+  "stem": "yuquan_gaolan",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr2_sentinel_union",
+  "n_valid_channels": 12,
+  "swap_class_full": "none"
+}

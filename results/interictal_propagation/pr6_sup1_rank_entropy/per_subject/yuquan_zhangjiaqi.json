@@ -1,0 +1,83 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 26817,
+      "n_events_kept_k": 4413,
+      "drop_rate_k": 0.8354402058395793,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.13878249117097807,
+      "asymmetry": -0.03277824430096732,
+      "H_p_norm": [
+        0.7803387228409426,
+        0.8882342817331482,
+        0.9612769324665487,
+        0.9828773456960033,
+        0.9587511580216805,
+        0.8864119628946413,
+        0.81311696714191
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.13878249117097807,
+        "endpoint_pair_rank": 21,
+        "endpoint_pair_percentile": 0.047619047619047616,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.047619047619047616,
+        "n_valid": 7
+      }
+    },
+    "1": {
+      "n_events_total_k": 21460,
+      "n_events_kept_k": 3408,
+      "drop_rate_k": 0.841192917054986,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.1077858891532174,
+      "asymmetry": 0.1025003849744347,
+      "H_p_norm": [
+        0.901571731322669,
+        0.9235188507430999,
+        0.9672805408252423,
+        0.9884694393904402,
+        0.9869132149723154,
+        0.9243550940122475,
+        0.7990713463482343
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.1077858891532174,
+        "endpoint_pair_rank": 21,
+        "endpoint_pair_percentile": 0.047619047619047616,
+        "is_endpoint_pair_max": false,
+        "p_N1": 1.0,
+        "min_attainable_p_N1": 0.047619047619047616,
+        "n_valid": 7
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 7,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "delta_obs_subject": -0.12328419016209774,
+    "n_combos": 441,
+    "subject_combo_rank": 441,
+    "subject_combo_percentile": 0.0022675736961451248,
+    "is_subject_combo_max": false,
+    "p_N1_subject": 1.0,
+    "min_attainable_p_N1_subject": 0.0022675736961451248,
+    "subject_eligibility_flag": "ok"
+  },
+  "subject_id": "zhangjiaqi",
+  "dataset": "yuquan",
+  "stem": "yuquan_zhangjiaqi",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr6_union",
+  "n_valid_channels": 7,
+  "swap_class_full": "strict"
+}

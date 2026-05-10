@@ -1,0 +1,79 @@
+{
+  "clusters": {
+    "0": {
+      "n_events_total_k": 2833,
+      "n_events_kept_k": 29,
+      "drop_rate_k": 0.9897635015884222,
+      "eligibility_flag": "excluded_low_kept_events",
+      "delta": NaN,
+      "asymmetry": NaN,
+      "H_p_norm": null,
+      "p_N0": NaN,
+      "N1_cluster": null
+    },
+    "1": {
+      "n_events_total_k": 15357,
+      "n_events_kept_k": 629,
+      "drop_rate_k": 0.9590414794556228,
+      "eligibility_flag": "high_drop_rate_warning",
+      "delta": -0.09785848427465615,
+      "asymmetry": -0.08784217847275588,
+      "H_p_norm": [
+        0.647162247227942,
+        0.6308829861059015,
+        0.642644843396041,
+        0.67708870323805,
+        0.6988014971115643,
+        0.7467014038735996,
+        0.7892114422993971,
+        0.7596337096173892,
+        0.7742948911299821,
+        0.7873951541359685,
+        0.7894054422445452,
+        0.818948838304017,
+        0.8849061694275556,
+        0.8867709912218842,
+        0.86837314916186,
+        0.8567112141937256,
+        0.8420510214300705,
+        0.8320533154101044,
+        0.8275452905694233,
+        0.828532144069822,
+        0.8272889990178178,
+        0.8302290987015865,
+        0.8331723677607812,
+        0.803462276278867,
+        0.698498749035473,
+        0.7350044257006979
+      ],
+      "p_N0": 1.0,
+      "N1_cluster": {
+        "delta_obs": -0.09785848427465593,
+        "endpoint_pair_rank": 308,
+        "endpoint_pair_percentile": 0.055384615384615386,
+        "is_endpoint_pair_max": false,
+        "p_N1": 0.9476923076923077,
+        "min_attainable_p_N1": 0.003076923076923077,
+        "n_valid": 26
+      }
+    }
+  },
+  "params": {
+    "n_clusters": 2,
+    "n_valid": 26,
+    "n_perm_N0": 1000,
+    "base_seed_N0": 0,
+    "min_kept_events": 50,
+    "high_drop_rate_warn": 0.5
+  },
+  "subject_level": {
+    "subject_eligibility_flag": "excluded_one_or_both_clusters"
+  },
+  "subject_id": "zhangkexuan",
+  "dataset": "yuquan",
+  "stem": "yuquan_zhangkexuan",
+  "stable_k": 2,
+  "valid_mask_provenance": "pr6_union",
+  "n_valid_channels": 26,
+  "swap_class_full": "candidate"
+}
