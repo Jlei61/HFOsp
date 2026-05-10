@@ -153,6 +153,12 @@ def rebuild_seizure_inventory_with_record_epochs(
             blk = block_lookup.get((subject, record))
             for interval in file_row.get("seizure_intervals", []):
                 seizure_idx += 1
+                if blk is None:
+                    raise KeyError(
+                        f"seizure {subject}_sz_{seizure_idx:03d} on record {record!r} "
+                        f"has no matching block inventory entry — yuquan_block_inventory.csv "
+                        f"must be regenerated covering this subject's EDFs"
+                    )
                 out_rows.append({
                     "subject": subject,
                     "patient_code": subject,
@@ -166,9 +172,17 @@ def rebuild_seizure_inventory_with_record_epochs(
                     "timezone_name": "Asia/Shanghai",
                     "eeg_onset_local_hour": "",
                     "eeg_onset_day_night": "",
-                    "record_start_epoch": (blk.block_start_epoch if blk else ""),
-                    "record_end_epoch": (blk.block_end_epoch if blk else ""),
+                    "record_start_epoch": blk.block_start_epoch,
+                    "record_end_epoch": blk.block_end_epoch,
                 })
+    subjects_with_rows = {r["subject"] for r in out_rows}
+    missing = sorted(subjects_in_scope - subjects_with_rows)
+    if missing:
+        print(
+            f"WARNING: {len(missing)} target subject(s) had no matching pr1_seizure_*.json "
+            f"and produced 0 seizure rows: {missing}",
+            file=sys.stderr, flush=True,
+        )
     return out_rows
 
 
