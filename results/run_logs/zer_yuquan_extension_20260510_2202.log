@@ -1,0 +1,226 @@
+=== yuquan/gaolan ===
+[per-subject:zer_binned] yuquan/gaolan → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_gaolan__zer_binned.json  (0.0s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  [broad_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+=== yuquan/huanghanwen ===
+[per-subject:zer_binned] yuquan/huanghanwen → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_huanghanwen__zer_binned.json  (0.0s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  [broad_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+=== yuquan/litengsheng ===
+  [broad_ER] extracting z-ER for 6 ok seizures...
+=== continuing per-subject run on remaining 7 yuquan ===
+=== yuquan/litengsheng (continuation) ===
+usage: cluster_ictal_seizures.py per-subject [-h] [--no-skip-existing]
+                                             [--from-sentinel]
+                                             [--feature-mode {t_onset,zer_binned}]
+                                             --subject SUBJECT
+cluster_ictal_seizures.py per-subject: error: the following arguments are required: --subject
+  EXIT=2
+=== yuquan/pengzihang (continuation) ===
+usage: cluster_ictal_seizures.py per-subject [-h] [--no-skip-existing]
+                                             [--from-sentinel]
+                                             [--feature-mode {t_onset,zer_binned}]
+                                             --subject SUBJECT
+cluster_ictal_seizures.py per-subject: error: the following arguments are required: --subject
+  EXIT=2
+=== yuquan/sunyuanxin (continuation) ===
+usage: cluster_ictal_seizures.py per-subject [-h] [--no-skip-existing]
+                                             [--from-sentinel]
+                                             [--feature-mode {t_onset,zer_binned}]
+                                             --subject SUBJECT
+cluster_ictal_seizures.py per-subject: error: the following arguments are required: --subject
+  EXIT=2
+=== yuquan/xuxinyi (continuation) ===
+usage: cluster_ictal_seizures.py per-subject [-h] [--no-skip-existing]
+                                             [--from-sentinel]
+                                             [--feature-mode {t_onset,zer_binned}]
+                                             --subject SUBJECT
+cluster_ictal_seizures.py per-subject: error: the following arguments are required: --subject
+  EXIT=2
+=== yuquan/zhangjinhan (continuation) ===
+usage: cluster_ictal_seizures.py per-subject [-h] [--no-skip-existing]
+                                             [--from-sentinel]
+                                             [--feature-mode {t_onset,zer_binned}]
+                                             --subject SUBJECT
+cluster_ictal_seizures.py per-subject: error: the following arguments are required: --subject
+  EXIT=2
+=== yuquan/zhangkexuan (continuation) ===
+usage: cluster_ictal_seizures.py per-subject [-h] [--no-skip-existing]
+                                             [--from-sentinel]
+                                             [--feature-mode {t_onset,zer_binned}]
+                                             --subject SUBJECT
+cluster_ictal_seizures.py per-subject: error: the following arguments are required: --subject
+  EXIT=2
+=== yuquan/zhaojinrui (continuation) ===
+usage: cluster_ictal_seizures.py per-subject [-h] [--no-skip-existing]
+                                             [--from-sentinel]
+                                             [--feature-mode {t_onset,zer_binned}]
+                                             --subject SUBJECT
+cluster_ictal_seizures.py per-subject: error: the following arguments are required: --subject
+  EXIT=2
+=== rebuilding cohort summary ===
+[cohort] processing 25 subjects from per_subject/  feature_mode=zer_binned
+  [broad_ER] extracting z-ER for 6 ok seizures...
+=== rendering 9 yuquan figures ===
+=== render yuquan/gaolan ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/gaolan
+  EXIT=2
+=== render yuquan/huanghanwen ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/huanghanwen
+  EXIT=2
+=== render yuquan/litengsheng ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/litengsheng
+  EXIT=2
+=== render yuquan/pengzihang ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/pengzihang
+  EXIT=2
+=== render yuquan/sunyuanxin ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/sunyuanxin
+  EXIT=2
+=== render yuquan/xuxinyi ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/xuxinyi
+  EXIT=2
+=== render yuquan/zhangjinhan ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/zhangjinhan
+  EXIT=2
+=== render yuquan/zhangkexuan ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/zhangkexuan
+  EXIT=2
+=== render yuquan/zhaojinrui ===
+usage: cluster_ictal_seizures.py [-h] {per-subject,cohort,render} ...
+cluster_ictal_seizures.py: error: unrecognized arguments: yuquan/zhaojinrui
+  EXIT=2
+=== ALL DONE ===
+
+=== RESTART with correct CLI: --subject + --feature-mode ===
+=== per-subject yuquan/litengsheng ===
+  [broad_ER] extracting z-ER for 6 ok seizures...
+  [broad_ER] z-ER extracted in 798.1s (0 dropped)
+[per-subject:zer_binned] yuquan/litengsheng → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_litengsheng__zer_binned.json  (799.0s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  [broad_ER] status=ok  n_sz_eff=6  chosen_k=2  n_subtypes=2  n_outliers=0  silhouette=0.39272996687067435  gap_perm=0.38487814972312506  s_sz_overall=0.5711263791848002  s_sz_within=0.6974278634228741
+  EXIT=0
+=== per-subject yuquan/pengzihang ===
+[per-subject:zer_binned] yuquan/pengzihang → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_pengzihang__zer_binned.json  (0.0s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  [broad_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  EXIT=0
+=== per-subject yuquan/sunyuanxin ===
+  [broad_ER] extracting z-ER for 6 ok seizures...
+  [broad_ER] z-ER extracted in 801.2s (0 dropped)
+[per-subject:zer_binned] yuquan/sunyuanxin → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_sunyuanxin__zer_binned.json  (802.1s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  [broad_ER] status=ok  n_sz_eff=6  chosen_k=2  n_subtypes=1  n_outliers=1  silhouette=0.4948858688136453  gap_perm=0.5220646194659064  s_sz_overall=0.2336073921009132  s_sz_within=0.49350385530491814
+  EXIT=0
+=== per-subject yuquan/xuxinyi ===
+[per-subject:zer_binned] yuquan/xuxinyi → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_xuxinyi__zer_binned.json  (0.0s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  [broad_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  EXIT=0
+=== per-subject yuquan/zhangjinhan ===
+[per-subject:zer_binned] yuquan/zhangjinhan → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_zhangjinhan__zer_binned.json  (0.0s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  [broad_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  EXIT=0
+=== per-subject yuquan/zhangkexuan ===
+  [gamma_ER] extracting z-ER for 6 ok seizures...
+  [gamma_ER] z-ER extracted in 526.9s (0 dropped)
+[per-subject:zer_binned] yuquan/zhangkexuan → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_zhangkexuan__zer_binned.json  (527.6s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: None
+  [gamma_ER] status=ok  n_sz_eff=6  chosen_k=2  n_subtypes=2  n_outliers=0  silhouette=0.5848967596604974  gap_perm=0.5914396377517062  s_sz_overall=0.6870201456168497  s_sz_within=0.7926613494847199
+  [broad_ER] status=insufficient_n  n_sz_eff=0  chosen_k=None  n_subtypes=0  n_outliers=0  silhouette=None  gap_perm=None  s_sz_overall=None  s_sz_within=None
+  EXIT=0
+=== per-subject yuquan/zhaojinrui ===
+  [gamma_ER] extracting z-ER for 5 ok seizures...
+  [gamma_ER] z-ER extracted in 635.1s (0 dropped)
+  [broad_ER] extracting z-ER for 5 ok seizures...
+  [broad_ER] z-ER extracted in 681.2s (0 dropped)
+[per-subject:zer_binned] yuquan/zhaojinrui → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/per_subject/yuquan_zhaojinrui__zer_binned.json  (1317.4s)
+  schema_version: topic5_pr1_seizure_clustering_zer_v1
+  ari_gamma_vs_broad: -0.15384615384615385
+  [gamma_ER] status=ok  n_sz_eff=5  chosen_k=2  n_subtypes=2  n_outliers=0  silhouette=0.59685194557754  gap_perm=0.6133421025287953  s_sz_overall=0.6642697272509895  s_sz_within=0.7920601126902983
+  [broad_ER] status=ok  n_sz_eff=5  chosen_k=2  n_subtypes=1  n_outliers=1  silhouette=0.4872366062509757  gap_perm=0.5521972532339818  s_sz_overall=0.7711897197307844  s_sz_within=0.8594435824043357
+  EXIT=0
+=== cohort rebuild ===
+[cohort] processing 25 subjects from per_subject/  feature_mode=zer_binned
+
+[cohort] cohort_summary.csv → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/cohort_summary__zer_binned.csv
+[cohort] 50 (subject,band) rows; 0 subject failures
+  EXIT=0
+=== render yuquan/gaolan ===
+  [yuquan/gaolan] → yuquan_gaolan__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/huanghanwen ===
+  [yuquan/huanghanwen] → yuquan_huanghanwen__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/litengsheng ===
+/home/honglab/leijiaxin/HFOsp/src/ictal_seizure_plotting.py:119: RuntimeWarning: Mean of empty slice
+  means = np.nanmean(sub, axis=1)
+/home/honglab/leijiaxin/HFOsp/src/ictal_seizure_plotting.py:121: RuntimeWarning: Mean of empty slice
+  overall = np.nanmean(onset_kept, axis=1)
+  [yuquan/litengsheng] → yuquan_litengsheng__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/pengzihang ===
+  [yuquan/pengzihang] → yuquan_pengzihang__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/sunyuanxin ===
+  [yuquan/sunyuanxin] → yuquan_sunyuanxin__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/xuxinyi ===
+  [yuquan/xuxinyi] → yuquan_xuxinyi__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/zhangjinhan ===
+  [yuquan/zhangjinhan] → yuquan_zhangjinhan__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/zhangkexuan ===
+/home/honglab/leijiaxin/HFOsp/src/ictal_seizure_plotting.py:119: RuntimeWarning: Mean of empty slice
+  means = np.nanmean(sub, axis=1)
+/home/honglab/leijiaxin/HFOsp/src/ictal_seizure_plotting.py:121: RuntimeWarning: Mean of empty slice
+  overall = np.nanmean(onset_kept, axis=1)
+  [yuquan/zhangkexuan] → yuquan_zhangkexuan__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== render yuquan/zhaojinrui ===
+  [yuquan/zhaojinrui] → yuquan_zhaojinrui__zer_binned.png
+
+[render] done=1, skipped=0, failed=0
+  EXIT=0
+=== ALL DONE ===

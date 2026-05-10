@@ -1,0 +1,91 @@
+{
+  "schema_version": "topic5_pr1_seizure_clustering_zer_v1",
+  "subject": "yuquan/huanghanwen",
+  "n_seizures_total": 2,
+  "feature_mode": "zer_binned",
+  "bins_sec": [
+    [
+      -200.0,
+      -50.0
+    ],
+    [
+      -50.0,
+      0.0
+    ],
+    [
+      0.0,
+      50.0
+    ],
+    [
+      50.0,
+      150.0
+    ],
+    [
+      150.0,
+      200.0
+    ]
+  ],
+  "per_band": {
+    "gamma_ER": {
+      "band": "gamma_ER",
+      "feature_mode": "zer_binned",
+      "status": "insufficient_n",
+      "n_sz_total": 2,
+      "n_sz_ok": 0,
+      "n_sz_pair_isolated": 0,
+      "n_sz_effective": 0,
+      "seizure_ids_kept": [],
+      "seizure_ids_dropped": {
+        "by_status": [],
+        "by_pair_isolated": []
+      },
+      "D": null,
+      "Z": null,
+      "subtype_label": null,
+      "outlier_flag": null,
+      "n_subtypes": 0,
+      "subtype_sizes": {},
+      "n_outliers": 0,
+      "chosen_k": null,
+      "silhouette_k": null,
+      "gap_perm_k": null,
+      "over_split_flag": false,
+      "centroids": {},
+      "s_sz_overall": null,
+      "s_sz_within_subtype_mean": null
+    },
+    "broad_ER": {
+      "band": "broad_ER",
+      "feature_mode": "zer_binned",
+      "status": "insufficient_n",
+      "n_sz_total": 2,
+      "n_sz_ok": 0,
+      "n_sz_pair_isolated": 0,
+      "n_sz_effective": 0,
+      "seizure_ids_kept": [],
+      "seizure_ids_dropped": {
+        "by_status": [],
+        "by_pair_isolated": []
+      },
+      "D": null,
+      "Z": null,
+      "subtype_label": null,
+      "outlier_flag": null,
+      "n_subtypes": 0,
+      "subtype_sizes": {},
+      "n_outliers": 0,
+      "chosen_k": null,
+      "silhouette_k": null,
+      "gap_perm_k": null,
+      "over_split_flag": false,
+      "centroids": {},
+      "s_sz_overall": null,
+      "s_sz_within_subtype_mean": null
+    }
+  },
+  "ari_gamma_vs_broad": null,
+  "ari_zer_vs_t_onset": {
+    "per_band": {}
+  },
+  "frozen_sanity": null
+}
