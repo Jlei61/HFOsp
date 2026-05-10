@@ -106,3 +106,15 @@ def test_extract_seizure_window_yuquan_window_overruns_block(tmp_path: Path):
             post_sec=30.0,
             results_root=tmp_path,
         )
+
+
+def test_cohort_selector_includes_yuquan_audit_eligible():
+    from scripts.run_ictal_er_rank import _cohort_subject_list
+    included, excluded = _cohort_subject_list()
+    yuquan_in = [s for s in included if s.startswith("yuquan/")]
+    epi_in = [s for s in included if s.startswith("epilepsiae/")]
+    assert len(yuquan_in) == 9, f"expected 9 yuquan, got {yuquan_in}"
+    assert "yuquan/gaolan" in yuquan_in
+    assert "yuquan/zhangjinhan" in yuquan_in
+    # No yuquan should be in `excluded` after this PR
+    assert not any(s.startswith("yuquan/") for s in excluded), excluded

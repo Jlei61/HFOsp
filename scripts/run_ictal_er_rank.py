@@ -105,11 +105,11 @@ COHORT_OUT_DIR = ROOT / "results" / "data_driven_soz" / "layer_a_ictal_er_rank" 
 AUDIT_CSV_PATH = ROOT / "results" / "spatial_modulation" / "data_driven_soz" / "audit.csv"
 SENTINEL_ONLY_SUBJECTS = ["epilepsiae/916"]  # 916 NOT in audit_eligible 24; sentinel only
 
-# v2.2 (2026-05-04) — known cohort scope constraint:
-# extract_seizure_window in src/ictal_onset_extraction.py:273 only
-# supports dataset == "epilepsiae" (existing limitation from PR-6A).
-# Yuquan SeizureWindow extractor is a separate future PR.
-SUPPORTED_DATASETS = frozenset({"epilepsiae"})
+# v2.3 PR-0.1 (2026-05-10) — yuquan dataset now supported.
+# extract_seizure_window in src/ictal_onset_extraction.py routes by
+# dataset prefix; yuquan path consumes yuquan_block_inventory.csv +
+# yuquan_seizure_inventory.csv (Tasks 1–3 of topic5 PR-0.1 plan).
+SUPPORTED_DATASETS = frozenset({"epilepsiae", "yuquan"})
 
 # v2.2 unblock threshold (plan §3.4.1, 2026-05-04). At least 1 cell
 # (sentinel × ER) must reach `producer_health == "stable"` to unblock A.4.
@@ -119,17 +119,34 @@ SENTINEL_MIN_STABLE_CELLS = 1
 TOPK_FOR_TAGS = 10
 
 
-def _focus_rel_path() -> Path:
-    return ROOT / "results" / "epilepsiae_electrode_focus_rel.json"
+def _focus_rel_path(dataset: str = "epilepsiae") -> Path:
+    if dataset == "epilepsiae":
+        return ROOT / "results" / "epilepsiae_electrode_focus_rel.json"
+    if dataset == "yuquan":
+        return ROOT / "results" / "yuquan_soz_core_channels.json"
+    raise ValueError(f"Unsupported dataset for focus_rel: {dataset}")
 
 
-def _seizure_inventory_path() -> Path:
-    return ROOT / "results" / "epilepsiae_seizure_inventory.csv"
+def _seizure_inventory_path(dataset: str = "epilepsiae") -> Path:
+    candidates = (
+        ROOT / "results" / "dataset_inventory" / f"{dataset}_seizure_inventory.csv",
+        ROOT / "results" / f"{dataset}_seizure_inventory.csv",
+    )
+    for p in candidates:
+        if p.exists():
+            return p
+    raise FileNotFoundError(f"{dataset}_seizure_inventory.csv not found")
 
 
-def _load_focus_rel() -> Dict:
-    with _focus_rel_path().open() as f:
-        return json.load(f)
+def _load_focus_rel(dataset: str = "epilepsiae") -> Dict:
+    path = _focus_rel_path(dataset)
+    with path.open() as f:
+        d = json.load(f)
+    if dataset == "yuquan":
+        # Normalize flat {sid: [channels]} to {sid: {"i": [channels]}} so the
+        # caller surface matches the epilepsiae 3-tier focus_rel JSON.
+        return {sid: {"i": list(chans), "l": [], "e": []} for sid, chans in d.items()}
+    return d
 
 
 def _focal_channels(subject: str, focus_rel: Dict) -> List[str]:
@@ -138,12 +155,14 @@ def _focal_channels(subject: str, focus_rel: Dict) -> List[str]:
 
 
 def _count_seizures(subject: str) -> int:
-    sid = subject.split("/", 1)[1]
+    dataset, sid = subject.split("/", 1)
+    inv = _seizure_inventory_path(dataset)
+    onset_col = "clin_onset_epoch" if dataset == "epilepsiae" else "eeg_onset_epoch"
     n = 0
-    with _seizure_inventory_path().open() as f:
+    with inv.open() as f:
         r = csv.DictReader(f)
         for row in r:
-            if row.get("subject") == sid and row.get("clin_onset_epoch"):
+            if row.get("subject") == sid and row.get(onset_col):
                 n += 1
     return n
 
@@ -579,7 +598,10 @@ def _count_stable_cells(per_subject_list: List[Dict]) -> Tuple[int, int, int, in
 
 def _run_sentinel(out_dir: Path) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
-    focus_rel = _load_focus_rel()
+    focus_rel_per_dataset = {
+        "epilepsiae": _load_focus_rel("epilepsiae"),
+        "yuquan": _load_focus_rel("yuquan"),
+    }
     summary: Dict = {
         "step": "Layer A Step A.3 sentinel sanity (v2.3 timing)",
         "schema_version": SCHEMA_VERSION,
@@ -595,7 +617,8 @@ def _run_sentinel(out_dir: Path) -> int:
     }
 
     for subject in SENTINEL_SUBJECTS:
-        focal = _focal_channels(subject, focus_rel)
+        ds = subject.split("/", 1)[0]
+        focal = _focal_channels(subject, focus_rel_per_dataset[ds])
         n_sz = _count_seizures(subject)
         print(
             f"\n=== {subject}  focal(i)={len(focal)}  n_seizures={n_sz} ===",
@@ -719,19 +742,20 @@ def _load_audit_eligible_subjects() -> List[str]:
 
 
 def _cohort_subject_list() -> Tuple[List[str], List[str]]:
-    """v2.2 cohort = audit_eligible ∩ SUPPORTED_DATASETS + sentinel-only (916).
+    """v2.3 cohort = audit_eligible ∩ SUPPORTED_DATASETS + sentinel-only (916).
 
-    Yuquan subjects are EXCLUDED in v2.2 because
-    ``extract_seizure_window`` (src/ictal_onset_extraction.py:273) only
-    supports ``dataset == "epilepsiae"``. Yuquan SeizureWindow
-    extraction is a separate future PR.
+    SUPPORTED_DATASETS now includes both ``epilepsiae`` and ``yuquan``
+    (topic5 PR-0.1, 2026-05-10). ``excluded`` should be empty under the
+    current contract; it is retained as a defensive log so any future
+    dataset still in audit.csv but absent from SUPPORTED_DATASETS is
+    auditable instead of silent.
 
     Returns
     -------
     (included, excluded)
         ``included`` is the cohort to actually run.
         ``excluded`` is the audit_eligible subjects skipped due to
-        unsupported dataset (logged + recorded in cohort_summary so the
+        unsupported dataset (logged + recorded in cohort_summary so any
         scope constraint is auditable, not silent).
     """
     eligible = _load_audit_eligible_subjects()
@@ -779,11 +803,14 @@ def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
     unless ``--force`` is passed.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
-    focus_rel = _load_focus_rel()
+    focus_rel_per_dataset = {
+        "epilepsiae": _load_focus_rel("epilepsiae"),
+        "yuquan": _load_focus_rel("yuquan"),
+    }
     subjects, excluded = _cohort_subject_list()
     if excluded:
         print(
-            f"\n[cohort] EXCLUDED (yuquan extract_seizure_window not yet supported): "
+            f"\n[cohort] EXCLUDED (dataset not in SUPPORTED_DATASETS): "
             f"{len(excluded)} subjects → {', '.join(excluded)}",
             flush=True,
         )
@@ -804,7 +831,8 @@ def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
             n_done += 1
             continue
 
-        focal = _focal_channels(subject, focus_rel)
+        ds = subject.split("/", 1)[0]
+        focal = _focal_channels(subject, focus_rel_per_dataset[ds])
         n_sz = _count_seizures(subject)
         if n_sz == 0:
             print(f"\n=== {subject}  SKIP (no seizures in inventory) ===", flush=True)
@@ -918,7 +946,7 @@ def _write_cohort_summary(out_dir: Path) -> None:
         "subjects": [d["subject"] for d in rows],
         "excluded_subjects": {
             "list": excluded,
-            "reason": "extract_seizure_window in src/ictal_onset_extraction.py:273 only supports dataset='epilepsiae'; yuquan SeizureWindow extractor is a separate future PR",
+            "reason": "dataset prefix not in SUPPORTED_DATASETS (currently {epilepsiae, yuquan}); list expected to be empty under v2.3 PR-0.1",
         },
         "two_d_distribution": table_serializable,
         "lambda_max_cap": cap_value,
