@@ -36,17 +36,20 @@ def load_topic5_subtype_labels(
     subject: str,
     band: str,
     results_root: Path,
+    dataset: str = "epilepsiae",
 ) -> Dict[str, Any]:
     """Load per-seizure subtype label from topic5 PR-1 z-ER cluster JSON.
 
     Parameters
     ----------
     subject : str
-        Numeric epilepsiae id without prefix, e.g. "442".
+        Numeric epilepsiae id (e.g. "442") or yuquan name (e.g. "gaolan"), without dataset prefix.
     band : str
         Either "gamma_ER" or "broad_ER".
     results_root : Path
         Project results root, typically Path("results") relative to repo root.
+    dataset : str
+        "epilepsiae" (default, backward compat) or "yuquan".
 
     Returns dict with keys:
       - seizure_id_to_subtype : Dict[str, int]   subtype labels (-1 = outlier)
@@ -59,7 +62,7 @@ def load_topic5_subtype_labels(
         / "layer_a_ictal_er_rank"
         / "seizure_clusters"
         / "per_subject"
-        / f"epilepsiae_{subject}__zer_binned.json"
+        / f"{dataset}_{subject}__zer_binned.json"
     )
     if not json_path.exists():
         raise FileNotFoundError(f"topic5 PR-1 JSON missing: {json_path}")
@@ -1019,6 +1022,7 @@ def load_atlas_seizure_channel_onsets(
     subject: str,
     band: str,
     results_root: Path,
+    dataset: str = "epilepsiae",
 ) -> Dict[str, Dict[str, Optional[float]]]:
     """Load per-seizure channel onset times (t_onset_sec) from atlas v2_3 timing JSON.
 
@@ -1030,7 +1034,7 @@ def load_atlas_seizure_channel_onsets(
         / "data_driven_soz"
         / "layer_a_ictal_er_rank"
         / "per_subject"
-        / f"epilepsiae_{subject}.json"
+        / f"{dataset}_{subject}.json"
     )
     if not p.exists():
         raise FileNotFoundError(f"atlas v2_3 JSON missing: {p}")
@@ -1053,6 +1057,7 @@ def load_atlas_seizure_channel_onsets(
 def load_swap_channel_subset(
     subject: str,
     results_root: Path,
+    dataset: str = "epilepsiae",
 ) -> Dict[str, Any]:
     """Derive swap-channel endpoint set from rank_displacement §8 swap_sweep.
 
@@ -1065,7 +1070,7 @@ def load_swap_channel_subset(
         / "interictal_propagation"
         / "rank_displacement"
         / "per_subject"
-        / f"epilepsiae_{subject}.json"
+        / f"{dataset}_{subject}.json"
     )
     if not p.exists():
         raise FileNotFoundError(f"rank_displacement JSON missing: {p}")
@@ -1180,13 +1185,14 @@ def load_template_ranks_with_t0t1(
     subject: str,
     results_root: Path,
     artifact_root: Path,
+    dataset: str = "epilepsiae",
 ) -> Dict[str, Any]:
     """Load adaptive_cluster.template_rank vectors for the 2 clusters,
     map to T0/T1 by fraction-larger rule (same convention as phase-1 freeze).
 
     Returns: channel_names, t0_template_id, t1_template_id, t0_rank (dict ch → rank), t1_rank.
     """
-    p = results_root / "interictal_propagation" / "per_subject" / f"epilepsiae_{subject}.json"
+    p = results_root / "interictal_propagation" / "per_subject" / f"{dataset}_{subject}.json"
     if not p.exists():
         raise FileNotFoundError(f"topic1 per_subject JSON missing: {p}")
     with p.open() as fh:
@@ -1302,24 +1308,36 @@ def run_q1prime_per_subject(
     artifact_root: Path,
     out_dir: Path,
     tau_min: float = 0.10,
+    dataset: str = "epilepsiae",
 ) -> None:
-    """For each subject in cohort, run the full Q1' pipeline + write JSON."""
+    """For each subject in cohort, run the full Q1' pipeline + write JSON.
+
+    `dataset` defaults to epilepsiae for backward compat. To run yuquan, pass dataset="yuquan".
+    Supports per-subject dataset auto-detection: if cohort entries are tuples (dataset, sid),
+    each subject uses its own dataset.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
-    for sid in cohort:
+    for entry in cohort:
+        if isinstance(entry, tuple):
+            ds, sid = entry
+        else:
+            ds, sid = dataset, entry
+        prefix = f"{ds}_{sid}"
         try:
-            swap = load_swap_channel_subset(sid, results_root)
-            tmpl = load_template_ranks_with_t0t1(sid, results_root, artifact_root)
-            atlas = load_atlas_seizure_channel_onsets(sid, band, results_root)
-            subtypes = load_topic5_subtype_labels(sid, band, results_root)
+            swap = load_swap_channel_subset(sid, results_root, dataset=ds)
+            tmpl = load_template_ranks_with_t0t1(sid, results_root, artifact_root, dataset=ds)
+            atlas = load_atlas_seizure_channel_onsets(sid, band, results_root, dataset=ds)
+            subtypes = load_topic5_subtype_labels(sid, band, results_root, dataset=ds)
         except Exception as exc:
             payload = {
-                "subject": f"epilepsiae_{sid}",
+                "subject": prefix,
+                "dataset": ds,
                 "status": "failed",
                 "error": repr(exc),
             }
-            with (out_dir / f"epilepsiae_{sid}__q1prime.json").open("w") as fh:
+            with (out_dir / f"{prefix}__q1prime.json").open("w") as fh:
                 json.dump(payload, fh, indent=2)
-            print(f"[WARN] q1prime epilepsiae_{sid} failed: {exc}")
+            print(f"[WARN] q1prime {prefix} failed: {exc}")
             continue
 
         per_seizure: List[Dict[str, Any]] = []
@@ -1341,7 +1359,8 @@ def run_q1prime_per_subject(
         st_map = {sid_: int(lab) for sid_, lab in subtypes["seizure_id_to_subtype"].items() if lab is not None}
         test = q1prime_per_subject_test(per_seizure, st_map)
         payload = {
-            "subject": f"epilepsiae_{sid}",
+            "subject": prefix,
+            "dataset": ds,
             "band": band,
             "swap_class": swap.get("swap_class"),
             "decision_k": swap.get("decision_k"),
@@ -1350,11 +1369,12 @@ def run_q1prime_per_subject(
             "t0_template_id": tmpl["t0_template_id"],
             "t1_template_id": tmpl["t1_template_id"],
             "topic5_n_subtypes": subtypes["n_subtypes"],
+            "topic5_status": subtypes.get("status"),
             "n_seizures_atlas": len(atlas),
             "per_seizure": per_seizure,
             "test": test,
         }
-        out_path = out_dir / f"epilepsiae_{sid}__q1prime.json"
+        out_path = out_dir / f"{prefix}__q1prime.json"
         with out_path.open("w") as fh:
             json.dump(payload, fh, indent=2, default=str)
 
