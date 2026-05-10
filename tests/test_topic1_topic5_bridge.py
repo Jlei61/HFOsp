@@ -45,3 +45,20 @@ def test_load_topic5_subtype_labels_548():
     )
     assert out["n_subtypes"] == 5
     assert len(out["seizure_id_to_subtype"]) == 19
+
+
+def test_load_seizure_onsets_442():
+    """442 has 17 ok seizures; clin_onset preferred, fallback eeg_onset."""
+    out = bridge.load_seizure_onsets(
+        subject="442",
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+    )
+    assert isinstance(out, dict)
+    # 442 has 17 seizures kept by topic5; the inventory has all of them
+    assert len(out) >= 17
+    # clin_onset_epoch is float seconds since epoch
+    sample_id, sample_t = next(iter(out.items()))
+    assert isinstance(sample_t, float)
+    assert sample_t > 1e9, "epoch seconds, not relative"
+    # No NaN values returned (NaN sources should be flagged via missing key)
+    assert all(np.isfinite(v) for v in out.values())

@@ -76,3 +76,33 @@ def load_topic5_subtype_labels(
         "n_subtypes": int(band_d["n_subtypes"]),
         "status": str(band_d["status"]),
     }
+
+
+def load_seizure_onsets(
+    subject: str,
+    results_root: Path,
+) -> Dict[str, float]:
+    """Load per-seizure clinical onset epoch from epilepsiae inventory.
+
+    Returns dict[seizure_id_str → epoch_seconds]. Prefers `clin_onset_epoch`;
+    falls back to `eeg_onset_epoch` when clin is NaN. Seizures missing both
+    are skipped (not returned).
+    """
+    inventory = pd.read_csv(
+        results_root / "epilepsiae_seizure_inventory.csv",
+        dtype={"subject": str, "seizure_id": str},
+    )
+    sub = inventory[inventory["subject"] == subject]
+    if sub.empty:
+        raise ValueError(f"subject {subject} not in epilepsiae_seizure_inventory.csv")
+    out: Dict[str, float] = {}
+    for _, row in sub.iterrows():
+        sid = str(row["seizure_id"])
+        clin = row.get("clin_onset_epoch")
+        eeg = row.get("eeg_onset_epoch")
+        if pd.notna(clin):
+            out[sid] = float(clin)
+        elif pd.notna(eeg):
+            out[sid] = float(eeg)
+        # else: skip (no usable onset)
+    return out
