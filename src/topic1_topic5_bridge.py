@@ -1209,3 +1209,83 @@ def load_template_ranks_with_t0t1(
         "t0_rank": dict(zip(chs, cluster_ranks[t0_id])),
         "t1_rank": dict(zip(chs, cluster_ranks[t1_id])),
     }
+
+
+# ---------------------------------------------------------------------------
+# Q1' per-subject contingency test (Task 3)
+# ---------------------------------------------------------------------------
+
+def q1prime_per_subject_test(
+    seizure_alignments: Sequence[Dict[str, Any]],
+    subtype_labels: Dict[str, int],
+    p_max: float = 0.05,
+    cramer_v_min: float = 0.30,
+) -> Dict[str, Any]:
+    """Per-subject Q1' test: contingency (assignment ∈ {T0,T1} × subtype) →
+    Fisher exact (2x2) or χ² (>2x2) + Cramér V + AMI on full assignment list.
+    """
+    try:
+        from sklearn.metrics import adjusted_mutual_info_score
+    except Exception as e:
+        raise RuntimeError("sklearn required for AMI") from e
+
+    # Filter
+    eligible = []
+    n_tie = 0
+    n_insuf = 0
+    for s in seizure_alignments:
+        a = s["assignment"]
+        sid = s["seizure_id"]
+        if sid not in subtype_labels:
+            continue
+        if a == "tie":
+            n_tie += 1
+            continue
+        if a == "insufficient_n":
+            n_insuf += 1
+            continue
+        eligible.append((sid, a, int(subtype_labels[sid])))
+
+    n_eligible = len(eligible)
+    out: Dict[str, Any] = {
+        "n_eligible": n_eligible,
+        "n_dropped_tie": n_tie,
+        "n_dropped_insufficient": n_insuf,
+        "p": 1.0,
+        "cramer_v": 0.0,
+        "ami": 0.0,
+        "contingency": [],
+        "q1prime_positive": False,
+    }
+    if n_eligible < 4:
+        out["eligibility"] = "below_floor"
+        return out
+
+    assignments = [a for _, a, _ in eligible]
+    subtypes = [s for _, _, s in eligible]
+    a_levels = sorted(set(assignments))
+    s_levels = sorted(set(subtypes))
+    if len(a_levels) < 2 or len(s_levels) < 2:
+        out["eligibility"] = "single_axis"
+        return out
+
+    cont = np.zeros((len(a_levels), len(s_levels)), dtype=int)
+    for i, a in enumerate(a_levels):
+        for j, sv in enumerate(s_levels):
+            cont[i, j] = sum(1 for k in range(n_eligible) if assignments[k] == a and subtypes[k] == sv)
+    out["contingency"] = cont.tolist()
+    out["a_levels"] = a_levels
+    out["s_levels"] = s_levels
+
+    p, v = _fisher_or_chi2_with_cramer_v(cont)
+    out["p"] = float(p)
+    out["cramer_v"] = float(v)
+
+    # AMI uses full per-seizure pairing (label encoded as int)
+    a_int = [a_levels.index(a) for a in assignments]
+    s_int = [s_levels.index(sv) for sv in subtypes]
+    out["ami"] = float(adjusted_mutual_info_score(s_int, a_int))
+
+    out["q1prime_positive"] = bool(p < p_max and v > cramer_v_min)
+    out["eligibility"] = "ok"
+    return out

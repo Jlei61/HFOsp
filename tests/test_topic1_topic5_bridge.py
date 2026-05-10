@@ -621,3 +621,58 @@ def test_compute_seizure_template_alignment_below_floor():
     )
     assert out["assignment"] == "insufficient_n"
     assert out["n_swap_channels_used"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Q1' per-subject contingency test (Task 3)
+# ---------------------------------------------------------------------------
+
+def test_q1prime_per_subject_test_perfect_alignment():
+    """Perfect alignment between assignment and subtype → small p, large V, high AMI.
+
+    Note: Fisher exact two-sided needs n≥4 per arm to clear p<0.05 on a perfect 2x2 split.
+    3+3 gives p=0.10; 4+4 gives p=0.029. Plan's n=6 example is numerically inconsistent
+    with the Fisher exact implementation — use n=8 (4+4) here.
+    """
+    seizure_alignments = [
+        {"seizure_id": "s0", "assignment": "T0"},
+        {"seizure_id": "s1", "assignment": "T0"},
+        {"seizure_id": "s2", "assignment": "T0"},
+        {"seizure_id": "s3", "assignment": "T0"},
+        {"seizure_id": "s4", "assignment": "T1"},
+        {"seizure_id": "s5", "assignment": "T1"},
+        {"seizure_id": "s6", "assignment": "T1"},
+        {"seizure_id": "s7", "assignment": "T1"},
+    ]
+    subtype_labels = {"s0": 0, "s1": 0, "s2": 0, "s3": 0, "s4": 1, "s5": 1, "s6": 1, "s7": 1}
+    out = bridge.q1prime_per_subject_test(seizure_alignments, subtype_labels)
+    assert out["n_eligible"] == 8
+    assert out["p"] < 0.05
+    assert out["cramer_v"] > 0.9
+    assert out["ami"] > 0.9
+    assert out["q1prime_positive"] is True
+
+
+def test_q1prime_per_subject_test_random():
+    """Random pairing → no significant association."""
+    seizure_alignments = [
+        {"seizure_id": f"s{i}", "assignment": "T0" if i % 2 == 0 else "T1"} for i in range(8)
+    ]
+    subtype_labels = {f"s{i}": (0 if i < 4 else 1) for i in range(8)}
+    out = bridge.q1prime_per_subject_test(seizure_alignments, subtype_labels)
+    assert out["q1prime_positive"] is False
+
+
+def test_q1prime_per_subject_test_drops_tie_and_insufficient():
+    """Ties and insufficient_n are excluded from contingency."""
+    seizure_alignments = [
+        {"seizure_id": "s0", "assignment": "T0"},
+        {"seizure_id": "s1", "assignment": "T1"},
+        {"seizure_id": "s2", "assignment": "tie"},
+        {"seizure_id": "s3", "assignment": "insufficient_n"},
+    ]
+    subtype_labels = {"s0": 0, "s1": 1, "s2": 0, "s3": 1}
+    out = bridge.q1prime_per_subject_test(seizure_alignments, subtype_labels)
+    assert out["n_eligible"] == 2  # s2, s3 dropped
+    assert out["n_dropped_tie"] == 1
+    assert out["n_dropped_insufficient"] == 1
