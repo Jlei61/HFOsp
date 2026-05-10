@@ -21,6 +21,7 @@ When answering scientific-status questions, prefer these canonical entry docs fi
 - `docs/topic1_within_event_dynamics.md` — within-event dynamics (propagation + synchrony)
 - `docs/topic2_between_event_dynamics.md` — event-between-event timing
 - `docs/topic3_spatial_soz_modulation.md` — where / SOZ spatial attribution
+- `docs/topic5_seizure_subtyping.md` — within-subject seizure subtyping (PR-0 v2.3 ER atlas + PR-1 z-ER subtyping); exploratory, audit-corrected 2026-05-10
 
 Historical docs remain valuable, but they are no longer the first entry point.
 
