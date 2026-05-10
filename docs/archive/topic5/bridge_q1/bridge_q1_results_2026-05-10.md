@@ -1,5 +1,8 @@
 # Topic 1 × Topic 5 Bridge Q1 — 探索性 cohort 结果 (2026-05-10)
 
+> **🔄 PIVOT 2026-05-10 (later same day)**: 本文档记录的 Q1 (state fingerprint) NULL-locked 结果作 phase-1 negative-control 保留，**已被 Q1' (channel-rank correspondence) 取代**作为主 axis。详见 `docs/archive/topic5/bridge_q1prime/bridge_q1prime_results_2026-05-10.md`。
+
+
 > **Tier**: 探索性，cohort N=9（spec 设计 N=10，1096 因 topic1 PR-2 lagPat lineage data freshness 失效退出）。
 > **Verdict**: **NULL-locked**（0/3 windows 通过 PER-WINDOW-PASS）。
 > **Spec**: `docs/superpowers/specs/2026-05-10-topic1-topic5-bridge-design.md`

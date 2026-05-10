@@ -136,6 +136,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/README.md` — cohort 视觉骨架文档
 - `docs/superpowers/specs/topic5_pr1_seizure_clustering*.md` — PR-1 plan v2
 - `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1 cohort exploratory result (verdict: NULL-locked, n=9; power floor identified)
+- `docs/archive/topic5/bridge_q1prime/bridge_q1prime_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1' PIVOT case-series result (verdict: INDETERMINATE, N=4 strict + 548 candidate; 4 strict subjects show consistent positive Cramér V 0.25–0.67 median 0.486 but underpowered on p; channel-rank correspondence × swap-subset)
 
 ---
 

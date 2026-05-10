@@ -510,6 +510,7 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 - `docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md` — Cluster geometry 验收 results（cohort 数字 / showcase 叙事 / KMeans-vs-template-matching audit / follow-up）。Topic 1 §3.1d / §10 引用本文件。
 - `docs/topic5_seizure_subtyping.md` — Topic 1 × Topic 5 cross-link：本 topic 关注 inter-ictal 群体事件内部的 within-event 时序结构；Topic 5 关注 ictal seizure 自身的 within-subject 异质性（v2.3 ER atlas + z-ER 张量子型聚类）。两 topic 的 propagation pattern / template 几何在下游 PR 可做联合分析，但当前主文档之间无强制依赖。
 - `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1 cohort exploratory result (verdict: NULL-locked, n=9; power floor identified)
+- `docs/archive/topic5/bridge_q1prime/bridge_q1prime_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1' PIVOT case-series result (verdict: INDETERMINATE, N=4 strict + 548 candidate; 4 strict subjects show consistent positive Cramér V 0.25–0.67 median 0.486 but underpowered on p; channel-rank correspondence × swap-subset)
 
 这些文档保留为历史事实来源；当前正式口径以本文件为准。
 
