@@ -490,6 +490,7 @@ def test_q3_stratifier_table_4cells():
     assert set(df["swap_class"].unique()) <= {"real", "none"}
     assert set(df["silhouette_class"].unique()) <= {"high", "low"}
     assert "subject_positive" in df.columns
+    assert "effect_winner" in df.columns
 
 
 # ============================================================================
