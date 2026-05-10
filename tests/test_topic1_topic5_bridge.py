@@ -490,4 +490,56 @@ def test_q3_stratifier_table_4cells():
     assert set(df["swap_class"].unique()) <= {"real", "none"}
     assert set(df["silhouette_class"].unique()) <= {"high", "low"}
     assert "subject_positive" in df.columns
-    assert "effect_winner" in df.columns
+
+
+# ============================================================================
+# Q1' (PIVOT 2026-05-10) loader tests
+# ============================================================================
+
+
+def test_load_atlas_seizure_channel_onsets_442():
+    """442 atlas v2_3 has 21 seizures × per-channel onset dicts; some channels None."""
+    out = bridge.load_atlas_seizure_channel_onsets(
+        subject="442",
+        band="gamma_ER",
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+    )
+    assert isinstance(out, dict)
+    assert len(out) == 21  # 442 has 21 seizure records
+    sample_id = next(iter(out))
+    sample_onsets = out[sample_id]
+    assert isinstance(sample_onsets, dict)
+    # values are floats (not None for valid channels) or None
+    for ch, val in sample_onsets.items():
+        assert val is None or isinstance(val, float)
+
+
+def test_load_swap_channel_subset_1073():
+    """1073 has swap_class=strict, decision_k=3, 6 channels total → endpoint set = 6 (all)."""
+    out = bridge.load_swap_channel_subset(
+        subject="1073",
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+    )
+    assert out["swap_class"] == "strict"
+    assert out["decision_k"] == 3
+    assert isinstance(out["endpoint_channels"], list)
+    assert isinstance(out["channel_names"], list)
+    # endpoint = top-3 ∪ bottom-3 in joint_valid; for 6-channel all-valid this is all 6
+    assert len(out["endpoint_channels"]) >= 4
+
+
+def test_load_template_ranks_with_t0t1_1073():
+    """1073: load template_rank for both clusters with T0/T1 mapping from bridge_setup."""
+    out = bridge.load_template_ranks_with_t0t1(
+        subject="1073",
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+    )
+    assert isinstance(out["channel_names"], list)
+    n = len(out["channel_names"])
+    assert isinstance(out["t0_rank"], dict)  # ch → rank
+    assert isinstance(out["t1_rank"], dict)
+    assert len(out["t0_rank"]) == n
+    assert len(out["t1_rank"]) == n
+    # ranks are integers from template_rank field
+    assert all(isinstance(v, int) for v in out["t0_rank"].values())

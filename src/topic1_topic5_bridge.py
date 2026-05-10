@@ -1008,3 +1008,141 @@ def run_per_subject(
             print(f"  [WARN] epilepsiae_{sid} failed: {exc}")
         with out_path.open("w") as fh:
             json.dump(per_subject_payload, fh, indent=2, default=str)
+
+
+# ============================================================================
+# Q1' (PIVOT 2026-05-10) — Channel-rank correspondence with swap-subset gating
+# ============================================================================
+
+
+def load_atlas_seizure_channel_onsets(
+    subject: str,
+    band: str,
+    results_root: Path,
+) -> Dict[str, Dict[str, Optional[float]]]:
+    """Load per-seizure channel onset times (t_onset_sec) from atlas v2_3 timing JSON.
+
+    Returns dict[seizure_id_str → dict[ch_name → t_onset_sec | None]].
+    None values mean that channel did not reach onset criterion in that seizure.
+    """
+    p = (
+        results_root
+        / "data_driven_soz"
+        / "layer_a_ictal_er_rank"
+        / "per_subject"
+        / f"epilepsiae_{subject}.json"
+    )
+    if not p.exists():
+        raise FileNotFoundError(f"atlas v2_3 JSON missing: {p}")
+    with p.open() as fh:
+        d = json.load(fh)
+    if d.get("schema_version") != "pr_t3_1_layer_a_v2_3_timing":
+        raise ValueError(f"unexpected schema_version: {d.get('schema_version')} in {p}")
+    sr = d["per_er"][band]["seizure_records"]
+    out: Dict[str, Dict[str, Optional[float]]] = {}
+    for rec in sr:
+        sid = str(rec["seizure_id"])
+        ch_onsets = rec.get("channel_onsets") or {}
+        out[sid] = {
+            ch: (None if v is None or v.get("t_onset_sec") is None else float(v["t_onset_sec"]))
+            for ch, v in ch_onsets.items()
+        }
+    return out
+
+
+def load_swap_channel_subset(
+    subject: str,
+    results_root: Path,
+) -> Dict[str, Any]:
+    """Derive swap-channel endpoint set from rank_displacement §8 swap_sweep.
+
+    Endpoint = top-decision_k ∪ bottom-decision_k channels (by rank_a_dense_full),
+    restricted to joint_valid. Strict tier per §8.7 is the only contract for
+    channel-level downstream consumption; candidate is reported but flagged.
+    """
+    p = (
+        results_root
+        / "interictal_propagation"
+        / "rank_displacement"
+        / "per_subject"
+        / f"epilepsiae_{subject}.json"
+    )
+    if not p.exists():
+        raise FileNotFoundError(f"rank_displacement JSON missing: {p}")
+    with p.open() as fh:
+        d = json.load(fh)
+    pairs = d.get("pairs", [])
+    if not pairs:
+        return {"swap_class": "none", "decision_k": None, "endpoint_channels": [], "channel_names": [], "exit_reason": "no_pair"}
+    pair = pairs[0]
+    chs = list(pair.get("channel_names", []))
+    joint_valid = list(pair.get("joint_valid", []))
+    rank_a = list(pair.get("rank_a_dense_full", []))
+    sweep = pair.get("swap_sweep", {}) or {}
+    swap_class = str(sweep.get("swap_class", "none"))
+    decision_k = sweep.get("decision_k")
+    if decision_k is None or not chs or not rank_a:
+        return {
+            "swap_class": swap_class,
+            "decision_k": decision_k,
+            "endpoint_channels": [],
+            "channel_names": chs,
+            "exit_reason": "missing_swap_sweep",
+        }
+    decision_k = int(decision_k)
+    valid_idx = [i for i, jv in enumerate(joint_valid) if jv]
+    valid_chs_with_rank = [(i, rank_a[i]) for i in valid_idx if rank_a[i] is not None]
+    valid_chs_with_rank.sort(key=lambda kv: kv[1])
+    if len(valid_chs_with_rank) < 2 * decision_k:
+        # Endpoint set may overlap (e.g., 6 ch with k=3 → top 3 + bottom 3 = whole set)
+        bottom = valid_chs_with_rank[:decision_k]
+        top = valid_chs_with_rank[-decision_k:]
+    else:
+        bottom = valid_chs_with_rank[:decision_k]
+        top = valid_chs_with_rank[-decision_k:]
+    endpoint_idx = sorted(set([i for i, _ in bottom] + [i for i, _ in top]))
+    endpoint_chs = [chs[i] for i in endpoint_idx]
+    return {
+        "swap_class": swap_class,
+        "decision_k": decision_k,
+        "endpoint_channels": endpoint_chs,
+        "channel_names": chs,
+        "joint_valid_count": len(valid_idx),
+        "p_fw": float(sweep.get("p_fw", float("nan"))),
+        "swap_score": float(sweep.get("decision_swap_score", float("nan"))),
+    }
+
+
+def load_template_ranks_with_t0t1(
+    subject: str,
+    results_root: Path,
+    artifact_root: Path,
+) -> Dict[str, Any]:
+    """Load adaptive_cluster.template_rank vectors for the 2 clusters,
+    map to T0/T1 by fraction-larger rule (same convention as phase-1 freeze).
+
+    Returns: channel_names, t0_template_id, t1_template_id, t0_rank (dict ch → rank), t1_rank.
+    """
+    p = results_root / "interictal_propagation" / "per_subject" / f"epilepsiae_{subject}.json"
+    if not p.exists():
+        raise FileNotFoundError(f"topic1 per_subject JSON missing: {p}")
+    with p.open() as fh:
+        d = json.load(fh)
+    chs = list(d.get("channel_names", []))
+    ac = d["adaptive_cluster"]
+    if int(ac.get("stable_k", 0)) != 2:
+        raise ValueError(f"subject {subject} stable_k != 2")
+    cluster_fracs: Dict[int, float] = {int(c["cluster_id"]): float(c["fraction"]) for c in ac["clusters"]}
+    cluster_ranks: Dict[int, List[int]] = {int(c["cluster_id"]): [int(r) for r in c["template_rank"]] for c in ac["clusters"]}
+    sorted_clusters = sorted(cluster_fracs.items(), key=lambda kv: (-kv[1], kv[0]))
+    t0_id = sorted_clusters[0][0]
+    t1_id = sorted_clusters[1][0]
+    if len(cluster_ranks[t0_id]) != len(chs) or len(cluster_ranks[t1_id]) != len(chs):
+        raise ValueError(f"template_rank length != channel_names length for {subject}")
+    return {
+        "channel_names": chs,
+        "t0_template_id": t0_id,
+        "t1_template_id": t1_id,
+        "t0_rank": dict(zip(chs, cluster_ranks[t0_id])),
+        "t1_rank": dict(zip(chs, cluster_ranks[t1_id])),
+    }
