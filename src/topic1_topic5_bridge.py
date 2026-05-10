@@ -7,12 +7,14 @@ Q2 is deferred and NOT implemented here.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
+from scipy import stats as sp_stats
 
 # --- Locked constants (see spec §4) -----------------------------------------
 
@@ -367,3 +369,74 @@ def build_subject_fingerprint_table(
                 **{k: fp[k] for k in ("n_events", "frac_T0", "switch_rate", "last_template", "dropped_reason")},
             })
     return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
+# Per-feature statistical helpers (Task 8)
+# ---------------------------------------------------------------------------
+
+def _mann_whitney_with_effect(
+    a: np.ndarray, b: np.ndarray
+) -> Tuple[float, float]:
+    """Mann-Whitney U two-sided + rank-biserial r effect.
+
+    Returns (p_two_sided, signed_rank_biserial_r).
+    Drops NaN values before computation. Returns (1.0, 0.0) for empty / degenerate.
+    """
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    a = a[np.isfinite(a)]
+    b = b[np.isfinite(b)]
+    if a.size == 0 or b.size == 0:
+        return 1.0, 0.0
+    res = sp_stats.mannwhitneyu(a, b, alternative="two-sided")
+    n1, n2 = a.size, b.size
+    # rank-biserial = 1 - 2U / (n1 * n2); sign indicates direction
+    r = 1.0 - 2.0 * float(res.statistic) / (n1 * n2)
+    return float(res.pvalue), float(r)
+
+
+def _kruskal_wallis_with_effect(
+    groups: Sequence[np.ndarray],
+) -> Tuple[float, float]:
+    """Kruskal-Wallis + ε² (epsilon-squared) effect.
+
+    ε² = (H - k + 1) / (n - k); negative values floored at 0.
+    Returns (1.0, 0.0) for empty / degenerate.
+    """
+    cleaned = [np.asarray(g, dtype=float)[np.isfinite(np.asarray(g, dtype=float))] for g in groups]
+    cleaned = [g for g in cleaned if g.size > 0]
+    if len(cleaned) < 2 or sum(g.size for g in cleaned) < 3:
+        return 1.0, 0.0
+    res = sp_stats.kruskal(*cleaned)
+    h = float(res.statistic)
+    k = len(cleaned)
+    n = int(sum(g.size for g in cleaned))
+    if n - k <= 0:
+        return float(res.pvalue), 0.0
+    eps2 = max(0.0, (h - k + 1) / (n - k))
+    return float(res.pvalue), float(eps2)
+
+
+def _fisher_or_chi2_with_cramer_v(
+    contingency: np.ndarray,
+) -> Tuple[float, float]:
+    """For 2x2 contingency use Fisher exact two-sided; for >2 rows or columns
+    use χ² with Yates correction off; effect = Cramér V.
+
+    Returns (p, V). Returns (1.0, 0.0) on degenerate input.
+    """
+    table = np.asarray(contingency, dtype=int)
+    n = int(table.sum())
+    if n == 0 or table.ndim != 2 or min(table.shape) < 2:
+        return 1.0, 0.0
+    if table.shape == (2, 2):
+        res = sp_stats.fisher_exact(table, alternative="two-sided")
+        p = float(res.pvalue)
+        chi2_stat, _, _, _ = sp_stats.chi2_contingency(table, correction=False)
+    else:
+        chi2_stat, p, _, _ = sp_stats.chi2_contingency(table, correction=False)
+    r, c = table.shape
+    denom = n * (min(r, c) - 1)
+    v = math.sqrt(chi2_stat / denom) if denom > 0 else 0.0
+    return float(p), float(v)

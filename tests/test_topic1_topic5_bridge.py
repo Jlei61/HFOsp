@@ -231,3 +231,41 @@ def test_compute_pre_ictal_fingerprint_window_boundary_inclusive_left_exclusive_
     )
     assert out["n_events"] == 2  # -1800 included, -60.001 included, -60.0 excluded
     assert out["last_template"] == 1  # the -60.001 event (closer to onset)
+
+
+# ---------------------------------------------------------------------------
+# Task 8: per-feature statistical helpers
+# ---------------------------------------------------------------------------
+
+def test_mann_whitney_with_rank_biserial():
+    """Two groups, clear separation → small p, large |effect|."""
+    a = np.array([1.0, 2.0, 3.0, 4.0])
+    b = np.array([10.0, 11.0, 12.0, 13.0])
+    p, eff = bridge._mann_whitney_with_effect(a, b)
+    assert p < 0.05
+    assert abs(eff) > 0.9
+
+
+def test_kruskal_wallis_with_eps2():
+    """Three groups, large between-group variance → small p, large ε²."""
+    g0 = np.array([1.0, 1.5, 2.0])
+    g1 = np.array([5.0, 5.5, 6.0])
+    g2 = np.array([10.0, 10.5, 11.0])
+    p, eff = bridge._kruskal_wallis_with_effect([g0, g1, g2])
+    assert p < 0.05
+    assert eff > 0.5
+
+
+def test_fisher_with_cramer_v_2x2():
+    """2x2 contingency, perfect separation → p<0.05, V≈1."""
+    contingency = np.array([[5, 0], [0, 5]], dtype=int)
+    p, eff = bridge._fisher_or_chi2_with_cramer_v(contingency)
+    assert p < 0.05
+    assert eff > 0.9
+
+
+def test_fisher_with_cramer_v_3x2():
+    """3 subtypes × 2 last_template levels."""
+    contingency = np.array([[4, 0], [0, 4], [2, 2]], dtype=int)
+    p, eff = bridge._fisher_or_chi2_with_cramer_v(contingency)
+    assert 0 <= eff <= 1
