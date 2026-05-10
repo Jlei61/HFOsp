@@ -823,6 +823,139 @@ def rank_entropy_null_N1_subject_level(
     }
 
 
+def compute_rank_position_entropy_with_absent(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    cluster_event_idx: np.ndarray,
+    valid_mask: np.ndarray,
+) -> Dict[str, Any]:
+    """Per-position entropy that **includes non-participating events** by
+    treating their empty slots as a virtual "absent" alphabet member.
+
+    Plan v3 §6.0 Option B (all-valid-participating filter) drops ~98 % of
+    cohort events on average — the high drop rate inflates apparent
+    slow-end stereotypy. This variant keeps every cluster event:
+
+    - For each event, dense-rank the participating valid channels
+      (ranks 1..n_part_e). The remaining (n_valid − n_part_e) slots at
+      the deeper rank positions are filled with the "absent" sentinel.
+    - At rank position p ∈ {1..n_valid}, the alphabet is the
+      n_valid valid channels plus "absent" — alphabet size n_valid + 1.
+    - H_p_norm normalised by log₂(n_valid + 1).
+
+    Returns dict with fields:
+      H_p_norm        : (n_valid,) — normalized Shannon entropy per rank
+      P_absent        : (n_valid,) — fraction of events with "absent" at
+                        each rank (= recording-level emptiness)
+      P_real_renorm   : (n_valid, n_valid) — count(channel, p) / n_events
+      n_events_total  : int — every cluster event counted
+      n_part_dist     : np.ndarray — distribution of n_part across events
+    """
+    valid_idx = np.where(valid_mask)[0]
+    n_valid = int(valid_idx.size)
+    if n_valid < _MIN_N_VALID_RANK_ENTROPY:
+        raise ValueError(
+            f"n_valid={n_valid} < {_MIN_N_VALID_RANK_ENTROPY}"
+        )
+    cluster_event_idx = np.asarray(cluster_event_idx, dtype=int)
+    n_events = int(cluster_event_idx.size)
+    if n_events == 0:
+        raise ValueError("cluster_event_idx empty")
+
+    # counts shape (n_valid + 1, n_valid) — last row is "absent"
+    counts = np.zeros((n_valid + 1, n_valid), dtype=int)
+    n_part_arr = np.zeros(n_events, dtype=int)
+
+    bools_valid = bools[valid_idx, :][:, cluster_event_idx]   # (n_valid, n_events)
+    ranks_valid = ranks[valid_idx, :][:, cluster_event_idx].astype(float)
+
+    for ei in range(n_events):
+        part_local_mask = bools_valid[:, ei]  # (n_valid,)
+        n_part = int(part_local_mask.sum())
+        n_part_arr[ei] = n_part
+        if n_part == 0:
+            counts[n_valid, :] += 1  # all positions absent
+            continue
+        # Dense-rank the participating channels by their lagPat rank values
+        part_local_idx = np.where(part_local_mask)[0]
+        part_rank_vals = ranks_valid[part_local_idx, ei]
+        order = np.argsort(part_rank_vals, kind="stable")
+        # order[0] is the local index of the channel with smallest rank
+        for k in range(n_part):
+            c_local = int(part_local_idx[order[k]])
+            counts[c_local, k] += 1
+        # Positions n_part..n_valid-1 are "absent" for this event
+        if n_part < n_valid:
+            counts[n_valid, n_part:] += 1
+
+    log2_alphabet = float(np.log2(n_valid + 1))
+    H_p_norm = np.empty(n_valid, dtype=float)
+    P_absent = np.empty(n_valid, dtype=float)
+    for p in range(n_valid):
+        col = counts[:, p].astype(float)
+        total = col.sum()
+        probs = col / total if total > 0 else col
+        positive = probs[probs > 0]
+        H = float(-np.sum(positive * np.log2(positive))) if positive.size else 0.0
+        H_p_norm[p] = H / log2_alphabet
+        P_absent[p] = float(probs[n_valid])
+
+    # Real-channel renorm (drops the "absent" row, renormalises)
+    P_real_renorm = np.zeros((n_valid, n_valid), dtype=float)
+    for p in range(n_valid):
+        real_col = counts[:n_valid, p].astype(float)
+        total_real = real_col.sum()
+        if total_real > 0:
+            P_real_renorm[:, p] = real_col / total_real
+
+    return {
+        "H_p_norm": H_p_norm,
+        "P_absent": P_absent,
+        "P_real_renorm": P_real_renorm,
+        "n_events_total": n_events,
+        "n_part_dist": n_part_arr,
+    }
+
+
+def run_subject_rank_entropy_with_absent(
+    subject_data: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Variant of run_subject_rank_entropy: no Option B filter, uses
+    "absent" sentinel + alphabet size n_valid + 1.
+    Returns per-cluster H_p_norm + P_absent + n_part_distribution.
+    """
+    n_clusters = int(subject_data["n_clusters"])
+    if n_clusters != 2:
+        raise ValueError("plan v3 locks sup1 to stable_k=2")
+
+    ranks = np.asarray(subject_data["ranks"])
+    bools = np.asarray(subject_data["bools"], dtype=bool)
+    labels = np.asarray(subject_data["labels"], dtype=int)
+    valid_mask = np.asarray(subject_data["valid_mask"], dtype=bool)
+
+    cluster_payload: Dict[str, Any] = {}
+    for k in range(n_clusters):
+        cluster_idx = np.where(labels == k)[0].astype(int)
+        if cluster_idx.size == 0:
+            cluster_payload[str(k)] = {"n_events_total": 0, "H_p_norm": None}
+            continue
+        out = compute_rank_position_entropy_with_absent(
+            ranks, bools, cluster_idx, valid_mask
+        )
+        cluster_payload[str(k)] = {
+            "n_events_total": int(out["n_events_total"]),
+            "H_p_norm": [float(x) for x in out["H_p_norm"]],
+            "P_absent": [float(x) for x in out["P_absent"]],
+            "n_part_median": float(np.median(out["n_part_dist"])),
+            "n_part_max": int(np.max(out["n_part_dist"])),
+        }
+
+    return {
+        "clusters_with_absent": cluster_payload,
+        "n_valid": int(valid_mask.sum()),
+    }
+
+
 def _filter_all_valid_participating_events(
     ranks: np.ndarray,
     bools: np.ndarray,

@@ -37,7 +37,10 @@ from src.interictal_propagation import (  # noqa: E402
     _valid_event_indices,
     load_subject_propagation_events,
 )
-from src.rank_displacement import run_subject_rank_entropy  # noqa: E402
+from src.rank_displacement import (  # noqa: E402
+    run_subject_rank_entropy,
+    run_subject_rank_entropy_with_absent,
+)
 
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
@@ -258,6 +261,13 @@ def _process_one(stem: str, *, n_perm_N0: int = 1000) -> Optional[dict]:
             "valid_mask_provenance": vm_provenance,
             "exit_reason": f"sup1_pipeline_failed: {exc}",
         }
+
+    # Always run the with-absent variant alongside (cheap; no permutations).
+    try:
+        with_absent = run_subject_rank_entropy_with_absent(subject_data)
+        result["with_absent"] = with_absent
+    except Exception as exc:  # noqa: BLE001
+        result["with_absent_error"] = f"{exc}"
 
     swap_class = _load_swap_class(stem)
     # ``run_subject_rank_entropy`` returns dict with key "subject" being the

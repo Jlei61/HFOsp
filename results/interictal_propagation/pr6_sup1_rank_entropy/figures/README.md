@@ -7,9 +7,28 @@
 
 ### H_p_norm_cohort_overlay
 
-主图。每 cluster 一条 H_p_norm 曲线（n=35 subject × 2 cluster − exit_reason 后剩 70 - 2 ≈ 68 条）插值到 normalized rank position x ∈ [0, 1]（x=0 最快通道、x=1 最慢通道）后叠加；按 forward/reverse template-pair classification 三色（红 = strong reversal、蓝 = suggestive reversal、灰 = no reversal）；cohort median 粗黑线 + IQR 灰带。**KMeans cluster_id 0/1 在本 cohort 上无系统排序**（c0 大者 16 个 / c1 大者 19 个 / 0 个相等），所以不分 panel。
+Option B（all-valid-participating events）下的 H_p_norm 曲线 cohort 叠加。x = normalized rank position ∈ [0, 1]，0 = 最快通道、1 = 最慢通道；按 reversal class 三色；cohort median 粗黑线 + IQR 灰带。**KMeans cluster_id 0/1 在本 cohort 上无系统排序**（c0 大者 16 / c1 大者 19 / 0 相等），所以不分 panel。
 
-**关注点**：(a) 整体 roof-shape——中间 H 接近 1.0，两端 dip 到 0.6-0.9；(b) cohort median 走势（黑线）证实形状一致；(c) 三色不分层——endpoint 稳定不是 reversal class 的副产物。
+**重要 caveat（user 2026-05-10 review 提出）**：本图的"屋顶形"被发现是**两个来源混合**——快端低熵是真生物信号，慢端低熵是 Option B selection artifact。详见 `H_p_norm_option_b_vs_with_absent`。本图只能支持"端点位置非 uniform"，**不能**支持"端点稳定 / source-sink stereotyped"。
+
+**关注点**：(a) cohort 平均屋顶形；(b) 三色不分层——任何残留信号不是 reversal class 副产物；(c) 不能直接读"端点稳定"——需配合 with-absent 对照图。
+
+### H_p_norm_option_b_vs_with_absent  ⭐ paper-grade re-analysis
+
+3-panel 对照图，回应"如果考虑非参与通道，值会不会很低？"
+
+- **A. Option B**（当前主图条件，drop_rate median = 0.98 selection 后）：roof-shape，两端 H ≈ 0.78
+- **B. with-absent**（保留所有 events，把"该 rank 位置没人"当作 alphabet 第 n_valid+1 个 sentinel，按 log₂(n_valid+1) 归一化）：**单调下降**，快端 ≈ 0.85、慢端 ≈ 0.05
+- **C. P("absent") at rank p**：慢端 95-100% events 在该 rank 位置空缺——解释了 panel B 慢端为何塌到接近 0
+
+**重新解读**：
+
+| 信号位置 | 在 Option B 下 | 真实来源（with-absent 揭示）|
+|---|---|---|
+| 快端低熵（rank≈1）| 0.78 | **真生物信号**：source channel 部分 stereotyped（effective alphabet ~6 of 8）|
+| 慢端低熵（rank≈n_valid）| 0.78 | **Selection artifact**：~95% events 该位置就是 absent，Option B 才把它"挑"出"低熵" |
+
+**关注点**：(a) panel A vs B 的形状对比是关键——roof 变 monotonic decrease；(b) panel C 慢端高 P("absent") 是因果解释；(c) with-absent 下 confluence prediction（端点最高熵）依然被否决，但**stable-pathway**（端点最低熵）只支持快端、不支持慢端。
 
 ### delta_by_swapclass_box
 

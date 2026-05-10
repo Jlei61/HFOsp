@@ -92,6 +92,29 @@ def _interp_to_grid(H_p_norm: List[float], n_valid: int) -> np.ndarray:
     return np.interp(X_GRID, src_x, np.asarray(H_p_norm, dtype=float))
 
 
+def _collect_with_absent_curves(records: List[dict]) -> Dict[str, Any]:
+    """Pull H_p_norm + P_absent curves from the with-absent variant."""
+    H_curves: List[Tuple[str, str, np.ndarray]] = []
+    P_absent_curves: List[Tuple[str, str, np.ndarray]] = []
+    for d in records:
+        wa = d.get("with_absent")
+        if wa is None:
+            continue
+        stem = d["stem"]
+        swap = d.get("swap_class_full") or "unknown"
+        n_valid = int(wa.get("n_valid") or 0)
+        if n_valid < 4:
+            continue
+        for cid, c in (wa.get("clusters_with_absent") or {}).items():
+            H = c.get("H_p_norm")
+            Pa = c.get("P_absent")
+            if H is None or Pa is None:
+                continue
+            H_curves.append((stem, swap, _interp_to_grid(H, n_valid)))
+            P_absent_curves.append((stem, swap, _interp_to_grid(Pa, n_valid)))
+    return {"H_curves": H_curves, "P_absent_curves": P_absent_curves}
+
+
 def _collect_curves(records: List[dict]) -> Dict[str, Any]:
     """All cluster-level curves flattened into one list (KMeans cluster_id
     has no semantic ordering — see verification 2026-05-10: 16 vs 19 split
@@ -203,6 +226,108 @@ def fig_cohort_overlay_normalized(data: Dict[str, Any]) -> Path:
 
     fig.tight_layout()
     out = FIG_DIR / "H_p_norm_cohort_overlay.png"
+    savefig_pub(fig, out)
+    savefig_pub(fig, out.with_suffix(".pdf"))
+    plt.close(fig)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Figure 1b: Option B vs with-absent comparison (3-panel)
+# ---------------------------------------------------------------------------
+def fig_option_b_vs_with_absent(
+    data: Dict[str, Any], absent_data: Dict[str, Any], records: List[dict]
+) -> Optional[Path]:
+    H_abs = absent_data.get("H_curves") or []
+    P_abs = absent_data.get("P_absent_curves") or []
+    if not H_abs:
+        return None
+
+    fig, axes = plt.subplots(1, 3, figsize=(17.0, 5.5))
+
+    swap_class_subject = data["swap_class_subject"]
+
+    # ---- Panel A: Option B (all-valid-participating events) ----
+    ax = axes[0]
+    flat = data["flat_curves"]
+    for stem, swap, y in flat:
+        ax.plot(X_GRID, y,
+                color=SWAP_COLORS.get(swap, SWAP_COLORS["unknown"]),
+                alpha=0.25, linewidth=0.9, zorder=2)
+    if flat:
+        Y = np.stack([y for _, _, y in flat], axis=0)
+        ax.fill_between(X_GRID, np.percentile(Y, 25, axis=0),
+                        np.percentile(Y, 75, axis=0),
+                        color="black", alpha=0.13, zorder=3)
+        ax.plot(X_GRID, np.median(Y, axis=0),
+                color="black", linewidth=2.5, zorder=4,
+                label=f"Cohort median ({Y.shape[0]} cluster curves)")
+    style_panel(ax)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    ax.margins(0)
+    ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
+    ax.set_ylabel("Channel-identity entropy", fontsize=FS_LABEL)
+    ax.set_title("A.  Option B  (all-valid-participating events;\n"
+                 "       drop-rate median ≈ 0.98)", fontsize=FS_TITLE - 2)
+
+    # ---- Panel B: with-absent (all events, "absent" sentinel) ----
+    ax = axes[1]
+    for stem, swap, y in H_abs:
+        ax.plot(X_GRID, y,
+                color=SWAP_COLORS.get(swap, SWAP_COLORS["unknown"]),
+                alpha=0.25, linewidth=0.9, zorder=2)
+    Y2 = np.stack([y for _, _, y in H_abs], axis=0)
+    ax.fill_between(X_GRID, np.percentile(Y2, 25, axis=0),
+                    np.percentile(Y2, 75, axis=0),
+                    color="black", alpha=0.13, zorder=3)
+    ax.plot(X_GRID, np.median(Y2, axis=0),
+            color="black", linewidth=2.5, zorder=4,
+            label=f"Cohort median ({Y2.shape[0]} curves)")
+    style_panel(ax)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    ax.margins(0)
+    ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
+    ax.set_ylabel("Channel-identity entropy\n[alphabet = n_valid + absent]",
+                  fontsize=FS_LABEL - 1)
+    ax.set_title("B.  Include all events with 'absent' sentinel\n"
+                 "       (alphabet n_valid + 1)", fontsize=FS_TITLE - 2)
+
+    # ---- Panel C: P('absent' at rank p) ----
+    ax = axes[2]
+    for stem, swap, y in P_abs:
+        ax.plot(X_GRID, y,
+                color=SWAP_COLORS.get(swap, SWAP_COLORS["unknown"]),
+                alpha=0.25, linewidth=0.9, zorder=2)
+    Y3 = np.stack([y for _, _, y in P_abs], axis=0)
+    ax.fill_between(X_GRID, np.percentile(Y3, 25, axis=0),
+                    np.percentile(Y3, 75, axis=0),
+                    color="black", alpha=0.13, zorder=3)
+    ax.plot(X_GRID, np.median(Y3, axis=0),
+            color="black", linewidth=2.5, zorder=4,
+            label="Cohort median")
+    style_panel(ax)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    ax.margins(0)
+    ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
+    ax.set_ylabel("Fraction of events with 'absent'\nat this rank position",
+                  fontsize=FS_LABEL - 1)
+    ax.set_title("C.  Why panel B drops at the slow end:\n"
+                 "       most events have nothing at deep ranks",
+                 fontsize=FS_TITLE - 2)
+
+    # Single shared legend at bottom
+    handles = _swap_legend_handles(swap_class_subject)
+    handles.append(plt.Line2D([0], [0], color="black", lw=2.5,
+                              label="Cohort median + IQR"))
+    fig.legend(handles=handles, loc="lower center",
+               bbox_to_anchor=(0.5, -0.02),
+               ncol=4, fontsize=FS_TICK - 1, frameon=True)
+
+    fig.tight_layout(rect=[0, 0.05, 1, 1])
+    out = FIG_DIR / "H_p_norm_option_b_vs_with_absent.png"
     savefig_pub(fig, out)
     savefig_pub(fig, out.with_suffix(".pdf"))
     plt.close(fig)
@@ -532,12 +657,16 @@ def main() -> None:
     data = _collect_curves(records)
 
     p1 = fig_cohort_overlay_normalized(data)
+    absent_data = _collect_with_absent_curves(records)
+    p1b = fig_option_b_vs_with_absent(data, absent_data, records)
     p2 = fig_delta_by_swapclass_box(data)
     p3 = fig_endpoint_percentile_panel(data)
     p4 = fig_swap_subset_per_subject(records)
     p5 = fig_bridge_with_rank_displacement(data)
 
     print(f"Wrote {p1.relative_to(WORKTREE_ROOT)}")
+    if p1b:
+        print(f"Wrote {p1b.relative_to(WORKTREE_ROOT)}")
     print(f"Wrote {p2.relative_to(WORKTREE_ROOT)}")
     print(f"Wrote {p3.relative_to(WORKTREE_ROOT)}")
     print(f"Wrote {p4.relative_to(WORKTREE_ROOT)}")
