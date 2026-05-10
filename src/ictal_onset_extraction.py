@@ -278,6 +278,10 @@ def extract_seizure_window(
     results_root = Path(results_root)
     sz_csv, blk_csv = _resolve_inventory_paths(results_root, dataset=dataset)
     sz_rows = [r for r in _read_csv_rows(sz_csv) if r["subject"] == sid]
+    # The join key carries the same value (the EDF-stem-equivalent block id) on
+    # both inventories, but the COLUMN NAMES differ between datasets. Yuquan
+    # seizure inventory uses `record`; both block inventories use `block_id`.
+    # Hence two field-name variables instead of one.
     if dataset == "epilepsiae":
         sz_rows = [r for r in sz_rows if r.get("clin_onset_epoch")]
         sz_rows.sort(key=lambda r: float(r["clin_onset_epoch"]))
@@ -302,8 +306,11 @@ def extract_seizure_window(
     eeg_onset_epoch = (
         float(sz["eeg_onset_epoch"]) if (dataset == "epilepsiae" and sz.get("eeg_onset_epoch")) else None
     )
-    # For yuquan, eeg_onset is the only annotation; treat it as the clinical
-    # onset reference (same as epilepsiae's clin_onset_epoch in the contract).
+    # For yuquan, eeg_onset is the ONLY annotation, and we already used it as
+    # `clin_onset_epoch` above. Setting `sw.eeg_onset_epoch = None` is the
+    # intentional signal to downstream `resolve_baseline_window` that there is
+    # NO separate electrographic-onset annotation distinct from the clinical
+    # reference — so it falls back to the legacy [-pre_sec, -buffer_sec] window.
 
     blk_rows = [
         r for r in _read_csv_rows(blk_csv)
