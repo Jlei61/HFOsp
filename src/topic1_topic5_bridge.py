@@ -69,8 +69,18 @@ def load_topic5_subtype_labels(
     with json_path.open() as fh:
         d = json.load(fh)
     band_d = d["per_band"][band]
-    seizure_ids = list(band_d["seizure_ids_kept"])
-    labels = list(band_d["subtype_label"])
+    status = str(band_d.get("status", "unknown"))
+    raw_labels = band_d.get("subtype_label")
+    raw_ids = band_d.get("seizure_ids_kept") or []
+    if raw_labels is None:
+        # status=insufficient_n or similar — no cluster labels available
+        return {
+            "seizure_id_to_subtype": {},
+            "n_subtypes": int(band_d.get("n_subtypes", 0)),
+            "status": status,
+        }
+    seizure_ids = list(raw_ids)
+    labels = list(raw_labels)
     if len(seizure_ids) != len(labels):
         raise ValueError(
             f"length mismatch in {json_path}: "
@@ -78,8 +88,8 @@ def load_topic5_subtype_labels(
         )
     return {
         "seizure_id_to_subtype": dict(zip(seizure_ids, [int(x) for x in labels])),
-        "n_subtypes": int(band_d["n_subtypes"]),
-        "status": str(band_d["status"]),
+        "n_subtypes": int(band_d.get("n_subtypes", 0)),
+        "status": status,
     }
 
 
