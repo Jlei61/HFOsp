@@ -220,22 +220,45 @@ def select_k_silhouette_with_min_size(
 
 
 def channelwise_permutation_null(
-    onset_matrix: np.ndarray,
+    feature_matrix: np.ndarray,
     labels: np.ndarray,
     *,
     B: int = 50,
     rng_seed: int = 0,
     min_overlap: int = 5,
+    bins_per_channel: int = 1,
 ) -> float:
-    """Gap = log(within_disp_observed) − median(log(within_disp_perm)).
+    """Gap = median(log(within_disp_perm)) − log(within_disp_observed).
 
-    Permutation preserves each channel's marginal distribution AND its
-    NaN-pattern (only finite values are shuffled within the row), and
-    breaks cross-channel seizure pattern. Negative gap means the
-    observed clustering is no tighter than channel-shuffled noise.
+    Positive gap = observed clusters tighter than channel-shuffled null.
+    Negative gap = observed no tighter than null.
+
+    Permutation modes (per ``bins_per_channel``):
+
+    - ``bins_per_channel == 1``: per-row shuffle. Each channel's finite
+      values are reshuffled across seizures (NaN positions preserved).
+      Used for t_onset feature where each row is a channel.
+
+    - ``bins_per_channel > 1``: channel-BLOCK shuffle. For each channel,
+      its ``bins_per_channel`` rows together pick up a random seizure
+      permutation — the (channel, all-bins) vector moves as one unit.
+      Preserves within-channel multi-bin covariance, which is essential
+      for z-ER tensor feature. Per-row independent shuffle would break
+      the joint structure across the 5 bins of the same channel and
+      systematically bias the null (audit 2026-05-10).
+
+    feature_matrix shape: ``(n_features, n_seizures)`` where
+    ``n_features = n_channels * bins_per_channel``.
     """
-    onset = np.asarray(onset_matrix, dtype=np.float64)
+    onset = np.asarray(feature_matrix, dtype=np.float64)
     labels = np.asarray(labels)
+    n_features, n_sz = onset.shape
+    bpc = int(bins_per_channel)
+    if bpc < 1 or n_features % bpc != 0:
+        raise ValueError(
+            f"bins_per_channel={bpc} does not divide n_features={n_features}"
+        )
+    n_blocks = n_features // bpc
 
     def _within_disp(D_obs: np.ndarray, lbl: np.ndarray) -> float:
         total = 0.0
@@ -259,13 +282,22 @@ def channelwise_permutation_null(
     log_wd_perm = []
     for _ in range(int(B)):
         perm = onset.copy()
-        for ch in range(perm.shape[0]):
-            row = perm[ch]
-            finite_idx = np.where(np.isfinite(row))[0]
-            if finite_idx.size < 2:
-                continue
-            shuffled_vals = rng.permutation(row[finite_idx])
-            perm[ch, finite_idx] = shuffled_vals
+        if bpc == 1:
+            # Per-row finite-value shuffle (preserves NaN positions)
+            for ch in range(n_features):
+                row = perm[ch]
+                finite_idx = np.where(np.isfinite(row))[0]
+                if finite_idx.size < 2:
+                    continue
+                shuffled_vals = rng.permutation(row[finite_idx])
+                perm[ch, finite_idx] = shuffled_vals
+        else:
+            # Channel-block coherent shuffle
+            for blk in range(n_blocks):
+                rs = blk * bpc
+                re = rs + bpc
+                sz_perm = rng.permutation(n_sz)
+                perm[rs:re, :] = perm[rs:re, sz_perm]
         D_p, _, _ = pairwise_spearman_dissim(perm, min_overlap=min_overlap)
         wd = _within_disp(D_p, labels)
         log_wd_perm.append(np.log(max(wd, 1e-12)))
@@ -498,7 +530,7 @@ def cluster_subject_band(
             "D": None, "Z": None,
             "subtype_label": None, "outlier_flag": None,
             "n_subtypes": 0, "subtype_sizes": {}, "n_outliers": 0,
-            "chosen_k": None, "silhouette_k": None, "gap_perm_k": None,
+            "chosen_k": None, "silhouette_k": None, "gap_perm_k": None, "over_split_flag": False,
             "centroids": {},
             "s_sz_overall": None, "s_sz_within_subtype_mean": None,
         }
@@ -529,7 +561,7 @@ def cluster_subject_band(
             "D": None, "Z": None,
             "subtype_label": None, "outlier_flag": None,
             "n_subtypes": 0, "subtype_sizes": {}, "n_outliers": 0,
-            "chosen_k": None, "silhouette_k": None, "gap_perm_k": None,
+            "chosen_k": None, "silhouette_k": None, "gap_perm_k": None, "over_split_flag": False,
             "centroids": {},
             "s_sz_overall": None, "s_sz_within_subtype_mean": None,
         }
@@ -581,6 +613,7 @@ def cluster_subject_band(
             "chosen_k": None,
             "silhouette_k": None,
             "gap_perm_k": gap_perm,
+            "over_split_flag": False,
             "centroids": {},
             "s_sz_overall": (None if not np.isfinite(s_overall) else float(1.0 - s_overall)),
             "s_sz_within_subtype_mean": None,
@@ -631,12 +664,43 @@ def cluster_subject_band(
         "chosen_k": int(chosen_k),
         "silhouette_k": (None if silhouette is None else float(silhouette)),
         "gap_perm_k": (None if gap_perm is None else float(gap_perm)),
+        "over_split_flag": _compute_over_split_flag(
+            n_subtypes, n_eff, silhouette, gap_perm,
+        ),
         "centroids": centroids,
         "s_sz_overall": (None if not np.isfinite(s_overall) else float(1.0 - s_overall)),
         "s_sz_within_subtype_mean": (
             None if not np.isfinite(s_within) else float(1.0 - s_within)
         ),
     }
+
+
+def _compute_over_split_flag(
+    n_subtypes: int,
+    n_effective: int,
+    silhouette: Optional[float],
+    gap_perm: Optional[float] = None,
+) -> bool:
+    """Descriptive flag (NOT a gate). True only when BOTH:
+      (a) gap_perm_k < 0.10  — within-cluster dispersion not lower than null
+      (b) n_subtypes / n_effective > 0.5 — sample sliced into mini-clusters
+
+    Why AND, why these thresholds (2026-05-10 cohort review):
+      OR-rule with silhouette<0.2 produced 3/32 false positives
+      (548 gamma k=7, 548 broad k=3, 1146 broad k=3) — all confirmed real
+      subtypes by visual review. silhouette absolute thresholds do not
+      transfer to high-dimensional Spearman feature space (distances are
+      compressed). gap_perm is permutation-null-relative and cross-feature
+      comparable; ratio>0.5 catches genuine fragmentation. AND ensures
+      both "weak vs null" AND "fragmented" must hold. silhouette argument
+      retained for backward compatibility but unused.
+    """
+    if n_subtypes < 2 or n_effective <= 0:
+        return False
+    ratio = n_subtypes / float(n_effective)
+    if gap_perm is None or gap_perm >= 0.10:
+        return False
+    return ratio > 0.5
 
 
 def _impute_finite_with_median(D: np.ndarray) -> np.ndarray:
@@ -659,6 +723,202 @@ def _impute_finite_with_median(D: np.ndarray) -> np.ndarray:
                 out[j, i] = med
     np.fill_diagonal(out, 0.0)
     return out
+
+
+def cluster_subject_band_zer(
+    feature_matrix: np.ndarray,
+    seizure_ids: Sequence[str],
+    *,
+    band: str,
+    channels_for_centroid: Optional[Sequence[str]] = None,
+    n_bins: Optional[int] = None,
+    min_overlap: int = DEFAULT_MIN_OVERLAP,
+    pair_isolated_threshold: float = DEFAULT_PAIR_ISOLATED_THRESHOLD,
+    min_subtype_size: int = DEFAULT_MIN_SUBTYPE_SIZE,
+    min_n_ok: int = DEFAULT_MIN_N_OK,
+    permutation_B: int = 50,
+    permutation_seed: int = 0,
+) -> Dict[str, Any]:
+    """End-to-end clustering on a pre-computed z-ER binned feature matrix.
+
+    Same pipeline as ``cluster_subject_band`` but takes a feature matrix
+    of shape (n_features, n_seizures) where n_features = n_channels × n_bins.
+    Distance / linkage / k-selection / outlier-split unchanged from the
+    t_onset path — only the feature representation differs.
+
+    Centroids: per-subtype mean feature vector, optionally reshaped to
+    (n_channels, n_bins) tensor if ``channels_for_centroid`` and ``n_bins``
+    are provided.
+    """
+    from typing import Sequence as _Seq  # noqa
+    from sklearn.metrics import silhouette_score  # noqa  (re-import locally)
+
+    feature_matrix = np.asarray(feature_matrix, dtype=np.float64)
+    n_features, n_sz = feature_matrix.shape
+    if n_sz < int(min_n_ok):
+        return _empty_band_result(
+            band, "insufficient_n",
+            n_sz_total=n_sz, n_sz_ok=n_sz,
+            seizure_ids_kept=[],
+            seizure_ids_dropped={"by_status": [], "by_pair_isolated": []},
+        )
+
+    # Distance + pair_isolated
+    D, _, _ = pairwise_spearman_dissim(feature_matrix, min_overlap=min_overlap)
+    isolated = pair_isolated_mask(D, threshold=pair_isolated_threshold)
+    keep_idx = np.where(~isolated)[0]
+    n_eff = int(keep_idx.size)
+    seizure_ids_dropped = {
+        "by_status": [],  # caller already filtered
+        "by_pair_isolated": [seizure_ids[j] for j in np.where(isolated)[0]],
+    }
+    if n_eff < int(min_n_ok):
+        status_post = "insufficient_post_filter" if n_eff > 0 else "all_pair_isolated"
+        return _empty_band_result(
+            band, status_post,
+            n_sz_total=n_sz, n_sz_ok=n_sz,
+            n_sz_pair_isolated=int(isolated.sum()),
+            n_sz_effective=n_eff,
+            seizure_ids_kept=[seizure_ids[j] for j in keep_idx],
+            seizure_ids_dropped=seizure_ids_dropped,
+        )
+
+    feat_kept = feature_matrix[:, keep_idx]
+    sz_ids_kept = [seizure_ids[j] for j in keep_idx]
+    D_kept = _impute_finite_with_median(D[np.ix_(keep_idx, keep_idx)])
+
+    max_k = max(2, int(np.ceil(n_eff / 3.0)))
+    labels_by_k: Dict[int, np.ndarray] = {}
+    for k in range(2, max_k + 1):
+        try:
+            labels_by_k[k] = cluster_from_distance_upgma(D_kept, k=k)
+        except (ValueError, RuntimeError):
+            continue
+
+    chosen_k, scores = select_k_silhouette_with_min_size(
+        D_kept, labels_by_k,
+        min_cluster_size=min_subtype_size, max_k=max_k,
+    )
+    Z = upgma_linkage_matrix(D_kept).tolist()
+
+    if chosen_k is None:
+        s_overall = _overall_pairwise_mean(D_kept)
+        return {
+            "band": band, "feature_mode": "zer_binned",
+            "status": "ok",
+            "n_sz_total": n_sz, "n_sz_ok": n_sz,
+            "n_sz_pair_isolated": int(isolated.sum()),
+            "n_sz_effective": n_eff,
+            "seizure_ids_kept": sz_ids_kept,
+            "seizure_ids_dropped": seizure_ids_dropped,
+            "D": D_kept.tolist(), "Z": Z,
+            "subtype_label": np.full(n_eff, -1).tolist(),
+            "outlier_flag": np.ones(n_eff, dtype=bool).tolist(),
+            "n_subtypes": 0, "subtype_sizes": {},
+            "n_outliers": int(n_eff),
+            "chosen_k": None, "silhouette_k": None, "gap_perm_k": None, "over_split_flag": False,
+            "centroids": {},
+            "s_sz_overall": (None if not np.isfinite(s_overall) else float(1.0 - s_overall)),
+            "s_sz_within_subtype_mean": None,
+        }
+
+    cluster_labels = labels_by_k[chosen_k]
+    subtype_label, outlier_flag = assign_outliers_and_subtypes(
+        cluster_labels, min_subtype_size=min_subtype_size,
+    )
+    # Centroids: per-subtype mean feature vector
+    centroids: Dict[str, Any] = {}
+    for s in sorted({int(x) for x in subtype_label if x >= 0}):
+        members = np.where(subtype_label == s)[0]
+        if members.size == 0:
+            continue
+        with np.errstate(invalid="ignore"):
+            mean_vec = np.nanmean(feat_kept[:, members], axis=1)
+        if channels_for_centroid is not None and n_bins:
+            n_ch_c = len(channels_for_centroid)
+            if n_ch_c * n_bins != n_features:
+                centroid_block: Any = mean_vec.tolist()
+            else:
+                tensor = mean_vec.reshape(n_ch_c, n_bins)
+                centroid_block = {
+                    ch: tensor[i].tolist() for i, ch in enumerate(channels_for_centroid)
+                }
+        else:
+            centroid_block = mean_vec.tolist()
+        centroids[f"subtype_{s}"] = centroid_block
+
+    n_subtypes = len({int(s) for s in subtype_label if s >= 0})
+    subtype_sizes = {
+        str(int(s)): int(np.sum(subtype_label == s))
+        for s in sorted({int(x) for x in subtype_label if x >= 0})
+    }
+    n_outliers = int(outlier_flag.sum())
+    silhouette = scores.get(chosen_k)
+
+    gap_perm = None
+    if permutation_B > 0:
+        try:
+            gap_perm = channelwise_permutation_null(
+                feat_kept, cluster_labels,
+                B=permutation_B, rng_seed=permutation_seed,
+                min_overlap=min_overlap,
+                bins_per_channel=int(n_bins),
+            )
+        except Exception:
+            gap_perm = None
+
+    s_overall = _overall_pairwise_mean(D_kept)
+    s_within = _within_subtype_pairwise_mean(D_kept, subtype_label)
+    return {
+        "band": band, "feature_mode": "zer_binned",
+        "status": "ok",
+        "n_sz_total": n_sz, "n_sz_ok": n_sz,
+        "n_sz_pair_isolated": int(isolated.sum()),
+        "n_sz_effective": n_eff,
+        "seizure_ids_kept": sz_ids_kept,
+        "seizure_ids_dropped": seizure_ids_dropped,
+        "D": D_kept.tolist(), "Z": Z,
+        "subtype_label": subtype_label.tolist(),
+        "outlier_flag": outlier_flag.tolist(),
+        "n_subtypes": n_subtypes,
+        "subtype_sizes": subtype_sizes,
+        "n_outliers": n_outliers,
+        "chosen_k": int(chosen_k),
+        "silhouette_k": (None if silhouette is None else float(silhouette)),
+        "gap_perm_k": (None if gap_perm is None else float(gap_perm)),
+        "over_split_flag": _compute_over_split_flag(
+            n_subtypes, n_eff, silhouette, gap_perm,
+        ),
+        "centroids": centroids,
+        "s_sz_overall": (None if not np.isfinite(s_overall) else float(1.0 - s_overall)),
+        "s_sz_within_subtype_mean": (
+            None if not np.isfinite(s_within) else float(1.0 - s_within)
+        ),
+    }
+
+
+def _empty_band_result(
+    band: str, status: str, *,
+    n_sz_total: int, n_sz_ok: int,
+    n_sz_pair_isolated: int = 0, n_sz_effective: int = 0,
+    seizure_ids_kept: List[str] = None,
+    seizure_ids_dropped: Dict[str, List[str]] = None,
+) -> Dict[str, Any]:
+    return {
+        "band": band, "feature_mode": "zer_binned",
+        "status": status,
+        "n_sz_total": n_sz_total, "n_sz_ok": n_sz_ok,
+        "n_sz_pair_isolated": n_sz_pair_isolated,
+        "n_sz_effective": n_sz_effective,
+        "seizure_ids_kept": seizure_ids_kept or [],
+        "seizure_ids_dropped": seizure_ids_dropped or {"by_status": [], "by_pair_isolated": []},
+        "D": None, "Z": None,
+        "subtype_label": None, "outlier_flag": None,
+        "n_subtypes": 0, "subtype_sizes": {}, "n_outliers": 0,
+        "chosen_k": None, "silhouette_k": None, "gap_perm_k": None, "over_split_flag": False,
+        "centroids": {},
+        "s_sz_overall": None, "s_sz_within_subtype_mean": None,
+    }
 
 
 def cluster_subject(
