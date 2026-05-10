@@ -31,5 +31,8 @@
     "swap_class_concordant_fraction": 0.686
   },
   "interpretation": "Pipeline has a structural null floor due to selection bias in assign_events_to_templates: even on rank-shuffled second-half data, the pipeline returns template_spearman ~0.75 and endpoint_position_recall ~0.67 because random events still get assigned to nearest cluster, and the mean rank of selected events drifts toward that cluster's template. The cohort medians sit ~0.17 above the null floor on these two metrics. swap_class_concordant has the cleanest signal: real 0.686 vs null 0.360 = +33pp. Calibration based on ONE subject (epilepsiae_548); per-subject null floors vary with n_valid_channels and n_events. Order-of-magnitude calibration only — tier rebalancing requires per-subject nulls in a future iteration.",
-  "scope_caveat": "This calibration covers the structural pipeline null. It does NOT address (a) week-month timescale H_drift, (b) channel-selection circularity (lagPat is already high-HI selected), (c) per-subject n_valid heterogeneity."
+  "scope_caveat": "This calibration covers the structural pipeline null. It does NOT address (a) week-month timescale H_drift, (b) channel-selection circularity (lagPat is already high-HI selected), (c) per-subject n_valid heterogeneity.",
+  "status": "single_subject_supportive_caveat",
+  "NOT": "cohort_level_calibration_artifact",
+  "user_review_2026_05_10": "Per-subject null floor varies with n_valid / n_events. Single-subject null cannot support cohort-wide calibrated gain. Use only as supportive caveat. Paper-level tier rebalancing requires per-subject null or stratified null."
 }

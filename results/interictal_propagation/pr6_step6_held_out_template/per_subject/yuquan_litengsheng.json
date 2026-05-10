@@ -1189,13 +1189,13 @@
   "validation": {
     "template_spearman": 0.7595652173913042,
     "endpoint_position_recall": 0.5,
-    "cluster_assignment_purity": 1.0,
     "swap_class_concordant": false,
     "tier": "weak",
     "hungarian_match_corrs": [
       0.6452173913043477,
       0.8739130434782607
-    ]
+    ],
+    "assignment_coverage": 1.0
   },
   "h1_descriptive": {
     "0": {

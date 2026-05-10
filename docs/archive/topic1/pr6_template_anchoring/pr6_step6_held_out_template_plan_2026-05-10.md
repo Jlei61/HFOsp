@@ -69,7 +69,7 @@ PR-6 主线（Step 2 / 4 / 4b / 5a / 5b / 3）所有结果均在**全数据**上
 |---|---|---|
 | `template_spearman` | `mean_k(ρ_Spearman(template_first[k], template_second_projected[k]))`，跨 valid channels | strong > 0.7（PR-2.5 阈值复用） |
 | `endpoint_position_recall` | 对每 cluster k，`#{c ∈ endpoint_first[k] : c 在 template_second_projected[k] 中仍处于 top-3（c 原本在 top）或 bottom-3（c 原本在 bottom）} / |endpoint_first[k]|`，再 mean over k | strong > 0.6；NULL ≈ 6/n_valid（n_valid=10 → 0.6 即 baseline） |
-| `cluster_assignment_purity` | `#{e ∈ second-half events : assigned_second[e] ≠ -1 AND Spearman 到 nearest > Spearman 到 second nearest by ≥ 0.1} / n_events_second`；descriptive | 报告分布，不设阈值 |
+| `assignment_coverage` | `#{e ∈ second-half events : assigned_second[e] ≠ -1} / n_events_second`；**descriptive only，不进 tier 规则**。⚠️ 原 plan 名为 `cluster_assignment_purity` 并要求 nearest vs second-nearest gap ≥ 0.1——实现中**未做** gap 计算（user review 2026-05-10 指出）；改名 `assignment_coverage` 与实际语义一致；后续若需 gap-margin purity 应补 `assignment_purity` 作 stricter sibling，不替换 coverage。 | 报告分布，不设阈值 |
 | `swap_class_concordant` | `swap_class_first == swap_class_second_projected`（categorical 三值），同时报告 (strict↔candidate, candidate↔none, strict↔none) 三类不一致频次 | strong = concordant; flip = fail |
 
 **注**：H1 anchoring delta 本身在 ε_first 固定 + clinical SOZ 固定下是同一个数，跨半段不变。Step 6 不"重跑 H1"——held-out 的 burden 全部压在 endpoint 几何稳定性 + swap_class concordance 上。如果这两项都稳，则 PR-6 全数据 H1 NULL 的 robustness 得到支持；如果两项都漂，则全数据 H1 / §8 / §9 一并需要 caveat。
@@ -146,7 +146,7 @@ def compute_held_out_endpoint_validation(
     Returns:
       - first_half: {labels, templates, endpoints, swap_class, decision_k, p_fw, day_night_ratio}
       - second_half: {assigned, template_projected, swap_class_projected, decision_k_projected, p_fw_projected, day_night_ratio, n_unassignable}
-      - validation: {template_spearman, endpoint_position_recall, cluster_assignment_purity, swap_class_concordant, tier}
+      - validation: {template_spearman, endpoint_position_recall, assignment_coverage, swap_class_concordant, tier}
       - confound: {day_night_imbalance}
     """
 ```

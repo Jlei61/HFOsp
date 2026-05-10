@@ -2254,7 +2254,12 @@ def compute_held_out_endpoint_validation(
         float(np.mean(endpoint_recalls)) if endpoint_recalls else float("nan")
     )
 
-    cluster_assignment_purity = (
+    # `assignment_coverage` = fraction of second-half events with a valid
+    # nearest-template assignment (assigned_second != -1). Plan §7.1
+    # originally specified a stricter purity (nearest vs second-nearest gap
+    # >= 0.1); not implemented in this iteration. Descriptive only — does
+    # not enter the tier rule. See user review 2026-05-10.
+    assignment_coverage = (
         float(n_assignable_second) / float(max(int(idx_second.size), 1))
     )
 
@@ -2337,7 +2342,7 @@ def compute_held_out_endpoint_validation(
         "validation": {
             "template_spearman": template_spearman,
             "endpoint_position_recall": endpoint_position_recall,
-            "cluster_assignment_purity": cluster_assignment_purity,
+            "assignment_coverage": assignment_coverage,
             "swap_class_concordant": swap_class_concordant,
             "tier": tier,
             "hungarian_match_corrs": match["matched_corrs"],

@@ -40,9 +40,46 @@ WORKTREE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(WORKTREE_ROOT))
 
 from src.interictal_propagation import (  # noqa: E402
+    _classify_day_night,
     compute_held_out_endpoint_validation,
     load_subject_propagation_events,
 )
+
+
+# Day/night windows are uniform across both datasets per AGENTS.md "Day/night
+# rule for current Epilepsiae analysis: 08:00-20:00 = day, else night" and
+# the same convention applies to Yuquan.
+DAY_START_HOUR = 8
+NIGHT_START_HOUR = 20
+
+DATASET_TIMEZONE = {
+    "yuquan": "Asia/Shanghai",
+    "epilepsiae": "Europe/Berlin",  # current mounted UKLFR cohort
+}
+
+
+def _compute_day_night_labels(
+    event_abs_times: np.ndarray, dataset: str
+) -> np.ndarray:
+    """Per-event 'day' / 'night' / 'unknown' labels using the same rule as
+    src.interictal_propagation._classify_day_night."""
+    tz = DATASET_TIMEZONE.get(dataset)
+    if tz is None:
+        return np.array(
+            ["unknown"] * len(event_abs_times), dtype=object
+        )
+    return np.asarray(
+        [
+            _classify_day_night(
+                float(t),
+                timezone_name=tz,
+                day_start_hour=DAY_START_HOUR,
+                night_start_hour=NIGHT_START_HOUR,
+            )
+            for t in event_abs_times
+        ],
+        dtype=object,
+    )
 
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
@@ -162,7 +199,12 @@ def _derive_valid_mask(
     return np.zeros(n_channels, dtype=bool), "none"
 
 
-def _process_one(stem: str, soz_lookup: Dict[str, Dict[str, Set[str]]]) -> Optional[dict]:
+def _process_one(
+    stem: str,
+    soz_lookup: Dict[str, Dict[str, Set[str]]],
+    *,
+    balance_day_night: bool = False,
+) -> Optional[dict]:
     dataset, subject = _split_stem(stem)
     pr2_path = PR2_DIR / f"{stem}.json"
     pr6_path = PR6_DIR / f"{stem}.json"
@@ -251,6 +293,10 @@ def _process_one(stem: str, soz_lookup: Dict[str, Dict[str, Set[str]]]) -> Optio
     valid_event_indices = np.arange(ranks.shape[1], dtype=int)
     soz_channels = soz_lookup.get(dataset, {}).get(str(subject), set())
 
+    day_night_labels: Optional[np.ndarray] = None
+    if balance_day_night:
+        day_night_labels = _compute_day_night_labels(event_abs_times, dataset)
+
     try:
         result = compute_held_out_endpoint_validation(
             ranks=ranks,
@@ -263,6 +309,8 @@ def _process_one(stem: str, soz_lookup: Dict[str, Dict[str, Set[str]]]) -> Optio
             channel_names=channel_names,
             soz_channels=soz_channels,
             valid_mask=valid_mask,
+            day_night_labels=day_night_labels,
+            balance_day_night=balance_day_night,
         )
     except Exception as exc:  # noqa: BLE001
         return {
@@ -313,7 +361,7 @@ def _slim_summary(record: dict) -> dict:
         ),
         "template_spearman": val.get("template_spearman"),
         "endpoint_position_recall": val.get("endpoint_position_recall"),
-        "cluster_assignment_purity": val.get("cluster_assignment_purity"),
+        "assignment_coverage": val.get("assignment_coverage"),
         "swap_class_concordant": val.get("swap_class_concordant"),
         "tier": val.get("tier"),
     }
@@ -342,7 +390,7 @@ def _cohort_stats(slim_records: List[dict]) -> dict:
 
     spear = _vals("template_spearman")
     recall = _vals("endpoint_position_recall")
-    purity = _vals("cluster_assignment_purity")
+    coverage = _vals("assignment_coverage")
     n_concord = sum(1 for r in valid if r.get("swap_class_concordant") is True)
 
     return {
@@ -365,12 +413,12 @@ def _cohort_stats(slim_records: List[dict]) -> dict:
             else None,
             "n": int(recall.size),
         },
-        "cluster_assignment_purity": {
-            "median": float(np.median(purity)) if purity.size else None,
-            "iqr": [float(np.percentile(purity, 25)), float(np.percentile(purity, 75))]
-            if purity.size
+        "assignment_coverage": {
+            "median": float(np.median(coverage)) if coverage.size else None,
+            "iqr": [float(np.percentile(coverage, 25)), float(np.percentile(coverage, 75))]
+            if coverage.size
             else None,
-            "n": int(purity.size),
+            "n": int(coverage.size),
         },
         "swap_class_concordant_count": n_concord,
         "swap_class_concordant_fraction": (n_concord / n) if n > 0 else None,
@@ -421,19 +469,33 @@ def main() -> None:
         "--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR,
         help=f"Override output (default {DEFAULT_OUTPUT_DIR})",
     )
+    ap.add_argument(
+        "--day-night-balanced", action="store_true",
+        help="Plan §6.5 sensitivity: split day events and night events "
+             "independently at their own medians, then union per half "
+             "(controls for day/night imbalance across the median split). "
+             "Adds Asia/Shanghai (yuquan) / Europe/Berlin (epilepsiae) "
+             "timezone resolution per event; 08:00-20:00 = day per "
+             "AGENTS.md.",
+    )
     args = ap.parse_args()
 
     stems = _resolve_cohort(args)
     soz_lookup = _load_soz_lookup()
 
     out_dir: Path = args.output_dir
+    if args.day_night_balanced:
+        # Sensitivity outputs go to a sibling dir to avoid clobbering main run.
+        out_dir = out_dir.with_name(out_dir.name + "_day_night_balanced")
     per_subject_dir = out_dir / "per_subject"
     out_dir.mkdir(parents=True, exist_ok=True)
     per_subject_dir.mkdir(parents=True, exist_ok=True)
 
     slim_records: List[dict] = []
     for stem in stems:
-        record = _process_one(stem, soz_lookup)
+        record = _process_one(
+            stem, soz_lookup, balance_day_night=args.day_night_balanced
+        )
         if record is None:
             print(f"[{stem}] skipped (None)")
             continue
@@ -450,7 +512,7 @@ def main() -> None:
                 f"[{stem}] tier={slim['tier']} "
                 f"spearman={slim['template_spearman']:.3f} "
                 f"recall={slim['endpoint_position_recall']:.3f} "
-                f"purity={slim['cluster_assignment_purity']:.3f} "
+                f"coverage={slim['assignment_coverage']:.3f} "
                 f"swap_concord={slim['swap_class_concordant']}"
             )
 

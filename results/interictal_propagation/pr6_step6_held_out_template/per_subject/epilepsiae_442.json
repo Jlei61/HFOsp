@@ -3396,13 +3396,13 @@
   "validation": {
     "template_spearman": 0.9392857142857142,
     "endpoint_position_recall": 0.5833333333333333,
-    "cluster_assignment_purity": 1.0,
     "swap_class_concordant": true,
     "tier": "moderate",
     "hungarian_match_corrs": [
       0.907142857142857,
       0.9714285714285713
-    ]
+    ],
+    "assignment_coverage": 1.0
   },
   "h1_descriptive": {
     "0": {
