@@ -213,6 +213,7 @@ def _read_csv_rows(csv_path: Path) -> list[dict]:
 
 def _resolve_inventory_paths(
     results_root: Path,
+    dataset: str = "epilepsiae",
 ) -> Tuple[Path, Path]:
     """Return (seizure_inventory_csv, block_inventory_csv) under ``results_root``.
 
@@ -220,18 +221,19 @@ def _resolve_inventory_paths(
     ``results/`` (legacy layout that ``src.epilepsiae_dataset`` writes by
     default).
     """
-
+    seizure_name = f"{dataset}_seizure_inventory.csv"
+    block_name = f"{dataset}_block_inventory.csv"
     candidates = (
-        results_root / "dataset_inventory" / "epilepsiae_seizure_inventory.csv",
-        results_root / "epilepsiae_seizure_inventory.csv",
+        results_root / "dataset_inventory" / seizure_name,
+        results_root / seizure_name,
     )
     for sz in candidates:
         if sz.exists():
-            blk = sz.with_name("epilepsiae_block_inventory.csv")
+            blk = sz.with_name(block_name)
             if blk.exists():
                 return sz, blk
     raise FileNotFoundError(
-        f"epilepsiae_seizure_inventory.csv not found under {results_root}"
+        f"{seizure_name} not found under {results_root}"
     )
 
 
@@ -268,37 +270,63 @@ def extract_seizure_window(
     if "/" not in subject:
         raise ValueError(f"subject must be '<dataset>/<id>', got {subject!r}")
     dataset, sid = subject.split("/", 1)
-    if dataset != "epilepsiae":
+    if dataset not in {"epilepsiae", "yuquan"}:
         raise NotImplementedError(
-            f"extract_seizure_window currently only supports epilepsiae; got {dataset}"
+            f"extract_seizure_window supports {{epilepsiae, yuquan}}; got {dataset}"
         )
 
     results_root = Path(results_root)
-    sz_csv, blk_csv = _resolve_inventory_paths(results_root)
+    sz_csv, blk_csv = _resolve_inventory_paths(results_root, dataset=dataset)
     sz_rows = [r for r in _read_csv_rows(sz_csv) if r["subject"] == sid]
-    sz_rows = [r for r in sz_rows if r.get("clin_onset_epoch")]
-    sz_rows.sort(key=lambda r: float(r["clin_onset_epoch"]))
+    if dataset == "epilepsiae":
+        sz_rows = [r for r in sz_rows if r.get("clin_onset_epoch")]
+        sz_rows.sort(key=lambda r: float(r["clin_onset_epoch"]))
+        onset_field = "clin_onset_epoch"
+        seizure_join_field = "block_id"
+        block_join_field = "block_id"
+    else:  # yuquan
+        sz_rows = [r for r in sz_rows if r.get("eeg_onset_epoch")]
+        sz_rows.sort(key=lambda r: float(r["eeg_onset_epoch"]))
+        onset_field = "eeg_onset_epoch"
+        seizure_join_field = "record"
+        block_join_field = "block_id"
     if not sz_rows:
-        raise ValueError(f"No seizures with clin_onset_epoch found for {subject}")
+        raise ValueError(f"No seizures with onset_epoch found for {subject}")
     if not (0 <= seizure_idx < len(sz_rows)):
         raise IndexError(
             f"seizure_idx={seizure_idx} out of range for {subject} (n={len(sz_rows)})"
         )
     sz = sz_rows[seizure_idx]
-    block_id = sz["block_id"]
-    clin_onset_epoch = float(sz["clin_onset_epoch"])
-    eeg_onset_epoch = float(sz["eeg_onset_epoch"]) if sz.get("eeg_onset_epoch") else None
+    block_id = sz[seizure_join_field]
+    clin_onset_epoch = float(sz[onset_field])
+    eeg_onset_epoch = (
+        float(sz["eeg_onset_epoch"]) if (dataset == "epilepsiae" and sz.get("eeg_onset_epoch")) else None
+    )
+    # For yuquan, eeg_onset is the only annotation; treat it as the clinical
+    # onset reference (same as epilepsiae's clin_onset_epoch in the contract).
 
-    blk_rows = [r for r in _read_csv_rows(blk_csv) if r["subject"] == sid and r["block_id"] == block_id]
+    blk_rows = [
+        r for r in _read_csv_rows(blk_csv)
+        if r["subject"] == sid and r[block_join_field] == block_id
+    ]
     if not blk_rows:
-        raise ValueError(f"block_id={block_id} not found in block inventory for {subject}")
+        raise ValueError(
+            f"{block_join_field}={block_id} not found in block inventory for {subject}"
+        )
     blk = blk_rows[0]
     block_start_epoch = float(blk["block_start_epoch"])
     block_end_epoch = float(blk["block_end_epoch"])
-    head_path = blk["head_path"]
-    data_path = blk["data_path"]
-    if not head_path or not data_path:
-        raise ValueError(f"block {block_id} missing head/data path in inventory")
+
+    if dataset == "epilepsiae":
+        head_path = blk["head_path"]
+        data_path = blk["data_path"]
+        if not head_path or not data_path:
+            raise ValueError(f"block {block_id} missing head/data path in inventory")
+    else:  # yuquan
+        head_path = ""
+        data_path = blk.get("edf_path") or blk.get("data_path")
+        if not data_path:
+            raise ValueError(f"record {block_id} missing edf_path in yuquan inventory")
 
     win_start_epoch = clin_onset_epoch - float(pre_sec)
     win_end_epoch = clin_onset_epoch + float(post_sec)
@@ -315,14 +343,19 @@ def extract_seizure_window(
             f"upstream caller must drop this seizure"
         )
 
-    from src.preprocessing import load_epilepsiae_block
+    if dataset == "epilepsiae":
+        from src.preprocessing import load_epilepsiae_block
+        pre = load_epilepsiae_block(
+            data_path, head_path, reference=reference, segment_sec=200.0,
+        )
+        block_stem_for_window = blk["block_stem"]
+    else:  # yuquan
+        from src.yuquan_dataset import load_yuquan_record
+        pre = load_yuquan_record(
+            data_path, reference=reference, segment_sec=200.0, intracranial_only=True,
+        )
+        block_stem_for_window = blk["block_stem"]
 
-    pre = load_epilepsiae_block(
-        data_path,
-        head_path,
-        reference=reference,
-        segment_sec=200.0,
-    )
     fs = float(pre.sfreq)
     rel_start_sec = win_start_epoch - block_start_epoch
     i0 = int(round(rel_start_sec * fs))
@@ -338,7 +371,7 @@ def extract_seizure_window(
         ch_names=list(pre.ch_names),
         subject=subject,
         seizure_id=sz["seizure_id"],
-        block_stem=blk["block_stem"],
+        block_stem=block_stem_for_window,
         clin_onset_epoch=clin_onset_epoch,
         eeg_onset_epoch=eeg_onset_epoch,
         pre_sec=float(pre_sec),
