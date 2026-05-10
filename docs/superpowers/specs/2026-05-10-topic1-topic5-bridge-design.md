@@ -1,9 +1,11 @@
 # Topic 1 × Topic 5 Bridge — Design Spec (2026-05-10)
 
-> **Tier**：exploratory（"hammer-meets-nail"），cohort N=10，**不开 cohort α 主张**。
-> **Status**：design spec，待 user 审阅 → 进 writing-plans。
-> **Topic**：把 Topic 1 PR-2 内部传播 stable_k=2 "两模板" 与 Topic 5 PR-1 z-ER ictal seizure subtypes 在 within-subject 层面对齐，验证间期模板状态是否在 pre-ictal 窗口内随 ictal subtype 系统改变。
-> **Cohort 限制**：Topic 5 = 16 epilepsiae（yuquan 未建 v2.3 atlas）；Topic 1 stable_k=2 全 cohort 覆盖；交集 audit 已落 `results/topic1_topic5_bridge_audit.csv`。
+> **🔄 PIVOT 2026-05-10 (later same day)**：原 Q1 (state fingerprint) cohort run 落 NULL-locked，但 user audit 判 axis 选错——`last_template` 单 boundary event 噪声主导，`frac_T0/switch_rate` 在 pre-ictal 窗口 median ≤ 4 events 上分辨率几乎为零，pre-ictal 窗口分钟级太短。**§2.1 Q1 弃案**，由新 §10 **Q1' (channel-rank correspondence with swap-channel subset)** 取代。原 Q1 NULL 结果作 phase-1 negative-control 保留（archive: `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md`）。Q1' 不依赖 pre-ictal 窗口（用 ictal channel-onset rank 直接做几何对应）。Cohort 重 audit (`results/topic1_topic5_bridge_q1prime_audit.csv`)：strict swap N=4 + candidate sentinel 1。
+>
+> **Tier**：exploratory（"hammer-meets-nail"），现 case-series N=4 (Q1') + 1 candidate sentinel + Q1 NULL phase-1。
+> **Status**：design spec，phase 1 (Q1) 已实施 + NULL-locked，phase 2 (Q1') 实施中。
+> **Topic**：把 Topic 1 PR-2 内部传播 stable_k=2 "两模板" 与 Topic 5 PR-1 z-ER ictal seizure subtypes 在 within-subject 层面对齐——通过 ictal channel-onset rank 与 swap-channel subset 上的 interictal template rank 的几何对应（Q1'），把"间期刻板时序模板"与"发作子型"做几何匹配。
+> **Cohort 限制**：Topic 5 = 16 epilepsiae（yuquan 未建 v2.3 atlas）；Q1 cohort N=10 (NULL)；Q1' cohort = strict swap_class ∩ γ_gamma≥2 ∩ stable_k=2 = N=4（详见 §10）。
 
 ---
 
@@ -329,15 +331,138 @@ Q2 deferred（§2.3 / §8 项目 1）。Audit-rerun 已完成，无需等待。
 - `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md`
 - `docs/archive/topic1/pr6_supplementary_rank_displacement_results_2026-05-06.md` §8
 - `docs/archive/topic5/pr1_seizure_clustering/pr1_zer_cohort_2026-05-10.md`
-- `results/topic1_topic5_bridge_audit.csv` (本 spec audit)
+- `results/topic1_topic5_bridge_audit.csv` (Q1 phase-1 audit)
+- `results/topic1_topic5_bridge_q1prime_audit.csv` (Q1' phase-2 audit; channel intersection + swap subset)
 - `results/run_logs/cohort_zer_audit_20260510_1045.log` (audit-rerun completed 2026-05-10 16:21)
 
 ---
 
+## 10. **Q1' Redesign — Channel-Rank Correspondence with Swap-Channel Subset Gating** (PIVOT 2026-05-10)
+
+> 取代 §2.1 Q1 (state fingerprint)。原 Q1 NULL-locked 结果作 phase-1 negative-control 保留，但**不再作主 axis**。
+
+### 10.1 一句话主张
+
+对每个 (`stable_k=2` ∩ rank_displacement §8 `swap_class=strict` ∩ topic5 `gamma_n_subtypes ≥ 2`) subject，每 ictal seizure 在 **swap-channel subset (rank_a_dense_full top-decision_k ∪ bottom-decision_k channels, joint_valid)** 上的 channel-onset rank 与该 subject 两个 interictal template rank (T0, T1) 的 Spearman 相关 **(ρ_a, ρ_b)** 决定 per-seizure assignment（更接近 T0 还是 T1）。**Within-subject 检验**：assignment 分布是否与 topic5 PR-1 z-ER subtype label 系统关联。Cohort = case-series N=4 strict + 1 candidate sentinel；**禁止** cohort α claim。
+
+### 10.2 假设结构
+
+**H1' (per-subject)**：对 swap-strict subject s，per-seizure assignment ∈ {T0, T1, tie} 与 ictal subtype label 形成 non-uniform contingency。
+
+| 步骤 | 操作 |
+|---|---|
+| 1 | 限定到 `topic1.channel_names ∩ topic5_atlas.channels ∩ swap_endpoint_set`（per subject）。最小 4 channels 才可计算 Spearman |
+| 2 | 对每 seizure k，从 `per_er.gamma_ER.seizure_records[k].channel_onsets[ch].t_onset_sec` 取 channel onset 时间，丢 None；剩余通道按 t_onset_sec 升序排得 `seizure_rank[ch]` |
+| 3 | 限定到 swap-channel subset，得 `r_k = seizure_rank[swap_subset]`，以及 `T0_rank[swap_subset]`、`T1_rank[swap_subset]` |
+| 4 | ρ_a = Spearman(r_k, T0_rank), ρ_b = Spearman(r_k, T1_rank) |
+| 5 | per-seizure assignment_k = T0 if (ρ_a − ρ_b) > τ_min; T1 if (ρ_b − ρ_a) > τ_min; else tie。τ_min = 0.10 |
+| 6 | per-subject 列联表 (assignment ∈ {T0, T1} × ictal_subtype ∈ {0..k_s−1})；tie 行单独报，不入主检验 |
+| 7 | per-subject Fisher exact (2×2) / χ² (2×k_s≥3)；effect = Cramér V |
+| 8 | per-subject Adjusted Mutual Information (AMI) on full assignment-vs-subtype 也报作 robustness（不依赖 contingency 形状） |
+
+**Per-seizure 排除**：
+- `n_swap_channels_with_valid_onset < 3` → seizure 整段 drop（Spearman 不可计算）
+- `|ρ_a − ρ_b| < τ_min` → assignment = "tie"，不入 contingency 主检验，但记入 reporting
+
+**T0/T1 freeze convention**：仍用 phase-1 已落盘的 `bridge_setup.json`（T0 = 整 recording assignment fraction 较大者；ties → 较小 cluster_id）。
+
+### 10.3 Cohort 与 sentinel
+
+**Q1' cohort = strict swap_class subjects ∩ topic5 γ_gamma ≥ 2**（N=4，audit_csv 验证）：
+
+```
+1073, 1146, 635, 958
+```
+
+**Q1' candidate sentinel**：`548`（swap_class=candidate, p_fw=0.057, γ_gamma=5）。**单独报**，不计入 cohort 主统计；§8.7 channel-label 合同允许 candidate 作 case-series 但不进 strict tier paper claim。
+
+**Q1b legacy sentinel**：`442`。在 Q1' 框架下 **不可测**（γ_gamma=1 + swap_class=none）。保留在原 §2.2 / phase-1 archive，作"Q1' axis 在双低 subject 上 axis collapse"的 reference。
+
+**Q3 stratifier**：在 Q1' cohort N=4 的尺度上失去意义，弃。
+
+### 10.4 统计 contract
+
+**Per-subject Q1'-positive iff**：
+
+```
+( Fisher_exact_p (or χ²_p) < 0.05 )  AND  ( Cramér V > 0.30 )
+```
+
+放宽 phase-1 的 α/3 = 0.0167 阈值因为 Q1' 不再做窗口 sensitivity battery（无多重检验）。
+
+**Per-subject AMI 报告（descriptive）**：
+- AMI > 0.10 = 弱关联
+- AMI > 0.30 = 中等关联
+- AMI > 0.50 = 强关联
+
+**Cohort case-series 判定**：
+
+| 状态 | 判据 |
+|---|---|
+| **CASE-SERIES-PASS** | ≥ 3/4 subjects Q1'-positive AND median Cramér V > 0.30 |
+| **NULL-locked** | 0/4 subjects Q1'-positive AND median Cramér V ≤ 0.10 AND median AMI ≤ 0.05 |
+| **INDETERMINATE** | 其他 |
+
+cohort 4/4 sign-test (binomial, p_null=0.5) one-sided p = 0.0625（borderline）；3/4 p = 0.3125。**显式 framing**：N=4 不构成 cohort claim，仅作 within-subject case-series 描述层。
+
+### 10.5 实施模块（增量于 phase-1 模块）
+
+复用：
+- `src/topic1_topic5_bridge.py::load_topic5_subtype_labels`（Q1' 需要 subtype label）
+- `bridge_setup.json` 的 T0/T1 freeze（Q1' 仍用同 convention）
+
+新加在 `src/topic1_topic5_bridge.py`（独立函数族，不修改 phase-1 函数）：
+
+| 函数 | 作用 |
+|---|---|
+| `load_atlas_seizure_channel_onsets(subject, band, results_root)` | 从 `per_subject/epilepsiae_<sid>.json` 读 `per_er[band].seizure_records`，返回 dict[seizure_id → dict[ch → t_onset_sec]] |
+| `load_swap_channel_subset(subject, results_root)` | 从 `rank_displacement/per_subject/epilepsiae_<sid>.json::pairs[0].swap_sweep` 拿 `decision_k` + `rank_a_dense_full` + `joint_valid`，导出 endpoint set (top-decision_k ∪ bottom-decision_k joint_valid channels) |
+| `load_template_ranks_with_t0t1(subject, results_root, artifact_root)` | 复用 `load_topic1_events_with_templates` 拿 T0/T1 cluster_id；从 topic1 JSON 的 `adaptive_cluster.clusters[i].template_rank` 拿 rank vectors，按 channel_names 索引 |
+| `compute_seizure_template_alignment(seizure_onsets_for_one_sz, t0_rank, t1_rank, swap_subset, channel_names_topic1, channel_names_atlas, tau_min=0.10)` | 通道交集 + Spearman → (ρ_a, ρ_b, assignment, n_swap_channels_used) |
+| `q1prime_per_subject_test(per_seizure_alignments, subtype_labels)` | per-subject contingency + Fisher/χ² + Cramér V + AMI |
+| `q1prime_cohort_summary(per_subject_results)` | 3-state case-series verdict |
+
+**新 CLI subcommand**：`q1prime` (在 `scripts/run_topic1_topic5_bridge.py`)。
+
+**输出**：
+```
+results/topic1_topic5_bridge/
+├── q1prime_per_subject/
+│   └── epilepsiae_<sid>__q1prime.json   # per-seizure (ρ_a, ρ_b, assignment) + contingency + Cramér V + AMI
+├── q1prime_cohort_summary.json          # case-series verdict
+└── figures/q1prime_*.png                # 至少: per-subject (ρ_a, ρ_b) scatter colored by subtype; cohort effect bar
+```
+
+### 10.6 Caveats（增量于 §6）
+
+1. **N=4 不构成 cohort claim**——任何 paper-level 表述必须带 "case series" qualifier。548 candidate 永远独立报。
+2. **swap-channel subset 来源 §8 dual-tier strict**——§8.7 channel-label 合同要求 strict tier 才允许下游使用 channel-level labels，candidate 不允许进主检验。
+3. **不重启 phase-1 Q1 (state fingerprint)**——它的 NULL 结果保留作 negative-control 但不再被引用为主结果。
+4. **Q1 / Q1' 不能在同一 paper 表述上叠加**——它们是 axis 不同的两套 H1，互相独立；reporting 时分两段。
+5. **Q1' 不依赖 pre-ictal 窗口**——纯 ictal channel-onset 几何对应；原 §2.1 / §3.5 windows 在 Q1' 下作废。
+6. **Channel intersection floor = 4**：低于 4 个 swap channels 与有效 onset，Spearman 不可计算；该 seizure drop。
+7. **Atlas channels 不在 lagPat 通道集** 时整段无法投射；audit 显示 4/4 strict subjects 上 lagPat ⊂ atlas，但每 seizure 上 atlas 的 valid (t_onset_sec ≠ None) 通道才计入交集。
+
+### 10.7 显式不做（locked）
+
+- 不重新跑 PR-2 cluster pipeline；直接消费 phase-1 已 freeze 的 T0/T1
+- 不做跨 subject template 对齐
+- 不在 N=4 上写 cohort α claim
+- 不引入 candidate-tier 入 strict cohort（违反 §8.7）
+- 不做 yuquan 扩展（v2.3 atlas 未建）
+
+### 10.8 来源 audit + 重设触发
+
+- `results/topic1_topic5_bridge_q1prime_audit.csv` (16-row inventory; viable_q1prime gate)
+- 用户 2026-05-10 audit 三点：(a) pre-ictal 窗口太短 (b) `last_template` noise (c) per-seizure × swap-subset 几何对应应作主 axis
+- phase-1 archive: `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` 加 PIVOT note
+
+---
+
 **Spec self-review checklist** (执行于 spec 写完后):
-- [ ] 所有 placeholder / TBD / TODO 移除
-- [ ] §2 hypothesis 与 §4 statistical contract 互不矛盾
-- [ ] §3 cohort N 与 §4 alpha threshold 数学上自洽
-- [ ] §5 复用接口路径全部存在（grep verify）
-- [ ] §6 caveats 覆盖 advisor 三个 blocking 与所有非 blocking
-- [ ] 仅 association，无 causal/predicts framing
+- [x] 所有 placeholder / TBD / TODO 移除
+- [x] §2 hypothesis 与 §4 statistical contract 互不矛盾（phase-1 locked，§10 PIVOT 取代 §2.1）
+- [x] §3 cohort N 与 §4 alpha threshold 数学上自洽（phase-1）；§10 cohort N=4 与 §10.4 case-series 自洽
+- [x] §5 复用接口路径全部存在（grep verify）
+- [x] §6 caveats 覆盖 advisor 三个 blocking 与所有非 blocking；§10.6 增量 caveat 覆盖 PIVOT
+- [x] 仅 association，无 causal/predicts framing
