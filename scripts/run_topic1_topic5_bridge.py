@@ -32,6 +32,9 @@ def main() -> None:
     sub.add_parser("cohort", help="Aggregate cohort + 3-state verdict")
     sub.add_parser("sentinel-442", help="Run Q1b 442 binary-outlier exact tests")
     sub.add_parser("figures", help="Render the 5 locked figures")
+    p_q1p = sub.add_parser("q1prime", help="Run Q1' per-subject (channel-rank correspondence)")
+    p_q1p.add_argument("--cohort", default="default", help="default = 4 strict + 548 sentinel + 442 (descriptive)")
+    p_q1p.add_argument("--band", default="gamma_ER")
     args = parser.parse_args()
 
     repo = Path(__file__).resolve().parent.parent
@@ -129,6 +132,22 @@ def main() -> None:
         )
         figure_q3_stratifier(cohort_summary, fig_dir / "q1_stratified_swap_silhouette.png")
         print(f"5 figures → {fig_dir}")
+        return
+
+    if args.cmd == "q1prime":
+        from src.topic1_topic5_bridge import run_q1prime_per_subject
+        if args.cohort == "default":
+            cohort = ["1073", "1146", "635", "958", "548", "442"]
+        else:
+            cohort = args.cohort.split(",")
+        run_q1prime_per_subject(
+            cohort=cohort,
+            band=args.band,
+            results_root=results_root,
+            artifact_root=artifact_root,
+            out_dir=out_root / "q1prime_per_subject",
+        )
+        print(f"q1prime per-subject done; {len(cohort)} subjects → {out_root / 'q1prime_per_subject'}")
         return
 
     raise NotImplementedError(f"subcommand {args.cmd} pending")

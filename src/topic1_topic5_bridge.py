@@ -1289,3 +1289,71 @@ def q1prime_per_subject_test(
     out["q1prime_positive"] = bool(p < p_max and v > cramer_v_min)
     out["eligibility"] = "ok"
     return out
+
+
+# ---------------------------------------------------------------------------
+# Q1' per-subject runner (Task 4)
+# ---------------------------------------------------------------------------
+
+def run_q1prime_per_subject(
+    cohort: Sequence[str],
+    band: str,
+    results_root: Path,
+    artifact_root: Path,
+    out_dir: Path,
+    tau_min: float = 0.10,
+) -> None:
+    """For each subject in cohort, run the full Q1' pipeline + write JSON."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for sid in cohort:
+        try:
+            swap = load_swap_channel_subset(sid, results_root)
+            tmpl = load_template_ranks_with_t0t1(sid, results_root, artifact_root)
+            atlas = load_atlas_seizure_channel_onsets(sid, band, results_root)
+            subtypes = load_topic5_subtype_labels(sid, band, results_root)
+        except Exception as exc:
+            payload = {
+                "subject": f"epilepsiae_{sid}",
+                "status": "failed",
+                "error": repr(exc),
+            }
+            with (out_dir / f"epilepsiae_{sid}__q1prime.json").open("w") as fh:
+                json.dump(payload, fh, indent=2)
+            print(f"[WARN] q1prime epilepsiae_{sid} failed: {exc}")
+            continue
+
+        per_seizure: List[Dict[str, Any]] = []
+        for seizure_id, sz_onsets in atlas.items():
+            align = compute_seizure_template_alignment(
+                seizure_onsets=sz_onsets,
+                t0_rank=tmpl["t0_rank"],
+                t1_rank=tmpl["t1_rank"],
+                swap_subset=swap["endpoint_channels"],
+                channel_names_topic1=tmpl["channel_names"],
+                channel_names_atlas=list(sz_onsets.keys()),
+                tau_min=tau_min,
+            )
+            per_seizure.append({
+                "seizure_id": seizure_id,
+                **align,
+                "subtype_label": subtypes["seizure_id_to_subtype"].get(seizure_id),
+            })
+        st_map = {sid_: int(lab) for sid_, lab in subtypes["seizure_id_to_subtype"].items() if lab is not None}
+        test = q1prime_per_subject_test(per_seizure, st_map)
+        payload = {
+            "subject": f"epilepsiae_{sid}",
+            "band": band,
+            "swap_class": swap.get("swap_class"),
+            "decision_k": swap.get("decision_k"),
+            "swap_endpoint_channels": swap.get("endpoint_channels"),
+            "n_swap_endpoint_channels": len(swap.get("endpoint_channels", [])),
+            "t0_template_id": tmpl["t0_template_id"],
+            "t1_template_id": tmpl["t1_template_id"],
+            "topic5_n_subtypes": subtypes["n_subtypes"],
+            "n_seizures_atlas": len(atlas),
+            "per_seizure": per_seizure,
+            "test": test,
+        }
+        out_path = out_dir / f"epilepsiae_{sid}__q1prime.json"
+        with out_path.open("w") as fh:
+            json.dump(payload, fh, indent=2, default=str)

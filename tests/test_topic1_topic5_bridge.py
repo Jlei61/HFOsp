@@ -676,3 +676,31 @@ def test_q1prime_per_subject_test_drops_tie_and_insufficient():
     assert out["n_eligible"] == 2  # s2, s3 dropped
     assert out["n_dropped_tie"] == 1
     assert out["n_dropped_insufficient"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Task 4 — run_q1prime_per_subject smoke test
+# ---------------------------------------------------------------------------
+
+def test_run_q1prime_per_subject_writes_json(tmp_path):
+    """Smoke: q1prime per-subject runner writes a valid JSON for one strict subject."""
+    out_dir = tmp_path / "q1prime_per_subject"
+    out_dir.mkdir(parents=True)
+    bridge.run_q1prime_per_subject(
+        cohort=["1073"],
+        band="gamma_ER",
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+        out_dir=out_dir,
+    )
+    f = out_dir / "epilepsiae_1073__q1prime.json"
+    assert f.exists()
+    with f.open() as fh:
+        d = json.load(fh)
+    assert d["subject"] == "epilepsiae_1073"
+    assert "swap_class" in d
+    assert "per_seizure" in d
+    assert "test" in d
+    assert "p" in d["test"]
+    assert "cramer_v" in d["test"]
+    assert "ami" in d["test"]
