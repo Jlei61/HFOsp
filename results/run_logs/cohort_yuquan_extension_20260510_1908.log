@@ -1,0 +1,158 @@
+
+[cohort] starting v2.2 cohort run on 25 subjects (skip_existing=True)
+
+=== yuquan/litengsheng  focal(i)=25  n_seizures=8   [18/25] ===
+  loading 8 seizures (ER computed for both configs in one pass)...
+    seizure 0 (litengsheng_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (150.8s)
+    seizure 1 (litengsheng_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (109.2s)
+    seizure 2 (litengsheng_sz_003): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (109.5s)
+    seizure 3 (litengsheng_sz_004): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (148.6s)
+    seizure 4 (litengsheng_sz_005): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (148.1s)
+    seizure 5 (litengsheng_sz_006): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (146.9s)
+    seizure 6 (litengsheng_sz_007): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (146.4s)
+    seizure 7 (litengsheng_sz_008): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (147.0s)
+  [gamma_ER] pooled baseline (124, 19200) (32.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (124, 19200) (32.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=1 bi=0 tied=0 ur=7 s_sz=None λ=100.0
+  [broad_ER] ok=6 bi=0 tied=0 ur=2 s_sz=0.37816014697743144 λ=100.0
+  [gamma_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  [broad_ER] producer_health=unstable  clinical_concordance=discordant
+  total subject elapsed: 1894.5s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_litengsheng.json
+
+=== yuquan/pengzihang  focal(i)=18  n_seizures=8   [19/25] ===
+  loading 8 seizures (ER computed for both configs in one pass)...
+    seizure 0 (pengzihang_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (157.1s)
+    seizure 1 (pengzihang_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (112.0s)
+    seizure 2: skipped (yuquan/pengzihang seizure 2: requested window starts 147.07s before block_start; upstream caller must drop this seizure)
+    seizure 3: skipped (yuquan/pengzihang seizure 3: requested window starts 106.07s before block_start; upstream caller must drop this seizure)
+    seizure 4 (pengzihang_sz_005): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (153.3s)
+    seizure 5 (pengzihang_sz_006): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (154.0s)
+    seizure 6 (pengzihang_sz_007): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (110.9s)
+    seizure 7 (pengzihang_sz_008): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (152.4s)
+  [gamma_ER] pooled baseline (130, 14400) (24.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (130, 14400) (24.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=3 bi=0 tied=0 ur=3 s_sz=0.45749641624200255 λ=100.0
+  [broad_ER] ok=2 bi=0 tied=0 ur=4 s_sz=0.9757893969523811 λ=100.0
+  [gamma_ER] producer_health=moderate  clinical_concordance=discordant
+  [broad_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  total subject elapsed: 1458.9s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_pengzihang.json
+
+=== yuquan/sunyuanxin  focal(i)=23  n_seizures=8   [20/25] ===
+  loading 8 seizures (ER computed for both configs in one pass)...
+    seizure 0 (sunyuanxin_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (143.4s)
+    seizure 1 (sunyuanxin_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (108.6s)
+    seizure 2 (sunyuanxin_sz_003): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (141.7s)
+    seizure 3 (sunyuanxin_sz_004): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (141.2s)
+    seizure 4 (sunyuanxin_sz_005): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (105.9s)
+    seizure 5 (sunyuanxin_sz_006): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (144.3s)
+    seizure 6 (sunyuanxin_sz_007): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (108.4s)
+    seizure 7 (sunyuanxin_sz_008): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (144.3s)
+  [gamma_ER] pooled baseline (126, 19200) (32.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (126, 19200) (32.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=4 bi=0 tied=0 ur=4 s_sz=0.2820624201072708 λ=100.0
+  [broad_ER] ok=6 bi=0 tied=0 ur=2 s_sz=0.008261630792964197 λ=100.0
+  [gamma_ER] producer_health=unstable  clinical_concordance=concordant
+  [broad_ER] producer_health=unstable  clinical_concordance=concordant
+  total subject elapsed: 1820.4s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_sunyuanxin.json
+
+=== yuquan/xuxinyi  focal(i)=22  n_seizures=3   [21/25] ===
+  loading 3 seizures (ER computed for both configs in one pass)...
+    seizure 0 (xuxinyi_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (134.8s)
+    seizure 1 (xuxinyi_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (133.2s)
+    seizure 2 (xuxinyi_sz_003): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (133.7s)
+  [gamma_ER] pooled baseline (114, 7200) (12.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (114, 7200) (12.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=0 bi=0 tied=0 ur=3 s_sz=None λ=100.0
+  [broad_ER] ok=2 bi=0 tied=0 ur=1 s_sz=0.8315451578132347 λ=100.0
+  [gamma_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  [broad_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  total subject elapsed: 663.3s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_xuxinyi.json
+
+=== yuquan/zhangjinhan  focal(i)=6  n_seizures=8   [22/25] ===
+  loading 8 seizures (ER computed for both configs in one pass)...
+    seizure 0: skipped (yuquan/zhangjinhan seizure 0: requested window starts 44.02s before block_start; upstream caller must drop this seizure)
+    seizure 1: skipped (yuquan/zhangjinhan seizure 1: requested window starts 13.05s before block_start; upstream caller must drop this seizure)
+    seizure 2 (zhangjinhan_sz_003): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (105.7s)
+    seizure 3 (zhangjinhan_sz_004): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (74.5s)
+    seizure 4 (zhangjinhan_sz_005): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (72.7s)
+    seizure 5 (zhangjinhan_sz_006): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (73.0s)
+    seizure 6 (zhangjinhan_sz_007): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (74.8s)
+    seizure 7 (zhangjinhan_sz_008): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (75.1s)
+  [gamma_ER] pooled baseline (86, 14400) (24.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (86, 14400) (24.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=3 bi=0 tied=0 ur=3 s_sz=0.9005113953680862 λ=100.0
+  [broad_ER] ok=1 bi=0 tied=0 ur=5 s_sz=None λ=100.0
+  [gamma_ER] producer_health=stable  clinical_concordance=not_assessable
+  [broad_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  total subject elapsed: 869.4s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_zhangjinhan.json
+
+=== yuquan/zhangkexuan  focal(i)=17  n_seizures=6   [23/25] ===
+  loading 6 seizures (ER computed for both configs in one pass)...
+    seizure 0 (zhangkexuan_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (105.0s)
+    seizure 1 (zhangkexuan_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (71.8s)
+    seizure 2 (zhangkexuan_sz_003): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (104.0s)
+    seizure 3 (zhangkexuan_sz_004): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (73.1s)
+    seizure 4 (zhangkexuan_sz_005): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (104.5s)
+    seizure 5 (zhangkexuan_sz_006): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (73.1s)
+  [gamma_ER] pooled baseline (84, 14400) (24.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (84, 14400) (24.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=6 bi=0 tied=0 ur=0 s_sz=0.13078280456789257 λ=100.0
+  [broad_ER] ok=3 bi=0 tied=0 ur=3 s_sz=-0.08877398617917052 λ=100.0
+  [gamma_ER] producer_health=unstable  clinical_concordance=discordant
+  [broad_ER] producer_health=unstable  clinical_concordance=partial
+  total subject elapsed: 921.3s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_zhangkexuan.json
+
+=== yuquan/zhaojinrui  focal(i)=2  n_seizures=5   [24/25] ===
+  loading 5 seizures (ER computed for both configs in one pass)...
+    seizure 0 (zhaojinrui_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (149.4s)
+    seizure 1 (zhaojinrui_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (144.7s)
+    seizure 2 (zhaojinrui_sz_003): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (155.8s)
+    seizure 3 (zhaojinrui_sz_004): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (115.6s)
+    seizure 4 (zhaojinrui_sz_005): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (152.0s)
+  [gamma_ER] pooled baseline (126, 12000) (20.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (126, 12000) (20.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=5 bi=0 tied=0 ur=0 s_sz=0.5440142433851807 λ=100.0
+  [broad_ER] ok=5 bi=0 tied=0 ur=0 s_sz=0.4903965252377653 λ=100.0
+  [gamma_ER] producer_health=stable  clinical_concordance=not_assessable
+  [broad_ER] producer_health=moderate  clinical_concordance=not_assessable
+  total subject elapsed: 1215.1s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_zhaojinrui.json
+
+[cohort] DONE — 25/25 subjects (7 newly computed, 18 skip_existing) in 147.4 min
+
+[cohort] summary → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/cohort_summary.json
+[cohort] (producer_health, clinical_concordance) 2D table:
+  gamma_ER:
+    insufficient|not_assessable              4
+    moderate|concordant                      1
+    moderate|discordant                      1
+    stable|discordant                        1
+    stable|not_assessable                    2
+    unstable|concordant                      1
+    unstable|discordant                      8
+    unstable|not_assessable                  4
+    unstable|partial                         3
+  broad_ER:
+    insufficient|not_assessable              5
+    moderate|discordant                      1
+    moderate|not_assessable                  1
+    stable|concordant                        1
+    stable|partial                           1
+    unstable|concordant                      4
+    unstable|discordant                      5
+    unstable|not_assessable                  3
+    unstable|partial                         4
+[cohort] λ-at-cap count (cells with λ == cap=100.0): gamma=25 broad=25

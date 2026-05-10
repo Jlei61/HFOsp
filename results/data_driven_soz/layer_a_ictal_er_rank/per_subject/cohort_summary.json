@@ -5,8 +5,8 @@
     -120.0,
     30.0
   ],
-  "generated_at": "2026-05-10T18:57:24+0800",
-  "n_subjects": 18,
+  "generated_at": "2026-05-10T21:36:20+0800",
+  "n_subjects": 25,
   "subjects": [
     "epilepsiae/1073",
     "epilepsiae/1077",
@@ -25,7 +25,14 @@
     "epilepsiae/922",
     "epilepsiae/958",
     "yuquan/gaolan",
-    "yuquan/huanghanwen"
+    "yuquan/huanghanwen",
+    "yuquan/litengsheng",
+    "yuquan/pengzihang",
+    "yuquan/sunyuanxin",
+    "yuquan/xuxinyi",
+    "yuquan/zhangjinhan",
+    "yuquan/zhangkexuan",
+    "yuquan/zhaojinrui"
   ],
   "excluded_subjects": {
     "list": [],
@@ -33,28 +40,32 @@
   },
   "two_d_distribution": {
     "gamma_ER": {
-      "unstable|discordant": 7,
+      "unstable|discordant": 8,
       "unstable|partial": 3,
       "unstable|not_assessable": 4,
       "moderate|concordant": 1,
       "stable|discordant": 1,
-      "insufficient|not_assessable": 2
+      "insufficient|not_assessable": 4,
+      "moderate|discordant": 1,
+      "unstable|concordant": 1,
+      "stable|not_assessable": 2
     },
     "broad_ER": {
       "moderate|discordant": 1,
-      "unstable|partial": 3,
+      "unstable|partial": 4,
       "unstable|not_assessable": 3,
-      "unstable|discordant": 4,
-      "unstable|concordant": 3,
+      "unstable|discordant": 5,
+      "unstable|concordant": 4,
       "stable|concordant": 1,
       "stable|partial": 1,
-      "insufficient|not_assessable": 2
+      "insufficient|not_assessable": 5,
+      "moderate|not_assessable": 1
     }
   },
   "lambda_max_cap": 100.0,
   "lambda_at_cap_count": {
-    "gamma_ER": 18,
-    "broad_ER": 18
+    "gamma_ER": 25,
+    "broad_ER": 25
   },
   "producer_fail_subjects": {
     "gamma_ER": [
@@ -73,7 +84,11 @@
       "epilepsiae/922",
       "epilepsiae/958",
       "yuquan/gaolan",
-      "yuquan/huanghanwen"
+      "yuquan/huanghanwen",
+      "yuquan/litengsheng",
+      "yuquan/sunyuanxin",
+      "yuquan/xuxinyi",
+      "yuquan/zhangkexuan"
     ],
     "broad_ER": [
       "epilepsiae/1077",
@@ -90,7 +105,13 @@
       "epilepsiae/922",
       "epilepsiae/958",
       "yuquan/gaolan",
-      "yuquan/huanghanwen"
+      "yuquan/huanghanwen",
+      "yuquan/litengsheng",
+      "yuquan/pengzihang",
+      "yuquan/sunyuanxin",
+      "yuquan/xuxinyi",
+      "yuquan/zhangjinhan",
+      "yuquan/zhangkexuan"
     ]
   }
 }
