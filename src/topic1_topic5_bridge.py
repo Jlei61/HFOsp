@@ -1113,6 +1113,69 @@ def load_swap_channel_subset(
     }
 
 
+def compute_seizure_template_alignment(
+    seizure_onsets: Dict[str, Optional[float]],
+    t0_rank: Dict[str, int],
+    t1_rank: Dict[str, int],
+    swap_subset: Sequence[str],
+    channel_names_topic1: Sequence[str],
+    channel_names_atlas: Sequence[str],
+    tau_min: float = 0.10,
+    min_channels: int = 3,
+) -> Dict[str, Any]:
+    """Per-seizure ρ_a, ρ_b, assignment ∈ {T0, T1, tie, insufficient_n}.
+
+    Compares seizure channel-onset rank against T0/T1 template ranks within
+    the swap-channel subset, restricted to the channel intersection of
+    topic1 lagPat ∩ atlas ∩ swap_subset and channels with valid (non-None)
+    seizure onset.
+    """
+    intersect = (
+        set(swap_subset)
+        & set(channel_names_topic1)
+        & set(channel_names_atlas)
+        & set(t0_rank.keys())
+        & set(t1_rank.keys())
+    )
+    valid_chs = [
+        ch for ch in intersect
+        if ch in seizure_onsets and seizure_onsets[ch] is not None
+    ]
+    n = len(valid_chs)
+    if n < min_channels:
+        return {
+            "assignment": "insufficient_n",
+            "rho_a": float("nan"),
+            "rho_b": float("nan"),
+            "n_swap_channels_used": n,
+            "channels_used": valid_chs,
+        }
+    onset_vec = np.array([seizure_onsets[ch] for ch in valid_chs], dtype=float)
+    t0_vec = np.array([t0_rank[ch] for ch in valid_chs], dtype=float)
+    t1_vec = np.array([t1_rank[ch] for ch in valid_chs], dtype=float)
+    seizure_rank_vec = np.argsort(np.argsort(onset_vec))  # rank 0..n-1
+    rho_a = sp_stats.spearmanr(seizure_rank_vec, t0_vec).statistic
+    rho_b = sp_stats.spearmanr(seizure_rank_vec, t1_vec).statistic
+    if not np.isfinite(rho_a):
+        rho_a = 0.0
+    if not np.isfinite(rho_b):
+        rho_b = 0.0
+    diff = float(rho_a - rho_b)
+    if diff > tau_min:
+        assignment = "T0"
+    elif -diff > tau_min:
+        assignment = "T1"
+    else:
+        assignment = "tie"
+    return {
+        "assignment": assignment,
+        "rho_a": float(rho_a),
+        "rho_b": float(rho_b),
+        "n_swap_channels_used": n,
+        "channels_used": valid_chs,
+    }
+
+
 def load_template_ranks_with_t0t1(
     subject: str,
     results_root: Path,

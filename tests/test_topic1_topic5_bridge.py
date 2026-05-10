@@ -544,3 +544,80 @@ def test_load_template_ranks_with_t0t1_1073():
     assert len(out["t1_rank"]) == n
     # ranks are integers from template_rank field
     assert all(isinstance(v, int) for v in out["t0_rank"].values())
+
+
+# ---------------------------------------------------------------------------
+# Task 2 — compute_seizure_template_alignment
+# ---------------------------------------------------------------------------
+
+
+def test_compute_seizure_template_alignment_basic():
+    """Hand-crafted: seizure onset rank closely matches T0_rank → ρ_a high, assignment=T0."""
+    seizure_onsets = {"A": 0.5, "B": 1.0, "C": 1.5, "D": 2.0}
+    t0_rank = {"A": 0, "B": 1, "C": 2, "D": 3}
+    t1_rank = {"A": 3, "B": 2, "C": 1, "D": 0}
+    swap_subset = ["A", "B", "C", "D"]
+    out = bridge.compute_seizure_template_alignment(
+        seizure_onsets=seizure_onsets,
+        t0_rank=t0_rank, t1_rank=t1_rank,
+        swap_subset=swap_subset,
+        channel_names_topic1=["A", "B", "C", "D"],
+        channel_names_atlas=["A", "B", "C", "D"],
+        tau_min=0.10,
+    )
+    assert out["assignment"] == "T0"
+    assert out["rho_a"] > 0.95
+    assert out["rho_b"] < -0.95
+    assert out["n_swap_channels_used"] == 4
+
+
+def test_compute_seizure_template_alignment_tie():
+    """When ρ_a ≈ ρ_b → assignment=tie."""
+    seizure_onsets = {"A": 0.5, "B": 0.6, "C": 0.7}  # nearly flat → ρ ≈ 0
+    t0_rank = {"A": 0, "B": 1, "C": 2}
+    t1_rank = {"A": 2, "B": 0, "C": 1}
+    out = bridge.compute_seizure_template_alignment(
+        seizure_onsets=seizure_onsets,
+        t0_rank=t0_rank, t1_rank=t1_rank,
+        swap_subset=["A", "B", "C"],
+        channel_names_topic1=["A", "B", "C"],
+        channel_names_atlas=["A", "B", "C"],
+        tau_min=0.10,
+    )
+    # When |ρ_a - ρ_b| < 0.10 → tie
+    if abs(out["rho_a"] - out["rho_b"]) < 0.10:
+        assert out["assignment"] == "tie"
+
+
+def test_compute_seizure_template_alignment_drops_none_channels():
+    """Channels with None onset are dropped from the comparison."""
+    seizure_onsets = {"A": 0.5, "B": None, "C": 1.5, "D": 2.0}
+    t0_rank = {"A": 0, "B": 1, "C": 2, "D": 3}
+    t1_rank = {"A": 3, "B": 2, "C": 1, "D": 0}
+    out = bridge.compute_seizure_template_alignment(
+        seizure_onsets=seizure_onsets,
+        t0_rank=t0_rank, t1_rank=t1_rank,
+        swap_subset=["A", "B", "C", "D"],
+        channel_names_topic1=["A", "B", "C", "D"],
+        channel_names_atlas=["A", "B", "C", "D"],
+        tau_min=0.10,
+    )
+    assert out["n_swap_channels_used"] == 3  # B dropped
+    assert out["assignment"] == "T0"
+
+
+def test_compute_seizure_template_alignment_below_floor():
+    """< 3 valid swap channels → assignment=insufficient_n."""
+    seizure_onsets = {"A": 0.5, "B": None}
+    t0_rank = {"A": 0, "B": 1}
+    t1_rank = {"A": 1, "B": 0}
+    out = bridge.compute_seizure_template_alignment(
+        seizure_onsets=seizure_onsets,
+        t0_rank=t0_rank, t1_rank=t1_rank,
+        swap_subset=["A", "B"],
+        channel_names_topic1=["A", "B"],
+        channel_names_atlas=["A", "B"],
+        tau_min=0.10,
+    )
+    assert out["assignment"] == "insufficient_n"
+    assert out["n_swap_channels_used"] == 1
