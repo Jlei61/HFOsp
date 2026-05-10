@@ -11,8 +11,9 @@ values across subjects.
 """
 from __future__ import annotations
 
+from itertools import combinations, product
 from math import floor
-from typing import Dict, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 from scipy import stats
@@ -560,4 +561,452 @@ def cohort_sign_test_enrichment(
         "bootstrap_ci_hi": ci_hi,
         "n_boot": int(n_boot),
         "seed": int(seed),
+    }
+
+
+# ---------------------------------------------------------------------------
+# PR-6-sup1 — first-rank entropy / symmetry-breaking diagnostic
+# Plan v3 (2026-05-10):
+#   docs/archive/topic1/pr6_template_anchoring/
+#       pr6_supplementary_rank_entropy_plan_2026-05-10.md
+#
+# Tier: Topic 4 / SBA mechanism preflight, descriptive only.
+# Sharp prediction: under noise-driven confluence-point dynamics, rank
+# vector entropy should be high at endpoint positions {1, n_valid} and
+# low in the middle ("seed jitter, backbone stable").
+# ---------------------------------------------------------------------------
+
+
+_MIN_N_VALID_RANK_ENTROPY = 4
+_MIN_KEPT_EVENTS = 50
+_HIGH_DROP_RATE_WARN = 0.5
+
+
+def compute_rank_position_entropy(
+    R_cluster: np.ndarray,
+    n_valid: int,
+) -> np.ndarray:
+    """Per-position normalized Shannon entropy of channel identity.
+
+    Parameters
+    ----------
+    R_cluster : (n_events, n_valid) integer array; each row is a permutation
+        of {1, ..., n_valid}.
+    n_valid : int (>= 4).
+
+    Returns
+    -------
+    H_p_norm : (n_valid,) float array, each entry in [0, 1].
+        H_p_norm[p-1] = Shannon entropy (base 2) of the channel-at-position-p
+        distribution divided by log_2(n_valid).
+    """
+    if n_valid < _MIN_N_VALID_RANK_ENTROPY:
+        raise ValueError(
+            f"n_valid={n_valid} < {_MIN_N_VALID_RANK_ENTROPY}; need at least "
+            f"2 endpoint + 2 middle positions."
+        )
+    R = np.asarray(R_cluster, dtype=int)
+    if R.ndim != 2:
+        raise ValueError(f"R_cluster must be 2D, got shape {R.shape}")
+    n_events, n_cols = R.shape
+    if n_events == 0:
+        raise ValueError("R_cluster has n_events=0")
+    if n_cols != n_valid:
+        raise ValueError(
+            f"R_cluster has n_cols={n_cols} but n_valid={n_valid}"
+        )
+
+    log2_nvalid = float(np.log2(n_valid))
+    H_p_norm = np.empty(n_valid, dtype=float)
+    for p_zero in range(n_valid):
+        # rank position is 1-indexed; mask events whose channel-at-rank=p+1
+        # is each candidate channel c
+        rank_value = p_zero + 1
+        # For each event, find which channel got rank=rank_value:
+        #   channel index c = where(R[event, :] == rank_value)[0][0]
+        # Vectorized: argmax over equality (each row has unique rank_value)
+        eq = R == rank_value
+        # eq has shape (n_events, n_valid); each row has exactly one True
+        channel_at_p = np.argmax(eq, axis=1)
+        counts = np.bincount(channel_at_p, minlength=n_valid)
+        probs = counts / float(n_events)
+        # Shannon entropy in bits (base 2); 0 * log(0) := 0
+        positive = probs[probs > 0]
+        H = float(-np.sum(positive * np.log2(positive))) if positive.size else 0.0
+        H_p_norm[p_zero] = H / log2_nvalid
+
+    return H_p_norm
+
+
+def compute_endpoint_middle_entropy_delta(
+    H_p_norm: np.ndarray,
+) -> Tuple[float, float]:
+    """Δ = mean(H at endpoints) - mean(H in middle); asymmetry = H_1 - H_n.
+
+    Endpoint positions are {1, n_valid} (rank-1 and rank-n_valid).
+    Middle positions are {2, ..., n_valid - 1}.
+    """
+    H = np.asarray(H_p_norm, dtype=float)
+    n_valid = H.size
+    if n_valid < _MIN_N_VALID_RANK_ENTROPY:
+        raise ValueError(
+            f"n_valid={n_valid} < {_MIN_N_VALID_RANK_ENTROPY}"
+        )
+    H_endpoint = (H[0] + H[-1]) / 2.0
+    H_middle = float(np.mean(H[1:-1]))
+    delta = H_endpoint - H_middle
+    asymmetry = float(H[0] - H[-1])
+    return float(delta), float(asymmetry)
+
+
+def rank_entropy_null_N0(
+    R_cluster: np.ndarray,
+    n_valid: int,
+    n_perm: int = 1000,
+    base_seed: int = 0,
+) -> np.ndarray:
+    """N0 null: per-event independent rank shuffle.
+
+    For each surrogate, replace every row of R_cluster with an independent
+    uniform random permutation of {1, ..., n_valid}, recompute H_p_norm and
+    Δ, and return the resulting Δ_null distribution.
+
+    Determinism: ``np.random.RandomState(base_seed + i)`` per surrogate i.
+    """
+    if n_valid < _MIN_N_VALID_RANK_ENTROPY:
+        raise ValueError(
+            f"n_valid={n_valid} < {_MIN_N_VALID_RANK_ENTROPY}"
+        )
+    R = np.asarray(R_cluster, dtype=int)
+    n_events = R.shape[0]
+    if n_events == 0:
+        raise ValueError("R_cluster has n_events=0")
+
+    deltas = np.empty(int(n_perm), dtype=float)
+    for i in range(int(n_perm)):
+        rng = np.random.RandomState(int(base_seed) + i)
+        # Generate n_events independent permutations of 1..n_valid
+        R_perm = np.empty_like(R)
+        for e in range(n_events):
+            R_perm[e] = rng.permutation(n_valid) + 1
+        H = compute_rank_position_entropy(R_perm, n_valid)
+        d, _ = compute_endpoint_middle_entropy_delta(H)
+        deltas[i] = d
+    return deltas
+
+
+def rank_entropy_null_N1_pseudo_endpoint(
+    H_p_norm: np.ndarray,
+) -> Dict[str, Any]:
+    """N1 cluster-level pseudo-endpoint position null (exact enumeration).
+
+    Holds H_p_norm fixed; enumerates all C(n_valid, 2) unordered position
+    pairs (p1, p2); for each pair computes
+        Δ_pair = mean(H[p1], H[p2]) - mean(H[q] for q ∉ {p1, p2}).
+    Reports endpoint pair {0, n_valid - 1} (1-indexed: {1, n_valid}) rank,
+    percentile, p-value, and the floor min_attainable_p_N1 = 1 / C(n_valid, 2).
+
+    The floor matters: at n_valid=6, min_attainable_p_N1 = 1/15 = 0.0667 —
+    higher than the conventional 0.05, so a hard `p_N1 < 0.05` gate
+    mechanically excludes n_valid=6 subjects. Use percentile / max-flag
+    instead. Plan v3 §7.2.3.
+
+    Returns dict per plan §7.2.1 schema.
+    """
+    H = np.asarray(H_p_norm, dtype=float)
+    n_valid = int(H.size)
+    if n_valid < _MIN_N_VALID_RANK_ENTROPY:
+        raise ValueError(
+            f"n_valid={n_valid} < {_MIN_N_VALID_RANK_ENTROPY}"
+        )
+
+    pairs: List[Tuple[int, int]] = list(combinations(range(n_valid), 2))
+    delta_pair = np.empty(len(pairs), dtype=float)
+    endpoint_pair = (0, n_valid - 1)
+    endpoint_pair_idx = -1
+    sum_H = float(np.sum(H))
+    for k, (i, j) in enumerate(pairs):
+        H_pair = (H[i] + H[j]) / 2.0
+        # Middle = all positions except (i, j); n_valid - 2 of them.
+        H_mid_sum = sum_H - H[i] - H[j]
+        H_mid_mean = H_mid_sum / (n_valid - 2)
+        delta_pair[k] = H_pair - H_mid_mean
+        if (i, j) == endpoint_pair:
+            endpoint_pair_idx = k
+
+    if endpoint_pair_idx < 0:
+        raise RuntimeError("endpoint pair (0, n_valid-1) not in enumeration")
+
+    delta_obs = float(delta_pair[endpoint_pair_idx])
+    n_pairs = len(pairs)
+    # Rank under "ties count as equal-or-better"; rank=1 means strictly max.
+    # We use ≥ in p_N1; rank is 1-indexed by # of pairs with delta_pair ≥ delta_obs.
+    n_ge = int(np.sum(delta_pair >= delta_obs - 1e-12))
+    p_N1 = n_ge / n_pairs
+    # endpoint_pair_rank: smallest 1-indexed rank achievable given ties; the
+    # endpoint pair sits among the ties at the top, so rank = 1 if it is
+    # tied for max, else rank = 1 + #{Δ_pair > delta_obs (strict)}.
+    n_strict_greater = int(np.sum(delta_pair > delta_obs + 1e-12))
+    endpoint_pair_rank = 1 + n_strict_greater
+    endpoint_pair_percentile = (n_pairs - endpoint_pair_rank + 1) / n_pairs
+    # is_endpoint_pair_max: endpoint pair is among the maxima (ties allowed)
+    max_val = float(np.max(delta_pair))
+    is_endpoint_pair_max = bool(delta_obs >= max_val - 1e-12)
+
+    return {
+        "delta_obs": delta_obs,
+        "delta_pair_dist": delta_pair,
+        "endpoint_pair_rank": int(endpoint_pair_rank),
+        "endpoint_pair_percentile": float(endpoint_pair_percentile),
+        "is_endpoint_pair_max": is_endpoint_pair_max,
+        "p_N1": float(p_N1),
+        "min_attainable_p_N1": 1.0 / n_pairs,
+        "n_valid": n_valid,
+    }
+
+
+def rank_entropy_null_N1_subject_level(
+    H_p_norm_per_cluster: List[np.ndarray],
+) -> Dict[str, Any]:
+    """N1 subject-level joint enumeration (Option B locked 2026-05-10 v3).
+
+    Enumerates the full Cartesian product of cluster-level position pairs:
+        n_combos = C(n_valid_0, 2) × C(n_valid_1, 2)
+    For each combo (pair_0, pair_1) computes
+        Δ_combo = mean(Δ_pair_0, Δ_pair_1)
+    The observed value is the (endpoint_0, endpoint_1) combo:
+        Δ_obs_subject = mean(Δ_obs_0, Δ_obs_1)
+
+    Locked at the stable_k=2 cohort: requires exactly 2 entries in
+    ``H_p_norm_per_cluster``.
+    """
+    if not isinstance(H_p_norm_per_cluster, (list, tuple)):
+        raise ValueError("H_p_norm_per_cluster must be a list of np.ndarray")
+    if len(H_p_norm_per_cluster) != 2:
+        raise ValueError(
+            f"plan v3 locks subject-level enumeration to exactly 2 clusters; "
+            f"got {len(H_p_norm_per_cluster)}"
+        )
+
+    cluster_results = []
+    pair_deltas: List[np.ndarray] = []
+    for H in H_p_norm_per_cluster:
+        out = rank_entropy_null_N1_pseudo_endpoint(H)
+        cluster_results.append(out)
+        pair_deltas.append(out["delta_pair_dist"])
+
+    delta_pair_0 = pair_deltas[0]
+    delta_pair_1 = pair_deltas[1]
+    n_combos = int(delta_pair_0.size * delta_pair_1.size)
+    # Δ_combo grid via outer mean
+    grid = (delta_pair_0[:, None] + delta_pair_1[None, :]) / 2.0
+    delta_obs_subject = (cluster_results[0]["delta_obs"]
+                         + cluster_results[1]["delta_obs"]) / 2.0
+
+    n_ge = int(np.sum(grid >= delta_obs_subject - 1e-12))
+    p_N1_subject = n_ge / n_combos
+    n_strict_greater = int(np.sum(grid > delta_obs_subject + 1e-12))
+    subject_combo_rank = 1 + n_strict_greater
+    subject_combo_percentile = (n_combos - subject_combo_rank + 1) / n_combos
+    max_val = float(np.max(grid))
+    is_subject_combo_max = bool(delta_obs_subject >= max_val - 1e-12)
+
+    return {
+        "delta_obs_subject": float(delta_obs_subject),
+        "n_combos": int(n_combos),
+        "subject_combo_rank": int(subject_combo_rank),
+        "subject_combo_percentile": float(subject_combo_percentile),
+        "is_subject_combo_max": is_subject_combo_max,
+        "p_N1_subject": float(p_N1_subject),
+        "min_attainable_p_N1_subject": 1.0 / n_combos,
+        "cluster_level": cluster_results,
+    }
+
+
+def _filter_all_valid_participating_events(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    cluster_event_idx: np.ndarray,
+    valid_mask: np.ndarray,
+) -> Tuple[np.ndarray, int, int]:
+    """Plan v3 §6.0 Option B: keep only events whose all valid_mask channels
+    participated. Returns (R_kept, n_events_total, n_events_kept).
+
+    R_kept has shape (n_events_kept, n_valid_channels) where
+    n_valid_channels = sum(valid_mask). Each row is the integer rank vector
+    (per-event min-subtracted argsort-of-argsort if needed; here we assume
+    ranks are already integer 1..n_ch with sentinel 0 for non-participating).
+    """
+    valid_idx = np.where(valid_mask)[0]
+    n_valid = int(valid_idx.size)
+    n_total = int(cluster_event_idx.size)
+    if n_total == 0:
+        return np.empty((0, n_valid), dtype=int), 0, 0
+
+    # bools[valid_idx, e] all True ⇒ keep event e
+    bools_valid = bools[valid_idx[:, None], cluster_event_idx[None, :]]
+    keep_mask = np.all(bools_valid, axis=0)
+    kept_event_idx = cluster_event_idx[keep_mask]
+    n_kept = int(kept_event_idx.size)
+
+    if n_kept == 0:
+        return np.empty((0, n_valid), dtype=int), n_total, 0
+
+    # Slice ranks to (n_valid, n_kept), then re-rank densely per event so
+    # every row is a permutation of {1, ..., n_valid} regardless of the
+    # raw lagPat-rank scale (which may include skipped values from the
+    # original n_ch > n_valid context).
+    ranks_kept = ranks[valid_idx[:, None], kept_event_idx[None, :]].astype(float)
+    # Per-event dense rank: argsort-of-argsort on (n_valid,) vector + 1
+    R = np.empty((n_kept, n_valid), dtype=int)
+    for k in range(n_kept):
+        order = np.argsort(np.argsort(ranks_kept[:, k], kind="stable"), kind="stable")
+        R[k] = order + 1
+
+    return R, n_total, n_kept
+
+
+def run_subject_rank_entropy(
+    subject_data: Dict[str, Any],
+    *,
+    n_perm_N0: int = 1000,
+    base_seed_N0: int = 0,
+    min_kept_events: int = _MIN_KEPT_EVENTS,
+    high_drop_rate_warn: float = _HIGH_DROP_RATE_WARN,
+) -> Dict[str, Any]:
+    """Run sup1 entropy pipeline on a single subject (stable_k=2).
+
+    Required keys in subject_data:
+      ranks         : (n_ch, n_events) integer or float
+      bools         : (n_ch, n_events) bool
+      labels        : (n_events,) int cluster labels in {0, ..., n_clusters-1}
+      valid_mask    : (n_ch,) bool
+      n_clusters    : int (locked at 2)
+      channel_names : list of length n_ch
+
+    Per cluster k: filter to all-valid-participating events (§6.0 Option B);
+    compute H_p_norm + Δ + asymmetry + N0 + N1 cluster-level. If both clusters
+    pass eligibility, also compute subject-level Option B null.
+
+    Returns nested dict; see plan §7 + §6.0 for schema.
+    """
+    n_clusters = int(subject_data["n_clusters"])
+    if n_clusters != 2:
+        raise ValueError(
+            f"plan v3 locks sup1 to stable_k=2; got n_clusters={n_clusters}"
+        )
+
+    ranks = np.asarray(subject_data["ranks"])
+    bools = np.asarray(subject_data["bools"], dtype=bool)
+    labels = np.asarray(subject_data["labels"], dtype=int)
+    valid_mask = np.asarray(subject_data["valid_mask"], dtype=bool)
+    n_valid = int(valid_mask.sum())
+
+    cluster_payload: Dict[str, Any] = {}
+    H_per_cluster: List[Optional[np.ndarray]] = [None, None]
+    eligibility = []
+
+    for k in range(n_clusters):
+        cluster_idx = np.where(labels == k)[0].astype(int)
+        R, n_total, n_kept = _filter_all_valid_participating_events(
+            ranks, bools, cluster_idx, valid_mask
+        )
+        drop_rate = (
+            float(1.0 - n_kept / n_total) if n_total > 0 else float("nan")
+        )
+
+        if n_kept < min_kept_events:
+            flag = "excluded_low_kept_events"
+        elif drop_rate > high_drop_rate_warn:
+            flag = "high_drop_rate_warning"
+        else:
+            flag = "ok"
+
+        cluster_record: Dict[str, Any] = {
+            "n_events_total_k": int(n_total),
+            "n_events_kept_k": int(n_kept),
+            "drop_rate_k": drop_rate,
+            "eligibility_flag": flag,
+        }
+
+        if flag == "excluded_low_kept_events":
+            cluster_record.update(
+                {
+                    "delta": float("nan"),
+                    "asymmetry": float("nan"),
+                    "H_p_norm": None,
+                    "p_N0": float("nan"),
+                    "N1_cluster": None,
+                }
+            )
+            eligibility.append(False)
+        else:
+            H_p_norm = compute_rank_position_entropy(R, n_valid)
+            delta, asymmetry = compute_endpoint_middle_entropy_delta(H_p_norm)
+            null_N0 = rank_entropy_null_N0(
+                R, n_valid, n_perm=n_perm_N0, base_seed=base_seed_N0
+            )
+            n_ge = int(np.sum(null_N0 >= delta - 1e-12))
+            p_N0 = (1 + n_ge) / (n_perm_N0 + 1)
+            N1 = rank_entropy_null_N1_pseudo_endpoint(H_p_norm)
+            cluster_record.update(
+                {
+                    "delta": float(delta),
+                    "asymmetry": float(asymmetry),
+                    "H_p_norm": [float(x) for x in H_p_norm],
+                    "p_N0": float(p_N0),
+                    "N1_cluster": {
+                        # serializable subset (drop the array)
+                        "delta_obs": N1["delta_obs"],
+                        "endpoint_pair_rank": N1["endpoint_pair_rank"],
+                        "endpoint_pair_percentile": N1[
+                            "endpoint_pair_percentile"
+                        ],
+                        "is_endpoint_pair_max": N1["is_endpoint_pair_max"],
+                        "p_N1": N1["p_N1"],
+                        "min_attainable_p_N1": N1["min_attainable_p_N1"],
+                        "n_valid": N1["n_valid"],
+                    },
+                }
+            )
+            H_per_cluster[k] = H_p_norm
+            eligibility.append(True)
+
+        cluster_payload[str(k)] = cluster_record
+
+    subject_payload: Dict[str, Any]
+    if all(eligibility) and all(H is not None for H in H_per_cluster):
+        N1_subject = rank_entropy_null_N1_subject_level(
+            [H for H in H_per_cluster if H is not None]
+        )
+        subject_payload = {
+            "delta_obs_subject": N1_subject["delta_obs_subject"],
+            "n_combos": N1_subject["n_combos"],
+            "subject_combo_rank": N1_subject["subject_combo_rank"],
+            "subject_combo_percentile": N1_subject[
+                "subject_combo_percentile"
+            ],
+            "is_subject_combo_max": N1_subject["is_subject_combo_max"],
+            "p_N1_subject": N1_subject["p_N1_subject"],
+            "min_attainable_p_N1_subject": N1_subject[
+                "min_attainable_p_N1_subject"
+            ],
+            "subject_eligibility_flag": "ok",
+        }
+    else:
+        subject_payload = {
+            "subject_eligibility_flag": "excluded_one_or_both_clusters",
+        }
+
+    return {
+        "clusters": cluster_payload,
+        "subject": subject_payload,
+        "params": {
+            "n_clusters": n_clusters,
+            "n_valid": n_valid,
+            "n_perm_N0": int(n_perm_N0),
+            "base_seed_N0": int(base_seed_N0),
+            "min_kept_events": int(min_kept_events),
+            "high_drop_rate_warn": float(high_drop_rate_warn),
+        },
     }
