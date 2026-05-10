@@ -217,12 +217,19 @@ def freeze_bridge_setup(
         )
 
     subjects: Dict[str, Any] = {}
+    dropped_subjects: Dict[str, str] = {}
     for sid in sorted(cohort):  # sorted = idempotent ordering
-        ev = load_topic1_events_with_templates(
-            subject=sid,
-            results_root=results_root,
-            artifact_root=artifact_root,
-        )
+        try:
+            ev = load_topic1_events_with_templates(
+                subject=sid,
+                results_root=results_root,
+                artifact_root=artifact_root,
+            )
+        except Exception as exc:
+            reason = repr(exc)
+            print(f"[setup] WARNING: skipping epilepsiae_{sid} — {reason}", flush=True)
+            dropped_subjects[f"epilepsiae_{sid}"] = reason
+            continue
         subjects[f"epilepsiae_{sid}"] = {
             "topic1_n_valid_events": ev["n_valid_events"],
             "topic1_template_fractions": {
@@ -240,6 +247,7 @@ def freeze_bridge_setup(
         "p_null_binomial": P_NULL_BINOMIAL,
         "windows_min": [list(w) for w in WINDOWS_MIN],
         "subjects": subjects,
+        "dropped_subjects": dropped_subjects,
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w") as fh:

@@ -39,6 +39,24 @@ def main() -> None:
     artifact_root = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
     out_root = results_root / "topic1_topic5_bridge"
 
+    if args.cmd == "setup":
+        from src.topic1_topic5_bridge import (
+            COHORT_GAMMA, SENTINEL_442, SENSITIVITY_BROAD_1084,
+            freeze_bridge_setup,
+        )
+        cohort = list(COHORT_GAMMA) + [SENTINEL_442, SENSITIVITY_BROAD_1084]
+        payload = freeze_bridge_setup(
+            cohort=cohort,
+            results_root=results_root,
+            artifact_root=artifact_root,
+            out_path=out_root / "bridge_setup.json",
+        )
+        n_ok = len(payload["subjects"])
+        n_dropped = len(payload["dropped_subjects"])
+        print(f"setup frozen for {n_ok} subjects → {out_root / 'bridge_setup.json'}"
+              + (f" ({n_dropped} dropped: {list(payload['dropped_subjects'].keys())})" if n_dropped else ""))
+        return
+
     if args.cmd == "per-subject":
         from src.topic1_topic5_bridge import (
             COHORT_GAMMA, SENTINEL_442, SENSITIVITY_BROAD_1084,
