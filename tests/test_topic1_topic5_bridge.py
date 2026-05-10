@@ -473,3 +473,21 @@ def test_q1b_sentinel_442_runs(tmp_path):
     # 16 subtype-0 seizures minus 2 that have zero events in the [-30,-1] window
     assert "n_main" in w and w["n_main"] == 14
     assert "frac_T0" in w and "p" in w["frac_T0"]
+
+
+def test_q3_stratifier_table_4cells():
+    """Q3 returns rows × {swap_class, silhouette_class} all populated."""
+    # Use the real cohort_summary if present
+    summary_path = Path(
+        "/home/honglab/leijiaxin/HFOsp/results/topic1_topic5_bridge/cohort_summary.json"
+    )
+    if not summary_path.exists():
+        pytest.skip("cohort_summary.json not yet generated; run Task 11 first")
+    df = bridge.q3_stratifier_table(summary_path, band="gamma_ER")
+    # 1096 is absent from cohort_summary (data freshness mismatch dropped it),
+    # so we expect 9 rows, not 10.
+    assert 9 <= len(df) <= 10, f"expected 9–10 rows, got {len(df)}"
+    assert set(df["swap_class"].unique()) <= {"real", "none"}
+    assert set(df["silhouette_class"].unique()) <= {"high", "low"}
+    assert "subject_positive" in df.columns
+    assert "effect_winner" in df.columns

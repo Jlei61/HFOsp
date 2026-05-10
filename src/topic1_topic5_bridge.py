@@ -726,6 +726,62 @@ def q1b_sentinel_442(
 
 
 # ---------------------------------------------------------------------------
+# Q3 stratifier — descriptive 4-cell table (swap × silhouette)
+# ---------------------------------------------------------------------------
+
+# Stratifier maps locked from spec §3.4
+SWAP_CLASS_MAP_GAMMA: Dict[str, str] = {
+    "1073": "strict",
+    "1146": "strict",
+    "635": "strict",
+    "958": "strict",
+    "548": "candidate",
+    "1096": "none",
+    "253": "none",
+    "590": "none",
+    "916": "none",
+    "922": "none",
+}
+
+# Approximate silhouette_median from cluster_geometry; >0.5 = high
+SILHOUETTE_MAP_GAMMA: Dict[str, float] = {
+    "1073": 0.549, "1146": 0.551, "635": 0.402, "958": 0.413,
+    "548": 0.627, "1096": 0.252, "253": 0.182, "590": 0.584,
+    "916": 0.647, "922": 0.275,
+}
+
+
+def q3_stratifier_table(
+    cohort_summary_path: Path,
+    band: str,
+    primary_window: Tuple[float, float] = PRIMARY_WINDOW,
+    swap_class_map: Dict[str, str] = SWAP_CLASS_MAP_GAMMA,
+    silhouette_map: Dict[str, float] = SILHOUETTE_MAP_GAMMA,
+    silhouette_high_min: float = 0.5,
+) -> pd.DataFrame:
+    """4-cell descriptive stratifier (swap × silhouette)."""
+    with cohort_summary_path.open() as fh:
+        d = json.load(fh)
+    wkey = f"[{primary_window[0]},{primary_window[1]}]"
+    subj_results = d["per_window_subject_results"][wkey]
+    rows = []
+    for subj_key, info in subj_results.items():
+        sid = subj_key.replace("epilepsiae_", "")
+        if sid not in swap_class_map:
+            continue
+        swap = swap_class_map[sid]
+        sil = silhouette_map.get(sid, float("nan"))
+        rows.append({
+            "subject": sid,
+            "swap_class": "real" if swap in ("strict", "candidate") else "none",
+            "silhouette_class": "high" if sil > silhouette_high_min else "low",
+            "subject_positive": info.get("subject_positive", False),
+            "effect_winner": info.get("feature_winner_effect"),
+        })
+    return pd.DataFrame(rows)
+
+
+# ---------------------------------------------------------------------------
 # Per-subject runner — full cohort batch (Task 10)
 # ---------------------------------------------------------------------------
 
