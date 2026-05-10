@@ -243,3 +243,69 @@ def freeze_bridge_setup(
     with out_path.open("w") as fh:
         json.dump(payload, fh, indent=2, sort_keys=True)
     return payload
+
+
+# --- Pre-ictal fingerprint (Task 6) ------------------------------------------
+
+@dataclass
+class FingerprintRow:
+    """One pre-ictal window fingerprint for one seizure."""
+    seizure_id: str
+    n_events: int
+    frac_T0: float          # NaN if n_events == 0
+    switch_rate: float      # NaN if n_events <= 1
+    last_template: Optional[int]  # None if n_events == 0
+    dropped_reason: Optional[str]
+
+
+def compute_pre_ictal_fingerprint(
+    event_times: np.ndarray,
+    event_template_ids: np.ndarray,
+    seizure_clinical_onset: float,
+    window_min_min: float,
+    window_min_max: float,
+    t0_template_id: int,
+    seizure_id: str = "",
+) -> Dict[str, Any]:
+    """Compute fingerprint for one (seizure × window) cell.
+
+    Window convention: t ∈ [onset + window_min_min * 60, onset + window_min_max * 60)
+    (left-inclusive, right-exclusive).
+
+    n_events == 0  → dropped_reason="no_events_in_window", all values NaN/None.
+    n_events == 1  → switch_rate=NaN (no transition defined).
+    """
+    win_lo = seizure_clinical_onset + window_min_min * 60.0
+    win_hi = seizure_clinical_onset + window_min_max * 60.0
+    mask = (event_times >= win_lo) & (event_times < win_hi)
+    in_times = event_times[mask]
+    in_labels = event_template_ids[mask]
+    n = int(in_times.size)
+
+    if n == 0:
+        return {
+            "seizure_id": seizure_id,
+            "n_events": 0,
+            "frac_T0": float("nan"),
+            "switch_rate": float("nan"),
+            "last_template": None,
+            "dropped_reason": "no_events_in_window",
+        }
+
+    order = np.argsort(in_times, kind="stable")
+    sorted_labels = in_labels[order]
+    frac_t0 = float((sorted_labels == t0_template_id).mean())
+    if n >= 2:
+        switch_rate = float((sorted_labels[1:] != sorted_labels[:-1]).mean())
+    else:
+        switch_rate = float("nan")
+    last_template = int(sorted_labels[-1])
+
+    return {
+        "seizure_id": seizure_id,
+        "n_events": n,
+        "frac_T0": frac_t0,
+        "switch_rate": switch_rate,
+        "last_template": last_template,
+        "dropped_reason": None,
+    }

@@ -120,3 +120,89 @@ def test_freeze_bridge_setup_audit_rerun_marker(tmp_path):
         d = json.load(fh)
     assert "audit_rerun_marker_log_line" in d
     assert "cohort_summary.csv" in d["audit_rerun_marker_log_line"]
+
+
+def test_compute_pre_ictal_fingerprint_basic():
+    """6 events in [-30, -1] min with template ids [0,0,1,1,0,1]; T0=0.
+    Expect frac_T0=0.5, switch_rate=3/5=0.6, last_template=1, n_events=6.
+    Pairs: (0,0)(0,1)(1,1)(1,0)(0,1) → switches at 3 of 5 positions.
+    """
+    onset = 1_000_000.0  # arbitrary epoch
+    # event times in seconds; -30 min = -1800 s, -1 min = -60 s
+    event_times = onset + np.array([-1500, -1200, -900, -600, -300, -100], dtype=float)
+    event_template_ids = np.array([0, 0, 1, 1, 0, 1], dtype=int)
+    out = bridge.compute_pre_ictal_fingerprint(
+        event_times=event_times,
+        event_template_ids=event_template_ids,
+        seizure_clinical_onset=onset,
+        window_min_min=-30.0,
+        window_min_max=-1.0,
+        t0_template_id=0,
+    )
+    assert out["n_events"] == 6
+    assert out["frac_T0"] == pytest.approx(0.5)
+    assert out["switch_rate"] == pytest.approx(3 / 5)
+    assert out["last_template"] == 1
+    assert out["dropped_reason"] is None
+
+
+def test_compute_pre_ictal_fingerprint_zero_events_drop():
+    """0 events in window → dropped, fingerprint values are NaN."""
+    onset = 1_000_000.0
+    event_times = onset + np.array([-3600, +60], dtype=float)  # outside window
+    event_template_ids = np.array([0, 1], dtype=int)
+    out = bridge.compute_pre_ictal_fingerprint(
+        event_times=event_times,
+        event_template_ids=event_template_ids,
+        seizure_clinical_onset=onset,
+        window_min_min=-30.0,
+        window_min_max=-1.0,
+        t0_template_id=0,
+    )
+    assert out["n_events"] == 0
+    assert out["dropped_reason"] == "no_events_in_window"
+    assert math.isnan(out["frac_T0"])
+    assert math.isnan(out["switch_rate"])
+    assert out["last_template"] is None
+
+
+def test_compute_pre_ictal_fingerprint_one_event_switch_nan():
+    """1 event → switch_rate is NaN (no transitions defined)."""
+    onset = 1_000_000.0
+    event_times = onset + np.array([-600], dtype=float)
+    event_template_ids = np.array([0], dtype=int)
+    out = bridge.compute_pre_ictal_fingerprint(
+        event_times=event_times,
+        event_template_ids=event_template_ids,
+        seizure_clinical_onset=onset,
+        window_min_min=-30.0,
+        window_min_max=-1.0,
+        t0_template_id=0,
+    )
+    assert out["n_events"] == 1
+    assert out["frac_T0"] == pytest.approx(1.0)
+    assert math.isnan(out["switch_rate"])
+    assert out["last_template"] == 0
+
+
+def test_compute_pre_ictal_fingerprint_window_boundary_inclusive_left_exclusive_right():
+    """Convention: t ∈ [onset + window_min*60, onset + window_max*60).
+    A point exactly at the right edge is excluded; at the left edge is included.
+    A point just inside the right edge (onset + (-60.001) < win_hi) is included.
+    """
+    onset = 1_000_000.0
+    # window [-30, -1] min → [onset-1800, onset-60) s
+    # -60.001 s from onset is just inside the window (< win_hi = onset-60)
+    # -60.0 s from onset is exactly at win_hi, so excluded
+    event_times = onset + np.array([-1800.0, -60.0, -60.001], dtype=float)
+    event_template_ids = np.array([0, 1, 1], dtype=int)
+    out = bridge.compute_pre_ictal_fingerprint(
+        event_times=event_times,
+        event_template_ids=event_template_ids,
+        seizure_clinical_onset=onset,
+        window_min_min=-30.0,
+        window_min_max=-1.0,
+        t0_template_id=0,
+    )
+    assert out["n_events"] == 2  # -1800 included, -60.001 included, -60.0 excluded
+    assert out["last_template"] == 1  # the -60.001 event (closer to onset)
