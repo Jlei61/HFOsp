@@ -1,0 +1,88 @@
+{
+  "subjects": [
+    {
+      "subject": "chengshuai",
+      "dataset": "yuquan",
+      "stem": "yuquan_chengshuai",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 8,
+      "n_first": 13816,
+      "n_second": 13816,
+      "swap_class_first": "none",
+      "swap_class_second_projected": "none",
+      "template_spearman": 0.9285714285714286,
+      "endpoint_position_recall": 0.9166666666666666,
+      "cluster_assignment_purity": 0.9973943254198031,
+      "swap_class_concordant": true,
+      "tier": "strong"
+    },
+    {
+      "subject": "548",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_548",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 12,
+      "n_first": 12641,
+      "n_second": 12641,
+      "swap_class_first": "candidate",
+      "swap_class_second_projected": "candidate",
+      "template_spearman": 0.986013986013986,
+      "endpoint_position_recall": 0.8333333333333333,
+      "cluster_assignment_purity": 1.0,
+      "swap_class_concordant": true,
+      "tier": "strong"
+    },
+    {
+      "subject": "1146",
+      "dataset": "epilepsiae",
+      "stem": "epilepsiae_1146",
+      "stable_k": 2,
+      "valid_mask_provenance": "pr6_union",
+      "n_valid_channels": 15,
+      "n_first": 23341,
+      "n_second": 23342,
+      "swap_class_first": "strict",
+      "swap_class_second_projected": "strict",
+      "template_spearman": 0.9678571428571427,
+      "endpoint_position_recall": 1.0,
+      "cluster_assignment_purity": 1.0,
+      "swap_class_concordant": true,
+      "tier": "strong"
+    }
+  ],
+  "stats": {
+    "n": 3,
+    "tier_counts": {
+      "strong": 3
+    },
+    "template_spearman": {
+      "median": 0.9678571428571427,
+      "iqr": [
+        0.9482142857142857,
+        0.9769355644355644
+      ],
+      "n": 3
+    },
+    "endpoint_position_recall": {
+      "median": 0.9166666666666666,
+      "iqr": [
+        0.875,
+        0.9583333333333333
+      ],
+      "se": 0.048112522432468836,
+      "n": 3
+    },
+    "cluster_assignment_purity": {
+      "median": 1.0,
+      "iqr": [
+        0.9986971627099015,
+        1.0
+      ],
+      "n": 3
+    },
+    "swap_class_concordant_count": 3,
+    "swap_class_concordant_fraction": 1.0
+  }
+}
