@@ -361,3 +361,32 @@ def test_q1_per_subject_drops_rows_with_no_events():
     assert out["n_eligible_seizures"] == 5
     # Power floor: spec §3.5 requires ≥4 to keep subject in cohort denominator
     assert out["passes_eligibility_floor"] is True
+
+
+# ---------------------------------------------------------------------------
+# Task 10: per-subject runner
+# ---------------------------------------------------------------------------
+
+def test_run_per_subject_writes_json(tmp_path):
+    """Smoke: run_per_subject writes one JSON per subject + window with required schema."""
+    out_dir = tmp_path / "per_subject"
+    out_dir.mkdir(parents=True)
+    bridge.run_per_subject(
+        cohort=["442"],  # smallest subject
+        bands=["gamma_ER"],
+        windows_min=[(-30.0, -1.0)],
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+        out_dir=out_dir,
+    )
+    f = out_dir / "epilepsiae_442__bridge.json"
+    assert f.exists()
+    with f.open() as fh:
+        d = json.load(fh)
+    assert d["subject"] == "epilepsiae_442"
+    assert "windows" in d
+    assert "[-30.0,-1.0]" in d["windows"]
+    w = d["windows"]["[-30.0,-1.0]"]
+    assert "fingerprint" in w
+    assert "q1_test" in w
+    assert "subject_positive" in w

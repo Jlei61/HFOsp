@@ -557,3 +557,74 @@ def q1_per_subject_test(
         out["feature_winner_p"] = passing[0][1]
         out["feature_winner_effect"] = passing[0][2]
     return out
+
+
+# ---------------------------------------------------------------------------
+# Per-subject runner — full cohort batch (Task 10)
+# ---------------------------------------------------------------------------
+
+def run_per_subject(
+    cohort: Sequence[str],
+    bands: Sequence[str],
+    windows_min: Sequence[Tuple[float, float]],
+    results_root: Path,
+    artifact_root: Path,
+    out_dir: Path,
+) -> None:
+    """For each subject in cohort × each band, build fingerprint table for all
+    windows + run per-subject Q1 test, write one JSON per subject."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for sid in cohort:
+        out_path = out_dir / f"epilepsiae_{sid}__bridge.json"
+        try:
+            per_subject_payload: Dict[str, Any] = {
+                "subject": f"epilepsiae_{sid}",
+                "bands": {},
+            }
+            for band in bands:
+                band_payload: Dict[str, Any] = {"windows": {}}
+                df_all = build_subject_fingerprint_table(
+                    subject=sid,
+                    band=band,
+                    results_root=results_root,
+                    artifact_root=artifact_root,
+                    windows_min=windows_min,
+                )
+                for win_lo, win_hi in windows_min:
+                    key = f"[{win_lo},{win_hi}]"
+                    df_w = df_all[
+                        (df_all["window_min_min"] == win_lo) & (df_all["window_min_max"] == win_hi)
+                    ].copy()
+                    # Handle last_template: may contain int or NaN; serialize None for missing
+                    df_w = df_w.copy()
+                    df_w["last_template_obj"] = df_w["last_template"].apply(
+                        lambda x: None if pd.isna(x) else int(x)
+                    )
+                    df_out = df_w.drop(columns=["last_template"]).rename(
+                        columns={"last_template_obj": "last_template"}
+                    )
+                    fingerprint_records = df_out.to_dict(orient="records")
+                    test = q1_per_subject_test(df_w)
+                    band_payload["windows"][key] = {
+                        "fingerprint": fingerprint_records,
+                        "q1_test": test,
+                        "subject_positive": test["subject_positive"],
+                        "feature_winner": test["feature_winner"],
+                        "feature_winner_p": test["feature_winner_p"],
+                        "feature_winner_effect": test["feature_winner_effect"],
+                        "n_eligible_seizures": test["n_eligible_seizures"],
+                        "passes_eligibility_floor": test["passes_eligibility_floor"],
+                    }
+                per_subject_payload["bands"][band] = band_payload
+            # For backward-compat single-band convenience
+            if len(bands) == 1:
+                per_subject_payload["windows"] = per_subject_payload["bands"][bands[0]]["windows"]
+        except Exception as exc:
+            per_subject_payload = {
+                "subject": f"epilepsiae_{sid}",
+                "error": str(exc),
+                "status": "failed",
+            }
+            print(f"  [WARN] epilepsiae_{sid} failed: {exc}")
+        with out_path.open("w") as fh:
+            json.dump(per_subject_payload, fh, indent=2, default=str)
