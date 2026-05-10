@@ -62,3 +62,25 @@ def test_load_seizure_onsets_442():
     assert sample_t > 1e9, "epoch seconds, not relative"
     # No NaN values returned (NaN sources should be flagged via missing key)
     assert all(np.isfinite(v) for v in out.values())
+
+
+def test_load_topic1_events_with_templates_442_alignment():
+    """442 has n_events_total=6556, all valid (n_valid_events=6556).
+    event_abs_times must be epoch seconds; labels must align 1-to-1.
+    """
+    out = bridge.load_topic1_events_with_templates(
+        subject="442",
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+    )
+    assert out["n_valid_events"] == 6556
+    assert out["event_abs_times"].shape == (6556,)
+    assert out["template_labels"].shape == (6556,)
+    # epoch seconds, not relative
+    assert np.nanmin(out["event_abs_times"]) > 1e9
+    # Label values match cluster_id set {0, 1} from spec
+    assert set(np.unique(out["template_labels"]).tolist()) == {0, 1}
+    # T0/T1 fractions match topic1 JSON
+    n_t0 = int((out["template_labels"] == out["t0_template_id"]).sum())
+    expected_t0_fraction = 0.5167785234899329  # cluster_id=1 has fraction 0.517
+    assert n_t0 / 6556 == pytest.approx(expected_t0_fraction, abs=1e-6)

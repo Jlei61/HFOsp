@@ -106,3 +106,82 @@ def load_seizure_onsets(
             out[sid] = float(eeg)
         # else: skip (no usable onset)
     return out
+
+
+def load_topic1_events_with_templates(
+    subject: str,
+    results_root: Path,
+    artifact_root: Path,
+    min_participating: int = 3,
+) -> Dict[str, Any]:
+    """Load topic1 per-event timestamps aligned with adaptive_cluster labels.
+
+    Pipeline:
+      1. load_subject_propagation_events on lagPat NPZ → event_abs_times, bools
+      2. _valid_event_indices(bools, min_participating) → idx of valid events
+      3. event_abs_times[idx] aligns with adaptive_cluster.labels (length match required)
+      4. T0 = template_id with larger fraction across valid events
+
+    Returns dict with:
+      - event_abs_times    : (n_valid,) float64 epoch seconds
+      - template_labels    : (n_valid,) int   ∈ {0, 1, ...} (raw cluster_id)
+      - block_time_ranges  : List[(start_epoch, end_epoch)]
+      - n_valid_events     : int
+      - t0_template_id     : int  (the cluster_id assigned T0 by larger-fraction rule)
+      - t1_template_id     : int  (the other one)
+      - cluster_fractions  : Dict[int → float]
+    """
+    from src.interictal_propagation import (
+        load_subject_propagation_events,
+        _valid_event_indices,
+    )
+
+    # Resolve subject_dir (epilepsiae layout)
+    legacy = artifact_root / subject / "all_recs"
+    subject_dir = legacy if legacy.exists() else (artifact_root / subject)
+
+    loaded = load_subject_propagation_events(subject_dir)
+    bools = loaded["bools"]
+    event_abs_times_all = np.asarray(loaded["event_abs_times"], dtype=float)
+    valid_idx = _valid_event_indices(bools, min_participating=min_participating)
+
+    # Load adaptive_cluster from topic1 per_subject JSON
+    pj = results_root / "interictal_propagation" / "per_subject" / f"epilepsiae_{subject}.json"
+    if not pj.exists():
+        raise FileNotFoundError(f"topic1 per_subject JSON missing: {pj}")
+    with pj.open() as fh:
+        topic1 = json.load(fh)
+    ac = topic1["adaptive_cluster"]
+    if int(ac.get("stable_k", 0)) != 2:
+        raise ValueError(f"subject {subject} stable_k != 2: {ac.get('stable_k')}")
+    labels = np.asarray(ac["labels"], dtype=int)
+
+    if labels.size != valid_idx.size:
+        raise ValueError(
+            f"labels size {labels.size} != valid_idx size {valid_idx.size} for {subject}"
+        )
+
+    valid_event_abs_times = event_abs_times_all[valid_idx]
+
+    # T0/T1 freeze: T0 = larger-fraction cluster (ties → smaller cluster_id)
+    cluster_fractions: Dict[int, float] = {}
+    for c in ac["clusters"]:
+        cluster_fractions[int(c["cluster_id"])] = float(c["fraction"])
+    if len(cluster_fractions) != 2:
+        raise ValueError(f"expected 2 clusters, got {len(cluster_fractions)}")
+    sorted_clusters = sorted(
+        cluster_fractions.items(),
+        key=lambda kv: (-kv[1], kv[0]),  # larger fraction first; smaller id ties first
+    )
+    t0_id = sorted_clusters[0][0]
+    t1_id = sorted_clusters[1][0]
+
+    return {
+        "event_abs_times": valid_event_abs_times,
+        "template_labels": labels,
+        "block_time_ranges": list(loaded["block_time_ranges"]),
+        "n_valid_events": int(labels.size),
+        "t0_template_id": int(t0_id),
+        "t1_template_id": int(t1_id),
+        "cluster_fractions": {int(k): float(v) for k, v in cluster_fractions.items()},
+    }
