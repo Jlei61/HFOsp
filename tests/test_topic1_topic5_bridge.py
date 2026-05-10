@@ -269,3 +269,95 @@ def test_fisher_with_cramer_v_3x2():
     contingency = np.array([[4, 0], [0, 4], [2, 2]], dtype=int)
     p, eff = bridge._fisher_or_chi2_with_cramer_v(contingency)
     assert 0 <= eff <= 1
+
+
+# ---------------------------------------------------------------------------
+# Task 9: per-subject Q1 test with same-feature dual gate
+# ---------------------------------------------------------------------------
+
+def test_q1_per_subject_dual_gate_rejects_cross_feature_pickup():
+    """Cross-feature pickup must NOT register positive.
+
+    Construct a fingerprint table where:
+      - frac_T0 has small p (0.005) but small effect (0.05)
+      - switch_rate has large p (0.5) but large effect (0.20)
+    The naive "min p AND max effect" would mark this positive.
+    The locked rule "∃ same feature with p AND effect both pass" must NOT.
+    """
+    fp_df = pd.DataFrame({
+        "seizure_id": [f"s{i}" for i in range(8)],
+        "subtype_label": [0, 0, 0, 0, 1, 1, 1, 1],
+        # frac_T0: significant p but tiny effect (8 events, almost-equal means)
+        "frac_T0": [0.50, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57],
+        # switch_rate: large effect but only achievable with insignificant p
+        "switch_rate": [0.20, 0.20, 0.20, 0.20, 0.50, 0.50, 0.50, 0.50],
+        "last_template": [0, 0, 0, 0, 1, 1, 1, 1],  # perfect separation, will be hit
+        "n_events": [10] * 8,
+    })
+    # Construct case: monotonically remove last_template separation by random-ize
+    fp_df_no_lt = fp_df.copy()
+    fp_df_no_lt["last_template"] = [0, 1, 0, 1, 0, 1, 0, 1]
+    out = bridge.q1_per_subject_test(fp_df_no_lt)
+    # Without the perfect last_template separation, no single feature should pass both gates
+    assert isinstance(out, dict)
+    assert "subject_positive" in out
+    # The original would-be cross-pickup case: tiny effect on frac_T0 + insignificant on switch
+    # Should NOT be positive
+    if not out["per_feature"]["frac_T0"]["passed_dual_gate"] \
+            and not out["per_feature"]["switch_rate"]["passed_dual_gate"] \
+            and not out["per_feature"]["last_template"]["passed_dual_gate"]:
+        assert out["subject_positive"] is False
+
+
+def test_q1_per_subject_dual_gate_accepts_single_feature_pass():
+    """When one feature has both small p AND large effect, subject is positive."""
+    # 10 seizures (5 per subtype), last_template perfectly splits subtype
+    # → Fisher exact p = 1/C(10,5) ≈ 0.0079 < ALPHA_WITHIN=0.0167, V=1
+    fp_df = pd.DataFrame({
+        "seizure_id": [f"s{i}" for i in range(10)],
+        "subtype_label": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+        "frac_T0": [0.50] * 10,            # no effect
+        "switch_rate": [0.50] * 10,        # no effect
+        "last_template": [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+        "n_events": [10] * 10,
+    })
+    out = bridge.q1_per_subject_test(fp_df)
+    assert out["per_feature"]["last_template"]["passed_dual_gate"] is True
+    assert out["per_feature"]["frac_T0"]["passed_dual_gate"] is False
+    assert out["subject_positive"] is True
+    assert out["feature_winner"] == "last_template"
+
+
+def test_q1_per_subject_skips_single_subtype():
+    """k_s=1 (only one ictal subtype) → cannot test, returns subject_positive=False."""
+    fp_df = pd.DataFrame({
+        "seizure_id": [f"s{i}" for i in range(5)],
+        "subtype_label": [0] * 5,
+        "frac_T0": [0.5, 0.6, 0.55, 0.5, 0.65],
+        "switch_rate": [0.2] * 5,
+        "last_template": [0, 0, 0, 0, 0],
+        "n_events": [10] * 5,
+    })
+    out = bridge.q1_per_subject_test(fp_df)
+    assert out["subject_positive"] is False
+    assert out["feature_winner"] is None
+    assert out.get("eligibility") == "single_subtype"
+
+
+def test_q1_per_subject_drops_rows_with_no_events():
+    """Rows with dropped_reason='no_events_in_window' must NOT count as eligible
+    seizures (n_events=0 → fingerprint is NaN; downstream test must skip)."""
+    fp_df = pd.DataFrame({
+        "seizure_id": [f"s{i}" for i in range(6)],
+        "subtype_label": [0, 0, 0, 1, 1, 1],
+        "frac_T0":      [0.6, 0.6, np.nan, 0.4, 0.4, 0.4],
+        "switch_rate":  [0.2, 0.2, np.nan, 0.5, 0.5, 0.5],
+        "last_template": [0, 0, None, 1, 1, 1],
+        "n_events":     [10, 10, 0, 10, 10, 10],
+        "dropped_reason": [None, None, "no_events_in_window", None, None, None],
+    })
+    out = bridge.q1_per_subject_test(fp_df)
+    # Effective n: subtype 0 has 2 (one dropped), subtype 1 has 3 → still eligible
+    assert out["n_eligible_seizures"] == 5
+    # Power floor: spec §3.5 requires ≥4 to keep subject in cohort denominator
+    assert out["passes_eligibility_floor"] is True

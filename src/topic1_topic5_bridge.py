@@ -440,3 +440,120 @@ def _fisher_or_chi2_with_cramer_v(
     denom = n * (min(r, c) - 1)
     v = math.sqrt(chi2_stat / denom) if denom > 0 else 0.0
     return float(p), float(v)
+
+
+# ---------------------------------------------------------------------------
+# Per-subject Q1 test — same-feature dual gate (Task 9)
+# ---------------------------------------------------------------------------
+
+def q1_per_subject_test(
+    fp_df: pd.DataFrame,
+    alpha_within: float = ALPHA_WITHIN,
+    effect_min: float = EFFECT_MIN,
+    eligibility_floor: int = 4,
+) -> Dict[str, Any]:
+    """Per-subject Q1 test under same-feature dual gate.
+
+    Locked rule (spec §4.1):
+        Per-subject Q1-positive iff
+        ∃ feature f ∈ {frac_T0, switch_rate, last_template}:
+            p_f < alpha_within  AND  |effect_f| > effect_min
+
+    Cross-feature pickup is forbidden — feature A providing p
+    while feature B provides effect must NOT produce a positive.
+
+    Drops seizures with `dropped_reason` set or n_events == 0 from
+    every feature's test.
+    """
+    # Drop dropped/zero-event rows for testing
+    eff = fp_df.copy()
+    if "dropped_reason" in eff.columns:
+        eff = eff[eff["dropped_reason"].isna() | (eff["dropped_reason"] == "")]
+    if "n_events" in eff.columns:
+        eff = eff[eff["n_events"] > 0]
+    n_eligible = int(len(eff))
+    passes_floor = n_eligible >= eligibility_floor
+
+    out: Dict[str, Any] = {
+        "n_eligible_seizures": n_eligible,
+        "passes_eligibility_floor": passes_floor,
+        "per_feature": {},
+        "subject_positive": False,
+        "feature_winner": None,
+        "feature_winner_p": None,
+        "feature_winner_effect": None,
+        "eligibility": "ok",
+    }
+
+    if not passes_floor:
+        out["eligibility"] = "below_floor"
+        return out
+
+    subtypes = sorted(eff["subtype_label"].unique().tolist())
+    if len(subtypes) < 2:
+        out["eligibility"] = "single_subtype"
+        return out
+
+    # frac_T0 → MW (k=2) or KW (k≥3)
+    groups_frac = [eff.loc[eff["subtype_label"] == s, "frac_T0"].to_numpy() for s in subtypes]
+    if len(subtypes) == 2:
+        p_frac, eff_frac = _mann_whitney_with_effect(groups_frac[0], groups_frac[1])
+    else:
+        p_frac, eff_frac = _kruskal_wallis_with_effect(groups_frac)
+    pass_frac = (p_frac < alpha_within) and (abs(eff_frac) > effect_min)
+    out["per_feature"]["frac_T0"] = {
+        "p": p_frac, "effect": eff_frac, "passed_dual_gate": bool(pass_frac),
+    }
+
+    # switch_rate → same logic; additional isfinite filter for n_events=1 NaN cases
+    groups_sw_raw = [eff.loc[eff["subtype_label"] == s, "switch_rate"].to_numpy() for s in subtypes]
+    groups_sw = [g[np.isfinite(g)] for g in groups_sw_raw]
+    if all(g.size > 0 for g in groups_sw):
+        if len(subtypes) == 2:
+            p_sw, eff_sw = _mann_whitney_with_effect(groups_sw[0], groups_sw[1])
+        else:
+            p_sw, eff_sw = _kruskal_wallis_with_effect(groups_sw)
+    else:
+        p_sw, eff_sw = 1.0, 0.0
+    pass_sw = (p_sw < alpha_within) and (abs(eff_sw) > effect_min)
+    out["per_feature"]["switch_rate"] = {
+        "p": p_sw, "effect": eff_sw, "passed_dual_gate": bool(pass_sw),
+    }
+
+    # last_template → contingency (subtype × template value)
+    sub_arr = eff["subtype_label"].to_numpy()
+    lt_arr = eff["last_template"].to_numpy()
+    valid_lt = ~pd.isna(lt_arr)
+    sub_v = sub_arr[valid_lt]
+    lt_v = lt_arr[valid_lt].astype(int)
+    if sub_v.size > 0:
+        templates_obs = sorted(np.unique(lt_v).tolist())
+        if len(templates_obs) < 2 or len(np.unique(sub_v)) < 2:
+            p_lt, eff_lt = 1.0, 0.0
+        else:
+            cont = np.zeros((len(subtypes), len(templates_obs)), dtype=int)
+            for i, s in enumerate(subtypes):
+                for j, t in enumerate(templates_obs):
+                    cont[i, j] = int(((sub_v == s) & (lt_v == t)).sum())
+            p_lt, eff_lt = _fisher_or_chi2_with_cramer_v(cont)
+    else:
+        p_lt, eff_lt = 1.0, 0.0
+    pass_lt = (p_lt < alpha_within) and (abs(eff_lt) > effect_min)
+    out["per_feature"]["last_template"] = {
+        "p": p_lt, "effect": eff_lt, "passed_dual_gate": bool(pass_lt),
+    }
+
+    # 3-feature OR: subject positive iff ∃ feature that passes its own dual gate
+    passing = [
+        (name, info["p"], abs(info["effect"]))
+        for name, info in out["per_feature"].items()
+        if info["passed_dual_gate"]
+    ]
+    if passing:
+        # winner = highest |effect| among passers
+        passing.sort(key=lambda x: -x[2])
+        out["subject_positive"] = True
+        out["feature_winner"] = passing[0][0]
+        out["feature_winner_p"] = passing[0][1]
+        out["feature_winner_effect"] = passing[0][2]
+    return out
