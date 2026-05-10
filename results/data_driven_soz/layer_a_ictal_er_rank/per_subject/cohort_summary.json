@@ -1,0 +1,96 @@
+{
+  "step": "Layer A Step A.4 cohort summary (v2.3 timing)",
+  "schema_version": "pr_t3_1_layer_a_v2_3_timing",
+  "detection_window_sec": [
+    -120.0,
+    30.0
+  ],
+  "generated_at": "2026-05-10T18:57:24+0800",
+  "n_subjects": 18,
+  "subjects": [
+    "epilepsiae/1073",
+    "epilepsiae/1077",
+    "epilepsiae/1084",
+    "epilepsiae/1096",
+    "epilepsiae/1146",
+    "epilepsiae/1150",
+    "epilepsiae/139",
+    "epilepsiae/253",
+    "epilepsiae/442",
+    "epilepsiae/548",
+    "epilepsiae/583",
+    "epilepsiae/590",
+    "epilepsiae/635",
+    "epilepsiae/916",
+    "epilepsiae/922",
+    "epilepsiae/958",
+    "yuquan/gaolan",
+    "yuquan/huanghanwen"
+  ],
+  "excluded_subjects": {
+    "list": [],
+    "reason": "dataset prefix not in SUPPORTED_DATASETS (currently {epilepsiae, yuquan}); list expected to be empty under v2.3 PR-0.1"
+  },
+  "two_d_distribution": {
+    "gamma_ER": {
+      "unstable|discordant": 7,
+      "unstable|partial": 3,
+      "unstable|not_assessable": 4,
+      "moderate|concordant": 1,
+      "stable|discordant": 1,
+      "insufficient|not_assessable": 2
+    },
+    "broad_ER": {
+      "moderate|discordant": 1,
+      "unstable|partial": 3,
+      "unstable|not_assessable": 3,
+      "unstable|discordant": 4,
+      "unstable|concordant": 3,
+      "stable|concordant": 1,
+      "stable|partial": 1,
+      "insufficient|not_assessable": 2
+    }
+  },
+  "lambda_max_cap": 100.0,
+  "lambda_at_cap_count": {
+    "gamma_ER": 18,
+    "broad_ER": 18
+  },
+  "producer_fail_subjects": {
+    "gamma_ER": [
+      "epilepsiae/1073",
+      "epilepsiae/1077",
+      "epilepsiae/1084",
+      "epilepsiae/1096",
+      "epilepsiae/1146",
+      "epilepsiae/1150",
+      "epilepsiae/139",
+      "epilepsiae/253",
+      "epilepsiae/442",
+      "epilepsiae/548",
+      "epilepsiae/590",
+      "epilepsiae/635",
+      "epilepsiae/922",
+      "epilepsiae/958",
+      "yuquan/gaolan",
+      "yuquan/huanghanwen"
+    ],
+    "broad_ER": [
+      "epilepsiae/1077",
+      "epilepsiae/1084",
+      "epilepsiae/1096",
+      "epilepsiae/1146",
+      "epilepsiae/1150",
+      "epilepsiae/139",
+      "epilepsiae/253",
+      "epilepsiae/442",
+      "epilepsiae/548",
+      "epilepsiae/590",
+      "epilepsiae/635",
+      "epilepsiae/922",
+      "epilepsiae/958",
+      "yuquan/gaolan",
+      "yuquan/huanghanwen"
+    ]
+  }
+}

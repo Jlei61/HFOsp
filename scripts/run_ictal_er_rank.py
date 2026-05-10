@@ -791,7 +791,12 @@ def _is_current_schema_per_subject_json(path: Path) -> bool:
     return d.get("schema_version") == SCHEMA_VERSION
 
 
-def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
+def _run_cohort(
+    out_dir: Path,
+    *,
+    skip_existing: bool = True,
+    allowlist: Optional[List[str]] = None,
+) -> int:
     """Step A.4 — cohort run on audit_eligible 24 + sentinel-only 916.
 
     Reuses the same _run_subject_all_ers + _build_v2_2_tags pipeline as
@@ -808,6 +813,12 @@ def _run_cohort(out_dir: Path, *, skip_existing: bool = True) -> int:
         "yuquan": _load_focus_rel("yuquan"),
     }
     subjects, excluded = _cohort_subject_list()
+    if allowlist is not None:
+        allow_set = set(allowlist)
+        subjects = [s for s in subjects if s in allow_set]
+        if not subjects:
+            print(f"[cohort] allowlist filtered to empty set; nothing to do", flush=True)
+            return 0
     if excluded:
         print(
             f"\n[cohort] EXCLUDED (dataset not in SUPPORTED_DATASETS): "
@@ -1014,6 +1025,14 @@ def main() -> int:
         help="Re-run subjects even if a v2.2-schema per-subject JSON exists.",
     )
     parser.add_argument(
+        "--subject-allowlist",
+        nargs="+",
+        default=None,
+        help="If set, only process subjects whose '<ds>/<sid>' matches one "
+             "entry. Used for canary runs (e.g. `--subject-allowlist "
+             "yuquan/gaolan yuquan/huanghanwen`).",
+    )
+    parser.add_argument(
         "--output-dir", type=Path, default=None,
         help="Output dir override (sentinel default: %(default)s; cohort default: per_subject/).",
     )
@@ -1053,7 +1072,11 @@ def main() -> int:
                 flush=True,
             )
             return 1
-        return _run_cohort(out_dir, skip_existing=not args.no_skip_existing)
+        return _run_cohort(
+            out_dir,
+            skip_existing=not args.no_skip_existing,
+            allowlist=args.subject_allowlist,
+        )
 
     if args.cohort_summary_only:
         out_dir = args.output_dir or COHORT_OUT_DIR

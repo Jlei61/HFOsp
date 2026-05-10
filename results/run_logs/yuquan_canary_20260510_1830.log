@@ -1,0 +1,12 @@
+
+[cohort] starting v2.2 cohort run on 2 subjects (skip_existing=True)
+
+=== yuquan/gaolan  focal(i)=20  n_seizures=4   [1/2] ===
+  loading 4 seizures (ER computed for both configs in one pass)...
+    seizure 0 (gaolan_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (117.7s)
+    seizure 1 (gaolan_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (161.7s)
+    seizure 2: skipped (yuquan/gaolan seizure 2: requested window starts 131.09s before block_start; upstream caller must drop this seizure)
+    seizure 3 (gaolan_sz_004): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (162.7s)
+  [gamma_ER] pooled baseline (124, 7200) (12.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (124, 7200) (12.0 min); calibrating λ...

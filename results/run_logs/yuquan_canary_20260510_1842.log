@@ -1,0 +1,58 @@
+
+[cohort] starting v2.2 cohort run on 2 subjects (skip_existing=True)
+
+=== yuquan/gaolan  focal(i)=20  n_seizures=4   [1/2] ===
+  loading 4 seizures (ER computed for both configs in one pass)...
+    seizure 0 (gaolan_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (111.9s)
+    seizure 1 (gaolan_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (109.0s)
+    seizure 2: skipped (yuquan/gaolan seizure 2: requested window starts 131.09s before block_start; upstream caller must drop this seizure)
+    seizure 3 (gaolan_sz_004): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (109.3s)
+  [gamma_ER] pooled baseline (124, 7200) (12.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (124, 7200) (12.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=1 bi=0 tied=0 ur=2 s_sz=None λ=100.0
+  [broad_ER] ok=1 bi=0 tied=0 ur=2 s_sz=None λ=100.0
+  [gamma_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  [broad_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  total subject elapsed: 618.9s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_gaolan.json
+
+=== yuquan/huanghanwen  focal(i)=16  n_seizures=2   [2/2] ===
+  loading 2 seizures (ER computed for both configs in one pass)...
+/home/honglab/leijiaxin/HFOsp/src/yuquan_dataset.py:116: RuntimeWarning: Channel names are not unique, found duplicates for: {'POL EMGL'}. Applying running numbers for duplicates.
+  raw = mne.io.read_raw_edf(
+    seizure 0 (huanghanwen_sz_001): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (92.1s)
+/home/honglab/leijiaxin/HFOsp/src/yuquan_dataset.py:116: RuntimeWarning: Channel names are not unique, found duplicates for: {'POL EMGL'}. Applying running numbers for duplicates.
+  raw = mne.io.read_raw_edf(
+    seizure 1 (huanghanwen_sz_002): {'gamma_ER': 'ok', 'broad_ER': 'ok'} (69.8s)
+  [gamma_ER] pooled baseline (76, 4800) (8.0 min); calibrating λ...
+  [gamma_ER] λ = 100.00 (lambda_max=100.0)
+  [broad_ER] pooled baseline (76, 4800) (8.0 min); calibrating λ...
+  [broad_ER] λ = 100.00 (lambda_max=100.0)
+  [gamma_ER] ok=0 bi=0 tied=0 ur=2 s_sz=None λ=100.0
+  [broad_ER] ok=0 bi=0 tied=0 ur=2 s_sz=None λ=100.0
+  [gamma_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  [broad_ER] producer_health=insufficient  clinical_concordance=not_assessable
+  total subject elapsed: 281.9s  → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/yuquan_huanghanwen.json
+
+[cohort] DONE — 2/2 subjects (2 newly computed, 0 skip_existing) in 15.0 min
+
+[cohort] summary → /home/honglab/leijiaxin/HFOsp/results/data_driven_soz/layer_a_ictal_er_rank/per_subject/cohort_summary.json
+[cohort] (producer_health, clinical_concordance) 2D table:
+  gamma_ER:
+    insufficient|not_assessable              2
+    moderate|concordant                      1
+    stable|discordant                        1
+    unstable|discordant                      7
+    unstable|not_assessable                  4
+    unstable|partial                         3
+  broad_ER:
+    insufficient|not_assessable              2
+    moderate|discordant                      1
+    stable|concordant                        1
+    stable|partial                           1
+    unstable|concordant                      3
+    unstable|discordant                      4
+    unstable|not_assessable                  3
+    unstable|partial                         3
+[cohort] λ-at-cap count (cells with λ == cap=100.0): gamma=18 broad=18
