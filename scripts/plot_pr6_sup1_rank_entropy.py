@@ -2,15 +2,20 @@
 """PR-6-sup1 figures — first-rank entropy / symmetry-breaking diagnostic.
 
 Plan v3: docs/archive/topic1/pr6_template_anchoring/
-         pr6_supplementary_rank_entropy_plan_2026-05-10.md §9
-Extension agreed 2026-05-10:
-  + cohort H_p_norm overlay on normalized rank position x ∈ [0, 1]
-  + swap subset (strict + candidate) per-subject panels
+         pr6_supplementary_rank_entropy_plan_2026-05-10.md
+Figure-design discipline 2026-05-10:
+  * No internal codebase terminology in legend / labels (no §X, no
+    cluster_id; describe what the variable represents scientifically).
+  * Single shared legend per figure, not per-panel.
+  * Tight axes — xlim(0,1) ylim(0,1) without decorative whitespace
+    when ranges are naturally bounded.
+  * Categorical colors must be perceptually distinguishable in print +
+    grayscale.
+  * Each panel title states the scientific question, not just the
+    variable name.
+  * fig.suptitle dropped unless it adds new context.
 
-Inputs (read after cohort run):
-  results/interictal_propagation/pr6_sup1_rank_entropy/per_subject/<stem>.json
-  results/interictal_propagation/pr6_sup1_rank_entropy/cohort_summary.json
-  results/interictal_propagation/rank_displacement/cohort_summary.json (for swap_class)
+Reference (memory): feedback_figure_self_contained_paper_grade.md
 """
 
 from __future__ import annotations
@@ -27,11 +32,6 @@ WORKTREE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(WORKTREE_ROOT))
 
 from src.plot_style import (  # noqa: E402
-    COL_EPILEPSIAE,
-    COL_NEUTRAL,
-    COL_NONSIG,
-    COL_SIG,
-    COL_YUQUAN,
     DPI_PUB,
     FS_LABEL,
     FS_TICK,
@@ -55,14 +55,26 @@ RD_COHORT = (
 )
 FIG_DIR = SUP1_DIR / "figures"
 
+
+# High-contrast categorical palette (perceptually distinct in print + grayscale).
+# Maps the rank_displacement variable-k swap classifier label (strict /
+# candidate / none) to a color, but the LEGEND text describes what the
+# label scientifically represents (reversal strength), not the codebase
+# section.
 SWAP_COLORS = {
-    "strict": COL_SIG,         # rust
-    "candidate": COL_NEUTRAL,  # dust
-    "none": COL_NONSIG,        # gray
-    "unknown": "#CFCFCF",
+    "strict": "#C0392B",     # firebrick — strong reversal
+    "candidate": "#2980B9",  # blue — suggestive reversal
+    "none": "#7F8C8D",       # dark gray — no reversal
+    "unknown": "#BDC3C7",
+}
+SWAP_LABEL_PLAIN = {
+    "strict": "Strong reversal",
+    "candidate": "Suggestive reversal",
+    "none": "No reversal",
+    "unknown": "Unclassified",
 }
 
-X_GRID = np.linspace(0.0, 1.0, 51)  # 51-point common grid for interpolation
+X_GRID = np.linspace(0.0, 1.0, 51)
 
 
 def _load_per_subject() -> List[dict]:
@@ -76,18 +88,15 @@ def _load_per_subject() -> List[dict]:
 
 
 def _interp_to_grid(H_p_norm: List[float], n_valid: int) -> np.ndarray:
-    """Interpolate H_p_norm onto X_GRID using normalized rank position.
-
-    Source x: (p - 1) / (n_valid - 1) for p = 1, ..., n_valid.
-    """
     src_x = np.linspace(0.0, 1.0, n_valid)
     return np.interp(X_GRID, src_x, np.asarray(H_p_norm, dtype=float))
 
 
 def _collect_curves(records: List[dict]) -> Dict[str, Any]:
-    """Pull H_p_norm interpolated curves per cluster + Δ + meta per subject."""
-    curves_by_cluster: Dict[str, List[Tuple[str, np.ndarray]]] = {"0": [], "1": []}
-    delta_per_cluster: Dict[str, List[float]] = {"0": [], "1": []}
+    """All cluster-level curves flattened into one list (KMeans cluster_id
+    has no semantic ordering — see verification 2026-05-10: 16 vs 19 split
+    on which cluster is larger across cohort)."""
+    flat_curves: List[Tuple[str, str, np.ndarray]] = []  # (stem, swap, curve)
     delta_subject: List[float] = []
     swap_class_subject: List[str] = []
     n_valid_subject: List[int] = []
@@ -104,15 +113,12 @@ def _collect_curves(records: List[dict]) -> Dict[str, Any]:
         swap_class_subject.append(swap)
         stems.append(stem)
 
-        # cluster-level
         cluster_drops = []
         for cid, c in d["clusters"].items():
             H = c.get("H_p_norm")
             if H is None:
                 continue
-            curves_by_cluster[cid].append((stem, _interp_to_grid(H, n_valid)))
-            if c.get("delta") is not None and np.isfinite(c["delta"]):
-                delta_per_cluster[cid].append(float(c["delta"]))
+            flat_curves.append((stem, swap, _interp_to_grid(H, n_valid)))
             dr = c.get("drop_rate_k")
             if dr is not None and np.isfinite(dr):
                 cluster_drops.append(float(dr))
@@ -121,23 +127,18 @@ def _collect_curves(records: List[dict]) -> Dict[str, Any]:
         )
 
         sl = d.get("subject_level") or {}
+        d_obs = sl.get("delta_obs_subject")
         delta_subject.append(
-            float(sl.get("delta_obs_subject"))
-            if sl.get("delta_obs_subject") is not None
-            and np.isfinite(sl.get("delta_obs_subject"))
-            else float("nan")
+            float(d_obs) if d_obs is not None and np.isfinite(d_obs) else float("nan")
         )
         is_max_subject.append(bool(sl.get("is_subject_combo_max")))
+        pct = sl.get("subject_combo_percentile")
         pct_subject.append(
-            float(sl.get("subject_combo_percentile"))
-            if sl.get("subject_combo_percentile") is not None
-            and np.isfinite(sl.get("subject_combo_percentile"))
-            else float("nan")
+            float(pct) if pct is not None and np.isfinite(pct) else float("nan")
         )
 
     return {
-        "curves_by_cluster": curves_by_cluster,
-        "delta_per_cluster": delta_per_cluster,
+        "flat_curves": flat_curves,
         "delta_subject": np.asarray(delta_subject, dtype=float),
         "swap_class_subject": swap_class_subject,
         "n_valid_subject": np.asarray(n_valid_subject, dtype=int),
@@ -148,69 +149,59 @@ def _collect_curves(records: List[dict]) -> Dict[str, Any]:
     }
 
 
+def _swap_legend_handles(swap_class_subject: List[str]) -> list:
+    """Build single shared legend with plain-English labels + cohort counts."""
+    counts = {
+        c: swap_class_subject.count(c) for c in ["strict", "candidate", "none"]
+    }
+    return [
+        plt.Line2D(
+            [0], [0], color=SWAP_COLORS[c], lw=2.5,
+            label=f"{SWAP_LABEL_PLAIN[c]}  (n={counts[c]})",
+        )
+        for c in ["strict", "candidate", "none"]
+    ]
+
+
 # ---------------------------------------------------------------------------
-# Figure 1 (主): H_p_norm cohort overlay on normalized rank position
+# Figure 1 (主): H_p_norm cohort overlay — single panel, no template split
 # ---------------------------------------------------------------------------
 def fig_cohort_overlay_normalized(data: Dict[str, Any]) -> Path:
-    fig, axes = plt.subplots(1, 2, figsize=(13.0, 5.0), sharey=True)
+    fig, ax = plt.subplots(figsize=(8.8, 5.6))
 
-    for cid, ax in zip(["0", "1"], axes):
-        curves = data["curves_by_cluster"][cid]
-        if not curves:
-            ax.set_title(f"cluster {cid} — no eligible subjects", fontsize=FS_TITLE - 1)
-            continue
+    flat = data["flat_curves"]  # list of (stem, swap, curve)
+    if not flat:
+        return FIG_DIR / "H_p_norm_cohort_overlay.png"
 
-        # Match by stem to swap_class
-        stem_to_swap = dict(zip(data["stems"], data["swap_class_subject"]))
-        # Plot individual curves colored by swap_class
-        for stem, y in curves:
-            cls = stem_to_swap.get(stem, "unknown")
-            color = SWAP_COLORS.get(cls, COL_NEUTRAL)
-            ax.plot(X_GRID, y, color=color, alpha=0.30, linewidth=1.0, zorder=2)
+    # Individual curves — per cluster (so 70 curves total for n=35 stable_k=2)
+    for stem, swap, y in flat:
+        ax.plot(X_GRID, y, color=SWAP_COLORS.get(swap, SWAP_COLORS["unknown"]),
+                alpha=0.28, linewidth=1.0, zorder=2)
 
-        # Cohort median + IQR
-        Y = np.stack([y for _, y in curves], axis=0)
-        med = np.median(Y, axis=0)
-        q25 = np.percentile(Y, 25, axis=0)
-        q75 = np.percentile(Y, 75, axis=0)
-        ax.fill_between(X_GRID, q25, q75, color="black", alpha=0.10, zorder=3)
-        ax.plot(X_GRID, med, color="black", linewidth=2.5, zorder=4,
-                label=f"cohort median (n={len(curves)})")
+    Y = np.stack([y for _, _, y in flat], axis=0)
+    med = np.median(Y, axis=0)
+    q25 = np.percentile(Y, 25, axis=0)
+    q75 = np.percentile(Y, 75, axis=0)
+    ax.fill_between(X_GRID, q25, q75, color="black", alpha=0.13, zorder=3)
+    ax.plot(X_GRID, med, color="black", linewidth=2.8, zorder=4,
+            label=f"Cohort median ({Y.shape[0]} cluster curves)")
 
-        # Reference: full-entropy ceiling at 1.0
-        ax.axhline(1.0, ls="--", lw=0.8, color="gray", alpha=0.6)
+    style_panel(ax)
+    ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
+    ax.set_ylabel("Channel-identity entropy", fontsize=FS_LABEL)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    ax.margins(0)
 
-        style_panel(ax)
-        ax.set_title(f"Cluster {cid}", fontsize=FS_TITLE)
-        ax.set_xlabel("normalized rank position  (0 = fastest, 1 = slowest)",
-                      fontsize=FS_LABEL)
-        if cid == "0":
-            ax.set_ylabel("H_p_norm  (channel-identity entropy at rank position)",
-                          fontsize=FS_LABEL)
-        ax.set_xlim(-0.02, 1.02)
-        ax.set_ylim(0.0, 1.05)
-
-        # Legend per axis
-        legend_handles = [
-            plt.Line2D([0], [0], color=SWAP_COLORS["strict"], lw=2,
-                       label=f"§8 strict (n={data['swap_class_subject'].count('strict')})"),
-            plt.Line2D([0], [0], color=SWAP_COLORS["candidate"], lw=2,
-                       label=f"§8 candidate (n={data['swap_class_subject'].count('candidate')})"),
-            plt.Line2D([0], [0], color=SWAP_COLORS["none"], lw=2,
-                       label=f"§8 none (n={data['swap_class_subject'].count('none')})"),
-            plt.Line2D([0], [0], color="black", lw=2.5,
-                       label="cohort median"),
-        ]
-        ax.legend(handles=legend_handles, loc="lower center", fontsize=FS_TICK - 1,
-                  frameon=True, ncol=2)
-
-    fig.suptitle(
-        "PR-6-sup1 — H_p_norm vs normalized rank position "
-        "(roof-shape = endpoints determined, middle jittery)",
-        fontsize=FS_TITLE,
+    handles = _swap_legend_handles(data["swap_class_subject"])
+    handles.append(plt.Line2D([0], [0], color="black", lw=2.8,
+                              label="Cohort median + IQR"))
+    ax.legend(
+        handles=handles, loc="lower center", fontsize=FS_TICK - 1,
+        frameon=True, ncol=2,
     )
-    fig.tight_layout()
 
+    fig.tight_layout()
     out = FIG_DIR / "H_p_norm_cohort_overlay.png"
     savefig_pub(fig, out)
     savefig_pub(fig, out.with_suffix(".pdf"))
@@ -219,14 +210,13 @@ def fig_cohort_overlay_normalized(data: Dict[str, Any]) -> Path:
 
 
 # ---------------------------------------------------------------------------
-# Figure 2: Δ_subject by swap_class box plot
+# Figure 2: Δ_subject by reversal class
 # ---------------------------------------------------------------------------
 def fig_delta_by_swapclass_box(data: Dict[str, Any]) -> Path:
     fig, ax = plt.subplots(figsize=(8.0, 5.0))
 
     classes = ["strict", "candidate", "none"]
     positions = list(range(1, len(classes) + 1))
-
     by_class: Dict[str, List[float]] = {c: [] for c in classes}
     for delta, cls in zip(data["delta_subject"], data["swap_class_subject"]):
         if cls in by_class and np.isfinite(delta):
@@ -255,25 +245,23 @@ def fig_delta_by_swapclass_box(data: Dict[str, Any]) -> Path:
         )
 
     ax.axhline(0.0, ls="--", lw=1.0, color="black", alpha=0.5,
-               label="Δ = 0 (no endpoint vs middle gap)")
+               label="Δ = 0  no endpoint–middle gap")
 
     ax.set_xticks(positions)
     ax.set_xticklabels(
-        [f"{c}\n(n={len(by_class[c])})" for c in classes], fontsize=FS_TICK,
+        [f"{SWAP_LABEL_PLAIN[c]}\n(n={len(by_class[c])})" for c in classes],
+        fontsize=FS_TICK,
     )
     style_panel(ax)
     ax.set_title(
-        f"Δ_subject by §8 swap_class (n={int(np.sum(np.isfinite(data['delta_subject'])))})",
-        fontsize=FS_TITLE,
+        "Δ < 0 across all subjects  ⇒  endpoints more determined than middle",
+        fontsize=FS_TITLE - 1,
     )
-    ax.set_xlabel("§8 swap_class", fontsize=FS_LABEL)
-    ax.set_ylabel(
-        "Δ_subject  =  mean(H endpoints) − mean(H middle)\n"
-        "(positive = confluence prediction; negative = endpoints determined)",
-        fontsize=FS_LABEL - 1,
-    )
+    ax.set_xlabel("Forward/reverse template-pair classification", fontsize=FS_LABEL)
+    ax.set_ylabel("Δ  (endpoint − middle entropy)", fontsize=FS_LABEL)
     ax.legend(loc="upper right", fontsize=FS_TICK - 1, frameon=True)
 
+    fig.tight_layout()
     out = FIG_DIR / "delta_by_swapclass_box.png"
     savefig_pub(fig, out)
     savefig_pub(fig, out.with_suffix(".pdf"))
@@ -282,54 +270,59 @@ def fig_delta_by_swapclass_box(data: Dict[str, Any]) -> Path:
 
 
 # ---------------------------------------------------------------------------
-# Figure 3: endpoint_pair_percentile_panel (3-panel, plan v3 §9)
+# Figure 3: endpoint_pair_percentile_panel — plain-English questions per panel
 # ---------------------------------------------------------------------------
 def fig_endpoint_percentile_panel(data: Dict[str, Any]) -> Path:
-    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.8))
+    fig, axes = plt.subplots(1, 3, figsize=(17.0, 6.5))
 
-    # --- Panel A: percentile vs Δ_subject scatter ---
+    # --- Panel A: percentile vs Δ scatter ---
     ax = axes[0]
     for delta, pct, cls in zip(
         data["delta_subject"], data["pct_subject"], data["swap_class_subject"]
     ):
         if not np.isfinite(delta) or not np.isfinite(pct):
             continue
-        color = SWAP_COLORS.get(cls, COL_NEUTRAL)
-        ax.scatter(pct, delta, color=color, edgecolors="black",
-                   linewidths=0.7, s=80, alpha=0.92)
-    ax.axvline(1.0, ls="--", lw=1.0, color="black", alpha=0.5)
-    ax.axhline(0.0, ls=":", lw=0.8, color="gray", alpha=0.6)
+        ax.scatter(pct, delta, color=SWAP_COLORS.get(cls, SWAP_COLORS["unknown"]),
+                   edgecolors="black", linewidths=0.7, s=85, alpha=0.92)
+    ax.axvline(1.0, ls="--", lw=1.2, color="black", alpha=0.6,
+               label="confluence prediction (percentile = 1, Δ > 0)")
+    ax.axhline(0.0, ls=":", lw=0.9, color="gray", alpha=0.7)
+    ax.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=True)
     style_panel(ax)
-    ax.set_title("A. subject_combo_percentile × Δ_subject", fontsize=FS_TITLE - 1)
-    ax.set_xlabel("subject_combo_percentile  (1.0 = endpoint pair is max)",
+    ax.set_title("A.  Endpoint-pair percentile vs Δ", fontsize=FS_TITLE - 1)
+    ax.set_xlabel("Endpoint-pair percentile\n(1 = endpoints have largest Δ)",
                   fontsize=FS_LABEL - 1)
-    ax.set_ylabel("Δ_subject", fontsize=FS_LABEL)
-    ax.set_xlim(-0.05, 1.05)
+    ax.set_ylabel("Δ", fontsize=FS_LABEL)
+    ax.set_xlim(0.0, 1.0)
+    ax.margins(x=0)
 
-    # --- Panel B: n_valid distribution + min_attainable_p_N1 floor ---
+    # --- Panel B: n_valid distribution + min p_N1 floor ---
     ax = axes[1]
     n_valids = data["n_valid_subject"]
     unique_nv = sorted(set(int(x) for x in n_valids))
     counts = [int(np.sum(n_valids == nv)) for nv in unique_nv]
-    bars = ax.bar(unique_nv, counts, color=COL_NEUTRAL, edgecolor="black",
-                  linewidth=1.2, alpha=0.85)
+    bars = ax.bar(unique_nv, counts, color="#BDC3C7", edgecolor="black",
+                  linewidth=1.2, alpha=0.85, label="Subjects with this n_valid")
     ax2 = ax.twinx()
-    floors = [1.0 / (nv * (nv - 1) // 2) for nv in unique_nv]  # cluster-level
-    ax2.plot(unique_nv, floors, "o-", color=COL_SIG, lw=1.8, markersize=9,
-             label="cluster-level min_attainable_p_N1")
-    ax2.axhline(0.05, ls="--", lw=1.0, color="black", alpha=0.5,
-                label="conventional 0.05 line")
-    ax2.set_ylabel("cluster-level min_attainable_p_N1\n(1 / C(n_valid, 2))",
-                   fontsize=FS_LABEL - 1, color=COL_SIG)
-    ax2.tick_params(axis="y", labelcolor=COL_SIG)
-    ax2.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=True)
+    floors = [1.0 / (nv * (nv - 1) // 2) for nv in unique_nv]
+    ax2.plot(unique_nv, floors, "o-", color="#C0392B", lw=2.0, markersize=10,
+             label="Smallest reachable p (1 / C(n,2))")
+    ax2.axhline(0.05, ls="--", lw=1.0, color="black", alpha=0.55,
+                label="p = 0.05 reference")
+    ax2.set_ylabel("Smallest reachable p_N1", fontsize=FS_LABEL - 1, color="#C0392B")
+    ax2.tick_params(axis="y", labelcolor="#C0392B")
     style_panel(ax)
-    ax.set_title("B. n_valid distribution + min_attainable_p_N1 floor",
+    ax.set_title("B.  Smallest reachable p depends on n_valid",
                  fontsize=FS_TITLE - 1)
-    ax.set_xlabel("n_valid (cluster channels)", fontsize=FS_LABEL)
-    ax.set_ylabel("subject count", fontsize=FS_LABEL)
+    ax.set_xlabel("n_valid\n(channels per template)", fontsize=FS_LABEL)
+    ax.set_ylabel("Subject count", fontsize=FS_LABEL)
 
-    # --- Panel C: is_subject_combo_max stacked bar by swap_class ---
+    # Combine legends
+    h1, l1 = ax.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    ax2.legend(h1 + h2, l1 + l2, loc="upper right", fontsize=FS_TICK - 2, frameon=True)
+
+    # --- Panel C: did endpoint pair achieve max? ---
     ax = axes[2]
     classes = ["strict", "candidate", "none"]
     counts_max: Dict[str, int] = {c: 0 for c in classes}
@@ -344,26 +337,24 @@ def fig_endpoint_percentile_panel(data: Dict[str, Any]) -> Path:
     positions = np.arange(len(classes))
     not_max_vals = [counts_not[c] for c in classes]
     max_vals = [counts_max[c] for c in classes]
-    ax.bar(positions, not_max_vals, color=COL_NONSIG, edgecolor="black",
-           linewidth=1.0, label="is_subject_combo_max = False")
-    ax.bar(positions, max_vals, bottom=not_max_vals, color=COL_SIG,
+    ax.bar(positions, not_max_vals, color="#7F8C8D", edgecolor="black",
+           linewidth=1.0, label="Endpoint pair NOT max  (Δ < some other pair)")
+    ax.bar(positions, max_vals, bottom=not_max_vals, color="#C0392B",
            edgecolor="black", linewidth=1.0,
-           label="is_subject_combo_max = True")
+           label="Endpoint pair = max  (confluence-style)")
     ax.set_xticks(positions)
-    ax.set_xticklabels(classes, fontsize=FS_TICK)
-    style_panel(ax)
-    ax.set_title("C. is_subject_combo_max by §8 swap_class",
-                 fontsize=FS_TITLE - 1)
-    ax.set_xlabel("§8 swap_class", fontsize=FS_LABEL)
-    ax.set_ylabel("subject count", fontsize=FS_LABEL)
-    ax.legend(loc="upper right", fontsize=FS_TICK - 1, frameon=True)
-
-    fig.suptitle(
-        "PR-6-sup1 — endpoint pair percentile panel",
-        fontsize=FS_TITLE,
+    ax.set_xticklabels(
+        [SWAP_LABEL_PLAIN[c] for c in classes],
+        fontsize=FS_TICK - 1, rotation=15, ha="right",
     )
-    fig.tight_layout()
+    style_panel(ax)
+    ax.set_title("C.  Did the endpoint pair achieve max-Δ?",
+                 fontsize=FS_TITLE - 1)
+    ax.set_xlabel("Forward/reverse template-pair class", fontsize=FS_LABEL)
+    ax.set_ylabel("Subject count", fontsize=FS_LABEL)
+    ax.legend(loc="lower right", fontsize=FS_TICK - 2, frameon=True)
 
+    fig.tight_layout()
     out = FIG_DIR / "endpoint_pair_percentile_panel.png"
     savefig_pub(fig, out)
     savefig_pub(fig, out.with_suffix(".pdf"))
@@ -372,7 +363,7 @@ def fig_endpoint_percentile_panel(data: Dict[str, Any]) -> Path:
 
 
 # ---------------------------------------------------------------------------
-# Figure 4: swap subset (strict + candidate) per-subject H_p_norm + delta
+# Figure 4: swap subset (strict + candidate) per-subject panels
 # ---------------------------------------------------------------------------
 def fig_swap_subset_per_subject(records: List[dict]) -> Path:
     swap_records = [
@@ -380,8 +371,9 @@ def fig_swap_subset_per_subject(records: List[dict]) -> Path:
         if d.get("swap_class_full") in {"strict", "candidate"}
     ]
     if not swap_records:
-        return FIG_DIR / "swap_subset_per_subject.png"  # nothing to plot
+        return FIG_DIR / "swap_subset_per_subject.png"
 
+    # Group: strict first, then candidate; alphabetical within group
     swap_records.sort(
         key=lambda d: (
             0 if d.get("swap_class_full") == "strict" else 1,
@@ -389,11 +381,13 @@ def fig_swap_subset_per_subject(records: List[dict]) -> Path:
         )
     )
     n_subj = len(swap_records)
-    n_cols = 6
+    n_cols = 5
     n_rows = (n_subj + n_cols - 1) // n_cols
 
+    # Larger panels + tighter font for subtitle (paper-grade clarity)
     fig, axes = plt.subplots(
-        n_rows, n_cols, figsize=(3.0 * n_cols, 2.4 * n_rows), sharey=True
+        n_rows, n_cols, figsize=(3.4 * n_cols, 3.2 * n_rows),
+        sharey=True,
     )
     axes = np.array(axes).reshape(n_rows, n_cols)
 
@@ -401,6 +395,7 @@ def fig_swap_subset_per_subject(records: List[dict]) -> Path:
         ax = axes[idx // n_cols, idx % n_cols]
         n_valid = int(d["n_valid_channels"])
         cls = d["swap_class_full"]
+        cls_color = SWAP_COLORS[cls]
         sl = d.get("subject_level") or {}
         d_subj = sl.get("delta_obs_subject")
         is_max = sl.get("is_subject_combo_max")
@@ -411,36 +406,45 @@ def fig_swap_subset_per_subject(records: List[dict]) -> Path:
             if H is None:
                 continue
             x = np.linspace(0.0, 1.0, len(H))
-            ax.plot(x, H, marker="o", markersize=3.5, lw=1.4,
-                    color=COL_YUQUAN if cid == "0" else COL_EPILEPSIAE,
-                    label=f"cluster {cid}", alpha=0.9)
+            ax.plot(x, H, marker="o", markersize=3.2, lw=1.4,
+                    color="#2980B9" if cid == "0" else "#E67E22",
+                    label=f"T_{cid}" if idx == 0 else None,
+                    alpha=0.92)
         ax.axhline(1.0, ls="--", lw=0.6, color="gray", alpha=0.5)
-        ax.set_xlim(-0.02, 1.02)
-        ax.set_ylim(0.4, 1.05)
-        ax.tick_params(labelsize=FS_TICK - 3)
+        ax.set_xlim(0.0, 1.0)
+        ax.set_ylim(0.2, 1.0)
+        ax.tick_params(labelsize=FS_TICK - 4)
+
+        # Color-coded class chip in upper-right
+        ax.text(0.97, 0.06, SWAP_LABEL_PLAIN[cls],
+                transform=ax.transAxes, ha="right", va="bottom",
+                fontsize=FS_TICK - 4, color="white",
+                bbox=dict(facecolor=cls_color, edgecolor="none",
+                          boxstyle="round,pad=0.25"))
+
         if d_subj is None or pct is None:
-            subtitle = "subject-level excluded"
+            sub = "subject-level excluded\n(low kept events)"
         else:
-            subtitle = f"Δ_subj={d_subj:.3f}, pct={pct:.3f}, max={is_max}"
+            sub = f"Δ = {d_subj:+.3f}     percentile = {pct:.3f}"
         ax.set_title(
-            f"{d['stem']} ({cls}, n_valid={n_valid})\n{subtitle}",
-            fontsize=FS_TICK - 1,
+            f"{d['stem']}  (n_valid = {n_valid})\n{sub}",
+            fontsize=FS_TICK - 2,
         )
+
         if idx == 0:
-            ax.legend(fontsize=FS_TICK - 3, loc="lower center")
+            ax.legend(fontsize=FS_TICK - 3, loc="lower center", ncol=2)
 
     # Hide unused panels
     for idx in range(n_subj, n_rows * n_cols):
         axes[idx // n_cols, idx % n_cols].axis("off")
 
-    fig.suptitle(
-        f"PR-6-sup1 — swap subset H_p_norm per subject (n={n_subj}: "
-        f"{sum(1 for d in swap_records if d['swap_class_full'] == 'strict')} strict + "
-        f"{sum(1 for d in swap_records if d['swap_class_full'] == 'candidate')} candidate)",
-        fontsize=FS_TITLE,
-    )
-    fig.tight_layout()
+    # Shared axis labels
+    fig.text(0.5, 0.01, "Normalized rank position", ha="center",
+             fontsize=FS_LABEL)
+    fig.text(0.005, 0.5, "Channel-identity entropy", va="center",
+             rotation="vertical", fontsize=FS_LABEL)
 
+    fig.tight_layout(rect=[0.018, 0.025, 1, 1], h_pad=2.4, w_pad=1.2)
     out = FIG_DIR / "swap_subset_per_subject.png"
     savefig_pub(fig, out)
     savefig_pub(fig, out.with_suffix(".pdf"))
@@ -449,7 +453,7 @@ def fig_swap_subset_per_subject(records: List[dict]) -> Path:
 
 
 # ---------------------------------------------------------------------------
-# Figure 5 (bridge): F_norm × subject_combo_percentile scatter
+# Figure 5: bridge with rank_displacement
 # ---------------------------------------------------------------------------
 def fig_bridge_with_rank_displacement(data: Dict[str, Any]) -> Optional[Path]:
     if not RD_COHORT.exists():
@@ -460,7 +464,6 @@ def fig_bridge_with_rank_displacement(data: Dict[str, Any]) -> Optional[Path]:
         if r.get("stable_k") != 2:
             continue
         stem = f"{r['dataset']}_{r['subject']}"
-        # F_norm is on the single pair for stable_k=2
         pairs = r.get("pairs") or []
         if not pairs:
             continue
@@ -469,52 +472,53 @@ def fig_bridge_with_rank_displacement(data: Dict[str, Any]) -> Optional[Path]:
             "fwd_rev": bool(r.get("fwd_rev_reproduced")),
         }
 
-    fig, ax = plt.subplots(figsize=(7.5, 6.0))
+    fig, ax = plt.subplots(figsize=(8.0, 6.2))
     for stem, pct, cls in zip(
         data["stems"], data["pct_subject"], data["swap_class_subject"]
     ):
-        if stem not in rd_lookup:
+        if stem not in rd_lookup or not np.isfinite(pct):
             continue
         F = rd_lookup[stem]["F_norm"]
         if F is None or not np.isfinite(F):
             continue
-        if not np.isfinite(pct):
-            continue
-        color = SWAP_COLORS.get(cls, COL_NEUTRAL)
         marker = "*" if rd_lookup[stem]["fwd_rev"] else "o"
-        size = 160 if rd_lookup[stem]["fwd_rev"] else 90
-        ax.scatter(F, pct, color=color, edgecolors="black",
-                   linewidths=0.8, s=size, marker=marker, alpha=0.92)
+        size = 200 if rd_lookup[stem]["fwd_rev"] else 90
+        ax.scatter(F, pct,
+                   color=SWAP_COLORS.get(cls, SWAP_COLORS["unknown"]),
+                   edgecolors="black", linewidths=0.8,
+                   s=size, marker=marker, alpha=0.92)
 
-    ax.axhline(1.0, ls="--", lw=1.0, color="black", alpha=0.4,
-               label="endpoint pair = max (sup1)")
-    ax.axvline(2 / 3, ls="--", lw=1.0, color=COL_SIG, alpha=0.6,
-               label="2/3 random reversal floor (rd)")
+    ax.axhline(1.0, ls="--", lw=1.0, color="black", alpha=0.45,
+               label="endpoint-pair Δ is max (sup1)")
+    ax.axvline(2 / 3, ls="--", lw=1.0, color="#C0392B", alpha=0.65,
+               label="random reversal floor 2/3 (rank displacement)")
     style_panel(ax)
-    ax.set_title(
-        "PR-6-sup1 × rank_displacement bridge",
-        fontsize=FS_TITLE,
+    ax.set_xlabel("Forward/reverse displacement F_norm  "
+                  "(0 = no swap, 1 = full reversal)",
+                  fontsize=FS_LABEL - 1)
+    ax.set_ylabel("Endpoint-pair percentile  (1 = endpoints have largest Δ)",
+                  fontsize=FS_LABEL - 1)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
+    ax.margins(0)
+
+    legend_handles = _swap_legend_handles(data["swap_class_subject"])
+    legend_handles.append(
+        plt.Line2D([0], [0], color="#7F8C8D", marker="*", lw=0,
+                   markersize=14, label="Forward/reverse reproduced (rd)"),
     )
-    ax.set_xlabel("rank_displacement F_norm  (0 = no swap, 1 = full reversal)",
-                  fontsize=FS_LABEL - 1)
-    ax.set_ylabel("sup1 subject_combo_percentile  (1 = endpoint pair is max)",
-                  fontsize=FS_LABEL - 1)
-    ax.set_xlim(-0.02, 1.05)
-    ax.set_ylim(-0.05, 1.05)
+    legend_handles.append(
+        plt.Line2D([0], [0], ls="--", color="black", lw=1.0,
+                   label="endpoint-pair Δ is max"),
+    )
+    legend_handles.append(
+        plt.Line2D([0], [0], ls="--", color="#C0392B", lw=1.0,
+                   label="random reversal floor 2/3"),
+    )
+    ax.legend(handles=legend_handles, loc="lower right",
+              fontsize=FS_TICK - 1, frameon=True)
 
-    legend_extra = [
-        plt.Line2D([0], [0], color=SWAP_COLORS["strict"], marker="o", lw=0,
-                   markersize=10, label="§8 strict"),
-        plt.Line2D([0], [0], color=SWAP_COLORS["candidate"], marker="o", lw=0,
-                   markersize=10, label="§8 candidate"),
-        plt.Line2D([0], [0], color=SWAP_COLORS["none"], marker="o", lw=0,
-                   markersize=10, label="§8 none"),
-        plt.Line2D([0], [0], color=COL_NEUTRAL, marker="*", lw=0,
-                   markersize=14, label="rd fwd/rev reproduced"),
-    ]
-    ax.legend(handles=legend_extra, loc="lower right", fontsize=FS_TICK - 1,
-              frameon=True)
-
+    fig.tight_layout()
     out = FIG_DIR / "bridge_rank_displacement.png"
     savefig_pub(fig, out)
     savefig_pub(fig, out.with_suffix(".pdf"))
