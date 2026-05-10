@@ -185,3 +185,61 @@ def load_topic1_events_with_templates(
         "t1_template_id": int(t1_id),
         "cluster_fractions": {int(k): float(v) for k, v in cluster_fractions.items()},
     }
+
+
+def freeze_bridge_setup(
+    cohort: Sequence[str],
+    results_root: Path,
+    artifact_root: Path,
+    out_path: Path,
+) -> Dict[str, Any]:
+    """Freeze T0/T1 convention + audit-rerun marker per spec §4 / §6 caveat #3.
+
+    Idempotent: running twice with same input produces byte-identical JSON.
+    """
+    # Find audit-rerun completion marker in log
+    log_dir = results_root / "run_logs"
+    marker = None
+    for log_file in sorted(log_dir.glob("cohort_zer_audit_*.log")):
+        text = log_file.read_text()
+        for line in text.splitlines():
+            if "[cohort] cohort_summary.csv" in line:
+                marker = line.strip()
+                break
+        if marker:
+            break
+    if not marker:
+        raise RuntimeError(
+            "audit-rerun completion marker not found in any run_logs/cohort_zer_audit_*.log; "
+            "did the audit-rerun finish?"
+        )
+
+    subjects: Dict[str, Any] = {}
+    for sid in sorted(cohort):  # sorted = idempotent ordering
+        ev = load_topic1_events_with_templates(
+            subject=sid,
+            results_root=results_root,
+            artifact_root=artifact_root,
+        )
+        subjects[f"epilepsiae_{sid}"] = {
+            "topic1_n_valid_events": ev["n_valid_events"],
+            "topic1_template_fractions": {
+                str(k): round(v, 12) for k, v in sorted(ev["cluster_fractions"].items())
+            },
+            "t0_template_id": ev["t0_template_id"],
+            "t1_template_id": ev["t1_template_id"],
+        }
+
+    payload = {
+        "schema_version": 1,
+        "audit_rerun_marker_log_line": marker,
+        "alpha_within": ALPHA_WITHIN,
+        "effect_min": EFFECT_MIN,
+        "p_null_binomial": P_NULL_BINOMIAL,
+        "windows_min": [list(w) for w in WINDOWS_MIN],
+        "subjects": subjects,
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w") as fh:
+        json.dump(payload, fh, indent=2, sort_keys=True)
+    return payload

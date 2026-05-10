@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 from pathlib import Path
 
@@ -84,3 +85,38 @@ def test_load_topic1_events_with_templates_442_alignment():
     n_t0 = int((out["template_labels"] == out["t0_template_id"]).sum())
     expected_t0_fraction = 0.5167785234899329  # cluster_id=1 has fraction 0.517
     assert n_t0 / 6556 == pytest.approx(expected_t0_fraction, abs=1e-6)
+
+
+def test_freeze_bridge_setup_idempotent(tmp_path):
+    """Running freeze_bridge_setup twice produces byte-identical bridge_setup.json."""
+    setup_path = tmp_path / "bridge_setup.json"
+    bridge.freeze_bridge_setup(
+        cohort=["442"],
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+        out_path=setup_path,
+    )
+    first = setup_path.read_bytes()
+    bridge.freeze_bridge_setup(
+        cohort=["442"],
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+        out_path=setup_path,
+    )
+    second = setup_path.read_bytes()
+    assert first == second
+
+
+def test_freeze_bridge_setup_audit_rerun_marker(tmp_path):
+    """bridge_setup.json must include audit-rerun completion marker."""
+    setup_path = tmp_path / "bridge_setup.json"
+    bridge.freeze_bridge_setup(
+        cohort=["442"],
+        results_root=Path("/home/honglab/leijiaxin/HFOsp/results"),
+        artifact_root=Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns"),
+        out_path=setup_path,
+    )
+    with setup_path.open() as fh:
+        d = json.load(fh)
+    assert "audit_rerun_marker_log_line" in d
+    assert "cohort_summary.csv" in d["audit_rerun_marker_log_line"]
