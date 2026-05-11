@@ -4,6 +4,67 @@ Provides unified semantic colors, panel styling, and reusable plot helpers
 following Nature/Science conventions.  Every plotting script in this repo
 should ``from src.plot_style import ...`` instead of defining its own
 style constants.
+
+----------------------------------------------------------------------------
+Convention: cluster-rank / endpoint-anchoring small multiples
+----------------------------------------------------------------------------
+
+When rendering per-subject small-multiples that show **per-cluster mean
+rank profiles with subset-channel highlighting** (e.g. PR-6 swap-node
+figures, propagation cluster_rank_fig4 style), follow these rules. They
+were settled iteratively during the PR-6 swap-cohort supplementary work
+(2026-05-11); ``scripts/plot_pr6_swap_cluster_rank_multiples.py`` is the
+reference implementation.
+
+1.  **No figure-level suptitle.** Prose narrative lives in the figure
+    ``README.md`` / caption, not in the figure canvas. Per-panel titles
+    only.
+
+2.  **Per-panel title.** Two-line maximum, ``pad=10`` so the title lifts
+    clearly above the axes top spine. Format:
+      line 1 = ``"{D}:{subject}"`` (D = first letter of dataset uppercased)
+      line 2 = compact stats only — ``"p=X.XXX   n_swap=N"`` style;
+               **never** include redundant labels like ``swap_score=X``,
+               ``k=X``, ``cluster_id=X`` that aren't needed by an
+               out-of-context reader.
+
+3.  **Tight axes** for naturally-bounded rank/index variables:
+      ``ax.set_xlim(0, n_ch - 1)``
+      ``ax.set_ylim(0, n_ch - 1); ax.invert_yaxis()``
+    First channel flush with the top edge, last channel flush with the
+    x-axis, x starts exactly at 0. No decorative whitespace.
+
+4.  **Highlight pattern for "important" channels** (swap nodes, source/
+    sink endpoints, etc.):
+      marker:  large filled star (``marker="*", s=180``) + black edge,
+               full saturation, ``zorder=12``, ``clip_on=False`` so
+               markers at axis boundary aren't clipped.
+      y-tick:  bold, orange ``COL_SWAP_LABEL = "#D2691E"`` (Morandi rust).
+      Non-highlight channels: small faded circle (``s=28``, alpha≈0.30),
+      muted gray y-tick (``#888888``).
+
+5.  **Two-cluster T0/T1 conventions:**
+      T0 (forward / cluster_id_a) = blue ``"#1f77b4"``
+      T1 (reverse / cluster_id_b) = red  ``"#d62728"``
+      Shaded mean ± 1 SD band (``alpha=0.12``) + solid line (``lw=1.8``).
+
+6.  **Legend in a dedicated right column.** No bottom-row legend that
+    cramps panel layout. Reserve 3.0–3.8 inches on the figure right
+    (more for figures with many or wider panels); place ``fig.legend``
+    with ``loc="center right"``, ``bbox_to_anchor=(0.995, 0.5)``,
+    ``ncol=1``. Single shared legend, never per-panel.
+
+7.  **Layout sizing:** ``gridspec`` ``right = panel_block_w / total_w``
+    (panel area ends before the reserved legend column);
+    ``top ≈ 0.91``, ``hspace ≈ 0.45–0.50`` to give the lifted titles
+    breathing room.
+
+8.  **Save both PNG (``dpi=200``) and PDF** from the same script call so
+    downstream consumers always have a vector copy.
+
+These rules are *additive* to the umbrella paper-grade-self-contained
+contract (no internal §X / PR-N / cluster_id terminology in legends or
+axis labels; render → eyeball → fix → re-render before commit).
 """
 from __future__ import annotations
 
@@ -45,6 +106,14 @@ COL_NIGHT = "#7E6E84"         # Morandi plum
 COL_NEUTRAL = "#A89B8A"       # Morandi dust
 COL_OSCILLATOR = "#A67C5A"    # warm brown (toy oscillator)
 COL_REFRACTORY = "#6F8FA8"    # blue (toy refractory)
+
+# Highlight color for "subset-of-interest" y-tick labels in small-multiples
+# (e.g. swap nodes, endpoint channels). Pairs with the COL_SIG marker family.
+COL_SWAP_LABEL = "#D2691E"    # vivid Morandi rust, bold-tick highlight
+
+# Two-cluster T0/T1 line colors used in cluster_rank_fig4-style panels
+COL_CLUSTER_T0 = "#1f77b4"    # forward / cluster_id_a — blue
+COL_CLUSTER_T1 = "#d62728"    # reverse / cluster_id_b — red
 
 # Convenience alias kept for backward compat with Topic 1 scripts
 COL_YQ = COL_YUQUAN

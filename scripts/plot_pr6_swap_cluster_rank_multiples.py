@@ -46,10 +46,13 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.plot_style import savefig_pub, FS_LABEL, FS_TICK, FS_TITLE  # noqa: E402
-
-# Orange accent for swap-node y-tick labels (Morandi rust, matches PR-6 swap color)
-COL_SWAP_LABEL = "#D2691E"
+from src.plot_style import (  # noqa: E402
+    savefig_pub,
+    FS_LABEL, FS_TICK, FS_TITLE,
+    COL_SWAP_LABEL,
+    COL_CLUSTER_T0,
+    COL_CLUSTER_T1,
+)
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -66,8 +69,9 @@ YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
 
 # Cluster colors (match per-subject propagation figure)
-COL_C0 = "#1f77b4"   # forward (T0)
-COL_C1 = "#d62728"   # reverse (T1)
+# Imported aliases for compactness in plotting calls.
+COL_C0 = COL_CLUSTER_T0   # T0 / forward (blue)
+COL_C1 = COL_CLUSTER_T1   # T1 / reverse (red)
 COL_FADE = 0.30      # alpha for non-swap markers
 
 
