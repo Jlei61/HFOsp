@@ -64,6 +64,7 @@ from scripts.plot_pr6_swap_cluster_rank_multiples import (  # noqa: E402
     _draw_subject_panel,
     _swap_nodes_rank_displacement,
 )
+from scipy import stats as sp_stats  # noqa: E402
 
 RESULTS = REPO / "results"
 FIG_DIR = RESULTS / "topic1_topic5_bridge" / "figures"
@@ -75,6 +76,17 @@ TARGETS: List[Tuple[str, str]] = [
 ]
 BAND = "gamma_ER"
 ZOOM_T = (-30.0, 20.0)  # seconds rel. clinical onset for zoom heatmap
+
+# Manual override for T0/T1 picks per subject — keyed by (dataset, sid).
+# Set to None to use automatic strict-swap picker.
+# Values are seizure_id strings (matching atlas seizure_records).
+MANUAL_PICK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Optional[str]]] = {
+    # 548: auto picker chose sz_idx=26 (Δρ_strict=-1.10, subtype=2) for T1;
+    # user requested a different example. Override to sz_idx=21
+    # (sz_id=54801302102, Δρ_strict=-1.00, subtype=1, n_strict=5/5) — almost
+    # equal T1 strength, full strict-swap coverage, different subtype.
+    ("epilepsiae", "548"): {"t1": "54801302102"},
+}
 
 # ER computation constants (match atlas v2_3 pipeline)
 ER_PRE_SEC = 300.0
@@ -320,6 +332,104 @@ def _seizure_idx_from_id(atlas_subj_json: dict, band: str, sz_id: str) -> Option
     return None
 
 
+def _compute_strict_swap_alignment(
+    atlas: Dict[str, Dict[str, Optional[float]]],
+    t0_rank: Dict[str, int],
+    t1_rank: Dict[str, int],
+    strict_channels: Sequence[str],
+    min_channels: int = 3,
+) -> Dict[str, Dict[str, object]]:
+    """Recompute (ρ_T0, ρ_T1, Δρ, n_used) per seizure using ONLY strict swap nodes.
+
+    The original Q1' computation used the *endpoint* set (top-k ∪ bottom-k of T0_rank),
+    which includes channels extreme in T0 alone. The cleaner Q1' axis restricts to
+    *strict swap* nodes: (top-k T0 ∩ bottom-k T1) ∪ (bottom-k T0 ∩ top-k T1).
+
+    Returns dict[sz_id → {rho_t0, rho_t1, delta_rho, n_strict_used, assignment}].
+    """
+    out: Dict[str, Dict[str, object]] = {}
+    for sz_id, sz_onsets in atlas.items():
+        valid_chs = [
+            ch for ch in strict_channels
+            if ch in t0_rank and ch in t1_rank
+            and ch in sz_onsets and sz_onsets[ch] is not None
+            and np.isfinite(sz_onsets[ch])
+        ]
+        n = len(valid_chs)
+        if n < min_channels:
+            out[sz_id] = {
+                "rho_t0": float("nan"), "rho_t1": float("nan"),
+                "delta_rho": float("nan"), "n_strict_used": n,
+                "assignment": "insufficient_n",
+            }
+            continue
+        onset_vec = np.array([sz_onsets[ch] for ch in valid_chs], dtype=float)
+        seizure_rank = np.argsort(np.argsort(onset_vec)).astype(float)
+        t0_vec = np.array([t0_rank[ch] for ch in valid_chs], dtype=float)
+        t1_vec = np.array([t1_rank[ch] for ch in valid_chs], dtype=float)
+        rho_t0 = sp_stats.spearmanr(seizure_rank, t0_vec).statistic
+        rho_t1 = sp_stats.spearmanr(seizure_rank, t1_vec).statistic
+        if not np.isfinite(rho_t0):
+            rho_t0 = 0.0
+        if not np.isfinite(rho_t1):
+            rho_t1 = 0.0
+        diff = float(rho_t0 - rho_t1)
+        if diff > 0.10:
+            assg = "T0"
+        elif -diff > 0.10:
+            assg = "T1"
+        else:
+            assg = "tie"
+        out[sz_id] = {
+            "rho_t0": float(rho_t0),
+            "rho_t1": float(rho_t1),
+            "delta_rho": diff,
+            "n_strict_used": n,
+            "assignment": assg,
+        }
+    return out
+
+
+def _pick_extreme_seizures_strict(
+    per_seizure: List[Dict[str, object]],
+    strict_alignments: Dict[str, Dict[str, object]],
+    n_strict: int,
+) -> Tuple[Dict, Dict]:
+    """Pick max/min Δρ using STRICT-swap-only alignments.
+
+    Gate: n_strict_used >= ceil(n_strict * 0.75), fallback to ≥ max(3, n_strict//2).
+    Within gate: prefer max n_strict_used, then Δρ extremity.
+    """
+    def _build(min_n: int):
+        t0p, t1p = [], []
+        for s in per_seizure:
+            sid = str(s.get("seizure_id"))
+            al = strict_alignments.get(sid)
+            if al is None or al["assignment"] not in ("T0", "T1", "tie"):
+                continue
+            n_used = int(al["n_strict_used"])
+            if n_used < min_n:
+                continue
+            delta = float(al["delta_rho"])
+            entry = (n_used, delta, s, al)
+            (t0p if delta > 0 else t1p).append(entry)
+        return t0p, t1p
+
+    gate_strict = max(3, (n_strict * 3 + 3) // 4)
+    t0p, t1p = _build(gate_strict)
+    if not t0p or not t1p:
+        gate_loose = max(3, n_strict // 2)
+        t0p, t1p = _build(gate_loose)
+    if not t0p or not t1p:
+        raise ValueError(
+            f"strict-swap alignment: not enough candidates "
+            f"(n_strict={n_strict}, t0_pool={len(t0p)}, t1_pool={len(t1p)})"
+        )
+    t0p.sort(key=lambda r: (-r[0], -r[1]))   # most strict-swap stars, then max +Δρ
+    t1p.sort(key=lambda r: (-r[0], r[1]))    # most strict-swap stars, then most -Δρ
+    return t0p[0], t1p[0]
+
+
 def _pick_extreme_seizures(
     per_seizure: List[Dict[str, object]], swap_size: int,
 ) -> Tuple[Dict, Dict]:
@@ -423,12 +533,63 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     swap_idx_ordered = sorted(swap_idx_unordered, key=_mean_rank)
     swap_labels = [channel_names[i] for i in swap_idx_ordered]
 
-    # --- pick seizures (require ≥ swap_size//2 CUSUM stars on swap nodes) ---
-    sz_t0, sz_t1 = _pick_extreme_seizures(q1p["per_seizure"], swap_size=len(swap_labels))
+    # --- Strict swap node set (from rank_displacement §8) ---
+    swap_nodes_set, _cid_a, _cid_b, _decision_k = _swap_nodes_rank_displacement(
+        dataset, sid,
+    )
+    strict_labels = [ch for ch in swap_labels if ch in swap_nodes_set]
+    if len(strict_labels) < 3:
+        # Fall back to full endpoint when strict tier is too small (e.g. swap=none subjects)
+        strict_labels = list(swap_labels)
+        used_strict_fallback = True
+    else:
+        used_strict_fallback = False
+    n_strict = len(strict_labels)
+
+    # Load atlas channel_onsets keyed by seizure_id (string) for alignment
+    atlas_by_sz_id = br.load_atlas_seizure_channel_onsets(
+        sid, BAND, RESULTS, dataset=dataset,
+    )
+
+    # --- Recompute alignment on STRICT swap channels only ---
+    strict_alignments = _compute_strict_swap_alignment(
+        atlas=atlas_by_sz_id,
+        t0_rank=tmpl["t0_rank"],
+        t1_rank=tmpl["t1_rank"],
+        strict_channels=strict_labels,
+        min_channels=3,
+    )
+    (sz_t0_n, sz_t0_dr, sz_t0, sz_t0_al), (sz_t1_n, sz_t1_dr, sz_t1, sz_t1_al) = \
+        _pick_extreme_seizures_strict(q1p["per_seizure"], strict_alignments, n_strict)
+
+    # Optional manual override (per-subject t0/t1 sz_id specified at top of file)
+    override = MANUAL_PICK_OVERRIDES.get((dataset, sid), {})
+    for side in ("t0", "t1"):
+        forced_id = override.get(side)
+        if forced_id is None:
+            continue
+        forced_seiz = next(
+            (s for s in q1p["per_seizure"] if str(s.get("seizure_id")) == forced_id),
+            None,
+        )
+        forced_al = strict_alignments.get(forced_id)
+        if forced_seiz is None or forced_al is None:
+            raise RuntimeError(
+                f"{dataset}_{sid}: manual override {side}={forced_id} not found"
+            )
+        replacement = (
+            int(forced_al["n_strict_used"]),
+            float(forced_al["delta_rho"]),
+            forced_seiz,
+            forced_al,
+        )
+        if side == "t0":
+            sz_t0_n, sz_t0_dr, sz_t0, sz_t0_al = replacement
+        else:
+            sz_t1_n, sz_t1_dr, sz_t1, sz_t1_al = replacement
+
     sz_t0_id = str(sz_t0["seizure_id"])
     sz_t1_id = str(sz_t1["seizure_id"])
-    sz_t0_dr = float(sz_t0["rho_a"]) - float(sz_t0["rho_b"])
-    sz_t1_dr = float(sz_t1["rho_a"]) - float(sz_t1["rho_b"])
     sz_t0_idx = _seizure_idx_from_id(atlas_subj, BAND, sz_t0_id)
     sz_t1_idx = _seizure_idx_from_id(atlas_subj, BAND, sz_t1_id)
     if sz_t0_idx is None or sz_t1_idx is None:
@@ -454,9 +615,6 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     print(f"  [zer] computing for {dataset}_{sid} sz_idx={sz_t1_idx} (T1-like)...")
     zer_t1 = _compute_seizure_zer(dataset, sid, sz_t1_idx)
 
-    # --- swap nodes from rank_displacement (same as left-panel function uses) ---
-    swap_nodes_set, cid_a, cid_b, _ = _swap_nodes_rank_displacement(dataset, sid)
-
     # T0/T1 cluster IDs from bridge_setup freeze (larger-fraction rule)
     t0_id = int(tmpl["t0_template_id"])
     t1_id = int(tmpl["t1_template_id"])
@@ -475,65 +633,78 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
             subtype_colors[st] = PAL[k % len(PAL)]
 
     # --- build figure (plot_style.py conventions) ---
-    # Wider figure; 3 top panels forced square via set_box_aspect(1); bottom row narrower.
-    # Reserve far-right column for shared legend; colorbar pinned to T1 panel via inset_axes.
-    fig = plt.figure(figsize=(20.0, 11.5), facecolor="white")
-    gs = GridSpec(
-        nrows=2, ncols=3, figure=fig,
-        height_ratios=[1.85, 1.0], width_ratios=[1.0, 1.0, 1.0],
-        left=0.05, right=0.78, top=0.93, bottom=0.07,
-        hspace=0.55, wspace=0.35,
-    )
-    ax_inter = fig.add_subplot(gs[0, 0])
-    ax_t0sz = fig.add_subplot(gs[0, 1])
-    ax_t1sz = fig.add_subplot(gs[0, 2])
-    ax_bar = fig.add_subplot(gs[1, 0:2])
-    ax_scatter = fig.add_subplot(gs[1, 2])
+    # Top row: 3 panels — slim interictal rank distribution + 2 SQUARE heatmaps.
+    # Bottom row: independent gridspec — wide Δρ bar + scatter, widths free.
+    # Colorbar pinned to T1 panel; legend far-right edge.
+    fig = plt.figure(figsize=(20.5, 11.0), facecolor="white")
 
-    # Left: canonical interictal template panel
+    # Top GridSpec — heatmaps square via set_box_aspect(1.0); rank panel stays slim
+    gs_top = GridSpec(
+        nrows=1, ncols=3, figure=fig,
+        width_ratios=[0.55, 1.0, 1.0],
+        left=0.045, right=0.78, top=0.94, bottom=0.50,
+        wspace=0.40,
+    )
+    ax_inter = fig.add_subplot(gs_top[0, 0])
+    ax_t0sz = fig.add_subplot(gs_top[0, 1])
+    ax_t1sz = fig.add_subplot(gs_top[0, 2])
+
+    # Bottom GridSpec — independent of top column widths
+    gs_bot = GridSpec(
+        nrows=1, ncols=2, figure=fig,
+        width_ratios=[2.2, 1.0],
+        left=0.07, right=0.78, top=0.40, bottom=0.07,
+        wspace=0.28,
+    )
+    ax_bar = fig.add_subplot(gs_bot[0, 0])
+    ax_scatter = fig.add_subplot(gs_bot[0, 1])
+
+    # Left: canonical interictal template panel (NOT forced square — keep slim)
     _draw_subject_panel(
         ax_inter, dataset, sid,
         swap_nodes=swap_nodes_set,
         cid_t0=t0_id, cid_t1=t1_id,
         title_text="",
     )
-    # Two-line title per plot_style §2; reset the canonical func's xlabel
     n_lagpat = len(channel_names)
     ax_inter.set_title(
         f"E:{sid}\ninterictal templates   n_swap={len(swap_nodes_set)}",
         fontsize=FS_TITLE, pad=10,
     )
     ax_inter.set_xlabel("rank", fontsize=FS_LABEL)
-    # Tight axes per plot_style §3
     ax_inter.set_xlim(0, n_lagpat - 1)
     ax_inter.set_ylim(n_lagpat - 0.5, -0.5)
-    ax_inter.set_box_aspect(1.0)  # square box, matches heatmap aspect
+    # NO set_box_aspect here — slim rectangle by default
 
-    # Middle/right: z-ER zoom heatmaps with strict swap-nodes highlight
+    # Middle/right: z-ER zoom heatmap restricted to STRICT SWAP rows only
+    # (per user: "T0/T1 不应该只考虑swap节点之间的时序" — ρ on strict swap only).
+    # Channel highlight rule is moot (all rows ARE strict swap), but keep
+    # bold-orange styling consistent with the left panel.
     im_t0 = _draw_seizure_heatmap(
         ax_t0sz, zer_t0["zer"], zer_t0["ch_names"], zer_t0["t_er"],
-        swap_labels, swap_nodes_set, onsets_t0, zer_t0["eeg_rel"],
+        strict_labels, set(strict_labels), onsets_t0, zer_t0["eeg_rel"],
         title_text=(
-            f"most T0-like   sz_idx={sz_t0_idx:02d}\n"
-            f"Δρ={sz_t0_dr:+.2f}   {_format_subtype(sz_t0.get('subtype_label'))}   "
-            f"n_swap={int(sz_t0.get('n_swap_channels_used', 0))}/{len(swap_labels)}"
+            f"most T0-like   sz_idx={sz_t0_idx:02d}   subtype={_format_subtype(sz_t0.get('subtype_label'))}\n"
+            f"Δρ_strict={sz_t0_dr:+.2f}   n_strict={sz_t0_n}/{n_strict}"
+            + ("   (strict tier empty → fallback endpoint)" if used_strict_fallback else "")
         ),
     )
     im_t1 = _draw_seizure_heatmap(
         ax_t1sz, zer_t1["zer"], zer_t1["ch_names"], zer_t1["t_er"],
-        swap_labels, swap_nodes_set, onsets_t1, zer_t1["eeg_rel"],
+        strict_labels, set(strict_labels), onsets_t1, zer_t1["eeg_rel"],
         title_text=(
-            f"most T1-like   sz_idx={sz_t1_idx:02d}\n"
-            f"Δρ={sz_t1_dr:+.2f}   {_format_subtype(sz_t1.get('subtype_label'))}   "
-            f"n_swap={int(sz_t1.get('n_swap_channels_used', 0))}/{len(swap_labels)}"
+            f"most T1-like   sz_idx={sz_t1_idx:02d}   subtype={_format_subtype(sz_t1.get('subtype_label'))}\n"
+            f"Δρ_strict={sz_t1_dr:+.2f}   n_strict={sz_t1_n}/{n_strict}"
+            + ("   (strict tier empty → fallback endpoint)" if used_strict_fallback else "")
         ),
     )
 
-    # Apply style_panel (remove top/right spines, thicken left/bottom, tick fonts)
+    # Apply style_panel (no-op for already-set spines but unifies tick params)
     for ax in (ax_inter, ax_t0sz, ax_t1sz, ax_bar, ax_scatter):
         style_panel(ax)
 
-    # Bottom
+    # Bottom (uses original Q1' endpoint-Δρ for cohort view — that's the
+    # subject-summary axis, not the strict-swap axis used in the seizure panels).
     _draw_delta_bar(ax_bar, q1p["per_seizure"], len(swap_labels), subtype_colors)
     _draw_scatter(ax_scatter, q1p["per_seizure"], subtype_colors)
 
@@ -561,10 +732,10 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
         legend_handles.append(Patch(facecolor=subtype_colors[st],
                                     edgecolor="black", label=lbl))
 
-    # Legend block: top-right corner, anchored to figure
+    # Legend block: top-right corner, anchored to figure (further right per user)
     fig.legend(
         handles=legend_handles,
-        loc="upper left", bbox_to_anchor=(0.79, 0.93),
+        loc="upper left", bbox_to_anchor=(0.86, 0.95),
         ncol=1, frameon=False, fontsize=FS_TICK,
     )
 
