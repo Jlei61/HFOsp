@@ -1,26 +1,27 @@
-"""Per-subject bridge figure for Q1' — interictal templates × per-seizure t_onset.
+"""Per-subject bridge figure for Q1' — interictal templates × per-seizure z-ER heatmap.
 
-For each target subject, produces one figure:
+Layout (gridspec 2×3):
 
-  ┌───────────────────────────────┬─────────────────────────┬─────────────────────────┐
-  │ Interictal templates          │ Most T0-like seizure    │ Most T1-like seizure    │
-  │   T0 / T1 mean ± SD rank      │   t_onset_sec stars     │   t_onset_sec stars     │
-  │   ★ swap-endpoint channels    │   on swap channels      │   on swap channels      │
-  ├───────────────────────────────┴─────────────────────────┼─────────────────────────┤
-  │ Δρ per seizure sorted, colored by subtype                │ (ρ_a, ρ_b) scatter      │
-  │                                                          │  colored by subtype      │
-  └──────────────────────────────────────────────────────────┴─────────────────────────┘
+  TOP:
+    [1] Interictal templates  — drawn by `_draw_subject_panel`
+        from scripts/plot_pr6_swap_cluster_rank_multiples.py
+        (the canonical project standard: T0/T1 mean ± SD rank curves,
+        ★ at swap-endpoint channels, ○ at non-swap, bold y-labels for swap).
+    [2] Most-T0-like seizure z-ER heatmap zoomed to swap channels × [-30, +20]s
+    [3] Most-T1-like seizure z-ER heatmap, same zoom
 
-All three top panels share y-axis = swap-endpoint channels, ordered by joint mean
-rank (matches the standard pattern from
-`scripts/plot_pr6_swap_cluster_rank_multiples.py`).
+  BOTTOM:
+    [Δρ per seizure sorted bar, colored by ictal subtype]
+    [(ρ_a, ρ_b) scatter, colored by ictal subtype]
 
-Seizure t_onset_sec is read directly from atlas v2_3
-`channel_onsets[ch].t_onset_sec` for gamma_ER band — the same value that produces
-the ✦ stars in `results/data_driven_soz/.../per_seizure/epilepsiae_<sid>_seizure_<idx>.png`.
+The right two heatmaps reuse the same z-ER computation pipeline as
+scripts/plot_ictal_er_atlas.py::render_per_seizure
+(extract_seizure_window → compute_er → baseline_zscore_er),
+giving values directly comparable to
+results/data_driven_soz/.../atlas_v2_3/figures/per_seizure/epilepsiae_<sid>_seizure_<idx>.png.
 
-Pre-figure validation (run separately): channels, T0/T1 cluster IDs, picked
-seizures, lagPat alignment all confirmed for {958, 548, 922}.
+Each picked seizure's title shows the atlas seizure_idx so cross-ref with
+the per_seizure PNG is direct.
 """
 
 from __future__ import annotations
@@ -34,7 +35,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 
@@ -42,15 +42,20 @@ REPO = Path("/home/honglab/leijiaxin/HFOsp")
 sys.path.insert(0, str(REPO))
 
 from src import topic1_topic5_bridge as br  # noqa: E402
-from src.interictal_propagation import (  # noqa: E402
-    _valid_event_indices,
-    load_subject_propagation_events,
+from src.ictal_onset_extraction import (  # noqa: E402
+    GAMMA_ER_BANDS,
+    baseline_zscore_er,
+    compute_er,
+    extract_seizure_window,
+    resolve_baseline_window,
 )
 from src.topic1_topic5_bridge import _morandi_palette  # noqa: E402
+from scripts.plot_pr6_swap_cluster_rank_multiples import (  # noqa: E402
+    _draw_subject_panel,
+    _swap_nodes_rank_displacement,
+)
 
 RESULTS = REPO / "results"
-ARTIFACT_EPI = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
-ARTIFACT_YUQ = Path("/mnt/yuquan_data/yuquan_24h_edf")
 FIG_DIR = RESULTS / "topic1_topic5_bridge" / "figures"
 
 TARGETS: List[Tuple[str, str]] = [
@@ -59,216 +64,172 @@ TARGETS: List[Tuple[str, str]] = [
     ("epilepsiae", "922"),
 ]
 BAND = "gamma_ER"
-DETECTION_WINDOW_SEC = (-120.0, 30.0)
+ZOOM_T = (-30.0, 20.0)  # seconds rel. clinical onset for zoom heatmap
+
+# ER computation constants (match atlas v2_3 pipeline)
+ER_PRE_SEC = 300.0
+ER_POST_SEC = 60.0
+ER_HOP_SEC = 0.1
+ER_WIN_SEC = 1.0
 
 PAL = _morandi_palette()
-COL_T0 = "#3B6F8A"      # blue
-COL_T1 = "#B85450"      # red
-COL_TIE = "#A0A0A0"     # grey
-COL_NO_ONSET = "#CCCCCC"
-
-
-def subject_dir(dataset: str, sid: str) -> Path:
-    if dataset == "epilepsiae":
-        legacy = ARTIFACT_EPI / sid / "all_recs"
-        return legacy if legacy.exists() else (ARTIFACT_EPI / sid)
-    return ARTIFACT_YUQ / sid
+COL_TIE = "#A0A0A0"
 
 
 # ---------------------------------------------------------------------------
-# Data assembly
+# Per-seizure z-ER computation (mirrors atlas v2_3 / plot_ictal_er_atlas)
 # ---------------------------------------------------------------------------
 
-def _joint_mean_rank_order(
-    ranks: np.ndarray, bools: np.ndarray, valid_events: np.ndarray,
-    subset_indices: List[int],
-) -> List[int]:
-    """Return subset_indices sorted by joint mean rank ascending (NaN at end)."""
-    mean_rank: Dict[int, float] = {}
-    for ci in subset_indices:
-        vals = np.asarray(ranks[ci, valid_events], dtype=float)
-        mask = np.asarray(bools[ci, valid_events], dtype=bool)
-        vv = vals[mask & np.isfinite(vals)]
-        if vv.size > 0:
-            mean_rank[ci] = float(np.mean(vv))
-        else:
-            mean_rank[ci] = float("inf")
-    return sorted(subset_indices, key=lambda ci: mean_rank[ci])
+def _compute_seizure_zer(
+    dataset: str, sid: str, seizure_idx: int,
+) -> Dict[str, object]:
+    """Run extract → compute_er → baseline_zscore on one seizure.
 
+    Tries decreasing post_sec windows to handle seizures near block boundaries
+    (same fallback ladder as plot_ictal_er_atlas.py::render_per_seizure).
 
-def _cluster_mean_sd(
-    ranks: np.ndarray, bools: np.ndarray, valid_events: np.ndarray,
-    labels: np.ndarray, channel_indices: List[int], cluster_id: int,
-) -> Tuple[np.ndarray, np.ndarray]:
-    n_ch = len(channel_indices)
-    means = np.full(n_ch, np.nan, dtype=float)
-    stds = np.full(n_ch, np.nan, dtype=float)
-    sel = labels == cluster_id
-    eidx = valid_events[sel]
-    if eidx.size == 0:
-        return means, stds
-    for k, ci in enumerate(channel_indices):
-        vals = np.asarray(ranks[ci, eidx], dtype=float)
-        mask = np.asarray(bools[ci, eidx], dtype=bool)
-        vv = vals[mask & np.isfinite(vals)]
-        if vv.size > 0:
-            means[k] = float(np.mean(vv))
-            stds[k] = float(np.std(vv))
-    return means, stds
-
-
-def _load_subject_data(dataset: str, sid: str) -> Dict[str, object]:
-    """Load all data needed for one subject's figure."""
-    swap = br.load_swap_channel_subset(sid, RESULTS, dataset=dataset)
-    tmpl = br.load_template_ranks_with_t0t1(sid, RESULTS, ARTIFACT_EPI, dataset=dataset)
-    atlas = br.load_atlas_seizure_channel_onsets(sid, BAND, RESULTS, dataset=dataset)
-    subtypes = br.load_topic5_subtype_labels(sid, BAND, RESULTS, dataset=dataset)
-
-    # Q1' per-seizure JSON (cached from the cohort run)
-    q1p_path = RESULTS / "topic1_topic5_bridge" / "q1prime_per_subject" / f"{dataset}_{sid}__q1prime.json"
-    with q1p_path.open() as fh:
-        q1p = json.load(fh)
-
-    # lagPat NPZ for mean ± SD
-    loaded = load_subject_propagation_events(subject_dir(dataset, sid))
-    ranks = np.asarray(loaded["ranks"], dtype=float)
-    bools = np.asarray(loaded["bools"], dtype=bool)
-    channel_names = list(loaded["channel_names"])
-
-    # Topic 1 propagation per_subject JSON for adaptive_cluster.labels
-    prop_path = RESULTS / "interictal_propagation" / "per_subject" / f"{dataset}_{sid}.json"
-    with prop_path.open() as fh:
-        prop = json.load(fh)
-    labels = np.asarray(prop["adaptive_cluster"]["labels"], dtype=int)
-    valid_events = _valid_event_indices(bools, min_participating=3)
-    if labels.size != valid_events.size:
-        raise ValueError(
-            f"{dataset}_{sid}: labels size {labels.size} != valid_events {valid_events.size}"
+    Returns:
+      zer        : (n_channels, n_frames) z-scored ER
+      ch_names   : list of channels matching zer rows
+      t_er       : (n_frames,) seconds relative to clinical onset
+      eeg_rel    : eeg onset (sec) relative to clinical onset, or None
+      post_sec   : actual post_sec used (for diagnostic)
+    """
+    sw = None
+    last_exc: Optional[Exception] = None
+    used_post = None
+    for post_attempt in (ER_POST_SEC, 30.0, 15.0):
+        try:
+            sw = extract_seizure_window(
+                f"{dataset}/{sid}", seizure_idx,
+                pre_sec=ER_PRE_SEC, post_sec=post_attempt,
+                results_root=RESULTS, reference="car",
+            )
+            used_post = post_attempt
+            break
+        except (ValueError, IndexError) as exc:
+            last_exc = exc
+            continue
+    if sw is None:
+        raise RuntimeError(
+            f"{dataset}/{sid} seizure {seizure_idx}: window extraction failed "
+            f"across post_sec fallback (last: {last_exc})"
         )
-
+    er = compute_er(
+        sw.signal, fs=sw.fs,
+        fast_band=GAMMA_ER_BANDS["fast"],
+        slow_band=GAMMA_ER_BANDS["slow"],
+        win_sec=ER_WIN_SEC, hop_sec=ER_HOP_SEC,
+    )
+    eeg_rel = (
+        sw.eeg_onset_epoch - sw.clin_onset_epoch
+        if sw.eeg_onset_epoch is not None else None
+    )
+    bl = resolve_baseline_window(
+        n_time_frames=er.shape[1], hop_sec=ER_HOP_SEC,
+        pre_sec=ER_PRE_SEC, eeg_onset_rel_sec=eeg_rel,
+    )
+    zer = baseline_zscore_er(
+        er, (bl.start_idx, bl.end_idx), hop_sec=ER_HOP_SEC,
+    )
+    # ER frame i centered at: (i * hop) + win/2 - pre_sec
+    n_frames = zer.shape[1]
+    t_er = np.arange(n_frames) * ER_HOP_SEC + ER_WIN_SEC / 2.0 - ER_PRE_SEC
     return {
-        "swap": swap,
-        "tmpl": tmpl,
-        "atlas": atlas,
-        "subtypes": subtypes,
-        "q1p": q1p,
-        "ranks": ranks,
-        "bools": bools,
-        "channel_names": channel_names,
-        "labels": labels,
-        "valid_events": valid_events,
+        "zer": zer,
+        "ch_names": list(sw.ch_names),
+        "t_er": t_er,
+        "eeg_rel": eeg_rel,
+        "post_sec_used": used_post,
     }
 
 
-def _pick_extreme_seizures(per_seizure: List[Dict[str, object]]) -> Tuple[Dict, Dict]:
-    """Pick max-Δρ (T0-like) and min-Δρ (T1-like) among valid-assignment seizures."""
-    cand = []
-    for s in per_seizure:
-        if s.get("assignment") not in ("T0", "T1", "tie"):
-            continue
-        ra, rb = s.get("rho_a"), s.get("rho_b")
-        if ra is None or rb is None or not np.isfinite(ra) or not np.isfinite(rb):
-            continue
-        delta = float(ra) - float(rb)
-        cand.append((delta, s))
-    if len(cand) < 2:
-        raise ValueError("not enough valid seizures to pick extremes")
-    cand.sort(key=lambda kv: kv[0])
-    return cand[-1][1], cand[0][1]  # most T0-like, most T1-like
-
-
-def _format_subtype(s: Optional[int]) -> str:
-    if s is None:
-        return "no label"
-    if int(s) == -1:
-        return "outlier"
-    return f"subtype={int(s)}"
-
-
 # ---------------------------------------------------------------------------
-# Panel drawing
+# Seizure-side panel: zoom z-ER heatmap on swap channels
 # ---------------------------------------------------------------------------
 
-def _draw_interictal_panel(ax, t0_mean, t0_sd, t1_mean, t1_sd, ch_labels):
-    """T0/T1 mean ± SD rank curves; channels are y-axis (top-down)."""
-    n_ch = len(ch_labels)
-    y_pos = np.arange(n_ch, dtype=float)
+def _draw_seizure_heatmap(
+    ax,
+    zer: np.ndarray,
+    ch_names_zer: List[str],
+    t_er: np.ndarray,
+    swap_channels_ordered: List[str],
+    channel_onsets: Dict[str, Optional[float]],
+    eeg_rel: Optional[float],
+    title_text: str,
+    vmax: float = 3.0,
+):
+    """Plot z-ER heatmap rows = swap_channels_ordered, x = t_er zoomed."""
+    # Match each swap channel to a row in zer (case-sensitive lookup)
+    name_to_row = {ch: i for i, ch in enumerate(ch_names_zer)}
+    rows: List[int] = []
+    missing: List[int] = []
+    for plot_idx, ch in enumerate(swap_channels_ordered):
+        if ch in name_to_row:
+            rows.append(name_to_row[ch])
+        else:
+            missing.append(plot_idx)
+            rows.append(-1)
 
-    for mean, sd, color, label in [
-        (t0_mean, t0_sd, COL_T0, "T0 (forward)"),
-        (t1_mean, t1_sd, COL_T1, "T1 (reverse)"),
-    ]:
-        valid = np.isfinite(mean)
-        if not valid.any():
-            continue
-        ax.fill_betweenx(
-            y_pos[valid], (mean - sd)[valid], (mean + sd)[valid],
-            color=color, alpha=0.13, linewidth=0,
-        )
-        ax.plot(mean[valid], y_pos[valid], "-", color=color, lw=2.0, alpha=0.9, zorder=8)
-        for k in range(n_ch):
-            if not np.isfinite(mean[k]):
-                continue
-            ax.scatter(
-                [mean[k]], [y_pos[k]], marker="*", s=180, color=color,
-                edgecolors="black", linewidths=0.6, zorder=12, clip_on=False,
-            )
+    # Time mask for zoom window
+    t_mask = (t_er >= ZOOM_T[0]) & (t_er <= ZOOM_T[1])
+    t_slice = t_er[t_mask]
+    if t_slice.size < 2:
+        ax.text(0.5, 0.5, "zoom window has no ER frames",
+                transform=ax.transAxes, ha="center")
+        return
 
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(ch_labels, fontsize=9, fontweight="bold")
-    ax.invert_yaxis()
-    ax.set_xlabel("cluster mean rank")
-    ax.set_title("Interictal templates  (mean ± SD over events;  ★ = swap channel)", fontsize=10)
-    legend_handles = [
-        Line2D([0], [0], color=COL_T0, lw=2.2, label="T0 (forward)"),
-        Line2D([0], [0], color=COL_T1, lw=2.2, label="T1 (reverse)"),
-    ]
-    ax.legend(handles=legend_handles, fontsize=8, loc="upper right", frameon=True)
-    ax.grid(True, axis="x", alpha=0.25, linestyle=":")
+    # Build heatmap matrix (n_swap_ch × n_zoom_frames); missing rows = NaN
+    n_swap = len(swap_channels_ordered)
+    mat = np.full((n_swap, t_slice.size), np.nan, dtype=float)
+    for k, r in enumerate(rows):
+        if r >= 0:
+            mat[k] = zer[r, t_mask]
 
+    # Plot
+    extent = (float(t_slice[0]), float(t_slice[-1]), n_swap - 0.5, -0.5)
+    im = ax.imshow(
+        mat, aspect="auto", interpolation="nearest",
+        cmap="RdBu_r", vmin=-vmax, vmax=vmax,
+        extent=extent, origin="upper",
+    )
 
-def _draw_seizure_panel(ax, ch_labels, sz_onsets_for_chs, sz_meta_text, accent_color):
-    """t_onset_sec stars per swap channel; x = time relative to clinical onset.
-
-    accent_color: single color used for all valid stars (matches T0 or T1 in title,
-    so reader can see at a glance which template this seizure resembles).
-    Channels with no onset get an × on the right edge.
-    """
-    n_ch = len(ch_labels)
-    y_pos = np.arange(n_ch, dtype=float)
-    n_active = 0
-
-    for k, ch in enumerate(ch_labels):
-        # Light row guideline (helps the eye scan across)
-        ax.axhline(y_pos[k], color="#EAEAEA", lw=0.5, zorder=1)
-        t = sz_onsets_for_chs.get(ch)
+    # Stars at t_onset_sec for channels with valid onset within zoom
+    y_pos = np.arange(n_swap, dtype=float)
+    for k, ch in enumerate(swap_channels_ordered):
+        t = channel_onsets.get(ch)
         if t is None or not np.isfinite(t):
-            ax.scatter(
-                [DETECTION_WINDOW_SEC[1] + 3], [y_pos[k]], marker="x",
-                s=60, color=COL_NO_ONSET, linewidths=1.2, zorder=6, clip_on=False,
-            )
             continue
-        n_active += 1
-        ax.scatter(
-            [t], [y_pos[k]], marker="*", s=240, color=accent_color,
-            edgecolors="black", linewidths=0.7, zorder=10,
-        )
+        if not (ZOOM_T[0] <= t <= ZOOM_T[1]):
+            continue
+        ax.scatter([t], [y_pos[k]], marker="*", s=130, color="white",
+                   edgecolors="black", linewidths=0.8, zorder=10)
 
-    ax.axvline(0, color="black", lw=1.0, ls="--", zorder=2, label="clin. onset" if n_active else None)
-    ax.set_xlim(DETECTION_WINDOW_SEC[0] - 2, DETECTION_WINDOW_SEC[1] + 8)
+    # Mark missing channels (not present in this seizure's signal)
+    for k in missing:
+        ax.scatter([ZOOM_T[1] + 1.0], [y_pos[k]], marker="x", s=60,
+                   color="#666", clip_on=False, zorder=8)
+
+    # Clinical onset + eeg onset markers
+    ax.axvline(0.0, color="black", lw=1.2, ls="--", zorder=3)
+    if eeg_rel is not None and ZOOM_T[0] <= eeg_rel <= ZOOM_T[1]:
+        ax.axvline(eeg_rel, color="#444", lw=0.9, ls=":", zorder=3)
+
     ax.set_yticks(y_pos)
-    ax.set_yticklabels([])
-    ax.invert_yaxis()
+    ax.set_yticklabels(swap_channels_ordered, fontsize=9, fontweight="bold")
     ax.set_xlabel("t rel. clinical onset (s)")
-    sz_meta_text_full = sz_meta_text + f"\nn_active={n_active}/{n_ch} swap ch ( × = no onset)"
-    ax.set_title(sz_meta_text_full, fontsize=10)
-    ax.grid(True, axis="x", alpha=0.25, linestyle=":")
+    ax.set_xlim(ZOOM_T[0], ZOOM_T[1] + 1.5)
+    ax.set_title(title_text, fontsize=10)
+    return im
 
 
-def _draw_delta_bar(ax, q1p, swap_subset_count, subtype_colors):
-    """Sorted Δρ bar across all valid-assignment seizures; colored by subtype."""
+# ---------------------------------------------------------------------------
+# Bottom summary panels
+# ---------------------------------------------------------------------------
+
+def _draw_delta_bar(ax, per_seizure, swap_subset_count, subtype_colors):
     rows = []
-    for s in q1p["per_seizure"]:
+    for s in per_seizure:
         ra, rb = s.get("rho_a"), s.get("rho_b")
         if ra is None or rb is None or not np.isfinite(ra) or not np.isfinite(rb):
             continue
@@ -299,8 +260,8 @@ def _draw_delta_bar(ax, q1p, swap_subset_count, subtype_colors):
     ax.set_title(title, fontsize=10)
 
 
-def _draw_scatter(ax, q1p, subtype_colors):
-    df = pd.DataFrame(q1p["per_seizure"])
+def _draw_scatter(ax, per_seizure, subtype_colors):
+    df = pd.DataFrame(per_seizure)
     df = df[df["rho_a"].notna() & df["rho_b"].notna()]
     if df.empty:
         ax.text(0.5, 0.5, "no valid seizures", transform=ax.transAxes, ha="center")
@@ -329,99 +290,202 @@ def _draw_scatter(ax, q1p, subtype_colors):
 
 
 # ---------------------------------------------------------------------------
-# Main per-subject driver
+# Per-subject driver
 # ---------------------------------------------------------------------------
 
+def _seizure_idx_from_id(atlas_subj_json: dict, band: str, sz_id: str) -> Optional[int]:
+    """Look up atlas seizure_idx for a given seizure_id string."""
+    sr = atlas_subj_json["per_er"][band]["seizure_records"]
+    for rec in sr:
+        if str(rec.get("seizure_id")) == sz_id:
+            return int(rec.get("seizure_idx", -1))
+    return None
+
+
+def _pick_extreme_seizures(per_seizure: List[Dict[str, object]]) -> Tuple[Dict, Dict]:
+    cand = []
+    for s in per_seizure:
+        if s.get("assignment") not in ("T0", "T1", "tie"):
+            continue
+        ra, rb = s.get("rho_a"), s.get("rho_b")
+        if ra is None or rb is None or not np.isfinite(ra) or not np.isfinite(rb):
+            continue
+        n_used = int(s.get("n_swap_channels_used", 0))
+        if n_used < 3:
+            continue
+        cand.append((float(ra) - float(rb), n_used, s))
+    if len(cand) < 2:
+        raise ValueError("not enough valid seizures (need ≥2 with n_swap ≥ 3)")
+    cand.sort(key=lambda kv: (kv[0], -kv[1]))  # sort by Δρ; tie-break: more channels first
+    return cand[-1][2], cand[0][2]
+
+
+def _format_subtype(s: Optional[int]) -> str:
+    if s is None:
+        return "no topic5 label"
+    if int(s) == -1:
+        return "outlier"
+    return f"subtype={int(s)}"
+
+
 def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
-    data = _load_subject_data(dataset, sid)
-    swap = data["swap"]
-    tmpl = data["tmpl"]
-    q1p = data["q1p"]
-    channel_names = data["channel_names"]
-    ranks = data["ranks"]
-    bools = data["bools"]
-    labels = data["labels"]
-    valid_events = data["valid_events"]
+    # --- load metadata ---
+    swap = br.load_swap_channel_subset(sid, RESULTS, dataset=dataset)
+    tmpl = br.load_template_ranks_with_t0t1(
+        sid, RESULTS, Path("/dev/null"), dataset=dataset,
+    )
+    q1p_path = (
+        RESULTS / "topic1_topic5_bridge" / "q1prime_per_subject"
+        / f"{dataset}_{sid}__q1prime.json"
+    )
+    with q1p_path.open() as fh:
+        q1p = json.load(fh)
+    atlas_subj = json.load(
+        (RESULTS / "data_driven_soz" / "layer_a_ictal_er_rank"
+         / "per_subject" / f"{dataset}_{sid}.json").open()
+    )
 
-    # Resolve swap channels' indices in lagPat ordering, then sort by joint mean rank
+    # Swap channels in their joint-rank order — get it from the same path
+    # the left panel will use (_fixed_channel_order via _draw_subject_panel),
+    # but we need it for the right heatmap rows. Re-derive here.
+    from src.interictal_propagation import (
+        _valid_event_indices, load_subject_propagation_events,
+    )
+    if dataset == "epilepsiae":
+        subj_dir = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns") / sid / "all_recs"
+        if not subj_dir.exists():
+            subj_dir = subj_dir.parent
+    else:
+        subj_dir = Path("/mnt/yuquan_data/yuquan_24h_edf") / sid
+    loaded = load_subject_propagation_events(subj_dir)
+    ranks = np.asarray(loaded["ranks"], dtype=float)
+    bools = np.asarray(loaded["bools"], dtype=bool)
+    channel_names = list(loaded["channel_names"])
+    valid_events = _valid_event_indices(bools, min_participating=3)
+
+    # joint mean rank order for swap channels
     name_to_idx = {ch: i for i, ch in enumerate(channel_names)}
-    swap_chs = [ch for ch in swap["endpoint_channels"] if ch in name_to_idx]
-    if len(swap_chs) < 3:
-        raise ValueError(
-            f"{dataset}_{sid}: swap-endpoint ∩ lagPat = {len(swap_chs)} channels (< 3)"
-        )
-    swap_indices_unordered = [name_to_idx[ch] for ch in swap_chs]
-    swap_indices = _joint_mean_rank_order(ranks, bools, valid_events, swap_indices_unordered)
-    swap_labels = [channel_names[i] for i in swap_indices]
+    swap_chs_present = [ch for ch in swap["endpoint_channels"] if ch in name_to_idx]
+    swap_idx_unordered = [name_to_idx[ch] for ch in swap_chs_present]
 
-    # Cluster mean ± SD on swap channels for T0 / T1 cluster IDs (from bridge_setup freeze)
+    def _mean_rank(ci):
+        vals = ranks[ci, valid_events]
+        mask = bools[ci, valid_events]
+        vv = vals[mask & np.isfinite(vals)]
+        return float(vv.mean()) if vv.size else float("inf")
+    swap_idx_ordered = sorted(swap_idx_unordered, key=_mean_rank)
+    swap_labels = [channel_names[i] for i in swap_idx_ordered]
+
+    # --- pick seizures ---
+    sz_t0, sz_t1 = _pick_extreme_seizures(q1p["per_seizure"])
+    sz_t0_id = str(sz_t0["seizure_id"])
+    sz_t1_id = str(sz_t1["seizure_id"])
+    sz_t0_dr = float(sz_t0["rho_a"]) - float(sz_t0["rho_b"])
+    sz_t1_dr = float(sz_t1["rho_a"]) - float(sz_t1["rho_b"])
+    sz_t0_idx = _seizure_idx_from_id(atlas_subj, BAND, sz_t0_id)
+    sz_t1_idx = _seizure_idx_from_id(atlas_subj, BAND, sz_t1_id)
+    if sz_t0_idx is None or sz_t1_idx is None:
+        raise RuntimeError(
+            f"{dataset}_{sid}: could not resolve seizure_idx "
+            f"(t0={sz_t0_idx} for sz_id={sz_t0_id}, t1={sz_t1_idx} for sz_id={sz_t1_id})"
+        )
+
+    # per-channel onsets for each picked seizure (gamma band)
+    sr_dict = {
+        int(rec["seizure_idx"]): {
+            ch: (entry or {}).get("t_onset_sec")
+            for ch, entry in (rec.get("channel_onsets") or {}).items()
+        }
+        for rec in atlas_subj["per_er"][BAND]["seizure_records"]
+    }
+    onsets_t0 = sr_dict.get(sz_t0_idx, {})
+    onsets_t1 = sr_dict.get(sz_t1_idx, {})
+
+    # --- compute z-ER for both seizures ---
+    print(f"  [zer] computing for {dataset}_{sid} sz_idx={sz_t0_idx} (T0-like)...")
+    zer_t0 = _compute_seizure_zer(dataset, sid, sz_t0_idx)
+    print(f"  [zer] computing for {dataset}_{sid} sz_idx={sz_t1_idx} (T1-like)...")
+    zer_t1 = _compute_seizure_zer(dataset, sid, sz_t1_idx)
+
+    # --- swap nodes from rank_displacement (same as left-panel function uses) ---
+    swap_nodes_set, cid_a, cid_b, _ = _swap_nodes_rank_displacement(dataset, sid)
+
+    # T0/T1 cluster IDs from bridge_setup freeze (larger-fraction rule)
     t0_id = int(tmpl["t0_template_id"])
     t1_id = int(tmpl["t1_template_id"])
-    t0_mean, t0_sd = _cluster_mean_sd(ranks, bools, valid_events, labels, swap_indices, t0_id)
-    t1_mean, t1_sd = _cluster_mean_sd(ranks, bools, valid_events, labels, swap_indices, t1_id)
 
-    # Pick extreme seizures
-    sz_t0_like, sz_t1_like = _pick_extreme_seizures(q1p["per_seizure"])
-    sz_t0_id = str(sz_t0_like["seizure_id"])
-    sz_t1_id = str(sz_t1_like["seizure_id"])
-    sz_t0_delta = float(sz_t0_like["rho_a"]) - float(sz_t0_like["rho_b"])
-    sz_t1_delta = float(sz_t1_like["rho_a"]) - float(sz_t1_like["rho_b"])
-    sz_t0_subtype = sz_t0_like.get("subtype_label")
-    sz_t1_subtype = sz_t1_like.get("subtype_label")
-
-    # Atlas channel_onsets for the picked seizures (only swap channels)
-    atlas = data["atlas"]
-    sz_t0_onsets = {ch: atlas.get(sz_t0_id, {}).get(ch) for ch in swap_labels}
-    sz_t1_onsets = {ch: atlas.get(sz_t1_id, {}).get(ch) for ch in swap_labels}
-
-    # Subtype color palette (per subject — subtype labels are subject-internal)
+    # subtype colors
     raw_subs = [s.get("subtype_label") for s in q1p["per_seizure"]]
     subtypes_present = sorted({
-        int(s) for s in raw_subs if s is not None and not (isinstance(s, float) and np.isnan(s))
+        int(s) for s in raw_subs
+        if s is not None and not (isinstance(s, float) and np.isnan(s))
     })
     subtype_colors: Dict[int, str] = {}
     for k, st in enumerate(subtypes_present):
         if st == -1:
-            subtype_colors[st] = "#8C8C8C"  # outlier = grey
+            subtype_colors[st] = "#8C8C8C"
         else:
             subtype_colors[st] = PAL[k % len(PAL)]
 
-    # Build figure
-    fig = plt.figure(figsize=(15.5, 9.5), dpi=150, facecolor="white")
+    # --- build figure ---
+    fig = plt.figure(figsize=(16.0, 9.5), dpi=150, facecolor="white")
     gs = GridSpec(
         nrows=2, ncols=3, figure=fig,
-        height_ratios=[3.0, 1.6], width_ratios=[1.0, 1.0, 1.0],
-        left=0.06, right=0.97, top=0.88, bottom=0.07,
-        hspace=0.42, wspace=0.16,
+        height_ratios=[3.0, 1.6], width_ratios=[1.0, 1.0, 1.05],
+        left=0.06, right=0.93, top=0.88, bottom=0.08,
+        hspace=0.42, wspace=0.22,
     )
-
     ax_inter = fig.add_subplot(gs[0, 0])
-    ax_t0sz = fig.add_subplot(gs[0, 1], sharey=ax_inter)
-    ax_t1sz = fig.add_subplot(gs[0, 2], sharey=ax_inter)
+    ax_t0sz = fig.add_subplot(gs[0, 1])
+    ax_t1sz = fig.add_subplot(gs[0, 2])
     ax_bar = fig.add_subplot(gs[1, 0:2])
     ax_scatter = fig.add_subplot(gs[1, 2])
 
-    _draw_interictal_panel(ax_inter, t0_mean, t0_sd, t1_mean, t1_sd, swap_labels)
-    _draw_seizure_panel(
-        ax_t0sz, swap_labels, sz_t0_onsets,
-        f"Most T0-like seizure (max Δρ)\n"
-        f"sz={sz_t0_id[-6:]}  Δρ={sz_t0_delta:+.2f}  {_format_subtype(sz_t0_subtype)}",
-        accent_color=COL_T0,
+    # Left: canonical interictal template panel (drop in)
+    _draw_subject_panel(
+        ax_inter, dataset, sid,
+        swap_nodes=swap_nodes_set,
+        cid_t0=t0_id, cid_t1=t1_id,
+        title_text="",
     )
-    _draw_seizure_panel(
-        ax_t1sz, swap_labels, sz_t1_onsets,
-        f"Most T1-like seizure (min Δρ)\n"
-        f"sz={sz_t1_id[-6:]}  Δρ={sz_t1_delta:+.2f}  {_format_subtype(sz_t1_subtype)}",
-        accent_color=COL_T1,
+    ax_inter.set_title(
+        f"Interictal templates  (mean ± SD;  ★ swap, ○ non-swap)",
+        fontsize=10,
     )
-    _draw_delta_bar(ax_bar, q1p, len(swap_labels), subtype_colors)
-    _draw_scatter(ax_scatter, q1p, subtype_colors)
+
+    # Middle/right: z-ER zoom heatmap
+    im_t0 = _draw_seizure_heatmap(
+        ax_t0sz, zer_t0["zer"], zer_t0["ch_names"], zer_t0["t_er"],
+        swap_labels, onsets_t0, zer_t0["eeg_rel"],
+        title_text=(
+            f"Most T0-like seizure  (sz_idx={sz_t0_idx:02d})\n"
+            f"sz_id={sz_t0_id}  |  Δρ={sz_t0_dr:+.2f}  |  {_format_subtype(sz_t0.get('subtype_label'))}"
+        ),
+    )
+    im_t1 = _draw_seizure_heatmap(
+        ax_t1sz, zer_t1["zer"], zer_t1["ch_names"], zer_t1["t_er"],
+        swap_labels, onsets_t1, zer_t1["eeg_rel"],
+        title_text=(
+            f"Most T1-like seizure  (sz_idx={sz_t1_idx:02d})\n"
+            f"sz_id={sz_t1_id}  |  Δρ={sz_t1_dr:+.2f}  |  {_format_subtype(sz_t1.get('subtype_label'))}"
+        ),
+    )
+
+    # Colorbar on the right
+    if im_t1 is not None:
+        cax = fig.add_axes([0.945, 0.42, 0.012, 0.40])
+        cb = fig.colorbar(im_t1, cax=cax)
+        cb.set_label("z-ER (gamma)", fontsize=9)
+
+    # Bottom
+    _draw_delta_bar(ax_bar, q1p["per_seizure"], len(swap_labels), subtype_colors)
+    _draw_scatter(ax_scatter, q1p["per_seizure"], subtype_colors)
 
     suptitle = (
         f"{dataset}_{sid}  |  swap_class={swap['swap_class']}  "
-        f"(decision_k={swap['decision_k']})  |  T0=cluster_id {t0_id}  T1=cluster_id {t1_id}  "
-        f"|  band={BAND}  |  topic5 status={q1p.get('topic5_status', '?')}  "
-        f"n_subtypes={q1p.get('topic5_n_subtypes', '?')}"
+        f"(decision_k={swap['decision_k']})  |  T0=cluster_id {t0_id}, T1=cluster_id {t1_id}  "
+        f"|  band={BAND}  |  zoom = {ZOOM_T[0]:.0f}…{ZOOM_T[1]:.0f}s, swap-channels only  "
+        f"|  topic5 n_subtypes={q1p.get('topic5_n_subtypes', '?')}"
     )
     fig.suptitle(suptitle, fontsize=11)
 
@@ -438,6 +502,8 @@ def main() -> None:
             plot_subject(ds, sid, out)
         except Exception as e:
             print(f"[ERROR] {ds}_{sid}: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
 
 
 if __name__ == "__main__":
