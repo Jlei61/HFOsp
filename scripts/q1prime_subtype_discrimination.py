@@ -24,6 +24,11 @@ from scipy import stats as sp_stats
 REPO = Path("/home/honglab/leijiaxin/HFOsp")
 sys.path.insert(0, str(REPO))
 
+from src.topic1_topic5_bridge import (  # noqa: E402
+    _kruskal_wallis_with_effect,
+    _mann_whitney_with_effect,
+)
+
 RESULTS = REPO / "results"
 FEATURES_CSV = RESULTS / "topic1_topic5_bridge" / "q1prime_features.csv"
 OUT_DIR = RESULTS / "topic1_topic5_bridge"
@@ -35,32 +40,6 @@ FEATURE_COLS = [
     "median_onset_latency_sec",
 ]
 MIN_PER_SUBTYPE = 2  # minimum seizures per subtype for test
-
-
-def mann_whitney_with_rbr(a: np.ndarray, b: np.ndarray) -> tuple[float, float]:
-    """MW U + rank-biserial r. Returns (p, r)."""
-    a = a[np.isfinite(a)]
-    b = b[np.isfinite(b)]
-    if a.size < 1 or b.size < 1:
-        return 1.0, 0.0
-    res = sp_stats.mannwhitneyu(a, b, alternative="two-sided")
-    n1, n2 = a.size, b.size
-    r = 1.0 - 2.0 * float(res.statistic) / (n1 * n2)
-    return float(res.pvalue), float(r)
-
-
-def kruskal_wallis_with_eps2(groups: list[np.ndarray]) -> tuple[float, float]:
-    """KW + epsilon^2. Returns (p, eps2)."""
-    cleaned = [g[np.isfinite(g)] for g in groups]
-    cleaned = [g for g in cleaned if g.size > 0]
-    if len(cleaned) < 2 or sum(g.size for g in cleaned) < 3:
-        return 1.0, 0.0
-    res = sp_stats.kruskal(*cleaned)
-    h = float(res.statistic)
-    k = len(cleaned)
-    n = sum(g.size for g in cleaned)
-    eps2 = max(0.0, (h - k + 1) / (n - k)) if n > k else 0.0
-    return float(res.pvalue), float(eps2)
 
 
 def per_subject_subtype_test(df: pd.DataFrame) -> pd.DataFrame:
@@ -108,11 +87,11 @@ def per_subject_subtype_test(df: pd.DataFrame) -> pd.DataFrame:
                 continue
 
             if len(unique_subtypes) == 2:
-                p, eff = mann_whitney_with_rbr(groups[0], groups[1])
+                p, eff = _mann_whitney_with_effect(groups[0], groups[1])
                 eff_type = "rank_biserial_r"
                 direction = "pos" if eff > 0 else ("neg" if eff < 0 else "zero")
             else:
-                p, eff = kruskal_wallis_with_eps2(groups)
+                p, eff = _kruskal_wallis_with_effect(groups)
                 eff_type = "epsilon_squared"
                 # For KW, direction = subtype 0 vs (1,...) median difference
                 m0 = float(np.nanmedian(groups[0])) if groups[0].size > 0 else float("nan")

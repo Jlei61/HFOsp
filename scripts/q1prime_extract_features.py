@@ -92,15 +92,20 @@ def load_atlas_features(dataset: str, sid: str) -> dict[str, dict]:
 def compute_full_alignment_per_subject(
     dataset: str,
     sid: str,
+    atlas: dict | None = None,
 ) -> dict[str, dict]:
     """Compute delta_rho_full for all atlas seizures of a subject.
 
     Full = use ALL topic1 lagPat channels as swap_subset (no endpoint restriction).
     Returns dict[seizure_id → {rho_a_full, rho_b_full, delta_rho_full, assignment_full}].
+
+    Passing `atlas` (pre-loaded onsets) avoids a duplicate atlas JSON read when the
+    caller already loaded it for feature extraction.
     """
     try:
         tmpl = load_template_ranks_with_t0t1(sid, RESULTS, Path("/dev/null"), dataset=dataset)
-        atlas = load_atlas_seizure_channel_onsets(sid, BAND, RESULTS, dataset=dataset)
+        if atlas is None:
+            atlas = load_atlas_seizure_channel_onsets(sid, BAND, RESULTS, dataset=dataset)
     except Exception as e:
         print(f"  [WARN] full alignment load failed {dataset}_{sid}: {e}")
         return {}
@@ -157,11 +162,14 @@ def main() -> None:
                 skipped.append(f"{ds}_{sid}: empty per_seizure")
                 continue
 
-            # Load atlas features
+            # Load atlas onsets once; reuse for both feature extraction and full alignment
+            try:
+                atlas_onsets = load_atlas_seizure_channel_onsets(sid, BAND, RESULTS, dataset=ds)
+            except Exception as e:
+                skipped.append(f"{ds}_{sid}: atlas load failed {e}")
+                continue
             atlas_feats = load_atlas_features(ds, sid)
-
-            # Compute full-intersection alignment
-            full_align = compute_full_alignment_per_subject(ds, sid)
+            full_align = compute_full_alignment_per_subject(ds, sid, atlas=atlas_onsets)
 
             for s in per_seizure:
                 sz_id = str(s["seizure_id"])

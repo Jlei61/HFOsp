@@ -19,6 +19,8 @@ import pandas as pd
 REPO = Path("/home/honglab/leijiaxin/HFOsp")
 sys.path.insert(0, str(REPO))
 
+from src.topic1_topic5_bridge import _morandi_palette  # noqa: E402
+
 RESULTS = REPO / "results"
 BRIDGE_DIR = RESULTS / "topic1_topic5_bridge"
 CORR_CSV = BRIDGE_DIR / "q1prime_feature_delta_rho_correlation.csv"
@@ -33,8 +35,7 @@ FEATURE_COLS = [
 ]
 DELTA_COL = "delta_rho_swap"
 
-# Morandi-ish palette
-PAL = ["#8AA6A3", "#C4A484", "#A9908A", "#7C8B96", "#D4B996"]
+PAL = _morandi_palette()
 
 
 def make_corr_heatmap(corr_df: pd.DataFrame, out_path: Path) -> None:
