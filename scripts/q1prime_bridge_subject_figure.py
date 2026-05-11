@@ -164,14 +164,17 @@ def _draw_seizure_heatmap(
     ch_names_zer: List[str],
     t_er: np.ndarray,
     swap_channels_ordered: List[str],
+    swap_nodes_strict: set,
     channel_onsets: Dict[str, Optional[float]],
     eeg_rel: Optional[float],
     title_text: str,
     vmax: float = 3.0,
 ):
-    """Plot z-ER heatmap rows = swap_channels_ordered, x = t_er zoomed.
+    """z-ER heatmap rows = swap_channels_ordered, x = t_er zoomed.
 
-    Conforms to plot_style.style_panel conventions (caller applies it).
+    y-tick styling matches left interictal panel: bold orange (COL_SWAP_LABEL)
+    only for channels in `swap_nodes_strict`; others muted grey.
+    Axes box forced square via ax.set_box_aspect(1.0).
     """
     name_to_row = {ch: i for i, ch in enumerate(ch_names_zer)}
     rows: List[int] = []
@@ -222,12 +225,19 @@ def _draw_seizure_heatmap(
         ax.axvline(eeg_rel, color="#444", lw=1.0, ls=":", zorder=3)
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(swap_channels_ordered, fontsize=FS_TICK, fontweight="bold")
+    ax.set_yticklabels(swap_channels_ordered, fontsize=FS_TICK)
+    # Match left panel: bold orange ONLY for strict swap nodes
     for tick, ch in zip(ax.get_yticklabels(), swap_channels_ordered):
-        tick.set_color(COL_SWAP_LABEL)
-    ax.set_xlabel("t rel. clinical onset (s)", fontsize=FS_LABEL)
+        if ch in swap_nodes_strict:
+            tick.set_fontweight("bold")
+            tick.set_color(COL_SWAP_LABEL)
+        else:
+            tick.set_color("#888888")
+    ax.set_xlabel("t rel. clin. onset (s)", fontsize=FS_LABEL)
     ax.set_xlim(ZOOM_T[0], ZOOM_T[1] + 1.5)
     ax.set_title(title_text, fontsize=FS_TITLE, pad=10)
+    # Square box (plot_style "保证方型" request)
+    ax.set_box_aspect(1.0)
     return im
 
 
@@ -313,29 +323,48 @@ def _seizure_idx_from_id(atlas_subj_json: dict, band: str, sz_id: str) -> Option
 def _pick_extreme_seizures(
     per_seizure: List[Dict[str, object]], swap_size: int,
 ) -> Tuple[Dict, Dict]:
-    """Pick max/min Δρ seizures with CUSUM stars on majority of swap nodes.
+    """Pick representative T0-like / T1-like seizures.
 
-    Gate: `n_swap_channels_used >= max(3, swap_size // 2)`.
-    Within gate, sort by Δρ; tie-break by larger n_swap (more stars on figure).
+    Primary criterion: maximum n_swap_channels_used (most CUSUM stars on
+    swap-endpoint channels — so the right-side heatmap shows a real
+    swap-node pattern, not mostly × markers).
+    Secondary: |Δρ| in the appropriate direction.
+
+    Gate: n_swap ≥ ceil(swap_size * 0.75). If too few pass, fall back to ≥ swap_size // 2.
     """
-    min_n = max(3, swap_size // 2)
-    cand = []
-    for s in per_seizure:
-        if s.get("assignment") not in ("T0", "T1", "tie"):
-            continue
-        ra, rb = s.get("rho_a"), s.get("rho_b")
-        if ra is None or rb is None or not np.isfinite(ra) or not np.isfinite(rb):
-            continue
-        n_used = int(s.get("n_swap_channels_used", 0))
-        if n_used < min_n:
-            continue
-        cand.append((float(ra) - float(rb), n_used, s))
-    if len(cand) < 2:
+    def _build_cand(min_n: int):
+        t0_pool: List[Tuple[int, float, dict]] = []
+        t1_pool: List[Tuple[int, float, dict]] = []
+        for s in per_seizure:
+            if s.get("assignment") not in ("T0", "T1", "tie"):
+                continue
+            ra, rb = s.get("rho_a"), s.get("rho_b")
+            if ra is None or rb is None or not np.isfinite(ra) or not np.isfinite(rb):
+                continue
+            n_used = int(s.get("n_swap_channels_used", 0))
+            if n_used < min_n:
+                continue
+            delta = float(ra) - float(rb)
+            (t0_pool if delta > 0 else t1_pool).append((n_used, delta, s))
+        return t0_pool, t1_pool
+
+    gate_strict = max(3, (swap_size * 3 + 3) // 4)  # ceil(swap_size * 0.75)
+    t0_pool, t1_pool = _build_cand(gate_strict)
+    if not t0_pool or not t1_pool:
+        gate_loose = max(3, swap_size // 2)
+        t0_pool, t1_pool = _build_cand(gate_loose)
+        used_gate = gate_loose
+    else:
+        used_gate = gate_strict
+    if not t0_pool or not t1_pool:
         raise ValueError(
-            f"not enough valid seizures (need ≥2 with n_swap ≥ {min_n}); got {len(cand)}"
+            f"not enough valid seizures across both directions "
+            f"(swap_size={swap_size}, gate={used_gate})"
         )
-    cand.sort(key=lambda kv: (kv[0], -kv[1]))
-    return cand[-1][2], cand[0][2]
+    # Prefer stars-rich first, then Δρ extremity
+    t0_pool.sort(key=lambda r: (-r[0], -r[1]))   # max n_swap, max +Δρ
+    t1_pool.sort(key=lambda r: (-r[0], r[1]))    # max n_swap, min Δρ (most negative)
+    return t0_pool[0][2], t1_pool[0][2]
 
 
 def _format_subtype(s: Optional[int]) -> str:
@@ -446,13 +475,14 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
             subtype_colors[st] = PAL[k % len(PAL)]
 
     # --- build figure (plot_style.py conventions) ---
-    # Reserve right column for shared legend + colorbar
-    fig = plt.figure(figsize=(18.0, 10.0), facecolor="white")
+    # Wider figure; 3 top panels forced square via set_box_aspect(1); bottom row narrower.
+    # Reserve far-right column for shared legend; colorbar pinned to T1 panel via inset_axes.
+    fig = plt.figure(figsize=(20.0, 11.5), facecolor="white")
     gs = GridSpec(
         nrows=2, ncols=3, figure=fig,
-        height_ratios=[3.0, 1.5], width_ratios=[1.0, 1.0, 1.0],
-        left=0.06, right=0.82, top=0.91, bottom=0.08,
-        hspace=0.50, wspace=0.30,
+        height_ratios=[1.85, 1.0], width_ratios=[1.0, 1.0, 1.0],
+        left=0.05, right=0.78, top=0.93, bottom=0.07,
+        hspace=0.55, wspace=0.35,
     )
     ax_inter = fig.add_subplot(gs[0, 0])
     ax_t0sz = fig.add_subplot(gs[0, 1])
@@ -477,11 +507,12 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     # Tight axes per plot_style §3
     ax_inter.set_xlim(0, n_lagpat - 1)
     ax_inter.set_ylim(n_lagpat - 0.5, -0.5)
+    ax_inter.set_box_aspect(1.0)  # square box, matches heatmap aspect
 
-    # Middle/right: z-ER zoom heatmaps
+    # Middle/right: z-ER zoom heatmaps with strict swap-nodes highlight
     im_t0 = _draw_seizure_heatmap(
         ax_t0sz, zer_t0["zer"], zer_t0["ch_names"], zer_t0["t_er"],
-        swap_labels, onsets_t0, zer_t0["eeg_rel"],
+        swap_labels, swap_nodes_set, onsets_t0, zer_t0["eeg_rel"],
         title_text=(
             f"most T0-like   sz_idx={sz_t0_idx:02d}\n"
             f"Δρ={sz_t0_dr:+.2f}   {_format_subtype(sz_t0.get('subtype_label'))}   "
@@ -490,7 +521,7 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     )
     im_t1 = _draw_seizure_heatmap(
         ax_t1sz, zer_t1["zer"], zer_t1["ch_names"], zer_t1["t_er"],
-        swap_labels, onsets_t1, zer_t1["eeg_rel"],
+        swap_labels, swap_nodes_set, onsets_t1, zer_t1["eeg_rel"],
         title_text=(
             f"most T1-like   sz_idx={sz_t1_idx:02d}\n"
             f"Δρ={sz_t1_dr:+.2f}   {_format_subtype(sz_t1.get('subtype_label'))}   "
@@ -512,33 +543,43 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     legend_handles = [
         Line2D([0], [0], color=COL_CLUSTER_T0, lw=2.5, marker="*",
                markersize=11, markeredgecolor="black",
-               label="T0 (forward) interictal mean ± SD"),
+               label="T0 mean ± SD"),
         Line2D([0], [0], color=COL_CLUSTER_T1, lw=2.5, marker="*",
                markersize=11, markeredgecolor="black",
-               label="T1 (reverse) interictal mean ± SD"),
+               label="T1 mean ± SD"),
         Line2D([0], [0], marker="*", color="white", markersize=12,
                markeredgecolor="black", markeredgewidth=1.0, lw=0,
-               label="t_onset_sec (CUSUM ✦)"),
+               label="CUSUM ✦"),
         Line2D([0], [0], marker="x", color="#666", lw=0, markersize=8,
-               label="no CUSUM onset"),
-        Line2D([0], [0], color="black", ls="--", lw=1.4, label="clinical onset"),
+               label="no onset"),
+        Line2D([0], [0], color="black", ls="--", lw=1.4, label="clin. onset"),
         Line2D([0], [0], color="#444", ls=":", lw=1.0, label="EEG onset"),
     ]
-    # Subtype color swatches (small)
+    # Subtype color swatches
     for st in sorted(subtype_colors.keys()):
         lbl = "outlier" if st == -1 else f"subtype {st}"
         legend_handles.append(Patch(facecolor=subtype_colors[st],
                                     edgecolor="black", label=lbl))
 
+    # Legend block: top-right corner, anchored to figure
     fig.legend(
         handles=legend_handles,
-        loc="center right", bbox_to_anchor=(0.995, 0.5),
+        loc="upper left", bbox_to_anchor=(0.79, 0.93),
         ncol=1, frameon=False, fontsize=FS_TICK,
     )
 
-    # Shared colorbar for z-ER heatmaps (small, near top of legend column)
+    # Colorbar pinned to T1 heatmap's right edge via inset_axes (auto-aligns
+    # whatever the actual axes position is — no manual positioning drift)
     if im_t1 is not None:
-        cax = fig.add_axes([0.835, 0.55, 0.012, 0.30])
+        from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+        cax = inset_axes(
+            ax_t1sz,
+            width="4%", height="100%",
+            loc="lower left",
+            bbox_to_anchor=(1.04, 0.0, 1.0, 1.0),
+            bbox_transform=ax_t1sz.transAxes,
+            borderpad=0,
+        )
         cb = fig.colorbar(im_t1, cax=cax)
         cb.set_label("z-ER (gamma)", fontsize=FS_LABEL)
         cb.ax.tick_params(labelsize=FS_TICK)
