@@ -32,7 +32,7 @@ Option B（all-valid-participating events）下的 H_p_norm 曲线 cohort 叠加
 
 ### delta_by_swapclass_box
 
-`Δ = mean(H endpoints) − mean(H middle)` 按 strong / suggestive / no reversal 三组 box + 散点；Δ=0 参考虚线；标题直接讲结果。
+`Δ = mean(H endpoints) − mean(H middle)` 按 swap-strict / swap-candidate / swap-none 三组 box + 散点；Δ=0 参考虚线；标题直接讲结果。
 
 **关注点**：(a) 三组 box 全部位于 Δ=0 以下；(b) 没有 outlier 跑到 Δ > 0 上半轴；(c) 组间 Kruskal-Wallis p=0.65（cohort_summary.json）—— 三组 indistinguishable。
 
@@ -49,7 +49,7 @@ Option B（all-valid-participating events）下的 H_p_norm 曲线 cohort 叠加
 
 forward/reverse strong + suggestive 共 18 subject 单独 H_p_norm grid（4 行 × 5 列，2 空白 cell；T_0 蓝 / T_1 橙；class chip 在每 panel 右下角；subject-level excluded subject 标 "subject-level excluded (low kept events)"）。
 
-**关注点**：(a) strong / suggestive reversal 标签 subject 也都出 roof-shape——swap 节点（端点 channel）真稳定；(b) excluded subject 仅由 §6.0 partial-participation 拒绝，不是 entropy 信号缺失；(c) paper-level 单 subject 例图候选（如 epilepsiae_1146 strong reversal、epilepsiae_958 strong reversal）。
+**关注点**：(a) swap-strict / swap-candidate subject 也都出 roof-shape——但根据 with-absent 对照（见 `H_p_norm_option_b_vs_with_absent`），其慢端低熵是 selection artifact，不是真"端点稳定"；(b) excluded subject 仅由 §6.0 partial-participation 拒绝，不是 entropy 信号缺失；(c) paper-level 单 subject 例图候选（如 epilepsiae_1146 swap-strict、epilepsiae_958 swap-strict），但解读必须配合 with-absent 图。
 
 ### bridge_rank_displacement
 

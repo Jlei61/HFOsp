@@ -68,10 +68,10 @@ SWAP_COLORS = {
     "unknown": "#BDC3C7",
 }
 SWAP_LABEL_PLAIN = {
-    "strict": "Strong reversal",
-    "candidate": "Suggestive reversal",
-    "none": "No reversal",
-    "unknown": "Unclassified",
+    "strict": "swap-strict",
+    "candidate": "swap-candidate",
+    "none": "swap-none",
+    "unknown": "swap-unknown",
 }
 
 X_GRID = np.linspace(0.0, 1.0, 51)
@@ -211,7 +211,7 @@ def fig_cohort_overlay_normalized(data: Dict[str, Any]) -> Path:
 
     style_panel(ax)
     ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
-    ax.set_ylabel("Channel-identity entropy", fontsize=FS_LABEL)
+    ax.set_ylabel("Entropy", fontsize=FS_LABEL)
     ax.set_xlim(0.0, 1.0)
     ax.set_ylim(0.0, 1.0)
     ax.margins(0)
@@ -267,11 +267,11 @@ def fig_option_b_vs_with_absent(
     ax.set_ylim(0.0, 1.0)
     ax.margins(0)
     ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
-    ax.set_ylabel("Channel-identity entropy", fontsize=FS_LABEL)
-    ax.set_title("A.  Option B  (all-valid-participating events;\n"
-                 "       drop-rate median ≈ 0.98)", fontsize=FS_TITLE - 2)
+    ax.set_ylabel("Entropy", fontsize=FS_LABEL)
+    ax.set_title("A.  Full-participation events (~2%)",
+                 fontsize=FS_TITLE - 1)
 
-    # ---- Panel B: with-absent (all events, "absent" sentinel) ----
+    # ---- Panel B: with-absent (all events, vacancy token) ----
     ax = axes[1]
     for stem, swap, y in H_abs:
         ax.plot(X_GRID, y,
@@ -289,12 +289,11 @@ def fig_option_b_vs_with_absent(
     ax.set_ylim(0.0, 1.0)
     ax.margins(0)
     ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
-    ax.set_ylabel("Channel-identity entropy\n[alphabet = n_valid + absent]",
-                  fontsize=FS_LABEL - 1)
-    ax.set_title("B.  Include all events with 'absent' sentinel\n"
-                 "       (alphabet n_valid + 1)", fontsize=FS_TITLE - 2)
+    ax.set_ylabel("Entropy (incl. vacancy)", fontsize=FS_LABEL)
+    ax.set_title("B.  All events, vacancy as a token",
+                 fontsize=FS_TITLE - 1)
 
-    # ---- Panel C: P('absent' at rank p) ----
+    # ---- Panel C: P(vacancy at rank p) ----
     ax = axes[2]
     for stem, swap, y in P_abs:
         ax.plot(X_GRID, y,
@@ -312,11 +311,9 @@ def fig_option_b_vs_with_absent(
     ax.set_ylim(0.0, 1.0)
     ax.margins(0)
     ax.set_xlabel("Normalized rank position", fontsize=FS_LABEL)
-    ax.set_ylabel("Fraction of events with 'absent'\nat this rank position",
-                  fontsize=FS_LABEL - 1)
-    ax.set_title("C.  Why panel B drops at the slow end:\n"
-                 "       most events have nothing at deep ranks",
-                 fontsize=FS_TITLE - 2)
+    ax.set_ylabel("Vacancy fraction", fontsize=FS_LABEL)
+    ax.set_title("C.  Vacancy fraction at each rank position",
+                 fontsize=FS_TITLE - 1)
 
     # Single shared legend at bottom
     handles = _swap_legend_handles(swap_class_subject)
@@ -378,11 +375,8 @@ def fig_delta_by_swapclass_box(data: Dict[str, Any]) -> Path:
         fontsize=FS_TICK,
     )
     style_panel(ax)
-    ax.set_title(
-        "Δ < 0 across all subjects  ⇒  endpoints more determined than middle",
-        fontsize=FS_TITLE - 1,
-    )
-    ax.set_xlabel("Forward/reverse template-pair classification", fontsize=FS_LABEL)
+    ax.set_title("Δ < 0 across all subjects", fontsize=FS_TITLE - 1)
+    ax.set_xlabel("swap-class", fontsize=FS_LABEL)
     ax.set_ylabel("Δ  (endpoint − middle entropy)", fontsize=FS_LABEL)
     ax.legend(loc="upper right", fontsize=FS_TICK - 1, frameon=True)
 
@@ -473,9 +467,8 @@ def fig_endpoint_percentile_panel(data: Dict[str, Any]) -> Path:
         fontsize=FS_TICK - 1, rotation=15, ha="right",
     )
     style_panel(ax)
-    ax.set_title("C.  Did the endpoint pair achieve max-Δ?",
-                 fontsize=FS_TITLE - 1)
-    ax.set_xlabel("Forward/reverse template-pair class", fontsize=FS_LABEL)
+    ax.set_title("C.  Endpoint pair = max-Δ?", fontsize=FS_TITLE - 1)
+    ax.set_xlabel("swap-class", fontsize=FS_LABEL)
     ax.set_ylabel("Subject count", fontsize=FS_LABEL)
     ax.legend(loc="lower right", fontsize=FS_TICK - 2, frameon=True)
 
@@ -613,15 +606,12 @@ def fig_bridge_with_rank_displacement(data: Dict[str, Any]) -> Optional[Path]:
                    edgecolors="black", linewidths=0.8,
                    s=size, marker=marker, alpha=0.92)
 
-    ax.axhline(1.0, ls="--", lw=1.0, color="black", alpha=0.45,
-               label="endpoint-pair Δ is max (sup1)")
-    ax.axvline(2 / 3, ls="--", lw=1.0, color="#C0392B", alpha=0.65,
-               label="random reversal floor 2/3 (rank displacement)")
+    ax.axhline(1.0, ls="--", lw=1.0, color="black", alpha=0.45)
+    ax.axvline(2 / 3, ls="--", lw=1.0, color="#C0392B", alpha=0.65)
     style_panel(ax)
-    ax.set_xlabel("Forward/reverse displacement F_norm  "
-                  "(0 = no swap, 1 = full reversal)",
+    ax.set_xlabel("F_norm  (rank displacement, 0 = no swap, 1 = full)",
                   fontsize=FS_LABEL - 1)
-    ax.set_ylabel("Endpoint-pair percentile  (1 = endpoints have largest Δ)",
+    ax.set_ylabel("Endpoint-pair percentile  (1 = max Δ)",
                   fontsize=FS_LABEL - 1)
     ax.set_xlim(0.0, 1.0)
     ax.set_ylim(0.0, 1.0)
@@ -630,15 +620,7 @@ def fig_bridge_with_rank_displacement(data: Dict[str, Any]) -> Optional[Path]:
     legend_handles = _swap_legend_handles(data["swap_class_subject"])
     legend_handles.append(
         plt.Line2D([0], [0], color="#7F8C8D", marker="*", lw=0,
-                   markersize=14, label="Forward/reverse reproduced (rd)"),
-    )
-    legend_handles.append(
-        plt.Line2D([0], [0], ls="--", color="black", lw=1.0,
-                   label="endpoint-pair Δ is max"),
-    )
-    legend_handles.append(
-        plt.Line2D([0], [0], ls="--", color="#C0392B", lw=1.0,
-                   label="random reversal floor 2/3"),
+                   markersize=14, label="fwd/rev reproduced"),
     )
     ax.legend(handles=legend_handles, loc="lower right",
               fontsize=FS_TICK - 1, frameon=True)
