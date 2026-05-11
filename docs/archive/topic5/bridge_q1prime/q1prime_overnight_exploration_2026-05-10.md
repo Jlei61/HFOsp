@@ -129,34 +129,40 @@
 
 ## 5. Stage D: Feature × subtype 区分
 
-**方法**: per-subject MW/KW（n_subtypes=2 → MW rank-biserial; ≥3 → KW ε²），排除 subtype=-1 outlier，每 subtype 至少 2 个 seizure。
+> **🔧 2026-05-11 sign-fix 重算**：原始报告基于 `_mann_whitney_with_effect` 的 rank-biserial r 公式 `r = 1 − 2U/(n1*n2)`，**与标准约定符号相反**（标准 `r = 2U/(n1*n2) − 1`：r > 0 ⇔ a > b）。在 src 修正后所有 k_s=2 subject 的方向标签翻转；KW (k_s≥3) 子型方向由中位数比较产生，未受影响。
+> phase-1 Q1 / Q1' 主轴**不受影响**（dual gate 用 `abs(effect)`；Q1' 用 Spearman/Fisher 不用 MW）。
+> 测试用例 `test_mann_whitney_sign_convention_standard` 已加入作 regression guard。
 
-**Eligible subjects（topic5=ok, n_subtypes≥2, min_per_subtype≥2）**: 12（全为 epilepsiae）。
+**方法**: per-subject MW (k_s=2) / KW (k_s≥3)，排除 subtype=-1 outlier，每 subtype ≥ 2 个 seizure。
 
-### Cohort sign-test 结果
+**Eligible subjects**: 12（全为 epilepsiae）。
 
-| Feature | n eligible | n_sig (p<0.05) | Binom p (vs 5%) | Median |eff| | Direction (+/-) | Direction sign p |
+### Cohort sign-test 结果（**已修正**）
+
+| Feature | n eligible | n_sig (p<0.05) | Binom p (vs 5%) | Median \|eff\| | Direction (+/−) | Direction sign p |
 |---|---|---|---|---|---|---|
-| n_active | 12 | 1 | 0.460 | 0.500 | 6+/6- | 1.000 |
-| active_fraction | 12 | 1 | 0.460 | 0.500 | 6+/6- | 1.000 |
-| onset_spread_sec | 12 | 0 | 1.000 | 0.248 | 6+/5- | 1.000 |
-| median_onset_latency_sec | 12 | 2 | 0.118 | 0.315 | **2+/10-** | **0.039** |
+| n_active | 12 | 1 | 0.460 | 0.500 | 5+/7− | 0.774 |
+| active_fraction | 12 | 1 | 0.460 | 0.500 | 5+/7− | 0.774 |
+| onset_spread_sec | 12 | 0 | 1.000 | 0.248 | 2+/9− | 0.065 |
+| median_onset_latency_sec | 12 | 2 | 0.118 | 0.315 | **9+/3−** | **0.146** |
 
-### 关键发现
+### 关键发现（修正后）
 
-**`median_onset_latency_sec` 方向信号**: 12 eligible subjects 中 10 个方向为负（subtype 0 的 median onset latency 比 subtype 1 更小），sign-test p=0.039。这是整个 overnight 探索中最强的方向性信号。
+**`median_onset_latency_sec` 方向倾向反转后变弱**：12 eligible subjects 中 9 个方向为正（subtype 0 的 median onset latency 比 subtype 1 **更晚**），sign-test p=0.146（不显著）。
+- **原始报告方向解读错误**：旧版报 "subtype 0 更早 onset"，实际数据是 9+/3−，方向是 subtype 0 比 subtype 1 **更晚**。
+- 修正后 sign_p=0.146 **未通过任何阈值**（uncorrected α=0.05 即不过）。Cohort 方向趋势消失。
 
-**解读**: subtype 0（更常见的 interictal template）对应的 seizure 更倾向于 early onset（median latency 更负/小），而 subtype 1 对应的 seizure 更倾向于 late onset。这在物理上可解释为：template 0 的 propagation pattern 对应了更快速的 ictal 招募。**但这是探索性的，方向信号 sign_p=0.039 在未矫正前看似显著，但涉及 4 个 feature 同时检验，Bonferroni 矫正后阈值为 0.0125，不满足。**
+**`onset_spread_sec` 新现弱方向倾向**：2+/9−（subtype 0 的 onset spread 比 subtype 1 更窄），sign-test p=0.065 (uncorrected)。**但未通过 0.05，也未通过 Bonferroni**。仅作 description。
 
-**显著 per-subject 单例（p<0.05）**:
-- `median_onset_latency_sec × epilepsiae_548`: p=0.025, ε²=0.596 (3 subtypes, n=17) — dir=pos
-- `n_active × epilepsiae_958`: p=0.018, ε²=0.674 (3 subtypes, n=12) — dir=neg
+**显著 per-subject 单例（p<0.05，修正后符号）**:
+- `median_onset_latency_sec × epilepsiae_548`: p=0.025, ε²=0.596 (3 subtypes, n=17) — dir=pos（subtype 0 onset 更晚）
+- `n_active × epilepsiae_958`: p=0.018, ε²=0.674 (3 subtypes, n=12) — dir=neg（subtype 0 n_active 更小）
 - `active_fraction × epilepsiae_958`: p=0.018, ε²=0.674 — dir=neg
-- `median_onset_latency_sec × epilepsiae_958`: p=0.036, ε²=0.520 — dir=neg
+- `median_onset_latency_sec × epilepsiae_958`: p=0.036, ε²=0.520 — dir=neg（subtype 0 onset **更早**）
 
-注意 epilepsiae_958 同时在 3 个 feature 上显著，效量很大（ε²>0.5）。这可能是真实的 within-subject 信号（n=12, 3 subtypes），也可能是小样本内的偶然簇聚。
+**548 与 958 在 median_onset_latency 上方向相反**：548 subtype 0 更晚（pos），958 subtype 0 更早（neg）。**两个 case-series 信号不能合成同一个 cohort 结论**（也就是为何 cohort sign-test 9+/3− 但显著 subject 一正一负）。
 
-**阶段反思**: Stage D 有一个方向性倾向（`median_onset_latency_sec`），但 Bonferroni 矫正后消失。Cohort n=12 对 sign-test 仍然很小。单 subject 效量（958）大但不稳健——如果这 12 个 seizure 换一个 subtype 分组标准结果可能完全不同。这不是可以写进论文的结论，但值得用更大样本重新检验。
+**阶段反思（修正后）**: Stage D **没有过任何阈值的 cohort signal**。`median_onset_latency_sec` 方向 9+/3− 距离 sign-test α=0.05 较近但未达；4-feature Bonferroni 校正后阈值 0.0125，更远。548/958 case-series 在该 feature 上方向**相反**，不构成 cohort 趋势。整体 Stage D 是 NULL 偏 weak-direction，**不是**原始报告所述的"方向倾向"。原始 archive 的 framing 因 sign-flip bug 高估了 cohort 信号；本节为标准约定下的诚实结果。
 
 ---
 
@@ -172,13 +178,24 @@
 
 4. **onset_spread_sec 作为区分器**: 效量低（median |eff|=0.248），方向不一致，不是好的 feature。
 
-### 哪些有信号（弱）
+### 哪些有信号（弱，sign-fix 重算后）
 
-1. **`median_onset_latency_sec` 方向倾向**: Stage D sign-test p=0.039（uncorrected）。这是最好的信号。物理解读：template 0 seizure 发作更快（早 onset），template 1 seizure 发作更慢。这值得在更大样本（epilepsiae 全量，包括从 Q1 cohort 排除的 subject）或 broad_ER band 上验证。
+1. **~~`median_onset_latency_sec` 方向倾向~~**: 原始声明的 sign-test p=0.039 是 sign-flip bug 的产物。修正后 9+/3−, sign_p=0.146。**信号消失**。
+   - 弱观察：方向 (subtype 0 onset 更晚) 仍有 weak trend，但未过任何阈值。
+   - 548 vs 958 在该 feature 上**方向相反**（548 subtype 0 更晚，958 subtype 0 更早）—— 两个 case-series 不能合成同一 cohort 趋势。
 
-2. **个案效量**: 958 在 n_active/active_fraction/median_latency 上有 ε²>0.5 的效量，548 在 median_latency 上同样显著。这两个 subject 的 subtype 分组与 ictal onset dynamics 有关联。
+2. **个案效量（修正后）**:
+   - **958** (strict, 3 subtypes): n_active/active_fraction ε²=0.674 (p=0.018), median_latency ε²=0.520 (p=0.036)，subtype 0 → 更**早** onset。
+   - **548** (candidate, 5 subtypes): median_latency ε²=0.596 (p=0.025)，subtype 0 → 更**晚** onset。
+   - 两 subject 同样在 within-subject 真实信号，但方向相反——这恰是 cohort pooling 失败的微观证据。
 
-3. **Cramér V 正向性**: 4 strict-swap subjects 的 Cramér V 均为正向（0.25–0.67），虽然都不通过 p-gate，但方向一致（phase-1 Q1' INDETERMINATE 结论的延续）。新增 11 subjects 后，Cramér V 在 none-swap subjects 上中位数较低（0.07–0.14），支持 swap 信号依赖精确通道选择。
+3. **Cramér V 正向性（Q1' 主轴，未受 MW sign-fix 影响）**: 4 strict-swap subjects (1073/1146/635/958) Cramér V 均正向 [0.25, 0.67]，median 0.486；548 candidate V=0.703；442 axis-collapse V=0.11 noise floor。Q1' 主轴的 cohort-level descriptive signal 仍然站住。
+
+4. **Per-subject Δρ 诊断 (新增)** — 用户 2026-05-11 要求：
+   - **958** (strict): n_valid=14, T1=10/T0=3/tie=1, median Δρ=−0.585 → 明显偏 T1
+   - **548** (candidate): n_valid=21, T1=13/T0=8, median Δρ=−1.000 → 偏 T1
+   - **922** (none): n_valid=25, T0=18/T1=5/tie=2, median Δρ=+0.381 → 偏 T0，但 swap_class=none，**不作主证据**
+   - 见 `results/topic1_topic5_bridge/q1prime_per_subject_rho_diag.csv` + `figures/q1prime_rho_diag_*.png`
 
 ### 方法学问题
 

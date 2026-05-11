@@ -246,6 +246,29 @@ def test_mann_whitney_with_rank_biserial():
     assert abs(eff) > 0.9
 
 
+def test_mann_whitney_sign_convention_standard():
+    """Locked sign convention: r = 2*U/(n1*n2) - 1, so r > 0 ⇔ a > b.
+
+    Regression guard against 2026-05-11 sign-flip bug where the formula
+    was `r = 1 - 2U/(n1*n2)` (inverted from standard rank-biserial).
+    """
+    # a dominates b → standard r should be POSITIVE
+    a = np.array([10.0, 20.0, 30.0])
+    b = np.array([1.0, 2.0, 3.0])
+    p, eff = bridge._mann_whitney_with_effect(a, b)
+    assert eff == pytest.approx(1.0), f"a dominates b → r should be +1, got {eff}"
+
+    # b dominates a → r should be NEGATIVE
+    p, eff = bridge._mann_whitney_with_effect(b, a)
+    assert eff == pytest.approx(-1.0), f"b dominates a → r should be -1, got {eff}"
+
+    # No separation → r near 0
+    c = np.array([1.0, 2.0, 3.0, 4.0])
+    d = np.array([1.5, 2.5, 3.5, 4.5])
+    p, eff = bridge._mann_whitney_with_effect(c, d)
+    assert abs(eff) < 0.5, f"overlapping distributions → |r| should be small, got {eff}"
+
+
 def test_kruskal_wallis_with_eps2():
     """Three groups, large between-group variance → small p, large ε²."""
     g0 = np.array([1.0, 1.5, 2.0])

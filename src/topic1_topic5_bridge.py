@@ -401,7 +401,11 @@ def _mann_whitney_with_effect(
 ) -> Tuple[float, float]:
     """Mann-Whitney U two-sided + rank-biserial r effect.
 
-    Returns (p_two_sided, signed_rank_biserial_r).
+    Standard convention: r = 2*U_1/(n1*n2) - 1, where U_1 is scipy.stats.mannwhitneyu's
+    returned statistic (sum of ranks of `a` minus n1*(n1+1)/2). Under this:
+      r > 0  ⇔  a > b  (first group dominates)
+      r < 0  ⇔  a < b  (second group dominates)
+
     Drops NaN values before computation. Returns (1.0, 0.0) for empty / degenerate.
     """
     a = np.asarray(a, dtype=float)
@@ -412,8 +416,7 @@ def _mann_whitney_with_effect(
         return 1.0, 0.0
     res = sp_stats.mannwhitneyu(a, b, alternative="two-sided")
     n1, n2 = a.size, b.size
-    # rank-biserial = 1 - 2U / (n1 * n2); sign indicates direction
-    r = 1.0 - 2.0 * float(res.statistic) / (n1 * n2)
+    r = 2.0 * float(res.statistic) / (n1 * n2) - 1.0
     return float(res.pvalue), float(r)
 
 
