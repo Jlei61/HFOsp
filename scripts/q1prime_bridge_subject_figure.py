@@ -49,6 +49,16 @@ from src.ictal_onset_extraction import (  # noqa: E402
     extract_seizure_window,
     resolve_baseline_window,
 )
+from src.plot_style import (  # noqa: E402
+    COL_CLUSTER_T0,
+    COL_CLUSTER_T1,
+    COL_SWAP_LABEL,
+    FS_LABEL,
+    FS_TICK,
+    FS_TITLE,
+    savefig_pub,
+    style_panel,
+)
 from src.topic1_topic5_bridge import _morandi_palette  # noqa: E402
 from scripts.plot_pr6_swap_cluster_rank_multiples import (  # noqa: E402
     _draw_subject_panel,
@@ -159,8 +169,10 @@ def _draw_seizure_heatmap(
     title_text: str,
     vmax: float = 3.0,
 ):
-    """Plot z-ER heatmap rows = swap_channels_ordered, x = t_er zoomed."""
-    # Match each swap channel to a row in zer (case-sensitive lookup)
+    """Plot z-ER heatmap rows = swap_channels_ordered, x = t_er zoomed.
+
+    Conforms to plot_style.style_panel conventions (caller applies it).
+    """
     name_to_row = {ch: i for i, ch in enumerate(ch_names_zer)}
     rows: List[int] = []
     missing: List[int] = []
@@ -171,22 +183,19 @@ def _draw_seizure_heatmap(
             missing.append(plot_idx)
             rows.append(-1)
 
-    # Time mask for zoom window
     t_mask = (t_er >= ZOOM_T[0]) & (t_er <= ZOOM_T[1])
     t_slice = t_er[t_mask]
     if t_slice.size < 2:
         ax.text(0.5, 0.5, "zoom window has no ER frames",
                 transform=ax.transAxes, ha="center")
-        return
+        return None
 
-    # Build heatmap matrix (n_swap_ch × n_zoom_frames); missing rows = NaN
     n_swap = len(swap_channels_ordered)
     mat = np.full((n_swap, t_slice.size), np.nan, dtype=float)
     for k, r in enumerate(rows):
         if r >= 0:
             mat[k] = zer[r, t_mask]
 
-    # Plot
     extent = (float(t_slice[0]), float(t_slice[-1]), n_swap - 0.5, -0.5)
     im = ax.imshow(
         mat, aspect="auto", interpolation="nearest",
@@ -194,7 +203,6 @@ def _draw_seizure_heatmap(
         extent=extent, origin="upper",
     )
 
-    # Stars at t_onset_sec for channels with valid onset within zoom
     y_pos = np.arange(n_swap, dtype=float)
     for k, ch in enumerate(swap_channels_ordered):
         t = channel_onsets.get(ch)
@@ -202,24 +210,24 @@ def _draw_seizure_heatmap(
             continue
         if not (ZOOM_T[0] <= t <= ZOOM_T[1]):
             continue
-        ax.scatter([t], [y_pos[k]], marker="*", s=130, color="white",
-                   edgecolors="black", linewidths=0.8, zorder=10)
+        ax.scatter([t], [y_pos[k]], marker="*", s=200, color="white",
+                   edgecolors="black", linewidths=1.0, zorder=10)
 
-    # Mark missing channels (not present in this seizure's signal)
     for k in missing:
         ax.scatter([ZOOM_T[1] + 1.0], [y_pos[k]], marker="x", s=60,
                    color="#666", clip_on=False, zorder=8)
 
-    # Clinical onset + eeg onset markers
-    ax.axvline(0.0, color="black", lw=1.2, ls="--", zorder=3)
+    ax.axvline(0.0, color="black", lw=1.4, ls="--", zorder=3)
     if eeg_rel is not None and ZOOM_T[0] <= eeg_rel <= ZOOM_T[1]:
-        ax.axvline(eeg_rel, color="#444", lw=0.9, ls=":", zorder=3)
+        ax.axvline(eeg_rel, color="#444", lw=1.0, ls=":", zorder=3)
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(swap_channels_ordered, fontsize=9, fontweight="bold")
-    ax.set_xlabel("t rel. clinical onset (s)")
+    ax.set_yticklabels(swap_channels_ordered, fontsize=FS_TICK, fontweight="bold")
+    for tick, ch in zip(ax.get_yticklabels(), swap_channels_ordered):
+        tick.set_color(COL_SWAP_LABEL)
+    ax.set_xlabel("t rel. clinical onset (s)", fontsize=FS_LABEL)
     ax.set_xlim(ZOOM_T[0], ZOOM_T[1] + 1.5)
-    ax.set_title(title_text, fontsize=10)
+    ax.set_title(title_text, fontsize=FS_TITLE, pad=10)
     return im
 
 
@@ -241,23 +249,25 @@ def _draw_delta_bar(ax, per_seizure, swap_subset_count, subtype_colors):
     df = pd.DataFrame(rows).sort_values("delta").reset_index(drop=True)
     if df.empty:
         ax.text(0.5, 0.5, "no valid seizures", transform=ax.transAxes, ha="center")
-        return
+        return None
     colors = [subtype_colors.get(s, COL_TIE) for s in df["subtype"]]
-    ax.bar(range(len(df)), df["delta"], color=colors, edgecolor="black", lw=0.3)
-    ax.axhline(0, color="grey", lw=0.5)
-    ax.axhline(+0.10, color="grey", lw=0.4, ls=":")
-    ax.axhline(-0.10, color="grey", lw=0.4, ls=":")
-    ax.set_ylabel("Δρ = ρ_a − ρ_b")
-    ax.set_xlabel(f"seizures (n={len(df)}, sorted)")
+    bars = ax.bar(range(len(df)), df["delta"], color=colors,
+                  edgecolor="black", lw=0.4)
+    ax.axhline(0, color="grey", lw=0.6)
+    ax.axhline(+0.10, color="grey", lw=0.5, ls=":")
+    ax.axhline(-0.10, color="grey", lw=0.5, ls=":")
+    ax.set_ylabel("Δρ = ρ(T0) − ρ(T1)", fontsize=FS_LABEL)
+    ax.set_xlabel(f"seizures (n={len(df)}, sorted)", fontsize=FS_LABEL)
     ax.set_xticks([])
     median_d = df["delta"].median()
     counts = df["assignment"].value_counts().to_dict()
     title = (
-        f"Δρ per seizure  |  T0={counts.get('T0', 0)}  T1={counts.get('T1', 0)}  "
-        f"tie={counts.get('tie', 0)}  median Δρ={median_d:+.3f}  "
-        f"|  swap subset = {swap_subset_count} ch"
+        f"Δρ per seizure   T0={counts.get('T0', 0)}   T1={counts.get('T1', 0)}   "
+        f"tie={counts.get('tie', 0)}   median={median_d:+.3f}   "
+        f"swap={swap_subset_count} ch"
     )
-    ax.set_title(title, fontsize=10)
+    ax.set_title(title, fontsize=FS_TITLE, pad=10)
+    return bars
 
 
 def _draw_scatter(ax, per_seizure, subtype_colors):
@@ -271,21 +281,19 @@ def _draw_scatter(ax, per_seizure, subtype_colors):
     for st in subtypes:
         sub = labeled[labeled["subtype_label"] == st]
         col = subtype_colors.get(st, COL_TIE)
-        ax.scatter(sub["rho_a"], sub["rho_b"], color=col, s=40, alpha=0.85,
-                   edgecolor="black", lw=0.3,
-                   label=f"subtype={st}" if st >= 0 else "outlier")
+        ax.scatter(sub["rho_a"], sub["rho_b"], color=col, s=60, alpha=0.85,
+                   edgecolor="black", lw=0.4)
     no_lab = df[df["subtype_label"].isna()]
     if len(no_lab):
-        ax.scatter(no_lab["rho_a"], no_lab["rho_b"], color="#D9D9D9", s=40,
-                   alpha=0.6, edgecolor="none", label="no label")
-    ax.axline((-1, -1), (1, 1), color="grey", ls=":", lw=0.5)
-    ax.axline((-1, 1), (1, -1), color="grey", ls="--", lw=0.5)
+        ax.scatter(no_lab["rho_a"], no_lab["rho_b"], color="#D9D9D9", s=60,
+                   alpha=0.6, edgecolor="none")
+    ax.axline((-1, -1), (1, 1), color="grey", ls=":", lw=0.6)
+    ax.axline((-1, 1), (1, -1), color="grey", ls="--", lw=0.6)
     ax.set_xlim(-1.05, 1.05)
     ax.set_ylim(-1.05, 1.05)
-    ax.set_xlabel("ρ_a (Spearman vs T0)")
-    ax.set_ylabel("ρ_b (Spearman vs T1)")
-    ax.set_title("(ρ_a, ρ_b) per seizure", fontsize=10)
-    ax.legend(fontsize=7, loc="lower left")
+    ax.set_xlabel("ρ vs T0", fontsize=FS_LABEL)
+    ax.set_ylabel("ρ vs T1", fontsize=FS_LABEL)
+    ax.set_title("per-seizure (ρ_T0, ρ_T1)", fontsize=FS_TITLE, pad=10)
     ax.grid(True, alpha=0.25, linestyle=":")
 
 
@@ -302,7 +310,15 @@ def _seizure_idx_from_id(atlas_subj_json: dict, band: str, sz_id: str) -> Option
     return None
 
 
-def _pick_extreme_seizures(per_seizure: List[Dict[str, object]]) -> Tuple[Dict, Dict]:
+def _pick_extreme_seizures(
+    per_seizure: List[Dict[str, object]], swap_size: int,
+) -> Tuple[Dict, Dict]:
+    """Pick max/min Δρ seizures with CUSUM stars on majority of swap nodes.
+
+    Gate: `n_swap_channels_used >= max(3, swap_size // 2)`.
+    Within gate, sort by Δρ; tie-break by larger n_swap (more stars on figure).
+    """
+    min_n = max(3, swap_size // 2)
     cand = []
     for s in per_seizure:
         if s.get("assignment") not in ("T0", "T1", "tie"):
@@ -311,12 +327,14 @@ def _pick_extreme_seizures(per_seizure: List[Dict[str, object]]) -> Tuple[Dict, 
         if ra is None or rb is None or not np.isfinite(ra) or not np.isfinite(rb):
             continue
         n_used = int(s.get("n_swap_channels_used", 0))
-        if n_used < 3:
+        if n_used < min_n:
             continue
         cand.append((float(ra) - float(rb), n_used, s))
     if len(cand) < 2:
-        raise ValueError("not enough valid seizures (need ≥2 with n_swap ≥ 3)")
-    cand.sort(key=lambda kv: (kv[0], -kv[1]))  # sort by Δρ; tie-break: more channels first
+        raise ValueError(
+            f"not enough valid seizures (need ≥2 with n_swap ≥ {min_n}); got {len(cand)}"
+        )
+    cand.sort(key=lambda kv: (kv[0], -kv[1]))
     return cand[-1][2], cand[0][2]
 
 
@@ -376,8 +394,8 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     swap_idx_ordered = sorted(swap_idx_unordered, key=_mean_rank)
     swap_labels = [channel_names[i] for i in swap_idx_ordered]
 
-    # --- pick seizures ---
-    sz_t0, sz_t1 = _pick_extreme_seizures(q1p["per_seizure"])
+    # --- pick seizures (require ≥ swap_size//2 CUSUM stars on swap nodes) ---
+    sz_t0, sz_t1 = _pick_extreme_seizures(q1p["per_seizure"], swap_size=len(swap_labels))
     sz_t0_id = str(sz_t0["seizure_id"])
     sz_t1_id = str(sz_t1["seizure_id"])
     sz_t0_dr = float(sz_t0["rho_a"]) - float(sz_t0["rho_b"])
@@ -427,13 +445,14 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
         else:
             subtype_colors[st] = PAL[k % len(PAL)]
 
-    # --- build figure ---
-    fig = plt.figure(figsize=(16.0, 9.5), dpi=150, facecolor="white")
+    # --- build figure (plot_style.py conventions) ---
+    # Reserve right column for shared legend + colorbar
+    fig = plt.figure(figsize=(18.0, 10.0), facecolor="white")
     gs = GridSpec(
         nrows=2, ncols=3, figure=fig,
-        height_ratios=[3.0, 1.6], width_ratios=[1.0, 1.0, 1.05],
-        left=0.06, right=0.93, top=0.88, bottom=0.08,
-        hspace=0.42, wspace=0.22,
+        height_ratios=[3.0, 1.5], width_ratios=[1.0, 1.0, 1.0],
+        left=0.06, right=0.82, top=0.91, bottom=0.08,
+        hspace=0.50, wspace=0.30,
     )
     ax_inter = fig.add_subplot(gs[0, 0])
     ax_t0sz = fig.add_subplot(gs[0, 1])
@@ -441,58 +460,95 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     ax_bar = fig.add_subplot(gs[1, 0:2])
     ax_scatter = fig.add_subplot(gs[1, 2])
 
-    # Left: canonical interictal template panel (drop in)
+    # Left: canonical interictal template panel
     _draw_subject_panel(
         ax_inter, dataset, sid,
         swap_nodes=swap_nodes_set,
         cid_t0=t0_id, cid_t1=t1_id,
         title_text="",
     )
+    # Two-line title per plot_style §2; reset the canonical func's xlabel
+    n_lagpat = len(channel_names)
     ax_inter.set_title(
-        f"Interictal templates  (mean ± SD;  ★ swap, ○ non-swap)",
-        fontsize=10,
+        f"E:{sid}\ninterictal templates   n_swap={len(swap_nodes_set)}",
+        fontsize=FS_TITLE, pad=10,
     )
+    ax_inter.set_xlabel("rank", fontsize=FS_LABEL)
+    # Tight axes per plot_style §3
+    ax_inter.set_xlim(0, n_lagpat - 1)
+    ax_inter.set_ylim(n_lagpat - 0.5, -0.5)
 
-    # Middle/right: z-ER zoom heatmap
+    # Middle/right: z-ER zoom heatmaps
     im_t0 = _draw_seizure_heatmap(
         ax_t0sz, zer_t0["zer"], zer_t0["ch_names"], zer_t0["t_er"],
         swap_labels, onsets_t0, zer_t0["eeg_rel"],
         title_text=(
-            f"Most T0-like seizure  (sz_idx={sz_t0_idx:02d})\n"
-            f"sz_id={sz_t0_id}  |  Δρ={sz_t0_dr:+.2f}  |  {_format_subtype(sz_t0.get('subtype_label'))}"
+            f"most T0-like   sz_idx={sz_t0_idx:02d}\n"
+            f"Δρ={sz_t0_dr:+.2f}   {_format_subtype(sz_t0.get('subtype_label'))}   "
+            f"n_swap={int(sz_t0.get('n_swap_channels_used', 0))}/{len(swap_labels)}"
         ),
     )
     im_t1 = _draw_seizure_heatmap(
         ax_t1sz, zer_t1["zer"], zer_t1["ch_names"], zer_t1["t_er"],
         swap_labels, onsets_t1, zer_t1["eeg_rel"],
         title_text=(
-            f"Most T1-like seizure  (sz_idx={sz_t1_idx:02d})\n"
-            f"sz_id={sz_t1_id}  |  Δρ={sz_t1_dr:+.2f}  |  {_format_subtype(sz_t1.get('subtype_label'))}"
+            f"most T1-like   sz_idx={sz_t1_idx:02d}\n"
+            f"Δρ={sz_t1_dr:+.2f}   {_format_subtype(sz_t1.get('subtype_label'))}   "
+            f"n_swap={int(sz_t1.get('n_swap_channels_used', 0))}/{len(swap_labels)}"
         ),
     )
 
-    # Colorbar on the right
-    if im_t1 is not None:
-        cax = fig.add_axes([0.945, 0.42, 0.012, 0.40])
-        cb = fig.colorbar(im_t1, cax=cax)
-        cb.set_label("z-ER (gamma)", fontsize=9)
+    # Apply style_panel (remove top/right spines, thicken left/bottom, tick fonts)
+    for ax in (ax_inter, ax_t0sz, ax_t1sz, ax_bar, ax_scatter):
+        style_panel(ax)
 
     # Bottom
     _draw_delta_bar(ax_bar, q1p["per_seizure"], len(swap_labels), subtype_colors)
     _draw_scatter(ax_scatter, q1p["per_seizure"], subtype_colors)
 
-    suptitle = (
-        f"{dataset}_{sid}  |  swap_class={swap['swap_class']}  "
-        f"(decision_k={swap['decision_k']})  |  T0=cluster_id {t0_id}, T1=cluster_id {t1_id}  "
-        f"|  band={BAND}  |  zoom = {ZOOM_T[0]:.0f}…{ZOOM_T[1]:.0f}s, swap-channels only  "
-        f"|  topic5 n_subtypes={q1p.get('topic5_n_subtypes', '?')}"
+    # Single shared legend on right (plot_style §6)
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+    legend_handles = [
+        Line2D([0], [0], color=COL_CLUSTER_T0, lw=2.5, marker="*",
+               markersize=11, markeredgecolor="black",
+               label="T0 (forward) interictal mean ± SD"),
+        Line2D([0], [0], color=COL_CLUSTER_T1, lw=2.5, marker="*",
+               markersize=11, markeredgecolor="black",
+               label="T1 (reverse) interictal mean ± SD"),
+        Line2D([0], [0], marker="*", color="white", markersize=12,
+               markeredgecolor="black", markeredgewidth=1.0, lw=0,
+               label="t_onset_sec (CUSUM ✦)"),
+        Line2D([0], [0], marker="x", color="#666", lw=0, markersize=8,
+               label="no CUSUM onset"),
+        Line2D([0], [0], color="black", ls="--", lw=1.4, label="clinical onset"),
+        Line2D([0], [0], color="#444", ls=":", lw=1.0, label="EEG onset"),
+    ]
+    # Subtype color swatches (small)
+    for st in sorted(subtype_colors.keys()):
+        lbl = "outlier" if st == -1 else f"subtype {st}"
+        legend_handles.append(Patch(facecolor=subtype_colors[st],
+                                    edgecolor="black", label=lbl))
+
+    fig.legend(
+        handles=legend_handles,
+        loc="center right", bbox_to_anchor=(0.995, 0.5),
+        ncol=1, frameon=False, fontsize=FS_TICK,
     )
-    fig.suptitle(suptitle, fontsize=11)
+
+    # Shared colorbar for z-ER heatmaps (small, near top of legend column)
+    if im_t1 is not None:
+        cax = fig.add_axes([0.835, 0.55, 0.012, 0.30])
+        cb = fig.colorbar(im_t1, cax=cax)
+        cb.set_label("z-ER (gamma)", fontsize=FS_LABEL)
+        cb.ax.tick_params(labelsize=FS_TICK)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(out_path)
-    plt.close(fig)
-    print(f"figure → {out_path}")
+    # Save PDF first, then PNG (savefig_pub closes figure) — plot_style §8
+    pdf_path = out_path.with_suffix(".pdf")
+    fig.savefig(pdf_path, bbox_inches="tight", facecolor="white")
+    savefig_pub(fig, out_path, dpi=200)
+    print(f"figure → {out_path}  +  {pdf_path}")
 
 
 def main() -> None:
