@@ -42,3 +42,15 @@ Q3 stratifier 散点：x 轴 = silhouette 二分（≤0.5 vs >0.5），y 轴 = p
 ### q1prime_assignment_x_subtype.png
 strict + candidate (5 subject) 的 assignment × subtype 列联 stacked bar；标题带 Fisher/χ² p。
 **关注点**：assignment {T0, T1} 是否在 subtype 间分布不均；p < 0.05 + V > 0.3 双 gate 通过的 subject。
+
+---
+
+## Q1' overnight 探索 figures (2026-05-10)
+
+### q1prime_overnight_feature_corr_heatmap.png
+16 eligible subjects × 4 features (n_active/active_fraction/onset_spread_sec/median_onset_latency_sec) 的 Spearman ρ(feature, delta_rho_swap) heatmap。行按 n_active ρ 排序，蓝=负相关，红=正相关，白=NaN（n 不足）。
+**关注点**：ρ 在各行的方向是否一致（若 8+/8- 对称则为 NULL）；是否有某个 subject 在多 feature 上同向且强（提示 case-study 信号）。Stage C 主结论为 NULL（sign-test p=1.0 for 3/4 features）。
+
+### q1prime_overnight_feature_subtype_discrim_bar.png
+双 panel：左侧 = n_sig (p<0.05) vs n_strong (|eff|>0.3) per feature 条形，虚线 = 5% chance 期望；右侧 = direction 分布（subtype 0 > vs < others）。
+**关注点**：median_onset_latency_sec 的方向 distribution 最偏（2+/10-），sign-test p=0.039（uncorrected），是 overnight 探索中唯一接近显著的方向性信号。Bonferroni 矫正（4 features）后 threshold=0.0125，不满足。
