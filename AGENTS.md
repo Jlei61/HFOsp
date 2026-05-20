@@ -18,6 +18,7 @@ Before tracing any result, read these in order:
 When answering scientific-status questions, prefer these canonical entry docs first:
 
 - `docs/paper_overview.md` — total index + one-line conclusions for all topics
+- **`docs/topic0_methodology_audits.md` — methodology audits & data contract bugs; READ FIRST before any Topic 1–5 number** (currently: `lagPatRank` phantom pseudo-rank confirmed 2026-05-20, broad re-derivation in progress)
 - `docs/topic1_within_event_dynamics.md` — within-event dynamics (propagation + synchrony)
 - `docs/topic2_between_event_dynamics.md` — event-between-event timing
 - `docs/topic3_spatial_soz_modulation.md` — where / SOZ spatial attribution
@@ -289,6 +290,8 @@ Stop and ask the user instead of guessing when:
 
 When a downstream PR consumes a field defined by an earlier PR, look up the accepted definition in the earlier PR's archive doc before using it — the JSON field name alone is not the contract. Frequent lookups follow.
 
+**`lagPatRank` is phantom-contaminated (Topic 0 §3.1)** — every non-participating channel in `*_lagPat*.npz` carries a finite int rank from the legacy producer (`hfo_net.py:289` `argsort(argsort(x))` is unmasked). The `np.where(np.isfinite, ranks, 0.0)` guard in HFOsp's 4 KMeans call sites is a no-op for these phantom int values. Cohort audit (`results/lagpatrank_audit/cohort_summary.csv`, n=40) shows **40/40 subjects fail the cosmetic gate**; cohort-median AMI(original, masked) − seed_floor = -0.599. Any KMeans feature matrix derived from `lagPatRank` must go through `src.lagpat_rank_audit.build_masked_kmeans_features(ranks, bools, impute='event_median')`, or use the `use_masked_features=True` parameter on `compute_adaptive_cluster_stereotypy` / `compute_cluster_stereotypy` / `compute_time_split_reproducibility` / `compute_pr6_step6_held_out`. Until Topic 0 §5 broad re-derivation completes, all PR-2/PR-3/PR-4/PR-5/PR-6/PR-7/Topic 4 numbers carry a methodology caveat. Source: `docs/topic0_methodology_audits.md` §3.1 + `docs/archive/topic0/lagpat_phantom_rank/diagnostic_2026-05-20.md`.
+
 **`forward_reverse_reproduced` (PR-2.5)** — accepted rule is **split-half OR odd-even** (8/9 subjects). The per-subject JSON exposes both `time_split_reproducibility.splits.first_half_second_half.forward_reverse_reproduced` and `splits.odd_even_block.forward_reverse_reproduced`; downstream consumers must take the OR. Checking only split-half undercounts. Source: `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` PR-2.5 section.
 
 **`template_rank` (PR-2 adaptive cluster)** — `adaptive_cluster.clusters[k].template_rank` is `argsort(argsort(template))`. Channels that never participate in this cluster's events still get a rank because `_legacy_hist_mean_rank` fallback assigns `template[ci] = ci`. Downstream code that picks rank extremes (source/sink, top-N) **must** derive a per-cluster `valid_mask` from raw bools and exclude non-participating channels — otherwise non-participating channels can be silently picked as endpoint members. Use `_load_bools_and_channels` (or `load_subject_propagation_events`) on the **`*_lagPat_withFreqCent.npz`** files (10ch full set), not `*_lagPat.npz` (older 7ch legacy slice).
@@ -391,6 +394,23 @@ When a downstream PR consumes a field defined by an earlier PR, look up the acce
 
 - **按 topic 分类，不使用 PR 编号命名。** `pr6_analysis/` 这类命名是坏味道，应是 `interictal_synchrony/analysis/combined/`。
 - 新建结果目录时，目录名必须能独立传达"这是什么分析的什么阶段输出"。
+
+### 方法学审计后重跑的并行目录约定（Topic 0）
+
+当某个 Topic 0 audit 触发广泛重跑时，**修复版结果走 parallel dir，旧结果不删**：
+
+```
+results/interictal_propagation/            ← 旧（phantom-contaminated），保留作为 archive evidence
+results/interictal_propagation_masked/     ← 新（masked re-rank）
+
+results/topic4_attractor/                  ← 旧
+results/topic4_attractor_masked/           ← 新
+```
+
+- **`_masked` 后缀** 是 `lagPatRank` phantom audit 的命名（参考 `docs/topic0_methodology_audits.md` §4）。未来其他 audit 用其他对应词缀。
+- 修复版目录里的图文件名**不重复加 `_masked`**——目录已区分。
+- 对比图（before-vs-after）放专门的 `<topic>_vs_masked/` dir。
+- 任何 PR 重跑时优先级：旧目录 path 在归档 doc 里仍然有效（不要 dangling），新目录 path 在新 PR 文档里使用。
 
 ### 优先级分层
 

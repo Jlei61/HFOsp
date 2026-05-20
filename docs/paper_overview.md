@@ -5,6 +5,15 @@
 
 ---
 
+## 0. Topic 0：方法学审计与数据合同（**优先级最高**）
+
+> 在读任何 Topic 1–5 的科学结论之前，必须先看本节是否有未结清问题。
+
+- 正式入口：`docs/topic0_methodology_audits.md`
+- 当前未结清问题：**1 个** —— `lagPatRank` phantom pseudo-rank（2026-05-20 确诊，broad re-derivation 进行中）
+- 影响范围：Topic 1 / Topic 4 / PR-5 / PR-6 / PR-7 的所有 KMeans-derived 数字
+- 含义：未走完 Topic 0 §5 重跑路线之前，Topic 1–5 主文档的相关数字背后挂方法学 caveat
+
 ## 1. 论文现在的 4 个 topic
 
 ### Topic 1：间期事件内部时序结构
@@ -77,13 +86,19 @@ PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subj
 ### 如果你只想知道当前正式结论
 
 1. `docs/paper_overview.md`
-2. `docs/topic1_within_event_dynamics.md`
-3. `docs/topic2_between_event_dynamics.md`
-4. `docs/topic3_spatial_soz_modulation.md`
-5. `docs/topic5_seizure_subtyping.md`
+2. **`docs/topic0_methodology_audits.md`** ← 必读，决定下面结论的可信度
+3. `docs/topic1_within_event_dynamics.md`
+4. `docs/topic2_between_event_dynamics.md`
+5. `docs/topic3_spatial_soz_modulation.md`
+6. `docs/topic5_seizure_subtyping.md`
 
 ### 如果你要看历史证据链或审阅意见
 
+- **Topic 0** 历史来源（`docs/archive/topic0/`）：
+  - `docs/archive/topic0/INDEX.md`
+  - `docs/archive/topic0/lagpat_phantom_rank/diagnostic_2026-05-20.md`
+  - `docs/archive/topic0/lagpat_phantom_rank/plain_chinese_report_2026-05-20.md`
+  - `docs/archive/topic0/lagpat_phantom_rank/rerun_roadmap_2026-05-20.md`
 - Topic 1 历史来源（`docs/archive/topic1/`）：
   - `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md`
   - `docs/archive/topic1/synchrony/interictal_synchrony_preliminary_report_2026-04-03.md`

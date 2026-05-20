@@ -36,6 +36,19 @@
 
 ## 3. 核心证据链
 
+> ### ⚠️ Topic 0 phantom-rank 未结清 caveat（2026-05-20 起）
+>
+> 本节所有 PR-2 / PR-2.5 / PR-3 / PR-4 / PR-5 / PR-6 / PR-7 / Topic 4 attractor 的数字
+> 由 KMeans on `lagPatRank` 派生。Topic 0 §3.1 已确诊 `lagPatRank` 是 phantom-contaminated
+> (non-participating channels carry phantom int ranks)，cohort audit 40/40 subject Δ<-0.10。
+> 修过版重跑（broad re-derivation, Topic 0 §5）**进行中**，未完成前本节数字背后挂方法学 caveat。
+>
+> - "PR-2 stable_k=2 是主导特征" → **结构层结论稳健**（修过版 34/35 主线 subject 仍选 k=2）
+> - "PR-2 哪些事件属于哪一类" → **修过版会变化**（cohort-median AMI(原 vs 修) = 0.37 vs noise floor 0.997；epilepsiae_916 stable_k 从 2 翻到 4）
+> - "PR-4B/D / PR-5 / PR-6 / PR-7 / Topic 4 attractor 的具体数字" → **必须重跑确认**
+>
+> 详见 `docs/topic0_methodology_audits.md` §3.1 + `docs/archive/topic0/lagpat_phantom_rank/`。
+
 > ### Cohort tier 注解（2026-05-07 起强制双轨/三层口径）
 >
 > 本 topic 现在共有 **三个 cohort 层**，下面 §3.1–§3.2 任何具体数字读到时**必须先识别它属于哪一层**：
