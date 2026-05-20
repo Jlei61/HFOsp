@@ -1,0 +1,90 @@
+{
+  "n_subjects": 40,
+  "n_strict_mixture": 40,
+  "n_possible_mixture": 0,
+  "n_soz_source_erased": 3,
+  "frac_soz_source_erased": 0.075,
+  "mean_tau_median": 0.08445096354736137,
+  "bias_fraction_median": 0.7109820891635739,
+  "soz_vs_nonsoz": {
+    "n_pairs": 14,
+    "n_soz_gt_nonsoz": 8,
+    "wilcoxon_greater_p": 0.0765380859375,
+    "soz_median_tau": 0.08317698289271928,
+    "nonsoz_median_tau": 0.06966386796214542
+  },
+  "by_nparticipating": [
+    {
+      "bin_label": "3-4",
+      "n_subjects": 24,
+      "median_tau": 0.030713414836865696
+    },
+    {
+      "bin_label": "5-8",
+      "n_subjects": 30,
+      "median_tau": 0.08116947328840568
+    },
+    {
+      "bin_label": "9-plus",
+      "n_subjects": 23,
+      "median_tau": 0.09634996583817988
+    }
+  ],
+  "cluster_analysis": {
+    "within_cluster_tau_median": 0.2888758839480622,
+    "overall_tau_median": 0.08445096354736137,
+    "uplift_median": 0.18394232692064377,
+    "inter_cluster_corr_median": -0.3396358543417367,
+    "n_anticorrelated": 15
+  },
+  "legacy_mi": {
+    "mi_mean_median": 0.18804455018263003,
+    "n_significant": 40,
+    "n_tested": 40
+  },
+  "adaptive_cluster_analysis": {
+    "n_subjects": 40,
+    "stable_k_distribution": {
+      "2": 34,
+      "3": 1,
+      "4": 2,
+      "5": 2,
+      "6": 1
+    },
+    "chosen_k_distribution": {
+      "2": 34,
+      "3": 1,
+      "4": 2,
+      "5": 2,
+      "6": 1
+    },
+    "n_stable_k_found": 40,
+    "n_fallback": 0,
+    "stable_k_median": 2.0,
+    "uplift_median": 0.1977050153113532,
+    "within_cluster_tau_median": 0.2913253661099341,
+    "n_subjects_with_forward_reverse": 16,
+    "total_forward_reverse_pairs": 30
+  },
+  "reproducibility_analysis": {
+    "n_subjects": 0
+  },
+  "absolute_lag_validation_analysis": {
+    "n_subjects": 0
+  },
+  "rate_state_coupling_analysis": {
+    "n_subjects": 0
+  },
+  "temporal_dynamics_analysis": {
+    "n_subjects": 0
+  },
+  "temporal_dynamics_followup_analysis": {
+    "n_subjects": 0
+  },
+  "seizure_proximity_analysis": {
+    "n_subjects": 0
+  },
+  "seizure_proximity_analysis_auxiliary": {
+    "n_subjects": 0
+  }
+}
