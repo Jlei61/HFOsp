@@ -511,6 +511,65 @@ def compute_clinical_soz_set_relation(
     }
 
 
+def compute_swap_pr_curve(
+    joint_chs: Sequence[str],
+    joint_dense: np.ndarray,
+    soz_chs: Sequence[str],
+) -> Dict[str, object]:
+    """Per-k precision/recall sweep for swap_endpoint vs clinical SOZ.
+
+    Convention (per user 2026-05-11 request):
+      precision(k) = |E_k ∩ S| / |S|     (denominator = clinical SOZ size)
+      recall(k)    = |E_k ∩ S| / |E_k|   (denominator = swap-endpoint size)
+
+    E_k = top k ∪ bottom k channels by ascending rank_a_dense.
+    k ranges [1, k_max] with k_max = floor(n_v / 2). Returns empty lists
+    when n_v < 2 or |S ∩ valid| == 0.
+
+    AUC is trapezoidal area over k normalized by (k_max - 1); returns NaN
+    when k_max < 2 (a single point cannot form a trapezoid).
+    """
+    joint_chs = list(joint_chs)
+    n_v = len(joint_chs)
+    k_max = n_v // 2
+    soz_set = set(soz_chs) & set(joint_chs)
+    n_S = len(soz_set)
+    out = {
+        "k_values": [],
+        "precision_by_k": [],
+        "recall_by_k": [],
+        "k_max": k_max,
+        "n_S": n_S,
+        "n_v": n_v,
+        "auc_precision_normalized": float("nan"),
+        "auc_recall_normalized": float("nan"),
+    }
+    if k_max < 1 or n_S == 0:
+        return out
+    joint_dense = np.asarray(joint_dense, dtype=float)
+    order = np.argsort(joint_dense, kind="stable")
+    k_values: list = list(range(1, k_max + 1))
+    precision_by_k: list = []
+    recall_by_k: list = []
+    for k in k_values:
+        endpoint_idx = set(order[:k].tolist()) | set(order[-k:].tolist())
+        endpoint_chs = {joint_chs[i] for i in endpoint_idx}
+        n_E = len(endpoint_chs)
+        n_inter = len(endpoint_chs & soz_set)
+        precision_by_k.append(n_inter / n_S)
+        recall_by_k.append(n_inter / n_E if n_E > 0 else float("nan"))
+    out["k_values"] = k_values
+    out["precision_by_k"] = precision_by_k
+    out["recall_by_k"] = recall_by_k
+    if k_max >= 2:
+        ks = np.asarray(k_values, dtype=float)
+        prec = np.asarray(precision_by_k, dtype=float)
+        rec = np.asarray(recall_by_k, dtype=float)
+        out["auc_precision_normalized"] = float(np.trapz(prec, ks) / (k_max - 1))
+        out["auc_recall_normalized"] = float(np.trapz(rec, ks) / (k_max - 1))
+    return out
+
+
 def cohort_sign_test_enrichment(
     enrichments: Sequence[Optional[float]],
     n_boot: int = 2000,

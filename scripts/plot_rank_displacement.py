@@ -605,9 +605,9 @@ def plot_clinical_soz_set_relation(
     rows = summary.get("per_subject", [])
 
     fig, axes = plt.subplots(
-        1, 3, figsize=(15.5, 5.0), gridspec_kw={"width_ratios": [1.05, 1.05, 1.0]}
+        1, 2, figsize=(11.5, 5.0), gridspec_kw={"width_ratios": [1.1, 0.95]}
     )
-    ax_a, ax_b, ax_c = axes
+    ax_a, ax_c = axes
 
     def _select(rows, predicate):
         return [r for r in rows if predicate(r)]
@@ -651,79 +651,85 @@ def plot_clinical_soz_set_relation(
     ax_a.legend(loc="lower left", fontsize=FS_TICK, frameon=False)
     style_panel(ax_a)
 
-    # ---------------- Panel B: enrichment × coverage ----------------
-    def _scatter_ec(ax, subjects, marker, face, edge, lw, size, label):
-        x = [r["coverage"] for r in subjects if r["coverage"] is not None]
-        y = [r["enrichment_over_lagPat"] for r in subjects if r["enrichment_over_lagPat"] is not None]
-        ax.scatter(
-            x, y, marker=marker, s=size, facecolors=face, edgecolors=edge,
-            linewidths=lw, label=label, zorder=4,
-        )
+    # ---------------- Panel B (was C): overlap-with-SOZ stacked bar ----
+    # New definition (user 2026-05-11): informative = any |E ∩ S| > 0.
+    # Two x-bars: strict + candidate combined vs none. Two stack colors:
+    # overlap (n_E_inter_S > 0) vs no_overlap (n_E_inter_S == 0).
+    # Subjects with no clinical SOZ JSON entry are excluded.
+    def _classify(r: dict) -> Optional[str]:
+        if r.get("exit_reason") == "no_clinical_soz":
+            return None
+        n_inter = r.get("n_E_inter_S")
+        if n_inter is None:
+            return None
+        return "overlap" if n_inter > 0 else "no_overlap"
 
-    _scatter_ec(ax_b, none_inf, "^", "0.85", "0.55", 0.7, 44, "none")
-    _scatter_ec(ax_b, cand_inf, "o", "none", "0.30", 1.4, 110, "candidate")
-    _scatter_ec(ax_b, strict_inf, "o", "black", "black", 0.8, 110, "strict")
-    for r in strict_inf:
-        if r["coverage"] is None or r["enrichment_over_lagPat"] is None:
-            continue
-        sub = str(r["subject"])
-        short = sub if len(sub) <= 6 else sub[:6]
-        ax_b.annotate(
-            short, xy=(r["coverage"], r["enrichment_over_lagPat"]),
-            xytext=(4, 4), textcoords="offset points",
-            fontsize=FS_TICK - 1, color="black", zorder=5,
-        )
-    ax_b.axhline(0.0, color="0.45", linestyle="--", linewidth=1.2, zorder=2)
-    ax_b.set_xlim(-0.02, 1.05)
-    ax_b.set_xlabel("Coverage  |E| / |L|", fontsize=FS_LABEL)
-    ax_b.set_ylabel("Enrichment over lagPat  precision − |S|/|L|", fontsize=FS_LABEL)
-    ax_b.set_title("(B) enrichment × coverage", fontsize=FS_TITLE, loc="left")
-    # Annotate the structural fact at coverage→1
-    ax_b.text(
-        0.99, 0.0, "→ 0 as cov→1\n(structural)",
-        ha="right", va="bottom", fontsize=FS_TICK - 1, color="0.45",
-        transform=ax_b.transData,
-    )
-    ax_b.legend(loc="lower left", fontsize=FS_TICK, frameon=False)
-    style_panel(ax_b)
-
-    # ---------------- Panel C: typology stacked bar ----------------
-    typ_dist = summary.get("typology_distribution", {})
-    tiers = ["strict", "candidate", "none"]
-    typ_order = ["E_subset_S", "S_subset_E", "partial", "disjoint", "degenerate", "missing"]
-    typ_colors = {
-        "E_subset_S": "#3F7A88",   # teal — refined SOZ candidate
-        "S_subset_E": "#C77E48",   # rust — extended SOZ candidate
-        "partial":    "#9B9B6F",   # olive
-        "disjoint":   "#7A4F4F",   # brick
-        "degenerate": "0.75",
-        "missing":    "0.90",
+    swap_rows = [r for r in rows if r["swap_class"] in ("strict", "candidate")]
+    none_rows = [r for r in rows if r["swap_class"] == "none"]
+    counts: Dict[str, Dict[str, int]] = {
+        "swap": {"overlap": 0, "no_overlap": 0, "excluded": 0},
+        "none": {"overlap": 0, "no_overlap": 0, "excluded": 0},
     }
-    bottoms = np.zeros(len(tiers), dtype=float)
-    bar_x = np.arange(len(tiers))
-    for typ in typ_order:
-        heights = np.array([typ_dist.get(t, {}).get(typ, 0) for t in tiers], dtype=float)
-        ax_c.bar(
-            bar_x, heights, bottom=bottoms,
-            color=typ_colors[typ], edgecolor="white", linewidth=0.5,
-            label=typ,
-        )
-        bottoms = bottoms + heights
-    ax_c.set_xticks(bar_x)
-    ax_c.set_xticklabels(tiers, fontsize=FS_TICK)
-    ax_c.set_ylabel("Subject count", fontsize=FS_LABEL)
-    ax_c.set_title("(C) typology by swap_class", fontsize=FS_TITLE, loc="left")
-    # Annotate informative count above each bar
-    for x, t in zip(bar_x, tiers):
-        n_inf = sum(typ_dist.get(t, {}).get(typ, 0) for typ in typ_order if typ != "degenerate" and typ != "missing")
-        n_total = sum(typ_dist.get(t, {}).get(typ, 0) for typ in typ_order)
+    for r in swap_rows:
+        c = _classify(r)
+        if c is None:
+            counts["swap"]["excluded"] += 1
+        else:
+            counts["swap"][c] += 1
+    for r in none_rows:
+        c = _classify(r)
+        if c is None:
+            counts["none"]["excluded"] += 1
+        else:
+            counts["none"][c] += 1
+
+    bar_x = np.arange(2)
+    bar_labels = ["strict + candidate", "none"]
+    overlap_heights = np.array(
+        [counts["swap"]["overlap"], counts["none"]["overlap"]], dtype=float
+    )
+    no_overlap_heights = np.array(
+        [counts["swap"]["no_overlap"], counts["none"]["no_overlap"]], dtype=float
+    )
+    ax_c.bar(
+        bar_x, overlap_heights, color="#3F7A88",
+        edgecolor="white", linewidth=0.5, label="overlap with SOZ",
+    )
+    ax_c.bar(
+        bar_x, no_overlap_heights, bottom=overlap_heights,
+        color="#C8B59A", edgecolor="white", linewidth=0.5,
+        label="no overlap",
+    )
+    # Annotate proportions and totals above bars.
+    for x, key in zip(bar_x, ("swap", "none")):
+        n_overlap = counts[key]["overlap"]
+        n_total = n_overlap + counts[key]["no_overlap"]
         ax_c.text(
-            x, n_total + 0.4, f"info={n_inf}/{n_total}",
-            ha="center", va="bottom", fontsize=FS_TICK - 1,
+            x, n_total + 0.5,
+            f"{n_overlap}/{n_total}",
+            ha="center", va="bottom", fontsize=FS_TICK,
+        )
+    ax_c.set_xticks(bar_x)
+    ax_c.set_xticklabels(bar_labels, fontsize=FS_TICK)
+    ax_c.set_ylabel("Subject count", fontsize=FS_LABEL)
+    ax_c.set_title("(B) overlap with clinical SOZ", fontsize=FS_TITLE, loc="left")
+    # Pad ylim so the n=N/M annotation and legend don't crowd the bars.
+    max_total = max(
+        counts["swap"]["overlap"] + counts["swap"]["no_overlap"],
+        counts["none"]["overlap"] + counts["none"]["no_overlap"],
+    )
+    ax_c.set_ylim(0, max_total * 1.30)
+    n_excl = counts["swap"]["excluded"] + counts["none"]["excluded"]
+    if n_excl > 0:
+        ax_c.text(
+            0.5, -0.18,
+            f"excluded: n={n_excl} subjects with no clinical SOZ JSON",
+            transform=ax_c.transAxes,
+            ha="center", va="top", fontsize=FS_TICK - 1, color="0.45",
         )
     ax_c.legend(
-        loc="upper right", fontsize=FS_TICK - 1, frameon=False,
-        ncol=1, bbox_to_anchor=(1.0, 1.0),
+        loc="upper center", bbox_to_anchor=(0.5, 1.0),
+        fontsize=FS_TICK, frameon=False, ncol=2,
     )
     style_panel(ax_c)
 
@@ -731,7 +737,235 @@ def plot_clinical_soz_set_relation(
         "Swap_endpoint × clinical SOZ within lagPat universe",
         fontsize=FS_TITLE + 1, y=0.99,
     )
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.tight_layout(rect=[0, 0.02, 1, 0.96])
+    for ext in ("png", "pdf"):
+        fig.savefig(f"{out_stem}.{ext}", dpi=DPI_PUB, bbox_inches="tight")
+    plt.close(fig)
+
+
+def _collect_swap_pr_curves(summary_path: Path) -> List[dict]:
+    """For each strict / candidate subject with non-empty SOZ in lagPat,
+    load the per_subject pair-level rank data and compute per-k precision /
+    recall sweep against clinical SOZ.
+
+    Returns list of dicts: {dataset, subject, swap_class, informative,
+    k_values, precision_by_k, recall_by_k, auc_precision_normalized,
+    auc_recall_normalized, n_v, n_S}.
+    """
+    from src.rank_displacement import compute_swap_pr_curve  # noqa: E402
+
+    summary = json.loads(summary_path.read_text())
+    rows = summary.get("per_subject", [])
+    target_subjects = [
+        r for r in rows
+        if r["swap_class"] in ("strict", "candidate")
+        and r.get("exit_reason") != "no_clinical_soz"
+    ]
+    out: List[dict] = []
+    for r in target_subjects:
+        stem = f"{r['dataset']}_{r['subject']}"
+        per_path = PER_SUBJECT_DIR / f"{stem}.json"
+        if not per_path.exists():
+            continue
+        d = json.loads(per_path.read_text())
+        soz_chs = list(d.get("soz_channels", []))
+        pairs = [p for p in d.get("pairs", []) if p.get("exit_reason") == "ok"]
+        if len(pairs) != 1:
+            continue
+        p = pairs[0]
+        joint_valid = np.asarray(p["joint_valid"], dtype=bool)
+        channel_names = p["channel_names"]
+        rank_a_dense_full = np.asarray(p["rank_a_dense_full"], dtype=float)
+        joint_chs = [ch for ch, v in zip(channel_names, joint_valid) if v]
+        joint_dense = rank_a_dense_full[joint_valid]
+        curve = compute_swap_pr_curve(joint_chs, joint_dense, soz_chs)
+        if not curve["k_values"]:
+            continue
+        out.append({
+            "dataset": r["dataset"],
+            "subject": r["subject"],
+            "swap_class": r["swap_class"],
+            "informative": bool(r.get("informative")),
+            **curve,
+        })
+    return out
+
+
+def plot_strict_candidate_overlap(
+    summary_path: Path, out_stem: Path
+) -> None:
+    """Two-panel per-k precision / recall sweep for strict + candidate
+    swap_endpoint vs clinical SOZ.
+
+    Definitions (user 2026-05-11 convention):
+      precision(k) = |E_k ∩ S| / |S|     (denominator = SOZ)
+      recall(k)    = |E_k ∩ S| / |E_k|   (denominator = swap)
+
+    E_k = top k ∪ bottom k channels by rank_a_dense (ascending), k=1..k_max
+    with k_max = floor(n_v / 2). Per-subject curves overlaid; cohort
+    median in bold; AUC (trapezoid normalized to k range) annotated.
+    """
+    curves = _collect_swap_pr_curves(summary_path)
+    if not curves:
+        raise RuntimeError("No strict/candidate curves available — nothing to plot.")
+
+    # Per-subject expected random baseline: pick 2k channels uniformly from
+    # the lagPat universe. E[precision(k)] = 2k/n_v ; E[recall(k)] = n_S/n_v.
+    def _add_baseline(c: dict) -> None:
+        n_v = c["n_v"]
+        n_S = c["n_S"]
+        ks = np.asarray(c["k_values"], dtype=float)
+        c["precision_baseline"] = np.minimum(2.0 * ks / n_v, 1.0).tolist()
+        c["recall_baseline"] = [float(n_S) / n_v] * len(c["k_values"])
+        if c["k_max"] >= 2:
+            pb = np.asarray(c["precision_baseline"], dtype=float)
+            rb = np.asarray(c["recall_baseline"], dtype=float)
+            c["auc_precision_baseline"] = float(np.trapz(pb, ks) / (c["k_max"] - 1))
+            c["auc_recall_baseline"] = float(np.trapz(rb, ks) / (c["k_max"] - 1))
+        else:
+            c["auc_precision_baseline"] = float("nan")
+            c["auc_recall_baseline"] = float("nan")
+
+    for c in curves:
+        _add_baseline(c)
+
+    def _style(c: dict) -> dict:
+        color = "black" if c["swap_class"] == "strict" else "0.55"
+        alpha = 1.0 if c["informative"] else 0.30
+        return {"color": color, "alpha": alpha,
+                "lw": 0.9 if c["informative"] else 0.7,
+                "ls": "-"}
+
+    # Cohort median across all subject groups (informative + degenerate).
+    k_max_cohort = max(c["k_max"] for c in curves)
+    k_grid = np.arange(1, k_max_cohort + 1)
+
+    def _median_curve(rows_in, key):
+        if not rows_in:
+            return None
+        stack = np.full((len(rows_in), len(k_grid)), np.nan)
+        for i, c in enumerate(rows_in):
+            ks = np.asarray(c["k_values"], dtype=int)
+            vals = np.asarray(c[key], dtype=float)
+            stack[i, ks - 1] = vals
+        with np.errstate(invalid="ignore"):
+            med = np.nanmedian(stack, axis=0)
+        return med
+
+    fig, (ax_p, ax_r) = plt.subplots(1, 2, figsize=(12.0, 5.8), sharex=True)
+
+    # Plot per-subject curves. Group by swap_class so the legend stays compact.
+    seen_legend = set()
+    for c in curves:
+        style = _style(c)
+        legend_key = (c["swap_class"], c["informative"])
+        if legend_key not in seen_legend:
+            lab_inf = "" if c["informative"] else " (degenerate)"
+            label = f"{c['swap_class']}{lab_inf}"
+            seen_legend.add(legend_key)
+        else:
+            label = None
+        ax_p.plot(c["k_values"], c["precision_by_k"],
+                  color=style["color"], alpha=style["alpha"],
+                  linewidth=style["lw"], linestyle=style["ls"],
+                  marker="o", markersize=3,
+                  label=label, zorder=3)
+        ax_r.plot(c["k_values"], c["recall_by_k"],
+                  color=style["color"], alpha=style["alpha"],
+                  linewidth=style["lw"], linestyle=style["ls"],
+                  marker="o", markersize=3,
+                  zorder=3)
+
+    # Cohort medians (over all strict + candidate, weighted equally).
+    med_p = _median_curve(curves, "precision_by_k")
+    med_r = _median_curve(curves, "recall_by_k")
+    med_pb = _median_curve(curves, "precision_baseline")
+    med_rb = _median_curve(curves, "recall_baseline")
+    if med_p is not None:
+        ax_p.plot(k_grid, med_p, color="#B22222", linewidth=2.4,
+                  marker="s", markersize=5, zorder=5,
+                  label=f"cohort median (n={len(curves)})")
+    if med_r is not None:
+        ax_r.plot(k_grid, med_r, color="#B22222", linewidth=2.4,
+                  marker="s", markersize=5, zorder=5)
+    if med_pb is not None:
+        ax_p.plot(k_grid, med_pb, color="0.45", linewidth=1.5,
+                  linestyle="--", zorder=4,
+                  label="random baseline (cohort median)")
+    if med_rb is not None:
+        ax_r.plot(k_grid, med_rb, color="0.45", linewidth=1.5,
+                  linestyle="--", zorder=4)
+
+    # Cohort-level summary AUC (median over per-subject normalized AUC).
+    auc_p_list = [c["auc_precision_normalized"] for c in curves
+                  if not np.isnan(c["auc_precision_normalized"])]
+    auc_r_list = [c["auc_recall_normalized"] for c in curves
+                  if not np.isnan(c["auc_recall_normalized"])]
+    auc_pb_list = [c["auc_precision_baseline"] for c in curves
+                   if not np.isnan(c["auc_precision_baseline"])]
+    auc_rb_list = [c["auc_recall_baseline"] for c in curves
+                   if not np.isnan(c["auc_recall_baseline"])]
+    auc_p_med = float(np.median(auc_p_list)) if auc_p_list else float("nan")
+    auc_r_med = float(np.median(auc_r_list)) if auc_r_list else float("nan")
+    auc_pb_med = float(np.median(auc_pb_list)) if auc_pb_list else float("nan")
+    auc_rb_med = float(np.median(auc_rb_list)) if auc_rb_list else float("nan")
+
+    for ax in (ax_p, ax_r):
+        ax.set_xlim(0.5, k_max_cohort + 0.5)
+        ax.set_ylim(-0.02, 1.05)
+        ax.set_xlabel("k  (swap = top k ∪ bottom k of rank in T_a)",
+                      fontsize=FS_LABEL)
+        ax.set_xticks(np.arange(1, k_max_cohort + 1))
+        style_panel(ax)
+
+    ax_p.set_ylabel("Precision  |swap ∩ SOZ| / |SOZ|", fontsize=FS_LABEL)
+    ax_r.set_ylabel("Recall  |swap ∩ SOZ| / |swap|", fontsize=FS_LABEL)
+    ax_p.set_title("(A) Precision", fontsize=FS_TITLE, loc="left")
+    ax_r.set_title("(B) Recall", fontsize=FS_TITLE, loc="left")
+    # Per-panel summary box. "Area" = trapezoidal ∫y dk normalized to
+    # (k_max − 1) — i.e., mean curve value across k. Not ROC-AUC.
+    ax_p.text(
+        0.97, 0.04,
+        f"area under curve\n(median over k)\nswap = {auc_p_med:.2f}\n"
+        f"random = {auc_pb_med:.2f}",
+        transform=ax_p.transAxes, fontsize=FS_TICK,
+        color="0.20", ha="right", va="bottom",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
+                  edgecolor="0.80", linewidth=0.5, alpha=0.90),
+    )
+    ax_r.text(
+        0.97, 0.96,
+        f"area under curve\n(median over k)\nswap = {auc_r_med:.2f}\n"
+        f"random = {auc_rb_med:.2f}",
+        transform=ax_r.transAxes, fontsize=FS_TICK,
+        color="0.20", ha="right", va="top",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
+                  edgecolor="0.80", linewidth=0.5, alpha=0.90),
+    )
+
+    fig.suptitle(
+        "Swap endpoint vs clinical SOZ — per-k sweep "
+        f"(strict + candidate, stable_k=2, n={len(curves)})",
+        fontsize=FS_TITLE + 1, y=0.995,
+    )
+
+    # Legend on the right of the figure (single shared legend).
+    handles, labels = ax_p.get_legend_handles_labels()
+    desired_order = [
+        "strict", "candidate",
+        "strict (degenerate)", "candidate (degenerate)",
+        f"cohort median (n={len(curves)})",
+        "random baseline (cohort median)",
+    ]
+    order_index = [labels.index(L) for L in desired_order if L in labels]
+    fig.legend(
+        [handles[i] for i in order_index],
+        [labels[i] for i in order_index],
+        loc="center left", bbox_to_anchor=(0.815, 0.5),
+        fontsize=FS_TICK, frameon=False,
+    )
+
+    fig.tight_layout(rect=[0, 0, 0.81, 0.92])
     for ext in ("png", "pdf"):
         fig.savefig(f"{out_stem}.{ext}", dpi=DPI_PUB, bbox_inches="tight")
     plt.close(fig)
@@ -742,7 +976,10 @@ def main() -> None:
     ap.add_argument(
         "--what",
         default="all",
-        choices=["all", "cohort", "per_subject", "swap", "clinical-soz-set-relation"],
+        choices=[
+            "all", "cohort", "per_subject", "swap",
+            "clinical-soz-set-relation", "clinical-soz-overlap",
+        ],
     )
     ap.add_argument(
         "--exclude",
@@ -785,6 +1022,15 @@ def main() -> None:
         )
         out_stem = FIG_DIR / "swap_clinical_soz_set_relation"
         plot_clinical_soz_set_relation(summary_path, out_stem)
+        print(f"Wrote {out_stem.name}.{{png,pdf}}")
+
+    if args.what in ("all", "clinical-soz-overlap"):
+        summary_path = (
+            DATA_ROOT / "results" / "interictal_propagation" /
+            "rank_displacement" / "clinical_soz_set_relation_summary.json"
+        )
+        out_stem = FIG_DIR / "swap_clinical_soz_overlap"
+        plot_strict_candidate_overlap(summary_path, out_stem)
         print(f"Wrote {out_stem.name}.{{png,pdf}}")
 
     if args.what in ("all", "swap"):
