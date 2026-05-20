@@ -163,6 +163,7 @@ def _save(data: Any, path: Path) -> None:
 def _run_pr25(
     datasets_list: List,
     per_subject_dir: Path,
+    use_masked_features: bool = False,
 ) -> None:
     """PR-2.5: augment existing per-subject JSONs with cross-time reproducibility."""
     import numpy as np
@@ -216,7 +217,7 @@ def _run_pr25(
                     chosen_k=chosen_k,
                     adaptive_labels=labels,
                     valid_event_indices=valid_events,
-                    use_masked_features=args.masked_features,
+                    use_masked_features=use_masked_features,
                 )
                 existing["time_split_reproducibility"] = repro
                 logger.info(
@@ -312,6 +313,7 @@ def _run_pr4a(
     n_sample: int,
     n_seeds: int,
     bin_hours: float,
+    use_masked_features: bool = False,
 ) -> None:
     """PR-4A: fixed-template occupancy timeline + day/night summaries."""
     import numpy as np
@@ -380,7 +382,7 @@ def _run_pr4a(
                     chosen_k=chosen_k,
                     adaptive_labels=labels,
                     valid_event_indices=valid_events,
-                    use_masked_features=args.masked_features,
+                    use_masked_features=use_masked_features,
                 )
                 existing["time_split_reproducibility"] = repro
 
@@ -1691,7 +1693,7 @@ def main() -> None:
         datasets_list.append(("epilepsiae", epi_root, epi_subjects, soz_epi))
 
     if args.pr25:
-        _run_pr25(datasets_list, per_subject_dir)
+        _run_pr25(datasets_list, per_subject_dir, use_masked_features=args.masked_features)
         return
 
     if args.augment_cluster_bias:
@@ -1705,6 +1707,7 @@ def main() -> None:
             n_sample=args.n_sample,
             n_seeds=args.n_seeds,
             bin_hours=args.bin_hours,
+            use_masked_features=args.masked_features,
         )
         return
 

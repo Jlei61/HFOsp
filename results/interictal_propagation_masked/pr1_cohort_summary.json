@@ -67,7 +67,26 @@
     "total_forward_reverse_pairs": 30
   },
   "reproducibility_analysis": {
-    "n_subjects": 0
+    "n_subjects": 40,
+    "grade_distribution": {
+      "moderate": 12,
+      "strong": 26,
+      "weak": 2
+    },
+    "split_half": {
+      "n_subjects": 40,
+      "median_match_corr": 0.8512241276003535,
+      "median_agreement": 0.870281940717456
+    },
+    "odd_even_block": {
+      "n_subjects": 40,
+      "median_match_corr": 0.9422660672660674,
+      "median_agreement": 0.8913072183515711
+    },
+    "forward_reverse": {
+      "n_subjects_with_pairs": 16,
+      "n_reproduced": 15
+    }
   },
   "absolute_lag_validation_analysis": {
     "n_subjects": 0
