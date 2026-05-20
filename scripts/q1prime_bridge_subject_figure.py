@@ -62,6 +62,7 @@ from src.plot_style import (  # noqa: E402
 from src.topic1_topic5_bridge import _morandi_palette  # noqa: E402
 from scripts.plot_pr6_swap_cluster_rank_multiples import (  # noqa: E402
     _draw_subject_panel,
+    _fixed_channel_order,
     _swap_nodes_rank_displacement,
 )
 from scipy import stats as sp_stats  # noqa: E402
@@ -81,11 +82,12 @@ ZOOM_T = (-30.0, 20.0)  # seconds rel. clinical onset for zoom heatmap
 # Set to None to use automatic strict-swap picker.
 # Values are seizure_id strings (matching atlas seizure_records).
 MANUAL_PICK_OVERRIDES: Dict[Tuple[str, str], Dict[str, Optional[str]]] = {
-    # 548: auto picker chose sz_idx=26 (Δρ_strict=-1.10, subtype=2) for T1;
-    # user requested a different example. Override to sz_idx=21
-    # (sz_id=54801302102, Δρ_strict=-1.00, subtype=1, n_strict=5/5) — almost
-    # equal T1 strength, full strict-swap coverage, different subtype.
-    ("epilepsiae", "548"): {"t1": "54801302102"},
+    # 548 T0: sz_idx=28 (sz_id=54802002102, Δρ_strict=+1.50, n_strict=3/5,
+    # subtype=0). Strongest T0 effect; subtype=0 contrasts cleanly with T1.
+    # 548 T1: sz_idx=26 (sz_id=54801802102, Δρ_strict=-1.10, n_strict=5/5,
+    # subtype=2). Full strict-swap coverage, strong T1 signal, third
+    # distinct subtype color alongside T0=0.
+    ("epilepsiae", "548"): {"t0": "54802002102", "t1": "54801802102"},
 }
 
 # ER computation constants (match atlas v2_3 pipeline)
@@ -546,6 +548,14 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
         used_strict_fallback = False
     n_strict = len(strict_labels)
 
+    # Full channel list in the SAME joint-mean-rank order used by the left
+    # interictal panel (_draw_subject_panel -> _fixed_channel_order). This is
+    # what populates the heatmap rows so the right panels share the y-axis
+    # range with the left rank-distribution panel. Bold-orange styling still
+    # marks only strict-swap nodes; non-strict rows render in muted grey.
+    full_channel_order = _fixed_channel_order(ranks, bools)
+    full_labels = [channel_names[i] for i in full_channel_order]
+
     # Load atlas channel_onsets keyed by seizure_id (string) for alignment
     atlas_by_sz_id = br.load_atlas_seizure_channel_onsets(
         sid, BAND, RESULTS, dataset=dataset,
@@ -676,13 +686,14 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     ax_inter.set_ylim(n_lagpat - 0.5, -0.5)
     # NO set_box_aspect here — slim rectangle by default
 
-    # Middle/right: z-ER zoom heatmap restricted to STRICT SWAP rows only
-    # (per user: "T0/T1 不应该只考虑swap节点之间的时序" — ρ on strict swap only).
-    # Channel highlight rule is moot (all rows ARE strict swap), but keep
-    # bold-orange styling consistent with the left panel.
+    # Middle/right: z-ER zoom heatmap on the FULL lagPat channel set,
+    # ordered to match the left interictal panel. ρ (Δρ_strict / n_strict) is
+    # still computed on strict-swap nodes only — the heatmap just visualizes
+    # all channels so the y-axis range matches the left rank-distribution panel.
+    # Bold-orange y-ticks mark strict-swap nodes; other rows render in muted grey.
     im_t0 = _draw_seizure_heatmap(
         ax_t0sz, zer_t0["zer"], zer_t0["ch_names"], zer_t0["t_er"],
-        strict_labels, set(strict_labels), onsets_t0, zer_t0["eeg_rel"],
+        full_labels, set(strict_labels), onsets_t0, zer_t0["eeg_rel"],
         title_text=(
             f"most T0-like   sz_idx={sz_t0_idx:02d}   subtype={_format_subtype(sz_t0.get('subtype_label'))}\n"
             f"Δρ_strict={sz_t0_dr:+.2f}   n_strict={sz_t0_n}/{n_strict}"
@@ -691,7 +702,7 @@ def plot_subject(dataset: str, sid: str, out_path: Path) -> None:
     )
     im_t1 = _draw_seizure_heatmap(
         ax_t1sz, zer_t1["zer"], zer_t1["ch_names"], zer_t1["t_er"],
-        strict_labels, set(strict_labels), onsets_t1, zer_t1["eeg_rel"],
+        full_labels, set(strict_labels), onsets_t1, zer_t1["eeg_rel"],
         title_text=(
             f"most T1-like   sz_idx={sz_t1_idx:02d}   subtype={_format_subtype(sz_t1.get('subtype_label'))}\n"
             f"Δρ_strict={sz_t1_dr:+.2f}   n_strict={sz_t1_n}/{n_strict}"
