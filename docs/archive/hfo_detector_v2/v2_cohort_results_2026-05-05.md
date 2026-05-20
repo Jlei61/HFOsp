@@ -126,12 +126,34 @@ GPU 利用率 > 0%、内存使用 > 200 MiB 才算正常 GPU 跑动；都为 0 /
 - per-channel pass rate 60–75% 区间，**这是按"每个通道是一个评估单元"统计**；很多 low-event 通道（< 5 events）的 ratio_p25 / margin_p50 估计本身就噪。
 - Phase 4 cohort 框架需要**先锁定 PASS rate 的统计单位**：per-subject 中位 vs per-channel pass fraction vs weighted-by-events。这是 Phase 4 入口决策，**不在这里下定**。
 
-### 待补 subject
+### Layer A subject 间变异汇总（n=7，2026-05-09 更新）
 
-- 384 进行中（21:07:38 启动）
-- Layer A 548 滚动验证仍在跑（CPU 81 min+，预计 ~10 min 内完成）
-- Layer A 139 待 548 完成后启动
-- 其余 16 subject 排队中
+| metric | 253 | 548 | 139 | 1077 | 1084 | 442 | 818 |
+|---|---|---|---|---|---|---|---|
+| ratio_p25 中位 | 2.137 | **1.710** | 2.207 | 2.312 | **1.483** | 2.245 | 2.215 |
+| ratio per-ch pass | 62.4% | 40.0% | 91.5% | 98.4% | 34.3% | 99.6% | 98.9% |
+| margin_p50 中位 | 0.917 | 0.579 | 1.021 | 1.052 | 0.779 | 0.856 | 0.819 |
+| margin per-ch pass | 74.4% | 52.7% | 94.0% | 97.2% | 59.8% | 94.4% | 92.9% |
+| events median/ch | 20 | 8 | 5 | 6 | 4 | 8 | 7 |
+
+**subject-level 中位线**（7 subject）：
+- ratio_p25 中位的中位 = 2.207；**5/7 ≥ 2.0**（548 + 1084 跌破）
+- margin_p50 中位的中位 = 0.856；7/7 ≥ 0.5
+- **subject-level 中位 PASS = 5/7 (ratio) + 7/7 (margin)**
+
+**新观察（1084 加入后）**：
+- 5 个 subject 中**两个**中位 ratio_p25 < 2.0，比例已达 40%
+- 这两个（548, 1084）共同点：events median/ch 低（8, 4）；events 少 → ratio_p25 估计本身有更多 sampling noise
+- 但 ch-w-events 总数都很大（10164, 16760）→ 不是数据稀缺，是单 ch event 稀疏
+- Phase 4 入口决策更紧迫：events-weighted PASS 可能比 per-channel pass 更能反映真实信号质量
+
+**关键洞察**：subject 间 per-channel pass rate 变异（2.5×）比 subject-level 中位变异（±20%）大得多。Phase 4 PASS rate 用 per-channel 单位会被 channel 多 / events/ch 少的 subject（如 548）拖低；用 subject-level 中位 + events-weighted 可能更稳定。**Phase 4 入口决策**，等更多 subject 跑出来再敲定。
+
+### 待补 subject（2026-05-08 更新）
+
+- ✅ 完成：253, 548, 139, 384, 1077
+- ⏳ 进行中：1084（22:12:38 启动，08:25 进度 178/252，87 ch，1024 Hz，ETA ~12:30 CST）
+- 排队：442, 818, 916, 922, 958, 583, 590, 620, 635, 1073, 1096, 1125, 1146, 1150（14 个）
 
 ### 滚动 cohort 进度表（per-subject 实测）
 
@@ -139,8 +161,10 @@ GPU 利用率 > 0%、内存使用 > 200 MiB 才算正常 GPU 跑动；都为 0 /
 |---|---|---|---|---|---|---|---|
 | 253 | 268 | 268 | 0 | — | 29 | 8,646 | 32 |
 | 548 | 147 | 147 | 0 | — | 83 | 21,084 | 143 |
-| 139 | 173 | 130 | 43 | sfreq=256 Hz < 500 Hz Nyquist 下限 | 41 | 5,229 | 40 |
-| 384 | 130 | ⏳ | — | — | — | — | — |
+| 139 | 173 | 130 | 43 | sfreq=256 Hz Nyquist | 41 | 5,229 | 40 |
+| 384 | 130 | 65 | 65 | sfreq=256 Hz Nyquist | 93 | 2,822 (恢复后；新增 10 records) | 32 |
+| 1077 | 189 | 189 | 0 | — | 121 | 40,694 | 215 |
+| 1084 | 252 | ⏳ | — | — | 87 | — | — |
 
 **关键观察**：
 - s/record 主要由 **channel 数 × 持续时间** 决定，channel 数最大权重（253 vs 548 = 4.5× s/record gap 对应 ~2.9× channel gap）。
