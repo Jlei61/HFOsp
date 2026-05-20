@@ -53,6 +53,27 @@
 - `_multi_seed_tau_summary`：tau 计算用 bools mask 限定 shared channels。
 - PR-6 endpoint extraction：`valid_mask` 从 raw bools 派生（AGENTS.md 已合同化）。
 
+### 0.5b Diagnostic 实测结果（2026-05-20，Step 1 + Step 2 + Step 3 已跑）
+
+**chengshuai 闪电诊断**：`ami_audit = 0.001` vs `ami_seed_floor_original = 0.952` → Δ = -0.951。
+phantom-driven cluster identity 几乎完全压倒真实 rank-order 信号。Cosmetic 出口在 chengshuai 单 subject 已被排除。
+
+**40 subject cohort audit** (`results/lagpatrank_audit/cohort_summary.csv`)：
+
+| metric | 全 cohort (n=40) | stable_k=2 (n=35) | stable_k>2 (n=5) |
+|---|---|---|---|
+| median Δ | **-0.599** | -0.609 | -0.252 |
+| n with Δ < -0.10 | 40/40 | 35/35 | 5/5 |
+| n with Δ < -0.50 | 27/40 | 26/35 | 1/5 |
+| stable_k flips | 4 | **1 (epilepsiae_916: 2→4)** | 3 (high-k cohort, n_ch≤5) |
+| Spearman ρ(phantom_frac, Δ) | -0.42, p=0.007 | — | — |
+
+**Gate verdict = Broad re-derivation**（cohort-median Δ = -0.599 < -0.15 触发；40/40 全部越 Δ<-0.10 触发）。
+
+**关键方法学观察**：`ami_seed_floor_original median = 0.997`——phantom-driven clustering 在 seed 间 fully 可重现，
+不是 noise；是与 PR-4 panel d identity-bias 同性质的 methodological finding。详见
+`docs/archive/topic1/propagation/lagpatrank_phantom_audit_diagnostic_2026-05-20.md` §4。
+
 ### 0.5 下游受影响的科学结论（待审计）
 
 - **stable_k 分布**：`{2:35, 4:2, 5:2, 6:1}`（PR-2 主表）
