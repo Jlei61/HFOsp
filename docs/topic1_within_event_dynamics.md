@@ -118,6 +118,8 @@ PR-2 / PR-2.5 cluster decomposition 的描述性补强。每 subject 一张 tril
   - Plan：`docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md`
   - Results：`docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md`
 
+> **桥到 Topic 4（attractor diagnostics, 2026-05-10）**：在 §3.1d cluster geometry 之上做的 attractor-class 诊断（principal curve + GOF + KMeans-axis 夹角 + coordinate-free PR-2 label λ₂）已完成 Step 0 + Step 1 + max_iter / grid-angle sensitivity；35 例 stable_k=2 cohort，34 进 H3 主分析。**未进主结论**——Step 2 Λ_gap 未跑，CLAUDE.md §5 sensitivity gates 全通过才入主文档。结果与口径见 `docs/archive/topic1/propagation/topic4_attractor_diagnostics_step1_results_2026-05-10.md`。最稳健的 H3 直测是 §3.4 label-transition λ₂（不依赖任何 1D 坐标），主曲线 s 仅作 sensitivity。
+
 ### 3.2 Identity bias 不是小问题，在簇内水平更高
 
 | 层 | raw τ | centered τ | bias fraction |
@@ -508,6 +510,9 @@ Step 5 注意：cohort verdict 跨 window 稳健（**不**应写"三条曲线高
 - `docs/archive/topic1/propagation/pr4_ppt_per_subject_iteration_summary_2026-04-20.md` — PR-4 PPT/per-subject 综合图的对话迭代记录：版式收敛、关键病例池、以及 SBCI/TRIS 新 metric 需求定义。
 - `docs/archive/topic1/propagation/cluster_geometry_viz_plan_2026-05-06.md` — Cluster geometry 可视化 plan-of-record（template-matching metric / 数据合同 / 失败合同 / panel layout / TDD 合同）。Topic 1 §3.1d / §10 引用本文件。
 - `docs/archive/topic1/propagation/cluster_geometry_viz_results_2026-05-06.md` — Cluster geometry 验收 results（cohort 数字 / showcase 叙事 / KMeans-vs-template-matching audit / follow-up）。Topic 1 §3.1d / §10 引用本文件。
+- `docs/archive/topic1/propagation/topic4_attractor_diagnostics_step1_results_2026-05-10.md` — **Topic 1 → Topic 4 桥（attractor diagnostics Step 0 + Step 1 + sensitivity）**：35 例 stable_k=2 cohort（34 进 H3 主分析）；principal curve + KMeans-axis 夹角 + coordinate-free PR-2 label λ₂；10/34 通过 p<0.001 & λ₂>0；主曲线收敛差，label-transition 路径最稳健；**未入主结论**（Step 2 Λ_gap 未跑）。Topic 1 §3.1d / §10 引用本文件。
+- `docs/archive/topic1/midterm_ppt_outline_2026-05-10.md` — 中期组会 ~40 页 PPT 大纲（Topic 1 主线：stereotypy → swap → SOZ 互补）；take-home 数字由 user 撰写，本文件不含具体数值。
+- `results/interictal_propagation/template_share_switching/figures/README.md` — PR-5 template share + switching 在扩展 stable_k=2 cohort 上的两张 paper-grade 图（share n=27、switching n=26）。Share post−baseline median +0.021 (p=0.005)；Switching cohort 全 NULL。描述层，不替代 PR-5-B retained cohort 主统计。
 - `docs/topic5_seizure_subtyping.md` — Topic 1 × Topic 5 cross-link：本 topic 关注 inter-ictal 群体事件内部的 within-event 时序结构；Topic 5 关注 ictal seizure 自身的 within-subject 异质性（v2.3 ER atlas + z-ER 张量子型聚类）。两 topic 的 propagation pattern / template 几何在下游 PR 可做联合分析，但当前主文档之间无强制依赖。
 - `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1 cohort exploratory result (verdict: NULL-locked, n=9; power floor identified)
 - `docs/archive/topic5/bridge_q1prime/bridge_q1prime_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1' PIVOT case-series result (verdict: INDETERMINATE, N=4 strict + 548 candidate; 4 strict subjects show consistent positive Cramér V 0.25–0.67 median 0.486 but underpowered on p; channel-rank correspondence × swap-subset)
