@@ -216,6 +216,7 @@ def _run_pr25(
                     chosen_k=chosen_k,
                     adaptive_labels=labels,
                     valid_event_indices=valid_events,
+                    use_masked_features=args.masked_features,
                 )
                 existing["time_split_reproducibility"] = repro
                 logger.info(
@@ -379,6 +380,7 @@ def _run_pr4a(
                     chosen_k=chosen_k,
                     adaptive_labels=labels,
                     valid_event_indices=valid_events,
+                    use_masked_features=args.masked_features,
                 )
                 existing["time_split_reproducibility"] = repro
 
@@ -1631,6 +1633,18 @@ def _build_parser() -> argparse.ArgumentParser:
             "sensitivity smoke so legacy outputs are not overwritten."
         ),
     )
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 §3.1 phantom-rank fix: build KMeans feature matrix via "
+            "build_masked_kmeans_features (per-event re-rank only over "
+            "participating channels + midpoint impute). When set, "
+            "--output-root defaults to results/interictal_propagation_masked "
+            "if not explicitly given. See "
+            "docs/topic0_methodology_audits.md §3.1 + §4."
+        ),
+    )
     return parser
 
 
@@ -1642,6 +1656,14 @@ def main() -> None:
     if args.output_root is not None:
         RESULTS_DIR = args.output_root
         logger.info("RESULTS_DIR overridden -> %s", RESULTS_DIR)
+    elif args.masked_features:
+        # Topic 0 §4 parallel-dir convention: _masked suffix.
+        RESULTS_DIR = Path("results/interictal_propagation_masked")
+        logger.info(
+            "RESULTS_DIR auto-routed for --masked-features -> %s "
+            "(Topic 0 §4 parallel-dir convention)",
+            RESULTS_DIR,
+        )
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     per_subject_dir = RESULTS_DIR / "per_subject"
@@ -1788,6 +1810,7 @@ def main() -> None:
                     soz_channels=soz_map.get(subject, []),
                     n_sample=args.n_sample,
                     n_seeds=args.n_seeds,
+                    use_masked_features=args.masked_features,
                 )
             except Exception as exc:
                 logger.exception("Failed %s", key)

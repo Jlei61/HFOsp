@@ -995,6 +995,7 @@ def run_subject_interictal_propagation_pr1(
     n_seeds: int = 5,
     min_shared_channels: int = 3,
     min_center_participation: int = 10,
+    use_masked_features: bool = False,
 ) -> Dict[str, Any]:
     loaded = load_subject_propagation_events(subject_dir)
     ranks = loaded["ranks"]
@@ -1054,6 +1055,7 @@ def run_subject_interictal_propagation_pr1(
         n_seeds=n_seeds,
         min_shared_channels=min_shared_channels,
         min_participation=min_center_participation,
+        use_masked_features=use_masked_features,
     )
     mi_result = compute_legacy_mi(ranks, bools, n_permutations=200, seed=0)
     adaptive_cluster = compute_adaptive_cluster_stereotypy(
@@ -1064,6 +1066,7 @@ def run_subject_interictal_propagation_pr1(
         n_tau_seeds=n_seeds,
         min_shared_channels=min_shared_channels,
         min_participation=min_center_participation,
+        use_masked_features=use_masked_features,
     )
 
     valid_ev = _valid_event_indices(bools, min_participating=min_shared_channels)
@@ -1202,19 +1205,35 @@ def compute_cluster_stereotypy(
     n_seeds: int = 5,
     min_shared_channels: int = 3,
     min_participation: int = 10,
+    use_masked_features: bool = False,
 ) -> Dict[str, Any]:
     """KMeans clustering of events + within-cluster stereotypy analysis.
 
     Replicates the legacy approach from plotting_figKura_epilepsiae958Cluster.py:
     KMeans(k=2) on lagPatRank.T, then computes per-cluster statistics.
+
+    Parameters
+    ----------
+    use_masked_features : bool, default False
+        If True, build the KMeans feature matrix via
+        ``src.lagpat_rank_audit.build_masked_kmeans_features`` (per-event
+        re-rank only over participating channels + midpoint impute), instead
+        of the legacy phantom-contaminated ``np.where(isfinite, ranks, 0.0)``
+        path. See ``docs/topic0_methodology_audits.md`` §3.1.
     """
     valid_events = _valid_event_indices(bools, min_participating=min_shared_channels)
     if valid_events.size < 2 * n_clusters:
         return {"error": "too_few_valid_events", "n_valid": int(valid_events.size)}
 
-    rank_subset = ranks[:, valid_events].T
-    finite_mask = np.isfinite(rank_subset)
-    rank_subset = np.where(finite_mask, rank_subset, 0.0)
+    if use_masked_features:
+        from src.lagpat_rank_audit import build_masked_kmeans_features
+        rank_subset = build_masked_kmeans_features(
+            ranks[:, valid_events], bools[:, valid_events], impute="event_median"
+        )
+    else:
+        rank_subset = ranks[:, valid_events].T
+        finite_mask = np.isfinite(rank_subset)
+        rank_subset = np.where(finite_mask, rank_subset, 0.0)
 
     kmeans = KMeans(n_clusters=n_clusters, n_init=10, random_state=0)
     labels = kmeans.fit_predict(rank_subset)
@@ -1452,6 +1471,7 @@ def compute_adaptive_cluster_stereotypy(
     n_tau_seeds: int = 5,
     min_shared_channels: int = 3,
     min_participation: int = 10,
+    use_masked_features: bool = False,
 ) -> Dict[str, Any]:
     """Scan *k* values with stability checks, report per-cluster stereotypy.
 
@@ -1461,13 +1481,26 @@ def compute_adaptive_cluster_stereotypy(
     ``chosen_reason`` flag.  The output includes a full scan summary
     (without per-seed label arrays) and an inter-cluster Spearman
     correlation matrix with candidate forward/reverse pair annotations.
+
+    Parameters
+    ----------
+    use_masked_features : bool, default False
+        If True, build KMeans feature matrix via
+        ``src.lagpat_rank_audit.build_masked_kmeans_features``. See
+        ``docs/topic0_methodology_audits.md`` §3.1 / §4.
     """
     valid_events = _valid_event_indices(bools, min_participating=min_shared_channels)
     if valid_events.size < 2 * k_range[0]:
         return {"error": "too_few_valid_events", "n_valid": int(valid_events.size)}
 
-    rank_features = ranks[:, valid_events].T.copy()
-    rank_features = np.where(np.isfinite(rank_features), rank_features, 0.0)
+    if use_masked_features:
+        from src.lagpat_rank_audit import build_masked_kmeans_features
+        rank_features = build_masked_kmeans_features(
+            ranks[:, valid_events], bools[:, valid_events], impute="event_median"
+        )
+    else:
+        rank_features = ranks[:, valid_events].T.copy()
+        rank_features = np.where(np.isfinite(rank_features), rank_features, 0.0)
 
     k_min, k_max = k_range
     k_max = min(k_max, max(valid_events.size // 2, k_min))
@@ -1761,6 +1794,7 @@ def compute_time_split_reproducibility(
     valid_event_indices: np.ndarray,
     min_shared_channels: int = 3,
     fwd_rev_threshold: float = -0.5,
+    use_masked_features: bool = False,
 ) -> Dict[str, Any]:
     """Assess cross-time template reproducibility via split-half and odd/even splits.
 
@@ -1771,6 +1805,11 @@ def compute_time_split_reproducibility(
     4. Assign half-B events to half-A templates and compute label agreement
 
     Returns a reproducibility grade: ``strong`` / ``moderate`` / ``weak``.
+
+    Parameters
+    ----------
+    use_masked_features : bool, default False
+        If True, build KMeans feature matrix via masked re-rank. See Topic 0.
     """
     labels = np.asarray(adaptive_labels, dtype=int)
     valid_event_indices = np.asarray(valid_event_indices, dtype=int)
@@ -1813,17 +1852,30 @@ def compute_time_split_reproducibility(
 
     split_results: Dict[str, Any] = {}
 
+    if use_masked_features:
+        from src.lagpat_rank_audit import build_masked_kmeans_features
+
     for split_name, (idx_a, idx_b) in splits.items():
-        feat_a = v_ranks[:, idx_a].T.copy()
-        feat_a = np.where(np.isfinite(feat_a), feat_a, 0.0)
+        if use_masked_features:
+            feat_a = build_masked_kmeans_features(
+                v_ranks[:, idx_a], v_bools[:, idx_a], impute="event_median"
+            )
+        else:
+            feat_a = v_ranks[:, idx_a].T.copy()
+            feat_a = np.where(np.isfinite(feat_a), feat_a, 0.0)
         km_a = KMeans(n_clusters=chosen_k, n_init=10, random_state=0)
         labels_a = km_a.fit_predict(feat_a)
         templates_a = build_cluster_templates(
             v_ranks[:, idx_a], v_bools[:, idx_a], labels_a, chosen_k
         )
 
-        feat_b = v_ranks[:, idx_b].T.copy()
-        feat_b = np.where(np.isfinite(feat_b), feat_b, 0.0)
+        if use_masked_features:
+            feat_b = build_masked_kmeans_features(
+                v_ranks[:, idx_b], v_bools[:, idx_b], impute="event_median"
+            )
+        else:
+            feat_b = v_ranks[:, idx_b].T.copy()
+            feat_b = np.where(np.isfinite(feat_b), feat_b, 0.0)
         km_b = KMeans(n_clusters=chosen_k, n_init=10, random_state=0)
         labels_b = km_b.fit_predict(feat_b)
         templates_b = build_cluster_templates(
@@ -2073,6 +2125,7 @@ def compute_held_out_endpoint_validation(
     balance_day_night: bool = False,
     swap_n_perm: int = 1000,
     swap_seed: int = 0,
+    use_masked_features: bool = False,
 ) -> Dict[str, Any]:
     """PR-6 Step 6 — held-out time validation, asymmetric train/test.
 
@@ -2135,8 +2188,14 @@ def compute_held_out_endpoint_validation(
     ranks_first = ranks_v[:, idx_first]
     bools_first = bools_v[:, idx_first]
 
-    feat_first = ranks_first.T.copy()
-    feat_first = np.where(np.isfinite(feat_first), feat_first, 0.0)
+    if use_masked_features:
+        from src.lagpat_rank_audit import build_masked_kmeans_features
+        feat_first = build_masked_kmeans_features(
+            ranks_first, bools_first, impute="event_median"
+        )
+    else:
+        feat_first = ranks_first.T.copy()
+        feat_first = np.where(np.isfinite(feat_first), feat_first, 0.0)
     km_first = KMeans(n_clusters=chosen_k, n_init=10, random_state=0)
     labels_first_arr = km_first.fit_predict(feat_first)
 

@@ -2578,3 +2578,90 @@ def test_pr5_recruitment_share_post_minus_pre_has_no_a_priori_direction() -> Non
 
     pre_base = summary["main"]["composition_diagnostic"]["share"]["pre_minus_baseline"]
     assert isinstance(pre_base["direction_consistent_count"], int)
+
+
+# --------------------------------------------------------------------------
+# Topic 0 §3.1 — use_masked_features path
+# (lagPatRank phantom-rank fix; see docs/topic0_methodology_audits.md)
+# --------------------------------------------------------------------------
+
+
+def _make_phantom_rich_synthetic(rng, n_per_cluster=120):
+    """Two-cluster synthetic with U-shape phantom in non-participating cells.
+
+    Mirrors tests/test_lagpat_rank_audit.py::_make_phantom_synth: cluster A
+    has channels {0,1,2} participating with rank (0,1,2); cluster B reverses
+    to (2,1,0); channels {3,4} never participate but get phantom ranks
+    asymmetrically (A → ch3 high, ch4 low; B → ch3 low, ch4 high). This is
+    exactly the bias the masked path must defuse.
+    """
+    n_ch = 5
+    a_events = n_per_cluster
+    b_events = n_per_cluster
+    n_ev = a_events + b_events
+    ranks = np.zeros((n_ch, n_ev), dtype=float)
+    bools = np.zeros((n_ch, n_ev), dtype=bool)
+    for e in range(a_events):
+        perm = np.array([0, 1, 2]) if rng.random() < 0.9 else np.array([1, 0, 2])
+        ranks[:3, e] = perm
+        bools[:3, e] = True
+        ranks[3, e] = rng.choice([3, 4])
+        ranks[4, e] = rng.choice([0, 1])
+    for ei in range(b_events):
+        e = a_events + ei
+        perm = np.array([2, 1, 0]) if rng.random() < 0.9 else np.array([2, 0, 1])
+        ranks[:3, e] = perm
+        bools[:3, e] = True
+        ranks[3, e] = rng.choice([0, 1])
+        ranks[4, e] = rng.choice([3, 4])
+    truth = np.concatenate([np.zeros(a_events, int), np.ones(b_events, int)])
+    return ranks, bools, truth
+
+
+def test_compute_adaptive_cluster_stereotypy_use_masked_features_smoke() -> None:
+    """Both feature paths run end-to-end and return a usable cluster dict."""
+    rng = np.random.default_rng(123)
+    ranks, bools, _ = _make_phantom_rich_synthetic(rng, n_per_cluster=100)
+    channel_names = [f"ch{i}" for i in range(ranks.shape[0])]
+    out_orig = compute_adaptive_cluster_stereotypy(
+        ranks, bools, channel_names,
+        k_range=(2, 3), n_stability_seeds=3, n_sample=30, n_tau_seeds=2,
+    )
+    out_mask = compute_adaptive_cluster_stereotypy(
+        ranks, bools, channel_names,
+        k_range=(2, 3), n_stability_seeds=3, n_sample=30, n_tau_seeds=2,
+        use_masked_features=True,
+    )
+    for out in (out_orig, out_mask):
+        assert "error" not in out
+        assert out["chosen_k"] >= 2
+        assert isinstance(out["labels"], list)
+        assert len(out["labels"]) == ranks.shape[1]
+        assert isinstance(out["clusters"], list)
+        assert len(out["clusters"]) == out["chosen_k"]
+
+
+def test_compute_time_split_reproducibility_use_masked_features_smoke() -> None:
+    """compute_time_split_reproducibility accepts use_masked_features and runs."""
+    rng = np.random.default_rng(7)
+    ranks, bools, _ = _make_phantom_rich_synthetic(rng, n_per_cluster=80)
+    n_ev = ranks.shape[1]
+    valid = np.arange(n_ev)
+    # Synthetic time + blocks
+    event_abs_times = np.linspace(0.0, 100.0, n_ev)
+    block_ids = (event_abs_times // 25.0).astype(int)
+    chosen_k = 2
+    adaptive_labels = np.concatenate([np.zeros(n_ev // 2, int), np.ones(n_ev - n_ev // 2, int)])
+    out_orig = compute_time_split_reproducibility(
+        ranks, bools, event_abs_times, block_ids, chosen_k,
+        adaptive_labels, valid, min_shared_channels=3,
+    )
+    out_mask = compute_time_split_reproducibility(
+        ranks, bools, event_abs_times, block_ids, chosen_k,
+        adaptive_labels, valid, min_shared_channels=3,
+        use_masked_features=True,
+    )
+    for out in (out_orig, out_mask):
+        assert "splits" in out
+        for split_name, split in out["splits"].items():
+            assert "assignment_agreement" in split
