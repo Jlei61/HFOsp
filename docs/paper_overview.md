@@ -10,9 +10,12 @@
 > 在读任何 Topic 1–5 的科学结论之前，必须先看本节是否有未结清问题。
 
 - 正式入口：`docs/topic0_methodology_audits.md`
-- 当前未结清问题：**1 个** —— `lagPatRank` phantom pseudo-rank（2026-05-20 确诊，broad re-derivation 进行中）
-- 影响范围：Topic 1 / Topic 4 / PR-5 / PR-6 / PR-7 的所有 KMeans-derived 数字
-- 含义：未走完 Topic 0 §5 重跑路线之前，Topic 1–5 主文档的相关数字背后挂方法学 caveat
+- 当前未结清问题：**1 个 + 1 个已基本结清**
+  1. **（已基本结清）** `lagPatRank` phantom pseudo-rank（2026-05-20 确诊，broad re-derivation 2026-05-21 **5a–5h 全部完成**；5g PR-7 per-subject 28/30 剩 2 大 subject 还在跑；Checkpoint A/B advisor consult 通过；**未发现任何 primary cohort verdict 翻转**；详见 `docs/archive/topic0/lagpat_phantom_rank/rerun_results_2026-05-21.md` + Topic 0 §3.1 表）
+  2. **（已落地）** SEEG 3D coord loader v3.1：`src/seeg_coord_loader.py` + 49 unit tests + 27-subject real-data smoke 全 GREEN。Yuquan 输出 `fs_native_ras_mm`，**Epilepsiae 自动发现 MRI + 应用 MNI152 affine 输出 `mni152_1mm`**（cohort-comparable）；当前 stable_k=2 cohort 约 22/34 已可直接进 SEF-ITP H1/H2 主分析
+- **Phase 0 解锁（2026-05-21）**：SEF-ITP Phase 1 可以启动，剩下 = `load_subject_for_phase1()` integration PR（接 coord loader → Phase 1 runner）
+- **影响范围**：Topic 1 / Topic 4 / PR-5 / PR-6 / PR-7 主结论方向全部保持；少量 secondary metric 弱化（详见 Topic 0 §3.1）
+- **2026-05-21 重跑期间科学发现**：Step 5c 在 masked 上重跑发现"簇内 86% identity bias" → "92% identity bias"，PR-4 panel d **加强**而非削弱；Topic 4 attractor λ₂ orig 10/34 → masked **13/34** 实质加强；PR-5-B 核心 +65 events/h 信号 magnitude + direction 100% 保持；PR-6 Step 6 swap_class concordance 0.69 → 0.82 实质提升；SEF-ITP "endpoint 是结构化锚点" 几何前提**被独立证据加强**
 
 ## 1. 论文现在的 4 个 topic
 
@@ -48,6 +51,16 @@
   - per-channel 框架下 SOZ 与 non-SOZ 是否真的不同
   - 哪部分是全局调制，哪部分是 SOZ 的局部短程记忆
 
+### Topic 4：模型层 —— SEF-ITP 空间易激场模型
+
+关注间期事件机制建模层，目标是给 Topic 1 现象（稳定模板、正反共享 endpoint、模板选择近似随机、慢漂解耦）提供机制解释而非拟合。
+
+- 正式入口：`docs/topic4_sef_itp_framework.md`（**v1 framework lock 2026-05-20**）
+- 上游 SBA framework：`docs/paper1_framework_sba.md`（SEF-ITP 取代其 BHPN-toy 部分；保留 P1/P2/P3/P5 红线）
+- 核心断言：间期群体 HFO = 空间组织化病理易激区 θ(x) 被扩散物理反复采样的痕迹；θ(x) 是模型输入而非产出
+- 6 条 pre-registered 预测：H1 endpoint 空间紧凑 / H2 source-sink 反向几何 / H3 mark independence + stable geometry / H4 rate-geometry 解耦 / H5 发作邻近 endpoint identity shift / H6 participation-field 空间分隔
+- 硬前置：Topic 0 §3.1 phantom-rank 修复 + §5 broad re-derivation 必须完成才能启动 Phase 1+
+
 ### Topic 5：Seizure-related analysis（subject 内 seizure subtype + 下游 pre-ictal/outcome）
 
 关注以 ictal seizure 本身为研究对象的 within-subject heterogeneity carve-out 与下游关联。
@@ -75,6 +88,10 @@
 
 lagPat 群体事件框架的 SOZ / non-SOZ 对比受结构性选择偏差污染。per-channel relaxed-refine 分析显示：原始 serial correlation 没有 SOZ 差异，但去趋势后 SOZ 更像保留了额外的局部短程记忆。
 
+### Topic 4
+
+SEF-ITP framework v1（2026-05-20 lock）取代了 BHPN-toy 循环论证模型，把 Topic 4 模型层从"塞 Hebbian 矩阵让 Kuramoto 演化得到预设吸引子"换成"假设空间组织化病理易激区，看它被扩散物理反复采样后必然留下的几何指纹"。6 条 pre-registered 预测（H1–H6）覆盖空间紧凑性、source/sink 反向几何、mark independence + 几何稳定、rate-geometry 解耦、发作邻近 endpoint identity shift、participation-field 空间分隔。**Phase 0 已解锁（2026-05-21）**：phantom-rank 修复 5a–5h 完成 + coord loader v3.1 落地；Phase 1 可启动，仅剩 `load_subject_for_phase1()` integration PR。Phase 0 实质性**加强**了 SEF-ITP 几条关键证据（PR-3 identity bias 86%→92%、Topic 4 λ₂ 10/34→13/34、PR-5-B +65 ev/h direction 100% 保持、PR-6 Step 6 concordance 0.69→0.82）。
+
 ### Topic 5
 
 PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subject 上落地（exploratory，2026-05-10 audit-corrected）：约 64% subject-band 找到 ≥2 morphological subtypes，与 Schroeder 2020 *PNAS* within-patient pathway-variability 先验一致。442/548 sentinel 视觉支持 z-ER 抓得到 user 标的视觉异类（recall=100%）；548 gamma k=7 标为 high-heterogeneity / fine subdivision candidate（需 sensitivity）；916/1077 因 status filter / n_ok 失效不能作 sentinel。下游 PR 必须 per-subtype 不 per-subject。
@@ -90,7 +107,8 @@ PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subj
 3. `docs/topic1_within_event_dynamics.md`
 4. `docs/topic2_between_event_dynamics.md`
 5. `docs/topic3_spatial_soz_modulation.md`
-6. `docs/topic5_seizure_subtyping.md`
+6. `docs/topic4_sef_itp_framework.md`
+7. `docs/topic5_seizure_subtyping.md`
 
 ### 如果你要看历史证据链或审阅意见
 

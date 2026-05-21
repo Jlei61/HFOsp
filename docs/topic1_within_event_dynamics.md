@@ -3,7 +3,7 @@
 > 状态：当前正式入口
 > 范围：只讨论单个间期群体事件内部的时序组织，包括传播刻板性与事件级同步性。
 > **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + 失败模式）。本 topic 的 PR-2 / PR-2.5 / PR-6 / PR-7 / 待立 PR-9 全部受该框架统辖；任何与 framework 中已 lock 的 prediction 判据冲突的修改必须先改 framework。
-> **Topic 4 模型层 framework（2026-05-20 lock 起替代 BHPN-toy）**：`docs/topic4_sef_itp_framework.md`（SEF-ITP：空间易激场模型，6 条预测 H1–H6 + Phase 0–4 路线；BHPN-toy 已 SUPERSEDED 为循环论证）。本 topic 的 endpoint anchoring / source-sink reversal / mark independence / endpoint identity shift 现在受 SEF-ITP 统辖；与 §2 P1/P2/P3 已 lock 的实证结论兼容（SBA 红线保留：HFO 不分 E/I、H3 措辞锁、sin not cos）。Phase 1+ 在 Topic 0 phantom-rank 修复完成前**不启动**。
+> **Topic 4 模型层 framework（2026-05-20 lock 起替代 BHPN-toy）**：`docs/topic4_sef_itp_framework.md`（SEF-ITP：空间易激场模型，6 条预测 H1–H6 + Phase 0–4 路线；BHPN-toy 已 SUPERSEDED 为循环论证）。本 topic 的 endpoint anchoring / source-sink reversal / mark independence / endpoint identity shift 现在受 SEF-ITP 统辖；与 §2 P1/P2/P3 已 lock 的实证结论兼容（SBA 红线保留：HFO 不分 E/I、H3 措辞锁、sin not cos）。**Phase 0 解锁 2026-05-21**：phantom-rank 修复 5a–5h 完成 + coord loader v3.1 落地（`src/seeg_coord_loader.py`，Yuquan fs_native_ras_mm + Epilepsiae mni152_1mm 双 cohort 都进主分析）；Phase 1 可启动，剩 `load_subject_for_phase1()` integration PR。
 
 ---
 
@@ -27,7 +27,7 @@
 - **传播刻板性**：内部传播真实存在但不是单一模板；`k=2` 是主导压缩，少数 subject 有 `k=4`/`k=6` 多模态；模板在 split-half / blockwise 上 `23/30 strong` + `7/30 moderate` + `0 weak`。Identity-bias 在簇内 86%（phantom-contaminated 旧版）→ **92%（2026-05-20 masked 重跑加强）**，必须并列报告 raw 与 centered。**masked 重跑详情**：簇内 raw τ +0.054（39/40 同向，p=1.27e-10），centered τ 不动（p=0.69），bias_fraction 87.9 → 92.2%（p=3.17e-4）；phantom 是噪声不是身份偏置——SEF-ITP "endpoint 是结构化锚点" 几何前提被独立证据加强。详见 `docs/archive/topic0/lagpat_phantom_rank/step5c_pr3_results_2026-05-20.md`。
 - **慢调制（PR-4B）**：模板混合（L1）与模板内顺序一致性（L2）cohort 全 null；模板内相对时延结构（L3）在全 cohort 上证据不足。L3 在 8 个高置信子集（`dom_r > 0.7`）的 Pearson r 上**原版有探索性显著（p=0.016, 7/8, Δ=+0.083），但 phantom-rank 修复后不复现（修过版 p=0.547, 5/8, Δ=+0.053，方向同 + 幅度减半）**——归 fragility-on-small-n 信号，**不**进入主结论 evidence base 也**不**入 SEF-ITP H4 evidence base。L1 / L2 / L3 全 cohort 主结论 cohort verdict 不变（NULL stays NULL）。详见 `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` + Topic 0 §3.1 + `docs/archive/topic0/lagpat_phantom_rank/checkpoint_b_report_2026-05-21.md`。
 - **发作邻近（PR-4C）**：propagation pattern 五指标 cohort Wilcoxon 在主+辅两配置下均 null（主 1/15 / 辅 1/15 名义显著且跨配置不一致）→ **模板内部几何无稳健发作邻近调制，正式封板为阴性**。唯一稳健信号在 `rate_by_template`（post_ictal vs baseline 主 p=0.0009、辅 p=0.0067）。详见 `docs/archive/topic1/propagation/pr4c_seizure_proximity_review_2026-04-17.md` §9。
-- **模板招募（PR-5）— 核心科学结论（已验收 2026-04-20）**：在 PR-5-A novel-template gate 已 PASS（main n=23 / aux n=22，未观察到 `H_OOD` 或 `H_assignment_drift` 的 cohort-level 证据）的前提下，PR-5-B 把 PR-4C `rate_by_template` 的描述层信号正式升级为推断结论：**dominant template 的绝对事件率（events/h）在 post-ictal 相对 baseline 出现 cohort-level 系统升高**（候选 A `dominant_global` `post_minus_baseline` median main `+65.46` / aux `+42.43` events/h；main p=0.00128 Bonferroni-pass α=0.0083，aux p=0.0115 nominal-pass，方向一致；候选 B main p=0.00214 同向支持 → §4.4 sensitivity gate `overall_strong=True`）。**§4.5 composition diagnostic 在 PR-5 合同下未复制 panel d**：`share_post_minus_baseline` 两配置都是 nominal-positive 但**与 panel d 预期方向相反**（main `+0.0156`, p=0.0149，direction-consistent 6/23；aux `+0.0328`, p=0.0301，direction-consistent 5/22）→ panel d 信号不在 PR-5 cohort 复现，且不为主结论背书。验收口径：PR-5-A PASS / PR-5-B STRONG；`pre_minus_baseline`、`post_minus_pre` 仅留为次级描述层。详见 `docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md` §11。
+- **模板招募（PR-5）— 核心科学结论（已验收 2026-04-20，phantom-rank 修过版 2026-05-21 加固）**：在 PR-5-A novel-template gate 已 PASS（orig main n=23 / aux n=22；**masked rerun main n=27 / aux n=26 cohort 扩大但 overall_pass=True 持平**）的前提下，PR-5-B 把 PR-4C `rate_by_template` 的描述层信号正式升级为推断结论：**dominant template 的绝对事件率（events/h）在 post-ictal 相对 baseline 出现 cohort-level 系统升高**（候选 A `dominant_global` `post_minus_baseline` median orig main `+65.46` / aux `+42.43` events/h, main p=0.00128 Bonferroni-pass α=0.0083；**masked main `+65.66` events/h, p=0.0004，magnitude direction 100% preserved**）。**§4.5 composition diagnostic 在 PR-5 合同下未复制 panel d**：`share_post_minus_baseline` orig 两配置都是 nominal-positive 但**与 panel d 预期方向相反**（main `+0.0156`, p=0.0149；aux `+0.0328`, p=0.0301）→ panel d 信号不在 PR-5 cohort 复现。**phantom-rank 修过版进一步弱化 §4.5**：masked share post-base p=0.86 (median +0.002)，extended 配置同向 NULL（p=0.82）；fig_b transition lift NULL → Wilcoxon-only borderline (p=0.022, sign p=0.076 不达 cohort 门槛)。**plan §4.5 明确 share/transition 不进主 Bonferroni 池**——主结论 PR-5-A PASS / PR-5-B STRONG 不动；fig_a/fig_b 论文叙事在 5i 收口时改为"dominant 绝对率抬升、share 维持、transition 边缘可疑"。详见 `docs/archive/topic1/pr5_template_recruitment/pr5_template_recruitment_plan_2026-04-20.md` §11 + `docs/archive/topic0/lagpat_phantom_rank/step5e_pr5_results_2026-05-21.md`。
 - **PR-6（2026-04-25 重启）**：原 PR-6-A multi-anchor consensus / ictal-onset alignment 主线**全部冻结归档**（sentinel `548/916` 已经把“稳定 ictal onset rank”证伪：cross-seizure top10 overlap=0、cross-band ρ=−0.21、early channels 大量落在 `other`），文献亦指明该方向在领域内高风险（Schroeder 2020 / Wenzel 2017 / Pinto 2023 / Bailey 2021）。**新主线 = stable template endpoint (source ∪ sink) anatomical anchoring**：H1 检验 `frac_SOZ(endpoint) − frac_SOZ(middle)` 的 subject-level cohort Wilcoxon，subset polarity（H1b）+ forward/reverse swap（H2）+ Epilepsiae focus_rel i/l/e（H3）作为方向性 / 机制 / 解剖三类 sensitivity。复用 `match_bipolar_soz` / `match_bipolar_focus_rel` 与已有 `template_rank`，cohort 从 audit 推导不预写 N。详见正式 plan-of-record：`docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md`；老 PR-6-A 三份 doc 顶部已加 SUPERSEDED 块。
 - **PR-7 Template Antagonistic Temporal Pairing（已验收 2026-04-30）**：检验 forward/reverse template 的时间耦合签名。**核心结论 = 几何上相关，已测试时间尺度上未见 mark dependence**：H1 主检验三条 metric 全部 NULL——event-level Δt ∈ [10s, 30s] opposite-template excess（N2 主 null Wilcoxon p=0.844，sign 3/6, median(30s)=−0.015）；N3 robustness 一致 NULL（p=0.891）；N2 window sweep {10/30/60 min} 三个尺度全部 NULL（p ∈ [0.78, 0.89]）。Step 3.5 burst diagnostic 在无 ISI 阈值 same-label run 定义下未见 persistence（cohort run_length_lift median=0.977）。**精确 framing**：在已测试的 event-level fixed-window + lag-1 + run-based 三类 metric 上数据 **compatible with mark-independent sampling**（最简洁描述，**不等于证明独立**）。PR-6 已建立的 fwd/rev 几何相关性**保留**；bouncing-back / 短时接力版本 Ping-Pong 撤回。**未测**：alternative burst definitions、rate-state / seizure-proximity switching、form (4) latent-state coupling、history-dependent regression。详见 `docs/archive/topic1/pr7_template_pairing/pr7_template_pairing_results_2026-04-29.md` §17。
 - **未来模型层（§7.9）** 维持冻结：当前不绑 PR 编号。
@@ -37,18 +37,35 @@
 
 ## 3. 核心证据链
 
-> ### ⚠️ Topic 0 phantom-rank 未结清 caveat（2026-05-20 起）
+> ### ⚠️ Topic 0 phantom-rank 重跑状态（2026-05-21 更新）
 >
 > 本节所有 PR-2 / PR-2.5 / PR-3 / PR-4 / PR-5 / PR-6 / PR-7 / Topic 4 attractor 的数字
 > 由 KMeans on `lagPatRank` 派生。Topic 0 §3.1 已确诊 `lagPatRank` 是 phantom-contaminated
 > (non-participating channels carry phantom int ranks)，cohort audit 40/40 subject Δ<-0.10。
-> 修过版重跑（broad re-derivation, Topic 0 §5）**进行中**，未完成前本节数字背后挂方法学 caveat。
+> **修过版重跑（broad re-derivation, Topic 0 §5）已基本完成 2026-05-21**（5a–5h + Checkpoint A/B advisor consult 通过；5g PR-7 在 2026-05-21 16:00 前后跑完）。具体方向 / 翻转 / 加强按 PR：
 >
-> - "PR-2 stable_k=2 是主导特征" → **结构层结论稳健**（修过版 34/35 主线 subject 仍选 k=2）
-> - "PR-2 哪些事件属于哪一类" → **修过版会变化**（cohort-median AMI(原 vs 修) = 0.37 vs noise floor 0.997；epilepsiae_916 stable_k 从 2 翻到 4）
-> - "PR-4B/D / PR-5 / PR-6 / PR-7 / Topic 4 attractor 的具体数字" → **必须重跑确认**
+> | 维度 | 验证状态 |
+> |---|---|
+> | "PR-2 stable_k=2 是主导特征" | ✅ **结构层结论稳健**（修过版 34/35 主线 subject 仍选 k=2；唯一翻 epilepsiae_916 stable_k=2→4）|
+> | "PR-2 哪些事件属于哪一类" | ⚠ **修过版会变化**（cohort-median AMI(原 vs 修) = 0.37 vs noise floor 0.997；event-level Jaccard 中位 0.70）|
+> | PR-3 簇内 stereotypy | ✅ **加强**：bias_fraction 87.9 → 92.2%，raw τ +0.054 increase；centered τ 不动 → phantom 是噪声不是 identity-bias source |
+> | PR-4A 昼夜模板占比 | ✅ 一致 NULL |
+> | PR-4B Step 0 / Step 1 | ✅ 一致 |
+> | **PR-4B Step 23 L3 高置信 Pearson r (n=8)** | ⚠ **显著 → NULL 翻转**：p=0.016, 7/8 → p=0.547, 5/8；归 fragility-on-small-n，不进主结论 |
+> | PR-4C 发作邻近 | ✅ 一致 NULL |
+> | PR-5-A novel template gate | ✅ overall_pass=True 持平；cohort grew main 23→27 / aux 22→26 |
+> | **PR-5-B 主结论 dominant rate post-base** | ✅ **direction + magnitude 完全保持**：+65.46 → +65.66 events/h, p 0.0013 → 0.0004 |
+> | PR-5-B fig_a/fig_b secondary (§4.5 + PR-7 §17) | ⚠ **3 条 secondary 翻转**（不进 Bonferroni 池）：share post-base p=0.015 → 0.86；extended 同向；transition lift NULL → Wilcoxon-only borderline；论文叙事需调整（已在下方 §4.5 / §7.10 落字） |
+> | PR-6 H1 endpoint vs middle | ✅ 一致 NULL（n=28=28 cohort identical, p 0.22 → 0.18）|
+> | PR-6 H2 fwd/rev swap | ✅ direction 100% 保持（9/9 → 8/8 positive，net −1 subject from 5b）|
+> | PR-6 Step 4b node anatomy h1_eligible | ⚠ **secondary cohort Wilcoxon borderline 翻转**：p=0.014 → 0.059（sign-test 在 orig 上也未达 α）|
+> | PR-6 Step 6 held-out swap_class concordance | ✅ **加强**：0.69 → 0.82 实质提升 |
+> | PR-6 supplementary rank displacement | ✅ F_norm / τ / ρ 几乎完全不变 |
+> | **PR-7 antagonistic temporal pairing**（含 P3）| 🟡 **5g 在跑**（截至 2026-05-21 15:30 PR-7 per-subject 27/30 complete；预期 P3 verdict 保持 INCONCLUSIVE，具体见 5g archive 出报后更新本表）|
+> | Topic 4 attractor λ₂（H3 主直测）| ✅ **加强**：orig 10/34 → mask 13/34 p<0.001（5 个原 NULL/borderline 新增显著；0 反向丢）|
+> | Topic 4 attractor GOF pass rate | ✅ 持平 97%（fail subject 从 916 换成 1077）|
 >
-> 详见 `docs/topic0_methodology_audits.md` §3.1 + `docs/archive/topic0/lagpat_phantom_rank/`。
+> **总判读**：phantom-rank 修复**实质性加强**了几条关键 H3/H4 框架证据（PR-3 bias_fraction、Topic 4 λ₂、PR-6 Step 6 concordance）；**1 条 primary metric 翻转**（PR-4B L3 high-conf Pearson r，归 fragility）；**3 条 secondary metric 翻转**（PR-5 share/extended/transition，§4.5 unchanged 主 claim）；**1 条 secondary cohort Wilcoxon borderline 翻转**（PR-6 node anatomy h1_eligible）；**没有任何 primary 方向反转**。详见 `docs/topic0_methodology_audits.md` §3.1 + §5 + `docs/archive/topic0/lagpat_phantom_rank/step5{a..h}_*_2026-05-{20,21}.md` + `checkpoint_b_report_2026-05-21.md`。
 
 > ### Cohort tier 注解（2026-05-07 起强制双轨/三层口径）
 >

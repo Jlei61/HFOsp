@@ -2,7 +2,8 @@
 
 > 状态：**Epilepsiae 基础设施已解锁** — 2026-04-15 更新
 > 范围：只讨论慢调制和时序差异在空间上发生在哪里，尤其是 SOZ / non-SOZ 的分离。
-> **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + BHPN-toy/fit + 5 dumb baselines + 失败模式）。本 topic 的 PR-T3-1（数据驱动 SOZ audit）+ PR-8 v2（与 Topic 1 桥接的 endpoint anatomical anchoring）受 framework 中 P4 prediction 统辖；PR-T3-1 verdict 决定 P4 的 multi-source SOZ 协同检验如何落地。
+> **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + 失败模式）。本 topic 的 PR-T3-1（数据驱动 SOZ audit）+ PR-8 v2（与 Topic 1 桥接的 endpoint anatomical anchoring）受 framework 中 P4 prediction 统辖；PR-T3-1 verdict 决定 P4 的 multi-source SOZ 协同检验如何落地。
+> **Topic 4 SEF-ITP framework**：`docs/topic4_sef_itp_framework.md`（2026-05-20 lock，取代 BHPN-toy；**Phase 0 解锁 2026-05-21**）—— PR-T3-1 Layer B 输出的数据驱动 SOZ 标签是 SEF-ITP H5（endpoint identity shift around seizures）的**第二份独立 SOZ 标签**，避免循环验证；H5 secondary 分析必须同时引用 clinical SOZ + data-driven SOZ 两个来源、不融合。**Coord loader v3.1 已落地**：`src/seeg_coord_loader.py` 自动发现 Epilepsiae MRI + 应用 MNI152 affine → Epilepsiae 通道坐标进入 cohort-comparable MNI mm 空间，可作 SEF-ITP H1 严格层 / H2 spatial reversal 主分析（27/27 病人 MRI 已确认 MNI152 1mm grid affine 一致）。
 
 ---
 
