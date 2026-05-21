@@ -140,6 +140,13 @@ behavior (does it return a number? does it permute?) miss invariants. Each
 science-contract clause needs its own test that would fail if that specific
 clause were violated.
 
+**Skill companion**: the structured ritual that operationalizes §6 lives in
+`.claude/skills/hfosp-deep-contract-verify/SKILL.md`. Invoke it before
+writing the body of any function whose plan specifies multi-clause
+invariants (boundary parameters, paired-cohort keys, surrogate construction,
+"reported alongside" secondary metrics, "re-use don't re-invent" helpers).
+The skill enforces the ritual; this section is the why.
+
 ## 7. Multi-Panel Figure Discipline
 
 **Each panel must answer one independent scientific question. Two panels
@@ -163,6 +170,56 @@ per-subject diagnostic):
 
 If two panels answer the same question, the figure has redundancy and
 one panel must be replaced.
+
+## 8. 第一性原理表达：避免代号雪球
+
+**项目越长，代号越多。代号越多，错位越深。**
+
+本仓库已经堆了一大堆代号 / 锁定字段 / 状态档位：`PR-T4-1`, `Λ_gap`,
+`stable_k=2`, `δ_excess=0.05`, `INCONCLUSIVE-locked`, `lambda_fragile`,
+`forward_reverse_reproduced`, `producer_health`, `clinical_concordance` …
+这些代号在写 plan / archive 时是合法且必要的（精度 + 可索引），
+但**在跟用户解释 "我们测了什么 / 怎么测的 / 揭示了什么" 时是污染源**：
+两个人都以为对方理解同一个代号，错位悄悄堆积。
+
+**强制规则**：所有面向用户的解释 / 回顾 / 现状汇报，必须先用**第一性原理朴素话**
+把内容讲一遍；archive 代号 / 锁定字段 / PR 编号只作为括号补注或链接，不
+代替朴素描述。三段式骨架：
+
+1. **测了什么** — 用日常物理 / 日常对象 / 日常因果讲清楚被测的现象
+2. **怎么测的** — 把核心算法步骤用"如果完全随机的话，应该长这样；实测长这样"的对比说出来
+3. **揭示了什么** — 不是"PASS / NULL / INCONCLUSIVE"，而是"在这个尺度上看起来像 / 不像 / 没看清"
+
+**反例（禁止形态）**：
+
+> "PR-7 addendum 1800s window + lag1_same_excess null-relative 干净 PASS，
+> 10/30/60s + run_length_lift CI underpowered at n=6 with structural outliers"
+
+**正例（要求形态）**：
+
+> "我们看：相邻两次事件挑的是不是同一个模板。如果完全像抛硬币一样独立，
+> 平均下来同模板比例应该等于 P(模板A)² + P(模板B)²，没有偏离这个数学预期。
+> 实测在 30 分钟尺度的窗口下确实就是这个数，差距小到 0.0002 — 看起来就是
+> 独立抛硬币，没有'刚才挑了 A 这次更倾向继续挑 A'的记忆效应。
+> 但在 10 秒 / 30 秒 / 60 秒短窗里我们只有 6 个被试，置信区间宽到不能下结论 —
+> 我们没说短窗里也是独立的，只能说 '在我们的精度内看起来兼容独立'。
+> （内部归档代号：P3, PR-7 addendum, lag1_same_excess, run_length_lift, δ=0.05）"
+
+**适用范围**：
+
+- 用户问"现在做到哪一步了 / 你为什么这么设计 / 我们到底揭示了什么"时
+- 写跨 topic 的对外 / 对协作者邮件、PPT、口头汇报底稿时
+- 在 main doc 引言段、§ 章节首句、archive doc 的 abstract 段时
+
+**不适用范围**：
+
+- archive doc 内部正文 / TDD 列表 / per-subject JSON schema — 这些需要精度
+  代号，不能朴素化
+- 代码注释 — 代码引用代号是工程必要
+
+**触发动作**：每写完一段 status / recap / explanation，自检 — 如果一个不熟悉
+此项目的人（或半年后的自己）只读这一段，他能不能复述"测了什么、怎么测的、
+揭示了什么"？不能 → 重写。
 
 ---
 
