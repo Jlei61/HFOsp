@@ -1,5 +1,19 @@
 # PR-T4-1 计划：BHPN-toy（Bidirectional Hebbian Phase Network — abstract toy model）
 
+> ## ⚠️ SUPERSEDED — 2026-05-20
+>
+> **本计划已被 `docs/topic4_sef_itp_framework.md` (SEF-ITP framework v1) 取代，不再是 Topic 4 模型层的 plan-of-record。**
+>
+> **取代原因（朴素表述）**：本 plan 设计的 BHPN-toy 是**循环论证** —— 预先把"目标通道顺序"塞进对称 Hebbian 连接矩阵 `A_ij = ρ·cos(φ*_i − φ*_j)`，让 Kuramoto 演化必然落到 `φ*_F` 或 `π − φ*_F` 两个对偶 fixed point，然后宣称"模型复现了正反模板"。**现象已经被预先编码进矩阵**；模型只是把预编码的东西演化一次显示出来，**不解释**为什么是这套通道、为什么是这个顺序、为什么发生在 SOZ 区域。
+>
+> **新方向（SEF-ITP）**：把"空间"放回机制核心 —— 假设 SOZ 是一个空间组织化的病理易激区，间期事件是它被扩散物理反复采样后留下的痕迹。模型预测的是 θ(x) + 扩散 + 随机触发产生的几何指纹（H1–H6），不是 θ(x) 本身。
+>
+> **保留为历史归档的价值**：本 plan 的 v2 修订过程（rotating-frame rank、direction-agnostic mark dependence、TDD 拆分 unit vs integration）作为方法学训练范例保留；其中"k=2 数学几乎必然由对称 Hebbian 保证、不是 mechanism discovery" 这一关键认知是 SEF-ITP 转向的直接触发点。
+>
+> 下面 v2 plan 原文不动，仅作为历史记录。
+>
+> ---
+
 > **状态**：plan-of-record v2（2026-05-01 同日修订，待执行）
 > **上游 framework**：`docs/paper1_framework_sba.md` v1.1.2（含 audit-triggered correction，2026-05-01 lock）
 > **创建日期**：2026-05-01（v1 同日由 review 触发 v2 重写）
