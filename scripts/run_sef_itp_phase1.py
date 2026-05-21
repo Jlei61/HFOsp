@@ -550,8 +550,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         help="Run all Tier 1 subjects (cohort mode)")
     parser.add_argument("--hypothesis", choices=["h6", "h1", "h2", "all"], default="all")
     parser.add_argument("--distance-metric", choices=["euclidean", "shaft_ordinal"],
-                        default="shaft_ordinal",
-                        help="euclidean requires Phase 0b coords; shaft_ordinal is fallback")
+                        default="euclidean",
+                        help="euclidean (default, main analysis) requires 3D mm coords; "
+                             "shaft_ordinal is the no-coord sensitivity fallback. "
+                             "Per framework §6.2, H1 main analysis demands euclidean.")
     parser.add_argument("--n-permutations", type=int, default=1000)
     parser.add_argument("--n-null", type=int, default=1000)
     parser.add_argument("--rng-seed", type=int, default=0)

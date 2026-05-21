@@ -1016,35 +1016,82 @@ def compute_h1_full(
             rng=rng,
         )
 
-    # --- Overall verdict (v1.0.4 fix, 2026-05-21 user audit) ---
+    # --- Overall verdict (v1.0.6 fix, 2026-05-21 advisor catch) ---
     #
-    # CRITICAL: if envelope (necessary condition) is SKIPPED, overall verdict
-    # MUST NOT be PASS / NULL / partial_PASS — that would let "necessary
-    # condition not tested" look like a complete H1 result. Refuse to give
-    # binary verdict; return INCOMPLETE_GATED_ON_COORDS instead.
+    # Three independent dimensions get mapped to one overall label:
+    #
+    #   strict source state ∈ {COMPACT, NULL, DIFFUSE, UNTESTABLE}
+    #   strict sink   state ∈ {COMPACT, NULL, DIFFUSE, UNTESTABLE}
+    #   envelope      state ∈ {PASS, FAIL, GATED, INDETERMINATE}
+    #
+    # v1.0.5 conflated {PASS, INSUFFICIENT_NULL} as `partial_PASS` — readers see
+    # "one side scientifically passed, the other side tested but didn't"
+    # which is wrong (the other side was UNTESTABLE not NULL). v1.0.5 also
+    # silently collapsed any FAIL_DIFFUSE result into `NULL`, erasing the
+    # anti-compact signal.
+    #
+    # v1.0.6 enumerates each combination explicitly. UNTESTABLE never gets
+    # smuggled into a binary verdict.
     env_v = envelope.get("verdict")
     src_v = strict_source.get("verdict")
     snk_v = strict_sink.get("verdict")
 
-    envelope_actually_ran = env_v in {"PASS", "FAIL"}
+    def _classify_strict(v: Optional[str]) -> str:
+        if v == "PASS":
+            return "COMPACT"
+        if v == "NULL":
+            return "NULL"
+        if v == "FAIL_DIFFUSE":
+            return "DIFFUSE"
+        # INSUFFICIENT_CHANNELS, INSUFFICIENT_NULL, etc. — couldn't decide
+        return "UNTESTABLE"
 
-    if not envelope_actually_ran:
-        # envelope didn't decide (coords=None / INSUFFICIENT_NON_ENDPOINT /
-        # DEGENERATE_CENTROID / INSUFFICIENT_NULL). H1 cannot claim a verdict
-        # without the necessary condition.
-        if env_v == "SKIPPED_NO_COORDS":
-            overall = "INCOMPLETE_GATED_ON_COORDS"
-        else:
-            overall = "INCONCLUSIVE_ENVELOPE_INDETERMINATE"
+    src_state = _classify_strict(src_v)
+    snk_state = _classify_strict(snk_v)
+
+    # Envelope classification — only PASS/FAIL run as "tested";
+    # SKIPPED_NO_COORDS is distinguishable from other indeterminate causes
+    # because the user can tell whether to wait for coords or fix the data.
+    if env_v == "PASS":
+        env_state = "PASS"
     elif env_v == "FAIL":
-        # necessary condition failed — overrides strict layer
-        overall = "FAIL"
-    elif src_v == "PASS" and snk_v == "PASS":
-        overall = "PASS"
-    elif src_v == "PASS" or snk_v == "PASS":
-        overall = "partial_PASS"
+        env_state = "FAIL"
+    elif env_v == "SKIPPED_NO_COORDS":
+        env_state = "GATED"
     else:
-        overall = "NULL"
+        env_state = "INDETERMINATE"
+
+    # Envelope-level short-circuit
+    if env_state == "GATED":
+        overall = "INCOMPLETE_GATED_ON_COORDS"
+    elif env_state == "INDETERMINATE":
+        overall = "INCONCLUSIVE_ENVELOPE_INDETERMINATE"
+    elif env_state == "FAIL":
+        # necessary condition failed → overrides strict layer
+        overall = "FAIL"
+    else:
+        # envelope PASS — now combine strict source × strict sink
+        # DIFFUSE on either side = strict-layer anti-compact signal — surface it
+        if src_state == "DIFFUSE" or snk_state == "DIFFUSE":
+            overall = "FAIL_DIFFUSE"
+        elif src_state == "COMPACT" and snk_state == "COMPACT":
+            overall = "PASS"
+        elif src_state == "COMPACT" and snk_state == "NULL":
+            overall = "partial_PASS"
+        elif src_state == "NULL" and snk_state == "COMPACT":
+            overall = "partial_PASS"
+        elif src_state == "COMPACT" and snk_state == "UNTESTABLE":
+            overall = "PASS_one_side_untestable"
+        elif src_state == "UNTESTABLE" and snk_state == "COMPACT":
+            overall = "PASS_one_side_untestable"
+        elif src_state == "NULL" and snk_state == "NULL":
+            overall = "NULL"
+        elif src_state == "NULL" and snk_state == "UNTESTABLE":
+            overall = "NULL_one_side_untestable"
+        elif src_state == "UNTESTABLE" and snk_state == "NULL":
+            overall = "NULL_one_side_untestable"
+        else:  # both UNTESTABLE
+            overall = "UNTESTABLE_BOTH_SIDES"
 
     return {
         "h1_overall_verdict": overall,

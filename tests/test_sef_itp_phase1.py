@@ -528,6 +528,100 @@ def test_h1_full_envelope_skipped_blocks_overall_verdict():
 
 
 # =============================================================================
+# H1 overall verdict aggregation table (v1.0.6, 2026-05-21 advisor catch)
+#
+# UNTESTABLE must never get smuggled into a binary verdict — readers must be
+# able to tell "tested-and-not-passed" from "could-not-be-tested".
+# FAIL_DIFFUSE must not collapse to NULL — anti-compact strict signal needs
+# to surface as its own verdict.
+# =============================================================================
+
+
+def _h1_overall_with_strict_sink_states(
+    monkeypatch, src_verdict: str, snk_verdict: str, env_verdict: str
+) -> str:
+    """Drive compute_h1_full by monkey-patching the three layer functions to
+    return canned verdicts. Returns the resulting h1_overall_verdict."""
+    from src import sef_itp_phase1 as mod
+
+    def fake_strict_factory(verdict):
+        def fn(*args, **kwargs):
+            return {"verdict": verdict, "C_actual": 1.0, "C_null_median": 1.0,
+                    "null_lower_p": 0.5, "null_upper_p": 0.5}
+        return fn
+
+    def fake_envelope(*args, **kwargs):
+        return {"verdict": env_verdict, "ratio_endpoint_to_non_endpoint": 1.0}
+
+    def fake_descriptive(*args, **kwargs):
+        return {"verdict": "DESCRIPTIVE", "mean_pairwise_distance": 1.0}
+
+    # Patch only the inner per-layer calls (compute_h1_full orchestrates them)
+    call_count = {"strict": 0}
+    def fake_strict_dispatcher(*args, **kwargs):
+        verdicts = [src_verdict, snk_verdict]
+        v = verdicts[call_count["strict"]]
+        call_count["strict"] += 1
+        return fake_strict_factory(v)()
+
+    monkeypatch.setattr(mod, "compute_h1_descriptive", fake_descriptive)
+    monkeypatch.setattr(mod, "compute_h1_compactness", fake_strict_dispatcher)
+    monkeypatch.setattr(mod, "compute_h1c_envelope", fake_envelope)
+
+    out = mod.compute_h1_full(
+        source_indices=[0, 1, 2],
+        sink_indices=[3, 4, 5],
+        valid_indices=[0, 1, 2, 3, 4, 5, 6, 7],
+        coords=np.zeros((8, 3)),
+        channel_names=[f"X{i}" for i in range(8)],
+        participation=np.zeros(8),
+        n_null=10,
+        rng=np.random.default_rng(0),
+        coord_units="mm",
+    )
+    return out["h1_overall_verdict"]
+
+
+VERDICT_TABLE = [
+    # (src, snk, env, expected_overall)
+    ("PASS", "PASS", "PASS", "PASS"),
+    ("PASS", "NULL", "PASS", "partial_PASS"),
+    ("NULL", "PASS", "PASS", "partial_PASS"),
+    ("NULL", "NULL", "PASS", "NULL"),
+
+    # UNTESTABLE distinguished from NULL on both sides
+    ("PASS", "INSUFFICIENT_NULL", "PASS", "PASS_one_side_untestable"),
+    ("INSUFFICIENT_NULL", "PASS", "PASS", "PASS_one_side_untestable"),
+    ("PASS", "INSUFFICIENT_CHANNELS", "PASS", "PASS_one_side_untestable"),
+    ("NULL", "INSUFFICIENT_NULL", "PASS", "NULL_one_side_untestable"),
+    ("INSUFFICIENT_NULL", "NULL", "PASS", "NULL_one_side_untestable"),
+    ("INSUFFICIENT_NULL", "INSUFFICIENT_NULL", "PASS", "UNTESTABLE_BOTH_SIDES"),
+
+    # FAIL_DIFFUSE surfaces (does not collapse to NULL)
+    ("FAIL_DIFFUSE", "PASS", "PASS", "FAIL_DIFFUSE"),
+    ("PASS", "FAIL_DIFFUSE", "PASS", "FAIL_DIFFUSE"),
+    ("FAIL_DIFFUSE", "FAIL_DIFFUSE", "PASS", "FAIL_DIFFUSE"),
+    ("FAIL_DIFFUSE", "NULL", "PASS", "FAIL_DIFFUSE"),
+
+    # Envelope-level overrides
+    ("PASS", "PASS", "FAIL", "FAIL"),                 # necessary condition override
+    ("PASS", "PASS", "SKIPPED_NO_COORDS", "INCOMPLETE_GATED_ON_COORDS"),
+    ("PASS", "PASS", "INSUFFICIENT_NON_ENDPOINT", "INCONCLUSIVE_ENVELOPE_INDETERMINATE"),
+    ("PASS", "PASS", "DEGENERATE_CENTROID", "INCONCLUSIVE_ENVELOPE_INDETERMINATE"),
+    ("PASS", "PASS", "INSUFFICIENT_NULL", "INCONCLUSIVE_ENVELOPE_INDETERMINATE"),
+]
+
+
+@pytest.mark.parametrize("src,snk,env,expected", VERDICT_TABLE)
+def test_h1_overall_verdict_table(monkeypatch, src, snk, env, expected):
+    """v1.0.6: full verdict aggregation table — UNTESTABLE ≠ NULL, FAIL_DIFFUSE ≠ NULL."""
+    got = _h1_overall_with_strict_sink_states(monkeypatch, src, snk, env)
+    assert got == expected, (
+        f"src={src}, snk={snk}, env={env} → expected {expected!r}, got {got!r}"
+    )
+
+
+# =============================================================================
 # H2 tests
 # =============================================================================
 
