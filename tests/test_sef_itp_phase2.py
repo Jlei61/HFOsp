@@ -271,3 +271,73 @@ def test_h3_integrated_verdict_not_supported_both():
         endpoint_jaccard_odd_even_median=0.55,
     )
     assert verdict == "NOT_SUPPORTED_BOTH"
+
+
+# --------------------------------------------------------------------------- #
+# Task 5 — H4 epoch slicer (block-aware, time-preserving)
+# --------------------------------------------------------------------------- #
+
+
+def test_slice_events_into_epochs_basic():
+    """24h of events sliced into 2h epochs → 12 epochs, time-ordered, no event overlap."""
+    t0 = 1_000_000.0
+    times = t0 + np.arange(86_400, dtype=float)  # 1 event/sec for 24h
+    labels = np.tile([0, 1], 43_200)
+    block_time_ranges = [(t0, t0 + 86_400)]
+    epochs = p2.slice_events_into_epochs(
+        event_abs_times=times,
+        cluster_labels=labels,
+        block_time_ranges=block_time_ranges,
+        epoch_hours=2.0,
+    )
+    assert len(epochs) == 12
+    assert epochs[0]["t_start"] == pytest.approx(t0)
+    assert epochs[0]["t_end"] == pytest.approx(t0 + 7200.0)
+    assert len(epochs[0]["event_indices"]) == 7200
+    total = sum(len(ep["event_indices"]) for ep in epochs)
+    assert total == 86_400
+    for i in range(1, len(epochs)):
+        assert epochs[i]["t_start"] >= epochs[i - 1]["t_end"]
+
+
+def test_slice_events_into_epochs_handles_gaps():
+    """Events split across two recording blocks with a 12h gap — slicer respects block
+    boundaries (no phantom epoch covering the gap)."""
+    t0 = 1_000_000.0
+    block_a = (t0, t0 + 7200.0)
+    block_b = (t0 + 50_000.0, t0 + 57_200.0)
+    times = np.concatenate([
+        np.linspace(t0 + 1.0, t0 + 7199.0, 100),
+        np.linspace(t0 + 50_001.0, t0 + 57_199.0, 100),
+    ])
+    labels = np.tile([0, 1], 100)
+    epochs = p2.slice_events_into_epochs(
+        event_abs_times=times,
+        cluster_labels=labels,
+        block_time_ranges=[block_a, block_b],
+        epoch_hours=2.0,
+    )
+    assert len(epochs) == 2
+    assert len(epochs[0]["event_indices"]) == 100
+    assert len(epochs[1]["event_indices"]) == 100
+    assert epochs[1]["t_start"] >= block_b[0]
+
+
+def test_slice_events_drops_short_epochs():
+    """Epoch with < min_events events is dropped."""
+    t0 = 1_000_000.0
+    times = np.concatenate([
+        np.linspace(t0 + 1.0, t0 + 7199.0, 100),       # epoch 0: 100 events (kept)
+        np.linspace(t0 + 7201.0, t0 + 14_399.0, 3),    # epoch 1: 3 events (dropped @ min=10)
+    ])
+    labels = np.array([0, 1] * 50 + [0, 1, 0])
+    block_time_ranges = [(t0, t0 + 14_400.0)]
+    epochs = p2.slice_events_into_epochs(
+        event_abs_times=times,
+        cluster_labels=labels,
+        block_time_ranges=block_time_ranges,
+        epoch_hours=2.0,
+        min_events=10,
+    )
+    assert len(epochs) == 1
+    assert len(epochs[0]["event_indices"]) == 100

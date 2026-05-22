@@ -279,3 +279,53 @@ def compute_h3_integrated_verdict(
     if not endpoint_stable:
         return "NOT_SUPPORTED_BOTH"
     return "CONTRADICTED" if robust else "NOT_SUPPORTED_MEMORY"
+
+
+# --------------------------------------------------------------------------- #
+# H4 epoch slicer
+#
+# Block-aware: each recording block is sliced independently into contiguous
+# `epoch_hours` windows starting at the block's t_start. Inter-block gaps are
+# preserved as gaps — no phantom epoch covers a gap.
+#
+# Time order is preserved across the returned list.
+# --------------------------------------------------------------------------- #
+
+
+def slice_events_into_epochs(
+    event_abs_times: np.ndarray,
+    cluster_labels: np.ndarray,
+    block_time_ranges: List[Tuple[float, float]],
+    epoch_hours: float = 2.0,
+    min_events: int = 10,
+) -> List[Dict[str, np.ndarray]]:
+    """Slice events into time-ordered, block-aware epochs of fixed wall-clock duration.
+
+    Each block is independently sliced into `floor(block_duration / epoch_seconds)` contiguous
+    epochs starting at the block's `t_start`. Events falling in
+    `[t_start + k * Δ, t_start + (k+1) * Δ)` are assigned to epoch k. Epochs with fewer than
+    `min_events` events are dropped.
+
+    Returns a list of dicts, one per kept epoch:
+      `{"t_start": float, "t_end": float, "event_indices": np.ndarray, "block_index": int}`
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    epoch_seconds = epoch_hours * 3600.0
+    epochs: List[Dict[str, np.ndarray]] = []
+    for bi, (b_start, b_end) in enumerate(block_time_ranges):
+        block_duration = b_end - b_start
+        n_epochs = int(np.floor(block_duration / epoch_seconds))
+        for k in range(n_epochs):
+            t_s = b_start + k * epoch_seconds
+            t_e = t_s + epoch_seconds
+            mask = (times >= t_s) & (times < t_e)
+            idx = np.where(mask)[0]
+            if len(idx) < min_events:
+                continue
+            epochs.append({
+                "t_start": float(t_s),
+                "t_end": float(t_e),
+                "event_indices": idx,
+                "block_index": bi,
+            })
+    return epochs
