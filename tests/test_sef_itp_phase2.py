@@ -341,3 +341,54 @@ def test_slice_events_drops_short_epochs():
     )
     assert len(epochs) == 1
     assert len(epochs[0]["event_indices"]) == 100
+
+
+# --------------------------------------------------------------------------- #
+# Task 6 — H4 per-epoch local endpoint + Jaccard helper
+# --------------------------------------------------------------------------- #
+
+
+def test_compute_local_endpoint_returns_top_k_source_sink():
+    """For 2 clusters with clear leader/laggard channels, local endpoint returns expected indices."""
+    bools = np.array([
+        [1, 1, 1, 0, 0, 0],   # cluster 0 leaders ch0,1,2
+        [1, 1, 0, 1, 0, 0],   # cluster 0 leaders ch0,1,3
+        [0, 0, 0, 1, 1, 1],   # cluster 1 leaders ch3,4,5
+        [0, 0, 1, 0, 1, 1],   # cluster 1 leaders ch2,4,5
+    ], dtype=bool)
+    labels = np.array([0, 0, 1, 1])
+    out = p2.compute_local_endpoint(bools, labels, k=2)
+    # cluster 0 mean = [1, 1, 0.5, 0.5, 0, 0] → source top-2 = {0,1}; sink bottom-2 = {4,5}
+    assert set(out[0]["source"]) == {0, 1}
+    assert set(out[0]["sink"]) == {4, 5}
+    # cluster 1 mean = [0, 0, 0.5, 0.5, 1, 1] → source = {4,5}; sink = {0,1}
+    assert set(out[1]["source"]) == {4, 5}
+    assert set(out[1]["sink"]) == {0, 1}
+
+
+def test_compute_local_endpoint_respects_valid_mask():
+    """If valid_mask drops some channels, they're not eligible for source/sink top-k."""
+    bools = np.zeros((4, 6), dtype=bool)
+    bools[:2, [0, 1, 2]] = True   # cluster 0 leaders ch0,1,2
+    bools[2:, [3, 4, 5]] = True   # cluster 1 leaders ch3,4,5
+    labels = np.array([0, 0, 1, 1])
+    valid_mask = np.array([True, True, False, True, True, False])  # ch2, ch5 invalid
+    out = p2.compute_local_endpoint(bools, labels, k=2, valid_mask=valid_mask)
+    assert 2 not in out[0]["source"] and 2 not in out[0]["sink"]
+    assert 5 not in out[1]["source"] and 5 not in out[1]["sink"]
+
+
+def test_endpoint_jaccard_local_vs_global():
+    """jaccard_endpoint(local, global) = |intersect|/|union| of source∪sink sets."""
+    local = {0: {"source": [0, 1, 2], "sink": [5, 6, 7]}}
+    global_ = {0: {"source": [0, 1, 3], "sink": [5, 6, 8]}}
+    j = p2.endpoint_jaccard(local, global_, cluster_id=0)
+    # local endpoint = {0,1,2,5,6,7}; global = {0,1,3,5,6,8}
+    # intersect = {0,1,5,6}, union = {0,1,2,3,5,6,7,8} → 4/8 = 0.5
+    assert j == pytest.approx(0.5)
+
+
+def test_endpoint_jaccard_perfect_match_returns_one():
+    local = {0: {"source": [0, 1, 2], "sink": [5, 6, 7]}}
+    global_ = {0: {"source": [2, 1, 0], "sink": [7, 6, 5]}}  # order shuffled
+    assert p2.endpoint_jaccard(local, global_, cluster_id=0) == pytest.approx(1.0)

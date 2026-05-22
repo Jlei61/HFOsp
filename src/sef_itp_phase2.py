@@ -329,3 +329,72 @@ def slice_events_into_epochs(
                 "block_index": bi,
             })
     return epochs
+
+
+# --------------------------------------------------------------------------- #
+# H4 per-epoch local endpoint + Jaccard
+#
+# CLAUDE.md §6.1 re-use check (question-match):
+#   PR-6 anchoring's full helper enforces minimum n_valid + audit gates designed for
+#   cohort-level reproducibility. H4 epoch endpoint is a different question — "what's
+#   the endpoint set of this epoch's events", gated only by `epoch had ≥ min_events
+#   events`. Therefore we write a Phase 2-local thin helper that operates on the
+#   epoch's events ONLY, not the PR-6 anchoring driver. The statistic computed
+#   (top-k by mean participation per cluster) is the same as PR-2's `template_rank`
+#   restricted to the epoch's events.
+# --------------------------------------------------------------------------- #
+
+
+def compute_local_endpoint(
+    events_bool: np.ndarray,
+    labels: np.ndarray,
+    k: int = 3,
+    valid_mask: np.ndarray = None,
+) -> Dict[int, Dict[str, List[int]]]:
+    """Compute per-cluster top-k source / bottom-k sink endpoint from a slice of events.
+
+    For each cluster c present in `labels`, take `mean(events_bool[labels == c], axis=0)` →
+    channel-wise participation rate. The top-k channels (highest participation) form the
+    source; the bottom-k channels (lowest participation) form the sink.
+
+    If `valid_mask` is provided, only channels where mask is True are eligible. When the
+    eligible pool is smaller than 2k, k degrades gracefully to `eligible // 2`.
+
+    Returns `{cluster_id: {"source": [int, ...], "sink": [int, ...]}}`.
+    """
+    n_ch = events_bool.shape[1]
+    if valid_mask is None:
+        valid_mask = np.ones(n_ch, dtype=bool)
+    eligible_idx = np.where(valid_mask)[0]
+    out: Dict[int, Dict[str, List[int]]] = {}
+    for c in np.unique(labels):
+        cluster_rows = events_bool[labels == c]
+        if cluster_rows.shape[0] == 0:
+            continue
+        ch_mean = cluster_rows.mean(axis=0)
+        elig_means = ch_mean[eligible_idx]
+        k_eff = k if len(elig_means) >= 2 * k else max(1, len(elig_means) // 2)
+        top_k_local = np.argsort(elig_means)[::-1][:k_eff]
+        bot_k_local = np.argsort(elig_means)[:k_eff]
+        out[int(c)] = {
+            "source": [int(eligible_idx[i]) for i in top_k_local],
+            "sink": [int(eligible_idx[i]) for i in bot_k_local],
+        }
+    return out
+
+
+def endpoint_jaccard(
+    local: Dict[int, Dict[str, List[int]]],
+    global_: Dict[int, Dict[str, List[int]]],
+    cluster_id: int,
+) -> float:
+    """Jaccard(source ∪ sink) between local and global per-cluster endpoint sets.
+
+    Returns |L ∩ G| / |L ∪ G|, or 0.0 if both sets empty.
+    """
+    L = set(local[cluster_id]["source"]) | set(local[cluster_id]["sink"])
+    G = set(global_[cluster_id]["source"]) | set(global_[cluster_id]["sink"])
+    union = L | G
+    if not union:
+        return 0.0
+    return len(L & G) / len(union)
