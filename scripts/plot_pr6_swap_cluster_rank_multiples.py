@@ -64,9 +64,31 @@ TEMPLATE_DIR = RESULTS_ROOT / "template_anchoring"
 ANC_PER_SUBJECT = TEMPLATE_DIR / "per_subject"
 FIG_DIR = TEMPLATE_DIR / "figures"
 COHORT_FP = TEMPLATE_DIR / "cohort_summary.json"
+RD_PER_SUBJECT = RESULTS_ROOT / "rank_displacement" / "per_subject"
+RD_COHORT_FP = RESULTS_ROOT / "rank_displacement" / "cohort_summary.json"
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors scripts/plot_rank_displacement.py:_apply_masked_paths. Swaps every
+    `results/interictal_propagation/...` global to `results/interictal_propagation_masked/...`
+    (including the two rank_displacement sub-paths that drive the
+    rank-displacement strict panel).
+    """
+    global RESULTS_ROOT, PROP_PER_SUBJECT, TEMPLATE_DIR, ANC_PER_SUBJECT
+    global FIG_DIR, COHORT_FP, RD_PER_SUBJECT, RD_COHORT_FP
+    RESULTS_ROOT = Path("results/interictal_propagation_masked")
+    PROP_PER_SUBJECT = RESULTS_ROOT / "per_subject"
+    TEMPLATE_DIR = RESULTS_ROOT / "template_anchoring"
+    ANC_PER_SUBJECT = TEMPLATE_DIR / "per_subject"
+    FIG_DIR = TEMPLATE_DIR / "figures"
+    COHORT_FP = TEMPLATE_DIR / "cohort_summary.json"
+    RD_PER_SUBJECT = RESULTS_ROOT / "rank_displacement" / "per_subject"
+    RD_COHORT_FP = RESULTS_ROOT / "rank_displacement" / "cohort_summary.json"
 
 # Cluster colors (match per-subject propagation figure)
 # Imported aliases for compactness in plotting calls.
@@ -177,8 +199,7 @@ def _swap_nodes_rank_displacement(dataset: str, subject: str) -> Tuple[set, int,
     using the dense rank vectors ``rank_a_dense_full`` / ``rank_b_dense_full``
     over the joint-valid channels. Returns (swap_set, cid_a, cid_b, decision_k).
     """
-    fp = Path("results/interictal_propagation/rank_displacement/per_subject") / \
-         f"{dataset}_{subject}.json"
+    fp = RD_PER_SUBJECT / f"{dataset}_{subject}.json"
     with open(fp) as f:
         rd = json.load(f)
     p = rd["pairs"][0]
@@ -483,7 +504,7 @@ def make_nonstrong(cohort: Dict[str, Any]) -> Path:
 
 
 def _select_rank_displacement_strict() -> List[Dict[str, Any]]:
-    fp = Path("results/interictal_propagation/rank_displacement/cohort_summary.json")
+    fp = RD_COHORT_FP
     with open(fp) as f:
         recs = json.load(f)
     strict = [
@@ -510,6 +531,21 @@ def make_rank_displacement_strict() -> Path:
 
 
 def main() -> int:
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="PR-6 swap cluster rank multiples (fwd/rev all + non-strong + rank_displacement strict)"
+    )
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help="Consume masked PR-6 + rank_displacement outputs under "
+             "results/interictal_propagation_masked/ and write figures next "
+             "to them. Mirrors scripts/plot_rank_displacement.py --masked-features.",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     with open(COHORT_FP) as f:
         cohort = json.load(f)
