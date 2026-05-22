@@ -91,7 +91,16 @@ COL_SEIZURE = "#C0392B"   # red dashed marker
 
 RESULTS_DIR = Path("results/interictal_propagation")
 PPT_DIR = RESULTS_DIR / "figures" / "ppt"
-PPT_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree."""
+    global RESULTS_DIR, PPT_DIR
+    RESULTS_DIR = Path("results/interictal_propagation_masked")
+    PPT_DIR = RESULTS_DIR / "figures" / "ppt"
+
+
+# `mkdir` deferred to inside `main()` so `_apply_masked_paths()` can run first.
 
 
 # =========================================================================
@@ -1647,6 +1656,11 @@ def plot_pr_per_subject_combined():
     from matplotlib.colors import ListedColormap
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    import scripts.plot_interictal_propagation as _pip
+    # Propagate masked-features mode to sibling module so its PER_SUBJECT_DIR
+    # / RESULTS_DIR globals point to the masked tree when our RESULTS_DIR does.
+    if str(RESULTS_DIR).endswith("_masked"):
+        _pip._apply_masked_paths()
     from scripts.plot_interictal_propagation import (
         _load_pr3_subject_records, _resolve_subject_dir, _load_lagpat,
         _formal_day_mask, _fixed_channel_order, _sample_event_indices,
@@ -2077,7 +2091,17 @@ def main():
     parser.add_argument("--per-subject", action="store_true",
                         help="Also write a Fig-5-style image for every "
                              "subject into per_subject/")
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help="Consume masked PR-4 inputs and write PPT figures under "
+             "results/interictal_propagation_masked/figures/ppt/. Mirrors "
+             "scripts/plot_rank_displacement.py --masked-features.",
+    )
     args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+    PPT_DIR.mkdir(parents=True, exist_ok=True)
 
     fns = {1: plot_fig1, 2: plot_fig2, 3: plot_fig3,
            4: plot_fig4, 5: plot_fig5}
