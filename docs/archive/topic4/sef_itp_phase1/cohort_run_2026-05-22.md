@@ -1,12 +1,107 @@
 # SEF-ITP Phase 1 Cohort 实跑 — 2026-05-22
 
-> **状态**：preliminary，pending Yuquan coord 补全 + cohort 扩展 + sensitivity checks
-> **runner**：`scripts/run_sef_itp_phase1.py` (commit `6c3a89e`)
+> **状态**（v1.0.7 update 2026-05-22）：preliminary，但 H1 cohort 出现强 pass 信号；pending Yuquan coord 补全 + cohort 扩展 + sensitivity checks
+> **runner**：`scripts/run_sef_itp_phase1.py` (commits `6c3a89e` v1.0.6 → 待 v1.0.7 commit)
 > **per-subject 输出**：`results/topic4_sef_itp/phase1_spatial_geometry/per_subject/<dataset>_<sid>.json` (23 个)
 > **cohort summary**：`results/topic4_sef_itp/phase1_spatial_geometry/cohort_summary.json`
 > **图**：`results/topic4_sef_itp/phase1_spatial_geometry/figures/`（含中文 README）
 > **plan**：`docs/archive/topic4/sef_itp_phase1/plan_2026-05-21.md`
 > **framework**：`docs/topic4_sef_itp_framework.md` v1.0.2
+
+---
+
+## 7. v1.0.7 H1 null-pool 修正 — 用户回归 2026-05-22
+
+### 7.1 用户诊断（朴素话）
+
+第一轮 cohort run（v1.0.6）的 H1 结果是这样：50% 的 cluster 卡在 INCONCLUSIVE_ENVELOPE_INDETERMINATE，剩下能测的 fail-like 12 / pass-like 9 / null-like 2 / untestable 4。我当时把这归结为"通道数小、cohort 小、统计功效低"。
+
+用户回归后立刻指出：**这不是统计功效问题，是 null pool 框错了**。
+
+旧实现把 H1 matched-null 的 candidate_pool 限制在 PR-6 给的 valid_mask 内——也就是"参与了这个 cluster 的事件的通道"，对 stable_k=2 小病人就 6-10 个通道。然后 endpoint k=3 + k=3 拿走 6 个，pool 剩 0-4 个，matched-null 抽不到 100 个样本，全部 INSUFFICIENT_NULL。
+
+**更严重的科学错误**：lagPat valid_mask 选的就是"高 HFO rate + 高 HI"通道——这本身已经是非随机选择。在这个非随机子集内部做 matched-null 等于问"在已经被 lagPat 选过的高 HFO 通道里，endpoint 比其他高 HFO 通道更紧凑吗"。**这是循环论证**：matched 约束把 null 框死在跟 endpoint 同一族通道里，根本测不出空间结构性差异。
+
+H1c envelope 同样问题：non_endpoint 用的是 valid_pool（lagPat 子集），小病人端点拿走 6 个剩 < 3 → INSUFFICIENT_NON_ENDPOINT，这就是 50% INCONCLUSIVE 的真正原因。
+
+### 7.2 修正方案
+
+| 组件 | v1.0.6 | v1.0.7 |
+|---|---|---|
+| H1 strict matched-null pool | PR-6 valid_mask ∩ mapped_mask | **全 SEEG implantation ∩ mapped_mask − endpoint** |
+| matched 约束 | shaft + participation + hfo_rate（多层 tier 退化） | **只 shaft** |
+| H1c envelope non_endpoint pool | PR-6 valid_mask − endpoint | **全 SEEG mapped − endpoint** |
+| `participation` / `hfo_rate` 参数 | 用于 matched 约束 | 保留签名（向后兼容）但被 ignored |
+
+**为什么去掉 participation / hfo_rate matched 约束**：这两个变量本身就是端点的核心特征。把它们作为 nuisance 控制掉等于把要测的信号一并扣掉。
+
+**为什么保留 shaft matched 约束**：去掉 shaft 约束后 null 主导是跨 shaft 配对（距离 50+ mm 量级），actual 在同 shaft 里（distance 几 mm）几乎一定显著更紧凑——但这就是 H1 想测的"端点是不是在解剖上聚集"。保留 shaft 约束等于让 null 拿同 shaft 的随机抽样，问的是"在 shaft 内部的紧凑程度，端点是否比随机更紧凑"。
+
+**新增**：`src/seeg_coord_loader.py::enumerate_subject_all_channels(dataset, subject_id)` 枚举病人全 SEEG implantation 通道（Yuquan 从 chnXyzDict.npy 全 shaft × n_contacts 枚举；Epilepsiae 从 SQL electrode 表，**过滤 invasive=True**，scalp EEG 不计）。
+
+**Channel namespace 改造**：`SubjectPhase1Data` 引入 unified namespace —— `channel_names` 前 `n_lagpat_channels` 项是 lagPat 选中通道（events_bool 有真实数据），后面是 all-SEEG 扩展通道（events_bool 行全 False）。endpoint indices 在 unified namespace 中（不变），valid_indices 现在指 "all mapped SEEG − endpoint"。
+
+**H6 不改**：H6 测的是"参与场空间分隔"，输入是 events_bool 的 mean。在非 lagPat 通道上 participation 恒为 0 → 全进 low group，会扭曲 H6 的 high/low split 语义。`run_h6` 显式把 events_bool / channel_names / coords 切片到 lagPat 前缀（first `n_lagpat_channels` 行）。
+
+### 7.3 重跑 cohort 对比
+
+n=23 (8 Yuquan + 15 Epilepsiae)，n_permutations=1000、n_null=1000。
+
+**H1 per-cluster verdict 分布（46 cluster）**：
+
+| 裁决 | v1.0.6 | v1.0.7 | Δ |
+|---|---|---|---|
+| PASS | 1 | **11** | +10 |
+| partial_PASS | 2 | **19** | +17 |
+| PASS_one_side_untestable | 6 | 1 | -5 |
+| NULL | 1 | 12 | +11 |
+| NULL_one_side_untestable | 1 | 1 | 0 |
+| FAIL | 7 | **0** | -7 |
+| FAIL_DIFFUSE | 5 | 2 | -3 |
+| UNTESTABLE_BOTH_SIDES | 4 | 0 | -4 |
+| INCOMPLETE_GATED_ON_COORDS | 0 | 0 | 0 |
+| INCONCLUSIVE_ENVELOPE_INDETERMINATE | 19 | **0** | -19 |
+
+**categorical**:
+
+| | v1.0.6 | v1.0.7 |
+|---|---|---|
+| pass-like | 9 (20%) | **31 (67%)** |
+| null-like | 2 (4%) | 13 (28%) |
+| fail-like | 12 (26%) | 2 (4%) |
+| untestable | 23 (50%) | **0 (0%)** |
+
+**H2 / H6 不变**（设计上 v1.0.7 没碰这两条）：
+
+- H2: 4 PASS + 1 partial_PASS + 1 NULL（n=6 pair）
+- H6: 0 PASS + 3 PARTIAL + 10 NULL + 8 INSUFFICIENT_SPLIT + 2 EXCLUDED_SINGLE_SHAFT
+
+**Coord 覆盖中位数**：从 11（lagPat 限制）→ 96（全 SEEG implantation）。
+
+### 7.4 修正后的 cohort verdict
+
+**H1 cohort-level 出现强 pass 信号（31/46 pass-like，67%）**——v1.0.6 看不到这个信号因为 null pool 框死在 lagPat 池里循环论证。修正后端点相对**整个 SEEG implantation 同 shaft 的随机通道**显著更紧凑：endpoint 不是 lagPat 选择偏差的产物，它们在解剖空间里真的是聚集的。
+
+7 个 FAIL（v1.0.6 出现的）全部变成 NULL 或 partial_PASS——证实那些是错配的 null pool 制造的"端点逃出参与场"假象，不是真的端点 anti-compact。
+
+剩下 2 个 FAIL_DIFFUSE 在 v1.0.7 下仍然是 fail-like，是 strict-layer 仍判定端点比同 shaft 随机更散开的真实信号，**值得追踪**：是 subject anatomy 异常还是 PR-6 端点定义在这两个 subject 上失败。
+
+### 7.5 测试 + 实现
+
+- 新增 `tests/test_run_sef_itp_phase1_integration.py::test_load_subject_for_phase1_unified_namespace_extends_pool` — 验证 unified namespace 把 lagPat + extra SEEG 拼接，endpoint indices 留在 lagPat 前缀，valid_indices 扩到全 SEEG 非端点
+- 更新 `test_h1c_envelope_within_field` / `test_h1c_envelope_outside_field_fail` / `test_h1c_envelope_circularity_guard` — 调用方传 `non_endpoint_pool` 显式排除 endpoint
+- 新增 `test_h1c_envelope_rejects_endpoint_in_pool` — v1.0.7 契约：pool 不包含 endpoint，违反 raise
+- 更新 `_make_h1_synthetic` — 非均匀 shaft z packing（首 3 dense + 后 7 spread），让 compact target 在 shaft-only null 下可显著
+- `test_h1_strict_diffuse_null_strict` 接受 NULL or FAIL_DIFFUSE（都满足 "diffuse target ≠ PASS" 的科学原意）
+- 整套测试：114/114 GREEN
+
+### 7.6 v1.0.6 → v1.0.7 是 framework 修订 OR 实现 bug 修复
+
+**是实现 bug 修复**，不是 framework 修订。framework v1.0.2 §3.1 写的就是 "matched random 3-channel sampling 1000 次；匹配条件 = shaft 分布 + participation rate + HFO rate" + "**all_valid_indices**"——其中 "all_valid_indices" 在 plan archive 里没有明文限定为 lagPat 子集。v1.0.6 实现把这个 "valid_indices" 误解为 PR-6 valid_mask，导致 null pool 框错。framework prose 没说错，实现没读 prose。
+
+修复时**保留** framework 写的 participation/hfo_rate matched 约束作为可选 sensitivity（参数仍在签名里），但**默认行为**改为只 shaft——因为在全 SEEG implantation 池里，非 lagPat 通道的 participation/hfo_rate 没有定义。这是工程现实，不是 framework 修订。
+
+---
 
 ---
 

@@ -245,6 +245,7 @@ class EpilepsiaeElectrodeRow:
     coord_y: Optional[float]
     coord_z: Optional[float]
     commentary: Optional[str]
+    invasive: Optional[bool] = None  # True for SEEG/depth/grid; False for scalp EEG
 
 
 def _parse_epilepsiae_sql_value(token: str) -> Any:
@@ -351,6 +352,19 @@ def _read_epilepsiae_electrode_sql(
             #         coord_x, coord_y, coord_z, commentary
             if len(tokens) < 12:
                 continue
+            # invasive token (tokens[6]) is parsed as 'TRUE' / 'FALSE' string;
+            # convert to Python bool. Anything else (None, malformed) → None.
+            inv_raw = tokens[6] if len(tokens) > 6 else None
+            if isinstance(inv_raw, str):
+                inv_norm = inv_raw.strip().upper()
+                invasive: Optional[bool] = (
+                    True if inv_norm == "TRUE"
+                    else False if inv_norm == "FALSE"
+                    else None
+                )
+            else:
+                invasive = None
+
             rows.append(
                 EpilepsiaeElectrodeRow(
                     name=str(tokens[2]),
@@ -358,6 +372,7 @@ def _read_epilepsiae_electrode_sql(
                     coord_y=tokens[9] if isinstance(tokens[9], float) else None,
                     coord_z=tokens[10] if isinstance(tokens[10], float) else None,
                     commentary=tokens[11] if isinstance(tokens[11], str) else None,
+                    invasive=invasive,
                 )
             )
     return rows, sql_path
@@ -808,6 +823,60 @@ def _validate_coord_result(result: CoordResult) -> None:
 # =============================================================================
 # Phase 1 consumer contract: assert coord_units == "mm" before geometric analysis
 # =============================================================================
+
+
+def enumerate_subject_all_channels(
+    dataset: Literal["yuquan", "epilepsiae"],
+    subject_id: str,
+    *,
+    yuquan_root: Path = YUQUAN_ELEC_ROOT,
+    epilepsiae_root: Path = EPILEPSIAE_SQL_ROOT,
+) -> List[str]:
+    """Enumerate all SEEG channel names for one subject (monopolar).
+
+    Returns the full implantation channel list — NOT filtered by lagPat
+    selection / HFO rate / HI threshold. Used by Phase 1 H1 strict matched-null
+    to define candidate_pool over the entire implantation (v1.0.7 fix:
+    matched-by-participation in lagPat pool was circular — endpoints and
+    null samples both came from the same pre-selected high-HFO subset).
+
+    Args:
+        dataset: "yuquan" → enumerate from chnXyzDict.npy shaft dict;
+                 "epilepsiae" → enumerate from SQL electrode table.
+        subject_id: subject identifier (canonicalized for Epilepsiae).
+
+    Returns:
+        Sorted list of monopolar channel names (e.g., ["A1", "A2", ..., "B1", ...]).
+
+    Raises:
+        FileNotFoundError: SQL or coord file not found.
+    """
+    if dataset == "yuquan":
+        shaft_dict = _read_yuquan_chnXyzDict(subject_id, yuquan_root)
+        names: List[str] = []
+        for prefix, arr in shaft_dict.items():
+            arr = np.asarray(arr)
+            n_contacts = len(arr)
+            for i in range(n_contacts):
+                names.append(f"{prefix}{i + 1}")
+        return sorted(names)
+    elif dataset == "epilepsiae":
+        canonical_id = _canonicalize_epilepsiae_subject_id(subject_id)
+        rows, _sql_path = _read_epilepsiae_electrode_sql(canonical_id, epilepsiae_root)
+        # Filter to invasive electrodes only (SEEG/depth/grid). Scalp EEG rows
+        # (FP1/F3/CZ/ECG ...) have invasive=False and must not be conflated
+        # with the implantation grid for H1 spatial-null pool.
+        seen = set()
+        out: List[str] = []
+        for row in rows:
+            if row.invasive is not True:
+                continue
+            if row.name not in seen:
+                seen.add(row.name)
+                out.append(row.name)
+        return sorted(out)
+    else:
+        raise ValueError(f"unknown dataset: {dataset!r}. Use 'yuquan' or 'epilepsiae'.")
 
 
 def assert_coord_result_is_mm_for_main_analysis(result: CoordResult) -> None:

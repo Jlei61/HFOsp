@@ -153,13 +153,19 @@ def pr6_root(tmp_path):
 
 
 def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root, tmp_path):
-    """Happy path: all 4 sources align, mm coords, full valid pool."""
+    """Happy path: all 4 sources align, mm coords, unified namespace with no extras.
+
+    v1.0.7: valid_indices_per_cluster is now "all mapped SEEG MINUS endpoints"
+    (not PR-6 valid_mask intersection).
+    """
     monkeypatch.setattr(runner, "load_subject_propagation_events",
                         lambda d: _make_fake_loader_dict(CHANNELS))
     monkeypatch.setattr(runner, "load_subject_coords",
                         lambda **kw: _make_coord_result(CHANNELS))
+    # All-SEEG enumerator returns no extra channels — unified == CHANNELS
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
 
-    # fake lagpat dir
     fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
     fake_dir.mkdir(parents=True)
 
@@ -172,6 +178,7 @@ def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root,
     assert subj.subject_id == "1073"
     assert subj.dataset == "epilepsiae"
     assert subj.channel_names == CHANNELS
+    assert subj.n_lagpat_channels == len(CHANNELS)
     assert subj.coord_units == "mm"
     assert subj.coord_space == "mni152_1mm"
     assert subj.events_bool.shape[0] == len(CHANNELS)
@@ -182,9 +189,10 @@ def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root,
     assert subj.cluster_endpoints[1]["S"] == [4, 5]       # swap for reverse
     assert subj.cluster_endpoints[1]["K"] == [0, 1]
 
-    # Valid indices = full pool (all mapped, all valid)
-    assert subj.valid_indices_per_cluster[0] == list(range(len(CHANNELS)))
-    assert subj.valid_indices_per_cluster[1] == list(range(len(CHANNELS)))
+    # v1.0.7: valid_indices = mapped channels MINUS endpoints
+    # endpoint cluster 0 = {0,1,4,5}; mapped = all → valid = [2, 3]
+    assert subj.valid_indices_per_cluster[0] == [2, 3]
+    assert subj.valid_indices_per_cluster[1] == [2, 3]
 
     # Forward-reverse pair schema translation
     assert len(subj.forward_reverse_pairs) == 1
@@ -197,6 +205,44 @@ def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root,
     assert subj.n_dropped_endpoints_no_coords_per_cluster == {0: 0, 1: 0}
 
 
+def test_load_subject_for_phase1_unified_namespace_extends_pool(
+    monkeypatch, phase0a_path, pr6_root, tmp_path,
+):
+    """v1.0.7: when all-SEEG enumerator returns extra channels, valid_indices
+    expands to include those extras (with coords); endpoint indices stay in
+    the lagPat front-portion of the unified namespace."""
+    EXTRAS = ["X1-X2", "X2-X3", "Y1-Y2"]
+    unified = list(CHANNELS) + EXTRAS
+
+    monkeypatch.setattr(runner, "load_subject_propagation_events",
+                        lambda d: _make_fake_loader_dict(CHANNELS))
+    monkeypatch.setattr(runner, "load_subject_coords",
+                        lambda **kw: _make_coord_result(unified))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: EXTRAS)
+
+    fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
+    fake_dir.mkdir(parents=True)
+
+    subj = runner.load_subject_for_phase1(
+        phase0a_path,
+        pr6_anchoring_root=pr6_root,
+        epilepsiae_lagpat_root=tmp_path / "lagpat_root",
+    )
+
+    assert subj.channel_names == unified
+    assert subj.n_lagpat_channels == len(CHANNELS)
+    assert subj.events_bool.shape[0] == len(unified)
+    # Non-lagPat rows are all False
+    assert subj.events_bool[len(CHANNELS):].sum() == 0
+    # Endpoint indices stay in front (lagPat region)
+    assert subj.cluster_endpoints[0]["S"] == [0, 1]
+    assert subj.cluster_endpoints[0]["K"] == [4, 5]
+    # valid_indices_per_cluster expands to include the all-SEEG extras
+    # endpoint c0 = {0,1,4,5}; mapped = all 9; valid = [2,3,6,7,8]
+    assert subj.valid_indices_per_cluster[0] == [2, 3, 6, 7, 8]
+
+
 def test_load_subject_for_phase1_rejects_channel_mismatch(monkeypatch, phase0a_path, pr6_root, tmp_path):
     """lagPat returns different channel ordering → raises."""
     shuffled = CHANNELS[::-1]
@@ -204,6 +250,8 @@ def test_load_subject_for_phase1_rejects_channel_mismatch(monkeypatch, phase0a_p
                         lambda d: _make_fake_loader_dict(shuffled))
     monkeypatch.setattr(runner, "load_subject_coords",
                         lambda **kw: _make_coord_result(CHANNELS))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
 
     fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
     fake_dir.mkdir(parents=True)
@@ -223,6 +271,8 @@ def test_load_subject_for_phase1_rejects_voxel_coords(monkeypatch, phase0a_path,
     monkeypatch.setattr(runner, "load_subject_coords",
                         lambda **kw: _make_coord_result(CHANNELS, units="voxel",
                                                        space="mri_native_voxel_ijk"))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
 
     fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
     fake_dir.mkdir(parents=True)
@@ -245,6 +295,8 @@ def test_load_subject_for_phase1_drops_unmapped_endpoints(monkeypatch, phase0a_p
     mapped_mask = np.array([True, False, True, True, True, False])
     monkeypatch.setattr(runner, "load_subject_coords",
                         lambda **kw: _make_coord_result(CHANNELS, mapped_mask=mapped_mask))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
 
     fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
     fake_dir.mkdir(parents=True)
@@ -266,16 +318,17 @@ def test_load_subject_for_phase1_drops_unmapped_endpoints(monkeypatch, phase0a_p
     # n_dropped audit (1 dropped from S + 1 dropped from K per cluster)
     assert subj.n_dropped_endpoints_no_coords_per_cluster == {0: 2, 1: 2}
 
-    # valid_indices = mask ∩ mapped = idx where both True
-    assert subj.valid_indices_per_cluster[0] == [0, 2, 3, 4]
-    assert subj.valid_indices_per_cluster[1] == [0, 2, 3, 4]
+    # v1.0.7: valid_indices = mapped channels MINUS endpoints
+    # mapped = [0,2,3,4]; endpoint c0 = {0,4} → valid = [2,3]
+    assert subj.valid_indices_per_cluster[0] == [2, 3]
+    assert subj.valid_indices_per_cluster[1] == [2, 3]
 
 
 def test_load_subject_for_phase1_rejects_unknown_endpoint_name(monkeypatch, phase0a_path, pr6_root, tmp_path):
-    """PR-6 endpoint name not in Phase 0a channel_names → raises (no silent index swap)."""
+    """PR-6 endpoint name not in unified channel_names → raises (no silent index swap)."""
     bad_templates = [
         {"cluster_id": 0,
-         "source": ["A1-A2", "Z9-Z10"],  # Z9-Z10 not in CHANNELS
+         "source": ["A1-A2", "Z9-Z10"],  # Z9-Z10 not in CHANNELS or all-SEEG enumerator
          "sink": ["B2-B3"],
          "endpoint": [], "middle": [],
          "valid_mask": [True] * len(CHANNELS),
@@ -289,6 +342,8 @@ def test_load_subject_for_phase1_rejects_unknown_endpoint_name(monkeypatch, phas
                         lambda d: _make_fake_loader_dict(CHANNELS))
     monkeypatch.setattr(runner, "load_subject_coords",
                         lambda **kw: _make_coord_result(CHANNELS))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
 
     fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
     fake_dir.mkdir(parents=True)
@@ -301,9 +356,15 @@ def test_load_subject_for_phase1_rejects_unknown_endpoint_name(monkeypatch, phas
         )
 
 
-def test_load_subject_for_phase1_pr6_valid_mask_intersection(monkeypatch, phase0a_path, pr6_root, tmp_path):
-    """When PR-6 valid_mask is partial, valid_indices reflects intersection with mapped."""
-    # PR-6 says only idx 0..3 participate; coord loader maps all
+def test_load_subject_for_phase1_pr6_valid_mask_no_longer_constrains_pool(monkeypatch, phase0a_path, pr6_root, tmp_path):
+    """v1.0.7: PR-6 valid_mask is no longer used to constrain valid_indices.
+
+    Previously v1.0.6 took intersection (PR-6 valid_mask ∩ mapped_mask).
+    v1.0.7 dropped this because PR-6 valid_mask = "lagPat-participating",
+    which created a circular null pool. valid_indices is now strictly
+    "all mapped SEEG channels MINUS endpoint" — independent of PR-6 mask."""
+    # PR-6 reports only idx 0..3 valid, but with all 6 channels mapped,
+    # valid_indices should ignore the PR-6 mask and use mapped non-endpoint.
     partial_templates = [
         {"cluster_id": 0,
          "source": ["A1-A2", "A2-A3"], "sink": ["A3-A4"],
@@ -324,6 +385,8 @@ def test_load_subject_for_phase1_pr6_valid_mask_intersection(monkeypatch, phase0
                         lambda d: _make_fake_loader_dict(CHANNELS))
     monkeypatch.setattr(runner, "load_subject_coords",
                         lambda **kw: _make_coord_result(CHANNELS))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
 
     fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
     fake_dir.mkdir(parents=True)
@@ -333,8 +396,10 @@ def test_load_subject_for_phase1_pr6_valid_mask_intersection(monkeypatch, phase0
         pr6_anchoring_root=pr6_root,
         epilepsiae_lagpat_root=tmp_path / "lagpat_root",
     )
-    assert subj.valid_indices_per_cluster[0] == [0, 1, 2, 3]
-    assert subj.valid_indices_per_cluster[1] == [0, 1, 2, 3]
+    # c0 endpoint = {0,1,2}; mapped = all → valid = [3,4,5] (PR-6 valid_mask IGNORED)
+    assert subj.valid_indices_per_cluster[0] == [3, 4, 5]
+    # c1 endpoint = {0,1,2} (S=[2], K=[0,1]); mapped = all → valid = [3,4,5]
+    assert subj.valid_indices_per_cluster[1] == [3, 4, 5]
 
 
 def test_load_subject_for_phase1_no_pr6_pair_skipped(monkeypatch, phase0a_path, pr6_root, tmp_path):
@@ -355,6 +420,8 @@ def test_load_subject_for_phase1_no_pr6_pair_skipped(monkeypatch, phase0a_path, 
                         lambda d: _make_fake_loader_dict(CHANNELS))
     monkeypatch.setattr(runner, "load_subject_coords",
                         lambda **kw: _make_coord_result(CHANNELS))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
 
     fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
     fake_dir.mkdir(parents=True)

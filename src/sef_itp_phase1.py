@@ -437,27 +437,29 @@ def compute_h1_compactness(
     rng: Optional[np.random.Generator] = None,
     coord_units: Optional[str] = None,
 ) -> Dict:
-    """H1 STRICT layer (v1.0.3 rename, 2026-05-21).
+    """H1 STRICT layer (v1.0.7, 2026-05-22).
 
-    Tests whether endpoints are MORE COMPACT than matched random null
-    (shaft + participation + HFO rate matched). This is asking:
-    "Is there extra spatial compactness BEYOND the geometric backbone
-    set by electrode shaft layout?"
+    Tests whether endpoints are MORE COMPACT than a shaft-matched random
+    subset drawn from the ENTIRE SEEG implantation pool. Asking:
+    "Is there extra spatial compactness beyond what same-shaft anchoring
+    would predict, when 'random' is sampled across the whole implantation
+    grid (not just lagPat-selected channels)?"
 
-    The same-shaft constraint means the null is also relatively compact
-    when target is on one shaft. PASS therefore requires endpoint to be
-    MORE compact than other 3-channel subsets on the same shaft(s) —
-    a strict bar. NULL means "no extra compactness beyond shaft
-    geometry"; does NOT mean "endpoints not compact" (use h1_descriptive
-    for the latter).
+    v1.0.7 null contract:
+      - candidate_pool = entire SEEG implantation, MINUS endpoint
+      - matched only on shaft distribution (preserves the geometric
+        backbone — without it the null is dominated by cross-shaft pairs
+        with very large mean distance, trivially making actual look compact)
+      - participation rate / HFO rate constraints REMOVED (v1.0.6 used them
+        but the pool was lagPat-restricted, producing a circular null
+        where endpoint and null both came from the same high-HFO subset)
+
+    NULL means "no extra compactness beyond same-shaft expectation";
+    PASS means endpoint compactness exceeds same-shaft random null;
+    FAIL_DIFFUSE means endpoint is MORE diffuse than same-shaft random.
 
     coord_units: when provided, must be 'mm' for euclidean distance metric.
     Raises ValueError if voxel coords are passed (v1.0.5 contract).
-
-    Null construction follows framework §3.1 with degradation:
-      - tier 0 (full): shaft + participation + HFO rate matched
-      - tier 1: drop HFO rate
-      - tier 2: drop participation rate (shaft + count only)
     """
     if distance_metric == "euclidean":
         _assert_coords_are_mm(coord_units, "compute_h1_compactness")
@@ -542,18 +544,24 @@ def compute_h1_compactness(
 
 def compute_h1c_envelope(
     endpoint_indices: Sequence[int],
-    valid_indices: Sequence[int],
+    non_endpoint_pool: Sequence[int],
     coords: np.ndarray,
     n_null: int = 1000,
     rng: Optional[np.random.Generator] = None,
 ) -> Dict:
     """H1c: endpoint envelope within pathological participation field.
 
-    Advisor 2026-05-21 fix: centroid is computed from VALID channels MINUS endpoint
-    set (avoid circularity where high-participation centroid is partially defined
-    by the endpoint set being tested).
+    v1.0.7 (2026-05-22): parameter renamed `valid_indices` → `non_endpoint_pool`
+    to match v1.0.7 semantics — caller passes the non-endpoint pool directly
+    (typically all mapped SEEG channels MINUS endpoint). Internal subtraction
+    removed.
 
-    Returns ratio = mean_d(endpoint→non_endpoint_centroid) / mean_d(non_endpoint→same_centroid).
+    Centroid is the spatial mean of non_endpoint_pool. Null draws "fake
+    endpoint" subsets of size |endpoint| from non_endpoint_pool, recomputes
+    centroid with the fake endpoint removed, and reports the ratio
+    distribution.
+
+    Returns ratio = mean_d(endpoint→centroid) / mean_d(non_endpoint→centroid).
     PASS if ratio not significantly larger than null (endpoint enveloped).
     FAIL if ratio significantly larger than null (endpoint escapes field).
     """
@@ -561,20 +569,22 @@ def compute_h1c_envelope(
         rng = np.random.default_rng(0)
 
     coords = np.asarray(coords, dtype=float)
-    valid_set = list(valid_indices)
+    pool = list(non_endpoint_pool)
     endpoint_set = set(endpoint_indices)
 
-    if not endpoint_set.issubset(set(valid_set)):
-        raise ValueError("endpoint_indices must be subset of valid_indices")
+    if endpoint_set & set(pool):
+        raise ValueError(
+            "non_endpoint_pool must NOT contain endpoint_indices "
+            "(v1.0.7: caller is responsible for excluding endpoints)"
+        )
 
-    non_endpoint = [i for i in valid_set if i not in endpoint_set]
-    if len(non_endpoint) < 3:
+    if len(pool) < 3:
         return {
             "verdict": "INSUFFICIENT_NON_ENDPOINT",
-            "n_non_endpoint": len(non_endpoint),
+            "n_non_endpoint": len(pool),
         }
 
-    non_ep_coords = coords[non_endpoint]
+    non_ep_coords = coords[pool]
     centroid = non_ep_coords.mean(axis=0)
 
     ep_coords = coords[list(endpoint_set)]
@@ -586,14 +596,14 @@ def compute_h1c_envelope(
 
     ratio = d_endpoint / d_non_endpoint
 
-    # null: random subsets of same size from valid pool, recompute ratio with
-    # leave-out centroid logic (same as actual)
+    # null: random "fake endpoint" subsets of same size from non_endpoint_pool;
+    # recompute centroid with leave-out logic (mirrors actual computation).
     null_ratios: List[float] = []
-    valid_arr = np.asarray(valid_set)
+    pool_arr = np.asarray(pool)
     for _ in range(n_null):
-        choice = rng.choice(valid_arr, size=len(endpoint_indices), replace=False)
+        choice = rng.choice(pool_arr, size=len(endpoint_indices), replace=False)
         cset = set(choice.tolist())
-        non_c = [i for i in valid_set if i not in cset]
+        non_c = [i for i in pool if i not in cset]
         if len(non_c) < 3:
             continue
         non_c_coords = coords[non_c]
@@ -620,7 +630,7 @@ def compute_h1c_envelope(
         "ratio_null_median": float(np.median(null_arr)),
         "upper_p": upper_p,
         "n_endpoint": len(endpoint_indices),
-        "n_non_endpoint": len(non_endpoint),
+        "n_non_endpoint": len(pool),
         "n_null": len(null_arr),
     }
 
@@ -640,16 +650,37 @@ def _matched_random_null(
     members: Sequence[int],
     candidate_pool: Sequence[int],
     shafts: Sequence[Optional[str]],
-    participation: np.ndarray,
-    hfo_rate: Optional[np.ndarray],
+    participation: np.ndarray,  # kept for back-compat; ignored in v1.0.7
+    hfo_rate: Optional[np.ndarray],  # kept for back-compat; ignored in v1.0.7
     n_null: int,
     rng: np.random.Generator,
     D: np.ndarray,
 ) -> Tuple[List[float], str]:
-    """Matched random null with degradation.
+    """Shaft-stratified random null over the full SEEG implantation pool.
 
-    Returns: (list of null distances, relaxation_tier).
-    relaxation_tier ∈ {"none", "drop_hfo_rate", "drop_participation"}
+    v1.0.7 (2026-05-22 user catch): previous matched-by-participation /
+    matched-by-hfo_rate constraints, combined with a candidate_pool drawn
+    from lagPat-selected channels (PR-6 valid_mask), produced a circular
+    null: endpoints AND null samples both came from the same pre-filtered
+    high-HFO subset. Result: 50% of clusters returned
+    INSUFFICIENT_ENVELOPE / INSUFFICIENT_NULL across the n=23 cohort, and
+    the testable subset measured "endpoint vs other high-HFO channels"
+    rather than "endpoint vs the entire implantation".
+
+    v1.0.7 fix:
+      - candidate_pool is now the entire SEEG implantation (caller's
+        responsibility — pass all-mm-mapped channels minus endpoint)
+      - matching is shaft-only; participation/hfo_rate constraints removed
+        (they were nuisance variables that also encoded the endpoint
+        signal we are trying to test).
+
+    Args:
+        participation, hfo_rate: kept in signature for backward compat
+            with v1.0.6 callers; IGNORED in v1.0.7 random sampling.
+
+    Returns:
+        (list of null distances, relaxation_tier)
+        relaxation_tier ∈ {"shaft_matched", "shaft_infeasible"}
     """
     members_set = set(members)
     pool = [i for i in candidate_pool if i not in members_set]
@@ -657,16 +688,13 @@ def _matched_random_null(
     if len(pool) < n_target:
         return [], "insufficient_pool"
 
-    # target characteristics
+    # Target shaft distribution (same-shaft constraint preserved — without it,
+    # the null would mostly sample cross-shaft pairs with very large mean
+    # distance, biasing actual towards "compact" by default).
     target_shaft_counts: Dict[Optional[str], int] = {}
     for i in members:
         s = shafts[i]
         target_shaft_counts[s] = target_shaft_counts.get(s, 0) + 1
-
-    target_part_mean = float(np.mean([participation[i] for i in members]))
-    target_hfo_mean = (
-        float(np.mean([hfo_rate[i] for i in members])) if hfo_rate is not None else None
-    )
 
     pool_by_shaft: Dict[Optional[str], List[int]] = {}
     for i in pool:
@@ -682,55 +710,17 @@ def _matched_random_null(
             sel.extend(int(x) for x in pick)
         return sel
 
-    # tier 0: full match
     null_dists: List[float] = []
-    tier = "none"
     max_attempts = n_null * 3
     attempts = 0
     while len(null_dists) < n_null and attempts < max_attempts:
         attempts += 1
         sel = _try_match_shaft()
         if sel is None:
-            break  # shaft match infeasible → degrade
-        sel_part = float(np.mean([participation[i] for i in sel]))
-        if abs(sel_part - target_part_mean) / (target_part_mean + 1e-9) > 0.3:
-            continue
-        if target_hfo_mean is not None:
-            sel_hfo = float(np.mean([hfo_rate[i] for i in sel]))
-            if abs(sel_hfo - target_hfo_mean) / (target_hfo_mean + 1e-9) > 0.3:
-                continue
+            return null_dists, "shaft_infeasible"
         null_dists.append(_mean_pairwise_distance(D, sel))
 
-    if len(null_dists) >= 100:
-        return null_dists, tier
-
-    # tier 1: drop HFO rate
-    tier = "drop_hfo_rate"
-    null_dists = []
-    attempts = 0
-    while len(null_dists) < n_null and attempts < max_attempts:
-        attempts += 1
-        sel = _try_match_shaft()
-        if sel is None:
-            break
-        sel_part = float(np.mean([participation[i] for i in sel]))
-        if abs(sel_part - target_part_mean) / (target_part_mean + 1e-9) > 0.3:
-            continue
-        null_dists.append(_mean_pairwise_distance(D, sel))
-
-    if len(null_dists) >= 100:
-        return null_dists, tier
-
-    # tier 2: drop participation rate too (shaft + count only)
-    tier = "drop_participation"
-    null_dists = []
-    for _ in range(n_null):
-        sel = _try_match_shaft()
-        if sel is None:
-            break
-        null_dists.append(_mean_pairwise_distance(D, sel))
-
-    return null_dists, tier
+    return null_dists, "shaft_matched"
 
 
 # =============================================================================
@@ -1008,9 +998,11 @@ def compute_h1_full(
         }
     else:
         endpoint = list(set(source_indices) | set(sink_indices))
+        # v1.0.7: valid_indices is already non_endpoint pool (mapped SEEG - endpoint)
+        non_endpoint_pool = [i for i in valid_indices if i not in set(endpoint)]
         envelope = compute_h1c_envelope(
             endpoint_indices=endpoint,
-            valid_indices=valid_indices,
+            non_endpoint_pool=non_endpoint_pool,
             coords=coords,
             n_null=n_null,
             rng=rng,

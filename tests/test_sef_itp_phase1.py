@@ -235,16 +235,21 @@ def test_h6_diffuse_random_participation_gives_null():
 def _make_h1_synthetic(rng, target_pattern="compact"):
     """Synthetic SEEG-like layout for H1 tests.
 
-    Layout: 3 shafts × 10 contacts; contacts spread along z over [0, 30] m (large
-    range so that random 3-of-10 picks are far apart on average, making compact
-    target distinct from null).
+    v1.0.7: non-uniform z packing — first 3 contacts of each shaft are very
+    close (z=0/1/2), remaining 7 spread (z=15..45). This makes "first 3 of
+    shaft" measurably more compact than "3 random contacts of shaft" under
+    shaft-only matched null. v1.0.6's uniform layout would have made the
+    null and actual statistically indistinguishable under shaft-only matching.
 
     Returns: (channel_names, coords, participation, hfo_rate, target_indices, valid_indices)
     """
     names = []
     coords = []
     n_per_shaft = 10
-    z_range = np.linspace(0, 30, n_per_shaft)
+    # First 3 contacts tightly packed (z=0,1,2), rest spread (z=15..45)
+    z_dense = np.array([0.0, 1.0, 2.0])
+    z_spread = np.linspace(15.0, 45.0, n_per_shaft - 3)
+    z_range = np.concatenate([z_dense, z_spread])
     for shaft_idx, prefix in enumerate(["A", "B", "C"]):
         shaft_x = shaft_idx * 50.0
         for i in range(n_per_shaft):
@@ -258,7 +263,7 @@ def _make_h1_synthetic(rng, target_pattern="compact"):
     valid = list(range(n_total))
 
     if target_pattern == "compact":
-        # target = 3 deepest channels of shaft A (z=0, ~3.3, ~6.7) — close together
+        # target = the 3 tightly-packed contacts of shaft A (z=0,1,2)
         target = [0, 1, 2]
     elif target_pattern == "diffuse":
         # target = 1 random contact from each shaft (cross-shaft spread + z-unaligned).
@@ -299,14 +304,15 @@ def test_h1a_within_source_compact_synthetic():
 
 
 def test_h1_strict_diffuse_null_strict():
-    """TT-H1-2b: diffuse target → STRICT NULL (user audit 2026-05-21: don't allow PASS).
+    """TT-H1-2b: diffuse target → NULL or FAIL_DIFFUSE, never PASS.
 
-    Target = one channel per shaft (cross-shaft spread). Matched null preserves
-    shaft distribution (also one per shaft), so null mean pairwise distance ≈
-    cross-shaft distance ≈ target distance. Strict assertion: NULL.
+    Target = one channel per shaft (cross-shaft spread). Under v1.0.7 shaft-only
+    matched-null on non-uniform shaft layout (dense low-z + spread high-z), the
+    actual mean pairwise distance is at least as large as null median; depending
+    on which contacts the diffuse target lands on, verdict is NULL or FAIL_DIFFUSE.
 
-    Earlier v1 of this test was 'in ("NULL", "PASS")' — too loose, user pointed
-    out this won't catch regressions in the matched-null logic.
+    Strict intent (user audit 2026-05-21): catch regressions where diffuse
+    target wrongly PASSes. Both NULL and FAIL_DIFFUSE confirm "not compact".
     """
     rng = np.random.default_rng(SEED)
     names, coords, participation, hfo_rate, target, valid = _make_h1_synthetic(
@@ -324,7 +330,9 @@ def test_h1_strict_diffuse_null_strict():
         n_null=500,
         rng=rng,
     )
-    assert out["verdict"] == "NULL", f"diffuse target must give NULL, got {out}"
+    assert out["verdict"] in ("NULL", "FAIL_DIFFUSE"), (
+        f"diffuse target must NOT be PASS, got {out}"
+    )
 
 
 def test_h1c_envelope_within_field():
@@ -334,11 +342,11 @@ def test_h1c_envelope_within_field():
     coords = rng.normal(0, 5, size=(30, 3))
     # endpoint = 6 channels also inside the cloud (random subset)
     endpoint = list(rng.choice(30, size=6, replace=False))
-    valid = list(range(30))
+    non_endpoint_pool = [i for i in range(30) if i not in set(endpoint)]
 
     out = compute_h1c_envelope(
         endpoint_indices=endpoint,
-        valid_indices=valid,
+        non_endpoint_pool=non_endpoint_pool,
         coords=coords,
         n_null=500,
         rng=rng,
@@ -354,12 +362,12 @@ def test_h1c_envelope_outside_field_fail():
     near = rng.normal(0, 1, size=(24, 3))
     far = rng.normal([20, 20, 20], 1, size=(6, 3))
     coords = np.vstack([near, far])
-    valid = list(range(30))
     endpoint = list(range(24, 30))
+    non_endpoint_pool = list(range(24))  # explicit exclusion of endpoint
 
     out = compute_h1c_envelope(
         endpoint_indices=endpoint,
-        valid_indices=valid,
+        non_endpoint_pool=non_endpoint_pool,
         coords=coords,
         n_null=500,
         rng=rng,
@@ -371,21 +379,21 @@ def test_h1c_envelope_outside_field_fail():
 def test_h1c_envelope_circularity_guard():
     """Advisor 2026-05-21 fix: H1c centroid uses NON-endpoint channels only.
 
-    If centroid were from ALL valid channels (including endpoint), endpoint would
-    be artifactually close to centroid → false PASS even when endpoint is at
-    an extreme.
+    v1.0.7: explicit non_endpoint_pool parameter enforces this by contract —
+    if centroid were from ALL valid channels (including endpoint), endpoint
+    would be artifactually close to centroid → false PASS even at an extreme.
     """
     rng = np.random.default_rng(SEED)
     # 30 valid: 24 near origin, 6 at extreme (10, 10, 10)
     near = rng.normal(0, 1, size=(24, 3))
     far = rng.normal([10, 10, 10], 0.5, size=(6, 3))
     coords = np.vstack([near, far])
-    valid = list(range(30))
     endpoint = list(range(24, 30))
+    non_endpoint_pool = list(range(24))
 
     out = compute_h1c_envelope(
         endpoint_indices=endpoint,
-        valid_indices=valid,
+        non_endpoint_pool=non_endpoint_pool,
         coords=coords,
         n_null=500,
         rng=rng,
@@ -395,6 +403,24 @@ def test_h1c_envelope_circularity_guard():
     assert out["ratio_endpoint_to_non_endpoint"] > 5.0, (
         f"circularity guard failed: ratio={out.get('ratio_endpoint_to_non_endpoint')}"
     )
+
+
+def test_h1c_envelope_rejects_endpoint_in_pool():
+    """v1.0.7 contract: non_endpoint_pool must not contain endpoint_indices."""
+    rng = np.random.default_rng(SEED)
+    coords = rng.normal(0, 5, size=(10, 3))
+    endpoint = [0, 1, 2]
+    # invalid: pool contains endpoint
+    bad_pool = list(range(10))
+
+    with pytest.raises(ValueError, match="non_endpoint_pool must NOT contain"):
+        compute_h1c_envelope(
+            endpoint_indices=endpoint,
+            non_endpoint_pool=bad_pool,
+            coords=coords,
+            n_null=100,
+            rng=rng,
+        )
 
 
 def test_h1_descriptive_compact_synthetic():

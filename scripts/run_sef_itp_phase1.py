@@ -44,6 +44,7 @@ from src.sef_itp_phase1 import (
 )
 from src.seeg_coord_loader import (
     assert_coord_result_is_mm_for_main_analysis,
+    enumerate_subject_all_channels,
     load_subject_coords,
 )
 from src.interictal_propagation import load_subject_propagation_events
@@ -67,22 +68,27 @@ SCHEMA_VERSION = "sef_itp_phase1_v1_2026_05_21"
 class SubjectPhase1Data:
     """Per-subject input for Phase 1 hypotheses.
 
-    Real-data wiring (2026-05-21): populated by load_subject_for_phase1() from
-    masked Phase 0a JSON + masked PR-6 JSON + lagPat NPZ + seeg coord loader.
+    v1.0.7 (2026-05-22): channel_names is UNIFIED namespace — first
+    `n_lagpat_channels` entries are lagPat-selected channels (where
+    events_bool has real data), remainder are all-SEEG channels added
+    for H1/H2 null-pool expansion. H6 must slice events_bool / coords /
+    channel_names to the first n_lagpat_channels rows (H6 stays on the
+    lagPat namespace; H1/H2 use the unified pool).
     """
 
     subject_id: str
     dataset: str  # "yuquan" | "epilepsiae"  — needed for downstream provenance
     channel_names: List[str]
-    events_bool: np.ndarray  # (n_ch, n_events) boolean
-    coords: Optional[np.ndarray]  # (n_ch, 3) — NaN row for unmapped channels
+    n_lagpat_channels: int  # first n rows of events_bool are lagPat-selected
+    events_bool: np.ndarray  # (n_unified, n_events) — non-lagPat rows all False
+    coords: Optional[np.ndarray]  # (n_unified, 3) — NaN row for unmapped channels
     coord_units: Optional[str]  # "mm" | "voxel" | None — gates euclidean compute
     coord_space: Optional[str]  # provenance for output JSON
-    mapped_mask: Optional[np.ndarray]  # (n_ch,) bool — True where coord is mapped
-    hfo_rate: Optional[np.ndarray]  # (n_ch,) optional — per-channel HFO rate
-    # PR-6 endpoint output per cluster:
+    mapped_mask: Optional[np.ndarray]  # (n_unified,) bool — True where coord is mapped
+    hfo_rate: Optional[np.ndarray]  # (n_unified,) optional — per-channel HFO rate
+    # PR-6 endpoint output per cluster (indices in unified namespace):
     cluster_endpoints: Dict[int, Dict[str, List[int]]]  # cluster_id → {"S": [...], "K": [...]}
-    valid_indices_per_cluster: Dict[int, List[int]]  # cluster_id → list of valid channel indices
+    valid_indices_per_cluster: Dict[int, List[int]]  # cluster_id → all mapped SEEG − endpoint
     forward_reverse_pairs: List[Dict]  # [{"cluster_A_id": int, "cluster_B_id": int, ...}, ...]
     # Audit / provenance:
     coord_provenance: Optional[Dict] = None
@@ -176,10 +182,10 @@ def load_subject_for_phase1(
         )
 
     phase0a_channels: List[str] = list(phase0a["channel_names"])
-    n_ch = len(phase0a_channels)
-    if n_ch != phase0a["n_channels"]:
+    n_lagpat = len(phase0a_channels)
+    if n_lagpat != phase0a["n_channels"]:
         raise ValueError(
-            f"Phase 0a channel_names length {n_ch} != n_channels {phase0a['n_channels']}"
+            f"Phase 0a channel_names length {n_lagpat} != n_channels {phase0a['n_channels']}"
         )
 
     # === Step 2: PR-6 anchoring JSON ===
@@ -202,7 +208,7 @@ def load_subject_for_phase1(
         raise FileNotFoundError(f"lagPat subject dir not found: {lagpat_dir}")
 
     loaded = load_subject_propagation_events(lagpat_dir)
-    events_bool = np.asarray(loaded["bools"], dtype=bool)
+    lagpat_events_bool = np.asarray(loaded["bools"], dtype=bool)
     lagpat_channels = list(loaded["channel_names"])
 
     if lagpat_channels != phase0a_channels:
@@ -213,12 +219,31 @@ def load_subject_for_phase1(
             f"  lagPat:   {lagpat_channels}\n"
             f"Re-run Phase 0a §5a if lagPat NPZ was regenerated."
         )
-    if events_bool.shape[0] != n_ch:
+    if lagpat_events_bool.shape[0] != n_lagpat:
         raise ValueError(
-            f"events_bool n_ch {events_bool.shape[0]} != Phase 0a n_channels {n_ch}"
+            f"events_bool n_ch {lagpat_events_bool.shape[0]} != Phase 0a n_channels {n_lagpat}"
         )
 
-    # === Step 4: SEEG coords ===
+    # === Step 4: full SEEG enumeration (v1.0.7 — replaces lagPat-restricted pool) ===
+    all_seeg_names = enumerate_subject_all_channels(dataset, subject_id)
+    # Unified namespace: lagPat channels first (preserves their position),
+    # then any non-lagPat SEEG channels not yet seen.
+    unified_names: List[str] = list(phase0a_channels)
+    seen = set(phase0a_channels)
+    for nm in all_seeg_names:
+        if nm not in seen:
+            unified_names.append(nm)
+            seen.add(nm)
+    n_unified = len(unified_names)
+    n_nonlagpat = n_unified - n_lagpat
+
+    # Expand events_bool to (n_unified, n_events): non-lagPat rows all False
+    # (they never participated in any lagPat group event by definition).
+    n_events = lagpat_events_bool.shape[1]
+    events_bool = np.zeros((n_unified, n_events), dtype=bool)
+    events_bool[:n_lagpat, :] = lagpat_events_bool
+
+    # === Step 5: SEEG coords on unified namespace ===
     coords: Optional[np.ndarray] = None
     coord_units: Optional[str] = None
     coord_space: Optional[str] = None
@@ -229,10 +254,9 @@ def load_subject_for_phase1(
         coord_result = load_subject_coords(
             dataset=dataset,
             subject_id=subject_id,
-            channel_names_requested=phase0a_channels,
+            channel_names_requested=unified_names,
             allow_voxel_fallback=allow_voxel_fallback,
         )
-        # v1.0.5 contract: voxel rejected for main analysis
         assert_coord_result_is_mm_for_main_analysis(coord_result)
         coords = coord_result.coords_array_in_requested_order
         mapped_mask = coord_result.mapped_mask_in_requested_order
@@ -240,11 +264,14 @@ def load_subject_for_phase1(
         coord_space = coord_result.coord_space
         coord_provenance = dict(coord_result.provenance)
         coord_provenance["n_mapped"] = int(mapped_mask.sum())
-        coord_provenance["n_missing"] = int(n_ch - mapped_mask.sum())
+        coord_provenance["n_missing"] = int(n_unified - mapped_mask.sum())
+        coord_provenance["n_lagpat_channels"] = n_lagpat
+        coord_provenance["n_unified_channels"] = n_unified
+        coord_provenance["n_nonlagpat_seeg_added"] = n_nonlagpat
         coord_provenance["normalization_certainty"] = coord_result.normalization_certainty
 
-    # === Step 5: cluster endpoints + valid_indices from PR-6 ===
-    name_to_idx = {nm: i for i, nm in enumerate(phase0a_channels)}
+    # === Step 6: cluster endpoints in unified namespace ===
+    name_to_idx = {nm: i for i, nm in enumerate(unified_names)}
     cluster_endpoints: Dict[int, Dict[str, List[int]]] = {}
     valid_indices_per_cluster: Dict[int, List[int]] = {}
     n_dropped_no_coords: Dict[int, int] = {}
@@ -253,39 +280,42 @@ def load_subject_for_phase1(
         cid = int(t["cluster_id"])
         s_names: List[str] = list(t["source"])
         k_names: List[str] = list(t["sink"])
-        valid_mask_t = np.asarray(t["valid_mask"], dtype=bool)
-        if valid_mask_t.shape != (n_ch,):
-            raise ValueError(
-                f"PR-6 cluster {cid} valid_mask shape {valid_mask_t.shape} != ({n_ch},)"
-            )
 
         missing_names = [nm for nm in s_names + k_names if nm not in name_to_idx]
         if missing_names:
             raise ValueError(
                 f"PR-6 cluster {cid} endpoint name(s) {missing_names} "
-                f"not in Phase 0a channel_names. Index map keys: {list(name_to_idx)[:5]}..."
+                f"not in unified channel_names. Sample keys: {list(name_to_idx)[:5]}..."
             )
         s_idx_raw = [name_to_idx[nm] for nm in s_names]
         k_idx_raw = [name_to_idx[nm] for nm in k_names]
 
-        valid_set = set(np.where(valid_mask_t)[0].tolist())
         if require_coords:
-            mapped_set = set(np.where(mapped_mask)[0].tolist())
-            valid_set &= mapped_set
             s_idx = [i for i in s_idx_raw if mapped_mask[i]]
             k_idx = [i for i in k_idx_raw if mapped_mask[i]]
             n_dropped_no_coords[cid] = (
                 (len(s_idx_raw) - len(s_idx)) + (len(k_idx_raw) - len(k_idx))
             )
+            # v1.0.7: valid_indices = ALL mapped SEEG channels minus endpoints.
+            # Earlier v1.0.6 used PR-6 valid_mask (lagPat-participating only),
+            # which created a circular null where endpoints and null samples
+            # came from the same pre-filtered high-HFO subset.
+            endpoint_set = set(s_idx + k_idx)
+            valid_idx = [
+                i for i in range(n_unified)
+                if mapped_mask[i] and i not in endpoint_set
+            ]
         else:
             s_idx = s_idx_raw
             k_idx = k_idx_raw
             n_dropped_no_coords[cid] = 0
+            endpoint_set = set(s_idx + k_idx)
+            valid_idx = [i for i in range(n_unified) if i not in endpoint_set]
 
         cluster_endpoints[cid] = {"S": s_idx, "K": k_idx}
-        valid_indices_per_cluster[cid] = sorted(valid_set)
+        valid_indices_per_cluster[cid] = valid_idx
 
-    # === Step 6: forward/reverse pairs translation ===
+    # === Step 7: forward/reverse pairs translation ===
     pairs_raw = phase0a.get("adaptive_cluster", {}).get(
         "candidate_forward_reverse_pairs", []
     )
@@ -294,7 +324,6 @@ def load_subject_for_phase1(
         a_id = int(p["cluster_a"])
         b_id = int(p["cluster_b"])
         if a_id not in cluster_endpoints or b_id not in cluster_endpoints:
-            # PR-6 didn't produce endpoints for this cluster — skip pair.
             continue
         forward_reverse_pairs.append(
             {
@@ -308,13 +337,14 @@ def load_subject_for_phase1(
     return SubjectPhase1Data(
         subject_id=subject_id,
         dataset=dataset,
-        channel_names=phase0a_channels,
+        channel_names=unified_names,
+        n_lagpat_channels=n_lagpat,
         events_bool=events_bool,
         coords=coords,
         coord_units=coord_units,
         coord_space=coord_space,
         mapped_mask=mapped_mask,
-        hfo_rate=None,  # Future: wire from results/spatial_modulation/per_channel_metrics
+        hfo_rate=None,
         cluster_endpoints=cluster_endpoints,
         valid_indices_per_cluster=valid_indices_per_cluster,
         forward_reverse_pairs=forward_reverse_pairs,
@@ -360,6 +390,7 @@ def make_synthetic_subject(seed: int = 0) -> SubjectPhase1Data:
         subject_id="synthetic_subject_001",
         dataset="synthetic",
         channel_names=names,
+        n_lagpat_channels=n_ch,  # synthetic: all channels are lagPat-selected
         events_bool=events_bool,
         coords=coords,
         coord_units="mm",
@@ -380,17 +411,30 @@ def run_h6(
     n_permutations: int = 1000,
     rng_seed: int = 0,
 ) -> Dict:
-    """Run H6 — participation field spatial segregation."""
-    participation = compute_participation_rate(subject.events_bool)
-    coords = subject.coords if distance_metric == "euclidean" else None
-    if distance_metric == "euclidean" and coords is None:
-        return {
-            "verdict": "GATED_ON_PHASE_0B_COORD_LOADER",
-            "reason": "euclidean distance requires 3D coords; switch to shaft_ordinal or wait for Phase 0b",
-        }
+    """Run H6 — participation field spatial segregation.
+
+    v1.0.7: H6 stays on lagPat namespace (sliced from unified channel_names).
+    The non-lagPat SEEG channels added for H1/H2 null-pool expansion are
+    by-construction zero participation; including them would dilute the
+    high/low split and change the H6 scientific question. Keep H6 as
+    "within the channels that participated in group events, is the
+    participation field spatially structured?"
+    """
+    nl = subject.n_lagpat_channels
+    participation = compute_participation_rate(subject.events_bool[:nl, :])
+    lagpat_names = subject.channel_names[:nl]
+    if distance_metric == "euclidean":
+        if subject.coords is None:
+            return {
+                "verdict": "GATED_NO_COORDS",
+                "reason": "euclidean distance requires 3D coords",
+            }
+        coords = subject.coords[:nl]
+    else:
+        coords = None
     out = compute_h6_segregation(
         participation=participation,
-        channel_names=subject.channel_names,
+        channel_names=lagpat_names,
         coords=coords,
         distance_metric=distance_metric,
         n_permutations=n_permutations,
