@@ -343,6 +343,38 @@ def test_slice_events_drops_short_epochs():
     assert len(epochs[0]["event_indices"]) == 100
 
 
+def test_slice_events_epoch_tolerance_handles_short_blocks():
+    """Epilepsiae-style: blocks of ~59:41 min (slightly under 1h target).
+    With epoch_tolerance=0.1 each block counts as 1 epoch; default tolerance=0 → 0 epochs."""
+    t0 = 1_000_000.0
+    blocks = [
+        (t0, t0 + 3581.0),                      # ~59:41 = 0.9947h
+        (t0 + 3700.0, t0 + 3700.0 + 3585.0),    # ~59:45
+        (t0 + 7400.0, t0 + 7400.0 + 3590.0),    # ~59:50
+    ]
+    # 50 events per block
+    times = np.concatenate([
+        np.linspace(b[0] + 1, b[1] - 1, 50) for b in blocks
+    ])
+    labels = np.tile([0, 1], 75)
+    # Strict floor → 0 epochs (each block < 1h)
+    strict = p2.slice_events_into_epochs(
+        event_abs_times=times, cluster_labels=labels,
+        block_time_ranges=blocks, epoch_hours=1.0, min_events=10,
+        epoch_tolerance=0.0,
+    )
+    assert len(strict) == 0
+    # Tolerance 0.1 → each block becomes 1 epoch
+    lenient = p2.slice_events_into_epochs(
+        event_abs_times=times, cluster_labels=labels,
+        block_time_ranges=blocks, epoch_hours=1.0, min_events=10,
+        epoch_tolerance=0.1,
+    )
+    assert len(lenient) == 3
+    for ep, block in zip(lenient, blocks):
+        assert ep["t_end"] == pytest.approx(block[1])  # clipped to block_end
+
+
 # --------------------------------------------------------------------------- #
 # Task 6 — H4 per-epoch local endpoint + Jaccard helper
 # --------------------------------------------------------------------------- #

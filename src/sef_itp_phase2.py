@@ -297,15 +297,20 @@ def slice_events_into_epochs(
     event_abs_times: np.ndarray,
     cluster_labels: np.ndarray,
     block_time_ranges: List[Tuple[float, float]],
-    epoch_hours: float = 2.0,
+    epoch_hours: float = 1.0,
     min_events: int = 10,
+    epoch_tolerance: float = 0.0,
 ) -> List[Dict[str, np.ndarray]]:
     """Slice events into time-ordered, block-aware epochs of fixed wall-clock duration.
 
-    Each block is independently sliced into `floor(block_duration / epoch_seconds)` contiguous
-    epochs starting at the block's `t_start`. Events falling in
+    Each block is independently sliced into `floor((block_duration / epoch_seconds) +
+    epoch_tolerance)` contiguous epochs starting at the block's `t_start`. Events falling in
     `[t_start + k * Δ, t_start + (k+1) * Δ)` are assigned to epoch k. Epochs with fewer than
     `min_events` events are dropped.
+
+    `epoch_tolerance` (default 0.0 = strict floor) lets short blocks count as 1 epoch when
+    their duration is close-but-under `epoch_seconds`. For Epilepsiae blocks (~59 min 41 s
+    natural duration vs 1h target), set `epoch_tolerance=0.1` to count each block as 1 epoch.
 
     Returns a list of dicts, one per kept epoch:
       `{"t_start": float, "t_end": float, "event_indices": np.ndarray, "block_index": int}`
@@ -315,10 +320,14 @@ def slice_events_into_epochs(
     epochs: List[Dict[str, np.ndarray]] = []
     for bi, (b_start, b_end) in enumerate(block_time_ranges):
         block_duration = b_end - b_start
-        n_epochs = int(np.floor(block_duration / epoch_seconds))
+        n_epochs = int(np.floor(block_duration / epoch_seconds + epoch_tolerance))
         for k in range(n_epochs):
             t_s = b_start + k * epoch_seconds
             t_e = t_s + epoch_seconds
+            # Last epoch may end early when block_duration < (k+1) * epoch_seconds
+            # (short block + epoch_tolerance > 0); clip to block end.
+            if t_e > b_end:
+                t_e = b_end
             mask = (times >= t_s) & (times < t_e)
             idx = np.where(mask)[0]
             if len(idx) < min_events:
@@ -452,10 +461,11 @@ def compute_I_rate_normalized(
 def compute_I_rate_normalized_circular_shift(
     event_abs_times: np.ndarray,
     block_time_ranges: List[Tuple[float, float]],
-    epoch_hours: float = 2.0,
+    epoch_hours: float = 1.0,
     min_events: int = 10,
     n_perm: int = 1000,
     seed: int = 0,
+    epoch_tolerance: float = 0.1,
 ) -> Dict[str, float]:
     """Non-degenerate null variant (proposed Phase 2 v1.0.0 spec amendment).
 
@@ -464,6 +474,9 @@ def compute_I_rate_normalized_circular_shift(
     compute rate per epoch, take std(log(rate)). The null distribution is non-degenerate
     because epoch-membership of events is randomized while sub-epoch temporal structure is
     preserved.
+
+    `epoch_tolerance` mirrors `slice_events_into_epochs` — needed so Epilepsiae's natural
+    ~59min41sec blocks count as 1 epoch when `epoch_hours=1.0`.
     """
     times = np.asarray(event_abs_times, dtype=float)
     epoch_seconds = epoch_hours * 3600.0
@@ -473,10 +486,10 @@ def compute_I_rate_normalized_circular_shift(
         rates: List[float] = []
         for (b_start, b_end) in block_time_ranges:
             block_duration = b_end - b_start
-            n_epochs = int(np.floor(block_duration / epoch_seconds))
+            n_epochs = int(np.floor(block_duration / epoch_seconds + epoch_tolerance))
             for k in range(n_epochs):
                 t_s = b_start + k * epoch_seconds
-                t_e = t_s + epoch_seconds
+                t_e = min(t_s + epoch_seconds, b_end)
                 cnt = int(np.sum((times_in >= t_s) & (times_in < t_e)))
                 if cnt >= min_events:
                     rates.append(cnt / epoch_hours)
