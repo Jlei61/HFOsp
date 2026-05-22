@@ -27,9 +27,43 @@ Contract (v1.0.8 lock):
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Dict, List, Literal, Optional, Sequence, Tuple
 
 import numpy as np
+
+
+# =============================================================================
+# lagPat subject directory resolver
+#
+# Cross-script utility shared by Phase 1 + Phase 2 runners. Defaults match the
+# canonical artifact roots documented in AGENTS.md. Promoted from
+# scripts/run_sef_itp_phase1.py:116 (private) on 2026-05-23 for Phase 2 reuse.
+# =============================================================================
+
+
+YUQUAN_DEFAULT_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
+EPILEPSIAE_DEFAULT_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+
+
+def resolve_lagpat_subject_dir(
+    dataset: str,
+    subject_id: str,
+    yuquan_root: Path = YUQUAN_DEFAULT_ROOT,
+    epilepsiae_root: Path = EPILEPSIAE_DEFAULT_ROOT,
+) -> Path:
+    """Locate the lagPat NPZ directory for a subject across both datasets.
+
+    Yuquan layout: `<yuquan_root>/<subject_id>/*.lagPat.npz`.
+    Epilepsiae layout: `<epilepsiae_root>/<subject_id>/all_recs/*.lagPat.npz` (preferred);
+    falls back to `<epilepsiae_root>/<subject_id>/` if the `all_recs` subdir does not exist.
+
+    Mirrors scripts/run_interictal_propagation.py:_subject_dir + _epilepsiae_subject_dir.
+    """
+    if dataset == "yuquan":
+        return yuquan_root / subject_id
+    legacy = epilepsiae_root / subject_id / "all_recs"
+    return legacy if legacy.exists() else epilepsiae_root / subject_id
 
 
 # =============================================================================

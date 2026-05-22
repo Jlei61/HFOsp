@@ -769,3 +769,21 @@ def test_compute_h1_descriptive_coord_units_none_permitted():
         coord_units=None,  # not provided — permitted
     )
     assert out["verdict"] == "DESCRIPTIVE"
+
+
+def test_resolve_lagpat_subject_dir_dispatches_dataset(tmp_path):
+    """Promoted from scripts/run_sef_itp_phase1.py:116 — Phase 2 now imports this too."""
+    from src.sef_itp_phase1 import resolve_lagpat_subject_dir
+
+    yuq = tmp_path / "yuq"
+    epi = tmp_path / "epi"
+    (yuq / "subj1").mkdir(parents=True)
+    (epi / "subj2" / "all_recs").mkdir(parents=True)
+    (epi / "subj3").mkdir()  # legacy flat (no all_recs subdir)
+
+    assert resolve_lagpat_subject_dir("yuquan", "subj1", yuq, epi) == yuq / "subj1"
+    assert (
+        resolve_lagpat_subject_dir("epilepsiae", "subj2", yuq, epi)
+        == epi / "subj2" / "all_recs"
+    )
+    assert resolve_lagpat_subject_dir("epilepsiae", "subj3", yuq, epi) == epi / "subj3"

@@ -43,6 +43,7 @@ from src.sef_itp_phase1 import (
     compute_participation_rate,
     pairwise_3d_euclidean,
     pairwise_shaft_ordinal,
+    resolve_lagpat_subject_dir as _resolve_lagpat_subject_dir,
 )
 from src.seeg_coord_loader import (
     assert_coord_result_is_mm_for_main_analysis,
@@ -111,19 +112,6 @@ def _parse_dataset_subject_from_filename(stem: str) -> Tuple[str, str]:
         f"Cannot infer dataset from filename stem {stem!r}; expected "
         f"'epilepsiae_<sid>' or 'yuquan_<sid>'"
     )
-
-
-def _resolve_lagpat_subject_dir(
-    dataset: str,
-    subject_id: str,
-    yuquan_root: Path,
-    epilepsiae_root: Path,
-) -> Path:
-    """Mirror scripts/run_interictal_propagation.py:_subject_dir + _epilepsiae_subject_dir."""
-    if dataset == "yuquan":
-        return yuquan_root / subject_id
-    legacy = epilepsiae_root / subject_id / "all_recs"
-    return legacy if legacy.exists() else epilepsiae_root / subject_id
 
 
 def _load_h2_from_rank_displacement(
