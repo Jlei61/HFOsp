@@ -57,6 +57,20 @@ RESULTS_DIR = Path("results/interictal_propagation/template_anchoring")
 FIG_DIR = RESULTS_DIR / "figures"
 PER_SUBJECT_DIR = RESULTS_DIR / "per_subject"
 
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors scripts/plot_rank_displacement.py:_apply_masked_paths so this
+    script consumes the masked PR-6 cohort_summary + per_subject JSONs and
+    writes figures next to them under results/interictal_propagation_masked/
+    template_anchoring/figures/.
+    """
+    global RESULTS_DIR, FIG_DIR, PER_SUBJECT_DIR
+    RESULTS_DIR = Path("results/interictal_propagation_masked/template_anchoring")
+    FIG_DIR = RESULTS_DIR / "figures"
+    PER_SUBJECT_DIR = RESULTS_DIR / "per_subject"
+
 # Node class colors
 COL_SWAP = COL_SIG                # rust — the headline
 COL_SAME = "#7E6E84"              # plum (COL_NIGHT) — competing geometry
@@ -747,7 +761,16 @@ def main() -> int:
     ap.add_argument("--fwdrev-multiples", action="store_true")
     ap.add_argument("--example-subject", default="635")
     ap.add_argument("--example-dataset", default="epilepsiae")
+    ap.add_argument(
+        "--masked-features",
+        action="store_true",
+        help="Consume masked PR-6 outputs (results/interictal_propagation_masked/"
+             "template_anchoring/) and write figures next to them.",
+    )
     args = ap.parse_args()
+
+    if args.masked_features:
+        _apply_masked_paths()
 
     if not (args.all or args.main or args.coreness
             or args.per_subject_jaccard or args.fwdrev_multiples):
