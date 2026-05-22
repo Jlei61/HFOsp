@@ -398,3 +398,114 @@ def endpoint_jaccard(
     if not union:
         return 0.0
     return len(L & G) / len(union)
+
+
+# --------------------------------------------------------------------------- #
+# H4 I_rate normalized rate instability
+#
+# Framework v1.0.5 §3.4 prose is mathematically degenerate (advisor catch B,
+# 2026-05-23). Phase 2 v1.0.0 implements BOTH the literal `epoch_order_shuffle`
+# null (degenerate by construction; reports `I_rate_undefined_under_shuffle_null`)
+# AND the proposed `circular_shift_within_block` null (non-degenerate).
+#
+# User decides which null enters the framework on return. See
+# docs/archive/topic4/sef_itp_phase2/spec_amendment_2026-05-23.md.
+# --------------------------------------------------------------------------- #
+
+
+def compute_I_rate_normalized(
+    rates: np.ndarray,
+    n_perm: int = 1000,
+    seed: int = 0,
+) -> Dict[str, float]:
+    """Literal framework v1.0.5 §3.4 null (degenerate by construction).
+
+    I_rate = std(log(rate)) across epochs / sqrt(var of std(log(rate)) over epoch-order
+             shuffles).
+
+    Returns I_rate = +inf and `I_rate_undefined_under_shuffle_null=True` whenever the null
+    is degenerate (always, since std is permutation-invariant; kept for spec-faithful audit).
+    """
+    rates = np.asarray(rates, dtype=float)
+    log_rates = np.log(rates + 1e-12)
+    obs_std = float(np.std(log_rates))
+    rng = np.random.default_rng(seed)
+    null_stds = np.array([
+        np.std(log_rates[rng.permutation(len(rates))]) for _ in range(n_perm)
+    ])
+    null_var = float(np.var(null_stds))
+    null_mean = float(np.mean(null_stds))
+    undefined = bool(null_var < 1e-12)
+    I_rate = float("inf") if undefined else obs_std / np.sqrt(null_var)
+    return {
+        "I_rate": I_rate,
+        "log_rate_std_obs": obs_std,
+        "null_std_mean": null_mean,
+        "null_std_var": null_var,
+        "I_rate_undefined_under_shuffle_null": undefined,
+        "null_method": "epoch_order_shuffle",
+        "n_epochs": int(len(rates)),
+    }
+
+
+def compute_I_rate_normalized_circular_shift(
+    event_abs_times: np.ndarray,
+    block_time_ranges: List[Tuple[float, float]],
+    epoch_hours: float = 2.0,
+    min_events: int = 10,
+    n_perm: int = 1000,
+    seed: int = 0,
+) -> Dict[str, float]:
+    """Non-degenerate null variant (proposed Phase 2 v1.0.0 spec amendment).
+
+    For each permutation: pick a random offset Δ ∈ [0, epoch_seconds) per block, shift event
+    times within block by Δ with wrap-around, re-slice into epochs starting at block start,
+    compute rate per epoch, take std(log(rate)). The null distribution is non-degenerate
+    because epoch-membership of events is randomized while sub-epoch temporal structure is
+    preserved.
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    epoch_seconds = epoch_hours * 3600.0
+    rng = np.random.default_rng(seed)
+
+    def _rates_for(times_in: np.ndarray) -> np.ndarray:
+        rates: List[float] = []
+        for (b_start, b_end) in block_time_ranges:
+            block_duration = b_end - b_start
+            n_epochs = int(np.floor(block_duration / epoch_seconds))
+            for k in range(n_epochs):
+                t_s = b_start + k * epoch_seconds
+                t_e = t_s + epoch_seconds
+                cnt = int(np.sum((times_in >= t_s) & (times_in < t_e)))
+                if cnt >= min_events:
+                    rates.append(cnt / epoch_hours)
+        return np.asarray(rates, dtype=float)
+
+    obs_rates = _rates_for(times)
+    obs_log_rates = np.log(obs_rates + 1e-12)
+    obs_std = float(np.std(obs_log_rates))
+
+    null_stds = []
+    for _ in range(n_perm):
+        shifted = times.copy()
+        for (b_start, b_end) in block_time_ranges:
+            mask = (shifted >= b_start) & (shifted < b_end)
+            block_duration = b_end - b_start
+            delta = float(rng.uniform(0.0, epoch_seconds))
+            wrapped = ((shifted[mask] + delta - b_start) % block_duration) + b_start
+            shifted[mask] = wrapped
+        null_log_rates = np.log(_rates_for(shifted) + 1e-12)
+        null_stds.append(float(np.std(null_log_rates)))
+
+    null_stds_arr = np.asarray(null_stds)
+    null_var = float(np.var(null_stds_arr))
+    null_mean = float(np.mean(null_stds_arr))
+    I_rate = obs_std / np.sqrt(null_var) if null_var > 1e-12 else float("inf")
+    return {
+        "I_rate": I_rate,
+        "log_rate_std_obs": obs_std,
+        "null_std_mean": null_mean,
+        "null_std_var": null_var,
+        "n_epochs": int(len(obs_rates)),
+        "null_method": "circular_shift_within_block",
+    }

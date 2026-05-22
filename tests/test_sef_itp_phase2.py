@@ -392,3 +392,69 @@ def test_endpoint_jaccard_perfect_match_returns_one():
     local = {0: {"source": [0, 1, 2], "sink": [5, 6, 7]}}
     global_ = {0: {"source": [2, 1, 0], "sink": [7, 6, 5]}}  # order shuffled
     assert p2.endpoint_jaccard(local, global_, cluster_id=0) == pytest.approx(1.0)
+
+
+# --------------------------------------------------------------------------- #
+# Task 7 — H4 I_rate normalized instability (BOTH null methods; advisor catch B)
+# --------------------------------------------------------------------------- #
+
+
+def test_compute_I_rate_epoch_order_shuffle_is_degenerate():
+    """Framework v1.0.5 §3.4 literal null (epoch_order_shuffle) is degenerate by construction:
+    std is permutation-invariant, so null_var = 0 and I_rate is flagged undefined."""
+    rates = np.array([5.0, 10.0, 20.0, 40.0, 80.0])
+    result = p2.compute_I_rate_normalized(rates, n_perm=200, seed=0)
+    assert result["null_std_var"] == pytest.approx(0.0, abs=1e-9)
+    assert result["I_rate_undefined_under_shuffle_null"] is True
+    assert result["null_method"] == "epoch_order_shuffle"
+
+
+def test_compute_I_rate_constant_rate_zero_obs_std():
+    """Constant rate → obs std = 0 (degenerate null too, but for a different reason)."""
+    rates = np.array([10.0, 10.0, 10.0, 10.0, 10.0])
+    result = p2.compute_I_rate_normalized(rates, n_perm=200, seed=0)
+    assert result["log_rate_std_obs"] == pytest.approx(0.0, abs=1e-9)
+
+
+def test_compute_I_rate_circular_shift_nondegenerate():
+    """Circular shift within block: random offset → epoch membership randomized →
+    rate per epoch changes → std varies across permutations → I_rate well-defined."""
+    rng = np.random.default_rng(0)
+    t0 = 1_000_000.0
+    # 24h block, ~720 events with sinusoidal modulation (rate ranges 10–50 events/h)
+    n_events = 720
+    times = np.sort(t0 + rng.uniform(0, 86_400, size=n_events))
+    result = p2.compute_I_rate_normalized_circular_shift(
+        event_abs_times=times,
+        block_time_ranges=[(t0, t0 + 86_400)],
+        epoch_hours=2.0,
+        n_perm=200,
+        seed=0,
+    )
+    assert result["null_std_var"] > 0
+    assert np.isfinite(result["I_rate"])
+    assert result["null_method"] == "circular_shift_within_block"
+    assert result["n_epochs"] == 12
+
+
+def test_compute_I_rate_circular_shift_respects_block_boundary():
+    """Circular shift stays within block — events don't cross blocks."""
+    rng = np.random.default_rng(0)
+    t0 = 1_000_000.0
+    block_a = (t0, t0 + 14_400.0)            # 4h
+    block_b = (t0 + 50_000.0, t0 + 64_400.0)  # 4h, 12h gap
+    # 100 events in each block
+    times = np.concatenate([
+        np.sort(t0 + rng.uniform(0, 14_400, size=100)),
+        np.sort(t0 + 50_000 + rng.uniform(0, 14_400, size=100)),
+    ])
+    result = p2.compute_I_rate_normalized_circular_shift(
+        event_abs_times=times,
+        block_time_ranges=[block_a, block_b],
+        epoch_hours=2.0,
+        n_perm=100,
+        seed=0,
+    )
+    # 2 epochs per block × 2 blocks = 4 epochs (depending on min_events; default 10)
+    assert result["n_epochs"] == 4
+    assert result["null_std_var"] > 0
