@@ -56,6 +56,24 @@ RD_COHORT = (
 FIG_DIR = SUP1_DIR / "figures"
 
 
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree."""
+    global SUP1_DIR, PER_SUBJECT_DIR, COHORT_PATH, RD_COHORT, FIG_DIR
+    SUP1_DIR = (
+        WORKTREE_ROOT / "results" / "interictal_propagation_masked" / "pr6_sup1_rank_entropy"
+    )
+    PER_SUBJECT_DIR = SUP1_DIR / "per_subject"
+    COHORT_PATH = SUP1_DIR / "cohort_summary.json"
+    RD_COHORT = (
+        WORKTREE_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "rank_displacement"
+        / "cohort_summary.json"
+    )
+    FIG_DIR = SUP1_DIR / "figures"
+
+
 # High-contrast categorical palette (perceptually distinct in print + grayscale).
 # Maps the rank_displacement variable-k swap classifier label (strict /
 # candidate / none) to a color, but the LEGEND text describes what the
@@ -634,6 +652,19 @@ def fig_bridge_with_rank_displacement(data: Dict[str, Any]) -> Optional[Path]:
 
 
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description="PR-6 sup1 rank entropy figures (Topic 4 preflight)")
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help="Consume masked PR-6 sup1 + rank_displacement cohort_summary under "
+             "results/interictal_propagation_masked/ and write figures next to "
+             "them. Mirrors scripts/plot_rank_displacement.py --masked-features.",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     records = _load_per_subject()
     data = _collect_curves(records)
