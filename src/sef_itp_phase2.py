@@ -509,3 +509,72 @@ def compute_I_rate_normalized_circular_shift(
         "n_epochs": int(len(obs_rates)),
         "null_method": "circular_shift_within_block",
     }
+
+
+# --------------------------------------------------------------------------- #
+# H4 I_geom normalized endpoint-geometry instability
+#
+# Per framework v1.0.5 §3.4: null is "role-shuffle endpoint per epoch within
+# valid_mask=True pool". For each permutation, replace each epoch's local endpoint
+# with a random sample of `endpoint_size` channels from the valid pool, then compute
+# the per-epoch Jaccard against global and the across-epoch std. This null is
+# non-degenerate by construction (random samples produce variable Jaccard).
+# --------------------------------------------------------------------------- #
+
+
+def compute_I_geom_normalized(
+    per_epoch_local: List[Dict[int, Dict[str, List[int]]]],
+    global_endpoint: Dict[int, Dict[str, List[int]]],
+    valid_mask: np.ndarray,
+    endpoint_size: int,
+    n_perm: int = 1000,
+    seed: int = 0,
+) -> Dict[str, float]:
+    """Normalized endpoint-geometry instability across epochs.
+
+    obs: for each epoch e, compute mean-across-cluster Jaccard(local_e, global). Take
+    std(1 - Jaccard_e) across epochs as `geom_dispersion_std_obs`.
+
+    null: for each permutation, for each epoch, pick `endpoint_size` channels uniformly at
+    random from `valid_mask=True` pool, split half-source half-sink, recompute Jaccard, take
+    std across epochs. 1000 permutations give null distribution of std.
+
+    I_geom = obs_std / sqrt(var(null_std)).
+    """
+    cluster_ids = list(global_endpoint.keys())
+    eligible = np.where(valid_mask)[0]
+    rng = np.random.default_rng(seed)
+
+    def _epoch_jaccard(local: Dict[int, Dict[str, List[int]]]) -> float:
+        js = [endpoint_jaccard(local, global_endpoint, c) for c in cluster_ids if c in local]
+        return float(np.mean(js)) if js else 0.0
+
+    obs_dispersion = np.array([1.0 - _epoch_jaccard(le) for le in per_epoch_local])
+    obs_std = float(np.std(obs_dispersion))
+    n_epochs = len(per_epoch_local)
+    half = endpoint_size // 2
+
+    null_stds: List[float] = []
+    for _ in range(n_perm):
+        epoch_jacs: List[float] = []
+        for _epoch in range(n_epochs):
+            chosen = rng.choice(eligible, size=endpoint_size, replace=False)
+            random_local = {
+                c: {"source": chosen[:half].tolist(), "sink": chosen[half:].tolist()}
+                for c in cluster_ids
+            }
+            epoch_jacs.append(_epoch_jaccard(random_local))
+        null_dispersion = 1.0 - np.array(epoch_jacs)
+        null_stds.append(float(np.std(null_dispersion)))
+
+    null_stds_arr = np.asarray(null_stds)
+    null_var = float(np.var(null_stds_arr))
+    null_mean = float(np.mean(null_stds_arr))
+    I_geom = obs_std / np.sqrt(null_var) if null_var > 1e-12 else float("inf")
+    return {
+        "I_geom": I_geom,
+        "geom_dispersion_std_obs": obs_std,
+        "null_std_mean": null_mean,
+        "null_std_var": null_var,
+        "n_epochs": int(n_epochs),
+    }

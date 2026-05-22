@@ -458,3 +458,55 @@ def test_compute_I_rate_circular_shift_respects_block_boundary():
     # 2 epochs per block × 2 blocks = 4 epochs (depending on min_events; default 10)
     assert result["n_epochs"] == 4
     assert result["null_std_var"] > 0
+
+
+# --------------------------------------------------------------------------- #
+# Task 8 — H4 I_geom normalized instability
+# --------------------------------------------------------------------------- #
+
+
+def test_compute_I_geom_random_endpoint_null_nondegenerate():
+    """Random endpoint sample → Jaccard varies → I_geom well-defined."""
+    rng = np.random.default_rng(42)
+    n_epochs = 10
+    n_ch = 12
+    global_endpoint = {0: {"source": [0, 1, 2], "sink": [9, 10, 11]}}
+    # Per-epoch local: 5 near global, 5 far
+    per_epoch_local = []
+    for i in range(n_epochs):
+        if i < 5:
+            per_epoch_local.append({0: {"source": [0, 1, 3], "sink": [9, 10, 8]}})
+        else:
+            per_epoch_local.append({0: {"source": [4, 5, 6], "sink": [4, 5, 6]}})
+    valid_mask = np.ones(n_ch, dtype=bool)
+    result = p2.compute_I_geom_normalized(
+        per_epoch_local=per_epoch_local,
+        global_endpoint=global_endpoint,
+        valid_mask=valid_mask,
+        endpoint_size=6,
+        n_perm=500,
+        seed=0,
+    )
+    assert result["null_std_var"] > 0  # non-degenerate
+    assert np.isfinite(result["I_geom"])
+    assert result["I_geom"] > 0
+    assert result["n_epochs"] == 10
+
+
+def test_compute_I_geom_perfect_stability_zero_obs():
+    """Every epoch's local endpoint == global → obs_std = 0 → I_geom = 0."""
+    n_epochs = 8
+    n_ch = 10
+    global_endpoint = {0: {"source": [0, 1, 2], "sink": [7, 8, 9]}}
+    per_epoch_local = [global_endpoint for _ in range(n_epochs)]
+    valid_mask = np.ones(n_ch, dtype=bool)
+    result = p2.compute_I_geom_normalized(
+        per_epoch_local=per_epoch_local,
+        global_endpoint=global_endpoint,
+        valid_mask=valid_mask,
+        endpoint_size=6,
+        n_perm=200,
+        seed=0,
+    )
+    assert result["geom_dispersion_std_obs"] == pytest.approx(0.0, abs=1e-9)
+    assert result["I_geom"] == pytest.approx(0.0, abs=1e-9)
