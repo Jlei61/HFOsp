@@ -174,3 +174,100 @@ def test_tost_equivalence_returns_expected_schema():
         "equivalence_pass", "median_inside_band", "ci_inside_band", "target", "delta", "n",
     ):
         assert k in out, f"missing key: {k}"
+
+
+# --------------------------------------------------------------------------- #
+# Task 4 — H3 integrated verdict (SUPPORTED / NOT_SUPPORTED_* / CONTRADICTED)
+# --------------------------------------------------------------------------- #
+
+
+_TOST_PASS = {"equivalence_pass": True, "cohort_main": {"equivalence_pass": True}}
+
+
+def _all_mark_pass():
+    return {
+        "lag1_same_excess": dict(_TOST_PASS),
+        "window_excess_10s": dict(_TOST_PASS),
+        "window_excess_30s": dict(_TOST_PASS),
+        "window_excess_60s": dict(_TOST_PASS),
+        "window_excess_1800s": dict(_TOST_PASS),
+        "run_length_lift": dict(_TOST_PASS),
+    }
+
+
+def test_h3_integrated_verdict_supported():
+    """All TOST equivalent + both endpoint Jaccard medians ≥ 0.7 → SUPPORTED."""
+    verdict = p2.compute_h3_integrated_verdict(
+        cohort_tost=_all_mark_pass(),
+        endpoint_jaccard_first_half_median=0.85,
+        endpoint_jaccard_odd_even_median=0.80,
+    )
+    assert verdict == "SUPPORTED"
+
+
+def test_h3_integrated_verdict_or_combinator():
+    """One Jaccard median ≥ 0.7, other below → still SUPPORTED (OR combinator).
+
+    Mirrors AGENTS.md forward_reverse_reproduced = split-half OR odd-even.
+    """
+    verdict = p2.compute_h3_integrated_verdict(
+        cohort_tost=_all_mark_pass(),
+        endpoint_jaccard_first_half_median=0.85,  # ≥ 0.7
+        endpoint_jaccard_odd_even_median=0.55,    # < 0.7
+    )
+    assert verdict == "SUPPORTED"
+
+
+def test_h3_integrated_verdict_not_supported_geometry_unstable():
+    """All TOST equivalent + BOTH endpoint Jaccard medians < 0.7 → NOT_SUPPORTED_GEOMETRY_UNSTABLE."""
+    verdict = p2.compute_h3_integrated_verdict(
+        cohort_tost=_all_mark_pass(),
+        endpoint_jaccard_first_half_median=0.60,
+        endpoint_jaccard_odd_even_median=0.55,
+    )
+    assert verdict == "NOT_SUPPORTED_GEOMETRY_UNSTABLE"
+
+
+def test_h3_integrated_verdict_contradicted_robust():
+    """≥1 TOST fail with robust LOO (no LOO subset restores equivalence) → CONTRADICTED."""
+    cohort_tost = _all_mark_pass()
+    cohort_tost["lag1_same_excess"] = {
+        "equivalence_pass": False,
+        "leave_one_out_min_pass_rate": 0.0,  # robust failure
+    }
+    verdict = p2.compute_h3_integrated_verdict(
+        cohort_tost=cohort_tost,
+        endpoint_jaccard_first_half_median=0.85,
+        endpoint_jaccard_odd_even_median=0.80,
+    )
+    assert verdict == "CONTRADICTED"
+
+
+def test_h3_integrated_verdict_not_supported_memory_single_subject_sensitive():
+    """≥1 TOST fail but LOO restores equivalence (single-subject sensitive) → NOT_SUPPORTED_MEMORY."""
+    cohort_tost = _all_mark_pass()
+    cohort_tost["window_excess_10s"] = {
+        "equivalence_pass": False,
+        "leave_one_out_min_pass_rate": 0.8,  # not robust
+    }
+    verdict = p2.compute_h3_integrated_verdict(
+        cohort_tost=cohort_tost,
+        endpoint_jaccard_first_half_median=0.85,
+        endpoint_jaccard_odd_even_median=0.80,
+    )
+    assert verdict == "NOT_SUPPORTED_MEMORY"
+
+
+def test_h3_integrated_verdict_not_supported_both():
+    """≥1 TOST fail AND endpoint unstable → NOT_SUPPORTED_BOTH."""
+    cohort_tost = _all_mark_pass()
+    cohort_tost["run_length_lift"] = {
+        "equivalence_pass": False,
+        "leave_one_out_min_pass_rate": 0.0,
+    }
+    verdict = p2.compute_h3_integrated_verdict(
+        cohort_tost=cohort_tost,
+        endpoint_jaccard_first_half_median=0.60,
+        endpoint_jaccard_odd_even_median=0.55,
+    )
+    assert verdict == "NOT_SUPPORTED_BOTH"

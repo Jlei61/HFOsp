@@ -195,3 +195,87 @@ def tost_equivalence(
         "delta": float(delta),
         "n": int(n),
     }
+
+
+# --------------------------------------------------------------------------- #
+# H3 integrated verdict (SUPPORTED / NOT_SUPPORTED_* / CONTRADICTED)
+#
+# Framework v1.0.5 §3.3 verdict naming locked at framework time. NOT PASS/NULL/FAIL —
+# guards against "PASS = proves independence" misreading.
+#
+# Mark-transition layer: lag1_same_excess + window_excess @ {10, 30, 60, 1800}s +
+#   run_length_lift; "compatible" = all 6 TOST tests equivalence_pass = True.
+# Endpoint geometry layer: endpoint_jaccard_first_half_median ≥ 0.7 **OR**
+#   endpoint_jaccard_odd_even_median ≥ 0.7 (OR combinator — project convention
+#   from AGENTS.md forward_reverse_reproduced = split-half OR odd-even).
+#
+# Robustness check: when mark-transition layer fails, inspect each failing metric's
+# leave_one_out_min_pass_rate. If any failing metric has min_pass_rate ≥
+# `loo_robust_threshold`, the cohort failure is single-subject sensitive — verdict
+# is NOT_SUPPORTED_MEMORY. If all failing metrics have min_pass_rate <
+# loo_robust_threshold, the failure persists under LOO → robust failure →
+# CONTRADICTED.
+# --------------------------------------------------------------------------- #
+
+
+_MARK_TRANSITION_KEYS = (
+    "lag1_same_excess",
+    "window_excess_10s",
+    "window_excess_30s",
+    "window_excess_60s",
+    "window_excess_1800s",
+    "run_length_lift",
+)
+
+
+def compute_h3_integrated_verdict(
+    cohort_tost: Dict[str, dict],
+    endpoint_jaccard_first_half_median: float,
+    endpoint_jaccard_odd_even_median: float,
+    *,
+    jaccard_threshold: float = 0.70,
+    loo_robust_threshold: float = 0.50,
+) -> str:
+    """Integrate H3 mark-transition + endpoint-stability into a framework v1.0.5 verdict.
+
+    Returns one of:
+      "SUPPORTED" — mark-transition layer compatible AND endpoint geometry stable
+      "NOT_SUPPORTED_GEOMETRY_UNSTABLE" — mark-transition compatible BUT geometry unstable
+      "NOT_SUPPORTED_MEMORY" — mark-transition not compatible (single-subject sensitive) +
+                                geometry stable
+      "NOT_SUPPORTED_BOTH" — mark-transition not compatible + geometry unstable
+      "CONTRADICTED" — mark-transition robustly not compatible (LOO does not restore) +
+                       geometry stable
+
+    Args:
+      cohort_tost: dict keyed by metric name (see `_MARK_TRANSITION_KEYS`). Each value carries
+        `equivalence_pass` and optionally `leave_one_out_min_pass_rate` (fraction of LOO
+        subsets that still pass equivalence; populated by `cohort_tost_with_loo` in Task 11.5;
+        defaults to 1.0 if absent, which means "treat as not robust"). Per advisor catch C,
+        Task 11.5 fills this field; without it the CONTRADICTED branch never fires.
+      endpoint_jaccard_first_half_median: cohort median of subject-level mean Jaccard endpoint
+        on first-half / second-half split.
+      endpoint_jaccard_odd_even_median: cohort median of same on odd / even block split.
+      jaccard_threshold: minimum Jaccard for "endpoint stable" call (default 0.70).
+      loo_robust_threshold: a failing metric is "robust" iff LOO min_pass_rate <
+        loo_robust_threshold (default 0.50; i.e., < half of LOO subsets restore equivalence).
+    """
+    mark_pass = all(cohort_tost[k]["equivalence_pass"] for k in _MARK_TRANSITION_KEYS)
+    endpoint_stable = (
+        endpoint_jaccard_first_half_median >= jaccard_threshold
+        or endpoint_jaccard_odd_even_median >= jaccard_threshold
+    )  # OR — project convention (advisor catch A, AGENTS.md forward_reverse_reproduced)
+
+    if mark_pass and endpoint_stable:
+        return "SUPPORTED"
+    if mark_pass and not endpoint_stable:
+        return "NOT_SUPPORTED_GEOMETRY_UNSTABLE"
+    # mark not pass — check LOO robustness of failures
+    failing = [k for k in _MARK_TRANSITION_KEYS if not cohort_tost[k]["equivalence_pass"]]
+    robust = any(
+        cohort_tost[k].get("leave_one_out_min_pass_rate", 1.0) < loo_robust_threshold
+        for k in failing
+    )
+    if not endpoint_stable:
+        return "NOT_SUPPORTED_BOTH"
+    return "CONTRADICTED" if robust else "NOT_SUPPORTED_MEMORY"
