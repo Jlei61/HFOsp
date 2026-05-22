@@ -638,3 +638,54 @@ def compute_h4_cohort_verdict(
         "median_I_rate": float(np.median(a)),
         "median_I_geom": float(np.median(b)),
     }
+
+
+# --------------------------------------------------------------------------- #
+# Cohort TOST with leave-one-out (advisor catch C — required for H3 CONTRADICTED branch)
+#
+# `compute_h3_integrated_verdict` reads `cohort_tost[metric].leave_one_out_min_pass_rate` to
+# distinguish:
+#   - robust failure (no LOO subset restores equivalence; min_pass_rate < threshold) → CONTRADICTED
+#   - single-subject-sensitive failure (≥ 1 LOO subset restores; min_pass_rate ≥ threshold) →
+#     NOT_SUPPORTED_MEMORY
+#
+# Without populating this field, the verdict logic defaults `min_pass_rate=1.0` → CONTRADICTED
+# branch silently never fires.
+# --------------------------------------------------------------------------- #
+
+
+def cohort_tost_with_loo(
+    values: np.ndarray,
+    target: float,
+    delta: float,
+    n_boot: int = 10_000,
+    alpha: float = 0.05,
+    seed: int = 0,
+) -> dict:
+    """Cohort TOST equivalence + leave-one-out robustness.
+
+    Computes `tost_equivalence` on the full cohort, then again for each LOO drop.
+    Returns dict with:
+      cohort_main: full-cohort tost_equivalence result
+      equivalence_pass: alias for cohort_main['equivalence_pass'] (verdict consumer compat)
+      leave_one_out: {f"drop_{i}": tost_equivalence_result} per dropped index
+      leave_one_out_min_pass_rate: fraction of LOO subsets that pass equivalence
+    """
+    values = np.asarray(values, dtype=float)
+    n = len(values)
+    main = tost_equivalence(values, target, delta, n_boot=n_boot, alpha=alpha, seed=seed)
+    loo: Dict[str, dict] = {}
+    n_pass = 0
+    for i in range(n):
+        sub = np.delete(values, i)
+        loo[f"drop_{i}"] = tost_equivalence(
+            sub, target, delta, n_boot=n_boot, alpha=alpha, seed=seed + 1 + i,
+        )
+        if loo[f"drop_{i}"]["equivalence_pass"]:
+            n_pass += 1
+    return {
+        "cohort_main": main,
+        "equivalence_pass": main["equivalence_pass"],
+        "leave_one_out": loo,
+        "leave_one_out_min_pass_rate": n_pass / n if n > 0 else 0.0,
+    }

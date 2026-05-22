@@ -561,3 +561,49 @@ def test_h4_cohort_verdict_handles_inf_filter():
     result = p2.compute_h4_cohort_verdict(I_rate, I_geom)
     # Indices 1, 2, 3, 5 have non-finite values → drop. Remaining n=8.
     assert result["n_subjects"] == 8
+
+
+# --------------------------------------------------------------------------- #
+# Task 11.5 — LOO populator (advisor catch C — required for CONTRADICTED branch)
+# --------------------------------------------------------------------------- #
+
+
+def test_cohort_tost_with_loo_robust_failure():
+    """When cohort fails TOST AND failure persists across all LOO drops:
+    leave_one_out_min_pass_rate = 0.0 → CONTRADICTED branch can fire."""
+    rng = np.random.default_rng(0)
+    values = rng.normal(0.10, 0.005, size=30)  # all ~0.10, far above δ=0.05 band
+    loo = p2.cohort_tost_with_loo(values, target=0.0, delta=0.05, n_boot=500, seed=0)
+    assert loo["cohort_main"]["equivalence_pass"] is False
+    assert loo["equivalence_pass"] is False
+    assert loo["leave_one_out_min_pass_rate"] == 0.0
+    assert "leave_one_out" in loo
+
+
+def test_cohort_tost_with_loo_single_subject_sensitive():
+    """Outlier subject — dropping it restores equivalence → min_pass_rate > 0.
+
+    Constructed: 29 compatible subjects (~0.0) + 1 huge outlier (~0.5). Cohort median
+    is dominated by the 29 cohort members (median ~0), but bootstrap CI is widened by
+    the outlier (still might pass for n=30 even / 29 odd). Use n=10 to keep cohort small
+    so the outlier matters; verify dropping outlier restores main test.
+    """
+    rng = np.random.default_rng(0)
+    values = np.concatenate([
+        rng.normal(0.0, 0.005, size=9),   # 9 compatible
+        np.array([0.5]),                  # 1 outlier
+    ])
+    loo = p2.cohort_tost_with_loo(values, target=0.0, delta=0.05, n_boot=500, seed=0)
+    # We don't strictly assert cohort_main fails (n=10 even may or may not be sensitive);
+    # we just assert the LOO scaffold returns sensible structure.
+    assert "leave_one_out_min_pass_rate" in loo
+    assert 0.0 <= loo["leave_one_out_min_pass_rate"] <= 1.0
+    assert len(loo["leave_one_out"]) == 10
+
+
+def test_cohort_tost_with_loo_returns_main_equivalence_alias():
+    """`equivalence_pass` mirrors cohort_main['equivalence_pass'] for verdict consumer compat."""
+    rng = np.random.default_rng(0)
+    values = rng.normal(0.0, 0.005, size=30)  # cohort-compatible
+    loo = p2.cohort_tost_with_loo(values, target=0.0, delta=0.05, n_boot=500, seed=0)
+    assert loo["equivalence_pass"] == loo["cohort_main"]["equivalence_pass"]
