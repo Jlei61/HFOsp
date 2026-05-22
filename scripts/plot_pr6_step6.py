@@ -63,6 +63,32 @@ FIG_DIR = (
     / "figures"
 )
 
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree."""
+    global COHORT_PATH, RD_PATH, FIG_DIR
+    COHORT_PATH = (
+        WORKTREE_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "pr6_step6_held_out_template"
+        / "cohort_summary.json"
+    )
+    RD_PATH = (
+        WORKTREE_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "rank_displacement"
+        / "cohort_summary.json"
+    )
+    FIG_DIR = (
+        WORKTREE_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "pr6_step6_held_out_template"
+        / "figures"
+    )
+
 SWAP_COLORS = {
     "strict": COL_SIG,         # rust
     "candidate": COL_NEUTRAL,  # dust
@@ -383,6 +409,19 @@ def fig_swap_class_transitions(records: List[dict]) -> Path:
 
 
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser(description="PR-6 Step 6 held-out template figures")
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help="Consume masked PR-6 Step 6 + rank_displacement cohort_summary "
+             "under results/interictal_propagation_masked/ and write figures next "
+             "to them. Mirrors scripts/plot_rank_displacement.py --masked-features.",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     records = _load_records()
     _attach_swap_class(records)
