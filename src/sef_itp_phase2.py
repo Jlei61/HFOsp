@@ -36,6 +36,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
 import numpy as np
+from scipy.stats import wilcoxon
 
 __version__ = "v1.0.0"
 
@@ -577,4 +578,63 @@ def compute_I_geom_normalized(
         "null_std_mean": null_mean,
         "null_std_var": null_var,
         "n_epochs": int(n_epochs),
+    }
+
+
+# --------------------------------------------------------------------------- #
+# H4 cohort verdict: Wilcoxon signed-rank + Cohen's d
+#
+# Framework v1.0.5 §3.4 lock:
+#   PASS: cohort Wilcoxon p < 0.05 AND Cohen's d ≥ 0.3 (rate more unstable than geom)
+#   NULL: not significant or |d| < 0.3
+#   FAIL: significant in REVERSE direction (geom more unstable than rate)
+#   UNDERPOWERED: n < 6 → no verdict
+# --------------------------------------------------------------------------- #
+
+
+def compute_h4_cohort_verdict(
+    I_rate_per_subject: np.ndarray,
+    I_geom_per_subject: np.ndarray,
+    *,
+    p_threshold: float = 0.05,
+    cohen_d_floor: float = 0.30,
+) -> Dict[str, float]:
+    """Cohort H4 verdict per framework v1.0.5 §3.4 lock.
+
+    Returns dict: `verdict`, `wilcoxon_p`, `cohen_d`, `n_subjects`, `median_I_rate`,
+    `median_I_geom`. Non-finite I_rate or I_geom rows are dropped before stats.
+    """
+    a = np.asarray(I_rate_per_subject, dtype=float)
+    b = np.asarray(I_geom_per_subject, dtype=float)
+    finite = np.isfinite(a) & np.isfinite(b)
+    a, b = a[finite], b[finite]
+    n = len(a)
+    if n < 6:
+        return {
+            "verdict": "UNDERPOWERED",
+            "wilcoxon_p": float("nan"),
+            "cohen_d": float("nan"),
+            "n_subjects": int(n),
+            "median_I_rate": float(np.median(a)) if n else float("nan"),
+            "median_I_geom": float(np.median(b)) if n else float("nan"),
+        }
+    diff = a - b  # positive → rate more unstable than geom (SEF-ITP direction)
+    p_greater = float(wilcoxon(diff, alternative="greater", zero_method="wilcox").pvalue)
+    cohen_d = float(np.mean(diff) / (np.std(diff, ddof=1) + 1e-12))
+
+    if p_greater < p_threshold and cohen_d >= cohen_d_floor:
+        verdict = "PASS"
+    elif cohen_d < 0:
+        p_less = float(wilcoxon(diff, alternative="less", zero_method="wilcox").pvalue)
+        verdict = "FAIL" if p_less < p_threshold else "NULL"
+    else:
+        verdict = "NULL"
+
+    return {
+        "verdict": verdict,
+        "wilcoxon_p": p_greater,
+        "cohen_d": cohen_d,
+        "n_subjects": int(n),
+        "median_I_rate": float(np.median(a)),
+        "median_I_geom": float(np.median(b)),
     }

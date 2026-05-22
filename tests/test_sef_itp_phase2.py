@@ -510,3 +510,54 @@ def test_compute_I_geom_perfect_stability_zero_obs():
     )
     assert result["geom_dispersion_std_obs"] == pytest.approx(0.0, abs=1e-9)
     assert result["I_geom"] == pytest.approx(0.0, abs=1e-9)
+
+
+# --------------------------------------------------------------------------- #
+# Task 9 — H4 cohort Wilcoxon + Cohen's d verdict
+# --------------------------------------------------------------------------- #
+
+
+def test_h4_cohort_verdict_pass():
+    """All subjects I_rate >> I_geom + Wilcoxon p < 0.05 + Cohen's d ≥ 0.3 → PASS."""
+    I_rate = np.array([3.0, 2.5, 2.8, 2.2, 3.5, 2.9, 2.1, 3.1, 2.6, 2.4])
+    I_geom = np.array([0.5, 0.8, 0.7, 0.9, 0.6, 0.8, 1.0, 0.7, 0.9, 0.8])
+    result = p2.compute_h4_cohort_verdict(I_rate, I_geom)
+    assert result["verdict"] == "PASS"
+    assert result["wilcoxon_p"] < 0.05
+    assert result["cohen_d"] >= 0.3
+
+
+def test_h4_cohort_verdict_null_low_effect():
+    """I_rate ≈ I_geom → NULL."""
+    rng = np.random.default_rng(42)
+    I_rate = rng.normal(1.0, 0.3, size=10)
+    I_geom = rng.normal(1.0, 0.3, size=10)
+    result = p2.compute_h4_cohort_verdict(I_rate, I_geom)
+    assert result["verdict"] == "NULL"
+
+
+def test_h4_cohort_verdict_fail_geom_more_unstable():
+    """I_geom systematically > I_rate → FAIL."""
+    I_rate = np.array([0.5, 0.6, 0.4, 0.7, 0.5, 0.8, 0.4, 0.6, 0.5, 0.7])
+    I_geom = np.array([2.5, 2.4, 2.8, 2.3, 2.6, 2.2, 2.7, 2.4, 2.5, 2.3])
+    result = p2.compute_h4_cohort_verdict(I_rate, I_geom)
+    assert result["verdict"] == "FAIL"
+    assert result["cohen_d"] < 0
+
+
+def test_h4_cohort_verdict_underpowered_n_lt_6():
+    """n < 6 → UNDERPOWERED, no PASS/NULL/FAIL."""
+    I_rate = np.array([3.0, 2.5, 2.8])
+    I_geom = np.array([0.5, 0.8, 0.7])
+    result = p2.compute_h4_cohort_verdict(I_rate, I_geom)
+    assert result["verdict"] == "UNDERPOWERED"
+    assert result["n_subjects"] == 3
+
+
+def test_h4_cohort_verdict_handles_inf_filter():
+    """Subjects with non-finite I_rate or I_geom are filtered out before stats."""
+    I_rate = np.array([3.0, np.inf, 2.5, np.inf, 2.8, np.nan, 3.5, 2.9, 2.1, 3.1, 2.6, 2.4])
+    I_geom = np.array([0.5, 0.8, np.inf, 0.9, 0.6, 0.8, 1.0, 0.7, 0.9, 0.8, 0.6, 0.8])
+    result = p2.compute_h4_cohort_verdict(I_rate, I_geom)
+    # Indices 1, 2, 3, 5 have non-finite values → drop. Remaining n=8.
+    assert result["n_subjects"] == 8
