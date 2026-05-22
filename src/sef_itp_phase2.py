@@ -67,3 +67,71 @@ class SubjectPhase2Data:
     block_time_ranges: List[Tuple[float, float]]
     template_ranks: Dict[int, np.ndarray]  # {cluster_id: rank vector aligned to channel_names}
     channel_names: List[str]
+
+
+# --------------------------------------------------------------------------- #
+# H3 ingest extractors
+#
+# H3's three statistical layers all source from existing per-subject JSONs:
+#   1. mark-transition lag1 + window excess: PR-7 burst + PR-7 pairing
+#   2. burst run length: PR-7 burst
+#   3. endpoint geometric stability: PR-6 anchoring (split_half_robustness)
+#
+# CLAUDE.md §6.1 re-use check (question-match):
+#   - PR-7 burst's lag1_same_excess vs N2: same question as H3 layer 1 (lag-1 same-template
+#     frequency vs marginal-preserving null). DIRECT INGEST.
+#   - PR-7 pairing's window excess @ {10, 30, 60, 1800}s vs N2: same question as H3 multi-scale
+#     mark-transition. DIRECT INGEST.
+#   - PR-6's split_half_robustness.subject_mean_jaccard_endpoint: same question as H3
+#     endpoint geometric stability (Jaccard recall of endpoint set across temporal split).
+#     DIRECT INGEST.
+# --------------------------------------------------------------------------- #
+
+
+def extract_window_excess_from_pairing(
+    pairing_json: dict,
+    windows: Tuple[float, ...] = (10.0, 30.0, 60.0, 1800.0),
+    null_key: str = "N2",
+) -> Dict[float, float]:
+    """Pull `excess` at the requested Δt windows from a PR-7 pairing per-subject JSON.
+
+    PR-7 schema: `pairing_with_nulls.lift.<null>.<window_str>.excess`. Windows are stored as
+    string keys (e.g. `"10.0"`).
+
+    Raises KeyError if `pairing_with_nulls`, `lift`, `null_key`, or any requested window is
+    missing. No silent default — H3 must not paper over a missing PR-7 window.
+    """
+    lift = pairing_json["pairing_with_nulls"]["lift"][null_key]
+    return {w: float(lift[f"{w}"]["excess"]) for w in windows}
+
+
+def extract_lag1_and_runlength_from_burst(
+    burst_json: dict,
+    null_key: str = "N2",
+) -> Tuple[float, float]:
+    """Pull (lag1_same_excess, run_length_lift) from a PR-7 burst per-subject JSON.
+
+    PR-7 schema:
+      `burst_diagnostic.lag1_same_excess.<null_key>` → float (target=0 in H3 TOST)
+      `burst_diagnostic.lift.<null_key>.run_length_lift` → float (target=1 in H3 TOST)
+    """
+    bd = burst_json["burst_diagnostic"]
+    lag1 = float(bd["lag1_same_excess"][null_key])
+    run_length = float(bd["lift"][null_key]["run_length_lift"])
+    return lag1, run_length
+
+
+def extract_endpoint_jaccard_from_anchoring(
+    anchoring_json: dict,
+) -> Tuple[float, float]:
+    """Pull (first_half_second_half, odd_even_block) endpoint Jaccard from a PR-6 anchoring
+    per-subject JSON.
+
+    PR-6 schema:
+      `split_half_robustness.per_split.first_half_second_half.subject_mean_jaccard_endpoint`
+      `split_half_robustness.per_split.odd_even_block.subject_mean_jaccard_endpoint`
+    """
+    per_split = anchoring_json["split_half_robustness"]["per_split"]
+    fh = float(per_split["first_half_second_half"]["subject_mean_jaccard_endpoint"])
+    oe = float(per_split["odd_even_block"]["subject_mean_jaccard_endpoint"])
+    return fh, oe
