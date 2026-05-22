@@ -17,6 +17,16 @@
 3. **δ_excess = 0.05** lock at framework time. Forbid post-hoc adjustment.
 4. **H4 Cohen's d ≥ 0.3 floor** + Wilcoxon p<0.05. Forbid CV ≥ 3× v1 hard ratio (废 in v1.0.2).
 5. **`masked_features` paths everywhere.** All consumers must read from `results/interictal_propagation_masked/...` (lagPatRank phantom-rank fix; Topic 0 §3.1). All lagPat loads via `src.lagpat_rank_audit.build_masked_kmeans_features` or `src.topic4_attractor_diagnostics.build_rank_feature_matrix(mask_phantom=True)`.
+
+**Advisor catches (2026-05-23, before implementation) — locked into plan:**
+
+A. **H3 endpoint stability combinator = OR (NOT AND).** Project convention (AGENTS.md cross-PR `forward_reverse_reproduced` = split-half OR odd-even). Defaulting to AND silently tightens the contract. Plan & Task 4 implementation use OR. Documented in archive.
+
+B. **H4 I_rate matched null spec ambiguity is a science decision, not implementation.** Framework v1.0.5 §3.4 prose "shuffle epoch order, recompute std" is mathematically degenerate (std is permutation-invariant). Multiple non-degenerate readings exist (circular-shift-within-block / homogeneous Poisson / gamma-fit resample / cross-epoch event shuffle preserving block boundary). Plan implements **BOTH** the literal `epoch_order_shuffle` (reports `I_rate_undefined_under_shuffle_null: true`) **AND** `circular_shift_within_block` variants, reports both in per-subject + cohort summary, and writes `spec_amendment_2026-05-23.md` as a **proposal**, not a lock. **STOP after Task 13** — do NOT edit framework doc autonomously (Task 14 deferred until user returns).
+
+C. **LOO populator is a separate task (Task 11.5).** Summarizer computes leave-one-out per metric by dropping each subject and re-running `tost_equivalence`; fills `leave_one_out_min_pass_rate` per metric. Without this, `compute_h3_integrated_verdict`'s CONTRADICTED branch silently never fires (default=1.0 masks unrobust-but-failing cases).
+
+D. **Promote `_resolve_lagpat_subject_dir`** from `scripts/run_sef_itp_phase1.py:116` to public `resolve_lagpat_subject_dir` in `src.sef_itp_phase1` (Task 1 prep), so Phase 2 imports without script-cross-dependency.
 6. **Re-use don't re-invent (CLAUDE.md §6 + §6.1):**
    - `pr7_addendum_p3_equivalence.tost_equivalence` is reused for H3 cohort TOST. **Question-match check**: PR-7 addendum asks "is cohort median of metric X equivalent to target within ±δ?" — H3 asks exactly the same question for different metrics (lag1_same_excess, window_excess at 10/30/60/1800s, run_length_lift). Test apparatus is reusable; subject 548 leave-out is PR-7-specific and dropped (Phase 2 cohort is n=23, not n=8).
    - `compute_burst_diagnostic_with_nulls` is reused on cohort subjects where PR-7 audit gates excluded them (Task 0 runs burst with relaxed gate). Same null construction (N2 marginal-preserving), same metrics. Question-match: both ask "compared to N2 mark-independent null, what is the lift on burst metrics?" — exact match.
@@ -613,7 +623,7 @@ git commit -m "feat(topic4 phase2): re-use PR-7 TOST equivalence for H3 cohort v
 
 Mark-transition layer = `lag1_same_excess` AND each of `window_excess @ {10s, 30s, 60s, 1800s}` AND `run_length_lift`. "Mark-transition compatible" = all 6 TOST tests equivalence_pass=True.
 
-Endpoint geometry layer = `endpoint_jaccard_first_half_median ≥ 0.7` AND `endpoint_jaccard_odd_even_median ≥ 0.7` AND each subject's per-split Jaccard ≥ 0.5 (per subject hard floor; otherwise that subject flagged as "unstable").
+Endpoint geometry layer = `endpoint_jaccard_first_half_median ≥ 0.7` **OR** `endpoint_jaccard_odd_even_median ≥ 0.7` (advisor catch A — project convention from `forward_reverse_reproduced`). Per-subject hard floor: at least one of the two Jaccard values ≥ 0.5.
 
 Integrated:
 
@@ -646,15 +656,29 @@ def test_h3_integrated_verdict_supported():
 
 
 def test_h3_integrated_verdict_not_supported_geometry_unstable():
-    """All TOST equivalent + endpoint Jaccard median < 0.7 → NOT_SUPPORTED_GEOMETRY_UNSTABLE."""
+    """All TOST equivalent + BOTH endpoint Jaccard medians < 0.7 → NOT_SUPPORTED_GEOMETRY_UNSTABLE.
+    OR combinator (advisor catch A) — one ≥ 0.7 would already qualify as stable."""
     verdict = p2.compute_h3_integrated_verdict(
         cohort_tost={k: {"equivalence_pass": True, "cohort_main": {"equivalence_pass": True}}
                      for k in ("lag1_same_excess", "window_excess_10s", "window_excess_30s",
                                "window_excess_60s", "window_excess_1800s", "run_length_lift")},
         endpoint_jaccard_first_half_median=0.60,
-        endpoint_jaccard_odd_even_median=0.55,
+        endpoint_jaccard_odd_even_median=0.55,  # both below threshold
     )
     assert verdict == "NOT_SUPPORTED_GEOMETRY_UNSTABLE"
+
+
+def test_h3_integrated_verdict_or_combinator():
+    """One Jaccard median ≥ 0.7, other below → still SUPPORTED (OR combinator).
+    Mirrors AGENTS.md forward_reverse_reproduced = split-half OR odd-even."""
+    verdict = p2.compute_h3_integrated_verdict(
+        cohort_tost={k: {"equivalence_pass": True, "cohort_main": {"equivalence_pass": True}}
+                     for k in ("lag1_same_excess", "window_excess_10s", "window_excess_30s",
+                               "window_excess_60s", "window_excess_1800s", "run_length_lift")},
+        endpoint_jaccard_first_half_median=0.85,  # ≥ 0.7
+        endpoint_jaccard_odd_even_median=0.55,    # < 0.7
+    )
+    assert verdict == "SUPPORTED"  # OR — only one needs to clear threshold
 
 
 def test_h3_integrated_verdict_contradicted_robust():
@@ -702,8 +726,8 @@ def compute_h3_integrated_verdict(
     mark_pass = all(cohort_tost[k]["equivalence_pass"] for k in mark_keys)
     endpoint_stable = (
         endpoint_jaccard_first_half_median >= jaccard_threshold
-        and endpoint_jaccard_odd_even_median >= jaccard_threshold
-    )
+        or endpoint_jaccard_odd_even_median >= jaccard_threshold
+    )  # OR — project convention (AGENTS.md forward_reverse_reproduced)
 
     if mark_pass and endpoint_stable:
         return "SUPPORTED"
@@ -1037,7 +1061,7 @@ def test_compute_I_rate_matched_null_preserves_marginal():
 
 - [ ] **Step 2: Run, confirm fail.**
 
-- [ ] **Step 3: Implement** — but realize the H4 contract requires re-reading framework v1.0.5 §3.4:
+- [ ] **Step 3: Implement** — but framework v1.0.5 §3.4 has a science spec ambiguity:
 
 The framework says:
 > `I_rate = std(log(rate)) across epochs / sqrt(matched-null variance of log(rate))`
@@ -1045,21 +1069,15 @@ The framework says:
 
 But std is **invariant** to permutation of a fixed set of values. So matched-null variance of `std(log(rate))` under epoch-order shuffle is identically 0 by construction.
 
-**This is a framework spec bug** discovered during planning. The matched null must shuffle something OTHER than epoch order if I_rate is to be well-defined. Options:
+**Per advisor catch B (2026-05-23): this is a science decision, not an implementation choice.** Multiple non-degenerate readings exist:
+- **(a) circular-shift-within-block**: random offset Δ ∈ [0, epoch_seconds), shift event times within each block (wrap-around), re-slice; preserves temporal structure at sub-epoch scale, randomizes epoch-membership
+- **(b) homogeneous Poisson**: resample event timestamps from a Poisson with the same total event count over the same block duration; null distribution reflects "what would std be if rate were truly constant"
+- **(c) gamma-fit resample**: fit gamma to empirical per-epoch rates, resample
+- **(d) cross-epoch shuffle preserving block boundary**: literal alternative reading — shuffle events across epochs within a block
 
-(a) Shuffle epoch boundaries within block (re-slice with shifted offset), recompute rate per epoch → null distribution of std(log(rate)) reflects "what would std be if temporal structure of events were preserved at sub-epoch scale but epoch-membership were re-assigned". This is a circular-shift null.
+**Implement BOTH (a) and the literal (epoch_order_shuffle) null.** Report both. Write proposal in `spec_amendment_2026-05-23.md`. **STOP at Task 13** — do not pick one autonomously.
 
-(b) Resample event timestamps from a homogeneous Poisson with the same total rate → null distribution of std(log(rate)) reflects "what would std be if rate were truly constant". This is a Poisson null.
-
-(c) Resample epoch-rate values from a Gamma fit to the empirical → null distribution under a smooth-rate model.
-
-**Decision** (write into archive): The framework §3.4 spec is ambiguous; we adopt (a) **circular-shift null**: for each permutation, choose a random offset Δ in [0, epoch_seconds), shift all event times by Δ (wrap within each block), re-slice into epochs starting at block start, re-compute rate per epoch, take std(log(rate)). The null distribution of std(log(rate)) is then non-degenerate and captures "what std would be if the temporal structure of events were preserved but epoch-membership were randomized within sub-epoch resolution."
-
-This must be flagged in the archive as a **framework spec amendment** (not bug fix) at Phase 2 v1.0.0 lock. CLAUDE.md §5 "Re-consult the Contract at Every Step Boundary": surface the issue, don't paper over.
-
-**Action:** Pause implementation; record the spec amendment in the archive doc draft; surface to the user when they return (since they're away 8h). Document the decision in `docs/archive/topic4/sef_itp_phase2/spec_amendment_2026-05-23.md` with the math derivation.
-
-For now, implement the placeholder with the trivial shuffle null + the `I_rate_undefined_under_shuffle_null` flag set, and add a `compute_I_rate_normalized_circular_shift` variant gated by a `null_method` parameter.
+For now: `compute_I_rate_normalized` exposes `null_method` parameter; both methods callable; both per-subject results captured in JSON output.
 
 ```python
 def compute_I_rate_normalized(
@@ -1109,11 +1127,100 @@ Add the circular-shift variant — `compute_I_rate_normalized_circular_shift(eve
 
 - [ ] **Step 4: Run tests, verify pass.**
 
-- [ ] **Step 5: Add `compute_I_rate_normalized_circular_shift` + test, commit, then surface spec amendment to user in archive note.**
+- [ ] **Step 5: Add `compute_I_rate_normalized_circular_shift` + test**:
+
+```python
+def compute_I_rate_normalized_circular_shift(
+    event_abs_times: np.ndarray,
+    block_time_ranges: List[Tuple[float, float]],
+    epoch_hours: float = 2.0,
+    min_events: int = 10,
+    n_perm: int = 1000,
+    seed: int = 0,
+) -> Dict[str, float]:
+    """Non-degenerate null for I_rate: per permutation, choose a random offset Δ ∈ [0, epoch_seconds)
+    per block, shift event times within block (wrap-around), re-slice into epochs starting at block
+    start, compute per-epoch rate, take std(log(rate)).
+    """
+    times = np.asarray(event_abs_times, dtype=float)
+    epoch_seconds = epoch_hours * 3600.0
+    rng = np.random.default_rng(seed)
+
+    def _rates_for(times_in):
+        rates = []
+        for (b_start, b_end) in block_time_ranges:
+            block_duration = b_end - b_start
+            n_epochs = int(np.floor(block_duration / epoch_seconds))
+            for k in range(n_epochs):
+                t_s = b_start + k * epoch_seconds
+                t_e = t_s + epoch_seconds
+                cnt = int(np.sum((times_in >= t_s) & (times_in < t_e)))
+                if cnt >= min_events:
+                    rates.append(cnt / epoch_hours)
+        return np.array(rates)
+
+    obs_rates = _rates_for(times)
+    obs_log_rates = np.log(obs_rates + 1e-12)
+    obs_std = float(np.std(obs_log_rates))
+
+    null_stds = []
+    for _ in range(n_perm):
+        shifted = times.copy()
+        for bi, (b_start, b_end) in enumerate(block_time_ranges):
+            mask = (shifted >= b_start) & (shifted < b_end)
+            delta = rng.uniform(0.0, epoch_seconds)
+            shifted_block = shifted[mask] + delta
+            # wrap-around within block
+            block_duration = b_end - b_start
+            wrap = (shifted_block - b_start) % block_duration + b_start
+            shifted[mask] = wrap
+        null_log_rates = np.log(_rates_for(shifted) + 1e-12)
+        null_stds.append(float(np.std(null_log_rates)))
+
+    null_stds = np.asarray(null_stds)
+    null_var = float(np.var(null_stds))
+    null_mean = float(np.mean(null_stds))
+    I_rate = obs_std / np.sqrt(null_var) if null_var > 1e-12 else float("inf")
+    return {
+        "I_rate": I_rate,
+        "log_rate_std_obs": obs_std,
+        "null_std_mean": null_mean,
+        "null_std_var": null_var,
+        "n_epochs": int(len(obs_rates)),
+        "null_method": "circular_shift_within_block",
+    }
+```
+
+Test:
+```python
+def test_compute_I_rate_circular_shift_nondegenerate():
+    """Circular shift null gives non-zero variance → I_rate well-defined."""
+    rng = np.random.default_rng(0)
+    # 24h block, 30 events/h average, with a slow modulation creating rate variability
+    t0 = 1_000_000.0
+    times = np.sort(t0 + rng.uniform(0, 86_400, size=720))
+    result = p2.compute_I_rate_normalized_circular_shift(
+        event_abs_times=times,
+        block_time_ranges=[(t0, t0 + 86_400)],
+        epoch_hours=2.0, n_perm=200, seed=0,
+    )
+    assert result["null_std_var"] > 0
+    assert np.isfinite(result["I_rate"])
+```
+
+- [ ] **Step 6: Write `spec_amendment_2026-05-23.md` as a proposal (not lock).**
+
+```bash
+mkdir -p docs/archive/topic4/sef_itp_phase2
+```
+
+Document the four candidate null methods (a–d above), math derivation of why epoch-order-shuffle is degenerate, expected behaviour of each candidate, and the recommendation (option a: circular-shift-within-block) — **as a proposal awaiting user ratification**. State explicitly that the framework doc edit is deferred until the user returns.
+
+- [ ] **Step 7: Commit**
 
 ```bash
 git add src/sef_itp_phase2.py tests/test_sef_itp_phase2.py docs/archive/topic4/sef_itp_phase2/spec_amendment_2026-05-23.md
-git commit -m "feat(topic4 phase2): H4 I_rate normalized instability + spec amendment (circular-shift null)"
+git commit -m "feat(topic4 phase2): H4 I_rate two null methods (literal + circular-shift) + spec amendment proposal"
 ```
 
 ---
@@ -1403,6 +1510,75 @@ git commit -m "feat(topic4 phase2): runner script (H3 ingest + H4 instability pe
 
 ---
 
+## Task 10.5: Promote `_resolve_lagpat_subject_dir` to public
+
+**Files:**
+- Modify: `src/sef_itp_phase1.py` (add public `resolve_lagpat_subject_dir`)
+- Modify: `scripts/run_sef_itp_phase1.py` (use the promoted version)
+- Add: test in `tests/test_sef_itp_phase1.py` (or extend existing)
+
+Currently lives at `scripts/run_sef_itp_phase1.py:116` as private. Phase 2 needs it; cross-script import is a smell. Promote with a 30-second move + import-swap.
+
+- [ ] **Step 1: Add to `src/sef_itp_phase1.py`** (resolve helper body verbatim, with default roots):
+
+```python
+from pathlib import Path
+
+YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
+EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+
+def resolve_lagpat_subject_dir(
+    dataset: str,
+    subject_id: str,
+    yuquan_root: Path = YUQUAN_ROOT,
+    epilepsiae_root: Path = EPILEPSIAE_ROOT,
+) -> Path:
+    """Locate the lagPat NPZ directory for a subject across both datasets."""
+    if dataset == "yuquan":
+        return yuquan_root / subject_id
+    legacy = epilepsiae_root / subject_id / "all_recs"
+    return legacy if legacy.exists() else epilepsiae_root / subject_id
+```
+
+- [ ] **Step 2: Update `scripts/run_sef_itp_phase1.py:116`** to delegate:
+
+```python
+from src.sef_itp_phase1 import resolve_lagpat_subject_dir as _resolve_lagpat_subject_dir
+# remove the old local definition
+```
+
+- [ ] **Step 3: Add a test** verifying the resolver picks `all_recs` vs flat for Epilepsiae:
+
+```python
+def test_resolve_lagpat_subject_dir_dispatches_dataset(tmp_path):
+    from src.sef_itp_phase1 import resolve_lagpat_subject_dir
+    yuq = tmp_path / "yuq"
+    epi = tmp_path / "epi"
+    (yuq / "subj1").mkdir(parents=True)
+    (epi / "subj2" / "all_recs").mkdir(parents=True)
+    (epi / "subj3").mkdir()  # legacy flat
+    assert resolve_lagpat_subject_dir("yuquan", "subj1", yuq, epi) == yuq / "subj1"
+    assert resolve_lagpat_subject_dir("epilepsiae", "subj2", yuq, epi) == epi / "subj2" / "all_recs"
+    assert resolve_lagpat_subject_dir("epilepsiae", "subj3", yuq, epi) == epi / "subj3"
+```
+
+- [ ] **Step 4: Run full Phase 1 test suite to confirm no regression.**
+
+```bash
+python3 -m pytest tests/test_sef_itp_phase1.py tests/test_run_sef_itp_phase1_integration.py -v
+```
+
+Expected: 115/115 still green (or +1 for the new resolver test).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/sef_itp_phase1.py scripts/run_sef_itp_phase1.py tests/test_sef_itp_phase1.py
+git commit -m "refactor(topic4 phase1): promote resolve_lagpat_subject_dir to public src module"
+```
+
+---
+
 ## Task 11: Summarizer `scripts/summarize_sef_itp_phase2.py`
 
 **Files:**
@@ -1421,6 +1597,92 @@ Reads per-subject JSONs from `results/topic4_sef_itp/phase2_temporal_x_geometry/
 ```bash
 git add scripts/summarize_sef_itp_phase2.py
 git commit -m "feat(topic4 phase2): cohort summarizer (H3 TOST + H4 Wilcoxon verdicts)"
+```
+
+---
+
+## Task 11.5: LOO populator (advisor catch C — required for H3 CONTRADICTED branch)
+
+**Files:**
+- Modify: `scripts/summarize_sef_itp_phase2.py`
+- Modify: `tests/test_sef_itp_phase2.py` (add test)
+
+Without leave-one-out, `compute_h3_integrated_verdict`'s CONTRADICTED branch silently never fires (`default=1.0` masks unrobust-but-failing cases). The summarizer must populate `leave_one_out_min_pass_rate` per metric.
+
+- [ ] **Step 1: Write failing test in `tests/test_sef_itp_phase2.py`**
+
+```python
+def test_cohort_tost_with_leave_one_out_robust_failure():
+    """When the cohort metric fails TOST equivalence AND the failure persists across all LOO drops,
+    leave_one_out_min_pass_rate = 0.0 (no LOO subset restores equivalence)."""
+    # Build a cohort where 30 subjects all have value ~0.10 (far above δ=0.05 band)
+    rng = np.random.default_rng(0)
+    values = rng.normal(0.10, 0.005, size=30)
+    cohort_main = p2.tost_equivalence(values, target=0.0, delta=0.05, n_boot=1000, seed=0)
+    assert cohort_main["equivalence_pass"] is False  # main cohort fails
+
+    loo = p2.cohort_tost_with_loo(values, target=0.0, delta=0.05, n_boot=500, seed=0)
+    assert loo["cohort_main"]["equivalence_pass"] is False
+    assert loo["leave_one_out_min_pass_rate"] == 0.0  # 0/30 LOO subsets restore equivalence
+
+
+def test_cohort_tost_with_leave_one_out_single_subject_sensitive():
+    """One subject is the outlier. Dropping it restores equivalence."""
+    values = np.concatenate([
+        np.random.default_rng(0).normal(0.0, 0.005, size=29),  # 29 compatible
+        np.array([0.5]),                                        # 1 huge outlier
+    ])
+    loo = p2.cohort_tost_with_loo(values, target=0.0, delta=0.05, n_boot=500, seed=0)
+    assert loo["cohort_main"]["equivalence_pass"] is False  # outlier breaks it
+    assert loo["leave_one_out_min_pass_rate"] > 0.0  # ≥ 1/30 LOO restores
+```
+
+- [ ] **Step 2: Implement `cohort_tost_with_loo` in `src/sef_itp_phase2.py`**:
+
+```python
+def cohort_tost_with_loo(
+    values: np.ndarray,
+    target: float,
+    delta: float,
+    n_boot: int = 10_000,
+    alpha: float = 0.05,
+    seed: int = 0,
+) -> dict:
+    """Cohort TOST + leave-one-out robustness.
+
+    Returns:
+      cohort_main: tost_equivalence on full cohort
+      leave_one_out: dict {drop_i: tost_equivalence dict} for each subject dropped
+      leave_one_out_min_pass_rate: fraction of LOO subsets that pass equivalence
+      equivalence_pass: True iff cohort_main passes (mirrored for compat with verdict logic)
+    """
+    values = np.asarray(values, dtype=float)
+    n = len(values)
+    main = tost_equivalence(values, target, delta, n_boot=n_boot, alpha=alpha, seed=seed)
+    loo = {}
+    n_pass = 0
+    for i in range(n):
+        sub = np.delete(values, i)
+        loo[f"drop_{i}"] = tost_equivalence(sub, target, delta, n_boot=n_boot, alpha=alpha, seed=seed + 1 + i)
+        if loo[f"drop_{i}"]["equivalence_pass"]:
+            n_pass += 1
+    return {
+        "cohort_main": main,
+        "equivalence_pass": main["equivalence_pass"],  # alias for verdict consumer
+        "leave_one_out": loo,
+        "leave_one_out_min_pass_rate": n_pass / n if n > 0 else 0.0,
+    }
+```
+
+- [ ] **Step 3: Wire `cohort_tost_with_loo` into summarizer for each metric.**
+
+- [ ] **Step 4: Run tests; verify pass.**
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/sef_itp_phase2.py scripts/summarize_sef_itp_phase2.py tests/test_sef_itp_phase2.py
+git commit -m "feat(topic4 phase2): cohort TOST + leave-one-out for CONTRADICTED branch"
 ```
 
 ---
@@ -1489,24 +1751,20 @@ git commit -m "docs(topic4 phase2): cohort run + archive doc (H3 + H4 results)"
 
 ---
 
-## Task 14: Framework doc update
+## Task 14 (DEFERRED — DO NOT RUN AUTONOMOUSLY): Framework doc update
 
-**Files:**
-- Modify: `docs/topic4_sef_itp_framework.md`
+**Advisor catch B (2026-05-23):** the H4 I_rate matched-null spec amendment is a science decision, not an implementation choice. The framework doc edit must be **proposed** to the user in `spec_amendment_2026-05-23.md` and only ratified when the user returns. **STOP after Task 13.**
 
-- [ ] **Step 1:** Update §6.3 Phase 2 status: add "completed 2026-05-23, see archive cohort_run_2026-05-23.md" + link.
-- [ ] **Step 2:** Update §3.4 H4 prose: add note "Phase 2 v1.0.0 spec amendment: matched null = circular-shift-within-block (epoch-order-shuffle is degenerate; see archive spec_amendment_2026-05-23.md)".
-- [ ] **Step 3:** Add §11 self-check items:
-  - [x] H3 verdict run on n=23 cohort (SUPPORTED / NOT_SUPPORTED_* / CONTRADICTED)
-  - [x] H4 cohort verdict run with circular-shift matched null + Cohen's d ≥ 0.3 floor
-- [ ] **Step 4:** Update version banner to **v1.0.6** with Phase 2 completion note.
+Deliverables to user when they return:
+- `docs/archive/topic4/sef_itp_phase2/spec_amendment_2026-05-23.md` (proposal)
+- `docs/archive/topic4/sef_itp_phase2/cohort_run_2026-05-23.md` (per-subject + cohort with **both** null methods reported side by side)
+- One-line summary in chat about what was decided autonomously and what is awaiting their call
 
-- [ ] **Step 5: Commit**
+The user decides:
+1. Which null method enters the framework (circular-shift / Poisson / gamma / cross-epoch shuffle / something else)
+2. Whether the framework banner moves to v1.0.6 or stays at v1.0.5 with a Phase 2 results pointer
 
-```bash
-git add docs/topic4_sef_itp_framework.md
-git commit -m "docs(topic4): framework v1.0.6 — Phase 2 (H3 + H4) results landed"
-```
+**This task is intentionally NOT executable as a checkbox sequence.** It is a stop-sign.
 
 ---
 
