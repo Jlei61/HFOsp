@@ -244,7 +244,7 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             "n_clusters_total": sum(h1_verdicts_per_cluster.values()),
         },
         "h2": {
-            "tier_lock": "directional_mechanism_sanity_not_cohort_claim",
+            "tier_lock": "primary_cohort_claim_spatial_layer_v1_0_5",  # 2026-05-22 user tier 拨正
             "source_contract": "rank_displacement_swap_sweep",
             "n_testable_total": h2_n_testable,
             "n_not_testable": h2_n_not_testable,
@@ -322,7 +322,7 @@ def main(argv=None) -> int:
         print(f"  {v}: {n}")
     print(f"  categorical: {summary['h1']['categorical_distribution']}")
     h2 = summary["h2"]
-    print(f"\nH2 (rank-displacement swap-k — mechanism sanity, NOT cohort claim):")
+    print(f"\nH2 (rank-displacement swap-k — primary cohort claim v1.0.5):")
     print(f"  TOTAL n_testable: {h2['n_testable_total']}, n_not_testable: {h2['n_not_testable']}")
     print(f"  swap_class distribution: {h2['swap_class_distribution']}")
     print(f"  strict + candidate: {h2['n_strict_or_candidate']} / {h2['n_testable_total']}")

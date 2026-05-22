@@ -269,6 +269,87 @@ H2 tier 不变：仍是 **directional mechanism sanity, NOT cohort claim**。
 
 ---
 
+## 10. v1.0.5 tier 拨正 — 用户 2026-05-22
+
+### 10.1 用户诊断
+
+v1.0.4 把 H2 标记为 "directional mechanism sanity, NOT cohort claim" 是 cohort 转移错误：
+
+- PR-6 plan §3.3 + §15 的 mechanism-sanity 锁是针对 **PR-6 自己的 n=6 8-subset 测试**（PR-2.5 strict subcohort），统计功效根本不允许 cohort claim
+- Topic 4 v1.0.4 H2 是**不同的测试**（rank-displacement swap-k + spatial compactness）跑在**不同的 cohort**（n=23），需要重新评估 tier
+- 更根本：**H1 才是 sanity / 必要前置**——任何"有结构传播"的模型（独立稳定锚点 / 单向行波 / 多焦点同步 / SEF-ITP 都包括）都会预测端点空间紧凑。**H2 才是 SEF-ITP 真正反直觉的、与替代模型分离的指纹**：同一空间结构被双向读取意味着 source 和 sink 不是两个独立的解剖区，而是一对耦合端点
+
+### 10.2 v1.0.5 tier 拨正
+
+| 假设 | v1.0.4 tier | v1.0.5 tier | 理由 |
+|---|---|---|---|
+| H1 | cohort claim 候选 | **sanity / 必要前置** | 任何结构化传播模型都预测；不区分 SEF-ITP |
+| H2 | mechanism sanity locked | **primary cohort claim** | SEF-ITP 真正区分性预测；n=23 上统计功效充足 |
+| H6 | cohort claim 候选 | secondary sanity（不变）| 弱信号，cohort 扩展前不升级 |
+
+### 10.3 H2 cohort claim 统计底气
+
+n=23 cohort（masked tree，euclidean，rank-displacement swap_sweep 派生 swap-k）：
+
+| 量 | 数值 | binomial 显著性 |
+|---|---|---|
+| source-side PASS | **19/23 (82.6%)** | p=1.3e-3 vs 50% coin-flip null；p=1.4e-21 vs 5%-α null |
+| sink-side PASS | **16/23 (69.6%)** | p=4.7e-2 vs 50% coin-flip null；p=2.7e-16 vs 5%-α null |
+| both source AND sink PASS | **13/23 (56.5%)** | p=1.2e-3 vs 25% independent baseline |
+| at least one side PASS | **22/23 (95.7%)** | descriptive |
+
+即使在最保守的"50% coin-flip"基线下（每个 subject 独立有 50% 概率 PASS），source 和 sink 两侧都通过 p<0.05；双侧联合在"两侧独立 50%"基线下 p=1.2e-3。**支持 cohort-level claim**。
+
+label 层（窄定义）：strict 5 / candidate 4 / none 14。label 层显著比 spatial 层窄，因为 family-wise null 严格性更高；spatial 层是 SEF-ITP 端点几何耦合的宽定义指纹。
+
+### 10.4 锁定 cohort 判读语言
+
+✅ **允许写**：
+
+- "在 n=23 cohort 上，rank-displacement 派生的 swap-k source-side 与 sink-side 节点各自显著空间紧凑（source 19/23 PASS, binomial p=1.3e-3 vs 50% null；sink 16/23 PASS, p=4.7e-2）"
+- "13/23 subject 双侧同时 PASS (p=1.2e-3 vs 25% independent baseline)，支持 SEF-ITP 对偶端点预测"
+- "spatial 层 cohort claim 成立；label 层窄定义 strict 5/23, candidate 4/23 是更狭义的角色反转信号"
+
+❌ **不能写**：
+
+- "H2 PASS"（信息丢失太多）
+- "H2 100% PASS" / "每个 subject 都通过"（实际 22/23 至少一侧 PASS，但 1/23 双侧 NULL）
+- 从 spatial 层 cohort claim 直接跳到 "source/sink reversal 是 cohort 主效应"（spatial 层是必要不充分，狭义角色反转看 label 层）
+- 把 mechanism sanity 当 tier 来报（已弃用）
+
+### 10.5 v1.0.4 → v1.0.5 是 framework 修订 OR 验收语言收紧
+
+**是 framework 修订**（不是 bug fix）。底层代码 / cohort 数字 / 测试都不变；变的是 **tier 标签 + 报告契约**：
+
+- H1 现在标记 sanity，cohort 31/46 pass-like 仍报，但不作为支持 SEF-ITP 的核心证据
+- H2 现在允许 cohort claim 措辞（带分母 + binomial p）
+- 失败模式表 H1 列改"sanity / 必要前置"、H2 列改"primary cohort claim"
+- "Pre-registered hypothesis tier is fixed at planning time" (CLAUDE.md §5) 的辩解：framework v1.0 没有把 H2 pre-register 为 mechanism sanity 那是 v1.0.3 错把 PR-6 plan §3.3 的 cohort-specific lock 转移过来的；v1.0.5 是修正 mis-attribution，**不是 hypothesis tier upgrade**。原 framework §3.2 prose 一直把 H2 列为"core 区分性预测"
+
+### 10.6 下一步（不等坐标）
+
+**用户指示**：不要等 7 个 Yuquan subject 的电极定位。当前 n=23 cohort 已足够支持 v1.0.5 cohort claim。
+
+后续优先级（按顺序）：
+
+1. **Phase 2 启动 (H3 mark independence + H4 normalized instability)** —— framework v1.0.0 §6.3 已有 plan；前置 H6+H1 至少 partial 已满足
+2. **2 个 H1 FAIL_DIFFUSE subject 单独追踪** —— anatomy 异常 vs PR-6 端点定义失败的甄别
+3. **Epilepsiae warp 核实** —— normalization_certainty 升级
+4. **Yuquan 7 个坐标 (low priority)** —— 临床方/imaging 团队，不阻塞 framework 推进
+
+### 10.7 实现 / 测试 / 验收
+
+代码无变更（v1.0.4 实现的 spatial layer 直接对应 v1.0.5 cohort claim 报告契约）。
+
+文档变更：
+- `docs/topic4_sef_itp_framework.md` §3.1 H1 标签 sanity；§3.2 H2 tier lock 改为 primary cohort claim + 报告契约 + 锁定语言；版本横幅 v1.0.4 → v1.0.5；失败模式表 H1 / H2 列重命名
+- `docs/archive/topic4/sef_itp_phase1/cohort_run_2026-05-22.md` §10 本节
+- summarizer / runner 输出可继续用，但 cohort_summary.json `h2.tier_lock` 字段应改为 `"primary_cohort_claim_spatial_layer"`（后续 commit 一起更新；当前 archive 数字 lock）
+
+测试：**115/115 GREEN**（v1.0.4 的实现测试不需要改，只是 tier 语义在文档里调整）
+
+---
+
 ---
 
 ## 0. Cohort 漏斗（实测）
