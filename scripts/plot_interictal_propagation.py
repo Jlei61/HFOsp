@@ -158,9 +158,13 @@ def plot_heatmap_examples(subjects: Dict[str, Dict[str, Any]]) -> None:
         else:
             display_indices = valid_events
         display_ranks = ranks[:, display_indices] if display_indices.size > 0 else ranks
+        display_bools = bools[:, display_indices] if display_indices.size > 0 else bools
 
         ax_ori = fig.add_subplot(inner[0])
-        im = ax_ori.pcolormesh(display_ranks, rasterized=True, cmap="viridis")
+        im = ax_ori.pcolormesh(
+            _mask_phantom_cells(display_ranks, display_bools),
+            rasterized=True, cmap=_viridis_with_lightgray_bad(),
+        )
         ax_ori.set_yticks(np.arange(n_ch) + 0.5)
         ax_ori.set_yticklabels(ch_names, fontsize=6)
         ax_ori.set_xlabel("Pop Events (time order)", fontsize=9)
@@ -187,11 +191,16 @@ def plot_heatmap_examples(subjects: Dict[str, Dict[str, Any]]) -> None:
                 disp_labels = labels[::step][:MAX_DISPLAY]
                 disp_order = np.argsort(disp_labels)
                 clustered_ranks = display_ranks[:, disp_order]
+                clustered_bools = display_bools[:, disp_order]
                 clustered_labels = disp_labels[disp_order]
             else:
                 clustered_ranks = display_ranks[:, order]
+                clustered_bools = display_bools[:, order]
                 clustered_labels = labels[order]
-            ax_clust.pcolormesh(clustered_ranks, rasterized=True, cmap="viridis")
+            ax_clust.pcolormesh(
+                _mask_phantom_cells(clustered_ranks, clustered_bools),
+                rasterized=True, cmap=_viridis_with_lightgray_bad(),
+            )
             boundary = int(np.sum(clustered_labels == 0))
             n_ev_disp_clust = clustered_ranks.shape[1]
             ax_clust.axvline(boundary, color="red", lw=1.5, ls="--")
@@ -202,7 +211,10 @@ def plot_heatmap_examples(subjects: Dict[str, Dict[str, Any]]) -> None:
             ax_clust.text((boundary + n_ev_disp_clust) / 2, n_ch + 0.3,
                           f"C1 (n={c1_total})", ha="center", fontsize=7, color="red")
         else:
-            ax_clust.pcolormesh(display_ranks, rasterized=True, cmap="viridis")
+            ax_clust.pcolormesh(
+                _mask_phantom_cells(display_ranks, display_bools),
+                rasterized=True, cmap=_viridis_with_lightgray_bad(),
+            )
         ax_clust.set_yticks([])
         ax_clust.set_xlabel("Pop Events (clustered)", fontsize=9)
         ax_clust.set_title(f"KMeans k=2{clust_info_str}", fontsize=9)
@@ -837,15 +849,49 @@ def _cluster_profiles(
 
 
 
+def _viridis_with_lightgray_bad():
+    """Return a viridis cmap copy that renders NaN cells as lightgray.
+
+    Used so non-participating channels (Topic 0 §3.1 phantom-rank mask) are
+    visually distinguished from real ranks. Without this, pcolormesh would
+    color the phantom int rank from the legacy `argsort(argsort(x))` producer.
+    """
+    cmap = plt.get_cmap("viridis").copy()
+    cmap.set_bad("lightgray")
+    return cmap
+
+
+def _mask_phantom_cells(display_ranks: np.ndarray, display_bools: np.ndarray | None) -> np.ndarray:
+    """Return a float copy of `display_ranks` with non-participating cells NaN'd.
+
+    `display_bools` has the same shape as `display_ranks`; True = participating
+    event-channel, False = non-participating (legacy producer wrote a phantom
+    int rank there). If `display_bools` is None, returns the input unchanged.
+    Shape mismatch is a programmer error and is asserted.
+    """
+    if display_bools is None:
+        return np.asarray(display_ranks, dtype=float)
+    out = np.asarray(display_ranks, dtype=float).copy()
+    mask = np.asarray(display_bools, dtype=bool)
+    if mask.shape != out.shape:
+        raise ValueError(
+            f"display_bools shape {mask.shape} != display_ranks shape {out.shape}"
+        )
+    out[~mask] = np.nan
+    return out
+
+
 def _plot_rank_heatmap(
     ax: plt.Axes,
     display_ranks: np.ndarray,
     channel_names: List[str],
     title: str,
     show_ylabels: bool = True,
+    display_bools: np.ndarray | None = None,
 ) -> Any:
     n_ch = display_ranks.shape[0]
-    im = ax.pcolormesh(display_ranks, rasterized=True, cmap="viridis")
+    masked = _mask_phantom_cells(display_ranks, display_bools)
+    im = ax.pcolormesh(masked, rasterized=True, cmap=_viridis_with_lightgray_bad())
     ax.set_yticks(np.arange(n_ch) + 0.5)
     ax.set_yticklabels(
         channel_names if show_ylabels else [],
@@ -1318,12 +1364,14 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
     )
     ax_raw = fig.add_subplot(raw_sub[0])
     display_ranks_raw = ranks[channel_order][:, display_events]
+    display_bools_raw = bools[channel_order][:, display_events]
     im = _plot_rank_heatmap(
         ax_raw, display_ranks_raw, ordered_names,
         title=(
             f"{dataset}:{subject}  (n={valid_events.size}, "
             f"\u03c4={all_tau:.3f}){mi_str}"
         ),
+        display_bools=display_bools_raw,
     )
     ax_raw.tick_params(axis="x", labelbottom=False)
     ax_raw.set_xlabel("", fontsize=1)
@@ -1346,8 +1394,10 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
         best_events_sorted = display_events[order_best]
         best_labels_sorted = disp_best_labels[order_best]
         display_ranks_best = ranks[channel_order][:, best_events_sorted]
+        display_bools_best = bools[channel_order][:, best_events_sorted]
         _plot_rank_heatmap(
             ax_clust, display_ranks_best, ordered_names, title="",
+            display_bools=display_bools_best,
         )
         clust_title = (
             f"KMeans k={best_k}  |  within-\u03c4={best_within_tau:.3f}"
@@ -1361,6 +1411,7 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
         _plot_rank_heatmap(
             ax_clust, display_ranks_raw, ordered_names,
             title=f"KMeans k={best_k} (no labels)",
+            display_bools=display_bools_raw,
         )
     ax_clust.set_xlabel("Pop Events (clustered)", fontsize=16)
 
