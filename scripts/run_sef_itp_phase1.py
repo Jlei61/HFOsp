@@ -37,8 +37,6 @@ if str(_REPO_ROOT) not in sys.path:
 
 from src.sef_itp_phase1 import (
     compute_h1_full,
-    compute_h2_set_reversal,
-    compute_h2_spatial_reversal,
     compute_h6_segregation,
     compute_participation_rate,
 )
@@ -89,7 +87,9 @@ class SubjectPhase1Data:
     # PR-6 endpoint output per cluster (indices in unified namespace):
     cluster_endpoints: Dict[int, Dict[str, List[int]]]  # cluster_id → {"S": [...], "K": [...]}
     valid_indices_per_cluster: Dict[int, List[int]]  # cluster_id → all mapped SEEG − endpoint
-    forward_reverse_pairs: List[Dict]  # [{"cluster_A_id": int, "cluster_B_id": int, ...}, ...]
+    # H2 input: PR-6 h2_swap_check already computed per subject (v1.0.8 2026-05-22).
+    # We do NOT recompute swap_score; we ingest PR-6's verdict directly.
+    h2_swap_check: Optional[Dict] = None  # {"swap_score", "null_p", "null_95th", "exit_reason", ...}
     # Audit / provenance:
     coord_provenance: Optional[Dict] = None
     n_dropped_endpoints_no_coords_per_cluster: Optional[Dict[int, int]] = None
@@ -315,24 +315,39 @@ def load_subject_for_phase1(
         cluster_endpoints[cid] = {"S": s_idx, "K": k_idx}
         valid_indices_per_cluster[cid] = valid_idx
 
-    # === Step 7: forward/reverse pairs translation ===
-    pairs_raw = phase0a.get("adaptive_cluster", {}).get(
-        "candidate_forward_reverse_pairs", []
-    )
-    forward_reverse_pairs: List[Dict] = []
-    for p in pairs_raw:
-        a_id = int(p["cluster_a"])
-        b_id = int(p["cluster_b"])
-        if a_id not in cluster_endpoints or b_id not in cluster_endpoints:
-            continue
-        forward_reverse_pairs.append(
-            {
-                "cluster_A_id": a_id,
-                "cluster_B_id": b_id,
-                "reproducibility_source": p.get("label", "candidate_forward_reverse"),
-                "spearman_r": float(p.get("spearman_r", float("nan"))),
-            }
-        )
+    # === Step 7: H2 — ingest PR-6 h2_swap_check directly (v1.0.8 2026-05-22) ===
+    #
+    # We do NOT recompute swap_score. PR-6's h2_swap_check is the locked
+    # contract (PR-6 plan §3.3): per-contact endpoint Jaccard reversal index
+    # + 1000-permutation null per subject. Re-implementing it in Phase 1
+    # would (a) duplicate code, (b) drift from PR-6 contract, (c) risk
+    # silent disagreement with downstream PR-6 sensitivity work.
+    #
+    # PR-6 H2 is registered as MECHANISM SANITY, NOT cohort claim (plan
+    # §3.3 + §15 lock). Phase 1 ingests + reports per-subject swap_score /
+    # null_p / null_95th, plus cohort sign-test (n_exceed / n_total). It
+    # does NOT produce a cohort PASS/NULL/FAIL verdict.
+    h2_swap_check_raw = pr6.get("h2_swap_check")
+    if h2_swap_check_raw is None or h2_swap_check_raw.get("exit_reason") is not None:
+        h2_swap_check: Optional[Dict] = None  # not testable this subject
+    else:
+        h2_swap_check = {
+            "swap_score": h2_swap_check_raw.get("swap_score"),
+            "null_p": h2_swap_check_raw.get("null_p"),
+            "null_95th": h2_swap_check_raw.get("null_95th"),
+            "null_median": h2_swap_check_raw.get("null_median"),
+            "n_perm": h2_swap_check_raw.get("n_perm"),
+            "source_contract": "pr6_h2_swap_check",
+            "source_path": str(pr6_path),
+            "jaccard_t0src_t1snk": h2_swap_check_raw.get("jaccard_t0src_t1snk"),
+            "jaccard_t0snk_t1src": h2_swap_check_raw.get("jaccard_t0snk_t1src"),
+        }
+        sc = h2_swap_check["swap_score"]
+        n95 = h2_swap_check["null_95th"]
+        if sc is not None and n95 is not None:
+            h2_swap_check["exceeds_null_95th"] = bool(sc > n95)
+        else:
+            h2_swap_check["exceeds_null_95th"] = None
 
     return SubjectPhase1Data(
         subject_id=subject_id,
@@ -347,7 +362,7 @@ def load_subject_for_phase1(
         hfo_rate=None,
         cluster_endpoints=cluster_endpoints,
         valid_indices_per_cluster=valid_indices_per_cluster,
-        forward_reverse_pairs=forward_reverse_pairs,
+        h2_swap_check=h2_swap_check,
         coord_provenance=coord_provenance,
         n_dropped_endpoints_no_coords_per_cluster=n_dropped_no_coords,
     )
@@ -384,13 +399,23 @@ def make_synthetic_subject(seed: int = 0) -> SubjectPhase1Data:
         1: {"S": [17, 18, 19], "K": [0, 1, 2]},  # reverse (perfect swap)
     }
     valid_indices_per_cluster = {0: list(range(30)), 1: list(range(30))}
-    fwd_rev_pairs = [{"cluster_A_id": 0, "cluster_B_id": 1, "reproducibility_source": "synthetic"}]
+    # Synthetic h2_swap_check that PR-6 would produce for a perfect forward/reverse:
+    synthetic_h2 = {
+        "swap_score": 1.0,
+        "null_p": 0.001,
+        "null_95th": 0.5,
+        "null_median": 0.3,
+        "n_perm": 1000,
+        "exceeds_null_95th": True,
+        "source_contract": "pr6_h2_swap_check",
+        "source_path": "<synthetic>",
+    }
 
     return SubjectPhase1Data(
         subject_id="synthetic_subject_001",
         dataset="synthetic",
         channel_names=names,
-        n_lagpat_channels=n_ch,  # synthetic: all channels are lagPat-selected
+        n_lagpat_channels=n_ch,
         events_bool=events_bool,
         coords=coords,
         coord_units="mm",
@@ -399,7 +424,7 @@ def make_synthetic_subject(seed: int = 0) -> SubjectPhase1Data:
         hfo_rate=rng.uniform(1, 10, size=n_ch),
         cluster_endpoints=cluster_endpoints,
         valid_indices_per_cluster=valid_indices_per_cluster,
-        forward_reverse_pairs=fwd_rev_pairs,
+        h2_swap_check=synthetic_h2,
         coord_provenance={"source_path": "<synthetic>", "loader_version": "make_synthetic_subject"},
         n_dropped_endpoints_no_coords_per_cluster={0: 0, 1: 0},
     )
@@ -482,53 +507,51 @@ def run_h1(
 
 def run_h2(
     subject: SubjectPhase1Data,
-    n_null: int = 1000,
-    rng_seed: int = 0,
+    n_null: int = 1000,    # unused (PR-6 already ran null); kept for CLI compat
+    rng_seed: int = 0,     # unused
 ) -> Dict:
-    """Run H2 (set + spatial reversal index) per forward/reverse pair."""
-    rng = np.random.default_rng(rng_seed)
-    per_pair: List[Dict] = []
-    for pair in subject.forward_reverse_pairs:
-        a_id = pair["cluster_A_id"]
-        b_id = pair["cluster_B_id"]
-        S_A = subject.cluster_endpoints[a_id]["S"]
-        K_A = subject.cluster_endpoints[a_id]["K"]
-        S_B = subject.cluster_endpoints[b_id]["S"]
-        K_B = subject.cluster_endpoints[b_id]["K"]
+    """Run H2 — ingest PR-6 h2_swap_check directly (v1.0.8 2026-05-22).
 
-        h2_set = compute_h2_set_reversal(S_A, K_A, S_B, K_B, n_null=n_null, rng=rng)
-        if subject.coords is not None:
-            h2_spatial = compute_h2_spatial_reversal(
-                S_A, K_A, S_B, K_B, subject.coords, n_null=n_null, rng=rng,
-                coord_units=subject.coord_units,
-            )
-        else:
-            h2_spatial = {
-                "verdict": "GATED_NO_COORDS",
-                "reason": "spatial reversal requires 3D coords",
-            }
+    PR-6 plan §3.3 + §15 lock:
+      - H2 is DIRECTIONAL MECHANISM SANITY, not cohort claim
+      - per-contact Jaccard endpoint reversal (T0_source × T1_sink +
+        T0_sink × T1_source) computed in PR-6 anchoring with 1000-perm null
+      - Phase 1 reports per-subject swap_score / null_p / null_95th
+      - Cohort: sign-test only (n_exceed_null_95th / n_total + binomial p);
+        no cohort-level PASS/NULL/FAIL verdict (per pre-registered tier)
 
-        # Integrated H2 verdict
-        v_set = h2_set.get("verdict")
-        v_spatial = h2_spatial.get("verdict")
-        if v_set == "PASS" and v_spatial == "PASS":
-            integrated = "PASS"
-        elif v_set == "PASS" or v_spatial == "PASS":
-            integrated = "partial_PASS"
-        elif v_set == "FAIL" or v_spatial == "FAIL":
-            integrated = "FAIL"
-        else:
-            integrated = "NULL"
-
-        per_pair.append({
-            "cluster_A_id": a_id,
-            "cluster_B_id": b_id,
-            "reproducibility_source": pair.get("reproducibility_source"),
-            "h2_set_reversal": h2_set,
-            "h2_spatial_reversal": h2_spatial,
-            "h2_integrated_verdict": integrated,
-        })
-    return {"per_pair": per_pair}
+    v1.0.7 attempted to recompute H2 in Phase 1 (compute_h2_set_reversal +
+    compute_h2_spatial_reversal); this duplicated PR-6 and used the wrong
+    cohort filter (PR-2 `candidate_forward_reverse_pairs`, which is "候选
+    描述标签，不是最终机制判定" per PR-2 archive). v1.0.8 deletes both
+    self-implementations and reads PR-6's locked verdict instead.
+    """
+    swap = subject.h2_swap_check
+    if swap is None:
+        return {
+            "available": False,
+            "reason": (
+                "PR-6 h2_swap_check missing or exit_reason != None for this subject "
+                "(per-contact endpoint Jaccard reversal not computable)"
+            ),
+        }
+    return {
+        "available": True,
+        "tier": "directional_mechanism_sanity_not_cohort_claim",
+        "source_contract": swap.get("source_contract"),
+        "swap_score": swap.get("swap_score"),
+        "null_p": swap.get("null_p"),
+        "null_95th": swap.get("null_95th"),
+        "null_median": swap.get("null_median"),
+        "exceeds_null_95th": swap.get("exceeds_null_95th"),
+        "jaccard_t0src_t1snk": swap.get("jaccard_t0src_t1snk"),
+        "jaccard_t0snk_t1src": swap.get("jaccard_t0snk_t1src"),
+        "n_perm": swap.get("n_perm"),
+        "note_no_verdict": (
+            "PR-6 plan §3.3 + §15: descriptive only, no PASS/NULL/FAIL verdict. "
+            "Cohort-level sign-test computed in summarize_sef_itp_phase1.py."
+        ),
+    }
 
 
 def run_phase1_subject(
@@ -626,12 +649,16 @@ def _print_verdict_summary(result: Dict) -> None:
             for cid, body in block.get("per_cluster", {}).items():
                 print(f"  H1 cluster {cid}: {body.get('h1_overall_verdict')}", file=sys.stderr)
         elif h == "h2":
-            for entry in block.get("per_pair", []):
+            if block.get("available"):
                 print(
-                    f"  H2 pair {entry['cluster_A_id']}<->{entry['cluster_B_id']}: "
-                    f"{entry.get('h2_integrated_verdict')}",
+                    f"  H2 (PR-6 swap_check, mechanism sanity): "
+                    f"swap_score={block.get('swap_score')}, "
+                    f"null_p={block.get('null_p')}, "
+                    f"exceeds_null_95th={block.get('exceeds_null_95th')}",
                     file=sys.stderr,
                 )
+            else:
+                print(f"  H2: unavailable ({block.get('reason')})", file=sys.stderr)
         elif h == "h6":
             print(f"  H6: {block.get('verdict')}", file=sys.stderr)
 

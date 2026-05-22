@@ -103,6 +103,87 @@ n=23 (8 Yuquan + 15 Epilepsiae)，n_permutations=1000、n_null=1000。
 
 ---
 
+## 8. v1.0.8 H2 PR-6 swap_check ingest — 用户回归 2026-05-22
+
+### 8.1 用户诊断
+
+我之前实现 H2 时犯了 CLAUDE.md §5+§6 经典错误**三段叠加**：
+
+1. **CLAUDE.md §5 用错字段**：input cohort 取 PR-2 `candidate_forward_reverse_pairs`，但这个字段 PR-2 archive 明文写 "**候选描述标签，不是最终机制判定**"。正确字段是 PR-2.5 `forward_reverse_reproduced` (split-half **OR** odd-even, AGENTS.md Cross-PR locked rule)。
+2. **CLAUDE.md §6 重新发明 helper**：PR-6 anchoring 已经有 `forward_reverse_swap_check` 函数，输出 `h2_swap_check.{swap_score, null_p, null_95th}`，per-subject + 1000-perm null 全锁好。我又写了一遍 `compute_h2_set_reversal` + `compute_h2_spatial_reversal`，公式重叠 + null 实现不同。
+3. **CLAUDE.md §5 升级 hypothesis tier**：PR-6 plan §3.3 + §15 pre-register H2 为 **directional mechanism sanity, NOT cohort claim**，明文 "严禁包装成独立可发表 finding"。我的 Phase 1 v1.0.6 / v1.0.7 用 PASS/NULL/FAIL 整合裁决报 "5/6 cohort pass-like, strongest signal" —— 这是 tier upgrade。
+
+用户回归后指出："PR-6 是逐 contact 确定的，PR-2 的整模板 spearman 反向被共享节点稀释"——这是关键 insight：PR-6 swap_score 在端点 contact 层做 Jaccard 反向判定，比 PR-2 整模板 spearman_r 反向更精细；PR-2 candidate cohort 标签是"整模板共享节点没排除"的产物，不能当 strict input。
+
+### 8.2 修正方案
+
+| 组件 | v1.0.7 之前 | v1.0.8 |
+|---|---|---|
+| H2 input cohort | PR-2 `candidate_forward_reverse_pairs` (n=6) | PR-6 `h2_swap_check` 直接读 (n_testable = 6 in current cohort) |
+| swap statistic | 自己重新算 set Jaccard + spatial centroid | 直接读 PR-6 `swap_score` |
+| `compute_h2_set_reversal` / `compute_h2_spatial_reversal` | Phase 1 内重写 | **删除**，从 src/sef_itp_phase1.py + tests 中移除 |
+| spatial reversal centroid | Phase 1 自己加的指标 | **删除** — PR-6 swap_score 逐 contact 已比 centroid 距离精细 |
+| H2 verdict 形式 | PASS / partial_PASS / NULL / FAIL | **descriptive only**: swap_score, null_p, exceeds_null_95th |
+| Cohort summary | "5/6 pass-like cohort signal" | sign-test `n_exceed_null_95th / n_testable` + binomial p；**no cohort PASS/NULL/FAIL** |
+| `forward_reverse_pairs` dataclass field | 驱动 H2 logic | 移除（h2_swap_check 字段替代）|
+
+### 8.3 重跑 cohort 结果
+
+n=23 cohort, n_permutations + n_null 不再使用（PR-6 已 1000-perm null per subject）：
+
+| 字段 | 值 |
+|---|---|
+| n_testable (PR-6 swap_check available + 有坐标) | 6 |
+| n_not_testable (PR-6 exit_reason or 缺坐标) | 17 |
+| n_exceed_null_95th | 4 |
+| sign-test binomial one-sided p (p_null=0.05) | **8.64e-05** |
+| swap_score median | 0.625 |
+| null_p median | 0.0315 |
+
+per-subject 数值：
+
+| subject | swap_score | null_p | null_95th | exceed |
+|---|---|---|---|---|
+| epilepsiae_1073 | 0.5 | 0.29 | 0.6 | No |
+| epilepsiae_139 | 1.0 | 0.002 | 0.5 | **Yes** |
+| epilepsiae_253 | 0.5 | 0.103 | 0.5 | No |
+| epilepsiae_958 | 0.75 | 0.0 | 0.36 | **Yes** |
+| yuquan_zhangjiaqi | 0.75 | 0.02 | 0.5 | **Yes** |
+| yuquan_zhaochenxi | 0.25 | 0.043 | 0.2 | **Yes** |
+
+(2 个 PR-6 swap_check 出了 swap_score 但缺坐标被排除：yuquan_chenziyang / wangyiyang)
+
+### 8.4 修正后的 H2 cohort verdict
+
+**方向上**支持 SEF-ITP "对偶端点"假说（4/6 exceed null_95th，sign-test 显著超过 chance）；但 tier-locked 不能升级为 cohort claim。判读语言：
+
+> H2 PR-6 swap_check 在 6 个 cohort subject 中 4 个 exceed null_95th（mechanism sanity 方向支持），sign-test p=8.64e-05；per-subject swap_score 中位数 0.625。**不构成 cohort-level 反转几何 claim**（PR-6 plan §3.3 + §15 pre-register tier lock）。
+
+### 8.5 删除 / 改动清单
+
+- `src/sef_itp_phase1.py`：删除 `compute_h2_set_reversal`、`compute_h2_spatial_reversal`、`_jaccard_set`；模块 docstring 升级 v1.0.8 lock，说明 H2 只 ingest
+- `scripts/run_sef_itp_phase1.py`：`run_h2` 重写为 PR-6 ingest；`SubjectPhase1Data` 删除 `forward_reverse_pairs` 字段，新增 `h2_swap_check: Optional[Dict]`；`load_subject_for_phase1` 读 PR-6 `h2_swap_check` 写入 `subject.h2_swap_check`
+- `scripts/summarize_sef_itp_phase1.py`：H2 cohort summary 改 sign-test + binomial p；删除 verdict_distribution_per_pair_integrated 等过时字段
+- `scripts/plot_sef_itp_phase1_cohort.py`：H2 plot 改 sign-test bar + per-subject swap_score vs null_95th 散点
+- `tests/test_sef_itp_phase1.py`：删除 H2 test suite (test_h2_set_reversal_*, test_h2_spatial_reversal_*, test_h2_jaccard_basic, test_compute_h2_spatial_reversal_rejects_voxel_coords)；保留 placeholder 注释说明 H2 测试在 PR-6 anchoring TDD 已覆盖
+- `tests/test_run_sef_itp_phase1_integration.py`：删除 `test_load_subject_for_phase1_no_pr6_pair_skipped`（forward_reverse_pairs 不再存在）；新增 `test_load_subject_for_phase1_h2_swap_check_unavailable_when_pr6_missing`
+- `docs/topic4_sef_itp_framework.md` §3.2：H2 prose v1.0.3 lock，旧 v1.0.2 prose 标记弃用，保留 audit trail
+- `tests/test_run_sef_itp_phase1_integration.py:_make_pr6_json`：新加 `h2_swap_check` 字段默认值
+- `docs/topic4_sef_itp_framework.md` 顶部版本横幅：v1.0.2 → v1.0.3
+
+测试：108/108 GREEN（之前 114 个，删了 6 个过时 H2 测试）
+
+### 8.6 v1.0.7 → v1.0.8 是 framework 修订 OR 实现 bug 修复
+
+**两个都是**：
+
+- framework prose 修订（v1.0.2 → v1.0.3）：早期 §3.2 prose "主分析 1 + 主分析 2 两条 reversal index" 不符合 PR-6 已锁的 contract，且 spatial reversal 是 framework 自己发明的指标 PR-6 没有。这是 framework 内部不一致，必须修 prose。
+- 实现 bug 修复（v1.0.7 → v1.0.8）：用错字段 + 重新发明 helper + 升级 tier 三个 cascade 都是实现层错误，跟 framework prose 怎么写无关。
+
+修完之后**framework prose 与实现一致**，且都对齐 PR-6 plan §3.3 + §15 的 mechanism sanity 锁定。
+
+---
+
 ---
 
 ## 0. Cohort 漏斗（实测）

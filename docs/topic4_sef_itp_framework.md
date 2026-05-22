@@ -1,7 +1,7 @@
 # Topic 4：SEF-ITP Framework —— 间期模板传播的空间易激场模型
 
-> **状态**：v1.0.2 framework lock，2026-05-20；**Phase 0 解锁 2026-05-21（lagPatRank phantom-rank broad re-derivation Step 5a–5h 全部完成 + Checkpoint A/B advisor consult 通过）**
-> **版本历史**：v1 lock 2026-05-20 (initial) → v1.0.1 advisor 5-fix 同日 → v1.0.2 user review 6-fix 同日（H2 工程不可行修复 + H1 概念冲突拆分 + H3 verdict naming 修订 + H4 normalized instability + H5 统计合同收紧 + Topic 1/3 cross-doc 实际落字）→ **Phase 0 完成 2026-05-21**（Topic 0 §3.1 phantom-rank 修复跑完所有下游 PR，详见下方"Phase 0 完成快照"）
+> **状态**：v1.0.3 framework lock，2026-05-22；**Phase 0 解锁 2026-05-21（lagPatRank phantom-rank broad re-derivation Step 5a–5h 全部完成 + Checkpoint A/B advisor consult 通过）**
+> **版本历史**：v1 lock 2026-05-20 (initial) → v1.0.1 advisor 5-fix 同日 → v1.0.2 user review 6-fix 同日（H2 工程不可行修复 + H1 概念冲突拆分 + H3 verdict naming 修订 + H4 normalized instability + H5 统计合同收紧 + Topic 1/3 cross-doc 实际落字）→ **Phase 0 完成 2026-05-21**（Topic 0 §3.1 phantom-rank 修复跑完所有下游 PR）→ **v1.0.3 lock 2026-05-22**：H2 prose 改 PR-6 swap_check ingest（CLAUDE.md §5+§6 错误三段修复：cohort 用错 candidate 字段、重新发明 PR-6 已有 helper、升级 mechanism-sanity tier 为 cohort claim 都修正）+ H1 v1.0.7 null pool 扩到全 SEEG implantation（v1.0.6 lagPat 池循环论证 bug 修正）
 > **取代**：`docs/paper1_framework_sba.md` 里的 BHPN-toy 数学模型部分（§4 toy model 数学规范 + §6 fitted model BHPN-fit spec 的 toy-mechanism 子句 + §7 dumb baselines 中针对 toy 机制的项）
 > **保留**：`paper1_framework_sba.md` 里 P1 / P2 实证 verdict + P3 PR-7 addendum 锁字 + P5 directionality（sin-based）红线
 > **硬前置（已解锁 2026-05-21）**：~~`docs/topic0_methodology_audits.md` §3.1 `lagPatRank` phantom-rank 修复 + §5 broad re-derivation roadmap 完成是所有 Phase ≥ 1 的不可越闸门~~ → **Phase 0 完成验收：所有 Phase ≥ 1 实验可以启动**。phantom-rank 修复结论（按 H1–H6 对应）：
@@ -134,7 +134,19 @@
 
 **敏感性**：每条 H1 子测都额外做 SOZ-mask 内随机抽样（控制 SOZ 选择偏差），并报告四种距离度量（Euclidean / shaft-ordinal / cortical surface / SC via DTI）下结论是否一致。
 
-### 3.2 H2 — Source/sink reversal geometry（角色集合 / 空间反转）
+### 3.2 H2 — Source/sink reversal geometry (PR-6 swap_check ingest)
+
+> **v1.0.3 修订（2026-05-22）**: H2 不在 Phase 1 内重新计算 — 直接 ingest PR-6 anchoring 已锁定的 `h2_swap_check` (per-contact endpoint Jaccard 反向 + 1000-perm null per subject; PR-6 plan §3.3 contract)。下方早期 v1.0.2 prose "主分析 1: Set-based reversal Jaccard" + "主分析 2: Spatial reversal centroid distance" + "Sensitivity: PCA axis projection" **已弃用**，保留只为 commit history 可追溯。
+>
+> **判读 tier lock**: PR-6 plan §3.3 + §15 → H2 是 **directional mechanism sanity, NOT cohort claim**（pre-registered tier，不允许 results 阶段升级）。每 subject 报 swap_score / null_p / exceeds_null_95th；cohort 报 sign-test #subjects exceed null_95th / n_testable + binomial one-sided p (p_null=0.05)；**不给 cohort-level PASS/NULL/FAIL 整合裁决**。
+>
+> **input cohort**: PR-2.5 `forward_reverse_reproduced` (split-half OR odd-even, per AGENTS.md Cross-PR contract) ∩ PR-6 audit eligible (endpoint defined, valid channels ≥ 6, SOZ JSON 等)，NOT PR-2 `candidate_forward_reverse_pairs`（PR-2 archive 明文："候选描述标签，不是最终机制判定"）。
+>
+> 设计错误三段叠加（CLAUDE.md §5+§6 经典）：(a) cohort 用错字段（candidate vs reproduced）；(b) 重新发明 PR-6 已有 swap_score helper；(c) 升级 mechanism-sanity tier 到 cohort claim。三条全部修正在 v1.0.3。
+
+---
+
+**以下为 v1.0.2 早期 prose（已弃用，保留 audit trail）**：
 
 **测了什么**：正反两个模板的 source / sink **角色互换**——即正模板里 "最先点火的几个通道" 应该和反模板里 "最后点火的几个通道" **空间上 / 集合上**对应，反之亦然。
 

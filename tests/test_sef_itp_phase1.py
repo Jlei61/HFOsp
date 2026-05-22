@@ -13,7 +13,6 @@ import numpy as np
 import pytest
 
 from src.sef_itp_phase1 import (
-    _jaccard_set,
     _morans_i,
     _parse_channel,
     _shaft_stratified_shuffle,
@@ -21,8 +20,6 @@ from src.sef_itp_phase1 import (
     compute_h1_descriptive,
     compute_h1_full,
     compute_h1c_envelope,
-    compute_h2_set_reversal,
-    compute_h2_spatial_reversal,
     compute_h6_segregation,
     compute_participation_rate,
     pairwise_3d_euclidean,
@@ -648,91 +645,21 @@ def test_h1_overall_verdict_table(monkeypatch, src, snk, env, expected):
 
 
 # =============================================================================
-# H2 tests
+# H2: NOT TESTED HERE (v1.0.8 deletion, 2026-05-22 user catch)
+#
+# H2 swap_score + null_p are computed by PR-6 anchoring's forward_reverse_swap_check
+# (per-contact endpoint Jaccard reversal + 1000-perm null per subject). Phase 1
+# only INGESTS that result — no recomputation. PR-6 already has its own TDD
+# (T7 test_forward_reverse_swap_score in pr6_template_anchoring tests).
+#
+# The previous self-implemented compute_h2_set_reversal + compute_h2_spatial_reversal
+# (v1.0.6/7) were removed because:
+#   1. set-based was duplicating PR-6's swap_score (same Jaccard formula)
+#   2. spatial reversal was inventing a new metric not in PR-6 contract
+#   3. cohort filter via PR-2 candidate_forward_reverse_pairs is WRONG —
+#      that field is "候选描述标签，不是最终机制判定" per PR-2 archive
+#   4. PR-6 H2 is mechanism sanity, not cohort claim (plan §3.3 + §15 lock)
 # =============================================================================
-
-
-def test_h2_set_reversal_perfect_swap():
-    """TT-H2-1: perfect role swap → R_set strongly positive."""
-    rng = np.random.default_rng(SEED)
-    S_A = [0, 1, 2]
-    K_A = [7, 8, 9]
-    S_B = [7, 8, 9]  # = K_A
-    K_B = [0, 1, 2]  # = S_A
-
-    out = compute_h2_set_reversal(S_A, K_A, S_B, K_B, n_null=1000, rng=rng)
-    assert out["R_set"] > 0.5, f"R_set should be high for perfect swap, got {out}"
-    assert out["upper_p"] < 0.05
-    assert out["verdict"] == "PASS"
-
-
-def test_h2_set_reversal_no_swap():
-    """TT-H2-2: disjoint roles, no swap → R_set ≈ 0, NULL."""
-    rng = np.random.default_rng(SEED)
-    S_A = [0, 1, 2]
-    K_A = [3, 4, 5]
-    S_B = [6, 7, 8]
-    K_B = [9, 10, 11]
-
-    out = compute_h2_set_reversal(S_A, K_A, S_B, K_B, n_null=1000, rng=rng)
-    # all four sets disjoint → all Jaccards = 0 → R_set = 0
-    assert abs(out["R_set"]) < 0.1
-    assert out["verdict"] in ("NULL",)
-
-
-def test_h2_spatial_reversal_two_blob_synthetic():
-    """TT-H2-3: endpoints in two spatial blobs with perfect reversal → R_spatial > 0.5."""
-    rng = np.random.default_rng(SEED)
-    # blob A at (0,0,0), blob B at (10,10,10)
-    coords_blob_a = rng.normal([0, 0, 0], 0.5, size=(6, 3))
-    coords_blob_b = rng.normal([10, 10, 10], 0.5, size=(6, 3))
-    coords = np.vstack([coords_blob_a, coords_blob_b])
-    # S_A in blob A (idx 0-2), K_A in blob B (idx 6-8)
-    # S_B in blob B (idx 9-11), K_B in blob A (idx 3-5) — reversal
-    S_A = [0, 1, 2]
-    K_A = [6, 7, 8]
-    S_B = [9, 10, 11]
-    K_B = [3, 4, 5]
-
-    out = compute_h2_spatial_reversal(S_A, K_A, S_B, K_B, coords, n_null=1000, rng=rng)
-    assert out["R_spatial"] > 0.7, f"expected R_spatial > 0.7 for two-blob reversal, got {out}"
-    assert out["verdict"] == "PASS"
-
-
-def test_h2_spatial_reversal_anti_swap_fail():
-    """TT-H2-5: anti-reversal geometry.
-
-    Setup: each template has source+sink within its own blob (degenerate template
-    geometry where forward's source and sink are spatially close). Then:
-      - d_same = d(S_A in A, K_A in A) + d(S_B in B, K_B in B) = small + small (small)
-      - d_swap = d(S_A in A, K_B in B) + d(K_A in A, S_B in B) = large + large (large)
-      - R_spatial = small / (large + small) → much < 0.5 → FAIL anti-reversal
-
-    Interpretation: roles are organized BY TEMPLATE (within-blob), not BY POSITION
-    (cross-blob extremes). This is the opposite of what SEF-ITP H2 predicts.
-    """
-    rng = np.random.default_rng(SEED)
-    # Each template's source + sink in its own blob (degenerate within-blob clustering)
-    coords_blob_a = rng.normal([0, 0, 0], 0.5, size=(6, 3))
-    coords_blob_b = rng.normal([10, 10, 10], 0.5, size=(6, 3))
-    coords = np.vstack([coords_blob_a, coords_blob_b])
-    # template A: S_A and K_A both in blob A (within-blob "extremes")
-    S_A = [0, 1, 2]
-    K_A = [3, 4, 5]
-    # template B: S_B and K_B both in blob B
-    S_B = [6, 7, 8]
-    K_B = [9, 10, 11]
-
-    out = compute_h2_spatial_reversal(S_A, K_A, S_B, K_B, coords, n_null=1000, rng=rng)
-    assert out["R_spatial"] < 0.4, f"expected R_spatial < 0.4 for anti-swap, got {out}"
-    assert out["verdict"] == "FAIL"
-
-
-def test_h2_jaccard_basic():
-    assert _jaccard_set({1, 2, 3}, {2, 3, 4}) == pytest.approx(2 / 4)
-    assert _jaccard_set({1, 2}, {3, 4}) == 0.0
-    assert _jaccard_set({1, 2, 3}, {1, 2, 3}) == 1.0
-    assert _jaccard_set(set(), set()) == 0.0
 
 
 # =============================================================================
@@ -809,21 +736,6 @@ def test_compute_h1_compactness_rejects_voxel_coords():
             participation=participation,
             hfo_rate=hfo_rate,
             distance_metric="euclidean",
-            n_null=100,
-            rng=rng,
-            coord_units="voxel",  # WRONG
-        )
-
-
-def test_compute_h2_spatial_reversal_rejects_voxel_coords():
-    """v1.0.5: H2 spatial reversal with coord_units='voxel' must raise."""
-    rng = np.random.default_rng(SEED)
-    coords = rng.normal(0, 1, size=(12, 3))
-    with pytest.raises(ValueError, match="coord_units must be 'mm'"):
-        compute_h2_spatial_reversal(
-            S_A=[0, 1, 2], K_A=[3, 4, 5],
-            S_B=[6, 7, 8], K_B=[9, 10, 11],
-            coords=coords,
             n_null=100,
             rng=rng,
             coord_units="voxel",  # WRONG

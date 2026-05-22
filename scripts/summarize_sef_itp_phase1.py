@@ -37,11 +37,6 @@ H1_UNTESTABLE = {
     "INCONCLUSIVE_ENVELOPE_INDETERMINATE",
 }
 
-H2_PASS_LIKE = {"PASS", "partial_PASS"}
-H2_NULL_LIKE = {"NULL"}
-H2_FAIL_LIKE = {"FAIL"}
-H2_UNTESTABLE = {"GATED_NO_COORDS", "EMPTY_SET", "INSUFFICIENT_NULL", "DEGENERATE"}
-
 H6_PASS_LIKE = {"PASS", "PARTIAL"}
 H6_NULL_LIKE = {"NULL"}
 H6_UNTESTABLE = {
@@ -74,9 +69,13 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
     # Verdict counters
     h6_verdicts = Counter()
     h1_verdicts_per_cluster = Counter()
-    h2_verdicts_per_pair = Counter()
-    h2_set_verdicts = Counter()
-    h2_spatial_verdicts = Counter()
+
+    # H2 sign-test accumulators (PR-6 mechanism sanity — no verdict, just counts)
+    h2_swap_scores: List[float] = []
+    h2_null_ps: List[float] = []
+    h2_n_exceed_null_95th = 0
+    h2_n_testable = 0
+    h2_n_not_testable = 0  # PR-6 exit_reason or h2_swap_check missing
 
     # Coord coverage
     n_mapped_list = []
@@ -87,7 +86,6 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
     # Cohort categorical buckets
     h1_categorical = Counter()  # per (subject, cluster)
     h6_categorical = Counter()  # per subject
-    h2_categorical = Counter()  # per (subject, pair)
 
     # Per-subject row for CSV
     csv_rows: List[Dict[str, Any]] = []
@@ -126,24 +124,33 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             h1_categorical[_categorize(v, H1_PASS_LIKE, H1_NULL_LIKE, H1_FAIL_LIKE, H1_UNTESTABLE)] += 1
             h1_subject_overall.append({"cluster_id": int(cid), "verdict": v})
 
-        # H2 per pair
-        h2_pairs = (d.get("h2") or {}).get("per_pair") or []
-        h2_subject_pairs = []
-        for pair in h2_pairs:
-            v_integrated = pair.get("h2_integrated_verdict")
-            v_set = (pair.get("h2_set_reversal") or {}).get("verdict")
-            v_spatial = (pair.get("h2_spatial_reversal") or {}).get("verdict")
-            h2_verdicts_per_pair[v_integrated] += 1
-            h2_set_verdicts[v_set] += 1
-            h2_spatial_verdicts[v_spatial] += 1
-            h2_categorical[_categorize(v_integrated, H2_PASS_LIKE, H2_NULL_LIKE, H2_FAIL_LIKE, H2_UNTESTABLE)] += 1
-            h2_subject_pairs.append({
-                "cluster_A_id": pair.get("cluster_A_id"),
-                "cluster_B_id": pair.get("cluster_B_id"),
-                "h2_integrated_verdict": v_integrated,
-                "h2_set_verdict": v_set,
-                "h2_spatial_verdict": v_spatial,
-            })
+        # H2 (v1.0.8): ingested from PR-6 h2_swap_check per subject;
+        # cohort-level = sign-test n_exceed_null_95th / n_total only,
+        # NO cohort PASS/NULL/FAIL verdict (PR-6 plan §3.3 mechanism-sanity tier).
+        h2_block = d.get("h2") or {}
+        h2_subject_swap: Optional[Dict] = None
+        if h2_block.get("available"):
+            sc = h2_block.get("swap_score")
+            np_ = h2_block.get("null_p")
+            exceeds = h2_block.get("exceeds_null_95th")
+            h2_subject_swap = {
+                "swap_score": sc,
+                "null_p": np_,
+                "null_95th": h2_block.get("null_95th"),
+                "null_median": h2_block.get("null_median"),
+                "exceeds_null_95th": exceeds,
+                "jaccard_t0src_t1snk": h2_block.get("jaccard_t0src_t1snk"),
+                "jaccard_t0snk_t1src": h2_block.get("jaccard_t0snk_t1src"),
+            }
+            h2_n_testable += 1
+            if sc is not None:
+                h2_swap_scores.append(float(sc))
+            if np_ is not None:
+                h2_null_ps.append(float(np_))
+            if exceeds:
+                h2_n_exceed_null_95th += 1
+        else:
+            h2_n_not_testable += 1
 
         subjects.append({
             "subject_id": sid,
@@ -154,7 +161,7 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             "coord_space": coord_space,
             "h6_verdict": h6_v,
             "h1_clusters": h1_subject_overall,
-            "h2_pairs": h2_subject_pairs,
+            "h2_swap_check": h2_subject_swap,
         })
 
         csv_rows.append({
@@ -167,8 +174,9 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             "h6": h6_v,
             "h1_c0": h1_subject_overall[0]["verdict"] if len(h1_subject_overall) > 0 else None,
             "h1_c1": h1_subject_overall[1]["verdict"] if len(h1_subject_overall) > 1 else None,
-            "h2_integrated_first_pair": h2_subject_pairs[0]["h2_integrated_verdict"] if h2_subject_pairs else None,
-            "n_h2_pairs": len(h2_subject_pairs),
+            "h2_swap_score": h2_subject_swap["swap_score"] if h2_subject_swap else None,
+            "h2_null_p": h2_subject_swap["null_p"] if h2_subject_swap else None,
+            "h2_exceeds_null_95th": h2_subject_swap["exceeds_null_95th"] if h2_subject_swap else None,
         })
 
     # Cohort funnel — derived from Phase 0a + PR-6 + coord availability
@@ -207,11 +215,17 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             "n_clusters_total": sum(h1_verdicts_per_cluster.values()),
         },
         "h2": {
-            "verdict_distribution_per_pair_integrated": dict(h2_verdicts_per_pair),
-            "verdict_distribution_per_pair_set": dict(h2_set_verdicts),
-            "verdict_distribution_per_pair_spatial": dict(h2_spatial_verdicts),
-            "categorical_distribution": dict(h2_categorical),
-            "n_pairs_total": sum(h2_verdicts_per_pair.values()),
+            "tier": "directional_mechanism_sanity_not_cohort_claim",
+            "source_contract": "pr6_h2_swap_check",
+            "n_testable": h2_n_testable,
+            "n_not_testable": h2_n_not_testable,
+            "n_exceed_null_95th": h2_n_exceed_null_95th,
+            "sign_test_p_binomial_one_sided_p0_05": _binomial_one_sided_p(
+                h2_n_exceed_null_95th, h2_n_testable, p_null=0.05
+            ) if h2_n_testable > 0 else None,
+            "swap_score_median": float(_median(h2_swap_scores)) if h2_swap_scores else None,
+            "null_p_median": float(_median(h2_null_ps)) if h2_null_ps else None,
+            "note": "PR-6 plan §3.3 + §15: descriptive only. No cohort PASS/NULL/FAIL verdict.",
         },
         "subjects": subjects,
     }, csv_rows
@@ -225,6 +239,21 @@ def _median(xs: List[float]) -> float:
     if n % 2 == 1:
         return xs[n // 2]
     return (xs[n // 2 - 1] + xs[n // 2]) / 2
+
+
+def _binomial_one_sided_p(k: int, n: int, p_null: float = 0.05) -> float:
+    """One-sided upper-tail binomial: P(X ≥ k | n, p_null).
+
+    Used for H2 sign-test cohort summary: under null p_null=0.05 (chance of
+    exceeding null_95th under H0), how unlikely is observing ≥k successes in n.
+    """
+    from math import comb
+    if n <= 0:
+        return float("nan")
+    return float(
+        sum(comb(n, i) * (p_null ** i) * ((1 - p_null) ** (n - i))
+            for i in range(k, n + 1))
+    )
 
 
 def main(argv=None) -> int:
@@ -268,12 +297,15 @@ def main(argv=None) -> int:
     for v, n in sorted(summary['h1']['verdict_distribution_per_cluster'].items(), key=lambda x: -x[1]):
         print(f"  {v}: {n}")
     print(f"  categorical: {summary['h1']['categorical_distribution']}")
-    print(f"\nH2 per-pair integrated verdicts (total {summary['h2']['n_pairs_total']} pairs):")
-    for v, n in sorted(summary['h2']['verdict_distribution_per_pair_integrated'].items(), key=lambda x: -x[1]):
-        print(f"  {v}: {n}")
-    print(f"  set-based: {summary['h2']['verdict_distribution_per_pair_set']}")
-    print(f"  spatial:   {summary['h2']['verdict_distribution_per_pair_spatial']}")
-    print(f"  categorical: {summary['h2']['categorical_distribution']}")
+    h2 = summary["h2"]
+    print(f"\nH2 (PR-6 swap_check — mechanism sanity, NOT cohort claim):")
+    print(f"  n_testable: {h2['n_testable']}, n_not_testable: {h2['n_not_testable']}")
+    print(f"  n_exceed_null_95th: {h2['n_exceed_null_95th']} / {h2['n_testable']}")
+    print(f"  sign-test binomial-p (one-sided, p_null=0.05): {h2['sign_test_p_binomial_one_sided_p0_05']:.4g}"
+          if h2['sign_test_p_binomial_one_sided_p0_05'] is not None
+          else "  sign-test: n/a")
+    print(f"  swap_score median: {h2['swap_score_median']}")
+    print(f"  null_p median: {h2['null_p_median']}")
     print(f"\nWrote {out_json}")
     print(f"Wrote {out_csv}")
     return 0

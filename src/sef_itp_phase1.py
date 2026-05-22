@@ -1,28 +1,28 @@
-"""SEF-ITP Phase 1: spatial geometry hypotheses H1 / H2 / H6.
+"""SEF-ITP Phase 1: spatial geometry hypotheses H1 / H6 + H2 ingest.
 
 Plan-of-record: docs/archive/topic4/sef_itp_phase1/plan_2026-05-21.md
-Upstream framework: docs/topic4_sef_itp_framework.md v1.0.2
+Upstream framework: docs/topic4_sef_itp_framework.md v1.0.2 (H2 prose pending
+                    v1.0.3 update — remove spatial reversal per 2026-05-22 fix)
+PR-6 H2 contract:   docs/archive/topic1/pr6_template_anchoring/pr6_template_endpoint_anchoring_plan_2026-04-25.md §3.3
 
-Contract (v1.0.2 lock):
-  - All compute functions take coords + valid pool indices EXPLICITLY.
-    No implicit coord loader. No default valid_mask=None.
-  - Distance metrics: euclidean_3d (main, requires coords) | shaft_ordinal (fallback,
-    requires only channel names). cortical_surface / SC reserved for future.
+Contract (v1.0.8 lock):
+  - **H1** and **H6** have compute_* functions in this module.
+    All take coords + valid pool indices EXPLICITLY; no implicit loader.
+  - **H2 is NOT computed here** (v1.0.8 deletion). PR-6 anchoring already
+    runs per-contact endpoint Jaccard reversal + permutation null in
+    `template_anchoring/per_subject/<sid>.json::h2_swap_check`. Phase 1
+    ingests that result via load_subject_for_phase1; do not re-implement.
+    PR-6 plan §3.3 + §15 lock H2 as MECHANISM SANITY (not cohort claim).
+  - Distance metrics: euclidean_3d (main, requires mm coords) | shaft_ordinal
+    (fallback, channel names only). cortical_surface / SC reserved.
   - Null constructions are pre-registered:
       H6: shaft-stratified shuffle of participation rate
-      H1: matched random sampling with shaft + participation + HFO rate, with
-          degradation order (drop_hfo_rate first, drop_participation second)
-      H1c: centroid from VALID channels MINUS endpoint set (advisor fix:
-           avoids circularity where high-participation centroid is partially
-           defined by the endpoint set being tested)
-      H2: role-label shuffle within (S_A ∪ K_A ∪ S_B ∪ K_B) pool
+      H1 strict: shaft-only matched random null over ALL SEEG implantation
+                 (v1.0.7 fix — was lagPat-restricted + matched-by-participation
+                 which produced a circular null pool)
+      H1c envelope: caller passes non_endpoint_pool explicitly (v1.0.7)
   - All RNG via np.random.default_rng with explicit seed.
-  - Channel ordering: every function entry that takes (channel_names, coords,
-    participation, ...) asserts these are aligned (same length / same indexing).
-
-This module is data-agnostic (synthetic inputs accepted). Real-data wiring is
-gated on Topic 0 Phase 0a (phantom-rank fix complete) + Phase 0b (coord-loader
-PR, NOT YET STARTED — see docs/topic0_methodology_audits.md §3.2).
+  - Channel ordering: aligned across (channel_names, coords, participation, ...).
 """
 
 from __future__ import annotations
@@ -722,183 +722,6 @@ def _matched_random_null(
 
     return null_dists, "shaft_matched"
 
-
-# =============================================================================
-# H2 — Source/sink reversal index
-# =============================================================================
-
-
-def compute_h2_set_reversal(
-    S_A: Sequence[int],
-    K_A: Sequence[int],
-    S_B: Sequence[int],
-    K_B: Sequence[int],
-    n_null: int = 1000,
-    rng: Optional[np.random.Generator] = None,
-) -> Dict:
-    """H2 main analysis 1: set-based reversal Jaccard.
-
-    R_set = J_swap − J_same
-      J_swap = mean(Jaccard(S_A, K_B), Jaccard(K_A, S_B))   # reversal pairs
-      J_same = mean(Jaccard(S_A, K_A), Jaccard(K_B, S_B))   # same-template ends
-
-    Null: shuffle role labels within (S_A ∪ K_A ∪ S_B ∪ K_B) pool.
-    """
-    if rng is None:
-        rng = np.random.default_rng(0)
-
-    sa, ka, sb, kb = set(S_A), set(K_A), set(S_B), set(K_B)
-    sizes = [len(sa), len(ka), len(sb), len(kb)]
-    if min(sizes) == 0:
-        return {"verdict": "EMPTY_SET", "sizes": sizes}
-
-    j_swap = (_jaccard_set(sa, kb) + _jaccard_set(ka, sb)) / 2.0
-    j_same = (_jaccard_set(sa, ka) + _jaccard_set(kb, sb)) / 2.0
-    r_set = j_swap - j_same
-
-    # null: shuffle role labels in union pool
-    union = list(sa | ka | sb | kb)
-    if len(union) < sum(sizes):
-        # roles overlap (e.g., source in A ∩ sink in B by chance, allowed under
-        # synthetic perfect-swap). Use sampling with replacement for null.
-        sample_with_replacement = True
-    else:
-        sample_with_replacement = False
-
-    null_r: List[float] = []
-    for _ in range(n_null):
-        if sample_with_replacement:
-            sets = []
-            for sz in sizes:
-                pick = rng.choice(union, size=sz, replace=True)
-                sets.append(set(pick.tolist()))
-        else:
-            shuffled = rng.permutation(union)
-            cs = np.cumsum([0] + sizes)
-            sets = [set(shuffled[cs[i] : cs[i + 1]].tolist()) for i in range(4)]
-        nsa, nka, nsb, nkb = sets
-        j_swap_n = (_jaccard_set(nsa, nkb) + _jaccard_set(nka, nsb)) / 2.0
-        j_same_n = (_jaccard_set(nsa, nka) + _jaccard_set(nkb, nsb)) / 2.0
-        null_r.append(j_swap_n - j_same_n)
-
-    null_arr = np.asarray(null_r)
-    upper_p = float((np.sum(null_arr >= r_set) + 1) / (len(null_arr) + 1))
-
-    if upper_p < 0.05:
-        verdict = "PASS"
-    elif r_set < -0.1:
-        verdict = "FAIL"
-    else:
-        verdict = "NULL"
-
-    return {
-        "verdict": verdict,
-        "J_swap": float(j_swap),
-        "J_same": float(j_same),
-        "R_set": float(r_set),
-        "R_set_null_median": float(np.median(null_arr)),
-        "upper_p": upper_p,
-        "n_null": len(null_arr),
-        "null_sampling": "with_replacement" if sample_with_replacement else "permutation",
-    }
-
-
-def compute_h2_spatial_reversal(
-    S_A: Sequence[int],
-    K_A: Sequence[int],
-    S_B: Sequence[int],
-    K_B: Sequence[int],
-    coords: np.ndarray,
-    n_null: int = 1000,
-    rng: Optional[np.random.Generator] = None,
-    coord_units: Optional[str] = None,
-) -> Dict:
-    """H2 main analysis 2: spatial reversal index (centroid distance based).
-
-    d_swap = d(c(S_A), c(K_B)) + d(c(K_A), c(S_B))   # reversal pair distances
-    d_same = d(c(S_A), c(K_A)) + d(c(K_B), c(S_B))   # same-template pair distances
-    R_spatial = d_same / (d_swap + d_same)
-
-    Expected: R_spatial > 0.5 under reversal hypothesis (swap pairs closer than same).
-
-    coord_units: when provided, must be 'mm' (v1.0.5 contract; reject voxel coords).
-    """
-    _assert_coords_are_mm(coord_units, "compute_h2_spatial_reversal")
-    if rng is None:
-        rng = np.random.default_rng(0)
-
-    coords = np.asarray(coords, dtype=float)
-    sa, ka, sb, kb = list(S_A), list(K_A), list(S_B), list(K_B)
-    sizes = [len(sa), len(ka), len(sb), len(kb)]
-    if min(sizes) == 0:
-        return {"verdict": "EMPTY_SET", "sizes": sizes}
-
-    def _cent(indices: Sequence[int]) -> np.ndarray:
-        return coords[list(indices)].mean(axis=0)
-
-    c_sa, c_ka, c_sb, c_kb = _cent(sa), _cent(ka), _cent(sb), _cent(kb)
-
-    d_swap = float(np.linalg.norm(c_sa - c_kb) + np.linalg.norm(c_ka - c_sb))
-    d_same = float(np.linalg.norm(c_sa - c_ka) + np.linalg.norm(c_kb - c_sb))
-    if d_swap + d_same == 0:
-        return {"verdict": "DEGENERATE", "d_swap": d_swap, "d_same": d_same}
-    r_spatial = d_same / (d_swap + d_same)
-
-    union = list(set(sa) | set(ka) | set(sb) | set(kb))
-    sample_with_replacement = len(union) < sum(sizes)
-
-    null_r: List[float] = []
-    for _ in range(n_null):
-        if sample_with_replacement:
-            sets = [rng.choice(union, size=sz, replace=True).tolist() for sz in sizes]
-        else:
-            shuffled = rng.permutation(union)
-            cs = np.cumsum([0] + sizes)
-            sets = [shuffled[cs[i] : cs[i + 1]].tolist() for i in range(4)]
-        if any(len(s) == 0 for s in sets):
-            continue
-        c0, c1, c2, c3 = [_cent(s) for s in sets]
-        dsw_n = float(np.linalg.norm(c0 - c3) + np.linalg.norm(c1 - c2))
-        dsa_n = float(np.linalg.norm(c0 - c1) + np.linalg.norm(c2 - c3))
-        if dsw_n + dsa_n > 0:
-            null_r.append(dsa_n / (dsw_n + dsa_n))
-
-    if len(null_r) < 100:
-        return {
-            "verdict": "INSUFFICIENT_NULL",
-            "n_null_obtained": len(null_r),
-            "R_spatial": float(r_spatial),
-        }
-
-    null_arr = np.asarray(null_r)
-    upper_p = float((np.sum(null_arr >= r_spatial) + 1) / (len(null_arr) + 1))
-
-    if upper_p < 0.05:
-        verdict = "PASS"
-    elif r_spatial < 0.45:
-        verdict = "FAIL"
-    else:
-        verdict = "NULL"
-
-    return {
-        "verdict": verdict,
-        "d_swap": d_swap,
-        "d_same": d_same,
-        "R_spatial": float(r_spatial),
-        "R_spatial_null_median": float(np.median(null_arr)),
-        "upper_p": upper_p,
-        "n_null_used": len(null_arr),
-        "null_sampling": "with_replacement" if sample_with_replacement else "permutation",
-    }
-
-
-def _jaccard_set(a: set, b: set) -> float:
-    if not a and not b:
-        return 0.0
-    union = a | b
-    if not union:
-        return 0.0
-    return len(a & b) / len(union)
 
 
 # =============================================================================

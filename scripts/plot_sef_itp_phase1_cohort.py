@@ -109,15 +109,56 @@ def main(argv=None) -> int:
     plt.close(fig)
     print(f"  wrote {p}")
 
-    # === H2 ===
-    fig, ax = plt.subplots(figsize=(8, 3.5))
-    h2d = summary["h2"]["verdict_distribution_per_pair_integrated"]
-    _bar(ax, h2d, H2_ORDER,
-         f"H2 source/sink reversal — integrated verdict per fwd/rev pair\n"
-         f"(n={summary['h2']['n_pairs_total']} pairs from {n_subj} subjects)",
-         total=summary['h2']['n_pairs_total'])
+    # === H2 (v1.0.8 — PR-6 swap_check ingest, mechanism sanity) ===
+    h2 = summary["h2"]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+    # Left: sign-test bar
+    n_test = h2["n_testable"]
+    n_exc = h2["n_exceed_null_95th"]
+    n_not = h2["n_not_testable"]
+    bars = ["exceed_null_95th\n(swap > 95th)", "not_exceed_null_95th", "not_testable\n(PR-6 exit_reason)"]
+    vals = [n_exc, n_test - n_exc, n_not]
+    cols = [COLOR["pass"], COLOR["null"], COLOR["untestable"]]
+    axes[0].barh(bars, vals, color=cols, edgecolor="black", linewidth=0.4)
+    for i, v in enumerate(vals):
+        axes[0].text(v + max(vals) * 0.02, i, str(v), va="center", fontsize=9)
+    axes[0].invert_yaxis()
+    axes[0].set_xlabel(f"n subjects (cohort = {n_subj})")
+    sign_p = h2.get("sign_test_p_binomial_one_sided_p0_05")
+    sign_p_str = f"{sign_p:.3g}" if sign_p is not None else "n/a"
+    axes[0].set_title(
+        f"H2 PR-6 swap_check — mechanism sanity (NOT cohort claim)\n"
+        f"sign-test binomial-p (p_null=0.05): {sign_p_str} "
+        f"({n_exc}/{n_test} exceed null_95th)",
+        fontsize=10,
+    )
+    axes[0].spines["top"].set_visible(False)
+    axes[0].spines["right"].set_visible(False)
+
+    # Right: per-subject swap_score scatter colored by exceed
+    subj_h2 = [s for s in summary["subjects"] if s.get("h2_swap_check") is not None]
+    sids = [f"{s['dataset']}_{s['subject_id']}" for s in subj_h2]
+    scores = [s["h2_swap_check"]["swap_score"] for s in subj_h2]
+    n95s = [s["h2_swap_check"]["null_95th"] for s in subj_h2]
+    exceeds = [s["h2_swap_check"]["exceeds_null_95th"] for s in subj_h2]
+    ypos = list(range(len(sids)))
+    point_colors = [COLOR["pass"] if e else COLOR["null"] for e in exceeds]
+    axes[1].scatter(scores, ypos, c=point_colors, s=80, edgecolor="black", zorder=3, label="swap_score")
+    axes[1].scatter(n95s, ypos, marker="x", c="black", s=50, zorder=4, label="null_95th")
+    for s, n95, y in zip(scores, n95s, ypos):
+        axes[1].plot([min(s, n95), max(s, n95)], [y, y], color="grey", lw=0.6, zorder=1)
+    axes[1].set_yticks(ypos)
+    axes[1].set_yticklabels(sids, fontsize=9)
+    axes[1].invert_yaxis()
+    axes[1].set_xlabel("swap_score (Jaccard reversal)")
+    axes[1].set_title(f"Per-subject swap_score vs null_95th (n={len(sids)})", fontsize=10)
+    axes[1].set_xlim(0, 1.05)
+    axes[1].legend(loc="lower right", fontsize=8)
+    axes[1].spines["top"].set_visible(False)
+    axes[1].spines["right"].set_visible(False)
+
     plt.tight_layout()
-    p = args.output_dir / "cohort_h2_verdict_distribution.png"
+    p = args.output_dir / "cohort_h2_swap_check_signtest.png"
     plt.savefig(p, dpi=140)
     plt.close(fig)
     print(f"  wrote {p}")

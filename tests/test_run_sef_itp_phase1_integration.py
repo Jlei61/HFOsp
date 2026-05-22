@@ -7,9 +7,9 @@ the contract clauses listed in load_subject_for_phase1 docstring:
   - channel alignment between Phase 0a and lagPat loader
   - PR-6 endpoint name → index conversion
   - coord_units mm assertion (voxel rejected when require_coords=True)
-  - valid_indices = PR-6 valid_mask ∩ coord mapped_mask
+  - valid_indices = mapped non-endpoint (v1.0.7; was PR-6 valid_mask intersection)
   - endpoint S/K drop when mapped_mask=False, with n_dropped audit
-  - forward_reverse_pairs schema translation (cluster_a → cluster_A_id)
+  - H2 swap_check ingest from PR-6 (v1.0.8; was self-implemented set/spatial reversal)
 """
 
 from __future__ import annotations
@@ -48,11 +48,21 @@ def _make_phase0a_json(channels, clusters_meta, pairs):
     }
 
 
-def _make_pr6_json(channels, templates):
+def _make_pr6_json(channels, templates, h2_swap=None):
     return {
         "subject_id": "1073",
         "dataset": "epilepsiae",
         "per_template": templates,
+        "h2_swap_check": h2_swap if h2_swap is not None else {
+            "swap_score": 0.8,
+            "null_p": 0.01,
+            "null_95th": 0.5,
+            "null_median": 0.3,
+            "n_perm": 1000,
+            "exit_reason": None,
+            "jaccard_t0src_t1snk": 0.8,
+            "jaccard_t0snk_t1src": 0.8,
+        },
     }
 
 
@@ -194,12 +204,12 @@ def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root,
     assert subj.valid_indices_per_cluster[0] == [2, 3]
     assert subj.valid_indices_per_cluster[1] == [2, 3]
 
-    # Forward-reverse pair schema translation
-    assert len(subj.forward_reverse_pairs) == 1
-    pair = subj.forward_reverse_pairs[0]
-    assert pair["cluster_A_id"] == 0
-    assert pair["cluster_B_id"] == 1
-    assert pair["reproducibility_source"] == "candidate_forward_reverse"
+    # v1.0.8: H2 swap_check ingested from PR-6, not recomputed
+    assert subj.h2_swap_check is not None
+    assert subj.h2_swap_check["swap_score"] == 0.8
+    assert subj.h2_swap_check["null_p"] == 0.01
+    assert subj.h2_swap_check["exceeds_null_95th"] is True
+    assert subj.h2_swap_check["source_contract"] == "pr6_h2_swap_check"
 
     # No drops
     assert subj.n_dropped_endpoints_no_coords_per_cluster == {0: 0, 1: 0}
@@ -402,9 +412,14 @@ def test_load_subject_for_phase1_pr6_valid_mask_no_longer_constrains_pool(monkey
     assert subj.valid_indices_per_cluster[1] == [3, 4, 5]
 
 
-def test_load_subject_for_phase1_no_pr6_pair_skipped(monkeypatch, phase0a_path, pr6_root, tmp_path):
-    """Forward-reverse pair with cluster missing from PR-6 → pair filtered out."""
-    # PR-6 has only cluster 0
+def test_load_subject_for_phase1_h2_swap_check_unavailable_when_pr6_missing(
+    monkeypatch, phase0a_path, pr6_root, tmp_path
+):
+    """When PR-6 h2_swap_check.exit_reason is non-None, h2_swap_check should be None.
+
+    v1.0.8: H2 is mechanism sanity ingested from PR-6. If PR-6 couldn't compute
+    it (exit_reason set), Phase 1 propagates as h2_swap_check=None — caller
+    treats subject as "H2 not testable" for cohort sign-test."""
     single = [
         {"cluster_id": 0,
          "source": ["A1-A2"], "sink": ["B2-B3"],
@@ -413,7 +428,10 @@ def test_load_subject_for_phase1_no_pr6_pair_skipped(monkeypatch, phase0a_path, 
          "n_valid_channels": len(CHANNELS), "n_valid": len(CHANNELS)},
     ]
     (pr6_root / "epilepsiae_1073.json").write_text(
-        json.dumps(_make_pr6_json(CHANNELS, single))
+        json.dumps(_make_pr6_json(CHANNELS, single, h2_swap={
+            "swap_score": None, "null_p": None, "null_95th": None,
+            "exit_reason": "n_valid_too_small", "n_perm": 0,
+        }))
     )
 
     monkeypatch.setattr(runner, "load_subject_propagation_events",
@@ -431,10 +449,9 @@ def test_load_subject_for_phase1_no_pr6_pair_skipped(monkeypatch, phase0a_path, 
         pr6_anchoring_root=pr6_root,
         epilepsiae_lagpat_root=tmp_path / "lagpat_root",
     )
-    # Phase 0a says pair (0,1) but PR-6 has no cluster 1 → pair filtered
-    assert subj.forward_reverse_pairs == []
+    assert subj.h2_swap_check is None
+    # cluster endpoints still populated
     assert 0 in subj.cluster_endpoints
-    assert 1 not in subj.cluster_endpoints
 
 
 def test_load_subject_for_phase1_subject_filename_mismatch_raises(tmp_path, pr6_root):
