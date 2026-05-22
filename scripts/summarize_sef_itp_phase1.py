@@ -6,7 +6,7 @@ Reads per-subject JSONs produced by scripts/run_sef_itp_phase1.py and writes:
   - results/topic4_sef_itp/phase1_spatial_geometry/cohort_subjects.csv
 
 Reports the cohort funnel (40→34→30→23), verdict distributions per hypothesis,
-coord-coverage stats, and cohort-level binomial-style aggregations.
+coord-coverage stats, and H2 rank-displacement swap-class counts.
 
 Plan: docs/archive/topic4/sef_itp_phase1/plan_2026-05-21.md §5.4 cohort summary
 """
@@ -70,12 +70,17 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
     h6_verdicts = Counter()
     h1_verdicts_per_cluster = Counter()
 
-    # H2 sign-test accumulators (PR-6 mechanism sanity — no verdict, just counts)
+    # H2 rank-displacement swap-k accumulators (mechanism sanity — no verdict)
     h2_swap_scores: List[float] = []
-    h2_null_ps: List[float] = []
-    h2_n_exceed_null_95th = 0
+    h2_p_fws: List[float] = []
     h2_n_testable = 0
-    h2_n_not_testable = 0  # PR-6 exit_reason or h2_swap_check missing
+    h2_n_not_testable = 0  # rank-displacement missing or not stable_k=2 one-pair
+    h2_swap_class_counts = Counter({"strict": 0, "candidate": 0, "none": 0, "unknown": 0})
+    h2_spatial_verdicts = {
+        "source_side": Counter(),
+        "sink_side": Counter(),
+        "combined_endpoint": Counter(),
+    }
 
     # Coord coverage
     n_mapped_list = []
@@ -124,31 +129,41 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             h1_categorical[_categorize(v, H1_PASS_LIKE, H1_NULL_LIKE, H1_FAIL_LIKE, H1_UNTESTABLE)] += 1
             h1_subject_overall.append({"cluster_id": int(cid), "verdict": v})
 
-        # H2 (v1.0.8): ingested from PR-6 h2_swap_check per subject;
-        # cohort-level = sign-test n_exceed_null_95th / n_total only,
-        # NO cohort PASS/NULL/FAIL verdict (PR-6 plan §3.3 mechanism-sanity tier).
+        # H2 (v1.0.10): rank-displacement swap_sweep channel labels.
+        # NO cohort PASS/NULL/FAIL verdict (mechanism-sanity tier).
         h2_block = d.get("h2") or {}
         h2_subject_swap: Optional[Dict] = None
         if h2_block.get("available"):
             sc = h2_block.get("swap_score")
-            np_ = h2_block.get("null_p")
-            exceeds = h2_block.get("exceeds_null_95th")
+            p_fw = h2_block.get("p_fw", h2_block.get("null_p"))
+            swap_class = h2_block.get("swap_class", "unknown")
+            if swap_class not in h2_swap_class_counts:
+                swap_class = "unknown"
             h2_subject_swap = {
                 "swap_score": sc,
-                "null_p": np_,
-                "null_95th": h2_block.get("null_95th"),
-                "null_median": h2_block.get("null_median"),
-                "exceeds_null_95th": exceeds,
-                "jaccard_t0src_t1snk": h2_block.get("jaccard_t0src_t1snk"),
-                "jaccard_t0snk_t1src": h2_block.get("jaccard_t0snk_t1src"),
+                "p_fw": p_fw,
+                "null_p": p_fw,  # backward-compatible alias for old CSV readers
+                "swap_class": swap_class,
+                "decision_k": h2_block.get("decision_k"),
+                "swap_source_channels": h2_block.get("swap_source_channels"),
+                "swap_sink_channels": h2_block.get("swap_sink_channels"),
+                "swap_endpoint_channels": h2_block.get("swap_endpoint_channels"),
+                "n_valid": h2_block.get("n_valid"),
+                "source_contract": h2_block.get("source_contract"),
+                "spatial_compactness": h2_block.get("spatial_compactness"),
             }
             h2_n_testable += 1
             if sc is not None:
                 h2_swap_scores.append(float(sc))
-            if np_ is not None:
-                h2_null_ps.append(float(np_))
-            if exceeds:
-                h2_n_exceed_null_95th += 1
+            if p_fw is not None:
+                h2_p_fws.append(float(p_fw))
+            h2_swap_class_counts[swap_class] += 1
+            spatial = h2_block.get("spatial_compactness") or {}
+            if spatial.get("available"):
+                for side in ("source_side", "sink_side", "combined_endpoint"):
+                    verdict = (spatial.get(side) or {}).get("verdict")
+                    if verdict is not None:
+                        h2_spatial_verdicts[side][verdict] += 1
         else:
             h2_n_not_testable += 1
 
@@ -175,8 +190,22 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             "h1_c0": h1_subject_overall[0]["verdict"] if len(h1_subject_overall) > 0 else None,
             "h1_c1": h1_subject_overall[1]["verdict"] if len(h1_subject_overall) > 1 else None,
             "h2_swap_score": h2_subject_swap["swap_score"] if h2_subject_swap else None,
+            "h2_p_fw": h2_subject_swap["p_fw"] if h2_subject_swap else None,
             "h2_null_p": h2_subject_swap["null_p"] if h2_subject_swap else None,
-            "h2_exceeds_null_95th": h2_subject_swap["exceeds_null_95th"] if h2_subject_swap else None,
+            "h2_swap_class": h2_subject_swap["swap_class"] if h2_subject_swap else None,
+            "h2_decision_k": h2_subject_swap["decision_k"] if h2_subject_swap else None,
+            "h2_source_spatial_verdict": (
+                ((h2_subject_swap.get("spatial_compactness") or {}).get("source_side") or {}).get("verdict")
+                if h2_subject_swap else None
+            ),
+            "h2_sink_spatial_verdict": (
+                ((h2_subject_swap.get("spatial_compactness") or {}).get("sink_side") or {}).get("verdict")
+                if h2_subject_swap else None
+            ),
+            "h2_combined_spatial_verdict": (
+                ((h2_subject_swap.get("spatial_compactness") or {}).get("combined_endpoint") or {}).get("verdict")
+                if h2_subject_swap else None
+            ),
         })
 
     # Cohort funnel — derived from Phase 0a + PR-6 + coord availability
@@ -215,17 +244,27 @@ def aggregate(per_subject_dir: Path) -> Dict[str, Any]:
             "n_clusters_total": sum(h1_verdicts_per_cluster.values()),
         },
         "h2": {
-            "tier": "directional_mechanism_sanity_not_cohort_claim",
-            "source_contract": "pr6_h2_swap_check",
-            "n_testable": h2_n_testable,
+            "tier_lock": "directional_mechanism_sanity_not_cohort_claim",
+            "source_contract": "rank_displacement_swap_sweep",
+            "n_testable_total": h2_n_testable,
             "n_not_testable": h2_n_not_testable,
-            "n_exceed_null_95th": h2_n_exceed_null_95th,
-            "sign_test_p_binomial_one_sided_p0_05": _binomial_one_sided_p(
-                h2_n_exceed_null_95th, h2_n_testable, p_null=0.05
-            ) if h2_n_testable > 0 else None,
+            "swap_class_distribution": dict(h2_swap_class_counts),
+            "n_strict": h2_swap_class_counts["strict"],
+            "n_candidate": h2_swap_class_counts["candidate"],
+            "n_strict_or_candidate": (
+                h2_swap_class_counts["strict"] + h2_swap_class_counts["candidate"]
+            ),
+            "spatial_compactness_verdict_distribution": {
+                side: dict(counter) for side, counter in h2_spatial_verdicts.items()
+            },
             "swap_score_median": float(_median(h2_swap_scores)) if h2_swap_scores else None,
-            "null_p_median": float(_median(h2_null_ps)) if h2_null_ps else None,
-            "note": "PR-6 plan §3.3 + §15: descriptive only. No cohort PASS/NULL/FAIL verdict.",
+            "p_fw_median": float(_median(h2_p_fws)) if h2_p_fws else None,
+            "null_p_median": float(_median(h2_p_fws)) if h2_p_fws else None,
+            "note": (
+                "Topic4 H2: rank-displacement swap-k defines labels; spatial "
+                "compactness tests source/sink swap-k sides against other valid nodes. "
+                "No cohort PASS/NULL/FAIL verdict."
+            ),
         },
         "subjects": subjects,
     }, csv_rows
@@ -239,21 +278,6 @@ def _median(xs: List[float]) -> float:
     if n % 2 == 1:
         return xs[n // 2]
     return (xs[n // 2 - 1] + xs[n // 2]) / 2
-
-
-def _binomial_one_sided_p(k: int, n: int, p_null: float = 0.05) -> float:
-    """One-sided upper-tail binomial: P(X ≥ k | n, p_null).
-
-    Used for H2 sign-test cohort summary: under null p_null=0.05 (chance of
-    exceeding null_95th under H0), how unlikely is observing ≥k successes in n.
-    """
-    from math import comb
-    if n <= 0:
-        return float("nan")
-    return float(
-        sum(comb(n, i) * (p_null ** i) * ((1 - p_null) ** (n - i))
-            for i in range(k, n + 1))
-    )
 
 
 def main(argv=None) -> int:
@@ -298,14 +322,14 @@ def main(argv=None) -> int:
         print(f"  {v}: {n}")
     print(f"  categorical: {summary['h1']['categorical_distribution']}")
     h2 = summary["h2"]
-    print(f"\nH2 (PR-6 swap_check — mechanism sanity, NOT cohort claim):")
-    print(f"  n_testable: {h2['n_testable']}, n_not_testable: {h2['n_not_testable']}")
-    print(f"  n_exceed_null_95th: {h2['n_exceed_null_95th']} / {h2['n_testable']}")
-    print(f"  sign-test binomial-p (one-sided, p_null=0.05): {h2['sign_test_p_binomial_one_sided_p0_05']:.4g}"
-          if h2['sign_test_p_binomial_one_sided_p0_05'] is not None
-          else "  sign-test: n/a")
+    print(f"\nH2 (rank-displacement swap-k — mechanism sanity, NOT cohort claim):")
+    print(f"  TOTAL n_testable: {h2['n_testable_total']}, n_not_testable: {h2['n_not_testable']}")
+    print(f"  swap_class distribution: {h2['swap_class_distribution']}")
+    print(f"  strict + candidate: {h2['n_strict_or_candidate']} / {h2['n_testable_total']}")
+    print(f"  source-side spatial verdicts: {h2['spatial_compactness_verdict_distribution']['source_side']}")
+    print(f"  sink-side spatial verdicts: {h2['spatial_compactness_verdict_distribution']['sink_side']}")
     print(f"  swap_score median: {h2['swap_score_median']}")
-    print(f"  null_p median: {h2['null_p_median']}")
+    print(f"  p_fw median: {h2['p_fw_median']}")
     print(f"\nWrote {out_json}")
     print(f"Wrote {out_csv}")
     return 0

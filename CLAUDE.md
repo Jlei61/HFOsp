@@ -103,6 +103,40 @@ The unifying principle: plan prose lists invariants the implementation must hold
 
 **Skill companion (operationalizes §6)**: `.claude/skills/hfosp-deep-contract-verify/SKILL.md` — invoke before writing the body of any function whose plan specifies multi-clause invariants (boundary params / paired-cohort keys / surrogate construction / "reported alongside" secondary metrics / "re-use don't re-invent" helpers). §6 is the *why*; the skill is the *how*.
 
+### 6.1 Helper reuse requires question-match, not signature-match
+
+Origin: SEF-ITP Phase 1 H2 v1.0.6 → v1.0.9 (4 cascading errors, 2026-05-22). Same lesson as §6 "re-use don't re-invent" but the inverse failure mode: **re-using an existing helper because the signature fits, without checking the helper's null contract matches the new hypothesis's question.**
+
+> **Worked example**: H1 strict layer uses `compute_h1_compactness` whose matched-null preserves **shaft distribution** (correct: H1 asks "is endpoint more compact than other 3-channel subsets on the same shaft(s)?"). When H2 needed a "swap-k node spatial compactness" check, an early implementation reused `compute_h1_compactness` because the signature fit (`members`, `candidate_pool`, `D`, `n_null`). But **H2's question is "are swap-k nodes more compact than other valid SEEG nodes irrespective of shaft" — same-shaft matching strangles H2's null (most pools end up < n_members → `INSUFFICIENT_NULL`) AND silently subtracts the shaft signal that's part of the H2 mechanism**.
+
+The discipline:
+- Before calling an existing helper from a new hypothesis, **state in one sentence what the helper's null asks**, then **state what your hypothesis asks**. If those two sentences differ on what gets controlled or what gets compared, the helper is the wrong shape — write a new one or extend with an opt-in mode.
+- "It produces a verdict with the right key" is not a fit — verdict labels can be the same while the underlying question is different.
+- Look at the helper's **null construction**, not its return shape. The null is the contract.
+
+### 6.2 Source-of-truth has resolution levels — name the level before you act
+
+Origin: SEF-ITP Phase 1 H2 input order (cohort_run §9, 2026-05-22). The same nominal concept ("swap" / "forward-reverse" / "endpoint") lives at three resolution levels in this repo, each producing a different per-subject answer:
+
+- **Template level**: PR-2 `candidate_forward_reverse_pairs` (whole-template Spearman r) — answers "this subject has two templates that look like negatives of each other". Diluted by shared channels; not channel-level.
+- **Endpoint summary level**: PR-6 anchoring fixed top-k source/sink + `h2_swap_check` Jaccard — answers "the top-k channels on each side swap roles between templates". Fixed k=3, audit-derived cohort gate.
+- **Channel level**: rank-displacement `swap_sweep.decision_k` (variable k, family-wise null per subject) — answers "which channels actually contribute to the swap, and how many?".
+
+If a downstream task needs channel-level inputs (e.g., a spatial compactness test on the swap nodes), reading PR-2's `candidate_forward_reverse_pairs` produces a syntactically valid input that is **scientifically the wrong layer**. The JSON field name doesn't carry the resolution level — the upstream archive does.
+
+The discipline:
+- Before pulling a field from an upstream JSON, write one sentence: "this field answers \<question at level X\>". Compare to "my task needs \<question at level Y\>". If X ≠ Y, you have a layer mismatch even when the names match.
+- For repeated concepts that span multiple resolution levels (template / endpoint summary / channel), keep an entry in AGENTS.md "Cross-PR Contract Lookups" pinning the layer of each field. Without the lookup, "swap" silently means whichever layer the most recent commit was working on.
+
+### 6.3 Pronoun discipline in cross-layer narration
+
+Origin: same H2 cascade. The agent wrote things like "swap-k node spatial compactness shows H2 PASS" — collapsing two distinct findings ("which channels are labeled as swap" + "are those channels spatially clustered") into a single "H2 PASS" pronoun. Readers (and future agents) silently re-expand the pronoun to whichever layer they care about, producing over-broad claims.
+
+The discipline:
+- When a result combines two layers (label + geometric, or label + statistical), **state both layers in the sentence**, e.g. "rank-displacement swap-k label was `strict` AND swap-k source-side spatial compactness was PASS". Do not write "H2 PASS" without specifying which layer.
+- The pre-registered tier (§5 last bullet) determines what kind of statement you're allowed: mechanism-sanity tier → per-subject descriptive sentences only; cohort-claim tier → cohort-level summary statistics allowed. **"H2 PASS" as a cohort statement requires both layers AND a cohort-claim tier — neither alone is enough.**
+- When tightening a section's wording, ask: if the reader only sees this sentence (no surrounding context), would they re-expand "H2" to "cohort-level reversal PASS" or to "swap-k spatial sanity supported per subject"? The two readings have very different implications; the wording must disambiguate.
+
 ## 7. Multi-Panel Figure Discipline
 
 **Each panel must answer one independent scientific question. Two panels

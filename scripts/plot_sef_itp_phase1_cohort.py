@@ -109,56 +109,63 @@ def main(argv=None) -> int:
     plt.close(fig)
     print(f"  wrote {p}")
 
-    # === H2 (v1.0.8 — PR-6 swap_check ingest, mechanism sanity) ===
+    # === H2 (v1.0.10 — rank-displacement swap-k, mechanism sanity) ===
     h2 = summary["h2"]
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-    # Left: sign-test bar
-    n_test = h2["n_testable"]
-    n_exc = h2["n_exceed_null_95th"]
+    # Left: swap_class distribution
+    n_test = h2["n_testable_total"]
     n_not = h2["n_not_testable"]
-    bars = ["exceed_null_95th\n(swap > 95th)", "not_exceed_null_95th", "not_testable\n(PR-6 exit_reason)"]
-    vals = [n_exc, n_test - n_exc, n_not]
-    cols = [COLOR["pass"], COLOR["null"], COLOR["untestable"]]
+    cls = h2.get("swap_class_distribution", {})
+    bars = ["strict", "candidate", "none", "unknown", "not_testable\n(no rank-disp)"]
+    vals = [
+        cls.get("strict", 0),
+        cls.get("candidate", 0),
+        cls.get("none", 0),
+        cls.get("unknown", 0),
+        n_not,
+    ]
+    cols = [COLOR["pass"], COLOR["partial"], COLOR["null"], COLOR["untestable"], COLOR["untestable"]]
     axes[0].barh(bars, vals, color=cols, edgecolor="black", linewidth=0.4)
     for i, v in enumerate(vals):
         axes[0].text(v + max(vals) * 0.02, i, str(v), va="center", fontsize=9)
     axes[0].invert_yaxis()
     axes[0].set_xlabel(f"n subjects (cohort = {n_subj})")
-    sign_p = h2.get("sign_test_p_binomial_one_sided_p0_05")
-    sign_p_str = f"{sign_p:.3g}" if sign_p is not None else "n/a"
     axes[0].set_title(
-        f"H2 PR-6 swap_check — mechanism sanity (NOT cohort claim)\n"
-        f"sign-test binomial-p (p_null=0.05): {sign_p_str} "
-        f"({n_exc}/{n_test} exceed null_95th)",
+        f"H2 rank-displacement swap-k — mechanism sanity (NOT cohort claim)\n"
+        f"strict + candidate: {h2.get('n_strict_or_candidate', 0)}/{n_test}",
         fontsize=10,
     )
     axes[0].spines["top"].set_visible(False)
     axes[0].spines["right"].set_visible(False)
 
-    # Right: per-subject swap_score scatter colored by exceed
+    # Right: per-subject swap_score scatter colored by swap_class
     subj_h2 = [s for s in summary["subjects"] if s.get("h2_swap_check") is not None]
     sids = [f"{s['dataset']}_{s['subject_id']}" for s in subj_h2]
     scores = [s["h2_swap_check"]["swap_score"] for s in subj_h2]
-    n95s = [s["h2_swap_check"]["null_95th"] for s in subj_h2]
-    exceeds = [s["h2_swap_check"]["exceeds_null_95th"] for s in subj_h2]
+    p_fws = [s["h2_swap_check"].get("p_fw") for s in subj_h2]
+    classes = [s["h2_swap_check"].get("swap_class", "unknown") for s in subj_h2]
     ypos = list(range(len(sids)))
-    point_colors = [COLOR["pass"] if e else COLOR["null"] for e in exceeds]
-    axes[1].scatter(scores, ypos, c=point_colors, s=80, edgecolor="black", zorder=3, label="swap_score")
-    axes[1].scatter(n95s, ypos, marker="x", c="black", s=50, zorder=4, label="null_95th")
-    for s, n95, y in zip(scores, n95s, ypos):
-        axes[1].plot([min(s, n95), max(s, n95)], [y, y], color="grey", lw=0.6, zorder=1)
+    color_for_class = {
+        "strict": COLOR["pass"],
+        "candidate": COLOR["partial"],
+        "none": COLOR["null"],
+    }
+    point_colors = [color_for_class.get(c, COLOR["untestable"]) for c in classes]
+    axes[1].scatter(scores, ypos, c=point_colors, s=80, edgecolor="black", zorder=3)
+    for score, p_fw, y in zip(scores, p_fws, ypos):
+        if p_fw is not None:
+            axes[1].text(score + 0.03, y, f"p_fw={p_fw:.3g}", va="center", fontsize=8)
     axes[1].set_yticks(ypos)
     axes[1].set_yticklabels(sids, fontsize=9)
     axes[1].invert_yaxis()
-    axes[1].set_xlabel("swap_score (Jaccard reversal)")
-    axes[1].set_title(f"Per-subject swap_score vs null_95th (n={len(sids)})", fontsize=10)
+    axes[1].set_xlabel("T_obs / decision swap_score")
+    axes[1].set_title(f"Per-subject rank-displacement swap-k (n={len(sids)})", fontsize=10)
     axes[1].set_xlim(0, 1.05)
-    axes[1].legend(loc="lower right", fontsize=8)
     axes[1].spines["top"].set_visible(False)
     axes[1].spines["right"].set_visible(False)
 
     plt.tight_layout()
-    p = args.output_dir / "cohort_h2_swap_check_signtest.png"
+    p = args.output_dir / "cohort_h2_rank_displacement_swap_class.png"
     plt.savefig(p, dpi=140)
     plt.close(fig)
     print(f"  wrote {p}")

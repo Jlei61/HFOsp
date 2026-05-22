@@ -66,6 +66,36 @@ def _make_pr6_json(channels, templates, h2_swap=None):
     }
 
 
+def _make_rank_displacement_json(channels, *, swap_class="strict", decision_k=2):
+    return {
+        "subject": "1073",
+        "dataset": "epilepsiae",
+        "stable_k": 2,
+        "channel_names": list(channels),
+        "pairs": [
+            {
+                "exit_reason": "ok",
+                "cluster_id_a": 0,
+                "cluster_id_b": 1,
+                "channel_names": list(channels),
+                "joint_valid": [True] * len(channels),
+                "rank_a_dense_full": [0, 1, 2, 3, 4, 5],
+                "rank_b_dense_full": [5, 4, 3, 2, 1, 0],
+                "swap_sweep": {
+                    "exit_reason": "ok",
+                    "swap_class": swap_class,
+                    "decision_k": decision_k,
+                    "decision_swap_score": 1.0,
+                    "T_obs": 1.0,
+                    "p_fw": 0.001,
+                    "n_valid": len(channels),
+                    "n_perm": 1000,
+                },
+            }
+        ],
+    }
+
+
 def _make_fake_loader_dict(channels, n_events=100):
     rng = np.random.default_rng(0)
     n_ch = len(channels)
@@ -162,7 +192,19 @@ def pr6_root(tmp_path):
     return p
 
 
-def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root, tmp_path):
+@pytest.fixture
+def rank_displacement_root(tmp_path):
+    p = tmp_path / "rank_displacement" / "per_subject"
+    p.mkdir(parents=True)
+    (p / "epilepsiae_1073.json").write_text(
+        json.dumps(_make_rank_displacement_json(CHANNELS))
+    )
+    return p
+
+
+def test_load_subject_for_phase1_happy_path(
+    monkeypatch, phase0a_path, pr6_root, rank_displacement_root, tmp_path
+):
     """Happy path: all 4 sources align, mm coords, unified namespace with no extras.
 
     v1.0.7: valid_indices_per_cluster is now "all mapped SEEG MINUS endpoints"
@@ -182,6 +224,7 @@ def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root,
     subj = runner.load_subject_for_phase1(
         phase0a_path,
         pr6_anchoring_root=pr6_root,
+        rank_displacement_root=rank_displacement_root,
         epilepsiae_lagpat_root=tmp_path / "lagpat_root",
     )
 
@@ -204,15 +247,111 @@ def test_load_subject_for_phase1_happy_path(monkeypatch, phase0a_path, pr6_root,
     assert subj.valid_indices_per_cluster[0] == [2, 3]
     assert subj.valid_indices_per_cluster[1] == [2, 3]
 
-    # v1.0.8: H2 swap_check ingested from PR-6, not recomputed
+    # v1.0.10: H2 labels are ingested from rank-displacement swap_sweep
     assert subj.h2_swap_check is not None
-    assert subj.h2_swap_check["swap_score"] == 0.8
-    assert subj.h2_swap_check["null_p"] == 0.01
-    assert subj.h2_swap_check["exceeds_null_95th"] is True
-    assert subj.h2_swap_check["source_contract"] == "pr6_h2_swap_check"
+    assert subj.h2_swap_check["swap_score"] == 1.0
+    assert subj.h2_swap_check["null_p"] == 0.001
+    assert subj.h2_swap_check["swap_class"] == "strict"
+    assert subj.h2_swap_check["decision_k"] == 2
+    assert subj.h2_swap_check["source_contract"] == "rank_displacement_swap_sweep_v1"
 
     # No drops
     assert subj.n_dropped_endpoints_no_coords_per_cluster == {0: 0, 1: 0}
+
+
+def test_load_subject_for_phase1_h2_uses_rank_displacement_swap_k(
+    monkeypatch, phase0a_path, pr6_root, rank_displacement_root, tmp_path
+):
+    """Topic4 H2 v1.0.4: channel labels come from rank-displacement
+    swap_sweep.decision_k, not PR-2 candidate labels or PR-6 fixed top-3."""
+    monkeypatch.setattr(runner, "load_subject_propagation_events",
+                        lambda d: _make_fake_loader_dict(CHANNELS))
+    monkeypatch.setattr(runner, "load_subject_coords",
+                        lambda **kw: _make_coord_result(CHANNELS))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
+
+    fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
+    fake_dir.mkdir(parents=True)
+
+    subj = runner.load_subject_for_phase1(
+        phase0a_path,
+        pr6_anchoring_root=pr6_root,
+        rank_displacement_root=rank_displacement_root,
+        epilepsiae_lagpat_root=tmp_path / "lagpat_root",
+    )
+
+    assert subj.h2_swap_check is not None
+    assert subj.h2_swap_check["source_contract"] == "rank_displacement_swap_sweep_v1"
+    assert subj.h2_swap_check["swap_class"] == "strict"
+    assert subj.h2_swap_check["decision_k"] == 2
+    assert subj.h2_swap_check["swap_endpoint_channels"] == [
+        "A1-A2", "A2-A3", "B2-B3", "B3-B4"
+    ]
+    assert subj.h2_swap_check["swap_score"] == 1.0
+    assert subj.h2_swap_check["null_p"] == 0.001
+
+
+def test_run_h2_spatiality_tests_swap_k_sides_against_other_nodes():
+    subj = runner.make_synthetic_subject(seed=0)
+
+    h2 = runner.run_h2(
+        subj,
+        distance_metric="euclidean",
+        n_null=200,
+        rng_seed=0,
+    )
+
+    assert h2["available"] is True
+    spatial = h2["spatial_compactness"]
+    assert spatial["candidate_pool_contract"] == "all_mapped_seeg_minus_swap_endpoint"
+    assert spatial["source_side"]["n_members"] == h2["decision_k"]
+    assert spatial["sink_side"]["n_members"] == h2["decision_k"]
+    assert spatial["combined_endpoint"]["n_members"] == 2 * h2["decision_k"]
+    assert spatial["source_side"]["verdict"] in {
+        "PASS", "NULL", "FAIL_DIFFUSE", "INSUFFICIENT_NULL", "INSUFFICIENT_CHANNELS"
+    }
+    assert spatial["sink_side"]["verdict"] in {
+        "PASS", "NULL", "FAIL_DIFFUSE", "INSUFFICIENT_NULL", "INSUFFICIENT_CHANNELS"
+    }
+
+
+def test_run_h2_spatiality_null_is_not_shaft_matched():
+    """H2 asks whether swap-k nodes are spatially special versus other SEEG
+    nodes. Unlike H1, it should not require same-shaft replacement; otherwise
+    endpoint-heavy shafts make the null impossible."""
+    subj = runner.make_synthetic_subject(seed=0)
+    names = subj.channel_names
+    subj.h2_swap_check = {
+        "source_contract": "rank_displacement_swap_sweep_v1",
+        "source_path": "<test>",
+        "swap_class": "strict",
+        "decision_k": 10,
+        "swap_source_channels": names[:10],
+        "swap_sink_channels": names[10:20],
+        "swap_endpoint_channels": names[:20],
+        "swap_score": 1.0,
+        "decision_swap_score": 1.0,
+        "T_obs": 1.0,
+        "p_fw": 0.001,
+        "null_p": 0.001,
+        "n_valid": len(names),
+        "n_perm": 1000,
+    }
+
+    h2 = runner.run_h2(
+        subj,
+        distance_metric="euclidean",
+        n_null=200,
+        rng_seed=0,
+    )
+
+    spatial = h2["spatial_compactness"]
+    assert spatial["null_contract"] == "unmatched_random_other_valid_nodes"
+    assert spatial["source_side"]["n_null_samples"] == 200
+    assert spatial["sink_side"]["n_null_samples"] == 200
+    assert spatial["source_side"]["verdict"] != "INSUFFICIENT_NULL"
+    assert spatial["sink_side"]["verdict"] != "INSUFFICIENT_NULL"
 
 
 def test_load_subject_for_phase1_unified_namespace_extends_pool(
@@ -237,6 +376,7 @@ def test_load_subject_for_phase1_unified_namespace_extends_pool(
     subj = runner.load_subject_for_phase1(
         phase0a_path,
         pr6_anchoring_root=pr6_root,
+        rank_displacement_root=tmp_path / "no_rank_displacement",
         epilepsiae_lagpat_root=tmp_path / "lagpat_root",
     )
 
@@ -314,6 +454,7 @@ def test_load_subject_for_phase1_drops_unmapped_endpoints(monkeypatch, phase0a_p
     subj = runner.load_subject_for_phase1(
         phase0a_path,
         pr6_anchoring_root=pr6_root,
+        rank_displacement_root=tmp_path / "no_rank_displacement",
         epilepsiae_lagpat_root=tmp_path / "lagpat_root",
     )
 
@@ -404,6 +545,7 @@ def test_load_subject_for_phase1_pr6_valid_mask_no_longer_constrains_pool(monkey
     subj = runner.load_subject_for_phase1(
         phase0a_path,
         pr6_anchoring_root=pr6_root,
+        rank_displacement_root=tmp_path / "no_rank_displacement",
         epilepsiae_lagpat_root=tmp_path / "lagpat_root",
     )
     # c0 endpoint = {0,1,2}; mapped = all → valid = [3,4,5] (PR-6 valid_mask IGNORED)
@@ -412,14 +554,58 @@ def test_load_subject_for_phase1_pr6_valid_mask_no_longer_constrains_pool(monkey
     assert subj.valid_indices_per_cluster[1] == [3, 4, 5]
 
 
+def test_load_subject_for_phase1_h2_does_not_fallback_to_pr6_endpoints(
+    monkeypatch, phase0a_path, pr6_root, tmp_path
+):
+    """Topic4 H2 v1.0.4: even when PR-6 has full fixed top-3 endpoints,
+    Phase 1 must not synthesize H2 labels without rank-displacement
+    swap_sweep."""
+    # PR-6 has 2 templates with full endpoints, but no rank_displacement file.
+    two_templates = [
+        {"cluster_id": 0,
+         "source": ["A1-A2", "A2-A3", "A3-A4"],
+         "sink": ["B1-B2", "B2-B3", "B3-B4"],
+         "endpoint": [], "middle": [],
+         "valid_mask": [True] * len(CHANNELS),
+         "n_valid_channels": len(CHANNELS), "n_valid": len(CHANNELS)},
+        {"cluster_id": 1,
+         "source": ["B1-B2", "B2-B3", "B3-B4"],
+         "sink": ["A1-A2", "A2-A3", "A3-A4"],
+         "endpoint": [], "middle": [],
+         "valid_mask": [True] * len(CHANNELS),
+         "n_valid_channels": len(CHANNELS), "n_valid": len(CHANNELS)},
+    ]
+    (pr6_root / "epilepsiae_1073.json").write_text(
+        json.dumps(_make_pr6_json(CHANNELS, two_templates, h2_swap={
+            "swap_score": None, "null_p": None, "null_95th": None,
+            "exit_reason": "not_in_pr2_5_reproduced_cohort", "n_perm": 0,
+        }))
+    )
+
+    monkeypatch.setattr(runner, "load_subject_propagation_events",
+                        lambda d: _make_fake_loader_dict(CHANNELS))
+    monkeypatch.setattr(runner, "load_subject_coords",
+                        lambda **kw: _make_coord_result(CHANNELS))
+    monkeypatch.setattr(runner, "enumerate_subject_all_channels",
+                        lambda ds, sid: list(CHANNELS))
+
+    fake_dir = tmp_path / "lagpat_root" / "1073" / "all_recs"
+    fake_dir.mkdir(parents=True)
+
+    subj = runner.load_subject_for_phase1(
+        phase0a_path,
+        pr6_anchoring_root=pr6_root,
+        rank_displacement_root=tmp_path / "no_rank_displacement",
+        epilepsiae_lagpat_root=tmp_path / "lagpat_root",
+    )
+    assert subj.h2_swap_check is None
+
+
 def test_load_subject_for_phase1_h2_swap_check_unavailable_when_pr6_missing(
     monkeypatch, phase0a_path, pr6_root, tmp_path
 ):
-    """When PR-6 h2_swap_check.exit_reason is non-None, h2_swap_check should be None.
-
-    v1.0.8: H2 is mechanism sanity ingested from PR-6. If PR-6 couldn't compute
-    it (exit_reason set), Phase 1 propagates as h2_swap_check=None — caller
-    treats subject as "H2 not testable" for cohort sign-test."""
+    """When rank-displacement swap_sweep is unavailable, H2 should be None;
+    PR-6 h2_swap_check / endpoints are audit trail only."""
     single = [
         {"cluster_id": 0,
          "source": ["A1-A2"], "sink": ["B2-B3"],
@@ -447,11 +633,50 @@ def test_load_subject_for_phase1_h2_swap_check_unavailable_when_pr6_missing(
     subj = runner.load_subject_for_phase1(
         phase0a_path,
         pr6_anchoring_root=pr6_root,
+        rank_displacement_root=tmp_path / "no_rank_displacement",
         epilepsiae_lagpat_root=tmp_path / "lagpat_root",
     )
     assert subj.h2_swap_check is None
     # cluster endpoints still populated
     assert 0 in subj.cluster_endpoints
+
+
+def test_main_passes_rank_displacement_root_to_real_data_loader(monkeypatch, tmp_path):
+    phase0a_root = tmp_path / "phase0a"
+    pr6_root = tmp_path / "pr6"
+    rank_root = tmp_path / "rank_displacement" / "per_subject"
+    out_dir = tmp_path / "out"
+    phase0a_root.mkdir()
+    pr6_root.mkdir()
+    rank_root.mkdir(parents=True)
+    (phase0a_root / "epilepsiae_1073.json").write_text("{}")
+
+    captured = {}
+
+    def fake_load_subject(path, **kwargs):
+        captured["rank_displacement_root"] = kwargs.get("rank_displacement_root")
+        return runner.make_synthetic_subject(seed=0)
+
+    monkeypatch.setattr(runner, "load_subject_for_phase1", fake_load_subject)
+    monkeypatch.setattr(
+        runner,
+        "run_phase1_subject",
+        lambda **kwargs: {"subject_id": "synthetic", "h2": {"available": False}},
+    )
+
+    rc = runner.main([
+        "--dataset", "epilepsiae",
+        "--subject", "1073",
+        "--phase0a-root", str(phase0a_root),
+        "--pr6-root", str(pr6_root),
+        "--rank-displacement-root", str(rank_root),
+        "--output-dir", str(out_dir),
+        "--distance-metric", "shaft_ordinal",
+        "--hypothesis", "h2",
+    ])
+
+    assert rc == 0
+    assert captured["rank_displacement_root"] == rank_root
 
 
 def test_load_subject_for_phase1_subject_filename_mismatch_raises(tmp_path, pr6_root):

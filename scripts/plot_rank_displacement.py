@@ -62,10 +62,26 @@ def _canonical_data_root() -> Path:
 
 
 DATA_ROOT = _canonical_data_root()
+# Legacy (non-masked) paths. `_apply_masked_paths()` swaps these to the
+# `_masked` parallel tree (Topic 0 §3.1 phantom-rank rerun).
 RES_DIR = DATA_ROOT / "results" / "interictal_propagation" / "rank_displacement"
 PER_SUBJECT_DIR = RES_DIR / "per_subject"
 FIG_DIR = RES_DIR / "figures"
 PER_SUB_FIG_DIR = FIG_DIR / "per_subject"
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors scripts/run_rank_displacement.py:_apply_masked_paths so the
+    plotting script consumes the masked rank_displacement per-subject JSONs
+    and writes figures next to them.
+    """
+    global RES_DIR, PER_SUBJECT_DIR, FIG_DIR, PER_SUB_FIG_DIR
+    RES_DIR = DATA_ROOT / "results" / "interictal_propagation_masked" / "rank_displacement"
+    PER_SUBJECT_DIR = RES_DIR / "per_subject"
+    FIG_DIR = RES_DIR / "figures"
+    PER_SUB_FIG_DIR = FIG_DIR / "per_subject"
 
 
 CANDIDATE_RHO_THRESHOLD = -0.5  # PR-2.5 fwd/rev candidate gate on inter_cluster_corr_matrix
@@ -988,7 +1004,19 @@ def main() -> None:
         help="Subject stems (<dataset>_<subject>) to exclude from cohort heatmap. "
              "Output filename gets a _excl_<slug> suffix; per_subject strips unaffected.",
     )
+    ap.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Read masked PR-6 rank_displacement per-subject JSONs from "
+            "results/interictal_propagation_masked/rank_displacement/ and write "
+            "figures to the same parallel tree. Matches run_rank_displacement.py "
+            "--masked-features routing (Topic 0 §3.1 phantom-rank rerun)."
+        ),
+    )
     args = ap.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
 
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     PER_SUB_FIG_DIR.mkdir(parents=True, exist_ok=True)

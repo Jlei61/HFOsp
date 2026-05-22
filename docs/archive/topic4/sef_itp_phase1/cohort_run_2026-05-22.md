@@ -184,6 +184,91 @@ per-subject 数值：
 
 ---
 
+## 9. v1.0.9 H2 input-order 调查 — PR-2 / PR-6 endpoint / rank-displacement 分层
+
+### 9.1 用户诊断（朴素话）
+
+上一版 v1.0.8 修正了三个错误：不再拿 PR-2 `candidate_forward_reverse_pairs` 当 strict input、不重新发明 PR-6 helper、不把 H2 升级成 cohort claim。但它仍然容易让后续实现者误会：**只要谈 H2，就先去抓 PR-2 或 PR-6 fixed top-3 endpoint**。
+
+这仍然不够精确。三层东西回答的是三个不同问题：
+
+- **PR-2 / PR-2.5**：先把事件分成几种稳定传播模板。它回答"这个 subject 有没有两条像正反的传播路线"。这是模板发现层，不是 channel-label 层。
+- **PR-6 endpoint anchoring**：每条模板取 fixed top-3 source/sink。它回答"每条传播路线最前 / 最后的几个通道是谁"。这是端点摘要层，比 PR-2 接近 H2，但 fixed-k 会丢掉 subject-specific cardinality。
+- **rank-displacement + swap-k**：逐通道看同一个 channel 从模板 A 到模板 B 的 rank 位移，再用 `swap_sweep` 找 family-wise null 下最稳的 `decision_k`。它回答"哪些通道真正构成这对模板的 source/sink swap endpoint"。这是 Topic 4 建模前最该用的 H2 channel-label。
+
+### 9.2 当前结论
+
+**rank-displacement 之后的 `swap_sweep` / `decision_k` 才是 H2 最稳输入**。原因：
+
+1. PR-2 的整模板 Spearman 相关会被共享节点稀释；它能发现候选模式，但不能稳健标通道。
+2. PR-6 fixed top-3 endpoint 是硬切 k=3；对不同有效通道数 subject 不够自适应。
+3. rank-displacement 的 `swap_sweep` 是 per-channel + variable-k + family-wise max-null，直接给出 `swap_class`、`decision_k`、`T_obs`、`p_fw`，再由 `joint_valid` + `rank_a_dense_full` 派生 endpoint channel label。
+
+### 9.3 后续实现合同
+
+Topic 4 H2 建模前输入顺序锁定为：
+
+1. 读取 masked rank-displacement per-subject JSON：`results/interictal_propagation_masked/rank_displacement/per_subject/<dataset>_<subject>.json`
+2. 只在 `stable_k=2` 且 `primary_pair.exit_reason == "ok"` 的 subject 上取 `primary_pair.swap_sweep`
+3. 用 `swap_sweep.decision_k` + `joint_valid` + `rank_a_dense_full` 派生 `swap_endpoint_channels`
+4. **不要停在 label 层**：`swap_class` / `decision_k` 只说明哪些通道构成 swap-k endpoint；真正的 H2 空间性还要把 source-side 前 `k` 个节点、sink-side 后 `k` 个节点分别拿去和其他有效 SEEG 节点做空间 compactness null
+5. 空间性检验不复用 H1 的 same-shaft null：`members = swap source-side k` 或 `swap sink-side k`；`candidate_pool = all mapped SEEG minus swap endpoint`；从这个 pool 无 shaft 约束随机抽同样大小节点集。`combined_endpoint (2k)` 只作辅助描述
+6. `swap_class == "strict"` 是主机制 sanity label；`candidate` 是描述 / sensitivity；`none` 保留为非 swap 对照
+7. PR-2 / PR-2.5 只作 provenance / funnel 字段，不作为 H2 channel-label；PR-6 fixed top-3 endpoint / `h2_swap_check` 保留为 audit trail 和摘要层
+
+H2 tier 不变：仍是 **directional mechanism sanity, NOT cohort claim**。
+
+### 9.4 2026-05-22 实现纠偏
+
+第一次 cohort 运行只统计了 `swap_class_distribution`，这是 **label-source validation**，不是完整 H2。正确 H2 必须多走一步：用 rank-displacement 产生的 swap-k 节点测试空间性。后续结果汇总必须同时报告：
+
+- label 层：`swap_class` / `decision_k` / `T_obs` / `p_fw` / `swap_endpoint_channels`
+- spatial 层：`source_side` / `sink_side` / `combined_endpoint` compactness verdict
+
+其中 `source_side` 与 `sink_side` 是主 sanity；`combined_endpoint` 是辅助，因为 source 与 sink 可能本来就在传播轨迹两端，混成 `2k` 后测 compactness 不应作为唯一主结论。
+
+### 9.5 verdict 验收（v1.0.4 lock 2026-05-22；措辞已收紧）
+
+**接受作为 H2 pre-modeling spatial sanity test**。Cohort 实跑（n=23，euclidean，masked tree）：
+
+| 子项 | 数值 |
+|---|---|
+| n_testable | 23 / 23（0 个 `INSUFFICIENT_POOL`，0 个 `INSUFFICIENT_NULL`，0 个 `not_testable`）|
+| swap_class | strict 5 / candidate 4 / none 14 / unknown 0 |
+| source-side spatial | PASS 19 / NULL 3 / FAIL_DIFFUSE 1 |
+| sink-side spatial | PASS 16 / NULL 7 |
+| combined_endpoint spatial（辅助） | PASS 20 / NULL 3 |
+
+**5 个 swap_class=strict subject 的 spatial 一致性**：
+- epilepsiae_139 / epilepsiae_1146 / yuquan_zhangjiaqi / yuquan_zhaochenxi: source PASS + sink PASS
+- epilepsiae_958: source PASS + sink NULL
+
+**4 个 swap_class=candidate subject**：
+- yuquan_liyouran: source PASS + sink PASS
+- epilepsiae_635 / epilepsiae_1073 / epilepsiae_253: 至少一侧 NULL / FAIL_DIFFUSE
+
+**14 个 swap_class=none subject 中，多数也得到 source/sink PASS**：这并不意味着这些 subject 也成立 swap 反转——只说明在 rank-displacement `decision_k` 给出的"前 k / 后 k"通道上，**单纯的空间紧凑性**对绝大多数有效 SEEG 实施都成立。这是 label 层"无 swap 信号"与 spatial 层"通道空间相邻"互不矛盾的体现。
+
+**允许的判读语言（lock）**：
+- ✅ "在可测的 H2 cohort 中，rank-displacement 定义出来的 swap-k source-side / sink-side 节点，整体上呈现相对其他 mapped SEEG 节点的空间紧凑性"
+- ✅ "swap-k source/sink endpoint 有空间聚合倾向；这是 mechanism sanity，不是最终 cohort claim"
+- ✅ EN: "H2 spatial sanity was supported: rank-displacement-derived swap-k source-side and sink-side endpoints showed non-random spatial compactness relative to other mapped SEEG contacts in most testable subjects."
+- ❌ "H2 证明 source/sink reversal 是 cohort-level 主效应"
+- ❌ "所有 source/sink 节点都有空间聚合"
+- ❌ "cohort PASS / partial PASS"
+
+**v1.0.4 实现纠错（accept-condition）**：旧实现复用 H1 `compute_h1_compactness`（same-shaft matching）→ 大量 `INSUFFICIENT_NULL`。H2 问的是"swap-k 节点相对全植入空间是否特殊"，source/sink 所在 shaft 是机制的一部分，不能强行 same-shaft 抽样。已替换为 `_compute_h2_unmatched_compactness`（pool=`all mapped SEEG minus swap endpoint`，无 shaft 约束）。
+
+**实现文件**：
+- `src/sef_itp_phase1.py`（H1 / H6 helper 不变）
+- `scripts/run_sef_itp_phase1.py`：`_compute_h2_unmatched_compactness` + `_run_h2_spatial_compactness` + `run_h2` ingest rank-displacement
+- `scripts/summarize_sef_itp_phase1.py`：`spatial_compactness_verdict_distribution` 字段
+- `tests/test_run_sef_itp_phase1_integration.py` + `tests/test_summarize_sef_itp_phase1.py`：115 passed
+
+**输出位置**：`results/topic4_sef_itp/phase1_h2_rank_displacement_spatial_validation/`（per_subject + cohort_summary.json + cohort_subjects.csv）
+
+---
+
 ---
 
 ## 0. Cohort 漏斗（实测）

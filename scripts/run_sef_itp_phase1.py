@@ -1,7 +1,7 @@
 """SEF-ITP Phase 1 CLI runner — H6 / H1 / H2 spatial geometry hypotheses.
 
 Plan: docs/archive/topic4/sef_itp_phase1/plan_2026-05-21.md
-Framework: docs/topic4_sef_itp_framework.md v1.0.2
+Framework: docs/topic4_sef_itp_framework.md v1.0.4
 Module: src/sef_itp_phase1.py
 
 CURRENT STATUS (2026-05-21):
@@ -11,9 +11,11 @@ CURRENT STATUS (2026-05-21):
           (results/interictal_propagation_masked/per_subject/<dataset>_<sid>.json)
       (b) masked PR-6 template_anchoring JSON
           (results/interictal_propagation_masked/template_anchoring/per_subject/<dataset>_<sid>.json)
-      (c) lagPat NPZ — events_bool aligned to Phase 0a channel_names
+      (c) masked rank_displacement JSON for H2 swap-k labels
+          (results/interictal_propagation_masked/rank_displacement/per_subject/<dataset>_<sid>.json)
+      (d) lagPat NPZ — events_bool aligned to Phase 0a channel_names
           via src.interictal_propagation.load_subject_propagation_events
-      (d) SEEG coords via src.seeg_coord_loader.load_subject_coords —
+      (e) SEEG coords via src.seeg_coord_loader.load_subject_coords —
           Yuquan fs_native_ras_mm, Epilepsiae MNI152 1mm via auto-discovered
           MRI affine; assert_coord_result_is_mm_for_main_analysis enforces mm
           before euclidean compute (v1.0.5 voxel-rejection contract).
@@ -26,7 +28,7 @@ import json
 import sys
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -39,6 +41,8 @@ from src.sef_itp_phase1 import (
     compute_h1_full,
     compute_h6_segregation,
     compute_participation_rate,
+    pairwise_3d_euclidean,
+    pairwise_shaft_ordinal,
 )
 from src.seeg_coord_loader import (
     assert_coord_result_is_mm_for_main_analysis,
@@ -46,6 +50,7 @@ from src.seeg_coord_loader import (
     load_subject_coords,
 )
 from src.interictal_propagation import load_subject_propagation_events
+from src.rank_displacement import derive_swap_endpoint
 
 
 # Path conventions (mirror scripts/run_interictal_propagation.py).
@@ -56,6 +61,9 @@ DEFAULT_EPILEPSIAE_LAGPAT_ROOT = Path(
 DEFAULT_PHASE0A_ROOT = Path("results/interictal_propagation_masked/per_subject")
 DEFAULT_PR6_ROOT = Path(
     "results/interictal_propagation_masked/template_anchoring/per_subject"
+)
+DEFAULT_RANK_DISPLACEMENT_ROOT = Path(
+    "results/interictal_propagation_masked/rank_displacement/per_subject"
 )
 
 
@@ -87,9 +95,8 @@ class SubjectPhase1Data:
     # PR-6 endpoint output per cluster (indices in unified namespace):
     cluster_endpoints: Dict[int, Dict[str, List[int]]]  # cluster_id → {"S": [...], "K": [...]}
     valid_indices_per_cluster: Dict[int, List[int]]  # cluster_id → all mapped SEEG − endpoint
-    # H2 input: PR-6 h2_swap_check already computed per subject (v1.0.8 2026-05-22).
-    # We do NOT recompute swap_score; we ingest PR-6's verdict directly.
-    h2_swap_check: Optional[Dict] = None  # {"swap_score", "null_p", "null_95th", "exit_reason", ...}
+    # H2 input: rank-displacement swap_sweep-derived channel labels.
+    h2_swap_check: Optional[Dict] = None
     # Audit / provenance:
     coord_provenance: Optional[Dict] = None
     n_dropped_endpoints_no_coords_per_cluster: Optional[Dict[int, int]] = None
@@ -119,24 +126,116 @@ def _resolve_lagpat_subject_dir(
     return legacy if legacy.exists() else epilepsiae_root / subject_id
 
 
+def _load_h2_from_rank_displacement(
+    rank_displacement_path: Path,
+    *,
+    dataset: str,
+    subject_id: str,
+    phase0a_channels: Sequence[str],
+) -> Optional[Dict[str, Any]]:
+    """Load Topic4 H2 channel labels from rank-displacement swap_sweep.
+
+    Contract v1.0.4: PR-2 is provenance, PR-6 fixed top-3 endpoint is an
+    audit summary; Topic4 H2 channel labels come from the variable-k
+    rank-displacement swap_sweep.
+    """
+    if not rank_displacement_path.exists():
+        return None
+
+    with open(rank_displacement_path) as f:
+        rd = json.load(f)
+
+    if rd.get("dataset") != dataset or str(rd.get("subject")) != subject_id:
+        raise ValueError(
+            f"rank_displacement JSON identity ({rd.get('dataset')!r}, {rd.get('subject')!r}) "
+            f"!= ({dataset!r}, {subject_id!r})"
+        )
+    if rd.get("stable_k") != 2:
+        return None
+
+    channel_names = list(rd.get("channel_names") or [])
+    if channel_names != list(phase0a_channels):
+        raise ValueError(
+            f"rank_displacement channel_names mismatch for {dataset}/{subject_id}.\n"
+            f"  Phase 0a:          {list(phase0a_channels)}\n"
+            f"  rank_displacement: {channel_names}"
+        )
+
+    ok_pairs = [p for p in rd.get("pairs", []) if p.get("exit_reason") == "ok"]
+    if len(ok_pairs) != 1:
+        return None
+    pair = ok_pairs[0]
+    sw = pair.get("swap_sweep") or {}
+    if sw.get("exit_reason") != "ok" or sw.get("decision_k") is None:
+        return None
+
+    pair_channels = list(pair.get("channel_names") or channel_names)
+    if pair_channels != channel_names:
+        raise ValueError(
+            f"rank_displacement pair channel_names mismatch for {dataset}/{subject_id}"
+        )
+
+    joint_valid = np.asarray(pair.get("joint_valid"), dtype=bool)
+    rank_a_dense_full = np.asarray(pair.get("rank_a_dense_full"), dtype=float)
+    if joint_valid.shape != rank_a_dense_full.shape or joint_valid.shape != (len(channel_names),):
+        raise ValueError(
+            f"rank_displacement pair shape mismatch for {dataset}/{subject_id}: "
+            f"joint_valid={joint_valid.shape}, rank_a_dense_full={rank_a_dense_full.shape}, "
+            f"n_channels={len(channel_names)}"
+        )
+
+    decision_k = int(sw["decision_k"])
+    joint_channels = [ch for ch, keep in zip(channel_names, joint_valid) if keep]
+    joint_rank_a = rank_a_dense_full[joint_valid]
+    order = np.argsort(joint_rank_a, kind="stable")
+    swap_source_channels = [joint_channels[i] for i in order[:decision_k]]
+    swap_sink_channels = [joint_channels[i] for i in order[-decision_k:]]
+    swap_endpoint_channels = derive_swap_endpoint(
+        channel_names=joint_channels,
+        rank_a_dense=joint_rank_a,
+        decision_k=decision_k,
+    )
+    swap_score = sw.get("decision_swap_score", sw.get("T_obs"))
+
+    return {
+        "source_contract": "rank_displacement_swap_sweep_v1",
+        "source_path": str(rank_displacement_path),
+        "cluster_id_a": pair.get("cluster_id_a"),
+        "cluster_id_b": pair.get("cluster_id_b"),
+        "swap_class": sw.get("swap_class", "none"),
+        "decision_k": decision_k,
+        "swap_source_channels": swap_source_channels,
+        "swap_sink_channels": swap_sink_channels,
+        "swap_endpoint_channels": swap_endpoint_channels,
+        "swap_score": swap_score,
+        "decision_swap_score": swap_score,
+        "T_obs": sw.get("T_obs", swap_score),
+        "p_fw": sw.get("p_fw"),
+        "null_p": sw.get("p_fw"),
+        "n_valid": sw.get("n_valid", int(joint_valid.sum())),
+        "n_perm": sw.get("n_perm"),
+    }
+
+
 def load_subject_for_phase1(
     subject_json_path: Path,
     *,
     pr6_anchoring_root: Path = DEFAULT_PR6_ROOT,
+    rank_displacement_root: Path = DEFAULT_RANK_DISPLACEMENT_ROOT,
     yuquan_lagpat_root: Path = DEFAULT_YUQUAN_LAGPAT_ROOT,
     epilepsiae_lagpat_root: Path = DEFAULT_EPILEPSIAE_LAGPAT_ROOT,
     require_coords: bool = True,
     allow_voxel_fallback: bool = False,
 ) -> SubjectPhase1Data:
-    """Load per-subject Phase 1 input from 4 aligned sources.
+    """Load per-subject Phase 1 input from 5 aligned sources.
 
     Inputs (all derived from `subject_json_path` + path roots):
-      1. Masked Phase 0a per-subject JSON (channel_names, adaptive_cluster
-         with cluster_id list + candidate_forward_reverse_pairs).
+      1. Masked Phase 0a per-subject JSON (channel_names, adaptive_cluster).
       2. Masked PR-6 template_anchoring JSON (per_template[] with
          source/sink/valid_mask).
-      3. lagPat NPZ → events_bool (via load_subject_propagation_events).
-      4. SEEG coords via load_subject_coords; assert mm units before return.
+      3. Masked rank_displacement JSON (H2 swap_sweep decision_k labels).
+      4. lagPat NPZ → events_bool (via load_subject_propagation_events).
+      5. SEEG coords via load_subject_coords; assert mm units before return.
 
     Contract clauses (CLAUDE.md §6):
       - **Channel alignment**: Phase 0a channel_names MUST equal lagPat-loader
@@ -145,9 +244,11 @@ def load_subject_for_phase1(
         ordering; raise on any name not found.
       - **coord_units mm**: assert_coord_result_is_mm_for_main_analysis called
         when require_coords=True (forbids silent voxel→euclidean).
-      - **Valid pool intersection**: valid_indices = PR-6 valid_mask ∩
-        coord mapped_mask (when require_coords=True); endpoint S/K filtered
-        to mapped channels; n_dropped audited per cluster.
+      - **Valid pool**: H1 valid_indices = all mapped SEEG channels minus
+        endpoints; PR-6 valid_mask is not used to constrain the null pool.
+      - **H2 channel labels**: rank_displacement swap_sweep decision_k defines
+        swap_endpoint_channels; PR-2 candidate and PR-6 fixed top-3 are not
+        H2 label sources.
       - **Subject ID canonicalization**: handled inside load_subject_coords
         for Epilepsiae (e.g., '1073' → '107302').
 
@@ -155,7 +256,7 @@ def load_subject_for_phase1(
         SubjectPhase1Data populated end-to-end.
 
     Raises:
-        FileNotFoundError: any of the 4 source files / dirs missing.
+        FileNotFoundError: required Phase 0a / PR-6 / lagPat sources missing.
         ValueError: subject/dataset mismatch, channel-name mismatch,
                     endpoint name not in channel_names, voxel coords when
                     require_coords=True, etc.
@@ -315,39 +416,22 @@ def load_subject_for_phase1(
         cluster_endpoints[cid] = {"S": s_idx, "K": k_idx}
         valid_indices_per_cluster[cid] = valid_idx
 
-    # === Step 7: H2 — ingest PR-6 h2_swap_check directly (v1.0.8 2026-05-22) ===
+    # === Step 7: H2 — rank-displacement swap-k channel labels (v1.0.10) ===
     #
-    # We do NOT recompute swap_score. PR-6's h2_swap_check is the locked
-    # contract (PR-6 plan §3.3): per-contact endpoint Jaccard reversal index
-    # + 1000-permutation null per subject. Re-implementing it in Phase 1
-    # would (a) duplicate code, (b) drift from PR-6 contract, (c) risk
-    # silent disagreement with downstream PR-6 sensitivity work.
+    # Topic4 framework v1.0.4 separates three layers:
+    #   PR-2/2.5       = template discovery / provenance
+    #   PR-6 endpoint  = fixed top-3 source/sink summary
+    #   rank-disp k    = per-channel, variable-k H2 label source
     #
-    # PR-6 H2 is registered as MECHANISM SANITY, NOT cohort claim (plan
-    # §3.3 + §15 lock). Phase 1 ingests + reports per-subject swap_score /
-    # null_p / null_95th, plus cohort sign-test (n_exceed / n_total). It
-    # does NOT produce a cohort PASS/NULL/FAIL verdict.
-    h2_swap_check_raw = pr6.get("h2_swap_check")
-    if h2_swap_check_raw is None or h2_swap_check_raw.get("exit_reason") is not None:
-        h2_swap_check: Optional[Dict] = None  # not testable this subject
-    else:
-        h2_swap_check = {
-            "swap_score": h2_swap_check_raw.get("swap_score"),
-            "null_p": h2_swap_check_raw.get("null_p"),
-            "null_95th": h2_swap_check_raw.get("null_95th"),
-            "null_median": h2_swap_check_raw.get("null_median"),
-            "n_perm": h2_swap_check_raw.get("n_perm"),
-            "source_contract": "pr6_h2_swap_check",
-            "source_path": str(pr6_path),
-            "jaccard_t0src_t1snk": h2_swap_check_raw.get("jaccard_t0src_t1snk"),
-            "jaccard_t0snk_t1src": h2_swap_check_raw.get("jaccard_t0snk_t1src"),
-        }
-        sc = h2_swap_check["swap_score"]
-        n95 = h2_swap_check["null_95th"]
-        if sc is not None and n95 is not None:
-            h2_swap_check["exceeds_null_95th"] = bool(sc > n95)
-        else:
-            h2_swap_check["exceeds_null_95th"] = None
+    # Therefore H2 channel labels are loaded from masked rank_displacement
+    # swap_sweep. PR-6 h2_swap_check remains audit trail only.
+    rd_path = rank_displacement_root / subject_json_path.name
+    h2_swap_check = _load_h2_from_rank_displacement(
+        rd_path,
+        dataset=dataset,
+        subject_id=subject_id,
+        phase0a_channels=phase0a_channels,
+    )
 
     return SubjectPhase1Data(
         subject_id=subject_id,
@@ -399,15 +483,21 @@ def make_synthetic_subject(seed: int = 0) -> SubjectPhase1Data:
         1: {"S": [17, 18, 19], "K": [0, 1, 2]},  # reverse (perfect swap)
     }
     valid_indices_per_cluster = {0: list(range(30)), 1: list(range(30))}
-    # Synthetic h2_swap_check that PR-6 would produce for a perfect forward/reverse:
+    # Synthetic rank-displacement swap_sweep-derived H2 payload.
     synthetic_h2 = {
         "swap_score": 1.0,
+        "decision_swap_score": 1.0,
+        "T_obs": 1.0,
+        "p_fw": 0.001,
         "null_p": 0.001,
-        "null_95th": 0.5,
-        "null_median": 0.3,
         "n_perm": 1000,
-        "exceeds_null_95th": True,
-        "source_contract": "pr6_h2_swap_check",
+        "swap_class": "strict",
+        "decision_k": 3,
+        "n_valid": n_ch,
+        "swap_source_channels": names[:3],
+        "swap_sink_channels": names[-3:],
+        "swap_endpoint_channels": names[:3] + names[-3:],
+        "source_contract": "rank_displacement_swap_sweep_v1",
         "source_path": "<synthetic>",
     }
 
@@ -505,51 +595,214 @@ def run_h1(
     return {"per_cluster": per_cluster}
 
 
+def _run_h2_spatial_compactness(
+    *,
+    subject: SubjectPhase1Data,
+    source_idx: Sequence[int],
+    sink_idx: Sequence[int],
+    endpoint_idx: Sequence[int],
+    base_pool: Sequence[int],
+    distance_metric: str,
+    n_null: int,
+    rng_seed: int,
+) -> Dict:
+    """Test swap-k endpoint spatiality against other valid SEEG nodes.
+
+    Rank-displacement defines the labels; this helper asks the spatial
+    question. Source-side and sink-side are primary because the two sides of a
+    source/sink swap can live at opposite ends of the trajectory.
+    """
+    endpoint_set = set(endpoint_idx)
+    other_pool = [i for i in base_pool if i not in endpoint_set]
+    rng = np.random.default_rng(rng_seed)
+    if distance_metric == "euclidean":
+        D = pairwise_3d_euclidean(subject.coords)
+    elif distance_metric == "shaft_ordinal":
+        D = pairwise_shaft_ordinal(subject.channel_names)
+    else:
+        raise ValueError(f"unknown distance_metric: {distance_metric}")
+
+    def _compact(members: Sequence[int]) -> Dict:
+        return _compute_h2_unmatched_compactness(
+            members=members,
+            candidate_pool=other_pool,
+            D=D,
+            n_null=n_null,
+            rng=rng,
+        )
+
+    return {
+        "available": True,
+        "source_helper": "h2_unmatched_compactness_null",
+        "candidate_pool_contract": (
+            "all_mapped_seeg_minus_swap_endpoint"
+            if distance_metric == "euclidean"
+            else "all_seeg_minus_swap_endpoint"
+        ),
+        "null_contract": "unmatched_random_other_valid_nodes",
+        "distance_metric": distance_metric,
+        "n_swap_endpoint": len(endpoint_set),
+        "n_other_valid": len(other_pool),
+        "source_side": _compact(source_idx),
+        "sink_side": _compact(sink_idx),
+        "combined_endpoint": _compact(endpoint_idx),
+    }
+
+
+def _mean_pairwise_from_distance(D: np.ndarray, indices: Sequence[int]) -> float:
+    idx = list(indices)
+    if len(idx) < 2:
+        return 0.0
+    sub = D[np.ix_(idx, idx)]
+    vals = sub[np.triu_indices_from(sub, k=1)]
+    finite = vals[np.isfinite(vals)]
+    return float(finite.mean()) if len(finite) else float("inf")
+
+
+def _compute_h2_unmatched_compactness(
+    *,
+    members: Sequence[int],
+    candidate_pool: Sequence[int],
+    D: np.ndarray,
+    n_null: int,
+    rng: np.random.Generator,
+) -> Dict:
+    members = list(members)
+    pool = [i for i in candidate_pool if i not in set(members)]
+    n_members = len(members)
+    if n_members < 2:
+        return {"verdict": "INSUFFICIENT_CHANNELS", "n_members": n_members}
+    if len(pool) < n_members:
+        return {
+            "verdict": "INSUFFICIENT_POOL",
+            "n_members": n_members,
+            "n_candidate_pool": len(pool),
+        }
+
+    C_actual = _mean_pairwise_from_distance(D, members)
+    pool_arr = np.asarray(pool)
+    null_dists = [
+        _mean_pairwise_from_distance(
+            D, rng.choice(pool_arr, size=n_members, replace=False).tolist()
+        )
+        for _ in range(n_null)
+    ]
+    null_arr = np.asarray(null_dists, dtype=float)
+    null_lower_p = float((np.sum(null_arr <= C_actual) + 1) / (len(null_arr) + 1))
+    null_upper_p = float((np.sum(null_arr >= C_actual) + 1) / (len(null_arr) + 1))
+
+    if null_lower_p < 0.05:
+        verdict = "PASS"
+    elif null_upper_p < 0.05:
+        verdict = "FAIL_DIFFUSE"
+    else:
+        verdict = "NULL"
+
+    return {
+        "verdict": verdict,
+        "C_actual": float(C_actual),
+        "C_null_median": float(np.median(null_arr)),
+        "null_lower_p": null_lower_p,
+        "null_upper_p": null_upper_p,
+        "n_members": n_members,
+        "n_candidate_pool": len(pool),
+        "n_null_samples": len(null_arr),
+        "relaxation_tier": "unmatched",
+    }
+
+
 def run_h2(
     subject: SubjectPhase1Data,
-    n_null: int = 1000,    # unused (PR-6 already ran null); kept for CLI compat
-    rng_seed: int = 0,     # unused
+    distance_metric: str = "euclidean",
+    n_null: int = 1000,
+    rng_seed: int = 0,
 ) -> Dict:
-    """Run H2 — ingest PR-6 h2_swap_check directly (v1.0.8 2026-05-22).
-
-    PR-6 plan §3.3 + §15 lock:
-      - H2 is DIRECTIONAL MECHANISM SANITY, not cohort claim
-      - per-contact Jaccard endpoint reversal (T0_source × T1_sink +
-        T0_sink × T1_source) computed in PR-6 anchoring with 1000-perm null
-      - Phase 1 reports per-subject swap_score / null_p / null_95th
-      - Cohort: sign-test only (n_exceed_null_95th / n_total + binomial p);
-        no cohort-level PASS/NULL/FAIL verdict (per pre-registered tier)
-
-    v1.0.7 attempted to recompute H2 in Phase 1 (compute_h2_set_reversal +
-    compute_h2_spatial_reversal); this duplicated PR-6 and used the wrong
-    cohort filter (PR-2 `candidate_forward_reverse_pairs`, which is "候选
-    描述标签，不是最终机制判定" per PR-2 archive). v1.0.8 deletes both
-    self-implementations and reads PR-6's locked verdict instead.
-    """
+    """Run H2 — ingest rank-displacement swap_sweep channel labels."""
     swap = subject.h2_swap_check
     if swap is None:
         return {
             "available": False,
             "reason": (
-                "PR-6 h2_swap_check missing or exit_reason != None for this subject "
-                "(per-contact endpoint Jaccard reversal not computable)"
+                "rank-displacement swap_sweep unavailable for this subject "
+                "(requires stable_k=2 with exactly one ok pair)"
             ),
         }
+    name_to_idx = {name: i for i, name in enumerate(subject.channel_names)}
+    source_channels = list(swap.get("swap_source_channels") or [])
+    sink_channels = list(swap.get("swap_sink_channels") or [])
+    endpoint_channels = list(swap.get("swap_endpoint_channels") or [])
+    if not source_channels or not sink_channels:
+        source_channels = endpoint_channels[: int(swap.get("decision_k") or 0)]
+        sink_channels = endpoint_channels[int(swap.get("decision_k") or 0):]
+    missing = [
+        ch for ch in source_channels + sink_channels + endpoint_channels
+        if ch not in name_to_idx
+    ]
+    if missing:
+        raise ValueError(f"H2 swap endpoint channel(s) not in subject namespace: {missing}")
+
+    source_idx = [name_to_idx[ch] for ch in source_channels]
+    sink_idx = [name_to_idx[ch] for ch in sink_channels]
+    endpoint_idx = sorted({name_to_idx[ch] for ch in endpoint_channels})
+
+    if distance_metric == "euclidean":
+        if subject.coords is None or subject.mapped_mask is None:
+            spatial_compactness = {
+                "available": False,
+                "reason": "euclidean H2 spatiality requires mapped 3D coords",
+            }
+        else:
+            base_pool = [
+                i for i in range(len(subject.channel_names))
+                if bool(subject.mapped_mask[i])
+            ]
+            spatial_compactness = _run_h2_spatial_compactness(
+                subject=subject,
+                source_idx=source_idx,
+                sink_idx=sink_idx,
+                endpoint_idx=endpoint_idx,
+                base_pool=base_pool,
+                distance_metric=distance_metric,
+                n_null=n_null,
+                rng_seed=rng_seed,
+            )
+    elif distance_metric == "shaft_ordinal":
+        base_pool = list(range(len(subject.channel_names)))
+        spatial_compactness = _run_h2_spatial_compactness(
+            subject=subject,
+            source_idx=source_idx,
+            sink_idx=sink_idx,
+            endpoint_idx=endpoint_idx,
+            base_pool=base_pool,
+            distance_metric=distance_metric,
+            n_null=n_null,
+            rng_seed=rng_seed,
+        )
+    else:
+        raise ValueError(f"unknown distance_metric: {distance_metric}")
+
     return {
         "available": True,
-        "tier": "directional_mechanism_sanity_not_cohort_claim",
+        "tier_lock": "directional_mechanism_sanity_not_cohort_claim",
         "source_contract": swap.get("source_contract"),
+        "source_path": swap.get("source_path"),
+        "swap_class": swap.get("swap_class"),
+        "decision_k": swap.get("decision_k"),
+        "swap_source_channels": source_channels,
+        "swap_sink_channels": sink_channels,
+        "swap_endpoint_channels": swap.get("swap_endpoint_channels"),
+        "decision_swap_score": swap.get("decision_swap_score"),
+        "T_obs": swap.get("T_obs"),
+        "p_fw": swap.get("p_fw"),
+        "n_valid": swap.get("n_valid"),
         "swap_score": swap.get("swap_score"),
         "null_p": swap.get("null_p"),
-        "null_95th": swap.get("null_95th"),
-        "null_median": swap.get("null_median"),
-        "exceeds_null_95th": swap.get("exceeds_null_95th"),
-        "jaccard_t0src_t1snk": swap.get("jaccard_t0src_t1snk"),
-        "jaccard_t0snk_t1src": swap.get("jaccard_t0snk_t1src"),
         "n_perm": swap.get("n_perm"),
+        "spatial_compactness": spatial_compactness,
         "note_no_verdict": (
-            "PR-6 plan §3.3 + §15: descriptive only, no PASS/NULL/FAIL verdict. "
-            "Cohort-level sign-test computed in summarize_sef_itp_phase1.py."
+            "Topic4 H2 is mechanism sanity only, no PASS/NULL/FAIL verdict. "
+            "Channel labels come from rank-displacement swap_sweep decision_k; "
+            "spatiality tests swap-k source/sink sides against other valid nodes."
         ),
     }
 
@@ -575,7 +828,7 @@ def run_phase1_subject(
         "coord_provenance": subject.coord_provenance,
         "n_coord_mapped": int(subject.mapped_mask.sum()) if subject.mapped_mask is not None else None,
         "n_dropped_endpoints_no_coords_per_cluster": subject.n_dropped_endpoints_no_coords_per_cluster,
-        "framework_ref": "topic4_sef_itp_framework.md v1.0.2",
+        "framework_ref": "topic4_sef_itp_framework.md v1.0.4",
         "plan_ref": "docs/archive/topic4/sef_itp_phase1/plan_2026-05-21.md",
     }
     if hypothesis in ("h6", "all"):
@@ -583,7 +836,7 @@ def run_phase1_subject(
     if hypothesis in ("h1", "all"):
         out["h1"] = run_h1(subject, distance_metric, n_null, rng_seed)
     if hypothesis in ("h2", "all"):
-        out["h2"] = run_h2(subject, n_null, rng_seed)
+        out["h2"] = run_h2(subject, distance_metric, n_null, rng_seed)
     return out
 
 
@@ -631,6 +884,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         help="masked Phase 0a per-subject JSON root")
     parser.add_argument("--pr6-root", type=Path, default=DEFAULT_PR6_ROOT,
                         help="masked PR-6 template_anchoring per-subject JSON root")
+    parser.add_argument("--rank-displacement-root", type=Path,
+                        default=DEFAULT_RANK_DISPLACEMENT_ROOT,
+                        help="masked rank_displacement per-subject JSON root for H2 swap-k labels")
     parser.add_argument("--allow-voxel-fallback", action="store_true",
                         help="Epilepsiae sensitivity mode — voxel coords (REJECTED by mm assertion; "
                              "use only with --distance-metric=shaft_ordinal)")
@@ -651,10 +907,11 @@ def _print_verdict_summary(result: Dict) -> None:
         elif h == "h2":
             if block.get("available"):
                 print(
-                    f"  H2 (PR-6 swap_check, mechanism sanity): "
-                    f"swap_score={block.get('swap_score')}, "
-                    f"null_p={block.get('null_p')}, "
-                    f"exceeds_null_95th={block.get('exceeds_null_95th')}",
+                    f"  H2 (rank-displacement swap-k, mechanism sanity): "
+                    f"swap_class={block.get('swap_class')}, "
+                    f"decision_k={block.get('decision_k')}, "
+                    f"T_obs={block.get('T_obs')}, "
+                    f"p_fw={block.get('p_fw')}",
                     file=sys.stderr,
                 )
             else:
@@ -722,6 +979,7 @@ def _run_real_data(args) -> int:
             subject = load_subject_for_phase1(
                 target,
                 pr6_anchoring_root=args.pr6_root,
+                rank_displacement_root=args.rank_displacement_root,
                 require_coords=(args.distance_metric == "euclidean"),
                 allow_voxel_fallback=args.allow_voxel_fallback,
             )
