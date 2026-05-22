@@ -132,3 +132,45 @@ def test_extract_endpoint_jaccard_missing_per_split_raises():
         p2.extract_endpoint_jaccard_from_anchoring({})
     with pytest.raises(KeyError):
         p2.extract_endpoint_jaccard_from_anchoring({"split_half_robustness": {}})
+
+
+# --------------------------------------------------------------------------- #
+# Task 3 — tost_equivalence (ported from PR-7 addendum)
+# --------------------------------------------------------------------------- #
+
+
+def test_tost_equivalence_compatible_median_zero():
+    """Cohort median ~0 with tight CI well inside ±δ → equivalence_pass = True."""
+    rng = np.random.default_rng(42)
+    vals = rng.normal(loc=0.0, scale=0.005, size=30)
+    out = p2.tost_equivalence(vals, target=0.0, delta=0.05, n_boot=2000, seed=0)
+    assert out["equivalence_pass"] is True
+    assert -0.05 < out["ci95_lo"] < out["ci95_hi"] < 0.05
+
+
+def test_tost_equivalence_violated_median_outside_band():
+    """Cohort median 0.1 > δ → equivalence_pass = False."""
+    rng = np.random.default_rng(42)
+    vals = rng.normal(loc=0.10, scale=0.01, size=30)
+    out = p2.tost_equivalence(vals, target=0.0, delta=0.05, n_boot=2000, seed=0)
+    assert out["equivalence_pass"] is False
+    assert out["ci95_lo"] > 0.05  # whole CI above δ band
+
+
+def test_tost_equivalence_target_one_for_run_length():
+    """run_length_lift target=1 with vals ~ 1.0 → equivalence_pass = True."""
+    rng = np.random.default_rng(42)
+    vals = rng.normal(loc=1.0, scale=0.005, size=30)
+    out = p2.tost_equivalence(vals, target=1.0, delta=0.05, n_boot=2000, seed=0)
+    assert out["equivalence_pass"] is True
+    assert out["target"] == pytest.approx(1.0)
+
+
+def test_tost_equivalence_returns_expected_schema():
+    """Output dict carries all expected keys (mirror of PR-7 addendum)."""
+    out = p2.tost_equivalence(np.array([0.0, 0.0, 0.0]), target=0.0, delta=0.05, n_boot=100, seed=0)
+    for k in (
+        "median_obs", "ci95_lo", "ci95_hi", "tost_p_lower", "tost_p_upper", "tost_p",
+        "equivalence_pass", "median_inside_band", "ci_inside_band", "target", "delta", "n",
+    ):
+        assert k in out, f"missing key: {k}"

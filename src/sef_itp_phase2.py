@@ -135,3 +135,63 @@ def extract_endpoint_jaccard_from_anchoring(
     fh = float(per_split["first_half_second_half"]["subject_mean_jaccard_endpoint"])
     oe = float(per_split["odd_even_block"]["subject_mean_jaccard_endpoint"])
     return fh, oe
+
+
+# --------------------------------------------------------------------------- #
+# TOST equivalence (cohort bootstrap CI vs ±δ band)
+#
+# Ported verbatim from scripts/pr7_addendum_p3_equivalence.py:123. Same statistical
+# guarantee: equivalence iff p_lower < α AND p_upper < α AND CI ⊂ (target ± δ).
+#
+# CLAUDE.md §6.1 re-use check (question-match):
+#   - PR-7 addendum question: "is cohort median of antagonistic-pair metric M
+#     equivalent to target (0 for excess, 1 for run_length_lift) within ±δ_excess?"
+#   - Phase 2 H3 question: identical, for different metrics (lag1_same_excess,
+#     window_excess @ {10,30,60,1800}s, run_length_lift). Same δ_excess=0.05.
+#   - DIRECT REUSE. PR-7 addendum's leave-one-out-548 is PR-7-specific; Phase 2's LOO
+#     iterates over its own cohort (n=23) via `cohort_tost_with_loo` (Task 11.5).
+# --------------------------------------------------------------------------- #
+
+
+def tost_equivalence(
+    values: np.ndarray,
+    target: float,
+    delta: float,
+    n_boot: int = 10_000,
+    alpha: float = 0.05,
+    seed: int = 0,
+) -> dict:
+    """Two One-Sided Test (TOST) for equivalence of cohort median to target ± delta.
+
+    Equivalence is declared iff bootstrap `p_lower < alpha` AND `p_upper < alpha` AND
+    the 95% CI on the median is wholly inside `(target - delta, target + delta)`.
+    """
+    values = np.asarray(values, dtype=float)
+    n = len(values)
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, n, size=(n_boot, n))
+    boot_medians = np.median(values[idx], axis=1)
+    obs_median = float(np.median(values))
+    ci_lo = float(np.quantile(boot_medians, alpha / 2))
+    ci_hi = float(np.quantile(boot_medians, 1 - alpha / 2))
+    p_lower = float(np.mean(boot_medians <= target - delta))
+    p_upper = float(np.mean(boot_medians >= target + delta))
+    p_tost = max(p_lower, p_upper)
+    inside_band = (target - delta) <= obs_median <= (target + delta)
+    equivalence_pass = (
+        (p_tost < alpha) and (ci_lo > target - delta) and (ci_hi < target + delta)
+    )
+    return {
+        "median_obs": obs_median,
+        "ci95_lo": ci_lo,
+        "ci95_hi": ci_hi,
+        "tost_p_lower": p_lower,
+        "tost_p_upper": p_upper,
+        "tost_p": p_tost,
+        "equivalence_pass": bool(equivalence_pass),
+        "median_inside_band": bool(inside_band),
+        "ci_inside_band": bool(ci_lo > target - delta and ci_hi < target + delta),
+        "target": float(target),
+        "delta": float(delta),
+        "n": int(n),
+    }
