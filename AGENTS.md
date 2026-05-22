@@ -15,267 +15,89 @@ Before tracing any result, read these in order:
 
 ## Canonical Topic Docs
 
-When answering scientific-status questions, prefer these canonical entry docs first:
+For any scientific-status question, go to the topic doc; do not rely on summaries in this file.
 
 - `docs/paper_overview.md` — total index + one-line conclusions for all topics
-- **`docs/topic0_methodology_audits.md` — methodology audits & data contract bugs; READ FIRST before any Topic 1–5 number** (currently: `lagPatRank` phantom pseudo-rank confirmed 2026-05-20, broad re-derivation in progress)
+- **`docs/topic0_methodology_audits.md` — READ FIRST before any Topic 1–5 number** (currently: `lagPatRank` phantom pseudo-rank fix; phase 0 broad re-derivation closed 2026-05-21)
 - `docs/topic1_within_event_dynamics.md` — within-event dynamics (propagation + synchrony)
 - `docs/topic2_between_event_dynamics.md` — event-between-event timing
 - `docs/topic3_spatial_soz_modulation.md` — where / SOZ spatial attribution
-- `docs/topic5_seizure_subtyping.md` — within-subject seizure subtyping (PR-0 v2.3 ER atlas + PR-1 z-ER subtyping); exploratory, audit-corrected 2026-05-10
-
-Historical docs remain valuable, but they are no longer the first entry point.
+- `docs/topic5_seizure_subtyping.md` — within-subject seizure subtyping (exploratory)
 
 ## 文档与输出形式
 
-本仓库 Topic 1/2/3 的科学结论一律走"分层中文 markdown 文档 + archive 归档"，不走 canvas / 单文件富前端面板。
-
-- **不要写 Cursor canvas (`*.canvas.tsx` / `canvases/` 下任何 React 面板)** 来呈现 Topic 1/2/3 的科学结论、审阅报告、统计结果或 next-step 路线图。即便用户问的是"给我看一下结果"，也走 markdown，不走 canvas。
-- 主文档 (`docs/topic{1,2,3}_*.md`) 只保留正式口径：当前接受结论、风险点、最小合同、推荐下一步。语言一律中文，必要的英文术语 / 变量名 / 文件名保持原样（如 `lagPatRank`, `pre_ictal vs baseline`）。
-- 审阅 / 总结 / 阶段性报告 / 完整数值表 / 长篇推理这类一次性产出，归档到 `docs/archive/<topic>/<descriptive_name>_<YYYY-MM-DD>.md`，命名参考 `docs/archive/topic2/event_periodicity_phase2_review_2026-04-05.md`。
-- 在主文档"历史文档索引"和**所有相关章节末尾**回链到 archive，确保后续 agent 顺着主文档就能找到完整背景，不需要靠对话上下文。
-- 不要在主文档里复制 archive 里的全量数值表；主文档只保留摘要和链接。
-- 如果用户没有明确点名 canvas，默认产出仍然是 markdown + archive。canvas 只在用户**明确**说"用 canvas / 给我做个交互面板"时才考虑。
+- Topic 1/2/3 走"分层中文 markdown + archive 归档"，不走 Cursor canvas / React 面板（用户**明确**点名 canvas 才考虑）。
+- 主文档 `docs/topic{1,2,3}_*.md` 只保留正式口径（当前接受结论、风险点、最小合同、下一步），语言中文，英文术语 / 变量名保持原样。
+- 审阅 / 阶段性报告 / 全量数值表归档到 `docs/archive/<topic>/<descriptive>_<YYYY-MM-DD>.md`。
+- 主文档**不复制 archive 全量数值表**；只保留摘要 + 链接，章节末尾回链 archive。
 
 ## Canonical Roots
 
 - Current codebase: `HFOsp/`
 - Canonical artifact root: `/mnt/yuquan_data/yuquan_24h_edf`
 - Epilepsiae raw/sql/artifact root: `/mnt/epilepsia_data`
-- Historical legacy tree:
-  - repo root: `/home/honglab/leijiaxin/HFOsp/ReplayIED`
-  - Yuquan mainline: `/home/honglab/leijiaxin/HFOsp/ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/`
+- Historical legacy tree: `/home/honglab/leijiaxin/HFOsp/ReplayIED` (Yuquan mainline at `inter_events/yuquan_24h_perPatientAnalysis_dropRef/`)
 
-If the legacy tree is not mounted in the current workspace, stop and ask the user for its real path. Do not invent one.
+If the legacy tree is not mounted, stop and ask the user for its real path. Do not invent one.
 
 ## Golden Rule
 
-Trace by artifact, not by figure number.
+Trace by **artifact**, not by figure number.
 
-Exception:
+1. Identify which artifact the figure consumes: `<record>_gpu.npz` / `_refineGpu.npz` / `<record>_packedTimes*.npy` / `<record>_lagPat*.npz` / network outputs.
+2. Map that artifact back to the producing stage.
+3. Find the plotting script only after the data source is clear.
 
-- when the user explicitly references a paper TIFF in `ReplayIED/tiffs`, read `docs/LEGACY_PAPER_TIFF_CHAIN.md` first
-- even then, use TIFF visual theme plus asset chain, not TIFF basename alone
+Exception: when the user explicitly references a paper TIFF in `ReplayIED/tiffs`, read `docs/LEGACY_PAPER_TIFF_CHAIN.md` first; even then, use TIFF visual theme + asset chain, not basename alone. Do not search by `Fig7` / `fig7` / `7b`.
 
-Bad:
+## Legacy Pipeline Map (short)
 
-- search `Fig7`, `Fig8`, `7b`
-- assume `fig7` in a script means paper Figure 7
+Detection (`p16_cuda_24h_bipolar.py`) → `_gpu.npz`; refine (`p16_refine_chns_bySyn.py`) → `_refineGpu.npz`; pack (`p16_packGroupEvents*.py` driving `hfo_net.get_packedEventsTimes_overThresh`) → `_packedTimes*.npy`; lag/freq (`p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py` calling `return_massCenterPat`) → `_lagPat*.npz`; 24h summary (`p16_merge24h_lagPat.py`) → `hist_meanX.npz`. Plotting in `plotting_fig{4,5,8}_*`.
 
-Good:
+**Drift**: the `_withFreqCenter` packer writes `_lagPat_withFreqCent.npz` + `_packedTimes_withFreqCent.npy`; legacy plotters still load old names. Verify which packer actually produced the artifact before tracing. Full detail: `docs/LEGACY_YUQUAN_CODEBASE_MAP.md`.
 
-1. Identify which artifact the figure consumes:
-   - `<record>_gpu.npz`
-   - `_refineGpu.npz`
-   - `<record>_packedTimes.npy`
-   - `<record>_lagPat.npz`
-   - `<record>_lagPat_withFreqCent.npz`
-   - network outputs
-2. Map that artifact back to the producing stage
-3. Find the plotting script only after the data source is clear
+## Current Code Map (modules only)
 
-## Legacy Pipeline Map
+Entry point: `scripts/run_pipeline.py`. Detection batch: `scripts/run_hfo_detection.py` (per-subject params in `config/subject_params.json`). Modules (look up specific functions via grep — names drift):
 
-- Detection:
-  - `p16_cuda_24h_bipolar.py`
-  - helper logic often in `highEvents_yuquan0910_utils.py`
-  - writes `<record>_gpu.npz`
-- Legacy refine:
-  - `p16_refine_chns_bySyn.py`
-  - writes `_refineGpu.npz`
-- Packed group events:
-  - `hfo_net.py::get_packedEventsTimes_overThresh`
-  - driven by `p16_packGroupEvents*.py`
-  - writes `<record>_packedTimes.npy`
-- Lag/frequency:
-  - `return_massCenterPat`
-  - `p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py`
-  - writes `<record>_lagPat*.npz`
-- 24h core-channel summary:
-  - `p16_merge24h_lagPat.py`
-  - writes `hist_meanX.npz`
-- Plotting:
-  - `plotting_fig4_*`
-  - `plotting_fig5_*`
-  - `plotting_fig8_*`
+- `src/preprocessing.py` — Yuquan EDF + Epilepsiae `.data/.head` loaders, spatial-extent seizure detection
+- `src/hfo_detector.py` — detection + legacy-compatible `_gpu.npz` writer, Nyquist hard gate
+- `src/group_event_analysis.py` — refine / packing / centroid / lag-rank (legacy-aligned)
+- `src/interictal_synchrony*.py` — event-level synchrony (PR4–PR6); CLI in `scripts/{pr6_interictal_sync_figures,run_*_interictal_synchrony,aggregate_*,compute_region_stratified_synchrony}.py`
+- `src/event_periodicity.py` — pulse-train PSD, specparam, surrogates, Phase 2 tools; CLI in `scripts/{run_event_periodicity,run_surrogates_batch,run_periodicity_phase2,plot_*}.py`
+- `src/interictal_propagation.py` — lagPatRank loader, KMeans cluster stereotypy + adaptive k-scan, template anchoring, rate-state coupling; CLI in `scripts/{run_interictal_propagation,plot_interictal_propagation,run_pr*,run_rank_displacement}.py`
+- `src/rank_displacement.py` — PR-6 supplement; CLI in `scripts/{run,plot}_rank_displacement.py`
+- `src/topic4_attractor_diagnostics.py` — Topic 4 attractor; CLI in `scripts/{run,summarize,augment,audit}_*attractor*.py`
+- `src/lagpat_rank_audit.py` — Topic 0 phantom-rank fix; `build_masked_kmeans_features()` is the canonical masked-feature constructor
+- `src/epilepsiae_dataset.py`, `src/network_analysis.py`, `src/visualization.py`
 
-Important drift:
-
-- `p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py` writes
-  - `<record>_lagPat_withFreqCent.npz`
-  - `<record>_packedTimes_withFreqCent.npy`
-- In that script, old `<record>_packedTimes.npy` writing is commented out.
-- Many legacy plotting scripts still load old names like `<record>_lagPat.npz` and `<record>_packedTimes.npy`.
-- Therefore, always verify which pack script actually produced the artifact before tracing a figure.
-
-## Current Code Map
-
-- Entry point: `scripts/run_pipeline.py`
-- Batch HFO detection: `scripts/run_hfo_detection.py` — produces `*_gpu.npz` + `_refineGpu.npz` for both datasets
-  - Per-subject parameters: `config/subject_params.json`
-- Preprocess: `src/preprocessing.py`
-  - includes `detect_seizure_by_spatial_extent()` (Yuquan EDF) and `detect_seizure_by_spatial_extent_epilepsiae()` (*.data/*.head)
-  - includes `load_epilepsiae_block()` — full signal loader for Epilepsiae `.data/.head` (CAR or bipolar)
-- HFO detection: `src/hfo_detector.py`
-  - `save_detection_as_gpu_npz()` — persist detection result as legacy-compatible `*_gpu.npz`
-  - `build_legacy_alias_map()` — bipolar→left-contact alias for backward compatibility
-  - Nyquist hard gate: `sfreq/2 <= band_upper` raises `ValueError`
-- Legacy-aligned refine / packing / lag:
-  - `src/group_event_analysis.py`
-  - look for:
-    - `legacy_refine_channels_from_detections()`
-    - `legacy_refine_counts_from_detection_sets()`
-    - `save_refine_gpu_npz()` — produce + persist `_refineGpu.npz`
-    - `_legacy_rehist_events_by_packing()`
-    - `build_windows_from_detections()`
-    - `build_windows_from_packed_times()`
-    - `compute_centroid_matrix_spectrogram()`
-    - `lag_rank_from_centroids()`
-- Interictal synchrony (event-level, PR4–PR6):
-  - `src/interictal_synchrony.py` — event row export (`build_event_rows_from_result`), legacy lagPat consumer, `select_core_penumbra_mask` (with zero-overlap fallback)
-  - `src/interictal_synchrony_aggregation.py` — interval annotation, day/night, exclusion rules
-  - `src/interictal_synchrony_analysis.py` — fixed-window tests, trajectory analysis, event rate test, region-stratified analysis, Figures A–F, `run_pr6_analysis()`
-  - `scripts/pr6_interictal_sync_figures.py` — PR6 CLI
-  - `scripts/run_epilepsiae_interictal_synchrony.py` / `scripts/run_yuquan_interictal_synchrony.py` — event CSV export (both support `--soz-core-json`)
-  - `scripts/aggregate_epilepsiae_interictal_synchrony.py` / `scripts/aggregate_yuquan_interictal_synchrony.py` — aggregation
-  - `scripts/compute_region_stratified_synchrony.py` — augment event CSV with per-region (i/l/e) synchrony columns
-- Event periodicity (Fig 3C / S7 / S13 verification):
-  - `src/event_periodicity.py` — pulse train PSD, specparam, IEI MLE, ISI-shuffle/Gamma surrogate, Phase 2 tools (hazard, return map, packing sweep, centroid bypass)
-  - `scripts/run_event_periodicity.py` — Phase 1 dual-dataset batch driver
-  - `scripts/run_surrogates_batch.py` — group-only surrogate batch
-  - `scripts/plot_event_periodicity.py` — Phase 1 cohort figures
-  - `scripts/run_periodicity_phase2.py` — Phase 2 experiments (artifact localization + PR-1 to PR-2.7 for event-between-event analyses)
-  - `scripts/plot_periodicity_phase2.py` — Phase 2 visualization (exp1–7d)
- - `scripts/plot_topic2_ppt.py` — Topic 2 PPT 5-figure narrative set (uses `src/plot_style.py` Morandi palette); outputs `results/event_periodicity/figures/ppt/`
-  - `tests/test_event_periodicity.py` — PR-2 / PR-2.5 / PR-2.6 / PR-2.7 function unit tests
-  - `docs/topic2_between_event_dynamics.md` — current formal entry for event-between-event analyses
-  - `docs/archive/topic2/event_periodicity_analysis.md` — detailed results + code map (historical main record)
-  - `docs/archive/topic2/event_periodicity_phase2_review_2026-04-05.md` — detailed scientific/statistical review of Phase 2
-  - `docs/archive/topic2/interictal_population_event_methodological_review.md` — collaborator-facing historical narrative update and next-step framing
-- Interictal group-event internal propagation (event-inside-event topic; former Periodicity PR-3):
-  - `src/interictal_propagation.py` — lagPatRank / eventsBool loader (`load_subject_propagation_events` with start_t sorting + time rebuild + `block_time_ranges` + `lagPatRaw` loading), mixture screen, centered-rank tau, n_participating stratification, SOZ source-erasure diagnostic, KMeans cluster stereotypy, adaptive k-scan cluster stereotypy (`compute_adaptive_cluster_stereotypy` with AMI stability + silhouette + min-fraction gate), fixed-template helpers (`build_cluster_templates`, `assign_events_to_templates`), cross-time reproducibility (`compute_time_split_reproducibility`), temporal cluster dynamics (`compute_temporal_cluster_dynamics` with coverage-aware binning + day/night classification), legacy MI + permutation test, absolute lag validation (`validate_absolute_lag_clustering` with per-event min-subtraction + stratified Pearson r + dominant-cluster pass logic), rate-state coupling (`compute_rate_state_coupling` with matched subsampling + `_build_rate_state_bins` + `_cluster_state_tau_summary` + `_cluster_state_l3_summary` + `_event_lag_span_summary` + `_match_event_indices_by_nparticipating` + `_aggregate_cluster_state_metric` + subject-level Wilcoxon + L1 occupancy-rate Spearman)
-  - `scripts/run_interictal_propagation.py` — independent batch driver for internal propagation PR-1, PR-2.5 (`--pr25`), PR-4A (`--pr4a`), PR-4B Step 0 (`--pr4b-step0`), PR-4B Step 1 (`--pr4b-step1`), and PR-4B Step 2–3 (`--pr4b-step23`)
-  - `scripts/plot_interictal_propagation.py` — per-subject propagation heatmaps (`--pr3`), per-subject MI distributions (`--mi`), 6-panel cohort summary (`--cohort`), PR-4A occupancy timelines + day/night group summary (`--pr4a`)
-  - `tests/test_interictal_propagation.py` — unit tests for centered-rank handling, mixture detection, source-node diagnostics, and temporal dynamics
-  - `docs/topic1_within_event_dynamics.md` — current formal entry for within-event dynamics
-  - `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` — detailed internal-propagation result note
-  - `results/interictal_propagation/` — per-subject JSON, cohort summary, and figures
-  - Current accepted bottom line: `30/30` subjects have stable adaptive solutions with `stable_k` distribution `27x k=2`, `2x k=4`, `1x k=6`; PR-2.5 adds split-half / odd-even block reproducibility with `23 strong / 7 moderate / 0 weak` and `8/9` forward/reverse subjects reproduced. `stable_k` remains descriptive compression, not a claim about the true number of modes.
-  - PR-3 visualization completed (2026-04-12): 30/30 per-subject propagation heatmaps, 30/30 per-subject MI distribution plots (Fig.2B style with cluster-level permutation tests), 6-panel cohort summary. MI significant for `30/30` (median 0.229, range 0.067–0.515). Within-cluster τ median = 0.252 vs overall τ = 0.089.
-  - PR-3 viz follow-up (2026-04-13): 6-panel cohort figure redesigned for publication quality. New panels: MI+null paired violin, bimodality KDE (within/between cluster τ), stability violin, inter-cluster r histogram+KDE with Wilcoxon ***, within-cluster identity-bias scatter. New computation: `compute_within_cluster_centered_tau()` + `compute_pairwise_tau_values()`. Within-cluster bias fraction median = **86%** (vs overall 65%). Forward/reverse reproduction = 8/9 (corrected from 11/12 using either split method). `--augment-cluster-bias` runner mode added.
-  - PR-4A accepted (2026-04-12): fixed-template occupancy timeline + day/night summaries. Day/night occupancy drift is weak: dominant_fraction Wilcoxon p=0.124, normalized_entropy p=0.245, TV distance median=0.019. Template projection agreement median=0.888 (3/30 < 0.8: chengshuai, 253, 818). Descriptive, not a strong mechanistic conclusion.
-  - PR-4B Step 0 completed (2026-04-13): `lagPatRaw → relative_lag` per-event min-subtraction validated (30/30 order match = 1.0). Dominant cluster Pearson r cohort median = 0.601; 8/30 pass (dom_r > 0.7); Spearman(τ,r) = 0.910 (p<0.0001). huangwanling L3-ineligible. Result: `results/interictal_propagation/pr4b_lag_validation.json`.
-  - PR-4B Step 1 completed (2026-04-14): L2 rate-state coupling with matched subsampling (30/30 verified). Raw τ delta median = +0.003, Wilcoxon p=0.349 (17/30 high>low). Centered τ delta median = +0.003, Wilcoxon p=0.221 (19/30 high>low). **L2 null** — 86% identity-bias makes L2 insensitive to H2; this does not reject H2, only confirms L2 cannot detect it. Result: `results/interictal_propagation/pr4b_step1_rate_coupling.json`.
-  - PR-4B Step 2–3 completed (2026-04-14): L3 + L1 rate-coupling (30/30 subjects). **L1 null** (dominant ρ median = −0.083, 13/30 positive). **L3 lag span full-cohort**: delta +0.001, 18/30, p=0.135 (trend). **L3 Pearson r full-cohort (n=29)**: delta +0.033, 17/29, p=0.265. **L3 Pearson r high-confidence (n=8, dom_r>0.7)**: delta +0.083, **7/8, p=0.016** (only significant result). Cross-metric consistency: Spearman(lag_span_Δ, pearson_r_Δ) = 0.628 (p=0.0003); 24/29 same sign (binomial p=0.0003). Positive direction = high rate → larger span + higher consistency (NOT compression). H2 exploratory-supported on HC subset, insufficient on full cohort. Result: `results/interictal_propagation/pr4b_coupling_summary.json`.
-  - PR-4C planned: seizure proximity L1+L2+L3. Reuses PR-4B's `compute_rate_state_coupling` framework with seizure-proximity windows. See `docs/topic1_within_event_dynamics.md` §7.2.
-  - PR-6 supplementary rank displacement (2026-05-06; **v14 cohort expansion 2026-05-07**): continuous-version footrule + Kendall τ from PR-2 cluster JSON × PR-6 anchoring JSON. **Cohort = full stable_k=2, n=35** (PR-2 stable_k distribution post-yuquan-backfill: `{2:35, 4:2, 5:2, 6:1}` over 40 total subjects). valid_mask provenance: 30 from PR-6 `per_template[k].valid_mask`, 5 fallback to PR-2 `(template_rank != -1)` sentinel (`epilepsiae_1125, 384, 620, 916, yuquan_gaolan` — PR-6 dropped them due to empty SOZ JSON). The two provenances are equivalent on overlap (cross-checked on `epi_1073`). Files: `src/rank_displacement.py`, `scripts/run_rank_displacement.py` (worktree-aware via `git rev-parse --git-common-dir`; PR-6 OPTIONAL with PR-2 sentinel fallback), `scripts/plot_rank_displacement.py`, `tests/test_rank_displacement.py` (8 tests). **Paper-level deliverable: single composite figure** `results/interictal_propagation/rank_displacement/figures/cohort_displacement_heatmap.{png,pdf}` — main heatmap (rows sorted by F_norm descending, columns by rank_T_a_dense; **x-axis ticks/xlabel on TOP** since bottom is occupied by horizontal colorbar) + 1 right-side shared-y F_norm summary track (with 2/3 dashed reference) + horizontal Δr colorbar **directly under the main heatmap**. NO SOZ outlines, NO SOZ legend, NO PR-2.5 internal classification, NO group colors, NO Kendall τ track (collinear with F_norm, ρ = −0.916 on n=35, redundant), NO SOZ contribution_excess track (SOZ definition / channel coverage not yet stable for paper claim). τ + SOZ statistics retained in per-subject JSON, cohort_summary.json, archive doc §3.3 only. Per-subject strips kept for debug/supplement (n=35). **v14 statistics (n=35)**: F_norm median 0.800, range [0.389, 1.000]; Kendall τ median −0.203, range [−0.810, +0.429]; Spearman ρ(F_norm, τ) = −0.916, p = 1.17e-14; Spearman ρ(F_norm, SOZ excess) = 0.239, p = 0.203, n=30 (5 PR-2-sentinel subjects have no SOZ overlap). 23/35 above 2/3 (truly reversed); 12/35 ≤ 2/3 (random null zone). Reproduced cohort grew 6 → 11 (added: `epi_620, epi_1125, yuq_zhangjiaqi, yuq_wangyiyang, yuq_zhaochenxi`); sign-test (τ<0) on n=11 reproduced p = 0.0005. **Conclusion unchanged from v13/v12**: continuous spectrum, no SOZ link. Channel selection caveat: lagPat uses high-HI / high-HFO-rate channels; metric reflects geometry on selected set, not "ground truth" reversal. Does **not** open new cohort claim; supplementary to PR-6 only.
-- Spatial modulation / SOZ analysis (Where question):
-  - `docs/topic3_spatial_soz_modulation.md` — current formal entry for where / SOZ spatial attribution
-  - `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md` — detailed plan and results for per-channel SOZ spatial attribution + HFO detection infrastructure (§8)
-  - `scripts/audit_gpu_npz.py` — Step 0 data audit (Yuquan PASS 11/18, Epilepsiae FAIL 0/20)
-  - `scripts/run_spatial_modulation.py` — PR-1 batch driver (Yuquan-only, 9 valid pairs)
-  - `scripts/plot_refine_soz_validation.py` — Refine-SOZ validation figure (legacy Fig1/S12 equivalent, AUC + bar charts)
-  - `scripts/plot_spatial_modulation.py` — PR-1 figures
-  - `scripts/run_hfo_detection.py` — batch HFO detection for both datasets (`--dataset yuquan/epilepsiae --subject/--all`)
-  - `src/event_periodicity.py` — `load_perchannel_events_relaxed()`, `compute_perchannel_metrics()`, `annotate_channels_soz()`, `match_bipolar_soz()`
-- Epilepsiae dataset: `src/epilepsiae_dataset.py`
-- Network: `src/network_analysis.py`
-- Plotting in current repo:
-  - `src/visualization.py`
-  - `scripts/visualize_run.py`
-- Seizure validation:
-  - `scripts/pr2_seizure_validation.py` — dual-dataset (yuquan + epilepsiae) detector validation
-  - `scripts/pr25_loso_validation.py` — LOSO threshold search scaffold
-
-Do not assume current plotting covers all legacy paper figures. Many old paper figures were produced by legacy `plotting_fig*` scripts, not by the new visualization module.
-
-## Interictal Synchrony Analysis — Current Status (2026-04-04)
-
-**Read `docs/topic1_within_event_dynamics.md` first for the current formal summary.**
-Use `docs/archive/topic1/synchrony/interictal_synchrony_preliminary_report_2026-04-03.md` for the full statistical report.
-
-- PR4–PR6 **completed for both Epilepsiae + Yuquan**. Overall conclusion: **population-level null** for phase synchrony.
-  - Combined: 29 subjects / 1,468,780 event rows / 253 intervals / 141 fixed-window intervals
-  - Phase_all Post vs Pre: p = 0.279, r = 0.106. Phase_core: p = 0.967.
-  - Within-interval trajectory: phase_all p = 0.589, phase_core p = 0.643.
-  - Event rate (events/hour): post vs pre p = 0.361 — no change in HFO group event density across windows.
-- **Region-stratified analysis (i/l/e)** completed on Epilepsiae:
-  - SOZ (`i`): p = 0.646, no effect. Lesion (`l`): p = 0.543, no effect.
-  - **Extra-focal (`e`): p = 0.012, r = 0.31** (pre > post, medium effect). Bonferroni-corrected p = 0.037.
-  - Trajectory for `e`: p = 0.129 (same direction, not significant).
-  - Interpretation: seizures may transiently disrupt extra-focal synchrony; SOZ itself is unaffected. Exploratory-significant, needs larger sample validation.
-- Analysis is **interval-first** (seizure_interval as statistical unit). Primary artifact: `*_interictal_sync_events.csv`.
-- Metric hierarchy: **phase** (primary scientific) > **legacy** (paper-comparable) > **span** (appendix).
-- Legacy metric "0.6 wall" at n_participating=3 is a **mathematical artifact** (≈0.5918), not biology.
-- SOZ definitions:
-  - Epilepsiae: `electrode.focus_rel == 'i'` from SQL → `results/epilepsiae_soz_core_channels.json`, `results/epilepsiae_electrode_focus_rel.json` (i/l/e per channel)
-  - Yuquan: `p16_subs_info.py` hand-annotated → `results/yuquan_soz_core_channels.json` (20 subjects with non-empty SOZ)
-- Paper Figure 7B/C (subject 548 = E14) **reproduced exactly**: r=0.147, p=3.2e−14 (single-subject effect).
-- Next scientific directions: (1) validate phase_e effect with bootstrap CI, (2) per-subject case series on phase_e, (3) event-timestamp resolution, (4) prediction framing.
+For per-PR scientific status, read the topic doc — NOT this file.
 
 ## Epilepsiae Contract
 
-Read `docs/epilepsiae_dataset_structure.md` before answering any Epilepsiae question.
+Read `docs/epilepsiae_dataset_structure.md` before any Epilepsiae question.
 
-- Dataset contract:
-  - raw signal: `*.data + *.head`
-  - metadata truth: `all_data_sqls/*.sql`
-  - interictal artifacts: `interilca_inter_results/all_data_lns/<subject>/all_recs`
-- Trust order inside Epilepsiae:
-  1. SQL `recording / block / seizure`
-  2. `.head.start_ts` only for block-level validation
-  3. legacy scripts only as hints
-- Do not treat `vigilance` as day/night.
-- Current mounted data resolves to `hospital=UKLFR` -> `Europe/Berlin`.
-- Day/night rule for current Epilepsiae analysis: `08:00-20:00 = day`, else `night`.
-- Reusable current interfaces:
-  - `src.epilepsiae_dataset`
-  - `src.interictal_synchrony`
-  - `src.interictal_synchrony_aggregation`
-  - `src.interictal_synchrony_analysis`
-- Current machine-readable outputs:
-  - `results/epilepsiae_subject_inventory.csv`
-  - `results/epilepsiae_recording_inventory.csv`
-  - `results/epilepsiae_block_inventory.csv`
-  - `results/epilepsiae_seizure_inventory.csv`
-  - `results/epilepsiae_sync_subject_manifest.csv`
-  - `results/epilepsiae_soz_core_channels.json` — SOZ (i-labeled) channels per subject
-  - `results/epilepsiae_electrode_focus_rel.json` — per-channel i/l/e labels per subject
-  - `results/yuquan_soz_core_channels.json` — Yuquan SOZ channels per subject
-  - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/`
-  - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/aggregated/`
-  - `results/interictal_synchrony/epilepsiae_ready_full_artifacts/epilepsiae_region_stratified_events.csv`
-  - `results/interictal_synchrony/yuquan_soz/` — Yuquan SOZ-stratified event CSV + aggregated
-  - `results/interictal_synchrony/analysis/combined/pr6_statistics_summary.json` — combined cohort statistics
-  - `results/interictal_synchrony/analysis/combined/figures/` — Figures B–F + per-subject timelines
-  - `results/interictal_synchrony/analysis/yuquan/figures/` — Yuquan-only Figures A–E
-- Aggregation rule:
-  - synchrony is computed per event from 1h lagPat blocks; analysis consumes event-level rows
-  - do not invent sub-block seizure / post-ictal / day-night labels
-  - if an event's parent block crosses seizure, post-ictal, day-night, or nontrivial gap boundaries, exclude the event instead of force-assigning it
+- Dataset contract: raw `*.data + *.head`; metadata truth `all_data_sqls/*.sql`; interictal artifacts under `interilca_inter_results/all_data_lns/<subject>/all_recs`.
+- Trust order: SQL `recording / block / seizure` > `.head.start_ts` (block-level validation only) > legacy scripts (hints only).
+- Do **not** treat `vigilance` as day/night. Current mount = `UKLFR` → `Europe/Berlin`; day/night rule = `08:00–20:00 = day`.
+- Aggregation rule: synchrony is computed per event from 1h lagPat blocks. If an event's parent block crosses seizure / post-ictal / day-night / nontrivial gap boundaries, **exclude** the event — do not force-assign.
+- Inventories + SOZ JSON live under `results/` (see `results/epilepsiae_*_inventory.csv`, `results/{epilepsiae,yuquan}_soz_core_channels.json`, `results/epilepsiae_electrode_focus_rel.json`).
 
-## HFO Detector v2 (canonical pipeline since 2026-05-05)
+## HFO Detector v2 (canonical since 2026-05-05)
 
-**Read these before tracing any 2026+ Epilepsiae detection result:**
-- `docs/archive/hfo_detector_v2/v2_specification.md` — algorithmic definition
-- `docs/archive/hfo_detector_v2/v2_validation_contract.md` — 3-layer acceptance
-- `docs/archive/hfo_detector_v2/v2_cohort_rebuild_plan_2026-05-05.md` — execution log
+Canonical artifact root: `results/hfo_detector_v2/`. Specs: `docs/archive/hfo_detector_v2/{v2_specification,v2_validation_contract,v2_cohort_rebuild_plan_2026-05-05}.md`.
 
-Canonical artifact root: `results/hfo_detector_v2/`. Do NOT compare v2 events
-1:1 against `results/_legacy_2021_readonly/` — that backup is historical
-citation only. The v2 detector is deterministic on modern stacks (CPU=GPU,
-float32=float64); the 21 年 cusignal vintage cannot be bit-reproduced and is
-not a parity target.
+Do **not** compare v2 events 1:1 against `results/_legacy_2021_readonly/` — that backup is historical citation only. v2 is deterministic on modern stacks (CPU=GPU, float32=float64); the 2021 cusignal vintage cannot be bit-reproduced and is not a parity target.
 
 ## Source-of-Truth Order
 
-When answers conflict, trust them in this order:
+When answers conflict, trust in this order:
 
 1. Files in `/mnt/yuquan_data/yuquan_24h_edf`
 2. Legacy producer scripts
 3. Current `HFOsp` ports of those producer scripts
 4. Existing docs
-5. Variable names like `fig7`, `fig8`
+5. Variable names like `fig7` / `fig8`
 
 ## Stop Conditions
 
@@ -290,7 +112,7 @@ Stop and ask the user instead of guessing when:
 
 When a downstream PR consumes a field defined by an earlier PR, look up the accepted definition in the earlier PR's archive doc before using it — the JSON field name alone is not the contract. Frequent lookups follow.
 
-**`lagPatRank` is phantom-contaminated (Topic 0 §3.1)** — every non-participating channel in `*_lagPat*.npz` carries a finite int rank from the legacy producer (`hfo_net.py:289` `argsort(argsort(x))` is unmasked). The `np.where(np.isfinite, ranks, 0.0)` guard in HFOsp's 4 KMeans call sites is a no-op for these phantom int values. Cohort audit (`results/lagpatrank_audit/cohort_summary.csv`, n=40) shows **40/40 subjects fail the cosmetic gate**; cohort-median AMI(original, masked) − seed_floor = -0.599. Any KMeans feature matrix derived from `lagPatRank` must go through `src.lagpat_rank_audit.build_masked_kmeans_features(ranks, bools, impute='event_median')`, or use the `use_masked_features=True` parameter on `compute_adaptive_cluster_stereotypy` / `compute_cluster_stereotypy` / `compute_time_split_reproducibility` / `compute_pr6_step6_held_out`. Until Topic 0 §5 broad re-derivation completes, all PR-2/PR-3/PR-4/PR-5/PR-6/PR-7/Topic 4 numbers carry a methodology caveat. Source: `docs/topic0_methodology_audits.md` §3.1 + `docs/archive/topic0/lagpat_phantom_rank/diagnostic_2026-05-20.md`.
+**`lagPatRank` is phantom-contaminated (Topic 0 §3.1)** — every non-participating channel in `*_lagPat*.npz` carries a finite int rank from the legacy producer (`hfo_net.py:289` `argsort(argsort(x))` is unmasked). The `np.where(np.isfinite, ranks, 0.0)` guard in HFOsp's 4 KMeans call sites is a no-op for these phantom int values. Cohort audit (`results/lagpatrank_audit/cohort_summary.csv`, n=40) shows **40/40 subjects fail the cosmetic gate**; cohort-median AMI(original, masked) − seed_floor = -0.599. Any KMeans feature matrix derived from `lagPatRank` must go through `src.lagpat_rank_audit.build_masked_kmeans_features(ranks, bools, impute='event_median')`, or use the **`use_masked_features=True`** parameter on `compute_adaptive_cluster_stereotypy` / `compute_cluster_stereotypy` / `compute_time_split_reproducibility` / `compute_held_out_endpoint_validation` (PR-6 Step 6), or **`mask_phantom=True`** on `src.topic4_attractor_diagnostics.build_rank_feature_matrix` (Topic 4 attractor; same intent, different parameter name kept for module-local convention). **2026-05-21 phase 0 broad re-derivation completed for all downstream PR (5a–5h + Checkpoint A + Checkpoint B advisor consult), see Topic 0 §5 row-by-row**. Phase 0 verdict: large structure (K=2 dominant, within-cluster stereotypy, 86%→92% identity bias) survives phantom fix; one primary metric flipped significant→NULL (PR-4B Step 23 L3 high-confidence Pearson r, n=8, p=0.016 → 0.547, written into Topic 1 §2); three secondary metrics flipped significant→NULL (PR-5-B composition share, PR-5-B fig_a extended, PR-6 Step 4b node anatomy h1_eligible Wilcoxon p=0.014→0.059); two metrics strengthened (PR-6 Step 6 swap_class concordance 0.69→0.82, Topic 4 λ₂ 10/34→13/34). Source: `docs/topic0_methodology_audits.md` §3.1 + `docs/archive/topic0/lagpat_phantom_rank/{diagnostic_2026-05-20.md, step5{a,b,c,d.1,d.2.0,d.2.1,d.2.2,d.3,e,f,g,h}_*_2026-05-{20,21}.md, checkpoint_b_report_2026-05-21.md}`. **Runner discipline**: any new script that consumes PR-2 cluster labels MUST add `--masked-features` flag and follow the `_apply_masked_paths()` 5-line global path-swap pattern used by all 8 existing scripts (`run_interictal_propagation.py`, `run_pr6_template_anchoring.py`, `run_pr6_step6.py`, `run_rank_displacement.py`, `run_pr7_template_pairing.py`, `pr7_addendum_p3_equivalence.py`, `plot_pr7_template_pairing.py`, `run_pr5b_share_extended.py`, `run_pr5_transition_windows.py`, `plot_template_share_switching.py`, 5 `*attractor*.py` scripts).
 
 **`forward_reverse_reproduced` (PR-2.5)** — accepted rule is **split-half OR odd-even** (8/9 subjects). The per-subject JSON exposes both `time_split_reproducibility.splits.first_half_second_half.forward_reverse_reproduced` and `splits.odd_even_block.forward_reverse_reproduced`; downstream consumers must take the OR. Checking only split-half undercounts. Source: `docs/archive/topic1/propagation/interictal_group_event_internal_propagation.md` PR-2.5 section.
 
@@ -303,90 +125,6 @@ When a downstream PR consumes a field defined by an earlier PR, look up the acce
 **`valid_mask` semantics in PR-6 helpers** — `extract_endpoint_middle` and `compute_template_anchoring` accept `valid_mask`. Two consumer modes: split-half consumers pass `-1` sentinels in the rank vector and rely on the default mask derivation; full-data consumers must compute `valid_mask` per cluster from raw bools and pass it explicitly. **Default `valid_mask=None` for full-data input restores the buggy "all channels valid" path** — this is silent and only catchable by audit.
 
 **Audit eligibility tiers (PR-6)** — `endpoint_defined` (n_ch ≥ 6) and `h1_primary_eligible` (n_ch ≥ 7) are orthogonal. `pass = h1_primary_eligible`. Never collapse them to a single "pass" without losing the n_ch=6 case-series subjects.
-
-## Fast Path For Common Questions
-
-- "What did the interictal synchrony analysis find?"
-  - Read `docs/topic1_within_event_dynamics.md` first
-  - Then read `docs/archive/topic1/synchrony/interictal_synchrony_preliminary_report_2026-04-03.md` for detailed stats
-  - Short answer: **population-level null** on 29 subjects (Epilepsiae + Yuquan); individual heterogeneity dominates
-  - **One exploratory finding**: extra-focal (`e`) phase synchrony is pre > post (p=0.012, r=0.31); SOZ (`i`) and lesion (`l`) show no effect
-  - Paper 548/E14 reproduced exactly; not generalizable to cohort
-
-- "What metrics should I use for synchrony?"
-  - **phase** (`sync_phase_global`) = primary scientific metric (no low-channel discretization artifact)
-  - **legacy** (`sync_legacy_global`) = only for backward compatibility with old paper
-  - **span** (`sync_span_global`) = appendix / sensitivity only
-  - See DEVELOP_PLAN.md § "指标层级判定"
-
-- "Is the ~2Hz event periodicity real?"
-  - Read `docs/topic2_between_event_dynamics.md` first
-  - Then read `docs/archive/topic2/event_periodicity_analysis.md`
-  - Then read `docs/archive/topic2/interictal_population_event_methodological_review.md` if the question is about scientific narrative / mechanism
-  - Short answer: **NO.** The ~2Hz PSD peak is not evidence for an intrinsic oscillator; current evidence supports a refractory / dead-time artifact plus slow rate modulation.
-  - Gamma renewal null (matching firing rate + refractory period) explains 15/21 subject peaks with specparam peaks
-  - Analytic renewal PSD overlay (PR-1 exp6A): 16/21 |Δf| < 1 Hz; **two independent paths cover 19/21 (90%)**
-  - Escaping 2/21 (1084, 1096) **resolved by PR-2.5 backfill**: detrended PSD shows peaks completely disappear → slow rate modulation, not oscillator
-  - ISI-shuffle shows peaks are distribution-shape artifacts, not temporal-order effects
-  - IEI distribution is lognormal (30/30), NOT power-law as old paper claimed
-  - Only 1/30 subjects passes both surrogate tests (huanghanwen, n=484, likely false positive)
-  - Per-channel vs group peak frequencies are inconsistent (packing artifact)
-  - SOZ dead-time (PR-1 exp6B): SOZ < non-SOZ (p=0.008, n=8, exploratory); 22/30 subjects have nearly zero pure non-SOZ group events
-  - Phase 2 (artifact localization):
-    - f_peak ≠ 1/W across 9 window sizes → packing window size is not the direct cause
-    - Centroid bypass: within the current legacy `lagPatRaw -> absolute time` mapping, most subjects keep similar peaks; this is not yet a fully independent timestamp reconstruction
-    - IEI serial correlation is **positive for all 30 subjects** on log-IEI; formal reporting should use subject-level direction consistency / sign test, not naive within-subject Pearson p-values
-    - Hazard curves are qualitative dead-time visualizations, not formal survival-analysis estimates
-    - Propagation stereotypy is the part most likely to reflect real network structure, but SOZ > non-SOZ is still exploratory rather than definitive
-  - PR-2 (exp7, 2026-04-08): lag-k serial correlation deep dive on 30 subjects:
-    - Half-life median = 107.5s ≈ 1.8 min; 6/30 never reach half (persistent slow modulation)
-    - 600s rolling-median detrending: **~72% of positive correlation is slow rate drift** (>10 min), **~28% is short-range dependency**; 27/30 still positive after detrending
-    - Within-block pooled: 30/30 positive (cross-block contamination ruled out)
-    - SOZ vs non-SOZ: SOZ median 0.302 > nonSOZ 0.132, p=0.055 (n=9, borderline)
-  - PR-2.5 (exp7b, 2026-04-08): multi-scale modulation anatomy on 30 subjects:
-    - Δ_frac nearly flat (0.080–0.147) → broad-band (1/f-like) modulation, no single dominant timescale; minor peak ~329s (~5.5 min)
-    - n_participating Spearman autocorrelation: cross-corr with IEI decay median 0.742 (18/30 > 0.7) → **single global state variable confirmed**
-    - Day/night stratified detrending: 28/30 still positive after within-segment detrending (day median 0.094, night 0.086) → short-range dependency is genuine, not day/night boundary artifact
-    - Backfill for escape subjects 1084, 1096: **peaks completely disappear after 600s detrending** → Layer 3 gap closed, 21/21 specparam peaks fully explained by renewal + slow modulation
-  - PR-2.6 (exp7c, 2026-04-09): continuous long-timescale analysis on 30 subjects:
-    - Yuquan 10/10 subjects provide near-24h continuous trajectories; Epilepsiae longest continuous run median = 75.1h, observed duration median = 158.4h
-    - Continuous-time binned rate autocorrelation (5-min bins) remains positive from 0.5h to 8h lags in Epilepsiae (median 0.108 at 8h); Yuquan positive to 4h but ~0 at 8h. Note: this is binned rate autocorrelation, not a direct extension of IEI lag-k serial correlation
-    - Continuous day/night segment analysis: Yuquan 9/10 and Epilepsiae 17/20 remain positive on both sides → short-range dependency survives inside continuous day/night segments
-  - PR-2.7 (exp7d, 2026-04-09): rate-trace spectral characterization + seizure proximity on 30 subjects:
-    - Rate-trace PSD β: cohort median = 0.64 (range 0.04–1.62), r² median 0.709 → sub-pink-noise but still confirms long-range dependence beyond white noise; consistent with PR-2.5 broad-band Δ_frac
-    - Rate × n_participating coherence: after fixing multi-span spectral averaging bug, median = 0.358 (4/26 > 0.5) → only weak/moderate frequency-domain coupling; do NOT overclaim a strong single global state variable
-    - **Seizure-triggered rate average: pre-ictal [-6h,-1h] vs baseline [-12h,-6h] Wilcoxon p=0.019, 16/21 pre > baseline, but post > pre (p=0.016)** → supports seizure-centered broad rate elevation, not yet a pure pre-ictal ramp. Primarily Epilepsiae-driven (21 subjects, 328 usable seizure windows)
-  - Next: PR-3 (stereotypy robustness with centering SOZ-erasure diagnostic)
-  - Method caveats incorporated: detrend_fraction curve behavior depends on window vs modulation timescale (use Δ_frac for band localization); n_participating must use Spearman not Pearson-on-log; centered rank tau must check SOZ source node preservation
-  - See `results/event_periodicity/` and `results/event_periodicity/phase2/` for full results
-
-- "Where does the slow IEI modulation occur? Is it SOZ-specific?"
-  - Read `docs/topic3_spatial_soz_modulation.md` first
-  - Then read `docs/archive/topic3/pr1_spatial_modulation/spatial_modulation_soz_analysis.md`
-  - Short answer: **PR-1 completed (Yuquan-only, n=9)**. Raw serial corr shows **no SOZ difference** (p=1.0). But **detrend_fraction is lower in SOZ** (7/9 subjects, p=0.129) — SOZ channels have more short-range memory, less slow drift. SOZ median IEI is shorter (p=0.055, marginal).
-   - Epilepsiae gpu.npz are all corrupt stubs (216 bytes); per-channel analysis requires HFO re-detection via `scripts/run_hfo_detection.py --dataset epilepsiae --all`
-  - Per-channel approach (relaxed refine k=0.0) successfully expands channel set from lagPat ~10 to ~33, with 9/11 subjects forming valid SOZ/nonSOZ pairs
-  - Key insight: lagPat-based SOZ > nonSOZ serial corr (PR-2 exp7D, p=0.055) was confounded by SOZ's higher event rate → global modulation effect. Per-channel detrending separates this into global (no difference) + local (SOZ has more short-range memory).
-  - Epilepsiae three-tier (i/l/e) gradient analysis deferred to PR-2
-
-- "Why is legacy synchrony always ~0.6?"
-  - Mathematical artifact: 3-channel uniform lag pattern → theoretical limit ≈ 0.5918
-  - Not biology. Filter by `n_participating >= 5` or use **phase** metric instead.
-
-- "Where does `_refineGpu.npz` come from?"
-  - Read `docs/LEGACY_YUQUAN_CODEBASE_MAP.md`
-  - Then inspect `p16_refine_chns_bySyn.py`
-  - In current code, inspect `legacy_refine_counts_from_detection_sets()`
-
-- "Where does `lagPat` come from?"
-  - Read `docs/OLD_vs_NEW_algorithm_comparison.md`
-  - Then inspect `p16_packGroupEvents*.py`
-  - In current code, inspect `compute_centroid_matrix_spectrogram()`
-
-- "Which script made a paper figure?"
-  - First identify the artifact class from axis labels and annotations
-  - Then map artifact -> producer -> plotter
-  - Never start from figure numbering alone
 
 ## Results Directory Standards
 
@@ -414,10 +152,10 @@ results/topic4_attractor_masked/           ← 新
 
 ### 优先级分层
 
-1. **图（`figures/`子目录）— 最高优先级**
+1. **图（`figures/` 子目录）— 最高优先级**
    - 每次生成后用户需亲自目视检查。
    - 每个含图的目录**必须**有一个 `figures/README.md`，用中文逐图说明"这张图在展示什么，关注点在哪里"。
-   - README.md 格式：`### filename`开头，正文2–4句，末尾一行`**关注点**：`。
+   - README.md 格式：`### filename` 开头，正文 2–4 句，末尾一行 `**关注点**：`。
    - 不需要每次重新生成图时重写 README，但当图的含义发生根本改变时必须更新。
 
 2. **聚合 CSV / JSON 统计（次优先）**
