@@ -9,7 +9,7 @@
 > - **H4 (slow rate modulation; PR-5-B post-ictal recruitment)**：dominant_rate 主信号 `+65.46 events/h, p=0.0013` → `+65.66 events/h, p=0.0004`，direction + magnitude 都保持。详见 `step5e_pr5_results_2026-05-21.md`
 > - **H4 联动 (PR-4B L3 high-conf Pearson r)**：orig 唯一显著 finding (n=8, p=0.016, 7/8) **修过版不复现** (p=0.547, 5/8) → 归 fragility-on-small-n，**不**进 H4 evidence base
 > - **H1/H2 (PR-6 endpoint anchoring + fwd/rev swap)**：H1 cohort NULL 不变；H2 fwd/rev swap 9/9 → 8/8 都 positive (−1 subject from 5b)；Step 6 held-out swap_class concordance **0.69 → 0.82 实质提升**；rank displacement F_norm/τ/ρ 几乎完全不变。详见 `step5f_pr6_results_2026-05-21.md`
-> - **PR-7 antagonistic temporal pairing (H3 mark-independence 联动)**：🟡 5g 重跑进行中（per-subject 并行跑中，~16:00 后完）；预期 P3 verdict 仍为 INCONCLUSIVE（具体见 5g archive doc + Topic 0 §5）；**P3 PASS/NULL 翻转 = framework-level revision**，需先停下来发起 `paper1_framework_sba.md` v1.1.2 review
+> - **PR-7 antagonistic temporal pairing (H3 mark-independence 联动) ✅ 完成 2026-05-22**：H1 triple-gate cohort-level NULL 不变；**P3 framework-flip gate CLEAR**：on orig P3 cohort (n=6) 用 masked features 重跑，verdict = **INCONCLUSIVE 完全保持 (4/4 flag 与 orig 一致)**；broader cohort (n=8 或 n=30) verdict 形式上滑到 NULL 但归 cohort × power × 5b fwd/rev 翻动互相作用非 phantom-rank 在 P3 statistic 的直接效应。`docs/paper1_framework_sba.md` v1.1.2 **不修订**。详见 `docs/archive/topic0/lagpat_phantom_rank/step5g_pr7_results_2026-05-21.md`
 > - **Cohort tier 数字 lock**：Tier 1 cohort 大小见下方 §5；epilepsiae_916 已确认 cohort exit（stable_k 2→4），其他 34 stable_k=2 subject 全部进 Tier 1
 > 
 > **Phase 0 verdict（一句话）**：phantom-rank 修复**实质性加强**了 SEF-ITP framework 的两条关键 H3/H4 证据；**一条 PR-4B exploratory 翻转**被识别归类（fragility-on-small-n，不入主结论）；H1/H2 大方向都保持，其中 H2 mechanism 信号略缩 magnitude 但方向 100% 保持。
@@ -446,24 +446,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 | 3. lagPat NPZ | yuquan: `/mnt/yuquan_data/yuquan_24h_edf/<sid>/`<br>epilepsiae: `/mnt/epilepsia_data/.../all_data_lns/<sid>/all_recs/` | `events_bool` via `src.interictal_propagation.load_subject_propagation_events` |
 | 4. SEEG 坐标 | yuquan: `chnXyzDict.npy`<br>epilepsiae: SQL `electrode.coord_*` + MNI152 1mm MRI affine | `coords (n_ch, 3)` via `src.seeg_coord_loader.load_subject_coords`；mm 强制断言 |
 
-合同关键条款（CLAUDE.md §6 落地）：
-
-- **通道对齐**：Phase 0a `channel_names` 必须等于 lagPat loader 返回的 `channel_names`；不一致时 raise（非自动 reorder）。
-- **端点 name→index**：PR-6 `source/sink` 是通道名，按 Phase 0a 顺序映射；任一通道名找不到时 raise。
-- **mm 单位断言**：`require_coords=True`（默认）时 `assert_coord_result_is_mm_for_main_analysis` 把 voxel coord 拒绝在主分析外（v1.0.5 contract）。
-- **valid_pool 交集**：`valid_indices = PR-6 valid_mask ∩ coord mapped_mask`；端点 S/K 中未 map 的通道被 drop，drop 数记入 `n_dropped_endpoints_no_coords_per_cluster` 审计字段。
-- **forward/reverse pair schema 翻译**：Phase 0a `cluster_a/cluster_b` → `SubjectPhase1Data.cluster_A_id/cluster_B_id`。
-
-集成测试 `tests/test_run_sef_itp_phase1_integration.py`（8 用例，全 GREEN，2026-05-21）：
-
-1. happy path — 4 源对齐，全 mm，full valid pool
-2. lagPat channel 顺序不一致 → raise
-3. coord_units=voxel + require_coords=True → raise
-4. mapped_mask 部分 False → 端点 drop + audit 字段
-5. PR-6 endpoint name 不在 Phase 0a → raise
-6. PR-6 valid_mask 部分 False → valid_indices 取交集
-7. Phase 0a forward_reverse_pair 引用的 cluster PR-6 未产出 → 该 pair 自动过滤
-8. Phase 0a JSON 内 subject ≠ 文件名 subject → raise
+合同关键条款（通道对齐 / 端点 name→index / mm 单位断言 / valid_pool 交集 / pair schema 翻译）+ 8 个集成测试用例 + 完整 results dir layout 见 [`docs/archive/topic4/sef_itp_phase1/phase1_runner_contract_2026-05-21.md`](archive/topic4/sef_itp_phase1/phase1_runner_contract_2026-05-21.md)。所有集成测试 GREEN（2026-05-21）。
 
 实跑 smoke test（7 subject：epilepsiae 1073/548/922/590/1150/1077/1146，yuquan chengshuai）全部产出真实裁决，无 pipeline error。`coord_provenance.normalization_certainty` 字段如实记录 `grid_confirmed_warp_type_unverified`（Epilepsiae）/ `subject_native`（Yuquan），未来 warp field 文档到位再升级到 `mni_normalized_verified`。
 
@@ -482,24 +465,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - participation spatial heatmap（每 subject 一张）
 - cohort summary forest plot（H1/H2/H6 effect sizes）
 
-**产出目录**（**to be created in Phase 1**，当前不存在）：
-
-```
-results/topic4_sef_itp/                            # ← 整个 root 在 Phase 1 启动时新建
-├── phase1_spatial_geometry/
-│   ├── per_subject/<dataset>_<subject>.json     # H1/H2/H6 per-subject
-│   ├── cohort_summary.json                       # H1/H2/H6 cohort verdicts
-│   ├── figures/
-│   │   ├── README.md                             # 中文
-│   │   ├── endpoint_spatial_map_<subject>.png
-│   │   ├── cohort_h1_violin.png
-│   │   ├── cohort_h2_reversal_scatter.png
-│   │   ├── cohort_h6_participation_heatmap.png
-│   │   └── cohort_forest.png
-│   └── soz_relation/                              # secondary
-│       ├── per_subject/...
-│       └── cohort_summary.json
-```
+**产出目录**：`results/topic4_sef_itp/phase1_spatial_geometry/{per_subject,cohort_summary.json,figures/,soz_relation/}` — 整个 root 在 Phase 1 启动时新建。完整 dir layout 见上述 archive。
 
 ### 6.3 Phase 2 —— Temporal × geometry 联合检验
 
