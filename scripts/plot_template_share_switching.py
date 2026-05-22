@@ -15,8 +15,15 @@ Outputs:
     fig_a_template_share.{png,pdf}
     fig_b_template_switching.{png,pdf}
     README.md
+
+Topic 0 Step 5e masked rerun: pass ``--masked-features`` to read PR-5
+inputs from ``results/interictal_propagation_masked/`` and write figures
+under that tree. STRICT_MATCH_SUBJECTS is hardcoded from orig PR-4D; PR-4D
+was SKIPPED in masked, so the "rate-burst seizure-enrich" emphasis on
+masked plots is informational only — flagged for Step 5i refresh.
 """
 from __future__ import annotations
+import argparse
 import json
 import logging
 from pathlib import Path
@@ -40,6 +47,23 @@ from src.plot_style import (  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
+# Default (legacy / non-masked) paths. `_apply_masked_paths()` swaps these.
+RESULTS_DIR = ROOT / "results" / "interictal_propagation"
+EXT_JSON = RESULTS_DIR / "pr5b_recruitment_shift_extended.json"
+ORIG_JSON = RESULTS_DIR / "pr5b_recruitment_shift.json"
+TRANSITION_JSON = RESULTS_DIR / "pr5_transition_windows.json"
+FIGURES_DIR = RESULTS_DIR / "template_share_switching" / "figures"
+
+
+def _apply_masked_paths() -> None:
+    """Re-route input + output paths to the `_masked` parallel tree."""
+    global RESULTS_DIR, EXT_JSON, ORIG_JSON, TRANSITION_JSON, FIGURES_DIR
+    RESULTS_DIR = ROOT / "results" / "interictal_propagation_masked"
+    EXT_JSON = RESULTS_DIR / "pr5b_recruitment_shift_extended.json"
+    ORIG_JSON = RESULTS_DIR / "pr5b_recruitment_shift.json"
+    TRANSITION_JSON = RESULTS_DIR / "pr5_transition_windows.json"
+    FIGURES_DIR = RESULTS_DIR / "template_share_switching" / "figures"
+
 # PR-4D strict-match subjects (rate burst enrich >=1.5 AND |rho(dom_frac, |Δt_sz|)| >= 0.15)
 # Source: docs/archive/topic1/propagation/topic1_pr4_ppt_figures.md §fig5 part B
 STRICT_MATCH_SUBJECTS = {
@@ -62,8 +86,8 @@ def _load_share_records() -> List[Dict[str, Any]]:
       {dataset, subject_id, base, pre, post, dpre, dpost, dpostpre,
        dom_agreement, n_seizures, label='dataset/subject_id'}
     """
-    ext_path = ROOT / "results/interictal_propagation/pr5b_recruitment_shift_extended.json"
-    orig_path = ROOT / "results/interictal_propagation/pr5b_recruitment_shift.json"
+    ext_path = EXT_JSON
+    orig_path = ORIG_JSON
     with open(ext_path) as f:
         ext = json.load(f)
     with open(orig_path) as f:
@@ -115,7 +139,7 @@ def _load_share_records() -> List[Dict[str, Any]]:
 
 
 def _load_transition_records() -> List[Dict[str, Any]]:
-    path = ROOT / "results/interictal_propagation/pr5_transition_windows.json"
+    path = TRANSITION_JSON
     with open(path) as f:
         d = json.load(f)
     out: List[Dict[str, Any]] = []
@@ -396,7 +420,21 @@ def fig_b_template_switching(out_dir: Path) -> None:
 
 
 def main() -> None:
-    out_dir = ROOT / "results/interictal_propagation/template_share_switching/figures"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5e masked rerun: read PR-5 inputs and write figures "
+            "to results/interictal_propagation_masked/template_share_switching/."
+        ),
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info("Paths auto-routed for --masked-features -> %s", FIGURES_DIR)
+
+    out_dir = FIGURES_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
     fig_a_template_share(out_dir)

@@ -29,6 +29,7 @@ Columns:
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import logging
@@ -52,10 +53,26 @@ logger = logging.getLogger("topic4_step0")
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+# Legacy (non-masked) paths. `_apply_masked_paths()` swaps these to the
+# `_masked` parallel tree (Topic 0 §4 / phantom rerun roadmap §5h).
 PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation" / "per_subject"
 OUT_DIR = REPO_ROOT / "results" / "topic4_attractor"
 OUT_CSV = OUT_DIR / "step0_audit.csv"
 OUT_SUMMARY = OUT_DIR / "step0_audit_summary.md"
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Topic 0 phantom-rank rerun roadmap §5h: feed masked PR-2 cluster JSONs
+    (with stable_k derived from masked features) into the Step 0 cohort
+    audit, and write the audit to `results/topic4_attractor_masked/`.
+    """
+    global PR2_PER_SUBJECT_DIR, OUT_DIR, OUT_CSV, OUT_SUMMARY
+    PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    OUT_DIR = REPO_ROOT / "results" / "topic4_attractor_masked"
+    OUT_CSV = OUT_DIR / "step0_audit.csv"
+    OUT_SUMMARY = OUT_DIR / "step0_audit_summary.md"
 
 # Mirrors `scripts/run_interictal_propagation.py` (the canonical PR-2 cohort).
 YUQUAN_SUBJECTS = [
@@ -424,6 +441,19 @@ def _write_summary(rows: List[Dict[str, Any]], out_md: Path) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features", action="store_true",
+        help="Read masked PR-2 JSON (interictal_propagation_masked/per_subject) "
+             "and write audit to results/topic4_attractor_masked/. "
+             "Topic 0 phantom-rank rerun roadmap §5h.",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info("Masked-features mode: PR2_PER_SUBJECT_DIR=%s OUT_DIR=%s",
+                    PR2_PER_SUBJECT_DIR, OUT_DIR)
+
     rows: List[Dict[str, Any]] = []
     for subject in YUQUAN_SUBJECTS:
         row = _audit_subject("yuquan", subject)

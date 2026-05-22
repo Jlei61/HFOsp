@@ -14,6 +14,7 @@ Reports (post 2026-05-10 hardening):
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -24,12 +25,26 @@ sys.path.insert(0, str(REPO_ROOT))
 
 import numpy as np  # noqa: E402
 
+# Legacy (non-masked) paths. `_apply_masked_paths()` swaps these to the
+# `_masked` parallel tree (Topic 0 §4 / phantom rerun roadmap §5h).
 OUT_DIR = REPO_ROOT / "results" / "topic4_attractor"
 PER_SUBJECT_DIR = OUT_DIR / "per_subject"
 SUMMARY_MD = OUT_DIR / "step1_summary.md"
 GOF_THRESHOLD = 0.6
 ANGLE_LOW_DEG = 15.0
 ANGLE_HIGH_DEG = 30.0
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Topic 0 phantom-rank rerun roadmap §5h: write Step 1 cohort summary into
+    `results/topic4_attractor_masked/step1_summary.md`.
+    """
+    global OUT_DIR, PER_SUBJECT_DIR, SUMMARY_MD
+    OUT_DIR = REPO_ROOT / "results" / "topic4_attractor_masked"
+    PER_SUBJECT_DIR = OUT_DIR / "per_subject"
+    SUMMARY_MD = OUT_DIR / "step1_summary.md"
 
 
 def _q(values: List[float], q: float) -> float:
@@ -43,6 +58,17 @@ def _finite(xs):
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features", action="store_true",
+        help="Read masked per-subject JSON from results/topic4_attractor_masked/ "
+             "and write summary there (Topic 0 phantom rerun roadmap §5h).",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        print(f"Masked-features mode: OUT_DIR={OUT_DIR}")
+
     files = sorted(PER_SUBJECT_DIR.glob("*.json"))
     rows: List[Dict[str, Any]] = []
     for fp in files:

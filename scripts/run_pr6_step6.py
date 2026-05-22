@@ -122,6 +122,45 @@ DEFAULT_OUTPUT_DIR = (
     / "pr6_step6_held_out_template"
 )
 
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors scripts/run_interictal_propagation.py main() (RESULTS_DIR
+    auto-routing) and scripts/run_pr6_template_anchoring.py. Must run BEFORE
+    `_resolve_cohort()` reads the cohort summaries or `_process_one()` reads
+    per-subject JSONs.
+    """
+    global PR2_DIR, PR6_DIR, PR6_COHORT_SUMMARY, RD_COHORT_SUMMARY, DEFAULT_OUTPUT_DIR
+    PR2_DIR = DATA_ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    PR6_DIR = (
+        DATA_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "template_anchoring"
+        / "per_subject"
+    )
+    PR6_COHORT_SUMMARY = (
+        DATA_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "template_anchoring"
+        / "cohort_summary.json"
+    )
+    RD_COHORT_SUMMARY = (
+        DATA_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "rank_displacement"
+        / "cohort_summary.json"
+    )
+    DEFAULT_OUTPUT_DIR = (
+        DATA_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "pr6_step6_held_out_template"
+    )
+
 PILOT_SUBJECTS = [
     "yuquan_chengshuai",
     "epilepsiae_548",
@@ -204,6 +243,7 @@ def _process_one(
     soz_lookup: Dict[str, Dict[str, Set[str]]],
     *,
     balance_day_night: bool = False,
+    use_masked_features: bool = False,
 ) -> Optional[dict]:
     dataset, subject = _split_stem(stem)
     pr2_path = PR2_DIR / f"{stem}.json"
@@ -311,6 +351,7 @@ def _process_one(
             valid_mask=valid_mask,
             day_night_labels=day_night_labels,
             balance_day_night=balance_day_night,
+            use_masked_features=use_masked_features,
         )
     except Exception as exc:  # noqa: BLE001
         return {
@@ -466,8 +507,12 @@ def main() -> None:
         help="Explicit stems, e.g. yuquan_chengshuai epilepsiae_548",
     )
     ap.add_argument(
-        "--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR,
-        help=f"Override output (default {DEFAULT_OUTPUT_DIR})",
+        "--output-dir", type=Path, default=None,
+        help=(
+            "Override output directory. Default = "
+            "results/interictal_propagation/pr6_step6_held_out_template/, or "
+            "results/interictal_propagation_masked/... when --masked-features."
+        ),
     )
     ap.add_argument(
         "--day-night-balanced", action="store_true",
@@ -478,12 +523,31 @@ def main() -> None:
              "timezone resolution per event; 08:00-20:00 = day per "
              "AGENTS.md.",
     )
+    ap.add_argument(
+        "--masked-features", action="store_true",
+        help=(
+            "Topic 0 Step 5f.3 masked rerun: read PR-2 JSONs from "
+            "results/interictal_propagation_masked/per_subject/, derive cohort "
+            "stems from the masked PR-6 / rank_displacement cohort summaries, "
+            "and pass use_masked_features=True to "
+            "compute_held_out_endpoint_validation (mirrors masked PR-2/5f.1)."
+        ),
+    )
     args = ap.parse_args()
+
+    if args.masked_features:
+        _apply_masked_paths()
+        print(
+            "[main] --masked-features: paths routed to "
+            "results/interictal_propagation_masked/pr6_step6_held_out_template/, "
+            "use_masked_features=True forwarded to "
+            "compute_held_out_endpoint_validation"
+        )
 
     stems = _resolve_cohort(args)
     soz_lookup = _load_soz_lookup()
 
-    out_dir: Path = args.output_dir
+    out_dir: Path = args.output_dir if args.output_dir is not None else DEFAULT_OUTPUT_DIR
     if args.day_night_balanced:
         # Sensitivity outputs go to a sibling dir to avoid clobbering main run.
         out_dir = out_dir.with_name(out_dir.name + "_day_night_balanced")
@@ -494,7 +558,10 @@ def main() -> None:
     slim_records: List[dict] = []
     for stem in stems:
         record = _process_one(
-            stem, soz_lookup, balance_day_night=args.day_night_balanced
+            stem,
+            soz_lookup,
+            balance_day_night=args.day_night_balanced,
+            use_masked_features=args.masked_features,
         )
         if record is None:
             print(f"[{stem}] skipped (None)")

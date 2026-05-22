@@ -15,6 +15,7 @@ negative-control overlay.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -45,6 +46,9 @@ from src.plot_style import (  # noqa: E402
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
+# Default (legacy / non-masked) paths. `_apply_masked_paths()` reassigns these
+# module globals when --masked-features is requested (Topic 0 §4 parallel-dir
+# convention: results/interictal_propagation_masked/).
 COHORT_SUMMARY = (
     ROOT
     / "results"
@@ -62,6 +66,41 @@ FIG_DIR = (
     / "template_pairing"
     / "figures"
 )
+
+# Placeholder declarations so `_apply_masked_paths()` can swap them in one
+# place. The real defaults are assigned just below the appendix sections too;
+# we re-bind them at module-import time for compatibility with the existing
+# call sites that close over the bottom definitions.
+SWEEP_DIR = (
+    ROOT
+    / "results"
+    / "interictal_propagation"
+    / "template_pairing"
+    / "per_subject_n2_sweep"
+)
+AUDIT_CSV_PATH = (
+    ROOT
+    / "results"
+    / "interictal_propagation"
+    / "template_pairing"
+    / "pr7_cohort_audit.csv"
+)
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors the pattern in scripts/run_pr6_template_anchoring.py. Must be
+    called BEFORE main() runs the plotting functions, which read these
+    globals.
+    """
+    global COHORT_SUMMARY, PER_SUBJECT_DIR, FIG_DIR, SWEEP_DIR, AUDIT_CSV_PATH
+    base = ROOT / "results" / "interictal_propagation_masked" / "template_pairing"
+    COHORT_SUMMARY = base / "cohort_summary.json"
+    PER_SUBJECT_DIR = base / "per_subject"
+    FIG_DIR = base / "figures"
+    SWEEP_DIR = base / "per_subject_n2_sweep"
+    AUDIT_CSV_PATH = base / "pr7_cohort_audit.csv"
 
 
 # ---------------------------------------------------------------------------
@@ -630,14 +669,9 @@ def plot_main_fig5_burst_diagnostic(summary: Dict[str, Any]) -> Optional[Path]:
 
 # ---------------------------------------------------------------------------
 # Step 6 appendix 1 — N2 window sweep (10/30/60 min) cohort excess curves
+# (SWEEP_DIR is declared near the top alongside the other path globals so
+# `_apply_masked_paths()` can swap it in one place.)
 # ---------------------------------------------------------------------------
-SWEEP_DIR = (
-    ROOT
-    / "results"
-    / "interictal_propagation"
-    / "template_pairing"
-    / "per_subject_n2_sweep"
-)
 
 
 def plot_appendix1_window_sweep() -> Optional[Path]:
@@ -704,14 +738,9 @@ def plot_appendix1_window_sweep() -> Optional[Path]:
 
 # ---------------------------------------------------------------------------
 # Step 6 appendix 3 — Cohort audit transparency table
+# (AUDIT_CSV_PATH is declared near the top alongside the other path globals
+# so `_apply_masked_paths()` can swap it in one place.)
 # ---------------------------------------------------------------------------
-AUDIT_CSV_PATH = (
-    ROOT
-    / "results"
-    / "interictal_propagation"
-    / "template_pairing"
-    / "pr7_cohort_audit.csv"
-)
 
 
 def plot_appendix3_audit_table() -> Optional[Path]:
@@ -929,6 +958,26 @@ cohort（17 subject），灰色 = excluded（7 subject）。可独立验证 incl
 # Main
 # ---------------------------------------------------------------------------
 def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5g masked rerun: read PR-7 cohort summary + "
+            "per-subject + sweep + audit from "
+            "results/interictal_propagation_masked/template_pairing/, write "
+            "figures to the same _masked tree."
+        ),
+    )
+    args = ap.parse_args()
+
+    if args.masked_features:
+        _apply_masked_paths()
+        print(
+            "[main] --masked-features: paths routed to "
+            "results/interictal_propagation_masked/template_pairing/"
+        )
+
     if not COHORT_SUMMARY.exists():
         raise FileNotFoundError(
             f"Missing {COHORT_SUMMARY}; run run_pr7_template_pairing.py --cohort-stats first."

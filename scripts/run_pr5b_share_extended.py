@@ -11,8 +11,15 @@ Output: results/interictal_propagation/pr5b_recruitment_shift_extended.json
 This script BYPASSES the PR-5-A gate: it produces descriptive figure data,
 not a cohort claim. The original PR-5-B retained-cohort statistics in
 ``pr5b_recruitment_shift.json`` remain the source of truth for §4.5.
+
+Topic 0 Step 5e masked rerun: pass ``--masked-features`` to re-route paths
+to ``results/interictal_propagation_masked/`` (Topic 0 §4 parallel-dir
+convention). No KMeans is invoked here — labels are read from the masked
+per-subject PR-1 JSONs produced by Step 5a; path routing alone is the
+fix.
 """
 from __future__ import annotations
+import argparse
 import json
 import csv
 import logging
@@ -45,6 +52,29 @@ from scripts.run_interictal_propagation import (  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
+
+# Default (legacy / non-masked) paths. `_apply_masked_paths()` swaps these.
+RESULTS_DIR = ROOT / "results" / "interictal_propagation"
+PR1_SUBJECT_SUMMARY = RESULTS_DIR / "pr1_subject_summary_n40.json"
+OUT_JSON = RESULTS_DIR / "pr5b_recruitment_shift_extended.json"
+OUT_CSV = RESULTS_DIR / "pr5b_recruitment_shift_extended.csv"
+
+
+def _apply_masked_paths() -> None:
+    """Re-route results/input paths to the `_masked` parallel tree.
+
+    Mirrors the pattern in scripts/run_pr6_template_anchoring.py
+    (`_apply_masked_paths`). Topic 0 §4 parallel-dir convention.
+
+    Note: masked PR-1 summary is `pr1_subject_summary.json` (no `_n40`
+    suffix) — Step 5a only writes one file there, no historical cohort
+    tag. Must swap filename, not just directory.
+    """
+    global RESULTS_DIR, PR1_SUBJECT_SUMMARY, OUT_JSON, OUT_CSV
+    RESULTS_DIR = ROOT / "results" / "interictal_propagation_masked"
+    PR1_SUBJECT_SUMMARY = RESULTS_DIR / "pr1_subject_summary.json"
+    OUT_JSON = RESULTS_DIR / "pr5b_recruitment_shift_extended.json"
+    OUT_CSV = RESULTS_DIR / "pr5b_recruitment_shift_extended.csv"
 
 
 def _build_subject_share_record(
@@ -149,8 +179,24 @@ def _build_subject_share_record(
 
 
 def main() -> None:
-    results_dir = ROOT / "results" / "interictal_propagation"
-    pr1_path = results_dir / "pr1_subject_summary_n40.json"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5e masked rerun: read PR-1 inputs and write outputs "
+            "to results/interictal_propagation_masked/ (parallel-dir "
+            "convention). No KMeans here; path routing only."
+        ),
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info("Paths auto-routed for --masked-features -> %s", RESULTS_DIR)
+
+    pr1_path = PR1_SUBJECT_SUMMARY
+    if not pr1_path.exists():
+        raise SystemExit(f"PR-1 subject summary not found: {pr1_path}")
     with open(pr1_path) as f:
         pr1 = json.load(f)
 
@@ -187,7 +233,7 @@ def main() -> None:
                 rec["weighted_per_state"]["dom_global_share"]["post"],
             )
 
-    out_json = results_dir / "pr5b_recruitment_shift_extended.json"
+    out_json = OUT_JSON
     payload = {
         "cohort_source": "stable_k=2 in pr1_subject_summary_n40.json",
         "n_targeted": len(target_subjects),
@@ -200,7 +246,7 @@ def main() -> None:
         json.dump(payload, f, indent=2)
     logger.info("Wrote %s", out_json)
 
-    out_csv = results_dir / "pr5b_recruitment_shift_extended.csv"
+    out_csv = OUT_CSV
     fields = [
         "config_name", "dataset", "subject_id", "stable_k",
         "dom_global_id", "n_seizures_usable", "n_windows_used", "dom_agreement",

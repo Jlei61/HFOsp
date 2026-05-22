@@ -18,8 +18,14 @@ case to the descriptive output. NOT a cohort inference claim.
 Outputs:
   results/interictal_propagation/pr5_transition_windows.json
   results/interictal_propagation/pr5_transition_windows.csv
+
+Topic 0 Step 5e masked rerun: pass ``--masked-features`` to re-route paths
+to ``results/interictal_propagation_masked/``. Labels are read from the
+masked per-subject PR-1 JSONs produced by Step 5a — no re-clustering, so
+path routing alone is the masked fix.
 """
 from __future__ import annotations
+import argparse
 import json
 import csv
 import logging
@@ -47,6 +53,25 @@ from scripts.run_interictal_propagation import (  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
+
+# Default (legacy / non-masked) paths. `_apply_masked_paths()` swaps these.
+RESULTS_DIR = ROOT / "results" / "interictal_propagation"
+PR1_SUBJECT_SUMMARY = RESULTS_DIR / "pr1_subject_summary_n40.json"
+OUT_JSON = RESULTS_DIR / "pr5_transition_windows.json"
+OUT_CSV = RESULTS_DIR / "pr5_transition_windows.csv"
+
+
+def _apply_masked_paths() -> None:
+    """Re-route input + output paths to the `_masked` parallel tree.
+
+    Note: masked PR-1 summary is `pr1_subject_summary.json` (no `_n40`
+    suffix) — see scripts/run_pr5b_share_extended.py:_apply_masked_paths.
+    """
+    global RESULTS_DIR, PR1_SUBJECT_SUMMARY, OUT_JSON, OUT_CSV
+    RESULTS_DIR = ROOT / "results" / "interictal_propagation_masked"
+    PR1_SUBJECT_SUMMARY = RESULTS_DIR / "pr1_subject_summary.json"
+    OUT_JSON = RESULTS_DIR / "pr5_transition_windows.json"
+    OUT_CSV = RESULTS_DIR / "pr5_transition_windows.csv"
 
 CFG_NAME = "main"
 STATE_RANGES = {
@@ -228,8 +253,23 @@ def _compute_subject(
 
 
 def main() -> None:
-    results_dir = ROOT / "results" / "interictal_propagation"
-    pr1_path = results_dir / "pr1_subject_summary_n40.json"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5e masked rerun: read PR-1 inputs and write outputs "
+            "to results/interictal_propagation_masked/."
+        ),
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info("Paths auto-routed for --masked-features -> %s", RESULTS_DIR)
+
+    pr1_path = PR1_SUBJECT_SUMMARY
+    if not pr1_path.exists():
+        raise SystemExit(f"PR-1 subject summary not found: {pr1_path}")
     with open(pr1_path) as f:
         pr1 = json.load(f)
 
@@ -262,7 +302,7 @@ def main() -> None:
             s["baseline"]["lift"], s["pre"]["lift"], s["post"]["lift"],
         )
 
-    out_json = results_dir / "pr5_transition_windows.json"
+    out_json = OUT_JSON
     payload = {
         "config_name": CFG_NAME,
         "state_ranges_hours": {k: list(v) for k, v in STATE_RANGES.items()},
@@ -275,7 +315,7 @@ def main() -> None:
         json.dump(payload, f, indent=2)
     logger.info("Wrote %s", out_json)
 
-    out_csv = results_dir / "pr5_transition_windows.csv"
+    out_csv = OUT_CSV
     fields = [
         "dataset", "subject_id", "stable_k", "dom_global_id", "n_seizures",
         "base_pairs", "base_n_opp", "base_lift",

@@ -10,12 +10,12 @@
 > 在读任何 Topic 1–5 的科学结论之前，必须先看本节是否有未结清问题。
 
 - 正式入口：`docs/topic0_methodology_audits.md`
-- 当前未结清问题：**1 个 + 1 个已基本结清**
-  1. **（已基本结清）** `lagPatRank` phantom pseudo-rank（2026-05-20 确诊，broad re-derivation 2026-05-21 **5a–5h 全部完成**；5g PR-7 per-subject 28/30 剩 2 大 subject 还在跑；Checkpoint A/B advisor consult 通过；**未发现任何 primary cohort verdict 翻转**；详见 `docs/archive/topic0/lagpat_phantom_rank/rerun_results_2026-05-21.md` + Topic 0 §3.1 表）
+- 当前未结清问题：**0 完全未结清 + 2 个已基本结清（科学层 PASS，工程层 1 个仍在收口）**
+  1. **（科学层 PASS，工程层 5i.6 进行中）** `lagPatRank` phantom pseudo-rank（2026-05-20 确诊；broad re-derivation 2026-05-22 **5a–5h + 5g 全部跑完，14/14 main step 完成**；Checkpoint A/B advisor consult 通过；**未发现任何 primary cohort verdict 翻转**；P3 framework-flip gate 在 like-for-like orig 6-cohort 上 verdict INCONCLUSIVE 完全保持。**工程层未封板**：`use_masked_features` / `mask_phantom` 默认仍是 False（5i.6 default flip 进行中），`src/cluster_geometry.py` PCA 嵌入路径还未走 masked features（5i.6 一起修），`scripts/run_interictal_propagation.py` PR-4* bootstrap 7 个 callsites 漏传 `use_masked_features`（5i.6 一起修）—— 直到 5i.6 落，新 runner 忘传 flag 会静默回到 phantom-contaminated 路径。详见 `docs/archive/topic0/lagpat_phantom_rank/rerun_results_2026-05-21.md` + Topic 0 §3.1 表 + §5 表）
   2. **（已落地）** SEEG 3D coord loader v3.1：`src/seeg_coord_loader.py` + 49 unit tests + 27-subject real-data smoke 全 GREEN。Yuquan 输出 `fs_native_ras_mm`，**Epilepsiae 自动发现 MRI + 应用 MNI152 affine 输出 `mni152_1mm`**（cohort-comparable）；当前 stable_k=2 cohort 约 22/34 已可直接进 SEF-ITP H1/H2 主分析
-- **Phase 0 解锁（2026-05-21）**：SEF-ITP Phase 1 可以启动，剩下 = `load_subject_for_phase1()` integration PR（接 coord loader → Phase 1 runner）
-- **影响范围**：Topic 1 / Topic 4 / PR-5 / PR-6 / PR-7 主结论方向全部保持；少量 secondary metric 弱化（详见 Topic 0 §3.1）
-- **2026-05-21 重跑期间科学发现**：Step 5c 在 masked 上重跑发现"簇内 86% identity bias" → "92% identity bias"，PR-4 panel d **加强**而非削弱；Topic 4 attractor λ₂ orig 10/34 → masked **13/34** 实质加强；PR-5-B 核心 +65 events/h 信号 magnitude + direction 100% 保持；PR-6 Step 6 swap_class concordance 0.69 → 0.82 实质提升；SEF-ITP "endpoint 是结构化锚点" 几何前提**被独立证据加强**
+- **Phase 0 解锁（2026-05-22）**：SEF-ITP Phase 1 可以启动，剩下 = `load_subject_for_phase1()` integration PR（接 coord loader → Phase 1 runner）
+- **影响范围**：Topic 1 / Topic 4 / PR-5 / PR-6 / PR-7 主结论方向全部保持；4 条 secondary metric flip（PR-5 share×2 + transition + PR-6 node anatomy h1_eligible Wilcoxon）；1 条 **exploratory/secondary loss**（PR-4B L3 高置信 n=8 Pearson r delta p=0.016→0.547，小样本脆弱性，原版 archive 已标 exploratory tier，不进 main evidence base — **不是 primary cohort verdict reversal**）；详见 Topic 0 §3.1
+- **2026-05-21–22 重跑期间科学发现**：Step 5c 在 masked 上重跑发现"簇内 86% identity bias" → "92% identity bias"，PR-4 panel d **加强**而非削弱；Topic 4 attractor λ₂ orig 10/34 → masked **13/34** 实质加强；PR-5-B 核心 +65 events/h 信号 magnitude + direction 100% 保持；PR-6 Step 6 swap_class concordance 0.69 → 0.82 实质提升；PR-7 short-window mark-dependent 偏离信号 directionally stronger after fix (orig 10s median −0.018 → mask −0.045) 但 cohort-level verdict INCONCLUSIVE 保持，作 PR-7 v2 power-analysis 跟踪条目；SEF-ITP "endpoint 是结构化锚点" 几何前提**被独立证据加强**
 
 ## 1. 论文现在的 4 个 topic
 

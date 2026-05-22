@@ -69,6 +69,29 @@ SOZ_FILES = {
 }
 
 
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Step 5f.4 of the Topic 0 phantom-rank rerun roadmap: rank displacement
+    consumes the masked PR-2 cluster JSONs + masked PR-6 template_anchoring
+    per-subject JSONs; writes a parallel rank_displacement_masked tree. Pure
+    path-routing change (no compute helper needs use_masked_features).
+    """
+    global PR2_DIR, PR6_DIR, OUT_DIR, OUT_PER_SUBJECT
+    PR2_DIR = DATA_ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    PR6_DIR = (
+        DATA_ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "template_anchoring"
+        / "per_subject"
+    )
+    OUT_DIR = (
+        DATA_ROOT / "results" / "interictal_propagation_masked" / "rank_displacement"
+    )
+    OUT_PER_SUBJECT = OUT_DIR / "per_subject"
+
+
 def load_soz_lookup() -> Dict[str, Dict[str, set]]:
     out: Dict[str, Dict[str, set]] = {}
     for ds, path in SOZ_FILES.items():
@@ -346,7 +369,23 @@ def main() -> None:
         default=None,
         help="Optional list of <dataset>_<subject> stems; default = all PR-2 JSONs.",
     )
+    ap.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5f.4 masked rerun: read PR-2 + PR-6 JSONs from "
+            "results/interictal_propagation_masked/{per_subject,template_anchoring/per_subject}/ "
+            "and write to results/interictal_propagation_masked/rank_displacement/."
+        ),
+    )
     args = ap.parse_args()
+
+    if args.masked_features:
+        _apply_masked_paths()
+        print(
+            "[main] --masked-features: rank_displacement paths routed to "
+            "results/interictal_propagation_masked/rank_displacement/"
+        )
 
     OUT_PER_SUBJECT.mkdir(parents=True, exist_ok=True)
     soz_lookup = load_soz_lookup()

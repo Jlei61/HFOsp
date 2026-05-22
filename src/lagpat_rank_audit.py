@@ -39,6 +39,36 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_mutual_info_score
 
 
+# ---------------------------------------------------------------------------
+# Topic 0 §3.1 Phase 0 closure (2026-05-22): default-flip + deprecation
+# ---------------------------------------------------------------------------
+_PHANTOM_RANK_DEPRECATION_NOTE = (
+    "use_masked_features=False (or mask_phantom=False) is deprecated since "
+    "Topic 0 §3.1 phantom-rank Phase 0 closure (2026-05-22). The legacy path "
+    "(`np.where(isfinite, ranks, 0.0)`) is phantom-vulnerable: non-participating "
+    "channels carry finite int ranks from the legacy producer and silently "
+    "drive KMeans cluster identity. New default = True (masked features via "
+    "`build_masked_kmeans_features`); legacy path is kept only for byte-level "
+    "reproducibility of paper-locked numbers. Omit the argument or pass True "
+    "to silence this warning."
+)
+
+
+def warn_phantom_legacy_path(stacklevel: int = 3) -> None:
+    """Emit DeprecationWarning for callers still using the phantom-vulnerable
+    feature-matrix construction. Used by `compute_*` helpers in
+    `src/interictal_propagation.py`, `src/topic4_attractor_diagnostics.py`,
+    and `src/cluster_geometry.py` when `use_masked_features=False` /
+    `mask_phantom=False` is explicitly passed.
+    """
+    import warnings
+    warnings.warn(
+        _PHANTOM_RANK_DEPRECATION_NOTE,
+        DeprecationWarning,
+        stacklevel=stacklevel,
+    )
+
+
 def mask_phantom_ranks(
     ranks: np.ndarray,
     bools: np.ndarray,

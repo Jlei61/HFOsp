@@ -27,6 +27,7 @@ Behavior changes vs first version (post 2026-05-10 fix):
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import logging
@@ -59,6 +60,8 @@ logger = logging.getLogger("topic4_step1_augment")
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+# Legacy (non-masked) paths. `_apply_masked_paths()` swaps these to the
+# `_masked` parallel tree (Topic 0 §4 / phantom rerun roadmap §5h).
 PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation" / "per_subject"
 OUT_DIR = REPO_ROOT / "results" / "topic4_attractor"
 PER_SUBJECT_DIR = OUT_DIR / "per_subject"
@@ -66,6 +69,19 @@ COHORT_CSV = OUT_DIR / "step1_cohort_summary.csv"
 
 PR2_VALID_MIN_PART = 3
 LABEL_TRANSITION_N_PERM = 1000
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Topic 0 phantom-rank rerun roadmap §5h: augment masked Step 1 per-subject
+    JSONs with s_kmeans + label_transition diagnostics in masked rank space.
+    """
+    global PR2_PER_SUBJECT_DIR, OUT_DIR, PER_SUBJECT_DIR, COHORT_CSV
+    PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    OUT_DIR = REPO_ROOT / "results" / "topic4_attractor_masked"
+    PER_SUBJECT_DIR = OUT_DIR / "per_subject"
+    COHORT_CSV = OUT_DIR / "step1_cohort_summary.csv"
 
 
 def _epilepsiae_subject_dir(subject: str) -> Path:
@@ -141,7 +157,7 @@ def _load_pr2_labels(json_path: Path):
     return np.asarray(labels, dtype=int), chosen_k
 
 
-def _augment_one(per_subject_path: Path) -> Dict[str, Any]:
+def _augment_one(per_subject_path: Path, *, mask_phantom: bool = False) -> Dict[str, Any]:
     with open(per_subject_path) as f:
         per = json.load(f)
 
@@ -192,7 +208,8 @@ def _augment_one(per_subject_path: Path) -> Dict[str, Any]:
         return per
 
     X, eligible_idx = build_rank_feature_matrix(
-        ranks, bools, min_participating=TOPIC4_MIN_PARTICIPATING
+        ranks, bools, min_participating=TOPIC4_MIN_PARTICIPATING,
+        mask_phantom=mask_phantom,
     )
 
     pr2_lookup: Dict[int, int] = {int(v): int(l) for v, l in zip(valid_pr2, labels_pr2)}
@@ -333,6 +350,19 @@ def _refresh_cohort_csv(rows: List[Dict[str, Any]]) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features", action="store_true",
+        help="Use masked PR-2 JSONs + masked rank features (Topic 0 phantom "
+             "rerun roadmap §5h). Augments per-subject JSONs in "
+             "results/topic4_attractor_masked/per_subject/.",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info("Masked-features mode: PR2_PER_SUBJECT_DIR=%s OUT_DIR=%s",
+                    PR2_PER_SUBJECT_DIR, OUT_DIR)
+
     files = sorted(PER_SUBJECT_DIR.glob("*.json"))
     if not files:
         logger.error("No per-subject files found in %s", PER_SUBJECT_DIR)
@@ -340,7 +370,7 @@ def main() -> int:
     rows: List[Dict[str, Any]] = []
     for fp in files:
         try:
-            r = _augment_one(fp)
+            r = _augment_one(fp, mask_phantom=args.masked_features)
         except Exception as exc:
             logger.exception("Failed on %s: %s", fp.name, exc)
             with open(fp) as f:

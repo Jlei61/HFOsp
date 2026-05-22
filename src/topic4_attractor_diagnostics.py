@@ -45,23 +45,32 @@ def build_rank_feature_matrix(
     bools: np.ndarray,
     *,
     min_participating: int = TOPIC4_MIN_PARTICIPATING,
+    mask_phantom: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Build PR-2-consistent rank feature matrix with NaN -> 0.
+    """Build PR-2-consistent rank feature matrix.
 
-    Mirrors `compute_kmeans_cluster_stereotypy` lines 1215-1217 in
-    `src/interictal_propagation.py`:
-        rank_subset = ranks[:, valid_events].T
-        rank_subset = np.where(np.isfinite(rank_subset), rank_subset, 0.0)
+    Since Topic 0 §3.1 Phase 0 closure (2026-05-22) the default is
+    ``mask_phantom=True`` (masked feature space via
+    ``src.lagpat_rank_audit.build_masked_kmeans_features``); the legacy
+    phantom-contaminated path (``np.where(isfinite, ranks, 0.0)``) is kept
+    only for byte-level reproducibility of paper-locked numbers and emits
+    a ``DeprecationWarning`` when explicitly requested.
 
     Parameters
     ----------
     ranks : (n_chan, n_events) lagPatRank with NaN for inactive entries.
     bools : (n_chan, n_events) participation mask.
     min_participating : Topic 4's tighter eligibility gate (default 6).
+    mask_phantom : bool, default True (since 2026-05-22; explicit False is deprecated)
+        Topic 4-local parameter name (mirrors roadmap §5h spec), distinct
+        from ``src/interictal_propagation.py``'s ``use_masked_features``
+        only because the call sites are in a different module.
 
     Returns
     -------
-    X : (n_eligible, n_chan_union) feature matrix, NaN-filled-to-zero.
+    X : (n_eligible, n_chan_union) feature matrix.
+        - mask_phantom=True (default): midpoint-imputed normalized ranks (Topic 0 fix).
+        - mask_phantom=False: NaN-filled-to-zero (legacy PR-2 path, deprecated).
     eligible_idx : (n_eligible,) indices into the original event axis.
     """
     ranks = np.asarray(ranks, dtype=float)
@@ -72,8 +81,17 @@ def build_rank_feature_matrix(
     eligible_idx = np.where(n_part >= int(min_participating))[0]
     if eligible_idx.size == 0:
         return np.zeros((0, ranks.shape[0]), dtype=float), eligible_idx
-    X = ranks[:, eligible_idx].T
-    X = np.where(np.isfinite(X), X, 0.0)
+    if not mask_phantom:
+        from src.lagpat_rank_audit import warn_phantom_legacy_path
+        warn_phantom_legacy_path(stacklevel=3)
+    if mask_phantom:
+        from src.lagpat_rank_audit import build_masked_kmeans_features
+        X = build_masked_kmeans_features(
+            ranks[:, eligible_idx], bools[:, eligible_idx], impute="event_median"
+        )
+    else:
+        X = ranks[:, eligible_idx].T
+        X = np.where(np.isfinite(X), X, 0.0)
     return X, eligible_idx
 
 
@@ -531,8 +549,13 @@ def run_step1_subject(
     min_participating: int = TOPIC4_MIN_PARTICIPATING,
     n_components: int = 3,
     gof_threshold: float = 0.6,
+    mask_phantom: bool = True,
 ) -> Dict[str, Any]:
     """End-to-end Step 1 per subject: feature → PCA-k → curve → GOF + angle.
+
+    Since Topic 0 §3.1 Phase 0 closure (2026-05-22), ``mask_phantom`` defaults
+    to True; passes through to ``build_rank_feature_matrix``. Explicit False
+    is deprecated and emits ``DeprecationWarning`` inside build_rank_feature_matrix.
 
     Cluster-axis policy (post 2026-05-10 hardening):
         1. PR-2 labels MUST align to Topic 4 eligibility (length match + at
@@ -546,7 +569,8 @@ def run_step1_subject(
     Returns a JSON-serialisable summary (no spline objects).
     """
     X, eligible_idx = build_rank_feature_matrix(
-        ranks, bools, min_participating=min_participating
+        ranks, bools, min_participating=min_participating,
+        mask_phantom=mask_phantom,
     )
     n_chan_union = int(ranks.shape[0])
     out: Dict[str, Any] = {

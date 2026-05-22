@@ -163,7 +163,7 @@ def _save(data: Any, path: Path) -> None:
 def _run_pr25(
     datasets_list: List,
     per_subject_dir: Path,
-    use_masked_features: bool = False,
+    use_masked_features: bool = True,
 ) -> None:
     """PR-2.5: augment existing per-subject JSONs with cross-time reproducibility."""
     import numpy as np
@@ -313,7 +313,7 @@ def _run_pr4a(
     n_sample: int,
     n_seeds: int,
     bin_hours: float,
-    use_masked_features: bool = False,
+    use_masked_features: bool = True,
 ) -> None:
     """PR-4A: fixed-template occupancy timeline + day/night summaries."""
     import numpy as np
@@ -343,6 +343,7 @@ def _run_pr4a(
                     soz_channels=soz_map.get(subject, []),
                     n_sample=n_sample,
                     n_seeds=n_seeds,
+                    use_masked_features=use_masked_features,
                 )
 
             if "error" in existing:
@@ -448,6 +449,7 @@ def _run_pr4a_followup(
     n_seeds: int,
     smoothing_hours: float,
     bin_hours: float,
+    use_masked_features: bool = True,
 ) -> None:
     """PR-4D: gap-aware per-template absolute rate decomposition over time."""
     import numpy as np
@@ -477,6 +479,7 @@ def _run_pr4a_followup(
                     soz_channels=soz_map.get(subject, []),
                     n_sample=n_sample,
                     n_seeds=n_seeds,
+                    use_masked_features=use_masked_features,
                 )
 
             if "error" in existing:
@@ -565,6 +568,7 @@ def _run_pr4b_step0(
     *,
     n_sample: int,
     n_seeds: int,
+    use_masked_features: bool = True,
 ) -> None:
     """PR-4B Step 0: relative-lag validation under fixed rank clusters."""
     import numpy as np
@@ -594,6 +598,7 @@ def _run_pr4b_step0(
                     soz_channels=soz_map.get(subject, []),
                     n_sample=n_sample,
                     n_seeds=n_seeds,
+                    use_masked_features=use_masked_features,
                 )
 
             if "error" in existing:
@@ -675,6 +680,7 @@ def _run_pr4b_step1(
     n_seeds: int,
     rate_bin_hours: float,
     min_events_per_rate_bin: int,
+    use_masked_features: bool = True,
 ) -> None:
     """PR-4B Step 1: high-rate vs low-rate within-cluster tau."""
     import numpy as np
@@ -704,6 +710,7 @@ def _run_pr4b_step1(
                     soz_channels=soz_map.get(subject, []),
                     n_sample=n_sample,
                     n_seeds=n_seeds,
+                    use_masked_features=use_masked_features,
                 )
 
             if "error" in existing:
@@ -789,6 +796,7 @@ def _run_pr4b_step23(
     n_seeds: int,
     rate_bin_hours: float,
     min_events_per_rate_bin: int,
+    use_masked_features: bool = True,
 ) -> None:
     """PR-4B Step 2-3: L3 lag span/Pearson plus L1 occupancy-rate."""
     import numpy as np
@@ -818,6 +826,7 @@ def _run_pr4b_step23(
                     soz_channels=soz_map.get(subject, []),
                     n_sample=n_sample,
                     n_seeds=n_seeds,
+                    use_masked_features=use_masked_features,
                 )
 
             if "error" in existing:
@@ -931,6 +940,7 @@ def _run_pr4c(
     n_sample: int,
     n_seeds: int,
     config_name: str = "main",
+    use_masked_features: bool = True,
 ) -> None:
     """PR-4C: seizure proximity L1/L2/L3 analysis.
 
@@ -986,6 +996,7 @@ def _run_pr4c(
                     soz_channels=soz_map.get(subject, []),
                     n_sample=n_sample,
                     n_seeds=n_seeds,
+                    use_masked_features=use_masked_features,
                 )
 
             if "error" in existing:
@@ -1719,6 +1730,7 @@ def main() -> None:
             n_seeds=args.n_seeds,
             smoothing_hours=args.followup_smoothing_hours,
             bin_hours=args.followup_bin_hours,
+            use_masked_features=args.masked_features,
         )
         return
 
@@ -1728,6 +1740,7 @@ def main() -> None:
             per_subject_dir,
             n_sample=args.n_sample,
             n_seeds=args.n_seeds,
+            use_masked_features=args.masked_features,
         )
         return
 
@@ -1739,6 +1752,7 @@ def main() -> None:
             n_seeds=args.n_seeds,
             rate_bin_hours=args.rate_bin_hours,
             min_events_per_rate_bin=args.min_events_per_rate_bin,
+            use_masked_features=args.masked_features,
         )
         return
 
@@ -1750,6 +1764,7 @@ def main() -> None:
             n_seeds=args.n_seeds,
             rate_bin_hours=args.rate_bin_hours,
             min_events_per_rate_bin=args.min_events_per_rate_bin,
+            use_masked_features=args.masked_features,
         )
         return
 
@@ -1760,6 +1775,7 @@ def main() -> None:
             n_sample=args.n_sample,
             n_seeds=args.n_seeds,
             config_name="main",
+            use_masked_features=args.masked_features,
         )
         return
 
@@ -1770,6 +1786,7 @@ def main() -> None:
             n_sample=args.n_sample,
             n_seeds=args.n_seeds,
             config_name="auxiliary",
+            use_masked_features=args.masked_features,
         )
         return
 

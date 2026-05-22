@@ -995,7 +995,7 @@ def run_subject_interictal_propagation_pr1(
     n_seeds: int = 5,
     min_shared_channels: int = 3,
     min_center_participation: int = 10,
-    use_masked_features: bool = False,
+    use_masked_features: bool = True,
 ) -> Dict[str, Any]:
     loaded = load_subject_propagation_events(subject_dir)
     ranks = loaded["ranks"]
@@ -1205,7 +1205,7 @@ def compute_cluster_stereotypy(
     n_seeds: int = 5,
     min_shared_channels: int = 3,
     min_participation: int = 10,
-    use_masked_features: bool = False,
+    use_masked_features: bool = True,
 ) -> Dict[str, Any]:
     """KMeans clustering of events + within-cluster stereotypy analysis.
 
@@ -1214,7 +1214,7 @@ def compute_cluster_stereotypy(
 
     Parameters
     ----------
-    use_masked_features : bool, default False
+    use_masked_features : bool, default True (since Topic 0 §3.1 Phase 0 closure 2026-05-22; explicit False is deprecated and emits DeprecationWarning)
         If True, build the KMeans feature matrix via
         ``src.lagpat_rank_audit.build_masked_kmeans_features`` (per-event
         re-rank only over participating channels + midpoint impute), instead
@@ -1225,6 +1225,9 @@ def compute_cluster_stereotypy(
     if valid_events.size < 2 * n_clusters:
         return {"error": "too_few_valid_events", "n_valid": int(valid_events.size)}
 
+    if not use_masked_features:
+        from src.lagpat_rank_audit import warn_phantom_legacy_path
+        warn_phantom_legacy_path(stacklevel=3)
     if use_masked_features:
         from src.lagpat_rank_audit import build_masked_kmeans_features
         rank_subset = build_masked_kmeans_features(
@@ -1471,7 +1474,7 @@ def compute_adaptive_cluster_stereotypy(
     n_tau_seeds: int = 5,
     min_shared_channels: int = 3,
     min_participation: int = 10,
-    use_masked_features: bool = False,
+    use_masked_features: bool = True,
 ) -> Dict[str, Any]:
     """Scan *k* values with stability checks, report per-cluster stereotypy.
 
@@ -1484,7 +1487,7 @@ def compute_adaptive_cluster_stereotypy(
 
     Parameters
     ----------
-    use_masked_features : bool, default False
+    use_masked_features : bool, default True (since Topic 0 §3.1 Phase 0 closure 2026-05-22; explicit False is deprecated and emits DeprecationWarning)
         If True, build KMeans feature matrix via
         ``src.lagpat_rank_audit.build_masked_kmeans_features``. See
         ``docs/topic0_methodology_audits.md`` §3.1 / §4.
@@ -1493,6 +1496,9 @@ def compute_adaptive_cluster_stereotypy(
     if valid_events.size < 2 * k_range[0]:
         return {"error": "too_few_valid_events", "n_valid": int(valid_events.size)}
 
+    if not use_masked_features:
+        from src.lagpat_rank_audit import warn_phantom_legacy_path
+        warn_phantom_legacy_path(stacklevel=3)
     if use_masked_features:
         from src.lagpat_rank_audit import build_masked_kmeans_features
         rank_features = build_masked_kmeans_features(
@@ -1794,7 +1800,7 @@ def compute_time_split_reproducibility(
     valid_event_indices: np.ndarray,
     min_shared_channels: int = 3,
     fwd_rev_threshold: float = -0.5,
-    use_masked_features: bool = False,
+    use_masked_features: bool = True,
 ) -> Dict[str, Any]:
     """Assess cross-time template reproducibility via split-half and odd/even splits.
 
@@ -1808,7 +1814,7 @@ def compute_time_split_reproducibility(
 
     Parameters
     ----------
-    use_masked_features : bool, default False
+    use_masked_features : bool, default True (since Topic 0 §3.1 Phase 0 closure 2026-05-22; explicit False is deprecated and emits DeprecationWarning)
         If True, build KMeans feature matrix via masked re-rank. See Topic 0.
     """
     labels = np.asarray(adaptive_labels, dtype=int)
@@ -1852,6 +1858,9 @@ def compute_time_split_reproducibility(
 
     split_results: Dict[str, Any] = {}
 
+    if not use_masked_features:
+        from src.lagpat_rank_audit import warn_phantom_legacy_path
+        warn_phantom_legacy_path(stacklevel=3)
     if use_masked_features:
         from src.lagpat_rank_audit import build_masked_kmeans_features
 
@@ -2125,7 +2134,7 @@ def compute_held_out_endpoint_validation(
     balance_day_night: bool = False,
     swap_n_perm: int = 1000,
     swap_seed: int = 0,
-    use_masked_features: bool = False,
+    use_masked_features: bool = True,
 ) -> Dict[str, Any]:
     """PR-6 Step 6 — held-out time validation, asymmetric train/test.
 
@@ -2188,6 +2197,9 @@ def compute_held_out_endpoint_validation(
     ranks_first = ranks_v[:, idx_first]
     bools_first = bools_v[:, idx_first]
 
+    if not use_masked_features:
+        from src.lagpat_rank_audit import warn_phantom_legacy_path
+        warn_phantom_legacy_path(stacklevel=3)
     if use_masked_features:
         from src.lagpat_rank_audit import build_masked_kmeans_features
         feat_first = build_masked_kmeans_features(

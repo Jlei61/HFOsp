@@ -382,16 +382,28 @@ def compute_pca_embedding(
     valid_event_indices: Sequence[int],
     templates_real: np.ndarray,
     n_components: int = 2,
+    *,
+    bools: Optional[np.ndarray] = None,
+    use_masked_features: bool = True,
 ) -> Dict[str, Any]:
     """PCA on the same feature matrix KMeans was trained on.
 
-    Reproduces the imputation that ``compute_adaptive_cluster_stereotypy``
-    uses (``np.where(isfinite, x, 0.0)``); for cohort subjects whose
-    lagPatRank is all-finite (the typical case), this is a no-op.
+    Default path (``use_masked_features=True``, since Topic 0 §3.1 Phase 0
+    closure 2026-05-22, requires ``bools``): per-event re-rank over
+    participating channels via
+    :func:`src.lagpat_rank_audit.build_masked_kmeans_features` with
+    ``impute='event_median'`` (0.5 midpoint for non-participating). Template
+    NaN values also imputed to 0.5 midpoint to match.
 
-    Templates are projected as additional rows in the same feature space;
-    template NaN values are imputed to 0 (matching KMeans's defensive
-    fallback). All events are embedded — no subsampling.
+    Legacy path (``use_masked_features=False``, **deprecated**, emits
+    ``DeprecationWarning``): reproduces the legacy imputation
+    ``np.where(isfinite, x, 0.0)``. **Phantom-rank-vulnerable**:
+    non-participating channels with finite phantom ranks from the legacy
+    producer go in unchanged. Kept only for byte-level reproducibility of
+    paper-locked numbers; should not be the path used for any new analysis.
+
+    Templates are projected as additional rows in the same feature space.
+    All events are embedded — no subsampling.
 
     Returns
     -------
@@ -402,11 +414,30 @@ def compute_pca_embedding(
     ranks = np.asarray(ranks, dtype=float)
     idx = np.asarray(valid_event_indices, dtype=int)
 
-    feat_events = ranks[:, idx].T  # (n_events, n_ch)
-    feat_events = np.where(np.isfinite(feat_events), feat_events, 0.0)
-
-    feat_templates = np.asarray(templates_real, dtype=float).copy()  # (k, n_ch)
-    feat_templates = np.where(np.isfinite(feat_templates), feat_templates, 0.0)
+    if not use_masked_features:
+        from src.lagpat_rank_audit import warn_phantom_legacy_path
+        warn_phantom_legacy_path(stacklevel=3)
+    if use_masked_features:
+        if bools is None:
+            raise ValueError(
+                "compute_pca_embedding(use_masked_features=True) requires "
+                "bools to derive per-event channel participation. Pass the "
+                "raw (n_ch, n_events) bool array from "
+                "load_subject_propagation_events."
+            )
+        from src.lagpat_rank_audit import build_masked_kmeans_features
+        bools_arr = np.asarray(bools, dtype=bool)
+        feat_events = build_masked_kmeans_features(
+            ranks[:, idx], bools_arr[:, idx], impute="event_median"
+        )  # already (n_events, n_ch) and NaN-imputed to 0.5
+        # Templates: NaN -> 0.5 midpoint (match build_masked_kmeans_features semantics)
+        feat_templates = np.asarray(templates_real, dtype=float).copy()
+        feat_templates = np.where(np.isfinite(feat_templates), feat_templates, 0.5)
+    else:
+        feat_events = ranks[:, idx].T  # (n_events, n_ch)
+        feat_events = np.where(np.isfinite(feat_events), feat_events, 0.0)
+        feat_templates = np.asarray(templates_real, dtype=float).copy()  # (k, n_ch)
+        feat_templates = np.where(np.isfinite(feat_templates), feat_templates, 0.0)
 
     n_events = feat_events.shape[0]
     if n_events < n_components + 1:
@@ -475,6 +506,7 @@ def compute_subject_geometry(
     max_events_for_mds: int = DEFAULT_N_MAX_FOR_MDS,
     subsample_seed: int = DEFAULT_SUBSAMPLE_SEED,
     n_min_events_total: int = 50,
+    use_masked_features: bool = True,
 ) -> Dict[str, Any]:
     """End-to-end per-subject geometry pipeline.
 
@@ -588,6 +620,8 @@ def compute_subject_geometry(
         valid_event_indices=valid_idx,
         templates_real=templates_real,
         n_components=2,
+        bools=bools,
+        use_masked_features=use_masked_features,
     )
     pca_Y_events = pca_out["Y_events"]
     pca_Y_templates = pca_out["Y_templates"]

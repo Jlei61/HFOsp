@@ -194,6 +194,9 @@ def _load_subject_with_freqcent(subject_dir: Path) -> Optional[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
+# Default (legacy / non-masked) paths. `_apply_masked_paths()` reassigns these
+# module globals when --masked-features is requested (Topic 0 §4 parallel-dir
+# convention: results/interictal_propagation_masked/).
 PER_SUBJECT_DIR = ROOT / "results" / "interictal_propagation" / "per_subject"
 PR6_AUDIT_CSV = (
     ROOT
@@ -212,6 +215,40 @@ PER_SUBJECT_BURST_OUT = OUT_DIR / "per_subject_burst"
 PER_SUBJECT_SWEEP_OUT = OUT_DIR / "per_subject_n2_sweep"
 AUDIT_CSV = OUT_DIR / "pr7_cohort_audit.csv"
 COHORT_SUMMARY_JSON = OUT_DIR / "cohort_summary.json"
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors the pattern in scripts/run_pr6_template_anchoring.py /
+    scripts/run_rank_displacement.py. Must be called BEFORE any function that
+    reads these globals (run_audit, run_per_subject, run_burst_diagnostic,
+    run_n2_window_sweep, aggregate_cohort).
+
+    Note: PR-7 compute helpers (`compute_pairing_with_nulls`,
+    `compute_burst_diagnostic_with_nulls`, `compute_transition_odds`) accept
+    `cluster_labels` directly and never run KMeans themselves, so no
+    `use_masked_features` kwarg needs to flow through compute. Path-swap is
+    the only wiring needed (mirrors `run_rank_displacement.py`).
+    """
+    global PER_SUBJECT_DIR, PR6_AUDIT_CSV, OUT_DIR, PER_SUBJECT_OUT
+    global PER_SUBJECT_BURST_OUT, PER_SUBJECT_SWEEP_OUT, AUDIT_CSV, COHORT_SUMMARY_JSON
+    PER_SUBJECT_DIR = (
+        ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    )
+    PR6_AUDIT_CSV = (
+        ROOT
+        / "results"
+        / "interictal_propagation_masked"
+        / "template_anchoring"
+        / "cohort_audit.csv"
+    )
+    OUT_DIR = ROOT / "results" / "interictal_propagation_masked" / "template_pairing"
+    PER_SUBJECT_OUT = OUT_DIR / "per_subject"
+    PER_SUBJECT_BURST_OUT = OUT_DIR / "per_subject_burst"
+    PER_SUBJECT_SWEEP_OUT = OUT_DIR / "per_subject_n2_sweep"
+    AUDIT_CSV = OUT_DIR / "pr7_cohort_audit.csv"
+    COHORT_SUMMARY_JSON = OUT_DIR / "cohort_summary.json"
 
 
 # ---------------------------------------------------------------------------
@@ -1291,6 +1328,17 @@ def main() -> None:
         default=None,
         help="Comma-separated subject_ids to restrict --per-subject to",
     )
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5g masked rerun: read PR-2 JSONs + PR-6 audit from "
+            "results/interictal_propagation_masked/..., write PR-7 outputs "
+            "to results/interictal_propagation_masked/template_pairing/. "
+            "PR-7 compute helpers do not run KMeans; path-swap is the only "
+            "wiring required."
+        ),
+    )
     args = parser.parse_args()
 
     if not (
@@ -1304,6 +1352,13 @@ def main() -> None:
         parser.error(
             "Must specify one of --audit / --per-subject / --cohort-stats "
             "/ --burst-diagnostic / --n2-window-sweep / --all"
+        )
+
+    if args.masked_features:
+        _apply_masked_paths()
+        print(
+            "[main] --masked-features: paths routed to "
+            "results/interictal_propagation_masked/template_pairing/"
         )
 
     if args.audit or args.all:

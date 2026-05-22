@@ -30,7 +30,13 @@ from src.topic4_attractor_diagnostics import (  # noqa: E402
 
 
 def test_build_rank_feature_matrix_nan_to_zero_pr2_contract():
-    """Inactive (bools=False) channels must be filled with 0.0 in X."""
+    """Legacy path contract: with explicit `mask_phantom=False`, inactive
+    (bools=False) channels are filled with 0.0 in X (phantom-vulnerable PR-2
+    legacy imputation, kept for byte-level reproducibility of paper-locked
+    numbers). Default since Topic 0 §3.1 Phase 0 closure (2026-05-22) is
+    True; explicit False emits DeprecationWarning that we suppress here
+    because we're explicitly testing the legacy path's nan→0.0 behavior."""
+    import warnings
     n_chan, n_event = 8, 200
     rng = np.random.default_rng(0)
     bools = rng.random((n_chan, n_event)) > 0.3
@@ -41,7 +47,11 @@ def test_build_rank_feature_matrix_nan_to_zero_pr2_contract():
     ranks = rng.uniform(1, n_chan + 1, size=(n_chan, n_event))
     ranks_with_nan = np.where(bools, ranks, np.nan)
 
-    X, idx = build_rank_feature_matrix(ranks_with_nan, bools, min_participating=6)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        X, idx = build_rank_feature_matrix(
+            ranks_with_nan, bools, min_participating=6, mask_phantom=False
+        )
     expected_eligible = int((bools.sum(axis=0) >= 6).sum())
     assert X.shape == (expected_eligible, n_chan)
     assert idx.shape == (expected_eligible,)

@@ -21,6 +21,7 @@ Outputs:
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import logging
@@ -54,11 +55,27 @@ logger = logging.getLogger("topic4_step1_sensitivity")
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+# Legacy (non-masked) paths. `_apply_masked_paths()` swaps these to the
+# `_masked` parallel tree (Topic 0 §4 / phantom rerun roadmap §5h).
 PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation" / "per_subject"
 OUT_DIR = REPO_ROOT / "results" / "topic4_attractor"
 PER_SUBJECT_DIR = OUT_DIR / "per_subject"
 SENS_CSV = OUT_DIR / "step1_sensitivity.csv"
 SENS_MD = OUT_DIR / "step1_sensitivity_summary.md"
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Topic 0 phantom-rank rerun roadmap §5h: feed Step 1 sensitivity (max_iter
+    sweep + grid/event-wide angles) into the masked Topic 4 results dir.
+    """
+    global PR2_PER_SUBJECT_DIR, OUT_DIR, PER_SUBJECT_DIR, SENS_CSV, SENS_MD
+    PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    OUT_DIR = REPO_ROOT / "results" / "topic4_attractor_masked"
+    PER_SUBJECT_DIR = OUT_DIR / "per_subject"
+    SENS_CSV = OUT_DIR / "step1_sensitivity.csv"
+    SENS_MD = OUT_DIR / "step1_sensitivity_summary.md"
 
 PR2_VALID_MIN_PART = 3
 MAX_ITER_SET = (15, 30, 60)
@@ -139,7 +156,7 @@ def _event_weighted_angle_stats(
     }
 
 
-def _run_one(sid: str, dataset: str, subject: str) -> List[Dict[str, Any]]:
+def _run_one(sid: str, dataset: str, subject: str, *, mask_phantom: bool = False) -> List[Dict[str, Any]]:
     out_rows: List[Dict[str, Any]] = []
     sub_dir = _subject_dir(dataset, subject)
     pr2_json = PR2_PER_SUBJECT_DIR / f"{sid}.json"
@@ -157,7 +174,8 @@ def _run_one(sid: str, dataset: str, subject: str) -> List[Dict[str, Any]]:
         return out_rows
 
     X, eligible_idx = build_rank_feature_matrix(
-        ranks, bools, min_participating=TOPIC4_MIN_PARTICIPATING
+        ranks, bools, min_participating=TOPIC4_MIN_PARTICIPATING,
+        mask_phantom=mask_phantom,
     )
     if X.shape[0] < 100:
         return out_rows
@@ -245,6 +263,18 @@ def _format_value(v: Any) -> Any:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features", action="store_true",
+        help="Use masked PR-2 JSONs + masked rank features (Topic 0 phantom "
+             "rerun roadmap §5h). Reads/writes from results/topic4_attractor_masked/.",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info("Masked-features mode: PR2_PER_SUBJECT_DIR=%s OUT_DIR=%s",
+                    PR2_PER_SUBJECT_DIR, OUT_DIR)
+
     files = sorted(PER_SUBJECT_DIR.glob("*.json"))
     cohort: List[tuple] = []
     for fp in files:
@@ -258,7 +288,7 @@ def main() -> int:
     all_rows: List[Dict[str, Any]] = []
     for sid, dataset, subject in cohort:
         try:
-            rows = _run_one(sid, dataset, subject)
+            rows = _run_one(sid, dataset, subject, mask_phantom=args.masked_features)
         except Exception as exc:
             logger.exception("%s failed: %s", sid, exc)
             continue

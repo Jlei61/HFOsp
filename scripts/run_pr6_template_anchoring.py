@@ -58,6 +58,9 @@ from src.template_anatomical_anchoring import (
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
+# Default (legacy / non-masked) paths. `_apply_masked_paths()` reassigns these
+# module globals when --masked-features is requested (Topic 0 §4 parallel-dir
+# convention: results/interictal_propagation_masked/).
 PER_SUBJECT_DIR = ROOT / "results" / "interictal_propagation" / "per_subject"
 YUQUAN_SOZ_PATH = ROOT / "results" / "yuquan_soz_core_channels.json"
 EPILEPSIAE_SOZ_PATH = ROOT / "results" / "epilepsiae_soz_core_channels.json"
@@ -75,6 +78,21 @@ OUT_DIR = ROOT / "results" / "interictal_propagation" / "template_anchoring"
 PER_SUBJECT_OUT = OUT_DIR / "per_subject"
 AUDIT_CSV = OUT_DIR / "cohort_audit.csv"
 COHORT_SUMMARY = OUT_DIR / "cohort_summary.json"
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors the pattern used in scripts/run_interictal_propagation.py main()
+    (RESULTS_DIR auto-routing). Must be called BEFORE any function that reads
+    these globals (load_all_candidates, run_audit, run_per_subject, run_cohort).
+    """
+    global PER_SUBJECT_DIR, OUT_DIR, PER_SUBJECT_OUT, AUDIT_CSV, COHORT_SUMMARY
+    PER_SUBJECT_DIR = ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    OUT_DIR = ROOT / "results" / "interictal_propagation_masked" / "template_anchoring"
+    PER_SUBJECT_OUT = OUT_DIR / "per_subject"
+    AUDIT_CSV = OUT_DIR / "cohort_audit.csv"
+    COHORT_SUMMARY = OUT_DIR / "cohort_summary.json"
 
 
 # ---------------------------------------------------------------------------
@@ -289,12 +307,19 @@ def compute_split_half_robustness(
     cand: Dict[str, Any],
     cluster_data: Dict[str, Any],
     n_endpoint: int = 3,
+    use_masked_features: bool = False,
 ) -> Dict[str, Any]:
     """Step 5b: invoke compute_time_split_reproducibility inline (so the
     Step 1 split-half extension fields are populated for THIS run, not relying
     on legacy per_subject JSONs predating Step 1) and return per-split Jaccard
     summaries.  Synthetic event_abs_times = arange so monotonic-by-construction;
-    real block_ids drive odd/even split."""
+    real block_ids drive odd/even split.
+
+    Topic 0 Step 5f.1 hook: ``use_masked_features`` is forwarded so the masked
+    feature space (per-event re-rank over participating channels) is used for
+    KMeans inside each split — matches the masked PR-2 cluster labels supplied
+    via ``cluster_data['labels']``.
+    """
     full_bools = cluster_data["full_bools"]
     full_ranks = cluster_data["full_ranks"]
     block_ids = cluster_data["full_block_ids"]
@@ -313,6 +338,7 @@ def compute_split_half_robustness(
             chosen_k=n_clusters,
             adaptive_labels=labels,
             valid_event_indices=valid_event_indices,
+            use_masked_features=use_masked_features,
         )
     except Exception as exc:
         return {"exit_reason": f"split_half_failed:{exc}"}
@@ -475,7 +501,11 @@ def run_audit() -> List[Dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # Step 2b: per-subject endpoint/middle SOZ enrichment
 # ---------------------------------------------------------------------------
-def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+def run_per_subject(
+    audit_rows: Optional[List[Dict[str, Any]]] = None,
+    *,
+    use_masked_features: bool = False,
+) -> List[Dict[str, Any]]:
     candidates = load_all_candidates()
     by_id = {c["subject_id"]: c for c in candidates}
 
@@ -619,7 +649,10 @@ def run_per_subject(audit_rows: Optional[List[Dict[str, Any]]] = None) -> List[D
         split_half_robustness: Optional[Dict[str, Any]] = None
         if cluster_data is not None:
             split_half_robustness = compute_split_half_robustness(
-                cand, cluster_data, n_endpoint=3
+                cand,
+                cluster_data,
+                n_endpoint=3,
+                use_masked_features=use_masked_features,
             )
 
         # Step 4 (upgraded) — template-pair geometry for all k=2 subjects
@@ -1379,18 +1412,40 @@ def main():
         help="Step 3: H1/H1b/H2/H3 cohort statistics",
     )
     ap.add_argument("--all", action="store_true", help="Run audit + per-subject + cohort")
+    ap.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5f.1 masked rerun: read PR-2 JSONs from "
+            "results/interictal_propagation_masked/per_subject/, write outputs "
+            "to results/interictal_propagation_masked/template_anchoring/, and "
+            "use build_masked_kmeans_features inside split-half "
+            "compute_time_split_reproducibility (mirrors masked PR-2/PR-2.5)."
+        ),
+    )
     args = ap.parse_args()
 
     if not (args.audit or args.per_subject or args.cohort or args.all):
         ap.print_help()
         sys.exit(2)
 
+    if args.masked_features:
+        _apply_masked_paths()
+        print(
+            "[main] --masked-features: paths routed to "
+            "results/interictal_propagation_masked/template_anchoring/, "
+            "use_masked_features=True will be forwarded to "
+            "compute_time_split_reproducibility"
+        )
+
     audit_rows = None
     per_subj_recs = None
     if args.audit or args.all:
         audit_rows = run_audit()
     if args.per_subject or args.all:
-        per_subj_recs = run_per_subject(audit_rows)
+        per_subj_recs = run_per_subject(
+            audit_rows, use_masked_features=args.masked_features
+        )
     if args.cohort or args.all:
         run_cohort(per_subj_recs)
 

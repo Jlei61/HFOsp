@@ -7,7 +7,7 @@ Inputs:
 - results/interictal_propagation/template_pairing/per_subject/<dataset>_<sid>.json
 - results/interictal_propagation/template_pairing/per_subject_burst/<dataset>_<sid>.json
 
-Cohort: 6 forward/reverse-reproduced subjects (PR-7 H1 cohort).
+Cohort: forward/reverse-reproduced subjects (PR-7 H1 cohort; n=6 in orig).
 
 Tests (all on N2 main null per framework):
   T1 — cohort excess(Δt) for Δt ∈ {10, 30, 60, 1800} s:
@@ -22,10 +22,18 @@ Verdict logic per v1.1.2 §5.3:
   INCONCLUSIVE:   cohort median 落 ±δ 内但 bootstrap CI 跨 ±δ
   SENSITIVITY:    cohort 主 INCONCLUSIVE 但 leave-one-out / leave-548-out 满足 PASS — archive only
   NULL:           cohort robust median |excess| > δ 且 leave-one-out 仍 > δ
+
+Usage:
+    # Original (phantom-rank) inputs/outputs:
+    python scripts/pr7_addendum_p3_equivalence.py
+
+    # Masked (phantom-fix) inputs/outputs — Topic 0 Step 5g:
+    python scripts/pr7_addendum_p3_equivalence.py --masked-features
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -36,9 +44,28 @@ import numpy as np
 
 
 REPO = Path("/home/honglab/leijiaxin/HFOsp")
+# Default (legacy / non-masked) paths. `_apply_masked_paths()` reassigns these
+# module globals when --masked-features is requested (Topic 0 §4 parallel-dir
+# convention: results/interictal_propagation_masked/).
 PER_SUBJECT_DIR = REPO / "results/interictal_propagation/template_pairing/per_subject"
 BURST_DIR = REPO / "results/interictal_propagation/template_pairing/per_subject_burst"
 OUT_DIR = REPO / "results/interictal_propagation/template_pairing"
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors the pattern in scripts/run_pr6_template_anchoring.py. Must be
+    called BEFORE load_subject_metrics() / main()'s OUT_DIR write.
+    """
+    global PER_SUBJECT_DIR, BURST_DIR, OUT_DIR
+    PER_SUBJECT_DIR = (
+        REPO / "results/interictal_propagation_masked/template_pairing/per_subject"
+    )
+    BURST_DIR = (
+        REPO / "results/interictal_propagation_masked/template_pairing/per_subject_burst"
+    )
+    OUT_DIR = REPO / "results/interictal_propagation_masked/template_pairing"
 
 DELTA_EXCESS = 0.05            # framework v1.1.2 lock
 WINDOWS = [10.0, 30.0, 60.0, 1800.0]
@@ -164,6 +191,25 @@ def _print_block(label: str, block: dict, *, with_l548: bool = False) -> None:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 Step 5g masked rerun: read PR-7 per-subject + burst JSONs "
+            "from results/interictal_propagation_masked/template_pairing/, "
+            "write addendum verdict to the same _masked tree."
+        ),
+    )
+    args = ap.parse_args()
+
+    if args.masked_features:
+        _apply_masked_paths()
+        print(
+            "[main] --masked-features: paths routed to "
+            "results/interictal_propagation_masked/template_pairing/"
+        )
+
     print(f"[PR-7 addendum] δ_excess = {DELTA_EXCESS}, n_boot = {N_BOOT}, null = {NULL_KEY}")
     subjects = load_subject_metrics()
     names = [s["subject"] for s in subjects]

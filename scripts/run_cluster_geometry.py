@@ -48,6 +48,19 @@ GEOMETRY_DIR = RESULTS_DIR / "cluster_geometry"
 PER_SUBJECT_DIR = GEOMETRY_DIR / "per_subject"
 EXISTING_PER_SUBJECT_DIR = RESULTS_DIR / "per_subject"
 
+
+def _apply_masked_paths() -> None:
+    """Topic 0 §3.1 phantom-rank: route to `_masked` parallel tree.
+
+    Mirrors the `_apply_masked_paths()` pattern in run_pr6_template_anchoring /
+    run_pr7_template_pairing / run_rank_displacement / run_pr6_step6 etc.
+    """
+    global RESULTS_DIR, GEOMETRY_DIR, PER_SUBJECT_DIR, EXISTING_PER_SUBJECT_DIR
+    RESULTS_DIR = Path("results/interictal_propagation_masked")
+    GEOMETRY_DIR = RESULTS_DIR / "cluster_geometry"
+    PER_SUBJECT_DIR = GEOMETRY_DIR / "per_subject"
+    EXISTING_PER_SUBJECT_DIR = RESULTS_DIR / "per_subject"
+
 YUQUAN_SUBJECTS = [
     "zhangkexuan", "pengzihang", "chengshuai", "huangwanling",
     "liyouran", "songzishuo", "zhangbichen", "zhaochenxi",
@@ -178,6 +191,7 @@ def _run_one(
     max_events_for_mds: int,
     subsample_seed: int,
     dry_run: bool = False,
+    use_masked_features: bool = False,
 ) -> Optional[Dict[str, Any]]:
     key = f"{dataset}/{subject}"
     subject_dir = _subject_dir(dataset, subject)
@@ -228,6 +242,7 @@ def _run_one(
                     min_shared=min_shared,
                     max_events_for_mds=max_events_for_mds,
                     subsample_seed=subsample_seed,
+                    use_masked_features=use_masked_features,
                 )
                 out["dataset"] = dataset
                 out["subject"] = subject
@@ -320,7 +335,27 @@ def main() -> None:
         action="store_true",
         help="Skip per-subject runs; only re-aggregate from existing per-subject JSONs.",
     )
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help=(
+            "Topic 0 §3.1 phantom-rank: read PR-2 JSONs from "
+            "results/interictal_propagation_masked/per_subject/, write cluster "
+            "geometry outputs to results/interictal_propagation_masked/cluster_geometry/, "
+            "and pass use_masked_features=True to compute_pca_embedding (per-event "
+            "re-rank via build_masked_kmeans_features instead of legacy "
+            "phantom-vulnerable np.where(isfinite, ranks, 0.0))."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info(
+            "[main] --masked-features: paths routed to "
+            "results/interictal_propagation_masked/cluster_geometry/, "
+            "use_masked_features=True forwarded to compute_pca_embedding"
+        )
 
     datasets = ["yuquan", "epilepsiae"] if args.dataset == "both" else [args.dataset]
     targets = _resolve_dataset_subjects(datasets, args.subject)
@@ -335,6 +370,7 @@ def main() -> None:
                 max_events_for_mds=args.max_events,
                 subsample_seed=args.subsample_seed,
                 dry_run=args.dry_run,
+                use_masked_features=args.masked_features,
             )
 
     if args.dry_run:

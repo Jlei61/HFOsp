@@ -18,6 +18,7 @@ Outputs:
 
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import logging
@@ -48,6 +49,8 @@ logger = logging.getLogger("topic4_step1")
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
+# Legacy (non-masked) paths. `_apply_masked_paths()` swaps these to the
+# `_masked` parallel tree (Topic 0 §4 / phantom rerun roadmap §5h).
 PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation" / "per_subject"
 OUT_DIR = REPO_ROOT / "results" / "topic4_attractor"
 PER_SUBJECT_DIR = OUT_DIR / "per_subject"
@@ -57,6 +60,22 @@ AUDIT_CSV = OUT_DIR / "step0_audit.csv"
 GOF_THRESHOLD = 0.6
 N_COMPONENTS = 3
 PR2_VALID_MIN_PART = 3  # Matches PR-2's `_valid_event_indices` default
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Topic 0 phantom-rank rerun roadmap §5h: read masked PR-2 cluster labels
+    + Step 0 audit, write Step 1 results to `results/topic4_attractor_masked/`.
+    Must be called BEFORE `main()` reaches any function that reads these
+    globals.
+    """
+    global PR2_PER_SUBJECT_DIR, OUT_DIR, PER_SUBJECT_DIR, COHORT_CSV, AUDIT_CSV
+    PR2_PER_SUBJECT_DIR = REPO_ROOT / "results" / "interictal_propagation_masked" / "per_subject"
+    OUT_DIR = REPO_ROOT / "results" / "topic4_attractor_masked"
+    PER_SUBJECT_DIR = OUT_DIR / "per_subject"
+    COHORT_CSV = OUT_DIR / "step1_cohort_summary.csv"
+    AUDIT_CSV = OUT_DIR / "step0_audit.csv"
 
 
 class NumpyEncoder(json.JSONEncoder):
@@ -110,7 +129,7 @@ def _read_pr2_labels(json_path: Path) -> Tuple[Optional[np.ndarray], Optional[Li
     return np.asarray(labels, dtype=int), template_ranks, channel_names_pr2, chosen_k, n_valid
 
 
-def _run_one(sid: str, dataset: str, subject: str) -> Dict[str, Any]:
+def _run_one(sid: str, dataset: str, subject: str, *, mask_phantom: bool = False) -> Dict[str, Any]:
     sub_dir = _subject_dir(dataset, subject)
     pr2_json = PR2_PER_SUBJECT_DIR / f"{sid}.json"
 
@@ -123,6 +142,7 @@ def _run_one(sid: str, dataset: str, subject: str) -> Dict[str, Any]:
         "min_participating": TOPIC4_MIN_PARTICIPATING,
         "gof_threshold": GOF_THRESHOLD,
         "n_components": N_COMPONENTS,
+        "mask_phantom": bool(mask_phantom),
     }
 
     if not sub_dir.exists():
@@ -162,6 +182,7 @@ def _run_one(sid: str, dataset: str, subject: str) -> Dict[str, Any]:
         min_participating=TOPIC4_MIN_PARTICIPATING,
         n_components=N_COMPONENTS,
         gof_threshold=GOF_THRESHOLD,
+        mask_phantom=mask_phantom,
     )
     base.update(step1)
     base["chosen_k_pr2"] = int(chosen_k)
@@ -232,6 +253,18 @@ def _write_cohort_csv(rows: List[Dict[str, Any]], out_csv: Path) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--masked-features", action="store_true",
+        help="Use masked PR-2 JSONs + masked rank features (Topic 0 phantom "
+             "rerun roadmap §5h). Reads/writes from results/topic4_attractor_masked/.",
+    )
+    args = parser.parse_args()
+    if args.masked_features:
+        _apply_masked_paths()
+        logger.info("Masked-features mode: PR2_PER_SUBJECT_DIR=%s OUT_DIR=%s",
+                    PR2_PER_SUBJECT_DIR, OUT_DIR)
+
     PER_SUBJECT_DIR.mkdir(parents=True, exist_ok=True)
     cohort = _load_main_cohort(AUDIT_CSV)
     logger.info("Main cohort: %d subjects", len(cohort))
@@ -239,7 +272,7 @@ def main() -> int:
     cohort_rows: List[Dict[str, Any]] = []
     for sid, dataset, subject in cohort:
         try:
-            result = _run_one(sid, dataset, subject)
+            result = _run_one(sid, dataset, subject, mask_phantom=args.masked_features)
         except Exception as exc:  # pragma: no cover
             logger.exception("Failure on %s: %s", sid, exc)
             result = {
