@@ -161,6 +161,16 @@ Framework v1.0.5 §3.4 prose "shuffle epoch order, recompute std" 是**数学退
 
 **21/23 有限 subject**：epi_1073 + epi_1077 因为 valid pool ≤ 6 通道，I_geom matched null 也退化（random sample 6 from 6 = 1 种可能），I_geom = inf → 被 `np.isfinite` 过滤。其他 21 个都给出有限 I_rate 和 I_geom。
 
+**⚠️ 跨数据集 magnitude caveat**（advisor 2026-05-23 提醒）：
+- Epi I_rate 中位 65.6 vs Yuq 中位 20.4（Epi ~3× higher）
+- Epi I_geom 中位 16.3 vs Yuq 中位 6.5（Epi ~2.5× higher）
+- 这个差距大概率来自 circular-shift null 的自由度差异（Epi block 短 → 每 block ~2 epoch → null 收得紧 → I 值膨胀；Yuq 24h 连续 → 每 block 48 epoch → null 散得开 → I 值小）
+- **per-subject 比值 I_rate / I_geom 跨数据集差不多**：Epi 中位 ~4.1, Yuq 中位 ~3.5
+- **统计稳健的是 within-subject difference (rate − geom) 的 Wilcoxon 方向**，不是绝对 magnitude
+- 1 个 outlier 在 SEF-ITP 反方向：yuquan_zhaochenxi ratio = 0.92 (I_rate < I_geom)；20/21 在 SEF-ITP 方向
+
+→ "median ratio 4×" 这一条要带星号读：方向 + Wilcoxon 在不同 null 下都 robust，绝对 4 倍 magnitude 是 null 构造 artifact。
+
 **Cohen's d = 1.50 是大效应**（远超 0.30 floor）；Wilcoxon p < 1e-6。
 
 ### 朴素话解读

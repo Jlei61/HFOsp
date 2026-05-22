@@ -7,7 +7,11 @@
 
 ## 一句话
 
-Topic 4 SEF-ITP Phase 2 (H3 mark-independence + H4 normalized rate/geometry instability) 实施完成，n=23 cohort run **finished** (`results/topic4_sef_itp/phase2_temporal_x_geometry/`)；**1 个 framework spec 决策点必须由用户拍板**才能闭环。
+**先讲科学**：H4 强支持 SEF-ITP 关于"事件率漂动 ≫ 几何漂动" 的核心区分性预测（n=21 有限，Wilcoxon p=9.5e-7，Cohen's d=+1.50，I_rate / I_geom 比值方向上稳健）；endpoint 通道集合时间二分稳定（Jaccard 0.71 / 0.86）；长尺度（60s+）模板挑选 compatible with mark-independent sampling within tested precision。
+
+**然后讲细节**：但 sub-30s 短窗显示统计显著的**反聚集**（negative excess —— 不是 "memory" 而是 refractoriness 方向），加 run_length lift CI 上端擦出 ±0.05 等价带 0.001（在 framework 锁定的 δ=0.05 规则下） → **H3 integrated verdict = CONTRADICTED**（按 framework v1.0.5 §3.3 字面规则）。但失败方向与"独立触发假说"的相反方向（memory / recurrence）相反，所以并不构成"framework 整体证伪"。
+
+**需要决策**：framework prose 需要 surgical clarification（详见 §7.2），**不是** rollback。**2 个核心决策点必须由用户拍板**才能闭环 framework doc v1.0.6 升级。
 
 ---
 
@@ -46,6 +50,17 @@ Topic 4 SEF-ITP Phase 2 (H3 mark-independence + H4 normalized rate/geometry inst
 ---
 
 ## 关键决策点（等用户拍板）
+
+### 0. ⚠️ Cohort 输出位置（git ignored）
+
+`results/topic4_sef_itp/phase2_temporal_x_geometry/{per_subject/*.json, cohort_summary.json, cohort_subjects.csv}` 是 `results/` 下的运行时 artifact，**不在 git** 里（项目惯例）。如果 fresh clone 想看数字，需重新跑：
+
+```bash
+python scripts/run_sef_itp_phase2.py --all --epoch-hours 0.5 --n-perm 1000 --seed 0
+python scripts/summarize_sef_itp_phase2.py
+```
+
+archive 文档 `cohort_run_2026-05-23.md` 已经把核心数字写进文本。
 
 ### 1. H4 I_rate matched null — framework v1.0.5 §3.4 spec 数学退化 🛑
 
