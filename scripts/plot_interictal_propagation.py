@@ -39,11 +39,27 @@ from src.plot_style import (  # noqa: E402
 
 RESULTS_DIR = Path("results/interictal_propagation")
 FIG_DIR = RESULTS_DIR / "figures"
-FIG_DIR.mkdir(parents=True, exist_ok=True)
 PER_SUBJECT_DIR = RESULTS_DIR / "per_subject"
 PR3_FIG_DIR = FIG_DIR / "per_subject"
 PR4A_FIG_DIR = FIG_DIR / "per_subject"
-PR4A_FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _apply_masked_paths() -> None:
+    """Reassign module-level path globals to the `_masked` parallel tree.
+
+    Mirrors scripts/plot_rank_displacement.py:_apply_masked_paths so the
+    plotting script consumes the masked per-subject JSONs / cohort_summary
+    and writes figures to results/interictal_propagation_masked/figures/.
+    """
+    global RESULTS_DIR, FIG_DIR, PER_SUBJECT_DIR, PR3_FIG_DIR, PR4A_FIG_DIR
+    RESULTS_DIR = Path("results/interictal_propagation_masked")
+    FIG_DIR = RESULTS_DIR / "figures"
+    PER_SUBJECT_DIR = RESULTS_DIR / "per_subject"
+    PR3_FIG_DIR = FIG_DIR / "per_subject"
+    PR4A_FIG_DIR = FIG_DIR / "per_subject"
+
+
+# `mkdir` deferred to inside `main()` so `_apply_masked_paths()` can run first.
 SOZ_FILE_YQ = Path("results/yuquan_soz_core_channels.json")
 SOZ_FILE_EPI = Path("results/epilepsiae_soz_core_channels.json")
 PR4A_COLORS = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b"]
@@ -1638,7 +1654,19 @@ def main() -> None:
     parser.add_argument("--pr4a", action="store_true", help="Generate PR-4A temporal dynamics figures")
     parser.add_argument("--pr4a-followup", action="store_true", help="Generate PR-4D template-rate figures")
     parser.add_argument("--max-events", type=int, default=2000, help="Max displayed events per panel")
+    parser.add_argument(
+        "--masked-features",
+        action="store_true",
+        help="Consume masked PR-2 cluster outputs and write figures under "
+             "results/interictal_propagation_masked/figures/. Mirrors "
+             "scripts/plot_rank_displacement.py --masked-features.",
+    )
     args = parser.parse_args()
+
+    if args.masked_features:
+        _apply_masked_paths()
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    PR4A_FIG_DIR.mkdir(parents=True, exist_ok=True)
 
     if args.pr4a:
         cohort = _load("pr1_cohort_summary.json")
