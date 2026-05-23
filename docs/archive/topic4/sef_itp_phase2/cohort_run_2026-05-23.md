@@ -1,5 +1,13 @@
 # SEF-ITP Phase 2 Cohort 实跑 — 2026-05-23
 
+> ⚠️ **2026-05-23 晚 banner（user-return v2 catch）**：本文档是 **framework v1.0.5 字面规则** 跑出来的 v1.0 cohort run，作为审计踪迹保留（CLAUDE.md §5 pre-registration 纪律：不允许 retroactive rewrite 已经跑过的 verdict）。**body 不修改**，但有 3 个 user-return catch 必须 cross-cite：
+>
+> 1. **H3 verdict 字面值 = CONTRADICTED 正确，但 framework prose 是 under-specified** — v1.0.5 §3.3 字面 6-metric AND-rule 没考虑 anti-clustering (refractoriness) 方向，把生理上合理的非独立模式触发 CONTRADICTED 是 prose 缺陷。v1.0.6 surgical clarification 加 scale-stratified sub-bullet（long-scale ≥60s independence + short-scale 10–30s anti-clustering descriptive + endpoint stability），原 AND-rule 作为审计踪迹保留。cohort 数字（中位 excess、CI、LOO）**不变**。
+> 2. **H4 PASS (p=9.5e-7, d=1.50) 是 participation field drift 不是 rank-based endpoint drift** — 当前 `compute_local_endpoint` 用 `events_bool.mean(axis=0)` 取 participation top-k/bottom-k，不是 propagation rank endpoint。当前 PASS 信号 v1.0.6 起降级为 supplementary "participation field stability"；主线 H4 v1.1 用 rank-based endpoint geometry drift + 4 spatial radius metrics + 9-subject decision-k drift 重做。
+> 3. **新 archive `cohort_run_2026-05-24.md` 是 v1.1 cohort run（rank-based endpoint）**，本文档保留作为 v1.0 历史快照。
+>
+> ---
+>
 > **状态**：v1.0.0 first cohort run. **pending user ratification** of H4 I_rate null method (spec amendment proposal — see [spec_amendment_2026-05-23.md](spec_amendment_2026-05-23.md))
 > **plan**：`docs/superpowers/plans/2026-05-23-topic4-phase2-h3-h4-plan.md`
 > **runner**：`scripts/run_sef_itp_phase2.py`
