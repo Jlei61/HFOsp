@@ -1,9 +1,10 @@
 # Topic 4：SEF-ITP Framework —— 间期模板传播的空间易激场模型
 
-> **状态**：**v1.0.6 lock 2026-05-23 — structural clarification locked, H5 verdict threshold pending user ratify**。Locked: §3.3 H3 三层 verdict (R1+R2+sub-shape) + §3.4 H4 current SUPPLEMENTARY + H4 v1.1 stub direction + §3.5 H5 主问题 pivot + 4 metrics (3 primary + 1 secondary) + measurement source contract。**Pending user ratify**: §3.5 H5 verdict 阈值具体值 (≥2/3 primary 或 ≥3/3 primary 等)；§3.3 short-scale POSITIVE memory variant 是否单独 sub-label；H4 I_rate matched null spec (independent of v1.0.6, see spec_amendment_2026-05-23.md)；endpoint stability OR vs AND combinator 永久锁；epoch_hours 默认 0.5 vs framework prose 1–2h。前置版本 v1.0.5 lock 2026-05-22；**Phase 0 解锁 2026-05-21（lagPatRank phantom-rank broad re-derivation Step 5a–5h 全部完成 + Checkpoint A/B advisor consult 通过）**
+> **状态**：**v1.0.7 lock 2026-05-23 (Phase 2 cohort 收口 + user-return v3 catch ratified)**。**v1.0.7 sub-amendments**: §3.4 H4 v1.1 Stage B scope strict-limit ("背景间期 30-min epochs rate-geometry decoupling", 不蕴含 ictal-adjacent / SOZ claim) + decision-k drift recast as Phase 3 biomarker feasibility (不入 Phase 2 verdict) + MEB k>3 caveat (Phase 3 启动前必须补 4-point sphere 或 MEB 降级 sensitivity); §3.5 H5 reporting unit per-seizure primary + cohort inference hierarchical/subject-clustered + stratify by seizure type/pair/interval + Δk + Δk/baseline_k + spatial radius 联合报 (decision_k_std cross-subject 不可直接比); v1.0.6 sustained: §3.3 H3 三层 verdict (R1+R2+sub-shape) + §3.4 H4 current SUPPLEMENTARY + §3.5 H5 主问题 pivot + 4 metrics tier。**Pending user ratify**: §3.5 H5 verdict 阈值具体值 (≥2/3 primary 或 ≥3/3 primary); §3.3 short-scale POSITIVE memory variant 是否单独 sub-label; H4 I_rate matched null spec (see spec_amendment_2026-05-23.md); endpoint stability OR vs AND combinator 永久锁; epoch_hours 默认 0.5 vs framework prose 1–2h; §3.5 H5 hierarchical model form (LMM vs GEE vs cluster-robust SE)。前置版本 v1.0.6 lock 2026-05-23 (structural clarification); v1.0.5 lock 2026-05-22; **Phase 0 解锁 2026-05-21（lagPatRank phantom-rank broad re-derivation Step 5a–5h 全部完成 + Checkpoint A/B advisor consult 通过）**
+> **Phase 2 完结 marker**：Stage B H4 v1.1 cohort 跑通 (23/23 subjects, B1 calibration 0/23 mismatch), 主结论 = "背景间期 30-min epochs, 标准化事件率不稳定度显著高于 rank-endpoint identity 不稳定度 (p=1.4e-6, d=+1.26), participation field 对照同向 (p=9.5e-7, d=+1.50)"。Stage B decision-k drift 作 Phase 3 biomarker 可行性验证, 不入 Phase 2 cohort verdict。下一步 Phase 3 (H5 v1.0.7 spec) per-seizure primary + subject-clustered inference。详见 `docs/archive/topic4/sef_itp_phase2/cohort_run_2026-05-24.md`。
 > **版本历史**：v1 lock 2026-05-20 (initial) → v1.0.1 advisor 5-fix 同日 → v1.0.2 user review 6-fix 同日（H2 工程不可行修复 + H1 概念冲突拆分 + H3 verdict naming 修订 + H4 normalized instability + H5 统计合同收紧 + Topic 1/3 cross-doc 实际落字）→ **Phase 0 完成 2026-05-21**（Topic 0 §3.1 phantom-rank 修复跑完所有下游 PR）→ **v1.0.3 lock 2026-05-22**：H2 prose 改 PR-6 swap_check ingest（CLAUDE.md §5+§6 错误三段修复）+ H1 v1.0.7 null pool 扩到全 SEEG implantation → **v1.0.4 lock 2026-05-22**：H2 input order 收紧到 rank-displacement `swap_sweep` variable-k，PR-2/PR-6 fixed top-3 降为 funnel/audit → **v1.0.5 lock 2026-05-22 user tier 拨正**：H1 从 cohort claim 候选 → **sanity / 必要前置**（任何结构化传播模型都会预测端点紧凑，不区分 SEF-ITP）；H2 从 mechanism sanity → **primary cohort claim**（同一空间结构被双向读取的反直觉预测才是 SEF-ITP 真正与替代模型分离的指纹；n=23 cohort 上 source 19/23 binomial p=1.3e-3 vs 50% null、sink 16/23 p=4.7e-2，足以支持 cohort 级别判读；PR-6 plan §3.3 的 mechanism-sanity 锁是针对 PR-6 自己的 n=6 8-subset 测试，**不**继承到 Topic 4 的 n=23 rank-displacement spatial 测试） → **v1.0.6 lock 2026-05-23 (user-return v2 catch surgical clarification)**：
 > - **§3.3 H3 scale-stratified amendment**：v1.0.5 字面 "全部 6 条 mark-transition TOST equiv_pass" AND-rule 把生理上的短尺度 refractoriness anti-clustering 作为 framework failure 触发，与 SEF-ITP 自己的 biophysics 内部矛盾。v1.0.6 surgical clarification 拆三层：**R1 (long-scale ≥60s independence required)** + **R2 (endpoint identity stability required)** + biophysical sub-shape (short/mid-scale burst/refractory) descriptive only；原 v1.0.5 AND-rule 保留作 audit trail；详见 §3.3
-> - **§3.4 H4 当前 implementation 降级 SUPPLEMENTARY + H4 v1.1 stub**：`compute_local_endpoint` 用 `events_bool[labels==c].mean(axis=0)` 取 participation rate top-k，不是 propagation rank top-k；v1.0.6 起当前 implementation 降级为 supplementary "participation field stability"；H4 v1.1 (rank-based endpoint + per-side 4 spatial radius metrics: centroid RMS radius / mean pairwise distance / min enclosing ball radius / source-sink centroid distance + decision-k drift on 9/23 strict-or-candidate swap subjects + k=3 fall-back for none-swap 14/23) Stage B 实施，结果记入新 archive `docs/archive/topic4/sef_itp_phase2/cohort_run_2026-05-24.md`；详见 §3.4
+> - **§3.4 H4 当前 implementation 降级 SUPPLEMENTARY + H4 v1.1 stub**：`compute_local_endpoint` 用 `events_bool[labels==c].mean(axis=0)` 取 participation rate top-k，不是 propagation rank top-k；v1.0.6 起当前 implementation 降级为 supplementary "participation field stability"；H4 v1.1 (rank-based endpoint + per-side spatial radius metrics + decision-k drift, **all 23 subjects computed, stratified by swap_class — v1.0.7 sub-amendment 修正自原 9/23 gating**) Stage B 实施，结果记入新 archive `docs/archive/topic4/sef_itp_phase2/cohort_run_2026-05-24.md`；详见 §3.4
 > - **§3.5 H5 主问题重定向**：v1.0.5 "ΔS > 0 AND ΔR > 0 fraction" 没测空间扩散 / endpoint 招募，把"单纯 rate 升高 endpoint 不变"误判为 NULL；v1.0.6 主问题改为 "发作邻近是否出现 endpoint/swap-core 招募或空间扩展，而不是单纯 rate 升高"；4 指标：swap-k node identity Jaccard 下降 (recruitment) + swap-k 空间半径 source/sink 各自扩张 + decision-k Δ 上升 (core recruitment) + HFO rate Δ secondary 标记；统计合同 (time-of-day matched baseline ≥12h, min 30 events, subject-level aggregation, power floor 6 subjects) 沿用 v1.0.5 lock；详见 §3.5
 > - **Banner bump trigger**：`docs/archive/topic4/sef_itp_phase2/cohort_run_2026-05-23.md` 顶部 user-return v2 catch banner (`temp_claude_log.md` 2026-05-23 user 长 message) ratifies above three amendments；archive body 保留作为 v1.0 字面 rule 跑出的 v1.0 cohort 历史快照，cross-cite 指向本 v1.0.6 amendment
 > **取代**：`docs/paper1_framework_sba.md` 里的 BHPN-toy 数学模型部分（§4 toy model 数学规范 + §6 fitted model BHPN-fit spec 的 toy-mechanism 子句 + §7 dumb baselines 中针对 toy 机制的项）
@@ -19,6 +20,13 @@
 > **Phase 0 verdict（一句话）**：phantom-rank 修复**实质性加强**了 SEF-ITP framework 的两条关键 H3/H4 证据；**一条 PR-4B exploratory 翻转**被识别归类（fragility-on-small-n，不入主结论）；H1/H2 大方向都保持，其中 H2 mechanism 信号略缩 magnitude 但方向 100% 保持。
 > **范围**：Topic 4 模型层 + Topic 1 within-event 现象的机制解释
 > **不属于**：Topic 2 事件间周期（→ Paper 2）、ictal phase transition（→ Paper 3）、HFO 80–250 Hz carrier 振荡机制层
+
+> **v1.0.8 banner amendment 2026-05-27 (user-return Phase 4 spec ratified)**：scope = Phase 4 modeling track 启动条件 + 节点动力学选择 + shaft 控制 + cluster 判据 + aniso D 进 stage 2 + smoke-first 网格 + 3-proxy sensitivity + adaptive gate + event extraction sensitivity sweep。修订 §6.5 三处：
+> 1. **Phase 4 prerequisite**：v1.0.7 "Phase 1+2 H6+H1+H3 PASS + Phase 3 NULL" → v1.0.8 "framework structural prerequisite met (phantom-rank 修复 done + Phase 1 runner 落地 done) 即可启动 Phase 4 modeling track；model 输出作 mechanism exploration 层，**不替代** cohort verdict"
+> 2. **节点动力学**：v1.0.7 "FHN，不加 Hindmarsh-Rose / Epileptor" → v1.0.8 "**HR (Hindmarsh-Rose) 主**，FHN / 简化 excitable unit 作 sensitivity；不模拟 HFO carrier 80–250Hz"
+> 3. **Shaft 采样 + cluster 判据**：v1.0.7 未规定 → v1.0.8 "**强制 shaft 控制**：aligned / orthogonal / offset / angled / random / jittered (≥6 几何) + isotropic θ negative control；**禁止单用 KMeans k=2 作机制成功**；必须并列 split-half + odd-even + forward/reverse Spearman + rank-displacement swap_sweep + principal-curve audit；**isotropic θ + random shaft 也不能通过这套**；3 proxy (P1=x, P2=dx/dt, P3=detrend envelope) 全 PASS 才进 framework mechanism support 栏（取严格版）；L4 principal-curve audit 是 descriptive classifier 不是 hard gate"
+>
+> 完整 v1 spec 见 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` v0.2。本 banner block 是 v1.0.7 doc 的 surgical 修订，§6.5 内容 v1.0.7 prose 不删除，下方 § 6.5 文末加 "→ v1.0.8 banner amendment 修订上面 3 项" cross-link。
 
 ---
 
@@ -341,19 +349,7 @@ ch_mean = events_bool[labels == c].mean(axis=0)
    - per-epoch 算每个指标，看时间漂动；matched null = `valid_mask=True` 池子里随机抽 |source| / |sink| 个通道重算 1000 次
    - **禁止**把 source+sink 混成单一半径作主指标（会把"轴变长"和"每端变散"混在一起）
 
-3. **decision-k drift — stratified report by swap_class (与 H2 spatial 层 stratified report 逻辑一致)** — per-epoch 重跑 `src.rank_displacement.swap_sweep`，看每 subject 的 `decision_k` 是否随 epoch 漂动：
-   - `decision_k` ↑ = 核心病理区招募更多通道（扩散）
-   - `decision_k` ↓ = 核心病理区收缩
-   - `decision_k` 时间稳定 = 病理空间结构 invariant under slow rate modulation
-
-   **三层 stratified report (注意 subset 关系，不是 disjoint partition)**：
-   - **High-confidence primary cohort claim** — 9/23 strict-or-candidate swap subjects (family-wise null 控制下确实测出 swap-k structure)：decision_k drift 上做 SEF-ITP cohort claim 判据（Wilcoxon signed-rank on per-subject decision_k drift magnitude vs matched null）
-   - **Descriptive / sensitivity report** — 所有 subject `swap_sweep` 返回 finite `decision_k` 的人（**是 high-confidence 9/23 的 superset**：含 weak signal 不进 strict-or-candidate 但仍有可定义 decision_k 的 subject）：报 per-subject decision_k drift 趋势作 descriptive；不入 primary cohort claim gate
-   - **Fall-back sensitivity** — 真 none-swap subject (swap_sweep 返回 decision_k undefined)：fall back to **k = 3 sensitivity**（用 fixed k=3 rank-based endpoint 跑 spatial radius drift 1+2，不跑 decision-k）
-
-   **报告契约**：primary cohort claim 报 strict-or-candidate 9/23 子集的 verdict (PASS/NULL/FAIL)，**alongside** broader-cohort descriptive trend (所有 finite decision_k subject)；两者**不是**互斥 cohort 而是 nested subset — 主结论以 strict 9/23 为准，descriptive 报告 broader trend 是否方向一致以提供 confidence boost。none-swap fall-back k=3 sensitivity 是第三类**完全独立**子集（k 固定，不参与 decision-k drift 检验）。
-
-   计算开销估计：strict-or-candidate primary 9 subject × ~50 epoch × 1000 perm ≈ 1-2 小时；全 decision-k descriptive 视 cohort 中有 finite decision_k 的实际人数而定。
+3. ~~**decision-k drift — stratified report by swap_class** (三层 stratified report: high-confidence 9/23 primary + descriptive superset + fall-back k=3 sensitivity)~~ → **SUPERSEDED by v1.0.7 sub-amendment 下方** (Stage B 实际跑了 all 23 subjects 不分 swap_class gate; Stage B decision-k drift 重 frame as Phase 3 biomarker feasibility, **不**入 Phase 2 cohort verdict; 真正的 SEF-ITP cohort claim 在 Phase 3 per-seizure 招募分析 by H5 v1.0.7 spec, 不在 Stage B 背景间期 decision_k drift)。原 prose 三层 stratified report 保留作 audit trail。
 
 4. **subject-level 检验 + cohort 检验** — 保持 v1.0.5 的 normalized instability + Wilcoxon signed-rank + Cohen's d ≥ 0.3 floor 框架，但 `I_geom` 改用 rank-based endpoint radius metrics（每个 spatial metric 独立检验，**多重比较 BH-FDR q<0.10 across 4 spatial metrics**）
 
@@ -368,6 +364,51 @@ ch_mean = events_bool[labels == c].mean(axis=0)
 - **applied to rank-based endpoint (v1.1 待实施)**：H4 v1.1 跑出的 verdict 才是 SEF-ITP H4 cohort claim 判据；v1.0.5 verdict labels (PASS/NULL/FAIL/UNDERPOWERED) 沿用，但每个 spatial metric BH-FDR 校正
 
 **I_rate matched null spec degeneracy (v1.0.0 implementation 已知问题，pending user decision — independent of v1.0.6 amendment)**：framework v1.0.5 §3.4 prose "shuffle epoch order, recompute std" 数学退化 (std 对置换不变 → null variance = 0)；详见 `docs/archive/topic4/sef_itp_phase2/spec_amendment_2026-05-23.md`。当前 Phase 2 v1.0.0 默认 `circular_shift_within_block`；H4 v1.1 Stage B 沿用该提议直到 user ratify 最终选择。**v1.0.6 amendment 不重复处理此 spec 问题**（独立 deferred decision），但 H4 v1.1 实施代码必须保留 circular_shift 直至 user ratify。
+
+---
+
+#### **v1.0.7 sub-amendment 2026-05-23（user-return v3 catch ratified）— Stage B H4 scope strict-limit + decision-k drift recast as Phase 3 motivation + MEB caveat**
+
+User-return v3 catch (`temp_claude_log.md` 2026-05-23 user 长 message 第 1-3 + 5 段)：v1.0.6 §3.4 H4 v1.1 stub 在 Stage B 实施后跑出 PASS，但 measurement framing / interpretation 必须严格限定，否则会被 over-read 成 "病理空间永久稳定 / SOZ 不扩张"，超出 Stage B 真正测的事的 scope。
+
+**Stage B H4 v1.1 cohort claim scope lock**：
+
+| 项 | 允许的 cohort claim | **禁止的 over-read** |
+|---|---|---|
+| Stage B 测的事 | 在**背景间期 30 分钟段**内, **标准化事件率不稳定度显著高于 rank-endpoint identity 不稳定度** (Wilcoxon p=1.4×10⁻⁶, Cohen's d=+1.26) | "病理空间形状不变" / "事件率漂动是 endpoint 漂动 X 倍" |
+| 措辞 | "在 23 个病人 cohort（21 个 finite）上, 背景间期 30-min epochs 中, 标准化事件率不稳定度显著高于 rank-endpoint identity 不稳定度, 支持慢状态主要调制触发频率、不显著重塑传播端点身份" | "rate 漂动是 geometry 漂动的 3 倍"（raw 量比 framing, 实际是两个 dimensionless 标准化指数, 不能这样表述） |
+| Time scale | **背景间期 30 分钟段**, 慢状态调制时间尺度 | ictal-adjacent / inter-seizure interval / 长时间尺度（这些是 Phase 3 重头戏 + future longitudinal cohort） |
+| Spatial claim | "endpoint identity 在 30-min epoch 间 bounded variation (CV ~ 0.30, sink 比 source 略大)" 作 background characterization, 不入 cohort verdict | "病理空间稳" / "SOZ 不扩张" / 任何 SOZ 相关 claim |
+| Endpoint definition | "rank-based propagation endpoint" (传播 rank top-k); participation-field (events_bool top-k) 作 supplementary 对照 | "rank-based 和 participation-field 都给 PASS → 端点定义不重要"（实际差别意义重大, supplementary 同向只是 robustness sanity） |
+
+**decision-k drift in Stage B = Phase 3 biomarker 可行性验证, 不入 H4 cohort verdict**：
+
+Stage B 对 all 23 subjects 跑了 per-epoch decision_k drift。**这个分析的科学价值不是 Phase 2 cohort claim**，而是：
+
+> Stage B confirms per-epoch decision_k is measurable and shows bounded variation (strict 子组 epoch decision_k range 普遍跨 2-4 个值, 最极端 zhaochenxi 跨 3-13); this **motivates Phase 3 per-seizure recruitment / expansion analysis** as a feasible biomarker candidate.
+
+**禁止 over-read**：
+- ❌ "swap-class 之间 decision_k_std 无差异 → SEF-ITP 一致" — 这是组间无差异, 不是 SEF-ITP cohort claim 的证据; 真正的 SEF-ITP claim 在 Phase 3 per-seizure 招募分析
+- ❌ "decision_k 稳 = 病理核心数量不变" — 跨 subject decision_k_std 不可直接比 (k=2 时 std=1 跟 k=23 时 std=1 含义完全不同); Stage B 只是验证 metric 可测 + bounded
+- ❌ none 组 decision_k 是 "稳定 swap-core 的核心大小" — 实际是 noise/control baseline, 不能跟 strict/candidate 同等解释
+
+**Spatial radius metric caveats (Stage B 报告 + Phase 3 implementation gate)**：
+
+1. **`compute_endpoint_spatial_radius` MEB (min enclosing ball) 当前实现对 k ≤ 3 完整, k ≥ 4 不完整**：
+   - 实现枚举 2-point antipodal sphere + 3-point circumsphere (3D 三角形外接圆球), 取最小包含所有点的半径
+   - k ≤ 3: 完整 (任何 ≤ 3 点的 MEB 必然由 2-point 或 3-point 候选给出)
+   - k ≥ 4: **不完整** — 4 点 MEB 可能由 4-point sphere (4 点都在球面) 给出, 当前实现缺这种穷举; fallback 是 "farthest-from-centroid" 启发, 给的是上界不是真正 MEB
+   - **Phase 3 implementation gate**：H5 用 variable decision_k 时 k 可能 > 3, **Phase 3 启动前必须**:
+     - 要么补 4-point sphere 枚举 (3D 4 点 MEB: 试 4 点都在球面的唯一外接球, 否则 fall back 到 3-point 子集穷举)
+     - 要么把 MEB **降级为 sensitivity metric**, centroid RMS + mean pairwise 升 primary (这两个对任意 k 都是 well-defined, 数学上无歧义)
+   - Stage B 报告里 MEB 数字 (cluster 0 source ≈ 10.82 mm, sink ≈ 18.03 mm) 在 k=3 fixed 默认下是正确的; 但 v1.0.6 §3.4 H4 v1.1 stub 提到 "k = decision-k for swap subjects" — 这部分 swap-positive subject 的 MEB 数字未在 Stage B v1.1.0 实施 (Stage B 默认 endpoint_k=3 fixed); future 实施 variable k 时必须先处理 MEB k>3 问题
+
+2. **source vs sink 半径 background characterization** (Stage B 描述性, 不入 cohort claim)：
+   - cluster 0 cohort 中位: source centroid RMS ≈ 9.66 mm, sink ≈ 16.69 mm; source mean pairwise ≈ 15.88 mm, sink ≈ 24.89 mm; source-sink centroid distance ≈ 20.95 mm (传播轴长度)
+   - 段间 CV 中位 ~ 0.28-0.32 — bounded variation, 不为零
+   - **观察**: sink 侧空间分布比 source 侧更分散 (~17 vs ~10 mm 半径量级) — 与"涟漪从紧的源点扩散开"的物理图景一致, 但**不**作 cohort claim, 只作 background characterization
+
+**v1.0.7 banner authorization scope**：user-return v3 catch authorized (a) Stage B H4 cohort claim scope strict-limit to background interictal rate-geometry decoupling, (b) decision-k drift Stage B 重 frame as Phase 3 biomarker feasibility (not cohort verdict), (c) MEB k>3 incomplete caveat + Phase 3 implementation gate, (d) source vs sink background characterization 限定 descriptive only. 措辞锁与 H3 v1.0.6 / H5 v1.0.7 一致 (cohort claim 严格限定 scope, 不 over-read; descriptive sub-shape / sensitivity / motivation 与 primary verdict 严格分层)。
 
 ### 3.5 H5 — Endpoint identity shift around seizures（短时尺度，仅可测部分）
 
@@ -408,7 +449,7 @@ User-return v2 catch (`temp_claude_log.md` 2026-05-23 user 长 message)：v1.0.5
 - 数据 gate：per channel × per window `n_events ≥ 30`；不达 channel 在该 subject H5 分析中剔除
 - 窗口定义：pre-ictal `[−60min, −5min]`，post-ictal `[+5min, +60min]`，baseline 按下规则
 - Baseline 选择：同 subject + 同 hour-of-day ± 2h + 距任何 seizure ≥ 12h + 每 seizure ≥ 5 baseline 窗口（不满足 → 该 seizure 排除）
-- Subject 内多 seizure：先 aggregate 到 subject-level (mean across seizures per metric)，**禁止**把每次 seizure 当独立观测
+- ~~Subject 内多 seizure：先 aggregate 到 subject-level (mean across seizures per metric)，**禁止**把每次 seizure 当独立观测~~ → **SUPERSEDED by v1.0.7 amendment 2026-05-23**（见下）
 - SOZ 关系 (secondary, 仅在 H5 主分析 SUPPORTED 时报告)：在 `≥X/3 primary metrics 显著的子集 subject` 上查 primary 指标 1-3 涉及的招募通道是否更靠近 clinical SOZ / data-driven SOZ (PR-T3-1 Layer B)；与 ictal early channel overlap；个体 DTI 可用时 SC out-degree 关系；**两套 SOZ 标签都查，不融合**；**禁止**在 underpowered case 上做 SOZ 关系分析
 
 **v1.0.6 measurement source contract**：
@@ -419,6 +460,46 @@ User-return v2 catch (`temp_claude_log.md` 2026-05-23 user 长 message)：v1.0.5
 - 指标 4 (rate Δ): events/h per window，简单计数
 
 **Stage 实施序**：H5 v1.0.6 实施依赖 H4 v1.1 的 spatial radius / decision-k drift helpers (复用 question-match: H4 v1.1 测时间漂动 inv slow rate modulation, H5 v1.0.6 测时间漂动 around seizures — 同类几何量、不同窗口划分)。建议 Stage B 先做 H4 v1.1 (Phase 2 收口)，然后用同样的 helpers 做 H5 v1.0.6 (Phase 3 启动)。
+
+---
+
+#### **v1.0.7 sub-amendment 2026-05-23（user-return v3 catch ratified）— H5 reporting unit + cohort inference 改 per-seizure**
+
+User-return v3 catch (`temp_claude_log.md` 2026-05-23 user 长 message 第 4 段)：v1.0.6 H5 sustained spec 里"Subject 内多 seizure 先 aggregate 到 subject-level"跟 user 当前判断**冲突**。Topic 5 PR-1 与 PR-4 cohort run 已证明 subject 内 seizure type 差异巨大、seizure 间时间波动也很大、相对时间也不能解决。subject-level aggregate 会把这些 within-subject heterogeneity 抹平 → 真正的 ictal-adjacent 招募/扩张信号被 average out。**H5 真正测的事**：peri-ictal 招募 / 空间扩张，这本来就是 per-seizure 现象（不同 seizure 性质不同、不同时段触发的核心区不同），subject 级 aggregate 是错的统计单位。
+
+**v1.0.7 H5 reporting unit + cohort inference lock**：
+
+| 项 | v1.0.6 (SUPERSEDED) | **v1.0.7 (current)** |
+|---|---|---|
+| Primary reporting unit | subject-level mean across seizures | **每次 seizure 的 peri-ictal window vs matched baseline** |
+| Cohort inference | Wilcoxon on subject-level fraction vs 0.25 | **hierarchical / subject-clustered**（mixed-effect model with seizure nested in subject, OR cluster-robust SE on subject id）；**禁止**把同一 subject 多次 seizure 当独立样本 |
+| Stratification (mandatory) | (无) | **按 seizure type / seizure pair / inter-seizure interval 分层报**（subject 内 seizure 性质不同必须 separately reported, 不能 average） |
+| Subject-level summary | primary statistic | **secondary**（仅作 between-subject heterogeneity sensitivity） |
+
+**Phase 3 主问题 lock (v1.0.7)**：
+
+> 在两次 seizure 之间或 seizure-adjacent window，**swap-k endpoint 的数量和空间范围是否相对 matched baseline 增加**？
+
+这是 per-seizure primary, subject-clustered cohort inference。
+
+**v1.0.7 primary metrics 精确定义（覆盖 v1.0.6 表的 metric tier）**：
+
+| # | 指标 | 类型 |
+|---|---|---|
+| 1 | **Δdecision_k = decision_k(peri) − decision_k(matched baseline)** | per-seizure primary |
+| 2 | **Δdecision_k / baseline_k**（normalized to baseline core size，跨 subject 可比化）| per-seizure primary |
+| 3 | **swap-k endpoint identity Jaccard(peri vs baseline) ↓**（招募新节点）| per-seizure primary |
+| 4 | **source-side / sink-side spatial radius peri vs baseline**（centroid RMS + mean pairwise + axis distance；MEB 见 §3.4 caveat）| per-seizure primary |
+| 5 | HFO rate Δ peri vs baseline | per-seizure **secondary**（excitability state marker 只用作 descriptive context，**不**入 SUPPORTED gate） |
+
+**为什么 Δk + Δk/baseline_k 一起报**：decision_k_std 跨 subject 不可直接比 — k=2 时 std=1 意味着核心区数量翻倍 ±50%，k=23 时 std=1 是 < 5% 变化（user-review catch）。Phase 3 必须用 Δk（绝对变化）、Δk/baseline_k（相对变化）、range（极值）+ spatial radius 联合报，**不**单独用 std 跨 subject 比较。
+
+**v1.0.7 implementation gate**：
+- 必须先把 §3.4 H4 v1.1 MEB k>3 caveat 处理掉（要么补 4-point sphere，要么 MEB 降为 sensitivity，centroid RMS + mean pairwise 升 primary）才能跑 Phase 3 spatial radius metric
+- swap_class=none 的 subject decision_k 是 noise/control baseline（**不是**稳定 swap-core 的核心大小），Phase 3 这部分 subject 的 Δdecision_k 不能跟 strict/candidate 同等解释 — 要么作 negative control（期望 Δk ≈ 0），要么完全排除 Phase 3 分析
+- Phase 3 启动前必须先把 Phase 2 cohort_run_2026-05-24.md 收口 + advisor pass
+
+**v1.0.7 banner authorization scope**：user-return v3 catch authorized (a) reporting unit pivot to per-seizure primary, (b) cohort inference 改 hierarchical / subject-clustered, (c) stratify by seizure type / pair / interval, (d) Δk + Δk/baseline_k + range + spatial radius 联合报, (e) decision_k_std cross-subject 不可直接比, (f) none 组 decision_k 不可与 strict/candidate 同等解释. The catch did **not** explicitly specify the hierarchical model form (linear mixed model vs GEE vs cluster-robust SE) — Stage C implementation must surface this decision before producing Phase 3 cohort verdict. Same authorization-scope lock pattern as §3.3 v1.0.6 + §3.5 v1.0.6 X/3 threshold pending items.
 
 **v1.0.5 H5 主问题 + verdict mapping (SUPERSEDED by v1.0.6 above, kept for audit trail below)**：
 
@@ -538,6 +619,8 @@ H2 现在是 **primary cohort claim**，但因为它有两层（label 层 / spat
 - ❌ "H2 100% PASS" / "每个 subject 都通过"（实际 22/23 至少一侧 PASS，但 1/23 双侧 NULL，分母不能丢）
 - ❌ 从 spatial 层 PASS 直接跳到 "source/sink 角色反转是 cohort 主效应"（spatial 层是必要不充分；要 strict claim role-swap 看 label 层 strict 比例）
 - ❌ `combined_endpoint` 当作唯一空间裁决（source 与 sink 可能本身就在传播轨迹两端）
+
+**H2b 方向轴诊断（supplementary，archive-only，2026-05-25 v1.0.2 review-round-1 demoted）**：在 H2 spatial-layer cohort claim 之上，archive-only 的 H2b 方向轴诊断 phase，问"swap 是同一条空间轴反向读取还是两个独立 source"。**Strict verdict (primary read)** 在 23 个可测 subject 上 0 个 axis_reversal，因 decision_k ≈ n_universe / 2 时 per-cluster role-shuffle null 自由度低。**Descriptive shape (supplementary, NOT a conclusion layer)** 在 swap_class∈{strict, candidate} 的 9 个可测 subject 上 5 个 axis_reversal_shaped、0 个 dual_source_shaped、4 个 unclear（含 3 个 PCA 单 shaft 退化）；shape 一致于"非正交"假说，但**注意 scope 红线**：H2b 只能 falsify "cluster A 与 cluster B 是正交无关解剖源" 假说，**不能区分** "同一病理核心轴双向读取" 与 "同轴双端独立 seed"（两者都预测 cos(v_A, −v_B) ≈ +1）。要区分必须做 Round 2（per-event seed 聚类 + rank-distance 梯度 + source 各自 SOZ 关系），未实施。**H2b 不是 cohort claim**；不进 framework v1.0.7 §3 H 主清单。详见 `docs/archive/topic4/sef_itp_direction_axis/{phase_h2b_direction_axis_plan_2026-05-25.md (v1.0.2 §1.5 + §10.5), cohort_run_2026-05-25.md}`。
 
 **Phase 1 失败模式表**（v1.0.5 lock；H1 列"sanity"，H2 列"primary cohort claim"按 spatial 层 cohort 比例填）：
 
@@ -727,6 +810,8 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - 跨 subject 参数共享
 
 **产出目录**：`results/topic4_sef_itp/phase4_fhn_toy/`，含 figures + sanity JSON + plain-language README
+
+> **→ v1.0.8 banner amendment (top of file) 修订上面 3 项**：(1) prerequisite 放宽 (2) HR 主、FHN sensitivity (3) shaft 控制 + cluster 判据 + 3-proxy sensitivity。v1.0.7 prose 保留作 audit trail。
 
 ---
 
