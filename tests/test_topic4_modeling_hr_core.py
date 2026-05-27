@@ -20,13 +20,14 @@ def test_hr_params_is_frozen():
     """HRParams is frozen (hashable for caching, immutable for safety)."""
     from src.topic4_modeling.hr_core import HRParams
     p = HRParams()
-    with pytest.raises((AttributeError, Exception)):
+    with pytest.raises(AttributeError):
         p.a = 2.0  # type: ignore[misc]
 
 
 # ── hr_rhs algebraic invariants ──────────────────────────────────────────
 
 def test_hr_rhs_returns_finite_3vec():
+    """hr_rhs at zero state returns finite (dx, dy, dz)."""
     from src.topic4_modeling.hr_core import HRParams, hr_rhs
     p = HRParams()
     dx, dy, dz = hr_rhs(0.0, 0.0, 0.0, p, I=-1.6, eta=0.0)
@@ -75,6 +76,7 @@ def test_rk4_step_deterministic_no_noise():
 
 
 def test_rk4_step_returns_finite_3tuple():
+    """RK4 step returns finite (x, y, z) tuple."""
     from src.topic4_modeling.hr_core import HRParams, rk4_step
     p = HRParams()
     x, y, z = rk4_step((0.0, 0.0, 0.0), p, I=-1.6, eta=0.0, dt=0.05)
@@ -108,7 +110,7 @@ def test_hr_rhs_jit_matches_python_version():
             # JIT version takes tuple of params (frozen dataclass → tuple unpack)
             jit_out = hr_rhs_jit(x, y, 0.5,
                                  p.a, p.b, p.c, p.d, p.r, p.s, p.x_R,
-                                 I=-1.0, eta=0.1)
+                                 -1.0, 0.1)
             np.testing.assert_allclose(ref, jit_out, rtol=1e-10)
 
 
@@ -120,5 +122,5 @@ def test_rk4_step_jit_matches_python_version():
     ref = rk4_step(s0, p, I=-1.6, eta=0.0, dt=0.05)
     jit_out = rk4_step_jit(s0[0], s0[1], s0[2],
                             p.a, p.b, p.c, p.d, p.r, p.s, p.x_R,
-                            I=-1.6, eta=0.0, dt=0.05)
+                            -1.6, 0.0, 0.05)
     np.testing.assert_allclose(ref, jit_out, rtol=1e-10)
