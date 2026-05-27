@@ -1,5 +1,9 @@
-# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v3**
+# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v3.1**
 
+> **v3.1 sub-amendment 2026-05-27 (round-3 user-return catch)**: two further fixes on top of v3 (commit d1e68f8):
+> - Integration tests still used plain `assert` after move to `_integration.py`, so failure path was still hard FAIL (not XFAIL). Switched all 3 to `pytest.xfail(reason=...)` inside the test when the empirical observation doesn't hold; PASS otherwise. Build never goes red on an empirical boundary mismatch.
+> - Task 4 commit message + Task 5 "test strategy" block said "6 synthetic" picker tests, but v3 actually has 7 (full-window pass / all-silent / zero-noise-not-silent / upper-flip / **lower-silent NEW** / **no-in-grid-lower NEW** / median-pick). Counter aligned to 7.
+>
 > **v3 supersedes v2 (commit 16a85aa)**, second user-return strict catch 2026-05-27. v2 had 3 must-fix bugs + 3 small notes:
 >
 > 1. Task 4 baseline picker only checked sigma=0 silent + sigma*1.4 still excitable; **missing the ±50% lower-side check** (sigma*0.5 still excitable). Spec §3 Stage 1 says "noise ±50% 不漂"; v2 picker would accept noise-threshold-edge baselines. v3 fixes picker to enforce BOTH lower AND upper neighbor.
@@ -798,11 +802,15 @@ Create `tests/test_topic4_modeling_hr_dynamics_integration.py`:
 
 These are NOT algebraic invariants. They describe what HR happens to do at
 specific parameter regimes. They run during Stage 1 smoke (Task 6) as
-empirical observations to be reported in archive, not as TDD unit gates.
+empirical observations to be reported in archive, NOT as TDD unit gates.
 
-If these xfail in Task 6, the implementation isn't wrong — HR's regime
-boundaries genuinely depend on parameters and we want to discover, not
-enforce, them.
+**Failure semantics (v3 user-return strict catch round 2):**
+when the empirical observation does NOT hold, the test calls
+`pytest.xfail(reason=...)` to mark itself XFAIL (yellow, not red).
+The build never goes red on an empirical boundary mismatch — Task 6
+smoke + archive review surfaces the divergence, and the implementer
+does NOT adjust HR params to satisfy a hard test. If the observation
+holds, the test PASSes normally.
 """
 
 from __future__ import annotations
@@ -813,22 +821,31 @@ import pytest
 
 @pytest.mark.slow
 def test_hr_silent_at_deeply_subthreshold():
-    """Empirical observation: at I=-3.0 with no noise, HR rests (x.max < 0.5)."""
+    """Empirical observation: at I=-3.0 no noise → HR rests (x.max < 0.5).
+
+    XFAIL (not FAIL) if HR regime boundary differs.
+    """
     from src.topic4_modeling.hr_core import HRParams
     from src.topic4_modeling.hr_dynamics import simulate_trajectory
     p = HRParams()
     _, traj = simulate_trajectory(p, I=-3.0, T=200.0, dt=0.05,
                                    sigma_ou=0.0, tau_ou=10.0, seed=0)
-    assert traj[:, 0].max() < 0.5, (
-        f"At I=-3.0 expected silent, got x.max={traj[:, 0].max():.3f}. "
-        "If unexpected, HR parameter regime differs from prior assumption — "
-        "report in Stage 1 archive, do not adjust to satisfy test."
-    )
+    x_max = float(traj[:, 0].max())
+    if x_max >= 0.5:
+        pytest.xfail(
+            f"At I=-3.0 expected silent (x.max<0.5), got x.max={x_max:.3f}. "
+            "HR regime boundary at this I differs from prior assumption — "
+            "report in Stage 1 archive; do NOT adjust HR params to satisfy."
+        )
+    # Observation holds → PASS
 
 
 @pytest.mark.slow
 def test_hr_repetitive_at_high_I():
-    """Empirical observation: at I=2.0, HR enters spontaneous bursting."""
+    """Empirical observation: at I=2.0 HR enters spontaneous bursting (>=3 ups).
+
+    XFAIL (not FAIL) if regime boundary differs.
+    """
     from src.topic4_modeling.hr_core import HRParams
     from src.topic4_modeling.hr_dynamics import simulate_trajectory
     p = HRParams()
@@ -836,26 +853,34 @@ def test_hr_repetitive_at_high_I():
                                    sigma_ou=0.0, tau_ou=10.0, seed=0)
     x = traj[:, 0]
     ups = int(np.sum((x[:-1] < 1.0) & (x[1:] >= 1.0)))
-    assert ups >= 3, (
-        f"At I=2.0 expected >=3 bursts, got {ups}. If unexpected, HR regime "
-        "boundary differs from prior assumption — report in Stage 1 archive."
-    )
+    if ups < 3:
+        pytest.xfail(
+            f"At I=2.0 expected >=3 burst rises through x=1.0, got {ups}. "
+            "HR regime boundary differs from prior assumption — "
+            "report in Stage 1 archive."
+        )
+    # Observation holds → PASS
 
 
 @pytest.mark.slow
 def test_hr_higher_r_yields_more_bursts():
-    """Empirical observation: larger r (slow var rate) → faster bursting cycle."""
+    """Empirical observation: larger r (slow-var rate) → more bursts in T.
+
+    XFAIL (not FAIL) if the monotone trend does NOT hold.
+    """
     from src.topic4_modeling.hr_core import HRParams
     from src.topic4_modeling.hr_sweep import evaluate_cell
     slow = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
                           r_override=0.003, T=1000.0, dt=0.05, seed=0)
     fast = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
                           r_override=0.012, T=1000.0, dt=0.05, seed=0)
-    assert fast["n_bursts"] > slow["n_bursts"], (
-        f"Expected fast r (0.012) → more bursts than slow r (0.003); "
-        f"got fast={fast['n_bursts']}, slow={slow['n_bursts']}. "
-        "Report in Stage 1 archive if regime boundary differs."
-    )
+    if fast["n_bursts"] <= slow["n_bursts"]:
+        pytest.xfail(
+            f"Expected fast r (0.012) → more bursts than slow r (0.003); "
+            f"got fast n_bursts={fast['n_bursts']}, slow n_bursts={slow['n_bursts']}. "
+            "Report in Stage 1 archive if regime boundary differs."
+        )
+    # Observation holds → PASS
 ```
 
 Note: the `evaluate_cell` test will import from `hr_sweep` (Task 4) — it stays as XFAIL until Task 4 lands `hr_sweep.py`. That's fine for a slow integration suite.
@@ -1517,10 +1542,10 @@ Picks median sigma_star among surviving candidates.
 
 Test strategy (v3 user-return strict catch — v1 used pytest.skip which
 silently bypassed the most important exit contract):
-  - 6 synthetic DataFrame unit tests for picker logic (ALWAYS run):
+  - 7 synthetic DataFrame unit tests for picker logic (ALWAYS run):
     full-window pass, all-silent → None, zero-noise-not-silent reject,
-    upper-flip reject, lower-silent reject (NEW), no-in-grid-lower
-    reject (NEW), median pick across multiple candidates
+    upper-flip reject, lower-silent reject (NEW v3), no-in-grid-lower
+    reject (NEW v3), median pick across multiple candidates
   - 2 sweep determinism + column tests
   - 2 evaluate_cell signature / dict-shape tests
   - 1 real-smoke integration test (~20s, marked @slow) using
