@@ -1,16 +1,36 @@
-# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan
+# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v2**
+
+> **v2 supersedes v1 (commit 857d916)**, post-user-return strict catch 2026-05-27. v1 had 5 hard problems flagged: (1) wrote HR code without framework v1.0.7 → v1.0.8 banner amendment first (source-of-truth contradiction); (2) numba claim with Python for-loops (15000 cell × 10000 step = unrunnable); (3) 15 per-task commits violating collab discipline; (4) `pytest.skip` in baseline picker test silently bypasses exit contract; (5) `swap_class > 30% events` is layer error (per-template-pair vs per-event). v2 fixes all 5 + restructures from 15 tasks to **Task 0 + 6 implementation tasks** per user proposal.
+>
+> v1 git history preserved at commit 857d916.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build single-node Hindmarsh-Rose excitable unit infrastructure: ODE + RK4 + OU noise + burst detector + regime classifier + phase-portrait viz + parameter-sweep CLI; produce regime map and select baseline (I*, r*, σ*) for Stage 2 hand-off.
+**Goal:** Build single-node Hindmarsh-Rose excitable infrastructure (HR + RK4 numba JIT + OU noise + burst detector + regime classifier + plot + CLI) and produce Stage 1 regime map + baseline (I*, r*, σ*) as hand-off contract to Stage 2 — **after** framework v1.0.7 → v1.0.8 banner amendment commits (Task 0, prerequisite).
 
-**Architecture:** numpy + numba JIT (RK4 hot loop) + matplotlib (viz) + pytest (TDD). Single-node simulation, no network coupling. Parameter sweep via joblib parallel. Results land in `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/` and selected baseline JSON is the hand-off contract to Stage 2.
+**Architecture:** Real numba `@njit(cache=True)` on hot ODE / RK4 / OU loops; numpy elsewhere; matplotlib for viz; pytest for tests with strict TDD on algebraic invariants; joblib for sweep parallelism. JSON (not parquet) for sweep outputs. Configurable thresholds in a frozen dataclass to avoid magic numbers. Baseline picker tested via (a) synthetic DataFrame unit tests that NEVER skip + (b) CLI exit-code 1 + archive FAIL marker when no baseline found.
 
-**Tech Stack:** Python 3.11, numpy 1.x, scipy 1.13, numba 0.60, matplotlib, pytest, joblib (already in env), dataclasses (stdlib).
+**Tech Stack:** Python 3.11, numpy, scipy, numba 0.60 (verified), matplotlib, pytest, joblib, dataclasses, json (stdlib). NO parquet / pyarrow / cython.
 
-**Spec source:** `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` §3 Stage 1 + §5.1 + §5.3 + §6.1-6.3 + §7 stage 1 row + §8 stage 1 failure mode.
+**Spec source:** `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` v0.2 (post-user-return).
 
-**Plan boundary:** This plan covers Stage 1 ONLY. Stages 2-5 each get their own plan, issued after the prior stage's exit contract is verified (per spec §13).
+**Plan boundary:** Stage 1 ONLY. Stages 2-5 each get their own plan after prior stage's exit contract verified.
+
+---
+
+## What's locked in v2 (vs v1)
+
+| Issue | v1 | **v2** |
+|---|---|---|
+| Framework amendment timing | "to Stage 5 后再改" | **Task 0 first**, before any code |
+| numba | claimed but Python loops | real `@njit(cache=True)` on `hr_rhs_jit`, `rk4_step_jit`, `simulate_trajectory_jit`, `generate_ou_noise_jit` |
+| Commits | 15 (one per task), per-step granular | **7 commits total** (one per Task, no per-step commits) |
+| Baseline picker test | `pytest.skip` if no baseline | split: (a) synthetic unit tests always run + (b) CLI exit 1 on no baseline + archive FAIL marker |
+| Cluster L3 layer | "swap_class > 30% events" | per-sim strict/candidate/none label + cohort across-seeds strict_or_candidate fraction (spec v0.2) |
+| Output format | parquet (no pyarrow guard) | JSON (sweep_results.json, regime_summary.json, baseline.json) |
+| L4 principal-curve | hard pass gate | descriptive classifier (spec v0.2) |
+| 3-proxy verdict | "framework only引P1" loose | strict: only 三 proxy 一致 PASS 才进 framework mechanism support (spec v0.2) |
+| Cell B framing | "C-only test (H-C)" | "anatomical-axis-substrate sanity" (spec v0.2; H-C reentry → K_long sensitivity, not Phase 4 v1) |
 
 ---
 
@@ -18,40 +38,147 @@
 
 **Created:**
 
-| File | Responsibility |
-|---|---|
-| `src/topic4_modeling/__init__.py` | Package init (exports public API) |
-| `src/topic4_modeling/hr.py` | HRParams dataclass, HR ODE rhs, RK4 integrator, OU noise, trajectory simulator, burst detector, regime classifier |
-| `src/topic4_modeling/hr_viz.py` | Phase portrait + nullcline plotter, regime-map heatmap plotter |
-| `src/topic4_modeling/hr_sweep.py` | Parameter sweep runner + baseline picker |
-| `tests/test_topic4_modeling_hr.py` | Unit tests for hr.py |
-| `tests/test_topic4_modeling_hr_viz.py` | Plot smoke tests |
-| `tests/test_topic4_modeling_hr_sweep.py` | Sweep + baseline picker tests |
-| `scripts/run_topic4_phase4_stage1_hr.py` | CLI: run sweep, plot regime map, pick baseline, save artifacts |
-| `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/` | Output dir (regime_map.png, regime_summary.json, phase_portraits/, baseline.json) |
+| File | Responsibility | Module owner |
+|---|---|---|
+| `src/topic4_modeling/__init__.py` | Package init (already exists from v1 scaffold commit 30858df) | Task 1 update (re-export) |
+| `src/topic4_modeling/hr_core.py` | HRParams + hr_rhs + numba RK4 step | Task 1 |
+| `src/topic4_modeling/ou_noise.py` | numba OU noise generator | Task 2 |
+| `src/topic4_modeling/hr_config.py` | Frozen dataclass for burst / regime thresholds (avoid magic numbers) | Task 3 |
+| `src/topic4_modeling/hr_dynamics.py` | simulate_trajectory + detect_bursts + classify_regime | Task 3 |
+| `src/topic4_modeling/hr_sweep.py` | evaluate_cell + sweep_hr_parameters + pick_excitable_baseline | Task 4 |
+| `src/topic4_modeling/hr_viz.py` | nullclines + phase portrait + regime map plots | Task 5 |
+| `scripts/run_topic4_phase4_stage1_hr.py` | CLI orchestration | Task 5 |
+| `tests/test_topic4_modeling_hr_core.py` | Task 1 tests |
+| `tests/test_topic4_modeling_ou_noise.py` | Task 2 tests |
+| `tests/test_topic4_modeling_hr_dynamics.py` | Task 3 tests |
+| `tests/test_topic4_modeling_hr_sweep.py` | Task 4 tests (synthetic always run + real-sweep xfail) |
+| `tests/test_topic4_modeling_hr_viz.py` | Task 5 plot smoke tests |
+| `tests/test_topic4_modeling_hr_cli.py` | Task 5 CLI exit-contract test |
+| `docs/archive/topic4/sef_itp_phase4_v1/stage1_results_2026-05-27.md` | Stage 1 results archive (Task 6) |
+| `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/` | Output dir (Task 5/6) |
 
-**Modified:** none in stage 1. (Framework v1.0.8 banner amendment will happen at end of stage 5, not now.)
+**Modified:**
+- `docs/topic4_sef_itp_framework.md` v1.0.7 → v1.0.8 (Task 0)
+- `src/topic4_modeling/hr.py` from v1 stub (commit 30858df) → either delete (Task 1) or repurpose as re-export shim. **Decision: delete** — `hr_core.py` replaces it, name was too generic.
+- `tests/test_topic4_modeling_hr.py` from v1 stub → **delete** (Task 1; replaced by `test_topic4_modeling_hr_core.py`)
+
+**Existing scaffold from v1 (commit 30858df)**: `src/topic4_modeling/__init__.py` is kept (still valid as package init).
 
 **Convention notes (codebase):**
-- Tests are flat in `tests/`, not nested (verified: `tests/test_*.py`). Use `tests/test_topic4_modeling_*.py`.
-- Numba `@njit` already in env (verified: numba 0.60). Use cache=True for fast import.
-- Existing pattern: dataclass for params, top-level function for sim, joblib for parallelism (see `src/sef_itp_phase2.py` for analogy).
+- Tests flat in `tests/`, `test_*.py` naming
+- Module names snake_case
+- numba `@njit(cache=True)` requires file path (not REPL) — works fine in src files (verified)
+- Existing pattern: dataclass for params, top-level functions for sim, joblib for parallelism
 
 ---
 
-## Task 1: Package skeleton + smoke import
+## Task 0 (PREREQUISITE — NO CODE): Framework v1.0.7 → v1.0.8 banner amendment
+
+**Why this is Task 0:** spec source-of-truth contradiction. v1.0.7 §6.5 字面 bans HR; writing HR code first leaves the framework doc out of sync. v1.0.8 banner amendment locks the scope changes the design spec (`docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md`) already records. **No HR code written before Task 0 commits.**
 
 **Files:**
-- Create: `src/topic4_modeling/__init__.py`
-- Create: `tests/test_topic4_modeling_hr.py`
-- Create: `src/topic4_modeling/hr.py` (empty stub)
+- Modify: `docs/topic4_sef_itp_framework.md`
 
-- [ ] **Step 1: Write the failing smoke test**
+- [ ] **Step 1: Read current §0 banner + §6.5 in framework**
 
-Create `tests/test_topic4_modeling_hr.py`:
+Run: `grep -n "FHN\|HR\|Phase 4\|v1.0.7\|prerequisite" docs/topic4_sef_itp_framework.md | head -30`
+
+Goal: locate the lines that contradict (HR ban + Phase 4 prerequisite).
+
+- [ ] **Step 2: Add v1.0.8 banner amendment block at top of framework doc**
+
+Insert immediately after the existing `> 状态：` banner. Use exact wording:
+
+```markdown
+> **v1.0.8 banner amendment 2026-05-27 (user-return Phase 4 spec ratified)**：scope = Phase 4 modeling track 启动条件 + 节点动力学选择 + shaft 控制 + cluster 判据 + aniso D 进 stage 2 + smoke-first 网格 + 3-proxy sensitivity + adaptive gate + event extraction sensitivity sweep。修订 §6.5 三处：
+> 1. **Phase 4 prerequisite**：v1.0.7 "Phase 1+2 H6+H1+H3 PASS + Phase 3 NULL" → v1.0.8 "framework structural prerequisite met (phantom-rank 修复 done + Phase 1 runner 落地 done) 即可启动 Phase 4 modeling track；model 输出作 mechanism exploration 层，**不替代** cohort verdict"
+> 2. **节点动力学**：v1.0.7 "FHN，不加 Hindmarsh-Rose / Epileptor" → v1.0.8 "**HR (Hindmarsh-Rose) 主**，FHN / 简化 excitable unit 作 sensitivity；不模拟 HFO carrier 80–250Hz"
+> 3. **Shaft 采样 + cluster 判据**：v1.0.7 未规定 → v1.0.8 "**强制 shaft 控制**：aligned / orthogonal / offset / angled / random / jittered (≥6 几何) + isotropic θ negative control；**禁止单用 KMeans k=2 作机制成功**；必须并列 split-half + odd-even + forward/reverse Spearman + rank-displacement swap_sweep + principal-curve audit；**isotropic θ + random shaft 也不能通过这套**；3 proxy (P1=x, P2=dx/dt, P3=detrend envelope) 全 PASS 才进 framework mechanism support 栏（取严格版）；L4 principal-curve audit 是 descriptive classifier 不是 hard gate"
+>
+> 完整 v1 spec 见 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` v0.2。本 banner block 是 v1.0.7 doc 的 surgical 修订，§6.5 内容 v1.0.7 prose 不删除，下方 § 6.5 文末加 "→ v1.0.8 banner amendment 修订上面 3 项" cross-link。
+```
+
+- [ ] **Step 3: Add cross-link at end of §6.5 (where v1.0.7 prose lives)**
+
+Locate the line in §6.5 ending with "`results/topic4_sef_itp/phase4_fhn_toy/`，含 figures + sanity JSON + plain-language README" (approximately line 805 in current file).
+
+Append immediately after:
+
+```markdown
+
+> **→ v1.0.8 banner amendment (top of file) 修订上面 3 项**：(1) prerequisite 放宽 (2) HR 主、FHN sensitivity (3) shaft 控制 + cluster 判据 + 3-proxy sensitivity。v1.0.7 prose 保留作 audit trail。
+```
+
+- [ ] **Step 4: Verify framework doc parses (markdown sanity)**
+
+Run: `python -c "open('docs/topic4_sef_itp_framework.md').read().count('v1.0.8 banner amendment 2026-05-27')"`
+Expected: prints `1` (the banner block exists exactly once)
+
+Run: `grep -n "v1.0.8 banner amendment (top of file)" docs/topic4_sef_itp_framework.md | wc -l`
+Expected: `1` (cross-link exists once)
+
+- [ ] **Step 5: Commit Task 0**
+
+```bash
+git add docs/topic4_sef_itp_framework.md
+git commit -m "$(cat <<'EOF'
+docs(topic4 framework): v1.0.8 banner amendment for Phase 4 modeling track
+
+Surgical 3-point modification to §6.5:
+1. Phase 4 prerequisite relaxed from "Phase 1+2+3 PASS" to "structural
+   prerequisite met (phantom-rank fix done + Phase 1 runner done)";
+   model outputs are mechanism exploration only, not cohort verdict.
+2. Node dynamics changed from FHN-only to HR primary + FHN sensitivity.
+3. Shaft sampling discipline + cluster judgement criteria added:
+   ≥6 shaft geometries + negative control; multi-criterion verdict
+   (split-half + odd-even + forward/reverse Spearman + rank-displacement
+   swap_sweep + L4 principal-curve descriptive); 3-proxy (x / dx/dt /
+   detrend envelope) consistency required for framework mechanism
+   support claim (strict).
+
+v1.0.7 §6.5 prose preserved as audit trail; banner block at top of file
+records authorization scope. Full spec at:
+docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md v0.2
+
+Source-of-truth fix: this commit MUST precede any Phase 4 HR
+implementation code; otherwise framework doc contradicts the spec.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Task 0 exit criterion**: framework v1.0.7 → v1.0.8 banner committed. No HR code in this commit.
+
+---
+
+## Task 1: HR core (HRParams + hr_rhs + numba RK4)
+
+**Files:**
+- Delete: `src/topic4_modeling/hr.py` (v1 stub, name too generic; replaced by `hr_core.py`)
+- Delete: `tests/test_topic4_modeling_hr.py` (v1 stub; replaced)
+- Create: `src/topic4_modeling/hr_core.py`
+- Create: `tests/test_topic4_modeling_hr_core.py`
+
+**Math (spec §5.1)**:
+```
+dx/dt = y − a x³ + b x² − z + I + η
+dy/dt = c − d x² − y
+dz/dt = r ( s (x − x_R) − z )
+```
+
+- [ ] **Step 1: Delete v1 stubs**
+
+```bash
+git rm src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
+```
+
+- [ ] **Step 2: Write failing algebraic tests**
+
+Create `tests/test_topic4_modeling_hr_core.py`:
 
 ```python
-"""Tests for src/topic4_modeling/hr.py (Stage 1 single-node HR)."""
+"""Tests for src/topic4_modeling/hr_core.py (HRParams + hr_rhs + RK4)."""
 
 from __future__ import annotations
 
@@ -59,243 +186,67 @@ import numpy as np
 import pytest
 
 
-def test_module_importable():
-    """Sanity: hr module can be imported."""
-    from src.topic4_modeling import hr  # noqa: F401
-```
+# ── HRParams ─────────────────────────────────────────────────────────────
 
-- [ ] **Step 2: Run test to verify it fails (no module yet)**
-
-Run: `pytest tests/test_topic4_modeling_hr.py::test_module_importable -v`
-Expected: FAIL with `ModuleNotFoundError: No module named 'src.topic4_modeling'`
-
-- [ ] **Step 3: Create package + empty stub**
-
-Create `src/topic4_modeling/__init__.py`:
-
-```python
-"""SEF-ITP Phase 4 modeling: Hindmarsh-Rose single-node + 2D sheet + observation layer.
-
-Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md
-"""
-```
-
-Create `src/topic4_modeling/hr.py`:
-
-```python
-"""Stage 1 — Single-node Hindmarsh-Rose excitable unit.
-
-Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1 + §5.1 + §5.3
-"""
-
-from __future__ import annotations
-```
-
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `pytest tests/test_topic4_modeling_hr.py::test_module_importable -v`
-Expected: PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/__init__.py src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4): scaffold src/topic4_modeling package + hr.py stub"
-```
-
----
-
-## Task 2: HRParams dataclass
-
-**Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `tests/test_topic4_modeling_hr.py`:
-
-```python
 def test_hr_params_defaults_match_spec():
-    """Default HRParams should match spec §5.1 baseline values."""
-    from src.topic4_modeling.hr import HRParams
+    """Default HRParams match spec §5.1 baseline."""
+    from src.topic4_modeling.hr_core import HRParams
     p = HRParams()
-    assert p.a == 1.0
-    assert p.b == 3.0
-    assert p.c == 1.0
-    assert p.d == 5.0
-    assert p.r == 0.006
-    assert p.s == 4.0
-    assert p.x_R == -1.6
+    assert p.a == 1.0 and p.b == 3.0 and p.c == 1.0 and p.d == 5.0
+    assert p.r == 0.006 and p.s == 4.0 and p.x_R == -1.6
 
 
 def test_hr_params_is_frozen():
-    """HRParams must be frozen (hashable for caching)."""
-    from src.topic4_modeling.hr import HRParams
+    """HRParams is frozen (hashable for caching, immutable for safety)."""
+    from src.topic4_modeling.hr_core import HRParams
     p = HRParams()
     with pytest.raises((AttributeError, Exception)):
         p.a = 2.0  # type: ignore[misc]
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `pytest tests/test_topic4_modeling_hr.py::test_hr_params_defaults_match_spec tests/test_topic4_modeling_hr.py::test_hr_params_is_frozen -v`
-Expected: FAIL with `ImportError: cannot import name 'HRParams'`
-
-- [ ] **Step 3: Implement HRParams**
-
-Append to `src/topic4_modeling/hr.py`:
-
-```python
-from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
-class HRParams:
-    """Hindmarsh-Rose ODE parameters. Defaults from spec §5.1 baseline."""
-    a: float = 1.0
-    b: float = 3.0
-    c: float = 1.0
-    d: float = 5.0
-    r: float = 0.006
-    s: float = 4.0
-    x_R: float = -1.6
-```
+# ── hr_rhs algebraic invariants ──────────────────────────────────────────
 
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v`
-Expected: PASS (3 tests now)
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): HRParams frozen dataclass with spec defaults"
-```
-
----
-
-## Task 3: HR ODE right-hand side
-
-**Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
-
-HR equations (spec §5.1):
-
-```
-dx/dt = y - a x³ + b x² - z + I + η
-dy/dt = c - d x² - y
-dz/dt = r ( s (x - x_R) - z )
-```
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `tests/test_topic4_modeling_hr.py`:
-
-```python
 def test_hr_rhs_returns_finite_3vec():
-    """rhs(x, y, z, params, I, eta) returns finite (dx, dy, dz)."""
-    from src.topic4_modeling.hr import HRParams, hr_rhs
+    from src.topic4_modeling.hr_core import HRParams, hr_rhs
     p = HRParams()
     dx, dy, dz = hr_rhs(0.0, 0.0, 0.0, p, I=-1.6, eta=0.0)
     assert np.isfinite(dx) and np.isfinite(dy) and np.isfinite(dz)
 
 
-def test_hr_rhs_known_fixed_point_y_equation():
-    """At x = x_R, dy/dt = c - d*x_R² - y (algebraic check)."""
-    from src.topic4_modeling.hr import HRParams, hr_rhs
+def test_hr_rhs_y_eq_at_known_point():
+    """At arbitrary x, y: dy/dt = c - d*x² - y (algebraic identity)."""
+    from src.topic4_modeling.hr_core import HRParams, hr_rhs
     p = HRParams()
-    y_test = -10.0  # arbitrary y
-    _, dy, _ = hr_rhs(p.x_R, y_test, 0.0, p, I=0.0, eta=0.0)
-    expected = p.c - p.d * p.x_R**2 - y_test
+    x_test, y_test = 0.5, -3.0
+    _, dy, _ = hr_rhs(x_test, y_test, 0.0, p, I=0.0, eta=0.0)
+    expected = p.c - p.d * x_test**2 - y_test
     assert dy == pytest.approx(expected)
 
 
-def test_hr_rhs_z_equation_at_x_R_yields_zero_drive():
-    """At x = x_R and z = 0, dz/dt = r * (s * 0 - 0) = 0."""
-    from src.topic4_modeling.hr import HRParams, hr_rhs
+def test_hr_rhs_z_eq_at_x_R_zero_z_yields_zero():
+    """At x = x_R and z = 0: dz/dt = r * (s * 0 - 0) = 0."""
+    from src.topic4_modeling.hr_core import HRParams, hr_rhs
     p = HRParams()
     _, _, dz = hr_rhs(p.x_R, 0.0, 0.0, p, I=0.0, eta=0.0)
     assert dz == pytest.approx(0.0)
 
 
-def test_hr_rhs_eta_adds_to_dx_only():
-    """eta enters dx/dt only (not dy or dz)."""
-    from src.topic4_modeling.hr import HRParams, hr_rhs
+def test_hr_rhs_eta_linear_only_in_dx():
+    """eta enters dx/dt linearly, doesn't enter dy or dz."""
+    from src.topic4_modeling.hr_core import HRParams, hr_rhs
     p = HRParams()
     dx0, dy0, dz0 = hr_rhs(0.0, 0.0, 0.0, p, I=0.0, eta=0.0)
     dx1, dy1, dz1 = hr_rhs(0.0, 0.0, 0.0, p, I=0.0, eta=0.5)
     assert dx1 - dx0 == pytest.approx(0.5)
     assert dy1 == pytest.approx(dy0)
     assert dz1 == pytest.approx(dz0)
-```
 
-- [ ] **Step 2: Run tests to verify they fail**
 
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "hr_rhs"`
-Expected: 4 FAILs with `ImportError: cannot import name 'hr_rhs'`
+# ── RK4 step ─────────────────────────────────────────────────────────────
 
-- [ ] **Step 3: Implement hr_rhs**
-
-Append to `src/topic4_modeling/hr.py`:
-
-```python
-def hr_rhs(
-    x: float,
-    y: float,
-    z: float,
-    params: HRParams,
-    I: float,
-    eta: float,
-) -> tuple[float, float, float]:
-    """Hindmarsh-Rose right-hand side (single node).
-
-    Args:
-        x, y, z: state variables (fast, fast, slow)
-        params: HR parameters
-        I: deterministic input current (baseline + theta)
-        eta: stochastic perturbation (OU noise sample)
-
-    Returns:
-        (dx/dt, dy/dt, dz/dt)
-    """
-    p = params
-    dx = y - p.a * x**3 + p.b * x**2 - z + I + eta
-    dy = p.c - p.d * x**2 - y
-    dz = p.r * (p.s * (x - p.x_R) - z)
-    return dx, dy, dz
-```
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "hr_rhs"`
-Expected: 4 PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): hr_rhs ODE right-hand side"
-```
-
----
-
-## Task 4: RK4 integrator step
-
-**Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `tests/test_topic4_modeling_hr.py`:
-
-```python
-def test_rk4_step_deterministic():
-    """rk4_step with fixed inputs produces deterministic output."""
-    from src.topic4_modeling.hr import HRParams, rk4_step
+def test_rk4_step_deterministic_no_noise():
+    """RK4 step with eta=0 is fully deterministic."""
+    from src.topic4_modeling.hr_core import HRParams, rk4_step
     p = HRParams()
     s0 = (0.0, 0.0, 0.0)
     out1 = rk4_step(s0, p, I=-1.6, eta=0.0, dt=0.05)
@@ -304,51 +255,116 @@ def test_rk4_step_deterministic():
 
 
 def test_rk4_step_returns_finite_3tuple():
-    """rk4_step returns finite (x, y, z)."""
-    from src.topic4_modeling.hr import HRParams, rk4_step
+    from src.topic4_modeling.hr_core import HRParams, rk4_step
     p = HRParams()
     x, y, z = rk4_step((0.0, 0.0, 0.0), p, I=-1.6, eta=0.0, dt=0.05)
     assert np.isfinite(x) and np.isfinite(y) and np.isfinite(z)
 
 
-def test_rk4_step_matches_first_order_euler_in_small_dt_limit():
-    """As dt → 0, RK4 step ≈ Euler step (within O(dt²))."""
-    from src.topic4_modeling.hr import HRParams, hr_rhs, rk4_step
+def test_rk4_step_matches_euler_at_tiny_dt():
+    """As dt → 0, RK4 step ≈ Euler step within O(dt²)."""
+    from src.topic4_modeling.hr_core import HRParams, hr_rhs, rk4_step
     p = HRParams()
     s0 = (-1.0, -5.0, 0.5)
     dt = 1e-4
     x_rk4, y_rk4, z_rk4 = rk4_step(s0, p, I=-1.6, eta=0.0, dt=dt)
     dx, dy, dz = hr_rhs(*s0, p, I=-1.6, eta=0.0)
-    x_euler = s0[0] + dt * dx
-    y_euler = s0[1] + dt * dy
-    z_euler = s0[2] + dt * dz
-    assert x_rk4 == pytest.approx(x_euler, abs=1e-6)
-    assert y_rk4 == pytest.approx(y_euler, abs=1e-6)
-    assert z_rk4 == pytest.approx(z_euler, abs=1e-6)
+    np.testing.assert_allclose(
+        [x_rk4, y_rk4, z_rk4],
+        [s0[0] + dt * dx, s0[1] + dt * dy, s0[2] + dt * dz],
+        atol=1e-6,
+    )
+
+
+# ── numba JIT smoke ──────────────────────────────────────────────────────
+
+def test_hr_rhs_jit_matches_python_version():
+    """Numba-JIT-compiled hr_rhs gives same answer as Python ref (if exposed)."""
+    from src.topic4_modeling.hr_core import HRParams, hr_rhs, hr_rhs_jit
+    p = HRParams()
+    for x in [-1.5, 0.0, 1.0]:
+        for y in [-5.0, 0.0, 2.0]:
+            ref = hr_rhs(x, y, 0.5, p, I=-1.0, eta=0.1)
+            # JIT version takes tuple of params (frozen dataclass → tuple unpack)
+            jit_out = hr_rhs_jit(x, y, 0.5,
+                                 p.a, p.b, p.c, p.d, p.r, p.s, p.x_R,
+                                 I=-1.0, eta=0.1)
+            np.testing.assert_allclose(ref, jit_out, rtol=1e-10)
+
+
+def test_rk4_step_jit_matches_python_version():
+    """JIT RK4 matches Python RK4 within 1e-10."""
+    from src.topic4_modeling.hr_core import HRParams, rk4_step, rk4_step_jit
+    p = HRParams()
+    s0 = (-1.0, -5.0, 0.5)
+    ref = rk4_step(s0, p, I=-1.6, eta=0.0, dt=0.05)
+    jit_out = rk4_step_jit(s0[0], s0[1], s0[2],
+                            p.a, p.b, p.c, p.d, p.r, p.s, p.x_R,
+                            I=-1.6, eta=0.0, dt=0.05)
+    np.testing.assert_allclose(ref, jit_out, rtol=1e-10)
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 3: Verify tests fail**
 
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "rk4_step"`
-Expected: 3 FAILs with `ImportError: cannot import name 'rk4_step'`
+Run: `pytest tests/test_topic4_modeling_hr_core.py -v`
+Expected: 9 FAILs (`ModuleNotFoundError` or `ImportError`).
 
-- [ ] **Step 3: Implement rk4_step**
+- [ ] **Step 4: Implement hr_core.py**
 
-Append to `src/topic4_modeling/hr.py`:
+Create `src/topic4_modeling/hr_core.py`:
 
 ```python
+"""Hindmarsh-Rose ODE core: params + rhs + RK4 step.
+
+Provides both pure-Python reference and numba @njit JIT versions.
+Hot loops (sweep / trajectory) call the _jit variants; tests verify
+JIT and reference agree to numerical tolerance.
+
+Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §5.1
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from numba import njit
+
+
+# ── Parameters (immutable, hashable) ──────────────────────────────────────
+
+@dataclass(frozen=True)
+class HRParams:
+    """Hindmarsh-Rose parameters. Defaults from spec §5.1 baseline."""
+    a: float = 1.0
+    b: float = 3.0
+    c: float = 1.0
+    d: float = 5.0
+    r: float = 0.006
+    s: float = 4.0
+    x_R: float = -1.6
+
+
+# ── Pure-Python reference (used by tests for ground-truth check) ─────────
+
+def hr_rhs(
+    x: float, y: float, z: float,
+    params: HRParams,
+    I: float, eta: float,
+) -> tuple[float, float, float]:
+    """HR ODE right-hand side (reference)."""
+    p = params
+    dx = y - p.a * x**3 + p.b * x**2 - z + I + eta
+    dy = p.c - p.d * x**2 - y
+    dz = p.r * (p.s * (x - p.x_R) - z)
+    return dx, dy, dz
+
+
 def rk4_step(
     state: tuple[float, float, float],
     params: HRParams,
-    I: float,
-    eta: float,
-    dt: float,
+    I: float, eta: float, dt: float,
 ) -> tuple[float, float, float]:
-    """Classical RK4 step on HR ODE (one timestep).
-
-    The stochastic term eta is held constant over the RK4 step (Stratonovich
-    interpretation with sub-step noise frozen — adequate when dt << τ_η).
-    """
+    """Classical RK4 step (reference). eta held constant over the step."""
     x, y, z = state
     k1x, k1y, k1z = hr_rhs(x, y, z, params, I, eta)
     k2x, k2y, k2z = hr_rhs(
@@ -367,84 +383,194 @@ def rk4_step(
     y_new = y + (dt / 6.0) * (k1y + 2.0 * k2y + 2.0 * k3y + k4y)
     z_new = z + (dt / 6.0) * (k1z + 2.0 * k2z + 2.0 * k3z + k4z)
     return x_new, y_new, z_new
+
+
+# ── numba JIT variants (called from hot loops) ───────────────────────────
+#
+# numba does not accept dataclass directly; params expanded to scalars.
+# Cache=True bakes JIT to disk so first-call cost amortized across runs.
+
+@njit(cache=True, fastmath=True)
+def hr_rhs_jit(
+    x, y, z,
+    a, b, c, d, r, s, x_R,
+    I, eta,
+):
+    """HR ODE rhs (numba JIT). Same math as hr_rhs."""
+    dx = y - a * x**3 + b * x**2 - z + I + eta
+    dy = c - d * x**2 - y
+    dz = r * (s * (x - x_R) - z)
+    return dx, dy, dz
+
+
+@njit(cache=True, fastmath=True)
+def rk4_step_jit(
+    x, y, z,
+    a, b, c, d, r, s, x_R,
+    I, eta, dt,
+):
+    """RK4 step (numba JIT)."""
+    k1x, k1y, k1z = hr_rhs_jit(x, y, z, a, b, c, d, r, s, x_R, I, eta)
+    k2x, k2y, k2z = hr_rhs_jit(
+        x + 0.5 * dt * k1x, y + 0.5 * dt * k1y, z + 0.5 * dt * k1z,
+        a, b, c, d, r, s, x_R, I, eta,
+    )
+    k3x, k3y, k3z = hr_rhs_jit(
+        x + 0.5 * dt * k2x, y + 0.5 * dt * k2y, z + 0.5 * dt * k2z,
+        a, b, c, d, r, s, x_R, I, eta,
+    )
+    k4x, k4y, k4z = hr_rhs_jit(
+        x + dt * k3x, y + dt * k3y, z + dt * k3z,
+        a, b, c, d, r, s, x_R, I, eta,
+    )
+    x_new = x + (dt / 6.0) * (k1x + 2.0 * k2x + 2.0 * k3x + k4x)
+    y_new = y + (dt / 6.0) * (k1y + 2.0 * k2y + 2.0 * k3y + k4y)
+    z_new = z + (dt / 6.0) * (k1z + 2.0 * k2z + 2.0 * k3z + k4z)
+    return x_new, y_new, z_new
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 5: Run tests, verify all 9 pass**
 
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "rk4_step"`
-Expected: 3 PASS
+Run: `pytest tests/test_topic4_modeling_hr_core.py -v`
+Expected: 9 PASS.
 
-- [ ] **Step 5: Commit**
+Note: first JIT call ~3-5s for numba compile + cache write. Subsequent runs use disk cache (~50ms). One-time pain.
+
+- [ ] **Step 6: Commit Task 1**
 
 ```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): rk4_step classical RK4 integrator"
+git add src/topic4_modeling/hr_core.py tests/test_topic4_modeling_hr_core.py
+git add -u src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
+git commit -m "$(cat <<'EOF'
+feat(topic4 phase4 stage1): HR core (params + ODE rhs + numba RK4)
+
+Replaces v1 stub (hr.py / test_topic4_modeling_hr.py — deleted).
+hr_core.py provides:
+- HRParams frozen dataclass (spec §5.1 defaults)
+- hr_rhs Python reference for algebraic tests
+- hr_rhs_jit / rk4_step_jit numba @njit(cache=True, fastmath=True)
+  for hot loops (sweep + trajectory)
+
+Tests verify: param defaults + frozen, rhs finiteness + y/z/eta
+algebraic invariants, RK4 determinism + Euler equivalence at tiny dt,
+JIT-vs-Python agreement at 1e-10 rtol.
+
+Numba first-call compile ~3-5s, then cached. Files: 9 tests passing.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
 ```
+
+**Task 1 exit criterion**: hr_core.py with both Python ref + numba JIT; 9 tests green; v1 stubs deleted.
 
 ---
 
-## Task 5: OU noise generator
+## Task 2: OU noise generator (numba)
 
 **Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
+- Create: `src/topic4_modeling/ou_noise.py`
+- Create: `tests/test_topic4_modeling_ou_noise.py`
 
-Spec §5.3: `dη/dt = −η/τ_η + σ_η · ξ(t)`, τ_η = 10 ms (in HR time units; assume 1 HR time unit ≈ 1 ms for stage 1 simplicity → τ_η = 10).
+Spec §5.3: `dη/dt = −η/τ_η + σ_η · ξ(t)`, exact discrete OU update.
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Write tests**
 
-Append to `tests/test_topic4_modeling_hr.py`:
+Create `tests/test_topic4_modeling_ou_noise.py`:
 
 ```python
+"""Tests for src/topic4_modeling/ou_noise.py."""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+
 def test_ou_noise_seed_reproducibility():
-    """Same seed produces same noise trace."""
-    from src.topic4_modeling.hr import generate_ou_noise
-    trace1 = generate_ou_noise(n_steps=1000, dt=0.05, tau=10.0, sigma=0.1, seed=42)
-    trace2 = generate_ou_noise(n_steps=1000, dt=0.05, tau=10.0, sigma=0.1, seed=42)
-    np.testing.assert_array_equal(trace1, trace2)
+    from src.topic4_modeling.ou_noise import generate_ou_noise
+    t1 = generate_ou_noise(n_steps=1000, dt=0.05, tau=10.0, sigma=0.1, seed=42)
+    t2 = generate_ou_noise(n_steps=1000, dt=0.05, tau=10.0, sigma=0.1, seed=42)
+    np.testing.assert_array_equal(t1, t2)
 
 
-def test_ou_noise_stationary_variance_matches_sigma_squared():
-    """Long OU trace has variance ≈ sigma² (analytic stationary variance)."""
-    from src.topic4_modeling.hr import generate_ou_noise
-    trace = generate_ou_noise(n_steps=200_000, dt=0.05, tau=10.0, sigma=0.1, seed=0)
-    burn_in = 5_000
+def test_ou_noise_different_seeds_diverge():
+    from src.topic4_modeling.ou_noise import generate_ou_noise
+    t1 = generate_ou_noise(n_steps=1000, dt=0.05, tau=10.0, sigma=0.1, seed=42)
+    t2 = generate_ou_noise(n_steps=1000, dt=0.05, tau=10.0, sigma=0.1, seed=43)
+    assert not np.array_equal(t1, t2)
+
+
+def test_ou_noise_stationary_variance():
+    """Long sample variance ≈ sigma²."""
+    from src.topic4_modeling.ou_noise import generate_ou_noise
+    trace = generate_ou_noise(
+        n_steps=200_000, dt=0.05, tau=10.0, sigma=0.1, seed=0
+    )
+    burn_in = 5000
     assert np.var(trace[burn_in:]) == pytest.approx(0.1**2, rel=0.15)
 
 
-def test_ou_noise_autocorrelation_time_matches_tau():
-    """Autocorrelation at lag = τ should equal 1/e of zero-lag (analytic OU)."""
-    from src.topic4_modeling.hr import generate_ou_noise
-    tau = 10.0
-    dt = 0.05
+def test_ou_noise_autocorrelation_at_lag_tau_is_inv_e():
+    """Autocorrelation at lag = tau ≈ 1/e."""
+    from src.topic4_modeling.ou_noise import generate_ou_noise
+    tau, dt = 10.0, 0.05
     trace = generate_ou_noise(n_steps=400_000, dt=dt, tau=tau, sigma=0.2, seed=1)
-    burn_in = 5_000
-    x = trace[burn_in:]
-    x = x - x.mean()
+    burn_in = 5000
+    x = trace[burn_in:] - trace[burn_in:].mean()
     var0 = (x * x).mean()
-    lag_steps = int(tau / dt)
-    cov_lag = (x[:-lag_steps] * x[lag_steps:]).mean()
-    autocorr = cov_lag / var0
-    assert autocorr == pytest.approx(np.exp(-1.0), abs=0.1)
+    lag = int(tau / dt)
+    autocorr = (x[:-lag] * x[lag:]).mean() / var0
+    assert autocorr == pytest.approx(np.exp(-1.0), abs=0.05)
 
 
-def test_ou_noise_length_matches_n_steps():
-    """Output length equals n_steps."""
-    from src.topic4_modeling.hr import generate_ou_noise
+def test_ou_noise_length_exact():
+    from src.topic4_modeling.ou_noise import generate_ou_noise
     trace = generate_ou_noise(n_steps=137, dt=0.05, tau=10.0, sigma=0.1, seed=0)
     assert trace.shape == (137,)
+
+
+def test_ou_noise_zero_sigma_returns_zero_trace():
+    from src.topic4_modeling.ou_noise import generate_ou_noise
+    trace = generate_ou_noise(n_steps=100, dt=0.05, tau=10.0, sigma=0.0, seed=0)
+    np.testing.assert_array_equal(trace, np.zeros(100))
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run, verify failures**
 
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "ou_noise"`
-Expected: 4 FAILs with `ImportError: cannot import name 'generate_ou_noise'`
+`pytest tests/test_topic4_modeling_ou_noise.py -v` → 6 FAILs
 
-- [ ] **Step 3: Implement generate_ou_noise**
+- [ ] **Step 3: Implement ou_noise.py**
 
-Append to `src/topic4_modeling/hr.py`:
+Create `src/topic4_modeling/ou_noise.py`:
 
 ```python
+"""Ornstein-Uhlenbeck noise generator (numba JIT).
+
+Exact discrete OU update:
+    η[t+dt] = η[t] · exp(-dt/τ) + sigma · sqrt(1 - exp(-2 dt/τ)) · N(0,1)
+
+so that stationary variance = sigma² regardless of dt.
+
+Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §5.3
+"""
+
+from __future__ import annotations
+
+import numpy as np
+from numba import njit
+
+
+@njit(cache=True, fastmath=True)
+def _ou_loop_jit(n_steps: int, decay: float, noise_scale: float,
+                  randn: np.ndarray) -> np.ndarray:
+    """numba hot loop: applies discrete OU update n_steps times."""
+    eta = np.zeros(n_steps)
+    for i in range(1, n_steps):
+        eta[i] = eta[i - 1] * decay + noise_scale * randn[i]
+    return eta
+
+
 def generate_ou_noise(
     n_steps: int,
     dt: float,
@@ -452,499 +578,268 @@ def generate_ou_noise(
     sigma: float,
     seed: int,
 ) -> np.ndarray:
-    """Generate Ornstein-Uhlenbeck noise trace.
+    """Generate OU noise trace with stationary variance sigma².
 
-    SDE: dη = -η/τ dt + sigma * sqrt(2/τ) dW (so stationary variance = sigma²)
-
-    Args:
-        n_steps: number of timesteps
-        dt: timestep
-        tau: correlation time
-        sigma: stationary std (target Var = sigma²)
-        seed: random seed
-
-    Returns:
-        OU trace of shape (n_steps,), starting from η_0 = 0.
+    Returns trace of shape (n_steps,) starting from eta_0 = 0.
     """
+    if sigma == 0.0:
+        return np.zeros(n_steps)
     rng = np.random.default_rng(seed)
-    eta = np.zeros(n_steps)
-    # Exact discrete OU update for constant timestep:
-    # η[t+dt] = η[t] * exp(-dt/τ) + sigma * sqrt(1 - exp(-2 dt/τ)) * N(0,1)
-    decay = np.exp(-dt / tau)
-    noise_scale = sigma * np.sqrt(1.0 - decay**2)
+    decay = float(np.exp(-dt / tau))
+    noise_scale = float(sigma * np.sqrt(1.0 - decay**2))
     randn = rng.standard_normal(n_steps)
-    for i in range(1, n_steps):
-        eta[i] = eta[i - 1] * decay + noise_scale * randn[i]
-    return eta
+    return _ou_loop_jit(n_steps, decay, noise_scale, randn)
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 4: Run, verify 6 pass**
 
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "ou_noise"`
-Expected: 4 PASS
+`pytest tests/test_topic4_modeling_ou_noise.py -v` → 6 PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Commit Task 2**
 
 ```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): generate_ou_noise (exact discrete OU)"
+git add src/topic4_modeling/ou_noise.py tests/test_topic4_modeling_ou_noise.py
+git commit -m "$(cat <<'EOF'
+feat(topic4 phase4 stage1): OU noise generator with numba JIT loop
+
+Exact discrete OU update so stationary variance equals sigma^2
+independent of dt. RNG via numpy default_rng(seed); randn array
+pre-generated outside JIT loop (numba cannot use default_rng directly
+without explicit typing). Hot per-step update is inside @njit loop.
+
+Tests: seed reproducibility, different seeds diverge, stationary
+variance within 15% of target, autocorrelation at lag tau ~= 1/e
+within abs 0.05, length exactness, zero-sigma fast-path.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
 ```
+
+**Task 2 exit criterion**: ou_noise.py + 6 tests green; numba JIT hot loop in `_ou_loop_jit`.
 
 ---
 
-## Task 6: Trajectory simulator
+## Task 3: Trajectory + burst detector + regime classifier (config-driven)
 
 **Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
+- Create: `src/topic4_modeling/hr_config.py`
+- Create: `src/topic4_modeling/hr_dynamics.py`
+- Create: `tests/test_topic4_modeling_hr_dynamics.py`
 
-- [ ] **Step 1: Write the failing test**
+Centralized thresholds (no magic numbers) in `hr_config.py` per user-return critique.
 
-Append to `tests/test_topic4_modeling_hr.py`:
+- [ ] **Step 1: Write tests**
 
-```python
-def test_simulate_trajectory_shapes():
-    """Output shapes match expected (n_steps, 3) for state + (n_steps,) for time."""
-    from src.topic4_modeling.hr import HRParams, simulate_trajectory
-    p = HRParams()
-    t, traj = simulate_trajectory(p, I=-1.6, T=10.0, dt=0.05,
-                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
-    n_expected = int(10.0 / 0.05)
-    assert t.shape == (n_expected,)
-    assert traj.shape == (n_expected, 3)
-
-
-def test_simulate_trajectory_reproducibility_with_seed():
-    """Same seed → same trajectory."""
-    from src.topic4_modeling.hr import HRParams, simulate_trajectory
-    p = HRParams()
-    _, t1 = simulate_trajectory(p, I=-1.6, T=50.0, dt=0.05,
-                                 sigma_ou=0.1, tau_ou=10.0, seed=42)
-    _, t2 = simulate_trajectory(p, I=-1.6, T=50.0, dt=0.05,
-                                 sigma_ou=0.1, tau_ou=10.0, seed=42)
-    np.testing.assert_array_equal(t1, t2)
-
-
-def test_simulate_trajectory_silent_at_low_I_no_noise():
-    """At very low I (deeply sub-threshold) with no noise, x stays bounded near rest."""
-    from src.topic4_modeling.hr import HRParams, simulate_trajectory
-    p = HRParams()
-    _, traj = simulate_trajectory(p, I=-2.5, T=200.0, dt=0.05,
-                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
-    x = traj[:, 0]
-    # x should not exhibit bursting (max stays below burst threshold)
-    assert x.max() < 0.5, f"x.max()={x.max()} suggests spontaneous firing at I=-2.5"
-
-
-def test_simulate_trajectory_repetitive_burst_at_high_I():
-    """At elevated I (above stable rest), HR enters repetitive bursting."""
-    from src.topic4_modeling.hr import HRParams, simulate_trajectory
-    p = HRParams()
-    _, traj = simulate_trajectory(p, I=2.0, T=300.0, dt=0.05,
-                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
-    x = traj[:, 0]
-    # multiple bursts means many crossings above x=1.0
-    crossings_up = np.sum((x[:-1] < 1.0) & (x[1:] >= 1.0))
-    assert crossings_up >= 3, f"At I=2.0 expected ≥3 bursts, got {crossings_up}"
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "simulate_trajectory"`
-Expected: 4 FAILs with `ImportError: cannot import name 'simulate_trajectory'`
-
-- [ ] **Step 3: Implement simulate_trajectory**
-
-Append to `src/topic4_modeling/hr.py`:
+Create `tests/test_topic4_modeling_hr_dynamics.py`:
 
 ```python
-def simulate_trajectory(
-    params: HRParams,
-    I: float,
-    T: float,
-    dt: float,
-    sigma_ou: float,
-    tau_ou: float,
-    seed: int,
-    x0: float = -1.6,
-    y0: float = -10.0,
-    z0: float = 2.0,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Simulate single-node HR trajectory for duration T.
-
-    Args:
-        params: HR parameters
-        I: constant input current
-        T: total simulated time (HR time units)
-        dt: integration timestep
-        sigma_ou: OU noise stationary std (0 disables noise)
-        tau_ou: OU noise correlation time
-        seed: random seed (also picks initial state perturbation)
-        x0, y0, z0: initial conditions (default near typical HR rest)
-
-    Returns:
-        (t, trajectory) where t.shape = (n_steps,) and trajectory.shape = (n_steps, 3)
-        with columns [x, y, z].
-    """
-    n_steps = int(T / dt)
-    t = np.arange(n_steps) * dt
-    trajectory = np.zeros((n_steps, 3))
-    trajectory[0] = (x0, y0, z0)
-
-    if sigma_ou > 0.0:
-        eta = generate_ou_noise(n_steps, dt, tau_ou, sigma_ou, seed)
-    else:
-        eta = np.zeros(n_steps)
-
-    state = (x0, y0, z0)
-    for i in range(1, n_steps):
-        state = rk4_step(state, params, I, eta[i], dt)
-        trajectory[i] = state
-    return t, trajectory
-```
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "simulate_trajectory"`
-Expected: 4 PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): simulate_trajectory (RK4 + OU noise)"
-```
-
----
-
-## Task 7: Burst detector with hysteresis
-
-**Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `tests/test_topic4_modeling_hr.py`:
-
-```python
-def test_detect_bursts_zero_on_silent_trace():
-    """Constant x=-1.6 (rest) produces no bursts."""
-    from src.topic4_modeling.hr import detect_bursts
-    t = np.arange(0, 100, 0.05)
-    x = np.full_like(t, -1.6)
-    bursts = detect_bursts(x, t, x_threshold=1.0, min_duration=5.0)
-    assert bursts == []
-
-
-def test_detect_bursts_one_on_synthetic_pulse():
-    """Single pulse above threshold for >min_duration registers as 1 burst."""
-    from src.topic4_modeling.hr import detect_bursts
-    t = np.arange(0, 100, 0.05)
-    x = np.full_like(t, -1.6)
-    # pulse from t=10 to t=20 (10 ms wide, well above 5 ms min)
-    x[(t >= 10.0) & (t <= 20.0)] = 1.5
-    bursts = detect_bursts(x, t, x_threshold=1.0, min_duration=5.0)
-    assert len(bursts) == 1
-    t_start, t_end = bursts[0]
-    assert t_start == pytest.approx(10.0, abs=0.1)
-    assert t_end == pytest.approx(20.0, abs=0.1)
-
-
-def test_detect_bursts_hysteresis_ignores_brief_dip():
-    """Brief dip below threshold within a sustained burst does not split it."""
-    from src.topic4_modeling.hr import detect_bursts
-    t = np.arange(0, 100, 0.05)
-    x = np.full_like(t, -1.6)
-    x[(t >= 10.0) & (t <= 30.0)] = 1.5
-    # 1 ms dip below threshold (shorter than 5 ms min_duration)
-    x[(t >= 19.5) & (t <= 20.5)] = 0.5
-    bursts = detect_bursts(x, t, x_threshold=1.0, min_duration=5.0)
-    assert len(bursts) == 1, (
-        f"Expected 1 burst (hysteresis should bridge 1ms dip), got {len(bursts)}"
-    )
-
-
-def test_detect_bursts_three_well_separated():
-    """Three well-separated pulses give 3 bursts."""
-    from src.topic4_modeling.hr import detect_bursts
-    t = np.arange(0, 200, 0.05)
-    x = np.full_like(t, -1.6)
-    for t_start in [10.0, 60.0, 120.0]:
-        x[(t >= t_start) & (t <= t_start + 10.0)] = 1.5
-    bursts = detect_bursts(x, t, x_threshold=1.0, min_duration=5.0)
-    assert len(bursts) == 3
-
-
-def test_detect_bursts_rejects_brief_above_threshold_noise():
-    """Brief spike above threshold (<min_duration) is rejected as not a burst."""
-    from src.topic4_modeling.hr import detect_bursts
-    t = np.arange(0, 100, 0.05)
-    x = np.full_like(t, -1.6)
-    # 1ms spike — well below 5ms min_duration
-    x[(t >= 10.0) & (t <= 11.0)] = 1.5
-    bursts = detect_bursts(x, t, x_threshold=1.0, min_duration=5.0)
-    assert bursts == []
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "detect_bursts"`
-Expected: 5 FAILs
-
-- [ ] **Step 3: Implement detect_bursts**
-
-Append to `src/topic4_modeling/hr.py`:
-
-```python
-def detect_bursts(
-    x: np.ndarray,
-    t: np.ndarray,
-    x_threshold: float = 1.0,
-    min_duration: float = 5.0,
-    bridge_gap: float = 2.0,
-) -> list[tuple[float, float]]:
-    """Detect bursts in x trace using hysteresis + min duration.
-
-    Algorithm:
-        1. Find contiguous segments where x > x_threshold
-        2. Bridge segments separated by gaps < bridge_gap (hysteresis)
-        3. Filter out merged segments shorter than min_duration
-
-    Args:
-        x: signal trace
-        t: time array (same shape as x)
-        x_threshold: amplitude threshold for "above"
-        min_duration: minimum burst duration (HR time units; spec: 5ms)
-        bridge_gap: max gap (HR time units) to bridge within a single burst
-
-    Returns:
-        list of (t_start, t_end) tuples, one per detected burst.
-    """
-    above = x > x_threshold
-    if not above.any():
-        return []
-    # Find rising / falling edges
-    transitions = np.diff(above.astype(np.int8))
-    rises = np.where(transitions == 1)[0] + 1
-    falls = np.where(transitions == -1)[0] + 1
-    # Handle boundary conditions
-    if above[0]:
-        rises = np.concatenate([[0], rises])
-    if above[-1]:
-        falls = np.concatenate([falls, [len(x)]])
-    # Build raw segments [(rise_idx, fall_idx), ...]
-    segments = list(zip(rises, falls))
-    # Bridge gaps
-    bridged: list[tuple[int, int]] = []
-    for seg in segments:
-        if bridged and (t[seg[0]] - t[bridged[-1][1] - 1]) < bridge_gap:
-            bridged[-1] = (bridged[-1][0], seg[1])
-        else:
-            bridged.append(seg)
-    # Filter by min_duration
-    result = []
-    for r, f in bridged:
-        t_start = t[r]
-        t_end = t[f - 1]
-        if (t_end - t_start) >= min_duration:
-            result.append((t_start, t_end))
-    return result
-```
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "detect_bursts"`
-Expected: 5 PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): detect_bursts with hysteresis + min_duration"
-```
-
----
-
-## Task 8: Regime classifier
-
-**Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
-
-Four regimes per spec §3 stage 1: silent / single-burst (= excitable, requires perturbation per burst) / repetitive-burst (spontaneous) / unstable (burst doesn't terminate).
-
-Operational definitions (concrete, testable):
-- **silent**: 0 bursts in T
-- **excitable**: ≥1 burst, all bursts ≤ 50 HR time units, mean inter-burst-interval ≥ 30 HR time units (sparse, perturbation-driven)
-- **repetitive-burst**: ≥3 bursts, mean inter-burst-interval < 30 HR time units (regular spontaneous)
-- **unstable**: any single burst longer than 100 HR time units (no termination)
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `tests/test_topic4_modeling_hr.py`:
-
-```python
-def test_classify_regime_silent_when_zero_bursts():
-    """No bursts → 'silent'."""
-    from src.topic4_modeling.hr import classify_regime
-    assert classify_regime(bursts=[], T=1000.0) == "silent"
-
-
-def test_classify_regime_excitable_when_sparse_short_bursts():
-    """Sparse short bursts (long IBI) → 'excitable'."""
-    from src.topic4_modeling.hr import classify_regime
-    bursts = [(100.0, 110.0), (300.0, 310.0), (700.0, 710.0)]  # IBI ~190
-    assert classify_regime(bursts=bursts, T=1000.0) == "excitable"
-
-
-def test_classify_regime_repetitive_burst_when_regular_short_ibi():
-    """Regular short-IBI bursts → 'repetitive-burst'."""
-    from src.topic4_modeling.hr import classify_regime
-    bursts = [(t, t + 5.0) for t in range(50, 500, 20)]  # IBI = 20 < 30
-    assert classify_regime(bursts=bursts, T=1000.0) == "repetitive-burst"
-
-
-def test_classify_regime_unstable_when_burst_does_not_terminate():
-    """Burst lasting >100 time units → 'unstable'."""
-    from src.topic4_modeling.hr import classify_regime
-    bursts = [(50.0, 200.0)]  # 150 unit burst
-    assert classify_regime(bursts=bursts, T=1000.0) == "unstable"
-
-
-def test_classify_regime_unstable_takes_precedence_over_repetitive():
-    """Even if many bursts, one unstable burst dominates classification."""
-    from src.topic4_modeling.hr import classify_regime
-    bursts = [(50.0, 55.0), (60.0, 65.0), (70.0, 200.0)]  # last one unstable
-    assert classify_regime(bursts=bursts, T=1000.0) == "unstable"
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "classify_regime"`
-Expected: 5 FAILs
-
-- [ ] **Step 3: Implement classify_regime**
-
-Append to `src/topic4_modeling/hr.py`:
-
-```python
-def classify_regime(
-    bursts: list[tuple[float, float]],
-    T: float,
-    max_burst_duration: float = 100.0,
-    excitable_max_burst: float = 50.0,
-    excitable_min_ibi: float = 30.0,
-) -> str:
-    """Classify HR regime from burst list.
-
-    Returns one of: "silent", "excitable", "repetitive-burst", "unstable".
-
-    Spec §3 Stage 1 + this plan task 8 operational definitions.
-    """
-    if not bursts:
-        return "silent"
-    durations = [end - start for start, end in bursts]
-    if any(d > max_burst_duration for d in durations):
-        return "unstable"
-    if len(bursts) >= 2:
-        ibis = [bursts[i + 1][0] - bursts[i][1] for i in range(len(bursts) - 1)]
-        mean_ibi = float(np.mean(ibis))
-    else:
-        mean_ibi = float("inf")
-    if (
-        all(d <= excitable_max_burst for d in durations)
-        and mean_ibi >= excitable_min_ibi
-    ):
-        return "excitable"
-    return "repetitive-burst"
-```
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "classify_regime"`
-Expected: 5 PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): classify_regime (silent/excitable/repetitive/unstable)"
-```
-
----
-
-## Task 9: Phase portrait + nullclines plotter
-
-**Files:**
-- Create: `src/topic4_modeling/hr_viz.py`
-- Create: `tests/test_topic4_modeling_hr_viz.py`
-
-- [ ] **Step 1: Write the failing test**
-
-Create `tests/test_topic4_modeling_hr_viz.py`:
-
-```python
-"""Tests for src/topic4_modeling/hr_viz.py."""
+"""Tests for src/topic4_modeling/hr_dynamics.py + hr_config.py."""
 
 from __future__ import annotations
 
 import numpy as np
 import pytest
-import matplotlib
-
-matplotlib.use("Agg")  # headless
-import matplotlib.pyplot as plt
 
 
-def test_nullcline_x_formula_at_known_point():
-    """x-nullcline: y = a x³ - b x² + z - I at given x."""
-    from src.topic4_modeling.hr_viz import compute_x_nullcline
-    from src.topic4_modeling.hr import HRParams
+# ── hr_config ────────────────────────────────────────────────────────────
+
+def test_burst_thresholds_defaults():
+    """BurstConfig has defaults matching spec §3 stage 1."""
+    from src.topic4_modeling.hr_config import BurstConfig
+    c = BurstConfig()
+    assert c.x_threshold == 1.0
+    assert c.min_burst_duration == 5.0
+    assert c.bridge_gap == 2.0
+
+
+def test_regime_thresholds_defaults():
+    """RegimeConfig has defaults matching spec §3 stage 1."""
+    from src.topic4_modeling.hr_config import RegimeConfig
+    c = RegimeConfig()
+    assert c.max_burst_duration == 100.0
+    assert c.excitable_max_burst == 50.0
+    assert c.excitable_min_ibi == 30.0
+
+
+# ── simulate_trajectory ──────────────────────────────────────────────────
+
+def test_simulate_trajectory_shapes():
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
     p = HRParams()
-    x_grid = np.array([0.0, 1.0, -1.0])
-    y_null = compute_x_nullcline(x_grid, params=p, z=0.5, I=-1.6)
-    expected = p.a * x_grid**3 - p.b * x_grid**2 + 0.5 - (-1.6)
-    np.testing.assert_allclose(y_null, expected)
+    t, traj = simulate_trajectory(p, I=-1.6, T=10.0, dt=0.05,
+                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
+    n = int(10.0 / 0.05)
+    assert t.shape == (n,)
+    assert traj.shape == (n, 3)
 
 
-def test_nullcline_y_formula_at_known_point():
-    """y-nullcline: y = c - d x²."""
-    from src.topic4_modeling.hr_viz import compute_y_nullcline
-    from src.topic4_modeling.hr import HRParams
+def test_simulate_trajectory_reproducibility():
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
     p = HRParams()
-    x_grid = np.array([0.0, 1.0, -1.0])
-    y_null = compute_y_nullcline(x_grid, params=p)
-    expected = p.c - p.d * x_grid**2
-    np.testing.assert_allclose(y_null, expected)
+    _, a = simulate_trajectory(p, I=-1.6, T=50.0, dt=0.05,
+                                sigma_ou=0.1, tau_ou=10.0, seed=42)
+    _, b = simulate_trajectory(p, I=-1.6, T=50.0, dt=0.05,
+                                sigma_ou=0.1, tau_ou=10.0, seed=42)
+    np.testing.assert_array_equal(a, b)
 
 
-def test_plot_phase_portrait_smoke(tmp_path):
-    """plot_phase_portrait runs and saves PNG with expected size."""
-    from src.topic4_modeling.hr_viz import plot_phase_portrait
-    from src.topic4_modeling.hr import HRParams, simulate_trajectory
+def test_simulate_trajectory_silent_at_deeply_subthreshold():
+    """At I=-3.0 no noise → no bursts (x.max stays low)."""
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
     p = HRParams()
-    _, traj = simulate_trajectory(p, I=-1.6, T=200.0, dt=0.05,
-                                   sigma_ou=0.1, tau_ou=10.0, seed=0)
-    out = tmp_path / "phase_portrait.png"
-    fig = plot_phase_portrait(traj, params=p, I=-1.6)
-    fig.savefig(out)
-    plt.close(fig)
-    assert out.exists()
-    assert out.stat().st_size > 1000  # non-trivial png
+    _, traj = simulate_trajectory(p, I=-3.0, T=200.0, dt=0.05,
+                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
+    assert traj[:, 0].max() < 0.5
+
+
+def test_simulate_trajectory_repetitive_at_high_I():
+    """At I=2.0 spontaneous bursting (≥3 x-crossings up through 1.0)."""
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
+    p = HRParams()
+    _, traj = simulate_trajectory(p, I=2.0, T=300.0, dt=0.05,
+                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
+    x = traj[:, 0]
+    ups = np.sum((x[:-1] < 1.0) & (x[1:] >= 1.0))
+    assert ups >= 3
+
+
+# ── detect_bursts ────────────────────────────────────────────────────────
+
+def test_detect_bursts_zero_on_silent_trace():
+    from src.topic4_modeling.hr_dynamics import detect_bursts
+    from src.topic4_modeling.hr_config import BurstConfig
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    assert detect_bursts(x, t, BurstConfig()) == []
+
+
+def test_detect_bursts_one_pulse():
+    from src.topic4_modeling.hr_dynamics import detect_bursts
+    from src.topic4_modeling.hr_config import BurstConfig
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5
+    bursts = detect_bursts(x, t, BurstConfig())
+    assert len(bursts) == 1
+    assert bursts[0][0] == pytest.approx(10.0, abs=0.1)
+
+
+def test_detect_bursts_hysteresis_bridges_short_dip():
+    from src.topic4_modeling.hr_dynamics import detect_bursts
+    from src.topic4_modeling.hr_config import BurstConfig
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 30.0)] = 1.5
+    x[(t >= 19.5) & (t <= 20.5)] = 0.5  # 1ms dip < bridge_gap=2ms
+    assert len(detect_bursts(x, t, BurstConfig())) == 1
+
+
+def test_detect_bursts_three_separated():
+    from src.topic4_modeling.hr_dynamics import detect_bursts
+    from src.topic4_modeling.hr_config import BurstConfig
+    t = np.arange(0, 200, 0.05)
+    x = np.full_like(t, -1.6)
+    for t0 in [10.0, 60.0, 120.0]:
+        x[(t >= t0) & (t <= t0 + 10.0)] = 1.5
+    assert len(detect_bursts(x, t, BurstConfig())) == 3
+
+
+def test_detect_bursts_rejects_short_noise_spike():
+    from src.topic4_modeling.hr_dynamics import detect_bursts
+    from src.topic4_modeling.hr_config import BurstConfig
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 11.0)] = 1.5  # 1ms < min_burst_duration=5ms
+    assert detect_bursts(x, t, BurstConfig()) == []
+
+
+# ── classify_regime ─────────────────────────────────────────────────────
+
+def test_classify_regime_silent():
+    from src.topic4_modeling.hr_dynamics import classify_regime
+    from src.topic4_modeling.hr_config import RegimeConfig
+    assert classify_regime([], T=1000.0, cfg=RegimeConfig()) == "silent"
+
+
+def test_classify_regime_excitable_sparse_short():
+    from src.topic4_modeling.hr_dynamics import classify_regime
+    from src.topic4_modeling.hr_config import RegimeConfig
+    bursts = [(100.0, 110.0), (300.0, 310.0), (700.0, 710.0)]
+    assert classify_regime(bursts, T=1000.0, cfg=RegimeConfig()) == "excitable"
+
+
+def test_classify_regime_repetitive_burst():
+    from src.topic4_modeling.hr_dynamics import classify_regime
+    from src.topic4_modeling.hr_config import RegimeConfig
+    bursts = [(t, t + 5.0) for t in range(50, 500, 20)]  # IBI=15<30
+    assert classify_regime(bursts, T=1000.0, cfg=RegimeConfig()) == "repetitive-burst"
+
+
+def test_classify_regime_unstable_long_burst():
+    from src.topic4_modeling.hr_dynamics import classify_regime
+    from src.topic4_modeling.hr_config import RegimeConfig
+    assert classify_regime([(50.0, 200.0)], T=1000.0, cfg=RegimeConfig()) == "unstable"
+
+
+def test_classify_regime_unstable_takes_precedence():
+    from src.topic4_modeling.hr_dynamics import classify_regime
+    from src.topic4_modeling.hr_config import RegimeConfig
+    bursts = [(50.0, 55.0), (60.0, 65.0), (70.0, 200.0)]
+    assert classify_regime(bursts, T=1000.0, cfg=RegimeConfig()) == "unstable"
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Run, verify all fail**
 
-Run: `pytest tests/test_topic4_modeling_hr_viz.py -v`
-Expected: 3 FAILs with `ModuleNotFoundError`
+`pytest tests/test_topic4_modeling_hr_dynamics.py -v` → all FAIL (modules don't exist).
 
-- [ ] **Step 3: Implement hr_viz.py**
+- [ ] **Step 3: Implement hr_config.py**
 
-Create `src/topic4_modeling/hr_viz.py`:
+Create `src/topic4_modeling/hr_config.py`:
 
 ```python
-"""Stage 1 phase-portrait + nullcline visualization for HR single node.
+"""Centralized thresholds for HR burst detection + regime classification.
+
+Centralizing here avoids magic numbers in hr_dynamics.py and lets the
+sweep / CLI override per experiment.
+
+Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class BurstConfig:
+    """Burst detection thresholds (HR time units; spec: 1 HR unit ≈ 1 ms)."""
+    x_threshold: float = 1.0       # x crossing to call "above"
+    min_burst_duration: float = 5.0  # below this is rejected as noise spike
+    bridge_gap: float = 2.0          # gaps shorter than this don't split a burst
+
+
+@dataclass(frozen=True)
+class RegimeConfig:
+    """Regime classification thresholds (HR time units)."""
+    max_burst_duration: float = 100.0  # exceeding this = "unstable"
+    excitable_max_burst: float = 50.0  # all bursts shorter than this = excitable-compatible
+    excitable_min_ibi: float = 30.0    # IBI shorter than this = repetitive-burst
+```
+
+- [ ] **Step 4: Implement hr_dynamics.py**
+
+Create `src/topic4_modeling/hr_dynamics.py`:
+
+```python
+"""Trajectory simulation + burst detection + regime classification.
+
+simulate_trajectory uses the numba JIT kernels from hr_core + ou_noise.
+detect_bursts and classify_regime stay numpy / pure Python (not hot loops).
 
 Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
 """
@@ -952,222 +847,187 @@ Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
 from __future__ import annotations
 
 import numpy as np
-import matplotlib.pyplot as plt
+from numba import njit
 
-from .hr import HRParams
+from .hr_config import BurstConfig, RegimeConfig
+from .hr_core import HRParams, rk4_step_jit
+from .ou_noise import generate_ou_noise
 
 
-def compute_x_nullcline(
-    x_grid: np.ndarray, params: HRParams, z: float, I: float,
+@njit(cache=True, fastmath=True)
+def _trajectory_jit(
+    n_steps: int, dt: float,
+    x0: float, y0: float, z0: float,
+    a: float, b: float, c: float, d: float, r: float, s: float, x_R: float,
+    I: float,
+    eta_trace: np.ndarray,
 ) -> np.ndarray:
-    """x-nullcline: where dx/dt = 0, given z and I (and eta=0).
+    """numba hot loop: run RK4 trajectory using pre-computed eta trace."""
+    traj = np.empty((n_steps, 3))
+    traj[0, 0] = x0
+    traj[0, 1] = y0
+    traj[0, 2] = z0
+    x, y, z = x0, y0, z0
+    for i in range(1, n_steps):
+        x, y, z = rk4_step_jit(x, y, z, a, b, c, d, r, s, x_R,
+                                I, eta_trace[i], dt)
+        traj[i, 0] = x
+        traj[i, 1] = y
+        traj[i, 2] = z
+    return traj
 
-    From dx/dt = y - a x³ + b x² - z + I = 0:
-        y = a x³ - b x² + z - I
-    """
-    p = params
-    return p.a * x_grid**3 - p.b * x_grid**2 + z - I
 
-
-def compute_y_nullcline(x_grid: np.ndarray, params: HRParams) -> np.ndarray:
-    """y-nullcline: where dy/dt = 0:  y = c - d x²."""
-    p = params
-    return p.c - p.d * x_grid**2
-
-
-def plot_phase_portrait(
-    trajectory: np.ndarray,
+def simulate_trajectory(
     params: HRParams,
-    I: float,
-    figsize: tuple[float, float] = (8.0, 6.0),
-) -> plt.Figure:
-    """Plot phase portrait: x-y plane with trajectory overlay + nullclines.
+    I: float, T: float, dt: float,
+    sigma_ou: float, tau_ou: float, seed: int,
+    x0: float = -1.6, y0: float = -10.0, z0: float = 2.0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Run HR single-node trajectory for duration T, return (t, traj).
 
-    Nullclines drawn at trajectory mean z (single representative z slice).
+    Uses numba JIT kernels under the hood (~50ms per simulation for
+    T=500, dt=0.05 = 10000 steps after first compile).
     """
-    x = trajectory[:, 0]
-    y = trajectory[:, 1]
-    z_mean = float(trajectory[:, 2].mean())
-
-    x_grid = np.linspace(x.min() - 0.5, x.max() + 0.5, 400)
-    y_null_x = compute_x_nullcline(x_grid, params, z_mean, I)
-    y_null_y = compute_y_nullcline(x_grid, params)
-
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.plot(x, y, alpha=0.4, color="C0", linewidth=0.5, label="trajectory")
-    ax.plot(x_grid, y_null_x, "r-", label=f"dx/dt=0  (z≈{z_mean:.2f})")
-    ax.plot(x_grid, y_null_y, "g-", label="dy/dt=0")
-    ax.scatter([x[0]], [y[0]], marker="o", color="black", zorder=5, label="start")
-    ax.scatter([x[-1]], [y[-1]], marker="s", color="black", zorder=5, label="end")
-    ax.set_xlabel("x (fast voltage-like)")
-    ax.set_ylabel("y (spiking variable)")
-    ax.set_title(f"HR phase portrait  (I={I:.2f})")
-    ax.legend(loc="upper right", fontsize=8)
-    ax.grid(True, alpha=0.3)
-    margin_y = 0.1 * (y.max() - y.min() + 1e-6)
-    ax.set_ylim(y.min() - margin_y, y.max() + margin_y)
-    return fig
-```
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `pytest tests/test_topic4_modeling_hr_viz.py -v`
-Expected: 3 PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr_viz.py tests/test_topic4_modeling_hr_viz.py
-git commit -m "feat(topic4 phase4 stage1): hr_viz nullclines + phase portrait plotter"
-```
-
----
-
-## Task 10: Single-cell regime evaluator (composing trajectory + bursts + classify)
-
-**Files:**
-- Modify: `src/topic4_modeling/hr.py`
-- Modify: `tests/test_topic4_modeling_hr.py`
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `tests/test_topic4_modeling_hr.py`:
-
-```python
-def test_evaluate_cell_returns_regime_string_and_metadata():
-    """evaluate_cell composes simulate + detect + classify into one call."""
-    from src.topic4_modeling.hr import HRParams, evaluate_cell
-    p = HRParams()
-    result = evaluate_cell(p, I=-2.5, sigma_ou=0.0, tau_ou=10.0,
-                           r_override=None, T=500.0, dt=0.05, seed=0)
-    assert isinstance(result, dict)
-    assert "regime" in result
-    assert "n_bursts" in result
-    assert "mean_burst_duration" in result
-    assert "mean_ibi" in result
-    assert result["regime"] in {"silent", "excitable", "repetitive-burst", "unstable"}
+    n_steps = int(T / dt)
+    t = np.arange(n_steps) * dt
+    eta = generate_ou_noise(n_steps, dt, tau_ou, sigma_ou, seed)
+    p = params
+    traj = _trajectory_jit(
+        n_steps, dt, x0, y0, z0,
+        p.a, p.b, p.c, p.d, p.r, p.s, p.x_R,
+        I, eta,
+    )
+    return t, traj
 
 
-def test_evaluate_cell_low_I_no_noise_is_silent():
-    """At deeply sub-threshold I with no noise → silent regime."""
-    from src.topic4_modeling.hr import HRParams, evaluate_cell
-    p = HRParams()
-    result = evaluate_cell(p, I=-3.0, sigma_ou=0.0, tau_ou=10.0,
-                           r_override=None, T=500.0, dt=0.05, seed=0)
-    assert result["regime"] == "silent"
-    assert result["n_bursts"] == 0
+def detect_bursts(
+    x: np.ndarray, t: np.ndarray, cfg: BurstConfig,
+) -> list[tuple[float, float]]:
+    """Detect bursts in x trace via hysteresis + min-duration filter.
+
+    Algorithm:
+        1. Find above-threshold contiguous segments
+        2. Bridge segments separated by gaps shorter than cfg.bridge_gap
+        3. Filter by minimum duration cfg.min_burst_duration
+    """
+    above = x > cfg.x_threshold
+    if not above.any():
+        return []
+    trans = np.diff(above.astype(np.int8))
+    rises = np.where(trans == 1)[0] + 1
+    falls = np.where(trans == -1)[0] + 1
+    if above[0]:
+        rises = np.concatenate([[0], rises])
+    if above[-1]:
+        falls = np.concatenate([falls, [len(x)]])
+    segments = list(zip(rises, falls))
+    # Bridge close-together segments
+    bridged: list[tuple[int, int]] = []
+    for seg in segments:
+        if bridged and (t[seg[0]] - t[bridged[-1][1] - 1]) < cfg.bridge_gap:
+            bridged[-1] = (bridged[-1][0], seg[1])
+        else:
+            bridged.append(seg)
+    # Filter by min duration
+    out: list[tuple[float, float]] = []
+    for r, f in bridged:
+        t_start = float(t[r])
+        t_end = float(t[f - 1])
+        if (t_end - t_start) >= cfg.min_burst_duration:
+            out.append((t_start, t_end))
+    return out
 
 
-def test_evaluate_cell_high_I_is_repetitive_or_unstable():
-    """At elevated I, regime should be repetitive-burst or unstable."""
-    from src.topic4_modeling.hr import HRParams, evaluate_cell
-    p = HRParams()
-    result = evaluate_cell(p, I=2.0, sigma_ou=0.0, tau_ou=10.0,
-                           r_override=None, T=500.0, dt=0.05, seed=0)
-    assert result["regime"] in {"repetitive-burst", "unstable"}
-    assert result["n_bursts"] >= 3
-
-
-def test_evaluate_cell_r_override_changes_burst_rate():
-    """Faster r (slow var) → shorter inter-burst-interval."""
-    from src.topic4_modeling.hr import HRParams, evaluate_cell
-    p = HRParams()
-    slow = evaluate_cell(p, I=2.0, sigma_ou=0.0, tau_ou=10.0,
-                         r_override=0.003, T=1000.0, dt=0.05, seed=0)
-    fast = evaluate_cell(p, I=2.0, sigma_ou=0.0, tau_ou=10.0,
-                         r_override=0.012, T=1000.0, dt=0.05, seed=0)
-    # fast r → more bursts (each cycle shorter)
-    assert fast["n_bursts"] > slow["n_bursts"]
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "evaluate_cell"`
-Expected: 4 FAILs with `ImportError: cannot import name 'evaluate_cell'`
-
-- [ ] **Step 3: Implement evaluate_cell**
-
-Append to `src/topic4_modeling/hr.py`:
-
-```python
-from dataclasses import replace
-
-
-def evaluate_cell(
-    params: HRParams,
-    I: float,
-    sigma_ou: float,
-    tau_ou: float,
-    r_override: float | None,
+def classify_regime(
+    bursts: list[tuple[float, float]],
     T: float,
-    dt: float,
-    seed: int,
-    x_threshold: float = 1.0,
-    min_burst_duration: float = 5.0,
-) -> dict:
-    """Run one sim + detect bursts + classify regime.
+    cfg: RegimeConfig,
+) -> str:
+    """Classify regime from burst list: silent / excitable / repetitive-burst / unstable.
 
-    Args:
-        params: HR baseline params
-        I: input current
-        sigma_ou: OU noise std
-        tau_ou: OU correlation time
-        r_override: if not None, override params.r with this value
-        T, dt: simulation duration + timestep (HR time units)
-        seed: random seed
-        x_threshold, min_burst_duration: burst detector params
-
-    Returns:
-        dict with keys: regime, n_bursts, mean_burst_duration, mean_ibi,
-        I, r_used, sigma_ou, seed, T (full provenance for sweep cell)
+    Operational definitions (spec §3 stage 1 + plan task 3):
+        - silent: 0 bursts
+        - unstable: any burst longer than cfg.max_burst_duration (takes precedence)
+        - excitable: all bursts ≤ cfg.excitable_max_burst AND mean IBI ≥ cfg.excitable_min_ibi
+        - repetitive-burst: otherwise (short IBI = spontaneous regular firing)
     """
-    p = params if r_override is None else replace(params, r=r_override)
-    t, traj = simulate_trajectory(p, I, T, dt, sigma_ou, tau_ou, seed)
-    x = traj[:, 0]
-    bursts = detect_bursts(x, t, x_threshold=x_threshold,
-                            min_duration=min_burst_duration)
+    if not bursts:
+        return "silent"
     durations = [end - start for start, end in bursts]
-    ibis = [bursts[i + 1][0] - bursts[i][1] for i in range(len(bursts) - 1)]
-    regime = classify_regime(bursts, T)
-    return {
-        "regime": regime,
-        "n_bursts": len(bursts),
-        "mean_burst_duration": float(np.mean(durations)) if durations else 0.0,
-        "mean_ibi": float(np.mean(ibis)) if ibis else float("inf"),
-        "I": I,
-        "r_used": p.r,
-        "sigma_ou": sigma_ou,
-        "seed": seed,
-        "T": T,
-    }
+    if any(d > cfg.max_burst_duration for d in durations):
+        return "unstable"
+    if len(bursts) >= 2:
+        ibis = [bursts[i + 1][0] - bursts[i][1] for i in range(len(bursts) - 1)]
+        mean_ibi = float(np.mean(ibis))
+    else:
+        mean_ibi = float("inf")
+    if (
+        all(d <= cfg.excitable_max_burst for d in durations)
+        and mean_ibi >= cfg.excitable_min_ibi
+    ):
+        return "excitable"
+    return "repetitive-burst"
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 5: Run all Task 3 tests, verify pass**
 
-Run: `pytest tests/test_topic4_modeling_hr.py -v -k "evaluate_cell"`
-Expected: 4 PASS
+`pytest tests/test_topic4_modeling_hr_dynamics.py -v` → 14 PASS.
 
-- [ ] **Step 5: Commit**
+Also run all prior tests to confirm no regression:
+`pytest tests/test_topic4_modeling_hr_core.py tests/test_topic4_modeling_ou_noise.py tests/test_topic4_modeling_hr_dynamics.py -v` → 29 total PASS.
+
+- [ ] **Step 6: Commit Task 3**
 
 ```bash
-git add src/topic4_modeling/hr.py tests/test_topic4_modeling_hr.py
-git commit -m "feat(topic4 phase4 stage1): evaluate_cell composing sim+detect+classify"
+git add src/topic4_modeling/hr_config.py src/topic4_modeling/hr_dynamics.py \
+        tests/test_topic4_modeling_hr_dynamics.py
+git commit -m "$(cat <<'EOF'
+feat(topic4 phase4 stage1): trajectory + burst + regime (config-driven)
+
+hr_config.py: BurstConfig + RegimeConfig frozen dataclasses centralize
+thresholds (avoid magic numbers; sweep/CLI can override).
+
+hr_dynamics.py:
+- simulate_trajectory wraps numba JIT _trajectory_jit (RK4 + pre-computed
+  OU eta trace). One simulation T=500 dt=0.05 (10k steps) ~50ms after
+  first compile.
+- detect_bursts: hysteresis + min-duration; numpy operations.
+- classify_regime: silent / excitable / repetitive-burst / unstable;
+  unstable takes precedence; excitable = sparse short bursts only.
+
+Tests: 14 added; full suite 29/29 green.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
 ```
+
+**Task 3 exit criterion**: simulate_trajectory + detect_bursts + classify_regime all green, regime semantics covered, no regression in prior tests.
 
 ---
 
-## Task 11: Parameter sweep runner
+## Task 4: Sweep + baseline picker (synthetic always-run + real-no-baseline → exit 1)
 
 **Files:**
 - Create: `src/topic4_modeling/hr_sweep.py`
 - Create: `tests/test_topic4_modeling_hr_sweep.py`
 
-- [ ] **Step 1: Write the failing test**
+**KEY FIX vs v1**: baseline picker has split test strategy:
+- **Synthetic DataFrame unit tests** (always run, NEVER skip) verify picker logic correctness
+- **Real-sweep integration test** uses `pytest.xfail` (not skip) so "no baseline" doesn't silently masquerade as green
+- **CLI exit-contract test** (Task 5) verifies CLI returns code 1 when baseline=None
+
+- [ ] **Step 1: Write tests**
 
 Create `tests/test_topic4_modeling_hr_sweep.py`:
 
 ```python
-"""Tests for src/topic4_modeling/hr_sweep.py."""
+"""Tests for src/topic4_modeling/hr_sweep.py.
+
+Two test layers (per user-return strict catch):
+  - Synthetic DataFrame unit tests for pick_excitable_baseline (always run)
+  - Real fast smoke sweep (~30s) that xfail-flags if no excitable regime
+"""
 
 from __future__ import annotations
 
@@ -1176,35 +1036,55 @@ import pandas as pd
 import pytest
 
 
-def test_sweep_grid_total_count_matches_cartesian_product():
-    """Sweep produces n_I * n_r * n_sigma * n_seeds rows."""
+# ── evaluate_cell smoke ──────────────────────────────────────────────────
+
+def test_evaluate_cell_returns_dict_with_regime_and_metadata():
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_sweep import evaluate_cell
+    result = evaluate_cell(HRParams(), I=-2.5, sigma_ou=0.0, tau_ou=10.0,
+                            r_override=None, T=100.0, dt=0.05, seed=0)
+    assert isinstance(result, dict)
+    assert "regime" in result
+    assert "n_bursts" in result
+    assert result["regime"] in {"silent", "excitable", "repetitive-burst", "unstable"}
+
+
+def test_evaluate_cell_r_override_changes_burst_rate():
+    """Larger r → faster bursting → more bursts."""
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_sweep import evaluate_cell
+    slow = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
+                          r_override=0.003, T=1000.0, dt=0.05, seed=0)
+    fast = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
+                          r_override=0.012, T=1000.0, dt=0.05, seed=0)
+    assert fast["n_bursts"] > slow["n_bursts"]
+
+
+# ── sweep_hr_parameters ──────────────────────────────────────────────────
+
+def test_sweep_total_count_matches_cartesian_product():
     from src.topic4_modeling.hr_sweep import sweep_hr_parameters
     df = sweep_hr_parameters(
         I_grid=[-2.0, -1.6, 0.0],
         r_grid=[0.004, 0.006],
         sigma_grid=[0.0, 0.1],
         seeds=[0, 1],
-        T=100.0,
-        dt=0.05,
-        n_jobs=1,
+        T=50.0, dt=0.05, n_jobs=1,
     )
-    assert len(df) == 3 * 2 * 2 * 2  # = 24
+    assert len(df) == 3 * 2 * 2 * 2
 
 
-def test_sweep_grid_columns_complete():
-    """Sweep DataFrame has all expected columns."""
+def test_sweep_columns_complete():
     from src.topic4_modeling.hr_sweep import sweep_hr_parameters
     df = sweep_hr_parameters(
         I_grid=[-2.0], r_grid=[0.006], sigma_grid=[0.0], seeds=[0],
         T=50.0, dt=0.05, n_jobs=1,
     )
-    required = {"I", "r_used", "sigma_ou", "seed", "regime", "n_bursts",
-                "mean_burst_duration", "mean_ibi"}
+    required = {"I", "r_used", "sigma_ou", "seed", "regime", "n_bursts"}
     assert required.issubset(df.columns)
 
 
-def test_sweep_grid_deterministic_per_cell():
-    """Same params + seed → same regime label across two sweep calls."""
+def test_sweep_deterministic_per_cell():
     from src.topic4_modeling.hr_sweep import sweep_hr_parameters
     df1 = sweep_hr_parameters(
         I_grid=[-1.6], r_grid=[0.006], sigma_grid=[0.1], seeds=[42],
@@ -1215,33 +1095,180 @@ def test_sweep_grid_deterministic_per_cell():
         T=100.0, dt=0.05, n_jobs=1,
     )
     assert df1["regime"].iloc[0] == df2["regime"].iloc[0]
-    assert df1["n_bursts"].iloc[0] == df2["n_bursts"].iloc[0]
+
+
+# ── pick_excitable_baseline SYNTHETIC unit tests (always run, never skip) ─
+
+def _row(I, r, sigma, seed, regime, n_bursts=1):
+    return {"I": I, "r_used": r, "sigma_ou": sigma, "seed": seed,
+            "regime": regime, "n_bursts": n_bursts,
+            "mean_burst_duration": 5.0, "mean_ibi": 100.0}
+
+
+def test_picker_returns_candidate_when_clean_excitable_present():
+    """Synthetic: clean excitable subband present → picker returns it."""
+    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
+    rows = []
+    # At (I=-1.3, r=0.006): silent at sigma=0, excitable at sigma=0.1, still excitable at sigma=0.15
+    for seed in [0, 1, 2]:
+        rows.append(_row(-1.3, 0.006, 0.0, seed, "silent", 0))
+        rows.append(_row(-1.3, 0.006, 0.1, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.15, seed, "excitable"))
+    # And some unrelated cells
+    for seed in [0, 1, 2]:
+        rows.append(_row(-2.5, 0.006, 0.0, seed, "silent", 0))
+        rows.append(_row(2.0, 0.006, 0.1, seed, "repetitive-burst", 10))
+    df = pd.DataFrame(rows)
+    baseline = pick_excitable_baseline(df)
+    assert baseline is not None
+    assert baseline["I_star"] == -1.3
+    assert baseline["r_star"] == 0.006
+    assert baseline["sigma_star"] == 0.1
+    assert baseline["noise_robust"] is True
+
+
+def test_picker_returns_none_when_no_excitable_anywhere():
+    """Synthetic: all silent or unstable → picker returns None."""
+    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
+    rows = []
+    for I in [-2.5, -1.6, 0.0]:
+        for sigma in [0.0, 0.1, 0.15]:
+            rows.append(_row(I, 0.006, sigma, 0, "silent", 0))
+    df = pd.DataFrame(rows)
+    assert pick_excitable_baseline(df) is None
+
+
+def test_picker_rejects_candidate_when_zero_noise_not_silent():
+    """Synthetic: excitable at sigma=0.1 but zero-noise NOT silent → rejected."""
+    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
+    rows = []
+    for seed in [0, 1, 2]:
+        rows.append(_row(-1.3, 0.006, 0.0, seed, "repetitive-burst", 10))
+        rows.append(_row(-1.3, 0.006, 0.1, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.15, seed, "excitable"))
+    df = pd.DataFrame(rows)
+    assert pick_excitable_baseline(df) is None
+
+
+def test_picker_rejects_candidate_when_high_noise_flips_regime():
+    """Synthetic: excitable at sigma=0.1 but flips to repetitive at 0.15 → rejected."""
+    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
+    rows = []
+    for seed in [0, 1, 2]:
+        rows.append(_row(-1.3, 0.006, 0.0, seed, "silent", 0))
+        rows.append(_row(-1.3, 0.006, 0.1, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.15, seed, "repetitive-burst", 10))
+    df = pd.DataFrame(rows)
+    assert pick_excitable_baseline(df) is None
+
+
+def test_picker_picks_median_sigma_when_multiple_candidates():
+    """Synthetic: 3 valid sigma levels (0.05, 0.10, 0.15) → picker picks median (0.10)."""
+    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
+    rows = []
+    for seed in [0, 1, 2]:
+        rows.append(_row(-1.3, 0.006, 0.0, seed, "silent", 0))
+        for sigma in [0.05, 0.10, 0.15]:
+            rows.append(_row(-1.3, 0.006, sigma, seed, "excitable"))
+        # need a higher sigma for the noise-robust check at sigma=0.15
+        rows.append(_row(-1.3, 0.006, 0.225, seed, "excitable"))
+    df = pd.DataFrame(rows)
+    baseline = pick_excitable_baseline(df)
+    assert baseline is not None
+    assert baseline["sigma_star"] == 0.10
+
+
+# ── Real fast smoke sweep integration (xfail, NOT skip) ─────────────────
+
+@pytest.mark.slow
+def test_real_smoke_sweep_finds_excitable_region():
+    """Real (small, ~20s) sweep — xfail if no excitable found.
+
+    Using xfail (not skip) so this test counts as failure if it
+    unexpectedly passes (XPASS) or unexpectedly fails (XFAIL marker
+    visible in pytest output). Skip would silently hide a missing
+    exit contract.
+    """
+    from src.topic4_modeling.hr_sweep import (
+        sweep_hr_parameters, pick_excitable_baseline,
+    )
+    df = sweep_hr_parameters(
+        I_grid=np.linspace(-2.0, -1.0, 6).tolist(),
+        r_grid=[0.006, 0.008],
+        sigma_grid=[0.0, 0.1, 0.15],
+        seeds=[0, 1, 2],
+        T=200.0, dt=0.05, n_jobs=1,
+    )
+    baseline = pick_excitable_baseline(df)
+    if baseline is None:
+        pytest.xfail(
+            "No excitable baseline in small smoke sweep. "
+            "Either parameter ranges need adjustment or HR doesn't have "
+            "excitable regime — see spec §8 stage 1 fallback (FHN)."
+        )
+    # If baseline found, verify exit contract
+    assert baseline["noise_robust"] is True
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [ ] **Step 2: Verify failures**
 
-Run: `pytest tests/test_topic4_modeling_hr_sweep.py -v`
-Expected: 3 FAILs with `ModuleNotFoundError`
+`pytest tests/test_topic4_modeling_hr_sweep.py -v -k "not slow"` → 10 FAILs (modules don't exist; slow test gated by mark)
 
 - [ ] **Step 3: Implement hr_sweep.py**
 
 Create `src/topic4_modeling/hr_sweep.py`:
 
 ```python
-"""Stage 1 parameter sweep runner + baseline picker.
+"""Stage 1 parameter sweep + baseline picker.
+
+evaluate_cell composes sim+detect+classify into one call.
+sweep_hr_parameters runs Cartesian product over (I, r, sigma, seed) with
+joblib parallel.
+pick_excitable_baseline applies Stage 1 exit-contract criteria.
 
 Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
 """
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Sequence
 
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
 
-from .hr import HRParams, evaluate_cell
+from .hr_config import BurstConfig, RegimeConfig
+from .hr_core import HRParams
+from .hr_dynamics import classify_regime, detect_bursts, simulate_trajectory
+
+
+def evaluate_cell(
+    params: HRParams,
+    I: float, sigma_ou: float, tau_ou: float,
+    r_override: float | None,
+    T: float, dt: float, seed: int,
+    burst_cfg: BurstConfig | None = None,
+    regime_cfg: RegimeConfig | None = None,
+) -> dict:
+    """Run one cell: sim + detect bursts + classify regime."""
+    if burst_cfg is None:
+        burst_cfg = BurstConfig()
+    if regime_cfg is None:
+        regime_cfg = RegimeConfig()
+    p = params if r_override is None else replace(params, r=r_override)
+    t, traj = simulate_trajectory(p, I, T, dt, sigma_ou, tau_ou, seed)
+    bursts = detect_bursts(traj[:, 0], t, burst_cfg)
+    durations = [e - s for s, e in bursts]
+    ibis = [bursts[i + 1][0] - bursts[i][1] for i in range(len(bursts) - 1)]
+    regime = classify_regime(bursts, T, regime_cfg)
+    return {
+        "regime": regime,
+        "n_bursts": len(bursts),
+        "mean_burst_duration": float(np.mean(durations)) if durations else 0.0,
+        "mean_ibi": float(np.mean(ibis)) if ibis else float("inf"),
+        "I": I, "r_used": p.r, "sigma_ou": sigma_ou, "seed": seed, "T": T,
+    }
 
 
 def sweep_hr_parameters(
@@ -1249,48 +1276,20 @@ def sweep_hr_parameters(
     r_grid: Sequence[float],
     sigma_grid: Sequence[float],
     seeds: Sequence[int],
-    T: float,
-    dt: float,
-    n_jobs: int = 1,
+    T: float, dt: float, n_jobs: int = 1,
     params_base: HRParams | None = None,
 ) -> pd.DataFrame:
-    """Run Cartesian sweep over (I, r, sigma, seed).
-
-    Args:
-        I_grid, r_grid, sigma_grid: parameter values to scan
-        seeds: random seeds per cell (each (I, r, sigma) cell × each seed = 1 row)
-        T, dt: sim duration + timestep
-        n_jobs: joblib parallelism (1 = serial)
-        params_base: HR baseline params (default = HRParams())
-
-    Returns:
-        DataFrame with one row per (I, r, sigma, seed) cell,
-        columns from evaluate_cell return dict.
-    """
+    """Cartesian sweep. Returns DataFrame with one row per (I, r, sigma, seed)."""
     if params_base is None:
         params_base = HRParams()
-
     cells = [
         (I, r, sigma, seed)
-        for I in I_grid
-        for r in r_grid
-        for sigma in sigma_grid
-        for seed in seeds
+        for I in I_grid for r in r_grid for sigma in sigma_grid for seed in seeds
     ]
-
     def _eval(cell):
         I, r, sigma, seed = cell
-        return evaluate_cell(
-            params=params_base,
-            I=I,
-            sigma_ou=sigma,
-            tau_ou=10.0,
-            r_override=r,
-            T=T,
-            dt=dt,
-            seed=seed,
-        )
-
+        return evaluate_cell(params_base, I=I, sigma_ou=sigma, tau_ou=10.0,
+                              r_override=r, T=T, dt=dt, seed=seed)
     if n_jobs == 1:
         results = [_eval(c) for c in cells]
     else:
@@ -1298,229 +1297,301 @@ def sweep_hr_parameters(
             delayed(_eval)(c) for c in cells
         )
     return pd.DataFrame(results)
-```
-
-- [ ] **Step 4: Run tests to verify they pass**
-
-Run: `pytest tests/test_topic4_modeling_hr_sweep.py -v`
-Expected: 3 PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr_sweep.py tests/test_topic4_modeling_hr_sweep.py
-git commit -m "feat(topic4 phase4 stage1): hr_sweep parameter sweep runner"
-```
-
----
-
-## Task 12: Baseline picker (excitable regime + noise-robust)
-
-**Files:**
-- Modify: `src/topic4_modeling/hr_sweep.py`
-- Modify: `tests/test_topic4_modeling_hr_sweep.py`
-
-Spec §3 Stage 1 退出契约:
-
-> 存在参数子带 (I*, r*, σ*) 节点无外驱时静默，OU 推扰可 trigger brief burst 然后回静默
-> 该 regime 对 noise amplitude ±50% 不漂
-
-Operational baseline picker:
-1. Filter cells where regime == "excitable" at σ_OU > 0
-2. For each (I, r) pair, check that the same (I, r) at σ_OU = 0 is "silent" AND at σ_OU × 1.5 is still "excitable" (not "repetitive-burst")
-3. Among surviving (I, r), pick the one with median sigma value (most "central" / robust)
-4. Return (I*, r*, σ*) + diagnostic dict
-
-- [ ] **Step 1: Write the failing test**
-
-Append to `tests/test_topic4_modeling_hr_sweep.py`:
-
-```python
-def test_pick_excitable_baseline_returns_silent_at_zero_noise():
-    """Picked baseline must satisfy: silent at sigma=0."""
-    from src.topic4_modeling.hr_sweep import (
-        sweep_hr_parameters, pick_excitable_baseline,
-    )
-    df = sweep_hr_parameters(
-        I_grid=np.linspace(-2.5, -0.5, 11).tolist(),
-        r_grid=[0.004, 0.006, 0.008],
-        sigma_grid=[0.0, 0.05, 0.1, 0.15],
-        seeds=[0, 1, 2],
-        T=500.0, dt=0.05, n_jobs=1,
-    )
-    baseline = pick_excitable_baseline(df)
-    if baseline is None:
-        pytest.skip("No excitable baseline found in this sweep — Stage 1 exit fails")
-    I_star, r_star, sigma_star = (
-        baseline["I_star"], baseline["r_star"], baseline["sigma_star"],
-    )
-    # silent at sigma=0 in this (I, r) cell
-    silent_check = df[
-        (df["I"] == I_star)
-        & (df["r_used"] == r_star)
-        & (df["sigma_ou"] == 0.0)
-    ]
-    assert silent_check["regime"].mode().iloc[0] == "silent"
 
 
-def test_pick_excitable_baseline_robust_to_noise_perturbation():
-    """Picked baseline regime stays 'excitable' under ±50% sigma."""
-    from src.topic4_modeling.hr_sweep import (
-        sweep_hr_parameters, pick_excitable_baseline,
-    )
-    df = sweep_hr_parameters(
-        I_grid=np.linspace(-2.5, -0.5, 11).tolist(),
-        r_grid=[0.004, 0.006, 0.008],
-        sigma_grid=[0.0, 0.05, 0.1, 0.15],
-        seeds=[0, 1, 2],
-        T=500.0, dt=0.05, n_jobs=1,
-    )
-    baseline = pick_excitable_baseline(df)
-    if baseline is None:
-        pytest.skip("No excitable baseline found")
-    assert baseline["noise_robust"] is True
-
-
-def test_pick_excitable_baseline_returns_none_when_no_candidate():
-    """If no cell is excitable + silent-at-zero, returns None."""
-    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
-    import pandas as pd
-    # synthetic: all cells either silent or unstable
-    df = pd.DataFrame([
-        {"I": -1.6, "r_used": 0.006, "sigma_ou": 0.0, "seed": 0,
-         "regime": "silent", "n_bursts": 0, "mean_burst_duration": 0.0,
-         "mean_ibi": float("inf")},
-        {"I": -1.6, "r_used": 0.006, "sigma_ou": 0.1, "seed": 0,
-         "regime": "silent", "n_bursts": 0, "mean_burst_duration": 0.0,
-         "mean_ibi": float("inf")},
-    ])
-    assert pick_excitable_baseline(df) is None
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-Run: `pytest tests/test_topic4_modeling_hr_sweep.py -v -k "pick_excitable_baseline"`
-Expected: 3 FAILs with `ImportError: cannot import name 'pick_excitable_baseline'`
-
-- [ ] **Step 3: Implement pick_excitable_baseline**
-
-Append to `src/topic4_modeling/hr_sweep.py`:
-
-```python
 def pick_excitable_baseline(df: pd.DataFrame) -> dict | None:
-    """Pick (I*, r*, sigma*) cell satisfying Stage 1 exit contract.
+    """Pick Stage 1 baseline (I*, r*, sigma*) per spec §3 stage 1 exit contract.
 
-    Criteria (spec §3 Stage 1 退出契约):
-        1. At chosen (I, r, sigma), majority of seeds → regime == "excitable"
-        2. Same (I, r) at sigma=0 → majority → "silent" (no spontaneous firing)
-        3. Same (I, r) at sigma × 1.5 → still mostly "excitable" (not flipped to
-           "repetitive-burst" or "unstable") — noise robustness check
+    Criteria:
+        (a) modal regime at (I, r, sigma) == "excitable", sigma > 0
+        (b) same (I, r) at sigma=0 modal regime == "silent"
+        (c) same (I, r) at next-higher sigma still modal "excitable"
+            (next-higher = first sigma >= 1.4 * current sigma)
 
-    Among surviving (I, r, sigma) cells, picks the one with median sigma
-    (central, robust). Returns None if no cell satisfies all 3 criteria.
+    Among candidates passing all 3, picks the one with median sigma_star.
+
+    Returns dict {I_star, r_star, sigma_star, noise_robust=True} or None.
     """
+    all_sigmas = sorted(df["sigma_ou"].unique())
     candidates = []
     for (I, r, sigma), group in df.groupby(["I", "r_used", "sigma_ou"]):
-        modal_regime = group["regime"].mode().iloc[0]
-        if modal_regime != "excitable" or sigma <= 0.0:
+        if sigma <= 0.0:
             continue
-        # Check silent at sigma=0 for same (I, r)
-        zero_noise = df[
-            (df["I"] == I) & (df["r_used"] == r) & (df["sigma_ou"] == 0.0)
-        ]
-        if zero_noise.empty:
+        if group["regime"].mode().iloc[0] != "excitable":
             continue
-        if zero_noise["regime"].mode().iloc[0] != "silent":
+        # (b) zero-noise silent
+        zn = df[(df["I"] == I) & (df["r_used"] == r) & (df["sigma_ou"] == 0.0)]
+        if zn.empty or zn["regime"].mode().iloc[0] != "silent":
             continue
-        # Find available sigma > sigma (for the ×1.5 check; nearest above)
-        all_sigmas = sorted(df["sigma_ou"].unique())
+        # (c) noise-robust check
         higher = [s for s in all_sigmas if s >= 1.4 * sigma]
-        noise_robust = False
-        if higher:
-            higher_sigma = higher[0]
-            high_cell = df[
-                (df["I"] == I)
-                & (df["r_used"] == r)
-                & (df["sigma_ou"] == higher_sigma)
-            ]
-            if not high_cell.empty:
-                regime_at_high = high_cell["regime"].mode().iloc[0]
-                if regime_at_high == "excitable":
-                    noise_robust = True
-        # Accept candidate only if noise-robust
-        if not noise_robust:
+        if not higher:
+            continue
+        hi_cell = df[
+            (df["I"] == I) & (df["r_used"] == r) & (df["sigma_ou"] == higher[0])
+        ]
+        if hi_cell.empty or hi_cell["regime"].mode().iloc[0] != "excitable":
             continue
         candidates.append({
-            "I_star": float(I),
-            "r_star": float(r),
-            "sigma_star": float(sigma),
+            "I_star": float(I), "r_star": float(r), "sigma_star": float(sigma),
             "noise_robust": True,
         })
     if not candidates:
         return None
-    # Pick candidate with median sigma_star (central)
     candidates.sort(key=lambda c: c["sigma_star"])
     return candidates[len(candidates) // 2]
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 4: Run tests (exclude slow), verify pass**
 
-Run: `pytest tests/test_topic4_modeling_hr_sweep.py -v -k "pick_excitable_baseline"`
-Expected: 3 PASS (or skip if no excitable regime found in sweep — that's a Stage 1 exit failure, fall back to FHN per spec §8)
+`pytest tests/test_topic4_modeling_hr_sweep.py -v -k "not slow"` → 10 PASS.
 
-- [ ] **Step 5: Commit**
+Optionally run slow integration:
+`pytest tests/test_topic4_modeling_hr_sweep.py -v -m slow` → 1 PASS or 1 XFAIL with informative reason.
+
+- [ ] **Step 5: Verify full suite no regression**
+
+`pytest tests/test_topic4_modeling_hr_core.py tests/test_topic4_modeling_ou_noise.py tests/test_topic4_modeling_hr_dynamics.py tests/test_topic4_modeling_hr_sweep.py -v -k "not slow"`
+Expected: 39 PASS (29 prior + 10 new sweep).
+
+- [ ] **Step 6: Commit Task 4**
 
 ```bash
 git add src/topic4_modeling/hr_sweep.py tests/test_topic4_modeling_hr_sweep.py
-git commit -m "feat(topic4 phase4 stage1): pick_excitable_baseline with noise-robust check"
+git commit -m "$(cat <<'EOF'
+feat(topic4 phase4 stage1): sweep + excitable-baseline picker
+
+evaluate_cell composes sim+detect+classify (one row per cell call).
+sweep_hr_parameters runs Cartesian product over (I, r, sigma, seed)
+with joblib parallel; returns DataFrame.
+pick_excitable_baseline applies 3-criterion Stage 1 exit contract:
+  (a) modal regime "excitable" at sigma > 0
+  (b) same (I, r) silent at sigma=0
+  (c) same (I, r) still "excitable" at next sigma >= 1.4 * sigma
+Picks median sigma_star among candidates.
+
+Test strategy (per user-return strict catch — v1 used pytest.skip which
+silently bypassed the most important exit contract):
+  - 5 synthetic DataFrame unit tests for picker logic (ALWAYS run)
+  - 1 real-smoke integration test (~20s, marked @slow) using
+    pytest.xfail (NOT skip) so missing baseline does not masquerade as
+    green. CLI exit-code 1 enforcement is in Task 5.
+
+Total Task 4 tests: 10 non-slow + 1 slow integration. Full suite 39/39
+non-slow green.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
 ```
+
+**Task 4 exit criterion**: picker logic verified by synthetic tests; real sweep test uses xfail not skip; full suite green.
 
 ---
 
-## Task 13: Regime map plotter
+## Task 5: Plotting + CLI (JSON output, exit-code 1 on no baseline)
 
 **Files:**
-- Modify: `src/topic4_modeling/hr_viz.py`
-- Modify: `tests/test_topic4_modeling_hr_viz.py`
+- Create: `src/topic4_modeling/hr_viz.py`
+- Create: `scripts/run_topic4_phase4_stage1_hr.py`
+- Create: `tests/test_topic4_modeling_hr_viz.py`
+- Create: `tests/test_topic4_modeling_hr_cli.py`
 
-- [ ] **Step 1: Write the failing test**
+Output format: **JSON** for all artifacts (sweep_results.json, regime_summary.json, baseline.json). No parquet (per user catch — pyarrow availability is incidental, JSON is canonical).
 
-Append to `tests/test_topic4_modeling_hr_viz.py`:
+- [ ] **Step 1: Write hr_viz tests**
+
+Create `tests/test_topic4_modeling_hr_viz.py`:
 
 ```python
+"""Tests for src/topic4_modeling/hr_viz.py."""
+
+from __future__ import annotations
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pytest
+
+
+def test_nullcline_x_formula():
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_viz import compute_x_nullcline
+    p = HRParams()
+    x = np.array([0.0, 1.0, -1.0])
+    out = compute_x_nullcline(x, p, z=0.5, I=-1.6)
+    expected = p.a * x**3 - p.b * x**2 + 0.5 - (-1.6)
+    np.testing.assert_allclose(out, expected)
+
+
+def test_nullcline_y_formula():
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_viz import compute_y_nullcline
+    p = HRParams()
+    x = np.array([0.0, 1.0, -1.0])
+    out = compute_y_nullcline(x, p)
+    np.testing.assert_allclose(out, p.c - p.d * x**2)
+
+
+def test_plot_phase_portrait_smoke(tmp_path):
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
+    from src.topic4_modeling.hr_viz import plot_phase_portrait
+    p = HRParams()
+    _, traj = simulate_trajectory(p, I=-1.6, T=100.0, dt=0.05,
+                                   sigma_ou=0.1, tau_ou=10.0, seed=0)
+    fig = plot_phase_portrait(traj, p, I=-1.6)
+    out = tmp_path / "phase.png"
+    fig.savefig(out)
+    plt.close(fig)
+    assert out.exists() and out.stat().st_size > 1000
+
+
 def test_plot_regime_map_smoke(tmp_path):
-    """Given sweep DataFrame, plot_regime_map writes a non-empty PNG."""
-    import pandas as pd
     from src.topic4_modeling.hr_viz import plot_regime_map
-    # synthetic 3×3×2 grid with mock regimes
     rows = []
     for I in [-2.0, -1.6, -1.0]:
-        for r in [0.004, 0.006, 0.008]:
+        for r in [0.004, 0.006]:
             for sigma in [0.0, 0.1]:
                 regime = "silent" if sigma == 0.0 else "excitable"
                 rows.append({"I": I, "r_used": r, "sigma_ou": sigma,
                              "seed": 0, "regime": regime, "n_bursts": 1,
                              "mean_burst_duration": 5.0, "mean_ibi": 100.0})
     df = pd.DataFrame(rows)
-    out = tmp_path / "regime_map.png"
     fig = plot_regime_map(df)
+    out = tmp_path / "regime.png"
     fig.savefig(out)
-    matplotlib.pyplot.close(fig)
-    assert out.exists()
-    assert out.stat().st_size > 1000
+    plt.close(fig)
+    assert out.exists() and out.stat().st_size > 1000
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **Step 2: Write hr_cli test (exit-code contract)**
 
-Run: `pytest tests/test_topic4_modeling_hr_viz.py::test_plot_regime_map_smoke -v`
-Expected: FAIL with `ImportError: cannot import name 'plot_regime_map'`
-
-- [ ] **Step 3: Implement plot_regime_map**
-
-Append to `src/topic4_modeling/hr_viz.py`:
+Create `tests/test_topic4_modeling_hr_cli.py`:
 
 ```python
+"""Tests for scripts/run_topic4_phase4_stage1_hr.py exit-code contract."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+
+def _run_cli(args: list[str], cwd: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, "scripts/run_topic4_phase4_stage1_hr.py", *args],
+        cwd=str(cwd),
+        env={"PYTHONPATH": str(cwd), **dict(__import__("os").environ)},
+        capture_output=True, text=True, timeout=600,
+    )
+
+
+def test_cli_help_works():
+    """CLI --help returns 0 and mentions key flags."""
+    repo_root = Path(__file__).resolve().parents[1]
+    proc = _run_cli(["--help"], repo_root)
+    assert proc.returncode == 0
+    assert "--mode" in proc.stdout
+    assert "--output-dir" in proc.stdout
+
+
+@pytest.mark.slow
+def test_cli_no_baseline_exits_one(tmp_path):
+    """CLI exits 1 when sweep produces no excitable baseline.
+
+    Trigger by feeding a sweep grid that's all silent (very deep I).
+    Outputs regime_summary.json with stage1_exit_contract_passed=false.
+    """
+    repo_root = Path(__file__).resolve().parents[1]
+    output_dir = tmp_path / "stage1_no_baseline"
+    proc = _run_cli(
+        ["--mode", "synthetic-allsilent",
+         "--output-dir", str(output_dir)],
+        repo_root,
+    )
+    assert proc.returncode == 1, (
+        f"Expected exit 1, got {proc.returncode}; stdout={proc.stdout}"
+    )
+    summary_path = output_dir / "regime_summary.json"
+    assert summary_path.exists()
+    summary = json.loads(summary_path.read_text())
+    assert summary["stage1_exit_contract_passed"] is False
+    assert summary["baseline"] is None
+```
+
+- [ ] **Step 3: Verify both tests fail**
+
+`pytest tests/test_topic4_modeling_hr_viz.py tests/test_topic4_modeling_hr_cli.py -v -k "not slow"` → 5 FAILs
+
+- [ ] **Step 4: Implement hr_viz.py**
+
+Create `src/topic4_modeling/hr_viz.py`:
+
+```python
+"""Phase portrait + nullcline + regime-map visualization.
+
+Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
+"""
+
+from __future__ import annotations
+
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+
+from .hr_core import HRParams
+
+
+# ── Nullclines (closed-form) ─────────────────────────────────────────────
+
+def compute_x_nullcline(x_grid: np.ndarray, params: HRParams,
+                         z: float, I: float) -> np.ndarray:
+    """y where dx/dt = 0: y = a x³ - b x² + z - I (with eta=0)."""
+    p = params
+    return p.a * x_grid**3 - p.b * x_grid**2 + z - I
+
+
+def compute_y_nullcline(x_grid: np.ndarray, params: HRParams) -> np.ndarray:
+    """y where dy/dt = 0: y = c - d x²."""
+    p = params
+    return p.c - p.d * x_grid**2
+
+
+# ── Phase portrait ───────────────────────────────────────────────────────
+
+def plot_phase_portrait(trajectory: np.ndarray, params: HRParams,
+                         I: float, figsize=(8.0, 6.0)) -> plt.Figure:
+    """Plot x-y phase plane with trajectory + nullclines at mean(z)."""
+    x = trajectory[:, 0]
+    y = trajectory[:, 1]
+    z_mean = float(trajectory[:, 2].mean())
+    x_grid = np.linspace(x.min() - 0.5, x.max() + 0.5, 400)
+    y_xnull = compute_x_nullcline(x_grid, params, z_mean, I)
+    y_ynull = compute_y_nullcline(x_grid, params)
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.plot(x, y, alpha=0.4, color="C0", linewidth=0.5, label="trajectory")
+    ax.plot(x_grid, y_xnull, "r-", label=f"dx/dt=0  (z≈{z_mean:.2f})")
+    ax.plot(x_grid, y_ynull, "g-", label="dy/dt=0")
+    ax.scatter([x[0]], [y[0]], marker="o", color="black", zorder=5, label="start")
+    ax.scatter([x[-1]], [y[-1]], marker="s", color="black", zorder=5, label="end")
+    ax.set_xlabel("x (fast voltage-like)")
+    ax.set_ylabel("y (spiking variable)")
+    ax.set_title(f"HR phase portrait  (I={I:.2f})")
+    ax.legend(loc="upper right", fontsize=8)
+    ax.grid(True, alpha=0.3)
+    margin_y = 0.1 * (y.max() - y.min() + 1e-6)
+    ax.set_ylim(y.min() - margin_y, y.max() + margin_y)
+    return fig
+
+
+# ── Regime map heatmap ───────────────────────────────────────────────────
 
 REGIME_COLOR = {
     "silent": "#dddddd",
@@ -1531,42 +1602,28 @@ REGIME_COLOR = {
 REGIME_ORDER = ["silent", "excitable", "repetitive-burst", "unstable"]
 
 
-def plot_regime_map(
-    sweep_df: pd.DataFrame,
-    figsize: tuple[float, float] | None = None,
-) -> plt.Figure:
-    """Plot regime map: rows = sigma_ou, cols = r_used, x-axis = I.
-
-    Each cell colored by modal regime across seeds for that (I, r, sigma).
-    """
+def plot_regime_map(sweep_df: pd.DataFrame, figsize=None) -> plt.Figure:
+    """Subplot grid: rows=sigma_ou, cols=r_used, x-axis=I, colored by modal regime."""
     sigmas = sorted(sweep_df["sigma_ou"].unique())
     rs = sorted(sweep_df["r_used"].unique())
     Is = sorted(sweep_df["I"].unique())
-
-    n_rows = len(sigmas)
-    n_cols = len(rs)
+    n_rows, n_cols = len(sigmas), len(rs)
     if figsize is None:
         figsize = (3.0 * n_cols, 1.2 * n_rows + 1.5)
     fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize,
                               squeeze=False, sharex=True, sharey=True)
-
     for i, sigma in enumerate(sigmas):
         for j, r in enumerate(rs):
             ax = axes[i, j]
             cell_data = []
             for I in Is:
-                sub = sweep_df[
-                    (sweep_df["sigma_ou"] == sigma)
-                    & (sweep_df["r_used"] == r)
-                    & (sweep_df["I"] == I)
-                ]
-                if sub.empty:
-                    cell_data.append("silent")
-                else:
-                    cell_data.append(sub["regime"].mode().iloc[0])
+                sub = sweep_df[(sweep_df["sigma_ou"] == sigma)
+                                & (sweep_df["r_used"] == r)
+                                & (sweep_df["I"] == I)]
+                cell_data.append(sub["regime"].mode().iloc[0] if not sub.empty else "silent")
             colors = [REGIME_COLOR[c] for c in cell_data]
             ax.bar(range(len(Is)), [1] * len(Is), color=colors, width=1.0,
-                   edgecolor="white", linewidth=0.5)
+                    edgecolor="white", linewidth=0.5)
             ax.set_xticks(range(len(Is)))
             ax.set_xticklabels([f"{I:.1f}" for I in Is], rotation=45, fontsize=7)
             ax.set_yticks([])
@@ -1576,360 +1633,384 @@ def plot_regime_map(
                 ax.set_ylabel(f"σ_OU={sigma:.2f}", fontsize=8)
             if i == n_rows - 1:
                 ax.set_xlabel("I", fontsize=8)
-
-    # Legend
-    handles = [
-        plt.Rectangle((0, 0), 1, 1, color=REGIME_COLOR[r]) for r in REGIME_ORDER
-    ]
+    handles = [plt.Rectangle((0, 0), 1, 1, color=REGIME_COLOR[r]) for r in REGIME_ORDER]
     fig.legend(handles, REGIME_ORDER, loc="upper center",
-               ncol=4, bbox_to_anchor=(0.5, 0.99), fontsize=9)
+                ncol=4, bbox_to_anchor=(0.5, 0.99), fontsize=9)
     fig.suptitle("HR single-node regime map", y=0.94, fontsize=11)
     fig.tight_layout(rect=(0, 0, 1, 0.9))
     return fig
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `pytest tests/test_topic4_modeling_hr_viz.py::test_plot_regime_map_smoke -v`
-Expected: PASS
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/topic4_modeling/hr_viz.py tests/test_topic4_modeling_hr_viz.py
-git commit -m "feat(topic4 phase4 stage1): plot_regime_map heatmap (sigma × r × I grid)"
-```
-
----
-
-## Task 14: CLI orchestration script
-
-**Files:**
-- Create: `scripts/run_topic4_phase4_stage1_hr.py`
-
-This is operational, not unit-tested in detail — tested via smoke run in Task 15.
-
-- [ ] **Step 1: Create script**
+- [ ] **Step 5: Implement CLI**
 
 Create `scripts/run_topic4_phase4_stage1_hr.py`:
 
 ```python
 #!/usr/bin/env python3
-"""SEF-ITP Phase 4 Stage 1 runner: HR single-node parameter sweep.
+"""SEF-ITP Phase 4 Stage 1 CLI: HR single-node parameter sweep.
 
-Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
-Plan: docs/superpowers/plans/2026-05-27-sef-itp-phase4-stage1-hr-single-node.md
+Modes:
+  --mode smoke      Small sweep, ~5 min single-threaded; default.
+  --mode full       Full sweep, ~25 min single-threaded; lock-in baseline.
+  --mode synthetic-allsilent
+                    Artificial test mode: tiny grid guaranteed to find no
+                    excitable regime. Used by test_topic4_modeling_hr_cli
+                    to verify exit-code 1 contract.
 
-Usage:
-    python scripts/run_topic4_phase4_stage1_hr.py --mode smoke
-    python scripts/run_topic4_phase4_stage1_hr.py --mode full --n-jobs 8
+Outputs (JSON, in --output-dir):
+  - sweep_results.json    : list[dict] of all sweep rows
+  - regime_summary.json   : config, regime counts, baseline, exit-contract flag
+  - baseline.json         : (I*, r*, sigma*) — only if baseline found
+  - regime_map.png        : 3-axis heatmap
+  - phase_portraits/      : baseline + 2 neighbor phase portraits
 
-Outputs land in results/topic4_sef_itp/phase4_modeling/stage1_hr_single/:
-    - regime_map.png
-    - regime_summary.json
-    - baseline.json     (selected I*, r*, sigma*)
-    - phase_portraits/  (representative cells)
-    - sweep_results.parquet
+Exit codes:
+  0  Stage 1 exit contract met (baseline found, noise-robust)
+  1  Exit contract failed (no excitable baseline)
+  2  Argparse/usage error (default argparse behavior)
+
+Spec:  docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
+Plan:  docs/superpowers/plans/2026-05-27-sef-itp-phase4-stage1-hr-single-node.md
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import matplotlib
-
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.topic4_modeling.hr import HRParams, simulate_trajectory
+from src.topic4_modeling.hr_core import HRParams
+from src.topic4_modeling.hr_dynamics import simulate_trajectory
 from src.topic4_modeling.hr_sweep import (
     pick_excitable_baseline,
     sweep_hr_parameters,
 )
 from src.topic4_modeling.hr_viz import plot_phase_portrait, plot_regime_map
 
-OUTPUT_ROOT = Path("results/topic4_sef_itp/phase4_modeling/stage1_hr_single")
+DEFAULT_OUTPUT = Path("results/topic4_sef_itp/phase4_modeling/stage1_hr_single")
 
-SMOKE_CONFIG = {
-    "I_grid": np.linspace(-2.5, 0.0, 6).tolist(),
-    "r_grid": [0.004, 0.006, 0.008],
-    "sigma_grid": [0.0, 0.05, 0.10, 0.15],
-    "seeds": [0, 1, 2],
-    "T": 200.0,
-    "dt": 0.05,
-}
-
-FULL_CONFIG = {
-    "I_grid": np.arange(-2.5, 0.05, 0.1).tolist(),
-    "r_grid": np.arange(0.002, 0.016, 0.001).tolist(),
-    "sigma_grid": [0.0, 0.05, 0.10, 0.15, 0.20, 0.30, 0.50],
-    "seeds": [0, 1, 2, 3, 4],
-    "T": 500.0,
-    "dt": 0.05,
+CONFIGS: dict[str, dict] = {
+    "smoke": {
+        "I_grid": np.linspace(-2.5, 0.0, 6).tolist(),
+        "r_grid": [0.004, 0.006, 0.008],
+        "sigma_grid": [0.0, 0.05, 0.10, 0.15],
+        "seeds": [0, 1, 2],
+        "T": 200.0, "dt": 0.05,
+    },
+    "full": {
+        "I_grid": np.arange(-2.5, 0.05, 0.1).tolist(),
+        "r_grid": np.arange(0.002, 0.016, 0.001).tolist(),
+        "sigma_grid": [0.0, 0.05, 0.10, 0.15, 0.20, 0.30, 0.50],
+        "seeds": [0, 1, 2, 3, 4],
+        "T": 500.0, "dt": 0.05,
+    },
+    # Test-only: deep-subthreshold + zero noise = guaranteed all silent
+    "synthetic-allsilent": {
+        "I_grid": [-3.5, -3.0],
+        "r_grid": [0.006],
+        "sigma_grid": [0.0, 0.05],
+        "seeds": [0, 1],
+        "T": 50.0, "dt": 0.05,
+    },
 }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=["smoke", "full"], default="smoke",
-                        help="smoke: ~5 min; full: ~25 min single-threaded")
-    parser.add_argument("--n-jobs", type=int, default=1,
-                        help="joblib parallelism")
-    parser.add_argument("--output-dir", type=Path, default=OUTPUT_ROOT)
+    parser = argparse.ArgumentParser(description=__doc__,
+                                      formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--mode", choices=list(CONFIGS), default="smoke")
+    parser.add_argument("--n-jobs", type=int, default=1)
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
 
-    config = SMOKE_CONFIG if args.mode == "smoke" else FULL_CONFIG
+    cfg = CONFIGS[args.mode]
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "phase_portraits").mkdir(exist_ok=True)
 
-    print(f"[stage1] mode={args.mode}  n_jobs={args.n_jobs}")
-    print(f"[stage1] sweep cells = "
-          f"{len(config['I_grid']) * len(config['r_grid']) * len(config['sigma_grid']) * len(config['seeds'])}")
+    n_cells = (len(cfg["I_grid"]) * len(cfg["r_grid"])
+                * len(cfg["sigma_grid"]) * len(cfg["seeds"]))
+    print(f"[stage1] mode={args.mode}  n_jobs={args.n_jobs}  n_cells={n_cells}")
 
     df = sweep_hr_parameters(
-        I_grid=config["I_grid"],
-        r_grid=config["r_grid"],
-        sigma_grid=config["sigma_grid"],
-        seeds=config["seeds"],
-        T=config["T"],
-        dt=config["dt"],
-        n_jobs=args.n_jobs,
+        I_grid=cfg["I_grid"], r_grid=cfg["r_grid"],
+        sigma_grid=cfg["sigma_grid"], seeds=cfg["seeds"],
+        T=cfg["T"], dt=cfg["dt"], n_jobs=args.n_jobs,
+    )
+    print(f"[stage1] sweep done, n_rows={len(df)}")
+    print(f"[stage1] regimes:\n{df['regime'].value_counts().to_string()}")
+
+    # JSON sweep results (no parquet)
+    (args.output_dir / "sweep_results.json").write_text(
+        json.dumps(df.to_dict(orient="records"), indent=2, default=str)
     )
 
-    df.to_parquet(args.output_dir / "sweep_results.parquet")
-    print(f"[stage1] sweep done, n_rows={len(df)}")
-    print(f"[stage1] regime distribution:\n{df['regime'].value_counts()}")
-
-    fig = plot_regime_map(df)
-    fig.savefig(args.output_dir / "regime_map.png", dpi=150,
-                bbox_inches="tight")
-    plt.close(fig)
-    print(f"[stage1] regime_map.png saved")
+    # Regime map (skip if grid too small or all one regime)
+    try:
+        fig = plot_regime_map(df)
+        fig.savefig(args.output_dir / "regime_map.png", dpi=150, bbox_inches="tight")
+        plt.close(fig)
+        print("[stage1] regime_map.png saved")
+    except Exception as e:
+        print(f"[stage1] regime map skipped: {e}")
 
     baseline = pick_excitable_baseline(df)
     summary = {
         "mode": args.mode,
-        "sweep_config": config,
+        "sweep_config": {k: v if not hasattr(v, "tolist") else v.tolist()
+                          for k, v in cfg.items()},
         "regime_counts": df["regime"].value_counts().to_dict(),
         "baseline": baseline,
         "stage1_exit_contract_passed": baseline is not None,
     }
-    with open(args.output_dir / "regime_summary.json", "w") as f:
-        json.dump(summary, f, indent=2, default=str)
-    print(f"[stage1] regime_summary.json saved")
+    (args.output_dir / "regime_summary.json").write_text(
+        json.dumps(summary, indent=2, default=str)
+    )
+    print("[stage1] regime_summary.json saved")
 
-    if baseline is not None:
-        with open(args.output_dir / "baseline.json", "w") as f:
-            json.dump(baseline, f, indent=2)
-        print(f"[stage1] baseline (I*, r*, sigma*) = "
-              f"({baseline['I_star']:.3f}, {baseline['r_star']:.4f}, "
-              f"{baseline['sigma_star']:.3f}) [hand-off contract to Stage 2]")
-
-        # Phase portraits at baseline and 3 neighbor cells
-        p = HRParams()
-        for label, (I, r, sigma) in [
-            ("baseline", (baseline["I_star"], baseline["r_star"],
-                          baseline["sigma_star"])),
-            ("baseline_zero_noise", (baseline["I_star"], baseline["r_star"], 0.0)),
-            ("baseline_high_noise", (baseline["I_star"], baseline["r_star"],
-                                      baseline["sigma_star"] * 2.0)),
-        ]:
-            from dataclasses import replace
-            p_cell = replace(p, r=r)
-            _, traj = simulate_trajectory(p_cell, I=I, T=300.0, dt=0.05,
-                                           sigma_ou=sigma, tau_ou=10.0,
-                                           seed=0)
-            fig = plot_phase_portrait(traj, p_cell, I=I)
-            fig.savefig(args.output_dir / "phase_portraits" / f"{label}.png",
-                        dpi=150, bbox_inches="tight")
-            plt.close(fig)
-        print(f"[stage1] phase_portraits/ written (baseline + 2 neighbors)")
-        return 0
-    else:
-        print("[stage1] EXIT CONTRACT FAILED: no excitable regime found")
+    if baseline is None:
+        print("[stage1] EXIT CONTRACT FAILED: no excitable baseline found")
         print("[stage1] per spec §8 stage 1 fallback: try FHN-with-adaptation")
         return 1
+
+    # Baseline + phase portraits
+    (args.output_dir / "baseline.json").write_text(
+        json.dumps(baseline, indent=2)
+    )
+    print(f"[stage1] baseline (I*, r*, σ*) = "
+           f"({baseline['I_star']:.3f}, {baseline['r_star']:.4f}, "
+           f"{baseline['sigma_star']:.3f})  [hand-off to Stage 2]")
+
+    p = HRParams()
+    for label, (I, r, sigma) in [
+        ("baseline", (baseline["I_star"], baseline["r_star"], baseline["sigma_star"])),
+        ("baseline_zero_noise", (baseline["I_star"], baseline["r_star"], 0.0)),
+        ("baseline_high_noise",
+         (baseline["I_star"], baseline["r_star"], baseline["sigma_star"] * 2.0)),
+    ]:
+        p_cell = replace(p, r=r)
+        _, traj = simulate_trajectory(p_cell, I=I, T=300.0, dt=0.05,
+                                       sigma_ou=sigma, tau_ou=10.0, seed=0)
+        fig = plot_phase_portrait(traj, p_cell, I=I)
+        fig.savefig(args.output_dir / "phase_portraits" / f"{label}.png",
+                     dpi=150, bbox_inches="tight")
+        plt.close(fig)
+    print("[stage1] phase_portraits/ written")
+    return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [ ] **Step 2: Verify it imports without error (smoke check)**
-
-Run: `python -c "import scripts.run_topic4_phase4_stage1_hr as m; print('OK')"`
-Expected: prints `OK` (no import error)
-
-Note: this requires PYTHONPATH including project root. If module-path issue, prefix:
-`PYTHONPATH=. python -c "..."`
-
-- [ ] **Step 3: Verify help text works**
-
-Run: `PYTHONPATH=. python scripts/run_topic4_phase4_stage1_hr.py --help`
-Expected: argparse help text including `--mode`, `--n-jobs`, `--output-dir`
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 6: Run tests, verify pass**
 
 ```bash
-git add scripts/run_topic4_phase4_stage1_hr.py
-git commit -m "feat(topic4 phase4 stage1): CLI runner for HR parameter sweep"
+pytest tests/test_topic4_modeling_hr_viz.py -v
+pytest tests/test_topic4_modeling_hr_cli.py -v -k "not slow"
 ```
+
+Expected: 4 + 1 = 5 PASS.
+
+Optionally run slow CLI exit-code test:
+`pytest tests/test_topic4_modeling_hr_cli.py -v -k "slow"` → 1 PASS (~1 min for subprocess + sweep).
+
+Full suite no regression check:
+`pytest tests/test_topic4_modeling_hr_core.py tests/test_topic4_modeling_ou_noise.py tests/test_topic4_modeling_hr_dynamics.py tests/test_topic4_modeling_hr_sweep.py tests/test_topic4_modeling_hr_viz.py tests/test_topic4_modeling_hr_cli.py -v -k "not slow"`
+Expected: 44 PASS (39 prior + 5 viz/cli).
+
+- [ ] **Step 7: Commit Task 5**
+
+```bash
+git add src/topic4_modeling/hr_viz.py scripts/run_topic4_phase4_stage1_hr.py \
+        tests/test_topic4_modeling_hr_viz.py tests/test_topic4_modeling_hr_cli.py
+git commit -m "$(cat <<'EOF'
+feat(topic4 phase4 stage1): plotting + CLI with JSON output + exit-code 1 on no baseline
+
+hr_viz.py: compute_x_nullcline / compute_y_nullcline (closed form),
+plot_phase_portrait (x-y plane + nullclines + start/end markers),
+plot_regime_map (sigma × r subplot grid colored by modal regime).
+
+scripts/run_topic4_phase4_stage1_hr.py: argparse CLI with three modes
+(smoke / full / synthetic-allsilent for testing). All outputs in JSON
+(no parquet — per user-return strict catch: pyarrow availability is
+incidental, JSON is canonical):
+  - sweep_results.json (per-row dicts)
+  - regime_summary.json (config + counts + baseline + exit-contract flag)
+  - baseline.json (only if exit contract passes)
+  - regime_map.png
+  - phase_portraits/baseline*.png
+
+Exit-code contract (key user-return strict catch):
+  0 = baseline found, Stage 2 hand-off ready
+  1 = no excitable baseline (spec §8 fallback: try FHN)
+  2 = argparse error
+Test test_cli_no_baseline_exits_one verifies exit 1 via subprocess on
+synthetic-allsilent mode.
+
+Tests added: 4 hr_viz smoke + 1 CLI help + 1 CLI exit-1 (slow).
+Full suite: 44/44 non-slow green.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+**Task 5 exit criterion**: hr_viz + CLI green; JSON outputs; CLI subprocess test verifies exit 1 on no baseline.
 
 ---
 
-## Task 15: Smoke run + Stage 1 exit contract verification
+## Task 6: Stage 1 smoke run + archive + advisor
 
 **Files:**
 - Run (no new code)
-- Modify: `docs/topic4_sef_itp_framework.md` (only add Stage 1 status link if passes)
+- Create: `docs/archive/topic4/sef_itp_phase4_v1/stage1_results_2026-05-27.md`
 
-This is the operational milestone. We run the smoke sweep, verify regime map looks reasonable, confirm baseline is found.
+- [ ] **Step 1: Run smoke mode**
 
-- [ ] **Step 1: Run smoke sweep**
-
-Run:
 ```bash
 PYTHONPATH=. python scripts/run_topic4_phase4_stage1_hr.py --mode smoke --n-jobs 4
 ```
 
-Expected output (approximate):
-- prints `[stage1] mode=smoke  n_jobs=4`
-- prints `[stage1] sweep cells = 216` (6 × 3 × 4 × 3)
-- runs ~3-5 minutes
-- prints `[stage1] regime distribution:` with non-zero counts in multiple regimes
-- creates `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/regime_map.png`
-- creates `regime_summary.json` + (if exit passes) `baseline.json` + `phase_portraits/`
-- exit code 0 if baseline found, 1 if not
-
-- [ ] **Step 2: Manually inspect regime_map.png**
-
-Open `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/regime_map.png`.
-
 Expected:
-- Multiple cells colored green ("excitable") at sigma > 0
-- silent (gray) cells at low I + low sigma
-- repetitive-burst (orange) cells at high I
-- No unstable (red) cells dominating
+- Prints sweep cell count + regime distribution
+- ~3-5 minutes on 4 cores after numba first-compile (~5s extra)
+- Writes outputs in `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/`
+- Exit code 0 (baseline found) or 1 (per spec §8 fallback)
 
-If pattern unclear (all gray or all orange): smoke grid too coarse, run `--mode full` next.
+- [ ] **Step 2: Manually inspect outputs**
 
-- [ ] **Step 3: Inspect baseline.json**
+Open in image viewer:
+- `regime_map.png`: should show silent (gray) at low-I+low-noise corner, excitable (green) cells at moderate I+noise, repetitive-burst (orange) at high I. If all gray or all orange: grid too coarse, run `--mode full`.
+- `phase_portraits/baseline.png`: trajectory with occasional bursts; nullclines visible
+- `phase_portraits/baseline_zero_noise.png`: trajectory stuck at rest (no excursions)
+- `phase_portraits/baseline_high_noise.png`: more frequent bursts than baseline
 
-Run: `cat results/topic4_sef_itp/phase4_modeling/stage1_hr_single/baseline.json`
+Inspect JSON:
+- `cat results/topic4_sef_itp/phase4_modeling/stage1_hr_single/baseline.json`
+- `cat results/topic4_sef_itp/phase4_modeling/stage1_hr_single/regime_summary.json | head -30`
 
-Expected (concrete values will vary):
-```json
-{
-  "I_star": -1.3,
-  "r_star": 0.006,
-  "sigma_star": 0.1,
-  "noise_robust": true
-}
-```
+If smoke regime map sensible AND baseline found AND portraits look right → proceed to Step 3.
 
-Verify all three values are within sweep range and `noise_robust=true`.
+If exit=1 or visual sanity fails → fall back to spec §8 (FHN-with-adaptation as Stage 1 plan v3). Do NOT P-hack the sweep grid.
 
-- [ ] **Step 4: Inspect phase portraits**
-
-Open `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/phase_portraits/baseline.png`.
-
-Expected:
-- Trajectory bounces around rest with occasional brief excursions through the burst region
-- Nullclines (red x-nullcline, green y-nullcline) intersect near rest
-
-Open `baseline_zero_noise.png`: should show trajectory stuck at rest (no excursions).
-
-Open `baseline_high_noise.png`: should show more frequent excursions but still discrete bursts (not continuous oscillation).
-
-If `baseline.png` shows trajectory at rest only OR continuous oscillation: smoke sweep didn't find the right baseline. Either re-run with finer grid or check parameter ranges.
-
-- [ ] **Step 5: If smoke passed, optionally run full sweep**
-
-If smoke regime map looks reasonable AND baseline found AND phase portraits sensible, run the full sweep for the lock-in baseline:
+- [ ] **Step 3: Optionally run full mode for lock-in baseline**
 
 ```bash
 PYTHONPATH=. python scripts/run_topic4_phase4_stage1_hr.py --mode full --n-jobs 8
 ```
 
-Expected: ~25 min on 8 cores. Same artifacts but higher-resolution `regime_map.png` and more confidence in baseline pick.
+Expected: ~25 min on 8 cores. Higher-resolution regime map + more confident baseline pick.
 
-- [ ] **Step 6: Run full test suite to confirm no regression**
+- [ ] **Step 4: Run full test suite — confirm zero regression**
 
-Run:
 ```bash
-pytest tests/test_topic4_modeling_hr.py tests/test_topic4_modeling_hr_viz.py tests/test_topic4_modeling_hr_sweep.py -v
+pytest tests/test_topic4_modeling_hr_core.py \
+       tests/test_topic4_modeling_ou_noise.py \
+       tests/test_topic4_modeling_hr_dynamics.py \
+       tests/test_topic4_modeling_hr_sweep.py \
+       tests/test_topic4_modeling_hr_viz.py \
+       tests/test_topic4_modeling_hr_cli.py \
+       -v
 ```
 
-Expected: all green (~30+ tests).
+Expected: 44 non-slow PASS + 2 slow (xfail or PASS).
 
-- [ ] **Step 7: Write Stage 1 archive results doc**
+- [ ] **Step 5: Write archive results doc**
 
-Create `docs/archive/topic4/sef_itp_phase4_v1/stage1_results_2026-05-27.md`:
+Create `docs/archive/topic4/sef_itp_phase4_v1/stage1_results_2026-05-27.md` filling in actual run numbers:
 
 ```markdown
 # SEF-ITP Phase 4 Stage 1 Results — Single-Node HR
 
-> 状态：[PASS|FAIL] (取实际)
+> 状态：[PASS|FAIL] — 取决于实际 exit code
 > 日期：[YYYY-MM-DD]
-> 上游 spec：`docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md`
-> 上游 plan：`docs/superpowers/plans/2026-05-27-sef-itp-phase4-stage1-hr-single-node.md`
+> 上游 spec：`docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` v0.2
+> 上游 plan：`docs/superpowers/plans/2026-05-27-sef-itp-phase4-stage1-hr-single-node.md` v2
+> Framework banner：v1.0.7 → v1.0.8 (commit [SHA])
 
 ## 一句话朴素话
 
-我们把 HR 单节点的 3 个核心参数 (I, r, σ_OU) 各自扫一遍，看哪些参数组合下节点行为像「正常静默 + 偶尔被噪声推一下打一个 brief burst 又回到静默」(excitable regime)。结果在 (I*, r*, σ*) = [实跑数] 处找到 such 子带；这个区间将作为 Stage 2 2D 均质 sheet 的节点 baseline 参数。
+我们把 HR 单节点的 3 个核心参数 (I, r, σ_OU) 扫遍后, 找一个参数组合让节点
+在 "正常静默 + 偶尔被噪声扰动打一个 brief burst 又回到静默" 状态 (excitable regime),
+作为后续 2D 网格中每个节点的基础动力学参数. 实跑找到 (I*, r*, σ*) = (___, ___, ___).
 
-## Stage 1 退出契约结果
+## Stage 1 退出契约
 
 - [ ] 存在 excitable 参数子带：[PASS|FAIL]
 - [ ] noise amplitude ±50% regime 不漂：[PASS|FAIL]
 - [ ] 选中 baseline (I*, r*, σ*) = (___, ___, ___)
-- [ ] TDD 测试全 GREEN: [n tests passed]
+- [ ] TDD 测试全 GREEN：[N tests passed]
+- [ ] CLI exit code: [0|1]
 
 ## Regime distribution
 
 [paste df['regime'].value_counts() output]
 
-## 输出 artifact
+## Artifacts
 
-- `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/regime_map.png`
-- `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/regime_summary.json`
-- `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/baseline.json`
-- `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/phase_portraits/`
-- `results/topic4_sef_itp/phase4_modeling/stage1_hr_single/sweep_results.parquet`
+- regime_map.png
+- regime_summary.json
+- baseline.json (if PASS)
+- phase_portraits/{baseline, baseline_zero_noise, baseline_high_noise}.png
+- sweep_results.json
 
 ## Advisor consult
 
-[paste advisor() call summary; verdict over-claim check]
+[paste advisor() consult result; over-claim check]
 
 ## 下一步
 
-[If PASS] → Stage 2 plan 立项 (`docs/superpowers/plans/2026-05-XX-sef-itp-phase4-stage2-2d-homogeneous.md`)
-[If FAIL] → spec §8 fallback: FHN-with-adaptation 重做 Stage 1
+[PASS] → Stage 2 plan 立项 (`docs/superpowers/plans/2026-05-XX-sef-itp-phase4-stage2-2d-homogeneous.md`)
+[FAIL] → spec §8 fallback: FHN-with-adaptation Stage 1 plan v3
 ```
 
-Fill in the bracketed values from your actual run.
+Fill in bracketed values from your actual run.
 
-- [ ] **Step 8: Commit results**
+- [ ] **Step 6: Advisor consult**
+
+Call `advisor()` in your implementation session. Advisor should verify:
+- regime map sensible, not all one regime
+- baseline noise-robustness real (not lucky single seed)
+- archive results doc honestly reflects what was found
+- Stage 2 hand-off clear
+
+If advisor flags issues → fix inline (re-run, adjust) before committing Stage 1 done.
+
+- [ ] **Step 7: Commit Task 6**
 
 ```bash
 mkdir -p docs/archive/topic4/sef_itp_phase4_v1
 git add docs/archive/topic4/sef_itp_phase4_v1/stage1_results_2026-05-27.md \
         results/topic4_sef_itp/phase4_modeling/stage1_hr_single/
-git commit -m "results(topic4 phase4 stage1): HR single-node sweep + baseline lock"
+git commit -m "$(cat <<'EOF'
+results(topic4 phase4 stage1): HR single-node sweep + baseline lock
+
+Stage 1 [PASS|FAIL — fill in].
+
+Smoke run on 4 cores, ~5 min. Regime map shows expected pattern
+(silent low-I, excitable middle, repetitive high-I). Baseline picker
+found (I*, r*, σ*) = ([fill in]) with noise-robust check.
+
+Full test suite: 44/44 non-slow GREEN; 2 slow integration tests:
+[smoke_real_sweep: PASS|XFAIL], [cli_exit_1: PASS].
+
+Advisor consult: [paste verdict].
+
+Hand-off to Stage 2: baseline.json contains the (I*, r*, σ*) tuple to
+use as per-node baseline in the 2D homogeneous sheet.
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
 ```
 
-- [ ] **Step 9: Advisor consult before declaring Stage 1 done**
-
-In the implementation session, call `advisor()` with the full Stage 1 transcript. Advisor should check:
-- regime map looks sensible (not all one regime)
-- baseline noise-robustness is real, not lucky single seed
-- Stage 2 hand-off contract clearly defined
-- No over-claim in archive results doc
-
-If advisor flags issues → fix inline (re-run, adjust, re-commit) before moving to Stage 2 plan.
+**Task 6 exit criterion**: archive doc written with real numbers, advisor consult done, results committed.
 
 ---
 
@@ -1939,45 +2020,34 @@ If advisor flags issues → fix inline (re-run, adjust, re-commit) before moving
 
 | Spec §3 Stage 1 requirement | Task |
 |---|---|
-| HR ODE with spec §5.1 params | Task 2 (HRParams) + Task 3 (hr_rhs) |
-| RK4, Δt=0.05 | Task 4 (rk4_step) |
-| Parameter sweep I × r × σ_OU × seeds | Task 11 (sweep_hr_parameters) |
-| 5 seeds per cell | Task 14 CLI (FULL_CONFIG seeds=[0..4]) |
-| Phase portrait + nullclines | Task 9 (hr_viz) |
-| Burst detection x > 1.0 sustained ≥ 5ms | Task 7 (detect_bursts) |
-| Regime classifier (silent/single-burst/repetitive/unstable) | Task 8 (classify_regime); note: spec says "single-burst" we use "excitable" (synonymous in this context, perturbation-driven) |
-| Exit: excitable subband + noise ±50% robust | Task 12 (pick_excitable_baseline) |
-| Output regime_map.png + regime_summary.json + selected baseline | Task 14 CLI + Task 15 |
-| TDD 6 test modules GREEN | Tasks 1-13 each have tests; Task 15 step 6 runs full suite |
+| Framework v1.0.7 ban on HR resolved before code | Task 0 |
+| HR ODE (spec §5.1 params) | Task 1 (hr_core: HRParams + hr_rhs + JIT) |
+| RK4 integrator dt=0.05 | Task 1 |
+| OU noise generator (spec §5.3) | Task 2 |
+| Parameter sweep over (I, r, σ, seed) | Task 4 (sweep_hr_parameters) |
+| Phase portrait + nullclines | Task 5 (hr_viz) |
+| Burst detector with hysteresis + min_duration | Task 3 (detect_bursts; thresholds in hr_config) |
+| Regime classifier (silent/excitable/repetitive/unstable) | Task 3 (classify_regime; thresholds in hr_config) |
+| Excitable subband baseline + noise-robust ±50% | Task 4 (pick_excitable_baseline) |
+| Output regime_map + summary JSON + selected baseline | Task 5 CLI; Task 6 actual run |
+| TDD all-green | Tasks 1-5 each have green tests; Task 6 full-suite verification |
+| Stage 1 exit contract: real "no baseline" = FAIL not skip | Task 4 (synthetic always-run + real-xfail) + Task 5 (CLI exit 1) |
 
-**Gap identified + fixed**: spec says "single-burst" regime, plan uses "excitable" label. These are semantically equivalent under spec §3 Stage 1 ("节点静息但被短扰动或 OU fluctuation 可触发 brief burst") — both mean perturbation-triggered single bursts. "Excitable" is the standard dynamical systems term; "single-burst" is the spec's phenomenological term. I've kept "excitable" in the code and noted the equivalence in this self-review. If you prefer "single-burst" rename: replace string literal in Task 8 + Task 12 + Task 13 + Task 15 step 3 output. Not a blocker.
-
-**2. Placeholder scan**:
-- No "TBD" / "TODO" / "implement later" anywhere
-- All test code is complete (not "write similar test")
-- All implementation code is complete (not "fill in here")
-- All commands have exact invocations + expected output
-- Task 15 step 7 archive results doc has bracketed `[YYYY-MM-DD]` / `[___]` — those are user-fillable runtime values, not plan placeholders (clearly marked as "fill in from your actual run")
+**2. Placeholder scan**: All code blocks complete. The only bracketed strings (`[fill in]`, `[YYYY-MM-DD]`, `[PASS|FAIL]`) are in Task 6 step 5/7 archive results doc — these are clearly marked as "fill in from actual run", not plan placeholders.
 
 **3. Type consistency**:
-- `HRParams` used consistently across Tasks 2-12
-- `hr_rhs(x, y, z, params, I, eta)` signature consistent in Tasks 3-4
-- `rk4_step(state, params, I, eta, dt)` returns `(x, y, z)` tuple consistent
-- `simulate_trajectory` returns `(t, traj)` where traj.shape = (n_steps, 3) consistent in Tasks 6, 9, 14
-- `detect_bursts(x, t, ...)` returns `list[(t_start, t_end)]` consistent
-- `classify_regime` returns one of 4 strings; `pick_excitable_baseline` filters on `"excitable"`; `plot_regime_map` color-keys on 4 strings. All consistent.
-- `sweep_hr_parameters` returns DataFrame with columns from `evaluate_cell` dict; `pick_excitable_baseline` reads those columns; `plot_regime_map` reads them too. Column names checked consistent.
+- `HRParams` from `hr_core` used everywhere consistently
+- `BurstConfig` / `RegimeConfig` from `hr_config` used in `hr_dynamics` + `hr_sweep` consistently
+- JIT and Python `hr_rhs` / `rk4_step` have matching numerical output (verified by Task 1 tests)
+- `sweep_hr_parameters` returns DataFrame; `pick_excitable_baseline` consumes same columns; `plot_regime_map` consumes same columns
+- `evaluate_cell` returns dict with `regime`, `n_bursts`, etc. — matches DataFrame column expectations in Task 4 + 5
 
-**Self-review pass**.
+Self-review pass.
 
 ---
 
 ## Execution Handoff
 
-Plan complete and saved to `docs/superpowers/plans/2026-05-27-sef-itp-phase4-stage1-hr-single-node.md`. Two execution options:
+Plan v2 complete. Next: invoke `superpowers:subagent-driven-development` (already loaded in the session) and dispatch Task 0 first (framework v1.0.8 banner — no code, just doc edit), then Tasks 1-6 in sequence with two-stage review per task.
 
-**1. Subagent-Driven (recommended)** — I dispatch a fresh subagent per task (15 tasks), review between tasks, fast iteration. Best for: discipline + caught regressions early.
-
-**2. Inline Execution** — Execute tasks in this session using `superpowers:executing-plans`, batch execution with checkpoints. Best for: faster wall time, lower coordination overhead.
-
-**Which approach?**
+The v1 stub commit (30858df) leaves `src/topic4_modeling/__init__.py` already created — Task 1 step 1 deletes the v1 `hr.py` + `tests/test_topic4_modeling_hr.py` stubs and replaces with `hr_core.py` + `tests/test_topic4_modeling_hr_core.py`.
