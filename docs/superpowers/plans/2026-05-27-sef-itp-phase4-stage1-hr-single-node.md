@@ -1,8 +1,15 @@
-# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v2**
+# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v3**
 
-> **v2 supersedes v1 (commit 857d916)**, post-user-return strict catch 2026-05-27. v1 had 5 hard problems flagged: (1) wrote HR code without framework v1.0.7 → v1.0.8 banner amendment first (source-of-truth contradiction); (2) numba claim with Python for-loops (15000 cell × 10000 step = unrunnable); (3) 15 per-task commits violating collab discipline; (4) `pytest.skip` in baseline picker test silently bypasses exit contract; (5) `swap_class > 30% events` is layer error (per-template-pair vs per-event). v2 fixes all 5 + restructures from 15 tasks to **Task 0 + 6 implementation tasks** per user proposal.
+> **v3 supersedes v2 (commit 16a85aa)**, second user-return strict catch 2026-05-27. v2 had 3 must-fix bugs + 3 small notes:
 >
-> v1 git history preserved at commit 857d916.
+> 1. Task 4 baseline picker only checked sigma=0 silent + sigma*1.4 still excitable; **missing the ±50% lower-side check** (sigma*0.5 still excitable). Spec §3 Stage 1 says "noise ±50% 不漂"; v2 picker would accept noise-threshold-edge baselines. v3 fixes picker to enforce BOTH lower AND upper neighbor.
+> 2. Task 5 CLI `try/except` around regime_map plot silently swallowed failures + exit 0. v3: synthetic-allsilent skips plot; smoke/full → plot failure flips `stage1_exit_contract_passed=false` + exit 1.
+> 3. Task 3 dynamics tests "I=2.0 produces ≥3 bursts" / "r_override changes burst rate" / "silent at deeply subthreshold" are empirical not algebraic — they invite tuning model to satisfy tests. v3 moves them to integration tests `@pytest.mark.slow`, keeps only algebraic / signature / reproducibility tests in unit suite.
+> 4. Plan commit messages dropped: no more Co-Authored-By footer (matches repo convention: recent commits bc73135 / 0563525 etc don't have it). Existing 5 committed footers (ead2200..16a85aa) left as-is (no force-push).
+> 5. Task 0 step 1 uses `rg` (ripgrep 14.1 available) instead of `grep | head`.
+> 6. Framework doc + v1 stub still pending in tree — Task 0 lands amendment first, Task 1 deletes stub.
+>
+> v2 git history preserved at commit 16a85aa. v1 at commit 857d916.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -18,19 +25,29 @@
 
 ---
 
-## What's locked in v2 (vs v1)
+## What's locked in v3 (vs v2)
 
-| Issue | v1 | **v2** |
+| Issue | v2 | **v3** |
+|---|---|---|
+| Baseline picker noise-robustness | only upper-side check (`sigma * 1.4`) | **both lower (`σ * 0.5`) AND upper (`σ * 1.5`)** neighbors must be excitable; rules out threshold-edge baselines |
+| CLI regime_map plot failure handling | silently caught, exit 0 even on plot fail | smoke/full: plot failure → `stage1_exit_contract_passed=false` + exit 1; synthetic-allsilent: skip plot legitimately |
+| Empirical dynamics tests | mixed into unit suite | moved to integration suite `@pytest.mark.slow`; unit suite contains only algebraic / signature / reproducibility invariants |
+| Commit message footer | Co-Authored-By present | **dropped** (matches repo convention: recent commits don't have it) |
+| Task 0 step 1 tooling | `grep ... | head` | `rg` (ripgrep available) |
+
+## What's locked from v1→v2 (still in v3)
+
+| Issue | v1 | **v3** |
 |---|---|---|
 | Framework amendment timing | "to Stage 5 后再改" | **Task 0 first**, before any code |
-| numba | claimed but Python loops | real `@njit(cache=True)` on `hr_rhs_jit`, `rk4_step_jit`, `simulate_trajectory_jit`, `generate_ou_noise_jit` |
-| Commits | 15 (one per task), per-step granular | **7 commits total** (one per Task, no per-step commits) |
-| Baseline picker test | `pytest.skip` if no baseline | split: (a) synthetic unit tests always run + (b) CLI exit 1 on no baseline + archive FAIL marker |
-| Cluster L3 layer | "swap_class > 30% events" | per-sim strict/candidate/none label + cohort across-seeds strict_or_candidate fraction (spec v0.2) |
-| Output format | parquet (no pyarrow guard) | JSON (sweep_results.json, regime_summary.json, baseline.json) |
+| numba | claimed but Python loops | real `@njit(cache=True)` on `hr_rhs_jit`, `rk4_step_jit`, `_trajectory_jit`, `_ou_loop_jit` |
+| Commits | 15 per task, per-step | **7 commits total** (one per Task, no per-step) |
+| Baseline picker test | `pytest.skip` if no baseline | synthetic always-run + real xfail + CLI exit-1 contract |
+| Cluster L3 layer | "swap_class > 30% events" | per-sim label + cohort across-seeds fraction (spec v0.2) |
+| Output format | parquet (no pyarrow guard) | JSON |
 | L4 principal-curve | hard pass gate | descriptive classifier (spec v0.2) |
-| 3-proxy verdict | "framework only引P1" loose | strict: only 三 proxy 一致 PASS 才进 framework mechanism support (spec v0.2) |
-| Cell B framing | "C-only test (H-C)" | "anatomical-axis-substrate sanity" (spec v0.2; H-C reentry → K_long sensitivity, not Phase 4 v1) |
+| 3-proxy verdict | loose "only引P1" | strict 三 proxy 一致 (spec v0.2) |
+| Cell B framing | "C-only test (H-C)" | "anatomical-axis-substrate sanity" (spec v0.2) |
 
 ---
 
@@ -81,9 +98,8 @@
 
 - [ ] **Step 1: Read current §0 banner + §6.5 in framework**
 
-Run: `grep -n "FHN\|HR\|Phase 4\|v1.0.7\|prerequisite" docs/topic4_sef_itp_framework.md | head -30`
-
-Goal: locate the lines that contradict (HR ban + Phase 4 prerequisite).
+Use Read tool (or `rg -n 'FHN|HR|Phase 4|v1.0.7|prerequisite' docs/topic4_sef_itp_framework.md`)
+to locate the lines that contradict the spec (HR ban + Phase 4 prerequisite).
 
 - [ ] **Step 2: Add v1.0.8 banner amendment block at top of framework doc**
 
@@ -114,7 +130,7 @@ Append immediately after:
 Run: `python -c "open('docs/topic4_sef_itp_framework.md').read().count('v1.0.8 banner amendment 2026-05-27')"`
 Expected: prints `1` (the banner block exists exactly once)
 
-Run: `grep -n "v1.0.8 banner amendment (top of file)" docs/topic4_sef_itp_framework.md | wc -l`
+Run: `rg -c 'v1.0.8 banner amendment \(top of file\)' docs/topic4_sef_itp_framework.md`
 Expected: `1` (cross-link exists once)
 
 - [ ] **Step 5: Commit Task 0**
@@ -130,7 +146,7 @@ Surgical 3-point modification to §6.5:
    model outputs are mechanism exploration only, not cohort verdict.
 2. Node dynamics changed from FHN-only to HR primary + FHN sensitivity.
 3. Shaft sampling discipline + cluster judgement criteria added:
-   ≥6 shaft geometries + negative control; multi-criterion verdict
+   >=6 shaft geometries + negative control; multi-criterion verdict
    (split-half + odd-even + forward/reverse Spearman + rank-displacement
    swap_sweep + L4 principal-curve descriptive); 3-proxy (x / dx/dt /
    detrend envelope) consistency required for framework mechanism
@@ -142,8 +158,6 @@ docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md v0.2
 
 Source-of-truth fix: this commit MUST precede any Phase 4 HR
 implementation code; otherwise framework doc contradicts the spec.
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -456,8 +470,6 @@ algebraic invariants, RK4 determinism + Euler equivalence at tiny dt,
 JIT-vs-Python agreement at 1e-10 rtol.
 
 Numba first-call compile ~3-5s, then cached. Files: 9 tests passing.
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -610,8 +622,6 @@ without explicit typing). Hot per-step update is inside @njit loop.
 Tests: seed reproducibility, different seeds diverge, stationary
 variance within 15% of target, autocorrelation at lag tau ~= 1/e
 within abs 0.05, length exactness, zero-sigma fast-path.
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -625,9 +635,12 @@ EOF
 **Files:**
 - Create: `src/topic4_modeling/hr_config.py`
 - Create: `src/topic4_modeling/hr_dynamics.py`
-- Create: `tests/test_topic4_modeling_hr_dynamics.py`
+- Create: `tests/test_topic4_modeling_hr_dynamics.py` (unit tests — algebraic / signature / reproducibility only)
+- Create: `tests/test_topic4_modeling_hr_dynamics_integration.py` (`@pytest.mark.slow` empirical tests)
 
 Centralized thresholds (no magic numbers) in `hr_config.py` per user-return critique.
+
+**Test discipline (v3 user-return strict catch)**: empirical regime-behavior tests ("at I=2.0 produces ≥3 bursts", "fast r produces more bursts than slow r", "at I=-3.0 stays silent") are NOT algebraic invariants — they describe what HR happens to do at a specific parameter regime, which invites the implementer to tune the model until tests pass. These go in `_integration.py` as `@pytest.mark.slow` so they're explicitly empirical observations (run during Task 6 smoke), not unit-test hard gates.
 
 - [ ] **Step 1: Write tests**
 
@@ -686,26 +699,9 @@ def test_simulate_trajectory_reproducibility():
     np.testing.assert_array_equal(a, b)
 
 
-def test_simulate_trajectory_silent_at_deeply_subthreshold():
-    """At I=-3.0 no noise → no bursts (x.max stays low)."""
-    from src.topic4_modeling.hr_core import HRParams
-    from src.topic4_modeling.hr_dynamics import simulate_trajectory
-    p = HRParams()
-    _, traj = simulate_trajectory(p, I=-3.0, T=200.0, dt=0.05,
-                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
-    assert traj[:, 0].max() < 0.5
-
-
-def test_simulate_trajectory_repetitive_at_high_I():
-    """At I=2.0 spontaneous bursting (≥3 x-crossings up through 1.0)."""
-    from src.topic4_modeling.hr_core import HRParams
-    from src.topic4_modeling.hr_dynamics import simulate_trajectory
-    p = HRParams()
-    _, traj = simulate_trajectory(p, I=2.0, T=300.0, dt=0.05,
-                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
-    x = traj[:, 0]
-    ups = np.sum((x[:-1] < 1.0) & (x[1:] >= 1.0))
-    assert ups >= 3
+# (Empirical regime-behavior tests "silent at I=-3.0" / "≥3 bursts at I=2.0"
+#  moved to tests/test_topic4_modeling_hr_dynamics_integration.py per
+#  v3 user-return critique — not algebraic, would invite model tuning.)
 
 
 # ── detect_bursts ────────────────────────────────────────────────────────
@@ -793,9 +789,82 @@ def test_classify_regime_unstable_takes_precedence():
     assert classify_regime(bursts, T=1000.0, cfg=RegimeConfig()) == "unstable"
 ```
 
-- [ ] **Step 2: Run, verify all fail**
+- [ ] **Step 2a: Write integration test file (empirical, slow)**
+
+Create `tests/test_topic4_modeling_hr_dynamics_integration.py`:
+
+```python
+"""Integration tests for hr_dynamics — empirical regime-behavior observations.
+
+These are NOT algebraic invariants. They describe what HR happens to do at
+specific parameter regimes. They run during Stage 1 smoke (Task 6) as
+empirical observations to be reported in archive, not as TDD unit gates.
+
+If these xfail in Task 6, the implementation isn't wrong — HR's regime
+boundaries genuinely depend on parameters and we want to discover, not
+enforce, them.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import pytest
+
+
+@pytest.mark.slow
+def test_hr_silent_at_deeply_subthreshold():
+    """Empirical observation: at I=-3.0 with no noise, HR rests (x.max < 0.5)."""
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
+    p = HRParams()
+    _, traj = simulate_trajectory(p, I=-3.0, T=200.0, dt=0.05,
+                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
+    assert traj[:, 0].max() < 0.5, (
+        f"At I=-3.0 expected silent, got x.max={traj[:, 0].max():.3f}. "
+        "If unexpected, HR parameter regime differs from prior assumption — "
+        "report in Stage 1 archive, do not adjust to satisfy test."
+    )
+
+
+@pytest.mark.slow
+def test_hr_repetitive_at_high_I():
+    """Empirical observation: at I=2.0, HR enters spontaneous bursting."""
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
+    p = HRParams()
+    _, traj = simulate_trajectory(p, I=2.0, T=300.0, dt=0.05,
+                                   sigma_ou=0.0, tau_ou=10.0, seed=0)
+    x = traj[:, 0]
+    ups = int(np.sum((x[:-1] < 1.0) & (x[1:] >= 1.0)))
+    assert ups >= 3, (
+        f"At I=2.0 expected >=3 bursts, got {ups}. If unexpected, HR regime "
+        "boundary differs from prior assumption — report in Stage 1 archive."
+    )
+
+
+@pytest.mark.slow
+def test_hr_higher_r_yields_more_bursts():
+    """Empirical observation: larger r (slow var rate) → faster bursting cycle."""
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_sweep import evaluate_cell
+    slow = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
+                          r_override=0.003, T=1000.0, dt=0.05, seed=0)
+    fast = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
+                          r_override=0.012, T=1000.0, dt=0.05, seed=0)
+    assert fast["n_bursts"] > slow["n_bursts"], (
+        f"Expected fast r (0.012) → more bursts than slow r (0.003); "
+        f"got fast={fast['n_bursts']}, slow={slow['n_bursts']}. "
+        "Report in Stage 1 archive if regime boundary differs."
+    )
+```
+
+Note: the `evaluate_cell` test will import from `hr_sweep` (Task 4) — it stays as XFAIL until Task 4 lands `hr_sweep.py`. That's fine for a slow integration suite.
+
+- [ ] **Step 2: Run unit tests, verify all fail**
 
 `pytest tests/test_topic4_modeling_hr_dynamics.py -v` → all FAIL (modules don't exist).
+
+The integration tests in `_integration.py` are skipped by `-m "not slow"` default discipline and won't run during TDD.
 
 - [ ] **Step 3: Implement hr_config.py**
 
@@ -969,18 +1038,22 @@ def classify_regime(
     return "repetitive-burst"
 ```
 
-- [ ] **Step 5: Run all Task 3 tests, verify pass**
+- [ ] **Step 5: Run all Task 3 unit tests, verify pass**
 
-`pytest tests/test_topic4_modeling_hr_dynamics.py -v` → 14 PASS.
+`pytest tests/test_topic4_modeling_hr_dynamics.py -v` → 12 PASS (unit suite; reduced from 14 after moving 2 empirical tests to integration; third empirical test was in evaluate_cell already moved).
 
 Also run all prior tests to confirm no regression:
-`pytest tests/test_topic4_modeling_hr_core.py tests/test_topic4_modeling_ou_noise.py tests/test_topic4_modeling_hr_dynamics.py -v` → 29 total PASS.
+`pytest tests/test_topic4_modeling_hr_core.py tests/test_topic4_modeling_ou_noise.py tests/test_topic4_modeling_hr_dynamics.py -v` → 27 total PASS (9 + 6 + 12).
+
+Verify integration suite is gated (should be skipped by `-m "not slow"`):
+`pytest tests/test_topic4_modeling_hr_dynamics_integration.py -v -m "not slow"` → expected "no tests ran in ..." or "deselected 3 items".
 
 - [ ] **Step 6: Commit Task 3**
 
 ```bash
 git add src/topic4_modeling/hr_config.py src/topic4_modeling/hr_dynamics.py \
-        tests/test_topic4_modeling_hr_dynamics.py
+        tests/test_topic4_modeling_hr_dynamics.py \
+        tests/test_topic4_modeling_hr_dynamics_integration.py
 git commit -m "$(cat <<'EOF'
 feat(topic4 phase4 stage1): trajectory + burst + regime (config-driven)
 
@@ -995,14 +1068,20 @@ hr_dynamics.py:
 - classify_regime: silent / excitable / repetitive-burst / unstable;
   unstable takes precedence; excitable = sparse short bursts only.
 
-Tests: 14 added; full suite 29/29 green.
+Test discipline (v3): only algebraic / signature / reproducibility
+tests in unit suite (12 tests). Empirical regime-behavior observations
+(silent at deeply-subthreshold I, repetitive at high I, fast r yields
+more bursts than slow r) moved to _integration.py @pytest.mark.slow —
+they describe what HR does at specific param regimes, not what the code
+must enforce. They run during Task 6 smoke and surface unexpected
+boundaries instead of being TDD hard gates.
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Full unit suite: 27/27 green (9 hr_core + 6 ou_noise + 12 hr_dynamics).
 EOF
 )"
 ```
 
-**Task 3 exit criterion**: simulate_trajectory + detect_bursts + classify_regime all green, regime semantics covered, no regression in prior tests.
+**Task 3 exit criterion**: simulate_trajectory + detect_bursts + classify_regime green; integration tests gated; no regression in prior tests.
 
 ---
 
@@ -1049,15 +1128,9 @@ def test_evaluate_cell_returns_dict_with_regime_and_metadata():
     assert result["regime"] in {"silent", "excitable", "repetitive-burst", "unstable"}
 
 
-def test_evaluate_cell_r_override_changes_burst_rate():
-    """Larger r → faster bursting → more bursts."""
-    from src.topic4_modeling.hr_core import HRParams
-    from src.topic4_modeling.hr_sweep import evaluate_cell
-    slow = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
-                          r_override=0.003, T=1000.0, dt=0.05, seed=0)
-    fast = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
-                          r_override=0.012, T=1000.0, dt=0.05, seed=0)
-    assert fast["n_bursts"] > slow["n_bursts"]
+# (Empirical "r_override changes burst rate" test moved to
+#  tests/test_topic4_modeling_hr_dynamics_integration.py per v3
+#  user-return critique — not algebraic, would invite model tuning.)
 
 
 # ── sweep_hr_parameters ──────────────────────────────────────────────────
@@ -1105,77 +1178,123 @@ def _row(I, r, sigma, seed, regime, n_bursts=1):
             "mean_burst_duration": 5.0, "mean_ibi": 100.0}
 
 
-def test_picker_returns_candidate_when_clean_excitable_present():
-    """Synthetic: clean excitable subband present → picker returns it."""
+def test_picker_returns_candidate_with_full_noise_window():
+    """Synthetic: candidate σ has BOTH lower (~0.5σ) and upper (~1.5σ)
+    neighbors that are excitable, sigma=0 silent → returns candidate."""
     from src.topic4_modeling.hr_sweep import pick_excitable_baseline
     rows = []
-    # At (I=-1.3, r=0.006): silent at sigma=0, excitable at sigma=0.1, still excitable at sigma=0.15
+    # Candidate σ=0.10: needs lower in [0.04, 0.06] and upper in [0.14, 0.16]
+    # Grid: [0, 0.05, 0.10, 0.15] (smoke config style)
     for seed in [0, 1, 2]:
         rows.append(_row(-1.3, 0.006, 0.0, seed, "silent", 0))
-        rows.append(_row(-1.3, 0.006, 0.1, seed, "excitable"))
-        rows.append(_row(-1.3, 0.006, 0.15, seed, "excitable"))
-    # And some unrelated cells
+        rows.append(_row(-1.3, 0.006, 0.05, seed, "excitable"))   # lower neighbor
+        rows.append(_row(-1.3, 0.006, 0.10, seed, "excitable"))   # candidate
+        rows.append(_row(-1.3, 0.006, 0.15, seed, "excitable"))   # upper neighbor
+    # Unrelated cells
     for seed in [0, 1, 2]:
         rows.append(_row(-2.5, 0.006, 0.0, seed, "silent", 0))
-        rows.append(_row(2.0, 0.006, 0.1, seed, "repetitive-burst", 10))
+        rows.append(_row(2.0, 0.006, 0.10, seed, "repetitive-burst", 10))
     df = pd.DataFrame(rows)
     baseline = pick_excitable_baseline(df)
     assert baseline is not None
-    assert baseline["I_star"] == -1.3
-    assert baseline["r_star"] == 0.006
-    assert baseline["sigma_star"] == 0.1
+    assert baseline["I_star"] == -1.3 and baseline["r_star"] == 0.006
+    assert baseline["sigma_star"] == 0.10
     assert baseline["noise_robust"] is True
 
 
 def test_picker_returns_none_when_no_excitable_anywhere():
-    """Synthetic: all silent or unstable → picker returns None."""
+    """Synthetic: all silent → returns None."""
     from src.topic4_modeling.hr_sweep import pick_excitable_baseline
     rows = []
     for I in [-2.5, -1.6, 0.0]:
-        for sigma in [0.0, 0.1, 0.15]:
+        for sigma in [0.0, 0.05, 0.10, 0.15]:
             rows.append(_row(I, 0.006, sigma, 0, "silent", 0))
     df = pd.DataFrame(rows)
     assert pick_excitable_baseline(df) is None
 
 
-def test_picker_rejects_candidate_when_zero_noise_not_silent():
-    """Synthetic: excitable at sigma=0.1 but zero-noise NOT silent → rejected."""
+def test_picker_rejects_when_zero_noise_not_silent():
+    """Synthetic: zero-noise NOT silent → reject (candidate is not the noise-driven excitable regime)."""
     from src.topic4_modeling.hr_sweep import pick_excitable_baseline
     rows = []
     for seed in [0, 1, 2]:
         rows.append(_row(-1.3, 0.006, 0.0, seed, "repetitive-burst", 10))
-        rows.append(_row(-1.3, 0.006, 0.1, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.05, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.10, seed, "excitable"))
         rows.append(_row(-1.3, 0.006, 0.15, seed, "excitable"))
     df = pd.DataFrame(rows)
     assert pick_excitable_baseline(df) is None
 
 
-def test_picker_rejects_candidate_when_high_noise_flips_regime():
-    """Synthetic: excitable at sigma=0.1 but flips to repetitive at 0.15 → rejected."""
+def test_picker_rejects_when_upper_sigma_flips_regime():
+    """Synthetic: upper neighbor flips to repetitive-burst → reject (upper-edge fragile)."""
     from src.topic4_modeling.hr_sweep import pick_excitable_baseline
     rows = []
     for seed in [0, 1, 2]:
         rows.append(_row(-1.3, 0.006, 0.0, seed, "silent", 0))
-        rows.append(_row(-1.3, 0.006, 0.1, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.05, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.10, seed, "excitable"))
         rows.append(_row(-1.3, 0.006, 0.15, seed, "repetitive-burst", 10))
     df = pd.DataFrame(rows)
     assert pick_excitable_baseline(df) is None
 
 
-def test_picker_picks_median_sigma_when_multiple_candidates():
-    """Synthetic: 3 valid sigma levels (0.05, 0.10, 0.15) → picker picks median (0.10)."""
+def test_picker_rejects_when_lower_sigma_is_silent():
+    """v3 NEW (user-return strict catch): lower neighbor silent → reject (lower-edge fragile).
+
+    v2 picker missed this case — without lower-side check, a candidate σ
+    sitting right at the noise threshold (where any smaller σ flips to
+    silent) would pass. v3 enforces both lower AND upper noise-robustness.
+    """
     from src.topic4_modeling.hr_sweep import pick_excitable_baseline
     rows = []
     for seed in [0, 1, 2]:
         rows.append(_row(-1.3, 0.006, 0.0, seed, "silent", 0))
-        for sigma in [0.05, 0.10, 0.15]:
-            rows.append(_row(-1.3, 0.006, sigma, seed, "excitable"))
-        # need a higher sigma for the noise-robust check at sigma=0.15
-        rows.append(_row(-1.3, 0.006, 0.225, seed, "excitable"))
+        rows.append(_row(-1.3, 0.006, 0.05, seed, "silent", 0))     # lower neighbor SILENT → fragile
+        rows.append(_row(-1.3, 0.006, 0.10, seed, "excitable"))     # candidate
+        rows.append(_row(-1.3, 0.006, 0.15, seed, "excitable"))
+    df = pd.DataFrame(rows)
+    assert pick_excitable_baseline(df) is None
+
+
+def test_picker_rejects_when_no_lower_neighbor_in_grid():
+    """Candidate σ=0.05 has no lower neighbor in [0.02, 0.03] → reject."""
+    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
+    rows = []
+    for seed in [0, 1, 2]:
+        rows.append(_row(-1.3, 0.006, 0.0, seed, "silent", 0))
+        rows.append(_row(-1.3, 0.006, 0.05, seed, "excitable"))   # candidate has no in-grid lower
+        rows.append(_row(-1.3, 0.006, 0.10, seed, "excitable"))
+    df = pd.DataFrame(rows)
+    # sigma=0.05 has no neighbor in [0.02, 0.03] (next-lower would be 0
+    # which is silent by separate criterion) → fragile lower-side → reject.
+    # sigma=0.10 has no upper in [0.14, 0.16] in this small grid → reject.
+    # → no candidate qualifies
+    assert pick_excitable_baseline(df) is None
+
+
+def test_picker_picks_median_sigma_when_multiple_candidates():
+    """Synthetic: 2 candidates (σ=0.10 and σ=0.20) both satisfy full noise window → picker picks median (sorted+median = σ=0.20 by len//2)."""
+    from src.topic4_modeling.hr_sweep import pick_excitable_baseline
+    rows = []
+    # Grid: [0, 0.05, 0.10, 0.15, 0.20, 0.30]
+    # σ=0.10: lower=0.05 ∈[0.04,0.06]✓, upper=0.15 ∈[0.14,0.16]✓ → candidate
+    # σ=0.15: lower=? need [0.06,0.09], none in grid → fail
+    # σ=0.20: lower=0.10 ∈[0.08,0.12]✓, upper=0.30 ∈[0.28,0.32]✓ → candidate
+    # σ=0.30: upper=? need [0.42,0.48], none → fail
+    grid_sigmas = [0.0, 0.05, 0.10, 0.15, 0.20, 0.30]
+    for seed in [0, 1, 2]:
+        for sigma in grid_sigmas:
+            regime = "silent" if sigma == 0.0 else "excitable"
+            rows.append(_row(-1.3, 0.006, sigma, seed, regime,
+                              0 if regime == "silent" else 1))
     df = pd.DataFrame(rows)
     baseline = pick_excitable_baseline(df)
     assert baseline is not None
-    assert baseline["sigma_star"] == 0.10
+    # Two candidates [0.10, 0.20]; sorted; median by len//2 = index 1 = 0.20
+    assert baseline["sigma_star"] in {0.10, 0.20}, (
+        f"Expected 0.10 or 0.20, got {baseline['sigma_star']}"
+    )
 
 
 # ── Real fast smoke sweep integration (xfail, NOT skip) ─────────────────
@@ -1302,15 +1421,24 @@ def sweep_hr_parameters(
 def pick_excitable_baseline(df: pd.DataFrame) -> dict | None:
     """Pick Stage 1 baseline (I*, r*, sigma*) per spec §3 stage 1 exit contract.
 
-    Criteria:
+    Criteria (spec §3 Stage 1: regime stable to ±50% noise perturbation):
         (a) modal regime at (I, r, sigma) == "excitable", sigma > 0
         (b) same (I, r) at sigma=0 modal regime == "silent"
-        (c) same (I, r) at next-higher sigma still modal "excitable"
-            (next-higher = first sigma >= 1.4 * current sigma)
+        (c) **lower** sigma in [0.4 * sigma, 0.6 * sigma] (closest to 0.5σ):
+            modal regime still "excitable" (NOT silent, NOT repetitive-burst)
+        (d) **upper** sigma in [1.4 * sigma, 1.6 * sigma] (closest to 1.5σ):
+            modal regime still "excitable" (NOT repetitive-burst, NOT unstable)
 
-    Among candidates passing all 3, picks the one with median sigma_star.
+    A candidate's grid must contain BOTH lower (in window) AND upper (in
+    window) neighbors AND both must be modal excitable. This enforces the
+    spec's "±50% noise robust" requirement and rules out threshold-edge
+    baselines (v3 fix: v2 only checked upper-side, missed lower).
 
-    Returns dict {I_star, r_star, sigma_star, noise_robust=True} or None.
+    Among surviving candidates, picks the one with median sigma_star
+    (sorted, len//2 index).
+
+    Returns dict {I_star, r_star, sigma_star, noise_robust=True,
+    lower_sigma, upper_sigma} or None.
     """
     all_sigmas = sorted(df["sigma_ou"].unique())
     candidates = []
@@ -1323,18 +1451,32 @@ def pick_excitable_baseline(df: pd.DataFrame) -> dict | None:
         zn = df[(df["I"] == I) & (df["r_used"] == r) & (df["sigma_ou"] == 0.0)]
         if zn.empty or zn["regime"].mode().iloc[0] != "silent":
             continue
-        # (c) noise-robust check
-        higher = [s for s in all_sigmas if s >= 1.4 * sigma]
-        if not higher:
+        # (c) lower-side robustness: need sigma' in [0.4σ, 0.6σ]
+        lower_window = [s for s in all_sigmas if 0.4 * sigma <= s <= 0.6 * sigma]
+        if not lower_window:
             continue
+        # Closest to 0.5σ (take the one with min |s - 0.5σ|)
+        lo_sigma = min(lower_window, key=lambda s: abs(s - 0.5 * sigma))
+        lo_cell = df[
+            (df["I"] == I) & (df["r_used"] == r) & (df["sigma_ou"] == lo_sigma)
+        ]
+        if lo_cell.empty or lo_cell["regime"].mode().iloc[0] != "excitable":
+            continue
+        # (d) upper-side robustness: need sigma' in [1.4σ, 1.6σ]
+        upper_window = [s for s in all_sigmas if 1.4 * sigma <= s <= 1.6 * sigma]
+        if not upper_window:
+            continue
+        hi_sigma = min(upper_window, key=lambda s: abs(s - 1.5 * sigma))
         hi_cell = df[
-            (df["I"] == I) & (df["r_used"] == r) & (df["sigma_ou"] == higher[0])
+            (df["I"] == I) & (df["r_used"] == r) & (df["sigma_ou"] == hi_sigma)
         ]
         if hi_cell.empty or hi_cell["regime"].mode().iloc[0] != "excitable":
             continue
         candidates.append({
             "I_star": float(I), "r_star": float(r), "sigma_star": float(sigma),
             "noise_robust": True,
+            "lower_sigma": float(lo_sigma),
+            "upper_sigma": float(hi_sigma),
         })
     if not candidates:
         return None
@@ -1344,7 +1486,7 @@ def pick_excitable_baseline(df: pd.DataFrame) -> dict | None:
 
 - [ ] **Step 4: Run tests (exclude slow), verify pass**
 
-`pytest tests/test_topic4_modeling_hr_sweep.py -v -k "not slow"` → 10 PASS.
+`pytest tests/test_topic4_modeling_hr_sweep.py -v -k "not slow"` → 11 PASS (7 picker synthetic + 3 sweep determinism + 1 evaluate_cell smoke).
 
 Optionally run slow integration:
 `pytest tests/test_topic4_modeling_hr_sweep.py -v -m slow` → 1 PASS or 1 XFAIL with informative reason.
@@ -1352,7 +1494,7 @@ Optionally run slow integration:
 - [ ] **Step 5: Verify full suite no regression**
 
 `pytest tests/test_topic4_modeling_hr_core.py tests/test_topic4_modeling_ou_noise.py tests/test_topic4_modeling_hr_dynamics.py tests/test_topic4_modeling_hr_sweep.py -v -k "not slow"`
-Expected: 39 PASS (29 prior + 10 new sweep).
+Expected: 38 PASS (9 + 6 + 12 + 11).
 
 - [ ] **Step 6: Commit Task 4**
 
@@ -1364,28 +1506,38 @@ feat(topic4 phase4 stage1): sweep + excitable-baseline picker
 evaluate_cell composes sim+detect+classify (one row per cell call).
 sweep_hr_parameters runs Cartesian product over (I, r, sigma, seed)
 with joblib parallel; returns DataFrame.
-pick_excitable_baseline applies 3-criterion Stage 1 exit contract:
+pick_excitable_baseline applies 4-criterion Stage 1 exit contract
+(v3: lower-side check added per user-return strict catch — v2 only
+checked upper, would accept threshold-edge baselines):
   (a) modal regime "excitable" at sigma > 0
-  (b) same (I, r) silent at sigma=0
-  (c) same (I, r) still "excitable" at next sigma >= 1.4 * sigma
-Picks median sigma_star among candidates.
+  (b) same (I, r) at sigma=0 modal "silent"
+  (c) lower neighbor in [0.4σ, 0.6σ] (closest to 0.5σ): modal "excitable"
+  (d) upper neighbor in [1.4σ, 1.6σ] (closest to 1.5σ): modal "excitable"
+Picks median sigma_star among surviving candidates.
 
-Test strategy (per user-return strict catch — v1 used pytest.skip which
+Test strategy (v3 user-return strict catch — v1 used pytest.skip which
 silently bypassed the most important exit contract):
-  - 5 synthetic DataFrame unit tests for picker logic (ALWAYS run)
+  - 6 synthetic DataFrame unit tests for picker logic (ALWAYS run):
+    full-window pass, all-silent → None, zero-noise-not-silent reject,
+    upper-flip reject, lower-silent reject (NEW), no-in-grid-lower
+    reject (NEW), median pick across multiple candidates
+  - 2 sweep determinism + column tests
+  - 2 evaluate_cell signature / dict-shape tests
   - 1 real-smoke integration test (~20s, marked @slow) using
     pytest.xfail (NOT skip) so missing baseline does not masquerade as
-    green. CLI exit-code 1 enforcement is in Task 5.
+    green. CLI exit-code 1 enforcement in Task 5.
 
-Total Task 4 tests: 10 non-slow + 1 slow integration. Full suite 39/39
-non-slow green.
+Total Task 4 tests: 11 non-slow + 1 slow integration. Full suite 38/38
+non-slow green (9 hr_core + 6 ou_noise + 12 hr_dynamics + 11 sweep).
 
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Empirical "r_override changes burst rate" test moved to
+test_topic4_modeling_hr_dynamics_integration.py (v3 user-return: not
+algebraic, would invite model tuning).
 EOF
 )"
 ```
 
-**Task 4 exit criterion**: picker logic verified by synthetic tests; real sweep test uses xfail not skip; full suite green.
+**Task 4 exit criterion**: picker validates both lower AND upper noise neighbors; synthetic tests always run; real sweep uses xfail not skip; full suite green.
 
 ---
 
@@ -1750,23 +1902,35 @@ def main() -> int:
         json.dumps(df.to_dict(orient="records"), indent=2, default=str)
     )
 
-    # Regime map (skip if grid too small or all one regime)
+    # Regime map. Plot failure handling (v3 fix):
+    #   - synthetic-allsilent: tiny grid may legitimately not plot → log + continue
+    #   - smoke / full: plot failure is an exit-contract violation → flag + exit 1
+    plot_failed = False
+    plot_error: str | None = None
     try:
         fig = plot_regime_map(df)
         fig.savefig(args.output_dir / "regime_map.png", dpi=150, bbox_inches="tight")
         plt.close(fig)
         print("[stage1] regime_map.png saved")
-    except Exception as e:
-        print(f"[stage1] regime map skipped: {e}")
+    except Exception as e:  # noqa: BLE001 — intentional broad catch + exit-1 escalation
+        if args.mode == "synthetic-allsilent":
+            print(f"[stage1] regime_map skipped (synthetic mode): {e}")
+        else:
+            plot_failed = True
+            plot_error = repr(e)
+            print(f"[stage1] regime_map FAILED ({args.mode} mode): {e}")
 
     baseline = pick_excitable_baseline(df)
+    contract_passed = (baseline is not None) and (not plot_failed)
     summary = {
         "mode": args.mode,
         "sweep_config": {k: v if not hasattr(v, "tolist") else v.tolist()
                           for k, v in cfg.items()},
         "regime_counts": df["regime"].value_counts().to_dict(),
         "baseline": baseline,
-        "stage1_exit_contract_passed": baseline is not None,
+        "regime_map_failed": plot_failed,
+        "regime_map_error": plot_error,
+        "stage1_exit_contract_passed": contract_passed,
     }
     (args.output_dir / "regime_summary.json").write_text(
         json.dumps(summary, indent=2, default=str)
@@ -1776,6 +1940,10 @@ def main() -> int:
     if baseline is None:
         print("[stage1] EXIT CONTRACT FAILED: no excitable baseline found")
         print("[stage1] per spec §8 stage 1 fallback: try FHN-with-adaptation")
+        return 1
+    if plot_failed:
+        print("[stage1] EXIT CONTRACT FAILED: regime_map plot failed in non-synthetic mode")
+        print(f"[stage1] error: {plot_error}")
         return 1
 
     # Baseline + phase portraits
@@ -1822,7 +1990,7 @@ Optionally run slow CLI exit-code test:
 
 Full suite no regression check:
 `pytest tests/test_topic4_modeling_hr_core.py tests/test_topic4_modeling_ou_noise.py tests/test_topic4_modeling_hr_dynamics.py tests/test_topic4_modeling_hr_sweep.py tests/test_topic4_modeling_hr_viz.py tests/test_topic4_modeling_hr_cli.py -v -k "not slow"`
-Expected: 44 PASS (39 prior + 5 viz/cli).
+Expected: 43 PASS (38 prior + 5 viz/cli).
 
 - [ ] **Step 7: Commit Task 5**
 
@@ -1846,17 +2014,20 @@ incidental, JSON is canonical):
   - regime_map.png
   - phase_portraits/baseline*.png
 
-Exit-code contract (key user-return strict catch):
-  0 = baseline found, Stage 2 hand-off ready
-  1 = no excitable baseline (spec §8 fallback: try FHN)
+Exit-code contract (v3 strict; user-return strict catch):
+  0 = baseline found AND regime_map plot ok (Stage 2 hand-off ready)
+  1 = no excitable baseline (spec §8 fallback: try FHN), OR
+      regime_map plot failed in smoke/full mode (artifact missing)
   2 = argparse error
+Synthetic-allsilent mode: tiny grid may legitimately skip plot; only no-
+baseline triggers exit 1 in that mode. regime_summary.json always
+records both `regime_map_failed` and `stage1_exit_contract_passed` flags.
+
 Test test_cli_no_baseline_exits_one verifies exit 1 via subprocess on
 synthetic-allsilent mode.
 
 Tests added: 4 hr_viz smoke + 1 CLI help + 1 CLI exit-1 (slow).
-Full suite: 44/44 non-slow green.
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Full suite: 43/43 non-slow green (38 prior + 5 viz/cli).
 EOF
 )"
 ```
@@ -1919,7 +2090,9 @@ pytest tests/test_topic4_modeling_hr_core.py \
        -v
 ```
 
-Expected: 44 non-slow PASS + 2 slow (xfail or PASS).
+Expected: 43 non-slow PASS + 5 slow integration tests
+(3 hr_dynamics_integration + 1 sweep_xfail + 1 cli_exit_1; each xfail
+or PASS depending on whether the empirical regime boundary is met).
 
 - [ ] **Step 5: Write archive results doc**
 
@@ -1995,17 +2168,20 @@ Stage 1 [PASS|FAIL — fill in].
 
 Smoke run on 4 cores, ~5 min. Regime map shows expected pattern
 (silent low-I, excitable middle, repetitive high-I). Baseline picker
-found (I*, r*, σ*) = ([fill in]) with noise-robust check.
+found (I*, r*, σ*) = ([fill in]) with both-side noise-robust check.
 
-Full test suite: 44/44 non-slow GREEN; 2 slow integration tests:
-[smoke_real_sweep: PASS|XFAIL], [cli_exit_1: PASS].
+Full unit suite: 43/43 non-slow GREEN; slow integration tests:
+[hr_silent_at_deeply_subthreshold: PASS|XFAIL],
+[hr_repetitive_at_high_I: PASS|XFAIL],
+[hr_higher_r_yields_more_bursts: PASS|XFAIL],
+[smoke_real_sweep: PASS|XFAIL],
+[cli_exit_1: PASS].
 
 Advisor consult: [paste verdict].
 
-Hand-off to Stage 2: baseline.json contains the (I*, r*, σ*) tuple to
-use as per-node baseline in the 2D homogeneous sheet.
-
-Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+Hand-off to Stage 2: baseline.json contains the (I*, r*, σ*) tuple plus
+the verified ±50% noise window (lower_sigma, upper_sigma) for use as
+per-node baseline in the 2D homogeneous sheet.
 EOF
 )"
 ```
@@ -2028,10 +2204,12 @@ EOF
 | Phase portrait + nullclines | Task 5 (hr_viz) |
 | Burst detector with hysteresis + min_duration | Task 3 (detect_bursts; thresholds in hr_config) |
 | Regime classifier (silent/excitable/repetitive/unstable) | Task 3 (classify_regime; thresholds in hr_config) |
-| Excitable subband baseline + noise-robust ±50% | Task 4 (pick_excitable_baseline) |
+| Excitable subband baseline + noise-robust ±50% (lower AND upper) | Task 4 (pick_excitable_baseline — v3 fix: BOTH neighbors) |
 | Output regime_map + summary JSON + selected baseline | Task 5 CLI; Task 6 actual run |
 | TDD all-green | Tasks 1-5 each have green tests; Task 6 full-suite verification |
 | Stage 1 exit contract: real "no baseline" = FAIL not skip | Task 4 (synthetic always-run + real-xfail) + Task 5 (CLI exit 1) |
+| Stage 1 exit contract: regime_map.png must be produced | Task 5 CLI (v3 fix: plot failure → exit 1 in smoke/full mode) |
+| Unit suite contains only algebraic invariants | Task 3 (empirical regime tests moved to integration `@slow` — v3 user-return) |
 
 **2. Placeholder scan**: All code blocks complete. The only bracketed strings (`[fill in]`, `[YYYY-MM-DD]`, `[PASS|FAIL]`) are in Task 6 step 5/7 archive results doc — these are clearly marked as "fill in from actual run", not plan placeholders.
 
@@ -2048,6 +2226,13 @@ Self-review pass.
 
 ## Execution Handoff
 
-Plan v2 complete. Next: invoke `superpowers:subagent-driven-development` (already loaded in the session) and dispatch Task 0 first (framework v1.0.8 banner — no code, just doc edit), then Tasks 1-6 in sequence with two-stage review per task.
+Plan v3 complete. Next: invoke `superpowers:subagent-driven-development` (already loaded in the session) and dispatch Task 0 first (framework v1.0.8 banner — no code, just doc edit), then Tasks 1-6 in sequence with two-stage review per task.
 
-The v1 stub commit (30858df) leaves `src/topic4_modeling/__init__.py` already created — Task 1 step 1 deletes the v1 `hr.py` + `tests/test_topic4_modeling_hr.py` stubs and replaces with `hr_core.py` + `tests/test_topic4_modeling_hr_core.py`.
+The v1 stub commit (30858df) leaves `src/topic4_modeling/__init__.py` already created (still valid as package init) — Task 1 step 1 deletes the v1 `hr.py` + `tests/test_topic4_modeling_hr.py` stubs and replaces with `hr_core.py` + `tests/test_topic4_modeling_hr_core.py`.
+
+**v3 vs v2 surgical diff summary** (so the implementer subagent doesn't re-read v2 mistakes):
+- Task 4 picker enforces lower (`σ * 0.5`) AND upper (`σ * 1.5`) neighbor robustness; not just upper. Added 2 synthetic tests for lower-side rejection cases (NEW v3).
+- Task 5 CLI on `regime_map` plot failure: smoke/full → exit 1 + `stage1_exit_contract_passed=false`; only synthetic-allsilent skips. Old v2 try/except silently exit 0 — fixed.
+- Task 3 unit suite shrinks from 14 → 12 unit tests (2 empirical regime-behavior tests moved to `tests/test_topic4_modeling_hr_dynamics_integration.py` `@pytest.mark.slow`); Task 4 unit suite shrinks evaluate_cell from 2 → 1 (r_override empirical moved to same integration file). Plan total: 38 unit + 11 sweep + 4 viz + 1 cli help = **43 non-slow PASS expected**, plus 3 + 1 + 1 = **5 slow integration tests** run in Task 6 smoke.
+- Commit messages no longer include Co-Authored-By footer (matches repo convention).
+- Task 0 step 1 uses `rg` not `grep | head`.
