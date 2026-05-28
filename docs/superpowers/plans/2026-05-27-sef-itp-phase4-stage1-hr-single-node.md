@@ -1,5 +1,10 @@
-# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v3.1**
+# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v3.2**
 
+> **v3.2 sub-amendment 2026-05-27 (round-4 user-return catch, after Task 3 review)**: two further code-side fixes already landed at commit `d390501` + plan-side updates:
+> - `simulate_trajectory` gained `burn_in: float = 0.0` kwarg (back-compat). Task 4 `evaluate_cell` MUST pass non-zero burn_in (suggested default 100.0 HR time units, which is ~6 × slow-var τ at r=0.006). Without burn-in, baseline picker risks treating initial-condition relaxation transients as steady-state bursts.
+> - Integration test `test_hr_higher_r_yields_more_bursts` now wraps `from hr_sweep import evaluate_cell` in try/except → `pytest.xfail("Task 4 pending")`. Bare `pytest` no longer goes red on the missing future import.
+> - Task 6 archive results doc must explicitly note 3 minor caveats: (a) `fastmath=True` is a JIT performance flag; monitor JIT-vs-Python 1e-10 tests for occasional flake; (b) `n_steps = int(T/dt)` truncates non-integer-divisible durations (current params all divide cleanly); (c) `classify_regime`'s "excitable" label is operational (single short burst → excitable), not a dynamical-systems strict classification — say so in archive.
+>
 > **v3.1 sub-amendment 2026-05-27 (round-3 user-return catch)**: two further fixes on top of v3 (commit d1e68f8):
 > - Integration tests still used plain `assert` after move to `_integration.py`, so failure path was still hard FAIL (not XFAIL). Switched all 3 to `pytest.xfail(reason=...)` inside the test when the empirical observation doesn't hold; PASS otherwise. Build never goes red on an empirical boundary mismatch.
 > - Task 4 commit message + Task 5 "test strategy" block said "6 synthetic" picker tests, but v3 actually has 7 (full-window pass / all-silent / zero-noise-not-silent / upper-flip / **lower-silent NEW** / **no-in-grid-lower NEW** / median-pick). Counter aligned to 7.
@@ -1394,14 +1399,25 @@ def evaluate_cell(
     T: float, dt: float, seed: int,
     burst_cfg: BurstConfig | None = None,
     regime_cfg: RegimeConfig | None = None,
+    burn_in: float = 100.0,
 ) -> dict:
-    """Run one cell: sim + detect bursts + classify regime."""
+    """Run one cell: sim + detect bursts + classify regime.
+
+    burn_in (v3.2 lock, user-return round-4 catch): discards the first
+    burn_in HR time units before burst detection / regime classification.
+    Default 100.0 is ~6 × slow-var τ at r=0.006 — enough for HR to
+    relax from arbitrary initial conditions (x0=-1.6, y0=-10, z0=2) into
+    the (I, r)-specific attractor. Without burn-in, the picker would
+    treat the relaxation transient as steady-state burst behavior and
+    silently accept cells that only LOOK excitable.
+    """
     if burst_cfg is None:
         burst_cfg = BurstConfig()
     if regime_cfg is None:
         regime_cfg = RegimeConfig()
     p = params if r_override is None else replace(params, r=r_override)
-    t, traj = simulate_trajectory(p, I, T, dt, sigma_ou, tau_ou, seed)
+    t, traj = simulate_trajectory(p, I, T, dt, sigma_ou, tau_ou, seed,
+                                    burn_in=burn_in)
     bursts = detect_bursts(traj[:, 0], t, burst_cfg)
     durations = [e - s for s, e in bursts]
     ibis = [bursts[i + 1][0] - bursts[i][1] for i in range(len(bursts) - 1)]
@@ -1412,6 +1428,7 @@ def evaluate_cell(
         "mean_burst_duration": float(np.mean(durations)) if durations else 0.0,
         "mean_ibi": float(np.mean(ibis)) if ibis else float("inf"),
         "I": I, "r_used": p.r, "sigma_ou": sigma_ou, "seed": seed, "T": T,
+        "burn_in": burn_in,
     }
 
 
@@ -2062,6 +2079,26 @@ EOF
 ---
 
 ## Task 6: Stage 1 smoke run + archive + advisor
+
+**Archive doc must include 3 operational caveats (v3.2 lock):**
+
+1. **`fastmath=True` on JIT kernels** — performance flag that permits the
+   compiler to reorder floating-point ops. JIT-vs-Python 1e-10 agreement
+   tests guard single-step correctness, but long-trajectory divergence
+   between JIT and Python is expected and not a bug. Note in archive.
+2. **`n_steps = int(T / dt)` truncates non-integer-divisible durations.**
+   All Stage 1 default `(T, dt)` pairs divide cleanly. If a future
+   sensitivity uses awkward T or dt values, the truncated step count
+   may shave milliseconds — surface in archive as a known limitation.
+3. **"excitable" regime label is operational, not dynamical-systems
+   strict.** A single short burst in a long T qualifies as excitable
+   under our classifier (sparse + short). This is the right operational
+   semantic for Stage 1 baseline picking, but is NOT equivalent to the
+   strict "excitable" classification from dynamical-systems literature
+   (no rigorous bifurcation analysis here). State this clearly in
+   archive so downstream Stage 2+ doesn't over-claim.
+
+
 
 **Files:**
 - Run (no new code)
