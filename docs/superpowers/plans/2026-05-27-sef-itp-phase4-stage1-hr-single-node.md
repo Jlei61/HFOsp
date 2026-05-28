@@ -1,5 +1,10 @@
-# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v3.2**
+# SEF-ITP Phase 4 Stage 1 (Single-Node HR) Implementation Plan — **v3.3**
 
+> **v3.3 sub-amendment 2026-05-28 (Stage 1 pre-Task-5 diagnostic, after Task 4)**: two calibration fixes landed (commits `5f9450c` + this plan edit) when a pre-Task-5 sanity probe found the whole sweep returning "silent" everywhere — Stage 1 exit contract would have been impossible:
+> - **detect_bursts recalibrated** (commit 5f9450c): framework-time guessed BurstConfig (x_threshold=1.0, min_burst_duration=5.0, bridge_gap=2.0) filtered out every HR spike (spikes are ~0.85 HR units wide, intra-burst ISI ~15 >> bridge_gap). New spike-level defaults: x_threshold=0.0, min_burst_duration=0.3, bridge_gap=1.0. Detected unit = spike-level excursion (documented decision, reversible; burst-vs-spike revisited in Stage 2-3). The 5 detect_bursts algorithm tests pinned to explicit BurstConfig matching their synthetic pulses.
+> - **Task 5 CLI CONFIGS ranges recalibrated** (this edit): excitable band lives at I ∈ [-1, 1], σ ~ 0.2-0.6; old ranges (I ≤ 0.0, σ ≤ 0.15) sat entirely in the silent region. smoke: I∈[-1.5,1.0]×6, σ∈{0,0.2,0.4,0.6}, T=500. full: I∈[-1.5,1.0] step 0.25, r∈[0.003,0.012], σ∈{0,0.1,...,0.6}, T=1000.
+> - Both are observation/experiment-design recalibration to HR's measured signal — NOT result-tuning. The picker still selects baseline by objective criteria. Verified: regime-covering sweep returns noise-robust baseline (I*=1.0, r*=0.006, σ*=0.4, lower=0.2/upper=0.6).
+>
 > **v3.2 sub-amendment 2026-05-27 (round-4 user-return catch, after Task 3 review)**: two further code-side fixes already landed at commit `d390501` + plan-side updates:
 > - `simulate_trajectory` gained `burn_in: float = 0.0` kwarg (back-compat). Task 4 `evaluate_cell` MUST pass non-zero burn_in (suggested default 100.0 HR time units, which is ~6 × slow-var τ at r=0.006). Without burn-in, baseline picker risks treating initial-condition relaxation transients as steady-state bursts.
 > - Integration test `test_hr_higher_r_yields_more_bursts` now wraps `from hr_sweep import evaluate_cell` in try/except → `pytest.xfail("Task 4 pending")`. Bare `pytest` no longer goes red on the missing future import.
@@ -1889,20 +1894,32 @@ from src.topic4_modeling.hr_viz import plot_phase_portrait, plot_regime_map
 
 DEFAULT_OUTPUT = Path("results/topic4_sef_itp/phase4_modeling/stage1_hr_single")
 
+# Parameter ranges recalibrated 2026-05-28 to cover HR's actual excitable
+# regime. Diagnostic (post detect_bursts recalibration, commit 5f9450c):
+# the excitable band — silent at sigma=0, noise-triggered events at sigma>0,
+# no runaway — lives at I in [-1, 1] with sigma ~ 0.2-0.6. The original
+# guessed ranges (I up to 0.0, sigma <= 0.15) sat entirely in the silent
+# region → all-silent sweep → no baseline. These ranges make the grid
+# COVER the regime that exists; the picker still selects objectively
+# (silent at sigma=0 + excitable + both-side noise-robust). Confirmed: a
+# regime-covering sweep returns baseline (I*=1.0, r*=0.006, sigma*=0.4).
+# Note the sigma grids include enough density (0.5x / 1x / 1.5x spacings)
+# for the picker's lower/upper [0.4-0.6 sigma] / [1.4-1.6 sigma] neighbor
+# checks to have in-grid candidates.
 CONFIGS: dict[str, dict] = {
     "smoke": {
-        "I_grid": np.linspace(-2.5, 0.0, 6).tolist(),
+        "I_grid": np.linspace(-1.5, 1.0, 6).tolist(),
         "r_grid": [0.004, 0.006, 0.008],
-        "sigma_grid": [0.0, 0.05, 0.10, 0.15],
+        "sigma_grid": [0.0, 0.2, 0.4, 0.6],
         "seeds": [0, 1, 2],
-        "T": 200.0, "dt": 0.05,
+        "T": 500.0, "dt": 0.05,
     },
     "full": {
-        "I_grid": np.arange(-2.5, 0.05, 0.1).tolist(),
-        "r_grid": np.arange(0.002, 0.016, 0.001).tolist(),
-        "sigma_grid": [0.0, 0.05, 0.10, 0.15, 0.20, 0.30, 0.50],
+        "I_grid": np.arange(-1.5, 1.05, 0.25).tolist(),
+        "r_grid": np.arange(0.003, 0.013, 0.001).tolist(),
+        "sigma_grid": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
         "seeds": [0, 1, 2, 3, 4],
-        "T": 500.0, "dt": 0.05,
+        "T": 1000.0, "dt": 0.05,
     },
     # Test-only: deep-subthreshold + zero noise = guaranteed all silent
     "synthetic-allsilent": {
@@ -2119,7 +2136,7 @@ Expected:
 - [ ] **Step 2: Manually inspect outputs**
 
 Open in image viewer:
-- `regime_map.png`: should show silent (gray) at low-I+low-noise corner, excitable (green) cells at moderate I+noise, repetitive-burst (orange) at high I. If all gray or all orange: grid too coarse, run `--mode full`.
+- `regime_map.png`: with v3.3 recalibrated ranges (I∈[-1.5,1.0], σ∈{0,0.2,0.4,0.6}), expect: silent (gray) along the σ=0 column AND at low-I, excitable (green) cells at moderate-to-high I with σ>0, repetitive-burst (orange) creeping in at the highest I+σ corner. Diagnostic baseline landed at I*≈1.0, r*=0.006, σ*=0.4 — expect green there. If all gray: the recalibration regressed (re-check BurstConfig defaults = 0.0/0.3/1.0) or grid still misses the band — investigate, do NOT silently widen ranges further without re-probing.
 - `phase_portraits/baseline.png`: trajectory with occasional bursts; nullclines visible
 - `phase_portraits/baseline_zero_noise.png`: trajectory stuck at rest (no excursions)
 - `phase_portraits/baseline_high_noise.png`: more frequent bursts than baseline
