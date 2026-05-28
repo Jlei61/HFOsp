@@ -63,6 +63,14 @@ SEEDS = [0, 1, 2, 3, 4]
 # sigma=0 silent gate: mean envelope count must be at/under this (tolerance for
 # a rare burn-in edge spike). Spec acceptance #2: "sigma=0 -> 0 or very low".
 SIGMA0_TOL = 0.5
+# Excitable-like gate: events must be sparse + brief, i.e. mean inter-event
+# interval >> mean event duration, for EVERY sigma>0 (incl the tightest, 0.6).
+# This is the property that actually supports the Stage 1b conclusion — without
+# it a future "repetitive" regime (IBI ~ duration) would false-PASS the weaker
+# count-only gate. k=3 ⇒ active duty cycle < 25%. Margin check: measured ratios
+# are 22.4 / 9.8 / 6.0 at sigma 0.2/0.4/0.6, so k=3 passes with ≥2× headroom on
+# the worst point yet rejects repetitive regimes (ratio → 1-2). MEASURED bound.
+IBI_DURATION_RATIO_MIN = 3.0
 
 
 def _spike_stats(spikes: list[tuple[float, float]]) -> dict:
@@ -92,19 +100,39 @@ def _envelope_stats(envs) -> dict:
 def evaluate_acceptance(rows: list[dict]) -> dict:
     """Stage 1b acceptance from per-sigma rows (raw envelope stats only).
 
-    Pass = sigma=0 envelope count <= SIGMA0_TOL (silent gate) AND every sigma>0
-    has >= 1 envelope event (noise-triggered). No classify_regime on envelopes
-    (plan clause #6 — RegimeConfig is spike-unit tuned and would mislabel).
+    Pass requires ALL of (no classify_regime on envelopes — plan clause #6):
+      1. sigma=0 envelope count <= SIGMA0_TOL                (silent gate)
+      2. every sigma>0 has >= 1 envelope event              (noise-triggered)
+      3. every sigma>0 is excitable-like: mean_ibi > k * mean_duration
+         (sparse + brief, NOT repetitive). The tightest point (sigma=0.6) must
+         satisfy this too — it is included in "every sigma>0". A row with < 2
+         envelopes has no defined IBI but a single event in T is trivially
+         sparse, so it passes condition 3.
     """
+    k = IBI_DURATION_RATIO_MIN
     sigma0 = next(r for r in rows if r["sigma"] == 0.0)
     sigma0_silent = sigma0["envelope"]["count"] <= SIGMA0_TOL
     noise_rows = [r for r in rows if r["sigma"] > 0.0]
     noise_triggered = all(r["envelope"]["count"] >= 1.0 for r in noise_rows)
+
+    def _ratio(r: dict) -> float:
+        e = r["envelope"]
+        dur = e["mean_duration"]
+        ibi = e["mean_ibi"]
+        if e["count"] < 2 or np.isnan(ibi):
+            return float("inf")  # single event = trivially sparse
+        return ibi / dur if dur > 0 else float("inf")
+
+    ratios = {r["sigma"]: _ratio(r) for r in noise_rows}
+    excitable_like = all(ratios[s] > k for s in ratios)
     return {
         "sigma0_silent": bool(sigma0_silent),
         "sigma0_envelope_count": sigma0["envelope"]["count"],
         "noise_triggered": bool(noise_triggered),
-        "stage1b_pass": bool(sigma0_silent and noise_triggered),
+        "ibi_duration_ratio_min": k,
+        "ibi_duration_ratios": {f"{s:.1f}": ratios[s] for s in ratios},
+        "excitable_like": bool(excitable_like),
+        "stage1b_pass": bool(sigma0_silent and noise_triggered and excitable_like),
     }
 
 
@@ -253,9 +281,13 @@ def main() -> int:
     if not acc["stage1b_pass"]:
         print(f"[stage1b] ACCEPTANCE FAILED: sigma0_silent="
               f"{acc['sigma0_silent']} (env_count={acc['sigma0_envelope_count']:.2f}), "
-              f"noise_triggered={acc['noise_triggered']}")
+              f"noise_triggered={acc['noise_triggered']}, "
+              f"excitable_like={acc['excitable_like']} "
+              f"(IBI/dur ratios {acc['ibi_duration_ratios']}, "
+              f"need > {acc['ibi_duration_ratio_min']})")
         return 1
-    print("[stage1b] ACCEPTANCE MET: σ=0 silent + σ>0 noise-triggered envelopes")
+    print("[stage1b] ACCEPTANCE MET: σ=0 silent + σ>0 noise-triggered + "
+          "excitable-like (IBI ≫ duration for all σ>0 incl 0.6)")
     print(f"[stage1b] hand-off to Stage 2: unit = burst envelope "
           f"(onset = first spike start), envelope_gap={result['envelope_gap']:g}")
     return 0

@@ -265,6 +265,32 @@ def test_burst_envelopes_gap_equal_to_envelope_gap_not_merged():
     assert len(envs) == 2
 
 
+def test_burst_envelopes_reuses_detect_bursts(monkeypatch):
+    """Clause #1 regression guard: detect_burst_envelopes must build its spike
+    atoms by calling detect_bursts (not a reinvented detector). Spy on the
+    module-level detect_bursts and assert it is invoked + total merged n_spikes
+    equals the spike-atom count it returned."""
+    import src.topic4_modeling.hr_dynamics as hd
+    calls = {"n": 0, "spikes": 0}
+    orig = hd.detect_bursts
+
+    def _spy(x, t, cfg):
+        out = orig(x, t, cfg)
+        calls["n"] += 1
+        calls["spikes"] = len(out)
+        return out
+
+    monkeypatch.setattr(hd, "detect_bursts", _spy)
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5
+    x[(t >= 25.0) & (t <= 35.0)] = 1.5   # gap 5 < env_gap → merges to 1 envelope
+    envs = hd.detect_burst_envelopes(x, t, _env_cfg(10.0))
+    assert calls["n"] >= 1, "must call detect_bursts for spike atoms"
+    # merged n_spikes accounts for every spike atom detect_bursts returned
+    assert sum(e.n_spikes for e in envs) == calls["spikes"]
+
+
 # ── classify_regime ─────────────────────────────────────────────────────
 
 def test_classify_regime_silent():

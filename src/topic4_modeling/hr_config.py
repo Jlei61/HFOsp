@@ -25,14 +25,14 @@ class BurstConfig:
     making the Stage 1 "excitable regime exists" exit-contract impossible
     to satisfy.
 
-    Design decision (documented, reversible): the detected unit is a
-    **spike-level excursion**, not a multi-spike burst envelope. At the
-    excitable boundary where Stage 1 operates (I ∈ [-1, 1] with noise),
-    noise-triggered activity is a single brief threshold crossing that
-    returns to rest — so spike-level detection is both robust across
-    parameters and the scientifically appropriate event unit there.
-    The burst-vs-spike distinction only becomes load-bearing in Stage 2-3
-    (propagation order / participation), where it will be revisited.
+    Unit role (RESOLVED Stage 1b, user-ratified 2026-05-28): ``detect_bursts``
+    with these fields is the **spike-atom detector** — it finds single
+    threshold-crossing excursions. It is NOT the primary event unit. The
+    primary node event is the **burst envelope** built by
+    ``detect_burst_envelopes`` (merges spike atoms whose gap < ``envelope_gap``;
+    onset = first spike start). Spike-level output is a within-burst secondary
+    descriptor only. Rationale + calibration:
+    ``docs/archive/topic4/sef_itp_phase4_v1/stage1b_results_2026-05-28.md``.
 
     Verified post-recalibration: a 2000-unit sweep shows σ=0 → 0 events
     (silent rest) for I ∈ [-1, 1], graded noise-triggered events for σ>0,

@@ -30,21 +30,28 @@ def _load_module():
     return mod
 
 
-def _row(sigma: float, env_count: float, spike_count: float = 0.0) -> dict:
+def _row(sigma: float, env_count: float, *, dur: float = 10.0,
+         ibi: float = 100.0, spike_count: float = 0.0) -> dict:
+    """Synthetic per-sigma row. Defaults give IBI/dur = 10 (excitable-like)."""
     return {
         "sigma": sigma,
         "spike": {"count": spike_count, "mean_duration": 0.0, "mean_ibi": 0.0},
-        "envelope": {"count": env_count, "mean_duration": 0.0,
-                     "mean_n_spikes_per_burst": 0.0, "mean_ibi": 0.0},
+        "envelope": {"count": env_count, "mean_duration": dur,
+                     "mean_n_spikes_per_burst": 0.0, "mean_ibi": ibi},
     }
 
 
-def test_acceptance_pass_when_silent_and_noise_triggered():
+def test_acceptance_pass_when_silent_noise_triggered_and_excitable():
     mod = _load_module()
-    rows = [_row(0.0, 0.0), _row(0.2, 4.2), _row(0.4, 6.6), _row(0.6, 7.4)]
+    # realistic-ish ratios: IBI >> duration at every sigma>0
+    rows = [_row(0.0, 0.0, dur=0.0, ibi=float("nan")),
+            _row(0.2, 4.2, dur=10.0, ibi=224.0),
+            _row(0.4, 6.6, dur=14.0, ibi=137.0),
+            _row(0.6, 7.4, dur=19.0, ibi=115.0)]
     acc = mod.evaluate_acceptance(rows)
     assert acc["sigma0_silent"] is True
     assert acc["noise_triggered"] is True
+    assert acc["excitable_like"] is True
     assert acc["stage1b_pass"] is True
 
 
@@ -60,10 +67,29 @@ def test_acceptance_fail_when_sigma0_not_silent():
 def test_acceptance_fail_when_no_noise_events():
     """A sigma>0 with zero envelopes fails the noise-triggered requirement."""
     mod = _load_module()
-    rows = [_row(0.0, 0.0), _row(0.2, 0.0), _row(0.4, 6.0), _row(0.6, 7.0)]
+    rows = [_row(0.0, 0.0, dur=0.0, ibi=float("nan")),
+            _row(0.2, 0.0, dur=0.0, ibi=float("nan")),
+            _row(0.4, 6.0), _row(0.6, 7.0)]
     acc = mod.evaluate_acceptance(rows)
     assert acc["sigma0_silent"] is True
     assert acc["noise_triggered"] is False
+    assert acc["stage1b_pass"] is False
+
+
+def test_acceptance_fail_when_sigma06_repetitive():
+    """Hard gate: a sigma=0.6 that degenerated to repetitive (IBI ~ duration)
+    must FAIL even though it is silent at 0 and has events — this is the case
+    the old count-only gate would have false-PASSed."""
+    mod = _load_module()
+    rows = [_row(0.0, 0.0, dur=0.0, ibi=float("nan")),
+            _row(0.2, 4.0, dur=10.0, ibi=200.0),
+            _row(0.4, 6.0, dur=14.0, ibi=130.0),
+            _row(0.6, 30.0, dur=25.0, ibi=20.0)]  # IBI < duration → repetitive
+    acc = mod.evaluate_acceptance(rows)
+    assert acc["sigma0_silent"] is True
+    assert acc["noise_triggered"] is True
+    assert acc["excitable_like"] is False
+    assert acc["ibi_duration_ratios"]["0.6"] < mod.IBI_DURATION_RATIO_MIN
     assert acc["stage1b_pass"] is False
 
 
@@ -99,3 +125,12 @@ def test_cli_end_to_end_passes_and_writes_outputs(tmp_path):
     assert rows[0.0]["envelope"]["count"] == 0.0
     assert rows[0.6]["envelope"]["mean_n_spikes_per_burst"] > 1.0
     assert (out / "figures" / "spike_vs_envelope.png").exists()
+    # Clause #6 structural guard: envelopes carry RAW stats only, never a
+    # classify_regime label (RegimeConfig is spike-unit tuned, would mislabel).
+    for r in comparison["rows"]:
+        assert "regime" not in r["envelope"]
+    # The strengthened gate's excitable-like check is recorded + passed.
+    assert comparison["acceptance"]["excitable_like"] is True
+    assert comparison["acceptance"]["ibi_duration_ratios"]["0.6"] > (
+        comparison["acceptance"]["ibi_duration_ratio_min"]
+    )
