@@ -188,9 +188,12 @@ def test_picker_picks_median_sigma_when_multiple_candidates():
     df = pd.DataFrame(rows)
     baseline = pick_excitable_baseline(df)
     assert baseline is not None
-    # Two candidates [0.10, 0.20]; sorted; median by len//2 = index 1 = 0.20
-    assert baseline["sigma_star"] in {0.10, 0.20}, (
-        f"Expected 0.10 or 0.20, got {baseline['sigma_star']}"
+    # Two candidates [0.10, 0.20]; sorted; median by len//2 = index 1 = 0.20.
+    # Strict == locks the median formula (a (len-1)//2 regression would pick
+    # 0.10 and a loose `in {...}` assertion would miss it).
+    assert baseline["sigma_star"] == 0.20, (
+        f"Expected median candidate 0.20 (2 candidates sorted [0.10, 0.20], "
+        f"len//2=1), got {baseline['sigma_star']}"
     )
 
 
