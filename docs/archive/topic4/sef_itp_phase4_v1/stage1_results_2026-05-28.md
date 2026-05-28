@@ -86,6 +86,8 @@ Stage 1 在 Task 4 之后、Task 5 之前的 sanity probe 暴露了一个会让 
 
 ## ⚠️ 待用户裁决（Stage 2 dispatch 前的硬前置）：event = spike 还是 burst envelope？
 
+> **RESOLVED 2026-05-28 by Stage 1b**：用户裁决 = **burst envelope**（onset = 第一个 spike 起点），spike-level 仅 within-burst secondary。单节点 baseline 标定 PASS。证据 `./stage1b_results_2026-05-28.md`。下方 ⚠️ 段保留作 audit trail。
+
 当前检测单位是 **spike-level excursion**（单次越阈），不是 multi-spike burst envelope。
 这是 detect_bursts 重标定时的设计决定，**Stage 2-3 讲传播顺序 / 节点参与时 load-bearing**，
 需要用户明确签字而不是当脚注 deferred。
