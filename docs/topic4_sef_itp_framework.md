@@ -28,6 +28,8 @@
 >
 > 完整 v1 spec 见 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` v0.2。本 banner block 是 v1.0.7 doc 的 surgical 修订，§6.5 内容 v1.0.7 prose 不删除，下方 § 6.5 文末加 "→ v1.0.8 banner amendment 修订上面 3 项" cross-link。
 
+> **Stage 1b 观测单位锁定 2026-05-28 (user-ratified)**：Phase 4 modeling track 的**节点事件单位 = burst envelope（一簇 spike 合并，事件时刻 = 第一个 spike 起点）**，不是单个 spike excursion；spike-level 仅作 within-burst secondary。理由：真实数据对象是 HFO / group-HFO，不是单神经元 spike；HR 节点被选正因其 bursting。单节点 baseline (I=1.0, r=0.006) 标定确认 σ=0 静息、σ>0 事件稀疏短暂 (excitable-like)，且 envelope 与 spike 确为不同单位 (n_spikes/burst 1.5→2.6)。merge 阈值 `envelope_gap=30` 取自实测 inter-spike gap 谷底，非调参。证据：`docs/archive/topic4/sef_itp_phase4_v1/stage1b_results_2026-05-28.md`；Stage 2+ group event = 多节点 burst-envelope onset 短窗共现。
+
 ---
 
 ## 0. 一句话承诺（朴素表述，CLAUDE.md §8 大白话风格）

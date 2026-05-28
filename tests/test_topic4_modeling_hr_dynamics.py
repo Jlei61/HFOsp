@@ -17,6 +17,7 @@ def test_burst_thresholds_defaults():
     assert c.x_threshold == 0.0
     assert c.min_burst_duration == 0.3
     assert c.bridge_gap == 1.0
+    assert c.envelope_gap == 30.0  # Stage 1b burst-envelope grouping valley
 
 
 def test_regime_thresholds_defaults():
@@ -155,6 +156,113 @@ def test_detect_bursts_rejects_short_noise_spike():
     x = np.full_like(t, -1.6)
     x[(t >= 10.0) & (t <= 11.0)] = 1.5  # 1-unit < min_burst_duration=5.0
     assert detect_bursts(x, t, BurstConfig(**_ALG_CFG_KWARGS)) == []
+
+
+# ── detect_burst_envelopes (Stage 1b burst-envelope unit) ────────────────
+#
+# Algorithm tests: spike atoms come from detect_bursts, then merge by
+# envelope_gap. Use an EXPLICIT BurstConfig at the synthetic-pulse scale
+# (same _ALG_CFG_KWARGS decoupling as detect_bursts tests above) + an
+# explicit envelope_gap, so these pin the merge ALGORITHM independent of the
+# production tuning constants. Contract clauses (Stage 1b plan §contract):
+#   #1 reuse detect_bursts for spike atoms   #2 merge by gap < envelope_gap
+#   #3 onset = first spike START             #4 secondary fields
+#   #5 envelope_gap configurable
+from dataclasses import replace as _replace
+
+
+def _env_cfg(envelope_gap: float):
+    from src.topic4_modeling.hr_config import BurstConfig
+    return BurstConfig(envelope_gap=envelope_gap, **_ALG_CFG_KWARGS)
+
+
+def test_burst_envelopes_empty_on_silent():
+    """Clause: silent trace → no envelopes."""
+    from src.topic4_modeling.hr_dynamics import detect_burst_envelopes
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    assert detect_burst_envelopes(x, t, _env_cfg(10.0)) == []
+
+
+def test_burst_envelopes_single_spike_is_one_envelope_n1():
+    """Clause #1+#4: one isolated spike → 1 envelope, n_spikes == 1,
+    onset = spike start."""
+    from src.topic4_modeling.hr_dynamics import detect_burst_envelopes
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5
+    envs = detect_burst_envelopes(x, t, _env_cfg(10.0))
+    assert len(envs) == 1
+    assert envs[0].n_spikes == 1
+    assert envs[0].onset == pytest.approx(10.0, abs=0.1)
+
+
+def test_burst_envelopes_merges_close_spikes():
+    """Clause #2+#3: two spikes with gap < envelope_gap → 1 envelope spanning
+    first-spike-start to last-spike-end, n_spikes == 2."""
+    from src.topic4_modeling.hr_dynamics import detect_burst_envelopes
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5   # spike 1
+    x[(t >= 25.0) & (t <= 35.0)] = 1.5   # spike 2; inter-spike gap = 5
+    # gap 5: > bridge_gap(2) so detect_bursts sees 2 spikes; < envelope_gap(10)
+    envs = detect_burst_envelopes(x, t, _env_cfg(10.0))
+    assert len(envs) == 1
+    assert envs[0].n_spikes == 2
+    assert envs[0].onset == pytest.approx(10.0, abs=0.1)
+    assert envs[0].offset == pytest.approx(35.0, abs=0.1)
+
+
+def test_burst_envelopes_separates_far_spikes():
+    """Clause #2: two spikes with gap > envelope_gap → 2 envelopes."""
+    from src.topic4_modeling.hr_dynamics import detect_burst_envelopes
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5
+    x[(t >= 40.0) & (t <= 50.0)] = 1.5   # inter-spike gap = 20 > envelope_gap 10
+    envs = detect_burst_envelopes(x, t, _env_cfg(10.0))
+    assert len(envs) == 2
+    assert all(e.n_spikes == 1 for e in envs)
+
+
+def test_burst_envelopes_onset_is_first_spike_start_not_peak():
+    """Clause #3 (load-bearing): onset = first spike START, NOT the time of the
+    peak. Build a spike whose peak sample is late in the window."""
+    from src.topic4_modeling.hr_dynamics import detect_burst_envelopes
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5
+    x[(t >= 18.0) & (t <= 20.0)] = 3.0   # peak occurs at t≈18-20, well after onset
+    envs = detect_burst_envelopes(x, t, _env_cfg(10.0))
+    assert len(envs) == 1
+    assert envs[0].onset == pytest.approx(10.0, abs=0.1)   # start, not peak time
+    assert envs[0].peak_x == pytest.approx(3.0, abs=1e-9)
+
+
+def test_burst_envelopes_peak_x_and_duration():
+    """Clause #4: peak_x = max x over the envelope window; duration =
+    offset - onset (across a merged 2-spike envelope)."""
+    from src.topic4_modeling.hr_dynamics import detect_burst_envelopes
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5
+    x[(t >= 25.0) & (t <= 35.0)] = 2.5   # higher peak in 2nd spike; gap 5 < 10
+    envs = detect_burst_envelopes(x, t, _env_cfg(10.0))
+    assert len(envs) == 1
+    assert envs[0].peak_x == pytest.approx(2.5, abs=1e-9)
+    assert envs[0].duration == pytest.approx(envs[0].offset - envs[0].onset)
+    assert envs[0].duration == pytest.approx(25.0, abs=0.2)  # 35 - 10
+
+
+def test_burst_envelopes_gap_equal_to_envelope_gap_not_merged():
+    """Clause #2 boundary: merge uses strict <, so gap == envelope_gap splits."""
+    from src.topic4_modeling.hr_dynamics import detect_burst_envelopes
+    t = np.arange(0, 100, 0.05)
+    x = np.full_like(t, -1.6)
+    x[(t >= 10.0) & (t <= 20.0)] = 1.5
+    x[(t >= 30.0) & (t <= 40.0)] = 1.5   # gap = 30 - 20 = 10 == envelope_gap
+    envs = detect_burst_envelopes(x, t, _env_cfg(10.0))
+    assert len(envs) == 2
 
 
 # ── classify_regime ─────────────────────────────────────────────────────

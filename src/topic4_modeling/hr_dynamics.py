@@ -8,6 +8,8 @@ Spec: docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md §3 Stage 1
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 from numba import njit
 
@@ -109,6 +111,65 @@ def detect_bursts(
         t_end = float(t[f - 1])
         if (t_end - t_start) >= cfg.min_burst_duration:
             out.append((t_start, t_end))
+    return out
+
+
+@dataclass(frozen=True)
+class BurstEnvelope:
+    """A node burst-envelope event: a cluster of merged spike-level excursions.
+
+    Stage 1b user-ratified observation unit (2026-05-28): the primary event is
+    the envelope, not the single spike. ``onset`` is the propagation timestamp
+    Stage 2-3 will diff between nodes — it is the FIRST spike's start, not the
+    peak time or centroid.
+    """
+    onset: float    # first spike's start time (HR units) — propagation timestamp
+    offset: float   # last spike's end time
+    n_spikes: int   # number of spike-level excursions merged into this envelope
+    peak_x: float   # max x over [onset, offset]
+
+    @property
+    def duration(self) -> float:
+        return self.offset - self.onset
+
+
+def detect_burst_envelopes(
+    x: np.ndarray, t: np.ndarray, cfg: BurstConfig,
+) -> list[BurstEnvelope]:
+    """Group spike-level excursions into burst-envelope events.
+
+    Contract (Stage 1b plan §contract clauses):
+        #1 re-use: spike atoms come from ``detect_bursts`` (not reinvented).
+        #2 merge: spikes whose inter-spike gap (prev offset → next onset) is
+           strictly < ``cfg.envelope_gap`` collapse into one envelope; a gap
+           ≥ envelope_gap starts a new envelope.
+        #3 onset: envelope onset = the first spike's START within the cluster.
+        #4 secondary: each envelope carries offset, n_spikes, peak_x (and
+           duration via property).
+        #5 config: the merge threshold is ``cfg.envelope_gap`` (not a literal).
+    """
+    spikes = detect_bursts(x, t, cfg)  # clause #1: re-use spike-level detector
+    if not spikes:
+        return []
+    # clause #2: greedily merge consecutive spikes whose gap < envelope_gap.
+    clusters: list[list[tuple[float, float]]] = [[spikes[0]]]
+    for onset, offset in spikes[1:]:
+        prev_offset = clusters[-1][-1][1]
+        if (onset - prev_offset) < cfg.envelope_gap:
+            clusters[-1].append((onset, offset))
+        else:
+            clusters.append([(onset, offset)])
+    out: list[BurstEnvelope] = []
+    for cluster in clusters:
+        env_onset = cluster[0][0]    # clause #3: first spike start
+        env_offset = cluster[-1][1]
+        window = (t >= env_onset) & (t <= env_offset)
+        out.append(BurstEnvelope(
+            onset=env_onset,
+            offset=env_offset,
+            n_spikes=len(cluster),                  # clause #4
+            peak_x=float(x[window].max()),          # clause #4
+        ))
     return out
 
 

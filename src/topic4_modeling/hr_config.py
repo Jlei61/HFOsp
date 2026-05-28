@@ -41,6 +41,15 @@ class BurstConfig:
     x_threshold: float = 0.0          # spike-onset crossing (HR rest≈-1.3, peak≈+1.8)
     min_burst_duration: float = 0.3   # below this = sub-spike noise flicker; reject
     bridge_gap: float = 1.0           # merge gaps shorter than this within one event
+    # Burst-envelope grouping (Stage 1b, user-ratified 2026-05-28). A "burst
+    # envelope" = a cluster of spike-level excursions; spikes whose inter-spike
+    # gap (prev offset → next onset) is shorter than envelope_gap collapse into
+    # one envelope event. Calibrated to the probe-measured gap valley at the
+    # Stage 1 baseline (I=1.0, r=0.006): intra-burst gaps <20 HR units,
+    # inter-burst gaps >50, so 30 sits in the valley for σ ∈ {0.2,0.4,0.6}.
+    # MEASURED, not tuned-to-taste — do NOT sweep this to make a regime prettier.
+    # Stage 1b plan: docs/superpowers/plans/2026-05-28-topic4-phase4-stage1b-*.md
+    envelope_gap: float = 30.0
 
 
 @dataclass(frozen=True)
