@@ -39,6 +39,45 @@ def test_simulate_trajectory_shapes():
     assert traj.shape == (n, 3)
 
 
+def test_simulate_trajectory_default_burn_in_is_zero():
+    """Without explicit burn_in, behavior is unchanged (back-compat)."""
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
+    p = HRParams()
+    t_ref, traj_ref = simulate_trajectory(p, I=-1.6, T=10.0, dt=0.05,
+                                            sigma_ou=0.0, tau_ou=10.0, seed=0)
+    t_burn0, traj_burn0 = simulate_trajectory(p, I=-1.6, T=10.0, dt=0.05,
+                                                sigma_ou=0.0, tau_ou=10.0, seed=0,
+                                                burn_in=0.0)
+    np.testing.assert_array_equal(t_ref, t_burn0)
+    np.testing.assert_array_equal(traj_ref, traj_burn0)
+
+
+def test_simulate_trajectory_burn_in_discards_initial_steps():
+    """burn_in=B slices off first B time units; returned shape stays int(T/dt).
+
+    Verified by: sim(T=10, burn_in=5, seed=S) returns the same trajectory
+    as sim(T=15, burn_in=0, seed=S) starting from index 5/dt = 100.
+    """
+    from src.topic4_modeling.hr_core import HRParams
+    from src.topic4_modeling.hr_dynamics import simulate_trajectory
+    p = HRParams()
+    t_burn, traj_burn = simulate_trajectory(
+        p, I=2.0, T=10.0, dt=0.05,
+        sigma_ou=0.1, tau_ou=10.0, seed=0, burn_in=5.0,
+    )
+    t_full, traj_full = simulate_trajectory(
+        p, I=2.0, T=15.0, dt=0.05,
+        sigma_ou=0.1, tau_ou=10.0, seed=0, burn_in=0.0,
+    )
+    # Returned shape: still 10/0.05 = 200 steps
+    assert traj_burn.shape == (200, 3)
+    # Returned trajectory = tail of the full trajectory after burn_in
+    np.testing.assert_array_equal(traj_burn, traj_full[100:])
+    # Returned t starts at 0 (re-zeroed after burn-in)
+    assert t_burn[0] == 0.0
+
+
 def test_simulate_trajectory_reproducibility():
     from src.topic4_modeling.hr_core import HRParams
     from src.topic4_modeling.hr_dynamics import simulate_trajectory

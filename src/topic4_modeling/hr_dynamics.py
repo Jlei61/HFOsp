@@ -44,22 +44,34 @@ def simulate_trajectory(
     I: float, T: float, dt: float,
     sigma_ou: float, tau_ou: float, seed: int,
     x0: float = -1.6, y0: float = -10.0, z0: float = 2.0,
+    burn_in: float = 0.0,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Run HR single-node trajectory for duration T, return (t, traj).
 
     Uses numba JIT kernels under the hood (~50ms per simulation for
     T=500, dt=0.05 = 10000 steps after first compile).
+
+    Args:
+        burn_in: discard the first ``burn_in`` HR time units of trajectory
+            (relaxation from initial conditions; OU noise samples during
+            burn-in are consumed but the trajectory slice is dropped).
+            Returned t starts at 0; traj has shape (int(T/dt), 3).
+            Default 0.0 = no burn-in (back-compat). Downstream consumers
+            (evaluate_cell in Task 4) pass a non-zero default so the
+            baseline picker isn't fooled by initial-condition transients.
     """
     n_steps = int(T / dt)
+    burn_n = int(burn_in / dt)
+    total_steps = burn_n + n_steps
     t = np.arange(n_steps) * dt
-    eta = generate_ou_noise(n_steps, dt, tau_ou, sigma_ou, seed)
+    eta = generate_ou_noise(total_steps, dt, tau_ou, sigma_ou, seed)
     p = params
-    traj = _trajectory_jit(
-        n_steps, dt, x0, y0, z0,
+    full_traj = _trajectory_jit(
+        total_steps, dt, x0, y0, z0,
         p.a, p.b, p.c, p.d, p.r, p.s, p.x_R,
         I, eta,
     )
-    return t, traj
+    return t, full_traj[burn_n:]
 
 
 def detect_bursts(

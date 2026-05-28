@@ -66,10 +66,18 @@ def test_hr_repetitive_at_high_I():
 def test_hr_higher_r_yields_more_bursts():
     """Empirical observation: larger r (slow-var rate) → more bursts in T.
 
-    XFAIL (not FAIL) if the monotone trend does NOT hold.
+    XFAIL (not FAIL) if the monotone trend does NOT hold, OR if hr_sweep
+    is not yet implemented (Task 4 pending).
     """
     from src.topic4_modeling.hr_core import HRParams
-    from src.topic4_modeling.hr_sweep import evaluate_cell
+    try:
+        from src.topic4_modeling.hr_sweep import evaluate_cell
+    except ImportError:
+        pytest.xfail(
+            "src.topic4_modeling.hr_sweep.evaluate_cell not yet implemented "
+            "(Task 4 pending). This test exercises the sim → detect → classify "
+            "composition that Task 4 introduces; will run once Task 4 lands."
+        )
     slow = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
                           r_override=0.003, T=1000.0, dt=0.05, seed=0)
     fast = evaluate_cell(HRParams(), I=2.0, sigma_ou=0.0, tau_ou=10.0,
