@@ -9,12 +9,14 @@ import pytest
 # ── hr_config ────────────────────────────────────────────────────────────
 
 def test_burst_thresholds_defaults():
-    """BurstConfig has defaults matching spec §3 stage 1."""
+    """BurstConfig defaults = spike-level (recalibrated 2026-05-28 to HR's
+    measured fast-spike timescale; old 1.0/5.0/2.0 made detect_bursts
+    return 0 across the whole grid — see hr_config.py docstring)."""
     from src.topic4_modeling.hr_config import BurstConfig
     c = BurstConfig()
-    assert c.x_threshold == 1.0
-    assert c.min_burst_duration == 5.0
-    assert c.bridge_gap == 2.0
+    assert c.x_threshold == 0.0
+    assert c.min_burst_duration == 0.3
+    assert c.bridge_gap == 1.0
 
 
 def test_regime_thresholds_defaults():
@@ -95,13 +97,24 @@ def test_simulate_trajectory_reproducibility():
 
 
 # ── detect_bursts ────────────────────────────────────────────────────────
+#
+# These are ALGORITHM tests (bridging + min-duration filtering on synthetic
+# pulses). They pin an EXPLICIT BurstConfig matching the synthetic-pulse
+# scale (x_threshold=1.0, min_burst_duration=5.0, bridge_gap=2.0) so they
+# stay valid regardless of the production default — which was recalibrated
+# 2026-05-28 to HR's real spike timescale (x_threshold=0.0, min=0.3,
+# bridge=1.0). Decoupling algorithm correctness from the production tuning
+# constant is the right test hygiene.
+
+_ALG_CFG_KWARGS = dict(x_threshold=1.0, min_burst_duration=5.0, bridge_gap=2.0)
+
 
 def test_detect_bursts_zero_on_silent_trace():
     from src.topic4_modeling.hr_dynamics import detect_bursts
     from src.topic4_modeling.hr_config import BurstConfig
     t = np.arange(0, 100, 0.05)
     x = np.full_like(t, -1.6)
-    assert detect_bursts(x, t, BurstConfig()) == []
+    assert detect_bursts(x, t, BurstConfig(**_ALG_CFG_KWARGS)) == []
 
 
 def test_detect_bursts_one_pulse():
@@ -110,7 +123,7 @@ def test_detect_bursts_one_pulse():
     t = np.arange(0, 100, 0.05)
     x = np.full_like(t, -1.6)
     x[(t >= 10.0) & (t <= 20.0)] = 1.5
-    bursts = detect_bursts(x, t, BurstConfig())
+    bursts = detect_bursts(x, t, BurstConfig(**_ALG_CFG_KWARGS))
     assert len(bursts) == 1
     assert bursts[0][0] == pytest.approx(10.0, abs=0.1)
 
@@ -121,8 +134,8 @@ def test_detect_bursts_hysteresis_bridges_short_dip():
     t = np.arange(0, 100, 0.05)
     x = np.full_like(t, -1.6)
     x[(t >= 10.0) & (t <= 30.0)] = 1.5
-    x[(t >= 19.5) & (t <= 20.5)] = 0.5  # 1ms dip < bridge_gap=2ms
-    assert len(detect_bursts(x, t, BurstConfig())) == 1
+    x[(t >= 19.5) & (t <= 20.5)] = 0.5  # 1-unit dip < bridge_gap=2.0
+    assert len(detect_bursts(x, t, BurstConfig(**_ALG_CFG_KWARGS))) == 1
 
 
 def test_detect_bursts_three_separated():
@@ -132,7 +145,7 @@ def test_detect_bursts_three_separated():
     x = np.full_like(t, -1.6)
     for t0 in [10.0, 60.0, 120.0]:
         x[(t >= t0) & (t <= t0 + 10.0)] = 1.5
-    assert len(detect_bursts(x, t, BurstConfig())) == 3
+    assert len(detect_bursts(x, t, BurstConfig(**_ALG_CFG_KWARGS))) == 3
 
 
 def test_detect_bursts_rejects_short_noise_spike():
@@ -140,8 +153,8 @@ def test_detect_bursts_rejects_short_noise_spike():
     from src.topic4_modeling.hr_config import BurstConfig
     t = np.arange(0, 100, 0.05)
     x = np.full_like(t, -1.6)
-    x[(t >= 10.0) & (t <= 11.0)] = 1.5  # 1ms < min_burst_duration=5ms
-    assert detect_bursts(x, t, BurstConfig()) == []
+    x[(t >= 10.0) & (t <= 11.0)] = 1.5  # 1-unit < min_burst_duration=5.0
+    assert detect_bursts(x, t, BurstConfig(**_ALG_CFG_KWARGS)) == []
 
 
 # ── classify_regime ─────────────────────────────────────────────────────
