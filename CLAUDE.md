@@ -211,6 +211,8 @@ one panel must be replaced.
 此项目的人（或半年后的自己）只读这一段，他能不能复述"测了什么、怎么测的、
 揭示了什么"？不能 → 重写。
 
+**Skill companion (operationalizes §8)**: `.claude/skills/hfosp-plain-language-recap/SKILL.md` — invoke before writing any user-facing status / recap / explanation paragraph (parallel to how `hfosp-deep-contract-verify` operationalizes §6). §8 is the *why* (规则 + 反例/正例); the skill is the *how* (TodoWrite 三段式 ritual + 外部读者复述 self-check + 红旗-表识别 半代号 inline 泄漏). 现象：CLAUDE.md §8 在 context 内时，agent 经常做对 "末尾括号收代号" 但仍然在 inline 散文里漏代号 (rank-displacement / decision_k / mechanism-sanity / PR-X 字段名)，外部读者无法复述。Skill 锁住的就是这最后 30%。
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying questions come before implementation rather than after mistakes, and helpers handle every plan-specified invariant on the first pass.
