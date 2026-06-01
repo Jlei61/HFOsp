@@ -1,7 +1,15 @@
 """SEF-ITP Phase 2 cohort summarizer — H3 TOST + H4 Wilcoxon verdicts.
 
-Plan: docs/superpowers/plans/2026-05-23-topic4-phase2-h3-h4-plan.md
-Framework: docs/topic4_sef_itp_framework.md v1.0.5
+Plan: docs/superpowers/plans/2026-05-23-topic4-phase2-h3-h4-plan.md (v1.0)
+Plan: docs/superpowers/plans/2026-05-23-topic4-phase2-h4-v1.1-rank-endpoint-plan.md (v1.1)
+Framework: docs/topic4_sef_itp_framework.md v1.0.6
+
+v2 schema (Stage B 2026-05-24): H4 main line = rank-based endpoint geometry drift
+(rank_endpoint.I_geom_rank); supplementary = participation field drift
+(supplementary_participation_field.I_geom_participation). Adds cohort summaries for
+spatial radius drift (per-side: source / sink centroid_rms / mean_pairwise /
+min_enclosing_radius; plus source-sink centroid distance) and decision-k drift
+(applicable only to ~9 subjects with swap_class in {strict, candidate}).
 
 Reads per-subject JSONs from results/topic4_sef_itp/phase2_temporal_x_geometry/per_subject/,
 runs cohort-level TOST equivalence (with leave-one-out per advisor catch C) for each H3
@@ -88,10 +96,11 @@ def _extract_h3_metric_values(
 
 
 def _extract_h4_arrays(records: List[dict]) -> Tuple[Dict[str, np.ndarray], List[str]]:
-    """Pull I_rate (both null methods) + I_geom per-subject arrays for cohort Wilcoxon."""
+    """Pull I_rate (both null methods) + I_geom (v1.1 main + v1.0 supplementary) per-subject."""
     I_rate_shuffle: List[float] = []
     I_rate_circshift: List[float] = []
-    I_geom: List[float] = []
+    I_geom_rank: List[float] = []          # v1.1 main line
+    I_geom_participation: List[float] = [] # v1.0 supplementary
     n_epochs: List[int] = []
     subject_ids: List[str] = []
     for rec in records:
@@ -101,17 +110,145 @@ def _extract_h4_arrays(records: List[dict]) -> Tuple[Dict[str, np.ndarray], List
         subject_ids.append(f"{rec['dataset']}_{rec['subject_id']}")
         I_rate_shuffle.append(h4["I_rate_epoch_order_shuffle"]["I_rate"])
         I_rate_circshift.append(h4["I_rate_circular_shift"]["I_rate"])
-        I_geom.append(h4["I_geom"]["I_geom"])
+        # v2 schema: rank-based endpoint is main; participation field is supplementary
+        rank_block = (h4.get("rank_endpoint") or {}).get("I_geom_rank") or {}
+        supp_block = (h4.get("supplementary_participation_field") or {}).get("I_geom_participation") or {}
+        # backward-compat fallback to v1 flat I_geom (treats as participation field)
+        legacy = (h4.get("I_geom") or {}) if not (rank_block or supp_block) else {}
+        I_geom_rank.append(rank_block.get("I_geom", float("nan")))
+        I_geom_participation.append(
+            supp_block.get("I_geom", legacy.get("I_geom", float("nan")))
+        )
         n_epochs.append(h4["n_epochs"])
     return (
         {
             "I_rate_epoch_order_shuffle": np.asarray(I_rate_shuffle, dtype=float),
             "I_rate_circular_shift": np.asarray(I_rate_circshift, dtype=float),
-            "I_geom": np.asarray(I_geom, dtype=float),
+            "I_geom_rank": np.asarray(I_geom_rank, dtype=float),
+            "I_geom_participation": np.asarray(I_geom_participation, dtype=float),
             "n_epochs": np.asarray(n_epochs, dtype=int),
         },
         subject_ids,
     )
+
+
+def _extract_spatial_radius_drift_per_subject(records: List[dict]) -> Dict[str, Any]:
+    """Cohort summary of spatial radius drift: per-subject std-across-epochs of each radius
+    metric (source/sink centroid_rms, mean_pairwise, min_enclosing, source_sink axis)."""
+    rows: List[Dict[str, Any]] = []
+    for rec in records:
+        if rec.get("exit_reason") != "ok" or not rec.get("h4"):
+            continue
+        sid = f"{rec['dataset']}_{rec['subject_id']}"
+        sp = (rec["h4"].get("spatial_radius") or {}).get("per_epoch_per_cluster") or []
+        if not sp:
+            continue
+        # Aggregate across clusters and epochs: per (cluster, side, metric) std-across-epochs
+        cluster_keys = sorted({c for ep in sp for c in (ep or {}).keys()})
+        per_cluster: Dict[str, Dict[str, float]] = {}
+        for ck in cluster_keys:
+            src_rms = np.array([
+                ((ep.get(ck) or {}).get("source") or {}).get("centroid_rms", np.nan)
+                for ep in sp
+            ], dtype=float)
+            snk_rms = np.array([
+                ((ep.get(ck) or {}).get("sink") or {}).get("centroid_rms", np.nan)
+                for ep in sp
+            ], dtype=float)
+            src_mp = np.array([
+                ((ep.get(ck) or {}).get("source") or {}).get("mean_pairwise", np.nan)
+                for ep in sp
+            ], dtype=float)
+            snk_mp = np.array([
+                ((ep.get(ck) or {}).get("sink") or {}).get("mean_pairwise", np.nan)
+                for ep in sp
+            ], dtype=float)
+            src_meb = np.array([
+                ((ep.get(ck) or {}).get("source") or {}).get("min_enclosing_radius", np.nan)
+                for ep in sp
+            ], dtype=float)
+            snk_meb = np.array([
+                ((ep.get(ck) or {}).get("sink") or {}).get("min_enclosing_radius", np.nan)
+                for ep in sp
+            ], dtype=float)
+            axis_d = np.array([
+                (ep.get(ck) or {}).get("source_sink_centroid_distance", np.nan)
+                for ep in sp
+            ], dtype=float)
+
+            def _stat(arr: np.ndarray) -> Dict[str, float]:
+                a = arr[np.isfinite(arr)]
+                return {
+                    "n_finite_epochs": int(a.size),
+                    "median": float(np.median(a)) if a.size else float("nan"),
+                    "std": float(np.std(a)) if a.size >= 2 else float("nan"),
+                    "cv": float(np.std(a) / (np.median(a) + 1e-12)) if a.size >= 2 else float("nan"),
+                }
+
+            per_cluster[ck] = {
+                "source_centroid_rms": _stat(src_rms),
+                "sink_centroid_rms": _stat(snk_rms),
+                "source_mean_pairwise": _stat(src_mp),
+                "sink_mean_pairwise": _stat(snk_mp),
+                "source_min_enclosing": _stat(src_meb),
+                "sink_min_enclosing": _stat(snk_meb),
+                "source_sink_centroid_distance": _stat(axis_d),
+            }
+        rows.append({"subject": sid, "per_cluster": per_cluster})
+    return {"n_subjects": len(rows), "per_subject": rows}
+
+
+def _extract_decision_k_drift_per_subject(records: List[dict]) -> Dict[str, Any]:
+    """Cohort summary of decision-k drift (computed for ALL subjects; stratified by swap_class).
+
+    User-return v2 catch 2026-05-23: don't gate at subject level; compute drift for all 23,
+    report swap_class as context. Summarizer stratifies. swap-positive (strict/candidate)
+    interpreted with confidence; swap=none acts as noise/control baseline.
+    """
+    rows: List[Dict[str, Any]] = []
+    swap_class_dist: Dict[str, int] = {"strict": 0, "candidate": 0, "none": 0, "unknown": 0}
+    drift_std_by_swap_class: Dict[str, List[float]] = {
+        "strict": [], "candidate": [], "none": [], "unknown": []
+    }
+    for rec in records:
+        if rec.get("exit_reason") != "ok" or not rec.get("h4"):
+            continue
+        sid = f"{rec['dataset']}_{rec['subject_id']}"
+        sc = rec["h4"].get("swap_class") or "unknown"
+        swap_class_dist[sc] = swap_class_dist.get(sc, 0) + 1
+        dk_blk = rec["h4"].get("decision_k_drift") or {}
+        # v2 schema (Stage B v1.1.1 2026-05-24): always computed; "computed"=True
+        if not dk_blk.get("computed", dk_blk.get("applicable", False)):
+            continue
+        result = dk_blk.get("result") or {}
+        dk_std = result.get("decision_k_std")
+        if dk_std is not None and not (isinstance(dk_std, float) and np.isnan(dk_std)):
+            drift_std_by_swap_class.setdefault(sc, []).append(float(dk_std))
+        rows.append({
+            "subject": sid,
+            "swap_class": sc,
+            "global_decision_k": dk_blk.get("global_decision_k_context") or rec["h4"].get("swap_decision_k"),
+            "n_epochs_with_decision_k": result.get("n_epochs_with_decision_k"),
+            "decision_k_mean": result.get("decision_k_mean"),
+            "decision_k_std": result.get("decision_k_std"),
+            "decision_k_range": result.get("decision_k_range"),
+            "decision_k_per_epoch": result.get("decision_k_per_epoch"),
+        })
+    # Stratified summary: median drift_std per swap_class
+    strat_summary: Dict[str, Dict[str, float]] = {}
+    for sc, vals in drift_std_by_swap_class.items():
+        if vals:
+            strat_summary[sc] = {
+                "n_subjects": len(vals),
+                "median_decision_k_std": float(np.median(vals)),
+                "iqr_decision_k_std": [float(np.percentile(vals, 25)), float(np.percentile(vals, 75))],
+            }
+    return {
+        "n_total_subjects_with_drift": len(rows),
+        "swap_class_distribution": swap_class_dist,
+        "stratified_summary": strat_summary,
+        "per_subject": rows,
+    }
 
 
 def _summarize_h3(
@@ -174,21 +311,36 @@ def _summarize_h3(
 
 
 def _summarize_h4(records: List[dict]) -> dict:
-    """Cohort-level H4 summary: I_rate (both null methods) vs I_geom Wilcoxon + Cohen's d."""
+    """Cohort-level H4 summary (v1.1 main + v1.0 supplementary):
+
+    Main verdict: I_rate (both null methods) vs **I_geom_rank** (rank-based endpoint).
+    Supplementary verdict: I_rate vs **I_geom_participation** (participation field, v1.0).
+    Plus: cohort spatial radius drift summary + cohort decision-k drift summary.
+    """
     arrs, subject_ids = _extract_h4_arrays(records)
-    h4_out = {
+    h4_out: Dict[str, Any] = {
         "n_cohort": len(subject_ids),
         "subject_ids": subject_ids,
     }
-    # Two verdicts: one per I_rate null method.
+    # v1.1 MAIN verdicts: I_rate vs I_geom_rank (rank-based endpoint)
+    h4_out["main_v1_1_rank_based"] = {}
     for null_label, key in (
         ("epoch_order_shuffle_literal", "I_rate_epoch_order_shuffle"),
         ("circular_shift_within_block_proposed", "I_rate_circular_shift"),
     ):
-        verdict = compute_h4_cohort_verdict(arrs[key], arrs["I_geom"])
-        h4_out[null_label] = verdict
+        verdict = compute_h4_cohort_verdict(arrs[key], arrs["I_geom_rank"])
+        h4_out["main_v1_1_rank_based"][null_label] = verdict
+    # v1.0 SUPPLEMENTARY verdicts: I_rate vs I_geom_participation (participation field)
+    h4_out["supplementary_v1_0_participation_field"] = {}
+    for null_label, key in (
+        ("epoch_order_shuffle_literal", "I_rate_epoch_order_shuffle"),
+        ("circular_shift_within_block_proposed", "I_rate_circular_shift"),
+    ):
+        verdict = compute_h4_cohort_verdict(arrs[key], arrs["I_geom_participation"])
+        h4_out["supplementary_v1_0_participation_field"][null_label] = verdict
     h4_out["per_subject_I_rate_circular_shift"] = arrs["I_rate_circular_shift"].tolist()
-    h4_out["per_subject_I_geom"] = arrs["I_geom"].tolist()
+    h4_out["per_subject_I_geom_rank"] = arrs["I_geom_rank"].tolist()
+    h4_out["per_subject_I_geom_participation"] = arrs["I_geom_participation"].tolist()
     h4_out["per_subject_n_epochs"] = arrs["n_epochs"].tolist()
     h4_out["spec_amendment_note"] = (
         "I_rate_epoch_order_shuffle is the framework v1.0.5 §3.4 literal null — "
@@ -197,6 +349,16 @@ def _summarize_h4(records: List[dict]) -> dict:
         "see docs/archive/topic4/sef_itp_phase2/spec_amendment_2026-05-23.md. "
         "User decides which enters the framework on return."
     )
+    h4_out["v1_1_note"] = (
+        "MAIN verdict uses I_geom_rank (rank-based endpoint via masked template_rank); "
+        "SUPPLEMENTARY uses I_geom_participation (participation field top-k, v1.0). "
+        "User 2026-05-23 catch: v1.0 participation-field measures 'participation field "
+        "drift', not 'propagation endpoint geometry drift' — main line corrected in v1.1."
+    )
+    # v1.1: spatial radius drift cohort summary
+    h4_out["spatial_radius_drift_cohort"] = _extract_spatial_radius_drift_per_subject(records)
+    # v1.1: decision-k drift cohort summary (swap-positive subset only)
+    h4_out["decision_k_drift_cohort"] = _extract_decision_k_drift_per_subject(records)
     return h4_out
 
 
@@ -223,7 +385,25 @@ def _write_csv(records: List[dict], path: Path) -> None:
         I_rate_so = (h4.get("I_rate_epoch_order_shuffle") or {}).get("I_rate", "")
         row["I_rate_circular_shift"] = I_rate_cs
         row["I_rate_epoch_order_shuffle"] = I_rate_so
-        row["I_geom"] = (h4.get("I_geom") or {}).get("I_geom", "")
+        # v2 schema (v1.1 rank-based MAIN + v1.0 participation SUPP)
+        rk = (h4.get("rank_endpoint") or {}).get("I_geom_rank") or {}
+        supp = (h4.get("supplementary_participation_field") or {}).get("I_geom_participation") or {}
+        # backward-compat fallback to old flat I_geom
+        legacy = (h4.get("I_geom") or {})
+        row["I_geom_rank"] = rk.get("I_geom", "")
+        row["I_geom_participation"] = supp.get("I_geom", legacy.get("I_geom", ""))
+        row["swap_class"] = h4.get("swap_class", "")
+        row["swap_decision_k"] = h4.get("swap_decision_k", "")
+        dk = (h4.get("decision_k_drift") or {})
+        if dk.get("applicable"):
+            dk_res = dk.get("result") or {}
+            row["dk_drift_mean"] = dk_res.get("decision_k_mean", "")
+            row["dk_drift_std"] = dk_res.get("decision_k_std", "")
+            row["dk_drift_range"] = str(dk_res.get("decision_k_range", ""))
+        else:
+            row["dk_drift_mean"] = ""
+            row["dk_drift_std"] = ""
+            row["dk_drift_range"] = ""
         rows.append(row)
     if not rows:
         return
@@ -252,9 +432,9 @@ def main() -> None:
     h4 = _summarize_h4(records)
 
     summary = {
-        "framework_version": "v1.0.5",
-        "phase2_version": "v1.0.0",
-        "schema_version": "sef_itp_phase2_cohort_v1_2026_05_23",
+        "framework_version": "v1.0.6",
+        "phase2_version": "v1.1.0",
+        "schema_version": "sef_itp_phase2_cohort_v2_2026_05_24",
         "n_records_in": len(records),
         "h3": h3,
         "h4": h4,
@@ -284,14 +464,33 @@ def main() -> None:
             f"loo_min_pass_rate={t.get('leave_one_out_min_pass_rate', 'n/a')}"
         )
     print()
-    print("H4 cohort verdicts:")
+    print("H4 cohort verdicts (v1.1 MAIN = rank-based endpoint):")
     for null_label in ("circular_shift_within_block_proposed", "epoch_order_shuffle_literal"):
-        v = h4[null_label]
+        v = h4["main_v1_1_rank_based"][null_label]
         print(
             f"  [{null_label}] verdict={v['verdict']}, "
             f"wilcoxon_p={v['wilcoxon_p']}, cohen_d={v['cohen_d']}, "
             f"n_subjects={v['n_subjects']}"
         )
+    print()
+    print("H4 cohort verdicts (v1.0 SUPPLEMENTARY = participation field):")
+    for null_label in ("circular_shift_within_block_proposed", "epoch_order_shuffle_literal"):
+        v = h4["supplementary_v1_0_participation_field"][null_label]
+        print(
+            f"  [{null_label}] verdict={v['verdict']}, "
+            f"wilcoxon_p={v['wilcoxon_p']}, cohen_d={v['cohen_d']}, "
+            f"n_subjects={v['n_subjects']}"
+        )
+    print()
+    dk_summary = h4["decision_k_drift_cohort"]
+    print(
+        f"Decision-k drift: computed for {dk_summary['n_total_subjects_with_drift']} subject(s); "
+        f"swap_class distribution: {dk_summary['swap_class_distribution']}"
+    )
+    if dk_summary.get("stratified_summary"):
+        print("  Stratified median decision_k_std by swap_class:")
+        for sc, st in dk_summary["stratified_summary"].items():
+            print(f"    {sc}: n={st['n_subjects']}, median_std={st['median_decision_k_std']:.3f}, IQR={st['iqr_decision_k_std']}")
 
 
 if __name__ == "__main__":

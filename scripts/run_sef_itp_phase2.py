@@ -65,12 +65,17 @@ if str(_REPO_ROOT) not in sys.path:
 
 from src.sef_itp_phase1 import resolve_lagpat_subject_dir
 from src.interictal_propagation import load_subject_propagation_events, _valid_event_indices
+from src.seeg_coord_loader import load_subject_coords
 from src.sef_itp_phase2 import (
     extract_window_excess_from_pairing,
     extract_lag1_and_runlength_from_burst,
     extract_endpoint_jaccard_from_anchoring,
     slice_events_into_epochs,
-    compute_local_endpoint,
+    compute_local_endpoint,                         # v1.0 participation-field (supplementary now)
+    compute_local_rank_endpoint,                    # v1.1 rank-based (main)
+    compute_endpoint_spatial_radius,                # v1.1
+    compute_source_sink_centroid_distance,          # v1.1
+    compute_decision_k_drift,                       # v1.1
     endpoint_jaccard,
     compute_I_rate_normalized,
     compute_I_rate_normalized_circular_shift,
@@ -78,7 +83,7 @@ from src.sef_itp_phase2 import (
 )
 
 
-SCHEMA_VERSION = "sef_itp_phase2_v1_2026_05_23"
+SCHEMA_VERSION = "sef_itp_phase2_v2_2026_05_24"   # bumped from v1 for v1.1 rank-endpoint
 
 
 # Path conventions (consistent with Phase 1 + Phase 0).
@@ -95,6 +100,9 @@ PR6_ANCHORING_DIR = Path(
     "results/interictal_propagation_masked/template_anchoring/per_subject"
 )
 PHASE0A_DIR = Path("results/interictal_propagation_masked/per_subject")
+RANK_DISPLACEMENT_DIR = Path(
+    "results/interictal_propagation_masked/rank_displacement/per_subject"
+)
 
 OUT_DIR = Path("results/topic4_sef_itp/phase2_temporal_x_geometry/per_subject")
 
@@ -146,6 +154,29 @@ def _valid_mask_from_pr6(
         # fall back to all-channels eligible if PR-6 didn't supply a mask
         union[:] = True
     return union
+
+
+def _spatial_radius_for_endpoint(
+    endpoint_indices: List[int],
+    coords: np.ndarray,
+    mapped_mask: np.ndarray,
+) -> Dict[str, float]:
+    """Wrap compute_endpoint_spatial_radius with mapped-mask gating (NaN coord rows excluded).
+
+    Returns NaN dict when < 2 mapped endpoint channels (insufficient for radius metrics).
+    """
+    mapped = [i for i in endpoint_indices if mapped_mask[i]]
+    if len(mapped) < 2:
+        return {
+            "centroid_rms": float("nan"),
+            "mean_pairwise": float("nan"),
+            "min_enclosing_radius": float("nan"),
+            "n_points": len(mapped),
+            "n_unmapped_dropped": len(endpoint_indices) - len(mapped),
+        }
+    out = compute_endpoint_spatial_radius(mapped, coords)
+    out["n_unmapped_dropped"] = len(endpoint_indices) - len(mapped)
+    return out
 
 
 def run_subject(
@@ -279,6 +310,47 @@ def run_subject(
     # Global endpoint from PR-6 anchoring (top-k by template_rank over full data).
     global_endpoint = _global_endpoint_from_pr6(anchoring, channel_names)
     valid_mask = _valid_mask_from_pr6(anchoring, n_ch)
+    # Note: per-epoch rank endpoint extraction uses derived_valid (channel participation in
+    # this epoch's cluster events), NOT a full-data PR-6 mask — see compute_local_rank_endpoint
+    # docstring + user-review catch 2026-05-23. PR-6 per-cluster masks are used only by
+    # scripts/b1_calibration_check.py for full-data parity audit.
+
+    # --- v1.1: load 3D coords (mm) for spatial radius metrics ---
+    coords: Optional[np.ndarray] = None
+    mapped_mask: Optional[np.ndarray] = None
+    coord_provenance: Optional[Dict[str, Any]] = None
+    try:
+        coord_result = load_subject_coords(
+            dataset=dataset,
+            subject_id=subject_id,
+            channel_names_requested=channel_names,
+        )
+        coords = coord_result.coords_array_in_requested_order
+        mapped_mask = coord_result.mapped_mask_in_requested_order
+        coord_provenance = {
+            "n_mapped": int(mapped_mask.sum()),
+            "n_missing": int(len(channel_names) - mapped_mask.sum()),
+            "coord_space": coord_result.coord_space,
+            "coord_units": coord_result.coord_units,
+            "normalization_certainty": coord_result.normalization_certainty,
+        }
+    except Exception as e:
+        # Phase 1 cohort gate guarantees coords exist, but be defensive.
+        record["coord_load_error"] = str(e)
+        coords = None
+        mapped_mask = None
+
+    # --- v1.1: load rank_displacement primary_pair to decide decision-k drift subset ---
+    rd_path = RANK_DISPLACEMENT_DIR / f"{stem}.json"
+    swap_class: Optional[str] = None
+    swap_decision_k: Optional[int] = None
+    if rd_path.exists():
+        rd = _read_json(rd_path)
+        pairs = rd.get("pairs") or []
+        if pairs:
+            ss = (pairs[0] or {}).get("swap_sweep") or {}
+            swap_class = ss.get("swap_class")
+            swap_decision_k = ss.get("decision_k")
 
     # --- H4: epoch slicing ---
     # epoch_tolerance=0.1 accommodates Epilepsiae's natural ~59min41sec blocks vs 1h target
@@ -297,33 +369,83 @@ def run_subject(
         _write_record(record, out_dir, stem)
         return record
 
-    # --- H4: per-epoch rate + per-epoch local endpoint ---
+    # --- v1.0 supplementary (participation field): per-epoch participation top-k endpoint ---
+    # Kept as sensitivity reference; framework v1.0.6 demotes this to supplementary.
     per_epoch_rate: List[float] = []
-    per_epoch_local: List[Dict[int, Dict[str, List[int]]]] = []
-    per_epoch_jaccard: List[float] = []
+    per_epoch_local_v1: List[Dict[int, Dict[str, List[int]]]] = []
+    per_epoch_jaccard_v1: List[float] = []
+    # --- v1.1 main: per-epoch rank-based endpoint + spatial radius ---
+    per_epoch_local_rank: List[Dict[int, Dict[str, List[int]]]] = []
+    per_epoch_jaccard_rank: List[float] = []
+    per_epoch_spatial: List[Dict[int, Dict[str, Dict[str, float]]]] = []
     cluster_ids = list(global_endpoint.keys())
+
     for ep in epochs:
         idx = ep["event_indices"]
         n_ev_epoch = len(idx)
         per_epoch_rate.append(n_ev_epoch / epoch_hours)
+
+        # v1.0 supplementary
         if n_ev_epoch == 0:
-            per_epoch_local.append({c: global_endpoint[c] for c in cluster_ids})
-            per_epoch_jaccard.append(1.0)  # degenerate; would be filtered by min_events
-            continue
-        local = compute_local_endpoint(
-            events_bool=events_bool[idx],
-            labels=labels[idx],
+            per_epoch_local_v1.append({c: global_endpoint[c] for c in cluster_ids})
+            per_epoch_jaccard_v1.append(1.0)
+        else:
+            local_v1 = compute_local_endpoint(
+                events_bool=events_bool[idx],
+                labels=labels[idx],
+                k=endpoint_k,
+                valid_mask=valid_mask,
+            )
+            for c in cluster_ids:
+                if c not in local_v1:
+                    local_v1[c] = global_endpoint[c]
+            per_epoch_local_v1.append(local_v1)
+            js_v1 = [endpoint_jaccard(local_v1, global_endpoint, c) for c in cluster_ids]
+            per_epoch_jaccard_v1.append(float(np.mean(js_v1)))
+
+        # v1.1 main: rank-based endpoint via per-epoch template_rank
+        # ranks/bools come from loaded; align indices to (n_ch, n_events_valid).
+        ranks_v_full = np.asarray(loaded["ranks"])[:, valid_idx][:, finite_mask]
+        bools_v_full = np.asarray(loaded["bools"])[:, valid_idx][:, finite_mask].astype(bool)
+        # Pass NO external valid_mask — derived_valid (per-epoch participation per cluster)
+        # is the correct gate (user-review catch 2026-05-23). PR-6 full-data mask is loaded
+        # for B1 calibration parity testing only, not for per-epoch endpoint extraction.
+        local_rank = compute_local_rank_endpoint(
+            ranks=ranks_v_full,
+            bools=bools_v_full,
+            labels=labels,
+            event_indices=idx,
             k=endpoint_k,
-            valid_mask=valid_mask,
         )
-        # ensure every cluster in global also in local; if missing (no events in epoch),
-        # fall back to global endpoint for that cluster (perfect match → no penalty).
+        # Fallback: if a cluster has no events in this epoch, use the global endpoint
+        # (perfect-match Jaccard contributes 1.0, no penalty — same convention as v1.0).
         for c in cluster_ids:
-            if c not in local:
-                local[c] = global_endpoint[c]
-        per_epoch_local.append(local)
-        js = [endpoint_jaccard(local, global_endpoint, c) for c in cluster_ids]
-        per_epoch_jaccard.append(float(np.mean(js)))
+            if c not in local_rank:
+                local_rank[c] = global_endpoint[c]
+        per_epoch_local_rank.append(local_rank)
+        js_rank = [endpoint_jaccard(local_rank, global_endpoint, c) for c in cluster_ids]
+        per_epoch_jaccard_rank.append(float(np.mean(js_rank)))
+
+        # v1.1: spatial radius per cluster, source + sink + axis (only if coords loaded)
+        epoch_spatial: Dict[int, Dict[str, Dict[str, float]]] = {}
+        if coords is not None and mapped_mask is not None:
+            for c in cluster_ids:
+                ep_local = local_rank[c]
+                src_radius = _spatial_radius_for_endpoint(ep_local["source"], coords, mapped_mask)
+                snk_radius = _spatial_radius_for_endpoint(ep_local["sink"], coords, mapped_mask)
+                src_mapped = [i for i in ep_local["source"] if mapped_mask[i]]
+                snk_mapped = [i for i in ep_local["sink"] if mapped_mask[i]]
+                axis_dist = (
+                    compute_source_sink_centroid_distance(src_mapped, snk_mapped, coords)
+                    if (src_mapped and snk_mapped)
+                    else float("nan")
+                )
+                epoch_spatial[c] = {
+                    "source": src_radius,
+                    "sink": snk_radius,
+                    "source_sink_centroid_distance": axis_dist,
+                }
+        per_epoch_spatial.append(epoch_spatial)
 
     rates_arr = np.asarray(per_epoch_rate, dtype=float)
 
@@ -336,20 +458,43 @@ def run_subject(
         min_events=min_events,
         n_perm=n_perm,
         seed=seed,
-        # Note: circular-shift respects its own block-internal slicing; tolerance not needed
-        # here since the per-block rate calc uses floor on block_duration. For Epilepsiae
-        # short blocks this means very few I_rate epochs — circular shift may be
-        # uninformative on those subjects (flagged in cohort summary).
     )
 
-    # --- H4: I_geom ---
+    # --- H4: I_geom on v1.1 rank-based endpoints (main line) ---
     endpoint_size = 2 * endpoint_k  # source + sink
-    I_geom = compute_I_geom_normalized(
-        per_epoch_local=per_epoch_local,
+    I_geom_rank = compute_I_geom_normalized(
+        per_epoch_local=per_epoch_local_rank,
         global_endpoint=global_endpoint,
         valid_mask=valid_mask,
         endpoint_size=endpoint_size,
         n_perm=n_perm,
+        seed=seed,
+    )
+    # --- H4: I_geom on v1.0 participation-field endpoints (supplementary) ---
+    I_geom_participation = compute_I_geom_normalized(
+        per_epoch_local=per_epoch_local_v1,
+        global_endpoint=global_endpoint,
+        valid_mask=valid_mask,
+        endpoint_size=endpoint_size,
+        n_perm=n_perm,
+        seed=seed,
+    )
+
+    # --- v1.1: decision-k drift (user-return v2 catch 2026-05-23: compute for ALL subjects,
+    # report swap_class as context — don't filter at runner level; let summarizer stratify).
+    # For swap-positive (strict/candidate) subjects the drift is informative; for swap=none
+    # subjects the per-epoch decision_k is a noise / control baseline.
+    ranks_v_full = np.asarray(loaded["ranks"])[:, valid_idx][:, finite_mask]
+    bools_v_full = np.asarray(loaded["bools"])[:, valid_idx][:, finite_mask].astype(bool)
+    # primary_pair is between the two stable_k=2 clusters → cluster_a=0, cluster_b=1
+    decision_k_drift_out = compute_decision_k_drift(
+        ranks=ranks_v_full,
+        bools=bools_v_full,
+        labels=labels,
+        epochs=epochs,
+        cluster_a=0, cluster_b=1,
+        min_events_per_cluster=20,
+        n_perm=500,
         seed=seed,
     )
 
@@ -359,10 +504,47 @@ def run_subject(
         "endpoint_k": endpoint_k,
         "endpoint_size_for_geom_null": endpoint_size,
         "per_epoch_rate": [float(r) for r in per_epoch_rate],
-        "per_epoch_jaccard": [float(j) for j in per_epoch_jaccard],
+        "swap_class": swap_class,
+        "swap_decision_k": swap_decision_k,
+        "coord_provenance": coord_provenance,
+
+        # v1.1 main line: rank-based endpoint geometry drift
+        "rank_endpoint": {
+            "per_epoch_jaccard": [float(j) for j in per_epoch_jaccard_rank],
+            "per_epoch_local": [
+                {str(c): v for c, v in le.items()} for le in per_epoch_local_rank
+            ],
+            "I_geom_rank": I_geom_rank,
+        },
+
+        # v1.1: spatial radius drift per cluster per epoch (source / sink / axis)
+        "spatial_radius": {
+            "per_epoch_per_cluster": [
+                {str(c): v for c, v in es.items()} for es in per_epoch_spatial
+            ],
+        },
+
+        # v1.1: decision-k drift (computed for ALL subjects; swap_class is context
+        # for stratification in summarizer, NOT a runner-level gate)
+        "decision_k_drift": {
+            "computed": True,
+            "swap_class_context": swap_class,
+            "global_decision_k_context": swap_decision_k,
+            "result": decision_k_drift_out,
+        },
+
+        # I_rate keep both null variants (no change from v1.0; user pending decision)
         "I_rate_epoch_order_shuffle": I_rate_shuffle,
         "I_rate_circular_shift": I_rate_circshift,
-        "I_geom": I_geom,
+
+        # v1.0 supplementary: participation-field endpoint drift
+        "supplementary_participation_field": {
+            "per_epoch_jaccard": [float(j) for j in per_epoch_jaccard_v1],
+            "per_epoch_local": [
+                {str(c): v for c, v in le.items()} for le in per_epoch_local_v1
+            ],
+            "I_geom_participation": I_geom_participation,
+        },
     }
     record["elapsed_seconds"] = time.time() - started
     _write_record(record, out_dir, stem)
@@ -439,11 +621,17 @@ def main() -> None:
             if rec["exit_reason"] == "ok":
                 n_ok += 1
                 h4 = rec.get("h4") or {}
+                rk = (h4.get("rank_endpoint") or {}).get("I_geom_rank") or {}
+                ir = (h4.get("I_rate_circular_shift") or {}).get("I_rate", float("nan"))
+                ig = rk.get("I_geom", float("nan"))
+                dk_block = h4.get("decision_k_drift") or {}
+                sc = dk_block.get("swap_class_context")
+                dk_res = dk_block.get("result") or {}
+                dk_mean = dk_res.get("decision_k_mean", float("nan"))
                 print(
-                    f"  {ds}_{sid}: ok "
-                    f"(n_epochs={h4.get('n_epochs')}, "
-                    f"I_rate_circshift={(h4.get('I_rate_circular_shift') or {}).get('I_rate'):.3f}, "
-                    f"I_geom={(h4.get('I_geom') or {}).get('I_geom'):.3f})"
+                    f"  {ds}_{sid}: ok (n_epochs={h4.get('n_epochs')}, "
+                    f"I_rate_circshift={ir:.3f}, I_geom_rank={ig:.3f}, "
+                    f"swap_class={sc}, dk_mean={dk_mean:.2f})"
                 )
             else:
                 print(f"  {ds}_{sid}: SKIP ({rec['exit_reason']})")

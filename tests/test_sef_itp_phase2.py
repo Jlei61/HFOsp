@@ -22,7 +22,8 @@ from src import sef_itp_phase2 as p2
 
 
 def test_module_version():
-    assert p2.__version__ == "v1.0.0"
+    """v1.1 — bumped 2026-05-23 user catch (rank-based endpoint, see B1+ in phase2 h4 v1.1 plan)."""
+    assert p2.__version__ == "v1.1.0"
 
 
 def test_subject_phase2_data_dataclass_fields():
@@ -639,3 +640,434 @@ def test_cohort_tost_with_loo_returns_main_equivalence_alias():
     values = rng.normal(0.0, 0.005, size=30)  # cohort-compatible
     loo = p2.cohort_tost_with_loo(values, target=0.0, delta=0.05, n_boot=500, seed=0)
     assert loo["equivalence_pass"] == loo["cohort_main"]["equivalence_pass"]
+
+
+# --------------------------------------------------------------------------- #
+# Stage B v1.1 — rank-based endpoint geometry drift (H4 v1.1 main line)
+# Plan: docs/superpowers/plans/2026-05-23-topic4-phase2-h4-v1.1-rank-endpoint-plan.md
+#
+# H4 v1.0 used participation field top-k (events_bool.mean) as "endpoint" — that
+# measures participation field drift, not propagation rank endpoint drift. v1.1
+# fixes this by using masked mean lag rank per channel (phantom-rank discipline
+# per AGENTS.md cross-PR lagPatRank contract).
+# --------------------------------------------------------------------------- #
+
+
+# --- B1 main: compute_local_rank_endpoint ---
+#
+# v1.1 endpoint extractor reuses PR-6 same primitives per-epoch:
+#   `_per_cluster_template_rank` (→ `_legacy_hist_mean_rank` from interictal_propagation
+#   → argsort(argsort)) + `extract_endpoint_middle` from template_anatomical_anchoring +
+#   per-cluster valid_mask. NOT a new "masked arithmetic mean rank" estimator (user-return
+#   v2 catch 2026-05-23: that would be a different statistic and wouldn't reproduce
+#   PR-6 anchoring on full data — calibration must pass).
+
+
+def test_compute_local_rank_endpoint_basic_two_clusters():
+    """For 2 clusters with masked mean rank low/high split, source = lowest mean, sink = highest."""
+    # 5 channels, 4 events. Cluster 0: events 0,1. Cluster 1: events 2,3.
+    # Cluster 0 mean masked rank: ch0=0, ch1=1, ch2=2, ch3=3, ch4=4 → source=lowest=[0,1], sink=highest=[3,4]
+    # Cluster 1 mean masked rank: ch0=4, ch1=3, ch2=2, ch3=1, ch4=0 → source=[4,3], sink=[0,1]
+    ranks = np.array([
+        [0, 0, 4, 4],
+        [1, 1, 3, 3],
+        [2, 2, 2, 2],
+        [3, 3, 1, 1],
+        [4, 4, 0, 0],
+    ], dtype=float)
+    bools = np.ones_like(ranks, dtype=bool)
+    labels = np.array([0, 0, 1, 1])
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1, 2, 3]), k=2,
+    )
+    assert set(out[0]["source"]) == {0, 1}
+    assert set(out[0]["sink"]) == {3, 4}
+    assert set(out[1]["source"]) == {4, 3}
+    assert set(out[1]["sink"]) == {0, 1}
+
+
+def test_compute_local_rank_endpoint_phantom_mask_changes_endpoint():
+    """C1 — Phantom-mask discipline: a channel with phantom int rank on non-participating
+    events must NOT be picked as endpoint based on those phantom values."""
+    # 4 channels, 4 events. All in cluster 0.
+    # Channel 0: rank 0 on event 0 (participates), phantom 99 on events 1,2,3 (does NOT participate)
+    #   → masked mean = 0 → source candidate. Unmasked mean would be 99*3/4=74.25 → sink candidate.
+    # Channel 1: rank 1 on all 4 events (participates) → mean=1
+    # Channel 2: rank 2 on all 4 events (participates) → mean=2
+    # Channel 3: rank 3 on all 4 events (participates) → mean=3 → sink
+    ranks = np.array([
+        [0, 99, 99, 99],
+        [1, 1, 1, 1],
+        [2, 2, 2, 2],
+        [3, 3, 3, 3],
+    ], dtype=float)
+    bools = np.array([
+        [1, 0, 0, 0],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+        [1, 1, 1, 1],
+    ], dtype=bool)
+    labels = np.array([0, 0, 0, 0])
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1, 2, 3]), k=1,
+    )
+    # Source = mean rank lowest = channel 0 (masked mean = 0). NOT channel 3.
+    assert out[0]["source"] == [0]
+    assert out[0]["sink"] == [3]
+
+
+def test_compute_local_rank_endpoint_zero_participation_channel_excluded():
+    """C2 — A channel with zero participation in the slice is excluded entirely; does not
+    appear as either source or sink even if it has phantom ranks."""
+    # 4 channels, 2 events all in cluster 0.
+    # Channel 2 has phantom rank but never participates → must be excluded.
+    ranks = np.array([
+        [1.0, 1.0],
+        [2.0, 2.0],
+        [99.0, 99.0],   # phantom only, never participates
+        [3.0, 3.0],
+    ])
+    bools = np.array([
+        [1, 1],
+        [1, 1],
+        [0, 0],
+        [1, 1],
+    ], dtype=bool)
+    labels = np.array([0, 0])
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1]), k=1,
+    )
+    # 3 eligible channels (0,1,3) with masked means 1,2,3. Source=ch0, sink=ch3.
+    assert out[0]["source"] == [0]
+    assert out[0]["sink"] == [3]
+    # Channel 2 must NOT appear anywhere
+    assert 2 not in out[0]["source"]
+    assert 2 not in out[0]["sink"]
+
+
+def test_compute_local_rank_endpoint_valid_mask_filter():
+    """C3 — external valid_mask=False channels excluded even with low template rank.
+
+    Uses valid_mask_per_cluster={cluster_id: mask} signature (mirrors PR-6 anchoring
+    runner's per_cluster_masks convention).
+    """
+    ranks = np.array([
+        [0.0, 0.0],   # ch0 lowest template rank
+        [1.0, 1.0],
+        [2.0, 2.0],
+        [3.0, 3.0],
+    ])
+    bools = np.ones((4, 2), dtype=bool)
+    labels = np.array([0, 0])
+    valid_mask = np.array([False, True, True, True])  # ch0 INVALID despite low rank
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1]), k=1,
+        valid_mask_per_cluster={0: valid_mask},
+    )
+    assert 0 not in out[0]["source"]
+    assert out[0]["source"] == [1]   # now ch1 is the source (lowest among eligible)
+    assert out[0]["sink"] == [3]
+
+
+def test_compute_local_rank_endpoint_k_degradation_on_small_pool():
+    """C4 — When eligible pool < 2k, k degrades to max(1, pool//2). Source / sink same size."""
+    ranks = np.arange(20, dtype=float).reshape(5, 4)  # 5 channels, 4 events
+    bools = np.ones((5, 4), dtype=bool)
+    labels = np.array([0, 0, 0, 0])
+    # k=3 with 5 eligible channels → 2k=6 > 5 → k_eff = 5//2 = 2
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1, 2, 3]), k=3,
+    )
+    assert len(out[0]["source"]) == 2
+    assert len(out[0]["sink"]) == 2
+
+
+def test_compute_local_rank_endpoint_empty_cluster_skipped():
+    """C6 — A cluster with no events in the slice is omitted from the output dict."""
+    ranks = np.zeros((3, 4))
+    bools = np.ones((3, 4), dtype=bool)
+    labels = np.array([0, 0, 0, 0])  # only cluster 0
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1, 2, 3]), k=1,
+    )
+    assert set(out.keys()) == {0}
+    assert 1 not in out  # cluster 1 has no events → not in dict
+
+
+def test_compute_local_rank_endpoint_empty_event_indices():
+    """Empty event_indices → empty output dict (no cluster gets endpoint)."""
+    ranks = np.zeros((3, 4))
+    bools = np.ones((3, 4), dtype=bool)
+    labels = np.array([0, 1, 0, 1])
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([], dtype=int), k=1,
+    )
+    assert out == {}
+
+
+def test_compute_local_rank_endpoint_external_mask_intersected_not_replaced():
+    """User-review catch 2026-05-23 — external valid_mask_per_cluster (e.g., full-data PR-6
+    per-cluster mask) must be INTERSECTED with derived_valid (per-epoch participation),
+    NOT replace it. Otherwise channels valid in full-data but absent from this epoch get
+    a phantom template[ci] = ci ranking via _legacy_hist_mean_rank fallback and may
+    silently bubble into source/sink.
+
+    Setup: 5 channels. Channel 0 has zero participation in cluster 0's events_indices
+    (the "absent in this epoch" case). External mask passes channel 0 as VALID
+    (full-data perspective; pretend it participates in some other epoch).
+    Without intersection (replace semantics): channel 0 enters template_rank via
+    fallback and may be picked as source/sink.
+    With intersection (correct): channel 0 excluded by derived_valid=False.
+    """
+    ranks = np.array([
+        [10.0, 10.0],   # channel 0: phantom (would fallback to ci=0)
+        [3.0, 3.0],
+        [1.0, 1.0],
+        [2.0, 2.0],
+        [4.0, 4.0],
+    ])
+    bools = np.array([
+        [0, 0],   # channel 0 zero participation in this epoch
+        [1, 1],
+        [1, 1],
+        [1, 1],
+        [1, 1],
+    ], dtype=bool)
+    labels = np.array([0, 0])
+    # External mask: ALL channels valid (full-data PR-6 mask says ch0 fine)
+    external = np.array([True, True, True, True, True])
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1]), k=1,
+        valid_mask_per_cluster={0: external},
+    )
+    # If REPLACE semantics (bug): ch0 enters via fallback template[0]=0 (lowest rank)
+    # and would be picked as source. With INTERSECT semantics (correct), ch0 is
+    # excluded by derived_valid (zero participation).
+    assert 0 not in out[0]["source"]
+    assert 0 not in out[0]["sink"]
+
+
+def test_compute_local_rank_endpoint_external_intersect_can_restrict_further():
+    """External mask CAN restrict beyond derived (subset semantics still works)."""
+    ranks = np.array([
+        [0.0, 0.0],
+        [1.0, 1.0],
+        [2.0, 2.0],
+        [3.0, 3.0],
+    ])
+    bools = np.ones((4, 2), dtype=bool)  # all participate (derived = all True)
+    labels = np.array([0, 0])
+    # External excludes ch0 (the would-be source)
+    external = np.array([False, True, True, True])
+    out = p2.compute_local_rank_endpoint(
+        ranks, bools, labels, event_indices=np.array([0, 1]), k=1,
+        valid_mask_per_cluster={0: external},
+    )
+    assert 0 not in out[0]["source"]
+    assert out[0]["source"] == [1]  # ch1 now lowest among eligible (intersection = [F,T,T,T])
+    assert out[0]["sink"] == [3]
+
+
+# --- B2: compute_endpoint_spatial_radius + compute_source_sink_centroid_distance ---
+
+
+def test_compute_endpoint_spatial_radius_empty():
+    """Empty endpoint list → all radii NaN."""
+    coords = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    out = p2.compute_endpoint_spatial_radius([], coords)
+    assert np.isnan(out["centroid_rms"])
+    assert np.isnan(out["mean_pairwise"])
+    assert np.isnan(out["min_enclosing_radius"])
+
+
+def test_compute_endpoint_spatial_radius_single_point():
+    """C8 — k=1 → centroid_rms=0, mean_pairwise=NaN (no pairs), min_enclosing=0."""
+    coords = np.array([[3.0, 4.0, 5.0], [10.0, 10.0, 10.0]])
+    out = p2.compute_endpoint_spatial_radius([0], coords)
+    assert out["centroid_rms"] == 0.0
+    assert np.isnan(out["mean_pairwise"])
+    assert out["min_enclosing_radius"] == 0.0
+    assert out["n_points"] == 1
+
+
+def test_compute_endpoint_spatial_radius_equilateral():
+    """C9 — n=3 points forming equilateral triangle (side d) →
+    centroid_rms = d/sqrt(3); mean_pairwise = d; min_enclosing_radius = d/sqrt(3)."""
+    d = 6.0
+    h = d * np.sqrt(3.0) / 2.0   # equilateral height
+    coords = np.array([
+        [0.0, 0.0, 0.0],
+        [d, 0.0, 0.0],
+        [d / 2.0, h, 0.0],
+    ])
+    out = p2.compute_endpoint_spatial_radius([0, 1, 2], coords)
+    assert out["centroid_rms"] == pytest.approx(d / np.sqrt(3.0), rel=1e-6)
+    assert out["mean_pairwise"] == pytest.approx(d, rel=1e-6)
+    assert out["min_enclosing_radius"] == pytest.approx(d / np.sqrt(3.0), rel=1e-6)
+
+
+def test_compute_endpoint_spatial_radius_collinear():
+    """C10 — collinear k=3 points → min_enclosing = half max pairwise distance."""
+    coords = np.array([
+        [0.0, 0.0, 0.0],
+        [10.0, 0.0, 0.0],
+        [5.0, 0.0, 0.0],
+    ])
+    out = p2.compute_endpoint_spatial_radius([0, 1, 2], coords)
+    # max pairwise = 10, mid = (0+10)/2 = 5 along x; min enclosing = 5
+    assert out["min_enclosing_radius"] == pytest.approx(5.0, rel=1e-6)
+    # centroid = (5,0,0); RMS = sqrt(((5-5)^2 + (5-5)^2 + (5-5)^2 + ...) wait
+    # actually centroid = (15/3, 0, 0) = (5, 0, 0); deviations = [5, 5, 0];
+    # RMS = sqrt((25 + 25 + 0) / 3) = sqrt(50/3) ≈ 4.082
+    assert out["centroid_rms"] == pytest.approx(np.sqrt(50.0 / 3.0), rel=1e-6)
+
+
+def test_compute_source_sink_centroid_distance_basic():
+    """source / sink axis length = ||centroid(source) − centroid(sink)||."""
+    coords = np.array([
+        [0.0, 0.0, 0.0],   # source 0
+        [2.0, 0.0, 0.0],   # source 1
+        [10.0, 0.0, 0.0],  # sink 0
+        [12.0, 0.0, 0.0],  # sink 1
+    ])
+    # source centroid = (1, 0, 0); sink centroid = (11, 0, 0); d = 10
+    d = p2.compute_source_sink_centroid_distance([0, 1], [2, 3], coords)
+    assert d == pytest.approx(10.0)
+
+
+def test_compute_source_sink_centroid_distance_3d():
+    """3D non-trivial separation."""
+    coords = np.array([
+        [0.0, 0.0, 0.0],
+        [4.0, 3.0, 0.0],   # sink at distance 5 from origin
+    ])
+    d = p2.compute_source_sink_centroid_distance([0], [1], coords)
+    assert d == pytest.approx(5.0)
+
+
+def test_compute_source_sink_centroid_distance_empty_returns_nan():
+    """If either side empty → NaN (can't compute centroid)."""
+    coords = np.array([[0.0, 0.0, 0.0]])
+    assert np.isnan(p2.compute_source_sink_centroid_distance([], [0], coords))
+    assert np.isnan(p2.compute_source_sink_centroid_distance([0], [], coords))
+
+
+# --- B3: compute_decision_k_drift ---
+
+
+def _make_synthetic_swap_data(rng, n_ch=8, n_events_per_cluster=50, swap_strength=1.0):
+    """Make synthetic ranks + bools + labels for 2 clusters with controllable swap signal.
+
+    Cluster 0 mean ranks (over events): roughly [0,1,2,3,4,5,6,7] (sorted ascending);
+    cluster 1 mean ranks: reversed [7,6,5,4,3,2,1,0] scaled by swap_strength + noise.
+    All channels participate (bools=True). epoch_indices selects events.
+    """
+    total = 2 * n_events_per_cluster
+    ranks = np.zeros((n_ch, total), dtype=float)
+    bools = np.ones((n_ch, total), dtype=bool)
+    labels = np.concatenate([
+        np.zeros(n_events_per_cluster, dtype=int),
+        np.ones(n_events_per_cluster, dtype=int),
+    ])
+    # Cluster 0
+    for e in range(n_events_per_cluster):
+        ranks[:, e] = np.arange(n_ch) + rng.normal(0, 0.3, size=n_ch)
+    # Cluster 1: swapped
+    for e in range(n_events_per_cluster, total):
+        ranks[:, e] = swap_strength * (n_ch - 1 - np.arange(n_ch)) + (1 - swap_strength) * np.arange(n_ch) + rng.normal(0, 0.3, size=n_ch)
+    return ranks, bools, labels
+
+
+def test_compute_decision_k_drift_returns_decision_k_per_epoch():
+    """Per-epoch decision-k extraction over synthetic strong-swap data."""
+    rng = np.random.default_rng(0)
+    ranks, bools, labels = _make_synthetic_swap_data(rng, n_ch=8, n_events_per_cluster=40, swap_strength=1.0)
+    # 2 epochs, each spanning half of each cluster's events
+    epochs = [
+        {"event_indices": np.concatenate([np.arange(0, 20), np.arange(40, 60)]), "block_index": 0, "t_start": 0, "t_end": 1},
+        {"event_indices": np.concatenate([np.arange(20, 40), np.arange(60, 80)]), "block_index": 0, "t_start": 1, "t_end": 2},
+    ]
+    out = p2.compute_decision_k_drift(
+        ranks, bools, labels, epochs,
+        cluster_a=0, cluster_b=1,
+        min_events_per_cluster=10,
+        n_perm=200, seed=0,
+    )
+    assert "decision_k_per_epoch" in out
+    assert len(out["decision_k_per_epoch"]) == 2
+    # With strong swap signal, both epochs should find a non-None decision_k
+    finite = [k for k in out["decision_k_per_epoch"] if k is not None]
+    assert len(finite) == 2
+    assert all(2 <= k <= 4 for k in finite)
+
+
+def test_compute_decision_k_drift_drops_low_event_epochs():
+    """C12 — epochs with cluster A or B events < min_events_per_cluster → decision_k=None."""
+    rng = np.random.default_rng(0)
+    ranks, bools, labels = _make_synthetic_swap_data(rng, n_ch=8, n_events_per_cluster=40)
+    # Epoch 0: cluster 0 has 5 events (< min 20), cluster 1 has 30 events
+    # Epoch 1: both have ≥ 20 events
+    epochs = [
+        {"event_indices": np.concatenate([np.arange(0, 5), np.arange(40, 70)]), "block_index": 0, "t_start": 0, "t_end": 1},
+        {"event_indices": np.concatenate([np.arange(5, 40), np.arange(70, 80)]), "block_index": 0, "t_start": 1, "t_end": 2},
+    ]
+    out = p2.compute_decision_k_drift(
+        ranks, bools, labels, epochs,
+        cluster_a=0, cluster_b=1,
+        min_events_per_cluster=20,
+        n_perm=100, seed=0,
+    )
+    # Epoch 0 cluster 0 has only 5 events → None
+    assert out["decision_k_per_epoch"][0] is None
+    # Epoch 1 cluster 1 has only 10 events → None
+    assert out["decision_k_per_epoch"][1] is None
+    assert out["n_epochs_with_decision_k"] == 0
+
+
+def test_compute_decision_k_drift_phantom_mask():
+    """C11 — per-cluster template rank in B3 uses masked mean rank (via _legacy_hist_mean_rank).
+    Phantom int ranks on non-participating events must not enter the per-epoch swap_sweep."""
+    rng = np.random.default_rng(0)
+    n_ch = 8
+    n_per = 30
+    ranks, bools, labels = _make_synthetic_swap_data(rng, n_ch=n_ch, n_events_per_cluster=n_per, swap_strength=1.0)
+    # Inject phantom rank into a channel for events where it doesn't participate
+    bools[7, n_per:] = False  # channel 7 doesn't participate in any cluster 1 event
+    ranks[7, n_per:] = 999.0  # phantom rank
+    epochs = [
+        {"event_indices": np.arange(0, 2 * n_per), "block_index": 0, "t_start": 0, "t_end": 1},
+    ]
+    out = p2.compute_decision_k_drift(
+        ranks, bools, labels, epochs,
+        cluster_a=0, cluster_b=1,
+        min_events_per_cluster=10,
+        n_perm=100, seed=0,
+    )
+    # Phantom 999 must not pull cluster 1's template — decision_k should still be reasonable (2-4)
+    assert out["decision_k_per_epoch"][0] is not None
+    assert 2 <= out["decision_k_per_epoch"][0] <= 4
+
+
+def test_compute_decision_k_drift_summary_stats():
+    """summary stats (std / mean / range) computed correctly on finite decision_k list."""
+    rng = np.random.default_rng(0)
+    ranks, bools, labels = _make_synthetic_swap_data(rng, n_ch=8, n_events_per_cluster=40, swap_strength=1.0)
+    epochs = [
+        {"event_indices": np.concatenate([np.arange(0, 20), np.arange(40, 60)]), "block_index": 0, "t_start": 0, "t_end": 1},
+        {"event_indices": np.concatenate([np.arange(20, 40), np.arange(60, 80)]), "block_index": 0, "t_start": 1, "t_end": 2},
+    ]
+    out = p2.compute_decision_k_drift(
+        ranks, bools, labels, epochs,
+        cluster_a=0, cluster_b=1,
+        min_events_per_cluster=10,
+        n_perm=200, seed=0,
+    )
+    finite = [k for k in out["decision_k_per_epoch"] if k is not None]
+    assert out["n_epochs_with_decision_k"] == len(finite)
+    assert "decision_k_std" in out
+    assert "decision_k_mean" in out
+    assert "decision_k_range" in out
+    if len(finite) >= 2:
+        assert out["decision_k_std"] == pytest.approx(float(np.std(finite)), rel=1e-6)
+        assert out["decision_k_mean"] == pytest.approx(float(np.mean(finite)), rel=1e-6)
+        assert out["decision_k_range"] == [int(min(finite)), int(max(finite))]

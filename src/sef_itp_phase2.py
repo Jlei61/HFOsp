@@ -33,12 +33,20 @@ H6 secondary). Phase 2 adds:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from scipy.stats import wilcoxon
 
-__version__ = "v1.0.0"
+# Reuse PR-2/PR-6 template estimator + endpoint extraction (CLAUDE.md §6.1
+# question-match): per-epoch H4 v1.1 asks "top-k source / bottom-k sink by template
+# rank in this epoch", same question as PR-6 anchoring asks over full data. Reusing
+# the same primitives guarantees per-epoch B1(full) == PR-6 set-equality on calibration.
+from src.interictal_propagation import _legacy_hist_mean_rank
+from src.rank_displacement import compute_swap_score_sweep
+from src.template_anatomical_anchoring import extract_endpoint_middle
+
+__version__ = "v1.1.0"  # v1.1 — rank-based endpoint geometry drift (user-catch 2026-05-23)
 
 
 @dataclass
@@ -363,6 +371,13 @@ def compute_local_endpoint(
 ) -> Dict[int, Dict[str, List[int]]]:
     """Compute per-cluster top-k source / bottom-k sink endpoint from a slice of events.
 
+    ⚠️ **v1.1 banner (2026-05-23 user catch)**: this helper measures **participation field
+    top-k/bottom-k**, NOT propagation rank endpoint. v1.0 used this as the H4 main
+    endpoint definition — user 2026-05-23 catch flagged that this is
+    "participation field drift", not "propagation endpoint geometry drift". v1.1
+    keeps this function as **supplementary** sensitivity (participation-field stability)
+    and adds `compute_local_rank_endpoint` as the new H4 main-line endpoint extractor.
+
     For each cluster c present in `labels`, take `mean(events_bool[labels == c], axis=0)` →
     channel-wise participation rate. The top-k channels (highest participation) form the
     source; the bottom-k channels (lowest participation) form the sink.
@@ -408,6 +423,351 @@ def endpoint_jaccard(
     if not union:
         return 0.0
     return len(L & G) / len(union)
+
+
+# --------------------------------------------------------------------------- #
+# v1.1 — rank-based endpoint (H4 main line; user catch 2026-05-23)
+#
+# Per-channel masked mean lag rank → top-k source / bottom-k sink. Replaces the
+# v1.0 participation-field top-k as the H4 main endpoint extractor.
+#
+# Phantom-mask discipline (AGENTS.md cross-PR lagPatRank contract):
+# every non-participating channel in *_lagPat*.npz carries a phantom int rank from
+# the legacy producer (hfo_net.py:289 argsort(argsort) is unmasked). Inclusion of
+# those phantom ranks in mean = silent contamination. We mask by bools (canonical
+# participation flag) before summing. Reference: src.lagpat_rank_audit
+# .build_masked_kmeans_features for the same pattern.
+# --------------------------------------------------------------------------- #
+
+
+def _per_cluster_template_rank(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    cluster_evt_idx: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute per-cluster template rank using PR-2's legacy estimator.
+
+    Returns (template_rank, valid_mask) per channel:
+      - template_rank: `argsort(argsort(_legacy_hist_mean_rank(masked_ranks)))` — int 0..n_ch-1.
+        Same estimator PR-2 stores in `adaptive_cluster.clusters[k].template_rank` and PR-6
+        anchoring consumes. For non-participating channels, _legacy_hist_mean_rank's
+        `template[ci] = ci` fallback kicks in (CLAUDE.md cross-PR contract `template_rank`).
+      - valid_mask: per-channel "any participation in cluster's epoch events" — mirrors
+        PR-6 anchoring runner's `per_cluster_masks` construction (channels with ≥1
+        participating event in the cluster slice).
+
+    Phantom-mask discipline (AGENTS.md cross-PR `lagPatRank`): non-participating
+    channels carry phantom int ranks in raw lagPat. `_legacy_hist_mean_rank` already
+    filters by `bools[ci] > 0` per channel, so the phantom ranks never enter the
+    template estimator. The valid_mask additionally enforces downstream exclusion.
+    """
+    n_ch = ranks.shape[0]
+    if cluster_evt_idx.size == 0:
+        return np.zeros(n_ch, dtype=int), np.zeros(n_ch, dtype=bool)
+    cl_ranks = ranks[:, cluster_evt_idx]
+    cl_bools = bools[:, cluster_evt_idx]
+    template = _legacy_hist_mean_rank(cl_ranks, cl_bools)
+    template_rank = np.argsort(np.argsort(template, kind="stable"), kind="stable")
+    valid_mask = cl_bools.any(axis=1)
+    return template_rank, valid_mask
+
+
+def compute_local_rank_endpoint(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    labels: np.ndarray,
+    event_indices: np.ndarray,
+    k: int = 3,
+    valid_mask_per_cluster: Optional[Dict[int, np.ndarray]] = None,
+) -> Dict[int, Dict[str, List[int]]]:
+    """Per-cluster top-k source / bottom-k sink endpoint by **template rank**.
+
+    Calibration contract (C5 in plan): when called with `event_indices = all events`,
+    must reproduce PR-6 anchoring's `per_template[].source/sink` per cluster, because
+    we reuse the same primitives (`_legacy_hist_mean_rank` template + `extract_endpoint_middle`
+    top-k selection + per-cluster valid_mask = "any participation in cluster events").
+
+    For each cluster c present in `labels[event_indices]`:
+      1. Slice events: `cluster_evt_idx = event_indices ∩ {labels == c}`.
+      2. Compute `template_rank` (legacy hist mean rank → argsort(argsort)) per channel.
+      3. valid_mask: **always** `derived_valid` (= channels that participated in cluster
+         events within this epoch slice). If `valid_mask_per_cluster` is also provided,
+         it acts as an upstream RESTRICTION (intersection): `mask = derived_valid &
+         external_mask`. The external mask **never replaces** derived — this prevents
+         full-data PR-6 mask from re-introducing zero-participation channels in per-epoch
+         endpoint (user-review catch 2026-05-23).
+      4. Source / sink via `extract_endpoint_middle` (PR-6 helper): lowest k = source,
+         highest k = sink, both restricted to valid_mask.
+      5. k degrades to `n_valid // 2` automatically via extract_endpoint_middle's exit
+         (returns empty source/sink when n_valid < 2k).
+
+    Args:
+      ranks: (n_ch, n_events_total) per-event per-channel lag rank.
+      bools: (n_ch, n_events_total) per-event per-channel participation flag.
+      labels: (n_events_total,) cluster id per event.
+      event_indices: indices into the global arrays for this epoch / slice.
+      k: target endpoint size (source / sink each).
+      valid_mask_per_cluster: optional per-cluster upstream restriction mask; intersected
+        with epoch-derived participation mask (NEVER replaces derived; see step 3).
+        Typical production usage: pass `None` (derived alone is correct). Calibration
+        can pass PR-6 per-cluster mask, which equals derived on full data anyway.
+
+    Returns:
+      `{cluster_id: {"source": [int, ...], "sink": [int, ...]}}` — only clusters with
+      at least one event in `event_indices` and at least 2k valid channels are included.
+      Smaller-pool clusters degrade gracefully: when extract_endpoint_middle reports
+      `n_ch<6`-style exit, we fall back to k = n_valid // 2.
+    """
+    n_ch = ranks.shape[0]
+    out: Dict[int, Dict[str, List[int]]] = {}
+    if event_indices.size == 0:
+        return out
+    slice_labels = labels[event_indices]
+    channel_names_pos = list(range(n_ch))  # use channel indices as names → endpoint returns indices
+    for c in np.unique(slice_labels):
+        cluster_evt_idx = event_indices[slice_labels == c]
+        if cluster_evt_idx.size == 0:
+            continue
+        template_rank, derived_valid = _per_cluster_template_rank(ranks, bools, cluster_evt_idx)
+        # External mask (if any) is an upstream RESTRICTION only — intersect with derived.
+        # Never replace derived: a full-data PR-6 mask would otherwise re-introduce channels
+        # that didn't participate in this epoch (silent participation-field pollution
+        # because _legacy_hist_mean_rank fallbacks template[ci] = ci for non-participating).
+        if valid_mask_per_cluster is not None and int(c) in valid_mask_per_cluster:
+            external = np.asarray(valid_mask_per_cluster[int(c)], dtype=bool)
+            mask = derived_valid & external
+        else:
+            mask = derived_valid
+        if not mask.any():
+            continue
+        n_valid = int(mask.sum())
+        k_eff = k if n_valid >= 2 * k else max(1, n_valid // 2)
+        rec = extract_endpoint_middle(
+            channel_names=channel_names_pos,
+            template_rank=template_rank.tolist(),
+            n=k_eff,
+            valid_mask=mask.tolist(),
+        )
+        if rec.get("exit_reason") is not None:
+            continue
+        out[int(c)] = {
+            "source": [int(x) for x in rec["source"]],
+            "sink": [int(x) for x in rec["sink"]],
+        }
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# v1.1 — spatial radius drift (H4 secondary geometry metric; user catch 2026-05-23)
+#
+# Per-cluster per-epoch endpoint set radius — source / sink computed independently
+# (don't混 source+sink into one radius, otherwise "轴变长" and "每端变散" are confounded
+# — user 2026-05-23 catch). Source / sink centroid distance gives propagation axis length.
+# Persistent homology (cloud-level) deferred to future analysis (per user's catch:
+# "持续同调留给完整 participation field 分析").
+# --------------------------------------------------------------------------- #
+
+
+def _min_enclosing_ball_radius(pts: np.ndarray) -> float:
+    """Smallest enclosing ball radius for k ≤ 5 points (brute force).
+
+    Tries (a) 2-point antipodal spheres; (b) circumspheres of all triples (in 3D
+    each triple defines a circle; the smallest enclosing sphere passing through a
+    triple is the circumcircle's diameter sphere); returns smallest radius whose
+    sphere contains all points within numeric tolerance. Welzl's algorithm is
+    overkill for k ≤ 5.
+    """
+    k = pts.shape[0]
+    if k <= 1:
+        return 0.0
+    if k == 2:
+        return 0.5 * float(np.linalg.norm(pts[0] - pts[1]))
+    candidates: List[float] = []
+    eps = 1e-9
+    # (a) 2-point antipodal
+    for i in range(k):
+        for j in range(i + 1, k):
+            c = 0.5 * (pts[i] + pts[j])
+            r = 0.5 * float(np.linalg.norm(pts[i] - pts[j]))
+            if np.all(np.linalg.norm(pts - c, axis=1) <= r + eps):
+                candidates.append(r)
+    # (b) 3-point circumsphere (in 3D, the smallest sphere passing through 3 points
+    # is the circumscribed circle of the triangle they form, lifted to 3D — its
+    # diameter is the circumdiameter of the triangle).
+    for i in range(k):
+        for j in range(i + 1, k):
+            for m in range(j + 1, k):
+                try:
+                    c, r = _triangle_circumsphere(pts[i], pts[j], pts[m])
+                except (ValueError, np.linalg.LinAlgError):
+                    continue
+                if np.all(np.linalg.norm(pts - c, axis=1) <= r + eps):
+                    candidates.append(r)
+    if not candidates:
+        # fallback (shouldn't happen for k ≤ 5 with reasonable input): use farthest-from-centroid
+        c = pts.mean(axis=0)
+        return float(np.max(np.linalg.norm(pts - c, axis=1)))
+    return min(candidates)
+
+
+def _triangle_circumsphere(a: np.ndarray, b: np.ndarray, c: np.ndarray) -> Tuple[np.ndarray, float]:
+    """Circumcenter + circumradius of triangle (a, b, c) in 3D space (sphere through all three).
+
+    Center lies in the plane of the triangle; standard barycentric formula.
+    """
+    ab = b - a
+    ac = c - a
+    cross = np.cross(ab, ac)
+    norm_sq = float(np.dot(cross, cross))
+    if norm_sq < 1e-18:
+        raise ValueError("degenerate triangle (collinear)")
+    alpha = float(np.dot(ac, ac)) * float(np.dot(ab, ab) - np.dot(ab, ac)) / (2.0 * norm_sq)
+    beta = float(np.dot(ab, ab)) * float(np.dot(ac, ac) - np.dot(ab, ac)) / (2.0 * norm_sq)
+    center = a + alpha * ab + beta * ac
+    radius = float(np.linalg.norm(center - a))
+    return center, radius
+
+
+def compute_endpoint_spatial_radius(
+    endpoint_indices: List[int],
+    coords: np.ndarray,
+) -> Dict[str, float]:
+    """Spatial radius metrics for an endpoint channel set.
+
+    Returns:
+      centroid_rms: sqrt(mean(||pt - centroid||²)) over endpoint pts; 0 for k=1, NaN for empty.
+      mean_pairwise: mean of pairwise Euclidean distances; NaN for k ≤ 1.
+      min_enclosing_radius: radius of smallest enclosing ball (brute force for k ≤ 5).
+      n_points: number of endpoint channels.
+
+    coords: (n_ch, 3) — assumed mm Euclidean (Phase 1 contract; not re-asserted here
+    since coords come pre-validated from `src.seeg_coord_loader.load_subject_coords`).
+    """
+    if not endpoint_indices:
+        return {
+            "centroid_rms": float("nan"),
+            "mean_pairwise": float("nan"),
+            "min_enclosing_radius": float("nan"),
+            "n_points": 0,
+        }
+    pts = coords[endpoint_indices]
+    k = int(pts.shape[0])
+    if k == 1:
+        return {
+            "centroid_rms": 0.0,
+            "mean_pairwise": float("nan"),
+            "min_enclosing_radius": 0.0,
+            "n_points": 1,
+        }
+    centroid = pts.mean(axis=0)
+    centroid_rms = float(np.sqrt(((pts - centroid) ** 2).sum(axis=1).mean()))
+    pdist = np.linalg.norm(pts[:, None, :] - pts[None, :, :], axis=-1)
+    iu = np.triu_indices(k, k=1)
+    mean_pairwise = float(pdist[iu].mean())
+    min_enclosing = _min_enclosing_ball_radius(pts)
+    return {
+        "centroid_rms": centroid_rms,
+        "mean_pairwise": mean_pairwise,
+        "min_enclosing_radius": min_enclosing,
+        "n_points": k,
+    }
+
+
+def compute_source_sink_centroid_distance(
+    source_indices: List[int],
+    sink_indices: List[int],
+    coords: np.ndarray,
+) -> float:
+    """Propagation axis length = ||centroid(source) − centroid(sink)|| in coord space.
+
+    Returns NaN if either side is empty.
+    """
+    if not source_indices or not sink_indices:
+        return float("nan")
+    c_src = coords[source_indices].mean(axis=0)
+    c_snk = coords[sink_indices].mean(axis=0)
+    return float(np.linalg.norm(c_src - c_snk))
+
+
+# --------------------------------------------------------------------------- #
+# v1.1 — per-epoch decision-k drift (B3; only 9/23 swap-positive subjects)
+#
+# For each epoch with sufficient events in both clusters, recompute per-cluster
+# template rank (via _per_cluster_template_rank) and run rank_displacement
+# `compute_swap_score_sweep` to extract `decision_k`. Returns per-epoch decision_k
+# list + summary stats. Epochs with insufficient events drop to None (do NOT
+# carry forward — advisor catch 4).
+#
+# Perf budget (advisor catch 4): n_perm=500 default for swap_sweep within drift to
+# keep cohort cost reasonable (9 subj × ~50 epoch × 500 perm).
+# --------------------------------------------------------------------------- #
+
+
+def compute_decision_k_drift(
+    ranks: np.ndarray,
+    bools: np.ndarray,
+    labels: np.ndarray,
+    epochs: List[Dict[str, np.ndarray]],
+    cluster_a: int,
+    cluster_b: int,
+    min_events_per_cluster: int = 20,
+    n_perm: int = 500,
+    seed: int = 0,
+) -> Dict[str, object]:
+    """Per-epoch decision-k drift via rank_displacement swap_sweep.
+
+    Args:
+      ranks, bools, labels: global arrays (n_ch, n_events_total) + (n_events_total,)
+      epochs: list of dicts with `event_indices` key (output of slice_events_into_epochs)
+      cluster_a, cluster_b: cluster IDs from `primary_pair` JSON (NOT np.unique(labels);
+        advisor catch 3 — caller passes explicitly to document which pair is swept)
+      min_events_per_cluster: epoch event-count gate per cluster (default 20; advisor
+        catch 4 — < 20 events makes template rank too noisy)
+      n_perm: swap_sweep family-wise null permutation count (default 500 for perf)
+      seed: rng seed (incremented per epoch internally)
+
+    Returns:
+      {
+        "decision_k_per_epoch": [int|None, ...],   # one per input epoch
+        "n_epochs_with_decision_k": int,
+        "decision_k_std": float,                    # std of finite values; NaN if <2
+        "decision_k_mean": float,                   # mean of finite values; NaN if 0
+        "decision_k_range": [min, max] | None,
+        "cluster_a": int, "cluster_b": int,
+        "min_events_per_cluster": int,
+        "n_perm": int,
+      }
+    """
+    decision_k_per_epoch: List[Optional[int]] = []
+    for ei, ep in enumerate(epochs):
+        evt_idx = np.asarray(ep["event_indices"], dtype=int)
+        idx_a = evt_idx[labels[evt_idx] == cluster_a]
+        idx_b = evt_idx[labels[evt_idx] == cluster_b]
+        if len(idx_a) < min_events_per_cluster or len(idx_b) < min_events_per_cluster:
+            decision_k_per_epoch.append(None)
+            continue
+        rank_a, valid_a = _per_cluster_template_rank(ranks, bools, idx_a)
+        rank_b, valid_b = _per_cluster_template_rank(ranks, bools, idx_b)
+        sweep = compute_swap_score_sweep(
+            rank_a.astype(float), rank_b.astype(float),
+            valid_a, valid_b,
+            n_perm=n_perm, seed=seed + ei,
+        )
+        dk = sweep.get("decision_k")
+        decision_k_per_epoch.append(int(dk) if dk is not None else None)
+    finite = [k for k in decision_k_per_epoch if k is not None]
+    n_finite = len(finite)
+    return {
+        "decision_k_per_epoch": decision_k_per_epoch,
+        "n_epochs_with_decision_k": n_finite,
+        "decision_k_std": float(np.std(finite)) if n_finite >= 2 else float("nan"),
+        "decision_k_mean": float(np.mean(finite)) if n_finite else float("nan"),
+        "decision_k_range": [int(min(finite)), int(max(finite))] if finite else None,
+        "cluster_a": int(cluster_a),
+        "cluster_b": int(cluster_b),
+        "min_events_per_cluster": int(min_events_per_cluster),
+        "n_perm": int(n_perm),
+    }
 
 
 # --------------------------------------------------------------------------- #
