@@ -1,6 +1,10 @@
-# Topic 4：SEF-ITP Framework —— 间期模板传播的空间易激场模型
+# Topic 4：SEF-HFO / SEF-ITP Framework —— 间期 HFO 传播的空间易激场模型
 
-> **状态**：**v1.0.7 lock 2026-05-23 (Phase 2 cohort 收口 + user-return v3 catch ratified)**。**v1.0.7 sub-amendments**: §3.4 H4 v1.1 Stage B scope strict-limit ("背景间期 30-min epochs rate-geometry decoupling", 不蕴含 ictal-adjacent / SOZ claim) + decision-k drift recast as Phase 3 biomarker feasibility (不入 Phase 2 verdict) + MEB k>3 caveat (Phase 3 启动前必须补 4-point sphere 或 MEB 降级 sensitivity); §3.5 H5 reporting unit per-seizure primary + cohort inference hierarchical/subject-clustered + stratify by seizure type/pair/interval + Δk + Δk/baseline_k + spatial radius 联合报 (decision_k_std cross-subject 不可直接比); v1.0.6 sustained: §3.3 H3 三层 verdict (R1+R2+sub-shape) + §3.4 H4 current SUPPLEMENTARY + §3.5 H5 主问题 pivot + 4 metrics tier。**Pending user ratify**: §3.5 H5 verdict 阈值具体值 (≥2/3 primary 或 ≥3/3 primary); §3.3 short-scale POSITIVE memory variant 是否单独 sub-label; H4 I_rate matched null spec (see spec_amendment_2026-05-23.md); endpoint stability OR vs AND combinator 永久锁; epoch_hours 默认 0.5 vs framework prose 1–2h; §3.5 H5 hierarchical model form (LMM vs GEE vs cluster-robust SE)。前置版本 v1.0.6 lock 2026-05-23 (structural clarification); v1.0.5 lock 2026-05-22; **Phase 0 解锁 2026-05-21（lagPatRank phantom-rank broad re-derivation Step 5a–5h 全部完成 + Checkpoint A/B advisor consult 通过）**
+> **状态**：**v0.2 plan lock draft 2026-06-01**。Topic 4 主模型路线更新为 **SEF-HFO：低异质性 + 各向异性连接 + 近临界 E-I 易激场 + 慢变量调制**，并在 review 后收紧为 **gain-closed + pulse-validated + control-disciplined** 版本。旧 HR/FHN Phase 4 modeling route 降级为历史探索 / sensitivity，不再是主模型路线。详细计划见 `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`。
+> **v0.2 核心边界**：只解释 HFO 群体事件的中观传播组织（event envelope、通道激活顺序、rank template、forward/reverse、identity bias、endpoint geometry、rate-geometry decoupling）；ictal-like recruitment 只作 synthetic feasibility bridge，不解释 clinical seizure onset；不解释 HFO 80-250/500 Hz carrier 的细胞生物物理，不把 template source 拟合成 clinical SOZ。
+> **v0.2 承接**：保留 v1 已锁定的真实数据验收合同、cohort tier、phantom-rank 修复纪律、clinical SOZ 不作为拟合标签的红线；替换的是建模机制路线，不是 Topic 1 的实证发现。
+>
+> **历史状态（v1，保留审计链；建模主线已被 v2 supersede）**：**v1.0.7 lock 2026-05-23 (Phase 2 cohort 收口 + user-return v3 catch ratified)**。**v1.0.7 sub-amendments**: §3.4 H4 v1.1 Stage B scope strict-limit ("背景间期 30-min epochs rate-geometry decoupling", 不蕴含 ictal-adjacent / SOZ claim) + decision-k drift recast as Phase 3 biomarker feasibility (不入 Phase 2 verdict) + MEB k>3 caveat (Phase 3 启动前必须补 4-point sphere 或 MEB 降级 sensitivity); §3.5 H5 reporting unit per-seizure primary + cohort inference hierarchical/subject-clustered + stratify by seizure type/pair/interval + Δk + Δk/baseline_k + spatial radius 联合报 (decision_k_std cross-subject 不可直接比); v1.0.6 sustained: §3.3 H3 三层 verdict (R1+R2+sub-shape) + §3.4 H4 current SUPPLEMENTARY + §3.5 H5 主问题 pivot + 4 metrics tier。**Pending user ratify**: §3.5 H5 verdict 阈值具体值 (≥2/3 primary 或 ≥3/3 primary); §3.3 short-scale POSITIVE memory variant 是否单独 sub-label; H4 I_rate matched null spec (see spec_amendment_2026-05-23.md); endpoint stability OR vs AND combinator 永久锁; epoch_hours 默认 0.5 vs framework prose 1–2h; §3.5 H5 hierarchical model form (LMM vs GEE vs cluster-robust SE)。前置版本 v1.0.6 lock 2026-05-23 (structural clarification); v1.0.5 lock 2026-05-22; **Phase 0 解锁 2026-05-21（lagPatRank phantom-rank broad re-derivation Step 5a–5h 全部完成 + Checkpoint A/B advisor consult 通过）**
 > **Phase 2 完结 marker**：Stage B H4 v1.1 cohort 跑通 (23/23 subjects, B1 calibration 0/23 mismatch), 主结论 = "背景间期 30-min epochs, 标准化事件率不稳定度显著高于 rank-endpoint identity 不稳定度 (p=1.4e-6, d=+1.26), participation field 对照同向 (p=9.5e-7, d=+1.50)"。Stage B decision-k drift 作 Phase 3 biomarker 可行性验证, 不入 Phase 2 cohort verdict。下一步 Phase 3 (H5 v1.0.7 spec) per-seizure primary + subject-clustered inference。详见 `docs/archive/topic4/sef_itp_phase2/cohort_run_2026-05-24.md`。
 > **版本历史**：v1 lock 2026-05-20 (initial) → v1.0.1 advisor 5-fix 同日 → v1.0.2 user review 6-fix 同日（H2 工程不可行修复 + H1 概念冲突拆分 + H3 verdict naming 修订 + H4 normalized instability + H5 统计合同收紧 + Topic 1/3 cross-doc 实际落字）→ **Phase 0 完成 2026-05-21**（Topic 0 §3.1 phantom-rank 修复跑完所有下游 PR）→ **v1.0.3 lock 2026-05-22**：H2 prose 改 PR-6 swap_check ingest（CLAUDE.md §5+§6 错误三段修复）+ H1 v1.0.7 null pool 扩到全 SEEG implantation → **v1.0.4 lock 2026-05-22**：H2 input order 收紧到 rank-displacement `swap_sweep` variable-k，PR-2/PR-6 fixed top-3 降为 funnel/audit → **v1.0.5 lock 2026-05-22 user tier 拨正**：H1 从 cohort claim 候选 → **sanity / 必要前置**（任何结构化传播模型都会预测端点紧凑，不区分 SEF-ITP）；H2 从 mechanism sanity → **primary cohort claim**（同一空间结构被双向读取的反直觉预测才是 SEF-ITP 真正与替代模型分离的指纹；n=23 cohort 上 source 19/23 binomial p=1.3e-3 vs 50% null、sink 16/23 p=4.7e-2，足以支持 cohort 级别判读；PR-6 plan §3.3 的 mechanism-sanity 锁是针对 PR-6 自己的 n=6 8-subset 测试，**不**继承到 Topic 4 的 n=23 rank-displacement spatial 测试） → **v1.0.6 lock 2026-05-23 (user-return v2 catch surgical clarification)**：
 > - **§3.3 H3 scale-stratified amendment**：v1.0.5 字面 "全部 6 条 mark-transition TOST equiv_pass" AND-rule 把生理上的短尺度 refractoriness anti-clustering 作为 framework failure 触发，与 SEF-ITP 自己的 biophysics 内部矛盾。v1.0.6 surgical clarification 拆三层：**R1 (long-scale ≥60s independence required)** + **R2 (endpoint identity stability required)** + biophysical sub-shape (short/mid-scale burst/refractory) descriptive only；原 v1.0.5 AND-rule 保留作 audit trail；详见 §3.3
@@ -21,25 +25,24 @@
 > **范围**：Topic 4 模型层 + Topic 1 within-event 现象的机制解释
 > **不属于**：Topic 2 事件间周期（→ Paper 2）、ictal phase transition（→ Paper 3）、HFO 80–250 Hz carrier 振荡机制层
 
-> **v1.0.8 banner amendment 2026-05-27 (user-return Phase 4 spec ratified)**：scope = Phase 4 modeling track 启动条件 + 节点动力学选择 + shaft 控制 + cluster 判据 + aniso D 进 stage 2 + smoke-first 网格 + 3-proxy sensitivity + adaptive gate + event extraction sensitivity sweep。修订 §6.5 三处：
+> **历史 v1.0.8 banner amendment 2026-05-27（已被 v2 建模路线 supersede；保留为 HR/FHN route audit trail）**：scope = Phase 4 modeling track 启动条件 + 节点动力学选择 + shaft 控制 + cluster 判据 + aniso D 进 stage 2 + smoke-first 网格 + 3-proxy sensitivity + adaptive gate + event extraction sensitivity sweep。修订 §6.5 三处：
 > 1. **Phase 4 prerequisite**：v1.0.7 "Phase 1+2 H6+H1+H3 PASS + Phase 3 NULL" → v1.0.8 "framework structural prerequisite met (phantom-rank 修复 done + Phase 1 runner 落地 done) 即可启动 Phase 4 modeling track；model 输出作 mechanism exploration 层，**不替代** cohort verdict"
 > 2. **节点动力学**：v1.0.7 "FHN，不加 Hindmarsh-Rose / Epileptor" → v1.0.8 "**HR (Hindmarsh-Rose) 主**，FHN / 简化 excitable unit 作 sensitivity；不模拟 HFO carrier 80–250Hz"
 > 3. **Shaft 采样 + cluster 判据**：v1.0.7 未规定 → v1.0.8 "**强制 shaft 控制**：aligned / orthogonal / offset / angled / random / jittered (≥6 几何) + isotropic θ negative control；**禁止单用 KMeans k=2 作机制成功**；必须并列 split-half + odd-even + forward/reverse Spearman + rank-displacement swap_sweep + principal-curve audit；**isotropic θ + random shaft 也不能通过这套**；3 proxy (P1=x, P2=dx/dt, P3=detrend envelope) 全 PASS 才进 framework mechanism support 栏（取严格版）；L4 principal-curve audit 是 descriptive classifier 不是 hard gate"
 >
 > 完整 v1 spec 见 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` v0.2。本 banner block 是 v1.0.7 doc 的 surgical 修订，§6.5 内容 v1.0.7 prose 不删除，下方 § 6.5 文末加 "→ v1.0.8 banner amendment 修订上面 3 项" cross-link。
 
-> **Stage 1b 观测单位锁定 2026-05-28 (user-ratified)**：Phase 4 modeling track 的**节点事件单位 = burst envelope（一簇 spike 合并，事件时刻 = 第一个 spike 起点）**，不是单个 spike excursion；spike-level 仅作 within-burst secondary。理由：真实数据对象是 HFO / group-HFO，不是单神经元 spike；HR 节点被选正因其 bursting。单节点 baseline (I=1.0, r=0.006) 标定确认 σ=0 静息、σ>0 事件稀疏短暂 (excitable-like)，且 envelope 与 spike 确为不同单位 (n_spikes/burst 1.5→2.6)。merge 阈值 `envelope_gap=30` 取自实测 inter-spike gap 谷底，非调参。证据：`docs/archive/topic4/sef_itp_phase4_v1/stage1b_results_2026-05-28.md`；Stage 2+ group event = 多节点 burst-envelope onset 短窗共现。
+> **历史 Stage 1b 观测单位锁定 2026-05-28（HR route only）**：Phase 4 modeling track 的**节点事件单位 = burst envelope（一簇 spike 合并，事件时刻 = 第一个 spike 起点）**，不是单个 spike excursion；spike-level 仅作 within-burst secondary。理由：真实数据对象是 HFO / group-HFO，不是单神经元 spike；HR 节点被选正因其 bursting。单节点 baseline (I=1.0, r=0.006) 标定确认 σ=0 静息、σ>0 事件稀疏短暂 (excitable-like)，且 envelope 与 spike 确为不同单位 (n_spikes/burst 1.5→2.6)。merge 阈值 `envelope_gap=30` 取自实测 inter-spike gap 谷底，非调参。证据：`docs/archive/topic4/sef_itp_phase4_v1/stage1b_results_2026-05-28.md`；Stage 2+ group event = 多节点 burst-envelope onset 短窗共现。
 
 ---
 
 ## 0. 一句话承诺（朴素表述，CLAUDE.md §8 大白话风格）
 
-我们假设：**间期群体 HFO 不是随机噪声，而是脑里某个空间组织化的"病理易激区"被反复触发后、扩散物理留下的痕迹**。这个区有它固有的几何形状（形状本身我们不预测——它是真实病理网络的物理结构，是模型输入）；模型预测的是**这个形状被反复采样后，在我们的数据上必然留下哪些可见的指纹**：通道传播顺序的稳定性、source/sink 的几何反转、模板选择的随机性、慢变率与模板几何的解耦、发作邻近的端点身份漂移。
+我们假设：**间期 HFO 群体事件不是每次随机走一条新路，而是同一块病理组织附近存在一条固定的传播高速路**。这块组织内部神经元更相似，但“更相似”本身不自动等于“更危险”；它必须先改变群体输入-输出曲线，再改变局部线性稳定性。噪声偶尔点燃这条路，活动沿轴传播后自限熄灭；慢变量把系统推得更危险时，事件出现得更频繁，但不应该重写传播路线。
 
-如果这些指纹在数据上被观察到 → 病理易激场假说被支持。
-如果指纹大多数没看到 → 假说在我们的数据精度内被证伪，回到讨论是否换模型。
+如果这个图景正确，我们应该看到：通道传播顺序稳定、正反模板共享同一条空间轴、同一 subject 内通道身份偏置很高但高于几何采样对照、事件率可被慢变量调制但传播几何相对稳定。发作样持续招募只作为仿真可行性桥接，不作为真实发作起始解释。
 
-我们**不**预测病理易激区具体长在哪、**不**预先假定它和临床 SOZ 边界重合、**不**解释 HFO 80–250 Hz carrier 振荡是哪来的。
+如果这些现象在 synthetic data 里只有靠手工调参或人工挑图才能出现，模型失败。所有 synthetic data 必须走真实模板 pipeline；clinical SOZ 只作 held-out 关系检验，不作反向拟合标签。模型**不**解释 HFO 80-250/500 Hz carrier 振荡是哪来的。
 
 ---
 
@@ -62,47 +65,65 @@
 
 这和老 KONWAC paper 犯的是同类病：数学漂亮，机制空洞。BHPN-toy 即使把所有 11 个单元测试 + 7 个集成 sanity 跑过，对评审而言它**仍然只是一个把"对称双稳态"重新画了一遍的装饰**——不是机制解释。
 
-### 1.2 新方向：空间组织化的病理易激场 + 局部扩散物理
+### 1.2 v2 新方向：低异质性 + 各向异性连接 + 近临界 E-I 易激场
 
 朴素思路：
 
-- 间期事件**不是**某个内禀振荡器在跳动
-- 是 SOZ 内部某处的局部异常兴奋，**像石头扔进水里激起涟漪**一样，经过场电势 / ephaptic / 局部组织扩散，扫过附近通道
-- 通道在事件里的点火先后顺序 = 涟漪扫过它们的先后
-- 正反两个模板 = 同一个病理区的"两个端点"各能成为涟漪起点（A→B vs B→A）
-- 慢漂的觉醒度 / 状态变量 控制涟漪触发**频率**，**不**控制涟漪走哪条路
+- 间期事件**不是**某个内禀振荡器在跳动，也不是每次随机换路。
+- 病理组织附近有一块局部低异质性的 E-I 易激斑块：同类神经元阈值更相似；这个变化必须先进入群体输入-输出曲线，再由实际线性化结果决定它是否更接近临界。
+- E→E 连接核是各向异性的；沿长轴传播更容易。这条长轴就是正反模板共享的传播高速路。
+- 斑块处在近临界但仍亚阈值的候选工作窗：线性稳定性只给地图，有限幅脉冲仿真才证明它能被点燃并自限熄灭。
+- 慢变量主要控制事件被点燃的**频率**，不应该重写传播几何；如果慢变量一加进去模板就完全换路，模型失败。
 
-这个思路把"空间"放回到机制核心——这正是我们经验证据的核心维度（PR-2 / PR-6 揭示的是空间几何，不是抽象 phase pattern）。模型不再是拟合机器，因为：
+这个思路把"空间几何"和"E-I 稳定性"同时放回机制核心。它比 v1 的抽象扩散 / HR toy 更 sharp，因为它给出三条可直接证伪的机制杠杆：
 
-- θ(x) 反映**真实但未知**的病理结构，是模型输入
-- 模型产出的是 **θ(x) + 扩散物理结合后必然产生的几何指纹**
-- 几何指纹有 6 条事先锁定的判据（H1–H6），每条都有 PASS/NULL/FAIL 解读
+- 各向异性轴旋转，模板方向必须跟着旋转。
+- 降低局部 threshold variance 后，必须先计算 gain 和线性稳定性是否真的改变；若改变方向成立，成核点才应向该 patch 聚集，而不是只增加全局同步。
+- 慢变量改变事件率时，rank geometry 应保持稳定。
+
+v1 已经锁定的真实数据判据继续保留；v0.2 替换的是机制实现路线：先做 effective gain、线性稳定性和 finite-pulse response，再进入 rate field / LIF SNN，而不是直接把 HR/FHN 节点拼成 toy movie。
 
 ---
 
-## 2. 核心方程（最小可行形式）
+## 2. 核心方程（v2 最小可行形式）
 
+第一版不直接上 SNN。先用二维 E-I rate field 找近临界工作窗：
+
+```text
+tau_E * dr_E/dt = -r_E + F_E(W_EE * r_E - W_EI * r_I + I_E)
+tau_I * dr_I/dt = -r_I + F_I(W_IE * r_E - W_II * r_I + I_I)
 ```
-∂_t u(x, t) = f(u, v; θ(x)) + D∇² u + I_event(x, t) + η(x, t)
-∂_t v(x, t) = g(u, v)
+
+对均匀稳态线性化，定义局部离失稳边界的距离：
+
+```text
+F_a_eff(h; x) = integral f_a(h - phi) p(phi; phi_bar_a(x), sigma_phi,a(x)) dphi
+G_a(x) = dF_a_eff(h; x) / dh | h=h0(x)
+eta_lin(x) = - max_k Re(lambda(k; G_E(x), G_I(x), W_hat(k), tau_E, tau_I))
 ```
+
+其中 `eta_lin(x) >> 0` 是小扰动稳定区，`eta_lin(x) approx 0+` 是候选可激窗，`eta_lin(x) < 0` 是小扰动失稳区。`sigma_phi(x)` 不能直接等同于 `eta_lin(x)`；只有当前工作点下实际计算显示 gain 改变使 `eta_lin(x)` 下降，才能说低异质性让 patch 更接近临界。
 
 | 符号 | 朴素含义 |
 |---|---|
-| `u(x, t)` | 局部活动变量（点火 / 不点火的连续量） |
-| `v(x, t)` | 恢复变量（不点火、休息中） |
-| `θ(x)` | 空间非均匀的局部易激性——**模型预设输入**，反映真实但未知的病理结构 |
-| `D∇² u` | 局部扩散（场电势 / ephaptic / 短程电耦合） |
-| `I_event(x, t)` | 事件触发输入（外部 OR 内部冲动） |
-| `η(x, t)` | 随机扰动，决定每次事件从哪个 seed 起 |
+| `r_E, r_I` | 局部兴奋 / 抑制群体活动 |
+| `W_EE` | E→E 连接核；v2 主模型中是椭圆形各向异性核 |
+| `W_EI, W_IE, W_II` | 抑制相关连接；抑制核更宽，并保留全局刹车 |
+| `sigma_phi(x)` | threshold variance；病理 patch 内降低，表示局部低异质性 |
+| `F_eff, G` | 阈值分布进入群体输入-输出曲线后的有效响应和局部 gain |
+| `eta_lin(x)` | 由 gain、E/I 参数、输入、慢变量和连接核共同决定的线性稳定性读数 |
+| `xi(x,t)` | 噪声触发源，决定哪次事件从哪里成核 |
 
-**关键 framing**（v1.0 反 tautology 锁）：
+**关键 framing（v2 反调参锁）**：
 
-- `θ(x)` 是**模型输入**而非模型产出。我们不预测"θ(x) 长啥样"，只预测"**给定 θ(x) 非均匀，加上扩散物理与随机触发，必然产生哪些可观察的几何指纹**"
-- 模型**不解释** HFO 80–250 Hz 振荡 carrier 的来源（PV interneuron ripple / ephaptic / population spike envelope 都有可能——那是另一层物理）
-- 模型**只解释**通道点火的空间-时间次序
+- `sigma_phi(x)` 是具体机制；`eta_lin(x)` 是稳定性读数，不是另一个任意病理场。
+- 线性稳定性只回答小扰动地图，不证明有限幅事件。自限传播必须由 finite-pulse response map 验证。
+- `k=2` 和 raw identity bias 只能作描述性输出；主证据必须高于几何采样 controls。
+- 第一版只降低 threshold variance，不同时调 `J_EE`、`E_L`、adaptation、外部输入。
+- 各向异性轴、低异质性 patch、慢变量必须做独立扰动实验；每个扰动都要有失败模式。
+- 模型**只解释**通道点火的空间-时间次序和群体事件组织，**不解释** HFO carrier 的细胞层振荡来源。
 
-如果不写清楚 θ(x) 是输入：paper 评审会立刻打回 "你预设了高激场，然后预测高激场区域被反复采样——同义反复"。
+如果不写清楚这一点，模型会退化成“给一个高易激场，然后预测高易激场被点燃”的同义反复。
 
 ---
 
@@ -779,41 +800,65 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 **产出目录**：`results/topic4_sef_itp/phase3_ictal_adjacent/`
 
-### 6.5 Phase 4 —— 最小 2D FHN neural-field toy（**最后才做**）
+### 6.5 Phase 4 v2 —— SEF-HFO 最小模型闭环（取代 HR/FHN toy 主线）
 
-**目标**：只复现 Phase 1–3 数据已支持的现象，**不做大而全拟合**。
+**目标**：用最少机制复现真实数据的核心几何：held-out rank stability、split-half / odd-even 稳定、forward / reverse 反相关、full model 高于几何采样 controls、事件率可变但模板几何稳定。`k=2` 和 raw identity bias 是描述性输出，不是 primary success criterion。**不做 patient-specific fitting，不用 clinical SOZ 反向拟合参数，不模拟 HFO carrier。**
 
-**前置**：Phase 1 + Phase 2 至少 H6 + H1 + H3 PASS；Phase 3 至少 NULL（不是 FAIL）。
+**前置**：Topic 0 phantom-rank 修复已完成；真实数据 pipeline 可用于 synthetic data。Phase 1-3 的实证合同继续作为验收标准，但 v2 建模路线不再等待 HR/FHN route。
 
-**第一版模型只包含**：
+**Step 0a：effective gain + 线性稳定性分析**
 
-- 2D grid（或 cortical sheet 抽象）
-- 非均匀 θ(x)：**v1 toy 必须用 generic structured 非均匀场（例如随机高斯随机场 + 单一 hot zone），不是 patient-specific 拟合**。如果 θ(x) 从 Phase 1 单 subject 数据反推，模型立刻退回 BHPN 拟合机器同类问题。**patient-specific θ(x) 拟合若启动，必须单独立 PR 并通过 framework-level review**
-- 局部扩散 `D∇² u`
-- 单一节点类型：**FHN**（不加 Hindmarsh-Rose / Epileptor）
-- 随机 event trigger η(x, t)
-- 慢变量 `s_slow(t)` 控制 event probability
-- **不**模拟 HFO carrier 80–250 Hz 振荡（FHN 自然频率 ~10 Hz，**不强行匹配**——HFO carrier 是另一层物理）
+- 把 `sigma_phi(x)` 写进 `F_eff(h;x)`，计算当前工作点下的局部 gain。
+- 用二维 E-I rate field 求 `max_k Re(lambda(k))`。
+- 必须找到三类区域：小扰动稳定区、候选可激窗、小扰动失稳区。
+- 输出 gain map、phase diagram、`max_k Re(lambda(k))` heatmap、`k*` heatmap、candidate working point 和 boundary。
 
-**模型只需要复现**：
+**Step 0b：finite-pulse response map**
 
-- 稳定 endpoint（对应 H1）
-- source/sink reversal（对应 H2）
-- mark-independent-like template sampling（对应 H3）
-- rate 变化大于 geometry 变化（对应 H4）
-- 如果加入慢变 θ(x, t)：可产生 endpoint identity shift（对应 H5）
+- 在预注册 pulse family 上扫描有限幅刺激，分类为 extinction / local bump / self-limited propagation / runaway。
+- 定义 `A_event` 和 `A_runaway`。
+- 真正的间期候选窗必须满足 `A_event < infinity` 且 `A_runaway - A_event` 有正安全边界。
+- 输出完整 response surface，不能只挑一个好看的 pulse。
 
-**Phase 4 显式不做**：
+**Step 1：最小 2D rate field**
 
-- patient-specific fitting（→ future PR）
-- HR / Epileptor 多节点类型（v1 toy 只 FHN）
-- 5 dumb baselines 比较（→ 未来 PR-T4-2 等价物，仅当走到那一步）
-- HFO carrier 振荡机制
-- 跨 subject 参数共享
+- 在 Step 0a/0b 锁定的候选窗加入 OU / Gaussian noise。
+- 验收：无噪声无持续事件；加噪声后出现离散、自限、空间范围合理的群体事件；事件落在 self-limited propagation 区；事件率可调到真实数据同一量级。
 
-**产出目录**：`results/topic4_sef_itp/phase4_fhn_toy/`，含 figures + sanity JSON + plain-language README
+**Step 2：加入 E→E 各向异性 + controls**
 
-> **→ v1.0.8 banner amendment (top of file) 修订上面 3 项**：(1) prerequisite 放宽 (2) HR 主、FHN sensitivity (3) shaft 控制 + cluster 判据 + 3-proxy sensitivity。v1.0.7 prose 保留作 audit trail。
+- 把 `W_EE` 改成椭圆核，`ell_parallel > ell_perp`。
+- 主验收：held-out rank stability、split-half / odd-even stability、inter-template anti-correlation、finite-pulse self-limited propagation 均高于 controls。
+- 必跑 controls：isotropic connection + aligned shaft、anisotropic connection + random shaft、rotated shaft、jittered contacts、shuffled contact identity、multiple shaft orientations。
+- `k=2` 和 identity bias 数值范围只报告为 descriptive。
+
+**Step 3：加入局部低异质性 patch**
+
+- 第一版只降低 `sigma_phi(x)`，不同时调多个生物物理旋钮。
+- 验收：事件成核点向 patch 聚集；source / endpoint 与 patch 有统计关系；移动 patch 后 source density 随之移动；不强制 source 等于 clinical SOZ。
+
+**Step 4：搬到 LIF E-I SNN**
+
+- 只有 Step 0-3 通过后才启动。
+- 用 conductance-based LIF 验证 rate 层机制在 spiking 层仍成立；虚拟 SEEG 用突触电流 proxy + envelope。
+- synthetic data 必须走真实 PR-2 / PR-2.5 / endpoint pipeline。
+
+**Step 5：加入慢变量**
+
+- 第一版只用抽象 `q(t)` 调制 `eta(x,t)`。
+- 验收：事件率升高但 rank template 不大幅改变；forward / reverse 不需要强时间配对；`eta(x,t) < 0` 时能在仿真中进入 ictal-like recruitment。
+- `z_I(t)`、`g_K(t)`、`E_GABA` 漂移只作后续机制分解，不进第一版主分析。
+- ictal-like recruitment 只作为 synthetic feasibility bridge，不作为 clinical seizure onset claim。
+
+**Step 6：回到真实数据做预测验证**
+
+- 用一半事件估计传播轴和 endpoint，另一半验证稳定性。
+- endpoint / source 与 clinical SOZ、ictal onset、影像病灶、resection zone 只做 held-out 关系检验。
+- endpoint 不等于 clinical SOZ 不算模型失败；真正失败是 held-out 内部不稳定，或模型不能复现 identity bias / template stability。
+
+**产出目录**：`results/topic4_sef_hfo/{linear_stability,rate_field,anisotropy,low_heterogeneity_patch,lif_snn,slow_variable_bridge,synthetic_vs_real}/`，含 figures + cohort/stat JSON + figures/README.md。
+
+**历史关系**：`results/topic4_sef_itp/phase4_fhn_toy/` 和 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` 保留为 HR/FHN route 历史探索 / sensitivity，不再是主模型路线。详细 v2 plan 见 `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`。
 
 ---
 
@@ -821,12 +866,12 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ### 7.1 模型能解释的现象
 
-1. 为什么同一 subject 内存在稳定传播模板（→ θ(x) 非均匀 + 扩散物理）
-2. 为什么正反模板共享 source/sink 几何骨架（→ 同一空间轴的反向读取）
-3. 为什么模板选择在已测试尺度上近似随机（→ η(x, t) 决定每次 seed）
-4. 为什么 event rate 可受慢变量调制，而模板几何相对稳定（→ s_slow 调 `I_event` 不调 θ(x)）
-5. 为什么某些 endpoint-like 节点可能和 SOZ 进展 / 发作招募有关（→ θ(x, t) 慢变可产生 endpoint identity shift）
-6. 为什么局部异常场遇到长程 SC-rich 区域时可能 transition 到大范围发作（→ 长程 SC 跳线被纳入扩散网络后递归招募；与 Abbott 的抑制波前崩溃说**互补而非冲突**）
+1. 为什么同一 subject 内存在稳定传播模板（→ 固定各向异性传播轴 + 固定电极几何；但必须高于几何采样 controls）
+2. 为什么正反模板共享 source/sink 几何骨架（→ 同一条轴从两端随机成核，而非两套网络）
+3. 为什么 identity bias 高（→ 通道 rank 主要由电极在传播轴上的位置决定；raw 数值只作描述性输出）
+4. 为什么模板选择在已测试尺度上近似随机（→ 噪声决定每次从哪端点燃，短时间强配对不是必要机制）
+5. 为什么 event rate 可受慢变量调制，而模板几何相对稳定（→ 抽象慢变量调 `eta(x,t)`，不改连接轴）
+6. 为什么同一参数族在仿真中可能从自限传播进入持续招募（→ synthetic feasibility bridge，不是 clinical seizure onset claim）
 
 ### 7.2 模型暂时**不支持**的强说法（写死 out-of-scope）
 
@@ -834,8 +879,28 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 2. ❌ endpoint 一定在 SOZ 内
 3. ❌ endpoint 一定是 seizure onset channel
 4. ❌ source 是兴奋驱动，sink 是抑制反弹（**HFO 80–250 Hz 不分 E/I**，红线）
-5. ❌ 正反模板证明了双稳态 attractor（H3 仅声明 "compatible with mark-independent within tested precision"）
+5. ❌ 正反模板证明了双稳态 attractor 或强 ping-pong 机制（H3 仅声明 "compatible with mark-independent within tested precision"）
 6. ❌ 模板选择已经被证明完全独立（同上）
+
+### 7.3 文献 framing：具体机制多样，中观动力学收敛
+
+这批文献的作用不是“证明我们的 HFO 模型”，而是给 Topic 4 的建模地位划边界：钾离子、钠钾泵、氯离子 / GABA、胶质缓冲、抑制失效、突触短时可塑性、结构连接和局部网络异质性都可能参与癫痫；但在 HFO 群体事件这个尺度上，它们共同改变的是局部网络多容易被点燃、点燃后多快恢复、有限扰动是否会扩展成更大空间招募。
+
+因此 SEF-HFO 不把某一个细胞机制硬塞成“真实慢变量”。它只检验一个更抽象、更可证伪的问题：如果局部组织处在稳定但可激、接近临界但未失控的状态，并且连接有固定空间轴，那么噪声触发的间期 HFO 群体事件是否会留下稳定的通道先后顺序；当慢状态把系统推近边界时，事件率和招募是否可以增加，而传播几何不被重写。
+
+引用分层写法：
+
+- Jirsa 2014 / Chizhov 2018 / Wendling 2005 支撑“间期到发作可以被看成慢状态推动的动力学转变，而不是单一细胞机制的直接结果”。
+- Cressman 2009 / Wei 2014 / Ho and Truccolo 2016 支撑“离子、泵、胶质和抑制等不同机制可以收敛到网络稳定性和易激性的变化”。
+- Proix 2018 / Naze 2015 / Wang 2016/2017 支撑“空间场、连接结构和周边组织可招募性会塑造传播形态”。
+- Chang 2018 / Maturana 2020 / Lepeu 2024 支撑“恢复能力、临界接近和有限扰动响应是比静态稳定性更贴近发作易感性的描述”。
+- Zijlmans 2010/2011 / Weiss 2013 只支撑“HFO 是合理观测对象且与癫痫组织有关”，不能用来声称“间期 HFO 就是微型发作”。
+
+安全核心句：
+
+> We do not assume a single cellular mechanism linking interictal and ictal activity. Instead, we use a dynamical abstraction: diverse biophysical mechanisms may converge onto a shared change in local excitability, resilience, and finite-amplitude recruitment. Under this view, interictal group-HFO events are modeled as isolated excursions of a pathological excitable field, whereas ictal-like recruitment corresponds to slow-state-gated clustering or spatial expansion of similar elementary events.
+
+详细文献分层和引用位置见 `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md` §6。
 
 ---
 
@@ -920,24 +985,28 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - [x] Tier 1+ sub-cohort（H2 PCA sensitivity）单独 criterion lock
 - [x] Phase 0 phantom-rank 修复硬前置，禁止跳过
 - [x] HFO carrier 振荡机制不在本 framework 范围（红线 §8.1）
-- [x] θ(x) 是模型输入而非产出，避免 tautology（红线 §8.4）
-- [x] Phase 4 最小 toy 只用 FHN + generic structured θ(x)（不 patient-fit），不加 HR / Epileptor
+- [x] `sigma_phi(x)` 必须通过 `F_eff -> G -> lambda -> eta_lin` 闭合，禁止直接写 `sigma_phi down => eta down`
+- [x] Phase 4 v0.2 主路线 = effective gain → linear dispersion map → finite-pulse response map → rate field → controls → LIF SNN → 抽象慢变量桥接；HR/FHN route 降级历史 / sensitivity
+- [x] `k=2` 与 raw identity bias 降级为 descriptive；主验收必须包含 held-out stability + controls fail
+- [x] ictal-like recruitment 只作 synthetic feasibility bridge，不作 clinical seizure onset claim
 - [x] 与 PR-T3-1 数据驱动 SOZ 的双标签合同写明
 - [x] SBA framework 取代 / 保留范围明确（§9.1）
 - [x] Topic 1 §2 + Topic 3 §2 实际加入 SEF-ITP 链接（v1.0.2 修订实际落字）
-- [x] Out of scope 包括 Paper 2 / Paper 3 / E/I / patient-specific fitting
+- [x] Out of scope 包括 Topic 2 事件间周期 / HFO carrier 细胞生物物理 / patient-specific fitting
 - [x] CLAUDE.md §8 大白话风格全文遵循（codename 仅作括号补注）
 
 ---
 
 ## 12. 一句话承诺（结尾）
 
-我们把 Topic 4 的模型层从 **"塞 Hebbian 矩阵让 Kuramoto 演化得到预设吸引子"** 换成 **"假设一个空间组织化的病理易激区，看它被扩散物理反复采样后必然留下的几何指纹"**。先**免费**在数据上查 6 条指纹（H1–H6：空间紧凑 / 反向几何 / 独立采样 / 慢漂解耦 / 发作邻近漂移 / 参与场分隔），全部 PASS 才上模型代码（Phase 4 最小 FHN toy）。每条假设失败都有明确预先注册的后续动作。Phantom-rank bug 修复（Topic 0 §5）是所有 Phase 的硬前置，没修复任何数字都不可信。
+我们把 Topic 4 的模型层从 **"塞 Hebbian 矩阵让 Kuramoto 演化得到预设吸引子"**，再推进到 **"低异质性 + 各向异性连接 + 近临界 E-I 易激场"**。第一步不是上复杂 SNN，而是先把低异质性写进群体输入-输出曲线，实际计算它是否改变局部 gain 和线性稳定性；线性图只给候选工作区，有限幅脉冲图才证明“能点燃但不失控”。随后才用二维 rate field 检查稳定正反传播几何，并且必须跑电极几何和采样方式的 negative controls。SNN 和慢变量只是后续验证：前者验证 spiking 层能否保留同一几何，后者先用抽象慢变量验证“事件率变、传播几何不变”。所有 synthetic data 必须走真实模板 pipeline；clinical SOZ 只作 held-out 关系检验，不作拟合标签。
 
 ---
 
 ## 13. 历史文档索引
 
+- `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md` —— **CURRENT v2 plan**，SEF-HFO 主模型路线（线性稳定性 → rate field → LIF SNN → 慢变量桥接）
+- `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
 - `docs/archive/topic4/layered_model_framework.md` —— 更早的分层模型框架（已被 SBA 取代）；保留为历史
