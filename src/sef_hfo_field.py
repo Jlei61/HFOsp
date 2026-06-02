@@ -63,12 +63,13 @@ def make_Feff_lookup(p, h_min=-30.0, h_max=30.0, npts=6001):
 def F_eff_grid(h, lookup):
     return np.interp(h, lookup[0], lookup[1])
 
-def integrate_field(p, op, I_E, I_I, stim_fn, dt, t_max):
+def integrate_field(p, op, I_E, I_I, stim_fn, dt, t_max, dE0=None):
     """2-D E-I field. Each connection: spatial conv (kernel) -> Erlang-delay+synaptic
     temporal chain (extra state grids) -> postsynaptic drive. Mirrors build_dispersion_matrix."""
     n = p.n; rE = np.full((n, n), op["r_E0"]); rI = np.full((n, n), op["r_I0"])
     a = np.full((n, n), op["r_E0"]); K = build_kernels(p); lut = make_Feff_lookup(p)
     rate_of = {"E": rE, "I": rI}
+    if dE0 is not None: rE = rE + dE0
     specs = _connection_specs(p)
     chain = {tag: [np.full((n, n), 0.0) for _ in _chain_rates(p, ts)]   # init at 0 perturbation level
              for (_, _, _, _, _, ts, tag) in specs}
@@ -93,3 +94,6 @@ def integrate_field(p, op, I_E, I_I, stim_fn, dt, t_max):
         a = a + dt/p.tau_a * (-a + rE); rate_of["E"], rate_of["I"] = rE, rI
         rec[t] = rE
     return rec
+
+def integrate_field_with_ic(p, op, I_E, I_I, stim_fn, dt, t_max, dE0):
+    return integrate_field(p, op, I_E, I_I, stim_fn, dt, t_max, dE0=dE0)
