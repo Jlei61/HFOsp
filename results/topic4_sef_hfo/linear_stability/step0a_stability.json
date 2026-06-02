@@ -1,0 +1,133 @@
+{
+  "provenance": {
+    "source": "scaffold",
+    "locked_before_sweep": false,
+    "derived_from": "PLACEHOLDER background-rate band; replace with data-fixed band",
+    "locked_at": null,
+    "cohort": null,
+    "hash": null
+  },
+  "sigma_phi_baseline": 1.0,
+  "sigma_phi_patch": 0.5,
+  "per_point": [
+    {
+      "I_E": 0.2,
+      "I_I": 0.1,
+      "converged": true,
+      "bistable": false,
+      "eta_lin": 0.27244370566499126,
+      "phase": "stable",
+      "k_star": 0.0,
+      "omega_star": 0.26682894924047
+    },
+    {
+      "I_E": 0.3,
+      "I_I": 0.1,
+      "converged": true,
+      "bistable": false,
+      "eta_lin": 0.2757819208830567,
+      "phase": "stable",
+      "k_star": 0.0,
+      "omega_star": 0.2664064386961758
+    },
+    {
+      "I_E": 0.4,
+      "I_I": 0.15,
+      "converged": true,
+      "bistable": false,
+      "eta_lin": 0.2809160987955564,
+      "phase": "stable",
+      "k_star": 0.0,
+      "omega_star": 0.26494094840493776
+    },
+    {
+      "I_E": 0.5,
+      "I_I": 0.2,
+      "converged": true,
+      "bistable": false,
+      "eta_lin": 0.2874925718236502,
+      "phase": "stable",
+      "k_star": 0.0,
+      "omega_star": 0.26333244030394265
+    },
+    {
+      "I_E": 0.6,
+      "I_I": 0.25,
+      "converged": true,
+      "bistable": false,
+      "eta_lin": 0.29537736197932635,
+      "phase": "stable",
+      "k_star": 0.0,
+      "omega_star": 0.26154469398634533
+    }
+  ],
+  "erlang_n_convergence": {
+    "values": [
+      [
+        1,
+        -0.280150521464238
+      ],
+      [
+        2,
+        -0.2809160987955564
+      ],
+      [
+        4,
+        -0.2818196378735351
+      ],
+      [
+        8,
+        -0.2823758914188865
+      ]
+    ],
+    "deltas": [
+      0.0007655773313183789,
+      0.0009035390779786878,
+      0.0005562535453514372
+    ],
+    "converged": true,
+    "recommended_n": 2
+  },
+  "low_heterogeneity_screen": {
+    "fraction_closer": 1.0,
+    "n_admissible": 5,
+    "per_point": [
+      {
+        "I_E": 0.2,
+        "I_I": 0.1,
+        "eta_baseline": 0.27244370566499126,
+        "eta_patch": 0.1752992458081574,
+        "closer_to_critical": true
+      },
+      {
+        "I_E": 0.3,
+        "I_I": 0.1,
+        "eta_baseline": 0.2757819208830567,
+        "eta_patch": 0.18659702409709167,
+        "closer_to_critical": true
+      },
+      {
+        "I_E": 0.4,
+        "I_I": 0.15,
+        "eta_baseline": 0.2809160987955564,
+        "eta_patch": 0.20409886098746582,
+        "closer_to_critical": true
+      },
+      {
+        "I_E": 0.5,
+        "I_I": 0.2,
+        "eta_baseline": 0.2874925718236502,
+        "eta_patch": 0.22675260451785126,
+        "closer_to_critical": true
+      },
+      {
+        "I_E": 0.6,
+        "I_I": 0.25,
+        "eta_baseline": 0.29537736197932635,
+        "eta_patch": 0.2531497878299863,
+        "closer_to_critical": true
+      }
+    ]
+  },
+  "candidate_operating_points": []
+}
