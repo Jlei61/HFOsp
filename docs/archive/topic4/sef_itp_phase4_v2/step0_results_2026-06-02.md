@@ -18,7 +18,7 @@
 
 ## 揭示了什么（本次 scaffold 跑）
 
-**一句话：机器搭好了、测试齐了、端到端跑通了；但在占位参数下，系统是深度稳定的，而且——更关键——它最容易先失稳的空间花样是"全局一起动（k=0）"，不是"沿一条轴的有限波长行波"。**
+**一句话：机器搭好了、测试齐了、端到端跑通了；在占位参数下系统深度稳定、主模在 k=0（全局），所以 0a/0b 全退化。但单独的能力体检证明这套机器有能力算出框架要求的三区结构和有限 k 空间轴——退化是 scaffold 参数坐在稳定角落，不是机器算不出。唯一真正悬而未决的是"会移动的有限 k 行波（finite-k Hopf）可不可达"（见下"能力体检"）。**
 
 具体数字（都是 scaffold 占位参数下的事实，不是正式科学结论）：
 
@@ -26,23 +26,32 @@
 - **候选可激工作点**：**0 个**。数据锁定的 5 个工作点"离边界距离"都在 0.27–0.30，全落在深度稳定区（相图整片是稳定的蓝色，没有黄色候选带、没有红色失稳区）。
 - **0b 有限脉冲**：所有工作点、所有脉冲（半径×时长×幅度 0.2–3.0）的响应**全部是 extinction（点不着就熄灭）**；`fraction_with_window = 0`，恢复关/开都一样；半 dt、小 L 的敏感性检查也都是 0 → 这个"退化"结论在数值上是稳定的，不是 dt 或边界假象。因为没有任何"自限传播/全局同步/失控"事件，例子快照图本次没生成（4 张图里出了 3 张）。
 
-**额外做的"能力体检"（advisor 在 Step 0a 关口提醒后补的，只动了画图的扫描范围和被允许调的 `sigma_phi`/连接强度探针，没动锁定参数）**：
+**额外做的"能力体检"（advisor 在 Step 0a 关口提醒、final review 收紧后补的，只动了被允许调的连接核 / 抑制强度探针，没动锁定参数；可复现产物 `results/topic4_sef_hfo/linear_stability/capability_probe.json`，脚本 `scripts/run_sef_hfo_step0a_capability_probe.py`）**：
 
-- 把背景驱动一路扫宽、把异质性一路降低，"离边界距离"始终没跨 0，且最容易先失稳的空间花样**始终是 k=0（全局同步）**，不是有限波长。
-- 即便专门工程化一组"短程兴奋 + 长程强抑制"（Mexican-hat）的参数，**确实能把系统推过失稳边界（`eta_lin < 0`）**——也就是说"稳定/候选/失稳"三区结构是这套机器算得出来的——**但失稳出来的最不稳模仍然是 k=0（全局），不是沿轴的有限 k**。
+体检扫了 3 个连接 regime（每个 15×8=120 个背景工作点）：
 
-**这意味着什么（诚实表述，不修饰）**：SEF-HFO 的核心论点（各向异性 E→E 连接挑出一条有限波长的传播轴，间期事件沿这条轴传播又自限）在**当前这套二维 rate-field 色散公式下，用占位参数及被允许调的旋钮，复现不出来**——最容易先长起来的是"全局一起动"，而不是"沿轴的行波"。这是一个值得在进 Step 1+ 之前与设计者讨论的**结构性发现**，而不是简单的"参数没调好"：连工程化的 Mexican-hat 都只给出 k=0 失稳。换句话说，要让这套 rate-field 真的选出有限 k 传播轴，可能需要重新检查连接核结构 / 抑制时间结构 / 是否缺了某个产生行波的成分，而不是只换数值。
+| regime | 收敛点 | `eta_lin<0`（失稳区可达？） | 有限 k 主模 | 有限 k 且失稳 | 有限 k 且行波(Hopf, ω*>0) |
+|---|---|---|---|---|---|
+| `scaffold_default`（锁定默认） | 120 | 0 | 0 | 0 | 0 |
+| `moderate_hat`（中等短兴奋/宽抑制） | 120 | 9 | 1 | 0 | 0 |
+| `aggressive_hat`（强短兴奋/宽强抑制） | 120 | 40 | 42 | **40** | **0** |
+
+- **scaffold 默认参数**：深度稳定（无 `eta_lin<0`）、主模全在 k=0。这是主结论。
+- **但这套机器结构上做得到三区相结构 + 有限 k 空间轴**：把连接推到"短程兴奋 + 长程强抑制"（Mexican-hat），`aggressive_hat` 有 40 个工作点出现**有限波长（沿轴）的失稳主模**（例：`|k*|≈0.20, max Re≈0.279 @(I_E=1.4,I_I=0.25)`，静态 Turing）。所以"各向异性连接挑出有限 k 传播轴"**不是机器算不出来**——之前一版写"始终 k=0、连 Mexican-hat 都只给 k=0"是探针太窄导致的过度断言，现已更正。
+- **真正还没拿到的是"行波"那一档**：本次扫到的有限 k 失稳全是**静态 Turing 花样（ω*=0）**，没有一个是**有限 k 行波（finite-k Hopf, ω*>0）**——而 SEF-HFO 要的是会**移动**的自限瞬态（对应 finite-k Hopf）。本扫描是有限的（3 regime、固定 k 网格），"finite-k Hopf 在这套 rate-field + 延迟/恢复结构里到底可不可达"**没有定论**（本次 0 个，但不能据此判死）。
+
+**这意味着什么（诚实表述，不修饰）**：(1) 机器搭好、测齐、跑通，且**经体检证明有能力**产出框架要求的三区相结构与有限 k 空间模；(2) **scaffold 默认参数坐在深度稳定、k=0 的角落**，所以本次 0a/0b 全退化是参数位置问题，不是机器算不出结构；(3) **唯一真正悬而未决的科学问题**是"会移动的有限 k 行波（finite-k Hopf）可不可达"——这要和数据锚定一起、并很可能要认真看延迟/恢复时间结构（它能把静态 Turing 变成行波）才能回答，而不是只换数值。
 
 ## go/no-go 闸门
 
 - **smoke tier（结构性检查，scaffold 跑就该过）：通过**。`erlang_n_convergence.converged = True`（延迟级数收敛，色散可信）；低异质性筛选输出是合法比例（0–1）；0b 的 `fraction_with_window` 在半 dt、小 L 下一致（数值稳定）。
 - **formal tier（解锁 Step 1 的正式闸门）：SKIP（scaffold 跑，按设计不解锁）**。formal tier 要求 `provenance.source == "data_locked"` + 数据锚定单位；当前是 `"scaffold"`。即便跑了 formal，本次 `fraction_with_window = 0` 也会判定 **Step 1 不启动**——计划早就锁定"`fraction_with_window == 0` 也是一个发现，不是失败"。
 
-**结论**：Step 0 的机器（模块 + 测试 + 两个 runner + 闸门）已就绪、全测试通过；scaffold 参数下没有自限工作窗，且最不稳模是全局而非有限 k。**Step 1 保持锁定**，等：(a) 数据锚定的工作点族 + 单位（Brunel Table 1 突触/膜时间常数、实测 HFO 群体事件时长定 `tau_a`、Hz 量纲）；(b) 对上面 k=0 结构性发现的处理决策。
+**结论**：Step 0 的机器（模块 + 测试 + 两个 runner + 闸门）已就绪、全测试通过；scaffold 默认参数下深度稳定、无自限工作窗、主模在 k=0（但能力体检已证明这套机器能算出三区结构 + 有限 k 空间模，见上）。**Step 1 保持锁定**，等：(a) 数据锚定的工作点族 + 单位（Brunel Table 1 突触/膜时间常数、实测 HFO 群体事件时长定 `tau_a`、Hz 量纲）；(b) 对"会移动的有限 k 行波（finite-k Hopf）在这套 rate-field 里可不可达"这一悬而未决问题的处理（很可能要看延迟/恢复时间结构）。
 
 ## 与 Brunel 2026 的关系
 
-方法（自洽 2×2 色散、外驱相图、各向异性 E→E 选轴、`|I^E|+|I^I|` LFP 代理）与 Bachschmid-Romano/Hatsopoulos/Brunel 2026 一致；区别是他们的事件是近全局 Turing–Hopf 行波，我们要的是局部自限瞬态——所以 0b 的 recovery off/on 正好对应"亚临界近 Hopf"与"恢复变量局部脉冲"两条机制。**但本次 scaffold 体检显示我们的最不稳模落在 k=0，更接近他们的"近全局"那一端**；要拿到"局部有限 k 自限瞬态"还差关键成分——这正是与数据锚定一起要解决的下一步。
+方法（自洽 2×2 色散、外驱相图、各向异性 E→E 选轴、`|I^E|+|I^I|` LFP 代理）与 Bachschmid-Romano/Hatsopoulos/Brunel 2026 一致；区别是他们的事件是近全局 Turing–Hopf 行波，我们要的是局部自限瞬态——所以 0b 的 recovery off/on 正好对应"亚临界近 Hopf"与"恢复变量局部脉冲"两条机制。能力体检显示：scaffold 默认坐在 k=0 角落，但把连接推到 Mexican-hat 能拿到**有限 k 的静态 Turing 失稳**；**还没拿到的恰恰是他们模型核心的那一档——有限 k 的 Hopf（行波）**。换句话说与 Brunel 的差距不在"能不能有限 k"，而在"有限 k 能不能动起来"，这正是与数据锚定一起要解决的下一步。
 
 ## Step 0 构建审计链（实现中发现并修复的计划代码缺陷）
 
@@ -51,6 +60,11 @@
 1. **transcendental 交叉校验（Task 5）**：计划的"角点变号"复平面盒扫描在实轴上有盲区（`Im(D)≡0` 使底排判据永不触发），返回 `-inf` → 改为同一盒内多起点复 Newton（`fsolve`）。仍是独立校验（D 由解析式独立构造）；4 工作点×4 k 切片上与矩阵特征值吻合 <0.0004。
 2. **场线性化↔特征值一致性（Task 9）**：计划把场的 rE 模衰减率与矩阵"最大 Re 特征值"比——错配，因为 rE-only 种子激发的是模式混合（此工作点最大 Re 模在 rE 上投影极小）→ 改为"同一可观测量"的对照：场 rE 模 vs 矩阵自身预测的 rE 模（`expm(M t)@ic`）。更强的一致性检验，|diff| 0.004–0.007。
 3. **分类器测试辅助 `_act`（Task 10）**：分类器本身正确，但计划的 `_act` 造数据辅助无法实现自己的两个用例（width 下限为 1 → frac=0 不熄灭；块向右长 → 静止闪光的质心漂移）→ 重写为 frac=0 出空帧 + 块以 cx 为中心。
-4. **runner 缺 `sys.path` bootstrap（0a/0b）**：计划逐字 runner 漏了本仓库所有 `scripts/*.py` 都有的 `sys.path.insert(0, parents[1])`，导致 `python scripts/X.py` 报 `No module named 'src'` → 按仓库惯例补上。
+4. **runner 缺 `sys.path` bootstrap（0a/0b）**：计划逐字 runner 漏了本仓库 `scripts/` 既有 runner 的惯例 `sys.path.insert(0, parents[1])`（如 `scripts/run_rank_displacement.py`），导致 `python scripts/X.py` 报 `No module named 'src'` → 按仓库惯例补上。
+
+## 留给 formal run 的已知问题（final review 标记，不影响本次 scaffold 结论）
+
+- **`safety_margin` 在"有自限窗但量程内无 runaway"时被低估**（`src/sef_hfo_pulse.py` + `scripts/run_sef_hfo_step0b_pulse.py` 的 `scan_point`）：此时 `safety_margin = A_runaway(=inf) − A_self_limited = inf`，而 `np.isfinite(safety_margin)` 把这个"最大安全"的窗判成 `has_window=False` → **漏计**。本次全 extinction 用不到，formal run 前要修（例如把 `A_runaway=inf` 视为"余量无上限即安全"）。
+- **单位锚定不是独立闸门**（`tests/test_sef_hfo_step0_gate.py` formal tier）：计划 review #5 要求"单位锚定 gate formal run"，但当前 formal test 只查 `source=="data_locked"` / `locked_before_sweep` / `hash` / 窗>0，没有独立的单位字段与断言（隐式并进 `data_locked` 标志）。formal run 前补一个显式单位锚定检查。
 
 （内部归档代号：Step 0a/0b、delayed dispersion、erlang_n、eta_lin、operating-point family、fraction_closer、finite-pulse、A_event/A_self_limited/A_runaway/safety_margin、global_synchronous、recovery off/on、k_star、Mexican-hat、provenance scaffold vs data_locked、Brunel 2026）
