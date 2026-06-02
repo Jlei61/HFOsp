@@ -1,5 +1,7 @@
 # tests/test_sef_hfo_stability.py
+import pytest
 import numpy as np
+from dataclasses import replace
 from src.sef_hfo_stability import F_eff, gain, _f
 
 def test_Feff_reduces_to_single_unit_when_sigma_zero():
@@ -73,3 +75,19 @@ def test_transcendental_cross_check_one_slice():
     m_matrix = float(np.linalg.eigvals(build_dispersion_matrix(p, op, k0, 0.0)).real.max())
     m_exact = transcendental_max_re(p, op, k0, re_lo=-3.0, re_hi=0.5, im_hi=8.0)
     assert abs(m_matrix - m_exact) < 0.05
+
+from src.sef_hfo_stability import _assert_only_sigma_phi_differs, screen_low_heterogeneity_effect
+
+def test_no_rescue_guard():
+    p = SEFParams()
+    with pytest.raises(ValueError):
+        _assert_only_sigma_phi_differs(p, replace(p, sigma_phi=0.5, phi_bar=0.3))
+    _assert_only_sigma_phi_differs(p, replace(p, sigma_phi=0.5))   # ok
+
+def test_screen_reports_fraction_over_whole_family():
+    p = SEFParams(); fam = [(0.3, 0.1), (0.4, 0.15), (0.5, 0.2)]; k = np.linspace(-2, 2, 17)
+    out = screen_low_heterogeneity_effect(p, fam, 0.5, k)
+    assert out["n_admissible"] == len(fam) == len(out["per_point"])
+    assert abs(out["fraction_closer"] - np.mean([d["closer_to_critical"] for d in out["per_point"]])) < 1e-12
+    with pytest.raises(ValueError):
+        screen_low_heterogeneity_effect(p, fam, 2.0, k)           # patch must LOWER sigma_phi

@@ -170,3 +170,24 @@ def leading_mode(p, op, k_grid):
         if ev.real[j] > best[0]:
             best = (float(ev.real[j]), float(kpar), float(abs(ev.imag[j])))
     return {"max_re": best[0], "k_star": best[1], "omega_star": best[2]}
+
+def _assert_only_sigma_phi_differs(p_base, p_patch):
+    for fld in fields(p_base):
+        if fld.name == "sigma_phi": continue
+        if getattr(p_base, fld.name) != getattr(p_patch, fld.name):
+            raise ValueError(f"forbidden rescue: '{fld.name}' changed alongside sigma_phi")
+
+def screen_low_heterogeneity_effect(p_base, admissible_operating_points, sigma_phi_patch, k_grid):
+    if sigma_phi_patch >= p_base.sigma_phi:
+        raise ValueError("patch must LOWER sigma_phi")
+    p_patch = replace(p_base, sigma_phi=sigma_phi_patch)
+    _assert_only_sigma_phi_differs(p_base, p_patch)
+    per = []
+    for I_E, I_I in admissible_operating_points:
+        ob = self_consistent_operating_point(p_base, I_E, I_I)
+        opp = self_consistent_operating_point(p_patch, I_E, I_I)
+        eb = eta_lin(p_base, ob, k_grid); ep = eta_lin(p_patch, opp, k_grid)
+        per.append({"I_E": I_E, "I_I": I_I, "eta_baseline": eb, "eta_patch": ep,
+                    "closer_to_critical": bool(ep < eb)})
+    return {"fraction_closer": float(np.mean([d["closer_to_critical"] for d in per])),
+            "n_admissible": len(per), "per_point": per}
