@@ -53,3 +53,23 @@ def test_stronger_EE_less_stable_at_fixed_operating_point():
     op = self_consistent_operating_point(SEFParams(), 0.4, 0.15)
     k = np.linspace(-2, 2, 25)
     assert eta_lin(SEFParams(J_EE=1.5), op, k) < eta_lin(SEFParams(J_EE=0.5), op, k)
+
+from src.sef_hfo_stability import erlang_n_convergence, transcendental_max_re
+
+def test_n_convergence_at_leading_mode():
+    # leading-mode growth rate must converge as Erlang n increases (advisor gate:
+    # distributed delay over-stabilizes; check convergence AT the leading mode).
+    p = SEFParams(); op = self_consistent_operating_point(p, 0.4, 0.15)
+    k = np.linspace(-2, 2, 25)
+    conv = erlang_n_convergence(p, op, k, n_values=(1, 2, 4, 8))
+    assert conv["converged"]                       # |Δ max_re| between top n's below tol
+    assert conv["recommended_n"] <= 8
+
+def test_transcendental_cross_check_one_slice():
+    # bounded complex-box scan of the EXACT delayed dispersion D(lambda,k)=0 must agree
+    # with the augmented-matrix max Re lambda on one coarse slice (catches algebra errors).
+    p = SEFParams(erlang_n=16); op = self_consistent_operating_point(p, 0.4, 0.15)
+    k0 = 0.5
+    m_matrix = float(np.linalg.eigvals(build_dispersion_matrix(p, op, k0, 0.0)).real.max())
+    m_exact = transcendental_max_re(p, op, k0, re_lo=-3.0, re_hi=0.5, im_hi=8.0)
+    assert abs(m_matrix - m_exact) < 0.05

@@ -110,6 +110,57 @@ def max_growth_rate(p, op, k_grid):
 def eta_lin(p, op, k_grid):
     return -max_growth_rate(p, op, k_grid)
 
+def erlang_n_convergence(p, op, k_grid, n_values=(1, 2, 4, 8), tol=1e-3):
+    """Leading-mode growth rate vs Erlang n. Returns smallest n past which it stops moving."""
+    vals = [(n, max_growth_rate(replace(p, erlang_n=n), op, k_grid)) for n in n_values]
+    deltas = [abs(vals[i][1] - vals[i - 1][1]) for i in range(1, len(vals))]
+    converged = bool(deltas and deltas[-1] < tol)
+    rec = next((n for (n, _), d in zip(vals[1:], deltas) if d < tol), n_values[-1])
+    return {"values": vals, "deltas": deltas, "converged": converged, "recommended_n": rec}
+
+def _char_det(lam, p, op, kpar, kperp):
+    """EXACT delayed dispersion determinant D(lambda,k) with e^{-lambda d}/(1+lambda tau_syn)."""
+    G = {"E": gain(op["h_E0"], p.phi_bar, p.sigma_phi, p.beta),
+         "I": gain(op["h_I0"], p.phi_bar, p.sigma_phi, p.beta)}
+    def H(tau_syn):
+        return np.exp(-lam * p.delay_d) / (1.0 + lam * tau_syn)
+    WEE = p.J_EE * gaussian_hat(kpar, kperp, p.ell_par, p.ell_perp)
+    WEI = p.J_EI * _inhib_hat(p, kpar, kperp)
+    WIE = p.J_IE * gaussian_hat(kpar, kperp, p.sigma_IE, p.sigma_IE)
+    WII = p.J_II * gaussian_hat(kpar, kperp, p.sigma_II, p.sigma_II)
+    a = (1 + p.tau_E * lam) - G["E"] * WEE * H(p.tau_AMPA)
+    b = G["E"] * WEI * H(p.tau_GABA)
+    c = -G["I"] * WIE * H(p.tau_AMPA)
+    d = (1 + p.tau_I * lam) + G["I"] * WII * H(p.tau_GABA)
+    return a * d - b * c
+
+def transcendental_max_re(p, op, k0, re_lo, re_hi, im_hi, n_re=24, n_im=24):
+    """Bounded rightmost-root estimate of the EXACT delayed dispersion D(lambda,k0)=0.
+    Multi-start complex Newton (fsolve) seeded on a grid over [re_lo,re_hi] x [0,im_hi];
+    keep only converged in-box roots with small residual; return the largest Re(lambda).
+    Roots are conjugate-symmetric (real params => D(conj)=conj(D)), so scanning Im>=0
+    captures the rightmost root. NOTE: this replaces the plan's corner-sign-change box
+    scan, which had a real-axis blind spot -- its root-in-cell test min(Im)<0<max(Im)
+    can never fire on the bottom row (Im(D)=0 on the real axis), so it missed roots
+    within one Im-grid step of the axis and returned -inf. See step0_results writeup."""
+    res = np.linspace(re_lo, re_hi, n_re); ims = np.linspace(0.0, im_hi, n_im)
+    def _fr(v):
+        d = _char_det(complex(v[0], v[1]), p, op, k0, 0.0)
+        return [d.real, d.imag]
+    best = -np.inf
+    for r0 in res:
+        for i0 in ims:
+            sol, info, ier, _ = fsolve(_fr, [r0, i0], full_output=True)
+            if ier != 1:
+                continue
+            re, im = float(sol[0]), float(sol[1])
+            if not (re_lo - 1e-6 <= re <= re_hi + 1e-6 and abs(im) <= im_hi + 1e-6):
+                continue
+            if abs(complex(*_fr(sol))) > 1e-7:
+                continue
+            best = max(best, re)
+    return best
+
 def leading_mode(p, op, k_grid):
     """Return (k*, omega*, max Re lambda) for the dominant mode (for k*/frequency reporting)."""
     best = (-np.inf, 0.0, 0.0)
