@@ -1,6 +1,6 @@
 # tests/test_sef_hfo_pulse.py
 import numpy as np
-from src.sef_hfo_pulse import classify_response
+from src.sef_hfo_pulse import classify_response, amplitude_thresholds
 
 def _act(extents, centroids, n=16):
     """Build (T,n,n) E-activity with prescribed active-fraction and centroid-x per frame.
@@ -34,3 +34,19 @@ def test_classifier_five_regimes():
     assert classify_response(self_lim,   **kw) == "self_limited_propagation"
     assert classify_response(runaway,    **kw) == "runaway"
     assert classify_response(flash,      **kw) == "global_synchronous"   # NOT propagation
+
+
+def test_adaptive_amplitude_thresholds_separates_self_limited():
+    # gate quantity is A_self_limited (NOT A_event): local_bump / global_synchronous
+    # must NOT count toward the safety margin. Here: extinction<0.8; local_bump[0.8,1.0);
+    # self-limited[1.0,2.0); runaway>=2.0.
+    def fake(A):
+        if A < 0.8: return "extinction"
+        if A < 1.0: return "local_bump"
+        if A < 2.0: return "self_limited_propagation"
+        return "runaway"
+    out = amplitude_thresholds(fake, a_lo=0.2, a_hi=3.0, n_coarse=12, n_refine=6)
+    assert abs(out["A_self_limited"] - 1.0) < 0.15
+    assert abs(out["A_runaway"] - 2.0) < 0.15
+    assert out["A_event"] < out["A_self_limited"]            # local_bump detected earlier, separate
+    assert abs(out["safety_margin"] - (out["A_runaway"] - out["A_self_limited"])) < 1e-9
