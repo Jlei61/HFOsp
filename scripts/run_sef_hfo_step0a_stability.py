@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+import sys; sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root on path (run as `python scripts/X.py`)
 from src.sef_hfo_field import SEFParams
 from src.sef_hfo_stability import (self_consistent_operating_point, eta_lin, leading_mode, gain,
                                    build_dispersion_matrix, erlang_n_convergence,
