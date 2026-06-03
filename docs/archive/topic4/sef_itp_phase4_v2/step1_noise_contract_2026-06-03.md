@@ -268,6 +268,12 @@ B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（
 
 **onset-front 方向测度（采用 SNN 原样）**：方向不用整事件形状/整帧聚合（已废，grid-contaminated），改用 SNN 验证过的 **onset-front**——踢后**最早 ~8ms（饱和前）**点亮像素的主轴，**逐事件**（不跨事件聚合）。先在 0d 确定性脉冲偏轴 θ=30/60 标定，再上 drive-0.6 噪声事件，带 θ 旋转 + isotropic 对照。**继承 SNN 的诚实 caveat**：isotropic 对照是近-fizzle（弱无向招募），精确表述 = "各向异性 E→E reach 是强传播 AND 定向前沿两者的**必要条件**"，**不**声称"从强各向同性波里干净读出方向"。
 
+**drive-grid 结果（2026-06-04）—— 预登记假设 NOT SUPPORTED：relocation 不让窗变宽，反而暴露 rate↔spiking 在 drive 轴上的不同构。**
+- **rate-field loop gain（G_E·C_EE·W_EE）随 drive 单调上升、全程亚临界 (<1)**：0.001(d0.5)→**0.123(d0.6)**→0.404(d0.7)→0.538(d0.8)→0.581(d1.0)。即 rate field 在所有 drive 都**稳定无 Hopf**（白噪声-Siegert 近似漏掉了 SNN 在 d1.0 的 Hopf）。
+- **drive=0.6 离散窗（3 seeds, τ=100）**：σ=0/0.5 extinction → σ=1.0 **fragile discrete (1/3 seed, rate 0.6/s)** → σ≥1.5 全 sustained。**比 drive=1.0 的 σ≈1.8 窄峰更窄更脆**，不是更宽。（σ=0 对照在 0.6 仍 extinction ✓。）
+- **结论**：**rate field 在任何 drive 都只有窄近阈离散窗，relocation 到 0.6 不达"≥2 相邻 σ ≥60%"宽窗判据（更差）。** 根因 = rate field 不复现 SNN 的 drive 结构（SNN：0.6 quiet-excitable / 1.0 Hopf；rate field：gain 随 drive 单调升、全程亚临界无 Hopf）。**白噪声-Siegert rate field 无法忠实坐在 SNN 的间期工作点**——这是 rate↔spiking 的真实不同构（drive 轴），不是参数没调好。
+- **含义（待 advisor + user 定）**：Step-1 的"噪声→宽稳健离散事件 train"在 rate field 里达不到（任何 drive）；忠实底物是 **spiking GT**（已在 d0.6 给出 kick→慢自限定向传播 + onset-front 方向 PASS + isotropic 对照，但 spiking 也还没做"噪声自发离散 event-train/IEI"那一段）。rate field 定位回退为 **Step-0 机制草图 + 线性稳定性工具**，非 Step-1 忠实动力学底物。
+
 ---
 
 ## 附录 A：数据锚定出处表（原 exploration 2，2026-06-03 整理合入）
