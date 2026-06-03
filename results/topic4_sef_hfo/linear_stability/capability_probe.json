@@ -1,0 +1,75 @@
+{
+  "note": "EXPLORATORY connectivity sweep; only scaffold_default is the locked SEFParams. Backs the step0_results capability claim.",
+  "regimes": {
+    "scaffold_default": {
+      "n_converged": 120,
+      "eta_lt0_reachable": false,
+      "n_eta_lt0": 0,
+      "finite_k_leading_reachable": false,
+      "n_finite_k": 0,
+      "finite_k_unstable_reachable": false,
+      "n_finite_k_unstable": 0,
+      "finite_k_hopf_reachable": false,
+      "n_finite_k_hopf": 0,
+      "illustrative_finite_k_point": null
+    },
+    "moderate_hat": {
+      "n_converged": 120,
+      "eta_lt0_reachable": true,
+      "n_eta_lt0": 9,
+      "finite_k_leading_reachable": true,
+      "n_finite_k": 1,
+      "finite_k_unstable_reachable": false,
+      "n_finite_k_unstable": 0,
+      "finite_k_hopf_reachable": false,
+      "n_finite_k_hopf": 0,
+      "illustrative_finite_k_point": {
+        "I_E": 1.5,
+        "I_I": 0.4,
+        "eta_lin": 0.13137641945128564,
+        "k_star": -0.19999999999999973,
+        "omega_star": 0.0,
+        "max_re": -0.15452994815333232
+      }
+    },
+    "aggressive_hat": {
+      "n_converged": 120,
+      "eta_lt0_reachable": true,
+      "n_eta_lt0": 40,
+      "finite_k_leading_reachable": true,
+      "n_finite_k": 42,
+      "finite_k_unstable_reachable": true,
+      "n_finite_k_unstable": 40,
+      "finite_k_hopf_reachable": false,
+      "n_finite_k_hopf": 0,
+      "illustrative_finite_k_point": {
+        "I_E": 1.4,
+        "I_I": 0.25,
+        "eta_lin": -0.2870170321902525,
+        "k_star": -0.19999999999999973,
+        "omega_star": 0.0,
+        "max_re": 0.2789868340909916
+      }
+    }
+  },
+  "regime_params": {
+    "scaffold_default": {},
+    "moderate_hat": {
+      "ell_par": 2.0,
+      "ell_perp": 1.0,
+      "sigma_I": 12.0,
+      "J_EI": 2.0,
+      "J_IE": 2.0,
+      "sigma_phi": 0.3
+    },
+    "aggressive_hat": {
+      "ell_par": 1.0,
+      "ell_perp": 0.4,
+      "sigma_I": 18.0,
+      "J_EE": 2.0,
+      "J_EI": 3.0,
+      "beta": 6.0,
+      "sigma_phi": 0.3
+    }
+  }
+}
