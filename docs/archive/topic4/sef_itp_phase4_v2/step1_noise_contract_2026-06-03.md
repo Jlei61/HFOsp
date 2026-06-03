@@ -20,13 +20,16 @@ Step 0 是"我手动戳一下让它点着、看它会不会定向铺开再自己
 
 ## 1. 锁死的事件检测器合同（用户风险 #2：先锁定义）
 
-在任何用于结果的仿真之前冻结。检测器作用在 canonical `integrate_lif_field` 返回的 `ext`（每步活跃像素比例，像素活跃 = `rE > op["nuE"] + DETECT`，DETECT=0.005 kHz）+ `front`（每步活跃区最大 x）+（窗口 B 需要）末态场。`dt=0.25 ms`。
+在任何用于结果的仿真之前冻结。检测器作用在 canonical `integrate_lif_field` 返回的 **`ext_coh`（coherence 活跃比例 = 把 `rE` 先做空间高斯平滑 `coh_len≈ELL_PAR` 再按 `> op["nuE"] + DETECT` 阈值，DETECT=0.005 kHz）** + `front`（每步活跃区最大 x）+（窗口 B 需要）末态场。`dt=0.25 ms`。
+
+> **v1.1 coherence amendment（2026-06-03，开 smoke 后 + advisor）**：原 v1.0 用 raw 每像素活跃比例 `ext`，但每像素 OU 噪声 speckle 会直接抬高 raw `ext`（smoke：σ=2.0 speckle raw_ext 0.048 / coh_ext 0.034 vs 真实相干脉冲 coh_ext 0.142），raw 测度把 speckle 当事件。**改为 coherence 测度**：先空间平滑（长度 = 模型自身 E→E 尺度 `ELL_PAR`，不是任意旋钮）再阈值，散点 speckle 被平均掉、只有空间相干活动计数。这是"按模型自身定义（相干、定向、传播）才算事件"的修正，不是调参。`EVENT_ON_FRAC` 随之按**新测度的噪声地板 + margin** 重定（见下）。
 
 **锁定阈值（数值固定，改动须改本文件 + 记 changelog）：**
 
 | 量 | 符号 | 值 | 含义 |
 |----|------|----|----|
-| 事件 ON 阈 | `EVENT_ON_FRAC` | 0.01 | 活跃比例 > 1% 算"事件进行中"（噪声地板之上，真实脉冲峰 ~0.05–0.28 之下）；S1.0 必须验证亚阈噪声下 ext 长期 < 此值 |
+| 相干尺度 | `coh_len` | `ELL_PAR`(0.54mm) | 空间平滑长度 = 模型 E→E 尺度；散点 speckle 被压、相干 patch 留存 |
+| 事件 ON 阈 | `EVENT_ON_FRAC` | 0.05 | coherence 活跃比例 > 5% 算"事件进行中"；设在 σ=2.0 speckle 的 coh-floor(0.034) **之上**、真实相干脉冲 coh 峰(0.142) **之下** = 噪声地板+margin（**不是**调到出事件）；S1.0 已端到端验证 σ=2.0 noise → extinction |
 | 最短时长 | `MIN_DUR_MS` | 8 | ON 段须 ≥8ms 才算事件（排除单/双帧噪声尖峰；远低于 ~70ms 真事件） |
 | 合并间隙 | `MERGE_GAP_MS` | 12 | 两 ON 段间隔 <12ms 视为同一事件闪烁，合并 |
 | 自终止比 | `RETURN_FRAC` | 0.2 | 事件 off 后 ext ≤ 0.2×峰值 = 已回落（沿用 step0b） |
@@ -41,7 +44,10 @@ Step 0 是"我手动戳一下让它点着、看它会不会定向铺开再自己
 2. `max_ext ≥ RUNAWAY_FRAC` 且末态未回落 → **`runaway`**
 3. （窗口 B）末态稳定均值距高 root 内 → **`captured_high`**
 4. 合并后自终止事件数 `n_events == 0` → **`extinction_only`**
-5. 否则（`n_events ≥ 1`，全部自终止、无 runaway/sustained/capture）→ **`discrete_events`** ← **目标**
+5. `frac_time_on ≥ FRAC_TIME_ON_MAX`(0.30) → **`sustained`**（连续活动/闪烁，**非时间离散**；advisor 2026-06-03 加固：离散事件必须时间上分开、大部分时间静息）
+6. 否则（`n_events ≥ 1`，全部自终止、时间分开、无 runaway/sustained/capture）→ **`discrete_events`** ← **目标**
+
+> 时间分离阈 `FRAC_TIME_ON_MAX=0.30`：活跃时间占比 ≥30% = 连续活动，不算"一颗一颗分开的事件"。这是 advisor 命名的判别项（"coherent AND temporally-separated AND self-terminating"）。
 
 **计数单位**：一颗"discrete self-terminating event" = 合并后、dur≥MIN_DUR、回落到 ≤RETURN_FRAC×峰、（B）且回低 root 的 ON 段。这是 fraction（风险#1）与 rate（风险#6）的唯一计数对象。
 
@@ -138,3 +144,4 @@ Step 0 是"我手动戳一下让它点着、看它会不会定向铺开再自己
 
 ## Changelog
 - 2026-06-03 v1.0：开工前冻结（用户 6 条加固落数值）。
+- 2026-06-03 v1.1：**coherence 测度 amendment**（开 smoke 验证噪声地板时触发 + advisor）。raw 每像素活跃比例被 OU speckle 污染（σ=2.0 raw_ext 0.048 vs coh_ext 0.034 vs 真脉冲 coh 0.142）→ 检测改用 coherence 活跃比例（空间平滑 `coh_len=ELL_PAR` 后阈值），`EVENT_ON_FRAC` 0.01→0.05（按新测度噪声地板+margin 重定），新增时间分离判别 `FRAC_TIME_ON_MAX=0.30`（离散事件必须时间分开）。`coh_len` 作为可选项加进 canonical `integrate_lif_field`（commit 见下）。端到端 TDD：σ=2.0 noise → extinction（speckle 被拒）。**这是先验证再冻结的修正，不是看结果调参——新阈值不为 window A 制造离散窗（A 的诚实结局可能就是无离散窗 = 离散需要 recovery）。**

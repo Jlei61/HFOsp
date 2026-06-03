@@ -13,51 +13,69 @@ from src.sef_hfo_events import (
     detect_events,
     make_ou_noise,
 )
-from src.sef_hfo_lif import integrate_lif_field, mean_field
+from src.sef_hfo_lif import ELL_PAR, ELL_PERP, L_INH, integrate_lif_field, mean_field
 
 DT = 0.25
+VAL = 0.2  # synthetic ON value, clearly above EVENT_ON_FRAC=0.05
 
 
 def _times(t_max):
     return np.arange(0, t_max, DT)
 
 
-def _bump(t, center, width, peak):
-    return peak * np.exp(-0.5 * ((t - center) / width) ** 2)
+def _rect(t, start, stop, val=VAL):
+    """Rectangular ON pulse on [start, stop) ms — deterministic on/off + gaps."""
+    return np.where((t >= start) & (t < stop), val, 0.0)
 
 
 # ---------------------------------------------------------------------------
-# Detector regime logic
+# Detector regime logic (synthetic coherence-activity traces)
 # ---------------------------------------------------------------------------
 
-def test_single_bump_is_one_discrete_event():
+def test_single_pulse_is_one_discrete_event():
     t = _times(300.0)
-    ext = _bump(t, 100.0, 10.0, 0.1)
+    ext = _rect(t, 90.0, 130.0)  # 40ms event, returns to 0
     op = mean_field(1.0)
     res = classify_run(ext, DT, op, window="A")
-    assert res["label"] == "discrete_events", res["label"]
+    assert res["label"] == "discrete_events", res
     assert res["n_events"] == 1, res["n_events"]
 
 
-def test_two_close_bumps_merge_to_one():
+def test_two_close_pulses_merge_to_one():
     t = _times(300.0)
-    ext = _bump(t, 100.0, 2.0, 0.1) + _bump(t, 110.0, 2.0, 0.1)  # gap ~1.4ms < 12ms
+    ext = _rect(t, 90.0, 100.0) + _rect(t, 108.0, 120.0)  # gap 8ms < 12ms -> merge
     evs = detect_events(ext, DT)
     assert len(evs) == 1, [(e["t_on"], e["t_off"]) for e in evs]
 
 
-def test_two_separated_bumps_are_two_events():
+def test_two_separated_pulses_are_two_events():
     t = _times(300.0)
-    ext = _bump(t, 100.0, 2.0, 0.1) + _bump(t, 140.0, 2.0, 0.1)  # gap ~30ms > 12ms
+    ext = _rect(t, 90.0, 100.0) + _rect(t, 130.0, 142.0)  # gap 30ms > 12ms -> two
     evs = detect_events(ext, DT)
     assert len(evs) == 2, [(e["t_on"], e["t_off"]) for e in evs]
 
 
 def test_sustained_plateau():
     t = _times(520.0)
-    ext = np.where((t >= 50.0), 0.1, 0.0)  # on from 50ms, never returns (>400ms)
+    ext = np.where(t >= 50.0, 0.2, 0.0)  # on from 50ms, never returns (>400ms)
     op = mean_field(1.0)
     res = classify_run(ext, DT, op, window="A")
+    assert res["label"] == "sustained", res
+
+
+def test_flickering_is_sustained_not_discrete():
+    """Many short self-terminating pulses occupying >30% of the run = sustained.
+
+    Locks the advisor temporal-separation criterion: discreteness requires
+    events be temporally separated (mostly quiescent), not continuous flicker.
+    """
+    t = _times(300.0)
+    ext = np.zeros_like(t)
+    for k in range(2, 10):  # 8 pulses of 15ms every 25ms -> frac_time_on = 0.40
+        ext = ext + _rect(t, k * 25.0, k * 25.0 + 15.0)
+    op = mean_field(1.0)
+    res = classify_run(ext, DT, op, window="A")
+    assert res["frac_time_on"] >= 0.30, res["frac_time_on"]
     assert res["label"] == "sustained", res
 
 
@@ -70,15 +88,13 @@ def test_runaway():
 
 
 def test_captured_high_window_B_only():
-    """Elevated, non-returning, moderate plateau + final field at the HIGH root.
+    """Elevated, non-returning, moderate plateau (<400ms) + field at the HIGH root.
 
     Window B (bistable, 2 roots) -> captured_high. Same trace under window A
     (no capture check) must NOT be labeled captured_high.
     """
     t = _times(300.0)
-    ext = np.where((t >= 50.0), 0.1, 0.0)[: int(300.0 / DT)]
-    # truncate the "never returns" to <400ms so it is not 'sustained'
-    ext = np.where((t >= 50.0) & (t <= 250.0), 0.1, 0.0)
+    ext = _rect(t, 50.0, 250.0)  # 200ms, < SUSTAINED_MS, does not return
     opB = mean_field(1.0, w_ee_mult=1.4)
     assert len(opB["roots"]) >= 2
     hi = opB["roots"][-1]["nuE"]
@@ -96,6 +112,24 @@ def test_extinction_when_below_threshold():
     res = classify_run(ext, DT, op, window="A")
     assert res["label"] == "extinction_only", res
     assert res["n_events"] == 0
+
+
+def test_coherence_measure_rejects_noise_speckle():
+    """End-to-end: low-σ OU noise -> coherence-active-fraction stays sub-threshold.
+
+    Locks the v1.1 coherence amendment: per-pixel speckle that crossed the RAW
+    active-fraction floor (raw_ext ~0.05 at σ=2.0) does NOT cross the coherence
+    floor (EVENT_ON_FRAC=0.05), so a sub-event noise run classifies extinction.
+    """
+    op = mean_field(1.0)
+    n, L = 64, 16.0
+    stim = make_ou_noise(n, L, DT, sigma_noise=2.0, seed=0)
+    ext, _front, coh = integrate_lif_field(
+        op, stim, dt=DT, t_max=1200.0, b_a=0.0, n=n, L=L,
+        ell_par=ELL_PAR, ell_perp=ELL_PERP, l_inh=L_INH, coh_len=ELL_PAR,
+    )
+    res = classify_run(coh, DT, op, window="A")
+    assert res["label"] == "extinction_only", res
 
 
 # ---------------------------------------------------------------------------

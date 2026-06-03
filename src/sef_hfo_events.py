@@ -15,16 +15,27 @@ import numpy as np
 from src.sef_hfo_field import isotropic_gaussian, convolve_periodic
 
 # ---------------------------------------------------------------------------
-# LOCKED detector thresholds (contract §1) — units: fraction, ms, kHz
+# LOCKED detector thresholds (contract §1, v1.1 coherence amendment) — fraction, ms, kHz
 # ---------------------------------------------------------------------------
-EVENT_ON_FRAC: float = 0.01    # active-fraction "event in progress" threshold
+# The activity series fed to the detector is the COHERENCE active-fraction
+# (smoothed-field threshold crossing, coh_len ~ ELL_PAR), NOT the raw per-pixel
+# active-fraction — per-pixel OU noise speckle inflates the raw measure (smoke
+# 2026-06-03: σ=2.0 speckle raw_ext 0.048 / coh_ext 0.034 vs coherent pulse
+# coh_ext 0.142). EVENT_ON_FRAC is set ABOVE the σ=2.0 speckle coh-floor (0.034)
+# and below the validated coherent-pulse coh peak (0.142): a noise-floor+margin
+# threshold, NOT tuned to yield discrete events.
+EVENT_ON_FRAC: float = 0.05    # coherence-active-fraction "event in progress" threshold
 MIN_DUR_MS: float = 8.0        # minimum ON duration to count as an event
 MERGE_GAP_MS: float = 12.0     # ON intervals closer than this are one event
-RETURN_FRAC: float = 0.2       # self-terminated if ext falls to <= RETURN_FRAC*peak
+RETURN_FRAC: float = 0.2       # self-terminated if activity falls to <= RETURN_FRAC*peak
 CAPTURE_FRAC: float = 0.5      # (window B) settled mean past lo+0.5*(hi-lo) -> captured
-RUNAWAY_FRAC: float = 0.5      # max_ext >= this and not returned -> runaway
+RUNAWAY_FRAC: float = 0.5      # max activity >= this and not returned -> runaway
 SUSTAINED_MS: float = 400.0    # single ON interval longer than this (not returned) -> sustained
 SETTLE_MS: float = 50.0        # post-event window used to judge return-to-low
+# Temporal separation (advisor 2026-06-03): "discrete_events" requires events to
+# be temporally SEPARATED (mostly quiescent), not continuous flicker. If activity
+# is ON more than this fraction of the run, the run is sustained, not discrete.
+FRAC_TIME_ON_MAX: float = 0.30
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +152,7 @@ def classify_run(ext: np.ndarray, dt: float, op: dict,
 
     ivs = _on_intervals(ext, dt)
     longest_on = max(((e - s + 1) * dt for s, e in ivs), default=0.0)
+    frac_time_on = float((ext > EVENT_ON_FRAC).mean())
 
     captured = False
     if window == "B" and rE_final is not None and len(op.get("roots", [])) >= 2:
@@ -156,10 +168,13 @@ def classify_run(ext: np.ndarray, dt: float, op: dict,
         label = "captured_high"
     elif n_self_term == 0:
         label = "extinction_only"
+    elif frac_time_on >= FRAC_TIME_ON_MAX:
+        label = "sustained"   # continuously active / flickering -> not temporally discrete
     else:
         label = "discrete_events"
 
     return dict(label=label, n_events=int(n_self_term), max_ext=max_ext,
                 final_ext=final_ext, longest_on_ms=float(longest_on),
+                frac_time_on=frac_time_on,
                 returned=bool(returned_global), captured_high=bool(captured),
                 events=events)

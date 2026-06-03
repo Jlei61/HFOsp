@@ -277,6 +277,7 @@ def integrate_lif_field(
     l_inh: float = L_INH,
     return_field: bool = False,
     return_peak_field: bool = False,
+    coh_len: float | None = None,
 ):
     """Integrate the 2-D LIF rate field.
 
@@ -318,6 +319,13 @@ def integrate_lif_field(
         to measure the spatial principal axis of a self-limited pulse (which has
         returned near rest by the final frame).  Takes precedence over
         ``return_field`` if both are set.
+    coh_len : float or None
+        If set, also compute a COHERENCE-based active fraction: the field is
+        spatially smoothed with a Gaussian of length ``coh_len`` (mm) before
+        thresholding, so per-pixel noise speckle is suppressed and only spatially
+        coherent activity (the model's own event scale, ~ell_par) is counted.
+        Returned as the LAST element of the tuple.  Used by the Step-1 noise
+        detector (per contract step1_noise_contract §1, v1.1 coherence amendment).
 
     Returns
     -------
@@ -328,10 +336,13 @@ def integrate_lif_field(
     rE_snapshot : ndarray, shape (n, n) — only when ``return_peak_field`` or
         ``return_field`` is set.  Peak-extent field if ``return_peak_field``,
         else final field.
+    ext_coh : ndarray, shape (nsteps,) — only when ``coh_len`` is set; appended
+        LAST.  Coherence-based active fraction (smoothed-field threshold crossing).
     """
     wee = float(op.get("w_ee_mult", 1.0)) * W_EE   # recurrent E→E gain matches the op
     KEE = anisotropic_gaussian(n, L, ell_par, ell_perp, theta_EE)
     KI = isotropic_gaussian(n, L, l_inh)
+    K_coh = isotropic_gaussian(n, L, coh_len) if coh_len is not None else None
     X_grid, _ = _grid(n, L)
 
     lE = _lut(op["sE"], TAU_ME, TREF_E)
@@ -354,6 +365,7 @@ def integrate_lif_field(
     nsteps = int(t_max / dt)
     ext = np.empty(nsteps)
     front = np.empty(nsteps)
+    ext_coh = np.empty(nsteps) if K_coh is not None else None
     thr = op["nuE"] + DETECT
     peak_field = rE.copy()
     peak_ext = -1.0
@@ -376,15 +388,20 @@ def integrate_lif_field(
         m = rE > thr
         ext[t] = m.mean()
         front[t] = float(X_grid[m].max()) if m.any() else np.nan
+        if ext_coh is not None:
+            ext_coh[t] = (convolve_periodic(rE, K_coh) > thr).mean()
         if ext[t] > peak_ext:
             peak_ext = ext[t]
             peak_field = rE.copy()
 
+    out = [ext, front]
     if return_peak_field:
-        return ext, front, peak_field
-    if return_field:
-        return ext, front, rE
-    return ext, front
+        out.append(peak_field)
+    elif return_field:
+        out.append(rE)
+    if ext_coh is not None:
+        out.append(ext_coh)
+    return tuple(out) if len(out) > 2 else (ext, front)
 
 
 # ---------------------------------------------------------------------------
