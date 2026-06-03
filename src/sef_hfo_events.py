@@ -169,6 +169,12 @@ def classify_run(ext: np.ndarray, dt: float, op: dict,
     if window == "B" and rE_final is not None and len(op.get("roots", [])) >= 2:
         lo = op["roots"][0]["nuE"]
         hi = op["roots"][-1]["nuE"]
+        # LIMITATION (window B is SENSITIVITY-tier, does not gate the window-A main
+        # line): this uses the SINGLE final-frame field mean, not a post-event /
+        # settled-window mean. A final frame caught mid-fluctuation can mis-call
+        # capture either way. Acceptable for the current screen; before any SERIOUS
+        # window-B report, upgrade to a settled-window mean (average rE over the last
+        # ~SETTLE_MS, which needs the integrator to expose a final-window field avg).
         captured = float(rE_final.mean()) > lo + CAPTURE_FRAC * (hi - lo)
 
     if longest_on > SUSTAINED_MS and not returned_global:
