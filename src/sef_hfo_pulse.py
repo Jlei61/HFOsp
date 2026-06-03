@@ -1,5 +1,12 @@
-# src/sef_hfo_pulse.py
-"""SEF-HFO Step-0b finite-pulse response: wavefront-aware classifier, adaptive thresholds."""
+"""Topic 4 SEF-HFO — Step 0b finite-pulse response map.
+
+Runs a finite-amplitude perturbation on the rate field (``src.sef_hfo_field``) and
+classifies each parameter point as extinction / local-bump / self-limited-propagation /
+runaway using a wavefront-aware classifier with adaptive thresholds.  Only parameter
+points classified as self-limited-propagation advance to Step 1.
+
+CLI: ``scripts/run_sef_hfo_step0b_pulse.py``.
+"""
 import numpy as np
 from src.sef_hfo_field import build_kernels, make_Feff_lookup, integrate_field, _grid
 

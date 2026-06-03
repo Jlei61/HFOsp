@@ -1,5 +1,13 @@
-# src/sef_hfo_stability.py
-"""SEF-HFO Step-0a delayed linear stability. See 2026-06-02 amendment."""
+"""Topic 4 SEF-HFO — Step 0a delayed linear stability and dispersion map.
+
+Finds self-consistent steady-state operating points, linearises the delayed rate
+field around each point to build the spatial-frequency dispersion relation
+λ(k), and screens the operating-point family for low-heterogeneity gain-shift
+and finite-k instability windows (candidate Step 0b targets).
+
+CLI: ``scripts/run_sef_hfo_step0a_stability.py``,
+     ``scripts/run_sef_hfo_step0a_capability_probe.py``.
+"""
 import numpy as np
 from dataclasses import replace, fields
 from scipy.optimize import fsolve

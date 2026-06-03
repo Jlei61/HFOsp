@@ -1,3 +1,14 @@
+"""Topic 1 interictal HFO propagation — core statistical layer.
+
+KMeans cluster stereotypy (adaptive k-scan, split-half / odd-even reproducibility),
+template endpoint anchoring, rate-state coupling, and phantom-rank-masked feature
+construction.  Every KMeans path must use ``use_masked_features=True`` — see
+``src/lagpat_rank_audit.py`` for the Topic 0 phantom-rank fix.
+
+CLI: ``scripts/run_interictal_propagation.py``,
+     ``scripts/run_pr6_template_anchoring.py``,
+     ``scripts/run_pr7_template_pairing.py``.
+"""
 from __future__ import annotations
 
 import datetime

@@ -1,12 +1,75 @@
 """
-Keep package import lightweight.
+HFOsp — interictal HFO propagation analysis library.
 
-This repo is used both as:
-  - a library (importing plotting utilities, cached-result analysis, etc.)
-  - a pipeline runner (needs heavier deps like `mne`)
+Module map (src/)
+=================
 
-Importing `src` should NOT eagerly import heavy dependencies. We provide lazy access to the
-group-event analysis API via PEP 562 `__getattr__`.
+DATA LAYER
+  preprocessing              EDF / Epilepsiae .data+.head loaders, re-referencing,
+                             notch filter, seizure detector
+  epilepsiae_dataset         Epilepsiae inventory, block-SQL contract, sync manifest
+  yuquan_dataset             Yuquan 24h record loader (mirrors Epilepsiae API)
+  seeg_coord_loader          3D SEEG coordinate loader v2 (7 hard invariants;
+                             Yuquan → fs_native_ras_mm, Epilepsiae → mni152_1mm)
+  atlas_loading              Layer A v2.3 per-subject JSON + onset-matrix loader
+
+DETECTION & CORE PIPELINE
+  hfo_detector               BQK HFO detector → legacy-compatible _gpu.npz writer
+  group_event_analysis       Pack detections → 500 ms group-event windows, lagPat
+                             matrices, centroid / lag-rank (legacy-aligned)
+  lagpat_rank_audit          ⚠ Topic 0 phantom-rank fix: build_masked_kmeans_features()
+                             is required before any KMeans step (see docs/topic0_*)
+
+TOPIC 1 — Within-Event Dynamics: Propagation + Synchrony
+  interictal_propagation     KMeans cluster stereotypy (adaptive k-scan, split-half /
+                             odd-even), template anchoring, rate-state coupling
+                             [PR-2 / PR-2.5 / PR-6 / PR-7 core; use_masked_features=True]
+  rank_displacement          Signed rank displacement + swap-k metrics [PR-6 supplement]
+  template_anatomical_anchoring  PR-6 endpoint anatomical anchoring (statistical layer)
+  template_temporal_pairing  PR-7 template antagonistic temporal pairing
+  cluster_geometry           PCA + UMAP embeddings of cluster feature matrices
+  interictal_synchrony       PR-4 event-level synchrony metrics (lagPat-based)
+  interictal_synchrony_aggregation  PR-5 / PR-5b aggregation: seizure-interval annotation,
+                                    Epilepsiae + Yuquan
+  interictal_synchrony_analysis    PR-6 interval-first synchrony statistics + visualization
+  topic1_topic5_bridge       Q1 / Q1b / Q3 bridge between Topic 1 templates and
+                             Topic 5 seizure subtypes
+
+TOPIC 2 — Between-Event Dynamics: Periodicity
+  event_periodicity          IEI + population-event PSD; specparam; surrogate tools
+                             [CLI: scripts/run_event_periodicity.py]
+
+TOPIC 3 — Spatial SOZ Modulation
+  ictal_er_rank              PR-T3-1 v2.1 Layer A: ictal ER-rank (Page-Hinkley CUSUM)
+  ictal_onset_extraction     PR-6-A ictal onset extraction primitives (sliding-window ER)
+  data_driven_soz            PR-T3-1 v1.1 — ⚠ OBSOLETE (superseded 2026-05-03),
+                             kept as audit trail only
+
+TOPIC 4 — SEF-HFO Modeling  (docs/topic4_sef_itp_framework.md)
+  topic4_attractor_diagnostics   Topic 1→4 bridge: PCA / principal-curve / λ₂ H3 probe;
+                                 build_rank_feature_matrix [mask_phantom=True required]
+  sef_itp_phase1             H1 source/sink compactness + H6 spatial geometry + H2 ingest
+  sef_itp_phase2             H3 mark-independence + H4 rate/geometry instability
+  sef_itp_phase3             H5 peri-ictal spatial recruitment
+  sef_itp_phase3_trajectory  H5 v2 continuous 24h trajectory + alternative endpoints
+  sef_itp_direction_axis     H2b direction-axis disambiguation (archive supplementary only)
+  sef_hfo_field              Step 0 rate field — scaffold (data-anchoring pending)
+  sef_hfo_stability          Step 0a delayed linear stability + dispersion map
+  sef_hfo_pulse              Step 0b finite-pulse response + wavefront classifier
+
+TOPIC 5 — Seizure Subtyping  (exploratory)
+  ictal_seizure_clustering   PR-1 per-subject seizure clustering on ER-onset dissimilarity
+  ictal_zer_features         PR-1 Step 2 z-ER binned tensor features
+  ictal_seizure_plotting     PR-1 MDS embedding + subtype color palette rendering
+
+SHARED UTILITIES
+  visualization              Multi-channel SEEG waveforms + HFO overlays (topic-agnostic)
+  network_analysis           HFO co-activation network — direction-first pipeline (exploratory)
+  plot_style                 Shared publication-quality style (Nature/Science conventions)
+  atomic_io                  Atomic JSON write helpers for long-running cohort drivers
+
+Import note: ``import src`` is lightweight — heavy modules load only on first attribute
+access via PEP 562 ``__getattr__``.  See _LAZY_EXPORTS below for the lazy API surface.
 """
 
 from __future__ import annotations

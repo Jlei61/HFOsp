@@ -1,4 +1,12 @@
-"""
+"""Core data-packing layer — used by Topics 1–4.
+
+Assembles per-channel HFO detections into 500 ms group-event windows, computes
+per-channel timing (centroid / lag-rank), and produces the lagPat matrices consumed
+by all downstream propagation analyses.  Outputs are legacy-compatible with the
+Yuquan _lagPat*.npz format.  Note: lagPatRank in .npz files is phantom-contaminated;
+always pass results through ``src.lagpat_rank_audit.build_masked_kmeans_features``
+before any KMeans step.
+
 Module 3: Group Event Analysis (Yuquan 24h SEEG)
 
 Goal

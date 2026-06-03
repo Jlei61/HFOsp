@@ -1,15 +1,8 @@
-"""
-SEEG Visualization Module for HFO Analysis
+"""Shared SEEG visualization utilities — topic-agnostic, used across Topics 1–5.
 
-This module provides visualization functions for:
-- Multi-channel SEEG waveform plots (monopolar, bipolar, CAR)
-- Segmented time series viewing (100s segments)
-- Channel selection (all, list, shaft)
-- HFO event overlays
-- Preprocessing comparison plots
-
-Author: HFOsp Team
-Date: 2026-01-14
+Multi-channel waveform plots (monopolar / bipolar / CAR), segmented time-series
+viewing (100 s segments), HFO event overlays, and preprocessing comparison plots.
+For publication-quality style constants import from ``src.plot_style`` instead.
 """
 
 import numpy as np

@@ -1,4 +1,10 @@
-"""
+"""HFO co-activation network analysis — exploratory, not a primary topic deliverable.
+
+Builds directed epilepsy networks from pairwise HFO lag statistics.  The main
+entry point is ``build_hfo_network(npz_path)``.  Phase B (geometry) and Phase C
+(source space) are stubs only.  Current Topic 1–4 analyses do not depend on this
+module; it is kept for exploratory use and potential future integration.
+
 Module 4: Network Analysis — Epilepsy Network from HFO Co-activation
 
 **v3: Direction-First Causal Pipeline**

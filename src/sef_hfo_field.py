@@ -1,7 +1,14 @@
-# src/sef_hfo_field.py
-"""SEF-HFO Step-0 rate field. ALL numeric defaults are TEST-ONLY SCAFFOLDS
-(Step 0a/0b screen them); formal results require data-anchored units (see gate).
-See docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md 2026-06-02 amendment."""
+"""Topic 4 SEF-HFO — Step 0 spatial rate field.
+
+2D E-I rate-field integrator with delayed synaptic kernels and optional recovery
+variable.  Provides ``integrate_field()``, ``build_kernels()``, and
+``make_Feff_lookup()`` used by both Step 0a (linear stability) and Step 0b
+(finite-pulse response).
+
+⚠ ALL numeric defaults are test-only scaffold values.  Formal Step 1 results
+require data-anchored operating points (provenance → data_locked); see the
+2026-06-02 amendment in docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md.
+"""
 import numpy as np
 from dataclasses import dataclass
 
