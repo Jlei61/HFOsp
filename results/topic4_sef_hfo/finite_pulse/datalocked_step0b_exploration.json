@@ -1,0 +1,87 @@
+{
+  "connectivity_note": "wave-regime (excitation>=inhibition); slow GABA tau=18ms; cm grid",
+  "loop_gain_audit_sample": [
+    {
+      "beta": 6.0,
+      "JEE": 1.5,
+      "IE": 0.0,
+      "rE0": 0.6955999582452014,
+      "G_E": 0.8412702657007947,
+      "loop_gain_GE_JEE": 1.261905398551192,
+      "eta_lin": 0.00865333096410007
+    },
+    {
+      "beta": 10.0,
+      "JEE": 1.5,
+      "IE": 0.0,
+      "rE0": 0.7826770661249259,
+      "G_E": 0.8421634099787436,
+      "loop_gain_GE_JEE": 1.2632451149681154,
+      "eta_lin": 0.004150617668239571
+    },
+    {
+      "beta": 16.0,
+      "JEE": 1.5,
+      "IE": 0.0,
+      "rE0": 0.8618109484419704,
+      "G_E": 0.6877260552812046,
+      "loop_gain_GE_JEE": 1.0315890829218068,
+      "eta_lin": 0.009564018270113106
+    }
+  ],
+  "propagation_test": [
+    {
+      "regime": "saturated_high",
+      "beta": 10.0,
+      "JEE": 2.5,
+      "IE": 0.3,
+      "A": 3.0,
+      "rE0": 0.999998980275969,
+      "front_advance_mm": 0.0,
+      "max_active_frac": 0.0,
+      "propagates": false
+    },
+    {
+      "regime": "saturated_high",
+      "beta": 10.0,
+      "JEE": 2.5,
+      "IE": 0.3,
+      "A": 6.0,
+      "rE0": 0.999998980275969,
+      "front_advance_mm": 0.0,
+      "max_active_frac": 0.0,
+      "propagates": false
+    },
+    {
+      "regime": "low_quiescent",
+      "beta": 16.0,
+      "JEE": 1.5,
+      "IE": -0.3,
+      "A": 3.0,
+      "rE0": 0.018125702424867947,
+      "front_advance_mm": 4.0,
+      "max_active_frac": 0.048095703125,
+      "propagates": false
+    },
+    {
+      "regime": "low_quiescent",
+      "beta": 16.0,
+      "JEE": 1.5,
+      "IE": -0.3,
+      "A": 6.0,
+      "rE0": 0.018125702424867947,
+      "front_advance_mm": 4.0,
+      "max_active_frac": 0.048095703125,
+      "propagates": false
+    }
+  ],
+  "verdict": {
+    "gate_passed": false,
+    "self_limited_propagation_found": false,
+    "max_loop_gain_at_stable_rest": 1.2632451149681154,
+    "loop_gain_needed_for_wave_exploration1": "~3-4",
+    "diagnosis": "sigmoid rate field cannot place a STABLE resting state at the high loop gain propagation/Hopf needs (high static loop gain destabilizes the rest); finite pulse -> saturated (no headroom) or confined local response that extinguishes (no neighbor recruitment). No propagating front -> no self_limited_propagation.",
+    "principled_fix": "LIF colored-noise transfer (steep f-I at low rate near threshold = high dynamic gain at low static rate), which coworker1's spiking model has and Exploration 1's injected-gain regime emulated.",
+    "step1_status": "LOCKED (finite-pulse gate prerequisite unmet; a valid finding)."
+  }
+}
