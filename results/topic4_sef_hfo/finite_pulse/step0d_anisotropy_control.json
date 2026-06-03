@@ -5,35 +5,35 @@
       "theta_EE": 0.0,
       "theta_prop": 0.0,
       "axis_err_deg": 0.0,
-      "anisotropy_ratio": 4.204075256392611
+      "anisotropy_ratio": 4.204075256395678
     },
     {
       "kernel": "anisotropic",
       "theta_EE": 30.0,
-      "theta_prop": 30.05881612212366,
-      "axis_err_deg": 0.05881612212365894,
-      "anisotropy_ratio": 4.22594508743313
+      "theta_prop": 30.058816122123716,
+      "axis_err_deg": 0.058816122123715786,
+      "anisotropy_ratio": 4.225945087436238
     },
     {
       "kernel": "anisotropic",
       "theta_EE": 60.0,
-      "theta_prop": 59.94118387787632,
-      "axis_err_deg": 0.05881612212368026,
-      "anisotropy_ratio": 4.2259450874331295
+      "theta_prop": 59.94118387787626,
+      "axis_err_deg": 0.0588161221237371,
+      "anisotropy_ratio": 4.225945087436238
     },
     {
       "kernel": "anisotropic",
       "theta_EE": 90.0,
       "theta_prop": 90.0,
       "axis_err_deg": 0.0,
-      "anisotropy_ratio": 4.204075256392611
+      "anisotropy_ratio": 4.2040752563956785
     },
     {
       "kernel": "anisotropic",
       "theta_EE": 135.0,
       "theta_prop": 135.0,
       "axis_err_deg": 0.0,
-      "anisotropy_ratio": 4.223605206819543
+      "anisotropy_ratio": 4.223605206822608
     }
   ],
   "isotropic_control": [
@@ -63,6 +63,6 @@
     "anisotropic_theta_prop_tracks_theta_EE": true,
     "isotropic_control_fails_to_produce_axis": true,
     "discriminator_passed": true,
-    "note": "Step-0d load-bearing discriminator: propagation axis set by E->E connectivity anisotropy (theta_prop tracks theta_EE), NOT electrode geometry; isotropic control produces no directional template. PASS supports SEF-HFO vs geometry artifact."
+    "note": "Step-0d load-bearing discriminator: propagation axis set by E->E connectivity anisotropy (theta_prop tracks theta_EE), NOT electrode geometry; isotropic control produces no directional template. PASS supports SEF-HFO vs geometry artifact. Dynamics from canonical src/sef_hfo_lif.integrate_lif_field (task 21 fold-in)."
   }
 }

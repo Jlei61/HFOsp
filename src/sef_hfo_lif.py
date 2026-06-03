@@ -127,8 +127,25 @@ def _ms(nuE: float, nuI: float, nuext: float, w_ee_mult: float = 1.0):
     return muE, muI, sE, sI
 
 
-def mean_field(ratio: float, w_ee_mult: float = 1.0) -> dict:
-    """Solve the self-consistent mean-field equations (fsolve).
+# Multi-start seeds (low-rate; the model's operating point is the stable
+# sub-threshold rest = lowest-nuE clean root) and convergence tolerances.
+# _RESID_TOL is set ~10^8x above the empirical residual floor of the known-good
+# ratio=1.0 root (~3e-14 across all seeds) and well below test 1's 1e-4
+# self-consistency bar.  _ROOT_RATE_RELTOL clusters seeds onto distinct roots so
+# a genuine second (e.g. saturated high-rate) branch is surfaced, not averaged away.
+_MEAN_FIELD_SEEDS = ([0.0005, 0.002], [0.001, 0.005], [0.002, 0.008], [0.005, 0.012])
+_RESID_TOL: float = 1e-6
+_ROOT_RATE_RELTOL: float = 0.05
+
+
+def mean_field(ratio: float, w_ee_mult: float = 1.0, strict: bool = True) -> dict:
+    """Solve the self-consistent mean-field equations (multi-start fsolve).
+
+    The model's operating point is the **stable sub-threshold rest** = the
+    **lowest-nuE clean root**.  Multi-start guards against silently locking onto
+    the wrong branch in the pathological-gain regime (w_ee_mult > 1), where a
+    high-rate saturated root can coexist with the rest state and would otherwise
+    be accepted just because a seed happened to converge to it first.
 
     Parameters
     ----------
@@ -136,11 +153,17 @@ def mean_field(ratio: float, w_ee_mult: float = 1.0) -> dict:
         External drive as a fraction of ν_θ (1.0 = threshold-balanced regime).
     w_ee_mult:
         Multiplicative gain on W_EE.  Values > 1 probe the pathological-gain
-        regime (used in step0d anisotropy control sensitivity checks).
+        regime.  Stored in the returned op so ``integrate_lif_field`` uses the
+        SAME recurrent gain as the operating point it was handed.
+    strict:
+        If True (default), raise ``RuntimeError`` when no seed converges to a
+        clean root (loud failure beats a silent wrong root).
 
     Returns
     -------
-    dict with keys: nuE, nuI, muE, sE, muI, sI, nuext  (rates in kHz, potentials in mV).
+    dict with keys: nuE, nuI, muE, sE, muI, sI, nuext, w_ee_mult,
+        resid_norm, converged, fsolve_ier, n_clean_roots
+        (rates in kHz, potentials in mV).
     """
     nuext = ratio * nu_theta_pop()
 
@@ -151,10 +174,45 @@ def mean_field(ratio: float, w_ee_mult: float = 1.0) -> dict:
             nu[1] - lif_rate(muI, sI, TAU_MI, TREF_I),
         ]
 
-    sol = fsolve(resid, [0.001, 0.005])
-    nuE, nuI = float(sol[0]), float(sol[1])
+    clean = []
+    for x0 in _MEAN_FIELD_SEEDS:
+        sol, _info, ier, _msg = fsolve(resid, x0, full_output=True)
+        r = resid(sol)
+        rnorm = float(np.hypot(r[0], r[1]))
+        nuE, nuI = float(sol[0]), float(sol[1])
+        if ier == 1 and rnorm < _RESID_TOL and nuE > 0 and nuI > 0:
+            clean.append(dict(nuE=nuE, nuI=nuI, resid_norm=rnorm, ier=int(ier)))
+
+    if not clean:
+        if strict:
+            raise RuntimeError(
+                f"mean_field did not converge to a clean root "
+                f"(ratio={ratio}, w_ee_mult={w_ee_mult}); tried "
+                f"{len(_MEAN_FIELD_SEEDS)} seeds, none met ier==1 & resid<{_RESID_TOL:.0e} "
+                f"& positive rates."
+            )
+        sol, _info, ier, _msg = fsolve(resid, _MEAN_FIELD_SEEDS[1], full_output=True)
+        r = resid(sol)
+        best = dict(nuE=float(sol[0]), nuI=float(sol[1]),
+                    resid_norm=float(np.hypot(r[0], r[1])), ier=int(ier))
+        n_roots = 0
+        converged = False
+    else:
+        # Dedup seeds onto distinct roots; operating point = lowest-nuE root.
+        distinct = []
+        for d in sorted(clean, key=lambda d: d["nuE"]):
+            if not any(abs(d["nuE"] - e["nuE"]) <= _ROOT_RATE_RELTOL * max(e["nuE"], 1e-12)
+                       for e in distinct):
+                distinct.append(d)
+        best = distinct[0]
+        n_roots = len(distinct)
+        converged = True
+
+    nuE, nuI = best["nuE"], best["nuI"]
     muE, muI, sE, sI = _ms(nuE, nuI, nuext, w_ee_mult)
-    return dict(nuE=nuE, nuI=nuI, muE=muE, sE=sE, muI=muI, sI=sI, nuext=nuext)
+    return dict(nuE=nuE, nuI=nuI, muE=muE, sE=sE, muI=muI, sI=sI, nuext=nuext,
+                w_ee_mult=w_ee_mult, resid_norm=best["resid_norm"],
+                converged=converged, fsolve_ier=best["ier"], n_clean_roots=n_roots)
 
 
 # ---------------------------------------------------------------------------
@@ -215,6 +273,7 @@ def integrate_lif_field(
     ell_perp: float = ELL_PERP,
     l_inh: float = L_INH,
     return_field: bool = False,
+    return_peak_field: bool = False,
 ):
     """Integrate the 2-D LIF rate field.
 
@@ -250,6 +309,12 @@ def integrate_lif_field(
     return_field : bool
         If True, also return the final rE field (shape (n, n)) as a third element.
         Default False — callers that only need (ext, front) are unaffected.
+    return_peak_field : bool
+        If True, also return the rE field at the timestep of MAXIMUM active
+        fraction (peak extent) as a third element.  This is the snapshot needed
+        to measure the spatial principal axis of a self-limited pulse (which has
+        returned near rest by the final frame).  Takes precedence over
+        ``return_field`` if both are set.
 
     Returns
     -------
@@ -257,9 +322,11 @@ def integrate_lif_field(
         Per-timestep fraction of active pixels (rE > op["nuE"] + DETECT).
     front : ndarray, shape (nsteps,)
         Per-timestep maximum x-coordinate of active pixels (nan if none active).
-    rE_final : ndarray, shape (n, n) — only present when ``return_field=True``
-        Final excitatory rate field (kHz).
+    rE_snapshot : ndarray, shape (n, n) — only when ``return_peak_field`` or
+        ``return_field`` is set.  Peak-extent field if ``return_peak_field``,
+        else final field.
     """
+    wee = float(op.get("w_ee_mult", 1.0)) * W_EE   # recurrent E→E gain matches the op
     KEE = anisotropic_gaussian(n, L, ell_par, ell_perp, theta_EE)
     KI = isotropic_gaussian(n, L, l_inh)
     X_grid, _ = _grid(n, L)
@@ -285,6 +352,8 @@ def integrate_lif_field(
     ext = np.empty(nsteps)
     front = np.empty(nsteps)
     thr = op["nuE"] + DETECT
+    peak_field = rE.copy()
+    peak_ext = -1.0
 
     for t in range(nsteps):
         stim = stim_fn(t * dt)
@@ -296,7 +365,7 @@ def integrate_lif_field(
         sEI += dt / TAU_GABA * (cEI - sEI)
         sIE += dt / TAU_AMPA * (cIE - sIE)
         sII += dt / TAU_GABA * (cII - sII)
-        muE = TAU_ME * (C_EE * W_EE * sEE - C_EI * W_EI * sEI) + muxE + stim - b_a * a
+        muE = TAU_ME * (C_EE * wee * sEE - C_EI * W_EI * sEI) + muxE + stim - b_a * a
         muI = TAU_MI * (C_IE * W_IE * sIE - C_II * W_II * sII) + muxI
         rE = rE + dt / TAU_ME * (-rE + fE(muE))
         rI = rI + dt / TAU_MI * (-rI + fI(muI))
@@ -304,7 +373,12 @@ def integrate_lif_field(
         m = rE > thr
         ext[t] = m.mean()
         front[t] = float(X_grid[m].max()) if m.any() else np.nan
+        if ext[t] > peak_ext:
+            peak_ext = ext[t]
+            peak_field = rE.copy()
 
+    if return_peak_field:
+        return ext, front, peak_field
     if return_field:
         return ext, front, rE
     return ext, front

@@ -169,3 +169,73 @@ def test_self_limited_propagation():
     assert info["max_ext"] < 0.5, (
         f"Max active fraction {info['max_ext']:.3f} >= 0.5 — response went runaway"
     )
+
+
+# ---------------------------------------------------------------------------
+# Test 5: anisotropy ROTATION discriminator (load-bearing; tripwire for Step 0d)
+# ---------------------------------------------------------------------------
+
+def _principal_axis_deg_ratio(field, X, Y, thr):
+    """Principal-axis angle (deg, mod 180) + anisotropy ratio of the active region."""
+    m = field > thr
+    if m.sum() < 5:
+        return float("nan"), 1.0
+    w = field[m]
+    xs, ys = X[m], Y[m]
+    xm = np.average(xs, weights=w)
+    ym = np.average(ys, weights=w)
+    cxx = np.average((xs - xm) ** 2, weights=w)
+    cyy = np.average((ys - ym) ** 2, weights=w)
+    cxy = np.average((xs - xm) * (ys - ym), weights=w)
+    ev, evec = np.linalg.eigh(np.array([[cxx, cxy], [cxy, cyy]]))
+    v = evec[:, -1]
+    ang = np.degrees(np.arctan2(v[1], v[0])) % 180.0
+    return float(ang), float(np.sqrt(ev[-1] / max(ev[0], 1e-12)))
+
+
+def _axis_diff(a, b):
+    d = abs(a - b) % 180.0
+    return min(d, 180.0 - d)
+
+
+def test_anisotropy_rotation_discriminator():
+    """Load-bearing discriminator: propagation axis tracks E→E connectivity, not geometry.
+
+    Fast tripwire for scripts/sef_hfo_step0d_anisotropy_control.py (the durable
+    5-angle + 3-isotropic regression).  Locks both halves on the canonical
+    integrate_lif_field:
+      - anisotropic E→E at theta_EE=60° (non-axis-aligned, so a pass cannot be a
+        grid-alignment artifact) → active-region principal axis tracks 60°
+        (err < 20°) and is clearly elongated (ratio > 1.3);
+      - isotropic E→E → no preferred axis (ratio < 1.3).
+    """
+    op = mean_field(1.0)
+    N, L = 96, 16.0
+    X, Y = _grid(N, L)
+    ell_par, ell_perp, l_inh = 0.9, 0.45, 0.45
+    R, A, Tp = 1.5, 8.0, 30.0
+    mask = (X ** 2 + Y ** 2 <= R ** 2).astype(float)
+
+    def stim(t):
+        return (A * mask) if t < Tp else (0.0 * mask)
+
+    # anisotropic E→E rotated to 60°
+    _e, _f, pf = integrate_lif_field(
+        op, stim, dt=0.25, t_max=150.0, b_a=0.0, theta_EE=np.radians(60.0),
+        n=N, L=L, ell_par=ell_par, ell_perp=ell_perp, l_inh=l_inh,
+        return_peak_field=True,
+    )
+    ang, ratio = _principal_axis_deg_ratio(pf - op["nuE"], X, Y, DETECT)
+    assert _axis_diff(ang, 60.0) < 20.0, (
+        f"theta_prop {ang:.1f}° does not track theta_EE=60° (err {_axis_diff(ang, 60.0):.1f}°)"
+    )
+    assert ratio > 1.3, f"anisotropic ratio {ratio:.2f} <= 1.3 (no directional elongation)"
+
+    # isotropic control: must NOT produce a preferred axis
+    _e, _f, pf2 = integrate_lif_field(
+        op, stim, dt=0.25, t_max=150.0, b_a=0.0, theta_EE=0.0,
+        n=N, L=L, ell_par=0.6, ell_perp=0.6, l_inh=l_inh,
+        return_peak_field=True,
+    )
+    _ang2, ratio2 = _principal_axis_deg_ratio(pf2 - op["nuE"], X, Y, DETECT)
+    assert ratio2 < 1.3, f"isotropic ratio {ratio2:.2f} >= 1.3 (spurious directional axis)"
