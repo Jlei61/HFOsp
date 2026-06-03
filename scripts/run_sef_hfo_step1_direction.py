@@ -1,9 +1,26 @@
-"""Step 1 S1.5/S1.6: direction readout + negative control on NOISE-DRIVEN events.
+"""[INVALID — DO NOT USE AS THE CANONICAL DIRECTION RUNNER]
 
-Load-bearing discriminator (contract §5/§6, carried from static 0d into the noisy
-regime): noise-triggered events' systematic elongation axis must track the E->E
-connectivity anisotropy axis theta_EE, NOT geometry; an ISOTROPIC E->E kernel must
-produce NO preferred axis.
+================================================================================
+!!! THIS MEASURE IS GRID-CONTAMINATED AND SUPERSEDED (step1_noise_contract §9.5).
+    The whole-frame aggregate second-moment is dominated by grid/boundary
+    structure (smoking gun: off-axis theta=60 failed at 45deg while grid-aligned
+    theta=0/90 "tracked" ~10deg) and mixes inter-event spacing with intra-event
+    shape. Its verdict (direction_A_INVALID_gridcontaminated.json) is NOT a valid
+    direction result. Do not cite it.
+
+    The correct, pre-registered replacement (NOT yet built): per-event isolation
+    (space-time connected component) + CALIBRATE on the 0d deterministic pulse at
+    OFF-AXIS theta=30/60 BEFORE touching noise; if still weak, escalate to the
+    real masked lagPat/PR-2 template pipeline (contract §5 step2) which also
+    carries the isotropic+aligned-shaft hard control (§6). See §9.5.
+    Kept only as an audit-trail record of the rejected measure.
+================================================================================
+
+Step 1 S1.5/S1.6 (rejected v2): direction readout + negative control on
+NOISE-DRIVEN events. Intended discriminator (contract §5/§6, carried from static
+0d into the noisy regime): noise-triggered events' systematic elongation axis must
+track the E->E connectivity anisotropy axis theta_EE, NOT geometry; an ISOTROPIC
+E->E kernel must produce NO preferred axis.
 
 Method (contract §5 AGGREGATION — a single noise event's shape is dominated by its
 triggering fluctuation, so single-event axes are meaningless; v1 used one peak
@@ -63,6 +80,9 @@ def sum_tensors(ts):
 
 
 def main():
+    print("\n*** WARNING: grid-contaminated / SUPERSEDED direction measure "
+          "(step1_noise_contract §9.5). Output is INVALID; not a direction result. ***\n",
+          file=sys.stderr, flush=True)
     aniso, iso = [], []
     for theta in [0.0, 60.0, 90.0]:
         ts = [accum_tensor(theta, ELL_PAR, ELL_PERP, s) for s in SEEDS]
@@ -83,12 +103,15 @@ def main():
                    for r in aniso)
     iso_fail = all(r["ratio"] < 1.3 for r in iso)
     verdict = dict(aniso_tracks_theta_EE=bool(aniso_ok), isotropic_no_axis=bool(iso_fail),
-                   discriminator_passed=bool(aniso_ok and iso_fail))
+                   discriminator_passed=bool(aniso_ok and iso_fail),
+                   INVALID=True,
+                   note="grid-contaminated aggregate second-moment; NOT a valid direction result (§9.5)")
 
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "direction_A.json").write_text(json.dumps(
+    (OUT / "direction_A_INVALID_gridcontaminated.json").write_text(json.dumps(
         dict(params=dict(N=N, L=L, sigma=SIGMA, tau_noise=TAU, t_run_ms=T, seeds=SEEDS,
-                         ell_par=ELL_PAR, ell_perp=ELL_PERP, method="aggregated_second_moment"),
+                         ell_par=ELL_PAR, ell_perp=ELL_PERP,
+                         method="INVALID_grid_contaminated_aggregate_second_moment"),
              anisotropic=aniso, isotropic=iso, verdict=verdict), indent=2, default=float))
     print("=== anisotropic E->E: aggregate event axis tracks theta_EE? (summed over seeds) ===")
     for r in aniso:

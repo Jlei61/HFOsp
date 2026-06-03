@@ -29,9 +29,11 @@ N, L, DT, T_RUN = 64, 16.0, 0.25, 5000.0
 # component, NOT the fast synaptic fluctuations already inside Phi_LIF's sigma
 # (tau_noise=5ms ~= TAU_AMPA was confounded -> dense ignition -> sustained, §9.1).
 TAU_NOISE = 100.0
-# Fine sigma grid around the discrete band found at sigma~2.0 (probe §9.3), to
-# measure band WIDTH (risk #6: a single sigma point fails; a pass needs a band).
-SIGMAS = [1.0, 1.5, 1.8, 2.0, 2.2, 2.5, 3.0]
+# sigma=0.0 is the no-noise deterministic control (must be extinction over the full
+# 5s -> verifies "no spontaneous sustained activity without noise" in the result JSON,
+# not just the 40ms unit test). Then a fine grid around the discrete band (sigma~2.0,
+# probe §9.3) to measure band WIDTH (risk #6: a single sigma point fails).
+SIGMAS = [0.0, 1.0, 1.5, 1.8, 2.0, 2.2, 2.5, 3.0]
 SEEDS = [0, 1, 2, 3, 4]
 
 WINDOWS = {

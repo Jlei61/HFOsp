@@ -9,6 +9,7 @@ import numpy as np
 
 from src.sef_hfo_events import (
     EVENT_ON_FRAC,
+    FRAC_TIME_ON_MAX,
     classify_run,
     detect_events,
     make_ou_noise,
@@ -76,6 +77,24 @@ def test_flickering_is_sustained_not_discrete():
     op = mean_field(1.0)
     res = classify_run(ext, DT, op, window="A")
     assert res["frac_time_on"] >= 0.30, res["frac_time_on"]
+    assert res["label"] == "sustained", res
+
+
+def test_mixed_returned_and_nonreturned_is_not_discrete():
+    """A normal self-terminating event + a trailing NON-returning ON segment must
+    NOT be labeled discrete (critical review repro: discrete_events [True, False]).
+
+    Both segments are short (<400ms) and frac_on<0.30, so only the all-returned
+    requirement can catch it.
+    """
+    t = _times(300.0)
+    ext = _rect(t, 50.0, 90.0) + _rect(t, 280.0, 300.0)  # 2nd runs to end -> cannot return
+    evs = detect_events(ext, DT)
+    assert [e["returned"] for e in evs] == [True, False], [e["returned"] for e in evs]
+    op = mean_field(1.0)
+    res = classify_run(ext, DT, op, window="A")
+    assert res["frac_time_on"] < FRAC_TIME_ON_MAX, res["frac_time_on"]
+    assert res["all_returned"] is False
     assert res["label"] == "sustained", res
 
 

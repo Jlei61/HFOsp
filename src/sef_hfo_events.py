@@ -43,8 +43,15 @@ FRAC_TIME_ON_MAX: float = 0.30
 # ---------------------------------------------------------------------------
 
 def make_ou_noise(n: int, L: float, dt: float, sigma_noise: float,
-                  tau_noise: float = 5.0, ell_noise: float = 0.5, seed: int = 0):
+                  tau_noise: float = 100.0, ell_noise: float = 0.5, seed: int = 0):
     """Return a stateful ``stim_fn(t_ms)`` producing an OU noise field added to muE.
+
+    NOTE on ``tau_noise`` default (2026-06-03): the OU term on mu represents the
+    SLOW afferent-input component (tens-hundreds of ms). It must NOT be set near
+    TAU_AMPA (~3.5-5 ms): fast synaptic fluctuations are already inside Phi_LIF's
+    sigma, so a fast tau_noise double-counts them and drives continuous ignition
+    (sustained, never discrete -- see step1_noise_contract §9.1). Default is now
+    100 ms (slow); the validated discrete band used 50-200 ms.
 
     Per-pixel Ornstein-Uhlenbeck in time (correlation time ``tau_noise`` ms,
     steady-state std ``sigma_noise`` mV) with white innovations smoothed by a
@@ -145,7 +152,11 @@ def classify_run(ext: np.ndarray, dt: float, op: dict,
     is required for the window-B capture check (uses ``op["roots"]`` lo/hi).
     """
     events = detect_events(ext, dt)
+    n_events_total = len(events)
     n_self_term = sum(1 for ev in events if ev["returned"])
+    # discrete requires EVERY ON segment to self-terminate -- one normal event plus
+    # a trailing non-returning segment is NOT discrete (it didn't fully self-limit).
+    all_returned = n_events_total > 0 and n_self_term == n_events_total
     max_ext = float(ext.max())
     final_ext = float(ext[-1])
     returned_global = final_ext <= RETURN_FRAC * max(max_ext, 1e-12)
@@ -166,14 +177,17 @@ def classify_run(ext: np.ndarray, dt: float, op: dict,
         label = "runaway"
     elif captured:
         label = "captured_high"
-    elif n_self_term == 0:
+    elif n_events_total == 0:
         label = "extinction_only"
     elif frac_time_on >= FRAC_TIME_ON_MAX:
         label = "sustained"   # continuously active / flickering -> not temporally discrete
+    elif not all_returned:
+        label = "sustained"   # >=1 ON segment did not self-terminate -> not discrete
     else:
-        label = "discrete_events"
+        label = "discrete_events"   # >=1 event AND every ON segment self-terminated
 
-    return dict(label=label, n_events=int(n_self_term), max_ext=max_ext,
+    return dict(label=label, n_events=int(n_self_term), n_events_total=int(n_events_total),
+                all_returned=bool(all_returned), max_ext=max_ext,
                 final_ext=final_ext, longest_on_ms=float(longest_on),
                 frac_time_on=frac_time_on,
                 returned=bool(returned_global), captured_high=bool(captured),
