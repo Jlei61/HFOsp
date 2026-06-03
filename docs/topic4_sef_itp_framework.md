@@ -16,6 +16,7 @@
 > **Step 1 解锁，带两个候选窗进入**：(a) **Brunel-like 分支（主线）**——短(~70ms)、稳健、宽窗、recovery-off，自限靠亚临界回落（参数少、不靠 recovery 精调）；(b) **病理高激 + 快回拉分支（机制 sensitivity）**——时长更贴 envelope(~110ms)，窗窄、recovery 必需（Pinto–Ermentrout 支）。
 > **Step 1 验收（粗量级、不精拟合）**：无噪声不自发持续响 + 加噪声出现**离散**事件（非持续振荡）+ 事件能自终止 + 传播方向/通道顺序能被真实 pipeline 稳定读出 + 事件率落到真实量级附近。
 > **保留风险（= Step 1/2 sensitivity，不是 Step 0 阻断项）**：速度-尺度张力（regime b 波前 ~0.9mm/ms → ~10cm reach、patch 渡越 ~30ms 偏快）；recovery 窗窄；定量时长未完全锁定；0a 的近临界 Hopf 是阻尼迭代假象（真工作点稳健亚临界、自限传播是 excitable-from-stable-rest 而非 Hopf）。详见 `docs/archive/topic4/sef_itp_phase4_v2/lif_transfer_route_2026-06-03.md`。
+> **数学路线更新（2026-06-03 晚，user 理论重新推导 + agent 的 near-critical→excitable 经验更正）**：Topic 4 主模型从「sigmoid rate field（`F_eff`）」升级为「**LIF-derived rate field（`Φ_LIF(μ,σ)` Siegert transfer）**」。逻辑链「population transfer → gain → linear stability → finite-pulse」不变，只换 transfer 实现；`F_eff` 降级为 optional coarse-graining，低异质性**后置**为「LIF 参数分布 p(θ) 收窄、经 `Φ_LIF`/gain/`λ(k)` 检验」（不再硬编码入 Step 0）。机制：sigmoid 低率 gain→0（卡死），LIF 近阈噪声区低率仍高 `∂Φ/∂μ`（活）。**关键更正（经验强制）**：fsolve 后真 LIF 工作点**稳健稳定**（max Re λ≈−0.05、loop gain≈0.58、k=0；**非 near-critical、无 finite-k Hopf**——之前的 Hopf 是阻尼迭代假象），而 self_limited_propagation 是**非线性可激**（全或无、波前推进幅度无关）→ **Step-0a 目标 = 稳健稳定但可激（非 η≈0+）；色散/finite-k-Hopf 是诊断不是闸门，finite-pulse 才是闸门**。**新 Step-0 工作**：(1) **0d 各向异性旋转控制**（θ_prop 随连接轴转、不随电极杆转；isotropic+aligned-shaft 必须过不了——承重判据，**未做**）；(2) 把 `Φ_LIF` 收进 canonical `src/sef_hfo_{field,stability}.py`（`F_eff⇒Φ_LIF` 落主代码，0a–0e 干净重跑）；(3) σ-dynamics + `G^σ` 作速度-尺度张力 sensitivity（Step 1/2）；(4) 0e heterogeneity 后置层（Φ_LIF 在多维 θ 分布上积分）。详见 `docs/archive/topic4/sef_itp_phase4_v2/lif_rate_field_theory_2026-06-03.md`。
 > **v0.2 核心边界**：只解释 HFO 群体事件的中观传播组织（event envelope、通道激活顺序、rank template、forward/reverse、identity bias、endpoint geometry、rate-geometry decoupling）；ictal-like recruitment 只作 synthetic feasibility bridge，不解释 clinical seizure onset；不解释 HFO 80-250/500 Hz carrier 的细胞生物物理，不把 template source 拟合成 clinical SOZ。
 > **v0.2 承接**：保留 v1 已锁定的真实数据验收合同、cohort tier、phantom-rank 修复纪律、clinical SOZ 不作为拟合标签的红线；替换的是建模机制路线，不是 Topic 1 的实证发现。
 >
@@ -101,6 +102,8 @@ v1 已经锁定的真实数据判据继续保留；v0.2 替换的是机制实现
 ---
 
 ## 2. 核心方程（v2 最小可行形式）
+
+> **2026-06-03 晚更新（见顶部 banner「数学路线更新」+ `docs/archive/topic4/sef_itp_phase4_v2/lif_rate_field_theory_2026-06-03.md`）**：下方 `F_eff`（阈值分布平均的 sigmoid）**已降级为 optional coarse-graining**；主 transfer 改为 **LIF Siegert `Φ_LIF(μ,σ)`**（功能位置相同：input→population transfer→rate；但 LIF 在低静息率仍有高 `∂Φ/∂μ`，sigmoid 没有）。下方 prose 保留作 audit trail + heterogeneity 后置层（`Φ_eff_LIF=∫Φ_LIF(μ,σ;θ)p(θ)dθ`）的概念前身。另：本节标题"近临界工作窗"措辞经更正——真 LIF 工作点是**稳健稳定但可激**，非 near-critical。
 
 第一版不直接上 SNN。先用二维 E-I rate field 找近临界工作窗：
 
