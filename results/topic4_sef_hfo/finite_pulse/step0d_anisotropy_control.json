@@ -1,0 +1,68 @@
+{
+  "anisotropic": [
+    {
+      "kernel": "anisotropic",
+      "theta_EE": 0.0,
+      "theta_prop": 0.0,
+      "axis_err_deg": 0.0,
+      "anisotropy_ratio": 4.204075256392611
+    },
+    {
+      "kernel": "anisotropic",
+      "theta_EE": 30.0,
+      "theta_prop": 30.05881612212366,
+      "axis_err_deg": 0.05881612212365894,
+      "anisotropy_ratio": 4.22594508743313
+    },
+    {
+      "kernel": "anisotropic",
+      "theta_EE": 60.0,
+      "theta_prop": 59.94118387787632,
+      "axis_err_deg": 0.05881612212368026,
+      "anisotropy_ratio": 4.2259450874331295
+    },
+    {
+      "kernel": "anisotropic",
+      "theta_EE": 90.0,
+      "theta_prop": 90.0,
+      "axis_err_deg": 0.0,
+      "anisotropy_ratio": 4.204075256392611
+    },
+    {
+      "kernel": "anisotropic",
+      "theta_EE": 135.0,
+      "theta_prop": 135.0,
+      "axis_err_deg": 0.0,
+      "anisotropy_ratio": 4.223605206819543
+    }
+  ],
+  "isotropic_control": [
+    {
+      "kernel": "isotropic",
+      "theta_EE": 0.0,
+      "theta_prop": 90.0,
+      "axis_err_deg": 90.0,
+      "anisotropy_ratio": 1.0
+    },
+    {
+      "kernel": "isotropic",
+      "theta_EE": 45.0,
+      "theta_prop": 90.0,
+      "axis_err_deg": 45.0,
+      "anisotropy_ratio": 1.0
+    },
+    {
+      "kernel": "isotropic",
+      "theta_EE": 90.0,
+      "theta_prop": 90.0,
+      "axis_err_deg": 0.0,
+      "anisotropy_ratio": 1.0
+    }
+  ],
+  "verdict": {
+    "anisotropic_theta_prop_tracks_theta_EE": true,
+    "isotropic_control_fails_to_produce_axis": true,
+    "discriminator_passed": true,
+    "note": "Step-0d load-bearing discriminator: propagation axis set by E->E connectivity anisotropy (theta_prop tracks theta_EE), NOT electrode geometry; isotropic control produces no directional template. PASS supports SEF-HFO vs geometry artifact."
+  }
+}
