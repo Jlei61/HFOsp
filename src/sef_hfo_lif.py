@@ -278,6 +278,7 @@ def integrate_lif_field(
     return_field: bool = False,
     return_peak_field: bool = False,
     coh_len: float | None = None,
+    axis_accum: bool = False,
 ):
     """Integrate the 2-D LIF rate field.
 
@@ -337,13 +338,21 @@ def integrate_lif_field(
         ``return_field`` is set.  Peak-extent field if ``return_peak_field``,
         else final field.
     ext_coh : ndarray, shape (nsteps,) — only when ``coh_len`` is set; appended
-        LAST.  Coherence-based active fraction (smoothed-field threshold crossing).
+        LAST (before axis_accum).  Coherence-based active fraction.
+    axis : dict — only when ``axis_accum`` is set (requires ``coh_len``); appended
+        VERY LAST.  Aggregated centered second-moment of the smoothed active
+        region over all "event-on" frames: ``{"Sxx","Sxy","Syy","n_onframes"}``.
+        The principal eigenvector of [[Sxx,Sxy],[Sxy,Syy]] is the systematic
+        event elongation axis across many events (per-event triggering asymmetry
+        averages out) — the contract §5 aggregated direction measure.
     """
     wee = float(op.get("w_ee_mult", 1.0)) * W_EE   # recurrent E→E gain matches the op
     KEE = anisotropic_gaussian(n, L, ell_par, ell_perp, theta_EE)
     KI = isotropic_gaussian(n, L, l_inh)
     K_coh = isotropic_gaussian(n, L, coh_len) if coh_len is not None else None
-    X_grid, _ = _grid(n, L)
+    if axis_accum and K_coh is None:
+        raise ValueError("axis_accum=True requires coh_len to be set")
+    X_grid, Y_grid = _grid(n, L)
 
     lE = _lut(op["sE"], TAU_ME, TREF_E)
     lI = _lut(op["sI"], TAU_MI, TREF_I)
@@ -369,6 +378,8 @@ def integrate_lif_field(
     thr = op["nuE"] + DETECT
     peak_field = rE.copy()
     peak_ext = -1.0
+    Sxx = Sxy = Syy = 0.0
+    n_onframes = 0
 
     for t in range(nsteps):
         stim = stim_fn(t * dt)
@@ -389,7 +400,19 @@ def integrate_lif_field(
         ext[t] = m.mean()
         front[t] = float(X_grid[m].max()) if m.any() else np.nan
         if ext_coh is not None:
-            ext_coh[t] = (convolve_periodic(rE, K_coh) > thr).mean()
+            cf = convolve_periodic(rE, K_coh)
+            m_coh = cf > thr
+            ext_coh[t] = m_coh.mean()
+            if axis_accum and m_coh.sum() >= 10:
+                w = cf[m_coh] - op["nuE"]
+                xs = X_grid[m_coh]
+                ys = Y_grid[m_coh]
+                xm = np.average(xs, weights=w)
+                ym = np.average(ys, weights=w)
+                Sxx += float(np.sum(w * (xs - xm) ** 2))
+                Syy += float(np.sum(w * (ys - ym) ** 2))
+                Sxy += float(np.sum(w * (xs - xm) * (ys - ym)))
+                n_onframes += 1
         if ext[t] > peak_ext:
             peak_ext = ext[t]
             peak_field = rE.copy()
@@ -401,6 +424,8 @@ def integrate_lif_field(
         out.append(rE)
     if ext_coh is not None:
         out.append(ext_coh)
+    if axis_accum:
+        out.append(dict(Sxx=Sxx, Sxy=Sxy, Syy=Syy, n_onframes=n_onframes))
     return tuple(out) if len(out) > 2 else (ext, front)
 
 

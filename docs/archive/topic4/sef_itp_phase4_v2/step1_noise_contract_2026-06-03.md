@@ -207,6 +207,14 @@ discrete_events 的 seed 比例（/5）：
 
 B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（`captured_high`，§9.2），所测 recovery（b_a=2000,τ_a=25）回拉但不失稳高不动点。B 的高态是否可变 transient 是更深的单独问题，不并入 window A 主线，不与 A 的慢噪声 probe 合并。**主线结论用 window A。**
 
+### 9.5 方向判别（S1.5/S1.6）—— 第一次测法错（单事件），换聚合测法
+
+**第一次尝试（`scripts/run_sef_hfo_step1_direction.py` v1，σ=2.0 τ=100）= 失败，但测法违反了本合同 §5。** 我用**单个全局峰值场**（一次 run 一帧）测主轴：anisotropic axis_err 散乱（1–89°、不跟 θ_EE），isotropic 对照也出虚假轴（ratio 1.1–1.8）。原因：**噪声触发的单个事件，其形状被那一次触发涨落的随机不对称主导**——单事件主轴无意义。静态 0d 能 <0.1° 是因为只有一个干净确定性事件。合同 §5 本就要求**聚合 ≥10 事件**，我违反了自己的合同。
+
+**修法（按 §5）**：在 canonical `integrate_lif_field` 加 `axis_accum`——对所有"事件进行中"帧（coherence 活跃）累加**居中二阶矩张量**（每帧减自身质心，按活动加权），principal axis of 累加张量 = 跨多事件的系统性拉长方向。随机单事件不对称会平均掉，θ_EE 系统拉长留存。[运行中 / 下一步]
+
+**当前判定**：window A 的**离散性四项已 PASS（§9.3）**；**方向承重判别项 = 测法修正后重测中**（单事件测法的 FAIL 不作结论，是方法 artifact）。
+
 ---
 
 ## 附录 A：数据锚定出处表（原 exploration 2，2026-06-03 整理合入）
