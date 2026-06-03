@@ -214,6 +214,7 @@ def integrate_lif_field(
     ell_par: float = ELL_PAR,
     ell_perp: float = ELL_PERP,
     l_inh: float = L_INH,
+    return_field: bool = False,
 ):
     """Integrate the 2-D LIF rate field.
 
@@ -246,12 +247,18 @@ def integrate_lif_field(
     l_inh : float
         Inhibitory kernel width (mm).
 
+    return_field : bool
+        If True, also return the final rE field (shape (n, n)) as a third element.
+        Default False — callers that only need (ext, front) are unaffected.
+
     Returns
     -------
     ext : ndarray, shape (nsteps,)
         Per-timestep fraction of active pixels (rE > op["nuE"] + DETECT).
     front : ndarray, shape (nsteps,)
         Per-timestep maximum x-coordinate of active pixels (nan if none active).
+    rE_final : ndarray, shape (n, n) — only present when ``return_field=True``
+        Final excitatory rate field (kHz).
     """
     KEE = anisotropic_gaussian(n, L, ell_par, ell_perp, theta_EE)
     KI = isotropic_gaussian(n, L, l_inh)
@@ -298,6 +305,8 @@ def integrate_lif_field(
         ext[t] = m.mean()
         front[t] = float(X_grid[m].max()) if m.any() else np.nan
 
+    if return_field:
+        return ext, front, rE
     return ext, front
 
 

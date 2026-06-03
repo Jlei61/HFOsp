@@ -99,11 +99,12 @@ def test_lif_high_gain_at_low_rate():
 def test_steady_state_holds():
     """Integrating the field with NO stim from the fsolve op must stay at the fixed point.
 
-    Criterion: max |rE(x,t) - op["nuE"]| over all space after 80 ms < 5e-3 kHz.
+    Criterion: max |rE(x,t) - op["nuE"]| over all space at t=80 ms < 5e-3 kHz.
     This verifies the fsolve solution is a genuine fixed point of the spatial PDE.
+    Uses return_field=True to directly check field deviation (not a proxy via ext).
     """
     op = mean_field(1.0)
-    ext, front = integrate_lif_field(
+    ext, front, rE_final = integrate_lif_field(
         op,
         stim_fn=lambda t: 0.0,
         dt=0.25,
@@ -113,12 +114,11 @@ def test_steady_state_holds():
         theta_EE=0.0,
         n=_DEFAULT_N,
         L=_DEFAULT_L,
+        return_field=True,
     )
-    # At the fixed point: all pixels are at op["nuE"], so active fraction ext ~ 0
-    # (since DETECT = 0.005, and perturbation should be < 5e-3 kHz = DETECT)
-    # Verify that ext stays near 0 (no pixels drift above threshold)
-    assert ext.max() < 5e-3, (
-        f"Fixed-point violated: max active fraction = {ext.max():.4f} (expected < 5e-3)"
+    max_dev = float(np.max(np.abs(rE_final - op["nuE"])))
+    assert max_dev < 5e-3, (
+        f"Fixed-point violated: max |rE - nuE| = {max_dev:.2e} kHz (expected < 5e-3)"
     )
 
 
