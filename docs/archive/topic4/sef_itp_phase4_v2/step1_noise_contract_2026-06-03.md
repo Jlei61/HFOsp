@@ -142,6 +142,49 @@ Step 0 是"我手动戳一下让它点着、看它会不会定向铺开再自己
 - `scripts/plot_sef_hfo_step1_noise.py`：触发率曲线（§4）+ regime 热图 → `figures/` + `figures/README.md`（中文）。
 - archive 续写本文件的 results 段；framework / INDEX / v2-plan 加 cross-link。
 
+---
+
+## 9. Results
+
+### 9.1 Window A (recovery-off) smoke — 诚实 NULL（2026-06-03，coherence 检测，N=64, T_RUN=2000ms, 2 seeds）
+
+| σ (mV) | seed 0 | seed 1 |
+|--------|--------|--------|
+| 1.5 | extinction | extinction |
+| 2.0 | extinction | extinction |
+| 2.5 | discrete (frac_on 0.26) | **sustained** (0.61) |
+| 3.0 | sustained | sustained |
+| 4.0 / 6.0 | sustained | sustained |
+
+**⚠️ 修正（2026-06-03，advisor catch）：初读"window A 无离散窗、离散需 recovery"是错的，被自己的数据推翻 —— 不要把它当结论。** σ=2.5 **两个 seed 都有 `n_ev=11` 个自终止事件**（seed0 frac_on 0.26 标 discrete；seed1 frac_on 0.61 仅因越过 0.30 时间分离阈被标 sustained）。即 **recovery-off 的 window A 确实从噪声里点出了 ~11 个自终止事件**（与 Step-0b 单脉冲自终止一致，现在是噪声触发）。所以：
+
+- **离散性不需要 recovery**（A 没 recovery 却出事件；B 有 recovery 却因被俘获失败——见 §9.2，两者失败原因不同，不可合并）。
+- 问题不是"没有离散"，而是**事件太密**（frac_on 高、~5.5/s vs 数据 ~0.3/s），卡在时间分离阈两侧。
+- **根因是噪声驱动被污染**：`tau_noise=5ms ≈ TAU_AMPA`——快突触涨落已被 Φ_LIF 的 σ 吸收，再加同速 per-pixel OU = **双重计数** → 持续的点火尝试流 → 任何能点着的 σ 都连续点着 → sustained。这是 OU 项用错了频段（应代表**慢、空间结构化**的输入：afferent burst/drift，几十–几百 ms），是**正确性问题不是调参**。
+
+**所以当前 smoke 既不是 pass 也不是干净 null——是 confounded。** 决定性实验（§9.3）：window A 换**慢噪声**（tau_noise ~50–200ms），预登记假设 = 稀疏越阈 → 孤立自终止脉冲、frac_on 跨 seed 稳健 <0.30。一个变量、有物理依据、先声明。慢噪声若**仍**无稳健窗 = 强且可解释的 null；当前这个不可解释。
+
+### 9.2 Window B (recovery-on) + B_ablate — 也 NULL（noise 把系统踢进高 root 被俘获）
+
+roots(B, wee×1.4) = [0.339, 2.028] Hz（双稳：低静息 + 高饱和）。smoke 同上（N=64, 2000ms, 2 seeds）。
+
+**B（recovery on，b_a=2000, τ_a=25）**：σ≤1 extinction；σ≥1.5 **全部 sustained 且 `captured_high=True`**（coh_max 0.6–0.8，frac_on 高）。无离散事件。
+**B_ablate（recovery off）**：σ=0.5 extinction；σ≥1.0 **全部 sustained，`captured_high=True`，coh_max=1.000**（整场饱和到高 root）。
+
+**B 失败的原因和 A 不同——不可合并、不作主结论。** B 是双稳（roots 0.34/2.03Hz），噪声不是"点着一个会熄灭的事件"，而是把系统**踢过 separatrix 落进高 root 盆地并留在那**（`captured_high=True`，advisor 预测命中："noise kicks the system into the high attractor"）。recovery 有可量化回拉（B σ≥1.5 才被俘获、coh 0.6–0.8；B_ablate σ≥1.0、coh=1.0）但**所测 b_a=2000/τ_a=25 不足以失稳那个高不动点**，故仍 captured。
+
+**这是一个结构性发现（B 的高态是稳定吸引子，所测 recovery 不能让它变 transient），不是 Step-1 主结论。** B 的真问题"是否存在某 recovery regime 让高态从稳定吸引子变成瞬态"更深，单独立项；**不与 A 的噪声驱动 probe 合并扫**（慢噪声救不了 B——稀疏 kick 仍落进高盆地）。
+
+**Step-1 主线（window A "噪声→离散事件"）的判定推迟到 §9.3 慢噪声 probe**——当前 fast-noise smoke 是 confounded（见 §9.1 修正），既非 pass 亦非干净 null。
+
+### 9.3 Window A 慢噪声 probe（决定性，预登记假设）
+
+**改 ONE 变量**：`tau_noise` 5ms → 慢（50–200ms），其余全锁（wee=1.0, recovery off, ell_noise=0.5, coherence 检测, N=64）。物理依据：Φ_LIF 的 σ 已含快突触涨落；OU 在 μ 上应代表**慢、afferent 级**输入，不是再加一遍快涨落。
+
+**预登记假设（跑之前写死）**：慢噪声 → 稀疏越阈激发 → **孤立**自终止脉冲 → 存在一段 σ 使 `frac_on` 跨 seed 稳健 <0.30 且 `n_ev≥1` 自终止（= discrete）。**若慢噪声仍无稳健离散带 = 强且可解释的 null（"持续随机驱动无论快慢都给不出离散，离散需要别的结构"）。** 若出现稳健离散带 = window A primary 的 mechanism-scale pass 候选（再验方向/率/对照）。
+
+[结果待填]
+
 ## Changelog
 - 2026-06-03 v1.0：开工前冻结（用户 6 条加固落数值）。
 - 2026-06-03 v1.1：**coherence 测度 amendment**（开 smoke 验证噪声地板时触发 + advisor）。raw 每像素活跃比例被 OU speckle 污染（σ=2.0 raw_ext 0.048 vs coh_ext 0.034 vs 真脉冲 coh 0.142）→ 检测改用 coherence 活跃比例（空间平滑 `coh_len=ELL_PAR` 后阈值），`EVENT_ON_FRAC` 0.01→0.05（按新测度噪声地板+margin 重定），新增时间分离判别 `FRAC_TIME_ON_MAX=0.30`（离散事件必须时间分开）。`coh_len` 作为可选项加进 canonical `integrate_lif_field`（commit 见下）。端到端 TDD：σ=2.0 noise → extinction（speckle 被拒）。**这是先验证再冻结的修正，不是看结果调参——新阈值不为 window A 制造离散窗（A 的诚实结局可能就是无离散窗 = 离散需要 recovery）。**
