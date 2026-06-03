@@ -1,0 +1,126 @@
+{
+  "per_ratio": [
+    {
+      "ratio": 0.85,
+      "nuE_Hz": 0.18589103226681947,
+      "nuI_Hz": 3.303116405852008,
+      "loop_gain_EE": 0.5654882017258243,
+      "max_re": -0.05231146947879095,
+      "k_star": 0.0,
+      "omega_star": 3.3734466740248353e-13,
+      "freq_Hz": 5.369007134279663e-11,
+      "regime": "stable",
+      "finite_k_hopf": false
+    },
+    {
+      "ratio": 0.9,
+      "nuE_Hz": 0.20638991972558807,
+      "nuI_Hz": 3.459603138159266,
+      "loop_gain_EE": 0.18541200120916743,
+      "max_re": -0.05065606830635065,
+      "k_star": 0.0,
+      "omega_star": 5.445499477983975e-14,
+      "freq_Hz": 8.666781595254853e-12,
+      "regime": "stable",
+      "finite_k_hopf": false
+    },
+    {
+      "ratio": 0.95,
+      "nuE_Hz": 0.6753633414678243,
+      "nuI_Hz": 6.301719805798997,
+      "loop_gain_EE": 2.2068687387827604,
+      "max_re": -0.022076550470917458,
+      "k_star": 2.4000000000000004,
+      "omega_star": 0.16058074268826592,
+      "freq_Hz": 25.55721896420525,
+      "regime": "stable",
+      "finite_k_hopf": true
+    },
+    {
+      "ratio": 1.0,
+      "nuE_Hz": 0.9317188090267855,
+      "nuI_Hz": 7.7306280546187525,
+      "loop_gain_EE": 2.745412419985637,
+      "max_re": -0.012129537880145971,
+      "k_star": 2.4000000000000004,
+      "omega_star": 0.16710086223844198,
+      "freq_Hz": 26.594928220165876,
+      "regime": "candidate",
+      "finite_k_hopf": true
+    },
+    {
+      "ratio": 1.05,
+      "nuE_Hz": 1.1445031973409674,
+      "nuI_Hz": 9.04167644953489,
+      "loop_gain_EE": 3.1044930699001716,
+      "max_re": -0.005941534163418905,
+      "k_star": 2.4000000000000004,
+      "omega_star": 0.17178030462822816,
+      "freq_Hz": 27.339684607414096,
+      "regime": "candidate",
+      "finite_k_hopf": true
+    },
+    {
+      "ratio": 1.1,
+      "nuE_Hz": 1.324887255204581,
+      "nuI_Hz": 10.275862940158232,
+      "loop_gain_EE": 3.3562799614537604,
+      "max_re": -0.001800456868347031,
+      "k_star": 2.4000000000000004,
+      "omega_star": 0.1754075178184329,
+      "freq_Hz": 27.916973516283306,
+      "regime": "candidate",
+      "finite_k_hopf": true
+    },
+    {
+      "ratio": 1.15,
+      "nuE_Hz": 1.4806782978174895,
+      "nuI_Hz": 11.455172504923631,
+      "loop_gain_EE": 3.538938080225127,
+      "max_re": 0.0011058908951504668,
+      "k_star": 2.4000000000000004,
+      "omega_star": 0.17835430571405925,
+      "freq_Hz": 28.385969376115604,
+      "regime": "unstable",
+      "finite_k_hopf": true
+    },
+    {
+      "ratio": 1.2,
+      "nuE_Hz": 1.617488756259851,
+      "nuI_Hz": 12.593490382785108,
+      "loop_gain_EE": 3.674926012278458,
+      "max_re": 0.0032165006041407224,
+      "k_star": 2.4000000000000004,
+      "omega_star": 0.18082826956267126,
+      "freq_Hz": 28.779712951652858,
+      "regime": "unstable",
+      "finite_k_hopf": true
+    },
+    {
+      "ratio": 1.25,
+      "nuE_Hz": 1.7389328021527048,
+      "nuI_Hz": 13.69875199775136,
+      "loop_gain_EE": 3.7769557243219274,
+      "max_re": 0.004768320017374118,
+      "k_star": 2.4000000000000004,
+      "omega_star": 0.18295262427062547,
+      "freq_Hz": 29.11781450430431,
+      "regime": "unstable",
+      "finite_k_hopf": true
+    }
+  ],
+  "verdict": {
+    "transfer": "LIF colored-noise (Siegert), self-consistent -- NO injected gain",
+    "validated_low_E_rate": true,
+    "fraction_candidate_or_unstable": 0.6666666666666666,
+    "fraction_finite_k_hopf": 0.7777777777777778,
+    "freq_range_Hz": [
+      25.55721896420525,
+      29.11781450430431
+    ],
+    "coworker1_empirical_Hz": 29.0,
+    "conclusion": "LIF transfer realizes a near-critical finite-k Hopf at LOW E rate (<2 Hz), through a candidate-excitable window, at ~25-29 Hz matching coworker1. The sigmoid could not (max stable-rest loop gain 1.26). Transfer replacement works through the linear map.",
+    "next": "Rebuild the finite-pulse gate (Step 0b) on a LIF field integrator; only self_limited_propagation + positive margin there unlocks Step 1.",
+    "step1_status": "LOCKED (finite-pulse gate not yet re-run on the LIF field)."
+  }
+}
