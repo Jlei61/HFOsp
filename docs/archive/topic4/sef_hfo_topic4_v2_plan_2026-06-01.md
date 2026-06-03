@@ -4,6 +4,33 @@
 > **替代范围**：替代 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` 中 HR 主、FHN sensitivity 的 Phase 4 建模主线；保留 `docs/topic4_sef_itp_framework.md` 中已经锁定的真实数据验收合同、cohort tier、phantom-rank 修复纪律、clinical SOZ 不作为拟合标签的红线。
 > **不替代范围**：不重写 Topic 1 的实证发现，不解释 HFO 80-250/500 Hz carrier 的细胞生物物理，不把 template source 直接等同 clinical SOZ。
 
+> **2026-06-02 review amendment（two-stage screen 重定位；本块为当前 governing 口径）**
+>
+> 经 2026-06-02 review（advisor 复核 + 用户 ratify），SEF-HFO v0.2 从「强机制确认模型」**重定位为 two-stage control-disciplined exploratory mechanism screen**：
+> - **Stage 1 = exploratory mechanism screen**：不预设「低异质性必然 → 近临界」。先在**跟模型无关的真实数据框定的 baseline operating-point family** 上系统筛选哪些机制组合能产生稳定、自限、可复现的间期传播组织；通过筛选的**最小机制冻结**后才进入 Stage 2。
+> - **Stage 2 = held-out consistency validation**（原 §4 Step 6「预测验证」改名）：在 held-out 上做一致性印证，**不**声称前瞻验证（各向异性轴旋转在真实数据无对应物；率变-几何不变即已有 H4）；**Stage 1 筛选用过的真实特征不得再作 Stage 2 验证目标**（disjoint screen/validation targets），或在未参与筛选的被试上验证。
+>
+> **冻结的是纪律与判据逻辑，不是参数值**（用户口径：建模本身探索性强，参数值留作待筛选的 hypothesis scaffold，不现在写死）。governing 纪律补丁（review A–E + 用户五条，统一编号）：
+>
+> 1. **operating-point family + 自洽稳态 + 不准抢救**（收紧 §1.3 第1条 gain-closed / §2.2）：工作点取**自洽稳态**（稳态发放率自洽解 r0 = F_eff(W·r0 + I)）；可接受族范围用背景发放率 / E-I 比例 / 平时离阈值距离等**模型无关真实数据先框死、动异质性前锁定**。报「可接受族里多大**比例**的工作点上『降低异质性 → 更易激（`eta_lin` 下降 / finite-pulse 阈值下降）』成立」，**不报「存在一个点成立」**。某些工作点不成立时**如实报适用范围，禁止用移动均值阈值 / 外部输入 / 连接强度抢救机制**。E、I gain 同时动，净效果正负由计算决定。
+> 2. **finite-pulse 为线性稳定性之后的必要步**（§3.1 / §4 Step 0 拆分）：linear dispersion map 只定位小扰动 mode 和候选窗，不证明有限幅自限事件；Step 0 拆 **0a linear dispersion map + 0b finite-pulse response map**（extinction / local bump / self-limited propagation / runaway）；**只有落在 self-limited propagation 区的参数进入后续 synthetic HFO 分析**。
+> 3. **recovery 变量从 rate 层起 + 跨阶段同构**（收紧 §3.1 / §3.4）：rate field 即加**可开关的最小恢复 / 不应变量**保证「点着→传播→熄灭」闭环；**0b 同时跑「纯抑制」与「加恢复变量」两套响应面，按实测哪套稳定给出自限传播定**，tie-break = 自限区间更宽（更不挑参数）+ 事件时长/空间范围更贴数据；选定后 **rate 与 LIF 用同一套**（LIF 映射为 g_K / adaptation current）。**恢复时间常数锚到真实 HFO 群体事件持续时长，不自由调**。Stage 4 须回验 LIF 粗粒化的群体 I-O 曲线与恢复时间常数与 rate 层一致（「同构」要验不是声明）。
+> 4. **承重判别指标 = 方向随连接轴转、不随电极杆转**（替换 §4 Step 2 的「是否出现 forward/reverse」主判据）：线性电极几何本身就能产生稳定顺序与正反反向模板（各向同性扩散从一根直杆两端成核即给出 1→n 与 n→1），故 **identity bias / held-out rank stability / inter-template anti-correlation 很可能与 isotropic+aligned-shaft 对照共享，不作承重判据**。承重判别指标具体化：系统转「连接各向异性轴」与「电极杆轴」，模板方向角对二者回归，**预注册「连接角系数≈1、杆角系数≈0、CI 排除反转情形」才算过**；且 **isotropic+aligned-shaft 对照必须过不了这一条**（它即该判据的坏数据回归测试）。
+> 5. **复用边界**（§3.5 / Stage 4）：模型只生成虚拟信号 + 事件候选；排序 / 聚类 / 模板稳定性 / identity bias / endpoint 全部**调用现有真实数据 pipeline 代码（PR-2 / PR-2.5 / PR-6）不改一行**，不为 synthetic data 另写更易通过的分析器（CLAUDE.md §6.1）。
+>
+> 受本 amendment 收紧的 **§1.3 / §4 Step 2 / §4 Step 6** 节首已加回指；§2.2 / §3.1 / §3.4 / §3.5 的 prose 由本 amendment 直接 govern，原文保留作 audit trail。**下一步**：Step 0a/0b 具体实施方案（exploratory mechanism screen 定位，预注册纪律 1–5，参数值留 scaffold）。
+
+> **2026-06-03 amendment（user 讨论敲定；与 `docs/topic4_sef_itp_framework.md` 2026-06-03 amendment 同步）**
+>
+> 1. **「局部自限」→「时间离散自终止」（空间可填满 SOZ 邻域网格）**：建模目标不是空间次网格波，而是 SOZ 小邻域网格内时间离散且自终止的群体 HFO 传播事件；要锚传播 lags（模板时间结构）+ 事件包络时长，**不**锚 HFO 80–250Hz 载波频率（载波仍 out of scope）。
+> 2. **recovery 措辞收硬**（收紧上节纪律 3）：recovery 不是首选生物解释，**但必须作为并列机制分支进入 Step 0b**（**不**写成暂不做）；纯抑制自限 vs 加恢复变量自限 report-both / no-auto-select，去留由真实事件时长 / 空间范围 / 自限区宽度决定。亚临界噪声触发（"Brunel 支"）为离散事件的概念首选路径。
+> 3. **促临界 ↔ 稳态回拉拮抗 = 看整个参数方案的组织视角**（描述性，非新验收）：旋钮归两极——促临界（低阈值异质性 / patch、强 E→E、增益↑、去抑制、Cl⁻ 致 E_GABA↑）vs 回拉（sAHP、自适应阈值、强/快抑制、阈值异质性↑）；同一拮抗跑两尺度：事件内（快：可激传播 vs recovery / 空间约束掐断）+ 跨时间（慢：促临界漂移 vs 稳态）。recovery = 回拉极快端，与慢端稳态同源。
+> 4. **homogeneous / heterogeneous（不绝对化）**：heterogeneous patch + surround = 间期自限事件的自然结构（促临界核被周围回拉约束住）；homogeneous = 单相极限，可能代表全回拉 / 全促临界 / 控制条件，**不直接等同「发作态」**。
+> 5. **发作桥接降格 = H5 / Phase 3 候选机制**，不入纯间期主验收：间期事件可能既是噪声涨落、又可能留净促临界痕迹；自限安全余量被压低时某次涨落更易越界成持续招募；逐事件累积 / 悬停临界 / 发作后重置须用 seizure 间隔 / 风险率数据判（无记忆 vs 渐增）。**只作后续仿真 + H5 数据检验候选机制，不作为 Topic 4 主模型已解释 clinical seizure onset 的结论。**
+> 6. **coworker1 LIF（`Jlibrary/ei_snn_scaffold/`，Brunel-exact current-based LIF）= Step 4 前置参考 / LIF 引擎可行性证据，非模型闭环**；缺：亚临界离散事件、低异质性 patch、synthetic 走真实 pipeline、controls 必须过不了、rate↔LIF 同构。
+>
+> **Step 0 验收判定（2026-06-03）**：Step 0a/0b **机器里程碑 accepted**（模块 + 21 tests + gate + runner，smoke tier 过；`docs/archive/topic4/sef_itp_phase4_v2/step0_results_2026-06-02.md`）。但**解锁 Step 1 的 formal gate 未过**：scaffold 占位参数下 `fraction_with_window=0`、0 候选工作点、深度稳定 / 主模 k=0、有限脉冲全 extinction —— 按纪律 2「只有落在 self-limited propagation 区的参数进入后续分析」**无参数入选**，Step 1 无候选窗可加噪声 → **Step 1 保持锁定**。解锁前置：(a) 数据锚定 operating-point family + 单位（背景率 / E-I 比 / 离阈距 + Brunel Table-1 时间常数 + 实测事件时长定恢复 / 包络 + 实测 lags 定传播速度），`provenance`→`data_locked`；(b) data_locked re-run 0a/0b 确认候选窗使有限脉冲给出 **self-limited PROPAGATION（移动波前，非静态 / 非全局闪）+ 正安全余量**，recovery off/on 并列、dt/L 敏感性稳定、报族内通过比例；(c) 很可能先把 rate 层换 LIF 有色噪声 transfer + Brunel 时间结构使色散预测有限-k Hopf / 传播态（rate↔LIF 同构交叉验证）。
+
 ---
 
 ## 0. 一句话假设
@@ -38,6 +65,8 @@
 - 不声称本模型解释 clinical seizure onset；发作样招募只作为仿真可行性，不作为 Topic 4 主结论。
 
 ### 1.3 v0.2 硬合同
+
+> **2026-06-02 amendment 收紧**：本节 5 条在 two-stage screen 重定位下收紧，见顶部 2026-06-02 amendment —— 第1条 gain-closed 加 operating-point family + 自洽稳态 +「报比例不报存在 + 不准抢救」；第3条 control-disciplined 的承重判别指标具体化为「方向随连接轴转、不随电极杆转」带阈值回归判据（isotropic+aligned-shaft 对照必须过不了）；并入 recovery 从 rate 层起跨阶段同构、Stage 2 disjoint screen/validation targets。
 
 这版计划的核心纪律是：
 
@@ -284,6 +313,8 @@ A_runaway - A_event > positive safety margin
 
 目标：复现主数据结构：两个方向、稳定模板、高 identity bias。
 
+> **2026-06-02 amendment（承重判别指标替换）**：下列主验收标准中 identity bias / held-out rank stability / inter-template anti-correlation **很可能与 isotropic+aligned-shaft 对照共享**（线性电极杆两端成核即给出正反反向模板），**不作承重判据**。承重判别指标改为「模板方向随连接各向异性轴转、随电极杆旋转不变」带阈值回归判据，且 isotropic+aligned-shaft 对照必须过不了这一条。详见顶部 2026-06-02 amendment 第4条。
+
 主验收标准：
 
 - held-out rank stability 高于 controls。
@@ -348,7 +379,9 @@ A_runaway - A_event > positive safety margin
 - 当 `eta(x,t) < 0` 时，仿真可进入 ictal-like recruitment；该结果只作为 synthetic feasibility bridge，不作为 clinical seizure onset claim。
 - `z_I(t)`、`g_K(t)` 不进入第一版主分析；只能作为 `q(t)` 版通过后的分解实验。
 
-### Step 6：回到真实数据做预测验证
+### Step 6：回到真实数据做预测验证（→ 2026-06-02 改名 held-out consistency validation）
+
+> **2026-06-02 amendment（改名 + 收紧）**：本步改名 **held-out consistency validation**，定位为一致性印证、**不**声称前瞻验证（各向异性轴旋转在真实数据无对应物，率变-几何不变即已有 H4）。新增硬约束：**Stage 1 筛选用过的真实特征不得再作本步验证目标**（disjoint screen/validation targets），或在未参与筛选的被试上验证。详见顶部 2026-06-02 amendment。
 
 目标：避免模型过度灵活，只做预测验证，不做反向拟合。
 
@@ -399,7 +432,7 @@ SEF-HFO 的贡献不是指定“钾、钠、氯、泵、胶质或抑制”哪一
 
 - **抽象动力学 / 慢变量**：Jirsa et al. 2014; Chizhov et al. 2018; Wendling et al. 2005.
 - **离子与胶质等慢机制实现**：Cressman et al. 2009; Wei et al. 2014; Ho and Truccolo 2016.
-- **空间场与传播**：Proix et al. 2018; Wang et al. 2016/2017; Naze et al. 2015.
+- **空间场与传播**：Proix et al. 2018; Wang et al. 2016/2017; Naze et al. 2015; **Bachschmid-Romano, Hatsopoulos & Brunel 2026**（bioRxiv 2026.03.18.712701；与本模型方法**最接近的先例**：空间结构化 E-I spiking 网络、自洽 2×2 色散 `λ(k)`、外驱相图、各向异性 E→E 选传播轴、`|I^E|+|I^I|` LFP 代理。**关键区别**：其事件为近全局 Turing–Hopf 行波，SEF-HFO 承接其机制与方法，但目标是局部自限的间期 HFO 事件——0b 的 recovery off/on 正对应"亚临界近 Hopf"与"恢复变量局部脉冲"两条机制）.
 - **恢复能力 / 有限扰动 / 临界转变**：Chang et al. 2018; Maturana et al. 2020; Lepeu et al. 2024.
 - **HFO 观测对象与边界**：Zijlmans et al. 2010/2011; Weiss et al. 2013.
 

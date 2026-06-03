@@ -1,6 +1,17 @@
 # Topic 4：SEF-HFO / SEF-ITP Framework —— 间期 HFO 传播的空间易激场模型
 
 > **状态**：**v0.2 plan lock draft 2026-06-01**。Topic 4 主模型路线更新为 **SEF-HFO：低异质性 + 各向异性连接 + 近临界 E-I 易激场 + 慢变量调制**，并在 review 后收紧为 **gain-closed + pulse-validated + control-disciplined** 版本。旧 HR/FHN Phase 4 modeling route 降级为历史探索 / sensitivity，不再是主模型路线。详细计划见 `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`。
+> **2026-06-02 review amendment（two-stage screen 重定位）**：SEF-HFO v0.2 从「强机制确认模型」重定位为 **two-stage control-disciplined exploratory mechanism screen**（Stage 1 exploratory screen → freeze 最小机制 → Stage 2 held-out consistency validation，筛选/验证目标不重叠）；三条核心纪律补丁（① operating-point family + 自洽稳态 + 报「可接受族里多大比例成立」不报「存在一个点」+ 不准用均值阈值/外部输入/连接强度抢救机制；② recovery 从 rate 层就加、0b 扫纯抑制 vs 加恢复变量按实测定、rate 与 LIF 用同一套、恢复时间常数锚真实事件时长；③ 承重判别指标改为「模板方向随连接各向异性轴转、随电极杆旋转不变」带阈值回归判据，isotropic+aligned-shaft 对照必须过不了）详见 `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md` 顶部 2026-06-02 amendment。
+> **2026-06-03 amendment（user 讨论敲定：时间离散性 + 促临界↔稳态回拉拮抗视角；建模主线仍限纯间期）**：本轮修正**全部不改 v0.2 核心边界红线**（Topic 4 主模型只解释间期 HFO 群体事件的中观传播组织，**不解释 clinical seizure onset**）。六条：
+> 1. **「局部自限」重新表述为「时间上离散自终止」（空间可填满 SOZ 邻域网格）**——修正之前把空间局部性看得过重。建模目标**不是**空间上比网格更小的波，而是在 SOZ 小邻域网格内出现的、时间上离散且能自终止的群体 HFO 传播事件；网格本身 = 病灶及其小邻域，波填满网格仍是解剖学局部。要锚的是传播 lags（= 模板时间结构）与事件包络时长（= 自终止尺度），**不是** HFO 80–250Hz 载波频率（载波仍 out of scope）。
+> 2. **recovery 不是首选生物解释，但必须作为并列机制分支进入 Step 0b**（**不**写成暂不做）——沿用 v0.2 plan「0b 扫纯抑制自限 vs 加恢复变量自限、report-both、no-auto-select」合同；是否保留 recovery 由**真实事件时长 / 空间范围 / 自限区宽度**决定。亚临界噪声触发（"Brunel 支"）是离散事件的概念首选路径，但 recovery（"Pinto–Ermentrout 支"）作为并列分支硬性进入对比，不预先砍掉。
+> 3. **coworker1 LIF 结果 = Step 4 前置参考（LIF 引擎可行性证据），不是我们的模型闭环**——它证明 LIF 层能产生各向异性行波；距模型闭环仍缺：亚临界离散事件、低异质性 patch、synthetic 走真实事件 pipeline、controls 必须过不了、rate↔LIF 同构。
+> 4. **促临界 ↔ 稳态回拉拮抗** 作为看待整个参数方案的组织视角（描述性框架，非新验收）——旋钮归两极：促临界（低阈值异质性 / patch、强 E→E、增益↑、去抑制、Cl⁻ 致 E_GABA↑）vs 回拉（sAHP、自适应阈值、强/快抑制、阈值异质性↑）。同一拮抗在两尺度各跑一遍：事件内（快：可激传播 vs recovery/空间约束掐断）+ 跨时间（慢：促临界漂移 vs 稳态）。recovery = 回拉极的快端，与慢端稳态同源。
+> 5. **homogeneous / heterogeneous（不绝对化）**——heterogeneous patch + surround 是**间期自限事件的自然结构**（促临界病理核心被周围回拉机制约束住）；homogeneous 是单相极限，**可能**代表全回拉 / 全促临界 / 或控制条件，**不应直接等同「发作态」**。间期态 = 促临界核心被周围回拉约束住；发作样招募 = 该约束被削弱后、自限安全余量被随机涨落穿越。
+> 6. **发作桥接 = H5 / Phase 3 候选机制，降格、不进入当前纯间期主验收**——可能图景：间期事件**既是**噪声涨落、**又可能**留下净促临界痕迹；当自限安全余量被压低时，某次涨落更容易越界成为持续招募。具体是逐事件累积 / 悬停临界 / 还是发作后重置（风险率无记忆 vs 渐增），**须用 seizure 间隔 / 风险率数据判**。**此发作桥接只作后续仿真与 H5 数据检验的候选机制，不作为当前 Topic 4 主模型已解释 clinical seizure onset 的结论。**
+>
+> **执行序不变**：先做固定工作点上的**纯间期**（异质 patch + 约束，离散自终止 + 传播轴 + 端点几何，全高于 controls），坐实拮抗快端；慢端（促临界漂移 → 发作）作为独立扰动后加、需自己的失败模式。Step 0a/0b 机器已落地（`docs/archive/topic4/sef_itp_phase4_v2/step0_results_2026-06-02.md`）：scaffold 深度稳定 / 主模 k=0；能力体检证明机器能算出有限 k Turing，但 finite-k Hopf（行波）需 Brunel 时间结构、未在 scaffold 出现。
+> **Step 0 验收判定（2026-06-03）**：Step 0 **机器里程碑 accepted**（模块 + 21 tests + gate + runner，smoke tier 过）；但**解锁 Step 1 的 formal gate 未过**——scaffold 占位参数下 `fraction_with_window=0`、0 候选窗、深度稳定 / 主模 k=0、有限脉冲全 extinction，按纪律「只有落在 self-limited propagation 区的参数进入后续分析」**无参数入选** → **Step 1 保持锁定**。解锁前置：(a) 数据锚定 operating-point family + 单位（provenance→data_locked）；(b) data_locked re-run 0a/0b 取得「移动波前自限 + 正安全余量」候选窗（recovery off/on 并列、dt/L 稳定、报族内通过比例）；(c) 很可能先换 rate 层 LIF 有色噪声 transfer + Brunel 时间结构以预测有限-k Hopf/传播态（rate↔LIF 同构交叉验证）。详见 v2 plan 2026-06-03 amendment + `docs/archive/topic4/sef_itp_phase4_v2/step0_results_2026-06-02.md`。
 > **v0.2 核心边界**：只解释 HFO 群体事件的中观传播组织（event envelope、通道激活顺序、rank template、forward/reverse、identity bias、endpoint geometry、rate-geometry decoupling）；ictal-like recruitment 只作 synthetic feasibility bridge，不解释 clinical seizure onset；不解释 HFO 80-250/500 Hz carrier 的细胞生物物理，不把 template source 拟合成 clinical SOZ。
 > **v0.2 承接**：保留 v1 已锁定的真实数据验收合同、cohort tier、phantom-rank 修复纪律、clinical SOZ 不作为拟合标签的红线；替换的是建模机制路线，不是 Topic 1 的实证发现。
 >
@@ -806,6 +817,8 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 **前置**：Topic 0 phantom-rank 修复已完成；真实数据 pipeline 可用于 synthetic data。Phase 1-3 的实证合同继续作为验收标准，但 v2 建模路线不再等待 HR/FHN route。
 
+> **2026-06-03 amendment 适用于本 Step 列表**（详见顶部 banner）：建模目标 = SOZ 小邻域网格内**时间离散自终止**的群体事件（**非**空间次网格波，波可填满网格）；Step 0b 的 recovery 为**并列机制分支**（纯抑制自限 vs 加恢复变量自限 report-both，去留由实测事件时长/空间范围/自限区宽度定）；亚临界噪声触发为离散事件首选路径；发作样 recruitment 只作 H5 / Phase 3 候选机制，**不**入本轮纯间期主验收。
+
 **Step 0a：effective gain + 线性稳定性分析**
 
 - 把 `sigma_phi(x)` 写进 `F_eff(h;x)`，计算当前工作点下的局部 gain。
@@ -909,11 +922,11 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 1. **HFO 80–250 Hz 不分 E/I**：framework / archive / paper / toy / 任何 plan 全文严禁出现 "兴奋驱动 / 抑制反弹 / 证明机制" 表述
 2. **H3 措辞锁**："compatible with mark-independent sampling within tested precision"；禁止写 "证明独立"，禁止用 leave-one-subject-out 替代主判据
 3. **不预设 clinical SOZ = true SOZ**：H1/H2/H5 的 endpoint 不被假定为 SOZ 边界 / SOZ 内 / seizure onset；与多源 SOZ proxy 关系并列报告
-4. **不预设 θ(x) 自然涌现**：θ(x) 是模型预设输入；模型预测的是 θ(x) + 物理产出的几何指纹，**不是** θ(x) 本身（v1.0 反 tautology 锁）
+4. **不把低异质性直接等同易激性**：`sigma_phi(x)` 只能表示局部 threshold variance；它必须通过 `F_eff -> G -> lambda -> eta_lin` 实际改变局部稳定性，才允许进入“更接近可激窗”的解释。禁止回退到 v1 的抽象 `θ(x)` 场，或写成 `sigma_phi down => eta_lin down`。
 5. **directional predictor 用 sin 不是 cos**：如果未来本 framework 扩展到 P5 等价物（间期 → 发作 directionality），必须用 sin-based 或 rank-based，**禁止** cos-based directed graph（继承 SBA v1.1）
 6. **k = 3 主预测，k ∈ {2, 4, 5} 敏感性**：endpoint 定义的 k 在 framework time lock，**禁止**事后调整
 7. **H1 三层拆分 lock**：H1 必须拆 H1a（within-source compactness）+ H1b（within-sink compactness）+ H1c（envelope within participation field）；**禁止**回退到 `mean pairwise distance within (S ∪ K)` 的 v1 单一度量（与 H2 概念冲突）
-8. **H2 主分析 = 两条 reversal index lock**：set-based Jaccard + spatial centroid distance 是 H2 主分析；PCA axis projection 只能作 Tier 1+ sensitivity；**禁止**把 PCA 升为主分析（Tier 1 工程上跑不动）
+8. **H2 当前主合同 = 通道层角色互换 + source/sink 两侧空间紧凑**：H2 channel-label 必须来自 masked rank-displacement `swap_sweep` 的 variable-k 输出；空间层分别检验 source-side 与 sink-side swap-k 节点相对 `all mapped SEEG minus swap endpoint` 的 compactness。早期 set-based Jaccard + centroid-distance reversal index 只保留为 v1.0.2 audit trail，**禁止**作为当前 H2 主分析复活。
 9. **H3 verdict naming = SUPPORTED / NOT SUPPORTED / CONTRADICTED**：**禁止**用 PASS / NULL / FAIL（防止 "PASS = 证明独立" 误读）
 10. **H4 normalized instability + Cohen's d ≥ 0.3** lock：**禁止**回退到 `CV(rate) ≥ 3 × CV(geometry)` 的 v1 硬阈值（量纲不同 + CV 不稳）
 11. **H5 统计合同 lock**：min event ≥ 30 / time-of-day matched baseline / subject-level aggregation / fraction-vs-0.25 Wilcoxon / power floor 6 subject；**禁止**裸 channel-level t-test 或不校正 FDR
@@ -956,23 +969,23 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ## 10. 中心段落（草稿，供未来 paper / abstract 使用）
 
-> 我们假设，间期群体 HFO 传播模板反映的是一个空间组织化的病理易激场被反复采样。模型中的 θ(x) 代表真实但未知的病理空间结构，是模型输入而非模型产出；模型真正预测的是 θ(x) 与局部扩散、随机触发共同作用后产生的传播模板几何、source/sink 反转结构和时间采样规律。稳定的 endpoint 不被假定为 SOZ 边界，也不被强制假定为 SOZ 内部节点，而是病理场中的几何锚点。正反模板来自同一局部高易激轴在不同随机初始条件下被相反方向读取。慢变量主要调节事件招募概率，而模板几何相对稳定。当前数据可检验的是小时尺度的 endpoint identity shift；月年尺度的 SOZ 漂移需要纵向 cohort，暂不作为主文预测。
+> 我们假设，间期群体 HFO 传播模板来自一块局部低异质性、连接有固定方向、接近临界但仍未失控的 E-I 易激斑块。低异质性本身不是结论；它必须先改变群体输入-输出曲线和局部 gain，再在线性稳定性与有限幅脉冲仿真中表现为“能被点燃、但能自限熄灭”的工作窗。稳定的 endpoint 不被假定为 SOZ 边界，也不被强制假定为 SOZ 内部节点，而是模型预测的传播几何锚点。正反模板来自同一条各向异性传播轴从两端随机成核，而不是两套独立网络或强 ping-pong 机制。慢变量主要调节事件发生率；如果它重写传播几何，模型失败。发作样持续招募只作为仿真可行性桥接，不作为 clinical seizure onset 解释。
 
 英文版（供 abstract / 投稿）：
 
-> We hypothesize that interictal group-HFO propagation templates reflect repeated sampling of a spatially organized pathological excitability field. The local excitability θ(x) is a model input reflecting the unknown true pathological structure; the model's predictions concern the geometric and temporal organization of templates emerging from θ(x) + local diffusion + stochastic event initialization, not θ(x) itself. Stable source/sink endpoints are not assumed to be SOZ boundaries or restricted to SOZ interior; rather, they are geometric anchors embedded in or near the pathological field. Forward/reverse template pairs arise when the same local high-excitability axis is read out in opposite directions under stochastic initial conditions. Slow modulation changes the probability of event recruitment while the underlying template geometry remains relatively stable. Short-timescale endpoint identity shifts around seizures (hours) are testable in current data; long-timescale drift (months) requires longitudinal cohorts not yet available.
+> We hypothesize that interictal group-HFO propagation templates arise from a locally low-heterogeneity, anisotropically connected E-I excitable patch that is near critical yet still subthreshold. Low heterogeneity is not assumed to imply excitability directly; it must enter the effective population transfer function, alter local gain, and then produce a linear-stability and finite-pulse working regime in which finite perturbations can trigger self-limited propagation without runaway recruitment. Stable source/sink endpoints are not assumed to be SOZ boundaries or restricted to SOZ interior; rather, they are predicted geometric anchors of propagation. Forward/reverse template pairs arise from stochastic nucleation at opposite ends of the same anisotropic propagation axis, not from two independent networks or a forced ping-pong mechanism. Slow modulation changes event probability while the underlying template geometry remains relatively stable; ictal-like recruitment is treated only as a synthetic feasibility bridge, not as an explanation of clinical seizure onset.
 
 ---
 
-## 11. 自检清单（v1 lock 状态）
+## 11. 自检清单（v0.2 当前合同 + v1 真实数据合同）
 
-- [x] 单核心断言清晰（H0 病理易激场 + 扩散 + 随机触发，θ(x) 是输入不是产出）
+- [x] 单核心断言清晰（局部低异质性 + 各向异性连接 + 近临界但亚阈值 E-I 易激斑块；低异质性必须经 `F_eff -> G -> lambda -> eta_lin` 闭合）
 - [x] H1–H6 每条有 verdict 标签 + 数字判据 lock + 三段式描述
 - [x] H1 拆三层（H1a within-source / H1b within-sink / H1c envelope-within-field）避免与 H2 概念冲突
 - [x] H1 endpoint k=3 主预测 + {2, 4, 5} 敏感性 lock
 - [x] H1 四种距离（Euclidean / shaft-ordinal / cortical surface / SC）并列报告 lock
-- [x] H2 主分析 = set-based Jaccard reversal + spatial centroid reversal index（两条都跑，都 PASS 才算 H2 PASS）
-- [x] H2 PCA axis projection 降为 Tier 1+ sensitivity（要求 `non_endpoint_participating ≥ 4`），不作主分析
+- [x] H2 主合同 = masked rank-displacement variable-k channel labels + source-side / sink-side swap-k spatial compactness；不写单一 "H2 PASS"
+- [x] H2 早期 set-based Jaccard / centroid-distance reversal index 与 PCA axis projection 只保留为 v1.0.2 audit trail，不作当前主分析
 - [x] H3 verdict naming = SUPPORTED / NOT SUPPORTED / CONTRADICTED（不用 PASS 防误读）
 - [x] H3 措辞锁 "compatible with mark-independent within tested precision"（继承 PR-7 addendum 2026-05-01）
 - [x] H4 normalized instability vs matched null + Cohen's d ≥ 0.3 lock（v1 CV ≥ 3× 已废）
@@ -991,7 +1004,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - [x] ictal-like recruitment 只作 synthetic feasibility bridge，不作 clinical seizure onset claim
 - [x] 与 PR-T3-1 数据驱动 SOZ 的双标签合同写明
 - [x] SBA framework 取代 / 保留范围明确（§9.1）
-- [x] Topic 1 §2 + Topic 3 §2 实际加入 SEF-ITP 链接（v1.0.2 修订实际落字）
+- [x] Topic 1 §2 + Topic 3 §2 保留 Topic 4 模型层链接；v0.2 主入口指向 SEF-HFO / SEF-ITP formal entry
 - [x] Out of scope 包括 Topic 2 事件间周期 / HFO carrier 细胞生物物理 / patient-specific fitting
 - [x] CLAUDE.md §8 大白话风格全文遵循（codename 仅作括号补注）
 

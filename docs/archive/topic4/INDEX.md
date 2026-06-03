@@ -17,6 +17,8 @@
 - v0.2 建模路线：effective gain → linear dispersion map → finite-pulse response map → 2D rate field + geometry controls → LIF E-I SNN → 抽象慢变量 feasibility bridge
 - 文献 framing：具体细胞机制多样，但在中观层收敛到易激性、恢复能力、有限扰动响应和空间招募变化；SEF-HFO 只承接这个抽象动力学层，不把间期 HFO 写成微型发作
 - 转向触发点（2026-06-01）：旧 HR/FHN route 仍能作为 sensitivity，但主线不够 sharp；v0.2 把机制收紧为“低异质性必须 gain-closed、事件必须 pulse-validated、几何证据必须 control-disciplined”
+- 2026-06-02 review amendment：v0.2 重定位为 **two-stage control-disciplined exploratory mechanism screen**（Stage 1 exploratory screen → freeze 最小机制 → Stage 2 held-out consistency validation，筛选/验证目标不重叠）；三条纪律补丁（operating-point family + 不准抢救、recovery 从 rate 层起跨阶段同构、判别指标改为「方向随连接轴转不随电极杆转」带阈值判据）见 v2 plan 顶部 2026-06-02 amendment。
+- 2026-06-03 amendment：「局部」收窄为**时间离散自终止（空间可填满 SOZ 邻域网格）** + 促临界↔稳态回拉拮抗作组织视角 + recovery 并列机制分支硬化（不写成暂不做）+ homogeneous/heterogeneous 不绝对化 + 发作桥接降格为 H5/Phase 3 候选机制（不作 clinical seizure onset 结论）+ coworker1 LIF (`Jlibrary/ei_snn_scaffold/`) = Step 4 前置参考。**Step 0 验收 = 机器里程碑 accepted（21 tests + gate，smoke 过）、但解锁 Step 1 的 formal gate 未过（scaffold `fraction_with_window=0`、无候选窗、主模 k=0）→ Step 1 锁定，待数据锚定 re-run 取得「移动波前自限 + 正余量」候选窗**。结果 `docs/archive/topic4/sef_itp_phase4_v2/step0_results_2026-06-02.md`；详见 framework + v2 plan 顶部 2026-06-03 amendment。
 
 ## 前一代主路径（2026-05-20 至 2026-06-01）
 
