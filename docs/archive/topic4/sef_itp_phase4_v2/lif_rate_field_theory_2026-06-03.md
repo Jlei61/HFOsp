@@ -72,7 +72,7 @@ User 推导把 Step-0a 目标写成 **near-critical `η_lin≈0+` / finite-k Hop
 
 1. **0d 各向异性旋转控制**（最重要，未做）：模板方向跟连接各向异性轴转、不随电极杆转；isotropic + aligned-shaft 必须过不了。这是 v0.2 plan 承重判据，LIF 路线下要重跑。
 2. **把 LIF transfer 收进 canonical src 模块**（`src/sef_hfo_{field,stability}.py` 目前是 sigmoid `F_eff`；LIF 路线在 exploration 脚本里）——按本推导 `F_eff ⇒ Φ_LIF` 落到主代码，0a–0e 在 canonical 模块上干净重跑。这是"换 transfer 的最小手术"的代码落地。
-3. **σ-dynamics + G^σ 作速度-尺度张力 sensitivity**（Step 1/2）：finite-pulse 期间局部 σ²∝r 变化大，固定-σ 近似忽略了它，而它直接调 G → 传播速度；σ-dynamics 是解开"波速太快/reach 太大"的首选候选。
+3. **σ-dynamics + G^σ 作速度-尺度张力 sensitivity**（Step 1/2）：finite-pulse 期间局部 σ²∝r 变化大，固定-σ 近似忽略了它，而它直接调 G → 传播速度；σ-dynamics 是解开"波速太快/reach 太大"的候选。**已初探（2D Φ_LIF(μ,σ) lut + 动态 σ(x,t)，在病理增益 wEE×1.4 regime）：σ-dynamics ON 把事件时长拉长（110→151ms，更贴 envelope），但 reach 仍 ~填满网格、波速没明显降——所以 σ-dynamics 是真实的"时长"杠杆，但 NOT 速度-尺度张力的解药。reach/速度张力仍开放（按 mechanism-scale 验收 = Step 1/2 sensitivity；要解可能得动空间核尺度/连接 reach，或接受"事件填满 SOZ patch"的 mechanism-scale 口径）。**
 4. **Step-0a 目标措辞改"稳定可激"**（折入更正），各文档 near-critical 语言相应收窄。
 
 （内部归档代号：Φ_LIF Siegert transfer、F_eff demote、G^μ/G^σ susceptibility、self-consistent (μ,σ) fsolve、M(λ,k) dispersion、η_lin、finite-k Hopf vs k=0、excitable-from-stable-rest vs near-critical、all-or-none amplitude-independent pulse、slow-GABA phase lag、anisotropy rotation control θ_prop≈θ_EE、heterogeneity-as-LIF-param-distribution、speed-scale tension、σ-dynamics）
