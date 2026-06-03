@@ -1,0 +1,96 @@
+{
+  "sigma_mV": 4.0,
+  "lif_f_I": [
+    {
+      "mu_mV": 8,
+      "nu_Hz": 0.12330355734453188,
+      "dnu_dmu": 0.00013916093948612338,
+      "loop_gain_EE": 0.35068556750503094
+    },
+    {
+      "mu_mV": 10,
+      "nu_Hz": 0.8900294268276466,
+      "dnu_dmu": 0.000755256317158269,
+      "loop_gain_EE": 1.9032459192388378
+    },
+    {
+      "mu_mV": 12,
+      "nu_Hz": 3.726653781828511,
+      "dnu_dmu": 0.002201083511586604,
+      "loop_gain_EE": 5.546730449198242
+    },
+    {
+      "mu_mV": 14,
+      "nu_Hz": 9.844868766285927,
+      "dnu_dmu": 0.003867001886739309,
+      "loop_gain_EE": 9.744844754583058
+    },
+    {
+      "mu_mV": 15,
+      "nu_Hz": 14.044529380154676,
+      "dnu_dmu": 0.004502313451901566,
+      "loop_gain_EE": 11.345829898791946
+    },
+    {
+      "mu_mV": 16,
+      "nu_Hz": 18.788964331130643,
+      "dnu_dmu": 0.004957390885251128,
+      "loop_gain_EE": 12.492625030832844
+    },
+    {
+      "mu_mV": 17,
+      "nu_Hz": 23.905789320765127,
+      "dnu_dmu": 0.0052523507742194275,
+      "loop_gain_EE": 13.235923951032957
+    },
+    {
+      "mu_mV": 17.5,
+      "nu_Hz": 26.557747977698714,
+      "dnu_dmu": 0.005350661374024443,
+      "loop_gain_EE": 13.483666662541596
+    }
+  ],
+  "sigmoid_f_I": [
+    {
+      "h": -2,
+      "F_eff": 1.8533901251574577e-07,
+      "dF_dh": 1.8516596756874322e-06
+    },
+    {
+      "h": -1,
+      "F_eff": 0.002506201936673915,
+      "dF_dh": 0.020562199874145693
+    },
+    {
+      "h": -0.5,
+      "F_eff": 0.07619734203494524,
+      "dF_dh": 0.40524007897305914
+    },
+    {
+      "h": 0,
+      "F_eff": 0.4999999999999995,
+      "dF_dh": 1.1483790477391054
+    },
+    {
+      "h": 0.5,
+      "F_eff": 0.9238026579650536,
+      "dF_dh": 0.405240078973059
+    },
+    {
+      "h": 1,
+      "F_eff": 0.9974937980633249,
+      "dF_dh": 0.02056219987414568
+    },
+    {
+      "h": 2,
+      "F_eff": 0.9999998146609863,
+      "dF_dh": 1.851659675678601e-06
+    }
+  ],
+  "verdict": {
+    "preflight_pass": true,
+    "lif_max_loopgain_at_nu_below_10Hz": 9.744844754583058,
+    "sigmoid_max_realized_loopgain": 1.26,
+    "conclusion": "LIF f-I hosts low-rate (1-10 Hz) operating points with loop gain ~2-5 (Exploration-1 Hopf range). Sigmoid cannot (gain ~0 at low rate). Transfer replacement is justified; proceed to LIF self-consistent steady state + linear map (no injected gain)."
+  }
+}
