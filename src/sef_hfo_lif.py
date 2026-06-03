@@ -197,6 +197,7 @@ def mean_field(ratio: float, w_ee_mult: float = 1.0, strict: bool = True) -> dic
                     resid_norm=float(np.hypot(r[0], r[1])), ier=int(ier))
         n_roots = 0
         converged = False
+        roots_out = [dict(nuE=best["nuE"], nuI=best["nuI"])]
     else:
         # Dedup seeds onto distinct roots; operating point = lowest-nuE root.
         distinct = []
@@ -207,12 +208,14 @@ def mean_field(ratio: float, w_ee_mult: float = 1.0, strict: bool = True) -> dic
         best = distinct[0]
         n_roots = len(distinct)
         converged = True
+        roots_out = [dict(nuE=d["nuE"], nuI=d["nuI"]) for d in distinct]
 
     nuE, nuI = best["nuE"], best["nuI"]
     muE, muI, sE, sI = _ms(nuE, nuI, nuext, w_ee_mult)
     return dict(nuE=nuE, nuI=nuI, muE=muE, sE=sE, muI=muI, sI=sI, nuext=nuext,
                 w_ee_mult=w_ee_mult, resid_norm=best["resid_norm"],
-                converged=converged, fsolve_ier=best["ier"], n_clean_roots=n_roots)
+                converged=converged, fsolve_ier=best["ier"], n_clean_roots=n_roots,
+                roots=roots_out)
 
 
 # ---------------------------------------------------------------------------
