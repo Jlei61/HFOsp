@@ -268,11 +268,34 @@ B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（
 
 **onset-front 方向测度（采用 SNN 原样）**：方向不用整事件形状/整帧聚合（已废，grid-contaminated），改用 SNN 验证过的 **onset-front**——踢后**最早 ~8ms（饱和前）**点亮像素的主轴，**逐事件**（不跨事件聚合）。先在 0d 确定性脉冲偏轴 θ=30/60 标定，再上 drive-0.6 噪声事件，带 θ 旋转 + isotropic 对照。**继承 SNN 的诚实 caveat**：isotropic 对照是近-fizzle（弱无向招募），精确表述 = "各向异性 E→E reach 是强传播 AND 定向前沿两者的**必要条件**"，**不**声称"从强各向同性波里干净读出方向"。
 
-**drive-grid 结果（2026-06-04）—— 预登记假设 NOT SUPPORTED：relocation 不让窗变宽，反而暴露 rate↔spiking 在 drive 轴上的不同构。**
-- **rate-field loop gain（G_E·C_EE·W_EE）随 drive 单调上升、全程亚临界 (<1)**：0.001(d0.5)→**0.123(d0.6)**→0.404(d0.7)→0.538(d0.8)→0.581(d1.0)。即 rate field 在所有 drive 都**稳定无 Hopf**（白噪声-Siegert 近似漏掉了 SNN 在 d1.0 的 Hopf）。
-- **drive=0.6 离散窗（3 seeds, τ=100）**：σ=0/0.5 extinction → σ=1.0 **fragile discrete (1/3 seed, rate 0.6/s)** → σ≥1.5 全 sustained。**比 drive=1.0 的 σ≈1.8 窄峰更窄更脆**，不是更宽。（σ=0 对照在 0.6 仍 extinction ✓。）
-- **结论**：**rate field 在任何 drive 都只有窄近阈离散窗，relocation 到 0.6 不达"≥2 相邻 σ ≥60%"宽窗判据（更差）。** 根因 = rate field 不复现 SNN 的 drive 结构（SNN：0.6 quiet-excitable / 1.0 Hopf；rate field：gain 随 drive 单调升、全程亚临界无 Hopf）。**白噪声-Siegert rate field 无法忠实坐在 SNN 的间期工作点**——这是 rate↔spiking 的真实不同构（drive 轴），不是参数没调好。
-- **含义（待 advisor + user 定）**：Step-1 的"噪声→宽稳健离散事件 train"在 rate field 里达不到（任何 drive）；忠实底物是 **spiking GT**（已在 d0.6 给出 kick→慢自限定向传播 + onset-front 方向 PASS + isotropic 对照，但 spiking 也还没做"噪声自发离散 event-train/IEI"那一段）。rate field 定位回退为 **Step-0 机制草图 + 线性稳定性工具**，非 Step-1 忠实动力学底物。
+**drive-grid 结果（2026-06-04）—— 预登记假设 NOT SUPPORTED：relocation 不让离散窗变宽。** （仅报实测事实，不下架构结论——见末尾"不下的结论"。）
+- **实测事实**：
+  - rate-field 静息 loop gain（G_E·C_EE·W_EE）随 drive 单调上升、全程亚临界 (<1)：0.001(d0.5)→0.123(d0.6)→0.404(d0.7)→0.538(d0.8)→0.581(d1.0)。这是**静息线性增益**；事件期的**超阈增益**才是驱动传播的（所以 step0b 能点燃）。亚临界稳定正是"可激介质"的前提。（**注：rate field 全程稳定无 Hopf 是早已 ratified 的设计**——见顶部数学路线更正"稳健稳定但可激、非 near-critical、色散诊断/finite-pulse 闸门"，**不是这里新发现的**。）
+  - drive=1.0：σ≈1.8 单点窄峰（≥60% seed，离散/自终止/rate ~0.3–0.5/s 同量级）—— rate field **确实产生过**离散定向率对的事件，只是窗窄。
+  - drive=0.6（3 seeds, τ=100）：σ=0/0.5 extinction → σ=1.0 fragile discrete (1/3 seed, 0.6/s) → σ≥1.5 标为 sustained。σ=0 对照仍 extinction ✓。
+- **⚠️ drive-0.6 "sustained" 未坐实（检测器 confound）**：检测器（DETECT 绝对 ~5Hz、FRAC_TIME_ON_MAX=0.30）是在 drive=1.0（rest 0.22Hz）标定的；drive=0.6 rest ~0.02Hz 近零 + 慢噪声 τ=100ms 可能把 coherence 测度在事件**之间**也顶在阈上 → frac_time_on≥0.3 触发"sustained" ≠ 真·网络自持。3 σ 点 × 3 seed 经异工作点检测器 = **太薄，不能据此说 0.6 不行**。**现在不重调检测器**（exhausted context 里第三次换测度 = 陷阱）；只是停止把"0.6 sustained"当已确立。
+- **实测判定**：**rate field 在所测 drive 上，离散自终止事件只在窄近阈窗出现；预登记的"≥2 相邻 σ ≥60%"宽窗判据 NOT MET**（= 预登记 null 口径"离散需要更精细的临界调节"）。**到此为止——narrow，不是 can't。**
+
+**不下的结论（不是我能定的）**：窄近阈窗**是否可接受**、以及"噪声自发离散 event-train"**是否应改到 spiking 底物**做——这是 §9.6 第 4 条我上一轮按 user 口述写下的**保留判断**（"不能偷偷把失败改成通过"）。把它扩写成"rate field 整体不忠实、降级路线"是同一个保留判断的更大版本，**同样不是我能 commit 的**。**上交 user 定，见 §9.8 fork。**
+
+### 9.8 Step-1 当前真实状态 + 上交 user 的 fork（2026-06-04，autonomous push 在此停）
+
+**Step 1 已确立的（durable）**：
+- **离散性**：rate field 能从慢噪声自发点出**离散、自终止、率同量级（~0.3–0.5/s）的事件**，但只在**窄近阈窗**（drive 1.0 σ≈1.8；drive 0.6 更窄更脆）。预登记**宽窗判据 NOT MET**。= narrow，**不是 can't**。
+- **方向**：0d 确定性脉冲形状主轴随 θ_EE（commit c183ed6）+ spiking GT onset-front 随连接轴转、isotropic 无轴（`spiking_gt_validation`）——**承重判据在 0d + spiking 两处 PASS**。
+- **无噪不持续**：σ=0 / 亚阈 extinction（两 drive 都守）。
+- **窗口 B**：双稳被高 root 俘获（结构性 sensitivity，单独）。
+
+**未完成 / stalled（不是 failed）**：
+- **噪声驱动事件的 onset-front 方向**：rate field 慢（τ_m=20ms），SNN 的 8ms onset 窗太早（n_active=0）；需逐事件隔离 + 适配 rate-field 时标（~20–40ms pre-saturation）。**stalled on 测度适配，不是模型错。**
+- **isotropic+aligned-shaft 硬对照 + 合成 SEEG→真实 masked lagPat/PR-2 pipeline**：未做（Step-1 最硬判据）。
+
+**Fork（user 定，autonomous 到此为止）**：
+- **(a)** 接受"窄近阈窗"为 rate-field Step-1 离散性结果（**显式改合同**，把宽窗判据放宽或重定义）；方向继续用 spiking GT 已 PASS 的 onset-front 背书。
+- **(b)** 把"噪声自发离散 event-train + 方向"测试**搬到 spiking 底物**（那里 Hopf/工作点结构忠实、onset-front 已验证）；rate field 保留为 Step-0 机制草图 + 线性稳定性工具。
+- **(c)** 在 rate field 把 drive=0.6 做对——**先解检测器 confound**（DETECT 绝对值/FRAC_TIME_ON_MAX 在近零 rest 下重标定），再判 0.6 有无离散窗；**不是从当前 confounded 数据下结论**。
+
+**我（agent）不替 user 选**；当前 durable 记录已是诚实的 Step-1 现状。
 
 ---
 
