@@ -64,15 +64,21 @@ def main():
     ap.add_argument("--window", choices=list(WINDOWS), default="A")
     ap.add_argument("--tau-noise", type=float, default=TAU_NOISE,
                     help="OU noise correlation time (ms); default 100 (slow afferent component)")
+    ap.add_argument("--drive", type=float, default=0.6,
+                    help="external drive ratio nu_ext/nu_theta; SNN-corrected interictal point "
+                         "is ~0.6 (drive=1.0 is the seizure-ward Hopf regime, spiking_gt_validation §)")
+    ap.add_argument("--sigmas", type=str, default=None,
+                    help="comma-separated sigma_noise grid override (mV); default uses SIGMAS")
     args = ap.parse_args()
     win = WINDOWS[args.window]
     tau_noise = args.tau_noise
-    tag = f"{args.window}_tau{int(tau_noise)}"
-    op = mean_field(1.0, w_ee_mult=win["w_ee_mult"])
+    sigmas = [float(s) for s in args.sigmas.split(",")] if args.sigmas else SIGMAS
+    tag = f"{args.window}_drive{args.drive}_tau{int(tau_noise)}"
+    op = mean_field(args.drive, w_ee_mult=win["w_ee_mult"])
 
     cells = []
     per_sigma = []
-    for sigma in SIGMAS:
+    for sigma in sigmas:
         labels = []
         rates = []
         for seed in SEEDS:
@@ -92,9 +98,10 @@ def main():
 
     OUT.mkdir(parents=True, exist_ok=True)
     payload = dict(
-        window=args.window, tau_noise=tau_noise,
-        params=dict(N=N, L=L, dt=DT, t_run_ms=T_RUN, sigmas=SIGMAS, seeds=SEEDS,
-                    tau_noise=tau_noise, w_ee_mult=win["w_ee_mult"], b_a=win["b_a"], tau_a=win["tau_a"],
+        window=args.window, tau_noise=tau_noise, drive=args.drive,
+        params=dict(N=N, L=L, dt=DT, t_run_ms=T_RUN, sigmas=sigmas, seeds=SEEDS,
+                    tau_noise=tau_noise, drive=args.drive,
+                    w_ee_mult=win["w_ee_mult"], b_a=win["b_a"], tau_a=win["tau_a"],
                     ell_par=ELL_PAR, ell_perp=ELL_PERP, l_inh=L_INH),
         op=dict(nuE=op["nuE"], n_clean_roots=op["n_clean_roots"],
                 roots=[r["nuE"] for r in op["roots"]]),

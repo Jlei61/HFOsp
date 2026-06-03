@@ -257,6 +257,17 @@ B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（
 3. **再做 isotropic + aligned-shaft + 真实 masked pipeline**：Step 1 最硬科学判据，不做不能说"方向由连接定"。
 4. **最后讨论窄窗是否可接受**：这是**科学判据问题不是代码问题**。按原合同"宽区间防调参"当前**不合格**；若认为近阈窄窗机制上可接受，**必须显式改合同**——不能偷偷把失败改成通过。
 
+### 9.7 工作点重定位 1.0→0.6（SNN N-scaling 强制）+ drive-grid 预登记（2026-06-04）
+
+**这是 §9.6 第 4 条要求的"显式改合同"，不是偷偷把失败改成通过。** 依据是**独立先验证据**：coworker Zou 的 spiking ground-truth（`spiking_gt_validation_2026-06-03.md`）用 **N-scaling** 判定 **drive ratio=1.0 是真·确定性 Hopf / 自持振荡 = 趋发作态**（密度 ×4 振荡 prominence 不降、频率稳 26.7Hz），间期样安静可激静息在 **drive ≈0.6**（0.5 dead → 0.6–0.65 quiet → 0.70+ oscillation）。**我之前 §9.3 的 window-A 网格全跑在 ratio=1.0 = 趋发作点**——所以离散窗窄/塌缩是"在错的（趋发作）工作点测"的产物。**§9.3 的 1.0 结果保留为 SUPERSEDED（在 seizure-ward 点测得），不删除。** 速率字段 drive 结构定性吻合 SNN（mean_field：0.5 nuE~0.0001Hz dead、0.6 ~0.023Hz quiet、0.7 ~0.10Hz、1.0 ~0.22Hz）。
+
+**预登记 drive-grid（跑之前写死，用户给的 bar）**：drive ∈ {0.5,0.6,0.7} × sigma_noise，修正检测器（all-returned）+ σ=0 对照，tau_noise 先 100ms smoke 再扩 50/200。**验收 = 在 drive≈0.6 是否出现 ≥2 个相邻 σ 点、≥60% seeds、且 rate 落 [0.01,1]/s 同量级。**
+- 若 drive=0.6 让窗变宽（≥2 相邻 σ）= **有价值新证据**，离散性在正确工作点成立（宽窗判据达成）。
+- 若 0.6 仍是单点窄峰 = **诚实结论"离散事件需要更精细的临界调节"**（reportable，不抢救，不算 PASS）。
+- σ=0 / 亚阈 在 drive 0.6 必须仍 extinction（无噪不自发持续，新工作点也要守）。
+
+**onset-front 方向测度（采用 SNN 原样）**：方向不用整事件形状/整帧聚合（已废，grid-contaminated），改用 SNN 验证过的 **onset-front**——踢后**最早 ~8ms（饱和前）**点亮像素的主轴，**逐事件**（不跨事件聚合）。先在 0d 确定性脉冲偏轴 θ=30/60 标定，再上 drive-0.6 噪声事件，带 θ 旋转 + isotropic 对照。**继承 SNN 的诚实 caveat**：isotropic 对照是近-fizzle（弱无向招募），精确表述 = "各向异性 E→E reach 是强传播 AND 定向前沿两者的**必要条件**"，**不**声称"从强各向同性波里干净读出方向"。
+
 ---
 
 ## 附录 A：数据锚定出处表（原 exploration 2，2026-06-03 整理合入）
