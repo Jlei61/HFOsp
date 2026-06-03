@@ -28,7 +28,7 @@ from src.sef_hfo_lif import ELL_PAR, ELL_PERP, integrate_lif_field, mean_field
 from src.sef_hfo_events import make_ou_noise
 
 OUT = Path("results/topic4_sef_hfo/step1_noise")
-N, L, DT, T = 64, 16.0, 0.25, 8000.0   # long run -> many event-on frames
+N, L, DT, T = 64, 16.0, 0.25, 5000.0   # run -> many event-on frames (aggregate is frame-dominated)
 SIGMA, TAU = 2.0, 100.0
 SEEDS = [0, 1, 2]
 
@@ -68,12 +68,16 @@ def main():
         ts = [accum_tensor(theta, ELL_PAR, ELL_PERP, s) for s in SEEDS]
         agg = sum_tensors(ts)
         ang, ratio = axis_of(agg)
-        aniso.append(dict(theta_EE=theta, theta_prop=ang, axis_err_deg=axis_diff(ang, theta),
-                          ratio=ratio, n_onframes=agg["n_onframes"]))
+        row = dict(theta_EE=theta, theta_prop=ang, axis_err_deg=axis_diff(ang, theta),
+                   ratio=ratio, n_onframes=agg["n_onframes"])
+        aniso.append(row)
+        print(f"  [aniso] theta_EE={theta:5.0f} theta_prop={ang:6.1f} "
+              f"axis_err={row['axis_err_deg']:5.1f} ratio={ratio:.2f} n_onframes={agg['n_onframes']}", flush=True)
     ts = [accum_tensor(0.0, 0.4, 0.4, s) for s in SEEDS]  # isotropic E->E
     agg = sum_tensors(ts)
     ang, ratio = axis_of(agg)
     iso.append(dict(theta_EE="isotropic", theta_prop=ang, ratio=ratio, n_onframes=agg["n_onframes"]))
+    print(f"  [iso]   theta_prop={ang:6.1f} ratio={ratio:.2f} n_onframes={agg['n_onframes']}", flush=True)
 
     aniso_ok = all(np.isfinite(r["theta_prop"]) and r["axis_err_deg"] < 20.0 and r["ratio"] > 1.3
                    for r in aniso)
