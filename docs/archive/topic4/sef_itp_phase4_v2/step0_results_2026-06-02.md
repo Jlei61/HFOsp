@@ -49,6 +49,19 @@
 
 **结论**：Step 0 的机器（模块 + 测试 + 两个 runner + 闸门）已就绪、全测试通过；scaffold 默认参数下深度稳定、无自限工作窗、主模在 k=0（但能力体检已证明这套机器能算出三区结构 + 有限 k 空间模，见上）。**Step 1 保持锁定**，等：(a) 数据锚定的工作点族 + 单位（Brunel Table 1 突触/膜时间常数、实测 HFO 群体事件时长定 `tau_a`、Hz 量纲）；(b) 对"会移动的有限 k 行波（finite-k Hopf, 沿轴）可不可达"这一悬而未决问题的处理——先试**打开恢复变量 `b_a`**（本次全程关着的唯一关键旋钮），再考虑更大延迟。
 
+### Step 0 验收判定（能否进 Step 1，2026-06-03 明确）
+
+**分两层**：
+- **机器里程碑：accepted**——4 个 src 模块 + 21 个测试通过 + go/no-go gate + 两个 runner，smoke tier 全过。
+- **解锁 Step 1 的 formal 闸门：未过（不是"没跑"，是"跑了、退化"）**——scaffold 占位参数下 `fraction_with_window=0`、0 候选工作点、深度稳定 / 主模 k=0、有限脉冲全 extinction。按 v2 plan 纪律 2「只有落在 self-limited propagation 区的参数才进入后续分析」，**当前无参数入选**；Step 1 定义为"在 0a/0b **锁定的候选窗**上加噪声"，**现无候选窗** → **Step 1 不能进**。
+
+**解锁 Step 1 的前置 checklist（= 真正"验收 Step 0"要补的，闸门必须编码这个结论而非"机器存在"）**：
+1. **数据锚定 operating-point family + 单位**：背景发放率 / E-I 比 / 平时离阈距离用模型无关真实数据先框死（动异质性前锁定）；突触 / 膜时间常数取 Brunel Table-1；恢复 / 事件包络时长锚实测 HFO 群体事件时长；传播速度锚实测通道激活 lags。`provenance.source` 从 `scaffold` → `data_locked`（带 hash / cohort）。
+2. **data_locked 参数上 re-run 0a/0b**，确认存在候选窗使有限脉冲给出 **self-limited PROPAGATION（移动波前 —— 2026-06-03 amendment：时间离散自终止的传播事件，非静态、非全局闪）+ 正安全余量（`A_runaway − A_self_limited > 0`）**；recovery off/on 并列报（no-auto-select）；dt/L 敏感性稳定；报"族里多大**比例**通过"（不报"存在一个点"）。
+3. **工程前置（很可能必需）**：把 rate 层 transfer 从 sigmoid 换成 LIF 有色噪声形式 + Brunel 时间结构（慢 GABA + 延迟），使色散能预测有限-k Hopf / 传播态——即 rate↔LIF 同构交叉验证（可直接拿 coworker1 `Jlibrary/ei_snn_scaffold/` 的 Brunel 参数喂进 `build_dispersion_matrix` 验证）。否则 data_locked 参数下 rate 层可能仍退化。
+
+一句话：**机器准备好了，候选窗还没有；Step 1 锁定不变，待数据锚定 re-run 拿到"会移动的自限窗"才解锁。**
+
 ## 与 Brunel 2026 的关系
 
 方法（自洽 2×2 色散、外驱相图、各向异性 E→E 选轴、`|I^E|+|I^I|` LFP 代理）与 Bachschmid-Romano/Hatsopoulos/Brunel 2026 一致；区别是他们的事件是近全局 Turing–Hopf 行波，我们要的是局部自限瞬态——所以 0b 的 recovery off/on 正好对应"亚临界近 Hopf"与"恢复变量局部脉冲"两条机制。能力体检显示：scaffold 默认坐在 k=0 角落，但把连接推到 Mexican-hat 能拿到**有限 k 的静态 Turing 失稳**；**还没拿到的恰恰是他们模型核心的那一档——有限 k 的 Hopf（行波）**。换句话说与 Brunel 的差距不在"能不能有限 k"，而在"有限 k 能不能动起来"，这正是与数据锚定一起要解决的下一步。
