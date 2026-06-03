@@ -63,7 +63,7 @@ Step 0 是"我手动戳一下让它点着、看它会不会定向铺开再自己
 - **实现**：有状态闭包（OU 内部态逐步推进），由 integrate 的 `stim_fn(t)` 按序查询；要求 integrate 单调按步调用（成立）。
 - **TDD 锁**：`sigma_noise=0` → 与确定性 run 逐位一致；同 seed 两次调用结果一致；不同 seed 不同。
 
-> 注：突触抑制时间尺度等不可锚（见 exploration 2）；OU 参数 tau_noise/ell_noise 是建模假设，作 sensitivity，不声称数据锚定。
+> 注：突触抑制时间尺度等不可锚（不可锚清单见文末附录 A）；OU 参数 tau_noise/ell_noise 是建模假设，作 sensitivity，不声称数据锚定。
 
 ---
 
@@ -87,7 +87,7 @@ Step 0 是"我手动戳一下让它点着、看它会不会定向铺开再自己
 
 - 画 **event_rate (events/s) vs sigma_noise**，把 `extinction`（低端）/ `sustained`+`runaway`+`captured`（高端）区段**阴影标出**。
 - 验收看：是否存在一段**宽**的 sigma_noise 区间（≥2 个网格点、理想 ≥~1.5× 幅度跨度），其中 **≥60% seed 是 discrete_events** 且 event_rate 落在数据量级内。
-- **数据率锚**（量级，源 exploration 2）：事件包络 ~100–300ms、通道滞后展布 ~50–178ms、IEI median ~3.3s（floor 0.18s）、rate ~209/h≈0.06/s（IEI 反推 ~0.3/s）→ 取量级带 **[0.01, 1] /s**。
+- **数据率锚**（量级，源 exploration 2；完整出处表见文末附录 A）：事件包络 ~100–300ms、通道滞后展布 ~50–178ms、IEI median ~3.3s（floor 0.18s）、rate ~209/h≈0.06/s（IEI 反推 ~0.3/s）→ 取量级带 **[0.01, 1] /s**。
 - 报**区间宽度**，不报单点。窄到只有一个点 = 调出来的，不算通过。
 
 ---
@@ -183,8 +183,58 @@ roots(B, wee×1.4) = [0.339, 2.028] Hz（双稳：低静息 + 高饱和）。smo
 
 **预登记假设（跑之前写死）**：慢噪声 → 稀疏越阈激发 → **孤立**自终止脉冲 → 存在一段 σ 使 `frac_on` 跨 seed 稳健 <0.30 且 `n_ev≥1` 自终止（= discrete）。**若慢噪声仍无稳健离散带 = 强且可解释的 null（"持续随机驱动无论快慢都给不出离散，离散需要别的结构"）。** 若出现稳健离散带 = window A primary 的 mechanism-scale pass 候选（再验方向/率/对照）。
 
-[结果待填]
+**结果（grid `results/topic4_sef_hfo/step1_noise/grid_A_tau{50,100,200}.json`，N=64, T=5s, 5 seeds）— 假设 SUPPORTED：**
+
+discrete_events 的 seed 比例（/5）：
+
+| σ (mV) | τ=50 | τ=100 | τ=200 |
+|--------|------|-------|-------|
+| 1.0 | 0.00 | 0.00 | 0.00 |
+| 1.5 | 0.00 | 0.00 | 0.00 |
+| **1.8** | 1.00 | 0.60 | 0.80 |
+| **2.0** | **1.00** | **1.00** | **1.00** |
+| **2.2** | 0.40 | 1.00 | 1.00 |
+| 2.5 | 0.00 | 0.00 | 0.00 |
+| 3.0 | 0.00 | 0.00 | 0.00 |
+
+**有稳健离散带 σ∈[1.8, 2.2]**（≥60% seed，σ=2.0 在三个 τ 全是 5/5），跨 τ 50–200ms（4×）稳定 —— 不是单点、不是幸运 seed。低端（σ=1.8–2.0）event_rate ~0.2–1/s，落在数据量级带 [0.01,1]/s（target ~0.3/s）。高于带（σ≥2.5）→ sustained（驱动太强连续点火，物理合理）；低于带（σ≤1.5）→ extinction。
+
+**朴素话 + 机制**：换成物理上正确的慢输入（τ~50–200ms，afferent 级，不是再加一遍已在 σ 里的快突触涨落）后，**最简单的 window A（Brunel-like、无 recovery）就能从纯噪声里自发点出一颗一颗分开、自己熄灭的间期样事件**，触发率与真实数据同量级，参数窗够宽够稳。**离散性不需要 recovery**（§9.1 修正坐实）；fast-noise 给不出离散是因为驱动用错频段（confound），不是模型不行。
+
+**判定**：window A primary 的 **「无噪不持续 + 噪声→宽稳健离散带 + 自终止 + 率同量级」四项 PASS**。**仍待**（§5/§6，下一步）：方向读出（场层主轴随 θ_EE）+ 噪声下负对照（isotropic 无轴、isotropic+aligned-shaft 过不了）—— 承重判别项，未过则 window A 仅"能出离散事件"但未坐实"方向由连接定"。
+
+### 9.4 Window B（结构性，单独）
+
+B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（`captured_high`，§9.2），所测 recovery（b_a=2000,τ_a=25）回拉但不失稳高不动点。B 的高态是否可变 transient 是更深的单独问题，不并入 window A 主线，不与 A 的慢噪声 probe 合并。**主线结论用 window A。**
+
+---
+
+## 附录 A：数据锚定出处表（原 exploration 2，2026-06-03 整理合入）
+
+> 此表 + 不可锚清单原在 `step1_unlock_feasibility_2026-06-03.md`（已于 2026-06-03 整理删除，git commit `7addc71` 保留）。§2 / §4 引用的"源 exploration 2"出处映射在此。原 Exploration 1（率层色散，commit `eedd1ce`）+ Exploration 2（Topic 1/2 artifact archaeology）的机制结论已分别由 `lif_rate_field_theory_2026-06-03.md` §9（慢抑制相位滞后）与 `lif_transfer_route_2026-06-03.md` 吸收。
+
+| 量 | 数据值 | 锚到模型的哪个 | 出处 |
+|---|---|---|---|
+| 事件包络时长 | ~100–300ms | 振铃时长 / 离临界距离（recovery 时间常数若开） | `pr4b_lag_validation` + 检测器 50–200ms |
+| 通道激活展布 | 中位 178ms（典型 ~50–150ms） | 传播速度（延迟 + 核 + 网格） | `pr4b_lag_validation::relative_lag_max` |
+| 网格尺度 L | cm 级（= SOZ 电极覆盖范围，不是 1–2mm） | 空间域大小 | 见下注 2 |
+| 不应期 / dead-time | ~0.18–0.5s | 触发不应期 | `iei_fit.iei_min` |
+| 事件率 | ~209 次/h（基线） | 噪声 + 亚临界设定的触发率 | `event_periodicity::n_events/dur` |
+| 慢漂移 | 数小时，调制率 + 参与数（xcorr 0.74） | Step-5 慢变量 S(t) | `event_periodicity_analysis §5.6/5.8` |
+| 参与通道数 | 中位 10（IQR 7–16） | 事件空间范围 | `pr1_subject_summary` |
+| 结构 vs 动态占比 | bias_fraction ~0.71 | 模板"固定骨架"占主导 | `pr1_cohort_summary::bias_fraction_median` |
+
+**不可锚清单（数据测不出、必须扫或假设的）**：
+
+- E-I 比、离阈距离、绝对突触权重、单通道基线发放率 —— 数据链里没有，必须扫（= framework 要求的 operating-point family）。
+- 突触抑制衰减时间常数本身 —— exploration 2 测不到；"慢抑制"只能作 Brunel 锚定假设带进去 + 扫一个范围，不能说成"数据已确认"。
+
+**注**：
+
+1. **慢抑制是假设不是测量** —— 数据**不反对**（事件级时间尺度兼容），但也**没法直接确认**它；带着扫。
+2. **空间尺度用电极覆盖范围（cm）**，不能照搬 coworker1 的 1–2mm 小网格 —— 1–2mm 网格上 Brunel 速度给 ~38ms 传播，比实测 ~50–178ms 快；换 cm 级网格（真实电极覆盖）后 ~33–100ms 对上。L 和传导速度要**联合锚**。
 
 ## Changelog
 - 2026-06-03 v1.0：开工前冻结（用户 6 条加固落数值）。
 - 2026-06-03 v1.1：**coherence 测度 amendment**（开 smoke 验证噪声地板时触发 + advisor）。raw 每像素活跃比例被 OU speckle 污染（σ=2.0 raw_ext 0.048 vs coh_ext 0.034 vs 真脉冲 coh 0.142）→ 检测改用 coherence 活跃比例（空间平滑 `coh_len=ELL_PAR` 后阈值），`EVENT_ON_FRAC` 0.01→0.05（按新测度噪声地板+margin 重定），新增时间分离判别 `FRAC_TIME_ON_MAX=0.30`（离散事件必须时间分开）。`coh_len` 作为可选项加进 canonical `integrate_lif_field`（commit 见下）。端到端 TDD：σ=2.0 noise → extinction（speckle 被拒）。**这是先验证再冻结的修正，不是看结果调参——新阈值不为 window A 制造离散窗（A 的诚实结局可能就是无离散窗 = 离散需要 recovery）。**
+- 2026-06-03 v1.2：**文档整理**——把原 `step1_unlock_feasibility_2026-06-03.md` 的 Exploration-2 数据锚定出处表 + 不可锚清单合入本文件附录 A（§2/§4 的"源 exploration 2"引用改指附录 A），随后删除该中间探索文件（git commit `7addc71` 保留）。同批删除 `exploration1_rate_lif_dispersion_2026-06-03.md`（结论被 fsolve 更正推翻；commit `eedd1ce`）与 `datalocked_step0b_exploration_2026-06-03.md`（sigmoid 失败已由 `lif_rate_field_theory` §3 自洽复述；commit `58ed445`）。
