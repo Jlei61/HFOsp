@@ -39,6 +39,43 @@ FRAC_TIME_ON_MAX: float = 0.30
 
 
 # ---------------------------------------------------------------------------
+# Per-operating-point amplitude-bar recalibration (contract §10.2)
+# ---------------------------------------------------------------------------
+# EVENT_ON_FRAC above was calibrated ONCE at drive=1.0 (rest νE~0.22 Hz). At a
+# near-zero-rest operating point (e.g. drive 0.6, rest ~0.02 Hz) slow OU noise
+# can hover ABOVE that fixed bar BETWEEN events -> frac_time_on inflates -> false
+# "sustained" (§9.7 confound). The (drive×σ) joint analysis recalibrates the bar
+# PER operating point between the σ=0/σ_ref floor and the deterministic-kick
+# event peak. Only this AMPLITUDE bar recalibrates; the shape/time constants
+# above (MIN_DUR/MERGE_GAP/RETURN_FRAC/SUSTAINED/SETTLE/FRAC_TIME_ON_MAX) are
+# operating-point invariant and stay fixed.
+
+class UndetectableOperatingPoint(ValueError):
+    """The σ=0/σ_ref noise floor is not strictly below the deterministic-kick
+    event peak — noise reaches the event amplitude, so no separable detection bar
+    exists at this operating point (contract §10.2 A loud-fail; also marks a
+    drive as non-excitable / non-interictal per §10.3)."""
+
+
+def event_on_frac_from_refs(floor: float, peak: float, frac: float = 0.5) -> float:
+    """Per-operating-point coherence-active-fraction bar (contract §10.2 A).
+
+    Lock the amplitude bar at ``floor + frac*(peak-floor)`` — the pre-registered
+    midpoint between the σ=0/σ_ref noise floor and the deterministic-kick event
+    peak, both measured at THIS operating point. Anti-circular: ``floor`` and
+    ``peak`` come only from no-noise / sub-threshold references and the
+    deterministic kick, NEVER from the noise-driven event grid.
+
+    Raises ``UndetectableOperatingPoint`` when ``floor`` is not strictly below
+    ``peak``.
+    """
+    if not floor < peak:
+        raise UndetectableOperatingPoint(
+            f"noise floor {floor:.4g} not below event peak {peak:.4g}")
+    return float(floor + frac * (peak - floor))
+
+
+# ---------------------------------------------------------------------------
 # OU spatiotemporal noise drive
 # ---------------------------------------------------------------------------
 
@@ -96,12 +133,16 @@ def make_ou_noise(n: int, L: float, dt: float, sigma_noise: float,
 # Event detection
 # ---------------------------------------------------------------------------
 
-def _on_intervals(ext: np.ndarray, dt: float):
-    """Contiguous ON runs (ext > EVENT_ON_FRAC), merged across gaps < MERGE_GAP_MS.
+def _on_intervals(ext: np.ndarray, dt: float, event_on_frac: float = EVENT_ON_FRAC):
+    """Contiguous ON runs (ext > event_on_frac), merged across gaps < MERGE_GAP_MS.
+
+    ``event_on_frac`` defaults to the module constant (validated drive=1.0 bar);
+    the (drive×σ) joint runner passes the per-operating-point recalibrated bar
+    (``event_on_frac_from_refs``, contract §10.2).
 
     Returns a list of (start_step, end_step) inclusive index pairs.
     """
-    idx = np.where(ext > EVENT_ON_FRAC)[0]
+    idx = np.where(ext > event_on_frac)[0]
     if idx.size == 0:
         return []
     splits = np.where(np.diff(idx) > 1)[0]
@@ -117,8 +158,11 @@ def _on_intervals(ext: np.ndarray, dt: float):
     return merged
 
 
-def detect_events(ext: np.ndarray, dt: float):
+def detect_events(ext: np.ndarray, dt: float, event_on_frac: float = EVENT_ON_FRAC):
     """Detect discrete events from the active-fraction series.
+
+    ``event_on_frac``: per-operating-point bar (contract §10.2); defaults to the
+    module constant.
 
     Returns a list of dicts: ``t_on, t_off, dur_ms, peak_ext, returned`` —
     ``returned`` flags self-termination (ext drops to <= RETURN_FRAC*peak within
@@ -127,7 +171,7 @@ def detect_events(ext: np.ndarray, dt: float):
     """
     events = []
     n = len(ext)
-    for s, e in _on_intervals(ext, dt):
+    for s, e in _on_intervals(ext, dt, event_on_frac):
         dur = (e - s + 1) * dt
         if dur < MIN_DUR_MS:
             continue
@@ -144,14 +188,20 @@ def detect_events(ext: np.ndarray, dt: float):
 
 
 def classify_run(ext: np.ndarray, dt: float, op: dict,
-                 rE_final: np.ndarray | None = None, window: str = "A") -> dict:
+                 rE_final: np.ndarray | None = None, window: str = "A",
+                 event_on_frac: float = EVENT_ON_FRAC) -> dict:
     """Classify a single noise run into one regime (contract §1).
 
     Priority: sustained > runaway > captured_high (window B) > extinction_only >
     discrete_events. ``rE_final`` (from ``integrate_lif_field(..., return_field=True)``)
     is required for the window-B capture check (uses ``op["roots"]`` lo/hi).
+
+    ``event_on_frac``: per-operating-point amplitude bar (contract §10.2);
+    defaults to the module constant (validated drive=1.0 bar). The (drive×σ)
+    joint runner MUST pass the recalibrated per-op bar — a forgotten arg falling
+    back to the fixed bar is the §9.7 confound at off-1.0 operating points.
     """
-    events = detect_events(ext, dt)
+    events = detect_events(ext, dt, event_on_frac)
     n_events_total = len(events)
     n_self_term = sum(1 for ev in events if ev["returned"])
     # discrete requires EVERY ON segment to self-terminate -- one normal event plus
@@ -161,9 +211,9 @@ def classify_run(ext: np.ndarray, dt: float, op: dict,
     final_ext = float(ext[-1])
     returned_global = final_ext <= RETURN_FRAC * max(max_ext, 1e-12)
 
-    ivs = _on_intervals(ext, dt)
+    ivs = _on_intervals(ext, dt, event_on_frac)
     longest_on = max(((e - s + 1) * dt for s, e in ivs), default=0.0)
-    frac_time_on = float((ext > EVENT_ON_FRAC).mean())
+    frac_time_on = float((ext > event_on_frac).mean())
 
     captured = False
     if window == "B" and rE_final is not None and len(op.get("roots", [])) >= 2:

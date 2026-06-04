@@ -187,3 +187,60 @@ def test_noise_steady_state_std_matches_sigma():
     for i in range(4000):
         field = f(i * DT)
     assert 0.5 * sigma < field.std() < 1.6 * sigma, field.std()
+
+
+# ---------------------------------------------------------------------------
+# Per-operating-point detector recalibration (contract §10.2)
+# The amplitude bar (event_on_frac on the coherence active-fraction) is set
+# PER operating point, between the σ=0/σ_ref floor and the deterministic-kick
+# event-peak — NOT a single constant calibrated at one drive (that single-point
+# calibration is the §9.7 confound: at near-zero rest, slow noise hovers above a
+# fixed bar between events -> false "sustained").
+# ---------------------------------------------------------------------------
+
+def test_event_on_frac_from_refs_is_midpoint_between_floor_and_peak():
+    """§10.2(A): bar = floor + 0.5*(peak-floor), pre-registered midpoint rule."""
+    from src.sef_hfo_events import event_on_frac_from_refs
+    bar = event_on_frac_from_refs(floor=0.02, peak=0.30)
+    assert abs(bar - 0.16) < 1e-12, bar
+    # comfortably above the noise floor and below the genuine event peak
+    assert 0.02 < bar < 0.30
+
+
+def test_event_on_frac_from_refs_loud_fails_when_floor_not_below_peak():
+    """§10.2(A): if noise floor reaches the event amplitude, the operating point
+    is undetectable — loud-fail, never silently emit a usable bar."""
+    import pytest
+
+    from src.sef_hfo_events import UndetectableOperatingPoint, event_on_frac_from_refs
+    with pytest.raises(UndetectableOperatingPoint):
+        event_on_frac_from_refs(floor=0.30, peak=0.30)
+    with pytest.raises(UndetectableOperatingPoint):
+        event_on_frac_from_refs(floor=0.35, peak=0.30)
+
+
+def test_recalibrated_bar_rejects_subevent_flicker_as_extinction():
+    """§9.7 fix: a near-zero-rest operating point where slow noise hovers at
+    amplitude 0.08 — ABOVE the default fixed bar 0.05 (mis-called sustained) but
+    BELOW a per-op bar recalibrated to 0.16 (correctly extinction)."""
+    t = _times(300.0)
+    flicker = np.full_like(t, 0.08)   # above default 0.05, below recalibrated 0.16
+    op = mean_field(0.6)
+    # default fixed bar (0.05): the flicker reads as continuous activity
+    assert classify_run(flicker, DT, op, window="A")["label"] == "sustained"
+    # per-op recalibrated bar (0.16): correctly extinction (no genuine event)
+    res = classify_run(flicker, DT, op, window="A", event_on_frac=0.16)
+    assert res["label"] == "extinction_only", res
+    assert res["n_events"] == 0
+
+
+def test_recalibrated_bar_preserves_clean_event_and_shape_constants():
+    """Invariant (§10.2 B): recalibrating only the amplitude bar must NOT drop a
+    genuine event nor change the shape/time classification — a clean 40ms,
+    amplitude-0.30 self-terminating pulse stays one discrete event at bar 0.16."""
+    t = _times(300.0)
+    ext = _rect(t, 90.0, 130.0, val=0.30)
+    op = mean_field(0.6)
+    res = classify_run(ext, DT, op, window="A", event_on_frac=0.16)
+    assert res["label"] == "discrete_events", res
+    assert res["n_events"] == 1, res
