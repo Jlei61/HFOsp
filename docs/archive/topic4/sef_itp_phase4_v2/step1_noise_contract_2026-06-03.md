@@ -114,6 +114,8 @@ Step 0 是"我手动戳一下让它点着、看它会不会定向铺开再自己
 
 ## 7. 验收（mechanism-scale，两窗分开报）
 
+> **⚠️ 2026-06-04 amendment（见 §10.1，承重）**：本节 5 条**追加前置 (0) + (7')**——(0) 必须先按 §10.3「模型自身相结构窗形」验证工作点是间期工作点（不照搬 SNN 名义 ratio / 不用 E 率对齐）；(7') 离散事件区须是 (drive×σ) 二维稳健区域（§10.4），非单 drive 一维 σ 切片。原 5 条**在验证过的间期工作点上**才算数。
+
 **窗口 A（PRIMARY）通过** 当且仅当（全部）：
 - 无噪声（sigma=0）/ 亚阈噪声 → 无自发持续活动（`extinction_only`，ext 长期 <EVENT_ON_FRAC）；
 - 存在**宽** sigma 区间，≥60% seed = `discrete_events`（非 sustained/runaway）；
@@ -312,7 +314,9 @@ B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（
 - **间期 = 促临界但被稳态回拉约束住的核，被噪声偶发点出的自限瞬态；趋发作 = 同一个核，工作点沿 drive/gain 轴漂上去（回拉失守 → 持续招募）**。SNN 已给出这条轴（0.6 安静可激间期 / 1.0 自持振荡趋发作）。间期与发作是**同一基质的两个工作点**。
 - **必要条件（锁死后续所有 step）**：模型必须把**间期与发作呈现为同一条 drive/gain 轴上的连续两段**（间期事件在转变点之下），即 **Step-1 的工作点和发作 step 的工作点必须是"同一个模型沿 drive 移动"，不是两套各自调参的模型**。否则发作桥接（H5/Phase 3）站不住。
 
-### 9.10 Step-1 最终判定（division-of-labor 纠正，user 2026-06-04 ratify）—— 本节为权威口径
+### 9.10 Step-1 判定（division-of-labor 纠正，user 2026-06-04 ratify）—— PASS 判定已被 §9.11 降级，见 banner
+
+> **⚠️ 2026-06-04 降级（user catch + advisor）**：本节"5 条满足 ⇒ PASS"已被 **§9.11 降级为 PENDING**——判据 2/4 是在**未被验证为间期工作点**的点上评出来的（双模型 drive 轴不可公度 + 仅一维 σ 切片 + 检测器单点标定）。**本节的 division-of-labor 纠正（方向=Step2、异质核/模板多样性=Step3、发作桥接=Step4–5、率场无 Hopf）仍成立**；只有"PASS"那句被推翻。PASS 表格保留作 audit trail。**权威口径见 §9.11 + §10 联合分析合同。**
 
 回到 v2 plan §4 Step 1 的**本职 5 条验收**（**不是**我之前自创的"宽窗"门槛——plan 从未要求窗宽）：
 
@@ -334,6 +338,75 @@ B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（
 - **发作轴连续性必要条件** 由 **SNN / Step 4–5** 承接：简化率场无自持振荡（已 ratified 设计），本就不负责发作桥接，只负责 Step 0/1 机制 + 线性稳定性。
 
 **遗留 sensitivity（不阻断 Step 1，带入后续）**：时长 ~100ms 在实测包络低端；窄窗是否对应"低模板多样性单源"留 Step 3 异质核处判（§9.9 选项 d）。
+
+### 9.11 §9.10 PASS → PENDING（2026-06-04 user catch：工作点未验证 + 双模型 drive 轴不可公度 + 仅一维 σ 切片）—— 本节为权威口径
+
+**§9.10 的 division-of-labor 纠正仍然成立**（方向=Step 2、异质核/模板多样性=Step 3、发作桥接=Step 4–5、率场无 Hopf 只负责机制+线性稳定性）。**被推翻的只是"5 条 plan 验收已满足 ⇒ Step 1 PASS"这一句**——那 5 条（尤其判据 2「噪声→离散事件」、判据 4「率到数据量级」）是**在一个从未被验证为间期工作点的点上**评出来的。**验收门漏写了承重前置：「在一个被验证过的间期工作点上」**（= 我自己存的教训"acceptance gate 必须编码结论本身，不只编码现象存在"）。
+
+user 2026-06-04 catch（advisor pressure-tested）三条，现有一维数据都排除不了：
+
+1. **两个模型的 drive 轴不可公度（同名不同刻度）**：rate field 与 SNN 共用名义外驱比 ν_ext/ν_θ，但同一名义 drive 下决定点火/传播的 **E 群发放率 rate field 比 SNN 低 3–4×**（rate 场名义 0.6 ν_E~0.023Hz 近死寂；SNN 间期 0.6 是 0.10–0.26Hz）。**且这 3–4× 被 `spiking_gt_validation` 文档自己标为"大部分是比较假象"**（稳态 FP vs 振荡网络、低率凸尾 Jensen），不是干净传递读数 → 连"两轴差多少"都没干净标定。**§9.7 把 SNN 名义 0.6 直接搬给 rate 场，违反了同一份文档"按机制+窗形对、不按 ratio-for-ratio 对"的告诫。**
+2. **(drive × σ) 联合空间从未扫过**——只在两条固定 drive（旧跑 1.0 写死 / 新跑 0.6 默认）上各扫了一条 σ 一维线（`run_sef_hfo_step1_noise.py`：drive 是命令行单值，σ 内层循环）。"窗很窄"是两条竖线上的结论，**不是那张面上的**；离散事件区是 (drive×σ) 上的二维楔形，固定 drive 上 σ 窄推不出楔形窄。
+3. **0.6 上"脆弱/sustained"是未解混淆，两个互斥解释一维数据分不开**：
+   - **甲（drive 太低）**：0.6 真接近死寂，该往上挪工作点。
+   - **乙（检测器没重标）**：3–4× 率差既"大部分假象"，则 0.6 在两模型是同一对的工作点，"sustained" 是检测器（DETECT 绝对 ~5Hz / FRAC_TIME_ON_MAX 在 drive=1.0 标定）在近零静息下被慢噪声顶上阈的假象（§9.7 已标）。
+   - **若率差真"大部分假象"，靠挪 drive 去补 = 重复计数**（把读数偏移当工作点偏移修）→ 文档自身逻辑偏向乙。**现有数据不能裁决，两者都 open。**（**不下"1.0 才是真间期点"这个 confirmation-bias 形状的结论**——advisor catch。）
+
+**判定：Step 1 PASS → PENDING。** 不依赖工作点验证的 durable 子结论：**rate field 能在其参数空间某处（名义 drive=1.0, σ≈1.8）从慢噪声点出离散、自终止、率同量级（~0.3–0.5/s）的事件**——但"那处是不是间期工作点"未验证、(drive×σ) 面未扫、检测器单点标定。**解锁 Step-1 PASS 须先做 §10 联合分析。**
+
+---
+
+## 10. (drive × σ) 联合分析 + 逐工作点检测器标定合同（pre-registration，2026-06-04 lock）
+
+> **朴素话**：上一轮发现我们只在两个"猜来的"驱动档位上各扫了一条噪声强度线，而且检测器"算不算活动"那把尺子是在其中一个档位上刻的、搬到另一档会读错。这一节在动手前先锁死三件事：(1) 怎么用模型**自己的脾气**找到"间期那个驱动档位"（不照搬另一个模型的数字）；(2) 检测器那把尺子怎么**按每个驱动档位重新刻**、且不许刻成"刚好出事件"；(3) 然后在"驱动 × 噪声"这张**二维面**上系统扫，看离散事件区是一整块还是一条缝。开工前冻结，跑完对照本节。
+
+> **范围**：本节处理 **(drive × σ) 标定轴**（噪声仍 homogeneous，user 2026-06-04 明确搁置异质性）。**不**处理模板多样性 / 单源-多源（= §9.9 选项 d / Step 3，正交的另一条轴）。本节是 §9.8 fork 选项 (c) 的**升级版**——光修 0.6 检测器分不开 §9.11 的甲/乙，必须连"工作点定位+逐点重标+二维面"一起做。
+
+### 10.1 补回缺失的 Step-1 验收承重条件（§7 amendment）
+
+§7 原 5 条验收**追加前置**（= §9.11 暴露的缺口）：
+- **(0) 工作点必须先被验证为间期工作点**：判据 2/4（噪声→离散、率到量级）只有在**按 §10.3 用模型自身相结构定出的间期工作点**上成立才算数；任意猜来的名义 drive 上成立**不算**。
+- **(7') 离散事件区必须是 (drive×σ) 上的稳健二维区域**，不是单 drive 上的一维 σ 切片；报二维 map（§10.4）的区域宽度/形状，不报单点。
+
+### 10.2 逐工作点检测器标定合同（= user 要的"对检测器的合同"）
+
+**问题**（§9.7 坐实）：§1 检测器把"算不算活动"的幅度尺（per-pixel bar = `op["nuE"]+DETECT`，DETECT=5Hz 绝对）+ 时间分离阈 FRAC_TIME_ON_MAX 都在 drive=1.0（rest 0.22Hz）刻好；搬到近零静息（drive 0.6 rest~0.02Hz）会因慢噪声顶阈而把事件之间也判 ON → 假 sustained。
+
+**修法（pre-registered，逐工作点重刻「幅度尺」，shape/time 常数不动）**：
+
+**(A) 每工作点重刻的只有「幅度尺」，且夹在两个无循环参照之间**：
+- **下界 = 静默地板 floor**：该 drive 跑 **σ=0（确定性无噪）+ 指定亚阈参照 σ_ref（= 网格最低噪声点，pre-registered）**，量 coherence 活跃测度的**静默上包络**。
+- **上界 = 真事件幅度 event-peak**：该 drive 跑 **step0b 确定性有限脉冲**（已知会点出自限事件），量其 coherence **峰值**。
+- **ON 幅度尺锁在 (floor, event-peak) 之间**（pre-registered 比例，如几何均值；并验证 `floor < bar < event-peak`，否则该工作点判 **`undetectable` loud-fail**——不偷偷过、也即该 drive 非可激/非间期候选）。
+- **反循环**：幅度尺**只**由 (i) 无噪/亚阈参照 + (ii) 确定性脉冲事件参照算出，**绝不**由噪声驱动事件网格回算；每工作点冻结后才跑噪声网格。
+
+**(B) 工作点不变量（跨 drive 锁死、不重刻）**：`MIN_DUR_MS=8`、`MERGE_GAP_MS=12`、`RETURN_FRAC=0.2`（相对自身峰）、`SUSTAINED_MS=400`、`SETTLE_MS=50`、`FRAC_TIME_ON_MAX=0.30`、all-returned 规则、`RUNAWAY_FRAC`/`CAPTURE_FRAC`（相对 roots/峰）—— 无量纲/时间常数，重刻幅度尺后即可跨工作点转移。
+
+**(C) 不变量回归测试（每工作点重刻后必过；= 反调参闸门）**：
+- σ=0 → extinction（**每个 drive 都必须**；若重刻让 σ=0 出"事件" = 重刻坏了）。
+- σ_ref（亚阈）→ extinction。
+- 确定性脉冲 → 仍判 step0b 的 discrete/self-limited（确认幅度尺没把真事件刷掉）。
+
+### 10.3 间期工作点定位：按模型自身相结构「窗形」，不按名义 ratio / 不按 E 率
+
+- **禁止**：照搬 SNN 名义 0.6（轴不可公度，§9.11-1）；用 E 率对齐（E 率差被标"大部分假象"，用它对齐 = §9.11-3 的重复计数陷阱）。
+- **做法**：用 rate field **自己**的 drive 轴相结构（dead：脉冲 fizzle → excitable：脉冲→自限事件 → bursty/captured/elevated-rest），**按窗形**对 SNN 的 drive 轴结构（0.5 dead → 0.6–0.65 quiet-excitable → 0.7 osc-onset）。**间期候选 drive 带 = rate field 的 step0b 有限脉冲自限传播窗**（excitable 且 sub-runaway；sub-Hopf 率场恒成立）—— 这是模型**自身**的可激结构，与名义数字无关；落在 0.6/0.7/1.0 哪都行、由结构定，不预设。
+- **与 §10.2 自洽**：dead drive 上 kick fizzle → 无 event-peak → §10.2(A) 判 `undetectable` → 自动排除出间期带。即 §10.2 标定本身就实现了"按可激性定位"。
+
+### 10.4 (drive × σ) 二维联合扫 + 区域验收
+
+- **网格**：drive ∈ {§10.3 的 step0b excitable 带，≥3–5 点} × σ ∈ {含 0 与 σ_ref}，每格 ≥5 seeds，τ_noise 先 100ms（再 50/200 sensitivity）；每格用 §10.2 逐点重刻的检测器 → regime 标签。
+- **报**：discrete-events seed 比例的**二维 heatmap**（frac_discrete over drive×σ）+ 每格 rate/IEI/包络。
+- **验收（取代单点 σ 判据）**：存在一块**稳健二维区域**（非单点/单缝），其中 ≥60% seeds = discrete、rate ∈ [0.01,1]/s、IEI/包络兼容。报**区域面积/形状**。
+- **σ=0 在每个 drive 必须 extinction**（无噪不自发持续，跨 drive 守）。
+- **诚实 null 合法**：正确定位工作点 + 逐点重刻检测器后，离散事件**仍只是细缝/单点** → 真结果（"离散性需要更精细临界调节 / 需异质核"，指向 §9.9 选项 d / Step 3），写明、不抢救。
+
+### 10.5 交付物 + 锁
+
+- `src/sef_hfo_events.py`：检测器幅度尺改为按 op 标定（`calibrate_detector(op, ref_runs, kick_run) → bar`，§10.2 A）；shape/time 常数保留为模块顶常量（§10.2 B）。
+- `tests/`：§10.2 C 三条回归（σ=0/σ_ref→extinction 每 drive；kick→discrete）+ 反循环（bar 不依赖噪声网格）TDD（先红后绿，§6 deep-contract-verify）。
+- `scripts/`：drive×σ 二维 runner（§10.4）→ `results/topic4_sef_hfo/step1_noise/` 二维 JSON+CSV；heatmap plot + `figures/README.md`（中文）。
+- 跑完续写 §11 results；§9.11 PENDING 据 §11 二维结果再判 PASS / 诚实 null。
 
 ---
 
@@ -366,3 +439,4 @@ B（wee×1.4 双稳）在所有 σ 要么 extinction 要么被高 root 俘获（
 - 2026-06-03 v1.0：开工前冻结（用户 6 条加固落数值）。
 - 2026-06-03 v1.1：**coherence 测度 amendment**（开 smoke 验证噪声地板时触发 + advisor）。raw 每像素活跃比例被 OU speckle 污染（σ=2.0 raw_ext 0.048 vs coh_ext 0.034 vs 真脉冲 coh 0.142）→ 检测改用 coherence 活跃比例（空间平滑 `coh_len=ELL_PAR` 后阈值），`EVENT_ON_FRAC` 0.01→0.05（按新测度噪声地板+margin 重定），新增时间分离判别 `FRAC_TIME_ON_MAX=0.30`（离散事件必须时间分开）。`coh_len` 作为可选项加进 canonical `integrate_lif_field`（commit 见下）。端到端 TDD：σ=2.0 noise → extinction（speckle 被拒）。**这是先验证再冻结的修正，不是看结果调参——新阈值不为 window A 制造离散窗（A 的诚实结局可能就是无离散窗 = 离散需要 recovery）。**
 - 2026-06-03 v1.2：**文档整理**——把原 `step1_unlock_feasibility_2026-06-03.md` 的 Exploration-2 数据锚定出处表 + 不可锚清单合入本文件附录 A（§2/§4 的"源 exploration 2"引用改指附录 A），随后删除该中间探索文件（git commit `7addc71` 保留）。同批删除 `exploration1_rate_lif_dispersion_2026-06-03.md`（结论被 fsolve 更正推翻；commit `eedd1ce`）与 `datalocked_step0b_exploration_2026-06-03.md`（sigmoid 失败已由 `lif_rate_field_theory` §3 自洽复述；commit `58ed445`）。
+- 2026-06-04 v1.3：**§9.10 PASS → PENDING（§9.11）+ §10 (drive×σ) 联合分析 + 逐工作点检测器标定合同 + §7 gate amendment (0)/(7')**。user 2026-06-04 catch（advisor pressure-tested）：§9.10 的"5 条 plan 满足 ⇒ PASS"是在**未验证为间期工作点**的点上评的——双模型 drive 轴不可公度（E 率 3–4× 被标"大部分假象"，§9.7 照搬名义 0.6 违反"按窗形不按 ratio"告诫）+ (drive×σ) 面从未扫（只两条一维 σ 切片）+ 检测器在 drive=1.0 单点标定。§9.10 的 division-of-labor 纠正仍成立，仅 PASS 降级。§10 锁死：检测器幅度尺逐工作点夹在 (σ=0/σ_ref floor, 确定性脉冲 event-peak) 之间、反循环、shape/time 常数不变、σ=0 每 drive 必 extinction 回归；工作点按模型自身相结构窗形定位（非名义 ratio/非 E 率）；二维区域验收取代单点 σ 判据。
