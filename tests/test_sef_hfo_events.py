@@ -271,3 +271,15 @@ def test_calibrate_detector_loud_fails_at_undetectable_operating_point():
     kick = np.full(100, 0.30)
     with pytest.raises(UndetectableOperatingPoint):
         calibrate_detector([ref_hot], kick)
+
+
+def test_accepted_cell_encodes_the_region_criterion():
+    """§10.4 acceptance machined (not eyeballed): a (drive,σ) cell is accepted iff
+    >=60% of seeds are discrete AND the discrete-seed mean rate is in [0.01,1]/s."""
+    from src.sef_hfo_events import accepted_cell
+    assert accepted_cell(frac_discrete=0.6, mean_rate_discrete=0.3) is True   # on both bounds
+    assert accepted_cell(frac_discrete=0.8, mean_rate_discrete=0.05) is True
+    assert accepted_cell(frac_discrete=0.4, mean_rate_discrete=0.3) is False  # too few seeds
+    assert accepted_cell(frac_discrete=0.8, mean_rate_discrete=5.0) is False  # rate too high
+    assert accepted_cell(frac_discrete=0.8, mean_rate_discrete=0.001) is False  # rate too low
+    assert accepted_cell(frac_discrete=0.8, mean_rate_discrete=None) is False  # no discrete seeds

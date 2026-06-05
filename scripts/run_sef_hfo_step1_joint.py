@@ -41,11 +41,11 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.sef_hfo_lif import (  # noqa: E402
-    ELL_PAR, ELL_PERP, L_INH, integrate_lif_field, mean_field,
+    ELL_PAR, ELL_PERP, L_INH, classify_response, integrate_lif_field, mean_field,
     _grid, _STIM_X0, _STIM_R, _STIM_T,
 )
 from src.sef_hfo_events import (  # noqa: E402
-    UndetectableOperatingPoint, calibrate_detector, classify_run, make_ou_noise,
+    UndetectableOperatingPoint, accepted_cell, calibrate_detector, classify_run, make_ou_noise,
 )
 
 OUT = Path("results/topic4_sef_hfo/step1_noise")
@@ -54,16 +54,19 @@ TAU_NOISE = 100.0          # slow afferent OU (contract §2; fast tau double-cou
 KICK_A = 8.0               # deterministic finite-pulse amplitude (matches kick_sweep)
 KICK_TMAX = 300.0          # kick run length (ms) — event has self-terminated well within this
 
-# Drive band within the step0b excitable window (kick_sweep self_limited 0.5-1.3);
-# interictal end up to the oscillation-onset shoulder, located by phase-structure
-# shape per §10.3 (NOT the SNN nominal ratio).
-DRIVES = [0.6, 0.7, 0.8, 0.9, 1.0]
-SIGMAS = [0.0, 1.0, 1.5, 1.8, 2.0, 2.2, 2.5, 3.0]
-# σ_ref must be UNIFORMLY sub-threshold across the whole drive band so the floor is
-# not contaminated by genuine events (circular). σ=1.0/1.5 already ignite at drive
-# 0.6 (1D runs), so they are NOT valid floor references there; σ=0.5 is extinction
-# across 0.6-1.0. Pre-registered dedicated reference (contract §10.2, NOT the lowest
-# sweep-grid point as v1.3 first wrote — that ignites at the interictal end).
+# Drive band = the FULL step0b excitable window (kick_sweep: 0.5-1.3 all
+# self_limited_propagation), located by the model's own phase structure (§10.3),
+# NOT the SNN nominal ratio. Each drive is VALIDATED per-run (run_drive re-fires the
+# kick and requires self_limited_propagation, §10.2 C) rather than asserted — a drive
+# whose kick fizzles is marked non-excitable and skipped. Spans interictal end (~0.6)
+# through the oscillation-onset shoulder so the (drive×σ) map can show a REGION vs a
+# crack across the whole window, not a hand-picked sub-band.
+DRIVES = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.3]
+# σ_ref=0.5 IS in the grid (so it is classified + its σ=0-like extinction verified),
+# AND must be UNIFORMLY sub-threshold across the band so the floor is not contaminated
+# by genuine events (circular). σ=1.0/1.5 already ignite at drive 0.6 (1D runs) so are
+# NOT valid floor references there; σ=0.5 is extinction across the band. (contract §10.2)
+SIGMAS = [0.0, 0.5, 1.0, 1.5, 1.8, 2.0, 2.2, 2.5, 3.0]
 SIGMA_REF = 0.5
 SEEDS = [0, 1, 2, 3, 4]
 W_EE_MULT = 1.0           # window A (PRIMARY); recovery off
@@ -79,12 +82,21 @@ def _coh(op, stim, t_max):
     return out[-1]  # ext_coh is appended last when coh_len is set
 
 
-def kick_coh(op):
-    """Coherence series from the deterministic off-center finite pulse (event peak)."""
+def kick_run(op):
+    """Deterministic off-center finite pulse; return (ext, front, ext_coh).
+
+    ``ext``/``front`` feed ``classify_response`` to VALIDATE the kick is a genuine
+    self-limited PROPAGATING event (§10.2 C — a local bump must not pass calibration);
+    ``ext_coh`` is the event-peak reference for the detector bar.
+    """
     X, Y = _grid(N, L)
     mask = ((X - _STIM_X0) ** 2 + Y ** 2 <= _STIM_R ** 2).astype(float)
     stim = lambda t: (KICK_A * mask) if t < _STIM_T else (0.0 * mask)
-    return _coh(op, stim, KICK_TMAX)
+    ext, front, ext_coh = integrate_lif_field(
+        op, stim, dt=DT, t_max=KICK_TMAX, b_a=B_A, n=N, L=L,
+        ell_par=ELL_PAR, ell_perp=ELL_PERP, l_inh=L_INH, coh_len=ELL_PAR,
+    )
+    return ext, front, ext_coh
 
 
 def noise_coh(op, sigma, seed, t_run):
@@ -104,20 +116,37 @@ def _iei_and_env(events):
 
 
 def run_drive(drive, sigmas, seeds, sigma_ref, t_run):
-    """Calibrate the detector at this drive, then sweep σ × seed with the per-op bar."""
+    """Calibrate the detector at this drive (validated kick + worst-case multi-seed
+    floor), then sweep σ × seed with the per-op bar."""
     op = mean_field(drive, w_ee_mult=W_EE_MULT)
-    # --- §10.2 calibration: kick peak + σ=0 / σ_ref floors (anti-circular: no grid) ---
-    kick = kick_coh(op)
-    s_floor0 = noise_coh(op, 0.0, 0, t_run)        # σ=0 deterministic rest (= the σ=0 sweep cell)
-    s_floorR = noise_coh(op, sigma_ref, 0, t_run)  # σ_ref sub-threshold (= the σ_ref,seed0 cell)
-    cache = {(0.0, 0): s_floor0, (sigma_ref, 0): s_floorR}
+
+    # --- §10.2 C / §10.3: the kick must be a genuine self-limited PROPAGATING event,
+    #     not a local bump — else this drive is non-excitable / non-interictal and the
+    #     "event peak" is meaningless. classify_response on the RAW ext/front. ---
+    k_ext, k_front, k_coh = kick_run(op)
+    k_label, _ = classify_response(k_ext, k_front, stim_x0=_STIM_X0, stim_r=_STIM_R, dt=DT)
+    if k_label != "self_limited_propagation":
+        return dict(drive=drive, undetectable=True, kick_label=k_label,
+                    reason=f"kick is {k_label}, not self_limited_propagation -> non-excitable",
+                    kick_peak=float(np.max(k_coh)), per_sigma=[], cells=[])
+
+    # --- §10.2 A: floor = worst case over the σ=0 deterministic run AND ALL σ_ref
+    #     seeds. One σ_ref seed underestimates the stochastic upper envelope (a too-low
+    #     floor -> too-low bar -> other quiet seeds mis-called events/sustained). σ=0 is
+    #     deterministic (make_ou_noise(σ=0) ignores the seed) so one run covers all. ---
+    s_floor0 = noise_coh(op, 0.0, 0, t_run)
+    cache = {(0.0, seed): s_floor0 for seed in seeds}      # σ=0 identical across seeds
+    floor_refs = [s_floor0]
+    for seed in seeds:
+        s = noise_coh(op, sigma_ref, seed, t_run)
+        cache[(sigma_ref, seed)] = s                       # reuse as the σ_ref grid cells
+        floor_refs.append(s)
     try:
-        cal = calibrate_detector([s_floor0, s_floorR], kick)
+        cal = calibrate_detector(floor_refs, k_coh)        # max over ALL refs (anti-circular)
     except UndetectableOperatingPoint as e:
-        return dict(drive=drive, undetectable=True, reason=str(e),
-                    kick_peak=float(np.max(kick)),
-                    floor=max(float(np.max(s_floor0)), float(np.max(s_floorR))),
-                    per_sigma=[], cells=[])
+        return dict(drive=drive, undetectable=True, kick_label=k_label, reason=str(e),
+                    kick_peak=float(np.max(k_coh)),
+                    floor=max(float(np.max(s)) for s in floor_refs), per_sigma=[], cells=[])
     bar = cal["event_on_frac"]
 
     cells, per_sigma = [], []
@@ -141,26 +170,32 @@ def run_drive(drive, sigmas, seeds, sigma_ref, t_run):
                               n_events=res["n_events"], max_ext=res["max_ext"],
                               frac_time_on=res["frac_time_on"], event_rate_per_s=rate))
         frac_discrete = labels.count("discrete_events") / len(labels)
+        mrd = float(np.mean(rates)) if rates else None
         per_sigma.append(dict(
             sigma=sigma, frac_discrete=frac_discrete, regime_counts=dict(Counter(labels)),
-            mean_rate_discrete=(float(np.mean(rates)) if rates else None),
+            mean_rate_discrete=mrd,
             median_iei_s=(float(np.median(ieis)) if ieis else None),
             median_env_ms=(float(np.median(envs)) if envs else None),
+            accepted=accepted_cell(frac_discrete, mrd),    # §10.4 machined (not eyeballed)
         ))
     sigma0 = next(p for p in per_sigma if p["sigma"] == 0.0)
-    return dict(drive=drive, undetectable=False, floor=cal["floor"], kick_peak=cal["peak"],
-                event_on_frac=bar, sigma0_extinction=(sigma0["regime_counts"] == {"extinction_only": len(seeds)}),
+    return dict(drive=drive, undetectable=False, kick_label=k_label,
+                floor=cal["floor"], kick_peak=cal["peak"], event_on_frac=bar,
+                sigma0_extinction=(sigma0["regime_counts"] == {"extinction_only": len(seeds)}),
+                accepted_sigmas=[p["sigma"] for p in per_sigma if p["accepted"]],
                 per_sigma=per_sigma, cells=cells)
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true",
-                    help="tiny fast end-to-end check (1 drive x 3 σ x 1 seed, short run)")
+                    help="tiny fast end-to-end check (1 drive x σ{0,σ_ref,1.8} x 2 seeds, short run)")
     args = ap.parse_args()
 
     if args.smoke:
-        drives, sigmas, seeds, sigma_ref, t_run = [1.0], [0.0, 1.5, 1.8], [0], 1.5, 800.0
+        # σ_ref=0.5 (matches the real run) AND in the σ grid; 2 seeds exercise the
+        # multi-seed floor path.
+        drives, sigmas, seeds, sigma_ref, t_run = [1.0], [0.0, 0.5, 1.8], [0, 1], 0.5, 800.0
         tag = "joint_A_smoke"
     else:
         drives, sigmas, seeds, sigma_ref, t_run = DRIVES, SIGMAS, SEEDS, SIGMA_REF, T_RUN
@@ -179,7 +214,29 @@ def main():
             fr = {p["sigma"]: round(p["frac_discrete"], 2) for p in r["per_sigma"]}
             print(f"drive={drive}: bar={r['event_on_frac']:.3f} floor={r['floor']:.3f} "
                   f"peak={r['kick_peak']:.3f} σ0_ext={r['sigma0_extinction']} "
-                  f"frac_discrete={fr}  [{time.time()-td:.0f}s]")
+                  f"accepted_σ={r['accepted_sigmas']} frac_discrete={fr}  [{time.time()-td:.0f}s]")
+
+    # --- §10.4 machined region verdict (NOT eyeballed off the heatmap): accepted
+    #     cells + whether they form a robust 2-D block (two grid-adjacent drives
+    #     sharing two grid-adjacent σ) vs a crack/single point, + the σ=0->extinction
+    #     regression at every detectable drive. The geometric read is also eyeballed on
+    #     the heatmap, but the verdict is machined so the conclusion can't drift. ---
+    acc = {r["drive"]: set(r["accepted_sigmas"]) for r in results if not r["undetectable"]}
+    accepted_cells = [(d, s) for d in sorted(acc) for s in sorted(acc[d])]
+    robust_block = False
+    for i in range(len(drives) - 1):
+        d0, d1 = drives[i], drives[i + 1]
+        shared = acc.get(d0, set()) & acc.get(d1, set())
+        for j in range(len(sigmas) - 1):
+            if sigmas[j] in shared and sigmas[j + 1] in shared:
+                robust_block = True
+    detectable = [r for r in results if not r["undetectable"]]
+    region_summary = dict(
+        n_accepted_cells=len(accepted_cells), accepted_cells=accepted_cells,
+        robust_2d_block=robust_block,
+        sigma0_extinction_all_drives=all(r["sigma0_extinction"] for r in detectable),
+        undetectable_drives=[r["drive"] for r in results if r["undetectable"]],
+    )
 
     OUT.mkdir(parents=True, exist_ok=True)
     payload = dict(
@@ -187,6 +244,7 @@ def main():
         params=dict(N=N, L=L, dt=DT, t_run_ms=t_run, drives=drives, sigmas=sigmas,
                     seeds=seeds, w_ee_mult=W_EE_MULT, b_a=B_A,
                     ell_par=ELL_PAR, ell_perp=ELL_PERP, l_inh=L_INH),
+        region_summary=region_summary,
         per_drive=[{k: v for k, v in r.items() if k != "cells"} for r in results],
     )
     (OUT / f"{tag}.json").write_text(json.dumps(payload, indent=2, default=float))
@@ -199,6 +257,11 @@ def main():
                         f"{c['max_ext']:.4f}", f"{c['frac_time_on']:.4f}",
                         f"{c['event_rate_per_s']:.4f}"])
     print(f"\nWrote {OUT}/{tag}.json + .csv  [total {time.time()-t0:.0f}s]")
+    print(f"REGION (§10.4): {region_summary['n_accepted_cells']} accepted cells; "
+          f"robust_2d_block={region_summary['robust_2d_block']}; "
+          f"σ0_extinction_all={region_summary['sigma0_extinction_all_drives']}; "
+          f"undetectable_drives={region_summary['undetectable_drives']}")
+    print(f"accepted cells (drive,σ): {region_summary['accepted_cells']}")
 
 
 if __name__ == "__main__":

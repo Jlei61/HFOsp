@@ -101,6 +101,26 @@ def calibrate_detector(ref_series, kick_series, frac: float = 0.5) -> dict:
     return dict(floor=floor, peak=peak, event_on_frac=bar)
 
 
+# Acceptance band (contract §10.4): a (drive, σ) cell counts toward the discrete
+# REGION iff a robust majority of seeds are discrete AND their rate is in the data
+# magnitude band. Machined here (not eyeballed off a heatmap) so the verdict can't
+# drift — per the saved lesson "acceptance gates must encode the conclusion".
+ACCEPT_FRAC_MIN: float = 0.60       # >=60% of seeds discrete
+ACCEPT_RATE_LO: float = 0.01        # events/s — data magnitude band [0.01, 1]
+ACCEPT_RATE_HI: float = 1.00
+
+
+def accepted_cell(frac_discrete: float, mean_rate_discrete,
+                  frac_min: float = ACCEPT_FRAC_MIN,
+                  rate_lo: float = ACCEPT_RATE_LO, rate_hi: float = ACCEPT_RATE_HI) -> bool:
+    """True iff this (drive, σ) cell meets the §10.4 region criterion: >= frac_min
+    of seeds discrete AND the discrete-seed mean rate within [rate_lo, rate_hi]/s.
+    ``mean_rate_discrete is None`` (no discrete seeds) -> not accepted."""
+    if mean_rate_discrete is None:
+        return False
+    return frac_discrete >= frac_min and rate_lo <= mean_rate_discrete <= rate_hi
+
+
 # ---------------------------------------------------------------------------
 # OU spatiotemporal noise drive
 # ---------------------------------------------------------------------------
