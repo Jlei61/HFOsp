@@ -354,6 +354,8 @@ user 2026-06-04 catch（advisor pressure-tested）三条，现有一维数据都
 
 **判定：Step 1 PASS → PENDING。** 不依赖工作点验证的 durable 子结论：**rate field 能在其参数空间某处（名义 drive=1.0, σ≈1.8）从慢噪声点出离散、自终止、率同量级（~0.3–0.5/s）的事件**——但"那处是不是间期工作点"未验证、(drive×σ) 面未扫、检测器单点标定。**解锁 Step-1 PASS 须先做 §10 联合分析。**
 
+> **PENDING 已判定（2026-06-04，§11）**：(drive×σ) 联合分析 + 逐点重标检测器跑完 → **诚实 NULL**：同质 window-A 率场**无稳健离散区**（0 accepted 格、robust_2d_block=False），离散只是 silent↔too-frequent 间一道种子脆弱窄缝；且旧"σ≈1.8 窄窗"经查部分是单点偏低阈高估（重标后 0.6→0.2）。**Step-1 的"噪声自发离散事件存在"在简化同质率场 = NULL（不是 PASS）**，存在性移交 Step 3（异质核）/ Step 4（spiking）。详见 §11。
+
 ---
 
 ## 10. (drive × σ) 联合分析 + 逐工作点检测器标定合同（pre-registration，2026-06-04 lock）
@@ -407,6 +409,34 @@ user 2026-06-04 catch（advisor pressure-tested）三条，现有一维数据都
 - `tests/`：§10.2 C 三条回归（σ=0/σ_ref→extinction 每 drive；kick→discrete）+ 反循环（bar 不依赖噪声网格）TDD（先红后绿，§6 deep-contract-verify）。
 - `scripts/`：drive×σ 二维 runner（§10.4）→ `results/topic4_sef_hfo/step1_noise/` 二维 JSON+CSV；heatmap plot + `figures/README.md`（中文）。
 - 跑完续写 §11 results；§9.11 PENDING 据 §11 二维结果再判 PASS / 诚实 null。
+
+---
+
+## 11. (drive × σ) 联合分析结果（2026-06-04）—— 诚实 NULL：同质 window-A 率场无稳健离散区
+
+> **朴素话**：把"撤掉手指、只给随机抖动"在"驱动强弱 × 抖动强弱"二维面上系统扫了一遍（驱动 0.5–1.3 × σ 9 档 × 5 种子），每个驱动档位都用"无噪静默 + 手动戳一下的真事件"两端重刻了检测器的尺。结果：**在同质组织、不开恢复机制（window A）这设定下，找不到一整块"随机抖动稳定自发点出一颗颗分开、自己灭、节奏对的事件"的区域**——只有零星几个、换种子就没的格子。这是 §10.4 预登记的诚实 null 分支。
+
+**机器判定（runner `region_summary`，不靠人眼看图）**：
+- **accepted 格子 = 0**（验收 = ≥60% 种子离散 且 离散事件率 ∈ [0.01,1]/s）；**robust_2d_block = False**。
+- **σ=0 在每个驱动档位都熄灭** ✓（无噪不自发持续，新坐标系也守）。
+- **drive 1.3 被脉冲检验判非可激**（kick=local_bump 非 self_limited_propagation）自动剔除——§10.2 C 脉冲门生效。
+
+**结构（图 b 是要害，`results/topic4_sef_hfo/step1_noise/figures/step1_joint_drive_sigma.png`）**：
+- **低驱动 0.5–0.7**：σ 一够强直接进 continuous（活动太频繁连成片，noise max_ext 中位 ~0.48 贴近 runaway），**无离散带**（silent 直接跳 too-frequent）。
+- **高驱动 1.0–1.1**：σ≈1.8–2.2 出现一道**极窄、换种子就塌**的离散缝（frac 峰值仅 0.4 = 2/5 种子）；σ 更低=silent，更高=continuous。
+- **失败模式 = 太频繁，不是不终止（§10.2 disambiguation，advisor catch）**：continuous 格子里**每次跑出 3–8 个会自终止的事件**（n_events>0 遍布所有驱动、frac_time_on 0.32–0.80），只是太密。**即自终止（recovery 的职责）本就工作；缺的是事件间稀疏间隔（数据 IEI~3s），而快 recovery（τ_a 25–80ms）的不应期远拉不到秒级 → 这是 Step-5 慢变量 / Step-3 结构问题，不是加 recovery 能补的。**
+
+**与旧 1D 的关系**：旧 1D（固定阈 0.05）drive 1.0 σ=1.8 报 frac 0.6；逐点重标后阈升到 0.071，同格**掉到 0.2** → 旧"0.6 窄窗"部分是**单点偏低阈的高估**。逐点重标 + 多种子地板 + 脉冲验证后，离散信号比旧分析更弱更碎。
+
+**口径限定（不可外推）**：限于 **window A（recovery off, w_ee_mult=1.0）+ 同质噪声 + 中点阈（frac=0.5）**，**不是"率场整体不行"**。
+**Caveats**：
+- (a) **阈值比例敏感**：边界 σ（drive 0.9–1.1, σ≈1.8–2.0）的 extinction 格子 max_ext 贴在阈下方（gap 0.000–0.007）→ discrete/extinction 边界对中点阈位置敏感；未做 frac<0.5 阈敏感性（序列未缓存，需重跑）。但 no-region 对**验收阈值**稳健（advisor：frac≥0.4 也无 2×2 块），因绑定约束是**种子脆弱性 ≤2/5**（独立于阈值）。
+- (b) **n=5 种子**：accepted(3/5) vs fragile(2/5) 只差一个种子 → 脆弱性主张有 power 限制。
+- (c) **window B（recovery-on）未二维扫**：但失败模式是太频繁（非不终止），recovery 非缺的那环；framework 原 window B 是 wee×1.4 双稳（旧 smoke→captured_high），与"太频繁"问题不同。列低优先未测。
+
+**指向**：同质 window-A 率场给不出稳健噪声自发离散区 → 需 **异质核（低阈值热点 → 一致成核、空间受限、抑制全局再点火）和/或结构化/慢输入**（= §9.9 选项 d / Step 3），和/或把噪声自发 event-train 搬 **spiking 底物**（§9.8 fork b，工作点结构忠实 + onset-front 已验证）。
+
+**§9.11 PENDING 的判定（据本节）**：Step-1 "噪声→离散自限事件存在 + 工作点" 在**同质 window-A 率场 = 诚实 NULL（不是 PASS）**。离散事件只是 silent↔too-frequent 间一道种子脆弱的窄缝，无稳健二维区；存在性问题**移交 Step 3（异质核）/ Step 4（spiking 底物）**，不在简化同质率场内解决。这与数据本身要"低模板多样性 / 近单源"（§9.9）一致——同质 patch 本就被预期可能过不了。**代码**：`scripts/run_sef_hfo_step1_joint.py`（runner）+ `src/sef_hfo_events.py::{event_on_frac_from_refs,calibrate_detector,accepted_cell}`（TDD）+ `scripts/plot_sef_hfo_step1_joint.py`（图）。
 
 ---
 
