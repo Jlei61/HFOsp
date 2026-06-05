@@ -273,6 +273,39 @@ def test_calibrate_detector_loud_fails_at_undetectable_operating_point():
         calibrate_detector([ref_hot], kick)
 
 
+def test_classify_run_reports_which_rule_fired_as_reason():
+    """The `sustained` label has THREE distinct mechanisms (contract §1 rules
+    1/5/6) — a >SUSTAINED_MS plateau, too-frequent-but-self-terminating, or a
+    non-returning segment. They imply different science, so classify_run must
+    report `reason` (which rule fired), not just the collapsed label."""
+    # too_frequent: many short pulses, each self-terminates, ON >30% of the run
+    t = _times(600.0)
+    ext = np.zeros_like(t)
+    for start in range(40, 560, 40):        # 13 pulses, 20ms ON / 20ms gap
+        ext[(t >= start) & (t < start + 20)] = VAL
+    op = mean_field(1.0)
+    r = classify_run(ext, DT, op, window="A")
+    assert r["label"] == "sustained" and r["reason"] == "too_frequent", r
+
+    # long_plateau: one ON segment > SUSTAINED_MS that never returns
+    ext2 = np.where(t >= 50, VAL, 0.0)      # ON 50..600ms (550ms) to the end
+    r2 = classify_run(ext2, DT, op, window="A")
+    assert r2["label"] == "sustained" and r2["reason"] == "long_plateau", r2
+
+    # non_returning: a clean returning pulse + a short non-returning tail, ON <30%
+    ext3 = np.zeros_like(t)
+    ext3[(t >= 50) & (t < 90)] = VAL        # returns
+    ext3[(t >= 560)] = VAL                  # short tail, never returns (ON well <30%)
+    r3 = classify_run(ext3, DT, op, window="A")
+    assert r3["label"] == "sustained" and r3["reason"] == "non_returning", r3
+
+    # discrete + extinction reasons
+    ext4 = _rect(t, 90, 130)
+    assert classify_run(ext4, DT, op, window="A")["reason"] == "discrete", "discrete"
+    ext5 = np.full_like(t, 0.5 * EVENT_ON_FRAC)
+    assert classify_run(ext5, DT, op, window="A")["reason"] == "extinction", "extinction"
+
+
 def test_accepted_cell_encodes_the_region_criterion():
     """§10.4 acceptance machined (not eyeballed): a (drive,σ) cell is accepted iff
     >=60% of seeds are discrete AND the discrete-seed mean rate is in [0.01,1]/s."""

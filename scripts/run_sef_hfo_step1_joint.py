@@ -54,13 +54,14 @@ TAU_NOISE = 100.0          # slow afferent OU (contract §2; fast tau double-cou
 KICK_A = 8.0               # deterministic finite-pulse amplitude (matches kick_sweep)
 KICK_TMAX = 300.0          # kick run length (ms) — event has self-terminated well within this
 
-# Drive band = the FULL step0b excitable window (kick_sweep: 0.5-1.3 all
-# self_limited_propagation), located by the model's own phase structure (§10.3),
-# NOT the SNN nominal ratio. Each drive is VALIDATED per-run (run_drive re-fires the
-# kick and requires self_limited_propagation, §10.2 C) rather than asserted — a drive
-# whose kick fizzles is marked non-excitable and skipped. Spans interictal end (~0.6)
-# through the oscillation-onset shoulder so the (drive×σ) map can show a REGION vs a
-# crack across the whole window, not a hand-picked sub-band.
+# CANDIDATE drive grid spanning the step0b excitable range. Each drive is VALIDATED
+# PER-RUN here (run_drive re-fires the kick at THIS runner's grid N=64/L=16 and requires
+# self_limited_propagation, §10.2 C) — that per-run gate, not the kick_sweep comment, is
+# authoritative. NB: kick_sweep.json (step0 default grid) labelled 0.5-1.3 all
+# self_limited, but at N=64/L=16 the joint runner finds drive 1.3 = local_bump and
+# excludes it; so 1.3 is a CANDIDATE excluded by this run's kick gate, not part of a
+# clean "0.5-1.3 excitable window" claim. Located by the model's own phase structure
+# (§10.3), NOT the SNN nominal ratio.
 DRIVES = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.3]
 # σ_ref=0.5 IS in the grid (so it is classified + its σ=0-like extinction verified),
 # AND must be UNIFORMLY sub-threshold across the band so the floor is not contaminated
@@ -151,7 +152,7 @@ def run_drive(drive, sigmas, seeds, sigma_ref, t_run):
 
     cells, per_sigma = [], []
     for sigma in sigmas:
-        labels, rates, ieis, envs = [], [], [], []
+        labels, reasons, rates, ieis, envs = [], [], [], [], []
         for seed in seeds:
             coh = cache.get((sigma, seed))
             if coh is None:
@@ -160,19 +161,26 @@ def run_drive(drive, sigmas, seeds, sigma_ref, t_run):
             rate = res["n_events"] / (t_run / 1000.0)
             iei, env = _iei_and_env(res["events"])
             labels.append(res["label"])
+            reasons.append(res["reason"])
             if res["label"] == "discrete_events":
                 rates.append(rate)
                 if iei is not None:
                     ieis.append(iei)
                 if env is not None:
                     envs.append(env)
+            # record the FAILURE-MODE fields the first run dropped (so "sustained" can be
+            # split into long_plateau / too_frequent / non_returning — the §11 claim
+            # depends on this; n_events>0 alone cannot exclude a non-returning segment).
             cells.append(dict(drive=drive, sigma=sigma, seed=seed, label=res["label"],
-                              n_events=res["n_events"], max_ext=res["max_ext"],
+                              reason=res["reason"], n_events=res["n_events"],
+                              n_events_total=res["n_events_total"], all_returned=res["all_returned"],
+                              longest_on_ms=res["longest_on_ms"], max_ext=res["max_ext"],
                               frac_time_on=res["frac_time_on"], event_rate_per_s=rate))
         frac_discrete = labels.count("discrete_events") / len(labels)
         mrd = float(np.mean(rates)) if rates else None
         per_sigma.append(dict(
             sigma=sigma, frac_discrete=frac_discrete, regime_counts=dict(Counter(labels)),
+            reason_counts=dict(Counter(reasons)),          # failure-mode breakdown
             mean_rate_discrete=mrd,
             median_iei_s=(float(np.median(ieis)) if ieis else None),
             median_env_ms=(float(np.median(envs)) if envs else None),
@@ -190,6 +198,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--smoke", action="store_true",
                     help="tiny fast end-to-end check (1 drive x σ{0,σ_ref,1.8} x 2 seeds, short run)")
+    ap.add_argument("--drives", type=str, default=None,
+                    help="comma-separated drive override (e.g. 0.6,1.0); default = full DRIVES grid")
+    ap.add_argument("--sigmas", type=str, default=None,
+                    help="comma-separated σ override; σ_ref (0.5) is auto-included if missing")
+    ap.add_argument("--tag", type=str, default=None, help="output file tag override")
     args = ap.parse_args()
 
     if args.smoke:
@@ -198,8 +211,14 @@ def main():
         drives, sigmas, seeds, sigma_ref, t_run = [1.0], [0.0, 0.5, 1.8], [0, 1], 0.5, 800.0
         tag = "joint_A_smoke"
     else:
-        drives, sigmas, seeds, sigma_ref, t_run = DRIVES, SIGMAS, SEEDS, SIGMA_REF, T_RUN
-        tag = f"joint_A_tau{int(TAU_NOISE)}"
+        seeds, sigma_ref, t_run = SEEDS, SIGMA_REF, T_RUN
+        drives = [float(x) for x in args.drives.split(",")] if args.drives else DRIVES
+        sigmas = [float(x) for x in args.sigmas.split(",")] if args.sigmas else SIGMAS
+        if sigma_ref not in sigmas:        # σ_ref must be in the grid (classified + reused as floor)
+            sigmas = sorted(set(sigmas) | {sigma_ref})
+        if 0.0 not in sigmas:              # σ=0 extinction regression must be in the grid
+            sigmas = sorted(set(sigmas) | {0.0})
+        tag = args.tag or f"joint_A_tau{int(TAU_NOISE)}"
 
     t0 = time.time()
     results, all_cells = [], []
@@ -250,12 +269,14 @@ def main():
     (OUT / f"{tag}.json").write_text(json.dumps(payload, indent=2, default=float))
     with (OUT / f"{tag}.csv").open("w", newline="") as fh:
         w = csv.writer(fh)
-        w.writerow(["drive", "sigma", "seed", "label", "n_events", "max_ext",
+        w.writerow(["drive", "sigma", "seed", "label", "reason", "n_events",
+                    "n_events_total", "all_returned", "longest_on_ms", "max_ext",
                     "frac_time_on", "event_rate_per_s"])
         for c in all_cells:
-            w.writerow([c["drive"], c["sigma"], c["seed"], c["label"], c["n_events"],
-                        f"{c['max_ext']:.4f}", f"{c['frac_time_on']:.4f}",
-                        f"{c['event_rate_per_s']:.4f}"])
+            w.writerow([c["drive"], c["sigma"], c["seed"], c["label"], c["reason"],
+                        c["n_events"], c["n_events_total"], c["all_returned"],
+                        f"{c['longest_on_ms']:.1f}", f"{c['max_ext']:.4f}",
+                        f"{c['frac_time_on']:.4f}", f"{c['event_rate_per_s']:.4f}"])
     print(f"\nWrote {OUT}/{tag}.json + .csv  [total {time.time()-t0:.0f}s]")
     print(f"REGION (§10.4): {region_summary['n_accepted_cells']} accepted cells; "
           f"robust_2d_block={region_summary['robust_2d_block']}; "

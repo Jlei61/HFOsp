@@ -273,22 +273,26 @@ def classify_run(ext: np.ndarray, dt: float, op: dict,
         # ~SETTLE_MS, which needs the integrator to expose a final-window field avg).
         captured = float(rE_final.mean()) > lo + CAPTURE_FRAC * (hi - lo)
 
+    # `reason` records WHICH rule produced the label — the `sustained` label has
+    # three distinct mechanisms (long_plateau / too_frequent / non_returning) that
+    # imply different science (§1; the §11 disambiguation depends on this).
     if longest_on > SUSTAINED_MS and not returned_global:
-        label = "sustained"
+        label, reason = "sustained", "long_plateau"
     elif max_ext >= RUNAWAY_FRAC and not returned_global:
-        label = "runaway"
+        label, reason = "runaway", "runaway"
     elif captured:
-        label = "captured_high"
+        label, reason = "captured_high", "captured_high"
     elif n_events_total == 0:
-        label = "extinction_only"
+        label, reason = "extinction_only", "extinction"
     elif frac_time_on >= FRAC_TIME_ON_MAX:
-        label = "sustained"   # continuously active / flickering -> not temporally discrete
+        label, reason = "sustained", "too_frequent"   # ON >30% of the run -> not temporally discrete
     elif not all_returned:
-        label = "sustained"   # >=1 ON segment did not self-terminate -> not discrete
+        label, reason = "sustained", "non_returning"  # >=1 ON segment did not self-terminate
     else:
-        label = "discrete_events"   # >=1 event AND every ON segment self-terminated
+        label, reason = "discrete_events", "discrete"  # event(s) AND every ON segment self-terminated
 
-    return dict(label=label, n_events=int(n_self_term), n_events_total=int(n_events_total),
+    return dict(label=label, reason=reason,
+                n_events=int(n_self_term), n_events_total=int(n_events_total),
                 all_returned=bool(all_returned), max_ext=max_ext,
                 final_ext=final_ext, longest_on_ms=float(longest_on),
                 frac_time_on=frac_time_on,
