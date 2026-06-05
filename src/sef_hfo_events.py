@@ -75,6 +75,32 @@ def event_on_frac_from_refs(floor: float, peak: float, frac: float = 0.5) -> flo
     return float(floor + frac * (peak - floor))
 
 
+def calibrate_detector(ref_series, kick_series, frac: float = 0.5) -> dict:
+    """Per-operating-point detector bar from coherence reference + kick series (§10.2/§10.5).
+
+    Parameters
+    ----------
+    ref_series : list of 1-D arrays
+        Coherence active-fraction (``ext_coh``) series from the no-event reference
+        runs at THIS operating point: the σ=0 deterministic run and the σ_ref
+        sub-threshold-noise run. The floor is the worst case = max over all of them
+        (so the bar sits above even the highest sub-threshold noise hovering — the
+        §9.7 mechanism).
+    kick_series : 1-D array
+        ``ext_coh`` from the deterministic finite-pulse run = the genuine event peak.
+    frac : float
+        Midpoint fraction (§10.2 A, default 0.5).
+
+    Returns ``dict(floor, peak, event_on_frac)``. Raises ``UndetectableOperatingPoint``
+    if the floor is not below the peak. Anti-circular: consumes ONLY the reference
+    and kick series, never the noise-driven event grid.
+    """
+    floor = max(float(np.max(np.asarray(s))) for s in ref_series)
+    peak = float(np.max(np.asarray(kick_series)))
+    bar = event_on_frac_from_refs(floor, peak, frac)
+    return dict(floor=floor, peak=peak, event_on_frac=bar)
+
+
 # ---------------------------------------------------------------------------
 # OU spatiotemporal noise drive
 # ---------------------------------------------------------------------------

@@ -375,7 +375,7 @@ user 2026-06-04 catch（advisor pressure-tested）三条，现有一维数据都
 **修法（pre-registered，逐工作点重刻「幅度尺」，shape/time 常数不动）**：
 
 **(A) 每工作点重刻的只有「幅度尺」，且夹在两个无循环参照之间**：
-- **下界 = 静默地板 floor**：该 drive 跑 **σ=0（确定性无噪）+ 指定亚阈参照 σ_ref（= 网格最低噪声点，pre-registered）**，量 coherence 活跃测度的**静默上包络**。
+- **下界 = 静默地板 floor**：该 drive 跑 **σ=0（确定性无噪）+ 指定亚阈参照 σ_ref**，量 coherence 活跃测度的**静默上包络**。**σ_ref 必须跨整条 drive 带都亚阈（不点火）**，否则 floor 被真事件污染=循环。**σ_ref=0.5（pre-registered）**：σ=1.0/1.5 在 drive 0.6 已点火（1D 实测），不能当那里 floor 参照；σ=0.5 在 0.6–1.0 全 extinction。（v1.3 初稿误写"网格最低噪声点"，已更正：最低非零网格点 1.0 在间期端会点火。）
 - **上界 = 真事件幅度 event-peak**：该 drive 跑 **step0b 确定性有限脉冲**（已知会点出自限事件），量其 coherence **峰值**。
 - **ON 幅度尺锁在 (floor, event-peak) 之间**（pre-registered 比例，如几何均值；并验证 `floor < bar < event-peak`，否则该工作点判 **`undetectable` loud-fail**——不偷偷过、也即该 drive 非可激/非间期候选）。
 - **反循环**：幅度尺**只**由 (i) 无噪/亚阈参照 + (ii) 确定性脉冲事件参照算出，**绝不**由噪声驱动事件网格回算；每工作点冻结后才跑噪声网格。

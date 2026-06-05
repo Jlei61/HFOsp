@@ -244,3 +244,30 @@ def test_recalibrated_bar_preserves_clean_event_and_shape_constants():
     res = classify_run(ext, DT, op, window="A", event_on_frac=0.16)
     assert res["label"] == "discrete_events", res
     assert res["n_events"] == 1, res
+
+
+def test_calibrate_detector_uses_worst_floor_and_kick_peak():
+    """§10.2(A)/§10.5: bar from reference coherence series (σ=0/σ_ref, worst-case
+    floor = max over references) and the deterministic-kick peak. Pure over the
+    series — the runner supplies them (anti-circular: never the noise grid)."""
+    from src.sef_hfo_events import calibrate_detector
+    ref0 = np.full(100, 0.02)            # σ=0 floor
+    refR = np.full(100, 0.03)            # σ_ref (sub-threshold) floor — higher
+    kick = np.concatenate([np.zeros(40), np.full(20, 0.30), np.zeros(40)])  # event peak 0.30
+    cal = calibrate_detector([ref0, refR], kick)
+    assert abs(cal["floor"] - 0.03) < 1e-12, cal      # worst (max) of the references
+    assert abs(cal["peak"] - 0.30) < 1e-12, cal
+    assert abs(cal["event_on_frac"] - (0.03 + 0.5 * 0.27)) < 1e-12, cal  # midpoint = 0.165
+
+
+def test_calibrate_detector_loud_fails_at_undetectable_operating_point():
+    """§10.2(A): if sub-threshold noise reaches the event amplitude (floor >= peak),
+    the operating point is non-excitable/undetectable -> loud-fail (drive excluded
+    from the interictal band, §10.3)."""
+    import pytest
+
+    from src.sef_hfo_events import UndetectableOperatingPoint, calibrate_detector
+    ref_hot = np.full(100, 0.30)         # noise floor already at event amplitude
+    kick = np.full(100, 0.30)
+    with pytest.raises(UndetectableOperatingPoint):
+        calibrate_detector([ref_hot], kick)
