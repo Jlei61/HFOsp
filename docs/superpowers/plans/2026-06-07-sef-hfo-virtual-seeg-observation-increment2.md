@@ -22,6 +22,7 @@
 - **Operating point LOCKED**: `nu_ext_ratio = 0.6` (interictal quiet-excitable; `Params(nu_ext_ratio=0.6)`). Default 1.0 = oscillatory/seizure-ward — NOT used. `T` (duration) is set on `Params` (no `t_max` arg); `dt=0.1 ms`.
 - **Envelope source LOCKED = smoothed E-spike density (path A, zero current-recording)**. The kick path `fresh_run`/`simulate_kick` saves `E_spk_bool (nsteps, NE)` aligned to `posE = net['pos'][:NE]`; **per-neuron synaptic currents are never stored**, and the kick loop does not wire `LFPRecorder`. So: bin+smooth `E_spk_bool` to a per-neuron rate field, then sample at montage contacts with the Increment-1 Gaussian footprint (`sample_envelopes(source_frames, grid_xy=posE, montage, kernel_width)`). This **reuses Increment-1 verbatim** and needs **zero engine edits** for the envelope.
   - **Why path A, not the current-LFP power-law (path B)**: path B (lfp.py `|I_E|+|I_I|`, power-law `f(r)`) is the more literal "synaptic-current proxy" the spec mentions, but it requires *extending the engine kick loop to record currents per step* + generalizing `make_grid` to montage coords — an engine edit to gitignored coworker code. For the **direction discriminator**, the read-out uses rank **ORDER** only; a discrete-contact, spatially-integrated, real-pipeline read of smoothed spike density carries that order faithfully. Path B (exact current-LFP waveform) is recorded as a **deferred fidelity upgrade** (needed only when we later match real-data event *waveforms*, not for the order-based direction test). **REVIEW HOOK: if you want the literal current-LFP observable now, say so and we bump to path B (+ engine edit + lfp.py `sites=` generalization).**
+  - **Reporting boundary (LOCKED)**: path A reads a **firing-density envelope**, NOT a synaptic-current LFP. It validates the **direction-ORDER read-out** only. It may **NOT** be reported as "the LFP observation layer is validated"; any claim about LFP *waveform* amplitude/shape (e.g. matching real-data event envelopes) requires path B. Increment-2's verdict is strictly "template direction tracks θ_EE through virtual contacts + real pipeline", nothing about waveform.
 - **Oracle parity (not a gate)**: keep `anisotropy_front.principal_axis` (true-position + spike-onset PCA; already PASSES err<1.2°, iso ratio 1.13). The virtual-electrode read should agree in *direction* (track θ_EE); it may be noisier. Report both; the oracle is the upper bound, the virtual read is the observable being validated.
 
 ### Item 2 — single-end kick + event window
@@ -32,7 +33,7 @@
 
 ### Item 3 — 2D montage: placement + rotation
 
-- **LOCKED**: ≥2 non-parallel shafts via Increment-1 `build_shaft` + `merge_montages`, **centered at sheet center `(L/2, L/2)`**, in the engine's mm frame (`pos` is mm on `[0,L]²`). Sheet is small (`L=2–3 mm`), so contact pitch **(proposed 0.3 mm)**, `n_contacts` per shaft **(proposed 7)** → 14 contacts spanning the sheet, comfortably above the ≥7 participation gate. Two shafts at **(proposed 10° and 100°)** (non-parallel, span 2D, even count avoids an exact-origin coincident contact — see Increment-1).
+- **LOCKED**: ≥2 non-parallel shafts via Increment-1 `build_shaft` + `merge_montages`, **centered at sheet center `(L/2, L/2)`**, in the engine's mm frame (`pos` is mm on `[0,L]²`). Sheet is small (`L=2–3 mm`), so contact pitch **(proposed 0.3 mm)**, `n_contacts` per shaft = **8 (EVEN — locked, not 7)** → 16 contacts spanning the sheet, well above the ≥7 participation gate. Two shafts at **(proposed 10° and 100°)**, both through the center. **Even count is required** so neither shaft has a contact exactly at the shared center → no coincident contact (two contacts at the same coord = duplicate signal + spurious ties; this is the exact Increment-1 lesson, build_shaft centers offsets at `±pitch·(2k-1)/2`, so even-n skips the origin).
 - **Rotate-montage control**: rebuild all shafts at `+Δ` (rotate the whole array); θ_EE fixed → recovered direction must be invariant.
 - **Angle convention LOCKED = `atan2(dy, dx) mod 180°`** (x-axis = 0°), matching the engine oracle (verified: rot θ=0→0°, θ=90→90°). The virtual read MUST use this or the vs-θ_EE comparison is meaningless.
 
@@ -40,20 +41,27 @@
 
 | Control | Setup | Judge (Increment-1 estimators) | PASS criterion |
 |---|---|---|---|
-| **C-track: direction tracks connectivity** | `build_connectivity_rot(theta_EE=deg, AR=2.0)` for θ_EE ∈ {0,45,90}; montage FIXED | recovered `endpoint_centroid_axis` vs θ_EE via `axis_angle_error_deg` (mod 180°) | mean axis error **< 25°** (proposed) for each θ_EE |
-| **shaft-invariance** | θ_EE FIXED; rotate the whole 2D montage by Δ ∈ {0,30,60} | recovered axis vs the θ_EE=fixed reference | axis shift **< 25°** (proposed) across montage rotations (direction follows connectivity, not electrodes) |
-| **must-fail: isotropic + aligned shaft** | `build_connectivity_rot(AR=1.0)` (isotropic; no separate iso flag) + shaft aligned to a reference axis | `direction_readability` (max-axis Spearman) | **< τ_fail = 0.3** (proposed) — NO stable readable direction |
+| **C-track: direction tracks connectivity** | `build_connectivity_rot(theta_EE=deg, AR=2.0)` for θ_EE ∈ {0,45,90}; montage FIXED | recovered `endpoint_centroid_axis` vs θ_EE via `axis_angle_error_deg` (mod 180°), over **direction-readable** seeds | mean axis error **< 25°** (proposed) for each θ_EE |
+| **shaft-invariance** | θ_EE **FIXED at 45°**; rotate the whole 2D montage by Δ ∈ {0,30,60} | recovered axis vs the **fixed θ_EE (45°)** — NOT a difference between rotations | **each** montage rotation's mean axis error **< 25°** vs the fixed 45° (proposed). This directly encodes "recovered axis stays at θ_EE, invariant to electrode rotation"; comparing *differences* of errors is rejected (all-rotations-60°-off would falsely pass). |
+| **must-fail: isotropic + aligned shaft** | `build_connectivity_rot(AR=1.0)` (isotropic; no separate iso flag) + shaft aligned to a reference axis | judged on **event-valid** seeds (event exists + ≥7 contacts participate); **does NOT require a direction axis** — "no readable axis" is the desired outcome. `direction_readability` (max-axis Spearman; NaN-when-fully-tied → treated as 0 = unreadable) | mean `direction_readability` over event-valid seeds **< τ_fail = 0.3** (proposed) — events occur but NO stable readable direction |
 
 - `build_connectivity_rot` keeps E→I/I→E/I→I bit-identical and **mass fixed by `C_EE=800` (without replacement) + constant `w_EE`** — Increment 2 introduces **no** kernel/distance weight scaling (pathology-mapping spec normalization contract; already satisfied). `AR=2.0 ↔ rho_EE=0.6` (≈45°/ratio1.85, empirical match). Pre-verify any (θ,AR) offline via `connectivity_rot._partner_cov_axis`.
 - **Grid/montage-contamination guard** (reader-C pitfall): C-track + shaft-invariance *together* prove the recovered axis follows connectivity, not the montage's own geometry. Both required.
 
-### Item 5 — valid-event count + ≥7-contact threshold
+### Item 5 — two-layer seed validity (event-valid vs direction-readable) + counts
 
-- One **single self-limited event per seed**. Per event: require `n_participating ≥ 2·k_dir+1 = 7` (k_dir=3, Increment-1 lock) for the endpoint axis, else that event = **INSUFFICIENT for direction** (not counted; not forced).
-- Per condition (each θ_EE value; each montage rotation; iso): run `n_seed` **(proposed 3)** seeds; require **≥ `n_seed_min = 2`** (proposed) events with a valid direction read, else that condition = **INSUFFICIENT** (loud — reported, never a forced PASS/FAIL). Mirrors the oracle's 3-seed protocol.
-- Report **mean axis error ± sd across seeds** per θ_EE (C-track) and per montage rotation (shaft-invariance); `direction_readability` mean ± sd for the iso must-fail.
+Two **orthogonal** per-seed flags (the iso must-fail breaks without the split):
+- **event-valid** = a self-limited event window was found **AND** `n_participating ≥ 2·k_dir+1 = 7` (k_dir=3 lock). "There was a real, well-sampled event."
+- **direction-readable** = event-valid **AND** `endpoint_centroid_axis` returns a non-degenerate axis. "A direction could be read off it." For isotropic, the *desired* outcome is **event-valid but NOT direction-readable**.
 
-> **Acceptance gate (encode the conclusion, not existence):** Increment-2 PASS = C-track all three θ_EE mean-err < 25° **AND** shaft-invariance shift < 25° **AND** iso readability < τ_fail **AND** every reported condition has ≥ n_seed_min valid events (else that condition is INSUFFICIENT, surfaced, not silently dropped). Thresholds lock at review; never tuned to pass.
+Per condition, run `n_seed` **(proposed 3)** seeds:
+- **Tracking conditions** (C-track, shaft-invariance): need **≥ `n_seed_min = 2`** (proposed) **direction-readable** seeds, else INSUFFICIENT (loud, never forced). Verdict = mean axis-error over readable seeds < 25°.
+- **Must-fail condition** (iso): need **≥ `n_seed_min` event-valid** seeds (so we know events DID occur), else INSUFFICIENT. Verdict = mean `direction_readability` over those event-valid seeds < τ_fail. **A condition where events don't even occur (event-valid < n_seed_min) is INSUFFICIENT, NOT a must-fail PASS** — "no events" must never be read as "events with no readable direction".
+- Report mean ± sd across seeds; mirrors the oracle's 3-seed protocol.
+
+**Observation-knob freeze (LOCKED discipline):** the read-out geometry/smoothing knobs — `kernel_width`, `bin_ms`, `smooth_ms`, montage `pitch`/`n_contacts`, `R_END_FRAC` — are calibrated ONCE in the Task-5 smoke (on a SINGLE condition, e.g. θ_EE=45°), then **frozen and recorded in verdict.json BEFORE** the formal three-control run. They are read-geometry, not verdict bars; tuning them after seeing the three-control results = tuning the virtual electrode to the answer (forbidden). The verdict thresholds (25° / τ_fail / k_dir / n_seed_min) are never tuned at all.
+
+> **Acceptance gate (encode the conclusion, not existence):** Increment-2 PASS = C-track each θ_EE mean-err < 25° (over ≥ n_seed_min direction-readable seeds) **AND** shaft-invariance each montage rotation mean-err < 25° vs the **fixed** θ_EE=45° **AND** iso must-fail mean readability < τ_fail over ≥ n_seed_min **event-valid** seeds. Any condition below its seed floor (tracking: direction-readable; iso: event-valid) is **INSUFFICIENT** — surfaced, never silently dropped, and "no events" is never a must-fail PASS. Thresholds lock at review; never tuned to pass.
 
 ---
 
@@ -296,7 +304,7 @@ from src.sef_hfo_snn_adapter import snn_event_envelope
 # LOCKED params (§0)
 L, DENSITY, T, DT = 2.0, 4000.0, 350.0, 0.1
 DRIVE = 0.6
-PITCH, NC, SHAFTS = 0.3, 7, (10.0, 100.0)
+PITCH, NC, SHAFTS = 0.3, 8, (10.0, 100.0)   # NC EVEN -> no center coincident contact (Item 3)
 KDIR, NSEED, NSEED_MIN = 3, 3, 2
 AXIS_ERR_MAX, TAU_FAIL = 25.0, 0.3
 R_END_FRAC = 0.6
@@ -331,7 +339,8 @@ def _read_one(theta_EE, AR, seed, montage):
     _, _, agg_r = snn_event_envelope(res_ref["E_spk_bool"], posE, montage, DT)
     win = event_window_for_run(agg_k, agg_r, fdt)        # Task 3 helper
     if win is None:
-        return {"valid": False, "reason": "no_self_limited_event"}
+        return {"event_valid": False, "direction_readable": False,
+                "reason": "no_self_limited_event"}
     art = extract_lagpat(env_k, fdt, event_windows=[win],
                          participation_floor=float(env_k.min()),
                          participation_margin=0.5*(float(env_k.max())-float(env_k.min())),
@@ -341,49 +350,65 @@ def _read_one(theta_EE, AR, seed, montage):
     n_part = int(b0.sum())
     axis = endpoint_centroid_axis(r0, b0, art.contact_coords, k_dir=KDIR, eps_deg=0.5*PITCH)
     read = direction_readability(r0, b0, art.contact_coords)
-    return {"valid": axis is not None and n_part >= 2*KDIR+1,
+    event_valid = n_part >= 2*KDIR+1                      # event exists + enough contacts (win!=None here)
+    return {"event_valid": bool(event_valid),
+            "direction_readable": bool(event_valid and axis is not None),
             "n_part": n_part, "axis": None if axis is None else axis.tolist(),
-            "readability": read}
+            "readability": float(read)}                   # may be nan (fully tied = unreadable)
 
 
-def _condition(theta_EE, AR, montage):
+def _tracking_condition(theta_EE, AR, montage):
+    """C-track / shaft-invariance: recovered axis must TRACK theta_EE.
+    Needs >= n_seed_min DIRECTION-READABLE seeds."""
     seeds = [_read_one(theta_EE, AR, s, montage) for s in range(1, NSEED+1)]
-    valid = [s for s in seeds if s["valid"]]
-    if len(valid) < NSEED_MIN:
-        return {"status": "INSUFFICIENT", "n_valid": len(valid), "seeds": seeds}
-    errs = [axis_angle_error_deg(np.array(s["axis"]), theta_EE) for s in valid]
-    reads = [s["readability"] for s in valid]
-    return {"status": "OK", "n_valid": len(valid),
-            "axis_err_mean": float(np.mean(errs)), "axis_err_sd": float(np.std(errs)),
-            "readability_mean": float(np.nanmean(reads)), "seeds": seeds}
+    readable = [s for s in seeds if s.get("direction_readable")]
+    if len(readable) < NSEED_MIN:
+        return {"status": "INSUFFICIENT", "n_readable": len(readable),
+                "n_event_valid": sum(bool(s.get("event_valid")) for s in seeds), "seeds": seeds}
+    errs = [axis_angle_error_deg(np.array(s["axis"]), theta_EE) for s in readable]
+    mean_err = float(np.mean(errs))
+    return {"status": "OK", "n_readable": len(readable),
+            "axis_err_mean": mean_err, "axis_err_sd": float(np.std(errs)),
+            "pass": bool(mean_err < AXIS_ERR_MAX), "seeds": seeds}
+
+
+def _mustfail_condition(theta_EE, AR, montage):
+    """Isotropic must-fail: events must OCCUR (event-valid) but direction must NOT be
+    readable. Judged on event-valid seeds' readability; 'no events' = INSUFFICIENT, NOT pass."""
+    seeds = [_read_one(theta_EE, AR, s, montage) for s in range(1, NSEED+1)]
+    ev = [s for s in seeds if s.get("event_valid")]
+    if len(ev) < NSEED_MIN:
+        return {"status": "INSUFFICIENT", "n_event_valid": len(ev), "seeds": seeds}
+    reads = [0.0 if s["readability"] != s["readability"] else s["readability"] for s in ev]  # NaN->0
+    mean_read = float(np.mean(reads))
+    return {"status": "OK", "n_event_valid": len(ev), "readability_mean": mean_read,
+            "pass": bool(mean_read < TAU_FAIL), "seeds": seeds}
 
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT.parent / "figures").mkdir(parents=True, exist_ok=True)
     verdict = {"locked": {"drive": DRIVE, "axis_err_max": AXIS_ERR_MAX, "tau_fail": TAU_FAIL,
-                          "k_dir": KDIR, "n_seed": NSEED, "n_seed_min": NSEED_MIN}}
+                          "k_dir": KDIR, "n_seed": NSEED, "n_seed_min": NSEED_MIN,
+                          "obs_knobs": {"pitch": PITCH, "n_contacts": NC, "shafts": SHAFTS,
+                                        "r_end_frac": R_END_FRAC}}}  # frozen after smoke (Item 5)
     m0 = _montage()
-    # C-track: rotate connectivity, montage fixed
-    verdict["C_track"] = {f"{d}deg": _condition(np.deg2rad(d), 2.0, m0) for d in (0, 45, 90)}
-    # shaft-invariance: connectivity fixed (45deg), rotate montage
-    verdict["shaft_invariance"] = {f"rot{r}": _condition(np.deg2rad(45.0), 2.0, _montage(rot_deg=r))
+    # C-track: rotate connectivity, montage FIXED -> axis must track theta_EE
+    verdict["C_track"] = {f"{d}deg": _tracking_condition(np.deg2rad(d), 2.0, m0) for d in (0, 45, 90)}
+    # shaft-invariance: connectivity FIXED at 45deg, rotate montage -> axis must STILL be 45deg
+    verdict["shaft_invariance"] = {f"rot{r}": _tracking_condition(np.deg2rad(45.0), 2.0, _montage(rot_deg=r))
                                    for r in (0, 30, 60)}
-    # must-fail: isotropic (AR=1) + aligned shaft
-    verdict["iso_mustfail"] = _condition(np.deg2rad(0.0), 1.0, m0)
+    # must-fail: isotropic (AR=1) + aligned shaft -> events occur but NO readable direction
+    verdict["iso_mustfail"] = _mustfail_condition(np.deg2rad(0.0), 1.0, m0)
 
     def ok(cond): return cond.get("status") == "OK"
-    ct = verdict["C_track"]
-    si = verdict["shaft_invariance"]
-    iso = verdict["iso_mustfail"]
-    c_track_pass = all(ok(ct[k]) and ct[k]["axis_err_mean"] < AXIS_ERR_MAX for k in ct)
-    # shaft-invariance: recovered axis must not move with the montage (compare to rot0)
-    si_pass = all(ok(si[k]) for k in si) and ok(si["rot0"]) and all(
-        abs(si[k]["axis_err_mean"] - si["rot0"]["axis_err_mean"]) < AXIS_ERR_MAX for k in si)
-    iso_pass = ok(iso) and iso["readability_mean"] < TAU_FAIL
+    ct, si, iso = verdict["C_track"], verdict["shaft_invariance"], verdict["iso_mustfail"]
+    # each tracking condition must itself track theta_EE within 25deg (NOT a diff-of-errors)
+    c_track_pass = all(ok(ct[k]) and ct[k]["pass"] for k in ct)
+    si_pass = all(ok(si[k]) and si[k]["pass"] for k in si)   # each montage rot: axis_err<25 vs fixed 45
+    iso_pass = ok(iso) and iso["pass"]
     verdict["GATE_PASS"] = bool(c_track_pass and si_pass and iso_pass)
-    verdict["insufficient"] = [k for grp, d in (("C", ct), ("S", si)) for k in d
-                               if not ok(d[k])] + ([] if ok(iso) else ["iso"])
+    verdict["insufficient"] = [k for d in (ct, si) for k in d if not ok(d[k])] + ([] if ok(iso) else ["iso"])
     (OUT / "verdict.json").write_text(json.dumps(verdict, indent=2, default=lambda o: None))
     print("GATE_PASS =", verdict["GATE_PASS"], "| insufficient:", verdict["insufficient"])
 
@@ -409,9 +434,9 @@ git commit -m "feat(topic4 obs): Increment-2 SNN discriminator runner (C-track +
 
 - [ ] **Step 1: Run a fast smoke** — temporarily `L=1.0, density=1000.0, T=250.0, NSEED=1` (tiny net ~1000 neurons, seconds) for one θ_EE=45° condition. Confirm: `build_connectivity_rot` runs, `simulate_kick(kick_center=end)` returns `E_spk_bool`, the adapter yields a non-degenerate envelope, `event_window_for_run` finds a self-limited window, and `_read_one` returns `valid=True` with `n_part ≥ 7`. This de-risks the full run.
 
-- [ ] **Step 2: If the smoke's window is None or n_part < 7** — diagnose (kick too weak / montage off the front / smoothing): adjust `R_END_FRAC`, `kernel_width`, `bin_ms` (these are observation knobs, not locked thresholds). Do NOT touch τ_fail / 25° / k_dir.
+- [ ] **Step 2: If the smoke's window is None or n_part < 7** — diagnose (kick too weak / montage off the front / smoothing): adjust the observation knobs `R_END_FRAC / kernel_width / bin_ms / smooth_ms / pitch / n_contacts` (NOT the verdict bars τ_fail / 25° / k_dir / n_seed_min). Tune on the smoke's SINGLE condition (θ_EE=45°) only.
 
-- [ ] **Step 3: No commit** (smoke is throwaway config).
+- [ ] **Step 3: FREEZE the observation knobs (Item-5 discipline).** Once the smoke gives a self-limited window + n_part ≥ 7, RECORD the final knob values into the runner constants + `verdict.json::locked.obs_knobs`, and DO NOT change them again. The formal three-control run (Task 6) uses these frozen values — tuning knobs after seeing the three-control results = tuning the electrode to the answer (forbidden). The smoke config itself is throwaway (no commit), but the frozen knob values ARE committed as the runner constants.
 
 ---
 
@@ -440,6 +465,8 @@ git commit -m "feat(topic4 obs): Increment-2 full SNN discriminator run + oracle
 
 - **TDD reality:** the real SNN is slow (~minutes at paper scale), so the *direction logic* is unit-tested on a synthetic spike front (Task 2) and the *event-window* on a synthetic aggregate (Task 3); the real SNN enters only in the runner (Tasks 5–6) where a smoke de-risks before the full run. This matches the engine's cost (cannot fast-unit-test a 16k-neuron sim).
 - **Reused, not reinvented:** montage / sample_envelopes / extract_lagpat / endpoint_centroid_axis / direction_readability / axis_angle_error_deg / detect_events / calibrate_detector are all Increment-1 / `sef_hfo_events` — Increment 2 adds only the spike→envelope adapter + the `kick_center` kwarg + the runner.
-- **Thresholds locked, never tuned:** 25° / τ_fail=0.3 / k_dir=3 / n_seed_min=2. Observation knobs that MAY be tuned in the smoke (Task 5): `R_END_FRAC`, `kernel_width`, `bin_ms`, `smooth_ms`, pitch/n_contacts — these set the read geometry, not the verdict bar.
+- **Thresholds locked, never tuned:** 25° / τ_fail=0.3 / k_dir=3 / n_seed_min=2. Observation knobs (`R_END_FRAC`, `kernel_width`, `bin_ms`, `smooth_ms`, pitch/n_contacts) MAY be calibrated in the Task-5 smoke (single condition) then are **FROZEN + recorded before the formal run** (Item 5) — read geometry, not the verdict bar, and not tunable to the three-control results.
+- **must-fail logic (the subtle one):** isotropic is judged on **event-valid** seeds' `direction_readability < τ_fail`, NOT on having a valid axis — "no readable axis" is the desired PASS. A condition with too few events is **INSUFFICIENT**, never a must-fail PASS. event-valid (event + ≥7 contacts) and direction-readable (axis exists) are separate per-seed flags.
+- **shaft-invariance:** each montage rotation must itself read within 25° of the **fixed** θ_EE=45° — not a difference-of-errors (which would let "all rotations 60° off" falsely pass).
 - **Oracle ≠ gate:** `anisotropy_front` is the upper-bound parity reference, not the acceptance criterion. The gate is the virtual-electrode + real-pipeline read.
 - **Open decisions for the user (review §0):** (1) path A (spike-density envelope, locked) vs path B (current-LFP forward model, deferred) — bump to B if you want the literal observable; (2) all **(proposed)** numbers; (3) the engine `kick_center` patch touches gitignored coworker code — acceptable, or prefer a tracked wrapper?
