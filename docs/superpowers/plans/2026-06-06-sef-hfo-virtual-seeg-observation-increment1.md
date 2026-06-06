@@ -815,10 +815,12 @@ from src.sef_hfo_observation import read_direction_from_source
 
 
 def _two_shaft():
-    # ≥2 non-parallel shafts spanning the sheet (D6); enough contacts for k_dir gate.
-    # Distinct origins so no contact coincides (both-through-(0,0) would duplicate a point).
-    a = build_shaft(np.deg2rad(10.0), 4.0, 9, (0.0, 0.0), "A")
-    b = build_shaft(np.deg2rad(100.0), 4.0, 9, (0.0, 4.0), "B")
+    # ≥2 non-parallel shafts (D6). EVEN contact count so neither has a contact exactly
+    # at the shared origin (no coincident point); both through (0,0) -> montage centroid
+    # = origin so the CENTERED radial control (C1) is sampled fairly. 16 contacts >>
+    # participation gate 2*k_dir+1=7.
+    a = build_shaft(np.deg2rad(10.0), 4.0, 8, (0.0, 0.0), "A")
+    b = build_shaft(np.deg2rad(100.0), 4.0, 8, (0.0, 0.0), "B")
     return merge_montages([a, b])
 
 
@@ -827,24 +829,27 @@ def test_gate_traveling_wave_reads_correct_direction():
         src = traveling_wave(64, 64.0, np.deg2rad(deg), c=0.4, dt=0.25,
                              t_max=200.0, width=8.0)
         out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
-        assert out["spearman"] >= 0.9                      # τ_pass
+        assert out["spearman"] >= 0.9                      # τ_pass (vs true n_hat)
         assert out["axis"] is not None                     # wave has a real axis
         assert axis_angle_error_deg(out["axis"], np.deg2rad(deg)) < 25.0
 
 
-def test_gate_C1_radial_source_reads_no_axis():
+def test_gate_C1_radial_source_reads_no_direction():
+    # centered radial: rank ∝ radius is monotone along NO axis -> readability < τ_fail.
+    # Montage is centered+symmetric on the source (a fair sample); an off-center montage
+    # would read a real arrival gradient (sampling artifact), which is NOT what C1 tests.
     src = radial_source(64, 64.0, c=0.35, dt=0.25, t_max=160.0, width=6.0)
     out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
-    # radial: no preferred axis -> endpoint axis degenerate, projection Spearman low
-    assert out["axis"] is None or abs(out["spearman_vs_shaft"]) < 0.3
+    assert out["readability"] < 0.3                        # τ_fail
 
 
 def test_gate_C2_synchronous_amplitude_makes_no_fake_order():
-    # aligned shaft + amplitude ramp along it; per-contact-relative timing -> no order
+    # a(x,t)=b(x)h(t): per-contact-relative timing -> all participants tied -> no order
+    # along any axis (readability NaN). A global absolute threshold WOULD fabricate order.
     src = synchronous_amplitude_source(64, 64.0, dt=0.25, t_max=120.0,
                                        width=10.0, ramp_axis_rad=np.deg2rad(10.0))
     out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
-    assert np.isnan(out["spearman_vs_shaft"]) or abs(out["spearman_vs_shaft"]) < 0.3
+    assert np.isnan(out["readability"]) or out["readability"] < 0.3
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -856,27 +861,53 @@ Expected: FAIL with `ImportError: cannot import name 'read_direction_from_source
 
 ```python
 # append to src/sef_hfo_observation.py
+def direction_readability(ranks_ev, bools_ev, coords, n_axes=180) -> float:
+    """C1/C2 must-fail scalar: the BEST rank-vs-projection Spearman over a sweep of
+    candidate axes (0..180 deg) — gives a directionless source every chance to show an
+    axis. High for a real wave (~main-gate Spearman), low for radial (rank=radius is
+    monotone along no line), NaN for a fully-tied (synchronous) read-out. More robust
+    than 'is the endpoint axis None' (tied ranks bias argsort into a spurious axis)."""
+    idx = np.flatnonzero(np.asarray(bools_ev, bool))
+    if idx.size < 2:
+        return float("nan")
+    r = np.asarray(ranks_ev, float)[idx]
+    if np.ptp(r) == 0:
+        return float("nan")
+    xy = np.asarray(coords, float)[idx]
+    rr = _rankdata_avg(r)
+    best = 0.0
+    for k in range(n_axes):
+        th = np.pi * k / n_axes
+        proj = xy @ np.array([np.cos(th), np.sin(th)])
+        if np.ptp(proj) == 0:
+            continue
+        rho = abs(float(np.corrcoef(rr, _rankdata_avg(proj))[0, 1]))
+        if rho > best:
+            best = rho
+    return best
+
+
 def read_direction_from_source(source, montage, kernel_width,
                                participation_frac=0.5, timing_frac=0.5,
                                k_dir=3) -> dict:
-    """End-to-end Increment-1 read-out: sample the analytic source through the
-    montage, extract one event's lagPat, and report both direction metrics.
+    """End-to-end Increment-1 read-out: sample the analytic source through the montage,
+    extract one event's lagPat, report the direction metrics.
 
     Returns dict with:
-      spearman          : rank-vs-(true n_hat)-projection Spearman (None-source -> nan)
-      spearman_vs_shaft : rank-vs-(shaft long-axis)-projection Spearman (for C1/C2)
-      axis              : endpoint-centroid unit axis or None (degenerate/no-axis)
+      spearman    : rank-vs-(true n_hat)-projection Spearman (nan when source has no n_hat)
+      readability : best rank-vs-projection Spearman over all axes (C1/C2 must-fail)
+      axis        : endpoint-centroid unit axis or None (for the wave angle-error report)
+      artifact    : the LagPatArtifact (for persistence)
     """
     frames = source["frames"]
     coords = source["grid_xy"]
     dt = source["dt"]
     env = sample_envelopes(frames, coords, montage, kernel_width)
-    # participation bar = TEMPORAL noise floor + margin (spec §4.1) — NOT a
-    # cross-contact peak percentile (which collapses to ~max when every contact is
-    # swept by the bell, giving a knife-edge bar). floor = global quiescent baseline
-    # (min over time, ~0 for the noiseless toy); margin scales to the global event
-    # peak so every bell-crossed contact robustly participates. Anti-fake-order: the
-    # TIMING threshold (inside extract_lagpat) is per-contact relative to own peak.
+    # participation bar = TEMPORAL noise floor + margin (spec §4.1) — NOT a cross-contact
+    # peak percentile. floor = global quiescent baseline (min over time, ~0 for the
+    # noiseless toy); margin scales to the global event peak so every bell-crossed
+    # contact robustly participates. Anti-fake-order: the TIMING threshold (inside
+    # extract_lagpat) is per-contact relative to own peak.
     floor = float(env.min())
     margin = participation_frac * (float(env.max()) - floor)
     art = extract_lagpat(env, dt, event_windows=[source["window"]],
@@ -890,19 +921,14 @@ def read_direction_from_source(source, montage, kernel_width,
     n_hat = source.get("n_hat")
     spearman = (rank_vs_projection_spearman(ranks0, bools0, art.contact_coords, n_hat)
                 if n_hat is not None else float("nan"))
-    # shaft long-axis = principal axis of the montage contacts (for C1/C2 no-fake test)
-    cc = art.contact_coords - art.contact_coords.mean(0)
-    shaft_axis = np.linalg.svd(cc, full_matrices=False)[2][0]
-    spearman_vs_shaft = rank_vs_projection_spearman(ranks0, bools0,
-                                                    art.contact_coords, shaft_axis)
-    return dict(spearman=spearman, spearman_vs_shaft=spearman_vs_shaft, axis=axis,
-                artifact=art)
+    readability = direction_readability(ranks0, bools0, art.contact_coords)
+    return dict(spearman=spearman, readability=readability, axis=axis, artifact=art)
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_sef_hfo_observation.py -k "gate_" -v`
-Expected: PASS (3 tests). If `test_gate_traveling_wave` fails on Spearman, the sampler/extractor has a bug — do NOT relax τ_pass; debug the chain (spec: thresholds locked, never tuned to pass). If C1's `spearman_vs_shaft` comes in high, the diagnosis is participation/centering (the radial source must be centered within the montage footprint), NOT a reason to loosen τ_fail.
+Expected: PASS (3 tests). If `test_gate_traveling_wave` fails on Spearman, the sampler/extractor has a bug — do NOT relax τ_pass; debug the chain (spec: thresholds locked, never tuned to pass). If C1's `readability` comes in ≥ 0.3, the diagnosis is montage centering/symmetry (the montage must be centered + symmetric on the radial source so rank∝radius is monotone along NO axis), NOT a reason to loosen τ_fail.
 
 - [ ] **Step 5: Commit**
 
@@ -972,8 +998,10 @@ OUT = Path("results/topic4_sef_hfo/observation_layer/increment1_toywave")
 
 
 def _montage():
-    a = build_shaft(np.deg2rad(10.0), 4.0, 9, (0.0, 0.0), "A")
-    b = build_shaft(np.deg2rad(100.0), 4.0, 9, (0.0, 4.0), "B")
+    # even contact count + both shafts through origin -> centroid at origin, no
+    # coincident point (matches the C1 centered-symmetric protocol, spec §3.5)
+    a = build_shaft(np.deg2rad(10.0), 4.0, 8, (0.0, 0.0), "A")
+    b = build_shaft(np.deg2rad(100.0), 4.0, 8, (0.0, 0.0), "B")
     return merge_montages([a, b])
 
 
@@ -996,17 +1024,16 @@ def main():
     c1 = read_direction_from_source(radial_source(64, 64.0, 0.35, 0.25, 160.0, 6.0),
                                     montage, 3.0)
     verdict["controls"]["C1_radial"] = {
-        "axis_is_none": c1["axis"] is None,
-        "spearman_vs_shaft": c1["spearman_vs_shaft"],
-        "must_fail_ok": bool(c1["axis"] is None or abs(c1["spearman_vs_shaft"]) < TAU_FAIL)}
+        "readability": c1["readability"],
+        "must_fail_ok": bool(c1["readability"] < TAU_FAIL)}
 
     c2 = read_direction_from_source(
         synchronous_amplitude_source(64, 64.0, 0.25, 120.0, 10.0, np.deg2rad(10.0)),
         montage, 3.0)
-    s2 = c2["spearman_vs_shaft"]
+    r2 = c2["readability"]
     verdict["controls"]["C2_synchronous"] = {
-        "spearman_vs_shaft": s2,
-        "must_fail_ok": bool(np.isnan(s2) or abs(s2) < TAU_FAIL)}
+        "readability": r2,
+        "must_fail_ok": bool(np.isnan(r2) or r2 < TAU_FAIL)}
 
     verdict["GATE_PASS"] = bool(
         all(w["pass"] for w in verdict["waves"].values() if w["spearman"] == w["spearman"])
