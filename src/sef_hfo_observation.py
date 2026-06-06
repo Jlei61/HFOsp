@@ -273,3 +273,67 @@ def write_montage_manifest(artifact: LagPatArtifact, path) -> None:
                "chn_names": list(artifact.names)}
     from pathlib import Path as _P
     _P(str(path)).write_text(json.dumps(payload))
+
+
+def direction_readability(ranks_ev, bools_ev, coords, n_axes=180) -> float:
+    """C1/C2 must-fail scalar: the BEST rank-vs-projection Spearman over a sweep of
+    candidate axes (0..180 deg) — gives a directionless source every chance to show an
+    axis. High for a real wave (~main-gate Spearman), low for radial (rank=radius is
+    monotone along no line), NaN for a fully-tied (synchronous) read-out. More robust
+    than 'is the endpoint axis None' (tied ranks bias argsort into a spurious axis)."""
+    idx = np.flatnonzero(np.asarray(bools_ev, bool))
+    if idx.size < 2:
+        return float("nan")
+    r = np.asarray(ranks_ev, float)[idx]
+    if np.ptp(r) == 0:
+        return float("nan")
+    xy = np.asarray(coords, float)[idx]
+    rr = _rankdata_avg(r)
+    best = 0.0
+    for k in range(n_axes):
+        th = np.pi * k / n_axes
+        proj = xy @ np.array([np.cos(th), np.sin(th)])
+        if np.ptp(proj) == 0:
+            continue
+        rho = abs(float(np.corrcoef(rr, _rankdata_avg(proj))[0, 1]))
+        if rho > best:
+            best = rho
+    return best
+
+
+def read_direction_from_source(source, montage, kernel_width,
+                               participation_frac=0.5, timing_frac=0.5,
+                               k_dir=3) -> dict:
+    """End-to-end Increment-1 read-out: sample the analytic source through the montage,
+    extract one event's lagPat, report the direction metrics.
+
+    Returns dict with:
+      spearman    : rank-vs-(true n_hat)-projection Spearman (nan when source has no n_hat)
+      readability : best rank-vs-projection Spearman over all axes (C1/C2 must-fail)
+      axis        : endpoint-centroid unit axis or None (for the wave angle-error report)
+      artifact    : the LagPatArtifact (for persistence)
+    """
+    frames = source["frames"]
+    coords = source["grid_xy"]
+    dt = source["dt"]
+    env = sample_envelopes(frames, coords, montage, kernel_width)
+    # participation bar = TEMPORAL noise floor + margin (spec §4.1) — NOT a cross-contact
+    # peak percentile. floor = global quiescent baseline (min over time, ~0 for the
+    # noiseless toy); margin scales to the global event peak so every bell-crossed
+    # contact robustly participates. Anti-fake-order: the TIMING threshold (inside
+    # extract_lagpat) is per-contact relative to own peak.
+    floor = float(env.min())
+    margin = participation_frac * (float(env.max()) - floor)
+    art = extract_lagpat(env, dt, event_windows=[source["window"]],
+                         participation_floor=floor, participation_margin=margin,
+                         timing_frac=timing_frac, tie_tol=dt)
+    art = attach_geometry(art, montage)
+    ranks0, bools0 = art.ranks[:, 0], art.bools[:, 0]
+    pitch = source.get("pitch_hint", 1.0)
+    axis = endpoint_centroid_axis(ranks0, bools0, art.contact_coords,
+                                  k_dir=k_dir, eps_deg=0.5 * pitch)
+    n_hat = source.get("n_hat")
+    spearman = (rank_vs_projection_spearman(ranks0, bools0, art.contact_coords, n_hat)
+                if n_hat is not None else float("nan"))
+    readability = direction_readability(ranks0, bools0, art.contact_coords)
+    return dict(spearman=spearman, readability=readability, axis=axis, artifact=art)

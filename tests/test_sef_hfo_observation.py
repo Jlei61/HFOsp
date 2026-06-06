@@ -207,3 +207,47 @@ def test_legacy_npz_loads_via_real_loader(tmp_path):
                                   art.bools.sum(axis=0) > 0)
     manifest = json.loads((tmp_path / f"{rec}_montage.json").read_text())
     assert manifest["chn_names"] == art.names
+
+
+from src.sef_hfo_toywave import (
+    traveling_wave, radial_source, synchronous_amplitude_source,
+)
+from src.sef_hfo_observation import read_direction_from_source
+
+
+def _two_shaft():
+    # ≥2 non-parallel shafts (D6). EVEN contact count so neither has a contact exactly
+    # at the shared origin (no coincident point); both through (0,0) -> montage centroid
+    # = origin so the CENTERED radial control (C1) is sampled fairly. 16 contacts >>
+    # participation gate 2*k_dir+1=7.
+    a = build_shaft(np.deg2rad(10.0), 4.0, 8, (0.0, 0.0), "A")
+    b = build_shaft(np.deg2rad(100.0), 4.0, 8, (0.0, 0.0), "B")
+    return merge_montages([a, b])
+
+
+def test_gate_traveling_wave_reads_correct_direction():
+    for deg in (30.0, 60.0):
+        src = traveling_wave(64, 64.0, np.deg2rad(deg), c=0.4, dt=0.25,
+                             t_max=200.0, width=8.0)
+        out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
+        assert out["spearman"] >= 0.9                      # τ_pass (vs true n_hat)
+        assert out["axis"] is not None                     # wave has a real axis
+        assert axis_angle_error_deg(out["axis"], np.deg2rad(deg)) < 25.0
+
+
+def test_gate_C1_radial_source_reads_no_direction():
+    # centered radial: rank ∝ radius is monotone along NO axis -> readability < τ_fail.
+    # Montage is centered+symmetric on the source (a fair sample); an off-center montage
+    # would read a real arrival gradient (sampling artifact), which is NOT what C1 tests.
+    src = radial_source(64, 64.0, c=0.35, dt=0.25, t_max=160.0, width=6.0)
+    out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
+    assert out["readability"] < 0.3                        # τ_fail
+
+
+def test_gate_C2_synchronous_amplitude_makes_no_fake_order():
+    # a(x,t)=b(x)h(t): per-contact-relative timing -> all participants tied -> no order
+    # along any axis (readability NaN). A global absolute threshold WOULD fabricate order.
+    src = synchronous_amplitude_source(64, 64.0, dt=0.25, t_max=120.0,
+                                       width=10.0, ramp_axis_rad=np.deg2rad(10.0))
+    out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
+    assert np.isnan(out["readability"]) or out["readability"] < 0.3
