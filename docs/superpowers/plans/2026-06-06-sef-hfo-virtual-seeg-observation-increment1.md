@@ -12,6 +12,11 @@
 
 **Locked constants (spec §3.5/§4.1/§10):** `k_dir=3`; participation gate `n_participating ≥ 2·k_dir+1 = 7`; `timing_frac f=0.5` (per-contact, relative to own in-event peak); `τ_pass=0.9` (Spearman); `τ_fail=0.3`; `ε_deg = 0.5×contact pitch`; tie tolerance `Δt` = 1 sample (= `dt`).
 
+> **Post-execution amendments (2026-06-06 review round 3, commit `12c4b64`; authoritative = spec §3/§5/§10).** The code blocks below were executed (WF1 tasks 1–6, WF2 tasks 7 & 9) then amended for three review findings — where the code now differs from a block below, the code + spec win:
+> 1. **On-disk units = SECONDS.** Real loader reads `lagPatRaw`/`packedTimes`/`start_t` in seconds (verified `event_periodicity.py` `block_dur=3600.0`). Module adds `MS_TO_S=1e-3`; `write_legacy_npz` (lagPatRaw) and `write_packed_times` (event times) convert ms→s at write. `LagPatArtifact` stays ms internally. The Task-6 round-trip test asserts `loaded.lag_raw == artifact.lag_raw × MS_TO_S` (this caught the 1000× bug). `write_montage_manifest` adds `encoding="utf-8"`.
+> 2. **Increment-1 gate = Spearman + C1/C2 only** (spec §3.5/§10). The endpoint-axis angle error is a REPORT field, NOT a gate (its accuracy gate is Task 5 unit + increment 2 vs θ_EE). `test_gate_traveling_wave` drops the `axis_angle_error_deg < 25°` assert (keeps `spearman ≥ 0.9` + `axis is not None`).
+> 3. **C1 ≠ increment-2 control.** C1's `direction_readability` (centered+symmetric sampling of a directionless source) does NOT replace increment 2's `isotropic + aligned-shaft` must-fail; off-center sampling fabricating direction is a real risk only that control tests (spec §5 scope 红线).
+
 ---
 
 ### Task 1: VirtualMontage + parametric shaft builder + real-geometry loud-fail stub
