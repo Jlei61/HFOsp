@@ -264,3 +264,35 @@ def test_gate_C2_synchronous_amplitude_makes_no_fake_order():
                                        width=10.0, ramp_axis_rad=np.deg2rad(10.0))
     out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
     assert np.isnan(out["readability"]) or out["readability"] < 0.3
+
+
+from src.sef_hfo_observation import onset_front_axis, angle_error_deg
+
+
+def test_onset_front_axis_tracks_anisotropic_lobe():
+    # CENTER-origin anisotropic spread (the real center-kick event geometry): lag grows
+    # FASTER across theta_EE than along it, so the onset front is a LOBE elongated ALONG
+    # theta_EE. (A unidirectional planar ramp is the WRONG model — its onset isochrone is
+    # a band perpendicular to propagation; see onset_front_axis GEOMETRY CONTRACT.)
+    g = np.linspace(-3, 3, 9)
+    XX, YY = np.meshgrid(g, g)
+    coords = np.column_stack([XX.ravel(), YY.ravel()])
+    th = np.deg2rad(30.0)
+    par = coords @ np.array([np.cos(th), np.sin(th)])        # along theta_EE
+    perp = coords @ np.array([-np.sin(th), np.cos(th)])      # across theta_EE
+    lag = 3.0 * np.abs(perp) + 1.0 * np.abs(par)             # faster along theta_EE -> lobe
+    bools = np.ones(len(coords), bool)
+    angle, ratio, n = onset_front_axis(lag, bools, coords, front_ms=2.0)
+    assert angle is not None and ratio > 1.3
+    assert angle_error_deg(angle, 30.0) < 25.0
+
+
+def test_onset_front_axis_radial_has_no_axis():
+    # onset lag ~ radius from center -> onset front is a ring -> no principal axis
+    g = np.linspace(-3, 3, 7)
+    XX, YY = np.meshgrid(g, g)
+    coords = np.column_stack([XX.ravel(), YY.ravel()])
+    lag = np.linalg.norm(coords, axis=1)
+    bools = np.ones(len(coords), bool)
+    angle, ratio, n = onset_front_axis(lag, bools, coords, front_ms=1.0)
+    assert (ratio is None) or (ratio < 1.3)        # ring -> ratio ~ 1

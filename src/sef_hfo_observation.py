@@ -355,3 +355,45 @@ def read_direction_from_source(source, montage, kernel_width,
                 if n_hat is not None else float("nan"))
     readability = direction_readability(ranks0, bools0, art.contact_coords)
     return dict(spearman=spearman, readability=readability, axis=axis, artifact=art)
+
+
+def onset_front_axis(lag_raw_ev, bools_ev, coords, front_ms):
+    """UNDIRECTED onset-front principal axis (the oracle's measure, on virtual contacts;
+    Increment-2 main estimator, spec reframe 2026-06-07). Onset-front = participating
+    contacts whose first-crossing lag is within front_ms of the earliest. Returns
+    (angle_deg mod 180, elongation ratio = sqrt(lmax/lmin), n_front), or (None, None, n)
+    if < 3 front contacts. Unlike endpoint_centroid_axis it has NO source/sink sign and
+    is well-defined for a bidirectional (center-kick) wave.
+
+    GEOMETRY CONTRACT (why the kick must be CENTER, not an edge/line): this recovers the
+    connectivity long-axis ONLY when the event is an elongated LOBE — a center-origin
+    anisotropic spread, where the onset front reaches farther ALONG theta_EE so the
+    early-contact set is elongated along theta_EE. For a UNIDIRECTIONAL PLANAR front
+    (edge/line kick) the onset isochrone is a thin band PERPENDICULAR to propagation,
+    and this returns that perpendicular (≈ propagation ± 90°). Increment-2 uses a CENTER
+    kick precisely so the event is a lobe (elongation = theta_EE), matching the oracle."""
+    idx = np.flatnonzero(np.asarray(bools_ev, bool))
+    if idx.size < 3:
+        return None, None, int(idx.size)
+    lag = np.asarray(lag_raw_ev, float)[idx]
+    finite = np.isfinite(lag)
+    idx, lag = idx[finite], lag[finite]
+    if idx.size < 3:
+        return None, None, int(idx.size)
+    front = idx[lag <= lag.min() + front_ms]
+    if front.size < 3:
+        return None, None, int(front.size)
+    xy = np.asarray(coords, float)[front]
+    c = xy - xy.mean(0)
+    cov = (c.T @ c) / len(c)
+    evals, evecs = np.linalg.eigh(cov)            # ascending
+    ratio = float("inf") if evals[0] <= 1e-12 else float(np.sqrt(evals[1] / evals[0]))
+    major = evecs[:, 1]
+    angle = float(np.rad2deg(np.arctan2(major[1], major[0])) % 180.0)
+    return angle, ratio, int(front.size)
+
+
+def angle_error_deg(angle_deg, ref_deg) -> float:
+    """Undirected (mod 180) error between two angles in degrees."""
+    d = abs((angle_deg - ref_deg) % 180.0)
+    return float(min(d, 180.0 - d))
