@@ -265,6 +265,9 @@ def write_legacy_npz(artifact: LagPatArtifact, path) -> None:
         eventsBool=artifact.bools.astype(np.int8),
         lagPatRaw=(artifact.lag_raw * MS_TO_S).astype(float),   # ms -> s
         chnNames=np.array(artifact.names, dtype=object),
+        # single synthetic block -> block start = 0 (unit-free). A future MULTI-block
+        # writer MUST emit start_t in SECONDS to match the now-seconds packedTimes:
+        # the loader reconstructs absolute time as packedTimes[:,0] + start_t.
         start_t=np.array(0.0),
     )
 
