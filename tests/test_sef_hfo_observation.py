@@ -42,3 +42,30 @@ def test_merge_two_nonparallel_shafts_spans_2d():
 def test_from_real_geometry_loud_fails():
     with pytest.raises(NotImplementedError):
         from_real_geometry(np.zeros((3, 3)))
+
+
+from src.sef_hfo_observation import grid_coords, sample_envelopes
+
+
+def test_grid_coords_match_field_grid():
+    # mirrors src.sef_hfo_field._grid (indexing="ij", centered, spacing L/n)
+    coords = grid_coords(n=4, L=8.0)
+    assert coords.shape == (16, 2)
+    xs = np.unique(coords[:, 0])
+    np.testing.assert_allclose(xs, [-4, -2, 0, 2])   # (arange(4)-2)*2
+
+
+def test_sample_envelope_tracks_a_localized_blob():
+    # A static blob centered at (+10,0); a contact at (+10,0) must read a larger
+    # envelope than a contact at (-10,0).
+    n, L = 64, 64.0
+    coords = grid_coords(n, L)
+    X = coords[:, 0]
+    Y = coords[:, 1]
+    blob = np.exp(-(((X - 10) ** 2 + Y ** 2) / (2 * 4.0 ** 2)))
+    frames = blob[None, :].repeat(3, axis=0)          # (3, n*n) constant in time
+    m = merge_montages([build_shaft(0.0, 4.0, 1, (10.0, 0.0), "near"),
+                        build_shaft(0.0, 4.0, 1, (-10.0, 0.0), "far")])
+    env = sample_envelopes(frames, coords, m, kernel_width=3.0)
+    assert env.shape == (2, 3)
+    assert env[0, 0] > env[1, 0]                      # near-contact reads more
