@@ -159,3 +159,51 @@ def test_endpoint_axis_insufficient_participants_returns_none():
     ranks = np.arange(6, dtype=float)
     bools = np.ones(6, bool)
     assert endpoint_centroid_axis(ranks, bools, coords, k_dir=3, eps_deg=0.1) is None
+
+
+from pathlib import Path
+from src.sef_hfo_observation import (
+    attach_geometry,
+    write_legacy_npz,
+    write_montage_manifest,
+    write_packed_times,
+    validate_artifact,
+)
+
+
+def _toy_artifact():
+    env = np.array([[0.0, 1.0, 0.2, 0.0],
+                    [0.0, 0.2, 1.0, 0.0],
+                    [0.0, 0.0, 0.0, 0.0]])
+    art = extract_lagpat(env, dt=1.0, event_windows=[(0.0, 4.0)],
+                         participation_floor=0.0, participation_margin=0.05,
+                         timing_frac=0.5, tie_tol=1.0)
+    m = merge_montages([build_shaft(0.0, 2.0, 2, (0.0, 0.0), "A"),
+                        build_shaft(np.pi / 2, 2.0, 1, (0.0, 3.0), "B")])
+    return attach_geometry(art, m)
+
+
+def test_validate_artifact_flags_phantom_rank():
+    art = _toy_artifact()
+    validate_artifact(art)                       # clean: non-participant rank is NaN
+    art.ranks[2, 0] = 7.0                         # inject a phantom finite rank
+    with pytest.raises(AssertionError):
+        validate_artifact(art)
+
+
+def test_legacy_npz_loads_via_real_loader(tmp_path):
+    # Round-trip: write legacy-key files, then the REAL loader must read them.
+    from src.interictal_propagation import load_subject_propagation_events
+    art = _toy_artifact()
+    rec = "synthrec"
+    npz = tmp_path / f"{rec}_lagPat_withFreqCent.npz"
+    write_legacy_npz(art, npz)
+    write_packed_times(art, tmp_path / f"{rec}_packedTimes_withFreqCent.npy")
+    write_montage_manifest(art, tmp_path / f"{rec}_montage.json")
+    loaded = load_subject_propagation_events(str(tmp_path))
+    assert list(loaded["channel_names"]) == art.names
+    assert loaded["bools"].shape[0] == len(art.names)
+    np.testing.assert_array_equal(loaded["bools"].sum(axis=0) > 0,
+                                  art.bools.sum(axis=0) > 0)
+    manifest = json.loads((tmp_path / f"{rec}_montage.json").read_text())
+    assert manifest["chn_names"] == art.names

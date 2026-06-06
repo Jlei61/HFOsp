@@ -7,6 +7,7 @@ the models, NOT here. No model dynamics in this module.
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 
 import numpy as np
@@ -220,3 +221,55 @@ def axis_angle_error_deg(axis, theta_ref) -> float:
     a = np.arctan2(axis[1], axis[0])
     diff = np.rad2deg(a - theta_ref) % 180.0
     return float(min(diff, 180.0 - diff))
+
+
+def validate_artifact(artifact: LagPatArtifact) -> None:
+    """Assert the spec invariants before writing: 2D montage, name/coord order
+    match, and non-participant entries carry NO finite rank (phantom-mask discipline)."""
+    b = artifact.bools
+    assert artifact.ranks.shape == b.shape == artifact.lag_raw.shape
+    assert artifact.contact_coords.shape == (b.shape[0], 2)
+    assert len(artifact.names) == b.shape[0]
+    assert VirtualMontage(artifact.contact_coords, artifact.names, "x").spans_2d(), \
+        "read-out montage must span 2D (>=2 non-parallel shafts) — spec D6"
+    nonpart = ~b
+    bad = np.isfinite(artifact.ranks[nonpart])
+    assert not bad.any(), "non-participating contacts must have NaN rank (no phantom)"
+    bad_lag = np.isfinite(artifact.lag_raw[nonpart])
+    assert not bad_lag.any(), "non-participating contacts must have NaN lag"
+
+
+def write_legacy_npz(artifact: LagPatArtifact, path) -> None:
+    """Write the *_lagPat_withFreqCent.npz with the EXACT keys the real loader
+    reads (src/interictal_propagation.py L344-353): lagPatRank / eventsBool /
+    lagPatRaw / chnNames / start_t."""
+    path = str(path)
+    assert path.endswith("_lagPat_withFreqCent.npz"), \
+        "filename must end with _lagPat_withFreqCent.npz for the loader's glob"
+    validate_artifact(artifact)
+    np.savez(
+        path,
+        lagPatRank=artifact.ranks.astype(float),
+        eventsBool=artifact.bools.astype(np.int8),
+        lagPatRaw=artifact.lag_raw.astype(float),
+        chnNames=np.array(artifact.names, dtype=object),
+        start_t=np.array(0.0),
+    )
+
+
+def write_packed_times(artifact: LagPatArtifact, path) -> None:
+    """Companion *_packedTimes_withFreqCent.npy: (n_event, 2) rel start/end ms.
+    The model gives these directly (D1: no packer, but the loader needs them)."""
+    path = str(path)
+    assert path.endswith("_packedTimes_withFreqCent.npy")
+    packed = np.column_stack([artifact.event_rel_times, artifact.event_rel_end_times])
+    np.save(path, packed.astype(float))
+
+
+def write_montage_manifest(artifact: LagPatArtifact, path) -> None:
+    """Sidecar JSON carrying contact coords (legacy lagPat has none; D6 needs them).
+    Order is asserted == chnNames."""
+    payload = {"contact_coords": artifact.contact_coords.tolist(),
+               "chn_names": list(artifact.names)}
+    from pathlib import Path as _P
+    _P(str(path)).write_text(json.dumps(payload))
