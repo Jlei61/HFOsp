@@ -3,6 +3,7 @@
 > **状态**：v0.2 plan lock draft，2026-06-01。用户确认：Topic 4 主模型路线从旧的 HR/FHN toy modeling 转为 **Spatial Excitability Field model for interictal HFO propagation (SEF-HFO)**；2026-06-01 review 后收紧为 **gain-closed + pulse-validated + control-disciplined** 版本。
 > **替代范围**：替代 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` 中 HR 主、FHN sensitivity 的 Phase 4 建模主线；保留 `docs/topic4_sef_itp_framework.md` 中已经锁定的真实数据验收合同、cohort tier、phantom-rank 修复纪律、clinical SOZ 不作为拟合标签的红线。
 > **不替代范围**：不重写 Topic 1 的实证发现，不解释 HFO 80-250/500 Hz carrier 的细胞生物物理，不把 template source 直接等同 clinical SOZ。
+> **2026-06-06 细化指针 + superseding note**：病理→中观→参数映射纪律（强制链 + 方向工作点上算不预设）+ 第一轮调参（连接性 E→E 核「定往哪传」+ E 阈值异质性 `Var(V_th,E)`「定哪里点着」，LIF/SNN 并行）见 `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md`。**SUPERSEDES**：本 plan 下文凡出现"降低异质性 → 更易激"这类**方向性**语言，一律以新 spec 的"方向必须在工作点上计算、不预设"为准（异质性经斜率/曲率→闭环稳定→有限扰动余量进入解释，可被 disconfirm）。承接 2026-06-04 Step-1 同质率场 NULL，走向**条件式**（too-frequent→异质核 / non-returning→先补 recovery·surround，由 `joint_A_failmode` 定），非"直接进异质核"。
 
 > **2026-06-02 review amendment（two-stage screen 重定位；本块为当前 governing 口径）**
 >

@@ -3,7 +3,7 @@
 > 状态：当前正式入口
 > 范围：只讨论单个间期群体事件内部的时序组织，包括传播刻板性与事件级同步性。
 > **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + 失败模式）。本 topic 的 PR-2 / PR-2.5 / PR-6 / PR-7 / 待立 PR-9 全部受该框架统辖；任何与 framework 中已 lock 的 prediction 判据冲突的修改必须先改 framework。
-> **Topic 4 模型层 framework（2026-05-20 lock 起替代 BHPN-toy）**：`docs/topic4_sef_itp_framework.md`（SEF-ITP：空间易激场模型，6 条预测 H1–H6 + Phase 0–4 路线；BHPN-toy 已 SUPERSEDED 为循环论证）。本 topic 的 endpoint anchoring / source-sink reversal / mark independence / endpoint identity shift 现在受 SEF-ITP 统辖；与 §2 P1/P2/P3 已 lock 的实证结论兼容（SBA 红线保留：HFO 不分 E/I、H3 措辞锁、sin not cos）。**Phase 0 解锁 2026-05-21**：phantom-rank 修复 5a–5h 完成 + coord loader v3.1 落地（`src/seeg_coord_loader.py`，Yuquan fs_native_ras_mm + Epilepsiae mni152_1mm 双 cohort 都进主分析）；Phase 1 可启动，剩 `load_subject_for_phase1()` integration PR。
+> **Topic 4 模型层 framework（2026-05-20 lock 起替代 BHPN-toy）**：`docs/topic4_sef_itp_framework.md`（SEF-ITP：空间易激场模型，6 条预测 H1–H6 + Phase 0–4 路线；BHPN-toy 已 SUPERSEDED 为循环论证）。本 topic 的 endpoint anchoring / source-sink reversal / mark independence / endpoint identity shift 现在受 SEF-ITP 统辖；与 §2 P1/P2/P3 已 lock 的实证结论兼容（SBA 红线保留：HFO 不分 E/I、H3 措辞锁、sin not cos）。**Phase 0 解锁 2026-05-21**：phantom-rank 修复 5a–5h 完成 + coord loader v3.1 落地（`src/seeg_coord_loader.py`，Yuquan fs_native_ras_mm + Epilepsiae mni152_1mm 双 cohort 都进主分析）；Phase 1 可启动，剩 `load_subject_for_phase1()` integration PR。**2026-06-06 模型层细化**：本 topic 的「双向刻板传播模板 / source-sink reversal」现象的机制复现计划 + 病理→中观→参数映射纪律见 `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md`（连接 E→E 核「定往哪传」+ E 阈值异质性「定哪里点着」，LIF/SNN 并行；方向在工作点上算、不预设）。
 
 ---
 
