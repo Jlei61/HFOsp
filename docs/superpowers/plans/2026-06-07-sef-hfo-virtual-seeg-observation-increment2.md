@@ -29,6 +29,7 @@
 - **Operating point LOCKED**: `nu_ext_ratio = 0.6` (interictal quiet-excitable). `T` on `Params` (no `t_max` arg), `dt=0.1 ms`.
 - **Envelope LOCKED = smoothed E-spike density (path A)**: kick path saves `E_spk_bool (nsteps, NE)` aligned to `posE`; currents are never stored. Bin+smooth `E_spk_bool` → per-neuron rate; sample at montage via Increment-1 `sample_envelopes(source_frames, grid_xy=posE, montage, kernel_width)`. Zero engine edits for the envelope. **Reporting boundary**: this is a *firing-density* envelope, NOT a synaptic-current LFP — it validates the **direction-axis read** only; cannot be reported as "LFP observation layer validated" (waveform amplitude/shape → path B current-LFP, deferred). **REVIEW HOOK: bump to path B if you want the literal current observable.**
 - **Direction estimate LOCKED = `onset_front_axis` (undirected)**: among participating contacts, take the onset-front subset (first-crossing lag within `front_ms` of the earliest), compute the covariance principal axis (`angle mod 180°`) + elongation `ratio = sqrt(λmax/λmin)`. This is the oracle's measure on virtual contacts. **Montage extent must exceed the event footprint** (or the read restricts to the onset front) so the axis reflects the wave, not the montage shape — flag for the Task-5 smoke.
+  - **GEOMETRY CONTRACT (verified the hard way in WF-A — ties the center-kick choice to the estimator):** `onset_front_axis` recovers θ_EE **only when the event is an elongated LOBE** (center-origin anisotropic spread → onset front elongated ALONG θ_EE). For a **unidirectional planar front** (edge/line kick) the onset isochrone is a band PERPENDICULAR to propagation and the estimator returns that perpendicular (≈ propagation ± 90°). This is a *second* reason the kick must be CENTER (Item 2), not just the no-confound reason: the center kick produces the lobe geometry the estimator needs. All synthetic tests (Tasks 2–3) use a center-origin anisotropic-lobe lag, NOT a unidirectional ramp.
 - **Oracle parity (not a gate)**: `anisotropy_front.principal_axis` on the same `E_spk_bool` — virtual read should agree in axis; may be noisier.
 
 ### Item 2 — kick placement + event window (the confound fix)
@@ -116,14 +117,18 @@ git commit -m "feat(topic4 obs): engine kick_center kwarg (single-end/off-center
 from src.sef_hfo_observation import onset_front_axis, angle_error_deg
 
 
-def test_onset_front_axis_tracks_directed_front():
-    # contacts on a grid; onset lag increases along 30deg -> front streaks along 30deg
-    g = np.linspace(-3, 3, 6)
+def test_onset_front_axis_tracks_anisotropic_lobe():
+    # CENTER-origin anisotropic spread (the real center-kick geometry): lag grows FASTER
+    # across theta_EE than along it -> onset front is a LOBE elongated ALONG theta_EE.
+    # (A unidirectional planar ramp is WRONG: its onset isochrone is a band PERPENDICULAR
+    # to propagation, so onset_front_axis would return ~perp. See estimator GEOMETRY CONTRACT.)
+    g = np.linspace(-3, 3, 9)
     XX, YY = np.meshgrid(g, g)
     coords = np.column_stack([XX.ravel(), YY.ravel()])
     th = np.deg2rad(30.0)
-    proj = coords @ np.array([np.cos(th), np.sin(th)])
-    lag = proj - proj.min()                       # earliest at the -proj end
+    par = coords @ np.array([np.cos(th), np.sin(th)])        # along theta_EE
+    perp = coords @ np.array([-np.sin(th), np.cos(th)])      # across theta_EE
+    lag = 3.0 * np.abs(perp) + 1.0 * np.abs(par)             # faster along theta_EE -> lobe
     bools = np.ones(len(coords), bool)
     angle, ratio, n = onset_front_axis(lag, bools, coords, front_ms=2.0)
     assert angle is not None and ratio > 1.3
@@ -203,11 +208,16 @@ from src.sef_hfo_observation import (build_shaft, merge_montages, extract_lagpat
     attach_geometry, onset_front_axis, angle_error_deg)
 
 
-def _front(n=2000, L=2.0, ang=np.deg2rad(30.0), dt=0.1, t_max=200.0, c=0.01, seed=0):
+def _front(n=2000, L=2.0, ang=np.deg2rad(30.0), dt=0.1, t_max=200.0, c=0.05, seed=0):
+    # CENTER-origin anisotropic lobe (real center-kick geometry, NOT a unidirectional
+    # ramp): onset grows with the anisotropic distance from the sheet center, faster
+    # along `ang` -> onset front elongated ALONG ang (matches onset_front_axis contract).
     rng = np.random.default_rng(seed)
     posE = rng.uniform(0, L, size=(n, 2))
-    s = posE @ np.array([np.cos(ang), np.sin(ang)])
-    onset = 50.0 + (s - s.min()) / c
+    d = posE - np.array([L / 2, L / 2])
+    par = d @ np.array([np.cos(ang), np.sin(ang)])
+    perp = d @ np.array([-np.sin(ang), np.cos(ang)])
+    onset = 50.0 + (3.0 * np.abs(perp) + 1.0 * np.abs(par)) / c
     nsteps = int(t_max / dt); spk = np.zeros((nsteps, n), bool)
     for j in range(n):
         k = int((onset[j] + rng.normal(0, 1.0)) / dt)
