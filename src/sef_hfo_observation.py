@@ -78,3 +78,80 @@ def sample_envelopes(source_frames, grid_xy, montage, kernel_width,
         w = w / max(w.sum(), 1e-12)
         out[ci] = frames[:, mask] @ w
     return out
+
+
+@dataclass
+class LagPatArtifact:
+    bools: np.ndarray          # (n_contact, n_event) bool
+    ranks: np.ndarray          # (n_contact, n_event) float; non-participant = NaN
+    lag_raw: np.ndarray        # (n_contact, n_event) float ms; non-participant = NaN
+    contact_coords: np.ndarray # (n_contact, 2)
+    names: list
+    event_rel_times: np.ndarray      # (n_event,) ms, event onset
+    event_rel_end_times: np.ndarray  # (n_event,) ms, event end
+
+
+def _dense_ranks_with_tie_tol(lags, tie_tol):
+    """Dense ranks (0,1,2,...) over a 1-D lag array; lags within tie_tol of a
+    group's first value share a rank."""
+    order = np.argsort(lags, kind="mergesort")
+    sorted_lags = lags[order]
+    grp = np.zeros(len(lags), dtype=float)
+    start = sorted_lags[0]
+    g = 0.0
+    for i in range(1, len(lags)):
+        if sorted_lags[i] - start > tie_tol:
+            g += 1.0
+            start = sorted_lags[i]
+        grp[i] = g
+    ranks = np.empty(len(lags))
+    ranks[order] = grp
+    return ranks
+
+
+def extract_lagpat(envelopes, dt, event_windows, participation_floor,
+                   participation_margin, timing_frac=0.5, tie_tol=None) -> LagPatArtifact:
+    """Per event window: participation (max env > floor+margin) sets bools; among
+    participants, activation time = first crossing of timing_frac * own in-window
+    peak (spec §4.1 timing 阈, per-contact relative); ranks = tie-tolerant dense
+    rank of those times. Non-participants -> NaN rank/lag (no phantom finite rank).
+
+    contact_coords/names are filled by the caller via attach_geometry()."""
+    env = np.asarray(envelopes, float)
+    n_c = env.shape[0]
+    n_ev = len(event_windows)
+    if tie_tol is None:
+        tie_tol = dt
+    bools = np.zeros((n_c, n_ev), bool)
+    ranks = np.full((n_c, n_ev), np.nan)
+    lag_raw = np.full((n_c, n_ev), np.nan)
+    bar = participation_floor + participation_margin
+    ev_on = np.array([w[0] for w in event_windows], float)
+    ev_off = np.array([w[1] for w in event_windows], float)
+    for ev, (t_on, t_off) in enumerate(event_windows):
+        s = int(round(t_on / dt))
+        e = int(round(t_off / dt))
+        seg = env[:, s:e]                      # (n_c, win)
+        if seg.shape[1] == 0:
+            continue
+        peak = seg.max(axis=1)
+        part = peak > bar
+        bools[part, ev] = True
+        for ci in np.flatnonzero(part):
+            thr = timing_frac * peak[ci]
+            crossings = np.flatnonzero(seg[ci] >= thr)
+            lag_raw[ci, ev] = t_on + crossings[0] * dt   # first-crossing time (ms)
+        idx = np.flatnonzero(part)
+        if idx.size:
+            ranks[idx, ev] = _dense_ranks_with_tie_tol(lag_raw[idx, ev], tie_tol)
+    return LagPatArtifact(bools=bools, ranks=ranks, lag_raw=lag_raw,
+                          contact_coords=np.zeros((n_c, 2)), names=[""] * n_c,
+                          event_rel_times=ev_on, event_rel_end_times=ev_off)
+
+
+def attach_geometry(artifact: LagPatArtifact, montage: VirtualMontage) -> LagPatArtifact:
+    """Fill coords/names from the montage (order = contact order). Asserts length."""
+    assert len(montage.names) == artifact.bools.shape[0]
+    artifact.contact_coords = np.asarray(montage.contacts, float)
+    artifact.names = list(montage.names)
+    return artifact

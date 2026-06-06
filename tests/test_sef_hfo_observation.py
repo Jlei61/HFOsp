@@ -69,3 +69,39 @@ def test_sample_envelope_tracks_a_localized_blob():
     env = sample_envelopes(frames, coords, m, kernel_width=3.0)
     assert env.shape == (2, 3)
     assert env[0, 0] > env[1, 0]                      # near-contact reads more
+
+
+from src.sef_hfo_observation import LagPatArtifact, extract_lagpat
+
+
+def test_extract_lagpat_orders_by_first_crossing_and_masks_nonparticipants():
+    # 3 contacts: A peaks earliest, B later, C never participates (tiny amplitude).
+    dt = 0.25
+    nt = 400
+    t = np.arange(nt) * dt
+    envA = np.exp(-((t - 20) ** 2) / (2 * 5.0 ** 2))
+    envB = np.exp(-((t - 40) ** 2) / (2 * 5.0 ** 2))
+    envC = 0.001 * np.ones(nt)
+    env = np.vstack([envA, envB, envC])
+    art = extract_lagpat(env, dt, event_windows=[(0.0, nt * dt)],
+                         participation_floor=0.0, participation_margin=0.05,
+                         timing_frac=0.5, tie_tol=dt)
+    assert art.bools[:, 0].tolist() == [True, True, False]
+    # A crosses 0.5*peak before B -> rank(A) < rank(B)
+    assert art.ranks[0, 0] < art.ranks[1, 0]
+    # non-participant C: NaN rank and NaN lag (no phantom finite rank)
+    assert np.isnan(art.ranks[2, 0])
+    assert np.isnan(art.lag_raw[2, 0])
+
+
+def test_extract_lagpat_ties_within_tol_get_equal_rank():
+    dt = 0.25
+    nt = 400
+    t = np.arange(nt) * dt
+    # A and B identical timing (synchronous) -> tied ranks
+    envAB = np.exp(-((t - 30) ** 2) / (2 * 5.0 ** 2))
+    env = np.vstack([envAB, envAB])
+    art = extract_lagpat(env, dt, event_windows=[(0.0, nt * dt)],
+                         participation_floor=0.0, participation_margin=0.05,
+                         timing_frac=0.5, tie_tol=dt)
+    assert art.ranks[0, 0] == art.ranks[1, 0]
