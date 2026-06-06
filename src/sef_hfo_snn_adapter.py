@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 
 from src.sef_hfo_observation import sample_envelopes
-from src.sef_hfo_events import calibrate_detector, detect_events
+from src.sef_hfo_events import calibrate_detector, detect_events, UndetectableOperatingPoint
 
 
 def _bin_and_smooth(E_spk_bool, dt, bin_ms, smooth_ms):
@@ -47,9 +47,16 @@ def event_window_for_run(agg_kick, agg_ref, frame_dt, frac=0.5):
     """Per-operating-point event window (spec Item 2): recalibrate the detector bar from
     the no-kick reference + this kick run (anti-circular: floor from ref, peak from kick),
     then detect the single self-limited event. Returns (t_on, t_off) ms or None (no
-    self-terminating event => INSUFFICIENT). Shared by the SNN and rate runners."""
-    cal = calibrate_detector([np.asarray(agg_ref, float)], np.asarray(agg_kick, float),
-                             frac=frac)
+    self-terminating event => INSUFFICIENT). Shared by the SNN and rate runners.
+
+    If the kick never exceeds the no-kick reference floor (no separable detection bar —
+    calibrate_detector raises UndetectableOperatingPoint), that IS the INSUFFICIENT case
+    (kick fizzled / no event) -> return None, not a crash."""
+    try:
+        cal = calibrate_detector([np.asarray(agg_ref, float)], np.asarray(agg_kick, float),
+                                 frac=frac)
+    except UndetectableOperatingPoint:
+        return None
     evs = [e for e in detect_events(np.asarray(agg_kick, float), frame_dt,
                                     event_on_frac=cal["event_on_frac"]) if e["returned"]]
     if not evs:

@@ -62,5 +62,9 @@ def test_event_window_none_when_no_event():
     frame_dt = 2.0
     t = np.arange(150) * frame_dt
     ref = 0.01 * np.abs(np.sin(t))
-    kick = ref + 0.005 * np.abs(np.cos(t))                  # sub-threshold, no real event
+    # kick == ref: no separable detection bar (peak <= floor) -> INSUFFICIENT, must return
+    # None, NOT raise UndetectableOperatingPoint (the kick fizzled / produced no event).
+    assert event_window_for_run(ref.copy(), ref.copy(), frame_dt) is None
+    # sub-threshold kick (peak not above the ref floor) -> also None
+    kick = ref + 0.003 * np.abs(np.cos(t))
     assert event_window_for_run(kick, ref, frame_dt) is None
