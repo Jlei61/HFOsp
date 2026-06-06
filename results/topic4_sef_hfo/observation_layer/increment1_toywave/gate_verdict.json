@@ -1,0 +1,42 @@
+{
+  "tau_pass": 0.9,
+  "tau_fail": 0.3,
+  "waves": {
+    "0deg": {
+      "spearman": 1.0,
+      "axis_err_deg": 10.000000000000002,
+      "pass": true
+    },
+    "30deg": {
+      "spearman": 0.9992644353546792,
+      "axis_err_deg": 20.0,
+      "pass": true
+    },
+    "60deg": {
+      "spearman": 1.0,
+      "axis_err_deg": 9.743562836470735,
+      "pass": true
+    },
+    "90deg": {
+      "spearman": 1.0,
+      "axis_err_deg": 10.000000000000002,
+      "pass": true
+    },
+    "135deg": {
+      "spearman": 0.9992644353546792,
+      "axis_err_deg": 4.743562836470716,
+      "pass": true
+    }
+  },
+  "controls": {
+    "C1_radial": {
+      "readability": 0.0,
+      "must_fail_ok": true
+    },
+    "C2_synchronous": {
+      "readability": NaN,
+      "must_fail_ok": true
+    }
+  },
+  "GATE_PASS": true
+}
