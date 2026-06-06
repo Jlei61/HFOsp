@@ -205,6 +205,17 @@ def test_legacy_npz_loads_via_real_loader(tmp_path):
     assert loaded["bools"].shape[0] == len(art.names)
     np.testing.assert_array_equal(loaded["bools"].sum(axis=0) > 0,
                                   art.bools.sum(axis=0) > 0)
+    # numeric round-trip + UNIT conversion: on-disk legacy = SECONDS, internal = ms.
+    from src.sef_hfo_observation import MS_TO_S
+    part = art.bools[:, 0]
+    np.testing.assert_allclose(loaded["ranks"][part, 0], art.ranks[part, 0])
+    np.testing.assert_allclose(loaded["lag_raw"][part, 0],
+                               art.lag_raw[part, 0] * MS_TO_S, rtol=1e-6, atol=1e-12)
+    # packedTimes companion is in seconds too (read the .npy directly; the loader's
+    # final return exposes only event_rel_times, so check the on-disk file).
+    packed = np.load(tmp_path / f"{rec}_packedTimes_withFreqCent.npy")
+    np.testing.assert_allclose(packed[0, 1],
+                               art.event_rel_end_times[0] * MS_TO_S, rtol=1e-6)
     manifest = json.loads((tmp_path / f"{rec}_montage.json").read_text())
     assert manifest["chn_names"] == art.names
 
@@ -226,13 +237,15 @@ def _two_shaft():
 
 
 def test_gate_traveling_wave_reads_correct_direction():
+    # Increment-1 gate = rank-vs-true-n_hat Spearman (§3.5); the endpoint-centroid axis
+    # is a REPORT field here (its angle-accuracy gate is Task 5 unit test + increment 2
+    # vs θ_EE), so we only sanity-check the axis exists, not its angle (spec §10).
     for deg in (30.0, 60.0):
         src = traveling_wave(64, 64.0, np.deg2rad(deg), c=0.4, dt=0.25,
                              t_max=200.0, width=8.0)
         out = read_direction_from_source(src, _two_shaft(), kernel_width=3.0)
         assert out["spearman"] >= 0.9                      # τ_pass (vs true n_hat)
-        assert out["axis"] is not None                     # wave has a real axis
-        assert axis_angle_error_deg(out["axis"], np.deg2rad(deg)) < 25.0
+        assert out["axis"] is not None                     # wave has a real axis (sanity)
 
 
 def test_gate_C1_radial_source_reads_no_direction():

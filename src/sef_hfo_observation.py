@@ -12,6 +12,15 @@ from dataclasses import dataclass
 
 import numpy as np
 
+# Time-unit contract: the model/sim and the toy-wave run in MILLISECONDS (sim
+# convention, matches src.sef_hfo_events DT/MIN_DUR_MS etc.). The real legacy
+# artifact the loader consumes is in SECONDS (verified: src.event_periodicity uses
+# block_dur = 3600.0 s, detections + start_t in seconds). So LagPatArtifact carries
+# ms internally and the legacy WRITERS convert ms -> s. Read-out gates (increment
+# 1/2) only use rank ORDER, so units do not affect them; rate/IEI/window analyses
+# (later) require the correct seconds, hence the conversion at the write boundary.
+MS_TO_S: float = 1e-3
+
 
 @dataclass
 class VirtualMontage:
@@ -242,7 +251,10 @@ def validate_artifact(artifact: LagPatArtifact) -> None:
 def write_legacy_npz(artifact: LagPatArtifact, path) -> None:
     """Write the *_lagPat_withFreqCent.npz with the EXACT keys the real loader
     reads (src/interictal_propagation.py L344-353): lagPatRank / eventsBool /
-    lagPatRaw / chnNames / start_t."""
+    lagPatRaw / chnNames / start_t.
+
+    UNIT: lagPatRaw is written in SECONDS (legacy on-disk unit). The artifact carries
+    ms (sim unit); convert here via MS_TO_S. ranks are unit-free."""
     path = str(path)
     assert path.endswith("_lagPat_withFreqCent.npz"), \
         "filename must end with _lagPat_withFreqCent.npz for the loader's glob"
@@ -251,18 +263,21 @@ def write_legacy_npz(artifact: LagPatArtifact, path) -> None:
         path,
         lagPatRank=artifact.ranks.astype(float),
         eventsBool=artifact.bools.astype(np.int8),
-        lagPatRaw=artifact.lag_raw.astype(float),
+        lagPatRaw=(artifact.lag_raw * MS_TO_S).astype(float),   # ms -> s
         chnNames=np.array(artifact.names, dtype=object),
         start_t=np.array(0.0),
     )
 
 
 def write_packed_times(artifact: LagPatArtifact, path) -> None:
-    """Companion *_packedTimes_withFreqCent.npy: (n_event, 2) rel start/end ms.
-    The model gives these directly (D1: no packer, but the loader needs them)."""
+    """Companion *_packedTimes_withFreqCent.npy: (n_event, 2) rel start/end times.
+    The model gives these directly (D1: no packer, but the loader needs them).
+
+    UNIT: written in SECONDS (legacy on-disk unit); artifact carries ms -> convert."""
     path = str(path)
     assert path.endswith("_packedTimes_withFreqCent.npy")
-    packed = np.column_stack([artifact.event_rel_times, artifact.event_rel_end_times])
+    packed = np.column_stack([artifact.event_rel_times * MS_TO_S,
+                              artifact.event_rel_end_times * MS_TO_S])   # ms -> s
     np.save(path, packed.astype(float))
 
 
@@ -272,7 +287,7 @@ def write_montage_manifest(artifact: LagPatArtifact, path) -> None:
     payload = {"contact_coords": artifact.contact_coords.tolist(),
                "chn_names": list(artifact.names)}
     from pathlib import Path as _P
-    _P(str(path)).write_text(json.dumps(payload))
+    _P(str(path)).write_text(json.dumps(payload), encoding="utf-8")
 
 
 def direction_readability(ranks_ev, bools_ev, coords, n_axes=180) -> float:
