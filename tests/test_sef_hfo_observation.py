@@ -105,3 +105,57 @@ def test_extract_lagpat_ties_within_tol_get_equal_rank():
                          participation_floor=0.0, participation_margin=0.05,
                          timing_frac=0.5, tie_tol=dt)
     assert art.ranks[0, 0] == art.ranks[1, 0]
+
+
+from src.sef_hfo_observation import (
+    rank_vs_projection_spearman,
+    endpoint_centroid_axis,
+    axis_angle_error_deg,
+)
+
+
+def _ranks_along(coords, n_hat):
+    # helper: monotone ranks increasing along n_hat (a perfect read-out)
+    proj = coords @ n_hat
+    order = np.argsort(proj)
+    r = np.empty(len(proj))
+    r[order] = np.arange(len(proj), dtype=float)
+    return r
+
+
+def test_spearman_is_one_when_ranks_follow_projection():
+    coords = np.column_stack([np.linspace(-5, 5, 9), np.zeros(9)])
+    n_hat = np.array([1.0, 0.0])
+    ranks = _ranks_along(coords, n_hat)
+    bools = np.ones(9, bool)
+    rho = rank_vs_projection_spearman(ranks, bools, coords, n_hat)
+    assert rho > 0.99
+
+
+def test_endpoint_axis_tracks_imposed_direction_within_tolerance():
+    # contacts on a 2D grid; ranks increase along 30deg
+    g = np.linspace(-6, 6, 5)
+    XX, YY = np.meshgrid(g, g)
+    coords = np.column_stack([XX.ravel(), YY.ravel()])     # 25 contacts, 2D
+    theta = np.deg2rad(30.0)
+    n_hat = np.array([np.cos(theta), np.sin(theta)])
+    ranks = _ranks_along(coords, n_hat)
+    bools = np.ones(len(coords), bool)
+    axis = endpoint_centroid_axis(ranks, bools, coords, k_dir=3, eps_deg=1.0)
+    assert axis is not None
+    assert axis_angle_error_deg(axis, theta) < 25.0
+
+
+def test_endpoint_axis_degenerate_returns_none():
+    # all participants tied (rank 0) -> early/late centroids coincide -> no-axis
+    coords = np.random.default_rng(0).normal(size=(9, 2))
+    ranks = np.zeros(9)
+    bools = np.ones(9, bool)
+    assert endpoint_centroid_axis(ranks, bools, coords, k_dir=3, eps_deg=1.0) is None
+
+
+def test_endpoint_axis_insufficient_participants_returns_none():
+    coords = np.random.default_rng(1).normal(size=(6, 2))   # < 2*k_dir+1 = 7
+    ranks = np.arange(6, dtype=float)
+    bools = np.ones(6, bool)
+    assert endpoint_centroid_axis(ranks, bools, coords, k_dir=3, eps_deg=0.1) is None

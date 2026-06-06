@@ -155,3 +155,68 @@ def attach_geometry(artifact: LagPatArtifact, montage: VirtualMontage) -> LagPat
     artifact.contact_coords = np.asarray(montage.contacts, float)
     artifact.names = list(montage.names)
     return artifact
+
+
+def _rankdata_avg(a):
+    """Average ranks (ties share mean rank), pure numpy."""
+    a = np.asarray(a, float)
+    order = np.argsort(a, kind="mergesort")
+    ranks = np.empty(len(a))
+    sa = a[order]
+    i = 0
+    while i < len(a):
+        j = i
+        while j + 1 < len(a) and sa[j + 1] == sa[i]:
+            j += 1
+        ranks[order[i:j + 1]] = (i + j) / 2.0
+        i = j + 1
+    return ranks
+
+
+def rank_vs_projection_spearman(ranks_ev, bools_ev, coords, n_hat) -> float:
+    """Increment-1 main gate: Spearman between per-event participant ranks and
+    their projection onto the known direction n_hat. NaN if <2 participants or
+    no variance (e.g. all tied)."""
+    idx = np.flatnonzero(np.asarray(bools_ev, bool))
+    if idx.size < 2:
+        return float("nan")
+    r = np.asarray(ranks_ev, float)[idx]
+    proj = (np.asarray(coords, float)[idx] @ np.asarray(n_hat, float))
+    if np.ptp(r) == 0 or np.ptp(proj) == 0:
+        return float("nan")            # no order to compare (e.g. synchronous source)
+    rr = _rankdata_avg(r)
+    rp = _rankdata_avg(proj)
+    return float(np.corrcoef(rr, rp)[0, 1])
+
+
+def endpoint_centroid_axis(ranks_ev, bools_ev, coords, k_dir=3, eps_deg=None):
+    """Increment-2 main estimator (also Increment-1 C1 no-axis check). Axis =
+    centroid(k_dir earliest-rank contacts) -> centroid(k_dir latest). Returns a
+    unit 2-vector, or None when: <2*k_dir+1 participants, endpoint sets overlap,
+    or ||axis|| < eps_deg (degenerate / no-axis)."""
+    idx = np.flatnonzero(np.asarray(bools_ev, bool))
+    if idx.size < 2 * k_dir + 1:
+        return None
+    r = np.asarray(ranks_ev, float)[idx]
+    xy = np.asarray(coords, float)[idx]
+    if np.ptp(r) == 0:        # all participants tied -> no early/late distinction
+        return None
+    order = np.argsort(r, kind="mergesort")
+    early = order[:k_dir]
+    late = order[-k_dir:]
+    if set(early.tolist()) & set(late.tolist()):
+        return None
+    vec = xy[late].mean(0) - xy[early].mean(0)
+    norm = float(np.linalg.norm(vec))
+    if eps_deg is not None and norm < eps_deg:
+        return None
+    if norm < 1e-9:
+        return None
+    return vec / norm
+
+
+def axis_angle_error_deg(axis, theta_ref) -> float:
+    """Undirected (mod 180°) angle between a 2-vector axis and a reference angle."""
+    a = np.arctan2(axis[1], axis[0])
+    diff = np.rad2deg(a - theta_ref) % 180.0
+    return float(min(diff, 180.0 - diff))
