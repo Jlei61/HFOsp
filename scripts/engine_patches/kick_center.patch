@@ -1,0 +1,29 @@
+# Engine patch: kick_center kwarg for single-end / off-center kick (Increment 2/3).
+# Target: results/topic4_sef_hfo/lif_snn/engine/kick_probe.py  (coworker Zou's engine;
+# that tree is GITIGNORED in this repo, so this patch-note is the tracked record.)
+# Backward-compatible: kick_center=None -> [L/2, L/2] (sheet center) = byte-identical to before.
+# Applied 2026-06-07.
+#
+# 1) simulate_kick signature:
+#      def simulate_kick(p, net, KICK_BOOST, slow=None, nu_signal_fn=None, verbose=False):
+#    ->
+#      def simulate_kick(p, net, KICK_BOOST, slow=None, nu_signal_fn=None, verbose=False, kick_center=None):
+#
+# 2) kick-mask center (~line 93):
+#      center = np.array([p.L / 2, p.L / 2])
+#    ->
+#      center = (np.array([p.L / 2, p.L / 2]) if kick_center is None
+#                else np.asarray(kick_center, float))   # default = sheet center (back-compat)
+#
+# 3) fresh_run forwards it (~line 304):
+#      def fresh_run(p, net, KICK_BOOST):
+#          net["rng"] = np.random.default_rng(p.seed)
+#          return simulate_kick(p, net, KICK_BOOST=KICK_BOOST)
+#    ->
+#      def fresh_run(p, net, KICK_BOOST, kick_center=None):
+#          net["rng"] = np.random.default_rng(p.seed)
+#          return simulate_kick(p, net, KICK_BOOST=KICK_BOOST, kick_center=kick_center)
+#
+# NOTE: outside_mask/spk_inside/spk_outside/classify/compute_metrics remain CENTER-disk-relative;
+# for an off-center kick they are no longer "seed vs spread" -- the Increment-2/3 read goes straight
+# off E_spk_bool + posE (direction estimator), not those center-relative bookkeeping fields.

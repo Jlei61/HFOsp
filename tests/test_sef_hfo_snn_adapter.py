@@ -58,6 +58,44 @@ def test_event_window_from_recalibrated_aggregate():
     assert win[1] > win[0]
 
 
+def test_engine_kick_center_moves_the_kick():
+    """Engine patch regression (Increment-2 Task 1): kick_center=None -> sheet-center disk;
+    off-center -> the kicked region moves in that direction. Skips if the gitignored LIF-SNN
+    engine is not importable. (Direction only — exact disk localisation needs a larger sheet /
+    earlier window = smoke geometry; here we only confirm the kwarg is wired and moves the kick.)"""
+    import os
+    import sys
+    import pytest
+    eng = os.path.join("results", "topic4_sef_hfo", "lif_snn", "engine")
+    if not os.path.isdir(eng):
+        pytest.skip("LIF-SNN engine not present")
+    sys.path.insert(0, eng)
+    try:
+        from params import Params, compute_nu_theta
+        from model import build_network
+        from kick_probe import fresh_run, T_KICK, DUR_KICK
+    except Exception:
+        pytest.skip("LIF-SNN engine not importable")
+    p = Params(g=3.6, L=2.0, density=800.0, T=185.0, nu_ext_ratio=0.6, seed=1)
+    net = build_network(p, verbose=False)
+    posE = net["pos"][:net["NE"]]
+    dt = p.dt
+    boost = 2 * compute_nu_theta(p)[0]
+    i0, i1 = int(round(T_KICK / dt)), int(round((T_KICK + DUR_KICK) / dt))
+
+    def top_excess_centroid(center):
+        rk = fresh_run(p, net, KICK_BOOST=boost, kick_center=center)["E_spk_bool"][i0:i1].sum(0).astype(float)
+        rr = fresh_run(p, net, KICK_BOOST=0.0, kick_center=center)["E_spk_bool"][i0:i1].sum(0).astype(float)
+        exc = np.clip(rk - rr, 0, None)
+        top = exc >= max(np.quantile(exc[exc > 0], 0.8), 1)
+        return posE[top].mean(0)
+
+    c_none = top_excess_centroid(None)
+    c_px = top_excess_centroid([1.6, 1.0])
+    np.testing.assert_allclose(c_none, [1.0, 1.0], atol=0.25)   # default = sheet center
+    assert c_px[0] > c_none[0] + 0.2                            # off-center moved +x
+
+
 def test_event_window_none_when_no_event():
     frame_dt = 2.0
     t = np.arange(150) * frame_dt
