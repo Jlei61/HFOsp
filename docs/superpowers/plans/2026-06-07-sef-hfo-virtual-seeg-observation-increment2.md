@@ -225,20 +225,32 @@ def _front(n=2000, L=2.0, ang=np.deg2rad(30.0), dt=0.1, t_max=200.0, c=0.05, see
     return spk, posE, ang, dt
 
 
-def test_adapter_front_direction():
-    spk, posE, ang, dt = _front()
-    m = merge_montages([build_shaft(np.deg2rad(10.0), 0.3, 8, (1.0, 1.0), "A"),
-                        build_shaft(np.deg2rad(100.0), 0.3, 8, (1.0, 1.0), "B")])
+# NOTE (WF-A lesson): the adapter UNIT test verifies the adapter's CORE property only —
+# a contact near early-firing neurons gets an earlier envelope first-crossing than one near
+# late-firing neurons. The FULL onset_front_axis direction read THROUGH a montage needs
+# montage-vs-event-footprint geometry tuning (montage extent > footprint, front_ms, kernel_width)
+# = the Task-5 SMOKE, NOT a unit test. onset_front_axis itself is unit-tested on lags directly
+# (Task 2). The _front lobe helper above is the SMOKE's reference geometry, not this test's.
+def test_adapter_envelope_lag_tracks_local_onset():
+    L, dt, t_max = 2.0, 0.1, 150.0
+    rng = np.random.default_rng(0)
+    posE = rng.uniform(0, L, size=(2000, 2))
+    onset = np.where(posE[:, 0] > L / 2, 30.0, 80.0)         # +x half early, -x late
+    nsteps = int(t_max / dt); spk = np.zeros((nsteps, len(posE)), bool)
+    for j in range(len(posE)):
+        k = int(onset[j] / dt)
+        if 0 <= k < nsteps: spk[k, j] = True
+    m = merge_montages([build_shaft(0.0, 0.3, 4, (1.6, 1.0), "P"),    # near +x (early)
+                        build_shaft(0.0, 0.3, 4, (0.4, 1.0), "N")])   # near -x (late)
     env, fdt, agg = snn_event_envelope(spk, posE, m, dt, bin_ms=2.0, smooth_ms=5.0, kernel_width=0.25)
     art = extract_lagpat(env, fdt, event_windows=[(0.0, env.shape[1]*fdt)],
                          participation_floor=float(env.min()),
-                         participation_margin=0.5*(float(env.max())-float(env.min())),
+                         participation_margin=0.3*(float(env.max())-float(env.min())),
                          timing_frac=0.5, tie_tol=fdt)
-    art = attach_geometry(art, m)
-    angle, ratio, n = onset_front_axis(art.lag_raw[:, 0], art.bools[:, 0], art.contact_coords, front_ms=8.0)
-    assert angle is not None and ratio > 1.3
-    assert angle_error_deg(angle, 30.0) < 25.0
+    assert np.nanmean(art.lag_raw[:4, 0]) < np.nanmean(art.lag_raw[4:, 0])   # +x before -x
 ```
+
+`event_window_for_run` lives in `src/sef_hfo_snn_adapter.py` (shared by SNN + rate runners), tested in the same file (one self-terminating window → `(t_on,t_off)`; no event → None = INSUFFICIENT).
 
 - [ ] **Step 2: Run → fail.** **Step 3: Implement** (the adapter from the engine map — bin+smooth `E_spk_bool` → `sample_envelopes(grid_xy=posE)`):
 
