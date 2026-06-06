@@ -21,6 +21,13 @@ import numpy as np
 # (later) require the correct seconds, hence the conversion at the write boundary.
 MS_TO_S: float = 1e-3
 
+# onset_front_axis degeneracy guard: the onset-front minor singular value must be >=
+# COLLINEAR_REL of the major, else the front is (near-)collinear and there is no reliable
+# 2D axis (electrode shape can squeeze the onset onto a line -> a fake "very strong axis").
+# This is a NUMERICAL/GEOMETRY degeneracy floor (ratio cap ~1/COLLINEAR_REL=50), NOT a verdict
+# bar: a real anisotropic lobe has ratio ~2-5, far below the cap and far above the 1.3 PASS band.
+COLLINEAR_REL: float = 0.02
+
 
 @dataclass
 class VirtualMontage:
@@ -385,9 +392,17 @@ def onset_front_axis(lag_raw_ev, bools_ev, coords, front_ms):
         return None, None, int(front.size)
     xy = np.asarray(coords, float)[front]
     c = xy - xy.mean(0)
+    # Degeneracy guard: a (near-)collinear onset front (electrode shaft can squeeze the
+    # early contacts onto a LINE) would give ratio -> inf = a FAKE "very strong axis" that
+    # is geometry, not tissue. No reliable 2D axis -> return None (see COLLINEAR_REL).
+    sv = np.linalg.svd(c, compute_uv=False)
+    if sv.size < 2 or sv[1] <= COLLINEAR_REL * sv[0]:
+        return None, None, int(front.size)
     cov = (c.T @ c) / len(c)
     evals, evecs = np.linalg.eigh(cov)            # ascending
-    ratio = float("inf") if evals[0] <= 1e-12 else float(np.sqrt(evals[1] / evals[0]))
+    ratio = float(np.sqrt(evals[1] / evals[0]))
+    if not np.isfinite(ratio):                    # belt-and-suspenders
+        return None, None, int(front.size)
     major = evecs[:, 1]
     angle = float(np.rad2deg(np.arctan2(major[1], major[0])) % 180.0)
     return angle, ratio, int(front.size)

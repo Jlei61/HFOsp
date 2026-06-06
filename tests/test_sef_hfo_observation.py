@@ -287,6 +287,24 @@ def test_onset_front_axis_tracks_anisotropic_lobe():
     assert angle_error_deg(angle, 30.0) < 25.0
 
 
+def test_onset_front_axis_collinear_front_returns_none():
+    # The DANGEROUS case: the onset-front contacts are squeezed onto a LINE (e.g. one
+    # shaft). Naively that looks like a "very strong axis" (ratio -> inf) but it is
+    # ELECTRODE SHAPE, not tissue. Must return (None, None, n), not a fake strong axis.
+    t = np.linspace(-1, 1, 9)
+    ang = np.deg2rad(80.0)
+    coords = np.column_stack([t * np.cos(ang), t * np.sin(ang)])   # perfectly collinear
+    lag = np.abs(t) * 0.1                                           # all within front_ms
+    bools = np.ones(len(coords), bool)
+    angle, ratio, n = onset_front_axis(lag, bools, coords, front_ms=5.0)
+    assert angle is None and ratio is None
+    # near-collinear (a thin sliver, ratio >> the cap) is also rejected
+    coords2 = coords + np.column_stack([np.zeros(9), 1e-3 * np.ones(9)])
+    coords2[:, 1] += np.linspace(0, 1e-4, 9)                        # tiny perpendicular jitter
+    a2, r2, _ = onset_front_axis(lag, bools, coords2, front_ms=5.0)
+    assert a2 is None
+
+
 def test_onset_front_axis_radial_has_no_axis():
     # onset lag ~ radius from center -> onset front is a ring -> no principal axis
     g = np.linspace(-3, 3, 7)
