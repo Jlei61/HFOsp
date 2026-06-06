@@ -62,7 +62,7 @@
 
 - Two orthogonal per-seed flags:
   - **event-valid** = self-limited event window found AND `n_participating ≥ 2·k_dir+1 = 7`.
-  - **direction-readable** = event-valid AND `onset_front_axis` returns a defined axis (≥3 onset-front contacts, finite ratio).
+  - **direction-readable** = event-valid AND `onset_front_axis` returns a **non-degenerate** axis: ≥3 onset-front contacts, **non-collinear front**, **finite ratio**. A (near-)collinear onset front (electrode shaft squeezing the early contacts onto a line) returns `(None, None, n)` — it must NOT count as a clear axis, because that "axis" is electrode shape, not tissue (the `COLLINEAR_REL` guard in `onset_front_axis`). The runner enforces `angle is not None and np.isfinite(ratio)`.
 - Per condition, `n_seed` (proposed 3); tracking conditions (C-track/kick-track/shaft-invariance) need ≥ `n_seed_min=2` **direction-readable** seeds else INSUFFICIENT; iso must-fail needs ≥ `n_seed_min` **event-valid** seeds else INSUFFICIENT (a condition with too few events is INSUFFICIENT, NEVER a must-fail PASS).
 - **Estimator pre-lock (advisor discipline — before the smoke)**: the SNN estimator MUST satisfy, on AR=2 CENTER-kick at θ_EE∈{0,45,90}: ratio>1.3 AND axis within 25° of θ_EE; AND AR=1 CENTER-kick: ratio<1.3; AND axis-tracks-θ_EE-not-montage under montage rotation. **If it cannot, the virtual read is contaminated — STOP** (do not pick the estimator to fit results). Smoke verifies on θ_EE=45° only, then FREEZE.
 - **Observation-knob freeze**: `kernel_width / bin_ms / smooth_ms / pitch / n_contacts / front_ms / R_OFF (kick-track offset)` calibrated ONCE in the Task-5 smoke, then frozen + recorded in `verdict.json` BEFORE the formal runs. Verdict bars (25° / 1.3 / k_dir / n_seed_min) never tuned.
@@ -171,9 +171,18 @@ def onset_front_axis(lag_raw_ev, bools_ev, coords, front_ms):
         return None, None, int(front.size)
     xy = np.asarray(coords, float)[front]
     c = xy - xy.mean(0)
+    # DEGENERACY GUARD: a (near-)collinear onset front (electrode shaft squeezes the early
+    # contacts onto a line) would give ratio -> inf = a FAKE strong axis (electrode shape,
+    # not tissue). No reliable 2D axis -> None. COLLINEAR_REL=0.02 = numerical/geometry floor
+    # (ratio cap ~50, far above the 1.3 verdict band), NOT a verdict bar.
+    sv = np.linalg.svd(c, compute_uv=False)
+    if sv.size < 2 or sv[1] <= COLLINEAR_REL * sv[0]:
+        return None, None, int(front.size)
     cov = (c.T @ c) / len(c)
     evals, evecs = np.linalg.eigh(cov)            # ascending
-    ratio = float("inf") if evals[0] <= 1e-12 else float(np.sqrt(evals[1] / evals[0]))
+    ratio = float(np.sqrt(evals[1] / evals[0]))
+    if not np.isfinite(ratio):
+        return None, None, int(front.size)
     major = evecs[:, 1]
     angle = float(np.rad2deg(np.arctan2(major[1], major[0])) % 180.0)
     return angle, ratio, int(front.size)
@@ -363,7 +372,10 @@ def _read(theta_EE, AR, seed, montage, kick_center):
     n_part = int(art.bools[:,0].sum())
     angle, ratio, nf = onset_front_axis(art.lag_raw[:,0], art.bools[:,0], art.contact_coords, FRONT_MS)
     ev = n_part >= 2*KDIR+1
-    return {"event_valid": bool(ev), "direction_readable": bool(ev and angle is not None),
+    # direction-readable requires a NON-DEGENERATE axis: angle defined AND ratio finite
+    # (onset_front_axis returns None/None for a collinear electrode-squeezed front).
+    readable = bool(ev and angle is not None and ratio is not None and np.isfinite(ratio))
+    return {"event_valid": bool(ev), "direction_readable": readable,
             "n_part": n_part, "angle": angle, "ratio": ratio}
 
 def _track(theta_EE, AR, montage, kick_center):
