@@ -242,3 +242,19 @@ def test_hetero_field_uniform_patch_matches_homogeneous():
                                       vth_std_core=0.0, vth_std_surround=0.0,
                                       vth_mean_core=V_TH, vth_mean_surround=V_TH, t_max=80.0)
     assert np.max(np.abs(ext_h - ext_g)) < 5e-3
+
+
+def test_patch_analysis_runs_both_layers():
+    from scripts.run_sef_hfo_hetero_patch import analyze_patch
+    res = analyze_patch(t_max=80.0, vth_std_wide=1.5, vth_std_narrow=0.5)
+    assert set(res["layers"]) >= {"baseline", "raw_narrow", "mean_matched"}
+    for layer in res["layers"].values():
+        assert "label" in layer and "max_ext" in layer
+    # Contract: surround must be defined (the call below must raise without it)
+    import pytest
+    from src.sef_hfo_heterogeneity import integrate_hetero_field
+    from src.sef_hfo_lif import mean_field
+    with pytest.raises(TypeError):
+        integrate_hetero_field(mean_field(1.0), lambda t: 0.0,
+                               x_patch=0.0, r_patch=2.0, vth_std_core=0.5,
+                               vth_mean_core=18.0)  # missing surround kwargs → TypeError
