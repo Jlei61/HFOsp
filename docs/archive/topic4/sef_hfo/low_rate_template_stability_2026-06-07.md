@@ -178,3 +178,58 @@
 - 优化审计（inline）：`_null_m` m≤25 精确，覆盖 53% low 窗；fast-2means 分离测试与 sklearn 一致。CONFIRMED。
 
 （内部归档代号：LR-7, denovo_window_axis, _fast_2means, window_recovery_paired, count_matched_null_gap_paired, peek_cost, polarity/direction ambiguity, seed robustness）
+
+---
+
+## LR-7 补充：方向无关端点稳定性（KMeans-union 方法）
+
+**日期**：2026-06-07
+**代码**：`src/low_rate_template_stability.py`（`window_endpoint_stability_denovo`）+ `scripts/run_denovo_endpoint_stability.py` + `tests/test_denovo_endpoint_stability.py`（5 tests 全绿）。
+**结果**：`results/topic4_sef_hfo/low_rate_template_stability/cohort_endpoint_stability.json`。
+
+### 重新设计的动机
+
+前一层（signed axis de novo）被方向歧义拖累：正反两套模板混合时，de novo 经常把方向认反。用户提出：直接看端点通道——KMeans k=2 分出两个子集，每个子集取最早/最晚放电的通道，**并集**。并集天然方向无关：正向子集的源头 = 反向子集的汇点，都出现在各自子集的极端位置，合并后就是同一批通道。
+
+### 方法
+
+1. 对窗内事件做 KMeans k=2（无方向信息）
+2. 对每个子集：取 top-k 最低秩（最早放电）+ top-k 最高秩（最晚放电）通道
+3. **两个子集并集** = 窗内端点候选（方向无关）
+4. 和全程端点集（全程轴两端各 top-2 = 4 个通道）比 Jaccard
+5. Rate 参照：发放次数最多的 top-4 通道
+
+小窗口（< 4 事件）退化到直接取 naive mean 两端，不做 KMeans。
+
+### 结果
+
+| | low 档绝对 endpoint_J | rate_J | EXCESS（扣 null） | p |
+|---|---|---|---|---|
+| ALL (n=27) | 0.38 | 0.33 | **−0.064** (4/27) | 0.993 (NULL) |
+| epilepsiae | 0.38 | 0.33 | −0.064 (3/15) | 0.950 (NULL) |
+| yuquan | 0.36 | 0.24 | −0.051 (1/12) | 0.981 (NULL) |
+
+**绝对水平参照**：
+- 纯随机（N=15 通道中随机选 4 个）：Jaccard ≈ 0.15
+- 发放计数 rate：0.33
+- KMeans-union 端点：0.38（>rate，>随机，但 excess 为负）
+
+**EXCESS 为负的解释**：count-matched null（从全程随机抽同样 M 个事件做同样流程）给出 ~0.44，比实际低事件窗（0.38）更高。意味着**连续安静时段比随机 M 事件更难恢复端点**——可能安静时段事件更均质（只出现一套模板）或 KMeans 分离度更低。
+
+### 两种 de novo 方法收敛到同一结论
+
+| 方法 | low 档绝对复现 | EXCESS | 结论 |
+|---|---|---|---|
+| Signed 轴（带方向） | epi 0.36 | NULL | 方向识别失败 |
+| \|·\| 轴线（去方向） | 0.48 | NULL | 轴线部分恢复 |
+| **KMeans-union 端点（本节）** | **0.38** | **NULL/负** | 端点识别也失败 |
+
+去掉方向问题后，结论不变：**短时间安静窗里，无法可靠地从零识别最早/最晚放电的通道。**
+
+### 科学意义
+
+这个结果从负面确认了 read-back 主结果的价值：
+- 直接找端点 → 不可靠（0.38，null）
+- 先用全程数据建模 → 再投影短窗 → 可靠（read-back +0.131）
+
+"先学习、再读回"不是取巧，是数据告诉我们的必要性：少事件窗里的信号量不足以独立建立稳定的传播结构，无论是方向敏感还是方向无关的方法。

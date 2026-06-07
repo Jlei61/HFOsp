@@ -19,7 +19,7 @@ from __future__ import annotations
 import numpy as np
 from scipy.stats import spearmanr
 
-from src.lagpat_rank_audit import mask_phantom_ranks
+from src.lagpat_rank_audit import mask_phantom_ranks, build_masked_kmeans_features
 
 
 def align_template_events(masked, labels, *, flip_threshold=0.0, min_overlap=3):
@@ -296,6 +296,80 @@ def window_endpoint_union_denovo(aligned_global, ranks, bools, full_axis, full_c
     return {"endpoint_union_jaccard": jaccard(w_union, f_union),
             "rate_topk_jaccard": jaccard(w_rate, f_rate),
             "n_common_channels": int(common.size)}
+
+
+def window_endpoint_stability_denovo(ranks_window, bools_window, full_axis, full_count, window_ev,
+                                     k=2, min_ch=3, min_cluster_events=4, random_state=0):
+    """Direction-agnostic endpoint recovery: can a short window re-discover the
+    full-recording ENDPOINT channels (first + last to fire)?
+
+    Approach: KMeans k=2 on the window's events → for each cluster, find the k channels
+    with LOWEST rank (source end) and k channels with HIGHEST rank (sink end) → take the
+    UNION across both clusters. This union is direction-agnostic:
+    - In the forward cluster: source = {A,B}, sink = {D,E}
+    - In the reverse cluster: source = {D,E}, sink = {A,B}
+    - Union = {A,B,D,E} = the correct structural endpoints regardless of direction.
+
+    Ground truth = top-k lowest + top-k highest channels in full_axis (the globally
+    aligned axis defines the endpoint channels; the window never sees this).
+    Rate reference = top-2k channels by participation count (operational reference).
+
+    Returns NaN if fewer than max(min_ch, 2k+1) common channels.
+    """
+    from src.sef_hfo_soz_localization import topk_indices, jaccard
+
+    window_ev = np.asarray(window_ev, dtype=int)
+    ranks_w = np.asarray(ranks_window, dtype=float)[:, window_ev]
+    bools_w = np.asarray(bools_window)[:, window_ev] > 0
+    full_axis = np.asarray(full_axis, dtype=float)
+    full_count = np.asarray(full_count, dtype=float)
+
+    nan = {"endpoint_jaccard": float("nan"), "rate_topk_jaccard": float("nan"),
+           "n_common_channels": 0, "n_events": int(window_ev.size)}
+
+    # Per-channel naive mean rank to define common channels
+    masked_w = mask_phantom_ranks(ranks_w, bools_w, normalize=True)
+    with np.errstate(invalid="ignore"):
+        win_axis_naive = np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan
+                                   for r in masked_w])
+    common = np.where(np.isfinite(win_axis_naive) & np.isfinite(full_axis))[0]
+    if common.size < max(min_ch, 2 * k + 1):
+        return nan
+
+    fa = full_axis[common]
+    full_endpoints = topk_indices(fa, k, largest=False) | topk_indices(fa, k, largest=True)
+
+    win_count = bools_w.sum(axis=1).astype(float)
+    rate_endpoints = topk_indices(win_count[common], 2 * k, largest=True)
+
+    m = int(window_ev.size)
+    if m < min_cluster_events:
+        # Small window: fallback to naive mean (no clustering)
+        wa = win_axis_naive[common]
+        window_endpoints = topk_indices(wa, k, largest=False) | topk_indices(wa, k, largest=True)
+    else:
+        features = build_masked_kmeans_features(ranks_w, bools_w)
+        labels = _fast_2means(features, n_init=3, rng_seed=random_state)
+        window_endpoints = set()
+        for lbl in range(2):
+            ev_mask = labels == lbl
+            if ev_mask.sum() < min_ch:
+                continue
+            with np.errstate(invalid="ignore"):
+                cl_axis = np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan
+                                    for r in masked_w[:, ev_mask]])
+            cl_common = cl_axis[common]
+            if int(np.sum(np.isfinite(cl_common))) >= 2 * k + 1:
+                window_endpoints |= (topk_indices(cl_common, k, largest=False) |
+                                     topk_indices(cl_common, k, largest=True))
+        if not window_endpoints:  # both clusters degenerate: fallback
+            wa = win_axis_naive[common]
+            window_endpoints = topk_indices(wa, k, largest=False) | topk_indices(wa, k, largest=True)
+
+    return {"endpoint_jaccard": jaccard(window_endpoints, full_endpoints),
+            "rate_topk_jaccard": jaccard(rate_endpoints, full_endpoints),
+            "n_common_channels": int(common.size),
+            "n_events": m}
 
 
 def count_matched_null_gap(aligned, bools, full_axis, full_count, m, n_ev, rng, n_null=100, min_ch=3):
