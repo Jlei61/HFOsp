@@ -1,4 +1,13 @@
-"""Rate-field θ=45° smoke — Increment-3a Task 4 (Increment-3 plan 2026-06-07).
+""">>> DEPRECATED / CONFOUNDED — DO NOT USE AS A VERDICT. <<<
+Its "θ=45 PASS" is invalid: both shafts run PARALLEL to θ_EE (violates locked D6
+"≥2 NON-parallel shafts" — the recovered axis is forced by shaft orientation, which
+IS θ_EE → circular), SPACING=3.0mm (not the locked real-SEEG 4mm/3.5mm pitch), and it
+hand-rolls the event window instead of the locked event_window_for_run (#5). Use the
+D6-compliant runner scripts/run_sef_hfo_obs_increment3a.py instead. See
+docs/archive/topic4/sef_hfo/increment3a_rate_parity_2026-06-07.md §3.1. Kept only for the
+thin-stripe-event diagnosis it documents; pending user decision to delete.
+
+Rate-field θ=45° smoke — Increment-3a Task 4 (Increment-3 plan 2026-06-07).
 
 Validates the full endpoint_centroid_axis read-out chain on the LIF rate field:
   pulse_stim_fn → integrate_lif_field(return_frames) → rate_event_envelope →
