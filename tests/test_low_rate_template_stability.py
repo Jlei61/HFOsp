@@ -17,6 +17,7 @@ from src.low_rate_template_stability import (
     stratify_by_event_count,
     count_matched_null_gap,
     m_bucket,
+    window_endpoint_overlaps,
 )
 
 
@@ -88,6 +89,31 @@ def test_stratify_by_event_count_low_mid_high():
     strata = stratify_by_event_count(counts, n_strata=3)
     assert strata[0] == "low" and strata[1] == "low"
     assert strata[4] == "high" and strata[5] == "high"
+
+
+def test_window_endpoint_overlaps_recovers_full_endpoints_and_compares_rate():
+    # stable axis: ch0,1 = source end; ch4,5 = sink end (over the common channels)
+    full_axis = np.array([0.0, 0.1, 0.5, 0.5, 0.9, 1.0])
+    aligned = np.tile(full_axis[:, None], (1, 10))             # window mirrors full axis
+    bools = np.ones((6, 10), dtype=bool)
+    full_count = np.array([10.0, 9.0, 5.0, 5.0, 2.0, 1.0])     # count high->low ch0..ch5
+    rep = window_endpoint_overlaps(aligned, bools, full_axis, full_count,
+                                   window_ev=np.arange(5), k=2, min_ch=3)
+    assert rep["endpoint_jaccard"] == pytest.approx(1.0)       # source{0,1} ∪ sink{4,5} recovered
+    assert rep["source_jaccard"] == pytest.approx(1.0)
+    assert rep["sink_jaccard"] == pytest.approx(1.0)
+    assert np.isfinite(rep["rate_topk_jaccard"])
+
+
+def test_window_endpoint_overlaps_insufficient_when_too_few_common_channels():
+    full_axis = np.array([0.0, 0.5, 1.0, np.nan])
+    aligned = np.array([[0.0] * 4, [0.5] * 4, [1.0] * 4, [np.nan] * 4])  # only 3 channels have axis
+    bools = np.array([[1] * 4, [1] * 4, [1] * 4, [0] * 4], dtype=bool)
+    full_count = np.array([3.0, 2.0, 1.0, 5.0])
+    rep = window_endpoint_overlaps(aligned, bools, full_axis, full_count,
+                                   window_ev=np.arange(4), k=2, min_ch=3)
+    # need >= 2k+1 = 5 common channels for clean source/sink separation; only 3 -> insufficient
+    assert np.isnan(rep["endpoint_jaccard"])
 
 
 def test_m_bucket_edges():

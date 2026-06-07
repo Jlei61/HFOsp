@@ -64,6 +64,21 @@
 - **bug 审计（6 项）**：CONFIRMED 无 bug——反转对齐用全局逐事件标签(非 per-window 偷挑)、通道索引一致、<3 通道窗丢弃并报数、计数=群体事件参与数(与模板同批事件)、无静态 SOZ 泄漏、全程轴与窗轴同一对齐。
 - **common-channel 公平性修复（user review 后追加）**：旧版 rate 在全通道(沉默→并列0)、template 仅在参与通道，对 template 有利。改成两者同在参与通道上算 → 结论**不变更干净**(EXCESS 0.140→0.131, 24/28→25/28, p 仍 <1e-4)。零膨胀是小头；count-matched null + common-channel 双修复后仍稳。
 
+## Secondary：端点集合是否漂（user review，已跑）
+
+主结果看的是**整条传播轴排序**复现；这个补充看离散的 **source/sink 端点集合**（全程 axis 两端各 top-2 = 4 个端点通道，common-channel）在低事件窗里漂不漂，与 rate top-2 overlap 做同样比较 + 同样 count-matched null。结果文件 `cohort_endpoint_overlap.json`。
+
+| | RAW Δ(端点−率) | RAW p | EXCESS（扣 null） | 分布 |
+|---|---|---|---|---|
+| ALL (n=27) | +0.205 | <1e-3 | 中位 +0.000 / 均值 +0.11 | 11 个恰为 0、13 正、3 负 |
+| epilepsiae (15) | +0.267 | 0.002 | 中位 +0.00 | |
+| yuquan (12) | +0.138 | 0.006 | +0.167 | |
+
+**诚实读法**：
+- **RAW 端点 overlap 远好于 rate top-k**（低档 0.60 vs 0.33），但这**大部分是"平滑统计量/估计量"效应**——count-matched null 也复现了大半（随机抽也是端点比 rate top-k 稳）。
+- **离散端点 metric 太粗**：~40%（11/27）被试 EXCESS **恰为 0**（端点集只 4 通道、饱和，时间连续窗与随机窗的 Jaccard 一样，分辨不开）。在能分辨的 16 个里，13 个为正（mean +0.11、最大 +0.60），方向与主轴结果一致；Wilcoxon p=0.002 是这 16 个里的正向显著（中位 0 是被 11 个零拉到的）。
+- **结论**：端点集合**方向上**也漂（与主轴一致），但**离散 top-k 端点是粗读数、对约 40% 被试无分辨力**；**真正敏感、稳健的时间结构信号在整条轴排序**（主结果 EXCESS +0.131、25/28、p<1e-4），不在离散端点。**所以主结果用整条轴排序，端点 overlap 作方向佐证而非独立强结论。**
+
 ## 护栏 / 局限（必读，诚实）
 
 1. **效应是 M-分级的，不是一致的 28/28**：峰值在 M=5-20；M>100 采样充足时趋近 0（应然）；**M≤2 分辨不开**（null 太宽，subjects 1084/442 不支持也不反对，符合"事件不足这个尺度测不了"的护栏）。报告须 M-分级，不可写成统一效应。
@@ -83,7 +98,7 @@
 ## 下一步（候选 / 分层）
 
 - ✓ count-matched null + M-分级 + common-channel 公平版已正式并入 runner 输出(`cohort.json` 含 `median_low_excess_NULLCORRECTED`/`wilcoxon_p_excess_low`/`m_graded_cohort_excess`)。
-- **(secondary，应补) 端点集合是否漂**：当前主结果看的是**整条传播轴排序**复现，不是严格看 top-k 源/汇**端点集合**漂不漂。补：全程定义 source/sink endpoint；每个低事件窗定义自己的 endpoint；比 Jaccard/overlap；与 rate top-k overlap 做同样比较；同样做 count-matched null。
+- ✓ **(secondary，已跑) 端点集合是否漂**：见上"Secondary"节——方向一致但离散端点是粗读数（~40% 被试 EXCESS=0 分辨不开），真正稳健信号在整条轴排序。
 - **(下一层验证，不否定当前结果) de novo short-window discovery**：低事件窗里**不借用全程模板标签**、单独用这段时间的群体事件**重新算传播排序、重新聚类**，能不能恢复出同一模板 / 同一组源-汇端点。更难（低事件窗事件可能不够、KMeans 不稳），更接近"短时记录能否独立发现模板"。是**下一层**，不是用来推翻 read-back 结果。
 - 30min 窗敏感性（`--window-min 30`）；per-template 事件预算更公平版；"模板缺失通道按不可复现惩罚"更狠 sensitivity。
 - 临床意义对接：这个时间稳定性差异是否帮助"短时记录也能定位"——需在独立队列预注册检验。

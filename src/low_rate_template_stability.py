@@ -92,6 +92,47 @@ def window_reproductions(aligned, bools, full_axis, full_count, window_ev, min_c
             "n_events": int(window_ev.size), "n_common_channels": int(common.sum())}
 
 
+def window_endpoint_overlaps(aligned, bools, full_axis, full_count, window_ev, k=2, min_ch=3):
+    """SECONDARY: does a window recover the full-recording source/sink ENDPOINT SET?
+
+    Unlike the main analysis (whole-axis ordering reproduction), this looks at the discrete
+    endpoint sets. Both full and window endpoints are defined over the SAME common channels
+    (finite win_axis AND full_axis) for fairness, consistent with the main common-channel fix.
+
+      source endpoint = k channels with lowest aligned rank; sink = k highest; endpoint = union.
+      rate top-k       = k channels with highest participation count.
+    Returns Jaccard(window endpoint, full endpoint) for source/sink/endpoint, and the analogous
+    rate top-k Jaccard. NaN if fewer than (2k+1) common channels (can't cleanly separate ends).
+    """
+    from src.sef_hfo_soz_localization import topk_indices, jaccard
+
+    window_ev = np.asarray(window_ev, dtype=int)
+    sub_a = np.asarray(aligned, dtype=float)[:, window_ev]
+    sub_b = np.asarray(bools)[:, window_ev].astype(bool)
+    full_axis = np.asarray(full_axis, dtype=float)
+    full_count = np.asarray(full_count, dtype=float)
+    with np.errstate(invalid="ignore"):
+        win_axis = np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in sub_a])
+    win_count = sub_b.sum(axis=1).astype(float)
+    common = np.where(np.isfinite(win_axis) & np.isfinite(full_axis))[0]
+    nan = {"endpoint_jaccard": float("nan"), "source_jaccard": float("nan"),
+           "sink_jaccard": float("nan"), "rate_topk_jaccard": float("nan"),
+           "n_common_channels": int(common.size)}
+    if common.size < max(min_ch, 2 * k + 1):
+        return nan
+    # restrict to common channels; topk positions index into `common`
+    fa, wa = full_axis[common], win_axis[common]
+    fc, wc = full_count[common], win_count[common]
+    f_src, f_snk = topk_indices(fa, k, largest=False), topk_indices(fa, k, largest=True)
+    w_src, w_snk = topk_indices(wa, k, largest=False), topk_indices(wa, k, largest=True)
+    f_rate, w_rate = topk_indices(fc, k, largest=True), topk_indices(wc, k, largest=True)
+    return {"source_jaccard": jaccard(w_src, f_src),
+            "sink_jaccard": jaccard(w_snk, f_snk),
+            "endpoint_jaccard": jaccard(w_src | w_snk, f_src | f_snk),
+            "rate_topk_jaccard": jaccard(w_rate, f_rate),
+            "n_common_channels": int(common.size)}
+
+
 def count_matched_null_gap(aligned, bools, full_axis, full_count, m, n_ev, rng, n_null=100, min_ch=3):
     """Time-scrambled null: median(template_repro - rate_repro) over n_null random draws of
     m events from the WHOLE recording. This is the 'rank is just a smoother estimator than a
