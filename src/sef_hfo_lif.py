@@ -85,13 +85,17 @@ _STIM_T: float = 30.0    # stimulus duration (ms)
 # Transfer function
 # ---------------------------------------------------------------------------
 
-def lif_rate(mu: float, sigma: float, tau_m: float, tau_ref: float) -> float:
+def lif_rate(mu: float, sigma: float, tau_m: float, tau_ref: float,
+             v_th: float = V_TH) -> float:
     """Siegert formula for the LIF firing rate (kHz).
 
     Numerically stable via ``scipy.special.erfcx``.  Physical units:
     mu, sigma in mV; tau_m, tau_ref in ms; return value in kHz.
+
+    v_th: firing threshold (mV); defaults to module-global V_TH so all
+    existing callers are unaffected.
     """
-    y_th = (V_TH - mu) / sigma
+    y_th = (v_th - mu) / sigma
     y_r = (V_RESET - mu) / sigma
     integ, _ = quad(lambda x: erfcx(-x), y_r, y_th, limit=200)
     return 1.0 / (tau_ref + tau_m * np.sqrt(np.pi) * integ)
