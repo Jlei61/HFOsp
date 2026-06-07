@@ -2,7 +2,7 @@
 
 > **⚠ 2026-06-07 AMENDMENT — threshold distribution fix + gap-limited std lock (read before Tasks 7–9).** User review caught a science bug in the as-built Tasks 4/6: `phi_eff_vth` modeled the E threshold as an **unbounded** Gaussian. Gauss–Hermite then sampled `v_th < V_RESET` (down to −16 mV), where the Siegert formula returns a **negative** firing rate, which was silently clamped with `max(0, .)`. Effect: `phi_eff` was **non-monotonic** in `vth_mean` (a higher mean threshold could give a *higher* mean rate) — breaking `mean_match_vth`'s monotonicity premise and the whole forced chain.
 >
-> **Fixed (commits 155cdc7, d4a1bf3):** `lif_rate` now **raises** for `v_th < V_RESET`; `phi_eff_vth` integrates a **truncated** Gaussian on `[V_RESET, vth_mean+8·std]` via fixed `leggauss(96)` (deterministic, smooth in μ, renormalized — replaces Gauss–Hermite + clamp); `mean_match_vth` default bracket is now `(V_RESET+0.5, V_TH+17)`; `closed_loop_leading` reports a `converged` flag. **The Task 4 / Task 6 code blocks below are SUPERSEDED — read the committed source in `src/sef_hfo_heterogeneity.py` / `src/sef_hfo_lif.py`, do NOT re-copy the blocks in this doc.**
+> **Fixed (commits 155cdc7, d4a1bf3):** `lif_rate` now **raises** for `v_th < V_RESET`; `phi_eff_vth` integrates a **truncated** Gaussian on `[V_RESET, vth_mean+8·std]` via fixed `leggauss(96)` (deterministic, smooth in μ, renormalized — replaces Gauss–Hermite + clamp); `mean_match_vth` default bracket is now `(V_RESET+0.5, V_TH+17)`; `closed_loop_leading` reports a `converged` flag. **The Task 4 / Task 6 embedded code + test blocks below have been UPDATED IN PLACE to the corrected (truncated leggauss / locked-std) form; the committed source in `src/sef_hfo_heterogeneity.py` / `src/sef_hfo_lif.py` is the source of truth if they ever drift.**
 >
 > **Gap-limit finding (locks Tasks 7 & 9 params):** with `V_TH−V_RESET = 7 mV` at the canonical sub-reset operating point, `lif_rate` has a steep reset knee. The plan's original `vth_std_wide=4.0` puts **~49%** of the effective rate in the `[V_RESET, 13]` reset knee = reset-floor saturation, **not** collective gain. **Locked clean params: `vth_std_wide=1.5`, `vth_std_narrow=0.5`** (knee share 0.29% / ~0%; narrowing 1.5→0.5 mean-matched raises effective gain ~13% — a computed signal, reported not asserted, spec §7). **All `vth_std_wide=4.0 / vth_std_narrow=1.0` in Tasks 7 & 9 below have been updated to 1.5 / 0.5.** See spec §5.2 and `tests/test_sef_hfo_heterogeneity.py::test_locked_std_params_stay_out_of_reset_knee`.
 
@@ -295,15 +295,21 @@ def test_phi_eff_zero_std_reduces_to_lif_rate():
     r = phi_eff_vth(5.0, 4.0, TAU_ME, TREF_E, vth_mean=V_TH, vth_std=0.0)
     assert abs(r - lif_rate(5.0, 4.0, TAU_ME, TREF_E, v_th=V_TH)) < 1e-9
 
-def test_phi_eff_quadrature_matches_dense_average():
-    """Gauss–Hermite must match a dense Monte-Carlo-free trapezoid average."""
+def test_phi_eff_matches_renormalized_truncated_dense_average():
+    """[2026-06-07 fix] GL quadrature must match a dense trapezoid of the RENORMALIZED
+    TRUNCATED integrand on the LEGAL support [V_RESET, hi] — not the old unbounded range
+    vm±5σ which sampled v_th < V_RESET (circular: it validated the integral against the
+    very illegal values the fix removes)."""
     import numpy as np
-    mu, sig, vm, vs = 5.0, 4.0, V_TH, 2.0
-    grid = np.linspace(vm - 5 * vs, vm + 5 * vs, 4001)
-    w = np.exp(-0.5 * ((grid - vm) / vs) ** 2); w /= w.sum()
-    dense = float(np.sum(w * np.array([lif_rate(mu, sig, TAU_ME, TREF_E, v_th=v) for v in grid])))
-    gh = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
-    assert abs(gh - dense) < 1e-4
+    from src.sef_hfo_lif import V_RESET
+    mu, sig, vm, vs = 8.0, 4.0, 19.0, 1.5
+    hi = vm + 8.0 * vs
+    grid = np.linspace(V_RESET, hi, 20001)
+    w = np.exp(-0.5 * ((grid - vm) / vs) ** 2)
+    r = np.array([lif_rate(mu, sig, TAU_ME, TREF_E, v_th=v) for v in grid])
+    dense = float(np.trapz(w * r, grid) / np.trapz(w, grid))
+    gl = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
+    assert abs(gl - dense) < 1e-6
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -328,25 +334,35 @@ effect is COMPUTED at the operating point, never assumed (spec §7).
 from __future__ import annotations
 
 import numpy as np
-from numpy.polynomial.hermite_e import hermegauss
+from numpy.polynomial.legendre import leggauss
 
-from src.sef_hfo_lif import lif_rate, V_TH
+from src.sef_hfo_lif import lif_rate, V_TH, V_RESET
 
-_GH_NODES, _GH_WEIGHTS = hermegauss(24)          # probabilists' Hermite (weight e^{-x^2/2})
-_GH_WSUM = _GH_WEIGHTS.sum()                     # = sqrt(2 pi)
+# Fixed (deterministic) Gauss–Legendre nodes — smooth in mu for eff_gain_curvature.
+_GL_NODES, _GL_WEIGHTS = leggauss(96)
 
 def phi_eff_vth(mu: float, sigma: float, tau_m: float, tau_ref: float,
                 vth_mean: float = V_TH, vth_std: float = 0.0) -> float:
-    """Φ_LIF averaged over v_th ~ N(vth_mean, vth_std^2), via Gauss–Hermite.
-
-    vth_std=0 returns exactly lif_rate(mu,sigma,tau_m,tau_ref,v_th=vth_mean).
-    Returns rate in kHz.
+    """[2026-06-07 fix — see top banner] Φ_LIF averaged over a TRUNCATED Gaussian
+    threshold v_th ~ N(vth_mean, vth_std^2) restricted to the physical support
+    v_th >= V_RESET, renormalized by the retained mass. An UNbounded Gaussian sampled
+    v_th < V_RESET where the Siegert rate is NEGATIVE (the old max(0,.) clamp masked it
+    and made Φ_eff non-monotonic). vth_std=0 returns exactly lif_rate at vth_mean.
     """
     if vth_std <= 0.0:
         return lif_rate(mu, sigma, tau_m, tau_ref, v_th=vth_mean)
-    vths = vth_mean + vth_std * _GH_NODES
+    hi = vth_mean + 8.0 * vth_std
+    half = 0.5 * (hi - V_RESET); mid = 0.5 * (hi + V_RESET)
+    vths = mid + half * _GL_NODES                              # GL nodes mapped onto [V_RESET, hi]
+    w_gauss = np.exp(-0.5 * ((vths - vth_mean) / vth_std) ** 2)
     rates = np.array([lif_rate(mu, sigma, tau_m, tau_ref, v_th=float(v)) for v in vths])
-    return float(np.sum(_GH_WEIGHTS * rates) / _GH_WSUM)
+    num = float(np.sum(_GL_WEIGHTS * w_gauss * rates))         # the GL ``half`` Jacobian cancels
+    den = float(np.sum(_GL_WEIGHTS * w_gauss))                 # renormalize by retained truncated mass
+    result = num / den if den > 0.0 else float("nan")
+    if not np.isfinite(result):                               # degenerate dist or extreme-threshold quad overflow
+        raise ValueError(f"phi_eff_vth: non-finite rate (num={num:.3g}, den={den:.3g}) at "
+                         f"vth_mean={vth_mean}, vth_std={vth_std}")
+    return result
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -444,11 +460,11 @@ from src.sef_hfo_lif import TAU_ME, TREF_E, V_TH
 def test_mean_match_restores_baseline_rate():
     """After mean-matching, Φ_eff at the op input equals the baseline rate,
     even though vth_std changed. This is Contract 2's whole point."""
-    mu, sig = 6.0, 4.0
-    baseline = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=V_TH, vth_std=4.0)
+    mu, sig = 8.0, 4.0
+    baseline = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=V_TH, vth_std=1.5)   # locked wide
     vm_matched = mean_match_vth(target_rate=baseline, mu=mu, sigma=sig,
-                                tau_m=TAU_ME, tau_ref=TREF_E, vth_std=1.0)
-    got = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm_matched, vth_std=1.0)
+                                tau_m=TAU_ME, tau_ref=TREF_E, vth_std=0.5)         # locked narrow
+    got = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm_matched, vth_std=0.5)
     assert abs(got - baseline) < 1e-6
 ```
 
@@ -465,7 +481,7 @@ from scipy.optimize import brentq
 
 def mean_match_vth(target_rate: float, mu: float, sigma: float,
                    tau_m: float, tau_ref: float, vth_std: float,
-                   bracket: tuple[float, float] = (V_TH - 8.0, V_TH + 8.0)) -> float:
+                   bracket: tuple[float, float] = (V_RESET + 0.5, V_TH + 17.0)) -> float:
     """Solve for vth_mean such that phi_eff_vth(...; vth_mean, vth_std) == target_rate
     at the operating input mu. Restores the baseline mean rate after a variance
     change (spec §5.0 Contract 2). Raises if target is unreachable in the bracket."""
@@ -864,7 +880,7 @@ def test_patch_analysis_runs_both_layers():
     from src.sef_hfo_lif import mean_field
     with pytest.raises(TypeError):
         integrate_hetero_field(mean_field(1.0), lambda t: 0.0,
-                               x_patch=0.0, r_patch=2.0, vth_std_core=1.0,
+                               x_patch=0.0, r_patch=2.0, vth_std_core=0.5,
                                vth_mean_core=18.0)  # missing surround kwargs → TypeError
 ```
 

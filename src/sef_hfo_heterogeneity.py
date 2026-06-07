@@ -56,7 +56,17 @@ def phi_eff_vth(mu: float, sigma: float, tau_m: float, tau_ref: float,
     rates = np.array([lif_rate(mu, sigma, tau_m, tau_ref, v_th=float(v)) for v in vths])
     num = float(np.sum(_GL_WEIGHTS * w_gauss * rates))   # the GL ``half`` Jacobian cancels in num/den
     den = float(np.sum(_GL_WEIGHTS * w_gauss))           # = renormalization by retained truncated mass
-    return num / den
+    result = num / den if den > 0.0 else float("nan")
+    if not np.isfinite(result):
+        # Degenerate input: the truncated mass underflowed (den→0, e.g. the whole
+        # distribution sits below V_RESET) or a sampled rate was non-finite (lif_rate
+        # quad overflow at an extreme threshold).  Raise loudly rather than emit a silent
+        # NaN — same loud-failure philosophy as lif_rate's sub-reset guard (CLAUDE.md §6).
+        raise ValueError(
+            f"phi_eff_vth: non-finite effective rate (num={num:.3g}, den={den:.3g}) at "
+            f"mu={mu:.4g}, sigma={sigma:.4g}, vth_mean={vth_mean:.4g}, vth_std={vth_std:.4g} "
+            f"— degenerate threshold distribution relative to V_RESET={V_RESET}.")
+    return result
 
 
 def eff_gain_curvature(mu: float, sigma: float, tau_m: float, tau_ref: float,

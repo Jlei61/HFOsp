@@ -104,14 +104,21 @@ def test_locked_std_params_stay_out_of_reset_knee():
     from scipy.integrate import quad
     op = mean_field(1.0)
     muE, sE, nuE = op["muE"], op["sE"], op["nuE"]
-    for vs in (1.5, 0.5):
+    def knee_share(vs):
         vm = mean_match_vth(nuE, muE, sE, TAU_ME, TREF_E, vs)
         hi = vm + 8.0 * vs
         pdf = lambda v: np.exp(-0.5 * ((v - vm) / vs) ** 2)
         rate_w = lambda v: lif_rate(muE, sE, TAU_ME, TREF_E, v_th=v) * pdf(v)
         den = quad(rate_w, V_RESET, hi, limit=200)[0]
         knee = quad(rate_w, V_RESET, 13.0, limit=200)[0]
-        assert knee / den < 0.05, f"vth_std={vs}: reset-knee share {knee/den:.3f} >= 5%"
+        return knee / den
+    for vs in (1.5, 0.5):
+        assert knee_share(vs) < 0.05, f"locked vth_std={vs}: reset-knee share {knee_share(vs):.3f} >= 5%"
+    # NON-VACUOUSNESS: the plan's original wide=4.0 MUST be rejected by the same gate,
+    # else the gate has no discriminating power (it would pass anything).
+    assert knee_share(4.0) > 0.20, (
+        f"gate is vacuous: plan's original vth_std=4.0 knee share {knee_share(4.0):.3f} "
+        f"should be large (~0.49) and rejected")
 
 
 def test_closed_loop_leading_canonical_op_stable():
