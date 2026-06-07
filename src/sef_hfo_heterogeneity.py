@@ -213,6 +213,61 @@ def mean_match_param(target_rate: float, mu: float, sigma: float, tau_m: float,
     return float(brentq(g, lo, hi, xtol=1e-8))
 
 
+def _param_grid(param, mean, std, n_nodes):
+    """GL nodes (mapped onto the param's truncated support) and their (GL × Gaussian)
+    weights, for the joint integral. Returns (vals, weights)."""
+    nodes, gl_w = leggauss(n_nodes)
+    floor = _PARAM_FLOOR[param]
+    hi = mean + 8.0 * std
+    lo = (mean - 8.0 * std) if floor is None else max(floor, mean - 8.0 * std)
+    vals = 0.5 * (hi - lo) * nodes + 0.5 * (hi + lo)
+    w = gl_w * np.exp(-0.5 * ((vals - mean) / std) ** 2)
+    return vals, w
+
+
+def phi_eff_multi(mu: float, sigma: float, tau_m: float, tau_ref: float, *,
+                  specs, v_th: float = V_TH, n_nodes: int = 48) -> float:
+    """Φ_LIF averaged over the INDEPENDENT JOINT truncated distribution of several cell
+    parameters (Step3b combo axes). ``specs`` = list of (param, mean, std); a spec with
+    std<=0 is a point mass at its mean. Tensor GL over the active (std>0) params, each
+    truncated to its physical support and the whole renormalized. n_nodes per active
+    dimension (use fewer for 3+ params — cost is n_nodes**k). Generalizes phi_eff_param to
+    >1 simultaneously-narrowed parameter (e.g. 'cells become more alike' across V_th AND
+    sigma together, not one at a time)."""
+    import itertools
+    base = {"mu": mu, "sigma": sigma, "tau_m": tau_m, "tau_ref": tau_ref, "v_th": v_th}
+    active = []
+    for (param, mean, std) in specs:
+        if param not in _PARAM_FLOOR:
+            raise ValueError(f"unknown param {param!r}; expected one of {sorted(_PARAM_FLOOR)}")
+        if std <= 0.0:
+            base[param] = mean
+        else:
+            vals, w = _param_grid(param, mean, std, n_nodes)
+            active.append((param, vals, w))
+    if not active:
+        return lif_rate(base["mu"], base["sigma"], base["tau_m"], base["tau_ref"], v_th=base["v_th"])
+    names = [a[0] for a in active]
+    val_grids = [a[1] for a in active]
+    w_grids = [a[2] for a in active]
+    num = 0.0
+    den = 0.0
+    for idx in itertools.product(*(range(len(v)) for v in val_grids)):
+        w = 1.0
+        d = dict(base)
+        for j, name in enumerate(names):
+            d[name] = float(val_grids[j][idx[j]])
+            w *= w_grids[j][idx[j]]
+        num += w * lif_rate(d["mu"], d["sigma"], d["tau_m"], d["tau_ref"], v_th=d["v_th"])
+        den += w
+    result = num / den if den > 0.0 else float("nan")
+    if not np.isfinite(result):
+        raise ValueError(
+            f"phi_eff_multi non-finite (num={num:.3g}, den={den:.3g}) for specs={specs} "
+            f"— a degenerate joint distribution relative to physical support.")
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Spatial core/surround patch integrator (Task 8) — applies the truncated
 # threshold heterogeneity to a finite-pulse field, core disk vs surround.

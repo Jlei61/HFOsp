@@ -27,9 +27,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.sef_hfo_lif import (  # noqa: E402
     mean_field, lif_gains, lif_rate, closed_loop_leading, TAU_ME, TREF_E, V_TH,
 )
-from src.sef_hfo_heterogeneity import phi_eff_param, mean_match_param  # noqa: E402
+from src.sef_hfo_heterogeneity import phi_eff_param, mean_match_param, phi_eff_multi  # noqa: E402
+from scipy.optimize import brentq  # noqa: E402
 
 OUT = Path("results/topic4_sef_hfo/heterogeneity/sensitivity_matrix.json")
+COMBO_OUT = Path("results/topic4_sef_hfo/heterogeneity/combo.json")
 
 # A fixed RELATIVE narrowing (coefficient of variation) applied to every parameter so the
 # leverage comparison is fair across parameters with different units/scales. The V_th values
@@ -102,6 +104,60 @@ def mu_shift_control(op, gI, dmu=1.0):
                 d_closed_loop_re_max=shifted["closed_loop_re_max"] - base["closed_loop_re_max"])
 
 
+def _combo_layer(op, gI, combo, cv, n_nodes, h=1e-2):
+    """Narrow ALL params in `combo` by relative factor `cv` (point mass if cv==0), restore
+    the rest rate nuE via a COMMON input-drive offset δ (Contract 2 control that does not
+    privilege any one intrinsic param), then report slope/curvature in that common drive
+    and the closed-loop margin. δ is the rate-matching knob; the slope axis is the same δ."""
+    muE, sE, nuE = op["muE"], op["sE"], op["nuE"]
+    specs = [(p, _nominal_mean(p, op), cv * _nominal_mean(p, op)) for p in combo]
+    f = lambda d: phi_eff_multi(muE + d, sE, TAU_ME, TREF_E, specs=specs, n_nodes=n_nodes)
+    # mean-match: common drive δ restoring nuE
+    delta = brentq(lambda d: f(d) - nuE, -12.0, 12.0, xtol=1e-7)
+    f0, fp, fm = f(delta), f(delta + h), f(delta - h)
+    slope = (fp - fm) / (2 * h)
+    curv = (fp - 2 * f0 + fm) / (h * h)
+    gE_eff = slope * TAU_ME
+    cl = closed_loop_leading(gE_eff, gI)
+    return dict(cv=cv, delta_match=float(delta), rate=f0, slope=slope, curvature=curv,
+                gE_eff=gE_eff, closed_loop_re_max=cl["re_max"], closed_loop_regime=cl["regime"],
+                closed_loop_converged=cl["converged"])
+
+
+def screen_combo(op, gI, combo, n_nodes):
+    wide = _combo_layer(op, gI, combo, CV_WIDE, n_nodes)
+    narrow = _combo_layer(op, gI, combo, CV_NARROW, n_nodes)
+    base_slope = wide["slope"]
+    return dict(
+        combo=list(combo), n_nodes=n_nodes, baseline_wide=wide, mean_matched_narrow=narrow,
+        d_slope_pure=narrow["slope"] - wide["slope"],
+        d_slope_pure_pct=(100.0 * (narrow["slope"] - wide["slope"]) / base_slope
+                          if base_slope != 0 else float("nan")),
+        d_curvature_pure=narrow["curvature"] - wide["curvature"],
+        d_closed_loop_re_max_pure=narrow["closed_loop_re_max"] - wide["closed_loop_re_max"])
+
+
+def run_combo():
+    op = mean_field(1.0)
+    gI = lif_gains(op)["I"]
+    combos = {"v_th+sigma": (("v_th", "sigma"), 48),
+              "v_th+tau_m+tau_ref": (("v_th", "tau_m", "tau_ref"), 22)}
+    rows = {name: screen_combo(op, gI, combo, n) for name, (combo, n) in combos.items()}
+    res = dict(operating_point=dict(muE=op["muE"], sE=op["sE"], nuE=op["nuE"], gI=gI),
+               cv=dict(wide=CV_WIDE, narrow=CV_NARROW), combos=rows,
+               note="Combo axes (spec §5.2 'cells more alike' = several cell params narrowed "
+                    "TOGETHER). Each combo narrows all listed params by the same relative "
+                    "factor; rate restored to nuE via a COMMON drive offset δ. d_*_pure = "
+                    "narrow − wide. Direction computed not preset (spec §7). closed_loop "
+                    "dispersion holds tau_m nominal (screen approx).")
+    COMBO_OUT.parent.mkdir(parents=True, exist_ok=True)
+    COMBO_OUT.write_text(json.dumps(res, indent=2))
+    print(f"wrote {COMBO_OUT}")
+    for name, r in rows.items():
+        print(f"  {name:20s} d_slope={r['d_slope_pure_pct']:+6.1f}%  "
+              f"d_cl_reMax={r['d_closed_loop_re_max_pure']:+.4f}")
+
+
 def run():
     op = mean_field(1.0)
     gI = lif_gains(op)["I"]
@@ -133,4 +189,7 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) > 1 and sys.argv[1] == "combo":
+        run_combo()
+    else:
+        run()

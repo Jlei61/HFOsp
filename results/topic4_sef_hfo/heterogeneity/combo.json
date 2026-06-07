@@ -1,0 +1,82 @@
+{
+  "operating_point": {
+    "muE": 8.377010357299127,
+    "sE": 4.0694866012736135,
+    "nuE": 0.0002226553708647553,
+    "gI": 0.027563150281355482
+  },
+  "cv": {
+    "wide": 0.08,
+    "narrow": 0.027
+  },
+  "combos": {
+    "v_th+sigma": {
+      "combo": [
+        "v_th",
+        "sigma"
+      ],
+      "n_nodes": 48,
+      "baseline_wide": {
+        "cv": 0.08,
+        "delta_match": -1.1008067008627658,
+        "rate": 0.00022265537096838783,
+        "slope": 0.00019285686011086332,
+        "curvature": 0.00014849351740202008,
+        "gE_eff": 0.0038571372022172664,
+        "closed_loop_re_max": -0.0520043432592976,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "mean_matched_narrow": {
+        "cv": 0.027,
+        "delta_match": -0.13134001120114905,
+        "rate": 0.00022265537082700147,
+        "slope": 0.00022448562515189213,
+        "curvature": 0.00019829259367799227,
+        "gE_eff": 0.004489712503037842,
+        "closed_loop_re_max": -0.05236063763779791,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "d_slope_pure": 3.162876504102881e-05,
+      "d_slope_pure_pct": 16.400124435732845,
+      "d_curvature_pure": 4.9799076275972194e-05,
+      "d_closed_loop_re_max_pure": -0.0003562943785003145
+    },
+    "v_th+tau_m+tau_ref": {
+      "combo": [
+        "v_th",
+        "tau_m",
+        "tau_ref"
+      ],
+      "n_nodes": 22,
+      "baseline_wide": {
+        "cv": 0.08,
+        "delta_match": -0.9432410500774668,
+        "rate": 0.0002226553702095678,
+        "slope": 0.00020388870659613994,
+        "curvature": 0.00016377249987035124,
+        "gE_eff": 0.004077774131922798,
+        "closed_loop_re_max": -0.052127689510063725,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "mean_matched_narrow": {
+        "cv": 0.027,
+        "delta_match": -0.10894878836962509,
+        "rate": 0.00022265537085794926,
+        "slope": 0.0002267244126212908,
+        "curvature": 0.00020171144236874215,
+        "gE_eff": 0.004534488252425816,
+        "closed_loop_re_max": -0.05238616799549786,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "d_slope_pure": 2.2835706025150853e-05,
+      "d_slope_pure_pct": 11.200083813559873,
+      "d_curvature_pure": 3.793894249839091e-05,
+      "d_closed_loop_re_max_pure": -0.0002584784854341368
+    }
+  },
+  "note": "Combo axes (spec \u00a75.2 'cells more alike' = several cell params narrowed TOGETHER). Each combo narrows all listed params by the same relative factor; rate restored to nuE via a COMMON drive offset \u03b4. d_*_pure = narrow \u2212 wide. Direction computed not preset (spec \u00a77). closed_loop dispersion holds tau_m nominal (screen approx)."
+}

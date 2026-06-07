@@ -354,3 +354,35 @@ def test_mean_match_param_restores_rate_for_tau_m():
     m = mean_match_param(baseline, mu, sig, TAU_ME, TREF_E, param="tau_m", std=1.0)
     got = phi_eff_param(mu, sig, TAU_ME, TREF_E, param="tau_m", mean=m, std=1.0)
     assert abs(got - baseline) < 1e-6
+
+
+def test_phi_eff_multi_reduces_to_single_param():
+    """phi_eff_multi with ONE active spec (others point masses) must match phi_eff_param —
+    the joint tensor integral reduces to the 1-D truncated average."""
+    from src.sef_hfo_heterogeneity import phi_eff_multi, phi_eff_param
+    mu, sig = 8.0, 4.0
+    a = phi_eff_multi(mu, sig, TAU_ME, TREF_E,
+                      specs=[("v_th", 19.0, 1.5), ("sigma", sig, 0.0)], n_nodes=96)
+    b = phi_eff_param(mu, sig, TAU_ME, TREF_E, param="v_th", mean=19.0, std=1.5)
+    assert abs(a - b) < 1e-7, f"{a} vs {b}"
+
+
+def test_phi_eff_multi_all_point_masses_is_lif_rate():
+    """All specs std=0 → joint point mass → plain lif_rate at those values."""
+    from src.sef_hfo_heterogeneity import phi_eff_multi
+    from src.sef_hfo_lif import lif_rate
+    got = phi_eff_multi(8.0, 4.0, TAU_ME, TREF_E,
+                        specs=[("v_th", 18.0, 0.0), ("sigma", 5.0, 0.0)])
+    assert abs(got - lif_rate(8.0, 5.0, TAU_ME, TREF_E, v_th=18.0)) < 1e-12
+
+
+def test_screen_combo_schema():
+    """Guard the combo screen's δ-match + schema (cheap: 1-param 'combo', coarse nodes)."""
+    from scripts.run_sef_hfo_hetero_sensitivity import screen_combo
+    from src.sef_hfo_lif import mean_field, lif_gains
+    op = mean_field(1.0)
+    gI = lif_gains(op)["I"]
+    r = screen_combo(op, gI, ("v_th",), n_nodes=8)
+    assert {"d_slope_pure_pct", "d_closed_loop_re_max_pure", "baseline_wide",
+            "mean_matched_narrow"} <= set(r)
+    assert np.isfinite(r["d_slope_pure_pct"]) and np.isfinite(r["d_closed_loop_re_max_pure"])
