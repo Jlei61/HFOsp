@@ -69,3 +69,17 @@ def test_closed_loop_leading_canonical_op_stable():
     assert res["re_max"] < 0.0           # stable
     assert res["re_max"] > -0.15         # ~ -0.05, not wildly off
     assert res["k_star"] < 0.3           # dominant mode near k=0 (no finite-k Hopf)
+
+
+def test_eff_gain_matches_central_difference():
+    """Reported slope/curvature must equal a finite-difference of phi_eff itself
+    (consistency check — NOT a direction claim)."""
+    from src.sef_hfo_heterogeneity import eff_gain_curvature, phi_eff_vth
+    from src.sef_hfo_lif import TAU_ME, TREF_E, V_TH
+    mu, sig, vm, vs = 6.0, 4.0, V_TH, 2.0
+    g = eff_gain_curvature(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs, h=1e-2)
+    f = lambda m: phi_eff_vth(m, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
+    slope = (f(mu + 1e-2) - f(mu - 1e-2)) / (2e-2)
+    curv = (f(mu + 1e-2) - 2 * f(mu) + f(mu - 1e-2)) / (1e-2 ** 2)
+    assert abs(g["slope"] - slope) < 1e-6
+    assert abs(g["curvature"] - curv) < 1e-4
