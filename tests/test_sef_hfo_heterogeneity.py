@@ -145,9 +145,12 @@ def test_closed_loop_leading_flags_failed_search():
     if res["n_converged"] == 0:
         assert res["converged"] is False
         assert not np.isfinite(res["re_max"]) or res["re_max"] == -np.inf
+        # the regime string itself must NOT read "stable" on a failed search
+        assert res["regime"] == "unresolved"
     else:
         # if the box happened to still catch a root, converged must agree with finiteness
         assert res["converged"] == bool(np.isfinite(res["re_max"]))
+        assert res["regime"] != "unresolved"
 
 
 def test_eff_gain_matches_central_difference():

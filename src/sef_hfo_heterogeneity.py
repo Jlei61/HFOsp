@@ -1,12 +1,19 @@
 """E-threshold heterogeneity layer for the SEF-HFO LIF rate field (spec §5.2).
 
-Effective transfer of a patch whose excitatory thresholds are spread as
-N(vth_mean, vth_std^2):  Φ_eff(μ,σ) = ∫ Φ_LIF(μ,σ; v) N(v; vth_mean, vth_std) dv.
+Effective transfer of a patch whose excitatory thresholds are spread as a
+**TRUNCATED, renormalized** Gaussian — N(vth_mean, vth_std^2) restricted to the
+physical support v_th >= V_RESET (a threshold below reset is unphysical and gives a
+negative Siegert rate):
+
+    Φ_eff(μ,σ) = ∫_{V_RESET}^∞ Φ_LIF(μ,σ; v) N(v; vth_mean, vth_std) dv
+                 / ∫_{V_RESET}^∞ N(v; vth_mean, vth_std) dv.
 
 DISCIPLINE: narrowing vth_std changes Φ_eff's slope/curvature AND (by Jensen)
 its mean level. Every experiment must pair the raw narrowing with a
 mean-matched control (mean_match_vth) — spec §5.0 Contract 2. Direction of the
-effect is COMPUTED at the operating point, never assumed (spec §7).
+effect is COMPUTED at the operating point, never assumed (spec §7). The usable
+vth_std is GAP-LIMITED by V_TH-V_RESET at the sub-reset operating point (locked
+wide=1.5 / narrow=0.5); see phi_eff_vth and spec §5.2.
 """
 from __future__ import annotations
 

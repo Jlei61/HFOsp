@@ -567,19 +567,33 @@ def closed_loop_leading(gE: float, gI: float, w_ee_mult: float = 1.0) -> dict:
     n_converged, n_modes}.
 
     ``converged`` is False if the WINNING k-mode found no root in the fixed search
-    box — in that case ``re_max`` is the -inf sentinel and the ``regime`` string would
-    spuriously read "stable".  A caller using this as a stability GATE (e.g. Task 7
-    feeding a shifted effective gain whose dominant root has left the box) MUST check
-    ``converged`` / ``n_converged`` before trusting ``re_max``.  ``n_converged`` /
-    ``n_modes`` quantifies how much of the k-grid the search actually resolved.
+    box — in that case ``re_max`` is the -inf sentinel and ``regime`` is set to
+    "unresolved" (NOT "stable"), so the regime string is safe to read on its own.
+    A caller using this as a stability GATE (e.g. Task 7 feeding a shifted effective
+    gain whose dominant root has left the box) should still prefer ``converged`` /
+    ``n_converged`` over re_max. ``n_converged`` / ``n_modes`` quantifies how much of
+    the k-grid the search actually resolved.
     """
     res = [_rightmost(float(k), gE, gI, w_ee_mult) for k in _CL_K]
     re = np.array([r[0] for r in res])
     im = np.array([r[1] for r in res])
     conv = np.array([r[2] for r in res], dtype=bool)
     j = int(np.argmax(re))
+    converged = bool(conv[j])
+    # regime is SAFE to read without separately checking ``converged``: a failed search
+    # leaves re_max at the -inf sentinel, which the ladder below would otherwise call
+    # "stable". Map that to "unresolved" so the string itself cannot mislead a caller
+    # (don't make every downstream consumer remember to read the flag).
+    if not converged:
+        regime = "unresolved"
+    elif re[j] > 1e-3:
+        regime = "unstable"
+    elif re[j] > -0.02:
+        regime = "candidate"
+    else:
+        regime = "stable"
     return dict(k_star=float(_CL_K[j]), re_max=float(re[j]), omega=float(im[j]),
                 freq_Hz=float(1000.0 * im[j] / (2 * np.pi)),
                 is_hopf=bool(_CL_K[j] > 1e-3 and im[j] > 1e-3 and re[j] > re[0] + 1e-4),
-                regime=("unstable" if re[j] > 1e-3 else "candidate" if re[j] > -0.02 else "stable"),
-                converged=bool(conv[j]), n_converged=int(conv.sum()), n_modes=int(len(_CL_K)))
+                regime=regime,
+                converged=converged, n_converged=int(conv.sum()), n_modes=int(len(_CL_K)))
