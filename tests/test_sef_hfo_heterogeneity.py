@@ -178,3 +178,50 @@ def test_mean_match_restores_baseline_rate():
                                 tau_m=TAU_ME, tau_ref=TREF_E, vth_std=0.5)         # locked narrow
     got = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm_matched, vth_std=0.5)
     assert abs(got - baseline) < 1e-6
+
+
+def test_optpoint_baseline_sits_at_self_consistent_rest():
+    """Baseline and mean-matched layers must evaluate AT the self-consistent rest nuE —
+    else slope/curvature are read off a non-rest input (review fix 2026-06-06)."""
+    from scripts.run_sef_hfo_hetero_optpoint import analyze_optpoint
+    res = analyze_optpoint(vth_std_wide=1.5, vth_std_narrow=0.5)
+    nuE = res["operating_point"]["nuE"]
+    assert abs(res["baseline"]["rate"] - nuE) < 1e-6
+    assert abs(res["mean_matched"]["rate"] - nuE) < 1e-6
+
+
+def test_optpoint_control_isolates_variance_effect():
+    """raw narrowing moves both mean-rate and shape; mean-matched holds rate at nuE.
+    Assert ONLY the control invariant (Contract 2), never the sign of the shape change
+    (spec §7 non-circularity)."""
+    from scripts.run_sef_hfo_hetero_optpoint import analyze_optpoint
+    res = analyze_optpoint(vth_std_wide=1.5, vth_std_narrow=0.5)
+    assert abs(res["mean_matched"]["rate"] - res["baseline"]["rate"]) < 1e-6
+    for layer in ("baseline", "raw_narrow", "mean_matched"):
+        assert np.isfinite(res[layer]["slope"]) and np.isfinite(res[layer]["curvature"])
+        assert np.isfinite(res[layer]["closed_loop_re_max"])
+
+
+def test_optpoint_default_op_closed_loop_converged():
+    """[2026-06-07 hardening] At the DEFAULT op every layer's closed-loop search must
+    fully resolve — converged True and n_converged == n_modes. This is the precondition
+    for trusting closed_loop_re_max as a stability readout; the script REFUSES (raises)
+    to emit a regime from a failed search rather than reporting a -inf as 'stable'."""
+    from scripts.run_sef_hfo_hetero_optpoint import analyze_optpoint
+    res = analyze_optpoint(vth_std_wide=1.5, vth_std_narrow=0.5)
+    for layer in ("baseline", "raw_narrow", "mean_matched"):
+        L = res[layer]
+        assert L["closed_loop_converged"] is True
+        assert L["closed_loop_n_converged"] == L["closed_loop_n_modes"]
+        assert L["closed_loop_regime"] != "unresolved"
+
+
+def test_optpoint_nondefault_op_knee_gate_raises():
+    """[2026-06-07 hardening] The locked std are validated ONLY at the default op. At a
+    non-default op where the std leave the reset-knee clean band, analyze_optpoint must
+    RAISE (refuse to produce a stable/unstable interpretation from a saturation-dominated
+    forced chain) rather than silently report. wide=4.0 is the saturation regime."""
+    import pytest
+    from scripts.run_sef_hfo_hetero_optpoint import analyze_optpoint
+    with pytest.raises(RuntimeError):
+        analyze_optpoint(w_ee_mult=1.2, vth_std_wide=4.0, vth_std_narrow=1.0)

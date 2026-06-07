@@ -1,0 +1,67 @@
+{
+  "operating_point": {
+    "muE": 8.377010357299127,
+    "sE": 4.0694866012736135,
+    "nuE": 0.0002226553708647553,
+    "gI": 0.027563150281355482,
+    "ratio": 1.0,
+    "w_ee_mult": 1.0,
+    "is_default": true,
+    "knee_share_wide": 0.00291817481050741,
+    "knee_share_narrow": 4.6420061383938955e-23
+  },
+  "params": {
+    "vth_std_wide": 1.5,
+    "vth_std_narrow": 0.5,
+    "knee_gate": 0.05
+  },
+  "baseline": {
+    "vth_mean": 18.97973607840528,
+    "vth_std": 1.5,
+    "rate": 0.00022265537086539622,
+    "slope": 0.0002004799076668444,
+    "curvature": 0.00015782735070897155,
+    "gE_eff": 0.004009598153336888,
+    "closed_loop_re_max": -0.05208947063529799,
+    "closed_loop_k_star": 0.0,
+    "closed_loop_regime": "stable",
+    "closed_loop_converged": true,
+    "closed_loop_n_converged": 31,
+    "closed_loop_n_modes": 31
+  },
+  "raw_narrow": {
+    "vth_mean": 18.97973607840528,
+    "vth_std": 0.5,
+    "rate": 8.765974408323618e-05,
+    "slope": 9.889493607478906e-05,
+    "curvature": 0.00010009157021923735,
+    "gE_eff": 0.001977898721495781,
+    "closed_loop_re_max": -0.050992815018734435,
+    "closed_loop_k_star": 0.0,
+    "closed_loop_regime": "stable",
+    "closed_loop_converged": true,
+    "closed_loop_n_converged": 31,
+    "closed_loop_n_modes": 31
+  },
+  "mean_matched": {
+    "vth_mean": 18.113809299912795,
+    "vth_std": 0.5,
+    "rate": 0.000222655370864755,
+    "slope": 0.00022638684857963426,
+    "curvature": 0.00020104760940634677,
+    "gE_eff": 0.004527736971592686,
+    "closed_loop_re_max": -0.052382315881847885,
+    "closed_loop_k_star": 0.0,
+    "closed_loop_regime": "stable",
+    "closed_loop_converged": true,
+    "closed_loop_n_converged": 31,
+    "closed_loop_n_modes": 31
+  },
+  "interpretation": {
+    "note": "All layers referenced to the self-consistent rest nuE (baseline & mean_matched sit AT nuE; raw_narrow carries the Jensen shift). closed_loop_re_max is the FULL 2\u00d72 E/I stability (spec \u00a72C), not an E\u2192E proxy. Direction computed, not preset (spec \u00a77). mean_matched \u2212 baseline = PURE variance effect; raw \u2212 mean_matched = the Jensen mean shift alone. closed_loop_converged MUST be true for re_max to be meaningful (a failed search yields regime='unresolved').",
+    "d_slope_pure": 2.5906940912789867e-05,
+    "d_slope_pure_pct": 12.922462512224305,
+    "d_curvature_pure": 4.322025869737522e-05,
+    "d_closed_loop_re_max_pure": -0.00029284524654989846
+  }
+}
