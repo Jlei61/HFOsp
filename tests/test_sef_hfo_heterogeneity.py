@@ -57,3 +57,15 @@ def test_phi_eff_quadrature_matches_dense_average():
     dense = float(np.sum(w * np.array([lif_rate(mu, sig, TAU_ME, TREF_E, v_th=v) for v in grid])))
     gh = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
     assert abs(gh - dense) < 1e-4
+
+
+def test_closed_loop_leading_canonical_op_stable():
+    """Canonical white-noise operating point is robustly STABLE.
+    Framework banner: max Re λ≈−0.05, k=0. Locks the promotion."""
+    from src.sef_hfo_lif import mean_field, lif_gains, closed_loop_leading
+    op = mean_field(1.0)
+    g = lif_gains(op)
+    res = closed_loop_leading(g["E"], g["I"])
+    assert res["re_max"] < 0.0           # stable
+    assert res["re_max"] > -0.15         # ~ -0.05, not wildly off
+    assert res["k_star"] < 0.3           # dominant mode near k=0 (no finite-k Hopf)

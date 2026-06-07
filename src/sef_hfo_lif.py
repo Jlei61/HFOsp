@@ -495,3 +495,64 @@ def classify_response(ext: np.ndarray, front: np.ndarray,
     else:
         lbl = "extinction"
     return lbl, dict(max_ext=max_ext, adv_mm=adv, returned=bool(returned), dur_ms=dur)
+
+
+# ---------------------------------------------------------------------------
+# 2×2 closed-loop dispersion (promoted from scripts/sef_hfo_lif_dispersion_closure.py)
+# ---------------------------------------------------------------------------
+
+_CL_DELAY: float = 1.0                          # conduction delay (ms), matches step0a
+_CL_K = np.linspace(0.0, 3.0, 31)               # spatial-mode grid (1/mm)
+
+
+def _ghat(k: float, ell: float) -> float:
+    """Gaussian kernel Fourier amplitude along one axis (k_perp=0)."""
+    return np.exp(-0.5 * ell * ell * k * k)
+
+
+def _char_det(lam, k, gE, gI, w_ee_mult):
+    """2×2 rate-dispersion determinant at spatial mode k."""
+    H = lambda ts: np.exp(-lam * _CL_DELAY) / (1 + lam * ts)
+    WEE = (C_EE * W_EE * w_ee_mult) * _ghat(k, ELL_PAR)
+    WEI = (C_EI * W_EI) * _ghat(k, L_INH)
+    WIE = (C_IE * W_IE) * _ghat(k, L_INH)
+    WII = (C_II * W_II) * _ghat(k, L_INH)
+    a = (1 + TAU_ME * lam) - gE * WEE * H(TAU_AMPA)
+    b = gE * WEI * H(TAU_GABA)
+    c = -gI * WIE * H(TAU_AMPA)
+    d = (1 + TAU_MI * lam) + gI * WII * H(TAU_GABA)
+    return a * d - b * c
+
+
+def _rightmost(k, gE, gI, w_ee_mult):
+    best = (-np.inf, 0.0)
+    def fr(v):
+        z = _char_det(complex(v[0], v[1]), k, gE, gI, w_ee_mult)
+        return [z.real, z.imag]
+    for r0 in np.linspace(-0.5, 0.3, 12):
+        for i0 in np.linspace(0.0, 0.6, 12):
+            s, _info, ier, _msg = fsolve(fr, [r0, i0], full_output=True)
+            if (ier == 1 and -0.5 - 1e-6 <= s[0] <= 0.3 + 1e-6 and abs(s[1]) <= 0.6
+                    and abs(complex(*fr(s))) < 1e-7 and s[0] > best[0]):
+                best = (float(s[0]), abs(float(s[1])))
+    return best
+
+
+def closed_loop_leading(gE: float, gI: float, w_ee_mult: float = 1.0) -> dict:
+    """Leading eigenvalue of the 2×2 LIF rate-dispersion relation.
+
+    Computes max over spatial mode k of Re λ_max, including conduction delay +
+    AMPA/GABA synaptic low-pass. gE and gI are dimensionless gains (∂ν/∂μ·τ_m)
+    as returned by ``lif_gains``. re_max < 0 means closed-loop stable (spec §2C).
+    NOT an E→E-only proxy — this is the full 2×2 E/I stability readout.
+
+    Returns dict: {k_star, re_max, omega, freq_Hz, is_hopf, regime}
+    """
+    res = [_rightmost(float(k), gE, gI, w_ee_mult) for k in _CL_K]
+    re = np.array([r[0] for r in res])
+    im = np.array([r[1] for r in res])
+    j = int(np.argmax(re))
+    return dict(k_star=float(_CL_K[j]), re_max=float(re[j]), omega=float(im[j]),
+                freq_Hz=float(1000.0 * im[j] / (2 * np.pi)),
+                is_hopf=bool(_CL_K[j] > 1e-3 and im[j] > 1e-3 and re[j] > re[0] + 1e-4),
+                regime=("unstable" if re[j] > 1e-3 else "candidate" if re[j] > -0.02 else "stable"))
