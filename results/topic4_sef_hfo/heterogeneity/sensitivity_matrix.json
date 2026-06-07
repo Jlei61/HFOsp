@@ -1,0 +1,183 @@
+{
+  "operating_point": {
+    "muE": 8.377010357299127,
+    "sE": 4.0694866012736135,
+    "nuE": 0.0002226553708647553,
+    "gI": 0.027563150281355482
+  },
+  "cv": {
+    "wide": 0.08,
+    "narrow": 0.027
+  },
+  "params": {
+    "v_th": {
+      "param": "v_th",
+      "nominal_mean": 18.0,
+      "cv_wide": 0.08,
+      "cv_narrow": 0.027,
+      "std_wide": 1.44,
+      "std_narrow": 0.486,
+      "rate_insensitive": false,
+      "baseline_wide": {
+        "mean": 18.905646775703357,
+        "std": 1.44,
+        "rate": 0.0002226553708652405,
+        "slope": 0.00020242336768418667,
+        "curvature": 0.00016088157151427328,
+        "gE_eff": 0.004048467353683733,
+        "closed_loop_re_max": -0.05211124881014299,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "mean_matched_narrow": {
+        "mean": 18.10756686747069,
+        "std": 0.486,
+        "rate": 0.00022265537086475537,
+        "slope": 0.0002266054267981637,
+        "curvature": 0.00020143524901805425,
+        "gE_eff": 0.004532108535963274,
+        "closed_loop_re_max": -0.052384810081487335,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "d_slope_pure": 2.418205911397704e-05,
+      "d_slope_pure_pct": 11.946278431502522,
+      "d_curvature_pure": 4.055367750378097e-05,
+      "d_closed_loop_re_max_pure": -0.0002735612713443414
+    },
+    "tau_m": {
+      "param": "tau_m",
+      "nominal_mean": 20.0,
+      "cv_wide": 0.08,
+      "cv_narrow": 0.027,
+      "std_wide": 1.6,
+      "std_narrow": 0.54,
+      "rate_insensitive": false,
+      "baseline_wide": {
+        "mean": 20.128782991620582,
+        "std": 1.6,
+        "rate": 0.0002226553708647528,
+        "slope": 0.0002304614695554247,
+        "curvature": 0.0002083396129478666,
+        "gE_eff": 0.004609229391108494,
+        "closed_loop_re_max": -0.052428876378146874,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "mean_matched_narrow": {
+        "mean": 20.014584153255832,
+        "std": 0.54,
+        "rate": 0.00022265537086273285,
+        "slope": 0.00023046206869319156,
+        "curvature": 0.00020834139415434232,
+        "gE_eff": 0.004609241373863831,
+        "closed_loop_re_max": -0.05242888323458808,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "d_slope_pure": 5.991377668513112e-10,
+      "d_slope_pure_pct": 0.00025997307402711927,
+      "d_curvature_pure": 1.7812064757177781e-09,
+      "d_closed_loop_re_max_pure": -6.856441206459785e-09
+    },
+    "tau_ref": {
+      "param": "tau_ref",
+      "nominal_mean": 2.0,
+      "cv_wide": 0.08,
+      "cv_narrow": 0.027,
+      "std_wide": 0.16,
+      "std_narrow": 0.054,
+      "rate_insensitive": false,
+      "baseline_wide": {
+        "mean": 2.0000057000105302,
+        "std": 0.16,
+        "rate": 0.00022265537086475524,
+        "slope": 0.00023046214399577853,
+        "curvature": 0.0002083416186286443,
+        "gE_eff": 0.0046092428799155705,
+        "closed_loop_re_max": -0.05242888409633882,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "mean_matched_narrow": {
+        "mean": 2.000000648663143,
+        "std": 0.054,
+        "rate": 0.00022265537086478665,
+        "slope": 0.0002304621437366,
+        "curvature": 0.0002083416173205544,
+        "gE_eff": 0.004609242874732,
+        "closed_loop_re_max": -0.05242888409337183,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "d_slope_pure": -2.5917852933265983e-13,
+      "d_slope_pure_pct": -1.1246034808103118e-07,
+      "d_curvature_pure": -1.308089921103761e-12,
+      "d_closed_loop_re_max_pure": 2.966987766583884e-12
+    },
+    "sigma": {
+      "param": "sigma",
+      "nominal_mean": 4.0694866012736135,
+      "cv_wide": 0.08,
+      "cv_narrow": 0.027,
+      "std_wide": 0.3255589281018891,
+      "std_narrow": 0.10987613823438756,
+      "rate_insensitive": false,
+      "baseline_wide": {
+        "mean": 3.982517855156168,
+        "std": 0.3255589281018891,
+        "rate": 0.0002226553708652907,
+        "slope": 0.00021614184347572025,
+        "curvature": 0.0001870473366141377,
+        "gE_eff": 0.004322836869514405,
+        "closed_loop_re_max": -0.052265851733981745,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "mean_matched_narrow": {
+        "mean": 4.059436035756626,
+        "std": 0.10987613823438756,
+        "rate": 0.00022265537171348225,
+        "slope": 0.000228609941618546,
+        "curvature": 0.00020560687392554532,
+        "gE_eff": 0.00457219883237092,
+        "closed_loop_re_max": -0.05240770203671684,
+        "closed_loop_regime": "stable",
+        "closed_loop_converged": true
+      },
+      "d_slope_pure": 1.2468098142825752e-05,
+      "d_slope_pure_pct": 5.768479597624198,
+      "d_curvature_pure": 1.855953731140763e-05,
+      "d_closed_loop_re_max_pure": -0.00014185030273509286
+    }
+  },
+  "mu_shift_control": {
+    "dmu": 1.0,
+    "baseline": {
+      "mean": 18.0,
+      "std": 0.0,
+      "rate": 0.00022265537086475694,
+      "slope": 0.00023046214370321064,
+      "curvature": 0.000208341617152232,
+      "gE_eff": 0.004609242874064213,
+      "closed_loop_re_max": -0.05242888409299072,
+      "closed_loop_regime": "stable",
+      "closed_loop_converged": true
+    },
+    "shifted": {
+      "mean": 18.0,
+      "std": 0.0,
+      "rate": 0.0005857395966218931,
+      "slope": 0.0005269262141728754,
+      "curvature": 0.0003950702705550393,
+      "gE_eff": 0.010538524283457508,
+      "closed_loop_re_max": -0.0399897442687322,
+      "closed_loop_regime": "stable",
+      "closed_loop_converged": true
+    },
+    "d_rate": 0.00036308422575713614,
+    "d_slope": 0.0002964640704696648,
+    "d_closed_loop_re_max": 0.012439139824258524
+  },
+  "note": "Non-spatial leverage screen (spec \u00a73 \u0398_cell, Step3b). Each parameter's spread narrowed by the same relative factor (CV wide\u2192narrow), mean-matched to nuE (Contract 2). d_*_pure = mean_matched_narrow \u2212 baseline_wide = the PURE spread effect. Direction computed not preset (spec \u00a77). closed_loop dispersion holds tau_m nominal (screen approximation). Leverage = |d_slope_pure_pct| and |d_closed_loop_re_max_pure| materially above the V_th baseline; only leverage-positive packs proceed to the (expensive) spatial finite-pulse gate."
+}
