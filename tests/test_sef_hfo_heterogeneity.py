@@ -258,3 +258,26 @@ def test_patch_analysis_runs_both_layers():
         integrate_hetero_field(mean_field(1.0), lambda t: 0.0,
                                x_patch=0.0, r_patch=2.0, vth_std_core=0.5,
                                vth_mean_core=18.0)  # missing surround kwargs → TypeError
+
+
+def test_hetero_field_can_run_away_positive_control():
+    """NON-VACUOUSNESS guard for the Task-9 null (2026-06-07). The first-round finding is
+    that the locked heterogeneity manipulation (1.5→0.5, mean-matched) keeps every layer
+    self_limited_propagation. That null is only meaningful if integrate_hetero_field CAN
+    produce a non-self-limited response at all. Push a strongly excitable core (low
+    vth_mean_core + strong pulse) and confirm it goes runaway — else a future refactor
+    that accidentally made the integrator always self-limit would silently make the null
+    vacuous."""
+    from src.sef_hfo_lif import mean_field, classify_response, V_TH
+    from src.sef_hfo_heterogeneity import integrate_hetero_field
+    from src.sef_hfo_field import _grid
+    op = mean_field(1.0)
+    X, Y = _grid(96, 12.0)
+    pulse = lambda t: (60.0 * (((X + 3) ** 2 + Y ** 2) <= 2.0 ** 2) if t < 30.0 else 0.0)
+    ext, front = integrate_hetero_field(
+        op, pulse, x_patch=-3.0, r_patch=2.0, vth_mean_core=12.5, vth_std_core=0.5,
+        vth_mean_surround=V_TH, vth_std_surround=1.5, t_max=70.0)
+    label, _ = classify_response(ext, front)
+    assert label in ("runaway", "global_synchronous"), (
+        f"integrator could not produce a non-self-limited response (got {label}); "
+        f"the Task-9 'self-limit holds' null would be vacuous")
