@@ -83,3 +83,16 @@ def test_eff_gain_matches_central_difference():
     curv = (f(mu + 1e-2) - 2 * f(mu) + f(mu - 1e-2)) / (1e-2 ** 2)
     assert abs(g["slope"] - slope) < 1e-6
     assert abs(g["curvature"] - curv) < 1e-4
+
+
+def test_mean_match_restores_baseline_rate():
+    """After mean-matching, Φ_eff at the op input equals the baseline rate,
+    even though vth_std changed. This is Contract 2's whole point."""
+    from src.sef_hfo_heterogeneity import mean_match_vth, phi_eff_vth
+    from src.sef_hfo_lif import TAU_ME, TREF_E, V_TH
+    mu, sig = 6.0, 4.0
+    baseline = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=V_TH, vth_std=4.0)
+    vm_matched = mean_match_vth(target_rate=baseline, mu=mu, sigma=sig,
+                                tau_m=TAU_ME, tau_ref=TREF_E, vth_std=1.0)
+    got = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm_matched, vth_std=1.0)
+    assert abs(got - baseline) < 1e-6

@@ -30,7 +30,7 @@ def phi_eff_vth(mu: float, sigma: float, tau_m: float, tau_ref: float,
     if vth_std <= 0.0:
         return lif_rate(mu, sigma, tau_m, tau_ref, v_th=vth_mean)
     vths = vth_mean + vth_std * _GH_NODES
-    rates = np.array([lif_rate(mu, sigma, tau_m, tau_ref, v_th=float(v)) for v in vths])
+    rates = np.array([max(0.0, lif_rate(mu, sigma, tau_m, tau_ref, v_th=float(v))) for v in vths])
     return float(np.sum(_GH_WEIGHTS * rates) / _GH_WSUM)
 
 
