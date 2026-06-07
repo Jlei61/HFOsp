@@ -19,8 +19,10 @@ from __future__ import annotations
 import numpy as np
 from scipy.stats import spearmanr
 
+from src.lagpat_rank_audit import mask_phantom_ranks
 
-def align_template_events(masked, labels):
+
+def align_template_events(masked, labels, *, flip_threshold=0.0, min_overlap=3):
     """Flip reverse-template events onto a common source->sink axis.
 
     masked: (n_ch, n_ev) per-event normalized propagation rank (0=source..1=sink, NaN=absent).
@@ -29,6 +31,11 @@ def align_template_events(masked, labels):
     The two largest clusters' centroids are compared; if anti-correlated (reversal), the
     second cluster's events are flipped (rank -> 1-rank) so both templates' sources coincide.
     Returns (aligned, meta). No per-window decision — alignment is global.
+
+    flip_threshold / min_overlap: defaults (0.0, 3) preserve the read-back behaviour
+    (flip iff centroid corr < 0 with >=3 overlapping channels). The de novo layer passes a
+    STRICTER flip_threshold (e.g. -0.2) so a direction-pure window — whose arbitrary KMeans
+    split yields two genuinely positively-correlated halves — is never spuriously flipped/blurred.
     """
     masked = np.asarray(masked, dtype=float)
     labels = np.asarray(labels)
@@ -41,10 +48,10 @@ def align_template_events(masked, labels):
         c0 = np.nanmean(masked[:, labels == l0], axis=1)
         c1 = np.nanmean(masked[:, labels == l1], axis=1)
     ok = np.isfinite(c0) & np.isfinite(c1)
-    corr = spearmanr(c0[ok], c1[ok]).correlation if ok.sum() >= 3 else 0.0
+    corr = spearmanr(c0[ok], c1[ok]).correlation if ok.sum() >= min_overlap else 0.0
     corr = float(corr) if corr == corr else 0.0
     aligned = masked.copy()
-    reversed_ = corr < 0
+    reversed_ = corr < flip_threshold
     if reversed_:
         flip = labels == l1
         aligned[:, flip] = 1.0 - aligned[:, flip]
@@ -129,6 +136,164 @@ def window_endpoint_overlaps(aligned, bools, full_axis, full_count, window_ev, k
     return {"source_jaccard": jaccard(w_src, f_src),
             "sink_jaccard": jaccard(w_snk, f_snk),
             "endpoint_jaccard": jaccard(w_src | w_snk, f_src | f_snk),
+            "rate_topk_jaccard": jaccard(w_rate, f_rate),
+            "n_common_channels": int(common.size)}
+
+
+# ---------------------------------------------------------------------------
+# De novo layer (LR-7): forbid the global-label peek. Each window re-clusters and
+# orients using ONLY its own events. Only the window axis changes vs read-back; rate,
+# the common mask, and the null structure are identical -> global vs de novo EXCESS is
+# a PAIRED contrast = the cost of forbidding the peek. Primary metric stays SIGNED.
+# ---------------------------------------------------------------------------
+
+def _fast_2means(X, n_init=3, max_iter=20, rng_seed=0):
+    """Numpy-only k=2 KMeans for the per-window de novo clustering. sklearn's KMeans carries
+    ~15ms Python-level overhead per call; the de novo null makes ~10^5 tiny k=2 calls, so this
+    hand-rolled version (farthest-point init + Lloyd, best-of-n_init inertia) is ~100x faster.
+    Faithfulness to the global sklearn clustering is NOT required: de novo discovery is a
+    window-internal operation and any reasonable 2-means is a valid discovery attempt; the null
+    re-runs the SAME routine, so it is self-consistent."""
+    X = np.asarray(X, dtype=float)
+    n = X.shape[0]
+    if n < 2:
+        return np.zeros(n, dtype=int)
+    rng = np.random.default_rng(rng_seed)
+    best_labels, best_inertia = np.zeros(n, dtype=int), np.inf
+    for _ in range(n_init):
+        i0 = int(rng.integers(n))
+        i1 = int(np.argmax(((X - X[i0]) ** 2).sum(1)))      # farthest point from a random seed
+        C = np.array([X[i0], X[i1]], dtype=float)
+        labels = np.zeros(n, dtype=int)
+        for it in range(max_iter):
+            d0 = ((X - C[0]) ** 2).sum(1)
+            d1 = ((X - C[1]) ** 2).sum(1)
+            new = (d1 < d0).astype(int)
+            if it > 0 and np.array_equal(new, labels):
+                break
+            labels = new
+            for c in (0, 1):
+                m = labels == c
+                if m.any():
+                    C[c] = X[m].mean(0)
+        inertia = float(np.minimum(((X - C[0]) ** 2).sum(1), ((X - C[1]) ** 2).sum(1)).sum())
+        if inertia < best_inertia:
+            best_inertia, best_labels = inertia, labels.copy()
+    return best_labels
+
+
+def denovo_window_axis(window_ranks, window_bools, *, min_cluster_events=4,
+                       flip_threshold=-0.2, min_overlap=3, random_state=0):
+    """Window source->sink axis discovered FROM SCRATCH (no global labels).
+
+    Re-cluster THIS window's events into k=2, self-align (larger sub-cluster anchors the
+    direction; flip the smaller only on genuine anti-correlation), return per-channel mean
+    normalized rank. The small-m fallback lives HERE (not in the runner) so count-matched
+    null draws hit the identical path. Direction-pure windows must not blur: an arbitrary
+    2-way split of one-direction events gives two positively-correlated centroids -> no flip;
+    the stricter flip_threshold guards against small-window noise spuriously anti-correlating.
+    """
+    window_ranks = np.asarray(window_ranks, dtype=float)
+    window_bools = np.asarray(window_bools) > 0
+    masked = mask_phantom_ranks(window_ranks, window_bools, normalize=True)
+    m = masked.shape[1]
+    if m < min_cluster_events:
+        with np.errstate(invalid="ignore"):
+            return np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in masked])
+    # event-median imputed features (== build_masked_kmeans_features) but reuse `masked` (no 2nd mask)
+    features = np.where(np.isnan(masked), 0.5, masked).T
+    labels = _fast_2means(features, n_init=3, rng_seed=random_state)
+    aligned, _ = align_template_events(masked, labels, flip_threshold=flip_threshold,
+                                       min_overlap=min_overlap)
+    with np.errstate(invalid="ignore"):
+        return np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in aligned])
+
+
+def window_recovery_paired(aligned_global, ranks, bools, full_axis, full_count, window_ev,
+                           *, min_ch=3, **denovo_kwargs):
+    """Score ONE window index set under BOTH axes (advisor: draw once, score both).
+
+    Global arm = the precomputed full-recording aligned axis (read-back; reproduces the main
+    result). De novo arm = the window's self-discovered axis. Rate and the common-channel mask
+    are identical for both (alignment never changes the NaN pattern), so global vs de novo EXCESS
+    are paired on the same events. Primary de novo metric is SIGNED; |.| reported alongside.
+    """
+    window_ev = np.asarray(window_ev, dtype=int)
+    aligned_global = np.asarray(aligned_global, dtype=float)
+    ranks = np.asarray(ranks, dtype=float)
+    bools_w = np.asarray(bools)[:, window_ev] > 0
+    full_axis = np.asarray(full_axis, dtype=float)
+    full_count = np.asarray(full_count, dtype=float)
+
+    sub_g = aligned_global[:, window_ev]
+    with np.errstate(invalid="ignore"):
+        win_axis_global = np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in sub_g])
+    win_axis_denovo = denovo_window_axis(ranks[:, window_ev], bools_w, **denovo_kwargs)
+    win_count = bools_w.sum(axis=1).astype(float)
+    # common mask from the global axis (definitionally identical to the main runner)
+    common = np.isfinite(win_axis_global) & np.isfinite(full_axis)
+    win_count_c = np.where(common, win_count, np.nan)
+    full_count_c = np.where(common, full_count, np.nan)
+    t_denovo = _spearman(win_axis_denovo, full_axis, min_ch)
+    return {"template_repro_global": _spearman(win_axis_global, full_axis, min_ch),
+            "template_repro_denovo_signed": t_denovo,
+            "template_repro_denovo_abs": abs(t_denovo) if t_denovo == t_denovo else float("nan"),
+            "rate_repro": _spearman(win_count_c, full_count_c, min_ch),
+            "n_events": int(window_ev.size),
+            "n_common_channels": int(common.sum())}
+
+
+def count_matched_null_gap_paired(aligned_global, ranks, bools, full_axis, full_count, m, n_ev, rng,
+                                  *, n_null=100, min_ch=3, **denovo_kwargs):
+    """Time-scrambled null for BOTH arms on the SAME draws. Returns medians of
+    (global gap, de novo SIGNED gap, de novo ABS gap), each = template_repro - rate_repro.
+    The de novo arm re-clusters every random draw through the same pipeline (incl. small-m
+    fallback), so it subtracts 'de novo clustering instability at M events', not just the
+    estimator-smoothness floor."""
+    gg, gd, gda = [], [], []
+    for _ in range(n_null):
+        ev = rng.choice(n_ev, size=min(m, n_ev), replace=False)
+        rep = window_recovery_paired(aligned_global, ranks, bools, full_axis, full_count, ev,
+                                     min_ch=min_ch, **denovo_kwargs)
+        if not np.isfinite(rep["rate_repro"]):
+            continue
+        if np.isfinite(rep["template_repro_global"]):
+            gg.append(rep["template_repro_global"] - rep["rate_repro"])
+        if np.isfinite(rep["template_repro_denovo_signed"]):
+            gd.append(rep["template_repro_denovo_signed"] - rep["rate_repro"])
+            gda.append(rep["template_repro_denovo_abs"] - rep["rate_repro"])
+    return (float(np.median(gg)) if gg else float("nan"),
+            float(np.median(gd)) if gd else float("nan"),
+            float(np.median(gda)) if gda else float("nan"))
+
+
+def window_endpoint_union_denovo(aligned_global, ranks, bools, full_axis, full_count, window_ev,
+                                 *, k=2, min_ch=3, **denovo_kwargs):
+    """Polarity-FREE endpoint secondary (de novo): does the window recover the full
+    source-UNION-sink endpoint SET? The union of both extremes is invariant to axis polarity,
+    so de novo's sign ambiguity is irrelevant here. Compared against rate top-(2k) over the
+    same common channels (matched set sizes). NaN if < max(min_ch, 2k+1) common channels."""
+    from src.sef_hfo_soz_localization import topk_indices, jaccard
+
+    window_ev = np.asarray(window_ev, dtype=int)
+    ranks = np.asarray(ranks, dtype=float)
+    bools_w = np.asarray(bools)[:, window_ev] > 0
+    full_axis = np.asarray(full_axis, dtype=float)
+    full_count = np.asarray(full_count, dtype=float)
+    win_axis = denovo_window_axis(ranks[:, window_ev], bools_w, **denovo_kwargs)
+    win_count = bools_w.sum(axis=1).astype(float)
+    common = np.where(np.isfinite(win_axis) & np.isfinite(full_axis))[0]
+    nan = {"endpoint_union_jaccard": float("nan"), "rate_topk_jaccard": float("nan"),
+           "n_common_channels": int(common.size)}
+    if common.size < max(min_ch, 2 * k + 1):
+        return nan
+    fa, wa = full_axis[common], win_axis[common]
+    fc, wc = full_count[common], win_count[common]
+    f_union = topk_indices(fa, k, largest=False) | topk_indices(fa, k, largest=True)
+    w_union = topk_indices(wa, k, largest=False) | topk_indices(wa, k, largest=True)
+    f_rate = topk_indices(fc, 2 * k, largest=True)
+    w_rate = topk_indices(wc, 2 * k, largest=True)
+    return {"endpoint_union_jaccard": jaccard(w_union, f_union),
             "rate_topk_jaccard": jaccard(w_rate, f_rate),
             "n_common_channels": int(common.size)}
 

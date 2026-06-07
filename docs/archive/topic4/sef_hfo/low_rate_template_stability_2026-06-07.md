@@ -99,6 +99,76 @@
 
 - ✓ count-matched null + M-分级 + common-channel 公平版已正式并入 runner 输出(`cohort.json` 含 `median_low_excess_NULLCORRECTED`/`wilcoxon_p_excess_low`/`m_graded_cohort_excess`)。
 - ✓ **(secondary，已跑) 端点集合是否漂**：见上"Secondary"节——方向一致但离散端点是粗读数（~40% 被试 EXCESS=0 分辨不开），真正稳健信号在整条轴排序。
-- **(下一层验证，不否定当前结果) de novo short-window discovery**：低事件窗里**不借用全程模板标签**、单独用这段时间的群体事件**重新算传播排序、重新聚类**，能不能恢复出同一模板 / 同一组源-汇端点。更难（低事件窗事件可能不够、KMeans 不稳），更接近"短时记录能否独立发现模板"。是**下一层**，不是用来推翻 read-back 结果。
+- ✓ **(下一层验证，已跑，NULL) de novo short-window discovery**：见下"De novo 那层（LR-7）"节。
 - 30min 窗敏感性（`--window-min 30`）；per-template 事件预算更公平版；"模板缺失通道按不可复现惩罚"更狠 sensitivity。
 - 临床意义对接：这个时间稳定性差异是否帮助"短时记录也能定位"——需在独立队列预注册检验。
+
+---
+
+## De novo 那层（LR-7，压力测试，NULL）
+
+**日期**：2026-06-07
+**代码**：`src/low_rate_template_stability.py`（`denovo_window_axis`, `_fast_2means`, `window_recovery_paired`, `count_matched_null_gap_paired`）+ `scripts/run_low_rate_denovo.py` + `scripts/plot_low_rate_denovo.py` + `tests/test_low_rate_denovo.py`（17 tests 全绿）。
+**结果**：`results/topic4_sef_hfo/low_rate_template_stability/{cohort_denovo.json, per_subject_denovo/*.json, figures/denovo_recovery_vs_event_count.png}`。
+
+### 这层在测什么（不是什么）
+
+和主结果（read-back）的**唯一区别**：主结果里每个低事件窗"借用全程逐事件归属"来定方向（知道答案）；这一层**禁止看答案**——每个窗自己对窗内事件重新分两堆、自己定哪头是源头（更大的那堆定向、更小的堆翻转到同一轴），不依赖全程标签。其余全不变：rate 基线、common-channel 掩码、count-matched null 结构、结果文件。
+
+这样 global（read-back）和 de novo 在**同一批窗、同一批随机抽样**上配对算——两者之差 = **不让偷看的代价（peek_cost）**。
+
+### 朴素话结论
+
+**测了什么**：低事件窗里，"不知道全程模板、自己重聚类"能不能发现出和全程一样的传播方向，并且比"通道发放计数排名"更靠谱。
+
+**怎么测的**：主结果 read-back 在 +0.131，说明"知道全程答案时读回是靠谱的"。这一层把"知道答案"拿掉，看从零发现能不能一样好。预先锁定：带符号的方向恢复是主指标（同口径可以和 +0.131 对比）；另报 |·|（只问轴线不问哪头是源）和无序端点并集；主定义"两者之差 = peek cost"。
+
+**揭示了什么**：
+
+- **绝对恢复水平（能不能发现）**：低事件窗里 read-back = 0.88 >> de novo 带方向 = 0.52，而且 de novo 带方向（0.52）在 epilepsiae 里连发放计数（0.66）都不如——**从零发现是这三者里最差的读数**。
+- **配对 RAW 差（更直白的指标）**：de novo 带方向 - 计数，epilepsiae 中位 **−0.167**，ALL **−0.069**。de novo **输给计数**。
+- **null 校正（扣掉"小样本聚类本来就不稳"的部分）**：ALL +0.022（16/28，p=0.104，**NULL**）；epilepsiae +0.007（8/15，p=0.598，**NULL**）；yuquan +0.143（8/13，p=0.025，但见下方红旗）。
+- **一致性检验通过**：同一 pipeline 的 global（read-back）臂，epilepsiae 一致性 +0.156 vs 主结果 +0.153，误差 0.003——**不是 pipeline 回归**，de novo 劣势是真实差距。
+
+**诚实主句**：低事件窗里，从零自己发现传播模板的方向，**没有比发放计数更靠谱**，带方向指标在 epilepsiae 里 RAW 差 −0.167（反而不如计数）；null 扣完约为 0 意味着"从零聚类的劣势中大头是通用的小样本聚类不稳，不是额外时间漂移"。这是对 read-back 主结果的**压力测试不是推翻**——read-back 的优势依赖"已知全程模板"，这是真实的认知门槛。
+
+### 关键数字
+
+| 队列 | 绝对水平 low（read-back / de novo signed / rate） | RAW 配对差（de novo - rate） | EXCESS（扣 null） | p |
+|---|---|---|---|---|
+| ALL (n=28) | 0.88 / 0.52 / 0.70 | −0.069 | +0.022 (16/28) | 0.104 (NULL) |
+| epilepsiae (n=15) | 0.83 / **0.36** / 0.66 | **−0.167** | +0.007 (8/15) | 0.598 (NULL) |
+| yuquan (n=13) | 0.89 / 0.79 / 0.78 | +0.002 | +0.143 (8/13) | 0.025 ⚠️ |
+
+⚠️ **yuquan p=0.025 是伪正结果**：去掉 gaolan 和 huanghanwen 后中位 +0.143 → +0.021、p 0.025 → 0.087（NULL，重算确认）。这两个被试的大 excess 来源是 **rate_repro 崩溃**（gaolan low 窗 rate_repro 中位 −0.34，huanghanwen +0.05）——rate 失灵不等于 de novo 成功。加之 yuquan 仅单 seed、每被试低档窗 4-11 个。三重脆弱。
+
+**Peek cost（不让偷看的代价，配对中位）**：epilepsiae +0.104，ALL +0.004（yuquan 平）——对 epilepsiae 多天记录，拿走全程模板标签、低事件窗几乎全吃掉 read-back 的优势。
+
+**极化（polarity）分解**：de novo |·|（只问轴线） = 0.64 > de novo signed = 0.52，gap = 0.12（低档）→ 0.02（高档）。约 11.7% 的窗 signed < 0 且 |·| > 0.5（翻了方向），这些窗集中在有正反两套模板的被试（reversed=True，13.0% vs reversed=False 2.2%）、且集中在**低事件数**（中位 66 vs 全窗 156）——少事件 → 反向模板半数运气偷到大堆 → 方向认反但轴线本身还可以。这是真实的**方向歧义**，不是 flip 代码 bug（direction-pure 被试 1150/922 该现象近零）。
+
+**M-分级 de novo signed excess**：
+`≤2(分辨不开) −0.20` → `3-4 −0.05` → `5-20 +0.12` → `21-100 +0.02` → `>100 0.00`。仅 M=5-20 档轻度正向，其余负或零。
+
+**种子稳健性**（全队列 ALL primary）：seed 0 p=0.104 / seed 1 p=0.093 / seed 2 p=0.181——三个种子全 NULL。
+
+**端点并集 secondary（无极化）**：ALL RAW −0.143，EXCESS +0.000（11/27，p=0.246，NULL）。
+
+### 对抗验证（3 agent，2026-06-07）
+
+- **独立重算**（不导入生产 de novo 函数，用 sklearn KMeans 独立实现）：epilepsiae 1073 low 档 [read-back 0.943, de novo signed 0.343, |·| 0.457, rate 0.547] 与 JSON 精确一致（delta < 0.01）。CONFIRMED。
+- **polarity/sign 审计**：abs == |signed| 全 2708 窗误差为 0；reversed-dom 窗集中在 reversed=True 被试、集中于低事件数（中位 66）；direction-pure 被试近零（0/113, 0/24, 0/26, 1/155）——是真实方向歧义而非 flip bug。CONFIRMED（一个 framing 修正：reverse-dom 在低事件数、不是高事件数，见上方纠正）。
+- **诚实性批评**：RAW paired gap (EPI −0.167) 必须明报、不能只报 null-corrected +0.022；yuquan p=0.025 是率崩溃伪正、需标注脆弱。已上述纠正纳入。CONFIRMED_WITH_CAVEAT（已修复）。
+- **优化审计**（inline 检查）：`_null_m` 对 m≤25 精确（低档 53% 窗覆盖，主指标不受 bucketing 影响）；fast-2means 与 sklearn 分离测试结果一致；单线程修复（OMP_NUM_THREADS=1）去除了 ~29ms/call OpenMP 开销后仍需 M-bucketing 才实用。CONFIRMED。
+
+### 与主结果的关系（不矛盾，有边界）
+
+| | 主结果（read-back） | 本层（de novo） |
+|---|---|---|
+| **测的是什么** | 已知全程模板，短窗能不能读回 | 不知全程模板，短窗能不能从零发现 |
+| **低档 epi 绝对恢复** | 0.83 | 0.36（低于计数 0.66） |
+| **epi null-corrected excess** | +0.153 (p=0.003) | +0.007 (p=0.598) |
+| **结论** | 时间稳健读数（read-back） | 短时记录无法独立发现 |
+
+**统一诚实主句（两层合并）**："HFO 传播模板在全程记录里是比发放计数更稳的时间读数（read-back +0.131）；但这个优势依赖已知全程模板——如果只有一段短时安静时段、没有全程参考，从零发现传播方向比发放计数更差（epi RAW −0.167）。模板稳健性是一个读数时间稳定性现象；能否用短时记录独立发现，是另一个更难的问题，当前结果否定它。"
+
+（内部归档代号：LR-7, denovo_window_axis, _fast_2means, window_recovery_paired, count_matched_null_gap_paired, peek_cost, polarity-free endpoint union, seed robustness）
