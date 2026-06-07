@@ -1,12 +1,18 @@
 # SEF-HFO LIF Rate-Field First Round (Connectivity Contract + E-Threshold Heterogeneity) Implementation Plan
 
+> **⚠ 2026-06-07 AMENDMENT — threshold distribution fix + gap-limited std lock (read before Tasks 7–9).** User review caught a science bug in the as-built Tasks 4/6: `phi_eff_vth` modeled the E threshold as an **unbounded** Gaussian. Gauss–Hermite then sampled `v_th < V_RESET` (down to −16 mV), where the Siegert formula returns a **negative** firing rate, which was silently clamped with `max(0, .)`. Effect: `phi_eff` was **non-monotonic** in `vth_mean` (a higher mean threshold could give a *higher* mean rate) — breaking `mean_match_vth`'s monotonicity premise and the whole forced chain.
+>
+> **Fixed (commits 155cdc7, d4a1bf3):** `lif_rate` now **raises** for `v_th < V_RESET`; `phi_eff_vth` integrates a **truncated** Gaussian on `[V_RESET, vth_mean+8·std]` via fixed `leggauss(96)` (deterministic, smooth in μ, renormalized — replaces Gauss–Hermite + clamp); `mean_match_vth` default bracket is now `(V_RESET+0.5, V_TH+17)`; `closed_loop_leading` reports a `converged` flag. **The Task 4 / Task 6 code blocks below are SUPERSEDED — read the committed source in `src/sef_hfo_heterogeneity.py` / `src/sef_hfo_lif.py`, do NOT re-copy the blocks in this doc.**
+>
+> **Gap-limit finding (locks Tasks 7 & 9 params):** with `V_TH−V_RESET = 7 mV` at the canonical sub-reset operating point, `lif_rate` has a steep reset knee. The plan's original `vth_std_wide=4.0` puts **~49%** of the effective rate in the `[V_RESET, 13]` reset knee = reset-floor saturation, **not** collective gain. **Locked clean params: `vth_std_wide=1.5`, `vth_std_narrow=0.5`** (knee share 0.29% / ~0%; narrowing 1.5→0.5 mean-matched raises effective gain ~13% — a computed signal, reported not asserted, spec §7). **All `vth_std_wide=4.0 / vth_std_narrow=1.0` in Tasks 7 & 9 below have been updated to 1.5 / 0.5.** See spec §5.2 and `tests/test_sef_hfo_heterogeneity.py::test_locked_std_params_stay_out_of_reset_knee`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** On the existing canonical LIF rate field, (a) lock the connectivity "fixed-total-mass" contract and map the ρ/ℓ geometry axis (Track G — mostly already built), and (b) build the genuinely new E-threshold heterogeneity layer with the mandatory mean-matched control, then run the forced chain (narrow `Var(V_th,E)` → effective-curve slope/curvature → closed-loop margin → observables) with direction **computed, not preset** (Track E).
 
 **Architecture:** Extend `src/sef_hfo_lif.py` (transfer takes `v_th`) and add a new `src/sef_hfo_heterogeneity.py` module (Φ_eff integration over a V_th distribution, gain/curvature at op, mean-matched control, spatial-patch integrator). Two analysis scripts: an operating-point level (non-spatial: slope/curvature/λ/margin, raw vs mean-matched) and a spatial-patch level (finite-pulse nucleation + event stats, raw vs mean-matched). Track G is a thin lock-and-sweep on existing machinery. Everything reuses the validated `mean_field` / `lif_rate` / `integrate_lif_field` / `amplitude_thresholds` / `detect_events`.
 
-**Tech Stack:** Python, numpy, scipy (`fsolve`, `erfcx`, Gauss–Hermite via `numpy.polynomial.hermite_e`), pytest. No new third-party deps.
+**Tech Stack:** Python, numpy, scipy (`fsolve`, `erfcx`, `brentq`, fixed Gauss–Legendre via `numpy.polynomial.legendre`), pytest. No new third-party deps.
 
 **Spec of record:** `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md` (§5.0 four contracts, §5.1 connectivity, §5.2 heterogeneity, §6 LIF/SNN, §7 acceptance). **This plan covers the LIF rate-field half only; the SNN isomorphic-validation plan is a separate follow-on** (it must match this plan's locked operating point — spec §6 / Contract 4).
 
@@ -602,7 +608,7 @@ def test_optpoint_baseline_sits_at_self_consistent_rest():
     nuE — else slope/curvature are read off a non-rest input and the field would
     start off its fixed point (review fix 2026-06-06)."""
     from scripts.run_sef_hfo_hetero_optpoint import analyze_optpoint
-    res = analyze_optpoint(vth_std_wide=4.0, vth_std_narrow=1.0)
+    res = analyze_optpoint(vth_std_wide=1.5, vth_std_narrow=0.5)
     nuE = res["operating_point"]["nuE"]
     assert abs(res["baseline"]["rate"] - nuE) < 1e-6
     assert abs(res["mean_matched"]["rate"] - nuE) < 1e-6
@@ -612,7 +618,7 @@ def test_optpoint_control_isolates_variance_effect():
     We assert ONLY the control invariant (Contract 2), never the sign of the shape
     change (spec §7 non-circularity)."""
     from scripts.run_sef_hfo_hetero_optpoint import analyze_optpoint
-    res = analyze_optpoint(vth_std_wide=4.0, vth_std_narrow=1.0)
+    res = analyze_optpoint(vth_std_wide=1.5, vth_std_narrow=0.5)
     assert abs(res["mean_matched"]["rate"] - res["baseline"]["rate"]) < 1e-6
     for layer in ("baseline", "raw_narrow", "mean_matched"):
         assert np.isfinite(res[layer]["slope"]) and np.isfinite(res[layer]["curvature"])
@@ -650,7 +656,7 @@ def _layer(muE, sE, vth_mean, vth_std, w_ee_mult, gI):
                 closed_loop_re_max=cl["re_max"], closed_loop_k_star=cl["k_star"],
                 closed_loop_regime=cl["regime"])
 
-def analyze_optpoint(ratio=1.0, w_ee_mult=1.0, vth_std_wide=4.0, vth_std_narrow=1.0):
+def analyze_optpoint(ratio=1.0, w_ee_mult=1.0, vth_std_wide=1.5, vth_std_narrow=0.5):
     op = mean_field(ratio, w_ee_mult=w_ee_mult)
     muE, sE, nuE = op["muE"], op["sE"], op["nuE"]
     gI = lif_gains(op)["I"]                            # I gain is homogeneous (no threshold spread)
@@ -848,7 +854,7 @@ Fire a finite pulse into the field with a narrowed-`Var(V_th,E)` core; measure w
 # append to tests/test_sef_hfo_heterogeneity.py
 def test_patch_analysis_runs_both_layers():
     from scripts.run_sef_hfo_hetero_patch import analyze_patch
-    res = analyze_patch(t_max=80.0, vth_std_wide=4.0, vth_std_narrow=1.0)
+    res = analyze_patch(t_max=80.0, vth_std_wide=1.5, vth_std_narrow=0.5)
     assert set(res["layers"]) >= {"baseline", "raw_narrow", "mean_matched"}
     for layer in res["layers"].values():
         assert "label" in layer and "max_ext" in layer
@@ -905,8 +911,8 @@ def _one(op, x_patch, r_patch, vmc, vsc, vms, vss, t_max):
                 dur_ms=info["dur_ms"], returned=info["returned"],
                 frac_mass_in_patch=frac_in_patch)
 
-def analyze_patch(ratio=1.0, x_patch=0.0, r_patch=2.0, vth_std_wide=4.0,
-                  vth_std_narrow=1.0, t_max=200.0):
+def analyze_patch(ratio=1.0, x_patch=0.0, r_patch=2.0, vth_std_wide=1.5,
+                  vth_std_narrow=0.5, t_max=200.0):
     op = mean_field(ratio)
     muE, sE, nuE = op["muE"], op["sE"], op["nuE"]
     # Mean-match the SURROUND (the bulk that sets the rest) and the baseline core to

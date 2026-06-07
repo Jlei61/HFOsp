@@ -151,6 +151,15 @@ W_EE(x,x') = w_EE · N(θ_EE,ρ,ℓ) · exp[ -u²/(2ℓ_∥²) - v²/(2ℓ_⊥²
 
 **强制 mean-matched control（合同 2）**：每个 `Var(V_th,E)` 收窄实验跑两层 —— (a) raw；(b) mean-rate-matched / mean-drive-matched control。只有 raw 与 control 的差，才是"分布变窄本身"的效应；raw 单独的变化里混着 Jensen 凸性带来的平均工作点移动，不能直接当异质性效应读。
 
+**阈值分布的物理域 + gap-limit（2026-06-07 review 加固，合同级）**：
+
+朴素话：神经元的发放阈值必须高于复位电位（`V_th > V_RESET`），否则"阈值比复位还低"在物理上没意义（细胞会一直发放）。如果把阈值建成一个**无界**高斯去积分，就会采到低于复位的阈值，那里的发放率公式给出**负值**——这是 bug，不能用 `max(0,·)` 截成 0 掩盖（那样会让"阈值越高反而平均发放越高"这种荒唐的非单调出现，连带毁掉 mean-match 的单调前提）。
+
+- **阈值分布必须截断在 `V_RESET` 以上并重新归一化**（truncated Gaussian on `[V_RESET, ∞)`）。`lif_rate` 对 `v_th < V_RESET` **显式报错**（loud tripwire，CLAUDE.md §6），不返回负值。实现见 `src/sef_hfo_heterogeneity.phi_eff_vth`（固定 `leggauss(96)`，确定性、对 μ 平滑、按保留质量归一化）。
+- **gap-limit 是真实科学约束，不是实现细节**：本工作点 `V_TH−V_RESET = 7 mV` 且 `muE < V_RESET`（深度阈下、噪声驱动），`lif_rate` 在复位上方有一道陡峭的"reset knee"。`vth_std` 一旦大到把可观测质量推进这道 knee，有效曲线就被**近饱和的少数细胞主导（reset-floor，不是 collective gain）**，那不是 Rich 异质性想探的机制。
+- **锁定干净参数：`vth_std_wide = 1.5`、`vth_std_narrow = 0.5`**（替换早期计划里的 4.0→1.0）。判据：mean-matched 到 `nuE` 后，`[V_RESET, 13] mV` 这段 reset knee 对有效率的贡献必须 `< 5%`（wide=1.5 实测 0.29%，narrow=0.5 ≈0%；而 wide=4.0 高达 ~49%，已废弃）。门见 `tests/test_sef_hfo_heterogeneity.py::test_locked_std_params_stay_out_of_reset_knee`。
+- **gap-limit 的代价要诚实上报**：7 mV 的 gap 把"健康→致痫"的异质性可操作幅度限制得相当窄（干净区 `std ≲ 2`）。在干净区里 1.5→0.5 的收窄使有效增益升约 13% —— 是个**算出来的、可检测的**信号（按 spec §7 只报方向不预设）。若将来科学上需要更大的异质性操作幅度，要改的是**工作点 / `V_TH−V_RESET` gap**（framework 级决定），不是偷偷放宽截断把问题藏起来。
+
 ---
 
 ## 6. LIF rate field 版 vs SNN 版（同构对齐）
