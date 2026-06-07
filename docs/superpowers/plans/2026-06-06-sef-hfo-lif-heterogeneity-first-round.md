@@ -611,6 +611,8 @@ git commit -m "feat(sef-hfo): promote 2×2 closed-loop dispersion (closed_loop_l
 
 Non-spatial: at the locked operating point, narrow `Var(V_th,E)` (raw + mean-matched), compute slope/curvature of Φ_eff and the **full 2×2 E/I closed-loop stability** `max_k Re λ` (reuse `closed_loop_leading` from Task 6b, fed the effective E gain + the bare I gain), and report. Direction is the JSON output, not an assertion.
 
+> **⚠ PRECONDITION (2026-06-07, advisor) — the locked std (1.5/0.5) and the knee-gate are operating-point-SPECIFIC.** They are validated only at `mean_field(1.0)` (ratio=1.0, w_ee_mult=1.0, sE≈4.07). `analyze_optpoint` carries `w_ee_mult` / `ratio` knobs; raising them moves muE/sE and therefore the reset knee relative to the distribution, so 1.5/0.5 may leave the clean band. **For ANY run with `w_ee_mult≠1` or `ratio≠1`, re-run the knee diagnostic (the `test_locked_std_params_stay_out_of_reset_knee` computation) at that op and confirm knee-share < 5% BEFORE trusting the forced-chain slope/curvature/`closed_loop_re_max`.** Also gate on `closed_loop_leading(...)["converged"]` — a non-converged leading mode makes `re_max` the −inf sentinel (would read as "very stable"). The default w_ee_mult=1.0 run is pre-validated; non-default ops are not.
+
 **Files:**
 - Create: `scripts/run_sef_hfo_hetero_optpoint.py`
 - Reuse: `src.sef_hfo_lif.{mean_field, lif_gains, closed_loop_leading, TAU_ME, TREF_E}`, `src.sef_hfo_heterogeneity.{eff_gain_curvature, mean_match_vth}`
