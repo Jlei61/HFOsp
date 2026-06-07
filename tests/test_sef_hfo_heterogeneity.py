@@ -299,4 +299,58 @@ def test_analyze_margin_returns_expected_schema():
         assert len(L["sweep"]) == 1
         assert {"A", "label", "max_ext", "peak_rE_max"} <= set(L["sweep"][0])
     it = res["interpretation"]
-    assert {"A_runaway_wide", "A_runaway_narrow", "margin_compressed", "both_unbounded"} <= set(it)
+    assert {"A_runaway_wide", "A_runaway_narrow", "margin_compressed",
+            "runaway_unreached_in_saturated_grid"} <= set(it)
+
+
+def test_phi_eff_param_vth_matches_phi_eff_vth():
+    """phi_eff_param(param='v_th') must agree with the validated phi_eff_vth — proves the
+    generalization + the _trunc_gl_avg refactor reproduce the V_th-only path."""
+    from src.sef_hfo_heterogeneity import phi_eff_param, phi_eff_vth
+    for vm, vs in [(18.0, 0.0), (18.98, 1.5), (18.11, 0.5), (19.0, 1.0)]:
+        a = phi_eff_param(8.0, 4.0, TAU_ME, TREF_E, param="v_th", mean=vm, std=vs)
+        b = phi_eff_vth(8.0, 4.0, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
+        assert abs(a - b) < 1e-9, f"param vs vth mismatch at vm={vm},vs={vs}: {a} vs {b}"
+
+
+def test_phi_eff_param_zero_std_reduces_to_lif_rate():
+    """std=0 → point mass → exactly lif_rate with that one argument substituted."""
+    from src.sef_hfo_heterogeneity import phi_eff_param
+    from src.sef_hfo_lif import lif_rate
+    mu, sig = 8.0, 4.0
+    assert abs(phi_eff_param(mu, sig, TAU_ME, TREF_E, param="tau_m", mean=25.0, std=0.0)
+               - lif_rate(mu, sig, 25.0, TREF_E)) < 1e-12
+    assert abs(phi_eff_param(mu, sig, TAU_ME, TREF_E, param="tau_ref", mean=3.0, std=0.0)
+               - lif_rate(mu, sig, TAU_ME, 3.0)) < 1e-12
+    assert abs(phi_eff_param(mu, sig, TAU_ME, TREF_E, param="sigma", mean=5.0, std=0.0)
+               - lif_rate(mu, 5.0, TAU_ME, TREF_E)) < 1e-12
+
+
+def test_phi_eff_param_never_samples_below_floor():
+    """The truncated support must keep every lif_rate call inside the parameter's physical
+    domain — e.g. sigma stays > 0 (a sigma<=0 would be unphysical / singular)."""
+    import src.sef_hfo_lif as _lifmod
+    from src.sef_hfo_heterogeneity import phi_eff_param
+    seen = []
+    orig = _lifmod.lif_rate
+    def spy(mu, sigma, tau_m, tau_ref, v_th=_lifmod.V_TH):
+        seen.append((sigma, tau_m, tau_ref, v_th))
+        return orig(mu, sigma, tau_m, tau_ref, v_th=v_th)
+    import src.sef_hfo_heterogeneity as _het
+    _het.lif_rate = spy
+    try:
+        phi_eff_param(8.0, 4.0, TAU_ME, TREF_E, param="sigma", mean=4.0, std=1.5)
+        assert all(s > 0 for (s, _tm, _tr, _v) in seen), "sigma sampled <= 0"
+    finally:
+        _het.lif_rate = orig
+
+
+def test_mean_match_param_restores_rate_for_tau_m():
+    """Per-parameter mean-matched control (Contract 2) generalizes beyond V_th: after
+    matching tau_m's mean at a narrower std, phi_eff_param returns the baseline rate."""
+    from src.sef_hfo_heterogeneity import phi_eff_param, mean_match_param
+    mu, sig = 8.0, 4.0
+    baseline = phi_eff_param(mu, sig, TAU_ME, TREF_E, param="tau_m", mean=TAU_ME, std=3.0)
+    m = mean_match_param(baseline, mu, sig, TAU_ME, TREF_E, param="tau_m", std=1.0)
+    got = phi_eff_param(mu, sig, TAU_ME, TREF_E, param="tau_m", mean=m, std=1.0)
+    assert abs(got - baseline) < 1e-6

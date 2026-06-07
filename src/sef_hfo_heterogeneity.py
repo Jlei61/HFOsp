@@ -41,6 +41,30 @@ from src.sef_hfo_lif import (
 _GL_NODES, _GL_WEIGHTS = leggauss(96)
 
 
+def _trunc_gl_avg(eval_fn, mean: float, std: float, lo: float, hi: float) -> float:
+    """Renormalized truncated-Gaussian average of ``eval_fn(val)`` over [lo, hi] with
+    Gaussian weight N(mean, std^2), via the fixed GL nodes. The single source of truth
+    for the truncated-distribution integral used by every heterogeneity helper.
+
+    Raises ValueError on a non-finite result (degenerate distribution / extreme-arg
+    overflow) rather than emitting a silent NaN — same loud-failure philosophy as
+    lif_rate's sub-reset guard (CLAUDE.md §6)."""
+    half = 0.5 * (hi - lo)
+    mid = 0.5 * (hi + lo)
+    vals = mid + half * _GL_NODES                                  # GL nodes mapped onto [lo, hi]
+    w_gauss = np.exp(-0.5 * ((vals - mean) / std) ** 2)            # unnormalized Gaussian weight
+    rates = np.array([eval_fn(float(v)) for v in vals])
+    num = float(np.sum(_GL_WEIGHTS * w_gauss * rates))            # the GL ``half`` Jacobian cancels
+    den = float(np.sum(_GL_WEIGHTS * w_gauss))                     # = renormalization by retained mass
+    result = num / den if den > 0.0 else float("nan")
+    if not np.isfinite(result):
+        raise ValueError(
+            f"truncated-Gaussian average non-finite (num={num:.3g}, den={den:.3g}) at "
+            f"mean={mean:.4g}, std={std:.4g}, support=[{lo:.4g},{hi:.4g}] — degenerate "
+            f"distribution relative to its physical support.")
+    return result
+
+
 def phi_eff_vth(mu: float, sigma: float, tau_m: float, tau_ref: float,
                 vth_mean: float = V_TH, vth_std: float = 0.0) -> float:
     """Φ_LIF averaged over a TRUNCATED Gaussian threshold v_th ~ N(vth_mean, vth_std^2)
@@ -66,25 +90,10 @@ def phi_eff_vth(mu: float, sigma: float, tau_m: float, tau_ref: float,
     """
     if vth_std <= 0.0:
         return lif_rate(mu, sigma, tau_m, tau_ref, v_th=vth_mean)
-    hi = vth_mean + 8.0 * vth_std            # upper tail; lower bound is the V_RESET floor
-    half = 0.5 * (hi - V_RESET)
-    mid = 0.5 * (hi + V_RESET)
-    vths = mid + half * _GL_NODES            # GL nodes mapped onto [V_RESET, hi]
-    w_gauss = np.exp(-0.5 * ((vths - vth_mean) / vth_std) ** 2)   # unnormalized Gaussian weight
-    rates = np.array([lif_rate(mu, sigma, tau_m, tau_ref, v_th=float(v)) for v in vths])
-    num = float(np.sum(_GL_WEIGHTS * w_gauss * rates))   # the GL ``half`` Jacobian cancels in num/den
-    den = float(np.sum(_GL_WEIGHTS * w_gauss))           # = renormalization by retained truncated mass
-    result = num / den if den > 0.0 else float("nan")
-    if not np.isfinite(result):
-        # Degenerate input: the truncated mass underflowed (den→0, e.g. the whole
-        # distribution sits below V_RESET) or a sampled rate was non-finite (lif_rate
-        # quad overflow at an extreme threshold).  Raise loudly rather than emit a silent
-        # NaN — same loud-failure philosophy as lif_rate's sub-reset guard (CLAUDE.md §6).
-        raise ValueError(
-            f"phi_eff_vth: non-finite effective rate (num={num:.3g}, den={den:.3g}) at "
-            f"mu={mu:.4g}, sigma={sigma:.4g}, vth_mean={vth_mean:.4g}, vth_std={vth_std:.4g} "
-            f"— degenerate threshold distribution relative to V_RESET={V_RESET}.")
-    return result
+    # truncated at the V_RESET floor; upper tail at vth_mean + 8*std (V_RESET-only lower
+    # bound preserves the validated Task 7-9 numerics).
+    return _trunc_gl_avg(lambda v: lif_rate(mu, sigma, tau_m, tau_ref, v_th=v),
+                         vth_mean, vth_std, V_RESET, vth_mean + 8.0 * vth_std)
 
 
 def eff_gain_curvature(mu: float, sigma: float, tau_m: float, tau_ref: float,
@@ -119,6 +128,88 @@ def mean_match_vth(target_rate: float, mu: float, sigma: float,
         raise ValueError(
             f"target_rate={target_rate:.5g} not bracketed by vth_mean∈{bracket} "
             f"at mu={mu}, sigma={sigma}, vth_std={vth_std}; widen the bracket.")
+    return float(brentq(g, lo, hi, xtol=1e-8))
+
+
+# ---------------------------------------------------------------------------
+# Multi-parameter cell heterogeneity (Step3b) — integrate Φ_LIF over ANY single
+# cell parameter's truncated distribution, not just V_th. Spec §3 Θ_cell pack.
+# ---------------------------------------------------------------------------
+
+# Physical lower bound of each cell parameter's distribution support. None = unbounded
+# below (a control/input axis, not a positively-constrained intrinsic parameter).
+_PARAM_FLOOR = {
+    "v_th": V_RESET,    # threshold must exceed reset (else negative Siegert rate)
+    "tau_m": 1.0,       # membrane time constant (ms); physical floor, also keeps lif_rate finite
+    "tau_ref": 0.0,     # refractory period >= 0 (0 = no refractory, allowed)
+    "sigma": 1.0,       # input-noise s.d. (mV); floored so (v_th-mu)/sigma stays bounded —
+                        #   sigma→0 makes lif_rate a hard step and erfcx overflows to NaN
+    "mu": None,         # input drive / E_L-equivalent baseline (control axis, unbounded)
+}
+# Default brentq search bracket for each parameter's mean given a target rate.
+_PARAM_BRACKET = {
+    "v_th": (V_RESET + 0.5, V_TH + 17.0),
+    "tau_m": (1.0, 80.0),
+    "tau_ref": (0.0, 15.0),
+    "sigma": (0.5, 25.0),
+    "mu": (-25.0, 35.0),
+}
+
+
+def _rate_with_param(mu, sigma, tau_m, tau_ref, v_th, param, val):
+    """lif_rate with ONE argument substituted by ``val`` (the heterogeneous parameter)."""
+    if param == "v_th":
+        return lif_rate(mu, sigma, tau_m, tau_ref, v_th=val)
+    if param == "tau_m":
+        return lif_rate(mu, sigma, val, tau_ref, v_th=v_th)
+    if param == "tau_ref":
+        return lif_rate(mu, sigma, tau_m, val, v_th=v_th)
+    if param == "sigma":
+        return lif_rate(mu, val, tau_m, tau_ref, v_th=v_th)
+    if param == "mu":
+        return lif_rate(val, sigma, tau_m, tau_ref, v_th=v_th)
+    raise ValueError(f"unknown param {param!r}; expected one of {sorted(_PARAM_FLOOR)}")
+
+
+def phi_eff_param(mu: float, sigma: float, tau_m: float, tau_ref: float, *,
+                  param: str, mean: float, std: float, v_th: float = V_TH) -> float:
+    """Φ_LIF averaged over ONE cell parameter ~ TRUNCATED N(mean, std^2), renormalized
+    to the parameter's physical support (spec §3 Θ_cell). ``param`` ∈
+    {'v_th','tau_m','tau_ref','sigma','mu'}. ``std`` <= 0 → point mass = lif_rate at mean.
+    Generalizes ``phi_eff_vth`` (param='v_th'); the slope/curvature of Φ_eff in the INPUT
+    mu, and the closed-loop / finite-pulse margins, are how the Step3b sensitivity screen
+    asks which cell-parameter narrowing actually has leverage (direction computed, spec §7)."""
+    if param not in _PARAM_FLOOR:
+        raise ValueError(f"unknown param {param!r}; expected one of {sorted(_PARAM_FLOOR)}")
+    if std <= 0.0:
+        return _rate_with_param(mu, sigma, tau_m, tau_ref, v_th, param, mean)
+    floor = _PARAM_FLOOR[param]
+    hi = mean + 8.0 * std
+    lo = (mean - 8.0 * std) if floor is None else max(floor, mean - 8.0 * std)
+    return _trunc_gl_avg(
+        lambda val: _rate_with_param(mu, sigma, tau_m, tau_ref, v_th, param, val),
+        mean, std, lo, hi)
+
+
+def mean_match_param(target_rate: float, mu: float, sigma: float, tau_m: float,
+                     tau_ref: float, *, param: str, std: float, v_th: float = V_TH,
+                     bracket: tuple | None = None) -> float:
+    """Solve for ``param``'s mean such that phi_eff_param(...) == target_rate at input mu —
+    the per-parameter mean-matched control (spec §5.0 Contract 2), generalizing
+    ``mean_match_vth``. Raises ValueError if target is not bracketed (e.g. the rate is
+    insensitive to this parameter at the operating point — itself an informative
+    'no leverage' screen result that the caller should handle, not a bug)."""
+    br = bracket if bracket is not None else _PARAM_BRACKET[param]
+
+    def g(m):
+        return phi_eff_param(mu, sigma, tau_m, tau_ref, param=param, mean=m, std=std,
+                             v_th=v_th) - target_rate
+    lo, hi = br
+    if g(lo) * g(hi) > 0:
+        raise ValueError(
+            f"target_rate={target_rate:.5g} not bracketed for param={param} in {br} "
+            f"at mu={mu}, sigma={sigma}, std={std}; the rate may be insensitive to "
+            f"{param} at this operating point (a 'no leverage' result), or widen the bracket.")
     return float(brentq(g, lo, hi, xtol=1e-8))
 
 

@@ -1,22 +1,26 @@
-# heterogeneity — E 阈值异质性首轮 (Track E)
+# heterogeneity — E 细胞异质性 (Track E / rate 均场层)
 
 spec: `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md` §5.2
 plan: `docs/superpowers/plans/2026-06-06-sef-hfo-lif-heterogeneity-first-round.md`
 
-- `optpoint.json` — 非空间工作点强制链 (Task 7)。收窄 `Var(V_th,E)`，三层 baseline(wide=1.5)/raw_narrow(0.5,同均值)/mean_matched(0.5,重配均值到 nuE) 的有效曲线斜率、曲率、**完整 2×2 E/I 闭环稳定性 `closed_loop_re_max`**（max Re λ, spec §2C）。每层带 `closed_loop_converged/n_converged/n_modes`；未收敛报错（不报 stable/unstable）；非默认工作点先过 reset-knee 闸门。
-- `patch.json` — 空间有限脉冲 + 事件分析 (Task 9)。两种 patch 位置（与种子同位 x=−3 / 下游 x=0），三层同上。每层报自限标签 `label`、成核聚集 `frac_mass_in_patch`、`max_ext`。`interpretation.d_*_pure` = mean_matched − baseline = 纯方差效应。
+## 首轮 = 只收窄阈值分布 `Var(V_th,E)`（子结论，已封存）
 
-**关注点（朴素话）**：阈值分布截断在复位电位以上（2026-06-07 修复）；可用异质性幅度被 `V_TH−V_RESET=7 mV` 卡住（gap-limit, 结构性），锁定 wide=1.5/narrow=0.5。
+- `optpoint.json` — 非空间工作点强制链 (Task 7)。三层 baseline(wide=1.5)/raw_narrow(0.5,同均值)/mean_matched(0.5,重配均值到 nuE) 的有效曲线斜率、曲率、**完整 2×2 E/I 闭环稳定性 `closed_loop_re_max`**（max Re λ, spec §2C 的「地图/诊断量」）。每层带 `closed_loop_converged/n_converged/n_modes`；未收敛报错（不报 stable/unstable）；非默认工作点先过 reset-knee 闸门。
+- `patch.json` — 空间有限脉冲 + 事件分析 (Task 9)。两种 patch 位置（与种子同位 x=−3 / 下游 x=0），三层同上。自限标签 `label`、成核聚集 `frac_mass_in_patch`、`max_ext`。
+- `margin.json` — 有限脉冲安全余量 sweep (Task 9b, spec §2C 真闸门 S = A_runaway − A_event)。**只变刺激幅度 A**，baseline(uniform wide=1.5) vs mean_matched(narrow=0.5 core)，both mean-matched 到 nuE。
 
-- `margin.json` — 有限脉冲安全余量 S sweep (Task 9b)。**只变刺激幅度 A**，对 baseline(uniform wide=1.5) vs mean_matched(narrow=0.5 core, both mean-matched 到 nuE) 各扫出 `A_runaway`（label 从 self_limited 翻成 runaway/global 的最小 A）。这才是 spec §2C 的最终闸门 S = A_runaway − A_event。**结果：A_runaway 两层都不可达**（A 从 8 推到 200，响应 A≥80 已饱和：wide max_ext 0.239 / narrow 0.247，narrow 因 +13% 增益略高一点，但都远不到失控；`both_unbounded=True`）。
+**关注点（朴素话）**：阈值分布截断在复位电位以上（2026-06-07 修复——旧版无界分布会采到非物理区、出负发放率、被硬压成 0 导致非单调；旧对照测试是循环验证，绿灯无意义）。可用阈值差异幅度被 `V_TH−V_RESET=7 mV` 这条窄缝**结构性**卡住，锁定 wide=1.5/narrow=0.5。
 
-**关注点（朴素话）**：阈值分布截断在复位电位以上（2026-06-07 修复）；可用异质性幅度被 `V_TH−V_RESET=7 mV` 卡住（gap-limit, 结构性），锁定 wide=1.5/narrow=0.5。
+**首轮子结论（只针对"阈值这一条"）**：收窄 E 阈值分布（mean-matched）使有效曲线变陡约 +13%（算出来的真信号，spec §7 只报方向）——但这点信号**传不到安全余量**：
+1. 线性闭环余量基本不动（Δ max Re λ ≈ −0.0003）——这只是「地图」；
+2. 有限脉冲：把刺激 A 从 8 推到 200，响应在 A≈80 已进入**饱和平台**（max_ext wide 0.239 / narrow 0.247，A80..A200 不再变；narrow 因 +13% 略高一点点）。在**这组已扫到饱和的平台里，整齐门槛和原始门槛都没推到失控**（`runaway_unreached_in_saturated_grid`）。
+   - ⚠ 措辞纪律：这是"在已扫到饱和的网格里推不到失控"，**不是**数学意义上"任意大刺激永不失控"。
+3. 非空对照：直接降低 core 门槛均值（让组织本身更易兴奋）确实能 runaway（`test_hetero_field_can_run_away_positive_control`）——所以"怎么推都自限"是有意义的结果，不是 integrator 永不失控。
 
-**首轮结论（rate-field 层，三道读数一致）**：收窄 E 阈值异质性（mean-matched）使有效增益升约 +13%（算出来的真信号，spec §7 只报方向）——但
-1. 线性闭环稳定余量基本不动（Δ max Re λ ≈ −0.0003，甚至略更稳）——spec §2C 的「地图/诊断量」；
-2. 固定幅度 A=8 下 6 个条件都 self_limited_propagation；
-3. **真闸门 S（A_runaway sweep）= 不可达 / 无界**：怎么推都自限、响应饱和，整齐门槛和原始门槛两种情况 A_runaway 都到不了 → S 没被收窄压缩（`margin_compressed=False`）。
+**封存口径（不要写成"异质性下降无效"）**：**仅"阈值分布变窄"这一条，在均场 rate 模型里没有让有限扰动更容易把组织推到失控。** 完整的细胞异质性机制（不止阈值）尚未验完；有限细胞的"突然集体同步爆发"均场原理上看不见，最终要交给 SNN 的有限细胞实现。
 
-**非空（positive control）**：直接降低 core 门槛均值（让组织本身更易兴奋）确实能 runaway（test_hetero_field_can_run_away_positive_control），所以「怎么推都自限」是有意义的 null，不是 integrator 永不失控。
+## 下一步 = Rate Step3b：细胞异质性来源扩展（仍 rate 纪律，不上 SNN）
 
-**即 Rich 方向「异质性↓→更易失控/余量塌缩」在 rate-field（均场）层没有稳健复现 —— 已在真闸门 S 上确认，不只是地图。** +13% 增益这点真信号传不到余量。部分是结构性（操作幅度被 gap 卡小 + 工作点离失控很远）。文献预言的有限尺寸**同步爆发**均场原理上看不见，移交 SNN；SNN 测试须能区分「均场看不见同步」与「这个工作点上操作本就太小」（advisor caveat）。
+问题换成：如果"细胞更像"不只是阈值变窄，而是整条输入-输出曲线一起变像，会怎样？rate 层先做**非空间敏感度矩阵**找哪类旋钮真有杠杆，再做组合轴，**只有在非空间层真的改变余量的参数包**才放进空间 patch。
+- 参数包：`V_th`(门槛) / `tau_m`(膜时间常数,响应速度) / `tau_ref`(不应期,高发放上限) / `sigma`(输入噪声,低发放区斜率)；`E_L`/baseline drive 只作工作点移动对照，不和"异质性下降"混读。
+- 产物（规划中）：`sensitivity_matrix.json`（每个参数分布变窄后 斜率/曲率/闭环余量怎么变）→ `combo_*.json`（V_th+tau_m+tau_ref 同向；V_th+sigma）。

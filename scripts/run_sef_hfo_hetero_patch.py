@@ -131,14 +131,16 @@ def analyze_margin(ratio=1.0, x_patch=-3.0, r_patch=2.0, vth_std_wide=1.5,
         baseline_wide=wide, mean_matched_narrow=narrow,
         interpretation=dict(
             note="Vary ONLY A; A_runaway = first A with runaway/global label. Both None + "
-                 "saturated_at_high_A True => the finite-pulse margin is UNBOUNDED (no kick "
-                 "amplitude triggers runaway; response saturates) for that layer. S "
-                 "compression = A_runaway_narrow < A_runaway_wide. Direction computed not "
-                 "preset (spec §7).",
+                 "saturated_at_high_A True => within THIS swept grid (which already reached "
+                 "the response-saturation plateau) no kick amplitude triggered runaway for "
+                 "that layer. This is NOT a proof that arbitrarily large stimuli never run "
+                 "away — it is 'runaway unreached in the saturated grid'. S compression = "
+                 "A_runaway_narrow < A_runaway_wide. Direction computed not preset (spec §7).",
             A_runaway_wide=ar_w, A_runaway_narrow=ar_n,
             margin_compressed=(ar_n is not None and ar_w is not None and ar_n < ar_w),
-            both_unbounded=(ar_w is None and ar_n is None
-                            and wide["saturated_at_high_A"] and narrow["saturated_at_high_A"])))
+            runaway_unreached_in_saturated_grid=(
+                ar_w is None and ar_n is None
+                and wide["saturated_at_high_A"] and narrow["saturated_at_high_A"])))
 
 
 def run():
@@ -173,7 +175,8 @@ def run_margin():
         L = res[tag]
         plateau = "  ".join(f"A{r['A']:.0f}:{r['max_ext']:.3f}" for r in L["sweep"])
         print(f"  {tag:20s} A_runaway={L['A_runaway']} saturated={L['saturated_at_high_A']}  [{plateau}]")
-    print(f"  margin_compressed={it['margin_compressed']}  both_unbounded={it['both_unbounded']}")
+    print(f"  margin_compressed={it['margin_compressed']}  "
+          f"runaway_unreached_in_saturated_grid={it['runaway_unreached_in_saturated_grid']}")
 
 
 if __name__ == "__main__":

@@ -93,10 +93,10 @@
     ]
   },
   "interpretation": {
-    "note": "Vary ONLY A; A_runaway = first A with runaway/global label. Both None + saturated_at_high_A True => the finite-pulse margin is UNBOUNDED (no kick amplitude triggers runaway; response saturates) for that layer. S compression = A_runaway_narrow < A_runaway_wide. Direction computed not preset (spec \u00a77).",
+    "note": "Vary ONLY A; A_runaway = first A with runaway/global label. Both None + saturated_at_high_A True => within THIS swept grid (which already reached the response-saturation plateau) no kick amplitude triggered runaway for that layer. This is NOT a proof that arbitrarily large stimuli never run away \u2014 it is 'runaway unreached in the saturated grid'. S compression = A_runaway_narrow < A_runaway_wide. Direction computed not preset (spec \u00a77).",
     "A_runaway_wide": null,
     "A_runaway_narrow": null,
     "margin_compressed": false,
-    "both_unbounded": true
+    "runaway_unreached_in_saturated_grid": true
   }
 }
