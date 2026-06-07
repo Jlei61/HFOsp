@@ -27,3 +27,11 @@
 # NOTE: outside_mask/spk_inside/spk_outside/classify/compute_metrics remain CENTER-disk-relative;
 # for an off-center kick they are no longer "seed vs spread" -- the Increment-2/3 read goes straight
 # off E_spk_bool + posE (direction estimator), not those center-relative bookkeeping fields.
+
+# --- 2026-06-07 addendum: current-based LFP at custom sites (formal §13.4 LFP) ---
+# lfp.py LFPRecorder.__init__: add `sites=None` -> self.sites = make_grid(p) if sites is None
+#   else np.asarray(sites, float)   (custom montage at real electrode spacing)
+# kick_probe.simulate_kick: add `lfp_recorder=None`; allocate lfp_trace=(nsteps,n_sites) if given;
+#   inside loop after I_E/I_I: if lfp_trace is not None: lfp_trace[t]=lfp_recorder.sample(I_E,I_I);
+#   return dict adds lfp_trace + lfp_sites. Backward-compatible (None -> identical to before).
+# Validated: tiny net, 10 custom 4mm sites -> lfp_trace (1850,10), per-site peaks vary (non-degenerate).
