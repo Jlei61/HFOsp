@@ -234,3 +234,27 @@ results/topic4_sef_hfo/observation_layer/
 - [x] 六道科学坑（循环 / 杆造假 / 模板→方向转换 / 时间估计含越哪个阈 / 稀疏 / 强制读出当自然机制）逐条锁防护
 - [x] 验收门编码结论非仅存在性；阈值 spec review 锁定不随结果调
 - [x] 与 pathology-mapping spec（§5.0-④/§7）+ framework（§6.5 Step 2/4、§8.1/§8.4 红线）一致、不冲突
+
+---
+
+## 13. 观测真实性合同（electrode scale + figure discipline + LFP 两档，2026-06-07 user lock）
+
+源于 user 的电极尺度锚（"虚拟 SEEG 应是真实电极间距；real 和 model 保持一致，成本很低"）+ 由此暴露的尺度不匹配（SNN 引擎是 2mm 介观 patch、一个 3.5mm 触点比整个 patch 还大）。五条锁定：
+
+**13.1 真实电极尺度锁（先锁，real↔model 一致）**
+- 虚拟电极**触点间距 = 真实 SEEG 间距**：Yuquan **3.5 mm**；Epilepsiae（UKLFR mount）间距**待从真实触点坐标算**（`src.seeg_coord_loader` 取一被试同杆相邻触点欧氏距离；典型 SEEG depth 3.5 或 5 mm）。real 分析与 model 观测用**同一间距**。
+- **尺度不匹配的处理（两基底，各自原生尺度）**：
+  - **rate field = 主观测基底**：原生 cm 尺（`sef_hfo_lif._DEFAULT_L=12`，Step-0 跑 L=12–16 mm），是 PDE、便宜；3.5 mm 间距在 12–16 mm 片上自然成立（数触点/杆×多杆→≥7）。Increment-3a 升为观测主路。
+  - **SNN**：2mm 介观 = sub-electrode（不可用 3.5mm 电极读）；按 user 指示**先放大到数十 mm（几 cm）**作同尺度 mechanism+observation，build 更重，**后面再调**。SNN @2mm 仍作密集-oracle 机制检查（`anisotropy_front`，已 44.9°）。
+
+**13.2 figure discipline（每张"声称 SEEG 读出"的图必须可诊断）**
+- 不需重做所有历史图；但**任何声称"SEEG 读出方向/模板"的图**必须叠加：**模型平面 + 踢点 + 传播方向 + shaft/contact 位置 + contact spacing + sheet size**。否则读者无法区分"读出失败"是 **模型问题 / 估计子问题 / 电极摆位问题**（本轮 SNN smoke 的混淆正源于此）。
+
+**13.3 per-contact read-out 面板（让链条可见）**
+- 每个触点一条**时间轨迹**，旁标 contact 位置 + 所属 shaft；再展示由这些轨迹导出的 **lag / rank / endpoint axis**。使"**模型事件 → 电极观测 → 方向估计**"整条链在图上可见，不是黑箱出一个角度。
+
+**13.4 LFP 两档（命名纪律）**
+- **快版（当前）= 虚拟触点 firing envelope**（平滑放电密度，`snn_event_envelope`）——**必须显式标注"不是 LFP"**；只验方向顺序。
+- **正式版 = current-based / field-based 读出**（突触电流 forward model，推广 `engine/lfp.py` |I_E|+|I_I| 至 montage 触点）——**只有这版才叫 LFP**，才适合与真实 SEEG **波形**幅度/形状对齐。两版别混名。
+
+**13.5 不变量**：13.1–13.4 是观测**真实性 / 可诊断性**合同，不改 §3.5 估计子（endpoint-centroid，sparse-friendly）、§10 验收阈（25°/k_dir=3/τ_fail，永不调）、§-1 reframe claim（连接定无向轴）。
