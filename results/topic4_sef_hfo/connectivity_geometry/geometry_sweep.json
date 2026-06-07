@@ -1,0 +1,101 @@
+{
+  "note": "Track G geometry sweep at fixed total E\u2192E mass (unit-sum kernel). \u03b8_EE rotation locked separately in step0d.",
+  "operating_point": {
+    "nuE": 0.0002226553708647553,
+    "nuI": 0.005013107909867823
+  },
+  "rho_sweep": [
+    {
+      "rho": 1.0,
+      "ell_par": 0.9,
+      "ell_perp": 0.9,
+      "axis_angle_deg": 0.0,
+      "anisotropy_ratio": 1.335356235697958,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 47.0
+    },
+    {
+      "rho": 0.9,
+      "ell_par": 0.9,
+      "ell_perp": 0.81,
+      "axis_angle_deg": 0.0,
+      "anisotropy_ratio": 1.6559695854997356,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 48.5
+    },
+    {
+      "rho": 0.75,
+      "ell_par": 0.9,
+      "ell_perp": 0.675,
+      "axis_angle_deg": 0.0,
+      "anisotropy_ratio": 2.2822069019233893,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 53.25
+    },
+    {
+      "rho": 0.5,
+      "ell_par": 0.9,
+      "ell_perp": 0.45,
+      "axis_angle_deg": 0.0,
+      "anisotropy_ratio": 3.400449752179435,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 75.5
+    },
+    {
+      "rho": 0.33,
+      "ell_par": 0.9,
+      "ell_perp": 0.29700000000000004,
+      "axis_angle_deg": 0.0,
+      "anisotropy_ratio": 3.9114865811726127,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 83.25
+    }
+  ],
+  "ell_sweep": [
+    {
+      "ell_par": 0.36,
+      "ell_perp": 0.18,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 70.5,
+      "max_ext": 0.1342230902777778
+    },
+    {
+      "ell_par": 0.54,
+      "ell_perp": 0.27,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 70.5,
+      "max_ext": 0.23046875
+    },
+    {
+      "ell_par": 0.72,
+      "ell_perp": 0.36,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 79.5,
+      "max_ext": 0.2981770833333333
+    },
+    {
+      "ell_par": 0.9,
+      "ell_perp": 0.45,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 75.5,
+      "max_ext": 0.3287760416666667
+    },
+    {
+      "ell_par": 1.2,
+      "ell_perp": 0.6,
+      "label": "self_limited_propagation",
+      "adv_mm": 6.875,
+      "dur_ms": 62.5,
+      "max_ext": 0.3348524305555556
+    }
+  ]
+}
