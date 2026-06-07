@@ -279,6 +279,7 @@ def integrate_lif_field(
     return_peak_field: bool = False,
     coh_len: float | None = None,
     axis_accum: bool = False,
+    return_frames: bool = False,
 ):
     """Integrate the 2-D LIF rate field.
 
@@ -340,11 +341,18 @@ def integrate_lif_field(
     ext_coh : ndarray, shape (nsteps,) — only when ``coh_len`` is set; appended
         LAST (before axis_accum).  Coherence-based active fraction.
     axis : dict — only when ``axis_accum`` is set (requires ``coh_len``); appended
-        VERY LAST.  Aggregated centered second-moment of the smoothed active
+        after ext_coh.  Aggregated centered second-moment of the smoothed active
         region over all "event-on" frames: ``{"Sxx","Sxy","Syy","n_onframes"}``.
         The principal eigenvector of [[Sxx,Sxy],[Sxy,Syy]] is the systematic
         event elongation axis across many events (per-event triggering asymmetry
         averages out) — the contract §5 aggregated direction measure.
+    rE_frames : ndarray, shape (nsteps, n, n) — only when ``return_frames`` is
+        set; appended as the **LAST** element of the tuple, AFTER all the above
+        optionals (RETURN-TUPLE POSITION LOCK, Increment-3a §0).  The per-step
+        field stack (each frame is the rE used for that step's ``ext[t]``).
+        ``rE_frames[-1]`` equals the ``return_field=True`` final snapshot.
+        Consumed by ``src.sef_hfo_rate_adapter.rate_event_envelope`` (virtual-SEEG
+        observation).  Default False keeps the return byte-identical.
     """
     wee = float(op.get("w_ee_mult", 1.0)) * W_EE   # recurrent E→E gain matches the op
     KEE = anisotropic_gaussian(n, L, ell_par, ell_perp, theta_EE)
@@ -380,6 +388,7 @@ def integrate_lif_field(
     peak_ext = -1.0
     Sxx = Sxy = Syy = 0.0
     n_onframes = 0
+    rE_frames = np.empty((nsteps, n, n)) if return_frames else None
 
     for t in range(nsteps):
         stim = stim_fn(t * dt)
@@ -416,6 +425,8 @@ def integrate_lif_field(
         if ext[t] > peak_ext:
             peak_ext = ext[t]
             peak_field = rE.copy()
+        if rE_frames is not None:        # same rE that ext[t]/peak_field saw (clause 4)
+            rE_frames[t] = rE
 
     out = [ext, front]
     if return_peak_field:
@@ -426,6 +437,8 @@ def integrate_lif_field(
         out.append(ext_coh)
     if axis_accum:
         out.append(dict(Sxx=Sxx, Sxy=Sxy, Syy=Syy, n_onframes=n_onframes))
+    if return_frames:                    # RETURN-TUPLE POSITION LOCK: rE_frames is LAST
+        out.append(rE_frames)
     return tuple(out) if len(out) > 2 else (ext, front)
 
 

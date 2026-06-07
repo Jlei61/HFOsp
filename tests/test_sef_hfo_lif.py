@@ -239,3 +239,56 @@ def test_anisotropy_rotation_discriminator():
     )
     _ang2, ratio2 = _principal_axis_deg_ratio(pf2 - op["nuE"], X, Y, DETECT)
     assert ratio2 < 1.3, f"isotropic ratio {ratio2:.2f} >= 1.3 (spurious directional axis)"
+
+
+# ---------------------------------------------------------------------------
+# Increment-3a Task 1: return_frames (per-step field stack), tuple-position lock
+# ---------------------------------------------------------------------------
+
+def test_return_frames_position_and_last_frame():
+    """return_frames=True appends the per-step rE stack (nsteps, n, n) as the
+    LAST tuple element — AFTER return_field/return_peak_field, ext_coh, axis —
+    and its last frame equals the return_field=True final snapshot.
+
+    Locks the RETURN-TUPLE POSITION contract (plan §0 Increment-3a) across flag
+    combos so no existing positional unpacking breaks and the rate adapter can
+    rely on frames being last.
+    """
+    op = mean_field(1.0)
+    N, L = 16, 8.0
+    R, A, Tp = 1.5, 8.0, 5.0
+    X, Y = _grid(N, L)
+    mask = (X ** 2 + Y ** 2 <= R ** 2).astype(float)
+
+    def stim(t):
+        return (A * mask) if t < Tp else (0.0 * mask)
+
+    kw = dict(dt=0.5, t_max=10.0, b_a=0.0, n=N, L=L)
+    nsteps = int(10.0 / 0.5)
+
+    # frames alone: appended right after (ext, front)
+    ext, _front, frames = integrate_lif_field(op, stim, return_frames=True, **kw)
+    assert ext.shape == (nsteps,)
+    assert frames.shape == (nsteps, N, N)
+
+    # position lock: return_field + return_frames -> rE at [2], frames LAST,
+    # and last frame == the return_field final snapshot (same deterministic run)
+    ext2, _front2, rE, frames2 = integrate_lif_field(
+        op, stim, return_field=True, return_frames=True, **kw)
+    assert rE.shape == (N, N)
+    assert frames2.shape == (nsteps, N, N)
+    assert np.allclose(frames2[-1], rE)
+
+    # position lock with ALL optionals on: (ext, front, rE, ext_coh, axis, frames)
+    out = integrate_lif_field(
+        op, stim, return_field=True, coh_len=1.0, axis_accum=True,
+        return_frames=True, **kw)
+    assert len(out) == 6
+    assert out[2].shape == (N, N)             # rE snapshot
+    assert out[3].shape == (nsteps,)          # ext_coh
+    assert isinstance(out[-2], dict)          # axis dict is second-last
+    assert out[-1].shape == (nsteps, N, N)    # rE_frames is LAST
+
+    # backward-compat: default (no flags) stays a byte-identical 2-tuple
+    res = integrate_lif_field(op, stim, **kw)
+    assert isinstance(res, tuple) and len(res) == 2
