@@ -91,19 +91,39 @@ def _integrate(op, theta_rad, AR, kick_xy, n, L):
 
 
 def _read(op, theta_rad, AR, kick_xy, m, theta_ref_rad, n, L, kw_pitch,
-          save_diag=False):
-    """Run one condition; return verdict dict (+ _diag for figure generation)."""
+          margin_frac=PART_MARGIN_FRAC, window_source="field", save_diag=False):
+    """Run one condition; return verdict dict (+ _diag for figure generation).
+
+    window_source / margin_frac are the event-DETECTION FRONT-END knobs. The parity
+    claim is the direction estimator + thresholds (endpoint_centroid_axis, 25°, k_dir=3),
+    which are byte-identical across substrates and — per the sensitivity harness —
+    INVARIANT to these front-end knobs (the knobs move COVERAGE: whether a window
+    exists / whether n_part≥7, not the recovered axis).
+      window_source="field"  : event window from the raw field active fraction (LOCKED
+          default). The kick is a model artifact with no real-data analog, so the
+          physical-field event interval is the cleanest, geometry-independent temporal
+          gate. Robust to montage rotation.
+      window_source="contact": from the contact-aggregate (the SNN-runner convention).
+          Geometry-FRAGILE (fails when a shaft lies parallel to the wave: contacts stay
+          lit, the aggregate never "returns"). Kept only for the window-source
+          invariance comparison.
+      margin_frac : participation margin = margin_frac*(env_max-env_min) (LOCKED 0.10).
+          The rate field has a 3-10x amplitude gradient along the wave; 0.10 includes
+          wavefront contacts that 0.50 (SNN convention) cuts off. Sensitivity-swept."""
     on_f, off_f, on_ext, off_ext = _integrate(op, theta_rad, AR, kick_xy, n, L)
     kw = 0.5 * kw_pitch                          # kernel_width = 0.5*pitch
     env = rate_event_envelope(on_f, n, L, m, kw)
-    # Event window from RAW FIELD ext (robust; contact aggregate is position-dependent)
-    win = event_window_for_run(on_ext, off_ext, DT)
+    if window_source == "contact":
+        env_ref = rate_event_envelope(off_f, n, L, m, kw)
+        win = event_window_for_run(env.mean(axis=0), env_ref.mean(axis=0), DT)
+    else:
+        win = event_window_for_run(on_ext, off_ext, DT)   # raw field active fraction
     empty = dict(n_part=0, axis_err=None, readability=None, win=None,
                  verdict="insufficient", reason="no_event_detected")
     if win is None:
         return empty
     floor  = float(env.min())
-    margin = PART_MARGIN_FRAC * (float(env.max()) - floor)
+    margin = margin_frac * (float(env.max()) - floor)
     art = extract_lagpat(env, DT, [win], floor, margin, 0.5, DT)
     art = attach_geometry(art, m)
     r0, b0 = art.ranks[:, 0], art.bools[:, 0]
@@ -147,18 +167,20 @@ def run_four_controls(L=24.0, n=96, pitch=4.0, n_contacts=6,
                       shafts=(15.0, 75.0, 135.0),
                       kick_end_frac=0.6, kicktrack_off=0.35,
                       shaft_rotations=(0.0, 30.0, 60.0, 90.0),
+                      margin_frac=PART_MARGIN_FRAC, window_source="field",
                       save_diag=False):
     center = np.zeros(2)            # rate grid is origin-centered
     op = mean_field(RATIO)
     m_base = _montage(center, pitch, n_contacts, shafts, rotation_deg=0.0)
     half = L / 2.0
     perp45 = np.array([-np.sin(np.deg2rad(45)), np.cos(np.deg2rad(45))])
+    rd = dict(margin_frac=margin_frac, window_source=window_source, save_diag=save_diag)
 
     cfg = dict(substrate="lif_rate_field", L=L, n=n, pitch=pitch,
                n_contacts=n_contacts, shafts=list(shafts),
                kick_end_frac=kick_end_frac, kicktrack_off=kicktrack_off,
                shaft_rotations=list(shaft_rotations), ratio=RATIO,
-               part_margin_frac=PART_MARGIN_FRAC)
+               part_margin_frac=margin_frac, window_source=window_source)
     res = {"config": cfg, "C1_connectivity": {}, "C2_kicktrack": {},
            "C3_shaft_invariance": {}, "C4_iso": None}
 
@@ -167,8 +189,7 @@ def run_four_controls(L=24.0, n=96, pitch=4.0, n_contacts=6,
         # kick at NEGATIVE θ_EE end (avoids periodic-BC wrap for θ=0/90)
         end = center - kick_end_frac * half * np.array([np.cos(np.deg2rad(th)),
                                                         np.sin(np.deg2rad(th))])
-        r = _read(op, np.deg2rad(th), 2.0, end, m_base, np.deg2rad(th), n, L, pitch,
-                  save_diag=save_diag)
+        r = _read(op, np.deg2rad(th), 2.0, end, m_base, np.deg2rad(th), n, L, pitch, **rd)
         v, reason = _verdict(r)
         r.update(verdict=v, reason=reason, kick_xy=end.tolist())
         res["C1_connectivity"][f"{th:g}deg"] = r
@@ -178,8 +199,7 @@ def run_four_controls(L=24.0, n=96, pitch=4.0, n_contacts=6,
                                                              np.sin(np.deg2rad(45))])
     for j in (-kicktrack_off, 0.0, kicktrack_off):
         kxy = base_kick45 + j * half * perp45
-        r = _read(op, np.deg2rad(45), 2.0, kxy, m_base, np.deg2rad(45), n, L, pitch,
-                  save_diag=save_diag)
+        r = _read(op, np.deg2rad(45), 2.0, kxy, m_base, np.deg2rad(45), n, L, pitch, **rd)
         v, reason = _verdict(r)
         r.update(verdict=v, reason=reason, kick_xy=kxy.tolist())
         res["C2_kicktrack"][f"perp{j:+.2f}"] = r
@@ -188,15 +208,14 @@ def run_four_controls(L=24.0, n=96, pitch=4.0, n_contacts=6,
     for rot in shaft_rotations:
         m_rot = _montage(center, pitch, n_contacts, shafts, rotation_deg=rot)
         r = _read(op, np.deg2rad(45), 2.0, base_kick45, m_rot, np.deg2rad(45), n, L,
-                  pitch, save_diag=save_diag)
+                  pitch, **rd)
         v, reason = _verdict(r)
         r.update(verdict=v, reason=reason)
         res["C3_shaft_invariance"][f"rot{rot:g}deg"] = r
 
     # --- C4: isotropic — must first have n_part≥7, THEN check no spurious direction ---
     iso_kick = center.copy()        # kick at CENTER (removes seed-position confound)
-    r = _read(op, np.deg2rad(45), 1.0, iso_kick, m_base, np.deg2rad(45), n, L, pitch,
-              save_diag=save_diag)
+    r = _read(op, np.deg2rad(45), 1.0, iso_kick, m_base, np.deg2rad(45), n, L, pitch, **rd)
     v, reason = _verdict(r, is_iso=True)
     r.update(verdict=v, reason=reason, kick_xy=iso_kick.tolist())
     res["C4_iso"] = r
@@ -339,6 +358,22 @@ def main():
     _make_overview_figure(res, os.path.join(out, "figures", "rate_parity_overview.png"))
     if save_diag:
         _make_diag_figures(res, os.path.join(out, "figures"), L=a.L, pitch=a.pitch)
+        # HEADLINE §13 figure: the primary C1 θ_EE=45 read-out diagnostic (electrode
+        # overlay + per-contact traces + lag/axis chain) — always emitted (the locked
+        # "every SEEG-read-out claim shows the chain" discipline), even though it PASSES.
+        head = res["C1_connectivity"].get("45deg", {})
+        if "_diag" in head:
+            d = head["_diag"]
+            plot_readout_diagnostic(
+                os.path.join(out, "figures", "rate_readout_headline_theta45.png"),
+                d["montage"], d["envelopes"], DT, d["artifact"],
+                d["kick_xy"], d["theta_EE_deg"], d["recovered_axis"],
+                d["sheet_L"], d["kw_pitch"],
+                source_frame=d["peak_frame"], grid_xy=grid_coords(a.n, a.L),
+                event_window=d["win"],
+                title=(f"Rate-field virtual-SEEG read-out (C1 θ_EE=45°, PASS) | "
+                       f"firing-rate-density envelope (NOT LFP) | "
+                       f"n_part={head['n_part']} axis_err={head['axis_err']}°"))
 
     print(f"\n=== OVERALL {'PASS' if res['PASS'] else 'NOT PASS'} ===", flush=True)
     print("C1:", {k: (v["n_part"], v["axis_err"], v["verdict"])

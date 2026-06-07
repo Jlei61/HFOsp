@@ -62,15 +62,15 @@ def main() -> int:
         mback.append(np.nanmedian(back[m])); mdsig.append(np.nanmedian(dsig[m]))
         mdabs.append(np.nanmedian(dabs[m])); mrate.append(np.nanmedian(rate[m]))
     centers = np.array(centers)
-    axA.plot(centers, mback, "s-", color=BACK_C, label="read-back (knows full template)")
-    axA.plot(centers, mdsig, "o-", color=DENO_C, label="de novo, directed (from scratch)")
-    axA.plot(centers, mdabs, "o--", color=DENO_C, alpha=0.6, label="de novo, axis line only (|ρ|)")
-    axA.plot(centers, mrate, "^-", color=RATE_C, label="firing count")
+    axA.plot(centers, mback, "s-", color=BACK_C, label="read-back (global template known)")
+    axA.plot(centers, mdsig, "o-", color=DENO_C, label="de novo, directed (from scratch, signed)")
+    axA.plot(centers, mdabs, "o--", color=DENO_C, alpha=0.6, label="de novo, axis line (|ρ|, direction ignored)")
+    axA.plot(centers, mrate, "^:", color=RATE_C, alpha=0.7, label="firing count (operational reference)")
     axA.axhline(0, color="k", lw=0.7, alpha=0.5)
     axA.set_xscale("log")
     axA.set_xlabel("HFO events in window")
-    axA.set_ylabel("recovery of full-recording propagation axis\n(Spearman, window vs whole recording)")
-    axA.set_title("Discovering the axis from scratch vs reading it back")
+    axA.set_ylabel("recovery of full-recording propagation axis\n(Spearman ρ, window vs whole recording)")
+    axA.set_title("Can a short quiet window re-discover the full template?\n(ground truth = whole-recording axis)")
     axA.legend(frameon=False, loc="lower left", fontsize=8.5)
     axA.set_ylim(min(-0.05, np.nanmin(mdsig) - 0.05), 1.02)
     axA.grid(alpha=0.25)
@@ -85,13 +85,14 @@ def main() -> int:
     axB.barh(y, vals, color=colors)
     axB.axvline(0, color="k", lw=0.8)
     axB.set_yticks([])
-    axB.set_xlabel("de novo template − firing-count recovery, null-corrected\n(low-event windows, per subject)")
+    axB.set_xlabel("de novo directed recovery − null (low-event windows, per subject)\n"
+                   "[primary: recovery of full-recording axis; rate shown as operational reference]")
     med = np.median(vals) if vals else float("nan")
     cagg = cohort["cohort_all"]
     p_all = cagg["wilcoxon_p_primary"]
     p_str = "<0.001" if (p_all == p_all and p_all < 0.001) else (f"{p_all:.3f}" if p_all == p_all else "n/a")
-    axB.set_title(f"From-scratch advantage per subject (null-corrected)\n"
-                  f"(median {med:+.2f}, n={len(vals)}, {sum(v>0 for v in vals)}/{len(vals)} >0, p={p_str})")
+    axB.set_title(f"Short-window independent discovery: per-subject recovery\n"
+                  f"(null-corrected; median {med:+.2f}, n={len(vals)}, {sum(v>0 for v in vals)}/{len(vals)} >0, p={p_str})")
     axB.legend(handles=[Patch(color="#55a868", label="epilepsiae"), Patch(color="#8172b3", label="yuquan")],
                frameon=False, loc="lower right")
     axB.grid(alpha=0.25, axis="x")

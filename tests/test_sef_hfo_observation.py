@@ -221,40 +221,36 @@ def test_legacy_npz_loads_via_real_loader(tmp_path):
 
 
 def test_rate_field_artifact_round_trips_via_real_loader(tmp_path):
-    """Step-3 ENGINEERING GATE: a REAL rate-field read (not a toy) writes legacy
-    artifacts that the DOWNSTREAM loader (load_subject_propagation_events — what
-    Step 3 will consume) reads back with (1) channel order, (2) ms->s units, and
-    (3) NON-participating contacts NaN-ranked (no phantom) all preserved.
+    """Step-3 ENGINEERING GATE: the FINAL four-control runner's artifact — produced by
+    its ACTUAL per-condition read function (scripts.run_sef_hfo_obs_increment3a._read,
+    the exact code run_four_controls calls) under the LOCKED convention (field-ext event
+    window, 10% participation margin, 15/75/135 shafts, 4mm pitch, kick at the -theta_EE
+    end) — writes legacy artifacts that the DOWNSTREAM loader reads back with
+    (1) channel order, (2) ms->s units, (3) the PARTICIPATING-contact set, and
+    (4) NON-participating contacts NaN-ranked (no phantom) all preserved.
 
-    This proves Step 3 consumes a written-then-reloaded artifact, not a temporary
-    in-memory object. ~10s (runs two short rate-field integrations)."""
-    from src.sef_hfo_lif import mean_field, integrate_lif_field
-    from src.sef_hfo_rate_adapter import pulse_stim_fn, rate_event_envelope
+    Uses the runner's _read (NOT a hand-rolled old-param copy) so the writeback exercises
+    the convention the four-control verdict actually used (the previous version of this
+    test used contact-aggregate window + 50% margin + 10/70/130 shafts — a different
+    convention from the runner, so it did not cover the runner's output). ~30-60s
+    (one on+off rate-field integration via the runner's locked operating point)."""
+    from scripts.run_sef_hfo_obs_increment3a import _read, _montage, RATIO
+    from src.sef_hfo_lif import mean_field
     from src.sef_hfo_observation import (
         write_legacy_npz, write_packed_times, write_montage_manifest, MS_TO_S,
     )
-    from src.sef_hfo_snn_adapter import event_window_for_run
     from src.interictal_propagation import load_subject_propagation_events
 
-    op = mean_field(0.6)
-    n, L, dt = 96, 24.0, 0.25
-    theta = np.deg2rad(45.0)
-    pitch, ncon = 4.0, 4            # locked real-SEEG pitch; 3 shafts -> 12 contacts
-    kick = (0.6 * (L / 2) * np.cos(theta), 0.6 * (L / 2) * np.sin(theta))   # theta_EE end
-    sf = pulse_stim_fn(kick, 2.0, 8.0, 0.0, 30.0, n, L)
-    on = integrate_lif_field(op, sf, dt=dt, t_max=200.0, theta_EE=theta, n=n, L=L,
-                             return_frames=True)[-1]
-    off = integrate_lif_field(op, lambda t: 0.0, dt=dt, t_max=200.0, theta_EE=theta,
-                              n=n, L=L, return_frames=True)[-1]
-    m = merge_montages([build_shaft(np.deg2rad(a), pitch, ncon, (0.0, 0.0), chr(65 + i))
-                        for i, a in enumerate((10.0, 70.0, 130.0))])
-    env = rate_event_envelope(on, n, L, m, kernel_width=0.5 * pitch)
-    env_ref = rate_event_envelope(off, n, L, m, kernel_width=0.5 * pitch)
-    win = event_window_for_run(env.mean(0), env_ref.mean(0), dt)
-    assert win is not None, "rate read produced no detectable event window"
-    art = extract_lagpat(env, dt, [win], float(env.min()),
-                         0.5 * (float(env.max()) - float(env.min())), 0.5, dt)
-    art = attach_geometry(art, m)
+    op = mean_field(RATIO)
+    L, n, pitch = 24.0, 96, 4.0
+    center = np.zeros(2)
+    m = _montage(center, pitch, 6, (15.0, 75.0, 135.0), rotation_deg=0.0)
+    # C1 theta_EE=45 PASSING condition, with the runner's locked convention:
+    kick = -0.6 * (L / 2) * np.array([np.cos(np.deg2rad(45.0)), np.sin(np.deg2rad(45.0))])
+    r = _read(op, np.deg2rad(45.0), 2.0, kick, m, np.deg2rad(45.0), n, L, pitch,
+              margin_frac=0.10, window_source="field", save_diag=True)
+    assert "_diag" in r, "runner _read produced no event window / artifact"
+    art = r["_diag"]["artifact"]
 
     # The read must exercise the mask: some contacts participate, some do not.
     part_any = art.bools.any(axis=1)
@@ -269,11 +265,13 @@ def test_rate_field_artifact_round_trips_via_real_loader(tmp_path):
 
     # (1) channel order preserved through the real loader
     assert list(loaded["channel_names"]) == art.names
-    # (2) participating timings round-trip in SECONDS (ms -> s)
+    # (2) the PARTICIPATING-contact set round-trips unchanged (user: 参与触点一致)
+    np.testing.assert_array_equal(loaded["bools"][:, 0], art.bools[:, 0])
+    # (3) participating timings round-trip in SECONDS (ms -> s)
     p0 = art.bools[:, 0]
     np.testing.assert_allclose(loaded["lag_raw"][p0, 0], art.lag_raw[p0, 0] * MS_TO_S,
                                rtol=1e-6, atol=1e-12)
-    # (3) NON-participating contacts come back NaN-ranked AND NaN-lag (no phantom)
+    # (4) NON-participating contacts come back NaN-ranked AND NaN-lag (no phantom)
     nonpart = ~loaded["bools"]
     assert nonpart.any()
     assert np.isnan(loaded["ranks"][nonpart]).all(), "phantom finite rank survived round-trip"

@@ -362,11 +362,15 @@ def main() -> int:
 
     out = {"meta": {"analysis": "de novo short-window template discovery (LR-7)",
                     "window_minutes": args.window_min, "min_ch": MIN_CH, "n_null": N_NULL,
-                    "primary_metric": "SIGNED de novo template recovery excess in LOW-event windows (pre-specified)",
-                    "decomposition": "|.| axis-line excess + polarity-free endpoint-union (reported alongside)",
-                    "paired_contrast": "peek_cost = excess_global - excess_denovo_signed (cost of forbidding the read-back peek)",
-                    "consistency": "median_low_excess_global should reproduce the read-back main result (+0.131)",
-                    "framing": "stress test of read-back, NOT a refutation; exploratory (no held-out)",
+                    "scientific_question": "Can a low-event window, using ONLY its own events, re-discover the "
+                                          "full-recording propagation structure? Ground truth = whole-recording axis.",
+                    "primary_metric": "SIGNED recovery of the full-recording axis from scratch in LOW-event windows "
+                                      "(template_repro_denovo_signed = Spearman(window_denovo_axis, full_axis))",
+                    "decomposition": "|.| axis-line recovery (direction ignored) + polarity-free endpoint-union secondary",
+                    "rate_role": "operational reference only -- rate and de novo template estimate different quantities",
+                    "consistency_check": "median_low_excess_global should reproduce the read-back main result (+0.131)",
+                    "framing": "negative result about SHORT-WINDOW INDEPENDENT DISCOVERY capability; does not negate "
+                               "the read-back result (which requires knowing the full template)",
                     "denovo_seeds": seeds, "n_subjects": len(per_subject)},
            "skipped": skipped,
            "seed_robustness": seed_robustness,

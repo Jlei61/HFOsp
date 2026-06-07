@@ -1,0 +1,420 @@
+{
+  "margin_sweep": {
+    "C1:0deg": {
+      "m10": {
+        "axis_err": 1.1,
+        "n_part": 11
+      },
+      "m20": {
+        "axis_err": 11.3,
+        "n_part": 10
+      },
+      "m30": {
+        "axis_err": 11.3,
+        "n_part": 9
+      }
+    },
+    "C1:45deg": {
+      "m10": {
+        "axis_err": 3.3,
+        "n_part": 12
+      },
+      "m20": {
+        "axis_err": 3.3,
+        "n_part": 12
+      },
+      "m30": {
+        "axis_err": 3.7,
+        "n_part": 8
+      }
+    },
+    "C1:90deg": {
+      "m10": {
+        "axis_err": 1.1,
+        "n_part": 11
+      },
+      "m20": {
+        "axis_err": 11.3,
+        "n_part": 10
+      },
+      "m30": {
+        "axis_err": 11.3,
+        "n_part": 9
+      }
+    },
+    "C2:perp-0.35": {
+      "m10": {
+        "axis_err": 20.5,
+        "n_part": 9
+      },
+      "m20": {
+        "axis_err": null,
+        "n_part": 5
+      },
+      "m30": {
+        "axis_err": null,
+        "n_part": 2
+      }
+    },
+    "C2:perp+0.00": {
+      "m10": {
+        "axis_err": 3.3,
+        "n_part": 12
+      },
+      "m20": {
+        "axis_err": 3.3,
+        "n_part": 12
+      },
+      "m30": {
+        "axis_err": 3.7,
+        "n_part": 8
+      }
+    },
+    "C2:perp+0.35": {
+      "m10": {
+        "axis_err": 20.5,
+        "n_part": 9
+      },
+      "m20": {
+        "axis_err": null,
+        "n_part": 5
+      },
+      "m30": {
+        "axis_err": null,
+        "n_part": 2
+      }
+    },
+    "C3:rot0deg": {
+      "m10": {
+        "axis_err": 3.3,
+        "n_part": 12
+      },
+      "m20": {
+        "axis_err": 3.3,
+        "n_part": 12
+      },
+      "m30": {
+        "axis_err": 3.7,
+        "n_part": 8
+      }
+    },
+    "C3:rot30deg": {
+      "m10": {
+        "axis_err": 0.0,
+        "n_part": 10
+      },
+      "m20": {
+        "axis_err": 3.7,
+        "n_part": 9
+      },
+      "m30": {
+        "axis_err": null,
+        "n_part": 6
+      }
+    },
+    "C3:rot60deg": {
+      "m10": {
+        "axis_err": 7.3,
+        "n_part": 12
+      },
+      "m20": {
+        "axis_err": 7.3,
+        "n_part": 12
+      },
+      "m30": {
+        "axis_err": 10.9,
+        "n_part": 8
+      }
+    },
+    "C3:rot90deg": {
+      "m10": {
+        "axis_err": 0.0,
+        "n_part": 10
+      },
+      "m20": {
+        "axis_err": 3.7,
+        "n_part": 9
+      },
+      "m30": {
+        "axis_err": null,
+        "n_part": 6
+      }
+    },
+    "C4:iso": {
+      "m10": {
+        "axis_err": null,
+        "n_part": 12
+      },
+      "m20": {
+        "axis_err": null,
+        "n_part": 6
+      },
+      "m30": {
+        "axis_err": null,
+        "n_part": 6
+      }
+    }
+  },
+  "window_sweep": {
+    "C1:0deg": {
+      "field": {
+        "axis_err": 1.1,
+        "n_part": 11,
+        "win": true
+      },
+      "contact": {
+        "axis_err": 1.1,
+        "n_part": 11,
+        "win": true
+      }
+    },
+    "C1:45deg": {
+      "field": {
+        "axis_err": 3.3,
+        "n_part": 12,
+        "win": true
+      },
+      "contact": {
+        "axis_err": 3.3,
+        "n_part": 12,
+        "win": true
+      }
+    },
+    "C1:90deg": {
+      "field": {
+        "axis_err": 1.1,
+        "n_part": 11,
+        "win": true
+      },
+      "contact": {
+        "axis_err": 1.1,
+        "n_part": 11,
+        "win": true
+      }
+    },
+    "C2:perp-0.35": {
+      "field": {
+        "axis_err": 20.5,
+        "n_part": 9,
+        "win": true
+      },
+      "contact": {
+        "axis_err": null,
+        "n_part": 0,
+        "win": false
+      }
+    },
+    "C2:perp+0.00": {
+      "field": {
+        "axis_err": 3.3,
+        "n_part": 12,
+        "win": true
+      },
+      "contact": {
+        "axis_err": 3.3,
+        "n_part": 12,
+        "win": true
+      }
+    },
+    "C2:perp+0.35": {
+      "field": {
+        "axis_err": 20.5,
+        "n_part": 9,
+        "win": true
+      },
+      "contact": {
+        "axis_err": null,
+        "n_part": 0,
+        "win": false
+      }
+    },
+    "C3:rot0deg": {
+      "field": {
+        "axis_err": 3.3,
+        "n_part": 12,
+        "win": true
+      },
+      "contact": {
+        "axis_err": 3.3,
+        "n_part": 12,
+        "win": true
+      }
+    },
+    "C3:rot30deg": {
+      "field": {
+        "axis_err": 0.0,
+        "n_part": 10,
+        "win": true
+      },
+      "contact": {
+        "axis_err": null,
+        "n_part": 0,
+        "win": false
+      }
+    },
+    "C3:rot60deg": {
+      "field": {
+        "axis_err": 7.3,
+        "n_part": 12,
+        "win": true
+      },
+      "contact": {
+        "axis_err": 7.3,
+        "n_part": 12,
+        "win": true
+      }
+    },
+    "C3:rot90deg": {
+      "field": {
+        "axis_err": 0.0,
+        "n_part": 10,
+        "win": true
+      },
+      "contact": {
+        "axis_err": null,
+        "n_part": 0,
+        "win": false
+      }
+    },
+    "C4:iso": {
+      "field": {
+        "axis_err": null,
+        "n_part": 12,
+        "win": true
+      },
+      "contact": {
+        "axis_err": 30.0,
+        "n_part": 12,
+        "win": true
+      }
+    }
+  },
+  "invariance": {
+    "C1:0deg": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "pass"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": 0.0,
+      "both_windows_exist": true
+    },
+    "C1:45deg": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "pass"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": 0.0,
+      "both_windows_exist": true
+    },
+    "C1:90deg": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "pass"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": 0.0,
+      "both_windows_exist": true
+    },
+    "C2:perp-0.35": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "insufficient",
+        "m30": "insufficient"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": "contact_has_no_window",
+      "both_windows_exist": false
+    },
+    "C2:perp+0.00": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "pass"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": 0.0,
+      "both_windows_exist": true
+    },
+    "C2:perp+0.35": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "insufficient",
+        "m30": "insufficient"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": "contact_has_no_window",
+      "both_windows_exist": false
+    },
+    "C3:rot0deg": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "pass"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": 0.0,
+      "both_windows_exist": true
+    },
+    "C3:rot30deg": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "insufficient"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": "contact_has_no_window",
+      "both_windows_exist": false
+    },
+    "C3:rot60deg": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "pass"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": 0.0,
+      "both_windows_exist": true
+    },
+    "C3:rot90deg": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "pass",
+        "m30": "insufficient"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": "contact_has_no_window",
+      "both_windows_exist": false
+    },
+    "C4:iso": {
+      "margin_verdicts": {
+        "m10": "pass",
+        "m20": "insufficient",
+        "m30": "insufficient"
+      },
+      "any_fail_over_margin": false,
+      "axis_err_field_vs_contact": null,
+      "both_windows_exist": true
+    }
+  },
+  "summary": {
+    "window_axis_err_invariant": true,
+    "max_axis_err_field_vs_contact": 0.0,
+    "margin_never_flips_to_fail": true,
+    "max_axis_err_drift_over_margin": 10.2,
+    "axis_err_drift_per_stable_condition": {
+      "C1:0deg": 10.2,
+      "C1:45deg": 0.4,
+      "C1:90deg": 10.2,
+      "C2:perp+0.00": 0.4,
+      "C3:rot0deg": 0.4,
+      "C3:rot60deg": 3.6
+    },
+    "n_conditions_contact_window_missing": 4,
+    "VERDICT_ROBUST": true
+  }
+}

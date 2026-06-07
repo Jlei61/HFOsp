@@ -105,70 +105,76 @@
 
 ---
 
-## De novo 那层（LR-7，压力测试，NULL）
+## De novo 那层（LR-7）：短窗独立发现能力 — 负结果
 
 **日期**：2026-06-07
 **代码**：`src/low_rate_template_stability.py`（`denovo_window_axis`, `_fast_2means`, `window_recovery_paired`, `count_matched_null_gap_paired`）+ `scripts/run_low_rate_denovo.py` + `scripts/plot_low_rate_denovo.py` + `tests/test_low_rate_denovo.py`（17 tests 全绿）。
 **结果**：`results/topic4_sef_hfo/low_rate_template_stability/{cohort_denovo.json, per_subject_denovo/*.json, figures/denovo_recovery_vs_event_count.png}`。
 
-### 这层在测什么（不是什么）
+### 科学靶子（三档指标，主次分明）
 
-和主结果（read-back）的**唯一区别**：主结果里每个低事件窗"借用全程逐事件归属"来定方向（知道答案）；这一层**禁止看答案**——每个窗自己对窗内事件重新分两堆、自己定哪头是源头（更大的那堆定向、更小的堆翻转到同一轴），不依赖全程标签。其余全不变：rate 基线、common-channel 掩码、count-matched null 结构、结果文件。
+这层要回答的问题是：**低事件窗只用自己的事件重新算模板，能不能恢复多事件/全程数据里看到的同一条传播结构？** 全程数据是 ground truth；评分始终是"短窗从零算出的结果 vs 全程答案"。
 
-这样 global（read-back）和 de novo 在**同一批窗、同一批随机抽样**上配对算——两者之差 = **不让偷看的代价（peek_cost）**。
+和主结果（read-back）的唯一区别：主结果里每个低事件窗借用全程逐事件归属来定方向；这一层**禁止看全程答案**，只用窗内事件自己重新聚类。数字上 `template_repro_denovo_signed = Spearman(window_denovo_axis, full_axis)`——分子和分母都是明确的：窗内自己算的轴 vs 全程轴。
+
+**三档指标（预先锁定，都报）**：
+
+1. **主指标 — 恢复全程传播方向（signed）**：短窗从零算的源→汇方向，与全程源→汇方向的 Spearman 相关（有符号，方向翻了记负）。这是"能不能独立发现同一条有向传播结构"。
+2. **分解指标 — 恢复轴线但不管方向（|·|）**：只问"是不是同一组通道在轴两端"，不问哪头是源。解释失败原因：短窗经常找到了轴线、但方向认反了。
+3. **端点 secondary — 恢复源/汇端点集合（无极化 union Jaccard）**：离散 top-k 问题，粗读数，见下方 secondary 节。
+
+**Rate 是操作性参照，不是主对手**：rate 和 de novo template 估计的是不同对象（"哪个通道响得多" vs "传播先后结构"），不应直接作为主竞争对手报告。但作为操作性问题——"如果短窗只能用自己的数据、要选一个 fingerprint，de novo template 是否比发放计数更可靠"——rate 是合理的参照，结果见下。
 
 ### 朴素话结论
 
-**测了什么**：低事件窗里，"不知道全程模板、自己重聚类"能不能发现出和全程一样的传播方向，并且比"通道发放计数排名"更靠谱。
+**测了什么**：低事件窗里，只用这段时间自己的 HFO 事件（不看全程），能不能重新发现全程里那条"哪个通道先放电、哪个后放电"的传播模板。
 
-**怎么测的**：主结果 read-back 在 +0.131，说明"知道全程答案时读回是靠谱的"。这一层把"知道答案"拿掉，看从零发现能不能一样好。预先锁定：带符号的方向恢复是主指标（同口径可以和 +0.131 对比）；另报 |·|（只问轴线不问哪头是源）和无序端点并集；主定义"两者之差 = peek cost"。
+**怎么测的**：每个 1 小时窗，把窗内事件自己分两堆、自己决定哪堆是源头方向，然后算出一条轴；再和全程轴比相关（signed）。同时也报"只看轴线两端是否一样、不管哪头叫源"（|·|）。**Ground truth 始终是全程轴，不是 rate。**
 
 **揭示了什么**：
 
-- **绝对恢复水平（能不能发现）**：低事件窗里 read-back = 0.88 >> de novo 带方向 = 0.52，而且 de novo 带方向（0.52）在 epilepsiae 里连发放计数（0.66）都不如——**从零发现是这三者里最差的读数**。
-- **配对 RAW 差（更直白的指标）**：de novo 带方向 - 计数，epilepsiae 中位 **−0.167**，ALL **−0.069**。de novo **输给计数**。
-- **null 校正（扣掉"小样本聚类本来就不稳"的部分）**：ALL +0.022（16/28，p=0.104，**NULL**）；epilepsiae +0.007（8/15，p=0.598，**NULL**）；yuquan +0.143（8/13，p=0.025，但见下方红旗）。
-- **一致性检验通过**：同一 pipeline 的 global（read-back）臂，epilepsiae 一致性 +0.156 vs 主结果 +0.153，误差 0.003——**不是 pipeline 回归**，de novo 劣势是真实差距。
+- **主指标（能不能从零发现方向）**：低事件窗里，从零恢复全程传播方向很难。低档绝对恢复：read-back 0.88 > de novo |·| 0.64 > de novo signed 0.52。epilepsiae 多天记录 de novo signed 只有 0.36，且三个种子全部不显著（p=0.60，NULL）。
+- **分解（轴线 vs 方向）**：约 12% 的窗 signed < 0 而 |·| > 0.5——轴线本身部分恢复，但方向认反了。这些窗集中在少事件（中位 66 事件）+ 有正反模板的被试：少事件时随机偷到大堆 → 方向歧义。这是短窗独立发现的核心困难，不是代码 bug。
+- **操作性参照（rate）**：作为短窗 fingerprint，de novo template 在 epilepsiae 里也不比发放计数更可靠（epi low 档 de novo signed 0.36 < rate 0.66）。这说明短窗里"传播先后"这个信号不比"谁响得多"更易提取——不是"模板稳定性差"，而是"从短窗里独立学模板这件事本身很难"。
+- **一致性通过（重要对照）**：同一 pipeline 的 read-back 臂复现 epi +0.156（vs 主结果 +0.153）——de novo 的劣势是真实的认知门槛，不是 pipeline 回归。
 
-**诚实主句**：低事件窗里，从零自己发现传播模板的方向，**没有比发放计数更靠谱**，带方向指标在 epilepsiae 里 RAW 差 −0.167（反而不如计数）；null 扣完约为 0 意味着"从零聚类的劣势中大头是通用的小样本聚类不稳，不是额外时间漂移"。这是对 read-back 主结果的**压力测试不是推翻**——read-back 的优势依赖"已知全程模板"，这是真实的认知门槛。
+**科学意义（重要）**：这个负结果实际上**有正面的科学内容**：传播模板是一个需要用多事件/全程数据先学习出来的稳定结构；它不是短窗里随手可发现的结构。这直接支持了主结果里"read-back 读回"这一框架的正当性——read-back 是真实有意义的操作（先建模板，再看短窗能否对齐），而不是一个平凡的自我印证。
 
 ### 关键数字
 
-| 队列 | 绝对水平 low（read-back / de novo signed / rate） | RAW 配对差（de novo - rate） | EXCESS（扣 null） | p |
+**主指标：低事件窗从零恢复全程方向（de novo signed absolute）**
+
+| 队列 | read-back 绝对水平 | de novo signed 绝对水平 | de novo |·| 绝对水平 | p（de novo signed > null） |
 |---|---|---|---|---|
-| ALL (n=28) | 0.88 / 0.52 / 0.70 | −0.069 | +0.022 (16/28) | 0.104 (NULL) |
-| epilepsiae (n=15) | 0.83 / **0.36** / 0.66 | **−0.167** | +0.007 (8/15) | 0.598 (NULL) |
-| yuquan (n=13) | 0.89 / 0.79 / 0.78 | +0.002 | +0.143 (8/13) | 0.025 ⚠️ |
+| ALL (n=28) | 0.88 | 0.52 | 0.64 | 0.104 (NULL) |
+| epilepsiae (n=15) | 0.83 | **0.36** | 0.48 | 0.598 (NULL) |
+| yuquan (n=13) | 0.89 | 0.79 | 0.82 | 0.025 ⚠️ |
 
-⚠️ **yuquan p=0.025 是伪正结果**：去掉 gaolan 和 huanghanwen 后中位 +0.143 → +0.021、p 0.025 → 0.087（NULL，重算确认）。这两个被试的大 excess 来源是 **rate_repro 崩溃**（gaolan low 窗 rate_repro 中位 −0.34，huanghanwen +0.05）——rate 失灵不等于 de novo 成功。加之 yuquan 仅单 seed、每被试低档窗 4-11 个。三重脆弱。
+⚠️ **yuquan p=0.025 不是真正的正结果**：去掉 gaolan 和 huanghanwen 后 p → 0.087（NULL）。这两个被试的大 excess 来源是 rate_repro 崩溃（gaolan low 窗 rate_repro 中位 −0.34），不是 de novo 成功。加之 yuquan 仅单 seed、每被试低档窗 4-11 个。三重脆弱。
 
-**Peek cost（不让偷看的代价，配对中位）**：epilepsiae +0.104，ALL +0.004（yuquan 平）——对 epilepsiae 多天记录，拿走全程模板标签、低事件窗几乎全吃掉 read-back 的优势。
+**操作性参照（rate）**：epi low 档 de novo signed 0.36 < rate 0.66；ALL RAW 配对差（de novo - rate）= −0.069（epi −0.167）。作为短窗 fingerprint，de novo template 在 epilepsiae 里甚至不如发放计数。这是一个关于短窗独立学习能力的操作性事实，不是"模板比率差"的结论（两者估计的对象不同）。
 
-**极化（polarity）分解**：de novo |·|（只问轴线） = 0.64 > de novo signed = 0.52，gap = 0.12（低档）→ 0.02（高档）。约 11.7% 的窗 signed < 0 且 |·| > 0.5（翻了方向），这些窗集中在有正反两套模板的被试（reversed=True，13.0% vs reversed=False 2.2%）、且集中在**低事件数**（中位 66 vs 全窗 156）——少事件 → 反向模板半数运气偷到大堆 → 方向认反但轴线本身还可以。这是真实的**方向歧义**，不是 flip 代码 bug（direction-pure 被试 1150/922 该现象近零）。
+**方向失败机制（分解）**：de novo |·| = 0.64 > de novo signed = 0.52，gap = 0.12（低档）→ 0.02（高档）。约 11.7% 的窗 signed < 0 且 |·| > 0.5，集中在 reversed=True 被试（13.0% vs 2.2%）和低事件数窗（中位 66 vs 156）。方向歧义在少事件时最严重，事件多时四线并拢。
 
-**M-分级 de novo signed excess**：
-`≤2(分辨不开) −0.20` → `3-4 −0.05` → `5-20 +0.12` → `21-100 +0.02` → `>100 0.00`。仅 M=5-20 档轻度正向，其余负或零。
+**三 seed 稳健性（ALL）**：p = 0.104 / 0.093 / 0.181，全 NULL。
 
-**种子稳健性**（全队列 ALL primary）：seed 0 p=0.104 / seed 1 p=0.093 / seed 2 p=0.181——三个种子全 NULL。
+**端点 secondary（无极化 union）**：ALL RAW −0.143，EXCESS +0.000，p=0.246，NULL。
 
-**端点并集 secondary（无极化）**：ALL RAW −0.143，EXCESS +0.000（11/27，p=0.246，NULL）。
-
-### 对抗验证（3 agent，2026-06-07）
-
-- **独立重算**（不导入生产 de novo 函数，用 sklearn KMeans 独立实现）：epilepsiae 1073 low 档 [read-back 0.943, de novo signed 0.343, |·| 0.457, rate 0.547] 与 JSON 精确一致（delta < 0.01）。CONFIRMED。
-- **polarity/sign 审计**：abs == |signed| 全 2708 窗误差为 0；reversed-dom 窗集中在 reversed=True 被试、集中于低事件数（中位 66）；direction-pure 被试近零（0/113, 0/24, 0/26, 1/155）——是真实方向歧义而非 flip bug。CONFIRMED（一个 framing 修正：reverse-dom 在低事件数、不是高事件数，见上方纠正）。
-- **诚实性批评**：RAW paired gap (EPI −0.167) 必须明报、不能只报 null-corrected +0.022；yuquan p=0.025 是率崩溃伪正、需标注脆弱。已上述纠正纳入。CONFIRMED_WITH_CAVEAT（已修复）。
-- **优化审计**（inline 检查）：`_null_m` 对 m≤25 精确（低档 53% 窗覆盖，主指标不受 bucketing 影响）；fast-2means 与 sklearn 分离测试结果一致；单线程修复（OMP_NUM_THREADS=1）去除了 ~29ms/call OpenMP 开销后仍需 M-bucketing 才实用。CONFIRMED。
-
-### 与主结果的关系（不矛盾，有边界）
+**Read-back 与 de novo 对比（不矛盾，是互补）**：
 
 | | 主结果（read-back） | 本层（de novo） |
 |---|---|---|
-| **测的是什么** | 已知全程模板，短窗能不能读回 | 不知全程模板，短窗能不能从零发现 |
-| **低档 epi 绝对恢复** | 0.83 | 0.36（低于计数 0.66） |
-| **epi null-corrected excess** | +0.153 (p=0.003) | +0.007 (p=0.598) |
-| **结论** | 时间稳健读数（read-back） | 短时记录无法独立发现 |
+| **操作定义** | 已知全程模板，短窗投影到全程轴读回 | 短窗只用自己事件，从零算轴并和全程比 |
+| **epi low 档 signed 绝对值** | 0.83 | 0.36 |
+| **epi 检验** | +0.153 (p=0.003) ✓ | NULL (p=0.60) |
+| **科学内容** | 模板是稳定时间读数（需要全程） | 短窗无法独立建立可靠模板 |
 
-**统一诚实主句（两层合并）**："HFO 传播模板在全程记录里是比发放计数更稳的时间读数（read-back +0.131）；但这个优势依赖已知全程模板——如果只有一段短时安静时段、没有全程参考，从零发现传播方向比发放计数更差（epi RAW −0.167）。模板稳健性是一个读数时间稳定性现象；能否用短时记录独立发现，是另一个更难的问题，当前结果否定它。"
+**统一主句**：全程传播模板是一个需要多事件数据学习出来的稳定结构——一旦建立，低事件短窗能稳定读回它（read-back +0.131）；但低事件短窗无法从零独立发现它，尤其是方向（epi de novo signed 0.36，NULL）。这两层合在一起，清楚描述了这个结构的性质：**稳定但需先验**。
 
-（内部归档代号：LR-7, denovo_window_axis, _fast_2means, window_recovery_paired, count_matched_null_gap_paired, peek_cost, polarity-free endpoint union, seed robustness）
+### 对抗验证摘要（3 agent，2026-06-07）
+
+- 独立重算（sklearn KMeans 独立实现）：1073 low 档 de novo signed 0.343 与 JSON 精确吻合（< 0.01 delta），rate 0.547 > de novo，read-back 0.943。CONFIRMED。
+- polarity/sign 审计：abs == |signed| 全 2708 窗误差为 0；reverse-dom 窗集中在低事件数（中位 66）+ reversed=True 被试；direction-pure 被试近零。是真实方向歧义，非 flip bug。CONFIRMED。
+- 优化审计（inline）：`_null_m` m≤25 精确，覆盖 53% low 窗；fast-2means 分离测试与 sklearn 一致。CONFIRMED。
+
+（内部归档代号：LR-7, denovo_window_axis, _fast_2means, window_recovery_paired, count_matched_null_gap_paired, peek_cost, polarity/direction ambiguity, seed robustness）
