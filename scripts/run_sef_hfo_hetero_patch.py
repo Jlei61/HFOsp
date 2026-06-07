@@ -77,6 +77,70 @@ def analyze_patch(ratio=1.0, x_patch=0.0, r_patch=2.0, vth_std_wide=1.5,
                     d_max_ext_pure=matched["max_ext"] - base["max_ext"]))
 
 
+MARGIN_OUT = Path("results/topic4_sef_hfo/heterogeneity/margin.json")
+_RUNAWAY = ("runaway", "global_synchronous")
+
+
+def _label_and_peak(op, A, x_patch, r_patch, core_vm, core_std, surr_vm, surr_std, t_max):
+    X, Y = _grid(96, 12.0)
+    pulse = lambda t: (A * (((X - x_patch) ** 2 + Y ** 2) <= r_patch ** 2) if t < 30.0 else 0.0)
+    ext, front, peak = integrate_hetero_field(
+        op, pulse, x_patch=x_patch, r_patch=r_patch,
+        vth_mean_core=core_vm, vth_std_core=core_std,
+        vth_mean_surround=surr_vm, vth_std_surround=surr_std,
+        t_max=t_max, return_peak_field=True)
+    label, info = classify_response(ext, front)
+    return label, info["max_ext"], float(peak.max())
+
+
+def analyze_margin(ratio=1.0, x_patch=-3.0, r_patch=2.0, vth_std_wide=1.5,
+                   vth_std_narrow=0.5, A_grid=(8, 24, 48, 80, 200), t_max=120.0):
+    """Finite-pulse safety margin (spec §2C order parameter). Vary ONLY stimulus
+    amplitude A; find A_runaway (first A with a runaway/global label) for baseline
+    (uniform wide) vs mean_matched (narrow core in wide surround), both mean-matched to
+    nuE, co-located patch+seed. S compression = A_runaway_narrow < A_runaway_wide (the
+    Rich direction the linear map + fixed-A label cannot detect). The A_grid spans into
+    the saturation plateau (high A) so a None A_runaway means UNREACHABLE, not just
+    out-of-grid. Direction computed not preset (spec §7)."""
+    op = mean_field(ratio)
+    muE, sE, nuE = op["muE"], op["sE"], op["nuE"]
+    vm_wide = mean_match_vth(nuE, muE, sE, TAU_ME, TREF_E, vth_std_wide)
+    vm_narrow = mean_match_vth(nuE, muE, sE, TAU_ME, TREF_E, vth_std_narrow)
+
+    def sweep(core_vm, core_std):
+        rows, a_run = [], None
+        for A in A_grid:
+            lbl, mx, pk = _label_and_peak(op, float(A), x_patch, r_patch,
+                                          core_vm, core_std, vm_wide, vth_std_wide, t_max)
+            rows.append(dict(A=float(A), label=lbl, max_ext=mx, peak_rE_max=pk))
+            if a_run is None and lbl in _RUNAWAY:
+                a_run = float(A)
+        # saturation flag: top-two A give the same max_ext => response saturated => a None
+        # A_runaway is genuinely unreachable, not merely beyond the grid.
+        saturated = (len(rows) >= 2 and abs(rows[-1]["max_ext"] - rows[-2]["max_ext"]) < 1e-3)
+        return dict(A_runaway=a_run, saturated_at_high_A=saturated, sweep=rows)
+
+    wide = sweep(vm_wide, vth_std_wide)
+    narrow = sweep(vm_narrow, vth_std_narrow)
+    ar_w, ar_n = wide["A_runaway"], narrow["A_runaway"]
+    return dict(
+        operating_point=dict(nuE=nuE, muE=muE, sE=sE),
+        params=dict(vth_std_wide=vth_std_wide, vth_std_narrow=vth_std_narrow, x_patch=x_patch,
+                    r_patch=r_patch, vm_wide=vm_wide, vm_narrow=vm_narrow,
+                    A_grid=list(A_grid), t_max=t_max),
+        baseline_wide=wide, mean_matched_narrow=narrow,
+        interpretation=dict(
+            note="Vary ONLY A; A_runaway = first A with runaway/global label. Both None + "
+                 "saturated_at_high_A True => the finite-pulse margin is UNBOUNDED (no kick "
+                 "amplitude triggers runaway; response saturates) for that layer. S "
+                 "compression = A_runaway_narrow < A_runaway_wide. Direction computed not "
+                 "preset (spec §7).",
+            A_runaway_wide=ar_w, A_runaway_narrow=ar_n,
+            margin_compressed=(ar_n is not None and ar_w is not None and ar_n < ar_w),
+            both_unbounded=(ar_w is None and ar_n is None
+                            and wide["saturated_at_high_A"] and narrow["saturated_at_high_A"])))
+
+
 def run():
     # Two patch placements: co-located with the seed (does narrowing make the SEED site
     # the nucleation hotspot?) and downstream at center (does a propagating wave get
@@ -98,5 +162,23 @@ def run():
               f"Δmax_ext={it['d_max_ext_pure']:+.4f}")
 
 
+def run_margin():
+    """Finite-pulse safety-margin S sweep (spec §2C real gate) — writes margin.json."""
+    res = analyze_margin()
+    MARGIN_OUT.parent.mkdir(parents=True, exist_ok=True)
+    MARGIN_OUT.write_text(json.dumps(res, indent=2))
+    print(f"wrote {MARGIN_OUT}")
+    it = res["interpretation"]
+    for tag in ("baseline_wide", "mean_matched_narrow"):
+        L = res[tag]
+        plateau = "  ".join(f"A{r['A']:.0f}:{r['max_ext']:.3f}" for r in L["sweep"])
+        print(f"  {tag:20s} A_runaway={L['A_runaway']} saturated={L['saturated_at_high_A']}  [{plateau}]")
+    print(f"  margin_compressed={it['margin_compressed']}  both_unbounded={it['both_unbounded']}")
+
+
 if __name__ == "__main__":
-    run()
+    import sys as _sys
+    if len(_sys.argv) > 1 and _sys.argv[1] == "margin":
+        run_margin()
+    else:
+        run()

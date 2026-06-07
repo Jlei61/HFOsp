@@ -1,0 +1,102 @@
+{
+  "operating_point": {
+    "nuE": 0.0002226553708647553,
+    "muE": 8.377010357299127,
+    "sE": 4.0694866012736135
+  },
+  "params": {
+    "vth_std_wide": 1.5,
+    "vth_std_narrow": 0.5,
+    "x_patch": -3.0,
+    "r_patch": 2.0,
+    "vm_wide": 18.97973607840528,
+    "vm_narrow": 18.113809299912795,
+    "A_grid": [
+      8,
+      24,
+      48,
+      80,
+      200
+    ],
+    "t_max": 120.0
+  },
+  "baseline_wide": {
+    "A_runaway": null,
+    "saturated_at_high_A": true,
+    "sweep": [
+      {
+        "A": 8.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.15635850694444445,
+        "peak_rE_max": 0.023947005062212617
+      },
+      {
+        "A": 24.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.2231987847222222,
+        "peak_rE_max": 0.027170727956974217
+      },
+      {
+        "A": 48.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.23838975694444445,
+        "peak_rE_max": 0.05691220090802519
+      },
+      {
+        "A": 80.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.2392578125,
+        "peak_rE_max": 0.05417634603625359
+      },
+      {
+        "A": 200.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.2392578125,
+        "peak_rE_max": 0.05417634603625359
+      }
+    ]
+  },
+  "mean_matched_narrow": {
+    "A_runaway": null,
+    "saturated_at_high_A": true,
+    "sweep": [
+      {
+        "A": 8.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.18001302083333334,
+        "peak_rE_max": 0.028246791352540514
+      },
+      {
+        "A": 24.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.23274739583333334,
+        "peak_rE_max": 0.03300892044234242
+      },
+      {
+        "A": 48.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.24641927083333334,
+        "peak_rE_max": 0.05842162880955486
+      },
+      {
+        "A": 80.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.2472873263888889,
+        "peak_rE_max": 0.060037359122956144
+      },
+      {
+        "A": 200.0,
+        "label": "self_limited_propagation",
+        "max_ext": 0.2472873263888889,
+        "peak_rE_max": 0.060037359122956144
+      }
+    ]
+  },
+  "interpretation": {
+    "note": "Vary ONLY A; A_runaway = first A with runaway/global label. Both None + saturated_at_high_A True => the finite-pulse margin is UNBOUNDED (no kick amplitude triggers runaway; response saturates) for that layer. S compression = A_runaway_narrow < A_runaway_wide. Direction computed not preset (spec \u00a77).",
+    "A_runaway_wide": null,
+    "A_runaway_narrow": null,
+    "margin_compressed": false,
+    "both_unbounded": true
+  }
+}

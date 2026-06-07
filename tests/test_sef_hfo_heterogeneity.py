@@ -281,3 +281,22 @@ def test_hetero_field_can_run_away_positive_control():
     assert label in ("runaway", "global_synchronous"), (
         f"integrator could not produce a non-self-limited response (got {label}); "
         f"the Task-9 'self-limit holds' null would be vacuous")
+
+
+def test_analyze_margin_returns_expected_schema():
+    """Structure/import guard for the finite-pulse margin sweep (Task 9b). Uses a tiny
+    grid + short t_max purely to exercise the code path cheaply — it does NOT assert the
+    science verdict. (A_runaway / margin_compressed depend on a long-enough t_max for the
+    self-limited wave to actually RETURN; a short t_max mislabels a not-yet-returned wave
+    as 'runaway' — a classify_response cutoff artifact, not real runaway.) The actual
+    result — A_runaway unreachable, margin NOT compressed, at t_max=120 with the
+    saturation-plateau grid — lives in committed margin.json."""
+    from scripts.run_sef_hfo_hetero_patch import analyze_margin
+    res = analyze_margin(A_grid=(8,), t_max=40.0)
+    for tag in ("baseline_wide", "mean_matched_narrow"):
+        L = res[tag]
+        assert {"A_runaway", "saturated_at_high_A", "sweep"} <= set(L)
+        assert len(L["sweep"]) == 1
+        assert {"A", "label", "max_ext", "peak_rE_max"} <= set(L["sweep"][0])
+    it = res["interpretation"]
+    assert {"A_runaway_wide", "A_runaway_narrow", "margin_compressed", "both_unbounded"} <= set(it)

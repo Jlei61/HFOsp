@@ -8,12 +8,15 @@ plan: `docs/superpowers/plans/2026-06-06-sef-hfo-lif-heterogeneity-first-round.m
 
 **关注点（朴素话）**：阈值分布截断在复位电位以上（2026-06-07 修复）；可用异质性幅度被 `V_TH−V_RESET=7 mV` 卡住（gap-limit, 结构性），锁定 wide=1.5/narrow=0.5。
 
-- `margin.json` — 有限脉冲安全余量 S sweep (Task 9b)。**只变刺激幅度 A**，对 baseline(uniform wide=1.5) vs mean_matched(narrow=0.5 core, both mean-matched 到 nuE) 各扫出 `A_runaway`（label 从 self_limited 翻成 runaway/global 的最小 A）。这才是 spec §2C 的最终闸门 S = A_runaway − A_event。
+- `margin.json` — 有限脉冲安全余量 S sweep (Task 9b)。**只变刺激幅度 A**，对 baseline(uniform wide=1.5) vs mean_matched(narrow=0.5 core, both mean-matched 到 nuE) 各扫出 `A_runaway`（label 从 self_limited 翻成 runaway/global 的最小 A）。这才是 spec §2C 的最终闸门 S = A_runaway − A_event。**结果：A_runaway 两层都不可达**（A 从 8 推到 200，响应 A≥80 已饱和：wide max_ext 0.239 / narrow 0.247，narrow 因 +13% 增益略高一点，但都远不到失控；`both_unbounded=True`）。
 
 **关注点（朴素话）**：阈值分布截断在复位电位以上（2026-06-07 修复）；可用异质性幅度被 `V_TH−V_RESET=7 mV` 卡住（gap-limit, 结构性），锁定 wide=1.5/narrow=0.5。
 
-**首轮观测（rate-field 层，⚠ 结论以 margin.json 的 S 为准）**：收窄 E 阈值异质性（mean-matched）使有效增益升约 +13%（算出来的真信号，spec §7 只报方向）——
-1. 线性闭环稳定余量基本不动（Δ max Re λ ≈ −0.0003，甚至略更稳）——但这是 spec §2C 说的「**地图/诊断量**」，不是闸门；
-2. 空间有限脉冲在**单一幅度 A=8** 下 6 个条件都 self_limited_propagation（只说明 A_event=8 < A_runaway），纯方差成核效应很小且随 patch 位置变号（−0.06 / +0.10），物理自洽（+13% 增益 → 传播略远 max_ext +0.01~0.02）。
+**首轮结论（rate-field 层，三道读数一致）**：收窄 E 阈值异质性（mean-matched）使有效增益升约 +13%（算出来的真信号，spec §7 只报方向）——但
+1. 线性闭环稳定余量基本不动（Δ max Re λ ≈ −0.0003，甚至略更稳）——spec §2C 的「地图/诊断量」；
+2. 固定幅度 A=8 下 6 个条件都 self_limited_propagation；
+3. **真闸门 S（A_runaway sweep）= 不可达 / 无界**：怎么推都自限、响应饱和，整齐门槛和原始门槛两种情况 A_runaway 都到不了 → S 没被收窄压缩（`margin_compressed=False`）。
 
-**真闸门 S（A_runaway sweep）= 结论依据**：所有动了的读数都朝「更易激」动（增益↑、max_ext↑），提示效应可能正落在 A_runaway 上 —— 故 Rich 方向是否在 rate-field 复现，取决于 S_narrow 是否 < S_wide（margin compression），不能只看固定 A 的 label。见 `margin.json`。
+**非空（positive control）**：直接降低 core 门槛均值（让组织本身更易兴奋）确实能 runaway（test_hetero_field_can_run_away_positive_control），所以「怎么推都自限」是有意义的 null，不是 integrator 永不失控。
+
+**即 Rich 方向「异质性↓→更易失控/余量塌缩」在 rate-field（均场）层没有稳健复现 —— 已在真闸门 S 上确认，不只是地图。** +13% 增益这点真信号传不到余量。部分是结构性（操作幅度被 gap 卡小 + 工作点离失控很远）。文献预言的有限尺寸**同步爆发**均场原理上看不见，移交 SNN；SNN 测试须能区分「均场看不见同步」与「这个工作点上操作本就太小」（advisor caveat）。
