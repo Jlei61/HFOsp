@@ -1,0 +1,46 @@
+{
+  "provenance": {
+    "source": "scripts/audit_electrode_spacing.py over /mnt/epilepsia_data/all_data_sqls (Epilepsiae) + Yuquan chnXyzDict.npy",
+    "audit_artifact": "results/topic4_sef_hfo/electrode_spacing_audit/cohort_summary.json",
+    "per_shaft_csv": "results/topic4_sef_hfo/electrode_spacing_audit/electrode_spacing_per_shaft.csv",
+    "coord_loader": "src.seeg_coord_loader (Epilepsiae: MNI152_1MM_AFFINE -> mm; Yuquan: fs_native_ras_mm)",
+    "generated_at": "2026-06-07",
+    "contract": "virtual electrode spacing = real SEEG spacing (user-locked). Spacing is BIMODAL: depth ~4mm vs grid/strip ~10mm. Do NOT collapse to a single average; pick the band matching the simulated electrode type.",
+    "method": "per shaft: sort contacts by integer contact number, adjacent-contact Euclidean distance, per-shaft median. Cohort number = median-of-per-shaft-medians per band."
+  },
+  "classification_bands_mm": {
+    "depth": [3.0, 6.0],
+    "grid_strip": [8.0, 16.0],
+    "other": "outside both bands -> flagged ambiguous, not force-fit"
+  },
+  "yuquan": {
+    "depth_mm": 3.5,
+    "depth_mm_recomputed_median": 3.5011,
+    "depth_range_mm": [3.4956, 3.5109],
+    "n_depth_shafts": 118,
+    "n_depth_subjects": 11,
+    "grid_strip_mm": null,
+    "n_grid_strip_shafts": 0,
+    "modality": "all-depth (unimodal) — no grid/strip electrodes in cohort",
+    "source": "user-locked 3.5mm; recomputed per-shaft median 3.5011mm reproduces the v3.1-lock 3.501mm audited value (docs/archive/topic0/seeg_coord_loader/v3_1_lock_2026-05-21.md). Coords from chnXyzDict.npy (fs_native_ras_mm)."
+  },
+  "epilepsiae": {
+    "depth_mm": 4.5826,
+    "depth_range_mm": [3.1623, 5.9161],
+    "n_depth_shafts": 46,
+    "n_depth_subjects": 12,
+    "grid_strip_mm": 11.0,
+    "grid_strip_range_mm": [9.0277, 15.5563],
+    "n_grid_strip_shafts": 230,
+    "n_grid_strip_subjects": 24,
+    "modality": "bimodal — depth-SEEG (~4.6mm) AND grid/strip (~11mm) both present",
+    "n_subjects_audited": 27,
+    "ambiguous": {
+      "n_other_shafts": 6,
+      "n_other_subjects": 5,
+      "other_subjects": ["115002", "13902", "44202", "58302", "63502"],
+      "note": "5 shafts (~6.0-6.8mm) sit just above the depth band (wide-pitch depth); 1 shaft (115002 RHA ~16mm) just above the grid band (wide grid/strip). Edge cases between the two modes, flagged not force-fit. Cohort bimodality is unambiguous."
+    },
+    "source": "audit_electrode_spacing.py over all_data_sqls (electrode table coord_x/y/z, MNI152 1mm voxels -> mm via MNI152_1MM_AFFINE through src.seeg_coord_loader)"
+  }
+}
