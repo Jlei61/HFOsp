@@ -3,6 +3,7 @@ import pytest
 from src.sef_hfo_lif import lif_rate, V_TH, TAU_ME, TREF_E, mean_field, integrate_lif_field
 from src.sef_hfo_field import _grid
 from scripts.sef_hfo_step0d_anisotropy_control import principal_axis
+from src.sef_hfo_heterogeneity import phi_eff_vth
 
 
 def test_lif_rate_vth_default_matches_global():
@@ -40,3 +41,19 @@ def test_geometry_rho_controls_directionality():
     r_iso = ratio_for(0.6, 0.6)      # rho = 1.0
     assert r_iso < 1.5                       # isotropic: weak directional bias (off-center seed)
     assert r_aniso > r_iso + 0.3             # anisotropy creates a directional template
+
+
+def test_phi_eff_zero_std_reduces_to_lif_rate():
+    """vth_std=0 → no spread → exactly lif_rate at vth_mean."""
+    r = phi_eff_vth(5.0, 4.0, TAU_ME, TREF_E, vth_mean=V_TH, vth_std=0.0)
+    assert abs(r - lif_rate(5.0, 4.0, TAU_ME, TREF_E, v_th=V_TH)) < 1e-9
+
+
+def test_phi_eff_quadrature_matches_dense_average():
+    """Gauss–Hermite must match a dense trapezoid average."""
+    mu, sig, vm, vs = 5.0, 4.0, V_TH, 2.0
+    grid = np.linspace(vm - 5 * vs, vm + 5 * vs, 4001)
+    w = np.exp(-0.5 * ((grid - vm) / vs) ** 2); w /= w.sum()
+    dense = float(np.sum(w * np.array([lif_rate(mu, sig, TAU_ME, TREF_E, v_th=v) for v in grid])))
+    gh = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
+    assert abs(gh - dense) < 1e-4
