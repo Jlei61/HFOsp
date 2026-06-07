@@ -1,0 +1,199 @@
+{
+  "config": {
+    "substrate": "lif_rate_field",
+    "L": 24.0,
+    "n": 96,
+    "pitch": 4.0,
+    "n_contacts": 6,
+    "shafts": [
+      15.0,
+      75.0,
+      135.0
+    ],
+    "kick_end_frac": 0.6,
+    "kicktrack_off": 0.35,
+    "shaft_rotations": [
+      0.0,
+      30.0,
+      60.0,
+      90.0
+    ],
+    "ratio": 0.6,
+    "part_margin_frac": 0.1
+  },
+  "C1_connectivity": {
+    "0deg": {
+      "n_part": 11,
+      "axis_err": 1.1,
+      "readability": 0.936,
+      "win": [
+        24.2,
+        105.0
+      ],
+      "verdict": "pass",
+      "reason": null,
+      "kick_xy": [
+        -7.199999999999999,
+        0.0
+      ]
+    },
+    "45deg": {
+      "n_part": 12,
+      "axis_err": 3.3,
+      "readability": 0.977,
+      "win": [
+        25.2,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null,
+      "kick_xy": [
+        -5.091168824543142,
+        -5.091168824543141
+      ]
+    },
+    "90deg": {
+      "n_part": 11,
+      "axis_err": 1.1,
+      "readability": 0.936,
+      "win": [
+        24.2,
+        105.0
+      ],
+      "verdict": "pass",
+      "reason": null,
+      "kick_xy": [
+        -4.408728476930471e-16,
+        -7.199999999999999
+      ]
+    }
+  },
+  "C2_kicktrack": {
+    "perp-0.35": {
+      "n_part": 9,
+      "axis_err": 20.5,
+      "readability": 0.992,
+      "win": [
+        24.5,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null,
+      "kick_xy": [
+        -2.1213203435596433,
+        -8.06101730552664
+      ]
+    },
+    "perp+0.00": {
+      "n_part": 12,
+      "axis_err": 3.3,
+      "readability": 0.977,
+      "win": [
+        25.2,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null,
+      "kick_xy": [
+        -5.091168824543142,
+        -5.091168824543141
+      ]
+    },
+    "perp+0.35": {
+      "n_part": 9,
+      "axis_err": 20.5,
+      "readability": 0.992,
+      "win": [
+        24.5,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null,
+      "kick_xy": [
+        -8.06101730552664,
+        -2.1213203435596415
+      ]
+    }
+  },
+  "C3_shaft_invariance": {
+    "rot0deg": {
+      "n_part": 12,
+      "axis_err": 3.3,
+      "readability": 0.977,
+      "win": [
+        25.2,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null
+    },
+    "rot30deg": {
+      "n_part": 10,
+      "axis_err": 0.0,
+      "readability": 0.991,
+      "win": [
+        25.2,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null
+    },
+    "rot60deg": {
+      "n_part": 12,
+      "axis_err": 7.3,
+      "readability": 0.982,
+      "win": [
+        25.2,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null
+    },
+    "rot90deg": {
+      "n_part": 10,
+      "axis_err": 0.0,
+      "readability": 0.991,
+      "win": [
+        25.2,
+        121.8
+      ],
+      "verdict": "pass",
+      "reason": null
+    }
+  },
+  "C4_iso": {
+    "n_part": 12,
+    "axis_err": null,
+    "readability": null,
+    "win": [
+      28.2,
+      69.8
+    ],
+    "verdict": "pass",
+    "reason": "no_spurious_direction",
+    "kick_xy": [
+      0.0,
+      0.0
+    ]
+  },
+  "PASS": true,
+  "summary": {
+    "C1": [
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "C2": [
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "C3": [
+      "pass",
+      "pass",
+      "pass",
+      "pass"
+    ],
+    "C4": "pass"
+  }
+}
