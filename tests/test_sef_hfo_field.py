@@ -72,3 +72,20 @@ def test_field_linearization_matches_dispersion_eigenvalue():
     amp_pred = np.abs(np.array([(expm(M * tt) @ ic)[0] for tt in t]))
     rate_pred = np.polyfit(t[lo:hi], np.log(amp_pred[lo:hi] + 1e-30), 1)[0]
     assert abs(rate_meas - rate_pred) < 0.05
+
+def test_ee_kernel_mass_invariant_across_geometry():
+    """Contract 1 (spec §5.0): sweeping ell_par/ell_perp/theta must NOT change
+    total E→E mass. Kernel is unit-sum by construction; lock it so a future
+    edit that reintroduces a shape-dependent total fails here."""
+    n, L = 96, 12.0
+    masses = []
+    for ell_par, ell_perp, theta in [
+        (0.9, 0.45, 0.0), (0.9, 0.45, np.pi / 4), (0.9, 0.45, np.pi / 2),
+        (0.6, 0.6, 0.0),                # isotropic
+        (1.2, 0.30, np.pi / 3),         # high anisotropy
+        (0.40, 0.40, 0.0),              # small isotropic
+    ]:
+        K = anisotropic_gaussian(n, L, ell_par, ell_perp, theta)
+        masses.append(float(K.sum()))
+    masses = np.array(masses)
+    assert np.allclose(masses, 1.0, atol=1e-10), f"kernel mass drifted: {masses}"
