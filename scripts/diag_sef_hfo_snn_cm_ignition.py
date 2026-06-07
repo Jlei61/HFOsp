@@ -79,6 +79,20 @@ def run_one(density, L, kick_mult, theta_rad, r_kick=None):
     spk = on["E_spk_bool"]
     spk_off = off["E_spk_bool"]
 
+    # INSTANTANEOUS active fraction (per 2ms bin) + returned-to-rest: the correct
+    # self-limited-vs-global discriminator (classify_response semantics), NOT cumulative
+    # recruited (a directional front sweeping a small sheet recruits high cumulative but is
+    # self-limited). global synchronous = high peak AND not returned; self-limited = returned.
+    bs = max(1, int(round(2.0 / dt)))
+    nb = spk.shape[0] // bs
+    inst = spk[:nb * bs].reshape(nb, bs, -1).any(axis=1).mean(axis=1)   # frac E active / 2ms bin
+    inst_off = spk_off[:nb * bs].reshape(nb, bs, -1).any(axis=1).mean(axis=1)
+    ikb = ik // bs
+    peak_inst = float(inst[ikb:].max()) if nb > ikb else 0.0
+    peak_inst_off = float(inst_off[ikb:].max()) if nb > ikb else 0.0
+    tail = float(inst[-15:].mean())                                      # last ~30ms
+    returned = bool(peak_inst <= 1e-9 or tail < 0.3 * peak_inst)
+
     def recruited(win_ms):
         w = slice(ik, ik + int(win_ms / dt))
         idx = np.where(spk[w].any(axis=0))[0]
@@ -98,7 +112,9 @@ def run_one(density, L, kick_mult, theta_rad, r_kick=None):
     out = {"density": density, "L": L, "kick_mult": kick_mult, "r_kick_mm": rk,
            "N": int(density * L * L), "NE": int(NE), "n_disk_E": n_disk,
            "realized_ee_radius_mm": ee_r, "l_EE_mm": p.l_EE,
-           "ee_radius_over_lEE": (None if ee_r is None else round(ee_r / p.l_EE, 2))}
+           "ee_radius_over_lEE": (None if ee_r is None else round(ee_r / p.l_EE, 2)),
+           "peak_inst_frac": round(peak_inst, 4), "peak_inst_off": round(peak_inst_off, 4),
+           "returned": returned}
     for win in (50, 100):
         idx, idx_off = recruited(win)
         n_on, n_off = len(idx), len(idx_off)
@@ -112,16 +128,21 @@ def run_one(density, L, kick_mult, theta_rad, r_kick=None):
             span_par_mm=round(span_on, 2), reach_par_mm=round(reach_on, 2),
             span_par_off_mm=round(span_off, 2), axis_deg=ang, axis_ratio=ratio)
     r = out["recruited_100ms"]
-    # IGNITED = a self-limited DIRECTIONAL propagating front (uses rk, NOT R_KICK):
-    #   (a) propagated several seed-radii ALONG theta_EE (reach_par > 3*rk),
-    #   (b) clearly above the no-kick background spread (span_par_on > 1.5*max(span_off, rk)),
-    #   (c) directional (axis elongation ratio > 1.5),
-    #   (d) self-limited, not global runaway (recruited < 50% of E).
-    out["IGNITED"] = bool(
-        r["reach_par_mm"] > 3 * rk
-        and r["span_par_mm"] > 1.5 * max(r["span_par_off_mm"], rk)
-        and (r["axis_ratio"] is not None and r["axis_ratio"] > 1.5)
-        and r["n_on"] < 0.5 * int(NE))
+    # Classify the event with the CORRECT self-limited-vs-global discriminator:
+    supra_bg = peak_inst > 3 * max(peak_inst_off, 1e-4)        # ignited above background
+    directional = (r["axis_ratio"] is not None and r["axis_ratio"] > 1.5)
+    propagated = r["reach_par_mm"] > 3 * rk
+    if not (supra_bg and propagated):
+        klass = "extinction"                                   # fizzle / sub-nucleus
+    elif not returned:
+        klass = "global_runaway"                               # ignited but never self-terminates
+    elif not directional:
+        klass = "isotropic_event"                              # ignited+self-limited but no axis
+    else:
+        klass = "self_limited_directional"                     # the target state
+    out["event_class"] = klass
+    # IGNITED (the target) = a self-limited DIRECTIONAL propagating front:
+    out["IGNITED"] = bool(klass == "self_limited_directional")
     return out
 
 
@@ -133,6 +154,13 @@ SWEEPS = {
     # kick_radius: fixed L=8 (failed at R_KICK=0.15) — does the rate-field-predicted
     # critical nucleus (~0.6-0.8mm) ignite the SNN deterministically?
     "kick_radius": [(1000.0, 8.0, 2.0, 0.15), (1000.0, 8.0, 2.0, 0.8), (1000.0, 8.0, 2.0, 1.2)],
+    # kick_radius_safe: map the fizzle->self_limited transition WITHOUT r>=1.2 (which runs
+    # away + blows up memory). Uses the instantaneous-peak+returned classifier.
+    "kick_radius_safe": [(1000.0, 8.0, 2.0, 0.4), (1000.0, 8.0, 2.0, 0.6), (1000.0, 8.0, 2.0, 0.8)],
+    # L12_oracle: take the confirmed window (r_kick=0.6, supra-nucleus) to cm scale L=12
+    # (fits 4mm >=7 contacts). axis_deg here IS the dense-neuron oracle (principal axis of
+    # recruited E). Must stay self_limited_directional ~45 deg before any electrode read-out.
+    "L12_oracle": [(1000.0, 12.0, 2.0, 0.6)],
 }
 
 
@@ -147,11 +175,9 @@ def main():
         r = run_one(density, L, km, theta_rad, r_kick=rk)
         rows.append(r)
         rr = r["recruited_100ms"]
-        print(f"  disk_E={r['n_disk_E']} ee_radius={r['realized_ee_radius_mm']}mm | "
-              f"recruited@100ms on/off={rr['n_on']}/{rr['n_off']} "
-              f"span_par={rr['span_par_mm']}mm (off {rr['span_par_off_mm']}) reach_par={rr['reach_par_mm']}mm "
-              f"(3*rk={3*r['r_kick_mm']:.2f}) axis={rr['axis_deg']}/{rr['axis_ratio']} "
-              f"-> {'IGNITED' if r['IGNITED'] else 'NO EVENT'}", flush=True)
+        print(f"  disk_E={r['n_disk_E']} | peak_inst={r['peak_inst_frac']} (off {r['peak_inst_off']}) "
+              f"returned={r['returned']} | reach_par={rr['reach_par_mm']}mm (3*rk={3*r['r_kick_mm']:.2f}) "
+              f"axis={rr['axis_deg']}/{rr['axis_ratio']} -> {r['event_class'].upper()}", flush=True)
     out = "results/topic4_sef_hfo/observation_layer/lfp_forward_validation"
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, f"cm_ignition_{a.sweep}_diagnosis.json"), "w") as f:
@@ -159,9 +185,9 @@ def main():
     print(f"\nSUMMARY (sweep={a.sweep}; one knob varied, others fixed):", flush=True)
     for r in rows:
         rr = r['recruited_100ms']
-        print(f"  density={r['density']:>6} L={r['L']:>4} kick={r['kick_mult']}x r_kick={r['r_kick_mm']}mm: "
-              f"on/off={rr['n_on']}/{rr['n_off']} span_par={rr['span_par_mm']}mm reach_par={rr['reach_par_mm']}mm "
-              f"axisratio={rr['axis_ratio']} -> {'IGNITED' if r['IGNITED'] else 'no event'}", flush=True)
+        print(f"  density={r['density']:>6} L={r['L']:>4} r_kick={r['r_kick_mm']}mm: "
+              f"peak_inst={r['peak_inst_frac']} returned={r['returned']} axisratio={rr['axis_ratio']} "
+              f"-> {r['event_class']}", flush=True)
 
 
 if __name__ == "__main__":
