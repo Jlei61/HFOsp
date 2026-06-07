@@ -56,7 +56,7 @@ def realized_ee_radius(p, pos, NE, rng, theta_rad, kick_center, n_sample=20):
     return round(float(np.median(radii)), 3) if radii else None
 
 
-def run_one(density, L, kick_mult, theta_rad):
+def run_one(density, L, kick_mult, theta_rad, r_kick=None):
     p = Params(g=3.6, L=L, density=density, T=T, dt=DT, nu_ext_ratio=DRIVE, seed=1)
     rng = np.random.default_rng(1)
     pos, labels, NE, NI = place_neurons(p, rng)
@@ -65,13 +65,14 @@ def run_one(density, L, kick_mult, theta_rad):
     posE = net["pos"][:NE]
     nut = compute_nu_theta(p)[0]
     center = np.array([L / 2, L / 2])
-    n_disk = int(np.sum(np.linalg.norm(posE - center, axis=1) <= R_KICK))
+    rk = R_KICK if r_kick is None else float(r_kick)
+    n_disk = int(np.sum(np.linalg.norm(posE - center, axis=1) <= rk))
     ee_r = realized_ee_radius(p, pos, NE, np.random.default_rng(7), theta_rad, center)
 
     net["rng"] = np.random.default_rng(1)
-    on = simulate_kick(p, net, KICK_BOOST=kick_mult * nut, kick_center=list(center))
+    on = simulate_kick(p, net, KICK_BOOST=kick_mult * nut, kick_center=list(center), r_kick=rk)
     net["rng"] = np.random.default_rng(1)
-    off = simulate_kick(p, net, KICK_BOOST=0.0, kick_center=list(center))
+    off = simulate_kick(p, net, KICK_BOOST=0.0, kick_center=list(center), r_kick=rk)
 
     dt = DT
     ik = int(T_KICK / dt)
@@ -84,29 +85,54 @@ def run_one(density, L, kick_mult, theta_rad):
         idx_off = np.where(spk_off[w].any(axis=0))[0]
         return idx, idx_off
 
-    out = {"density": density, "L": L, "kick_mult": kick_mult,
-           "N": int(density * L * L), "n_disk_E": n_disk,
+    theta_hat = np.array([np.cos(theta_rad), np.sin(theta_rad)])
+
+    def par_span(idx):
+        """Span + reach of recruited E projected onto the theta_EE axis (propagation
+        distance along the connectivity axis, NOT isotropic max radius)."""
+        if len(idx) < 2:
+            return 0.0, 0.0
+        proj = (posE[idx] - center) @ theta_hat
+        return float(np.ptp(proj)), float(np.abs(proj).max())
+
+    out = {"density": density, "L": L, "kick_mult": kick_mult, "r_kick_mm": rk,
+           "N": int(density * L * L), "NE": int(NE), "n_disk_E": n_disk,
            "realized_ee_radius_mm": ee_r, "l_EE_mm": p.l_EE,
            "ee_radius_over_lEE": (None if ee_r is None else round(ee_r / p.l_EE, 2))}
     for win in (50, 100):
         idx, idx_off = recruited(win)
         n_on, n_off = len(idx), len(idx_off)
-        spread = (round(float(np.linalg.norm(posE[idx] - center, axis=1).max()), 2)
-                  if n_on else 0.0)
+        max_dist = (round(float(np.linalg.norm(posE[idx] - center, axis=1).max()), 2)
+                    if n_on else 0.0)
         ang, ratio = principal_axis_deg_ratio(posE[idx], center) if n_on >= 5 else (None, None)
-        out[f"recruited_{win}ms"] = dict(n_on=n_on, n_off=n_off, max_dist_mm=spread,
-                                         axis_deg=ang, axis_ratio=ratio)
-    r100 = out["recruited_100ms"]
-    out["IGNITED"] = bool(r100["n_on"] > 5 * max(r100["n_off"], 1) + n_disk
-                          and r100["max_dist_mm"] > 2 * R_KICK)
+        span_on, reach_on = par_span(idx)
+        span_off, _ = par_span(idx_off)
+        out[f"recruited_{win}ms"] = dict(
+            n_on=n_on, n_off=n_off, max_dist_mm=max_dist,
+            span_par_mm=round(span_on, 2), reach_par_mm=round(reach_on, 2),
+            span_par_off_mm=round(span_off, 2), axis_deg=ang, axis_ratio=ratio)
+    r = out["recruited_100ms"]
+    # IGNITED = a self-limited DIRECTIONAL propagating front (uses rk, NOT R_KICK):
+    #   (a) propagated several seed-radii ALONG theta_EE (reach_par > 3*rk),
+    #   (b) clearly above the no-kick background spread (span_par_on > 1.5*max(span_off, rk)),
+    #   (c) directional (axis elongation ratio > 1.5),
+    #   (d) self-limited, not global runaway (recruited < 50% of E).
+    out["IGNITED"] = bool(
+        r["reach_par_mm"] > 3 * rk
+        and r["span_par_mm"] > 1.5 * max(r["span_par_off_mm"], rk)
+        and (r["axis_ratio"] is not None and r["axis_ratio"] > 1.5)
+        and r["n_on"] < 0.5 * int(NE))
     return out
 
 
-# one-knob-at-a-time grids: (density, L, kick_mult) tuples
+# one-knob-at-a-time grids: (density, L, kick_mult, r_kick_mm) tuples
 SWEEPS = {
-    "density": [(1000.0, 6.0, 2.0), (2000.0, 6.0, 2.0), (4000.0, 6.0, 2.0)],
-    "L":       [(1000.0, 6.0, 2.0), (1000.0, 8.0, 2.0), (1000.0, 12.0, 2.0)],
-    "kick":    [(1000.0, 12.0, 2.0), (1000.0, 12.0, 4.0), (1000.0, 12.0, 8.0)],
+    "density": [(1000.0, 6.0, 2.0, None), (2000.0, 6.0, 2.0, None), (4000.0, 6.0, 2.0, None)],
+    "L":       [(1000.0, 6.0, 2.0, None), (1000.0, 8.0, 2.0, None), (1000.0, 12.0, 2.0, None)],
+    "kick":    [(1000.0, 12.0, 2.0, None), (1000.0, 12.0, 4.0, None), (1000.0, 12.0, 8.0, None)],
+    # kick_radius: fixed L=8 (failed at R_KICK=0.15) — does the rate-field-predicted
+    # critical nucleus (~0.6-0.8mm) ignite the SNN deterministically?
+    "kick_radius": [(1000.0, 8.0, 2.0, 0.15), (1000.0, 8.0, 2.0, 0.8), (1000.0, 8.0, 2.0, 1.2)],
 }
 
 
@@ -116,14 +142,15 @@ def main():
     a = ap.parse_args()
     theta_rad = np.deg2rad(THETA)
     rows = []
-    for density, L, km in SWEEPS[a.sweep]:
-        print(f"--- density={density} L={L} kick={km}x (N~{int(density*L*L)}) building+simulating ---", flush=True)
-        r = run_one(density, L, km, theta_rad)
+    for density, L, km, rk in SWEEPS[a.sweep]:
+        print(f"--- density={density} L={L} kick={km}x r_kick={rk} (N~{int(density*L*L)}) building+simulating ---", flush=True)
+        r = run_one(density, L, km, theta_rad, r_kick=rk)
         rows.append(r)
         rr = r["recruited_100ms"]
-        print(f"  disk_E={r['n_disk_E']} ee_radius={r['realized_ee_radius_mm']}mm "
-              f"({r['ee_radius_over_lEE']}x l_EE) | recruited@100ms n_on={rr['n_on']} "
-              f"n_off={rr['n_off']} max_dist={rr['max_dist_mm']}mm axis={rr['axis_deg']}/{rr['axis_ratio']} "
+        print(f"  disk_E={r['n_disk_E']} ee_radius={r['realized_ee_radius_mm']}mm | "
+              f"recruited@100ms on/off={rr['n_on']}/{rr['n_off']} "
+              f"span_par={rr['span_par_mm']}mm (off {rr['span_par_off_mm']}) reach_par={rr['reach_par_mm']}mm "
+              f"(3*rk={3*r['r_kick_mm']:.2f}) axis={rr['axis_deg']}/{rr['axis_ratio']} "
               f"-> {'IGNITED' if r['IGNITED'] else 'NO EVENT'}", flush=True)
     out = "results/topic4_sef_hfo/observation_layer/lfp_forward_validation"
     os.makedirs(out, exist_ok=True)
@@ -131,10 +158,10 @@ def main():
         json.dump({"sweep": a.sweep, "theta": THETA, "rows": rows}, f, indent=2, default=lambda o: None)
     print(f"\nSUMMARY (sweep={a.sweep}; one knob varied, others fixed):", flush=True)
     for r in rows:
-        print(f"  density={r['density']:>6} L={r['L']:>4} kick={r['kick_mult']}x: "
-              f"recruited@100ms on/off={r['recruited_100ms']['n_on']}/{r['recruited_100ms']['n_off']} "
-              f"axisratio={r['recruited_100ms']['axis_ratio']} -> "
-              f"{'IGNITED' if r['IGNITED'] else 'no event'}", flush=True)
+        rr = r['recruited_100ms']
+        print(f"  density={r['density']:>6} L={r['L']:>4} kick={r['kick_mult']}x r_kick={r['r_kick_mm']}mm: "
+              f"on/off={rr['n_on']}/{rr['n_off']} span_par={rr['span_par_mm']}mm reach_par={rr['reach_par_mm']}mm "
+              f"axisratio={rr['axis_ratio']} -> {'IGNITED' if r['IGNITED'] else 'no event'}", flush=True)
 
 
 if __name__ == "__main__":

@@ -35,3 +35,20 @@
 #   inside loop after I_E/I_I: if lfp_trace is not None: lfp_trace[t]=lfp_recorder.sample(I_E,I_I);
 #   return dict adds lfp_trace + lfp_sites. Backward-compatible (None -> identical to before).
 # Validated: tiny net, 10 custom 4mm sites -> lfp_trace (1850,10), per-site peaks vary (non-degenerate).
+
+# ---------------------------------------------------------------------------
+# Engine patch: r_kick kwarg (kick-disk radius override). Applied 2026-06-07.
+# WHY: the default R_KICK=0.15mm is BELOW the excitable medium's critical
+# nucleation radius (~0.6-0.8mm, measured in the rate field at ratio=0.6/g=3.6:
+# r=0.15 -> extinction, r>=0.8 -> self_limited_propagation). cm-scale (large-N)
+# ignition needs a SUPRA-NUCLEUS kick; finite-size noise only masks this at small N.
+# Backward-compatible: r_kick=None -> R_KICK (byte-identical to before).
+#
+# 1) simulate_kick signature: ...verbose=False, kick_center=None, lfp_recorder=None):
+#    -> ...verbose=False, kick_center=None, lfp_recorder=None, r_kick=None):
+#
+# 2) kick-mask radius (~line 97):
+#      kick_mask = is_E & (dist_c <= R_KICK)
+#    ->
+#      rk = R_KICK if r_kick is None else float(r_kick)   # patched: kick radius override
+#      kick_mask = is_E & (dist_c <= rk)
