@@ -11,27 +11,52 @@ effect is COMPUTED at the operating point, never assumed (spec §7).
 from __future__ import annotations
 
 import numpy as np
-from numpy.polynomial.hermite_e import hermegauss
+from numpy.polynomial.legendre import leggauss
 from scipy.optimize import brentq
 
-from src.sef_hfo_lif import lif_rate, V_TH
+from src.sef_hfo_lif import lif_rate, V_TH, V_RESET
 
-_GH_NODES, _GH_WEIGHTS = hermegauss(24)          # probabilists' Hermite (weight e^{-x^2/2})
-_GH_WSUM = _GH_WEIGHTS.sum()                     # = sqrt(2 pi)
+# Fixed (deterministic) Gauss–Legendre nodes on [-1, 1].  Deterministic nodes make
+# phi_eff_vth SMOOTH in mu (the nodes do not move when mu changes during a finite
+# difference), which a quad-based adaptive integrator would not guarantee — needed
+# for eff_gain_curvature's second derivative.
+_GL_NODES, _GL_WEIGHTS = leggauss(96)
 
 
 def phi_eff_vth(mu: float, sigma: float, tau_m: float, tau_ref: float,
                 vth_mean: float = V_TH, vth_std: float = 0.0) -> float:
-    """Φ_LIF averaged over v_th ~ N(vth_mean, vth_std^2), via Gauss–Hermite.
+    """Φ_LIF averaged over a TRUNCATED Gaussian threshold v_th ~ N(vth_mean, vth_std^2)
+    restricted to the physical support v_th >= V_RESET, renormalized by the retained
+    mass.  Returns rate in kHz.
+
+    WHY TRUNCATED (2026-06-07 fix):  an UNbounded Gaussian samples v_th < V_RESET,
+    where the Siegert formula returns a NEGATIVE firing rate (a threshold below reset
+    is unphysical).  The previous implementation clamped those with ``max(0, .)``,
+    which (a) silently masked illegal samples and (b) made Φ_eff NON-MONOTONIC in
+    vth_mean — a higher mean threshold could give a *higher* mean rate.  Truncating
+    at V_RESET and renormalizing removes both pathologies; lif_rate now also RAISES
+    below reset so any future leak fails loudly.
 
     vth_std=0 returns exactly lif_rate(mu,sigma,tau_m,tau_ref,v_th=vth_mean).
-    Returns rate in kHz.
+
+    GAP-LIMIT CAVEAT:  with V_TH - V_RESET = 7 mV at the canonical sub-reset operating
+    point, lif_rate has a steep reset knee just above V_RESET.  vth_std large enough to
+    place real mass in that knee makes Φ_eff dominated by near-saturated cells (reset-
+    floor, not collective gain).  The usable heterogeneity range is therefore gap-
+    limited (locked: wide vth_std=1.5, narrow=0.5); see spec §5.2 and the knee-gate
+    test ``test_locked_std_params_stay_out_of_reset_knee``.
     """
     if vth_std <= 0.0:
         return lif_rate(mu, sigma, tau_m, tau_ref, v_th=vth_mean)
-    vths = vth_mean + vth_std * _GH_NODES
-    rates = np.array([max(0.0, lif_rate(mu, sigma, tau_m, tau_ref, v_th=float(v))) for v in vths])
-    return float(np.sum(_GH_WEIGHTS * rates) / _GH_WSUM)
+    hi = vth_mean + 8.0 * vth_std            # upper tail; lower bound is the V_RESET floor
+    half = 0.5 * (hi - V_RESET)
+    mid = 0.5 * (hi + V_RESET)
+    vths = mid + half * _GL_NODES            # GL nodes mapped onto [V_RESET, hi]
+    w_gauss = np.exp(-0.5 * ((vths - vth_mean) / vth_std) ** 2)   # unnormalized Gaussian weight
+    rates = np.array([lif_rate(mu, sigma, tau_m, tau_ref, v_th=float(v)) for v in vths])
+    num = float(np.sum(_GL_WEIGHTS * w_gauss * rates))   # the GL ``half`` Jacobian cancels in num/den
+    den = float(np.sum(_GL_WEIGHTS * w_gauss))           # = renormalization by retained truncated mass
+    return num / den
 
 
 def eff_gain_curvature(mu: float, sigma: float, tau_m: float, tau_ref: float,
@@ -49,10 +74,16 @@ def eff_gain_curvature(mu: float, sigma: float, tau_m: float, tau_ref: float,
 
 def mean_match_vth(target_rate: float, mu: float, sigma: float,
                    tau_m: float, tau_ref: float, vth_std: float,
-                   bracket: tuple = (V_TH - 8.0, V_TH + 8.0)) -> float:
+                   bracket: tuple = (V_RESET + 0.5, V_TH + 17.0)) -> float:
     """Solve for vth_mean such that phi_eff_vth(...; vth_mean, vth_std) == target_rate
     at the operating input mu. Restores the baseline mean rate after a variance
-    change (spec §5.0 Contract 2). Raises ValueError if target unreachable in bracket."""
+    change (spec §5.0 Contract 2). Raises ValueError if target unreachable in bracket.
+
+    The default bracket starts just ABOVE V_RESET (the old default V_TH-8=10 reached
+    into the sub-reset region) and extends well above V_TH so a wide-variance baseline
+    — which needs a higher mean to compensate the truncated-Jensen lift — stays inside.
+    phi_eff_vth is strictly decreasing in vth_mean (truncated, monotone), so the root
+    is unique."""
     def g(vm):
         return phi_eff_vth(mu, sigma, tau_m, tau_ref, vth_mean=vm, vth_std=vth_std) - target_rate
     lo, hi = bracket

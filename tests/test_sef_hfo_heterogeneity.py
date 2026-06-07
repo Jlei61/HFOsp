@@ -49,14 +49,69 @@ def test_phi_eff_zero_std_reduces_to_lif_rate():
     assert abs(r - lif_rate(5.0, 4.0, TAU_ME, TREF_E, v_th=V_TH)) < 1e-9
 
 
-def test_phi_eff_quadrature_matches_dense_average():
-    """Gauss–Hermite must match a dense trapezoid average."""
-    mu, sig, vm, vs = 5.0, 4.0, V_TH, 2.0
-    grid = np.linspace(vm - 5 * vs, vm + 5 * vs, 4001)
-    w = np.exp(-0.5 * ((grid - vm) / vs) ** 2); w /= w.sum()
-    dense = float(np.sum(w * np.array([lif_rate(mu, sig, TAU_ME, TREF_E, v_th=v) for v in grid])))
-    gh = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
-    assert abs(gh - dense) < 1e-4
+def test_lif_rate_raises_below_reset():
+    """A threshold below reset is unphysical (the Siegert rate goes negative). lif_rate
+    must RAISE rather than silently return a negative / clamped value — the 2026-06-07
+    tripwire that the old unbounded-Gaussian + max(0,.) bug masked."""
+    from src.sef_hfo_lif import V_RESET
+    with pytest.raises(ValueError):
+        lif_rate(8.0, 4.0, TAU_ME, TREF_E, v_th=V_RESET - 1.0)
+    # exactly at reset is the legal zero-gap saturation (rate = 1/tau_ref), must NOT raise
+    r_floor = lif_rate(8.0, 4.0, TAU_ME, TREF_E, v_th=V_RESET)
+    assert abs(r_floor - 1.0 / TREF_E) < 1e-9
+
+
+def test_phi_eff_matches_renormalized_truncated_dense_average():
+    """The Gauss–Legendre quadrature must match a dense trapezoid of the RENORMALIZED
+    TRUNCATED integrand (support [V_RESET, hi]) — legal v_th only.  Replaces the old
+    test that compared against a dense average of the UNbounded Gaussian (which sampled
+    v_th < V_RESET, i.e. validated the integration against the very illegal values the
+    fix removes — circular)."""
+    from src.sef_hfo_lif import V_RESET
+    mu, sig, vm, vs = 8.0, 4.0, 19.0, 1.5
+    hi = vm + 8.0 * vs
+    grid = np.linspace(V_RESET, hi, 20001)
+    w = np.exp(-0.5 * ((grid - vm) / vs) ** 2)
+    r = np.array([lif_rate(mu, sig, TAU_ME, TREF_E, v_th=v) for v in grid])
+    dense = float(np.trapz(w * r, grid) / np.trapz(w, grid))
+    gl = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
+    assert abs(gl - dense) < 1e-6
+
+
+def test_phi_eff_strictly_decreasing_in_vth_mean():
+    """PRIMARY SCIENTIFIC GATE (2026-06-07): a higher mean threshold must give a LOWER
+    effective rate, for every vth_std actually used.  The unbounded-Gaussian + clamp bug
+    violated this (rate rose then collapsed as vth_mean increased), which silently broke
+    mean_match_vth's monotonicity premise and the whole forced chain."""
+    mu, sig = 8.0, 4.0
+    for vs in (0.5, 1.0, 1.5):
+        vals = [phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
+                for vm in np.linspace(14.0, 26.0, 25)]
+        diffs = np.diff(vals)
+        assert np.all(diffs < 0), (
+            f"phi_eff not strictly decreasing in vth_mean at vth_std={vs}: {vals}")
+
+
+def test_locked_std_params_stay_out_of_reset_knee():
+    """Lock the GAP-LIMITED std choice (wide=1.5, narrow=0.5).  At the canonical
+    operating point, mean-matched to nuE, the near-reset saturation knee [V_RESET, 13]
+    must contribute < 5% of the effective rate — else Φ_eff measures reset-floor
+    saturation of a near-spiking minority, not the collective gain the heterogeneity
+    manipulation is meant to probe (advisor gate 2026-06-07).  The plan's original
+    wide=4.0 fails this badly (~49%); these are the corrected, locked parameters."""
+    from src.sef_hfo_lif import mean_field, V_RESET
+    from src.sef_hfo_heterogeneity import mean_match_vth
+    from scipy.integrate import quad
+    op = mean_field(1.0)
+    muE, sE, nuE = op["muE"], op["sE"], op["nuE"]
+    for vs in (1.5, 0.5):
+        vm = mean_match_vth(nuE, muE, sE, TAU_ME, TREF_E, vs)
+        hi = vm + 8.0 * vs
+        pdf = lambda v: np.exp(-0.5 * ((v - vm) / vs) ** 2)
+        rate_w = lambda v: lif_rate(muE, sE, TAU_ME, TREF_E, v_th=v) * pdf(v)
+        den = quad(rate_w, V_RESET, hi, limit=200)[0]
+        knee = quad(rate_w, V_RESET, 13.0, limit=200)[0]
+        assert knee / den < 0.05, f"vth_std={vs}: reset-knee share {knee/den:.3f} >= 5%"
 
 
 def test_closed_loop_leading_canonical_op_stable():
@@ -76,8 +131,8 @@ def test_eff_gain_matches_central_difference():
     (consistency check — NOT a direction claim)."""
     from src.sef_hfo_heterogeneity import eff_gain_curvature, phi_eff_vth
     from src.sef_hfo_lif import TAU_ME, TREF_E, V_TH
-    mu, sig, vm, vs = 6.0, 4.0, V_TH, 2.0
-    g = eff_gain_curvature(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs, h=1e-2)
+    mu, sig, vm, vs = 8.0, 4.0, 19.0, 1.5   # clean (out-of-knee) regime; this is a
+    g = eff_gain_curvature(mu, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs, h=1e-2)   # consistency check (FD vs FD)
     f = lambda m: phi_eff_vth(m, sig, TAU_ME, TREF_E, vth_mean=vm, vth_std=vs)
     slope = (f(mu + 1e-2) - f(mu - 1e-2)) / (2e-2)
     curv = (f(mu + 1e-2) - 2 * f(mu) + f(mu - 1e-2)) / (1e-2 ** 2)
@@ -90,9 +145,9 @@ def test_mean_match_restores_baseline_rate():
     even though vth_std changed. This is Contract 2's whole point."""
     from src.sef_hfo_heterogeneity import mean_match_vth, phi_eff_vth
     from src.sef_hfo_lif import TAU_ME, TREF_E, V_TH
-    mu, sig = 6.0, 4.0
-    baseline = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=V_TH, vth_std=4.0)
+    mu, sig = 8.0, 4.0
+    baseline = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=V_TH, vth_std=1.5)   # locked wide
     vm_matched = mean_match_vth(target_rate=baseline, mu=mu, sigma=sig,
-                                tau_m=TAU_ME, tau_ref=TREF_E, vth_std=1.0)
-    got = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm_matched, vth_std=1.0)
+                                tau_m=TAU_ME, tau_ref=TREF_E, vth_std=0.5)         # locked narrow
+    got = phi_eff_vth(mu, sig, TAU_ME, TREF_E, vth_mean=vm_matched, vth_std=0.5)
     assert abs(got - baseline) < 1e-6

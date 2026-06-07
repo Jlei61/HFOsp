@@ -94,7 +94,19 @@ def lif_rate(mu: float, sigma: float, tau_m: float, tau_ref: float,
 
     v_th: firing threshold (mV); defaults to module-global V_TH so all
     existing callers are unaffected.
+
+    A threshold below the reset potential (``v_th < V_RESET``) is unphysical: the
+    Siegert integral runs backwards and returns a NEGATIVE rate.  We raise loudly
+    rather than return a negative (or silently clamped) value — a tripwire for any
+    quadrature that wanders below reset (CLAUDE.md §6: loud failure beats silent
+    contamination).  ``v_th == V_RESET`` is the well-defined zero-gap saturation
+    (rate = 1/tau_ref, the refractory ceiling).
     """
+    if v_th < V_RESET:
+        raise ValueError(
+            f"v_th={v_th:.4g} < V_RESET={V_RESET}: threshold below reset is unphysical "
+            f"(Siegert rate would be negative). Threshold distributions must be "
+            f"truncated at V_RESET (see src/sef_hfo_heterogeneity.phi_eff_vth).")
     y_th = (v_th - mu) / sigma
     y_r = (V_RESET - mu) / sigma
     integ, _ = quad(lambda x: erfcx(-x), y_r, y_th, limit=200)
