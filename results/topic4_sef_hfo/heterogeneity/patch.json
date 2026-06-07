@@ -1,0 +1,96 @@
+{
+  "colocated_x-3": {
+    "operating_point": {
+      "nuE": 0.0002226553708647553,
+      "muE": 8.377010357299127,
+      "sE": 4.0694866012736135
+    },
+    "patch": {
+      "x_patch": -3.0,
+      "r_patch": 2.0,
+      "stim_x0": -3.0,
+      "vth_std_wide": 1.5,
+      "vth_std_narrow": 0.5,
+      "vth_mean_surround": 18.97973607840528,
+      "vth_mean_core_matched": 18.113809299912795
+    },
+    "layers": {
+      "baseline": {
+        "label": "self_limited_propagation",
+        "max_ext": 0.15635850694444445,
+        "adv_mm": 6.875,
+        "dur_ms": 61.25,
+        "returned": true,
+        "frac_mass_in_patch": 0.6493741490614318
+      },
+      "raw_narrow": {
+        "label": "self_limited_propagation",
+        "max_ext": 0.1498480902777778,
+        "adv_mm": 6.875,
+        "dur_ms": 59.5,
+        "returned": true,
+        "frac_mass_in_patch": 0.6831294219669884
+      },
+      "mean_matched": {
+        "label": "self_limited_propagation",
+        "max_ext": 0.18001302083333334,
+        "adv_mm": 6.875,
+        "dur_ms": 66.5,
+        "returned": true,
+        "frac_mass_in_patch": 0.5866580333703818
+      }
+    },
+    "interpretation": {
+      "note": "Whole field referenced to self-consistent rest nuE (surround, baseline & matched-core sit AT nuE). Direction computed not preset (spec \u00a77). mean_matched vs baseline = PURE variance effect on nucleation/self-limit; raw carries the Jensen core shift.",
+      "d_frac_in_patch_pure": -0.06271611569104996,
+      "d_max_ext_pure": 0.023654513888888895
+    }
+  },
+  "downstream_x0": {
+    "operating_point": {
+      "nuE": 0.0002226553708647553,
+      "muE": 8.377010357299127,
+      "sE": 4.0694866012736135
+    },
+    "patch": {
+      "x_patch": 0.0,
+      "r_patch": 2.0,
+      "stim_x0": -3.0,
+      "vth_std_wide": 1.5,
+      "vth_std_narrow": 0.5,
+      "vth_mean_surround": 18.97973607840528,
+      "vth_mean_core_matched": 18.113809299912795
+    },
+    "layers": {
+      "baseline": {
+        "label": "self_limited_propagation",
+        "max_ext": 0.15635850694444445,
+        "adv_mm": 6.875,
+        "dur_ms": 61.25,
+        "returned": true,
+        "frac_mass_in_patch": 0.25016463541446254
+      },
+      "raw_narrow": {
+        "label": "self_limited_propagation",
+        "max_ext": 0.1519097222222222,
+        "adv_mm": 6.875,
+        "dur_ms": 61.0,
+        "returned": true,
+        "frac_mass_in_patch": 0.2247242044615526
+      },
+      "mean_matched": {
+        "label": "self_limited_propagation",
+        "max_ext": 0.16959635416666666,
+        "adv_mm": 6.875,
+        "dur_ms": 62.25,
+        "returned": true,
+        "frac_mass_in_patch": 0.3493228072398351
+      }
+    },
+    "interpretation": {
+      "note": "Whole field referenced to self-consistent rest nuE (surround, baseline & matched-core sit AT nuE). Direction computed not preset (spec \u00a77). mean_matched vs baseline = PURE variance effect on nucleation/self-limit; raw carries the Jensen core shift.",
+      "d_frac_in_patch_pure": 0.09915817182537257,
+      "d_max_ext_pure": 0.01323784722222221
+    }
+  }
+}
