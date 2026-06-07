@@ -22,6 +22,17 @@ from numpy.polynomial.legendre import leggauss
 from scipy.optimize import brentq
 
 from src.sef_hfo_lif import lif_rate, V_TH, V_RESET
+# Field-loop reuse for the spatial patch integrator (Task 8). Aliased to keep the
+# integrator body terse; the spatial functions live at the bottom of the module.
+from src.sef_hfo_field import anisotropic_gaussian, isotropic_gaussian, convolve_periodic, _grid
+from src.sef_hfo_lif import (
+    W_EE as _W_EE, W_EI as _W_EI, W_IE as _W_IE, W_II as _W_II,
+    C_EE as _C_EE, C_EI as _C_EI, C_IE as _C_IE, C_II as _C_II,
+    TAU_ME as _TME, TAU_MI as _TMI, TREF_E as _TRE, TREF_I as _TRI,
+    JX_E as _JXE, JX_I as _JXI, TAU_AMPA as _TA, TAU_GABA as _TG,
+    ELL_PAR as _EP, ELL_PERP as _EPP, L_INH as _LI, DETECT as _DET,
+    _DEFAULT_N as _N, _DEFAULT_L as _L,
+)
 
 # Fixed (deterministic) Gauss–Legendre nodes on [-1, 1].  Deterministic nodes make
 # phi_eff_vth SMOOTH in mu (the nodes do not move when mu changes during a finite
@@ -109,3 +120,81 @@ def mean_match_vth(target_rate: float, mu: float, sigma: float,
             f"target_rate={target_rate:.5g} not bracketed by vth_mean∈{bracket} "
             f"at mu={mu}, sigma={sigma}, vth_std={vth_std}; widen the bracket.")
     return float(brentq(g, lo, hi, xtol=1e-8))
+
+
+# ---------------------------------------------------------------------------
+# Spatial core/surround patch integrator (Task 8) — applies the truncated
+# threshold heterogeneity to a finite-pulse field, core disk vs surround.
+# ---------------------------------------------------------------------------
+
+def hetero_lut(sigma: float, vth_mean: float, vth_std: float,
+               lo: float = -12.0, hi: float = 45.0, npts: int = 5000):
+    """(mus, rates) LUT for the E effective transfer Φ_eff(μ; vth_mean,vth_std) at
+    fixed sigma (the TRUNCATED phi_eff_vth — inherits the 2026-06-07 fix). np.interp
+    over this is the per-region E transfer."""
+    mus = np.linspace(lo, hi, npts)
+    rates = np.array([phi_eff_vth(m, sigma, _TME, _TRE, vth_mean, vth_std) for m in mus])
+    return mus, rates
+
+
+def integrate_hetero_field(op, stim_fn, *, x_patch: float, r_patch: float,
+                           vth_std_core: float, vth_std_surround: float,
+                           vth_mean_core: float, vth_mean_surround: float,
+                           dt: float = 0.25, t_max: float = 300.0,
+                           theta_EE: float = 0.0, n: int = _N, L: float = _L,
+                           ell_par: float = _EP, ell_perp: float = _EPP, l_inh: float = _LI,
+                           return_peak_field: bool = False):
+    """MINIMAL finite-pulse heterogeneity integrator (NOT a full mirror of
+    integrate_lif_field). Same core Euler loop and synaptic filters, but DROPS
+    recovery (b_a/tau_a), coherence (coh_len) and axis_accum — all out of this
+    round's scope (finite-pulse only, no recovery, no noise). The substantive
+    addition is a spatially heterogeneous E threshold distribution:
+    core disk (center (x_patch,0), radius r_patch) uses (vth_mean_core, vth_std_core);
+    surround uses (vth_mean_surround, vth_std_surround); I population unchanged
+    (homogeneous Φ_LIF). Per-region E transfer = two LUTs blended by the patch mask.
+
+    Contract: surround params are REQUIRED kwargs (no defaults) so a caller cannot
+    silently tune the core without defining the background (spec §5.2)."""
+    wee = float(op.get("w_ee_mult", 1.0)) * _W_EE
+    KEE = anisotropic_gaussian(n, L, ell_par, ell_perp, theta_EE)
+    KI = isotropic_gaussian(n, L, l_inh)
+    X, Y = _grid(n, L)
+    core = ((X - x_patch) ** 2 + Y ** 2) <= r_patch ** 2
+
+    musC, rC = hetero_lut(op["sE"], vth_mean_core, vth_std_core)
+    musS, rS = hetero_lut(op["sE"], vth_mean_surround, vth_std_surround)
+    musI = np.linspace(-12.0, 45.0, 5000)
+    rI_lut = np.array([lif_rate(m, op["sI"], _TMI, _TRI) for m in musI])
+
+    def fE(mu):
+        out = np.interp(mu, musS, rS)
+        out[core] = np.interp(mu[core], musC, rC)
+        return out
+    fI = lambda mu: np.interp(mu, musI, rI_lut)
+
+    muxE = _TME * _JXE * op["nuext"]; muxI = _TMI * _JXI * op["nuext"]
+    rE = np.full((n, n), op["nuE"]); rI = np.full((n, n), op["nuI"])
+    sEE = convolve_periodic(rE, KEE).copy(); sEI = convolve_periodic(rI, KI).copy()
+    sIE = convolve_periodic(rE, KI).copy(); sII = convolve_periodic(rI, KI).copy()
+
+    nsteps = int(t_max / dt)
+    ext = np.empty(nsteps); front = np.empty(nsteps); thr = op["nuE"] + _DET
+    peak_field = rE.copy(); peak_ext = -1.0
+    for t in range(nsteps):
+        stim = stim_fn(t * dt)
+        sEE += dt / _TA * (convolve_periodic(rE, KEE) - sEE)
+        sEI += dt / _TG * (convolve_periodic(rI, KI) - sEI)
+        sIE += dt / _TA * (convolve_periodic(rE, KI) - sIE)
+        sII += dt / _TG * (convolve_periodic(rI, KI) - sII)
+        muE = _TME * (_C_EE * wee * sEE - _C_EI * _W_EI * sEI) + muxE + stim
+        muI = _TMI * (_C_IE * _W_IE * sIE - _C_II * _W_II * sII) + muxI
+        rE = rE + dt / _TME * (-rE + fE(muE))
+        rI = rI + dt / _TMI * (-rI + fI(muI))
+        m = rE > thr
+        ext[t] = m.mean()
+        front[t] = float(X[m].max()) if m.any() else np.nan
+        if ext[t] > peak_ext:
+            peak_ext = ext[t]; peak_field = rE.copy()
+    if return_peak_field:
+        return ext, front, peak_field
+    return ext, front

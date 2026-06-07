@@ -225,3 +225,20 @@ def test_optpoint_nondefault_op_knee_gate_raises():
     from scripts.run_sef_hfo_hetero_optpoint import analyze_optpoint
     with pytest.raises(RuntimeError):
         analyze_optpoint(w_ee_mult=1.2, vth_std_wide=4.0, vth_std_narrow=1.0)
+
+
+def test_hetero_field_uniform_patch_matches_homogeneous():
+    """With core==surround AND vth_std=0, integrate_hetero_field must reduce to the
+    homogeneous integrate_lif_field exactly (same LUTs, same loop). vth_std=0 is
+    required because integrate_lif_field uses bare lif_rate (no threshold spread)."""
+    from src.sef_hfo_lif import mean_field, integrate_lif_field, V_TH
+    from src.sef_hfo_heterogeneity import integrate_hetero_field
+    from src.sef_hfo_field import _grid
+    op = mean_field(1.0)
+    X, Y = _grid(96, 12.0)
+    pulse = lambda t: (8.0 * ((X ** 2 + Y ** 2) <= 1.5 ** 2) if t < 30.0 else 0.0)
+    ext_h, _ = integrate_lif_field(op, pulse, t_max=80.0)
+    ext_g, _ = integrate_hetero_field(op, pulse, x_patch=0.0, r_patch=2.0,
+                                      vth_std_core=0.0, vth_std_surround=0.0,
+                                      vth_mean_core=V_TH, vth_mean_surround=V_TH, t_max=80.0)
+    assert np.max(np.abs(ext_h - ext_g)) < 5e-3
