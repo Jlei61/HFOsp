@@ -124,6 +124,23 @@ def test_closed_loop_leading_canonical_op_stable():
     assert res["re_max"] < 0.0           # stable
     assert res["re_max"] > -0.15         # ~ -0.05, not wildly off
     assert res["k_star"] < 0.3           # dominant mode near k=0 (no finite-k Hopf)
+    assert res["converged"] is True      # the reported re_max came from a real root
+    assert res["n_converged"] == res["n_modes"]   # every k-mode resolved at this op
+
+
+def test_closed_loop_leading_flags_failed_search():
+    """If NO root is found in the fixed search box, re_max is the -inf sentinel and the
+    'regime' string would spuriously read 'stable'. converged must be False so a Task-7
+    stability gate does not read a failed search as 'very stable' (advisor 2026-06-07).
+    Force failure with absurd gains that drive every root outside the box."""
+    from src.sef_hfo_lif import closed_loop_leading
+    res = closed_loop_leading(1e6, 1e6)
+    if res["n_converged"] == 0:
+        assert res["converged"] is False
+        assert not np.isfinite(res["re_max"]) or res["re_max"] == -np.inf
+    else:
+        # if the box happened to still catch a root, converged must agree with finiteness
+        assert res["converged"] == bool(np.isfinite(res["re_max"]))
 
 
 def test_eff_gain_matches_central_difference():

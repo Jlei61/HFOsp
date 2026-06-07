@@ -537,7 +537,11 @@ def _char_det(lam, k, gE, gI, w_ee_mult):
 
 
 def _rightmost(k, gE, gI, w_ee_mult):
+    """Returns (re, |im|, found). ``found`` is False when the fixed-box multi-start
+    search located NO root for this k — then (re, |im|) is the (-inf, 0) sentinel and
+    callers must not treat -inf as 'very stable' (see closed_loop_leading)."""
     best = (-np.inf, 0.0)
+    found = False
     def fr(v):
         z = _char_det(complex(v[0], v[1]), k, gE, gI, w_ee_mult)
         return [z.real, z.imag]
@@ -547,7 +551,8 @@ def _rightmost(k, gE, gI, w_ee_mult):
             if (ier == 1 and -0.5 - 1e-6 <= s[0] <= 0.3 + 1e-6 and abs(s[1]) <= 0.6
                     and abs(complex(*fr(s))) < 1e-7 and s[0] > best[0]):
                 best = (float(s[0]), abs(float(s[1])))
-    return best
+                found = True
+    return best[0], best[1], found
 
 
 def closed_loop_leading(gE: float, gI: float, w_ee_mult: float = 1.0) -> dict:
@@ -558,13 +563,23 @@ def closed_loop_leading(gE: float, gI: float, w_ee_mult: float = 1.0) -> dict:
     as returned by ``lif_gains``. re_max < 0 means closed-loop stable (spec §2C).
     NOT an E→E-only proxy — this is the full 2×2 E/I stability readout.
 
-    Returns dict: {k_star, re_max, omega, freq_Hz, is_hopf, regime}
+    Returns dict: {k_star, re_max, omega, freq_Hz, is_hopf, regime, converged,
+    n_converged, n_modes}.
+
+    ``converged`` is False if the WINNING k-mode found no root in the fixed search
+    box — in that case ``re_max`` is the -inf sentinel and the ``regime`` string would
+    spuriously read "stable".  A caller using this as a stability GATE (e.g. Task 7
+    feeding a shifted effective gain whose dominant root has left the box) MUST check
+    ``converged`` / ``n_converged`` before trusting ``re_max``.  ``n_converged`` /
+    ``n_modes`` quantifies how much of the k-grid the search actually resolved.
     """
     res = [_rightmost(float(k), gE, gI, w_ee_mult) for k in _CL_K]
     re = np.array([r[0] for r in res])
     im = np.array([r[1] for r in res])
+    conv = np.array([r[2] for r in res], dtype=bool)
     j = int(np.argmax(re))
     return dict(k_star=float(_CL_K[j]), re_max=float(re[j]), omega=float(im[j]),
                 freq_Hz=float(1000.0 * im[j] / (2 * np.pi)),
                 is_hopf=bool(_CL_K[j] > 1e-3 and im[j] > 1e-3 and re[j] > re[0] + 1e-4),
-                regime=("unstable" if re[j] > 1e-3 else "candidate" if re[j] > -0.02 else "stable"))
+                regime=("unstable" if re[j] > 1e-3 else "candidate" if re[j] > -0.02 else "stable"),
+                converged=bool(conv[j]), n_converged=int(conv.sum()), n_modes=int(len(_CL_K)))
