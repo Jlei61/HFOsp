@@ -38,9 +38,9 @@ DT, DRIVE = 0.1, 0.6
 OUT = "results/topic4_sef_hfo/observation_layer/snn_cm_wave"
 
 
-def montage(center, rot_deg=0.0):
+def montage(center, rot_deg=0.0, nc=NC):
     rot = np.deg2rad(rot_deg)
-    return merge_montages([build_shaft(np.deg2rad(a) + rot, PITCH, NC, tuple(center), chr(65 + i))
+    return merge_montages([build_shaft(np.deg2rad(a) + rot, PITCH, nc, tuple(center), chr(65 + i))
                            for i, a in enumerate(SHAFTS)])
 
 
@@ -92,6 +92,7 @@ def main():
     ap.add_argument("--kick-mode", choices=["negend", "center", "perp"], default="negend")
     ap.add_argument("--perp-j", type=float, default=0.0)
     ap.add_argument("--montage-rot", type=float, default=0.0)
+    ap.add_argument("--nc", type=int, default=NC)        # contacts/shaft (coverage for shifted waves)
     ap.add_argument("--theta-ref", type=float, default=None)
     ap.add_argument("--tag", default="L8")
     a = ap.parse_args()
@@ -118,7 +119,7 @@ def main():
         kxy = base + a.perp_j * half * perp
     else:                                   # negend (single-end, source at -theta end)
         kxy = center - 0.6 * half * np.array([np.cos(theta_rad), np.sin(theta_rad)])
-    m = montage(center, a.montage_rot)
+    m = montage(center, a.montage_rot, a.nc)
     rec = LFPRecorder(p, net["pos"], net["labels"], sites=m.contacts)
     print(f"[{a.tag}] simulating on/off (kick {a.kick_mode} r={a.r_kick} at {np.round(kxy,2)}) ...", flush=True)
     net["rng"] = np.random.default_rng(1)
