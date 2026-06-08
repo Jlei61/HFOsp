@@ -478,7 +478,10 @@ def test_threshold_fields_share_surround_and_narrow_core():
     # surround is BIT-IDENTICAL across the three (paired-seed contract)
     np.testing.assert_array_equal(base[surround], matched[surround])
     np.testing.assert_array_equal(base[surround], unmatched[surround])
-    # core spread narrows; baseline core keeps the wide spread
+    # localized design (2026-06-08b): surround is SCALAR-quiet (=vth_mean), only the
+    # core carries heterogeneity; baseline core is WIDE, matched/unmatched NARROW
+    assert np.allclose(base[surround], 18.0)          # quiet scalar surround
+    assert base[core].std() > 1.0                     # baseline core heterogeneous (wide)
     assert matched[core].std() < base[core].std()
     assert unmatched[core].std() < base[core].std()
     # matched core mean ~ 18 (held), unmatched core mean ~ 16 (shifted down)
@@ -491,11 +494,14 @@ def test_threshold_fields_share_surround_and_narrow_core():
     assert np.allclose(base[~is_E], 18.0)
 
 
-def test_local_vth_spread_lower_in_core():
+def test_local_vth_spread_shows_core_narrowing():
+    # localized design: surround scalar (~0 spread); narrowing the core lowers its
+    # local spread relative to the wide baseline core (the Rich pathology direction).
     pos, is_E, rng = _toy_sheet()
     out = sample_threshold_fields(pos, is_E, (1.5, 1.5), 0.5, rng)
-    spread = local_vth_spread(pos, out["matched"], is_E, radius=0.3)
-    core = out["core_mask"]
-    surround = is_E & ~core
-    assert np.nanmean(spread[core]) < np.nanmean(spread[surround])
-    assert np.isnan(spread[~is_E]).all()   # I neurons not colored
+    core = out["core_mask"]; surround = is_E & ~core
+    sp_base = local_vth_spread(pos, out["baseline"], is_E, radius=0.3)
+    sp_matched = local_vth_spread(pos, out["matched"], is_E, radius=0.3)
+    assert np.nanmean(sp_matched[core]) < np.nanmean(sp_base[core])   # core narrows
+    assert np.nanmean(sp_base[surround]) < 0.1                        # quiet surround
+    assert np.isnan(sp_base[~is_E]).all()                            # I not colored

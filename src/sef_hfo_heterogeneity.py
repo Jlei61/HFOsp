@@ -356,12 +356,16 @@ def integrate_hetero_field(op, stim_fn, *, x_patch: float, r_patch: float,
 
 
 # ======================================================================
-# SNN per-neuron threshold field (spec 2026-06-08, Task 1)
+# SNN per-neuron threshold field (spec 2026-06-08, Task 1; localized 2026-06-08b)
 # ----------------------------------------------------------------------
 # The rate-field functions above INTEGRATE the threshold spread analytically.
-# The SNN needs a per-neuron threshold ARRAY: a wide-spread surround shared
-# bit-identically across baseline/matched/unmatched (paired-seed contract,
-# spec §2), with only the in-patch E neurons redrawn narrow.
+# The SNN needs a per-neuron threshold ARRAY. Heterogeneity is LOCALIZED to the
+# core; the surround is QUIET (scalar vth_mean) so the baseline stays the
+# validated quiet-excitable net. A WIDE surround spontaneously bursts (its low-
+# threshold tail self-ignites: verified kick-OFF 299 Hz @65ms vs scalar 2 Hz),
+# which destroys Experiment A's "fixed kick -> evoked propagation" premise. The
+# three fields share a bit-identical surround (paired-seed contract, spec §2) and
+# differ ONLY in the CORE's threshold distribution.
 # ======================================================================
 def _trunc_gauss(mean, std, low, size, rng):
     """N(mean,std) truncated to [low, inf) by rejection resampling (truncated +
@@ -380,38 +384,48 @@ def _trunc_gauss(mean, std, low, size, rng):
 
 def sample_threshold_fields(pos, is_E, patch_center, patch_radius, rng,
                             vth_mean=18.0, std_wide=1.5, std_narrow=0.5,
-                            v_reset=11.0, core_mean_shift=2.0):
+                            v_reset=11.0, core_mean_shift=2.0, surround_std=0.0):
     """Per-neuron firing thresholds (length N) for baseline / matched / unmatched,
-    sharing a bit-identical surround (paired-seed contract, spec §2).
+    LOCALIZED to the patch core, sharing a bit-identical surround (paired-seed
+    contract, spec §2). The surround is quiet (``surround_std=0`` -> scalar
+    ``vth_mean``); only the in-core E neurons get a threshold distribution:
 
-    I neurons keep scalar ``vth_mean`` (the SNN engine inhibitory threshold stays
-    scalar). E neurons: wide TruncGauss everywhere (= surround field ``W``); the
-    matched / unmatched variants redraw ONLY the in-patch E neurons (narrow
-    spread; matched mean = ``vth_mean``, unmatched mean = ``vth_mean -
-    core_mean_shift`` = local hyperexcitability). Truncated at ``v_reset``.
+      baseline  core ~ TruncGauss(vth_mean, std_wide)    (healthy heterogeneous)
+      matched   core ~ TruncGauss(vth_mean, std_narrow)  (pathological, mean held)
+      unmatched core ~ TruncGauss(vth_mean - core_mean_shift, std_narrow)
+                                                          (pathological + hyperexcitable)
 
-    Returns dict(baseline, matched, unmatched, core_mask). All three E-fields are
+    I neurons keep scalar ``vth_mean``. Truncated at ``v_reset``. Returns
+    dict(baseline, matched, unmatched, core_mask). All three E-fields are
     >= v_reset; surround entries are equal across the three by construction.
+    ``surround_std>0`` reproduces the wide-everywhere field (the B-side regime
+    probe) — but it spontaneously bursts, so the default for Experiment A is 0.
     """
     pos = np.asarray(pos, float); is_E = np.asarray(is_E, bool)
     n = len(pos)
-    W = np.full(n, vth_mean, float)
+    surround = np.full(n, vth_mean, float)
     eidx = np.flatnonzero(is_E)
-    W[eidx] = _trunc_gauss(vth_mean, std_wide, v_reset, eidx.size, rng)
+    if surround_std > 0:
+        surround[eidx] = _trunc_gauss(vth_mean, surround_std, v_reset, eidx.size, rng)
     d = np.linalg.norm(pos - np.asarray(patch_center, float)[None, :], axis=1)
     core = is_E & (d <= float(patch_radius))
     cidx = np.flatnonzero(core)
+    rng_b = np.random.default_rng(int(rng.integers(1 << 31)))
     rng_m = np.random.default_rng(int(rng.integers(1 << 31)))
     rng_u = np.random.default_rng(int(rng.integers(1 << 31)))
-    matched = W.copy()
-    matched[cidx] = _trunc_gauss(vth_mean, std_narrow, v_reset, cidx.size, rng_m)
-    unmatched = W.copy()
-    unmatched[cidx] = _trunc_gauss(vth_mean - core_mean_shift, std_narrow, v_reset,
-                                   cidx.size, rng_u)
-    for arr in (W, matched, unmatched):
+
+    def with_core(mean, std, r):
+        f = surround.copy()
+        f[cidx] = _trunc_gauss(mean, std, v_reset, cidx.size, r)
+        return f
+
+    baseline = with_core(vth_mean, std_wide, rng_b)            # wide healthy core
+    matched = with_core(vth_mean, std_narrow, rng_m)           # narrow, mean held
+    unmatched = with_core(vth_mean - core_mean_shift, std_narrow, rng_u)
+    for arr in (baseline, matched, unmatched):
         if not (arr[eidx] >= v_reset).all():
             raise ValueError("threshold below V_reset — truncation failed (spec §2)")
-    return dict(baseline=W, matched=matched, unmatched=unmatched, core_mask=core)
+    return dict(baseline=baseline, matched=matched, unmatched=unmatched, core_mask=core)
 
 
 def local_vth_spread(pos, vth, is_E, radius):
