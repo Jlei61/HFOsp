@@ -52,3 +52,13 @@
 #    ->
 #      rk = R_KICK if r_kick is None else float(r_kick)   # patched: kick radius override
 #      kick_mask = is_E & (dist_c <= rk)
+
+# ---------------------------------------------------------------------------
+# Engine patch: t_kick kwarg (kick-onset override, for EARLY kick). Applied 2026-06-08.
+# WHY: default T_KICK=150ms; a short total-T run then leaves almost no post-kick window so a
+# cm traveling FRONT gets cut off before it crosses (mis-read as 'runaway'/n=0). Early kick
+# (t_kick~20ms) gives the front the whole sim to cross + be read. Backward-compatible:
+# t_kick=None -> T_KICK.
+# 1) simulate_kick signature: ...r_kick=None): -> ...r_kick=None, t_kick=None):
+# 2) near rk: tk = T_KICK if t_kick is None else float(t_kick)
+# 3) kick gate: if T_KICK <= tm < T_KICK+DUR_KICK:  ->  if tk <= tm < tk+DUR_KICK:
