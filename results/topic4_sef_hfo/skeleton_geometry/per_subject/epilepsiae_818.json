@@ -19,6 +19,48 @@
   "phantom_core_violation": false,
   "degenerate_axis": false,
   "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "channels": [
+    {
+      "name": "TBA3",
+      "along_axis_mm": 48.22400303004973,
+      "off_axis_mm": 4.76398276211772,
+      "stereotypy_excess": -0.08389683101517761,
+      "role": "sink_core",
+      "shaft": "TBA"
+    },
+    {
+      "name": "TBB3",
+      "along_axis_mm": 9.5161405035709,
+      "off_axis_mm": 5.71778540313445,
+      "stereotypy_excess": 0.10888603289370241,
+      "role": "source_core",
+      "shaft": "TBB"
+    },
+    {
+      "name": "TBB4",
+      "along_axis_mm": 15.50981844646304,
+      "off_axis_mm": 4.763982762117722,
+      "stereotypy_excess": 0.38740618315922204,
+      "role": "sink_core",
+      "shaft": "TBB"
+    },
+    {
+      "name": "TBC5",
+      "along_axis_mm": -9.5161405035709,
+      "off_axis_mm": 5.71778540313445,
+      "stereotypy_excess": 0.2143925524086886,
+      "role": "source_core",
+      "shaft": "TBC"
+    },
+    {
+      "name": "TBC6",
+      "along_axis_mm": -3.145896407198624,
+      "off_axis_mm": 14.330154772198895,
+      "stereotypy_excess": 0.13889343898831633,
+      "role": "interior",
+      "shaft": "TBC"
+    }
+  ],
   "source_radius": {
     "rms_mm": 11.10180165558726,
     "meb_mm": 11.10180165558726,

@@ -154,6 +154,34 @@ def process_subject(ds, subj):
         cnts = full_count[sel]
         b["mean_event_count"] = float(cnts.mean()) if cnts.size else float("nan")
     rec["along_axis_profile_metric"] = "raw_excess_obs_minus_nullmean"
+    # Per-channel record so the plotter is self-contained (no recompute). One
+    # entry per ELIGIBLE channel (participating AND coord-mapped); channels with
+    # NaN along/off (out of frame, e.g. NaN coords) are skipped. NO new geometry
+    # — these are values already computed above (fr along/off, comps excess).
+    source_set = set(cores["source_idx"])
+    sink_set = set(cores["sink_idx"])
+    excess_arr = np.asarray(excess, dtype=float)
+    channels = []
+    for i in np.where(eligible)[0]:
+        a_i = float(along[i])
+        o_i = float(fr["off_axis"][i])
+        if np.isnan(a_i) or np.isnan(o_i):
+            continue
+        if i in source_set:
+            role = "source_core"
+        elif i in sink_set:
+            role = "sink_core"
+        else:
+            role = "interior"
+        channels.append({
+            "name": str(names[i]),
+            "along_axis_mm": a_i,
+            "off_axis_mm": o_i,
+            "stereotypy_excess": float(excess_arr[i]),
+            "role": role,
+            "shaft": str(G.parse_shaft(names[i])[0]),
+        })
+    rec["channels"] = channels
     rec.update({
         "source_radius": G.core_radii(coords[cores["source_idx"]],
                                       np.array(fr["source_centroid"])),

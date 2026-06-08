@@ -25,6 +25,96 @@
   "phantom_core_violation": false,
   "degenerate_axis": false,
   "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "channels": [
+    {
+      "name": "GA3",
+      "along_axis_mm": -2.204796774135818,
+      "off_axis_mm": 7.462869872931982,
+      "stereotypy_excess": 0.1107037533573706,
+      "role": "source_core",
+      "shaft": "GA"
+    },
+    {
+      "name": "GA4",
+      "along_axis_mm": 5.722373306917395,
+      "off_axis_mm": 1.2151814508547794,
+      "stereotypy_excess": 0.07641729622129934,
+      "role": "source_core",
+      "shaft": "GA"
+    },
+    {
+      "name": "GA5",
+      "along_axis_mm": 11.579390691644608,
+      "off_axis_mm": 9.099813190343149,
+      "stereotypy_excess": 0.007349795547963167,
+      "role": "interior",
+      "shaft": "GA"
+    },
+    {
+      "name": "GA6",
+      "along_axis_mm": 19.531806537287164,
+      "off_axis_mm": 17.370398832848046,
+      "stereotypy_excess": 0.035792272770039046,
+      "role": "sink_core",
+      "shaft": "GA"
+    },
+    {
+      "name": "GB3",
+      "along_axis_mm": -9.829017680116934,
+      "off_axis_mm": 3.5041832618796627,
+      "stereotypy_excess": -0.0625811991339647,
+      "role": "interior",
+      "shaft": "GB"
+    },
+    {
+      "name": "GB4",
+      "along_axis_mm": -3.5175765327815722,
+      "off_axis_mm": 6.941340712829182,
+      "stereotypy_excess": 0.07824158282054922,
+      "role": "source_core",
+      "shaft": "GB"
+    },
+    {
+      "name": "GB5",
+      "along_axis_mm": 3.601729081412714,
+      "off_axis_mm": 15.435341585022606,
+      "stereotypy_excess": 0.1566667127837208,
+      "role": "interior",
+      "shaft": "GB"
+    },
+    {
+      "name": "GC4",
+      "along_axis_mm": -11.116551674173346,
+      "off_axis_mm": 13.783244698944777,
+      "stereotypy_excess": -0.12948894018085189,
+      "role": "interior",
+      "shaft": "GC"
+    },
+    {
+      "name": "GC5",
+      "along_axis_mm": -3.568068061960256,
+      "off_axis_mm": 22.623537430313032,
+      "stereotypy_excess": 0.023593607648691173,
+      "role": "interior",
+      "shaft": "GC"
+    },
+    {
+      "name": "M7",
+      "along_axis_mm": 13.775772210917312,
+      "off_axis_mm": 5.271020351741576,
+      "stereotypy_excess": 0.12185103922341467,
+      "role": "sink_core",
+      "shaft": "M"
+    },
+    {
+      "name": "M8",
+      "along_axis_mm": 6.303025892472245,
+      "off_axis_mm": 12.130983203669572,
+      "stereotypy_excess": 0.2037985992706829,
+      "role": "sink_core",
+      "shaft": "M"
+    }
+  ],
   "source_radius": {
     "rms_mm": 7.195677714974301,
     "meb_mm": 7.350457181646647,

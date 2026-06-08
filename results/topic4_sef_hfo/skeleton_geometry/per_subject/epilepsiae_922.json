@@ -22,6 +22,72 @@
   "phantom_core_violation": false,
   "degenerate_axis": false,
   "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "channels": [
+    {
+      "name": "GA3",
+      "along_axis_mm": 22.903241638696052,
+      "off_axis_mm": 3.036330057368153,
+      "stereotypy_excess": 0.19397838048483695,
+      "role": "sink_core",
+      "shaft": "GA"
+    },
+    {
+      "name": "GB1",
+      "along_axis_mm": 1.6035941500102524,
+      "off_axis_mm": 14.715284465927393,
+      "stereotypy_excess": 0.08128531099546288,
+      "role": "interior",
+      "shaft": "GB"
+    },
+    {
+      "name": "GB2",
+      "along_axis_mm": 8.59942664413895,
+      "off_axis_mm": 5.9577097811589965,
+      "stereotypy_excess": 0.09812054465774195,
+      "role": "sink_core",
+      "shaft": "GB"
+    },
+    {
+      "name": "GB3",
+      "along_axis_mm": 96.53391959527369,
+      "off_axis_mm": 89.60829655795095,
+      "stereotypy_excess": 0.10856289732506014,
+      "role": "interior",
+      "shaft": "GB"
+    },
+    {
+      "name": "GB4",
+      "along_axis_mm": 22.958326933925413,
+      "off_axis_mm": 8.545544775267768,
+      "stereotypy_excess": 0.11235207136466491,
+      "role": "sink_core",
+      "shaft": "GB"
+    },
+    {
+      "name": "GC1",
+      "along_axis_mm": -6.5306677788585485,
+      "off_axis_mm": 9.440770950508044,
+      "stereotypy_excess": 0.08878558250764856,
+      "role": "source_core",
+      "shaft": "GC"
+    },
+    {
+      "name": "GC2",
+      "along_axis_mm": 0.22646176927625625,
+      "off_axis_mm": 0.24459390459980399,
+      "stereotypy_excess": 0.2446010690949505,
+      "role": "source_core",
+      "shaft": "GC"
+    },
+    {
+      "name": "GC3",
+      "along_axis_mm": 6.304206009582289,
+      "off_axis_mm": 9.221429627043971,
+      "stereotypy_excess": 0.0528814386377795,
+      "role": "source_core",
+      "shaft": "GC"
+    }
+  ],
   "source_radius": {
     "rms_mm": 9.249624617007738,
     "meb_mm": 11.324751652906125,

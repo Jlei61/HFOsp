@@ -23,6 +23,80 @@
   "phantom_core_violation": false,
   "degenerate_axis": false,
   "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "channels": [
+    {
+      "name": "RFB2",
+      "along_axis_mm": -4.120780174499097,
+      "off_axis_mm": 15.424268528599471,
+      "stereotypy_excess": 0.10857960266506217,
+      "role": "sink_core",
+      "shaft": "RFB"
+    },
+    {
+      "name": "RFB3",
+      "along_axis_mm": -2.493370612830975,
+      "off_axis_mm": 10.312063738293439,
+      "stereotypy_excess": 0.08461855287783093,
+      "role": "interior",
+      "shaft": "RFB"
+    },
+    {
+      "name": "RFB4",
+      "along_axis_mm": -1.612479198717038,
+      "off_axis_mm": 5.855663901095567,
+      "stereotypy_excess": 0.08453502905209215,
+      "role": "source_core",
+      "shaft": "RFB"
+    },
+    {
+      "name": "RFB5",
+      "along_axis_mm": -0.07465181475541877,
+      "off_axis_mm": 1.6980329783142067,
+      "stereotypy_excess": 0.1933485747377004,
+      "role": "source_core",
+      "shaft": "RFB"
+    },
+    {
+      "name": "RFB7",
+      "along_axis_mm": 1.6871310134724555,
+      "off_axis_mm": 7.396563019331003,
+      "stereotypy_excess": 0.041856511557028964,
+      "role": "source_core",
+      "shaft": "RFB"
+    },
+    {
+      "name": "RFB12",
+      "along_axis_mm": 9.52557156279139,
+      "off_axis_mm": 31.131212236130942,
+      "stereotypy_excess": -0.00529424450963073,
+      "role": "interior",
+      "shaft": "RFB"
+    },
+    {
+      "name": "RHA1",
+      "along_axis_mm": 26.15799589029861,
+      "off_axis_mm": 8.143390360204794,
+      "stereotypy_excess": -0.08017983569234732,
+      "role": "sink_core",
+      "shaft": "RHA"
+    },
+    {
+      "name": "RHB1",
+      "along_axis_mm": 44.94039248276189,
+      "off_axis_mm": 8.9582371248035,
+      "stereotypy_excess": -0.09954461110149843,
+      "role": "sink_core",
+      "shaft": "RHB"
+    },
+    {
+      "name": "LHA1",
+      "along_axis_mm": 29.860725902167367,
+      "off_axis_mm": 54.84729653760995,
+      "stereotypy_excess": -0.1868362256363449,
+      "role": "interior",
+      "shaft": "LHA"
+    }
+  ],
   "source_radius": {
     "rms_mm": 5.696002496878354,
     "meb_mm": 6.819090848492928,

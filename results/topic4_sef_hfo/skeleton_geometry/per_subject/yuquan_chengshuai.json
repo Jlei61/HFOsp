@@ -22,6 +22,72 @@
   "phantom_core_violation": false,
   "degenerate_axis": false,
   "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "channels": [
+    {
+      "name": "E11",
+      "along_axis_mm": 20.541107013013697,
+      "off_axis_mm": 5.0522599691546155,
+      "stereotypy_excess": -0.041400969069647076,
+      "role": "interior",
+      "shaft": "E"
+    },
+    {
+      "name": "K3",
+      "along_axis_mm": -10.50012141655515,
+      "off_axis_mm": 0.07268989212285754,
+      "stereotypy_excess": -0.03728344278211809,
+      "role": "interior",
+      "shaft": "K"
+    },
+    {
+      "name": "K5",
+      "along_axis_mm": -3.495607062007646,
+      "off_axis_mm": 0.013964411096592555,
+      "stereotypy_excess": 0.008874020322355847,
+      "role": "source_core",
+      "shaft": "K"
+    },
+    {
+      "name": "K6",
+      "along_axis_mm": -0.0025533992361884096,
+      "off_axis_mm": 0.002780757898583841,
+      "stereotypy_excess": 0.23424723191391006,
+      "role": "source_core",
+      "shaft": "K"
+    },
+    {
+      "name": "K7",
+      "along_axis_mm": 3.498160461243835,
+      "off_axis_mm": 0.01118365319801379,
+      "stereotypy_excess": 0.023307743752869592,
+      "role": "source_core",
+      "shaft": "K"
+    },
+    {
+      "name": "K8",
+      "along_axis_mm": 6.998256410693336,
+      "off_axis_mm": 0.011194674834032867,
+      "stereotypy_excess": 0.21577398502996947,
+      "role": "sink_core",
+      "shaft": "K"
+    },
+    {
+      "name": "K9",
+      "along_axis_mm": 10.497734449112315,
+      "off_axis_mm": 0.002813822806636021,
+      "stereotypy_excess": -0.016164915359096144,
+      "role": "sink_core",
+      "shaft": "K"
+    },
+    {
+      "name": "K10",
+      "along_axis_mm": 14.004865381326969,
+      "off_axis_mm": 0.014008497640660306,
+      "stereotypy_excess": -0.02968477989442958,
+      "role": "sink_core",
+      "shaft": "K"
+    }
+  ],
   "source_radius": {
     "rms_mm": 2.855213341468881,
     "meb_mm": 3.496906368292727,

@@ -20,6 +20,56 @@
   "phantom_core_violation": false,
   "degenerate_axis": false,
   "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "channels": [
+    {
+      "name": "AM1",
+      "along_axis_mm": -0.9123312478220622,
+      "off_axis_mm": 1.2913758919259097,
+      "stereotypy_excess": 0.0933980052038651,
+      "role": "source_core",
+      "shaft": "AM"
+    },
+    {
+      "name": "AM2",
+      "along_axis_mm": 0.9123312478220622,
+      "off_axis_mm": 1.2913758919259097,
+      "stereotypy_excess": 0.14948732819423222,
+      "role": "source_core",
+      "shaft": "AM"
+    },
+    {
+      "name": "AH1",
+      "along_axis_mm": 11.270799876940247,
+      "off_axis_mm": 8.801651557177422,
+      "stereotypy_excess": -0.02355229316097468,
+      "role": "interior",
+      "shaft": "AH"
+    },
+    {
+      "name": "AH2",
+      "along_axis_mm": 13.965686024353108,
+      "off_axis_mm": 5.2401921595670835,
+      "stereotypy_excess": 0.12728154247769466,
+      "role": "interior",
+      "shaft": "AH"
+    },
+    {
+      "name": "AH3",
+      "along_axis_mm": 16.66057217176597,
+      "off_axis_mm": 1.7103610464979206,
+      "stereotypy_excess": 0.12636162010667162,
+      "role": "sink_core",
+      "shaft": "AH"
+    },
+    {
+      "name": "AH4",
+      "along_axis_mm": 18.962454089347787,
+      "off_axis_mm": 1.710361046497922,
+      "stereotypy_excess": 0.14281129659871478,
+      "role": "sink_core",
+      "shaft": "AH"
+    }
+  ],
   "source_radius": {
     "rms_mm": 1.5811388300841898,
     "meb_mm": 1.5811388300841898,

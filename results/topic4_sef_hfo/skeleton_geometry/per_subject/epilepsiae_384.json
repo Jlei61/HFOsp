@@ -23,6 +23,80 @@
   "phantom_core_violation": false,
   "degenerate_axis": false,
   "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "channels": [
+    {
+      "name": "FLA2",
+      "along_axis_mm": 29.16495401224071,
+      "off_axis_mm": 7.3079037667367,
+      "stereotypy_excess": 0.14982063683357194,
+      "role": "sink_core",
+      "shaft": "FLA"
+    },
+    {
+      "name": "FLA3",
+      "along_axis_mm": 23.146990000158027,
+      "off_axis_mm": 5.849517410230036,
+      "stereotypy_excess": 0.28041701383230166,
+      "role": "sink_core",
+      "shaft": "FLA"
+    },
+    {
+      "name": "FLA4",
+      "along_axis_mm": 14.240403262275654,
+      "off_axis_mm": 13.160961778220043,
+      "stereotypy_excess": 0.1864964014708833,
+      "role": "interior",
+      "shaft": "FLA"
+    },
+    {
+      "name": "FLA5",
+      "along_axis_mm": 6.030633410002858,
+      "off_axis_mm": 16.01972099239426,
+      "stereotypy_excess": 0.15697356035876997,
+      "role": "interior",
+      "shaft": "FLA"
+    },
+    {
+      "name": "FLB1",
+      "along_axis_mm": 3.724802988531173,
+      "off_axis_mm": 24.59930573606965,
+      "stereotypy_excess": 0.07647247841049132,
+      "role": "source_core",
+      "shaft": "FLB"
+    },
+    {
+      "name": "FLB4",
+      "along_axis_mm": -11.934572840803977,
+      "off_axis_mm": 12.31121322646733,
+      "stereotypy_excess": 0.15534521153293612,
+      "role": "source_core",
+      "shaft": "FLB"
+    },
+    {
+      "name": "FBA1",
+      "along_axis_mm": 26.618405030285725,
+      "off_axis_mm": 6.4389838983848735,
+      "stereotypy_excess": 0.3787071189401762,
+      "role": "sink_core",
+      "shaft": "FBA"
+    },
+    {
+      "name": "FBA3",
+      "along_axis_mm": 10.008824356937518,
+      "off_axis_mm": 19.100351698122584,
+      "stereotypy_excess": 0.17497276968004,
+      "role": "interior",
+      "shaft": "FBA"
+    },
+    {
+      "name": "FBB3",
+      "along_axis_mm": 8.209769852272803,
+      "off_axis_mm": 29.9599679401149,
+      "stereotypy_excess": 0.3022159712634037,
+      "role": "source_core",
+      "shaft": "FBB"
+    }
+  ],
   "source_radius": {
     "rms_mm": 25.019992006393608,
     "meb_mm": 26.80485030736042,
