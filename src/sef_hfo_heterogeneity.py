@@ -34,6 +34,15 @@ from src.sef_hfo_lif import (
     _DEFAULT_N as _N, _DEFAULT_L as _L,
 )
 
+class MeanMatchNotBracketed(ValueError):
+    """The mean-match target rate is not bracketed by the parameter mean over the search
+    bracket — i.e. the rate is (near-)insensitive to this parameter at the operating point
+    (or the bracket is too narrow). A SCREEN may legitimately treat this as 'no leverage'.
+    It is a DISTINCT subclass so callers catch ONLY this and let a genuine numerical /
+    illegal-domain ValueError (non-finite integral, unknown param) propagate loudly —
+    rather than disguising a real error as 'no leverage' (CLAUDE.md §6)."""
+
+
 # Fixed (deterministic) Gauss–Legendre nodes on [-1, 1].  Deterministic nodes make
 # phi_eff_vth SMOOTH in mu (the nodes do not move when mu changes during a finite
 # difference), which a quad-based adaptive integrator would not guarantee — needed
@@ -125,7 +134,7 @@ def mean_match_vth(target_rate: float, mu: float, sigma: float,
         return phi_eff_vth(mu, sigma, tau_m, tau_ref, vth_mean=vm, vth_std=vth_std) - target_rate
     lo, hi = bracket
     if g(lo) * g(hi) > 0:
-        raise ValueError(
+        raise MeanMatchNotBracketed(
             f"target_rate={target_rate:.5g} not bracketed by vth_mean∈{bracket} "
             f"at mu={mu}, sigma={sigma}, vth_std={vth_std}; widen the bracket.")
     return float(brentq(g, lo, hi, xtol=1e-8))
@@ -206,7 +215,7 @@ def mean_match_param(target_rate: float, mu: float, sigma: float, tau_m: float,
                              v_th=v_th) - target_rate
     lo, hi = br
     if g(lo) * g(hi) > 0:
-        raise ValueError(
+        raise MeanMatchNotBracketed(
             f"target_rate={target_rate:.5g} not bracketed for param={param} in {br} "
             f"at mu={mu}, sigma={sigma}, std={std}; the rate may be insensitive to "
             f"{param} at this operating point (a 'no leverage' result), or widen the bracket.")

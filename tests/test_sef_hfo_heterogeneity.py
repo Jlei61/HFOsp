@@ -386,3 +386,70 @@ def test_screen_combo_schema():
     assert {"d_slope_pure_pct", "d_closed_loop_re_max_pure", "baseline_wide",
             "mean_matched_narrow"} <= set(r)
     assert np.isfinite(r["d_slope_pure_pct"]) and np.isfinite(r["d_closed_loop_re_max_pure"])
+
+
+def test_step3b_combo_vth_sigma_numeric_lock():
+    """Regression: recompute the V_th+sigma combo (drift gate) and lock its science —
+    spread-narrowing steepens the curve by ~+16% but does NOT move the safety margin, and
+    the closed-loop search converges in both layers. (n_nodes=24 for test speed; the
+    committed combo.json uses 48 — the locked ranges are tolerant to that.)"""
+    from scripts.run_sef_hfo_hetero_sensitivity import screen_combo
+    from src.sef_hfo_lif import mean_field, lif_gains
+    op = mean_field(1.0)
+    gI = lif_gains(op)["I"]
+    r = screen_combo(op, gI, ("v_th", "sigma"), n_nodes=24)
+    assert 10.0 < r["d_slope_pure_pct"] < 22.0, r["d_slope_pure_pct"]      # curve steepens ~+16%
+    assert abs(r["d_closed_loop_re_max_pure"]) < 0.005                     # margin does NOT move
+    assert r["baseline_wide"]["closed_loop_converged"] is True
+    assert r["mean_matched_narrow"]["closed_loop_converged"] is True
+
+
+def test_step3b_committed_results_all_converged_and_in_range():
+    """Regression: lock the committed Step3b artifacts — EVERY closed_loop_converged flag
+    True (a failed search would read as spuriously 'stable'), and the key leverage numbers
+    in their expected ranges (V_th/sigma move the curve, tau_m/tau_ref dead, no pack moves
+    the margin)."""
+    import json
+    from pathlib import Path
+    base = Path("results/topic4_sef_hfo/heterogeneity")
+    sm = json.loads((base / "sensitivity_matrix.json").read_text())
+    cb = json.loads((base / "combo.json").read_text())
+    # every closed_loop_converged flag across both artifacts must be True
+    flags = []
+    for p, r in sm["params"].items():
+        flags += [r["baseline_wide"]["closed_loop_converged"],
+                  r["mean_matched_narrow"]["closed_loop_converged"]]
+    flags += [sm["mu_shift_control"]["baseline"]["closed_loop_converged"],
+              sm["mu_shift_control"]["shifted"]["closed_loop_converged"]]
+    for r in cb["combos"].values():
+        flags += [r["baseline_wide"]["closed_loop_converged"],
+                  r["mean_matched_narrow"]["closed_loop_converged"]]
+    assert all(flags), "a committed Step3b layer has closed_loop_converged=False"
+    # leverage ranking + no-margin-move (science lock)
+    P = sm["params"]
+    assert 8.0 < P["v_th"]["d_slope_pure_pct"] < 16.0          # V_th moves the curve ~+12%
+    assert 3.0 < P["sigma"]["d_slope_pure_pct"] < 9.0          # sigma ~+6%
+    assert abs(P["tau_m"]["d_slope_pure_pct"]) < 1.0           # tau_m static-dead
+    assert abs(P["tau_ref"]["d_slope_pure_pct"]) < 1.0         # tau_ref dead
+    for p in ("v_th", "sigma", "tau_m", "tau_ref"):
+        assert abs(P[p]["d_closed_loop_re_max_pure"]) < 0.005  # none move the margin
+    cvs = cb["combos"]["v_th+sigma"]
+    assert 10.0 < cvs["d_slope_pure_pct"] < 22.0
+    assert abs(cvs["d_closed_loop_re_max_pure"]) < 0.005
+    # the control DID move the margin (apparatus alive)
+    assert abs(sm["mu_shift_control"]["d_closed_loop_re_max"]) > 0.005
+
+
+def test_mean_match_raises_specific_not_bracketed_exception():
+    """The not-bracketed case raises the SPECIFIC MeanMatchNotBracketed (a ValueError
+    subclass) so a screen catches ONLY 'no leverage' and lets genuine numerical/domain
+    ValueErrors propagate (engineering fix 2026-06-07)."""
+    from src.sef_hfo_heterogeneity import mean_match_param, MeanMatchNotBracketed
+    from src.sef_hfo_lif import mean_field, V_RESET
+    op = mean_field(1.0)
+    muE, sE, nuE = op["muE"], op["sE"], op["nuE"]
+    assert issubclass(MeanMatchNotBracketed, ValueError)
+    # v_th over a tiny low-threshold bracket: rate >> nuE at both ends => not bracketed
+    with pytest.raises(MeanMatchNotBracketed):
+        mean_match_param(nuE, muE, sE, TAU_ME, TREF_E, param="v_th", std=0.5,
+                         bracket=(V_RESET + 0.5, V_RESET + 1.0))

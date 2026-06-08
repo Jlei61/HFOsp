@@ -27,7 +27,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.sef_hfo_lif import (  # noqa: E402
     mean_field, lif_gains, lif_rate, closed_loop_leading, TAU_ME, TREF_E, V_TH,
 )
-from src.sef_hfo_heterogeneity import phi_eff_param, mean_match_param, phi_eff_multi  # noqa: E402
+from src.sef_hfo_heterogeneity import (  # noqa: E402
+    phi_eff_param, mean_match_param, phi_eff_multi, MeanMatchNotBracketed,
+)
 from scipy.optimize import brentq  # noqa: E402
 
 OUT = Path("results/topic4_sef_hfo/heterogeneity/sensitivity_matrix.json")
@@ -73,7 +75,10 @@ def screen_param(param, op, gI):
     try:
         m_wide = mean_match_param(nuE, muE, sE, TAU_ME, TREF_E, param=param, std=std_wide)
         m_narrow = mean_match_param(nuE, muE, sE, TAU_ME, TREF_E, param=param, std=std_narrow)
-    except ValueError:
+    except MeanMatchNotBracketed:
+        # ONLY the genuine not-bracketed case = rate insensitive to this param here (no
+        # leverage). A numerical / illegal-domain ValueError (non-finite integral, unknown
+        # param) is NOT caught — it must fail loudly, not masquerade as 'no leverage'.
         rate_insensitive = True
         m_wide = m_narrow = nom
     wide = _layer(muE, sE, param, m_wide, std_wide, gI)
