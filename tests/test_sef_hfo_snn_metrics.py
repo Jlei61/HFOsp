@@ -71,3 +71,22 @@ def test_event_peak_time_finds_post_kick_peak():
     dt = 0.1
     r = _trace(dt, 450, [(80, 200, 6), (300, 150, 6)])   # pre-kick + post-kick peaks
     assert abs(event_peak_time(r, dt, 150.0, 350.0) - 300.0) < 2.0   # picks the post-kick one
+
+
+# ---- science guards (review 4A): the metrics must not be contaminated ----
+def test_self_limit_rest_window_clean_under_prekick_ignition():
+    # a core that self-ignites at 80ms must NOT inflate the rest reference [20,50):
+    # this is the bug the engine's [50,150] 'returned' window had.
+    dt = 0.1
+    r = _trace(dt, 450, [(80, 250, 6), (300, 120, 6)])   # pre-kick ignition + late event
+    m = self_limit(r, dt, t_kick=150.0)
+    assert m["rest_rate"] < 5.0                          # rest stays ~2Hz, not pulled up to 80ms burst
+
+
+def test_kick_precedes_detected_evoked_peak_for_clean_event():
+    # guard: for a non-igniting trace the detected event peak is AFTER the kick
+    dt, t_kick = 0.1, 150.0
+    r = _trace(dt, 450, [(185, 150, 6)])
+    ig, _ = pre_kick_ignition(r, dt, t_kick)
+    assert ig is False                                   # clean (no pre-kick ignition)
+    assert event_peak_time(r, dt, t_kick, 350.0) > t_kick
