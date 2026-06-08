@@ -182,6 +182,15 @@ def process_subject(ds, subj):
             "shaft": str(G.parse_shaft(names[i])[0]),
         })
     rec["channels"] = channels
+    # Weak-axis flag: when a sink-core channel projects to a SMALLER along-axis
+    # position than some source-core channel, the cores interleave along the axis
+    # -> source/sink centroids collapse toward each other -> axis_length cancels
+    # and is unreliable. This is the real split-core detector; degenerate_axis
+    # (L<1e-9) does NOT catch it. Downstream model code should gate on this.
+    src_along = [c["along_axis_mm"] for c in channels if c["role"] == "source_core"]
+    snk_along = [c["along_axis_mm"] for c in channels if c["role"] == "sink_core"]
+    weak_axis = bool(src_along and snk_along and (min(snk_along) < max(src_along)))
+    rec["weak_axis"] = weak_axis
     rec.update({
         "source_radius": G.core_radii(coords[cores["source_idx"]],
                                       np.array(fr["source_centroid"])),
@@ -256,6 +265,7 @@ def main():
         d["n"] += 1
         if r.get("eligibility_tier") in ("primary", "fallback") and "axis_length_mm" in r:
             d["axis_length_mm"].append(r["axis_length_mm"])
+    weak_recs = [r for r in ok if r.get("weak_axis")]
     cohort_summary = {
         "n_processed": len(recs), "n_ok": len(ok),
         "n_error": len(errored),
@@ -264,6 +274,8 @@ def main():
         "excluded_bad_data": [f"{ds}:{subj}" for ds, subj in excluded],
         "phantom_core_violations":
             int(sum(bool(r.get("phantom_core_violation")) for r in ok)),
+        "weak_axis": len(weak_recs),
+        "weak_axis_subjects": [f"{r['dataset']}:{r['subject']}" for r in weak_recs],
         "tiers": tiers,
         "sampling_geometry": {
             g: int(sum(r.get("sampling_geometry", {}).get("geometry") == g for r in ok))

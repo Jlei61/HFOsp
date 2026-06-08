@@ -35,7 +35,7 @@
 
 **采样几何（`sampling_geometry`）**：21 distributed（跨多根杆，可测横向铺展）/ 5 1D（单根电极杆，横向铺展不可测、已排除出横展统计）。
 
-**起止端路由（swap routing）**：12 个被试在跨事件上能稳定看到起止角色互换（7 个候选层 + 5 个严格层）→ 这些用主导聚类那条轴（`template_source=dominant_cluster_*`，9+3=12）；其余 18 个无稳定互换 → 用全程那条轴（`template_source=full_recording`）。
+**起止端路由（swap routing）**：12 个 swap-positive 被试（7 个候选层 + 5 个严格层）路由到主导聚类那条轴（`template_source=dominant_cluster_*`：9 个落 dominant cluster 0 + 3 个落 dominant cluster 1）；其余 18 个无稳定互换的用全程那条轴（`template_source=full_recording`）。上面这 12 / 18 是对全部 30 个 ok 被试计数；其中真正算出几何轴（有 `axis_length_mm`）的子集是 10（swap）+ 16（non-swap）= 26 个。
 
 **phantom 安全**：`phantom_core_violations=0`——没有任何非参与的幽灵通道混进起/止 core。
 
@@ -56,10 +56,11 @@
 
 **起止 core 跨杆情况**：起点 core 跨 >1 根电极杆的有 10/26 个被试，终点 core 跨 >1 根杆的有 12/26 个——再次说明多数传播不是沿单一杆的一维链，而是跨杆铺开。
 
-**起止 core 没有 egregious 裂核**：26 个被试里没有任何一个的起点 core 满足"最大两两距离 > 2.5×RMS 半径"（0/26）——MEB + max-pairwise 这道裂核护栏在位，但数据本身已经相当紧凑，护栏没被触发。
+**"最大两两距离 > 2.5×RMS"这道裂核护栏结构性失效，不能据此断言紧凑**：core 只有 k≤3 个通道，k 点集的"最大两两距离 / RMS 半径"比值有个解析上界 √6≈2.449 < 2.5，所以这个比值**永远不会触发**——0/26 不是"数据相当紧凑/没有裂核"的证据，而是这个判据对 k≤3 的 core 根本无信息量。MEB 与各通道坐标仍按被试保留（`source/sink_radius`、各通道 `along_axis_mm`），但**本队列无法从这个判据断言 core 紧凑性**。
 
-**最短轴个案（不是紧凑模板，是弱约束轴）**：`epilepsiae:635` 轴长仅 1.8 mm。**这条轴短不是因为模板紧**，而是因为它的终点 core 跨在起点两侧——终点 3 个通道里有一个沿轴坐标在 −20.4 mm（落在起点*后方*），把终点重心拉回到几乎与起点重合，所以两个重心间距塌成 1.8 mm；但终点 core 自身 RMS 半径 23.5 mm、最大两两距离 53.3 mm，还有一个内部通道偏离主轴 52 mm。它是 distributed 采样、布尔 `degenerate_axis=false`（这个布尔没抓住"终点 core 空间上不连贯"这种情况），但**这是轴坐标系最不可信的一个个案，axis 长度在这里不能读成"模板紧凑"**。把它作为最短轴离群点保留，但明确改口：不是 compact 模板，是弱约束轴。
-> 注：这一点与本轮上游 prompt 草稿里"a genuinely compact template, not degenerate"的措辞**冲突**；本归档以 per-subject 数据为准（`source/sink_radius`、各通道 `along_axis_mm`），不照搬 prompt 措辞——"compact" 在本文其它地方专指 core 半径（Yuquan 2.9 mm），用它形容 635 的短轴会发生代号坍缩（CLAUDE.md §6.3）。
+**真正的裂核探测：4/26 被试起止 core 沿轴交错（弱约束轴）**：用 `sink_min_along < source_max_along`（即某个汇 core 通道投影到的沿轴位置比某个源 core 通道更靠前）检测起止 core 沿轴交错——这会让源/汇重心互相靠拢、重心间距（=轴长）被抵消，axis_length 不可信。命中 **4/26：`epilepsiae:635 / 620 / 1150 / 583`（全部 Epilepsiae；Yuquan 0/7 干净）**。以 635 为例：终点 3 个通道里有一个沿轴坐标在 −20.4 mm（落在起点*后方*），把终点重心拉回到几乎与起点重合，两个重心间距塌成 1.8 mm。
+
+把 Epilepsiae 轴长中位数**两种口径都报，作为敏感性、不作为更正**：**22.3 mm（全 19 个）** vs **26.3 mm（剔掉这 4 个弱约束轴后的 15 个）**。注意布尔 `degenerate_axis`（L<1e-9）**一个都没抓到**这 4 个（它们 `degenerate_axis=false`）——新增的 `weak_axis` 标志（写进 per_subject + `cohort_summary.weak_axis` / `weak_axis_subjects`）才是下游模型代码应该 gate 的字段。
 
 ---
 

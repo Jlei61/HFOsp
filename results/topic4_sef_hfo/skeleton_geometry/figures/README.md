@@ -8,7 +8,7 @@
 
 ### skeleton_scalars_by_dataset.png
 
-四联散点，**按数据集分层**：源-汇轴长、源 core 半径RMS、汇 core 半径RMS、参与通道垂向铺展RMS。每点一个被试；Yuquan(native mm)与 Epilepsiae(MNI-space mm)分两列、不混。垂向铺展那一联只画"可测"（非单杆 1D 采样）的被试。
+四联散点，**按数据集分层**：源-汇轴长、源 core 半径RMS、汇 core 半径RMS、参与通道垂向铺展RMS。每点一个被试；Yuquan(native mm)与 Epilepsiae(MNI-space mm)分两列、不混。**轴长那一联（最左）里，起止 core 沿轴交错（`sink_min_along < source_max_along`）的被试用红色空心圈标出**（图例 "weak axis (interleaved cores)"，4/26，全在 Epilepsiae 列）——这些被试源/汇重心相互抵消，轴长被弱约束、不能读成"模板紧凑"。垂向铺展那一联只画"可测"（非单杆 1D 采样）的被试。
 
 **关注点**：Epilepsiae 坐标是 MNI 模板空间 mm（每个头被缩放到模板），与 Yuquan 真解剖 native mm **不能直接比绝对数值**——只看各数据集内部的尺度量级与分布。"垂向铺展"是**参与通道的垂向铺展**，受采样+发放率共同圈住，是一个**下界**，不是"斑块真实宽度"；单杆 1D 被试垂宽不可测、已被排除。
 

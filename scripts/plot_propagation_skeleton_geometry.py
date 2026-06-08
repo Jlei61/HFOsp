@@ -136,21 +136,34 @@ panels = [
 ]
 rng = np.random.default_rng(0)
 fig, axes = plt.subplots(1, 4, figsize=(16, 4.2))
-for ax, (lab, getter, measurable_only) in zip(axes, panels):
+for p_idx, (ax, (lab, getter, measurable_only)) in enumerate(zip(axes, panels)):
+    is_axis_panel = (p_idx == 0)  # only the axis-length panel marks weak-axis
     for i, (ds, color) in enumerate(DATASETS):
-        vals = []
+        normal_vals, weak_vals = [], []
         for r in ok:
             if r["dataset"] != ds:
                 continue
             if measurable_only and not r.get("perp_width_measurable"):
                 continue
             v = getter(r)
-            if v is not None and np.isfinite(v):
-                vals.append(v)
-        jitter = rng.uniform(-0.08, 0.08, len(vals))
-        ax.scatter(np.full(len(vals), i) + jitter, vals, c=color, alpha=0.75,
-                   s=45, edgecolors="0.3", linewidths=0.4,
+            if v is None or not np.isfinite(v):
+                continue
+            # Interleaved source/sink cores -> centroid cancellation -> the
+            # axis_length is weakly constrained; flag those points so the reader
+            # does not read the short axes as compact templates.
+            if is_axis_panel and r.get("weak_axis"):
+                weak_vals.append(v)
+            else:
+                normal_vals.append(v)
+        jitter = rng.uniform(-0.08, 0.08, len(normal_vals))
+        ax.scatter(np.full(len(normal_vals), i) + jitter, normal_vals, c=color,
+                   alpha=0.75, s=45, edgecolors="0.3", linewidths=0.4,
                    label=f"{ds} {_DS_TAG[ds]}")
+        if weak_vals:
+            wj = rng.uniform(-0.08, 0.08, len(weak_vals))
+            ax.scatter(np.full(len(weak_vals), i) + wj, weak_vals,
+                       facecolors="none", edgecolors="red", linewidths=1.6,
+                       s=80, label="weak axis (interleaved cores)")
     ax.set_xticks([0, 1])
     ax.set_xticklabels(["Yuquan\nSEEG", "Epilepsiae\nSEEG+ECoG"])
     ax.set_xlim(-0.5, 1.5)
