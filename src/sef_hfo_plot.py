@@ -164,33 +164,14 @@ def _trace_panel(ax, e, t, event_window, cmap_name, panel_title, signal_ylabel,
     ax.set_title(panel_title, fontsize=FS_TITLE - 3, pad=6)
 
 
-def two_electrode_readout(
-    out_path, *,
-    field_xy, kick_xy, axis_deg, extent,     # panel A: points; seed; axis deg; (xmin,xmax,ymin,ymax)
-    par, perp,                               # dict(contacts,part,s, signal(k,nt), label, panel_title)
-    t, event_window, signal_ylabel,          # shared time vector (ms); event window (t0,t1); signal name
-    substrate_label, contact_note,           # panel-A title; spacing caption
-    field_c=None, field_clabel=None,         # color panel-A points (rate=onset / SNN=density); None=single
-    E_xy=None, I_xy=None,                    # faint substrate (SNN); None for rate field
-    name_fs=10,                              # panel-A contact-label font (smaller for dense montages)
-    label_endpoints_only=False,              # dense crossing montage: label only the shaft ends
-    patch_circle=None,                       # (x,y,r) mm: dashed outline of a pathology core on panel A
-    field_cmap=None,                         # panel-A field colormap (default viridis; e.g. 'plasma' for spread)
-    field_vlim=None,                         # (vmin,vmax) clip for panel-A field colour (e.g. 5–95th pct so outliers don't blow out the gradient)
-    color_contacts=False,                    # colour electrode markers by par/perp 'contact_c' on the field scale
-    title=None,
-):
-    """3-panel two-electrode read-out (A geometry | B ∥-traces | C ⊥-traces),
-    house style, manual fixed-fraction axes (robust to square-box + colorbar
-    collapse)."""
-    fig = plt.figure(figsize=(17.0, 5.6))
-    fig.patch.set_facecolor("white")
-    axA = fig.add_axes([0.040, 0.150, 0.250, 0.700])    # square (0.250*17 ≈ 0.700*5.6 ... ≈4.0)
-    cax = fig.add_axes([0.296, 0.150, 0.011, 0.700])
-    axB = fig.add_axes([0.405, 0.150, 0.255, 0.700])
-    axC = fig.add_axes([0.715, 0.150, 0.255, 0.700])
-
-    # ---------------- Panel A: spatial event + electrodes ----------------
+def _spatial_panel(fig, axA, cax, *, field_xy, kick_xy, axis_deg, extent, par, perp,
+                   field_c=None, field_clabel=None, field_cmap=None, field_vlim=None,
+                   color_contacts=False, E_xy=None, I_xy=None, name_fs=10,
+                   label_endpoints_only=False, patch_circle=None, substrate_label="",
+                   panel_letter="a", label_x=-0.20, show_legend=True):
+    """One spatial event+electrodes panel (field scatter + colorbar + electrodes +
+    seed + axis arrow + optional pathology-core outline). Shared by the 3-panel
+    read-out and the 4-panel mechanism figure so both draw the map identically."""
     draw_substrate(axA, E_xy, I_xy)
     fxy = np.asarray(field_xy, float)
     _cmap_name = field_cmap or FIELD_CMAP
@@ -205,7 +186,7 @@ def two_electrode_readout(
         cb = fig.colorbar(sc, cax=cax)
         cb.set_label(field_clabel or "", fontsize=FS_LABEL - 3)
         cb.ax.tick_params(labelsize=FS_TICK - 4)
-        if color_contacts:                               # shared scale for contact markers
+        if color_contacts:
             _ccmap = plt.get_cmap(_cmap_name)
             _cnorm = plt.Normalize(vmin=_vmin, vmax=_vmax)
     else:
@@ -236,8 +217,44 @@ def two_electrode_readout(
     axA.set_aspect("equal")
     axA.set_xlabel("x (mm)", fontsize=FS_LABEL); axA.set_ylabel("y (mm)", fontsize=FS_LABEL)
     axA.set_title(substrate_label, fontsize=FS_TITLE - 3, pad=6)
-    style_panel(axA, "a", label_x=-0.20, label_y=1.02)
-    axA.legend(fontsize=LEG_FS - 1, loc="upper left", framealpha=0.92)
+    style_panel(axA, panel_letter, label_x=label_x, label_y=1.02)
+    if show_legend:
+        axA.legend(fontsize=LEG_FS - 1, loc="upper left", framealpha=0.92)
+
+
+def two_electrode_readout(
+    out_path, *,
+    field_xy, kick_xy, axis_deg, extent,     # panel A: points; seed; axis deg; (xmin,xmax,ymin,ymax)
+    par, perp,                               # dict(contacts,part,s, signal(k,nt), label, panel_title)
+    t, event_window, signal_ylabel,          # shared time vector (ms); event window (t0,t1); signal name
+    substrate_label, contact_note,           # panel-A title; spacing caption
+    field_c=None, field_clabel=None,         # color panel-A points (rate=onset / SNN=density); None=single
+    E_xy=None, I_xy=None,                    # faint substrate (SNN); None for rate field
+    name_fs=10,                              # panel-A contact-label font (smaller for dense montages)
+    label_endpoints_only=False,              # dense crossing montage: label only the shaft ends
+    patch_circle=None,                       # (x,y,r) mm: dashed outline of a pathology core on panel A
+    field_cmap=None,                         # panel-A field colormap (default viridis; e.g. 'plasma' for spread)
+    field_vlim=None,                         # (vmin,vmax) clip for panel-A field colour (e.g. 5–95th pct so outliers don't blow out the gradient)
+    color_contacts=False,                    # colour electrode markers by par/perp 'contact_c' on the field scale
+    title=None,
+):
+    """3-panel two-electrode read-out (A geometry | B ∥-traces | C ⊥-traces),
+    house style, manual fixed-fraction axes (robust to square-box + colorbar
+    collapse)."""
+    fig = plt.figure(figsize=(17.0, 5.6))
+    fig.patch.set_facecolor("white")
+    axA = fig.add_axes([0.040, 0.150, 0.250, 0.700])    # square (0.250*17 ≈ 0.700*5.6 ... ≈4.0)
+    cax = fig.add_axes([0.296, 0.150, 0.011, 0.700])
+    axB = fig.add_axes([0.405, 0.150, 0.255, 0.700])
+    axC = fig.add_axes([0.715, 0.150, 0.255, 0.700])
+
+    # ---------------- Panel A: spatial event + electrodes ----------------
+    _spatial_panel(fig, axA, cax, field_xy=field_xy, kick_xy=kick_xy, axis_deg=axis_deg,
+                   extent=extent, par=par, perp=perp, field_c=field_c,
+                   field_clabel=field_clabel, field_cmap=field_cmap, field_vlim=field_vlim,
+                   color_contacts=color_contacts, E_xy=E_xy, I_xy=I_xy, name_fs=name_fs,
+                   label_endpoints_only=label_endpoints_only, patch_circle=patch_circle,
+                   substrate_label=substrate_label, panel_letter="a", label_x=-0.20)
 
     # ---------------- Panel B/C: per-contact recorded signal ----------------
     _trace_panel(axB, par, t, event_window, "Oranges", par["panel_title"], signal_ylabel,
@@ -250,6 +267,55 @@ def two_electrode_readout(
     fig.text(0.5, 0.018, contact_note, ha="center", va="bottom",
              fontsize=FS_TICK - 4, color="0.35")
 
+    if title:
+        fig.suptitle(title, fontsize=FS_TITLE, y=0.99)
+    fig.savefig(out_path, dpi=300, facecolor="white")
+    fig.savefig(out_path.replace(".png", ".pdf"), facecolor="white")
+    plt.close(fig)
+    print(f"  Saved {out_path}")
+    return out_path
+
+
+def mechanism_4panel(
+    out_path, *,
+    field_xy, kick_xy, axis_deg, extent,
+    map_a, map_b,                            # each: dict(field_c, clabel, cmap, vlim, color_contacts, title)
+    par, perp, t, event_window, signal_ylabel, contact_note,
+    E_xy=None, I_xy=None, name_fs=10, label_endpoints_only=False,
+    patch_circle=None, title=None,
+):
+    """4-panel mechanism figure: (a) heterogeneity map | (b) onset/propagation map |
+    (c) ∥-axis read-out | (d) ⊥-axis read-out. The two maps share the same geometry
+    (electrodes / seed / axis / core); the read-out (c/d) is SHARED, not duplicated
+    across two figures (CLAUDE.md §7)."""
+    fig = plt.figure(figsize=(20.5, 5.6))
+    fig.patch.set_facecolor("white")
+    axA = fig.add_axes([0.030, 0.150, 0.185, 0.700]); caxA = fig.add_axes([0.220, 0.150, 0.008, 0.700])
+    axB = fig.add_axes([0.285, 0.150, 0.185, 0.700]); caxB = fig.add_axes([0.475, 0.150, 0.008, 0.700])
+    axC = fig.add_axes([0.560, 0.150, 0.185, 0.700])
+    axD = fig.add_axes([0.795, 0.150, 0.185, 0.700])
+
+    def _map(ax, cax, m, letter, label_x, show_legend):
+        _spatial_panel(fig, ax, cax, field_xy=field_xy, kick_xy=kick_xy, axis_deg=axis_deg,
+                       extent=extent, par=par, perp=perp, field_c=m.get("field_c"),
+                       field_clabel=m.get("clabel"), field_cmap=m.get("cmap"),
+                       field_vlim=m.get("vlim"), color_contacts=m.get("color_contacts", False),
+                       E_xy=E_xy, I_xy=I_xy, name_fs=name_fs,
+                       label_endpoints_only=label_endpoints_only, patch_circle=patch_circle,
+                       substrate_label=m.get("title", ""), panel_letter=letter,
+                       label_x=label_x, show_legend=show_legend)
+
+    _map(axA, caxA, map_a, "a", -0.22, True)
+    _map(axB, caxB, map_b, "b", -0.18, False)
+    _trace_panel(axC, par, t, event_window, "Oranges", par["panel_title"], signal_ylabel,
+                 show_ylabel=True)
+    _trace_panel(axD, perp, t, event_window, "GnBu", perp["panel_title"], signal_ylabel,
+                 show_ylabel=False)
+    style_panel(axC, "c", label_x=-0.10, label_y=1.02)
+    style_panel(axD, "d", label_x=-0.08, label_y=1.02)
+    axC.legend(fontsize=LEG_FS - 1, loc="upper right", framealpha=0.9)
+    fig.text(0.5, 0.018, contact_note, ha="center", va="bottom",
+             fontsize=FS_TICK - 4, color="0.35")
     if title:
         fig.suptitle(title, fontsize=FS_TITLE, y=0.99)
     fig.savefig(out_path, dpi=300, facecolor="white")

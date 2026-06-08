@@ -20,7 +20,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from src.sef_hfo_plot import two_electrode_readout
+from src.sef_hfo_plot import mechanism_4panel
 from src.sef_hfo_heterogeneity import local_vth_spread
 
 OUT = Path("results/topic4_sef_hfo/snn_heterogeneity")
@@ -66,44 +66,32 @@ def _load(cell):
     return z, L, theta, t, win, par, perp
 
 
-def _propagation_figure(cell, tag):
-    z, L, theta, t, win, par, perp = _load(cell)
-    onset = np.asarray(z["onset_core"], float)
-    field_c = onset - np.nanmin(onset)                               # time after first activation
-    fin = np.isfinite(field_c)
-    # clip the colour to 5–95th pct so late-firing outliers don't blow out the gradient
-    vlim = ((float(np.nanpercentile(field_c[fin], 5)), float(np.nanpercentile(field_c[fin], 95)))
-            if fin.sum() > 5 else None)
-    two_electrode_readout(
-        str(FIG / f"propagation_{tag}.png"),
-        field_xy=z["posE"], field_c=field_c, field_vlim=vlim,
-        field_clabel="time after event onset (ms)", color_contacts=True,
-        kick_xy=z["kick"], axis_deg=theta, extent=(0, L, 0, L),
-        par=par, perp=perp, t=t, event_window=win, name_fs=8, label_endpoints_only=True,
-        signal_ylabel="current-LFP (|I_E|+|I_I|)",
-        substrate_label=f"Spiking · {cell['cond']} core · {tag}  (onset map)",
-        contact_note="contacts SCALED to model sheet — NOT real SEEG spacing; firing-density "
-                     "read-out (NOT LFP); contacts coloured by arrival time; dashed = core",
-        patch_circle=(float(z["patch"][0]), float(z["patch"][1]), float(z["patch_r"])),
-        title="Virtual electrode reads the propagation order — onset map + peak locus")
-
-
-def _heterogeneity_figure(cell, tag):
+def _mechanism_figure(cell, tag):
+    """One 4-panel figure: a=heterogeneity map | b=onset/propagation map |
+    c=∥ read-out | d=⊥ read-out (c/d shared, not duplicated)."""
     z, L, theta, t, win, par, perp = _load(cell)
     posE = z["posE"]; vth = z["vth"]; NE = len(posE)
     spread = local_vth_spread(posE, vth[:NE], np.ones(NE, bool), 0.3)
-    two_electrode_readout(
-        str(FIG / f"heterogeneity_{tag}.png"),
-        field_xy=posE, field_c=spread, field_clabel="local V_th spread (mV)",
-        field_cmap="plasma", color_contacts=False,
-        kick_xy=z["kick"], axis_deg=theta, extent=(0, L, 0, L),
+    onset_rel = np.asarray(z["onset_core"], float) - np.nanmin(z["onset_core"])
+    fin = np.isfinite(onset_rel)
+    # clip onset colour to 5–95th pct so late-firing outliers don't blow out the gradient
+    vlim = ((float(np.nanpercentile(onset_rel[fin], 5)), float(np.nanpercentile(onset_rel[fin], 95)))
+            if fin.sum() > 5 else None)
+    mechanism_4panel(
+        str(FIG / f"mechanism_{tag}.png"),
+        field_xy=posE, kick_xy=z["kick"], axis_deg=theta, extent=(0, L, 0, L),
+        map_a=dict(field_c=spread, clabel="local V_th spread (mV)", cmap="plasma",
+                   vlim=None, color_contacts=False,
+                   title=f"heterogeneity map · {cell['cond']} core"),
+        map_b=dict(field_c=onset_rel, clabel="time after event onset (ms)", cmap=None,
+                   vlim=vlim, color_contacts=True, title="onset / propagation map"),
         par=par, perp=perp, t=t, event_window=win, name_fs=8, label_endpoints_only=True,
         signal_ylabel="current-LFP (|I_E|+|I_I|)",
-        substrate_label=f"Spiking · {cell['cond']} core · {tag}  (heterogeneity map)",
-        contact_note="panel-a = local threshold dispersion (NOT onset); dashed = pathology core; "
-                     "core-boundary ring on mean-shifted cores = mean jump, see core interior",
+        contact_note="contacts SCALED to model sheet — NOT real SEEG spacing; firing-density read-out "
+                     "(NOT LFP); dashed = pathology core; b-contacts coloured by arrival time; "
+                     "a heterogeneity boundary ring on mean-shifted cores = mean jump, see core interior",
         patch_circle=(float(z["patch"][0]), float(z["patch"][1]), float(z["patch_r"])),
-        title="Pathology core heterogeneity map (distinct colorbar)")
+        title=f"Pathology core ({cell['cond']}) — heterogeneity + propagation + electrode read-out ({tag})")
 
 
 def _overview(cells):
@@ -167,18 +155,15 @@ def _baseline_compare(reps):
 
 def main():
     FIG.mkdir(parents=True, exist_ok=True)
-    for old in FIG.glob("propagation_*.png"):
-        old.unlink()
-    for old in FIG.glob("heterogeneity_*.png"):
-        old.unlink()
-    for old in FIG.glob("mechanism_*.png"):                          # drop stale single-fig names
-        old.unlink()
+    for pat in ("propagation_*", "heterogeneity_*", "mechanism_*"):   # drop stale split/old names
+        for ext in ("png", "pdf"):
+            for old in FIG.glob(f"{pat}.{ext}"):
+                old.unlink()
     cells = json.loads((OUT / "grid_metrics.json").read_text())["cells"]
     _overview(cells)
     reps = _pick_representatives(cells)
     for tag, c in reps.items():
-        _propagation_figure(c, tag)
-        _heterogeneity_figure(c, tag)
+        _mechanism_figure(c, tag)
     _baseline_compare(reps)
     (OUT / "cohort_summary.json").write_text(json.dumps(
         {"representatives": {k: v["idx"] for k, v in reps.items()}, "n_cells": len(cells)},
