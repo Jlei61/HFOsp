@@ -32,6 +32,7 @@
   - **de novo（短窗从零发现模板）= 负结果**：方向恢复 NULL（ALL +0.022 p=0.10）、端点恢复 NULL（excess −0.064）；一致性臂复现 read-back（epi +0.156）证明非 pipeline 回归。
   - **学习曲线**：失败既因事件少（方向需 ~100 事件饱和）又因安静时段本身状态变了（真实窗落随机基准下 −0.29，rate 同降）。**统一：传播模板要"多事件学习、短窗读回"，不能"短窗从零发现"。**
   - 代码 `src/low_rate_template_stability.py` + `scripts/{run_low_rate_denovo,run_denovo_endpoint_stability,run_denovo_learning_curve,plot_*}.py`；tests 22 全绿。
+- **2026-06-08 间期传播几何骨架**（探索性，描述性 model-input，无 held-out，n=30 有几何）：`docs/archive/topic4/sef_hfo/propagation_skeleton_geometry_2026-06-08.md`。纯几何量传播骨架的 3D 尺度喂给 SEF-HFO 模型——起止 core 相当紧凑（Yuquan 半径中位约 3 mm）、传播轴厘米级（中位约 18–22 mm）、多数是跨杆 distributed 采样（21/26）而非单杆一维；**不是 SOZ 定位器、不是假设检验**（起止端≠致痫区已确证 NULL）；几何 vs 发放稳定性对比留下一轮。
 
 ## 前一代主路径（2026-05-20 至 2026-06-01）
 
