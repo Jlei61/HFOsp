@@ -1,0 +1,173 @@
+{
+  "dataset": "yuquan",
+  "subject": "songzishuo",
+  "status": "ok",
+  "swap_class": "none",
+  "template_source": "full_recording",
+  "coord_space": "fs_native_ras_mm",
+  "n_eff": 38,
+  "k_used": 3,
+  "eligibility_tier": "primary",
+  "channel_names": [
+    "A8",
+    "B'1",
+    "B'2",
+    "B'4",
+    "B3",
+    "B5",
+    "B6",
+    "B7",
+    "C'1",
+    "C'2",
+    "C'3",
+    "C'4",
+    "C'5",
+    "C'6",
+    "C'7",
+    "C'8",
+    "C1",
+    "C2",
+    "C4",
+    "C5",
+    "C6",
+    "D'2",
+    "D'3",
+    "D'4",
+    "D'5",
+    "D'8",
+    "D3",
+    "D4",
+    "E'2",
+    "E'3",
+    "E'4",
+    "E10",
+    "F'13",
+    "F'7",
+    "F'8",
+    "F3",
+    "F4",
+    "G8"
+  ],
+  "missing_coords": [],
+  "phantom_core_violation": false,
+  "degenerate_axis": false,
+  "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "source_radius": {
+    "rms_mm": 23.432248763663836,
+    "meb_mm": 25.305999159249986,
+    "max_pairwise_mm": 50.61199831849997
+  },
+  "sink_radius": {
+    "rms_mm": 9.682541194852684,
+    "meb_mm": 10.269197211127711,
+    "max_pairwise_mm": 20.53839261881705
+  },
+  "axis_length_mm": 57.234728020693275,
+  "perp_spread": {
+    "rms_mm": 42.14312579789774,
+    "p75_mm": 59.30756549437524,
+    "p90_mm": 67.85432749458496,
+    "n": 38
+  },
+  "perp_spread_participation_sweep": [
+    {
+      "threshold": 1,
+      "n": 38,
+      "rms_mm": 42.14312579789774,
+      "p90_mm": 67.85432749458496
+    },
+    {
+      "threshold": 5,
+      "n": 38,
+      "rms_mm": 42.14312579789774,
+      "p90_mm": 67.85432749458496
+    },
+    {
+      "threshold": 10,
+      "n": 38,
+      "rms_mm": 42.14312579789774,
+      "p90_mm": 67.85432749458496
+    },
+    {
+      "threshold": 20,
+      "n": 38,
+      "rms_mm": 42.14312579789774,
+      "p90_mm": 67.85432749458496
+    }
+  ],
+  "sampling_geometry": {
+    "geometry": "distributed",
+    "n_shafts": 12,
+    "p90_off_mm": 67.85432749458496,
+    "measurable": true
+  },
+  "perp_width_measurable": true,
+  "along_axis_profile": [
+    {
+      "a_lo": -36.72630376007006,
+      "a_hi": -17.732564884458085,
+      "n": 3,
+      "mean_excess": -0.056470943595286316,
+      "sd_excess": 0.08633467906097902,
+      "mean_event_count": 224.0
+    },
+    {
+      "a_lo": -17.732564884458085,
+      "a_hi": 1.261173991153889,
+      "n": 15,
+      "mean_excess": 0.0901039148270319,
+      "sd_excess": 0.052183053022179786,
+      "mean_event_count": 273.8666666666667
+    },
+    {
+      "a_lo": 1.261173991153889,
+      "a_hi": 20.254912866765864,
+      "n": 4,
+      "mean_excess": 0.09673245057766529,
+      "sd_excess": 0.01217861386426932,
+      "mean_event_count": 318.0
+    },
+    {
+      "a_lo": 20.254912866765864,
+      "a_hi": 39.24865174237784,
+      "n": 8,
+      "mean_excess": 0.1118183050914667,
+      "sd_excess": 0.040485362062605675,
+      "mean_event_count": 287.875
+    },
+    {
+      "a_lo": 39.24865174237784,
+      "a_hi": 58.24239061798982,
+      "n": 8,
+      "mean_excess": 0.08088989156037935,
+      "sd_excess": 0.04684160804452663,
+      "mean_event_count": 262.5
+    }
+  ],
+  "soz_relation": {
+    "source_core": [
+      "B'1",
+      "B'2",
+      "C'6"
+    ],
+    "sink_core": [
+      "D'8",
+      "E'2",
+      "E'4"
+    ],
+    "soz_channels_in_montage": [
+      "B'1",
+      "B'2",
+      "C'1",
+      "C'2",
+      "C'3",
+      "C'4",
+      "C'5",
+      "C'6",
+      "C'7",
+      "C'8",
+      "F'13",
+      "F'8"
+    ]
+  }
+}

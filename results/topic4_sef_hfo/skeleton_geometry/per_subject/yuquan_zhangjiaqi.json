@@ -1,0 +1,137 @@
+{
+  "dataset": "yuquan",
+  "subject": "zhangjiaqi",
+  "status": "ok",
+  "swap_class": "strict",
+  "template_source": "dominant_cluster_1",
+  "coord_space": "fs_native_ras_mm",
+  "n_eff": 7,
+  "k_used": 3,
+  "eligibility_tier": "primary",
+  "channel_names": [
+    "H1",
+    "H2",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "H7"
+  ],
+  "missing_coords": [],
+  "phantom_core_violation": false,
+  "degenerate_axis": false,
+  "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "source_radius": {
+    "rms_mm": 2.864828222006351,
+    "meb_mm": 3.5085845949097263,
+    "max_pairwise_mm": 7.017169189819453
+  },
+  "sink_radius": {
+    "rms_mm": 2.858578214514354,
+    "meb_mm": 3.5009229743038413,
+    "max_pairwise_mm": 7.0018459486076825
+  },
+  "axis_length_mm": 14.003500008931779,
+  "perp_spread": {
+    "rms_mm": 0.1639511941506551,
+    "p75_mm": 0.20135771073342484,
+    "p90_mm": 0.2082471737223916,
+    "n": 7
+  },
+  "perp_spread_participation_sweep": [
+    {
+      "threshold": 1,
+      "n": 7,
+      "rms_mm": 0.1639511941506551,
+      "p90_mm": 0.2082471737223916
+    },
+    {
+      "threshold": 5,
+      "n": 7,
+      "rms_mm": 0.1639511941506551,
+      "p90_mm": 0.2082471737223916
+    },
+    {
+      "threshold": 10,
+      "n": 7,
+      "rms_mm": 0.1639511941506551,
+      "p90_mm": 0.2082471737223916
+    },
+    {
+      "threshold": 20,
+      "n": 7,
+      "rms_mm": 0.1639511941506551,
+      "p90_mm": 0.2082471737223916
+    }
+  ],
+  "sampling_geometry": {
+    "geometry": "1D",
+    "n_shafts": 1,
+    "p90_off_mm": 0.2082471737223916,
+    "measurable": false
+  },
+  "perp_width_measurable": false,
+  "along_axis_profile": [
+    {
+      "a_lo": -3.5036364524616226,
+      "a_hi": 0.6967897941346464,
+      "n": 2,
+      "mean_excess": 0.18084733881340417,
+      "sd_excess": 0.08036939994439915,
+      "mean_event_count": 22753.5
+    },
+    {
+      "a_lo": 0.6967897941346464,
+      "a_hi": 4.897216040730916,
+      "n": 1,
+      "mean_excess": 0.033437455378725944,
+      "sd_excess": 0.0,
+      "mean_event_count": 22073.0
+    },
+    {
+      "a_lo": 4.897216040730916,
+      "a_hi": 9.097642287327185,
+      "n": 1,
+      "mean_excess": 0.09515349111297483,
+      "sd_excess": 0.0,
+      "mean_event_count": 20177.0
+    },
+    {
+      "a_lo": 9.097642287327185,
+      "a_hi": 13.298068533923454,
+      "n": 1,
+      "mean_excess": 0.1449836665871651,
+      "sd_excess": 0.0,
+      "mean_event_count": 18216.0
+    },
+    {
+      "a_lo": 13.298068533923454,
+      "a_hi": 17.498494780519724,
+      "n": 2,
+      "mean_excess": 0.10040357837185981,
+      "sd_excess": 0.035266287520414885,
+      "mean_event_count": 13461.0
+    }
+  ],
+  "soz_relation": {
+    "source_core": [
+      "H5",
+      "H6",
+      "H7"
+    ],
+    "sink_core": [
+      "H1",
+      "H2",
+      "H3"
+    ],
+    "soz_channels_in_montage": [
+      "H1",
+      "H2",
+      "H3",
+      "H4",
+      "H5",
+      "H6",
+      "H7"
+    ]
+  }
+}

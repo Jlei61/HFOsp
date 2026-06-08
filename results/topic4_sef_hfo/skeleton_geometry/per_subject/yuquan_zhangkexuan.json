@@ -1,0 +1,159 @@
+{
+  "dataset": "yuquan",
+  "subject": "zhangkexuan",
+  "status": "ok",
+  "swap_class": "none",
+  "template_source": "full_recording",
+  "coord_space": "fs_native_ras_mm",
+  "n_eff": 26,
+  "k_used": 3,
+  "eligibility_tier": "primary",
+  "channel_names": [
+    "A10",
+    "A11",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "A9",
+    "B1",
+    "B10",
+    "B11",
+    "B12",
+    "B2",
+    "B6",
+    "B7",
+    "B9",
+    "C1",
+    "D14",
+    "E1",
+    "E2",
+    "E4",
+    "F1",
+    "F2",
+    "F3"
+  ],
+  "missing_coords": [],
+  "phantom_core_violation": false,
+  "degenerate_axis": false,
+  "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "source_radius": {
+    "rms_mm": 3.838278349581454,
+    "meb_mm": 3.981342685672454,
+    "max_pairwise_mm": 7.774003671170827
+  },
+  "sink_radius": {
+    "rms_mm": 4.366178518060742,
+    "meb_mm": 5.2503985142577365,
+    "max_pairwise_mm": 10.500797028515473
+  },
+  "axis_length_mm": 33.70276999851654,
+  "perp_spread": {
+    "rms_mm": 10.961314006548125,
+    "p75_mm": 11.749995877873742,
+    "p90_mm": 17.241866497708422,
+    "n": 26
+  },
+  "perp_spread_participation_sweep": [
+    {
+      "threshold": 1,
+      "n": 26,
+      "rms_mm": 10.961314006548125,
+      "p90_mm": 17.241866497708422
+    },
+    {
+      "threshold": 5,
+      "n": 26,
+      "rms_mm": 10.961314006548125,
+      "p90_mm": 17.241866497708422
+    },
+    {
+      "threshold": 10,
+      "n": 26,
+      "rms_mm": 10.961314006548125,
+      "p90_mm": 17.241866497708422
+    },
+    {
+      "threshold": 20,
+      "n": 26,
+      "rms_mm": 10.961314006548125,
+      "p90_mm": 17.241866497708422
+    }
+  ],
+  "sampling_geometry": {
+    "geometry": "distributed",
+    "n_shafts": 6,
+    "p90_off_mm": 17.241866497708422,
+    "measurable": true
+  },
+  "perp_width_measurable": true,
+  "along_axis_profile": [
+    {
+      "a_lo": -4.35699800748739,
+      "a_hi": 3.9729950110331673,
+      "n": 6,
+      "mean_excess": 0.17390335826685843,
+      "sd_excess": 0.017260006335070122,
+      "mean_event_count": 12824.666666666666
+    },
+    {
+      "a_lo": 3.9729950110331673,
+      "a_hi": 12.302988029553724,
+      "n": 3,
+      "mean_excess": 0.15103826967151615,
+      "sd_excess": 0.028652224307215125,
+      "mean_event_count": 11857.0
+    },
+    {
+      "a_lo": 12.302988029553724,
+      "a_hi": 20.63298104807428,
+      "n": 4,
+      "mean_excess": 0.09917367106635963,
+      "sd_excess": 0.06399331410850763,
+      "mean_event_count": 13003.0
+    },
+    {
+      "a_lo": 20.63298104807428,
+      "a_hi": 28.96297406659484,
+      "n": 3,
+      "mean_excess": 0.13635473211578106,
+      "sd_excess": 0.012200278553456258,
+      "mean_event_count": 14738.666666666666
+    },
+    {
+      "a_lo": 28.96297406659484,
+      "a_hi": 37.2929670851154,
+      "n": 10,
+      "mean_excess": 0.12063353906564775,
+      "sd_excess": 0.024654551245949726,
+      "mean_event_count": 14441.7
+    }
+  ],
+  "soz_relation": {
+    "source_core": [
+      "E1",
+      "E2",
+      "F1"
+    ],
+    "sink_core": [
+      "B6",
+      "B7",
+      "B9"
+    ],
+    "soz_channels_in_montage": [
+      "A2",
+      "A3",
+      "A4",
+      "C1",
+      "E1",
+      "E2",
+      "E4",
+      "F1",
+      "F2",
+      "F3"
+    ]
+  }
+}

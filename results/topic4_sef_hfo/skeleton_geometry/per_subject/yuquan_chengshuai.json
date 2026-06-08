@@ -1,0 +1,139 @@
+{
+  "dataset": "yuquan",
+  "subject": "chengshuai",
+  "status": "ok",
+  "swap_class": "none",
+  "template_source": "full_recording",
+  "coord_space": "fs_native_ras_mm",
+  "n_eff": 8,
+  "k_used": 3,
+  "eligibility_tier": "primary",
+  "channel_names": [
+    "E11",
+    "K3",
+    "K5",
+    "K6",
+    "K7",
+    "K8",
+    "K9",
+    "K10"
+  ],
+  "missing_coords": [],
+  "phantom_core_violation": false,
+  "degenerate_axis": false,
+  "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "source_radius": {
+    "rms_mm": 2.855213341468881,
+    "meb_mm": 3.496906368292727,
+    "max_pairwise_mm": 6.993812736585454
+  },
+  "sink_radius": {
+    "rms_mm": 2.860455900211363,
+    "meb_mm": 3.503327149556065,
+    "max_pairwise_mm": 7.00665429911213
+  },
+  "axis_length_mm": 10.500285413710873,
+  "perp_spread": {
+    "rms_mm": 1.7864515073246188,
+    "p75_mm": 0.028678846261209614,
+    "p90_mm": 1.566560915232384,
+    "n": 8
+  },
+  "perp_spread_participation_sweep": [
+    {
+      "threshold": 1,
+      "n": 8,
+      "rms_mm": 1.7864515073246188,
+      "p90_mm": 1.566560915232384
+    },
+    {
+      "threshold": 5,
+      "n": 8,
+      "rms_mm": 1.7864515073246188,
+      "p90_mm": 1.566560915232384
+    },
+    {
+      "threshold": 10,
+      "n": 8,
+      "rms_mm": 1.7864515073246188,
+      "p90_mm": 1.566560915232384
+    },
+    {
+      "threshold": 20,
+      "n": 8,
+      "rms_mm": 1.7864515073246188,
+      "p90_mm": 1.566560915232384
+    }
+  ],
+  "sampling_geometry": {
+    "geometry": "1D",
+    "n_shafts": 2,
+    "p90_off_mm": 1.566560915232384,
+    "measurable": false
+  },
+  "perp_width_measurable": false,
+  "along_axis_profile": [
+    {
+      "a_lo": -10.50012141655515,
+      "a_hi": -4.29187573064138,
+      "n": 1,
+      "mean_excess": -0.03728344278211809,
+      "sd_excess": 0.0,
+      "mean_event_count": 7677.0
+    },
+    {
+      "a_lo": -4.29187573064138,
+      "a_hi": 1.9163699552723887,
+      "n": 2,
+      "mean_excess": 0.12156062611813295,
+      "sd_excess": 0.1126866057957771,
+      "mean_event_count": 24428.0
+    },
+    {
+      "a_lo": 1.9163699552723887,
+      "a_hi": 8.124615641186157,
+      "n": 2,
+      "mean_excess": 0.11954086439141953,
+      "sd_excess": 0.09623312063854994,
+      "mean_event_count": 25636.0
+    },
+    {
+      "a_lo": 8.124615641186157,
+      "a_hi": 14.332861327099927,
+      "n": 2,
+      "mean_excess": -0.022924847626762862,
+      "sd_excess": 0.006759932267666718,
+      "mean_event_count": 15311.0
+    },
+    {
+      "a_lo": 14.332861327099927,
+      "a_hi": 20.5411070130137,
+      "n": 1,
+      "mean_excess": -0.041400969069647076,
+      "sd_excess": 0.0,
+      "mean_event_count": 8067.0
+    }
+  ],
+  "soz_relation": {
+    "source_core": [
+      "K5",
+      "K6",
+      "K7"
+    ],
+    "sink_core": [
+      "K8",
+      "K9",
+      "K10"
+    ],
+    "soz_channels_in_montage": [
+      "E11",
+      "K10",
+      "K3",
+      "K5",
+      "K6",
+      "K7",
+      "K8",
+      "K9"
+    ]
+  }
+}

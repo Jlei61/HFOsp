@@ -1,0 +1,136 @@
+{
+  "dataset": "epilepsiae",
+  "subject": "1096",
+  "status": "ok",
+  "swap_class": "none",
+  "template_source": "full_recording",
+  "coord_space": "mni152_1mm",
+  "n_eff": 7,
+  "k_used": 3,
+  "eligibility_tier": "primary",
+  "channel_names": [
+    "HL2",
+    "HL3",
+    "HL4",
+    "HL5",
+    "HL6",
+    "HL7",
+    "TBA3"
+  ],
+  "missing_coords": [],
+  "phantom_core_violation": false,
+  "degenerate_axis": false,
+  "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "source_radius": {
+    "rms_mm": 5.14241620684717,
+    "meb_mm": 6.284902544988268,
+    "max_pairwise_mm": 12.569805089976535
+  },
+  "sink_radius": {
+    "rms_mm": 4.737556801183965,
+    "meb_mm": 5.787918451395113,
+    "max_pairwise_mm": 11.575836902790225
+  },
+  "axis_length_mm": 18.153665072253467,
+  "perp_spread": {
+    "rms_mm": 6.797543334366467,
+    "p75_mm": 0.7548882116579986,
+    "p90_mm": 7.669447952469853,
+    "n": 7
+  },
+  "perp_spread_participation_sweep": [
+    {
+      "threshold": 1,
+      "n": 7,
+      "rms_mm": 6.797543334366467,
+      "p90_mm": 7.669447952469853
+    },
+    {
+      "threshold": 5,
+      "n": 7,
+      "rms_mm": 6.797543334366467,
+      "p90_mm": 7.669447952469853
+    },
+    {
+      "threshold": 10,
+      "n": 7,
+      "rms_mm": 6.797543334366467,
+      "p90_mm": 7.669447952469853
+    },
+    {
+      "threshold": 20,
+      "n": 7,
+      "rms_mm": 6.797543334366467,
+      "p90_mm": 7.669447952469853
+    }
+  ],
+  "sampling_geometry": {
+    "geometry": "distributed",
+    "n_shafts": 2,
+    "p90_off_mm": 7.669447952469853,
+    "measurable": true
+  },
+  "perp_width_measurable": true,
+  "along_axis_profile": [
+    {
+      "a_lo": -6.08998541702367,
+      "a_hi": -0.10037764908461266,
+      "n": 2,
+      "mean_excess": 0.14949109740789132,
+      "sd_excess": 0.12092543144261378,
+      "mean_event_count": 149576.5
+    },
+    {
+      "a_lo": -0.10037764908461266,
+      "a_hi": 5.889230118854445,
+      "n": 0,
+      "mean_excess": NaN,
+      "sd_excess": NaN,
+      "mean_event_count": NaN
+    },
+    {
+      "a_lo": 5.889230118854445,
+      "a_hi": 11.878837886793505,
+      "n": 2,
+      "mean_excess": -0.06329027207262283,
+      "sd_excess": 0.14307571972413824,
+      "mean_event_count": 139466.0
+    },
+    {
+      "a_lo": 11.878837886793505,
+      "a_hi": 17.86844565473256,
+      "n": 1,
+      "mean_excess": 0.10643382781450456,
+      "sd_excess": 0.0,
+      "mean_event_count": 196122.0
+    },
+    {
+      "a_lo": 17.86844565473256,
+      "a_hi": 23.858053422671624,
+      "n": 2,
+      "mean_excess": 0.18416181147579708,
+      "sd_excess": 0.048565207801945176,
+      "mean_event_count": 176520.5
+    }
+  ],
+  "soz_relation": {
+    "source_core": [
+      "HL2",
+      "HL3",
+      "HL4"
+    ],
+    "sink_core": [
+      "HL5",
+      "HL6",
+      "HL7"
+    ],
+    "soz_channels_in_montage": [
+      "HL2",
+      "HL3",
+      "HL4",
+      "HL5",
+      "HL6",
+      "HL7"
+    ]
+  }
+}

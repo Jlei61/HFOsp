@@ -1,0 +1,108 @@
+{
+  "n_processed": 39,
+  "n_ok": 30,
+  "n_error": 9,
+  "errors": [
+    {
+      "dataset": "yuquan",
+      "subject": "chenziyang",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/chenziyang/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "gaolan",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/gaolan/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "hanyuxuan",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/hanyuxuan/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "huanghanwen",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/huanghanwen/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "litengsheng",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/litengsheng/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "sunyuanxin",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/sunyuanxin/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "wangyiyang",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/wangyiyang/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "xuxinyi",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/xuxinyi/chnXyzDict.npy"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "zhangjinhan",
+      "status": "error: Yuquan coord file not found: /mnt/yuquan_data/yuquan_images/nii\u683c\u5f0f\u53ca\u70b9\u7535\u6781\u5750\u6807/caseAndMRI/yuquan_24h_mriCT/patients_elecs_reGen/zhangjinhan/chnXyzDict.npy"
+    }
+  ],
+  "excluded_bad_data": [
+    "yuquan:pengzihang"
+  ],
+  "phantom_core_violations": 0,
+  "tiers": {
+    "descriptive_only": 4,
+    "fallback": 3,
+    "primary": 23
+  },
+  "sampling_geometry": {
+    "1D": 5,
+    "distributed": 21
+  },
+  "swap_tiers": {
+    "none": 18,
+    "candidate": 7,
+    "strict": 5
+  },
+  "by_dataset": {
+    "epilepsiae": {
+      "n": 20,
+      "axis_length_mm": [
+        34.09912022325503,
+        13.203534880225575,
+        18.153665072253467,
+        13.144496102086904,
+        27.746871695542346,
+        22.32586939952047,
+        26.66874991862615,
+        18.116904322268258,
+        26.310116347561486,
+        35.873233599564024,
+        36.444783196257625,
+        19.058389811897076,
+        46.414796491348895,
+        12.476644848141934,
+        1.7950549357115007,
+        31.866910738256383,
+        17.811513130556875,
+        18.153665072253467,
+        25.978623691198283
+      ]
+    },
+    "yuquan": {
+      "n": 10,
+      "axis_length_mm": [
+        10.500285413710873,
+        18.260043373997394,
+        57.234728020693275,
+        22.906888407297537,
+        14.003500008931779,
+        33.70276999851654,
+        17.785944616052834
+      ]
+    }
+  }
+}

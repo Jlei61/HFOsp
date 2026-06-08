@@ -1,0 +1,183 @@
+{
+  "dataset": "yuquan",
+  "subject": "zhangbichen",
+  "status": "ok",
+  "swap_class": "none",
+  "template_source": "full_recording",
+  "coord_space": "fs_native_ras_mm",
+  "n_eff": 52,
+  "k_used": 3,
+  "eligibility_tier": "primary",
+  "channel_names": [
+    "B1",
+    "B13",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5",
+    "C6",
+    "C7",
+    "C8",
+    "D10",
+    "D11",
+    "D12",
+    "D13",
+    "D14",
+    "D5",
+    "D6",
+    "D7",
+    "D8",
+    "D9",
+    "E1",
+    "E10",
+    "E2",
+    "E3",
+    "E4",
+    "E5",
+    "E6",
+    "E7",
+    "E8",
+    "E9",
+    "F4",
+    "F5",
+    "F6",
+    "F7",
+    "F8",
+    "F9",
+    "G7",
+    "G8",
+    "G9",
+    "H3",
+    "H4",
+    "H5",
+    "H6",
+    "N1",
+    "N2",
+    "N6"
+  ],
+  "missing_coords": [],
+  "phantom_core_violation": false,
+  "degenerate_axis": false,
+  "along_axis_profile_metric": "raw_excess_obs_minus_nullmean",
+  "source_radius": {
+    "rms_mm": 2.85908441957185,
+    "meb_mm": 3.501648023953781,
+    "max_pairwise_mm": 7.003296047907562
+  },
+  "sink_radius": {
+    "rms_mm": 2.8585649497404093,
+    "meb_mm": 3.501007641564675,
+    "max_pairwise_mm": 7.002015283129349
+  },
+  "axis_length_mm": 22.906888407297537,
+  "perp_spread": {
+    "rms_mm": 23.55863785299527,
+    "p75_mm": 22.107801308841488,
+    "p90_mm": 27.4522596125184,
+    "n": 52
+  },
+  "perp_spread_participation_sweep": [
+    {
+      "threshold": 1,
+      "n": 52,
+      "rms_mm": 23.55863785299527,
+      "p90_mm": 27.4522596125184
+    },
+    {
+      "threshold": 5,
+      "n": 52,
+      "rms_mm": 23.55863785299527,
+      "p90_mm": 27.4522596125184
+    },
+    {
+      "threshold": 10,
+      "n": 52,
+      "rms_mm": 23.55863785299527,
+      "p90_mm": 27.4522596125184
+    },
+    {
+      "threshold": 20,
+      "n": 52,
+      "rms_mm": 23.55863785299527,
+      "p90_mm": 27.4522596125184
+    }
+  ],
+  "sampling_geometry": {
+    "geometry": "distributed",
+    "n_shafts": 8,
+    "p90_off_mm": 27.4522596125184,
+    "measurable": true
+  },
+  "perp_width_measurable": true,
+  "along_axis_profile": [
+    {
+      "a_lo": -13.378101889619186,
+      "a_hi": -4.878018307832331,
+      "n": 7,
+      "mean_excess": 0.02465404153537946,
+      "sd_excess": 0.03158045957697533,
+      "mean_event_count": 5156.428571428572
+    },
+    {
+      "a_lo": -4.878018307832331,
+      "a_hi": 3.622065273954524,
+      "n": 10,
+      "mean_excess": 0.11059496254666212,
+      "sd_excess": 0.02612935913573805,
+      "mean_event_count": 5737.5
+    },
+    {
+      "a_lo": 3.622065273954524,
+      "a_hi": 12.122148855741381,
+      "n": 12,
+      "mean_excess": 0.04574113108545954,
+      "sd_excess": 0.036586116036134805,
+      "mean_event_count": 5921.416666666667
+    },
+    {
+      "a_lo": 12.122148855741381,
+      "a_hi": 20.622232437528233,
+      "n": 9,
+      "mean_excess": -0.004298349790466838,
+      "sd_excess": 0.0471120729155841,
+      "mean_event_count": 5483.444444444444
+    },
+    {
+      "a_lo": 20.622232437528233,
+      "a_hi": 29.122316019315093,
+      "n": 14,
+      "mean_excess": 0.023573485238475328,
+      "sd_excess": 0.08517454533121005,
+      "mean_event_count": 5296.357142857143
+    }
+  ],
+  "soz_relation": {
+    "source_core": [
+      "E7",
+      "E8",
+      "E9"
+    ],
+    "sink_core": [
+      "C5",
+      "C6",
+      "C7"
+    ],
+    "soz_channels_in_montage": [
+      "B13",
+      "F5",
+      "F6",
+      "F7",
+      "F8",
+      "F9",
+      "G8",
+      "G9"
+    ]
+  }
+}
