@@ -50,22 +50,31 @@ def draw_substrate(ax, E_xy=None, I_xy=None, alpha_E=0.10, alpha_I=0.12):
 
 
 def _draw_electrode(ax, contacts, part, color, marker, label, names=None, name_dxy=(0, 9),
-                    name_fs=9, endpoints_only=False):
+                    name_fs=9, endpoints_only=False, contact_c=None, ccmap=None, cnorm=None):
     """One shaft: a thin guide line through the contacts, filled markers for
     participating contacts, hollow gray for non-participating, per-contact name
     labels (so panel A contacts match the trace labels in panels B/C). Labels are
     drawn large with a white-stroke halo so they read over the dense field. When
     the montage is too dense to label every contact (crossing sub-mm shafts whose
     centre contacts coincide), endpoints_only labels just the two shaft ends — the
-    intermediate contacts follow shaft order, matching the B/C trace stack."""
+    intermediate contacts follow shaft order, matching the B/C trace stack.
+
+    contact_c (+ ccmap/cnorm): colour the participating markers by a per-contact
+    value (e.g. arrival time) on a shared scale — so the propagation order is
+    visible ON the electrodes, not just the field (user 2026-06-08c). The shaft
+    `color` then only outlines the guide line / non-participants / labels."""
     c = np.asarray(contacts, float)
     ax.plot(c[:, 0], c[:, 1], color=color, lw=1.0, alpha=0.6, zorder=3)
     part = np.asarray(part, bool)
     if (~part).any():
         ax.scatter(c[~part, 0], c[~part, 1], s=42, facecolor="white",
                    edgecolor="0.5", marker=marker, linewidths=1.0, zorder=4)
-    ax.scatter(c[part, 0], c[part, 1], s=54, facecolor=color, edgecolor="black",
-               marker=marker, linewidths=1.0, zorder=5, label=label)
+    if contact_c is not None and ccmap is not None and cnorm is not None and part.any():
+        fc = ccmap(cnorm(np.asarray(contact_c, float)[part]))
+    else:
+        fc = color
+    ax.scatter(c[part, 0], c[part, 1], s=66, facecolor=fc, edgecolor="black",
+               marker=marker, linewidths=1.1, zorder=5, label=label)
     if names is not None:
         idxs = [0, len(names) - 1] if endpoints_only else range(len(names))
         for j in idxs:
@@ -166,6 +175,8 @@ def two_electrode_readout(
     name_fs=10,                              # panel-A contact-label font (smaller for dense montages)
     label_endpoints_only=False,              # dense crossing montage: label only the shaft ends
     patch_circle=None,                       # (x,y,r) mm: dashed outline of a pathology core on panel A
+    field_cmap=None,                         # panel-A field colormap (default viridis; e.g. 'plasma' for spread)
+    color_contacts=False,                    # colour electrode markers by par/perp 'contact_c' on the field scale
     title=None,
 ):
     """3-panel two-electrode read-out (A geometry | B ∥-traces | C ⊥-traces),
@@ -181,14 +192,20 @@ def two_electrode_readout(
     # ---------------- Panel A: spatial event + electrodes ----------------
     draw_substrate(axA, E_xy, I_xy)
     fxy = np.asarray(field_xy, float)
+    _cmap_name = field_cmap or FIELD_CMAP
+    _ccmap = _cnorm = None
     if field_c is not None:
         fc = np.asarray(field_c, float)
         fin = np.isfinite(fc)
-        sc = axA.scatter(fxy[fin, 0], fxy[fin, 1], c=fc[fin], cmap=FIELD_CMAP,
+        sc = axA.scatter(fxy[fin, 0], fxy[fin, 1], c=fc[fin], cmap=_cmap_name,
                          s=8, linewidths=0, alpha=0.9, zorder=1)
         cb = fig.colorbar(sc, cax=cax)
         cb.set_label(field_clabel or "", fontsize=FS_LABEL - 3)
         cb.ax.tick_params(labelsize=FS_TICK - 4)
+        if color_contacts:                               # shared scale for contact markers
+            _ccmap = plt.get_cmap(_cmap_name)
+            _cnorm = plt.Normalize(vmin=float(np.nanmin(fc[fin])),
+                                   vmax=float(np.nanmax(fc[fin])))
     else:
         cax.set_visible(False)
         axA.scatter(fxy[:, 0], fxy[:, 1], c=C_FOOT, s=7, linewidths=0, alpha=0.45, zorder=1)
@@ -199,12 +216,16 @@ def two_electrode_readout(
                                  lw=1.6, zorder=4, label="pathology core"))
 
     _axis_arrow(axA, kick_xy, axis_deg, extent)
+    _cc_par = par.get("contact_c") if color_contacts else None
+    _cc_perp = perp.get("contact_c") if color_contacts else None
     _draw_electrode(axA, par["contacts"], par["part"], C_PAR, "o", "electrode ∥ axis",
                     names=par.get("names"), name_dxy=(7, 7), name_fs=name_fs,
-                    endpoints_only=label_endpoints_only)
+                    endpoints_only=label_endpoints_only,
+                    contact_c=_cc_par, ccmap=_ccmap, cnorm=_cnorm)
     _draw_electrode(axA, perp["contacts"], perp["part"], C_PERP, "s", "electrode ⊥ axis",
                     names=perp.get("names"), name_dxy=(-7, -9), name_fs=name_fs,
-                    endpoints_only=label_endpoints_only)
+                    endpoints_only=label_endpoints_only,
+                    contact_c=_cc_perp, ccmap=_ccmap, cnorm=_cnorm)
     k = np.asarray(kick_xy, float)
     axA.scatter([k[0]], [k[1]], marker="*", s=280, c="black", edgecolor="white",
                 linewidths=1.0, zorder=7, label="event seed")
