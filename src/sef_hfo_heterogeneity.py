@@ -385,21 +385,25 @@ def _trunc_gauss(mean, std, low, size, rng):
 def sample_threshold_fields(pos, is_E, patch_center, patch_radius, rng,
                             vth_mean=18.0, std_wide=1.5, std_narrow=0.5,
                             v_reset=11.0, core_mean_shift=2.0, surround_std=0.0):
-    """Per-neuron firing thresholds (length N) for baseline / matched / unmatched,
-    LOCALIZED to the patch core, sharing a bit-identical surround (paired-seed
-    contract, spec §2). The surround is quiet (``surround_std=0`` -> scalar
-    ``vth_mean``); only the in-core E neurons get a threshold distribution:
+    """Per-neuron firing thresholds (length N) for a 2x2 of conditions, LOCALIZED
+    to the patch core, sharing a bit-identical surround (paired-seed contract,
+    spec §2). Surround quiet (``surround_std=0`` -> scalar ``vth_mean``); only the
+    in-core E neurons get a threshold distribution. The 2x2 separates the variance
+    axis from the mean axis (2026-06-08c):
 
-      baseline  core ~ TruncGauss(vth_mean, std_wide)    (healthy heterogeneous)
-      matched   core ~ TruncGauss(vth_mean, std_narrow)  (pathological, mean held)
-      unmatched core ~ TruncGauss(vth_mean - core_mean_shift, std_narrow)
-                                                          (pathological + hyperexcitable)
+      mean \\ std   wide(std_wide)                  narrow(std_narrow)
+      vth_mean     baseline (healthy)              matched   (variance axis)
+      -shift       mean_only (mean axis)           unmatched (combined)
+
+    so: matched-baseline = pure variance (mean held); mean_only-baseline = pure
+    mean shift (spread held wide); unmatched-baseline = combined; unmatched-
+    mean_only = variance at the lowered mean (interaction check).
 
     I neurons keep scalar ``vth_mean``. Truncated at ``v_reset``. Returns
-    dict(baseline, matched, unmatched, core_mask). All three E-fields are
-    >= v_reset; surround entries are equal across the three by construction.
-    ``surround_std>0`` reproduces the wide-everywhere field (the B-side regime
-    probe) — but it spontaneously bursts, so the default for Experiment A is 0.
+    dict(baseline, matched, mean_only, unmatched, core_mask). All E-fields are
+    >= v_reset; surround entries equal across conditions by construction.
+    ``surround_std>0`` reproduces the wide-everywhere field (B-side regime probe)
+    — but it spontaneously bursts, so the default for Experiment A is 0.
     """
     pos = np.asarray(pos, float); is_E = np.asarray(is_E, bool)
     n = len(pos)
@@ -412,6 +416,7 @@ def sample_threshold_fields(pos, is_E, patch_center, patch_radius, rng,
     cidx = np.flatnonzero(core)
     rng_b = np.random.default_rng(int(rng.integers(1 << 31)))
     rng_m = np.random.default_rng(int(rng.integers(1 << 31)))
+    rng_o = np.random.default_rng(int(rng.integers(1 << 31)))
     rng_u = np.random.default_rng(int(rng.integers(1 << 31)))
 
     def with_core(mean, std, r):
@@ -419,13 +424,19 @@ def sample_threshold_fields(pos, is_E, patch_center, patch_radius, rng,
         f[cidx] = _trunc_gauss(mean, std, v_reset, cidx.size, r)
         return f
 
-    baseline = with_core(vth_mean, std_wide, rng_b)            # wide healthy core
-    matched = with_core(vth_mean, std_narrow, rng_m)           # narrow, mean held
-    unmatched = with_core(vth_mean - core_mean_shift, std_narrow, rng_u)
-    for arr in (baseline, matched, unmatched):
+    # 2x2 axes (spec §2; mean-only added 2026-06-08c to separate variance vs mean):
+    #   mean \ std    wide(std_wide)         narrow(std_narrow)
+    #   18 (held)     baseline               matched
+    #   16 (down)     mean_only              unmatched
+    baseline = with_core(vth_mean, std_wide, rng_b)              # (18, wide) healthy
+    matched = with_core(vth_mean, std_narrow, rng_m)             # (18, narrow) variance axis
+    mean_only = with_core(vth_mean - core_mean_shift, std_wide, rng_o)   # (16, wide) mean axis
+    unmatched = with_core(vth_mean - core_mean_shift, std_narrow, rng_u)  # (16, narrow) combined
+    for arr in (baseline, matched, mean_only, unmatched):
         if not (arr[eidx] >= v_reset).all():
             raise ValueError("threshold below V_reset — truncation failed (spec §2)")
-    return dict(baseline=baseline, matched=matched, unmatched=unmatched, core_mask=core)
+    return dict(baseline=baseline, matched=matched, mean_only=mean_only,
+                unmatched=unmatched, core_mask=core)
 
 
 def local_vth_spread(pos, vth, is_E, radius):

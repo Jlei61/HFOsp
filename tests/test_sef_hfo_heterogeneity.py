@@ -472,24 +472,26 @@ def test_threshold_fields_share_surround_and_narrow_core():
                                   patch_radius=0.5, rng=rng,
                                   vth_mean=18.0, std_wide=1.5, std_narrow=0.5,
                                   v_reset=11.0, core_mean_shift=2.0)
-    base, matched, unmatched = out["baseline"], out["matched"], out["unmatched"]
+    base, matched = out["baseline"], out["matched"]
+    mean_only, unmatched = out["mean_only"], out["unmatched"]
     core = out["core_mask"]
     surround = is_E & ~core
-    # surround is BIT-IDENTICAL across the three (paired-seed contract)
-    np.testing.assert_array_equal(base[surround], matched[surround])
-    np.testing.assert_array_equal(base[surround], unmatched[surround])
+    # surround is BIT-IDENTICAL across all 4 (paired-seed contract)
+    for f in (matched, mean_only, unmatched):
+        np.testing.assert_array_equal(base[surround], f[surround])
     # localized design (2026-06-08b): surround is SCALAR-quiet (=vth_mean), only the
-    # core carries heterogeneity; baseline core is WIDE, matched/unmatched NARROW
+    # core carries heterogeneity. 2x2 (2026-06-08c) mean{18,16} x std{wide,narrow}:
     assert np.allclose(base[surround], 18.0)          # quiet scalar surround
-    assert base[core].std() > 1.0                     # baseline core heterogeneous (wide)
-    assert matched[core].std() < base[core].std()
-    assert unmatched[core].std() < base[core].std()
-    # matched core mean ~ 18 (held), unmatched core mean ~ 16 (shifted down)
-    assert abs(matched[core].mean() - 18.0) < 0.3
-    assert abs(unmatched[core].mean() - 16.0) < 0.3
+    assert base[core].std() > 1.0                     # baseline (18, wide)
+    assert matched[core].std() < base[core].std()     # matched  (18, narrow) variance axis
+    assert mean_only[core].std() > 1.0                # mean_only (16, WIDE) mean axis
+    assert unmatched[core].std() < base[core].std()   # unmatched (16, narrow) combined
+    assert abs(matched[core].mean() - 18.0) < 0.3     # matched mean held at 18
+    assert abs(mean_only[core].mean() - 16.0) < 0.3   # mean_only mean down to 16
+    assert abs(unmatched[core].mean() - 16.0) < 0.3   # unmatched mean down to 16
     # physical domain: nothing below reset
-    assert (base[is_E] >= 11.0).all()
-    assert (matched[is_E] >= 11.0).all() and (unmatched[is_E] >= 11.0).all()
+    for f in (base, matched, mean_only, unmatched):
+        assert (f[is_E] >= 11.0).all()
     # I neurons keep scalar threshold
     assert np.allclose(base[~is_E], 18.0)
 
