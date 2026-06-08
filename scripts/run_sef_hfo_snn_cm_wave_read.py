@@ -1,21 +1,37 @@
-"""SNN cm-scale TRAVELING-WAVE read (user 2026-06-08, option A + scale-law tuning).
+"""SNN cm-scale TRAVELING-WAVE read (user 2026-06-08, option A) — AUDITED v2.
 
-Reframe: at cm scale the SNN event is a sustained traveling FRONT, not a self-limited blob.
-So read it as a wave: kick EARLY (t_kick~20ms, so the front has the whole sim to cross), use a
-FIXED first-pass window (NOT event_window_for_run, which needs a self-terminating event ->
-n=0 for a sustained wave), and read per-contact FIRST-crossing onset times -> endpoint_centroid_axis
-(early-onset centroid -> late-onset centroid = propagation direction; first-crossing captures the
-FIRST front pass even if periodic-BC re-entry follows). Estimator unchanged (the WF-A perpendicular
-trap is onset_front_axis only). Reads firing-envelope AND current-LFP.
+Reframe: at cm scale the SNN event is a sustained traveling FRONT (not a self-limited blob);
+read the FIRST front pass (first-crossing onset -> endpoint_centroid_axis). v2 adds the rigor
+the user 2026-06-08 demanded:
+  1. VALID-CONTACT MASK: a contact counts ONLY if it is inside the sheet [0,L]^2 AND has >=1 real
+     E neuron within Rr. The engine LFPRecorder falls back to the NEAREST single neuron for empty
+     (off-sheet) sites, and sample_envelopes' normalized Gaussian likewise reads the nearest
+     neurons — so off-sheet contacts are boundary-neuron extrapolations, NOT real 4mm reads. We
+     exclude them. NC=4 (the largest montage that FITS the 12mm sheet: shaft length 12mm) is the
+     default so there are no off-sheet contacts to begin with; the mask is the audit on top.
+  2. POSITIVE/NEGATIVE VERDICT SCHEMA: control_type drives the pass logic. positive (C1/C2/C3):
+     pass = BOTH reads n_valid_part>=7 AND axis_err<25 (the pre-registered gate; NOT loosened to
+     'LFP-only'). negative (C4 iso): pass = NO readable axis (readability<TAU_FAIL or axis None).
+  3. PROVENANCE: git_sha + engine file hashes + full CLI/params (kxy, perp_j, nc, r_kick, t_kick,
+     seed) + contact coords + valid mask + which contacts participated + their rank/lag — so the
+     axis is auditable ("which contacts read it") months later.
 
-Scale law used: mean-field operating point is N-invariant (fixed in-degree) so g/drive fixed across
-scales; only finite-size noise ~1/sqrt(N) changes; event speed v is intensive so the crossing time
-(and read window) scale with L, not N. Run ONE config per process (fresh memory); CLI-parametrized.
+C2 CONTRACT NOTE (plan-vs-code reconciliation): the plan said "perpendicular offset FROM montage
+center". This code offsets perpendicular FROM the single-end kick BASE (center - end_frac*half*dir),
+i.e. kick = base +/- perp_j*half*perp. This is a documented CONTRACT CHANGE (the kick-track control
+still moves ONLY the kick perpendicular while montage + theta_EE stay fixed -> it still isolates
+"seed position must not drag direction"; it just starts from the single-end base, consistent with
+the single-end-kick reframe). Not "plan tests A, code tests B" silently.
+
+Parity comparator = the FIRING envelope (rate runner-v2 reads firing-density; the rate field has no
+current-LFP). current-LFP is an SNN-only bonus and does NOT carry the parity claim.
 """
 import sys
 import os
 import json
 import argparse
+import subprocess
+import hashlib
 import numpy as np
 
 ENG = os.path.join("results", "topic4_sef_hfo", "lif_snn", "engine")
@@ -32,34 +48,69 @@ from src.sef_hfo_observation import (build_shaft, merge_montages, extract_lagpat
                                      axis_angle_error_deg, direction_readability)
 from src.sef_hfo_snn_adapter import snn_event_envelope      # noqa: E402
 
-PITCH, NC, SHAFTS = 4.0, 6, (15.0, 75.0, 135.0)
-MARGIN_FRAC, KDIR, AXIS_ERR_MAX, PART_MIN = 0.10, 3, 25.0, 7
+PITCH, SHAFTS = 4.0, (15.0, 75.0, 135.0)
+MARGIN_FRAC, KDIR, AXIS_ERR_MAX, PART_MIN, TAU_FAIL = 0.10, 3, 25.0, 7, 0.3
 DT, DRIVE = 0.1, 0.6
 OUT = "results/topic4_sef_hfo/observation_layer/snn_cm_wave"
+_ENG_FILES = ("kick_probe.py", "lfp.py", "connectivity.py", "connectivity_rot.py", "params.py")
 
 
-def montage(center, rot_deg=0.0, nc=NC):
+def _provenance():
+    try:
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+    except Exception:
+        sha = None
+    eng = {}
+    for fn in _ENG_FILES:
+        try:
+            eng[fn] = hashlib.sha1(open(os.path.join(ENG, fn), "rb").read()).hexdigest()[:12]
+        except Exception:
+            eng[fn] = None
+    return dict(git_sha=sha, engine_sha=eng, argv=sys.argv)
+
+
+def montage(center, rot_deg, nc):
     rot = np.deg2rad(rot_deg)
     return merge_montages([build_shaft(np.deg2rad(a) + rot, PITCH, nc, tuple(center), chr(65 + i))
                            for i, a in enumerate(SHAFTS)])
 
 
-def read_fixed_window(env, fdt, m, win, theta_ref_rad, label):
-    """First-pass read: extract_lagpat on a FIXED window (first-crossing onset) -> endpoint axis."""
-    floor = float(env.min())
-    margin = MARGIN_FRAC * (float(env.max()) - floor)
-    art = extract_lagpat(env, fdt, [win], floor, margin, 0.5, fdt)
-    art = attach_geometry(art, m)
+def valid_mask(m, posE, L, Rr):
+    """valid contact = inside sheet [0,L]^2 AND >=1 real E neuron within Rr (no fallback)."""
+    C = np.asarray(m.contacts, float)
+    inside = (C[:, 0] >= 0) & (C[:, 0] <= L) & (C[:, 1] >= 0) & (C[:, 1] <= L)
+    has_n = np.array([int((np.linalg.norm(posE - c, axis=1) <= Rr).sum()) >= 1 for c in C])
+    return inside & has_n, inside, has_n
+
+
+def read_valid(env, fdt, m, valid, win, theta_ref_rad, label):
+    """Read direction using ONLY valid contacts (subset env+montage), with contact-level detail."""
+    vi = np.where(valid)[0]
+    if len(vi) < PART_MIN:
+        return dict(signal=label, n_valid=int(valid.sum()), n_part=0, axis_err=None,
+                    readability=None, axis_vec=None, participating=[], ranks={}, lags_s={})
+    env_v = env[vi]
+    names_v = [m.names[i] for i in vi]
+    from src.sef_hfo_observation import VirtualMontage
+    m_v = VirtualMontage(np.asarray(m.contacts)[vi], names_v, "valid_subset")
+    floor = float(env_v.min())
+    margin = MARGIN_FRAC * (float(env_v.max()) - floor)
+    art = extract_lagpat(env_v, fdt, [win], floor, margin, 0.5, fdt)
+    art = attach_geometry(art, m_v)
     r0, b0 = art.ranks[:, 0], art.bools[:, 0]
     ax = endpoint_centroid_axis(r0, b0, art.contact_coords, k_dir=KDIR, eps_deg=0.5 * PITCH)
     rd = direction_readability(r0, b0, art.contact_coords)
     err = None if ax is None else round(float(axis_angle_error_deg(ax, theta_ref_rad)), 1)
-    return {"signal": label, "n_part": int(b0.sum()), "axis_err": err,
-            "readability": (None if rd is None or rd != rd else round(float(rd), 3))}
+    part = [names_v[j] for j in range(len(b0)) if b0[j]]
+    ranks = {names_v[j]: round(float(r0[j]), 2) for j in range(len(b0)) if b0[j]}
+    lags = {names_v[j]: round(float(art.lag_raw[j, 0]), 4) for j in range(len(b0)) if b0[j]}
+    return dict(signal=label, n_valid=int(valid.sum()), n_part=int(b0.sum()), axis_err=err,
+                readability=(None if rd is None or rd != rd else round(float(rd), 3)),
+                axis_vec=(None if ax is None else [round(float(ax[0]), 4), round(float(ax[1]), 4)]),
+                participating=part, ranks=ranks, lags_s=lags)
 
 
 def front_speed(on_spk, posE, theta_rad, t_kick, dt):
-    """Front position along theta vs time -> speed (mm/ms). Confirms a single-pass crossing + v."""
     th = np.array([np.cos(theta_rad), np.sin(theta_rad)])
     proj = posE @ th
     bs = max(1, int(round(2.0 / dt)))
@@ -68,33 +119,51 @@ def front_speed(on_spk, posE, theta_rad, t_kick, dt):
     ikb = int(t_kick / dt) // bs
     fronts, times = [], []
     for b in range(ikb, nb):
-        active = binned[b]
-        if active.sum() >= 5:
-            fronts.append(float(np.percentile(proj[active], 95)))   # leading edge along theta
+        if binned[b].sum() >= 5:
+            fronts.append(float(np.percentile(proj[binned[b]], 95)))
             times.append(b * bs * dt)
     if len(fronts) < 4:
-        return None, None
+        return None
     fr = np.array(fronts); tm = np.array(times)
-    # speed = slope of leading-edge advance over the rising phase
-    v = float(np.polyfit(tm[:max(4, len(tm) // 2)], fr[:max(4, len(fr) // 2)], 1)[0])
-    return round(v, 4), round(float(fr.max() - fr.min()), 2)
+    h = max(4, len(tm) // 2)
+    return round(float(np.polyfit(tm[:h], fr[:h], 1)[0]), 4)
+
+
+def positive_verdict(fire, lfp):
+    def ok(r):
+        return r["axis_err"] is not None and r["n_part"] >= PART_MIN and r["axis_err"] < AXIS_ERR_MAX
+    return dict(control_type="positive",
+                firing_pass=ok(fire), lfp_pass=ok(lfp),
+                PASS=bool(ok(fire) and ok(lfp)),                       # pre-registered gate: BOTH
+                parity_comparator="firing", parity_pass=ok(fire))
+
+
+def negative_verdict(fire, lfp):
+    def no_axis(r):
+        return (r["axis_err"] is None) or (r["readability"] is not None and r["readability"] < TAU_FAIL)
+    return dict(control_type="negative",
+                firing_no_axis=no_axis(fire), lfp_no_axis=no_axis(lfp),
+                PASS=bool(no_axis(fire) and no_axis(lfp)),             # correct = NO readable axis
+                parity_comparator="firing", parity_pass=no_axis(fire))
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--L", type=float, default=8.0)
+    ap.add_argument("--L", type=float, default=12.0)
     ap.add_argument("--theta", type=float, default=45.0)
     ap.add_argument("--AR", type=float, default=2.0)
-    ap.add_argument("--density", type=float, default=1000.0)
+    ap.add_argument("--density", type=float, default=500.0)
     ap.add_argument("--r-kick", type=float, default=0.6)
     ap.add_argument("--t-kick", type=float, default=20.0)
-    ap.add_argument("--t-window", type=float, default=180.0)   # post-kick window (>= crossing)
+    ap.add_argument("--t-window", type=float, default=180.0)
     ap.add_argument("--kick-mode", choices=["negend", "center", "perp"], default="negend")
     ap.add_argument("--perp-j", type=float, default=0.0)
     ap.add_argument("--montage-rot", type=float, default=0.0)
-    ap.add_argument("--nc", type=int, default=NC)        # contacts/shaft (coverage for shifted waves)
+    ap.add_argument("--nc", type=int, default=4)             # NC=4 FITS L=12 (no off-sheet contacts)
     ap.add_argument("--theta-ref", type=float, default=None)
-    ap.add_argument("--tag", default="L8")
+    ap.add_argument("--control-type", choices=["positive", "negative"], default="positive")
+    ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--tag", default="L12")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "wave.pid"), "w") as f:
@@ -102,9 +171,9 @@ def main():
     L, theta_rad = a.L, np.deg2rad(a.theta)
     theta_ref = np.deg2rad(a.theta if a.theta_ref is None else a.theta_ref)
     T = a.t_kick + DUR_KICK + a.t_window
-    p = Params(g=3.6, L=L, density=a.density, T=T, dt=DT, nu_ext_ratio=DRIVE, seed=1)
-    rng = np.random.default_rng(1)
-    print(f"[{a.tag}] placing+building N~{int(a.density*L*L)} (T={T:.0f}ms t_kick={a.t_kick}) ...", flush=True)
+    p = Params(g=3.6, L=L, density=a.density, T=T, dt=DT, nu_ext_ratio=DRIVE, seed=a.seed)
+    rng = np.random.default_rng(a.seed)
+    print(f"[{a.tag}] N~{int(a.density*L*L)} seed={a.seed} nc={a.nc} ...", flush=True)
     pos, labels, NE, NI = place_neurons(p, rng)
     net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR, verbose=False)
     posE = net["pos"][:NE]
@@ -117,19 +186,18 @@ def main():
         base = center - 0.6 * half * np.array([np.cos(theta_rad), np.sin(theta_rad)])
         perp = np.array([-np.sin(theta_rad), np.cos(theta_rad)])
         kxy = base + a.perp_j * half * perp
-    else:                                   # negend (single-end, source at -theta end)
+    else:
         kxy = center - 0.6 * half * np.array([np.cos(theta_rad), np.sin(theta_rad)])
     m = montage(center, a.montage_rot, a.nc)
+    valid, inside, has_n = valid_mask(m, posE, L, p.Rr)
     rec = LFPRecorder(p, net["pos"], net["labels"], sites=m.contacts)
-    print(f"[{a.tag}] simulating on/off (kick {a.kick_mode} r={a.r_kick} at {np.round(kxy,2)}) ...", flush=True)
-    net["rng"] = np.random.default_rng(1)
+    net["rng"] = np.random.default_rng(a.seed)
     on = simulate_kick(p, net, KICK_BOOST=2 * nut, kick_center=list(kxy), lfp_recorder=rec,
                        r_kick=a.r_kick, t_kick=a.t_kick)
-    net["rng"] = np.random.default_rng(1)
+    net["rng"] = np.random.default_rng(a.seed)
     off = simulate_kick(p, net, KICK_BOOST=0.0, kick_center=list(kxy), lfp_recorder=rec,
                         r_kick=a.r_kick, t_kick=a.t_kick)
 
-    # ignition (instantaneous peak + returned) + dense oracle + front speed
     spk = on["E_spk_bool"]
     bs = max(1, int(round(2.0 / DT)))
     nb = spk.shape[0] // bs
@@ -149,30 +217,33 @@ def main():
                       err_vs_ref=round(float(axis_angle_error_deg(
                           np.array([np.cos(np.deg2rad(oa)), np.sin(np.deg2rad(oa))]), theta_ref)), 1),
                       ratio=round(float(np.sqrt(w.max() / max(w.min(), 1e-12))), 2))
-    v, reach = front_speed(spk, posE, theta_rad, a.t_kick, DT)
+    v = front_speed(spk, posE, theta_rad, a.t_kick, DT)
 
-    # FIXED first-pass read window (kick-end -> end) — no event_window_for_run
     win = (a.t_kick + DUR_KICK + 2.0, T - 5.0)
     env_f, fdt, _ = snn_event_envelope(on["E_spk_bool"], posE, m, DT)
-    env_l = on["lfp_trace"].T
-    fire = read_fixed_window(env_f, fdt, m, win, theta_ref, "firing")
-    lfp = read_fixed_window(env_l, DT, m, win, theta_ref, "current_lfp")
+    fire = read_valid(env_f, fdt, m, valid, win, theta_ref, "firing")
+    lfp = read_valid(on["lfp_trace"].T, DT, m, valid, win, theta_ref, "current_lfp")
+    verdict = (negative_verdict if a.control_type == "negative" else positive_verdict)(fire, lfp)
 
-    res = dict(tag=a.tag, L=L, theta=a.theta, AR=a.AR, density=a.density, r_kick=a.r_kick,
-               t_kick=a.t_kick, T=T, kick_mode=a.kick_mode, montage_rot=a.montage_rot,
-               theta_ref=(a.theta if a.theta_ref is None else a.theta_ref),
-               NE=int(NE), peak_inst=round(peak, 4), returned=returned,
-               front_v_mm_per_ms=v, front_reach_mm=reach, win=[round(win[0], 1), round(win[1], 1)],
-               oracle=oracle, firing=fire, current_lfp=lfp)
-    with open(os.path.join(OUT, f"wave_read_{a.tag}.json"), "w") as f:
-        json.dump(res, f, indent=2, default=lambda o: None)
-    print(f"[{a.tag}] peak_inst={peak:.3f} returned={returned} v={v}mm/ms reach={reach}mm | "
-          f"oracle={oracle['axis_deg'] if oracle else None}deg(err {oracle['err_vs_ref'] if oracle else None}) | "
-          f"firing n={fire['n_part']} err={fire['axis_err']} | LFP n={lfp['n_part']} err={lfp['axis_err']}",
+    res = dict(tag=a.tag, control_type=a.control_type, provenance=_provenance(),
+               config=dict(L=L, theta=a.theta, theta_ref=(a.theta if a.theta_ref is None else a.theta_ref),
+                           AR=a.AR, density=a.density, NE=int(NE), r_kick=a.r_kick, t_kick=a.t_kick,
+                           T=T, kick_mode=a.kick_mode, perp_j=a.perp_j, montage_rot=a.montage_rot,
+                           nc=a.nc, seed=a.seed, Rr=p.Rr, kxy=[round(float(kxy[0]), 3), round(float(kxy[1]), 3)]),
+               geometry_audit=dict(n_contacts=len(m.contacts), n_inside=int(inside.sum()),
+                                   n_valid=int(valid.sum()), n_offsheet=int((~inside).sum()),
+                                   contact_coords=np.asarray(m.contacts).round(2).tolist(),
+                                   valid=valid.astype(int).tolist()),
+               ignition=dict(peak_inst=round(peak, 4), returned=returned, front_v_mm_per_ms=v),
+               oracle=oracle, firing=fire, current_lfp=lfp, verdict=verdict)
+    with open(os.path.join(OUT, f"wave_read_{a.tag}.json"), "w") as fh:
+        json.dump(res, fh, indent=2, default=lambda o: None)
+    print(f"[{a.tag}] {a.control_type} | valid {valid.sum()}/{len(m.contacts)} (offsheet {(~inside).sum()}) "
+          f"| oracle={oracle['axis_deg'] if oracle else None}({oracle['err_vs_ref'] if oracle else None}) "
+          f"| fir n={fire['n_part']}/{fire['n_valid']} err={fire['axis_err']} rd={fire['readability']} "
+          f"| lfp n={lfp['n_part']}/{lfp['n_valid']} err={lfp['axis_err']} rd={lfp['readability']} "
+          f"-> VERDICT {'PASS' if verdict['PASS'] else 'FAIL'} (parity[firing] {'pass' if verdict['parity_pass'] else 'FAIL'})",
           flush=True)
-    ok = (fire["axis_err"] is not None and fire["n_part"] >= PART_MIN and fire["axis_err"] < AXIS_ERR_MAX
-          and lfp["axis_err"] is not None and lfp["n_part"] >= PART_MIN and lfp["axis_err"] < AXIS_ERR_MAX)
-    print(f"[{a.tag}] WAVE-READ {'PASS' if ok else 'not-yet'} (both reads >=7 contacts & <25deg)", flush=True)
 
 
 if __name__ == "__main__":
