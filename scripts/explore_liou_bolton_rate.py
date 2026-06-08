@@ -82,17 +82,24 @@ def _setup():
 
 
 def integrate(*, w_ee_mult, dphi, b_a, l_inh, tphi, ta, t_max=10000.0,
-              kick_amp=10.0, kick_t=(200.0, 600.0), kick_frac=0.12):
+              kick_amp=10.0, kick_t=(200.0, 600.0), kick_frac=0.12,
+              cl=False, tau_z=5000.0, cl_th=0.05, cl_w=0.01, return_aux=False):
     """1-D bolt-on rate field. dphi=0 → no adaptive threshold; b_a=0 → no sAHP; l_inh small
-    → no surround. Returns (t_ms, frames[nsteps,N] Hz). sigma fixed at canonical sE."""
+    → no surround. cl=True adds usage-dependent inhibition exhaustion (paper eq 8, the
+    substrate-agnostic abstraction of the chloride mechanism eq 3, since our Siegert model
+    is not conductance-based): efficacy z scales inhibition, decays (τ_z≈5 s) where the I→E
+    drive is heavily used (> cl_th, in kHz), recovers when quiet. Returns (t_ms, frames Hz);
+    if return_aux also returns the mean efficacy z(t). sigma fixed at canonical sE."""
     s = _setup()
     wee = w_ee_mult * W_EE
     KE, KI = _gauss_kernel(ELL), _gauss_kernel(l_inh)
     rE = np.full(N, 1e-4); rI = np.full(N, 1e-4); vth = np.full(N, V_TH); a = np.full(N, 1e-4)
+    z = np.ones(N)                          # inhibition efficacy (1 = intact, 0 = exhausted)
     sEE = _conv(rE, KE).copy(); sEI = _conv(rI, KI).copy()
     sIE = _conv(rE, KI).copy(); sII = _conv(rI, KI).copy()
     nsteps = int(t_max / DT)
     frames = np.empty((nsteps, N))
+    zbar = np.empty(nsteps)
     kick_mask = np.arange(N) < int(kick_frac * N)
     for t in range(nsteps):
         stim = kick_amp * kick_mask if (kick_t[0] <= t * DT < kick_t[1]) else 0.0
@@ -100,7 +107,12 @@ def integrate(*, w_ee_mult, dphi, b_a, l_inh, tphi, ta, t_max=10000.0,
         sEI += DT / TAU_GABA * (_conv(rI, KI) - sEI)
         sIE += DT / TAU_AMPA * (_conv(rE, KI) - sIE)
         sII += DT / TAU_GABA * (_conv(rI, KI) - sII)
-        muE = TAU_ME * (C_EE * wee * sEE - C_EI * W_EI * sEI) + s["muxE"] + stim - b_a * a
+        if cl:
+            # usage = I→E synaptic drive (∝ inhibitory conductance "g_I" in eq 8); heavy use
+            # drives the efficacy steady state toward 0 (exhaustion), quiet toward 1 (recovery).
+            z_inf = 1.0 / (1.0 + np.exp((sEI - cl_th) / cl_w))
+            z = z + DT / tau_z * (z_inf - z)
+        muE = TAU_ME * (C_EE * wee * sEE - z * C_EI * W_EI * sEI) + s["muxE"] + stim - b_a * a
         muI = TAU_MI * (C_IE * W_IE * sIE - C_II * W_II * sII) + s["muxI"]
         fE = s["rateE"](np.column_stack([np.clip(muE, -20, 220), np.clip(vth, V_TH, V_TH + 160)]))
         fI = np.interp(muI, s["musI"], s["rI_lut"])
@@ -109,6 +121,9 @@ def integrate(*, w_ee_mult, dphi, b_a, l_inh, tphi, ta, t_max=10000.0,
         vth = vth + DT / tphi * ((V_TH - vth) + dphi * rE * 1000.0)
         a = a + DT / ta * (-a + rE)
         frames[t] = rE * 1000.0
+        zbar[t] = z.mean()
+    if return_aux:
+        return np.arange(nsteps) * DT, frames, zbar
     return np.arange(nsteps) * DT, frames
 
 
@@ -278,11 +293,45 @@ def mode_sweep():
     print(f"  period vs tphi: {list(zip(tphis, [round(x,3) if x==x else None for x in pers]))}")
 
 
+def mode_chloride():
+    """Chloride / usage-dependent inhibition exhaustion (paper eq 8, the substrate-agnostic
+    abstraction of eq 3 for our non-conductance Siegert model): efficacy z scales inhibition,
+    decays under heavy I→E use (τ_z≈5 s). Deliverable figure: 3 mechanisms vs +chloride —
+    inhibition exhaustion disinhibits and collapses the clonic bursting into tonic."""
+    TMX = 24000.0
+    t0, f0, z0 = integrate(t_max=TMX, return_aux=True, **DEF)                       # no chloride
+    t1, f1, z1 = integrate(t_max=TMX, return_aux=True, **{**DEF, "cl": True,
+                                                          "cl_th": 0.06, "cl_w": 0.012})
+    vmax = float(np.percentile(np.concatenate([f0, f1]), 99.5))
+    fig, ax = plt.subplots(2, 2, figsize=(13, 7), gridspec_kw={"height_ratios": [1.0, 0.55]})
+    for col, (t, fr, zb, ttl) in enumerate([
+            (t0, f0, z0, "without inhibition exhaustion → sustained clonic bursting"),
+            (t1, f1, z1, "with inhibition exhaustion (chloride/eq8) → bursting collapses to tonic")]):
+        im = _raster(ax[0, col], t, fr, vmax, ttl, ylab=(col == 0))
+        fig.colorbar(im, ax=ax[0, col], label="firing rate (Hz)", fraction=0.046, pad=0.02)
+        ax[1, col].plot(t / 1000, zb, color="#1f77b4")
+        ax[1, col].set_ylim(0, 1.05); ax[1, col].margins(x=0)
+        ax[1, col].set_xlabel("time (s)")
+        if col == 0:
+            ax[1, col].set_ylabel("inhibition efficacy")
+        ax[1, col].set_title("inhibition efficacy over time (1 = intact, 0 = exhausted)", fontsize=9)
+    fig.suptitle("Usage-dependent inhibition exhaustion (chloride mechanism, paper eq 8) — "
+                 "disinhibition collapses the clonic rhythm into tonic\n"
+                 "excitable-regime capability test, not the data-locked operating point; "
+                 "eq 8 abstraction of eq 3 (our rate model is not conductance-based); no "
+                 "spontaneous termination in this regime", fontsize=9)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    p = os.path.join(OUT, "liou_bolton_chloride.png"); fig.savefig(p, dpi=110)
+    print(f"wrote {p}")
+    print(f"  no chloride: {classify(f0)}")
+    print(f"  +chloride:   {classify(f1)}  (z_end={z1[-1]:.3f})")
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     mode = sys.argv[1] if len(sys.argv) > 1 else "all"
     modes = {"explore": mode_explore, "main": mode_main, "ablation": mode_ablation,
-             "sweep": mode_sweep}
+             "sweep": mode_sweep, "chloride": mode_chloride}
     if mode == "all":
         _setup()
         for m in ("main", "ablation", "sweep"):
