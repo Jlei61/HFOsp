@@ -70,9 +70,13 @@ def _propagation_figure(cell, tag):
     z, L, theta, t, win, par, perp = _load(cell)
     onset = np.asarray(z["onset_core"], float)
     field_c = onset - np.nanmin(onset)                               # time after first activation
+    fin = np.isfinite(field_c)
+    # clip the colour to 5–95th pct so late-firing outliers don't blow out the gradient
+    vlim = ((float(np.nanpercentile(field_c[fin], 5)), float(np.nanpercentile(field_c[fin], 95)))
+            if fin.sum() > 5 else None)
     two_electrode_readout(
         str(FIG / f"propagation_{tag}.png"),
-        field_xy=z["posE"], field_c=field_c,
+        field_xy=z["posE"], field_c=field_c, field_vlim=vlim,
         field_clabel="time after event onset (ms)", color_contacts=True,
         kick_xy=z["kick"], axis_deg=theta, extent=(0, L, 0, L),
         par=par, perp=perp, t=t, event_window=win, name_fs=8, label_endpoints_only=True,
@@ -103,7 +107,7 @@ def _heterogeneity_figure(cell, tag):
 
 
 def _overview(cells):
-    fig, ax = plt.subplots(figsize=(11, 4.2))
+    fig, ax = plt.subplots(figsize=(12.5, 4.6))
     vals = [(c["d_core_paf"] if c["d_core_paf"] is not None else np.nan) for c in cells]
     cols = [COND_COLOR.get(c["cond"], "0.5") for c in cells]
     bars = ax.bar(range(len(cells)), vals, color=cols)
@@ -116,9 +120,9 @@ def _overview(cells):
     ax.axhline(0, color="k", lw=0.8)
     ax.set_xticks(range(len(cells))); ax.set_xticklabels(labels, fontsize=6)
     ax.set_ylabel("Δ core peak-active-fraction (core − baseline)")
-    ax.set_title("Heterogeneity 2×2 grid (blue=variance/matched, orange=mean_only, red=combined)\n"
-                 "hatched = core self-ignites pre-kick (NOT within-event synchrony, review 1B); "
-                 "black edge = kick-on-patch (not mechanism evidence)")
+    ax.set_title("Heterogeneity 2×2: blue=matched(variance), orange=mean_only, red=unmatched(combined)\n"
+                 "hatch = core self-ignites pre-kick (state index, NOT within-event synchrony) · "
+                 "black edge = kick-on-patch", fontsize=9)
     fig.tight_layout(); fig.savefig(FIG / "grid_overview.png", dpi=130); plt.close(fig)
 
 

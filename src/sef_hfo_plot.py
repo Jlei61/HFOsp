@@ -176,6 +176,7 @@ def two_electrode_readout(
     label_endpoints_only=False,              # dense crossing montage: label only the shaft ends
     patch_circle=None,                       # (x,y,r) mm: dashed outline of a pathology core on panel A
     field_cmap=None,                         # panel-A field colormap (default viridis; e.g. 'plasma' for spread)
+    field_vlim=None,                         # (vmin,vmax) clip for panel-A field colour (e.g. 5–95th pct so outliers don't blow out the gradient)
     color_contacts=False,                    # colour electrode markers by par/perp 'contact_c' on the field scale
     title=None,
 ):
@@ -197,15 +198,16 @@ def two_electrode_readout(
     if field_c is not None:
         fc = np.asarray(field_c, float)
         fin = np.isfinite(fc)
+        _vmin = field_vlim[0] if field_vlim else float(np.nanmin(fc[fin]))
+        _vmax = field_vlim[1] if field_vlim else float(np.nanmax(fc[fin]))
         sc = axA.scatter(fxy[fin, 0], fxy[fin, 1], c=fc[fin], cmap=_cmap_name,
-                         s=8, linewidths=0, alpha=0.9, zorder=1)
+                         vmin=_vmin, vmax=_vmax, s=8, linewidths=0, alpha=0.9, zorder=1)
         cb = fig.colorbar(sc, cax=cax)
         cb.set_label(field_clabel or "", fontsize=FS_LABEL - 3)
         cb.ax.tick_params(labelsize=FS_TICK - 4)
         if color_contacts:                               # shared scale for contact markers
             _ccmap = plt.get_cmap(_cmap_name)
-            _cnorm = plt.Normalize(vmin=float(np.nanmin(fc[fin])),
-                                   vmax=float(np.nanmax(fc[fin])))
+            _cnorm = plt.Normalize(vmin=_vmin, vmax=_vmax)
     else:
         cax.set_visible(False)
         axA.scatter(fxy[:, 0], fxy[:, 1], c=C_FOOT, s=7, linewidths=0, alpha=0.45, zorder=1)
