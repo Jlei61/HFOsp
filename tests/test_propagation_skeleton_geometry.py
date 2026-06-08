@@ -225,3 +225,31 @@ def test_axis_profile_bins_by_along_axis():
     assert len(prof) == 2
     assert prof[0]["n"] == 3 and prof[0]["mean_excess"] == pytest.approx(2.0)
     assert prof[1]["n"] == 1 and prof[1]["mean_excess"] == pytest.approx(-0.5)
+
+
+# ---------------------------------------------------------------------------
+# Task 9: Runner integration smoke test (guarded by artifact availability)
+# ---------------------------------------------------------------------------
+import json as _json
+import subprocess
+import sys as _sys
+import pathlib
+
+
+def test_runner_smoke_two_subjects(tmp_path):
+    root = pathlib.Path(__file__).resolve().parents[1]
+    if not (root / "results/interictal_propagation_masked/rank_displacement/"
+            "per_subject/epilepsiae_253.json").exists():
+        pytest.skip("masked rank-displacement artifacts not present")
+    out = tmp_path / "skeleton_geometry"
+    r = subprocess.run(
+        [_sys.executable, str(root / "scripts/run_propagation_skeleton_geometry.py"),
+         "--subjects", "epilepsiae:253", "yuquan:chengshuai",
+         "--out", str(out)],
+        capture_output=True, text=True, cwd=str(root))
+    assert r.returncode == 0, r.stderr
+    cohort = _json.loads((out / "cohort_summary.json").read_text())
+    # phantom-safe cores: zero violations reported
+    assert cohort["phantom_core_violations"] == 0
+    # dataset stratification present
+    assert "by_dataset" in cohort and set(cohort["by_dataset"]) <= {"yuquan", "epilepsiae"}
