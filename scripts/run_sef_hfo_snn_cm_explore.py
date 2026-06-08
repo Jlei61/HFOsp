@@ -199,11 +199,24 @@ def write_report(results):
         fh.write("\n".join(lines) + "\n")
 
 
+def avail_gb():
+    try:
+        with open("/proc/meminfo") as f:
+            for line in f:
+                if line.startswith("MemAvailable:"):
+                    return int(line.split()[1]) / 1048576.0
+    except Exception:
+        pass
+    return 999.0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--start-idx", type=int, default=0)
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, "explorer.pid"), "w") as f:   # for a PID-based watchdog
+        f.write(str(os.getpid()))
     conds = build_conditions()
     results = []
     if os.path.exists(JSON):
@@ -215,7 +228,10 @@ def main():
     for i, cond in enumerate(conds):
         if i < a.start_idx or cond["name"] in done:
             continue
-        print(f"\n===== [{i}] {cond['name']} =====", flush=True)
+        if avail_gb() < 40:                       # in-process memory guard (between conditions)
+            print(f"ABORTING before {cond['name']}: low memory ({avail_gb():.0f}GB avail)", flush=True)
+            break
+        print(f"\n===== [{i}] {cond['name']} (avail {avail_gb():.0f}GB) =====", flush=True)
         try:
             r = run_condition(cond)
             ig = r["ignition"]
