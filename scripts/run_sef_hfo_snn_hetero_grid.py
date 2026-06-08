@@ -38,6 +38,7 @@ OUT = Path("results/topic4_sef_hfo/snn_heterogeneity")
 THETA, AR = 45.0, 2.0
 PATCH_R = 0.5
 T_KICK = 150.0
+PAF_LO, PAF_HI = 150.0, 350.0   # event-capturing window (localized events ~176ms; max-based)
 PITCH, NC = 0.26, 9          # per shaft (scaled sub-mm contacts; matches existing figure)
 
 
@@ -62,9 +63,10 @@ def _montage(L):
                            build_shaft(np.deg2rad(THETA + 90.0), PITCH, NC, c, "Q")])
 
 
-def _run_one(p, net, nu_theta, NE, kick_xy, vth, montage, core_mask):
-    """One paired-seed run; source-space metrics + arrays for the plotter."""
-    net["rng"] = np.random.default_rng(p.seed)          # paired noise/poisson
+def _run_one(p, net, nu_theta, NE, kick_xy, vth, montage, core_mask, seed):
+    """One paired-seed run; source-space metrics + arrays for the plotter. `seed`
+    drives the noise/poisson stream (paired across baseline vs core at fixed seed)."""
+    net["rng"] = np.random.default_rng(seed)            # paired noise/poisson
     rec = LFPRecorder(p, net["pos"], net["labels"], sites=montage.contacts)
     res = simulate_kick(p, net, KICK_BOOST=2 * nu_theta, kick_center=list(kick_xy),
                         lfp_recorder=rec, V_th_per_neuron=vth)
@@ -73,11 +75,14 @@ def _run_one(p, net, nu_theta, NE, kick_xy, vth, montage, core_mask):
     axis = onset_axis(net["pos"][:NE], onset, min_n=20)
     m = compute_metrics(res, dt)
     coreE = np.asarray(core_mask, bool)[:NE]
-    core_paf = (peak_active_fraction(res["E_spk_bool"][:, coreE], dt, 150.0, 300.0)
+    whole_paf = peak_active_fraction(res["E_spk_bool"], dt, PAF_LO, PAF_HI)
+    core_paf = (peak_active_fraction(res["E_spk_bool"][:, coreE], dt, PAF_LO, PAF_HI)
                 if coreE.any() else float("nan"))
+    rate = res["rate_E"]; post = res["times"] >= T_KICK
+    ev_t = float(res["times"][post][rate[post].argmax()])   # post-kick event peak time
     return dict(
         peak=m["peak"], returned=bool(m["returned"]), outside=m["outside"],
-        peak_active_frac=m["peak_active_frac"], core_paf=core_paf,
+        peak_active_frac=whole_paf, core_paf=core_paf, event_peak_t=ev_t,
         axis_deg=(float(np.degrees(np.arctan2(axis[1], axis[0])) % 180.0)
                   if axis is not None else None),
         onset=onset, lfp=res["lfp_trace"], times=res["times"],
@@ -121,19 +126,20 @@ def _process(cells, L, density, seed):
     is_E = net["labels"] == 0
     montage = _montage(L)
     rows = []
-    base_cache = {}                                      # (kick) -> baseline run dict
+    base_cache = {}                                      # (kick, patch) -> baseline run
     t_start = time.time()
     for i, c in enumerate(cells):
         fields = sample_threshold_fields(net["pos"], is_E, c["patch"], PATCH_R,
                                          np.random.default_rng(seed))
         core_mask = fields["core_mask"]
-        kkey = tuple(np.round(c["kick"], 4))
-        if kkey not in base_cache:
-            base_cache[kkey] = _run_one(p, net, nu_theta, NE, c["kick"],
-                                        fields["baseline"], montage, core_mask)
-        b = base_cache[kkey]
+        # baseline = WIDE core at THIS patch -> key on (kick, patch), not kick alone
+        bkey = (tuple(np.round(c["kick"], 4)), tuple(np.round(c["patch"], 4)))
+        if bkey not in base_cache:
+            base_cache[bkey] = _run_one(p, net, nu_theta, NE, c["kick"],
+                                        fields["baseline"], montage, core_mask, seed)
+        b = base_cache[bkey]
         core = _run_one(p, net, nu_theta, NE, c["kick"], fields[c["cond"]],
-                        montage, core_mask)
+                        montage, core_mask, seed)
         d_paf = core["peak_active_frac"] - b["peak_active_frac"]
         d_core = (core["core_paf"] - b["core_paf"]
                   if np.isfinite(core["core_paf"]) and np.isfinite(b["core_paf"]) else None)
@@ -144,6 +150,8 @@ def _process(cells, L, density, seed):
                    cond=c["cond"], patch=list(c["patch"]), kick=list(c["kick"]),
                    n_core=int(core_mask.sum()),
                    d_peak_active_frac=d_paf, d_core_paf=d_core, d_axis_deg=d_axis,
+                   d_event_t=core["event_peak_t"] - b["event_peak_t"],
+                   core_event_t=core["event_peak_t"], base_event_t=b["event_peak_t"],
                    core_returned=core["returned"], base_returned=b["returned"],
                    kick_on_patch=on_patch)
         rows.append(row)
@@ -154,14 +162,55 @@ def _process(cells, L, density, seed):
             contacts=core["contacts"], names=core["names"], nc=NC,
             kick=np.array(c["kick"]), patch=np.array(c["patch"]), patch_r=PATCH_R,
             L=L, theta=THETA, base_lfp=b["lfp"], base_times=b["times"],
+            event_peak_t=core["event_peak_t"], base_event_peak_t=b["event_peak_t"],
             meta=json.dumps(row))
         print(f"[{i+1}/{len(cells)}] sweep{c['sweep']} k={c['kname']} p={c['pname']} "
-              f"{c['cond']} dpaf={d_paf:+.3f} dcore={d_core} daxis={d_axis} "
+              f"{c['cond']} dcore={d_core} daxis={d_axis} dt={row['d_event_t']:+.0f}ms "
               f"on_patch={on_patch} ({time.time()-t_start:.0f}s)", flush=True)
     (OUT / "grid_metrics.json").write_text(json.dumps(
         dict(L=L, density=density, seed=seed, patch_r=PATCH_R, theta=THETA,
              cells=rows), indent=2))
     print(f"wrote grid_metrics.json ({len(rows)} cells, {time.time()-t_start:.0f}s)")
+
+
+def _mid_pair_seeds(L, density, seeds=(1, 2, 3)):
+    """3-seed robustness for the mid-core matched vs unmatched pair (advisor: a
+    single-realization Δ is noisy). Each seed = independent field draw + noise;
+    within a seed baseline-vs-core is paired. Writes mid_pair_seeds.json."""
+    p, net, nu_theta, NE = _build(L, density, seeds[0])
+    is_E = net["labels"] == 0
+    montage = _montage(L)
+    ctr = np.array([L / 2, L / 2])
+    u = np.array([np.cos(np.deg2rad(THETA)), np.sin(np.deg2rad(THETA))])
+    kick = ctr + 0.6 * (L / 2) * u                      # = grid "end" kick
+    patch = tuple(ctr)
+    recs = []
+    for s in seeds:
+        fields = sample_threshold_fields(net["pos"], is_E, patch, PATCH_R,
+                                         np.random.default_rng(s))
+        cm = fields["core_mask"]
+        b = _run_one(p, net, nu_theta, NE, kick, fields["baseline"], montage, cm, s)
+        mt = _run_one(p, net, nu_theta, NE, kick, fields["matched"], montage, cm, s)
+        um = _run_one(p, net, nu_theta, NE, kick, fields["unmatched"], montage, cm, s)
+        recs.append(dict(seed=s,
+                         d_core_matched=mt["core_paf"] - b["core_paf"],
+                         d_core_unmatched=um["core_paf"] - b["core_paf"],
+                         d_event_t_matched=mt["event_peak_t"] - b["event_peak_t"],
+                         d_event_t_unmatched=um["event_peak_t"] - b["event_peak_t"]))
+        print(f"[mid-seed {s}] dcore matched={recs[-1]['d_core_matched']:+.3f} "
+              f"unmatched={recs[-1]['d_core_unmatched']:+.3f}", flush=True)
+
+    def agg(key):
+        v = np.array([r[key] for r in recs])
+        return dict(mean=float(v.mean()), std=float(v.std()), vals=v.tolist())
+
+    summary = dict(seeds=list(seeds), patch="mid", kick="end",
+                   d_core_matched=agg("d_core_matched"),
+                   d_core_unmatched=agg("d_core_unmatched"),
+                   d_event_t_matched=agg("d_event_t_matched"),
+                   d_event_t_unmatched=agg("d_event_t_unmatched"), per_seed=recs)
+    (OUT / "mid_pair_seeds.json").write_text(json.dumps(summary, indent=2))
+    print("wrote mid_pair_seeds.json")
 
 
 def main():
@@ -177,13 +226,15 @@ def main():
                                          (1.5, 1.5), PATCH_R, np.random.default_rng(1))
         t0 = time.time()
         _run_one(p, net, nu_theta, NE, [2.4, 1.5], fields["baseline"], _montage(3.0),
-                 fields["core_mask"])
+                 fields["core_mask"], 1)
         print(f"ONE L=3 run wall = {time.time()-t0:.1f}s")
         return
     if a.quick:
         _process(_grid_cells(1.0)[:2], 1.0, 4000.0, 1)
+        _mid_pair_seeds(1.0, 4000.0, seeds=(1, 2))
         return
     _process(_grid_cells(3.0), 3.0, 1800.0, 1)
+    _mid_pair_seeds(3.0, 1800.0, seeds=(1, 2, 3))
 
 
 if __name__ == "__main__":
