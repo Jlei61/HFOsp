@@ -82,6 +82,8 @@
       "shaft": "HR"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": false,
   "source_radius": {
     "rms_mm": 5.354126134736337,
@@ -130,7 +132,8 @@
     "geometry": "distributed",
     "n_shafts": 2,
     "p90_off_mm": 10.65949557691913,
-    "measurable": true
+    "measurable": true,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [

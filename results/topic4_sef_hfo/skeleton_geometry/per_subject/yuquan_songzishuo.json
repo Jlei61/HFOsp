@@ -358,6 +358,8 @@
       "shaft": "G"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": false,
   "source_radius": {
     "rms_mm": 23.432248763663836,
@@ -406,7 +408,8 @@
     "geometry": "distributed",
     "n_shafts": 12,
     "p90_off_mm": 67.85432749458496,
-    "measurable": true
+    "measurable": true,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [

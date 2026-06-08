@@ -79,6 +79,8 @@
       "shaft": "HL"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": false,
   "source_radius": {
     "rms_mm": 5.185449728701348,
@@ -127,7 +129,8 @@
     "geometry": "1D",
     "n_shafts": 1,
     "p90_off_mm": 0.6924944142806997,
-    "measurable": false
+    "measurable": false,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": false,
   "along_axis_profile": [

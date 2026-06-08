@@ -84,10 +84,16 @@ def compute_axis_frame(
     degenerate_axis=True and along/off all NaN.
     """
     coords = np.asarray(coords, dtype=float)
+    if len(source_idx) == 0 or len(sink_idx) == 0:
+        raise ValueError("compute_axis_frame: empty source/sink core")
     src_c = np.nanmean(coords[list(source_idx)], axis=0)
     snk_c = np.nanmean(coords[list(sink_idx)], axis=0)
+    if not (np.isfinite(src_c).all() and np.isfinite(snk_c).all()):
+        raise ValueError("compute_axis_frame: non-finite source/sink centroid")
     axis = snk_c - src_c
     L = float(np.linalg.norm(axis))
+    if not np.isfinite(L):
+        raise ValueError("compute_axis_frame: non-finite axis length")
     n = coords.shape[0]
     along = np.full(n, np.nan)
     off = np.full(n, np.nan)
@@ -199,15 +205,30 @@ def classify_sampling_geometry(
     part = np.asarray(participating_mask, dtype=bool)
     off = np.asarray(off_axis, dtype=float)
     names = [channel_names[i] for i in np.where(part)[0]]
-    shafts = {parse_shaft(nm)[0] for nm in names} - {None}
+    parsed = [parse_shaft(nm)[0] for nm in names]
+    shafts = set(parsed) - {None}
     vals = off[part & ~np.isnan(off)]
     p90 = float(np.percentile(vals, 90)) if vals.size else 0.0
+    # If too many participating names don't parse to a shaft, len(shafts)<=1
+    # can't be trusted to mean "1D" — flag instead of misclassifying.
+    n_part = len(names)
+    unparsed_frac = (
+        float(sum(s is None for s in parsed)) / n_part if n_part else 0.0)
+    if unparsed_frac > 0.20:
+        return {
+            "geometry": "shaft_parse_uncertain",
+            "n_shafts": int(len(shafts)),
+            "p90_off_mm": p90,
+            "measurable": False,
+            "unparsed_frac": unparsed_frac,
+        }
     one_d = (len(shafts) <= 1) or (p90 < spacing_mm)
     return {
         "geometry": "1D" if one_d else "distributed",
         "n_shafts": int(len(shafts)),
         "p90_off_mm": p90,
         "measurable": not one_d,
+        "unparsed_frac": unparsed_frac,
     }
 
 
@@ -269,6 +290,13 @@ def channel_stereotypy_components(
     """
     masked = np.asarray(masked, dtype=float)
     bools = np.asarray(bools, dtype=bool)
+    if masked.shape != bools.shape:
+        raise ValueError(
+            "channel_stereotypy_components: masked/bools shape mismatch")
+    if not np.array_equal(~np.isnan(masked), bools):
+        raise ValueError(
+            "channel_stereotypy_components: masked NaN pattern does not match "
+            "bools")
     obs = channel_stereotypy(masked)
     n_ch, n_ev = masked.shape
     ev_sizes = bools.sum(axis=0).astype(float)        # m_e per event

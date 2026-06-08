@@ -70,6 +70,8 @@
       "shaft": "HPR"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": false,
   "source_radius": {
     "rms_mm": 2.0615528128088303,
@@ -118,7 +120,8 @@
     "geometry": "1D",
     "n_shafts": 3,
     "p90_off_mm": 4.263710489532304,
-    "measurable": false
+    "measurable": false,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": false,
   "along_axis_profile": [

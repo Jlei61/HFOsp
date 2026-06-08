@@ -97,6 +97,8 @@
       "shaft": "FBB"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": false,
   "source_radius": {
     "rms_mm": 25.019992006393608,
@@ -145,7 +147,8 @@
     "geometry": "distributed",
     "n_shafts": 4,
     "p90_off_mm": 25.6714381768787,
-    "measurable": true
+    "measurable": true,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [

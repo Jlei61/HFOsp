@@ -88,6 +88,8 @@
       "shaft": "HLC"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": false,
   "source_radius": {
     "rms_mm": 5.617433182117572,
@@ -136,7 +138,8 @@
     "geometry": "distributed",
     "n_shafts": 4,
     "p90_off_mm": 20.87652793529616,
-    "measurable": true
+    "measurable": true,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [

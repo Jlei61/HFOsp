@@ -42,6 +42,22 @@ def _subject_dir(ds, subj):
     return YUQUAN_ROOT / subj if ds == "yuquan" else EPILEPSIAE_ROOT / subj / "all_recs"
 
 
+# Coord-loader failure fingerprints (yuquan chnXyzDict, epilepsiae SQL/MRI).
+# A known coord miss is benign (subject lacks coords); anything else is a real
+# bug (loader misuse, contract violation) and must NOT be swept up as benign.
+_COORD_MISS_MARKERS = (
+    "coord file not found", "chnXyzDict",
+    "SQL not found", "MRI not found", "coords missing",
+)
+
+
+def _error_category(status):
+    s = str(status).lower()
+    if any(m.lower() in s for m in _COORD_MISS_MARKERS):
+        return "no_coord_file"
+    return "unexpected"
+
+
 def _swap_class(ds, subj):
     f = RANKDISP / f"{ds}_{subj}.json"
     if not f.exists():
@@ -182,6 +198,21 @@ def process_subject(ds, subj):
             "shaft": str(G.parse_shaft(names[i])[0]),
         })
     rec["channels"] = channels
+    # Modality tag (inferred from channel naming): a channel is "grid" if its
+    # parsed shaft starts with "G" — but ONLY for Epilepsiae (grid naming
+    # GA1/GB3...). Yuquan is all depth by recording convention; its bare-"G"
+    # shafts are single-letter DEPTH labels, not grids, so the heuristic is
+    # dataset-gated to avoid a false-positive grid tag. Infer over the
+    # PARTICIPATING set (broadest-correct: a grid channel that participates but
+    # is unmapped/out-of-frame would be missed if we used only the in-frame
+    # `channels` list, under-counting depth+grid). This 3-layer breakdown makes
+    # the SEEG-vs-mixed confound visible at cohort level.
+    participating = bools.any(axis=1)
+    has_grid = ds == "epilepsiae" and any(
+        (G.parse_shaft(names[i])[0] or "").startswith("G")
+        for i in np.where(participating)[0])
+    rec["modality"] = "depth+grid" if has_grid else "depth_only"
+    rec["modality_inferred_from"] = "channel_naming"
     # Weak-axis flag: when a sink-core channel projects to a SMALLER along-axis
     # position than some source-core channel, the cores interleave along the axis
     # -> source/sink centroids collapse toward each other -> axis_length cancels
@@ -248,7 +279,9 @@ def main():
         try:
             rec = process_subject(ds, subj)
         except Exception as e:  # noqa: BLE001 — record, don't crash the cohort
-            rec = {"dataset": ds, "subject": subj, "status": f"error: {e}"}
+            status = f"error: {e}"
+            rec = {"dataset": ds, "subject": subj, "status": status,
+                   "error_category": _error_category(status)}
             print(f"  [error {ds}:{subj}] {type(e).__name__}: {e}", flush=True)
         (out / "per_subject" / f"{ds}_{subj}.json").write_text(
             json.dumps(rec, indent=2, default=float))
@@ -266,20 +299,58 @@ def main():
         if r.get("eligibility_tier") in ("primary", "fallback") and "axis_length_mm" in r:
             d["axis_length_mm"].append(r["axis_length_mm"])
     weak_recs = [r for r in ok if r.get("weak_axis")]
+    # Error-category tally + vacuous-green guard (refuse a summary built on zero
+    # successes; never silently swallow a loader-misuse "unexpected" error).
+    error_categories = {}
+    for r in errored:
+        cat = r.get("error_category") or _error_category(r.get("status", ""))
+        error_categories[cat] = error_categories.get(cat, 0) + 1
+    n_ok = len(ok)
+    if n_ok == 0:
+        raise SystemExit(
+            "all subjects failed — systemic error, refusing to write a vacuous "
+            "cohort summary")
+    n_unexpected = error_categories.get("unexpected", 0)
+    if n_unexpected:
+        print(f"WARNING: {n_unexpected} unexpected errors", file=sys.stderr,
+              flush=True)
+    # Modality 3-layer breakdown over ok primary/fallback subjects (modality is
+    # only set on the full-record path). Makes the SEEG-vs-mixed confound visible.
+    modality = {"yuquan_depth_only": 0, "epilepsiae_depth_only": 0,
+                "epilepsiae_depth+grid": 0}
+    n_tagged = 0
+    for r in ok:
+        m = r.get("modality")
+        if m is None:
+            continue
+        n_tagged += 1
+        key = f"{r['dataset']}_{m}"
+        if key in modality:
+            modality[key] += 1
+    # Exhaustiveness: every modality-tagged ok rec must land in a bucket. A new
+    # (dataset, modality) combo with no bucket would otherwise be silently
+    # dropped (the bug that surfaced yuquan bare-"G" depth shafts as grid).
+    if sum(modality.values()) != n_tagged:
+        raise SystemExit(
+            f"modality breakdown drops subjects: sum(buckets)="
+            f"{sum(modality.values())} != n_tagged={n_tagged}")
     cohort_summary = {
-        "n_processed": len(recs), "n_ok": len(ok),
+        "n_processed": len(recs), "n_ok": n_ok,
         "n_error": len(errored),
         "errors": [{"dataset": r["dataset"], "subject": r["subject"],
-                    "status": r["status"]} for r in errored],
+                    "status": r["status"],
+                    "error_category": r.get("error_category")} for r in errored],
+        "error_categories": error_categories,
         "excluded_bad_data": [f"{ds}:{subj}" for ds, subj in excluded],
         "phantom_core_violations":
             int(sum(bool(r.get("phantom_core_violation")) for r in ok)),
         "weak_axis": len(weak_recs),
         "weak_axis_subjects": [f"{r['dataset']}:{r['subject']}" for r in weak_recs],
         "tiers": tiers,
+        "modality": modality,
         "sampling_geometry": {
             g: int(sum(r.get("sampling_geometry", {}).get("geometry") == g for r in ok))
-            for g in ("1D", "distributed")},
+            for g in ("1D", "distributed", "shaft_parse_uncertain")},
         "swap_tiers": {
             sc: int(sum(r.get("swap_class") == sc for r in ok))
             for sc in ("none", "candidate", "strict")},

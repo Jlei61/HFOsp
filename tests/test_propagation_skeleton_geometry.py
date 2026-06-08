@@ -94,6 +94,18 @@ def test_axis_frame_degenerate_axis_flagged():
     assert fr["degenerate_axis"] is True
 
 
+def test_axis_frame_nan_source_core_raises():
+    # all-NaN source-core coords -> non-finite centroid -> ValueError (a NaN L
+    # would silently pass `L < 1e-9` and propagate NaN everywhere).
+    coords = np.array([
+        [np.nan, np.nan, np.nan], [np.nan, np.nan, np.nan],   # source core, all NaN
+        [10., 0., 0.], [10., 0., 0.],                          # sink core
+        [5., 3., 0.],
+    ])
+    with pytest.raises(ValueError):
+        compute_axis_frame(coords, source_idx=[0, 1], sink_idx=[2, 3])
+
+
 # ---------------------------------------------------------------------------
 # Task 4: Core radii (RMS / MEB / max-pairwise) — bimodal-core guard
 # ---------------------------------------------------------------------------
@@ -157,6 +169,20 @@ def test_classify_distributed_multi_shaft():
     assert g["geometry"] == "distributed"
     assert g["n_shafts"] == 3
     assert g["measurable"] is True
+    assert g["unparsed_frac"] == pytest.approx(0.0)
+
+
+def test_classify_shaft_parse_uncertain_when_many_unparsed():
+    # >20% of participating names are junk (don't parse to a shaft) -> we cannot
+    # trust len(shafts)<=1 to mean 1D; flag it instead of misclassifying.
+    names = ["A1", "A2", "EKG", "REF", "X"]   # 3/5 = 60% unparsed
+    part = np.ones(5, bool)
+    off = np.array([0., 1., 0., 0., 0.])
+    g = classify_sampling_geometry(names, part, off, spacing_mm=3.5)
+    assert g["geometry"] == "shaft_parse_uncertain"
+    assert g["measurable"] is False
+    assert g["unparsed_frac"] == pytest.approx(0.6)
+    assert g["n_shafts"] == 1   # only "A" parses
 
 
 # ---------------------------------------------------------------------------
@@ -211,6 +237,21 @@ def test_stereotypy_excess_z_separates_signal_from_chance():
                                   n_null=200)
     assert z[0] > 3.0        # clearly above chance
     assert abs(z[1]) < 2.0   # ~chance
+
+
+def test_stereotypy_components_nan_pattern_mismatch_raises():
+    # masked NaN pattern must agree with bools (NaN <=> non-participating).
+    # Here masked[0,0] is a finite value but bools[0,0] is False -> mismatch.
+    masked = np.array([
+        [0.5, np.nan],
+        [np.nan, 0.5],
+    ])
+    bools = np.array([
+        [False, False],
+        [False, True],
+    ])
+    with pytest.raises(ValueError):
+        channel_stereotypy_components(masked, bools, rng=np.random.default_rng(0))
 
 
 def test_excess_is_n_invariant_while_z_inflates():

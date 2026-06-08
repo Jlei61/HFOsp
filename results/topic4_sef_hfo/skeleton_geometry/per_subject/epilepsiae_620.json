@@ -97,6 +97,8 @@
       "shaft": "TBA"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": true,
   "source_radius": {
     "rms_mm": 6.912147117775907,
@@ -145,7 +147,8 @@
     "geometry": "1D",
     "n_shafts": 2,
     "p90_off_mm": 4.313008505757318,
-    "measurable": false
+    "measurable": false,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": false,
   "along_axis_profile": [

@@ -97,6 +97,8 @@
       "shaft": "LHA"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": true,
   "source_radius": {
     "rms_mm": 5.696002496878354,
@@ -145,7 +147,8 @@
     "geometry": "distributed",
     "n_shafts": 4,
     "p90_off_mm": 35.874429096426745,
-    "measurable": true
+    "measurable": true,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [

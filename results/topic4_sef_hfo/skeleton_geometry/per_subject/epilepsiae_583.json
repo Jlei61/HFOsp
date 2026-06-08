@@ -79,6 +79,8 @@
       "shaft": "TBC"
     }
   ],
+  "modality": "depth_only",
+  "modality_inferred_from": "channel_naming",
   "weak_axis": true,
   "source_radius": {
     "rms_mm": 10.954451150103322,
@@ -127,7 +129,8 @@
     "geometry": "distributed",
     "n_shafts": 5,
     "p90_off_mm": 23.31703962437891,
-    "measurable": true
+    "measurable": true,
+    "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [
