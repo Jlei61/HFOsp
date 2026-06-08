@@ -267,5 +267,7 @@ def test_runner_smoke_two_subjects(tmp_path):
     cohort = _json.loads((out / "cohort_summary.json").read_text())
     # phantom-safe cores: zero violations reported
     assert cohort["phantom_core_violations"] == 0
+    # an all-error run must fail loudly, not pass vacuously
+    assert cohort["n_ok"] >= 1
     # dataset stratification present
     assert "by_dataset" in cohort and set(cohort["by_dataset"]) <= {"yuquan", "epilepsiae"}

@@ -33,6 +33,10 @@ RANKDISP = _ROOT / "results/interictal_propagation_masked/rank_displacement/per_
 SOZ_JSON = {ds: _ROOT / f"results/{ds}_soz_core_channels.json" for ds in ("yuquan", "epilepsiae")}
 ALL_SUBJECTS = None  # default cohort discovered from RANKDISP + coord availability
 
+# Bad-data exclusions (spec 2026-06-08 §2 + memory project_topic4_soz_localization_plan:
+# pengzihang total_hours=2.0, gpu=1 — not a valid recording). Recorded, not silently dropped.
+EXCLUDE_BAD_DATA = {("yuquan", "pengzihang")}
+
 
 def _subject_dir(ds, subj):
     return YUQUAN_ROOT / subj if ds == "yuquan" else EPILEPSIAE_ROOT / subj / "all_recs"
@@ -45,12 +49,6 @@ def _swap_class(ds, subj):
     d = json.loads(f.read_text())
     pairs = d.get("pairs") or [{}]
     return (((pairs[0].get("swap_sweep") or {}).get("swap_class")) or "none")
-
-
-def _cluster_axis(masked, labels, cluster):
-    sel = labels == cluster
-    sub = masked[:, sel]
-    return np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in sub])
 
 
 def _soz_set(ds, subj):
@@ -82,17 +80,27 @@ def process_subject(ds, subj):
     masked = mask_phantom_ranks(ranks, bools, normalize=True)
     labels = KMeans(n_clusters=2, n_init=5, random_state=0).fit_predict(
         build_masked_kmeans_features(ranks, bools))
-    aligned, _ = align_template_events(masked, labels)
 
+    # Single event-set/frame feeds axis + stereotypy + count (spec: no anti-parallel
+    # "糊平均"). For swap subjects the dominant cluster's OWN frame is used — do NOT
+    # global-align (that re-merges the anti-parallel clusters and washes the excess).
     swap_class = _swap_class(ds, subj)
     if swap_class in ("strict", "candidate"):
         dom = 0 if (labels == 0).sum() >= (labels == 1).sum() else 1
-        template_axis = _cluster_axis(masked, labels, dom)
+        sel = labels == dom
+        ster_masked = masked[:, sel]
+        ster_bools = bools[:, sel]
         template_source = f"dominant_cluster_{dom}"
     else:
-        template_axis = np.array(
-            [np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in aligned])
+        aligned, _ = align_template_events(masked, labels)
+        ster_masked = aligned
+        ster_bools = bools
         template_source = "full_recording"
+    template_axis = np.array(
+        [np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in ster_masked])
+    full_count = ster_bools.sum(axis=1).astype(float)
+    comps = G.channel_stereotypy_components(ster_masked, ster_bools,
+                                            rng=np.random.default_rng(0))
 
     cr = load_subject_coords(ds, subj, names)
     coords = np.asarray(cr.coords_array_in_requested_order, float)
@@ -121,17 +129,21 @@ def process_subject(ds, subj):
         rec["eligibility_tier"] = "descriptive_only"
         return rec
 
-    full_count = bools.sum(axis=1).astype(float)
-    comps = G.channel_stereotypy_components(masked, bools, rng=np.random.default_rng(0))
     excess = comps["excess"]
     samp = G.classify_sampling_geometry(
         names, eligible, fr["off_axis"],
         spacing_mm=3.5 if ds == "yuquan" else 4.6)
-    # Right-exclusive profile bins (a < hi) would drop a sink-core channel at
-    # exactly along==L; bump the top edge just past L so the final bin includes it.
-    edges = list(np.linspace(0.0, max(fr["axis_length"], 1e-6), 5))
-    edges[-1] = np.nextafter(edges[-1], np.inf)
     along = np.asarray(fr["along_axis"], dtype=float)
+    # Span the FULL along range so the profile shows a<0 (before source) and a>L
+    # (beyond sink) — spec §5 wants endpoints tested as hard boundaries, not assumed.
+    # Right-exclusive bins (a < hi) would drop the channel at exactly along==hi;
+    # bump the top edge just past it so the final bin includes it.
+    amin = float(np.nanmin(along)) if np.any(~np.isnan(along)) else 0.0
+    amax = float(np.nanmax(along)) if np.any(~np.isnan(along)) else max(fr["axis_length"], 1e-6)
+    lo = min(0.0, amin)
+    hi = max(fr["axis_length"], amax)
+    edges = list(np.linspace(lo, hi, 6))
+    edges[-1] = np.nextafter(edges[-1], np.inf)
     along_profile = G.axis_stereotypy_profile(along, excess, edges=edges)
     # Per-bin mean event count over the SAME channels whose excess was averaged
     # (axis_stereotypy_profile masks on ~isnan(along) & ~isnan(excess)). Lets a
@@ -187,17 +199,26 @@ def main():
     else:
         cohort = discover_cohort()
 
+    # Bad-data exclusions apply to BOTH branches (spec §2). Excluded subjects are
+    # recorded by name with provenance; they are NOT processed and write NO record.
+    excluded = [(ds, subj) for ds, subj in cohort if (ds, subj) in EXCLUDE_BAD_DATA]
+    cohort = [(ds, subj) for ds, subj in cohort if (ds, subj) not in EXCLUDE_BAD_DATA]
+    for ds, subj in excluded:
+        print(f"  [exclude bad-data] {ds}:{subj}", flush=True)
+
     recs = []
     for ds, subj in cohort:
         try:
             rec = process_subject(ds, subj)
         except Exception as e:  # noqa: BLE001 — record, don't crash the cohort
             rec = {"dataset": ds, "subject": subj, "status": f"error: {e}"}
+            print(f"  [error {ds}:{subj}] {type(e).__name__}: {e}", flush=True)
         (out / "per_subject" / f"{ds}_{subj}.json").write_text(
             json.dumps(rec, indent=2, default=float))
         recs.append(rec)
 
     ok = [r for r in recs if r.get("status") == "ok"]
+    errored = [r for r in recs if str(r.get("status", "")).startswith("error")]
     tiers = {}
     for r in ok:
         tiers[r["eligibility_tier"]] = tiers.get(r["eligibility_tier"], 0) + 1
@@ -209,6 +230,10 @@ def main():
             d["axis_length_mm"].append(r["axis_length_mm"])
     cohort_summary = {
         "n_processed": len(recs), "n_ok": len(ok),
+        "n_error": len(errored),
+        "errors": [{"dataset": r["dataset"], "subject": r["subject"],
+                    "status": r["status"]} for r in errored],
+        "excluded_bad_data": [f"{ds}:{subj}" for ds, subj in excluded],
         "phantom_core_violations":
             int(sum(bool(r.get("phantom_core_violation")) for r in ok)),
         "tiers": tiers,
