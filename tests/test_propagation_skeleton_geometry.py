@@ -106,7 +106,7 @@ def test_core_radii_compact_vs_split():
     r = core_radii(compact, centroid)
     assert r["rms_mm"] == pytest.approx(1.0, abs=1e-9)
     assert r["max_pairwise_mm"] == pytest.approx(2.0, abs=1e-6)   # [1,0,0]-[-1,0,0]
-    assert r["meb_mm"] == pytest.approx(1.0, abs=1e-6)            # right triangle, hyp=2
+    assert r["meb_mm"] == pytest.approx(1.0, abs=1e-6)            # circumradius branch (right triangle: circumradius = hyp/2 = 1.0)
 
     # split core: two contacts 20mm apart -> centroid in the gap.
     split = np.array([[10., 0., 0.], [-10., 0., 0.]])
@@ -114,6 +114,13 @@ def test_core_radii_compact_vs_split():
     rs = core_radii(split, split_centroid)
     assert rs["max_pairwise_mm"] == pytest.approx(20.0, abs=1e-6)
     assert rs["meb_mm"] == pytest.approx(10.0, abs=1e-6)
+
+
+def test_meb_obtuse_triangle_uses_longest_over_two():
+    # obtuse triangle: longest side dominates -> MEB = longest/2
+    pts = np.array([[0., 0., 0.], [4., 0., 0.], [5., 1., 0.]])
+    r = core_radii(pts, pts.mean(axis=0))
+    assert r["meb_mm"] == pytest.approx(np.sqrt(26) / 2.0, abs=1e-6)  # longest side = |(0,0,0)-(5,1,0)| = sqrt(26)
 
 
 # ---------------------------------------------------------------------------

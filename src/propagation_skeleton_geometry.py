@@ -112,8 +112,8 @@ def compute_axis_frame(
 
 
 def _meb_radius(points: np.ndarray) -> float:
-    """Exact min-enclosing-ball radius for small point sets (k<=3 exact;
-    k>=4 Ritter upper bound). Cores here are k in {2,3}."""
+    """Exact min-enclosing-ball radius for small point sets (k<=3 exact).
+    Cores here are k in {2,3}; >3 points raises (loud-failure, CLAUDE.md §6)."""
     pts = np.asarray(points, dtype=float)
     pts = pts[~np.isnan(pts).any(axis=1)]
     m = pts.shape[0]
@@ -141,9 +141,8 @@ def _meb_radius(points: np.ndarray) -> float:
         if area < 1e-12:
             return float(longest / 2.0)
         return float((s[0] * s[1] * s[2]) / (4.0 * area))
-    # Ritter upper bound (defensive; not expected for k in {2,3})
-    center = pts.mean(axis=0)
-    return float(np.max(np.linalg.norm(pts - center, axis=1)))
+    raise ValueError(
+        f"_meb_radius expects <=3 points (cores are k<=3), got {pts.shape[0]}")
 
 
 def core_radii(core_coords: np.ndarray, centroid: np.ndarray) -> Dict[str, object]:
@@ -259,6 +258,10 @@ def channel_stereotypy_excess(
     (integer in [0, m_e-1] normalized by m_e-1, m_e = #participants in e),
     recomputes stereotypy, repeats n_null times. z = (obs - null_mean)/null_std.
     Fewer events -> wider null -> smaller z (participation control).
+
+    PRECONDITION: `masked` must be the per-event normalized integer-rank grid
+    k/(m_e-1), e.g. from mask_phantom_ranks(normalize=True); off-grid
+    continuous input inflates z.
     """
     masked = np.asarray(masked, dtype=float)
     bools = np.asarray(bools, dtype=bool)
