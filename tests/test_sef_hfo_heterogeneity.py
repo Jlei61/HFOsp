@@ -453,3 +453,49 @@ def test_mean_match_raises_specific_not_bracketed_exception():
     with pytest.raises(MeanMatchNotBracketed):
         mean_match_param(nuE, muE, sE, TAU_ME, TREF_E, param="v_th", std=0.5,
                          bracket=(V_RESET + 0.5, V_RESET + 1.0))
+
+
+# ---- SNN per-neuron threshold field (2026-06-08 spec; Task 1) ----
+from src.sef_hfo_heterogeneity import sample_threshold_fields, local_vth_spread
+
+
+def _toy_sheet(n=4000, L=3.0, fE=0.8, seed=0):
+    rng = np.random.default_rng(seed)
+    pos = rng.uniform(0, L, size=(n, 2))
+    is_E = np.zeros(n, bool); is_E[: int(fE * n)] = True
+    return pos, is_E, rng
+
+
+def test_threshold_fields_share_surround_and_narrow_core():
+    pos, is_E, rng = _toy_sheet()
+    out = sample_threshold_fields(pos, is_E, patch_center=(1.5, 1.5),
+                                  patch_radius=0.5, rng=rng,
+                                  vth_mean=18.0, std_wide=1.5, std_narrow=0.5,
+                                  v_reset=11.0, core_mean_shift=2.0)
+    base, matched, unmatched = out["baseline"], out["matched"], out["unmatched"]
+    core = out["core_mask"]
+    surround = is_E & ~core
+    # surround is BIT-IDENTICAL across the three (paired-seed contract)
+    np.testing.assert_array_equal(base[surround], matched[surround])
+    np.testing.assert_array_equal(base[surround], unmatched[surround])
+    # core spread narrows; baseline core keeps the wide spread
+    assert matched[core].std() < base[core].std()
+    assert unmatched[core].std() < base[core].std()
+    # matched core mean ~ 18 (held), unmatched core mean ~ 16 (shifted down)
+    assert abs(matched[core].mean() - 18.0) < 0.3
+    assert abs(unmatched[core].mean() - 16.0) < 0.3
+    # physical domain: nothing below reset
+    assert (base[is_E] >= 11.0).all()
+    assert (matched[is_E] >= 11.0).all() and (unmatched[is_E] >= 11.0).all()
+    # I neurons keep scalar threshold
+    assert np.allclose(base[~is_E], 18.0)
+
+
+def test_local_vth_spread_lower_in_core():
+    pos, is_E, rng = _toy_sheet()
+    out = sample_threshold_fields(pos, is_E, (1.5, 1.5), 0.5, rng)
+    spread = local_vth_spread(pos, out["matched"], is_E, radius=0.3)
+    core = out["core_mask"]
+    surround = is_E & ~core
+    assert np.nanmean(spread[core]) < np.nanmean(spread[surround])
+    assert np.isnan(spread[~is_E]).all()   # I neurons not colored

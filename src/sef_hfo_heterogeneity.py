@@ -353,3 +353,78 @@ def integrate_hetero_field(op, stim_fn, *, x_patch: float, r_patch: float,
     if return_peak_field:
         return ext, front, peak_field
     return ext, front
+
+
+# ======================================================================
+# SNN per-neuron threshold field (spec 2026-06-08, Task 1)
+# ----------------------------------------------------------------------
+# The rate-field functions above INTEGRATE the threshold spread analytically.
+# The SNN needs a per-neuron threshold ARRAY: a wide-spread surround shared
+# bit-identically across baseline/matched/unmatched (paired-seed contract,
+# spec §2), with only the in-patch E neurons redrawn narrow.
+# ======================================================================
+def _trunc_gauss(mean, std, low, size, rng):
+    """N(mean,std) truncated to [low, inf) by rejection resampling (truncated +
+    renormalized; spec §2 physical domain — no clip-to-floor that would break
+    monotonicity)."""
+    if std <= 0:
+        return np.full(size, max(mean, low), float)
+    out = np.empty(size); filled = 0
+    while filled < size:
+        draw = rng.normal(mean, std, size=size - filled)
+        ok = draw[draw >= low]
+        out[filled:filled + ok.size] = ok
+        filled += ok.size
+    return out
+
+
+def sample_threshold_fields(pos, is_E, patch_center, patch_radius, rng,
+                            vth_mean=18.0, std_wide=1.5, std_narrow=0.5,
+                            v_reset=11.0, core_mean_shift=2.0):
+    """Per-neuron firing thresholds (length N) for baseline / matched / unmatched,
+    sharing a bit-identical surround (paired-seed contract, spec §2).
+
+    I neurons keep scalar ``vth_mean`` (the SNN engine inhibitory threshold stays
+    scalar). E neurons: wide TruncGauss everywhere (= surround field ``W``); the
+    matched / unmatched variants redraw ONLY the in-patch E neurons (narrow
+    spread; matched mean = ``vth_mean``, unmatched mean = ``vth_mean -
+    core_mean_shift`` = local hyperexcitability). Truncated at ``v_reset``.
+
+    Returns dict(baseline, matched, unmatched, core_mask). All three E-fields are
+    >= v_reset; surround entries are equal across the three by construction.
+    """
+    pos = np.asarray(pos, float); is_E = np.asarray(is_E, bool)
+    n = len(pos)
+    W = np.full(n, vth_mean, float)
+    eidx = np.flatnonzero(is_E)
+    W[eidx] = _trunc_gauss(vth_mean, std_wide, v_reset, eidx.size, rng)
+    d = np.linalg.norm(pos - np.asarray(patch_center, float)[None, :], axis=1)
+    core = is_E & (d <= float(patch_radius))
+    cidx = np.flatnonzero(core)
+    rng_m = np.random.default_rng(int(rng.integers(1 << 31)))
+    rng_u = np.random.default_rng(int(rng.integers(1 << 31)))
+    matched = W.copy()
+    matched[cidx] = _trunc_gauss(vth_mean, std_narrow, v_reset, cidx.size, rng_m)
+    unmatched = W.copy()
+    unmatched[cidx] = _trunc_gauss(vth_mean - core_mean_shift, std_narrow, v_reset,
+                                   cidx.size, rng_u)
+    for arr in (W, matched, unmatched):
+        if not (arr[eidx] >= v_reset).all():
+            raise ValueError("threshold below V_reset — truncation failed (spec §2)")
+    return dict(baseline=W, matched=matched, unmatched=unmatched, core_mask=core)
+
+
+def local_vth_spread(pos, vth, is_E, radius):
+    """Per-E-neuron std of V_th among E neighbours within ``radius`` (mm) — for the
+    mechanism-figure colouring. I neurons -> NaN (not coloured); an E neuron with
+    < 3 E neighbours -> NaN."""
+    pos = np.asarray(pos, float); vth = np.asarray(vth, float)
+    is_E = np.asarray(is_E, bool)
+    out = np.full(len(pos), np.nan)
+    eidx = np.flatnonzero(is_E)
+    Epos = pos[eidx]; Evth = vth[eidx]
+    for i in eidx:
+        nb = np.linalg.norm(Epos - pos[i][None, :], axis=1) <= radius
+        if nb.sum() >= 3:
+            out[i] = Evth[nb].std()
+    return out
