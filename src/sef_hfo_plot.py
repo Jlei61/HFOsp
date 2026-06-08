@@ -165,6 +165,7 @@ def two_electrode_readout(
     E_xy=None, I_xy=None,                    # faint substrate (SNN); None for rate field
     name_fs=10,                              # panel-A contact-label font (smaller for dense montages)
     label_endpoints_only=False,              # dense crossing montage: label only the shaft ends
+    patch_circle=None,                       # (x,y,r) mm: dashed outline of a pathology core on panel A
     title=None,
 ):
     """3-panel two-electrode read-out (A geometry | B ∥-traces | C ⊥-traces),
@@ -191,6 +192,11 @@ def two_electrode_readout(
     else:
         cax.set_visible(False)
         axA.scatter(fxy[:, 0], fxy[:, 1], c=C_FOOT, s=7, linewidths=0, alpha=0.45, zorder=1)
+
+    if patch_circle is not None:
+        px, py, pr = patch_circle
+        axA.add_patch(plt.Circle((px, py), pr, fill=False, ls="--", ec="crimson",
+                                 lw=1.6, zorder=4, label="pathology core"))
 
     _axis_arrow(axA, kick_xy, axis_deg, extent)
     _draw_electrode(axA, par["contacts"], par["part"], C_PAR, "o", "electrode ∥ axis",
