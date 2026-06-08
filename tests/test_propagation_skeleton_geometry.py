@@ -181,6 +181,7 @@ def test_participation_sweep_tightens_with_threshold():
 # ---------------------------------------------------------------------------
 from src.propagation_skeleton_geometry import (
     channel_stereotypy, channel_stereotypy_excess,
+    channel_stereotypy_components,
 )
 
 
@@ -210,6 +211,21 @@ def test_stereotypy_excess_z_separates_signal_from_chance():
                                   n_null=200)
     assert z[0] > 3.0        # clearly above chance
     assert abs(z[1]) < 2.0   # ~chance
+
+
+def test_excess_is_n_invariant_while_z_inflates():
+    rng = np.random.default_rng(0)
+    def front_channel(n_ev, n_ch=10):
+        m = rng.integers(0, n_ch, (n_ch, n_ev)).astype(float) / (n_ch - 1)
+        m[0] = 0.0   # pinned to the front every event = fixed reproducibility
+        return m, np.ones((n_ch, n_ev), bool)
+    comps = {}
+    for n_ev in (20, 2000):
+        m, b = front_channel(n_ev)
+        comps[n_ev] = channel_stereotypy_components(m, b, rng=np.random.default_rng(1), n_null=300)
+    # raw excess ~stable across a 100x event-count change; z grows a lot
+    assert abs(comps[20]["excess"][0] - comps[2000]["excess"][0]) < 0.05
+    assert comps[2000]["z"][0] > 3 * comps[20]["z"][0]
 
 
 # ---------------------------------------------------------------------------

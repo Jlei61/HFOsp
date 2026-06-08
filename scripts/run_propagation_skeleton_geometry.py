@@ -122,7 +122,8 @@ def process_subject(ds, subj):
         return rec
 
     full_count = bools.sum(axis=1).astype(float)
-    z = G.channel_stereotypy_excess(masked, bools, rng=np.random.default_rng(0))
+    comps = G.channel_stereotypy_components(masked, bools, rng=np.random.default_rng(0))
+    excess = comps["excess"]
     samp = G.classify_sampling_geometry(
         names, eligible, fr["off_axis"],
         spacing_mm=3.5 if ds == "yuquan" else 4.6)
@@ -130,6 +131,17 @@ def process_subject(ds, subj):
     # exactly along==L; bump the top edge just past L so the final bin includes it.
     edges = list(np.linspace(0.0, max(fr["axis_length"], 1e-6), 5))
     edges[-1] = np.nextafter(edges[-1], np.inf)
+    along = np.asarray(fr["along_axis"], dtype=float)
+    along_profile = G.axis_stereotypy_profile(along, excess, edges=edges)
+    # Per-bin mean event count over the SAME channels whose excess was averaged
+    # (axis_stereotypy_profile masks on ~isnan(along) & ~isnan(excess)). Lets a
+    # reader confirm firing rate is roughly flat across along-axis bins (control).
+    bin_ok = ~np.isnan(along) & ~np.isnan(np.asarray(excess, dtype=float))
+    for b in along_profile:
+        sel = bin_ok & (along >= b["a_lo"]) & (along < b["a_hi"])
+        cnts = full_count[sel]
+        b["mean_event_count"] = float(cnts.mean()) if cnts.size else float("nan")
+    rec["along_axis_profile_metric"] = "raw_excess_obs_minus_nullmean"
     rec.update({
         "source_radius": G.core_radii(coords[cores["source_idx"]],
                                       np.array(fr["source_centroid"])),
@@ -141,8 +153,7 @@ def process_subject(ds, subj):
             G.perp_spread_participation_sweep(fr["off_axis"], full_count),
         "sampling_geometry": samp,
         "perp_width_measurable": samp["measurable"],
-        "along_axis_profile": G.axis_stereotypy_profile(
-            fr["along_axis"], z, edges=edges),
+        "along_axis_profile": along_profile,
         "soz_relation": {
             "source_core": [names[i] for i in cores["source_idx"]],
             "sink_core": [names[i] for i in cores["sink_idx"]],

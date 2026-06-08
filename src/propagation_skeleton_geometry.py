@@ -244,6 +244,57 @@ def channel_stereotypy(masked: np.ndarray) -> np.ndarray:
     return out
 
 
+def channel_stereotypy_components(
+    masked: np.ndarray,
+    bools: np.ndarray,
+    *,
+    rng: np.random.Generator,
+    n_null: int = 200,
+) -> Dict[str, np.ndarray]:
+    """Per-channel stereotypy decomposition (n_ch arrays).
+
+    Returns dict with: 'obs' (observed stereotypy), 'null_mean', 'null_std',
+    'excess' (= obs - null_mean; n-INVARIANT magnitude — use this for
+    descriptive profiles), 'z' (= excess/null_std; a significance that GROWS
+    with event count, so do NOT use it as a cross-channel magnitude).
+
+    For each channel c with participating events E_c, the null draws, per
+    event e in E_c, a uniform random within-event rank position
+    (integer in [0, m_e-1] normalized by m_e-1, m_e = #participants in e),
+    recomputes stereotypy, repeats n_null times. Fewer events -> wider null,
+    so z shrinks (participation control) while excess stays ~constant.
+
+    PRECONDITION: same as channel_stereotypy_excess — `masked` must be the
+    per-event normalized integer-rank grid k/(m_e-1).
+    """
+    masked = np.asarray(masked, dtype=float)
+    bools = np.asarray(bools, dtype=bool)
+    obs = channel_stereotypy(masked)
+    n_ch, n_ev = masked.shape
+    ev_sizes = bools.sum(axis=0).astype(float)        # m_e per event
+    null_mean = np.full(n_ch, np.nan)
+    null_std = np.full(n_ch, np.nan)
+    z = np.full(n_ch, np.nan)
+    for c in range(n_ch):
+        ev_idx = np.where(~np.isnan(masked[c]))[0]
+        if ev_idx.size < 2:
+            continue
+        m = ev_sizes[ev_idx]
+        denom = np.maximum(m - 1.0, 1.0)
+        null_vals = np.empty(n_null)
+        for j in range(n_null):
+            draws = rng.integers(0, np.maximum(m.astype(int), 1)) / denom
+            null_vals[j] = 1.0 - 2.0 * float(np.std(draws))
+        mu, sd = float(null_vals.mean()), float(null_vals.std())
+        null_mean[c] = mu
+        null_std[c] = sd
+        if sd > 1e-9:
+            z[c] = (obs[c] - mu) / sd
+    excess = obs - null_mean
+    return {"obs": obs, "null_mean": null_mean, "null_std": null_std,
+            "excess": excess, "z": z}
+
+
 def channel_stereotypy_excess(
     masked: np.ndarray,
     bools: np.ndarray,
@@ -259,30 +310,16 @@ def channel_stereotypy_excess(
     recomputes stereotypy, repeats n_null times. z = (obs - null_mean)/null_std.
     Fewer events -> wider null -> smaller z (participation control).
 
+    NOTE: z = excess*sqrt(n)-style inflates with event count and is a
+    SIGNIFICANCE, not a cross-channel magnitude. For descriptive profiles use
+    channel_stereotypy_components(...)["excess"] instead.
+
     PRECONDITION: `masked` must be the per-event normalized integer-rank grid
     k/(m_e-1), e.g. from mask_phantom_ranks(normalize=True); off-grid
     continuous input inflates z.
     """
-    masked = np.asarray(masked, dtype=float)
-    bools = np.asarray(bools, dtype=bool)
-    obs = channel_stereotypy(masked)
-    n_ch, n_ev = masked.shape
-    ev_sizes = bools.sum(axis=0).astype(float)        # m_e per event
-    z = np.full(n_ch, np.nan)
-    for c in range(n_ch):
-        ev_idx = np.where(~np.isnan(masked[c]))[0]
-        if ev_idx.size < 2:
-            continue
-        m = ev_sizes[ev_idx]
-        denom = np.maximum(m - 1.0, 1.0)
-        null_vals = np.empty(n_null)
-        for j in range(n_null):
-            draws = rng.integers(0, np.maximum(m.astype(int), 1)) / denom
-            null_vals[j] = 1.0 - 2.0 * float(np.std(draws))
-        mu, sd = float(null_vals.mean()), float(null_vals.std())
-        if sd > 1e-9:
-            z[c] = (obs[c] - mu) / sd
-    return z
+    return channel_stereotypy_components(
+        masked, bools, rng=rng, n_null=n_null)["z"]
 
 
 def axis_stereotypy_profile(
