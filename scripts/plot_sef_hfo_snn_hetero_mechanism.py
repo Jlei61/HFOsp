@@ -39,21 +39,27 @@ def _snn_electrode(lfp, contacts, names, t, win, u_shaft, panel_title):
 
 
 def _pick_representatives(cells):
-    reps = {}
-    reps["maxeffect"] = max(cells, key=_effect)
-    reps["nearzero"] = min(cells, key=_effect)
-    off = [c for c in cells if not c["kick_on_patch"]]
-    if off:
-        reps["through_core"] = max(off, key=_effect)
-    u = [c for c in cells if c["cond"] == "unmatched"]
-    if u:
-        reps["unmatched"] = max(u, key=_effect)
-    # de-dup by idx, keep first tag
-    seen, out = set(), {}
-    for tag, c in reps.items():
-        if c["idx"] not in seen:
-            out[tag] = c; seen.add(c["idx"])
-    return out
+    """Distinct reps (spec §4), prioritising the HEADLINE mid-patch matched-vs-
+    unmatched dissociation (the 3-seed pair: variance-null vs mean-effect), plus
+    the max-effect and near-zero cells. Off-patch preferred (mechanism evidence)."""
+    picked, used = {}, set()
+
+    def take(tag, c):
+        if c is not None and c["idx"] not in used:
+            picked[tag] = c; used.add(c["idx"])
+
+    def find(pname, cond, off=True, sweep=None):
+        cand = [c for c in cells if c["pname"] == pname and c["cond"] == cond
+                and (not off or not c["kick_on_patch"])
+                and (sweep is None or c["sweep"] == sweep)]
+        return max(cand, key=_effect) if cand else None
+
+    # mid pair pinned to sweep-2 (kick=end) so they share the same kick == the 3-seed pair
+    take("mid_matched", find("mid", "matched", sweep=2))    # variance-only (mean held) ~ null
+    take("mid_unmatched", find("mid", "unmatched", sweep=2))  # + mean shift (hyperexcitable)
+    take("maxeffect", max(cells, key=_effect))
+    take("nearzero", min(cells, key=_effect))
+    return picked
 
 
 def _overview(cells):
@@ -78,7 +84,8 @@ def _mechanism(cell, tag):
     nc = int(z["nc"])
     t = np.asarray(z["times"]); lfp = np.asarray(z["lfp"]).T          # (n_contact, nt)
     contacts = z["contacts"]; names = [str(s) for s in z["names"]]
-    win = (155.0, 205.0)                                              # 5..55 ms after T_KICK
+    ev_t = float(z["event_peak_t"]) if "event_peak_t" in z.files else 176.0
+    win = (ev_t - 25.0, ev_t + 30.0)                                 # event-locked read-out
     u_par = np.array([np.cos(np.deg2rad(theta)), np.sin(np.deg2rad(theta))])
     u_perp = np.array([np.cos(np.deg2rad(theta + 90)), np.sin(np.deg2rad(theta + 90))])
     par = _snn_electrode(lfp[:nc], contacts[:nc], names[:nc], t, win, u_par,
