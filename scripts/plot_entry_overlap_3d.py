@@ -113,8 +113,11 @@ def analyze(d: Dict, rng) -> Dict:
     radA, pcA, kA = compactness_null(gA, coords, mapped, rng)
     radB, pcB, kB = compactness_null(gB, coords, mapped, rng)
     axis = propagation_axis(cl[0]["template_rank"], coords, mapped)
+    tr1 = np.asarray(cl[0]["template_rank"], int)   # per-channel typical order in T1 (0=avg-first)
+    tr2 = np.asarray(cl[1]["template_rank"], int)   # ... in T2
     return {
         "dataset": d["dataset"], "subject": d["subject"],
+        "_tr1": tr1, "_tr2": tr2,
         "coord_space": d["coord_space"], "n_channels": d["n_channels"],
         "groupA": sorted(chn[c] for c in gA), "groupB": sorted(chn[c] for c in gB),
         "groupA_size": len(gA), "groupB_size": len(gB),
@@ -137,15 +140,22 @@ def figure(r: Dict):
                  f"entry-group overlap Jaccard={r['jaccard']}, centroid dist={r['centroid_dist_mm']} mm   "
                  f"| compactness p: T1={r['groupA_p_compact']}, T2={r['groupB_p_compact']}",
                  fontsize=10)
-    groups = [(r["_gA"] - r["_shared"], "#c0504d", "template 1 entry group"),
-              (r["_gB"] - r["_shared"], "#3b6ea5", "template 2 entry group"),
-              (r["_shared"], "#7e57c2", "shared by both")]
+    # typical firing order within each template (1 = on-average first to fire).
+    tr1, tr2 = r["_tr1"], r["_tr2"]
+    ord_lab = {  # per-channel order tag, by which group the channel is in
+        "A": lambda c: f"#{int(tr1[c]) + 1}",
+        "B": lambda c: f"#{int(tr2[c]) + 1}",
+        "S": lambda c: f"T1#{int(tr1[c]) + 1}/T2#{int(tr2[c]) + 1}",
+    }
+    groups = [(r["_gA"] - r["_shared"], "#c0504d", "template 1 entry group", "A"),
+              (r["_gB"] - r["_shared"], "#3b6ea5", "template 2 entry group", "B"),
+              (r["_shared"], "#7e57c2", "shared by both", "S")]
 
     # --- left: 3D real space ---
     ax = fig.add_subplot(121, projection="3d")
     ax.scatter(coords[mp, 0], coords[mp, 1], coords[mp, 2], s=10, c="0.8",
                edgecolor="none", depthshade=False, label="other contacts")
-    for idx, color, lab in groups:
+    for idx, color, lab, _ in groups:
         use = [c for c in idx if mapped[c]]
         if use:
             ax.scatter(coords[use, 0], coords[use, 1], coords[use, 2],
@@ -168,17 +178,21 @@ def figure(r: Dict):
     along = (coords - ctr) @ axis
     off = (coords - ctr) @ e2
     ax.scatter(along[mp], off[mp], s=10, c="0.8", edgecolor="none", label="other contacts")
-    for idx, color, lab in groups:
+    for idx, color, lab, gk in groups:
         use = [c for c in idx if mapped[c]]
         if use:
             ax.scatter(along[use], off[use], s=35 + 1200 * pmax[use], c=color,
                        edgecolor="k", linewidth=0.5, label=lab)
             for c in use:
-                ax.annotate(chn[c], (along[c], off[c]), fontsize=6.5)
+                # annotate channel name + its typical firing order in that template
+                ax.annotate(f"{chn[c]} {ord_lab[gk](c)}", (along[c], off[c]),
+                            fontsize=6.3, color=color)
     ax.axhline(0, color="0.6", lw=0.7, ls=":")
     ax.set_xlabel("along propagation axis (mm)  [template-early → template-late]")
     ax.set_ylabel("off-axis (mm)")
-    ax.set_title("projection onto template propagation axis", fontsize=9.5)
+    ax.set_title("projection onto template propagation axis\n"
+                 "(label '#k' = channel is on average the k-th to fire in that template)",
+                 fontsize=9)
     ax.set_aspect("equal", "datalim")
 
     fig.tight_layout(rect=[0, 0, 1, 0.95])
