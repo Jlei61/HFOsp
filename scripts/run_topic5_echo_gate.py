@@ -1,0 +1,345 @@
+"""Topic 5 Stage-1 ictal-template-echo gate runner (proxy triage).
+
+Spec: docs/superpowers/specs/2026-06-08-topic5-ictal-template-echo-gate-design.md (v4)
+
+P0 invariants enforced here:
+- §3.6 phantom-safe: primary templates come ONLY from
+  results/interictal_propagation_masked/ (rank_a_full/rank_b_full + joint_valid),
+  masked via topic5_echo_gate.masked_template_rank_1d (1-D np.where contract).
+  The old unmasked bridge loader / q1prime JSON template_rank are NOT used.
+- P0-B: ictal atlas via src.atlas_loading (NOT a hand-rolled atlas_v2_3 path).
+- P0-1: proxy triage NEVER vetoes Stage 2 — verdicts only set Stage-2 priority and
+  the artifact must not contain the veto word (cohort lint guard).
+
+Scope (spec v4 §3.2): GENERIC template echo. primary = ALL subjects with a stable
+masked template (k=2, n_valid>=MIN_CH). swap_class is a pre-registered STRATIFIER.
+Negative control = between-subject (Null D) + bad-data regression.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import sys
+import warnings
+from collections import defaultdict
+from pathlib import Path
+
+import numpy as np
+from scipy.stats import rankdata
+
+_ROOT = Path(__file__).resolve().parents[1]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+warnings.filterwarnings("ignore", message="Mean of empty slice")
+
+from src import atlas_loading
+from src import topic5_echo_gate as echo
+from src.propagation_skeleton_geometry import parse_shaft
+
+MASKED_DIR = Path("results/interictal_propagation_masked/rank_displacement/per_subject")
+OUT_ROOT = Path("results/topic5_ictal_template_echo")
+MIN_CH = 8                 # P1-1 locked
+B = 2000                   # §5.3 lock
+TIE_MAX = 0.3              # atlas-quality
+N_ANCHOR_BINS = 4          # Null C earliness bins
+BAND_PRIMARY = "broad_ER"  # user-locked 2026-06-08 (gamma_ER = sensitivity)
+RNG_SEED = 20260608
+
+
+def ictal_rank_from_onsets(channel_onsets, channels):
+    """Per-channel ictal rank over `channels`: rank ascending t_onset_sec
+    (earliest recruited -> lowest rank, matching the template convention);
+    NaN where the channel has no onset (not recruited / CUSUM not triggered)."""
+    onsets = np.array(
+        [(channel_onsets.get(ch) or {}).get("t_onset_sec", None) for ch in channels],
+        dtype=object)
+    t = np.array([np.nan if v is None else float(v) for v in onsets], dtype=float)
+    rank = np.full(t.shape, np.nan)
+    finite = np.isfinite(t)
+    if finite.sum() >= 2:
+        rank[finite] = rankdata(t[finite], method="average") - 1.0   # 0-based like template
+    return rank
+
+
+def load_subject(stem):
+    """stem e.g. 'epilepsiae_1146'. Returns a dict with masked templates + ictal
+    seizure ranks aligned to the SAME channel order, or None if unusable."""
+    mj = MASKED_DIR / f"{stem}.json"
+    if not mj.exists():
+        return None
+    d = json.load(open(mj))
+    if d.get("stable_k") != 2 or not d.get("pairs"):
+        return None
+    dataset, subject = d["dataset"], d["subject"]
+    channels = list(d["channel_names"])
+    pair = d["pairs"][0]
+    joint_valid = np.asarray(pair["joint_valid"], dtype=bool)
+    t_a = echo.masked_template_rank_1d(np.asarray(pair["rank_a_full"], float), joint_valid)
+    t_b = echo.masked_template_rank_1d(np.asarray(pair["rank_b_full"], float), joint_valid)
+    templates = [t_a, t_b]
+    swap_class = pair.get("swap_sweep", {}).get("swap_class")
+    n_valid = int(joint_valid.sum())
+
+    # --- ictal side: atlas onsets aligned to the SAME channel order (name match) ---
+    try:
+        atlas = atlas_loading.load_per_subject_json(f"{dataset}/{subject}", source="per_subject")
+    except Exception:
+        return None
+    band = atlas.get("per_er", {}).get(BAND_PRIMARY)
+    if band is None:
+        return None
+    atlas_channels = set()
+    for rec in band.get("seizure_records", []):
+        atlas_channels |= set((rec.get("channel_onsets") or {}).keys())
+    # alignment guard (P0/item 10): template channels must be a subset of atlas channels.
+    missing = [c for c in channels if c not in atlas_channels]
+    if missing:
+        raise ValueError(f"{stem}: template channels absent from atlas onsets: {missing[:5]} "
+                         f"({len(missing)} total) — alignment guard hard fail")
+    seiz_ranks = []
+    seiz_ids = []
+    for rec in band.get("seizure_records", []):
+        if rec.get("status") != "ok":
+            continue
+        r = ictal_rank_from_onsets(rec.get("channel_onsets") or {}, channels)
+        common = np.isfinite(r) & np.isfinite(t_a)      # template-valid (NaN if invalid) ∩ onset
+        if int(np.sum(np.isfinite(r) & joint_valid)) >= MIN_CH:
+            seiz_ranks.append(r)
+            seiz_ids.append(rec.get("seizure_id"))
+    if len(seiz_ranks) < 2:
+        return None
+    seiz_matrix = np.vstack(seiz_ranks)
+
+    # atlas quality on the per-subject mean ictal rank
+    with np.errstate(invalid="ignore"):
+        mean_ictal = np.where(np.all(np.isnan(seiz_matrix), axis=0), np.nan,
+                              np.nanmean(seiz_matrix, axis=0))
+    aq = echo.compute_atlas_quality(mean_ictal, tie_max=TIE_MAX, min_channels=MIN_CH)
+
+    # Null C anchor bins = quartiles of mean ictal earliness (None where no onsets)
+    anchor_bins = np.full(len(channels), None, dtype=object)
+    fin = np.isfinite(mean_ictal)
+    if fin.sum() >= N_ANCHOR_BINS:
+        qs = np.quantile(mean_ictal[fin], np.linspace(0, 1, N_ANCHOR_BINS + 1)[1:-1])
+        binid = np.digitize(mean_ictal[fin], qs)
+        anchor_bins[np.where(fin)[0]] = binid.astype(object)
+
+    return {
+        "stem": stem, "dataset": dataset, "subject": subject,
+        "channels": channels, "templates": templates, "swap_class": swap_class,
+        "template_k": 2, "n_valid": n_valid, "soz_channels": d.get("soz_channels", []),
+        "seizure_ranks": seiz_matrix, "seizure_ids": seiz_ids,
+        "atlas_quality_flag": aq["atlas_quality_flag"], "rank_tie_fraction": aq["rank_tie_fraction"],
+        "rank_dynamic_range": aq["rank_dynamic_range"], "anchor_bins": anchor_bins,
+        "construct_validity_flag": "pending",
+    }
+
+
+def _iter_stems():
+    atlas_subjects = set(atlas_loading.list_cohort_subjects())   # 'dataset/sid' keys
+    for mj in sorted(MASKED_DIR.glob("*.json")):
+        d = json.load(open(mj))
+        if d.get("stable_k") != 2:
+            continue
+        key = f"{d['dataset']}/{d['subject']}"
+        if key in atlas_subjects:
+            yield mj.stem
+
+
+# --------------------------------------------------------------------------- audit
+def cmd_audit(args):
+    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for stem in _iter_stems():
+        try:
+            sub = load_subject(stem)
+        except ValueError as e:
+            rows.append({"subject_id": stem, "alignment_guard_pass": False, "note": str(e)[:80]})
+            continue
+        if sub is None:
+            continue
+        sm = sub["seizure_ranks"]
+        ncommon = [int(np.sum(np.isfinite(r) & np.isfinite(sub["templates"][0]))) for r in sm]
+        rows.append({
+            "subject_id": stem, "dataset": sub["dataset"],
+            "n_seizures_eligible": len(sm), "n_channels_template": sub["n_valid"],
+            "n_channels_common_min": min(ncommon), "n_channels_common_median": int(np.median(ncommon)),
+            "n_channels_common_max": max(ncommon), "rank_tie_fraction": round(sub["rank_tie_fraction"], 3),
+            "rank_dynamic_range": round(sub["rank_dynamic_range"], 2), "template_k": 2,
+            "swap_class": sub["swap_class"], "ictal_rank_source": f"ER_atlas:{BAND_PRIMARY}",
+            "atlas_quality_flag": sub["atlas_quality_flag"], "construct_validity_flag": "pending",
+            "phantom_mask_applied": True, "valid_mask_source": "rank_displacement.joint_valid",
+            "alignment_guard_pass": True,
+            "deanchor_eligible": len(sm) >= 4,
+            "deanchor_anchor_reliability": round(echo.anchor_reliability(sm), 3),
+        })
+    cols = ["subject_id", "dataset", "n_seizures_eligible", "n_channels_template",
+            "n_channels_common_min", "n_channels_common_median", "n_channels_common_max",
+            "rank_tie_fraction", "rank_dynamic_range", "template_k", "swap_class",
+            "ictal_rank_source", "atlas_quality_flag", "construct_validity_flag",
+            "phantom_mask_applied", "valid_mask_source", "alignment_guard_pass",
+            "deanchor_eligible", "deanchor_anchor_reliability", "note"]
+    with open(OUT_ROOT / "b0_eligibility_audit.csv", "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+        w.writeheader()
+        for r in rows:
+            w.writerow(r)
+    n_ok = sum(1 for r in rows if r.get("alignment_guard_pass") and r.get("atlas_quality_flag") == "pass")
+    drop8 = sum(1 for r in rows if (r.get("n_channels_common_median") or 0) < MIN_CH)
+    print(f"wrote {OUT_ROOT/'b0_eligibility_audit.csv'} ({len(rows)} subjects; "
+          f"{n_ok} pass atlas-quality; {drop8} have median common<{MIN_CH})")
+
+
+# ------------------------------------------------------------------- per-subject
+def cmd_per_subject(args):
+    rng = np.random.default_rng(RNG_SEED)
+    (OUT_ROOT / "per_subject").mkdir(parents=True, exist_ok=True)
+    n = 0
+    for stem in _iter_stems():
+        try:
+            sub = load_subject(stem)
+        except ValueError:
+            continue
+        if sub is None or sub["atlas_quality_flag"] == "fail":
+            continue
+        templates = sub["templates"]
+        shafts = np.array([parse_shaft(c)[0] for c in sub["channels"]], dtype=object)
+        cap = echo.shaft_block_capacity(shafts)
+        seiz = sub["seizure_ranks"]
+        per_seizure = []
+        for k in range(seiz.shape[0]):
+            rec = {"seizure_idx": k}
+            modes = [("channel", None), ("within_shaft", shafts),
+                     ("anchor_matched", sub["anchor_bins"])]
+            if not cap["insufficient_block_exchange"]:
+                modes.append(("shaft_block", shafts))
+            for mode, blocks in modes:
+                rec[mode] = echo.compute_echo_strength(
+                    seiz[k], templates, B=B, rng=rng, min_ch=MIN_CH,
+                    null_mode=mode, blocks=blocks)
+            per_seizure.append(rec)
+        deanchor = (echo.compute_deanchor_echo(seiz, templates, B=B, rng=rng, min_ch=MIN_CH)
+                    if seiz.shape[0] >= 4 else None)
+        out = {
+            "subject": stem, "dataset": sub["dataset"], "swap_class": sub["swap_class"],
+            "template_k": 2, "atlas_quality_flag": sub["atlas_quality_flag"],
+            "construct_validity_flag": sub["construct_validity_flag"],
+            "shaft_block_capacity": cap, "anchor_reliability": echo.anchor_reliability(seiz),
+            "n_seizures": int(seiz.shape[0]),
+            "per_seizure": per_seizure, "deanchor": deanchor,
+            "channels": list(sub["channels"]),
+            "template_ranks": [list(map(_jsonnum, t)) for t in templates],
+            "seizure_ranks": [list(map(_jsonnum, r)) for r in seiz],
+        }
+        json.dump(out, open(OUT_ROOT / "per_subject" / f"{stem}.json", "w"),
+                  indent=2, default=_jsonnum)
+        n += 1
+    print(f"per-subject done ({n} subjects)")
+
+
+def _jsonnum(o):
+    if isinstance(o, float) and not np.isfinite(o):
+        return None
+    if isinstance(o, (np.floating, np.integer)):
+        return None if (isinstance(o, np.floating) and not np.isfinite(o)) else o.item()
+    return o
+
+
+# ------------------------------------------------------------------------ cohort
+def cmd_cohort(args):
+    subs = [json.load(open(p)) for p in sorted((OUT_ROOT / "per_subject").glob("*.json"))]
+
+    def pool_mode(mode, subset=None):
+        recs = []
+        for s in subs:
+            if subset == "strict_candidate" and s["swap_class"] not in ("strict", "candidate"):
+                continue
+            if subset == "none" and s["swap_class"] != "none":
+                continue
+            for ps in s["per_seizure"]:
+                m = ps.get(mode)
+                if m is None:
+                    continue
+                recs.append({"subject": s["subject"], "e_k": m.get("e_k")})
+        return echo.pool_echo_subject_level(recs)
+
+    rng = np.random.default_rng(RNG_SEED + 1)
+    bs_recs = []
+    for s in subs:
+        others = [np.array(t, float) for o in subs if o["subject"] != s["subject"]
+                  for t in o["template_ranks"]]
+        if not others:
+            continue
+        for seiz in s["seizure_ranks"]:
+            r = echo.between_subject_control(np.array(seiz, float), others,
+                                             B=B, rng=rng, min_ch=MIN_CH)
+            bs_recs.append({"subject": s["subject"], "e_k": r["e_k"]})
+
+    bd_recs = [{"subject": s["subject"], "e_k_baddata": ps["channel"]["e_k_baddata"]}
+               for s in subs for ps in s["per_seizure"] if ps.get("channel")]
+
+    deanchor_recs = []
+    for s in subs:
+        if not s.get("deanchor"):
+            continue
+        for r in s["deanchor"]:
+            deanchor_recs.append({"subject": s["subject"], "e_k": r.get("e_k")})
+
+    summary = {
+        "scope": "generic_template_echo", "n_subjects_loaded": len(subs),
+        "primary_channel_all": pool_mode("channel"),
+        "primary_within_shaft_all": pool_mode("within_shaft"),
+        "primary_anchor_matched_all": pool_mode("anchor_matched"),
+        "deanchor_all": echo.pool_echo_subject_level(deanchor_recs),
+        "stratifier_swap_strict_candidate": pool_mode("channel", "strict_candidate"),
+        "stratifier_swap_none": pool_mode("channel", "none"),
+        "negative_between_subject": echo.pool_echo_subject_level(bs_recs),
+        "bad_data_regression": echo.bad_data_regression(bd_recs),
+    }
+    summary["verdict"] = _assign_verdict(summary)
+    assert "暂缓" not in json.dumps(summary, ensure_ascii=False)   # P0-1 no-veto guard
+    json.dump(summary, open(OUT_ROOT / "cohort_echo_summary.json", "w"), indent=2)
+    print("verdict:", summary["verdict"]["label"], "|", summary["verdict"]["why"])
+
+
+def _assign_verdict(summary):
+    p = summary["primary_channel_all"]
+    has_sens = (np.isfinite(p.get("sign_p_onesided", np.nan)) and
+                np.isfinite((p.get("boot_ci95") or [np.nan])[0]))
+    neg = summary["negative_between_subject"]
+    bad = summary["bad_data_regression"]
+    neg_clean = not (neg.get("wilcoxon_p_onesided") is not None
+                     and neg.get("wilcoxon_p_onesided", 1) < 0.05)
+    bad_clean = not (bad.get("wilcoxon_p_onesided") is not None
+                     and bad.get("wilcoxon_p_onesided", 1) < 0.05)
+    if p["n_subjects"] < 6:
+        return {"label": "没看清", "why": "n_subjects<6"}
+    wp = p.get("wilcoxon_p_onesided")
+    standing = (wp is not None and wp < 0.05 and p["median_E_s"] > 0
+                and has_sens and neg_clean and bad_clean)
+    if not standing:
+        return {"label": "代理阴性/没看清",
+                "why": "primary not significant or sensitivities/controls missing; "
+                       "ER proxy gave no continuation evidence — Stage 2 decided by "
+                       "scientific value, not vetoed"}
+    a = summary["primary_within_shaft_all"]
+    c = summary["primary_anchor_matched_all"]
+    specific = ((a.get("wilcoxon_p_onesided") or 1) < 0.05 or
+                (c.get("wilcoxon_p_onesided") or 1) < 0.05)
+    return {"label": "站住·含具体通路" if specific else "站住·稳定锚为主",
+            "why": "inclusive echo holds; A/C " + ("survive" if specific else "flatten")}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("audit").set_defaults(func=cmd_audit)
+    sub.add_parser("per-subject").set_defaults(func=cmd_per_subject)
+    sub.add_parser("cohort").set_defaults(func=cmd_cohort)
+    args = ap.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main()
