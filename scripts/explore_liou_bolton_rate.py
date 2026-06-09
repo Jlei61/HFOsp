@@ -1,25 +1,22 @@
-"""EXPLORATORY (capability/feasibility in an EXCITABLE regime — NOT a data-locked
-SEF-HFO conclusion; deliberately separated from the locked-op heterogeneity nulls).
+"""
+Liou-Abbott (eLife 2020) seizure dynamics on the Siegert LIF rate field — v2.
 
-Bolt the three Liou-Abbott (eLife 2020, Liou…Abbott "A model for focal seizure onset,
-propagation, evolution, and progression") mechanisms onto OUR Siegert LIF rate field and
-study, with mechanism-ablation controls and a parameter sweep, whether the rate model
-produces adaptation-driven repetitive bursting (the ictal tonic→clonic relaxation
-oscillation + inward traveling waves of paper Fig 2).
+Minimal correct bone structure:
+  - Local inhibition:  narrow Gaussian kernel (sigma_L), Mexican-hat surround
+  - Global inhibition: uniform γ·mean(rE), drives termination as recruited area grows
+  - Spatial z(x,t):   inhibition efficacy field (eq 8), exhausts locally under heavy I→E use
+  - Adaptive threshold φ(x,t): fast negative feedback, sets clonic rhythm (eq 2)
+  - sAHP a(x,t):       slow adaptation, tonic→clonic envelope (eq 4)
 
-Three mechanisms (paper eqs, docs/paper/abbott_model.md):
-  1. adaptive threshold   τ_φ φ̇ = (φ0−φ) + Δ_φ f          (eq 2) — firing raises threshold
-  2. sAHP recovery        τ_a ȧ  = −a + r ; μ ← μ − b_a a   (eq 4 analogue; our recovery)
-  3. Mexican-hat surround inhibition wider than excitation (l_inh > ell)  (eq 5)
-(chloride/eq-3, the slow wavefront-expansion mechanism τ=5 s, is NOT a bursting driver — skipped.)
+Three deliverable figures:
+  lifecycle  — four spatial fields (rE, φ, z, a) + per-contact traces; mechanism causality
+  ablation   — remove one mechanism at a time; wavefront + termination metrics annotated
+  threshold  — kick-amplitude spectrum: silent → self-limited → sustained seizure
 
-1-D neural field (Liou's primary reduction, their Fig 2). Modes (argv[1]):
-  explore  — grid of candidate space-time rasters (pick a paper-like regime)
-  main     — paper Fig-2-style full-model figure (space-time + zoom + per-contact readout)
-  ablation — mechanism A/B controls (full / −threshold / −sAHP / −surround / none)
-  sweep    — regime phase diagram (Δ_φ × excitability) + burst-period dependence
+Excitable-regime capability test (w_ee_mult≈2.0). NOT the data-locked SEF-HFO op.
 
-Run: PYTHONPATH="$PWD" python scripts/explore_liou_bolton_rate.py <mode>
+Run:
+  PYTHONPATH="$PWD" python scripts/explore_liou_bolton_rate.py [lifecycle|ablation|threshold|all]
 """
 from __future__ import annotations
 
@@ -39,302 +36,457 @@ from src.sef_hfo_lif import (  # noqa: E402
     TAU_AMPA, TAU_GABA,
 )
 
-OUT = "results/topic4_sef_hfo/observation_layer/figures"
-N = 200
-L = 12.0
-DX = L / N
-ELL = 0.54
-DT = 0.5
+OUT  = "results/topic4_sef_hfo/observation_layer/figures"
+N    = 200
+L    = 12.0      # mm
+DX   = L / N     # 0.06 mm / node
+ELL  = 0.54      # E spatial scale (mm)
+DT   = 0.5       # ms
+KICK_FRAC = 0.12  # fraction of domain = SOZ seed
 
-# default bursting recipe (excitable regime); fast threshold = clonic rhythm,
-# slow sAHP = tonic→clonic→termination envelope.
-DEF = dict(w_ee_mult=2.0, dphi=1.0, b_a=3.0, l_inh=1.6, tphi=100.0, ta=2500.0)
-NARROW_INH = 0.5
+# Default recipe: excitable regime, all mechanisms on
+DEF = dict(
+    w_ee_mult = 2.0,      # recurrent E→E multiplier
+    dphi      = 1.0,      # adaptive threshold strength (mV·ms / kHz)
+    b_a       = 3.0,      # sAHP strength
+    sigma_L   = 1.5,      # local I kernel width (mm); > ELL → Mexican hat
+    gamma     = 0.0,      # global inhibition coeff (set >0 to enable termination drive)
+    tau_G     = 4000.0,   # τ of slow global inhibition pool (ms)
+    tphi      = 100.0,    # threshold recovery τ (ms)
+    ta        = 2500.0,   # sAHP recovery τ (ms)
+    tau_z     = 100000.0, # z τ (ms); slow → visible spatial gradient without killing bursting
+)
 
-_LUT = {}          # cache: sigma -> (interpolator, sI, rI_lut, musI, nuext, muxE, muxI)
+_LUT: dict = {}
 
 
-def _gauss_kernel(width):
+def _gauss_kernel(width: float) -> np.ndarray:
     x = (np.arange(N) - N // 2) * DX
     g = np.exp(-0.5 * (x / width) ** 2)
     return g / g.sum()
 
 
-def _conv(field, kern):
+def _conv(field: np.ndarray, kern: np.ndarray) -> np.ndarray:
     return np.real(np.fft.ifft(np.fft.fft(field) * np.fft.fft(np.fft.ifftshift(kern))))
 
 
-def _setup():
+def _setup() -> dict:
     if "rateE" not in _LUT:
         op = mean_field(1.0)
         sE, sI, nuext = op["sE"], op["sI"], op["nuext"]
-        mus = np.linspace(-20.0, 220.0, 700)
+        mus  = np.linspace(-20.0, 220.0, 700)
         vths = np.linspace(V_TH, V_TH + 160.0, 320)
-        tab = np.array([[lif_rate(float(m), sE, TAU_ME, TREF_E, v_th=float(v)) for v in vths]
-                        for m in mus])
-        tab = np.nan_to_num(tab, nan=0.0, posinf=1.0 / TREF_E, neginf=0.0)
+        tab  = np.array([[lif_rate(float(m), sE, TAU_ME, TREF_E, v_th=float(v))
+                          for v in vths] for m in mus])
+        tab  = np.nan_to_num(tab, nan=0.0, posinf=1.0 / TREF_E, neginf=0.0)
         musI = np.linspace(-20.0, 220.0, 1500)
-        _LUT.update(rateE=RegularGridInterpolator((mus, vths), tab, bounds_error=False,
-                                                  fill_value=None),
-                    musI=musI, rI_lut=np.array([lif_rate(m, sI, TAU_MI, TREF_I) for m in musI]),
-                    nuext=nuext, muxE=TAU_ME * JX_E * nuext, muxI=TAU_MI * JX_I * nuext)
+        _LUT.update(
+            rateE=RegularGridInterpolator(
+                (mus, vths), tab, bounds_error=False, fill_value=None),
+            musI=musI,
+            rI_lut=np.array([lif_rate(m, sI, TAU_MI, TREF_I) for m in musI]),
+            nuext=nuext,
+            muxE=TAU_ME * JX_E * nuext,
+            muxI=TAU_MI * JX_I * nuext,
+        )
     return _LUT
 
 
-def integrate(*, w_ee_mult, dphi, b_a, l_inh, tphi, ta, t_max=10000.0,
-              kick_amp=10.0, kick_t=(200.0, 600.0), kick_frac=0.12,
-              cl=False, tau_z=5000.0, cl_th=0.05, cl_w=0.01, return_aux=False):
-    """1-D bolt-on rate field. dphi=0 → no adaptive threshold; b_a=0 → no sAHP; l_inh small
-    → no surround. cl=True adds usage-dependent inhibition exhaustion (paper eq 8, the
-    substrate-agnostic abstraction of the chloride mechanism eq 3, since our Siegert model
-    is not conductance-based): efficacy z scales inhibition, decays (τ_z≈5 s) where the I→E
-    drive is heavily used (> cl_th, in kHz), recovers when quiet. Returns (t_ms, frames Hz);
-    if return_aux also returns the mean efficacy z(t). sigma fixed at canonical sE."""
-    s = _setup()
-    wee = w_ee_mult * W_EE
-    KE, KI = _gauss_kernel(ELL), _gauss_kernel(l_inh)
-    rE = np.full(N, 1e-4); rI = np.full(N, 1e-4); vth = np.full(N, V_TH); a = np.full(N, 1e-4)
-    z = np.ones(N)                          # inhibition efficacy (1 = intact, 0 = exhausted)
-    sEE = _conv(rE, KE).copy(); sEI = _conv(rI, KI).copy()
-    sIE = _conv(rE, KI).copy(); sII = _conv(rI, KI).copy()
+def integrate(
+    *, w_ee_mult, dphi, b_a, sigma_L, gamma, tau_G, tphi, ta,
+    t_max=10000.0, kick_amp=10.0, kick_t=(200.0, 600.0),
+    cl=True, tau_z=100000.0, cl_th=0.05, cl_w=0.012,
+    soz_delta_mu=0.0, return_full=False,
+):
+    """
+    Spatial LIF rate field with local / global inhibition decomposed.
+
+    muE(x,t) = τ_E [C_EE·wee·sEE(x) − z(x)·C_EI·W_EI·sEI(x)]
+               − γ·r̄_E(t)  +  μ_ext,E + μ_offset(x) + stim(x,t) − b_a·a(x,t)
+
+    Local inhibition : sEI = conv(rI, K_L),  K_L ~ Gauss(sigma_L > ELL).
+    Global inhibition: γ·G(t), where G is a slow scalar (τ_G≈4s) accumulating mean(rE).
+                       Slow accumulation lets burst rhythm develop; termination happens
+                       when G saturates and γ·G overcomes local excitatory drive.
+    Efficacy z(x,t)  : per-node; τ_z decay toward z_inf(sEI) when cl=True.
+
+    Returns
+    -------
+    (t_ms, rE_Hz)                          when return_full=False
+    (t_ms, rE_Hz, vth, z, a_scaled)       when return_full=True  [shape (nsteps, N)]
+    """
+    s    = _setup()
+    wee  = w_ee_mult * W_EE
+    KE   = _gauss_kernel(ELL)
+    KI   = _gauss_kernel(sigma_L)
+
+    n_kick = int(KICK_FRAC * N)
+    mu_off = np.zeros(N)
+    mu_off[:n_kick] = soz_delta_mu
+
+    rE  = np.full(N, 1e-4)
+    rI  = np.full(N, 1e-4)
+    vth = np.full(N, V_TH)
+    a   = np.zeros(N)
+    z   = np.ones(N)
+    G   = 0.0   # slow global inhibition pool (scalar); τ_G accumulation of mean(rE)
+
+    sEE = _conv(rE, KE); sEI = _conv(rI, KI)
+    sIE = _conv(rE, KI); sII = _conv(rI, KI)
+
     nsteps = int(t_max / DT)
-    frames = np.empty((nsteps, N))
-    zbar = np.empty(nsteps)
-    kick_mask = np.arange(N) < int(kick_frac * N)
-    for t in range(nsteps):
-        stim = kick_amp * kick_mask if (kick_t[0] <= t * DT < kick_t[1]) else 0.0
+    rE_f  = np.empty((nsteps, N), dtype=np.float32)
+    vth_f = np.empty((nsteps, N), dtype=np.float32) if return_full else None
+    z_f   = np.empty((nsteps, N), dtype=np.float32) if return_full else None
+    a_f   = np.empty((nsteps, N), dtype=np.float32) if return_full else None
+
+    kick_mask = np.arange(N) < n_kick
+
+    for ti in range(nsteps):
+        stim = kick_amp * kick_mask if kick_t[0] <= ti * DT < kick_t[1] else 0.0
+
         sEE += DT / TAU_AMPA * (_conv(rE, KE) - sEE)
         sEI += DT / TAU_GABA * (_conv(rI, KI) - sEI)
         sIE += DT / TAU_AMPA * (_conv(rE, KI) - sIE)
         sII += DT / TAU_GABA * (_conv(rI, KI) - sII)
+
         if cl:
-            # usage = I→E synaptic drive (∝ inhibitory conductance "g_I" in eq 8); heavy use
-            # drives the efficacy steady state toward 0 (exhaustion), quiet toward 1 (recovery).
             z_inf = 1.0 / (1.0 + np.exp((sEI - cl_th) / cl_w))
-            z = z + DT / tau_z * (z_inf - z)
-        muE = TAU_ME * (C_EE * wee * sEE - z * C_EI * W_EI * sEI) + s["muxE"] + stim - b_a * a
+            z    += DT / tau_z * (z_inf - z)
+
+        # global inhibition: slow pool G accumulates with mean activity; drives termination
+        G += DT / tau_G * (-G + rE.mean())
+
+        muE = (TAU_ME * (C_EE * wee * sEE - z * C_EI * W_EI * sEI)
+               - gamma * G + s["muxE"] + mu_off + stim - b_a * a)
         muI = TAU_MI * (C_IE * W_IE * sIE - C_II * W_II * sII) + s["muxI"]
-        fE = s["rateE"](np.column_stack([np.clip(muE, -20, 220), np.clip(vth, V_TH, V_TH + 160)]))
+
+        fE = s["rateE"](np.column_stack([
+            np.clip(muE, -20.0, 220.0),
+            np.clip(vth, V_TH, V_TH + 160.0),
+        ]))
         fI = np.interp(muI, s["musI"], s["rI_lut"])
-        rE = rE + DT / TAU_ME * (-rE + fE)
-        rI = rI + DT / TAU_MI * (-rI + fI)
-        vth = vth + DT / tphi * ((V_TH - vth) + dphi * rE * 1000.0)
-        a = a + DT / ta * (-a + rE)
-        frames[t] = rE * 1000.0
-        zbar[t] = z.mean()
-    if return_aux:
-        return np.arange(nsteps) * DT, frames, zbar
-    return np.arange(nsteps) * DT, frames
+
+        rE  += DT / TAU_ME * (-rE + fE)
+        rI  += DT / TAU_MI * (-rI + fI)
+        vth += DT / tphi * ((V_TH - vth) + dphi * rE * 1000.0)
+        a   += DT / ta   * (-a + rE)
+
+        rE_f[ti] = (rE * 1000.0).astype(np.float32)
+        if return_full:
+            vth_f[ti] = vth.astype(np.float32)
+            z_f[ti]   = z.astype(np.float32)
+            a_f[ti]   = (a * 1000.0).astype(np.float32)
+
+    t_ms = np.arange(nsteps, dtype=np.float32) * DT
+    if return_full:
+        return t_ms, rE_f, vth_f, z_f, a_f
+    return t_ms, rE_f
 
 
-def classify(frames, kick_end=600.0):
-    """Outcome at the seed contact: regime, burst count/period, spatial extent, termination."""
-    c = int(0.12 * N) // 2
-    s = int((kick_end + 200) / DT)
-    x = frames[s:, c]
-    peak = float(frames.max())
+def classify(frames: np.ndarray, kick_end: float = 600.0) -> dict:
+    """
+    Classify spatiotemporal outcome from rE_frames (Hz, shape nsteps×N).
+
+    Returns: regime, n_bursts, period_s, peak_hz, wavefront_speed_mms,
+             terminated, recruitment_mm_max.
+    """
+    n_kick = int(KICK_FRAC * N)
+    c_seed = n_kick // 2
+    s0     = int((kick_end + 200) / DT)
+    peak   = float(frames.max())
+
     if peak < 5.0:
-        return dict(regime="silent", n_bursts=0, period_s=np.nan, peak_hz=peak,
-                    extent_mm=0.0, terminated=False)
-    thr = 0.35 * x.max() if x.max() > 0 else 1e9
-    pk = [i for i in range(1, len(x) - 1) if x[i] > x[i - 1] and x[i] >= x[i + 1] and x[i] > thr]
-    nb = len(pk)
-    per = float(np.mean(np.diff(pk)) * DT / 1000.0) if nb >= 2 else np.nan
-    final = frames[-int(500 / DT):].max()
-    terminated = final < 0.1 * peak
-    active = (frames > 0.1 * peak).any(axis=0)
-    extent = float(active.sum() * DX)
-    regime = ("bursting" if nb >= 3 and not (np.isnan(per))
-              else "tonic" if x[-len(x) // 5:].mean() > 0.3 * x.max() else "single")
+        return dict(regime="silent", n_bursts=0, period_s=float("nan"),
+                    peak_hz=peak, wavefront_speed_mms=0.0,
+                    terminated=False, recruitment_mm_max=0.0)
+
+    thr  = 0.2 * peak
+    post = frames[s0:]
+
+    # Rightmost active node at each post-kick time step → wavefront position
+    edge = np.array([
+        r.nonzero()[0][-1] * DX if (r > thr).any() else 0.0
+        for r in (post > thr)
+    ])
+    t_edge = np.arange(len(edge)) * DT / 1000.0
+    grow   = np.where(np.diff(edge) > 0.0)[0]
+    if len(grow) >= 10:
+        half = grow[: max(1, len(grow) // 2)]
+        wf_speed = float(np.polyfit(t_edge[half], edge[half], 1)[0])
+    else:
+        wf_speed = 0.0
+
+    x      = post[:, c_seed]
+    thr_pk = 0.35 * x.max() if x.max() > 0 else 1e9
+    pk = [i for i in range(1, len(x) - 1)
+          if x[i] > x[i - 1] and x[i] >= x[i + 1] and x[i] > thr_pk]
+    nb  = len(pk)
+    per = float(np.mean(np.diff(pk)) * DT / 1000.0) if nb >= 2 else float("nan")
+
+    terminated      = float(frames[-int(500 / DT):].max()) < 0.1 * peak
+    recruitment_max = float((frames > thr).any(axis=0).sum() * DX)
+
+    # regime: ≥3 periodic peaks → bursting; terminated → transient; else → tonic
+    if nb >= 3 and per == per:
+        regime = "bursting"
+    elif terminated:
+        regime = "transient"    # brief after-discharge, self-limited (interictal-like)
+    else:
+        regime = "tonic"        # sustained but non-oscillatory
     return dict(regime=regime, n_bursts=nb, period_s=per, peak_hz=peak,
-                extent_mm=extent, terminated=bool(terminated))
+                wavefront_speed_mms=wf_speed, terminated=bool(terminated),
+                recruitment_mm_max=recruitment_max)
 
 
-# ---------------------------------------------------------------------------
-def mode_explore():
-    cands = [
-        ("w_ee2.0 dphi1.0 ba3 ta2500", dict(DEF)),
-        ("slower sAHP ta=4500 (termination?)", {**DEF, "ta": 4500.0}),
-        ("ta=1200 (sustained)", {**DEF, "ta": 1200.0}),
-        ("dphi0.6 ba5", {**DEF, "dphi": 0.6, "b_a": 5.0}),
-        ("w_ee1.8", {**DEF, "w_ee_mult": 1.8}),
-        ("w_ee2.4 ta4000", {**DEF, "w_ee_mult": 2.4, "ta": 4000.0}),
-    ]
-    fig, ax = plt.subplots(2, 3, figsize=(15, 7))
-    for k, (lbl, p) in enumerate(cands):
-        t, fr = integrate(t_max=10000.0, **p)
-        info = classify(fr)
-        a = ax.flat[k]
-        a.imshow(fr.T, aspect="auto", origin="lower", extent=(0, t[-1] / 1000, 0, L),
-                 cmap="magma", vmin=0, vmax=np.percentile(fr, 99.5))
-        a.set_title(f"{lbl}\n{info['regime']} nb={info['n_bursts']} "
-                    f"T={info['period_s']:.2f}s term={info['terminated']}", fontsize=8)
-        a.set_xlabel("time (s)"); a.set_ylabel("space (mm)")
-    fig.tight_layout(); p = os.path.join(OUT, "_explore_liou_grid.png")
-    fig.savefig(p, dpi=85); print(f"wrote {p}")
-    for lbl, pp in cands:
-        print(f"  {lbl}: {classify(integrate(t_max=10000.0, **pp)[1])}")
+# ─────────────────────────────────────────────────────────────────────────────
+#  Figure 1: lifecycle — four spatial fields + contact traces
+# ─────────────────────────────────────────────────────────────────────────────
+
+def mode_lifecycle():
+    """Seizure lifecycle: four spatial fields + per-contact traces.
+
+    Layout (rows, share time axis):
+      0 – firing rate rE(x,t)
+      1 – spike threshold φ(x,t)
+      2 – inhibition efficacy z(x,t)  [1=intact, 0=exhausted]
+      3 – sAHP adaptation current a(x,t)
+      4 – single-contact traces at seed / border / outside
+    """
+    print("[lifecycle] integrating …", flush=True)
+    t, rE, vth, z, a = integrate(t_max=14000.0, return_full=True, **DEF)
+    t_s  = t / 1000.0
+    info = classify(rE)
+    print(f"  outcome: {info}")
+
+    vmax_r = float(np.percentile(rE, 99.5))
+
+    fig, axes = plt.subplots(5, 1, figsize=(13, 16), sharex=True,
+                              gridspec_kw={"hspace": 0.42})
+
+    def hmap(ax, data, cmap, vmin=None, vmax=None, cbar_label=""):
+        im = ax.imshow(data.T, aspect="auto", origin="lower",
+                       extent=(t_s[0], t_s[-1], 0, L),
+                       cmap=cmap, vmin=vmin, vmax=vmax)
+        fig.colorbar(im, ax=ax, fraction=0.012, pad=0.01, label=cbar_label)
+        ax.set_ylabel("position (mm)")
+        ax.margins(0)
+
+    hmap(axes[0], rE,  "magma",   0,  vmax_r, "Hz")
+    axes[0].set_title("Firing rate", fontsize=11, fontweight="bold")
+
+    hmap(axes[1], vth, "plasma",  cbar_label="mV")
+    axes[1].set_title(
+        "Spike threshold — rises inside active zone, drives tonic→clonic rhythm", fontsize=10)
+
+    hmap(axes[2], z,   "RdYlGn", 0,  1,      "efficacy")
+    axes[2].set_title(
+        "Inhibition efficacy — exhausts at wavefront, recovers when quiet", fontsize=10)
+
+    hmap(axes[3], a,   "Blues",   cbar_label="a.u.")
+    axes[3].set_title(
+        "sAHP current — accumulated activity, contributes to termination", fontsize=10)
+
+    idxs = [int(0.05 * N), int(0.40 * N), int(0.78 * N)]
+    cols = ["#d73027", "#f4a300", "#4575b4"]
+    labs = [f"inside SOZ  (x={idxs[0]*DX:.1f} mm)",
+            f"border      (x={idxs[1]*DX:.1f} mm)",
+            f"outside     (x={idxs[2]*DX:.1f} mm)"]
+    for idx, lab, col in zip(idxs, labs, cols):
+        axes[4].plot(t_s, rE[:, idx], lw=0.7, label=lab, color=col)
+    axes[4].set_ylabel("firing rate (Hz)")
+    axes[4].set_xlabel("time (s)")
+    axes[4].set_title(
+        "Single-location traces — phase delay reveals propagating wavefront", fontsize=10)
+    axes[4].legend(fontsize=9, loc="upper right")
+    axes[4].margins(x=0)
+
+    fig.tight_layout()
+    p = os.path.join(OUT, "liou_bolton_lifecycle.png")
+    fig.savefig(p, dpi=110)
+    print(f"wrote {p}")
 
 
-def _raster(ax, t, fr, vmax, title, ylab=True):
-    im = ax.imshow(fr.T, aspect="auto", origin="lower", extent=(0, t[-1] / 1000, 0, L),
-                   cmap="magma", vmin=0, vmax=vmax)
-    ax.set_title(title, fontsize=10)
-    ax.set_xlabel("time (s)")
-    if ylab:
-        ax.set_ylabel("cortical position (mm)")
-    ax.margins(0)
-    return im
-
-
-def mode_main():
-    """Paper Fig-2-style full-model figure: spatiotemporal evolution + traveling-wave zoom +
-    single-location readout (the three mechanisms ON, excitable regime)."""
-    t, fr = integrate(t_max=9000.0, **DEF)
-    vmax = float(np.percentile(fr, 99.5))
-    z0, z1 = 3000.0, 4800.0                                  # clonic-window zoom
-    iz = slice(int(z0 / DT), int(z1 / DT))
-    fig = plt.figure(figsize=(13, 8))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 0.85], width_ratios=[1.5, 1.0])
-    axA = fig.add_subplot(gs[0, :])
-    imA = _raster(axA, t, fr, vmax, "Spatiotemporal evolution — recurrent excitation + "
-                  "adaptive threshold + sAHP + surround → sustained repetitive bursting")
-    axA.axvspan(0.2, 0.6, color="cyan", alpha=0.25)
-    axA.text(0.4, L * 0.96, "seed", color="cyan", fontsize=8, ha="center", va="top")
-    axA.axvspan(z0 / 1000, z1 / 1000, ec="white", fc="none", lw=1.2)
-    fig.colorbar(imA, ax=axA, label="firing rate (Hz)", fraction=0.04, pad=0.01)
-    axB = fig.add_subplot(gs[1, 0])
-    imB = axB.imshow(fr[iz].T, aspect="auto", origin="lower",
-                     extent=(z0 / 1000, z1 / 1000, 0, L), cmap="magma", vmin=0, vmax=vmax)
-    axB.set_title("Zoom: each burst is a travelling wave", fontsize=10)
-    axB.set_xlabel("time (s)"); axB.set_ylabel("cortical position (mm)"); axB.margins(0)
-    fig.colorbar(imB, ax=axB, label="firing rate (Hz)", fraction=0.046, pad=0.02)
-    axC = fig.add_subplot(gs[1, 1])
-    for c, lab in [(int(0.12 * N), "near seed"), (int(0.40 * N), "mid"), (int(0.70 * N), "far")]:
-        axC.plot(t / 1000, fr[:, c], lw=0.8, label=lab)
-    axC.set_title("Single-location firing rate over time", fontsize=10)
-    axC.set_xlabel("time (s)"); axC.set_ylabel("firing rate (Hz)"); axC.margins(x=0)
-    axC.legend(fontsize=8, title="cortical site", loc="upper right")
-    fig.suptitle("Adaptation-driven seizure-like bursting reproduced on the LIF rate field "
-                 "(1-D)  ·  excitable-regime capability test, not the data-locked operating point",
-                 fontsize=11)
-    fig.tight_layout(rect=(0, 0, 1, 0.96))
-    p = os.path.join(OUT, "liou_bolton_main.png"); fig.savefig(p, dpi=110)
-    print(f"wrote {p}  ({classify(fr)})")
-
+# ─────────────────────────────────────────────────────────────────────────────
+#  Figure 2: mechanism ablation
+# ─────────────────────────────────────────────────────────────────────────────
 
 def mode_ablation():
-    """Mechanism A/B controls: remove one mechanism at a time, same excitable regime."""
+    """Mechanism ablation — remove one mechanism per panel, annotate outcome metrics.
+
+    Conditions:
+      Full model              — adaptive threshold + sAHP + Mexican-hat surround + z
+      No adaptive threshold   — dphi=0; what drives the clonic rhythm?
+      No sAHP                 — b_a=0; what shapes the tonic→clonic envelope?
+      No surround             — sigma_L=ELL; what does wider inhibition do spatially?
+    """
     conds = [
-        ("all three on", DEF),
-        ("no adaptive threshold", {**DEF, "dphi": 0.0}),
-        ("no sAHP recovery", {**DEF, "b_a": 0.0}),
-        ("no surround (narrow inhibition)", {**DEF, "l_inh": NARROW_INH}),
-        ("none (no adaptation, no surround)", {**DEF, "dphi": 0.0, "b_a": 0.0, "l_inh": NARROW_INH}),
+        ("Full model\n(adaptive thresh + sAHP + surround)",
+         {**DEF}),
+        ("No adaptive threshold\n(dphi = 0)",
+         {**DEF, "dphi": 0.0}),
+        ("No sAHP recovery\n(b_a = 0)",
+         {**DEF, "b_a": 0.0}),
+        ("No Mexican-hat surround\n(σ_I = σ_E, narrow inhibition)",
+         {**DEF, "sigma_L": ELL}),
     ]
-    res = [(lab, integrate(t_max=8000.0, **p)) for lab, p in conds]
-    vmax = max(float(np.percentile(fr, 99.5)) for _, (_t, fr) in res)
-    fig, ax = plt.subplots(2, 3, figsize=(15, 8))
-    im = None
-    for k, (lab, (t, fr)) in enumerate(res):
-        info = classify(fr)
-        tag = (f"bursting · period {info['period_s']:.2f}s" if info["regime"] == "bursting"
-               else info["regime"])
-        im = _raster(ax.flat[k], t, fr, vmax, f"{lab}\n→ {tag}", ylab=(k % 3 == 0))
-    ax.flat[5].axis("off")               # 6th cell holds the shared colourbar only
-    fig.colorbar(im, ax=ax[1, 2], label="firing rate (Hz)", fraction=0.05)
-    fig.suptitle("Which mechanism does what — remove one at a time (same excitable regime).  "
-                 "Adaptive threshold / sAHP drive the bursting RHYTHM; surround shapes spatial spread;\n"
-                 "with no adaptation the field locks into uncontrolled tonic saturation.  "
-                 "Excitable-regime capability test, not the data-locked operating point.",
-                 fontsize=10)
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
-    p = os.path.join(OUT, "liou_bolton_ablation.png"); fig.savefig(p, dpi=105)
+    T_MAX = 10000.0
+    results = []
+    for lab, p in conds:
+        tag = lab.split("\n")[0]
+        print(f"  [{tag}] …", flush=True)
+        t, fr = integrate(t_max=T_MAX, return_full=False, **p)
+        results.append((lab, t, fr, classify(fr)))
+
+    vmax = max(float(np.percentile(fr, 99.5)) for _, _, fr, _ in results)
+    t_s  = results[0][1] / 1000.0
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 9))
+    for ax, (lab, _t, fr, info) in zip(axes.flat, results):
+        im = ax.imshow(fr.T, aspect="auto", origin="lower",
+                       extent=(t_s[0], t_s[-1], 0, L),
+                       cmap="magma", vmin=0, vmax=vmax)
+        r   = info["regime"]
+        ann = [r]
+        if r == "bursting" and info["period_s"] == info["period_s"]:
+            ann.append(f"period={info['period_s']:.2f}s")
+        if info["wavefront_speed_mms"] > 0.5:
+            ann.append(f"wf={info['wavefront_speed_mms']:.1f}mm/s")
+        ann.append("terminates" if info["terminated"] else "sustained")
+        ax.set_title(f"{lab}\n→ {', '.join(ann)}", fontsize=9)
+        ax.set_xlabel("time (s)")
+        ax.set_ylabel("position (mm)")
+        ax.margins(0)
+        fig.colorbar(im, ax=ax, fraction=0.018, pad=0.01, label="firing rate (Hz)")
+
+    fig.suptitle(
+        "Mechanism ablation: which variable controls onset / wavefront / clonic rhythm / termination?\n"
+        "Excitable-regime capability test — not the data-locked operating point",
+        fontsize=10,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    p = os.path.join(OUT, "liou_bolton_ablation.png")
+    fig.savefig(p, dpi=110)
     print(f"wrote {p}")
-    for lab, (_t, fr) in res:
-        print(f"  {lab:38s} {classify(fr)}")
+    for lab, _, _, info in results:
+        print(f"  {lab.split(chr(10))[0]:42s}  {info}")
 
 
-def mode_sweep():
-    """Regime phase diagram (threshold-adaptation strength × excitability) + burst-rhythm
-    dependence on the threshold time constant."""
-    dphis = [0.0, 0.3, 0.6, 1.0, 1.5, 2.0]
-    wees = [1.4, 1.6, 1.8, 2.0, 2.2, 2.4]
-    code = {"silent": 0, "single": 1, "tonic": 2, "bursting": 3}
-    grid = np.zeros((len(wees), len(dphis)))
-    for i, wee in enumerate(wees):
-        for j, dp in enumerate(dphis):
-            info = classify(integrate(t_max=6000.0, **{**DEF, "w_ee_mult": wee, "dphi": dp})[1])
-            grid[i, j] = code[info["regime"]]
-    tphis = [50.0, 100.0, 150.0, 200.0, 300.0]
-    pers = [classify(integrate(t_max=8000.0, **{**DEF, "tphi": tp})[1])["period_s"] for tp in tphis]
+# ─────────────────────────────────────────────────────────────────────────────
+#  Figure 3: stimulus-amplitude threshold scan
+# ─────────────────────────────────────────────────────────────────────────────
 
-    fig, ax = plt.subplots(1, 2, figsize=(13, 5))
-    from matplotlib.colors import ListedColormap, BoundaryNorm
-    cmap = ListedColormap(["#2b2b2b", "#4575b4", "#f4a300", "#d73027"])
-    im = ax[0].imshow(grid, origin="lower", aspect="auto", cmap=cmap,
-                      norm=BoundaryNorm([-.5, .5, 1.5, 2.5, 3.5], cmap.N),
-                      extent=(dphis[0] - .15, dphis[-1] + .15, wees[0] - .1, wees[-1] + .1))
-    ax[0].set_xlabel("threshold-adaptation strength  Δφ (mV per kHz)")
-    ax[0].set_ylabel("recurrent excitability  (× baseline E→E)")
-    ax[0].set_title("Where bursting lives in parameter space")
-    cb = fig.colorbar(im, ax=ax[0], ticks=[0, 1, 2, 3], fraction=0.046)
-    cb.ax.set_yticklabels(["silent", "single", "tonic", "bursting"])
-    ax[1].plot(tphis, pers, "o-", color="#d73027")
-    ax[1].set_xlabel("threshold recovery time constant  τφ (ms)")
-    ax[1].set_ylabel("burst period (s)")
-    ax[1].set_title("Threshold recovery sets the burst rhythm"); ax[1].margins(0.05)
-    fig.suptitle("Parameter exploration of the adaptation-driven bursting  ·  "
-                 "excitable-regime capability test, not the data-locked operating point",
-                 fontsize=11)
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
-    p = os.path.join(OUT, "liou_bolton_sweep.png"); fig.savefig(p, dpi=110)
+def mode_threshold():
+    """Stimulus-amplitude spectrum: silent → self-limited → sustained seizure.
+
+    Varies kick amplitude to reveal the sub-/supra-threshold boundary.
+    Uses a near-threshold excitability (w_ee_mult=1.7) so that small kicks produce
+    brief self-limited after-discharges while larger kicks trigger sustained bursting.
+    Two example rasters (one on each side) shown alongside the spectrum.
+    """
+    # Near-threshold excitability: spontaneous quiescent, kick-triggered seizure
+    THRESH_PARAMS = {**DEF, "w_ee_mult": 1.7}
+    kick_amps = [0, 1, 2, 3, 4, 5, 6, 8, 10, 15, 20]
+    T_MAX     = 8000.0
+    print("[threshold] scanning at w_ee_mult=1.7 …", flush=True)
+    results = []
+    for amp in kick_amps:
+        _, fr = integrate(t_max=T_MAX, kick_amp=float(amp), **THRESH_PARAMS)
+        info  = classify(fr)
+        results.append((amp, info, fr))
+        print(f"  amp={amp:4g}  {info['regime']:12s}  nb={info['n_bursts']}  "
+              f"recruited={info['recruitment_mm_max']:.1f}mm  term={info['terminated']}")
+
+    # colour by regime code
+    code = {"silent": 0, "transient": 1, "tonic": 2, "bursting": 3}
+    cpal = {0: "#333333", 1: "#4575b4", 2: "#f46d43", 3: "#d73027"}
+    llbl = {0: "silent",
+            1: "self-limited (interictal-like)",
+            2: "sustained tonic",
+            3: "sustained bursting (seizure-like)"}
+
+    sub_i   = next((i for i, (_, inf, _) in enumerate(results)
+                    if inf["regime"] == "transient"), 0)
+    supra_i = next((i for i, (_, inf, _) in enumerate(results)
+                    if inf["regime"] == "bursting"), -1)
+
+    fig = plt.figure(figsize=(13, 8))
+    gs  = fig.add_gridspec(2, 2, width_ratios=[1, 1.3], hspace=0.55, wspace=0.38)
+
+    # Spectrum: recruited area vs amplitude
+    ax_s = fig.add_subplot(gs[0, 0])
+    amps_all = [a for a, _, _ in results]
+    recr_all = [inf["recruitment_mm_max"] for _, inf, _ in results]
+    ax_s.plot(amps_all, recr_all, "-", color="#aaaaaa", lw=0.8, zorder=1)
+    for amp, info, _ in results:
+        c = code.get(info["regime"], 0)
+        ax_s.scatter(amp, info["recruitment_mm_max"], color=cpal[c], s=70, zorder=4)
+    from matplotlib.patches import Patch
+    ax_s.legend(handles=[Patch(facecolor=cpal[v], label=llbl[v])
+                          for v in sorted(cpal)],
+                fontsize=8, loc="upper left")
+    ax_s.set_xlabel("stimulus strength (a.u.)")
+    ax_s.set_ylabel("max recruited area (mm)")
+    ax_s.set_title("Recruited area vs stimulus")
+    ax_s.margins(0.06)
+
+    # Event count vs amplitude — distinguishes interictal (few) from ictal (many)
+    ax_p = fig.add_subplot(gs[1, 0])
+    for amp, info, _ in results:
+        c = code.get(info["regime"], 0)
+        ax_p.scatter(amp, info["n_bursts"], color=cpal[c], s=60, zorder=4)
+    ax_p.plot(amps_all, [inf["n_bursts"] for _, inf, _ in results],
+              "-", color="#aaaaaa", lw=0.8, zorder=1)
+    ax_p.set_xlabel("stimulus strength (a.u.)")
+    ax_p.set_ylabel("number of discharge events")
+    ax_p.set_title("Event count — interictal (1–2) vs ictal (many)")
+    ax_p.margins(0.06)
+
+    # Two example rasters
+    for row, idx, ttl_prefix in [
+        (0, sub_i,   "Self-limited after-discharge"),
+        (1, supra_i, "Sustained seizure-like activity"),
+    ]:
+        amp_ex, info_ex, fr_ex = results[idx]
+        t_ex   = np.arange(fr_ex.shape[0]) * DT / 1000.0
+        vmax_ex = float(np.percentile(fr_ex, 99.5))
+        ax = fig.add_subplot(gs[row, 1])
+        im = ax.imshow(fr_ex.T, aspect="auto", origin="lower",
+                       extent=(t_ex[0], t_ex[-1], 0, L),
+                       cmap="magma", vmin=0, vmax=vmax_ex)
+        ax.set_title(f"{ttl_prefix}  (stimulus = {amp_ex})", fontsize=9)
+        ax.set_xlabel("time (s)")
+        ax.set_ylabel("position (mm)")
+        ax.margins(0)
+        fig.colorbar(im, ax=ax, fraction=0.018, pad=0.01, label="firing rate (Hz)")
+
+    fig.suptitle(
+        "Stimulus threshold scan — interictal-like after-discharge vs sustained seizure\n"
+        "Excitable-regime capability test — not the data-locked operating point",
+        fontsize=10,
+    )
+    p = os.path.join(OUT, "liou_bolton_threshold.png")
+    fig.savefig(p, dpi=110)
     print(f"wrote {p}")
-    print(f"  period vs tphi: {list(zip(tphis, [round(x,3) if x==x else None for x in pers]))}")
 
 
-def mode_chloride():
-    """Chloride / usage-dependent inhibition exhaustion (paper eq 8, the substrate-agnostic
-    abstraction of eq 3 for our non-conductance Siegert model): efficacy z scales inhibition,
-    decays under heavy I→E use (τ_z≈5 s). Deliverable figure: 3 mechanisms vs +chloride —
-    inhibition exhaustion disinhibits and collapses the clonic bursting into tonic."""
-    TMX = 24000.0
-    t0, f0, z0 = integrate(t_max=TMX, return_aux=True, **DEF)                       # no chloride
-    t1, f1, z1 = integrate(t_max=TMX, return_aux=True, **{**DEF, "cl": True,
-                                                          "cl_th": 0.06, "cl_w": 0.012})
-    vmax = float(np.percentile(np.concatenate([f0, f1]), 99.5))
-    fig, ax = plt.subplots(2, 2, figsize=(13, 7), gridspec_kw={"height_ratios": [1.0, 0.55]})
-    for col, (t, fr, zb, ttl) in enumerate([
-            (t0, f0, z0, "without inhibition exhaustion → sustained clonic bursting"),
-            (t1, f1, z1, "with inhibition exhaustion (chloride/eq8) → bursting collapses to tonic")]):
-        im = _raster(ax[0, col], t, fr, vmax, ttl, ylab=(col == 0))
-        fig.colorbar(im, ax=ax[0, col], label="firing rate (Hz)", fraction=0.046, pad=0.02)
-        ax[1, col].plot(t / 1000, zb, color="#1f77b4")
-        ax[1, col].set_ylim(0, 1.05); ax[1, col].margins(x=0)
-        ax[1, col].set_xlabel("time (s)")
-        if col == 0:
-            ax[1, col].set_ylabel("inhibition efficacy")
-        ax[1, col].set_title("inhibition efficacy over time (1 = intact, 0 = exhausted)", fontsize=9)
-    fig.suptitle("Usage-dependent inhibition exhaustion (chloride mechanism, paper eq 8) — "
-                 "disinhibition collapses the clonic rhythm into tonic\n"
-                 "excitable-regime capability test, not the data-locked operating point; "
-                 "eq 8 abstraction of eq 3 (our rate model is not conductance-based); no "
-                 "spontaneous termination in this regime", fontsize=9)
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
-    p = os.path.join(OUT, "liou_bolton_chloride.png"); fig.savefig(p, dpi=110)
-    print(f"wrote {p}")
-    print(f"  no chloride: {classify(f0)}")
-    print(f"  +chloride:   {classify(f1)}  (z_end={z1[-1]:.3f})")
-
+# ─────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    mode = sys.argv[1] if len(sys.argv) > 1 else "all"
-    modes = {"explore": mode_explore, "main": mode_main, "ablation": mode_ablation,
-             "sweep": mode_sweep, "chloride": mode_chloride}
+    mode  = sys.argv[1] if len(sys.argv) > 1 else "all"
+    MODES = {
+        "lifecycle": mode_lifecycle,
+        "ablation":  mode_ablation,
+        "threshold": mode_threshold,
+    }
     if mode == "all":
         _setup()
-        for m in ("main", "ablation", "sweep"):
-            print(f"[{m}] ...", flush=True); modes[m]()
+        for m in ("lifecycle", "ablation", "threshold"):
+            print(f"\n[{m}] starting …", flush=True)
+            MODES[m]()
+    elif mode in MODES:
+        MODES[mode]()
     else:
-        modes.get(mode, mode_explore)()
+        print(f"unknown mode '{mode}'. choose: lifecycle ablation threshold all")
+        sys.exit(1)
