@@ -229,3 +229,26 @@ def test_bad_data_regression_real_null_draw_flattens():
         [{"subject": r["subject"], "e_k_baddata": r["e_k_baddata"]} for r in records])
     assert primary["wilcoxon_p_onesided"] < 0.05         # real echo survives
     assert bad["wilcoxon_p_onesided"] > 0.10             # fake (null-draw) obs flattens
+
+
+# --- Task 7: compute_atlas_quality ---
+from src.topic5_echo_gate import compute_atlas_quality
+
+
+def test_atlas_quality_pass_for_clean_ranks():
+    rank = np.arange(12, dtype=float)
+    q = compute_atlas_quality(rank, tie_max=0.3, min_channels=8)
+    assert q["atlas_quality_flag"] == "pass"
+    assert q["rank_tie_fraction"] == pytest.approx(0.0)
+
+
+def test_atlas_quality_fail_for_mostly_tied_ranks():
+    rank = np.array([1.0] * 10 + [2.0, 3.0])
+    q = compute_atlas_quality(rank, tie_max=0.3, min_channels=8)
+    assert q["atlas_quality_flag"] == "fail"
+
+
+def test_atlas_quality_fail_for_too_few_channels():
+    rank = np.array([0.0, 1.0, 2.0, np.nan, np.nan, np.nan, np.nan, np.nan])
+    q = compute_atlas_quality(rank, tie_max=0.3, min_channels=8)
+    assert q["atlas_quality_flag"] == "fail"

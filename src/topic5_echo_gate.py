@@ -236,3 +236,22 @@ def bad_data_regression(echo_records) -> Dict:
     echo_records carry 'subject' + 'e_k_baddata'."""
     recs = [{"subject": r["subject"], "e_k": r.get("e_k_baddata")} for r in echo_records]
     return pool_echo_subject_level(recs)
+
+
+def compute_atlas_quality(ictal_rank, *, tie_max: float, min_channels: int) -> Dict:
+    """Atlas-quality flags (§3.5): does the ER-derived ictal rank carry ORDER info?
+    (tie fraction, dynamic range, channel count). This does NOT verify the order is
+    propagation — that is the separate construct-validity sentinel (runner, P1-2)."""
+    r = np.asarray(ictal_rank, dtype=float)
+    finite = r[np.isfinite(r)]
+    n = int(finite.size)
+    if n == 0:
+        return {"atlas_quality_flag": "fail", "rank_tie_fraction": float("nan"),
+                "rank_dynamic_range": 0.0, "n_ranked_channels": 0}
+    _, counts = np.unique(finite, return_counts=True)
+    tie_frac = float(np.sum(counts[counts > 1]) / n)
+    dyn = float(finite.max() - finite.min())
+    ok = (n >= min_channels) and (tie_frac <= tie_max) and (dyn > 0)
+    return {"atlas_quality_flag": "pass" if ok else "fail",
+            "rank_tie_fraction": tie_frac, "rank_dynamic_range": dyn,
+            "n_ranked_channels": n}
