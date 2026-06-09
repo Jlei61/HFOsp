@@ -12,6 +12,7 @@ import re
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
+from scipy.stats import kendalltau, spearmanr
 
 # Handles both "A'1" and "A1'" (prime before OR after the digit)
 _NAME_RE = re.compile(r"^([A-Za-z]+)('?)\s*(\d+)('?)$")
@@ -370,3 +371,237 @@ def axis_stereotypy_profile(
             "sd_excess": float(vals.std()) if vals.size else float("nan"),
         })
     return out
+
+
+# ---------------------------------------------------------------------------
+# Validation layer (reuse accepted templates + anti-tautology + radius null)
+# ---------------------------------------------------------------------------
+
+
+def _safe_spearman(x: np.ndarray, y: np.ndarray) -> float:
+    """Spearman rho with constant/degenerate inputs -> NaN (no warning leak)."""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    if x.size < 2 or np.std(x) < 1e-12 or np.std(y) < 1e-12:
+        return float("nan")
+    with np.errstate(invalid="ignore", divide="ignore"):
+        rho = spearmanr(x, y).correlation
+    return float(rho) if rho == rho else float("nan")
+
+
+def assign_events_to_templates(
+    event_ranks_masked: np.ndarray,
+    template_a: np.ndarray,
+    template_b: np.ndarray,
+) -> np.ndarray:
+    """Per-event nearest-template label (0=template_a, 1=template_b, -1=unassigned).
+
+    Each event's participating ranks (non-NaN entries of the event column) are
+    Spearman-correlated, over the channels valid in BOTH the event and a given
+    template (template non-NaN), against template_a and template_b. The event
+    takes the label of whichever template it correlates highest with. An event
+    with fewer than 3 common channels (per-template) is unassigned (-1).
+
+    Spearman is scale-invariant, so a dense-rank template and a normalized
+    event-rank column need no rescaling. Anti-correlation with a template is, by
+    construction, correlation with its reverse, so an event anti-correlated with
+    template_a labels to whichever template it correlates highest with.
+    """
+    ev = np.asarray(event_ranks_masked, dtype=float)
+    ta = np.asarray(template_a, dtype=float)
+    tb = np.asarray(template_b, dtype=float)
+    if ev.ndim != 2:
+        raise ValueError("event_ranks_masked must be 2D (n_ch, n_ev)")
+    n_ch, n_ev = ev.shape
+    if ta.shape != (n_ch,) or tb.shape != (n_ch,):
+        raise ValueError("template_a/template_b must be length n_ch")
+    labels = np.full(n_ev, -1, dtype=int)
+    a_valid = ~np.isnan(ta)
+    b_valid = ~np.isnan(tb)
+    for e in range(n_ev):
+        col = ev[:, e]
+        part = ~np.isnan(col)
+        ca = part & a_valid
+        cb = part & b_valid
+        ra = _safe_spearman(col[ca], ta[ca]) if ca.sum() >= 3 else float("nan")
+        rb = _safe_spearman(col[cb], tb[cb]) if cb.sum() >= 3 else float("nan")
+        # Constant event -> Spearman NaN -> treat as -inf (never picked).
+        sa = ra if ra == ra else float("-inf")
+        sb = rb if rb == rb else float("-inf")
+        if sa == float("-inf") and sb == float("-inf"):
+            labels[e] = -1
+        else:
+            labels[e] = 0 if sa >= sb else 1
+    return labels
+
+
+def core_radius_null(
+    coords: np.ndarray,
+    eligible_idx: Sequence[int],
+    k: int,
+    observed_radius_rms: float,
+    *,
+    n_null: int,
+    rng: np.random.Generator,
+) -> Dict[str, object]:
+    """Left-tail compactness p-value of an observed core RMS radius.
+
+    Draw n_null random k-subsets from eligible_idx (channels with valid coords),
+    compute each subset's RMS distance to its own centroid, and report
+    p_value = fraction of null radii <= observed (left tail = 'more compact than
+    random'). Returns NaN p_value when eligible coords < k+1 (no null possible).
+    """
+    coords = np.asarray(coords, dtype=float)
+    idx = np.asarray(list(eligible_idx), dtype=int)
+    # Restrict to channels with finite coords (a NaN-coord channel can't be drawn).
+    idx = np.array([i for i in idx if np.isfinite(coords[i]).all()], dtype=int)
+    base = {
+        "p_value": float("nan"),
+        "null_median_mm": float("nan"),
+        "null_lo_mm": float("nan"),
+        "null_hi_mm": float("nan"),
+        "observed_mm": float(observed_radius_rms),
+    }
+    if k < 1 or idx.size <= k or n_null < 1:
+        return base
+    null_radii = np.empty(n_null)
+    for j in range(n_null):
+        sub = coords[rng.choice(idx, size=k, replace=False)]
+        centroid = sub.mean(axis=0)
+        null_radii[j] = float(np.sqrt(np.mean(np.sum((sub - centroid) ** 2, axis=1))))
+    obs = float(observed_radius_rms)
+    p = float(np.mean(null_radii <= obs)) if obs == obs else float("nan")
+    base.update(
+        p_value=p,
+        null_median_mm=float(np.median(null_radii)),
+        null_lo_mm=float(np.percentile(null_radii, 2.5)),
+        null_hi_mm=float(np.percentile(null_radii, 97.5)),
+    )
+    return base
+
+
+def _half_along_axis(
+    half_masked: np.ndarray,
+    coords: np.ndarray,
+    eligible_idx: np.ndarray,
+    k: int,
+) -> Optional[np.ndarray]:
+    """Build cores from a half's per-channel mean rank and return the along-axis
+    position of every channel. Returns None if the half can't form a valid frame
+    (tier descriptive_only / coincident or interleaved centroids)."""
+    n_ch = coords.shape[0]
+    with np.errstate(invalid="ignore"):
+        mean_rank = np.array([
+            np.nanmean(half_masked[c]) if np.any(~np.isnan(half_masked[c]))
+            else np.nan for c in range(n_ch)])
+    eligible_mask = np.zeros(n_ch, dtype=bool)
+    eligible_mask[eligible_idx] = True
+    eligible_mask &= ~np.isnan(mean_rank)
+    cores = build_endpoint_cores(mean_rank, eligible_mask, k_primary=k)
+    if cores["tier"] == "descriptive_only" or not cores["source_idx"] or not cores["sink_idx"]:
+        return None
+    try:
+        fr = compute_axis_frame(coords, cores["source_idx"], cores["sink_idx"])
+    except ValueError:
+        return None
+    if fr["degenerate_axis"]:
+        return None
+    return np.asarray(fr["along_axis"], dtype=float)
+
+
+def split_half_axis_validation(
+    event_ranks_masked: np.ndarray,
+    coords: np.ndarray,
+    eligible_idx: Sequence[int],
+    k: int,
+    *,
+    rng: np.random.Generator,
+    n_boot: int,
+) -> Dict[str, object]:
+    """Anti-tautology held-out test: does the spatial axis built from one half of
+    the events predict firing order on the OTHER (held-out) half?
+
+    Split assigned events into halves A and B. From half A: per-channel mean rank
+    -> source/sink cores -> axis frame -> each eligible channel's along-axis
+    position. From held-out half B: per-channel mean rank. rho = Spearman(
+    along_axis_position, held_out_mean_rank) over eligible channels with both
+    defined. A high positive HELD-OUT rho means the spatial axis predicts firing
+    order on events it was NOT built from (shared stereotyped pathway, NOT a
+    tautology, because half-B ranks are independent of half-A). CI by bootstrapping
+    the event split n_boot times (percentile CI).
+
+    The point estimate (rho/p/kendall) is from one canonical seeded split; the CI
+    is from the bootstrap. The correlation's n is ELIGIBLE CHANNELS, not events, so
+    the single-split p is usually non-significant — read the CI, not the point.
+    """
+    ev = np.asarray(event_ranks_masked, dtype=float)
+    coords = np.asarray(coords, dtype=float)
+    eligible_idx = np.asarray(list(eligible_idx), dtype=int)
+    n_ch, n_ev = ev.shape
+    nan = float("nan")
+    base = {
+        "spearman_rho": nan, "spearman_p": nan, "kendall_tau": nan,
+        "rho_ci_lo": nan, "rho_ci_hi": nan,
+        "n_channels": 0, "n_events_a": 0, "n_events_b": 0,
+    }
+    # Only events that participate (any non-NaN) are usable.
+    usable = np.where(np.any(~np.isnan(ev), axis=0))[0]
+    if usable.size < 4:
+        return base
+
+    def _one_split(event_order: np.ndarray) -> Optional[Dict[str, object]]:
+        half = event_order.size // 2
+        a_ev, b_ev = event_order[:half], event_order[half:]
+        if a_ev.size < 1 or b_ev.size < 1:
+            return None
+        along = _half_along_axis(ev[:, a_ev], coords, eligible_idx, k)
+        if along is None:
+            return None
+        with np.errstate(invalid="ignore"):
+            held_mean = np.array([
+                np.nanmean(ev[c, b_ev]) if np.any(~np.isnan(ev[c, b_ev]))
+                else np.nan for c in range(n_ch)])
+        elig = np.zeros(n_ch, dtype=bool)
+        elig[eligible_idx] = True
+        ok = elig & ~np.isnan(along) & ~np.isnan(held_mean)
+        if ok.sum() < 3:
+            return None
+        x = along[ok]
+        y = held_mean[ok]
+        rho = _safe_spearman(x, y)
+        if rho != rho:
+            return None
+        with np.errstate(invalid="ignore"):
+            sp = spearmanr(x, y)
+            kt = kendalltau(x, y).correlation
+        return {
+            "rho": rho,
+            "p": float(sp.pvalue) if sp.pvalue == sp.pvalue else nan,
+            "kendall": float(kt) if kt == kt else nan,
+            "n_ch": int(ok.sum()), "n_a": int(a_ev.size), "n_b": int(b_ev.size),
+        }
+
+    # Canonical point estimate from the FIRST split that forms a valid frame
+    # (a single unlucky permutation that interleaves cores must not zero out the
+    # whole readout when most splits are fine).
+    point = None
+    for _ in range(max(n_boot, 50)):
+        point = _one_split(rng.permutation(usable))
+        if point is not None:
+            break
+    if point is None:
+        return base
+    base.update(
+        spearman_rho=point["rho"], spearman_p=point["p"],
+        kendall_tau=point["kendall"], n_channels=point["n_ch"],
+        n_events_a=point["n_a"], n_events_b=point["n_b"])
+    # Bootstrap the event split for the CI; skip splits that can't form a frame.
+    boot = []
+    for _ in range(n_boot):
+        res = _one_split(rng.permutation(usable))
+        if res is not None:
+            boot.append(res["rho"])
+    if len(boot) >= 2:
+        base["rho_ci_lo"] = float(np.percentile(boot, 2.5))
+        base["rho_ci_hi"] = float(np.percentile(boot, 97.5))
+    return base

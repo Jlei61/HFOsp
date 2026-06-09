@@ -19,11 +19,8 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 warnings.filterwarnings("ignore", message="Mean of empty slice")
 
-from sklearn.cluster import KMeans
-
 from src.interictal_propagation import load_subject_propagation_events
-from src.lagpat_rank_audit import mask_phantom_ranks, build_masked_kmeans_features
-from src.low_rate_template_stability import align_template_events
+from src.lagpat_rank_audit import mask_phantom_ranks
 from src.seeg_coord_loader import load_subject_coords
 from src import propagation_skeleton_geometry as G
 
@@ -51,6 +48,12 @@ _COORD_MISS_MARKERS = (
 )
 
 
+# Fix B: only these error categories may be recorded-and-continued. Everything
+# else re-raises and fails the whole run loudly (the 9 yuquan chnXyzDict misses
+# are the sole expected benign category).
+WHITELIST_ERROR_CATEGORIES = {"no_coord_file"}
+
+
 def _error_category(status):
     s = str(status).lower()
     if any(m.lower() in s for m in _COORD_MISS_MARKERS):
@@ -65,6 +68,40 @@ def _swap_class(ds, subj):
     d = json.loads(f.read_text())
     pairs = d.get("pairs") or [{}]
     return (((pairs[0].get("swap_sweep") or {}).get("swap_class")) or "none")
+
+
+def _load_accepted_templates(ds, subj, names):
+    """Load the two ACCEPTED cluster templates (rank-displacement pair[0]) and
+    align them to the propagation-events `names` ordering by NAME.
+
+    Returns (template_a, template_b, swap_class). Each template is a length-len(names)
+    float array, NaN where that channel is absent from the rank-displacement pair
+    (NaN-at-non-participating, so it never enters a phantom core). A missing
+    rank-displacement JSON is an UNEXPECTED error (Fix A): the runner must NOT
+    silently fall back to fresh KMeans — raise loudly.
+    """
+    f = RANKDISP / f"{ds}_{subj}.json"
+    if not f.exists():
+        raise FileNotFoundError(
+            f"rank-displacement JSON missing for {ds}:{subj} ({f}); accepted "
+            "cluster templates are required (no KMeans fallback)")
+    d = json.loads(f.read_text())
+    pair = (d.get("pairs") or [{}])[0]
+    rd_names = list(pair.get("channel_names") or [])
+    ra = np.asarray(pair.get("rank_a_dense_full"), float)
+    rb = np.asarray(pair.get("rank_b_dense_full"), float)
+    if rd_names == [] or ra.size != len(rd_names) or rb.size != len(rd_names):
+        raise ValueError(
+            f"rank-displacement templates malformed for {ds}:{subj}: "
+            f"n_names={len(rd_names)} ra={ra.size} rb={rb.size}")
+    # Map rank-displacement (name -> template value) onto the propagation ordering;
+    # NaN where a propagation channel is absent from the rank-displacement pair.
+    idx_a = {nm: ra[i] for i, nm in enumerate(rd_names)}
+    idx_b = {nm: rb[i] for i, nm in enumerate(rd_names)}
+    template_a = np.array([idx_a.get(nm, np.nan) for nm in names], float)
+    template_b = np.array([idx_b.get(nm, np.nan) for nm in names], float)
+    swap_class = (((pair.get("swap_sweep") or {}).get("swap_class")) or "none")
+    return template_a, template_b, swap_class
 
 
 def _soz_set(ds, subj):
@@ -94,22 +131,34 @@ def process_subject(ds, subj):
     ranks = np.asarray(ev["ranks"], float)
     bools = np.asarray(ev["bools"]) > 0
     masked = mask_phantom_ranks(ranks, bools, normalize=True)
-    labels = KMeans(n_clusters=2, n_init=5, random_state=0).fit_predict(
-        build_masked_kmeans_features(ranks, bools))
 
-    # Single event-set/frame feeds axis + stereotypy + count (spec: no anti-parallel
-    # "糊平均"). For swap subjects the dominant cluster's OWN frame is used — do NOT
-    # global-align (that re-merges the anti-parallel clusters and washes the excess).
-    swap_class = _swap_class(ds, subj)
+    # Fix A: reuse the two ACCEPTED cluster templates (rank-displacement pair[0]),
+    # NOT a fresh KMeans. Assign every event to its nearest accepted template by
+    # Spearman correlation; no re-clustering, no global re-alignment "糊平均".
+    template_a, template_b, swap_class = _load_accepted_templates(ds, subj, names)
+    labels = G.assign_events_to_templates(masked, template_a, template_b)
+    clustering_provenance = "accepted_rankdisp_templates"
+
+    # Swap-positive: the dominant accepted cluster's OWN frame feeds axis +
+    # stereotypy (the two templates are anti-parallel; averaging them washes the
+    # excess). Non-swap: clusters are not anti-parallel, so the full recording is
+    # used directly (no flipping needed).
+    minority_masked = minority_bools = None
     if swap_class in ("strict", "candidate"):
-        dom = 0 if (labels == 0).sum() >= (labels == 1).sum() else 1
+        n0 = int((labels == 0).sum())
+        n1 = int((labels == 1).sum())
+        dom = 0 if n0 >= n1 else 1
         sel = labels == dom
         ster_masked = masked[:, sel]
         ster_bools = bools[:, sel]
-        template_source = f"dominant_cluster_{dom}"
+        template_source = "dominant_cluster"
+        minority = 1 - dom
+        msel = labels == minority
+        if msel.any():
+            minority_masked = masked[:, msel]
+            minority_bools = bools[:, msel]
     else:
-        aligned, _ = align_template_events(masked, labels)
-        ster_masked = aligned
+        ster_masked = masked
         ster_bools = bools
         template_source = "full_recording"
     template_axis = np.array(
@@ -127,6 +176,7 @@ def process_subject(ds, subj):
     rec = {
         "dataset": ds, "subject": subj, "status": "ok",
         "swap_class": swap_class, "template_source": template_source,
+        "clustering_provenance": clustering_provenance,
         "coord_space": cr.coord_space, "n_eff": cores["n_eff"],
         "k_used": cores["k_used"], "eligibility_tier": cores["tier"],
         "channel_names": names,
@@ -241,7 +291,72 @@ def process_subject(ds, subj):
                 sorted(_soz_set(ds, subj) & set(names)),
         },
     })
+
+    # Fix C: per-cluster (multi-template) geometry for swap subjects. Build the
+    # MINORITY accepted cluster's own source/sink cores + axis, then report the
+    # cosine between the dominant and minority axis unit vectors. Descriptive only
+    # (no significance): cos ~ -1 -> same spatial axis, opposite directions;
+    # cos ~ 0/positive -> divergent paths. NEVER raises (Fix B): a minority cluster
+    # too small/interleaved -> minority_axis=None, axes_cos_angle=None.
+    rec["minority_axis"] = None
+    rec["axes_cos_angle"] = None
+    if minority_masked is not None and minority_masked.shape[1] >= 1:
+        min_axis_vec = _cluster_axis(coords, minority_masked, eligible)
+        if min_axis_vec is not None:
+            m_src_c, m_snk_c, m_len = min_axis_vec
+            rec["minority_axis"] = {
+                "axis_length_mm": m_len,
+                "source_centroid": m_src_c.tolist(),
+                "sink_centroid": m_snk_c.tolist(),
+            }
+            dom_axis = np.array(fr["sink_centroid"]) - np.array(fr["source_centroid"])
+            min_axis = m_snk_c - m_src_c
+            dn = np.linalg.norm(dom_axis)
+            mn = np.linalg.norm(min_axis)
+            if dn > 1e-9 and mn > 1e-9:
+                rec["axes_cos_angle"] = float(
+                    np.dot(dom_axis, min_axis) / (dn * mn))
+
+    # Fix D: split-half path validation (anti-tautology) + per-core radius null.
+    # Fixed seed (np.random.default_rng(0)) for reproducibility. eligible_idx is
+    # the eligible-channel index set; k matches the tier's core size.
+    eligible_idx = np.where(eligible)[0]
+    rng = np.random.default_rng(0)
+    rec["split_half_validation"] = G.split_half_axis_validation(
+        ster_masked, coords, eligible_idx, k=cores["k_used"],
+        rng=rng, n_boot=200)
+    rec["source_radius_null"] = G.core_radius_null(
+        coords, eligible_idx, k=cores["k_used"],
+        observed_radius_rms=rec["source_radius"]["rms_mm"],
+        n_null=2000, rng=rng)
+    rec["sink_radius_null"] = G.core_radius_null(
+        coords, eligible_idx, k=cores["k_used"],
+        observed_radius_rms=rec["sink_radius"]["rms_mm"],
+        n_null=2000, rng=rng)
     return rec
+
+
+def _cluster_axis(coords, cluster_masked, eligible):
+    """Source/sink cores + axis for one cluster's per-channel mean rank. Returns
+    (source_centroid, sink_centroid, axis_length_mm) or None if the cluster can't
+    form a valid (non-degenerate, non-descriptive) frame. NEVER raises."""
+    n_ch = coords.shape[0]
+    with np.errstate(invalid="ignore"):
+        axis = np.array([
+            np.nanmean(cluster_masked[c]) if np.any(~np.isnan(cluster_masked[c]))
+            else np.nan for c in range(n_ch)])
+    elig = np.asarray(eligible, bool) & ~np.isnan(axis)
+    cores = G.build_endpoint_cores(axis, elig, k_primary=3)
+    if cores["tier"] == "descriptive_only" or not cores["source_idx"] or not cores["sink_idx"]:
+        return None
+    try:
+        fr = G.compute_axis_frame(coords, cores["source_idx"], cores["sink_idx"])
+    except ValueError:
+        return None
+    if fr["degenerate_axis"]:
+        return None
+    return (np.array(fr["source_centroid"]), np.array(fr["sink_centroid"]),
+            fr["axis_length"])
 
 
 def discover_cohort():
@@ -278,10 +393,19 @@ def main():
     for ds, subj in cohort:
         try:
             rec = process_subject(ds, subj)
-        except Exception as e:  # noqa: BLE001 — record, don't crash the cohort
+        except Exception as e:  # noqa: BLE001
             status = f"error: {e}"
+            category = _error_category(status)
+            # Fix B: only KNOWN-benign coord misses are recorded-and-continued.
+            # Anything else (loader misuse, missing rank-disp JSON, contract
+            # violation) is a systemic bug — re-raise loudly rather than hide it
+            # under a cohort summary built on a silent failure.
+            if category not in WHITELIST_ERROR_CATEGORIES:
+                print(f"  [FATAL {ds}:{subj}] {type(e).__name__}: {e}",
+                      file=sys.stderr, flush=True)
+                raise
             rec = {"dataset": ds, "subject": subj, "status": status,
-                   "error_category": _error_category(status)}
+                   "error_category": category}
             print(f"  [error {ds}:{subj}] {type(e).__name__}: {e}", flush=True)
         (out / "per_subject" / f"{ds}_{subj}.json").write_text(
             json.dumps(rec, indent=2, default=float))

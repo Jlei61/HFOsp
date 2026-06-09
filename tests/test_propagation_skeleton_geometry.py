@@ -285,6 +285,157 @@ def test_axis_profile_bins_by_along_axis():
 
 
 # ---------------------------------------------------------------------------
+# Task V1: assign_events_to_templates (reuse accepted cluster templates)
+# ---------------------------------------------------------------------------
+from src.propagation_skeleton_geometry import assign_events_to_templates
+
+
+def test_assign_events_to_nearest_template_by_spearman():
+    # template_a: ascending order 0..4; template_b: descending (reverse) order.
+    template_a = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    template_b = np.array([4.0, 3.0, 2.0, 1.0, 0.0])
+    # event 0 follows template_a's order; event 1 follows template_b's order.
+    ev = np.array([
+        [0.10, 0.90],
+        [0.20, 0.80],
+        [0.50, 0.50],
+        [0.80, 0.20],
+        [0.95, 0.05],
+    ])
+    labels = assign_events_to_templates(ev, template_a, template_b)
+    assert labels[0] == 0      # ascending event -> template_a
+    assert labels[1] == 1      # descending event -> template_b
+
+
+def test_assign_anticorrelated_event_goes_to_higher_correlation():
+    # an event that is anti-correlated with template_a is, by construction,
+    # correlated with template_a's reverse (= template_b). It labels to whichever
+    # it correlates highest -> template_b.
+    template_a = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    template_b = np.array([4.0, 3.0, 2.0, 1.0, 0.0])
+    ev = np.array([[0.9], [0.7], [0.5], [0.3], [0.1]])   # anti-correlated w/ a
+    labels = assign_events_to_templates(ev, template_a, template_b)
+    assert labels[0] == 1
+
+
+def test_assign_unassigned_when_fewer_than_three_common_channels():
+    # event participates in only 2 channels common to template_a -> label -1.
+    template_a = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    template_b = np.array([4.0, 3.0, 2.0, 1.0, 0.0])
+    ev = np.array([[0.1], [0.2], [np.nan], [np.nan], [np.nan]])
+    labels = assign_events_to_templates(ev, template_a, template_b)
+    assert labels[0] == -1
+
+
+def test_assign_template_nan_channels_excluded_from_common_set():
+    # template_a NaN at channel 0 and 4: common set = {1,2,3} (event participates
+    # in all 5, template_a valid only at 3). 3 common channels -> assignable.
+    template_a = np.array([np.nan, 1.0, 2.0, 3.0, np.nan])
+    template_b = np.array([4.0, 3.0, 2.0, 1.0, 0.0])
+    ev = np.array([[0.1], [0.2], [0.5], [0.8], [0.95]])
+    labels = assign_events_to_templates(ev, template_a, template_b)
+    assert labels[0] in (0, 1)   # assignable (not -1)
+
+
+# ---------------------------------------------------------------------------
+# Task V2: core_radius_null (compactness vs random k-subsets)
+# ---------------------------------------------------------------------------
+from src.propagation_skeleton_geometry import core_radius_null
+
+
+def test_core_radius_null_compact_observed_p_near_zero():
+    # eligible channels scattered on a line 0..19; observed radius (~0) smaller
+    # than every random 3-subset -> left-tail p ~ 0.
+    coords = np.column_stack([np.arange(20.0), np.zeros(20), np.zeros(20)])
+    eligible_idx = np.arange(20)
+    r = core_radius_null(coords, eligible_idx, k=3, observed_radius_rms=1e-6,
+                         n_null=2000, rng=np.random.default_rng(0))
+    assert r["p_value"] < 0.02
+    assert r["observed_mm"] == pytest.approx(1e-6)
+    assert r["null_lo_mm"] <= r["null_median_mm"] <= r["null_hi_mm"]
+
+
+def test_core_radius_null_median_observed_p_near_half():
+    # observed set to the null median -> p ~ 0.5.
+    coords = np.column_stack([np.arange(20.0), np.zeros(20), np.zeros(20)])
+    eligible_idx = np.arange(20)
+    # first measure the null median, then feed it back as observed.
+    pre = core_radius_null(coords, eligible_idx, k=3, observed_radius_rms=0.0,
+                           n_null=4000, rng=np.random.default_rng(1))
+    r = core_radius_null(coords, eligible_idx, k=3,
+                         observed_radius_rms=pre["null_median_mm"],
+                         n_null=4000, rng=np.random.default_rng(2))
+    assert 0.35 < r["p_value"] < 0.65
+
+
+def test_core_radius_null_insufficient_eligible_returns_nan():
+    coords = np.column_stack([np.arange(3.0), np.zeros(3), np.zeros(3)])
+    r = core_radius_null(coords, np.arange(3), k=3, observed_radius_rms=1.0,
+                         n_null=100, rng=np.random.default_rng(0))
+    assert np.isnan(r["p_value"])
+
+
+# ---------------------------------------------------------------------------
+# Task V3: split_half_axis_validation (anti-tautology held-out test)
+# ---------------------------------------------------------------------------
+from src.propagation_skeleton_geometry import split_half_axis_validation
+
+
+def _monotone_events(n_ev, coords, rng, jitter=0.0):
+    """Every event orders channels by their x-coordinate (a fixed spatial axis).
+    masked[c,e] = normalized rank position of channel c in event e."""
+    n_ch = coords.shape[0]
+    order_key = coords[:, 0]
+    masked = np.empty((n_ch, n_ev))
+    for e in range(n_ev):
+        key = order_key + rng.normal(0, jitter, n_ch)
+        ranks = np.argsort(np.argsort(key)).astype(float)
+        masked[:, e] = ranks / (n_ch - 1)
+    return masked
+
+
+def test_split_half_held_out_rho_high_for_monotone_spatial_order():
+    rng = np.random.default_rng(0)
+    coords = np.column_stack([np.arange(10.0) * 5.0, np.zeros(10), np.zeros(10)])
+    masked = _monotone_events(200, coords, rng, jitter=0.5)
+    r = split_half_axis_validation(masked, coords, np.arange(10), k=3,
+                                   rng=np.random.default_rng(1), n_boot=100)
+    assert r["spearman_rho"] > 0.8
+    assert r["rho_ci_lo"] > 0.0      # CI excludes 0 -> real shared pathway
+
+
+def test_split_half_random_order_rho_ci_spans_zero():
+    # random per-event order: held-out rho has no shared pathway -> CI spans 0.
+    # NOTE: the point estimate is a correlation over CHANNELS (n=10 here), so even
+    # with 400 events a single split's point rho can be large by chance (advisor
+    # #1: read the CI, not the point). The load-bearing assertion is the CI.
+    rng = np.random.default_rng(0)
+    coords = np.column_stack([np.arange(10.0) * 5.0, np.zeros(10), np.zeros(10)])
+    n_ev, n_ch = 400, 10
+    masked = rng.integers(0, n_ch, (n_ch, n_ev)).astype(float) / (n_ch - 1)
+    r = split_half_axis_validation(masked, coords, np.arange(10), k=3,
+                                   rng=np.random.default_rng(1), n_boot=100)
+    assert r["rho_ci_lo"] < 0.0 < r["rho_ci_hi"]
+
+
+def test_split_half_anti_tautology_small_n_random_ci_spans_zero():
+    # THE anti-tautology guard (advisor #1). Small n (10 events, 10 channels),
+    # pure random per-event order. A CIRCULAR implementation that builds the axis
+    # AND correlates on the SAME events inflates rho to ~0.5-0.8 (cores are
+    # spatial extremes-by-rank, so source-core<->low-along, sink-core<->high-along
+    # are positively correlated in-sample). A correct HELD-OUT implementation kills
+    # it because half-B ranks are independent of half-A -> CI must span 0.
+    rng = np.random.default_rng(7)
+    coords = np.column_stack([np.arange(10.0) * 5.0, np.zeros(10), np.zeros(10)])
+    n_ev, n_ch = 10, 10
+    masked = rng.integers(0, n_ch, (n_ch, n_ev)).astype(float) / (n_ch - 1)
+    r = split_half_axis_validation(masked, coords, np.arange(10), k=3,
+                                   rng=np.random.default_rng(3), n_boot=300)
+    # held-out rho is NOT pinned high, and the CI must include 0.
+    assert r["rho_ci_lo"] < 0.0 < r["rho_ci_hi"]
+
+
+# ---------------------------------------------------------------------------
 # Task 9: Runner integration smoke test (guarded by artifact availability)
 # ---------------------------------------------------------------------------
 import json as _json
