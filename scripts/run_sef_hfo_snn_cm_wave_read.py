@@ -47,6 +47,7 @@ from src.sef_hfo_observation import (build_shaft, merge_montages, extract_lagpat
                                      attach_geometry, endpoint_centroid_axis,
                                      axis_angle_error_deg, direction_readability)
 from src.sef_hfo_snn_adapter import snn_event_envelope      # noqa: E402
+from src.sef_hfo_heterogeneity import sample_core_field     # noqa: E402 (Step-3 pathology core)
 
 PITCH, SHAFTS = 4.0, (15.0, 75.0, 135.0)
 MARGIN_FRAC, KDIR, AXIS_ERR_MAX, PART_MIN, TAU_FAIL = 0.10, 3, 25.0, 7, 0.3
@@ -164,6 +165,14 @@ def main():
     ap.add_argument("--control-type", choices=["positive", "negative"], default="positive")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--tag", default="L12")
+    # Step-3 pathology core (heterogeneity): lower + spread the firing threshold in a
+    # localized core at the kick origin, then read the core-seeded event through the SAME
+    # validated virtual-SEEG read-out. --core-mean<18 = more excitable; std 1.5 wide / 0.5 narrow.
+    ap.add_argument("--core", action="store_true")
+    ap.add_argument("--core-mean", type=float, default=18.0)
+    ap.add_argument("--core-std", type=float, default=1.5)
+    ap.add_argument("--core-r", type=float, default=1.5)        # ~= measured E->E reach at d=100
+    ap.add_argument("--core-at", choices=["kick", "center"], default="kick")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
     with open(os.path.join(OUT, "wave.pid"), "w") as f:
@@ -188,15 +197,27 @@ def main():
         kxy = base + a.perp_j * half * perp
     else:
         kxy = center - 0.6 * half * np.array([np.cos(theta_rad), np.sin(theta_rad)])
+    # Step-3 pathology core: localized threshold heterogeneity at the kick origin (or center).
+    vth, core_info = None, None
+    if a.core:
+        is_E = np.zeros(len(net["pos"]), bool); is_E[:NE] = True
+        core_xy = (kxy if a.core_at == "kick" else center)
+        cf = sample_core_field(net["pos"], is_E, core_xy, a.core_r,
+                               np.random.default_rng(a.seed + 7),
+                               core_mean=a.core_mean, core_std=a.core_std, base_mean=18.0)
+        vth = cf["vth"]
+        core_info = dict(core_mean=a.core_mean, core_std=a.core_std, core_r=a.core_r,
+                         core_at=a.core_at, core_xy=[round(float(core_xy[0]), 3), round(float(core_xy[1]), 3)],
+                         n_core=int(cf["core_mask"].sum()))
     m = montage(center, a.montage_rot, a.nc)
     valid, inside, has_n = valid_mask(m, posE, L, p.Rr)
     rec = LFPRecorder(p, net["pos"], net["labels"], sites=m.contacts)
     net["rng"] = np.random.default_rng(a.seed)
     on = simulate_kick(p, net, KICK_BOOST=2 * nut, kick_center=list(kxy), lfp_recorder=rec,
-                       r_kick=a.r_kick, t_kick=a.t_kick)
+                       r_kick=a.r_kick, t_kick=a.t_kick, V_th_per_neuron=vth)
     net["rng"] = np.random.default_rng(a.seed)
     off = simulate_kick(p, net, KICK_BOOST=0.0, kick_center=list(kxy), lfp_recorder=rec,
-                        r_kick=a.r_kick, t_kick=a.t_kick)
+                        r_kick=a.r_kick, t_kick=a.t_kick, V_th_per_neuron=vth)
 
     spk = on["E_spk_bool"]
     bs = max(1, int(round(2.0 / DT)))
@@ -205,6 +226,14 @@ def main():
     ikb = int(a.t_kick / DT) // bs
     peak = float(inst[ikb:].max()) if nb > ikb else 0.0
     returned = bool(peak <= 1e-9 or float(inst[-10:].mean()) < 0.3 * peak)
+    # self-ignition probe: the OFF run has the SAME core vth but NO kick. If the core fires
+    # spontaneously the off run bursts -> the on event is NOT a clean evoked read (the
+    # spontaneous/pathology leg, NOT-YET multi-seed-grade). evoked_clean gates the read-out.
+    off_spk = off["E_spk_bool"]
+    off_inst = off_spk[:nb * bs].reshape(nb, bs, -1).any(axis=1).mean(axis=1)
+    off_peak = float(off_inst.max()) if nb else 0.0
+    core_self_ignite = bool(core_info is not None and off_peak > max(5e-3, 0.2 * peak))
+    evoked_clean = bool(core_info is None or not core_self_ignite)
     ik = int(a.t_kick / DT)
     idx = np.where(spk[ik:].any(axis=0))[0]
     oracle = None
@@ -234,11 +263,17 @@ def main():
                                    n_valid=int(valid.sum()), n_offsheet=int((~inside).sum()),
                                    contact_coords=np.asarray(m.contacts).round(2).tolist(),
                                    valid=valid.astype(int).tolist()),
-               ignition=dict(peak_inst=round(peak, 4), returned=returned, front_v_mm_per_ms=v),
+               ignition=dict(peak_inst=round(peak, 4), returned=returned, front_v_mm_per_ms=v,
+                             off_peak_inst=round(off_peak, 4), core_self_ignite=core_self_ignite,
+                             evoked_clean=evoked_clean),
+               core=core_info,
                oracle=oracle, firing=fire, current_lfp=lfp, verdict=verdict)
     with open(os.path.join(OUT, f"wave_read_{a.tag}.json"), "w") as fh:
         json.dump(res, fh, indent=2, default=lambda o: None)
-    print(f"[{a.tag}] {a.control_type} | valid {valid.sum()}/{len(m.contacts)} (offsheet {(~inside).sum()}) "
+    cstr = ("" if core_info is None else
+            f"| CORE m={a.core_mean} s={a.core_std} r={a.core_r} ign_on={peak:.3f} ign_off={off_peak:.3f} "
+            f"self_ignite={core_self_ignite} evoked_clean={evoked_clean} ")
+    print(f"[{a.tag}] {a.control_type} {cstr}| valid {valid.sum()}/{len(m.contacts)} (offsheet {(~inside).sum()}) "
           f"| oracle={oracle['axis_deg'] if oracle else None}({oracle['err_vs_ref'] if oracle else None}) "
           f"| fir n={fire['n_part']}/{fire['n_valid']} err={fire['axis_err']} rd={fire['readability']} "
           f"| lfp n={lfp['n_part']}/{lfp['n_valid']} err={lfp['axis_err']} rd={lfp['readability']} "
