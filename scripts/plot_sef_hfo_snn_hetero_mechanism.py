@@ -68,7 +68,9 @@ def _load(cell):
 
 def _mechanism_figure(cell, tag):
     """One 4-panel figure: a=heterogeneity map | b=onset/propagation map |
-    c=∥ read-out | d=⊥ read-out (c/d shared, not duplicated)."""
+    c=∥ read-out | d=⊥ read-out (c/d shared, not duplicated). Self-igniting cells
+    get a banner — their post-kick propagation (panels b/c/d) is illustrative only
+    (§2 downgrade discipline), not an evoked-propagation conclusion."""
     z, L, theta, t, win, par, perp = _load(cell)
     posE = z["posE"]; vth = z["vth"]; NE = len(posE)
     spread = local_vth_spread(posE, vth[:NE], np.ones(NE, bool), 0.3)
@@ -77,6 +79,8 @@ def _mechanism_figure(cell, tag):
     # clip onset colour to 5–95th pct so late-firing outliers don't blow out the gradient
     vlim = ((float(np.nanpercentile(onset_rel[fin], 5)), float(np.nanpercentile(onset_rel[fin], 95)))
             if fin.sum() > 5 else None)
+    ig = bool(cell.get("core_prekick_ignited", False))
+    igmark = "   ⚠ SELF-IGNITES pre-kick — b/c/d propagation ILLUSTRATIVE ONLY" if ig else "   (evoked event)"
     mechanism_4panel(
         str(FIG / f"mechanism_{tag}.png"),
         field_xy=posE, kick_xy=z["kick"], axis_deg=theta, extent=(0, L, 0, L),
@@ -91,7 +95,8 @@ def _mechanism_figure(cell, tag):
                      "(NOT LFP); dashed = pathology core; b-contacts coloured by arrival time; "
                      "a heterogeneity boundary ring on mean-shifted cores = mean jump, see core interior",
         patch_circle=(float(z["patch"][0]), float(z["patch"][1]), float(z["patch_r"])),
-        title=f"Pathology core ({cell['cond']}) — heterogeneity + propagation + electrode read-out ({tag})")
+        title=f"core={cell['pname']}  kick={cell['kname']}  ({cell['cond']}) — "
+              f"heterogeneity + propagation + electrode read-out{igmark}")
 
 
 def _overview(cells):
@@ -161,15 +166,19 @@ def main():
                 old.unlink()
     cells = json.loads((OUT / "grid_metrics.json").read_text())["cells"]
     _overview(cells)
-    reps = _pick_representatives(cells)
-    for tag, c in reps.items():
+    # one mechanism figure per parameter combination (kick × core × cond) — the grid
+    # spans 4 kicks (at mid core, matched) + 4 cores (at end kick × 3 conds).
+    tags = {}
+    for c in cells:
+        tag = f"{c['kname']}kick_{c['pname']}core_{c['cond']}"
         _mechanism_figure(c, tag)
-    _baseline_compare(reps)
+        tags[tag] = c["idx"]
+    _baseline_compare(_pick_representatives(cells))
     (OUT / "cohort_summary.json").write_text(json.dumps(
-        {"representatives": {k: v["idx"] for k, v in reps.items()}, "n_cells": len(cells)},
-        indent=2))
-    print("representatives:", {k: v["idx"] for k, v in reps.items()})
-    print("figures:", sorted(p.name for p in FIG.glob("*.png")))
+        {"mechanism_figures": tags, "n_cells": len(cells)}, indent=2))
+    print(f"wrote {len(tags)} mechanism figures:")
+    for tag in sorted(tags):
+        print("  mechanism_" + tag + ".png")
 
 
 if __name__ == "__main__":

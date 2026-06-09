@@ -318,8 +318,10 @@ def mechanism_4panel(
              fontsize=FS_TICK - 4, color="0.35")
     if title:
         fig.suptitle(title, fontsize=FS_TITLE, y=0.99)
-    fig.savefig(out_path, dpi=300, facecolor="white")
-    fig.savefig(out_path.replace(".png", ".pdf"), facecolor="white")
+    # dpi 150 keeps each ~16k-neuron 4-panel inspection figure ~1MB (vs ~4MB at 300);
+    # one per (kick×core×cond) combination is committed, so the footprint matters. No
+    # PDF (the vector copy of a 16k-point scatter is large and was never committed).
+    fig.savefig(out_path, dpi=150, facecolor="white")
     plt.close(fig)
     print(f"  Saved {out_path}")
     return out_path
