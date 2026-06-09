@@ -268,19 +268,22 @@ def cmd_cohort(args):
 
     rng = np.random.default_rng(RNG_SEED + 1)
     bs_recs = []
+    n_overlap_seen = []
     for s in subs:
-        others = [np.array(t, float) for o in subs if o["subject"] != s["subject"]
-                  for t in o["template_ranks"]]
-        if not others:
+        # foreign templates NAME-ALIGNED: (rank_seq, channel_names) from OTHER subjects.
+        foreign = [(t, o["channels"]) for o in subs if o["subject"] != s["subject"]
+                   for t in o["template_ranks"]]
+        if not foreign:
             continue
-        # sample up to 8 foreign templates (a negative control needs a sample, not all)
-        if len(others) > 8:
-            idx = rng.choice(len(others), size=8, replace=False)
-            others = [others[i] for i in idx]
+        if len(foreign) > 8:
+            idx = rng.choice(len(foreign), size=8, replace=False)
+            foreign = [foreign[i] for i in idx]
         for seiz in s["seizure_ranks"]:
-            r = echo.between_subject_control(np.array(seiz, float), others,
+            r = echo.between_subject_control(np.array(seiz, float), s["channels"], foreign,
                                              B=B, rng=rng, min_ch=MIN_CH)
-            bs_recs.append({"subject": s["subject"], "e_k": r["e_k"]})
+            n_overlap_seen.append(r.get("n_foreign_overlapping", 0))
+            if r.get("n_foreign_overlapping", 0) > 0:
+                bs_recs.append({"subject": s["subject"], "e_k": r["e_k"]})
 
     bd_recs = [{"subject": s["subject"], "e_k_baddata": ps["channel"]["e_k_baddata"]}
                for s in subs for ps in s["per_seizure"] if ps.get("channel")]
@@ -301,6 +304,8 @@ def cmd_cohort(args):
         "stratifier_swap_strict_candidate": pool_mode("channel", "strict_candidate"),
         "stratifier_swap_none": pool_mode("channel", "none"),
         "negative_between_subject": echo.pool_echo_subject_level(bs_recs),
+        "between_subject_n_overlap_median": float(np.median(n_overlap_seen)) if n_overlap_seen else 0.0,
+        "between_subject_n_overlap_max": int(max(n_overlap_seen)) if n_overlap_seen else 0,
         "bad_data_regression": echo.bad_data_regression(bd_recs),
     }
     summary["verdict"] = _assign_verdict(summary)

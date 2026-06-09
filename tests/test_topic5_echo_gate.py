@@ -271,13 +271,29 @@ def test_atlas_quality_fail_for_too_few_channels():
 from src.topic5_echo_gate import between_subject_control
 
 
-def test_between_subject_control_neutral_for_unrelated_templates():
+def test_between_subject_control_name_aligned_neutral_for_unrelated():
     rng = np.random.default_rng(11)
-    seizure = np.arange(12, dtype=float)             # echoes ITS OWN template
-    other_templates = [rng.permutation(12).astype(float) for _ in range(8)]
-    res = between_subject_control(seizure, other_templates, B=800, rng=rng, min_ch=8)
+    this_channels = [f"X{i}" for i in range(12)]      # this subject's channel names
+    seizure = np.arange(12, dtype=float)              # echoes its own (X-named) template
+    # foreign templates: SAME channel names (anatomical labels shared across patients),
+    # but UNRELATED rank order -> should be neutral.
+    foreign = [(rng.permutation(12).astype(float).tolist(), list(this_channels))
+               for _ in range(8)]
+    res = between_subject_control(seizure, this_channels, foreign, B=800, rng=rng, min_ch=8)
+    assert res["n_foreign_overlapping"] == 8
     assert abs(res["e_k"]) < 2.5
     assert 0.02 < res["p_k"] < 0.98
+
+
+def test_between_subject_control_skips_nonoverlapping_names():
+    # foreign templates on DIFFERENT channel names -> no overlap -> nan record.
+    this_channels = [f"X{i}" for i in range(12)]
+    seizure = np.arange(12, dtype=float)
+    foreign = [(list(range(12)), [f"Y{i}" for i in range(12)])]
+    res = between_subject_control(seizure, this_channels, foreign, B=200,
+                                  rng=np.random.default_rng(0), min_ch=8)
+    assert res["n_foreign_overlapping"] == 0
+    assert np.isnan(res["e_k"])
 
 
 # --- Task 8: phantom-safe template contracts (1-D np.where vs 2-D rebuild) ---

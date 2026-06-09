@@ -284,23 +284,39 @@ def compute_atlas_quality(ictal_rank, *, tie_max: float, min_channels: int) -> D
             "n_ranked_channels": n}
 
 
-def between_subject_control(seizure_rank, other_subject_templates, *, B, rng, min_ch,
-                            null_mode="channel", blocks=None) -> Dict:
-    """Null D (§4.6): echo of this seizure against OTHER subjects' templates (each
-    remapped to this seizure's channel count by truncation/padding). Same record shape
-    as compute_echo_strength so it pools identically. Under generic-echo scope (spec
-    v4 §3.2) the cohort pool of this is the FORMAL negative control — it should be
-    neutral; if it pools significant, the statistic is too coarse -> primary void."""
-    n = len(np.asarray(seizure_rank))
+def between_subject_control(seizure_rank, this_channels, foreign_named_templates, *,
+                            B, rng, min_ch, null_mode="channel", blocks=None) -> Dict:
+    """Null D (§4.6): echo of this seizure against OTHER subjects' templates, NAME-
+    ALIGNED onto this subject's channels (apples-to-apples with the name-aligned
+    primary — NOT positional truncation). A foreign template contributes its rank only
+    at channels whose NAME this subject also has; this subject's other channels are NaN.
+
+    this_channels: list[str] aligned to seizure_rank.
+    foreign_named_templates: list of (rank_seq, channel_names_seq) from OTHER subjects.
+
+    Under generic-echo scope (spec v4 §3.2) the cohort pool of this is the FORMAL
+    negative control: it should be neutral. If it pools significant, the echo is
+    anatomy-general (not subject-specific) -> primary not specific."""
+    idx = {c: i for i, c in enumerate(this_channels)}
+    n = len(this_channels)
     remapped = []
-    for t in other_subject_templates:
-        t = np.asarray(t, dtype=float)
-        if t.size >= n:
-            remapped.append(t[:n])
-        else:
-            remapped.append(np.concatenate([t, np.full(n - t.size, np.nan)]))
-    return compute_echo_strength(seizure_rank, remapped, B=B, rng=rng, min_ch=min_ch,
-                                 null_mode=null_mode, blocks=blocks)
+    for f_rank, f_channels in foreign_named_templates:
+        v = np.full(n, np.nan)
+        for fr, fc in zip(f_rank, f_channels):
+            fr = float(fr) if fr is not None else np.nan
+            if fc in idx and np.isfinite(fr):
+                v[idx[fc]] = fr
+        if np.sum(np.isfinite(v)) >= min_ch:      # only foreign templates that actually overlap
+            remapped.append(v)
+    if not remapped:
+        return {"e_k": float("nan"), "p_k": float("nan"), "r_obs": float("nan"),
+                "e_k_baddata": float("nan"), "null_mean": float("nan"),
+                "null_sd": float("nan"), "null_q": [float("nan")] * 3,
+                "n_null": 0, "null_mode": null_mode, "n_foreign_overlapping": 0}
+    res = compute_echo_strength(seizure_rank, remapped, B=B, rng=rng, min_ch=min_ch,
+                                null_mode=null_mode, blocks=blocks)
+    res["n_foreign_overlapping"] = len(remapped)
+    return res
 
 
 def masked_template_rank_1d(agg_rank, valid_mask):
