@@ -110,3 +110,39 @@ def shaft_block_capacity(blocks) -> Dict:
     total = sum(int(np.sum(blocks == b)) for b in uniq)
     return {"n_exchangeable_channels": int(n_exch), "n_total_channels": int(total),
             "insufficient_block_exchange": bool(n_exch < 2)}
+
+
+def compute_echo_strength(seizure_rank, template_ranks, *, B, rng, min_ch,
+                          null_mode="channel", blocks=None) -> Dict:
+    """Standardized echo strength e_k = (r_obs - null_mean)/null_sd, plus one-sided
+    percentile p_k, null quantiles, and e_k_baddata (P0-C: a REAL held-out null draw
+    used as a fake observation — pools NS by construction, see bad_data_regression)."""
+    r_obs = echo_r_obs(seizure_rank, template_ranks, min_ch=min_ch)
+    if not np.isfinite(r_obs):
+        return {"e_k": float("nan"), "p_k": float("nan"), "r_obs": float("nan"),
+                "e_k_baddata": float("nan"), "null_mean": float("nan"),
+                "null_sd": float("nan"), "null_q": [float("nan")] * 3,
+                "n_null": 0, "null_mode": null_mode}
+    null = shuffle_null(seizure_rank, template_ranks, B=B, rng=rng,
+                        null_mode=null_mode, min_ch=min_ch, blocks=blocks)
+    null = null[np.isfinite(null)]
+    if null.size < 2:
+        return {"e_k": float("nan"), "p_k": float("nan"), "r_obs": float(r_obs),
+                "e_k_baddata": float("nan"), "null_mean": float("nan"),
+                "null_sd": float("nan"), "null_q": [float("nan")] * 3,
+                "n_null": int(null.size), "null_mode": null_mode}
+    sd = float(null.std(ddof=1))
+    e_k = float((r_obs - null.mean()) / sd) if sd > 0 else float("nan")
+    p_k = float((np.sum(null >= r_obs) + 1) / (null.size + 1))
+    # P0-C: one REAL null draw standardized against the REST of the null. E[.]~0.
+    if null.size >= 3:
+        rest = null[1:]
+        rsd = float(rest.std(ddof=1))
+        e_k_baddata = float((null[0] - rest.mean()) / rsd) if rsd > 0 else float("nan")
+    else:
+        e_k_baddata = float("nan")
+    return {"e_k": e_k, "p_k": p_k, "r_obs": float(r_obs),
+            "e_k_baddata": e_k_baddata,
+            "null_mean": float(null.mean()), "null_sd": sd,
+            "null_q": [float(q) for q in np.quantile(null, [0.05, 0.5, 0.95])],
+            "n_null": int(null.size), "null_mode": null_mode}

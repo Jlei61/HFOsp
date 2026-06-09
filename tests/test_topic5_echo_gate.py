@@ -96,3 +96,42 @@ def test_shaft_block_capacity_ok_when_two_equal_shafts():
     cap = shaft_block_capacity(blocks)
     assert cap["n_exchangeable_channels"] == 8
     assert cap["insufficient_block_exchange"] is False
+
+
+# --- Task 4: compute_echo_strength (+ e_k_baddata real null draw) ---
+from src.topic5_echo_gate import compute_echo_strength
+
+
+def test_echo_strength_positive_for_matching_seizure():
+    templ = np.arange(12, dtype=float)
+    seizure = np.arange(12, dtype=float)          # perfect echo
+    res = compute_echo_strength(seizure, [templ], B=1000,
+                                rng=np.random.default_rng(1), min_ch=8)
+    assert res["r_obs"] == pytest.approx(1.0)
+    assert res["e_k"] > 3.0
+    assert res["p_k"] < 0.01
+
+
+def test_echo_strength_null_for_random_seizure():
+    templ = np.arange(12, dtype=float)
+    rng = np.random.default_rng(2)
+    seizure = rng.permutation(12).astype(float)
+    res = compute_echo_strength(seizure, [templ], B=1000, rng=rng, min_ch=8)
+    assert abs(res["e_k"]) < 2.5
+    assert 0.02 < res["p_k"] < 0.98
+
+
+def test_echo_strength_insufficient_returns_nan_record():
+    a = np.array([0.0, 1.0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+    res = compute_echo_strength(a, [np.arange(8.0)], B=100,
+                                rng=np.random.default_rng(3), min_ch=8)
+    assert np.isnan(res["e_k"]) and res["n_null"] == 0
+
+
+def test_echo_strength_baddata_field_is_centered_draw():
+    templ = np.arange(12, dtype=float)
+    seizure = np.arange(12, dtype=float)
+    res = compute_echo_strength(seizure, [templ], B=2000,
+                                rng=np.random.default_rng(4), min_ch=8)
+    assert np.isfinite(res["e_k_baddata"])
+    assert abs(res["e_k_baddata"]) < res["e_k"]
