@@ -2,24 +2,26 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the Stage-1 "proxy triage" that pools, across subjects, whether each seizure's ER/atlas-derived ictal channel ordering echoes the subject's masked interictal propagation template — replacing the power-floored per-subject contingency (Q1/Q1') with subject-level pooling.
+**Goal:** Build the Stage-1 "proxy triage" that pools, across subjects, whether each seizure's ER/atlas-derived ictal channel ordering echoes **any of the subject's stable masked interictal propagation templates (generic template echo, spec v4 §3.2 — NOT restricted to swap subjects)** — replacing the power-floored per-subject contingency (Q1/Q1') with subject-level pooling.
 
-**Architecture:** One pure-math module (`src/topic5_echo_gate.py`, no I/O) holding the echo statistic, the five shuffle nulls, the leave-one-seizure-out de-anchor, subject-level pooling, and atlas-quality; one runner that loads masked templates (from `results/interictal_propagation_masked/`) + ER atlas ranks, runs the B0 audit, computes per-subject + cohort JSON; one plotter. **P0 invariants from the spec:** templates are phantom-safe masked (§3.6), proxy triage never vetoes Stage 2 (P0-1, lives in reporting wording), MIN_CH=8 locked (P1-1).
+**Architecture:** One pure-math module (`src/topic5_echo_gate.py`, no I/O) holding the echo statistic, the shuffle nulls, the between-subject control, the leave-one-seizure-out de-anchor, subject-level pooling, and atlas-quality; one runner that loads masked templates **via `results/interictal_propagation_masked/`** + ER atlas ranks **via `src.atlas_loading`**, runs the B0 audit, computes per-subject + cohort JSON; one plotter. **P0 invariants:** templates phantom-safe masked (§3.6, **1-D template ≠ `mask_phantom_ranks` 2-D event matrix — see Task 8**); atlas via canonical loader (not a hand-rolled path); proxy triage never vetoes Stage 2 (P0-1, reporting wording + lint guard); bad-data regression uses **real null draws** (P0-C); de-anchor keeps `max_m` over templates (P1-A); MIN_CH=8 locked (P1-1).
 
-**Tech Stack:** Python, numpy, scipy.stats (spearmanr, wilcoxon, kendalltau), statsmodels (cluster-robust OLS sensitivity). pytest for TDD. Matplotlib for figures.
+**Tech Stack:** Python, numpy, scipy.stats (spearmanr, wilcoxon, binomtest, rankdata), statsmodels (cluster-robust OLS sensitivity). pytest for TDD. Matplotlib for figures.
 
-**Spec:** `docs/superpowers/specs/2026-06-08-topic5-ictal-template-echo-gate-design.md` (committed c1b3dde, v3). Re-read each referenced spec section at the matching task boundary (CLAUDE.md §5).
+**Spec:** `docs/superpowers/specs/2026-06-08-topic5-ictal-template-echo-gate-design.md` (committed a713ac8, **v4**). Re-read each referenced spec section at the matching task boundary (CLAUDE.md §5).
 
 ---
 
 ## File Structure
 
-- **Create `src/topic5_echo_gate.py`** — pure functions, no file I/O. Responsibilities: `spearman_common` (masked, common-channel Spearman); `echo_r_obs` (max over k templates); `_block_permute` + `shuffle_null` (the 5 null modes §4.6); `compute_echo_strength` (e_k/p_k/quantiles §4.1); `loo_anchor` + `compute_deanchor_echo` + `anchor_reliability` (§4.1b); `pool_echo_subject_level` (Wilcoxon/sign/bootstrap primary + cluster-robust sensitivity + bad-data regression §4.1.4/§4.4); `compute_atlas_quality` (§3.5).
-- **Create `scripts/run_topic5_echo_gate.py`** — I/O + orchestration. `audit` (B0 csv), `per-subject`, `cohort`, `figures` subcommands. Loads masked templates per §3.6, ER atlas ranks, swap_class. Applies `_apply_masked_paths()` path-swap.
+- **Create `src/topic5_echo_gate.py`** — pure functions, no file I/O. Responsibilities: `spearman_common` (masked, common-channel Spearman); `echo_r_obs` (max over k templates); `_block_permute` + `shuffle_null` (null modes A/B/C §4.6, B fail-closed on unequal shafts); `between_subject_control` (Null D §4.6); `compute_echo_strength` (e_k/p_k/quantiles **+ `e_k_baddata` real null draw** §4.1/§4.4); `loo_anchor` + `compute_deanchor_echo` (**`max_m` over templates** §4.1b) + `anchor_reliability`; `pool_echo_subject_level` (Wilcoxon/sign/bootstrap primary + cluster-robust sensitivity §4.1.4); `bad_data_regression` (pools `e_k_baddata` §4.4); `compute_atlas_quality` (§3.5).
+- **Create `scripts/run_topic5_echo_gate.py`** — I/O + orchestration. `audit` / `per-subject` / `cohort` / `figures`. Masked templates from `results/interictal_propagation_masked/` (§3.6); **ER atlas via `src.atlas_loading.load_per_subject_json` / `list_cohort_subjects` / `REQUIRED_SCHEMA` — do NOT hand-roll an atlas root**. Applies `_apply_masked_paths()` path-swap.
 - **Create `scripts/plot_topic5_echo_gate.py`** — 3 figures + `figures/README.md`.
 - **Create `tests/test_topic5_echo_gate.py`** — unit tests on synthetic data with known answers.
 
-**Cohort gate (spec §3):** subject ∈ cohort ⇔ has a phantom-safe masked stable template (primary k=2) AND a v2.3 ictal atlas with `n_seizures_with_atlas ≥ 2` AND passes atlas-quality + construct-validity. `MIN_CH=8` locked. swap_class tiers: strict/candidate = primary, none = negative control, all = sensitivity.
+> **Note on test counts:** the `Expected: PASS (N tests)` numbers below are cumulative and indicative; the real gate is `pytest tests/test_topic5_echo_gate.py -v` coming back fully green, not the exact integer (which shifts as tasks add tests).
+
+**Cohort gate (spec v4 §3.1/§3.2 — generic template echo):** subject ∈ **primary** ⇔ has a phantom-safe masked **stable template (k=2 primary; k=1/k>2 → sensitivity)** AND a v2.3 ictal atlas with `n_seizures_with_atlas ≥ 2` passing atlas-quality + construct-validity. **`swap_class` is a pre-registered STRATIFIER, not a primary gate** (strict/candidate vs none = planned subgroup). **Negative control = between-subject template control (Null D) + bad-data regression**, NOT the none-subset (none subjects have legitimate templates and are expected to echo). `MIN_CH=8` locked.
 
 ---
 
@@ -228,6 +230,22 @@ def test_shaft_block_requires_blocks():
     with pytest.raises(ValueError):
         shuffle_null(np.arange(8.0), [np.arange(8.0)], B=10,
                      rng=np.random.default_rng(0), null_mode="within_shaft", min_ch=8)
+
+
+def test_shaft_block_capacity_fail_closed_on_unequal_shafts():
+    from src.topic5_echo_gate import shaft_block_capacity
+    # 3 shafts of sizes 4, 3, 2 -> NO two shafts share a size -> nothing exchangeable.
+    blocks = np.array(["A", "A", "A", "A", "B", "B", "B", "C", "C"])
+    cap = shaft_block_capacity(blocks)
+    assert cap["n_exchangeable_channels"] == 0
+    assert cap["insufficient_block_exchange"] is True
+
+
+def test_shaft_block_capacity_ok_when_two_equal_shafts():
+    blocks = np.array(["A", "A", "A", "A", "B", "B", "B", "B"])  # 2 shafts of size 4
+    cap = shaft_block_capacity(blocks)
+    assert cap["n_exchangeable_channels"] == 8
+    assert cap["insufficient_block_exchange"] is False
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -290,12 +308,28 @@ def shuffle_null(seizure_rank, template_ranks, *, B, rng, null_mode, min_ch, blo
         shuf = _block_permute(np.asarray(seizure_rank, float), blk, kind, rng)
         out[i] = echo_r_obs(shuf, template_ranks, min_ch=min_ch)
     return out
+
+
+def shaft_block_capacity(blocks) -> Dict:
+    """How many channels CAN be block-exchanged (shafts that share a length with
+    >=1 other shaft). Unequal shafts are NOT exchangeable and stay put (§4.6 P1-B).
+    insufficient_block_exchange=True means shaft_block null is degenerate for this
+    subject and must NOT be reported as a real null — fail closed."""
+    blocks = np.asarray(blocks)
+    uniq = [b for b in np.unique(blocks) if b is not None and b == b]
+    sizes = defaultdict(list)
+    for b in uniq:
+        sizes[int(np.sum(blocks == b))].append(b)
+    n_exch = sum(size * len(grp) for size, grp in sizes.items() if len(grp) >= 2)
+    total = sum(int(np.sum(blocks == b)) for b in uniq)
+    return {"n_exchangeable_channels": int(n_exch), "n_total_channels": int(total),
+            "insufficient_block_exchange": bool(n_exch < 2)}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_topic5_echo_gate.py -v`
-Expected: PASS (9 tests).
+Expected: PASS (11 tests). Note: runner records `insufficient_block_exchange` per subject; when True, shaft_block is reported `inconclusive` for that subject and does NOT enter §4.3 hard constraints (spec §4.6 P1-B).
 
 - [ ] **Step 5: Commit**
 
@@ -371,16 +405,40 @@ def compute_echo_strength(seizure_rank, template_ranks, *, B, rng, min_ch,
     sd = float(null.std(ddof=1))
     e_k = float((r_obs - null.mean()) / sd) if sd > 0 else float("nan")
     p_k = float((np.sum(null >= r_obs) + 1) / (null.size + 1))
+    # P0-C bad-data regression: a REAL null draw used as a fake observation,
+    # standardized against the REST of the null. By construction E[.]~0, so the
+    # cohort pool of e_k_baddata must come out non-significant (Task 6). This is
+    # NOT a random N(0,1) re-roll — it reuses this seizure's own null geometry.
+    if null.size >= 3:
+        rest = null[1:]
+        rsd = float(rest.std(ddof=1))
+        e_k_baddata = float((null[0] - rest.mean()) / rsd) if rsd > 0 else float("nan")
+    else:
+        e_k_baddata = float("nan")
     return {"e_k": e_k, "p_k": p_k, "r_obs": float(r_obs),
+            "e_k_baddata": e_k_baddata,
             "null_mean": float(null.mean()), "null_sd": sd,
             "null_q": [float(q) for q in np.quantile(null, [0.05, 0.5, 0.95])],
             "n_null": int(null.size), "null_mode": null_mode}
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+Also add `"e_k_baddata": float("nan")` to BOTH early-return dicts (the not-finite and the `null.size < 2` branches) so the schema is uniform.
+
+- [ ] **Step 4: Add a test pinning the bad-data field**
+
+```python
+def test_echo_strength_baddata_field_is_centered_draw():
+    templ = np.arange(12, dtype=float)
+    seizure = np.arange(12, dtype=float)
+    res = compute_echo_strength(seizure, [templ], B=2000,
+                                rng=np.random.default_rng(4), min_ch=8)
+    # e_k_baddata is a single standardized null draw -> finite, not the huge e_k
+    assert np.isfinite(res["e_k_baddata"])
+    assert abs(res["e_k_baddata"]) < res["e_k"]      # fake obs is unremarkable vs real
+```
 
 Run: `pytest tests/test_topic5_echo_gate.py -v`
-Expected: PASS (12 tests).
+Expected: PASS (13 tests).
 
 - [ ] **Step 5: Commit**
 
@@ -458,17 +516,19 @@ def loo_anchor(per_seizure_ranks) -> np.ndarray:
     return out
 
 
-def compute_deanchor_echo(per_seizure_ranks, template_rank, *, B, rng, min_ch) -> List[Dict]:
-    """Echo on de-anchored deltas: delta_seiz = seiz_k - r_bar_{-k};
-    delta_templ = template - r_bar_{-k}. One record per seizure."""
+def compute_deanchor_echo(per_seizure_ranks, template_ranks, *, B, rng, min_ch) -> List[Dict]:
+    """Echo on de-anchored deltas, keeping max-over-templates (P1-A — same contract
+    as the primary §4.1, so k=2 subjects are not arbitrarily dominated by template 0):
+    delta_seiz = seiz_k - r_bar_{-k}; delta_templ_m = template_m - r_bar_{-k}.
+    compute_echo_strength already takes max_m over the delta-template list."""
     M = np.asarray(per_seizure_ranks, dtype=float)
-    t = np.asarray(template_rank, dtype=float)
+    templs = [np.asarray(t, dtype=float) for t in template_ranks]
     anc = loo_anchor(M)
     records = []
     for k in range(M.shape[0]):
         d_seiz = M[k] - anc[k]
-        d_templ = t - anc[k]
-        records.append(compute_echo_strength(d_seiz, [d_templ], B=B, rng=rng, min_ch=min_ch))
+        d_templs = [t - anc[k] for t in templs]      # de-anchor EACH template
+        records.append(compute_echo_strength(d_seiz, d_templs, B=B, rng=rng, min_ch=min_ch))
     return records
 
 
@@ -533,11 +593,31 @@ def test_pool_positive_when_subjects_consistently_positive():
     assert res["wilcoxon_p_onesided"] < 0.05
 
 
-def test_pool_null_when_subjects_centered_zero():
+def test_pool_sanity_centered_zero_not_significant():
     rng = np.random.default_rng(7)
     recs = _records({f"s{i}": list(rng.normal(0, 1, 3)) for i in range(12)})
     res = pool_echo_subject_level(recs)
-    assert res["wilcoxon_p_onesided"] > 0.10        # bad-data regression: no false signal
+    assert res["wilcoxon_p_onesided"] > 0.10        # generic pooling sanity
+
+
+def test_bad_data_regression_real_null_draw_flattens(monkeypatch):
+    # P0-C: real records carry BOTH a strong e_k and an e_k_baddata (real null draw).
+    # The primary pool on e_k must be significant; the bad-data pool on e_k_baddata
+    # must NOT — using the actual null-draw field, NOT a re-rolled N(0,1).
+    from src.topic5_echo_gate import compute_echo_strength, bad_data_regression
+    templ = np.arange(12, dtype=float)
+    records = []
+    for i in range(12):
+        rng = np.random.default_rng(100 + i)
+        # mild real echo (seizure ~ template + small noise on ranks)
+        seiz = np.argsort(np.arange(12) + rng.normal(0, 0.6, 12)).astype(float)
+        res = compute_echo_strength(seiz, [templ], B=1500, rng=rng, min_ch=8)
+        res["subject"] = f"s{i}"
+        records.append(res)
+    primary = pool_echo_subject_level([{"subject": r["subject"], "e_k": r["e_k"]} for r in records])
+    bad = bad_data_regression(records)
+    assert primary["wilcoxon_p_onesided"] < 0.05         # real echo survives
+    assert bad["wilcoxon_p_onesided"] > 0.10             # fake (null-draw) obs flattens
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -579,12 +659,21 @@ def pool_echo_subject_level(records, *, n_boot: int = 2000, seed: int = 0) -> Di
     meds = [np.median(rng.choice(Es, size=n, replace=True)) for _ in range(n_boot)]
     out["boot_ci95"] = [float(np.quantile(meds, 0.025)), float(np.quantile(meds, 0.975))]
     return out
+
+
+def bad_data_regression(echo_records) -> Dict:
+    """P0-C: pool the e_k_baddata field (each a REAL null draw used as a fake
+    observation) exactly like the primary pool. Must come out non-significant; a
+    significant result means the pooling machinery manufactures signal -> stop & fix.
+    echo_records: list of compute_echo_strength dicts that carry 'subject' + 'e_k_baddata'."""
+    recs = [{"subject": r["subject"], "e_k": r.get("e_k_baddata")} for r in echo_records]
+    return pool_echo_subject_level(recs)
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/test_topic5_echo_gate.py -v`
-Expected: PASS (17 tests).
+Expected: PASS (20 tests).
 
 - [ ] **Step 5: Commit**
 
@@ -667,6 +756,75 @@ git commit -m "feat(topic5-echo): compute_atlas_quality flags"
 
 ---
 
+## Task 7b: `between_subject_control` (Null D — formal negative control, §4.6 / spec v4 §3.2)
+
+Re-read spec v4 §3.2 + §4.6 Null D. Under generic-template-echo scope this is the **primary negative control** (replaces the none-subset). For each subject, recompute echo using OTHER subjects' templates remapped to this subject's channel count; the pooled effect must be ~neutral. A significant between-subject echo means the statistic is too coarse → primary conclusion void.
+
+**Files:**
+- Modify: `src/topic5_echo_gate.py`
+- Test: `tests/test_topic5_echo_gate.py`
+
+- [ ] **Step 1: Write the failing test**
+
+```python
+from src.topic5_echo_gate import between_subject_control
+
+
+def test_between_subject_control_neutral_for_unrelated_templates():
+    rng = np.random.default_rng(11)
+    # subject's seizure echoes ITS OWN template; OTHER templates are random orders.
+    own = np.arange(12, dtype=float)
+    seizure = np.arange(12, dtype=float)
+    other_templates = [rng.permutation(12).astype(float) for _ in range(8)]
+    res = between_subject_control(seizure, other_templates, B=800, rng=rng, min_ch=8)
+    # echo against unrelated templates should be unremarkable (|e| small, p mid)
+    assert abs(res["e_k"]) < 2.5
+    assert 0.02 < res["p_k"] < 0.98
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `pytest tests/test_topic5_echo_gate.py::test_between_subject_control_neutral_for_unrelated_templates -v`
+Expected: FAIL with `ImportError`.
+
+- [ ] **Step 3: Write minimal implementation**
+
+```python
+def between_subject_control(seizure_rank, other_subject_templates, *, B, rng, min_ch,
+                            null_mode="channel", blocks=None) -> Dict:
+    """Null D: echo of this seizure against OTHER subjects' templates (each remapped
+    to this seizure's channel count by truncation/identity ordering). Returns the same
+    record shape as compute_echo_strength so it pools identically. The pooled result
+    across the cohort is the formal negative control under generic-echo scope."""
+    n = len(np.asarray(seizure_rank))
+    remapped = []
+    for t in other_subject_templates:
+        t = np.asarray(t, dtype=float)
+        if t.size >= n:
+            remapped.append(t[:n])
+        else:
+            pad = np.full(n - t.size, np.nan)
+            remapped.append(np.concatenate([t, pad]))
+    return compute_echo_strength(seizure_rank, remapped, B=B, rng=rng, min_ch=min_ch,
+                                 null_mode=null_mode, blocks=blocks)
+```
+
+(Note: the runner builds `other_subject_templates` from the cohort's OTHER subjects' masked templates; remapping by truncation is a deliberately coarse surrogate — its only job is to show that an arbitrary template does NOT echo. If it DOES, the statistic is too coarse and primary is void.)
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `pytest tests/test_topic5_echo_gate.py -v`
+Expected: PASS (suite green).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/topic5_echo_gate.py tests/test_topic5_echo_gate.py
+git commit -m "feat(topic5-echo): between_subject_control (Null D negative control)"
+```
+
+---
+
 ## Task 8: Runner — masked template + ictal-rank loader (§3.6 hard contract)
 
 Re-read spec §3.6 BEFORE writing this. **Phantom-safe contract: templates from `results/interictal_propagation_masked/`, each cluster carries its own `valid_mask`; the old `topic1_topic5_bridge` loader / `q1prime_per_subject` JSON `template_rank` are FORBIDDEN as primary.** This is the highest-risk task — verify the masked loader actually returns per-cluster valid masks before trusting it.
@@ -687,16 +845,28 @@ Expected: a per-subject JSON exists; print its top-level keys. **Record** which 
 - [ ] **Step 2: Write the failing loader-contract test**
 
 ```python
-def test_load_masked_template_excludes_phantom(tmp_path, monkeypatch):
-    # Build a tiny masked-template fixture: 1 cluster, channel 3 is non-participating.
-    # The returned template rank MUST be NaN at the non-participating channel.
+def test_masked_template_rank_1d_uses_valid_mask_not_helper():
+    # P0-A: a 1-D ALREADY-AGGREGATED template rank + per-cluster valid_mask must be
+    # masked with np.where — NOT passed to mask_phantom_ranks (which is a 2-D
+    # (n_ch, n_ev) event matrix re-ranker and would raise/re-rank).
     import scripts.run_topic5_echo_gate as R
-    channels = ["A1", "A2", "A3", "A4"]
-    raw_ranks = np.array([0.0, 1.0, 7.0, 2.0])      # phantom int 7 at idx2 (A3)
-    bools = np.array([True, True, False, True])      # A3 never participates
-    templ = R.masked_template_rank(raw_ranks, bools)
+    agg_rank = np.array([0.0, 1.0, 7.0, 2.0])        # idx2 carries a phantom value
+    valid_mask = np.array([True, True, False, True]) # idx2 non-participating
+    templ = R.masked_template_rank_1d(agg_rank, valid_mask)
     assert np.isnan(templ[2])                        # phantom excluded
-    assert np.allclose(templ[[0, 1, 3]], raw_ranks[[0, 1, 3]])
+    assert np.allclose(templ[[0, 1, 3]], agg_rank[[0, 1, 3]])
+
+
+def test_rebuild_template_from_events_2d_uses_helper():
+    # P0-A: the OTHER contract — event-level (n_ch, n_ev) raw ranks + bools go through
+    # mask_phantom_ranks (per-event re-rank, phantom discarded), then aggregate to a
+    # 1-D template. Non-participating-everywhere channel -> NaN in the template.
+    import scripts.run_topic5_echo_gate as R
+    raw = np.array([[0.0, 1.0], [1.0, 0.0], [9.0, 9.0], [2.0, 2.0]])   # (4 ch, 2 ev)
+    bools = np.array([[True, True], [True, True], [False, False], [True, True]])
+    templ = R.rebuild_template_from_events(raw, bools)
+    assert np.isnan(templ[2])                        # ch2 never participates -> NaN
+    assert np.all(np.isfinite(templ[[0, 1, 3]]))
 ```
 
 - [ ] **Step 3: Run test to verify it fails**
@@ -726,12 +896,15 @@ from pathlib import Path
 
 import numpy as np
 
-from src.lagpat_rank_audit import mask_phantom_ranks
+from src.lagpat_rank_audit import mask_phantom_ranks       # 2-D event matrix ONLY
 from src.propagation_skeleton_geometry import parse_shaft
+from src import atlas_loading                              # P0-B canonical atlas loader
 from src import topic5_echo_gate as echo
 
 MASKED_ROOT = Path("results/interictal_propagation_masked")
-ATLAS_ROOT = Path("results/data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3")
+# NOTE: atlas JSONs come from src.atlas_loading (PER_SUBJECT_DIR =
+# results/data_driven_soz/layer_a_ictal_er_rank/per_subject). Do NOT point at
+# .../atlas_v2_3 — that is the FIGURES dir, not the data (P0-B).
 OUT_ROOT = Path("results/topic5_ictal_template_echo")
 MIN_CH = 8           # P1-1 locked
 B = 2000             # §5.3 lock
@@ -739,20 +912,35 @@ TIE_MAX = 0.3
 RNG_SEED = 20260608
 
 
-def masked_template_rank(raw_ranks, bools):
-    """Phantom-safe template rank: non-participating channels -> NaN (§3.6)."""
-    r = np.asarray(raw_ranks, dtype=float)
-    masked = mask_phantom_ranks(r, np.asarray(bools, dtype=bool))
-    # mask_phantom_ranks returns ranks with non-participating set to NaN; coerce here
-    out = np.asarray(masked, dtype=float)
-    out[~np.asarray(bools, dtype=bool)] = np.nan
-    return out
+def masked_template_rank_1d(agg_rank, valid_mask):
+    """P0-A contract #1: a 1-D ALREADY-AGGREGATED template rank + per-cluster
+    valid_mask. Mask with np.where — do NOT call mask_phantom_ranks (that helper
+    is a 2-D (n_ch, n_ev) per-event re-ranker; passing 1-D is wrong)."""
+    r = np.asarray(agg_rank, dtype=float)
+    m = np.asarray(valid_mask, dtype=bool)
+    if r.shape != m.shape:
+        raise ValueError(f"agg_rank {r.shape} != valid_mask {m.shape}")
+    return np.where(m, r, np.nan)
+
+
+def rebuild_template_from_events(raw_ranks_2d, bools_2d):
+    """P0-A contract #2: event-level (n_ch, n_ev) raw ranks + bools. Run
+    mask_phantom_ranks (per-event re-rank, phantom discarded -> NaN), then aggregate
+    to a 1-D template by nanmean across events. Channel never participating -> NaN."""
+    masked = np.asarray(mask_phantom_ranks(np.asarray(raw_ranks_2d, float),
+                                           np.asarray(bools_2d, bool)), dtype=float)
+    with np.errstate(invalid="ignore"):
+        templ = np.where(np.all(np.isnan(masked), axis=1), np.nan,
+                         np.nanmean(masked, axis=1))
+    return templ
 ```
+
+**Which contract does the masked tree need?** Decide from Task 8 Step 1: if the masked JSON already stores a 1-D per-cluster aggregated `template_rank` + a `valid_mask`/`bools`, use `masked_template_rank_1d`. If it stores event-level `(n_ch, n_ev)` ranks + bools, use `rebuild_template_from_events`. **Do not mix them** — they are different contracts.
 
 - [ ] **Step 5: Run test to verify it passes**
 
-Run: `pytest tests/test_topic5_echo_gate.py::test_load_masked_template_excludes_phantom -v`
-Expected: PASS. (If `mask_phantom_ranks` signature differs from the spec, adapt the call and re-run — the contract is "non-participating → NaN", verified by the test.)
+Run: `pytest tests/test_topic5_echo_gate.py -k "masked_template_rank_1d or rebuild_template_from_events" -v`
+Expected: PASS (both contracts). `mask_phantom_ranks` is verified by the 2-D test to require an (n_ch, n_ev) matrix — the 1-D path deliberately never calls it.
 
 - [ ] **Step 6: Commit**
 
@@ -774,13 +962,14 @@ Re-read spec §3.1 (B0 audit columns; MIN_CH=8 locked; audit reports drops only)
 
 ```python
 def _iter_subjects():
-    """Yield (dataset, sid, masked_json_path, atlas_dir) for subjects present in BOTH
-    the masked-template tree and the ictal atlas. Adapt globs to the layout recorded
-    in Task 8 Step 1."""
+    """Yield (ds_sid, masked_json_path) for subjects present in BOTH the masked-template
+    tree AND the v2.3 ictal atlas. Atlas membership uses the CANONICAL loader
+    (src.atlas_loading.list_cohort_subjects), NOT a hand-rolled atlas path (P0-B)."""
+    atlas_subjects = set(atlas_loading.list_cohort_subjects())   # schema-gated v2.3 set
     for mj in sorted(MASKED_ROOT.glob("rank_displacement/per_subject/*.json")):
-        ds_sid = mj.stem                      # e.g. "epilepsiae_1146"
-        atlas_dir = ATLAS_ROOT / "figures"    # adapt to actual atlas json location
-        yield ds_sid, mj
+        ds_sid = mj.stem                      # e.g. "epilepsiae_1146" — match atlas keys
+        if ds_sid in atlas_subjects or ds_sid.split("_", 1)[-1] in atlas_subjects:
+            yield ds_sid, mj
 
 
 def cmd_audit(args):
@@ -813,7 +1002,7 @@ def cmd_audit(args):
     print(f"[MIN_CH={MIN_CH} locked] subjects with median common<8: {drop8} (reported, not tuned)")
 ```
 
-(Implement `load_subject(ds_sid)` to read the masked template JSON + atlas, build the masked template rank per cluster via `masked_template_rank`, build the ictal rank vector aligned to the same channel order with an `alignment_guard` that hard-raises on mismatch, and fill the columns. `construct_validity_flag` defaults to `"pending"` — the human sets it after the sentinel eyeball.)
+(Implement `load_subject(ds_sid)` to: read the masked template JSON; build each cluster's masked template rank via `masked_template_rank_1d` **or** `rebuild_template_from_events` per the Task 8 Step 1 decision; load the ictal rank via `atlas_loading.load_per_subject_json(sid, source="per_subject")` and extract `channel_onsets` → a per-channel rank vector; align ictal-rank channels to the template channel order with an `alignment_guard` that **hard-raises** on mismatch; fill the columns. `construct_validity_flag` defaults to `"pending"` — the human sets it after the sentinel eyeball. `swap_class` is recorded as a STRATIFIER column, not a gate.)
 
 - [ ] **Step 2: Run the audit on the real cohort**
 
@@ -850,22 +1039,33 @@ def cmd_per_subject(args):
         shafts = np.array([parse_shaft(c)[0] for c in sub["channels"]])
         per_seizure = []
         seiz_matrix = sub["seizure_ranks"]           # (n_seiz, n_ch) masked-aligned
+        cap = echo.shaft_block_capacity(shafts)      # P1-B fail-closed flag
         for k, seiz in enumerate(seiz_matrix):
             rec = {"seizure_idx": k}
-            for mode, blocks in [("channel", None), ("within_shaft", shafts),
-                                 ("anchor_matched", sub["anchor_bins"])]:
+            modes = [("channel", None), ("within_shaft", shafts),
+                     ("anchor_matched", sub["anchor_bins"])]
+            if not cap["insufficient_block_exchange"]:
+                modes.append(("shaft_block", shafts))     # only if real exchange possible
+            for mode, blocks in modes:
                 rec[mode] = echo.compute_echo_strength(
                     seiz, templates, B=B, rng=rng, min_ch=MIN_CH,
                     null_mode=mode, blocks=blocks)
             per_seizure.append(rec)
-        deanchor = (echo.compute_deanchor_echo(seiz_matrix, templates[0], B=B, rng=rng,
+        # P1-A: de-anchor keeps max-over-ALL-templates (not templates[0])
+        deanchor = (echo.compute_deanchor_echo(seiz_matrix, templates, B=B, rng=rng,
                                                min_ch=MIN_CH)
                     if seiz_matrix.shape[0] >= 4 else None)
         out = {"subject": ds_sid, "swap_class": sub["swap_class"],
                "dataset": sub["dataset"], "template_k": sub["template_k"],
                "atlas_quality_flag": sub["atlas_quality_flag"],
+               "construct_validity_flag": sub["construct_validity_flag"],
+               "shaft_block_capacity": cap,
                "anchor_reliability": echo.anchor_reliability(seiz_matrix),
-               "per_seizure": per_seizure, "deanchor": deanchor}
+               "per_seizure": per_seizure, "deanchor": deanchor,
+               # stored so cmd_cohort can compute Null D (between-subject control):
+               "channels": list(sub["channels"]),
+               "template_ranks": [list(t) for t in templates],
+               "seizure_ranks": [list(s) for s in seiz_matrix]}
         json.dump(out, open(OUT_ROOT / "per_subject" / f"{ds_sid}.json", "w"), indent=2,
                   default=lambda o: None if isinstance(o, float) and np.isnan(o) else o)
     print("per-subject done")
@@ -876,31 +1076,80 @@ def cmd_per_subject(args):
 ```python
 def cmd_cohort(args):
     subs = [json.load(open(p)) for p in sorted((OUT_ROOT / "per_subject").glob("*.json"))]
-    def pool_for(mode, tier):
+
+    def pool_mode(mode, subset=None):
+        # GENERIC SCOPE (spec v4 §3.2): primary = ALL subjects with a stable template.
+        # subset=None -> all; subset='strict_candidate'/'none' -> swap STRATIFIER subgroup.
         recs = []
         for s in subs:
-            if tier == "primary" and s["swap_class"] not in ("strict", "candidate"):
+            if subset == "strict_candidate" and s["swap_class"] not in ("strict", "candidate"):
                 continue
-            if tier == "none" and s["swap_class"] != "none":
+            if subset == "none" and s["swap_class"] != "none":
                 continue
             for ps in s["per_seizure"]:
-                e = ps.get(mode, {}).get("e_k")
-                recs.append({"subject": s["subject"], "e_k": e})
+                m = ps.get(mode)
+                if m is None:                      # e.g. shaft_block skipped (P1-B)
+                    continue
+                recs.append({"subject": s["subject"], "e_k": m.get("e_k")})
         return echo.pool_echo_subject_level(recs)
+
+    # Null D between-subject control (formal negative control, generic scope):
+    rng = np.random.default_rng(RNG_SEED + 1)
+    bs_recs = []
+    for s in subs:
+        others = [np.array(t, float) for o in subs if o["subject"] != s["subject"]
+                  for t in o["template_ranks"]]
+        for seiz in s["seizure_ranks"]:
+            r = echo.between_subject_control(np.array(seiz, float), others,
+                                             B=B, rng=rng, min_ch=MIN_CH)
+            bs_recs.append({"subject": s["subject"], "e_k": r["e_k"]})
+
+    # bad-data regression pools the REAL null-draw field e_k_baddata (P0-C):
+    bd_recs = [{"subject": s["subject"], "e_k_baddata": ps["channel"]["e_k_baddata"],
+                "e_k": ps["channel"]["e_k"]}
+               for s in subs for ps in s["per_seizure"] if ps.get("channel")]
+
     summary = {
-        "primary_channel": pool_for("channel", "primary"),
-        "primary_within_shaft": pool_for("within_shaft", "primary"),
-        "primary_anchor_matched": pool_for("anchor_matched", "primary"),
-        "negative_none_channel": pool_for("channel", "none"),
+        "scope": "generic_template_echo",
+        "primary_channel_all": pool_mode("channel"),                 # PRIMARY (all subjects)
+        "primary_within_shaft_all": pool_mode("within_shaft"),
+        "primary_anchor_matched_all": pool_mode("anchor_matched"),
+        "stratifier_swap_strict_candidate": pool_mode("channel", "strict_candidate"),
+        "stratifier_swap_none": pool_mode("channel", "none"),
+        "negative_between_subject": echo.pool_echo_subject_level(bs_recs),
+        "bad_data_regression": echo.bad_data_regression(bd_recs),
     }
-    # bad-data regression: replace each e_k with a draw from its own null (mean 0) -> NS
-    summary["bad_data_regression"] = _bad_data_regression(subs)
     summary["verdict"] = _assign_verdict(summary, subs)   # §4.3, NO "暂缓" string anywhere
+    # P0-1 no-veto guard: the artifact must never contain the veto word.
+    assert "暂缓" not in json.dumps(summary, ensure_ascii=False)
     json.dump(summary, open(OUT_ROOT / "cohort_echo_summary.json", "w"), indent=2)
     print("verdict:", summary["verdict"]["label"])
 ```
 
-(`_assign_verdict` implements the §4.3 table. **Lint guard:** add `assert "暂缓" not in json.dumps(summary, ensure_ascii=False)` so the no-veto wording (P0-1) can never regress into the artifact.)
+**`_assign_verdict` (§4.3) — guard against "站住" without sensitivities:** a `站住·*` label MUST require that the floor-robust percentile/Stouffer combine AND the per-seizure cluster-robust sensitivity are BOTH present and same-direction (spec §4.3). If either is missing/NaN, the label cannot be any `站住·*` — fall to `没看清`. Encode this explicitly:
+
+```python
+def _assign_verdict(summary, subs):
+    p = summary["primary_channel_all"]
+    has_sens = (np.isfinite(p.get("sign_p_onesided", np.nan)) and
+                np.isfinite(p.get("boot_ci95", [np.nan])[0]))
+    neg = summary["negative_between_subject"]
+    bad = summary["bad_data_regression"]
+    neg_clean = not (neg.get("wilcoxon_p_onesided", 1) < 0.05)          # D must be neutral
+    bad_clean = not (bad.get("wilcoxon_p_onesided", 1) < 0.05)          # bad-data must flatten
+    if p["n_subjects"] < 6:
+        return {"label": "没看清", "why": "n_subjects<6"}
+    standing = (p.get("wilcoxon_p_onesided", 1) < 0.05 and p["median_E_s"] > 0
+                and has_sens and neg_clean and bad_clean)
+    if not standing:
+        return {"label": "代理阴性/没看清", "why": "primary not significant or sensitivities/controls missing",
+                "note": "ER proxy gave no continuation evidence; Stage 2 decided by scientific value (not vetoed)"}
+    # standing -> distinguish 含具体通路 vs 稳定锚为主 via A/C nulls (§4.6)
+    a = summary["primary_within_shaft_all"]; c = summary["primary_anchor_matched_all"]
+    specific = (a.get("wilcoxon_p_onesided", 1) < 0.05 or c.get("wilcoxon_p_onesided", 1) < 0.05)
+    return {"label": "站住·含具体通路" if specific else "站住·稳定锚为主",
+            "why": "inclusive echo holds; A/C " + ("survive" if specific else "flatten")}
+```
 
 - [ ] **Step 3: Wire argparse and run end-to-end**
 
@@ -922,11 +1171,34 @@ if __name__ == "__main__":
 Run: `python scripts/run_topic5_echo_gate.py per-subject && python scripts/run_topic5_echo_gate.py cohort`
 Expected: writes `cohort_echo_summary.json`; prints a verdict label from §4.3; the run does not raise on the `"暂缓"` lint guard.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Test the verdict guard (no 站住 without sensitivities)**
+
+```python
+def test_verdict_refuses_standing_without_sensitivities():
+    import scripts.run_topic5_echo_gate as R
+    # primary is "significant" but sign/bootstrap sensitivities are MISSING (NaN) ->
+    # must NOT return any 站住·* label (spec §4.3).
+    summary = {
+        "primary_channel_all": {"n_subjects": 12, "wilcoxon_p_onesided": 0.001,
+                                "median_E_s": 0.9, "sign_p_onesided": float("nan"),
+                                "boot_ci95": [float("nan"), float("nan")]},
+        "primary_within_shaft_all": {"wilcoxon_p_onesided": 0.001},
+        "primary_anchor_matched_all": {"wilcoxon_p_onesided": 0.001},
+        "negative_between_subject": {"wilcoxon_p_onesided": 0.5},
+        "bad_data_regression": {"wilcoxon_p_onesided": 0.5},
+    }
+    v = R._assign_verdict(summary, [])
+    assert not v["label"].startswith("站住")
+```
+
+Run: `pytest tests/test_topic5_echo_gate.py::test_verdict_refuses_standing_without_sensitivities -v`
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/run_topic5_echo_gate.py
-git commit -m "feat(topic5-echo): per-subject + cohort + 6-state verdict (no-veto lint guard)"
+git add scripts/run_topic5_echo_gate.py tests/test_topic5_echo_gate.py
+git commit -m "feat(topic5-echo): per-subject + cohort + generic-scope verdict (no-veto + sensitivity guard)"
 ```
 
 ---
@@ -939,7 +1211,7 @@ Re-read spec §5.3 (3 figures: echo_strength_distribution, null_mode_panel, coho
 - Create: `scripts/plot_topic5_echo_gate.py`
 - Create: `results/topic5_ictal_template_echo/figures/README.md`
 
-- [ ] **Step 1: Write the plotter** (per-seizure e_k strip by swap_class/dataset; null-mode forest comparing channel vs within-shaft vs anchor-matched pooled estimates; subject-level E_s forest with pooled marker and none-subset control). Each figure paper-grade self-contained (no internal codenames on axes — see `MEMORY.md feedback_figure_self_contained_paper_grade`).
+- [ ] **Step 1: Write the plotter** (per-seizure e_k strip by swap-stratifier/dataset; null-mode forest comparing channel vs within-shaft vs anchor-matched pooled estimates; subject-level E_s forest with the pooled marker AND the between-subject negative control + bad-data regression overlaid). Each figure paper-grade self-contained (no internal codenames on axes — see `MEMORY.md feedback_figure_self_contained_paper_grade`).
 
 - [ ] **Step 2: Generate and eyeball**
 
@@ -980,14 +1252,16 @@ git commit -m "feat(topic5-echo): H2 descriptive appendix + topic5 doc回链"
 
 ## Self-Review (run after writing all tasks)
 
-**Spec coverage:** §3.6 phantom-safe (Task 8) ✓; §4.1 echo + k (Tasks 1–4) ✓; §4.1b LOO de-anchor no-leakage (Task 5) ✓; §4.1.4 subject-level pooling (Task 6) ✓; §4.6 null modes A/C (Task 3, gating in Task 10) ✓; §4.4 bad-data regression (Tasks 6, 10) ✓; §3.5 atlas-quality (Task 7) + construct-validity manual flag (Task 9) ✓; §4.3 6-state no-veto verdict (Task 10, lint guard) ✓; §3.1 B0 audit MIN_CH=8 locked (Task 9) ✓; §9 H2 appendix (Task 12) ✓; figures (Task 11) ✓.
+**Spec coverage (v4):** §3.6 phantom-safe 1-D vs 2-D (Task 8, two contract tests) ✓; §4.1 echo + k (Tasks 1–4) ✓; §4.1b LOO de-anchor no-leakage + **max-over-templates** (Tasks 5, 10) ✓; §4.1.4 subject-level pooling (Task 6) ✓; §4.6 null modes A/C + **B fail-closed `insufficient_block_exchange`** (Task 3) + **D between-subject formal control** (Task 7b, cohort in Task 10) ✓; §4.4 bad-data regression via **real null draw `e_k_baddata`** (Tasks 4, 6, 10) ✓; §3.5 atlas-quality (Task 7) + construct-validity manual flag (Task 9) ✓; §4.3 verdict no-veto + **refuses 站住 without sensitivities** (Task 10, guard test) ✓; §3.1 B0 audit MIN_CH=8 locked via `src.atlas_loading` (Task 9) ✓; **generic-scope: primary=all stable templates, swap=stratifier, negative control=between-subject (Tasks 9/10)** ✓; §9 H2 appendix (Task 12) ✓; figures (Task 11) ✓.
 
-**P0/P1 guards present:** P0-1 no-veto → Task 10 `"暂缓"` lint assert + reporting wording; P0-2 phantom → Task 8 loader-contract test + Task 1 phantom-exclusion test; P1-1 MIN_CH=8 locked constant (no post-audit tuning); P1-2 construct_validity_flag column; P1-3 H2 in appendix only.
+**P0/P1 guards present:** P0-1 no-veto → Task 10 `"暂缓"` lint assert + reporting wording; P0-2 phantom → Task 8 1-D/2-D loader-contract tests + Task 1 phantom-exclusion test; P0-A 1-D≠2-D mask contract split (Task 8); P0-B canonical `src.atlas_loading` (Tasks 8/9, no hand-rolled atlas root); P0-C bad-data uses real null draws not N(0,1) (Tasks 4/6); P1-A de-anchor max-over-templates (Tasks 5/10); P1-B between-subject task + unequal-shaft fail-closed (Tasks 7b/3); P1-1 MIN_CH=8 locked; P1-2 construct_validity_flag + sentinel; P1-3 H2 appendix only.
 
 **Open implementation risks to verify at execution (not placeholders — flagged checks):**
-- The exact masked-template JSON key layout (Task 8 Step 1 inspects it live). `mask_phantom_ranks` return convention is verified by the Task 8 test, not assumed.
+- The exact masked-template JSON key layout decides 1-D (`masked_template_rank_1d`) vs 2-D (`rebuild_template_from_events`) — Task 8 Step 1 inspects it live; do NOT mix the two contracts.
+- Atlas access goes through `src.atlas_loading.load_per_subject_json` / `list_cohort_subjects` (schema-gated v2.3) — NOT a hand-rolled path. The ds_sid↔atlas-key matching (with/without dataset prefix) is verified live in Task 9.
 - Atlas `channel_onsets` → rank vector alignment to the template channel order: the `alignment_guard` MUST hard-raise on mismatch (spec §3.4 / item 10); do not silently truncate.
-- `anchor_bins` for `anchor_matched` null: bins by distance-to-SOZ or mean ictal earliness — define in `load_subject` from available SOZ JSON; if no SOZ for a subject, that null mode is skipped for them (recorded, not silently dropped).
+- `anchor_bins` for `anchor_matched` null: bins by **distance-to-SOZ OR mean ictal earliness** (pick per spec §4.6; the user owns which — confirm before Task 10) — define in `load_subject`; if no SOZ for a subject, that null mode is skipped for them (recorded, not silently dropped).
+- Null D remap-by-truncation is a deliberately coarse surrogate (Task 7b); if it ever pools significant, the statistic is too coarse → primary void (this is the control doing its job, not a bug).
 
 ---
 
