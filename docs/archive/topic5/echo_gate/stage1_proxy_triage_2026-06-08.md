@@ -31,6 +31,8 @@ B0 audit: 22 个 (masked stable_k=2 ∩ v2.3 atlas) 候选；锁定门槛 (MIN_C
 
 **载荷信号（clean null 下稳）**：full-shuffle / within-shaft 正向，但 **anchor-matched 打平** = "发作顺序与间期模板共享一个 earliness/病灶距离粗锚，而非具体路径复用"。bad-data 自检干净，机器无偏。
 
+**图**：`results/topic5_ictal_template_echo/figures/echo_anchor_not_path.png`（2 板 paper-grade，README 见同目录）。A = 三档零假设逐步收紧下相似度 survives→survives→**vanishes**(p=0.007/0.010/0.423)；B = 发作惯常先后 ≈ 间期模板(rank correlation 0.42)=被共享的粗锚。绘图 `scripts/plot_topic5_echo_gate.py`。
+
 ## 3. 三个控制项都没闭环（为什么不能下结论）
 
 1. **Null D（跨病人模板特异性对照）结构上跑不起来**：generic-echo 口径下，"别人模板也一样像吗"是判断"特异 vs 解剖泛化"的关键控制。但
