@@ -185,3 +185,47 @@ def test_deanchor_echo_uses_all_templates_not_first():
                                  rng=np.random.default_rng(6), min_ch=8)
     assert len(recs) == 4
     assert all(np.isfinite(r["r_obs"]) for r in recs)
+
+
+# --- Task 6: subject-level pooling + bad-data regression ---
+from src.topic5_echo_gate import pool_echo_subject_level, bad_data_regression
+
+
+def _records(per_subject_es):
+    out = []
+    for sid, evals in per_subject_es.items():
+        for e in evals:
+            out.append({"subject": sid, "e_k": e})
+    return out
+
+
+def test_pool_positive_when_subjects_consistently_positive():
+    recs = _records({f"s{i}": [0.8, 1.1, 0.9] for i in range(12)})
+    res = pool_echo_subject_level(recs)
+    assert res["n_subjects"] == 12
+    assert res["median_E_s"] > 0
+    assert res["wilcoxon_p_onesided"] < 0.05
+
+
+def test_pool_sanity_centered_zero_not_significant():
+    rng = np.random.default_rng(7)
+    recs = _records({f"s{i}": list(rng.normal(0, 1, 3)) for i in range(12)})
+    res = pool_echo_subject_level(recs)
+    assert res["wilcoxon_p_onesided"] > 0.10
+
+
+def test_bad_data_regression_real_null_draw_flattens():
+    templ = np.arange(12, dtype=float)
+    records = []
+    for i in range(12):
+        rng = np.random.default_rng(100 + i)
+        seiz = np.argsort(np.arange(12) + rng.normal(0, 0.6, 12)).astype(float)
+        res = compute_echo_strength(seiz, [templ], B=1500, rng=rng, min_ch=8)
+        res["subject"] = f"s{i}"
+        records.append(res)
+    primary = pool_echo_subject_level(
+        [{"subject": r["subject"], "e_k": r["e_k"]} for r in records])
+    bad = bad_data_regression(
+        [{"subject": r["subject"], "e_k_baddata": r["e_k_baddata"]} for r in records])
+    assert primary["wilcoxon_p_onesided"] < 0.05         # real echo survives
+    assert bad["wilcoxon_p_onesided"] > 0.10             # fake (null-draw) obs flattens

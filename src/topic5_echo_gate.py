@@ -196,3 +196,43 @@ def anchor_reliability(per_seizure_ranks) -> float:
     S = np.sum((Rj - Rj.mean()) ** 2)
     W = 12 * S / (n ** 2 * (m ** 3 - m))
     return float(W)
+
+
+def pool_echo_subject_level(records, *, n_boot: int = 2000, seed: int = 0) -> Dict:
+    """Subject-level primary pooling (§4.1.4). records: list of {subject, e_k}.
+    E_s = mean over a subject's finite e_k. One-sided (>0) Wilcoxon signed-rank +
+    sign test + bootstrap CI on median(E_s). Statistical unit is the SUBJECT."""
+    from scipy.stats import wilcoxon, binomtest
+    by_subj = defaultdict(list)
+    for r in records:
+        if r.get("e_k") is not None and np.isfinite(r["e_k"]):
+            by_subj[r["subject"]].append(float(r["e_k"]))
+    Es = np.array([np.mean(v) for v in by_subj.values() if v], dtype=float)
+    n = int(Es.size)
+    out = {"n_subjects": n, "E_s": Es.tolist(),
+           "median_E_s": float(np.median(Es)) if n else float("nan"),
+           "mean_E_s": float(np.mean(Es)) if n else float("nan")}
+    if n < 2 or np.allclose(Es, 0):
+        out["wilcoxon_p_onesided"] = float("nan")
+        out["sign_p_onesided"] = float("nan")
+        out["boot_ci95"] = [float("nan"), float("nan")]
+        return out
+    try:
+        out["wilcoxon_p_onesided"] = float(wilcoxon(Es, alternative="greater").pvalue)
+    except ValueError:
+        out["wilcoxon_p_onesided"] = float("nan")
+    n_pos = int(np.sum(Es > 0))
+    out["sign_p_onesided"] = float(binomtest(n_pos, n, 0.5, alternative="greater").pvalue)
+    rng = np.random.default_rng(seed)
+    meds = [np.median(rng.choice(Es, size=n, replace=True)) for _ in range(n_boot)]
+    out["boot_ci95"] = [float(np.quantile(meds, 0.025)), float(np.quantile(meds, 0.975))]
+    return out
+
+
+def bad_data_regression(echo_records) -> Dict:
+    """P0-C: pool the e_k_baddata field (each a REAL null draw used as a fake
+    observation) exactly like the primary pool. Must come out non-significant; a
+    significant result means the pooling machinery manufactures signal -> stop & fix.
+    echo_records carry 'subject' + 'e_k_baddata'."""
+    recs = [{"subject": r["subject"], "e_k": r.get("e_k_baddata")} for r in echo_records]
+    return pool_echo_subject_level(recs)
