@@ -46,7 +46,7 @@
 
 ### kick_amp.png（kick 幅度稳健性，2026-06-09 自主探索 B）
 固定 mid 核 + end kick，KICK_BOOST {1×,2×,3×}·ν_θ，只扫 matched+baseline（igniting 跨幅度 bit-identical）。
-- **a matched 诱发同步 vs 幅度**：**2×（锁定）+0.030、3×（更强）+0.045 = 贴零 → matched-null 对更强刺激稳健**（roadmap P1 问题 = YES）；但 **1×（弱）= −0.406±0.086（10/12 网络为负）= 弱戳下收窄参差让核招募更少**（宽尾巴在刺激边缘帮招募，同点火尾巴机制、anti-Rich 方向）。
+- **a matched 诱发同步 vs 幅度**：**2×（锁定）+0.030、3×（更强）+0.045 = 贴零 → matched-null 对更强刺激稳健**（roadmap P1 问题 = YES）；**1×（弱）= −0.406±0.086（10/12 网络为负）= 弱戳下窄核窗内同步更低**。**⚠ 机制未定**：是 (a) 招募更少（尾巴帮招募）还是 (b) 事件延后被固定窗截（§1 固定窗坑）——本轮没记 `event_peak_t`、无法分辨；不动 headline。
 - **b sanity**：baseline 任何幅度都不自点火（0/0/0）；pre-kick 不变量 True（unmatched 潜伏期 56.4ms 三幅度一致）；whole-net 诱发峰 0.34–0.43（弱戳反而略高 = 弱戳更挑门槛分布）。
 
 **关注点**：a 看 2×/3× 贴零（null 稳健）+ 1× 负（弱戳尾巴效应，新发现、非 overturn）；b 看 baseline 不自点火 + pre-kick 不变量。**不是 advisor 守的 overturn（更强刺激冒效应）**——locked-kick null 站得稳，1× 是弱-刺激 regime 细化。

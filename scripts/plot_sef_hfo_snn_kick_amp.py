@@ -42,8 +42,8 @@ def main():
     rng = max(0.12, max(abs(np.nanmin(ys)), abs(np.nanmax(ys))) * 1.6) if any(np.isfinite(ys)) else 0.12
     axA.set_ylim(-rng, rng)
     axA.set_title("a · matched (variance-only) evoked effect vs stimulus strength\n"
-                  "null at locked (2×) + stronger (3×); weak (1×) = wide tail helps recruitment",
-                  fontsize=10)
+                  "null at locked (2×) + stronger (3×); weak (1×) lower in-window sync "
+                  "(recruitment-vs-timing unresolved)", fontsize=9)
     axA.grid(axis="y", alpha=0.3)
 
     # b — sanity: evoked peak grows; baseline never ignites
