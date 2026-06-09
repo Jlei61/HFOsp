@@ -121,23 +121,48 @@ def _undirected_diff(a, b):
     return float(min(d, 180.0 - d))
 
 
-def _grid_cells(L):
-    """Pre-registered coarse grid. sweep-1: variance axis (matched) across kicks,
-    fixed mid patch; sweep-2: all 3 conds across patches, fixed kick=end."""
+def _kicks_patches(L):
+    """Canonical kick and core (patch) positions shared by the grid + factorial."""
     u = np.array([np.cos(np.deg2rad(THETA)), np.sin(np.deg2rad(THETA))])
     perp = np.array([-u[1], u[0]])
     ctr = np.array([L / 2, L / 2]); end = ctr + 0.6 * (L / 2) * u
-    mid = tuple(ctr); cells = []
+    mid = tuple(ctr)
     kicks = {"end": end, "nearcore": ctr + 0.25 * (L / 2) * u,
              "opp": ctr - 0.6 * (L / 2) * u, "offaxis": ctr + 0.5 * (L / 2) * perp}
-    for kn, k in kicks.items():
-        cells.append(dict(sweep=1, kick=tuple(k), kname=kn, pname="mid",
-                          patch=mid, cond="matched"))
     patches = {"nearseed": tuple(end - 0.3 * (L / 2) * u), "mid": mid,
                "far": tuple(ctr - 0.4 * (L / 2) * u),
                "offaxis": tuple(ctr + 0.4 * (L / 2) * perp)}
+    return kicks, patches, end
+
+
+def _grid_cells(L):
+    """Pre-registered coarse grid. sweep-1: variance axis (matched) across kicks,
+    fixed mid patch; sweep-2: all 3 conds across patches, fixed kick=end."""
+    kicks, patches, end = _kicks_patches(L)
+    cells = []
+    for kn, k in kicks.items():
+        cells.append(dict(sweep=1, kick=tuple(k), kname=kn, pname="mid",
+                          patch=patches["mid"], cond="matched"))
     for pn, pc in patches.items():
         for cond in CONDS:
+            cells.append(dict(sweep=2, kick=tuple(end), kname="end", pname=pn,
+                              patch=pc, cond=cond))
+    return cells
+
+
+def _grid_cells_factorial_matched(L):
+    """Full matched kick×core factorial (4×4=16; matched = clean evoked, so
+    propagation direction is comparable across the whole grid) PLUS the end-kick
+    mean_only/unmatched cells (8) so the self-igniting-condition figures persist.
+    24 unique (kick,core,cond) cells — one mechanism figure each."""
+    kicks, patches, end = _kicks_patches(L)
+    cells = []
+    for kn, k in kicks.items():
+        for pn, pc in patches.items():
+            cells.append(dict(sweep=3, kick=tuple(k), kname=kn, pname=pn,
+                              patch=pc, cond="matched"))
+    for pn, pc in patches.items():
+        for cond in ("mean_only", "unmatched"):
             cells.append(dict(sweep=2, kick=tuple(end), kname="end", pname=pn,
                               patch=pc, cond=cond))
     return cells
@@ -248,6 +273,8 @@ def main():
     ap.add_argument("--time-one", action="store_true")
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--grid", action="store_true")
+    ap.add_argument("--factorial-matched", action="store_true",
+                    help="full matched kick×core factorial + end-kick igniting cells (24)")
     a = ap.parse_args()
     _engine_guard()
     if a.time_one:
@@ -260,8 +287,14 @@ def main():
         print(f"ONE L=3 run wall = {time.time()-t0:.1f}s")
         return
     if a.quick:
-        _process(_grid_cells(1.0)[:3], 1.0, 4000.0, 1)
-        _mid_pair_seeds(1.0, 4000.0, seeds=(1, 2))
+        cells = (_grid_cells_factorial_matched(1.0)[:3] if a.factorial_matched
+                 else _grid_cells(1.0)[:3])
+        _process(cells, 1.0, 4000.0, 1)
+        if not a.factorial_matched:
+            _mid_pair_seeds(1.0, 4000.0, seeds=(1, 2))
+        return
+    if a.factorial_matched:
+        _process(_grid_cells_factorial_matched(3.0), 3.0, 1800.0, 1)   # 24 cells, ~25min
         return
     _process(_grid_cells(3.0), 3.0, 1800.0, 1)
     _mid_pair_seeds(3.0, 1800.0, seeds=(1, 2, 3))

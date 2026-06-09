@@ -15,7 +15,10 @@
 - **c ∥ 杆读出**：per-contact 峰值依次扫（**斜的峰轨迹 = 读出方向**）。
 - **d ⊥ 杆读出**：峰值对齐（竖直 = 无方向）。
 
-**命名 = `{kick位置}kick_{核位置}core_{条件}`**，每个网格参数组合一张（共 **15 个唯一组合**，来自 grid_metrics.json 全部 cell）。**覆盖范围（诚实）**：grid 是**两条正交 1-D 扫**，不是全因子——① **kick 位置扫**（end/nearcore/opp/offaxis 4 个 kick，**固定 mid 核 + matched**）；② **核位置扫**（nearseed/mid/far/offaxis 4 个核，**固定 end kick × 3 条件 matched/mean_only/unmatched**）。所以"不同 kick"只在 mid/matched 下有、"不同核"只在 end kick 下有；**完整的 kick×核×条件全因子（4×4×3=48）需重跑 grid**（未做）。
+**命名 = `{kick位置}kick_{核位置}core_{条件}`**，每个参数组合一张（共 **24 个**，来自 grid_metrics.json 全部 cell）。**覆盖范围（2026-06-09 扩成 matched 全因子）**：
+- **matched 条件 = 完整 kick×核 全因子（4 kick × 4 核 = 16）**：kick ∈ {end, nearcore, opp, offaxis} × 核 ∈ {nearseed, mid, far, offaxis} 每个交叉都有。matched 不自点火 = 干净诱发波，传播方向跨 kick×核 系统可比。
+- **mean_only / unmatched 条件 = 只在 end kick × 4 核（8）**：这两个条件自点火、传播面板只作图示，所以没跑它们的全因子（kick 位置对自点火格子的传播无意义）。
+- 合计 16 + 8 = 24。（更全的 mean_only/unmatched × 其他 kick 没做——自点火使其传播图示价值低。）
 - 标题带 **⚠ SELF-IGNITES pre-kick — b/c/d propagation ILLUSTRATIVE ONLY**（mean_only/unmatched 自点火格子，传播面板只作图示、不进结论，§2 降级纪律）或 **(evoked event)**（matched 干净诱发）。
 
 **关注点**：a 看异质性在哪、b 看传播顺序、c 峰轨迹斜率 = 方向、d 对齐 = 无方向；a 边界环是均值跳变伪迹（看核内）；带 ⚠ 的传播面板别当结论。

@@ -1,6 +1,6 @@
 {
   "provenance": {
-    "git_commit": "626c3c58142cb712a623c3bc8ce39452e0676394",
+    "git_commit": "1f15c9dd78b6acc0b690d2b11b1c64b92442f936",
     "metric_version": "2026-06-08c",
     "engine_versions": {
       "results/topic4_sef_hfo/lif_snn/engine/kick_probe.py": "64e3893227f7916ab4a1302e079aa30ef24651a0766d20d2488bccabc7539b4a",
@@ -38,127 +38,7 @@
   "cells": [
     {
       "idx": 0,
-      "sweep": 1,
-      "kname": "end",
-      "pname": "mid",
-      "cond": "matched",
-      "patch": [
-        1.5,
-        1.5
-      ],
-      "kick": [
-        2.136396103067893,
-        2.1363961030678924
-      ],
-      "n_core": 1167,
-      "d_core_paf": 0.045415595544130216,
-      "d_axis_deg": 18.717553592346974,
-      "d_event_t": -1.9000000000000057,
-      "core_prekick_ignited": false,
-      "core_ignition_latency": NaN,
-      "base_prekick_ignited": false,
-      "evoked_clean": true,
-      "core_returned": true,
-      "base_returned": true,
-      "core_decay_ratio": 0.35937499999999994,
-      "core_rest_rate": 0.0617283950617284,
-      "core_burst_ms": 17.400000000000002,
-      "base_rest_rate": 0.10545267489711932,
-      "kick_on_patch": false
-    },
-    {
-      "idx": 1,
-      "sweep": 1,
-      "kname": "nearcore",
-      "pname": "mid",
-      "cond": "matched",
-      "patch": [
-        1.5,
-        1.5
-      ],
-      "kick": [
-        1.7651650429449552,
-        1.7651650429449552
-      ],
-      "n_core": 1167,
-      "d_core_paf": -0.06083976006855185,
-      "d_axis_deg": 10.541978125955993,
-      "d_event_t": 0.5,
-      "core_prekick_ignited": false,
-      "core_ignition_latency": NaN,
-      "base_prekick_ignited": false,
-      "evoked_clean": true,
-      "core_returned": true,
-      "base_returned": true,
-      "core_decay_ratio": 0.453125,
-      "core_rest_rate": 0.0617283950617284,
-      "core_burst_ms": 11.3,
-      "base_rest_rate": 0.10545267489711932,
-      "kick_on_patch": true
-    },
-    {
-      "idx": 2,
-      "sweep": 1,
-      "kname": "opp",
-      "pname": "mid",
-      "cond": "matched",
-      "patch": [
-        1.5,
-        1.5
-      ],
-      "kick": [
-        0.8636038969321073,
-        0.8636038969321074
-      ],
-      "n_core": 1167,
-      "d_core_paf": 0.1645244215938303,
-      "d_axis_deg": 13.428196071826903,
-      "d_event_t": -0.30000000000001137,
-      "core_prekick_ignited": false,
-      "core_ignition_latency": NaN,
-      "base_prekick_ignited": false,
-      "evoked_clean": true,
-      "core_returned": true,
-      "base_returned": true,
-      "core_decay_ratio": 0.171875,
-      "core_rest_rate": 0.0617283950617284,
-      "core_burst_ms": 12.9,
-      "base_rest_rate": 0.10545267489711932,
-      "kick_on_patch": false
-    },
-    {
-      "idx": 3,
-      "sweep": 1,
-      "kname": "offaxis",
-      "pname": "mid",
-      "cond": "matched",
-      "patch": [
-        1.5,
-        1.5
-      ],
-      "kick": [
-        0.9696699141100894,
-        2.0303300858899105
-      ],
-      "n_core": 1167,
-      "d_core_paf": -0.05826906598114828,
-      "d_axis_deg": 0.11245547268183032,
-      "d_event_t": 0.30000000000001137,
-      "core_prekick_ignited": false,
-      "core_ignition_latency": NaN,
-      "base_prekick_ignited": false,
-      "evoked_clean": true,
-      "core_returned": true,
-      "base_returned": true,
-      "core_decay_ratio": 0.828125,
-      "core_rest_rate": 0.0617283950617284,
-      "core_burst_ms": 11.700000000000001,
-      "base_rest_rate": 0.10545267489711932,
-      "kick_on_patch": false
-    },
-    {
-      "idx": 4,
-      "sweep": 2,
+      "sweep": 3,
       "kname": "end",
       "pname": "nearseed",
       "cond": "matched",
@@ -187,7 +67,457 @@
       "kick_on_patch": true
     },
     {
+      "idx": 1,
+      "sweep": 3,
+      "kname": "end",
+      "pname": "mid",
+      "cond": "matched",
+      "patch": [
+        1.5,
+        1.5
+      ],
+      "kick": [
+        2.136396103067893,
+        2.1363961030678924
+      ],
+      "n_core": 1167,
+      "d_core_paf": 0.045415595544130216,
+      "d_axis_deg": 18.717553592346974,
+      "d_event_t": -1.9000000000000057,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.35937499999999994,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 17.400000000000002,
+      "base_rest_rate": 0.10545267489711932,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 2,
+      "sweep": 3,
+      "kname": "end",
+      "pname": "far",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.0757359312880714
+      ],
+      "kick": [
+        2.136396103067893,
+        2.1363961030678924
+      ],
+      "n_core": 1155,
+      "d_core_paf": -0.039826839826839766,
+      "d_axis_deg": 0.7550236243700112,
+      "d_event_t": 2.6000000000000227,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.24999999999999997,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 16.3,
+      "base_rest_rate": 0.10288065843621398,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 3,
+      "sweep": 3,
+      "kname": "end",
+      "pname": "offaxis",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.9242640687119286
+      ],
+      "kick": [
+        2.136396103067893,
+        2.1363961030678924
+      ],
+      "n_core": 1186,
+      "d_core_paf": -0.07588532883642496,
+      "d_axis_deg": 10.438530021891921,
+      "d_event_t": 3.700000000000017,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.265625,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 16.7,
+      "base_rest_rate": 0.11831275720164608,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 4,
+      "sweep": 3,
+      "kname": "nearcore",
+      "pname": "nearseed",
+      "cond": "matched",
+      "patch": [
+        1.8181980515339464,
+        1.8181980515339462
+      ],
+      "kick": [
+        1.7651650429449552,
+        1.7651650429449552
+      ],
+      "n_core": 1112,
+      "d_core_paf": -0.06744604316546765,
+      "d_axis_deg": 35.19362945364229,
+      "d_event_t": 2.1999999999999886,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.5062500000000001,
+      "core_rest_rate": 0.051440329218107,
+      "core_burst_ms": 10.600000000000001,
+      "base_rest_rate": 0.10545267489711933,
+      "kick_on_patch": true
+    },
+    {
       "idx": 5,
+      "sweep": 3,
+      "kname": "nearcore",
+      "pname": "mid",
+      "cond": "matched",
+      "patch": [
+        1.5,
+        1.5
+      ],
+      "kick": [
+        1.7651650429449552,
+        1.7651650429449552
+      ],
+      "n_core": 1167,
+      "d_core_paf": -0.06083976006855185,
+      "d_axis_deg": 10.541978125955993,
+      "d_event_t": 0.5,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.453125,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 11.3,
+      "base_rest_rate": 0.10545267489711932,
+      "kick_on_patch": true
+    },
+    {
+      "idx": 6,
+      "sweep": 3,
+      "kname": "nearcore",
+      "pname": "far",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.0757359312880714
+      ],
+      "kick": [
+        1.7651650429449552,
+        1.7651650429449552
+      ],
+      "n_core": 1155,
+      "d_core_paf": 0.20259740259740266,
+      "d_axis_deg": 2.1306623936162623,
+      "d_event_t": 0.700000000000017,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.40675844806007505,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 11.600000000000001,
+      "base_rest_rate": 0.10288065843621398,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 7,
+      "sweep": 3,
+      "kname": "nearcore",
+      "pname": "offaxis",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.9242640687119286
+      ],
+      "kick": [
+        1.7651650429449552,
+        1.7651650429449552
+      ],
+      "n_core": 1186,
+      "d_core_paf": -0.026981450252951178,
+      "d_axis_deg": 24.165387130257713,
+      "d_event_t": 1.5999999999999943,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.4531249999999999,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 10.700000000000001,
+      "base_rest_rate": 0.11831275720164608,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 8,
+      "sweep": 3,
+      "kname": "opp",
+      "pname": "nearseed",
+      "cond": "matched",
+      "patch": [
+        1.8181980515339464,
+        1.8181980515339462
+      ],
+      "kick": [
+        0.8636038969321073,
+        0.8636038969321074
+      ],
+      "n_core": 1112,
+      "d_core_paf": -0.017985611510791366,
+      "d_axis_deg": 0.746647678992332,
+      "d_event_t": 2.4000000000000057,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.16874999999999996,
+      "core_rest_rate": 0.051440329218107,
+      "core_burst_ms": 12.9,
+      "base_rest_rate": 0.10545267489711933,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 9,
+      "sweep": 3,
+      "kname": "opp",
+      "pname": "mid",
+      "cond": "matched",
+      "patch": [
+        1.5,
+        1.5
+      ],
+      "kick": [
+        0.8636038969321073,
+        0.8636038969321074
+      ],
+      "n_core": 1167,
+      "d_core_paf": 0.1645244215938303,
+      "d_axis_deg": 13.428196071826903,
+      "d_event_t": -0.30000000000001137,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.171875,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 12.9,
+      "base_rest_rate": 0.10545267489711932,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 10,
+      "sweep": 3,
+      "kname": "opp",
+      "pname": "far",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.0757359312880714
+      ],
+      "kick": [
+        0.8636038969321073,
+        0.8636038969321074
+      ],
+      "n_core": 1155,
+      "d_core_paf": -0.009523809523809545,
+      "d_axis_deg": 3.3955717275664625,
+      "d_event_t": 2.200000000000017,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.14080100125156444,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 13.5,
+      "base_rest_rate": 0.10288065843621398,
+      "kick_on_patch": true
+    },
+    {
+      "idx": 11,
+      "sweep": 3,
+      "kname": "opp",
+      "pname": "offaxis",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.9242640687119286
+      ],
+      "kick": [
+        0.8636038969321073,
+        0.8636038969321074
+      ],
+      "n_core": 1186,
+      "d_core_paf": -0.018549747048903886,
+      "d_axis_deg": 4.873439678562363,
+      "d_event_t": 0.6999999999999886,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.15625,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 14.0,
+      "base_rest_rate": 0.11831275720164608,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 12,
+      "sweep": 3,
+      "kname": "offaxis",
+      "pname": "nearseed",
+      "cond": "matched",
+      "patch": [
+        1.8181980515339464,
+        1.8181980515339462
+      ],
+      "kick": [
+        0.9696699141100894,
+        2.0303300858899105
+      ],
+      "n_core": 1112,
+      "d_core_paf": -0.029676258992805793,
+      "d_axis_deg": 0.05499511544300617,
+      "d_event_t": -1.3000000000000114,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 1.0125000000000002,
+      "core_rest_rate": 0.051440329218107,
+      "core_burst_ms": 11.5,
+      "base_rest_rate": 0.10545267489711933,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 13,
+      "sweep": 3,
+      "kname": "offaxis",
+      "pname": "mid",
+      "cond": "matched",
+      "patch": [
+        1.5,
+        1.5
+      ],
+      "kick": [
+        0.9696699141100894,
+        2.0303300858899105
+      ],
+      "n_core": 1167,
+      "d_core_paf": -0.05826906598114828,
+      "d_axis_deg": 0.11245547268183032,
+      "d_event_t": 0.30000000000001137,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.828125,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 11.700000000000001,
+      "base_rest_rate": 0.10545267489711932,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 14,
+      "sweep": 3,
+      "kname": "offaxis",
+      "pname": "far",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.0757359312880714
+      ],
+      "kick": [
+        0.9696699141100894,
+        2.0303300858899105
+      ],
+      "n_core": 1155,
+      "d_core_paf": -0.12121212121212122,
+      "d_axis_deg": 1.2821191125715927,
+      "d_event_t": -1.299999999999983,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.75,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 11.200000000000001,
+      "base_rest_rate": 0.10288065843621398,
+      "kick_on_patch": false
+    },
+    {
+      "idx": 15,
+      "sweep": 3,
+      "kname": "offaxis",
+      "pname": "offaxis",
+      "cond": "matched",
+      "patch": [
+        1.0757359312880714,
+        1.9242640687119286
+      ],
+      "kick": [
+        0.9696699141100894,
+        2.0303300858899105
+      ],
+      "n_core": 1186,
+      "d_core_paf": 0.08516020236087685,
+      "d_axis_deg": 0.37171638033353815,
+      "d_event_t": 0.8000000000000114,
+      "core_prekick_ignited": false,
+      "core_ignition_latency": NaN,
+      "base_prekick_ignited": false,
+      "evoked_clean": true,
+      "core_returned": true,
+      "base_returned": true,
+      "core_decay_ratio": 0.8917396745932413,
+      "core_rest_rate": 0.0617283950617284,
+      "core_burst_ms": 10.8,
+      "base_rest_rate": 0.11831275720164608,
+      "kick_on_patch": true
+    },
+    {
+      "idx": 16,
       "sweep": 2,
       "kname": "end",
       "pname": "nearseed",
@@ -217,7 +547,7 @@
       "kick_on_patch": true
     },
     {
-      "idx": 6,
+      "idx": 17,
       "sweep": 2,
       "kname": "end",
       "pname": "nearseed",
@@ -247,37 +577,7 @@
       "kick_on_patch": true
     },
     {
-      "idx": 7,
-      "sweep": 2,
-      "kname": "end",
-      "pname": "mid",
-      "cond": "matched",
-      "patch": [
-        1.5,
-        1.5
-      ],
-      "kick": [
-        2.136396103067893,
-        2.1363961030678924
-      ],
-      "n_core": 1167,
-      "d_core_paf": 0.045415595544130216,
-      "d_axis_deg": 18.717553592346974,
-      "d_event_t": -1.9000000000000057,
-      "core_prekick_ignited": false,
-      "core_ignition_latency": NaN,
-      "base_prekick_ignited": false,
-      "evoked_clean": true,
-      "core_returned": true,
-      "base_returned": true,
-      "core_decay_ratio": 0.35937499999999994,
-      "core_rest_rate": 0.0617283950617284,
-      "core_burst_ms": 17.400000000000002,
-      "base_rest_rate": 0.10545267489711932,
-      "kick_on_patch": false
-    },
-    {
-      "idx": 8,
+      "idx": 18,
       "sweep": 2,
       "kname": "end",
       "pname": "mid",
@@ -307,7 +607,7 @@
       "kick_on_patch": false
     },
     {
-      "idx": 9,
+      "idx": 19,
       "sweep": 2,
       "kname": "end",
       "pname": "mid",
@@ -337,37 +637,7 @@
       "kick_on_patch": false
     },
     {
-      "idx": 10,
-      "sweep": 2,
-      "kname": "end",
-      "pname": "far",
-      "cond": "matched",
-      "patch": [
-        1.0757359312880714,
-        1.0757359312880714
-      ],
-      "kick": [
-        2.136396103067893,
-        2.1363961030678924
-      ],
-      "n_core": 1155,
-      "d_core_paf": -0.039826839826839766,
-      "d_axis_deg": 0.7550236243700112,
-      "d_event_t": 2.6000000000000227,
-      "core_prekick_ignited": false,
-      "core_ignition_latency": NaN,
-      "base_prekick_ignited": false,
-      "evoked_clean": true,
-      "core_returned": true,
-      "base_returned": true,
-      "core_decay_ratio": 0.24999999999999997,
-      "core_rest_rate": 0.0617283950617284,
-      "core_burst_ms": 16.3,
-      "base_rest_rate": 0.10288065843621398,
-      "kick_on_patch": false
-    },
-    {
-      "idx": 11,
+      "idx": 20,
       "sweep": 2,
       "kname": "end",
       "pname": "far",
@@ -397,7 +667,7 @@
       "kick_on_patch": false
     },
     {
-      "idx": 12,
+      "idx": 21,
       "sweep": 2,
       "kname": "end",
       "pname": "far",
@@ -427,37 +697,7 @@
       "kick_on_patch": false
     },
     {
-      "idx": 13,
-      "sweep": 2,
-      "kname": "end",
-      "pname": "offaxis",
-      "cond": "matched",
-      "patch": [
-        1.0757359312880714,
-        1.9242640687119286
-      ],
-      "kick": [
-        2.136396103067893,
-        2.1363961030678924
-      ],
-      "n_core": 1186,
-      "d_core_paf": -0.07588532883642496,
-      "d_axis_deg": 10.438530021891921,
-      "d_event_t": 3.700000000000017,
-      "core_prekick_ignited": false,
-      "core_ignition_latency": NaN,
-      "base_prekick_ignited": false,
-      "evoked_clean": true,
-      "core_returned": true,
-      "base_returned": true,
-      "core_decay_ratio": 0.265625,
-      "core_rest_rate": 0.0617283950617284,
-      "core_burst_ms": 16.7,
-      "base_rest_rate": 0.11831275720164608,
-      "kick_on_patch": false
-    },
-    {
-      "idx": 14,
+      "idx": 22,
       "sweep": 2,
       "kname": "end",
       "pname": "offaxis",
@@ -487,7 +727,7 @@
       "kick_on_patch": false
     },
     {
-      "idx": 15,
+      "idx": 23,
       "sweep": 2,
       "kname": "end",
       "pname": "offaxis",
