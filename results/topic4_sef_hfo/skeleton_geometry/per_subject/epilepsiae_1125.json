@@ -4,6 +4,7 @@
   "status": "ok",
   "swap_class": "none",
   "template_source": "full_recording",
+  "clustering_provenance": "accepted_rankdisp_templates",
   "coord_space": "mni152_1mm",
   "n_eff": 7,
   "k_used": 3,
@@ -27,168 +28,194 @@
   "channels": [
     {
       "name": "TBB1",
-      "along_axis_mm": 8.68973761604202,
-      "off_axis_mm": 9.651690361331069,
-      "stereotypy_excess": -0.03745481010292995,
-      "role": "interior",
+      "along_axis_mm": 11.24636991375145,
+      "off_axis_mm": 4.9852278881109875,
+      "stereotypy_excess": 0.006120725957284301,
+      "role": "sink_core",
       "shaft": "TBB"
     },
     {
       "name": "TBB2",
-      "along_axis_mm": 12.417533616698178,
-      "off_axis_mm": 12.171203400301223,
-      "stereotypy_excess": -0.14776013658954762,
+      "along_axis_mm": 15.983477241058878,
+      "off_axis_mm": 5.434009135486694,
+      "stereotypy_excess": -0.15345456582972655,
       "role": "sink_core",
       "shaft": "TBB"
     },
     {
       "name": "HR9",
-      "along_axis_mm": 15.891738052683841,
-      "off_axis_mm": 6.936809665224137,
-      "stereotypy_excess": 0.055796685934528745,
-      "role": "sink_core",
+      "along_axis_mm": 6.747821948250871,
+      "off_axis_mm": 13.849196088150283,
+      "stereotypy_excess": -0.09654424071982876,
+      "role": "interior",
       "shaft": "HR"
     },
     {
       "name": "HR10",
-      "along_axis_mm": 11.124216636878689,
-      "off_axis_mm": 5.252155514560159,
-      "stereotypy_excess": 0.20809670039937012,
-      "role": "sink_core",
-      "shaft": "HR"
-    },
-    {
-      "name": "HR12",
-      "along_axis_mm": 5.950948717600758,
-      "off_axis_mm": 2.5663611126429364,
-      "stereotypy_excess": 0.1097177156166545,
+      "along_axis_mm": 4.3963082390119315,
+      "off_axis_mm": 9.381141039390098,
+      "stereotypy_excess": 0.022103221153286556,
       "role": "source_core",
       "shaft": "HR"
     },
     {
+      "name": "HR12",
+      "along_axis_mm": 2.1129543474320913,
+      "off_axis_mm": 4.025182057042202,
+      "stereotypy_excess": 0.10722461109062814,
+      "role": "sink_core",
+      "shaft": "HR"
+    },
+    {
       "name": "HR13",
-      "along_axis_mm": -0.05917136508978024,
-      "off_axis_mm": 0.5743100929695932,
-      "stereotypy_excess": 0.21485109525738927,
+      "along_axis_mm": -1.1587169002046933,
+      "off_axis_mm": 1.5244808335452074,
+      "stereotypy_excess": 0.048418930320228204,
       "role": "source_core",
       "shaft": "HR"
     },
     {
       "name": "HR14",
-      "along_axis_mm": -5.891777352510978,
-      "off_axis_mm": 2.9922610673377776,
-      "stereotypy_excess": 0.23413073065413115,
+      "along_axis_mm": -3.237591338807233,
+      "off_axis_mm": 7.906832635314876,
+      "stereotypy_excess": -0.04723270224700871,
       "role": "source_core",
       "shaft": "HR"
     }
   ],
   "modality": "depth_only",
   "modality_inferred_from": "channel_naming",
-  "weak_axis": false,
+  "weak_axis": true,
   "source_radius": {
-    "rms_mm": 5.354126134736337,
-    "meb_mm": 6.5383484153110105,
-    "max_pairwise_mm": 13.076696830622021
+    "rms_mm": 7.831560082980487,
+    "meb_mm": 9.447221813845593,
+    "max_pairwise_mm": 18.894443627691185
   },
   "sink_radius": {
-    "rms_mm": 8.86942313043338,
-    "meb_mm": 9.7082439194738,
-    "max_pairwise_mm": 19.4164878389476
+    "rms_mm": 7.52772652709081,
+    "meb_mm": 8.04673846971554,
+    "max_pairwise_mm": 16.09347693943108
   },
-  "axis_length_mm": 13.144496102086904,
+  "axis_length_mm": 9.780933834080809,
   "perp_spread": {
-    "rms_mm": 6.895831584180454,
-    "p75_mm": 8.294250013277603,
-    "p90_mm": 10.65949557691913,
+    "rms_mm": 7.70186551239355,
+    "p75_mm": 8.643986837352486,
+    "p90_mm": 11.168363058894172,
     "n": 7
   },
   "perp_spread_participation_sweep": [
     {
       "threshold": 1,
       "n": 7,
-      "rms_mm": 6.895831584180454,
-      "p90_mm": 10.65949557691913
+      "rms_mm": 7.70186551239355,
+      "p90_mm": 11.168363058894172
     },
     {
       "threshold": 5,
       "n": 7,
-      "rms_mm": 6.895831584180454,
-      "p90_mm": 10.65949557691913
+      "rms_mm": 7.70186551239355,
+      "p90_mm": 11.168363058894172
     },
     {
       "threshold": 10,
       "n": 7,
-      "rms_mm": 6.895831584180454,
-      "p90_mm": 10.65949557691913
+      "rms_mm": 7.70186551239355,
+      "p90_mm": 11.168363058894172
     },
     {
       "threshold": 20,
       "n": 7,
-      "rms_mm": 6.895831584180454,
-      "p90_mm": 10.65949557691913
+      "rms_mm": 7.70186551239355,
+      "p90_mm": 11.168363058894172
     }
   ],
   "sampling_geometry": {
     "geometry": "distributed",
     "n_shafts": 2,
-    "p90_off_mm": 10.65949557691913,
+    "p90_off_mm": 11.168363058894172,
     "measurable": true,
     "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [
     {
-      "a_lo": -5.891777352510978,
-      "a_hi": -1.5350742714720145,
-      "n": 1,
-      "mean_excess": 0.23413073065413115,
-      "sd_excess": 0.0,
-      "mean_event_count": 62452.0
-    },
-    {
-      "a_lo": -1.5350742714720145,
-      "a_hi": 2.821628809566949,
-      "n": 1,
-      "mean_excess": 0.21485109525738927,
-      "sd_excess": 0.0,
-      "mean_event_count": 63070.0
-    },
-    {
-      "a_lo": 2.821628809566949,
-      "a_hi": 7.178331890605913,
-      "n": 1,
-      "mean_excess": 0.1097177156166545,
-      "sd_excess": 0.0,
-      "mean_event_count": 63470.0
-    },
-    {
-      "a_lo": 7.178331890605913,
-      "a_hi": 11.535034971644876,
+      "a_lo": -3.237591338807233,
+      "a_hi": 0.6066223771659898,
       "n": 2,
-      "mean_excess": 0.08532094514822008,
-      "sd_excess": 0.12277575525115003,
-      "mean_event_count": 49723.5
+      "mean_excess": 0.0005931140366097487,
+      "sd_excess": 0.047825816283618455,
+      "mean_event_count": 62761.0
     },
     {
-      "a_lo": 11.535034971644876,
-      "a_hi": 15.891738052683843,
+      "a_lo": 0.6066223771659898,
+      "a_hi": 4.450836093139213,
       "n": 2,
-      "mean_excess": -0.04598172532750944,
-      "sd_excess": 0.10177841126203818,
-      "mean_event_count": 33002.0
+      "mean_excess": 0.06466391612195735,
+      "sd_excess": 0.04256069496867079,
+      "mean_event_count": 58072.0
+    },
+    {
+      "a_lo": 4.450836093139213,
+      "a_hi": 8.295049809112436,
+      "n": 1,
+      "mean_excess": -0.09654424071982876,
+      "sd_excess": 0.0,
+      "mean_event_count": 34932.0
+    },
+    {
+      "a_lo": 8.295049809112436,
+      "a_hi": 12.139263525085658,
+      "n": 1,
+      "mean_excess": 0.006120725957284301,
+      "sd_excess": 0.0,
+      "mean_event_count": 46773.0
+    },
+    {
+      "a_lo": 12.139263525085658,
+      "a_hi": 15.98347724105888,
+      "n": 1,
+      "mean_excess": -0.15345456582972655,
+      "sd_excess": 0.0,
+      "mean_event_count": 31072.0
     }
   ],
   "soz_relation": {
     "source_core": [
-      "HR12",
+      "HR10",
       "HR13",
       "HR14"
     ],
     "sink_core": [
+      "TBB1",
       "TBB2",
-      "HR9",
-      "HR10"
+      "HR12"
     ],
     "soz_channels_in_montage": []
+  },
+  "minority_axis": null,
+  "axes_cos_angle": null,
+  "split_half_validation": {
+    "spearman_rho": 0.8214285714285715,
+    "spearman_p": 0.023448808345691505,
+    "kendall_tau": 0.6190476190476191,
+    "rho_ci_lo": 0.7142857142857144,
+    "rho_ci_hi": 0.8214285714285715,
+    "n_channels": 7,
+    "n_events_a": 35353,
+    "n_events_b": 35354
+  },
+  "source_radius_null": {
+    "p_value": 0.3605,
+    "null_median_mm": 8.259674462242577,
+    "null_lo_mm": 4.447221354708778,
+    "null_hi_mm": 12.33783701554783,
+    "observed_mm": 7.831560082980487
+  },
+  "sink_radius_null": {
+    "p_value": 0.28,
+    "null_median_mm": 8.232726023485647,
+    "null_lo_mm": 4.447221354708778,
+    "null_hi_mm": 12.33783701554783,
+    "observed_mm": 7.52772652709081
   }
 }

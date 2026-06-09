@@ -4,6 +4,7 @@
   "status": "ok",
   "swap_class": "none",
   "template_source": "full_recording",
+  "clustering_provenance": "accepted_rankdisp_templates",
   "coord_space": "mni152_1mm",
   "n_eff": 5,
   "k_used": 2,
@@ -22,42 +23,42 @@
   "channels": [
     {
       "name": "TBA3",
-      "along_axis_mm": 48.22400303004973,
-      "off_axis_mm": 4.76398276211772,
-      "stereotypy_excess": -0.08389683101517761,
+      "along_axis_mm": 45.98919424801127,
+      "off_axis_mm": 2.0601000991910974,
+      "stereotypy_excess": -0.08179481134655273,
       "role": "sink_core",
       "shaft": "TBA"
     },
     {
       "name": "TBB3",
-      "along_axis_mm": 9.5161405035709,
-      "off_axis_mm": 5.71778540313445,
-      "stereotypy_excess": 0.10888603289370241,
+      "along_axis_mm": 7.729348593935714,
+      "off_axis_mm": 8.746837732199221,
+      "stereotypy_excess": 0.13999751594386095,
       "role": "source_core",
       "shaft": "TBB"
     },
     {
       "name": "TBB4",
-      "along_axis_mm": 15.50981844646304,
-      "off_axis_mm": 4.763982762117722,
-      "stereotypy_excess": 0.38740618315922204,
+      "along_axis_mm": 12.165771146183577,
+      "off_axis_mm": 2.0601000991910965,
+      "stereotypy_excess": 0.1183383711252145,
       "role": "sink_core",
       "shaft": "TBB"
     },
     {
       "name": "TBC5",
-      "along_axis_mm": -9.5161405035709,
-      "off_axis_mm": 5.71778540313445,
-      "stereotypy_excess": 0.2143925524086886,
-      "role": "source_core",
+      "along_axis_mm": -12.440898126167939,
+      "off_axis_mm": 4.634010553970615,
+      "stereotypy_excess": 0.06525944920402293,
+      "role": "interior",
       "shaft": "TBC"
     },
     {
       "name": "TBC6",
-      "along_axis_mm": -3.145896407198624,
-      "off_axis_mm": 14.330154772198895,
-      "stereotypy_excess": 0.13889343898831633,
-      "role": "interior",
+      "along_axis_mm": -7.729348593935714,
+      "off_axis_mm": 8.746837732199221,
+      "stereotypy_excess": 0.1454373434185018,
+      "role": "source_core",
       "shaft": "TBC"
     }
   ],
@@ -65,94 +66,94 @@
   "modality_inferred_from": "channel_naming",
   "weak_axis": false,
   "source_radius": {
-    "rms_mm": 11.10180165558726,
-    "meb_mm": 11.10180165558726,
-    "max_pairwise_mm": 22.20360331117452
+    "rms_mm": 11.672617529928752,
+    "meb_mm": 11.672617529928752,
+    "max_pairwise_mm": 23.345235059857504
   },
   "sink_radius": {
     "rms_mm": 17.03672503740082,
     "meb_mm": 17.03672503740082,
     "max_pairwise_mm": 34.07345007480164
   },
-  "axis_length_mm": 31.866910738256383,
+  "axis_length_mm": 29.077482697097423,
   "perp_spread": {
-    "rms_mm": 7.951484630473471,
-    "p75_mm": 5.71778540313445,
-    "p90_mm": 10.885207024573118,
+    "rms_mm": 6.049403595041968,
+    "p75_mm": 8.746837732199221,
+    "p90_mm": 8.746837732199221,
     "n": 5
   },
   "perp_spread_participation_sweep": [
     {
       "threshold": 1,
       "n": 5,
-      "rms_mm": 7.951484630473471,
-      "p90_mm": 10.885207024573118
+      "rms_mm": 6.049403595041968,
+      "p90_mm": 8.746837732199221
     },
     {
       "threshold": 5,
       "n": 5,
-      "rms_mm": 7.951484630473471,
-      "p90_mm": 10.885207024573118
+      "rms_mm": 6.049403595041968,
+      "p90_mm": 8.746837732199221
     },
     {
       "threshold": 10,
       "n": 5,
-      "rms_mm": 7.951484630473471,
-      "p90_mm": 10.885207024573118
+      "rms_mm": 6.049403595041968,
+      "p90_mm": 8.746837732199221
     },
     {
       "threshold": 20,
       "n": 5,
-      "rms_mm": 7.951484630473471,
-      "p90_mm": 10.885207024573118
+      "rms_mm": 6.049403595041968,
+      "p90_mm": 8.746837732199221
     }
   ],
   "sampling_geometry": {
     "geometry": "distributed",
     "n_shafts": 3,
-    "p90_off_mm": 10.885207024573118,
+    "p90_off_mm": 8.746837732199221,
     "measurable": true,
     "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [
     {
-      "a_lo": -9.5161405035709,
-      "a_hi": 2.031888203153226,
+      "a_lo": -12.440898126167939,
+      "a_hi": -0.7548796513320966,
       "n": 2,
-      "mean_excess": 0.17664299569850245,
-      "sd_excess": 0.037749556710186136,
+      "mean_excess": 0.10534839631126237,
+      "sd_excess": 0.04008894710723944,
       "mean_event_count": 7913.0
     },
     {
-      "a_lo": 2.031888203153226,
-      "a_hi": 13.579916909877353,
+      "a_lo": -0.7548796513320966,
+      "a_hi": 10.931138823503746,
       "n": 1,
-      "mean_excess": 0.10888603289370241,
+      "mean_excess": 0.13999751594386095,
       "sd_excess": 0.0,
       "mean_event_count": 8603.0
     },
     {
-      "a_lo": 13.579916909877353,
-      "a_hi": 25.12794561660148,
+      "a_lo": 10.931138823503746,
+      "a_hi": 22.617157298339592,
       "n": 1,
-      "mean_excess": 0.38740618315922204,
+      "mean_excess": 0.1183383711252145,
       "sd_excess": 0.0,
       "mean_event_count": 9045.0
     },
     {
-      "a_lo": 25.12794561660148,
-      "a_hi": 36.675974323325605,
+      "a_lo": 22.617157298339592,
+      "a_hi": 34.30317577317543,
       "n": 0,
       "mean_excess": NaN,
       "sd_excess": NaN,
       "mean_event_count": NaN
     },
     {
-      "a_lo": 36.675974323325605,
-      "a_hi": 48.22400303004974,
+      "a_lo": 34.30317577317543,
+      "a_hi": 45.98919424801128,
       "n": 1,
-      "mean_excess": -0.08389683101517761,
+      "mean_excess": -0.08179481134655273,
       "sd_excess": 0.0,
       "mean_event_count": 3492.0
     }
@@ -160,12 +161,38 @@
   "soz_relation": {
     "source_core": [
       "TBB3",
-      "TBC5"
+      "TBC6"
     ],
     "sink_core": [
       "TBA3",
       "TBB4"
     ],
     "soz_channels_in_montage": []
+  },
+  "minority_axis": null,
+  "axes_cos_angle": null,
+  "split_half_validation": {
+    "spearman_rho": 0.49999999999999994,
+    "spearman_p": 0.39100221895577053,
+    "kendall_tau": 0.19999999999999998,
+    "rho_ci_lo": 0.49999999999999994,
+    "rho_ci_hi": 0.49999999999999994,
+    "n_channels": 5,
+    "n_events_a": 5699,
+    "n_events_b": 5699
+  },
+  "source_radius_null": {
+    "p_value": 0.485,
+    "null_median_mm": 12.619429464123963,
+    "null_lo_mm": 5.744562646538029,
+    "null_hi_mm": 29.300170647967224,
+    "observed_mm": 11.672617529928752
+  },
+  "sink_radius_null": {
+    "p_value": 0.7025,
+    "null_median_mm": 12.619429464123963,
+    "null_lo_mm": 5.744562646538029,
+    "null_hi_mm": 29.300170647967224,
+    "observed_mm": 17.03672503740082
   }
 }

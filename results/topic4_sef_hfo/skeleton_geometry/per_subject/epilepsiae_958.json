@@ -3,7 +3,8 @@
   "subject": "958",
   "status": "ok",
   "swap_class": "strict",
-  "template_source": "dominant_cluster_0",
+  "template_source": "dominant_cluster",
+  "clustering_provenance": "accepted_rankdisp_templates",
   "coord_space": "mni152_1mm",
   "n_eff": 16,
   "k_used": 3,
@@ -33,129 +34,129 @@
   "channels": [
     {
       "name": "GD8",
-      "along_axis_mm": 34.07074684295119,
-      "off_axis_mm": 14.269851225852905,
-      "stereotypy_excess": 0.12141788618262217,
+      "along_axis_mm": 32.06747609192012,
+      "off_axis_mm": 18.33361452465323,
+      "stereotypy_excess": 0.19119391599044072,
       "role": "sink_core",
       "shaft": "GD"
     },
     {
       "name": "GE7",
-      "along_axis_mm": 26.70571720906192,
-      "off_axis_mm": 3.2530671876541044,
-      "stereotypy_excess": 0.1714707144376163,
+      "along_axis_mm": 26.10654606031722,
+      "off_axis_mm": 6.498155936749502,
+      "stereotypy_excess": 0.17082407271075595,
       "role": "sink_core",
       "shaft": "GE"
     },
     {
       "name": "GE8",
-      "along_axis_mm": 23.356810006195893,
-      "off_axis_mm": 13.363028752703428,
-      "stereotypy_excess": -0.017244443115203623,
+      "along_axis_mm": 21.529172456873788,
+      "off_axis_mm": 16.14329100379777,
+      "stereotypy_excess": -0.022112255948253612,
       "role": "interior",
       "shaft": "GE"
     },
     {
       "name": "GF4",
-      "along_axis_mm": 15.966118248146723,
-      "off_axis_mm": 26.879871884565237,
-      "stereotypy_excess": 0.1486467657042307,
-      "role": "interior",
-      "shaft": "GF"
-    },
-    {
-      "name": "GF5",
-      "along_axis_mm": 17.159407021581742,
-      "off_axis_mm": 17.33971919550032,
-      "stereotypy_excess": 0.1935969022157043,
+      "along_axis_mm": 19.16290305170388,
+      "off_axis_mm": 24.7027850874237,
+      "stereotypy_excess": 0.1323224233277565,
       "role": "sink_core",
       "shaft": "GF"
     },
     {
+      "name": "GF5",
+      "along_axis_mm": 19.16290305170388,
+      "off_axis_mm": 15.09616698841495,
+      "stereotypy_excess": 0.14479164906744657,
+      "role": "interior",
+      "shaft": "GF"
+    },
+    {
       "name": "GF6",
-      "along_axis_mm": 14.759998412631756,
-      "off_axis_mm": 6.994299438606116,
-      "stereotypy_excess": 0.13291543448317972,
+      "along_axis_mm": 15.503590255730735,
+      "off_axis_mm": 5.139695220554304,
+      "stereotypy_excess": 0.10019694986823069,
       "role": "interior",
       "shaft": "GF"
     },
     {
       "name": "GF7",
-      "along_axis_mm": 15.504200013268651,
-      "off_axis_mm": 3.7502301786696752,
-      "stereotypy_excess": 0.06107324361672606,
+      "along_axis_mm": 14.921720729869282,
+      "off_axis_mm": 5.637969040730339,
+      "stereotypy_excess": 0.06712572163734903,
       "role": "interior",
       "shaft": "GF"
     },
     {
       "name": "GF8",
-      "along_axis_mm": 9.961181194731775,
-      "off_axis_mm": 13.743579603466964,
-      "stereotypy_excess": 0.017550072111635062,
+      "along_axis_mm": 8.184964663784449,
+      "off_axis_mm": 14.870018983300291,
+      "stereotypy_excess": 0.013897903512170351,
       "role": "interior",
       "shaft": "GF"
     },
     {
       "name": "GG4",
-      "along_axis_mm": 6.586611867705853,
-      "off_axis_mm": 25.483216474416533,
-      "stereotypy_excess": 0.08602496594051418,
+      "along_axis_mm": 9.684894997116198,
+      "off_axis_mm": 24.474079894300655,
+      "stereotypy_excess": 0.08657879825315185,
       "role": "interior",
       "shaft": "GG"
     },
     {
       "name": "GG5",
-      "along_axis_mm": 6.458301246906388,
-      "off_axis_mm": 15.4726034045767,
-      "stereotypy_excess": 0.17606507524654563,
+      "along_axis_mm": 8.314269002864773,
+      "off_axis_mm": 14.559671770308324,
+      "stereotypy_excess": 0.17651184789141638,
       "role": "interior",
       "shaft": "GG"
     },
     {
       "name": "GG6",
-      "along_axis_mm": 4.469486624514686,
-      "off_axis_mm": 5.983432718019155,
-      "stereotypy_excess": 0.23736604635653702,
+      "along_axis_mm": 5.172173563212922,
+      "off_axis_mm": 5.3876152804166635,
+      "stereotypy_excess": 0.21593862960335075,
       "role": "source_core",
       "shaft": "GG"
     },
     {
       "name": "GG7",
-      "along_axis_mm": 2.891265988681271,
-      "off_axis_mm": 2.66177110720275,
-      "stereotypy_excess": 0.09944615921527034,
+      "along_axis_mm": 2.547295479882364,
+      "off_axis_mm": 2.992612601493103,
+      "stereotypy_excess": 0.08178336315809687,
       "role": "source_core",
       "shaft": "GG"
     },
     {
       "name": "GH5",
-      "along_axis_mm": -5.615728170323241,
-      "off_axis_mm": 15.58550742072527,
-      "stereotypy_excess": 0.08580784323183388,
+      "along_axis_mm": -3.6593127959731433,
+      "off_axis_mm": 16.15716170327176,
+      "stereotypy_excess": 0.0846970410089729,
       "role": "interior",
       "shaft": "GH"
     },
     {
       "name": "GH6",
-      "along_axis_mm": -6.693537385038743,
-      "off_axis_mm": 5.7132304101561635,
-      "stereotypy_excess": 0.18591763523056293,
+      "along_axis_mm": -5.947999597694862,
+      "off_axis_mm": 6.485811069578439,
+      "stereotypy_excess": 0.16158490491052424,
       "role": "interior",
       "shaft": "GH"
     },
     {
       "name": "GH7",
-      "along_axis_mm": -7.3607526131959595,
-      "off_axis_mm": 3.356153365353454,
-      "stereotypy_excess": 0.0454429515207902,
+      "along_axis_mm": -7.7194690430952875,
+      "off_axis_mm": 2.419554119489368,
+      "stereotypy_excess": 0.0401599299763159,
       "role": "source_core",
       "shaft": "GH"
     },
     {
       "name": "OPL5",
-      "along_axis_mm": 22.971878143797497,
-      "off_axis_mm": 38.41966413601629,
-      "stereotypy_excess": -0.03281014153745865,
+      "along_axis_mm": 18.400007451129973,
+      "off_axis_mm": 40.807076635997085,
+      "stereotypy_excess": -0.018952424804737134,
       "role": "interior",
       "shaft": "OPL"
     }
@@ -169,91 +170,91 @@
     "max_pairwise_mm": 15.066519173319364
   },
   "sink_radius": {
-    "rms_mm": 14.817407180595245,
-    "meb_mm": 17.916472867168917,
-    "max_pairwise_mm": 35.832945734337834
+    "rms_mm": 18.90326250501043,
+    "meb_mm": 22.45551157288562,
+    "max_pairwise_mm": 44.91102314577124
   },
-  "axis_length_mm": 25.978623691198283,
+  "axis_length_mm": 25.77897506798041,
   "perp_spread": {
-    "rms_mm": 16.5121377983926,
-    "p75_mm": 16.024060364419032,
-    "p90_mm": 26.181544179490885,
+    "rms_mm": 16.918063376110027,
+    "p75_mm": 16.70127490861713,
+    "p90_mm": 24.588432490862175,
     "n": 16
   },
   "perp_spread_participation_sweep": [
     {
       "threshold": 1,
       "n": 16,
-      "rms_mm": 16.5121377983926,
-      "p90_mm": 26.181544179490885
+      "rms_mm": 16.918063376110027,
+      "p90_mm": 24.588432490862175
     },
     {
       "threshold": 5,
       "n": 16,
-      "rms_mm": 16.5121377983926,
-      "p90_mm": 26.181544179490885
+      "rms_mm": 16.918063376110027,
+      "p90_mm": 24.588432490862175
     },
     {
       "threshold": 10,
       "n": 16,
-      "rms_mm": 16.5121377983926,
-      "p90_mm": 26.181544179490885
+      "rms_mm": 16.918063376110027,
+      "p90_mm": 24.588432490862175
     },
     {
       "threshold": 20,
       "n": 16,
-      "rms_mm": 16.5121377983926,
-      "p90_mm": 26.181544179490885
+      "rms_mm": 16.918063376110027,
+      "p90_mm": 24.588432490862175
     }
   ],
   "sampling_geometry": {
     "geometry": "distributed",
     "n_shafts": 6,
-    "p90_off_mm": 26.181544179490885,
+    "p90_off_mm": 24.588432490862175,
     "measurable": true,
     "unparsed_frac": 0.0
   },
   "perp_width_measurable": true,
   "along_axis_profile": [
     {
-      "a_lo": -7.3607526131959595,
-      "a_hi": 0.9255472780334699,
+      "a_lo": -7.7194690430952875,
+      "a_hi": 0.23791998390779412,
       "n": 3,
-      "mean_excess": 0.10572280999439566,
-      "sd_excess": 0.05905217250706152,
-      "mean_event_count": 62101.0
+      "mean_excess": 0.09548062529860435,
+      "sd_excess": 0.05015456378065689,
+      "mean_event_count": 62271.333333333336
     },
     {
-      "a_lo": 0.9255472780334699,
-      "a_hi": 9.2118471692629,
+      "a_lo": 0.23791998390779412,
+      "a_hi": 8.195309010910876,
+      "n": 3,
+      "mean_excess": 0.10387329875787266,
+      "sd_excess": 0.08394874504110442,
+      "mean_event_count": 62536.333333333336
+    },
+    {
+      "a_lo": 8.195309010910876,
+      "a_hi": 16.152698037913957,
       "n": 4,
-      "mean_excess": 0.1497255616897168,
-      "sd_excess": 0.06115637484971666,
-      "mean_event_count": 63467.25
+      "mean_excess": 0.10760332941253699,
+      "sd_excess": 0.04148405120821222,
+      "mean_event_count": 61874.0
     },
     {
-      "a_lo": 9.2118471692629,
-      "a_hi": 17.49814706049233,
-      "n": 5,
-      "mean_excess": 0.11075648362629517,
-      "sd_excess": 0.0631586684729507,
-      "mean_event_count": 59030.4
+      "a_lo": 16.152698037913957,
+      "a_hi": 24.11008706491704,
+      "n": 4,
+      "mean_excess": 0.059012347910553084,
+      "sd_excess": 0.07967459256318205,
+      "mean_event_count": 56478.75
     },
     {
-      "a_lo": 17.49814706049233,
-      "a_hi": 25.78444695172176,
+      "a_lo": 24.11008706491704,
+      "a_hi": 32.06747609192013,
       "n": 2,
-      "mean_excess": -0.025027292326331135,
-      "sd_excess": 0.007782849211127513,
-      "mean_event_count": 50852.0
-    },
-    {
-      "a_lo": 25.78444695172176,
-      "a_hi": 34.070746842951195,
-      "n": 2,
-      "mean_excess": 0.14644430031011924,
-      "sd_excess": 0.025026414127497065,
-      "mean_event_count": 46988.5
+      "mean_excess": 0.18100899435059833,
+      "sd_excess": 0.010184921639842387,
+      "mean_event_count": 49060.5
     }
   ],
   "soz_relation": {
@@ -265,7 +266,7 @@
     "sink_core": [
       "GD8",
       "GE7",
-      "GF5"
+      "GF4"
     ],
     "soz_channels_in_montage": [
       "GD8",
@@ -275,5 +276,43 @@
       "GH6",
       "OPL5"
     ]
+  },
+  "minority_axis": {
+    "axis_length_mm": 25.510346484863312,
+    "source_centroid": [
+      -56.333333333333336,
+      -49.0,
+      4.333333333333333
+    ],
+    "sink_centroid": [
+      -45.333333333333336,
+      -71.66666666666667,
+      0.3333333333333333
+    ]
+  },
+  "axes_cos_angle": -0.6212538836356193,
+  "split_half_validation": {
+    "spearman_rho": 0.8462106779513116,
+    "spearman_p": 3.596393862219723e-05,
+    "kendall_tau": 0.6945667492672501,
+    "rho_ci_lo": 0.8462106779513116,
+    "rho_ci_hi": 0.8697574098595219,
+    "n_channels": 16,
+    "n_events_a": 42132,
+    "n_events_b": 42133
+  },
+  "source_radius_null": {
+    "p_value": 0.0105,
+    "null_median_mm": 15.506271132817343,
+    "null_lo_mm": 6.944222218666553,
+    "null_hi_mm": 27.796882319185844,
+    "observed_mm": 6.7494855771055295
+  },
+  "sink_radius_null": {
+    "p_value": 0.7345,
+    "null_median_mm": 15.592020751368665,
+    "null_lo_mm": 7.195677714974301,
+    "null_hi_mm": 27.816861393366754,
+    "observed_mm": 18.90326250501043
   }
 }

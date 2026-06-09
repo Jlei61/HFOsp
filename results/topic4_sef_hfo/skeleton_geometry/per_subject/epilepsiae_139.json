@@ -3,7 +3,8 @@
   "subject": "139",
   "status": "ok",
   "swap_class": "strict",
-  "template_source": "dominant_cluster_1",
+  "template_source": "dominant_cluster",
+  "clustering_provenance": "accepted_rankdisp_templates",
   "coord_space": "mni152_1mm",
   "n_eff": 7,
   "k_used": 3,
@@ -26,7 +27,7 @@
       "name": "HL2",
       "along_axis_mm": -6.182850317019405,
       "off_axis_mm": 0.465624743519392,
-      "stereotypy_excess": 0.08013273373297813,
+      "stereotypy_excess": 0.1299684370414227,
       "role": "source_core",
       "shaft": "HL"
     },
@@ -34,7 +35,7 @@
       "name": "HL3",
       "along_axis_mm": -0.2958102240622492,
       "off_axis_mm": 0.1536470710796438,
-      "stereotypy_excess": 0.179591240840966,
+      "stereotypy_excess": 0.19523042811786584,
       "role": "source_core",
       "shaft": "HL"
     },
@@ -42,7 +43,7 @@
       "name": "HL4",
       "along_axis_mm": 6.478660541081652,
       "off_axis_mm": 0.37157597411928145,
-      "stereotypy_excess": 0.294897437778279,
+      "stereotypy_excess": 0.21150197710207347,
       "role": "source_core",
       "shaft": "HL"
     },
@@ -50,7 +51,7 @@
       "name": "HL5",
       "along_axis_mm": 13.603103965679484,
       "off_axis_mm": 1.0327989204226606,
-      "stereotypy_excess": 0.11210044880024045,
+      "stereotypy_excess": 0.09540312092109104,
       "role": "interior",
       "shaft": "HL"
     },
@@ -58,7 +59,7 @@
       "name": "HL6",
       "along_axis_mm": 19.92760988295405,
       "off_axis_mm": 0.03841176776990987,
-      "stereotypy_excess": 0.17823364041569695,
+      "stereotypy_excess": 0.15745967061921423,
       "role": "sink_core",
       "shaft": "HL"
     },
@@ -66,7 +67,7 @@
       "name": "HL7",
       "along_axis_mm": 26.702080648097954,
       "off_axis_mm": 0.3316627407231449,
-      "stereotypy_excess": 0.3150772747002799,
+      "stereotypy_excess": 0.2375008130074044,
       "role": "sink_core",
       "shaft": "HL"
     },
@@ -74,7 +75,7 @@
       "name": "HL8",
       "along_axis_mm": 33.376559224826444,
       "off_axis_mm": 0.34118238929318323,
-      "stereotypy_excess": 0.19229674045524714,
+      "stereotypy_excess": 0.26861547953851683,
       "role": "sink_core",
       "shaft": "HL"
     }
@@ -138,41 +139,41 @@
       "a_lo": -6.182850317019405,
       "a_hi": 1.7290315913497656,
       "n": 2,
-      "mean_excess": 0.12986198728697207,
-      "sd_excess": 0.049729253553993935,
-      "mean_event_count": 4197.0
+      "mean_excess": 0.16259943257964427,
+      "sd_excess": 0.032630995538221574,
+      "mean_event_count": 4411.0
     },
     {
       "a_lo": 1.7290315913497656,
       "a_hi": 9.640913499718936,
       "n": 1,
-      "mean_excess": 0.294897437778279,
+      "mean_excess": 0.21150197710207347,
       "sd_excess": 0.0,
-      "mean_event_count": 6452.0
+      "mean_event_count": 6670.0
     },
     {
       "a_lo": 9.640913499718936,
       "a_hi": 17.552795408088105,
       "n": 1,
-      "mean_excess": 0.11210044880024045,
+      "mean_excess": 0.09540312092109104,
       "sd_excess": 0.0,
-      "mean_event_count": 7784.0
+      "mean_event_count": 8185.0
     },
     {
       "a_lo": 17.552795408088105,
       "a_hi": 25.464677316457276,
       "n": 1,
-      "mean_excess": 0.17823364041569695,
+      "mean_excess": 0.15745967061921423,
       "sd_excess": 0.0,
-      "mean_event_count": 7274.0
+      "mean_event_count": 7562.0
     },
     {
       "a_lo": 25.464677316457276,
       "a_hi": 33.37655922482645,
       "n": 2,
-      "mean_excess": 0.2536870075777635,
-      "sd_excess": 0.061390267122516384,
-      "mean_event_count": 5790.0
+      "mean_excess": 0.25305814627296064,
+      "sd_excess": 0.015557333265556222,
+      "mean_event_count": 6134.0
     }
   ],
   "soz_relation": {
@@ -192,5 +193,43 @@
       "HL4",
       "HL5"
     ]
+  },
+  "minority_axis": {
+    "axis_length_mm": 26.66874991862615,
+    "source_centroid": [
+      -29.666666666666668,
+      -27.0,
+      -16.0
+    ],
+    "sink_centroid": [
+      -27.0,
+      -3.3333333333333335,
+      -28.0
+    ]
+  },
+  "axes_cos_angle": -0.9999999999999999,
+  "split_half_validation": {
+    "spearman_rho": 0.8928571428571429,
+    "spearman_p": 0.006807187408935392,
+    "kendall_tau": 0.8095238095238096,
+    "rho_ci_lo": 0.8928571428571429,
+    "rho_ci_hi": 0.8928571428571429,
+    "n_channels": 7,
+    "n_events_a": 4559,
+    "n_events_b": 4559
+  },
+  "source_radius_null": {
+    "p_value": 0.0325,
+    "null_median_mm": 11.185307823708346,
+    "null_lo_mm": 5.185449728701348,
+    "null_hi_mm": 17.29482902809713,
+    "observed_mm": 5.185449728701348
+  },
+  "sink_radius_null": {
+    "p_value": 0.094,
+    "null_median_mm": 11.185307823708344,
+    "null_lo_mm": 5.185449728701348,
+    "null_hi_mm": 17.429221949868495,
+    "observed_mm": 5.497474167490214
   }
 }

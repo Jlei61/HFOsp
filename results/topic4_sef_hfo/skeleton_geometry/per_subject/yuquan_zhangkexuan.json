@@ -4,6 +4,7 @@
   "status": "ok",
   "swap_class": "none",
   "template_source": "full_recording",
+  "clustering_provenance": "accepted_rankdisp_templates",
   "coord_space": "fs_native_ras_mm",
   "n_eff": 26,
   "k_used": 3,
@@ -369,5 +370,31 @@
       "F2",
       "F3"
     ]
+  },
+  "minority_axis": null,
+  "axes_cos_angle": null,
+  "split_half_validation": {
+    "spearman_rho": 0.8188034188034188,
+    "spearman_p": 3.1730710667830347e-07,
+    "kendall_tau": 0.6307692307692307,
+    "rho_ci_lo": 0.816068376068376,
+    "rho_ci_hi": 0.8201709401709402,
+    "n_channels": 26,
+    "n_events_a": 9095,
+    "n_events_b": 9095
+  },
+  "source_radius_null": {
+    "p_value": 0.0185,
+    "null_median_mm": 14.365774393867397,
+    "null_lo_mm": 4.363261918922334,
+    "null_hi_mm": 21.76916415807267,
+    "observed_mm": 3.838278349581454
+  },
+  "sink_radius_null": {
+    "p_value": 0.019,
+    "null_median_mm": 14.387735247633808,
+    "null_lo_mm": 4.871653054458219,
+    "null_hi_mm": 22.120790915446783,
+    "observed_mm": 4.366178518060742
   }
 }

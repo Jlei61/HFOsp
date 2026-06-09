@@ -4,6 +4,7 @@
   "status": "ok",
   "swap_class": "none",
   "template_source": "full_recording",
+  "clustering_provenance": "accepted_rankdisp_templates",
   "coord_space": "mni152_1mm",
   "n_eff": 6,
   "k_used": 2,
@@ -176,5 +177,31 @@
       "AH4"
     ],
     "soz_channels_in_montage": []
+  },
+  "minority_axis": null,
+  "axes_cos_angle": null,
+  "split_half_validation": {
+    "spearman_rho": 1.0,
+    "spearman_p": 0.0,
+    "kendall_tau": 0.9999999999999999,
+    "rho_ci_lo": 1.0,
+    "rho_ci_hi": 1.0,
+    "n_channels": 6,
+    "n_events_a": 46628,
+    "n_events_b": 46629
+  },
+  "source_radius_null": {
+    "p_value": 0.073,
+    "null_median_mm": 7.158910531638177,
+    "null_lo_mm": 1.5811388300841898,
+    "null_hi_mm": 10.04987562112089,
+    "observed_mm": 1.5811388300841898
+  },
+  "sink_radius_null": {
+    "p_value": 0.1185,
+    "null_median_mm": 7.158910531638177,
+    "null_lo_mm": 1.5811388300841898,
+    "null_hi_mm": 10.04987562112089,
+    "observed_mm": 2.0615528128088303
   }
 }
