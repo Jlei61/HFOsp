@@ -252,3 +252,16 @@ def test_atlas_quality_fail_for_too_few_channels():
     rank = np.array([0.0, 1.0, 2.0, np.nan, np.nan, np.nan, np.nan, np.nan])
     q = compute_atlas_quality(rank, tie_max=0.3, min_channels=8)
     assert q["atlas_quality_flag"] == "fail"
+
+
+# --- Task 7b: between_subject_control (Null D) ---
+from src.topic5_echo_gate import between_subject_control
+
+
+def test_between_subject_control_neutral_for_unrelated_templates():
+    rng = np.random.default_rng(11)
+    seizure = np.arange(12, dtype=float)             # echoes ITS OWN template
+    other_templates = [rng.permutation(12).astype(float) for _ in range(8)]
+    res = between_subject_control(seizure, other_templates, B=800, rng=rng, min_ch=8)
+    assert abs(res["e_k"]) < 2.5
+    assert 0.02 < res["p_k"] < 0.98

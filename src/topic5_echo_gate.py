@@ -255,3 +255,22 @@ def compute_atlas_quality(ictal_rank, *, tie_max: float, min_channels: int) -> D
     return {"atlas_quality_flag": "pass" if ok else "fail",
             "rank_tie_fraction": tie_frac, "rank_dynamic_range": dyn,
             "n_ranked_channels": n}
+
+
+def between_subject_control(seizure_rank, other_subject_templates, *, B, rng, min_ch,
+                            null_mode="channel", blocks=None) -> Dict:
+    """Null D (§4.6): echo of this seizure against OTHER subjects' templates (each
+    remapped to this seizure's channel count by truncation/padding). Same record shape
+    as compute_echo_strength so it pools identically. Under generic-echo scope (spec
+    v4 §3.2) the cohort pool of this is the FORMAL negative control — it should be
+    neutral; if it pools significant, the statistic is too coarse -> primary void."""
+    n = len(np.asarray(seizure_rank))
+    remapped = []
+    for t in other_subject_templates:
+        t = np.asarray(t, dtype=float)
+        if t.size >= n:
+            remapped.append(t[:n])
+        else:
+            remapped.append(np.concatenate([t, np.full(n - t.size, np.nan)]))
+    return compute_echo_strength(seizure_rank, remapped, B=B, rng=rng, min_ch=min_ch,
+                                 null_mode=null_mode, blocks=blocks)
