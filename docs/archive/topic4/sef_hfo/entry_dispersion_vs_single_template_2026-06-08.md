@@ -118,8 +118,18 @@
 
 **口径**：k=2「两种时序模式」本身是上游逐事件聚类（PR-2）的结果，**不是**本入口分析独立重新发现的；本分析只是确认「入口尊重并复现了这两模式，且两模式入口相反」。「只用入口（不看后续顺序）能否独立聚出两模式」未做。
 
+### 4.7 两条通路入口的 3D 空间分布 + 紧凑度 null（2026-06-08 追加）
+
+把「两模式入口相反」从「名次相关」推进到**真实 3D 脑空间**（26 个有坐标的 k=2 被试；每模板入口群 = 覆盖 ≥70% 入口的最小通道集；Epilepsiae MNI mm、Yuquan 原生 RAS mm，**不并比**）。数据：`results/propagation_entry_dispersion/entry_overlap_summary.{json,csv}`、图 `figures/entry_overlap_3d/`（左 3D + 右投影到模板传播主轴，主轴由 template_rank 空间梯度算、非入口标签 → 不循环）。两件事分开讲：
+
+- **两条通路的入口群在空间上彼此分开（稳）**：重叠 Jaccard 中位 **0.17**，**35%** 被试两群完全无共享通道；两群（频率加权）重心脑内中位相距约 **16 mm**（Yuquan ~10mm / Epilepsiae ~17mm）。即正反两条通路确实从空间上分开的两小撮进入，与「同一条轴的两端」一致。
+- **但每个入口群自己并不特别紧凑（确认不了「局部入口结构」）**：每个入口群对「同被试随机抽同样多触点」比几何半径（unweighted rms，1000 次 null），只有 **10/51（19.6%）** 显著更紧（中位 p 0.20）。所以 per-event 入口群是**空间上铺开**的，与「单一通路里抖动最大的早端」一致，而**不是**一个紧凑的独立入口结构。**诚实 caveat**：即便某些入口群显著紧，也部分只是「沿轴传播的早端天然落在一个空间端」，不能据此断言独立入口机制——和 §4.5 的结论一致：**reject 强于 confirm**。
+- **与并行 skeleton-geometry 的区别（不串台）**：那边对 template-均值 **source/sink core**（固定 top-k）做的随机-k null 源端常显著紧；本处是 **per-event 入口群**（覆盖 70%、含轮流领先的多条），更铺开，两者是不同对象、不矛盾。
+
+**综合空间图像**：两条互为反向的通路，从脑内相距约 16mm、彼此基本不重叠的**两个入口区域**进入；但每个区域内部是一小撮通道轮流领先、空间上铺开（不是一个紧点）。这把「有抖动的刻板传播通路 + 早端小入口群」的图景在空间上坐实了，同时**没有**升级成「紧凑的独立入口结构被证实」。
+
 ---
 
 ## 内部归档代号
 
-Topic 1 PR-2 / PR-2.5 adaptive_cluster 模板簇 + `template_rank` + `adaptive_cluster.labels`；Topic 0 §3.1 masked lagPatRank（`mask_phantom_ranks` / `build_masked_kmeans_features`，phantom pseudo-rank 修复）；earliest = argmin masked normalized rank（= argmin lag_raw）；entry dispersion = effective number = exp(Shannon entropy)；single-template-noise generative null（per-channel template mean + pooled residual resample，directional `p_neff_excess` / `p_neff_concentrated` / `p_radius_excess`）；entry shape = spearman(per-channel earliest-prob, template_rank)；downstream invariance = cross-entry-group downstream-template Spearman；post-entry stability = `_multi_seed_tau_summary` raw + centered（`_center_rank_matrix`），earliest-removed delta；coords via `src.seeg_coord_loader`（Epilepsiae mni152_1mm / Yuquan fs_native_ras_mm）；簇内 92% identity-bias（Topic 0 §3.1 / Topic 1 §3.2）。
+Topic 1 PR-2 / PR-2.5 adaptive_cluster 模板簇 + `template_rank` + `adaptive_cluster.labels`；Topic 0 §3.1 masked lagPatRank（`mask_phantom_ranks` / `build_masked_kmeans_features`，phantom pseudo-rank 修复）；earliest = argmin masked normalized rank（= argmin lag_raw）；entry dispersion = effective number = exp(Shannon entropy)；single-template-noise generative null（per-channel template mean + pooled residual resample，directional `p_neff_excess` / `p_neff_concentrated` / `p_radius_excess`）；entry shape = spearman(per-channel earliest-prob, template_rank)；downstream invariance = cross-entry-group downstream-template Spearman；post-entry stability = `_multi_seed_tau_summary` raw + centered（`_center_rank_matrix`），earliest-removed delta；coords via `src.seeg_coord_loader`（Epilepsiae mni152_1mm / Yuquan fs_native_ras_mm）；簇内 92% identity-bias（Topic 0 §3.1 / Topic 1 §3.2）。§4.7 entry-overlap：entry group = 覆盖 ≥70% entry mass 的最小通道集；overlap = Jaccard + 频率加权重心 mm 距离；compactness null = entry-group unweighted rms radius vs within-subject random-k mapped channels（1000×，one-sided `p_compact`）；propagation axis = template_rank 空间梯度方向（regress coords on rank）；`scripts/plot_entry_overlap_3d.py`、`results/propagation_entry_dispersion/entry_overlap_summary.{json,csv}`、`figures/entry_overlap_3d/`。
