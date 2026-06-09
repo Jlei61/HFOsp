@@ -296,6 +296,8 @@ def integrate_lif_field(
     coh_len: float | None = None,
     axis_accum: bool = False,
     return_frames: bool = False,
+    dphi_mult: float = 0.0,
+    tau_phi: float = 100.0,
 ):
     """Integrate the 2-D LIF rate field.
 
@@ -369,6 +371,15 @@ def integrate_lif_field(
         ``rE_frames[-1]`` equals the ``return_field=True`` final snapshot.
         Consumed by ``src.sef_hfo_rate_adapter.rate_event_envelope`` (virtual-SEEG
         observation).  Default False keeps the return byte-identical.
+    dphi_mult : float
+        Adaptive-threshold strength (mV per Hz of firing).  0 = OFF (default; existing
+        path byte-identical).  When > 0 a per-pixel threshold variable φ is integrated:
+            dφ/dt = (−φ + dphi_mult·rE·1000) / tau_phi
+        The effective firing threshold becomes V_TH + φ, evaluated via a (μ, V_th)
+        LUT pre-computed from ``lif_rate``.  Mechanism: φ rises during burst → suppresses
+        firing → burst terminates; φ decays → next burst ignites.
+    tau_phi : float
+        φ recovery time constant (ms).  Default 100 ms.
     """
     wee = float(op.get("w_ee_mult", 1.0)) * W_EE   # recurrent E→E gain matches the op
     KEE = anisotropic_gaussian(n, L, ell_par, ell_perp, theta_EE)
@@ -385,6 +396,19 @@ def integrate_lif_field(
 
     muxE = TAU_ME * JX_E * op["nuext"]
     muxI = TAU_MI * JX_I * op["nuext"]
+
+    # Adaptive threshold — pre-build (μ, V_th) 2-D LUT; only when dphi_mult > 0.
+    _phi = None
+    _fE_2d = None
+    if dphi_mult > 0.0:
+        from scipy.interpolate import RegularGridInterpolator as _RGI  # lazy import
+        _mus_g  = np.linspace(-20.0, 220.0, 700)
+        _vths_g = np.linspace(V_TH, V_TH + 160.0, 320)
+        _tab = np.array([[lif_rate(float(m), op["sE"], TAU_ME, TREF_E, v_th=float(v))
+                          for v in _vths_g] for m in _mus_g])
+        _tab = np.nan_to_num(_tab, nan=0.0, posinf=1.0 / TREF_E, neginf=0.0)
+        _fE_2d = _RGI((_mus_g, _vths_g), _tab, bounds_error=False, fill_value=None)
+        _phi = np.zeros((n, n))
 
     rE = np.full((n, n), op["nuE"])
     rI = np.full((n, n), op["nuI"])
@@ -418,7 +442,15 @@ def integrate_lif_field(
         sII += dt / TAU_GABA * (cII - sII)
         muE = TAU_ME * (C_EE * wee * sEE - C_EI * W_EI * sEI) + muxE + stim - b_a * a
         muI = TAU_MI * (C_IE * W_IE * sIE - C_II * W_II * sII) + muxI
-        rE = rE + dt / TAU_ME * (-rE + fE(muE))
+        if _phi is not None:
+            _phi += dt / tau_phi * (-_phi + dphi_mult * rE * 1000.0)
+            _pts = np.column_stack([
+                np.clip(muE.ravel(), -20.0, 220.0),
+                np.clip((V_TH + _phi).ravel(), V_TH, V_TH + 160.0),
+            ])
+            rE = rE + dt / TAU_ME * (-rE + _fE_2d(_pts).reshape(n, n))
+        else:
+            rE = rE + dt / TAU_ME * (-rE + fE(muE))
         rI = rI + dt / TAU_MI * (-rI + fI(muI))
         a = a + dt / tau_a * (-a + rE)
         m = rE > thr
