@@ -30,3 +30,27 @@ def test_spearman_common_phantom_channel_excluded():
 def test_spearman_common_shape_mismatch_raises():
     with pytest.raises(ValueError):
         spearman_common(np.zeros(8), np.zeros(7), min_ch=5)
+
+
+# --- Task 2: echo_r_obs ---
+from src.topic5_echo_gate import echo_r_obs
+
+
+def test_echo_r_obs_takes_best_matching_template():
+    base = np.arange(8, dtype=float)
+    t0 = base.copy()
+    seizure = base[::-1].copy()      # matches t0 reversed -> rho=-1
+    t1 = seizure.copy()              # t1 matches the seizure exactly -> rho=1
+    r = echo_r_obs(seizure, [t0, t1], min_ch=8)
+    assert r == pytest.approx(1.0)   # best template (t1) wins
+
+
+def test_echo_r_obs_single_template_k1():
+    base = np.arange(8, dtype=float)
+    assert echo_r_obs(base, [base.copy()], min_ch=8) == pytest.approx(1.0)
+
+
+def test_echo_r_obs_all_insufficient_returns_nan():
+    a = np.array([0.0, 1.0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+    t = np.arange(8, dtype=float)
+    assert np.isnan(echo_r_obs(a, [t], min_ch=8))

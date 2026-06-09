@@ -26,3 +26,18 @@ def spearman_common(rank_a, rank_b, *, min_ch: int) -> float:
         return float("nan")
     rho = spearmanr(a[common], b[common]).statistic
     return float(rho) if np.isfinite(rho) else float("nan")
+
+
+def echo_r_obs(seizure_rank, template_ranks: Sequence, *, min_ch: int) -> float:
+    """max_m Spearman(seizure, template_m) over templates with enough overlap; NaN if none.
+
+    k handling (§4.1): k=1 -> the single rho; k=2 -> max(rho_a, rho_b); k>2 -> max over k.
+    """
+    rhos = []
+    for t in template_ranks:
+        r = spearman_common(seizure_rank, t, min_ch=min_ch)
+        if np.isfinite(r):
+            rhos.append(r)
+    if not rhos:
+        return float("nan")
+    return float(max(rhos))
