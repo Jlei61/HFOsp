@@ -265,3 +265,30 @@ def test_between_subject_control_neutral_for_unrelated_templates():
     res = between_subject_control(seizure, other_templates, B=800, rng=rng, min_ch=8)
     assert abs(res["e_k"]) < 2.5
     assert 0.02 < res["p_k"] < 0.98
+
+
+# --- Task 8: phantom-safe template contracts (1-D np.where vs 2-D rebuild) ---
+from src.topic5_echo_gate import masked_template_rank_1d, rebuild_template_from_events
+
+
+def test_masked_template_rank_1d_uses_valid_mask_not_helper():
+    # 1-D ALREADY-AGGREGATED template rank + per-cluster valid_mask -> np.where.
+    agg_rank = np.array([0.0, 1.0, 7.0, 2.0])        # idx2 carries a phantom value
+    valid_mask = np.array([True, True, False, True]) # idx2 non-participating
+    templ = masked_template_rank_1d(agg_rank, valid_mask)
+    assert np.isnan(templ[2])                        # phantom excluded
+    assert np.allclose(templ[[0, 1, 3]], agg_rank[[0, 1, 3]])
+
+
+def test_masked_template_rank_1d_shape_mismatch_raises():
+    with pytest.raises(ValueError):
+        masked_template_rank_1d(np.zeros(4), np.ones(3, bool))
+
+
+def test_rebuild_template_from_events_2d_uses_helper():
+    # event-level (n_ch, n_ev) raw ranks + bools -> mask_phantom_ranks -> aggregate.
+    raw = np.array([[0.0, 1.0], [1.0, 0.0], [9.0, 9.0], [2.0, 2.0]])   # (4 ch, 2 ev)
+    bools = np.array([[True, True], [True, True], [False, False], [True, True]])
+    templ = rebuild_template_from_events(raw, bools)
+    assert np.isnan(templ[2])                        # ch2 never participates -> NaN
+    assert np.all(np.isfinite(templ[[0, 1, 3]]))

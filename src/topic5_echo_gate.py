@@ -274,3 +274,27 @@ def between_subject_control(seizure_rank, other_subject_templates, *, B, rng, mi
             remapped.append(np.concatenate([t, np.full(n - t.size, np.nan)]))
     return compute_echo_strength(seizure_rank, remapped, B=B, rng=rng, min_ch=min_ch,
                                  null_mode=null_mode, blocks=blocks)
+
+
+def masked_template_rank_1d(agg_rank, valid_mask):
+    """P0-A contract #1: a 1-D ALREADY-AGGREGATED template rank + per-cluster valid_mask.
+    Mask with np.where — do NOT call mask_phantom_ranks (that helper is a 2-D
+    (n_ch, n_ev) per-event re-ranker; passing 1-D is wrong)."""
+    r = np.asarray(agg_rank, dtype=float)
+    m = np.asarray(valid_mask, dtype=bool)
+    if r.shape != m.shape:
+        raise ValueError(f"agg_rank {r.shape} != valid_mask {m.shape}")
+    return np.where(m, r, np.nan)
+
+
+def rebuild_template_from_events(raw_ranks_2d, bools_2d):
+    """P0-A contract #2: event-level (n_ch, n_ev) raw ranks + bools. Run
+    mask_phantom_ranks (per-event re-rank, phantom discarded -> NaN), then aggregate
+    to a 1-D template by nanmean across events. Channel never participating -> NaN."""
+    from src.lagpat_rank_audit import mask_phantom_ranks
+    masked = np.asarray(mask_phantom_ranks(np.asarray(raw_ranks_2d, float),
+                                           np.asarray(bools_2d, bool)), dtype=float)
+    with np.errstate(invalid="ignore"):
+        templ = np.where(np.all(np.isnan(masked), axis=1), np.nan,
+                         np.nanmean(masked, axis=1))
+    return templ
