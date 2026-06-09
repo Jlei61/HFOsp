@@ -82,12 +82,13 @@ def _cross_mean(means_desc, rates):
     return float("nan")
 
 
-def _scan(L, density, conn_seeds, fn_seeds):
+def _scan(L, density, conn_seeds, fn_seeds, means=None, out_tag=""):
+    means = list(MEANS if means is None else means)
     G._engine_guard()
     patch, kick = _geom(L)
     montage = G._montage(L)
     rows = []; t0 = time.time(); k = 0
-    tot = len(conn_seeds) * len(fn_seeds) * (len(MEANS) * len(STDS) - 1)
+    tot = len(conn_seeds) * len(fn_seeds) * (len(means) * len(STDS) - 1)
     p_ref = None
     for cs in conn_seeds:
         p, net, nu_theta, NE = G._build(L, density, cs)      # INDEPENDENT network per conn seed
@@ -100,7 +101,7 @@ def _scan(L, density, conn_seeds, fn_seeds):
             cm = bf["core_mask"]
             b = G._run_one(p, net, nu_theta, NE, kick, bf["vth"], montage, cm, fn)
             cell_ig = {}                                       # (m,sname) -> ignited, for the progress line
-            for m in MEANS:
+            for m in means:
                 for sname, sval in STDS.items():
                     is_base = (m == BASE_MEAN and sname == "wide")
                     if is_base:
@@ -122,13 +123,13 @@ def _scan(L, density, conn_seeds, fn_seeds):
                         d_axis_deg=d_axis, base_ignited=bool(b["prekick_ignited"])))
             print(f"[conn{cs} fn{fn}] " + "  ".join(
                 f"{m:.1f}:" + "".join("I" if cell_ig[(m, s)] else "." for s in STDS)
-                for m in MEANS) + f"  (w/n per mean; {time.time()-t0:.0f}s, {k}/{tot})", flush=True)
+                for m in means) + f"  (w/n per mean; {time.time()-t0:.0f}s, {k}/{tot})", flush=True)
 
     # aggregate per (mean, std): ignition rate, latency (igniting), evoked sync (non-igniting)
     agg = {}
     for sname in STDS:
         agg[sname] = {}
-        for m in MEANS:
+        for m in means:
             sub = [r for r in rows if r["mean"] == m and r["std"] == sname]
             ig = np.array([r["ignited"] for r in sub], bool)
             lat = np.array([r["latency"] for r in sub if r["ignited"]], float)
@@ -137,16 +138,16 @@ def _scan(L, density, conn_seeds, fn_seeds):
                 ignition_rate=float(ig.mean()), n=int(len(sub)),
                 latency_igniting=(_ci(lat) if lat.size else None),
                 d_core_paf_evoked=(_ci(dpaf) if dpaf.size else None))
-    means_desc = sorted(MEANS, reverse=True)
+    means_desc = sorted(means, reverse=True)
     cross = {s: _cross_mean(means_desc, [agg[s][f"{m:.1f}"]["ignition_rate"] for m in means_desc])
              for s in STDS}
     boundary_shift = (cross["wide"] - cross["narrow"]
                       if np.isfinite(cross["wide"]) and np.isfinite(cross["narrow"]) else None)
 
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "mean_scan_metrics.json").write_text(json.dumps(dict(
+    (OUT / f"mean_scan{out_tag}_metrics.json").write_text(json.dumps(dict(
         provenance=G._provenance(p_ref, conn_seeds[0]),
-        means=MEANS, stds=STDS, base=(BASE_MEAN, BASE_STD),
+        means=means, stds=STDS, base=(BASE_MEAN, BASE_STD),
         conn_seeds=list(conn_seeds), fn_seeds=list(fn_seeds), patch=list(patch), kick=list(kick),
         aggregate=agg, ignition_cross_mean=cross, boundary_shift_wide_minus_narrow=boundary_shift,
         raw=rows), indent=2))
@@ -155,20 +156,29 @@ def _scan(L, density, conn_seeds, fn_seeds):
     print(f"\nSANITY mean=18 ignition rate = {san_ig:.3f} (must be ~0 to match sweep matched-null)")
     print(f"ignition cross-mean: wide={cross['wide']}, narrow={cross['narrow']}, "
           f"shift(wide-narrow)={boundary_shift}")
-    print(f"wrote mean_scan_metrics.json ({len(rows)} rows, {time.time()-t0:.0f}s)")
+    print(f"wrote mean_scan{out_tag}_metrics.json ({len(rows)} rows, {time.time()-t0:.0f}s)")
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--conn", type=int, default=6)
+    ap.add_argument("--conn-start", type=int, default=1,
+                    help="first connection seed (use FRESH seeds for a 2nd pass — reusing "
+                         "seeds reproduces cells bit-identically at shared means)")
     ap.add_argument("--fn", type=int, default=2)
+    ap.add_argument("--means", type=str, default=None,
+                    help="comma-separated core means (default 18,17.5,17,16.5,16)")
+    ap.add_argument("--out-tag", type=str, default="",
+                    help="suffix for the output file (e.g. _fine) — keep separate from the coarse run")
     a = ap.parse_args()
+    means = ([float(x) for x in a.means.split(",")] if a.means else None)
     if a.quick:
-        _scan(1.0, 4000.0, conn_seeds=[1, 2], fn_seeds=[1])
+        _scan(1.0, 4000.0, conn_seeds=[1, 2], fn_seeds=[1], means=means, out_tag=a.out_tag)
     else:
-        _scan(3.0, 1800.0, conn_seeds=list(range(1, a.conn + 1)),
-              fn_seeds=list(range(1, a.fn + 1)))
+        cs = list(range(a.conn_start, a.conn_start + a.conn))
+        _scan(3.0, 1800.0, conn_seeds=cs, fn_seeds=list(range(1, a.fn + 1)),
+              means=means, out_tag=a.out_tag)
 
 
 if __name__ == "__main__":

@@ -23,8 +23,8 @@ SCOLOR = {"wide": "darkorange", "narrow": "firebrick"}
 SLABEL = {"wide": "wide spread (std 1.5)", "narrow": "narrow spread (std 0.5)"}
 
 
-def _load():
-    return json.loads((OUT / "mean_scan_metrics.json").read_text())
+def _load(tag=""):
+    return json.loads((OUT / f"mean_scan{tag}_metrics.json").read_text())
 
 
 def _panel_ignition(ax, d):
@@ -91,18 +91,25 @@ def _panel_evoked(ax, d):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tag", type=str, default="", help="metrics/figure suffix, e.g. _fine")
+    a = ap.parse_args()
     FIG.mkdir(parents=True, exist_ok=True)
-    d = _load()
+    d = _load(a.tag)
     fig, axes = plt.subplots(1, 3, figsize=(17.5, 5.2))
     _panel_ignition(axes[0], d)
     _panel_latency(axes[1], d)
     _panel_evoked(axes[2], d)
-    fig.suptitle("Pathology-core mean-amplitude scan: ignition boundary as core mean walks 18→16 "
-                 f"(6 networks × 2 field-noise seeds = {len(d['conn_seeds'])*len(d['fn_seeds'])} "
+    nseed = len(d['conn_seeds']) * len(d['fn_seeds'])
+    pass_lbl = ("2nd pass / fresh networks" if a.tag else "")
+    fig.suptitle(f"Pathology-core mean-amplitude scan{(' — ' + pass_lbl) if pass_lbl else ''}: "
+                 f"ignition boundary as core mean walks down "
+                 f"({len(d['conn_seeds'])} networks × {len(d['fn_seeds'])} field-noise = {nseed} "
                  "independent realizations/cell; fixed mid core + end kick)", fontsize=11)
     fig.tight_layout(rect=(0, 0, 1, 0.95))
-    fig.savefig(FIG / "mean_scan.png", dpi=140); plt.close(fig)
-    print("wrote mean_scan.png")
+    fig.savefig(FIG / f"mean_scan{a.tag}.png", dpi=140); plt.close(fig)
+    print(f"wrote mean_scan{a.tag}.png")
 
 
 if __name__ == "__main__":

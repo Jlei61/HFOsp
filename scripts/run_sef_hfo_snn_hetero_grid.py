@@ -87,11 +87,14 @@ def _montage(L):
                            build_shaft(np.deg2rad(THETA + 90.0), PITCH, NC, c, "Q")])
 
 
-def _run_one(p, net, nu_theta, NE, kick_xy, vth, montage, core_mask, seed):
-    """One paired-seed run; source-space metrics + ignition split + self-limit."""
+def _run_one(p, net, nu_theta, NE, kick_xy, vth, montage, core_mask, seed,
+             kick_boost_mult=2.0):
+    """One paired-seed run; source-space metrics + ignition split + self-limit.
+    kick_boost_mult scales the evoked stimulus (default 2.0·nu_theta = the locked
+    operating kick); the kick-amplitude robustness probe varies it."""
     net["rng"] = np.random.default_rng(seed)            # paired noise/poisson
     rec = LFPRecorder(p, net["pos"], net["labels"], sites=montage.contacts)
-    res = simulate_kick(p, net, KICK_BOOST=2 * nu_theta, kick_center=list(kick_xy),
+    res = simulate_kick(p, net, KICK_BOOST=kick_boost_mult * nu_theta, kick_center=list(kick_xy),
                         lfp_recorder=rec, V_th_per_neuron=vth)
     dt = p.dt; rate = res["rate_E"]
     onset = onset_times(res["E_spk_bool"], dt, T_KICK)
