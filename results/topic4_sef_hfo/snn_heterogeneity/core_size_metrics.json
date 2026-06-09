@@ -1,0 +1,1511 @@
+{
+  "provenance": {
+    "git_commit": "0d05e1965b0d9fb956f58e80f520d33c7e8530f7",
+    "metric_version": "2026-06-08c",
+    "engine_versions": {
+      "results/topic4_sef_hfo/lif_snn/engine/kick_probe.py": "64e3893227f7916ab4a1302e079aa30ef24651a0766d20d2488bccabc7539b4a",
+      "results/topic4_sef_hfo/lif_snn/engine/params.py": "d7f7b7e3453fb0220ab3ed391481779c4d359d047b1eefe334a5a9a2277b14b4",
+      "results/topic4_sef_hfo/lif_snn/engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+      "results/topic4_sef_hfo/lif_snn/engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+      "results/topic4_sef_hfo/lif_snn/engine/connectivity_rot.py": "9694171ae636b5b9fde667079005c65e269c66aa04aa4d94f64a290ee3e5c107",
+      "results/topic4_sef_hfo/lif_snn/engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+    },
+    "config": {
+      "L": 3.0,
+      "density": 1800.0,
+      "drive": 0.6,
+      "g": 3.6,
+      "dt": 0.1,
+      "T": 450.0,
+      "theta_EE": 45.0,
+      "AR": 2.0,
+      "patch_r": 0.5,
+      "V_th": 18.0,
+      "V_reset": 11.0,
+      "std_wide": 1.5,
+      "std_narrow": 0.5,
+      "core_mean_shift": 2.0
+    },
+    "seeds": {
+      "network_seed": 1
+    },
+    "paf_window": [
+      150.0,
+      350.0
+    ],
+    "self_limit": "rest[20,50] / decay-ratio[peak+120,+200] / burst-duration; pre-kick ignition split [20,150]@10Hz"
+  },
+  "radii": [
+    0.3,
+    0.45,
+    0.6
+  ],
+  "means": [
+    18.0,
+    17.0,
+    16.5,
+    16.0
+  ],
+  "stds": {
+    "wide": 1.5,
+    "narrow": 0.5
+  },
+  "conn_seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "patch": [
+    1.5,
+    1.5
+  ],
+  "kick": [
+    2.136396103067893,
+    2.1363961030678924
+  ],
+  "aggregate": {
+    "wide": {
+      "r0.3_m18.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.3_m17.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.3_m16.5": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.3_m16.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.45_m18.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.45_m17.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.45_m16.5": {
+        "ignition_rate": 0.5,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.45_m16.0": {
+        "ignition_rate": 1.0,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.6_m18.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 1628
+      },
+      "r0.6_m17.0": {
+        "ignition_rate": 0.6666666666666666,
+        "n": 6,
+        "n_core": 1628
+      },
+      "r0.6_m16.5": {
+        "ignition_rate": 1.0,
+        "n": 6,
+        "n_core": 1628
+      },
+      "r0.6_m16.0": {
+        "ignition_rate": 1.0,
+        "n": 6,
+        "n_core": 1628
+      }
+    },
+    "narrow": {
+      "r0.3_m18.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.3_m17.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.3_m16.5": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.3_m16.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 395
+      },
+      "r0.45_m18.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.45_m17.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.45_m16.5": {
+        "ignition_rate": 0.3333333333333333,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.45_m16.0": {
+        "ignition_rate": 0.5,
+        "n": 6,
+        "n_core": 920
+      },
+      "r0.6_m18.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 1628
+      },
+      "r0.6_m17.0": {
+        "ignition_rate": 0.0,
+        "n": 6,
+        "n_core": 1628
+      },
+      "r0.6_m16.5": {
+        "ignition_rate": 0.6666666666666666,
+        "n": 6,
+        "n_core": 1628
+      },
+      "r0.6_m16.0": {
+        "ignition_rate": 1.0,
+        "n": 6,
+        "n_core": 1628
+      }
+    }
+  },
+  "ignition_boundary": {
+    "wide": {
+      "r0.3": NaN,
+      "r0.45": 16.5,
+      "r0.6": 17.25
+    },
+    "narrow": {
+      "r0.3": NaN,
+      "r0.45": 16.0,
+      "r0.6": 16.625
+    }
+  },
+  "guard_baseline_wide18_ignition": {
+    "r0.3": 0.0,
+    "r0.45": 0.0,
+    "r0.6": 0.0
+  },
+  "guard_clean": true,
+  "raw": [
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 409,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 959,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 959,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 959,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 959,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 959,
+      "ignited": true,
+      "latency": 48.7
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 959,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 959,
+      "ignited": true,
+      "latency": 40.300000000000004
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 959,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 1625,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 1625,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 1625,
+      "ignited": true,
+      "latency": 62.5
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 1625,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 1625,
+      "ignited": true,
+      "latency": 37.300000000000004
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 1625,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 1625,
+      "ignited": true,
+      "latency": 28.3
+    },
+    {
+      "conn_seed": 1,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 1625,
+      "ignited": true,
+      "latency": 50.0
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 393,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 935,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 935,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 935,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 935,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 935,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 935,
+      "ignited": true,
+      "latency": 120.9
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 935,
+      "ignited": true,
+      "latency": 39.7
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 935,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 1604,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 1604,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 1604,
+      "ignited": true,
+      "latency": 70.4
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 1604,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 1604,
+      "ignited": true,
+      "latency": 44.400000000000006
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 1604,
+      "ignited": true,
+      "latency": 92.30000000000001
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 1604,
+      "ignited": true,
+      "latency": 33.1
+    },
+    {
+      "conn_seed": 2,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 1604,
+      "ignited": true,
+      "latency": 46.800000000000004
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 397,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 874,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 874,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 874,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 874,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 874,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 874,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 874,
+      "ignited": true,
+      "latency": 44.7
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 874,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 1631,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 1631,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 1631,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 1631,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 1631,
+      "ignited": true,
+      "latency": 39.400000000000006
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 1631,
+      "ignited": true,
+      "latency": 96.80000000000001
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 1631,
+      "ignited": true,
+      "latency": 30.400000000000002
+    },
+    {
+      "conn_seed": 3,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 1631,
+      "ignited": true,
+      "latency": 46.900000000000006
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 376,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 870,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 870,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 870,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 870,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 870,
+      "ignited": true,
+      "latency": 52.6
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 870,
+      "ignited": true,
+      "latency": 92.5
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 870,
+      "ignited": true,
+      "latency": 36.0
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 870,
+      "ignited": true,
+      "latency": 82.7
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 1620,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 1620,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 1620,
+      "ignited": true,
+      "latency": 56.900000000000006
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 1620,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 1620,
+      "ignited": true,
+      "latency": 35.7
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 1620,
+      "ignited": true,
+      "latency": 72.4
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 1620,
+      "ignited": true,
+      "latency": 32.7
+    },
+    {
+      "conn_seed": 4,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 1620,
+      "ignited": true,
+      "latency": 44.800000000000004
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 384,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 908,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 908,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 908,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 908,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 908,
+      "ignited": true,
+      "latency": 148.4
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 908,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 908,
+      "ignited": true,
+      "latency": 40.400000000000006
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 908,
+      "ignited": true,
+      "latency": 62.5
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 1645,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 1645,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 1645,
+      "ignited": true,
+      "latency": 59.400000000000006
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 1645,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 1645,
+      "ignited": true,
+      "latency": 40.5
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 1645,
+      "ignited": true,
+      "latency": 72.10000000000001
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 1645,
+      "ignited": true,
+      "latency": 30.0
+    },
+    {
+      "conn_seed": 5,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 1645,
+      "ignited": true,
+      "latency": 46.7
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.3,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 431,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 932,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 932,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 932,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 932,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 932,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 932,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 932,
+      "ignited": true,
+      "latency": 41.900000000000006
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.45,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 932,
+      "ignited": true,
+      "latency": 87.9
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "wide",
+      "n_core": 1658,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 18.0,
+      "std": "narrow",
+      "n_core": 1658,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "wide",
+      "n_core": 1658,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 17.0,
+      "std": "narrow",
+      "n_core": 1658,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "wide",
+      "n_core": 1658,
+      "ignited": true,
+      "latency": 38.900000000000006
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 16.5,
+      "std": "narrow",
+      "n_core": 1658,
+      "ignited": false,
+      "latency": NaN
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "wide",
+      "n_core": 1658,
+      "ignited": true,
+      "latency": 32.9
+    },
+    {
+      "conn_seed": 6,
+      "radius": 0.6,
+      "mean": 16.0,
+      "std": "narrow",
+      "n_core": 1658,
+      "ignited": true,
+      "latency": 51.900000000000006
+    }
+  ]
+}
