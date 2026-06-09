@@ -496,6 +496,31 @@ def test_threshold_fields_share_surround_and_narrow_core():
     assert np.allclose(base[~is_E], 18.0)
 
 
+def test_sample_core_field_arbitrary_mean_std():
+    """Mean-amplitude scan (2026-06-09): ONE core at an arbitrary (mean,std),
+    quiet scalar surround, paired baseline contract preserved."""
+    from src.sef_hfo_heterogeneity import sample_core_field
+    pos, is_E, _ = _toy_sheet()
+    out = sample_core_field(pos, is_E, (1.5, 1.5), 0.5, np.random.default_rng(1),
+                            core_mean=16.5, core_std=0.5, base_mean=18.0, v_reset=11.0)
+    vth, core = out["vth"], out["core_mask"]
+    assert core.sum() > 10
+    assert abs(vth[core].mean() - 16.5) < 0.3          # core mean at the requested level
+    assert vth[core].std() < 1.0                        # narrow
+    assert (vth[is_E] >= 11.0).all()                    # physical domain
+    surround = is_E & ~core
+    assert np.allclose(vth[surround], 18.0)             # quiet scalar surround
+    assert np.allclose(vth[~is_E], 18.0)                # I neurons scalar
+    # wide vs narrow at the same mean
+    wide = sample_core_field(pos, is_E, (1.5, 1.5), 0.5, np.random.default_rng(2),
+                             core_mean=16.5, core_std=1.5)
+    assert wide["vth"][wide["core_mask"]].std() > vth[core].std()
+    # std=0 -> point mass at the mean
+    pm = sample_core_field(pos, is_E, (1.5, 1.5), 0.5, np.random.default_rng(3),
+                           core_mean=15.0, core_std=0.0)
+    assert np.allclose(pm["vth"][pm["core_mask"]], 15.0)
+
+
 def test_local_vth_spread_shows_core_narrowing():
     # localized design: surround scalar (~0 spread); narrowing the core lowers its
     # local spread relative to the wide baseline core (the Rich pathology direction).

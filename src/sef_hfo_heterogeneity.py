@@ -439,6 +439,36 @@ def sample_threshold_fields(pos, is_E, patch_center, patch_radius, rng,
                 unmatched=unmatched, core_mask=core)
 
 
+def sample_core_field(pos, is_E, patch_center, patch_radius, rng, *,
+                      core_mean, core_std, base_mean=18.0, v_reset=11.0,
+                      surround_std=0.0):
+    """Per-neuron thresholds (length N) for ONE pathology core at an ARBITRARY
+    (core_mean, core_std) — the mean-amplitude scan generalization of the fixed
+    2x2 ``sample_threshold_fields`` (2026-06-09). Surround quiet (scalar
+    ``base_mean``; ``surround_std>0`` = B-side wide-everywhere probe), only the
+    in-core E neurons get the threshold distribution; I neurons keep ``base_mean``.
+    Truncated at ``v_reset``. Returns dict(vth, core_mask).
+
+    The paired HEALTHY baseline for evoked-sync differencing is just this function
+    called with (core_mean=base_mean, core_std=base_std_wide) on the SAME network
+    + a shared noise seed (the caller owns the pairing; surround is scalar-identical
+    by construction so the contract holds)."""
+    pos = np.asarray(pos, float); is_E = np.asarray(is_E, bool)
+    n = len(pos)
+    surround = np.full(n, base_mean, float)
+    eidx = np.flatnonzero(is_E)
+    if surround_std > 0:
+        surround[eidx] = _trunc_gauss(base_mean, surround_std, v_reset, eidx.size, rng)
+    d = np.linalg.norm(pos - np.asarray(patch_center, float)[None, :], axis=1)
+    core = is_E & (d <= float(patch_radius))
+    cidx = np.flatnonzero(core)
+    f = surround.copy()
+    f[cidx] = _trunc_gauss(core_mean, core_std, v_reset, cidx.size, rng)
+    if not (f[eidx] >= v_reset).all():
+        raise ValueError("threshold below V_reset — truncation failed (spec §2)")
+    return dict(vth=f, core_mask=core)
+
+
 def local_vth_spread(pos, vth, is_E, radius):
     """Per-E-neuron std of V_th among E neighbours within ``radius`` (mm) — for the
     mechanism-figure colouring. I neurons -> NaN (not coloured); an E neuron with
