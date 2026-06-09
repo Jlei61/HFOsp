@@ -83,6 +83,22 @@ def test_shaft_block_requires_blocks():
                      rng=np.random.default_rng(0), null_mode="within_shaft", min_ch=8)
 
 
+def test_shuffle_null_invariant_to_template_invalid_channel_values():
+    # HARD regression: the null must NOT depend on seizure values at template-INVALID
+    # channels (template NaN there). The buggy full-vector shuffle let those values
+    # migrate into valid positions -> different null. The eligible-only shuffle excludes
+    # them -> identical null for any garbage value at the invalid channels.
+    templ = np.concatenate([np.arange(8.0), np.full(8, np.nan)])   # valid 0-7, invalid 8-15
+    base = np.arange(16.0)
+    seiz_a = base.copy(); seiz_a[8:] = 100.0
+    seiz_b = base.copy(); seiz_b[8:] = -50.0
+    na = shuffle_null(seiz_a, [templ], B=100, rng=np.random.default_rng(0),
+                      null_mode="channel", min_ch=8)
+    nb = shuffle_null(seiz_b, [templ], B=100, rng=np.random.default_rng(0),
+                      null_mode="channel", min_ch=8)
+    assert np.allclose(na[np.isfinite(na)], nb[np.isfinite(nb)])
+
+
 def test_null_handles_none_and_int_mixed_blocks():
     # anchor_bins / unparseable shaft ids produce None mixed with int/str labels;
     # must not trip np.unique's int-vs-None sort. None-block channels stay put.

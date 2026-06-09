@@ -108,19 +108,32 @@ def _block_permute(values: np.ndarray, blocks: np.ndarray, kind: str, rng) -> np
 
 
 def shuffle_null(seizure_rank, template_ranks, *, B, rng, null_mode, min_ch, blocks=None):
-    """Null distribution of echo_r_obs under the requested channel-label shuffle (§4.6)."""
+    """Null distribution of echo_r_obs under the requested channel-label shuffle (§4.6).
+
+    The shuffle permutes seizure values ONLY among ELIGIBLE channels = seizure-finite AND
+    finite in at least one template. Channels that are template-invalid (all templates NaN)
+    or seizure-NaN are excluded, so their values can never migrate into template-valid
+    positions and pollute the null. r_obs is unchanged by this restriction because those
+    excluded channels never enter spearman_common anyway."""
+    s = np.asarray(seizure_rank, dtype=float)
+    templ = [np.asarray(t, dtype=float) for t in template_ranks]
+    any_templ_finite = np.zeros(s.shape, dtype=bool)
+    for t in templ:
+        any_templ_finite |= np.isfinite(t)
+    eligible = np.isfinite(s) & any_templ_finite
+    s_e = s[eligible]
+    templ_e = [t[eligible] for t in templ]
     kind = _NULL_MODE_KIND[null_mode]
-    n = len(np.asarray(seizure_rank))
     if null_mode == "channel":
-        blk = np.zeros(n, dtype=int)
+        blk = np.zeros(s_e.shape, dtype=int)
     else:
         if blocks is None:
             raise ValueError(f"null_mode={null_mode} requires blocks")
-        blk = np.asarray(blocks)
+        blk = np.asarray(blocks, dtype=object)[eligible]
     out = np.empty(B, dtype=float)
     for i in range(B):
-        shuf = _block_permute(np.asarray(seizure_rank, float), blk, kind, rng)
-        out[i] = echo_r_obs(shuf, template_ranks, min_ch=min_ch)
+        shuf = _block_permute(s_e, blk, kind, rng)
+        out[i] = echo_r_obs(shuf, templ_e, min_ch=min_ch)
     return out
 
 

@@ -57,7 +57,8 @@ def subject_atlas_quality(seiz_matrix, joint_valid):
     joint_valid = np.asarray(joint_valid, dtype=bool)
     tie_fracs = []
     for r in np.asarray(seiz_matrix, float):
-        fin = r[np.isfinite(r)]
+        rv = r[joint_valid]                       # mask to template-valid channels first
+        fin = rv[np.isfinite(rv)]
         if fin.size:
             _, c = np.unique(fin, return_counts=True)
             tie_fracs.append(float(np.sum(c[c > 1]) / fin.size))
