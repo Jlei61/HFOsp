@@ -32,6 +32,8 @@ L, DENSITY, T, DT, DRIVE = 12.0, 1000.0, 220.0, 0.1, 0.6   # cm-ish + igniting d
 CENTER = np.array([L / 2, L / 2])
 PITCH, NC, THETA = 4.0, 4, 45.0                             # locked real-SEEG pitch
 SHAFTS = (10.0, 70.0, 130.0)                                # 3 non-parallel (D6)
+R_KICK = 0.6                                                # supra-nucleus (diag: >0.4 ignites;
+#   default 0.15 fizzles. L=12 oracle confirmed self_limited_directional 45.1deg at r=0.6)
 KDIR, AXIS_ERR_MAX, PART_MIN = 3, 25.0, 7
 
 
@@ -68,10 +70,10 @@ def main():
     rec = LFPRecorder(p, net["pos"], net["labels"], sites=m.contacts)
     print("simulating kick (on)...", flush=True)
     net["rng"] = np.random.default_rng(1)
-    on = simulate_kick(p, net, KICK_BOOST=2 * nut, kick_center=list(end), lfp_recorder=rec)
+    on = simulate_kick(p, net, KICK_BOOST=2 * nut, kick_center=list(end), lfp_recorder=rec, r_kick=R_KICK)
     print("simulating ref (off)...", flush=True)
     net["rng"] = np.random.default_rng(1)
-    off = simulate_kick(p, net, KICK_BOOST=0.0, kick_center=list(end), lfp_recorder=rec)
+    off = simulate_kick(p, net, KICK_BOOST=0.0, kick_center=list(end), lfp_recorder=rec, r_kick=R_KICK)
 
     ignited = float(on["E_spk_bool"].mean(axis=1).max())
     base = float(off["E_spk_bool"].mean(axis=1).max())
