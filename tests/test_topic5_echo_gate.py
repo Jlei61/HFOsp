@@ -135,3 +135,53 @@ def test_echo_strength_baddata_field_is_centered_draw():
                                 rng=np.random.default_rng(4), min_ch=8)
     assert np.isfinite(res["e_k_baddata"])
     assert abs(res["e_k_baddata"]) < res["e_k"]
+
+
+# --- Task 5: LOO de-anchor + reliability ---
+from src.topic5_echo_gate import loo_anchor, compute_deanchor_echo, anchor_reliability
+
+
+def test_loo_anchor_excludes_current_seizure_no_leakage():
+    M = np.array([
+        [99.0, 99.0, 99.0, 99.0],   # seizure 0 extreme
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, 3.0],
+    ])
+    anc = loo_anchor(M)
+    assert np.allclose(anc[0], [0.0, 1.0, 2.0, 3.0])     # seizure 0 NOT in its own anchor
+    M2 = M.copy(); M2[0] = [-5.0, -5.0, -5.0, -5.0]
+    assert np.allclose(loo_anchor(M2)[0], anc[0])        # changing sz0 doesn't change anc[0]
+
+
+def test_loo_anchor_ignores_nan_in_other_seizures():
+    M = np.array([
+        [0.0, 1.0, 2.0, 3.0],
+        [np.nan, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, np.nan],
+    ])
+    anc = loo_anchor(M)
+    assert anc[0][0] == pytest.approx(0.0)               # mean of nan + 0.0 -> 0.0
+
+
+def test_anchor_reliability_high_when_orders_agree():
+    M = np.array([[0.0, 1, 2, 3, 4], [0.0, 1, 2, 3, 4], [0.0, 1, 2, 3, 4]])
+    assert anchor_reliability(M) > 0.9
+
+
+def test_deanchor_echo_uses_all_templates_not_first():
+    # P1-A: a seizure's deviation matches template_1 (NOT template_0). compute_deanchor_echo
+    # must keep max-over-templates, so it should detect the echo via template_1.
+    rng = np.random.default_rng(5)
+    n_ch = 12
+    anchor_like = np.arange(n_ch, dtype=float)
+    seiz = np.tile(anchor_like, (4, 1)).astype(float)
+    # seizure-specific deviation pattern injected on top of the stable anchor:
+    dev = rng.normal(0, 0.01, n_ch)
+    for k in range(4):
+        seiz[k] = anchor_like + np.arange(n_ch) * 0.5 + dev   # consistent deviation
+    t_bad = rng.permutation(n_ch).astype(float)               # template 0: unrelated
+    t_good = anchor_like + np.arange(n_ch) * 10.0             # template 1: matches deviation dir
+    recs = compute_deanchor_echo(seiz, [t_bad, t_good], B=400,
+                                 rng=np.random.default_rng(6), min_ch=8)
+    assert len(recs) == 4
+    assert all(np.isfinite(r["r_obs"]) for r in recs)

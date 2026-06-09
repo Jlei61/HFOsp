@@ -146,3 +146,53 @@ def compute_echo_strength(seizure_rank, template_ranks, *, B, rng, min_ch,
             "null_mean": float(null.mean()), "null_sd": sd,
             "null_q": [float(q) for q in np.quantile(null, [0.05, 0.5, 0.95])],
             "n_null": int(null.size), "null_mode": null_mode}
+
+
+def loo_anchor(per_seizure_ranks) -> np.ndarray:
+    """r_bar_{c,-k}: per-channel mean rank over OTHER seizures (current k excluded).
+
+    Leave-one-seizure-out — the current seizure never enters its own anchor (§4.1b
+    leakage fix). Channels NaN across all other seizures stay NaN.
+    """
+    M = np.asarray(per_seizure_ranks, dtype=float)
+    ns = M.shape[0]
+    out = np.full_like(M, np.nan)
+    for k in range(ns):
+        others = np.delete(M, k, axis=0)
+        with np.errstate(invalid="ignore"):
+            col_mean = np.where(np.all(np.isnan(others), axis=0), np.nan,
+                                np.nanmean(others, axis=0))
+        out[k] = col_mean
+    return out
+
+
+def compute_deanchor_echo(per_seizure_ranks, template_ranks, *, B, rng, min_ch) -> List[Dict]:
+    """Echo on de-anchored deltas, keeping max-over-templates (P1-A — same contract as
+    §4.1, so k=2 subjects are not arbitrarily dominated by template 0):
+    delta_seiz = seiz_k - r_bar_{-k}; delta_templ_m = template_m - r_bar_{-k}.
+    """
+    M = np.asarray(per_seizure_ranks, dtype=float)
+    templs = [np.asarray(t, dtype=float) for t in template_ranks]
+    anc = loo_anchor(M)
+    records = []
+    for k in range(M.shape[0]):
+        d_seiz = M[k] - anc[k]
+        d_templs = [t - anc[k] for t in templs]      # de-anchor EACH template
+        records.append(compute_echo_strength(d_seiz, d_templs, B=B, rng=rng, min_ch=min_ch))
+    return records
+
+
+def anchor_reliability(per_seizure_ranks) -> float:
+    """Kendall's W (coefficient of concordance) across seizures over channels."""
+    M = np.asarray(per_seizure_ranks, dtype=float)
+    valid = ~np.any(np.isnan(M), axis=0)
+    if valid.sum() < 3 or M.shape[0] < 2:
+        return float("nan")
+    sub = M[:, valid]
+    from scipy.stats import rankdata
+    R = np.vstack([rankdata(row) for row in sub])         # n_seiz x n_ch ranks
+    n, m = R.shape                                        # n raters, m items
+    Rj = R.sum(axis=0)
+    S = np.sum((Rj - Rj.mean()) ** 2)
+    W = 12 * S / (n ** 2 * (m ** 3 - m))
+    return float(W)
