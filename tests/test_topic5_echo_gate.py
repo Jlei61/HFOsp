@@ -182,22 +182,23 @@ def test_anchor_reliability_high_when_orders_agree():
 
 
 def test_deanchor_echo_uses_all_templates_not_first():
-    # P1-A: a seizure's deviation matches template_1 (NOT template_0). compute_deanchor_echo
-    # must keep max-over-templates, so it should detect the echo via template_1.
+    # P1-A HARD: verify max-over-templates directly against echo_r_obs on the SAME
+    # de-anchored deltas. An impl using only templates[0] would make r_obs equal the
+    # t0-only value for every seizure -> the `any(differs)` assertion would fail.
+    from src.topic5_echo_gate import loo_anchor, echo_r_obs
     rng = np.random.default_rng(5)
-    n_ch = 12
-    anchor_like = np.arange(n_ch, dtype=float)
-    seiz = np.tile(anchor_like, (4, 1)).astype(float)
-    # seizure-specific deviation pattern injected on top of the stable anchor:
-    dev = rng.normal(0, 0.01, n_ch)
-    for k in range(4):
-        seiz[k] = anchor_like + np.arange(n_ch) * 0.5 + dev   # consistent deviation
-    t_bad = rng.permutation(n_ch).astype(float)               # template 0: unrelated
-    t_good = anchor_like + np.arange(n_ch) * 10.0             # template 1: matches deviation dir
-    recs = compute_deanchor_echo(seiz, [t_bad, t_good], B=400,
-                                 rng=np.random.default_rng(6), min_ch=8)
-    assert len(recs) == 4
-    assert all(np.isfinite(r["r_obs"]) for r in recs)
+    seiz = np.vstack([rng.normal(0, 1, 12) for _ in range(4)])
+    t0, t1 = rng.normal(0, 1, 12), rng.normal(0, 1, 12)
+    recs = compute_deanchor_echo(seiz, [t0, t1], B=20, rng=np.random.default_rng(6), min_ch=8)
+    anc = loo_anchor(seiz)
+    differs = []
+    for k, r in enumerate(recs):
+        d = seiz[k] - anc[k]
+        expected_both = echo_r_obs(d, [t0 - anc[k], t1 - anc[k]], min_ch=8)
+        only_t0 = echo_r_obs(d, [t0 - anc[k]], min_ch=8)
+        assert np.isclose(r["r_obs"], expected_both)       # uses BOTH de-anchored templates
+        differs.append(not np.isclose(r["r_obs"], only_t0))
+    assert any(differs)   # at least one seizure where max(t0,t1) != t0 alone
 
 
 # --- Task 6: subject-level pooling + bad-data regression ---
@@ -267,6 +268,49 @@ def test_atlas_quality_fail_for_too_few_channels():
     assert q["atlas_quality_flag"] == "fail"
 
 
+# --- runner-level review hardening (P0/P1) ---
+def test_subject_atlas_quality_masks_to_joint_valid():
+    import scripts.run_topic5_echo_gate as R
+    # 8 channels but the last 2 are template-INVALID. They carry values that would prop up
+    # quality; masking to joint_valid must exclude them -> only 6 ranked -> fail (<MIN_CH=8).
+    seiz = np.array([[0.0, 1, 2, 3, 4, 5, 100, 101]])
+    joint_valid = np.array([True] * 6 + [False, False])
+    q = R.subject_atlas_quality(seiz, joint_valid)
+    assert q["n_ranked_channels"] == 6          # invalid channels excluded
+    assert q["atlas_quality_flag"] == "fail"
+
+
+def test_verdict_no_standing_when_construct_pending():
+    import scripts.run_topic5_echo_gate as R
+    summary = {
+        "construct_validity_status": "pending",
+        "primary_channel_all": {"n_subjects": 12, "wilcoxon_p_onesided": 0.001,
+                                "median_E_s": 0.9, "sign_p_onesided": 0.01, "boot_ci95": [0.1, 0.9]},
+        "primary_within_shaft_all": {"wilcoxon_p_onesided": 0.001},
+        "primary_anchor_matched_all": {"wilcoxon_p_onesided": 0.001},
+        "negative_between_subject_epilepsiae": {"n_subjects": 8, "wilcoxon_p_onesided": 0.5},
+        "bad_data_regression": {"wilcoxon_p_onesided": 0.5},
+    }
+    v = R._assign_verdict(summary)
+    assert not v["label"].startswith("站住")     # construct pending forbids standing
+
+
+def test_verdict_no_standing_without_sensitivities():
+    import scripts.run_topic5_echo_gate as R
+    summary = {
+        "construct_validity_status": "pass",     # construct ok, but sensitivities missing
+        "primary_channel_all": {"n_subjects": 12, "wilcoxon_p_onesided": 0.001,
+                                "median_E_s": 0.9, "sign_p_onesided": float("nan"),
+                                "boot_ci95": [float("nan"), float("nan")]},
+        "primary_within_shaft_all": {"wilcoxon_p_onesided": 0.001},
+        "primary_anchor_matched_all": {"wilcoxon_p_onesided": 0.001},
+        "negative_between_subject_epilepsiae": {"n_subjects": 8, "wilcoxon_p_onesided": 0.5},
+        "bad_data_regression": {"wilcoxon_p_onesided": 0.5},
+    }
+    v = R._assign_verdict(summary)
+    assert not v["label"].startswith("站住")
+
+
 # --- Task 7b: between_subject_control (Null D) ---
 from src.topic5_echo_gate import between_subject_control
 
@@ -294,6 +338,21 @@ def test_between_subject_control_skips_nonoverlapping_names():
                                   rng=np.random.default_rng(0), min_ch=8)
     assert res["n_foreign_overlapping"] == 0
     assert np.isnan(res["e_k"])
+
+
+def test_between_subject_control_name_align_not_positional():
+    # Foreign template has the SAME values [0..11] but its channel NAMES are in REVERSED
+    # order vs this subject. Name-alignment must place foreign rank by NAME (-> reversed
+    # vs this subject -> rho=-1 with an ascending seizure). Positional truncation would
+    # instead give rho=+1. So r_obs must be NEGATIVE, proving name-align (not positional).
+    this_channels = [f"X{i}" for i in range(12)]
+    seizure = np.arange(12, dtype=float)                      # ascending
+    foreign_names = [f"X{i}" for i in range(11, -1, -1)]      # reversed name order
+    foreign_vals = list(range(12))                            # 0..11 in that reversed order
+    res = between_subject_control(seizure, this_channels, [(foreign_vals, foreign_names)],
+                                  B=100, rng=np.random.default_rng(0), min_ch=8)
+    assert res["n_foreign_overlapping"] == 1
+    assert res["r_obs"] < -0.5    # name-aligned -> reversed -> negative (positional would be +1)
 
 
 # --- Task 8: phantom-safe template contracts (1-D np.where vs 2-D rebuild) ---

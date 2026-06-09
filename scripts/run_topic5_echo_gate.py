@@ -47,6 +47,33 @@ BAND_PRIMARY = "broad_ER"  # user-locked 2026-06-08 (gamma_ER = sensitivity)
 RNG_SEED = 20260608
 
 
+def subject_atlas_quality(seiz_matrix, joint_valid):
+    """Atlas-quality on the RIGHT channel set + per-seizure ties (review P1 x2).
+    - mean ictal rank is masked to joint_valid BEFORE the quality check, so template-
+      invalid channels (which never enter the primary correlation) cannot prop up
+      quality.
+    - tie fraction is measured PER SEIZURE (averaging across seizures hides ties);
+      gate on the per-seizure median."""
+    joint_valid = np.asarray(joint_valid, dtype=bool)
+    tie_fracs = []
+    for r in np.asarray(seiz_matrix, float):
+        fin = r[np.isfinite(r)]
+        if fin.size:
+            _, c = np.unique(fin, return_counts=True)
+            tie_fracs.append(float(np.sum(c[c > 1]) / fin.size))
+    tie_med = float(np.median(tie_fracs)) if tie_fracs else 1.0
+    tie_mx = float(np.max(tie_fracs)) if tie_fracs else 1.0
+    with np.errstate(invalid="ignore"):
+        mean_ictal = np.where(np.all(np.isnan(seiz_matrix), axis=0), np.nan,
+                              np.nanmean(seiz_matrix, axis=0))
+    mean_ictal_q = np.where(joint_valid, mean_ictal, np.nan)   # P1: mask to joint_valid
+    aq = echo.compute_atlas_quality(mean_ictal_q, tie_max=TIE_MAX, min_channels=MIN_CH)
+    flag = "pass" if (aq["atlas_quality_flag"] == "pass" and tie_med <= TIE_MAX) else "fail"
+    return {"atlas_quality_flag": flag, "rank_tie_fraction_perseizure_median": round(tie_med, 3),
+            "rank_tie_fraction_perseizure_max": round(tie_mx, 3),
+            "rank_dynamic_range": aq["rank_dynamic_range"], "n_ranked_channels": aq["n_ranked_channels"]}
+
+
 def ictal_rank_from_onsets(channel_onsets, channels):
     """Per-channel ictal rank over `channels`: rank ascending t_onset_sec
     (earliest recruited -> lowest rank, matching the template convention);
@@ -113,11 +140,11 @@ def load_subject(stem):
         return None
     seiz_matrix = np.vstack(seiz_ranks)
 
-    # atlas quality on the per-subject mean ictal rank
+    # atlas quality on the joint_valid-masked mean ictal rank + per-seizure ties (P1)
+    aq = subject_atlas_quality(seiz_matrix, joint_valid)
     with np.errstate(invalid="ignore"):
         mean_ictal = np.where(np.all(np.isnan(seiz_matrix), axis=0), np.nan,
                               np.nanmean(seiz_matrix, axis=0))
-    aq = echo.compute_atlas_quality(mean_ictal, tie_max=TIE_MAX, min_channels=MIN_CH)
 
     # Null C anchor bins = quartiles of mean ictal earliness (None where no onsets)
     anchor_bins = np.full(len(channels), None, dtype=object)
@@ -133,7 +160,9 @@ def load_subject(stem):
         "template_k": 2, "n_valid": n_valid, "n_name_overlap": int(n_name_overlap),
         "soz_channels": d.get("soz_channels", []),
         "seizure_ranks": seiz_matrix, "seizure_ids": seiz_ids,
-        "atlas_quality_flag": aq["atlas_quality_flag"], "rank_tie_fraction": aq["rank_tie_fraction"],
+        "atlas_quality_flag": aq["atlas_quality_flag"],
+        "rank_tie_fraction": aq["rank_tie_fraction_perseizure_median"],
+        "rank_tie_fraction_max": aq["rank_tie_fraction_perseizure_max"],
         "rank_dynamic_range": aq["rank_dynamic_range"], "anchor_bins": anchor_bins,
         "construct_validity_flag": "pending",
     }
@@ -266,12 +295,22 @@ def cmd_cohort(args):
                 recs.append({"subject": s["subject"], "e_k": m.get("e_k")})
         return echo.pool_echo_subject_level(recs)
 
+    # P0: Null D split by dataset; yuquan A/B/C/D shaft names are WITHIN-patient
+    # numbering, NOT cross-patient anatomical labels — exact-name cross-patient alignment
+    # would treat coincidental name collisions as the same location, so yuquan is skipped.
     rng = np.random.default_rng(RNG_SEED + 1)
     bs_recs = []
     n_overlap_seen = []
+    null_d_notes = {
+        "epilepsiae": "name-aligned within epilepsiae (labels assumed cross-patient anatomical)",
+        "yuquan": "SKIPPED — A/B/C/D shaft names are within-patient numbering, not "
+                  "cross-patient anatomical labels; exact-name alignment is invalid",
+    }
     for s in subs:
-        # foreign templates NAME-ALIGNED: (rank_seq, channel_names) from OTHER subjects.
-        foreign = [(t, o["channels"]) for o in subs if o["subject"] != s["subject"]
+        if s["dataset"] != "epilepsiae":     # P0: yuquan name-align invalid -> skip Null D
+            continue
+        foreign = [(t, o["channels"]) for o in subs
+                   if o["dataset"] == "epilepsiae" and o["subject"] != s["subject"]
                    for t in o["template_ranks"]]
         if not foreign:
             continue
@@ -295,15 +334,19 @@ def cmd_cohort(args):
         for r in s["deanchor"]:
             deanchor_recs.append({"subject": s["subject"], "e_k": r.get("e_k")})
 
+    cv = [s.get("construct_validity_flag", "pending") for s in subs]
+    construct_status = "pass" if (cv and all(x == "pass" for x in cv)) else "pending"
     summary = {
         "scope": "generic_template_echo", "n_subjects_loaded": len(subs),
+        "construct_validity_status": construct_status,
         "primary_channel_all": pool_mode("channel"),
         "primary_within_shaft_all": pool_mode("within_shaft"),
         "primary_anchor_matched_all": pool_mode("anchor_matched"),
         "deanchor_all": echo.pool_echo_subject_level(deanchor_recs),
         "stratifier_swap_strict_candidate": pool_mode("channel", "strict_candidate"),
         "stratifier_swap_none": pool_mode("channel", "none"),
-        "negative_between_subject": echo.pool_echo_subject_level(bs_recs),
+        "negative_between_subject_epilepsiae": echo.pool_echo_subject_level(bs_recs),
+        "null_d_notes": null_d_notes,
         "between_subject_n_overlap_median": float(np.median(n_overlap_seen)) if n_overlap_seen else 0.0,
         "between_subject_n_overlap_max": int(max(n_overlap_seen)) if n_overlap_seen else 0,
         "bad_data_regression": echo.bad_data_regression(bd_recs),
@@ -318,8 +361,9 @@ def _assign_verdict(summary):
     p = summary["primary_channel_all"]
     has_sens = (np.isfinite(p.get("sign_p_onesided", np.nan)) and
                 np.isfinite((p.get("boot_ci95") or [np.nan])[0]))
-    neg = summary["negative_between_subject"]
+    neg = summary["negative_between_subject_epilepsiae"]
     bad = summary["bad_data_regression"]
+    construct_ok = summary.get("construct_validity_status") == "pass"
     # Null D applicability: needs an actual cross-patient name-overlap to run. With
     # disjoint electrode labels it is INAPPLICABLE (n_subjects==0 / not enough overlap) —
     # that is NOT a clean pass; flag it so the verdict cannot claim subject-specificity.
@@ -328,6 +372,13 @@ def _assign_verdict(summary):
     bad_clean = not ((bad.get("wilcoxon_p_onesided") or 1) < 0.05)
     if p["n_subjects"] < 6:
         return {"label": "没看清", "why": "n_subjects<6"}
+    # P1: construct-validity sentinel is a precondition for ANY standing verdict.
+    if not construct_ok:
+        return {"label": "代理计算跑通·控制未闭环",
+                "why": "construct-validity sentinel is 'pending' — cannot certify the ER "
+                       "proxy order reflects propagation (有形状≠是传播); only 'proxy "
+                       "pipeline runs', NOT a standing verdict. Run the sentinel first.",
+                "neg_applicable": neg_applicable}
     wp = p.get("wilcoxon_p_onesided")
     primary_sig = wp is not None and wp < 0.05 and p["median_E_s"] > 0 and has_sens and bad_clean
     if not primary_sig:
