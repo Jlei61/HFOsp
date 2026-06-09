@@ -41,17 +41,17 @@ def _panel_ignition(ax, d):
     ax.axhline(0.5, color="0.6", lw=0.8, ls="--")
     ax.scatter([18.0], [d["aggregate"]["narrow"]["18.0"]["ignition_rate"]], s=140,
                facecolors="none", edgecolors="k", zorder=5, lw=1.4)
-    ax.annotate("mean=18 sanity anchor\n(must be ~0 = sweep null)", xy=(18.0, 0.04),
-                xytext=(17.2, 0.30), fontsize=7.5,
+    ax.annotate("mean=18 sanity anchor\n(0.00 = reproduces sweep null)", xy=(18.0, 0.03),
+                xytext=(17.85, 0.42), fontsize=7.5, ha="left",
                 arrowprops=dict(arrowstyle="->", color="0.4", lw=0.8))
     sh = d.get("boundary_shift_wide_minus_narrow")
-    sht = (f"boundary shift (wide−narrow) = {sh:+.2f} mV" if sh is not None
-           else "boundary shift: n/a (a curve never crosses 0.5)")
+    sht = (f"boundary shift (wide−narrow) = {sh:+.2f} mV  (wide tail ignites at higher mean)"
+           if sh is not None else "boundary shift: n/a (a curve never crosses 0.5)")
     ax.set_xlabel("core mean threshold (mV)   — lower = more excitable →")
     ax.set_ylabel("P(core self-ignites before stimulus)")
     ax.set_title(f"a · ignition boundary\n{sht}", fontsize=10)
     ax.invert_xaxis()                                    # mean decreasing left→right
-    ax.set_ylim(-0.05, 1.08); ax.legend(fontsize=8, loc="center right")
+    ax.set_ylim(-0.05, 1.10); ax.legend(fontsize=8, loc="upper left")
     ax.grid(alpha=0.3)
 
 
@@ -93,7 +93,7 @@ def _panel_evoked(ax, d):
 def main():
     FIG.mkdir(parents=True, exist_ok=True)
     d = _load()
-    fig, axes = plt.subplots(1, 3, figsize=(16.5, 4.7))
+    fig, axes = plt.subplots(1, 3, figsize=(17.5, 5.2))
     _panel_ignition(axes[0], d)
     _panel_latency(axes[1], d)
     _panel_evoked(axes[2], d)
