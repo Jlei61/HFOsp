@@ -12,7 +12,18 @@ from __future__ import annotations
 from typing import Dict, List, Sequence
 
 import numpy as np
-from scipy.stats import spearmanr
+from scipy.stats import rankdata
+
+
+def _spearman_fast(a: np.ndarray, b: np.ndarray) -> float:
+    """Spearman rho = Pearson of average-ranks. Value-identical to scipy.spearmanr
+    (verified incl. ties) but ~6x faster — the null loop calls this millions of times."""
+    ra = rankdata(a)
+    rb = rankdata(b)
+    ra = ra - ra.mean()
+    rb = rb - rb.mean()
+    denom = np.sqrt((ra * ra).sum() * (rb * rb).sum())
+    return float((ra @ rb) / denom) if denom > 0 else float("nan")
 
 
 def spearman_common(rank_a, rank_b, *, min_ch: int) -> float:
@@ -24,7 +35,7 @@ def spearman_common(rank_a, rank_b, *, min_ch: int) -> float:
     common = np.isfinite(a) & np.isfinite(b)
     if int(common.sum()) < min_ch:
         return float("nan")
-    rho = spearmanr(a[common], b[common]).statistic
+    rho = _spearman_fast(a[common], b[common])
     return float(rho) if np.isfinite(rho) else float("nan")
 
 
