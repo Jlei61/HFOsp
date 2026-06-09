@@ -73,6 +73,21 @@ def test_event_peak_time_finds_post_kick_peak():
     assert abs(event_peak_time(r, dt, 150.0, 350.0) - 300.0) < 2.0   # picks the post-kick one
 
 
+def test_self_limit_tail_complete_guards_late_peak():
+    """review fix: a peak so late that the decay window [peak+120,+200] runs off the
+    end of the trace must NOT be silently judged 'returned' — tail_complete=False so
+    the caller can downgrade it to weak evidence."""
+    dt = 0.1
+    # clean early event: decay window [305,385] fits inside the 450ms trace
+    r_ok = _trace(dt, 450, [(185, 150, 6)])
+    m_ok = self_limit(r_ok, dt, t_kick=150.0)
+    assert m_ok["tail_complete"] is True
+    # late event peaking at 400ms: decay window [520,600] is past the 450ms end
+    r_late = _trace(dt, 450, [(400, 150, 6)])
+    m_late = self_limit(r_late, dt, t_kick=150.0)
+    assert m_late["tail_complete"] is False           # cannot trust 'returned' here
+
+
 # ---- science guards (review 4A): the metrics must not be contaminated ----
 def test_self_limit_rest_window_clean_under_prekick_ignition():
     # a core that self-ignites at 80ms must NOT inflate the rest reference [20,50):

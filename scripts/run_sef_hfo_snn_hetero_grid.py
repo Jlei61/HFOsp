@@ -106,7 +106,8 @@ def _run_one(p, net, nu_theta, NE, kick_xy, vth, montage, core_mask, seed):
         core_paf=core_paf, peak_active_frac=whole_paf,
         event_peak_t=event_peak_time(rate, dt, PAF_LO, PAF_HI),
         prekick_ignited=bool(ig), ignition_latency=ig_lat,
-        rest_rate=sl["rest_rate"], returned=sl["returned"], decay_ratio=sl["decay_ratio"],
+        rest_rate=sl["rest_rate"], returned=sl["returned"], tail_complete=sl["tail_complete"],
+        decay_ratio=sl["decay_ratio"],
         burst_duration_ms=sl["burst_duration_ms"], peak=sl["peak"],
         axis_deg=(float(np.degrees(np.arctan2(axis[1], axis[0])) % 180.0)
                   if axis is not None else None),

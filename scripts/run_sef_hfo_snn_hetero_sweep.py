@@ -77,6 +77,7 @@ def _sweep(L, density, positions, kick, seeds):
                 rec[f"ignited_{cond}"] = c["prekick_ignited"]
                 rec[f"iglat_{cond}"] = c["ignition_latency"]
                 rec[f"returned_{cond}"] = c["returned"]
+                rec[f"tail_{cond}"] = c["tail_complete"]      # returned is weak where False
             rows.append(rec); k += 1
             print(f"[{k}/{tot}] {pname} seed{s} " + " ".join(
                 f"{cc[:4]}={rec[f'd_core_{cc}']:+.2f}(ig{int(rec[f'ignited_{cc}'])})"
@@ -89,11 +90,13 @@ def _sweep(L, density, positions, kick, seeds):
         for cond in CONDS:
             ig = np.array([r[f"ignited_{cond}"] for r in prows], bool)
             d = np.array([r[f"d_core_{cond}"] for r in prows], float)
+            tc = np.array([r.get(f"tail_{cond}", True) for r in prows], bool)
             agg[pname][cond] = dict(
                 ignition_rate=float(ig.mean()),
                 d_core_evoked=(_ci(d[~ig]) if (~ig).any() else None),   # non-igniting seeds
                 d_core_ignited=(_ci(d[ig]) if ig.any() else None),      # igniting seeds (index)
-                returned_rate=float(np.mean([r[f"returned_{cond}"] for r in prows])))
+                returned_rate=float(np.mean([r[f"returned_{cond}"] for r in prows])),
+                tail_complete_rate=float(tc.mean()))                    # <1.0 → returned is weak
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "sweep_metrics.json").write_text(json.dumps(
         dict(provenance=G._provenance(p, seeds[0]), kick=list(kick), n_seeds=len(seeds),

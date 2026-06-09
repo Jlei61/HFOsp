@@ -79,6 +79,8 @@ def self_limit(rate, dt, t_kick, rest_win=(20.0, 50.0), decay_after=120.0,
       peak, peak_t  : max post-kick + its time
       decay_ratio   : mean rate over [peak_t+decay_after, +decay_dur] / rest_rate
       returned      : decay_ratio <= return_factor (activity falls back near rest)
+      tail_complete : the full decay window fits inside the trace (else 'returned' is
+                      truncated — weak evidence; caller must downgrade)
       burst_duration_ms : total time the rate stays above rest + burst_frac*(peak-rest)
     """
     rate = np.asarray(rate, float)
@@ -88,6 +90,7 @@ def self_limit(rate, dt, t_kick, rest_win=(20.0, 50.0), decay_after=120.0,
     post = t >= t_kick
     peak = float(rate[post].max()); peak_t = float(t[post][rate[post].argmax()])
     dlo, dhi = peak_t + decay_after, peak_t + decay_after + decay_dur
+    tail_complete = bool(dhi <= t[-1])
     dmask = (t >= dlo) & (t < dhi)
     decay = float(rate[dmask].mean()) if dmask.any() else float(rate[-1])
     ratio = decay / max(rest, 1e-6)
@@ -95,4 +98,4 @@ def self_limit(rate, dt, t_kick, rest_win=(20.0, 50.0), decay_after=120.0,
     dur = float((rate > thr).sum() * dt)
     return dict(rest_rate=rest, peak=peak, peak_t=peak_t, decay_rate=decay,
                 decay_ratio=ratio, returned=bool(ratio <= return_factor),
-                burst_duration_ms=dur)
+                tail_complete=tail_complete, burst_duration_ms=dur)
