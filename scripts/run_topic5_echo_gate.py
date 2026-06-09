@@ -320,26 +320,41 @@ def _assign_verdict(summary):
                 np.isfinite((p.get("boot_ci95") or [np.nan])[0]))
     neg = summary["negative_between_subject"]
     bad = summary["bad_data_regression"]
-    neg_clean = not (neg.get("wilcoxon_p_onesided") is not None
-                     and neg.get("wilcoxon_p_onesided", 1) < 0.05)
-    bad_clean = not (bad.get("wilcoxon_p_onesided") is not None
-                     and bad.get("wilcoxon_p_onesided", 1) < 0.05)
+    # Null D applicability: needs an actual cross-patient name-overlap to run. With
+    # disjoint electrode labels it is INAPPLICABLE (n_subjects==0 / not enough overlap) —
+    # that is NOT a clean pass; flag it so the verdict cannot claim subject-specificity.
+    neg_applicable = (neg.get("n_subjects") or 0) >= 6
+    neg_clean = neg_applicable and not ((neg.get("wilcoxon_p_onesided") or 1) < 0.05)
+    bad_clean = not ((bad.get("wilcoxon_p_onesided") or 1) < 0.05)
     if p["n_subjects"] < 6:
         return {"label": "没看清", "why": "n_subjects<6"}
     wp = p.get("wilcoxon_p_onesided")
-    standing = (wp is not None and wp < 0.05 and p["median_E_s"] > 0
-                and has_sens and neg_clean and bad_clean)
-    if not standing:
+    primary_sig = wp is not None and wp < 0.05 and p["median_E_s"] > 0 and has_sens and bad_clean
+    if not primary_sig:
         return {"label": "代理阴性/没看清",
-                "why": "primary not significant or sensitivities/controls missing; "
-                       "ER proxy gave no continuation evidence — Stage 2 decided by "
-                       "scientific value, not vetoed"}
+                "why": "primary not significant or sensitivities/bad-data not clean; "
+                       "ER proxy gave no continuation evidence — Stage 2 by scientific value, not vetoed",
+                "neg_applicable": neg_applicable}
     a = summary["primary_within_shaft_all"]
     c = summary["primary_anchor_matched_all"]
-    specific = ((a.get("wilcoxon_p_onesided") or 1) < 0.05 or
-                (c.get("wilcoxon_p_onesided") or 1) < 0.05)
+    a_sig = (a.get("wilcoxon_p_onesided") or 1) < 0.05
+    c_sig = (c.get("wilcoxon_p_onesided") or 1) < 0.05
+    # primary is significant (inclusive echo). Subject-SPECIFICITY cannot be claimed
+    # without an applicable Null D — so cap at inclusive when Null D is inapplicable.
+    if not neg_applicable:
+        return {"label": "站住·inclusive（特异性未判定）",
+                "why": f"inclusive echo holds (p={wp:.3f}); within-shaft {'survives' if a_sig else 'flat'}, "
+                       f"anchor-matched {'survives' if c_sig else 'FLAT'}; "
+                       "Null D (between-subject) INAPPLICABLE — patients have disjoint channel "
+                       "names, so subject-specificity is NOT established",
+                "neg_applicable": False}
+    if not neg_clean:
+        return {"label": "站住·inclusive（非特异：Null D 显著）",
+                "why": "between-subject control also significant -> anatomy-general, not subject-specific"}
+    specific = a_sig or c_sig
     return {"label": "站住·含具体通路" if specific else "站住·稳定锚为主",
-            "why": "inclusive echo holds; A/C " + ("survive" if specific else "flatten")}
+            "why": "inclusive echo holds; A/C " + ("survive" if specific else "flatten"),
+            "neg_applicable": True}
 
 
 def main():
