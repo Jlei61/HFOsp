@@ -54,3 +54,45 @@ def test_echo_r_obs_all_insufficient_returns_nan():
     a = np.array([0.0, 1.0, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
     t = np.arange(8, dtype=float)
     assert np.isnan(echo_r_obs(a, [t], min_ch=8))
+
+
+# --- Task 3: shuffle null modes + shaft_block capacity ---
+from src.topic5_echo_gate import shuffle_null, shaft_block_capacity
+
+
+def test_channel_shuffle_destroys_cross_shaft_order_but_within_shaft_preserves():
+    # 2 shafts x 4 channels. Template = global ascending. Seizure = same global order.
+    # within_shaft shuffle only scrambles inside each contiguous shaft block -> global
+    # Spearman stays high; channel shuffle destroys cross-shaft order -> null lower.
+    templ = np.arange(8, dtype=float)
+    seizure = np.arange(8, dtype=float)
+    shafts = np.array(["A", "A", "A", "A", "B", "B", "B", "B"])
+    rng = np.random.default_rng(0)
+    null_chan = shuffle_null(seizure, [templ], B=500, rng=rng, null_mode="channel", min_ch=8)
+    rng = np.random.default_rng(0)
+    null_within = shuffle_null(seizure, [templ], B=500, rng=rng,
+                               null_mode="within_shaft", blocks=shafts, min_ch=8)
+    null_chan = null_chan[np.isfinite(null_chan)]
+    null_within = null_within[np.isfinite(null_within)]
+    assert np.nanmean(null_within) > np.nanmean(null_chan) + 0.2
+
+
+def test_shaft_block_requires_blocks():
+    with pytest.raises(ValueError):
+        shuffle_null(np.arange(8.0), [np.arange(8.0)], B=10,
+                     rng=np.random.default_rng(0), null_mode="within_shaft", min_ch=8)
+
+
+def test_shaft_block_capacity_fail_closed_on_unequal_shafts():
+    # sizes 4, 3, 2 -> no two shafts share a size -> nothing exchangeable.
+    blocks = np.array(["A", "A", "A", "A", "B", "B", "B", "C", "C"])
+    cap = shaft_block_capacity(blocks)
+    assert cap["n_exchangeable_channels"] == 0
+    assert cap["insufficient_block_exchange"] is True
+
+
+def test_shaft_block_capacity_ok_when_two_equal_shafts():
+    blocks = np.array(["A", "A", "A", "A", "B", "B", "B", "B"])  # 2 shafts of size 4
+    cap = shaft_block_capacity(blocks)
+    assert cap["n_exchangeable_channels"] == 8
+    assert cap["insufficient_block_exchange"] is False

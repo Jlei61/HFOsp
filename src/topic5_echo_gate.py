@@ -41,3 +41,72 @@ def echo_r_obs(seizure_rank, template_ranks: Sequence, *, min_ch: int) -> float:
     if not rhos:
         return float("nan")
     return float(max(rhos))
+
+
+from collections import defaultdict
+
+_NULL_MODE_KIND = {
+    "channel": "within",
+    "within_shaft": "within",
+    "anchor_matched": "within",
+    "shaft_block": "between",
+}
+
+
+def _block_permute(values: np.ndarray, blocks: np.ndarray, kind: str, rng) -> np.ndarray:
+    """within: permute values inside each block. between: swap whole equal-size blocks."""
+    values = np.asarray(values, dtype=float)
+    blocks = np.asarray(blocks)
+    out = values.copy()
+    uniq = [b for b in np.unique(blocks) if b is not None and b == b]  # drop None/NaN
+    if kind == "within":
+        for b in uniq:
+            idx = np.where(blocks == b)[0]
+            out[idx] = values[idx][rng.permutation(len(idx))]
+    elif kind == "between":
+        by_size = defaultdict(list)
+        for b in uniq:
+            idx = np.where(blocks == b)[0]
+            by_size[len(idx)].append(idx)
+        for size, idx_list in by_size.items():
+            if len(idx_list) < 2:
+                continue
+            src_vals = [values[ix].copy() for ix in idx_list]
+            perm = rng.permutation(len(idx_list))
+            for tgt_pos, src_pos in enumerate(perm):
+                out[idx_list[tgt_pos]] = src_vals[src_pos]
+    else:
+        raise ValueError(f"unknown kind {kind}")
+    return out
+
+
+def shuffle_null(seizure_rank, template_ranks, *, B, rng, null_mode, min_ch, blocks=None):
+    """Null distribution of echo_r_obs under the requested channel-label shuffle (§4.6)."""
+    kind = _NULL_MODE_KIND[null_mode]
+    n = len(np.asarray(seizure_rank))
+    if null_mode == "channel":
+        blk = np.zeros(n, dtype=int)
+    else:
+        if blocks is None:
+            raise ValueError(f"null_mode={null_mode} requires blocks")
+        blk = np.asarray(blocks)
+    out = np.empty(B, dtype=float)
+    for i in range(B):
+        shuf = _block_permute(np.asarray(seizure_rank, float), blk, kind, rng)
+        out[i] = echo_r_obs(shuf, template_ranks, min_ch=min_ch)
+    return out
+
+
+def shaft_block_capacity(blocks) -> Dict:
+    """How many channels CAN be block-exchanged (shafts sharing a length with >=1
+    other shaft). Unequal shafts are NOT exchangeable and stay put (§4.6 P1-B).
+    insufficient_block_exchange=True -> shaft_block null is degenerate; fail closed."""
+    blocks = np.asarray(blocks)
+    uniq = [b for b in np.unique(blocks) if b is not None and b == b]
+    sizes = defaultdict(list)
+    for b in uniq:
+        sizes[int(np.sum(blocks == b))].append(b)
+    n_exch = sum(size * len(grp) for size, grp in sizes.items() if len(grp) >= 2)
+    total = sum(int(np.sum(blocks == b)) for b in uniq)
+    return {"n_exchangeable_channels": int(n_exch), "n_total_channels": int(total),
+            "insufficient_block_exchange": bool(n_exch < 2)}
