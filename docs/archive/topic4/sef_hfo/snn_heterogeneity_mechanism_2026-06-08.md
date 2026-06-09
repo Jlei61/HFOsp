@@ -163,3 +163,18 @@ kick-OFF（无刺激）：均匀标量 2.3 Hz 安静；宽参差铺满整片 327
 - **窄参差亚阈升温曲线复制**：窄非点火诱发同步随平均下移**逐档升高** +0.047 → +0.129（17）→ +0.190（16.75）→ +0.219（16.5）→ +0.240（16.25），与 §9 同型（更细分辨）。再次确认"参差零诱发效应"只在 18 成立、逼近边界核在升温。
 
 **口径**：仍 **screen-plus、非正式裁决**（小样本独立网络），但**边界 + 尾巴帮点火两条结论现在在两组独立网络上各自复制**——置信度升一档（"初版参数规律"更稳）。fresh 种子 → coarse+fine 在共享 means {18,17,16.5,16} 可**合并**（不重复计数），合并后 16.5 档宽 27/28、窄 13/28。**仍不爬级到"formal verdict"**（需 3-way 种子分离 + forward-LFP）。轻微细节：窄 16.25(0.56) 比 16.5(0.62) 低一丝 = 二项噪声（9/16 vs 10/16），非单调违例。
+
+## 11. kick 幅度稳健性（2026-06-09 自主探索 B，roadmap P1）—— matched-null 对更强刺激稳健；意外发现弱刺激下尾巴帮招募
+
+`results/topic4_sef_hfo/snn_heterogeneity/kick_amp_metrics.json` + 图 `figures/kick_amp.png`。固定 mid 核 + end kick，KICK_BOOST ∈ {1×, 2×, 3×}·ν_θ。**只扫 matched + baseline**（advisor：igniting 条件自点火在戳前、跨幅度 bit-identical，扫它们是 true-by-construction 非结果）；6 网络 × 2 阈值场/噪声 = 12 实现/格。一个 unmatched 格子只跑一次作 pre-kick 不变量 sanity。
+
+**预注册读法 + 结果：**
+- **roadmap 问题"matched-null 在更强刺激下还是 null 吗" = YES**：matched 诱发同步 Δ（核内 − 健康）在 **2×（锁定工作点）= +0.030±0.016、3×（更强）= +0.045±0.023**，都贴零。**locked-kick 的 matched-null 稳健、且延伸到 3×**。
+- **sanity 全过**：baseline 在任何幅度都**不自点火**（0/0/0 → 干净参考）；unmatched pre-kick 点火潜伏期跨 1×/2×/3× **bit-identical（56.4ms）= pre-kick 不变量确认**（advisor 预言）；kick 在所有幅度都产生实质诱发事件（whole-net 峰 0.34–0.43）。
+- **意外发现（大声标记、不抹平，advisor 纪律）—— 弱刺激下 matched 非零、且是负的**：**1×（弱刺激）matched = −0.406±0.086（中位 −0.54，12 个网络里 10 个为负）**——即弱戳下**收窄参差让核招募的细胞更少**。机制 = **宽分布的低门槛尾巴细胞在刺激边缘时帮忙招募**（弱戳时只有低门槛细胞够得着，宽核有这些尾巴、窄核没有）。这与点火边界的"尾巴帮点火"**同一个机制**，只是出现在弱-诱发招募 regime。**方向是 anti-Rich**（收窄 → 更少同步，不是更多）。
+
+**这是 overturn 吗？不是。** advisor 守的 overturn 信号是"matched 在**更强**刺激（3×）冒出之前 2× 没有的效应"——**没发生**（3× 仍贴零）。standing 的 locked-kick null 站得稳。1× 的负效应是**对 null 的细化 + 一个新的弱-刺激 regime 发现**：matched-null **专属于 locked kick（2×）及以上**；弱刺激（1×）是另一个 regime，尾巴在那里对招募有用。**"matched = null" 的口径要补上"在 locked kick 及更强下"这个限定。**
+
+**次要观察**：baseline whole-net 诱发峰在弱戳（1× 0.432）反而比强戳（2×/3× ~0.34）**高**——与"弱戳是尾巴/门槛分布起作用的 regime"一致（弱戳更挑细胞、招募对核内门槛分布更敏感；强戳人人都发放、与分布无关）。不过度解读，记录在案。
+
+**口径**：screen-grade，单工作点（mid 核 / end kick），standing caveats。matched-null（locked-kick）+ 弱刺激尾巴招募效应都是 screen 级、各自 6 网络。**不爬级**。

@@ -41,8 +41,9 @@ def main():
     axA.set_ylabel("matched Δ core co-activation\n(variance-only − healthy)")
     rng = max(0.12, max(abs(np.nanmin(ys)), abs(np.nanmax(ys))) * 1.6) if any(np.isfinite(ys)) else 0.12
     axA.set_ylim(-rng, rng)
-    axA.set_title("a · is the matched (variance-only) NULL robust to a stronger kick?\n"
-                  "flat ~0 across amplitudes = null robust", fontsize=10)
+    axA.set_title("a · matched (variance-only) evoked effect vs stimulus strength\n"
+                  "null at locked (2×) + stronger (3×); weak (1×) = wide tail helps recruitment",
+                  fontsize=10)
     axA.grid(axis="y", alpha=0.3)
 
     # b — sanity: evoked peak grows; baseline never ignites
@@ -50,7 +51,7 @@ def main():
     pe = [ag[a]["base_whole_paf"]["sem"] for a in amps]
     bign = [ag[a]["base_ignition_rate"] for a in amps]
     axB.errorbar(x, peak, yerr=pe, fmt="s-", color="seagreen", lw=1.8, ms=8, capsize=5,
-                 label="whole-net evoked peak (should grow)")
+                 label="whole-net evoked peak (substantial at all amps)")
     axB.set_xticks(x); axB.set_xticklabels([f"{a}·ν_θ" for a in amps])
     axB.set_xlabel("kick amplitude (× locked operating kick)")
     axB.set_ylabel("whole-net peak active fraction\n(evoked window)")
