@@ -83,6 +83,19 @@ def test_shaft_block_requires_blocks():
                      rng=np.random.default_rng(0), null_mode="within_shaft", min_ch=8)
 
 
+def test_null_handles_none_and_int_mixed_blocks():
+    # anchor_bins / unparseable shaft ids produce None mixed with int/str labels;
+    # must not trip np.unique's int-vs-None sort. None-block channels stay put.
+    templ = np.arange(10, dtype=float)
+    seizure = np.arange(10, dtype=float)
+    blocks = np.array([0, 0, 1, 1, None, None, 2, 2, None, 3], dtype=object)
+    null = shuffle_null(seizure, [templ], B=50, rng=np.random.default_rng(0),
+                        null_mode="anchor_matched", blocks=blocks, min_ch=8)
+    assert np.all(np.isfinite(null))
+    cap = shaft_block_capacity(np.array(["A", "A", None, "B", "B", None], dtype=object))
+    assert cap["n_exchangeable_channels"] == 4   # A(2)+B(2); None ignored
+
+
 def test_shaft_block_capacity_fail_closed_on_unequal_shafts():
     # sizes 4, 3, 2 -> no two shafts share a size -> nothing exchangeable.
     blocks = np.array(["A", "A", "A", "A", "B", "B", "B", "C", "C"])

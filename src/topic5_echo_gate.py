@@ -64,12 +64,28 @@ _NULL_MODE_KIND = {
 }
 
 
+def _unique_blocks(blocks: np.ndarray):
+    """Unique block labels, dropping None/NaN. Uses a set (not np.unique) so a mix of
+    int bins and None (anchor_bins) or None shaft ids (unparseable names) never trips
+    np.unique's int-vs-None sort."""
+    seen = []
+    for b in blocks.tolist():
+        if b is None:
+            continue
+        if isinstance(b, float) and b != b:   # NaN
+            continue
+        if b not in seen:
+            seen.append(b)
+    return seen
+
+
 def _block_permute(values: np.ndarray, blocks: np.ndarray, kind: str, rng) -> np.ndarray:
-    """within: permute values inside each block. between: swap whole equal-size blocks."""
+    """within: permute values inside each block. between: swap whole equal-size blocks.
+    Channels whose block label is None/NaN stay put (never permuted)."""
     values = np.asarray(values, dtype=float)
-    blocks = np.asarray(blocks)
+    blocks = np.asarray(blocks, dtype=object)
     out = values.copy()
-    uniq = [b for b in np.unique(blocks) if b is not None and b == b]  # drop None/NaN
+    uniq = _unique_blocks(blocks)
     if kind == "within":
         for b in uniq:
             idx = np.where(blocks == b)[0]
@@ -112,8 +128,8 @@ def shaft_block_capacity(blocks) -> Dict:
     """How many channels CAN be block-exchanged (shafts sharing a length with >=1
     other shaft). Unequal shafts are NOT exchangeable and stay put (§4.6 P1-B).
     insufficient_block_exchange=True -> shaft_block null is degenerate; fail closed."""
-    blocks = np.asarray(blocks)
-    uniq = [b for b in np.unique(blocks) if b is not None and b == b]
+    blocks = np.asarray(blocks, dtype=object)
+    uniq = _unique_blocks(blocks)
     sizes = defaultdict(list)
     for b in uniq:
         sizes[int(np.sum(blocks == b))].append(b)
