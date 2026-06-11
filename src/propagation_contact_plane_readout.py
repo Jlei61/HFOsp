@@ -183,3 +183,54 @@ def build_readout_record(
         "flags": flags,
         "n_channels": len(channels),
     }
+
+
+def _median_nn_spacing(pts: np.ndarray) -> float:
+    """最近邻间距中位数（normalized plane）。"""
+    if pts.shape[0] < 2:
+        return 0.1
+    d = np.linalg.norm(pts[:, None, :] - pts[None, :, :], axis=-1)
+    np.fill_diagonal(d, np.inf)
+    return float(np.median(d.min(axis=1)))
+
+
+def smooth_field(record: Dict, X: np.ndarray, Y: np.ndarray,
+                 sigma_xy: Optional[float] = None, scalar: str = "rank",
+                 s_thresh: float = S_THRESH) -> Dict[str, object]:
+    """normalized 平面上的 support 加权 kernel regression。
+
+    每触点提供 (x_norm, y_norm, value, support)，value = typical_rank(scalar='rank')
+    或 typical_time('time')。
+      w_i(x,y) = support_i * exp(-((x-x_i)^2+(y-y_i)^2)/(2 sigma^2))
+      T = Σ w_i value_i / Σ w_i ；S = Σ w_i（支撑权重，NOT 事件率）；
+      U = Σ w_i unc_i / Σ w_i ；mask = S >= s_thresh。
+    返回 T/S/U/mask（均 (n,n)）+ sigma_xy。
+    """
+    val_key = "typical_rank" if scalar == "rank" else "typical_time"
+    # 过滤：坐标有限 AND 该标量有限 AND support>0。否则 NaN-value 通道仍会把权重
+    # 加进 S 分母却不进 T 分子 -> 稀释 T（reviewer P1）。
+    chans = [c for c in record["channels"]
+             if np.isfinite(c["x_norm"]) and np.isfinite(c["y_norm"])
+             and np.isfinite(c.get(val_key, np.nan)) and c.get("support", 0) > 0]
+    pts = np.array([[c["x_norm"], c["y_norm"]] for c in chans], float).reshape(-1, 2)
+    vals = np.array([c[val_key] for c in chans], float)
+    sup = np.array([c["support"] for c in chans], float)
+    unc = np.array([c.get("uncertainty_rank", 0.0) for c in chans], float)
+    if sigma_xy is None:
+        sigma_xy = _median_nn_spacing(pts)
+    sig2 = 2.0 * sigma_xy ** 2
+    gx = X.ravel(); gy = Y.ravel()
+    S = np.zeros(gx.shape); WT = np.zeros(gx.shape); WU = np.zeros(gx.shape)
+    for k in range(pts.shape[0]):
+        d2 = (gx - pts[k, 0]) ** 2 + (gy - pts[k, 1]) ** 2
+        w = sup[k] * np.exp(-d2 / sig2)
+        S += w
+        if np.isfinite(vals[k]):
+            WT += w * vals[k]
+        WU += w * unc[k]
+    with np.errstate(invalid="ignore", divide="ignore"):
+        T = np.where(S > 1e-12, WT / S, np.nan).reshape(X.shape)
+        U = np.where(S > 1e-12, WU / S, np.nan).reshape(X.shape)
+    S = S.reshape(X.shape)
+    mask = S >= s_thresh
+    return {"T": T, "S": S, "U": U, "mask": mask, "sigma_xy": float(sigma_xy)}

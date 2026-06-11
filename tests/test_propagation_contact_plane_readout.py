@@ -153,3 +153,39 @@ def test_build_readout_record_poor_planarity_and_low_contact():
         soz_first_contacts=set(), lag_time_unit="s",
         one_dimensional_sampling=False)
     assert rec2["flags"]["low_contact_count"] is True
+
+
+def test_smooth_field_support_weight_and_gate():
+    # 两触点 (x_norm,y_norm,typical_rank,support)，sigma 小 -> 各自附近显色
+    rec = {"channels": [
+        {"x_norm": 0.1, "y_norm": 0.0, "typical_rank": 0.0, "support": 1.0,
+         "uncertainty_rank": 0.0},
+        {"x_norm": 0.9, "y_norm": 0.0, "typical_rank": 1.0, "support": 1.0,
+         "uncertainty_rank": 0.0},
+    ]}
+    X, Y = R.make_plane_grid()
+    fld = R.smooth_field(rec, X, Y, sigma_xy=0.05, scalar="rank")
+    assert fld["T"].shape == X.shape
+    # S 是支撑权重（>=0），不是事件率
+    assert (fld["S"] >= 0).all()
+    # 远离两触点的像素 S 很低 -> 被 gate 掉（mask=False）
+    far = (np.abs(X - 0.5) < 0.02) & (np.abs(Y) < 0.02)   # 网格中央、无触点
+    assert fld["mask"][far].sum() == 0
+    # 触点 0 附近 T≈0，触点 1 附近 T≈1
+    near0 = np.unravel_index(np.argmin((X-0.1)**2 + (Y-0)**2), X.shape)
+    near1 = np.unravel_index(np.argmin((X-0.9)**2 + (Y-0)**2), X.shape)
+    assert fld["T"][near0] == pytest.approx(0.0, abs=0.2)
+    assert fld["T"][near1] == pytest.approx(1.0, abs=0.2)
+
+
+def test_smooth_field_sigma_default_nn_spacing():
+    rec = {"channels": [
+        {"x_norm": 0.0, "y_norm": 0.0, "typical_rank": 0.0, "support": 1.0,
+         "uncertainty_rank": 0.0},
+        {"x_norm": 0.3, "y_norm": 0.0, "typical_rank": 1.0, "support": 1.0,
+         "uncertainty_rank": 0.0},
+    ]}
+    X, Y = R.make_plane_grid()
+    fld = R.smooth_field(rec, X, Y, sigma_xy=None, scalar="rank")
+    # 默认 sigma = 最近邻间距中位数 = 0.3
+    assert fld["sigma_xy"] == pytest.approx(0.3, abs=1e-9)
