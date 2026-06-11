@@ -1,5 +1,7 @@
 # SEF-HFO Step 0 结果 + go/no-go 闸门（2026-06-02，带延迟版）
 
+> **⚠️ SUPERSEDED（2026-06-03，保留作 audit trail）**：本文是 **sigmoid 路线**的 scaffold 结果。sigmoid transfer 后被证明结构性失败（放不出低静息高增益态 → 有限脉冲不传播）。Step 0 已改走 **LIF-derived transfer（`Φ_LIF`）** 并**通过 mechanism-scale gate**。**当前 Step-0 结论**见同目录 `lif_transfer_route_2026-06-03.md`（验收 + Step-1 设计）+ `lif_rate_field_theory_2026-06-03.md`（数学路线）。本文保留作 sigmoid 路线 audit trail，**勿当作当前 Step-0 现状**。
+>
 > 状态：**Step 0 机器搭建完成 + scaffold 跑通**。本次是 scaffold（占位参数）跑，正式科学结论须等数据锚定的工作点与单位（见 §go/no-go 闸门 formal tier）。计划见 `docs/superpowers/plans/2026-06-02-topic4-sef-hfo-step0-stability-pulse-plan.md`。
 
 ## 测了什么

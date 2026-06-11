@@ -1,5 +1,8 @@
 # SEF-ITP Phase 4 v1 Modeling Track — Design Spec
 
+> ## ⚠️ SUPERSEDED（2026-06-01，HR/FHN 路线整体被 EI/LIF 取代）
+> 本 spec 是 **HR (Hindmarsh-Rose) / FHN 节点** 建模路线（Phase 4 v1）。Topic 4 主模型已切到 **EI / LIF-derived rate field（SEF-HFO v0.2）**，不再用 HR 抽象节点。当前路线见 `docs/topic4_sef_itp_framework.md` + `docs/archive/topic4/sef_itp_phase4_v2/`；结果 `results/topic4_sef_hfo/`。HR 路线全部归档：本 spec + `docs/archive/topic4/sef_itp_phase4_v1/` + 结果 `results/topic4_sef_itp/phase4_hr_route_SUPERSEDED/`。保留作 audit trail，**勿当作当前路线**。
+>
 > 状态：**v0.2 draft 2026-05-27**（v0.1 → v0.2 = user-return strict catch ratified；4 处 surgical edit: H-C reentry framing 拆解 + L4 principal-curve 从 hard gate 改 descriptive classifier + L3 swap_class per-sim layer fix + 3-proxy verdict strict 收紧）
 > v0.1 → v0.2 commit history：spec 文件本身有 git log 追溯
 > 上游 framework：`docs/topic4_sef_itp_framework.md` v1.0.7（待 banner v1.0.8 amendment）

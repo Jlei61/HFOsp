@@ -61,18 +61,18 @@ User 推导把 Step-0a 目标写成 **near-critical `η_lin≈0+` / finite-k Hop
 - **0a 同质 transfer 屏**：找工作点 `r_E^0 low, r_I^0 reasonable, G_E high`，**（更正）+ 稳健稳定可激，不是 η≈0+**。✅ 已做（preflight + fsolve 工作点）。
 - **0b 空间色散屏**：加 `K_ab(x)`、`K̂_ab(k)`，算 `λ(k)`，看 `k*≠0`（finite-k）。✅ 已做（**结果：真工作点 k*=0、稳健稳定**——所以本步是诊断不是闸门，见更正）。
 - **0c finite-pulse 验证**：near-critical-but-stable→**(更正)稳定但可激**参数做 finite pulse；合格 = 点着 + 传播 + 自终止（只爆炸 / 怎么都不传播 = 不合格）。✅ 已做（self_limited_propagation 找到，mechanism-scale gate 已过）。
-- **0d 各向异性控制**：加各向异性 `K_EE`，检 `θ_prop≈θ_EE`；**旋转连接轴 ⇒ θ_prop 旋转；旋转电极杆 ⇏ θ_prop 根本改变**。❌ **未做——这是 framework 的承重判别指标，是最重要的新 Step-0 工作。**
+- **0d 各向异性控制**：加各向异性 `K_EE`，检 `θ_prop≈θ_EE`；**旋转连接轴 ⇒ θ_prop 旋转；旋转电极杆 ⇏ θ_prop 根本改变**。✅ **已做 PASS（2026-06-03）**：θ_prop 随 θ_EE 转 <0.1°（测 0/30/60/90/135），isotropic 对照无优势轴 ratio 1.00；framework 的承重判别指标通过。`scripts/sef_hfo_step0d_anisotropy_control.py`（commit c183ed6 + canonical 化 e95af61）。
 - **0e heterogeneity patch 后置**：`Φ_a^eff(μ,σ;x)=∫Φ_a(μ,σ;θ)p_a(θ;x)dθ`，扫 `Var(θ)↓` 看是否 `G_E(x)↑ / η_lin(x)↓`，只在此方向成立才说「low heterogeneity 让该 patch 更易受激」。❌ 未做（计算较重：Φ_LIF 在多维 θ 分布上积分；scope 为后置层，不入 Step 0 核心）。
 
 ## 13. 机制链条（收口）
 
 `Φ_LIF(μ,σ) → G_μ → M(λ,k) → λ(k) → η_lin（诊断）→ finite-pulse ignition（闸门）→ anisotropic propagation → self-limited HFO envelope`。**不是** `σ_φ↓ → F_eff → easy excitation`。
 
-## 由此推导出的新 Step-0 工作（待 user 定优先级）
+## 由此推导出的新 Step-0 工作（状态更新 2026-06-03：1/2/4 已做，3 已初探，0e deferred）
 
-1. **0d 各向异性旋转控制**（最重要，未做）：模板方向跟连接各向异性轴转、不随电极杆转；isotropic + aligned-shaft 必须过不了。这是 v0.2 plan 承重判据，LIF 路线下要重跑。
-2. **把 LIF transfer 收进 canonical src 模块**（`src/sef_hfo_{field,stability}.py` 目前是 sigmoid `F_eff`；LIF 路线在 exploration 脚本里）——按本推导 `F_eff ⇒ Φ_LIF` 落到主代码，0a–0e 在 canonical 模块上干净重跑。这是"换 transfer 的最小手术"的代码落地。
+1. ✅ **0d 各向异性旋转控制（已做 PASS，commit c183ed6 + e95af61）**：模板方向随连接各向异性轴转、不随电极杆转（<0.1°）；isotropic+aligned-shaft 对照不过（Step-1 噪声下重跑见 `step1_noise_contract_2026-06-03.md` §6）。v0.2 plan 承重判据通过。
+2. ✅ **把 LIF transfer 收进 canonical src 模块（已做，commit 46f9040 + e95af61）**：`Φ_LIF` 落到 canonical `src/sef_hfo_lif.py`（Siegert + fsolve `mean_field` + `lif_gains` + `integrate_lif_field`（可旋各向异性 + recovery）+ `classify_response`，TDD）；exploration 脚本不再是唯一实现。w_ee_mult 贯穿场 + mean_field 多初值取最低-nuE root（暴露 wEE×1.4 双稳）已加固。
 3. **σ-dynamics + G^σ 作速度-尺度张力 sensitivity**（Step 1/2）：finite-pulse 期间局部 σ²∝r 变化大，固定-σ 近似忽略了它，而它直接调 G → 传播速度；σ-dynamics 是解开"波速太快/reach 太大"的候选。**已初探（2D Φ_LIF(μ,σ) lut + 动态 σ(x,t)，在病理增益 wEE×1.4 regime）：σ-dynamics ON 把事件时长拉长（110→151ms，更贴 envelope），但 reach 仍 ~填满网格、波速没明显降——所以 σ-dynamics 是真实的"时长"杠杆，但 NOT 速度-尺度张力的解药。reach/速度张力仍开放（按 mechanism-scale 验收 = Step 1/2 sensitivity；要解可能得动空间核尺度/连接 reach，或接受"事件填满 SOZ patch"的 mechanism-scale 口径）。**
-4. **Step-0a 目标措辞改"稳定可激"**（折入更正），各文档 near-critical 语言相应收窄。
+4. ✅ **Step-0a 目标措辞改"稳定可激"（已折入）**：本文 §⚠️更正 + framework §6.5/banner 的 near-critical 语言已收窄。
 
 （内部归档代号：Φ_LIF Siegert transfer、F_eff demote、G^μ/G^σ susceptibility、self-consistent (μ,σ) fsolve、M(λ,k) dispersion、η_lin、finite-k Hopf vs k=0、excitable-from-stable-rest vs near-critical、all-or-none amplitude-independent pulse、slow-GABA phase lag、anisotropy rotation control θ_prop≈θ_EE、heterogeneity-as-LIF-param-distribution、speed-scale tension、σ-dynamics）

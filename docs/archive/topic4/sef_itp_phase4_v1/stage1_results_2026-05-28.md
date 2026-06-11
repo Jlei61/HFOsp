@@ -1,5 +1,7 @@
 # SEF-ITP Phase 4 Stage 1 Results — Single-Node HR
 
+> **⚠️ SUPERSEDED（2026-06-01）**：HR/FHN 路线已被 EI/LIF rate field（SEF-HFO v0.2）取代。当前路线见 `docs/topic4_sef_itp_framework.md`；HR 路线归档索引见 `docs/archive/topic4/INDEX.md` 历史归档节；HR 结果图移至 `results/topic4_sef_itp/phase4_hr_route_SUPERSEDED/`。保留作 audit trail。
+>
 > 状态：**PASS**（Stage 1 exit contract 满足）
 > 日期：2026-05-28
 > 上游 spec：`docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` v0.2
@@ -44,7 +46,7 @@ unstable              0
 
 ## Artifacts
 
-`results/topic4_sef_itp/phase4_modeling/stage1_hr_single/`
+`results/topic4_sef_itp/phase4_hr_route_SUPERSEDED/stage1_hr_single/` （2026-06-01 由 `phase4_modeling/` 移入归档）
 - `regime_map.png` — 三参数 regime 热图（已目视：σ=0 全灰、噪声增大绿区扩展、标准可激介质图景）
 - `phase_portraits/baseline.png` — 静息 + 噪声触发大环（excitable 签名，已目视）
 - `phase_portraits/baseline_zero_noise.png` — 纯静息无大环（已目视，确认 σ=0 silent）
