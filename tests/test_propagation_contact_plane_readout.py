@@ -385,3 +385,18 @@ def test_comparison_runner_end_to_end(tmp_path):
     summary = run_comparison(rd, md, tmp_path / "comparison")
     assert "scalar_placement" in summary
     assert (tmp_path / "comparison" / "real_vs_model_summary.json").exists()
+
+
+def test_plot_record_smoke(tmp_path):
+    from scripts.plot_contact_plane_static import plot_record
+    # 合成最小 readout record（含 channels），确认绘图链不报错、出 PNG
+    chans = [{"name": f"A{i}", "x_norm": float(x), "y_norm": 0.0,
+              "typical_rank": float(x), "typical_time": float(x), "support": 1.0,
+              "uncertainty_rank": 0.1, "uncertainty_time": 0.1,
+              "is_soz": (i == 0)}
+             for i, x in enumerate(np.linspace(0.1, 0.9, 8))]
+    rec = {"dataset": "yuquan", "subject": "s1", "template_id": "t_a",
+           "channels": chans, "soz_ambiguous": []}
+    out = tmp_path / "card.png"
+    plot_record(rec, out)
+    assert out.exists() and out.stat().st_size > 0
