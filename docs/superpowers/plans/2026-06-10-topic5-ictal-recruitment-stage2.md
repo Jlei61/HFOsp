@@ -918,14 +918,10 @@ Re-read spec §3.4 (montage trace is the sentinel pre-step). Determine whether t
 **Files:**
 - Create: `scripts/run_topic5_ictal_recruitment.py`
 
-- [ ] **Step 1: Inspect the masked template + its producer provenance live**
+- [x] **Step 1: Trace the template montage — DONE 2026-06-10 (result = PER-DATASET)**
 
-Run:
-```bash
-python -c "import json,glob; f=sorted(glob.glob('results/interictal_propagation_masked/**/*.json',recursive=True))[0]; d=json.load(open(f)); print(f); print('keys', list(d.keys())); print('channel_names', d.get('channel_names')[:8]); print('src_diag', d.get('source_diagnostic'))"
-grep -rnE "reference|bipolar|car|alias|monopolar" src/interictal_propagation.py | head
-```
-Expected: confirm whether `channel_names` are single-contact (bipolar-aliased-left, working hypothesis) or true monopolar. **Record the verdict** — it sets `TEMPLATE_MONTAGE` and the ictal `reference`. If genuinely ambiguous, STOP and ask the user before proceeding (do not guess).
+Evidence (already executed): `config/default.yaml` `reference: bipolar` + `alias_bipolar_to_left: true`; `config/subject_params.json` `/yuquan/_defaults reference='bipolar'`, `/epilepsiae/_defaults reference='car'`; epilepsiae masked template `channel_names` show consecutive contacts (`FLA2,FLA3,FLA4,FLA5`) = CAR single contacts, not bipolar pairs.
+**Verdict: yuquan = bipolar aliased-left; epilepsiae = CAR.** This overturned the v1 "both bipolar" hypothesis → `TEMPLATE_MONTAGE` / `ICTAL_REFERENCE` are now per-dataset dicts (constants below; spec §3.4 v2.1). No ambiguity remained, so no stop-and-ask was needed beyond surfacing this change to the user.
 
 - [ ] **Step 2: Write the runner scaffold + `cmd_trace_montage`**
 
@@ -936,9 +932,9 @@ Spec: docs/superpowers/specs/2026-06-10-topic5-ictal-recruitment-stage2-design.m
 Staged gate: trace-montage -> audit -> sentinel (MANUAL) -> per-subject -> cohort.
 
 P0 invariants:
-- §3.4 montage: ictal features computed on bipolar (reference='bipolar') aliased
-  to the template's single-contact convention; assert_channel_identity hard-fails
-  on a montage mismatch; CAR is sensitivity only.
+- §3.4 montage (PER-DATASET, traced): ictal features computed with the dataset's
+  detection reference — yuquan='bipolar' (alias-left), epilepsiae='car';
+  assert_channel_identity hard-fails on a montage mismatch.
 - §7.1 echo reuses src.topic5_echo_gate (no reinvented statistic).
 """
 from __future__ import annotations
@@ -969,9 +965,11 @@ PRE_ONSET_CHANGE_SEC = -10.0
 EARLY_K = 3
 B = 2000
 RNG_SEED = 20260610
-# set from Task 10 Step 1 trace; default = working hypothesis
-TEMPLATE_MONTAGE = "bipolar_aliased_left"
-ICTAL_REFERENCE = "bipolar"
+# PER-DATASET montage (traced 2026-06-10 via Task 10 Step 1; spec §3.4 v2.1):
+# yuquan detection = bipolar + alias-left; epilepsiae detection = CAR. The ictal
+# reference MUST match the dataset's detection reference, else channel name != signal.
+TEMPLATE_MONTAGE = {"yuquan": "bipolar_aliased_left", "epilepsiae": "car"}
+ICTAL_REFERENCE = {"yuquan": "bipolar", "epilepsiae": "car"}
 
 FUSED_FEATURES = ("line_length", "broadband", "hfa", "spectral_edge")
 AMP_FEATURES = ("line_length", "broadband", "hfa")
@@ -1184,21 +1182,28 @@ Re-read spec §3.1 (audit columns; locked thresholds; report drops only) + §3.4
 
 ```python
 def _load_masked_template(ds_sid):
-    """Return (channel_names, [template_rank vectors per cluster], template_k, swap_class,
-    template_montage). Phantom-safe masked source (Stage-1 contract)."""
-    # locate the masked per-subject JSON (rank_displacement or propagation tree)
-    import glob
-    cand = glob.glob(str(MASKED_ROOT / "**" / f"{ds_sid}.json"), recursive=True)
-    if not cand:
+    """Return masked Main-A narrow template(s), reusing the VERIFIED Stage-1 contract
+    (scripts/run_topic5_echo_gate.py load_subject): the masked JSON lives at
+    results/interictal_propagation_masked/rank_displacement/per_subject/<ds_sid>.json,
+    requires stable_k==2 + pairs, and the two cluster templates are
+    pairs[0].rank_a_full / rank_b_full masked by pairs[0].joint_valid via
+    echo.masked_template_rank_1d (1-D np.where contract). Per-dataset montage (§3.4).
+    None if unusable. (`echo` = src.topic5_echo_gate, imported at top.)"""
+    mj = MASKED_ROOT / "rank_displacement" / "per_subject" / f"{ds_sid}.json"
+    if not mj.exists():
         return None
-    d = json.load(open(sorted(cand)[0]))
-    ch = d["channel_names"]
-    # cluster template ranks: reuse the same masked field Stage-1 used (centered_rank /
-    # adaptive_cluster); confirm key live at execution and apply per-cluster valid_mask.
-    templates = _extract_masked_cluster_templates(d)        # list of 1-D rank vectors (NaN=masked)
-    return {"channels": ch, "templates": templates,
-            "template_k": len(templates), "swap_class": d.get("swap_class", "na"),
-            "template_montage": TEMPLATE_MONTAGE}
+    d = json.load(open(mj))
+    if d.get("stable_k") != 2 or not d.get("pairs"):
+        return None
+    dataset = d["dataset"]                                   # 'epilepsiae' | 'yuquan'
+    ch = list(d["channel_names"])
+    pair = d["pairs"][0]
+    jv = np.asarray(pair["joint_valid"], dtype=bool)
+    templates = [echo.masked_template_rank_1d(np.asarray(pair["rank_a_full"], float), jv),
+                 echo.masked_template_rank_1d(np.asarray(pair["rank_b_full"], float), jv)]
+    return {"channels": ch, "dataset": dataset, "templates": templates, "template_k": 2,
+            "swap_class": pair.get("swap_sweep", {}).get("swap_class", "na"),
+            "template_montage": TEMPLATE_MONTAGE[dataset]}    # per-dataset (§3.4 v2.1)
 
 
 def cmd_audit(args):
@@ -1263,8 +1268,9 @@ def cmd_sentinel(args):
     plotter = importlib.import_module("scripts.plot_topic5_ictal_recruitment")
     for sid_spec in sentinel_ids:
         subj, sz = sid_spec.rsplit(":", 1)
+        ds = subj.split("/", 1)[0]                  # 'epilepsiae' or 'yuquan'
         sw = extract_seizure_window(subj, int(sz), pre_sec=BASELINE_PRE_SEC, post_sec=30.0,
-                                    reference=ICTAL_REFERENCE)
+                                    reference=ICTAL_REFERENCE[ds])   # per-dataset (§3.4 v2.1)
         lambdas = _subject_lambdas(subj)            # from audit / recompute pooled
         # Task 11 signature: (signal, fs, pre_sec, channels, lambdas, *, eeg_onset_rel_sec).
         # NEVER pass sw.t_axis (raw sample axis) here — that was the P0-1 bug.

@@ -2,6 +2,7 @@
 
 > **状态**：设计稿 **v2**（v1 brainstorm 2026-06-10 + review patch：①montage/channel-identity 硬合同 §3.4 [P0]；②global-onset 去单调空条件 §4.2；③λ 单位=per-hour + pooled baseline + calibration_unstable §5.3；④Null D 按坐标空间分 epi-MNI-NN / yuquan-region §7.3；⑤spectral-edge 完全移出 feature_agreement 硬门 §6.2-6.3）。plan 待写。
 > **v1 已锁的 3 点收紧**（仍有效）：窗口分层（extraction vs recruitment）/ 特征族融合（amplitude family gate + spectral corroboration）/ narrow=Main-A·broad=Main-B。
+> **v2.1 montage trace（2026-06-10 Phase 2 trace-montage 步骤实测）**：§3.4 的 montage 工作假设被推翻——**按数据集不同**：yuquan = bipolar aliased-left；epilepsiae = **car**（非 bipolar）。ICTAL_REFERENCE 改为 per-dataset。见 §3.4。
 > **Topic**：搭一个**真正的 early-ictal 招募时序仪器**——从原始发作 EEG 上，用多个独立检测器测"每个触点真正开始改变的时刻"，得到逐触点招募顺序，再用 Stage 1 已验证的 echo 统计量重测它与间期传播模板的对齐。**主线 = 真实招募仪器；pre-ictal 状态层是另一个 secondary layer，单独立 spec，不混进本 spec 的结论。**
 > **定位**：Stage 1（proxy triage）的结论是"现成 ER/atlas 代理里的'像'主要来自共享粗锚（病灶距离 / 早晚优先级），不是具体路径复用；且 ER-derived rank 不是传播路径仪器"。Stage 1 同时留下两个**结构上闭不了**的缺口：(i) construct-validity（ER 最早 vs 真特征最早是否一致）pending；(ii) Null D 跨病人特异性对照在按通道名对齐时跑不起来。**Stage 2 的真仪器把这两个缺口变成可闭环的：cross-feature agreement = construct validity；coordinate/region-matched Null D = 特异性。**
 > **Owner（user-locked 2026-06-08）**：topic5 拥有"真正发作 EEG 招募层 + 间期↔发作桥接"。与 Topic 4 H5（间期高频事件端点在发作邻近的招募）不重复——本层碰的是真正发作 EEG 信号本身的顺序。
@@ -82,16 +83,21 @@ subject 入选 ⇔ **同时**满足：
 - **必报 sensitivity** = epi-only、yuquan-only 各自合并估计。
 - yuquan 只有单一 onset 标注（eeg_onset 即 clinical），故 §4 "annotation anchor vs data-driven anchor" 的双锚 sensitivity 在 yuquan 上退化为"data-driven anchor only"；epilepsiae 两锚都有。这一退化进 B0 audit。
 
-### 3.4 montage / channel-identity 硬合同（P0 — 桥接的承重点）
+### 3.4 montage / channel-identity 硬合同（P0 — 桥接的承重点；**2026-06-10 traced，per-dataset**）
 
-> **核心风险**：interictal 模板的 `channel_names` 是单触点标签（实测 `HRA1, BFRA5, AMR1, HAR1…`），但 legacy 检测是 **bipolar**（`p16_cuda_24h_bipolar.py`），且 `src/preprocessing.py:9` 明确"A1-A2 labeled as A1"——即模板通道**极可能是 bipolar pair aliased-left**（A1–A2 别名为 A1）。若 ictal feature 用 `extract_seizure_window` 的默认 `reference="car"` 在同名单触点上算，名字相同但**信号对象不同**，echo 就变成"名字像"而非"同一路径比较"。
+> **核心风险**：interictal 模板的 `channel_names` 是单触点标签，若 ictal feature 用错 reference，名字相同但**信号对象不同**，echo 就变成"名字像"而非"同一路径比较"。
+>
+> **trace 结果（v2 已 trace，推翻了 v1 "两数据集都 bipolar-aliased-left" 的工作假设）**：montage **按数据集不同**：
+> - **yuquan**：`config/default.yaml` `reference: bipolar` + `alias_bipolar_to_left: true`，`config/subject_params.json /yuquan/_defaults reference='bipolar'` → 模板通道（如 `D13`）= **bipolar pair `D13-D14` 别名取左**。
+> - **epilepsiae**：`config/subject_params.json /epilepsiae/_defaults reference='car'`（`run_hfo_detection.py` epilepsiae 路径默认 car）→ 模板通道（如 `FLA2`）= **CAR 单触点**。佐证：epilepsiae 模板里相邻触点 `FLA2,FLA3,FLA4,FLA5` 同时出现，是 CAR 单触点特征，不是相邻 bipolar pairing。
 
-- **实现期必须先 trace 模板真实 montage（sentinel 前置）**：从 interictal propagation 模板的 producer 确认 `channel_names` 是 (a) 真 monopolar 还是 (b) bipolar aliased-left。**默认工作假设 = (b) bipolar aliased-left（legacy 一致）**，但**不**在没 trace 前就当定论；trace 结果落 B0 audit `template_montage`。
-- **Main-A primary 硬合同**：ictal feature 必须在**与模板同语义的 montage** 上算。若模板是 bipolar aliased-left → ictal 用 `reference="bipolar"` 生成相邻 pair，再**按模板同一别名约定**（pair `HRA1-HRA2` → 标签 `HRA1`）对齐；CAR / monopolar **只作 sensitivity**，不进 Main-A primary。
-- **`channel_identity_contract` 不是名字相等**：runner 必须断言 `template_montage == ictal_montage`（语义层），并对每个进 echo 的通道核对其 montage 来源标签一致；**名字相同但 montage 语义不同 → hard fail，禁止 silent 通过**。
-- B0 audit 加列：`template_montage`（traced）、`ictal_montage`（生成时用的 reference）、`channel_identity_contract`（`matched_bipolar_aliased_left` / `matched_monopolar` / `MISMATCH`）、`n_channels_montage_matched`。
+- **Main-A primary 硬合同 — ictal reference 按数据集匹配检测 reference**：
+  - yuquan ictal：`extract_seizure_window(reference="bipolar")`，再**按 alias-left 约定**（pair `D13-D14` → 标签 `D13`）对齐；`template_montage = ictal_montage = "bipolar_aliased_left"`。
+  - epilepsiae ictal：`extract_seizure_window(reference="car")`，单触点同名对齐；`template_montage = ictal_montage = "car"`。
+  - **不匹配（如 epilepsiae 用 bipolar、或 yuquan 用 car）→ `assert_channel_identity` hard fail**。CAR-vs-bipolar 的**跨数据集对比**不存在（各自 within-dataset 匹配；dataset 作 stratum，§3.3）。
+- **`channel_identity_contract` 不是名字相等**：runner 按数据集取 `ICTAL_REFERENCE[dataset]`，断言 `template_montage == ictal_montage`（语义层）；**名字相同但 montage 语义不同 → hard fail，禁止 silent 通过**。
+- B0 audit 加列：`template_montage`（per-dataset traced 值）、`ictal_montage`（生成时用的 reference）、`channel_identity_contract`（`matched_bipolar_aliased_left` / `matched_car` / `MISMATCH`）、`n_channels_montage_matched`。
 - TDD 必含：构造"同名单触点、但一个是 CAR-monopolar 一个是 bipolar-aliased"的两路 → 断言 contract 检查 **hard raise**（不得因名字相等而通过）。
-- yuquan 同理：yuquan 模板也走 legacy bipolar；ictal `reference="bipolar"` 对齐。
 
 ---
 
@@ -318,7 +324,7 @@ Stage 1 Null D（别人模板）按通道名对齐 → epi 0 overlap、yuquan wi
 
 | 需要 | 复用来源 | 匹配？|
 |---|---|---|
-| raw ictal EEG 窗 | `src.ictal_onset_extraction.extract_seizure_window`（epi+yuquan）| ✅ 双数据集；**Main-A 必须 `reference="bipolar"` 对齐模板 montage（§3.4）**，非默认 car |
+| raw ictal EEG 窗 | `src.ictal_onset_extraction.extract_seizure_window`（epi+yuquan）| ✅ 双数据集；**Main-A 的 ictal reference 按数据集匹配检测 reference：yuquan=`bipolar`(alias-left)、epilepsiae=`car`（§3.4 traced）** |
 | ER trace | `src.ictal_onset_extraction.compute_er` | ✅ ER held-out 参照；F2/F3/F5 仿其 spectrogram 骨架 |
 | baseline 窗 | `resolve_baseline_window` | ✅ EEG-onset-aware |
 | baseline z-score 骨架 | `baseline_zscore_er` | ⚠️ 新写 `baseline_robust_z`（MAD）沿用其 mask 逻辑 |
