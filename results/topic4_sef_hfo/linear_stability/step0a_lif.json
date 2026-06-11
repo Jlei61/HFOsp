@@ -1,4 +1,5 @@
 {
+  "_SUPERSEDED_NOTE": "WARNING: per_ratio regime/k_star/finite_k_hopf below is a DAMPED-ITERATION ARTIFACT (overstates criticality: nuE rises to 1.74 Hz with near-critical finite-k Hopf). The corrected fsolve operating point is robustly stable / low rate (nuE~0.2 Hz, k=0, no finite-k Hopf) and matches step0b_lif.json's fsolve nuE point-for-point. Use figures/step0a_lif_operating_point.png (computed live from canonical src.sef_hfo_lif.mean_field), NOT this per_ratio block. See docs/archive/topic4/sef_itp_phase4_v2/lif_rate_field_theory_2026-06-03.md correction.",
   "per_ratio": [
     {
       "ratio": 0.85,

@@ -167,11 +167,13 @@ def _trace_panel(ax, e, t, event_window, cmap_name, panel_title, signal_ylabel,
 def _spatial_panel(fig, axA, cax, *, field_xy, kick_xy, axis_deg, extent, par, perp,
                    field_c=None, field_clabel=None, field_cmap=None, field_vlim=None,
                    color_contacts=False, E_xy=None, I_xy=None, name_fs=10,
-                   label_endpoints_only=False, patch_circle=None, substrate_label="",
-                   panel_letter="a", label_x=-0.20, show_legend=True):
+                   label_endpoints_only=False, patch_circle=None, extra_patch_circles=None,
+                   substrate_label="", panel_letter="a", label_x=-0.20, show_legend=True):
     """One spatial event+electrodes panel (field scatter + colorbar + electrodes +
     seed + axis arrow + optional pathology-core outline). Shared by the 3-panel
-    read-out and the 4-panel mechanism figure so both draw the map identically."""
+    read-out and the 4-panel mechanism figure so both draw the map identically.
+    extra_patch_circles = additional (x,y,r) cores (e.g. a second lesion focus); default
+    None keeps single-core (kick-version) figures byte-identical."""
     draw_substrate(axA, E_xy, I_xy)
     fxy = np.asarray(field_xy, float)
     _cmap_name = field_cmap or FIELD_CMAP
@@ -197,6 +199,9 @@ def _spatial_panel(fig, axA, cax, *, field_xy, kick_xy, axis_deg, extent, par, p
         px, py, pr = patch_circle
         axA.add_patch(plt.Circle((px, py), pr, fill=False, ls="--", ec="crimson",
                                  lw=1.6, zorder=4, label="pathology core"))
+    for j, (px, py, pr) in enumerate(extra_patch_circles or []):
+        axA.add_patch(plt.Circle((px, py), pr, fill=False, ls="--", ec="crimson",
+                                 lw=1.6, zorder=4, label=("pathology core" if patch_circle is None and j == 0 else None)))
 
     _axis_arrow(axA, kick_xy, axis_deg, extent)
     _cc_par = par.get("contact_c") if color_contacts else None
@@ -282,7 +287,7 @@ def mechanism_4panel(
     map_a, map_b,                            # each: dict(field_c, clabel, cmap, vlim, color_contacts, title)
     par, perp, t, event_window, signal_ylabel, contact_note,
     E_xy=None, I_xy=None, name_fs=10, label_endpoints_only=False,
-    patch_circle=None, title=None,
+    patch_circle=None, extra_patch_circles=None, title=None,
 ):
     """4-panel mechanism figure: (a) heterogeneity map | (b) onset/propagation map |
     (c) ∥-axis read-out | (d) ⊥-axis read-out. The two maps share the same geometry
@@ -302,6 +307,7 @@ def mechanism_4panel(
                        field_vlim=m.get("vlim"), color_contacts=m.get("color_contacts", False),
                        E_xy=E_xy, I_xy=I_xy, name_fs=name_fs,
                        label_endpoints_only=label_endpoints_only, patch_circle=patch_circle,
+                       extra_patch_circles=extra_patch_circles,
                        substrate_label=m.get("title", ""), panel_letter=letter,
                        label_x=label_x, show_legend=show_legend)
 

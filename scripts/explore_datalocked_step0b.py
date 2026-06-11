@@ -17,7 +17,8 @@ gives a confined local response that extinguishes (no neighbor recruitment) -> n
 propagating front -> no self_limited_propagation. Principled fix (NOT brute-force): use
 the LIF colored-noise transfer (steep f-I at LOW rate near threshold = high dynamic gain
 at a low STATIC rate), which the spiking model (coworker1) has and which Exploration 1's
-injected-gain regime emulated. See datalocked_step0b_exploration_2026-06-03.md.
+injected-gain regime emulated. See lif_rate_field_theory_2026-06-03.md §3 (the sigmoid
+failure is restated there; this script's standalone archive writeup was pruned 2026-06-03).
 
 Run: python scripts/explore_datalocked_step0b.py
 """

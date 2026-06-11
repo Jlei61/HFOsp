@@ -9,7 +9,7 @@ fluctuation-driven f-I is steep (high dnu/dmu) AND the recurrent weight scale
 (tau_m*C_EE*w_EE ~ 2520) is large. The sigmoid's gain is ~0 wherever the rate is low
 (flat tails), peaking only at F~0.5; its max realized loop gain was 1.26 (only near
 saturation). So the sigmoid structurally cannot host a low-rate excitable rest; the LIF
-can. See datalocked_step0b_exploration_2026-06-03.md for the sigmoid failure.
+can. See lif_rate_field_theory_2026-06-03.md §3 for the sigmoid-vs-LIF transfer argument.
 
 White-noise Siegert (numerically stable via erfcx); colored-noise (synaptic-filter)
 threshold correction is a refinement for the formal rebuild, not needed for this
