@@ -320,7 +320,8 @@ def _audit_one_subject(ds_sid, *, verbose=False):
             agree += int(res["agreement"].get("feature_agreement_flag", False))
             preonset += res.get("n_preonset_change", 0)
     n_recr = n_recr or [0]
-    per_feat_avail = {k: (k in lambdas and np.isfinite(lambdas.get(k, np.nan))) for k in FUSED_FEATURES}
+    per_feat_avail = {k: bool(k in lambdas and np.isfinite(lambdas.get(k, np.nan)))
+                      for k in FUSED_FEATURES}
     return {
         "subject_id": ds_sid, "dataset": dataset, "fs": fs,
         "n_seizures_total": info["n_seizures_total"], "n_seizures_loadable": len(z_cache),
@@ -404,39 +405,54 @@ def cmd_trace_montage(args):
 # Task 13 — sentinel overlay (MANUAL GATE)
 # ---------------------------------------------------------------------------
 def cmd_sentinel(args):
+    """Sentinel overlays for the manual gate. Groups seizures by subject so lambda is
+    pooled-calibrated ONCE per subject (each calibration reloads <=cap EDFs)."""
     (OUT_ROOT / "sentinel").mkdir(parents=True, exist_ok=True)
     import importlib
+    from collections import defaultdict
     plotter = importlib.import_module("scripts.plot_topic5_ictal_recruitment")
-    for sid_spec in args.seizures:
-        subj, sz = sid_spec.rsplit(":", 1)
+    by_subj = defaultdict(list)
+    for spec in args.seizures:
+        subj, sz = spec.rsplit(":", 1)
+        by_subj[subj].append(int(sz))
+    for subj, szs in by_subj.items():
         ds = subj.split("/", 1)[0]
-        print(f"[sentinel] {sid_spec} (ref={ICTAL_REFERENCE[ds]}) ...", flush=True)
+        print(f"[sentinel] {subj} seizures={szs} (ref={ICTAL_REFERENCE[ds]}) — calibrating lambda ...",
+              flush=True)
         lambdas, info = _subject_lambdas(subj, verbose=True)
-        sw = extract_seizure_window(subj, int(sz), pre_sec=BASELINE_PRE_SEC, post_sec=30.0,
-                                    reference=ICTAL_REFERENCE[ds])
-        eeg_rel = ((sw.eeg_onset_epoch - sw.clin_onset_epoch)
-                   if sw.eeg_onset_epoch is not None else None)
-        out = compute_seizure_recruitment(sw.signal, sw.fs, sw.pre_sec, sw.ch_names, lambdas,
-                                          eeg_onset_rel_sec=eeg_rel)
-        tag = f"{subj.replace('/', '_')}_{sz}"
         lam_print = {k: (round(lambdas[k], 2) if np.isfinite(lambdas.get(k, np.nan)) else None)
                      for k in FUSED_FEATURES}
-        if out is None:
-            print(f"  UNRESOLVED (global onset not reached or baseline invalid). lambdas={lam_print}")
-            continue
-        rec = {"seizure": sid_spec, "t_global_sec": out["t_global_sec"],
-               "n_recruited": out["n_recruited"], "n_preonset_change": out["n_preonset_change"],
-               "lambdas": lam_print, "no_onset_rate": {k: round(v, 3) for k, v in out["no_onset_rate"].items()},
-               "agreement": {k: (round(v, 3) if isinstance(v, float) else v)
-                             for k, v in out["agreement"].items()},
-               "available_features": out["available_features"]}
-        json.dump(rec, open(OUT_ROOT / "sentinel" / f"{tag}.json", "w"), indent=2)
-        plotter.plot_sentinel_overlay(sw, out, lambdas, BASELINE_PRE_SEC,
-                                      OUT_ROOT / "sentinel" / f"{tag}.png")
-        print(f"  t_global={out['t_global_sec']:.1f}s n_recruited={out['n_recruited']} "
-              f"agree_flag={out['agreement'].get('feature_agreement_flag')} "
-              f"amp_agree={out['agreement'].get('amplitude_family_agreement')} "
-              f"spectral_support={out['agreement'].get('spectral_support')} lambdas={lam_print}")
+        print(f"  lambdas={lam_print}", flush=True)
+        for sz in szs:
+            tag = f"{subj.replace('/', '_')}_{sz}"
+            try:
+                sw = extract_seizure_window(subj, sz, pre_sec=BASELINE_PRE_SEC, post_sec=30.0,
+                                            reference=ICTAL_REFERENCE[ds])
+            except Exception as e:
+                print(f"  sz{sz} load FAILED: {type(e).__name__}: {e}", flush=True)
+                continue
+            eeg_rel = ((sw.eeg_onset_epoch - sw.clin_onset_epoch)
+                       if sw.eeg_onset_epoch is not None else None)
+            out = compute_seizure_recruitment(sw.signal, sw.fs, sw.pre_sec, sw.ch_names, lambdas,
+                                              eeg_onset_rel_sec=eeg_rel)
+            if out is None:
+                print(f"  sz{sz}: UNRESOLVED (global onset not reached or baseline invalid)", flush=True)
+                continue
+            rec = {"seizure": f"{subj}:{sz}", "t_global_sec": out["t_global_sec"],
+                   "n_recruited": out["n_recruited"], "n_preonset_change": out["n_preonset_change"],
+                   "lambdas": lam_print,
+                   "no_onset_rate": {k: round(float(v), 3) for k, v in out["no_onset_rate"].items()},
+                   "agreement": {k: (round(float(v), 3) if isinstance(v, (int, float)) and not isinstance(v, bool)
+                                     else bool(v) if isinstance(v, (bool, np.bool_)) else v)
+                                 for k, v in out["agreement"].items()},
+                   "available_features": out["available_features"]}
+            json.dump(rec, open(OUT_ROOT / "sentinel" / f"{tag}.json", "w"), indent=2)
+            plotter.plot_sentinel_overlay(sw, out, lambdas, BASELINE_PRE_SEC,
+                                          OUT_ROOT / "sentinel" / f"{tag}.png")
+            print(f"  sz{sz}: t_global={out['t_global_sec']:.1f}s n_recruited={out['n_recruited']} "
+                  f"agree_flag={out['agreement'].get('feature_agreement_flag')} "
+                  f"amp_agree={out['agreement'].get('amplitude_family_agreement')} "
+                  f"spectral_support={out['agreement'].get('spectral_support')}", flush=True)
     print("\nSENTINEL DONE — human visual gate. Do NOT run per-subject/cohort until sign-off.")
 
 

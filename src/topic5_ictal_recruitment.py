@@ -187,15 +187,21 @@ def calibrate_feature_lambda(pooled_baseline_z, *, fpr_target_per_hour=1.0, hop_
                 "pooled_baseline_sec": float(pooled_sec)}
     keep = ~np.all(np.isnan(z), axis=1)            # drop dead channels, KEEP all frames
     z = z[keep]
-    if z.shape[0] < 1 or z.shape[1] < 2:
+    n_ch = int(z.shape[0])
+    if n_ch < 1 or z.shape[1] < 2:
         return {"lambda": float("nan"), "calibration_unstable": True,
                 "pooled_baseline_sec": float(pooled_sec)}
+    # calibrate_lambda_per_subject pools alarms across channels but normalizes the FP
+    # budget by SINGLE-channel baseline-hours, i.e. its target is a SUBJECT-pooled FPR.
+    # For a multi-channel recruitment instrument that allows ~0 alarms across the whole
+    # array and saturates lambda_max. Scale the target by n_ch so the effective criterion
+    # is a PER-CHANNEL FPR of fpr_target_per_hour (the spec's intended per-hour rate).
     lam = calibrate_lambda_per_subject(
-        z, fpr_target_per_hour=float(fpr_target_per_hour), bias=float(bias),
+        z, fpr_target_per_hour=float(fpr_target_per_hour) * n_ch, bias=float(bias),
         hop_sec=float(hop_sec),
     )
     return {"lambda": float(lam), "calibration_unstable": False,
-            "pooled_baseline_sec": float(pooled_sec)}
+            "pooled_baseline_sec": float(pooled_sec), "n_channels": n_ch}
 
 
 # ---------------------------------------------------------------------------
