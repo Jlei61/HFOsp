@@ -25,6 +25,13 @@
 
 ---
 
+# PHASE 0 — Pre-flight (before any code, reviewer §5/§7)
+
+- [ ] **Clean the worktree.** This work is on branch `topic5-ictal-recruitment-stage2`, but the working tree still carries uncommitted Topic 4 changes + untracked Topic 4 scripts. Before Phase 1, isolate Topic 5: either (a) commit/stash the Topic 4 changes, or (b) start a clean worktree from a Topic-4-clean commit. Do NOT let Topic 4 edits land in Topic 5 commits. Verify with `git status` showing only Topic 5 files staged per task.
+- [ ] **Skill availability.** The header names Claude Code skills (`superpowers:subagent-driven-development`, `hfosp-deep-contract-verify`). In Claude Code they are available. In environments without them (e.g. Codex), treat each as a **manual pre-implementation contract check**: before writing a function with multi-clause invariants (montage §3.4, pooled-λ §5.3, two-pass onset §5.2, fusion families §6), write the invariants out and verify the implementation against each — same discipline, no skill required.
+
+---
+
 # PHASE 1 — Pure-math instrument + synthetic TDD
 
 > Phase 1 has NO file I/O and NO real data. Every test runs on synthetic signals with a known injected recruitment order. This is the only phase that can be fully verified before touching the cohort.
@@ -341,7 +348,7 @@ git commit -m "feat(topic5-recruit): baseline_robust_z (MAD)"
 
 ## Task 4: `detect_contact_onset` (CUSUM wrapper + no-onset / ambiguous rules)
 
-Re-read spec §5.0 + §5.4. The change-point inner core is `src.ictal_er_rank.compute_cusum_n_d_with_time` — a GENERIC wrapper, not ER-specific. Ambiguous = crosses λ then falls below λ/2 within `ambiguous_drop_sec` → onset void (NaN). No-onset = never crosses → NaN.
+Re-read spec §5.0 + §5.4. The change-point inner core is `src.ictal_er_rank.compute_cusum_n_d_with_time` — a GENERIC wrapper, not ER-specific. Ambiguous = CUSUM fires but the **feature z** does not HOLD ≥ `z_sustain` (a robust-z level) over `sustain_sec` → transient false alarm → onset void (NaN). No-onset = CUSUM never crosses λ → NaN. (The ambiguity test is on the feature z, never on λ — λ is a CUSUM accumulation threshold, a different quantity.)
 
 **Files:**
 - Modify: `src/topic5_ictal_recruitment.py`
@@ -356,22 +363,27 @@ from src.topic5_ictal_recruitment import detect_contact_onset
 def test_detect_contact_onset_sustained_step_fires():
     z = np.zeros(200)
     z[80:] = 6.0                                  # sustained step at frame 80
-    res = detect_contact_onset(z, lam=5.0, search_start=0, hop_sec=0.1, ambiguous_drop_sec=1.0)
+    res = detect_contact_onset(z, lam=5.0, detection_idx_window=(0, 200),
+                               hop_sec=0.1, win_sec=1.0, pre_sec=0.0)
     assert res["detected"] is True
     assert 78 <= res["onset_frame"] <= 90
+    # onset_sec = frame*hop + win/2 - pre (center convention, rel clinical onset)
+    assert res["onset_sec"] == pytest.approx(res["onset_frame"] * 0.1 + 0.5, abs=0.2)
 
 
 def test_detect_contact_onset_transient_is_ambiguous():
     z = np.zeros(200)
-    z[80:83] = 6.0                                # 0.3s spike then back to 0
-    res = detect_contact_onset(z, lam=5.0, search_start=0, hop_sec=0.1, ambiguous_drop_sec=1.0)
+    z[80:83] = 6.0                                # 0.3s spike then back to baseline
+    res = detect_contact_onset(z, lam=5.0, detection_idx_window=(0, 200),
+                               hop_sec=0.1, win_sec=1.0, pre_sec=0.0)
     assert res["detected"] is False
-    assert res["reason"] == "ambiguous"
+    assert res["reason"] == "ambiguous"            # feature-z not sustained post-onset
 
 
 def test_detect_contact_onset_never_crosses():
     z = 0.5 * np.ones(200)
-    res = detect_contact_onset(z, lam=5.0, search_start=0, hop_sec=0.1, ambiguous_drop_sec=1.0)
+    res = detect_contact_onset(z, lam=5.0, detection_idx_window=(0, 200),
+                               hop_sec=0.1, win_sec=1.0, pre_sec=0.0)
     assert res["detected"] is False
     assert res["reason"] == "unreached"
     assert np.isnan(res["onset_frame"])
@@ -387,34 +399,47 @@ Expected: FAIL with `ImportError`.
 ```python
 from src.ictal_er_rank import compute_cusum_n_d_with_time
 
+Z_SUSTAIN = 2.0   # robust-z floor the feature must HOLD post-onset (a feature-z, NOT lambda)
 
-def detect_contact_onset(z_trace_1d, *, lam, search_start, hop_sec=0.1, bias=0.5,
-                         ambiguous_drop_sec=1.0):
-    """Per-contact onset on a 1-D robust-z trace via clamped CUSUM.
 
-    Returns {detected, onset_frame, onset_sec, reason}. reason in
-    {ok, unreached, ambiguous}. ambiguous = CUSUM-stat crosses lam then the
-    z-trace falls below lam/2 within ambiguous_drop_sec (transient false alarm).
+def detect_contact_onset(z_trace_1d, *, lam, detection_idx_window, hop_sec=0.1,
+                         win_sec=1.0, pre_sec=0.0, bias=0.5, sustain_sec=1.0,
+                         z_sustain=Z_SUSTAIN):
+    """Per-contact onset on a 1-D robust-z trace via clamped Page-Hinkley CUSUM.
+
+    REAL wrapper signature (src/ictal_er_rank.py:179):
+      compute_cusum_n_d_with_time(z, lambda_thresh, *, bias, detection_idx_window,
+                                  hop_sec, win_sec, pre_sec) -> CusumOnsetResult(frame_idx, t_onset_sec)
+    where t_onset_sec = frame_idx*hop + win/2 - pre (CENTER convention, rel clinical
+    onset). Because every feature uses this same formula, onset_sec is directly
+    comparable ACROSS features despite different win — this is what makes the fused
+    median well-defined (Task 11 fuses on onset_sec, NOT raw frame index).
+
+    Ambiguous (§5.4) is judged on the FEATURE z (dimensionally correct), NOT on lambda:
+    lambda is a CUSUM ACCUMULATION threshold, not a feature-z level. A transient false
+    alarm = the post-onset feature z does not HOLD >= z_sustain over sustain_sec -> void.
+    Returns {detected, onset_frame, onset_sec, reason in {ok, unreached, ambiguous}}.
     """
     z = np.asarray(z_trace_1d, dtype=np.float64)
     res = compute_cusum_n_d_with_time(
-        z, lam=float(lam), bias=float(bias), hop_sec=float(hop_sec),
-        search_start=int(search_start),
+        z, float(lam), bias=float(bias), detection_idx_window=detection_idx_window,
+        hop_sec=float(hop_sec), win_sec=float(win_sec), pre_sec=float(pre_sec),
     )
-    idx = res.frame_idx
-    if idx is None:
+    if res.frame_idx is None:
         return {"detected": False, "onset_frame": float("nan"),
                 "onset_sec": float("nan"), "reason": "unreached"}
-    drop_frames = int(round(float(ambiguous_drop_sec) / float(hop_sec)))
-    seg = z[idx: idx + max(1, drop_frames)]
-    if seg.size and np.nanmin(seg) < float(lam) / 2.0 and seg[-1] < float(lam) / 2.0:
+    idx = int(res.frame_idx)
+    n_sus = max(1, int(round(float(sustain_sec) / float(hop_sec))))
+    post = z[idx: idx + n_sus]
+    post_med = np.nanmedian(post) if post.size else np.nan
+    if not np.isfinite(post_med) or post_med < float(z_sustain):
         return {"detected": False, "onset_frame": float("nan"),
                 "onset_sec": float("nan"), "reason": "ambiguous"}
-    return {"detected": True, "onset_frame": int(idx),
-            "onset_sec": float(idx * hop_sec), "reason": "ok"}
+    return {"detected": True, "onset_frame": idx,
+            "onset_sec": float(res.t_onset_sec), "reason": "ok"}
 ```
 
-> **Implementation note:** verify `compute_cusum_n_d_with_time`'s actual kwargs at execution (it was read as `compute_cusum_n_d_with_time(z_er_1d, lam=..., bias=..., hop_sec=..., search_start=...)` returning an object with `.frame_idx`). If the signature differs, adapt the call but keep the no-onset/ambiguous contract identical. The ambiguous rule operates on the z-trace (not the CUSUM stat) per spec §5.4 wording "回落到 < λ/2".
+> **Signature aligned (reviewer P0-2):** this matches the real `compute_cusum_n_d_with_time` (positional `lambda_thresh`; kwargs `detection_idx_window`, `hop_sec`, `win_sec`, `pre_sec`; returns `CusumOnsetResult(frame_idx, t_onset_sec)`). No "adapt at execution" hand-wave — the core detector signature is locked here. The ambiguous rule compares the **feature z** to `z_sustain` (a robust-z level), never to `lambda` (a CUSUM accumulation threshold) — the v1 `z < λ/2` was a dimensional error (reviewer P1).
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -445,13 +470,25 @@ from src.topic5_ictal_recruitment import calibrate_feature_lambda
 
 
 def test_calibrate_feature_lambda_pooled_ok():
-    # 7000 baseline frames * 0.1s = 700s pooled > 600 -> stable
+    # 7000 baseline frames * 0.1s = 700s pooled > 600 -> stable (duration = n_FRAMES*hop)
     rng = np.random.default_rng(4)
-    pooled = rng.standard_normal((10, 700))      # (n_ch, n_frames) baseline z
+    pooled = rng.standard_normal((10, 7000))     # (n_ch, n_frames) baseline z
     out = calibrate_feature_lambda(pooled, fpr_target_per_hour=1.0, hop_sec=0.1,
                                    min_pooled_baseline_sec=600.0)
     assert out["calibration_unstable"] is False
+    assert out["pooled_baseline_sec"] == pytest.approx(700.0)
     assert 1.0 <= out["lambda"] <= 100.0
+
+
+def test_calibrate_feature_lambda_nan_frames_do_not_shrink_duration():
+    # a few NaN channels must NOT delete whole time frames (duration is time-based)
+    rng = np.random.default_rng(9)
+    pooled = rng.standard_normal((10, 7000))
+    pooled[3, :] = np.nan                          # one dead channel
+    out = calibrate_feature_lambda(pooled, fpr_target_per_hour=1.0, hop_sec=0.1,
+                                   min_pooled_baseline_sec=600.0)
+    assert out["pooled_baseline_sec"] == pytest.approx(700.0)   # NOT shrunk to ~0
+    assert out["calibration_unstable"] is False
 
 
 def test_calibrate_feature_lambda_too_short_is_unstable():
@@ -483,10 +520,17 @@ def calibrate_feature_lambda(pooled_baseline_z, *, fpr_target_per_hour=1.0, hop_
     min_pooled_baseline_sec -> calibration_unstable (lambda NaN), subject->sensitivity.
     """
     z = np.asarray(pooled_baseline_z, dtype=np.float64)
-    finite_cols = np.isfinite(z).all(axis=0)
-    z = z[:, finite_cols]
+    # Duration is TIME-based: pooled_sec = n_time_frames * hop. Do NOT drop frames just
+    # because some channel is NaN (reviewer P1-1) — that would collapse the duration.
+    # Drop only fully-NaN CHANNELS (rows); calibrate_lambda_per_subject already skips
+    # non-finite values internally (src/ictal_er_rank.py count_alarms `if not np.isfinite`).
     pooled_sec = z.shape[1] * float(hop_sec)
     if pooled_sec < float(min_pooled_baseline_sec):
+        return {"lambda": float("nan"), "calibration_unstable": True,
+                "pooled_baseline_sec": float(pooled_sec)}
+    keep = ~np.all(np.isnan(z), axis=1)            # drop dead channels, KEEP all frames
+    z = z[keep]
+    if z.shape[0] < 1 or z.shape[1] < 2:
         return {"lambda": float("nan"), "calibration_unstable": True,
                 "pooled_baseline_sec": float(pooled_sec)}
     lam = calibrate_lambda_per_subject(
@@ -497,7 +541,7 @@ def calibrate_feature_lambda(pooled_baseline_z, *, fpr_target_per_hour=1.0, hop_
             "pooled_baseline_sec": float(pooled_sec)}
 ```
 
-> **Implementation note:** confirm `calibrate_lambda_per_subject` accepts an (n_ch, n_frames) z-array (it was read with first positional `z_er_baseline`). If it expects flattened frames, flatten before the call but keep the per-hour semantics.
+> **Signature confirmed:** `calibrate_lambda_per_subject(z_er_baseline (n_ch,n_frames), *, fpr_target_per_hour, bias, hop_sec, ...)` takes a 2-D array and pools multi-channel baseline alarms internally, skipping non-finite values (src/ictal_er_rank.py:208). No flattening needed.
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -916,6 +960,7 @@ RECRUIT_POST_SEC = 15.0
 GLOBAL_ONSET_FRAC = 0.15
 FPR_TARGET_PER_HOUR = 1.0
 MIN_POOLED_BASELINE_SEC = 600.0
+MIN_BASELINE_SEC = 60.0
 BASELINE_PRE_SEC = 300.0
 PRE_ONSET_CHANGE_SEC = -10.0
 EARLY_K = 3
@@ -995,116 +1040,122 @@ def _feature_traces(signal, fs):
     return traces
 
 
-def compute_seizure_recruitment(signal, fs, t_axis, channels, lambdas, *, anchor="data_driven"):
+# per-feature analysis window (sec) — needed to convert between onset SECONDS and that
+# feature's own frame grid, since features have different win (HFA=0.5, others=1.0).
+FEATURE_WIN = {"line_length": 1.0, "broadband": 1.0, "hfa": 0.5,
+               "spectral_edge": 1.0, "er": 1.0}
+
+
+def _sec_to_frame(sec, *, pre_sec, win_sec, hop_sec, n_frames):
+    """Inverse of t_onset_sec = frame*hop + win/2 - pre. Clamped to [0, n_frames]."""
+    frame = int(round((float(sec) + float(pre_sec) - float(win_sec) / 2.0) / float(hop_sec)))
+    return int(np.clip(frame, 0, n_frames))
+
+
+def compute_seizure_recruitment(signal, fs, pre_sec, channels, lambdas, *,
+                                eeg_onset_rel_sec=None):
     """One seizure -> fused recruitment rank (pass 2), agreement, ER reference.
 
-    lambdas: {feature_key: lambda or NaN}. Returns dict or None if unresolvable.
-    Window contract §4: baseline from the long pre-onset segment; pass-1 onset over
-    the [-30,+30]s search band -> t_global; pass-2 onset over [t_global-2, +RECRUIT_POST].
+    REVIEWER P0-1: operate entirely in onset SECONDS (rel clinical onset, center
+    convention = CUSUM wrapper's t_onset_sec), NOT raw frame indices — the raw sample
+    t_axis must NEVER index feature frames. pre_sec = extraction pre (signal frame 0 is
+    t = -pre_sec). lambdas: {feature_key: lambda or NaN}. Returns dict or None.
+    Window contract §4: baseline from the long pre-onset segment; pass-1 onset over the
+    [-30,+30]s band -> t_global (sec); pass-2 onset over [t_global-2, t_global+RECRUIT_POST].
     """
     traces = _feature_traces(signal, fs)
     avail = [k for k in FUSED_FEATURES if traces[k][0] is not None
              and np.isfinite(lambdas.get(k, np.nan))]
     if len(avail) < 2:
         return None
-    # baseline window (frames) from the long pre-onset segment (clinical onset = t=0)
-    n_frames = traces["line_length"][0].shape[1]
-    bl = resolve_baseline_window(pre_sec=BASELINE_PRE_SEC, hop_sec=HOP,
-                                 n_time_frames=n_frames)
-    if not bl.valid:
-        return None
-    # robust-z every available feature + ER
-    z = {}
+    # robust-z each available feature + ER on its OWN frame grid + its OWN baseline window
+    z, nfr = {}, {}
     for k in avail + ["er"]:
         tr = traces[k][0]
+        nfr[k] = tr.shape[1]
+        bl = resolve_baseline_window(nfr[k], hop_sec=HOP, pre_sec=pre_sec,
+                                     eeg_onset_rel_sec=eeg_onset_rel_sec)
+        if not bl.valid:
+            return None
         z[k] = recruit.baseline_robust_z(tr, (bl.start_idx, bl.end_idx),
-                                         hop_sec=HOP, min_baseline_valid_sec=60.0)
+                                         hop_sec=HOP, min_baseline_valid_sec=MIN_BASELINE_SEC)
+    n_valid = z[avail[0]].shape[0]
 
-    def onsets_in(search_start_frame, search_end_frame, keys):
+    def onsets_in(lo_sec, hi_sec, keys):
+        """Per-feature onset SECONDS (rel clinical onset) within [lo_sec, hi_sec]."""
         out = {}
         for k in keys:
-            arr = np.full(z[k].shape[0], np.nan)
+            win = FEATURE_WIN[k]
+            lo_f = _sec_to_frame(lo_sec, pre_sec=pre_sec, win_sec=win, hop_sec=HOP, n_frames=nfr[k])
+            hi_f = _sec_to_frame(hi_sec, pre_sec=pre_sec, win_sec=win, hop_sec=HOP, n_frames=nfr[k])
+            arr = np.full(n_valid, np.nan)
             for c in range(z[k].shape[0]):
-                zc = z[k][c, :search_end_frame]
-                if not np.all(np.isfinite(zc[:1])):
-                    continue
-                r = recruit.detect_contact_onset(zc, lam=lambdas[k],
-                                                 search_start=search_start_frame, hop_sec=HOP)
+                if not np.isfinite(z[k][c]).any():
+                    continue                       # baseline-invalid channel (NaN row)
+                r = recruit.detect_contact_onset(
+                    z[k][c], lam=lambdas[k], detection_idx_window=(lo_f, hi_f),
+                    hop_sec=HOP, win_sec=win, pre_sec=pre_sec)
                 if r["detected"]:
-                    arr[c] = r["onset_frame"]
+                    arr[c] = r["onset_sec"]        # SECONDS, comparable across features
             out[k] = arr
         return out
 
-    # frame indices for the search band [-30, +30]s (t_axis is sec rel clinical onset)
-    def sec_to_frame(s):
-        return int(np.clip(np.searchsorted(t_axis, s), 0, n_frames - 1))
-    s0, s1 = sec_to_frame(-30.0), sec_to_frame(30.0)
-
-    # PASS 1: provisional onsets over the wide search band -> fused provisional -> t_global
-    p1 = onsets_in(s0, s1, avail)
-    n_valid = z[avail[0]].shape[0]
+    # PASS 1: provisional onset SECONDS over [-30,+30]s -> fused provisional -> t_global (sec)
+    p1 = onsets_in(-30.0, 30.0, avail)
     prov_rank, prov_onset = recruit.fuse_recruitment_rank(p1)
     g = recruit.resolve_global_onset(prov_onset, n_valid=n_valid, frac=GLOBAL_ONSET_FRAC)
     if not g["global_onset_resolved"]:
         return None
-    tg = g["t_global_frame"]
-    # pre-onset-change flag: contacts whose pass-1 onset is before annotation-10s
-    pre_cut = sec_to_frame(PRE_ONSET_CHANGE_SEC)
+    t_global = g["t_global_frame"]                 # NOTE: holds SECONDS here (unit follows input)
 
-    # PASS 2: recruitment band [t_global-2s, t_global+RECRUIT_POST]
-    r0 = int(max(0, tg - 2.0 / HOP))
-    r1 = int(min(n_frames, tg + RECRUIT_POST_SEC / HOP))
-    p2 = onsets_in(r0, r1, avail + ["er"])
-    # exclude pre-onset-change contacts from recruitment rank
+    # PASS 2: per-contact onset SECONDS in [t_global-2, t_global+RECRUIT_POST]
+    p2 = onsets_in(t_global - 2.0, t_global + RECRUIT_POST_SEC, avail + ["er"])
+    # pre-onset-change: pass-1 onset before annotation-10s -> exclude from recruitment rank
     for k in avail:
-        mask_pre = np.isfinite(p1[k]) & (p1[k] < pre_cut)
+        mask_pre = np.isfinite(p1[k]) & (p1[k] < PRE_ONSET_CHANGE_SEC)
         p2[k][mask_pre] = np.nan
-    p2_fused = {k: p2[k] for k in avail}
-    fused_rank, fused_onset = recruit.fuse_recruitment_rank(p2_fused)
-    # agreement (amplitude-family gate) on pass-2 ranks
+    fused_rank, fused_onset = recruit.fuse_recruitment_rank({k: p2[k] for k in avail})
     per_rank = {k: recruit._rank_of(p2[k]) for k in avail}
     have_amp = [k for k in AMP_FEATURES if k in per_rank]
     ag = (recruit.feature_agreement(
             {**per_rank, SPECTRAL_FEATURE: per_rank.get(SPECTRAL_FEATURE, np.full(n_valid, np.nan))},
             amplitude=tuple(have_amp), spectral=SPECTRAL_FEATURE, early_k=EARLY_K)
           if len(have_amp) >= 2 else {"feature_agreement_flag": False})
-    er_rank = recruit._rank_of(p2["er"])
-    return {"recruitment_rank": fused_rank, "er_rank": er_rank,
-            "t_global_sec": float(tg * HOP), "n_recruited": int(np.isfinite(fused_rank).sum()),
-            "n_preonset_change": int(sum(int((np.isfinite(p1[k]) & (p1[k] < pre_cut)).sum())
+    return {"recruitment_rank": fused_rank, "er_rank": recruit._rank_of(p2["er"]),
+            "t_global_sec": float(t_global), "n_recruited": int(np.isfinite(fused_rank).sum()),
+            "n_preonset_change": int(sum(int((np.isfinite(p1[k]) & (p1[k] < PRE_ONSET_CHANGE_SEC)).sum())
                                          for k in avail)),
-            "agreement": ag, "channels": list(channels),
-            "available_features": avail}
+            "agreement": ag, "channels": list(channels), "available_features": avail}
 ```
 
-> **Implementation note:** `resolve_baseline_window` was read with kwargs `pre_sec, buffer_sec, eeg_onset_rel_sec, hop_sec` and an `n_time_frames` positional/kw — confirm its exact signature at execution and pass `n_time_frames=n_frames`. The `z[k][:, :1]` finiteness guard skips channels whose baseline was invalid (NaN row). Keep the pass-1/pass-2 split intact (§5.2).
+> **Signature confirmed:** `resolve_baseline_window(n_time_frames, *, hop_sec, pre_sec, buffer_sec=60, eeg_onset_rel_sec, min_baseline_valid_sec=60, onset_t_sec=0)` — `n_time_frames` is the first positional; **pre_sec must exceed buffer_sec (60s)**, so the extraction `pre_sec` (default 300, §4.1) is well above the 60s buffer. Each feature gets its own baseline window from its own frame count. `t_global` is in SECONDS (the value `resolve_global_onset` returns just follows the unit of its input array — here seconds, not frames). Cross-feature comparability holds because every `onset_sec` comes from the same `frame*hop + win/2 - pre` formula.
 
 - [ ] **Step 2: Add a tiny smoke (synthetic seizure) to the test file**
 
 ```python
-def test_compute_seizure_recruitment_smoke(tmp_path, monkeypatch):
-    # build a synthetic 3-shaft seizure where recruitment order is known, run the
-    # per-seizure function directly (no disk). This guards the two-pass wiring.
+def test_compute_seizure_recruitment_smoke():
+    # synthetic seizure with a KNOWN recruitment order; run the per-seizure function
+    # directly (no disk). Guards the two-pass wiring + the SECONDS time axis (P0-1).
+    # pre_sec=120 > buffer(60) so resolve_baseline_window yields a valid 60s baseline.
     import scripts.run_topic5_ictal_recruitment as R
     fs = 500.0
-    n = int(round(80 * fs))           # [-50,+30]s
-    t_axis = np.arange(n) / fs - 50.0
+    pre_sec = 120.0
+    n = int(round((pre_sec + 30.0) * fs))      # [-120, +30]s
     rng = np.random.default_rng(8)
     sig = 0.01 * rng.standard_normal((10, n))
-    onset0 = int(round(50 * fs))      # clinical onset at t=0 -> sample 50s
-    # recruit channels 0..9 in order, 0.2s apart, with fast activity
+    onset0 = int(round(pre_sec * fs))          # clinical onset (t=0) sample
+    # recruit channels 0..9 in order, 0.2s apart, with sustained fast activity
     for c in range(10):
         s = onset0 + int(round(c * 0.2 * fs))
         tt = np.arange(n - s) / fs
         sig[c, s:] += np.sin(2 * np.pi * 90 * tt)
     lambdas = {k: 5.0 for k in R.FUSED_FEATURES}
     lambdas["er"] = 5.0
-    out = R.compute_seizure_recruitment(sig, fs, t_axis, [f"A{i}" for i in range(10)],
-                                        lambdas)
+    out = R.compute_seizure_recruitment(sig, fs, pre_sec, [f"A{i}" for i in range(10)], lambdas)
     assert out is not None
-    # earliest-recruited channels should rank lowest
     rr = out["recruitment_rank"]
-    assert np.nanargmin(rr) in (0, 1)
+    assert np.nanargmin(rr) in (0, 1)          # earliest-recruited channels rank lowest
+    assert out["t_global_sec"] == pytest.approx(0.0, abs=2.0)   # global onset near t=0
 ```
 
 Run: `pytest tests/test_topic5_ictal_recruitment.py -k compute_seizure_recruitment -v`
@@ -1318,14 +1369,59 @@ git commit -m "feat(topic5-recruit): per-subject echo across null modes + ER hel
 
 ---
 
-## Task 15: `cohort` — Main-A verdict + Main-B broad extension + bad-data + Null D
+## Task 15: Null D coordinate/region control (`_pool_null_d`) — built BEFORE cohort
 
-Re-read spec §7.4 (verdict), §8 (Main-A primary / Main-B broad with unsealed caveat), §7.3 (Null D by dataset), §4.4 bad-data. Primary subset = seizures with `feature_agreement_flag=True`; spectral-conflict seizures stay in but flagged.
+Re-read spec §7.3. Epilepsiae: MNI nearest-neighbor remap of other subjects' templates. Yuquan: region/shaft-matched remap. Forbid cross-subject NN on yuquan subject-native coords. **This task precedes the cohort task (reviewer P0-3): `cmd_cohort` calls `_pool_null_d`, so it must exist first.**
+
+**Files:**
+- Modify: `scripts/run_topic5_ictal_recruitment.py`
+- Test: `tests/test_topic5_ictal_recruitment.py`
+
+- [ ] **Step 1: Write the failing test** (the runner Null D dispatcher must route by dataset and never call coord-NN for yuquan)
+
+```python
+def test_null_d_routes_by_dataset(monkeypatch):
+    import scripts.run_topic5_ictal_recruitment as R
+    calls = {"mni_nn": 0, "region": 0}
+    monkeypatch.setattr(R, "_null_d_mni_nn", lambda *a, **k: calls.__setitem__("mni_nn", calls["mni_nn"] + 1) or {"e_k": 0.0})
+    monkeypatch.setattr(R, "_null_d_region_matched", lambda *a, **k: calls.__setitem__("region", calls["region"] + 1) or {"e_k": 0.0})
+    subs = [{"subject": "epilepsiae_1", "dataset": "epilepsiae", "null_d_mode": "mni_nn",
+             "recruitment_ranks": [[0.0] * 8], "templates": [[0.0] * 8], "channels": [f"C{i}" for i in range(8)]},
+            {"subject": "yuquan_a", "dataset": "yuquan", "null_d_mode": "region_matched",
+             "recruitment_ranks": [[0.0] * 8], "templates": [[0.0] * 8], "channels": [f"A{i}" for i in range(8)]}]
+    R._pool_null_d(subs)
+    assert calls["mni_nn"] >= 1 and calls["region"] >= 1   # both routed; yuquan never via mni_nn
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `pytest tests/test_topic5_ictal_recruitment.py -k null_d_routes -v`
+Expected: FAIL with `AttributeError` (functions not defined).
+
+- [ ] **Step 3: Implement `_pool_null_d`, `_null_d_mni_nn`, `_null_d_region_matched`** (mni_nn uses `seeg_coord_loader.load_subject_coords(dataset='epilepsiae')` → mni152 coords → nearest-neighbor remap of other subjects' templates; region_matched uses yuquan region/shaft labels; pooled result reports `neutral = not (wilcoxon_p < 0.05)`). The dispatcher routes each subject by `null_d_mode` and MUST raise / skip rather than call `_null_d_mni_nn` for a yuquan subject (subject-native coords are not cross-subject comparable, spec §7.3).
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `pytest tests/test_topic5_ictal_recruitment.py -k null_d_routes -v`
+Expected: PASS.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add scripts/run_topic5_ictal_recruitment.py tests/test_topic5_ictal_recruitment.py
+git commit -m "feat(topic5-recruit): Null D split by coord space (epi MNI-NN / yuquan region)"
+```
+
+---
+
+## Task 16: `cohort` — Main-A verdict + Main-B broad extension + bad-data
+
+Re-read spec §7.4 (verdict), §8 (Main-A primary / Main-B broad with unsealed caveat), §7.3 (Null D by dataset, implemented in Task 15), §4.4 bad-data, §4.1b LOO de-anchor. Primary subset = seizures with `feature_agreement_flag=True`; spectral-conflict seizures stay in but flagged.
 
 **Files:**
 - Modify: `scripts/run_topic5_ictal_recruitment.py`
 
-- [ ] **Step 1: Add `cmd_cohort`** (subject-level pooling via `echo.pool_echo_subject_level`; primary = channel null on agreement-flagged seizures; within-shaft + anchor-matched + LOO for "含具体通路"; bad-data via `e_k_baddata`; Null D split by `null_d_mode`; Main-B = re-run on broad templates with `broad_unsealed` epi → sensitivity)
+- [ ] **Step 1: Add `cmd_cohort`** (subject-level pooling via `echo.pool_echo_subject_level`; primary = channel null on agreement-flagged seizures; `_pool_null_d` from Task 15; bad-data via `e_k_baddata`; `_pool_deanchor` for the LOO de-anchor cohort pool; Main-B = re-run on broad templates with `broad_unsealed` epi → sensitivity)
 
 ```python
 def cmd_cohort(args):
@@ -1358,7 +1454,8 @@ def cmd_cohort(args):
         "epi_only": pool("channel", subset="epilepsiae"),
         "yuquan_only": pool("channel", subset="yuquan"),
         "bad_data_regression": echo.bad_data_regression(bd),
-        "null_d": _pool_null_d(subs),                  # split by null_d_mode (§7.3)
+        "null_d": _pool_null_d(subs),                  # split by null_d_mode (§7.3, Task 15)
+        "deanchor_all": _pool_deanchor(subs),          # §4.1b LOO de-anchor cohort pool (P1-2)
         "er_vs_fused_consistency_dist": _consistency_dist(subs),
         "construct_validity": _construct_validity_dist(subs),
         "main_b_broad_extension": _main_b_broad(subs),  # broad templates; epi unsealed->sensitivity
@@ -1368,9 +1465,19 @@ def cmd_cohort(args):
     print("verdict:", summary["verdict"]["label"])
 ```
 
-`_assign_verdict` (§7.4) — encode the conclusion into thresholds (mirror Stage 1's guard that `站住·*` requires sign/bootstrap sensitivities present + bad-data clean + Null D neutral):
+`_pool_deanchor` + `_assign_verdict` (§7.4) — encode the conclusion into thresholds (mirror Stage 1's guard that `站住·*` requires sign/bootstrap sensitivities present + bad-data clean + Null D neutral). **含具体通路 additionally requires the LOO de-anchor leg (reviewer P1-2):**
 
 ```python
+def _pool_deanchor(subs):
+    """Cohort pool of the LOO de-anchor echo (§4.1b). Each subject's `deanchor` is a
+    list of per-seizure echo records (compute_deanchor_echo output) or None."""
+    recs = []
+    for s in subs:
+        for r in (s.get("deanchor") or []):
+            recs.append({"subject": s["subject"], "e_k": r.get("e_k")})
+    return echo.pool_echo_subject_level(recs)
+
+
 def _assign_verdict(summary, subs):
     p = summary["primary_channel"]
     has_sens = (np.isfinite(p.get("sign_p_onesided", np.nan)) and
@@ -1385,10 +1492,17 @@ def _assign_verdict(summary, subs):
     if not standing:
         return {"label": "真仪器阴性/没看清",
                 "why": "primary not significant or sensitivities/controls missing"}
+    # 含具体通路 (spec §7.4): inclusive echo holds AND (within-shaft OR anchor-matched
+    # significant) AND LOO de-anchor same-direction significant. Missing the LOO leg ->
+    # at most 稳定锚为主 (reviewer P1-2).
     a = summary["primary_within_shaft"]; c = summary["primary_anchor_matched"]
-    specific = (a.get("wilcoxon_p_onesided", 1) < 0.05 or c.get("wilcoxon_p_onesided", 1) < 0.05)
+    da = summary["deanchor_all"]
+    ac_sig = (a.get("wilcoxon_p_onesided", 1) < 0.05 or c.get("wilcoxon_p_onesided", 1) < 0.05)
+    deanchor_sig = (da.get("wilcoxon_p_onesided", 1) < 0.05 and da.get("median_E_s", 0) > 0)
+    specific = ac_sig and deanchor_sig
     return {"label": "站住·含具体通路" if specific else "站住·稳定锚为主",
-            "why": "recruitment echo holds; A/C " + ("survive" if specific else "flatten")}
+            "why": "echo holds; " + ("A/C survive AND LOO de-anchor significant"
+                                     if specific else "A/C or LOO de-anchor flatten")}
 ```
 
 - [ ] **Step 2: Run**
@@ -1400,52 +1514,7 @@ Expected: writes `cohort_recruitment_summary.json`; prints a §7.4 verdict label
 
 ```bash
 git add scripts/run_topic5_ictal_recruitment.py
-git commit -m "feat(topic5-recruit): cohort Main-A verdict + Main-B broad + Null D by dataset"
-```
-
----
-
-## Task 16: Null D coordinate/region control (`_pool_null_d`)
-
-Re-read spec §7.3. Epilepsiae: MNI nearest-neighbor remap of other subjects' templates. Yuquan: region/shaft-matched remap. Forbid cross-subject NN on yuquan subject-native coords.
-
-**Files:**
-- Modify: `scripts/run_topic5_ictal_recruitment.py`
-- Test: `tests/test_topic5_ictal_recruitment.py`
-
-- [ ] **Step 1: Write the failing test** (the runner Null D dispatcher must route by dataset and never call coord-NN for yuquan)
-
-```python
-def test_null_d_routes_by_dataset(monkeypatch):
-    import scripts.run_topic5_ictal_recruitment as R
-    calls = {"mni_nn": 0, "region": 0}
-    monkeypatch.setattr(R, "_null_d_mni_nn", lambda *a, **k: calls.__setitem__("mni_nn", calls["mni_nn"] + 1) or {"e_k": 0.0})
-    monkeypatch.setattr(R, "_null_d_region_matched", lambda *a, **k: calls.__setitem__("region", calls["region"] + 1) or {"e_k": 0.0})
-    subs = [{"subject": "epilepsiae_1", "dataset": "epilepsiae", "null_d_mode": "mni_nn",
-             "recruitment_ranks": [[0.0] * 8], "templates": [[0.0] * 8], "channels": [f"C{i}" for i in range(8)]},
-            {"subject": "yuquan_a", "dataset": "yuquan", "null_d_mode": "region_matched",
-             "recruitment_ranks": [[0.0] * 8], "templates": [[0.0] * 8], "channels": [f"A{i}" for i in range(8)]}]
-    R._pool_null_d(subs)
-    assert calls["mni_nn"] >= 1 and calls["region"] >= 1   # both routed; yuquan never via mni_nn
-```
-
-- [ ] **Step 2: Run test to verify it fails**
-
-Run: `pytest tests/test_topic5_ictal_recruitment.py -k null_d_routes -v`
-Expected: FAIL with `AttributeError` (functions not defined).
-
-- [ ] **Step 3: Implement `_pool_null_d`, `_null_d_mni_nn`, `_null_d_region_matched`** (mni_nn uses `seeg_coord_loader.load_subject_coords(dataset='epilepsiae')` → mni152 coords → nearest-neighbor remap of other subjects' templates; region_matched uses yuquan region/shaft labels; pooled result reports `neutral = not (wilcoxon_p < 0.05)`)
-
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `pytest tests/test_topic5_ictal_recruitment.py -k null_d_routes -v`
-Expected: PASS.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add scripts/run_topic5_ictal_recruitment.py tests/test_topic5_ictal_recruitment.py
-git commit -m "feat(topic5-recruit): Null D split by coord space (epi MNI-NN / yuquan region)"
+git commit -m "feat(topic5-recruit): cohort Main-A verdict + Main-B broad + LOO de-anchor + Null D"
 ```
 
 ---
@@ -1501,7 +1570,7 @@ git commit -m "docs(topic5 stage2): recruitment instrument results archive + mai
 
 ## Self-Review (run after writing all tasks)
 
-**Spec coverage (v2):** §3.4 montage hard contract (Tasks 8, 10, 12) ✓; §4.1 three-layer window + §4.2 non-vacuous global onset (Tasks 6, 11) ✓; §4.3 dual anchor (Task 11/14) ✓; §5.1 5 detectors incl. ER held-out (Tasks 1, 2, 11) ✓; §5.3 robust-z + pooled per-hour λ + calibration_unstable (Tasks 3, 5, 12) ✓; §5.4 no-onset/ambiguous (Task 4) ✓; §5.2 two-pass (Tasks 6, 11) ✓; §6 family-structured fusion + amplitude-only gate + ER held-out consistency (Tasks 7, 11, 14) ✓; §7.1–7.2 echo + nulls reuse Stage 1 (Tasks 9, 14) ✓; §7.3 Null D by coord space (Task 16) ✓; §7.4 verdict (Task 15) ✓; §8 Main-A/Main-B (Task 15) ✓; §9 cross-feature agreement construct validity (Tasks 7, 14, 17) ✓; §10 sensitivity battery (Task 15 epi/yuquan + sentinel) ✓; §13 staged gate (Phase gates) ✓; figures (Task 17) + archive (Task 18) ✓.
+**Spec coverage (v2):** §3.4 montage hard contract (Tasks 8, 10, 12) ✓; §4.1 three-layer window + §4.2 non-vacuous global onset (Tasks 6, 11) ✓; §4.3 dual anchor (Task 11/14) ✓; §5.1 5 detectors incl. ER held-out (Tasks 1, 2, 11) ✓; §5.3 robust-z + pooled per-hour λ + calibration_unstable (Tasks 3, 5, 12) ✓; §5.4 no-onset/ambiguous (Task 4) ✓; §5.2 two-pass (Tasks 6, 11) ✓; §6 family-structured fusion + amplitude-only gate + ER held-out consistency (Tasks 7, 11, 14) ✓; §7.1–7.2 echo + nulls reuse Stage 1 (Tasks 9, 14) ✓; §7.3 Null D by coord space (Task 15, built before cohort — reviewer P0-3) ✓; §7.4 verdict incl. LOO de-anchor leg (Task 16 — reviewer P1-2) ✓; §8 Main-A/Main-B (Task 16) ✓; §9 cross-feature agreement construct validity (Tasks 7, 14, 17) ✓; §10 sensitivity battery (Task 16 epi/yuquan + sentinel) ✓; §13 staged gate (Phase gates) ✓; figures (Task 17) + archive (Task 18) ✓.
 
 **Open implementation risks to verify at execution (flagged checks, not placeholders):**
 - Masked-template cluster-rank field + per-cluster `valid_mask` key layout — Task 10/12 inspects live (`_extract_masked_cluster_templates`); reuse Stage 1's masked loader logic.
