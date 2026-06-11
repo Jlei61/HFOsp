@@ -63,3 +63,40 @@ def test_plane_grid_symmetry():
     # y 对称：flip 行后 Y == -Y
     assert np.allclose(np.flip(Y, axis=0), -Y)
     assert X.shape == Y.shape == (R.GRID_N, R.GRID_N)
+
+
+def test_contact_aggregates_rank_event_size_invariant():
+    # 同一空间顺序，两组 event size 不同 -> typical_rank 必须一致（不被 size 污染）
+    from src.lagpat_rank_audit import mask_phantom_ranks
+    # 3-ch event 与 5-ch event 对同 3 个核心触点给相同顺序
+    n_ch = 5
+    # event A: 触点 0,1,2 参与，顺序 0<1<2
+    # event B: 全 5 个参与，顺序 0<1<2<3<4
+    bools = np.zeros((n_ch, 2), bool)
+    bools[[0,1,2], 0] = True
+    bools[:, 1] = True
+    ranks = np.full((n_ch, 2), np.nan)
+    ranks[[0,1,2], 0] = [0, 1, 2]
+    ranks[:, 1] = [0, 1, 2, 3, 4]
+    masked = mask_phantom_ranks(ranks, bools, normalize=True)
+    agg = R.contact_aggregates(masked, lag_raw=np.where(bools, ranks, np.nan), bools=bools)
+    # 触点 0 在两事件里都是"最早"(归一化 rank=0) -> typical_rank≈0
+    assert agg["typical_rank"][0] == pytest.approx(0.0, abs=1e-9)
+    # support：触点 3 只在 event B 参与 -> 0.5
+    assert agg["support"][3] == pytest.approx(0.5)
+    assert agg["support"][0] == pytest.approx(1.0)
+
+
+def test_contact_aggregates_time_unit_invariant():
+    # lag_raw 一份秒、一份 ms(×1000) -> typical_time 场一致（事件内归一化消单位）
+    n_ch = 4
+    bools = np.ones((n_ch, 1), bool)
+    masked = np.array([[0.0],[0.333],[0.667],[1.0]])
+    lag_sec = np.array([[0.0],[0.010],[0.020],[0.030]])
+    lag_ms = lag_sec * 1000.0
+    a = R.contact_aggregates(masked, lag_sec, bools)
+    b = R.contact_aggregates(masked, lag_ms, bools)
+    assert np.allclose(a["typical_time"], b["typical_time"], equal_nan=True)
+    # 归一化后 0..1
+    assert a["typical_time"][0] == pytest.approx(0.0)
+    assert a["typical_time"][3] == pytest.approx(1.0)

@@ -67,3 +67,55 @@ def signed_transverse_axis(perp_vec: np.ndarray,
     st[idx] = P @ v1
     return {"signed_transverse": st, "v_perp": v1,
             "pc1_variance_explained": pc1_var, "n_used": int(idx.size)}
+
+
+def contact_aggregates(masked: np.ndarray, lag_raw: np.ndarray,
+                       bools: np.ndarray) -> Dict[str, np.ndarray]:
+    """每触点时序聚合。
+
+    masked : (n_ch, n_ev) 事件内归一化 masked rank（= mask_phantom_ranks(normalize=True)），
+             非参与 = NaN。这就是 spec 的 rank_norm，不再二次归一化。
+    lag_raw : (n_ch, n_ev) 原始 lag（秒或 ms，单位无关），非参与 = NaN。
+    bools : (n_ch, n_ev) bool。
+
+    返回各 (n_ch,) 数组：
+      typical_rank   = nanmedian_e masked            （主，进比较）
+      typical_time   = nanmedian_e lag_norm          （副，仅画图）
+      support        = 参与事件数 / 总事件数
+      uncertainty_rank = nan-IQR_e masked
+      uncertainty_time = nan-IQR_e lag_norm
+    其中 lag_norm(c,e) = (lag-min)/max(lag-min) 在每事件参与触点内（min/max 消单位）。
+    """
+    masked = np.asarray(masked, float)
+    lag_raw = np.asarray(lag_raw, float)
+    bools = np.asarray(bools, bool)
+    n_ch, n_ev = masked.shape
+    # 事件内 lag 归一化（仅参与触点）
+    lag_norm = np.full_like(lag_raw, np.nan)
+    for e in range(n_ev):
+        idx = np.where(bools[:, e])[0]
+        if idx.size == 0:
+            continue
+        v = lag_raw[idx, e]
+        vmin = np.nanmin(v)
+        rel = v - vmin
+        rmax = np.nanmax(rel)
+        lag_norm[idx, e] = rel / rmax if rmax > 1e-12 else 0.0
+
+    def _nan_iqr(a, axis):
+        with np.errstate(invalid="ignore"):
+            q75 = np.nanpercentile(a, 75, axis=axis)
+            q25 = np.nanpercentile(a, 25, axis=axis)
+        return q75 - q25
+
+    with np.errstate(invalid="ignore"):
+        typ_rank = np.nanmedian(masked, axis=1)
+        typ_time = np.nanmedian(lag_norm, axis=1)
+    support = bools.sum(axis=1).astype(float) / max(n_ev, 1)
+    return {
+        "typical_rank": typ_rank,
+        "typical_time": typ_time,
+        "support": support,
+        "uncertainty_rank": _nan_iqr(masked, 1),
+        "uncertainty_time": _nan_iqr(lag_norm, 1),
+    }
