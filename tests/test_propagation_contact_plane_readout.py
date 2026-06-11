@@ -349,3 +349,16 @@ def test_runner_build_record_from_arrays():
     assert "scalars" in rec and "rank_vs_xnorm_spearman" in rec["scalars"]
     # 两 shaft + p90 off-axis(≈1.9) >= spacing(1.0) -> 不是 1D
     assert rec["flags"]["one_dimensional_sampling"] is False
+
+
+def test_model_runner_reads_observation_npz():
+    from scripts.run_model_contact_plane_readout import build_model_record
+    npz = (_ROOT / "results/topic4_sef_hfo/observation_layer/"
+           "increment1_toywave/example30_lagPat_withFreqCent.npz")
+    if not npz.exists():
+        pytest.skip("model observation NPZ fixture absent")
+    # 核心：legacy-key 读取 + sidecar montage 不 KeyError/顺序不匹配
+    rec = build_model_record(str(npz), model_id="example30", template_id="t0")
+    assert rec["dataset"] == "model"
+    # 单事件 toy fixture 可能退化成 descriptive_only；只要不抛即算通过
+    assert rec.get("status") == "descriptive_only" or ("channels" in rec and "scalars" in rec)
