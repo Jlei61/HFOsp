@@ -126,6 +126,7 @@ def test_build_readout_record_normalized_coords_and_flags():
     assert ch["A4"]["y_norm"] == pytest.approx(-1.0 / 6.0)
     assert rec["lag_time_unit"] == "ms"
     assert rec["flags"]["poor_planarity"] is False
+    assert np.isfinite(ch["A6"]["uncertainty_time"])   # Fix C: time uncertainty stored
 
 
 def test_build_readout_record_poor_planarity_and_low_contact():
@@ -280,3 +281,44 @@ def test_cohort_scalars_rank_vs_xnorm_no_theta_ref():
     assert sc["rank_vs_xnorm_spearman"] == pytest.approx(1.0, abs=1e-6)
     assert "axis_angle_error" not in sc          # model-only validation, 不在 cohort scalar
     assert "transverse_width_mm" in sc
+
+
+def test_corr_pair_candidate_level_overlap_gate():
+    # identity 方向 overlap 大但 F 恒定 -> corr NaN；mirror 方向 overlap 小(<min)但 corr 有限。
+    # 修复前：max(n_id,n_mir) 放行 mirror 的小样本相关；修复后：每候选各自需达 overlap_min -> insufficient。
+    n = R.GRID_N
+    F1 = np.zeros((n, n)); S1 = np.zeros((n, n))
+    F2 = np.zeros((n, n)); S2 = np.zeros((n, n))
+    S1[50:, :] = 1.0; S2[50:, :] = 1.0
+    F1[50:, :] = 1.0; F2[50:, :] = 1.0                 # identity overlap 大、F 恒定 -> NaN
+    S1[10, 0:6] = 1.0; F1[10, 0:6] = np.arange(6)      # mirror overlap 6 像素(<25)
+    S2[70, 0:6] = 1.0; F2[70, 0:6] = np.arange(6) * 2.0  # flip(row70)->row10, 线性相关 -> 有限
+    out = R.corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh=0.5, overlap_min=25)
+    assert out["insufficient_overlap"] is True
+    assert out["corr"] is None
+
+
+def test_contact_aggregates_allnan_lag_not_fabricated():
+    # 某事件参与触点 lag_raw 全 NaN -> 不得伪造成 0；该事件不进 time 归一化。
+    n_ch = 3
+    bools = np.ones((n_ch, 2), bool)
+    masked = np.array([[0.0, 0.0], [0.5, 0.5], [1.0, 1.0]])
+    lag_raw = np.full((n_ch, 2), np.nan)   # event 0 全 NaN
+    lag_raw[:, 1] = [0.0, 1.0, 2.0]        # event 1 正常 -> 中触点 lag_norm=0.5
+    agg = R.contact_aggregates(masked, lag_raw, bools)
+    # 修复前 event0 被填 0 -> 中触点 typical_time=median(0,0.5)=0.25；修复后=0.5
+    assert agg["typical_time"][1] == pytest.approx(0.5)
+
+
+def test_smooth_field_time_uses_uncertainty_time():
+    # scalar='time' 时 U 必须用 uncertainty_time(0.1)，不是 uncertainty_rank(0.9)。
+    rec = {"channels": [
+        {"x_norm": 0.2, "y_norm": 0.0, "typical_rank": 0.0, "typical_time": 0.0,
+         "support": 1.0, "uncertainty_rank": 0.9, "uncertainty_time": 0.1},
+        {"x_norm": 0.8, "y_norm": 0.0, "typical_rank": 1.0, "typical_time": 1.0,
+         "support": 1.0, "uncertainty_rank": 0.9, "uncertainty_time": 0.1},
+    ]}
+    X, Y = R.make_plane_grid()
+    fld = R.smooth_field(rec, X, Y, sigma_xy=0.1, scalar="time")
+    near = np.unravel_index(np.argmin((X - 0.2) ** 2 + (Y - 0) ** 2), X.shape)
+    assert fld["U"][near] == pytest.approx(0.1, abs=0.05)

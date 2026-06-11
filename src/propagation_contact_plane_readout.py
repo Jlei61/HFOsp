@@ -96,10 +96,16 @@ def contact_aggregates(masked: np.ndarray, lag_raw: np.ndarray,
         if idx.size == 0:
             continue
         v = lag_raw[idx, e]
+        finite = np.isfinite(v)
+        if not finite.any():
+            continue                      # 全 NaN lag：不伪造，该事件不进 time
         vmin = np.nanmin(v)
         rel = v - vmin
         rmax = np.nanmax(rel)
-        lag_norm[idx, e] = rel / rmax if rmax > 1e-12 else 0.0
+        if rmax > 1e-12:
+            lag_norm[idx, e] = rel / rmax            # 非有限项保持 NaN
+        else:
+            lag_norm[idx, e] = np.where(finite, 0.0, np.nan)
 
     def _nan_iqr(a, axis):
         with np.errstate(invalid="ignore"):
@@ -162,6 +168,7 @@ def build_readout_record(
             "typical_time": float(agg["typical_time"][i]),
             "support": float(agg["support"][i]),
             "uncertainty_rank": float(agg["uncertainty_rank"][i]),
+            "uncertainty_time": float(agg["uncertainty_time"][i]),
             "is_soz": _first_contact(str(nm)) in soz_first_contacts,
         })
     med_support = float(np.median([c["support"] for c in channels])) if channels else 0.0
@@ -214,7 +221,8 @@ def smooth_field(record: Dict, X: np.ndarray, Y: np.ndarray,
     pts = np.array([[c["x_norm"], c["y_norm"]] for c in chans], float).reshape(-1, 2)
     vals = np.array([c[val_key] for c in chans], float)
     sup = np.array([c["support"] for c in chans], float)
-    unc = np.array([c.get("uncertainty_rank", 0.0) for c in chans], float)
+    unc_key = "uncertainty_rank" if scalar == "rank" else "uncertainty_time"
+    unc = np.array([c.get(unc_key, 0.0) for c in chans], float)
     if sigma_xy is None:
         sigma_xy = _median_nn_spacing(pts)
     sig2 = 2.0 * sigma_xy ** 2
@@ -260,14 +268,13 @@ def corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh: float = S_THRESH,
     c_id, n_id = _support_corr(F1, F2, S1, S2, s_thresh)
     F2m = np.flip(F2, axis=0); S2m = np.flip(S2, axis=0)
     c_mir, n_mir = _support_corr(F1, F2m, S1, S2m, s_thresh)
-    n_overlap = max(n_id, n_mir)
-    if n_overlap < overlap_min:
-        return {"corr": None, "n_overlap": n_overlap, "insufficient_overlap": True}
-    cands = [c for c in (c_id, c_mir) if np.isfinite(c)]
-    if not cands:
-        return {"corr": None, "n_overlap": n_overlap, "insufficient_overlap": True}
-    return {"corr": float(max(cands)), "n_overlap": n_overlap,
-            "insufficient_overlap": False}
+    candidates = [(c_id, n_id), (c_mir, n_mir)]
+    valid = [(c, n) for c, n in candidates if n >= overlap_min and np.isfinite(c)]
+    if not valid:
+        return {"corr": None, "n_overlap": max(n_id, n_mir),
+                "insufficient_overlap": True}
+    corr, n = max(valid, key=lambda x: x[0])
+    return {"corr": float(corr), "n_overlap": int(n), "insufficient_overlap": False}
 
 
 def placement_in_distribution(value: float, dist: Sequence[float]) -> Dict[str, float]:
