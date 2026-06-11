@@ -100,3 +100,56 @@ def test_contact_aggregates_time_unit_invariant():
     # 归一化后 0..1
     assert a["typical_time"][0] == pytest.approx(0.0)
     assert a["typical_time"][3] == pytest.approx(1.0)
+
+
+def test_build_readout_record_normalized_coords_and_flags():
+    # along_axis_mm + axis_length -> x_norm = along/axis_length; signed_transverse -> y_norm
+    n_ch = 7
+    names = [f"A{i}" for i in range(n_ch)]
+    coords = np.array([[i, 0, 0] for i in range(n_ch)], float)
+    coords[3, 1] = 1.0; coords[4, 1] = -1.0   # 两侧横向
+    along = np.array([float(i) for i in range(n_ch)])     # 0..6 mm
+    axis_length = 6.0
+    signed_t = np.array([0,0,0, 1.0, -1.0, 0, 0])
+    masked = np.tile(np.linspace(0, 1, n_ch)[:, None], (1, 4))
+    bools = np.ones((n_ch, 4), bool)
+    rec = R.build_readout_record(
+        dataset="yuquan", subject="s1", template_id="t0", names=names,
+        along_axis_mm=along, axis_length_mm=axis_length, off_axis_mm=np.zeros(n_ch),
+        signed_transverse=signed_t, pc1_variance_explained=0.99,
+        masked=masked, lag_raw=masked.copy(), bools=bools,
+        soz_first_contacts=set(), lag_time_unit="ms",
+        one_dimensional_sampling=False)
+    ch = {c["name"]: c for c in rec["channels"]}
+    assert ch["A6"]["x_norm"] == pytest.approx(1.0)         # along/axis_length
+    assert ch["A3"]["y_norm"] == pytest.approx(1.0 / 6.0)   # signed_t/axis_length
+    assert ch["A4"]["y_norm"] == pytest.approx(-1.0 / 6.0)
+    assert rec["lag_time_unit"] == "ms"
+    assert rec["flags"]["poor_planarity"] is False
+
+
+def test_build_readout_record_poor_planarity_and_low_contact():
+    n_ch = 7
+    names = [f"A{i}" for i in range(n_ch)]
+    along = np.arange(n_ch, dtype=float)
+    masked = np.tile(np.linspace(0, 1, n_ch)[:, None], (1, 4))
+    bools = np.ones((n_ch, 4), bool)
+    rec = R.build_readout_record(
+        dataset="yuquan", subject="s2", template_id="t0", names=names,
+        along_axis_mm=along, axis_length_mm=6.0, off_axis_mm=np.zeros(n_ch),
+        signed_transverse=np.zeros(n_ch),
+        pc1_variance_explained=0.5,                 # < POOR_PLANARITY_PC1
+        masked=masked, lag_raw=masked.copy(), bools=bools,
+        soz_first_contacts=set(), lag_time_unit="s",
+        one_dimensional_sampling=False)
+    assert rec["flags"]["poor_planarity"] is True
+    # 仅 4 参与触点 (< MIN_CONTACTS=6) -> low_contact_count
+    bools_few = np.zeros((n_ch, 4), bool); bools_few[:4, :] = True
+    rec2 = R.build_readout_record(
+        dataset="yuquan", subject="s3", template_id="t0", names=names,
+        along_axis_mm=along, axis_length_mm=6.0, off_axis_mm=np.zeros(n_ch),
+        signed_transverse=np.zeros(n_ch), pc1_variance_explained=0.99,
+        masked=masked, lag_raw=masked.copy(), bools=bools_few,
+        soz_first_contacts=set(), lag_time_unit="s",
+        one_dimensional_sampling=False)
+    assert rec2["flags"]["low_contact_count"] is True

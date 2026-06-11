@@ -119,3 +119,67 @@ def contact_aggregates(masked: np.ndarray, lag_raw: np.ndarray,
         "uncertainty_rank": _nan_iqr(masked, 1),
         "uncertainty_time": _nan_iqr(lag_norm, 1),
     }
+
+
+def build_readout_record(
+    *, dataset: str, subject: str, template_id: str, names: Sequence[str],
+    along_axis_mm: np.ndarray, axis_length_mm: float, off_axis_mm: np.ndarray,
+    signed_transverse: np.ndarray, pc1_variance_explained: float,
+    masked: np.ndarray, lag_raw: np.ndarray, bools: np.ndarray,
+    soz_first_contacts: set, lag_time_unit: str,
+    one_dimensional_sampling: bool,
+) -> Dict[str, object]:
+    """组装一份标准化 readout record（real / model 同构）。
+
+    along_axis_mm / off_axis_mm 来自 compute_axis_frame；signed_transverse 来自
+    signed_transverse_axis；masked = mask_phantom_ranks(normalize=True)。
+    x_norm = along/axis_length，y_norm = signed_transverse/axis_length（spec §3 双坐标系）。
+    每触点一条（仅 along/signed 非 NaN 的参与触点）。flags 见 spec §10。
+    SOZ overlay 仅描述性：标 is_soz（first-contact alias 在 soz_first_contacts 内）。
+    """
+    from src.propagation_skeleton_geometry import parse_shaft
+    from src.sef_hfo_soz_localization import _first_contact
+
+    along = np.asarray(along_axis_mm, float)
+    st = np.asarray(signed_transverse, float)
+    agg = contact_aggregates(masked, lag_raw, bools)
+    L = float(axis_length_mm)
+    channels: List[dict] = []
+    for i, nm in enumerate(names):
+        a_i, s_i = float(along[i]), float(st[i])
+        if not (np.isfinite(a_i) and np.isfinite(s_i)) or L < 1e-9:
+            continue
+        if agg["support"][i] <= 0:
+            continue
+        channels.append({
+            "name": str(nm),
+            "shaft": str(parse_shaft(nm)[0]),
+            "along_axis_mm": a_i,
+            "signed_transverse_mm": s_i,
+            "off_axis_mm": float(off_axis_mm[i]),
+            "x_norm": a_i / L,
+            "y_norm": s_i / L,
+            "typical_rank": float(agg["typical_rank"][i]),
+            "typical_time": float(agg["typical_time"][i]),
+            "support": float(agg["support"][i]),
+            "uncertainty_rank": float(agg["uncertainty_rank"][i]),
+            "is_soz": _first_contact(str(nm)) in soz_first_contacts,
+        })
+    med_support = float(np.median([c["support"] for c in channels])) if channels else 0.0
+    flags = {
+        "one_dimensional_sampling": bool(one_dimensional_sampling),
+        "poor_planarity": bool(np.isfinite(pc1_variance_explained)
+                               and pc1_variance_explained < POOR_PLANARITY_PC1),
+        "low_contact_count": len(channels) < MIN_CONTACTS,
+        "low_support": med_support < LOW_SUPPORT_FRAC,
+        "weak_axis": L < 1e-9,
+    }
+    return {
+        "dataset": dataset, "subject": subject, "template_id": template_id,
+        "axis_length_mm": L,
+        "transverse_pc1_variance_explained": float(pc1_variance_explained),
+        "lag_time_unit": lag_time_unit,
+        "channels": channels,
+        "flags": flags,
+        "n_channels": len(channels),
+    }
