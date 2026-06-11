@@ -252,3 +252,31 @@ def test_compare_model_to_cohort_scalar_and_field():
     assert "field_placement" in out
     # field：model_to_real 中位相关 落在 real_to_real 分布里 -> 有 percentile
     assert np.isfinite(out["field_placement"]["model_to_real_median_corr"])
+
+
+def test_soz_first_contact_alias_and_ambiguity():
+    # 单极 montage：精确匹配
+    out = R.resolve_soz_overlay(["E11", "E12", "A6"], soz_core={"E11", "A6"},
+                                montage="single")
+    assert out["soz_first_contacts"] == {"E11", "A6"}
+    assert out["soz_ambiguous"] == []
+    # 双极 montage：first-contact alias（'E11-E12' -> 'E11'）
+    out2 = R.resolve_soz_overlay(["E11-E12", "E12-E13", "A6-A7"],
+                                 soz_core={"E11"}, montage="bipolar")
+    assert "E11" in out2["soz_first_contacts"]
+    # 歧义：SOZ contact 映射到 >=2 个 montage 通道 -> 记 ambiguous，不强配
+    out3 = R.resolve_soz_overlay(["E11-E12", "E11-E10"], soz_core={"E11"},
+                                 montage="bipolar")
+    assert "E11" in out3["soz_ambiguous"]
+
+
+def test_cohort_scalars_rank_vs_xnorm_no_theta_ref():
+    # rank_vs_xnorm_spearman 真实数据自身有定义（不需 theta_ref）
+    rec = {"channels": [{"x_norm": x, "typical_rank": x, "y_norm": 0.0,
+                         "signed_transverse_mm": 0.0, "along_axis_mm": x*30}
+                        for x in np.linspace(0, 1, 8)],
+           "axis_length_mm": 30.0}
+    sc = R.compute_cohort_scalars(rec)
+    assert sc["rank_vs_xnorm_spearman"] == pytest.approx(1.0, abs=1e-6)
+    assert "axis_angle_error" not in sc          # model-only validation, 不在 cohort scalar
+    assert "transverse_width_mm" in sc

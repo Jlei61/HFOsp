@@ -367,3 +367,59 @@ def compare_model_to_cohort(model_record: dict, real_records: Sequence[dict],
 def R_smooth_rank(rec, X, Y, sigma_xy, s_thresh):
     """compare 内部用：取 rank 场（薄封装 smooth_field）。"""
     return smooth_field(rec, X, Y, sigma_xy=sigma_xy, scalar="rank", s_thresh=s_thresh)
+
+
+def resolve_soz_overlay(names: Sequence[str], soz_core: set,
+                        montage: str) -> Dict[str, object]:
+    """SOZ overlay 匹配，政策锁 = first-contact alias（spec §7）。
+
+    single montage：montage 名即 contact，精确匹配 soz_core。
+    bipolar montage：每通道取 _first_contact（'E11-E12'->'E11'），匹配 soz_core；
+      一个 SOZ contact 映射到 >=2 个通道 -> ambiguous（记录，不强配）。
+    返回 soz_first_contacts（用于 record is_soz）+ soz_ambiguous（图注标注）。
+    仅描述性，不进任何 metric。
+    """
+    from src.sef_hfo_soz_localization import _first_contact
+    if montage == "single":
+        hit = {n for n in names if n in soz_core}
+        return {"soz_first_contacts": hit, "soz_ambiguous": []}
+    first_map: Dict[str, list] = {}
+    for n in names:
+        first_map.setdefault(_first_contact(n), []).append(n)
+    hit, ambig = set(), []
+    for contact in soz_core:
+        pairs = first_map.get(contact, [])
+        if len(pairs) == 1:
+            hit.add(contact)
+        elif len(pairs) >= 2:
+            ambig.append(contact)
+    return {"soz_first_contacts": hit, "soz_ambiguous": sorted(ambig)}
+
+
+def compute_cohort_scalars(record: dict) -> Dict[str, float]:
+    """real-vs-model cohort scalar（spec §9 (a)，均真实数据自身有定义；NO theta_ref）。"""
+    from scipy.stats import spearmanr
+    chans = record["channels"]
+    x = np.array([c["x_norm"] for c in chans], float)
+    rk = np.array([c["typical_rank"] for c in chans], float)
+    st = np.array([c["signed_transverse_mm"] for c in chans], float)
+    ok = np.isfinite(x) & np.isfinite(rk)
+    rho = float(spearmanr(x[ok], rk[ok]).correlation) if ok.sum() >= 3 else float("nan")
+    # transverse_width：signed_transverse 的稳健展宽（p90-p10），mm
+    tw = float(np.nanpercentile(st, 90) - np.nanpercentile(st, 10)) if st.size else float("nan")
+    # 早/晚端：按 typical_rank 取前/后 1/3 的 signed_transverse 展宽 + 沿轴中心距
+    order = np.argsort(rk)
+    k = max(1, len(order) // 3)
+    early, late = order[:k], order[-k:]
+    along = np.array([c["along_axis_mm"] for c in chans], float)
+    early_late_dist = abs(float(np.nanmean(along[late]) - np.nanmean(along[early])))
+    L = record.get("axis_length_mm", float("nan"))
+    return {
+        "axis_length_mm": float(L),
+        "transverse_width_mm": tw,
+        "early_zone_spread": float(np.nanstd(st[early])) if k else float("nan"),
+        "late_zone_spread": float(np.nanstd(st[late])) if k else float("nan"),
+        "early_late_centroid_distance_norm":
+            early_late_dist / L if L and np.isfinite(L) and L > 1e-9 else float("nan"),
+        "rank_vs_xnorm_spearman": rho,
+    }
