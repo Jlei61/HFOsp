@@ -572,13 +572,15 @@ from src.topic5_ictal_recruitment import resolve_global_onset
 
 
 def test_resolve_global_onset_reaches_fraction():
-    # 20 contacts; onsets clustered at frame 100; 1 early straggler at frame 10
+    # 20 contacts; onsets clustered at value 100; 1 early straggler at 10.
+    # NOTE: resolve_global_onset is UNIT-AGNOSTIC — Task 11 feeds it onset SECONDS,
+    # so the returned `t_global` carries whatever unit the input had (here arbitrary).
     onsets = np.full(20, 100.0)
     onsets[0] = 10.0
     res = resolve_global_onset(onsets, n_valid=20, frac=0.15)
-    # need >=3 of 20 (15%); only 1 by frame 10 -> not global; 3rd-earliest is ~100
+    # need >=3 of 20 (15%); only 1 by 10 -> not global; 3rd-earliest is ~100
     assert res["global_onset_resolved"] is True
-    assert res["t_global_frame"] == pytest.approx(100, abs=1)
+    assert res["t_global"] == pytest.approx(100, abs=1)
 
 
 def test_resolve_global_onset_single_transient_not_global():
@@ -586,7 +588,7 @@ def test_resolve_global_onset_single_transient_not_global():
     onsets[0] = 10.0
     res = resolve_global_onset(onsets, n_valid=20, frac=0.15)
     assert res["global_onset_resolved"] is False
-    assert np.isnan(res["t_global_frame"])
+    assert np.isnan(res["t_global"])
 
 
 def test_resolve_global_onset_unresolved_when_too_few():
@@ -604,18 +606,19 @@ Expected: FAIL with `ImportError`.
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-def resolve_global_onset(provisional_onset_frames, n_valid, *, frac=0.15):
-    """t_global = earliest frame where >= frac of n_valid contacts have a
-    (non-ambiguous, non-NaN) provisional onset <= that frame. No persist clause —
+def resolve_global_onset(provisional_onsets, n_valid, *, frac=0.15):
+    """t_global = earliest value where >= frac of n_valid contacts have a
+    (non-ambiguous, non-NaN) provisional onset <= that value. UNIT-AGNOSTIC: Task 11
+    passes onset SECONDS, so the returned `t_global` is in seconds. No persist clause —
     transient false alarms are already voided by the ambiguous rule (Task 4)."""
-    onsets = np.asarray(provisional_onset_frames, dtype=np.float64)
+    onsets = np.asarray(provisional_onsets, dtype=np.float64)
     finite = onsets[np.isfinite(onsets)]
     need = int(np.ceil(float(frac) * int(n_valid)))
     if finite.size < need or need < 1:
-        return {"global_onset_resolved": False, "t_global_frame": float("nan"),
+        return {"global_onset_resolved": False, "t_global": float("nan"),
                 "n_recruited": int(finite.size), "n_needed": int(need)}
     t_global = float(np.sort(finite)[need - 1])      # the need-th earliest onset
-    return {"global_onset_resolved": True, "t_global_frame": t_global,
+    return {"global_onset_resolved": True, "t_global": t_global,
             "n_recruited": int(finite.size), "n_needed": int(need)}
 ```
 
@@ -1106,7 +1109,7 @@ def compute_seizure_recruitment(signal, fs, pre_sec, channels, lambdas, *,
     g = recruit.resolve_global_onset(prov_onset, n_valid=n_valid, frac=GLOBAL_ONSET_FRAC)
     if not g["global_onset_resolved"]:
         return None
-    t_global = g["t_global_frame"]                 # NOTE: holds SECONDS here (unit follows input)
+    t_global = g["t_global"]                       # SECONDS (resolve_global_onset is unit-agnostic)
 
     # PASS 2: per-contact onset SECONDS in [t_global-2, t_global+RECRUIT_POST]
     p2 = onsets_in(t_global - 2.0, t_global + RECRUIT_POST_SEC, avail + ["er"])
@@ -1263,7 +1266,12 @@ def cmd_sentinel(args):
         sw = extract_seizure_window(subj, int(sz), pre_sec=BASELINE_PRE_SEC, post_sec=30.0,
                                     reference=ICTAL_REFERENCE)
         lambdas = _subject_lambdas(subj)            # from audit / recompute pooled
-        out = compute_seizure_recruitment(sw.signal, sw.fs, sw.t_axis, sw.ch_names, lambdas)
+        # Task 11 signature: (signal, fs, pre_sec, channels, lambdas, *, eeg_onset_rel_sec).
+        # NEVER pass sw.t_axis (raw sample axis) here — that was the P0-1 bug.
+        eeg_rel = ((sw.eeg_onset_epoch - sw.clin_onset_epoch)
+                   if sw.eeg_onset_epoch is not None else None)
+        out = compute_seizure_recruitment(sw.signal, sw.fs, sw.pre_sec, sw.ch_names, lambdas,
+                                          eeg_onset_rel_sec=eeg_rel)
         json.dump(_jsonable(out), open(OUT_ROOT / "sentinel" / f"{subj.replace('/','_')}_{sz}.json", "w"),
                   indent=2)
         plotter.plot_sentinel_overlay(sw, out, lambdas,
@@ -1398,7 +1406,29 @@ def test_null_d_routes_by_dataset(monkeypatch):
 Run: `pytest tests/test_topic5_ictal_recruitment.py -k null_d_routes -v`
 Expected: FAIL with `AttributeError` (functions not defined).
 
-- [ ] **Step 3: Implement `_pool_null_d`, `_null_d_mni_nn`, `_null_d_region_matched`** (mni_nn uses `seeg_coord_loader.load_subject_coords(dataset='epilepsiae')` → mni152 coords → nearest-neighbor remap of other subjects' templates; region_matched uses yuquan region/shaft labels; pooled result reports `neutral = not (wilcoxon_p < 0.05)`). The dispatcher routes each subject by `null_d_mode` and MUST raise / skip rather than call `_null_d_mni_nn` for a yuquan subject (subject-native coords are not cross-subject comparable, spec §7.3).
+- [ ] **Step 3: Implement `_pool_null_d`, `_null_d_mni_nn`, `_null_d_region_matched`** (mni_nn uses `seeg_coord_loader.load_subject_coords(dataset='epilepsiae')` → mni152 coords → nearest-neighbor remap of other subjects' templates; region_matched uses yuquan region/shaft labels). The dispatcher routes each subject by `null_d_mode` and MUST raise / skip rather than call `_null_d_mni_nn` for a yuquan subject (subject-native coords are not cross-subject comparable, spec §7.3). **`_pool_null_d` returns a `by_mode` dict so the verdict can check each coordinate space separately (spec §7.3, reviewer):**
+
+```python
+def _pool_null_d(subs):
+    """Returns {"by_mode": {"mni_nn": {neutral, wilcoxon_p_onesided, n_subjects},
+    "region_matched": {...}}, "neutral": <both modes neutral>}. A mode with no eligible
+    subjects is OMITTED (the verdict treats a missing mode as neutral — it cannot fail).
+    `inapplicable` (no coords/region) subjects are counted but NOT silently passed."""
+    by_mode = {}
+    for mode, fn in (("mni_nn", _null_d_mni_nn), ("region_matched", _null_d_region_matched)):
+        recs = []
+        for s in subs:
+            if s["null_d_mode"] != mode:
+                continue
+            for seiz in s["recruitment_ranks"]:
+                recs.append({"subject": s["subject"], "e_k": fn(s, seiz, subs).get("e_k")})
+        if recs:
+            pooled = echo.pool_echo_subject_level(recs)
+            pooled["neutral"] = not (pooled.get("wilcoxon_p_onesided", 1) < 0.05)
+            by_mode[mode] = pooled
+    overall = all(v.get("neutral", True) for v in by_mode.values()) if by_mode else False
+    return {"by_mode": by_mode, "neutral": overall}
+```
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -1454,8 +1484,9 @@ def cmd_cohort(args):
         "epi_only": pool("channel", subset="epilepsiae"),
         "yuquan_only": pool("channel", subset="yuquan"),
         "bad_data_regression": echo.bad_data_regression(bd),
-        "null_d": _pool_null_d(subs),                  # split by null_d_mode (§7.3, Task 15)
+        "null_d": _pool_null_d(subs),                  # by_mode (§7.3, Task 15): mni_nn / region_matched
         "deanchor_all": _pool_deanchor(subs),          # §4.1b LOO de-anchor cohort pool (P1-2)
+        "cluster_robust_sensitivity": _cluster_robust_sensitivity(subs),  # §7.1 per-seizure leg
         "er_vs_fused_consistency_dist": _consistency_dist(subs),
         "construct_validity": _construct_validity_dist(subs),
         "main_b_broad_extension": _main_b_broad(subs),  # broad templates; epi unsealed->sensitivity
@@ -1478,31 +1509,55 @@ def _pool_deanchor(subs):
     return echo.pool_echo_subject_level(recs)
 
 
+def _cluster_robust_sensitivity(subs):
+    """Spec §7.1 per-seizure cluster-robust leg: e_k ~ 1 with cluster-robust SE by
+    subject. direction_ok = intercept > 0 AND one-sided p < 0.05 (same direction as the
+    subject-level primary). Uses statsmodels OLS cov_type='cluster'."""
+    import statsmodels.api as sm
+    rows = [(s["subject"], ps["channel"]["e_k"]) for s in subs for ps in s["per_seizure"]
+            if ps.get("feature_agreement_flag") and ps.get("channel")
+            and np.isfinite(ps["channel"].get("e_k", np.nan))]
+    if len(rows) < 3:
+        return {"slope": float("nan"), "p_onesided": float("nan"), "direction_ok": False}
+    y = np.array([r[1] for r in rows], dtype=float)
+    _, groups = np.unique([r[0] for r in rows], return_inverse=True)   # stable int group codes
+    res = sm.OLS(y, np.ones((y.size, 1))).fit(cov_type="cluster", cov_kwds={"groups": groups})
+    coef = float(res.params[0]); p2 = float(res.pvalues[0])
+    p1 = p2 / 2.0 if coef > 0 else 1.0 - p2 / 2.0       # one-sided (>0)
+    return {"slope": coef, "p_onesided": p1, "direction_ok": bool(coef > 0 and p1 < 0.05)}
+
+
 def _assign_verdict(summary, subs):
     p = summary["primary_channel"]
+    n_primary = int(p.get("n_subjects", 0))            # subjects in the agreement-flagged channel pool
     has_sens = (np.isfinite(p.get("sign_p_onesided", np.nan)) and
                 np.isfinite(p.get("boot_ci95", [np.nan])[0]))
     bad_clean = not (summary["bad_data_regression"].get("wilcoxon_p_onesided", 1) < 0.05)
-    nd_clean = summary["null_d"].get("neutral", False)
-    n_agree = sum(1 for s in subs for ps in s["per_seizure"] if ps.get("feature_agreement_flag"))
-    if p["n_subjects"] < 6 or n_agree < 6:
-        return {"label": "没看清", "why": "n_subjects<6 or feature_agreement primary<6"}
-    standing = (p.get("wilcoxon_p_onesided", 1) < 0.05 and p["median_E_s"] > 0
-                and has_sens and bad_clean and nd_clean)
-    if not standing:
+    nd = summary["null_d"].get("by_mode", {})          # §7.3 per-mode, NOT one pooled neutral
+    nd_clean = (nd.get("mni_nn", {}).get("neutral", True)        # missing mode = no subjects -> can't fail
+                and nd.get("region_matched", {}).get("neutral", True))
+    cluster_ok = bool(summary["cluster_robust_sensitivity"].get("direction_ok", False))  # §7.1 leg
+    if n_primary < 6:
+        return {"label": "没看清", "why": "primary agreement subjects < 6"}
+    sig = (p.get("wilcoxon_p_onesided", 1) < 0.05 and p["median_E_s"] > 0
+           and has_sens and cluster_ok and bad_clean and nd_clean)
+    if not sig:
         return {"label": "真仪器阴性/没看清",
-                "why": "primary not significant or sensitivities/controls missing"}
-    # 含具体通路 (spec §7.4): inclusive echo holds AND (within-shaft OR anchor-matched
-    # significant) AND LOO de-anchor same-direction significant. Missing the LOO leg ->
-    # at most 稳定锚为主 (reviewer P1-2).
+                "why": "primary not significant OR a leg missing (sign/bootstrap/cluster-robust/bad-data/Null-D-by-mode)"}
+    if n_primary < 10:                                  # spec §7.4: 站住 needs >=10 subjects
+        return {"label": "临界",
+                "why": "all legs pass but 6<=primary subjects<10; spec requires >=10 to 站住 — Stage 2 continues"}
+    # standing (>=10 subjects + all sensitivities/controls). 含具体通路 additionally needs
+    # (within-shaft OR anchor-matched) AND LOO de-anchor same-direction significant (§7.4).
     a = summary["primary_within_shaft"]; c = summary["primary_anchor_matched"]
     da = summary["deanchor_all"]
     ac_sig = (a.get("wilcoxon_p_onesided", 1) < 0.05 or c.get("wilcoxon_p_onesided", 1) < 0.05)
     deanchor_sig = (da.get("wilcoxon_p_onesided", 1) < 0.05 and da.get("median_E_s", 0) > 0)
     specific = ac_sig and deanchor_sig
     return {"label": "站住·含具体通路" if specific else "站住·稳定锚为主",
-            "why": "echo holds; " + ("A/C survive AND LOO de-anchor significant"
-                                     if specific else "A/C or LOO de-anchor flatten")}
+            "why": "echo holds (>=10 subjects, all controls); " +
+                   ("A/C survive AND LOO de-anchor significant" if specific
+                    else "A/C or LOO de-anchor flatten")}
 ```
 
 - [ ] **Step 2: Run**
@@ -1570,7 +1625,7 @@ git commit -m "docs(topic5 stage2): recruitment instrument results archive + mai
 
 ## Self-Review (run after writing all tasks)
 
-**Spec coverage (v2):** §3.4 montage hard contract (Tasks 8, 10, 12) ✓; §4.1 three-layer window + §4.2 non-vacuous global onset (Tasks 6, 11) ✓; §4.3 dual anchor (Task 11/14) ✓; §5.1 5 detectors incl. ER held-out (Tasks 1, 2, 11) ✓; §5.3 robust-z + pooled per-hour λ + calibration_unstable (Tasks 3, 5, 12) ✓; §5.4 no-onset/ambiguous (Task 4) ✓; §5.2 two-pass (Tasks 6, 11) ✓; §6 family-structured fusion + amplitude-only gate + ER held-out consistency (Tasks 7, 11, 14) ✓; §7.1–7.2 echo + nulls reuse Stage 1 (Tasks 9, 14) ✓; §7.3 Null D by coord space (Task 15, built before cohort — reviewer P0-3) ✓; §7.4 verdict incl. LOO de-anchor leg (Task 16 — reviewer P1-2) ✓; §8 Main-A/Main-B (Task 16) ✓; §9 cross-feature agreement construct validity (Tasks 7, 14, 17) ✓; §10 sensitivity battery (Task 16 epi/yuquan + sentinel) ✓; §13 staged gate (Phase gates) ✓; figures (Task 17) + archive (Task 18) ✓.
+**Spec coverage (v2):** §3.4 montage hard contract (Tasks 8, 10, 12) ✓; §4.1 three-layer window + §4.2 non-vacuous global onset (Tasks 6, 11) ✓; §4.3 dual anchor (Task 11/14) ✓; §5.1 5 detectors incl. ER held-out (Tasks 1, 2, 11) ✓; §5.3 robust-z + pooled per-hour λ + calibration_unstable (Tasks 3, 5, 12) ✓; §5.4 no-onset/ambiguous (Task 4) ✓; §5.2 two-pass (Tasks 6, 11) ✓; §6 family-structured fusion + amplitude-only gate + ER held-out consistency (Tasks 7, 11, 14) ✓; §7.1–7.2 echo + nulls reuse Stage 1 (Tasks 9, 14) ✓; §7.3 Null D by coord space, checked per-mode in verdict (Task 15 built before cohort — reviewer P0-3 + by_mode) ✓; §7.4 verdict full gate — ≥10 primary subjects + sign/bootstrap + per-seizure cluster-robust + bad-data + Null-D-by-mode + (within-shaft/anchor) + LOO de-anchor (Task 16 — reviewer P1-2/subject-floor/cluster-robust) ✓; §8 Main-A/Main-B (Task 16) ✓; §9 cross-feature agreement construct validity (Tasks 7, 14, 17) ✓; §10 sensitivity battery (Task 16 epi/yuquan + sentinel) ✓; §13 staged gate (Phase gates) ✓; figures (Task 17) + archive (Task 18) ✓.
 
 **Open implementation risks to verify at execution (flagged checks, not placeholders):**
 - Masked-template cluster-rank field + per-cluster `valid_mask` key layout — Task 10/12 inspects live (`_extract_masked_cluster_templates`); reuse Stage 1's masked loader logic.
