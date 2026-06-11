@@ -61,7 +61,6 @@ def signed_transverse_axis(perp_vec: np.ndarray,
     pc1_var = float((S[0] ** 2) / var_total) if var_total > 1e-12 else float("nan")
     proj = P @ v1
     # B1 确定性符号：|proj| 最大触点为正
-    anchor = idx[np.argmax(np.abs(proj))]
     sign = 1.0 if (P[np.argmax(np.abs(proj))] @ v1) >= 0 else -1.0
     v1 = v1 * sign
     st[idx] = P @ v1
