@@ -1,6 +1,7 @@
 # Topic 5 — Stage 2 Early-Ictal Recruitment-Time Instrument Design Spec (2026-06-10)
 
-> **状态**：设计稿 **v1**（brainstorm 2026-06-10，user 批准方向 + 3 点收紧：窗口分层 / 特征族融合 / narrow=Main-A·broad=Main-B）。plan 待写。
+> **状态**：设计稿 **v2**（v1 brainstorm 2026-06-10 + review patch：①montage/channel-identity 硬合同 §3.4 [P0]；②global-onset 去单调空条件 §4.2；③λ 单位=per-hour + pooled baseline + calibration_unstable §5.3；④Null D 按坐标空间分 epi-MNI-NN / yuquan-region §7.3；⑤spectral-edge 完全移出 feature_agreement 硬门 §6.2-6.3）。plan 待写。
+> **v1 已锁的 3 点收紧**（仍有效）：窗口分层（extraction vs recruitment）/ 特征族融合（amplitude family gate + spectral corroboration）/ narrow=Main-A·broad=Main-B。
 > **Topic**：搭一个**真正的 early-ictal 招募时序仪器**——从原始发作 EEG 上，用多个独立检测器测"每个触点真正开始改变的时刻"，得到逐触点招募顺序，再用 Stage 1 已验证的 echo 统计量重测它与间期传播模板的对齐。**主线 = 真实招募仪器；pre-ictal 状态层是另一个 secondary layer，单独立 spec，不混进本 spec 的结论。**
 > **定位**：Stage 1（proxy triage）的结论是"现成 ER/atlas 代理里的'像'主要来自共享粗锚（病灶距离 / 早晚优先级），不是具体路径复用；且 ER-derived rank 不是传播路径仪器"。Stage 1 同时留下两个**结构上闭不了**的缺口：(i) construct-validity（ER 最早 vs 真特征最早是否一致）pending；(ii) Null D 跨病人特异性对照在按通道名对齐时跑不起来。**Stage 2 的真仪器把这两个缺口变成可闭环的：cross-feature agreement = construct validity；coordinate/region-matched Null D = 特异性。**
 > **Owner（user-locked 2026-06-08）**：topic5 拥有"真正发作 EEG 招募层 + 间期↔发作桥接"。与 Topic 4 H5（间期高频事件端点在发作邻近的招募）不重复——本层碰的是真正发作 EEG 信号本身的顺序。
@@ -66,7 +67,7 @@ subject 入选 ⇔ **同时**满足：
 2. **原始发作 EEG 可加载**：`extract_seizure_window(subject, seizure_idx)` 能取出不跨 block 边界的窗（epilepsiae + yuquan，见 §5），且 `n_seizures_eligible ≥ 2`。
 3. **baseline 可解**：每特征在该 seizure 上能解出合法 baseline 窗（§5.3），否则该 (seizure, feature) drop。
 
-> **B0 recruitment audit（必先跑）**：每 subject 枚举：`subject_id, dataset, fs, n_seizures_total, n_seizures_loadable, n_seizures_eligible, n_channels_template_{narrow,broad}, n_channels_recruited_{min,median,max}, per_feature_available (LL/broadband/HFA/ER/spectral_edge), global_onset_resolved_fraction, feature_agreement_flag_fraction, template_k_{narrow,broad}, swap_class, reference_type, montage_type, coord_available, channel_name_normalization_status, alignment_guard_pass, n_preonset_change_contacts, MIN_CH_pass`。
+> **B0 recruitment audit（必先跑）**：每 subject 枚举：`subject_id, dataset, fs, n_seizures_total, n_seizures_loadable, n_seizures_eligible, n_channels_template_{narrow,broad}, n_channels_recruited_{min,median,max}, per_feature_available (LL/broadband/HFA/ER/spectral_edge), global_onset_resolved_fraction, feature_agreement_flag_fraction, template_k_{narrow,broad}, swap_class, template_montage, ictal_montage, channel_identity_contract, n_channels_montage_matched, calibration_unstable_per_feature, pooled_baseline_sec, no_onset_rate_per_feature, null_d_mode, coord_available, channel_name_normalization_status, alignment_guard_pass, n_preonset_change_contacts, MIN_CH_pass`。
 > **门槛锁死，audit 只报 drop**：`MIN_CH=8`、各特征 baseline / λ / detection-window 参数（§5）、global-onset 判据（§4）都**在跑数据前锁死写进本 spec**，audit **只报告按锁定门槛各掉多少**，**禁止**看了 audit 再回调门槛。**audit 必须在 cohort inference 之前跑且人工看过。**
 
 ### 3.2 per-seizure 资格门
@@ -81,6 +82,17 @@ subject 入选 ⇔ **同时**满足：
 - **必报 sensitivity** = epi-only、yuquan-only 各自合并估计。
 - yuquan 只有单一 onset 标注（eeg_onset 即 clinical），故 §4 "annotation anchor vs data-driven anchor" 的双锚 sensitivity 在 yuquan 上退化为"data-driven anchor only"；epilepsiae 两锚都有。这一退化进 B0 audit。
 
+### 3.4 montage / channel-identity 硬合同（P0 — 桥接的承重点）
+
+> **核心风险**：interictal 模板的 `channel_names` 是单触点标签（实测 `HRA1, BFRA5, AMR1, HAR1…`），但 legacy 检测是 **bipolar**（`p16_cuda_24h_bipolar.py`），且 `src/preprocessing.py:9` 明确"A1-A2 labeled as A1"——即模板通道**极可能是 bipolar pair aliased-left**（A1–A2 别名为 A1）。若 ictal feature 用 `extract_seizure_window` 的默认 `reference="car"` 在同名单触点上算，名字相同但**信号对象不同**，echo 就变成"名字像"而非"同一路径比较"。
+
+- **实现期必须先 trace 模板真实 montage（sentinel 前置）**：从 interictal propagation 模板的 producer 确认 `channel_names` 是 (a) 真 monopolar 还是 (b) bipolar aliased-left。**默认工作假设 = (b) bipolar aliased-left（legacy 一致）**，但**不**在没 trace 前就当定论；trace 结果落 B0 audit `template_montage`。
+- **Main-A primary 硬合同**：ictal feature 必须在**与模板同语义的 montage** 上算。若模板是 bipolar aliased-left → ictal 用 `reference="bipolar"` 生成相邻 pair，再**按模板同一别名约定**（pair `HRA1-HRA2` → 标签 `HRA1`）对齐；CAR / monopolar **只作 sensitivity**，不进 Main-A primary。
+- **`channel_identity_contract` 不是名字相等**：runner 必须断言 `template_montage == ictal_montage`（语义层），并对每个进 echo 的通道核对其 montage 来源标签一致；**名字相同但 montage 语义不同 → hard fail，禁止 silent 通过**。
+- B0 audit 加列：`template_montage`（traced）、`ictal_montage`（生成时用的 reference）、`channel_identity_contract`（`matched_bipolar_aliased_left` / `matched_monopolar` / `MISMATCH`）、`n_channels_montage_matched`。
+- TDD 必含：构造"同名单触点、但一个是 CAR-monopolar 一个是 bipolar-aliased"的两路 → 断言 contract 检查 **hard raise**（不得因名字相等而通过）。
+- yuquan 同理：yuquan 模板也走 legacy bipolar；ictal `reference="bipolar"` 对齐。
+
 ---
 
 ## 4. 窗口合同（user P1 收紧 — 三层窗，招募 ≠ 漂移）
@@ -89,24 +101,24 @@ subject 入选 ⇔ **同时**满足：
 
 | 层 | 名字 | 范围 | 用途 |
 |---|---|---|---|
-| 1 | **extraction / context window** | `[-PRE_SEC, +30]s` rel 标注 onset；`PRE_SEC` 取能给出合法 baseline 的最小值，默认 120s，block 不够时退到 ≥ `MIN_BASELINE_SEC` 的可用值，再不够则 drop seizure | 提供 baseline + 给 global-onset search 足够上下文 |
+| 1 | **extraction / baseline-load window** | `[-PRE_SEC, +30]s` rel 标注 onset；`PRE_SEC` 默认 **300s**（沿用 atlas，给 λ 校准足够 baseline），block 不够时退到可用值，低于 baseline 下限则该 seizure 走 pooled 校准 / 标 `calibration_unstable`（§5.3）| 提供长 baseline（z + λ 校准）+ global-onset search 上下文 |
 | 2 | **data-driven global onset search** | 在 extraction 窗内 `[-30, +30]s` 内带 | 找**网络级最早持续改变** `t_global`（§4.2）|
 | 3 | **per-contact recruitment search** | `[t_global - 2s, t_global + RECRUIT_POST_SEC]`，`RECRUIT_POST_SEC=15s`（lock；sensitivity 10/20s）| 每触点只在此窄带内找自己的招募时刻 |
 
-- **pre-onset-change flag**：若某触点的 per-contact onset 落在 `标注 onset − 10s` 之前（即 `< -10s`），标 `pre_onset_change=True`，**不进**发作招募排名（进 audit 计数 `n_preonset_change_contacts`）。
-- baseline 窗复用 `resolve_baseline_window`（EEG-onset-aware），但 `MIN_BASELINE_SEC` 为本 spec 锁定值（默认 60s；若 PRE_SEC 退化导致 < 60s，该 (seizure) 的 baseline 标 invalid → drop）。
+- **baseline 窗 ≠ recruitment 窗**：baseline（z + λ 校准）取层 1 的长 pre-onset 段（`resolve_baseline_window` EEG-onset-aware），recruitment rank 只从层 3 窄带定（§0 verbatim lock）。
+- **pre-onset-change flag**：若某触点的 per-contact onset 落在 `标注 onset − 10s` 之前（即 `< -10s`），标 `pre_onset_change=True`，**不进**发作招募排名（进 audit 计数 `n_preonset_change_contacts`）。该 flag 在 §5.2 pass 1 上判。
 
 ### 4.2 data-driven global onset `t_global` 判据（锁死）
 
-`t_global` = **在 global-onset search 窗内，跨触点的"已招募比例"首次持续超过阈值的时刻**。具体：
+`t_global` = **在 global-onset search 窗内，跨触点的"已招募比例"首次达到阈值的时刻**。具体：
 
-1. 对每个特征、每个触点，先按 §5 z-score + CUSUM 得 per-contact onset（在 search 窗内，未约束到 recruitment 窄带）。
-2. 在 fused 层（§6）得每触点一个 provisional onset。
+1. 对每个特征、每个触点，先按 §5（pass 1）z-score + CUSUM 得 per-contact onset（在 search 窗内，未约束到 recruitment 窄带）。**sustained-ness 在这一层强制**：CUSUM 越阈 + §5.4 ambiguous-drop 规则（越阈后 1s 内回落到 < λ/2 → 判 ambiguous，该 onset 作废）——所以进入 fraction 的每个 onset 已是"持续改变"，不是瞬时假警。
+2. 在 fused 层（§6）得每触点一个 provisional onset（仅 non-ambiguous）。
 3. `recruited_fraction(t)` = provisional onset ≤ t 的触点比例（分母 = 该 seizure 合法触点数）。
-4. `t_global` = `recruited_fraction(t)` 首次 ≥ `GLOBAL_ONSET_FRAC`（lock=0.15）且在其后 `GLOBAL_PERSIST_SEC`（lock=1.0s）内不回落的最早 t。
+4. `t_global` = `recruited_fraction(t)` 首次 ≥ `GLOBAL_ONSET_FRAC`（lock=0.15）的最早 t。
 5. 解不出（fraction 全程 < 阈值）→ `global_onset_resolved=False` → seizure drop（进 audit）。
 
-> 这一步把"网络真正开始招募"从"发作前个别触点慢漂移"里分出来：要求**一批**触点（≥15%）在**持续**1s 内点着，才算 global onset。
+> **去掉了原 v1 的 `GLOBAL_PERSIST_SEC` 单调空条件**（reviewer P1）：`recruited_fraction(t)` 按定义单调不降，"其后 1s 内不回落"天然成立、防不了瞬时假警。瞬时假警由 **per-contact 层的 ambiguous-drop 规则（§5.4）** 拦掉——sustained 约束放在它该在的层。global onset 只要求 ≥15% 触点（已通过持续性过滤）点着。
 
 ### 4.3 双锚 sensitivity（user：两锚互为 sensitivity）
 
@@ -127,13 +139,13 @@ subject 入选 ⇔ **同时**满足：
 raw signal (n_ch, n_samp) @ fs
   → feature trace builder f_i: (n_ch, n_frames)  on a COMMON hop grid (HOP=0.1s)
   → baseline z-score against baseline window (resolve_baseline_window)  [robust variant §5.3]
-  → per-(subject,feature) λ calibration on baseline targeting FPR=FPR_TARGET (lock=0.05)
+  → per-(subject,feature) λ calibration on POOLED baseline (fpr_target_per_hour, §5.3)
   → clamped CUSUM (compute_cusum_n_d_with_time) → per-contact onset frame → onset_sec
   → no-onset / tie / ambiguous rules (§5.4)
 ```
 
-- **COMMON hop grid**：所有特征用 `HOP=0.1s`，使 5 个特征的 onset 时间可直接比较 / fuse。各特征的分析 `WIN` 可不同（见下），但落到同一 hop 轴。
-- λ calibration 复用 `src.ictal_er_rank.calibrate_lambda_per_subject`，但**每特征独立**校准（每特征自己的 baseline z 分布）。
+- **COMMON hop grid**：所有特征用 `HOP=0.1s`，使 5 个 detector 的 onset 时间可直接比较 / fuse（ER 比较但不进 fuse）。各特征的分析 `WIN` 可不同（见下），但落到同一 hop 轴。
+- λ calibration 复用 `src.ictal_er_rank.calibrate_lambda_per_subject`，**每特征独立**校准，**单位 = `fpr_target_per_hour`（不是 per-window）**，pooled baseline（§5.3）。
 - z-score 复用 `baseline_zscore_er` 的 baseline-window 机制；**normalization 默认改 robust**（median / MAD）以抗 baseline 内偶发尖峰，见 §5.3。
 
 ### 5.1 五个检测器（fused instrument = amplitude ×3 + spectral ×1；ER = held-out 代理参照）
@@ -160,11 +172,17 @@ raw signal (n_ch, n_samp) @ fs
 - **Pass 2（final recruitment rank）**：detection window = `[t_global-2s, t_global+RECRUIT_POST_SEC]`（§4.1 第 3 层窄带）。**重跑**每特征每触点 CUSUM（从该窄带起点累积，沿用 `compute_cusum_n_d` 的 `search_start` 语义）→ pass-2 onset → fuse → **final `recruitment_rank`（§6.1 用的是 pass-2 onset）**。
 - pre-onset-change flag（§4.1）在 **pass 1** 上判（onset < 标注−10s 的触点），这些触点**不进 pass 2 / 不进 recruitment rank**。
 
-### 5.3 baseline + normalization（锁死）
+### 5.3 baseline + normalization + λ 校准（锁死 — reviewer P1）
 
-- baseline 窗：`resolve_baseline_window`，EEG-onset-aware，`MIN_BASELINE_SEC=60`（lock）。
-- normalization：**robust z = (x − median_baseline) / (1.4826 · MAD_baseline)**（替换 `baseline_zscore_er` 的 mean/std；新写 `baseline_robust_z`，但沿用其 baseline-frame mask + min-valid 逻辑）。MAD=0 的触点 → NaN → drop（不回退全局统计）。
-- 理由：发作 baseline 短（PRE_SEC 退化时），mean/std 易被偶发尖峰拉偏；MAD 稳健。mean/std 版作 §10 sensitivity。
+**baseline + normalization**：
+- baseline 窗：`resolve_baseline_window`，EEG-onset-aware，取层 1 长 pre-onset 段（§4.1），`MIN_BASELINE_SEC=60`（lock，per-seizure z-score 下限）。
+- normalization：**robust z = (x − median_baseline) / (1.4826 · MAD_baseline)**（替换 `baseline_zscore_er` 的 mean/std；新写 `baseline_robust_z`，沿用其 baseline-frame mask + min-valid 逻辑）。MAD=0 的触点 → NaN → drop（不回退全局统计）。mean/std 版作 §10 sensitivity。
+
+**λ 校准（单位明确 + 短 baseline 不可校准的处理）**：
+- `calibrate_lambda_per_subject` 的语义是 **`fpr_target_per_hour`（每小时假警数），不是 per-window**。lock `fpr_target_per_hour=1.0`（沿用 atlas）。
+- **单条 seizure 的 60–120s baseline 在 per-hour 口径下分辨率不足**（reviewer P1）：故 λ 在 **(subject, feature)** 层用**跨该 subject 所有合格 seizure 的 pooled baseline z-frames** 校准（pool 后帧数足以分辨 per-hour FPR）。
+- `MIN_POOLED_BASELINE_SEC=600`（lock）：pooled baseline 总时长 < 600s → 该 (subject, feature) 标 `calibration_unstable=True` → 该 subject 在该特征上**只进 sensitivity，不进 primary**（不 silent 用一个推不准的 λ）。
+- **sentinel 阶段（§13）必输出每特征**：`lambda`、`baseline_alarm_count`、`pooled_baseline_sec`、`no_onset_rate`（detection 窗内未触发触点比例）。no-onset rate 过高（λ 被推太高）在 sentinel 抓出来，回炉前不跑 cohort。
 
 ### 5.4 no-onset / tie / ambiguous 规则（锁死，每特征一致）
 
@@ -190,8 +208,9 @@ raw signal (n_ch, n_samp) @ fs
 | `pairwise_rank_corr` | F1/F2/F3/F5 四者两两 recruitment-rank Spearman 矩阵（ER 作单列对照行，不进 fused 统计）| 特征是否一致测同一招募 |
 | `amplitude_family_agreement` | F1/F2/F3（LL/broadband/HFA）三者两两 ρ 的 median | amplitude family 内部一致性 |
 | `spectral_support` | F5（spectral-edge）rank vs amplitude-family-median（F1/F2/F3）rank 的 ρ | spectral 轴是支持还是冲突 |
-| `early_K_overlap` | 各 fused 特征"最早 K=3 触点"集合的 Jaccard（pairwise median）| 端点（最先点着）是否一致 |
-| `feature_agreement_flag` | `amplitude_family_agreement ≥ 0.5` **AND** `early_K_overlap ≥ 0.3` | **进 primary 的门**（§3.2）|
+| `early_K_overlap` | **F1/F2/F3 amplitude family** "最早 K=3 触点"集合的 Jaccard（pairwise median）；F5 不进此量 | 端点（最先点着）是否一致 |
+| `early_K_overlap_with_spectral` | 含 F5 的同一量（**仅 diagnostic，不进硬门**）| spectral 是否改变端点判读 |
+| `feature_agreement_flag` | `amplitude_family_agreement ≥ 0.5` **AND** `early_K_overlap ≥ 0.3`（**两项都只用 amplitude family F1/F2/F3，F5 完全不进硬门**）| **进 primary 的门**（§3.2）|
 
 ### 6.3 spectral-edge 的特殊处理（user：不要求每次必过，冲突时降级）
 
@@ -229,11 +248,15 @@ raw signal (n_ch, n_samp) @ fs
 
 ### 7.3 Null D 改坐标 / region matched（闭合 Stage 1 缺口）
 
-Stage 1 Null D（别人模板）按通道名对齐 → epi 0 overlap、yuquan within-patient names → 跑不起来。Stage 2 改：
+Stage 1 Null D（别人模板）按通道名对齐 → epi 0 overlap、yuquan within-patient names → 跑不起来。Stage 2 改坐标 / region，但**两数据集坐标空间不同，不能一刀切**（reviewer P1 + Topic 0）：
 
-- 用 `src.seeg_coord_loader` 取每触点坐标 / region 标签。
-- between-subject control = 把"别人模板"映射到**坐标 / region 最近邻**的本病人触点（不靠名字），再算 echo；cohort 合并方向应 ≈ 中性。
-- 坐标缺失的 subject → Null D 在其上标 `coord_unavailable`，进 sensitivity（不进 primary 硬约束），**不**silent 跳过。
+`src.seeg_coord_loader.load_subject_coords`：**epilepsiae = `mni152_1mm`（跨病人可比）；yuquan = `fs_native_ras_mm`（subject-native，源码注释明确"No cross-subject registration; per-subject native space only"）**。所以：
+
+- **Epilepsiae → MNI coordinate Null D**：把"别人模板"按 **MNI 坐标最近邻**映射到本病人触点（跨病人合法），再算 echo；合并方向应 ≈ 中性。
+- **Yuquan → region / shaft / clinical-network matched Null D**：yuquan subject-native 点云**禁止**跨病人 pooled nearest-neighbor（坐标不可比）。改用 **解剖 region / shaft / 临床网络标签**匹配的 Null D（`results/lagpat_broad/yuquan_clinical_networks.json` 等 region 标签）。
+- coord / region 标签缺失的 subject → Null D 标 `null_d_inapplicable`，进 sensitivity（不进 primary 硬约束），**不** silent 跳过。
+- B0 audit 加列 `null_d_mode`（`mni_nn` / `region_matched` / `inapplicable`）。
+- **§7.4 verdict 里 "Null D 中性" 的硬约束按 `null_d_mode` 分别判**：epi 用 mni_nn 结果，yuquan 用 region_matched 结果，不混。
 
 ### 7.4 判决合同（把结论写进数字；no-veto 原则不适用 — Stage 2 是真仪器本体）
 
@@ -295,7 +318,7 @@ Stage 1 Null D（别人模板）按通道名对齐 → epi 0 overlap、yuquan wi
 
 | 需要 | 复用来源 | 匹配？|
 |---|---|---|
-| raw ictal EEG 窗 | `src.ictal_onset_extraction.extract_seizure_window`（epi+yuquan）| ✅ 已支持双数据集；本 spec 加 `pre_sec`/`post_sec` 调用 |
+| raw ictal EEG 窗 | `src.ictal_onset_extraction.extract_seizure_window`（epi+yuquan）| ✅ 双数据集；**Main-A 必须 `reference="bipolar"` 对齐模板 montage（§3.4）**，非默认 car |
 | ER trace | `src.ictal_onset_extraction.compute_er` | ✅ ER held-out 参照；F2/F3/F5 仿其 spectrogram 骨架 |
 | baseline 窗 | `resolve_baseline_window` | ✅ EEG-onset-aware |
 | baseline z-score 骨架 | `baseline_zscore_er` | ⚠️ 新写 `baseline_robust_z`（MAD）沿用其 mask 逻辑 |
@@ -303,7 +326,7 @@ Stage 1 Null D（别人模板）按通道名对齐 → epi 0 overlap、yuquan wi
 | change-point onset | `compute_cusum_n_d_with_time` | ✅ **通用 wrapper，非 ER 专用** |
 | echo 统计 + null | `src.topic5_echo_gate.*`（Stage 1，36 tests）| ✅ **直接复用，不重造统计量** |
 | shaft 解析 | `src.propagation_skeleton_geometry.parse_shaft` | ✅ |
-| 坐标 / region（Null D）| `src.seeg_coord_loader` | ✅ 闭合 Stage 1 缺口 |
+| 坐标 / region（Null D）| `src.seeg_coord_loader.load_subject_coords` | ✅ 闭合 Stage 1 缺口；**epi=mni152_1mm（NN 合法）/ yuquan=fs_native_ras_mm（只能 region matched）**（§7.3）|
 | masked 模板加载 | Stage 1 runner 的 masked loader 逻辑（`results/interictal_propagation_masked/`）| ✅ Main-A；Main-B 加 broad 树 |
 
 ### 11.2 新代码（focused 新模块）
@@ -319,7 +342,13 @@ Stage 1 Null D（别人模板）按通道名对齐 → epi 0 overlap、yuquan wi
   - `feature_agreement(per_feature_ranks, families, *, early_k)` → §6.2 量 + `feature_agreement_flag`。
 - **新建 `scripts/run_topic5_ictal_recruitment.py`**：`audit / sentinel / per-subject / cohort / figures` 子命令。masked 模板（Main-A narrow + Main-B broad）；raw EEG via `extract_seizure_window`；echo via `src.topic5_echo_gate`。`audit` 与 `sentinel` 先跑、人工看过再 `per-subject`/`cohort`。
 - **新建 `scripts/plot_topic5_ictal_recruitment.py`** + `figures/README.md`。
-- TDD（`tests/test_topic5_ictal_recruitment.py`）：合成已知招募波（注入已知 onset 顺序）→ 5 特征 trace + onset 应复原顺序；spectral-edge 在"低压快活动无幅度上升"合成信号上仍触发而 amplitude 特征不触发（证明 F5 的独立轴价值）；global-onset 把"发作前慢漂移"判 not-global；pre-onset-change flag 把 < −10s 的 onset 排除；fuse median 对单特征噪声稳健；feature_agreement_flag 在一致 / 冲突合成上分别 True/False；HFA 在低 fs 上 feature-drop 而非 seizure-drop。
+- TDD（`tests/test_topic5_ictal_recruitment.py`）：合成已知招募波（注入已知 onset 顺序）→ 4 fused 特征 trace + onset 应复原顺序；spectral-edge 在"低压快活动无幅度上升"合成信号上仍触发而 amplitude 特征不触发（证明 F5 的独立轴价值）；global-onset 把"发作前慢漂移"判 not-global；**单个瞬时假警触点不足以触发 global onset（≥15% 且 ambiguous-drop 过滤生效）**；pre-onset-change flag 把 < −10s 的 onset 排除；fuse median 对单特征噪声稳健；feature_agreement_flag 在一致 / 冲突合成上分别 True/False；HFA 在低 fs 上 feature-drop 而非 seizure-drop。
+- **reviewer-mandated TDD（P0/P1）**：
+  - **montage hard fail**：同名单触点、一路 CAR-monopolar 一路 bipolar-aliased → `channel_identity_contract` 检查 **hard raise**，名字相等不得通过（§3.4）。
+  - **λ 短 baseline**：pooled baseline < `MIN_POOLED_BASELINE_SEC` → 返回 `calibration_unstable=True`，该 (subject,feature) 不进 primary（§5.3）。
+  - **global onset 非空条件**：构造"招募比例先到 0.15 又因 ambiguous 撤回"的合成 → 验证撤回的 onset 不计入 fraction（§4.2）。
+  - **Null D 分数据集**：epi 走 `mni_nn`，yuquan 走 `region_matched`；断言 yuquan **不**调用跨病人坐标 NN（§7.3）。
+  - **spectral conflict 不 drop**：`spectral_support < 0` 的 seizure → `spectral_conflict_flag=True` + `confidence=low`，但**仍进 primary**（不被 drop），且 `feature_agreement_flag` 只看 amplitude family（§6.2/§6.3）。
 
 ### 11.3 输出
 
@@ -357,7 +386,10 @@ results/topic5_ictal_recruitment/
 - 不做 directed connectivity / Bayesian / neural-field。
 - **不把 EI 当独立 feature**（文献定位，双计数风险）。
 - **不把 ER 默认参数照搬到别的特征**（每特征独立 baseline/λ/window）。
-- 不按 channel name 做 Null D（改坐标 / region）。
+- **不在 trace 出模板真实 montage 前就当 ictal montage 对**（§3.4）；**不按名字相等当 channel identity**（必须 montage 语义匹配，否则 hard fail）。
+- **不用单条 seizure 短 baseline 的 per-hour λ**（必须 pooled；< MIN_POOLED 标 calibration_unstable，§5.3）。
+- 不按 channel name 做 Null D（改坐标 / region）；**不在 yuquan subject-native 坐标上做跨病人 NN**（改 region matched，§7.3）。
+- **不因 spectral conflict drop primary seizure**（只降 confidence，§6.3）；**不让 F5 进 feature_agreement 硬门**（§6.2）。
 - 不让 broad 未封板部分进 Main-B 主估计。
 - 不在 within-subject 写 α-claim 当机制因果。
 - 不跑 sentinel 通过前就跑 cohort（§13 staged gate）。
@@ -369,9 +401,10 @@ results/topic5_ictal_recruitment/
 1. **写 spec**（本文件）→ user review。
 2. **写 implementation plan**（TDD task-by-task）→ user review。
 3. **实现 instrument**（`src/topic5_ictal_recruitment.py` + runner，TDD 绿）。
-4. **B0 audit + sentinel**：跑 audit；抽 **3–5 个 sentinel seizure**（覆盖 epi + yuquan，至少 1 个低压快起始候选），生成 §9 叠图，**人工目视核对** 5 特征是否同向、global-onset 是否合理、pre-onset-change flag 是否生效。**sentinel 不过 → 回炉特征 / 窗口参数，不跑 cohort。**
-5. **sentinel 通过后** → 跑 `per-subject` + `cohort`（Main-A 主 + Main-B 扩展）。
-6. **figures + 人工巡视** → 写 archive doc（`docs/archive/topic5/ictal_recruitment/`）→ 仅在全 sensitivity 过后回链主文档。
+4. **montage trace（sentinel 前置，P0）**：先 trace interictal 模板的真实 montage（monopolar vs bipolar-aliased-left），落 `template_montage`；据此定 ictal `reference`。**montage 没 trace 清楚 → 不进 sentinel。**
+5. **B0 audit + sentinel**：跑 audit；抽 **3–5 个 sentinel seizure**（覆盖 epi + yuquan，至少 1 个低压快起始候选），生成 §9 叠图 + **每特征 `lambda`/`pooled_baseline_sec`/`no_onset_rate` 表**，**人工目视核对**：5 detector 是否同向、global-onset 是否合理、pre-onset-change flag 是否生效、montage 对齐后通道是否对得上、λ 下 no-onset rate 是否过高。**sentinel 不过 → 回炉特征 / 窗口 / λ 参数，不跑 cohort。**
+6. **sentinel 通过后** → 跑 `per-subject` + `cohort`（Main-A 主 + Main-B 扩展）。
+7. **figures + 人工巡视** → 写 archive doc（`docs/archive/topic5/ictal_recruitment/`）→ 仅在全 sensitivity 过后回链主文档。
 
 ---
 
