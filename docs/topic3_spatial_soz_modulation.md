@@ -217,6 +217,11 @@ Legacy 的一个隐患：`epilepsiae_detectHFOs.py` 模块顶部默认 `rel_thre
 - 检测结果：`results/hfo_detection/`（Yuquan + Epilepsiae gpu.npz / refineGpu.npz）
 - SOZ-AUC 结果：`results/refine_soz_validation/yuquan/`、`results/refine_soz_validation/epilepsiae/`
 - Per-channel 结果：`results/spatial_modulation/`
+- **传播几何整合结果（Topic 1 × Topic 3 空间桥，探索性）**：`results/spatial_modulation/propagation_geometry/`
+  - 顶层 `cohort_summary.json` / `cohort_summary.csv` 是 canonical 入口
+  - `components/path_axis/` 保存模板均值 source/sink core、传播轴、留出半验证
+  - `components/entry_variability/` 保存逐事件 entry leader 分散度与双模板入口重叠
+  - 口径锁定：这是 Topic 3 的空间 / where 结果；Topic 4 模型只消费这些尺度参数，不拥有这个实证结果
 
 ---
 
