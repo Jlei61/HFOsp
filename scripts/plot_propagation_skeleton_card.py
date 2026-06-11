@@ -386,11 +386,12 @@ def main():
     ap.add_argument("--subjects", nargs="+",
                     default=["epilepsiae:958", "epilepsiae:139",
                              "yuquan:zhangbichen", "epilepsiae:635"])
-    ap.add_argument("--geom-json-dir", default="/tmp/skel_cards/per_subject",
+    ap.add_argument("--geom-json-dir", default=str(
+        _ROOT / "results/spatial_modulation/propagation_geometry/components/path_axis/per_subject"),
                     help="dir with {ds}_{subj}.json from "
                          "run_propagation_skeleton_geometry.py")
     ap.add_argument("--out", default=str(
-        _ROOT / "results/topic4_sef_hfo/skeleton_geometry/figures/per_subject"))
+        _ROOT / "results/spatial_modulation/propagation_geometry/components/path_axis/figures/per_subject"))
     args = ap.parse_args()
     geom_dir = Path(args.geom_json_dir)
     out_dir = Path(args.out)

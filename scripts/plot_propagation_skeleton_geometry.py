@@ -20,7 +20,7 @@ from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 
 _ROOT = Path(__file__).resolve().parents[1]
-BASE = _ROOT / "results/topic4_sef_hfo/skeleton_geometry"
+BASE = _ROOT / "results/spatial_modulation/propagation_geometry/components/path_axis"
 FIG = BASE / "figures"
 FIG.mkdir(parents=True, exist_ok=True)
 

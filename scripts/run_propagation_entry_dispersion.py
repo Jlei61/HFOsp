@@ -11,7 +11,7 @@ Inputs : results/interictal_propagation_masked/per_subject/*.json  (masked
          PR-2 labels + templates; phantom-rank safe)
          raw *_lagPat_withFreqCent.npz under the dataset roots (event matrices)
          SEEG coords via src.seeg_coord_loader (Epilepsiae MNI mm / Yuquan native)
-Outputs: results/propagation_entry_dispersion/{cohort_summary.json,.csv,
+Outputs: results/spatial_modulation/propagation_geometry/components/entry_variability/{cohort_summary.json,.csv,
          per_subject/<dataset>_<subject>.json}
 
 Discipline: NEVER pool Epilepsiae (MNI) and Yuquan (native RAS) coordinates;
@@ -47,7 +47,7 @@ logger = logging.getLogger("entry_dispersion")
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
 MASKED_PER_SUBJECT = Path("results/interictal_propagation_masked/per_subject")
-OUT_DIR = Path("results/propagation_entry_dispersion")
+OUT_DIR = Path("results/spatial_modulation/propagation_geometry/components/entry_variability")
 
 
 def _subject_dir(dataset: str, subject: str) -> Path:

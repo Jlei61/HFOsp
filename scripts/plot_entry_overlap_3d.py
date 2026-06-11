@@ -17,8 +17,8 @@ archive §4.6). Then, spatially:
     from the template_rank spatial gradient, NOT from entry labels -> not
     circular). Epilepsiae MNI mm / Yuquan native RAS mm NEVER pooled.
 
-Outputs: results/propagation_entry_dispersion/entry_overlap_summary.{json,csv}
-         results/propagation_entry_dispersion/figures/entry_overlap_3d/<stem>.png
+Outputs: results/spatial_modulation/propagation_geometry/components/entry_variability/entry_overlap_summary.{json,csv}
+         results/spatial_modulation/propagation_geometry/components/entry_variability/figures/entry_overlap_3d/<stem>.png
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
-OUT = Path("results/propagation_entry_dispersion")
+OUT = Path("results/spatial_modulation/propagation_geometry/components/entry_variability")
 FIG = OUT / "figures" / "entry_overlap_3d"
 COVERAGE = 0.70
 N_NULL = 1000

@@ -30,7 +30,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-OUT = Path("results/propagation_entry_dispersion")
+OUT = Path("results/spatial_modulation/propagation_geometry/components/entry_variability")
 FIG = OUT / "figures"
 DS_COLOR = {"epilepsiae": "#3b6ea5", "yuquan": "#c0504d"}
 DS_LABEL = {"epilepsiae": "Epilepsiae cohort", "yuquan": "Yuquan cohort"}

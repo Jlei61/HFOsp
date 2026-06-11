@@ -2,7 +2,7 @@
 """Per-subject interictal propagation skeleton geometry (descriptive model-input).
 
 Spec: docs/superpowers/specs/2026-06-08-sef-hfo-propagation-skeleton-geometry-design.md
-Outputs: results/topic4_sef_hfo/skeleton_geometry/{per_subject/{ds}_{subj}.json, cohort_summary.json}
+Outputs: results/spatial_modulation/propagation_geometry/components/path_axis/{per_subject/{ds}_{subj}.json, cohort_summary.json}
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")
@@ -372,7 +372,7 @@ def main():
     ap.add_argument("--subjects", nargs="*", default=None,
                     help="ds:subj tokens; default = full cohort")
     ap.add_argument("--out", default=str(
-        _ROOT / "results/topic4_sef_hfo/skeleton_geometry"))
+        _ROOT / "results/spatial_modulation/propagation_geometry/components/path_axis"))
     args = ap.parse_args()
     out = Path(args.out)
     (out / "per_subject").mkdir(parents=True, exist_ok=True)
