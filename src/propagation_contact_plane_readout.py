@@ -269,3 +269,101 @@ def corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh: float = S_THRESH,
         return {"corr": None, "n_overlap": n_overlap, "insufficient_overlap": True}
     return {"corr": float(max(cands)), "n_overlap": n_overlap,
             "insufficient_overlap": False}
+
+
+def placement_in_distribution(value: float, dist: Sequence[float]) -> Dict[str, float]:
+    """value 落在 dist 的 percentile + robust z（median + MAD）。不报 p 值（spec §9）。"""
+    d = np.asarray([x for x in dist if np.isfinite(x)], float)
+    if d.size == 0 or not np.isfinite(value):
+        return {"percentile": float("nan"), "robust_z": float("nan"), "n": int(d.size)}
+    pct = float((d < value).mean() * 100.0)
+    med = float(np.median(d))
+    mad = float(np.median(np.abs(d - med)))
+    rz = float((value - med) / (1.4826 * mad)) if mad > 1e-12 else float("nan")
+    return {"percentile": pct, "robust_z": rz, "n": int(d.size)}
+
+
+def subject_first_fold(records: Sequence[dict], key: str) -> List[float]:
+    """多模板 subject 先折叠为一个代表值（同 subject 的 key 取中位），再返回每 subject 一个值。
+    防 cohort 汇总里模板多的 subject 被重复计数（spec §9 聚合纪律）。"""
+    by_subj: Dict[tuple, list] = {}
+    for r in records:
+        v = r.get(key)
+        if v is None or not np.isfinite(v):
+            continue
+        by_subj.setdefault((r["dataset"], r["subject"]), []).append(float(v))
+    return [float(np.median(vs)) for vs in by_subj.values()]
+
+
+def compare_model_to_cohort(model_record: dict, real_records: Sequence[dict],
+                            X: np.ndarray, Y: np.ndarray,
+                            sigma_xy: Optional[float] = None,
+                            s_thresh: float = S_THRESH,
+                            overlap_min: int = OVERLAP_MIN) -> Dict[str, object]:
+    """spec §9 描述性 posterior-predictive 比较。
+
+    (a) 标量：对每个 real-vs-model cohort scalar，real subject-first 折叠成分布，
+        model 取 placement_in_distribution（percentile + robust z）。
+    (b) field：先给每个 record 算 rank 场；real_to_real(i)=median_{j≠i} corr_pair；
+        model_to_real=median_i corr_pair(model,i)；报 model 值落在
+        {real_to_real} 分布的 percentile/z。镜像不变 + support-gated。
+    禁报 p 值。
+    """
+    SCALARS = ["axis_length_mm", "transverse_width_mm", "early_zone_spread",
+               "late_zone_spread", "early_late_centroid_distance_norm",
+               "rank_vs_xnorm_spearman"]
+    # (a) 标量
+    scalar_placement = {}
+    for s in SCALARS:
+        dist = subject_first_fold(
+            [{"dataset": r["dataset"], "subject": r["subject"],
+              "scalar": r.get("scalars", {}).get(s)} for r in real_records],
+            key="scalar")
+        mv = model_record.get("scalars", {}).get(s)
+        if mv is not None and dist:
+            scalar_placement[s] = placement_in_distribution(float(mv), dist)
+    # (b) field —— subject-first（reviewer P1：同 subject 多模板不得自我膨胀/过度加权）
+    def fld(rec):
+        return R_smooth_rank(rec, X, Y, sigma_xy, s_thresh)
+    def _subj(r):
+        return (r["dataset"], r["subject"])
+    real_flds = [fld(r) for r in real_records]
+    model_fld = fld(model_record)
+    # real-to-real：同一 (dataset,subject)（含其它模板）跳过；每 record 取对【其他 subject】
+    # 的 median，再 subject_first_fold 折成每 subject 一个值
+    r2r = []
+    for i, fi in enumerate(real_flds):
+        cs = []
+        for j, fj in enumerate(real_flds):
+            if _subj(real_records[i]) == _subj(real_records[j]):
+                continue
+            c = corr_pair_mirror_invariant(fi["T"], fi["S"], fj["T"], fj["S"],
+                                           s_thresh, overlap_min)["corr"]
+            if c is not None:
+                cs.append(c)
+        if cs:
+            r2r.append({"dataset": real_records[i]["dataset"],
+                        "subject": real_records[i]["subject"],
+                        "scalar": float(np.median(cs))})
+    r2r_dist = subject_first_fold(r2r, key="scalar")
+    # model-to-real：先按 real subject 折叠 corr（同 subject 多模板取 median），再跨 subject median
+    m2r_by_subj: Dict[tuple, list] = {}
+    for fi, ri in zip(real_flds, real_records):
+        c = corr_pair_mirror_invariant(model_fld["T"], model_fld["S"],
+                                       fi["T"], fi["S"], s_thresh, overlap_min)["corr"]
+        if c is not None:
+            m2r_by_subj.setdefault(_subj(ri), []).append(c)
+    m2r_subj = [float(np.median(v)) for v in m2r_by_subj.values()]
+    m2r_med = float(np.median(m2r_subj)) if m2r_subj else float("nan")
+    field_placement = {
+        "model_to_real_median_corr": m2r_med,
+        "real_to_real_distribution_n": len(r2r_dist),
+        "placement": placement_in_distribution(m2r_med, r2r_dist),
+    }
+    return {"scalar_placement": scalar_placement, "field_placement": field_placement,
+            "note": "descriptive posterior-predictive; no p-value; SOZ not a metric"}
+
+
+def R_smooth_rank(rec, X, Y, sigma_xy, s_thresh):
+    """compare 内部用：取 rank 场（薄封装 smooth_field）。"""
+    return smooth_field(rec, X, Y, sigma_xy=sigma_xy, scalar="rank", s_thresh=s_thresh)

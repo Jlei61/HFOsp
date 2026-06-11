@@ -213,3 +213,42 @@ def test_corr_pair_low_overlap_flag():
     out = R.corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh=0.5, overlap_min=25)
     assert out["insufficient_overlap"] is True
     assert out["corr"] is None
+
+
+def test_robust_z_and_percentile():
+    dist = [0.1, 0.2, 0.3, 0.4, 0.5]
+    out = R.placement_in_distribution(0.3, dist)
+    assert out["percentile"] == pytest.approx(50.0, abs=15)   # 中位附近
+    assert out["robust_z"] == pytest.approx(0.0, abs=1e-9)     # = median
+
+
+def test_subject_first_folding_no_overweight():
+    # subject 'A' 有 3 个 template record，'B' 有 1 个；折叠后各算 1 个 subject 值
+    recs = [
+        {"dataset": "yuquan", "subject": "A", "scalar": 0.0},
+        {"dataset": "yuquan", "subject": "A", "scalar": 0.0},
+        {"dataset": "yuquan", "subject": "A", "scalar": 0.0},
+        {"dataset": "yuquan", "subject": "B", "scalar": 1.0},
+    ]
+    folded = R.subject_first_fold(recs, key="scalar")
+    # 两个 subject -> 长度 2，不是 4
+    assert len(folded) == 2
+    assert sorted(folded) == [0.0, 1.0]
+
+
+def test_compare_model_to_cohort_scalar_and_field():
+    X, Y = R.make_plane_grid()
+    def mk(subj, tid, shift):
+        chans = [{"x_norm": x, "y_norm": 0.0, "typical_rank": x, "support": 1.0,
+                  "uncertainty_rank": 0.0} for x in np.linspace(0.1, 0.9, 8)]
+        return {"dataset": "yuquan", "subject": subj, "template_id": tid,
+                "axis_length_mm": 30.0 + shift, "channels": chans,
+                "scalars": {"axis_length_mm": 30.0 + shift}}
+    reals = [mk(f"s{i}", "t0", i) for i in range(5)]
+    model = mk("model", "t0", 2)
+    out = R.compare_model_to_cohort(model, reals, X, Y,
+                                    sigma_xy=0.1, s_thresh=0.05, overlap_min=5)
+    assert "scalar_placement" in out and "axis_length_mm" in out["scalar_placement"]
+    assert "field_placement" in out
+    # field：model_to_real 中位相关 落在 real_to_real 分布里 -> 有 percentile
+    assert np.isfinite(out["field_placement"]["model_to_real_median_corr"])
