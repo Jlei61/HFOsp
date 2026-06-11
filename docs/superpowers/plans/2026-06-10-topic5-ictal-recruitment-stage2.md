@@ -1427,7 +1427,8 @@ def _pool_null_d(subs):
             pooled["neutral"] = not (pooled.get("wilcoxon_p_onesided", 1) < 0.05)
             by_mode[mode] = pooled
     overall = all(v.get("neutral", True) for v in by_mode.values()) if by_mode else False
-    return {"by_mode": by_mode, "neutral": overall}
+    inapplicable = [s["subject"] for s in subs if s.get("null_d_mode") == "inapplicable"]
+    return {"by_mode": by_mode, "neutral": overall, "inapplicable_subjects": inapplicable}
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1517,10 +1518,12 @@ def _cluster_robust_sensitivity(subs):
     rows = [(s["subject"], ps["channel"]["e_k"]) for s in subs for ps in s["per_seizure"]
             if ps.get("feature_agreement_flag") and ps.get("channel")
             and np.isfinite(ps["channel"].get("e_k", np.nan))]
-    if len(rows) < 3:
-        return {"slope": float("nan"), "p_onesided": float("nan"), "direction_ok": False}
+    subjects = [r[0] for r in rows]
+    if len(rows) < 3 or len(set(subjects)) < 2:        # cov_type='cluster' needs >=2 groups
+        return {"slope": float("nan"), "p_onesided": float("nan"), "direction_ok": False,
+                "n_clusters": len(set(subjects))}
     y = np.array([r[1] for r in rows], dtype=float)
-    _, groups = np.unique([r[0] for r in rows], return_inverse=True)   # stable int group codes
+    _, groups = np.unique(subjects, return_inverse=True)   # stable int group codes
     res = sm.OLS(y, np.ones((y.size, 1))).fit(cov_type="cluster", cov_kwds={"groups": groups})
     coef = float(res.params[0]); p2 = float(res.pvalues[0])
     p1 = p2 / 2.0 if coef > 0 else 1.0 - p2 / 2.0       # one-sided (>0)
