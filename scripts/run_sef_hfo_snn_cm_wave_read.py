@@ -48,12 +48,36 @@ from src.sef_hfo_observation import (build_shaft, merge_montages, extract_lagpat
                                      axis_angle_error_deg, direction_readability)
 from src.sef_hfo_snn_adapter import snn_event_envelope      # noqa: E402
 from src.sef_hfo_heterogeneity import sample_core_field     # noqa: E402 (Step-3 pathology core)
+from src.sef_hfo_snn_engine_guard import assert_versions    # noqa: E402 (loud-fail on engine drift)
 
 PITCH, SHAFTS = 4.0, (15.0, 75.0, 135.0)
+# Participation margin: cm-scale SNN single-end kick is a sustained traveling FRONT with a 3-10x
+# amplitude gradient along the wave (near-kick contacts >> wavefront contacts), like the rate field
+# (spec §4.2) and UNLIKE the L=3 self-limited blob that spec §4.1 locked at 0.5. 0.10 = the
+# max-coverage end (a tighter margin only drops wavefront contacts -> n_part<7 -> INSUFFICIENT;
+# it is not a cherry-picked sweet spot). Run --margin-scan to audit: axis_err must stay invariant
+# across margins (margin is a detection front-end / coverage knob, NOT the parity claim, which is
+# estimator+threshold = endpoint_centroid_axis / 25 deg / k_dir=3). Locked in spec §4.3.
 MARGIN_FRAC, KDIR, AXIS_ERR_MAX, PART_MIN, TAU_FAIL = 0.10, 3, 25.0, 7, 0.3
+MARGIN_SCAN_FRACS = (0.10, 0.20, 0.30, 0.50)
 DT, DRIVE = 0.1, 0.6
 OUT = "results/topic4_sef_hfo/observation_layer/snn_cm_wave"
 _ENG_FILES = ("kick_probe.py", "lfp.py", "connectivity.py", "connectivity_rot.py", "params.py")
+# Shared engine-version baseline (same engine as the hetero grid runner); assert_versions() at
+# main() startup loud-fails if any engine file drifts from this recorded snapshot.
+ENGINE_VERSIONS = os.path.join("results", "topic4_sef_hfo", "snn_heterogeneity", "engine_versions.json")
+
+
+def _engine_guard():
+    """Loud-fail if the gitignored engine drifted from the recorded baseline (spec §7 hard
+    contract; same guard the hetero grid runner uses). The engine is patched (r_kick/t_kick/
+    lfp sites; patch-note scripts/engine_patches/kick_center.patch) and NOT git-tracked, so a
+    silent edit there would make these cm reads unreproducible."""
+    if not os.path.exists(ENGINE_VERSIONS):
+        raise RuntimeError(
+            f"engine baseline missing: {ENGINE_VERSIONS}. Re-snapshot it with "
+            "src.sef_hfo_snn_engine_guard.record_versions after reviewing the engine.")
+    assert_versions(json.loads(open(ENGINE_VERSIONS).read()))
 
 
 def _provenance():
@@ -84,7 +108,7 @@ def valid_mask(m, posE, L, Rr):
     return inside & has_n, inside, has_n
 
 
-def read_valid(env, fdt, m, valid, win, theta_ref_rad, label):
+def read_valid(env, fdt, m, valid, win, theta_ref_rad, label, margin_frac=MARGIN_FRAC):
     """Read direction using ONLY valid contacts (subset env+montage), with contact-level detail."""
     vi = np.where(valid)[0]
     if len(vi) < PART_MIN:
@@ -95,7 +119,7 @@ def read_valid(env, fdt, m, valid, win, theta_ref_rad, label):
     from src.sef_hfo_observation import VirtualMontage
     m_v = VirtualMontage(np.asarray(m.contacts)[vi], names_v, "valid_subset")
     floor = float(env_v.min())
-    margin = MARGIN_FRAC * (float(env_v.max()) - floor)
+    margin = margin_frac * (float(env_v.max()) - floor)
     art = extract_lagpat(env_v, fdt, [win], floor, margin, 0.5, fdt)
     art = attach_geometry(art, m_v)
     r0, b0 = art.ranks[:, 0], art.bools[:, 0]
@@ -109,6 +133,18 @@ def read_valid(env, fdt, m, valid, win, theta_ref_rad, label):
                 readability=(None if rd is None or rd != rd else round(float(rd), 3)),
                 axis_vec=(None if ax is None else [round(float(ax[0]), 4), round(float(ax[1]), 4)]),
                 participating=part, ranks=ranks, lags_s=lags)
+
+
+def margin_scan_read(env, fdt, m, valid, win, theta_ref, label, margins=MARGIN_SCAN_FRACS):
+    """Read the SAME recorded envelope at several participation margins (cheap; the sim is unchanged).
+    Decisive evidence that margin is a detection front-end (coverage knob), not the parity claim:
+    axis_err must stay invariant where n_part>=7; a tighter margin only drops wavefront contacts."""
+    out = []
+    for mf in margins:
+        r = read_valid(env, fdt, m, valid, win, theta_ref, label, margin_frac=mf)
+        out.append(dict(margin_frac=mf, n_part=r["n_part"], n_valid=r["n_valid"],
+                        axis_err=r["axis_err"], readability=r["readability"]))
+    return out
 
 
 def front_speed(on_spk, posE, theta_rad, t_kick, dt):
@@ -173,8 +209,13 @@ def main():
     ap.add_argument("--core-std", type=float, default=1.5)
     ap.add_argument("--core-r", type=float, default=1.5)        # ~= measured E->E reach at d=100
     ap.add_argument("--core-at", choices=["kick", "center"], default="kick")
+    ap.add_argument("--margin-frac", type=float, default=MARGIN_FRAC,
+                    help="participation margin fraction (cm-SNN locked 0.10, spec §4.3)")
+    ap.add_argument("--margin-scan", action="store_true",
+                    help="also read the envelope at margins 0.10/0.20/0.30/0.50 (sensitivity)")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
+    _engine_guard()
     with open(os.path.join(OUT, "wave.pid"), "w") as f:
         f.write(str(os.getpid()))
     L, theta_rad = a.L, np.deg2rad(a.theta)
@@ -250,15 +291,25 @@ def main():
 
     win = (a.t_kick + DUR_KICK + 2.0, T - 5.0)
     env_f, fdt, _ = snn_event_envelope(on["E_spk_bool"], posE, m, DT)
-    fire = read_valid(env_f, fdt, m, valid, win, theta_ref, "firing")
-    lfp = read_valid(on["lfp_trace"].T, DT, m, valid, win, theta_ref, "current_lfp")
+    fire = read_valid(env_f, fdt, m, valid, win, theta_ref, "firing", margin_frac=a.margin_frac)
+    lfp = read_valid(on["lfp_trace"].T, DT, m, valid, win, theta_ref, "current_lfp", margin_frac=a.margin_frac)
     verdict = (negative_verdict if a.control_type == "negative" else positive_verdict)(fire, lfp)
+    margin_sensitivity = None
+    if a.margin_scan:
+        margin_sensitivity = dict(
+            margins=list(MARGIN_SCAN_FRACS),
+            firing=margin_scan_read(env_f, fdt, m, valid, win, theta_ref, "firing"),
+            current_lfp=margin_scan_read(on["lfp_trace"].T, DT, m, valid, win, theta_ref, "current_lfp"),
+            note="margin = detection front-end (coverage); parity claim = estimator+threshold "
+                 "(endpoint_centroid_axis / 25deg / k_dir=3, unchanged). axis_err invariance across "
+                 "margins => margin moves coverage not the read; 0.10 = max-coverage end (spec §4.3).")
 
     res = dict(tag=a.tag, control_type=a.control_type, provenance=_provenance(),
                config=dict(L=L, theta=a.theta, theta_ref=(a.theta if a.theta_ref is None else a.theta_ref),
                            AR=a.AR, density=a.density, NE=int(NE), r_kick=a.r_kick, t_kick=a.t_kick,
                            T=T, kick_mode=a.kick_mode, perp_j=a.perp_j, montage_rot=a.montage_rot,
-                           nc=a.nc, seed=a.seed, Rr=p.Rr, kxy=[round(float(kxy[0]), 3), round(float(kxy[1]), 3)]),
+                           nc=a.nc, seed=a.seed, Rr=p.Rr, margin_frac=a.margin_frac,
+                           kxy=[round(float(kxy[0]), 3), round(float(kxy[1]), 3)]),
                geometry_audit=dict(n_contacts=len(m.contacts), n_inside=int(inside.sum()),
                                    n_valid=int(valid.sum()), n_offsheet=int((~inside).sum()),
                                    contact_coords=np.asarray(m.contacts).round(2).tolist(),
@@ -266,7 +317,7 @@ def main():
                ignition=dict(peak_inst=round(peak, 4), returned=returned, front_v_mm_per_ms=v,
                              off_peak_inst=round(off_peak, 4), core_self_ignite=core_self_ignite,
                              evoked_clean=evoked_clean),
-               core=core_info,
+               core=core_info, margin_sensitivity=margin_sensitivity,
                oracle=oracle, firing=fire, current_lfp=lfp, verdict=verdict)
     with open(os.path.join(OUT, f"wave_read_{a.tag}.json"), "w") as fh:
         json.dump(res, fh, indent=2, default=lambda o: None)
