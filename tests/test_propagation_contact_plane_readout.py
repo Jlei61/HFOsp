@@ -1,4 +1,5 @@
 # tests/test_propagation_contact_plane_readout.py
+import json
 import sys
 from pathlib import Path
 import numpy as np
@@ -362,3 +363,25 @@ def test_model_runner_reads_observation_npz():
     assert rec["dataset"] == "model"
     # 单事件 toy fixture 可能退化成 descriptive_only；只要不抛即算通过
     assert rec.get("status") == "descriptive_only" or ("channels" in rec and "scalars" in rec)
+
+
+def test_comparison_runner_end_to_end(tmp_path):
+    from scripts.run_real_vs_model_comparison import run_comparison
+    # 造 3 个 real record + 1 个 model record 到临时目录
+    def mk(d, s, tid, shift):
+        chans = [{"x_norm": x, "y_norm": 0.0, "typical_rank": x, "support": 1.0,
+                  "uncertainty_rank": 0.0, "signed_transverse_mm": 0.0,
+                  "along_axis_mm": x*30} for x in np.linspace(0.1, 0.9, 8)]
+        return {"dataset": d, "subject": s, "template_id": tid,
+                "axis_length_mm": 30.0+shift,
+                "scalars": R.compute_cohort_scalars(
+                    {"channels": chans, "axis_length_mm": 30.0+shift}),
+                "channels": chans}
+    rd = tmp_path / "real_subjects"; rd.mkdir()
+    md = tmp_path / "model_subjects"; md.mkdir()
+    for i in range(3):
+        (rd / f"yuquan_s{i}_t0.json").write_text(json.dumps(mk("yuquan", f"s{i}", "t0", i)))
+    (md / "example_t0.json").write_text(json.dumps(mk("model", "example", "t0", 1)))
+    summary = run_comparison(rd, md, tmp_path / "comparison")
+    assert "scalar_placement" in summary
+    assert (tmp_path / "comparison" / "real_vs_model_summary.json").exists()
