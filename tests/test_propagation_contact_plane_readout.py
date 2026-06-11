@@ -322,3 +322,30 @@ def test_smooth_field_time_uses_uncertainty_time():
     fld = R.smooth_field(rec, X, Y, sigma_xy=0.1, scalar="time")
     near = np.unravel_index(np.argmin((X - 0.2) ** 2 + (Y - 0) ** 2), X.shape)
     assert fld["U"][near] == pytest.approx(0.1, abs=0.05)
+
+
+def test_runner_build_record_from_arrays():
+    # runner 的核心 build_record_from_events 应能从内存数组产出合法 record
+    from scripts.run_contact_plane_readout import build_record_from_events
+    # classify_sampling_geometry: one_d = (len(shafts)<=1) OR (p90_off < spacing_mm)。
+    # 单 shaft 直接判 1D，所以必须给两根 shaft(A/B) + 横向散布 >= spacing_mm，
+    # 否则正确实现也会标 1D（reviewer P0）。
+    names = [f"A{i}" for i in range(4)] + [f"B{i}" for i in range(4)]
+    coords = np.array([
+        [0, 0, 0], [1, 0, 0], [2, 0, 0], [3, 0, 0],
+        [1, 2.0, 0], [2, -2.0, 0], [4, 0, 0], [5, 0, 0],
+    ], float)
+    n_ch = len(names)
+    mapped = np.ones(n_ch, bool)
+    ranks = np.tile(np.arange(n_ch)[:, None], (1, 6)).astype(float)
+    bools = np.ones((n_ch, 6), bool)
+    rec = build_record_from_events(
+        dataset="yuquan", subject="s1", template_id="t_a",
+        names=names, ranks=ranks, bools=bools, lag_raw=ranks.copy(),
+        coords=coords, mapped=mapped, soz_core=set(), montage="single",
+        lag_time_unit="ms", spacing_mm=1.0)
+    assert rec["flags"]["weak_axis"] is False
+    assert rec["n_channels"] >= R.MIN_CONTACTS
+    assert "scalars" in rec and "rank_vs_xnorm_spearman" in rec["scalars"]
+    # 两 shaft + p90 off-axis(≈1.9) >= spacing(1.0) -> 不是 1D
+    assert rec["flags"]["one_dimensional_sampling"] is False
