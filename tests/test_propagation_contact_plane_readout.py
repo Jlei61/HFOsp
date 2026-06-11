@@ -189,3 +189,27 @@ def test_smooth_field_sigma_default_nn_spacing():
     fld = R.smooth_field(rec, X, Y, sigma_xy=None, scalar="rank")
     # 默认 sigma = 最近邻间距中位数 = 0.3
     assert fld["sigma_xy"] == pytest.approx(0.3, abs=1e-9)
+
+
+def test_corr_pair_mirror_invariant():
+    X, Y = R.make_plane_grid()
+    # 一个沿 +y 偏的场
+    F1 = np.exp(-((X-0.5)**2 + (Y-0.4)**2)/0.05)
+    S1 = F1.copy()
+    # F2 = F1 沿 y 翻面（即镜像副本）
+    F2 = np.flip(F1, axis=0)
+    S2 = np.flip(S1, axis=0)
+    out = R.corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh=0.1, overlap_min=5)
+    # 镜像不变：max-over-mirror 必须把翻面的 F2 对回去 -> corr≈1
+    assert out["corr"] == pytest.approx(1.0, abs=1e-6)
+    assert out["insufficient_overlap"] is False
+
+
+def test_corr_pair_low_overlap_flag():
+    X, Y = R.make_plane_grid()
+    # 两个支撑几乎不交叠的场
+    F1 = np.exp(-((X-0.1)**2 + Y**2)/0.01); S1 = F1.copy()
+    F2 = np.exp(-((X-1.4)**2 + Y**2)/0.01); S2 = F2.copy()
+    out = R.corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh=0.5, overlap_min=25)
+    assert out["insufficient_overlap"] is True
+    assert out["corr"] is None

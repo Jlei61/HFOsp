@@ -234,3 +234,38 @@ def smooth_field(record: Dict, X: np.ndarray, Y: np.ndarray,
     S = S.reshape(X.shape)
     mask = S >= s_thresh
     return {"T": T, "S": S, "U": U, "mask": mask, "sigma_xy": float(sigma_xy)}
+
+
+def _support_corr(F1, F2, S1, S2, s_thresh):
+    """两场在双方 support>=thresh 像素交集上的 Pearson 相关 + 交集像素数。"""
+    m = (S1 >= s_thresh) & (S2 >= s_thresh) & np.isfinite(F1) & np.isfinite(F2)
+    n = int(m.sum())
+    if n < 2:
+        return float("nan"), n
+    a = F1[m]; b = F2[m]
+    if np.std(a) < 1e-12 or np.std(b) < 1e-12:
+        return float("nan"), n
+    return float(np.corrcoef(a, b)[0, 1]), n
+
+
+def corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh: float = S_THRESH,
+                               overlap_min: int = OVERLAP_MIN) -> Dict[str, object]:
+    """y-reflection invariant、support-gated 场相关（spec §4 P0 lock）。
+
+    signed-y 只是图上稳定坐标，不是解剖左右；所以取
+    corr = max(corr(F1,F2), corr(F1, flip_y(F2)))。
+    仅在双方 S>=s_thresh 像素交集上算；交集 < overlap_min -> corr=None +
+    insufficient_overlap=True。网格须 y 对称（make_plane_grid 保证），故
+    np.flip(axis=0) == y -> -y。
+    """
+    c_id, n_id = _support_corr(F1, F2, S1, S2, s_thresh)
+    F2m = np.flip(F2, axis=0); S2m = np.flip(S2, axis=0)
+    c_mir, n_mir = _support_corr(F1, F2m, S1, S2m, s_thresh)
+    n_overlap = max(n_id, n_mir)
+    if n_overlap < overlap_min:
+        return {"corr": None, "n_overlap": n_overlap, "insufficient_overlap": True}
+    cands = [c for c in (c_id, c_mir) if np.isfinite(c)]
+    if not cands:
+        return {"corr": None, "n_overlap": n_overlap, "insufficient_overlap": True}
+    return {"corr": float(max(cands)), "n_overlap": n_overlap,
+            "insufficient_overlap": False}
