@@ -386,7 +386,10 @@ def test_comparison_runner_end_to_end(tmp_path):
         (rd / f"yuquan_s{i}_t0.json").write_text(json.dumps(mk("yuquan", f"s{i}", "t0", i)))
     (md / "example_t0.json").write_text(json.dumps(mk("model", "example", "t0", 1)))
     summary = run_comparison(rd, md, tmp_path / "comparison")
-    assert "scalar_placement" in summary
+    # per-model placement only (no ambiguous top-level cohort field)
+    assert "scalar_placement" not in summary
+    assert "per_model" in summary and "example_t0" in summary["per_model"]
+    assert "scalar_placement" in summary["per_model"]["example_t0"]
     assert (tmp_path / "comparison" / "real_vs_model_summary.json").exists()
 
 

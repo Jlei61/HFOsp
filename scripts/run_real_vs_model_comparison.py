@@ -42,10 +42,11 @@ def run_comparison(real_dir, model_dir, out_dir, s_thresh=R.S_THRESH,
         "n_real_records": len(reals), "n_model_records": len(models),
         "params": {"s_thresh": s_thresh, "overlap_min": overlap_min,
                    "grid_n": R.GRID_N},
-        "scalar_placement": (next(iter(per_model.values()))["scalar_placement"]
-                             if per_model else {}),
+        # NO top-level scalar_placement: with >1 model it is ambiguous (would only
+        # be the first model). Read per-model results from `per_model[<id>]`.
         "per_model": per_model,
-        "note": "descriptive posterior-predictive; no p-value; SOZ not a metric",
+        "note": "descriptive posterior-predictive; no p-value; SOZ not a metric. "
+                "Per-model placement lives in per_model[<id>]; there is no cohort-level field.",
     }
     (out_dir / "real_vs_model_summary.json").write_text(
         json.dumps(summary, indent=2, default=float))
@@ -72,7 +73,8 @@ def main():
             for om in (15, 25, 40):
                 ss = run_comparison(args.real_dir, args.model_dir,
                                     Path(args.out_dir) / f"sens_{st}_{om}",
-                                    s_thresh=st, overlap_min=om)
+                                    s_thresh=st, overlap_min=om,
+                                    real_2d_only=args.real_2d_only)
                 for mid, c in ss["per_model"].items():
                     fp = c.get("field_placement", {})
                     grid.append({"model": mid, "s_thresh": st, "overlap_min": om,
