@@ -20,13 +20,16 @@ from scripts.run_contact_plane_readout import build_record_from_events
 OUT = _ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/model_subjects"
 
 
-def build_model_record(npz_path, model_id, template_id="t0"):
+def build_model_record(npz_path, model_id, template_id="t0", montage_path=None):
     """观测层 NPZ -> 模型 readout record。
 
     on-disk legacy 键（已验证 example30_lagPat_withFreqCent.npz）：
       lagPatRank / eventsBool / lagPatRaw / chnNames / start_t
     坐标 NOT 在 NPZ —— 在同前缀 sidecar `<record>_montage.json`：
       {contact_coords: [N×2], chn_names: [...]}，顺序须等于 NPZ chnNames（断言）。
+
+    montage_path: 显式 override sidecar 路径（默认 None = 从 npz 名推导）。用于
+    复用同一虚拟 montage 的模型（如 bidir 复用 oneend，chnNames 必须一致——断言保护）。
     """
     npz_path = Path(npz_path)
     z = np.load(npz_path, allow_pickle=True)
@@ -34,9 +37,12 @@ def build_model_record(npz_path, model_id, template_id="t0"):
     ranks = np.asarray(z["lagPatRank"], float)
     bools = np.asarray(z["eventsBool"]) > 0
     lag_raw = np.asarray(z["lagPatRaw"], float)
-    # sidecar montage：把 `_lagPat_withFreqCent.npz` 换成 `_montage.json`
-    stem = npz_path.name.replace("_lagPat_withFreqCent.npz", "")
-    mont_f = npz_path.parent / f"{stem}_montage.json"
+    # sidecar montage：把 `_lagPat_withFreqCent.npz` 换成 `_montage.json`（或 override）
+    if montage_path is not None:
+        mont_f = Path(montage_path)
+    else:
+        stem = npz_path.name.replace("_lagPat_withFreqCent.npz", "")
+        mont_f = npz_path.parent / f"{stem}_montage.json"
     if not mont_f.exists():
         raise FileNotFoundError(f"montage sidecar missing: {mont_f}")
     mont = json.loads(mont_f.read_text())
@@ -59,10 +65,13 @@ def main():
     ap.add_argument("--npz", required=True, help="观测层 *_lagPat_withFreqCent.npz")
     ap.add_argument("--model-id", required=True)
     ap.add_argument("--template-id", default="t0")
+    ap.add_argument("--montage", default=None,
+                    help="override montage sidecar path (e.g. bidir 复用 oneend montage)")
     ap.add_argument("--out", default=str(OUT))
     args = ap.parse_args()
     out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
-    rec = build_model_record(args.npz, args.model_id, args.template_id)
+    rec = build_model_record(args.npz, args.model_id, args.template_id,
+                             montage_path=args.montage)
     (out / f"{args.model_id}_{args.template_id}.json").write_text(
         json.dumps(rec, indent=2, default=float))
     print(f"wrote model readout: {args.model_id}_{args.template_id}.json "
