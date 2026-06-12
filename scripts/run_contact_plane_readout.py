@@ -158,6 +158,21 @@ def discover_cohort():
     return [tuple(f.stem.split("_", 1)) for f in sorted(RANKDISP.glob("*.json"))]
 
 
+# Coord-loader failure fingerprints (yuquan chnXyzDict, epilepsiae SQL/MRI). A
+# known coord miss is benign (subject lacks coords; ~9 yuquan); anything else is
+# a real bug and must NOT be swept up — mirrors run_propagation_skeleton_geometry.
+_COORD_MISS_MARKERS = ("coord file not found", "chnxyzdict",
+                       "sql not found", "mri not found", "coords missing")
+WHITELIST_ERROR_CATEGORIES = {"no_coord_file"}
+
+
+def _error_category(status):
+    s = str(status).lower()
+    if any(m in s for m in _COORD_MISS_MARKERS):
+        return "no_coord_file"
+    return "unexpected"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--subjects", nargs="*", default=None)
@@ -168,17 +183,35 @@ def main():
               else discover_cohort())
     cohort = [(d, s) for d, s in cohort if (d, s) not in EXCLUDE_BAD_DATA]
     n_ok = 0
+    n_skip = 0
     for ds, subj in cohort:
-        recs = process_subject(ds, subj)
+        try:
+            recs = process_subject(ds, subj)
+        except Exception as e:  # noqa: BLE001
+            status = f"error: {e}"
+            category = _error_category(status)
+            # Only KNOWN-benign coord misses are recorded-and-continued; anything
+            # else (loader misuse, contract violation) re-raises loudly.
+            if category not in WHITELIST_ERROR_CATEGORIES:
+                print(f"  [FATAL {ds}:{subj}] {type(e).__name__}: {e}",
+                      file=sys.stderr, flush=True)
+                raise
+            print(f"  [skip {ds}:{subj}] {category}", flush=True)
+            (out / f"{ds}_{subj}.json").write_text(json.dumps(
+                {"dataset": ds, "subject": subj, "status": status,
+                 "error_category": category}, indent=2, default=float))
+            n_skip += 1
+            continue
         for rec in recs:
-            tid = rec.get("template_id", "t0")
-            (out / f"{ds}_{subj}_{tid}.json").write_text(
-                json.dumps(rec, indent=2, default=float))
+            tid = rec.get("template_id")
+            name = f"{ds}_{subj}_{tid}.json" if tid else f"{ds}_{subj}.json"
+            (out / name).write_text(json.dumps(rec, indent=2, default=float))
             if rec.get("status") not in ("no_events", "descriptive_only"):
                 n_ok += 1
     if n_ok == 0:
         raise SystemExit("no usable real readout records — refusing vacuous run")
-    print(f"wrote real readout records for {len(cohort)} subjects ({n_ok} usable)")
+    print(f"wrote real readout records: {n_ok} usable, {n_skip} skipped (benign), "
+          f"{len(cohort)} attempted")
 
 
 if __name__ == "__main__":

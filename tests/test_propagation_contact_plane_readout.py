@@ -440,3 +440,10 @@ def test_build_readout_record_robust_scale_bounds_short_axis():
     assert xmax <= R.X_HI               # 旧实现给 30/3=10 (>>1.5)
     assert rec["out_of_field"]["count"] == 0
     assert rec["norm_scale_mm"] > 3.0   # scale 由触点铺开决定，远大于 axis_length=3
+
+
+def test_runner_error_category_coord_miss():
+    from scripts.run_contact_plane_readout import _error_category
+    assert _error_category(
+        "error: Yuquan coord file not found: .../chnXyzDict.npy") == "no_coord_file"
+    assert _error_category("error: something unexpected") == "unexpected"
