@@ -1,12 +1,11 @@
-"""Multi-event electrode TRAIN view (user 2026-06-11): instead of zooming the read-out into ONE
-event, show the TWO electrodes (∥ along EE axis, ⊥ across) over a LONG window with the whole train
-of spontaneous events. Within each event the ∥ contacts peak in SEQUENCE (diagonal = direction);
-the ⊥ contacts peak TOGETHER (vertical = no direction); and the pattern REPEATS event after event
-= the spontaneous train. Reads rep_<tag>.npz (full LFP trace) + readout_<tag>.json (all event
-windows). NO re-sim.
+"""Multi-event electrode TRAIN view (user 2026-06-11): show the spontaneous event train over a LONG
+window with the ∥ (along EE axis) and ⊥ (across) electrodes INTEGRATED into ONE panel, electrodes on
+the y-axis, and electrodes that never participate DROPPED. Within each event the ∥ contacts peak in
+SEQUENCE (slanted peak locus = direction); the ⊥ contacts peak TOGETHER (vertical = no direction);
+the pattern REPEATS event after event = the spontaneous train. A dashed divider separates the two
+shaft groups. Reads rep_<tag>.npz (full LFP trace) + readout_<tag>.json (event windows). NO re-sim.
 """
 import os
-import sys
 import json
 import argparse
 
@@ -17,66 +16,35 @@ import matplotlib.pyplot as plt
 
 OUT = "results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous"
 FIG = os.path.join(OUT, "figures")
-
-
-def _panel(ax, lfp, names, t, win_lo, win_hi, events, axis_unit, contacts, title):
-    """Stacked per-contact LFP traces over [win_lo, win_hi], contacts ordered along the shaft,
-    event windows shaded, per-contact peak within each event marked (+ connected per event)."""
-    sel = (t >= win_lo) & (t <= win_hi)
-    ts = t[sel]
-    s = (np.asarray(contacts, float) - np.asarray(contacts, float).mean(0)) @ axis_unit
-    order = np.argsort(s)
-    lfp = lfp[order][:, sel]; names = [names[i] for i in order]
-    k = lfp.shape[0]
-    base = np.median(lfp, axis=1, keepdims=True)
-    scale = np.maximum(lfp.max(axis=1, keepdims=True) - base, 1e-9)
-    z = (lfp - base) / scale
-    off = 1.3
-    for i in range(k):
-        col = plt.get_cmap("viridis")(0.1 + 0.8 * i / max(k - 1, 1))
-        ax.plot(ts, z[i] + i * off, color=col, lw=0.8, alpha=0.9)
-        ax.text(win_hi + 0.01 * (win_hi - win_lo), i * off, f" {names[i]}", fontsize=7,
-                va="center", color=col)
-    nev = 0
-    for e in events:
-        if e["t_off"] < win_lo or e["t_on"] > win_hi:
-            continue
-        nev += 1
-        ax.axvspan(e["t_on"], e["t_off"], color="0.86", alpha=0.5, lw=0, zorder=0)
-        pts = []
-        for i in range(k):
-            # Only mark contacts that actually participated in THIS event. Otherwise
-            # noisy non-participants can create a fake peak locus, especially on the
-            # perpendicular shaft.
-            ranks = e.get("ranks") or {}
-            if ranks.get(names[i]) is None:
-                continue
-            m = (ts >= e["t_on"]) & (ts <= e["t_off"])
-            if m.sum() < 2:
-                continue
-            pi = np.flatnonzero(m)[int(np.argmax(z[i][m]))]
-            pts.append((ts[pi], z[i][pi] + i * off))
-            ax.plot([ts[pi]], [z[i][pi] + i * off], "o", ms=3.0, mfc="k", mec="white", mew=0.4, zorder=5)
-        if len(pts) >= 2:
-            px, py = zip(*sorted(pts))
-            ax.plot(px, py, "-", color="k", lw=0.9, alpha=0.7, zorder=4)   # peak locus per event
-    ax.set_xlim(win_lo, win_hi + 0.10 * (win_hi - win_lo))
-    ax.set_yticks([]); ax.set_title(f"{title}  ({nev} events in view)", fontsize=10)
+OFF = 1.35                                          # vertical offset between stacked traces
 
 
 def _clean_events(events, sign):
     """Clean train events: self-terminated, readable, enough participating contacts, expected sign."""
     return [e for e in events
-            if e.get("returned")
-            and e.get("sign") == sign
+            if e.get("returned") and e.get("sign") == sign
             and e.get("axis_err") is not None and e.get("axis_err") < 25
             and e.get("n_part", 0) >= 7]
+
+
+def _active_ordered(idxs, names, contacts, axis_unit, events):
+    """Of the contacts in idxs, keep those that participate (non-None rank) in >=1 event, ordered
+    along the shaft axis. Electrodes with no activity are dropped (user 2026-06-11)."""
+    active_names = set()
+    for e in events:
+        ranks = e.get("ranks") or {}
+        active_names.update(nm for nm, v in ranks.items() if v is not None)
+    keep = [i for i in idxs if names[i] in active_names]
+    if not keep:
+        return []
+    s = (contacts[keep] - contacts[keep].mean(0)) @ axis_unit
+    return [keep[j] for j in np.argsort(s)]
 
 
 def figure(tag, window_ms, all_events=False):
     z = np.load(os.path.join(OUT, "per_event", f"rep_{tag}.npz"), allow_pickle=True)
     d = json.load(open(os.path.join(OUT, f"readout_{tag}.json")))
-    lfp = np.asarray(z["lfp"]).T                  # (n_contact, n_time)
+    lfp = np.asarray(z["lfp"]).T                                # (n_contact, n_time)
     t = np.asarray(z["times"]); nc = int(z["nc"]); theta = float(z["theta"])
     names = [str(s) for s in z["names"]]; contacts = np.asarray(z["contacts"])
     sign = float(z["sign"]) if "sign" in z.files else 0.0
@@ -85,32 +53,78 @@ def figure(tag, window_ms, all_events=False):
     u_par = np.array([np.cos(np.deg2rad(theta)), np.sin(np.deg2rad(theta))])
     u_perp = np.array([np.cos(np.deg2rad(theta + 90)), np.sin(np.deg2rad(theta + 90))])
 
-    fig, axes = plt.subplots(2, 1, figsize=(15, 7.2), sharex=True)
-    _panel(axes[0], lfp[:nc], names[:nc], t, win_lo, win_hi, events, u_par, contacts[:nc],
-           "∥ electrode (along EE axis) — peaks SWEEP within each event = direction")
-    _panel(axes[1], lfp[nc:2 * nc], names[nc:2 * nc], t, win_lo, win_hi, events, u_perp, contacts[nc:2 * nc],
-           "⊥ electrode (across EE axis) — peaks ALIGNED = no direction")
-    axes[1].set_xlabel("time (ms)")
+    # active contacts per shaft, ordered along the shaft; ⊥ at the bottom, ∥ on top (one panel)
+    perp_o = _active_ordered(list(range(nc, 2 * nc)), names, contacts, u_perp, events)
+    par_o = _active_ordered(list(range(nc)), names, contacts, u_par, events)
+    combined = perp_o + par_o                                   # bottom -> top
+    nb = len(perp_o)                                            # boundary: ∥ group starts at index nb
+    k = len(combined)
+    if k == 0:
+        print(f"  (skip {tag}: no active electrodes)"); return
+    groups = [(0, nb, u_perp, "⊥ across axis\n(peaks align = no direction)", "winter"),
+              (nb, k, u_par, "∥ along axis\n(peaks slant = direction)", "autumn")]
+
+    sel = (t >= win_lo) & (t <= win_hi); ts = t[sel]
+    sub = lfp[combined][:, sel]
+    base = np.median(sub, axis=1, keepdims=True)
+    scale = np.maximum(sub.max(axis=1, keepdims=True) - base, 1e-9)
+    zt = (sub - base) / scale
+
+    fig, ax = plt.subplots(figsize=(15, max(4.5, 0.62 * k)))
+    for g0, g1, _, _, cmap in groups:
+        for i in range(g0, g1):
+            col = plt.get_cmap(cmap)(0.15 + 0.6 * (i - g0) / max(g1 - g0 - 1, 1))
+            ax.plot(ts, zt[i] + i * OFF, color=col, lw=0.9, alpha=0.95)
+            ax.text(win_hi + 0.008 * (win_hi - win_lo), i * OFF, f" {names[combined[i]]}",
+                    fontsize=8, va="center", color=col)
+    if 0 < nb < k:
+        ax.axhline((nb - 0.5) * OFF, color="0.45", ls="--", lw=1.1, zorder=1)
+    for g0, g1, _, label, _ in groups:
+        ax.text(win_lo - 0.008 * (win_hi - win_lo), (g0 + g1 - 1) / 2.0 * OFF, label,
+                fontsize=9, va="center", ha="right", rotation=90, color="0.25")
+
+    nev = 0
+    for e in events:
+        if e["t_off"] < win_lo or e["t_on"] > win_hi:
+            continue
+        nev += 1
+        ax.axvspan(e["t_on"], e["t_off"], color="0.86", alpha=0.5, lw=0, zorder=0)
+        ranks = e.get("ranks") or {}
+        for g0, g1, *_ in groups:                              # locus per group (don't cross divider)
+            pts = []
+            for i in range(g0, g1):
+                if ranks.get(names[combined[i]]) is None:
+                    continue
+                m = (ts >= e["t_on"]) & (ts <= e["t_off"])
+                if m.sum() < 2:
+                    continue
+                pi = np.flatnonzero(m)[int(np.argmax(zt[i][m]))]
+                pts.append((ts[pi], zt[i][pi] + i * OFF))
+                ax.plot([ts[pi]], [zt[i][pi] + i * OFF], "o", ms=3.2, mfc="k", mec="white",
+                        mew=0.4, zorder=5)
+            if len(pts) >= 2:
+                px, py = zip(*sorted(pts))
+                ax.plot(px, py, "-", color="k", lw=1.0, alpha=0.75, zorder=4)
+
+    ax.set_xlim(win_lo - 0.04 * (win_hi - win_lo), win_hi + 0.10 * (win_hi - win_lo))
+    ax.set_yticks([]); ax.set_xlabel("time (ms)")
     dirword = "forward" if sign > 0 else ("reverse" if sign < 0 else "—")
-    fig.suptitle(
-        f"SPONTANEOUS event train — {tag} ({dirword}; current-LFP)\n"
-        f"grey blocks = self-ignited events; top ∥ peaks slant, bottom ⊥ peaks align; "
-        f"showing {len(events)} {'detected' if all_events else 'clean'} / {d['n_events']} events",
-        fontsize=10,
-    )
-    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    ax.set_title(
+        f"SPONTANEOUS event train — {tag} ({dirword}; current-LFP)  |  {nev} events in view, "
+        f"{len(events)} {'detected' if all_events else 'clean'}/{d['n_events']} total  |  active "
+        f"electrodes only ({nb}⊥ + {k - nb}∥)\n∥ peaks slant = direction; ⊥ peaks align = no "
+        f"direction; pattern repeats = the spontaneous train", fontsize=10)
+    fig.tight_layout()
     out = os.path.join(FIG, f"train_{tag}.png")
     fig.savefig(out, dpi=140); plt.close(fig)
-    print(f"  wrote {out}")
+    print(f"  wrote {out}  ({nb}⊥ + {k - nb}∥ active electrodes, {nev} events)")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--tags", nargs="+",
-                    default=["stage2_main_neg", "stage2_main_pos"])
+    ap.add_argument("--tags", nargs="+", default=["stage2_main_neg", "stage2_main_pos"])
     ap.add_argument("--window-ms", type=float, default=900.0,
-                    help="window shows multiple events while keeping each event's sweep visible "
-                         "(~4-5 events; raise for a longer train overview, lower to zoom)")
+                    help="window shows multiple events while keeping each event's sweep visible")
     ap.add_argument("--all-events", action="store_true",
                     help="show all detected events instead of the default clean expected-direction events")
     a = ap.parse_args()

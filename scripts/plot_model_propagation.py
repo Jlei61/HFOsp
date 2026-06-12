@@ -29,9 +29,23 @@ POOLED = MODEL_OUT / "pooled_bidir"
 FIGDIR = MODEL_OUT / "figures" / "model_propagation"
 
 
+def _active_filter(loaded):
+    """Drop electrodes that never participate (all-False bools) — user 2026-06-11: the lagPat
+    figure shows only active electrodes. All-inactive rows are inert (they never set a rank/bool),
+    so dropping them changes neither valid_events nor the per-event KMeans labels."""
+    B = np.asarray(loaded["bools"], bool)
+    active = B.any(axis=1)
+    out = dict(loaded)
+    for key in ("ranks", "bools", "lag_raw"):
+        if key in out and out[key] is not None:
+            out[key] = np.asarray(out[key])[active]
+    out["channel_names"] = [n for n, a in zip(loaded["channel_names"], active) if a]
+    return out
+
+
 def _make_record(tag):
     sub_dir = POOLED / tag
-    ev = load_subject_propagation_events(sub_dir)
+    ev = _active_filter(load_subject_propagation_events(sub_dir))
     R = np.asarray(ev["ranks"], float); B = np.asarray(ev["bools"], bool)
     names = list(ev["channel_names"])
     pr2 = compute_adaptive_cluster_stereotypy(R, B, names, use_masked_features=True)
@@ -53,6 +67,7 @@ def main():
     FIGDIR.mkdir(parents=True, exist_ok=True)
     # redirect the real plotter at the model's pooled record + a dedicated fig dir
     P._resolve_subject_dir = lambda dataset, subject: POOLED / subject
+    P._load_lagpat = lambda subject_dir: _active_filter(load_subject_propagation_events(subject_dir))
     P.PR3_FIG_DIR = FIGDIR
     P._ensure_pr3_readme = lambda: None      # don't write the real-data README into the model dir
     for tag in tags:
@@ -63,13 +78,16 @@ def main():
     (FIGDIR / "README.md").write_text(
         "# model_propagation — MODEL plotted with the real per-subject pipeline\n\n"
         "模型自发事件（cm-SNN 虚拟病灶、两端池化）走**和真实病人完全相同的** lagPat + KMeans + "
-        "`plot_pr3_subject_figure`，产出 `model_<config>_propagation.png`，与真实 per-subject 图直接可比。\n\n"
-        "**诚实口径（锁）**：这是**仪器对齐**、非机制重现——单一连接轴 → 模板空间近 1 维 → stable_k=2 半被迫；"
-        "图标题标 `model:`、不混进病人队列。图上 cluster 面板显示的 `inter-corr` 是管线 masked-插补后的值"
-        "（~+0.44、forward/reverse:none），与真实被试**同一指标可比**；但模型**通道级真正的反相**是共享触点 "
-        "**−0.945** / rank-displacement **swap=strict**（见 `pooled_bidir/<config>/masked_pipeline_summary.json`）。\n\n"
-        "**关注点**：左下聚类 heatmap 两簇（正/反向事件）+ 右下两簇 rank 分布的峰值位置相反；"
-        "把它和真实病人的 `<dataset>_<subject>_propagation.png` 并排，就是模型↔数据同款图对比。\n")
+        "`plot_pr3_subject_figure`，产出 `model_<config>_propagation.png`，与真实 per-subject 图直接可比。"
+        "**只画有活动的电极**（从不参与的触点 B0/B1/B4/B5 已剔除，user 2026-06-11）。\n\n"
+        "**剔除无活动电极后正反检测变干净（关键）**：之前用全 12 通道时簇间相关被 masked-插补的死通道拉成 "
+        "**+0.44 / forward-reverse:none**；剔除死通道后，真实管线在活动通道上直接给 **inter-corr −0.95、"
+        "forward/reverse: 1 pair (r=−0.95)** —— 即模板层也干净认出两套相反模板（与 rank-displacement "
+        "**swap=strict** 一致）。死通道无信息、其插补值是污染源，剔除不是 cherry-pick。\n\n"
+        "**诚实口径（锁）**：仍是**仪器对齐**、非机制重现——单一连接轴 → 模板空间近 1 维 → stable_k=2 半被迫；"
+        "图标题标 `model:`、不混进病人队列。\n\n"
+        "**关注点**：左下聚类 heatmap 两簇（正/反向事件）+ 右下两簇 rank 分布峰值相反；"
+        "与真实病人 `<dataset>_<subject>_propagation.png` 并排 = 模型↔数据同款图对比。\n")
     print(f"done -> {FIGDIR}")
 
 
