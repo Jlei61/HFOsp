@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-06-11-propagation-contact-plane-readout-design.md`
 
+> **修订 2026-06-11 (pilot audit)**: `x_norm/y_norm` 归一化分母由 `axis_length` 改为参与触点 along 的鲁棒跨度 `norm_scale_mm = p97.5−p2.5`（真实数据 60% 主队列 along/axis_length 爆表出网格）。record 增 `norm_scale_mm` + `out_of_field` 统计。runner 增良性 no-coord 跳过。详见 spec §3 修订段。
+
 ---
 
 ## File Structure

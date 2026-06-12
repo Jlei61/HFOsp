@@ -54,10 +54,18 @@ def plot_record(rec, out_png):
         im = a.imshow(F, origin="lower", extent=[R.X_LO, R.X_HI, -R.Y_EXT, R.Y_EXT],
                       aspect="equal", cmap=cm)
         a.set_title(ttl); plt.colorbar(im, ax=a)
+    flags = rec.get("flags", {})
+    scalars = rec.get("scalars", {})
+    flag_txt = "1D" if flags.get("one_dimensional_sampling") else "2D"
+    rho = scalars.get("rank_vs_xnorm_spearman", float("nan"))
+    oof = rec.get("out_of_field", {}).get("count", 0)
+    weak = " | WEAK rank-axis" if (np.isfinite(rho) and abs(rho) < 0.3) else ""
     amb = rec.get("soz_ambiguous", [])
-    fig.suptitle(f"{rec['dataset']}:{rec['subject']} {rec['template_id']} | "
-                 f"SOZ overlay only, not metric input"
-                 + (f" | SOZ ambiguous: {amb}" if amb else ""))
+    fig.suptitle(
+        f"{rec['dataset']}:{rec['subject']} {rec['template_id']} | {flag_txt} | "
+        f"rho_x_rank={rho:.2f} | out_of_field={oof}{weak} | "
+        "SOZ overlay only, not metric input"
+        + (f" | SOZ ambiguous: {amb}" if amb else ""))
     fig.tight_layout()
     fig.savefig(out_png, dpi=130); plt.close(fig)
 

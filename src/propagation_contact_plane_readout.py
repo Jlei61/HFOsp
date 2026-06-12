@@ -138,7 +138,7 @@ def build_readout_record(
 
     along_axis_mm / off_axis_mm 来自 compute_axis_frame；signed_transverse 来自
     signed_transverse_axis；masked = mask_phantom_ranks(normalize=True)。
-    x_norm = along/axis_length，y_norm = signed_transverse/axis_length（spec §3 双坐标系）。
+    x_norm = along/norm_scale，y_norm = signed_transverse/norm_scale；norm_scale = 参与触点 along 的 p97.5−p2.5 鲁棒跨度（x=0 仍源核中心，x/y 同 scale 各向同性）。axis_length_mm 仅作物理标量，不再作 field plane 尺度（spec §3 修订 2026-06-11）。
     每触点一条（仅 along/signed 非 NaN 的参与触点）。flags 见 spec §10。
     SOZ overlay 仅描述性：标 is_soz（first-contact alias 在 soz_first_contacts 内）。
     """
