@@ -27,8 +27,10 @@ def _load_records(d):
 
 
 def run_comparison(real_dir, model_dir, out_dir, s_thresh=R.S_THRESH,
-                   overlap_min=R.OVERLAP_MIN):
+                   overlap_min=R.OVERLAP_MIN, real_2d_only=False):
     reals = _load_records(real_dir)
+    if real_2d_only:
+        reals = [r for r in reals if not r.get("flags", {}).get("one_dimensional_sampling")]
     models = _load_records(model_dir)
     X, Y = R.make_plane_grid()
     out_dir = Path(out_dir); out_dir.mkdir(parents=True, exist_ok=True)
@@ -57,8 +59,11 @@ def main():
     ap.add_argument("--out-dir", default=str(BASE / "comparison"))
     ap.add_argument("--sensitivity", action="store_true",
                     help="跑 S_THRESH/OVERLAP_MIN/GRID_N 敏感性，验证 placement 方向不变")
+    ap.add_argument("--real-2d-only", action="store_true",
+                    help="仅用 2D 真实记录（one_dimensional_sampling==False）")
     args = ap.parse_args()
-    s = run_comparison(args.real_dir, args.model_dir, args.out_dir)
+    s = run_comparison(args.real_dir, args.model_dir, args.out_dir,
+                       real_2d_only=args.real_2d_only)
     print(json.dumps({"n_real": s["n_real_records"], "n_model": s["n_model_records"]},
                      indent=2))
     if args.sensitivity:
@@ -68,10 +73,11 @@ def main():
                 ss = run_comparison(args.real_dir, args.model_dir,
                                     Path(args.out_dir) / f"sens_{st}_{om}",
                                     s_thresh=st, overlap_min=om)
-                fp = next(iter(ss["per_model"].values()), {}).get("field_placement", {})
-                grid.append({"s_thresh": st, "overlap_min": om,
-                             "model_to_real_median_corr":
-                                 fp.get("model_to_real_median_corr")})
+                for mid, c in ss["per_model"].items():
+                    fp = c.get("field_placement", {})
+                    grid.append({"model": mid, "s_thresh": st, "overlap_min": om,
+                                 "model_to_real_median_corr": fp.get("model_to_real_median_corr"),
+                                 "field_percentile": fp.get("placement", {}).get("percentile")})
         (Path(args.out_dir) / "sensitivity.json").write_text(
             json.dumps(grid, indent=2, default=float))
         print("sensitivity grid written")
