@@ -181,7 +181,12 @@ def _max_null_pvals(template_rank, activation_grid, channels, *, b, rng):
         null = dyn.echo_curve_null(template_rank, activation_grid, _grid_t(activation_grid),
                                    kind="intensity", min_ch=MIN_CH, null_mode=mode,
                                    blocks=blocks_by_mode[mode], B=b, rng=rng)
-        res[mode] = {"p": _f(dyn.echo_peak_pvalue(obs, null)), "n_null": int(null.size)}
+        # null_q95 = the max-over-time significance THRESHOLD for the figure (peak must exceed it)
+        q = (np.quantile(null, [0.5, 0.95, 0.99]).tolist() if null.size else [None, None, None])
+        res[mode] = {"p": _f(dyn.echo_peak_pvalue(obs, null)), "n_null": int(null.size),
+                     "null_q50": _f(q[0]) if q[0] is not None else None,
+                     "null_q95": _f(q[1]) if q[1] is not None else None,
+                     "null_q99": _f(q[2]) if q[2] is not None else None}
     return res
 
 

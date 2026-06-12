@@ -70,17 +70,16 @@ def figure(tag, window_ms, all_events=False):
     zt = (sub - base) / scale
 
     fig, ax = plt.subplots(figsize=(15, max(4.5, 0.62 * k)))
+    y_pos = np.arange(k) * OFF
     for i in range(k):
         # colour by shaft (∥ along-axis = orange, ⊥ across = teal) so identity stays visible even
         # though both electrodes are stacked together as one observation set
         col = ("#1f9e9e" if is_perp[i] else "#e8743b")
-        ax.plot(ts, zt[i] + i * OFF, color=col, lw=0.9, alpha=0.95)
-        ax.text(win_hi + 0.008 * (win_hi - win_lo), i * OFF, f" {names[combined[i]]}",
-                fontsize=8, va="center", color=col)
+        ax.plot(ts, zt[i] + y_pos[i], color=col, lw=0.9, alpha=0.95)
 
     nev = 0
     for e in events:
-        if e["t_off"] < win_lo or e["t_on"] > win_hi:
+        if e["t_on"] < win_lo or e["t_off"] > win_hi:
             continue
         nev += 1
         ax.axvspan(e["t_on"], e["t_off"], color="0.86", alpha=0.5, lw=0, zorder=0)
@@ -93,16 +92,23 @@ def figure(tag, window_ms, all_events=False):
             if m.sum() < 2:
                 continue
             pi = np.flatnonzero(m)[int(np.argmax(zt[i][m]))]
-            pts.append((ts[pi], zt[i][pi] + i * OFF))
-            ax.plot([ts[pi]], [zt[i][pi] + i * OFF], "o", ms=3.2, mfc="k", mec="white",
+            pts.append((ts[pi], zt[i][pi] + y_pos[i]))
+            ax.plot([ts[pi]], [zt[i][pi] + y_pos[i]], "o", ms=3.2, mfc="k", mec="white",
                     mew=0.4, zorder=5)
         if len(pts) >= 2:
             px, py = zip(*sorted(pts))                          # sorted by peak time
             ax.plot(px, py, "-", color="k", lw=1.0, alpha=0.75, zorder=4)
 
-    ax.set_xlim(win_lo - 0.03 * (win_hi - win_lo), win_hi + 0.10 * (win_hi - win_lo))
-    ax.set_yticks([]); ax.set_xlabel("time (ms)")
-    ax.set_ylabel("electrodes ordered along propagation axis →", fontsize=9)
+    ax.set_xlim(0.0, win_hi)
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels([names[i] for i in combined], fontsize=8)
+    for tick, is_b in zip(ax.get_yticklabels(), is_perp):
+        tick.set_color("#1f9e9e" if is_b else "#e8743b")
+    ax.tick_params(axis="y", length=0, pad=4)
+    ax.tick_params(axis="x", length=3, color="0.35", labelsize=8)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.set_xlabel("time (ms)")
     dirword = "forward" if sign > 0 else ("reverse" if sign < 0 else "—")
     ax.set_title(
         f"SPONTANEOUS event train — {tag} ({dirword}; current-LFP)  |  {nev} events in view, "
