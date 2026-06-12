@@ -134,6 +134,57 @@ def test_max_null_significant_on_real_echo():
 
 
 # ---------------------------------------------------------------------------
+# Task 4b — echo_curve_null block-null guards (no silent degradation to channel null)
+# ---------------------------------------------------------------------------
+def test_echo_curve_null_block_mode_requires_blocks():
+    # within_shaft / anchor_matched with blocks=None must NOT silently become a full
+    # channel shuffle (that would falsely pass the shaft/anchor null criterion, §2.2).
+    n_ch, n_t = 10, 30
+    t = np.arange(n_t) * 0.1
+    template_rank = np.arange(n_ch, dtype=float)
+    value = np.zeros((n_ch, n_t))
+    for c in range(n_ch):
+        value[c] = np.clip(t - 0.2 * c, 0, None)
+    for mode in ("within_shaft", "anchor_matched"):
+        with pytest.raises(ValueError):
+            echo_curve_null(template_rank, value, t, kind="intensity", min_ch=8,
+                            null_mode=mode, blocks=None, B=10,
+                            rng=np.random.default_rng(0))
+
+
+def test_echo_curve_null_unknown_mode_raises():
+    n_ch, n_t = 10, 30
+    t = np.arange(n_t) * 0.1
+    template_rank = np.arange(n_ch, dtype=float)
+    value = np.zeros((n_ch, n_t))
+    with pytest.raises(ValueError):
+        echo_curve_null(template_rank, value, t, kind="intensity", min_ch=8,
+                        null_mode="bogus", blocks=None, B=10,
+                        rng=np.random.default_rng(0))
+
+
+def test_echo_curve_null_blocks_length_mismatch_raises():
+    n_ch, n_t = 10, 30
+    t = np.arange(n_t) * 0.1
+    template_rank = np.arange(n_ch, dtype=float)
+    value = np.zeros((n_ch, n_t))
+    bad_blocks = np.array([0, 0, 1, 1])              # length 4 != n_ch=10
+    with pytest.raises(ValueError):
+        echo_curve_null(template_rank, value, t, kind="intensity", min_ch=8,
+                        null_mode="within_shaft", blocks=bad_blocks, B=10,
+                        rng=np.random.default_rng(0))
+
+
+def test_echo_curve_length_mismatch_raises():
+    template_rank = np.arange(10, dtype=float)
+    value = np.zeros((10, 30))
+    t = np.arange(25) * 0.1                          # len 25 != value.shape[1]=30
+    with pytest.raises(ValueError):
+        echo_curve(template_rank, value, t, kind="intensity", min_ch=8,
+                   mean_window=(0, 5))
+
+
+# ---------------------------------------------------------------------------
 # Task 5 — slope_latencies (eligibility-gated, §3.2)
 # ---------------------------------------------------------------------------
 def test_slope_latencies_orders_by_rise_time_and_gates_flat():

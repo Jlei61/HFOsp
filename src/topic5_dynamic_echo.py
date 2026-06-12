@@ -74,6 +74,8 @@ def echo_curve(template_rank, value_by_t, t_axis, *, kind, min_ch, mean_window):
     echo_mean = mean over the pre-registered confirmatory window (no time selection)."""
     V = np.asarray(value_by_t, float)
     t = np.asarray(t_axis, float)
+    if V.shape[1] != t.shape[0]:
+        raise ValueError(f"value_by_t time axis {V.shape[1]} != len(t_axis) {t.shape[0]}")
     curve = np.array([align_score(template_rank, V[:, j], kind=kind, min_ch=min_ch)
                       for j in range(V.shape[1])])
     finite = np.isfinite(curve)
@@ -110,6 +112,17 @@ def echo_curve_null(template_rank, value_by_t, t_axis, *, kind, min_ch, null_mod
     = within-block permute using `blocks`."""
     V = np.asarray(value_by_t, float)
     n_ch, n_t = V.shape
+    # Hard guard: a block-null must NOT silently degrade to a channel shuffle. Missing/
+    # wrong-length blocks for within_shaft/anchor_matched would falsely pass the shaft/
+    # anchor null criterion that separates path replay from a shared coarse anchor (§2.2).
+    if null_mode not in {"channel", "within_shaft", "anchor_matched"}:
+        raise ValueError(f"unknown null_mode={null_mode!r}")
+    if null_mode != "channel":
+        if blocks is None:
+            raise ValueError(f"null_mode={null_mode!r} requires blocks (got None)")
+        blocks = np.asarray(blocks)
+        if blocks.shape[0] != n_ch:
+            raise ValueError(f"blocks length {blocks.shape[0]} != n_ch {n_ch}")
     idx = np.arange(n_ch)
     out = np.full(B, np.nan)
     for b in range(B):

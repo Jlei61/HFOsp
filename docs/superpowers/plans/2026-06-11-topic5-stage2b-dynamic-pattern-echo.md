@@ -524,7 +524,7 @@ from src.propagation_skeleton_geometry import parse_shaft
 CACHE_DIR = Path("results/topic5_ictal_recruitment/sentinel_cache")
 OUT = Path("results/topic5_dynamic_echo")
 HOP = 0.1; T0, T1 = 0.0, 10.0; MEAN_WIN = (0.0, 5.0)
-MIN_CH = 8; Z_MIN = 2.0; DELTA_MIN = 1.0; B = 2000; RNG_SEED = 20260611
+MIN_CH = 8; Z_MIN = 2.0; DELTA_MIN = 1.0; B = 2000; B_SENTINEL = 500; RNG_SEED = 20260611
 DETREND = "rolling_median"
 FUSED = ("line_length", "broadband", "hfa", "spectral_edge")
 AMP = ("line_length", "broadband", "hfa")
@@ -564,7 +564,7 @@ Re-read spec §2.2 (max-null), §3.4 (region), §8 (sentinel). Compute echo(t) +
 
 **Files:** Modify runner + test
 
-- [ ] **Step 1: Add `cmd_sentinel`** (loops the cached sentinels epi 1146:2/5 + yuquan litengsheng:0; per feature: echo_curve + echo_curve_null; max-over-feature; latency/ramp align_score; region-level; dumps JSON with echo_peak/p/t_peak/echo_mean per feature + family direction summary)
+- [ ] **Step 1: Add `cmd_sentinel`** (loops the cached sentinels epi 1146:2/5 + yuquan litengsheng:0; per feature: echo_curve + echo_curve_null; max-over-feature; latency/ramp align_score; region-level; dumps JSON with echo_peak/p/t_peak/echo_mean per feature + family direction summary). Use `B_SENTINEL=500` for the sentinel preview (the max-null Spearman loop over B×features×null-modes is the cost); the cohort run uses `B=2000`. `null_mode in {within_shaft, anchor_matched}` MUST pass real `blocks` (shaft ids via `parse_shaft`) — the module now raises if blocks is None/wrong-length, no silent degradation to channel null.
 
 - [ ] **Step 2: Region composition test** (region-level align_score uses region-label shuffle, not contact shuffle)
 
