@@ -222,3 +222,16 @@ def test_region_aggregate_medians_by_group_and_drops_singletons():
     reg_val, reg_labels = region_aggregate(value, groups, min_group=2)
     assert reg_labels == ["A", "B"]
     assert np.allclose(reg_val, [2.0, 15.0])
+
+
+# ---------------------------------------------------------------------------
+# Task 9 — runner region composition (region-level uses region aggregation, not contacts)
+# ---------------------------------------------------------------------------
+def test_region_level_uses_region_label_aggregation():
+    import scripts.run_topic5_dynamic_echo as R
+    # 6 contacts in 3 shafts; region aggregate must collapse to 3 region medians.
+    val = np.array([1., 2, 9, 10, 4, 5])
+    shafts = np.array(list("AABBCC"))
+    rv, labels = R.dyn.region_aggregate(val, shafts, min_group=2)
+    assert labels == ["A", "B", "C"]
+    assert np.allclose(rv, [1.5, 9.5, 4.5])
