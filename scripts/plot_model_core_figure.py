@@ -25,12 +25,14 @@ W_IN = 17.0   # common width (inches)
 
 def compose(config):
     panels = [
-        (f"{D}/mechanism_spont_{config}_neg.png",
-         "A · MODEL SIMULATION — forward event (lesion at −end): heterogeneity map · propagation · ∥/⊥ electrode read-out"),
-        (f"{D}/mechanism_spont_{config}_pos.png",
-         "B · MODEL SIMULATION — reverse event (lesion at +end)"),
+        (f"{D}/train_{config}_neg.png",
+         "A · MODEL — forward event TRAIN (lesion at −end): ∥+⊥ electrodes (active only, one panel), "
+         "∥ peaks slant = direction, repeats event-to-event"),
+        (f"{D}/train_{config}_pos.png",
+         "B · MODEL — reverse event TRAIN (lesion at +end): same electrodes, peaks slant the other way"),
         (f"{D}/model_propagation/model_{config}_bidir_propagation.png",
-         "C · REAL PER-SUBJECT PIPELINE on pooled events — lagPat + KMeans k=2 → two opposite templates (instrument parity, model: labelled)"),
+         "C · REAL PER-SUBJECT PIPELINE on pooled events (active electrodes) — lagPat + KMeans k=2 → "
+         "two opposite templates (inter-corr −0.95, forward/reverse pair; model: labelled)"),
     ]
     imgs, aspects, titles = [], [], []
     for path, ttl in panels:
