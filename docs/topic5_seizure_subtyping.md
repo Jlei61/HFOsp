@@ -140,6 +140,8 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/bridge_q1/bridge_q1_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1 cohort exploratory result (verdict: NULL-locked, n=9; power floor identified)
 - `docs/archive/topic5/bridge_q1prime/bridge_q1prime_results_2026-05-10.md` — Topic 1 × Topic 5 Bridge Q1' PIVOT case-series result (verdict: INDETERMINATE, N=4 strict + 548 candidate; 4 strict subjects show consistent positive Cramér V 0.25–0.67 median 0.486 but underpowered on p; channel-rank correspondence × swap-subset)
 - `docs/archive/topic5/bridge_q1prime/q1prime_overnight_exploration_2026-05-10.md` — Q1' overnight 探索：full 25-subject cohort + per-seizure feature × delta_rho/subtype 相关性分析 (verdict: INDETERMINATE/WEAK-SIGNAL; median_onset_latency_sec 有方向性倾向 sign_p=0.039 uncorrected; Stage C 全 NULL; 2 subjects 有大效量 subtype 区分)
+- `docs/archive/topic5/echo_gate/stage1_proxy_triage_2026-06-08.md` — Stage 1 ictal-template-echo gate（ER 代理）：ER 代理 echo = **共享粗锚**非 specific-path-replay（coarse positive 但 anchor-matched FLAT + bad-data self-check clean）
+- `docs/archive/topic5/dynamic_echo/stage2b_sentinel_2026-06-12.md` — **Stage 2b early-ictal dynamic-pattern echo sentinel（gate NOT PASSED，B=500 n=3，exploratory）**：早发作动态有模板相关结构（过 channel max-null）但**非稳定早期路径复演**——峰时偏晚、confirmatory 早窗方向逐发作变号、yuquan within-shaft 塌掉 → **共享粗解剖/杆级锚为主**，细化并一致于 Stage 1。**未进 cohort、不支持路径复演主张**；first-onset recruitment（Stage 2，量错失败）的接替。
 
 ---
 
