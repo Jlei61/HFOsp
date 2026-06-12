@@ -3,7 +3,7 @@
 > **状态**：sentinel 人工门结果，**exploratory**。`B=500`（sentinel preview，**不是**最终 cohort-级 inference）。**未进 cohort**，**不支持**"发作早期动态稳定复演特定间期传播通道"的主张。
 > **日期**：2026-06-12。分支 `topic5-ictal-recruitment-stage2`。
 > **谱系**：Bridge Q1/Q1′ → Stage 1 echo gate（ER 代理粗锚）→ Stage 2 first-onset recruitment（量错，失败）→ **Stage 2b dynamic-pattern echo（本文）**。
-> **代码**：`src/topic5_dynamic_echo.py`（纯数学，19 tests）+ `scripts/run_topic5_dynamic_echo.py`（sentinel）+ `scripts/plot_topic5_dynamic_echo.py`。图 + README：`results/topic5_dynamic_echo/sentinel/figures/`。spec `docs/superpowers/specs/2026-06-11-topic5-stage2b-dynamic-pattern-echo-design.md` (v2.1)、plan `docs/superpowers/plans/2026-06-11-topic5-stage2b-dynamic-pattern-echo.md`。
+> **代码**：`src/topic5_dynamic_echo.py`（纯数学，18 tests）+ `scripts/run_topic5_dynamic_echo.py`（sentinel）+ `scripts/plot_topic5_dynamic_echo.py`。图 + README：`results/topic5_dynamic_echo/sentinel/figures/`。spec `docs/superpowers/specs/2026-06-11-topic5-stage2b-dynamic-pattern-echo-design.md` (v2.1)、plan `docs/superpowers/plans/2026-06-11-topic5-stage2b-dynamic-pattern-echo.md`。
 
 ---
 
