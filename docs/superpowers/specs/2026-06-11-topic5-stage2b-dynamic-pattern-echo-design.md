@@ -1,6 +1,6 @@
 # Topic 5 — Stage 2b Early-Ictal Dynamic Pattern Echo Design Spec (2026-06-11)
 
-> **状态**：设计稿 **v2**（v1 2026-06-11 pivot + review patch：①max-over-time/feature null 硬合同 §2.2 [最重要统计门]；②align_score 符号表 spec-locked + TDD §2.1；③cohort cache-building 阶段 §2.3/§8；④latency eligibility(z_min/delta_min) + MIN_CH/MIN_GROUP §3.2/§3.4；+ Savitzky-Golay 导数锁 / region-label null / EEG-onset 窗 sensitivity）。plan 待写。
+> **状态**：设计稿 **v2.1**（v2 4-patch + 第二轮 review patch：术语硬区分 early-ictal main vs preictal secondary §1；新增 §6b preictal state-template alignment 层[三档窗 + 状态量非强度峰 + matched-interictal control，不阻塞 main]；§4 operational 主判据写明）。plan 待写。v2 patch：①max-over-time/feature null §2.2[最重要统计门]；②align_score 符号表 spec-locked+TDD §2.1；③cohort cache-building §2.3/§8；④latency eligibility + MIN_CH/MIN_GROUP §3.2/§3.4；+ Savitzky-Golay / region-label null / EEG-onset 窗。
 > **Topic**：把"间期那条固定的高频传播通路（topic1 模板）"与"发作头 0–10s 的**动态激活模式**（不是首次越阈的逐触点 onset rank）"对齐——问"发作早期的激活/上升模式是否系统性地贴合间期模板的通道优先级"。
 > **为什么 pivot（Stage 2 first-onset 仪器失败的诚实记录）**：Stage 2 用 band-power 变点（CUSUM）测逐触点首次招募时刻，detector repair 全扫（bias 0.5–2.0 × detrend{none,median,quantile} × {cusum,zcross}）**都不过门**。诊断确认 blocker 不是阈值标定，而是**最早被招募的触点在触点层面近乎同步、并列**——几十个触点在招募窗起点同帧越阈，"最早 3 个"在并列里随机挑，各特征挑各的（early_K_overlap 恒 0）；换 pass-1 onset 也救不了。**结论：发作早期在触点层面近乎同步，不能稳定定义"最早几个触点"。** 这**支持** Stage 1 谨慎口径（最稳的是病灶距离/早晚粗锚，不是具体路径重放），但**不是**"发作动态与间期模板无关"的负结论——只是"first-onset rank"这个量错了。Stage 2b 换量。详见 [[project_topic5_stage2_recruitment_2026-06-11]] + `results/topic5_ictal_recruitment/detector_sweep.csv`。
 > **Owner**：topic5 拥有"真正发作 EEG 招募/动态层 + 间期↔发作桥接"（与 Topic 4 H5 不重复）。
@@ -34,6 +34,12 @@ Stage 2b 换个问法，绕开"谁第一"：
 - 判定语言只允许 "**像 / 不像 / 没看清**"；禁止 "predicts seizure" / "causes" / α-claim 升机制因果。
 - **不再用 first-onset contact rank**（Stage 2 已证其在触点层面并列、测不稳）。改用 §3 的动态量。
 - echo 统计复用 Stage 1 `src/topic5_echo_gate.py`；模板 = masked narrow（Main-A）为主、broad 为 §6 secondary。
+
+> **术语硬区分（P1，三层不混结论）**：
+> - **Stage 2b-main = early-ictal（发作早期），窗 `[0,+10]s`**——本 spec §2–§5 的主线。**不是 preictal**。文献支撑早期 spread 临床时间窗常落 ~3–10s（JAMA Neurol 2019 前 10s fast beta / rapid spread；early-spread 综述 1–14s 较强证据集中 3–10s），且经典 SEEG 量化是"快活动 + 相对 onset 延迟"（Bartolomei EI, Brain 2008）、空间快活动图（60–100Hz epileptogenicity maps）——都与 echo_curve/ramp/latency 一脉，而非单一 onset time。
+> - **Stage 2b-secondary = preictal state（发作前状态），窗 `[-300,-100]/[-60,-10]/[-10,0]s`**——§6b，**另一层、另一套量**（状态漂移而非传播峰），**不阻塞 main sentinel**，单独 sub-plan。
+> - **coarse 层 = region/shaft（§3.4）+ broad lagPat（§6）**——并列太多时退路。
+> 三层各自结论分开写，不合并。
 
 ---
 
@@ -137,6 +143,20 @@ TDD：构造"模板靠前通道升更快/更强"的合成 Z → 所有族 `align
 - **没看清 / 阴性**：动态量方向不一致或全打平 → 当前动态量也没看到 echo（与 Stage 1 粗锚口径一致，不升级为"无关"负结论）。
 - 合并仍 subject-level 优先（Stage 1 `pool_echo_subject_level`），dataset 分层 sensitivity。
 
+**operational 主判据（写进 plan）**：
+```text
+Primary (early-ictal main):
+  pre-registered broadband echo_mean [0,+5]s direction > 0
+  AND max-over-time echo_peak survives channel max-null (§2.2)
+  AND at least one of within-shaft / anchor-matched max-null remains positive
+Construct validity (replaces failed early_K):
+  activation_z, dZdt, ramp-AUC align_score mostly same direction across features
+  ER held-out reports er_vs_fused consistency but does NOT vote
+Secondary (preictal, §6b — separate conclusion):
+  template-alignment trajectory monotone-rising toward onset across
+  far/near/immediate windows AND exceeds matched-interictal control + max-over-window null
+```
+
 ---
 
 ## 5. 复用 + 新代码
@@ -187,6 +207,20 @@ user 次线：发作早期参与的网络比 topic1 高-HI-index 窄模板大。
 
 ---
 
+## 6b. Secondary — preictal state-template alignment（**另一层，不阻塞 main，单独 sub-plan**）
+
+> **与 main 的硬区分**：main 问"发作早期传播动态像不像模板"；本层问"**发作前**，间期模板靠前的通道/区域是不是更早进入高风险**状态**"。preictal 是**状态漂移**，不是传播峰——**禁止复用 §3 的"强度峰值/上升斜率"口径**。本层**不阻塞 main sentinel**，main 过门后再单独立 sub-plan / 缓存。
+
+- **窗（onset 前，三档）**：`far_preictal [-300,-100]s`、`near_preictal [-60,-10]s`、`immediate_preictal [-10,0]s`（文献 preictal 多在分钟级；Sci Rep 2022 报 SOZ degree/centrality 在 onset 前 ~37s 升、全通道 ~8s 升；Sci Rep 2019 PAC 用 300s vs 10s 窗区分 involved 电极）。
+- **状态量（非 onset rank、非 §3 强度峰）**：
+  - **primary**：HFA/HFO **rate 或 power 的 template-alignment 轨迹**（模板靠前通道的 HFA power/rate 是否随接近 onset 逐渐相对升高）。
+  - **optional（更重，按需）**：PAC / PLV；directed connectivity centrality（degree / betweenness / inflow-outflow）；synchrony。这些是独立子工作量，按价值决定是否做。
+- **对照（关键，与 main 不同）**：**必须与 matched interictal control windows 比**（同长度、远离发作/post-ictal/睡眠期边界的间期窗），不能只和 channel-shuffle 比——因为 preictal 漂移可能是全局状态变化而非模板特异。再叠 **max-over-window null**（跨三档窗取 max，null 同口径）。
+- **判读**：模板对齐轨迹是否随接近 onset 单调升高 **且** 超过 matched-interictal control 的同口径分布。
+- **角色**：探索性 secondary；与 main 的 early-ictal 结论**分开写**，不合并成一个 "Stage 2b PASS"。
+
+---
+
 ## 7. Caveats & NOT-DO
 
 1. **Stage 2 first-onset 失败已记录**：发作早期触点层面近乎同步 → 不能稳定定义"最早几个触点"。Stage 2b 换动态量。
@@ -195,7 +229,8 @@ user 次线：发作早期参与的网络比 topic1 高-HI-index 窄模板大。
 4. **exploratory**：sensitivity（窗 / 特征 / null）+ user 视觉巡视 echo(t) 曲线全过前不写 paper-level claim。
 5. **双数据集必须都过**（epi+yuquan），montage per-dataset。
 6. **不进 cohort 直到 sentinel echo(t) 曲线 epi+yuquan 都可解释且方向一致**（staged gate）。
-- NOT-DO：不用 first-onset contact rank；不重读 EDF（用缓存）；不在 within-subject 写 α-claim；broad 未封板不进 Main 估计。
+7. **early-ictal main 与 preictal secondary 结论分开（§1 术语锁）**：不合并成单一 "Stage 2b PASS"；preictal 不复用强度峰口径、必须对 matched-interictal control。
+- NOT-DO：不用 first-onset contact rank；不重读 EDF（用缓存）；不在 within-subject 写 α-claim；broad 未封板不进 Main 估计；**不把 preictal 状态漂移当 early-ictal 传播 echo**；**preictal 不只对 channel-shuffle（要 matched-interictal）**。
 
 ---
 
@@ -219,3 +254,12 @@ user 次线：发作早期参与的网络比 topic1 高-HI-index 窄模板大。
 - `results/topic5_ictal_recruitment/sentinel_cache/`（Z 缓存，复用）
 - `results/lagpat_broad/`（broad 模板，secondary §6）
 - memory [[project_topic5_stage2_recruitment_2026-06-11]]、[[project_topic5_echo_gate_2026-06-08]]
+
+**文献锚（窗口 / 量化口径支撑，review 提供）**：
+- Bartolomei et al., *Brain* 2008 — Epileptogenicity Index = 快活动出现 + 相对 onset 延迟（"快活动+延迟"，非单一 onset time；支撑 latency/ramp 口径）。
+- Perucca et al., *Brain* 2014 — intracranial onset pattern 异质（LVFA / 周期 spike / sharp / spike-wave 等，且部分 onset pattern 也现于 spread 区）→ 不强压统一 first-onset detector。
+- JAMA Neurology 2019 — 前 10s fast-beta power / rapid spread 与术后失败相关；early-spread 综述较强证据集中 3–10s → 支撑 `[0,+10]s` 主窗。
+- Epileptogenicity Maps (Frontiers Neurol 2019) — 60–100Hz 快活动空间统计图定位 onset/propagation，baseline 选择敏感 → 近 echo_curve/AUC。
+- Esteller 2001 — line-length 是 seizure **detection**（均延迟 ~4.1s），不是稳定的早期触点排序工具 → line-length 只作 detection-family 特征之一。
+- Sci Rep 2022 — directed network centrality：SOZ degree/betweenness onset 前 ~37s 升、全通道 ~8s 升 → preictal 可定义为 centrality trajectory（§6b optional）。
+- Sci Rep 2019 — preictal PAC（300s vs 10s 窗）区分 involved 电极 → §6b 状态量 + 分钟级窗。
