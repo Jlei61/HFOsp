@@ -18,7 +18,7 @@ from scipy.signal import spectrogram
 from scipy.ndimage import median_filter
 from scipy.stats import rankdata, spearmanr
 
-from src.ictal_er_rank import compute_cusum_n_d_with_time, calibrate_lambda_per_subject
+from src.ictal_er_rank import compute_cusum_n_d_with_time
 
 Z_SUSTAIN = 2.0   # robust-z floor the feature must HOLD post-onset (a feature-z, NOT lambda)
 
@@ -217,14 +217,39 @@ def detect_contact_onset_zcross(z_trace_1d, *, z_cross, detection_idx_window, ho
 # ---------------------------------------------------------------------------
 # Task 5 — pooled per-(subject,feature) lambda calibration
 # ---------------------------------------------------------------------------
+def _count_baseline_alarms(z, lam, bias):
+    """Pooled cross-channel clamped-CUSUM alarm count on baseline z, VECTORIZED over
+    channels (single Python loop over frames). Re-arms (U->0) after each alarm and resets
+    on non-finite frames — same semantics as ictal_er_rank.calibrate_lambda_per_subject's
+    count_alarms, but ~100x faster for the per-feature/per-bias/per-detrend sweep."""
+    z = np.asarray(z, dtype=np.float64)
+    n_ch, n_frames = z.shape
+    U = np.zeros(n_ch, dtype=np.float64)
+    lam = float(lam); bias = float(bias)
+    total = 0
+    for n in range(n_frames):
+        v = z[:, n]
+        fin = np.isfinite(v)
+        U = np.where(fin, np.maximum(0.0, U + np.where(fin, v, 0.0) - bias), 0.0)
+        al = U >= lam
+        if al.any():
+            total += int(al.sum())
+            U = np.where(al, 0.0, U)
+    return total
+
+
 def calibrate_feature_lambda(pooled_baseline_z, *, fpr_target_per_hour=1.0, hop_sec=0.1,
-                             min_pooled_baseline_sec=600.0, bias=0.5):
-    """Per-(subject,feature) lambda on POOLED baseline z-frames.
+                             min_pooled_baseline_sec=600.0, bias=0.5,
+                             lambda_min=1.0, lambda_max=100.0):
+    """Per-(subject,feature) lambda via a PER-CHANNEL FPR target on the pooled baseline.
 
     Duration is TIME-based: pooled_sec = n_time_frames * hop. Below
-    min_pooled_baseline_sec -> calibration_unstable (lambda NaN). Dead (all-NaN)
-    channels are dropped as ROWS (frames kept); the underlying calibrator skips
-    non-finite values internally.
+    min_pooled_baseline_sec -> calibration_unstable (lambda NaN). Dead (all-NaN) channels
+    are dropped as ROWS (frames kept). Budget = fpr_target_per_hour * n_ch * pooled_hours
+    (per-channel rate, counted across the pooled array — a 1/hr subject-pooled target over
+    100+ channels would otherwise allow ~0 alarms and saturate). Smallest lambda whose
+    pooled alarm count <= budget, found by binary search (counts are monotone in lambda);
+    returns lambda_max (saturated) when even lambda_max exceeds the budget.
     """
     z = np.asarray(pooled_baseline_z, dtype=np.float64)
     pooled_sec = z.shape[1] * float(hop_sec)
@@ -237,16 +262,22 @@ def calibrate_feature_lambda(pooled_baseline_z, *, fpr_target_per_hour=1.0, hop_
     if n_ch < 1 or z.shape[1] < 2:
         return {"lambda": float("nan"), "calibration_unstable": True,
                 "pooled_baseline_sec": float(pooled_sec)}
-    # calibrate_lambda_per_subject pools alarms across channels but normalizes the FP
-    # budget by SINGLE-channel baseline-hours, i.e. its target is a SUBJECT-pooled FPR.
-    # For a multi-channel recruitment instrument that allows ~0 alarms across the whole
-    # array and saturates lambda_max. Scale the target by n_ch so the effective criterion
-    # is a PER-CHANNEL FPR of fpr_target_per_hour (the spec's intended per-hour rate).
-    lam = calibrate_lambda_per_subject(
-        z, fpr_target_per_hour=float(fpr_target_per_hour) * n_ch, bias=float(bias),
-        hop_sec=float(hop_sec),
-    )
-    return {"lambda": float(lam), "calibration_unstable": False,
+    budget = float(fpr_target_per_hour) * n_ch * (pooled_sec / 3600.0)
+    if _count_baseline_alarms(z, lambda_max, bias) > budget:
+        return {"lambda": float(lambda_max), "calibration_unstable": False, "saturated": True,
+                "pooled_baseline_sec": float(pooled_sec), "n_channels": n_ch}
+    lo, hi = float(lambda_min), float(lambda_max)
+    if _count_baseline_alarms(z, lo, bias) <= budget:
+        chosen = lo
+    else:
+        for _ in range(22):                        # binary search (~1e-5 resolution on [1,100])
+            mid = 0.5 * (lo + hi)
+            if _count_baseline_alarms(z, mid, bias) <= budget:
+                hi = mid
+            else:
+                lo = mid
+        chosen = hi
+    return {"lambda": float(chosen), "calibration_unstable": False, "saturated": False,
             "pooled_baseline_sec": float(pooled_sec), "n_channels": n_ch}
 
 
