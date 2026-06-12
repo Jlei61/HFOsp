@@ -26,7 +26,8 @@ def plot_record(rec, out_png):
     rk = np.array([c["typical_rank"] for c in chans]); sp = np.array([c["support"] for c in chans])
     soz = np.array([bool(c.get("is_soz")) for c in chans])
     ingrid = (xs >= R.X_LO) & (xs <= R.X_HI) & (ys >= -R.Y_EXT) & (ys <= R.Y_EXT)
-    fig, ax = plt.subplots(1, 4, figsize=(20, 5))
+    fig, ax = plt.subplots(2, 2, figsize=(13, 11))
+    ax = ax.ravel()
     sc = ax[0].scatter(xs[ingrid], ys[ingrid], c=rk[ingrid],
                        s=40 + 200*sp[ingrid], cmap="viridis",
                        vmin=0, vmax=1,
