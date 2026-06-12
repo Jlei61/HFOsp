@@ -130,16 +130,21 @@ def _feature_traces(signal, fs):
     return traces
 
 
-def _build_z(signal, fs, pre_sec, eeg_onset_rel_sec):
-    """Robust-z each available feature + ER on its own frame grid + baseline window.
+def _raw_traces(signal, fs):
+    """Cacheable unit: raw feature traces {feat: trace_2d} (HFA may be absent). No z."""
+    tr = _feature_traces(signal, fs)
+    return {k: (tr[k][0] if tr[k][0] is not None else None) for k in list(FUSED_FEATURES) + ["er"]}
+
+
+def _z_from_traces(raw, pre_sec, eeg_onset_rel_sec, *, detrend="none"):
+    """Raw traces -> (optional detrend) -> robust-z + baseline frames. Sweepable (cheap).
     Returns (z_by_feat, nfr_by_feat, baseline_frames_by_feat, available_features) or None."""
-    traces = _feature_traces(signal, fs)
-    avail = [k for k in FUSED_FEATURES if traces[k][0] is not None]
+    avail = [k for k in FUSED_FEATURES if raw.get(k) is not None]
     if len(avail) < 2:
         return None
     z, nfr, base = {}, {}, {}
-    for k in avail + ["er"]:
-        tr = traces[k][0]
+    for k in [c for c in avail + ["er"] if raw.get(c) is not None]:
+        tr = recruit.detrend_trace(raw[k], mode=detrend, hop_sec=HOP, win_sec=30.0)
         nfr[k] = tr.shape[1]
         bl = resolve_baseline_window(nfr[k], hop_sec=HOP, pre_sec=pre_sec,
                                      eeg_onset_rel_sec=eeg_onset_rel_sec)
@@ -151,13 +156,21 @@ def _build_z(signal, fs, pre_sec, eeg_onset_rel_sec):
     return z, nfr, base, avail
 
 
+def _build_z(signal, fs, pre_sec, eeg_onset_rel_sec, *, detrend="none"):
+    """Load path: signal -> raw traces -> z. Thin wrapper over _z_from_traces."""
+    return _z_from_traces(_raw_traces(signal, fs), pre_sec, eeg_onset_rel_sec, detrend=detrend)
+
+
 def _sec_to_frame(sec, *, pre_sec, win_sec, n_frames):
     frame = int(round((float(sec) + float(pre_sec) - float(win_sec) / 2.0) / HOP))
     return int(np.clip(frame, 0, n_frames))
 
 
-def _onsets_in(z, nfr, avail_keys, lo_sec, hi_sec, lambdas, pre_sec):
-    """Per-feature onset SECONDS in [lo_sec, hi_sec]; also per-(feat) no-onset count."""
+def _onsets_in(z, nfr, avail_keys, lo_sec, hi_sec, lambdas, pre_sec, *, detector=("cusum", 0.5)):
+    """Per-feature onset SECONDS in [lo_sec, hi_sec]; also per-(feat) no-onset count.
+    detector = ('cusum', bias) -> Page-Hinkley change-point at per-feature lambda;
+               ('zcross', z_cross) -> fixed-z sustained-crossing BACKUP comparator."""
+    mode = detector[0]
     out, no_onset = {}, {}
     n_ch = z[avail_keys[0]].shape[0]
     for k in avail_keys:
@@ -169,9 +182,14 @@ def _onsets_in(z, nfr, avail_keys, lo_sec, hi_sec, lambdas, pre_sec):
         for c in range(z[k].shape[0]):
             if not np.isfinite(z[k][c]).any():
                 continue
-            r = recruit.detect_contact_onset(z[k][c], lam=lambdas[k],
-                                             detection_idx_window=(lo_f, hi_f),
-                                             hop_sec=HOP, win_sec=win, pre_sec=pre_sec)
+            if mode == "cusum":
+                r = recruit.detect_contact_onset(z[k][c], lam=lambdas[k],
+                                                 detection_idx_window=(lo_f, hi_f), hop_sec=HOP,
+                                                 win_sec=win, pre_sec=pre_sec, bias=detector[1])
+            else:  # zcross
+                r = recruit.detect_contact_onset_zcross(z[k][c], z_cross=detector[1],
+                                                        detection_idx_window=(lo_f, hi_f), hop_sec=HOP,
+                                                        win_sec=win, pre_sec=pre_sec)
             if r["detected"]:
                 arr[c] = r["onset_sec"]
             else:
@@ -181,23 +199,29 @@ def _onsets_in(z, nfr, avail_keys, lo_sec, hi_sec, lambdas, pre_sec):
     return out, no_onset
 
 
-def _recruitment_from_z(z, nfr, channels, lambdas, pre_sec):
-    """Two-pass recruitment from pre-built z + per-feature lambda. None if unresolved."""
-    avail = [k for k in FUSED_FEATURES if k in z and np.isfinite(lambdas.get(k, np.nan))]
+def _recruitment_from_z(z, nfr, channels, lambdas, pre_sec, *, detector=("cusum", 0.5)):
+    """Two-pass recruitment from pre-built z. detector selects the per-contact onset
+    method (see _onsets_in). For cusum a finite per-feature lambda is required; zcross
+    needs no lambda. None if unresolved."""
+    if detector[0] == "cusum":
+        avail = [k for k in FUSED_FEATURES if k in z and np.isfinite(lambdas.get(k, np.nan))]
+    else:
+        avail = [k for k in FUSED_FEATURES if k in z]
     if len(avail) < 2:
         return None
     n_ch = z[avail[0]].shape[0]
     # PASS 1: provisional onset SECONDS over [-30,+30]s -> t_global
-    p1, _ = _onsets_in(z, nfr, avail, -30.0, 30.0, lambdas, pre_sec)
+    p1, _ = _onsets_in(z, nfr, avail, -30.0, 30.0, lambdas, pre_sec, detector=detector)
     _, prov_onset = recruit.fuse_recruitment_rank(p1)
     g = recruit.resolve_global_onset(prov_onset, n_valid=n_ch, frac=GLOBAL_ONSET_FRAC)
     if not g["global_onset_resolved"]:
         return {"global_onset_resolved": False, "available_features": avail}
     t_global = g["t_global"]
     # PASS 2: per-contact onset SECONDS in recruitment band
-    er_keys = avail + (["er"] if "er" in z and np.isfinite(lambdas.get("er", np.nan)) else [])
+    er_ok = "er" in z and (detector[0] == "zcross" or np.isfinite(lambdas.get("er", np.nan)))
+    er_keys = avail + (["er"] if er_ok else [])
     p2, no_onset = _onsets_in(z, nfr, er_keys, t_global - 2.0, t_global + RECRUIT_POST_SEC,
-                              lambdas, pre_sec)
+                              lambdas, pre_sec, detector=detector)
     n_preonset = 0
     for k in avail:
         mask_pre = np.isfinite(p1[k]) & (p1[k] < PRE_ONSET_CHANGE_SEC)
@@ -456,6 +480,164 @@ def cmd_sentinel(args):
     print("\nSENTINEL DONE — human visual gate. Do NOT run per-subject/cohort until sign-off.")
 
 
+# ---------------------------------------------------------------------------
+# Detector Repair Stage — feature cache + bias/detrend/detector sweep (NO cohort)
+# ---------------------------------------------------------------------------
+CACHE_DIR = OUT_ROOT / "sentinel_cache"
+
+
+def _cache_subject(subj, target_idxs):
+    """Load subject's baseline-pool (<=cap) + target seizures ONCE; cache RAW feature
+    traces + full context (fs/channels/pre_sec/eeg_rel/montage/baseline-pool idxs) so the
+    detector sweep needs no EDF reloads. Raw traces (not the raw EEG window) are cached:
+    they are the sweepable unit for detrend/robust-z/bias/zcross; raw-window caching is
+    deferred (large) until a feature/window sweep is needed."""
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    dataset = subj.split("/", 1)[0]
+    ds_sid = f"{dataset}_{subj.split('/', 1)[1]}"
+    ref = ICTAL_REFERENCE[dataset]
+    tmpl = _load_masked_template(ds_sid)
+    arrays = {}
+    meta = {"dataset": dataset, "subject": subj, "ictal_reference": ref,
+            "template_montage": tmpl["template_montage"] if tmpl else ICTAL_REFERENCE[dataset],
+            "pre_sec": BASELINE_PRE_SEC, "hop_sec": HOP, "eeg_rel_by_idx": {},
+            "loaded_idxs": [], "target_idxs": list(target_idxs)}
+    loaded = []
+    for idx in range(_n_seizures(subj)):
+        is_target = idx in target_idxs
+        if len(loaded) >= LAMBDA_MAX_SEIZURES and not is_target:
+            continue
+        try:
+            sw = extract_seizure_window(subj, idx, pre_sec=BASELINE_PRE_SEC, post_sec=30.0,
+                                        reference=ref)
+        except Exception as e:
+            print(f"  [{subj} sz{idx}] load skip: {type(e).__name__}", flush=True)
+            continue
+        raw = _raw_traces(sw.signal, sw.fs)
+        if len([k for k in FUSED_FEATURES if raw.get(k) is not None]) < 2:
+            continue
+        for k in [c for c in list(FUSED_FEATURES) + ["er"] if raw.get(k) is not None]:
+            arrays[f"tr__{k}__{idx}"] = raw[k].astype(np.float32)
+        meta["eeg_rel_by_idx"][str(idx)] = (
+            (sw.eeg_onset_epoch - sw.clin_onset_epoch) if sw.eeg_onset_epoch is not None else None)
+        meta["fs"] = float(sw.fs)
+        meta["channels"] = list(sw.ch_names)
+        loaded.append(idx)
+        print(f"  [{subj} sz{idx}] cached ({len(loaded)}) target={is_target} fs={sw.fs}", flush=True)
+    meta["loaded_idxs"] = loaded
+    meta["baseline_pool_idxs"] = loaded[:LAMBDA_MAX_SEIZURES]
+    np.savez_compressed(CACHE_DIR / f"{ds_sid}.npz", **arrays)
+    json.dump(meta, open(CACHE_DIR / f"{ds_sid}.json", "w"), indent=2)
+    print(f"  cached {ds_sid}: loaded={loaded} pool={meta['baseline_pool_idxs']}", flush=True)
+
+
+def cmd_cache(args):
+    from collections import defaultdict
+    by_subj = defaultdict(list)
+    for spec in args.seizures:
+        subj, sz = spec.rsplit(":", 1)
+        by_subj[subj].append(int(sz))
+    for subj, szs in by_subj.items():
+        print(f"[cache] {subj} targets={szs}", flush=True)
+        _cache_subject(subj, szs)
+    print("CACHE DONE.")
+
+
+def _load_cache(ds_sid):
+    npz, mj = CACHE_DIR / f"{ds_sid}.npz", CACHE_DIR / f"{ds_sid}.json"
+    if not npz.exists() or not mj.exists():
+        return None
+    data = np.load(npz)
+    meta = json.load(open(mj))
+    raw_by_idx = {idx: {k: (data[f"tr__{k}__{idx}"].astype(np.float64)
+                            if f"tr__{k}__{idx}" in data.files else None)
+                        for k in list(FUSED_FEATURES) + ["er"]}
+                  for idx in meta["loaded_idxs"]}
+    return raw_by_idx, meta
+
+
+def cmd_sweep(args):
+    """Detector ablation from cache (no EDF reload). Grid: detrend x detector, where
+    detector in {cusum(bias), zcross(z_cross BACKUP)}. Writes detector_sweep.csv."""
+    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    from collections import defaultdict
+    detectors = [("cusum", b) for b in args.bias_grid] + [("zcross", z) for z in args.zcross_grid]
+    by_subj = defaultdict(list)
+    for spec in args.seizures:
+        subj, sz = spec.rsplit(":", 1)
+        ds = subj.split("/", 1)[0]
+        by_subj[f"{ds}_{subj.split('/', 1)[1]}"].append(int(sz))
+    rows = []
+    for ds_sid, targets in by_subj.items():
+        cached = _load_cache(ds_sid)
+        if cached is None:
+            print(f"[sweep] {ds_sid}: NO CACHE (run `cache` first)", flush=True)
+            continue
+        raw_by_idx, meta = cached
+        pre_sec, pool_idxs = meta["pre_sec"], meta["baseline_pool_idxs"]
+        for detrend in args.detrend_grid:
+            # z for every loaded seizure under this detrend (shared across detectors)
+            zinfo = {}
+            for idx in meta["loaded_idxs"]:
+                built = _z_from_traces(raw_by_idx[idx], pre_sec,
+                                       meta["eeg_rel_by_idx"].get(str(idx)), detrend=detrend)
+                if built is not None:
+                    z, nfr, base, avail = built
+                    zinfo[idx] = {"z": z, "nfr": nfr, "base": base}
+            # pooled baseline frames per feature (shared)
+            pooled = defaultdict(list)
+            for idx in pool_idxs:
+                if idx in zinfo:
+                    for k, arr in zinfo[idx]["base"].items():
+                        pooled[k].append(arr)
+            for det in detectors:
+                if det[0] == "cusum":
+                    lambdas = {}
+                    for k, frames in pooled.items():
+                        out = recruit.calibrate_feature_lambda(
+                            np.concatenate(frames, axis=1), fpr_target_per_hour=FPR_TARGET_PER_HOUR,
+                            hop_sec=HOP, min_pooled_baseline_sec=MIN_POOLED_BASELINE_SEC, bias=det[1])
+                        lambdas[k] = out["lambda"]
+                    lam_med = float(np.nanmedian([lambdas[k] for k in FUSED_FEATURES if k in lambdas]))
+                    lam_sat = bool(lam_med >= 99.9)
+                    det_label = f"cusum_b{det[1]}"
+                else:
+                    lambdas, lam_med, lam_sat, det_label = {}, float("nan"), False, f"zcross_z{det[1]}"
+                for idx in targets:
+                    base_row = {"subject": ds_sid, "seizure": idx, "detector": det_label,
+                                "detrend": detrend, "lambda_med": round(lam_med, 2) if np.isfinite(lam_med) else "",
+                                "lambda_saturated": lam_sat}
+                    if idx not in zinfo:
+                        rows.append({**base_row, "status": "no_z"}); continue
+                    zi = zinfo[idx]
+                    res = _recruitment_from_z(zi["z"], zi["nfr"], meta["channels"], lambdas,
+                                              pre_sec, detector=det)
+                    if res is None or not res.get("global_onset_resolved"):
+                        rows.append({**base_row, "status": "unresolved"}); continue
+                    ag = res["agreement"]
+                    rows.append({**base_row, "status": "ok",
+                                 "t_global_sec": round(res["t_global_sec"], 2),
+                                 "n_recruited": res["n_recruited"],
+                                 "feature_agreement_flag": bool(ag.get("feature_agreement_flag")),
+                                 "amp_agree": round(float(ag.get("amplitude_family_agreement", float("nan"))), 3),
+                                 "early_K_overlap": round(float(ag.get("early_K_overlap", float("nan"))), 3),
+                                 "spectral_support": round(float(ag.get("spectral_support", float("nan"))), 3)})
+                    print(f"  {ds_sid} sz{idx} {det_label} detrend={detrend}: lam={lam_med:.1f}"
+                          f"{'(SAT)' if lam_sat else ''} agree={ag.get('feature_agreement_flag')} "
+                          f"amp={ag.get('amplitude_family_agreement'):.2f} "
+                          f"earlyK={ag.get('early_K_overlap'):.2f} nrec={res['n_recruited']}", flush=True)
+    import csv as _csv
+    cols = ["subject", "seizure", "detector", "detrend", "lambda_med", "lambda_saturated",
+            "t_global_sec", "n_recruited", "feature_agreement_flag", "amp_agree",
+            "early_K_overlap", "spectral_support", "status"]
+    with open(OUT_ROOT / "detector_sweep.csv", "w", newline="") as fh:
+        w = _csv.DictWriter(fh, fieldnames=cols, extrasaction="ignore")
+        w.writeheader()
+        for r in rows:
+            w.writerow(r)
+    print(f"\nwrote {OUT_ROOT/'detector_sweep.csv'} ({len(rows)} rows)")
+
+
 def main():
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -464,6 +646,13 @@ def main():
     pa.add_argument("--verbose", action="store_true"); pa.set_defaults(func=cmd_audit)
     ps = sub.add_parser("sentinel"); ps.add_argument("--seizures", nargs="+", required=True)
     ps.set_defaults(func=cmd_sentinel)
+    pc = sub.add_parser("cache"); pc.add_argument("--seizures", nargs="+", required=True)
+    pc.set_defaults(func=cmd_cache)
+    pw = sub.add_parser("sweep"); pw.add_argument("--seizures", nargs="+", required=True)
+    pw.add_argument("--bias-grid", nargs="*", type=float, default=[0.5, 1.0, 1.5, 2.0])
+    pw.add_argument("--zcross-grid", nargs="*", type=float, default=[3.0, 4.0])
+    pw.add_argument("--detrend-grid", nargs="*", default=["none", "rolling_median", "rolling_quantile"])
+    pw.set_defaults(func=cmd_sweep)
     args = p.parse_args()
     args.func(args)
 

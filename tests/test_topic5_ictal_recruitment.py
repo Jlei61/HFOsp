@@ -6,7 +6,53 @@ from src.topic5_ictal_recruitment import (
     line_length_trace, band_power_trace, spectral_edge_trace, baseline_robust_z,
     detect_contact_onset, calibrate_feature_lambda, resolve_global_onset,
     fuse_recruitment_rank, feature_agreement, bipolar_alias_label, assert_channel_identity,
+    detrend_trace,
 )
+
+
+# --- Detector Repair: detrend_trace --------------------------------------------
+def test_detrend_rolling_median_removes_slow_drift_keeps_fast_rise():
+    hop = 0.1
+    n = 3000                                  # 300 s
+    t = np.arange(n) * hop
+    drift = 0.02 * t                          # slow linear drift over the baseline
+    tr = (drift + 0.05 * np.random.default_rng(0).standard_normal(n))[None, :]
+    tr[0, 2000:2010] += 20.0                  # fast 1 s ictal-like rise
+    out = detrend_trace(tr, mode="rolling_median", hop_sec=hop, win_sec=30.0)
+    # drift removed: baseline portion ~ 0-centered, much flatter than raw
+    assert abs(np.median(out[0, :1500])) < 0.2
+    assert np.std(out[0, :1500]) < np.std(tr[0, :1500])
+    # fast rise preserved
+    assert out[0, 2004] > 15.0
+
+
+def test_detrend_none_is_identity():
+    tr = np.random.default_rng(1).standard_normal((2, 100))
+    assert np.allclose(detrend_trace(tr, mode="none"), tr)
+
+
+def test_detrend_rolling_quantile_removes_drift():
+    hop = 0.1
+    n = 3000
+    t = np.arange(n) * hop
+    tr = (0.02 * t)[None, :].copy()
+    tr[0, 2000:2010] += 20.0
+    out = detrend_trace(tr, mode="rolling_quantile", hop_sec=hop, win_sec=30.0)
+    assert abs(np.median(out[0, :1500])) < 1.0
+    assert out[0, 2004] > 15.0
+
+
+def test_zcross_detector_fires_on_sustained_not_transient():
+    from src.topic5_ictal_recruitment import detect_contact_onset_zcross
+    z = np.zeros(200)
+    z[80:] = 4.0
+    r = detect_contact_onset_zcross(z, z_cross=3.0, detection_idx_window=(0, 200),
+                                    hop_sec=0.1, win_sec=1.0, pre_sec=0.0, sustain_sec=1.0)
+    assert r["detected"] is True and 78 <= r["onset_frame"] <= 82
+    z2 = np.zeros(200); z2[80:83] = 4.0           # transient
+    r2 = detect_contact_onset_zcross(z2, z_cross=3.0, detection_idx_window=(0, 200),
+                                     hop_sec=0.1, win_sec=1.0, pre_sec=0.0, sustain_sec=1.0)
+    assert r2["detected"] is False
 
 
 # --- Task 1: line_length_trace -------------------------------------------------

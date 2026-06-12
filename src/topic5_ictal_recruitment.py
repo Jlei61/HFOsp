@@ -15,11 +15,35 @@ from typing import Dict, Sequence
 
 import numpy as np
 from scipy.signal import spectrogram
+from scipy.ndimage import median_filter
 from scipy.stats import rankdata, spearmanr
 
 from src.ictal_er_rank import compute_cusum_n_d_with_time, calibrate_lambda_per_subject
 
 Z_SUSTAIN = 2.0   # robust-z floor the feature must HOLD post-onset (a feature-z, NOT lambda)
+
+
+def detrend_trace(trace, *, mode="none", hop_sec=0.1, win_sec=30.0):
+    """Optional baseline-drift removal on a feature trace BEFORE robust-z (Detector Repair).
+    Raw band-power / line-length baselines drift slowly, so CUSUM accumulates the drift
+    and saturates lambda. Subtracting a rolling median (window win_sec) removes drift
+    slower than win_sec while preserving the fast ictal rise.
+      mode='none'           -> identity
+      mode='rolling_median' -> trace - median_filter(trace, win_sec)
+    """
+    tr = np.asarray(trace, dtype=np.float64)
+    if mode == "none":
+        return tr
+    if mode == "rolling_median":
+        w = max(3, int(round(float(win_sec) / float(hop_sec))))
+        base = median_filter(tr, size=(1, w), mode="nearest")
+        return tr - base
+    if mode == "rolling_quantile":
+        from scipy.ndimage import percentile_filter
+        w = max(3, int(round(float(win_sec) / float(hop_sec))))
+        base = percentile_filter(tr, percentile=20, size=(1, w), mode="nearest")
+        return tr - base                              # track the baseline FLOOR (one-sided rise)
+    raise ValueError(f"unknown detrend mode {mode!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +190,28 @@ def detect_contact_onset(z_trace_1d, *, lam, detection_idx_window, hop_sec=0.1,
                 "onset_sec": float("nan"), "reason": "ambiguous"}
     return {"detected": True, "onset_frame": idx,
             "onset_sec": float(res.t_onset_sec), "reason": "ok"}
+
+
+def detect_contact_onset_zcross(z_trace_1d, *, z_cross, detection_idx_window, hop_sec=0.1,
+                                win_sec=1.0, pre_sec=0.0, sustain_sec=1.0):
+    """BACKUP comparator (Detector Repair) — threshold-crossing, NOT change-point.
+    onset = first frame in the detection window where robust-z >= z_cross AND stays
+    >= z_cross (median over sustain_sec). Scientifically DIFFERENT from CUSUM: it tests
+    'feature exceeds a fixed level', not 'a sustained accumulated change'. Kept as a
+    comparator only; if it wins, the spec framing changes from change-point to crossing."""
+    z = np.asarray(z_trace_1d, dtype=np.float64)
+    lo, hi = detection_idx_window
+    lo = max(0, int(lo)); hi = min(len(z), int(hi))
+    n_sus = max(1, int(round(float(sustain_sec) / float(hop_sec))))
+    for i in range(lo, hi):
+        if np.isfinite(z[i]) and z[i] >= float(z_cross):
+            post = z[i:i + n_sus]
+            if post.size and np.nanmedian(post) >= float(z_cross):
+                t_onset = i * hop_sec + win_sec / 2.0 - pre_sec
+                return {"detected": True, "onset_frame": int(i), "onset_sec": float(t_onset),
+                        "reason": "ok"}
+    return {"detected": False, "onset_frame": float("nan"), "onset_sec": float("nan"),
+            "reason": "unreached"}
 
 
 # ---------------------------------------------------------------------------
