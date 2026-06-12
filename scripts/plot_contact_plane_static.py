@@ -22,13 +22,24 @@ def plot_record(rec, out_png):
     X, Y = R.make_plane_grid()
     fldT = R.smooth_field(rec, X, Y, sigma_xy=None, scalar="rank")
     chans = rec["channels"]
-    xs = [c["x_norm"] for c in chans]; ys = [c["y_norm"] for c in chans]
-    rk = [c["typical_rank"] for c in chans]; sp = [c["support"] for c in chans]
-    soz = [c.get("is_soz", False) for c in chans]
+    xs = np.array([c["x_norm"] for c in chans]); ys = np.array([c["y_norm"] for c in chans])
+    rk = np.array([c["typical_rank"] for c in chans]); sp = np.array([c["support"] for c in chans])
+    soz = np.array([bool(c.get("is_soz")) for c in chans])
+    ingrid = (xs >= R.X_LO) & (xs <= R.X_HI) & (ys >= -R.Y_EXT) & (ys <= R.Y_EXT)
     fig, ax = plt.subplots(1, 4, figsize=(20, 5))
-    sc = ax[0].scatter(xs, ys, c=rk, s=[40 + 200*s for s in sp], cmap="viridis",
-                       vmin=0, vmax=1, edgecolors=["k" if z else "none" for z in soz],
+    sc = ax[0].scatter(xs[ingrid], ys[ingrid], c=rk[ingrid],
+                       s=40 + 200*sp[ingrid], cmap="viridis",
+                       vmin=0, vmax=1,
+                       edgecolors=["k" if z else "none" for z in soz[ingrid]],
                        linewidths=1.5)
+    if (~ingrid).any():
+        xc = np.clip(xs[~ingrid], R.X_LO, R.X_HI); yc = np.clip(ys[~ingrid], -R.Y_EXT, R.Y_EXT)
+        ax[0].scatter(xc, yc, marker="^", facecolors="none", edgecolors="red",
+                      s=70, linewidths=1.5, zorder=5)
+        ax[0].text(0.02, 0.02, f"{int((~ingrid).sum())} contacts outside comparison field",
+                   transform=ax[0].transAxes, fontsize=8, color="red", va="bottom")
+    ax[0].set_xlim(R.X_LO, R.X_HI); ax[0].set_ylim(-R.Y_EXT, R.Y_EXT)
+    ax[0].set_aspect("equal", adjustable="box")
     ax[0].set_title("contacts: color=order, size=support\n(black ring = SOZ overlay)")
     ax[0].set_xlabel("along-axis (norm)"); ax[0].set_ylabel("transverse (norm, display only)")
     plt.colorbar(sc, ax=ax[0], label="typical order (0=early,1=late)")
@@ -40,7 +51,7 @@ def plot_record(rec, out_png):
         if key != "S":
             F = np.where(fldT["mask"], F, np.nan)
         im = a.imshow(F, origin="lower", extent=[R.X_LO, R.X_HI, -R.Y_EXT, R.Y_EXT],
-                      aspect="auto", cmap=cm)
+                      aspect="equal", cmap=cm)
         a.set_title(ttl); plt.colorbar(im, ax=a)
     amb = rec.get("soz_ambiguous", [])
     fig.suptitle(f"{rec['dataset']}:{rec['subject']} {rec['template_id']} | "

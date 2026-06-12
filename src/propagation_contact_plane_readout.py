@@ -180,6 +180,14 @@ def build_readout_record(
         "low_support": med_support < LOW_SUPPORT_FRAC,
         "weak_axis": L < 1e-9,
     }
+    out_idx = [i for i, c in enumerate(channels)
+               if not (X_LO <= c["x_norm"] <= X_HI and -Y_EXT <= c["y_norm"] <= Y_EXT)]
+    out_of_field = {
+        "count": len(out_idx),
+        "contacts": [channels[i]["name"] for i in out_idx],
+        "support_sum": float(sum(channels[i]["support"] for i in out_idx)),
+        "soz_count": int(sum(bool(channels[i]["is_soz"]) for i in out_idx)),
+    }
     return {
         "dataset": dataset, "subject": subject, "template_id": template_id,
         "axis_length_mm": L,
@@ -187,6 +195,7 @@ def build_readout_record(
         "lag_time_unit": lag_time_unit,
         "channels": channels,
         "flags": flags,
+        "out_of_field": out_of_field,
         "n_channels": len(channels),
     }
 

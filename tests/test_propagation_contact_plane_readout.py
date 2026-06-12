@@ -400,3 +400,22 @@ def test_plot_record_smoke(tmp_path):
     out = tmp_path / "card.png"
     plot_record(rec, out)
     assert out.exists() and out.stat().st_size > 0
+
+
+def test_build_readout_record_out_of_field_stats():
+    # 触点 x_norm 超出 [X_LO,X_HI] 必须计入 out_of_field，不静默丢失
+    n_ch = 7
+    names = [f"A{i}" for i in range(n_ch)]
+    along = np.array([0, 1, 2, 3, 4, 5, 30.0])   # along=5 -> x_norm 1.67 (>1.5); 30 -> 10 (>>)
+    masked = np.tile(np.linspace(0, 1, n_ch)[:, None], (1, 4))
+    bools = np.ones((n_ch, 4), bool)
+    rec = R.build_readout_record(
+        dataset="yuquan", subject="s1", template_id="t_a", names=names,
+        along_axis_mm=along, axis_length_mm=3.0, off_axis_mm=np.zeros(n_ch),
+        signed_transverse=np.zeros(n_ch), pc1_variance_explained=0.99,
+        masked=masked, lag_raw=masked.copy(), bools=bools,
+        soz_first_contacts={"A6"}, lag_time_unit="ms", one_dimensional_sampling=False)
+    oof = rec["out_of_field"]
+    assert oof["count"] == 2 and set(oof["contacts"]) == {"A5", "A6"}
+    assert oof["soz_count"] == 1            # A6 是 SOZ 且出界
+    assert oof["support_sum"] > 0
