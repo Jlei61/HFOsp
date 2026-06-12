@@ -42,7 +42,23 @@ def plot_record(rec, out_png):
     ax[0].set_xlim(R.X_LO, R.X_HI); ax[0].set_ylim(-R.Y_EXT, R.Y_EXT)
     ax[0].set_aspect("equal", adjustable="box")
     ax[0].set_title("contacts: color=order, size=support\n(black ring = SOZ overlay)")
-    ax[0].set_xlabel("along-axis (norm)"); ax[0].set_ylabel("transverse (norm, display only)")
+    ax[0].set_xlabel("along-axis (norm; 0 = early-core centroid)")
+    ax[0].set_ylabel("transverse (norm, signed; display only)")
+    # subject-specific mm reference layer — does NOT alter the normalized comparison
+    # plane (field correlation stays on shared norm coords). x mm = projection along
+    # the early→late axis from the early-core centroid; y mm = signed PCA-residual
+    # projection (sign is display convention, NOT anatomical left/right).
+    nsm = rec.get("norm_scale_mm"); axlen = rec.get("axis_length_mm", float("nan"))
+    if nsm and np.isfinite(nsm) and nsm > 0:
+        ax[0].text(0.02, 0.98, f"1 norm = {nsm:.0f} mm | core dist = {axlen:.0f} mm",
+                   transform=ax[0].transAxes, fontsize=8, va="top", color="0.25")
+        bar = 20.0 / nsm  # 20 mm expressed in normalized units
+        if bar < 0.9 * (R.X_HI - R.X_LO):
+            x0 = R.X_HI - 0.06 * (R.X_HI - R.X_LO) - bar
+            y0 = -R.Y_EXT + 0.08 * (2 * R.Y_EXT)
+            ax[0].plot([x0, x0 + bar], [y0, y0], color="k", lw=3, solid_capstyle="butt")
+            ax[0].text(x0 + bar / 2, y0 + 0.025 * (2 * R.Y_EXT), "20 mm",
+                       ha="center", va="bottom", fontsize=8)
     plt.colorbar(sc, ax=ax[0], label="typical order (0=early,1=late)")
     for a, key, ttl, cm in [(ax[1], "T", "smoothed order field", "viridis"),
                             (ax[2], "S", "support field", "magma"),
