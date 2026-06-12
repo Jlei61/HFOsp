@@ -149,6 +149,18 @@ def build_readout_record(
     st = np.asarray(signed_transverse, float)
     agg = contact_aggregates(masked, lag_raw, bools)
     L = float(axis_length_mm)
+    # Robust normalization scale: IQR-based along-extent over participating channels.
+    # Prevents x_norm explosion when axis_length_mm << contact spread.
+    _part = np.array([
+        np.isfinite(along[i]) and np.isfinite(st[i]) and agg["support"][i] > 0
+        for i in range(len(names))])
+    _along_part = along[_part]
+    if _along_part.size >= 2:
+        scale = float(np.percentile(_along_part, 97.5) - np.percentile(_along_part, 2.5))
+    else:
+        scale = L
+    if not (scale > 1e-9):
+        scale = L if L > 1e-9 else 1.0
     channels: List[dict] = []
     for i, nm in enumerate(names):
         a_i, s_i = float(along[i]), float(st[i])
@@ -162,8 +174,8 @@ def build_readout_record(
             "along_axis_mm": a_i,
             "signed_transverse_mm": s_i,
             "off_axis_mm": float(off_axis_mm[i]),
-            "x_norm": a_i / L,
-            "y_norm": s_i / L,
+            "x_norm": a_i / scale,
+            "y_norm": s_i / scale,
             "typical_rank": float(agg["typical_rank"][i]),
             "typical_time": float(agg["typical_time"][i]),
             "support": float(agg["support"][i]),
@@ -191,6 +203,7 @@ def build_readout_record(
     return {
         "dataset": dataset, "subject": subject, "template_id": template_id,
         "axis_length_mm": L,
+        "norm_scale_mm": scale,
         "transverse_pc1_variance_explained": float(pc1_variance_explained),
         "lag_time_unit": lag_time_unit,
         "channels": channels,
@@ -426,15 +439,14 @@ def compute_cohort_scalars(record: dict) -> Dict[str, float]:
     order = np.argsort(rk)
     k = max(1, len(order) // 3)
     early, late = order[:k], order[-k:]
-    along = np.array([c["along_axis_mm"] for c in chans], float)
-    early_late_dist = abs(float(np.nanmean(along[late]) - np.nanmean(along[early])))
+    xn = np.array([c["x_norm"] for c in chans], float)
+    early_late_norm = abs(float(np.nanmean(xn[late]) - np.nanmean(xn[early])))
     L = record.get("axis_length_mm", float("nan"))
     return {
         "axis_length_mm": float(L),
         "transverse_width_mm": tw,
         "early_zone_spread": float(np.nanstd(st[early])) if k else float("nan"),
         "late_zone_spread": float(np.nanstd(st[late])) if k else float("nan"),
-        "early_late_centroid_distance_norm":
-            early_late_dist / L if L and np.isfinite(L) and L > 1e-9 else float("nan"),
+        "early_late_centroid_distance_norm": early_late_norm,
         "rank_vs_xnorm_spearman": rho,
     }
