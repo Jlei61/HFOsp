@@ -79,11 +79,13 @@ topic3 回答"传播往哪、SOZ 在哪"；topic4 用 SEF-HFO 模型生成传播
 - 这些 mm 标量**不直接 pool**进场比较
 
 **(b) normalized field plane** — 服务连续场与 field 比较，无量纲：
-- `x_norm = along_axis / axis_length`
-- `y_norm = signed_transverse / axis_length`
-- field correlation **只在 normalized plane 上做**
+- 归一化尺度 = 参与触点 along 的**鲁棒跨度** `norm_scale = p97.5(along) − p2.5(along)`（参与触点 < 2 或退化时回退 `axis_length`）
+- `x_norm = along_axis / norm_scale`（x=0 仍 = 源核中心，因 along=0 在 source centroid）
+- `y_norm = signed_transverse / norm_scale`（**同一 scale**，平面各向同性 / 几何忠实）
+- `axis_length_mm` 仅作独立物理标量（§9 标量），**不进 field 归一化**
+- field correlation 只在此 normalized plane 上做
 
-理由：`compute_axis_frame` 给的是 3D mm 下的框架；real-vs-model 场比较若混用 raw mm 和 normalized plane，相关会被绝对尺度污染。
+**为何不用 axis_length 作分母（2026-06-11 pilot audit 修正）**：真实数据里源核↔汇核中心距常远小于触点铺开范围，`along/axis_length` 爆表——cohort audit 显示 distributed 队列 60% 记录触点落网格外、最坏 91%、x_norm 到 5.68、11 条连 SOZ 触点都出界，场退化。鲁棒 along 跨度把触点收回 ~[0,1]，固定网格全队列适用。
 
 ---
 
