@@ -516,7 +516,7 @@ def _cache_subject(subj, target_idxs):
         raw = _raw_traces(sw.signal, sw.fs)
         if len([k for k in FUSED_FEATURES if raw.get(k) is not None]) < 2:
             continue
-        for k in [c for c in list(FUSED_FEATURES) + ["er"] if raw.get(k) is not None]:
+        for k in [c for c in list(FUSED_FEATURES) + ["er"] if raw.get(c) is not None]:
             arrays[f"tr__{k}__{idx}"] = raw[k].astype(np.float32)
         meta["eeg_rel_by_idx"][str(idx)] = (
             (sw.eeg_onset_epoch - sw.clin_onset_epoch) if sw.eeg_onset_epoch is not None else None)
