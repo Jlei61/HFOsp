@@ -10,7 +10,25 @@
 
 **Spec:** `docs/superpowers/specs/2026-06-11-topic5-stage2b-dynamic-pattern-echo-design.md` (v2.1, committed). Re-read the referenced spec section at each task boundary (CLAUDE.md §5).
 
-**Locked constants (spec):** `HOP=0.1`, window `[T0,T1]=[0,+10]s` (sensitivity `[-2,+10]` + epi EEG-onset-anchored), `SAVGOL_WIN=5` frames (0.5s)/`polyorder=2`, ramp windows `(0,2)/(2,5)/(5,10)s`, `Z_MIN=2.0`, `DELTA_MIN=1.0`, `MIN_CH=8`, `MIN_GROUP=4`, region `min_group=2`, `B=2000`, `RNG_SEED=20260611`, pre-registered confirmatory = broadband `echo_mean[0,+5]s`. Feature win: HFA=0.5s others 1.0s. detrend default `rolling_median` (sensitivity `none`).
+**Locked constants (spec):** `HOP=0.1`, primary window `[T0,T1]=[0,+10]s` clinical-onset anchored, `SAVGOL_WIN=5` frames (0.5s)/`polyorder=2`, ramp windows `(0,2)/(2,5)/(5,10)s`, `Z_MIN=2.0`, `DELTA_MIN=1.0`, `MIN_CH=8`, `MIN_GROUP=4`, region `min_group=2`, `B=2000`, `RNG_SEED=20260611`, pre-registered confirmatory = broadband `echo_mean[0,+5]s`. Feature win: HFA=0.5s others 1.0s. detrend default `rolling_median` (sensitivity `none`).
+
+**Window contract (pre-registered — onset labels are imprecise so the window is layered, NOT widened post-hoc):**
+
+```text
+Primary early-ictal window:
+  clinical-onset anchored [0,+10]s.
+
+Onset-uncertainty sensitivities (robustness only):
+  clinical-onset anchored [-5,+15]s;
+  EEG-onset anchored [-5,+15]s (epilepsiae);
+  compact confirmatory broadband echo_mean [0,+5]s.
+
+ONLY the primary [0,+10]s result can carry the main Stage 2b verdict.
+Sensitivity windows may support robustness but CANNOT rescue a failed primary
+by post-hoc window widening.
+```
+
+The runner computes all layers; the verdict (§4) and the Phase-2 manual gate read the primary `[0,+10]s` clinical-anchored result. Sensitivity windows are reported alongside, tagged as sensitivity.
 
 ---
 
@@ -292,7 +310,7 @@ def echo_curve_null(template_rank, value_by_t, t_axis, *, kind, min_ch, null_mod
     idx = np.arange(n_ch)
     out = np.full(B, np.nan)
     for b in range(B):
-        perm = idx if null_mode == "channel" and blocks is None else None
+        # channel null = full shuffle (blocks=None); within_shaft/anchor_matched = block permute
         perm = _permute_channels(idx, None if null_mode == "channel" else blocks, rng)
         Vp = V[perm]
         curve = np.array([align_score(template_rank, Vp[:, j], kind=kind, min_ch=min_ch)
@@ -512,12 +530,21 @@ FUSED = ("line_length", "broadband", "hfa", "spectral_edge")
 AMP = ("line_length", "broadband", "hfa")
 
 
+def _ictal_montage_semantics(dataset):
+    """Canonical montage-SEMANTICS of the ictal signal AFTER per-dataset aliasing — NOT
+    the raw detection reference. yuquan ictal is bipolar then alias-left, which IS the
+    template's 'bipolar_aliased_left' semantics; epi ictal is car. Compared against
+    tmpl['template_montage'] so name-equality reflects signal-object identity. (P1 fix:
+    passing the raw ICTAL_REFERENCE 'bipolar' would falsely raise on yuquan.)"""
+    return "bipolar_aliased_left" if dataset == "yuquan" else "car"
+
+
 def _aligned_template(ds_sid, ictal_channels, dataset):
     """Masked narrow template (Main-A) aligned to ictal channels by per-dataset alias.
     Returns template_rank vector over ictal_channels order (NaN where no template)."""
     tmpl = recruit._load_masked_template(ds_sid)
     recruit.assert_channel_identity(template_montage=tmpl["template_montage"],
-                                    ictal_montage=recruit.ICTAL_REFERENCE[dataset])
+                                    ictal_montage=_ictal_montage_semantics(dataset))
     # template channel -> rank (use cluster-0 masked rank; both clusters handled in cohort)
     t_ch = tmpl["channels"]; t_rank = np.asarray(tmpl["templates"][0], float)
     name2rank = {c: r for c, r in zip(t_ch, t_rank) if np.isfinite(r)}
@@ -575,7 +602,7 @@ Re-read spec §5.2 + AGENTS.md figure standards. Paper-grade self-contained.
 - [ ] **Step 4: Commit** `feat(topic5-dyn): echo(t) sentinel plotter + README`.
 
 ### PHASE 2 GATE (MANUAL)
-**STOP. Present echo(t) curves + the per-feature max-null p-values to the user.** Per spec §4/§8, Phase 3 runs only if, on BOTH epi(CAR) and yuquan(bipolar): echo(t) shows a same-direction positive peak in `[0,~6]s`, it survives the channel max-null, and at least one of within-shaft / anchor-matched survives. If not, iterate (window / detrend / feature) — do NOT run cohort.
+**STOP. Present echo(t) curves + the per-feature max-null p-values to the user.** Read the gate off the **primary `[0,+10]s` clinical-anchored** result (sensitivity windows reported alongside, never substituted in). Per spec §4/§8, Phase 3 runs only if, on BOTH epi(CAR) and yuquan(bipolar): echo(t) shows a same-direction positive peak in `[0,~6]s`, it survives the channel max-null, and at least one of within-shaft / anchor-matched survives. If not, iterate (detrend / feature, and report the sensitivity windows) — do NOT widen the primary window to rescue, and do NOT run cohort.
 
 ---
 

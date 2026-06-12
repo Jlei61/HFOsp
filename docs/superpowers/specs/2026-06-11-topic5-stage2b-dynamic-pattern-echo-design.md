@@ -49,7 +49,7 @@ Stage 2 已经把每个发作的每个特征算成了逐触点逐帧的 robust-z
 
 - 时间轴：帧中心相对临床 onset 的秒（`t_center = frame*hop + win/2 - pre`），hop=0.1s，per-feature win（HFA=0.5s 其余 1.0s）。**echo_curve 必须把各特征插值到同一 0.1s 时间网格后再算**（不同 win 的 t_center 偏移半窗，否则 echo(t) 跨特征错位）。
 - `dZdt` 平滑方法**锁死**：Savitzky-Golay（window=0.5s=5 frames, polyorder=2）对 robust-z 求一阶导；**不在执行期随手调**。
-- 分析窗：early-ictal `[T0, T1]` = `[0, +10]s` rel 标注 onset（primary；**sensitivity `[-2,+10]` + EEG-onset-anchored**——epi 有 `eeg_onset_epoch`，用它作 t=0 的 anchor 重算一遍；yuquan 只有单一 onset 退化）。**不再需要 data-driven global onset 的 -2s 重测窄带**（那正是制造并列的根源）；Stage 2b 直接在 early-ictal 窗上算动态量。
+- 分析窗（**pre-registered 分层，不 post-hoc 加宽**）：early-ictal primary = `[0, +10]s` rel **临床** onset。sensitivity（仅稳健性，不进主判据）：临床 onset `[-5,+15]s`；EEG-onset-anchored `[-5,+15]s`（epi 有 `eeg_onset_epoch`，用它作 t=0 的 anchor 重算一遍；yuquan 只有单一 onset 退化）；compact confirmatory broadband `echo_mean[0,+5]s`。**只有 primary `[0,+10]s` 临床锚结果能承载 Stage 2b 主判据；sensitivity 窗只能支持 robustness，不能靠事后加宽窗口救回 failed primary。** **不再需要 data-driven global onset 的 -2s 重测窄带**（那正是制造并列的根源）；Stage 2b 直接在 early-ictal 窗上算动态量。
 - **cache manifest（每 seizure）记录**：`fs/channels/pre_sec/eeg_rel/montage/template_id/feature_win/hop`，供 cohort 复算时上下文不丢。
 
 ### 2.1 alignment_score convention（**spec-locked，TDD 必锁——P1**）
