@@ -106,9 +106,9 @@ def fig_contrast(rows):
     ax.set_ylabel("fraction treated", fontsize=9)
     ax.set_ylim(-0.03, 1.05)
     ax.axhline(1.0, color="0.6", ls=":", lw=1)
-    ax.set_title("Which target has discriminative contrast vs saturates at full coverage\n"
-                 "(SOZ / early-end ≈ saturated → cannot ever separate outcome; "
-                 "network / HFO / template-endpoint carry spread)", fontsize=9)
+    ax.set_title("Coverage spread per network target in this cohort (n=18)\n"
+                 "SOZ / early-end near full (limited discriminative range here); "
+                 "network / HFO / template-endpoint span wider", fontsize=9)
     fig.tight_layout()
     p = os.path.join(FIGDIR, "coverage_contrast_by_target.png")
     fig.savefig(p, dpi=150, bbox_inches="tight")

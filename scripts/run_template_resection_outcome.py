@@ -67,7 +67,7 @@ METRIC_COLS = [
     "early_end_coverage", "n_source",
     "shared_endpoint_core_coverage", "n_shared_endpoint",
     "clinical_soz_coverage", "n_soz",
-    "hfo_rate_topk_sozsize_coverage", "n_hfo_rate_core",
+    "hfo_rate_topk_sozsize_coverage", "n_hfo_rate_core", "n_hfo_rate_available",
     "clinical_network_coverage", "n_clinical_network",
     "template_coreness_endpoint_coverage",
     "late_end_coverage",
@@ -233,7 +233,10 @@ def main():
             "clinical_soz_coverage": round_or_blank(clinical_soz_cov),
             "n_soz": len(soz),
             "hfo_rate_topk_sozsize_coverage": round_or_blank(hfo_cov),
-            "n_hfo_rate_core": "" if n_hfo_avail is None else n_hfo_avail,
+            # n_hfo_rate_core = size-matched top-k core size (= coverage denominator),
+            # NOT the available pool (that is n_hfo_rate_available).
+            "n_hfo_rate_core": "" if hfo_status != "ok" else len(hfo_core),
+            "n_hfo_rate_available": "" if n_hfo_avail is None else n_hfo_avail,
             "clinical_network_coverage": round_or_blank(clinical_net_cov),
             "n_clinical_network": len(net),
             "template_coreness_endpoint_coverage": round_or_blank(coreness_cov),
@@ -320,6 +323,10 @@ def main():
             "clinical_network_coverage": med("clinical_network_coverage"),
         },
         "discordant_candidates": [r["subject"] for r in rows if r["discordant_candidate"]],
+        "hfo_rate_core_def": (
+            "n_hfo_rate_core = size-matched top-k core (k=min(|SOZ|, available)) = "
+            "coverage denominator; n_hfo_rate_available = full bridged HFO-active pool"
+        ),
         "note": "Predictors only; outcome association NOT run (labels absent). All exploratory.",
     }
     with open(os.path.join(OUT, "cohort_summary.json"), "w") as fh:

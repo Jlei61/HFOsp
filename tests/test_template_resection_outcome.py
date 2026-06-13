@@ -119,3 +119,31 @@ def test_discordant_na_safe_metrics_dont_crash():
 def test_discordant_origin_clause_needs_both_nonempty():
     # template_source empty (NA) -> origin-disjoint clause must NOT fire
     assert discordant_candidate(0.7, 0.9, 0.9, set(), {"B1"}, False) is False
+
+
+# ---- output-layer invariant: HFO denominator column = size-matched core, NOT pool ----
+def test_metrics_csv_hfo_denominator_is_core_not_available():
+    """Regression: n_hfo_rate_core must be the size-matched top-k core
+    (= min(|SOZ|, available)), never the full available HFO pool. Caught a real
+    'value-right, denominator-wrong' bug. Skips if the metrics CSV is absent."""
+    import csv
+    import os
+
+    path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "results/template_resection_outcome/yuquan_template_resection_metrics.csv",
+    )
+    if not os.path.exists(path):
+        import pytest
+        pytest.skip("metrics CSV not generated")
+    rows = list(csv.DictReader(open(path)))
+    ok = [r for r in rows if r["hfo_rate_core_status"] == "ok"]
+    assert ok, "expected some HFO-available subjects"
+    for r in ok:
+        n_core = int(r["n_hfo_rate_core"])
+        n_avail = int(r["n_hfo_rate_available"])
+        n_soz = int(r["n_soz"])
+        assert n_core == min(n_soz, n_avail), (
+            f"{r['subject']}: n_hfo_rate_core={n_core} != min(|SOZ|={n_soz}, avail={n_avail})"
+        )
+        assert n_core <= n_avail

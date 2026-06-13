@@ -92,6 +92,7 @@
      tie-break     = stable sort by (-event_rate, channel_name)
      ```
    - 源：`per_channel_metrics/yuquan/*_perchannel.json`（12/18）。NA + `hfo_rate_core_status`/`hfo_rate_core_exit_reason` for 缺的 6 人。
+   - **分母列语义（载重，别搞错）**：`n_hfo_rate_core` = size-matched core 大小 = `k = min(|SOZ|, n_available)` = **coverage 的分母**；`n_hfo_rate_available` = 桥接后过事件门的 HFO-active 触点池（≥ core）。两列必须分开报，否则读者会把 池当成 core 分母（实测踩过：available=32 误写成 core=7 的位置）。
    - 若日后找到 topic3 更权威 HFO-area 定义，作 **sensitivity**，**不改**本 spec 主合同。
 
 6. **临床网络覆盖** `clinical_network_coverage`
@@ -183,7 +184,7 @@ early_end_coverage, n_source,
 shared_endpoint_core_coverage, n_shared_endpoint,
 # 三 baseline + 分母
 clinical_soz_coverage, n_soz,
-hfo_rate_topk_sozsize_coverage, n_hfo_rate_core,
+hfo_rate_topk_sozsize_coverage, n_hfo_rate_core, n_hfo_rate_available,
 clinical_network_coverage, n_clinical_network,
 # sensitivity / supplement
 template_coreness_endpoint_coverage,
