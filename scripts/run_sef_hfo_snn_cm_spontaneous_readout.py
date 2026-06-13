@@ -42,6 +42,7 @@ from src.sef_hfo_snn_adapter import snn_event_envelope      # noqa: E402
 from src.sef_hfo_heterogeneity import sample_core_field     # noqa: E402
 from src.sef_hfo_events import detect_events                 # noqa: E402
 from src.sef_hfo_snn_engine_guard import assert_versions     # noqa: E402
+from src.sef_hfo_stage3 import build_sidecar               # noqa: E402
 
 OUT = "results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous"
 ENGINE_VERSIONS = os.path.join("results", "topic4_sef_hfo", "snn_heterogeneity", "engine_versions.json")
@@ -92,26 +93,37 @@ def valid_mask(m, posE, L, Rr):
 
 def build_lesion_vth(net, NE, axis_unit, center, half, lesion, core_mean, core_std, core_r,
                      dephase, seed):
-    """Per-neuron threshold field for the lesion config. Returns (vth, core_mask, foci[list of xy]).
-    twoend_deph: pos-end focus mean is RAISED by `dephase` mV so the two foci run at different
-    rates and fire at separated times (identical means collide/merge — diagnostic 2026-06-10)."""
+    """Per-neuron threshold field. Returns (vth, core_mask, foci[xy list], core_masks[per-focus
+    FULL-network bool masks]). The per-focus masks let the caller compute a core-LEVEL onset per end.
+    twoend_equal: both foci at the SAME core_mean (Stage 3; collisions handled downstream by censoring,
+    NOT by dephasing). twoend_deph: pos-end mean RAISED by `dephase` so the two run at different rates
+    (identical means collide/merge — diagnostic 2026-06-10)."""
     is_E = np.zeros(len(net["pos"]), bool); is_E[:NE] = True
     neg_xy = center - 0.6 * half * axis_unit
     pos_xy = center + 0.6 * half * axis_unit
     if lesion == "oneend_neg":
         cf = sample_core_field(net["pos"], is_E, neg_xy, core_r, np.random.default_rng(seed + 7),
                                core_mean=core_mean, core_std=core_std, base_mean=18.0)
-        return cf["vth"], cf["core_mask"], [neg_xy]
+        return cf["vth"], cf["core_mask"], [neg_xy], [cf["core_mask"]]
     if lesion == "oneend_pos":
         cf = sample_core_field(net["pos"], is_E, pos_xy, core_r, np.random.default_rng(seed + 7),
                                core_mean=core_mean, core_std=core_std, base_mean=18.0)
-        return cf["vth"], cf["core_mask"], [pos_xy]
+        return cf["vth"], cf["core_mask"], [pos_xy], [cf["core_mask"]]
+    if lesion == "twoend_equal":
+        # both foci SAME mean/std; distinct rng seeds only de-correlate the threshold draws
+        cf1 = sample_core_field(net["pos"], is_E, neg_xy, core_r, np.random.default_rng(seed + 7),
+                                core_mean=core_mean, core_std=core_std, base_mean=18.0)
+        cf2 = sample_core_field(net["pos"], is_E, pos_xy, core_r, np.random.default_rng(seed + 8),
+                                core_mean=core_mean, core_std=core_std, base_mean=18.0)
+        return (np.minimum(cf1["vth"], cf2["vth"]), (cf1["core_mask"] | cf2["core_mask"]),
+                [neg_xy, pos_xy], [cf1["core_mask"], cf2["core_mask"]])
     # twoend_deph: neg focus at core_mean, pos focus at core_mean + dephase (slower) -> drift apart
     cf1 = sample_core_field(net["pos"], is_E, neg_xy, core_r, np.random.default_rng(seed + 7),
                             core_mean=core_mean, core_std=core_std, base_mean=18.0)
     cf2 = sample_core_field(net["pos"], is_E, pos_xy, core_r, np.random.default_rng(seed + 8),
                             core_mean=core_mean + dephase, core_std=core_std, base_mean=18.0)
-    return np.minimum(cf1["vth"], cf2["vth"]), (cf1["core_mask"] | cf2["core_mask"]), [neg_xy, pos_xy]
+    return (np.minimum(cf1["vth"], cf2["vth"]), (cf1["core_mask"] | cf2["core_mask"]),
+            [neg_xy, pos_xy], [cf1["core_mask"], cf2["core_mask"]])
 
 
 def active_fraction(E_spk_bool, dt, bin_ms):
@@ -166,15 +178,21 @@ def main():
     ap.add_argument("--core-mean", type=float, default=17.0)
     ap.add_argument("--core-std", type=float, default=1.5)
     ap.add_argument("--core-r", type=float, default=1.5)
-    ap.add_argument("--dephase", type=float, default=0.3, help="twoend: +mV on pos focus to separate firing times")
+    ap.add_argument("--dephase", type=float, default=0.3, help="twoend_deph: +mV on pos focus to separate firing times")
     ap.add_argument("--nc", type=int, default=6)
-    ap.add_argument("--lesion", choices=["oneend_neg", "oneend_pos", "twoend_deph"], default="oneend_neg")
+    ap.add_argument("--lesion", choices=["oneend_neg", "oneend_pos", "twoend_deph", "twoend_equal"],
+                    default="oneend_neg")
+    ap.add_argument("--delta-onset", type=float, default=30.0,
+                    help="ms; two cores igniting within this -> collision (Stage 3 twoend_equal)")
+    ap.add_argument("--n-min", type=int, default=5, help="min core E cells to count an onset")
+    ap.add_argument("--out", default=None, help="output root (default: canonical OUT; set for tests/worktree)")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--tag", default=None)
     a = ap.parse_args()
     tag = a.tag or f"{a.lesion}_s{a.seed}"
-    os.makedirs(OUT, exist_ok=True)
-    os.makedirs(os.path.join(OUT, "per_event"), exist_ok=True)
+    out_dir = a.out or OUT
+    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(os.path.join(out_dir, "per_event"), exist_ok=True)
     _engine_guard()
 
     L, theta_rad = a.L, np.deg2rad(a.theta)
@@ -186,8 +204,8 @@ def main():
     net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR, verbose=False)
     posE = net["pos"][:NE]
     center = np.array([L / 2, L / 2]); half = L / 2
-    vth, core_mask, foci = build_lesion_vth(net, NE, axis_unit, center, half, a.lesion,
-                                            a.core_mean, a.core_std, a.core_r, a.dephase, a.seed)
+    vth, core_mask, foci, core_masks = build_lesion_vth(net, NE, axis_unit, center, half, a.lesion,
+                                                        a.core_mean, a.core_std, a.core_r, a.dephase, a.seed)
 
     m = montage(center, a.theta, 0.0, a.nc)
     valid = valid_mask(m, posE, L, p.Rr)
@@ -233,7 +251,7 @@ def main():
         # reverse at the +end focus (foci[-1]). marked with the star; all foci are drawn as cores.
         src_focus = foci[0] if (rep["sign"] is None or rep["sign"] >= 0) else foci[-1]
         np.savez_compressed(
-            os.path.join(OUT, "per_event", f"rep_{tag}.npz"),
+            os.path.join(out_dir, "per_event", f"rep_{tag}.npz"),
             posE=posE, onset_core=onset, vth=vth[:NE], is_E=np.ones(NE, bool),
             lfp=lfp_trace, times=times, contacts=np.asarray(m.contacts), names=np.array(m.names),
             nc=a.nc, kick=np.asarray(src_focus), patch=np.asarray(src_focus), patch_r=a.core_r,
@@ -255,11 +273,19 @@ def main():
         assert valid.all(), "off-sheet contacts present — record would be boundary-extrapolated; refuse"
         floor_g = float(env_f.min()); margin_g = MARGIN_FRAC * (float(env_f.max()) - floor_g)
         rec_art = attach_geometry(extract_lagpat(env_f, fdt, ret_wins, floor_g, margin_g, 0.5, fdt), m)
-        rec_dir = os.path.join(OUT, "record", tag); os.makedirs(rec_dir, exist_ok=True)
+        rec_dir = os.path.join(out_dir, "record", tag); os.makedirs(rec_dir, exist_ok=True)
         base = os.path.join(rec_dir, f"model_{tag}")
         write_legacy_npz(rec_art, base + "_lagPat_withFreqCent.npz")
         write_packed_times(rec_art, base + "_packedTimes_withFreqCent.npy")
         write_montage_manifest(rec_art, base + "_montage.json")
+
+    # --- Stage 3 sidecar (two-focus runs): hidden core-level source label per RETURNED event,
+    # aligned 1:1 to the record columns (plan P1-3). build_sidecar is pure (unit-tested w/o a sim).
+    if len(core_masks) == 2:
+        payload = build_sidecar(ev_recs, spk, core_masks, NE, dt=DT, bin_ms=BIN_MS,
+                                part_min=PART_MIN, delta_onset=a.delta_onset, n_min=a.n_min)
+        json.dump(dict(tag=tag, **payload),
+                  open(os.path.join(out_dir, f"sidecar_{tag}.json"), "w"), indent=2)
 
     n_fwd = sum(1 for r in ev_recs if _clean(r, 1.0))
     n_rev = sum(1 for r in ev_recs if _clean(r, -1.0))
@@ -282,7 +308,7 @@ def main():
                    n_events=len(ev_recs), n_clean_forward=n_fwd, n_clean_reverse=n_rev,
                    n_truncated_directional=n_trunc_dir,
                    rep_event_index=rep_i, events=ev_recs)
-    json.dump(summary, open(os.path.join(OUT, f"readout_{tag}.json"), "w"), indent=2)
+    json.dump(summary, open(os.path.join(out_dir, f"readout_{tag}.json"), "w"), indent=2)
     print(f"[{tag}] events={len(ev_recs)} clean fwd/rev={n_fwd}/{n_rev} (+{n_trunc_dir} truncated boundary) "
           f"| rep_event={rep_i} (rd={rep['readability'] if rep else None} err={rep['axis_err'] if rep else None}) "
           f"| bar={bar:.4f} peak={peak:.4f}", flush=True)

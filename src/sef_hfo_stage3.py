@@ -95,17 +95,44 @@ def collision_free_blocks(event_times, clean_for_timing
     return blocks, block_id
 
 
-def synthetic_label_sequence(labels, mode: str, rng) -> np.ndarray:
+def synthetic_label_sequence(labels, mode: str, rng, block_id=None) -> np.ndarray:
     """Re-arrange a binary label array holding the MARGINAL COUNTS fixed (spec §4, P1-5).
 
     mode='alternating' -> maximal ping-pong; 'sticky' -> two maximal runs;
     'shuffle' -> random permutation (independent). The caller leaves event TIMES and
     the collision/block structure unchanged; only the label order is replaced.
+
+    block_id (P1-b): when given (aligned to `labels`, -1 = censored/out-of-block), the control
+    is generated INDEPENDENTLY within each collision-free block, because the block-aware timing
+    test resets runs at block boundaries (`compute_runs`). A globally-sticky sequence whose run
+    straddles a boundary would be split by the test and under-state stickiness; per-block
+    generation makes the control maximally dependent AS THE TEST MEASURES IT. Censored events
+    (block_id < 0) keep their original label (they fall outside every block range). Single-class
+    blocks (only one end fired) are left as-is — they cannot alternate/split.
     """
+    labels = np.asarray(labels, int)
+    if block_id is None:
+        return _rearrange_labels(labels, mode, rng, allow_single_class=False)
+    block_id = np.asarray(block_id, int)
+    out = labels.copy()
+    for b in np.unique(block_id):
+        if b < 0:
+            continue
+        idx = np.flatnonzero(block_id == b)
+        out[idx] = _rearrange_labels(labels[idx], mode, rng, allow_single_class=True)
+    return out
+
+
+def _rearrange_labels(labels, mode, rng, allow_single_class) -> np.ndarray:
+    """Marginal-preserving re-arrangement of ONE label run (the per-block / global primitive)."""
     labels = np.asarray(labels, int)
     if mode == "shuffle":
         return rng.permutation(labels)
     classes, counts = np.unique(labels, return_counts=True)
+    if classes.size == 1:
+        if allow_single_class:
+            return labels.copy()
+        raise ValueError(f"synthetic controls require 2 classes, got {classes.tolist()}")
     if classes.size != 2:
         raise ValueError(f"synthetic controls require 2 classes, got {classes.tolist()}")
     a, b = int(classes[0]), int(classes[1])
@@ -143,3 +170,63 @@ def entry_jitter_stats(first_contacts: Sequence) -> dict:
         "top3_fraction": float(cnts_desc[:3].sum()) / n,
         "counts": {str(vals[i]): int(cnts[i]) for i in range(vals.size)},
     }
+
+
+def core_active_fraction(spk, core_e_idx, dt, bin_ms, t_on, t_off) -> np.ndarray:
+    """Binned active fraction of ONE core's E cells inside [t_on, t_off]. `core_e_idx` are
+    E-NEURON column indices of `spk` (the (n_steps, NE) E-spike-bool matrix). Bin i spans
+    [t_on + i*bin_ms, ...); pair with first_crossing_time(..., t_offset=t_on) for an absolute onset.
+    Pure numpy (no engine) so the labeling contract is unit-testable without a simulation."""
+    core_e_idx = np.asarray(core_e_idx)
+    bs = max(1, int(round(bin_ms / dt)))
+    s, e = int(round(t_on / dt)), int(round(t_off / dt))
+    seg = np.asarray(spk)[s:e][:, core_e_idx]
+    nb = seg.shape[0] // bs
+    if nb == 0 or core_e_idx.size == 0:
+        return np.zeros(0)
+    binned = seg[:nb * bs].reshape(nb, bs, -1).any(axis=1)
+    return binned.mean(axis=1)
+
+
+def build_sidecar(ev_recs, spk, core_masks, NE, *, dt, bin_ms, part_min, delta_onset, n_min) -> dict:
+    """Per RETURNED event (== legacy-record column order) hidden core-level source label + collision
+    flag + clean_for_timing. Pure given (ev_recs, spk, core_masks): no sim, no I/O -> unit-testable.
+
+    Aligns 1:1 to the record columns (the runner builds the record from the SAME returned events, in
+    the SAME order), so `event_id` == lagPat column index and `raw_event_index` keeps the original
+    detect_events position (plan P1-3). The packedTimes hard assert (packed[:,0] == t_on/1000) holds
+    because both the sidecar `t_on` and the record window onset derive from this same `ev_recs` t_on.
+    """
+    neg_idx = np.flatnonzero(np.asarray(core_masks[0])[:NE])
+    pos_idx = np.flatnonzero(np.asarray(core_masks[1])[:NE])
+    frac_neg = core_participation_threshold(neg_idx.size, n_min) if neg_idx.size else 1.0
+    frac_pos = core_participation_threshold(pos_idx.size, n_min) if pos_idx.size else 1.0
+    sidecar: List[dict] = []
+    for raw_i, e in enumerate(ev_recs):
+        if not e["returned"]:
+            continue
+        af_neg = core_active_fraction(spk, neg_idx, dt, bin_ms, e["t_on"], e["t_off"])
+        af_pos = core_active_fraction(spk, pos_idx, dt, bin_ms, e["t_on"], e["t_off"])
+        on_neg = first_crossing_time(af_neg, bin_ms, frac_neg, t_offset=e["t_on"])
+        on_pos = first_crossing_time(af_pos, bin_ms, frac_pos, t_offset=e["t_on"])
+        readable = e["axis_err"] is not None and e["n_part"] >= part_min
+        hidden = label_event(on_neg, on_pos, delta_onset, readable)
+        reason = ("unreadable_axis" if not readable else
+                  "no_core_crossing" if (on_neg is None and on_pos is None) else
+                  "simultaneous_onset" if hidden == "collision" else "none")
+        clean_t = (hidden in ("neg", "pos") and readable and e["axis_err"] < 25)
+        sidecar.append(dict(
+            event_id=len(sidecar), raw_event_index=raw_i, t_on=e["t_on"], t_off=e["t_off"],
+            event_peak_t=e.get("event_peak_t"), hidden_source_label=hidden,
+            core_onset_neg=(None if on_neg is None else round(on_neg, 1)),
+            core_onset_pos=(None if on_pos is None else round(on_pos, 1)),
+            collision_reason=reason, clean_for_timing=bool(clean_t),
+            n_part=e["n_part"], axis_err=e["axis_err"], sign=e["sign"],
+            readability=e.get("readability")))
+    n_coll = sum(1 for s in sidecar if s["hidden_source_label"] == "collision")
+    return dict(n_record_events=len(sidecar),
+                config=dict(delta_onset=delta_onset, n_min=n_min,
+                            n_core_neg=int(neg_idx.size), n_core_pos=int(pos_idx.size),
+                            frac_neg=round(frac_neg, 4), frac_pos=round(frac_pos, 4)),
+                collision_rate=round(n_coll / max(1, len(sidecar)), 4),
+                events=sidecar)

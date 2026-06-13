@@ -14,6 +14,8 @@ from src.sef_hfo_stage3 import (
     collision_free_blocks,
     synthetic_label_sequence,
     entry_jitter_stats,
+    core_active_fraction,
+    build_sidecar,
 )
 
 
@@ -124,6 +126,45 @@ def test_synthetic_shuffle_preserves_marginal():
     assert sorted(out.tolist()) == sorted(labels.tolist())
 
 
+# --- synthetic controls must be BLOCK-AWARE (P1-b: collision splits the sequence; the control
+#     has to be maximally dependent AS MEASURED by the block-aware timing test, which resets runs
+#     at block boundaries — so generate it independently within each collision-free block) ---
+
+def test_synthetic_alternating_is_block_local_when_block_id_given():
+    # block 0 = events 0-3 (counts 2,2); censored event 4 (block -1); block 1 = events 5-8 (2,2).
+    labels   = np.array([0, 0, 1, 1,   1,   0, 1, 0, 1])
+    block_id = np.array([0, 0, 0, 0,  -1,   1, 1, 1, 1])
+    out = synthetic_label_sequence(labels, mode="alternating",
+                                   rng=np.random.default_rng(0), block_id=block_id)
+    for b in (0, 1):
+        seg = out[block_id == b]
+        assert int(np.sum(seg[:-1] == seg[1:])) == 0          # alternating WITHIN each block
+        assert sorted(seg.tolist()) == [0, 0, 1, 1]            # per-block marginal preserved
+    assert out[4] == labels[4]                                 # censored event untouched
+
+
+def test_synthetic_sticky_is_block_local_when_block_id_given():
+    # each block must collapse to TWO runs internally (AABB), not one global run spanning blocks.
+    labels   = np.array([0, 1, 0, 1,   0, 1, 0, 1])
+    block_id = np.array([0, 0, 0, 0,   1, 1, 1, 1])
+    out = synthetic_label_sequence(labels, mode="sticky",
+                                   rng=np.random.default_rng(0), block_id=block_id)
+    for b in (0, 1):
+        seg = out[block_id == b]
+        n_runs = 1 + int(np.sum(seg[1:] != seg[:-1]))
+        assert n_runs == 2
+        assert sorted(seg.tolist()) == [0, 0, 1, 1]
+
+
+def test_synthetic_block_local_tolerates_single_class_block():
+    # a block where only one end fired (all 0) cannot alternate -> stays all-0, no raise.
+    labels   = np.array([0, 0,   0, 1])
+    block_id = np.array([0, 0,   1, 1])
+    out = synthetic_label_sequence(labels, mode="alternating",
+                                   rng=np.random.default_rng(0), block_id=block_id)
+    assert out[block_id == 0].tolist() == [0, 0]               # single-class block unchanged
+
+
 # --- entry_jitter_stats: first-active contact dispersion (spec §3.3) ---
 
 def test_entry_jitter_stats_single_fixed_contact_has_zero_dispersion():
@@ -137,3 +178,66 @@ def test_entry_jitter_stats_wandering_group():
     assert s["n_unique"] == 3
     assert 0.0 < s["top1_fraction"] < 1.0
     assert s["top3_fraction"] == 1.0
+
+
+# --- Task 6 writer contract: build_sidecar aligns to returned events + core-level label (P1-3/P1-4) ---
+# Unit-tested WITHOUT a sim: a tiny cm-SNN can't reach the discrete-event regime (it saturates),
+# so the writer contract is pinned on synthetic spikes here; the real sim path is the pilot (Task 7).
+
+def _spk_two_end(n_steps=300, NE=10):
+    """Synthetic E-spike matrix: neg cells 0-4 ignite at bin0 of windows [0,10] and [20,30] ms;
+    pos cells 5-9 ignite only at bin5 of window [0,10] ms."""
+    spk = np.zeros((n_steps, NE), bool)
+    spk[0:10, 0:5] = True       # event0 [0,10]: neg @ bin0 (steps 0-9, dt=0.1 -> 0-1ms)
+    spk[50:60, 5:10] = True     # event0 [0,10]: pos @ bin5 (steps 50-59 -> 5-6ms)
+    spk[200:210, 0:5] = True    # event2 [20,30]: neg @ bin0-of-window
+    return spk
+
+
+def _ev(t_on, t_off, returned, axis_err=5.0):
+    return dict(t_on=t_on, t_off=t_off, returned=returned, event_peak_t=t_on + 2.0,
+                n_part=8, axis_err=axis_err, sign=1.0, readability=0.9)
+
+
+def test_build_sidecar_aligns_to_returned_events_only():
+    spk = _spk_two_end()
+    core_masks = [np.array([True] * 5 + [False] * 5), np.array([False] * 5 + [True] * 5)]
+    ev_recs = [_ev(0.0, 10.0, True), _ev(10.0, 20.0, False), _ev(20.0, 30.0, True)]
+    payload = build_sidecar(ev_recs, spk, core_masks, NE=10, dt=0.1, bin_ms=1.0,
+                            part_min=7, delta_onset=1.0, n_min=1)
+    ev = payload["events"]
+    # only the 2 RETURNED events; event_id contiguous; raw_event_index keeps original positions
+    assert payload["n_record_events"] == 2
+    assert [e["event_id"] for e in ev] == [0, 1]
+    assert [e["raw_event_index"] for e in ev] == [0, 2]
+    # t_on preserved -> packedTimes (t_on/1000) align to the record by construction (P1-3)
+    assert [e["t_on"] for e in ev] == [0.0, 20.0]
+
+
+def test_build_sidecar_labels_earlier_core_as_source():
+    spk = _spk_two_end()
+    core_masks = [np.array([True] * 5 + [False] * 5), np.array([False] * 5 + [True] * 5)]
+    payload = build_sidecar([_ev(0.0, 10.0, True)], spk, core_masks, NE=10, dt=0.1, bin_ms=1.0,
+                            part_min=7, delta_onset=1.0, n_min=1)
+    # neg ignites at ~0ms, pos at ~5ms, |Δ|=5 > delta 1 -> 'neg', clean for timing
+    assert payload["events"][0]["hidden_source_label"] == "neg"
+    assert payload["events"][0]["clean_for_timing"] is True
+
+
+def test_build_sidecar_unreadable_axis_is_ambiguous_and_not_clean():
+    spk = _spk_two_end()
+    core_masks = [np.array([True] * 5 + [False] * 5), np.array([False] * 5 + [True] * 5)]
+    # axis_err None (unreadable) -> ambiguous regardless of onsets, never clean_for_timing
+    payload = build_sidecar([_ev(0.0, 10.0, True, axis_err=None)], spk, core_masks, NE=10,
+                            dt=0.1, bin_ms=1.0, part_min=7, delta_onset=1.0, n_min=1)
+    e0 = payload["events"][0]
+    assert e0["hidden_source_label"] == "ambiguous"
+    assert e0["collision_reason"] == "unreadable_axis"
+    assert e0["clean_for_timing"] is False
+
+
+def test_core_active_fraction_window_binning():
+    spk = _spk_two_end()
+    # neg cells 0-4 all fire in bin0 of [0,10] -> af[0] == 1.0
+    af = core_active_fraction(spk, np.arange(5), dt=0.1, bin_ms=1.0, t_on=0.0, t_off=10.0)
+    assert af.shape[0] == 10 and af[0] == 1.0 and af[5] == 0.0
