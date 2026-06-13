@@ -106,6 +106,28 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 诊断 grid（`figures/diagnostic/`）：6 张以 v2.3 atlas per-seizure thumbnail 为单元
 的 cluster-grouped grid，用于目视裁定。
 
+### 3.4 Track E：临床结局收口（状态更新，2026-06-13）
+
+问的是有真正临床新意的一句：**把平时高频小放电那条传播路线的网络切/毁得越完整，
+术后越不容易复发吗——而且这个网络指标是不是比单纯 HFO 高发率区或临床 SOZ 更贴近结局。**
+分两条、口径隔离：
+
+- **E1（Yuquan 触点级，主线）= 预测变量侧已跑通，结局侧 gating 中。** 18 个有病例文档的
+  Yuquan 病人，已算出"切/毁了多少网络"的六个 exploratory 覆盖量（3 个传播模板派生 + 3 个
+  临床基线 SOZ/HFO/网络）+ swap 分层标签，全部 exploratory、discordant 个案领衔。**卡点：
+  结局标签（Engel/ILAE/复发/随访月数）不在 repo、病例文档只到术后 24h，必须去医院补**；
+  开颅切除区是图片抠不出 → 触点级"treated"这轮 = 热凝 only、`n_resected` 记 NA（不是 0）。
+  已冻结空结局表 `results/template_resection_outcome/yuquan_outcome_labels.csv` 待填。
+  spec：`docs/superpowers/specs/2026-06-13-yuquan-template-resection-outcome-design.md`。
+- **E2（Epilepsiae 区域级）= no-go feasibility，已落盘。** 公开队列结局齐（18/20 有手术+随访，
+  按主分析门随访 ≥ 12mo 达标 10 例、门内 Engel I=7 / II–IV=3），**但切除只记到叶级/区域级
+  （17/18 叶级码 + 1 占位、无任何一例触点级）**，触点级"模板网络被切多少"**根本构造不出来**
+  （粒度不足，未做逐触点→脑叶映射，不主张全切）→ 不能作 E1 外部验证、只区域级弱佐证。
+  归档：`docs/archive/topic5/epilepsiae_e2_region_feasibility_2026-06-13.md`。
+
+一句话：**E 线的限速步是 Yuquan 医院随访标签**；标签到位前不下任何覆盖-结局结论。
+（Track A–E 全貌见 `docs/archive/topic5/network_axis_pivot_plan_2026-06-13.md`。）
+
 ---
 
 ## 4. 已知 caveat

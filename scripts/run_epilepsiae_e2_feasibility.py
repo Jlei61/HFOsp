@@ -106,47 +106,58 @@ def main():
     engel_dist = {}
     for r in with_outcome:
         engel_dist[r["engel_class"]] = engel_dist.get(r["engel_class"], 0) + 1
-    # region-degeneracy: resection coded as how many lobe codes per subject? (1 = whole-lobe coarse)
-    loc_code_sizes = [r["n_surgery_loc_codes"] for r in with_surgery if r["n_surgery_loc_codes"]]
+    # main-analysis gate would be followup >= 12mo; stratify (full 18 mixes <12mo follow-ups)
+    ge12 = [r for r in with_outcome
+            if r["followup_months_max"] != "" and int(r["followup_months_max"]) >= 12]
+    # surgery-localisation validity: lobe/region code vs placeholder ('---'); none is contact-level
+    valid_surgloc = [r for r in with_surgery if r["surgery_localisation"] not in ("", "---")]
+    placeholder_surgloc = [r["subject"] for r in with_surgery
+                           if r["surgery_localisation"] in ("", "---")]
     template_ch = [r["n_template_channels"] for r in rows]
 
     summary = {
         "track": "E2_epilepsiae_region_level_feasibility",
-        "verdict": "region_level_no_go_for_contact_level (weak region pilot only)",
+        "verdict": "no_go_contact_level__granularity_insufficient (outcome present; resection only lobe-level)",
         "n_template_subjects": len(rows),
         "n_with_surgery": len(with_surgery),
         "n_with_outcome_label": len(with_outcome),
-        "engel_distribution": engel_dist,
-        "engel_I_seizure_free": sum(1 for r in with_outcome if r["engel_class"] == "I"),
-        "engel_II_to_IV": sum(1 for r in with_outcome if r["engel_class"] != "I"),
-        "resection_granularity": {
-            "surgery_localisation_is_lobe_level": True,
-            "median_loc_codes_per_subject": (sorted(loc_code_sizes)[len(loc_code_sizes) // 2]
-                                             if loc_code_sizes else None),
-            "note": "surgerylocalisation = whole-lobe code(s) (e.g. 't-r'); NOT contact-level.",
+        "engel_distribution_all_outcome": engel_dist,
+        "outcome_followup_stratification": {
+            "n_outcome_parseable": len(with_outcome),
+            "n_followup_ge12mo": len(ge12),
+            "engel_ge12mo_I": sum(1 for r in ge12 if r["engel_class"] == "I"),
+            "engel_ge12mo_II_to_IV": sum(1 for r in ge12 if r["engel_class"] != "I"),
+            "note": "main analysis gate = followup>=12mo; the full-18 Engel split mixes <12mo follow-ups.",
         },
-        "template_channel_pool": {
-            "min": min(template_ch), "max": max(template_ch),
-            "note": "templates computed on a focus-restricted small channel pool, subset of the resected "
-                    "lobe -> 'template-source in resected lobe' ~ trivially true -> binary predictor degenerate.",
+        "surgery_localisation_validity": {
+            "n_with_surgery": len(with_surgery),
+            "n_valid_lobe_region_localisation": len(valid_surgloc),
+            "placeholder_or_unspecified": placeholder_surgloc,
+            "any_contact_level": False,
+            "note": "lobe/region-level codes only (e.g. 't-r'); 1 placeholder ('---'); "
+                    "NO subject has a contact-level resection boundary.",
         },
+        "template_channel_pool": {"min": min(template_ch), "max": max(template_ch)},
         "why_no_go": (
-            "Outcome labels EXIST and are parseable (proves the pipeline could run); but resection is "
-            "coded at lobe granularity while templates sit inside the focus pool within that lobe, so the "
-            "contact-level 'fraction of template network treated' has no contrast (re-confirms strategy "
-            "§5.1 dual-NULL). Epilepsiae stays a weak region-level pilot, NOT mixed into the Yuquan "
-            "contact-level E1; this is the data-side reason Yuquan contact-level outcome is the critical path."
+            "Outcome labels EXIST and parse (18/20; 10 at >=12mo) -- proves the analysis pipeline could "
+            "run. But surgery localisation is lobe/region-level only (17/18 a lobe code, 1 placeholder; "
+            "none contact-level), so a contact-level 'fraction of template network treated' CANNOT BE "
+            "CONSTRUCTED at all. This is granularity-insufficiency, NOT a demonstration that templates were "
+            "fully resected -- no per-contact channel-to-lobe mapping was performed. Hence Epilepsiae "
+            "cannot externally validate the Yuquan contact-level E1 question; it stays a separate "
+            "region-level pilot. Re-confirms strategy §5.1."
         ),
     }
     with open(os.path.join(OUT, "E2_feasibility_summary.json"), "w") as fh:
         json.dump(summary, fh, indent=2, ensure_ascii=False)
 
+    s = summary["outcome_followup_stratification"]
     print(f"template subjects = {len(rows)}; with surgery = {len(with_surgery)}; "
-          f"with outcome = {len(with_outcome)}")
-    print(f"Engel dist = {engel_dist} (I seizure-free = {summary['engel_I_seizure_free']}, "
-          f"II-IV = {summary['engel_II_to_IV']})")
-    print(f"surgery_localisation codes/subject (median) = {summary['resection_granularity']['median_loc_codes_per_subject']} "
-          f"(lobe-level); template pool {min(template_ch)}-{max(template_ch)} ch")
+          f"outcome parseable = {len(with_outcome)}")
+    print(f"followup>=12mo = {s['n_followup_ge12mo']} (Engel I={s['engel_ge12mo_I']} / "
+          f"II-IV={s['engel_ge12mo_II_to_IV']}); full-18 = {engel_dist}")
+    print(f"valid lobe-level surgery localisation = {len(valid_surgloc)}/{len(with_surgery)}; "
+          f"placeholder = {placeholder_surgloc}; contact-level = NONE")
     print(f"wrote {OUT}/")
 
 

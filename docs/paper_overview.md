@@ -185,6 +185,7 @@ PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subj
 - Topic 3：SOZ / non-SOZ 的 raw serial correlation 差异在 per-channel 框架下消失，说明旧 lagPat 结果部分混入了事件率与通道选择偏差。
 - Topic 3：SOZ 更像是“全局调制之上叠加局部短程记忆”，而不是简单地“整体更同步”或“整体更周期”。
 - Topic 5：v2.3 ictal ER atlas 显示 within-subject seizure 异质性是真现象；z-ER subtyping cohort 上 ~64% subject-band 找到 ≥2 morphological subtypes，与 Schroeder 2020 PNAS 先验一致。结论 commit 到 publication-grade 仍需 sensitivity（sentinel 442/548 已视觉过关；548 gamma k=7 / 916/1077 sentinel 失效是已知限制）。下游 PR 必须 per-subtype。
+- Topic 5（临床结局收口 Track E，2026-06-13）：Yuquan 触点级"模板网络覆盖"预测变量侧已跑通、结局标签 gating 待医院随访（E1）；Epilepsiae 切除仅叶级、触点级覆盖构造不出 = no-go feasibility（E2）。详见 `docs/topic5_seizure_subtyping.md` §3.4。
 
 ---
 
