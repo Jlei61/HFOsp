@@ -34,7 +34,18 @@ Phasing (the pilot is a HARD STOP):
 
 ## Phase 0 — Pure helpers (TDD)
 
-### Task 1: `core_onset` — first time a core's active fraction crosses threshold
+### Execution reconciliation (2026-06-13, round 4 — pre-existing files)
+
+`src/sef_hfo_stage3.py` + `tests/test_sef_hfo_stage3.py` already existed (untracked) with 3 working, tested functions that SUPERSEDE Tasks 1–2 — keep them, do not overwrite:
+- `core_participation_threshold(n_core_cells, n_min)` → `max(0.01, n_min/n_core_cells)` (replaces the inline threshold).
+- `first_crossing_time(series, bin_w, threshold, t_offset=0.0)` → **absolute** in-window onset (replaces `core_onset`; the `t_offset` is an improvement).
+- `label_event(onset_neg, onset_pos, delta_onset, readable)` → replaces `assign_hidden_label`; folds the unreadable→`ambiguous` override into the function, and **a single-core crossing (one onset None) → that core's label, NOT `ambiguous`** (the cleanest single-end events are kept; deliberate, better than the plan's stricter rule).
+
+**Therefore: Tasks 1–2 are DONE (verify the 10 existing tests pass). Tasks 3–5 (below) ADD the missing helpers to the same file. Task 6 wiring uses the existing names:** `frac = core_participation_threshold(n_core_cells, N_MIN)`; `onset = first_crossing_time(core_af, bin_w, frac, t_offset=t_on)`; `hidden = label_event(onset_neg, onset_pos, DELTA_ONSET_MS, readable=(rd["axis_err"] is not None and rd["n_part"] >= PART_MIN))`. `clean_for_timing = hidden in {"neg","pos"} and returned` (the readability is already inside `label_event`).
+
+### Task 1: `core_onset` — SUPERSEDED by `first_crossing_time` (see reconciliation above; verify existing test)
+
+### ~~Task 1: `core_onset`~~ — first time a core's active fraction crosses threshold
 
 **Files:**
 - Create: `src/sef_hfo_stage3.py`
