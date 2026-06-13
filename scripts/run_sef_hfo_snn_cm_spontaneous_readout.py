@@ -92,15 +92,17 @@ def valid_mask(m, posE, L, Rr):
 
 
 def build_lesion_vth(net, NE, axis_unit, center, half, lesion, core_mean, core_std, core_r,
-                     dephase, seed):
+                     dephase, seed, sep_frac=0.6):
     """Per-neuron threshold field. Returns (vth, core_mask, foci[xy list], core_masks[per-focus
     FULL-network bool masks]). The per-focus masks let the caller compute a core-LEVEL onset per end.
+    `sep_frac`: each focus sits at center ± sep_frac*half along the axis; larger = farther apart =
+    weaker coupling between the two ends (regime-screen geometry knob; default 0.6 = the pilot value).
     twoend_equal: both foci at the SAME core_mean (Stage 3; collisions handled downstream by censoring,
     NOT by dephasing). twoend_deph: pos-end mean RAISED by `dephase` so the two run at different rates
     (identical means collide/merge — diagnostic 2026-06-10)."""
     is_E = np.zeros(len(net["pos"]), bool); is_E[:NE] = True
-    neg_xy = center - 0.6 * half * axis_unit
-    pos_xy = center + 0.6 * half * axis_unit
+    neg_xy = center - sep_frac * half * axis_unit
+    pos_xy = center + sep_frac * half * axis_unit
     if lesion == "oneend_neg":
         cf = sample_core_field(net["pos"], is_E, neg_xy, core_r, np.random.default_rng(seed + 7),
                                core_mean=core_mean, core_std=core_std, base_mean=18.0)
@@ -180,6 +182,8 @@ def main():
     ap.add_argument("--core-mean", type=float, default=17.0)
     ap.add_argument("--core-std", type=float, default=1.5)
     ap.add_argument("--core-r", type=float, default=1.5)
+    ap.add_argument("--sep-frac", type=float, default=0.6,
+                    help="focus offset from center as a fraction of half-L (twoend separation; higher = farther apart / less coupled)")
     ap.add_argument("--dephase", type=float, default=0.3, help="twoend_deph: +mV on pos focus to separate firing times")
     ap.add_argument("--nc", type=int, default=6)
     ap.add_argument("--lesion", choices=["oneend_neg", "oneend_pos", "twoend_deph", "twoend_equal"],
@@ -207,7 +211,8 @@ def main():
     posE = net["pos"][:NE]
     center = np.array([L / 2, L / 2]); half = L / 2
     vth, core_mask, foci, core_masks = build_lesion_vth(net, NE, axis_unit, center, half, a.lesion,
-                                                        a.core_mean, a.core_std, a.core_r, a.dephase, a.seed)
+                                                        a.core_mean, a.core_std, a.core_r, a.dephase, a.seed,
+                                                        sep_frac=a.sep_frac)
 
     m = montage(center, a.theta, 0.0, a.nc)
     valid = valid_mask(m, posE, L, p.Rr)
