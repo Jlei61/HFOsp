@@ -174,6 +174,8 @@ def main():
     ap.add_argument("--density", type=float, default=100.0)
     ap.add_argument("--theta", type=float, default=45.0)
     ap.add_argument("--AR", type=float, default=2.0)
+    ap.add_argument("--drive", type=float, default=DRIVE,
+                    help="nu_ext_ratio (background drive); lower -> sparser / more local events")
     ap.add_argument("--T", type=float, default=1500.0)
     ap.add_argument("--core-mean", type=float, default=17.0)
     ap.add_argument("--core-std", type=float, default=1.5)
@@ -197,7 +199,7 @@ def main():
 
     L, theta_rad = a.L, np.deg2rad(a.theta)
     axis_unit = np.array([np.cos(theta_rad), np.sin(theta_rad)])
-    p = Params(g=3.6, L=L, density=a.density, T=a.T, dt=DT, nu_ext_ratio=DRIVE, seed=a.seed)
+    p = Params(g=3.6, L=L, density=a.density, T=a.T, dt=DT, nu_ext_ratio=a.drive, seed=a.seed)
     rng = np.random.default_rng(a.seed)
     print(f"[{tag}] N~{int(a.density*L*L)} seed={a.seed} T={a.T} lesion={a.lesion} m={a.core_mean} ...", flush=True)
     pos, labels, NE, NI = place_neurons(p, rng)
@@ -314,7 +316,7 @@ def main():
         _imask[max(0, int((e["t_on"] - 10) / bin_w)):int((e["t_off"] + 10) / bin_w)] = False
     true_floor = round(float(np.percentile(af[_imask], 95)), 5) if _imask.any() else None
     summary = dict(tag=tag, provenance=_provenance(),
-                   config=dict(L=L, density=a.density, theta=a.theta, AR=a.AR, T=a.T, NE=int(NE),
+                   config=dict(L=L, density=a.density, theta=a.theta, AR=a.AR, drive=a.drive, T=a.T, NE=int(NE),
                                lesion=a.lesion, core_mean=a.core_mean, core_std=a.core_std,
                                core_r=a.core_r, dephase=a.dephase, nc=a.nc, seed=a.seed,
                                foci=[[round(float(f[0]), 2), round(float(f[1]), 2)] for f in foci],
