@@ -301,3 +301,17 @@ results/topic4_sef_hfo/observation_layer/
 - **正式版 = current-based / field-based 读出**（突触电流 forward model，推广 `engine/lfp.py` |I_E|+|I_I| 至 montage 触点）——**只有这版才叫 LFP**，才适合与真实 SEEG **波形**幅度/形状对齐。两版别混名。
 
 **13.5 不变量**：13.1–13.4 是观测**真实性 / 可诊断性**合同，不改 §3.5 估计子（endpoint-centroid，sparse-friendly）、§10 验收阈（25°/k_dir=3/τ_fail，永不调）、§-1 reframe claim（连接定无向轴）。
+
+---
+
+## 14. 自发点火双向读出闭合（2026-06-11，验收通过）
+
+承本 spec（§4.3 cm-SNN substrate）+ cm 行波归档，把读出层从"人为戳单事件方向"推进到**病灶自己点火、读出一串自发事件、并被与真实病人完全相同的聚类流水线认出两套相反方向模板**。
+
+**结论（仪器层面验收通过）**：cm-SNN 在背景噪声下，**两个端点各设一个低阈值病灶 → 两种相反传播模式**（−端正向 / +端反向，各 15 个干净自发事件）；池化 30 事件走真实 masked PR-2/PR-2.5/rank-displacement → **stable_k=2、15/15、inter-cluster corr −0.95（活动电极）、forward/reverse 1 pair、swap=strict、split-half reproduced**。两档（主 17 宽 / 低异常 17.5 宽）两端都过门并闭合；过热 16.5 宽与稀疏 17 窄被门正确拦下。
+
+**关键发现**：剔除从不参与的死电极后，真实管线的正反检测从 +0.44/none 变成 −0.95/1-pair（死通道的 masked 插补值是污染源，剔除非 cherry-pick）。
+
+**诚实口径**：仪器对齐、非机制重现（单轴 → 模板空间近 1 维 → stable_k=2 半被迫）；两端各设源 = 强制读出口径（§7），非"模型自发交替产生正反"。
+
+**全量数值 + 图 + 脚本**：`docs/archive/topic4/sef_hfo/snn_cm_spontaneous_bidirectional_2026-06-11.md`。
