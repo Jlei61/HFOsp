@@ -279,13 +279,29 @@ def main():
         write_packed_times(rec_art, base + "_packedTimes_withFreqCent.npy")
         write_montage_manifest(rec_art, base + "_montage.json")
 
+    # Stage 3 sidecar + the downstream synthetic-label timing controls rearrange labels in ARRAY
+    # order within each collision-free block (src.sef_hfo_stage3) -> they assume events are in TIME
+    # order. detect_events already emits time-order; pin it here at the data-production boundary so
+    # the sidecar (and anything built from it) is guaranteed time-sorted (user 2026-06-13).
+    _ton = [e["t_on"] for e in ev_recs]
+    assert _ton == sorted(_ton), "events not time-sorted — sidecar/synthetic-controls assume time order"
     # --- Stage 3 sidecar (two-focus runs): hidden core-level source label per RETURNED event,
     # aligned 1:1 to the record columns (plan P1-3). build_sidecar is pure (unit-tested w/o a sim).
+    stage3_source_counts = None   # sidecar-derived hidden-SOURCE counts (distinct from direction)
     if len(core_masks) == 2:
         payload = build_sidecar(ev_recs, spk, core_masks, NE, dt=DT, bin_ms=BIN_MS,
                                 part_min=PART_MIN, delta_onset=a.delta_onset, n_min=a.n_min)
         json.dump(dict(tag=tag, **payload),
                   open(os.path.join(out_dir, f"sidecar_{tag}.json"), "w"), indent=2)
+        # Stage 3 GATE counts = hidden SOURCE end (neg/pos), NOT the read-out direction. A run can be
+        # all-forward by direction yet have 0 neg-source events (pilot 2026-06-13) — do not conflate.
+        _se = payload["events"]
+        stage3_source_counts = dict(
+            neg_clean=sum(1 for e in _se if e["hidden_source_label"] == "neg" and e["clean_for_timing"]),
+            pos_clean=sum(1 for e in _se if e["hidden_source_label"] == "pos" and e["clean_for_timing"]),
+            collision=sum(1 for e in _se if e["hidden_source_label"] == "collision"),
+            ambiguous=sum(1 for e in _se if e["hidden_source_label"] == "ambiguous"),
+            collision_rate=payload["collision_rate"])
 
     n_fwd = sum(1 for r in ev_recs if _clean(r, 1.0))
     n_rev = sum(1 for r in ev_recs if _clean(r, -1.0))
@@ -305,11 +321,17 @@ def main():
                                margin_frac=MARGIN_FRAC, n_core=int(core_mask.sum())),
                    detector=dict(floor=round(floor, 4), peak=round(peak, 4), bar=round(bar, 4),
                                  true_inter_event_floor=true_floor),
-                   n_events=len(ev_recs), n_clean_forward=n_fwd, n_clean_reverse=n_rev,
+                   n_events=len(ev_recs),
+                   # n_clean_* are DIRECTION (read-out sign) counts, NOT hidden-source counts;
+                   # Stage 3 gates read stage3_source_counts (sidecar hidden neg/pos), see above.
+                   n_clean_forward=n_fwd, n_clean_reverse=n_rev,
                    n_truncated_directional=n_trunc_dir,
+                   stage3_source_counts=stage3_source_counts,
                    rep_event_index=rep_i, events=ev_recs)
     json.dump(summary, open(os.path.join(out_dir, f"readout_{tag}.json"), "w"), indent=2)
-    print(f"[{tag}] events={len(ev_recs)} clean fwd/rev={n_fwd}/{n_rev} (+{n_trunc_dir} truncated boundary) "
+    if stage3_source_counts is not None:
+        print(f"[{tag}] stage3 SOURCE counts (gate): {stage3_source_counts}", flush=True)
+    print(f"[{tag}] events={len(ev_recs)} clean DIRECTION fwd/rev={n_fwd}/{n_rev} (+{n_trunc_dir} truncated boundary) "
           f"| rep_event={rep_i} (rd={rep['readability'] if rep else None} err={rep['axis_err'] if rep else None}) "
           f"| bar={bar:.4f} peak={peak:.4f}", flush=True)
 
