@@ -701,6 +701,10 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - 用 conductance-based LIF 验证 rate 层机制在 spiking 层仍成立；虚拟 SEEG 用突触电流 proxy + envelope。
 - synthetic data 必须走真实 PR-2 / PR-2.5 / endpoint pipeline。
 
+> **执行状态（2026-06-08 → 06-14，探索性观测层）**：Step 1（同质率场）NULL 把"存在性"移交到这里后，cm 尺度 LIF SNN（L=20mm/density=100，异质核 + 各向异性连接 + 真实 4mm 虚拟 SEEG）的观测层分三阶段探索：
+> - **Stage 2 = 结构层闭合（站得住）**：单灶分开跑、把正/反事件池化成一个 synthetic subject，过真实 masked pipeline → `stable_k=2` + 两套相反模板可复现 + 端点互换 `strict`。定位 = **仪器闭合**（管线能认出两套稳定、可复现、端点互换的相反模板），非"机制重现"（单一连接轴 → 模板空间近 1 维 → `stable_k≈2` 半被迫）。详 `docs/archive/topic4/sef_hfo/snn_cm_spontaneous_bidirectional_2026-06-11.md`。
+> - **Stage 3 = 二端等强单网络自发（探索性，已收束，timing 主问未被检验）**：两块等强病灶放同一张网、靠噪声自发，想测"网络自己的事件序列是否标签-时序独立"。扫遍工作点都没拿到"两头都干净自发、低碰撞、平衡双向"的可用区；改做事件分型后揭示 **局部事件=猛点火但传不远（contained / relay-failure），区分局部↔全局靠持续时间+扩散而非成核能量；源层面双端成核存在但 per-cell 不平衡**。支持"正反模板来自同轴两端随机成核"（源层面），不支持"平衡独立长时序双源列车"。**timing 独立性主问从未被检验，不写主结论。** 详 `docs/archive/topic4/sef_hfo/stage3_regime_screen_2026-06-14.md`（探索阶段文档，含 pilot `stage3_twoend_equal_pilot_2026-06-13.md`）。
+
 **Step 5：加入慢变量**
 
 - 第一版只用抽象 `q(t)` 调制 `eta(x,t)`。
@@ -865,6 +869,9 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 - `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md` —— **病理→中观→参数映射纪律 + 首轮调参 plan**（连接性 E→E 核「定往哪传」+ E 阈值异质性「定哪里点着」，LIF/SNN 并行）；framework §2 / §7.3 / §8.4 的可执行细化；癫痫方向锚 Rich/Huberfeld/Lepeu
 - `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md` —— **CURRENT v2 plan**，SEF-HFO 主模型路线（线性稳定性 → rate field → LIF SNN → 慢变量桥接）
+- **cm-SNN 观测层（Step 4 spiking 执行线，探索性）**：
+  - `docs/archive/topic4/sef_hfo/snn_cm_spontaneous_bidirectional_2026-06-11.md` —— **Stage 2 结构层闭合**（池化正/反事件过真实 masked pipeline → `stable_k=2` + 相反模板可复现 + 端点互换 strict；定位=仪器闭合非机制重现）
+  - `docs/archive/topic4/sef_hfo/stage3_regime_screen_2026-06-14.md` —— **Stage 3 探索阶段文档**（二端等强单网络自发事件分型；局部=猛点火但传不远 contained/relay-failure，区分局部↔全局靠持续+扩散非能量；源层面双端成核存在但 per-cell 不平衡；**timing 独立性主问未被检验，不进主结论**）；pilot = `stage3_twoend_equal_pilot_2026-06-13.md`
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
