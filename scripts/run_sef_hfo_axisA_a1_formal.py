@@ -161,19 +161,35 @@ def analyze() -> None:
     # cross-band tests on per-event pathway_width + axis_err
     def cross_band(metric):
         groups = [band[std][metric] for std in STDS if band[std][metric]]
-        kw = (stats.kruskal(*groups) if len(groups) >= 2 and all(len(g) for g in groups)
-              else None)
+        allv = np.concatenate([np.asarray(g, float) for g in groups]) if groups else np.array([])
+        degenerate = allv.size > 0 and np.unique(np.round(allv, 6)).size == 1
+        kw = (stats.kruskal(*groups) if (not degenerate and len(groups) >= 2
+                                         and all(len(g) for g in groups)) else None)
         pair = {}
         for a, b in combinations(STDS, 2):
             ga, gb = band[a][metric], band[b][metric]
-            if ga and gb:
+            if ga and gb and not degenerate:
                 u = stats.mannwhitneyu(ga, gb, alternative="two-sided")
                 pair[f"{BAND_NAME[a]}_vs_{BAND_NAME[b]}"] = dict(
                     p=round(float(u.pvalue), 5), cliffs_delta=round(_cliffs_delta(ga, gb), 4),
                     n_a=len(ga), n_b=len(gb))
-        return dict(kruskal_p=(round(float(kw.pvalue), 5) if kw else None), pairwise=pair)
+        return dict(kruskal_p=(round(float(kw.pvalue), 5) if kw else None),
+                    degenerate_identical=bool(degenerate),
+                    common_value=(round(float(np.unique(np.round(allv, 6))[0]), 4) if degenerate else None),
+                    pairwise=pair)
 
     primary = dict(pathway_width=cross_band("widths"), axis_err=cross_band("errs"))
+    headline = dict(
+        n_clean_per_band={BAND_NAME[std]: bands_out[BAND_NAME[std]]["n_clean_total"] for std in STDS},
+        pathway_width_degenerate=primary["pathway_width"]["degenerate_identical"],
+        axis_err_degenerate=primary["axis_err"]["degenerate_identical"],
+        onset_top1_per_band={BAND_NAME[std]: bands_out[BAND_NAME[std]]["onset_jitter"].get("top1_fraction")
+                             for std in STDS},
+        interpretation=("primary fingerprint (pathway_width / axis_err / entry) is IDENTICAL across "
+                        "narrow/mid/wide at this montage resolution; the only band difference is the "
+                        "IGNITION RATE (n_clean rises narrow->wide). Threshold dispersion modulates "
+                        "how OFTEN events ignite, NOT the propagation fingerprint. Descriptive NULL; "
+                        "not a mechanism claim."))
 
     # matched-rate SENSITIVITY: count-match each band to the smallest band's clean count
     n_match = min(len(band[std]["widths"]) for std in STDS)
@@ -201,6 +217,7 @@ def analyze() -> None:
         lesion=LESION, core_mean=MEAN, T=T, stds=STDS, seeds=SEEDS,
         n_min_events=N_MIN_EVENTS_DEFAULT,
         insufficient_bands=insufficient_bands,
+        headline=headline,
         per_run=per_run, bands=bands_out, primary_cross_band=primary, sensitivity=sensitivity)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "a1_formal_results.json").write_text(json.dumps(out, indent=2, ensure_ascii=False))

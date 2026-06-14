@@ -1,0 +1,91 @@
+# Axis A — 病灶内部机制 → 传播指纹：执行归档
+
+**Date:** 2026-06-15 · **Status:** 执行中(无人值守 8h run) · **Plan:** `docs/superpowers/plans/2026-06-14-sef-hfo-axisA-lesion-propagation-fingerprint.md` · **Spec(engine):** `docs/superpowers/specs/2026-06-13-sef-hfo-snn-axisA-ei-local-lesion-design.md`
+
+用户 2026-06-15 锁定:scope = 阈值离散臂 + E/I 机制臂(改引擎);A1 = fixed-mean 主 + matched-rate 敏感性;引擎 re-bless 自主进行;阶段提交 + 阻塞降级继续。
+
+---
+
+## §0 朴素 abstract(测了什么 / 怎么测的 / 揭示了什么)
+
+**测了什么** —— 在同一张网络上,用两种不同的"局部病灶"方式让一小块组织变得容易自发放电:(1) 把那一小块的**放电门槛离散度**调宽/调窄(阈值异质性);(2) 把那一小块的**抑制刹车调弱**(w_EI↓)或**自激回路加粗**(w_EE↑)。问:不同的病灶方式,会不会让间期 HFO 在网络上传播时留下**不同的"指纹"**(往哪传 axis_dir、波垂直方向多宽 pathway_width、入口漂不漂 onset_jitter)。
+
+**怎么测的** —— 每个病灶配置自发放出一串间期事件,透过同一套虚拟 SEEG 电极读出,用冻结的指纹仪器(`src/sef_hfo_fingerprint.py`)抽 primary 三件套,跨 seed 聚合后做非参检验 + 效应量。所有比较都在**事件率匹配的工作点**上,防"更容易点火"冒充"机制指纹不同"。
+
+**揭示了什么** ——
+- **阈值离散臂(A1/A4):描述性 NULL。** 在干净工作点(mean=17.0)上,把核内放电门槛的离散度从窄(0.5)调到宽(1.5),**只改变事件点火的频率**(clean 事件 窄26 / 中40 / 宽47),**不改变传播指纹**——三档的 pathway_width 全是 2.6mm、axis_err 全是 0°、最早入口全锁在 A0。也就是说"离散度大小"在这个电极分辨率下不留下可区分的传播指纹,它只决定"多久点一次火"。
+- **E/I 机制臂(A3):pilot 发现局部 E/I 病灶点火但事件太局部。** 把核内抑制刹车调弱(w_EI↓)或自激加粗(w_EE↑),核确实会自发点火(bare sheet 仍安静,true_floor 0.00016),但放出的事件**自终止却空间局部**(参与触点多数 <7,读不出方向),几乎不产生 V_th↓ 那样的可读方向模板。是不是磁量不够 → 磁量扫描(A3-0a)进行中。
+
+(一句话:到目前为止,"病灶内部机制不同 → 传播指纹不同"这个 A 轴主假设,在阈值离散这条**被证伪**(只改率不改指纹);在 E/I 这条,初步看到的是"点火但模板读不出",磁量扫描判断是否有窗口能复现 V_th↓ 模板。)
+
+---
+
+## §1 A0 指纹仪器冻结(user sign-off 2026-06-14)
+
+冻结 event-level schema + extractor。primary = {axis_dir, pathway_width, onset_jitter};secondary = {latency_jitter, recruit_extent};deferred = {speed, event_size};amplitude_proxy = diagnostic。`pathway_width` = 相对 **LOCKED 几何轴 theta**(非 event-fitted)的垂直 robust span(p95−p5),<3 触点 NaN。`n_min_events=6` 为 A1/A3/A4 最低门。两道边界 loud-fail:name-alignment + `n_part==非空rank数`。baseline 从现有 oneend neg/pos 抽出(无新仿真):axis_err 中位 0°、sign +1/−1、pathway_width 2.6mm。详见 `results/.../fingerprint/baseline_oneend{,_summary}.json` + commit b955298。
+
+## §2 A1-0a 点火可行性(`a1_0a_feasibility/`)
+
+单灶 oneend_neg,`mean{17,16.5,16} × std{0.5,1,1.5}`,seed 1,T=2000,只报可点火性。
+
+| mean \ std | 0.5 窄 | 1.0 中 | 1.5 宽 |
+|---|---|---|---|
+| **17.0** | clean **5** ✓ | clean **8** ✓ | clean **9** ✓ |
+| 16.5 | clean 8 ✓ | clean 9 ✓ | 14 ev / **0 clean** ✗ |
+| 16.0 | clean 9 ✓ | 20 ev / **0 clean** ✗ | 8 ev / **0 clean** ✗ |
+
+**关键(推翻 plan 旧假设)**:窄档(std=0.5)在 mean=17.0 **并不** gate-fail——三档在 17.0 都干净点火。降 mean 反而让中/宽档**过度点火成不可读事件**(事件多但 0 clean directional)。
+
+**对 A1 formal 的影响**:fixed-mean = **17.0** 就是三档共同的干净点火工作点,**不需要降 mean** → plan 担心的 mean/工作点混淆在 17.0 基本消解。这是个比预期更干净的结果。
+
+## §3 A1 formal — 阈值离散 → 指纹(fixed-mean 17.0 + matched-rate 敏感性)= 描述性 NULL
+
+`a1_formal/`,9 cells(std{0.5,1,1.5} × seed{1,2,3})@ mean=17.0 T=3500。结果(`a1_formal_results.json` + `figures/a1_heterogeneity_fingerprint.png`):
+
+| 档 | clean 事件(3 seed 合) | pathway_width | axis_err 中位 | onset top1 |
+|---|---|---|---|---|
+| 窄 std=0.5 | **26** | 2.6mm | 0° | 1.00 |
+| 中 std=1.0 | **40** | 2.6mm | 0° | 0.975 |
+| 宽 std=1.5 | **47** | 2.6mm | 0° | 1.00 |
+
+- **primary 三件套在三档完全相同**(`pathway_width_degenerate=true`、`axis_err_degenerate=true`、入口几乎全 A0)→ Kruskal 退化(无方差)。matched-rate 敏感性(count-match 到 26/档)同样无差(值恒等)。
+- **唯一的档间差异是点火频率**:clean 事件随离散度上升(窄→宽 26→40→47)。
+- **结论(描述性 NULL)**:阈值离散度在本电极分辨率下**不产生可区分的传播指纹**,只调制点火频率。这证伪了"离散度 → 指纹"这条;与 plan 预案一致("若没有指纹效应,E/I 那条更值得投")。注:pathway_width 的"2.6mm 恒定"部分是 montage 离散化(虚拟电极间距把 ⊥ 展宽量化到同一格),所以是"在该读出分辨率下无差",非"物理上严格无差"。
+
+## §4 A4 paired single-focus = A1 宽-vs-中 pairwise(同样 NULL)
+
+A4 plan = "分别单灶、同 seed/同 geometry/同工作点,一端 std=1.5 一端 std=1.0"——正是 A1 数据里 **std1.5 vs std1.0** 的两两对比(同一套 fixed-mean/geometry/seeds),无需额外仿真。结论 = **宽与中两个不同离散度的灶,传播指纹无可区分差异**(pathway_width/axis_err/入口全同),只有点火频率不同(宽 47 vs 中 40)。即"两个不同内部属性(离散度)的灶给同一指纹"。**true two-focus(同网双灶)本轮不做**(scope 锁定 paired single-focus)。
+
+## §5 A2 — 局部 E/I 病灶引擎(guarded edit + re-bless logged diff)
+
+引擎在 `results/topic4_sef_hfo/lif_snn/engine/`(**gitignored**),由 `engine_versions.json` sha 守护。本节是这次改动的**durable 记录**(git 不收 gitignored 文件)。
+
+**改了什么**:`build_connectivity_rot` 加一个**可选 per-neuron 突触权重缩放场**,在 partner 采样**之后**施加(rng 抽取顺序不变 → 默认路径 BIT-IDENTICAL,已对 pre-edit snapshot 验证:a_tot=22272000.0 / g_tot=14844211.2 完全相等):
+- `local_scale_EI`:E **靶**在核内 → 乘 w_EI(该 E 细胞的 GABA 输入),即 perisomatic 抑制塌陷。**target-indexed scalar,绝不碰 w_II**。
+- `w_EE_gain_core` + `core_mask_E`:E→E 边的**源与靶都在核内** → 乘 w_EE,即复发兴奋簇。**edge-indexed both-in-core**(只看源会热扩散出核、破坏 bare-sheet-quiet);源用 **E-local** 下标。
+- `tau_I`(A4 行)= 全局内禀量,**DEFERRED**,不做空间场。
+
+**re-bless logged diff**(2026-06-15):`engine_versions.json` 6 文件中**仅** `connectivity_rot.py` sha 变:`9694171ae636 → fe8527c6e440`;`kick_probe.py / params.py / model.py / connectivity.py / lfp.py` 不变。
+
+**TDD**(`tests/test_sef_hfo_axisA_ei_engine.py`,5 pass,直接 import 不过守护 runner):默认确定性 + explicit-noop 一致;w_EI↓ 只降 in-core E 的 GABA mass(结构不变);w_II 永不被 EI 场缩放;w_EE↑ 只升 both-in-core AMPA mass;**out-core 靶即使有 in-core 源也不缩放**(both-in-core 判别子)。
+
+**runner 接线**:`oneend_inhib`(w_EI↓)/ `oneend_recur`(w_EE↑)/ `oneend_combined` 三个单灶模式,FLAT V_th=18.0(可激性来自权重病灶、非降阈值),权重场进 `build_connectivity_rot`(**不进 `simulate_kick`**——权重建连时烘焙;spec §5 原措辞已改)。新增 `--ei-scale`(默认 0.5)/ `--ee-gain`(默认 1.5)+ config provenance。V_th 路径不变。commit 9eaaabd。
+
+## §6 A3 — E/I 机制 → 指纹(事件率匹配)
+
+**pilot(`a3_pilot/`,T=2000,ei=0.5 / ee=1.5)**:两种 E/I 病灶都点火(inhib 8 事件 / recur 7 事件),**全部 self-terminate(returned=True)**,bare sheet 仍安静(true_floor 0.00016)——但事件**空间局部**:参与触点数多为 1–6(<PART_MIN=7),axis 读不出(sign=None),inhib 仅 1/8、recur 0/7 达到可读方向模板。即**这个磁量下 E/I 病灶给的是自终止的小局部兴奋,不是 V_th↓ 那样招募成可读方向模板的事件**。
+
+**A3-0a 磁量扫描(`a3_0a_scan/`,跑中)**:inhib ei_scale∈{0.5,0.35,0.2} / recur ee_gain∈{1.5,2.0,2.5},T=2000,问:更强的病灶能不能招募≥7 触点、产生可读方向模板?
+
+- 若**某磁量产生可读方向模板** → 调到 rate-match 带(0.8–1.25× baseline)跑 A3 formal(`run_sef_hfo_axisA_a3_ei.py`,3 lesion × 3 seed),抽指纹,与 V_th↓ 参考(A1 宽档)比。
+- 若**没有磁量产生可读模板**(都停在局部或翻成混乱)→ 诚实结论:**在测试磁量内,局部 E/I 病灶不复现 V_th↓ 的可读方向模板**;按 spec,E/I 轴写 future direction,V_th↓ 保留唯象标签。
+
+口径上限(spec §3):"在读出层面 E/I 病灶能/不能复现 V_th↓ 的双向模板(事件率匹配前提下)",**禁止**"E/I 机制被证实"。
+
+## §7 A5-real 真实可靠性审计(`fingerprint/real_feature_reliability.{csv,json}`)
+
+split-half **AND** odd-even 双折门(各 ≥0.6,比模板级 forward_reverse_reproduced 的 OR 规则更严)。axis_dir 17 PASS(含 6 weak_axis + 4 degenerate 硬否);onset_jitter 34 PASS(用 cluster_rank 折间一致性作 proxy,per-fold earliest-prob 重算 deferred);**pathway_width 40 DEFERRED**(path_axis 只存全量 perp_spread、无 per-fold;23 个可日后重算)。4 个 borderline(一折≥0.6 一折<0.6,被 AND 门拦下,OR 规则会放过),最强 epilepsiae_1096(0.25 / 1.00)。纯描述、按数据集分层(mm 不跨库 pool)、无机制 label。
+
+## §8 内部归档代号
+
+axis A = E/I 局部病灶 + 阈值异质性 → propagation fingerprint;A0 fingerprint freeze(SCHEMA_VERSION=A0-frozen-2026-06-14);A1-0a ignition feasibility;A1 fixed-mean 17.0 + count-matched sensitivity;A4 = A1 wide-vs-mid pairwise(paired single-focus);A2 engine = local_scale_EI(w_EI↓ target-in-core)/ w_EE_gain_core+core_mask_E(w_EE↑ edge both-in-core);engine re-bless connectivity_rot.py 9694171→fe8527c;A3 rate-matched 0.8–1.25×;A5-real reliability split-half AND odd-even ≥0.6。
