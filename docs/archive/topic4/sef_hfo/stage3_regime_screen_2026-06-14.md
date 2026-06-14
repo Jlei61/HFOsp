@@ -159,9 +159,10 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 - **rep-event 全场探针不结论**：rep event 都是 sheet-wide 大事件（n_fired_E 6800–13000、全场展宽~3.8mm），不代表典型 local 小事件 → **local 事件的全场 spread/duration 必须靠 spk-dump re-run** 才能算（rep-NPZ 只存代表事件、且都是大事件）。
 - **工作假说（待 re-run 证伪）**：不是内禀 neg/pos 差异，而是**每张网"赢者通吃"**——某一核（由有限阈值抽样 + 连接抽样的运气决定，哪核赢随 seed 翻）主导事件、其事件读出干净带向；输者只产出少数、偏弱、勉强够 n_part≥7 的事件 → 轴噪声大 → 方向读出≈抛硬币。pooled across seeds 里 neg 恰在事件最多的 seed 赢 → 看着像"neg 干净 / pos 模糊"，实为"赢者 vs 输者"被贴成了"neg vs pos"的采样假象。
 
-**决定性 re-run（待跑，需 runner 加 `--swap-vth`/`--mirror-vth`/`--dump-spk` 加性开关 + RAM 协调，~35min/13GB 每条）：**
-- **paired swap**：同一网内交换两核 Vth 场 → 若"赢家"跟着翻 = 点火不对称由阈值抽样驱动（证实 per-run 运气）；不翻 = 几何/连接/读出固定偏置。
-- **mirror control**：理想对称 Vth 场 → 若读出仍偏向一个方向 = 纯读出/几何 artifact。
-- **full-field spk-dump**：对真正的 local 事件算全场 spread/duration（补 rep-event 探针的盲区）。
+**操控性 re-run（已跑 2026-06-15：候选格 sep0.7/std1.0/m17.5，8 seed ×{base, swap-vth, mirror-vth}=24 run，T=3000，`--dump-fullfield`；runner 加性开关 smoke 验证，RAM-capped 批量 `scripts/run_stage3_source_asymmetry_battery.sh`，分析 `scripts/analyze_stage3_asym_reruns.py`→`asym_reruns/asym_reruns_summary.json`）：**
+- **full-field（probe ④）= SOLID（n=78 baseline 事件）。** 在**真实神经元场**上（不只 12 虚拟触点）local↔global 分界成立且更干净：local 全场展宽 **1.54mm** / 时长 **18ms** / 点火 **5488** 神经元，global **3.52mm / 66ms / 13495**。**关键：global 事件按起点端分开后全场展宽/时长几乎相同**（neg-src 3.52mm/66ms vs pos-src 3.54mm/65ms）——**事件一旦传成 global，传多远、撑多久与起点端无关**。所以虚拟电极上"pos 端方向读出≈抛硬币"是**读出层**现象（12 触点 endpoint-centroid 轴对 pos 事件定不准），**不是 pos 事件本身更弱/更短**。
+- **swap / mirror（probe ②③）= UNDERPOWERED，不下因果结论。** 候选格冷（m17.5）每条 run 只 ~6 事件（base_s1 = neg3/pos2/amb1），clean 单源事件更稀（多数 seed 0/0），**只有 1 个 seed 的 base→swap 可判**（n_seeds_judgeable=1）→ **swap 翻转率不可解读**（不是"position-driven"，是没功率）。聚合 hidden-source 计数：base neg13/pos8、swap neg6/pos5、mirror neg15/pos9——mirror（两核理想对称阈值）下仍有**轻微 neg 偏**（15/9，且主要由 s1 贡献），**提示**可能有一点几何/连接/读出的系统偏置，但样本太小不能定论。
+- **整合裁决（cheap + 操控）**：**这不是内禀的 neg/pos 差异。** 两核结构等价（cheap）+ 事件传成 global 后按源全场等同（re-run）→ 池化的"neg 干净 / pos 模糊"主要是**每网赢者-采样 + 读出层**效应，不是 pos 事件更弱。mirror 下的轻微 neg 偏是个**未定论的小信号**（要更高事件率的格才能测准，但更热 = 更多碰撞，权衡）。
+- **方法学坑（记下）**：用"clean 单源计数"判赢家在冷低碰撞格上没功率；该用全 hidden-source 计数 / 点火强度。要做有功率的 swap/mirror，需换更高事件率的工作点（与低碰撞冲突）——是否值得再跑一轮交用户定。
 
-裁决：cheap phase 已**弱化**"内禀 neg/pos 不对称"的解读（结构等价 + 点火不对称翻号），但方向读出不对称是否纯属"赢者-输者 + 小样本"还要 swap/mirror 证实。**本段为 preliminary，re-run 跑完前不写进任何主结论。**
+**裁决（升级自 preliminary）**：用户问"参数等强为何分源"——**答：基本不是真实的源差异**；事件等价、表观分化来自每网竞争 + 读出。残留的 mirror 轻微 neg 偏未定论。**仍是探索性，进 archive、不进主结论。**
