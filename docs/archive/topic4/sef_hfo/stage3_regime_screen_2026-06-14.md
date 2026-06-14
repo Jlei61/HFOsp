@@ -146,3 +146,22 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 重跑门 = **每个 source ≥20 readable_global 且每个 source 跨 ≥2 seeds**。复核（`readable_global_events.csv` 按 cell×source 分组）：**当前 0 个 cell 达标**（20 个 cell-source 组合全部不足；最好的 `sep0.7/std1.0/m17.5` 也只有 neg 10（3 seeds）/ pos 5（3 seeds），事件数远不及 20）→ **不开仿真**。只有 Step 3 明确显示"事件数不足但形态有信号"（某 source 层 chosen_k==2 且 swap 方向清晰但 n 未及阈值）才重提；本步三个 source/cell 分层均 `diversity_limited=True`，无此情形，门维持关闭（C6：不在本计划内自动触发任何长仿真）。
 
 **tier 纪律（重申）**：Stage 3 主问（单网络标签-时序独立性）= 未检验；本步 = 探索性机制刻画，进 archive、**不进**建模主文档主结论。
+
+---
+
+## Source-asymmetry investigation（2026-06-15，**cheap phase 已跑 / 操控性 re-run 待跑** — preliminary）
+
+**问题**：两端病灶**参数完全相等**（同 `core_mean`/`core_std`、几何镜像对称放置）为什么读出仍按起点端（neg/pos）分化？（用户提问 + 4 探针：① 每核 n_E/Vth 分位/局部度数/到电极距离描述性审计；② paired swap 交换两核阈值场 RNG；③ mirror control 理想对称场；④ 全神经元场 spread/duration 复核，不只虚拟电极 n_part。）
+
+**Cheap phase（脚本 `scripts/analyze_stage3_source_asymmetry.py`，纯读已落盘 artifact，无 re-run）→ `stage3_source_asymmetry_audit.json`：**
+- **点火不对称是 per-run / per-seed，不是固定的结构性 neg>pos。** 按 seed 看 local 源核点火强度差（neg−pos）**翻号**：seed1 +0.085、seed2 +0.130（neg 更旺）但 seed3 −0.047（pos 更旺）；按 cell 看 16 格里 10 格 neg 高 = MIXED/sporadic。pooled 的"neg 0.366 > pos 0.278"主要被事件最多的 seed1/2 加权出来。
+- **两核结构上等价（平均意义）。** 9 个有 rep-NPZ 的 twoend run：每核 E 神经元数几乎相等（~587/588）、电极到两核距离**精确对称**（Δ=0.0）、realized Vth 中位差**逐 run 翻号**（s1 −0.084 / s2 +0.239 / s3 −0.258 …，跨 run 近 0）——seed+7(neg)/seed+8(pos) 的随机阈值抽样不系统偏向任何一核。
+- **rep-event 全场探针不结论**：rep event 都是 sheet-wide 大事件（n_fired_E 6800–13000、全场展宽~3.8mm），不代表典型 local 小事件 → **local 事件的全场 spread/duration 必须靠 spk-dump re-run** 才能算（rep-NPZ 只存代表事件、且都是大事件）。
+- **工作假说（待 re-run 证伪）**：不是内禀 neg/pos 差异，而是**每张网"赢者通吃"**——某一核（由有限阈值抽样 + 连接抽样的运气决定，哪核赢随 seed 翻）主导事件、其事件读出干净带向；输者只产出少数、偏弱、勉强够 n_part≥7 的事件 → 轴噪声大 → 方向读出≈抛硬币。pooled across seeds 里 neg 恰在事件最多的 seed 赢 → 看着像"neg 干净 / pos 模糊"，实为"赢者 vs 输者"被贴成了"neg vs pos"的采样假象。
+
+**决定性 re-run（待跑，需 runner 加 `--swap-vth`/`--mirror-vth`/`--dump-spk` 加性开关 + RAM 协调，~35min/13GB 每条）：**
+- **paired swap**：同一网内交换两核 Vth 场 → 若"赢家"跟着翻 = 点火不对称由阈值抽样驱动（证实 per-run 运气）；不翻 = 几何/连接/读出固定偏置。
+- **mirror control**：理想对称 Vth 场 → 若读出仍偏向一个方向 = 纯读出/几何 artifact。
+- **full-field spk-dump**：对真正的 local 事件算全场 spread/duration（补 rep-event 探针的盲区）。
+
+裁决：cheap phase 已**弱化**"内禀 neg/pos 不对称"的解读（结构等价 + 点火不对称翻号），但方向读出不对称是否纯属"赢者-输者 + 小样本"还要 swap/mirror 证实。**本段为 preliminary，re-run 跑完前不写进任何主结论。**
