@@ -102,6 +102,8 @@
 | [topic4_sef_hfo/observation_layer/increment3a_rate_parity/figures/](topic4_sef_hfo/observation_layer/increment3a_rate_parity/figures/) | rate parity 增量 |
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | cm-SNN 自发（headline: stage2_summary / stage3_regime_compare） |
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/) | 候选格电极读出 train |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/) | **axis-A A1** 阈值离散→指纹 = NULL（只改点火率不改指纹） |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/) | **axis-A A3** 局部 E/I 病灶 screen = NULL（不复现 V_th↓ 方向模板） |
 
 **SEF-ITP**
 | 目录 | 内容 |
