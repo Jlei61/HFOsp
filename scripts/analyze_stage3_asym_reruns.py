@@ -1,0 +1,124 @@
+"""Stage 3 source-asymmetry re-run analysis (2026-06-15). Reads the battery outputs
+(asym_reruns/{readout,sidecar,fullfield}_{base,swap,mirror}_s*.json) and answers the 3 probes:
+
+  SWAP   : per seed, baseline winner end (hidden neg_clean vs pos_clean) vs swap winner end.
+           swap moves each core's threshold DRAW to the other end. If the winner FLIPS end under
+           swap => the per-network winner is threshold-DRAW-driven (per-run luck), NOT a fixed
+           neg/pos structural/geometric bias. Low flip rate => position-driven (geom/connectivity).
+  MIRROR : identical threshold profile on both cores. If a source imbalance / direction bias
+           PERSISTS (consistently same end) => geometry/connectivity/read-out artifact, not
+           threshold heterogeneity. If it balances => threshold draw was the source.
+  FULLFIELD : per-event FULL-neuron-field spread (std of fired-E positions) + duration + n_fired_E,
+           local (n_part<7) vs global (n_part>=7), and split by read-out sign (source proxy) — does
+           the duration/spread story (and the neg/pos asymmetry) hold on the real field, not just
+           the 12 virtual contacts?
+"""
+import os, glob, json
+import numpy as np
+
+ROOT = "results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/asym_reruns"
+PART_MIN = 7
+
+
+def load(cond, seed):
+    p = os.path.join(ROOT, f"readout_{cond}_s{seed}.json")
+    return json.load(open(p)) if os.path.exists(p) else None
+
+
+def winner(sc):
+    if not sc:
+        return None
+    n, p = sc.get("neg_clean", 0), sc.get("pos_clean", 0)
+    return "tie" if n == p else ("neg" if n > p else "pos")
+
+
+def seeds_present():
+    ss = set()
+    for f in glob.glob(os.path.join(ROOT, "readout_base_s*.json")):
+        ss.add(int(f.split("_s")[-1].split(".")[0]))
+    return sorted(ss)
+
+
+def swap_mirror_table():
+    rows, flips, mirror_imbalance = [], [], []
+    for s in seeds_present():
+        rb, rs, rm = load("base", s), load("swap", s), load("mirror", s)
+        scb = rb.get("stage3_source_counts") if rb else None
+        scs = rs.get("stage3_source_counts") if rs else None
+        scm = rm.get("stage3_source_counts") if rm else None
+        wb, ws, wm = winner(scb), winner(scs), winner(scm)
+        flip = (wb in ("neg", "pos") and ws in ("neg", "pos") and wb != ws)
+        if wb in ("neg", "pos") and ws in ("neg", "pos"):
+            flips.append(flip)
+        if scm:
+            mirror_imbalance.append(abs(scm.get("neg_clean", 0) - scm.get("pos_clean", 0)))
+        rows.append(dict(seed=s,
+                         base=f"n{scb['neg_clean']}/p{scb['pos_clean']}(win {wb})" if scb else None,
+                         swap=f"n{scs['neg_clean']}/p{scs['pos_clean']}(win {ws})" if scs else None,
+                         mirror=f"n{scm['neg_clean']}/p{scm['pos_clean']}(win {wm})" if scm else None,
+                         winner_flipped_under_swap=flip))
+    verdict = dict(
+        n_seeds_judgeable=len(flips),
+        swap_flip_rate=(round(sum(flips) / len(flips), 3) if flips else None),
+        swap_verdict=("threshold-DRAW-driven (winner flips with the draw => per-run luck)"
+                      if flips and sum(flips) >= 0.6 * len(flips)
+                      else "position-driven (winner stays => geometry/connectivity/readout)"
+                      if flips and sum(flips) <= 0.4 * len(flips) else "MIXED / inconclusive"),
+        mirror_residual_imbalance_median=(round(float(np.median(mirror_imbalance)), 2)
+                                          if mirror_imbalance else None),
+        mirror_note="if residual imbalance ~0 across seeds => threshold heterogeneity WAS the source; "
+                    "if it persists same-end => geometry/connectivity/readout artifact")
+    return rows, verdict
+
+
+def fullfield_table():
+    """Pool baseline full-field events; local vs global; split by sign (source proxy: +1 fwd≈neg-src)."""
+    evs = []
+    for f in glob.glob(os.path.join(ROOT, "fullfield_base_s*.json")):
+        for e in json.load(open(f)).get("events", []):
+            evs.append(e)
+    if not evs:
+        return {"note": "no fullfield_base_*.json yet"}
+    def med(xs, k):
+        v = [e[k] for e in xs if e.get(k) is not None]
+        return round(float(np.median(v)), 3) if v else None
+    out = {"n_events": len(evs)}
+    for lab, sub in [("local", [e for e in evs if (e.get("n_part") or 0) < PART_MIN]),
+                     ("global", [e for e in evs if (e.get("n_part") or 0) >= PART_MIN])]:
+        out[lab] = dict(n=len(sub), fullfield_extent_mm=med(sub, "fullfield_extent_mm"),
+                        duration=med(sub, "duration"), n_fired_E=med(sub, "n_fired_E"),
+                        n_part=med(sub, "n_part"))
+    # by sign (source proxy) within global (the readable ones)
+    g = [e for e in evs if (e.get("n_part") or 0) >= PART_MIN]
+    for lab, sgn in [("global_fwd(neg-src)", 1.0), ("global_rev(pos-src)", -1.0)]:
+        sub = [e for e in g if e.get("sign") == sgn]
+        out[lab] = dict(n=len(sub), fullfield_extent_mm=med(sub, "fullfield_extent_mm"),
+                        duration=med(sub, "duration"))
+    # local by sign too (the asymmetry of interest: does pos local differ from neg local on the field?)
+    loc = [e for e in evs if (e.get("n_part") or 0) < PART_MIN]
+    for lab, sgn in [("local_fwd(neg-src)", 1.0), ("local_rev(pos-src)", -1.0)]:
+        sub = [e for e in loc if e.get("sign") == sgn]
+        out[lab] = dict(n=len(sub), fullfield_extent_mm=med(sub, "fullfield_extent_mm"),
+                        duration=med(sub, "duration"))
+    return out
+
+
+def main():
+    rows, verdict = swap_mirror_table()
+    ff = fullfield_table()
+    summary = dict(swap_mirror_per_seed=rows, swap_mirror_verdict=verdict, fullfield=ff)
+    json.dump(summary, open(os.path.join(ROOT, "asym_reruns_summary.json"), "w"), indent=2,
+              default=lambda o: None)
+
+    print("=== SWAP / MIRROR per seed (winner = hidden neg_clean vs pos_clean) ===")
+    for r in rows:
+        print(f"  seed {r['seed']}: base {r['base']} | swap {r['swap']} | mirror {r['mirror']} "
+              f"| flip={r['winner_flipped_under_swap']}")
+    print("\nVERDICT:", json.dumps(verdict, indent=2, ensure_ascii=False))
+    print("\n=== FULL-FIELD local vs global (baseline runs) ===")
+    print(json.dumps(ff, indent=2, ensure_ascii=False))
+    print(f"\nwrote {os.path.join(ROOT, 'asym_reruns_summary.json')}")
+
+
+if __name__ == "__main__":
+    main()

@@ -91,8 +91,22 @@ def valid_mask(m, posE, L, Rr):
     return inside & has_n
 
 
+def _mirror_core_field(cf_src, cf_dst, pos, src_xy, dst_xy):
+    """ideal-symmetry probe: transplant cf_src's core threshold-vs-radius profile onto cf_dst's
+    core neurons (matched by within-core distance-to-focus rank) so the two cores carry an
+    IDENTICAL realized field. If the read-out still biases one direction under this -> the
+    asymmetry is geometry/connectivity/read-out, NOT a threshold-draw difference."""
+    src_idx = np.flatnonzero(cf_src["core_mask"]); dst_idx = np.flatnonzero(cf_dst["core_mask"])
+    rs = src_idx[np.argsort(np.linalg.norm(pos[src_idx] - src_xy, axis=1))]
+    rd = dst_idx[np.argsort(np.linalg.norm(pos[dst_idx] - dst_xy, axis=1))]
+    n = min(len(rs), len(rd))
+    new_vth = cf_dst["vth"].copy()
+    new_vth[rd[:n]] = cf_src["vth"][rs[:n]]   # same vth-vs-radius profile on both cores
+    return dict(vth=new_vth, core_mask=cf_dst["core_mask"])
+
+
 def build_lesion_vth(net, NE, axis_unit, center, half, lesion, core_mean, core_std, core_r,
-                     dephase, seed, sep_frac=0.6):
+                     dephase, seed, sep_frac=0.6, swap_vth=False, mirror_vth=False):
     """Per-neuron threshold field. Returns (vth, core_mask, foci[xy list], core_masks[per-focus
     FULL-network bool masks]). The per-focus masks let the caller compute a core-LEVEL onset per end.
     `sep_frac`: each focus sits at center ± sep_frac*half along the axis; larger = farther apart =
@@ -112,11 +126,17 @@ def build_lesion_vth(net, NE, axis_unit, center, half, lesion, core_mean, core_s
                                core_mean=core_mean, core_std=core_std, base_mean=18.0)
         return cf["vth"], cf["core_mask"], [pos_xy], [cf["core_mask"]]
     if lesion == "twoend_equal":
-        # both foci SAME mean/std; distinct rng seeds only de-correlate the threshold draws
-        cf1 = sample_core_field(net["pos"], is_E, neg_xy, core_r, np.random.default_rng(seed + 7),
+        # both foci SAME mean/std; distinct rng seeds only de-correlate the threshold draws.
+        # paired-swap probe (swap_vth): swap which RNG draw each core gets (connectivity + OU noise
+        # from rng(seed) held fixed) -> if the per-network 'winner' flips end, the asymmetry is
+        # threshold-draw-driven (per-run luck), not a fixed neg/pos structural bias.
+        s_neg, s_pos = (seed + 8, seed + 7) if swap_vth else (seed + 7, seed + 8)
+        cf1 = sample_core_field(net["pos"], is_E, neg_xy, core_r, np.random.default_rng(s_neg),
                                 core_mean=core_mean, core_std=core_std, base_mean=18.0)
-        cf2 = sample_core_field(net["pos"], is_E, pos_xy, core_r, np.random.default_rng(seed + 8),
+        cf2 = sample_core_field(net["pos"], is_E, pos_xy, core_r, np.random.default_rng(s_pos),
                                 core_mean=core_mean, core_std=core_std, base_mean=18.0)
+        if mirror_vth:
+            cf2 = _mirror_core_field(cf1, cf2, net["pos"], neg_xy, pos_xy)
         return (np.minimum(cf1["vth"], cf2["vth"]), (cf1["core_mask"] | cf2["core_mask"]),
                 [neg_xy, pos_xy], [cf1["core_mask"], cf2["core_mask"]])
     # twoend_deph: neg focus at core_mean, pos focus at core_mean + dephase (slower) -> drift apart
@@ -194,6 +214,12 @@ def main():
     ap.add_argument("--out", default=None, help="output root (default: canonical OUT; set for tests/worktree)")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--tag", default=None)
+    ap.add_argument("--swap-vth", action="store_true",
+                    help="source-asymmetry probe: swap the two cores' threshold RNG draws (twoend_equal)")
+    ap.add_argument("--mirror-vth", action="store_true",
+                    help="source-asymmetry probe: identical threshold-vs-radius profile on both cores (twoend_equal)")
+    ap.add_argument("--dump-fullfield", action="store_true",
+                    help="write per-event FULL-neuron-field spatial extent + n_fired_E (local-vs-global spread, not just n_part)")
     a = ap.parse_args()
     tag = a.tag or f"{a.lesion}_s{a.seed}"
     out_dir = a.out or OUT
@@ -212,7 +238,8 @@ def main():
     center = np.array([L / 2, L / 2]); half = L / 2
     vth, core_mask, foci, core_masks = build_lesion_vth(net, NE, axis_unit, center, half, a.lesion,
                                                         a.core_mean, a.core_std, a.core_r, a.dephase, a.seed,
-                                                        sep_frac=a.sep_frac)
+                                                        sep_frac=a.sep_frac, swap_vth=a.swap_vth,
+                                                        mirror_vth=a.mirror_vth)
 
     m = montage(center, a.theta, 0.0, a.nc)
     valid = valid_mask(m, posE, L, p.Rr)
@@ -240,6 +267,24 @@ def main():
                             event_peak_t=round(ep, 1), returned=bool(ev["returned"]),
                             n_part=rd["n_part"], axis_err=rd["axis_err"], sign=rd["sign"],
                             readability=rd["readability"], ranks=rd["ranks"]))
+
+    # --- source-asymmetry probe ④: per-event FULL-neuron-field spread/duration (not just the 12
+    # virtual contacts) so local vs global can be compared on the real neural field. Reuses
+    # per_neuron_onset; spatial extent = std of fired E-neuron radial distances about their centroid.
+    if a.dump_fullfield:
+        ff = []
+        for e in ev_recs:
+            on = per_neuron_onset(spk, e["t_on"], e["t_off"], DT)
+            fired = np.isfinite(on)
+            if fired.sum() > 1:
+                P = posE[fired]; ext = float(np.std(np.linalg.norm(P - P.mean(0), axis=1)))
+            else:
+                ext = 0.0
+            ff.append(dict(t_on=e["t_on"], t_off=e["t_off"], duration=round(e["t_off"] - e["t_on"], 1),
+                           n_fired_E=int(fired.sum()), fullfield_extent_mm=round(ext, 3),
+                           n_part=e["n_part"], sign=e["sign"], returned=e["returned"]))
+        json.dump(dict(tag=tag, events=ff),
+                  open(os.path.join(out_dir, f"fullfield_{tag}.json"), "w"), indent=2)
 
     # representative event for the figure = clean, self-terminating, enough contacts, readable axis.
     # Skip the FIRST event (index 0): the network is still settling from t=0 so its pre-event
