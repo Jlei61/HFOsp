@@ -36,6 +36,19 @@
 
 **本轮并行 agent 拓扑（按 round-2 §5）**：Agent 1 = A0 Schema Lead（阻断主线，写 `src/sef_hfo_fingerprint.py` + TDD + baseline）；Agent 2 = Real-Data Audit Prep（只读 inventory）；Agent 3 = Engine Step 0 Auditor（只读 `build_connectivity_rot`，不改 engine）；+ QA Gatekeeper（查 figures/README、summary JSON 字段、deferred 纪律、无 subject-level 机制 label）。A1 Feasibility Runner 等 A0 schema 冻结 + 用户审阅后才启动。
 
+**执行 round-1 结果（2026-06-14，workflow 4 agents 全绿）：**
+- **A0 = schema freeze 提案，QA verdict = PASS**（`src/sef_hfo_fingerprint.py` + 11 TDD + 47 回归全过；baseline 从现有 oneend neg/pos 抽出，无新仿真）。primary 三件套从现有产物可算；`latency_jitter`/`speed`/`event_size` 诚实标 `requires_extended_readout_save`，不造数。**等用户签字 7 项才解锁 A1。** baseline 落 `results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/fingerprint/`。
+- **Real-Data 覆盖图**：40 subj（20 epi backbone + 20 yuquan）。`onset_jitter` rank 层 40/40 最广；`axis_dir` mm 向量 ~26/40；**`pathway_width` 硬天花板 23/40**（单杆 1D 物理量不到，非随机缺失）→ 它是最娇贵的几何特征、要最严的 geometry-matched null。mm 标量禁跨库混（epi=mni152 / yuquan=fs_native）。reliability 表用 split-half AND odd-even（比模板 OR 规则更紧）。
+- **Engine Step 0 合同已钉**（写回 spec §1/§5）：`i`=靶/`cols`=源；`w_EI↓`=target-scalar@:123；`w_EE↑`=edge both-in-core@:100/:111-117（**锁 both-in-core**）；`tau_I` **DEFER global**；**spec §5 改错**：权重场进 `build_connectivity_rot` 不进 `simulate_kick`（否则静默忽略）；guard 6-vs-5 文件 re-bless 陷阱已记。
+
+**A0 已冻结（用户 sign-off 2026-06-15，附 round-3 审阅 5 项 punch-list 已全部落地）：**
+- 字段集 + 分层 / `n_min_events=6`（A1/A3/A4 最低门）/ clean 门沿用 runner / 双灶 source_label 必走 sidecar hidden label / deferred-save 缺口作为冻结内容 —— 全部同意。
+- **`pathway_width` 定义锁**：robust span p95−p5、<3 触点 NaN，**且明确是相对 LOCKED model/geometry axis（`theta`）的垂直轴，不是 event-fitted axis**（不会随事件旋转）。已写进 `src/sef_hfo_fingerprint.py` 的 schema source + `perp_pathway_width` docstring。
+- **P1-lite extractor 一致性 assert**：`load_run_artifacts`/`extract_fingerprint` 现在 loud-fail 当 `n_part ≠ 非空 rank 数`（clean 门用 n_part、width/jitter 用 rank dict，必须一致）；新增 `test_n_part_rank_mismatch_raises`。真实 neg/pos baseline 实测 ALL-OK。59 测试全过。
+- **P1 真实覆盖审计落成独立 artifact**：`fingerprint/real_feature_coverage.{csv,json}`（逐 subject：rank/axis/pathway_width 可得性 + coord_space + weak_axis + sampling_geometry + exclusion_reason）—— 此前只写进 plan，现已是可复现文件。
+- **freeze 落盘**：`SCHEMA_VERSION=A0-frozen-2026-06-14`；baseline 由新 `scripts/run_sef_hfo_fingerprint_baseline.py` 可复现生成（headline 值不变：15/15 clean、axis_err 0°、sign +1/−1、pw 2.6mm）；README/summary "一一对上" 措辞改成 "rank names must map to geometry names; mismatches raise" + n_part 一致性。
+- **下一步已解锁**：A1-0a ignition feasibility（先扫哪些 (mean,std) 点得着，只报可点火性、不下科学结论）。
+
 ---
 
 ## §1 传播指纹 = 测量仪器（先冻结 schema，再跑任何科学 sweep）
