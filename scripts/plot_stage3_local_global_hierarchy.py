@@ -190,9 +190,9 @@ def make_figure(d, eff, out_png):
                  fontsize=13, fontweight="bold", y=1.0)
     # C4 边界 caption
     fig.text(0.5, 0.005,
-             "区分 local↔global 的是传播（duration + spread），不是点火能量；"
-             "contained propagation / relay-failure，未证明波前截断。",
-             ha="center", va="bottom", fontsize=9)
+             "扩散范围(n_part)是通用分界；持续时间是负端特异分界；源核点火强度分源相反、"
+             "不支持弱成核但非统一相等。contained / relay-failure，未证明波前截断。",
+             ha="center", va="bottom", fontsize=8.5)
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     fig.savefig(out_png, dpi=150, bbox_inches="tight")
     plt.close(fig)
