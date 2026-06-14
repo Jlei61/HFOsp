@@ -223,7 +223,7 @@ def _figure(out_lesions, lesions, vth) -> None:
     fig, ax = plt.subplots(1, 2, figsize=(11, 4))
     data = [vth["widths"]] + [lesions[k]["widths"] for k in keys]
     labels = ["V_th↓ (wide)"] + [k.replace("oneend_", "") for k in keys]
-    ax[0].boxplot(data, labels=labels, showmeans=True)
+    ax[0].boxplot(data, tick_labels=labels, showmeans=True)
     ax[0].set_ylabel("pathway_width (mm, perp to locked axis)")
     ax[0].set_title("E/I lesion fingerprint vs V_th↓")
     top1 = [(out_lesions[k]["onset_jitter"].get("top1_fraction") or 0) for k in keys]

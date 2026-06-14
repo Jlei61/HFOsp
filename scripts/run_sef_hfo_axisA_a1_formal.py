@@ -238,10 +238,10 @@ def _figure(bands_out, band, per_run) -> None:
     fig, ax = plt.subplots(1, 3, figsize=(12, 4))
     labels = [BAND_NAME[s] for s in STDS]
     # pathway_width violin/box per band
-    ax[0].boxplot([band[s]["widths"] for s in STDS], labels=labels, showmeans=True)
+    ax[0].boxplot([band[s]["widths"] for s in STDS], tick_labels=labels, showmeans=True)
     ax[0].set_ylabel("pathway_width (mm, perp to locked axis)"); ax[0].set_title("pathway_width per band")
     # axis_err per band
-    ax[1].boxplot([band[s]["errs"] for s in STDS], labels=labels, showmeans=True)
+    ax[1].boxplot([band[s]["errs"] for s in STDS], tick_labels=labels, showmeans=True)
     ax[1].set_ylabel("axis_err (deg)"); ax[1].set_title("axis readability per band")
     # onset top1 per band
     top1 = [bands_out[BAND_NAME[s]]["onset_jitter"].get("top1_fraction") or 0 for s in STDS]
