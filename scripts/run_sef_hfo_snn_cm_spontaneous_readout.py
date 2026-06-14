@@ -323,7 +323,7 @@ def main():
     summary = dict(tag=tag, provenance=_provenance(),
                    config=dict(L=L, density=a.density, theta=a.theta, AR=a.AR, drive=a.drive, T=a.T, NE=int(NE),
                                lesion=a.lesion, core_mean=a.core_mean, core_std=a.core_std,
-                               core_r=a.core_r, dephase=a.dephase, nc=a.nc, seed=a.seed,
+                               core_r=a.core_r, sep_frac=a.sep_frac, dephase=a.dephase, nc=a.nc, seed=a.seed,
                                foci=[[round(float(f[0]), 2), round(float(f[1]), 2)] for f in foci],
                                margin_frac=MARGIN_FRAC, n_core=int(core_mask.sum())),
                    detector=dict(floor=round(floor, 4), peak=round(peak, 4), bar=round(bar, 4),

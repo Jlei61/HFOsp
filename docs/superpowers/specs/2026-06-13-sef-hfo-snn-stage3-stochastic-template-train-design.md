@@ -139,7 +139,8 @@ Per-cell (per operating point), aggregated across runs:
 
 | Gate | Threshold |
 |---|---|
-| clean events per end | ≥ **30** (≥ 50 preferred) |
+| clean events per end + per run — **PILOT** | ≥ **30 / end** (regime check only, NO conclusions drawn) |
+| clean events per end + per run — **FORMAL main-conclusion gate** | ≥ **50 / end AND ≥ 100 clean / run**. The independence statement ("未见强依赖") is made ONLY at this floor; ≥30/end is pilot-only — concluding "no strong ping-pong/persistence" at ≥30/end would be an underpowered null. (Sizing `T` to hit this is §9's job.) |
 | collision rate | < **20–30 %** |
 | `stable_k` | == 2 (across runs) |
 | cluster ↔ hidden-focus purity | ≥ **90 %** |
@@ -192,7 +193,7 @@ Reuse discipline (CLAUDE.md §6.1): the timing helpers' null contract is "is the
 
 1. **Spec** (this doc) with all P1 fixes — pending user review.
 2. **Short pilot, NO conclusions:** confirm `twoend_equal` at 17.0 wide does not mush, and the collision rate is acceptable (< 20–30 %); pin `N_min`, `Δ_onset`, `T`, and the typical IEI for the Δt grid.
-3. **Multi-seed long records:** ~6 independent networks (connection seed FREED — reusing one skeleton is not a real multi-seed, per the heterogeneity-result lesson), `T` sized so each run yields ≥ 30 (ideally 50) clean events/end with usable segment lengths.
+3. **Multi-seed long records:** ~6 independent networks (connection seed FREED — reusing one skeleton is not a real multi-seed, per the heterogeneity-result lesson), `T` sized so each run hits the **formal gate (≥ 50 clean/end AND ≥ 100 clean/run)** with usable segment lengths — NOT the pilot's ≥30/end.
 4. **Blind clustering + timing test + positive controls**, then gates + figure.
 
 ---
@@ -200,7 +201,7 @@ Reuse discipline (CLAUDE.md §6.1): the timing helpers' null contract is "is the
 ## §9 Resourcing defaults (tunable, not scientific forks)
 
 - operating point: 17.0 mV wide (above the 16.5 over-heating point).
-- `T ≈ 15 s/run` as a starting estimate (Stage 2 gave ~15 clean/focus at 3.5 s single-focus; two shared-sheet foci lose some to collisions + mutual dead-time) — re-pinned by the pilot.
+- `T` starting estimate: Stage 2 gave ~15 clean/focus at 3.5 s single-focus; two shared-sheet foci lose some to collisions + mutual dead-time, and the formal gate now needs ≥ 50 clean/end → expect `T` well above the earlier ~15 s guess (re-pinned by the pilot from its measured clean-event rate).
 - seeds: 6 independent networks; structure per-run; independence per-run then combined (a label *sequence* exists only within one continuous run — pooling sequences across runs would fabricate transitions).
 
 ---

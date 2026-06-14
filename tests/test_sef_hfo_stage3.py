@@ -241,3 +241,32 @@ def test_core_active_fraction_window_binning():
     # neg cells 0-4 all fire in bin0 of [0,10] -> af[0] == 1.0
     af = core_active_fraction(spk, np.arange(5), dt=0.1, bin_ms=1.0, t_on=0.0, t_off=10.0)
     assert af.shape[0] == 10 and af[0] == 1.0 and af[5] == 0.0
+
+
+# --- sidecar diagnostic fields (user 2026-06-13: distinguish REAL co-ignition from a too-sensitive
+#     1% onset threshold, and tag block membership) — needs per-core first-bin curves + block_id ---
+
+def test_build_sidecar_saves_per_core_first_bins():
+    # [0,10]: neg core fully active in bin0, pos core silent until bin5. The first-bin curves make
+    # 'is this a real co-ignition or did one core just tickle the 1% threshold' auditable offline.
+    spk = _spk_two_end()
+    core_masks = [np.array([True] * 5 + [False] * 5), np.array([False] * 5 + [True] * 5)]
+    payload = build_sidecar([_ev(0.0, 10.0, True)], spk, core_masks, NE=10, dt=0.1, bin_ms=1.0,
+                            part_min=7, delta_onset=1.0, n_min=1)
+    e0 = payload["events"][0]
+    assert e0["core_frac_neg_first_bins"][0] == 1.0     # neg fully active in bin0
+    assert e0["core_frac_pos_first_bins"][0] == 0.0     # pos silent in bin0
+    assert e0["core_frac_pos_first_bins"][5] == 1.0     # pos ramps at bin5 (captured, not a stray spike)
+    # n_min=1 over a 5-cell core -> max(0.01, 1/5) = 0.2 (the N_min count dominates on a tiny core;
+    # the 1% floor only wins on the real ~587-cell pilot core).
+    assert e0["core_threshold_neg"] == 0.2 and e0["core_threshold_pos"] == 0.2
+
+
+def test_build_sidecar_assigns_block_id_censoring_breaks_run():
+    # clean, censored(unreadable), clean -> block_id 0, -1, 1 (reuses collision_free_blocks).
+    spk = _spk_two_end()
+    core_masks = [np.array([True] * 5 + [False] * 5), np.array([False] * 5 + [True] * 5)]
+    ev_recs = [_ev(0.0, 10.0, True), _ev(10.0, 20.0, True, axis_err=None), _ev(20.0, 30.0, True)]
+    payload = build_sidecar(ev_recs, spk, core_masks, NE=10, dt=0.1, bin_ms=1.0,
+                            part_min=7, delta_onset=1.0, n_min=1)
+    assert [e["block_id_after_collision_censoring"] for e in payload["events"]] == [0, -1, 1]

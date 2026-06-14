@@ -215,14 +215,29 @@ def build_sidecar(ev_recs, spk, core_masks, NE, *, dt, bin_ms, part_min, delta_o
                   "no_core_crossing" if (on_neg is None and on_pos is None) else
                   "simultaneous_onset" if hidden == "collision" else "none")
         clean_t = (hidden in ("neg", "pos") and readable and e["axis_err"] < 25)
+        diag_k = 8
         sidecar.append(dict(
             event_id=len(sidecar), raw_event_index=raw_i, t_on=e["t_on"], t_off=e["t_off"],
             event_peak_t=e.get("event_peak_t"), hidden_source_label=hidden,
             core_onset_neg=(None if on_neg is None else round(on_neg, 1)),
             core_onset_pos=(None if on_pos is None else round(on_pos, 1)),
             collision_reason=reason, clean_for_timing=bool(clean_t),
+            # diagnostic (user 2026-06-13): the first bins of each core's active fraction let an
+            # auditor tell a REAL co-ignition (both cores ramp together) from a too-sensitive 1%
+            # onset (one core just tickles threshold). thresholds echoed per-event for self-containment.
+            core_frac_neg_first_bins=np.round(af_neg[:diag_k], 4).tolist(),
+            core_frac_pos_first_bins=np.round(af_pos[:diag_k], 4).tolist(),
+            core_threshold_neg=round(frac_neg, 4), core_threshold_pos=round(frac_pos, 4),
             n_part=e["n_part"], axis_err=e["axis_err"], sign=e["sign"],
             readability=e.get("readability")))
+    # block_id_after_collision_censoring: censored (non-clean) events break the consecutive-clean
+    # run so no transition is counted across them (spec §2, P1-1). Reuses collision_free_blocks.
+    if sidecar:
+        _bt = np.array([s["t_on"] for s in sidecar], float)
+        _bc = np.array([s["clean_for_timing"] for s in sidecar], bool)
+        _, _bid = collision_free_blocks(_bt, _bc)
+        for s, b in zip(sidecar, _bid):
+            s["block_id_after_collision_censoring"] = int(b)
     n_coll = sum(1 for s in sidecar if s["hidden_source_label"] == "collision")
     return dict(n_record_events=len(sidecar),
                 config=dict(delta_onset=delta_onset, n_min=n_min,
@@ -230,3 +245,37 @@ def build_sidecar(ev_recs, spk, core_masks, NE, *, dt, bin_ms, part_min, delta_o
                             frac_neg=round(frac_neg, 4), frac_pos=round(frac_pos, 4)),
                 collision_rate=round(n_coll / max(1, len(sidecar)), 4),
                 events=sidecar)
+
+
+def pilot_gate(collision_rate, neg_clean, pos_clean, n_events, ambiguous,
+               bidir_seed_frac=1.0, sign_ok=True,
+               coll_max=0.30, clean_min=3, min_events=6):
+    """Pre-registered Stage 3 regime-screen gate, applied per (sep,std,mean[,drive]) cell on the
+    MEDIAN over its seeds. Returns (passed: bool, reason: str, flags: dict).
+
+    Encodes the conclusion (MEMORY: a gate must encode the conclusion, not just existence): a cell
+    only PASSES if it is a usable BALANCED bidirectional low-collision regime. Failures carry a
+    specific reason so a too-cold ('no_events') / co-igniting ('high_collision') / one-end-dominant
+    ('source_imbalance') / single-direction ('unidirectional') regime can never silently pass.
+
+    `bidir_seed_frac` = fraction of the cell's seeds with BOTH directions present; only enforced
+    when `sign_ok` (the oneend sign sanity validated the read-out direction). If sign is NOT
+    trusted, direction is ignored and the source-based sub-gates decide.
+    """
+    amb_rate = round((ambiguous or 0) / n_events, 3) if n_events else None
+    flags = {
+        "collision_ok": collision_rate is not None and collision_rate < coll_max,
+        "source_balance_ok": (neg_clean or 0) >= clean_min and (pos_clean or 0) >= clean_min,
+        "enough_events": (n_events or 0) >= min_events,
+        "bidir_ok": (not sign_ok) or bidir_seed_frac >= 0.5,
+        "ambiguous_rate": amb_rate,
+    }
+    if not flags["enough_events"]:
+        return False, "no_events", flags
+    if not flags["collision_ok"]:
+        return False, "high_collision", flags
+    if not flags["source_balance_ok"]:
+        return False, "source_imbalance", flags
+    if not flags["bidir_ok"]:
+        return False, "unidirectional", flags
+    return True, "pass", flags
