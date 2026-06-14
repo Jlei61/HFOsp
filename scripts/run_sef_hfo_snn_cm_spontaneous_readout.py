@@ -206,8 +206,13 @@ def main():
                     help="focus offset from center as a fraction of half-L (twoend separation; higher = farther apart / less coupled)")
     ap.add_argument("--dephase", type=float, default=0.3, help="twoend_deph: +mV on pos focus to separate firing times")
     ap.add_argument("--nc", type=int, default=6)
-    ap.add_argument("--lesion", choices=["oneend_neg", "oneend_pos", "twoend_deph", "twoend_equal"],
+    ap.add_argument("--lesion", choices=["oneend_neg", "oneend_pos", "twoend_deph", "twoend_equal",
+                                         "oneend_inhib", "oneend_recur", "oneend_combined"],
                     default="oneend_neg")
+    ap.add_argument("--ei-scale", type=float, default=0.5,
+                    help="oneend_inhib/combined: w_EI multiplier for in-core E targets (<1 = perisomatic inhibition collapse)")
+    ap.add_argument("--ee-gain", type=float, default=1.5,
+                    help="oneend_recur/combined: w_EE multiplier for both-in-core E->E edges (>1 = recurrent cluster)")
     ap.add_argument("--delta-onset", type=float, default=30.0,
                     help="ms; two cores igniting within this -> collision (Stage 3 twoend_equal)")
     ap.add_argument("--n-min", type=int, default=5, help="min core E cells to count an onset")
@@ -233,13 +238,33 @@ def main():
     rng = np.random.default_rng(a.seed)
     print(f"[{tag}] N~{int(a.density*L*L)} seed={a.seed} T={a.T} lesion={a.lesion} m={a.core_mean} ...", flush=True)
     pos, labels, NE, NI = place_neurons(p, rng)
-    net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR, verbose=False)
-    posE = net["pos"][:NE]
     center = np.array([L / 2, L / 2]); half = L / 2
-    vth, core_mask, foci, core_masks = build_lesion_vth(net, NE, axis_unit, center, half, a.lesion,
-                                                        a.core_mean, a.core_std, a.core_r, a.dephase, a.seed,
-                                                        sep_frac=a.sep_frac, swap_vth=a.swap_vth,
-                                                        mirror_vth=a.mirror_vth)
+    EI_LESIONS = ("oneend_inhib", "oneend_recur", "oneend_combined")
+    if a.lesion in EI_LESIONS:
+        # Axis-A local E/I lesion: scale synaptic weights inside ONE core (neg end), FLAT V_th --
+        # excitability comes from the weight lesion, not a lowered threshold. The weight field is
+        # threaded into build_connectivity_rot (NOT simulate_kick: weights are baked at build time).
+        focus = center - a.sep_frac * half * axis_unit
+        core_mask_E = np.linalg.norm(pos[:NE] - focus, axis=1) <= a.core_r
+        local_scale_EI = None
+        w_EE_gain_core = 1.0
+        if a.lesion in ("oneend_inhib", "oneend_combined"):
+            local_scale_EI = np.ones(NE + NI); local_scale_EI[:NE][core_mask_E] = a.ei_scale
+        if a.lesion in ("oneend_recur", "oneend_combined"):
+            w_EE_gain_core = a.ee_gain
+        net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR,
+                                     local_scale_EI=local_scale_EI, w_EE_gain_core=w_EE_gain_core,
+                                     core_mask_E=core_mask_E, verbose=False)
+        vth = np.full(NE + NI, 18.0)   # flat bare-sheet threshold (same base as the V_th lesions)
+        core_mask = np.zeros(NE + NI, bool); core_mask[:NE] = core_mask_E
+        foci = [focus]; core_masks = [core_mask]
+    else:
+        net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR, verbose=False)
+        vth, core_mask, foci, core_masks = build_lesion_vth(net, NE, axis_unit, center, half, a.lesion,
+                                                            a.core_mean, a.core_std, a.core_r, a.dephase, a.seed,
+                                                            sep_frac=a.sep_frac, swap_vth=a.swap_vth,
+                                                            mirror_vth=a.mirror_vth)
+    posE = net["pos"][:NE]
 
     m = montage(center, a.theta, 0.0, a.nc)
     valid = valid_mask(m, posE, L, p.Rr)
@@ -369,6 +394,7 @@ def main():
                    config=dict(L=L, density=a.density, theta=a.theta, AR=a.AR, drive=a.drive, T=a.T, NE=int(NE),
                                lesion=a.lesion, core_mean=a.core_mean, core_std=a.core_std,
                                core_r=a.core_r, sep_frac=a.sep_frac, dephase=a.dephase, nc=a.nc, seed=a.seed,
+                               ei_scale=a.ei_scale, ee_gain=a.ee_gain,
                                foci=[[round(float(f[0]), 2), round(float(f[1]), 2)] for f in foci],
                                margin_frac=MARGIN_FRAC, n_core=int(core_mask.sum())),
                    detector=dict(floor=round(floor, 4), peak=round(peak, 4), bar=round(bar, 4),
