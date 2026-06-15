@@ -24,23 +24,39 @@
 
 ## §A Scope + 三态问题 + 进入门（数值锁定）
 
-**三个并列问题（每个对应一个地图层）：**
-1. 什么参数让事件**停在局部**？→ 指标 `local_frac`（n_part<7 的事件占比）。
-2. 什么参数让事件**中继成大传播**？→ 指标 `clean_global_neg` / `clean_global_pos`（n_part≥7 ∧ clean_for_timing ∧ hidden_source∈{neg,pos}，按端分）。
-3. 什么参数让两端**共点火/碰撞**？→ 指标 `collision_rate`（hidden_source=="collision" 占比）。
+**事件分桶（互斥，5 桶，按 hidden_source_label 优先；FATAL-1/2 锁定）：**
+```
+if hidden == "collision":                       -> collision           # 两端共点火（来源级）
+elif hidden in {"neg","pos"} and clean_for_timing: -> clean_global_{neg,pos}  # 干净大事件，按端
+elif n_part < 7:                                -> local               # 传不开（严格 n_part<7）
+else:                                           -> dirty_global        # n_part>=7 但读不清/来源不明
+```
+- **FATAL-1：`local` 严格 = 非碰撞 ∧ `n_part<7`。** `n_part>=7 但读不清` 归 `dirty_global`，**不进 `local_frac`**（否则把"传不开"和"传开了但读不清"混成冷格）。
+- **FATAL-2：干净大事件只看 `hidden_source_label∈{neg,pos} ∧ clean_for_timing`。** 不自造 `readable`/`axis_err` 判据——`clean_for_timing` 已由 `src/sef_hfo_stage3.build_sidecar()` 锁成「单端来源 ∧ 可读 ∧ axis_err<25」（且 `readable` 已含 `n_part>=part_min`，见 `:212-217`）。复用合同，别重造。
 
-**进入门（ADVANCE GATE，写死数值，encode 结论——非仅存在性）：** 某格（pooled over seeds）"够格进二级双向模板测试" 当且仅当全部满足：
-- `clean_global_neg ≥ 2` **且** `clean_global_pos ≥ 2`（两端**都**示范了中继能力，不是一端独大）；
-- `collision_rate < 0.30`（不是碰撞主导）；
-- `local_frac < 0.90`（不是几乎全局部=冷格只攒重复局部）；
-- `total_events ≥ 10`（这格在短 T 下有足够事件来判，否则标 `too_cold/undersampled`，不判 pass/fail）。
+**三个并列问题（每个对应一个地图层）：** ① 停在局部 → `local_frac`（=local/total，严格定义如上）；② 中继成大传播 → `clean_global_neg`/`clean_global_pos`（按端）；③ 共点火 → `collision_rate`（hidden=="collision" 占比）。
 
-> **门的语义（acceptance-gate 纪律）**：pass 不代表"找到了双向模板"，只代表"这格值得花长 T 去**accumulate** 足够事件做模板测试"。fail 的两种子类必须分开记：`collision_dominated`（热）vs `local_dominated/too_cold`（冷）——这正是"冷长跑只攒局部、热长跑只升碰撞"的两个失败方向。
+**进入门（ADVANCE GATE，写死数值，encode 结论；FATAL-3 三类失败）：** 某格（pooled over seeds）verdict ∈：
+- `too_cold/undersampled`：`total_events < 10`（短 T 下事件不足，**不判** pass/fail）。
+- `fail:collision_dominated`（**热**）：`collision_rate ≥ 0.30`。
+- `fail:local_dominated`（**冷**）：`local_frac ≥ 0.90`。
+- `PASS:relay_both_ends`：`clean_global_neg ≥ 2` **且** `clean_global_pos ≥ 2`（两端都中继）。
+- `fail:one_end_or_no_clean_relay`（**中间**：低碰撞、非局部，但双端干净中继不足/一端独大）：以上都不满足。子字段 `mid_reason ∈ {one_end_dominant, no_clean_relay}` 区分"一端独大"vs"两端都读不出干净大事件（多 dirty_global）"。
+
+> **门语义（acceptance-gate 纪律）**：PASS 不代表"找到双向模板"，只代表"值得花长 T accumulate 事件做模板测试"。**三个失败方向**：热（碰撞主导）/ 冷（局部主导，长跑只攒重复局部）/ 中间（低碰撞非局部但一端独大或读不出干净大事件）——中间类正是 regime-screen 反复撞上的"一端通吃"，是双向问题的核心障碍，**必须单列，不并入冷**。
+
+**FATAL-4 — seed 稳定性（pooled 太松，必须输出）：** 每格除 pooled 计数外，**必输** `n_seeds_neg_clean`（有 ≥1 neg 干净大事件的 seed 数）/ `n_seeds_pos_clean` / `n_seeds_both`（两端都有的 seed 数），否则单 seed 偶然点亮整格无法察觉、Task 3「跨 seed 不稳」档无数据支撑。`dirty_global_count` / `ambiguous` 也入 summary。
 
 **纪律（写死）：**
 - **本 scout 用短 T**（`T=3000`，每格 3 seed）。**不在本计划内跑任何 >1 格的长 T 仿真。**
 - 长 T 确认**只在某格通过 ADVANCE GATE 后**、且作为该格的二级步骤单独提（不在本 plan 自动触发）。
 - 二级"稳定双向模板测试"复用 Stage-2 的 masked pipeline + `analyze_stage3_readable_templates.py`，**不在本 plan 实现**——本 plan 只到"地图 + 进入门判定"。
+
+**Round-2 审阅补丁（2026-06-15，并入合同）：**
+- **IMPROVE-5（硬阈值不裸奔）**：`analyze_stage3_regime_map.py` 的 `gate()`/`cell_of()`/事件分桶必须有 **pytest 测试**（`tests/test_stage3_regime_map.py`，合成 sidecar 事件覆盖 5 桶 + 5 个 verdict + cell_of 解析）。阈值是科学合同，先测后跑。
+- **IMPROVE-6**：summary 加 `dirty_global_count` / `ambiguous`（=dirty_global）/ per-seed clean 计数（FATAL-4）。地图**仍 3 面板**（local_frac / collision_rate / min(neg,pos) clean global），不加废面板。
+- **IMPROVE-7（gitignore 一致）**：`results/.../regime_map/` 被 gitignore。`figures/README.md` 只写盘**本地**（供目视，AGENTS.md），**不 git add**；图的文字说明进 **archive doc**（Task 3）。不要 `git add -f` 跟 gitignore 对打。
+- **IMPROVE-8（skip 稳健）**：driver 的 skip 不只看 `sidecar_$tag.json` 存在；要 `sidecar` **和** `readout` 都存在且 JSON 可 load（防半写文件假 skip）。
 
 ---
 
