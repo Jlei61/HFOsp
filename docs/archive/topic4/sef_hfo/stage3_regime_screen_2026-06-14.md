@@ -166,3 +166,29 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 - **方法学坑（记下）**：用"clean 单源计数"判赢家在冷低碰撞格上没功率；该用全 hidden-source 计数 / 点火强度。要做有功率的 swap/mirror，需换更高事件率的工作点（与低碰撞冲突）——是否值得再跑一轮交用户定。
 
 **裁决（升级自 preliminary）**：用户问"参数等强为何分源"——**答：基本不是真实的源差异**；事件等价、表观分化来自每网竞争 + 读出。残留的 mirror 轻微 neg 偏未定论。**仍是探索性，进 archive、不进主结论。**
+
+---
+
+## Local-global regime-map scout（2026-06-15，结果：存在中间地带 = m17.5/sep0.7）
+
+**测了什么** —— 退一步问地图级问题：调"核兴奋度（core_mean）× 两灶间距（sep_frac）"两个旋钮，事件会**停在局部** / **中继成大传播** / **两端共点火撞车**？目标是找一块"两端都能各自传出干净大事件、又不老撞车"的中间地带。
+
+**怎么测的** —— 粗扫 3×3 网格（m∈{16.5,17.0,17.5} × sep∈{0.6,0.7,0.8}），每格 3 seed，短 T=3000（只够判这格属哪种态，不为统计）；每事件按 5 桶分（碰撞 / 干净大事件(neg) / 干净大事件(pos) / 局部 n_part<7 / dirty_global n_part≥7但读不清），进入门写死数值（两端各≥2 干净大事件 ∧ 碰撞<0.30 ∧ 局部<0.90 ∧ n≥10）。脚本 `scripts/{run_stage3_regime_map_scout.sh, analyze_stage3_regime_map.py}`（gate/分桶 12 测试上锁 `tests/test_stage3_regime_map.py`）→ `regime_map/regime_map_summary.json` + `figures/stage3_regime_map.png`。**全 27 格单一引擎（kick_probe 861489，跑中途引擎被改过、清旧 15 格重跑全部，避免引擎版本 confound 冷热轴）。**
+
+**揭示了什么** —— **存在唯一的中间地带：`m17.5/sep0.7`（冷核 + 中等间距）**，两端都干净中继（pooled 干净大事件 neg 10 / pos 5，碰撞 0，局部 0.29），且 **3 个 seed 全部两端都有**（neg3/pos2、neg3/pos2、neg4/pos1，逐 seed 零碰撞——不是单 seed 侥幸）。其余 8 格各自落三种失败方向，构成清晰景观：**近/热 → 碰撞主导**（m17.5/sep0.6 碰撞 0.96、m17.0/sep0.6 0.52、m16.5/sep0.7-0.8 ~0.34-0.42）；**远/冷 → 局部或一端独大**（m17.0/sep0.8 局部 0.91；m17.5/sep0.8、m16.5/sep0.6 一端独大）。m17.5/sep0.7 正夹在碰撞区与局部区之间的窄缝。**注：这正是 regime-screen 早先标的唯一候选格——地图给了它的景观位置（为什么是它），并确认 3 seed 稳。**
+
+| cell (m/sep) | n | local_frac | collision | dirty | cg_neg(seeds) | cg_pos(seeds) | both_seeds | verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 16.5/0.6 | 37 | 0.459 | 0.270 | 4 | 0(0) | 6(3) | 0 | fail: one_end_dominant |
+| 16.5/0.7 | 41 | 0.537 | 0.415 | 2 | 0(0) | 0(0) | 0 | fail: collision_dominated |
+| 16.5/0.8 | 41 | 0.659 | 0.341 | 0 | 0(0) | 0(0) | 0 | fail: collision_dominated |
+| 17.0/0.6 | 29 | 0.241 | 0.517 | 1 | 1(1) | 5(2) | 1 | fail: collision_dominated |
+| 17.0/0.7 | 35 | 0.743 | 0.229 | 0 | 1(1) | 0(0) | 0 | fail: no_clean_relay |
+| 17.0/0.8 | 35 | 0.914 | 0.086 | 0 | 0(0) | 0(0) | 0 | fail: local_dominated |
+| 17.5/0.6 | 22 | 0.000 | 0.955 | 0 | 1(1) | 0(0) | 0 | fail: collision_dominated |
+| **17.5/0.7** | **21** | **0.286** | **0.000** | **0** | **10(3)** | **5(3)** | **3** | **PASS: relay_both_ends** |
+| 17.5/0.8 | 23 | 0.783 | 0.043 | 0 | 3(2) | 1(1) | 1 | fail: one_end_dominant |
+
+**进入门语义（守纪）**：PASS **不**代表"找到稳定双向模板"，只代表 m17.5/sep0.7 **值得花长 T 去 accumulate 足够事件做二级模板测试**。该格 ~7 事件/seed、且 neg 偏（10:5，与"每网赢者采样"一致）——所以二级测试前必须先长跑攒量（之前 swap/mirror 在此格因事件少而没功率，印证）。
+
+**Post-gate 下一步（不在本 plan 自动触发）**：只在 `m17.5/sep0.7` 上加长 T（估 ≥200-400s/run 才够 ≥50 干净大事件/端，小时级）做二级"稳定双向模板测试"（复用 masked pipeline + `analyze_stage3_readable_templates.py`）。冷长跑只在别的格攒重复局部、热长跑只升碰撞——已由本地图佐证，所以长跑只对这唯一过门格做。**仍探索性，不进主结论。**
