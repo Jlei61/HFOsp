@@ -1,5 +1,6 @@
 # Topic 5：Seizure-related analysis (per-subject subtype + 下游 pre-ictal / outcome)
 
+> **主线结果（2026-06-14）：network-axis A+B 已执行**——间期传播轴 ↔ 发作早期激活共享一根粗网络骨架（18 Epilepsiae 队列稳），细对齐仅快活动量稳；符号自由共线，非逐点重放。见 §3.0 + 归档 `axis_alignment_AB_result_2026-06-14.md`。
 > 状态：**探索性 (exploratory) — PR-0 + PR-1 落地，audit-rerun 完成 (2026-05-10)，yuquan 扩展 (2026-05-10 PR-0.1)**。PR-1 cohort z-ER 聚类有 1 张 cohort 主结果（`figures/per_subject/`，25 subjects），cohort-level "真子型断言" 仍依赖 sensitivity；PR-2+ 未启动。
 > 范围：以 ictal seizure 本身为研究对象——subject 内的 seizure subtype carve-out + 下游 pre-ictal / outcome / propagation 关联。
 > **不属于**：interictal 事件内部传播（topic1）、IEI/PSD（topic2）、spatial SOZ 归因（topic3）、模型层（topic4）。
@@ -24,6 +25,13 @@
 
 ## 2. 一句话当前结论
 
+- **🟢 主线（network-axis pivot，A+B，2026-06-14 执行完毕）**：把每个病人**平时**那条间期高频传播轴
+  （各触点平均发放先后）和**发作头十秒**的激活高地摆到同一张电极平面上，量两者空间梯度是否共线
+  （符号自由）。**18 个 Epilepsiae 被试队列：粗层面的"共享网络主轴"稳——四种激活量都稳赢"全触点随机洗牌"，
+  FDR + 留一都扛得住。**比电极杆/活跃度更细的对齐只在**快活动 60–100 Hz**上稳（过最严的同杆×活跃度联合洗牌，
+  FDR q=0.029），主指标宽带功率止于粗层。**这是符号自由的轴/梯度共线，不是"发作沿间期路线逐点重放"。**
+  primary 只有宽带一条，B 线（EI-like）/ hfa / ramp 是次级 / 灵敏度读出。
+  详见 §3.0 + 归档 `docs/archive/topic5/axis_alignment_AB_result_2026-06-14.md`（含 handoff）。
 - **PR-0 (v2.3 Layer A ictal ER timing atlas)**：cohort = 25 (15 epilepsiae audit_eligible + 9 yuquan audit_eligible + sentinel-only epilepsiae/916; topic5 PR-0.1 2026-05-10 yuquan extension)。每 subject v2.3 schema，per-seizure PNG 全 cohort 渲完。User 视觉巡视暴露 within-subject seizure pattern 异质性（442 sz=9 / 548 {13,14,24,25} / 916 {21,23,25} / 1077 sz=1），是 PR-1 的直接动机。详见 `docs/superpowers/specs/topic5_pr0_*` (待整理) + `results/data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/`。
 - **PR-1 z-ER subtype 聚类（2026-05-10 audit-corrected exploratory 版；2026-05-10 yuquan-extended）**：25 subjects (16 epilepsiae + 9 yuquan)，50 subject-band rows，33 ok / 17 insufficient_n。yuquan ok 子集 (n=5 cells, 4 subjects: litengsheng broad k=2, sunyuanxin broad k=1, zhangkexuan gamma k=2, zhaojinrui gamma k=2 + broad k=1) silhouette median 0.495 / gap_perm median 0.552 — 实际优于 epilepsiae ok 子集 (silhouette 0.418 / gap_perm 0.325)。整体 cohort silhouette median 0.444、gap_perm median 0.380。`over_split_flag` (AND 规则 `gap_perm < 0.10 AND ratio > 0.5`) cohort 命中 **0/33 ok**。Bug-fix 实测影响：pre-audit 28 个 ok rows 上 Δgap_perm 中位 −0.0007、abs_max 0.061，**0 个 over_split_flag flip**，0 个 sentinel jaccard 变化。
 - **PR-1 sentinel 视觉裁定**（user 2026-05-09 / 2026-05-10）：
@@ -44,6 +52,42 @@
 ---
 
 ## 3. 核心证据链
+
+### 3.0 Network-axis 主线：间期传播轴 ↔ 发作早期激活（A 线 primary + B 线 secondary，2026-06-14）
+
+**这是 network-axis pivot 阶段唯一有队列结论的部分，作为 topic5 现阶段主线结果。**
+
+**测什么**：每被试取间期模板 A 的逐触点排名场（传播轴）与所有合格发作头 10 s 的逐触点激活均值，
+算两者的镜像不变（符号自由）相关 `|corr_pair_mirror_invariant|` —— 只判共线/共轴，含反向共线，
+**不判方向重放**。
+
+**怎么测**：对四层独立 null 各比一遍——`channel`（全触点随机洗牌 = 有没有任何粗共享结构）、
+`within_shaft`（同杆内 = 比解剖杆细吗）、`anchor_matched`（同活跃度箱 = 排活跃度混淆）、
+`joint`（同杆×同活跃度 = 最严）。每被试 null = 跨发作取中位的 B 个重排实现的 95 分位；队列做
+二项 + Wilcoxon + 留一（LOSO）+ BH-FDR。主队列 18 Epilepsiae / 354 合格发作；
+Yuquan 结构性仅 1 被试合格，不成队列。
+
+**结论**：
+- **粗网络骨架共享 = 稳**：四种激活量都稳赢 `channel`（broadband FDR q=0.020 / LOSO p=0.015）。
+- **细对齐 = 仅快活动量稳**：hfa（60–100 Hz）四层全稳赢含 `joint`（q=0.029）；broadband 只过粗层；
+  ramp / ei 过粗 + 活跃度、不过 `joint`。
+- **措辞红线**：符号自由共线 ≠ 逐点重放；primary 只有 broadband，B 线（ei）/ hfa / ramp 不得当 primary
+  cohort claim。
+
+**预注册纪律**：primary 单一终点 = broadband × channel；其余 exploratory / sensitivity。
+"快活动细对齐"是唯一过最严联合 null 的发现，但属灵敏度档。**2026-06-15 已做 hfa×joint 冻结复验
+（split-half + 负对照）：full 干净复现（joint Wilcox=0.022）、偶数半显著、奇数半不显著（0.078）→
+split_half_robust=False；负对照四层全部非显著=非假阳性。结论 = real-but-not-robust，维持灵敏度档、
+不升 primary，升格须独立第二队列**（`docs/archive/topic5/hfa_joint_confirm_2026-06-15.md`）。主线粗骨架不受影响。
+
+完整方法 + 定稿数值表 + 工件清单 + handoff：
+`docs/archive/topic5/axis_alignment_AB_result_2026-06-14.md`
+（定稿表 `results/topic5_ictal_recruitment/axis_alignment/axis_alignment_FINAL.md`）。
+
+图三类（`.../axis_alignment/figures/`）：① **四层 null 阶梯图** `axis_alignment_null_ladder_B1000.png`
+——一张图读出"主结论=粗骨架、只有 HFA 爬到最严层"的层级；② **每被试场图** `fields/*_axis_vs_broadband.png`
+——左间期轴(模板 A) / 右发作激活同平面眼看共线；③ **方向玫瑰图** `rose/*_direction_rose_broadband.png`
+——发作方向归一化 0°，两模板逐事件方向画成整圆空心直方图（ECoG 网格最实、SEEG 投影 caveat）。
 
 ### 3.1 PR-0：v2.3 Layer A ictal ER timing atlas
 

@@ -4,6 +4,17 @@
 > **范围**：以 ictal seizure 本身为研究对象（subtype / pre-ictal / propagation / outcome）。
 > **不属于**：interictal 事件内部传播（topic1）、IEI/PSD（topic2）、SOZ 空间归因（topic3）、模型层（topic4）。
 
+## 主线（network-axis pivot）
+
+### `axis_alignment_AB_result_2026-06-14.md` — **现阶段主线结果**：间期传播轴 ↔ 发作早期激活的轴对齐（A 线 primary + B 线 secondary）
+- 18 Epilepsiae 队列：粗"共享网络主轴"稳（broadband 稳赢全通道 null，FDR + LOSO 扛住）；细对齐仅快活动（hfa）稳（过最严 joint）；符号自由共线，非逐点重放。
+- 含完整方法 / 定稿数值表 / 工件清单 / handoff。计划全貌：`network_axis_pivot_plan_2026-06-13.md`（A/B 段已标 ✅ 执行）。
+- 定稿表 `results/topic5_ictal_recruitment/axis_alignment/axis_alignment_FINAL.md`。
+
+### `hfa_joint_confirm_2026-06-15.md` — hfa×joint 冻结复验（split-half + 负对照）
+- 唯一过最严 joint null 的 hfa 细对齐：full 干净复现（Wilcox=0.022）但**奇数半不显著（0.078）→ 非 split-half 稳健**；负对照四层全部非显著=非假阳性。
+- 结论 = real-but-not-robust，**维持灵敏度档、不升 primary**；升格须独立第二队列。主线粗骨架不受影响。
+
 ## PR 系列
 
 ### `pr1_seizure_clustering/` — Per-subject seizure subtyping (z-ER tensor + 1−Spearman + UPGMA)
