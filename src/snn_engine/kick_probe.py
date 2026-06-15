@@ -37,6 +37,28 @@ T_KICK = 150.0     # ms   kick onset
 DUR_KICK = 18.0    # ms   kick duration
 
 
+def _flatten_by_source(by_delay, bins, Nsrc):
+    """Flatten the per-delay CSC (N x Nsrc) connectivity into SOURCE-indexed edge
+    arrays so a spike scatter is O(#firing-edges) via a SINGLE np.add.at, instead
+    of a dense N-add per delay bin (the paper-scale integration-loop bottleneck).
+    Returns (indptr[Nsrc+1], dst[nnz], dly[nnz], w[nnz]); source s's out-edges are
+    dst/dly/w[indptr[s]:indptr[s+1]]. Results-preserving: same edges/weights."""
+    src, dst, dly, w = [], [], [], []
+    for d in bins:
+        coo = by_delay[d].tocoo()              # row = target (dst), col = source
+        src.append(coo.col)
+        dst.append(coo.row)
+        dly.append(np.full(coo.nnz, d, np.int32))
+        w.append(coo.data)
+    src = np.concatenate(src)
+    dst = np.concatenate(dst).astype(np.int64)
+    dly = np.concatenate(dly)
+    w = np.concatenate(w)
+    o = np.argsort(src, kind="stable")
+    indptr = np.searchsorted(src[o], np.arange(Nsrc + 1)).astype(np.int64)
+    return indptr, dst[o], dly[o], w[o]
+
+
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
                   V_th_per_neuron=None):
@@ -78,6 +100,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     ampa_bins = [d for d in range(M) if ampa[d].nnz > 0]
     gaba_bins = [d for d in range(M) if gaba[d].nnz > 0]
+    # source-indexed flat edges for O(#firing-edges) scatter; cache on net (reused across runs)
+    if "ampa_flat" not in net:
+        net["ampa_flat"] = _flatten_by_source(ampa, ampa_bins, NE)
+        net["gaba_flat"] = _flatten_by_source(gaba, gaba_bins, NI)
+    a_indptr, a_dst, a_dly, a_w = net["ampa_flat"]
+    g_indptr, g_dst, g_dly, g_w = net["gaba_flat"]
 
     # ---- external drive scale ---- (identical to model.simulate)
     nu_theta, _, _ = compute_nu_theta(p)
@@ -187,16 +215,26 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                 spk_t.append(np.full(idx.size, tm))
                 spk_i.append(idx)
             # ----- scatter spikes into delay ring -----
+            # PERF (2026-06-15): the firers' synapses are SPARSE -- scatter only the
+            # nonzero target rows (np.add.at on the column-gathered COO) instead of
+            # building+adding a DENSE N-vector for every delay bin. At paper scale this
+            # is the integration-loop bottleneck (a dense N add per ~206 bins per step).
+            # Results-preserving: same column-gathered weights, only zero-adds skipped;
+            # verified spike-identical against the pre-opt engine (tests/test_snn_engine_scatter.py).
             spE = np.where(spk[:NE])[0]
             spI = np.where(spk[NE:])[0]
             if spE.size:
-                for d in ampa_bins:
-                    contrib = np.asarray(ampa[d][:, spE].sum(axis=1)).ravel()
-                    ring_sE[(t + d) % M] += contrib
+                st = a_indptr[spE]; cnt = a_indptr[spE + 1] - st; tot = int(cnt.sum())
+                if tot:
+                    idx = (np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt)
+                           + np.repeat(st, cnt))            # concat of each firer's edge range
+                    np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
             if spI.size:
-                for d in gaba_bins:
-                    contrib = np.asarray(gaba[d][:, spI].sum(axis=1)).ravel()
-                    ring_sI[(t + d) % M] += contrib
+                st = g_indptr[spI]; cnt = g_indptr[spI + 1] - st; tot = int(cnt.sum())
+                if tot:
+                    idx = (np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt)
+                           + np.repeat(st, cnt))
+                    np.add.at(ring_sI, ((t + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
 
         if verbose and (t % max(1, nsteps // 5) == 0):
             print(f"  sim {t}/{nsteps}  ({tm:.0f} ms)  "
