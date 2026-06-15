@@ -11,12 +11,42 @@ from src.sef_hfo_stage3 import (
     core_participation_threshold,
     first_crossing_time,
     label_event,
+    label_core_event,
+    classify_readout,
     collision_free_blocks,
     synthetic_label_sequence,
     entry_jitter_stats,
     core_active_fraction,
     build_sidecar,
 )
+
+
+# --- P1 split (review 2026-06-15): source attribution vs read-out quality are SEPARATE ---
+
+def test_label_core_event_attributes_source_regardless_of_readability():
+    # the whole point: a core that fired is attributed even if the read-out can't see the axis
+    assert label_core_event(onset_neg=10.0, onset_pos=14.0, delta_onset=1.0) == "neg"
+    assert label_core_event(onset_neg=14.0, onset_pos=10.0, delta_onset=1.0) == "pos"
+    assert label_core_event(onset_neg=10.0, onset_pos=10.4, delta_onset=1.0) == "collision"
+    assert label_core_event(onset_neg=None, onset_pos=10.0, delta_onset=1.0) == "pos"
+
+
+def test_label_core_event_none_when_no_core_fires():
+    # core-level 'none' (NOT 'ambiguous') — distinguishes 'no core fired' from 'unreadable read-out'
+    assert label_core_event(onset_neg=None, onset_pos=None, delta_onset=1.0) == "none"
+
+
+def test_core_source_vs_hidden_diverge_when_unreadable():
+    # the failure mode the split fixes: a real neg ignition with an UNREADABLE axis. legacy
+    # hidden_source_label calls it 'ambiguous' (source lost); core_source_label keeps it 'neg'.
+    assert label_event(onset_neg=10.0, onset_pos=14.0, delta_onset=1.0, readable=False) == "ambiguous"
+    assert label_core_event(onset_neg=10.0, onset_pos=14.0, delta_onset=1.0) == "neg"
+
+
+def test_classify_readout_separates_quality_from_source():
+    assert classify_readout(n_part=8, axis_err=0.0, returned=True, part_min=7) == "readable"
+    assert classify_readout(n_part=2, axis_err=None, returned=True, part_min=7) == "unreadable"
+    assert classify_readout(n_part=9, axis_err=10.0, returned=False, part_min=7) == "not_returned"
 
 
 # --- core_participation_threshold = max(0.01, n_min / n_core_cells) (spec §1) ---

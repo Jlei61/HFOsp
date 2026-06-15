@@ -377,9 +377,20 @@ def main():
     # phantom-mask (non-participating contacts -> NaN). Written in the real loader's legacy keys so
     # the pooled forward+reverse record traverses masked PR-2/PR-2.5/rank-displacement unchanged.
     ret_wins = [(e["t_on"], e["t_off"]) for e in ev_recs if e["returned"]]
+    env_ref_src = None
     if ret_wins:
         assert valid.all(), "off-sheet contacts present — record would be boundary-extrapolated; refuse"
-        floor_g = float(env_f.min()); margin_g = MARGIN_FRAC * (float(env_f.max()) - floor_g)
+        # P1/P2 (review 2026-06-15): the record-lagPat participation margin must NOT be record-length
+        # -dependent either (env_f.max() is a whole-record quantity -> a big late event raises the
+        # margin -> earlier events' participation/ranks shift, same length-bug as the event bar, which
+        # would bias the template matrix). prefix_peak -> calibrate the envelope reference from the
+        # first cal_prefix_ms (env_f is (n_contacts, n_time)); record_peak/fixed_bar -> legacy max.
+        if a.event_bar_mode == "prefix_peak":
+            npf_e = max(1, int(round(a.cal_prefix_ms / fdt)))
+            env_ref_max = float(env_f[:, :npf_e].max()); env_ref_src = f"prefix({a.cal_prefix_ms}ms)"
+        else:
+            env_ref_max = float(env_f.max()); env_ref_src = "record_max"
+        floor_g = float(env_f.min()); margin_g = MARGIN_FRAC * (env_ref_max - floor_g)
         rec_art = attach_geometry(extract_lagpat(env_f, fdt, ret_wins, floor_g, margin_g, 0.5, fdt), m)
         rec_dir = os.path.join(out_dir, "record", tag); os.makedirs(rec_dir, exist_ok=True)
         base = os.path.join(rec_dir, f"model_{tag}")
@@ -430,6 +441,7 @@ def main():
                                margin_frac=MARGIN_FRAC, n_core=int(core_mask.sum())),
                    detector=dict(floor=round(floor, 4), peak=round(peak, 4), bar=round(bar, 4),
                                  event_bar_mode=a.event_bar_mode, bar_source=bar_src,
+                                 record_env_ref=env_ref_src,  # P1/P2: record-lagPat margin calibration source
                                  # NOTE (P1 review 2026-06-15): true_inter_event_floor masks detected
                                  # windows; under a high bar those windows are narrow so event tails
                                  # leak in -> this value can be inflated. Use the --dump-af rolling

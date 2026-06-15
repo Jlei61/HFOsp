@@ -60,6 +60,29 @@ def label_event(onset_neg, onset_pos, delta_onset, readable):
     return "neg" if neg < pos else "pos"
 
 
+def label_core_event(onset_neg, onset_pos, delta_onset):
+    """CORE-level source attribution from core onsets ONLY — NO read-out readability gate (review
+    2026-06-15: `hidden_source_label` conflated 'which core fired' with 'could the virtual SEEG read
+    it'; this separates them). 'neg' | 'pos' | 'collision' | 'none'. Unlike `label_event`, an
+    unreadable axis does NOT fold a genuine core ignition into 'ambiguous' — a core that crossed is
+    attributed regardless of read-out. 'none' = neither core crossed."""
+    neg = math.inf if onset_neg is None else onset_neg
+    pos = math.inf if onset_pos is None else onset_pos
+    if neg == math.inf and pos == math.inf:
+        return "none"
+    if abs(neg - pos) <= delta_onset:
+        return "collision"
+    return "neg" if neg < pos else "pos"
+
+
+def classify_readout(n_part, axis_err, returned, part_min):
+    """READ-OUT quality of one event, independent of source (review 2026-06-15). 'not_returned'
+    (boundary-truncated) | 'readable' (axis_err is not None AND n_part>=part_min) | 'unreadable'."""
+    if not returned:
+        return "not_returned"
+    return "readable" if (axis_err is not None and (n_part or 0) >= part_min) else "unreadable"
+
+
 def collision_free_blocks(event_times, clean_for_timing
                           ) -> Tuple[List[Tuple[float, float]], np.ndarray]:
     """Partition events into maximal runs of CONSECUTIVE clean events (time order).
@@ -210,15 +233,21 @@ def build_sidecar(ev_recs, spk, core_masks, NE, *, dt, bin_ms, part_min, delta_o
         on_neg = first_crossing_time(af_neg, bin_ms, frac_neg, t_offset=e["t_on"])
         on_pos = first_crossing_time(af_pos, bin_ms, frac_pos, t_offset=e["t_on"])
         readable = e["axis_err"] is not None and e["n_part"] >= part_min
-        hidden = label_event(on_neg, on_pos, delta_onset, readable)
+        hidden = label_event(on_neg, on_pos, delta_onset, readable)   # legacy (compat): folds readability
+        # P1 split (review 2026-06-15): source attribution (core onsets) vs read-out quality — kept
+        # SEPARATE so a real core ignition that the virtual SEEG can't read is NOT mislabeled a source
+        # failure. clean_for_timing stays bit-identical (it already required readability).
+        core_source_label = label_core_event(on_neg, on_pos, delta_onset)
+        readout_class = classify_readout(e["n_part"], e["axis_err"], e["returned"], part_min)
         reason = ("unreadable_axis" if not readable else
                   "no_core_crossing" if (on_neg is None and on_pos is None) else
                   "simultaneous_onset" if hidden == "collision" else "none")
-        clean_t = (hidden in ("neg", "pos") and readable and e["axis_err"] < 25)
+        clean_t = (core_source_label in ("neg", "pos") and readable and e["axis_err"] < 25)
         diag_k = 8
         sidecar.append(dict(
             event_id=len(sidecar), raw_event_index=raw_i, t_on=e["t_on"], t_off=e["t_off"],
             event_peak_t=e.get("event_peak_t"), hidden_source_label=hidden,
+            core_source_label=core_source_label, readout_class=readout_class,
             core_onset_neg=(None if on_neg is None else round(on_neg, 1)),
             core_onset_pos=(None if on_pos is None else round(on_pos, 1)),
             collision_reason=reason, clean_for_timing=bool(clean_t),
