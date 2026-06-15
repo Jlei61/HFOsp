@@ -213,6 +213,9 @@ def main():
                     help="oneend_inhib/combined: w_EI multiplier for in-core E targets (<1 = perisomatic inhibition collapse)")
     ap.add_argument("--ee-gain", type=float, default=1.5,
                     help="oneend_recur/combined: w_EE multiplier for both-in-core E->E edges (>1 = recurrent cluster)")
+    ap.add_argument("--ei-vth-seed", type=float, default=None,
+                    help="E/I lesions: if set, lower the in-core E cells' V_th to this (mild threshold seed) "
+                         "instead of flat 18.0 -- nucleation-vs-propagation-relay screen (does E/I need a seed to relay out)")
     ap.add_argument("--delta-onset", type=float, default=30.0,
                     help="ms; two cores igniting within this -> collision (Stage 3 twoend_equal)")
     ap.add_argument("--n-min", type=int, default=5, help="min core E cells to count an onset")
@@ -256,6 +259,8 @@ def main():
                                      local_scale_EI=local_scale_EI, w_EE_gain_core=w_EE_gain_core,
                                      core_mask_E=core_mask_E, verbose=False)
         vth = np.full(NE + NI, 18.0)   # flat bare-sheet threshold (same base as the V_th lesions)
+        if a.ei_vth_seed is not None:
+            vth[:NE][core_mask_E] = a.ei_vth_seed   # mild in-core V_th seed (nucleation-vs-relay screen)
         core_mask = np.zeros(NE + NI, bool); core_mask[:NE] = core_mask_E
         foci = [focus]; core_masks = [core_mask]
     else:
@@ -394,7 +399,7 @@ def main():
                    config=dict(L=L, density=a.density, theta=a.theta, AR=a.AR, drive=a.drive, T=a.T, NE=int(NE),
                                lesion=a.lesion, core_mean=a.core_mean, core_std=a.core_std,
                                core_r=a.core_r, sep_frac=a.sep_frac, dephase=a.dephase, nc=a.nc, seed=a.seed,
-                               ei_scale=a.ei_scale, ee_gain=a.ee_gain,
+                               ei_scale=a.ei_scale, ee_gain=a.ee_gain, ei_vth_seed=a.ei_vth_seed,
                                foci=[[round(float(f[0]), 2), round(float(f[1]), 2)] for f in foci],
                                margin_frac=MARGIN_FRAC, n_core=int(core_mask.sum())),
                    detector=dict(floor=round(floor, 4), peak=round(peak, 4), bar=round(bar, 4),
