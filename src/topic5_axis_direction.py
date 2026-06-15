@@ -102,6 +102,14 @@ def axial_mean(angles):
     return float(0.5 * np.mod(np.arctan2(s, c), TWO_PI))
 
 
+def axial_distance(a, b):
+    """Axial angular distance in [0, pi/2]: a and a+pi count as the SAME axis. d(0, pi)=0 (same
+    axis), d(0, pi/2)=pi/2 (orthogonal axes). Use to measure how far a template's axis sits from
+    the seizure axis (0 = collinear = the A-line 'aligned' case, pi/2 = orthogonal)."""
+    d = abs(float(a) - float(b)) % np.pi
+    return float(min(d, np.pi - d))
+
+
 def axial_resultant_length(angles):
     """Axial concentration R_axial in [0,1] = |mean(e^{i*2*theta})|. 1 = all on one axis (incl. a
     perfectly bidirectional set), 0 = uniform / no axis. NaN if empty."""

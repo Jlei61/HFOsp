@@ -3,7 +3,7 @@ import pytest
 
 from src.topic5_axis_direction import (gradient_angle, event_angles_by_template,
                                        circular_mean, resultant_length, rotate_to_reference,
-                                       axial_mean, axial_resultant_length)
+                                       axial_mean, axial_resultant_length, axial_distance)
 
 # a small 5-point cloud spanning x and y
 X = np.array([0.0, 1.0, 2.0, 1.0, 1.0])
@@ -72,6 +72,14 @@ def test_axial_mean_does_not_cancel_on_bidirectional_set():
 def test_axial_mean_orthogonal_axes_degenerate_nan():
     # 0deg and 90deg are orthogonal axes -> no net axis
     assert np.isnan(axial_mean([0.0, np.pi / 2]))
+
+
+def test_axial_distance_collinear_is_zero_orthogonal_is_half_pi():
+    assert axial_distance(0.0, np.pi) == pytest.approx(0.0)        # same axis
+    assert axial_distance(0.3, 0.3 + np.pi) == pytest.approx(0.0)
+    assert axial_distance(0.0, np.pi / 2) == pytest.approx(np.pi / 2)  # orthogonal
+    assert axial_distance(0.1, 0.25) == pytest.approx(0.15)
+    assert axial_distance(0.25, 0.1) == pytest.approx(0.15)        # symmetric
 
 
 def test_axial_mean_in_zero_to_pi():

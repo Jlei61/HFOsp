@@ -39,14 +39,35 @@ from src.lagpat_rank_audit import mask_phantom_ranks
 from src import propagation_skeleton_geometry as G
 from src.topic5_axis_direction import (event_angles_by_template, resultant_length,
                                        rotate_to_reference, gradient_angle,
-                                       axial_mean, axial_resultant_length)
+                                       axial_mean, axial_resultant_length, axial_distance)
 
 REAL_DIR = _ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects"
 CACHE_DIR = _ROOT / "results/topic5_ictal_recruitment/t0_feature_cache"
 OUT = _ROOT / "results/topic5_ictal_recruitment/axis_alignment/figures/rose"
 SQL_DIR = Path("/mnt/epilepsia_data/all_data_sqls")
+ALIGN_DIR = _ROOT / "results/topic5_ictal_recruitment/axis_alignment"
 ACTIVATION_KEY = {"broadband": "bb_auc", "hfa": "hfa_auc", "ramp": "ramp", "ei": "ei_like"}
 A_COLOR, B_COLOR = "#1f77b4", "#d95f02"
+
+
+def _align_lookup(activation):
+    """A-line cohort statistic per subject (template-A field |corr_pair_mirror_invariant| vs the 4
+    nulls) — the test that already established interictal-axis vs seizure-activation SIGNIFICANCE."""
+    f = ALIGN_DIR / f"axis_alignment_{activation}_B1000.json"
+    if not f.exists():
+        return {}
+    d = json.load(open(f))
+    return {r["subject_id"]: r for r in d.get("per_subject", []) if r.get("status") == "ok"}
+
+
+def _aline_caption(rec):
+    if not rec or rec.get("real_median_abs_corr") is None:
+        return ""
+    beats = [nm for nm, k in [("coarse", "pass_channel_null"), ("within-shaft", "pass_within_shaft_null"),
+                              ("activity", "pass_anchor_matched_null"), ("joint", "pass_joint_null")]
+             if rec.get(k)]
+    tail = (" · beats " + ", ".join(beats)) if beats else " · beats no null"
+    return f"A-line field alignment |r| = {rec['real_median_abs_corr']:.2f}{tail}"
 MAX_EVENTS = 6000          # subjects have 90k-240k events; a few thousand fixes the direction
 EVENT_SEED = 20260615      # histogram exactly. Seeded subsample keeps it reproducible + fast.
 
@@ -172,7 +193,7 @@ def _rose_axes(ax, grp, ref, sz_angles, bins):
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.22), ncol=1, frameon=False, fontsize=8.8)
 
 
-def plot_subject(ds_sid, activation, bins=18):
+def plot_subject(ds_sid, activation, align=None, bins=18):
     loaded = _load_frame(ds_sid)
     if loaded is None:
         return None
@@ -198,14 +219,15 @@ def plot_subject(ds_sid, activation, bins=18):
     ax = fig.add_subplot(111, projection="polar")
     _rose_axes(ax, grp, ref, sz_angles, bins)
     fig.suptitle(f"Patient {pretty} — {kind} ({detail})\n"
-                 f"interictal event directions per template vs seizure axis  ({activation})",
+                 f"per-event interictal directions per template vs seizure axis  ({activation})",
                  fontsize=12, y=1.0)
-    cap = ("direction = gradient of the rank/activation scalar field (NOT a wavefront velocity); "
-           "black = seizure axis (axial mean) set to 0°/180°; hollow bars = interictal event "
-           "directions per template; a lobe near 180° = reverse-collinear (still aligned)")
+    cap = ("DIRECTION-DISTRIBUTION DIAGNOSTIC (per-event gradient directions; feeds C-line, NOT the "
+           "A-line stat — A-line is the mirror-invariant FIELD correlation, see the field maps). "
+           "direction = scalar-field gradient, NOT a wavefront velocity; black = seizure axis (axial "
+           "mean) at 0°/180°; hollow bars = interictal event directions per template.")
     if kind == "SEEG":
         cap = "SEEG: projected-plane estimate, read with care.  " + cap
-    fig.text(0.5, -0.01, cap, ha="center", fontsize=7.8, color="0.35", wrap=True)
+    fig.text(0.5, -0.01, cap, ha="center", fontsize=7.6, color="0.35", wrap=True)
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"{ds_sid}_direction_rose_{activation}.png"
     fig.savefig(out, dpi=150)
@@ -276,12 +298,13 @@ def main():
     ap.add_argument("--pooled", action="store_true", help="also render the cohort-pooled rose")
     ap.add_argument("--pooled-only", action="store_true", help="render ONLY the cohort-pooled rose")
     args = ap.parse_args()
+    align = _align_lookup(args.activation)
     all_subs = sorted(p.stem for p in CACHE_DIR.glob("*.npz"))
     subs = args.subjects or all_subs
     done = []
     if not args.pooled_only:
         for sid in subs:
-            r = plot_subject(sid, args.activation, bins=args.bins)
+            r = plot_subject(sid, args.activation, align=align, bins=args.bins)
             if r:
                 out, kind = r
                 done.append(sid)
