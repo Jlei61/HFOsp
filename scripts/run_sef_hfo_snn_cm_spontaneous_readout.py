@@ -231,6 +231,14 @@ def main():
                     help="source-asymmetry probe: identical threshold-vs-radius profile on both cores (twoend_equal)")
     ap.add_argument("--dump-fullfield", action="store_true",
                     help="write per-event FULL-neuron-field spatial extent + n_fired_E (local-vs-global spread, not just n_part)")
+    ap.add_argument("--event-bar-mode", choices=["record_peak", "prefix_peak", "fixed_bar"],
+                    default="record_peak",
+                    help="event-detection bar calibration. record_peak=legacy global-max (length-dependent!); "
+                         "prefix_peak=bar from first --cal-prefix-ms (length-stable); fixed_bar=--event-bar")
+    ap.add_argument("--cal-prefix-ms", type=float, default=3000.0, help="prefix_peak: window for peak calibration")
+    ap.add_argument("--event-bar", type=float, default=None, help="fixed_bar: explicit event-on active fraction")
+    ap.add_argument("--dump-af", action="store_true",
+                    help="save af trace + bin_w + bar + detected windows + detector config (length-stable warming diagnostic)")
     a = ap.parse_args()
     tag = a.tag or f"{a.lesion}_s{a.seed}"
     out_dir = a.out or OUT
@@ -286,7 +294,21 @@ def main():
     af, bin_w = active_fraction(spk, DT, BIN_MS)
     nb0, nb1 = int(BASELINE_MS[0] / bin_w), int(BASELINE_MS[1] / bin_w)
     floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
-    peak = float(af.max()); bar = floor + CAL_FRAC * (peak - floor)
+    # P1 (review 2026-06-15): the event bar must not be silently record-length-dependent. Default
+    # 'record_peak' = legacy behavior (peak = global max -> a big LATE event raises the bar for ALL
+    # earlier events; this made the SAME deterministic early events read n_part=8 at T=3000 but
+    # n_part=2 at T=30000). 'prefix_peak' calibrates the bar from the first cal_prefix_ms only (so
+    # short/long records share the bar); 'fixed_bar' uses an explicit bar. bar_source -> provenance.
+    if a.event_bar_mode == "record_peak":
+        peak = float(af.max()); bar = floor + CAL_FRAC * (peak - floor); bar_src = "record_peak"
+    elif a.event_bar_mode == "prefix_peak":
+        npf = max(1, int(round(a.cal_prefix_ms / bin_w)))
+        peak = float(af[:npf].max()); bar = floor + CAL_FRAC * (peak - floor)
+        bar_src = f"prefix_peak({a.cal_prefix_ms}ms)"
+    elif a.event_bar_mode == "fixed_bar":
+        peak = float(af.max()); bar = float(a.event_bar); bar_src = f"fixed_bar({a.event_bar})"
+    else:
+        raise ValueError(f"unknown --event-bar-mode {a.event_bar_mode}")
     events = detect_events(af, bin_w, event_on_frac=bar)
 
     env_f, fdt, _ = snn_event_envelope(spk, posE, m, DT)
@@ -407,6 +429,11 @@ def main():
                                foci=[[round(float(f[0]), 2), round(float(f[1]), 2)] for f in foci],
                                margin_frac=MARGIN_FRAC, n_core=int(core_mask.sum())),
                    detector=dict(floor=round(floor, 4), peak=round(peak, 4), bar=round(bar, 4),
+                                 event_bar_mode=a.event_bar_mode, bar_source=bar_src,
+                                 # NOTE (P1 review 2026-06-15): true_inter_event_floor masks detected
+                                 # windows; under a high bar those windows are narrow so event tails
+                                 # leak in -> this value can be inflated. Use the --dump-af rolling
+                                 # p50/p95 (bar-independent) to judge real warming, NOT this field.
                                  true_inter_event_floor=true_floor),
                    n_events=len(ev_recs),
                    # n_clean_* are DIRECTION (read-out sign) counts, NOT hidden-source counts;
@@ -416,6 +443,15 @@ def main():
                    stage3_source_counts=stage3_source_counts,
                    rep_event_index=rep_i, events=ev_recs)
     json.dump(summary, open(os.path.join(out_dir, f"readout_{tag}.json"), "w"), indent=2)
+    if a.dump_af:
+        # length-stable warming diagnostic: full af trace + the windows the CURRENT bar produced.
+        # Lets an analyzer recompute rolling p50/p95 af (bar-independent) and re-detect under any bar.
+        np.savez_compressed(os.path.join(out_dir, f"af_{tag}.npz"),
+                            af=af.astype(np.float32), bin_w=bin_w, floor=floor, peak=peak, bar=bar,
+                            event_bar_mode=a.event_bar_mode, bar_source=bar_src,
+                            win_on=np.array([e["t_on"] for e in ev_recs], float),
+                            win_off=np.array([e["t_off"] for e in ev_recs], float),
+                            n_part=np.array([e["n_part"] for e in ev_recs], int))
     if stage3_source_counts is not None:
         print(f"[{tag}] stage3 SOURCE counts (gate): {stage3_source_counts}", flush=True)
     print(f"[{tag}] events={len(ev_recs)} clean DIRECTION fwd/rev={n_fwd}/{n_rev} (+{n_trunc_dir} truncated boundary) "
