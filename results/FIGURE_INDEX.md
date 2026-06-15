@@ -28,6 +28,7 @@
 | 4 观测层 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/stage2_summary.png](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | 虚拟 SEEG 把模型读回成方向/模板 |
 | 5 ictal 回响 | [topic5_ictal_template_echo/figures/echo_anchor_not_path.png](topic5_ictal_template_echo/figures/) | 发作期通道顺序是否回响间期模板（共享粗锚 vs 具体路径） |
 | 5 桥接 | [topic1_topic5_bridge/figures/q1prime_cohort_effect.png](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 的队列效应 |
+| 5 子型×方向 | [topic5_ictal_recruitment/subtype_direction/figures/cohort_C_to_A_connection_broadband.png](topic5_ictal_recruitment/subtype_direction/figures/) | C 线：发作子型是否决定激活方向 + 与 A 线奇偶不稳的连接（队列不可行/无信号） |
 
 ---
 
@@ -104,6 +105,7 @@
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/) | 候选格电极读出 train |
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/) | **axis-A A1** 阈值离散→指纹 = NULL（只改点火率不改指纹） |
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/) | **axis-A A3** 局部 E/I 病灶 screen = NULL（不复现 V_th↓ 方向模板） |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/ei_param_scan/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/ei_param_scan/figures/) | **axis-A E/I 参数扫描** broad-basis NULL（无"既安静又出模板"甜区） |
 
 **SEF-ITP**
 | 目录 | 内容 |
@@ -124,6 +126,7 @@
 | [topic5_ictal_template_echo/figures/](topic5_ictal_template_echo/figures/) | Stage 1 ictal-template-echo（anchor vs path） |
 | [topic5_dynamic_echo/sentinel/figures/](topic5_dynamic_echo/sentinel/figures/) | Stage 2b 动态回响哨兵 |
 | [topic5_ictal_recruitment/axis_alignment/figures/](topic5_ictal_recruitment/axis_alignment/figures/) | A 线 axis alignment 可视化 |
+| [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
 | [topic1_topic5_bridge/figures/](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 桥接（q1 / q1prime 系列） |
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |

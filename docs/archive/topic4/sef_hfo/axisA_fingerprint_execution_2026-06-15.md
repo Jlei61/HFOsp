@@ -148,6 +148,22 @@ A3 是 **screen-NULL**,不是"局部 E/I 机制一般不能复现 V_th↓"的 fi
 
 **诚实 caveat**:每条件 1 seed、1 个磁量点;④ 把 E/I 与 V_th seed 合在一起(更温和的组合如 ei=0.7+seed=17.8 可能另有窗口,本轮没穷举)。干净的可说项:**这几个具体 rescue 都没用,且失败方式是"破安静"不是"传不动"**。
 
+## §6.8 E/I 参数扫描(gentler-window probe,`ei_param_scan/ei_param_scan.json`)— NO survivor,NULL 收到一整片基础
+
+用户 2026-06-15"再扫一些 EI 参数范围"。relay screen 显示强 E/I 破安静、弱 E/I 困核内,所以这轮专扫**中间偏温和**的一片(10 格,1 seed,T=2000,gate-only):inhib `ei`∈{0.7,0.6,0.5} / recur `ee`∈{1.3,1.5} / combined(0.7+1.3、0.6+1.4)/ inhib + mild `V_th` seed(0.7+17.8、0.6+17.6、0.7+17.5)。
+
+| 强度档 | 格 | 干净方向模板 | bare-sheet | 备注 |
+|---|---|---|---|---|
+| 温和 | ei0.7 / ei0.6 / ee1.3 / ee1.5 / comb0.7+1.3 / inhib0.7+seed17.8 | **0** | ✓ 安静 | 事件局部、读不出 |
+| 参考 | ei0.5 / inhib0.7+seed17.5 | **1** | ✓ 安静 | 偶有 1 个 |
+| 略强 | comb0.6+1.4 / inhib0.6+seed17.6 | **0** | **✗ 破**(0.021 / 0.018) | 一加力就破安静 |
+
+**结果:NO survivor(`survivors=[]`)。** 整片温和窗口里**没有任何工作点能"既安静又出 ≥6 个干净方向模板"**。清晰的转变:**强度往上 = 安静→破安静,而干净模板始终 0–1**——中间**不存在**"安静且出模板"的甜区。这把 A3 的"局部 E/I 不复现 V_th↓ 模板"从单点收紧到**一整片参数基础**(inhib 0.5–0.7 / recur 1.3–1.5 / combined / inhib+seed 17.5–17.8)。
+
+**揭示了什么(同 §6.7,更广基础)**:局部 E/I 缺的是 V_th↓ 那种"在安静前提下形成向外接力 pulse"的能力;温和时事件困在核内,稍加力就把背景点起来,**两头都到不了"干净长程模板"**。按协议:**无 survivor → STOP,不扫 `tau_m/tau_ref/sigma/tau_I`**。图:`ei_param_scan/figures/ei_param_scan.png`。
+
+**caveat**:仍 1 seed/格、T=2000、单 core/flat-threshold 基底;是**broad-basis screen 确认**,非 final verdict。
+
 ## §7 A5-real 真实可靠性审计(`fingerprint/real_feature_reliability.{csv,json}`)
 
 split-half **AND** odd-even 双折门(各 ≥0.6,比模板级 forward_reverse_reproduced 的 OR 规则更严)。axis_dir 17 PASS(含 6 weak_axis + 4 degenerate 硬否);onset_jitter 34 PASS(用 cluster_rank 折间一致性作 proxy,per-fold earliest-prob 重算 deferred);**pathway_width 40 DEFERRED**(path_axis 只存全量 perp_spread、无 per-fold;23 个可日后重算)。4 个 borderline(一折≥0.6 一折<0.6,被 AND 门拦下,OR 规则会放过),最强 epilepsiae_1096(0.25 / 1.00)。纯描述、按数据集分层(mm 不跨库 pool)、无机制 label。
