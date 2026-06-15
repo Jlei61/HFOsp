@@ -97,7 +97,7 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 
 **怎么测的** —— 第一步（分源层级量化）：把"小局部"和"少数可读大"两档放在一起比三件事 —— 撑多久、点亮几个触点、起点那块组织点得多旺。关键是**必须按"哪头先点着"分开比**，因为合在一起看像"两档点火一样旺"，分开看其实两头方向相反。如果点火能量真是无差别的，那么按起点端分开后两档应当各自重叠；实测发现负端起的小事件比大事件点得还旺，正端起的反过来 —— 这正说明"点火能量两档相等"是合并假象。第二步（可读大事件的描述性模板复核）：先把那 54 个可读大事件逐个对回它在记录文件里的精确那一列（验证列映射），再用和真实病人完全相同的去伪聚类机器，看它们能不能聚成"两套相反模板"。但这一步只当**描述性核对**，不当主问的答案。
 
-**揭示了什么** —— ① 区分小局部和可读大事件的是**传播（撑得久 + 传得广），不是成核能量**：撑的时长局部约 22 ms、全局约 67 ms（≈3×），点亮触点局部 3 个、全局 8 个，两档差距大且方向明确；点火能量则是**分源相反、不是统一相等**（负端起的小事件比大事件点得旺，正端起的反过来）。② 那 54 个可读大事件做描述性模板核对时，按起点端分开后**每端可区分的形状种类太少**（负端 35 个事件里只有 6 种不同形状、正端 19 个里只有 7 种），所以即便聚类机械上聚出了"两类"，也**不能**把它读成"找到了稳定的两套相反模板"——只能记成"数据太少（形态多样性不足）"。③ 因此小局部事件是"点得旺却传不远"的**受限传播 / 接力失败**（contained / relay-failure），是机制信息不是失败。
+**揭示了什么** —— ① 区分小局部和可读大事件的主要是**扩散范围（通用分界：两源都 local 点亮 3 个触点 → global 8 个）**；**持续时间是负端特异分界**（负端 22→67ms ≈3×，正端两档相近 26 vs 25ms），不是两源都靠时长分。点火能量则是**分源相反、不是统一相等**（负端起的小事件比大事件点得旺，正端起的反过来），都不支持"弱成核"解释。② 那 54 个可读大事件做描述性模板核对时，按起点端分开后**每端可区分的形状种类太少**（负端 35 个事件里只有 6 种不同形状、正端 19 个里只有 7 种），所以即便聚类机械上聚出了"两类"，也**不能**把它读成"找到了稳定的两套相反模板"——只能记成"数据太少（形态多样性不足）"。③ 因此小局部事件是"点得旺却传不远"的**受限传播 / 接力失败**（contained / relay-failure），是机制信息不是失败。
 
 （内部归档代号：Step 2 = 分源 `local` vs `readable_global` 效应量；`source∈{neg,pos}` 分面 + bootstrap 95% CI + label-shuffle permutation；`duration` / `n_part` / `source_core_ignite_frac` / `sign` 四面板；Step 3 = `readable_global` masked 模板复核，复用 `compute_adaptive_cluster_stereotypy(use_masked_features=True)` + `compute_swap_score_sweep`；`n_unique_masked_patterns` / `diversity_limited` / `swap_class` / `decision_k` / `chosen_k`）
 
@@ -149,7 +149,7 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 
 ---
 
-## Source-asymmetry investigation（2026-06-15，**cheap phase 已跑 / 操控性 re-run 待跑** — preliminary）
+## Source-asymmetry investigation（2026-06-15，**cheap phase + 操控性 re-run 均已跑 — 收口**）
 
 **问题**：两端病灶**参数完全相等**（同 `core_mean`/`core_std`、几何镜像对称放置）为什么读出仍按起点端（neg/pos）分化？（用户提问 + 4 探针：① 每核 n_E/Vth 分位/局部度数/到电极距离描述性审计；② paired swap 交换两核阈值场 RNG；③ mirror control 理想对称场；④ 全神经元场 spread/duration 复核，不只虚拟电极 n_part。）
 
@@ -157,10 +157,10 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 - **点火不对称是 per-run / per-seed，不是固定的结构性 neg>pos。** 按 seed 看 local 源核点火强度差（neg−pos）**翻号**：seed1 +0.085、seed2 +0.130（neg 更旺）但 seed3 −0.047（pos 更旺）；按 cell 看 16 格里 10 格 neg 高 = MIXED/sporadic。pooled 的"neg 0.366 > pos 0.278"主要被事件最多的 seed1/2 加权出来。
 - **两核结构上等价（平均意义）。** 9 个有 rep-NPZ 的 twoend run：每核 E 神经元数几乎相等（~587/588）、电极到两核距离**精确对称**（Δ=0.0）、realized Vth 中位差**逐 run 翻号**（s1 −0.084 / s2 +0.239 / s3 −0.258 …，跨 run 近 0）——seed+7(neg)/seed+8(pos) 的随机阈值抽样不系统偏向任何一核。
 - **rep-event 全场探针不结论**：rep event 都是 sheet-wide 大事件（n_fired_E 6800–13000、全场展宽~3.8mm），不代表典型 local 小事件 → **local 事件的全场 spread/duration 必须靠 spk-dump re-run** 才能算（rep-NPZ 只存代表事件、且都是大事件）。
-- **工作假说（待 re-run 证伪）**：不是内禀 neg/pos 差异，而是**每张网"赢者通吃"**——某一核（由有限阈值抽样 + 连接抽样的运气决定，哪核赢随 seed 翻）主导事件、其事件读出干净带向；输者只产出少数、偏弱、勉强够 n_part≥7 的事件 → 轴噪声大 → 方向读出≈抛硬币。pooled across seeds 里 neg 恰在事件最多的 seed 赢 → 看着像"neg 干净 / pos 模糊"，实为"赢者 vs 输者"被贴成了"neg vs pos"的采样假象。
+- **工作假说（已 re-run 验证，见下：全场支持"事件等价"，swap/mirror 没功率）**：不是内禀 neg/pos 差异，而是**每张网"赢者通吃"**——某一核（由有限阈值抽样 + 连接抽样的运气决定，哪核赢随 seed 翻）主导事件、其事件读出干净带向；输者只产出少数、偏弱、勉强够 n_part≥7 的事件 → 轴噪声大 → 方向读出≈抛硬币。pooled across seeds 里 neg 恰在事件最多的 seed 赢 → 看着像"neg 干净 / pos 模糊"，实为"赢者 vs 输者"被贴成了"neg vs pos"的采样假象。
 
 **操控性 re-run（已跑 2026-06-15：候选格 sep0.7/std1.0/m17.5，8 seed ×{base, swap-vth, mirror-vth}=24 run，T=3000，`--dump-fullfield`；runner 加性开关 smoke 验证，RAM-capped 批量 `scripts/run_stage3_source_asymmetry_battery.sh`，分析 `scripts/analyze_stage3_asym_reruns.py`→`asym_reruns/asym_reruns_summary.json`）：**
-- **full-field（probe ④）= SOLID（n=78 baseline 事件）。** 在**真实神经元场**上（不只 12 虚拟触点）local↔global 分界成立且更干净：local 全场展宽 **1.54mm** / 时长 **18ms** / 点火 **5488** 神经元，global **3.52mm / 66ms / 13495**。**关键：global 事件按起点端分开后全场展宽/时长几乎相同**（neg-src 3.52mm/66ms vs pos-src 3.54mm/65ms）——**事件一旦传成 global，传多远、撑多久与起点端无关**。所以虚拟电极上"pos 端方向读出≈抛硬币"是**读出层**现象（12 触点 endpoint-centroid 轴对 pos 事件定不准），**不是 pos 事件本身更弱/更短**。
+- **full-field（probe ④）= SOLID（n=78 baseline 事件）。** 在**真实神经元场**上（不只 12 虚拟触点）local↔global 分界成立且更干净：local 全场展宽 **1.54mm** / 时长 **18ms** / 点火 **5488** 神经元，global **3.52mm / 66ms / 13495**。**关键：按 HIDDEN 源（核起始 onset，NOT 读出 sign —— pos 端 sign 不可靠）分的 clean global 事件，两端全场展宽/时长几乎相同**：**neg-src n=13、3.498mm、67ms vs pos-src n=8、3.519mm、66.5ms**——**事件一旦传成 global，传多远、撑多久与起点端无关**。所以虚拟电极上"pos 端方向读出≈抛硬币"是**读出层**现象（12 触点 endpoint-centroid 轴对 pos 事件定不准），**不是 pos 事件本身更弱/更短**。（注：源分层必须用 hidden-source，早先用读出 sign 分是错的——pos 端 sign 本就不可信。）
 - **swap / mirror（probe ②③）= UNDERPOWERED，不下因果结论。** 候选格冷（m17.5）每条 run 只 ~6 事件（base_s1 = neg3/pos2/amb1），clean 单源事件更稀（多数 seed 0/0），**只有 1 个 seed 的 base→swap 可判**（n_seeds_judgeable=1）→ **swap 翻转率不可解读**（不是"position-driven"，是没功率）。聚合 hidden-source 计数：base neg13/pos8、swap neg6/pos5、mirror neg15/pos9——mirror（两核理想对称阈值）下仍有**轻微 neg 偏**（15/9，且主要由 s1 贡献），**提示**可能有一点几何/连接/读出的系统偏置，但样本太小不能定论。
 - **整合裁决（cheap + 操控）**：**这不是内禀的 neg/pos 差异。** 两核结构等价（cheap）+ 事件传成 global 后按源全场等同（re-run）→ 池化的"neg 干净 / pos 模糊"主要是**每网赢者-采样 + 读出层**效应，不是 pos 事件更弱。mirror 下的轻微 neg 偏是个**未定论的小信号**（要更高事件率的格才能测准，但更热 = 更多碰撞，权衡）。
 - **方法学坑（记下）**：用"clean 单源计数"判赢家在冷低碰撞格上没功率；该用全 hidden-source 计数 / 点火强度。要做有功率的 swap/mirror，需换更高事件率的工作点（与低碰撞冲突）——是否值得再跑一轮交用户定。

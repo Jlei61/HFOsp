@@ -57,13 +57,20 @@ def swap_mirror_table():
                          swap=f"n{scs['neg_clean']}/p{scs['pos_clean']}(win {ws})" if scs else None,
                          mirror=f"n{scm['neg_clean']}/p{scm['pos_clean']}(win {wm})" if scm else None,
                          winner_flipped_under_swap=flip))
+    MIN_JUDGEABLE = 4   # minimum power gate: fewer judgeable seeds => no causal verdict (P1 2026-06-15)
+    if len(flips) < MIN_JUDGEABLE:
+        sv = (f"UNDERPOWERED / inconclusive (n_seeds_judgeable={len(flips)} < {MIN_JUDGEABLE}; "
+              "cold low-collision cell yields too few clean single-source events per run)")
+    elif sum(flips) >= 0.6 * len(flips):
+        sv = "threshold-DRAW-driven (winner flips with the draw => per-run luck)"
+    elif sum(flips) <= 0.4 * len(flips):
+        sv = "position-driven (winner stays => geometry/connectivity/readout)"
+    else:
+        sv = "MIXED / inconclusive"
     verdict = dict(
         n_seeds_judgeable=len(flips),
         swap_flip_rate=(round(sum(flips) / len(flips), 3) if flips else None),
-        swap_verdict=("threshold-DRAW-driven (winner flips with the draw => per-run luck)"
-                      if flips and sum(flips) >= 0.6 * len(flips)
-                      else "position-driven (winner stays => geometry/connectivity/readout)"
-                      if flips and sum(flips) <= 0.4 * len(flips) else "MIXED / inconclusive"),
+        swap_verdict=sv,
         mirror_residual_imbalance_median=(round(float(np.median(mirror_imbalance)), 2)
                                           if mirror_imbalance else None),
         mirror_note="if residual imbalance ~0 across seeds => threshold heterogeneity WAS the source; "
@@ -71,35 +78,45 @@ def swap_mirror_table():
     return rows, verdict
 
 
+def _hidden_source_by_ton(seed):
+    """sidecar hidden_source_label + clean_for_timing keyed by rounded t_on (base condition).
+    The read-out SIGN is unreliable on the pos end (Stage 3), so the source split MUST use the
+    core-onset hidden label, NOT sign (P1 2026-06-15)."""
+    p = os.path.join(ROOT, f"sidecar_base_s{seed}.json")
+    if not os.path.exists(p):
+        return {}
+    return {round(e["t_on"], 1): (e.get("hidden_source_label"), bool(e.get("clean_for_timing")))
+            for e in json.load(open(p)).get("events", [])}
+
+
 def fullfield_table():
-    """Pool baseline full-field events; local vs global; split by sign (source proxy: +1 fwd≈neg-src)."""
+    """Pool baseline full-field events; local vs global overall, then CLEAN GLOBAL split by HIDDEN
+    SOURCE (core-onset label joined from the sidecar by t_on), NOT read-out sign."""
     evs = []
     for f in glob.glob(os.path.join(ROOT, "fullfield_base_s*.json")):
+        seed = int(f.split("_s")[-1].split(".")[0])
+        hid = _hidden_source_by_ton(seed)
         for e in json.load(open(f)).get("events", []):
-            evs.append(e)
+            lab, clean = hid.get(round(e["t_on"], 1), (None, False))
+            evs.append({**e, "hidden_source": lab, "clean_for_timing": clean})
     if not evs:
         return {"note": "no fullfield_base_*.json yet"}
     def med(xs, k):
         v = [e[k] for e in xs if e.get(k) is not None]
         return round(float(np.median(v)), 3) if v else None
-    out = {"n_events": len(evs)}
-    for lab, sub in [("local", [e for e in evs if (e.get("n_part") or 0) < PART_MIN]),
-                     ("global", [e for e in evs if (e.get("n_part") or 0) >= PART_MIN])]:
-        out[lab] = dict(n=len(sub), fullfield_extent_mm=med(sub, "fullfield_extent_mm"),
-                        duration=med(sub, "duration"), n_fired_E=med(sub, "n_fired_E"),
-                        n_part=med(sub, "n_part"))
-    # by sign (source proxy) within global (the readable ones)
-    g = [e for e in evs if (e.get("n_part") or 0) >= PART_MIN]
-    for lab, sgn in [("global_fwd(neg-src)", 1.0), ("global_rev(pos-src)", -1.0)]:
-        sub = [e for e in g if e.get("sign") == sgn]
-        out[lab] = dict(n=len(sub), fullfield_extent_mm=med(sub, "fullfield_extent_mm"),
-                        duration=med(sub, "duration"))
-    # local by sign too (the asymmetry of interest: does pos local differ from neg local on the field?)
-    loc = [e for e in evs if (e.get("n_part") or 0) < PART_MIN]
-    for lab, sgn in [("local_fwd(neg-src)", 1.0), ("local_rev(pos-src)", -1.0)]:
-        sub = [e for e in loc if e.get("sign") == sgn]
-        out[lab] = dict(n=len(sub), fullfield_extent_mm=med(sub, "fullfield_extent_mm"),
-                        duration=med(sub, "duration"))
+    def block(sub):
+        return dict(n=len(sub), fullfield_extent_mm=med(sub, "fullfield_extent_mm"),
+                    duration=med(sub, "duration"), n_fired_E=med(sub, "n_fired_E"),
+                    n_part=med(sub, "n_part"))
+    out = {"n_events": len(evs),
+           "local": block([e for e in evs if (e.get("n_part") or 0) < PART_MIN]),
+           "global": block([e for e in evs if (e.get("n_part") or 0) >= PART_MIN])}
+    # CLEAN GLOBAL split by HIDDEN source (the load-bearing comparison)
+    cg = [e for e in evs if (e.get("n_part") or 0) >= PART_MIN and e["clean_for_timing"]
+          and e["hidden_source"] in ("neg", "pos")]
+    out["clean_global_n"] = len(cg)
+    for lab in ("neg", "pos"):
+        out[f"clean_global_{lab}_src"] = block([e for e in cg if e["hidden_source"] == lab])
     return out
 
 
