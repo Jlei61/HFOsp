@@ -47,6 +47,26 @@ def test_flat_scatter_equals_dense_per_bin():
     assert np.allclose(ring_dense, ring_flat, rtol=0, atol=1e-12)
 
 
+def test_flat_scatter_gaba_equals_dense_per_bin():
+    """Same equivalence for the GABA (I-source) channel — the optimized loop scatters
+    spI through gaba_by_delay identically to the dense per-bin formula."""
+    p, net, NE, NI = _net()
+    gaba = net["gaba_by_delay"]; M = net["max_delay_steps"] + 1; N = NE + NI
+    bins = [d for d in range(M) if gaba[d].nnz > 0]
+    spI = np.random.default_rng(9).choice(NI, size=min(20, NI), replace=False)
+    t = 2
+    ring_dense = np.zeros((M, N))
+    for d in bins:
+        ring_dense[(t + d) % M] += np.asarray(gaba[d][:, spI].sum(axis=1)).ravel()
+    indptr, dst, dly, w = _flatten_by_source(gaba, bins, NI)
+    ring_flat = np.zeros((M, N))
+    st = indptr[spI]; cnt = indptr[spI + 1] - st; tot = int(cnt.sum())
+    idx = np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt) + np.repeat(st, cnt)
+    np.add.at(ring_flat, ((t + dly[idx]) % M, dst[idx]), w[idx])
+    assert np.array_equal(ring_dense != 0, ring_flat != 0)
+    assert np.allclose(ring_dense, ring_flat, rtol=0, atol=1e-12)
+
+
 def test_simulate_kick_deterministic():
     """Same seed -> bit-identical spike output (no hidden nondeterminism)."""
     p, net, NE, NI = _net()

@@ -25,6 +25,25 @@
 | **Sim 0.5 s (dense, pre-opt)** | 1091 s | the wall |
 | **Sim 0.5 s (flat scatter)** | **66 s (16.5×)** | → ~15–20 min per T=4000 ms run ✓ |
 
+These rows are **manual measurements** (not a test). Re-run command:
+
+### L=32 in-degree / timing command
+
+```python
+python -c "
+import time, sys, numpy as np, resource; sys.path.insert(0,'src/snn_engine')
+from params import Params; from connectivity import place_neurons
+from connectivity_rot import build_connectivity_rot; from kick_probe import simulate_kick
+p=Params(L=32.0, density=100.0, T=500.0, seed=1); rng=np.random.default_rng(1)
+R=8.0*p.l_EE*np.sqrt(2.0); pos,labels,NE,NI=place_neurons(p,rng)
+tb=time.time(); net=build_connectivity_rot(p,pos,labels,NE,NI,rng,theta_EE=np.radians(45),AR=2.0,prune_radius=R,verbose=True); print('build',round(time.time()-tb))
+net['rng']=np.random.default_rng(1); vth=np.full(NE+NI,18.0)
+ts=time.time(); simulate_kick(p,net,KICK_BOOST=0.0,kick_center=[16,16],r_kick=8.0,t_kick=1e9,V_th_per_neuron=vth)
+print('sim',round(time.time()-ts),'RSS_GB',round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss/1e6,1))
+"
+# verbose prints 'synapses(rot): AMPA=81,920,000' = NE*C_EE (65.5M E->E) + NI*C_IE (16.4M) -> no target starved below 800.
+```
+
 ## Equivalence gates (Tasks 0.1–0.2, `tests/test_snn_engine_prune.py`)
 
 Validated at **production density 100** (where the fixed in-degree `C_EE=800` is satisfied within ~1.8 mm ≪ R=4.3 mm, so the truncated cells are never selected; low density distorts and is out of scope):
@@ -37,8 +56,19 @@ Validated at **production density 100** (where the fixed in-degree `C_EE=800` is
 
 ## Dynamics gates
 
-- **`oneend` smoke** (L=16/d100, real prune restriction): pruned vs naive give identical dynamics — 4 events, 4/4 readable, 100% forward (correct for `oneend_neg`), peak active fraction 0.048 vs 0.049.
-- **Scatter optimization** (`tests/test_snn_engine_scatter.py`): the flat source-indexed scatter equals the dense per-bin formula on the supported entries; `simulate_kick` deterministic; **E_spk_bool / rate_E bit-identical** to the pre-opt engine on a kicked small net (18 190 E spikes). Full engine suite (11 tests) passes.
+- **Scatter optimization** (`tests/test_snn_engine_scatter.py`, 2 tests, CI-reproducible): the flat source-indexed scatter equals the dense per-bin formula on the supported entries (AMPA + GABA); `simulate_kick` deterministic.
+- **`oneend` smoke** — MANUAL (ephemeral, not a CI test). L=16/d100, real prune restriction; pruned vs naive gave identical dynamics — 4 events, 4/4 readable, 100% forward (correct for `oneend_neg`), peak active fraction 0.048 vs 0.049. Command:
+  ```bash
+  for tag in naive prune; do EXTRA=""; [ "$tag" = prune ] && EXTRA="--prune-radius 4.3"; \
+    python scripts/run_sef_hfo_snn_cm_spontaneous_readout.py --lesion oneend_neg --L 16 \
+    --density 100 --core-mean 17.0 --core-std 1.5 --T 800 --seed 1 $EXTRA --tag oneend_$tag --out /tmp/p0_smoke; done
+  ```
+- **Pre-/post-optimization bit-identity** — MANUAL (golden saved to /tmp, ephemeral): a kicked small net (L=8/d100, seed 1, 18 190 E spikes) produced `E_spk_bool` / `rate_E` bit-identical before vs after the scatter optimization. The *durable* guard is the dense-vs-flat unit test above; this golden run was the one-off confirmation.
+
+## Evidence provenance (what is CI-reproducible vs manual)
+
+- **CI-reproducible (persistent tests)**: `tests/test_snn_engine_prune.py` (3 — prune equivalence) + `tests/test_snn_engine_scatter.py` (2 — scatter correctness) = **5 tests**. Broader bit-identity regression (build+simulate through the engine): `tests/test_sef_hfo_snn_adapter.py` + `test_sef_hfo_snn_hetero_engine.py` + `test_sef_hfo_axisA_ei_engine.py` = **11 tests** (these use the default `prune_radius=None` path + the optimized scatter; all pass).
+- **Manual measurements (ephemeral, commands recorded here for re-run)**: the L=32 build/sim timings, peak RSS, and the in-degree (AMPA = `NE·C_EE`) no-starvation check — see the §"L=32 in-degree / timing command" below; the `oneend` smoke above. These are NOT in a test file.
 
 ## Engineering notes carried to Phase 1/2
 
