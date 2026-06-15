@@ -67,7 +67,7 @@ flags:`one_dimensional_sampling`(单杆 / p90 off-axis < 间距)、`poor_planari
 
 **方向对 1D 混入稳健**:剔除 7 个 1D 真实记录后,两个单向模型仍落 61–78 百分位、双向模型仍垫底(7.7→13.0,在噪声内),`oneend 像 / bidir 不像` 不变。
 
-标量 placement(`axis_length_mm` 百分位 ~4%、`transverse_width_mm` ~8%)显示模型物理尺度系统性偏小(虚拟 cm 贴片 vs 真实人脑 SEEG)。模型 `uncertainty_rank` 场 ≈0(单向模型不确定度场全灰)= 模型比真实更刻板。
+标量 placement(`axis_length_mm` 百分位 ~4%、`transverse_width_mm` ~8%)显示模型物理尺度系统性偏小(虚拟 cm 贴片 vs 真实人脑 SEEG)。模型 `uncertainty_rank` 接近 0 = 模型比真实更刻板(该诊断保留在 record / comparison 层,不放入主展示图)。
 
 sensitivity sweep(`S_THRESH∈{0.10,0.15,0.20} × overlap_min∈{15,25,40}`,per-model 27 行)= `comparison/sensitivity.json`。
 

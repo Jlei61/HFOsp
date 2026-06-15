@@ -132,7 +132,7 @@ def build_readout_record(
     signed_transverse: np.ndarray, pc1_variance_explained: float,
     masked: np.ndarray, lag_raw: np.ndarray, bools: np.ndarray,
     soz_first_contacts: set, lag_time_unit: str,
-    one_dimensional_sampling: bool,
+    one_dimensional_sampling: bool, coords_mm: Optional[np.ndarray] = None,
 ) -> Dict[str, object]:
     """组装一份标准化 readout record（real / model 同构）。
 
@@ -147,6 +147,7 @@ def build_readout_record(
 
     along = np.asarray(along_axis_mm, float)
     st = np.asarray(signed_transverse, float)
+    coords_arr = None if coords_mm is None else np.asarray(coords_mm, float)
     agg = contact_aggregates(masked, lag_raw, bools)
     L = float(axis_length_mm)
     # Robust normalization scale: IQR-based along-extent over participating channels.
@@ -168,7 +169,7 @@ def build_readout_record(
             continue
         if agg["support"][i] <= 0:
             continue
-        channels.append({
+        ch = {
             "name": str(nm),
             "shaft": str(parse_shaft(nm)[0]),
             "along_axis_mm": a_i,
@@ -182,7 +183,11 @@ def build_readout_record(
             "uncertainty_rank": float(agg["uncertainty_rank"][i]),
             "uncertainty_time": float(agg["uncertainty_time"][i]),
             "is_soz": _first_contact(str(nm)) in soz_first_contacts,
-        })
+        }
+        if coords_arr is not None and i < coords_arr.shape[0]:
+            xyz = coords_arr[i]
+            ch["coord_mm"] = [float(v) for v in xyz] if np.isfinite(xyz).all() else None
+        channels.append(ch)
     med_support = float(np.median([c["support"] for c in channels])) if channels else 0.0
     flags = {
         "one_dimensional_sampling": bool(one_dimensional_sampling),
@@ -297,6 +302,45 @@ def corr_pair_mirror_invariant(F1, S1, F2, S2, s_thresh: float = S_THRESH,
                 "insufficient_overlap": True}
     corr, n = max(valid, key=lambda x: x[0])
     return {"corr": float(corr), "n_overlap": int(n), "insufficient_overlap": False}
+
+
+def corr_pair_mirror_invariant_signed(F1, S1, F2, S2, s_thresh: float = S_THRESH,
+                                      overlap_min: int = OVERLAP_MIN) -> Dict[str, object]:
+    """同 corr_pair_mirror_invariant，但候选选择规则 = |corr| 最大（choose="abs"）。
+
+    现有函数取 signed-max 再下游 abs()，当 abs 更大的候选为负时 abs(signed_max)
+    偏小。这里直接在合格候选里取 |corr| 最大的，返回带符号值 + 其绝对值 +
+    与旧 signed-max 规则是否分歧（mirror_disagree）。support-gating / overlap /
+    flip 逻辑与现有函数完全一致。
+    """
+    c_id, n_id = _support_corr(F1, F2, S1, S2, s_thresh)
+    F2m = np.flip(F2, axis=0); S2m = np.flip(S2, axis=0)
+    c_mir, n_mir = _support_corr(F1, F2m, S1, S2m, s_thresh)
+    id_ok = n_id >= overlap_min and np.isfinite(c_id)
+    mir_ok = n_mir >= overlap_min and np.isfinite(c_mir)
+    out: Dict[str, object] = {
+        "corr_id": float(c_id) if id_ok else None,
+        "corr_mirror": float(c_mir) if mir_ok else None,
+    }
+    candidates = []  # (label, corr, n)
+    if id_ok:
+        candidates.append(("identity", float(c_id), n_id))
+    if mir_ok:
+        candidates.append(("mirror", float(c_mir), n_mir))
+    if not candidates:
+        out.update({"mirror_choice": None, "signed_corr": None, "abs_corr": None,
+                    "n_overlap": max(n_id, n_mir), "insufficient_overlap": True,
+                    "mirror_disagree": False})
+        return out
+    # abs-max 选择
+    label, corr, n = max(candidates, key=lambda x: abs(x[1]))
+    # signed-max 选择（旧规则），用于 disagree 判定；仅两候选都合格时有意义
+    legacy_label = max(candidates, key=lambda x: x[1])[0]
+    disagree = len(candidates) == 2 and label != legacy_label
+    out.update({"mirror_choice": label, "signed_corr": float(corr),
+                "abs_corr": abs(float(corr)), "n_overlap": int(n),
+                "insufficient_overlap": False, "mirror_disagree": disagree})
+    return out
 
 
 def placement_in_distribution(value: float, dist: Sequence[float]) -> Dict[str, float]:

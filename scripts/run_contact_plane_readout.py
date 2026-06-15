@@ -29,6 +29,8 @@ RANKDISP = _ROOT / "results/interictal_propagation_masked/rank_displacement/per_
 SOZ_JSON = {ds: _ROOT / f"results/{ds}_soz_core_channels.json"
             for ds in ("yuquan", "epilepsiae")}
 OUT = _ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects"
+OUT_SPLITHALF = _ROOT / ("results/spatial_modulation/propagation_geometry/"
+                         "observation_readout/real_subjects_splithalf")
 EXCLUDE_BAD_DATA = {("yuquan", "pengzihang")}
 
 
@@ -106,14 +108,33 @@ def build_record_from_events(*, dataset, subject, template_id, names, ranks, boo
         pc1_variance_explained=st["pc1_variance_explained"],
         masked=masked, lag_raw=lag_raw, bools=bools,
         soz_first_contacts=soz["soz_first_contacts"], lag_time_unit=lag_time_unit,
-        one_dimensional_sampling=one_d)
+        one_dimensional_sampling=one_d, coords_mm=coords)
     rec["soz_ambiguous"] = soz["soz_ambiguous"]
     rec["sampling_geometry"] = samp.get("geometry")
     rec["scalars"] = R.compute_cohort_scalars(rec)
     return rec
 
 
-def process_subject(ds, subj):
+def _template_axis(masked_cols):
+    """每通道 over 选中事件列的 nanmean（与全集 t_a/t_b 完全相同的 axis 构造）。"""
+    return np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan
+                     for r in masked_cols])
+
+
+def _half_can_frame(half_masked, coords, mapped, k=3):
+    """A-line 退化门：该半事件子集能否成帧。复用 split-half 用的同一个
+    _half_along_axis（None <=> cores descriptive_only / NaN-core ValueError /
+    degenerate_axis）。返回 (ok: bool, reason: str|None)。"""
+    taxis = _template_axis(half_masked)
+    eligible = (~np.isnan(taxis)) & np.asarray(mapped, bool)
+    eligible_idx = np.where(eligible)[0]
+    along = G._half_along_axis(half_masked, coords, eligible_idx, k)
+    if along is None:
+        return False, "half_cannot_frame"  # descriptive_only / NaN-core / degenerate_axis
+    return True, None
+
+
+def process_subject(ds, subj, split=None):
     ev = load_subject_propagation_events(_subject_dir(ds, subj))
     if not ev["channel_names"] or np.asarray(ev["ranks"]).size == 0:
         return [{"dataset": ds, "subject": subj, "status": "no_events"}]
@@ -133,24 +154,55 @@ def process_subject(ds, subj):
     if "lag_raw" not in ev:
         raise KeyError(f"{ds}:{subj} load_subject_propagation_events 缺 lag_raw 键")
     lag_raw = np.where(bools, np.asarray(ev["lag_raw"], float), np.nan)
+    soz_core = _soz_set(ds, subj)
     out = []
     # 逐 template（A/B 两个 accepted 模板）各出一份 record（spec §8 逐模板处理）。
     # 命名 t_a/t_b：只是 rank-displacement pair 的两支，NOT dominant/minority 的科学事实。
     for tid, lbl in (("t_a", 0), ("t_b", 1)):
         sel = labels == lbl
-        if sel.sum() == 0:
+        sel_cols = np.where(sel)[0]
+        if sel_cols.size == 0:
             continue
-        tmask = masked[:, sel]
-        taxis = np.array([np.nanmean(r) if np.any(~np.isnan(r)) else np.nan
-                          for r in tmask])
-        rec = build_record_from_events(
-            dataset=ds, subject=subj, template_id=tid, names=names,
-            ranks=ranks[:, sel], bools=bools[:, sel], lag_raw=lag_raw[:, sel],
-            coords=coords, mapped=mapped, soz_core=_soz_set(ds, subj),
-            montage=montage, lag_time_unit="s", spacing_mm=spacing,
-            template_axis=taxis)
-        rec["swap_class"] = swap
-        out.append(rec)
+        if split is None:
+            # 全集路径（现行行为不变）。
+            rec = build_record_from_events(
+                dataset=ds, subject=subj, template_id=tid, names=names,
+                ranks=ranks[:, sel], bools=bools[:, sel], lag_raw=lag_raw[:, sel],
+                coords=coords, mapped=mapped, soz_core=soz_core,
+                montage=montage, lag_time_unit="s", spacing_mm=spacing,
+                template_axis=_template_axis(masked[:, sel]))
+            rec["swap_class"] = swap
+            out.append(rec)
+            continue
+        # ---- A-line half-axis 路径：把该 template 的可用事件确定性二分，每半
+        #      用 *和全集完全相同* 的 build_record_from_events 重搭一根轴记录 ----
+        # 只在「有参与通道」的事件上划半，避免某半全是空事件导致退化。
+        usable = sel_cols[np.any(~np.isnan(masked[:, sel_cols]), axis=0)]
+        a_cols, b_cols = G.deterministic_event_split(usable, split)
+        for half_idx, half_cols in ((1, a_cols), (2, b_cols)):
+            half_tid = f"{tid}_{split}_half{half_idx}"
+            if half_cols.size == 0:
+                out.append({"dataset": ds, "subject": subj,
+                            "template_id": half_tid, "degenerate": True,
+                            "reason": "empty_half", "channels": []})
+                continue
+            ok, reason = _half_can_frame(masked[:, half_cols], coords, mapped)
+            if not ok:
+                # 不静默写坏记录：写带 degenerate / channels:[] 的占位（喂 §3.1 attrition）。
+                out.append({"dataset": ds, "subject": subj,
+                            "template_id": half_tid, "degenerate": True,
+                            "reason": reason, "channels": []})
+                continue
+            rec = build_record_from_events(
+                dataset=ds, subject=subj, template_id=half_tid, names=names,
+                ranks=ranks[:, half_cols], bools=bools[:, half_cols],
+                lag_raw=lag_raw[:, half_cols], coords=coords, mapped=mapped,
+                soz_core=soz_core, montage=montage, lag_time_unit="s",
+                spacing_mm=spacing, template_axis=_template_axis(masked[:, half_cols]))
+            rec["swap_class"] = swap
+            rec["event_split"] = split
+            rec["split_half"] = half_idx
+            out.append(rec)
     return out
 
 
@@ -177,16 +229,29 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--subjects", nargs="*", default=None)
     ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--allow-excluded", action="store_true",
+                    help="bypass EXCLUDE_BAD_DATA for explicitly-named --subjects (topic5 A-line "
+                         "re-admission of yuquan:pengzihang, user 2026-06-13). Default keeps the "
+                         "exclusion so topic3/topic4 cohort runs are unchanged.")
+    ap.add_argument("--event-split", choices=["first_second", "odd_even"], default=None,
+                    help="A-line robustness: deterministically split each template's events into "
+                         "two halves and re-build a half-axis record per half with the SAME "
+                         "build_record_from_events path as the full set. Default None = unchanged "
+                         "full-set behavior. When set, default --out is real_subjects_splithalf/.")
     args = ap.parse_args()
+    # Split-mode 默认走独立子目录，避免覆盖全集 t_a/t_b 记录（用户显式 --out 时尊重）。
+    if args.event_split and args.out == str(OUT):
+        args.out = str(OUT_SPLITHALF)
     out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
     cohort = ([tuple(s.split(":", 1)) for s in args.subjects] if args.subjects
               else discover_cohort())
-    cohort = [(d, s) for d, s in cohort if (d, s) not in EXCLUDE_BAD_DATA]
+    if not args.allow_excluded:
+        cohort = [(d, s) for d, s in cohort if (d, s) not in EXCLUDE_BAD_DATA]
     n_ok = 0
     n_skip = 0
     for ds, subj in cohort:
         try:
-            recs = process_subject(ds, subj)
+            recs = process_subject(ds, subj, split=args.event_split)
         except Exception as e:  # noqa: BLE001
             status = f"error: {e}"
             category = _error_category(status)
@@ -206,7 +271,8 @@ def main():
             tid = rec.get("template_id")
             name = f"{ds}_{subj}_{tid}.json" if tid else f"{ds}_{subj}.json"
             (out / name).write_text(json.dumps(rec, indent=2, default=float))
-            if rec.get("status") not in ("no_events", "descriptive_only"):
+            if (rec.get("status") not in ("no_events", "descriptive_only")
+                    and not rec.get("degenerate")):
                 n_ok += 1
     if n_ok == 0:
         raise SystemExit("no usable real readout records — refusing vacuous run")

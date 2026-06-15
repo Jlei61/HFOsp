@@ -120,7 +120,7 @@ def test_build_readout_record_normalized_coords_and_flags():
         signed_transverse=signed_t, pc1_variance_explained=0.99,
         masked=masked, lag_raw=masked.copy(), bools=bools,
         soz_first_contacts=set(), lag_time_unit="ms",
-        one_dimensional_sampling=False)
+        one_dimensional_sampling=False, coords_mm=coords)
     ch = {c["name"]: c for c in rec["channels"]}
     along_part = np.array([0, 1, 2, 3, 4, 5, 6], float)   # all 7 participate
     scale = float(np.percentile(along_part, 97.5) - np.percentile(along_part, 2.5))
@@ -131,6 +131,7 @@ def test_build_readout_record_normalized_coords_and_flags():
     assert rec["lag_time_unit"] == "ms"
     assert rec["flags"]["poor_planarity"] is False
     assert np.isfinite(ch["A6"]["uncertainty_time"])   # Fix C: time uncertainty stored
+    assert ch["A3"]["coord_mm"] == [3.0, 1.0, 0.0]
 
 
 def test_build_readout_record_poor_planarity_and_low_contact():
@@ -408,6 +409,72 @@ def test_plot_record_smoke(tmp_path):
     assert out.exists() and out.stat().st_size > 0
 
 
+def test_plot_subject_records_ab_combined_smoke(tmp_path):
+    from scripts.plot_contact_plane_static import plot_subject_records, _subject_display_frame
+
+    coords = np.array([[0, 0, 0], [10, 0, 0], [20, 0, 0], [0, 10, 0],
+                       [10, 10, 0], [20, 10, 0], [5, -10, 0], [15, -10, 0]], float)
+
+    def mk(tid, along):
+        chans = []
+        for i, xyz in enumerate(coords):
+            rank = i / (len(coords) - 1)
+            chans.append({
+                "name": f"A{i}",
+                "coord_mm": xyz.tolist(),
+                "along_axis_mm": float(along[i]),
+                "signed_transverse_mm": float(xyz[1]),
+                "x_norm": float(along[i] / 20.0),
+                "y_norm": float(xyz[1] / 20.0),
+                "typical_rank": float(rank),
+                "typical_time": float(rank),
+                "support": 1.0,
+                "uncertainty_rank": 0.1,
+                "uncertainty_time": 0.1,
+                "is_soz": (i == 0),
+            })
+        return {"dataset": "yuquan", "subject": "s1", "template_id": tid,
+                "channels": chans, "soz_ambiguous": [],
+                "norm_scale_mm": 20.0, "axis_length_mm": 20.0,
+                "scalars": {"rank_vs_xnorm_spearman": 1.0},
+                "flags": {"one_dimensional_sampling": False}}
+
+    recs = [mk("t_a", coords[:, 0]), mk("t_b", 20.0 - coords[:, 0])]
+    out = tmp_path / "yuquan_s1.png"
+    plot_subject_records(recs, out, display_frame=_subject_display_frame(recs))
+    assert out.exists() and out.stat().st_size > 0
+
+
+def test_subject_display_frame_keeps_ab_template_view_fixed():
+    from scripts.plot_contact_plane_static import _subject_display_frame, _display_points
+    coords = np.array([[0, 0, 0], [10, 0, 0], [20, 0, 0], [0, 10, 0],
+                       [10, 10, 0], [20, 10, 0]], float)
+
+    def mk(tid, along):
+        chans = []
+        for i, xyz in enumerate(coords):
+            chans.append({
+                "name": f"A{i}", "coord_mm": xyz.tolist(),
+                "along_axis_mm": float(along[i]),
+                "signed_transverse_mm": float(xyz[1]),
+                "x_norm": float(along[i] / 20.0), "y_norm": float(xyz[1] / 20.0),
+                "typical_rank": float(i / 5), "support": 1.0,
+                "is_soz": False,
+            })
+        return {"dataset": "yuquan", "subject": "s1", "template_id": tid,
+                "channels": chans, "norm_scale_mm": 20.0, "axis_length_mm": 20.0,
+                "scalars": {"rank_vs_xnorm_spearman": 1.0},
+                "flags": {"one_dimensional_sampling": False}}
+
+    rec_a = mk("t_a", coords[:, 0])
+    rec_b = mk("t_b", 20.0 - coords[:, 0])  # reversed propagation axis
+    frame = _subject_display_frame([rec_a, rec_b])
+    xa, ya = _display_points(rec_a, frame)
+    xb, yb = _display_points(rec_b, frame)
+    np.testing.assert_allclose(xa, xb, atol=1e-9)
+    np.testing.assert_allclose(ya, yb, atol=1e-9)
+
+
 def test_build_readout_record_out_of_field_stats():
     # 极端离群触点(远超 p97.5)仍会出界 -> out_of_field 不静默丢
     n_ch = 21
@@ -450,3 +517,96 @@ def test_runner_error_category_coord_miss():
     assert _error_category(
         "error: Yuquan coord file not found: .../chnXyzDict.npy") == "no_coord_file"
     assert _error_category("error: something unexpected") == "unexpected"
+
+
+# ---- corr_pair_mirror_invariant_signed (abs-max 候选选择) -------------------
+
+def _signed_disagree_fields(neg_mirror=True):
+    """构造 identity / mirror 两候选异号且 |c_mir|>|c_id| 的 F/S 场。
+
+    flip(axis=0): row r -> (GRID_N-1)-r。让两候选采到不同 row 集合：
+    identity 采 rows A（弱正），mirror 采 flip(A)（强负）。
+    """
+    n = R.GRID_N
+    F1 = np.zeros((n, n)); S1 = np.zeros((n, n))
+    F2 = np.zeros((n, n)); S2 = np.zeros((n, n))
+    A = np.arange(5, 46)
+    flipA = (n - 1) - A
+    S1[A, :] = 1.0
+    S2[A, :] = 1.0
+    S2[flipA, :] = 1.0
+    for r in A:
+        F1[r, :] = float(r)                 # F1 沿 row 单调增
+        F2[r, :] = 0.05 * float(r)          # identity: 弱正 corr
+    for q in flipA:
+        F2[q, :] = 10.0 * float(q)          # flip(F2)[r] 随 r 增而强减 -> 强负 corr
+    return F1, S1, F2, S2
+
+
+def test_signed_abs_equals_max_of_candidates():
+    # abs(signed_corr) == abs_corr == max(|c_id|,|c_mir|)（两候选都合格）。
+    F1, S1, F2, S2 = _signed_disagree_fields()
+    out = R.corr_pair_mirror_invariant_signed(F1, S1, F2, S2,
+                                              s_thresh=0.5, overlap_min=25)
+    assert out["insufficient_overlap"] is False
+    assert out["corr_id"] is not None and out["corr_mirror"] is not None
+    assert abs(out["signed_corr"]) == pytest.approx(out["abs_corr"], abs=1e-12)
+    assert out["abs_corr"] == pytest.approx(
+        max(abs(out["corr_id"]), abs(out["corr_mirror"])), abs=1e-12)
+
+
+def test_signed_abs_ge_legacy_signed_max():
+    # abs-max 永远 >= 旧 signed-max-then-abs。
+    F1, S1, F2, S2 = _signed_disagree_fields()
+    new = R.corr_pair_mirror_invariant_signed(F1, S1, F2, S2,
+                                              s_thresh=0.5, overlap_min=25)
+    old = R.corr_pair_mirror_invariant(F1, S1, F2, S2,
+                                       s_thresh=0.5, overlap_min=25)
+    assert new["abs_corr"] >= abs(old["corr"]) - 1e-12
+
+
+def test_signed_picks_abs_larger_negative_candidate():
+    # abs 更大的是负候选、另一候选小正 -> mirror_disagree True 且 signed_corr<0。
+    F1, S1, F2, S2 = _signed_disagree_fields()
+    out = R.corr_pair_mirror_invariant_signed(F1, S1, F2, S2,
+                                              s_thresh=0.5, overlap_min=25)
+    assert out["mirror_choice"] == "mirror"
+    assert out["signed_corr"] < 0
+    assert out["corr_id"] > 0                    # 旧规则会选这个小正候选
+    assert out["mirror_disagree"] is True
+    # 与旧 signed-max 规则一致性对照：旧实现确实选了正的 identity 候选
+    old = R.corr_pair_mirror_invariant(F1, S1, F2, S2,
+                                       s_thresh=0.5, overlap_min=25)
+    assert old["corr"] > 0
+
+
+def test_signed_sign_correct_pos_and_neg():
+    # 正相关场对 -> signed_corr>0；负相关场对 -> signed_corr<0。
+    n = R.GRID_N
+    F1 = np.zeros((n, n)); S1 = np.zeros((n, n))
+    F1[5:46, :] = np.arange(41).reshape(-1, 1).astype(float)
+    S1[5:46, :] = 1.0
+    # 同向场：identity 强正，mirror 不可能更大 -> signed>0
+    out_pos = R.corr_pair_mirror_invariant_signed(F1, S1, F1.copy(), S1.copy(),
+                                                  s_thresh=0.5, overlap_min=25)
+    assert out_pos["signed_corr"] > 0
+    # 反向场：F2 = -F1（同 support），identity 强负、mirror（flip 后 row 不对齐 support 仅部分）
+    F2 = -F1; S2 = S1.copy()
+    out_neg = R.corr_pair_mirror_invariant_signed(F1, S1, F2, S2,
+                                                  s_thresh=0.5, overlap_min=25)
+    assert out_neg["signed_corr"] < 0
+
+
+def test_signed_insufficient_overlap_none():
+    # 交集 < overlap_min -> insufficient True，abs/signed 为 None。
+    n = R.GRID_N
+    F1 = np.zeros((n, n)); S1 = np.zeros((n, n))
+    F2 = np.zeros((n, n)); S2 = np.zeros((n, n))
+    # 两个支撑几乎不交叠，且 flip 后也不交叠
+    S1[10, 0:6] = 1.0; F1[10, 0:6] = np.arange(6)
+    S2[40, 0:6] = 1.0; F2[40, 0:6] = np.arange(6) * 2.0  # flip(40)=40, 仍与 row10 不交
+    out = R.corr_pair_mirror_invariant_signed(F1, S1, F2, S2,
+                                              s_thresh=0.5, overlap_min=25)
+    assert out["insufficient_overlap"] is True
+    assert out["abs_corr"] is None
+    assert out["signed_corr"] is None

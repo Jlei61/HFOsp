@@ -480,6 +480,29 @@ def core_radius_null(
     return base
 
 
+def deterministic_event_split(
+    usable_event_indices: np.ndarray,
+    mode: str,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """确定性把可用事件二分成两半（不依赖 rng；用于 half-axis 复搭，区别于
+    split_half_axis_validation 的随机 rng.permutation split）。
+
+    usable_event_indices: 可用事件的列索引数组（按出现顺序，可以不是 0..n-1）。
+    mode == "first_second": 前一半 / 后一半（奇数个时前半 = n//2，余数进后半）。
+    mode == "odd_even":     偶数位 usable[::2] / 奇数位 usable[1::2]。
+
+    返回 (a_idx, b_idx)，二者不相交且并集 == 全集（保留原始列索引，不重新编号）。
+    """
+    usable = np.asarray(usable_event_indices)
+    if mode == "first_second":
+        half = usable.size // 2
+        return usable[:half], usable[half:]
+    if mode == "odd_even":
+        return usable[::2], usable[1::2]
+    raise ValueError(f"unknown event-split mode: {mode!r} "
+                     "(expected 'first_second' or 'odd_even')")
+
+
 def _half_along_axis(
     half_masked: np.ndarray,
     coords: np.ndarray,

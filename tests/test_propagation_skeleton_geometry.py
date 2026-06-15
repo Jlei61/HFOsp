@@ -463,3 +463,60 @@ def test_runner_smoke_two_subjects(tmp_path):
     assert cohort["n_ok"] >= 1
     # dataset stratification present
     assert "by_dataset" in cohort and set(cohort["by_dataset"]) <= {"yuquan", "epilepsiae"}
+
+
+# ---------------------------------------------------------------------------
+# Task A-line: deterministic_event_split (event halves for half-axis records)
+# ---------------------------------------------------------------------------
+from src.propagation_skeleton_geometry import deterministic_event_split
+
+
+def test_event_split_first_second_even():
+    a, b = deterministic_event_split(np.arange(10), "first_second")
+    assert list(a) == [0, 1, 2, 3, 4]
+    assert list(b) == [5, 6, 7, 8, 9]
+
+
+def test_event_split_first_second_odd_count_half_is_floor():
+    # 7 events -> first half = n//2 = 3, second half = 4 (the remainder).
+    a, b = deterministic_event_split(np.arange(7), "first_second")
+    assert list(a) == [0, 1, 2]
+    assert list(b) == [3, 4, 5, 6]
+
+
+def test_event_split_odd_even_by_position():
+    a, b = deterministic_event_split(np.arange(10), "odd_even")
+    assert list(a) == [0, 2, 4, 6, 8]   # even positions (usable[::2])
+    assert list(b) == [1, 3, 5, 7, 9]   # odd positions  (usable[1::2])
+
+
+def test_event_split_preserves_original_column_indices():
+    # usable column indices need not be 0..n-1: the split must carry the actual
+    # column ids through, not re-index from 0.
+    usable = np.array([2, 5, 8, 11, 14])
+    a, b = deterministic_event_split(usable, "odd_even")
+    assert list(a) == [2, 8, 14]
+    assert list(b) == [5, 11]
+
+
+def test_event_split_cover_and_disjoint_both_modes():
+    usable = np.array([3, 4, 9, 10, 11, 20, 21])
+    for mode in ("first_second", "odd_even"):
+        a, b = deterministic_event_split(usable, mode)
+        union = set(a.tolist()) | set(b.tolist())
+        assert union == set(usable.tolist())                 # covers the full set
+        assert set(a.tolist()).isdisjoint(b.tolist())        # two halves disjoint
+        assert a.size + b.size == usable.size                # exact partition
+
+
+def test_event_split_deterministic_repeatable():
+    usable = np.array([1, 2, 3, 4, 5, 6])
+    for mode in ("first_second", "odd_even"):
+        a1, b1 = deterministic_event_split(usable, mode)
+        a2, b2 = deterministic_event_split(usable, mode)
+        assert list(a1) == list(a2) and list(b1) == list(b2)
+
+
+def test_event_split_unknown_mode_raises():
+    with pytest.raises(ValueError):
+        deterministic_event_split(np.arange(4), "random")
