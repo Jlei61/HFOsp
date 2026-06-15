@@ -196,6 +196,9 @@ def main():
     ap.add_argument("--density", type=float, default=100.0)
     ap.add_argument("--theta", type=float, default=45.0)
     ap.add_argument("--AR", type=float, default=2.0)
+    ap.add_argument("--prune-radius", type=float, default=None,
+                    help="tail-bounded E->E candidate radius (mm); None=full pop (L<=24). "
+                         "L>=28: set ~8*l_EE*sqrt(AR) ~= 4.3 mm (Stage 4 Phase 0).")
     ap.add_argument("--drive", type=float, default=DRIVE,
                     help="nu_ext_ratio (background drive); lower -> sparser / more local events")
     ap.add_argument("--T", type=float, default=1500.0)
@@ -257,14 +260,15 @@ def main():
             w_EE_gain_core = a.ee_gain
         net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR,
                                      local_scale_EI=local_scale_EI, w_EE_gain_core=w_EE_gain_core,
-                                     core_mask_E=core_mask_E, verbose=False)
+                                     core_mask_E=core_mask_E, verbose=False, prune_radius=a.prune_radius)
         vth = np.full(NE + NI, 18.0)   # flat bare-sheet threshold (same base as the V_th lesions)
         if a.ei_vth_seed is not None:
             vth[:NE][core_mask_E] = a.ei_vth_seed   # mild in-core V_th seed (nucleation-vs-relay screen)
         core_mask = np.zeros(NE + NI, bool); core_mask[:NE] = core_mask_E
         foci = [focus]; core_masks = [core_mask]
     else:
-        net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR, verbose=False)
+        net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=a.AR,
+                                     verbose=False, prune_radius=a.prune_radius)
         vth, core_mask, foci, core_masks = build_lesion_vth(net, NE, axis_unit, center, half, a.lesion,
                                                             a.core_mean, a.core_std, a.core_r, a.dephase, a.seed,
                                                             sep_frac=a.sep_frac, swap_vth=a.swap_vth,
