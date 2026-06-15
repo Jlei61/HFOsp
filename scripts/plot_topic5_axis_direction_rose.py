@@ -221,10 +221,12 @@ def plot_subject(ds_sid, activation, align=None, bins=18):
     fig.suptitle(f"Patient {pretty} — {kind} ({detail})\n"
                  f"per-event interictal directions per template vs seizure axis  ({activation})",
                  fontsize=12, y=1.0)
-    cap = ("DIRECTION-DISTRIBUTION DIAGNOSTIC (per-event gradient directions; feeds C-line, NOT the "
-           "A-line stat — A-line is the mirror-invariant FIELD correlation, see the field maps). "
-           "direction = scalar-field gradient, NOT a wavefront velocity; black = seizure axis (axial "
-           "mean) at 0°/180°; hollow bars = interictal event directions per template.")
+    cap = ("DIRECTIONAL view — TWO roles: (1) a supplement to the A-line (whose main stat is the "
+           "mirror-invariant FIELD correlation; field maps are the primary A-line visual), and (2) the "
+           "C-line's main figure (per-seizure directions by subtype). direction = scalar-field "
+           "gradient, NOT a wavefront velocity; black = seizure axis (axial mean) 0°/180°; hollow bars "
+           "= interictal event directions per template. Field & direction agree on clean subjects — see "
+           "aline_direction/ for the clean-subject directional A-line.")
     if kind == "SEEG":
         cap = "SEEG: projected-plane estimate, read with care.  " + cap
     fig.text(0.5, -0.01, cap, ha="center", fontsize=7.6, color="0.35", wrap=True)
