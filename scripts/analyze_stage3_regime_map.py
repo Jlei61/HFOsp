@@ -68,6 +68,29 @@ def gate(d):
     return "fail:one_end_or_no_clean_relay", mid
 
 
+def audit_provenance(provs):
+    """provs: list of per-readout provenance dicts. A map MUST be single-provenance — mixed
+    git_sha / engine_sha means a code/engine drift silently spanned the grid (it happened
+    2026-06-15 when the engine was edited mid-scout). Returns single_provenance + the breakdown."""
+    from collections import Counter
+    gits = Counter(p.get("git_sha") for p in provs)
+    engs = Counter((p.get("engine_sha") or {}).get("kick_probe.py") for p in provs)
+    return dict(n_readouts=len(provs), single_provenance=(len(gits) <= 1 and len(engs) <= 1),
+                distinct_git_sha={(k[:9] if k else k): v for k, v in gits.items()},
+                distinct_kick_probe_engine_sha=dict(engs))
+
+
+def read_provenance(root=None):
+    root = root or ROOT
+    out = []
+    for r in sorted(glob.glob(os.path.join(root, "readout_rm_*.json"))):
+        try:
+            out.append(json.load(open(r)).get("provenance", {}))
+        except Exception:
+            pass
+    return out
+
+
 def cell_metrics(root=None):
     root = root or ROOT          # read module ROOT at call-time (not def-time) so overrides take
     cells = {}
@@ -139,12 +162,22 @@ def _figure(rows, out_png):
 
 
 def main():
+    prov = audit_provenance(read_provenance())
     rows = build_rows(cell_metrics())
     passing = [r for r in rows if r["verdict"].startswith("PASS")]
     summary = dict(gate_thresholds=dict(K_END=K_END, COLL_MAX=COLL_MAX, LOCAL_MAX=LOCAL_MAX, MIN_EV=MIN_EV),
+                   provenance_audit=prov,
+                   completeness=dict(n_cells=len(rows), n_readouts=prov["n_readouts"],
+                                     seeds_per_cell={f"m{r['core_mean']}/sep{r['sep_frac']}": r["n_seeds"] for r in rows}),
                    cells=rows, n_passing=len(passing),
                    passing_cells=[(r["core_mean"], r["sep_frac"]) for r in passing])
     json.dump(summary, open(os.path.join(ROOT, "regime_map_summary.json"), "w"), indent=2, default=str)
+    if not prov["single_provenance"]:
+        print("!!! MIXED PROVENANCE — map spans >1 engine/code version, cells NOT comparable:")
+        print("   ", prov, "\n")
+    else:
+        print(f"[provenance OK] {prov['n_readouts']} readouts, single git+engine "
+              f"({list(prov['distinct_git_sha'])[0]} / {list(prov['distinct_kick_probe_engine_sha'])[0]})")
     print(f"=== REGIME MAP ({len(rows)} cells) ===")
     for r in rows:
         print(f"  m{r['core_mean']}/sep{r['sep_frac']}: n={r['n_events']:>3} "

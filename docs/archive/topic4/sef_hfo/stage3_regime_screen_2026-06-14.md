@@ -173,7 +173,7 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 
 **测了什么** —— 退一步问地图级问题：调"核兴奋度（core_mean）× 两灶间距（sep_frac）"两个旋钮，事件会**停在局部** / **中继成大传播** / **两端共点火撞车**？目标是找一块"两端都能各自传出干净大事件、又不老撞车"的中间地带。
 
-**怎么测的** —— 粗扫 3×3 网格（m∈{16.5,17.0,17.5} × sep∈{0.6,0.7,0.8}），每格 3 seed，短 T=3000（只够判这格属哪种态，不为统计）；每事件按 5 桶分（碰撞 / 干净大事件(neg) / 干净大事件(pos) / 局部 n_part<7 / dirty_global n_part≥7但读不清），进入门写死数值（两端各≥2 干净大事件 ∧ 碰撞<0.30 ∧ 局部<0.90 ∧ n≥10）。脚本 `scripts/{run_stage3_regime_map_scout.sh, analyze_stage3_regime_map.py}`（gate/分桶 12 测试上锁 `tests/test_stage3_regime_map.py`）→ `regime_map/regime_map_summary.json` + `figures/stage3_regime_map.png`。**全 27 格单一引擎（kick_probe 861489，跑中途引擎被改过、清旧 15 格重跑全部，避免引擎版本 confound 冷热轴）。**
+**怎么测的** —— 粗扫 3×3 网格（m∈{16.5,17.0,17.5} × sep∈{0.6,0.7,0.8}），每格 3 seed，短 T=3000（只够判这格属哪种态，不为统计）；每事件按 5 桶分（碰撞 / 干净大事件(neg) / 干净大事件(pos) / 局部 n_part<7 / dirty_global n_part≥7但读不清），进入门写死数值（两端各≥2 干净大事件 ∧ 碰撞<0.30 ∧ 局部<0.90 ∧ n≥10）。脚本 `scripts/{run_stage3_regime_map_scout.sh, analyze_stage3_regime_map.py}`（gate/分桶 12 测试上锁 `tests/test_stage3_regime_map.py`）→ `regime_map/regime_map_summary.json` + `figures/stage3_regime_map.png`。**全 27 格单一 provenance（27/27 readout 同 `git_sha=cd5aad90e` + `kick_probe.py engine_sha=a51e0875c3ec`；跑中途引擎被改过、清旧 15 格重跑全部，避免引擎版本 confound 冷热轴）。**
 
 **揭示了什么** —— **存在唯一的中间地带：`m17.5/sep0.7`（冷核 + 中等间距）**，两端都干净中继（pooled 干净大事件 neg 10 / pos 5，碰撞 0，局部 0.29），且 **3 个 seed 全部两端都有**（neg3/pos2、neg3/pos2、neg4/pos1，逐 seed 零碰撞——不是单 seed 侥幸）。其余 8 格各自落三种失败方向，构成清晰景观：**近/热 → 碰撞主导**（m17.5/sep0.6 碰撞 0.96、m17.0/sep0.6 0.52、m16.5/sep0.7-0.8 ~0.34-0.42）；**远/冷 → 局部或一端独大**（m17.0/sep0.8 局部 0.91；m17.5/sep0.8、m16.5/sep0.6 一端独大）。m17.5/sep0.7 正夹在碰撞区与局部区之间的窄缝。**注：这正是 regime-screen 早先标的唯一候选格——地图给了它的景观位置（为什么是它），并确认 3 seed 稳。**
 

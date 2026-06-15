@@ -72,3 +72,24 @@ def test_gate_middle_no_clean_relay():
 
 def test_gate_thresholds_are_the_locked_values():
     assert (rm.K_END, rm.COLL_MAX, rm.LOCAL_MAX, rm.MIN_EV) == (2, 0.30, 0.90, 10)
+
+
+# ---------- provenance audit (catches engine-drift mid-scout) ----------
+def _prov(git, eng):
+    return dict(git_sha=git, engine_sha={"kick_probe.py": eng})
+
+
+def test_provenance_audit_single_ok():
+    p = rm.audit_provenance([_prov("abc", "k1"), _prov("abc", "k1"), _prov("abc", "k1")])
+    assert p["single_provenance"] is True and p["n_readouts"] == 3
+
+
+def test_provenance_audit_flags_mixed_engine():
+    # the 2026-06-15 failure mode: engine edited mid-scout -> two kick_probe shas
+    p = rm.audit_provenance([_prov("abc", "k1"), _prov("abc", "k2")])
+    assert p["single_provenance"] is False
+
+
+def test_provenance_audit_flags_mixed_git():
+    p = rm.audit_provenance([_prov("abc", "k1"), _prov("def", "k1")])
+    assert p["single_provenance"] is False

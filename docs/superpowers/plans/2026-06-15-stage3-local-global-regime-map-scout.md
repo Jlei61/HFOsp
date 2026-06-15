@@ -47,6 +47,16 @@ else:                                           -> dirty_global        # n_part>
 
 **FATAL-4 — seed 稳定性（pooled 太松，必须输出）：** 每格除 pooled 计数外，**必输** `n_seeds_neg_clean`（有 ≥1 neg 干净大事件的 seed 数）/ `n_seeds_pos_clean` / `n_seeds_both`（两端都有的 seed 数），否则单 seed 偶然点亮整格无法察觉、Task 3「跨 seed 不稳」档无数据支撑。`dirty_global_count` / `ambiguous` 也入 summary。
 
+**二级门（TEMPLATE-READINESS GATE，长跑→模板测试的合同，2026-06-15 round-3 锁定）：** ADVANCE GATE（K_END=2）**只是 scout 筛选门，绝不等价于"足够做模板测试"**。某过门格的 post-gate 长跑产出"够做二级稳定双向模板测试"当且仅当：
+- pooled **每端** clean global ≥ **50**（neg 与 pos 各自）；
+- 两端都出现于 ≥ **3 seeds**（`n_seeds_both ≥ 3`）；
+- `collision_rate` 仍 < **0.30**（长跑没退化成碰撞）；
+- `dirty_global` 占比未暴涨（< **0.30**，长跑没退化成"传开但读不清"）；
+- masked **distinct patterns 足够**（每端 `n_unique_masked_patterns ≥ 10`，即不 `diversity_limited`——否则又回到 readable-template 复核里 stable_k 被过度解释的坑）。
+全部满足才跑二级模板测试；任一不满足则继续加长 T 或记"该格事件率/多样性不足以支撑模板测试"。
+
+**PROVENANCE/COMPLETENESS 审计（round-3）：** `analyze_stage3_regime_map.py` 必须审计所有 readout 的 `provenance`（`git_sha` + `engine_sha`）单一性 —— 混 provenance = 引擎/代码在网格中途漂移（2026-06-15 真实发生过），地图各格不可比，必须 loud flag。summary 输出 `provenance_audit` + `completeness`。
+
 **纪律（写死）：**
 - **本 scout 用短 T**（`T=3000`，每格 3 seed）。**不在本计划内跑任何 >1 格的长 T 仿真。**
 - 长 T 确认**只在某格通过 ADVANCE GATE 后**、且作为该格的二级步骤单独提（不在本 plan 自动触发）。
