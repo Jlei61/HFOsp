@@ -26,6 +26,7 @@ original rho=0.6 ratio of ~1.9); confirmed by `_sanity_check` below.
 from __future__ import annotations
 import numpy as np
 from scipy import sparse
+from scipy.spatial import cKDTree
 
 # Reuse the original isotropic machinery verbatim for E->I, I->E, I->I and the
 # delay-grouping. ONLY the E->E branch gets the rotated kernel.
@@ -48,28 +49,42 @@ def _kernel_logweights_rot(dz, l_par, l_perp, theta):
 
 
 def _sample_partners_rot(pos_t, src_pos, C, l_par, l_perp, theta, rng,
-                         self_local=None):
+                         self_local=None, prune_radius=None, src_tree=None):
     """Weighted reservoir sample (same Efraimidis-Spirakis scheme as
-    connectivity._sample_partners) but with the ROTATED kernel weights."""
-    dz = src_pos - pos_t                       # (Ns, 2)
+    connectivity._sample_partners) but with the ROTATED kernel weights.
+
+    prune_radius=None -> full population (BIT-IDENTICAL to the pre-2026-06-15
+    path: same rng draws, same return). prune_radius=R -> tail-bounded, only E
+    sources within R mm of the target are candidates (src_tree = prebuilt
+    cKDTree(src_pos), built once by the caller). The pruned path consumes a
+    different number of rng draws -> it is a tail-bounded APPROXIMATION, not
+    bit-identical; equivalence is distributional (tests/test_snn_engine_prune.py)."""
+    if prune_radius is None:
+        cand = np.arange(len(src_pos))
+    else:
+        tree = src_tree if src_tree is not None else cKDTree(src_pos)
+        cand = np.asarray(tree.query_ball_point(pos_t, prune_radius), dtype=np.int64)
+        if cand.size == 0:
+            return np.empty(0, dtype=np.int64)
+    dz = src_pos[cand] - pos_t                 # (Ncand, 2)
     lw = _kernel_logweights_rot(dz, l_par, l_perp, theta)
     w = np.exp(lw - lw.max())
     if self_local is not None:
-        w[self_local] = 0.0
+        w[cand == self_local] = 0.0
     nz = int(np.count_nonzero(w))
     if nz == 0:
         return np.empty(0, dtype=np.int64)
     Cc = min(C, nz)
-    Ns = len(src_pos)
+    Ns = len(cand)
     if Cc >= Ns:
-        return np.arange(Ns)
+        return cand[w > 0.0]
     keys = rng.standard_exponential(Ns) / np.where(w > 0.0, w, np.inf)
-    return np.argpartition(keys, Cc - 1)[:Cc]
+    return cand[np.argpartition(keys, Cc - 1)[:Cc]]
 
 
 def build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE, AR,
                            verbose=False, local_scale_EI=None,
-                           w_EE_gain_core=1.0, core_mask_E=None):
+                           w_EE_gain_core=1.0, core_mask_E=None, prune_radius=None):
     """Identical to connectivity.build_connectivity except the E->E AMPA channel
     uses a rotated elliptical-exponential kernel (theta_EE, AR). Every other
     channel is bit-identical to the original isotropic build.
@@ -90,6 +105,9 @@ def build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE, AR,
     w_EE, w_IE, w_EI, w_II = p.weights()
     posE = pos[:NE]
     posI = pos[NE:]
+    # tail-bounded E->E candidate restriction (Stage 4 Phase 0): build the spatial
+    # index once; None -> full-population bit-identical path.
+    _etree = cKDTree(posE) if prune_radius is not None else None
     tau_m = np.where(labels == 0, p.tau_m_E, p.tau_m_I).astype(np.float64)
 
     jump_ampa = tau_m / p.tau_r_AMPA
@@ -114,7 +132,8 @@ def build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE, AR,
             wval = w_EE * jump_ampa[i]
             self_local = i
             cols = _sample_partners_rot(pt, posE, C, l_par, l_perp, theta_EE,
-                                        rng, self_local=self_local)
+                                        rng, self_local=self_local,
+                                        prune_radius=prune_radius, src_tree=_etree)
         else:
             # I target: original isotropic E->I (bit-identical to connectivity.py)
             C = p.C_IE
