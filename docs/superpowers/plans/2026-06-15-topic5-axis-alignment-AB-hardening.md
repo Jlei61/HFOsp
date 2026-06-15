@@ -286,3 +286,33 @@ phantom 纪律全程：任何消费 lagPat 模板的新路径走 masked（`mask_
 **反预期不改门**：若 5–10s 比 0–10s 更强、或某层 null 比预期弱，照实报，不回头改门（memory
 `feedback_acceptance_gate_encode_conclusion`）。弱 ≠ 失败：A 线门本就允许"只到粗解剖轴"这个落点
 （plan `network_axis_pivot_plan_2026-06-13.md`）。
+
+---
+
+## 8. 执行记录（2026-06-15）
+
+**Phase 1（并行 agent，全绿）**：A1 `corr_pair_mirror_invariant_signed`（abs-max 诊断 helper，33 测试）；
+A2 `_effect_stats`（effect-size + bootstrap CI + rank-biserial 写进 FINAL，5 测试）；A3 v2 窗口缓存构建器
+（`bb_zt`+全程轨迹+relt+切片纯函数，13 测试 + §5 跨消费者修复 ei_like onset）。D runner `--cache-dir/
+--axis-dir` + 1D 沿轴 sign（16 测试）；E `deterministic_event_split` + `--event-split` half-axis 产出器
+（38 测试，schema 与全集一致）。
+
+**abs-max 诊断 → 主统计保持 P-current（§3.4）**：354 发作上 mirror_disagree 36–52%，大差来自横向 nuisance
+→ 不切 abs-max，FINAL 不动，符号改 1D 沿轴。
+
+**第二轮审阅修订（用户 82/100，2026-06-15）**：
+- **P1-1（已修+揭示）**：`aggregate_topic5_axis_alignment.py::_subject_diffs` 加 `adequate_only`
+  （`effective_shuffle_n>=MIN_EFF=4`）；FINAL 现输出 `effect_n_all/effect_n_adequate` + adequate CI +
+  `wilcoxon_p_adequate`。**HFA-joint 揭示**：剔 5 个退化-null 被试后 eff 0.022→0.050，但 **adequate CI
+  下界仍≈−0.003（恰触 0）**；broadband-channel eff 0.087 CI[0.006,0.129] 下界>0 干净。→ **HFA-joint 靠
+  adequate Wilcoxon(0.013)+FDR(0.029)+rb(+0.59) 显著、效应≈0.05，但效应量 CI 边界**；不得写"HFA 干净碾过
+  最严 null"。`aggregate_topic5_windows.py` 同步加 adequate 过滤。
+- **P1-2（已建脚本）**：`audit_topic5_v2_cache_attrition.py` —— v2 加长 pre 致部分发作越 block 边界被丢
+  （已观察 epilepsiae_1077 sz5），窗口扫描前出 `v2_cache_attrition.csv`，seizure-精度 N 按实际 cached/window-
+  finite 报，不再说"354 不变"；病人单位仍 18。
+- **P1-3（已过门）**：split-half 产出器完成 = 144 条记录，**t_a 半轴 4 组合 ×18 = 72，0 退化、0 个
+  n_channels<6**。门过 → 启动 split-half alignment。
+
+**流水线状态（nohup）**：split-half alignment 跑批中（8 runs×B=1000）；v2 缓存构建收尾（15→19）；组合
+waiter 等两者完成 → 跑 P1-2 审计 → 我审 → 启动 window sweep。剩：split-half 腿(i) 轴自洽 held-out ρ（几何
+侧曾 median 0.752，需在 18 人上复算）、两套聚合、三张图、措辞锁。
