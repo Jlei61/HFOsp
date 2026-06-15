@@ -207,3 +207,20 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 - **③ 该格在长记录上持续双向中继（正面结论）**：prefix bar 下整 30000ms 出 **50 个干净大事件 / 74 事件**，每个 5s 分箱里两端都有（pooled 单 seed neg 24 / pos 26，大致平衡）。
 
 **裁决** —— 把 post-gate"0 干净大事件 = 失败"撤回：那是检测器 length-依赖伪影。**`m17.5/sep0.7` 在 length-稳定检测器下持续产出平衡双向干净大事件、且网络平稳（无升温）。** 按决策树（早期恢复 ∧ 后段平稳）→ 正式长跑可行。**遗留待修（模板测试前）**：record lagPat 的 `env_f.max()`（`:360`）也是全记录量，长跑模板矩阵同样有 length-依赖，模板测试前要一起改 prefix/fixed 或逐事件标定；`hidden_source_label` 把"核源"与"读出可读性"混在一起，要拆 `core_source_label` / `readout_class`（P1-2，带新测试）。**二级门**（pooled 每端干净大事件 ≥50 ∧ ≥3 seeds ∧ collision<0.30 ∧ dirty<0.30 ∧ masked distinct≥10/端）待 3-seed prefix 长跑齐了再评。**仍探索性，不进主结论。**
+
+### 二级门 — 3-seed prefix 长跑（2026-06-15）：可数部分全过；distinct+模板部分待修后评
+
+3 seed × T=30000 × prefix_peak（length-稳定）+ dump-af（s1 重读 + s2/s3 补齐，BLAS 线程限 8 避让 Topic5）。**只汇总可数指标，未做模板测试**（守 P0）：
+
+| seed | n | cg_neg | cg_pos | collision | dirty | both_ends |
+| --- | --- | --- | --- | --- | --- | --- |
+| s1 | 74 | 24 | 26 | 0.20 | 0.00 | ✓ |
+| s2 | 77 | 9 | 28 | 0.17 | 0.00 | ✓ |
+| s3 | 71 | 28 | 8 | 0.14 | 0.01 | ✓ |
+| **pooled** | 222 | **61** | **62** | **0.171** | **0.005** | **3/3** |
+
+**可数部分全过**：每端干净大事件 ≥50（neg 61 / pos 62，且平衡）✓；≥3 seeds 两端都有（3/3）✓；collision 0.171<0.30 ✓；dirty 0.005<0.30 ✓；**AF 平稳（与阈值无关滚动 p50/p95 三 seed 全平，无升温）**✓。per-seed 赢家翻号（s2 pos-heavy 9/28、s3 neg-heavy 28/8）但两端恒中继、pooled 平衡（61/62）——「每网赢者通吃但两端都传」在长记录上重现。
+
+**未评（按 P0 顺序）**：masked **distinct≥10/端** + 二级稳定双向模板测试 —— 这两项依赖 record lagPat 矩阵，而该矩阵的 `env_f.max()`（`:382`）仍是全记录量（同 length-依赖），**必须先修 `env_f.max()` + 拆 `hidden_source_label`→`core_source_label`/`readout_class`（带新测试），才跑模板测试**。
+
+**口径（守）**：可数二级门过 = 「`m17.5/sep0.7` 在 length-稳定读出下、3 seed 都持续平衡双端中继、网络平稳、且累积量足够」——**不**等于「稳定双向模板已成立」（模板测试尚未跑，且其前置 fix 未做）。**仍探索性，不进主结论。**
