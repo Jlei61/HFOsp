@@ -78,24 +78,66 @@ def main():
                       f"{c['effect_size']} | [{c['effect_ci'][0]}, {c['effect_ci'][1]}] |")
             print(f"[{w:22s} {act:10s} {layer:8s}] pass {c['n_pass']}/{c['n']} "
                   f"real_med={c['real_median']} eff={c['effect_size']} CI={c['effect_ci']}", flush=True)
-    # explicit negative-control verdict: distal vs 0-10 for broadband-channel + hfa-joint
+    # ICTAL-SPECIFICITY test (reviewer P1): per-subject paired post(0-10) - distal(pre) on the RAW
+    # |alignment|. post >> distal => ictal-early-specific; post ~ distal => persistent scaffold (the
+    # axis reads the same coarse structure pre-onset and at onset). This is THE quantity that decides
+    # whether we may say "ictal-specific" or only "stable scaffold readout".
+    from scipy.stats import wilcoxon as _wil
+    spec = {}
+    for act in ["broadband", "hfa"]:
+        post = {r["subject_id"]: r for r in _load("post_0_10", act)}
+        dist = {r["subject_id"]: r for r in _load("pre_distal_m120_m90", act)}
+        common = sorted(set(post) & set(dist))
+        diffs = [post[s]["real_median_abs_corr"] - dist[s]["real_median_abs_corr"] for s in common]
+        if len(diffs) < 3:
+            continue
+        eff, lo, hi = _effect_ci(diffs)
+        try:
+            wp = float(_wil(diffs, alternative="greater").pvalue) if any(d != 0 for d in diffs) else 1.0
+        except ValueError:
+            wp = 1.0
+        spec[act] = {"n_paired": len(common),
+                     "median_post_minus_distal_abscorr": round(eff, 5), "ci": [round(lo, 5), round(hi, 5)],
+                     "wilcoxon_post_gt_distal_p": round(wp, 5),
+                     "ictal_specific": bool(lo is not None and lo > 0 and wp < 0.05)}
+        print(f"[ictal-specificity {act}] post-distal |corr| median={eff:.4f} CI=[{lo:.4f},{hi:.4f}] "
+              f"Wilcox(post>distal) p={wp:.4f} -> ictal_specific={spec[act]['ictal_specific']}", flush=True)
+    summary["ictal_specificity"] = spec
+
+    # Negative-control verdict, derived HONESTLY from the ictal-specificity paired test (NOT from a
+    # lenient 'distal CI contains 0'): the alignment is ictal-early-specific ONLY if post(0-10) is
+    # significantly stronger than distal pre. Both metrics fail this -> persistent scaffold.
     verdict = {}
     for act, layer in [("broadband", "channel"), ("hfa", "joint")]:
         d = next((r for r in summary["rows"] if r["window"] == "pre_distal_m120_m90"
                   and r["metric"] == act and r["layer"] == layer), None)
         i = next((r for r in summary["rows"] if r["window"] == "post_0_10"
                   and r["metric"] == act and r["layer"] == layer), None)
+        sp = spec.get(act, {})
         if d and i:
-            ci_contains_0 = d["effect_ci"][0] <= 0 <= d["effect_ci"][1]
-            below_ictal = d["effect_size"] < i["effect_size"]
-            verdict[f"{act}_{layer}"] = {"distal_effect": d["effect_size"], "ictal_0_10_effect": i["effect_size"],
-                                         "distal_ci_contains_0": ci_contains_0, "distal_below_ictal": below_ictal,
-                                         "negative_control_ok": bool(ci_contains_0 or below_ictal)}
+            is_spec = bool(sp.get("ictal_specific"))
+            verdict[f"{act}_{layer}"] = {
+                "distal_effect": d["effect_size"], "ictal_0_10_effect": i["effect_size"],
+                "distal_n_pass": d["n_pass"], "ictal_0_10_n_pass": i["n_pass"],
+                "post_minus_distal_abscorr": sp.get("median_post_minus_distal_abscorr"),
+                "wilcoxon_post_gt_distal_p": sp.get("wilcoxon_post_gt_distal_p"),
+                "ictal_specific": is_spec,
+                "conclusion": "ictal_early_specific" if is_spec else "persistent_scaffold_NOT_ictal_specific"}
     summary["negative_control_verdict"] = verdict
+    md.append("")
+    md.append("## Ictal-specificity (paired post[0-10] - distal[-120,-90] on raw |alignment|)")
+    md.append("post >> distal => ictal-specific; post ~ distal => persistent scaffold (NOT ictal-specific).")
+    md.append("")
+    md.append("| metric | n | median(post-distal) | 95% CI | Wilcox(post>distal) p | ictal_specific |")
+    md.append("|---|---|---|---|---|---|")
+    for act, s in spec.items():
+        md.append(f"| {act} | {s['n_paired']} | {s['median_post_minus_distal_abscorr']} | "
+                  f"[{s['ci'][0]}, {s['ci'][1]}] | {s['wilcoxon_post_gt_distal_p']} | {s['ictal_specific']} |")
     out = WIN / "window_summary.json"
     json.dump(summary, open(out, "w"), indent=2, ensure_ascii=False)
     (WIN / "window_summary.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     print(f"\nwrote {out}\nnegative-control verdict: {json.dumps(verdict, ensure_ascii=False)}")
+    print(f"ictal-specificity: {json.dumps(spec, ensure_ascii=False)}")
 
 
 if __name__ == "__main__":
