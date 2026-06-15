@@ -58,6 +58,35 @@ OUT_DIR = os.path.join(
     "results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/fingerprint",
 )
 
+# --- INTERIM broad-lagPat patch (2026-06-15) -------------------------------
+# huangwanling + zhaojinrui have a 4-channel SINGLE-shaft narrow montage
+# (H2-H5 / F5-F8) -> degenerate propagation axis -> axis_available=false. Their
+# broad-lagPat re-derivation (top_n=20, multi-shaft; built by
+# scripts/build_broad_lagpat_patch.py) yields a usable multi-shaft axis. Until
+# the full-cohort broad re-derivation runs, overlay the broad path_axis
+# COMPONENT record for exactly these two subjects. The broad component rec is
+# itself the full path_axis dict (same field names this audit reads), so it
+# drops straight into `pa`. Remove this block (and re-run) once the full broad
+# cohort lands.
+BROAD_PATCH = {("yuquan", "huangwanling"), ("yuquan", "zhaojinrui")}
+BROAD_GEO_COMPONENT = os.path.join(
+    REPO,
+    "results/spatial_modulation/propagation_geometry_broad/"
+    "components/path_axis/per_subject",
+)
+
+
+def broad_path_axis(dataset, subject):
+    """Broad path_axis component rec for a patched subject, else None."""
+    if (dataset, subject) not in BROAD_PATCH:
+        return None
+    path = os.path.join(BROAD_GEO_COMPONENT, f"{dataset}_{subject}.json")
+    if not os.path.isfile(path):
+        return None
+    with open(path) as f:
+        return json.load(f)
+
+
 # Known reconciliation anchors from the Axis-A A5-real coverage prose.
 ANCHORS = {
     "rank_available": 40,
@@ -111,6 +140,10 @@ def build_rows():
         dataset = s["dataset"]
         subject = s["subject"]
         pa = s.get("path_axis", {}) or {}
+        broad_pa = broad_path_axis(dataset, subject)
+        is_broad_patched = broad_pa is not None
+        if is_broad_patched:
+            pa = broad_pa
         status = pa.get("status")
 
         is_ok = status == "ok"
@@ -172,6 +205,7 @@ def build_rows():
             ("sampling_geometry", sampling_geometry),
             ("n_shafts", n_shafts),
             ("exclusion_reason", exclusion_reason),
+            ("broad_patched", is_broad_patched),
         ]))
 
     rows.sort(key=lambda r: (r["dataset"], r["subject"]))
@@ -214,6 +248,16 @@ def build_reconciliation(rows):
             if r["exclusion_reason"] != "missing_or_excluded_from_path_axis"
         ),
     }
+    # Broad-patch delta: the anchors above are the pre-patch narrow-cohort prose
+    # numbers. The interim broad patch flips exactly the patched subjects, so the
+    # rigorous check is computed == narrow_anchor + (patched rows now True). This
+    # confirms ONLY the intended subjects changed and nothing else drifted.
+    patch_delta = {
+        "axis_available": sum(
+            1 for r in rows if r["broad_patched"] and r["axis_available"]),
+        "pathway_width_available": sum(
+            1 for r in rows if r["broad_patched"] and r["pathway_width_available"]),
+    }
     recon = OrderedDict()
     for key, anchor in ANCHORS.items():
         if key == "entry_overlap_subjects":
@@ -229,10 +273,12 @@ def build_reconciliation(rows):
             ])
             continue
         comp = computed.get(key)
+        delta = patch_delta.get(key, 0)
         recon[key] = OrderedDict([
             ("computed", comp),
             ("anchor", anchor),
-            ("match", comp == anchor),
+            ("broad_patch_delta", delta),
+            ("match", comp == anchor + delta),
         ])
     recon["rank_vs_path_axis_note"] = (
         "interictal_masked rank layer = 40 subjects vs path_axis processed = 39 "
@@ -297,6 +343,23 @@ def main():
         ("weak_axis_count", sum(1 for r in rows if r["weak_axis"])),
         ("degenerate_axis_count",
          sum(1 for r in rows if r["degenerate_axis"])),
+        ("broad_patch", OrderedDict([
+            ("status",
+             "INTERIM: broad-lagPat path_axis overlaid for single-shaft "
+             "4-channel subjects; superseded when the full-cohort broad "
+             "re-derivation lands"),
+            ("subjects",
+             sorted(f"{d}:{s}" for (d, s) in BROAD_PATCH)),
+            ("reason",
+             "narrow montage = 4ch on ONE shaft -> degenerate axis "
+             "(axis_available=false). Broad lagPat (top_n=20, multi-shaft) "
+             "yields a usable axis."),
+            ("source",
+             "results/spatial_modulation/propagation_geometry_broad/"
+             "components/path_axis/per_subject/"),
+            ("built_by", "scripts/build_broad_lagpat_patch.py"),
+            ("n_patched_rows", sum(1 for r in rows if r["broad_patched"])),
+        ])),
         ("reconciliation", build_reconciliation(rows)),
         ("per_subject", rows),
     ])

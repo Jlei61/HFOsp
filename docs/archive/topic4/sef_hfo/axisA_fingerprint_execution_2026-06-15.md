@@ -166,7 +166,30 @@ A3 是 **screen-NULL**,不是"局部 E/I 机制一般不能复现 V_th↓"的 fi
 
 ## §7 A5-real 真实可靠性审计(`fingerprint/real_feature_reliability.{csv,json}`)
 
+> **口径说明**:本段数字是 **pre-broad-patch baseline**(宽通道补丁前的原始审计run)。补丁后的定稿口径(axis_available 28 / pathway_width 25 / degenerate 2 / axis_dir 18 PASS / onset_jitter 33 PASS)见 §7.1,§7.1 是增量解释。
+
 split-half **AND** odd-even 双折门(各 ≥0.6,比模板级 forward_reverse_reproduced 的 OR 规则更严)。axis_dir 17 PASS(含 6 weak_axis + 4 degenerate 硬否);onset_jitter 34 PASS(用 cluster_rank 折间一致性作 proxy,per-fold earliest-prob 重算 deferred);**pathway_width 40 DEFERRED**(path_axis 只存全量 perp_spread、无 per-fold;23 个可日后重算)。4 个 borderline(一折≥0.6 一折<0.6,被 AND 门拦下,OR 规则会放过),最强 epilepsiae_1096(0.25 / 1.00)。纯描述、按数据集分层(mm 不跨库 pool)、无机制 label。
+
+### §7.1 单杆 4 通道被试的宽通道补丁(2026-06-15,interim)
+
+**测了什么。** 上面"4 个 degenerate 硬否"里,有 3 个 Yuquan 被试(huangwanling / zhaojinrui / zhourongxuan)在原窄通道层只采到 4 个触点,而且**这 4 个全在同一根电极杆上**(H2–H5 / F5–F8 / G7–G10)。一根杆只能连成一条线,张不出"从哪头传到哪头"的方向轴,所以方向特征整层不可用。问题是窄通道池只盯了发放最密的那一小撮,不是这些被试真没有别的网络。
+
+**怎么做的。** 用已经跑好的宽通道重打包(top_n=20,跨多根杆;`results/lagpat_broad_dyn/`),把传播→端点排名→几何轴这条链对这 3 个被试重跑一遍,写进平行的 `_broad` 目录(原窄树不动)。然后让两个审计脚本**只对这 2 个能补进覆盖层的被试**改读宽版结果(`BROAD_PATCH` overlay)。
+
+**揭示了什么——必须分两层说,不能合并成"救/不救"。**「覆盖层」= 这个被试有没有可用的方向轴(coverage);「可靠性层」= 这个方向在时间分割下稳不稳(reliability,split-half **AND** odd-even 双折门各 ≥0.6)。**覆盖层张出轴 ≠ 可靠性层方向稳**——one-fold 过不是 two-fold 过,绝不能把"补进覆盖"读成"方向 fingerprint 可靠"。
+
+| 被试 | 覆盖层(轴可用?) | 可靠性层(方向双折稳?) |
+|---|---|---|
+| **huangwanling** | **PASS** — 真轴 32mm / 6 杆 / 非退化 / primary | **PASS** — 前后半 0.93 ∧ 奇偶 0.97,双折都 ≥0.6 |
+| **zhaojinrui** | **PASS** — 真轴 28mm / 5 杆 / 非退化 / primary | **FAIL** — 前后半仅 0.52(<0.6)∧ 奇偶 0.78;双折门不过(列入 fold_disagreements) |
+| **zhourongxuan** | **FAIL / 不补** — 宽版仅 28 事件,聚不出稳定模板 | n/a(无轴) |
+
+- **zhaojinrui 的正确口径**:只补进了 axis / pathway_width 的**覆盖层**;**方向可靠性不过**(轴能张出来,但前后半两段拼出来的方向不一致)。**禁止**写成"救回 direction feature"。它适合用来说明"宽通道池改善了覆盖",**不能**用来说明"方向 fingerprint 可靠"。
+- **zhourongxuan 不补是合理的**:不是没有宽版文件,而是宽版 QC 事件数太少、稳定模板层不成立。
+
+**净变化**:覆盖层 axis_available 26→28(Yuquan 7→9)、pathway_width_available 23→25、degenerate_axis 4→2(仅剩 epilepsiae 1073 + zhourongxuan);reconciliation 用 `narrow_anchor + broad_patch_delta(=2)` 校验,确认**只有这 2 个被试变了、其余没漂**。可靠性层:axis_dir PASS 17→18(只有 huangwanling 翻过;zhaojinrui 原是 degenerate 硬否、现是双折门 FAIL,两种情形都不算 PASS),onset_jitter PASS 34→33(zhaojinrui 改读宽版折后 PASS→FAIL,因为它和 axis_dir 共用这两折)。
+
+**口径 + 状态**:这是 **interim 补丁**,只补单杆退化被试、只动 path_axis 这一层;narrow 树仍是 archive 证据,平行 `_broad` 树是新路径(AGENTS.md 平行目录约定)。**下一步**是对整个 Yuquan 侧用统一的 per-subject 宽池规则(narrow+15,谁都不收窄)重派生,届时本补丁被取代。脚本:`scripts/build_broad_lagpat_patch.py`(三 runner monkeypatch 路由,跳过 integrate——几何 component rec 已含审计全部字段);产物 `results/{interictal_propagation_masked_broad,spatial_modulation/propagation_geometry_broad}/`。
 
 ## §8 内部归档代号
 
