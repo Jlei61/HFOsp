@@ -13,6 +13,11 @@ T="${T:-30000}"
 SEEDS="${SEEDS:-1 2 3}"
 MAXJOBS="${MAXJOBS:-3}"
 MIN_FREE_GB="${MIN_FREE_GB:-40}"
+# review P1 2026-06-15: bar must be length-stable for long runs. prefix_peak default here (NOT the
+# legacy record_peak) + distinct tag suffix so it never collides with the legacy record_peak runs.
+BARMODE="${BARMODE:-prefix_peak}"; CALPREFIX="${CALPREFIX:-3000}"
+SUFFIX=""; [ "$BARMODE" = "prefix_peak" ] && SUFFIX="prefix_"
+[ "$BARMODE" = "fixed_bar" ] && SUFFIX="fixed_"
 
 free_gb(){ free -g | awk '/^Mem:/{print $7}'; }
 running(){ pgrep -f "run_sef_hfo_snn_cm_spontaneous_readout.py.*post_gate" | grep -vc grep; }
@@ -23,15 +28,16 @@ for p in sys.argv[1:]:
 PY
 }
 
-echo "POST-GATE start $(date +%H:%M:%S): cell m$MEAN/sep$SEP/std$STD T=$T seeds=[$SEEDS] maxjobs=$MAXJOBS"
+echo "POST-GATE start $(date +%H:%M:%S): cell m$MEAN/sep$SEP/std$STD T=$T seeds=[$SEEDS] bar=$BARMODE maxjobs=$MAXJOBS"
 for s in $SEEDS; do
-  tag="pg_m${MEAN}_sep${SEP}_T${T}_s${s}"
+  tag="pg_m${MEAN}_sep${SEP}_T${T}_${SUFFIX}s${s}"
   if done_ok "$tag"; then echo "[skip] $tag"; continue; fi
   while [ "$(running)" -ge "$MAXJOBS" ] || [ "$(free_gb)" -lt "$MIN_FREE_GB" ]; do sleep 30; done
   echo "[$(date +%H:%M:%S)] launch $tag (running=$(running) free=$(free_gb)G)"
   nohup python3 scripts/run_sef_hfo_snn_cm_spontaneous_readout.py \
     --lesion twoend_equal --core-mean "$MEAN" --sep-frac "$SEP" --core-std "$STD" --seed "$s" \
-    --T "$T" --dump-fullfield --tag "$tag" --out "$OUT" > "$OUT/logs/$tag.log" 2>&1 &
+    --T "$T" --event-bar-mode "$BARMODE" --cal-prefix-ms "$CALPREFIX" --dump-fullfield --dump-af \
+    --tag "$tag" --out "$OUT" > "$OUT/logs/$tag.log" 2>&1 &
   sleep 5
 done
 wait

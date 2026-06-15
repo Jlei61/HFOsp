@@ -192,3 +192,18 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 **进入门语义（守纪）**：PASS **不**代表"找到稳定双向模板"，只代表 m17.5/sep0.7 **值得花长 T 去 accumulate 足够事件做二级模板测试**。该格 ~7 事件/seed、且 neg 偏（10:5，与"每网赢者采样"一致）——所以二级测试前必须先长跑攒量（之前 swap/mirror 在此格因事件少而没功率，印证）。
 
 **Post-gate 下一步（不在本 plan 自动触发）**：只在 `m17.5/sep0.7` 上加长 T（估 ≥200-400s/run 才够 ≥50 干净大事件/端，小时级）做二级"稳定双向模板测试"（复用 masked pipeline + `analyze_stage3_readable_templates.py`）。冷长跑只在别的格攒重复局部、热长跑只升碰撞——已由本地图佐证，所以长跑只对这唯一过门格做。**仍探索性，不进主结论。**
+
+---
+
+## Post-gate 长跑 + 检测器 length-依赖 bug（2026-06-15，关键方法学发现）
+
+**测了什么 / 发生了什么** —— 在过门格 `m17.5/sep0.7` 上把记录从 T=3000 加长到 T=30000（10×）做 post-gate 确认。第一次（默认检测器）读出**两端 0 干净大事件**，看似"这格其实不行"。但这是个**检测器 length-依赖伪影**，不是科学失败。
+
+**怎么定位的（确定性对照）** —— 同 seed、同引擎、同参数、无 kick → **前 3000ms 的脉冲逐点完全一致**（scout 与长跑的前 3000ms LFP `maxdiff=0`）。可那批完全相同的早期事件，scout（T=3000）读成 `n_part=8` 干净大事件，长跑（T=30000）读成 `n_part=2` 局部。唯一变量：检测阈值 `bar = floor + 0.5×(整段最大 peak − floor)`。长记录后段出现一个更大的事件，把"整段 peak" 从 0.041 抬到 0.063 → `bar` 0.0205→0.0317 → **同一早期事件的检测窗口从 ~66ms 掐到 ~10-20ms，传播还没铺开就被截断 → n_part 8→2**。根因在 `scripts/run_sef_hfo_snn_cm_spontaneous_readout.py` 的 `peak = af.max()`（全记录量）。
+
+**B-prime 诊断（固定 detector，把两个问题分开，脚本 `analyze_stage3_warming_diag.py`；runner 加 opt-in `--event-bar-mode {record_peak默认/prefix_peak/fixed_bar}` + `--dump-af`，默认 record_peak 字节不变不动旧结果）** ——
+- **① 恢复 = YES（确定）**：用 length-稳定的 prefix bar（前 3000ms 标定）重读 seed1 T=30000，早期事件恢复成 `n_part=8` 干净大事件（6/7 干净，neg/pos 交替），与 scout 一致 → "0 干净大事件"100% 是检测器伪影。
+- **② 升温 = NO（确定）**：与阈值无关的 af 滚动 p50/p95 在整 30000ms **平**（p50 9e-05→9e-05，p95 稳定 ~0.030）。网络**不**随时间升温。早先 `true_inter_event_floor` 0.0004→0.023（60×）是**污染**（高 bar 窄窗口让事件肩/尾漏进 inter-event 基线），不是真非平稳——审阅的提醒成立。
+- **③ 该格在长记录上持续双向中继（正面结论）**：prefix bar 下整 30000ms 出 **50 个干净大事件 / 74 事件**，每个 5s 分箱里两端都有（pooled 单 seed neg 24 / pos 26，大致平衡）。
+
+**裁决** —— 把 post-gate"0 干净大事件 = 失败"撤回：那是检测器 length-依赖伪影。**`m17.5/sep0.7` 在 length-稳定检测器下持续产出平衡双向干净大事件、且网络平稳（无升温）。** 按决策树（早期恢复 ∧ 后段平稳）→ 正式长跑可行。**遗留待修（模板测试前）**：record lagPat 的 `env_f.max()`（`:360`）也是全记录量，长跑模板矩阵同样有 length-依赖，模板测试前要一起改 prefix/fixed 或逐事件标定；`hidden_source_label` 把"核源"与"读出可读性"混在一起，要拆 `core_source_label` / `readout_class`（P1-2，带新测试）。**二级门**（pooled 每端干净大事件 ≥50 ∧ ≥3 seeds ∧ collision<0.30 ∧ dirty<0.30 ∧ masked distinct≥10/端）待 3-seed prefix 长跑齐了再评。**仍探索性，不进主结论。**
