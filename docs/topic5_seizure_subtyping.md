@@ -84,10 +84,32 @@ split_half_robust=False；负对照四层全部非显著=非假阳性。结论 =
 `docs/archive/topic5/axis_alignment_AB_result_2026-06-14.md`
 （定稿表 `results/topic5_ictal_recruitment/axis_alignment/axis_alignment_FINAL.md`）。
 
-图三类（`.../axis_alignment/figures/`）：① **四层 null 阶梯图** `axis_alignment_null_ladder_B1000.png`
-——一张图读出"主结论=粗骨架、只有 HFA 爬到最严层"的层级；② **每被试场图** `fields/*_axis_vs_broadband.png`
-——左间期轴(模板 A) / 右发作激活同平面眼看共线；③ **方向玫瑰图** `rose/*_direction_rose_broadband.png`
-——发作方向归一化 0°，两模板逐事件方向画成整圆空心直方图（ECoG 网格最实、SEEG 投影 caveat）。
+**主图（论文级 field cohort，`figures/field_concordance/`）**：① **field concordance atlas**
+`field_concordance_atlas_broadband.png` —— 18 病人 paired field 同屏（左间期 order 场 / 右发作 activation 场，
+最佳符号镜像、深框=过自己的粗 null、按 margin 排序），**不做场平均**，一眼看到很多病人左右场对得上；
+② **null forest** `field_concordance_null_forest_broadband.png` —— 实测 |r| vs 每病人自己的 channel-shuffle null
+（5/18 黑=过自己 null95%，E590/E583 远超；cohort 二项 p=0.0016）。**这两张是 field 主结果图。**
+
+**Supplement（方法审稿向）**：四层 null 阶梯图 `axis_alignment_null_ladder_B1000.png`、每被试场图
+`fields/*`、方向玫瑰图 `rose/*`（A 线方向补充 + C 线主图）、干净被试方向版 A 线 `aline_direction/*`、
+加固三图 `axis_hardening_fig*`。
+
+**加固复验（2026-06-15，五项稳健性 + 关键负对照）—— 主结论收窄为"持续 scaffold readout"。**
+归档 `docs/archive/topic5/axis_alignment_hardening_result_2026-06-15.md`。
+- **轴自洽（反套套）**：用一半事件搭轴、预测另一半发放顺序，held-out ρ 中位 **0.76、18/18 病人 CI>0**
+  → 间期轴是高度可复现的患者特异结构，不是某批事件的偶然。
+- **砍两半重搭轴再对齐**：broadband × 粗层（主）在两种砍法 × 两半上**每个都赢过随机**（binom 全<0.05），
+  跨被试两半对齐强度一致（ρ 0.54 / 0.94）→ 主结论不靠某批间期事件。（与上面 hfa×joint 复验一致：
+  最严层细对齐两种分半都不稳，主线粗骨架两种分半都稳。）
+- **⚠️ 时间负对照（关键，新）**：把"发作激活"换成**发作前 90–120 s 的远端窗**重测——粗对齐**不弱于、甚至
+  强于发作窗**（broadband 远端 eff 0.111 > 发作 0–10 的 0.091；逐病人配对 post−distal 不显著 p=0.37）。
+  → **这根粗网络骨架是持续存在的患者底座，不是发作早期特异招募。**
+- **adequate 分母修正**：joint 层只 13 个有效病人；修正后 hfa×joint 效应量 CI 触 0（与"real-but-not-robust"
+  一致，归 sensitivity）。broadband×粗层效应量 0.087、CI[0.006,0.129] 干净。
+- **措辞收窄**：✅ 可写"间期传播轴是患者内稳定结构，读出与发作激活相关的粗网络骨架"；
+  ❌ 不可写"该对齐是发作早期特异出现的现象 / ictal-early-specific"；❌ 不可写"HFA 干净过最严 null"。
+- 图：`figures/axis_hardening_fig{1_patient_level,2_null_hierarchy,3_window_sensitivity}.png`（fig3 承载
+  "非发作特异 = scaffold"判读）。**待用户目视复核。**
 
 ### 3.1 PR-0：v2.3 Layer A ictal ER timing atlas
 
