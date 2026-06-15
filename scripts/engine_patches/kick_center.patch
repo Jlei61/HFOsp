@@ -1,5 +1,5 @@
 # Engine patch: kick_center kwarg for single-end / off-center kick (Increment 2/3).
-# Target: results/topic4_sef_hfo/lif_snn/engine/kick_probe.py  (coworker Zou's engine;
+# Target: src/snn_engine/kick_probe.py  (coworker Zou's engine;
 # that tree is GITIGNORED in this repo, so this patch-note is the tracked record.)
 # Backward-compatible: kick_center=None -> [L/2, L/2] (sheet center) = byte-identical to before.
 # Applied 2026-06-07.

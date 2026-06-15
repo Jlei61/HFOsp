@@ -16,7 +16,7 @@ import os
 import json
 import numpy as np
 
-ENG = os.path.join("results", "topic4_sef_hfo", "lif_snn", "engine")
+ENG = os.path.join("src", "snn_engine")
 sys.path.insert(0, ENG)
 from params import Params, compute_nu_theta            # noqa: E402
 from connectivity import place_neurons                  # noqa: E402

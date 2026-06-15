@@ -34,7 +34,7 @@ import subprocess
 import hashlib
 import numpy as np
 
-ENG = os.path.join("results", "topic4_sef_hfo", "lif_snn", "engine")
+ENG = os.path.join("src", "snn_engine")
 sys.path.insert(0, ENG)
 from params import Params, compute_nu_theta                # noqa: E402
 from connectivity import place_neurons                      # noqa: E402
@@ -69,10 +69,10 @@ ENGINE_VERSIONS = os.path.join("results", "topic4_sef_hfo", "snn_heterogeneity",
 
 
 def _engine_guard():
-    """Loud-fail if the gitignored engine drifted from the recorded baseline (spec §7 hard
+    """Loud-fail if the engine drifted from the recorded baseline (spec §7 hard
     contract; same guard the hetero grid runner uses). The engine is patched (r_kick/t_kick/
-    lfp sites; patch-note scripts/engine_patches/kick_center.patch) and NOT git-tracked, so a
-    silent edit there would make these cm reads unreproducible."""
+    lfp sites; patch-note scripts/engine_patches/kick_center.patch); the guard asserts its sha256 so an
+    unreviewed in-place edit fails loudly before a run."""
     if not os.path.exists(ENGINE_VERSIONS):
         raise RuntimeError(
             f"engine baseline missing: {ENGINE_VERSIONS}. Re-snapshot it with "

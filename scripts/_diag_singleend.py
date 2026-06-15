@@ -1,7 +1,7 @@
 """DIAGNOSTIC: single-end kick + endpoint_centroid_axis (sparse-friendly, Increment-1) on
 the 16-contact montage where onset_front_axis failed. Option B validation."""
 import sys, os, numpy as np
-ENG = os.path.join("results","topic4_sef_hfo","lif_snn","engine"); sys.path.insert(0, ENG)
+ENG = os.path.join("src","snn_engine"); sys.path.insert(0, ENG)
 from params import Params, compute_nu_theta
 from connectivity import place_neurons
 from connectivity_rot import build_connectivity_rot

@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-ENG = Path(__file__).resolve().parents[1] / "results/topic4_sef_hfo/lif_snn/engine"
+ENG = Path(__file__).resolve().parents[1] / "src/snn_engine"
 sys.path.insert(0, str(ENG))
 
 from params import Params                       # noqa: E402

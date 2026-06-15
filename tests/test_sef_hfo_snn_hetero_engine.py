@@ -9,7 +9,7 @@ import sys
 import numpy as np
 import pytest
 
-ENGINE = os.path.join("results", "topic4_sef_hfo", "lif_snn", "engine")
+ENGINE = os.path.join("src", "snn_engine")
 sys.path.insert(0, ENGINE)
 
 

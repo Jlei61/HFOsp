@@ -2,7 +2,7 @@
 onset-front axis on the SAME AR=2/theta_EE=45 center-kick event. Discriminates
 estimator<->sparse-montage mismatch vs substrate issue (advisor 2026-06-07)."""
 import sys, os, numpy as np
-ENG = os.path.join("results","topic4_sef_hfo","lif_snn","engine"); sys.path.insert(0, ENG)
+ENG = os.path.join("src","snn_engine"); sys.path.insert(0, ENG)
 from params import Params, compute_nu_theta
 from connectivity import place_neurons
 from connectivity_rot import build_connectivity_rot

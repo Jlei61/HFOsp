@@ -38,7 +38,7 @@ import numpy as np
 REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 # the spiking engine (coworker's scaffold) currently lives UNTRACKED under results/;
 # import it from there until it is moved into a tracked location (flagged for the user).
-ENGINE = os.path.join(REPO, "results", "topic4_sef_hfo", "lif_snn", "engine")
+ENGINE = os.path.join(REPO, "src", "snn_engine")
 for pth in (ENGINE, REPO):
     if pth not in sys.path:
         sys.path.insert(0, pth)

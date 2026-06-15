@@ -17,7 +17,7 @@ import sys
 import os
 import numpy as np
 
-ENG = os.path.join("results", "topic4_sef_hfo", "lif_snn", "engine")
+ENG = os.path.join("src", "snn_engine")
 sys.path.insert(0, ENG)
 from anisotropy_front import (onset_times, front_mask, principal_axis,        # noqa: E402
                               axis_error, max_active_frac)

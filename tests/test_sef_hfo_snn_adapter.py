@@ -66,7 +66,7 @@ def test_engine_kick_center_moves_the_kick():
     import os
     import sys
     import pytest
-    eng = os.path.join("results", "topic4_sef_hfo", "lif_snn", "engine")
+    eng = os.path.join("src", "snn_engine")
     if not os.path.isdir(eng):
         pytest.skip("LIF-SNN engine not present")
     sys.path.insert(0, eng)
