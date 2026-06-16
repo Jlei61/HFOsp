@@ -75,17 +75,14 @@ def _subject_data(ds_sid, activation):
     support = np.array([float(c.get("support", 1.0)) for c in matched], float)
     soz = np.array([bool(c.get("is_soz")) for c in matched])
 
-    # orientation decision on the A-line's own smoothed fields (R_smooth_rank), so the displayed
-    # mirror/sign matches the |r| the cohort stat reports
-    X, Y = make_plane_grid()
-    F_inter = R_smooth_rank(make_field_record(matched, list(inter)), X, Y, None, S_THRESH)
-    sigma = F_inter["sigma_xy"]
-    F_ict = R_smooth_rank(make_field_record(matched, list(ict)), X, Y, sigma, S_THRESH)
-    o = corr_pair_mirror_invariant_signed(F_inter["T"], F_inter["S"], F_ict["T"], F_ict["S"],
-                                          S_THRESH, OVERLAP_MIN)
-    mirror = (o.get("mirror_choice") == "mirror")
-    signed = o.get("signed_corr")
-    sign_neg = (signed is not None and signed < 0)
+    # Display orientation: NEVER move electrode positions (no y-flip).
+    # Use a simple sign-flip (1-rank) based on the direct per-contact correlation between
+    # inter and ict — same approach as plot_topic5_axis_alignment_fields.py.
+    # The annotated |r| (from the JSON, corr_pair_mirror_invariant) is authoritative and
+    # accounts for both sign and y-mirror ambiguity; the display orientation is a visual
+    # approximation that keeps electrode positions identical in both panels.
+    m_ok = np.isfinite(inter) & np.isfinite(ict)
+    sign_neg = bool(m_ok.sum() >= 3 and np.corrcoef(inter[m_ok], ict[m_ok])[0, 1] < 0)
 
     # display frame (mm) for the nice viridis panels
     rec = json.loads(axis_f.read_text())
@@ -103,7 +100,7 @@ def _subject_data(ds_sid, activation):
     margin = (r - p95) if (r is not None and p95 is not None) else -np.inf
     return {"ds_sid": ds_sid, "xs": xs, "ys": ys, "inter": inter, "ict": ict, "support": support,
             "soz": soz, "xlim": frame["xlim"], "ylim": frame["ylim"], "sigma": frame["sigma_mm"],
-            "mirror": mirror, "sign_neg": sign_neg, "r": r, "p95": p95, "passed": passed,
+            "sign_neg": sign_neg, "r": r, "p95": p95, "passed": passed,
             "margin": float(margin), "n_ch": len(matched)}
 
 
@@ -149,9 +146,8 @@ def plot_atlas(rows, activation, ncols=6):
         axL = fig.add_subplot(gs[rr + 1, 2 * cc])
         axR = fig.add_subplot(gs[rr + 1, 2 * cc + 1])
         _field_panel(axL, d["xs"], d["ys"], d["inter"], d["support"], d["xlim"], d["ylim"], d["sigma"], d["soz"])
-        ys_s = -d["ys"] if d["mirror"] else d["ys"]
         vals_s = (1.0 - d["ict"]) if d["sign_neg"] else d["ict"]
-        _field_panel(axR, d["xs"], ys_s, vals_s, d["support"], d["xlim"], d["ylim"], d["sigma"], d["soz"])
+        _field_panel(axR, d["xs"], d["ys"], vals_s, d["support"], d["xlim"], d["ylim"], d["sigma"], d["soz"])
         last_im = axR.images[-1]
         # tile border = passes coarse null?
         edge = "#1a1a1a" if d["passed"] else "#b8b8b8"
