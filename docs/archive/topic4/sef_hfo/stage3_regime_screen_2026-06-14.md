@@ -221,6 +221,19 @@ The "NULL / no-go / pass-fail" language above overstates it and is retired. This
 
 **可数部分全过**：每端干净大事件 ≥50（neg 61 / pos 62，且平衡）✓；≥3 seeds 两端都有（3/3）✓；collision 0.171<0.30 ✓；dirty 0.005<0.30 ✓；**AF 平稳（与阈值无关滚动 p50/p95 三 seed 全平，无升温）**✓。per-seed 赢家翻号（s2 pos-heavy 9/28、s3 neg-heavy 28/8）但两端恒中继、pooled 平衡（61/62）——「每网赢者通吃但两端都传」在长记录上重现。
 
-**未评（按 P0 顺序）**：masked **distinct≥10/端** + 二级稳定双向模板测试 —— 这两项依赖 record lagPat 矩阵，而该矩阵的 `env_f.max()`（`:382`）仍是全记录量（同 length-依赖），**必须先修 `env_f.max()` + 拆 `hidden_source_label`→`core_source_label`/`readout_class`（带新测试），才跑模板测试**。
+**前置 fix（已做，commit `c789b69` + `1b10981`，2026-06-16）**：① `core_source_label`/`readout_class` 拆分加进 `build_sidecar`，旧字段字节不变；② record lagPat margin 改 prefix 标定（`env_f[:, :npf_e].max()`，长度稳定），旧 `record_peak` 模式默认不变；③ `stage3_core_counts`（含 `core_collision_rate`）加进 readout summary；④ `build_sidecar` unreadable 路径的测试**直接断言** `core_source_label`/`readout_class`（52 tests 全绿）。
 
-**口径（守）**：可数二级门过 = 「`m17.5/sep0.7` 在 length-稳定读出下、3 seed 都持续平衡双端中继、网络平稳、且累积量足够」——**不**等于「稳定双向模板已成立」（模板测试尚未跑，且其前置 fix 未做）。**仍探索性，不进主结论。**
+**3-seed artifact 重建（2026-06-16 14:48–14:50，全部 mtime > fix commit 2026-06-15 23:08）**：schema 三项全验（`core_source_label`/`readout_class` 有 + `record_env_ref=prefix(3000ms)` 有 + `stage3_core_counts` 有）。
+
+**可数二级门 re-summary（post-fix artifact，使用 `core_source_label`）**：
+
+| seed | n | cg_neg | cg_pos | core_coll | dirty | both_ends |
+| --- | --- | --- | --- | --- | --- | --- |
+| s1 | 74 | 24 | 26 | 15(0.203) | 0 | ✓ |
+| s2 | 77 | 9 | 28 | 13(0.169) | 0 | ✓ |
+| s3 | 71 | 28 | 8 | 11(0.155) | 0 | ✓ |
+| **pooled** | 222 | **61** | **62** | **39(0.176)** | **0** | **3/3** |
+
+**全过**：neg 61 ≥50 ✓ / pos 62 ≥50 ✓ / 3/3 seeds 两端 ✓ / core_collision 0.176<0.30 ✓ / dirty 0.0<0.30 ✓ / AF p50 三 seed 全程平稳 ✓。数字与修复前几乎一致（pre-fix 时 `hidden_source_label` 和 `core_source_label` 在这些干净事件上相同，差异仅在 unreadable 轴事件的分桶）。
+
+**口径（守）**：可数二级门过（post-fix artifact）= 「`m17.5/sep0.7` 在 length-稳定读出下、3 seed 持续平衡双端中继、网络平稳、量足够、前置 fix 已落到 artifact」。**仍不等于「稳定双向模板已成立」**——masked distinct≥10/端 + 稳定双向模板测试尚未跑，awaiting user go。**仍探索性，不进主结论。**
