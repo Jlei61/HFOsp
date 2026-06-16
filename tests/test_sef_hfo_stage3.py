@@ -261,9 +261,13 @@ def test_build_sidecar_unreadable_axis_is_ambiguous_and_not_clean():
     payload = build_sidecar([_ev(0.0, 10.0, True, axis_err=None)], spk, core_masks, NE=10,
                             dt=0.1, bin_ms=1.0, part_min=7, delta_onset=1.0, n_min=1)
     e0 = payload["events"][0]
-    assert e0["hidden_source_label"] == "ambiguous"
+    assert e0["hidden_source_label"] == "ambiguous"   # legacy: readability folds source -> ambiguous
     assert e0["collision_reason"] == "unreadable_axis"
     assert e0["clean_for_timing"] is False
+    # P1 split (review 2026-06-15): the REAL source survives on the core-level label even when the
+    # read-out is unreadable — neg cells ignite ~0ms, pos ~5ms in window [0,10] -> source is 'neg'.
+    assert e0["core_source_label"] == "neg"
+    assert e0["readout_class"] == "unreadable"
 
 
 def test_core_active_fraction_window_binning():

@@ -407,6 +407,7 @@ def main():
     # --- Stage 3 sidecar (two-focus runs): hidden core-level source label per RETURNED event,
     # aligned 1:1 to the record columns (plan P1-3). build_sidecar is pure (unit-tested w/o a sim).
     stage3_source_counts = None   # sidecar-derived hidden-SOURCE counts (distinct from direction)
+    stage3_core_counts = None     # core-level counts using core_source_label (not readability-gated)
     if len(core_masks) == 2:
         payload = build_sidecar(ev_recs, spk, core_masks, NE, dt=DT, bin_ms=BIN_MS,
                                 part_min=PART_MIN, delta_onset=a.delta_onset, n_min=a.n_min)
@@ -421,6 +422,16 @@ def main():
             collision=sum(1 for e in _se if e["hidden_source_label"] == "collision"),
             ambiguous=sum(1 for e in _se if e["hidden_source_label"] == "ambiguous"),
             collision_rate=payload["collision_rate"])
+        # P1 review 2026-06-15: core-level counts use core_source_label (not readability-gated),
+        # so core_collision includes events where both cores co-ignite but the axis is unreadable.
+        # The second-tier gate should prefer core_collision_rate over the legacy collision_rate.
+        stage3_core_counts = dict(
+            neg_clean=sum(1 for e in _se if e["core_source_label"] == "neg" and e["clean_for_timing"]),
+            pos_clean=sum(1 for e in _se if e["core_source_label"] == "pos" and e["clean_for_timing"]),
+            core_collision=sum(1 for e in _se if e["core_source_label"] == "collision"),
+            core_none=sum(1 for e in _se if e["core_source_label"] == "none"),
+            core_collision_rate=round(
+                sum(1 for e in _se if e["core_source_label"] == "collision") / max(1, len(_se)), 4))
 
     n_fwd = sum(1 for r in ev_recs if _clean(r, 1.0))
     n_rev = sum(1 for r in ev_recs if _clean(r, -1.0))
@@ -453,6 +464,7 @@ def main():
                    n_clean_forward=n_fwd, n_clean_reverse=n_rev,
                    n_truncated_directional=n_trunc_dir,
                    stage3_source_counts=stage3_source_counts,
+                   stage3_core_counts=stage3_core_counts if len(core_masks) == 2 else None,
                    rep_event_index=rep_i, events=ev_recs)
     json.dump(summary, open(os.path.join(out_dir, f"readout_{tag}.json"), "w"), indent=2)
     if a.dump_af:
