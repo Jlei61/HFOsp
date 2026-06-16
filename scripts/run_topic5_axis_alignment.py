@@ -69,8 +69,13 @@ def _p95_med(draws):
     return float(np.nanpercentile(dist, 95)), float(np.nanmedian(dist))
 
 
-def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_control=False):
-    axis_f = AXIS_DIR / f"{ds_sid}_t_a.json"          # A-primary uses the primary template only
+def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_control=False,
+             statistic="ta"):
+    """statistic: 'ta' = A-line primary (pre-registered, t_a only); 'max_ab' = sensitivity
+    T_s = max(|r_{s,A}|, |r_{s,B}|) with a PAIRED null — the SAME channel shuffle is applied to
+    the activation before computing both template correlations so the selection penalty is correct.
+    Subjects without a t_b record fall back to t_a (max of one)."""
+    axis_f = AXIS_DIR / f"{ds_sid}_t_a.json"
     npz_f = CACHE_DIR / f"{ds_sid}.npz"
     if not axis_f.exists() or not npz_f.exists():
         return None
@@ -82,7 +87,7 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
     cache_names = [str(x) for x in data["channels"]]
     cidx = {n: i for i, n in enumerate(cache_names)}
 
-    matched = matched_channels(axis, {n: 0.0 for n in cache_names})   # axis chans present ictally
+    matched = matched_channels(axis, {n: 0.0 for n in cache_names})
     if len(matched) < 6:
         return {"subject_id": ds_sid, "status": f"insufficient_matched_{len(matched)}"}
     names_m = [c["name"] for c in matched]
@@ -90,13 +95,36 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
     has_anchor = any(k.startswith("bact__") for k in data.files)
 
     X, Y = make_plane_grid()
-    inter = [float(c["typical_rank"]) for c in matched]   # interictal along-axis rank (1D sign side-channel)
+    inter = [float(c["typical_rank"]) for c in matched]
     inter_rec = make_field_record(matched, inter)
     F_inter = R_smooth_rank(inter_rec, X, Y, None, S_THRESH)
     sigma = F_inter["sigma_xy"]
 
+    # For max_ab: also build t_b interictal field (same matched channels, different ranks)
+    F_inter_b = None
+    if statistic == "max_ab":
+        axis_f_b = AXIS_DIR / f"{ds_sid}_t_b.json"
+        if axis_f_b.exists():
+            axis_b = json.load(open(axis_f_b))
+            if axis_b.get("channels"):
+                matched_b = matched_channels(axis_b, {n: 0.0 for n in cache_names})
+                # re-index t_b channels to the same contact order as t_a
+                b_rank = {c["name"]: float(c["typical_rank"]) for c in matched_b}
+                inter_b = [b_rank.get(n, np.nan) for n in names_m]
+                if np.isfinite(inter_b).sum() >= 4:
+                    F_inter_b = R_smooth_rank(make_field_record(matched, inter_b), X, Y, sigma, S_THRESH)
+
     def fld(vals):
         return R_smooth_rank(make_field_record(matched, vals), X, Y, sigma, S_THRESH)
+
+    def stat_t(vals):
+        """Compute the per-seizure statistic T for a given (possibly shuffled) activation."""
+        r_a = _abs_corr(F_inter, fld(vals))
+        if F_inter_b is None or statistic != "max_ab":
+            return r_a
+        r_b = _abs_corr(F_inter_b, fld(vals))   # same vals = same shuffle → paired null
+        valid = [v for v in (r_a, r_b) if np.isfinite(v)]
+        return float(max(valid)) if valid else np.nan
 
     eff = {"channel": effective_shuffle_n(names_m, None, "channel"),
            "within_shaft": effective_shuffle_n(names_m, None, "within_shaft")}
@@ -113,19 +141,19 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
         if np.isfinite(ict_vals).sum() < 6:
             continue
         scored = channel_shuffle(ict_vals, rng) if negative_control else ict_vals  # bad-data gate
-        r = _abs_corr(F_inter, fld(scored))
+        r = stat_t(scored)
         if not np.isfinite(r):
             continue
         real.append(r)
-        s = along_axis_sign(inter, ict_vals)   # 1D side-channel: source(<0)/sink(>0) bias, mirror-free
+        s = along_axis_sign(inter, ict_vals)
         if s["sign"] != 0:
             sign_corrs.append(s["signed_corr"])
-        ch_draws.append([_abs_corr(F_inter, fld(channel_shuffle(ict_vals, rng))) for _ in range(B)])
-        sh_draws.append([_abs_corr(F_inter, fld(within_shaft_shuffle(ict_vals, names_m, rng))) for _ in range(B)])
+        ch_draws.append([stat_t(channel_shuffle(ict_vals, rng)) for _ in range(B)])
+        sh_draws.append([stat_t(within_shaft_shuffle(ict_vals, names_m, rng)) for _ in range(B)])
         if has_anchor and f"bact__{idx}" in data.files:
             anchor = data[f"bact__{idx}"][m_in_cache].astype(float)
-            an_draws.append([_abs_corr(F_inter, fld(anchor_matched_shuffle(ict_vals, anchor, rng))) for _ in range(B)])
-            jt_draws.append([_abs_corr(F_inter, fld(within_shaft_anchor_shuffle(ict_vals, names_m, anchor, rng))) for _ in range(B)])
+            an_draws.append([stat_t(anchor_matched_shuffle(ict_vals, anchor, rng)) for _ in range(B)])
+            jt_draws.append([stat_t(within_shaft_anchor_shuffle(ict_vals, names_m, anchor, rng)) for _ in range(B)])
             if eff_anchor is None:
                 eff_anchor = effective_shuffle_n(names_m, anchor, "anchor")
                 eff_joint = effective_shuffle_n(names_m, anchor, "joint")
@@ -171,21 +199,26 @@ def main():
     ap.add_argument("--cache-dir", default=str(CACHE_DIR), help="T0 feature cache (.npz/.json) dir")
     ap.add_argument("--axis-dir", default=str(AXIS_DIR), help="interictal axis record (_t_a.json) dir")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--statistic", choices=["ta", "max_ab"], default="ta",
+                    help="ta = pre-registered t_a only (primary); "
+                         "max_ab = max(|r_A|,|r_B|) with paired null (sensitivity, selection-corrected)")
     args = ap.parse_args()
     CACHE_DIR = Path(args.cache_dir)
     AXIS_DIR = Path(args.axis_dir)
     rng = np.random.default_rng(RNG_SEED)
     act_key = ACTIVATION_KEY[args.activation]
-    out_path = Path(args.out) if args.out else OUT / f"axis_alignment_{args.activation}_B{args.B}.json"
+    stat_suffix = "" if args.statistic == "ta" else f"_{args.statistic}"
+    out_path = (Path(args.out) if args.out
+                else OUT / f"axis_alignment_{args.activation}{stat_suffix}_B{args.B}.json")
 
     cached = sorted(p.stem for p in CACHE_DIR.glob("*.npz"))
     if args.subjects:
         cached = [s for s in cached if s in set(args.subjects)]
-    print(f"[axis-alignment] activation={args.activation} B={args.B} | {len(cached)} cached subjects",
-          flush=True)
+    print(f"[axis-alignment] activation={args.activation} statistic={args.statistic} "
+          f"B={args.B} | {len(cached)} cached subjects", flush=True)
     rows = []
     for ds_sid in cached:
-        r = _subject(ds_sid, B=args.B, rng=rng, activation=act_key)
+        r = _subject(ds_sid, B=args.B, rng=rng, activation=act_key, statistic=args.statistic)
         if r is None:
             continue
         rows.append(r)
