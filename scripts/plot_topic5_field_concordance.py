@@ -50,6 +50,7 @@ CACHE_DIR = _ROOT / "results/topic5_ictal_recruitment/t0_feature_cache"
 ALIGN_DIR = _ROOT / "results/topic5_ictal_recruitment/axis_alignment"
 OUT = ALIGN_DIR / "figures/field_concordance"
 ACTIVATION_KEY = {"broadband": "bb_auc", "hfa": "hfa_auc"}
+ACTIVATION_LABEL = {"broadband": "broadband power, 0–10 s", "hfa": "fast activity 60–100 Hz, 0–10 s"}
 
 
 def _subject_data(ds_sid, activation):
@@ -134,8 +135,9 @@ def plot_atlas(rows, activation, ncols=6):
     axA = fig.add_subplot(gs[0, :]); axA.axis("off")
     axA.text(0.5, 0.80, "A-line field concordance across subjects", ha="center", va="center",
              fontsize=17, fontweight="bold", transform=axA.transAxes)
-    axA.text(0.5, 0.40, "per subject:  interictal template-rank field   vs   seizure-onset broadband "
-             "activation field          r$_s$ = | corr$_{mirror}$( F$_{interictal}$ , F$_{seizure}$ ) |",
+    axA.text(0.5, 0.40, f"per subject:  interictal template-rank field   vs   seizure-onset "
+             f"{ACTIVATION_LABEL[activation]} activation field"
+             "          r$_s$ = | corr$_{mirror}$( F$_{interictal}$ , F$_{seizure}$ ) |",
              ha="center", va="center", fontsize=10.5, transform=axA.transAxes, color="0.2")
     axA.text(0.5, 0.10, "same colour in the same place (after sign alignment) = same spatial gradient "
              "— this is field similarity, not direction and not replay",
@@ -225,25 +227,40 @@ def plot_forest(rows, activation, B=500, seed=20260615):
         obs, null = nd
         data.append((d, obs, null))
     fig, ax = plt.subplots(figsize=(7.4, 0.42 * len(data) + 1.4), constrained_layout=True)
+    # colormap for the continuous margin dot: diverging at 0 (negative=null not beaten, positive=beaten)
+    import matplotlib.cm as cm
+    margins = [d["r"] - (d["p95"] or d["r"]) for d, _, _ in data]
+    mabs = max(abs(m) for m in margins) or 1.0
+    cmap = cm.RdYlGn  # red (negative margin) → yellow (at null) → green (positive margin)
     for i, (d, obs, null) in enumerate(data):
         y = len(data) - 1 - i
         nn = null[np.isfinite(null)]
-        ax.scatter(nn, np.full(nn.size, y), s=5, color="0.80", alpha=0.45, zorder=1)
-        # authoritative observed / 95th / verdict come from the cohort JSON (B=1000), so the forest
-        # matches the atlas borders and the FINAL table; the grey cloud is the recomputed shape only.
+        ax.scatter(nn, np.full(nn.size, y), s=5, color="0.82", alpha=0.40, zorder=1)
+        # authoritative observed / 95th / verdict come from the cohort JSON (B=1000)
         p95, robs, passed = d["p95"], d["r"], d["passed"]
-        ax.plot([p95, p95], [y - 0.32, y + 0.32], color="0.4", lw=1.5, zorder=2)
-        ax.scatter([robs], [y], s=48, color=("#1a1a1a" if passed else "#c0392b"), zorder=3)
-        ax.text(-0.02, y, d["ds_sid"].replace("epilepsiae_", "E"), ha="right", va="center",
-                fontsize=8.2, transform=ax.get_yaxis_transform())
+        margin = robs - p95
+        dot_color = cmap(0.5 + 0.5 * np.clip(margin / mabs, -1, 1))
+        ax.plot([p95, p95], [y - 0.30, y + 0.30], color="0.38", lw=1.4, zorder=2)
+        ax.scatter([robs], [y], s=60, color=dot_color, edgecolors="0.2", linewidths=0.6, zorder=3)
+        nch = d["n_ch"]
+        margin_str = f"{margin:+.2f}" if margin is not None else ""
+        ax.text(-0.02, y,
+                f"E{d['ds_sid'].replace('epilepsiae_','')}  n={nch}",
+                ha="right", va="center", fontsize=8.0, transform=ax.get_yaxis_transform())
+        ax.text(1.01, y, margin_str, ha="left", va="center", fontsize=7.4,
+                color=("0.35" if margin < 0 else "#2d7a2d"),
+                transform=ax.get_yaxis_transform())
     ax.set_yticks([]); ax.set_ylim(-0.7, len(data) - 0.3)
     ax.set_xlabel("mirror-invariant field alignment  |r|", fontsize=10)
     ax.set_xlim(0, 1)
-    ax.set_title("Epilepsiae subjects · broadband 0-10 s · template A\n"
-                 "observed |r| (●) vs each subject's own channel-shuffle null (grey) + null 95th pct (│)",
+    ax.set_title(f"Epilepsiae subjects · {ACTIVATION_LABEL[activation]} · template A\n"
+                 "observed |r| (●) vs each subject's own channel-shuffle null (grey dots) + null 95th pct (│)",
                  fontsize=10.5)
-    ax.text(0.99, 0.01, "black ● = beats own null 95%   ·   red ● = does not   ·   sorted by margin",
-            ha="right", va="bottom", transform=ax.transAxes, fontsize=7.8, color="0.4")
+    ax.text(0.99, 0.01,
+            "● colour = observed – null 95th (green = beats null, red = below null)   ·   "
+            "wide null = few contacts (n=)   ·   sorted by margin   ·   "
+            "B=1000 MC; exact permutation audit (n≤7): max |MC−exact| p95 < 0.02",
+            ha="right", va="bottom", transform=ax.transAxes, fontsize=7.4, color="0.4")
     OUT.mkdir(parents=True, exist_ok=True)
     out = OUT / f"field_concordance_null_forest_{activation}.png"
     fig.savefig(out, dpi=160, bbox_inches="tight")
