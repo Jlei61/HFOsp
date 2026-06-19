@@ -227,7 +227,22 @@ def _write_outputs(records, per_event_all, verdict):
             SAMPLING_ARTIFACT="AF<=0.5 & axial CI includes 0",
             INCONCLUSIVE="n<10, or 0.5<AF<0.75, or CI straddles 0 (default)"),
         n_draw=N_DRAW, min_n_part=MIN_N_PART, n_event_cap=N_EVENT_CAP)
+    # Reference distribution for the model-side LAYER-2 consistency test (Task 6 Step 3b):
+    # pooled per-event observed contact AF/LR (+ shaft-null) the model must be statistically
+    # consistent with after the same virtual-SEEG sampling.
+    summary["reference_distribution"] = dict(
+        n_events=len(per_event_all),
+        axial_fraction=[round(e["axial_fraction"], 4) for e in per_event_all],
+        lateral_ratio=[round(e["lateral_ratio"], 4) for e in per_event_all],
+        null_shaft_axial=[round(e["null_shaft_axial"], 4) for e in per_event_all],
+        null_shaft_lateral=[round(e["null_shaft_lateral"], 4) for e in per_event_all],
+    )
     (OUT / "cohort_summary.json").write_text(json.dumps(summary, indent=2, default=float))
+    pe_cols = ["dataset", "subject", "event", "n_part", "axial_fraction", "lateral_ratio",
+               "null_shaft_axial", "null_shaft_lateral"]
+    pe_lines = [",".join(pe_cols)] + [",".join(str(e.get(c, "")) for c in pe_cols)
+                                      for e in per_event_all]
+    (OUT / "per_event.csv").write_text("\n".join(pe_lines) + "\n")  # gitignored, for inspection
     return summary
 
 
