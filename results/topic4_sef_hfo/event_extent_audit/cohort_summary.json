@@ -1,0 +1,45 @@
+{
+  "verdict": "INCONCLUSIVE",
+  "n_eligible_subjects": 26,
+  "n_subjects_with_events": 23,
+  "AF_cohort_median": 0.9152127174929465,
+  "LR_cohort_median": 0.561370067820767,
+  "axial_delta_mean": -0.021973242174572388,
+  "axial_ci": [
+    -0.04363713784976689,
+    -0.002868744009707618
+  ],
+  "lateral_delta_mean": -0.020360743236779173,
+  "lateral_ci": [
+    -0.05250229756449352,
+    0.004426935128473593
+  ],
+  "axial_wilcoxon_p": 0.05625271797180176,
+  "lateral_wilcoxon_p": 0.8932116031646729,
+  "excluded": [
+    {
+      "dataset": "yuquan",
+      "subject": "songzishuo",
+      "excluded_reason": "core_unmapped"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "zhangbichen",
+      "excluded_reason": "core_unmapped"
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "zhaochenxi",
+      "excluded_reason": "core_unmapped"
+    }
+  ],
+  "pre_registered_thresholds": {
+    "AXIAL_EXTENDED_LATERAL_NARROW": "AF>=0.75 & LR<=0.5 & lateral below shaft-null",
+    "AXIAL_SEGMENT": "AF<=0.5 & axial below shaft-null",
+    "SAMPLING_ARTIFACT": "AF<=0.5 & axial CI includes 0",
+    "INCONCLUSIVE": "n<10, or 0.5<AF<0.75, or CI straddles 0 (default)"
+  },
+  "n_draw": 200,
+  "min_n_part": 5,
+  "n_event_cap": 400
+}
