@@ -15,8 +15,9 @@
 从"间期的局部事件"切换到"发作样的广泛传播"。
 
 **怎么做**：上一阶段（M2）的思路是"在沿传播轴的方向上，让前方抑制先升起来把波刹停"。放电网络里这招失效
-（波是全或无的，点着就沿轴传到组织边缘），而且真实数据也不支持"事件沿轴只走一小段"（实测事件在采到的范围里
-沿轴铺满约 92%，跟随机按电极杆抽样几乎没差别）。所以 M3 换承重机制：给病理通路一条**有限长的走廊**，
+（波是全或无的，点着就沿轴传到组织边缘）；而真实数据的电极读出里事件足迹是**沿轴长的**（采到的范围里沿轴铺满约
+92%、且跟随机按电极杆抽样几乎没差别）——这是**采样主导的 contact-space 事实**：它不支持把模型读出做成"沿轴一小段"，
+但**组织层面到底有没有轴向自限，它判不了**。所以 M3 换承重机制：给病理通路一条**有限长的走廊**，
 走廊尽头放一个**高门槛的广播枢纽**。平时枢纽关着，事件能在走廊里自发冒出来、沿走廊传、时间上自己停、
 两头都能起，但**过不了枢纽**，所以不会烧到更大范围——这就是新的"空间上自己停"：不是沿轴短，而是"到枢纽为止、
 不外溢成发作"。当慢变量（比如抑制储备下降）把枢纽门槛压低，同一条走廊就能跨过枢纽，枢纽的长程输出把活动广播到
@@ -44,9 +45,11 @@ Task 0（数据侧审计，n=23）独立地从另一头夹击了"沿轴一小段
 的事实——足迹主要由电极采样决定，既不能证明也不能否定**组织层面**的自限。它的作用是**校准模型**：
 模型的虚拟电极读出也必须"沿轴长 + 像随机抽样"，**短一段反而算不对**（详见 §6 验收 layer 2）。
 
-**两头夹击的结论**：把空间自限的承重点放在"沿轴刹停"上，既被放电动力学顶回来，又不被数据支持。
-M3 把承重点换成"**有限走廊 + 关着的枢纽**"，同时绕开这两堵墙——事件在走廊里铺满（沿轴长，对得上数据）
-但跨不过枢纽（不外溢成发作）。这同时把顶层设计（间期/发作共享病理通路、慢变量触发相变）落成一个具体可证伪的网络机制。
+**两头收口的结论（非对称，别写成"两边都证否了轴向自限"）**：把空间自限的承重点放在"沿轴刹停 / 让模型读出变成一小段"上，
+一头被**放电动力学硬顶回来**（M2 失败，确定），另一头被**数据读出约束住**（contact-space 足迹是沿轴长的 → 模型读出不能短一段；
+但组织层面是否轴向自限本身判不了，是 constraint 不是 negative）。M3 把承重点换成"**有限走廊 + 关着的枢纽**"，同时满足这两侧——
+事件在走廊里铺满（沿轴长，对得上数据读出）但跨不过枢纽（不外溢成发作）。这把顶层设计（间期/发作共享病理通路、慢变量触发相变）
+落成一个具体可证伪的网络机制。
 
 ---
 
@@ -73,10 +76,12 @@ M3 的"临界"对象**必须**是**事件跨过枢纽的招募概率 / 分支比
 honoring 这条：M3 主力是放电网络；§5.3 的结构探针是**连接矩阵的线性代数**（全或无招募的线性化筛查），
 **不是**平滑率场动力学。若日后想加率场 mean-field，只能作旁证，不能作 SNN 结论的替身。
 
-**C3. 空间自限的承重机制换人，但两层验收照搬 M2。** 承重机制：旧 = 前沿抑制刹停（放电层失败）→
-新 = **有限走廊 + 关着的高门槛枢纽**。验收照搬 M2 两层（§6）：layer 1（组织/全场）事件空间有界、随薄片放大
-不长大、不贴边、不强直、死在枢纽前（不招募全局区）；layer 2（虚拟电极）沿轴铺展比 + 侧向比与 Task 0 真实分布
-**统计一致**（沿轴长 ~0.9、像随机抽样）。**绝不能把目标写回"沿轴收到一小段"**——那是 layer 2 失败。
+**C3. 空间自限的承重机制换人，措辞从"内禀自限"改"结构封闭"，两层验收照搬并收紧 M2。** 承重机制：旧 = 前沿抑制刹停（放电层失败）→
+新 = **有限走廊 + 关着的高门槛枢纽**。**措辞锁（审阅 §4）**：事件因"走廊有限长 + 枢纽关着"而停 = **结构封闭 / 闭门约束
+（structural containment / closed-gate confinement）**，**不是内禀传播自限（intrinsic self-limitation）**——论文/报告语言只准用前者。
+验收两层（§6）：layer 1（组织/全场）事件空间有界、随薄片放大不长大、不贴边、不强直、死在枢纽前（不招募全局区，**数值判据见 §6.5**）；
+layer 2（虚拟电极）沿轴/侧向足迹在 **subject 层面与 Task 0 真实分布等价**（预注册容差，**非"不被拒"**，见 §6.2）。
+**绝不能把目标写回"沿轴收到一小段"**——那是 layer 2 失败。
 
 **C4. 间期→发作相变只能当"合成可行性桥"。** 框架 §7.2 红线：ictal-like recruitment 只作 synthetic feasibility
 bridge，**不解释临床发作起始**。M3 的相变是"同一走廊在慢变量改变后能否从局部跨成广泛"的**动力学可行性**演示，
@@ -130,9 +135,14 @@ M3 需要一个**同时**有"走廊（各向异性轴）+ 两端触发盆（给 
 - **全局区**：走廊核斑之外的薄片（普通 V_th，非病理）。间期事件**不应**招募它；发作时经 hub 长程边招募它。
 - **Hub 位置**：走廊轴末端（靠近全局区的过渡带）的少数 E cell。`hub_select ∈ {axis_end, top_outdeg}`
   （首选 `axis_end` = 几何指定在轴端；`top_outdeg` = 按建好的局部出度选，作 sensitivity）。
+  **必须 deterministic（审阅 §5）**：`axis_end` 给定基底/seed 唯一确定，**不得引入 seed-dependent hub 位置**；`top_outdeg` 给定建好的 net 也唯一确定。
 
-> 设计校验（CLAUDE.md §7 figure/单元纪律）：U1 必须先在"hub 关、慢变量低"的纯走廊态复现 M2 已拿到的
-> ①②④⑤（自发 + 时间自限 + 可传 + 双向），再叠 U2。否则 U2 的"成功"分不清是 hub 机制还是基底本身。
+> **U1.0 substrate feasibility gate（独立闸门，审阅 P1）**：在"hub 关、慢变量低"的纯走廊态，`corridor_twoend` 必须先**自己**
+> 产生**足够、稳定、双向可读**的事件，才允许进入 hub 机制判定。⚠️ ⑤双向 + 刻板在旧 cm-SNN 里是 **partial / unstable**
+> （M2 recap §5：两灶能给正/反，但多次事件路线越攒越散），**不是已解决事实**——这是要重新挣回的 gate，**不能假设**。
+> **判据**：自发离散事件率 > 阈值（非 silent / 非 tonic）、fwd 与 rev 各 ≥ N_min 个干净可读事件、跨事件路线稳定度 > 阈值。
+> **失败 = 停在"substrate fail"**，记录报告，**不得把基底失败算到 hub 机制头上**（否则混淆 substrate 与 hub 的责任）。
+> 通过后才叠 U2，这样 U2 的"成功/失败"才分得清是 hub 机制还是基底本身（CLAUDE.md §7 单元纪律）。
 
 ### 5.2 U2 — Hub 机制（3 块手术，默认关 = 逐比特一致）
 
@@ -147,10 +157,13 @@ M3 需要一个**同时**有"走廊（各向异性轴）+ 两端触发盆（给 
 **手术 2：度归一化门槛（runner 预变换，零 `simulate_kick` 改动）。**
 - 关键工程点：`simulate_kick` 已经吃一个 per-neuron 的 `V_th_per_neuron` 向量。度归一化门槛 = 从建好的 net 算每个 E cell
   的出度 `k_i^out`（含长程边），在调 `simulate_kick` **之前**把 `V_th_per_neuron[i] += degnorm_alpha * k_i^out`。
-- 新增参数：`degnorm_alpha=0.0`（默认 0 → 阈值不变 → 无副作用）；可选 `degnorm_use='outdeg'|'in_strength'`
-  （首选出度；入强度作 sensitivity，对应顾问报告的 θ_i=θ0+α·s_i^in 变体）。
-- **作用范围 = 全网 E cell（全局 homeostatic 归一化），不是 hub 专属**：每个 E cell 的阈值都按自身出度抬高；
-  hub 因为带着长程边、出度最高，**自然**收到最大的抬升——这正是"hub 成为高门槛门"的来源（机制驱动，非手工指定）。
+- 新增参数：`degnorm_alpha=0.0`（默认 0 → 阈值不变 → 无副作用）；`degnorm_use ∈ {out_strength, in_strength, hybrid}`。
+- **三方案预注册并列、不设单一 primary、不许看结果挑（审阅 P1）**：`out_strength`（θ∝输出强度 = "广播者难被点着"，护 hub 源端）；
+  `in_strength`（θ∝输入强度 = homeostatic / input-normalized，更对应 Nature 那篇"减均值=全局抑制反馈"，且**护住接收 hub 长程输入的
+  全局区 cell**、防其过早被招募）；`hybrid`（两者 max 或加权）。**out 与 in 护的是不同环节**（out 护 hub 难招募、in 护下游不早燃），
+  **只用 out 单口径有让全局区过早招募的风险** → 主口径在 M3.0/M3.5 **预注册后再定，结果出来不许改**。
+- **作用范围 = 全网 E cell（全局 homeostatic 归一化），不是 hub 专属**：每个 E cell 按自身的（out/in/hybrid）连接量抬高阈值；
+  hub 因连接量最高**自然**收到最大抬升——这正是"hub 成为高门槛门"的来源（机制驱动，非手工指定）。
 - 这是纯连接→阈值的 readout 变换，**不碰动力学、不碰 rng** → 天然 bit-parity，且让"连得越多门槛越高"显式成立。
 
 **手术 3：慢变量门控相变（复用 `slow_vars.py`，C5）。**
@@ -158,10 +171,13 @@ M3 需要一个**同时**有"走廊（各向异性轴）+ 两端触发盆（给 
   V_th 上。先证明"高门槛 → 走廊内自限 / 低门槛 → 跨枢纽广播"，**再**把它接成慢变量。
 - **与手术 2 的复合（写清，避免歧义）**：hub cell 的间期阈值 = θ0 + 手术 2 的度归一化抬升（高基线，门关）；
   手术 3 的慢变量在此基线上**向下叠一个 permissivity 增量**（只对 hub cell），把有效 θ_hub 从度归一化高基线压到
-  `hub_theta_ictal`（门开）。即 `θ_hub_eff = θ0 + α·k_hub^out − (permissivity 慢项)`，对应顾问的 θ_i=θ0+α·k − β·z。
+  `hub_theta_ictal`（门开）。即 `θ_hub_eff = θ0 + α·g_deg(hub) − (permissivity 慢项)`（`g_deg` = 预注册的 out/in/hybrid 度量），对应顾问的 θ_i=θ0+α·k − β·z。
 - 第二版 = 接 `slow_vars` 的 φ（自适应阈值，~100ms）或 z（去抑制，~5s）作用于 hub cell，让 θ_hub 随慢状态平滑下降。
   `slow_vars` 参数是占位值，必须先标定（§8 风险）。慢变量**只调 permissivity（θ_hub / 长程增益），不得改走廊轴、
   模板几何、hub 位置**——否则不再是"同一病理通路的相变"（C4 + framework H4 不变形几何）。
+
+**默认关 parity 测试粒度（审阅 §5）**：`hub_n=0`、`hub_gain=0`、`degnorm_alpha=0` 三个 toggle **分开各测一遍** spike SHA bit-parity
+（不是只测"全关"），确保每块手术独立默认无副作用。
 
 ### 5.3 U3 — 结构临界探针（cheap phase map，替代 toy）
 
@@ -172,7 +188,7 @@ M3 需要一个**同时**有"走廊（各向异性轴）+ 两端触发盆（给 
 - 把全或无招募线性化成一个**招募算子** `M`：`M[j,i] ≈ P(活跃的 i 把 j 顶过阈值)`，由 E→E 权重 `W[j,i]` 与
   `(V_th[j] − 静息驱动)` 的间隙单调映射得到（screening 用的单调 link，非动力学拟合）。
 - **分支比** σ = `M` 的最大特征值（或受限子集的平均行和）。
-  - `σ_corridor` = 限制在走廊节点上的 σ：目标区要 **≳1**（事件能沿轴传，④）但走廊有限长 → 到边界自终止。
+  - `σ_corridor` = 限制在走廊节点上的 σ：目标区要 **≳1**（事件能沿轴**可再生**传播，④）；事件停下来是因为**走廊有限长 + 枢纽关着 = 结构封闭**，**不是内禀自限**（措辞锁见 C3）。
   - `σ_crossing` = 走廊→hub→全局区这条跨越路径的 σ：**间期要 <1**（死在枢纽）、**发作要 >1**（广播）。
 - **相图**：σ_crossing 作为 (`degnorm_alpha`/`θ_hub`, `hub_gain`) 的函数 → 等高线 σ_crossing=1 就是间期/发作的相变边界。
   选 SNN 工作点：间期候选 = σ_corridor≳1 且 σ_crossing<1；发作候选 = 同一点把 θ_hub 压到 σ_crossing>1。
@@ -206,15 +222,18 @@ SNN 的两层验收（§6）才判 pass/fail。探针只负责"别在 SNN 上盲
 | ⑤ 刻板 + 双向 | 固定走廊/hub 拓扑 + 两端触发盆 | 双向 fwd/rev 干净；多次事件路线稳定（不越攒越散） |
 | 相变 | 慢变量压低 θ_hub / 抬高长程增益（U2 手术 3，C4 合成桥） | σ_crossing 越过 1 + SNN 确认从"走廊内自限"切到"跨 hub 广播" |
 
-### 6.2 两层验收（照搬 M2 faithful plan，C3）
+### 6.2 两层验收（layer 1 框架照搬 M2；layer 2 **收紧** M2 faithful plan §6 Step 3b 的 event-level "不被拒=PASS" 误判，C3）
 
-- **Layer 1（组织 / 全场自限）**：每个可读事件（`n_part≥7`）的真实空间足迹有界：`reach_axis_mm`/`r95_mm`
-  在 L20≈L32（**L 不变**，不随薄片放大长大）、`edge_margin_mm>0`（不贴边）、事件间安静基线（非 tonic）、
-  **不招募全局区**（hub 关时全局区放电占比 ≈ 本底）。**目标是 FINITE + 有界 + 死在 hub 前，不是"沿轴短"。**
-- **Layer 2（虚拟电极足迹 ≈ Task 0）**：模型每事件的沿轴铺展比 AF + 侧向比 LR 分布，与 Task 0 真实分布
-  （`cohort_summary.json::reference_distribution`，n=9145）做两样本检验（KS / Mann–Whitney），
-  **PASS = 不被拒（宽松 α=0.01）**+ 报告 overlap/effect-size。**短一段（AF≪0.9）的模型 = layer 2 FAIL。**
-  诚实补注：不被拒 = "分辨不开"，非"证明相同"。
+- **Layer 1（组织 / 全场自限）**：**三层都报，不得只看可读事件（审阅 §5）**——(a) 全部组织事件、(b) 可读子集 `n_part≥7`、
+  (c) 局部不可读子集；只筛可读子集会把失败事件（runaway / 贴杆窄）藏掉。每事件量真实足迹 `reach_axis_mm`/`r95_mm`/`edge_margin_mm`。
+  **Layer 1 PASS = 事件 FINITE**：足迹有界、L20≈L32（**L 不变**）、`edge_margin_mm>0`（不贴边）、事件间安静基线（非 tonic）、
+  **死在枢纽前**（hub/global 数值判据见 §6.5）。**目标是 FINITE + 有界 + 结构封闭，不是"沿轴短"。**
+- **Layer 2（虚拟电极足迹 ≈ Task 0，subject-level 等价检验）**：**不用 event-level KS/MW 的"不被拒"当 PASS（审阅 P0）**——
+  Task 0 reference 是 9145 event 嵌套在 23 subject 内（**非独立**），且"不被拒"是低功效/分辨不开、不是匹配。**改 subject-level /
+  hierarchical bootstrap**：每个模型"被试"（一个网络实现 / seed）算 subject-level median AF、median LR、obs−null gap、IQR，
+  要求**都落在真实 subject 分布的预注册容差带内**（等价检验 / TOST 思路，**PASS = 在容差内，非 p>α**）。容差带由 Task 0
+  真实 subject 间分布（per_subject median 的分位距）预注册。event-level KS/MW + overlap/effect-size **只作辅助描述**，不作 PASS。
+  **短一段（subject-median AF≪0.9）= layer 2 FAIL。**
 
 ### 6.3 相变 demo（synthetic feasibility bridge，C4）
 
@@ -244,16 +263,26 @@ SNN 的两层验收（§6）才判 pass/fail。探针只负责"别在 SNN 上盲
 - **σ_crossing 结构预测 vs SNN 实测**：探针预测的相变边界与 SNN 实际跨越点是否吻合（吻合 = 机制可解释；
   不吻合 = 探针线性化失真，需诚实标注，SNN 为准）。
 - **是哪些 cell 跨过 hub**：跨越事件应走 hub + 长程边（结构通路），不是全局抬升。
+- **hub/global recruitment 数值判据（审阅 P1，替代"死在 hub 前"口语，喂间期 gate + 发作 bridge）**：定义
+  `hub_recruited_fraction`（hub cell 被招募比例）、`global_E_spike_fraction`（全局区 E cell 放电比例）、
+  `global_first_spike_after_hub_ms`（全局区首发相对 hub 首发的延迟）。**间期 gate**（Layer 1）要求 `hub_recruited_fraction`
+  与 `global_E_spike_fraction` 都 < 预注册阈值（事件死在枢纽前、全局区 ≈ 本底）。**发作 bridge**（§6.3）要求 onset→hub→global
+  时序成立：hub 先被招募、`global_first_spike_after_hub_ms > 0`（全局区在 hub 之后才燃）、`global_E_spike_fraction` 显著抬升。
 
 ---
 
 ## 7. 分阶段交付（pilot-first，每阶段有 go/no-go）
 
-- **M3.0 基底 + 结构探针**（便宜，无动力学网格）：建 `corridor_twoend` 基底 + `src/topic4_hub_criticality.py`，
-  算 σ_corridor/σ_crossing 相图 → 选间期 & 发作候选工作点。**Gate**：相图里存在"σ_corridor≳1 且 σ_crossing<1"的区，
+- **M3.0 基底 + 结构探针 + 预注册**（便宜，无动力学网格）：建 `corridor_twoend` 基底 + `src/topic4_hub_criticality.py`，
+  算 σ_corridor/σ_crossing 相图 → 选间期 & 发作候选工作点。**此阶段（出任何 SNN 结果之前）预注册并落盘，结果出来不许改**：
+  度归一化三方案（out/in/hybrid）的比较 + 主口径选取规则（审阅 P1）、Layer 2 的 subject-level 容差带（由 Task 0 真实 subject
+  分布 per_subject median 分位距导出）、hub/global 数值阈值（§6.5）。**Gate**：相图里存在"σ_corridor≳1 且 σ_crossing<1"的区，
   且其邻域有 σ_crossing>1 的发作区。无此区 → 停，报告（拓扑不支持门控）。
 - **M3.1 引擎手术**（默认关 bit-parity）：长程边（`connectivity_rot`）+ 度归一化阈值变换（runner）+ TDD + re-bless。
-  **Gate**：默认关 spike SHA 不变；开启后 σ/出度按预期变化。
+  **Gate**：默认关 spike SHA 不变（`hub_n=0`/`hub_gain=0`/`degnorm_alpha=0` 三 toggle 分开测）；开启后 σ/出度按预期变化。
+- **M3.1b U1.0 substrate feasibility gate**（bare corridor，hub 全关 + degnorm 关）：跑纯走廊 `corridor_twoend` SNN，
+  确认 §5.1 U1.0 判据成立（足够 + 稳定 + 双向可读，非 silent/tonic）。**Gate**：U1.0 通过才进 M3.2；**失败 = "substrate fail"**
+  停报告，**不把基底失败算到 hub**（审阅 P1）。
 - **M3.2 工作点 sanity**（仿 M2 Task 5）：度归一化 + hub 开后，基底仍自发点火、有安静 rest。
   **Gate**：若 degnorm 压死点火 → 在该层 re-tune drive（不在 hub pilot 里调）；若无 (drive, degnorm) 给离散事件 → 停报告。
 - **M3.3 间期 pilot**（单工作点）：hub 关（θ_hub 高）→ 事件填满走廊、死在 hub 前、双向、有界。跑 layer 1 + layer 2。
