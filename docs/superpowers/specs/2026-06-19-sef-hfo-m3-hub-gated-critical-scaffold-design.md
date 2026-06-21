@@ -1,5 +1,15 @@
 # M3：hub 门控的临界分支病理骨架 (hub-gated critical branching scaffold) — Design Spec
 
+> ⚠️ **SUPERSEDED（2026-06-21）→ 已被 local-W 版取代为承重主线，本版降级为「已记录退路 fallback」。**
+> 新主线：`docs/superpowers/specs/2026-06-21-sef-hfo-m3-local-w-propagation-operator-design.md`
+> （承重机制从「空间墙：走廊 + 关着的枢纽」换成「同一条局部各向异性传播场 W + 慢易感度 μ 把它从亚临界推到超临界」；
+> 自限从「空间沿轴短」重定义为「时间上回到静息 / 不持续招募」）。
+> **取代原因（实测，非口味）**：本版 hub 在 worktree `.worktrees/topic4-m3` 跑过第一轮——空间拉开距离不 gate（间隔 0→0.4 漏只降约 6%）、
+> 各向同性对照漏大降约 48%（沿轴各向异性自己把活动桥到外围）、度归一化门一开正反双向塌成单向。见
+> `docs/archive/topic4/sef_hfo/m3_hub_scaffold_infra_status_2026-06-19.md`。
+> **本版仍是合法退路**：当 local-W 给不出「亚临界 + 可读 + 自停」窗、或拿不到稳定双向模板时启用（新 spec §9 + §10）。
+> 本版已跑出的基础设施（degnorm / σ 探针 / Layer-2 等价 / hub-diag / runner 接线）大量被 local-W 主线复用。
+>
 > 状态：DESIGN（待用户 review → writing-plans 出实现计划）。日期 2026-06-19。
 > 上游：M2 收口 `docs/archive/topic4/sef_hfo/m2_stage_recap_2026-06-19.md`；Task 0 数据审计
 > `results/topic4_sef_hfo/event_extent_audit/cohort_summary.json`（INCONCLUSIVE，AF=0.915，LR=0.561，

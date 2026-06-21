@@ -1,5 +1,12 @@
 # M3 hub-gated critical branching scaffold — Implementation Plan
 
+> ⚠️ **SUPERSEDED（2026-06-21）→ local-W 版为承重主线，本计划降级为「已记录退路 fallback」。**
+> 新主线 plan：`docs/superpowers/plans/2026-06-21-sef-hfo-m3-local-w-propagation-operator-plan.md`。
+> 本计划 Task 0–8（基础设施 + σ 相图 + 预注册）**已在 worktree `.worktrees/topic4-m3` 执行并提交**，
+> 其复用件（`topic4_degnorm` / `topic4_hub_criticality` / `topic4_m3_acceptance` / `topic4_hub_diag` / runner 接线）被 local-W 主线复用；
+> 仅 hub 专属件（长程边 `hub_gain` / `crossing_path_gain` / `hub_theta_delta`）留作 fallback、不进 local-W 主线。
+> 退路启用条件见新 spec §9 + §10。
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`).
 > **Spec:** `docs/superpowers/specs/2026-06-19-sef-hfo-m3-hub-gated-critical-scaffold-design.md` (commit ebbd27f) — read it for the *why*; this plan is the *how*.
 
