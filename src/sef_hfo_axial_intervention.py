@@ -140,3 +140,78 @@ def make_static_deadzone_schedule():
     upper bound -- if even a permanent band cannot block spread, no triggered strategy at that
     target is worth pursuing)."""
     return dict(on_ms=0.0, off_ms=float("inf"))
+
+
+# ===================== Task 3: baseline eligibility + replay schedule =====================
+
+def baseline_eligibility(summary, min_events=20, min_per_end=3, min_cross_midline=5,
+                         min_trigger_opportunity=5, cross_midline_frac=0.05):
+    """FROZEN eligibility gate: does a NO-INTERVENTION baseline have something to stop? Encodes the
+    conclusion. cross-midline = single-source event with oracle far participation > `cross_midline_frac`.
+    trigger-opportunity = such an event whose far side activates strictly AFTER its source onset (a
+    real temporal window to intervene before far recruitment). Returns (eligible, reason, flags)."""
+    evs = summary.get("events", [])
+
+    def is_single_cross(e):
+        return (e.get("core_source_raw") in ("neg", "pos")
+                and (e.get("oracle_far_ratio") or 0.0) > cross_midline_frac)
+
+    n_cross = sum(1 for e in evs if is_single_cross(e))
+    n_opp = sum(1 for e in evs if is_single_cross(e)
+                and e.get("source_onset") is not None
+                and e.get("far_onset_time") is not None
+                and e["far_onset_time"] > e["source_onset"])
+    flags = {
+        "enough_events": summary.get("n_returned", 0) >= min_events,
+        "both_ends_fire": (summary.get("n_neg", 0) >= min_per_end
+                           and summary.get("n_pos", 0) >= min_per_end),
+        "has_cross_midline": n_cross >= min_cross_midline,
+        "has_trigger_opportunity": n_opp >= min_trigger_opportunity,
+        "n_cross_midline": n_cross, "n_trigger_opportunity": n_opp,
+    }
+    if not flags["enough_events"]:
+        return False, "too_few_events", flags
+    if not flags["both_ends_fire"]:
+        return False, "one_end_silent", flags
+    if not flags["has_cross_midline"]:
+        return False, "no_cross_midline", flags
+    if not flags["has_trigger_opportunity"]:
+        return False, "no_trigger_opportunity", flags
+    return True, "eligible", flags
+
+
+def select_first_eligible_event(events, cross_midline_frac=0.05):
+    """First event (in order) that is single-source (neg/pos) AND crosses the midline
+    (oracle_far_ratio > frac). Skips collision/none/non-crossing. None if there is none."""
+    for e in events:
+        if (e.get("core_source_raw") in ("neg", "pos")
+                and (e.get("oracle_far_ratio") or 0.0) > cross_midline_frac):
+            return e
+    return None
+
+
+def build_replay_schedule(event, trigger_delay_ms=8.0, duration_ms=40.0, allow_late=False):
+    """Oracle replay intervention schedule: fire at source_onset + trigger_delay_ms for duration_ms.
+    Rejects (ValueError) a schedule that would start at/after far-side onset unless allow_late
+    (the whole point is to intervene BEFORE far-side recruitment)."""
+    so = event.get("source_onset")
+    if so is None:
+        raise ValueError("event has no source_onset")
+    on = so + trigger_delay_ms
+    fo = event.get("far_onset_time")
+    if fo is not None and on >= fo and not allow_late:
+        raise ValueError(f"trigger {on} >= far_onset {fo}: no pre-far window (set allow_late=True)")
+    return dict(on_ms=on, off_ms=on + duration_ms, trigger_time=on,
+                source_onset=so, far_onset_time=fo, trigger_status="fired")
+
+
+def build_late_schedule(event, late_delay_ms=8.0, duration_ms=40.0):
+    """Late control schedule: fire AFTER far-side recruitment (far_onset_time + late_delay_ms). If
+    late intervention works as well as a timely one, the effect is likely global suppression, not
+    propagation stopping."""
+    fo = event.get("far_onset_time")
+    if fo is None:
+        raise ValueError("event has no far_onset_time for a late schedule")
+    on = fo + late_delay_ms
+    return dict(on_ms=on, off_ms=on + duration_ms, trigger_time=on,
+                source_onset=event.get("source_onset"), far_onset_time=fo, trigger_status="late")

@@ -6,6 +6,8 @@ from src.sef_hfo_axial_intervention import (
     participation_ratio, exclude_target_contacts,
     CLAMP_LEVEL, intervention_vth_at_time, make_on_axis_target,
     make_off_axis_target, make_static_deadzone_schedule,
+    baseline_eligibility, select_first_eligible_event,
+    build_replay_schedule, build_late_schedule,
 )
 
 
@@ -123,3 +125,50 @@ def test_static_target_is_upper_bound():
     vth_t = intervention_vth_at_time(base, target, is_E, 12345.0, sched["on_ms"], sched["off_ms"])
     expect = base.copy(); expect[target & is_E] = CLAMP_LEVEL    # idx 0,2 (E + target)
     assert np.array_equal(vth_t, expect)
+
+
+# ---------------- Task 3: baseline eligibility + replay schedule ----------------
+
+def _ev(src, far_ratio, so, fo, eid=0):
+    return dict(event_id=eid, core_source_raw=src, oracle_far_ratio=far_ratio,
+                source_onset=so, far_onset_time=fo)
+
+
+def test_baseline_eligibility_requires_cross_midline_opportunities():
+    cross = [_ev("neg", 0.2, 100.0, 150.0) for _ in range(6)]   # crossing + far after source
+    ok, reason, flags = baseline_eligibility(dict(n_returned=25, n_neg=10, n_pos=8, events=cross))
+    assert ok and reason == "eligible"
+    assert flags["n_cross_midline"] >= 5 and flags["n_trigger_opportunity"] >= 5
+    assert baseline_eligibility(dict(n_returned=10, n_neg=10, n_pos=8, events=cross))[1] == "too_few_events"
+    assert baseline_eligibility(dict(n_returned=25, n_neg=1, n_pos=8, events=cross))[1] == "one_end_silent"
+    # crossing but far_onset == source_onset -> no temporal window to intervene
+    nowindow = [_ev("neg", 0.2, 100.0, 100.0) for _ in range(6)]
+    assert baseline_eligibility(dict(n_returned=25, n_neg=10, n_pos=8, events=nowindow))[1] == "no_trigger_opportunity"
+    flat = [_ev("neg", 0.0, 100.0, None) for _ in range(6)]
+    assert baseline_eligibility(dict(n_returned=25, n_neg=10, n_pos=8, events=flat))[1] == "no_cross_midline"
+
+
+def test_select_first_eligible_event_prefers_single_source_cross_midline():
+    events = [
+        _ev("collision", 0.9, 100.0, 150.0, eid=0),
+        _ev("none", 0.0, None, None, eid=1),
+        _ev("neg", 0.02, 100.0, 150.0, eid=2),     # below cross-midline frac
+        _ev("pos", 0.30, 100.0, 150.0, eid=3),     # first eligible
+        _ev("neg", 0.50, 100.0, 150.0, eid=4),
+    ]
+    assert select_first_eligible_event(events, 0.05)["event_id"] == 3
+    assert select_first_eligible_event([], 0.05) is None
+
+
+def test_build_replay_schedule_starts_after_source_onset():
+    s = build_replay_schedule(_ev("neg", 0.2, 100.0, 160.0), trigger_delay_ms=8.0, duration_ms=40.0)
+    assert s["on_ms"] == 108.0 and s["off_ms"] == 148.0 and s["trigger_status"] == "fired"
+    with pytest.raises(ValueError):     # trigger would fire after far onset
+        build_replay_schedule(_ev("neg", 0.2, 100.0, 105.0), trigger_delay_ms=8.0)
+    s2 = build_replay_schedule(_ev("neg", 0.2, 100.0, 105.0), trigger_delay_ms=8.0, allow_late=True)
+    assert s2["on_ms"] == 108.0
+
+
+def test_late_schedule_marks_late_control():
+    s = build_late_schedule(_ev("neg", 0.2, 100.0, 160.0), late_delay_ms=8.0, duration_ms=40.0)
+    assert s["on_ms"] == 168.0 and s["off_ms"] == 208.0 and s["trigger_status"] == "late"
