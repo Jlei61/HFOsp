@@ -215,3 +215,147 @@ def build_late_schedule(event, late_delay_ms=8.0, duration_ms=40.0):
     on = fo + late_delay_ms
     return dict(on_ms=on, off_ms=on + duration_ms, trigger_time=on,
                 source_onset=event.get("source_onset"), far_onset_time=fo, trigger_status="late")
+
+
+# ===================== Task 4: dynamic-Vth simulation adapter (parity-critical) =====================
+
+def simulate_dynamic_vth(p, net, base_vth, target_mask=None, is_E=None,
+                         on_ms=None, off_ms=None, clamp_level=CLAMP_LEVEL, lfp_recorder=None):
+    """Verbatim copy of src/snn_engine/kick_probe.py::simulate_kick's integration loop (recurrent
+    dynamics, RNG draw order, recorders, LFP) with the kick REMOVED and exactly ONE addition: a
+    time-dependent per-neuron V_th. `base_vth` is the static dual-focus threshold field; when a
+    schedule is given (target_mask + on_ms/off_ms) the target's E cells are clamped to clamp_level
+    during [on_ms, off_ms) via intervention_vth_at_time, else V_th_eff = base_vth every step.
+
+    PARITY CONTRACT (CLAUDE.md §6): the intervention changes ONLY the spike-threshold comparison,
+    never an RNG draw. So:
+      - no schedule -> bit-identical to simulate_kick(KICK_BOOST=0, t_kick=1e9, V_th_per_neuron=base_vth);
+      - with a schedule -> bit-identical to baseline before on_ms.
+    RNG draw order is copied EXACTLY: two rng.choice (ras_keep) at setup, then per step
+    standard_normal() then poisson(nu_vec*dt, size=N) with nu_vec the ARRAY form (== simulate_kick
+    with the kick off). Do NOT add/remove/reorder any rng call here."""
+    import time as _time
+    from params import compute_nu_theta as _compute_nu_theta   # lazy engine import (keeps pure helpers engine-free)
+
+    rng = net["rng"]
+    NE, NI = net["NE"], net["NI"]
+    N = NE + NI
+    labels = net["labels"]
+    ampa = net["ampa_by_delay"]
+    gaba = net["gaba_by_delay"]
+    M = net["max_delay_steps"] + 1
+
+    dt = p.dt
+    nsteps = int(round(p.T / dt))
+
+    # ---- precomputed decays (identical to simulate_kick) ----
+    decay_sE = np.exp(-dt / p.tau_r_AMPA)
+    decay_IE = np.exp(-dt / p.tau_d_AMPA)
+    decay_sI = np.exp(-dt / p.tau_r_GABA)
+    decay_II = np.exp(-dt / p.tau_d_GABA)
+    tau_m = np.where(labels == 0, p.tau_m_E, p.tau_m_I).astype(np.float64)
+    decay_V = np.exp(-dt / tau_m)
+    ref_steps = np.where(labels == 0, int(round(p.tau_ref_E / dt)),
+                         int(round(p.tau_ref_I / dt))).astype(np.int32)
+    ext_incr = (tau_m / p.tau_r_AMPA) * np.where(labels == 0, p.J_ext_E, p.J_ext_I)
+    ampa_bins = [d for d in range(M) if ampa[d].nnz > 0]
+    gaba_bins = [d for d in range(M) if gaba[d].nnz > 0]
+
+    nu_theta, _, _ = _compute_nu_theta(p)
+    nu_sig_const = p.nu_ext_ratio * nu_theta
+    sigma_n_inv_ms = p.sigma_n * 1e-3
+    sigma_xi = sigma_n_inv_ms * np.sqrt(p.tau_n / 2.0)
+    ou_a = np.exp(-dt / p.tau_n)
+    ou_b = sigma_xi * np.sqrt(1.0 - ou_a * ou_a)
+    xi = 0.0
+
+    base_vth = np.asarray(base_vth, float)
+    has_sched = on_ms is not None and target_mask is not None
+    if has_sched:
+        target_mask = np.asarray(target_mask, bool)
+        is_E = np.asarray(is_E, bool)
+
+    # ---- state (identical) ----
+    V = np.full(N, p.V_reset, dtype=np.float64)
+    ref = np.zeros(N, dtype=np.int32)
+    s_E = np.zeros(N); I_E = np.zeros(N)
+    s_I = np.zeros(N); I_I = np.zeros(N)
+    ring_sE = np.zeros((M, N))
+    ring_sI = np.zeros((M, N))
+
+    # ---- recorders: replicate simulate_kick's RNG-consuming raster choices EXACTLY for alignment ----
+    rate_E = np.zeros(nsteps); rate_I = np.zeros(nsteps)
+    _ras_keepE = rng.choice(NE, size=min(80, NE), replace=False)        # RNG-align (unused otherwise)
+    _ras_keepI = NE + rng.choice(NI, size=min(20, NI), replace=False)   # RNG-align (unused otherwise)
+    E_spk_bool = np.zeros((nsteps, NE), dtype=bool)
+    intervention_active = np.zeros(nsteps, dtype=bool)
+    lfp_trace = (np.zeros((nsteps, len(lfp_recorder.sites)))
+                 if lfp_recorder is not None else None)
+
+    t0 = _time.time()
+    for t in range(nsteps):
+        tm = t * dt
+        # external homogeneous Poisson rate (Eq 6) -- RNG draw #1 (standard_normal)
+        xi = ou_a * xi + ou_b * rng.standard_normal()
+        nu_now = nu_sig_const + xi
+        if nu_now < 0.0:
+            nu_now = 0.0
+
+        # synaptic gating: decay, recurrent arrivals, external
+        s_E *= decay_sE
+        s_I *= decay_sI
+        slot = t % M
+        s_E += ring_sE[slot]; ring_sE[slot] = 0.0
+        s_I += ring_sI[slot]; ring_sI[slot] = 0.0
+        nu_vec = np.full(N, max(nu_now, 0.0))                 # array form == simulate_kick (kick off)
+        ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)   # RNG draw #2 (poisson, array)
+        s_E += ext * ext_incr
+
+        # synaptic currents (low-pass of s)
+        I_E = s_E + (I_E - s_E) * decay_IE
+        I_I = s_I + (I_I - s_I) * decay_II
+        if lfp_trace is not None:
+            lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
+
+        I_net = I_E - I_I
+        # ===== the ONLY new behavior: time-dependent threshold (reuses intervention_vth_at_time) =====
+        if has_sched:
+            V_th_eff = intervention_vth_at_time(base_vth, target_mask, is_E, tm, on_ms, off_ms, clamp_level)
+            intervention_active[t] = (on_ms <= tm < off_ms)
+        else:
+            V_th_eff = base_vth
+        # ============================================================================================
+
+        # membrane (Eq 3) + refractory
+        ref -= 1
+        np.maximum(ref, 0, out=ref)
+        free = ref == 0
+        Vtmp = I_net + (V - I_net) * decay_V
+        V = np.where(free, Vtmp, p.V_reset)
+        spk = free & (V >= V_th_eff)
+        V[spk] = p.V_reset
+        ref[spk] = ref_steps[spk]
+
+        # record
+        rate_E[t] = spk[:NE].sum()
+        rate_I[t] = spk[NE:].sum()
+        E_spk_bool[t] = spk[:NE]
+        if spk.any():
+            spE = np.where(spk[:NE])[0]
+            spI = np.where(spk[NE:])[0]
+            if spE.size:
+                for d in ampa_bins:
+                    contrib = np.asarray(ampa[d][:, spE].sum(axis=1)).ravel()
+                    ring_sE[(t + d) % M] += contrib
+            if spI.size:
+                for d in gaba_bins:
+                    contrib = np.asarray(gaba[d][:, spI].sum(axis=1)).ravel()
+                    ring_sI[(t + d) % M] += contrib
+
+    rate_E_hz = rate_E / NE / dt * 1e3
+    rate_I_hz = rate_I / NI / dt * 1e3
+    return dict(times=np.arange(nsteps) * dt, rate_E=rate_E_hz, rate_I=rate_I_hz,
+                E_spk_bool=E_spk_bool, intervention_active=intervention_active,
+                NE=NE, nu_theta=nu_theta, lfp_trace=lfp_trace,
+                lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
+                wall_s=_time.time() - t0)
