@@ -7,7 +7,46 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.rank_displacement import compute_signed_rank_displacement
+from src.rank_displacement import (compute_signed_rank_displacement,
+                                    compute_swap_score_at_k, swap_nodes_at_k,
+                                    swap_node_groups_at_k)
+
+
+def test_swap_node_groups_split_and_union():
+    ra = np.array([0.0, 1, 2, 3, 4, 5]); rb = np.array([5.0, 4, 3, 2, 1, 0]); v = np.ones(6, bool)
+    src_a, src_b = swap_node_groups_at_k(ra, rb, v, v, 1)
+    assert src_a == [0] and src_b == [5]                       # ch0 source in A; ch5 source in B
+    # groups are disjoint and their union == swap_nodes_at_k
+    s_a, s_b = swap_node_groups_at_k(ra, rb, v, v, 2)
+    assert set(s_a).isdisjoint(s_b)
+    assert sorted(set(s_a) | set(s_b)) == swap_nodes_at_k(ra, rb, v, v, 2)
+
+
+def test_swap_nodes_at_k_perfect_reversal():
+    # 6 channels, B = exact reversal of A -> the k=1 swap nodes are both extreme ends
+    ra = np.array([0.0, 1, 2, 3, 4, 5]); rb = np.array([5.0, 4, 3, 2, 1, 0])
+    v = np.ones(6, bool)
+    nodes = swap_nodes_at_k(ra, rb, v, v, 1)
+    assert set(nodes) == {0, 5}                       # ch0 (bot A / top B) and ch5 (top A / bot B)
+    # k=2 adds the next ranks in
+    assert set(swap_nodes_at_k(ra, rb, v, v, 2)) == {0, 1, 4, 5}
+
+
+def test_swap_nodes_consistent_with_swap_score():
+    # nodes nonempty IFF swap_score>0 (same top/bottom selection); no-swap -> empty
+    rng = np.random.default_rng(0)
+    ra = np.argsort(rng.permutation(8)).astype(float)
+    rb = ra.copy()                                    # identical -> no swap
+    v = np.ones(8, bool)
+    assert swap_nodes_at_k(ra, rb, v, v, 2) == []
+    assert compute_swap_score_at_k(ra, rb, v, v, 2) == 0.0
+
+
+def test_swap_nodes_respect_joint_valid_and_2k_gate():
+    ra = np.array([0.0, 1, 2, 3]); rb = np.array([3.0, 2, 1, 0]); v = np.ones(4, bool)
+    assert set(swap_nodes_at_k(ra, rb, v, v, 1)) == {0, 3}
+    assert set(swap_nodes_at_k(ra, rb, v, v, 2)) == {0, 1, 2, 3}   # 2*k == n_valid is allowed (guard is >)
+    assert swap_nodes_at_k(ra, rb, v, v, 3) == []                  # 2*k > n_valid -> empty (matches swap_score)
 
 
 def test_identical_ranks_zero_displacement():
