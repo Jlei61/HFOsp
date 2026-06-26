@@ -309,7 +309,13 @@ def main():
     ap.add_argument("--resummarize", action="store_true",
                     help="regenerate the summary JSON from the existing CSV (no audit re-run)")
     ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--geom-dir", default=None,
+                    help="override readout-record dir (e.g. propagation_geometry_broad/.../real_subjects) "
+                         "so broad-only subjects (yuquan) are attempted. Default None = canonical narrow.")
     args = ap.parse_args()
+    if args.geom_dir:
+        global GEOM_ROOT
+        GEOM_ROOT = Path(args.geom_dir)
 
     OUT_ROOT.mkdir(parents=True, exist_ok=True)
     only = set(args.subjects) if args.subjects else None

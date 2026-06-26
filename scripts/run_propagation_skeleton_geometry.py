@@ -373,7 +373,17 @@ def main():
                     help="ds:subj tokens; default = full cohort")
     ap.add_argument("--out", default=str(
         _ROOT / "results/spatial_modulation/propagation_geometry/components/path_axis"))
+    ap.add_argument("--lagpat-root", default=None,
+                    help="override YUQUAN_ROOT lagPat dir (broad pool, e.g. results/lagpat_broad_dyn).")
+    ap.add_argument("--rankdisp-dir", default=None,
+                    help="override rank-displacement dir (e.g. masked_broad/rank_displacement/per_subject).")
     args = ap.parse_args()
+    if args.lagpat_root:
+        global YUQUAN_ROOT
+        YUQUAN_ROOT = Path(args.lagpat_root)
+    if args.rankdisp_dir:
+        global RANKDISP
+        RANKDISP = Path(args.rankdisp_dir)
     out = Path(args.out)
     (out / "per_subject").mkdir(parents=True, exist_ok=True)
 
