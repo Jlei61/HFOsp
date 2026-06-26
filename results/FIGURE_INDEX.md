@@ -127,6 +127,10 @@
 | [topic5_dynamic_echo/sentinel/figures/](topic5_dynamic_echo/sentinel/figures/) | Stage 2b 动态回响哨兵 |
 | [topic5_ictal_recruitment/axis_alignment/figures/](topic5_ictal_recruitment/axis_alignment/figures/) | A 线 axis alignment 可视化 |
 | [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/](topic5_ictal_recruitment/event_resolved_alignment/figures/) | A 线 event-resolved 二级：逐间期事件(A/B 两类)对发作场的对齐分布 + 事件级离散度（PILOT 3 epi，exploratory，broad 底物） |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/fields/](topic5_ictal_recruitment/event_resolved_alignment/figures/fields/) | 同上的**场图版**（用户 pivot）：A 类全事件场 \| B 类全事件场 \| 发作场，同一物理平面、左图形式 |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/class_vs_template_field_similarity_cohort.png](topic5_ictal_recruitment/event_resolved_alignment/figures/) | cohort 级：用 class 事件造的间期场 ≈ 用模板投影造的间期场（N=23 中位 \|r\|=0.985；构念等价） |
+| [topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/](topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/) | **6 面板/被试**（全 12 epi）：模板A\|模板B\|发作前−10..0s / 类A场\|类B场\|发作前−120..−90s；配 max-AB 统计（class 场 ≈ template 场） |
 | [topic1_topic5_bridge/figures/](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 桥接（q1 / q1prime 系列） |
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
