@@ -115,4 +115,52 @@
 - 图说明：`figures/README.md`（中文，含两类图 + STD/离散度更正口径）
 - 数据：`results/topic5_ictal_recruitment/event_resolved_alignment/{per_subject/*.json, figures/**, pilot_summary.json}`
 
-**HARD STOP**：cohort run / cohort 判决未执行，等用户(advisor) sign-off。当前所有结论为 pilot-exploratory。代码与文档**未 commit**（沿用本项目 exploratory 工作"待用户审阅再提交"惯例；当前分支 `topic4-event-extent-audit`）。
+---
+
+## 7. 2026-06-26 续作（用户多轮追加：几何刷新 + 看板正式化 + swap 标注 + cohort 相似性）
+
+> pilot 之后用户分多轮追加了几件配套工作，都还在 **secondary / exploratory** 这一档，**没有动 A-line primary scaffold**，也没有把 event-resolved 推进到 cohort 判决。逐件白话归档如下。
+
+### 7.1 yuquan broad + narrow 几何全量刷新（坐标补齐）
+
+**白话**：yuquan 这批病人之前缺电极三维坐标，旧的几何缓存里记着"没有坐标文件"。这次坐标补齐后，把 broad（宽电极池）和 narrow（窄电极池）两套几何都重建了一遍。结果：**11 个 k=2 的 yuquan 现在 broad 间期几何可用**；还有 5 个（chenziyang/gaolan/hanyuxuan/sunyuanxin/wangyiyang）**确实仍缺坐标**，保留"无坐标"是对的、不是 stale。litengsheng 是 k=3（只有一套模板、没有 A/B 两套），有几何骨架但**不进**场分析。
+
+**关键教训**：broad 和 narrow 是**两棵独立的几何树**——第一轮"全量刷新"只重建了 broad，narrow 树里这些新补坐标的 yuquan 还停在补坐标前的旧记录，导致 xuxinyi 在窄底物上拿不到候选（见 7.3 maxAB 追因）。补刷 narrow 后才补齐。详见 `results/spatial_modulation/propagation_geometry_broad/REFRESH_2026-06-26.md`。
+
+**进入发作对比测试仍受"发作侧合格"门限制**：只有 **xuxinyi（3/3 发作合格）+ zhangkexuan（复用已有缓存）** 能进；zhangjinhan / zhaojinrui 间期几何已建好但**发作侧 0 合格**（间期轴触点在发作双极导联里解析 <80% + 发作太密集 baseline 间隔 <300s）。所以这**不是一个 yuquan 队列**，只是合格子集里的两个病人。
+
+### 7.2 场一致性看板：从"挑最好"探索筛 → 正式选择校正
+
+**测了什么** — 每个病人的间期传播方向图，跟他发作头 0–10s 的活动方向图，是不是落在同一条空间线上。每个病人有最多 4 个候选口径（两种频段 × 两套电极底物），我们报他最像的那个。
+
+**怎么测的** — 如果两者毫无关系，把电极标签随机打乱后算出的对齐分应该跟真实的差不多。**关键修正**：因为我们替每个病人**挑了"最像的那个候选"**，对照打乱时也必须**每次重复"挑最像的"这一步**（付选择成本），否则会高估。两个版本：(1) **挑最好不付成本** = 探索筛 screen；(2) **挑最好付成本** = 正式 formal pass（max-statistic family-wise null）。
+
+**揭示了什么** — 探索筛下 18 epi + 2 yuquan 里 16 个超随机；**正式校正后只剩 11 个**（epi 9/18 + yuquan 2/2：zhangkexuan p=.001 / xuxinyi p=.022），**5 个 epi 从 screen 过翻成 formal 不过**——它们能过自己单口径的随机线，过不了"挑最好"的校正线（这就是选择成本）。读法：约一半 epi 病人在"挑最好候选"这个探索口径下，间期方向看起来确实落在发作早期方向上；但这是**探索性计数、不是队列显著率**，不能读成"间期重放发作"。
+
+工件：`src/topic5_field_selcorr.py`（向量化场平滑 + 镜像不变相关 null + 选择校正 p 值）、`scripts/run_topic5_field_concordance_selcorr.py`、`scripts/plot_topic5_field_concordance_{best_board,selcorr_board}.py`；图 `field_concordance/field_concordance_{best_only_board,selcorr_board}_{all,epilepsiae,yuquan}.png`（口径警告写在图脚注 + `field_concordance/README.md`）。
+
+### 7.3 xuxinyi maxAB 追因 + 修复
+
+**白话**：用户问"xuxinyi 的 maxAB 为什么没做"。根因 = 它的**窄几何**还停在补坐标前的"无坐标"旧记录（7.1 那个 broad-only 全刷漏了 narrow 树）。重建窄几何后，xuxinyi 拿到窄底物两模板 → 看板拿到它的 **maxAB 候选**，而且这就是它最强的候选（bb maxAB real |r|=0.896，选择校正 p=0.001）。看板（screen + selcorr，all/epi/yuquan）已重渲。
+
+### 7.4 class 场 ≈ template 场（cohort 级相似性图）
+
+**测了什么** — 用"成千次具体间期事件直接投影叠加并加权归一化"造出来的那张场（class 场），跟用"那一类的平均模板投影"造出来的场（template 场），在每个病人身上长得像不像。
+
+**怎么测的** — 算两张场逐触点的相关。如果两者是同一个东西，相关应该接近 1。
+
+**揭示了什么** — **N=23 个病人里中位 |场相关| = 0.985、触点排名 Spearman = 0.957**——几乎完全一样。含义（接 §3b）：**在"聚合成一张场"这个层面，class 场就是 template 场**（模板本来就是这一类事件的平均），所以 event-resolved 的增量**不在聚合场层**（那等于模板），而在**逐事件离散度层**（Stage A，§3）和之后的序列层（Stage C，未做）。这张图按 CLAUDE.md §7 多面板纪律做成单一构念的 cohort 统计图。工件：`scripts/plot_topic5_class_vs_template_similarity.py` → `figures/class_vs_template_field_similarity_cohort.png`。
+
+### 7.5 角色互换（swap）触点标注图
+
+**白话**：把"在两套传播模板里角色互换的电极触点"标在间期两模板场对比图上。所谓角色互换 = 在模板 A 里最早放电（源）、却在模板 B 里最晚放电（汇）的触点，反之亦然（来自 PR-6 limian rank-displacement 在 decision_k 处的判定）。圈的颜色**和触点绑定**：红圈 = 在模板 A 里当源，蓝圈 = 在模板 B 里当源；圈加黑色描边好辨认，电极名标签调淡，图例画到图外。每个有 swap 节点的病人一张 + 一张合并 atlas；narrow / broad 两套底物各出一版。另出一版"间期场 | 发作激活场"也带同样的 swap 源标注。纯展示、无统计。工件：`scripts/plot_topic5_swap_nodes_fields.py`、`scripts/plot_topic5_field_vs_ictal_swap.py`；底层 helper `src.rank_displacement.swap_nodes_at_k` / `swap_node_groups_at_k`；6 面板 class_vs_template 图也加了同样标注。
+
+### 7.6 几何/合格管线的 broad 覆盖开关
+
+三个管线 runner 加了**向后兼容**的覆盖参数（默认 None = 不变的窄底物 canonical 行为），让 broad lagPat 池能驱动同一套几何/合格管线：`run_contact_plane_readout.py` / `run_propagation_skeleton_geometry.py` 的 `--lagpat-root` + `--rankdisp-dir`；`run_topic5_t0_eligibility.py` 的 `--geom-dir`。
+
+（内部归档代号：A-line primary = `corr_pair_mirror_invariant` + 4-null + FDR；本续作 = field-concordance best-only screen vs selection-corrected formal board / class-vs-template similarity / swap-node annotation；底物 broad = `lagpat_broad_dyn`(yuquan) + `lagpat_broad_epilepsiae`(epi) + `propagation_geometry_broad`，narrow = `propagation_geometry` + `interictal_propagation_masked/rank_displacement`；swap = `rank_displacement.swap_node_groups_at_k` 在 `swap_sweep.decision_k`；maxAB = 候选 t_a/t_b 取 |r| 更大者。）
+
+---
+
+**STATUS（2026-06-26 更新）**：cohort run / cohort 判决**仍未执行**，§5 决策菜单待用户(advisor) sign-off。当前所有结论为 **secondary-exploratory**（pilot + 上列配套图），**未触碰 A-line primary scaffold**。代码与文档**已分 7 批 commit**（rank_displacement swap helpers → event-resolved 核心 → class-vs-template + similarity → field-concordance selcorr + 看板 → swap-node 图 → runner broad 覆盖开关 → docs + FIGURE_INDEX；分支 `topic4-axial-intervention-probe`）。`results/` 下图与 per-subject JSON 按项目惯例 gitignored，未入库。
