@@ -1,0 +1,104 @@
+{
+  "legacy_code_reference": [
+    "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/for523_p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool.py",
+    "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/p16_packGroupEvents_per2h_showSpecs_bipolar_refine_bool_withFreqCenter.py"
+  ],
+  "source_paths": {
+    "edf": "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf",
+    "gpu_npz": "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz",
+    "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy"
+  },
+  "selection": {
+    "candidate_channels": [
+      "K3-K4",
+      "K4-K5",
+      "K5-K6",
+      "K6-K7",
+      "K7-K8",
+      "K8-K9",
+      "K9-K10",
+      "K11-K12",
+      "K12-K13",
+      "K13-K14",
+      "E8-E9",
+      "E10-E11",
+      "E11-E12",
+      "E12-E13",
+      "E13-E14"
+    ],
+    "selected_channels": [
+      "E12-E13",
+      "K5-K6",
+      "K9-K10",
+      "K6-K7",
+      "K7-K8",
+      "K8-K9",
+      "K4-K5",
+      "K11-K12",
+      "E11-E12",
+      "K12-K13"
+    ],
+    "display_labels": [
+      "E12",
+      "K5",
+      "K9",
+      "K6",
+      "K7",
+      "K8",
+      "K4",
+      "K11",
+      "E11",
+      "K12"
+    ],
+    "event_indices": [
+      22,
+      237,
+      1458
+    ],
+    "event_indices_mode": "fixed_clean_examples",
+    "event_windows_sec": [
+      [
+        49.733000000000004,
+        50.233000000000004
+      ],
+      [
+        582.1379999999999,
+        582.6379999999999
+      ],
+      [
+        3715.402,
+        3715.902
+      ]
+    ],
+    "event_active_channel_counts_in_candidate_set": [
+      7,
+      8,
+      9
+    ],
+    "event_selection_rule": "fixed clean examples selected after visual screening",
+    "channel_selection_rule": "top participating candidate channels, sorted by median detection center over selected events"
+  },
+  "plot": {
+    "window_sec": 0.32,
+    "fs_out": 1000.0,
+    "band_hz": [
+      80,
+      250
+    ],
+    "spectrogram": {
+      "window": "hamming",
+      "nperseg_sec": 0.05,
+      "overlap_fraction": 0.8,
+      "freq_range_hz": [
+        50,
+        300
+      ],
+      "gaussian_sigma": 1.5,
+      "normalization": "per channel per event window max, matching old ReplayIED norm_theSpec_toMaxOne"
+    },
+    "outputs": [
+      "results/paper-ready-figure/fig1_hfo_group_event_demo/figures/yuquan_y1_hfo_group_event_demo.png",
+      "results/paper-ready-figure/fig1_hfo_group_event_demo/figures/yuquan_y1_hfo_group_event_demo.pdf"
+    ]
+  }
+}
