@@ -9,6 +9,7 @@
     "packed_times": "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy"
   },
   "selection": {
+    "figure_label": "Fig1-A",
     "candidate_channels": [
       "K3-K4",
       "K4-K5",
@@ -99,6 +100,20 @@
     "outputs": [
       "results/paper-ready-figure/fig1_hfo_group_event_demo/figures/yuquan_y1_hfo_group_event_demo.png",
       "results/paper-ready-figure/fig1_hfo_group_event_demo/figures/yuquan_y1_hfo_group_event_demo.pdf"
-    ]
+    ],
+    "layout": {
+      "figure_size_in": [
+        6.5,
+        4.25
+      ],
+      "panel_width_ratios": [
+        0.52,
+        1.45
+      ],
+      "x_extent_sec": [
+        0.0,
+        0.96
+      ]
+    }
   }
 }

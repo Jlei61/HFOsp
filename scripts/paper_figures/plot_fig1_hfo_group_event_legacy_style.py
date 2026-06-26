@@ -320,8 +320,8 @@ def _plot(
     n_freq = len(spec_freqs)
     total_t = split_conti_high.shape[1] / float(fs)
 
-    fig = plt.figure(figsize=(7.4, 4.3))
-    gs = fig.add_gridspec(1, 2, width_ratios=[0.6, 1.75], wspace=0.06)
+    fig = plt.figure(figsize=(6.5, 4.25))
+    gs = fig.add_gridspec(1, 2, width_ratios=[0.52, 1.45], wspace=0.055)
     ax_trace = fig.add_subplot(gs[0, 0])
     ax_spec = fig.add_subplot(gs[0, 1])
 
@@ -351,7 +351,7 @@ def _plot(
         cmap="coolwarm",
         vmin=0.0,
         vmax=1.0,
-        extent=(float(spec_times[0]), float(spec_times[-1]), n_channels * n_freq, 0.0),
+        extent=(0.0, total_t, n_channels * n_freq, 0.0),
     )
     for border in split_borders:
         ax_spec.axvline(float(border), color="white", linestyle="-", linewidth=0.9, alpha=0.95)
@@ -505,6 +505,7 @@ def main() -> None:
             "packed_times": str(packed_path),
         },
         "selection": {
+            "figure_label": "Fig1-A",
             "candidate_channels": candidate_channels,
             "selected_channels": selected_channels,
             "display_labels": [_display_label(ch) for ch in selected_channels],
@@ -532,6 +533,11 @@ def main() -> None:
                 "normalization": "per channel per event window max, matching old ReplayIED norm_theSpec_toMaxOne",
             },
             "outputs": [str(output_png), str(output_pdf)],
+            "layout": {
+                "figure_size_in": [6.5, 4.25],
+                "panel_width_ratios": [0.52, 1.45],
+                "x_extent_sec": [0.0, float(split_high.shape[1] / float(fs))],
+            },
         },
     }
     with metadata_path.open("w", encoding="utf-8") as f:

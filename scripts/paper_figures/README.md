@@ -4,7 +4,7 @@ This directory contains scripts used to generate manuscript-facing figures.
 Keep final figure scripts here rather than scattering one-off plotting code in
 the top-level `scripts/` directory.
 
-## Fig1 HFO Group Event Demo
+## Fig1-A HFO Group Event Demo
 
 Formal entry point:
 
@@ -27,10 +27,13 @@ legacy artifact chain:
 
 Current accepted visual contract:
 
+- manuscript panel label: `Fig1-A`
 - fixed clean group-event examples: packed event indices `22,237,1458`
 - compact panel width
 - left panel: 80-250 Hz stacked bipolar traces
 - right panel: legacy-style normalized spectrogram with spec-center trajectories
+- both x axes start at `0`; spectrogram image extent is clamped to the full
+  concatenated event duration to avoid leading/trailing blank x margins
 - channel names shown only on the left
 - E9/K10 display rows excluded from the default channel candidate set
 
