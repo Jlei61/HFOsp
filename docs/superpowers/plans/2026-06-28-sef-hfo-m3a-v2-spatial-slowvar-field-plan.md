@@ -72,8 +72,8 @@ def validate(self) -> None:
                          "(wide disinhibition footprint, narrow fatigue footprint; §B5.3)")
     if self.eta_I < self.eta_E:
         raise ValueError(f"eta_I ({self.eta_I}) must be >= eta_E ({self.eta_E}) (§B5.2)")
-    if not (0.0 < self.q_min <= 1.0):
-        raise ValueError(f"q_min must be in (0, 1], got {self.q_min}")
+    if not (0.0 <= self.q_min <= 1.0):                  # q_min=0 is valid (full depletion; §B5.2 floor)
+        raise ValueError(f"q_min must be in [0, 1], got {self.q_min}")
     if self.gK_max < 0.0:
         raise ValueError(f"gK_max must be >= 0, got {self.gK_max}")
     if self.n_grid < 2:

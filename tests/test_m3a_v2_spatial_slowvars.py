@@ -320,8 +320,11 @@ def test_gK_bounded_ceiling():
 
 
 def test_kernel_q_footprint_wider_than_kernel_K():
-    """sigma_q > sigma_K behaviorally: identical localized burst, q_I depletion footprint
-    must be wider than the g_K buildup footprint (§B5.3)."""
+    """sigma_q > sigma_K behaviorally: identical localized burst, the q_I depletion footprint
+    must be wider than the g_K buildup footprint (§B5.3). Footprint = full-width-half-max cell
+    count (relative 0.5*peak on BOTH fields) -- an amplitude-INDEPENDENT spatial-width measure.
+    (The firing-rate field is normalized so absolute depletion is small, ~0.007; an absolute
+    q-threshold would measure amplitude, not width, and read 0.)"""
     L = 6.0
     posE, posI, labels = _synthetic_positions(L=L)
     N = labels.size
@@ -333,8 +336,9 @@ def test_kernel_q_footprint_wider_than_kernel_K():
     spk[:posE.shape[0]] = np.linalg.norm(posE - L / 2.0, axis=1) < 0.4    # central blob
     for _ in range(500):
         fld.step(spk, labels, 0.1)
-    q_footprint = ((1.0 - fld.q_I) > 0.05).sum()               # cells meaningfully disinhibited
-    gk_footprint = (fld.g_K > 0.05 * fld.g_K.max()).sum()      # cells meaningfully fatigued
+    q_dep = 1.0 - fld.q_I
+    q_footprint = (q_dep > 0.5 * q_dep.max()).sum()            # FWHM disinhibition footprint (~sigma_q)
+    gk_footprint = (fld.g_K > 0.5 * fld.g_K.max()).sum()       # FWHM fatigue footprint (~sigma_K)
     assert q_footprint > gk_footprint
 
 
