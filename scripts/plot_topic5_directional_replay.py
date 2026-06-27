@@ -20,12 +20,16 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.plot_topic5_axis_direction_rose import _load_frame, _seizure_angles
+from scripts.plot_topic5_axis_direction_rose import (_load_frame, _seizure_angles,
+                                                     _interictal_event_vals)
 from scripts.run_topic5_directional_replay import template_direction, OUT_DIR, PRIMARY_COHORT
 from src.topic5_directional_replay import cluster_directions_k2
+from src.topic5_axis_direction import (event_angles_by_template, axial_mean,
+                                       rotate_to_reference, resultant_length, circular_mean)
 
 FIG_DIR = OUT_DIR / "figures"
-C1, C2 = "#1b9e77", "#7570b3"
+C1, C2 = "#1b9e77", "#7570b3"             # ictal direction classes (green / purple)
+A_COLOR, B_COLOR = "#1f77b4", "#d95f02"   # interictal templates (match mature rose)
 
 
 def plot_subject(ds_sid, activation):
@@ -70,14 +74,73 @@ def plot_subject(ds_sid, activation):
     return out
 
 
+def plot_class_interictal_rose(ds_sid, activation, bins=18):
+    """Mature-rose style: hollow interictal event histograms per template (A/B) +
+    seizure early-direction ticks colored by the two unsupervised ictal classes.
+    Everything rotated so the seizure axis sits at 0 deg / 180 deg (mature convention)."""
+    loaded = _load_frame(ds_sid)
+    if loaded is None:
+        return None
+    rec, x, y, names = loaded
+    ds, subj = ds_sid.split("_", 1)
+    sz = _seizure_angles(ds_sid, x, y, names, activation)
+    if sz.size < 4:
+        return None
+    clus = cluster_directions_k2(sz, seed=0)
+    ref = axial_mean(sz)                          # seizure axis -> 0 deg / 180 deg
+    try:
+        event_vals, ev_labels, _ = _interictal_event_vals(ds, subj, names)
+        grp = event_angles_by_template(event_vals, x, y, ev_labels) if event_vals is not None else {0: [], 1: []}
+    except FileNotFoundError:
+        grp = {0: np.array([]), 1: np.array([])}
+
+    fig = plt.figure(figsize=(7.8, 7.9), constrained_layout=True)
+    ax = fig.add_subplot(111, projection="polar")
+    edges = np.linspace(0, 2 * np.pi, bins + 1)
+    centers = edges[:-1] + (edges[1] - edges[0]) / 2
+    width = (edges[1] - edges[0]) * 0.95
+    rmax = 1
+    for lbl, color, nm in [(0, A_COLOR, "interictal template A (events)"),
+                           (1, B_COLOR, "interictal template B (events)")]:
+        a = rotate_to_reference(np.asarray(grp.get(lbl, []), float), ref)
+        a = a[np.isfinite(a)]
+        if a.size == 0:
+            continue
+        counts, _ = np.histogram(a, bins=edges)
+        rmax = max(rmax, int(counts.max()))
+        ax.bar(centers, counts, width=width, facecolor="none", edgecolor=color, linewidth=2.0,
+               alpha=0.95, label=f"{nm}  n={a.size}, R={resultant_length(a):.2f}")
+    for c, col in ((0, C1), (1, C2)):
+        ca = rotate_to_reference(clus["angles"][clus["labels"] == c], ref)
+        for a in ca[np.isfinite(ca)]:
+            ax.plot([a, a], [0, rmax * 0.9], color=col, lw=1.5, alpha=0.7, zorder=3)
+        m = circular_mean(clus["angles"][clus["labels"] == c])
+        if np.isfinite(m):
+            mr = float(rotate_to_reference(np.array([m]), ref)[0])
+            ax.plot([mr, mr], [0, rmax * 1.12], color=col, lw=3.6, zorder=5,
+                    label=f"ictal direction class {c+1}  n={clus['sizes'][c]}, R={clus['class_R'][c]:.2f}")
+    ax.set_theta_zero_location("E"); ax.set_theta_direction(1); ax.set_rlabel_position(112.5)
+    pretty = ds_sid.replace("epilepsiae_", "E").replace("yuquan_", "Y-")
+    ax.set_title(f"{pretty} — two ictal direction classes (color) vs interictal event directions per template\n"
+                 f"seizure axis rotated to 0 deg / 180 deg  ({activation})", fontsize=11.2, pad=16)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.24), ncol=1, frameon=False, fontsize=8.8)
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    out = FIG_DIR / f"{ds_sid}__classes_vs_interictal_hist_{activation}.png"
+    fig.savefig(out, dpi=150); plt.close(fig)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--subjects", nargs="*", default=None)
     ap.add_argument("--activation", default="broadband")
+    ap.add_argument("--hist-rose", action="store_true",
+                    help="mature-style rose: interictal event hist + class-colored seizure ticks")
     args = ap.parse_args()
     subs = args.subjects or PRIMARY_COHORT
+    fn = plot_class_interictal_rose if args.hist_rose else plot_subject
     for sid in subs:
-        out = plot_subject(sid, args.activation)
+        out = fn(sid, args.activation)
         print(f"  {'wrote ' + out.name if out else 'skip ' + sid}", flush=True)
 
 
