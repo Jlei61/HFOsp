@@ -194,6 +194,16 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 一句话：**E 线的限速步是 Yuquan 医院随访标签**；标签到位前不下任何覆盖-结局结论。
 （Track A–E 全貌见 `docs/archive/topic5/network_axis_pivot_plan_2026-06-13.md`。）
 
+### 3.5 发作早期方向无监督两类 ↔ 间期 A/B（2026-06-27，exploratory，negative）
+
+**测什么**：每个几何干净（ECoG）病人，把每次发作头 10 s 的激活方向**盲于间期**无监督分两堆，再看这两堆方向与间期两条传播路线（模板 A/B）的关系——不预设正反，纯描述。
+
+**怎么测**：三道预锁门防"算法硬造两类"：① 真两堆 vs 一个主方向+散点（H0="主方向+均匀背景散点"，比 silhouette）；② 间期两模板成不成一根可比的轴（Δ_AB <60/60–120/≥120° 三档，看结果前锁）；③ 两堆贴 A/B 超不超"把两堆整体随机旋转两千次"。
+
+**结论**：**6 病人、宽带+快活动，0 个"两类对上 A/B"。** 唯一真分两堆的 442（宽带，p_bimodal=0.042）其两堆与间期模板对不齐到超随机（two_class_unmapped，p_align=0.31）；其余只有一个主方向，或间期两模板几乎同向不成轴（1084，Δ_AB=6°）。**与 A 线、echo gate 各线一致：共性是粗网络/解剖锚，不是细到"方向两类"可分的重放。** 朴素 best-pair 残差曾给 9–18° 的假"对上"，被二模 null + 旋转 null 正确打回。
+
+完整方法 + 数值表 + 措辞红线 + 442 图：`docs/archive/topic5/ictal_direction_clustering_2026-06-27.md`。
+
 ---
 
 ## 4. 已知 caveat
@@ -230,6 +240,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/bridge_q1prime/q1prime_overnight_exploration_2026-05-10.md` — Q1' overnight 探索：full 25-subject cohort + per-seizure feature × delta_rho/subtype 相关性分析 (verdict: INDETERMINATE/WEAK-SIGNAL; median_onset_latency_sec 有方向性倾向 sign_p=0.039 uncorrected; Stage C 全 NULL; 2 subjects 有大效量 subtype 区分)
 - `docs/archive/topic5/echo_gate/stage1_proxy_triage_2026-06-08.md` — Stage 1 ictal-template-echo gate（ER 代理）：ER 代理 echo = **共享粗锚**非 specific-path-replay（coarse positive 但 anchor-matched FLAT + bad-data self-check clean）
 - `docs/archive/topic5/dynamic_echo/stage2b_sentinel_2026-06-12.md` — **Stage 2b early-ictal dynamic-pattern echo sentinel（gate NOT PASSED，B=500 n=3，exploratory）**：早发作动态有模板相关结构（过 channel max-null）但**非稳定早期路径复演**——峰时偏晚、confirmatory 早窗方向逐发作变号、yuquan within-shaft 塌掉 → **共享粗解剖/杆级锚为主**，细化并一致于 Stage 1。**未进 cohort、不支持路径复演主张**；first-onset recruitment（Stage 2，量错失败）的接替。
+- `docs/archive/topic5/ictal_direction_clustering_2026-06-27.md` — **发作早期方向无监督两类 ↔ 间期 A/B（exploratory，negative）**：6 个干净 ECoG、宽带+快活动全无 two_class_mapped；唯一真两堆的 442 其两堆与间期模板对不齐到超随机（two_class_unmapped）。防自欺=主方向+散点 null（弃纯单峰）+ best-pair 旋转 null + 预锁轴质量门；与 A 线一致=粗网络/解剖锚非方向两类重放。
 
 ---
 
