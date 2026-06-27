@@ -149,7 +149,11 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 > - red-TDD 骨架：`tests/test_m3a_v2_spatial_slowvars.py`（40 红 + 1 `@slow` 红，含 2026-06-28 review 加固的
 >   `k_K` bounded build / `area_large` size gate / `Y=P_global` / `aq_drive` `eta_I` 加权 4 条合同）；stub
 >   `src/snn_engine/slow_field.py::SpatialSlowField` + `src/topic4_m3a_v2_phenotype.py`。
-> - 延后（本轮不建）：$D_{EE}$ 场、ablation A/B/C/D 机制证明、标定/pilot。**破轴主张受 ablation gate，未解锁。**
+> - 延后（plan 本轮不建）：$D_{EE}$ 场、ablation A/B/C/D 机制证明。**破轴主张受 ablation gate，未解锁。**
+> - **实现后首轮 pilot（2026-06-28，descriptive screen）**：见 `docs/archive/topic4/m3a_v2_field_pilot_2026-06-28.md`。
+>   一句话：**慢变量场机器本身 OK（地图层面 σ_q>σ_K 因果地造出"旁边追上主轴"的破轴地形，剂量可控）；但闭环接不上——
+>   这块衬底踢出的是全场招募事件（R_area~0.65，非局部沿轴行波），q_I 被均匀抽干（主轴=旁边 gap≈0），机制无结构可分，
+>   强耗竭只 runaway。卡点在衬底 regime（老问题），不在 M3A-v2 慢变量。** proxy β_K=0.3 相对膜 η_K=1.0 低估疲劳、滞后报 off-axis 追上。
 
 ## 7. 合并与 worktree
 
