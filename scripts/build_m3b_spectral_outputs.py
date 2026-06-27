@@ -98,18 +98,30 @@ def main() -> None:
     (OUT / "ratefield_spotcheck_summary.json").write_text(json.dumps(rf_summary, indent=1),
                                                           encoding="utf-8")
 
-    # 5. SNN spot check (one real tiny pilot) ---------------------------------------------------
+    # 5. SNN spot-check GRID (real, ~1 min) — does the §5 axial transient reproduce in spiking? -----
+    snn_points = [(0.0, 1.0), (0.3, 1.0), (0.6, 1.0), (0.9, 1.0), (0.0, 0.95), (0.6, 0.95)]
+    # the §5 linear readout predicts these points are AXIAL self-limited; pair that against the SNN
+    spectral_pred = {f"{mu},{q}": "axial" for mu, q in snn_points}
     try:
-        snn_rec = spm.run_snn_spotcheck(mu_core=0.3, q_global=1.0, w_ee_mult=1.0)
-        snn_summary = {
-            "pilots": [snn_rec],
-            "note": (f"single tiny frozen-state pilot; R_class={snn_rec['R_class']} "
-                     f"(returned={snn_rec['returned']}, peak_active_frac={snn_rec['peak_active_frac']}). "
-                     "A non-returning full-recruitment event = tonic runaway, NOT self-limited "
-                     "recruitment; this STRENGTHENS the bounded-negative. Full grid deferred."),
-        }
+        snn_grid = spm.run_snn_spotcheck_grid(snn_points, seeds=(1, 2, 3), kick_mult=1.0,
+                                              spectral_mode_classes=spectral_pred)
     except Exception as exc:                                       # keep the build robust
-        snn_summary = {"pilots": [], "note": f"SNN pilot skipped: {exc!r}"}
+        snn_grid = {"error": repr(exc), "snn_grid_pass_axial": False, "all_R4b": None,
+                    "per_point": {}, "consistency": {"status": "unknown"}}
+    (OUT / "snn_spotcheck_grid.json").write_text(json.dumps(snn_grid, indent=1), encoding="utf-8")
+    snn_summary = {
+        "mode": "grid", "R_class_counts": snn_grid.get("R_class_counts"),
+        "all_R4b": snn_grid.get("all_R4b"),
+        "n_self_limited_axial": snn_grid.get("n_self_limited_axial"),
+        "n_self_limited_any": snn_grid.get("n_self_limited_any"),
+        "snn_grid_pass_axial": snn_grid.get("snn_grid_pass_axial"),
+        "consistency": snn_grid.get("consistency"),
+        "note": ("grid SNN spot-check (6 pts x 3 seeds). The SNN produces self-terminating GLOBAL "
+                 "events (R4a) and tonic runaway (R4b) but the recruitment axis is ~0 at every point "
+                 "-> the §5 linear non-normal AXIAL self-limited transient does NOT reproduce in "
+                 "spiking. So spontaneous-AXIAL-mechanism is NOT supported; the §5 axial signal stays "
+                 "a linear-operator result (frozen-map). Not-all-R4b (R4a/R1 appear), but axial absent."),
+    }
     (OUT / "snn_spotcheck_summary.json").write_text(json.dumps(snn_summary, indent=1), encoding="utf-8")
 
     # 6. mode -> readout projection -------------------------------------------------------------
@@ -184,7 +196,9 @@ def main() -> None:
         rf_summary["axial_ar2"]["response_axis_score"] > rf_summary["isotropic_ar1"]["response_axis_score"]
         and not rf_summary["runaway"]["returned"])
     non_normal_axial_pass = bool(n_axial == len(nn_pts) and len(nn_pts) > 0)
-    snn_grid_pass = False        # only 1 pilot (R4b tonic runaway) — NOT a grid validation; deferred
+    # spontaneous-AXIAL mechanism needs the §5 axial to reproduce in SPIKING (R2/R3 + axial onset).
+    # The grid shows R4a global / R4b runaway with axis~0 -> axial does NOT reproduce -> False.
+    snn_grid_pass = bool(snn_grid.get("snn_grid_pass_axial"))
     m3a_overlay_pass = (audit.get("overlay_verdict") == "phase_map_trajectory")   # refused -> False
     readout_null_pass = (readout["geometry_null_status"] == "passed")             # not_run -> False
     verdict = spm.m3b_verdict(
@@ -196,7 +210,11 @@ def main() -> None:
         "model_matches_dynamics_ratefield": ratefield_pass, "controls_pass": controls_pass,
         "non_normal_axial_pass": non_normal_axial_pass,
         "n_axial_amplified_selflimited": n_axial, "n_resolved": len(nn_pts),
-        "snn_grid_pass": snn_grid_pass, "snn_validation_status": "not_run_grid (1 pilot = R4b)",
+        "snn_grid_pass": snn_grid_pass,
+        "snn_validation_status": ("grid_run_6pts_x_3seeds; R4a global + R4b runaway, recruitment "
+                                  "axis~0 -> §5 axial does NOT reproduce in spiking"),
+        "snn_R_class_counts": snn_grid.get("R_class_counts"),
+        "snn_consistency": snn_grid.get("consistency", {}).get("status"),
         "m3a_overlay_pass": m3a_overlay_pass, "m3a_overlay_status": audit.get("overlay_verdict"),
         "readout_null_pass": readout_null_pass, "geometry_null_status": readout["geometry_null_status"],
         "note": ("explicit fail-closed gates: frozen-map = controls_pass AND non_normal_axial_pass; "
@@ -204,7 +222,8 @@ def main() -> None:
                  "m3a_overlay_pass AND readout_null_pass."),
     }
     (OUT / "verdict_inputs.json").write_text(json.dumps(verdict_inputs, indent=1), encoding="utf-8")
-    _write_status(verdict, n_axial=n_axial, n_resolved=len(nn_pts), nn=nn_ar2, nn_ar1=nn_ar1)
+    _write_status(verdict, n_axial=n_axial, n_resolved=len(nn_pts), nn=nn_ar2, nn_ar1=nn_ar1,
+                  snn_grid=snn_grid)
 
     # ---- figures ------------------------------------------------------------------------------
     _fig_dispersion(disp)
@@ -212,17 +231,20 @@ def main() -> None:
     _fig_controls(controls)
     _fig_readout(rec)
     _fig_non_normal(nn_ar2, nn_ar1)
+    _fig_snn_grid(snn_grid)
     _write_readme()
     print(f"wrote artifacts + figures to {OUT} (verdict: {verdict}; "
           f"§5 axial {n_axial}/{len(nn_pts)} resolved pts)")
 
 
-def _write_status(verdict, *, n_axial, n_resolved, nn, nn_ar1) -> None:
+def _write_status(verdict, *, n_axial, n_resolved, nn, nn_ar1, snn_grid) -> None:
     peak_g = max(nn["gains"])
     max_ax = max(nn["axes"])
     ar1_ax = nn_ar1["max_axis"]
     t_gain = nn["windows"][nn["gains"].index(peak_g)]      # ms at the gain peak
     t_axis = nn["windows"][nn["axes"].index(max_ax)]       # ms at the axis peak (later than gain)
+    snn_counts = snn_grid.get("R_class_counts", {})
+    snn_axial = snn_grid.get("n_self_limited_axial", 0)
     (OUT / "STATUS.md").write_text(
         """# M3B-R2 spectral phase-map — STATUS
 
@@ -313,8 +335,11 @@ Plain language — 我们把带病灶核的薄片线性化、扫"核兴奋度 ×
   α₁ 实际是**负的** ≈ −0.05），不是 α₁>0 线性失稳。失控是非线性饱和态，不是谱失稳。
 - **主导本征花样在所有点都是全局**（轴向≈0）→ 轴向信号必须用 §5 瞬态读法才看得到；这是上一版
   误判成 bounded-negative 的原因。
-- SNN 一个 tiny pilot = **R4b（不返回 = tonic runaway）** → 印证去抑制端会冲到饱和失控
-  （见 `snn_spotcheck_summary.json`）。
+- **SNN 成组抽查（6 点 × 3 seeds）= §5 轴向在 spiking 层没复现**：SNN 给自终止的**全局**事件
+  （R4a）和 tonic runaway（R4b），R_class 计数 """ + str(snn_counts) + """，但**招募轴向≈0**（每个点都是），
+  自限**轴向** R2/R3 一个没有（n_self_limited_axial=""" + str(snn_axial) + """）→ 线性算子里的非正规轴向瞬态
+  **不进 spiking 动力学**，spontaneous-AXIAL-mechanism **不放行**，§5 轴向停在线性算子层。非全 R4b
+  （R4a/R1 都出现）但轴向缺席。见 `snn_spotcheck_grid.json`。
 - M3A 轨迹叠加 = `refused`（5 个交接产物全不存在；见 `m3a_interface_audit.json`）→ 无 full bridge。
 - 读出：模式投影 schema/管线**接通了**，但几何零模型**没跑**（geometry_null_status=`not_run`，是
   "未运行"非"跑了没过"）→ verdict=`projection_only`（连 placement 都没算），撑不起 cohort bridge。
@@ -425,6 +450,36 @@ def _fig_non_normal(nn_ar2, nn_ar1):
     plt.close(fig)
 
 
+def _fig_snn_grid(snn_grid):
+    per = snn_grid.get("per_point", {})
+    if not per:
+        return
+    counts = snn_grid.get("R_class_counts", {})
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.4))
+    classes = ["R1", "R2", "R3", "R4a", "R4b"]
+    vals = [counts.get(c, 0) for c in classes]
+    cols = ["#2ca02c", "#2ca02c", "#2ca02c", "#ff7f0e", "#d62728"]
+    ax1.bar(range(len(classes)), vals, color=cols)
+    ax1.set_xticks(range(len(classes)))
+    ax1.set_xticklabels(classes)
+    ax1.set_ylabel("count (pts × seeds)")
+    ax1.set_title("SNN R-class: global (R4a) / runaway (R4b),\nno self-limited axial (R2/R3)")
+    keys = list(per.keys())
+    axes = [per[k]["mean_recruitment_axis"] for k in keys]
+    ax2.scatter(range(len(keys)), axes, c="#1f77b4", s=50, zorder=3)
+    ax2.axhline(0.15, color="#2ca02c", lw=1.0, ls="--", label="§5 axial threshold (0.15)")
+    ax2.axhline(0.0, color="0.6", lw=0.8)
+    ax2.set_xticks(range(len(keys)))
+    ax2.set_xticklabels(keys, rotation=30, fontsize=7)
+    ax2.set_ylabel("mean SNN recruitment axis")
+    ax2.set_ylim(-0.3, 0.5)
+    ax2.set_title("Recruitment axis ~0 everywhere\n(§5 axial does NOT reproduce in spiking)")
+    ax2.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(FIG / "snn_spotcheck_grid.png", dpi=130)
+    plt.close(fig)
+
+
 def _write_readme():
     (FIG / "README.md").write_text(
         """# M3B-R2 谱相图 figures 说明
@@ -467,10 +522,16 @@ Brunel/Turing 式有限-k 峰——这是均质衬底"想全场一起点火"的�
 特异）。这说明**间期自限轴向传播活在非正规瞬态里**——主导本征花样是全局的，轴向信号不在主导
 花样而在瞬态，且方向是 E→E 各向异性给的。
 
+### snn_spotcheck_grid.png（§5 在 spiking 层的验证）
+成组 SNN 抽查（6 个相图点 × 3 seeds）的结果，回答"线性算子里的 §5 自限轴向瞬态能不能在 spiking
+层复现"。左图=R-class 计数：SNN 给的是自终止的**全局**事件（R4a，橙）和 tonic runaway（R4b，红），
+**没有一个自限轴向 R2/R3**（绿）。右图=每个点的平均招募轴向,**全都≈0、远低于 §5 轴向阈 0.15**
+（绿虚线）。结论：**§5 的轴向自限传播不进 spiking 动力学**——spiking 要么全局招募要么失控,不沿轴。
+**关注点**：左图绿柱（R2/R3）是否为 0；右图蓝点是否全压在绿虚线下方。是 → spontaneous-AXIAL 不放行。
+
 ### N/A（本轮未生成，原因如下）
 - `example_modes.png` — 需要挑代表性 local/axial/mixed/global 本征模式做四联图；主导花样都是全局，留待需要时生成。
 - `phase_map_gap_gain.png` — spectral-gap + finite-time-gain 等值线图，§5 主信号已在 non_normal_gain_controllability.png，此图作为补充待生成。
-- `snn_spotcheck_grid.png` — 需要成组 SNN 抽查（每点 ~3s × 多点）；本轮只跑了 1 个 pilot（见 snn_spotcheck_summary.json）。
 - `slow_trajectory_overlay.png` — M3A 轨迹叠加；M3A 五个交接产物全不存在、overlay 判定为 refused，故 N/A。
 """, encoding="utf-8")
 

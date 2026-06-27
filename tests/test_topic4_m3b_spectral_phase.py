@@ -757,12 +757,44 @@ def test_systematic_spectrum_snn_mismatch_triggers_stop_status():
     assert ok["status"] == "ok"
 
 
+def test_snn_recruitment_axis_detects_axial_vs_isotropic():
+    n = 12
+    xs = np.repeat(np.linspace(-1, 1, n), n)
+    ys = np.tile(np.linspace(-1, 1, n), n)
+    pos_E = np.column_stack([xs, ys])
+    th = spm.THETA_EE
+    v = -np.sin(th) * xs + np.cos(th) * ys
+    axial_mask = np.abs(v) < 0.2                       # a tube ALONG the 45deg axis
+    iso_mask = (xs ** 2 + ys ** 2) < 0.3               # a central isotropic blob
+    dt = 0.1
+    nsteps = int(200 / dt)
+
+    def spk(mask):
+        b = np.zeros((nsteps, pos_E.shape[0]), bool)
+        b[int(150 / dt):int(180 / dt), mask] = True
+        return b
+
+    assert spm._snn_recruitment_axis(spk(axial_mask), pos_E, dt, 150, 180) > 0.3
+    assert abs(spm._snn_recruitment_axis(spk(iso_mask), pos_E, dt, 150, 180)) < 0.15
+
+
 @pytest.mark.slow
 def test_snn_runs_emit_classification_fields():
     # one real (tiny) SNN frozen-state pilot must run end-to-end and emit the R-class + metric fields
     rec = spm.run_snn_spotcheck(mu_core=0.3, q_global=1.0, w_ee_mult=1.0)
     assert set(spm.SNN_SPOTCHECK_FIELDS) <= set(rec)
     assert rec["R_class"] in spm.SNN_R_CLASSES
+    assert "recruitment_axis" in rec
+
+
+@pytest.mark.slow
+def test_snn_spotcheck_grid_runs_and_classifies():
+    g = spm.run_snn_spotcheck_grid([(0.0, 1.0), (0.6, 1.0)], seeds=(1,), kick_mult=1.0,
+                                   spectral_mode_classes={"0.0,1.0": "axial", "0.6,1.0": "axial"})
+    assert g["n_points"] == 2 and set(g["per_point"]) == {"0.0,1.0", "0.6,1.0"}
+    for pp in g["per_point"].values():
+        assert pp["modal_R_class"] in spm.SNN_R_CLASSES and "mean_recruitment_axis" in pp
+    assert "snn_grid_pass_axial" in g and g["consistency"]["status"] in {"ok", "stop"}
 
 
 # ---------------------------------------------------------------------------

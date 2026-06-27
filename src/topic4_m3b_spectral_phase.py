@@ -1315,10 +1315,35 @@ def snn_spectrum_consistency(pairs: list) -> dict:
     return {"status": "ok", "reason": "spectrum_snn_consistent"}
 
 
+def _snn_recruitment_axis(E_spk_bool: np.ndarray, pos_E: np.ndarray, dt: float,
+                          t0_ms: float, t1_ms: float, theta: float = THETA_EE) -> float:
+    """Elongation axis (along the E->E scaffold) of the E-spike spatial pattern in [t0, t1] ms.
+
+    >0 = early recruitment elongated along the scaffold axis (axial spread); ~0 = isotropic/global."""
+    i0, i1 = int(t0_ms / dt), int(t1_ms / dt)
+    counts = np.asarray(E_spk_bool)[i0:i1].sum(axis=0).astype(float)   # (NE,) spikes per E neuron
+    if counts.sum() < 10:
+        return 0.0
+    X, Y = pos_E[:, 0], pos_E[:, 1]
+    xm, ym = np.average(X, weights=counts), np.average(Y, weights=counts)
+    Sxx = np.average((X - xm) ** 2, weights=counts)
+    Syy = np.average((Y - ym) ** 2, weights=counts)
+    Sxy = np.average((X - xm) * (Y - ym), weights=counts)
+    ang = 0.5 * np.arctan2(2 * Sxy, Sxx - Syy)
+    ev = np.clip(np.linalg.eigvalsh(np.array([[Sxx, Sxy], [Sxy, Syy]])), 0.0, None)
+    aniso = float((ev.max() - ev.min()) / (ev.max() + ev.min() + 1e-30))
+    return float(aniso * np.cos(2 * (ang - theta)))
+
+
 def run_snn_spotcheck(mu_core: float, q_global: float, w_ee_mult: float = 1.0, *, ratio: float = 0.9,
                       core_radius: float = 0.1, L: float = 0.5, density: float = 2000.0,
-                      T: float = 450.0, seed: int = 1, core_std: float = 0.5) -> dict:
-    """Run ONE real frozen-state SNN pilot at a phase-map point and classify it (slow ~3s)."""
+                      T: float = 450.0, seed: int = 1, core_std: float = 0.5,
+                      kick_mult: float = 1.0) -> dict:
+    """Run ONE real frozen-state SNN pilot at a phase-map point and classify it (slow ~3s).
+
+    Also measures the early-recruitment spike axis (does the spiking spread AXIALLY, like the §5
+    linear transient, or globally?) — the key test of whether the linear axial signal survives into
+    spiking."""
     import os
     import sys
     eng = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snn_engine")
@@ -1333,17 +1358,69 @@ def run_snn_spotcheck(mu_core: float, q_global: float, w_ee_mult: float = 1.0, *
     p = Params(g=mp["g"], L=L, density=density, T=T, dt=0.1, nu_ext_ratio=ratio, seed=seed)
     p.w_EE = mp["w_EE"]
     net = build_network(p, verbose=False)
+    pos = np.asarray(net["pos"])
     vth = None
     if mu_core > 0:
-        pos = np.asarray(net["pos"])
         is_E = np.asarray(net["labels"]) == 0
         cf = sample_core_field(pos, is_E, (L / 2.0, L / 2.0), core_radius, net["rng"],
                                core_mean=_SNN_BASE_V_TH - mu_core, core_std=core_std)
         vth = cf["vth"]
     nut = compute_nu_theta(p)
     nut = float(nut[0]) if np.ndim(nut) else float(nut)
-    res = simulate_kick(p, net, KICK_BOOST=2.0 * nut, verbose=False, V_th_per_neuron=vth)
-    return snn_spotcheck_record(mu_core, q_global, w_ee_mult, compute_metrics(res, p.dt))
+    res = simulate_kick(p, net, KICK_BOOST=kick_mult * nut, verbose=False, V_th_per_neuron=vth)
+    rec = snn_spotcheck_record(mu_core, q_global, w_ee_mult, compute_metrics(res, p.dt))
+    # early-recruitment axis over the first 30 ms of the event window (150-180 ms)
+    rec["recruitment_axis"] = _snn_recruitment_axis(res["E_spk_bool"], pos[:net["NE"]], p.dt, 150.0, 180.0)
+    rec["seed"] = int(seed)
+    return rec
+
+
+def run_snn_spotcheck_grid(points: list, *, seeds=(1, 2, 3), kick_mult: float = 1.0,
+                           spectral_mode_classes: dict = None) -> dict:
+    """Run the SNN spot-check over a grid of (mu_core, q_global) points x seeds; aggregate R-class +
+    recruitment axis per point, and form a spectrum<->SNN consistency stop/ok verdict.
+
+    ``points`` = list of (mu_core, q_global[, w_ee_mult]) tuples. ``spectral_mode_classes`` maps a
+    point key "mu,q" to the spectral leading mode_class for the consistency check."""
+    runs = []
+    per_point = {}
+    for pt in points:
+        mu, q = pt[0], pt[1]
+        w = pt[2] if len(pt) > 2 else 1.0
+        key = f"{mu},{q}"
+        recs = [run_snn_spotcheck(mu, q, w, seed=s, kick_mult=kick_mult) for s in seeds]
+        runs.extend(recs)
+        rclasses = [r["R_class"] for r in recs]
+        axes = [r["recruitment_axis"] for r in recs]
+        # modal R-class; self-limited-axial requires a returning event AND an axial recruitment
+        modal = max(set(rclasses), key=rclasses.count)
+        per_point[key] = {
+            "mu_core": mu, "q_global": q, "R_classes": rclasses, "modal_R_class": modal,
+            "mean_recruitment_axis": float(np.mean(axes)),
+            "self_limited_axial": bool(any(rc in ("R2", "R3") for rc in rclasses)
+                                       and np.mean(axes) > 0.15),
+            "self_limited_global": bool(any(rc == "R4a" for rc in rclasses)),
+            "tonic_runaway": bool(all(rc == "R4b" for rc in rclasses)),
+        }
+    all_classes = [r["R_class"] for r in runs]
+    pairs = []
+    if spectral_mode_classes:
+        for key, pp in per_point.items():
+            pairs.append((spectral_mode_classes.get(key, "unknown"), pp["modal_R_class"]))
+    consistency = snn_spectrum_consistency(pairs) if pairs else {"status": "ok", "reason": "no_pairs"}
+    n_self_limited_axial = sum(1 for pp in per_point.values() if pp["self_limited_axial"])
+    n_self_limited_any = sum(1 for pp in per_point.values()
+                             if pp["self_limited_axial"] or pp["self_limited_global"])
+    return {
+        "per_point": per_point, "n_points": len(per_point),
+        "all_R4b": all(rc == "R4b" for rc in all_classes),
+        "n_self_limited_axial": n_self_limited_axial, "n_self_limited_any": n_self_limited_any,
+        "R_class_counts": {c: all_classes.count(c) for c in sorted(set(all_classes))},
+        "consistency": consistency,
+        # spontaneous-AXIAL mechanism needs self-limited AXIAL (R2/R3 + axial), not just global R4a
+        "snn_grid_pass_axial": n_self_limited_axial > 0,
+        "snn_self_limited_present": n_self_limited_any > 0,
+    }
 
 
 # ---------------------------------------------------------------------------
