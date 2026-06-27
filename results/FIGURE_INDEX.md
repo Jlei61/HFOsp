@@ -131,6 +131,7 @@
 | [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
 | [topic5_ictal_recruitment/directional_clustering/figures/](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类 ↔ 间期 A/B（每被试玫瑰 + 442 间期事件 hist×两色发作方向类；exploratory negative，6 ECoG 全无 two_class_mapped） |
 | [topic5_ictal_recruitment/event_resolved_alignment/figures/](topic5_ictal_recruitment/event_resolved_alignment/figures/) | A 线 event-resolved 二级：逐间期事件(A/B 两类)对发作场的对齐分布 + 事件级离散度（PILOT 3 epi，exploratory，broad 底物） |
+| [topic5_ictal_recruitment/field_dynamics/figures/](topic5_ictal_recruitment/field_dynamics/figures/) | **发作内 field 动力学 pilot**（6 ECoG，narrow）：逐次发作 onset→offset+终止前后的 场-轴对齐/轴向中段-非轴向正质量占比/同步/方向漂移；progress+offset+heatmap+geometry_qc 四类 subject 图 + per-seizure composite；纯描述，1084=退化轴负控 |
 | [topic5_ictal_recruitment/event_resolved_alignment/figures/fields/](topic5_ictal_recruitment/event_resolved_alignment/figures/fields/) | 同上的**场图版**（用户 pivot）：A 类全事件场 \| B 类全事件场 \| 发作场，同一物理平面、左图形式 |
 | [topic5_ictal_recruitment/event_resolved_alignment/figures/class_vs_template_field_similarity_cohort.png](topic5_ictal_recruitment/event_resolved_alignment/figures/) | cohort 级：用 class 事件造的间期场 ≈ 用模板投影造的间期场（N=23 中位 \|r\|=0.985；构念等价） |
 | [topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/](topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/) | **6 面板/被试**（全 12 epi）：模板A\|模板B\|发作前−10..0s / 类A场\|类B场\|发作前−120..−90s；配 max-AB 统计（class 场 ≈ template 场） |
