@@ -74,7 +74,7 @@ def plot_subject(ds_sid, activation):
     return out
 
 
-def plot_class_interictal_rose(ds_sid, activation, bins=18):
+def plot_class_interictal_rose(ds_sid, activation, bins=18, subdir=None):
     """简洁版：间期模板 A/B 事件方向画成空心直方图（A=红 / B=蓝，原始计数），
     发作只画两类的**平均方向**（黑线，实线=类1 / 虚线=类2）。只两色直方图 + 黑均向线，
     避免多色拥挤。发作轴旋到 0 deg / 180 deg（mature convention）。"""
@@ -124,8 +124,69 @@ def plot_class_interictal_rose(ds_sid, activation, bins=18):
     ax.set_title(f"{pretty} — interictal template A/B event directions (hist) + ictal class mean directions\n"
                  f"seizure main direction (larger class) rotated to 0 deg  ({activation})", fontsize=11.0, pad=16)
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.22), ncol=1, frameon=False, fontsize=8.8)
+    out_dir = (FIG_DIR / subdir) if subdir else FIG_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / f"{ds_sid}__classes_vs_interictal_hist_{activation}.png"
+    fig.savefig(out, dpi=150); plt.close(fig)
+    return out
+
+
+def plot_cohort_pooled_main_aligned(subjects, activation, bins=24):
+    """全队列汇总：每被试旋到自己的发作主要方向(占多数类均向)=0 deg, 再把每被试的间期事件
+    方向直方图**归一化后等权平均**(避免事件多的被试主导), 看跨被试间期事件相对发作主方向有没有
+    一致偏好。toward-main = 落在主方向 ±90 deg 内的占比(~0.5 = 无方向偏好, 只共享轴)。"""
+    edges = np.linspace(0, 2 * np.pi, bins + 1)
+    centers = edges[:-1] + (edges[1] - edges[0]) / 2
+    width = (edges[1] - edges[0]) * 0.95
+    dens, used = [], []
+    for ds_sid in subjects:
+        loaded = _load_frame(ds_sid)
+        if loaded is None:
+            continue
+        rec, x, y, names = loaded
+        ds, subj = ds_sid.split("_", 1)
+        sz = _seizure_angles(ds_sid, x, y, names, activation)
+        if sz.size < 4:
+            continue
+        clus = cluster_directions_k2(sz, seed=0)
+        dom = 0 if clus["sizes"][0] >= clus["sizes"][1] else 1
+        ref = circular_mean(clus["angles"][clus["labels"] == dom])
+        if not np.isfinite(ref):
+            continue
+        try:
+            ev, lab, _ = _interictal_event_vals(ds, subj, names)
+            grp = event_angles_by_template(ev, x, y, lab) if ev is not None else {0: [], 1: []}
+        except FileNotFoundError:
+            continue
+        a = np.concatenate([np.asarray(grp.get(0, []), float), np.asarray(grp.get(1, []), float)])
+        a = rotate_to_reference(a, ref); a = a[np.isfinite(a)]
+        if a.size == 0:
+            continue
+        counts, _ = np.histogram(a, bins=edges)
+        if counts.sum() == 0:
+            continue
+        dens.append(counts / counts.sum())
+        used.append(ds_sid)
+    if not dens:
+        return None
+    mean_dens = np.mean(dens, axis=0)
+    d0 = np.minimum(centers, 2 * np.pi - centers)            # angular distance to 0 deg
+    toward = float(mean_dens[d0 < np.pi / 2].sum() / mean_dens.sum())
+
+    fig = plt.figure(figsize=(7.6, 7.9), constrained_layout=True)
+    ax = fig.add_subplot(111, projection="polar")
+    ax.bar(centers, mean_dens / mean_dens.max(), width=width, facecolor="none",
+           edgecolor="#6a3d9a", linewidth=2.2, alpha=0.95,
+           label=f"pooled interictal events ({len(used)} subj, equal weight)")
+    ax.plot([0, 0], [0, 1.12], color="black", lw=3.0, label="seizure main direction (each subj = 0 deg)")
+    ax.set_theta_zero_location("E"); ax.set_theta_direction(1); ax.set_rlabel_position(100)
+    ax.set_rlim(0, 1.18); ax.set_rticks([0.5, 1.0])
+    ax.set_title("Cohort-pooled interictal event directions vs seizure MAIN direction "
+                 f"— {activation}\neach subject rotated so its seizure main direction = 0 deg  "
+                 f"(n={len(used)}; toward-main fraction = {toward:.2f})", fontsize=10.6, pad=16)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.16), ncol=1, frameon=False, fontsize=8.8)
     FIG_DIR.mkdir(parents=True, exist_ok=True)
-    out = FIG_DIR / f"{ds_sid}__classes_vs_interictal_hist_{activation}.png"
+    out = FIG_DIR / f"cohort_pooled_main_aligned_{activation}.png"
     fig.savefig(out, dpi=150); plt.close(fig)
     return out
 
@@ -135,12 +196,20 @@ def main():
     ap.add_argument("--subjects", nargs="*", default=None)
     ap.add_argument("--activation", default="broadband")
     ap.add_argument("--hist-rose", action="store_true",
-                    help="mature-style rose: interictal event hist + class-colored seizure ticks")
+                    help="combined rose: interictal A/B event hist + ictal class mean directions")
+    ap.add_argument("--pooled", action="store_true",
+                    help="cohort-pooled rose aligned to each subject's seizure main direction")
+    ap.add_argument("--out-subdir", default=None, help="figures/<subdir>/ for caveat sets (e.g. seeg_caveat)")
     args = ap.parse_args()
+    if args.pooled:
+        out = plot_cohort_pooled_main_aligned(args.subjects or PRIMARY_COHORT, args.activation)
+        print(f"  {'wrote ' + out.name if out else 'pooled: insufficient data'}", flush=True)
+        return
     subs = args.subjects or PRIMARY_COHORT
     fn = plot_class_interictal_rose if args.hist_rose else plot_subject
     for sid in subs:
-        out = fn(sid, args.activation)
+        out = (fn(sid, args.activation, subdir=args.out_subdir) if args.hist_rose
+               else fn(sid, args.activation))
         print(f"  {'wrote ' + out.name if out else 'skip ' + sid}", flush=True)
 
 
