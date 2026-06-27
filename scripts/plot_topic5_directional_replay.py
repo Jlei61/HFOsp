@@ -87,7 +87,10 @@ def plot_class_interictal_rose(ds_sid, activation, bins=18):
     if sz.size < 4:
         return None
     clus = cluster_directions_k2(sz, seed=0)
-    ref = axial_mean(sz)                          # seizure axis -> 0 deg / 180 deg
+    # align so the seizure MAIN direction (mean of the larger ictal class) sits at 0 deg
+    _dom = 0 if clus["sizes"][0] >= clus["sizes"][1] else 1
+    _main = circular_mean(clus["angles"][clus["labels"] == _dom])
+    ref = _main if np.isfinite(_main) else axial_mean(sz)
     try:
         event_vals, ev_labels, _ = _interictal_event_vals(ds, subj, names)
         grp = event_angles_by_template(event_vals, x, y, ev_labels) if event_vals is not None else {0: [], 1: []}
@@ -119,7 +122,7 @@ def plot_class_interictal_rose(ds_sid, activation, bins=18):
     ax.set_theta_zero_location("E"); ax.set_theta_direction(1); ax.set_rlabel_position(100)
     pretty = ds_sid.replace("epilepsiae_", "E").replace("yuquan_", "Y-")
     ax.set_title(f"{pretty} — interictal template A/B event directions (hist) + ictal class mean directions\n"
-                 f"seizure axis rotated to 0 deg / 180 deg  ({activation})", fontsize=11.0, pad=16)
+                 f"seizure main direction (larger class) rotated to 0 deg  ({activation})", fontsize=11.0, pad=16)
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.22), ncol=1, frameon=False, fontsize=8.8)
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     out = FIG_DIR / f"{ds_sid}__classes_vs_interictal_hist_{activation}.png"
