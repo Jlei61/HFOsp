@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
 import numpy as np
 
+plt.rcParams.update({"font.size": 14, "axes.titlesize": 14, "axes.labelsize": 14,
+                     "xtick.labelsize": 13, "ytick.labelsize": 13, "legend.fontsize": 12.5})
+
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
@@ -48,7 +51,7 @@ def plot_subject(ds_sid, activation):
     rj = OUT_DIR / "per_subject" / f"{ds_sid}__dir_cluster_{activation}.json"
     meta = json.loads(rj.read_text()) if rj.exists() else {}
 
-    fig = plt.figure(figsize=(7.2, 7.6), constrained_layout=True)
+    fig = plt.figure(figsize=(8.8, 8.6), constrained_layout=True)
     ax = fig.add_subplot(111, projection="polar")
     for c, col in ((0, C1), (1, C2)):
         for a in clus["angles"][labels == c]:
@@ -67,8 +70,8 @@ def plot_subject(ds_sid, activation):
     ax.set_title(f"{pretty} — ictal direction k=2 vs interictal A/B  ({activation})\n"
                  f"report_tier={tier} · axis={axt} · "
                  f"p_bimodal={pb if pb is None else round(pb, 3)} · "
-                 f"p_align={pa if pa is None else round(pa, 3)}", fontsize=11)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.2), ncol=2, frameon=False, fontsize=8.6)
+                 f"p_align={pa if pa is None else round(pa, 3)}", fontsize=12)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.2), ncol=2, frameon=False, fontsize=11.5)
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     out = FIG_DIR / f"{ds_sid}__dir_cluster_{activation}.png"
     fig.savefig(out, dpi=150); plt.close(fig)
@@ -98,7 +101,7 @@ def plot_class_interictal_rose(ds_sid, activation, bins=18, subdir=None):
     except FileNotFoundError:
         grp = {0: np.array([]), 1: np.array([])}
 
-    fig = plt.figure(figsize=(7.6, 7.9), constrained_layout=True)
+    fig = plt.figure(figsize=(9.2, 9.0), constrained_layout=True)
     ax = fig.add_subplot(111, projection="polar")
     edges = np.linspace(0, 2 * np.pi, bins + 1)
     centers = edges[:-1] + (edges[1] - edges[0]) / 2
@@ -122,9 +125,9 @@ def plot_class_interictal_rose(ds_sid, activation, bins=18, subdir=None):
                     label=f"ictal class {c+1} mean  n={clus['sizes'][c]}, R={clus['class_R'][c]:.2f}")
     ax.set_theta_zero_location("E"); ax.set_theta_direction(1); ax.set_rlabel_position(100)
     pretty = ds_sid.replace("epilepsiae_", "E").replace("yuquan_", "Y-")
-    ax.set_title(f"{pretty} — interictal template A/B event directions (hist) + ictal class mean directions\n"
-                 f"seizure main direction (larger class) rotated to 0 deg  ({activation})", fontsize=11.0, pad=16)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.22), ncol=1, frameon=False, fontsize=8.8)
+    ax.set_title(f"{pretty}: ictal class means + interictal A/B event directions\n"
+                 f"seizure main direction → 0°  ({activation})", fontsize=14, pad=14)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.22), ncol=1, frameon=False, fontsize=11.5)
     out_dir = (FIG_DIR / subdir) if subdir else FIG_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"{ds_sid}__classes_vs_interictal_hist_{activation}.png"
@@ -174,7 +177,7 @@ def plot_cohort_pooled_main_aligned(subjects, activation, bins=24, subdir=None):
     d0 = np.minimum(centers, 2 * np.pi - centers)            # angular distance to 0 deg
     toward = float(mean_dens[d0 < np.pi / 2].sum() / mean_dens.sum())
 
-    fig = plt.figure(figsize=(7.6, 7.9), constrained_layout=True)
+    fig = plt.figure(figsize=(9.2, 9.0), constrained_layout=True)
     ax = fig.add_subplot(111, projection="polar")
     ax.bar(centers, mean_dens / mean_dens.max(), width=width, facecolor=to_rgba("#6a3d9a", 0.22),
            edgecolor="#6a3d9a", linewidth=2.2,
@@ -182,10 +185,10 @@ def plot_cohort_pooled_main_aligned(subjects, activation, bins=24, subdir=None):
     ax.plot([0, 0], [0, 1.12], color="black", lw=3.0, label="seizure main direction (each subj = 0 deg)")
     ax.set_theta_zero_location("E"); ax.set_theta_direction(1); ax.set_rlabel_position(100)
     ax.set_rlim(0, 1.18); ax.set_rticks([0.5, 1.0])
-    ax.set_title("Cohort-pooled interictal event directions vs seizure MAIN direction "
-                 f"— {activation}\neach subject rotated so its seizure main direction = 0 deg  "
-                 f"(n={len(used)}; toward-main fraction = {toward:.2f})", fontsize=10.6, pad=16)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.16), ncol=1, frameon=False, fontsize=8.8)
+    ax.set_title(f"Cohort-pooled interictal directions vs seizure MAIN direction ({activation})\n"
+                 f"each subject's seizure main direction = 0°  (n={len(used)}; toward-main = {toward:.2f})",
+                 fontsize=13, pad=14)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.16), ncol=1, frameon=False, fontsize=12)
     out_dir = (FIG_DIR / subdir) if subdir else FIG_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"cohort_pooled_main_aligned_{activation}.png"
@@ -197,7 +200,7 @@ def plot_cohort_axis_alignment(bands=("broadband", "hfa"), subdir=None):
     """Cohort SIGN-FREE axis-alignment test: per subject, angular gap from the seizure MAIN
     direction (dominant ictal class mean) to the NEARER interictal template direction; vs a
     per-subject uniform-rotation null. One figure, one panel per band (broadband primary)."""
-    fig, axes = plt.subplots(1, len(bands), figsize=(11.6, 6.4), constrained_layout=True, sharey=True)
+    fig, axes = plt.subplots(1, len(bands), figsize=(14.5, 7.2), constrained_layout=True, sharey=True)
     if len(bands) == 1:
         axes = [axes]
     for ax, band in zip(axes, bands):
@@ -228,17 +231,17 @@ def plot_cohort_axis_alignment(bands=("broadband", "hfa"), subdir=None):
             ax.plot(k, gaps[i], "o", color=col, ms=9, zorder=5)
             if meta[i][1] is not None and meta[i][1] < 60:
                 ax.annotate("ΔAB<60°\n(degenerate)", (k, gaps[i]), textcoords="offset points",
-                            xytext=(0, 9), ha="center", fontsize=6.8, color="0.4")
+                            xytext=(0, 9), ha="center", fontsize=9.5, color="0.4")
         ax.axhline(45, ls="--", color="0.6", lw=1, zorder=0)
         ax.set_xticks(range(len(order)))
-        ax.set_xticklabels([meta[i][0] for i in order], fontsize=9)
+        ax.set_xticklabels([meta[i][0] for i in order], fontsize=13)
         ax.set_ylim(0, 188)
         ax.set_title(f"{band}: median gap {np.degrees(r['T_obs']):.1f}°, "
-                     f"rotation-null p={r['p']:.4f} (n={len(mains)})", fontsize=10.4)
+                     f"rotation-null p={r['p']:.4f} (n={len(mains)})", fontsize=13)
     axes[0].set_ylabel("gap: seizure main dir → nearest interictal template dir (deg)")
-    fig.suptitle("Cohort SIGN-FREE axis alignment — seizure main direction vs nearest interictal template direction\n"
-                 "gray = per-subject uniform-rotation null (5–95%, median tick) · dot = observed (red if per-subject p<0.05) · "
-                 "dashed = 45° (chance for opposite templates)", fontsize=10.2)
+    fig.suptitle("Cohort sign-free axis alignment: seizure main direction vs nearest interictal template\n"
+                 "gray = rotation null (5–95%, median tick) · dot = observed · dashed = 45° chance",
+                 fontsize=13)
     out_dir = (FIG_DIR / subdir) if subdir else FIG_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / "cohort_axis_alignment_test.png"
