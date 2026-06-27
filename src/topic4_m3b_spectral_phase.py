@@ -1149,3 +1149,303 @@ def run_controls(grid: Grid, *, ratio: float = 1.0, w_ee_mult: float = 1.3, mu_c
 REQUIRED_CONTROLS: tuple[str, ...] = (
     "no_core", "core", "ar1_isotropic", "ar2_anisotropic", "off_axis_core", "shuffled_core",
 )
+
+
+# ---------------------------------------------------------------------------
+# TDD-11: rate-field dynamic spot checks — verify the linear predictions against the nonlinear field
+#
+# integrate_lif_field is HOMOGENEOUS, so M3B carries its own heterogeneous integrator (the SAME
+# 6-field dynamics solve_operating_point integrates, plus a transient stimulus). A core kick probes
+# the non-normal transient response the linear spectrum predicts.
+# ---------------------------------------------------------------------------
+from src.sef_hfo_lif import DETECT as _DETECT          # active-pixel threshold above rest
+_RETURN_FRAC: float = 0.2                                # final/peak active fraction => returned
+_RUNAWAY_FRAC: float = 0.4                               # peak active fraction => high-rate/runaway risk
+
+
+@dataclass
+class RateFieldResponse:
+    active_fraction: np.ndarray         # (nsteps,) fraction of cells active above rest
+    max_active: float
+    final_active: float
+    returned: bool
+    response_axis_score: float          # elongation of the peak-response E field along the E->E axis
+    peak_field: np.ndarray              # (n,n) rE at peak active fraction
+    op_status: str
+
+
+def simulate_ratefield_response(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
+                                inh: InhibitionField, *, ratio: float = 1.0, w_ee_mult: float = 1.3,
+                                stim_amp: float = 6.0, stim_radius: float = 1.2,
+                                stim_center: tuple[float, float] = (0.0, 0.0),
+                                stim_window_ms: float = 15.0, dt: float = 0.5, t_max: float = 250.0,
+                                noise_amp: float = 0.0, seed: int = 0) -> RateFieldResponse:
+    """Integrate the heterogeneous 6-field rate field from its op under a finite core pulse (and/or
+    noise), measuring the transient: active fraction over time, return-to-baseline, response axis."""
+    op = solve_operating_point(grid, kernels, exc, inh, ratio=ratio, w_ee_mult=w_ee_mult)
+    n = grid.n
+    wee = w_ee_mult * W_EE
+    muxE, muxI = TAU_ME * JX_E * op.nuext, TAU_MI * JX_I * op.nuext
+    wEI = inh.q * W_EI
+    wII = inh.q * W_II if inh.scale_II else np.full((n, n), W_II)
+    X, Y = grid.coords()
+    disk = ((X - stim_center[0]) ** 2 + (Y - stim_center[1]) ** 2 <= stim_radius ** 2).astype(float)
+    rng = np.random.default_rng(seed)
+
+    rE, rI = op.rE.copy(), op.rI.copy()
+    sEE = convolve_periodic(rE, kernels.K_EE)
+    sEI = convolve_periodic(rI, kernels.K_I)
+    sIE = convolve_periodic(rE, kernels.K_I)
+    sII = convolve_periodic(rI, kernels.K_I)
+    thr = op.rE + _DETECT
+    nsteps = int(t_max / dt)
+    active = np.empty(nsteps)
+    peak_field = rE.copy()
+    peak_active = -1.0
+    for t in range(nsteps):
+        stim = stim_amp * disk if (t * dt) < stim_window_ms else 0.0
+        if noise_amp > 0:
+            stim = stim + noise_amp * rng.standard_normal((n, n))
+        sEE += dt / TAU_AMPA * (convolve_periodic(rE, kernels.K_EE) - sEE)
+        sEI += dt / TAU_GABA * (convolve_periodic(rI, kernels.K_I) - sEI)
+        sIE += dt / TAU_AMPA * (convolve_periodic(rE, kernels.K_I) - sIE)
+        sII += dt / TAU_GABA * (convolve_periodic(rI, kernels.K_I) - sII)
+        muE = TAU_ME * (C_EE * wee * sEE - C_EI * wEI * sEI) + muxE + exc.mu_core + stim
+        muI = TAU_MI * (C_IE * W_IE * sIE - C_II * wII * sII) + muxI
+        varE = TAU_ME * (C_EE * wee ** 2 * sEE + C_EI * wEI ** 2 * sEI) + TAU_ME * JX_E ** 2 * op.nuext
+        varI = TAU_MI * (C_IE * W_IE ** 2 * sIE + C_II * wII ** 2 * sII) + TAU_MI * JX_I ** 2 * op.nuext
+        rE = rE + dt / TAU_ME * (-rE + _phi_field(muE, np.sqrt(np.maximum(varE, 1e-9)), "E"))
+        rI = rI + dt / TAU_MI * (-rI + _phi_field(muI, np.sqrt(np.maximum(varI, 1e-9)), "I"))
+        a = float(np.mean(rE > thr))
+        active[t] = a
+        if a > peak_active:
+            peak_active = a
+            peak_field = rE.copy()
+
+    max_active = float(active.max())
+    final_active = float(active[-1])
+    returned = bool(final_active <= _RETURN_FRAC * max(max_active, 1e-12))
+    resp = elongation_axis_score(peak_field - op.rE, grid, kernels.theta)
+    return RateFieldResponse(active, max_active, final_active, returned, float(resp),
+                             peak_field, op.status)
+
+
+# ---------------------------------------------------------------------------
+# TDD-12: SNN frozen-state spot checks — verify phase-map predictions in actual SNN pilots
+#
+# Map phase-map params to the SEF-HFO SNN engine (src/snn_engine) with a documented transform, run a
+# short frozen-state pilot, classify R0..R4b. The deterministic machinery (mapping/classifier/mass/
+# consistency) is tested on synthetic metrics; run_snn_spotcheck does the real (slow) pilot.
+# ---------------------------------------------------------------------------
+SNN_R_CLASSES: tuple[str, ...] = ("R0", "R1", "R2", "R3", "R4a", "R4b")
+SNN_SPOTCHECK_FIELDS: tuple[str, ...] = (
+    "x_mu_core", "y_q_global", "w_ee_mult", "baseline", "peak", "tail", "returned",
+    "peak_active_frac", "inside", "outside", "active_mass", "R_class",
+)
+_SNN_BASE_G: float = 3.6          # baseline inhibitory gain (Params.g)
+_SNN_BASE_W_EE: float = 0.1575    # baseline E->E weight (Params.w_EE)
+_SNN_BASE_V_TH: float = 18.0      # baseline threshold (Params.V_th)
+
+
+def snn_param_mapping(mu_core: float, q_global: float, w_ee_mult: float = 1.0) -> dict:
+    """Documented transform from M3B phase-map params to SEF-HFO SNN controls.
+
+    q_global scales the inhibitory gain g (lower q = disinhibition); w_ee_mult scales the recurrent
+    E->E weight; mu_core lowers the CORE E-cell threshold (via sample_core_field), not a global shift.
+    """
+    return {
+        "g": _SNN_BASE_G * q_global,
+        "w_EE": _SNN_BASE_W_EE * w_ee_mult,
+        "core_v_th": _SNN_BASE_V_TH - mu_core,
+        "transforms": {
+            "q_global->g": "g = 3.6 * q_global  (scales I->E and I->I; lower q = disinhibition)",
+            "w_ee_mult->w_EE": "w_EE = 0.1575 * w_ee_mult  (recurrent E->E gain)",
+            "mu_core->core_v_th": "core E threshold = 18.0 - mu_core via sample_core_field (core only)",
+        },
+    }
+
+
+def classify_snn_r_class(metrics: dict) -> str:
+    """Map SNN ``compute_metrics`` output to an R-class (R0..R4b)."""
+    base = max(metrics["baseline"], 1e-9)
+    paf = metrics["peak_active_frac"]
+    if metrics["peak"] <= 2.0 * base:
+        return "R0"                                      # no event / recovery
+    if not metrics["returned"]:
+        return "R4b"                                     # sustained tonic runaway
+    if paf > 0.6:
+        return "R4a"                                     # global recruitment, self-terminated
+    outside = metrics["outside"] > 1.5 * max(metrics["inside"], 1.0)
+    if outside and paf > 0.2:
+        return "R3"                                      # larger axial spread
+    if outside:
+        return "R2"                                      # local axial spread
+    return "R1"                                          # local
+
+
+def snn_active_mass(metrics: dict) -> float:
+    """Active mass = peak fraction of E neurons recruited (the spatial recruitment extent)."""
+    return float(metrics["peak_active_frac"])
+
+
+def snn_spotcheck_record(mu_core: float, q_global: float, w_ee_mult: float, metrics: dict) -> dict:
+    """Assemble a spot-check record (SNN_SPOTCHECK_FIELDS) including the R-class + active mass."""
+    return {
+        "x_mu_core": float(mu_core), "y_q_global": float(q_global), "w_ee_mult": float(w_ee_mult),
+        "baseline": float(metrics["baseline"]), "peak": float(metrics["peak"]),
+        "tail": float(metrics["tail"]), "returned": bool(metrics["returned"]),
+        "peak_active_frac": float(metrics["peak_active_frac"]),
+        "inside": float(metrics["inside"]), "outside": float(metrics["outside"]),
+        "active_mass": snn_active_mass(metrics), "R_class": classify_snn_r_class(metrics),
+    }
+
+
+def snn_spectrum_consistency(pairs: list) -> dict:
+    """Stop-status when SNN spot checks systematically contradict the spectral prediction.
+
+    ``pairs`` = list of (predicted spectral mode_class, observed SNN R_class). Triggers a stop if the
+    SNN shows ONLY R4b tonic runaway, or if every axial/local/stable prediction comes back global/
+    runaway (R4a/R4b) — the substrate-bottleneck signature the plan flags as a stop rule."""
+    snn = [s for _, s in pairs]
+    if snn and all(s == "R4b" for s in snn):
+        return {"status": "stop", "reason": "snn_only_r4b_tonic_runaway"}
+    relevant = [(p, s) for p, s in pairs if p in ("axial", "local", "stable")]
+    if relevant and all(s in ("R4a", "R4b") for _, s in relevant):
+        return {"status": "stop", "reason": "spectral_axial_local_but_snn_global_runaway"}
+    return {"status": "ok", "reason": "spectrum_snn_consistent"}
+
+
+def run_snn_spotcheck(mu_core: float, q_global: float, w_ee_mult: float = 1.0, *, ratio: float = 0.9,
+                      core_radius: float = 0.1, L: float = 0.5, density: float = 2000.0,
+                      T: float = 450.0, seed: int = 1, core_std: float = 0.5) -> dict:
+    """Run ONE real frozen-state SNN pilot at a phase-map point and classify it (slow ~3s)."""
+    import os
+    import sys
+    eng = os.path.join(os.path.dirname(os.path.abspath(__file__)), "snn_engine")
+    if eng not in sys.path:
+        sys.path.insert(0, eng)
+    from params import Params, compute_nu_theta            # noqa: E402  (engine on sys.path)
+    from model import build_network                        # noqa: E402
+    from kick_probe import simulate_kick, compute_metrics  # noqa: E402
+    from src.sef_hfo_heterogeneity import sample_core_field
+
+    mp = snn_param_mapping(mu_core, q_global, w_ee_mult)
+    p = Params(g=mp["g"], L=L, density=density, T=T, dt=0.1, nu_ext_ratio=ratio, seed=seed)
+    p.w_EE = mp["w_EE"]
+    net = build_network(p, verbose=False)
+    vth = None
+    if mu_core > 0:
+        pos = np.asarray(net["pos"])
+        is_E = np.asarray(net["labels"]) == 0
+        cf = sample_core_field(pos, is_E, (L / 2.0, L / 2.0), core_radius, net["rng"],
+                               core_mean=_SNN_BASE_V_TH - mu_core, core_std=core_std)
+        vth = cf["vth"]
+    nut = compute_nu_theta(p)
+    nut = float(nut[0]) if np.ndim(nut) else float(nut)
+    res = simulate_kick(p, net, KICK_BOOST=2.0 * nut, verbose=False, V_th_per_neuron=vth)
+    return snn_spotcheck_record(mu_core, q_global, w_ee_mult, compute_metrics(res, p.dt))
+
+
+# ---------------------------------------------------------------------------
+# TDD-13: mode / event projection into the M3B Round-1 virtual-SEEG readout
+#
+# Push a model field (an eigenmode's E-field or an SNN/rate event) through the SAME virtual-SEEG
+# readout Round-1 used (build_record_from_events + masked ranks), so generated modes can be placed
+# against the real interictal/ictal cohort with geometry nulls. The new bridge claim requires BOTH
+# a spectral mode class AND a readout/null pass (else placement-only).
+# ---------------------------------------------------------------------------
+def default_cross_montage(*, n_per_shaft: int = 7, pitch_mm: float = 1.0, theta: float = THETA_EE):
+    """Two virtual-SEEG shafts crossing at the origin (one along the E->E axis, one across)."""
+    from src.sef_hfo_observation import build_shaft, merge_montages
+    half = 0.5 * (n_per_shaft - 1) * pitch_mm
+    da = (np.cos(theta), np.sin(theta))
+    db = (np.cos(theta + np.pi / 2), np.sin(theta + np.pi / 2))
+    return merge_montages([
+        build_shaft(theta, pitch_mm, n_per_shaft, origin=(-half * da[0], -half * da[1]), name_prefix="A"),
+        build_shaft(theta + np.pi / 2, pitch_mm, n_per_shaft,
+                    origin=(-half * db[0], -half * db[1]), name_prefix="B"),
+    ])
+
+
+def _sample_field_at_contacts(field: np.ndarray, grid: Grid, montage) -> np.ndarray:
+    """Sample |field| at each virtual contact (nearest grid cell)."""
+    sp, off = grid.spacing, grid.n // 2
+    vals = []
+    for cx, cy in montage.contacts:
+        ix = min(max(int(round(cx / sp + off)), 0), grid.n - 1)
+        iy = min(max(int(round(cy / sp + off)), 0), grid.n - 1)
+        vals.append(abs(field[ix, iy]))
+    return np.asarray(vals, float)
+
+
+def project_mode_to_record(phi_E_field: np.ndarray, grid: Grid, *, montage=None,
+                           model_id: str = "model", template_id: str = "t0",
+                           spacing_mm: float = 4.0, participation_frac: float = 0.1,
+                           return_intermediates: bool = False):
+    """Project a mode/event E-field through the virtual-SEEG readout into a model record.
+
+    Higher field amplitude = earlier in the propagation order. Non-participating contacts (amplitude
+    below ``participation_frac`` of max) carry NaN ranks via ``mask_phantom_ranks`` — the SAME masked
+    convention the cohort readout uses (no phantom integer ranks)."""
+    from scripts.run_contact_plane_readout import build_record_from_events
+    from src.lagpat_rank_audit import mask_phantom_ranks
+    if montage is None:
+        montage = default_cross_montage(pitch_mm=grid.L / 10.0)
+    amp = _sample_field_at_contacts(np.asarray(phi_E_field), grid, montage)
+    n_ch = amp.size
+    thr = participation_frac * amp.max() if amp.max() > 0 else 0.0
+    bools = (amp > thr).reshape(-1, 1)
+    ranks = np.argsort(np.argsort(-amp)).astype(float).reshape(-1, 1)   # amplitude order (has phantoms)
+    masked = mask_phantom_ranks(ranks, bools, normalize=True)           # non-participants -> NaN
+    lag_raw = np.where(bools, ranks, np.nan)
+    coords = np.column_stack([montage.contacts, np.zeros(n_ch)])
+    rec = build_record_from_events(
+        dataset="model", subject=model_id, template_id=template_id, names=list(montage.names),
+        ranks=masked, bools=bools, lag_raw=lag_raw, coords=coords, mapped=np.ones(n_ch, bool),
+        soz_core=set(), montage="single", lag_time_unit="ms", spacing_mm=spacing_mm)
+    if return_intermediates:
+        return rec, {"masked_ranks": masked, "bools": bools, "amp": amp}
+    return rec
+
+
+def readout_bridge_verdict(field_placement_percentile: float, geometry_null_beaten: bool) -> str:
+    """Round-1 rule: a model->patient BRIDGE claim requires beating the geometry nulls; otherwise the
+    leg is placement-only (the ictal leg of Round-1 was placement-only for exactly this reason)."""
+    return "bridge" if geometry_null_beaten else "placement_only"
+
+
+# ---------------------------------------------------------------------------
+# TDD-15: verdict / claim audit
+# ---------------------------------------------------------------------------
+ALLOWED_VERDICTS: tuple[str, ...] = (
+    "SPM-PASS full bridge", "SPM-PASS spontaneous mechanism", "SPM-PASS frozen map",
+    "SPM-BOUNDED negative", "SPM-MODEL mismatch", "SPM-UNRESOLVED",
+)
+
+
+def full_bridge_gate(*, phase_map_coherent: bool, snn_predicts_spotchecks: bool,
+                     m3a_trajectory_valid: bool, readout_null_pass: bool) -> str:
+    """A FULL bridge requires ALL of: a coherent phase map, SNN spot checks matching the spectrum, a
+    valid M3A slow trajectory, AND a readout/geometry-null pass. Anything less is a lower tier."""
+    if phase_map_coherent and snn_predicts_spotchecks and m3a_trajectory_valid and readout_null_pass:
+        return "SPM-PASS full bridge"
+    if phase_map_coherent and snn_predicts_spotchecks:
+        return "SPM-PASS spontaneous mechanism"
+    if phase_map_coherent:
+        return "SPM-PASS frozen map"
+    return "SPM-UNRESOLVED"
+
+
+def m3b_verdict(*, phase_map_resolved: bool, controls_pass: bool, model_matches_dynamics: bool,
+                axial_to_global_transition: bool, snn_predicts_spotchecks: bool,
+                m3a_trajectory_valid: bool, readout_null_pass: bool) -> str:
+    """The M3B-R2 verdict from the staged evidence (plan §TDD-15 verdict categories)."""
+    if not phase_map_resolved:
+        return "SPM-UNRESOLVED"
+    if not model_matches_dynamics:
+        return "SPM-MODEL mismatch"
+    if not axial_to_global_transition:
+        # map is numerically valid + controls pass, but no axial->global transition in plausible range
+        return "SPM-BOUNDED negative"
+    return full_bridge_gate(phase_map_coherent=True, snn_predicts_spotchecks=snn_predicts_spotchecks,
+                            m3a_trajectory_valid=m3a_trajectory_valid, readout_null_pass=readout_null_pass)

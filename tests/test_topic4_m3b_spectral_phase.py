@@ -681,41 +681,203 @@ def test_controls_summary_contains_all_required_controls(controls_summary):
 
 
 # ---------------------------------------------------------------------------
-# TDD-11..13 / TDD-15: pending roadmap (parametrized skips -> src/topic4_m3b_spectral_phase.py)
+# TDD-11: rate-field dynamic spot checks (real)
 # ---------------------------------------------------------------------------
-_PENDING = {
-    "TDD-11 rate-field dynamic spot checks": [
-        "test_axial_spectral_point_produces_axial_ratefield_response",
-        "test_global_spectral_point_produces_higher_active_fraction",
-        "test_stable_point_returns_to_baseline_after_pulse",
-        "test_runaway_risk_point_is_flagged_if_no_return",
-    ],
-    "TDD-12 SNN frozen-state spot checks": [
-        "test_snn_param_mapping_is_documented_for_each_point",
-        "test_snn_runs_emit_classification_fields",
-        "test_axial_point_not_systematically_r4b",
-        "test_global_risk_point_has_higher_active_mass_than_axial_point",
-        "test_systematic_spectrum_snn_mismatch_triggers_stop_status",
-    ],
-    "TDD-13 mode/event readout projection": [
-        "test_mock_mode_to_virtual_seeg_record_schema",
-        "test_real_mode_projection_has_required_scalars_and_channels",
-        "test_snn_event_projection_uses_same_masked_readout_conventions",
-        "test_compare_model_to_cohort_runs_without_schema_adapter_hacks",
-        "test_geometry_null_failure_forces_placement_only_verdict",
-    ],
-    "TDD-15 figures/verdict/claim audit": [
-        "test_required_artifacts_exist", "test_required_figures_exist_or_are_marked_na",
-        "test_verdict_category_is_one_of_allowed_values",
-        "test_full_bridge_requires_phase_map_snn_m3a_readout_null_pass",
-        "test_no_forbidden_claims_in_status_and_readme",
-    ],
-}
-
-_ROADMAP = [(section, name) for section, names in _PENDING.items() for name in names]
+@pytest.fixture(scope="module")
+def rf_responses():
+    g = spm.Grid(n=24, L=10.0)
+    core = spm.make_core_mask(g, kind="single", radius=1.2)
+    ker2 = spm.build_kernels(g, ell_perp=0.7)               # AR2 anisotropic scaffold
+    ker1 = spm.build_kernels(g, ar=1.0, ell_perp=0.7)       # AR1 isotropic control
+    exc0 = spm.build_excitability_field(g, core, mu_core=0.0)
+    inh = spm.build_inhibition_field(g, core)
+    ar2 = spm.simulate_ratefield_response(g, ker2, exc0, inh, w_ee_mult=1.0, stim_amp=8.0)
+    ar1 = spm.simulate_ratefield_response(g, ker1, exc0, inh, w_ee_mult=1.0, stim_amp=8.0)
+    exc_hi = spm.build_excitability_field(g, core, mu_core=0.7)
+    runaway = spm.simulate_ratefield_response(g, ker2, exc_hi, inh, w_ee_mult=1.4, stim_amp=8.0)
+    return ar2, ar1, runaway
 
 
-@pytest.mark.parametrize("section,name", _ROADMAP, ids=[f"{n}" for _, n in _ROADMAP])
-def test_m3b_spectral_roadmap_pending(section, name):
-    pytest.skip(f"{section} pending: implement {name} against src/topic4_m3b_spectral_phase.py "
-                "(see plan + canonical interface contract)")
+def test_axial_spectral_point_produces_axial_ratefield_response(rf_responses):
+    ar2, ar1, _ = rf_responses
+    # the anisotropic E->E scaffold makes the kick response elongate along the axis; the isotropic
+    # control does not (Round-1 recovered this 45deg axis from a kick-driven rate field)
+    assert ar2.response_axis_score > 0.2, ar2.response_axis_score
+    assert ar2.response_axis_score > ar1.response_axis_score
+
+
+def test_global_spectral_point_produces_higher_active_fraction(rf_responses):
+    ar2, _ar1, runaway = rf_responses
+    assert runaway.max_active > ar2.max_active    # global recruitment lights up more than self-limited
+
+
+def test_stable_point_returns_to_baseline_after_pulse(rf_responses):
+    ar2, _ar1, _ = rf_responses
+    assert ar2.max_active > 0.0 and ar2.returned   # the kick does excite, then returns to baseline
+
+
+def test_runaway_risk_point_is_flagged_if_no_return(rf_responses):
+    _ar2, _ar1, runaway = rf_responses
+    assert (not runaway.returned) and runaway.max_active > spm._RUNAWAY_FRAC
+
+
+# ---------------------------------------------------------------------------
+# TDD-12: SNN frozen-state spot checks (real)
+# ---------------------------------------------------------------------------
+def test_snn_param_mapping_is_documented_for_each_point():
+    m = spm.snn_param_mapping(mu_core=0.5, q_global=0.9, w_ee_mult=1.3)
+    assert m["g"] < spm._SNN_BASE_G               # q<1 -> disinhibition
+    assert m["w_EE"] > spm._SNN_BASE_W_EE         # w_ee_mult>1 -> stronger recurrent E
+    assert m["core_v_th"] < spm._SNN_BASE_V_TH    # mu_core lowers core threshold
+    assert "transforms" in m and len(m["transforms"]) == 3
+
+
+def test_axial_point_not_systematically_r4b():
+    # a self-limited local event (returns to baseline, low recruitment) must NOT be called R4b
+    axial = dict(baseline=4.0, peak=40.0, tail=4.0, returned=True, inside=200.0, outside=50.0,
+                 ratio=0.25, peak_active_frac=0.1)
+    assert spm.classify_snn_r_class(axial) != "R4b"
+    runaway = dict(baseline=4.0, peak=600.0, tail=600.0, returned=False, inside=500.0,
+                   outside=1200.0, ratio=2.4, peak_active_frac=1.0)
+    assert spm.classify_snn_r_class(runaway) == "R4b"
+
+
+def test_global_risk_point_has_higher_active_mass_than_axial_point():
+    glob = dict(baseline=4.0, peak=300.0, tail=8.0, returned=True, inside=300.0, outside=900.0,
+                ratio=3.0, peak_active_frac=0.8)
+    axial = dict(baseline=4.0, peak=40.0, tail=4.0, returned=True, inside=200.0, outside=50.0,
+                 ratio=0.25, peak_active_frac=0.15)
+    assert spm.snn_active_mass(glob) > spm.snn_active_mass(axial)
+
+
+def test_systematic_spectrum_snn_mismatch_triggers_stop_status():
+    stop = spm.snn_spectrum_consistency([("axial", "R4b"), ("local", "R4b"), ("stable", "R4a")])
+    assert stop["status"] == "stop"
+    ok = spm.snn_spectrum_consistency([("axial", "R2"), ("global", "R4a")])
+    assert ok["status"] == "ok"
+
+
+@pytest.mark.slow
+def test_snn_runs_emit_classification_fields():
+    # one real (tiny) SNN frozen-state pilot must run end-to-end and emit the R-class + metric fields
+    rec = spm.run_snn_spotcheck(mu_core=0.3, q_global=1.0, w_ee_mult=1.0)
+    assert set(spm.SNN_SPOTCHECK_FIELDS) <= set(rec)
+    assert rec["R_class"] in spm.SNN_R_CLASSES
+
+
+# ---------------------------------------------------------------------------
+# TDD-13: mode / event readout projection (real)
+# ---------------------------------------------------------------------------
+def _axial_field(g):
+    th = spm.THETA_EE
+    X, Y = g.coords()
+    u = np.cos(th) * X + np.sin(th) * Y
+    v = -np.sin(th) * X + np.cos(th) * Y
+    return np.exp(-(v ** 2) / (2 * 0.8 ** 2) - (u ** 2) / (2 * 3.0 ** 2))
+
+
+def test_mock_mode_to_virtual_seeg_record_schema():
+    g = spm.Grid(n=24, L=10.0)
+    rec = spm.project_mode_to_record(_axial_field(g), g)
+    assert {"dataset", "subject", "template_id", "channels", "n_channels", "scalars", "flags"} <= set(rec)
+    assert rec["n_channels"] >= 6
+    assert {"axis_length_mm", "transverse_width_mm", "rank_vs_xnorm_spearman"} <= set(rec["scalars"])
+    assert len(rec["channels"]) == rec["n_channels"]
+
+
+def test_real_mode_projection_has_required_scalars_and_channels():
+    g, _ker, _core, _op, J = _core_jac()
+    res = spm.rate_eigenpairs(J, g, n_modes=2)
+    eE = np.abs(spm.mode_e_field(res.right[:, 0], g))
+    rec = spm.project_mode_to_record(eE, g)
+    assert rec.get("n_channels", 0) >= 6
+    assert "scalars" in rec and len(rec.get("channels", [])) > 0
+
+
+def test_snn_event_projection_uses_same_masked_readout_conventions():
+    g = spm.Grid(n=24, L=10.0)
+    X, Y = g.coords()
+    blob = np.exp(-(X ** 2 + Y ** 2) / (2 * 0.8 ** 2))     # localized -> many non-participants
+    _rec, interm = spm.project_mode_to_record(blob, g, return_intermediates=True)
+    nonpart = ~interm["bools"].ravel()
+    assert nonpart.any()
+    # non-participating contacts carry NaN ranks (no phantom integer ranks) — the masked convention
+    assert np.all(np.isnan(interm["masked_ranks"].ravel()[nonpart]))
+
+
+def test_compare_model_to_cohort_runs_without_schema_adapter_hacks():
+    from src.propagation_contact_plane_readout import compare_model_to_cohort, make_plane_grid
+    g = spm.Grid(n=24, L=10.0)
+    model = spm.project_mode_to_record(_axial_field(g), g, model_id="model")
+    reals = [spm.project_mode_to_record(_axial_field(g) * (1 + 0.05 * k), g, model_id=f"s{k}")
+             for k in range(3)]
+    X, Y = make_plane_grid()
+    res = compare_model_to_cohort(model, reals, X, Y)
+    assert "field_placement" in res and "scalar_placement" in res
+
+
+def test_geometry_null_failure_forces_placement_only_verdict():
+    assert spm.readout_bridge_verdict(74.0, geometry_null_beaten=False) == "placement_only"
+    assert spm.readout_bridge_verdict(74.0, geometry_null_beaten=True) == "bridge"
+
+
+# ---------------------------------------------------------------------------
+# TDD-15: figures / verdict / claim audit (real)
+# ---------------------------------------------------------------------------
+_OUT = Path(__file__).resolve().parents[1] / "results/topic4_sef_hfo/m3b_spectral_phase_map"
+_FIG = _OUT / "figures"
+_REQUIRED_ARTIFACTS = (
+    "STATUS.md", "homogeneous_dispersion.json", "finite_jacobian_grid.json", "mode_metrics.csv",
+    "control_summary.json", "mode_readout_projection.json", "m3a_interface_audit.json",
+    "snn_spotcheck_summary.json", "ratefield_spotcheck_summary.json",
+)
+_REQUIRED_FIGURES = (
+    "homogeneous_dispersion.png", "example_modes.png", "phase_map_mode_class.png",
+    "phase_map_gap_gain.png", "non_normal_gain_controllability.png", "mode_readout_projection.png",
+    "snn_spotcheck_grid.png", "slow_trajectory_overlay.png",
+)
+
+
+def test_required_artifacts_exist():
+    import json
+    for art in _REQUIRED_ARTIFACTS:
+        assert (_OUT / art).exists(), f"missing artifact {art} (run scripts/build_m3b_spectral_outputs.py)"
+    # the M3A overlay artifact is correctly the REFUSED audit (M3A absent); the overlay CSV is absent
+    audit = json.loads((_OUT / "m3a_interface_audit.json").read_text(encoding="utf-8"))
+    assert audit.get("overlay_verdict") == "refused"
+
+
+def test_required_figures_exist_or_are_marked_na():
+    readme = (_FIG / "README.md").read_text(encoding="utf-8")
+    for fig in _REQUIRED_FIGURES:
+        assert (_FIG / fig).exists() or fig in readme, f"figure {fig} neither generated nor marked N/A"
+
+
+def test_verdict_category_is_one_of_allowed_values():
+    status = (_OUT / "STATUS.md").read_text(encoding="utf-8")
+    assert any(v in status for v in spm.ALLOWED_VERDICTS)
+    # this run's evidence -> the honest bounded-negative verdict (an allowed category)
+    v = spm.m3b_verdict(phase_map_resolved=True, controls_pass=True, model_matches_dynamics=True,
+                        axial_to_global_transition=False, snn_predicts_spotchecks=False,
+                        m3a_trajectory_valid=False, readout_null_pass=False)
+    assert v in spm.ALLOWED_VERDICTS and v == "SPM-BOUNDED negative"
+
+
+def test_full_bridge_requires_phase_map_snn_m3a_readout_null_pass():
+    full = dict(phase_map_coherent=True, snn_predicts_spotchecks=True, m3a_trajectory_valid=True,
+                readout_null_pass=True)
+    assert spm.full_bridge_gate(**full) == "SPM-PASS full bridge"
+    for k in ("phase_map_coherent", "snn_predicts_spotchecks", "m3a_trajectory_valid", "readout_null_pass"):
+        partial = dict(full)
+        partial[k] = False
+        assert spm.full_bridge_gate(**partial) != "SPM-PASS full bridge"
+
+
+def test_no_forbidden_claims_in_status_and_readme():
+    status = (_OUT / "STATUS.md").read_text(encoding="utf-8")
+    readme = (_FIG / "README.md").read_text(encoding="utf-8")
+    assert "## Forbidden claims" in status                      # guardrail stays frozen
+    # neither the verdict prose nor the figure README overclaims a full bridge / seizure proof
+    for bad in ("proves clinical seizure", "proves seizure onset", "证明发作机制成立", "full bridge established"):
+        assert bad not in readme
+    assert "SPM-BOUNDED negative" in status                     # this run's honest verdict
