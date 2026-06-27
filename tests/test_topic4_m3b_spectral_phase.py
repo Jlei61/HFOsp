@@ -856,11 +856,12 @@ def test_required_figures_exist_or_are_marked_na():
 def test_verdict_category_is_one_of_allowed_values():
     status = (_OUT / "STATUS.md").read_text(encoding="utf-8")
     assert any(v in status for v in spm.ALLOWED_VERDICTS)
-    # this run's evidence -> the honest bounded-negative verdict (an allowed category)
+    # this run's evidence: the §5 non-normal transient shows scaffold-specific self-limited axial
+    # propagation (axial regime present), no SNN/M3A/readout-null bridge -> frozen-map tier
     v = spm.m3b_verdict(phase_map_resolved=True, controls_pass=True, model_matches_dynamics=True,
-                        axial_to_global_transition=False, snn_predicts_spotchecks=False,
+                        axial_to_global_transition=True, snn_predicts_spotchecks=False,
                         m3a_trajectory_valid=False, readout_null_pass=False)
-    assert v in spm.ALLOWED_VERDICTS and v == "SPM-BOUNDED negative"
+    assert v in spm.ALLOWED_VERDICTS and v == "SPM-PASS frozen map"
 
 
 def test_full_bridge_requires_phase_map_snn_m3a_readout_null_pass():
@@ -880,4 +881,42 @@ def test_no_forbidden_claims_in_status_and_readme():
     # neither the verdict prose nor the figure README overclaims a full bridge / seizure proof
     for bad in ("proves clinical seizure", "proves seizure onset", "证明发作机制成立", "full bridge established"):
         assert bad not in readme
-    assert "SPM-BOUNDED negative" in status                     # this run's honest verdict
+    assert any(v in status for v in spm.ALLOWED_VERDICTS)       # the written verdict is an allowed category
+
+
+# ---------------------------------------------------------------------------
+# Path (a): non-normal transient axial readout (§5 PRIMARY metric)
+# ---------------------------------------------------------------------------
+def _resolved_core_jac(mu_core=0.6, ell_perp=0.6, ar=2.0):
+    g = spm.Grid(n=10, L=5.0)
+    ker = spm.build_kernels(g, ar=ar, ell_perp=ell_perp)
+    core = spm.make_core_mask(g, kind="single", radius=0.9)
+    op = spm.solve_operating_point(g, ker, spm.build_excitability_field(g, core, mu_core=mu_core),
+                                   spm.build_inhibition_field(g, core), ratio=1.0, w_ee_mult=1.3)
+    assert op.status == "resolved"
+    return g, ker, core, spm.build_jacobian_dense(g, ker, op)
+
+
+def test_core_kick_transiently_amplified_and_self_limited():
+    g, _ker, core, J = _resolved_core_jac()
+    r = spm.non_normal_axial_readout(J, g, core)
+    # non-normal: a core kick is amplified above 1 then decays back (self-limited), even though the
+    # leading eigenvalue is stable/global
+    assert r["transient_amplified"] and r["peak_gain"] > 1.2
+    assert r["self_limited"]
+
+
+def test_core_kick_transient_is_axial_but_leading_mode_is_not():
+    g, ker, core, J = _resolved_core_jac()
+    r = spm.non_normal_axial_readout(J, g, core)
+    assert r["axial"] and r["max_axis"] > 0.2          # the transient spreads along the E->E axis
+    # ... while the leading eigenmode itself is NOT axial (the signal is in the transient, not the mode)
+    res = spm.rate_eigenpairs(J, g, n_modes=2)
+    assert abs(spm.elongation_axis_score(spm.mode_e_field(res.right[:, 0], g), g)) < 0.1
+
+
+def test_isotropic_scaffold_has_no_axial_transient():
+    # the axial transient is scaffold-specific: an isotropic (AR1) E->E kernel gives no axial transient
+    g, _ker, core, J = _resolved_core_jac(ar=1.0)
+    r = spm.non_normal_axial_readout(J, g, core)
+    assert not r["axial"] and r["max_axis"] < 0.05

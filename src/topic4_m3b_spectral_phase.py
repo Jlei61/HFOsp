@@ -1449,3 +1449,63 @@ def m3b_verdict(*, phase_map_resolved: bool, controls_pass: bool, model_matches_
         return "SPM-BOUNDED negative"
     return full_bridge_gate(phase_map_coherent=True, snn_predicts_spotchecks=snn_predicts_spotchecks,
                             m3a_trajectory_valid=m3a_trajectory_valid, readout_null_pass=readout_null_pass)
+
+
+# ---------------------------------------------------------------------------
+# Path (a): non-normal transient axial readout (§5 PRIMARY metric)
+#
+# The leading eigenmode is global (the bounded-negative result), but the operator is non-normal:
+# a core perturbation b_core can be TRANSIENTLY amplified along the E->E axis before decaying, even
+# when max Re(lambda) < 0. That transient IS the interictal self-limited axial propagation the plan
+# §5 names as a primary result — so we read it directly from exp(J*T) b_core, not the leading mode.
+# ---------------------------------------------------------------------------
+@dataclass
+class TransientResponse:
+    window_ms: float
+    gain: float                 # ||exp(J*T) b_core|| / ||b_core||
+    axis_score: float           # elongation of the transient E-field along the E->E axis
+    core_overlap: float         # E-power still inside the core
+    e_field: np.ndarray         # (n,n) |rE| of the transient response
+
+
+def core_transient_response(J: np.ndarray, grid: Grid, core: CoreMask, T: float, *,
+                            theta: float = THETA_EE, b: np.ndarray = None) -> TransientResponse:
+    """Propagate a core perturbation b_core through exp(J*T) and read its gain / axis / localization."""
+    from scipy.sparse.linalg import expm_multiply
+    if b is None:
+        b = core_perturbation_vector(grid, core)
+    yT = expm_multiply(np.asarray(J) * float(T), b)
+    eT = unpack_state_complex(yT, grid)["rE"]
+    return TransientResponse(
+        window_ms=float(T), gain=float(np.linalg.norm(yT) / np.linalg.norm(b)),
+        axis_score=elongation_axis_score(eT, grid, theta),
+        core_overlap=core_overlap(np.abs(eT), grid, core), e_field=np.abs(eT))
+
+
+# HFO-burst-scale windows (ms) over which the non-normal transient rises and self-limits.
+_TRANSIENT_WINDOWS_MS: tuple[float, ...] = (2.0, 5.0, 10.0, 15.0, 20.0, 30.0, 40.0, 60.0, 90.0)
+
+
+def non_normal_axial_readout(J: np.ndarray, grid: Grid, core: CoreMask, *, theta: float = THETA_EE,
+                             windows: tuple = _TRANSIENT_WINDOWS_MS) -> dict:
+    """§5 primary readout: is a core kick transiently AMPLIFIED, AXIAL, and SELF-LIMITED?
+
+    Returns the gain/axis curves over windows plus the peak summary. ``transient_amplified`` = the
+    gain rises above its short-window value and above 1; ``self_limited`` = it decays back below the
+    peak by the longest window; ``axial`` flags whether the transient elongates along the E->E axis.
+    """
+    resp = [core_transient_response(J, grid, core, T, theta=theta) for T in windows]
+    gains = [r.gain for r in resp]
+    axes = [r.axis_score for r in resp]
+    ipeak = int(np.argmax(gains))
+    peak = resp[ipeak]
+    max_axis = max(axes)
+    return {
+        "windows": list(windows), "gains": gains, "axes": axes,
+        "core_overlaps": [r.core_overlap for r in resp],
+        "peak_gain": peak.gain, "T_at_peak_ms": peak.window_ms, "axis_at_peak": peak.axis_score,
+        "max_axis": float(max_axis), "axis_at_longest": axes[-1],
+        "transient_amplified": bool(peak.gain > gains[0] and peak.gain > 1.0),
+        "self_limited": bool(gains[-1] < peak.gain),
+        "axial": bool(max_axis > 0.15),
+    }

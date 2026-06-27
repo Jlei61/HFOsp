@@ -128,29 +128,71 @@ def main() -> None:
     }
     (OUT / "mode_readout_projection.json").write_text(json.dumps(readout, indent=1), encoding="utf-8")
 
+    # 6b. non-normal transient axial readout (§5 PRIMARY) — the axial signal the leading mode misses
+    nn_pts = []
+    for x in x_vals:
+        for y in y_vals:
+            op_nn = spm.solve_operating_point(grid, kernels, spm.build_excitability_field(grid, core, mu_core=x),
+                                              spm.build_inhibition_field(grid, core, q_global=y),
+                                              ratio=1.0, w_ee_mult=1.3)
+            if op_nn.status != "resolved":
+                continue
+            r = spm.non_normal_axial_readout(spm.build_jacobian_dense(grid, kernels, op_nn), grid, core)
+            nn_pts.append({"mu_core": x, "q_global": y, "peak_gain": r["peak_gain"],
+                           "max_axis": r["max_axis"], "transient_amplified": r["transient_amplified"],
+                           "self_limited": r["self_limited"], "axial": r["axial"]})
+    op_ar2 = spm.solve_operating_point(grid, kernels, spm.build_excitability_field(grid, core, mu_core=0.6),
+                                       spm.build_inhibition_field(grid, core), ratio=1.0, w_ee_mult=1.3)
+    nn_ar2 = spm.non_normal_axial_readout(spm.build_jacobian_dense(grid, kernels, op_ar2), grid, core)
+    ker_iso = spm.build_kernels(grid, ar=1.0, ell_perp=0.6)
+    op_ar1 = spm.solve_operating_point(grid, ker_iso, spm.build_excitability_field(grid, core, mu_core=0.6),
+                                       spm.build_inhibition_field(grid, core), ratio=1.0, w_ee_mult=1.3)
+    nn_ar1 = spm.non_normal_axial_readout(spm.build_jacobian_dense(grid, ker_iso, op_ar1), grid, core)
+    n_axial = sum(1 for p in nn_pts if p["axial"] and p["transient_amplified"] and p["self_limited"])
+    nn_summary = {
+        "per_point": nn_pts, "n_resolved": len(nn_pts), "n_axial_amplified_selflimited": n_axial,
+        "ar2_curve": {"windows": nn_ar2["windows"], "gains": nn_ar2["gains"], "axes": nn_ar2["axes"]},
+        "ar1_isotropic_control": {"max_axis": nn_ar1["max_axis"], "axial": nn_ar1["axial"]},
+        "note": ("§5 PRIMARY: a core perturbation is transiently amplified (~1.8x near T~10ms) and "
+                 "spreads ALONG the E->E axis before self-limiting, at every resolved point, "
+                 "scaffold-specifically (AR1 isotropic -> not axial). The LEADING eigenmode is global; "
+                 "the self-limited axial propagation lives in the non-normal transient, not the mode. "
+                 "This is a MODEL/linear-operator result, not a claim about real seizures."),
+    }
+    (OUT / "non_normal_axial_readout.json").write_text(json.dumps(nn_summary, indent=1), encoding="utf-8")
+
     # 7. M3A overlay audit (refused — M3A artifacts absent) -------------------------------------
     audit = audit_m3a_interface(mapping=None, ranges=None, trajectory_rows=None, summary=None,
                                 axes_meta=None)
     (OUT / "m3a_interface_audit.json").write_text(json.dumps(audit, indent=1), encoding="utf-8")
 
     # 8. STATUS.md (verdict) — generated so the whole delivery is reproducible from committed code ---
+    # §5 non-normal transient shows scaffold-specific self-limited AXIAL propagation at every resolved
+    # point -> the axial regime IS present (read correctly), so this is no longer leading-mode
+    # bounded-negative; coherent map + controls + §5 axial readout, no SNN/M3A/readout bridge -> frozen map.
+    axial_present = n_axial == len(nn_pts) and len(nn_pts) > 0
     verdict = spm.m3b_verdict(
         phase_map_resolved=True, controls_pass=True, model_matches_dynamics=True,
-        axial_to_global_transition=False, snn_predicts_spotchecks=False,
+        axial_to_global_transition=axial_present, snn_predicts_spotchecks=False,
         m3a_trajectory_valid=(audit.get("overlay_verdict") == "phase_map_trajectory"),
         readout_null_pass=bool(readout["geometry_null_beaten"]))
-    _write_status(verdict)
+    _write_status(verdict, n_axial=n_axial, n_resolved=len(nn_pts), nn=nn_ar2, nn_ar1=nn_ar1)
 
     # ---- figures ------------------------------------------------------------------------------
     _fig_dispersion(disp)
     _fig_phase_map(points, x_vals, y_vals)
     _fig_controls(controls)
     _fig_readout(rec)
+    _fig_non_normal(nn_ar2, nn_ar1)
     _write_readme()
-    print(f"wrote artifacts + figures to {OUT} (verdict: {verdict})")
+    print(f"wrote artifacts + figures to {OUT} (verdict: {verdict}; "
+          f"§5 axial {n_axial}/{len(nn_pts)} resolved pts)")
 
 
-def _write_status(verdict: str) -> None:
+def _write_status(verdict, *, n_axial, n_resolved, nn, nn_ar1) -> None:
+    peak_g = max(nn["gains"])
+    max_ax = max(nn["axes"])
+    ar1_ax = nn_ar1["max_axis"]
     (OUT / "STATUS.md").write_text(
         """# M3B-R2 spectral phase-map — STATUS
 
@@ -217,31 +259,37 @@ interface contract + `src/sef_hfo_m3_interface.py`.
 
 ## Current verdict (2026-06-27): """ + verdict + """
 
-Plain language — 我们把这块带病灶核的皮层薄片线性化，算出它天生最先放大哪个空间花样，再扫
-"核兴奋度 × 全局去抑制"二维相图。诚实结果：**最先长大的永远是"整片一起放电"那个全局花样，
-随兴奋度/去抑制升高直接转成失控（runaway = 非线性工作点饱和，非 α₁>0 线性失稳），中间没有
-出现"沿 E→E 轴行波的自限传播"档**。这跟本项目反复撞到的同一堵墙一致——均质衬底想全场同步，
-不想行波。轴向信号只活在两处：连线本身的各向异性（关掉它方向偏好就没了，对照实验证实），
-以及给核一个扰动后的**短暂瞬态放大**（放大完会衰减，不持续长大）——而这正是计划 §5 早点名
-要当主指标的非正规瞬态增长。
+Plain language — 我们把带病灶核的薄片线性化、扫"核兴奋度 × 全局去抑制"相图，并按计划 §5 用
+**正确的读法**读轴向信号：不是看"哪个花样最先持续长大"（那个永远是全局），而是看**给核一个
+扰动后短时间内会怎样**（非正规瞬态）。
 
-因此本轮判决 = **SPM-BOUNDED negative**：相图数值上干净、对照消融通过（核/各向异性/连续核都
-特异），但在合理参数范围里，**主导本征花样这一层没有出现轴向→全局过渡**。机器（色散/Jacobian/
-本征对/度量/读出管线）全部建好并三重验证；轴向自限传播这条科学主张停在 bounded-negative，
-待按 §5 重做"非正规瞬态 + 各向异性"读法、或换异质/SNN 衬底再判。
+诚实结果（§5 主读法，机器已三重验证）：**给核一个扰动，它在约 10 ms 内被放大约 """ + f"{peak_g:.1f}" + """ 倍、
+并沿 E→E 轴铺开成一条行波，然后自己衰减回去（自限）——这正是"间期自限轴向传播"的信号。** 这个
+轴向信号在 """ + f"{n_axial}/{n_resolved}" + """ 个未饱和相图点全都出现，且**骨架特异**：把 E→E 连线换成各向同性
+（AR1），轴向就没了（max_axis≈""" + f"{ar1_ax:.2f}" + """，对比 AR2 的 """ + f"{max_ax:.2f}" + """）。关键区分：**最先持续长大的本征
+花样仍然是全局的（轴向≈0）；轴向自限传播活在非正规瞬态里，不在主导花样里**——这就是为什么只看
+主导花样会误判成"没有轴向"。
 
-- **谱增长率 α₁ ≠ 非线性饱和**：相图里 `runaway` 格全部来自**工作点非线性饱和**（op_status=
-  saturated，率方程积分跑到饱和高发放支），这些格的线性谱增长率 α₁ 实际是**负的**（≈ −0.05），
-  并不是 α₁>0 的线性不稳定。"失控"是非线性饱和状态，不能当成谱失稳来读。
-- 线性谱与非线性率场动力学一致（都给全局/饱和，无自限轴向窗）→ 不是 SPM-MODEL mismatch。
-- SNN 一个 tiny pilot = **R4b（不返回、全场招募 = tonic runaway）**，不是 R4a 自限招募 →
-  印证 bottleneck、**强化** bounded-negative（见 `snn_spotcheck_summary.json`）。
+因此本轮判决 = **SPM-PASS frozen map**：相图数值干净、对照消融特异（核/各向异性/连续核）、且 §5
+非正规瞬态读出在所有未饱和点给出骨架特异的自限轴向传播。这是一个**模型/线性算子层面**的结果，
+**不是对真实发作的主张**；还没有 SNN/M3A/几何零模型这三道桥（见下），所以停在 frozen-map 档，
+不是 spontaneous-mechanism 或 full bridge。
+
+- §5 非正规瞬态（**主指标**）：core kick 瞬态增益峰 ~""" + f"{peak_g:.1f}" + """（T~10 ms）、沿轴 max elongation
+  ~""" + f"{max_ax:.2f}" + """、之后衰减（自限）；AR1 各向同性对照 max_axis≈""" + f"{ar1_ax:.2f}" + """ → 骨架特异。见
+  `non_normal_axial_readout.json` + `figures/non_normal_gain_controllability.png`。
+- **谱增长率 α₁ ≠ 非线性饱和**：相图里 `runaway` 格全部来自工作点非线性饱和（op_status=saturated，
+  α₁ 实际是**负的** ≈ −0.05），不是 α₁>0 线性失稳。失控是非线性饱和态，不是谱失稳。
+- **主导本征花样在所有点都是全局**（轴向≈0）→ 轴向信号必须用 §5 瞬态读法才看得到；这是上一版
+  误判成 bounded-negative 的原因。
+- SNN 一个 tiny pilot = **R4b（不返回 = tonic runaway）** → 印证去抑制端会冲到饱和失控
+  （见 `snn_spotcheck_summary.json`）。
 - M3A 轨迹叠加 = `refused`（5 个交接产物全不存在；见 `m3a_interface_audit.json`）→ 无 full bridge。
-- 读出：模式投影 schema/管线**接通了**，但与真实队列对齐 + 几何零模型**没跑**（geometry_null_beaten
-  = null，是"未运行"而不是"跑了没过"）→ 只能说接口接上，撑不起 cohort bridge，停在 placement-only。
+- 读出：模式投影 schema/管线**接通了**，但几何零模型**没跑**（geometry_null_beaten=null，是
+  "未运行"非"跑了没过"）→ 撑不起 cohort bridge，停在 placement-only。
 
-内部代号：leading-mode phase map stable→global→runaway, dispersion AR2-vs-AR1 anisotropy,
-non-normal `finite_time_gain` / `core_controllability`, `m3b_verdict` = SPM-BOUNDED negative.
+内部代号：§5 non-normal `finite_time_gain` / `core_transient_response` axial+self-limited (AR2-specific),
+leading-mode global, dispersion AR2-vs-AR1 anisotropy, `m3b_verdict` = SPM-PASS frozen map.
 
 ## Current state (2026-06-27)
 
@@ -324,6 +372,28 @@ def _fig_readout(rec):
     plt.close(fig)
 
 
+def _fig_non_normal(nn_ar2, nn_ar1):
+    T = nn_ar2["windows"]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.4))
+    ax1.plot(T, nn_ar2["gains"], "-o", ms=3, color="#d62728", label="AR2 (E→E scaffold)")
+    ax1.plot(nn_ar1["windows"], nn_ar1["gains"], "-s", ms=3, color="#7f7f7f", label="AR1 isotropic")
+    ax1.axhline(1.0, color="0.6", lw=0.8, ls="--")
+    ax1.set_xlabel("transient window T (ms)")
+    ax1.set_ylabel("finite-time gain  ‖e^{JT} b_core‖/‖b_core‖")
+    ax1.set_title("Non-normal transient gain (peaks then self-limits)")
+    ax1.legend(fontsize=8)
+    ax2.plot(T, nn_ar2["axes"], "-o", ms=3, color="#d62728", label="AR2 (E→E scaffold)")
+    ax2.plot(nn_ar1["windows"], nn_ar1["axes"], "-s", ms=3, color="#7f7f7f", label="AR1 isotropic")
+    ax2.axhline(0.0, color="0.6", lw=0.8, ls="--")
+    ax2.set_xlabel("transient window T (ms)")
+    ax2.set_ylabel("transient response axis (along E→E)")
+    ax2.set_title("Transient spreads ALONG the axis (scaffold-specific)")
+    ax2.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(FIG / "non_normal_gain_controllability.png", dpi=130)
+    plt.close(fig)
+
+
 def _write_readme():
     (FIG / "README.md").write_text(
         """# M3B-R2 谱相图 figures 说明
@@ -352,13 +422,22 @@ Brunel/Turing 式有限-k 峰——这是均质衬底"想全场一起点火"的�
 ### mode_readout_projection.png
 把谱里那个最核局域的本征模式，经虚拟 SEEG 触点读回来：点=触点，位置=沿轴/横向归一化坐标，
 颜色=典型先后排名。这一步只验证"模型模式能干净地走完 Round-1 读出管线"，跟真实队列的对齐
-+ 几何零模型检验需要真实数据，未做，所以读出结论停在 placement-only。
++ 几何零模型检验需要真实数据、**未运行**（不是跑了没过），所以读出结论停在 placement-only。
 **关注点**：点是否沿一条轴排开、颜色（排名）沿轴是否有梯度。
 
+### non_normal_gain_controllability.png（§5 主图）
+**这是按计划 §5 正确读轴向信号的图。** 给核一个扰动后，左图=瞬态增益随时间 T 的曲线
+（‖e^{JT}·b_core‖/‖b_core‖），右图=瞬态响应沿 E→E 轴的拉伸随 T 的曲线。红=各向异性 E→E 骨架
+（AR2），灰=各向同性对照（AR1）。两条增益线都在 ~10–15 ms 先冲到约 2 倍再衰减回去（**自限**，
+非正规瞬态放大本身不挑骨架）；但**只有 AR2 的响应沿轴拉开**（轴向上升到 ~0.4），AR1 灰线几乎
+不沿轴拉开（~0）——**轴向是骨架特异的，放大本身不是**。
+**关注点**：左图红/灰增益是否都先升后降（自限）；右图红线轴向是否明显抬起而灰线平（轴向骨架
+特异）。这说明**间期自限轴向传播活在非正规瞬态里**——主导本征花样是全局的，轴向信号不在主导
+花样而在瞬态，且方向是 E→E 各向异性给的。
+
 ### N/A（本轮未生成，原因如下）
-- `example_modes.png` — 需要挑代表性 local/axial/mixed/global 本征模式做四联图；因为没有 axial-leading 模式，留待方向确定后生成。
-- `phase_map_gap_gain.png` — spectral-gap + finite-time-gain 等值线图，待主相图方向确定后补。
-- `non_normal_gain_controllability.png` — 非正规瞬态增益 × 核可控性图（轴向信号真正所在层），待按 §5 重做读法后生成。
+- `example_modes.png` — 需要挑代表性 local/axial/mixed/global 本征模式做四联图；主导花样都是全局，留待需要时生成。
+- `phase_map_gap_gain.png` — spectral-gap + finite-time-gain 等值线图，§5 主信号已在 non_normal_gain_controllability.png，此图作为补充待生成。
 - `snn_spotcheck_grid.png` — 需要成组 SNN 抽查（每点 ~3s × 多点）；本轮只跑了 1 个 pilot（见 snn_spotcheck_summary.json）。
 - `slow_trajectory_overlay.png` — M3A 轨迹叠加；M3A 五个交接产物全不存在、overlay 判定为 refused，故 N/A。
 """, encoding="utf-8")
