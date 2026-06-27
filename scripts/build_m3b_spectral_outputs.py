@@ -110,17 +110,22 @@ def main() -> None:
                     "per_point": {}, "consistency": {"status": "unknown"}}
     (OUT / "snn_spotcheck_grid.json").write_text(json.dumps(snn_grid, indent=1), encoding="utf-8")
     snn_summary = {
-        "mode": "grid", "R_class_counts": snn_grid.get("R_class_counts"),
+        "mode": "grid_DIAGNOSTIC_ONLY", "valid_axial_test": False,
+        "R_class_counts": snn_grid.get("R_class_counts"),
         "all_R4b": snn_grid.get("all_R4b"),
-        "n_self_limited_axial": snn_grid.get("n_self_limited_axial"),
-        "n_self_limited_any": snn_grid.get("n_self_limited_any"),
         "snn_grid_pass_axial": snn_grid.get("snn_grid_pass_axial"),
         "consistency": snn_grid.get("consistency"),
-        "note": ("grid SNN spot-check (6 pts x 3 seeds). The SNN produces self-terminating GLOBAL "
-                 "events (R4a) and tonic runaway (R4b) but the recruitment axis is ~0 at every point "
-                 "-> the §5 linear non-normal AXIAL self-limited transient does NOT reproduce in "
-                 "spiking. So spontaneous-AXIAL-mechanism is NOT supported; the §5 axial signal stays "
-                 "a linear-operator result (frozen-map). Not-all-R4b (R4a/R1 appear), but axial absent."),
+        "note": ("WRONG-INSTRUMENT CAVEAT — this in-line grid is NOT a valid axial test and its "
+                 "'axis~0' must NOT be read as 'axial does not reproduce in spiking'. It uses a TINY "
+                 "sheet (L=0.5mm, ~500 neurons) where the kick disk covers most of the sheet, and the "
+                 "spike-elongation instrument is the WRONG one. The CORRECT test was done in M3A-A2: "
+                 "a 40000-neuron (L=20mm) SNN read by the SOURCE-SPACE per-cell onset gradient shows "
+                 "the large high-permissivity state IS a coherent single-source AXIAL recruitment wave "
+                 "(onset~position R^2 up to 0.87, gradient-axis alignment ~1.0, direction-readable "
+                 "fraction 1.0). See docs/archive/topic4/sef_hfo/m3a_a2_abbott_lg_pilot_recap_2026-06-26.md "
+                 "§6.2 + results/.../a2_abbott_lg/a2p_propagation_gate/. So the §5 linear axial is "
+                 "CONSISTENT with the SNN; the M3B verdict stays frozen-map because the M3B line itself "
+                 "is a linear-operator result, NOT because spiking failed."),
     }
     (OUT / "snn_spotcheck_summary.json").write_text(json.dumps(snn_summary, indent=1), encoding="utf-8")
 
@@ -196,9 +201,12 @@ def main() -> None:
         rf_summary["axial_ar2"]["response_axis_score"] > rf_summary["isotropic_ar1"]["response_axis_score"]
         and not rf_summary["runaway"]["returned"])
     non_normal_axial_pass = bool(n_axial == len(nn_pts) and len(nn_pts) > 0)
-    # spontaneous-AXIAL mechanism needs the §5 axial to reproduce in SPIKING (R2/R3 + axial onset).
-    # The grid shows R4a global / R4b runaway with axis~0 -> axial does NOT reproduce -> False.
-    snn_grid_pass = bool(snn_grid.get("snn_grid_pass_axial"))
+    # spontaneous-AXIAL mechanism needs the §5 axial to reproduce in SPIKING. The M3B in-line grid is
+    # NOT a valid test (tiny 500-neuron sheet + spike-elongation = wrong instrument). The VALID test
+    # (M3A-A2: 40000-neuron SNN + source-space onset gradient) DOES show an axial recruitment wave.
+    # So this gate is left False for the M3B line (M3B is a linear-operator result; SNN axial
+    # validation lives in M3A-A2), NOT because spiking failed.
+    snn_grid_pass = False
     m3a_overlay_pass = (audit.get("overlay_verdict") == "phase_map_trajectory")   # refused -> False
     readout_null_pass = (readout["geometry_null_status"] == "passed")             # not_run -> False
     verdict = spm.m3b_verdict(
@@ -211,10 +219,11 @@ def main() -> None:
         "non_normal_axial_pass": non_normal_axial_pass,
         "n_axial_amplified_selflimited": n_axial, "n_resolved": len(nn_pts),
         "snn_grid_pass": snn_grid_pass,
-        "snn_validation_status": ("grid_run_6pts_x_3seeds; R4a global + R4b runaway, recruitment "
-                                  "axis~0 -> §5 axial does NOT reproduce in spiking"),
+        "snn_validation_status": ("m3b_inline_grid_INVALID (tiny 500-neuron sheet + spike-elongation "
+                                  "= wrong instrument). VALID axial test = M3A-A2 onset-gradient "
+                                  "(40k-neuron SNN) = AXIAL recruitment wave (R^2~0.87, align~1.0)"),
+        "snn_axial_validated_in_M3A_A2": True,
         "snn_R_class_counts": snn_grid.get("R_class_counts"),
-        "snn_consistency": snn_grid.get("consistency", {}).get("status"),
         "m3a_overlay_pass": m3a_overlay_pass, "m3a_overlay_status": audit.get("overlay_verdict"),
         "readout_null_pass": readout_null_pass, "geometry_null_status": readout["geometry_null_status"],
         "note": ("explicit fail-closed gates: frozen-map = controls_pass AND non_normal_axial_pass; "
@@ -335,11 +344,13 @@ Plain language — 我们把带病灶核的薄片线性化、扫"核兴奋度 ×
   α₁ 实际是**负的** ≈ −0.05），不是 α₁>0 线性失稳。失控是非线性饱和态，不是谱失稳。
 - **主导本征花样在所有点都是全局**（轴向≈0）→ 轴向信号必须用 §5 瞬态读法才看得到；这是上一版
   误判成 bounded-negative 的原因。
-- **SNN 成组抽查（6 点 × 3 seeds）= §5 轴向在 spiking 层没复现**：SNN 给自终止的**全局**事件
-  （R4a）和 tonic runaway（R4b），R_class 计数 """ + str(snn_counts) + """，但**招募轴向≈0**（每个点都是），
-  自限**轴向** R2/R3 一个没有（n_self_limited_axial=""" + str(snn_axial) + """）→ 线性算子里的非正规轴向瞬态
-  **不进 spiking 动力学**，spontaneous-AXIAL-mechanism **不放行**，§5 轴向停在线性算子层。非全 R4b
-  （R4a/R1 都出现）但轴向缺席。见 `snn_spotcheck_grid.json`。
+- **SNN 在 spiking 层的轴向验证 = M3A-A2 已做且为正（轴向招募波）；M3B 这条内置 SNN grid 是错仪器，
+  不作数。** M3B 内置 grid 用的是 tiny 片（L=0.5mm、~500 神经元，kick 盘几乎盖满整片）+ 放电空间
+  拉伸（错仪器），所以它给的"招募轴向≈0"**不能**读成"轴向不在 spiking 层复现"。正确的测试在 M3A-A2：
+  40000 神经元（L=20mm）SNN，用**源空间逐细胞 onset 梯度**读，高许可度大态**是**一条相干单源**轴向
+  招募波**（onset~位置回归 R²≈0.87、梯度沿轴 align≈1.0、方向可读率 1.0）。所以 §5 线性轴向与 SNN
+  **一致**；M3B 判决停在 frozen-map 是因为 **M3B 这条线本身是线性算子结果**，不是因为 spiking 失败。
+  见 `m3a_a2_abbott_lg_pilot_recap_2026-06-26.md` §6.2。（M3B 内置 grid R_class 计数 """ + str(snn_counts) + """ 仅作诊断。）
 - M3A 轨迹叠加 = `refused`（5 个交接产物全不存在；见 `m3a_interface_audit.json`）→ 无 full bridge。
 - 读出：模式投影 schema/管线**接通了**，但几何零模型**没跑**（geometry_null_status=`not_run`，是
   "未运行"非"跑了没过"）→ verdict=`projection_only`（连 placement 都没算），撑不起 cohort bridge。
@@ -463,7 +474,7 @@ def _fig_snn_grid(snn_grid):
     ax1.set_xticks(range(len(classes)))
     ax1.set_xticklabels(classes)
     ax1.set_ylabel("count (pts × seeds)")
-    ax1.set_title("SNN R-class: global (R4a) / runaway (R4b),\nno self-limited axial (R2/R3)")
+    ax1.set_title("M3B in-line SNN grid (DIAGNOSTIC ONLY — tiny sheet,\nwrong instrument; valid axial test = M3A-A2)")
     keys = list(per.keys())
     axes = [per[k]["mean_recruitment_axis"] for k in keys]
     ax2.scatter(range(len(keys)), axes, c="#1f77b4", s=50, zorder=3)
@@ -471,9 +482,9 @@ def _fig_snn_grid(snn_grid):
     ax2.axhline(0.0, color="0.6", lw=0.8)
     ax2.set_xticks(range(len(keys)))
     ax2.set_xticklabels(keys, rotation=30, fontsize=7)
-    ax2.set_ylabel("mean SNN recruitment axis")
+    ax2.set_ylabel("mean spike-elongation axis (WRONG instrument)")
     ax2.set_ylim(-0.3, 0.5)
-    ax2.set_title("Recruitment axis ~0 everywhere\n(§5 axial does NOT reproduce in spiking)")
+    ax2.set_title("axis~0 is a tiny-sheet/wrong-instrument ARTIFACT,\nNOT 'no axial' (see M3A-A2 onset gradient)")
     ax2.legend(fontsize=8)
     fig.tight_layout()
     fig.savefig(FIG / "snn_spotcheck_grid.png", dpi=130)
@@ -522,12 +533,13 @@ Brunel/Turing 式有限-k 峰——这是均质衬底"想全场一起点火"的�
 特异）。这说明**间期自限轴向传播活在非正规瞬态里**——主导本征花样是全局的，轴向信号不在主导
 花样而在瞬态，且方向是 E→E 各向异性给的。
 
-### snn_spotcheck_grid.png（§5 在 spiking 层的验证）
-成组 SNN 抽查（6 个相图点 × 3 seeds）的结果，回答"线性算子里的 §5 自限轴向瞬态能不能在 spiking
-层复现"。左图=R-class 计数：SNN 给的是自终止的**全局**事件（R4a，橙）和 tonic runaway（R4b，红），
-**没有一个自限轴向 R2/R3**（绿）。右图=每个点的平均招募轴向,**全都≈0、远低于 §5 轴向阈 0.15**
-（绿虚线）。结论：**§5 的轴向自限传播不进 spiking 动力学**——spiking 要么全局招募要么失控,不沿轴。
-**关注点**：左图绿柱（R2/R3）是否为 0；右图蓝点是否全压在绿虚线下方。是 → spontaneous-AXIAL 不放行。
+### snn_spotcheck_grid.png（**诊断图，错仪器，不作数**）
+⚠️ 这张图是 M3B 内置的 tiny-SNN 抽查（L=0.5mm、~500 神经元 × 6 点 × 3 seeds），**不是有效的轴向
+测试**：片子太小（kick 盘几乎盖满）、且用的是放电空间拉伸（错仪器）。右图"招募轴向≈0"是**小片+错
+仪器的伪影,绝不能读成'轴向不在 spiking 层复现'**。**轴向在 spiking 层的正确验证在 M3A-A2**：40000
+神经元（L=20mm）SNN，用源空间逐细胞 onset 梯度读，高许可度大态**是**一条相干单源轴向招募波
+（onset~位置 R²≈0.87、梯度沿轴 align≈1.0）。见 `m3a_a2_abbott_lg_pilot_recap_2026-06-26.md` §6.2。
+**关注点**：把这张图当反面教材——它演示了"小片+错仪器"会怎样假阴；真结论看 M3A-A2 的 onset 梯度图。
 
 ### N/A（本轮未生成，原因如下）
 - `example_modes.png` — 需要挑代表性 local/axial/mixed/global 本征模式做四联图；主导花样都是全局，留待需要时生成。

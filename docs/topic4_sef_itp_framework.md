@@ -8,6 +8,8 @@
 >
 > **v0.2 核心边界**：只解释间期 HFO 群体事件中观传播组织（event envelope、通道激活顺序、rank template、forward/reverse、endpoint geometry）；不解释 clinical seizure onset；不解释 HFO carrier 细胞生物物理；不把 template source 拟合成 clinical SOZ。
 >
+> **M3A 慢变量边界（2026-06-28 收紧）**：A1b/A2 里的“大范围招募”不能自动叫发作样。若事件仍沿 E→E 长轴相干推进，应降级为 expanded axial recruitment / preictal-like axial expansion；只有出现轴向主导下降、离轴/全局/低-k 招募增强，并且能从高招募态恢复，才进入 ictal-like candidate。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -20,9 +22,9 @@
 
 ## 0. 一句话承诺（朴素表述，CLAUDE.md §8 大白话风格）
 
-我们假设：**间期 HFO 群体事件不是每次随机走一条新路，而是同一块病理组织附近存在一条固定的传播高速路**。这块组织内部神经元更相似，但“更相似”本身不自动等于“更危险”；它必须先改变群体输入-输出曲线，再改变局部线性稳定性。噪声偶尔点燃这条路，活动沿轴传播后自限熄灭；慢变量把系统推得更危险时，事件出现得更频繁，但不应该重写传播路线。
+我们假设：**间期 HFO 群体事件不是每次随机走一条新路，而是同一块病理组织附近存在一条固定的传播高速路**。这块组织内部神经元更相似，但“更相似”本身不自动等于“更危险”；它必须先改变群体输入-输出曲线，再改变局部线性稳定性。噪声偶尔点燃这条路，活动沿轴传播后自限熄灭；慢变量把系统推得更危险时，应先解释为什么事件被推大、怎么推大、以及怎么回来。若活动只是沿同一条轴扩大，仍是间期轴向传播的放大版；发作样只保留给破开轴向主导的全局/离轴招募候选。
 
-如果这个图景正确，我们应该看到：通道传播顺序稳定、正反模板共享同一条空间轴、同一 subject 内通道身份偏置很高但高于几何采样对照、事件率可被慢变量调制但传播几何相对稳定。发作样持续招募只作为仿真可行性桥接，不作为真实发作起始解释。
+如果这个图景正确，我们应该看到：通道传播顺序稳定、正反模板共享同一条空间轴、同一 subject 内通道身份偏置很高但高于几何采样对照；慢变量可以调制事件率和招募范围，但不能把“同轴扩大”误写成发作。发作样持续招募只作为仿真可行性桥接，不作为真实发作起始解释。
 
 如果这些现象在 synthetic data 里只有靠手工调参或人工挑图才能出现，模型失败。所有 synthetic data 必须走真实模板 pipeline；clinical SOZ 只作 held-out 关系检验，不作反向拟合标签。模型**不**解释 HFO 80-250/500 Hz carrier 振荡是哪来的。
 
@@ -55,13 +57,13 @@
 - 病理组织附近有一块局部低异质性的 E-I 易激斑块：同类神经元阈值更相似；这个变化必须先进入群体输入-输出曲线，再由实际线性化结果决定它是否更接近临界。
 - E→E 连接核是各向异性的；沿长轴传播更容易。这条长轴就是正反模板共享的传播高速路。
 - 斑块处在近临界但仍亚阈值的候选工作窗：线性稳定性只给地图，有限幅脉冲仿真才证明它能被点燃并自限熄灭。
-- 慢变量主要控制事件被点燃的**频率**，不应该重写传播几何；如果慢变量一加进去模板就完全换路，模型失败。
+- 慢变量首先回答事件为什么更容易被点燃、为什么会扩大、以及如何恢复；在间期模板层面传播轴应相对稳定，但若要声称发作样，必须证明主导活动模式不只是同轴扩大，而是出现离轴/全局/低-k 招募。
 
 这个思路把"空间几何"和"E-I 稳定性"同时放回机制核心。它比 v1 的抽象扩散 / HR toy 更 sharp，因为它给出三条可直接证伪的机制杠杆：
 
 - 各向异性轴旋转，模板方向必须跟着旋转。
 - 降低局部 threshold variance 后，必须先计算 gain 和线性稳定性是否真的改变；若改变方向成立，成核点才应向该 patch 聚集，而不是只增加全局同步。
-- 慢变量改变事件率时，rank geometry 应保持稳定。
+- 慢变量改变事件率或招募范围时，间期 rank geometry 应保持稳定；发作样候选必须另用 source-space onset / axis-breaking gate 判定，不能只靠 `r95` 变大。
 
 v1 已经锁定的真实数据判据继续保留；v0.2 替换的是机制实现路线：先做 effective gain、线性稳定性和 finite-pulse response，再进入 rate field / LIF SNN，而不是直接把 HR/FHN 节点拼成 toy movie。
 
@@ -707,10 +709,12 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 **Step 5：加入慢变量**
 
-- 第一版只用抽象 `q(t)` 调制 `eta(x,t)`。
-- 验收：事件率升高但 rank template 不大幅改变；forward / reverse 不需要强时间配对；`eta(x,t) < 0` 时能在仿真中进入 ictal-like recruitment。
-- `z_I(t)`、`g_K(t)`、`E_GABA` 漂移只作后续机制分解，不进第一版主分析。
-- ictal-like recruitment 只作为 synthetic feasibility bridge，不作为 clinical seizure onset claim。
+- M3A 现在拆成两个 gate：**Gate A = 慢状态轨迹是否合理**，即局部资源耗竭把系统推向更高许可度，恢复变量把系统拉回来；**Gate B = phenotype 是否真的发作样**，即是否从轴向传播/轴向扩大切换到离轴、全局或 low-k 招募。
+- A1b 的 `local-global` 地形只支持一个静态模型坐标：局部化易激性优势 vs 全局抑制约束。旧 `seizure_like` 标签过宽；若事件仍沿 E→E 长轴推进，应改写为 expanded axial recruitment，而不是发作态。
+- A1c 说明动态全局反馈的 timing 可以终止部分 runaway，但 uniform global brake 不是干净机制：强到压住 core 时会同时过压 surround / 弱态；弱到保住弱态时又压不住 core。
+- A2 说明 `q_core` 耗竭能解释“为什么推”，`g_K` / sAHP 类恢复项能解释“怎么回来”的最低条件；但当前高许可度事件主要是沿两核轴的相干招募波，不是完全同步爆发，也不是已验证的离轴发作样招募。
+- 验收必须显式分四类：interictal axial event、expanded axial recruitment、ictal-like axis-breaking/global recruitment、runaway。单纯事件率升高、`r95` 变大、contact 同步或旧 collision 读数都不够。
+- ictal-like recruitment 只作为 synthetic feasibility bridge，不作为 clinical seizure onset claim；当前 M3A 结论是 pilot / mechanism screen，不是 PASS。
 
 **Step 6：回到真实数据做预测验证**
 
@@ -732,8 +736,8 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 2. 为什么正反模板共享 source/sink 几何骨架（→ 同一条轴从两端随机成核，而非两套网络）
 3. 为什么 identity bias 高（→ 通道 rank 主要由电极在传播轴上的位置决定；raw 数值只作描述性输出）
 4. 为什么模板选择在已测试尺度上近似随机（→ 噪声决定每次从哪端点燃，短时间强配对不是必要机制）
-5. 为什么 event rate 可受慢变量调制，而模板几何相对稳定（→ 抽象慢变量调 `eta(x,t)`，不改连接轴）
-6. 为什么同一参数族在仿真中可能从自限传播进入持续招募（→ synthetic feasibility bridge，不是 clinical seizure onset claim）
+5. 为什么 event rate 和招募范围可受慢变量调制，而间期模板几何相对稳定（→ 局部资源耗竭调许可度，不改 E→E 连接轴）
+6. 为什么同一参数族在仿真中可能从局部轴向事件进入更大轴向招募并恢复（→ M3A pilot 支持 expanded axial recruitment；真正 ictal-like 仍需 axis-breaking/global gate）
 
 ### 7.2 模型暂时**不支持**的强说法（写死 out-of-scope）
 
@@ -743,12 +747,14 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 4. ❌ source 是兴奋驱动，sink 是抑制反弹（**HFO 80–250 Hz 不分 E/I**，红线）
 5. ❌ 正反模板证明了双稳态 attractor 或强 ping-pong 机制（H3 仅声明 "compatible with mark-independent within tested precision"）
 6. ❌ 模板选择已经被证明完全独立（同上）
+7. ❌ 大范围但仍沿轴推进的 recruitment wave 已经等于发作
+8. ❌ A1b/A2 已经证明“间期短事件 → 发作样全局招募 → 恢复”的完整慢变量机制
 
 ### 7.3 文献 framing：具体机制多样，中观动力学收敛
 
 这批文献的作用不是“证明我们的 HFO 模型”，而是给 Topic 4 的建模地位划边界：钾离子、钠钾泵、氯离子 / GABA、胶质缓冲、抑制失效、突触短时可塑性、结构连接和局部网络异质性都可能参与癫痫；但在 HFO 群体事件这个尺度上，它们共同改变的是局部网络多容易被点燃、点燃后多快恢复、有限扰动是否会扩展成更大空间招募。
 
-因此 SEF-HFO 不把某一个细胞机制硬塞成“真实慢变量”。它只检验一个更抽象、更可证伪的问题：如果局部组织处在稳定但可激、接近临界但未失控的状态，并且连接有固定空间轴，那么噪声触发的间期 HFO 群体事件是否会留下稳定的通道先后顺序；当慢状态把系统推近边界时，事件率和招募是否可以增加，而传播几何不被重写。
+因此 SEF-HFO 不把某一个细胞机制硬塞成“真实慢变量”。它只检验一个更抽象、更可证伪的问题：如果局部组织处在稳定但可激、接近临界但未失控的状态，并且连接有固定空间轴，那么噪声触发的间期 HFO 群体事件是否会留下稳定的通道先后顺序；当慢状态把系统推近边界时，事件率和招募是否可以增加，并且大范围轴向招募、离轴/全局招募和 runaway 能否被清楚区分。
 
 引用分层写法：
 
@@ -760,7 +766,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 安全核心句：
 
-> We do not assume a single cellular mechanism linking interictal and ictal activity. Instead, we use a dynamical abstraction: diverse biophysical mechanisms may converge onto a shared change in local excitability, resilience, and finite-amplitude recruitment. Under this view, interictal group-HFO events are modeled as isolated excursions of a pathological excitable field, whereas ictal-like recruitment corresponds to slow-state-gated clustering or spatial expansion of similar elementary events.
+> We do not assume a single cellular mechanism linking interictal and ictal activity. Instead, we use a dynamical abstraction: diverse biophysical mechanisms may converge onto a shared change in local excitability, resilience, and finite-amplitude recruitment. Under this view, interictal group-HFO events are modeled as isolated axial excursions of a pathological excitable field. Slow-state-gated expansion along the same axis is an intermediate recruitment phenotype, whereas an ictal-like synthetic candidate requires a measurable shift toward off-axis, global, or low-k recruitment with recovery rather than tonic runaway.
 
 详细文献分层和引用位置见 `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md` §6。
 
@@ -818,11 +824,11 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ## 10. 中心段落（草稿，供未来 paper / abstract 使用）
 
-> 我们假设，间期群体 HFO 传播模板来自一块局部低异质性、连接有固定方向、接近临界但仍未失控的 E-I 易激斑块。低异质性本身不是结论；它必须先改变群体输入-输出曲线和局部 gain，再在线性稳定性与有限幅脉冲仿真中表现为“能被点燃、但能自限熄灭”的工作窗。稳定的 endpoint 不被假定为 SOZ 边界，也不被强制假定为 SOZ 内部节点，而是模型预测的传播几何锚点。正反模板来自同一条各向异性传播轴从两端随机成核，而不是两套独立网络或强 ping-pong 机制。慢变量主要调节事件发生率；如果它重写传播几何，模型失败。发作样持续招募只作为仿真可行性桥接，不作为 clinical seizure onset 解释。
+> 我们假设，间期群体 HFO 传播模板来自一块局部低异质性、连接有固定方向、接近临界但仍未失控的 E-I 易激斑块。低异质性本身不是结论；它必须先改变群体输入-输出曲线和局部 gain，再在线性稳定性与有限幅脉冲仿真中表现为“能被点燃、但能自限熄灭”的工作窗。稳定的 endpoint 不被假定为 SOZ 边界，也不被强制假定为 SOZ 内部节点，而是模型预测的传播几何锚点。正反模板来自同一条各向异性传播轴从两端随机成核，而不是两套独立网络或强 ping-pong 机制。慢变量可以通过局部资源耗竭和恢复过程改变事件发生率与招募范围；但沿同一传播轴变大的事件仍只是 expanded axial recruitment。发作样持续招募只作为仿真可行性桥接，必须另证离轴/全局/low-k 招募和恢复，不作为 clinical seizure onset 解释。
 
 英文版（供 abstract / 投稿）：
 
-> We hypothesize that interictal group-HFO propagation templates arise from a locally low-heterogeneity, anisotropically connected E-I excitable patch that is near critical yet still subthreshold. Low heterogeneity is not assumed to imply excitability directly; it must enter the effective population transfer function, alter local gain, and then produce a linear-stability and finite-pulse working regime in which finite perturbations can trigger self-limited propagation without runaway recruitment. Stable source/sink endpoints are not assumed to be SOZ boundaries or restricted to SOZ interior; rather, they are predicted geometric anchors of propagation. Forward/reverse template pairs arise from stochastic nucleation at opposite ends of the same anisotropic propagation axis, not from two independent networks or a forced ping-pong mechanism. Slow modulation changes event probability while the underlying template geometry remains relatively stable; ictal-like recruitment is treated only as a synthetic feasibility bridge, not as an explanation of clinical seizure onset.
+> We hypothesize that interictal group-HFO propagation templates arise from a locally low-heterogeneity, anisotropically connected E-I excitable patch that is near critical yet still subthreshold. Low heterogeneity is not assumed to imply excitability directly; it must enter the effective population transfer function, alter local gain, and then produce a linear-stability and finite-pulse working regime in which finite perturbations can trigger self-limited propagation without runaway recruitment. Stable source/sink endpoints are not assumed to be SOZ boundaries or restricted to SOZ interior; rather, they are predicted geometric anchors of propagation. Forward/reverse template pairs arise from stochastic nucleation at opposite ends of the same anisotropic propagation axis, not from two independent networks or a forced ping-pong mechanism. Slow modulation may alter event probability and recruitment extent through local resource depletion and recovery, but larger waves along the same axis are classified as expanded axial recruitment. Ictal-like recruitment is treated only as a synthetic feasibility bridge and requires a separate off-axis/global/low-k recruitment gate with recovery, not an explanation of clinical seizure onset.
 
 ---
 
@@ -850,7 +856,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - [x] `sigma_phi(x)` 必须通过 `F_eff -> G -> lambda -> eta_lin` 闭合，禁止直接写 `sigma_phi down => eta down`
 - [x] Phase 4 v0.2 主路线 = effective gain → linear dispersion map → finite-pulse response map → rate field → controls → LIF SNN → 抽象慢变量桥接；HR/FHN route 降级历史 / sensitivity
 - [x] `k=2` 与 raw identity bias 降级为 descriptive；主验收必须包含 held-out stability + controls fail
-- [x] ictal-like recruitment 只作 synthetic feasibility bridge，不作 clinical seizure onset claim
+- [x] ictal-like recruitment 只作 synthetic feasibility bridge，不作 clinical seizure onset claim；大范围同轴 recruitment wave 不自动升级为发作样
 - [x] 与 PR-T3-1 数据驱动 SOZ 的双标签合同写明
 - [x] SBA framework 取代 / 保留范围明确（§9.1）
 - [x] Topic 1 §2 + Topic 3 §2 保留 Topic 4 模型层链接；v0.2 主入口指向 SEF-HFO / SEF-ITP formal entry
@@ -861,7 +867,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ## 12. 一句话承诺（结尾）
 
-我们把 Topic 4 的模型层从 **"塞 Hebbian 矩阵让 Kuramoto 演化得到预设吸引子"**，再推进到 **"低异质性 + 各向异性连接 + 近临界 E-I 易激场"**。第一步不是上复杂 SNN，而是先把低异质性写进群体输入-输出曲线，实际计算它是否改变局部 gain 和线性稳定性；线性图只给候选工作区，有限幅脉冲图才证明“能点燃但不失控”。随后才用二维 rate field 检查稳定正反传播几何，并且必须跑电极几何和采样方式的 negative controls。SNN 和慢变量只是后续验证：前者验证 spiking 层能否保留同一几何，后者先用抽象慢变量验证“事件率变、传播几何不变”。所有 synthetic data 必须走真实模板 pipeline；clinical SOZ 只作 held-out 关系检验，不作拟合标签。
+我们把 Topic 4 的模型层从 **"塞 Hebbian 矩阵让 Kuramoto 演化得到预设吸引子"**，再推进到 **"低异质性 + 各向异性连接 + 近临界 E-I 易激场"**。第一步不是上复杂 SNN，而是先把低异质性写进群体输入-输出曲线，实际计算它是否改变局部 gain 和线性稳定性；线性图只给候选工作区，有限幅脉冲图才证明“能点燃但不失控”。随后才用二维 rate field 检查稳定正反传播几何，并且必须跑电极几何和采样方式的 negative controls。SNN 验证 spiking 层能否保留同一几何；慢变量先验证事件为什么被推大、怎样被推大、怎样恢复，并把同轴扩大和真正离轴/全局发作样候选分开。所有 synthetic data 必须走真实模板 pipeline；clinical SOZ 只作 held-out 关系检验，不作拟合标签。
 
 ---
 
@@ -872,6 +878,9 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - **cm-SNN 观测层（Step 4 spiking 执行线，探索性）**：
   - `docs/archive/topic4/sef_hfo/snn_cm_spontaneous_bidirectional_2026-06-11.md` —— **Stage 2 结构层闭合**（池化正/反事件过真实 masked pipeline → `stable_k=2` + 相反模板可复现 + 端点互换 strict；定位=仪器闭合非机制重现）
   - `docs/archive/topic4/sef_hfo/stage3_regime_screen_2026-06-14.md` —— **Stage 3 探索阶段文档**（二端等强单网络自发事件分型；局部=猛点火但传不远 contained/relay-failure，区分局部↔全局靠持续+扩散非能量；源层面双端成核存在但 per-cell 不平衡；**timing 独立性主问未被检验，不进主结论**）；pilot = `stage3_twoend_equal_pilot_2026-06-13.md`
+- **M3 阶段主文档（机制 screen，未 PASS）**：`docs/topic4_m3_stage.md` —— M3 stage 收口（一个主文档 + A/B 分文档）。M0→M1→M2 一致性（均质衬底空间自限难、不靠压死）→ 转 M3；**A 线（慢变量）源空间逐细胞 onset 梯度 = 沿轴相干招募波**（R²≈0.87、align≈1.0、40k SNN），**B 线（谱相图）§5 非正规瞬态 = 骨架特异自限轴向放大**，两线互相印证；停在"机制 screen 通过、发作机制未 validate"。方法学锁：正确仪器=源空间 onset 梯度（非接触空间/collision/elongation/主导本征模式）。
+  - **A 线分文档** `docs/archive/topic4/sef_hfo/m3a_stage_conclusion_2026-06-27.md` —— A1/A1b/A1c/A2 收口；局部资源耗竭 + 恢复项产生 expanded axial recruitment 候选，不支持完整"间期短事件 → 离轴/全局发作样招募 → 恢复"。分阶段 recap：`m3a_a1b_state_topography_2026-06-25.md` / `m3a_a1c_pilot_recap_2026-06-25.md` / `m3a_a2_abbott_lg_pilot_recap_2026-06-26.md`（§6.2 = onset 梯度重开判读）；旧 `seizure_like` 仅历史 screen 名。
+  - **B 线分文档** `docs/archive/topic4/sef_hfo/m3b_stage_conclusion_2026-06-28.md` —— Brunel 式有限-Jacobian 谱相图 = **SPM-PASS frozen map**（线性算子层面）；主导本征模式全局（k=0），§5 非正规瞬态读出骨架特异自限轴向；**SNN 口径已纠正**（B 线内置 tiny grid 是错仪器假阴，轴向 spiking 验证在 A 线 A2-P 为正）；判决闸 fail-closed（无 SNN/M3A overlay/几何零模型三道桥）。机器 = `src/topic4_m3b_spectral_phase.py`（TDD-0..15 绿）+ `m3b_jacobian_design_LOCKED_2026-06-27.md`。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
