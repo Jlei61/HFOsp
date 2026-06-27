@@ -1288,11 +1288,15 @@ def _ensure_pr3_readme() -> None:
     )
 
 
-def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> Path:
+def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000,
+                            display_label=None) -> Path:
     from src.interictal_propagation import _valid_event_indices
 
     dataset = str(record["dataset"])
     subject = str(record["subject"])
+    # Reader-facing label for titles only (dir resolution + output filename still use `subject`).
+    # Lets the model figure show a paper-grade name instead of the internal pooled tag.
+    label = display_label if display_label else f"{dataset}:{subject}"
     subject_dir = _resolve_subject_dir(dataset, subject)
     loaded = _load_lagpat(subject_dir)
     ranks = np.asarray(loaded["ranks"], dtype=float)
@@ -1368,7 +1372,7 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
     im = _plot_rank_heatmap(
         ax_raw, display_ranks_raw, ordered_names,
         title=(
-            f"{dataset}:{subject}  (n={valid_events.size}, "
+            f"{label}  (n={valid_events.size}, "
             f"\u03c4={all_tau:.3f}){mi_str}"
         ),
         display_bools=display_bools_raw,
@@ -1442,7 +1446,7 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
     cbar.ax.tick_params(labelsize=13)
 
     # ---- Suptitle ----
-    suptitle = f"{dataset}:{subject} | repro={repro_grade}"
+    suptitle = f"{label} | repro={repro_grade}"
     if repro_grade == "moderate":
         suptitle += " | WARNING: template moderate"
     fig.suptitle(suptitle, fontsize=20, y=0.98)

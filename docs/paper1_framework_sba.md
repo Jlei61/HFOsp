@@ -73,7 +73,7 @@ C6 是最强约束：naive 对称 Hebbian-coupled bidirectional storage 几乎�
 
 ## 4. Toy model — BHPN-toy（已被 SEF-ITP 取代）
 
-> **2026-05-22 归档说明**：BHPN-toy 数学规范 (§4.1–4.5) 已被 `docs/topic4_sef_itp_framework.md` v1.0.2 取代（详见 topic4_sef L5 取代声明）。原 §4 完整内容（节点动力学 + Hebbian 存储 + core node heterogeneity + s_rate/ε_id 解耦 + T1–T7 最小事实清单）保留在 [`docs/archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md`](archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md) §4。
+> **2026-05-22 归档说明**：BHPN-toy 数学规范 (§4.1–4.5) 已被 `docs/topic4_sef_hfo.md` v1.0.2 取代（详见 topic4_sef L5 取代声明）。原 §4 完整内容（节点动力学 + Hebbian 存储 + core node heterogeneity + s_rate/ε_id 解耦 + T1–T7 最小事实清单）保留在 [`docs/archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md`](archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md) §4。
 >
 > 当前 modeling spec 以 SEF-ITP H1–H6 框架为准。Paper 1 引用 SBA toy mechanism 仅作为 historical context，正面 modeling 论述走 topic4_sef。
 
@@ -251,7 +251,7 @@ C6 是最强约束：naive 对称 Hebbian-coupled bidirectional storage 几乎�
 
 ## 6. Fitted model — BHPN-fit（已被 SEF-ITP 取代）
 
-> **2026-05-22 归档说明**：BHPN-fit 完整 spec (§6.1–6.3，含 50/50 时间切分 + ≤6 自由参数表 + F1–F4 v1.1.2 marginal-aware null-relative 形式) 已被 `docs/topic4_sef_itp_framework.md` v1.0.2 取代。原 §6 完整内容保留在 [`docs/archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md`](archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md) §6。
+> **2026-05-22 归档说明**：BHPN-fit 完整 spec (§6.1–6.3，含 50/50 时间切分 + ≤6 自由参数表 + F1–F4 v1.1.2 marginal-aware null-relative 形式) 已被 `docs/topic4_sef_hfo.md` v1.0.2 取代。原 §6 完整内容保留在 [`docs/archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md`](archive/paper1/bhpn_toy_and_fit_spec_superseded_2026-04-30.md) §6。
 >
 > SEF-ITP H1–H6 取代 F1–F4：geometry / mark-independence / coupling 等 mechanism 检验全部走 SEF-ITP Phase 1 runner。
 

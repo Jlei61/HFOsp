@@ -22,11 +22,22 @@ sys.path.insert(0, os.getcwd())
 sys.path.insert(0, os.path.join(os.getcwd(), "scripts"))
 import plot_interictal_propagation as P                                       # noqa: E402
 from src.interictal_propagation import (load_subject_propagation_events,      # noqa: E402
-                                        compute_adaptive_cluster_stereotypy)
+                                        compute_adaptive_cluster_stereotypy,
+                                        compute_time_split_reproducibility,
+                                        _valid_event_indices)
 
 MODEL_OUT = Path("results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous")
 POOLED = MODEL_OUT / "pooled_bidir"
 FIGDIR = MODEL_OUT / "figures" / "model_propagation"
+
+# Reader-facing C-row titles (paper-grade): map the internal pooled tag -> a plain label.
+# Tags not listed fall back to the default "model:<tag>" (unchanged for the stage-2 figures).
+DISPLAY_LABELS = {
+    "s3_brakeoff_bidir": "Model — stage-3 multi-focus substrate (front-inhibition brake OFF)",
+    "s3_brakeon_bidir":  "Model — stage-3 multi-focus substrate (front-inhibition brake ON)",
+    "s4_brakeoff_bidir": "Model — stage-4 extended-patch substrate (front-inhibition brake OFF)",
+    "s4_brakeon_bidir":  "Model — stage-4 extended-patch substrate (front-inhibition brake ON)",
+}
 
 
 def _active_filter(loaded):
@@ -48,15 +59,33 @@ def _make_record(tag):
     ev = _active_filter(load_subject_propagation_events(sub_dir))
     R = np.asarray(ev["ranks"], float); B = np.asarray(ev["bools"], bool)
     names = list(ev["channel_names"])
-    pr2 = compute_adaptive_cluster_stereotypy(R, B, names, use_masked_features=True)
-    # reproducibility grade from the masked-pipeline summary if present (else unknown)
-    grade = "unknown"
+    # single connectivity axis -> template space is ~1-D -> k=2 is the intended cluster count
+    # (forward + reverse). Pin k=2 so the model figure matches the two-template framing.
+    pr2 = compute_adaptive_cluster_stereotypy(R, B, names, k_range=(2, 2), use_masked_features=True)
+    # reproducibility grade: prefer the persisted masked-pipeline summary; else compute it here
+    # (masked split-half / odd-even forward_reverse_reproduced, take the OR) so the figure shows a
+    # real strong/moderate grade instead of "unknown" when the pooled dir was built from one record.
     import json
-    mp = sub_dir.parent.parent / "pooled_bidir" / tag / "masked_pipeline_summary.json"
+    grade = "unknown"
+    mp = sub_dir / "masked_pipeline_summary.json"
     if mp.exists():
         s = json.load(open(mp))
         repro = s.get("pr25", {}).get("forward_reverse_reproduced")
         grade = "strong" if (isinstance(repro, dict) and any(repro.values())) else "moderate"
+    else:
+        eat = np.asarray(ev["event_abs_times"], float)
+        bid = np.asarray(ev["block_ids"]) if "block_ids" in ev else np.zeros(R.shape[1], int)
+        labels = np.asarray(pr2.get("labels", []), dtype=int)
+        valid_ev = _valid_event_indices(B, min_participating=3)
+        try:
+            pr25 = compute_time_split_reproducibility(R, B, eat, bid, 2, labels, valid_ev,
+                                                      use_masked_features=True)
+            splits = pr25.get("splits", {}) if isinstance(pr25, dict) else {}
+            any_repro = any(bool(v.get("forward_reverse_reproduced"))
+                            for v in splits.values() if isinstance(v, dict))
+            grade = "strong" if any_repro else "moderate"
+        except Exception:
+            grade = "moderate"
     return dict(dataset="model", subject=tag, adaptive_cluster=pr2,
                 propagation_stereotypy={"all": {"mean_tau": pr2.get("overall_tau", float("nan"))}},
                 time_split_reproducibility={"reproducibility_grade": grade})
@@ -73,7 +102,7 @@ def main():
     for tag in tags:
         if not (POOLED / tag).exists():
             print(f"  (skip {tag}: no pooled dir)"); continue
-        P.plot_pr3_subject_figure(_make_record(tag))
+        P.plot_pr3_subject_figure(_make_record(tag), display_label=DISPLAY_LABELS.get(tag))
     # MODEL caption / caveat
     (FIGDIR / "README.md").write_text(
         "# model_propagation — MODEL plotted with the real per-subject pipeline\n\n"

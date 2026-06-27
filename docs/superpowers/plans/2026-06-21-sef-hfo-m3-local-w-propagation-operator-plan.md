@@ -1,5 +1,12 @@
 # M3B model↔SEEG field-bridge plan
 
+> 2026-06-27 note: this file is now the **M3B Round-1 bridge record**. It answers what
+> the instrument-probe model field can and cannot bridge to SEEG. The next M3B mechanism
+> line is the spectral phase-map design in
+> `docs/superpowers/specs/2026-06-27-sef-hfo-m3b-spectral-phase-map-design.md`
+> and its implementation plan in
+> `docs/superpowers/plans/2026-06-27-sef-hfo-m3b-spectral-phase-map-plan.md`.
+
 > Status: re-centered 2026-06-24. Round 1 now attacks the model↔SEEG bridge directly.
 > The previous version made round 1 = model-side W estimation (estimate W three ways +
 > resolution sweep). An asset audit (below) showed that is the wrong first move; the bridge

@@ -10,9 +10,15 @@ from scripts.plot_ictal_er_atlas import (
     _build_onset_matrix,
     _channel_order,
     _channel_role,
+    _clip_display_window_to_signal,
+    _display_window_around_eeg,
+    _heatmap_order_from_display_entries,
+    _lagpat_json_to_display_clusters,
+    _ordered_display_rows,
     _row_order_per_seizure,
     _select_sort_band,
     _sort_band_unreliable,
+    _select_bg_traces_in_window,
 )
 
 
@@ -222,3 +228,158 @@ def test_row_order_per_seizure_returns_permutation():
     assert sorted(order) == [0, 1, 2, 3, 4]
     # 'b' (focal) must be first
     assert chs[order[0]] == "b"
+
+
+# ---------------------------------------------------------------------------
+# Per-seizure display controls
+
+
+def test_display_window_centers_on_eeg_onset_when_available():
+    assert _display_window_around_eeg(-35.0) == pytest.approx((-125.0, 55.0))
+
+
+def test_display_window_falls_back_to_zero_for_yuquan_reference():
+    assert _display_window_around_eeg(None) == pytest.approx((-90.0, 90.0))
+
+
+def test_clip_window_keeps_sane_eeg_centered_window():
+    # legitimate large eeg-to-clinical offset (-150s) stays eeg-centered
+    assert _clip_display_window_to_signal(
+        (-240.0, -60.0), pre_sec=300.0, post_sec=100.0
+    ) == pytest.approx((-240.0, -60.0))
+
+
+def test_clip_window_falls_back_to_zero_zoom_for_bogus_eeg_onset():
+    # bogus eeg_onset thousands of s off -> window outside signal -> ±90 around 0,
+    # NOT the full [-pre, post] span (would defeat the zoom).
+    assert _clip_display_window_to_signal(
+        (-11329.0, -11149.0), pre_sec=300.0, post_sec=100.0
+    ) == pytest.approx((-90.0, 90.0))
+
+
+def test_alignment_reference_prefers_eeg_else_clinical():
+    from scripts.plot_ictal_er_atlas import _alignment_reference
+    # Yuquan already eeg/ref-aligned
+    assert _alignment_reference("yuquan", None, pre_sec=300, post_sec=30) == (0.0, True)
+    # Epilepsiae: sane eeg offset -> align to eeg onset
+    assert _alignment_reference("epilepsiae", -5.0, pre_sec=300, post_sec=30) == (-5.0, True)
+    # bogus eeg far outside signal -> fall back to clinical onset
+    assert _alignment_reference("epilepsiae", -11239.0, pre_sec=300, post_sec=30) == (0.0, False)
+    assert _alignment_reference("epilepsiae", None, pre_sec=300, post_sec=30) == (0.0, False)
+
+
+def test_select_sequence_rows_picks_onset_channels_ordered_by_onset():
+    from scripts.plot_ictal_er_atlas import _select_sequence_rows
+    ch = ["A", "B", "C", "D", "E"]
+    t = np.linspace(-50.0, 50.0, 11)
+    z = np.zeros((5, 11))
+    z[0, 5] = 5.0    # A peak 5 (focal)
+    z[1, 5] = 4.0    # B peak 4
+    z[2, 5] = 3.0    # C peak 3
+    z[3, 5] = 6.0    # D peak 6 but NO onset
+    z[4, 5] = 99.0   # E not High-HI -> ignored
+    onsets = {"A": -10.0, "B": -30.0, "C": 5.0, "D": None}
+    rows = _select_sequence_rows(
+        z, t, ch,
+        high_hi_upper={"A", "B", "C", "D"},
+        focal_upper={"A"},
+        valid_mask=np.array([True] * 5),
+        display_window=(-50.0, 50.0),
+        onsets=onsets, align_ref_sec=0.0, max_ch=3,
+    )
+    # onset-bearing channels beat the strong no-onset D; ordered by onset asc
+    assert [r["channel"] for r in rows] == ["B", "A", "C"]
+    roles = {r["channel"]: r["role"] for r in rows}
+    assert roles["A"] == "high_hi_ictal"   # focal
+    assert roles["B"] == "high_hi_index"
+    assert rows[0]["onset_disp"] == pytest.approx(-30.0)
+
+
+def test_select_sequence_rows_caps_to_max_ch():
+    from scripts.plot_ictal_er_atlas import _select_sequence_rows
+    ch = [f"C{i}" for i in range(12)]
+    t = np.linspace(-50.0, 50.0, 11)
+    z = np.zeros((12, 11))
+    for i in range(12):
+        z[i, 5] = float(i + 1)
+    onsets = {c: -float(i) for i, c in enumerate(ch)}
+    rows = _select_sequence_rows(
+        z, t, ch,
+        high_hi_upper={c.upper() for c in ch},
+        focal_upper=set(),
+        valid_mask=np.array([True] * 12),
+        display_window=(-50.0, 50.0),
+        onsets=onsets, align_ref_sec=0.0, max_ch=8,
+    )
+    assert len(rows) == 8
+
+
+def test_ordered_display_rows_groups_by_role_and_counts():
+    entries = [
+        {"idx": 7, "role": "other", "channel": "O1"},
+        {"idx": 1, "role": "high_hi_index", "channel": "X1"},
+        {"idx": 3, "role": "ictal", "channel": "I1"},
+        {"idx": 4, "role": "high_hi_ictal", "channel": "H1"},
+    ]
+    rows, counts = _ordered_display_rows(entries)
+    assert [r["idx"] for r in rows] == [4, 1, 3, 7]
+    assert [r["channel"] for r in rows] == ["H1", "X1", "I1", "O1"]
+    assert counts == {
+        "high_hi_ictal": 1, "high_hi_index": 1, "ictal": 1, "other": 1,
+    }
+
+
+def test_select_bg_traces_uses_display_window_and_excludes_high_hi():
+    z = np.zeros((4, 5), dtype=float)
+    t = np.array([-100.0, -50.0, 0.0, 50.0, 100.0])
+    # Channel C is strongest inside the displayed [-80, 20] window.
+    z[1, 1:3] = 3.0
+    z[2, 4] = 99.0
+    z[3, 1:3] = 2.0
+    sel = _select_bg_traces_in_window(
+        z,
+        t,
+        ["A", "B", "C", "D"],
+        {"A"},
+        np.array([True, True, True, True]),
+        (-80.0, 20.0),
+        n_bg=2,
+    )
+    assert sel.tolist() == [1, 3]
+
+
+def test_heatmap_order_uses_raw_panel_entries_not_all_other_channels():
+    entries = [
+        {"idx": 7, "role": "other"},
+        {"idx": 1, "role": "high_hi_index"},
+        {"idx": 2, "role": "other"},
+        {"idx": 3, "role": "ictal"},
+        {"idx": 4, "role": "high_hi_ictal"},
+    ]
+    order, counts = _heatmap_order_from_display_entries(entries)
+    assert order.tolist() == [4, 1, 3, 7, 2]
+    assert counts == {
+        "high_hi_ictal": 1,
+        "high_hi_index": 1,
+        "ictal": 1,
+        "other": 2,
+    }
+
+
+def test_lagpat_json_to_display_clusters_aligns_rank_by_channel():
+    d = {
+        "channel_names": ["A1", "A2", "A3"],
+        "adaptive_cluster": {
+            "clusters": [
+                {
+                    "cluster_id": 1,
+                    "n_events": 10,
+                    "fraction": 0.5,
+                    "template_rank": [2, None, 0],
+                }
+            ]
+        },
+    }
+    channels, clusters = _lagpat_json_to_display_clusters("yuquan/fake", d)
+    assert channels == ["A1", "A2", "A3"]
+    assert clusters[0]["rank_by_channel"] == {"A1": 2, "A2": None, "A3": 0}

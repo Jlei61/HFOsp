@@ -55,7 +55,7 @@
 
 关注间期事件机制建模层，目标是给 Topic 1 现象（稳定模板、正反共享 endpoint、模板选择近似随机、慢漂解耦）提供机制解释而非拟合。
 
-- 正式入口：`docs/topic4_sef_itp_framework.md`（**v0.2 plan lock draft 2026-06-01**）
+- 正式入口：`docs/topic4_sef_hfo.md`（**v0.2 plan lock draft 2026-06-01**）
 - 当前主模型计划：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
 - 上游 SBA framework：`docs/paper1_framework_sba.md`（SEF-ITP 取代其 BHPN-toy 部分；保留 P1/P2/P3/P5 红线）
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际计算进入稳定性分析
@@ -110,7 +110,7 @@ PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subj
 3. `docs/topic1_within_event_dynamics.md`
 4. `docs/topic2_between_event_dynamics.md`
 5. `docs/topic3_spatial_soz_modulation.md`
-6. `docs/topic4_sef_itp_framework.md`
+6. `docs/topic4_sef_hfo.md`
 7. `docs/topic5_seizure_subtyping.md`
 
 ### 如果你要看历史证据链或审阅意见

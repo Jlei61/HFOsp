@@ -33,6 +33,7 @@ class Params:
     # ---------------- Membrane & refractory (Table 1) ----------------
     V_th: float = 18.0       # mV   spike threshold (Vθ)
     V_reset: float = 11.0    # mV   reset (Vreset)
+    E_gaba: float = 11.0     # mV   GABA reversal (= V_reset; M2 conductance shunting, near-rest)
     V_L: float = 0.0         # mV   leak / rest (current-based Brunel form, Eq 3)
     tau_m_E: float = 20.0    # ms   excitatory membrane time constant
     tau_m_I: float = 10.0    # ms   inhibitory membrane time constant

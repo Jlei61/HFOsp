@@ -1,7 +1,7 @@
 # Topic 4 · M3 阶段主文档（SEF-HFO 机制建模）
 
 > 这是 Topic 4 建模程序里 **M3 阶段**的 stage 主文档（一个主文档 + A/B 两条分文档）。
-> Topic 4 的 topic 级主文档仍是 `docs/topic4_sef_itp_framework.md`；本 doc 是它下面 M3 阶段的收口，
+> Topic 4 的 topic 级主文档仍是 `docs/topic4_sef_hfo.md`；本 doc 是它下面 M3 阶段的收口，
 > 由 §13 历史索引回链。两条分文档：
 > - **A 线（慢变量机制）**：`docs/archive/topic4/sef_hfo/m3a_stage_conclusion_2026-06-27.md`
 > - **B 线（谱相图 / W-场）**：`docs/archive/topic4/sef_hfo/m3b_stage_conclusion_2026-06-28.md`

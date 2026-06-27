@@ -24,11 +24,12 @@ Spec: ``docs/superpowers/specs/2026-05-08-ictal-er-atlas-design.md``
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import json
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, Iterator, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -37,6 +38,7 @@ matplotlib.use("Agg")
 import matplotlib.gridspec as mgs
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 from matplotlib.colors import TwoSlopeNorm
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +66,16 @@ PER_SEIZURE_OUT_DIR = ATLAS_OUT_DIR / "per_seizure"
 
 DETECTION_WINDOW_SEC = (-120.0, 30.0)   # heatmap display window (matches v2.3 detection)
 CMAP_HEATMAP = "RdBu_r"                  # diverging; midpoint at 0 = clinical onset
+EEG_ZOOM_PRE_SEC = 90.0
+EEG_ZOOM_POST_SEC = 90.0
+_MIN_DISPLAY_OVERLAP_SEC = 60.0  # below this, treat eeg_onset as bogus → zoom on t=0
+HEATMAP_ROLE_ORDER = ("high_hi_ictal", "high_hi_index", "ictal", "other")
+HEATMAP_ROLE_LABEL = {
+    "high_hi_ictal": "High-HI ∩ ictal",
+    "high_hi_index": "High-HI index",
+    "ictal": "ictal only",
+    "other": "other",
+}
 
 # Tick coloring (spec §4.3 / §5.3)
 COL_TICK_SOZ = "#c0392b"
@@ -402,6 +414,62 @@ def _import_archive_plotter():
     return _arch
 
 
+def _lagpat_json_to_display_clusters(subject: str, d: Dict) -> Tuple[List[str], List[Dict]]:
+    """Convert a PR-2 adaptive-cluster JSON into archive display clusters."""
+    lagpat_channels = list(d["channel_names"])
+    clusters_raw = d["adaptive_cluster"]["clusters"]
+    clusters: List[Dict] = []
+    for c in clusters_raw:
+        tpl = list(c["template_rank"])
+        if len(tpl) != len(lagpat_channels):
+            raise ValueError(
+                f"{subject}: template_rank length {len(tpl)} != "
+                f"len(channel_names) {len(lagpat_channels)}"
+            )
+        rank_by_channel = {
+            ch: (
+                None if r is None or (isinstance(r, float) and np.isnan(r))
+                else int(r)
+            )
+            for ch, r in zip(lagpat_channels, tpl)
+        }
+        clusters.append(
+            {
+                "cluster_id": int(c["cluster_id"]),
+                "n_events": int(c["n_events"]),
+                "fraction": float(c["fraction"]),
+                "rank_by_channel": rank_by_channel,
+            }
+        )
+    clusters.sort(key=lambda x: -x["n_events"])
+    return lagpat_channels, clusters
+
+
+def _load_display_lagpat(subject: str) -> Tuple[List[str], List[Dict]]:
+    """Load the High-HI / Lagpat channel pool for per-seizure display.
+
+    Prefer the **broad** channel-pool lagpat (``interictal_propagation_masked_broad``,
+    top-N by event count) — High-HI is a *range* of channels, and the broad pool
+    covers subjects whose narrow Lagpat channels are absent from the ictal
+    recording (e.g. yuquan zhaojinrui: narrow 4ch→0 ictal match, broad 20ch→10).
+    Fall back to the narrow masked pool, then the unmasked legacy path.
+    """
+    sid = subject.replace("/", "_")
+    candidates = [
+        ROOT / "results" / "interictal_propagation_masked_broad" / "per_subject" / f"{sid}.json",
+        ROOT / "results" / "interictal_propagation_masked" / "per_subject" / f"{sid}.json",
+        ROOT / "results" / "interictal_propagation" / "per_subject" / f"{sid}.json",
+    ]
+    for path in candidates:
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as fh:
+                return _lagpat_json_to_display_clusters(subject, json.load(fh))
+    raise FileNotFoundError(
+        f"{subject}: no interictal propagation per_subject JSON found in "
+        f"{', '.join(str(p.parent) for p in candidates)}"
+    )
+
+
 def _heatmap_row_order_archive_compat(
     z: np.ndarray,
     t_axis_er: np.ndarray,
@@ -438,35 +506,431 @@ def _heatmap_row_order_archive_compat(
     return np.concatenate([seg_hhi_ictal, seg_hhi_only, seg_ictal_only, seg_other])
 
 
+def _display_window_around_eeg(
+    eeg_onset_rel_sec: Optional[float],
+    *,
+    pre_sec: float = EEG_ZOOM_PRE_SEC,
+    post_sec: float = EEG_ZOOM_POST_SEC,
+) -> Tuple[float, float]:
+    """Return a display window centered on EEG onset.
+
+    Epilepsiae has separate clinical and EEG onset annotations, so
+    ``eeg_onset_rel_sec`` can be negative relative to clinical onset.
+    Yuquan only has EEG onset; the loader uses that as t=0 and passes
+    ``None`` here, which correctly falls back to a window around zero.
+    """
+    if eeg_onset_rel_sec is None:
+        center = 0.0
+    else:
+        center = float(eeg_onset_rel_sec)
+        if not np.isfinite(center):
+            center = 0.0
+    return (center - float(pre_sec), center + float(post_sec))
+
+
+def _clip_display_window_to_signal(
+    display_window: Tuple[float, float],
+    *,
+    pre_sec: float,
+    post_sec: float,
+) -> Tuple[float, float]:
+    """Clip a requested display window to the extracted signal span.
+
+    If the requested (EEG-centred) window barely overlaps the signal — which
+    happens when ``eeg_onset`` is a bogus annotation hundreds/thousands of
+    seconds off (some Epilepsiae seizures) — fall back to a ±EEG_ZOOM window
+    around t=0 (clinical onset / reference) rather than the full signal span,
+    so every figure stays zoomed near onset.
+    """
+    lo, hi = float(display_window[0]), float(display_window[1])
+    lo = max(lo, -float(pre_sec))
+    hi = min(hi, float(post_sec))
+    if hi - lo < _MIN_DISPLAY_OVERLAP_SEC:
+        return (
+            max(-EEG_ZOOM_PRE_SEC, -float(pre_sec)),
+            min(EEG_ZOOM_POST_SEC, float(post_sec)),
+        )
+    return (lo, hi)
+
+
+def _alignment_reference(
+    dataset: str,
+    eeg_rel: Optional[float],
+    *,
+    pre_sec: float,
+    post_sec: float,
+) -> Tuple[float, bool]:
+    """Pick the t=0 reference: EEG (electrographic) onset when usable, else clinical.
+
+    Returns ``(align_ref_sec, ref_is_eeg)``. ``align_ref_sec`` is the offset of
+    the reference in the clinical-onset frame; subtract it from clin-frame times
+    to get display (EEG-aligned) times. Yuquan's ``extract_seizure_window``
+    already uses EEG onset / reference as t=0, so ``align_ref_sec=0``. For
+    Epilepsiae, align to EEG onset only when its ±zoom window overlaps the
+    signal — a bogus ``eeg_onset`` annotation (hundreds/thousands of s off)
+    falls back to clinical onset.
+    """
+    if dataset == "yuquan":
+        return 0.0, True
+    if eeg_rel is not None and np.isfinite(eeg_rel):
+        lo = max(float(eeg_rel) - EEG_ZOOM_PRE_SEC, -float(pre_sec))
+        hi = min(float(eeg_rel) + EEG_ZOOM_POST_SEC, float(post_sec))
+        if hi - lo >= _MIN_DISPLAY_OVERLAP_SEC:
+            return float(eeg_rel), True
+    return 0.0, False
+
+
+@contextmanager
+def _archive_display_window(arch, display_window: Tuple[float, float]) -> Iterator[None]:
+    """Temporarily set archive plotter display constants for raw traces."""
+    old = (arch.DISPLAY_TMIN, arch.DISPLAY_TMAX)
+    arch.DISPLAY_TMIN = float(display_window[0])
+    arch.DISPLAY_TMAX = float(display_window[1])
+    try:
+        yield
+    finally:
+        arch.DISPLAY_TMIN, arch.DISPLAY_TMAX = old
+
+
+def _select_bg_traces_in_window(
+    z: np.ndarray,
+    t_axis_er: np.ndarray,
+    ch_names: Sequence[str],
+    high_hi_upper: set,
+    valid_mask: np.ndarray,
+    display_window: Tuple[float, float],
+    *,
+    n_bg: int = 5,
+) -> np.ndarray:
+    """Select non-High-HI controls with the largest |z-ER| in the display window."""
+    non_high_hi_idx = np.array(
+        [
+            i for i, nm in enumerate(ch_names)
+            if nm.upper() not in high_hi_upper and bool(valid_mask[i])
+        ],
+        dtype=int,
+    )
+    if non_high_hi_idx.size == 0:
+        return np.array([], dtype=int)
+    xmask = (
+        (t_axis_er >= float(display_window[0]))
+        & (t_axis_er <= float(display_window[1]))
+    )
+    if not xmask.any():
+        return np.array([], dtype=int)
+    with np.errstate(invalid="ignore"):
+        score = np.nanmax(np.abs(z[non_high_hi_idx][:, xmask]), axis=1)
+    score = np.where(np.isfinite(score), score, -np.inf)
+    order = np.argsort(-score)
+    return non_high_hi_idx[order[:int(n_bg)]]
+
+
+def _heatmap_order_from_display_entries(
+    display_entries: Sequence[Dict],
+) -> Tuple[np.ndarray, Dict[str, int]]:
+    """Use the raw-panel channel set for the heatmap, grouped by semantic role."""
+    order: List[int] = []
+    counts = {role: 0 for role in HEATMAP_ROLE_ORDER}
+    seen: set[int] = set()
+    for role in HEATMAP_ROLE_ORDER:
+        for entry in display_entries:
+            if entry.get("role") != role:
+                continue
+            idx = int(entry["idx"])
+            if idx in seen:
+                continue
+            seen.add(idx)
+            order.append(idx)
+            counts[role] += 1
+    return np.asarray(order, dtype=int), counts
+
+
+def _ordered_display_rows(
+    display_entries: Sequence[Dict],
+) -> Tuple[List[Dict], Dict[str, int]]:
+    """Role-grouped row list shared by the aligned raw + heatmap panels.
+
+    Returns ``(rows, counts)`` where ``rows[p]`` = ``{idx, role, channel}``
+    for the channel drawn at visual row ``p`` (top = 0). Both the raw SEEG
+    panel and the z-ER heatmap iterate this single ordering so that raw
+    trace ``p`` and heatmap row ``p`` are the same channel — the y-axis
+    alignment the two side-by-side panels rely on.
+    """
+    counts = {role: 0 for role in HEATMAP_ROLE_ORDER}
+    rows: List[Dict] = []
+    seen: set[int] = set()
+    for role in HEATMAP_ROLE_ORDER:
+        for entry in display_entries:
+            if entry.get("role") != role:
+                continue
+            idx = int(entry["idx"])
+            if idx in seen:
+                continue
+            seen.add(idx)
+            rows.append({"idx": idx, "role": role, "channel": entry["channel"]})
+            counts[role] += 1
+    return rows, counts
+
+
+MAX_SEQUENCE_CH = 8  # at most this many channels per per-seizure figure
+
+
+def _select_sequence_rows(
+    z_sel: np.ndarray,
+    t_axis_er: np.ndarray,
+    ch_names: Sequence[str],
+    *,
+    high_hi_upper: set,
+    focal_upper: set,
+    valid_mask: np.ndarray,
+    display_window: Tuple[float, float],
+    onsets: Dict[str, Optional[float]],
+    align_ref_sec: float,
+    max_ch: int = MAX_SEQUENCE_CH,
+) -> List[Dict]:
+    """Pick ≤``max_ch`` Lagpat/High-HI channels with the clearest ictal sequence.
+
+    Selection band is the *broad* band (``z_sel`` / ``onsets`` are broad). The
+    clearest-sequence rule:
+
+    - candidate pool = High-HI (Lagpat) channels that are valid in this band;
+    - selection key = ``(has a visible in-window onset, peak |z-ER| in-window)``
+      descending — channels that actually participate in the recruitment
+      sequence rank first, then the strongest activation;
+    - keep the top ``max_ch``;
+    - order top→bottom by **onset time ascending** (earliest recruited at top;
+      channels without a visible onset sink to the bottom by peak desc) so the
+      connecting line through the onset markers reads as the recruitment order.
+
+    Only High-HI/Lagpat channels are shown — no non-Lagpat fill. If a subject
+    has zero High-HI channels in the ictal recording (even after the broad pool),
+    the returned list is empty and the caller skips the figure.
+
+    Each returned row carries the **display-frame** onset (``onset_disp``) for
+    the connecting line / marker (already shifted by ``align_ref_sec``).
+    """
+    lo, hi = float(display_window[0]), float(display_window[1])
+    xmask = (t_axis_er >= lo) & (t_axis_er <= hi)
+    cand: List[Dict] = []
+    for i, nm in enumerate(ch_names):
+        if nm.upper() not in high_hi_upper or not bool(valid_mask[i]):
+            continue
+        if xmask.any():
+            seg = z_sel[i, xmask]
+            finite = seg[np.isfinite(seg)]
+            peak = float(np.max(np.abs(finite))) if finite.size else 0.0
+        else:
+            peak = 0.0
+        raw_onset = onsets.get(nm)
+        onset_disp = None
+        if raw_onset is not None and np.isfinite(raw_onset):
+            od = float(raw_onset) - float(align_ref_sec)
+            if lo <= od <= hi:
+                onset_disp = od
+        cand.append({
+            "idx": i,
+            "channel": nm,
+            "role": ("high_hi_ictal" if nm.upper() in focal_upper
+                     else "high_hi_index"),
+            "peak": peak,
+            "onset_disp": onset_disp,
+        })
+    if not cand:
+        return []
+    # selection: prefer a visible onset, then strongest peak
+    cand.sort(key=lambda c: (c["onset_disp"] is None, -c["peak"]))
+    selected = cand[:int(max_ch)]
+    # order top->bottom by onset ascending (no-onset last, by peak desc)
+    selected.sort(key=lambda c: (
+        c["onset_disp"] is None,
+        c["onset_disp"] if c["onset_disp"] is not None else 0.0,
+        -c["peak"],
+    ))
+    return selected
+
+
+def _apply_time_locator(ax: plt.Axes, display_window: Tuple[float, float]) -> None:
+    span = float(display_window[1]) - float(display_window[0])
+    if span <= 180.0:
+        ax.xaxis.set_major_locator(mticker.MultipleLocator(50))
+        ax.xaxis.set_minor_locator(mticker.MultipleLocator(10))
+    else:
+        ax.xaxis.set_major_locator(mticker.MultipleLocator(100))
+        ax.xaxis.set_minor_locator(mticker.MultipleLocator(25))
+
+
+def _raw_label_fontsize(n_rows: int) -> float:
+    """Channel-name tick fontsize that stays legible as row count grows."""
+    if n_rows <= 8:
+        return 11.0
+    if n_rows <= 16:
+        return 8.0
+    if n_rows <= 24:
+        return 6.5
+    if n_rows <= 34:
+        return 5.5
+    return 4.5
+
+
+def _plot_aligned_raw_panel(
+    ax: plt.Axes,
+    *,
+    arch,
+    signal: np.ndarray,
+    t_axis_raw: np.ndarray,
+    rows: Sequence[Dict],
+    display_window: Tuple[float, float],
+    eeg_onset_rel_sec: Optional[float],
+    baseline_edge_sec: float,
+    show_xlabel: bool,
+    x_label: str,
+):
+    """Raw SEEG traces in heatmap-row coordinates (y-aligned with the heatmap).
+
+    Channel ``rows[p]`` is drawn centred at ``y = p + 0.5`` and its robust-
+    scaled waveform stays within the ``[p, p+1]`` band, so the panel shares
+    the heatmap's ``ylim = (n, 0)`` row geometry exactly.
+    """
+    n = len(rows)
+    disp = (t_axis_raw >= float(display_window[0])) & (
+        t_axis_raw <= float(display_window[1])
+    )
+    t_disp = t_axis_raw[disp]
+    dt = float(np.median(np.diff(t_disp))) if t_disp.size > 1 else 0.0
+    stride = max(1, int(round(1.0 / (dt * arch.RAW_PLOT_TARGET_HZ)))) if dt > 0 else 1
+    t_plot = t_disp[::stride]
+    amp = 0.42 / float(arch.RAW_TRACE_CLIP)  # ±CLIP maps to ±0.42 of a row
+    for p, r in enumerate(rows):
+        ts = arch._robust_scale_trace(signal[r["idx"], disp])[::stride]
+        # positive deflection points up (toward smaller y, origin upper)
+        y = (p + 0.5) - ts * amp
+        ax.plot(
+            t_plot, y,
+            color=arch._role_color(r["role"]),
+            lw=arch._role_linewidth(r["role"], raw=True),
+            alpha=arch._role_alpha(r["role"], raw=True),
+            zorder=4,
+        )
+    ax.set_ylim(n, 0)
+    arch.style_panel(ax)
+    # custom (small) channel-name ticks AFTER style_panel (which forces FS_TICK)
+    fs = _raw_label_fontsize(n)
+    ax.set_yticks([p + 0.5 for p in range(n)])
+    ax.set_yticklabels([r["channel"] for r in rows], fontsize=fs)
+    for tlbl, r in zip(ax.get_yticklabels(), rows):
+        tlbl.set_color(arch._role_color(r["role"]))
+    ax.yaxis.set_ticks_position("left")
+    ax.tick_params(axis="y", labelsize=_raw_label_fontsize(n), length=2)
+    arch._draw_event_lines(
+        ax, eeg_onset_rel_sec=eeg_onset_rel_sec, baseline_edge_sec=baseline_edge_sec,
+    )
+    ax.set_xlim(float(display_window[0]), float(display_window[1]))
+    _apply_time_locator(ax, display_window)
+    if show_xlabel:
+        ax.set_xlabel(x_label, fontsize=FS_LABEL)
+    else:
+        plt.setp(ax.get_xticklabels(), visible=False)
+
+
+def _plot_aligned_heatmap_panel(
+    ax: plt.Axes,
+    *,
+    arch,
+    z: np.ndarray,
+    t_axis_er: np.ndarray,
+    rows: Sequence[Dict],
+    display_window: Tuple[float, float],
+    eeg_onset_rel_sec: Optional[float],
+    baseline_edge_sec: float,
+    show_xlabel: bool,
+    x_label: str,
+):
+    """z-ER heatmap over the same onset-ordered rows as the raw panel.
+
+    Rows are ordered by recruitment (onset) time, not grouped, so there are no
+    group separators; the per-channel names live on the LEFT raw panel and both
+    panels share ``ylim = (n, 0)``.
+    """
+    n = len(rows)
+    order = [r["idx"] for r in rows]
+    xmask = (
+        (t_axis_er >= float(display_window[0]))
+        & (t_axis_er <= float(display_window[1]))
+    )
+    if n == 0 or not xmask.any():
+        heat = np.zeros((max(1, n), 1), dtype=float)
+        extent = [float(display_window[0]), float(display_window[1]), max(1, n), 0]
+        vmax = 2.0
+    else:
+        heat = z[order][:, xmask]
+        extent = [
+            float(t_axis_er[xmask][0]),
+            float(t_axis_er[xmask][-1]),
+            n,
+            0,
+        ]
+        finite_abs = np.abs(heat[np.isfinite(heat)])
+        vmax = float(np.percentile(finite_abs, 99)) if finite_abs.size else 2.0
+        vmax = max(vmax, 2.0)
+
+    im = ax.imshow(
+        heat, aspect="auto", origin="upper", cmap="RdBu_r",
+        vmin=-vmax, vmax=vmax, extent=extent, interpolation="nearest",
+    )
+    ax.set_ylim(n, 0)
+    arch.style_panel(ax)
+    ax.set_yticks([])  # channel names live on the left raw panel
+    arch._draw_event_lines(
+        ax, eeg_onset_rel_sec=eeg_onset_rel_sec, baseline_edge_sec=baseline_edge_sec,
+    )
+    ax.set_xlim(float(display_window[0]), float(display_window[1]))
+    _apply_time_locator(ax, display_window)
+    if show_xlabel:
+        ax.set_xlabel(x_label, fontsize=FS_LABEL)
+    else:
+        plt.setp(ax.get_xticklabels(), visible=False)
+
+    return ({"heatmap_vmax": float(vmax), "n_rows": int(n)}, im)
+
+
+class _FigureSkipped(Exception):
+    """Raised when a per-seizure figure has no displayable High-HI channels."""
+
+
 def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
                         *, per_subject_json: Optional[Dict] = None) -> Path:
-    """Dual-band per-seizure figure: left=gamma | right=broad.
+    """Dual-band per-seizure figure: horizontal layout.
 
-    Each column = (raw SEEG row) over (full-channel z-ER heatmap row),
-    matching the archive's publication style. The middle High-HI z-ER
-    trace panel is dropped per spec §4.1 brainstorm decision.
+    Two band rows (gamma top / broad bottom); within each row the left
+    panel is the raw SEEG and the right panel is the z-ER heatmap. The two
+    panels share the same role-grouped channel order and ``ylim``, so raw
+    trace ``p`` lines up with heatmap row ``p`` (per-channel names on the
+    far-left, role-group labels on the heatmap's right). The heatmap uses
+    the same channel set as the raw panel, so the ``other`` block is a
+    small set of selected controls rather than every non-index channel.
 
     t_ER_onset markers (✦ on each heatmap row) come from the v2.3
     per-subject JSON channel_onsets — guaranteed consistent with r_sz.
     """
     from src.ictal_onset_extraction import (
         BROAD_ER_BANDS, GAMMA_ER_BANDS,
-        baseline_zscore_er, compute_er, extract_seizure_window,
-        resolve_baseline_window,
+        baseline_zscore_er, compute_er, detect_er_onset_preview,
+        extract_seizure_window, resolve_baseline_window,
     )
     arch = _import_archive_plotter()
+    dataset = subject.split("/", 1)[0]
 
     if per_subject_json is None:
         per_subject_json = _load_per_subject_json(subject)
 
-    # Load lagpat for High-HI cluster info (from PR-1 per_subject JSON,
+    # Load lagpat for High-HI cluster info (from PR-2 per_subject JSON,
     # not the v2.3 Layer A JSON). 1084-class subjects with focal=[] still
     # work because lagpat is independent of clinical labels.
     try:
-        lagpat_channels, clusters = arch._load_lagpat(subject)
+        lagpat_channels, clusters = _load_display_lagpat(subject)
         display_cluster = arch._pick_display_cluster(clusters)
     except (FileNotFoundError, ValueError) as exc:
-        # No PR-1 lagpat available — fall back to empty High-HI set.
+        # No PR-2 lagpat available — fall back to empty High-HI set.
         # Heatmap will only show ictal-only + other groups.
         lagpat_channels, display_cluster = [], None
         print(f"  [warn] {subject}: lagpat unavailable ({exc}); "
@@ -476,6 +940,11 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
     # seizure is near a block boundary. This guarantees we still render
     # something even when the seizure is too close to block_end for
     # post_sec=300 to fit.
+    # Yuquan: the High-HI/Lagpat channels are bipolar (alias-to-left); draw the
+    # ictal z-ER in the same montage so the channel names match. Epilepsiae
+    # High-HI matches CAR directly, so it stays CAR.
+    ref = "bipolar" if dataset == "yuquan" else "car"
+    alias_left = (dataset == "yuquan")
     sw = None
     last_exc: Exception | None = None
     for post_attempt in (300.0, 200.0, 100.0, 60.0, 30.0):
@@ -483,7 +952,8 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
             sw = extract_seizure_window(
                 subject, seizure_idx,
                 pre_sec=300.0, post_sec=post_attempt,
-                results_root=ROOT / "results", reference="car",
+                results_root=ROOT / "results", reference=ref,
+                alias_bipolar_to_left=alias_left,
             )
             break
         except (ValueError, IndexError) as exc:
@@ -498,20 +968,44 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
         sw.eeg_onset_epoch - sw.clin_onset_epoch
         if sw.eeg_onset_epoch is not None else None
     )
+    # Align t=0 to the EEG (electrographic) onset when usable; clinical onset
+    # becomes a secondary marker. Yuquan is already EEG/ref-aligned. Bogus
+    # eeg_onset annotations fall back to t=0 = clinical onset.
+    align_ref_sec, ref_is_eeg = _alignment_reference(
+        dataset, eeg_rel, pre_sec=sw.pre_sec, post_sec=sw.post_sec,
+    )
+    lo_sig = -float(sw.pre_sec) - align_ref_sec
+    hi_sig = float(sw.post_sec) - align_ref_sec
+    display_window = (
+        max(-EEG_ZOOM_PRE_SEC, lo_sig),
+        min(EEG_ZOOM_POST_SEC, hi_sig),
+    )
+    x_label = "Time (s)"  # t=0 reference is named in the legend (ref_legend)
+    if dataset == "yuquan":
+        ref_legend = "eeg_onset/ref (t=0)"
+        other_onset_disp = None
+    elif ref_is_eeg:
+        ref_legend = "eeg_onset (t=0)"
+        other_onset_disp = 0.0 - align_ref_sec  # clinical onset display position
+    else:
+        ref_legend = "clin_onset (t=0)"
+        other_onset_disp = None  # eeg_onset bogus → not shown
     focal_set = set(per_subject_json.get("focal_channels") or [])
     focal_upper = {c.upper() for c in focal_set}
     high_hi_upper = {ch.upper() for ch in lagpat_channels}
 
-    # Layout: 3 rows (raw / heatmap / colorbar) x 2 cols (gamma | broad).
-    # Drop the middle z-ER trace panel per brainstorm decision.
-    fig_w = 24.0
-    fig_h = 13.0
+    # Layout: 2 rows (gamma top / broad bottom) x 2 cols (raw SEEG | z-ER).
+    # Within each band row the raw panel (left) and heatmap (right) share the
+    # same onset-ordered channel set + ylim, so SEEG trace p aligns with
+    # heatmap row p (sharey within the row).
+    fig_w = 20.0
+    fig_h = 12.5
     fig = plt.figure(figsize=(fig_w, fig_h), facecolor="white")
     gs = mgs.GridSpec(
         nrows=2, ncols=2, figure=fig,
-        height_ratios=[1.0, 1.6], width_ratios=[1.0, 1.0],
-        left=0.06, right=0.86, top=0.93, bottom=0.07,
-        hspace=0.16, wspace=0.18,
+        height_ratios=[1.0, 1.0], width_ratios=[1.0, 1.0],
+        left=0.08, right=0.82, top=0.91, bottom=0.08,
+        hspace=0.22, wspace=0.10,
     )
 
     bands = (GAMMA_ER_BANDS, BROAD_ER_BANDS)
@@ -527,12 +1021,10 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
                         for ch, entry in co.items()}
         return {}
 
-    for col, band in enumerate(bands):
-        band_key = band["key"]
-        ax_raw = fig.add_subplot(gs[0, col])
-        ax_heat = fig.add_subplot(gs[1, col], sharex=ax_raw)
-
-        # ER + baseline z-score for this band
+    # ---- Precompute both bands (ER → baseline-z → display-frame axes) ----
+    band_blobs: Dict[str, Dict] = {}
+    for band in bands:
+        bkey = band["key"]
         er = compute_er(
             sw.signal, fs=sw.fs,
             fast_band=band["fast"], slow_band=band["slow"],
@@ -543,80 +1035,115 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
             n_t, hop_sec=0.1, pre_sec=sw.pre_sec, eeg_onset_rel_sec=eeg_rel,
         )
         if bw.valid:
-            z = arch.baseline_zscore_er(
-                er, (bw.start_idx, bw.end_idx), hop_sec=0.1,
-            )
-            baseline_edge_sec = bw.end_sec
+            z = arch.baseline_zscore_er(er, (bw.start_idx, bw.end_idx), hop_sec=0.1)
+            baseline_edge_disp = bw.end_sec - align_ref_sec
         else:
             z = np.full_like(er, np.nan, dtype=np.float64)
-            baseline_edge_sec = -60.0
-        t_axis_er = (np.arange(n_t) * 0.1 + 0.5) - sw.pre_sec
-        t_axis_raw = np.arange(sw.signal.shape[1]) / sw.fs - sw.pre_sec
-        valid_mask = ~np.isnan(z).any(axis=1)
+            baseline_edge_disp = -60.0 - align_ref_sec
+        t_axis_er = ((np.arange(n_t) * 0.1 + 0.5) - sw.pre_sec) - align_ref_sec
 
-        # --- Raw row (archive _plot_raw_panel) ---
-        bg_idx_top5, _ = arch._select_bg_traces(
-            z, t_axis_er, sw.ch_names, high_hi_upper, valid_mask,
-        )
-        if display_cluster is None:
-            # Synthetic cluster wrapping all valid channels with rank None
-            display_cluster_local = {
-                "cluster_id": 0,
-                "n_events": 0,
-                "fraction": 0.0,
-                "rank_by_channel": {},
-            }
+        # Per-channel ER onset in the DISPLAY frame.
+        #  - Epilepsiae (CAR): reuse the Layer A CAR onsets (names match), shifted.
+        #  - Yuquan (bipolar): Layer A is CAR and does NOT match the bipolar
+        #    channel names, so detect the onset in-figure from the displayed
+        #    bipolar z-ER with the same CUSUM detector.
+        onsets_disp: Dict[str, Optional[float]] = {}
+        if dataset == "yuquan":
+            det_mask = (t_axis_er >= baseline_edge_disp) & (t_axis_er <= display_window[1])
+            det_idx = np.where(det_mask)[0]
+            det_win = (int(det_idx[0]), int(det_idx[-1]) + 1) if det_idx.size >= 2 else None
+            for i, nm in enumerate(sw.ch_names):
+                if det_win is None:
+                    onsets_disp[nm] = None
+                    continue
+                ev = detect_er_onset_preview(z[i], t_axis_er, det_win,
+                                             bias=0.5, threshold=5.0)
+                onsets_disp[nm] = float(ev.onset_sec) if ev.detected else None
         else:
-            display_cluster_local = display_cluster
-        display_entries = arch._build_display_entries(
-            ch_names=sw.ch_names,
-            focal_upper=focal_upper,
-            high_hi_upper=high_hi_upper,
-            cluster=display_cluster_local,
-            control_idx_top5=bg_idx_top5,
-            valid_mask=valid_mask,
-        )
-        arch._plot_raw_panel(
-            ax_raw,
-            signal=sw.signal,
-            t_axis=t_axis_raw,
-            display_entries=display_entries,
-            eeg_onset_rel_sec=eeg_rel,
-            baseline_edge_sec=baseline_edge_sec,
-        )
-        ax_raw.set_title(band_key, fontsize=FS_LABEL, pad=6)
-        plt.setp(ax_raw.get_xticklabels(), visible=False)
+            la = _channel_onsets_for_seizure(bkey)
+            for nm in sw.ch_names:
+                v = la.get(nm)
+                onsets_disp[nm] = (float(v) - align_ref_sec) if (
+                    v is not None and np.isfinite(v)) else None
 
-        # --- Heatmap row (archive _plot_heatmap_panel) ---
-        _, im = arch._plot_heatmap_panel(
-            ax_heat,
-            z=z, t_axis_er=t_axis_er, ch_names=sw.ch_names,
-            focal_upper=focal_upper, high_hi_upper=high_hi_upper,
-            valid_mask=valid_mask,
-            eeg_onset_rel_sec=eeg_rel,
-            baseline_edge_sec=baseline_edge_sec,
+        band_blobs[bkey] = {
+            "z": z,
+            "t_axis_er": t_axis_er,
+            "t_axis_raw": (np.arange(sw.signal.shape[1]) / sw.fs - sw.pre_sec) - align_ref_sec,
+            "baseline_edge_disp": baseline_edge_disp,
+            "valid_mask": ~np.isnan(z).any(axis=1),
+            "onsets_disp": onsets_disp,  # DISPLAY frame, None where no onset
+        }
+
+    # ---- Select ≤8 sequence channels by the BROAD band (Lagpat ∩ clearest) ----
+    sb = band_blobs[BROAD_ER_BANDS["key"]]
+    rows = _select_sequence_rows(
+        sb["z"], sb["t_axis_er"], sw.ch_names,
+        high_hi_upper=high_hi_upper, focal_upper=focal_upper,
+        valid_mask=sb["valid_mask"], display_window=display_window,
+        onsets=sb["onsets_disp"], align_ref_sec=0.0, max_ch=MAX_SEQUENCE_CH,
+    )
+    if not rows:
+        plt.close(fig)
+        raise _FigureSkipped(
+            f"{subject} seizure {seizure_idx}: no High-HI/Lagpat channels present "
+            f"in the ictal recording — figure skipped"
         )
+
+    # ---- Plot both band rows with the shared, onset-ordered channel set ----
+    for row_i, band in enumerate(bands):
+        bkey = band["key"]
+        blob = band_blobs[bkey]
+        show_xlabel = (row_i == len(bands) - 1)
+        ax_raw = fig.add_subplot(gs[row_i, 0])
+        # No sharey: both panels set identical ylim=(n,0) in the same gridspec
+        # row, so rows align without the heatmap's set_yticks([]) wiping the raw
+        # panel's channel-name ticks.
+        ax_heat = fig.add_subplot(gs[row_i, 1])
+
+        _plot_aligned_raw_panel(
+            ax_raw, arch=arch, signal=sw.signal, t_axis_raw=blob["t_axis_raw"],
+            rows=rows, display_window=display_window,
+            eeg_onset_rel_sec=other_onset_disp,
+            baseline_edge_sec=blob["baseline_edge_disp"],
+            show_xlabel=show_xlabel, x_label=x_label,
+        )
+        ax_raw.set_title(f"{bkey} · raw SEEG", fontsize=FS_LABEL,
+                          loc="left", fontweight="bold", pad=6)
+
+        _, im = _plot_aligned_heatmap_panel(
+            ax_heat, arch=arch, z=blob["z"], t_axis_er=blob["t_axis_er"],
+            rows=rows, display_window=display_window,
+            eeg_onset_rel_sec=other_onset_disp,
+            baseline_edge_sec=blob["baseline_edge_disp"],
+            show_xlabel=show_xlabel, x_label=x_label,
+        )
+        ax_heat.set_title(f"{bkey} · z-ER", fontsize=FS_LABEL,
+                           loc="left", fontweight="bold", pad=6)
         last_im = im
 
-        # Overlay t_ER_onset markers per row. The archive heatmap orders
-        # rows by [hhi_ictal, hhi_only, ictal_only, other] then by post_max
-        # within each group; replicate that order here so markers land on
-        # the correct visual row.
-        order = _heatmap_row_order_archive_compat(
-            z, t_axis_er, sw.ch_names, focal_upper, high_hi_upper, valid_mask,
-        )
-        onsets = _channel_onsets_for_seizure(band_key)
-        for visual_row, ch_idx in enumerate(order):
-            ch = sw.ch_names[ch_idx]
-            t_on = onsets.get(ch)
-            if t_on is not None and np.isfinite(t_on):
-                ax_heat.plot(t_on, visual_row + 0.5, marker="*", markersize=8,
-                              color="white", markeredgecolor="black",
-                              markeredgewidth=0.7, zorder=12)
+        # Peak markers (✦, big) at this band's onset, connected top→bottom to
+        # show the recruitment sequence.
+        onsets_disp = blob["onsets_disp"]
+        seq_pts = []
+        for p, r in enumerate(rows):
+            t_disp = onsets_disp.get(r["channel"])
+            if t_disp is None or not np.isfinite(t_disp):
+                continue
+            if not (display_window[0] <= t_disp <= display_window[1]):
+                continue
+            seq_pts.append((t_disp, p + 0.5))
+        if len(seq_pts) >= 2:
+            xs, ys = zip(*seq_pts)
+            ax_heat.plot(xs, ys, "-", color="#10131a", lw=1.8, alpha=0.8, zorder=12)
+        for t_disp, yy in seq_pts:
+            ax_heat.plot(t_disp, yy, marker="*", markersize=18,
+                          color="white", markeredgecolor="black",
+                          markeredgewidth=1.2, zorder=14)
 
-    # --- Shared horizontal colorbar at the right of the figure ---
+    # --- Shared colorbar at the far right (clear of heatmap group labels) ---
     if last_im is not None:
-        cbar_ax = fig.add_axes([0.88, 0.20, 0.012, 0.55])
+        cbar_ax = fig.add_axes([0.90, 0.30, 0.014, 0.40])
         cbar = fig.colorbar(last_im, cax=cbar_ax)
         cbar.set_label("z-ER", fontsize=FS_LABEL)
         cbar.ax.tick_params(labelsize=FS_TICK - 2)
@@ -625,36 +1152,37 @@ def render_per_seizure(subject: str, seizure_idx: int, out_path: Path,
     from matplotlib.lines import Line2D
     legend_handles = [
         Line2D([0], [0], color=arch._role_color("high_hi_ictal"), lw=2.0,
-                label="High-HI ∩ ictal"),
+                label="High-HI ∩ SOZ"),
         Line2D([0], [0], color=arch._role_color("high_hi_index"), lw=2.0,
-                label="High-HI index"),
-        Line2D([0], [0], color=arch._role_color("ictal"), lw=2.0,
-                label="ictal"),
-        Line2D([0], [0], color=arch._role_color("other"), lw=2.0,
-                label="other"),
+                label="High-HI (Lagpat)"),
         Line2D([0], [0], **arch.EVENT_LINE_STYLES["clin_onset"],
-                label="clin_onset (t=0)"),
+                label=ref_legend),
         Line2D([0], [0], **arch.EVENT_LINE_STYLES["baseline_edge"],
                 label="baseline edge"),
         Line2D([0], [0], marker="*", color="white", markeredgecolor="black",
-                markersize=8, lw=0, label="t_ER_onset (CUSUM)"),
+                markersize=15, markeredgewidth=1.2, lw=0,
+                label="t_ER_onset (peak)"),
+        Line2D([0], [0], color="#10131a", lw=1.8, alpha=0.8,
+                label="recruitment order"),
     ]
-    if eeg_rel is not None and abs(eeg_rel) > 0.5:
+    if (other_onset_disp is not None and abs(other_onset_disp) > 0.5
+            and display_window[0] <= other_onset_disp <= display_window[1]):
         legend_handles.insert(
-            -1,
+            3,
             Line2D([0], [0], **arch.EVENT_LINE_STYLES["eeg_onset"],
-                    label=f"eeg_onset (Δ={eeg_rel:+.1f}s)"),
+                    label=f"clin_onset (Δ={other_onset_disp:+.1f}s)"),
         )
     fig.legend(
         handles=legend_handles,
-        loc="upper left", bbox_to_anchor=(0.87, 0.93),
+        loc="upper left", bbox_to_anchor=(0.855, 0.985),
         bbox_transform=fig.transFigure,
         frameon=False, ncol=1, fontsize=FS_TICK - 3,
         handlelength=2.0, labelspacing=0.9, borderaxespad=0.0,
     )
 
     fig.suptitle(
-        f"{subject}  |  seizure_idx={seizure_idx}  |  seizure_id={sw.seizure_id}",
+        f"{subject}  |  seizure_idx={seizure_idx}  |  seizure_id={sw.seizure_id}"
+        f"  |  display=[{display_window[0]:.0f},{display_window[1]:.0f}]s",
         fontsize=FS_TITLE, y=0.97,
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -709,13 +1237,23 @@ def cmd_per_seizure(args: argparse.Namespace) -> int:
     sz_idx = int(args.seizure_idx)
     src = "_sentinel" if args.from_sentinel else "per_subject"
     per_subject = _load_per_subject_json(subject, source=src)
-    out_path = _per_seizure_out_path(subject, sz_idx)
+    if getattr(args, "out_dir", None):
+        out_path = (Path(args.out_dir)
+                    / f"{subject.replace('/', '_')}_seizure_{sz_idx:02d}.png")
+    else:
+        out_path = _per_seizure_out_path(subject, sz_idx)
     if not args.no_skip_existing and out_path.exists():
         print(f"[skip] {out_path} exists", flush=True)
         return 0
     t0 = time.time()
-    render_per_seizure(subject, sz_idx, out_path,
-                        per_subject_json=per_subject)
+    try:
+        render_per_seizure(subject, sz_idx, out_path,
+                            per_subject_json=per_subject)
+    except _FigureSkipped as exc:
+        if out_path.exists():
+            out_path.unlink()  # remove any stale figure from an earlier run
+        print(f"[skip] {exc}", flush=True)
+        return 0
     print(f"[per-seizure] {subject}#{sz_idx} → {out_path}  ({time.time()-t0:.1f}s)",
            flush=True)
     return 0
@@ -763,6 +1301,8 @@ def main() -> int:
     pse = sub.add_parser("per-seizure", parents=[common])
     pse.add_argument("--subject", required=True)
     pse.add_argument("--seizure-idx", required=True, type=int)
+    pse.add_argument("--out-dir", default=None,
+                     help="Override output directory (e.g. a preview folder).")
 
     sub.add_parser("cohort", parents=[common])
 

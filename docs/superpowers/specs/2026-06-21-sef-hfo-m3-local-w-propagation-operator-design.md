@@ -5,7 +5,7 @@
 > 上游：M2 收口 `docs/archive/topic4/sef_hfo/m2_stage_recap_2026-06-19.md`；hub 第一轮实测
 > `docs/archive/topic4/sef_hfo/m3_hub_scaffold_infra_status_2026-06-19.md`（worktree `.worktrees/topic4-m3`）；
 > Task 0 数据审计 `results/topic4_sef_hfo/event_extent_audit/cohort_summary.json`（AF=0.915、LR=0.561、contact-space sampling-dominated）；
-> 联合判据 `snn_5criteria_joint_verdict_2026-06-18.md` §7。框架合同 `docs/topic4_sef_itp_framework.md`（工作点 lock 2026-06-03、§7.2 红线、tier 纪律）。
+> 联合判据 `snn_5criteria_joint_verdict_2026-06-18.md` §7。框架合同 `docs/topic4_sef_hfo.md`（工作点 lock 2026-06-03、§7.2 红线、tier 纪律）。
 
 ---
 
@@ -356,6 +356,6 @@ separatrix 变近、near-critical；`K_min≈0` = 自发即进持续招募。这
 - **复用件（worktree）**：`src/topic4_degnorm.py::ee_degree`（结构先验 h）、`src/topic4_hub_criticality.py::{recruitment_operator, branching_ratio}`（W_struct + ρ）、
   `src/topic4_m3_acceptance.py`（Layer-2 subject 等价）、`src/topic4_hub_diag.py`（reach / 招募读出）、runner `V_th_per_neuron` 接线。
 - **新增（本 spec）**：`src/topic4_propagation_operator.py`（W_kicked 测量 + 𝒟 + W_resp/W_step/W_shape 三对象 + h^post(W_resp) + Λ₀=ρ(W_step) + 主轴(W_shape)）；runner `--mu/--h-source/--h-control` h-耦合（骑 V_th，μ=0 bit-parity）；M3-3/4/5 相图 + basin 脚本。
-- 框架合同：`docs/topic4_sef_itp_framework.md`（工作点 lock 2026-06-03、§7.2 红线、H4 几何不变形、tier 纪律）；联合判据 `snn_5criteria_joint_verdict_2026-06-18.md` §7。
+- 框架合同：`docs/topic4_sef_hfo.md`（工作点 lock 2026-06-03、§7.2 红线、H4 几何不变形、tier 纪律）；联合判据 `snn_5criteria_joint_verdict_2026-06-18.md` §7。
 - 文献 framing：Pachitariu/Stringer 2026 Nature（critically-normalized 连接、谱半径≈1，仅建模语言）；Moosavi & Truccolo 2023 PLOS Comp Biol（seizure spread 相图 excitability×connectivity）；Proix/Jirsa 2018 Nat Commun（局部 + 异质长程 + 多时间尺度 spread）。
 ```

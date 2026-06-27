@@ -87,14 +87,33 @@
 
 ## Topic 4 · 机制模型（SEF-HFO / cm-SNN）
 
-- **示范图**：[`results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/core_model_stage2_low_abnormality.png`](../results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/core_model_stage2_low_abnormality.png)
-- **回答**：模型的同一基底在「正向」与「反向」两种工作模式下，源空间长什么样、传播梯度朝哪、虚拟 SEEG 读回来是什么 train、读回的 rank 模板是否复刻数据侧的双模板结构。
-- **布局（3 行）**：
-  - **A 行 Forward**：[a/b 空间场（蓝色基底 + 散点 + 红圈标 locus，注「heterogeneity + event propagation」）]＋[propagation gradient 散点（viridis `first→last`）]＋[融合虚拟电极读出 traces（一个 locus 横跨各 active contact）]。
-  - **B 行 Reverse**：与 A 同布局，注「same substrate, reversed propagation / same montage」。
-  - **C 行 读回**：rank 热图（event×channel，`First→Last` viridis）＋ per-channel rank 分布 ＋ KMeans **k=2** 重排热图 ＋ cluster rank 分布折线（与 1a 同款，强调模型读回与真实数据同构）。
-- **标题约定**：`model:<配置名> | repro=<strong/…>`；C 行子标题带 `KMeans k=2 | within-τ | inter-corr | forward/reverse pair`。
-- **配色**：传播/rank 全 viridis `First→Last`；与 Topic 1a / Topic 3 共用同一套，使「数据侧模板」与「模型读回模板」可直接并排比较。
+- **示范图**：[`results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png`](../results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png)
+- **默认标准（SNN 仿真图都按这个画）**：`mechanism + tempA source + tempB source + electrode readout`。除非用户明确要求做诊断图、参数扫描图或 pipeline/KMeans 结果图，任何 SNN 相关主图 / paper-ready 图都不得回到旧的三行 Forward/Reverse/C 行堆叠布局。
+- **回答**：同一个 SNN 基底里，机制变量在哪里、两种特异性组合如何产生相反传播、同一虚拟 SEEG montage 是否能在电极 readout 中读出正/反事件。
+- **布局（单行 4 列）**：
+  - **mechanism**：左 1 格，画底物和机制变量。必须标出关键连接 / 病理范围，例如 E->E 长轴作用范围、病灶核、虚拟电极位置。这个 panel 只解释“机制是什么”，不堆长说明文字。
+  - **tempA source**：中间第 1 个方形 panel，画 tempA / source-A / 组合 A 的代表传播事件。点云颜色为传播起始相对时间，沿用 viridis `early → late`；红圈标病灶 / source 区，星号只标该事件的实际 source。
+  - **tempB source**：中间第 2 个方形 panel，画 tempB / source-B / 组合 B 的代表传播事件。坐标轴、colormap、contact 标注必须与 tempA panel 完全一致，便于直接比较两种组合是否反向。
+  - **electrode readout**：右侧宽 panel，画同一 montage 的多事件虚拟 SEEG train。只画 active contacts，y 轴为 contact，x 轴为 time；用不同颜色 shading 区分 forward / reverse clean propagation events，黑点/线标每个事件的 peak order。
+- **标题约定**：子图标题只用短名：`mechanism`、`tempA source`、`tempB source`；readout 不加长标题。必要统计写进 metadata/README，不压到图上。
+- **配色 / 渲染锁定**：
+  - mechanism 底物用原 SNN 机制图风格：`plasma`，点大小和透明度沿用原机制脚本的粗点风格。
+  - 传播事件用 viridis，早=紫、晚=黄；不得换成低饱和替代色。
+  - readout 事件 shading：forward 用暖色，reverse 用浅蓝；同一图只保留一个共享 legend。
+  - 电极颜色固定：沿轴 / A shaft 为橙色，横轴 / B shaft 为青色。
+- **输出纪律**：正式 SNN 仿真图脚本放 `scripts/paper_figures/`，输出放 `results/paper-ready-figure/<figure_name>/figures/`，同时可写一份兼容旧 Topic 4 结果目录；`figures/README.md` 必须说明四列各自回答什么。
+- **科学边界**：这类图只能写成“模型底物 + 两种特异性组合 + 虚拟 SEEG readout”的机制/读出示意。不能因为图上有正反事件，就直接声称真实病人机制被证明；pipeline/KMeans 验证若需要，另作补图或下游结果图。
+- **被试特异性变体（subject-specific SNN，Fig4A/B 起）**：Fig4A 用同一四列标准，但底物按**病人真实电极布局**摆放（示范 `results/paper-ready-figure/fig_subject_snn_epilepsiae_1146/`，脚本 `scripts/paper_figures/plot_fig_subject_snn.py`）。Fig4B 是同一 readout 的 KMeans=2 核验图，脚本 `scripts/paper_figures/plot_fig_subject_snn_kmeans2.py`。锁定约定：
+  - 两个低阈值核 = **两类间期模板各自最早的 k 个电极**（`template_source` 摆放，`src/sef_hfo_subject_placement.py`），即两类模板的 source 区，落在传播轴两端；不要用 swap decision_k 的宽 strip 质心（会被拉向中间）。
+  - 用**真实几何 plane-fit**（核间距自然 ≈ blessed sep0.7），不得人为 core-anchor 到固定间距。
+  - mechanism panel 必须显示**核与电极间期最早区 overlap**（高亮核成员触点）+ E→E 长轴带。
+  - readout 用 `k_dir=2`（病人电极比模型密杆稀疏的放宽，**载重参数**，必须在 metadata/README 注明 k_dir=3 的退化情况）。
+  - 诚实口径：readout 若用 spontaneous twoend，需注明自发双向**与 seed 有关**；separate-then-pool 只能写"仪器对齐"不能写"自发机制"。
+  - **LOCKED 模式（2026-06-26）= 每个 subject-SNN 案例固定出两张主图：Fig4A（readout 四列）+ Fig4B（KMeans 核验四块）。** Fig4C（real-vs-model profile）、Fig4D（组合 S 置换 null）是可选 supplement。
+  - **Fig4B 四块（左→右）**：`clustered event heatmap | per-channel rank distribution | cluster rank distributions | model-vs-real 2×2 相似性矩阵`。最左 heatmap **占主导宽度**，后三块紧凑。
+    - **左三块 y 轴必须 channel-for-channel 对齐**（同一通道在三块里同一高度，`sharey`）。heatmap 用 canonical `_plot_rank_heatmap` + `_plot_cluster_boundaries`；rank distribution + cluster profile **沿用 canonical 视觉风格但画在 heatmap 的 1-unit 通道坐标上**（`_hist_aligned` / `_cluster_aligned`，**不用** canonical 的 ridge `_plot_rank_histogram`——它 0.15 spacing 无法与 heatmap 对齐）。heatmap rank colorbar 横放 x-label 下方。
+    - 第四块 = 模型(fwd/rev)×真实(t_a/t_b) Spearman 矩阵，**只用 star 显示方向性 channel-shuffle 置换 p**（不写数值），颜色=ρ、`aspect=equal`（cells 方形不压扁）。
+    - 只消费 Fig4A 同一 readout 的 clean directional events，不重跑仿真；标题/README 报告 cluster-size、direction purity、within-cluster tau、shared-overlap corr + 模型↔真实模板一致性，不是 cohort 统计。
 
 ---
 

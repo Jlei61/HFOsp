@@ -48,6 +48,15 @@ ACTIVATION_KEY = {"broadband": "bb_auc", "hfa": "hfa_auc", "ramp": "ramp", "ei":
 ACTIVATION_LABEL = {"broadband": "broadband power, 0-10 s", "hfa": "fast activity 60-100 Hz, 0-10 s",
                     "ramp": "activation ramp slope, 0-10 s", "ei": "EI-like (fast-activity / delay)"}
 
+# Enlarged paper-grade font sizes (xy-labels + colorbar labels emphasized, per user request).
+FS_AXLABEL = 17        # x/y axis labels (largest)
+FS_CBAR_LABEL = 17     # colorbar labels (largest)
+FS_TICK = 13           # axis + colorbar tick numbers
+FS_TITLE_PANEL = 14    # per-subject panel title
+FS_TITLE_COMPACT = 11  # atlas compact panel title
+FS_TITLE_SUP = 15      # figure suptitle
+FS_LEGEND = 14         # legend
+
 
 def _ictal_activation(ds_sid, key="bb_auc"):
     """Per-contact mean early-ictal activation across the subject's eligible seizures -> {name: z}."""
@@ -116,29 +125,34 @@ def _field_panel(ax, dat, vals, title, cbar_label, *, compact, labels=False, cba
         for x, y, n in zip(xx, yy, nn):
             ax.text(x, y + (ylim[1] - ylim[0]) * 0.026, n, ha="center", va="bottom",
                     fontsize=5.5, color="0.92", path_effects=LABEL_HALO, zorder=6)
-    ax.set_title(title, fontsize=9 if compact else 10.5)
+    ax.set_title(title, fontsize=FS_TITLE_COMPACT if compact else FS_TITLE_PANEL)
     ax.set_xlim(*xlim); ax.set_ylim(*ylim); ax.set_aspect("equal", adjustable="box")
     if compact:
         ax.set_xticks([]); ax.set_yticks([])
     else:
-        ax.set_xlabel("along propagation axis (mm)"); ax.set_ylabel("transverse (mm)")
+        ax.set_xlabel("along propagation axis (mm)", fontsize=FS_AXLABEL)
+        ax.set_ylabel("transverse (mm)", fontsize=FS_AXLABEL)
+        ax.tick_params(labelsize=FS_TICK)
         if cbar:
-            cb = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.03); cb.set_label(cbar_label, fontsize=9)
+            cb = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+            cb.set_label(cbar_label, fontsize=FS_CBAR_LABEL)
+            cb.ax.tick_params(labelsize=FS_TICK)
 
 
 def _ict_labels(dat, activation):
-    if dat["flip"]:
-        return (f"seizure-onset activation — {ACTIVATION_LABEL[activation]}",
-                "activation high (0) -> low (1)  [flipped to match axis]")
-    return (f"seizure-onset activation — {ACTIVATION_LABEL[activation]}",
-            "activation low (0) -> high (1)")
+    # Colorbar text = what the field actually is: a within-subject RANK of the mean 0-10 s
+    # baseline-robust-z activation (not absolute energy, not a peak). The flip note is kept
+    # because the ictal field is sign-oriented to the interictal axis for the concordance read.
+    base = "activation rank (within subject, mean 0–10s)"
+    flip_note = "  [flipped to match axis]" if dat["flip"] else ""
+    return (f"seizure-onset activation — {ACTIVATION_LABEL[activation]}", base + flip_note)
 
 
 def plot_subject(dat, substrate, activation):
     ds_sid = dat["ds_sid"]; ss = dat["ss"]
     pretty = ds_sid.replace("epilepsiae_", "E").replace("yuquan_", "Y-")
     ict_title, ict_lbl = _ict_labels(dat, activation)
-    fig, ax = plt.subplots(1, 2, figsize=(13.6, 6.6), constrained_layout=True)
+    fig, ax = plt.subplots(1, 2, figsize=(14.0, 7.4), layout="constrained")
     _field_panel(ax[0], dat, dat["inter"], "interictal propagation order — template A",
                  "early (0) -> late (1)", compact=False, labels=True, cbar=True)
     _field_panel(ax[1], dat, dat["ict"], ict_title, ict_lbl, compact=False, labels=True, cbar=True)
@@ -146,9 +160,10 @@ def plot_subject(dat, substrate, activation):
     fig.suptitle(f"Patient {pretty} — interictal propagation field vs seizure-onset activation, "
                  f"role-SWAP source nodes\n(swap={ss.get('swap_class')}, k={ss.get('decision_k')}, "
                  f"p_fw={ss.get('p_fw'):.3f}; {len(nodes)} nodes; red=source in A, blue=source in B)",
-                 fontsize=10.5)
-    fig.legend(handles=_legend_handles(), loc="lower center", ncol=3, fontsize=8.5,
-               frameon=False, bbox_to_anchor=(0.5, -0.03))
+                 fontsize=FS_TITLE_SUP)
+    # Legend in its own reserved band below the panels (separate, never overlapping the fields).
+    fig.legend(handles=_legend_handles(), loc="outside lower center", ncol=3,
+               fontsize=FS_LEGEND, frameon=False)
     OUT.mkdir(parents=True, exist_ok=True)
     fp = OUT / f"{ds_sid}_field_vs_ictal_{substrate}.png"
     fig.savefig(fp, dpi=135, bbox_inches="tight"); plt.close(fig)
@@ -161,7 +176,7 @@ def plot_all(data, substrate, activation):
     ncols_sub = 3 if n >= 9 else (2 if n >= 4 else 1)
     nrows = int(np.ceil(n / ncols_sub))
     fig, axes = plt.subplots(nrows, 2 * ncols_sub, figsize=(6.6 * ncols_sub, 3.1 * nrows),
-                             squeeze=False)
+                             squeeze=False, layout="constrained")
     for i, dat in enumerate(data):
         r, c = i // ncols_sub, (i % ncols_sub) * 2
         pretty = dat["ds_sid"].replace("epilepsiae_", "E").replace("yuquan_", "Y-")
@@ -173,12 +188,12 @@ def plot_all(data, substrate, activation):
     for j in range(n, nrows * ncols_sub):          # blank the unused subject slots
         r, c = j // ncols_sub, (j % ncols_sub) * 2
         axes[r, c].axis("off"); axes[r, c + 1].axis("off")
-    fig.legend(handles=_legend_handles(), loc="upper center", ncol=3, fontsize=8, framealpha=0.9,
-               bbox_to_anchor=(0.5, 1.0))
+    # Legend in its own reserved band (bottom), separate from the panels and the suptitle.
+    fig.legend(handles=_legend_handles(), loc="outside lower center", ncol=3, fontsize=FS_LEGEND,
+               framealpha=0.9)
     fig.suptitle(f"Swap-positive subjects ({substrate}): interictal propagation field | seizure-onset "
                  f"activation ({ACTIVATION_LABEL[activation]}), role-SWAP source nodes ringed "
-                 f"(red=source in A, blue=source in B)", fontsize=11, y=1.005)
-    fig.tight_layout(rect=(0, 0, 1, 0.985))
+                 f"(red=source in A, blue=source in B)", fontsize=FS_TITLE_SUP)
     OUT.mkdir(parents=True, exist_ok=True)
     fp = OUT / f"ALL_field_vs_ictal_{substrate}.png"
     fig.savefig(fp, dpi=120, bbox_inches="tight"); plt.close(fig)

@@ -68,6 +68,15 @@ def _row_letter(fig, ax, letter):
 
 
 def compose(config):
+    if config == "s3_brakeoff":
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if root not in sys.path:
+            sys.path.insert(0, root)
+        from scripts.paper_figures.plot_fig5_core_model_s3_brakeoff import compose as compose_paper
+        compose_paper()
+        print(f"  wrote {D}/core_model_{config}.png")
+        return
+
     paths = {
         "maps_neg": f"{D}/mechanism_spont_{config}_neg.png",
         "train_neg": f"{D}/train_{config}_neg.png",

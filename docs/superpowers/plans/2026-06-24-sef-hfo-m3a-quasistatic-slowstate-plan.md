@@ -25,6 +25,11 @@ Test whether a biologically motivated slow state can move the SNN through at lea
 
 M3A-A1 is quasi-static. It freezes or clamps slow-state values and asks: if the tissue were already at this slow state, would spontaneous events change phenotype?
 
+A1 also owns the **slow-to-rate calibration interface** for M3B-R2. That does not make A1 a
+spectral analysis. It means every frozen slow state that A1 passes downstream must have an explicit
+interpretation as a coarse rate-field parameter change: local core excitability, global
+disinhibition, or recovery/protection. M3B must not infer those signs by itself.
+
 ## 2. Mechanism Candidates
 
 Priority order:
@@ -80,6 +85,9 @@ Required files:
 - `config.json`: engine SHA, Params, substrate, slow-state values, detector thresholds.
 - `per_event.csv`: one row per spontaneous event.
 - `slow_state_samples.csv`: state at `pre`, `onset`, `peak`, `end`, and post-event windows.
+- `slow_to_rate_mapping.json`: calibrated mapping from SNN slow variables to M3B rate-field
+  coordinates / parameter effects.
+- `phase_coord_ranges.json`: valid A1 coordinate ranges for M3B phase-map axes.
 - `summary.json`: event rate, size, duration, return probability, R-class fractions.
 - `figures/README.md`: Chinese description for every generated figure.
 
@@ -96,6 +104,111 @@ e_gaba_pre, e_gaba_onset, e_gaba_peak, e_gaba_end
 ```
 
 Fields can be `NA` only when the mechanism is not active or not implemented; do not write unknown as 0.
+
+Required state-level / event-level M3B handoff fields:
+
+```text
+phase_x_core, phase_y_global, phase_recovery,
+phase_coord_valid, phase_coord_source,
+slow_to_rate_mapping_id
+```
+
+`phase_x_core` and `phase_y_global` are not new biology; they are documented coordinates used by
+M3B-R2 to place frozen states on a phase map. If a mechanism has no calibrated mapping, write
+`phase_coord_valid=false` and do not hand it to M3B as a trajectory/range.
+
+### M3A -> M3B slow-to-rate mapping contract
+
+> **2026-06-27 — CANONICAL CONTRACT SUPERSEDES THE SCHEMA DETAIL BELOW.** See
+> `docs/superpowers/specs/2026-06-27-sef-hfo-m3-interface-contract.md` §4 (executable mirror
+> `src/sef_hfo_m3_interface.py`, TDD `tests/test_sef_hfo_m3_interface.py`). Corrections A1 must honor:
+> - each coordinate's transform is a CLOSED-ENUM descriptor
+>   `{type ∈ {identity, affine, reciprocal_affine}, input_var, a, b, clip, input_min, input_max,
+>   expected_direction}` — NOT a free-text `formula` string (no `eval`);
+> - the sign tests are SIGNED-slope tests (`phase_y_global` strictly decreasing in `q_global`;
+>   `phase_x_core` strictly decreasing in `q_core`; `phase_recovery` increasing in `phi`/`g_K`,
+>   decreasing in `x_EE`), NOT mere monotonicity — a backwards-encoded axis must FAIL;
+> - `calibration_status == "passed"` is permitted only with non-empty, all-pass `sign_tests`
+>   (element schema `{name, coord, input_var, expected_direction, observed_slope_sign, passed,
+>   engine_sha}`); empty / `not_applicable` on a plotted axis fails closed;
+> - the top-level id key is `slow_to_rate_mapping_id` (not `mapping_id`); `axis_space` ==
+>   `"normalized_unit"`; `e_GABA` records `shunt_path_active` and may not export calibrated
+>   disinhibition when it is false; two-core substrates record `two_core_reduction`;
+> - out-of-range is checked against the INPUT domain `[input_min, input_max]` too, so output clipping
+>   to [0,1] cannot hide extrapolation.
+> The mapping-interface TDD listed at the end of this section is implemented at the CONTRACT layer in
+> `tests/test_sef_hfo_m3_interface.py`; the ENGINE-sign tests (lower z weakens inhibition, etc.)
+> remain runner-layer A1 work.
+
+| SNN slow/control variable | Rate-field parameter effect | Phase-map coordinate role | Required sign check |
+|---|---|---|---|
+| `q_global` or global `z` | scales E-target inhibitory input globally | `phase_y_global ~ 1/q_global` or `1/z_global` | lower value weakens inhibition and should not be encoded with the opposite sign |
+| `q_core` or core-local `z` | extra inhibition scale on core E cells | `phase_x_core ~ 1/q_core` or local disinhibition component | affects core E cells more than background E cells |
+| `phi` / threshold adaptation | raises effective `V_theta` or reduces local drive | recovery/protection coordinate; may lower `phase_x_core` if core-local | higher `phi` suppresses firing / local gain |
+| `g_K` | subtracts effective E drive / outward recovery current | recovery/protection coordinate | higher `g_K` suppresses activity and finite-time gain |
+| static or dynamic `e_GABA` | changes effective inhibitory current via shunting/reversal path | global or core disinhibition only after calibration | depolarized `e_GABA` makes inhibition less protective in the active shunt path |
+| static core threshold / drive | changes core E excitability | primary `phase_x_core` axis | lower threshold / higher drive increases core event susceptibility |
+
+`slow_to_rate_mapping.json` must include formula, units, valid range, calibration status, and sign
+tests for every coordinate it exposes. M3B consumes this file; it should not re-derive the mapping
+from raw slow traces.
+
+Minimum `slow_to_rate_mapping.json` schema:
+
+```json
+{
+  "mapping_id": "m3a_a1_<date>_<hash>",
+  "source": "M3A-A1 quasi-static SNN calibration",
+  "substrate": "stage3_twoend_equal",
+  "coordinates": {
+    "phase_x_core": {
+      "formula": "...",
+      "units": "dimensionless",
+      "valid_range": [0.0, 1.0],
+      "variables": ["q_core", "z_core", "g_K_core", "phi_core"],
+      "calibration_status": "passed|failed|not_applicable",
+      "sign_tests": []
+    },
+    "phase_y_global": {
+      "formula": "...",
+      "units": "dimensionless",
+      "valid_range": [0.0, 1.0],
+      "variables": ["q_global", "z_global"],
+      "calibration_status": "passed|failed|not_applicable",
+      "sign_tests": []
+    },
+    "phase_recovery": {
+      "formula": "...",
+      "units": "dimensionless",
+      "valid_range": [0.0, 1.0],
+      "variables": ["g_K", "phi", "x_EE"],
+      "calibration_status": "passed|failed|not_applicable",
+      "sign_tests": []
+    }
+  }
+}
+```
+
+Minimum `phase_coord_ranges.json` schema:
+
+```json
+{
+  "mapping_id": "same-as-slow_to_rate_mapping",
+  "phase_x_core": {"min": 0.0, "max": 1.0, "source": "A1 sweep range"},
+  "phase_y_global": {"min": 0.0, "max": 1.0, "source": "A1 sweep range"},
+  "phase_recovery": {"min": 0.0, "max": 1.0, "source": "A1 sweep range"}
+}
+```
+
+TDD for the mapping interface is part of A1, not M3B:
+
+- `test_slow_to_rate_mapping_schema_required_keys`
+- `test_phase_coord_ranges_reference_same_mapping_id`
+- `test_q_global_or_z_global_maps_monotonically_to_phase_y_global`
+- `test_q_core_or_z_core_maps_monotonically_to_phase_x_core`
+- `test_recovery_variables_are_not_mislabeled_as_disinhibition`
+- `test_uncalibrated_variable_exports_phase_coord_invalid`
+- `test_mapping_sign_tests_fail_closed`
 
 ## 5. Tasks
 
@@ -127,6 +240,11 @@ Pass condition: no-slow path unchanged; slow-on path measurably changes either c
   - higher `phi` raises threshold;
   - higher `g_K` suppresses excitability;
   - depolarized `e_GABA` makes inhibition less protective only in the shunting path.
+- [ ] Add phase-coordinate / slow-to-rate mapping tests:
+  - `q_global` / global `z` maps monotonically to `phase_y_global`;
+  - `q_core` / core `z` maps monotonically to `phase_x_core` or a documented core-disinhibition term;
+  - `phi` and `g_K` are exported as recovery/protection coordinates, not mislabeled as disinhibition;
+  - unmapped variables are exported with `phase_coord_valid=false`.
 
 ### Task 3: No-kick spontaneous detector reuse
 
@@ -154,7 +272,7 @@ Only one slow variable is varied at a time. Other mechanisms remain off or basel
 
 ### Task 5: A1 verdict
 
-Answer these six questions:
+Answer these seven questions:
 
 1. Does event rate change?
 2. Does event size distribution shift?
@@ -162,8 +280,12 @@ Answer these six questions:
 4. Does return probability drop?
 5. Does R-class composition change toward R4a?
 6. Does the effect differ from simple rate-only heating?
+7. Which slow-state coordinates are M3B-ready, with valid sign/calibration ranges?
 
 Success requires more than event-rate increase. A minimal A1 candidate needs size/duration or return/R-class movement in addition to rate change.
+M3B-readiness additionally requires `slow_to_rate_mapping.json` and `phase_coord_ranges.json` with
+valid sign tests. A1 may find a biological phenotype candidate that is **not yet** M3B-ready if
+its rate-field coordinate mapping is unclear.
 
 Failure modes:
 
@@ -178,4 +300,3 @@ Stop after A1 tiny pilot and write a recap before A2. Do not start dynamic slow-
 
 - a positive phenotype-shift candidate, or
 - a clearly documented negative boundary worth testing dynamically for history effects.
-

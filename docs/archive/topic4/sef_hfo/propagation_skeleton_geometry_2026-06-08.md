@@ -1,7 +1,7 @@
 # SEF-HFO 间期传播几何骨架 — 一轮结果归档（2026-06-08）
 
 > **状态**：探索性、archive-only，不得把任何数字升级进 topic4 主文档的 paper 档。这一轮**两部分**：(a) 描述性几何尺度数（喂模型，不是 SOZ 定位器）；(b) **每被试内的留出半检验**——把事件折半、一半定轴、另一半验证"沿轴位置能否预测放电先后"，回答"这条传播是不是真·共享刻板通路，而非平均出来的同义反复"。(b) 是本轮相对前一版的关键升级（前一版只有描述、被批同义反复风险）。仍为探索性：留出是**被试内**的、无跨被试 held-out、无多重比较校正。
-> **上游**：`docs/topic4_sef_itp_framework.md`（SEF-HFO v0.2）；数据侧 plan `docs/superpowers/plans/2026-06-06-sef-hfo-soz-localization-rate-vs-geometry.md`；low-rate 读回结论 `docs/archive/topic4/sef_hfo/low_rate_template_stability_2026-06-07.md`。
+> **上游**：`docs/topic4_sef_hfo.md`（SEF-HFO v0.2）；数据侧 plan `docs/superpowers/plans/2026-06-06-sef-hfo-soz-localization-rate-vs-geometry.md`；low-rate 读回结论 `docs/archive/topic4/sef_hfo/low_rate_template_stability_2026-06-07.md`。
 > **硬前置**：`lagPatRank` phantom-mask（Topic 0 §3.1）——源/汇 core 只用 phantom-safe 的稠密排名（非参与通道为 NaN，无法被选进 core；实测 `phantom_core_violations=0`）。
 
 ---

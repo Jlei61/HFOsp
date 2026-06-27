@@ -1,6 +1,6 @@
 # Topic 4 Archive Index — Model layer
 
-> **Topic 4 formal entry（2026-06-01 起）**：`docs/topic4_sef_itp_framework.md` (**SEF-HFO / SEF-ITP framework v0.2**)
+> **Topic 4 formal entry（2026-06-01 起）**：`docs/topic4_sef_hfo.md` (**SEF-HFO / SEF-ITP framework v0.2**)
 > **上游 SBA framework**：`docs/paper1_framework_sba.md`（v1.1.2 lock 2026-04-30 / PR-7 addendum 2026-05-01）—— SEF-ITP 取代其 BHPN-toy / BHPN-fit toy-mechanism 部分；保留其 P1/P2/P3/P5 红线
 > **硬前置**：`docs/topic0_methodology_audits.md` §3.1 phantom-rank 修复 + §5 broad re-derivation roadmap（已解锁；后续 runner 仍必须使用 masked features）
 > **范围**：Topic 1 / Topic 3 实验数据之上的模型层；当前主路径 = SEF-HFO（间期 HFO 传播的空间易激场模型）
@@ -10,7 +10,7 @@
 
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
-- 主文档：`docs/topic4_sef_itp_framework.md`
+- 主文档：`docs/topic4_sef_hfo.md`
 - v0.2 plan：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际进入稳定性分析
 - 保留 v1 真实数据验收合同（H1–H6）：endpoint compactness / source-sink reversal / mark independence + stable geometry / rate-geometry decoupling / pre-post-ictal endpoint shift / participation-field segregation
@@ -59,7 +59,7 @@
 
 ### `pr_t4_1_bhpn_toy/` — BHPN-toy plan（**SUPERSEDED 2026-05-20**）
 - `pr_t4_1_bhpn_toy_plan_2026-05-01.md` — plan-of-record v2，**已被 SEF-ITP 取代**
-  - 顶部有 SUPERSEDED banner 指向 `docs/topic4_sef_itp_framework.md`
+  - 顶部有 SUPERSEDED banner 指向 `docs/topic4_sef_hfo.md`
   - 保留为历史归档：v2 修订过程（rotating-frame rank / direction-agnostic mark dependence / TDD unit vs integration 拆分）作为方法学训练范例；其中 "k=2 是对称 Hebbian 数学必然，不是 mechanism discovery" 是触发 SEF-ITP 转向的关键认知
 
 ### HR/FHN 节点动力学路线（Phase 4 v1）— **整体 SUPERSEDED 2026-06-01，全部集中在此**
@@ -67,10 +67,10 @@
 - **文档**：`sef_itp_phase4_v1/stage1_results_2026-05-28.md`、`stage1b_results_2026-05-28.md`（HR 单节点 regime + burst-envelope 标定，均已加 SUPERSEDED 头）
 - **spec**：`docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md`（HR/FHN route 设计，已加 SUPERSEDED 头）
 - **结果图**：`results/topic4_sef_itp/phase4_hr_route_SUPERSEDED/`（HR 单节点相图 + regime map + envelope 标定图；含 `_SUPERSEDED_README.md`）
-- 保留为历史 audit trail / sensitivity，**不是当前路线**。当前路线 = SEF-HFO v0.2（`docs/topic4_sef_itp_framework.md` + `sef_itp_phase4_v2/`，结果 `results/topic4_sef_hfo/`）。
+- 保留为历史 audit trail / sensitivity，**不是当前路线**。当前路线 = SEF-HFO v0.2（`docs/topic4_sef_hfo.md` + `sef_itp_phase4_v2/`，结果 `results/topic4_sef_hfo/`）。
 
 ## 跨文档链接
 
-- `docs/topic4_sef_itp_framework.md` §9.1 — SBA framework 取代 / 保留范围
-- `docs/topic4_sef_itp_framework.md` §13 — 历史文档索引（含本 INDEX 反向链接）
+- `docs/topic4_sef_hfo.md` §9.1 — SBA framework 取代 / 保留范围
+- `docs/topic4_sef_hfo.md` §13 — 历史文档索引（含本 INDEX 反向链接）
 - `docs/topic0_methodology_audits.md` §5h — Topic 4 attractor on masked re-run 是 SEF-ITP Phase 0 子步

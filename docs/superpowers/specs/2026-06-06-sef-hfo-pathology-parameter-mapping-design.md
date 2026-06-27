@@ -1,6 +1,6 @@
 # SEF-HFO 病理 → 中观 → 参数 映射 + 首轮调参 Design Spec
 
-> **状态**：draft 2026-06-06。本 spec 在 `docs/topic4_sef_itp_framework.md` v0.2 之上，**细化"当我们说这个模型是癫痫模型时，应当改变什么参数 / 引入什么机制"这一规范问题**，并给出第一轮可执行的调参计划（连接性 E→E 核 + E 细胞阈值异质性），LIF rate field 与 SNN 两版并行。
+> **状态**：draft 2026-06-06。本 spec 在 `docs/topic4_sef_hfo.md` v0.2 之上，**细化"当我们说这个模型是癫痫模型时，应当改变什么参数 / 引入什么机制"这一规范问题**，并给出第一轮可执行的调参计划（连接性 E→E 核 + E 细胞阈值异质性），LIF rate field 与 SNN 两版并行。
 >
 > **关系**：
 > - **细化**（不替换）framework §2 核心方程的 framing、§7.3"具体机制多样、中观动力学收敛"的文献地位、§6.5 Phase 4 实施路线。
@@ -228,7 +228,7 @@ W_EE(x,x') = w_EE · N(θ_EE,ρ,ℓ) · exp[ -u²/(2ℓ_∥²) - v²/(2ℓ_⊥²
 
 ## 9. Topic 文档 hook（写 spec 后加）
 
-- `docs/topic4_sef_itp_framework.md`：顶部 banner 加一行 2026-06-06 amendment 指针 + §13 历史文档索引加本 spec 条目（formal entry）。
+- `docs/topic4_sef_hfo.md`：顶部 banner 加一行 2026-06-06 amendment 指针 + §13 历史文档索引加本 spec 条目（formal entry）。
 - `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`：顶部加指针，标"病理→参数映射 + 首轮调参细化见本 spec"。
 - `docs/topic1_within_event_dynamics.md` §2（within-event 传播 = 双模板现象的实证家）：加轻量 hook 指向本 spec 的模型层机制（**待用户确认是否动 topic1 锁定文档**）。
 

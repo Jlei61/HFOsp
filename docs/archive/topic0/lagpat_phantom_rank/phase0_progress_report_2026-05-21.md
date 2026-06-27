@@ -180,7 +180,7 @@ PR-4D 在 Topic 1 主结论里属次级描述层（rate-burst seizure-enrich 9 s
 ### Step 5h / Topic 4 attractor（PENDING）
 
 **预期测什么** — 35 stable_k=2 cohort 上重跑 Step 1（principal curve + GOF + label transition λ₂）。
-**为什么优先 + 解锁条件** — SEF-ITP framework Phase 1+ 的硬前置（topic4_sef_itp_framework.md §"Phase 1+ 在 Topic 0 phantom-rank 修复完成前不启动"）。
+**为什么优先 + 解锁条件** — SEF-ITP framework Phase 1+ 的硬前置（topic4_sef_hfo.md §"Phase 1+ 在 Topic 0 phantom-rank 修复完成前不启动"）。
 **前置工作** — `scripts/run_attractor_step1.py` 需加 `--masked-features` flag → `build_rank_feature_matrix` 已经支持 `mask_phantom` 参数。
 
 ### Step 5i / 主文档 + AGENTS.md 收口（PENDING）

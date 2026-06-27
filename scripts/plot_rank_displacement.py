@@ -4,9 +4,9 @@
 Plan: docs/archive/topic1/pr6_supplementary_rank_displacement_plan_2026-05-06.md
 
 Produces 3 deliverables:
-  1. cohort_displacement_heatmap.{png,pdf} — stable_k=2 cohort × channels,
-     rows sorted by Kendall tau, columns sorted by rank_T_a_dense
-     (T_a source -> sink), divergent RdBu palette, SOZ outlined.
+  1. cohort_displacement_heatmap.{png,pdf} — stable_k=2 cohort × rank bins,
+     columns sorted by F_norm, rows sorted by rank_T_a_dense
+     (T_a source -> sink), divergent RdBu palette with fixed color cap.
   2. footrule_kendall_summary.{png,pdf} — 2-panel: footrule_normalized
      split by fwd/rev-reproduced flag; Kendall tau strip with reference lines.
   3. per_subject/<stem>_displacement.png — per-subject zoom-in heatstrip
@@ -85,6 +85,8 @@ def _apply_masked_paths() -> None:
 
 
 CANDIDATE_RHO_THRESHOLD = -0.5  # PR-2.5 fwd/rev candidate gate on inter_cluster_corr_matrix
+COHORT_HEATMAP_MAX_RANK_BINS = 24
+COHORT_HEATMAP_COLOR_ABS_MAX = 24.0
 
 def _classify_pr25_status(record: dict) -> str:
     """Return one of 'reproduced' (TRUE), 'candidate_fail' (FALSE),
@@ -138,17 +140,63 @@ def sort_by_footrule_desc(records: List[dict]) -> List[dict]:
     )
 
 
+def _compress_sorted_rank_axis(
+    delta_sorted: np.ndarray,
+    soz_sorted: np.ndarray,
+    max_rank_bins: Optional[int],
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Reduce a long source-to-sink rank axis without sorting by effect size."""
+    n = len(delta_sorted)
+    if max_rank_bins is None or n <= max_rank_bins:
+        return delta_sorted, soz_sorted
+    if max_rank_bins < 1:
+        raise ValueError("max_rank_bins must be >= 1")
+
+    bins = np.array_split(np.arange(n), max_rank_bins)
+    delta_binned = np.array(
+        [float(np.nanmedian(delta_sorted[idx])) for idx in bins],
+        dtype=float,
+    )
+    soz_binned = np.array(
+        [bool(np.any(soz_sorted[idx])) for idx in bins],
+        dtype=bool,
+    )
+    return delta_binned, soz_binned
+
+
+def _rank_position_to_display_bin(
+    position: int,
+    n_valid: int,
+    n_display: int,
+) -> Optional[int]:
+    """Map a raw rank-axis position to the plotted binned position."""
+    if n_valid <= 0 or n_display <= 0:
+        return None
+    position = int(np.clip(position, 0, n_valid - 1))
+    if n_valid <= n_display:
+        return min(position, n_display - 1)
+
+    for bin_i, idx in enumerate(np.array_split(np.arange(n_valid), n_display)):
+        if len(idx) and position <= int(idx[-1]):
+            return bin_i
+    return n_display - 1
+
+
 def build_heatmap_matrix(
     records: List[dict],
-) -> Tuple[np.ndarray, List[str], np.ndarray]:
-    """(subjects, max_n_valid) signed displacement matrix, NaN-padded.
+    max_rank_bins: Optional[int] = None,
+) -> Tuple[np.ndarray, List[str], np.ndarray, List[int], List[int]]:
+    """(subjects, max_display_bins) signed displacement matrix, NaN-padded.
 
     Columns within each row are arranged by rank_T_a_dense (T_a source first,
-    sink last). NEVER sort by Δr.
+    sink last). Long rows are compressed into rank-order bins by median Δr.
+    NEVER sort by Δr.
     """
     sub_labels = [f"{r['dataset'][:3]}_{r['subject']}" for r in records]
     cached: List[Tuple[np.ndarray, np.ndarray]] = []
-    max_n_valid = 0
+    raw_counts: List[int] = []
+    display_counts: List[int] = []
+    max_n_display = 0
     for r in records:
         pair = r["primary_pair"]
         delta = np.asarray(pair["signed_displacement_full"], dtype=float)
@@ -160,43 +208,50 @@ def build_heatmap_matrix(
         valid_idx = np.where(joint)[0]
         if len(valid_idx) == 0:
             cached.append((np.array([]), np.array([], dtype=bool)))
+            raw_counts.append(0)
+            display_counts.append(0)
             continue
         rank_a_dense_subset = rank_a_dense_full[valid_idx]
         order = np.argsort(rank_a_dense_subset)  # T_a source first → sink last
         delta_sorted = delta[valid_idx][order]
         soz_sorted = soz_mask[valid_idx][order]
-        max_n_valid = max(max_n_valid, len(delta_sorted))
-        cached.append((delta_sorted, soz_sorted))
+        delta_display, soz_display = _compress_sorted_rank_axis(
+            delta_sorted, soz_sorted, max_rank_bins
+        )
+        raw_counts.append(len(delta_sorted))
+        display_counts.append(len(delta_display))
+        max_n_display = max(max_n_display, len(delta_display))
+        cached.append((delta_display, soz_display))
 
-    matrix = np.full((len(records), max_n_valid), np.nan)
+    matrix = np.full((len(records), max_n_display), np.nan)
     soz_overlay = np.zeros_like(matrix, dtype=bool)
     for i, (delta_sorted, soz_sorted) in enumerate(cached):
         n = len(delta_sorted)
         matrix[i, :n] = delta_sorted
         soz_overlay[i, :n] = soz_sorted
-    return matrix, sub_labels, soz_overlay
+    return matrix, sub_labels, soz_overlay, display_counts, raw_counts
 
 
 def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     """Single paper-level supplementary figure.
 
-    Main heatmap: per-channel Δr across two-template subjects.
-    Three right-side summary tracks (sharing the same y-axis = subject):
-        - F_norm (Diaconis-Graham normalized footrule), with 2/3 reference
-        - Kendall τ between Tₐ and T_b ranks, with τ = 0 reference
-        - SOZ contribution_excess, with excess = 0 reference (chance baseline)
-
-    Each row of the entire panel is one subject - reader sees the channel-
-    level pattern, overall reversal magnitude, and SOZ contribution all
-    in the same coordinate system.
+    Main heatmap: per-channel Δr across two-template subjects, transposed so
+    subjects run horizontally and rank position runs vertically. Very long
+    subject rows are compressed into source-to-sink rank bins by median Δr,
+    which keeps the anti-bias ordering rule while preventing one high-channel
+    subject from setting the whole canvas width.
 
     No PR-2.5 internal classifications, no group colors. Subjects sorted
-    by F_norm descending (most reversal at top).
+    by F_norm descending (most reversal at left).
     """
     sorted_records = sort_by_footrule_desc(records)
-    matrix, _, soz_overlay = build_heatmap_matrix(sorted_records)
+    matrix, _, _soz_overlay, display_counts, raw_counts = build_heatmap_matrix(
+        sorted_records, max_rank_bins=COHORT_HEATMAP_MAX_RANK_BINS
+    )
     sub_labels = [f"{r['dataset'][:3]}_{r['subject']}" for r in sorted_records]
-    n_sub, n_ch = matrix.shape
+    n_sub, n_rank = matrix.shape
+    if n_sub == 0 or n_rank == 0:
+        raise RuntimeError("No rank displacement values available for cohort heatmap.")
     f_norms = np.array(
         [r["primary_pair"]["footrule_normalized"] for r in sorted_records],
         dtype=float,
@@ -210,38 +265,33 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     # yet stable enough for a paper-level claim (see archive doc §5.1, §6).
 
     finite = matrix[np.isfinite(matrix)]
-    vmax = float(np.nanmax(np.abs(finite))) if finite.size else 1.0
-    vmax = max(vmax, 1e-6)
+    data_abs_max = float(np.nanmax(np.abs(finite))) if finite.size else 1.0
+    vmax = min(max(data_abs_max, 1e-6), COHORT_HEATMAP_COLOR_ABS_MAX)
     norm = TwoSlopeNorm(vcenter=0.0, vmin=-vmax, vmax=vmax)
 
     # Layout:
-    #   [ heatmap (top x-axis)  | F_norm track ]   <- main row
-    #   [ horizontal colorbar   | SOZ legend   ]   <- bottom row
+    #   [ transposed heatmap | vertical colorbar ]
+    #   [ F_norm track       | empty             ]
     # τ track removed (highly collinear with F_norm: ρ ≈ -0.92);
     # SOZ track removed (lagPat / SOZ coverage not yet stable for paper).
-    fig = plt.figure(figsize=(13.5, max(8.5, 0.46 * n_sub) + 2.0))
-    # Two-row layout: heatmap+F_norm / colorbar.
-    # Legend is placed as a separate axes above the heatmap (between
-    # suptitle and the heatmap's top xticks) so it sits at the natural
-    # entry point of the reader's gaze.
+    fig_width = min(18.0, max(12.5, 0.36 * n_sub + 5.0))
+    fig_height = min(9.8, max(7.2, 0.24 * n_rank + 4.2))
+    fig = plt.figure(figsize=(fig_width, fig_height))
     gs = fig.add_gridspec(
         2, 2,
-        width_ratios=[7.0, 1.3],
-        height_ratios=[1.0, 0.045],
-        wspace=0.14,
-        hspace=0.06,
+        width_ratios=[1.0, 0.035],
+        height_ratios=[1.0, 0.24],
+        wspace=0.04,
+        hspace=0.12,
         top=0.84,
-        bottom=0.07,
-        left=0.11,
-        right=0.97,
+        bottom=0.23,
+        left=0.09,
+        right=0.94,
     )
     ax_h = fig.add_subplot(gs[0, 0])
-    ax_F = fig.add_subplot(gs[0, 1], sharey=ax_h)
-    ax_cb = fig.add_subplot(gs[1, 0])  # horizontal colorbar under heatmap
-    # Legend axes positioned in the gap between suptitle (y~0.96) and
-    # the heatmap top xticks/xlabel (top edge of heatmap = 0.84). Centered
-    # on the heatmap column [0.11, 0.78].
-    ax_legend = fig.add_axes([0.20, 0.91, 0.55, 0.035])
+    ax_F = fig.add_subplot(gs[1, 0], sharex=ax_h)
+    ax_cb = fig.add_subplot(gs[0, 1])
+    ax_legend = fig.add_axes([0.24, 0.905, 0.56, 0.04])
     ax_legend.axis("off")
 
     # NaN cells (channels beyond a subject's n_valid) render as white via
@@ -251,11 +301,12 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     cmap = plt.cm.RdBu_r.copy()
     cmap.set_bad(color="white")
     im = ax_h.imshow(
-        matrix,
+        matrix.T,
         aspect="auto",
         cmap=cmap,
         norm=norm,
         interpolation="nearest",
+        origin="upper",
     )
 
     # SOZ overlay deliberately removed: SOZ definition / lagPat coverage
@@ -274,7 +325,7 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
     # would mislead readers if mapped to '*'.
     n_strict_drawn = 0
     n_cand_drawn = 0
-    for row_i, r in enumerate(sorted_records):
+    for col_i, r in enumerate(sorted_records):
         sw = r["primary_pair"].get("swap_sweep") or {}
         if sw.get("exit_reason") != "ok":
             continue
@@ -282,8 +333,13 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         if cls == "none":
             continue
         dk = int(sw["decision_k"])
-        n_v = int(sw["n_valid"])
+        n_v = int(raw_counts[col_i])
+        n_display = int(display_counts[col_i])
         if 2 * dk > n_v:
+            continue
+        top_bin = _rank_position_to_display_bin(dk - 1, n_v, n_display)
+        bottom_bin = _rank_position_to_display_bin(n_v - dk, n_v, n_display)
+        if top_bin is None or bottom_bin is None:
             continue
         if cls == "strict":
             face, edge, lw, marker_size = "black", "black", 0.8, 100
@@ -291,87 +347,89 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
         else:  # candidate
             face, edge, lw, marker_size = "none", "0.30", 1.5, 90
             n_cand_drawn += 1
-        # Left boundary: ">" pointing rightward (toward center)
+        # Source-side boundary: "v" pointing downward (toward center)
         ax_h.scatter(
-            [dk - 1], [row_i], marker=">", s=marker_size,
+            [col_i], [top_bin], marker="v", s=marker_size,
             facecolors=face, edgecolors=edge, linewidths=lw, zorder=6,
+            clip_on=False,
         )
-        # Right boundary: "<" pointing leftward (toward center)
+        # Sink-side boundary: "^" pointing upward (toward center)
         ax_h.scatter(
-            [n_v - dk], [row_i], marker="<", s=marker_size,
+            [col_i], [bottom_bin], marker="^", s=marker_size,
             facecolors=face, edgecolors=edge, linewidths=lw, zorder=6,
+            clip_on=False,
         )
 
-    ax_h.set_yticks(range(n_sub))
-    ax_h.set_yticklabels(sub_labels, fontsize=FS_TICK + 2)
-    # Move heatmap x-axis (ticks + label) to the TOP, since the bottom row
-    # is now occupied by the horizontal colorbar.
-    ax_h.xaxis.tick_top()
-    ax_h.xaxis.set_label_position("top")
-    ax_h.set_xticks([0, n_ch - 1])
-    ax_h.set_xticklabels(
+    ax_h.set_xlim(-0.5, n_sub - 0.5)
+    ax_h.set_ylim(n_rank - 0.5, -0.5)
+    ax_h.set_xticks(range(n_sub))
+    ax_h.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
+    ax_h.set_yticks([0, n_rank - 1])
+    ax_h.set_yticklabels(
         ["source\n(earliest in T_a)", "sink\n(latest in T_a)"],
-        fontsize=FS_TICK + 4,
+        fontsize=FS_TICK + 1,
     )
-    ax_h.set_xlabel(
-        "Channel position along T_a (source → sink)",
-        fontsize=FS_LABEL + 3,
-        labelpad=12,
+    ax_h.set_ylabel(
+        f"Rank position along T_a\n(max {COHORT_HEATMAP_MAX_RANK_BINS} bins)",
+        fontsize=FS_LABEL + 1,
     )
-    # Hide top + right spines (cleaner paper-style; xticks at top still draw)
-    ax_h.spines["top"].set_visible(False)
-    ax_h.spines["right"].set_visible(False)
-    ax_h.tick_params(axis="x", which="both", bottom=False, top=True)
+    for spine in ("top", "right"):
+        ax_h.spines[spine].set_visible(False)
 
-    # === F_norm summary track (right of heatmap, shared y) ===
+    # === F_norm summary track (below heatmap, shared x) ===
     # Bar length encodes continuous F_norm. To make 2/3 visible as the
     # asymptotic random null (Diaconis-Graham 1977), shade the [0, 2/3]
     # range as a soft "null zone" background — bars whose tip lies inside
     # the shaded band are at-or-below random; bars extending past it are
     # above random expectation. NOT a per-subject classification: the
     # bars themselves are still single-color.
-    ax_F.axvspan(0, 2 / 3, color="lightgray", alpha=0.45, zorder=0)
-    ax_F.barh(
+    ax_F.axhspan(0, 2 / 3, color="lightgray", alpha=0.45, zorder=0)
+    ax_F.bar(
         range(n_sub), f_norms,
         color=COL_NEUTRAL, edgecolor="black", linewidth=0.5,
+        width=0.82,
         zorder=2,
     )
     # Prominent 2/3 reference line (thicker rust dashed for paper-level clarity)
-    ax_F.axvline(2 / 3, color=COL_SIG, linewidth=3.2, linestyle="--",
+    ax_F.axhline(2 / 3, color=COL_SIG, linewidth=3.2, linestyle="--",
                  zorder=3)
-    ax_F.set_xlim(0, 1.05)
-    ax_F.set_xticks([0, 2 / 3, 1])
-    ax_F.set_xticklabels(["0", "2/3", "1"], fontsize=FS_TICK + 2)
-    # Match heatmap: x-axis at top
-    ax_F.xaxis.tick_top()
-    ax_F.xaxis.set_label_position("top")
-    ax_F.tick_params(axis="x", which="both", bottom=False, top=True)
-    plt.setp(ax_F.get_yticklabels(), visible=False)
-    ax_F.set_xlabel("F_norm", fontsize=FS_LABEL + 3, labelpad=12)
-    ax_F.spines["top"].set_visible(False)
-    ax_F.spines["right"].set_visible(False)
+    ax_F.set_ylim(0, 1.05)
+    ax_F.set_yticks([0, 2 / 3, 1])
+    ax_F.set_yticklabels(["0", "2/3", "1"], fontsize=FS_TICK - 1)
+    ax_F.set_ylabel("F_norm", fontsize=FS_LABEL)
+    ax_F.set_xticks(range(n_sub))
+    ax_F.set_xticklabels(
+        sub_labels, rotation=60, fontsize=FS_TICK - 2, ha="right"
+    )
+    ax_F.set_xlabel("Subject (sorted by F_norm descending)",
+                    fontsize=FS_LABEL, labelpad=10)
+    for spine in ("top", "right"):
+        ax_F.spines[spine].set_visible(False)
     # Random-null annotation removed: redundant with the dashed 2/3 reference,
     # the "2/3" xtick label, and the shaded null zone — three signals already
     # convey the same meaning. Removing the inline text frees the bottom
     # corner for the swap legend without overlap.
 
-    # Horizontal colorbar directly under heatmap (close, not separated)
-    cb = fig.colorbar(im, cax=ax_cb, orientation="horizontal")
+    # Vertical colorbar with a fixed absolute cap so one high-channel subject
+    # cannot wash out the rest of the cohort.
+    extend = "both" if data_abs_max > vmax + 1e-9 else "neither"
+    cb = fig.colorbar(im, cax=ax_cb, orientation="vertical", extend=extend)
     cb.set_label("Signed Δr  (= rank_T_b − rank_T_a)",
-                 fontsize=FS_LABEL + 2, labelpad=4)
-    cb.ax.tick_params(labelsize=FS_TICK + 1)
+                 fontsize=FS_LABEL, labelpad=8)
+    cb.set_ticks([-vmax, -vmax / 2, 0, vmax / 2, vmax])
+    cb.ax.tick_params(labelsize=FS_TICK - 1)
 
     # Swap marker legend at top of figure (between suptitle and heatmap
-    # xticks). Single horizontal row: "> < strict (n, p<0.05)  > < candidate (n, p<0.20)".
+    # xticks). Single horizontal row: "v ^ strict (n, p<0.05)  v ^ candidate (n, p<0.20)".
     # Markers are plotted via scatter at fixed x positions inside ax_legend
     # so the visual mirrors what appears on the heatmap.
     ax_legend.set_xlim(0, 1)
     ax_legend.set_ylim(0, 1)
-    # Strict swatch (filled black > <) + label
-    ax_legend.scatter([0.06], [0.5], marker=">", s=110,
+    # Strict swatch (filled black v ^) + label
+    ax_legend.scatter([0.06], [0.5], marker="v", s=110,
                       facecolors="black", edgecolors="black",
                       linewidths=0.8, transform=ax_legend.transAxes)
-    ax_legend.scatter([0.10], [0.5], marker="<", s=110,
+    ax_legend.scatter([0.10], [0.5], marker="^", s=110,
                       facecolors="black", edgecolors="black",
                       linewidths=0.8, transform=ax_legend.transAxes)
     ax_legend.text(0.13, 0.5,
@@ -379,11 +437,11 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
                    ha="left", va="center",
                    fontsize=FS_TICK + 2, fontweight="bold",
                    transform=ax_legend.transAxes)
-    # Candidate swatch (open grey > <) + label
-    ax_legend.scatter([0.55], [0.5], marker=">", s=100,
+    # Candidate swatch (open grey v ^) + label
+    ax_legend.scatter([0.55], [0.5], marker="v", s=100,
                       facecolors="none", edgecolors="0.30",
                       linewidths=1.5, transform=ax_legend.transAxes)
-    ax_legend.scatter([0.59], [0.5], marker="<", s=100,
+    ax_legend.scatter([0.59], [0.5], marker="^", s=100,
                       facecolors="none", edgecolors="0.30",
                       linewidths=1.5, transform=ax_legend.transAxes)
     ax_legend.text(0.62, 0.5,
@@ -393,7 +451,8 @@ def plot_cohort_heatmap(records: List[dict], out_stem: Path) -> None:
                    transform=ax_legend.transAxes)
 
     fig.suptitle(
-        f"Per-channel signed rank displacement — two-template subjects (n={n_sub})",
+        f"Signed rank displacement across two-template subjects "
+        f"(n={n_sub}; rank axis capped at {COHORT_HEATMAP_MAX_RANK_BINS} bins)",
         fontsize=FS_TITLE + 4,
         y=0.96,
     )

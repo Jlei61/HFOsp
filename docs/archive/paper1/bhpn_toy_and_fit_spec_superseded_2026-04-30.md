@@ -1,6 +1,6 @@
 # BHPN-toy + BHPN-fit Spec (Superseded by SEF-ITP, Archived 2026-05-22)
 
-> **归档说明**：这是 `docs/paper1_framework_sba.md` §4（BHPN-toy 数学规范）与 §6（BHPN-fit spec）的完整原文，两者于 2026-04-30 lock 在 v1.1.2，**于 2026-05-20 被 SEF-ITP framework (`docs/topic4_sef_itp_framework.md` v1.0.2)取代**。
+> **归档说明**：这是 `docs/paper1_framework_sba.md` §4（BHPN-toy 数学规范）与 §6（BHPN-fit spec）的完整原文，两者于 2026-04-30 lock 在 v1.1.2，**于 2026-05-20 被 SEF-ITP framework (`docs/topic4_sef_hfo.md` v1.0.2)取代**。
 >
 > 取代理由（见 topic4_sef L5）："SEF-ITP framework 取代 paper1_sba §4 toy model 数学规范 + §6 fitted model BHPN-fit spec 的 toy-mechanism 子句 + §7 dumb baselines 中针对 toy 机制的项"。
 >

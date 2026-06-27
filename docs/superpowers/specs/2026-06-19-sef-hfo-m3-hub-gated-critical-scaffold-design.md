@@ -14,7 +14,7 @@
 > 上游：M2 收口 `docs/archive/topic4/sef_hfo/m2_stage_recap_2026-06-19.md`；Task 0 数据审计
 > `results/topic4_sef_hfo/event_extent_audit/cohort_summary.json`（INCONCLUSIVE，AF=0.915，LR=0.561，
 > contact-space sampling-dominated）；联合判据 `snn_5criteria_joint_verdict_2026-06-18.md` §7。
-> 框架合同：`docs/topic4_sef_itp_framework.md`（工作点 lock 2026-06-03、§7.2 红线、tier 纪律）。
+> 框架合同：`docs/topic4_sef_hfo.md`（工作点 lock 2026-06-03、§7.2 红线、tier 纪律）。
 
 ---
 
@@ -353,7 +353,7 @@ SNN 的两层验收（§6）才判 pass/fail。探针只负责"别在 SNN 上盲
   lesion `twoend_equal`(双向)/`extended_patch`(走廊) → 新 `corridor_twoend`；M1 recovery `--ee-std-u`。
 - 新增（本 spec）：`src/topic4_hub_criticality.py`（σ 探针）；`connectivity_rot` 长程 E→E 边（`hub_n/hub_gain/l_hub_long/hub_long_range_C`）；
   runner 度归一化阈值变换（`degnorm_alpha/degnorm_use`）+ hub θ 门控（`hub_theta_interictal/ictal` → slow_vars φ/z）。
-- 框架合同：`docs/topic4_sef_itp_framework.md`（工作点 lock 2026-06-03、§7.2 红线、H4 几何不变形、tier 纪律）；
+- 框架合同：`docs/topic4_sef_hfo.md`（工作点 lock 2026-06-03、§7.2 红线、H4 几何不变形、tier 纪律）；
   联合判据 `snn_5criteria_joint_verdict_2026-06-18.md` §7。
 - 文献 framing：Pachitariu/Stringer 2026 Nature（critically-normalized 连接 + 稀疏长程 → 宏观模式，谱半径≈1，
   仅作建模语言）；Moosavi & Truccolo 2023 PLOS Comp Biol（seizure spread 相图：excitability × global connectivity 控制）；
