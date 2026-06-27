@@ -1408,10 +1408,17 @@ def project_mode_to_record(phi_E_field: np.ndarray, grid: Grid, *, montage=None,
     return rec
 
 
-def readout_bridge_verdict(field_placement_percentile: float, geometry_null_beaten: bool) -> str:
-    """Round-1 rule: a model->patient BRIDGE claim requires beating the geometry nulls; otherwise the
-    leg is placement-only (the ictal leg of Round-1 was placement-only for exactly this reason)."""
-    return "bridge" if geometry_null_beaten else "placement_only"
+GEOMETRY_NULL_STATUSES: tuple[str, ...] = ("not_run", "failed", "passed")
+
+
+def readout_bridge_verdict(geometry_null_status: str) -> str:
+    """Map the geometry-null status to a readout verdict (fail-closed; distinguishes 'not run' from
+    'ran and failed'):
+      passed  -> 'bridge'          (placement beat the geometry null = model->patient bridge leg)
+      failed  -> 'placement_only'  (placement computed but did NOT beat the null, as in Round-1 ictal)
+      not_run -> 'projection_only' (only the schema/projection connected; no cohort placement run)."""
+    return {"passed": "bridge", "failed": "placement_only", "not_run": "projection_only"}.get(
+        geometry_null_status, "projection_only")
 
 
 # ---------------------------------------------------------------------------
@@ -1436,19 +1443,24 @@ def full_bridge_gate(*, phase_map_coherent: bool, snn_predicts_spotchecks: bool,
     return "SPM-UNRESOLVED"
 
 
-def m3b_verdict(*, phase_map_resolved: bool, controls_pass: bool, model_matches_dynamics: bool,
-                axial_to_global_transition: bool, snn_predicts_spotchecks: bool,
-                m3a_trajectory_valid: bool, readout_null_pass: bool) -> str:
-    """The M3B-R2 verdict from the staged evidence (plan §TDD-15 verdict categories)."""
+def m3b_verdict(*, phase_map_resolved: bool, model_matches_dynamics: bool, controls_pass: bool,
+                non_normal_axial_pass: bool, snn_grid_pass: bool, m3a_overlay_pass: bool,
+                readout_null_pass: bool) -> str:
+    """The M3B-R2 verdict from EXPLICIT, FAIL-CLOSED gates (plan §TDD-15 verdict categories).
+
+    Frozen-map PASS requires BOTH specific controls AND the §5 non-normal axial substrate — a control
+    failure or a missing axial substrate drops to SPM-BOUNDED negative (no fail-open). The bridge
+    tiers each need their own gate: spontaneous mechanism needs a passing SNN grid; full bridge also
+    needs a valid M3A overlay AND a readout/geometry-null pass. A single missing gate caps the tier.
+    """
     if not phase_map_resolved:
         return "SPM-UNRESOLVED"
     if not model_matches_dynamics:
         return "SPM-MODEL mismatch"
-    if not axial_to_global_transition:
-        # map is numerically valid + controls pass, but no axial->global transition in plausible range
+    if not (controls_pass and non_normal_axial_pass):
         return "SPM-BOUNDED negative"
-    return full_bridge_gate(phase_map_coherent=True, snn_predicts_spotchecks=snn_predicts_spotchecks,
-                            m3a_trajectory_valid=m3a_trajectory_valid, readout_null_pass=readout_null_pass)
+    return full_bridge_gate(phase_map_coherent=True, snn_predicts_spotchecks=snn_grid_pass,
+                            m3a_trajectory_valid=m3a_overlay_pass, readout_null_pass=readout_null_pass)
 
 
 # ---------------------------------------------------------------------------

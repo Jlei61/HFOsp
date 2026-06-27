@@ -55,6 +55,11 @@ def main() -> None:
     grid_meta = {
         "axes_built_from_slow_to_rate_mapping_id": None,    # M3A mapping absent (overlay refused)
         "axis_space": "raw_knob_unit",                      # frozen map uses raw knobs (no M3A norm)
+        "m3a_overlay_consumable": False,                    # raw knobs != normalized_unit (contract D1)
+        "axis_space_note": ("raw_knob_unit atlas (mu_core mV x q_global). NOT normalized_unit, so it "
+                            "CANNOT be consumed by an M3A trajectory overlay, which requires "
+                            "normalized phase coords per the interface contract D1. A separate "
+                            "normalized phase grid must be built before any M3A overlay."),
         "x_axis": "mu_core (core excitability, mV)",
         "y_axis": "q_global (GABA efficacy; lower = disinhibition)",
         "x_values": x_vals, "y_values": y_vals,
@@ -118,13 +123,13 @@ def main() -> None:
     readout = {
         "model_record_n_channels": rec.get("n_channels"),
         "model_record_scalars": rec.get("scalars"),
-        "geometry_null_beaten": None,        # geometry null NOT RUN (needs the real cohort)
+        "geometry_null_status": "not_run",   # enum {not_run, failed, passed} — NOT a bool
         "cohort_placement_run": False,
-        "verdict": spm.readout_bridge_verdict(float("nan"), geometry_null_beaten=None),
+        "verdict": spm.readout_bridge_verdict("not_run"),    # -> 'projection_only'
         "note": "the SCHEMA / PROJECTION connects (a mode field walks the Round-1 virtual-SEEG readout "
                 "cleanly), but cohort alignment + the geometry null were NOT RUN — they need the real "
-                "cohort. 'placement_only' here means 'null not run', NOT 'ran the null and failed'. "
-                "This cannot support a model->patient cohort bridge yet.",
+                "cohort. geometry_null_status='not_run' (NOT 'failed'); verdict='projection_only' "
+                "(not even 'placement_only', since no placement was computed). No cohort bridge.",
     }
     (OUT / "mode_readout_projection.json").write_text(json.dumps(readout, indent=1), encoding="utf-8")
 
@@ -166,16 +171,39 @@ def main() -> None:
                                 axes_meta=None)
     (OUT / "m3a_interface_audit.json").write_text(json.dumps(audit, indent=1), encoding="utf-8")
 
-    # 8. STATUS.md (verdict) — generated so the whole delivery is reproducible from committed code ---
-    # §5 non-normal transient shows scaffold-specific self-limited AXIAL propagation at every resolved
-    # point -> the axial regime IS present (read correctly), so this is no longer leading-mode
-    # bounded-negative; coherent map + controls + §5 axial readout, no SNN/M3A/readout bridge -> frozen map.
-    axial_present = n_axial == len(nn_pts) and len(nn_pts) > 0
+    # 8. verdict — EXPLICIT, FAIL-CLOSED gates derived from the actual artifacts (no hardcoded PASS) ---
+    controls_pass = bool(
+        controls["core"]["core_localization"] > controls["no_core"]["core_localization"] + 0.01
+        and controls["ar2_anisotropic"]["dispersion_anisotropy"]
+        > controls["ar1_isotropic"]["dispersion_anisotropy"]
+        and controls["shuffled_core"]["core_localization_mean"]
+        < controls["shuffled_core"]["contiguous_core_localization"])
+    # model_matches_dynamics = the nonlinear RATE FIELD agrees with the spectral prediction (AR2 kick
+    # axial vs AR1; runaway does not return). This is NOT an SNN claim.
+    ratefield_pass = bool(
+        rf_summary["axial_ar2"]["response_axis_score"] > rf_summary["isotropic_ar1"]["response_axis_score"]
+        and not rf_summary["runaway"]["returned"])
+    non_normal_axial_pass = bool(n_axial == len(nn_pts) and len(nn_pts) > 0)
+    snn_grid_pass = False        # only 1 pilot (R4b tonic runaway) — NOT a grid validation; deferred
+    m3a_overlay_pass = (audit.get("overlay_verdict") == "phase_map_trajectory")   # refused -> False
+    readout_null_pass = (readout["geometry_null_status"] == "passed")             # not_run -> False
     verdict = spm.m3b_verdict(
-        phase_map_resolved=True, controls_pass=True, model_matches_dynamics=True,
-        axial_to_global_transition=axial_present, snn_predicts_spotchecks=False,
-        m3a_trajectory_valid=(audit.get("overlay_verdict") == "phase_map_trajectory"),
-        readout_null_pass=bool(readout["geometry_null_beaten"]))
+        phase_map_resolved=True, model_matches_dynamics=ratefield_pass, controls_pass=controls_pass,
+        non_normal_axial_pass=non_normal_axial_pass, snn_grid_pass=snn_grid_pass,
+        m3a_overlay_pass=m3a_overlay_pass, readout_null_pass=readout_null_pass)
+    verdict_inputs = {
+        "verdict": verdict, "phase_map_resolved": True,
+        "model_matches_dynamics_ratefield": ratefield_pass, "controls_pass": controls_pass,
+        "non_normal_axial_pass": non_normal_axial_pass,
+        "n_axial_amplified_selflimited": n_axial, "n_resolved": len(nn_pts),
+        "snn_grid_pass": snn_grid_pass, "snn_validation_status": "not_run_grid (1 pilot = R4b)",
+        "m3a_overlay_pass": m3a_overlay_pass, "m3a_overlay_status": audit.get("overlay_verdict"),
+        "readout_null_pass": readout_null_pass, "geometry_null_status": readout["geometry_null_status"],
+        "note": ("explicit fail-closed gates: frozen-map = controls_pass AND non_normal_axial_pass; "
+                 "spontaneous-mechanism additionally needs snn_grid_pass; full bridge also needs "
+                 "m3a_overlay_pass AND readout_null_pass."),
+    }
+    (OUT / "verdict_inputs.json").write_text(json.dumps(verdict_inputs, indent=1), encoding="utf-8")
     _write_status(verdict, n_axial=n_axial, n_resolved=len(nn_pts), nn=nn_ar2, nn_ar1=nn_ar1)
 
     # ---- figures ------------------------------------------------------------------------------
@@ -193,6 +221,8 @@ def _write_status(verdict, *, n_axial, n_resolved, nn, nn_ar1) -> None:
     peak_g = max(nn["gains"])
     max_ax = max(nn["axes"])
     ar1_ax = nn_ar1["max_axis"]
+    t_gain = nn["windows"][nn["gains"].index(peak_g)]      # ms at the gain peak
+    t_axis = nn["windows"][nn["axes"].index(max_ax)]       # ms at the axis peak (later than gain)
     (OUT / "STATUS.md").write_text(
         """# M3B-R2 spectral phase-map — STATUS
 
@@ -263,12 +293,13 @@ Plain language — 我们把带病灶核的薄片线性化、扫"核兴奋度 ×
 **正确的读法**读轴向信号：不是看"哪个花样最先持续长大"（那个永远是全局），而是看**给核一个
 扰动后短时间内会怎样**（非正规瞬态）。
 
-诚实结果（§5 主读法，机器已三重验证）：**给核一个扰动，它在约 10 ms 内被放大约 """ + f"{peak_g:.1f}" + """ 倍、
-并沿 E→E 轴铺开成一条行波，然后自己衰减回去（自限）——这正是"间期自限轴向传播"的信号。** 这个
-轴向信号在 """ + f"{n_axial}/{n_resolved}" + """ 个未饱和相图点全都出现，且**骨架特异**：把 E→E 连线换成各向同性
-（AR1），轴向就没了（max_axis≈""" + f"{ar1_ax:.2f}" + """，对比 AR2 的 """ + f"{max_ax:.2f}" + """）。关键区分：**最先持续长大的本征
-花样仍然是全局的（轴向≈0）；轴向自限传播活在非正规瞬态里，不在主导花样里**——这就是为什么只看
-主导花样会误判成"没有轴向"。
+诚实结果（§5 主读法，机器已三重验证）：**给核一个扰动，瞬态增益在约 """ + f"{t_gain:.0f}" + """ ms 先冲到约 """ + f"{peak_g:.1f}" + """
+倍，沿 E→E 轴的拉伸峰更靠后（约 """ + f"{t_axis:.0f}" + """ ms，max≈""" + f"{max_ax:.2f}" + """），随后增益与轴向都衰减回去
+（**自限**）——这是"间期自限轴向传播"的信号，不是"10 ms 内已经一条完整行波"。** 这个轴向信号在
+""" + f"{n_axial}/{n_resolved}" + """ 个未饱和相图点全都出现，且**方向骨架特异**：把 E→E 连线换成各向同性（AR1），
+增益放大还在（放大本身不挑骨架）但沿轴拉伸没了（max_axis≈""" + f"{ar1_ax:.2f}" + """ vs AR2 """ + f"{max_ax:.2f}" + """）。关键区分：
+**最先持续长大的本征花样仍然是全局的（轴向≈0）；轴向自限传播活在非正规瞬态里，不在主导花样里**
+——这就是为什么只看主导花样会误判成"没有轴向"。
 
 因此本轮判决 = **SPM-PASS frozen map**：相图数值干净、对照消融特异（核/各向异性/连续核）、且 §5
 非正规瞬态读出在所有未饱和点给出骨架特异的自限轴向传播。这是一个**模型/线性算子层面**的结果，
@@ -285,8 +316,8 @@ Plain language — 我们把带病灶核的薄片线性化、扫"核兴奋度 ×
 - SNN 一个 tiny pilot = **R4b（不返回 = tonic runaway）** → 印证去抑制端会冲到饱和失控
   （见 `snn_spotcheck_summary.json`）。
 - M3A 轨迹叠加 = `refused`（5 个交接产物全不存在；见 `m3a_interface_audit.json`）→ 无 full bridge。
-- 读出：模式投影 schema/管线**接通了**，但几何零模型**没跑**（geometry_null_beaten=null，是
-  "未运行"非"跑了没过"）→ 撑不起 cohort bridge，停在 placement-only。
+- 读出：模式投影 schema/管线**接通了**，但几何零模型**没跑**（geometry_null_status=`not_run`，是
+  "未运行"非"跑了没过"）→ verdict=`projection_only`（连 placement 都没算），撑不起 cohort bridge。
 
 内部代号：§5 non-normal `finite_time_gain` / `core_transient_response` axial+self-limited (AR2-specific),
 leading-mode global, dispersion AR2-vs-AR1 anisotropy, `m3b_verdict` = SPM-PASS frozen map.
@@ -429,8 +460,9 @@ Brunel/Turing 式有限-k 峰——这是均质衬底"想全场一起点火"的�
 **这是按计划 §5 正确读轴向信号的图。** 给核一个扰动后，左图=瞬态增益随时间 T 的曲线
 （‖e^{JT}·b_core‖/‖b_core‖），右图=瞬态响应沿 E→E 轴的拉伸随 T 的曲线。红=各向异性 E→E 骨架
 （AR2），灰=各向同性对照（AR1）。两条增益线都在 ~10–15 ms 先冲到约 2 倍再衰减回去（**自限**，
-非正规瞬态放大本身不挑骨架）；但**只有 AR2 的响应沿轴拉开**（轴向上升到 ~0.4），AR1 灰线几乎
-不沿轴拉开（~0）——**轴向是骨架特异的，放大本身不是**。
+非正规瞬态放大本身不挑骨架）；**只有 AR2 的响应沿轴拉开**，且沿轴拉伸的峰**比增益峰更靠后**
+（约 30 ms，max≈0.4），不是"10 ms 内就一条完整行波"；AR1 灰线几乎不沿轴拉开（~0）——
+**轴向是骨架特异的，放大本身不是**。
 **关注点**：左图红/灰增益是否都先升后降（自限）；右图红线轴向是否明显抬起而灰线平（轴向骨架
 特异）。这说明**间期自限轴向传播活在非正规瞬态里**——主导本征花样是全局的，轴向信号不在主导
 花样而在瞬态，且方向是 E→E 各向异性给的。

@@ -817,8 +817,10 @@ def test_compare_model_to_cohort_runs_without_schema_adapter_hacks():
 
 
 def test_geometry_null_failure_forces_placement_only_verdict():
-    assert spm.readout_bridge_verdict(74.0, geometry_null_beaten=False) == "placement_only"
-    assert spm.readout_bridge_verdict(74.0, geometry_null_beaten=True) == "bridge"
+    assert spm.readout_bridge_verdict("failed") == "placement_only"
+    assert spm.readout_bridge_verdict("passed") == "bridge"
+    # 'not_run' is distinct from 'failed': only the schema/projection connected, no placement computed
+    assert spm.readout_bridge_verdict("not_run") == "projection_only"
 
 
 # ---------------------------------------------------------------------------
@@ -856,12 +858,26 @@ def test_required_figures_exist_or_are_marked_na():
 def test_verdict_category_is_one_of_allowed_values():
     status = (_OUT / "STATUS.md").read_text(encoding="utf-8")
     assert any(v in status for v in spm.ALLOWED_VERDICTS)
-    # this run's evidence: the §5 non-normal transient shows scaffold-specific self-limited axial
-    # propagation (axial regime present), no SNN/M3A/readout-null bridge -> frozen-map tier
-    v = spm.m3b_verdict(phase_map_resolved=True, controls_pass=True, model_matches_dynamics=True,
-                        axial_to_global_transition=True, snn_predicts_spotchecks=False,
-                        m3a_trajectory_valid=False, readout_null_pass=False)
+    # this run's evidence: specific controls + §5 non-normal axial substrate present; no SNN grid /
+    # M3A overlay / readout-null bridge -> frozen-map tier
+    v = spm.m3b_verdict(phase_map_resolved=True, model_matches_dynamics=True, controls_pass=True,
+                        non_normal_axial_pass=True, snn_grid_pass=False, m3a_overlay_pass=False,
+                        readout_null_pass=False)
     assert v in spm.ALLOWED_VERDICTS and v == "SPM-PASS frozen map"
+
+
+def test_verdict_is_fail_closed_on_controls_and_axial():
+    base = dict(phase_map_resolved=True, model_matches_dynamics=True, controls_pass=True,
+                non_normal_axial_pass=True, snn_grid_pass=False, m3a_overlay_pass=False,
+                readout_null_pass=False)
+    # a control failure CANNOT return a PASS tier (fail-closed; controls_pass is load-bearing)
+    assert spm.m3b_verdict(**{**base, "controls_pass": False}) == "SPM-BOUNDED negative"
+    # a missing §5 axial substrate CANNOT return a PASS tier
+    assert spm.m3b_verdict(**{**base, "non_normal_axial_pass": False}) == "SPM-BOUNDED negative"
+    # the bridge tiers each need their own gate
+    assert spm.m3b_verdict(**{**base, "snn_grid_pass": True}) == "SPM-PASS spontaneous mechanism"
+    assert spm.m3b_verdict(**{**base, "snn_grid_pass": True, "m3a_overlay_pass": True,
+                              "readout_null_pass": True}) == "SPM-PASS full bridge"
 
 
 def test_full_bridge_requires_phase_map_snn_m3a_readout_null_pass():
