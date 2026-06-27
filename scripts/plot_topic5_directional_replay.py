@@ -14,6 +14,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[1]
@@ -110,8 +111,8 @@ def plot_class_interictal_rose(ds_sid, activation, bins=18, subdir=None):
             continue
         counts, _ = np.histogram(a, bins=edges)
         rmax = max(rmax, int(counts.max()))
-        ax.bar(centers, counts, width=width, facecolor="none", edgecolor=color, linewidth=2.0,
-               alpha=0.95, label=f"{nm}  n={a.size}, R={resultant_length(a):.2f}")
+        ax.bar(centers, counts, width=width, facecolor=to_rgba(color, 0.22), edgecolor=color,
+               linewidth=2.0, label=f"{nm}  n={a.size}, R={resultant_length(a):.2f}")
     # seizure: two class MEAN directions only (black solid=class1, dashed=class2)
     for c, ls in ((0, "-"), (1, "--")):
         m = circular_mean(clus["angles"][clus["labels"] == c])
@@ -131,7 +132,7 @@ def plot_class_interictal_rose(ds_sid, activation, bins=18, subdir=None):
     return out
 
 
-def plot_cohort_pooled_main_aligned(subjects, activation, bins=24):
+def plot_cohort_pooled_main_aligned(subjects, activation, bins=24, subdir=None):
     """全队列汇总：每被试旋到自己的发作主要方向(占多数类均向)=0 deg, 再把每被试的间期事件
     方向直方图**归一化后等权平均**(避免事件多的被试主导), 看跨被试间期事件相对发作主方向有没有
     一致偏好。toward-main = 落在主方向 ±90 deg 内的占比(~0.5 = 无方向偏好, 只共享轴)。"""
@@ -175,8 +176,8 @@ def plot_cohort_pooled_main_aligned(subjects, activation, bins=24):
 
     fig = plt.figure(figsize=(7.6, 7.9), constrained_layout=True)
     ax = fig.add_subplot(111, projection="polar")
-    ax.bar(centers, mean_dens / mean_dens.max(), width=width, facecolor="none",
-           edgecolor="#6a3d9a", linewidth=2.2, alpha=0.95,
+    ax.bar(centers, mean_dens / mean_dens.max(), width=width, facecolor=to_rgba("#6a3d9a", 0.22),
+           edgecolor="#6a3d9a", linewidth=2.2,
            label=f"pooled interictal events ({len(used)} subj, equal weight)")
     ax.plot([0, 0], [0, 1.12], color="black", lw=3.0, label="seizure main direction (each subj = 0 deg)")
     ax.set_theta_zero_location("E"); ax.set_theta_direction(1); ax.set_rlabel_position(100)
@@ -185,13 +186,14 @@ def plot_cohort_pooled_main_aligned(subjects, activation, bins=24):
                  f"— {activation}\neach subject rotated so its seizure main direction = 0 deg  "
                  f"(n={len(used)}; toward-main fraction = {toward:.2f})", fontsize=10.6, pad=16)
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, -0.16), ncol=1, frameon=False, fontsize=8.8)
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
-    out = FIG_DIR / f"cohort_pooled_main_aligned_{activation}.png"
+    out_dir = (FIG_DIR / subdir) if subdir else FIG_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / f"cohort_pooled_main_aligned_{activation}.png"
     fig.savefig(out, dpi=150); plt.close(fig)
     return out
 
 
-def plot_cohort_axis_alignment(bands=("broadband", "hfa")):
+def plot_cohort_axis_alignment(bands=("broadband", "hfa"), subdir=None):
     """Cohort SIGN-FREE axis-alignment test: per subject, angular gap from the seizure MAIN
     direction (dominant ictal class mean) to the NEARER interictal template direction; vs a
     per-subject uniform-rotation null. One figure, one panel per band (broadband primary)."""
@@ -237,8 +239,9 @@ def plot_cohort_axis_alignment(bands=("broadband", "hfa")):
     fig.suptitle("Cohort SIGN-FREE axis alignment — seizure main direction vs nearest interictal template direction\n"
                  "gray = per-subject uniform-rotation null (5–95%, median tick) · dot = observed (red if per-subject p<0.05) · "
                  "dashed = 45° (chance for opposite templates)", fontsize=10.2)
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
-    out = FIG_DIR / "cohort_axis_alignment_test.png"
+    out_dir = (FIG_DIR / subdir) if subdir else FIG_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out = out_dir / "cohort_axis_alignment_test.png"
     fig.savefig(out, dpi=150); plt.close(fig)
     return out
 
