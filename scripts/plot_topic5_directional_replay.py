@@ -23,7 +23,7 @@ if str(_ROOT) not in sys.path:
 from scripts.plot_topic5_axis_direction_rose import (_load_frame, _seizure_angles,
                                                      _interictal_event_vals)
 from scripts.run_topic5_directional_replay import template_direction, OUT_DIR, PRIMARY_COHORT
-from src.topic5_directional_replay import cluster_directions_k2
+from src.topic5_directional_replay import cluster_directions_k2, cohort_alignment_rotation_test
 from src.topic5_axis_direction import (event_angles_by_template, axial_mean,
                                        rotate_to_reference, resultant_length, circular_mean)
 
@@ -191,6 +191,58 @@ def plot_cohort_pooled_main_aligned(subjects, activation, bins=24):
     return out
 
 
+def plot_cohort_axis_alignment(bands=("broadband", "hfa")):
+    """Cohort SIGN-FREE axis-alignment test: per subject, angular gap from the seizure MAIN
+    direction (dominant ictal class mean) to the NEARER interictal template direction; vs a
+    per-subject uniform-rotation null. One figure, one panel per band (broadband primary)."""
+    fig, axes = plt.subplots(1, len(bands), figsize=(11.6, 6.4), constrained_layout=True, sharey=True)
+    if len(bands) == 1:
+        axes = [axes]
+    for ax, band in zip(axes, bands):
+        mains, pairs, meta = [], [], []
+        for sid in PRIMARY_COHORT:
+            jp = OUT_DIR / "per_subject" / f"{sid}__dir_cluster_{band}.json"
+            if not jp.exists():
+                continue
+            j = json.loads(jp.read_text())
+            if j.get("status") != "ok":
+                continue
+            means, sizes, thA, thB = j["means_deg"], j["sizes"], j["theta_A"], j["theta_B"]
+            if thA is None or thB is None or None in means:
+                continue
+            dom = 0 if sizes[0] >= sizes[1] else 1
+            mains.append(np.radians(means[dom])); pairs.append((np.radians(thA), np.radians(thB)))
+            meta.append((sid.replace("epilepsiae_", "E"), j.get("delta_ab_deg")))
+        if not mains:
+            continue
+        r = cohort_alignment_rotation_test(mains, pairs, B=20000, seed=20260627)
+        gaps = np.degrees(r["gaps"]); lo = np.degrees(r["null_lo"])
+        md = np.degrees(r["null_md"]); hi = np.degrees(r["null_hi"])
+        order = np.argsort(gaps)
+        for k, i in enumerate(order):
+            ax.bar(k, hi[i] - lo[i], bottom=lo[i], width=0.55, color="0.82", zorder=0)
+            ax.hlines(md[i], k - 0.28, k + 0.28, color="0.45", lw=1.5, zorder=1)
+            col = "#d62728" if r["per_pct"][i] < 0.05 else "black"
+            ax.plot(k, gaps[i], "o", color=col, ms=9, zorder=5)
+            if meta[i][1] is not None and meta[i][1] < 60:
+                ax.annotate("ΔAB<60°\n(degenerate)", (k, gaps[i]), textcoords="offset points",
+                            xytext=(0, 9), ha="center", fontsize=6.8, color="0.4")
+        ax.axhline(45, ls="--", color="0.6", lw=1, zorder=0)
+        ax.set_xticks(range(len(order)))
+        ax.set_xticklabels([meta[i][0] for i in order], fontsize=9)
+        ax.set_ylim(0, 188)
+        ax.set_title(f"{band}: median gap {np.degrees(r['T_obs']):.1f}°, "
+                     f"rotation-null p={r['p']:.4f} (n={len(mains)})", fontsize=10.4)
+    axes[0].set_ylabel("gap: seizure main dir → nearest interictal template dir (deg)")
+    fig.suptitle("Cohort SIGN-FREE axis alignment — seizure main direction vs nearest interictal template direction\n"
+                 "gray = per-subject uniform-rotation null (5–95%, median tick) · dot = observed (red if per-subject p<0.05) · "
+                 "dashed = 45° (chance for opposite templates)", fontsize=10.2)
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    out = FIG_DIR / "cohort_axis_alignment_test.png"
+    fig.savefig(out, dpi=150); plt.close(fig)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--subjects", nargs="*", default=None)
@@ -200,7 +252,13 @@ def main():
     ap.add_argument("--pooled", action="store_true",
                     help="cohort-pooled rose aligned to each subject's seizure main direction")
     ap.add_argument("--out-subdir", default=None, help="figures/<subdir>/ for caveat sets (e.g. seeg_caveat)")
+    ap.add_argument("--alignment", action="store_true",
+                    help="cohort sign-free axis-alignment test figure (both bands)")
     args = ap.parse_args()
+    if args.alignment:
+        out = plot_cohort_axis_alignment()
+        print(f"  wrote {out.name}", flush=True)
+        return
     if args.pooled:
         out = plot_cohort_pooled_main_aligned(args.subjects or PRIMARY_COHORT, args.activation)
         print(f"  {'wrote ' + out.name if out else 'pooled: insufficient data'}", flush=True)

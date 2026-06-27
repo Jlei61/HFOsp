@@ -202,7 +202,9 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 **结论**：**6 病人、宽带+快活动，0 个"两类对上 A/B"。** 唯一真分两堆的 442（宽带，p_bimodal=0.042）其两堆与间期模板对不齐到超随机（two_class_unmapped，p_align=0.31）；其余只有一个主方向，或间期两模板几乎同向不成轴（1084，Δ_AB=6°）。**与 A 线、echo gate 各线一致：共性是粗网络/解剖锚，不是细到"方向两类"可分的重放。** 朴素 best-pair 残差曾给 9–18° 的假"对上"，被二模 null + 旋转 null 正确打回。
 
-完整方法 + 数值表 + 措辞红线 + 442 图：`docs/archive/topic5/ictal_direction_clustering_2026-06-27.md`。
+**补充（方向角层面 cohort 检验，2026-06-27）**：发作主方向到**较近**那条间期模板方向的角距，broadband 中位 **12°**、旋转 null **p=0.005 显著**——即发作主方向**确实落在间期轴上**（符号自由），把 A 线粗轴结论在方向角层面印证一遍（caveat：旋转 null 不控同平面几何，严格版是 A 线 channel-shuffle）；但这是**符号自由**，**极性/哪一端仍阴性**（逐被试 p_align 全 ≥0.05）。hfa 中位 32°、p=0.15 不显著。**一句话：轴共享（确认），极性不重放。**
+
+完整方法 + 数值表 + 措辞红线 + 442 图 + cohort 轴对齐图：`docs/archive/topic5/ictal_direction_clustering_2026-06-27.md`。
 
 ---
 

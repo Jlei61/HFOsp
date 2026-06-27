@@ -3,7 +3,8 @@ import pytest
 from src.topic5_directional_replay import (
     TWO_PI, plane_fit_direction, coord_aspect, cluster_directions_k2, silhouette_unit,
     kappa_from_R, unimodal_null_pvalue, bootstrap_label_stability, two_class_eligible,
-    axis_quality_tier, angular_distance, best_pair_residual, best_pair_rotation_null)
+    axis_quality_tier, angular_distance, best_pair_residual, best_pair_rotation_null,
+    nearest_template_gap, cohort_alignment_rotation_test)
 
 
 # ---- Task 1: geometry ----
@@ -152,3 +153,25 @@ def test_rotation_null_small_when_aligned():
 def test_rotation_null_large_when_orthogonal():
     p = best_pair_rotation_null([np.pi / 2, 3 * np.pi / 2], [0.0, np.pi], B=2000, seed=20260627)
     assert p > 0.8
+
+
+# ---- cohort sign-free axis-alignment test ----
+def test_nearest_template_gap():
+    assert nearest_template_gap(0.1, 0.0, np.pi) == pytest.approx(0.1, abs=1e-9)
+    assert nearest_template_gap(np.pi - 0.1, 0.0, np.pi) == pytest.approx(0.1, abs=1e-9)
+
+
+def test_cohort_alignment_significant_when_aligned():
+    mains = [0.2, 1.0, 2.0, 3.0, 0.5]
+    pairs = [(m, m + np.pi) for m in mains]              # main == template A end -> gap 0
+    r = cohort_alignment_rotation_test(mains, pairs, B=2000, seed=20260627)
+    assert r["T_obs"] < np.radians(2)
+    assert r["p"] < 0.01
+
+
+def test_cohort_alignment_null_when_orthogonal():
+    bases = [0.2, 1.0, 2.0, 3.0, 0.5]
+    mains = [b + np.pi / 2 for b in bases]               # 90deg off the axis -> max gap
+    pairs = [(b, b + np.pi) for b in bases]
+    r = cohort_alignment_rotation_test(mains, pairs, B=2000, seed=20260627)
+    assert r["p"] > 0.5

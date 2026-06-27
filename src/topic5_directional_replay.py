@@ -205,6 +205,49 @@ def best_pair_residual(class_means, template_dirs):
             "pairing": pairing, "matched": [float(matched[0]), float(matched[1])]}
 
 
+def nearest_template_gap(main_dir, theta_a, theta_b):
+    """角距(rad, [0,pi]) 从一个方向到两条模板方向里**较近**的那条 (sign-free 轴对齐)。"""
+    return min(angular_distance(main_dir, theta_a), angular_distance(main_dir, theta_b))
+
+
+def cohort_alignment_rotation_test(mains, ab_pairs, B=10000, seed=SEED, stat="median"):
+    """队列检验: 发作主方向是否比随机方向更贴近其**较近**的间期模板方向 (SIGN-FREE 轴对齐)。
+
+    mains: 每被试发作主方向 (rad)。ab_pairs: 每被试 (theta_a, theta_b) (rad)。
+    每被试 gap = 到两模板方向较近者的角距; cohort 统计量 = 各 gap 的 median/mean。
+    null: 每被试 main 方向换成独立均匀随机方向(模板固定), 重算 gap 与 cohort 统计量;
+    p = P(stat_null <= stat_obs) 单侧。返回 dict(gaps, T_obs, p, per_pct, null_lo/md/hi) (rad)。
+    """
+    mains = np.asarray(mains, float)
+    A = np.asarray([p[0] for p in ab_pairs], float)
+    Bv = np.asarray([p[1] for p in ab_pairs], float)
+    ok = np.isfinite(mains) & np.isfinite(A) & np.isfinite(Bv)
+    mains, A, Bv = mains[ok], A[ok], Bv[ok]
+    n = mains.size
+    agg = np.median if stat == "median" else np.mean
+
+    def _gap(m):
+        da = np.abs(m - A) % TWO_PI; da = np.minimum(da, TWO_PI - da)
+        db = np.abs(m - Bv) % TWO_PI; db = np.minimum(db, TWO_PI - db)
+        return np.minimum(da, db)
+
+    gaps = _gap(mains)
+    T_obs = float(agg(gaps))
+    rng = np.random.default_rng(seed)
+    null_stat = np.empty(B)
+    per_null = np.empty((B, n))
+    for b in range(B):
+        g = _gap(rng.uniform(0, TWO_PI, n))
+        per_null[b] = g
+        null_stat[b] = agg(g)
+    p = float((1 + np.sum(null_stat <= T_obs)) / (B + 1))
+    per_pct = np.array([(1 + np.sum(per_null[:, i] <= gaps[i])) / (B + 1) for i in range(n)])
+    return dict(gaps=gaps, T_obs=T_obs, p=p, per_pct=per_pct,
+                null_lo=np.percentile(per_null, 5, axis=0),
+                null_md=np.percentile(per_null, 50, axis=0),
+                null_hi=np.percentile(per_null, 95, axis=0))
+
+
 def best_pair_rotation_null(class_means, template_dirs, B=2000, seed=SEED):
     """旋转 null: 共同旋转两类均向 φ~U[0,2pi), 对固定模板重做 best-pair; p_align=resid_sum<=obs 比例。"""
     c1, c2 = class_means
