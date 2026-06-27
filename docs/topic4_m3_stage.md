@@ -79,6 +79,12 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 > 两态 / 大范围沿轴 recruitment = 发作 / 连接 scaffold 从各向异性变各向同性"。Gate A（可投到 B 线相图的
 > 慢状态轨迹）可以先过，**不能自动升级成 Gate B（seizure-like phenotype）**。
 
+**→ M3A-v2（空间慢变量场，2026-06-28 计划锁定）** — 把 v1 的两个**标量**油箱
+（`q_core`·`q_global`）升级成**空间场** $q_I(x,t)$（抑制资源）+ $g_K(x,t)$（疲劳/恢复）。动机：两个全局标量
+没有**空间历史**，"轴向疲劳的同时周边许可度上升 → 破轴" 这件事结构上承载不了（标量去抑制只会继续**加强**轴向）；
+空间场给每个位置自己的慢状态，让破轴**可被表示、可被检出**。公式见 `docs/snn_core_model_equations.md §B5`，
+实现计划 + red-TDD 骨架见 §6。仍是 **screen**：破轴是否真发生是经验问题，移交延后的 ablation。
+
 ## 3. B 线 · 谱相图 / W-场（→ 分文档 m3b_stage_conclusion）
 
 **测了什么** — 把这块带核薄片**线性化**，算出它天生最先放大哪些空间本征模式，扫"核兴奋度 × 全局去抑制"
@@ -135,6 +141,15 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 4. **A→B overlay** 只在 A2 的 trajectory/export schema 过测试、且 M3A→M3B 接口合同（normalized phase
    coords，见 `src/sef_hfo_m3_interface.py`）满足后才做；当前 B 线相图是 raw-knob 原子图，
    `m3a_overlay_consumable=False`，不能被直接 overlay。
+
+> **M3A-v2 落地状态（2026-06-28）** — 上面第 1–2 步（四类 phenotype gate + 源空间 onset canonical
+> readout）已收敛为可执行 spec + 计划：
+> - 公式：`docs/snn_core_model_equations.md §B5`（空间场 $q_I/g_K$、四类判据、proxy/spectral 相图、红线）。
+> - 计划：`docs/superpowers/plans/2026-06-28-sef-hfo-m3a-v2-spatial-slowvar-field-plan.md`（10 任务，逐任务 TDD）。
+> - red-TDD 骨架：`tests/test_m3a_v2_spatial_slowvars.py`（40 红 + 1 `@slow` 红，含 2026-06-28 review 加固的
+>   `k_K` bounded build / `area_large` size gate / `Y=P_global` / `aq_drive` `eta_I` 加权 4 条合同）；stub
+>   `src/snn_engine/slow_field.py::SpatialSlowField` + `src/topic4_m3a_v2_phenotype.py`。
+> - 延后（本轮不建）：$D_{EE}$ 场、ablation A/B/C/D 机制证明、标定/pilot。**破轴主张受 ablation gate，未解锁。**
 
 ## 7. 合并与 worktree
 
