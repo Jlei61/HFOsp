@@ -169,6 +169,17 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 > - **Step 4 fork A 低-q 初始态（2026-06-28）= NEGATIVE → M3A-v2 closed-loop 线收口**：见 `docs/archive/topic4/m3a_v2_step4_lowq_2026-06-28.md`；runner `scripts/run_m3a_v2_step4_lowq.py`（preload/washout/probe 三相 + 记录起点态 + qonly/braked + 严格判据）→ `results/topic4_m3a_v2_step4_lowq/{step4_lowq_small,step4_lowq_finer}.json`。
 >   **0/24 success。preload 的 q 双稳无稳定中间态**（kq 扫 0.02–0.10：~0.9 浅 或 crash 到 ~0.02–0.18，**0.5–0.7 落不住**——全场事件→q 均匀耗→spatial 退化成 uniform）。**唯一够 q<0.7 是 crash 态 → probe 出 off-axis（F=0.635）但 runaway，braked 也救不回（太爆，dynamic g_K 太晚）**；浅 q → 无 off-axis / braked over-suppress。
 >   **收口结论（用户 §7 预判）**：**field-only 载体正，但当前 SNN 事件时标/状态轨迹触发不了空间机制**——衬底全或无/全场：无局部事件、无稳定中间低-q 态、off-axis 只在 runaway 出现而无刹车能控。**closed-loop 机制当前 SNN regime 未闭合。** 后续才值得 D_EE（削 relay）或事件协议/衬底重做（新方向、非当前 spec、待用户定）。
+> - **M3A-v2.2（sustained 协议 + 全局恢复变量 `h_G` 载体，2026-06-29）= NEGATIVE，承接 Step 4 三岔**：见
+>   `docs/archive/topic4/m3a_v2_2_carrier_exploration_2026-06-29.md`。新做 (a) 持续 ramp+HOLD 驱动协议（runner 级
+>   `nu_signal_fn`，**引擎未碰**）补 timescale 缺口；(b) 全局活动触发恢复变量 `h_G`（`M/B/Π` 传感器 + smooth-AND，
+>   off-by-default 字节奇偶，spec `docs/snn_core_model_equations.md §B6`，`tests/test_m3a_v2_2_global_recovery.py` 29 过）。
+>   **自主扫 3184 次仿真（~5.7h，分支 `codex/topic4-m3a-v2-2`，driver `scripts/run_m3a_v2_2_explore.py` fc65a61 +
+>   followup b87cd45）：持续协议没改掉"全或无"**——slow-off C1 **718/720 失败模式保留**、Exp-0 全程 `UNCALIBRATED`；
+>   **`q_I+g_K` 载体 0 partial-fill 候选**（primary 1920 + backup·0.85 补 544，全 tonic/fail-closed；唯一干净事件是
+>   backup 小沿轴 blip R≈0.08/S≈0.97，加 `q_I+g_K` 也不破轴）。**与独立 clamp 复查（memory
+>   `project_topic4_m3a_v2_1_qigk_clamp_verdict`）同向收敛 = 载体图景本身不足**。Stage-3 `h_G` 闭环按 gate 设计 **SKIPPED**。
+>   **收口：NO-GO 继续调 `q_I/g_K`；下一杠杆 `D_EE`（relay depression）或衬底/事件协议重做**——瓶颈在衬底拓扑、不在恢复变量。
+>   `h_G` 载体（已实现、测齐、字节奇偶守）保留备用，拿到干净 partial-fill 候选前不开闭环大扫。
 
 ## 7. 合并与 worktree
 
