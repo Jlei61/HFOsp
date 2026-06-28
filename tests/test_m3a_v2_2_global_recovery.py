@@ -92,3 +92,35 @@ def test_chi_low_for_local_axial_high_for_global():
     chi_local = chi_G(Ml, Bl, Pl, 0.5, 0.5, 0.45, 4, 4, 4)
     chi_glob = chi_G(Mg, Bg, Pg, 0.5, 0.5, 0.45, 4, 4, 4)
     assert chi_local < 0.1 < chi_glob
+
+
+# ===========================================================================
+# Task 4 -- h_G state + apply_currents E-only coupling (hard-gated)
+# ===========================================================================
+def test_apply_currents_hG_subtracts_on_E_only():
+    fld, nE, nI = _tiny_field(use_hG=True, eta_G=0.5)
+    fld.h_G = 2.0                                       # external set
+    I_E = np.ones(nE + nI) * 3.0; I_I = np.ones(nE + nI) * 1.0
+    out = fld.apply_currents(I_E, I_I)
+    # E cells: 3 - q_I(=1)*1 - eta_K*g_K(=0) - eta_G*h_G(=0.5*2) = 3-1-0-1 = 1
+    assert np.allclose(out[:nE], 1.0)
+    # I cells: 3 - 1 = 2 (h_G does NOT touch I)
+    assert np.allclose(out[nE:], 2.0)
+
+
+def test_apply_currents_etaG_zero_is_no_op():
+    fld, nE, nI = _tiny_field(use_hG=True, eta_G=0.0)
+    fld.h_G = 5.0
+    I_E = np.ones(nE + nI) * 3.0; I_I = np.ones(nE + nI) * 1.0
+    out = fld.apply_currents(I_E, I_I)
+    assert np.allclose(out[:nE], 2.0)                  # 3 - 1 - 0 - 0
+
+
+def test_apply_currents_hG_off_ignores_etaG_and_hG_init():
+    # HARD gate: use_hG=False must zero h_G even with eta_G>0, hG_init>0, and an external h_G set.
+    fld, nE, nI = _tiny_field(use_hG=False, eta_G=9.0, hG_init=1.0)
+    fld.h_G = 2.0
+    I_E = np.ones(nE + nI) * 3.0; I_I = np.ones(nE + nI) * 1.0
+    out = fld.apply_currents(I_E, I_I)
+    assert np.allclose(out[:nE], 2.0)                  # 3 - 1 - 0 - 0 (h_G HARD-gated off)
+    assert np.allclose(out[nE:], 2.0)

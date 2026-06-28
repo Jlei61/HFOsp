@@ -196,6 +196,13 @@ class SpatialSlowField:
         self._ixE, self._iyE = _grid_index(self.posE, L, n)            # fixed E->grid map
         self._alpha_a = None
         self.trace_qI_mean = []; self.trace_gK_mean = []
+        # ---- h_G(t) global recovery (M3A-v2.2, §B6) ----
+        self.h_G = float(self.cfg.hG_init)
+        self.rE_fast = np.zeros((n, n))                               # FAST (tau_s) EMA for sensors
+        self._t = 0.0                                                 # absolute time (for hG_script)
+        self._alpha_s = None
+        self.hG_script = None                                        # clamp/surrogate override (Deferred)
+        self.trace_hG = []; self.trace_M = []; self.trace_B = []; self.trace_Pi = []
 
     def apply_currents(self, I_E, I_I, labels=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) for E cells; I_E - I_I for I
@@ -204,7 +211,10 @@ class SpatialSlowField:
         gK_E = self.g_K[self._iyE, self._ixE]
         out = np.asarray(I_E, float) - np.asarray(I_I, float)          # I cells: I_E - I_I
         nE = self.nE
-        out[:nE] = I_E[:nE] - qI_E * I_I[:nE] - self.cfg.eta_K * gK_E  # E cells
+        hG_eff = self.h_G if self.cfg.use_hG else 0.0                  # HARD gate: use_hG=False -> no h_G
+        out[:nE] = (I_E[:nE] - qI_E * I_I[:nE]
+                    - self.cfg.eta_K * gK_E
+                    - self.cfg.eta_G * hG_eff)                         # global recovery scalar (E only)
         return out
 
     def threshold(self, V_th_base):
