@@ -542,6 +542,61 @@ fail-closed 合同约束；空间场的接口扩展**延后**（合同 §9 defer
 
 ---
 
+## B6. M3A-v2.2 全局抑制性恢复变量 `h_G(t)`（global inhibitory recovery）
+
+> **本节状态**：公式锁定（2026-06-28）。实验结构 / 硬合同（C1–C9）见
+> `docs/superpowers/specs/2026-06-28-sef-hfo-m3a-v2.2-global-recovery-design.md`；
+> 实现计划见 `docs/superpowers/plans/2026-06-28-sef-hfo-m3a-v2.2-global-recovery-plan.md`。
+> 仍是 **mechanism screen**：`h_G` 是 global recovery/restraint 变量，**非**发作机制 validation。
+> OFF-by-default：`use_hG=False ⇒ h_G≡0 ⇒` 与 `slow=None` 字节一致（硬退化门）。
+
+把"回来"从局部 `g_K`（§B5.3）分出去：`h_G(t)` 是**全局标量**，只看**网络整体活动**（非轴/旁分区）。
+机制链 `ignite/expand (q_I↓) → redirect/limit (g_K↑) → terminate/recover (h_G↑)` 里它只管最后一步。
+
+### B6.1 传感器（快 EMA 率场 `r̃_E`，时间常数 `τ_s`，独立于 §B5.1 的 `τ_a`）
+
+$$
+M(t)=\langle \tilde r_E\rangle_x,\qquad
+B(t)=\Big\langle \sigma\!\big(\tfrac{\tilde r_E-r_A}{\Delta_A}\big)\Big\rangle_x,\qquad
+\Pi(t)=\frac{\big(\sum_x\tilde r_E\big)^2}{N_x\sum_x\tilde r_E^2+\epsilon}
+$$
+
+`M`=总活动强度，`B`=软参与面积（`σ`=logistic，非硬阈），`Π`=空间 participation/globality
+（单热点→低、大范围均匀→高）。
+
+### B6.2 平滑 AND 触发 + 有界 build ODE + 膜耦合（仅 E）
+
+$$
+\chi_G=H_{n_M}(M;M_{50})\,H_{n_B}(B;B_{50})\,H_{n_\Pi}(\Pi;\Pi_{50}),\qquad
+H_n(z;z_{50})=\frac{z^n}{z^n+z_{50}^n}
+$$
+
+$$
+\dot h_G=-\frac{h_G}{\tau_G}+k_G\,\chi_G\,(h_G^{\max}-h_G),\quad 0\le h_G\le h_G^{\max},\qquad
+I^{\text{net}}_i\mathrel{-}=\eta_G\,h_G\ \ (i\in E)
+$$
+
+`k_G=0` 即**不 build**（不是不 decay：`-h_G/τ_G` 衰减项始终在）。小局部轴向事件 `χ_G≈0`（不触发）；
+近失控时 `M/B/Π` 都上来、`χ_G` 自然变大、`h_G` 接管。`I` 细胞先不加 `h_G`。
+
+### B6.3 可选 q 回灌（仅 arm F，单独消融）+ 相图新 Y + clamp/surrogate
+
+$$
+\partial_t q_I \mathrel{+}= \lambda_G\,h_G\,(1-q_I)\quad(\text{arm E: }\lambda_G=0),\qquad
+Y^{\text{new}}=P_{\text{global}}-\beta_G h_G
+$$
+
+`X` 不变（`-β_G h_G` 对 axis/offaxis/global 一视同仁、差分抵消）→ **`h_G` 不伪造破轴**。
+`hG_script` 非空时跳过 ODE、`h_G=\text{clip}(hG\_script(t),0,h_G^{\max})`（恒定钳制相图 / onset-gated 假 `h_G`）。
+
+- `τ_s,r_A,Δ_A`：快 EMA 时间常数 / 软面积参考 / 斜率。`M50/B50/Π50,n_*`：Hill 半触发 / 指数。
+- `τ_G,k_G,h_G^max,η_G`：衰减时间常数 / build 强度旋钮（`k_G=0`→不 build → 字节奇偶）/ 上界 / 膜耦合强度。
+- `λ_G`：q 回灌强度（arm F secondary）。`β_G`：相图 Y 中 `h_G` 权重。
+- 模块：`src/snn_engine/slow_field.py::SpatialSlowField`（`h_G` 态 + `hG_script`）；传感器纯函数
+  `src/topic4_m3a_v2_2_sensors.py`；持续驱动 `src/topic4_m3a_v2_2_protocol.py`（runner 级 `nu_signal_fn`，不碰引擎）。
+
+---
+
 ## 出处
 
 - 底层 SNN：`src/snn_engine/{model,params,connectivity_rot,kick_probe}.py`
