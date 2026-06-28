@@ -32,6 +32,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.sef_hfo_field import isotropic_gaussian, convolve_periodic
+from src.topic4_m3a_v2_2_sensors import global_M, global_B, global_participation, chi_G  # §B6 sensors
 
 
 # ---------------------------------------------------------------------------
@@ -249,3 +250,22 @@ class SpatialSlowField:
             np.clip(self.g_K, 0.0, cfg.gK_max, out=self.g_K)
         self.trace_qI_mean.append(float(self.q_I.mean()))
         self.trace_gK_mean.append(float(self.g_K.mean()))
+        if cfg.use_hG:                                            # §B6 global recovery
+            if self._alpha_s is None:
+                self._alpha_s = 1.0 - np.exp(-dt / cfg.tau_s)
+            self.rE_fast += self._alpha_s * (rE_inst - self.rE_fast)   # FAST sensor EMA
+            M = global_M(self.rE_fast)                            # sensors ALWAYS computed (trace sync)
+            B = global_B(self.rE_fast, cfg.r_A, cfg.Delta_A)
+            Pi = global_participation(self.rE_fast)
+            chi = chi_G(M, B, Pi, cfg.M50, cfg.B50, cfg.Pi50, cfg.n_M, cfg.n_B, cfg.n_Pi)
+            if self.hG_script is not None:                       # clamp/surrogate path (skip ODE)
+                self.h_G = float(np.clip(self.hG_script(self._t), 0.0, cfg.hG_max))
+            else:                                                # ALWAYS integrate: k_G=0 -> decay ONLY
+                dh = -self.h_G / cfg.tau_G + cfg.k_G * chi * (cfg.hG_max - self.h_G)
+                self.h_G = float(np.clip(self.h_G + dt * dh, 0.0, cfg.hG_max))
+            if cfg.lambda_G != 0.0 and cfg.use_qI:               # arm F: h_G accelerates q_I refill
+                self.q_I += dt * (cfg.lambda_G * self.h_G * (1.0 - self.q_I))
+                np.clip(self.q_I, cfg.q_min, 1.0, out=self.q_I)
+            self.trace_M.append(M); self.trace_B.append(B); self.trace_Pi.append(Pi)
+            self.trace_hG.append(self.h_G)                       # traces ALWAYS synced under use_hG
+        self._t += dt

@@ -124,3 +124,92 @@ def test_apply_currents_hG_off_ignores_etaG_and_hG_init():
     out = fld.apply_currents(I_E, I_I)
     assert np.allclose(out[:nE], 2.0)                  # 3 - 1 - 0 - 0 (h_G HARD-gated off)
     assert np.allclose(out[nE:], 2.0)
+
+
+# ===========================================================================
+# Task 5 -- step h_G ODE + hG_script override + byte parity
+# ===========================================================================
+def test_step_hG_builds_then_decays_bounded():
+    fld, nE, nI = _tiny_field(use_hG=True, k_G=5.0, tau_G=200.0, hG_max=1.0,
+                              M50=1e-6, B50=1e-6, Pi50=1e-6)   # easy trigger
+    spk = np.zeros(nE + nI, bool); spk[:nE] = True
+    for _ in range(200):
+        fld.step(spk, None, dt=0.1)
+    assert 0.0 < fld.h_G <= 1.0                       # built, bounded
+    quiet = np.zeros(nE + nI, bool)
+    for _ in range(8000):                              # 800 ms quiet >> tau_G=200 -> decays well below 0.05
+        fld.step(quiet, None, dt=0.1)
+    assert fld.h_G < 0.05
+
+
+def test_step_hG_larger_kG_builds_more():
+    def peak(kG):
+        fld, nE, nI = _tiny_field(use_hG=True, k_G=kG, tau_G=500.0,
+                                  M50=1e-6, B50=1e-6, Pi50=1e-6)
+        spk = np.zeros(nE + nI, bool); spk[:nE] = True
+        for _ in range(100):
+            fld.step(spk, None, 0.1)
+        return fld.h_G
+    assert peak(5.0) > peak(1.0)
+
+
+def test_step_hG_kG_zero_still_decays():
+    # k_G=0 means NO BUILD, not NO DECAY: a pre-set h_G must still relax via -h_G/tau_G.
+    fld, nE, nI = _tiny_field(use_hG=True, k_G=0.0, hG_init=0.8, tau_G=100.0)
+    quiet = np.zeros(nE + nI, bool)
+    for _ in range(1000):
+        fld.step(quiet, None, 0.1)
+    assert fld.h_G < 0.8
+
+
+def test_step_hG_script_overrides_ode():
+    fld, nE, nI = _tiny_field(use_hG=True, k_G=9.0)
+    fld.hG_script = lambda t: 0.7 if t >= 5.0 else 0.0   # onset-gated constant
+    spk = np.zeros(nE + nI, bool); spk[:nE] = True
+    fld.step(spk, None, 0.1)                              # t=0 -> script 0
+    assert fld.h_G == 0.0
+    for _ in range(100):
+        fld.step(spk, None, 0.1)                          # t>5 -> script 0.7
+    assert fld.h_G == 0.7                                 # exact, ODE skipped
+
+
+def test_step_hG_no_nan_long_random():
+    fld, nE, nI = _tiny_field(use_hG=True, k_G=3.0)
+    rng = np.random.default_rng(1)
+    for _ in range(3000):
+        fld.step(rng.random(nE + nI) < 0.2, None, 0.1)
+    assert np.isfinite(fld.h_G)
+
+
+@pytest.mark.slow
+def test_hG_offparity_byte_identical_to_slow_none():
+    # Real parity harness from the v2.1 test module (_build/_run/_sha). use_hG=False must HARD-gate
+    # h_G even with nonzero eta_G/k_G/hG_init.
+    from tests.test_m3a_v2_spatial_slowvars import _build, _run, _sha
+    p, net, NE, NI = _build()
+    pos = net["pos"]; N = NE + NI
+    vth = np.full(N, 18.0)
+    res_none = _run(p, net, NE, NI, slow=None, V_th_per_neuron=vth)
+    fld = SpatialSlowField(N, 18.0, pos[:NE], pos[NE:], p.L,
+                           cfg=SpatialSlowFieldConfig(k_q=0.0, k_K=0.0, q_init=1.0,
+                                                      use_hG=False, eta_G=9.0, k_G=9.0, hG_init=1.0))
+    res_off = _run(p, net, NE, NI, slow=fld, V_th_per_neuron=vth)
+    assert _sha(res_off) == _sha(res_none)
+
+
+# ===========================================================================
+# Task 6 -- lambda_G q-replenish (arm F isolation; primary arm E lambda_G=0)
+# ===========================================================================
+def test_lambdaG_zero_no_replenish_positive_refills_faster():
+    def q_after(lamG):
+        fld, nE, nI = _tiny_field(use_hG=True, k_q=0.0, lambda_G=lamG, k_G=0.0)
+        fld.q_I[:] = 0.4                              # pre-depressed
+        fld.hG_script = lambda t: 1.0                # h_G held high (overrides ODE)
+        quiet = np.zeros(nE + nI, bool)
+        for _ in range(500):
+            fld.step(quiet, None, 0.1)
+        return float(fld.q_I.mean())
+    q_armE = q_after(0.0)                             # primary: no replenish term
+    q_armF = q_after(1.0 / 250.0)                     # arm F: replenish on
+    assert q_armF > q_armE                            # F refills q_I faster
+    assert abs(q_armE - 0.4) < 1e-6                   # arm E: k_q=0 -> q_I unchanged
