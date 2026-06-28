@@ -16,16 +16,22 @@ from src import topic5_ictal_field_dynamics as fd
 from src.propagation_contact_plane_readout import (make_plane_grid, R_smooth_rank,
                                                    corr_pair_mirror_invariant, S_THRESH, OVERLAP_MIN)
 from src.topic5_axis_alignment import matched_channels, make_field_record
-from scripts.plot_contact_plane_static import _subject_display_frame, _display_points, _attach_real_coords
-from scripts.plot_topic5_swap_nodes_fields import _arrays
+from scripts.plot_topic5_swap_nodes_fields import SUBSTRATE, _subject_data, _arrays
+from scripts.plot_contact_plane_static import _subject_display_frame, _attach_real_coords
 
-RD_DIR = _ROOT / "results/interictal_propagation_masked/rank_displacement/per_subject"
-GEO_DIR = _ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects"
-CACHE = _ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"
+CACHE = _ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"   # substrate-independent (per-subject ictal z)
 V2REF = _ROOT / "results/topic5_ictal_recruitment/t0_feature_cache_v2_windows"
-OUT = _ROOT / "results/topic5_ictal_recruitment/field_dynamics"
-SUBJECTS = ["epilepsiae_442", "epilepsiae_548", "epilepsiae_583",
-            "epilepsiae_384", "epilepsiae_958", "epilepsiae_1084"]
+OUT_BY_SUB = {"broad": _ROOT / "results/topic5_ictal_recruitment/field_dynamics",
+              "narrow": _ROOT / "results/topic5_ictal_recruitment/field_dynamics_narrow"}
+OUT = OUT_BY_SUB["broad"]   # rebound per --substrate in main()
+# broad = swap-positive(8) + E916(non-swap, 48 sz; 调查证明非 swap 也可用); narrow = parallel batch.
+# 走廊/轴的数学只需每模板最早端点(compact core)，不必 swap -> ungated loader 通吃 swap + non-swap。
+SUBJECTS_BY_SUB = {
+    "broad": ["epilepsiae_139", "epilepsiae_253", "epilepsiae_1077", "epilepsiae_1096", "epilepsiae_1125",
+              "epilepsiae_1150", "epilepsiae_620", "epilepsiae_635", "epilepsiae_916"],
+    "narrow": ["epilepsiae_1096", "epilepsiae_1125", "epilepsiae_1146", "epilepsiae_253",
+               "epilepsiae_384", "epilepsiae_442", "epilepsiae_958"],
+}
 PARITY_TOL = 1e-3
 ONSET_WIN, ONSET_STEP = 10.0, 5.0
 OFFSET_WINS = [(-60, -30), (-30, -10), (-10, 0), (0, 30)]
@@ -37,19 +43,40 @@ def _abs_corr(Fi, Fj):
     return abs(r) if r is not None and np.isfinite(r) else np.nan
 
 
-def load_context(ds_sid):
-    rd = json.load(open(RD_DIR / f"{ds_sid}.json"))
+def _load_subject(ds_sid, substrate):
+    """UNGATED subject loader (swap + non-swap). Returns ta, tb, frame, src_a_disp, src_b_disp(集合,
+    图红蓝圈用), swap_class, decision_k. swap-positive -> 用 swap source 集合作圈; 非 swap -> fallback
+    用每模板最早 top-K_disp 集合作圈(K_disp=clip(decision_k,3,n//3))。轴/走廊数学另用 compact core(见 load_context)。"""
+    rd_dir, geo_dir = SUBSTRATE[substrate]
+    dat = _subject_data(ds_sid, rd_dir, geo_dir)   # swap-gated; None if non-swap
+    if dat is not None:
+        ss = dat["ss"]
+        return dat["ta"], dat["tb"], dat["frame"], set(dat["src_a"]), set(dat["src_b"]), \
+            ss.get("swap_class"), ss.get("decision_k")
+    rd = json.load(open(rd_dir / f"{ds_sid}.json"))
     pp = rd.get("primary_pair") or rd["pairs"][0]
-    rd_names = pp["channel_names"]
-    jv = np.asarray(pp["joint_valid"], bool)
-    ra = np.asarray(pp["rank_a_dense_full"], float)
-    rb = np.asarray(pp["rank_b_dense_full"], float)
-    decision_k = int(pp["swap_sweep"]["decision_k"])
-    ta = json.load(open(GEO_DIR / f"{ds_sid}_t_a.json"))
-    tb = json.load(open(GEO_DIR / f"{ds_sid}_t_b.json"))
+    sw = (pp.get("swap_sweep") or {})
+    decision_k = int(sw.get("decision_k") or 3)
+    ta = json.load(open(geo_dir / f"{ds_sid}_t_a.json"))
+    tb = json.load(open(geo_dir / f"{ds_sid}_t_b.json"))
     recs = [ta, tb]
     _attach_real_coords(recs)
     frame = _subject_display_frame(recs)
+
+    def _topk(rec):
+        rk = sorted(((c["name"], c["typical_rank"]) for c in rec["channels"]
+                     if np.isfinite(c.get("typical_rank", np.nan))), key=lambda x: x[1])
+        kd = int(np.clip(decision_k, 3, max(3, len(rk) // 3)))
+        return set(n for n, _ in rk[:kd])
+
+    return ta, tb, frame, _topk(ta), _topk(tb), sw.get("swap_class"), decision_k
+
+
+def load_context(ds_sid, substrate="broad"):
+    """轴/走廊: core_a/core_b = 每模板最早 COMPACT core(top-2 if <15mm else single; 非 decision_k 整串)。
+    图红蓝圈 = src_*_disp(swap 集合或 template-earliest top-K)。interictal A/B 场 = t_a/t_b typical_rank。
+    ungated -> swap + non-swap 通吃(E916/narrow non-swap 也能跑)。"""
+    ta, tb, frame, src_a_disp, src_b_disp, swap_class, decision_k = _load_subject(ds_sid, substrate)
     names_geo, xs, ys, inter, sup, soz = _arrays(ta, frame)
     pos = {n: (float(x), float(y)) for n, x, y in zip(names_geo, xs, ys)
            if np.isfinite(x) and np.isfinite(y)}
@@ -58,15 +85,17 @@ def load_context(ds_sid):
     matched = matched_channels(ta, {n: 0.0 for n in cache_names})
     names_m = [c["name"] for c in matched]
     mapped = [n for n in names_m if n in pos]
-
-    def order(rank):
-        idx = [i for i in range(len(rd_names))
-               if jv[i] and np.isfinite(rank[i]) and rd_names[i] in pos]
-        return [rd_names[i] for i in sorted(idx, key=lambda i: rank[i])]
-
-    order_a, order_b = order(ra), order(rb)
-    core_a, uncert_a, dist_a = fd.source_core(order_a, pos)
-    core_b, uncert_b, dist_b = fd.source_core(order_b, pos)
+    # AXIS/corridor cores = COMPACT extreme-early core of each template (top-2 if <15mm else single).
+    # NOT the full swap source SET (k=10 sets eat the whole middle -> axial_mid=0). Full sets kept
+    # for figure rings only (display). 139 -> axial_mid=3; bilateral 253 -> 0 (no mid electrodes).
+    src_a_full = [n for n in sorted(src_a_disp) if n in pos]
+    src_b_full = [n for n in sorted(src_b_disp) if n in pos]
+    ta_rank = {c["name"]: c["typical_rank"] for c in ta["channels"]
+               if c["name"] in pos and np.isfinite(c.get("typical_rank", np.nan))}
+    tb_rank = {c["name"]: c["typical_rank"] for c in tb["channels"]
+               if c["name"] in pos and np.isfinite(c.get("typical_rank", np.nan))}
+    core_a, uncert_a, dist_a = fd.source_core(sorted(ta_rank, key=ta_rank.get), pos)
+    core_b, uncert_b, dist_b = fd.source_core(sorted(tb_rank, key=tb_rank.get), pos)
     part = fd.axis_partition(mapped, pos, core_a, core_b)
     X, Y = make_plane_grid()
     F_inter_a = R_smooth_rank(make_field_record(matched, [float(c["typical_rank"]) for c in matched]),
@@ -78,10 +107,11 @@ def load_context(ds_sid):
     F_inter_b = (R_smooth_rank(make_field_record(matched, inter_b), X, Y, sigma, S_THRESH)
                  if np.isfinite(inter_b).sum() >= 4 else None)
     return dict(ds_sid=ds_sid, names_m=names_m, mapped=mapped, pos=pos, matched=matched,
-                order_a=order_a, order_b=order_b, decision_k=decision_k, X=X, Y=Y, sigma=sigma,
-                F_inter_a=F_inter_a, F_inter_b=F_inter_b, core_a=core_a, core_b=core_b,
-                uncert_a=uncert_a, uncert_b=uncert_b, dist_a=dist_a, dist_b=dist_b,
-                part=part, frame=frame, ta=ta)
+                swap_class=swap_class, decision_k=decision_k,
+                X=X, Y=Y, sigma=sigma, F_inter_a=F_inter_a, F_inter_b=F_inter_b,
+                core_a=core_a, core_b=core_b, uncert_a=uncert_a, uncert_b=uncert_b,
+                dist_a=dist_a, dist_b=dist_b, src_a_full=src_a_full, src_b_full=src_b_full,
+                part=part, frame=frame, ta=ta, tb=tb)
 
 
 def window_maxab(ctx, vals_by_name):
@@ -164,18 +194,20 @@ def _parity_fail(ds_sid, idx, long_npz):
     return (diff > PARITY_TOL), f"{diff:.2e}"
 
 
-def run_subject(ds_sid):
-    ctx = load_context(ds_sid)
+def run_subject(ds_sid, substrate):
+    ctx = load_context(ds_sid, substrate)
     meta = json.load(open(CACHE / f"{ds_sid}.json"))
     data = np.load(CACHE / f"{ds_sid}.npz", allow_pickle=True)
     cache_names = [str(x) for x in data["channels"]]
     rows, n_long, n_parity_fail = [], 0, 0
     gcounts = {gname: sum(v == gname for v in ctx["part"]["groups"].values()) for gname in fd.GROUPS}
     base = dict(ds_sid=ds_sid, subject=ds_sid.split("_", 1)[1],
-                axis_degenerate=ctx["part"]["axis_degenerate"],
-                source_focus_uncertain_a=ctx["uncert_a"], source_focus_uncertain_b=ctx["uncert_b"],
-                n_source_core=gcounts["source_core"], n_axis_end_noncore=gcounts["axis_end_noncore"],
-                n_axial_mid=gcounts["axial_mid"], n_non_axial=gcounts["non_axial"])
+                axis_degenerate=ctx["part"]["axis_degenerate"], swap_class=ctx["swap_class"],
+                decision_k=ctx["decision_k"], source_focus_uncertain_a=ctx["uncert_a"],
+                source_focus_uncertain_b=ctx["uncert_b"], n_src_a_full=len(ctx["src_a_full"]),
+                n_src_b_full=len(ctx["src_b_full"]), n_source_core=gcounts["source_core"],
+                n_axis_end_noncore=gcounts["axis_end_noncore"], n_axial_mid=gcounts["axial_mid"],
+                n_non_axial=gcounts["non_axial"])
     for idx in meta["eligible_idxs"]:
         s = meta["seizure"][str(idx)]
         off, dur = s["eeg_offset_rel"], s["eeg_duration_sec"]
@@ -235,18 +267,21 @@ def run_subject(ds_sid):
                 n_used=len({k[0] for k in by}), n_parity_fail=n_parity_fail, n_long_seizures=n_long,
                 axis=dict(L=ctx["part"]["L"], bbox_diag=ctx["part"]["bbox_diag"],
                           axis_degenerate=ctx["part"]["axis_degenerate"],
-                          source_core_a=ctx["core_a"], source_core_b=ctx["core_b"],
+                          swap_class=ctx["swap_class"], decision_k=ctx["decision_k"],
+                          core_a=ctx["core_a"], core_b=ctx["core_b"],
                           source_focus_uncertain_a=ctx["uncert_a"], source_focus_uncertain_b=ctx["uncert_b"],
                           source_top2_dist_a_mm=ctx["dist_a"], source_top2_dist_b_mm=ctx["dist_b"],
-                          decision_k_provenance=ctx["decision_k"]))
+                          src_a_full=ctx["src_a_full"], src_b_full=ctx["src_b_full"],
+                          n_axial_mid=sum(v == "axial_mid" for v in ctx["part"]["groups"].values())))
     return rows, subj
 
 
 CSV_COLS = ["ds_sid", "subject", "seizure_idx", "seizure_id", "window_kind", "t_center_rel_onset",
             "t_center_rel_offset", "progress_frac", "pre_onset_overlap", "post_offset_overlap",
-            "ictal_fraction", "parity_fail", "band", "n_matched", "n_source_core", "n_axis_end_noncore",
-            "n_axial_mid", "n_non_axial", "axis_degenerate", "source_focus_uncertain_a",
-            "source_focus_uncertain_b", "align_maxab", "drift_vs_onset", "angle_to_interictal_axis",
+            "ictal_fraction", "parity_fail", "band", "swap_class", "decision_k",
+            "source_focus_uncertain_a", "source_focus_uncertain_b", "n_src_a_full", "n_src_b_full",
+            "n_matched", "n_source_core", "n_axis_end_noncore", "n_axial_mid", "n_non_axial",
+            "axis_degenerate", "align_maxab", "drift_vs_onset", "angle_to_interictal_axis",
             "grad_mag", "source_core_mean_z", "axis_end_noncore_mean_z", "axial_mid_mean_z",
             "non_axial_mean_z", "axialmid_minus_nonaxial", "source_core_minus_all", "pms_source_core",
             "pms_axis_end_noncore", "pms_axial_mid", "pms_non_axial", "source_core_pos_share",
@@ -255,21 +290,25 @@ CSV_COLS = ["ds_sid", "subject", "seizure_idx", "seizure_id", "window_kind", "t_
 
 
 def main():
+    global OUT
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--subjects", nargs="*", default=SUBJECTS)
+    ap.add_argument("--substrate", choices=list(OUT_BY_SUB), default="broad")
+    ap.add_argument("--subjects", nargs="*", default=None)
     args = ap.parse_args()
+    OUT = OUT_BY_SUB[args.substrate]
+    subjects = args.subjects or SUBJECTS_BY_SUB[args.substrate]
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "per_subject").mkdir(exist_ok=True)
     all_rows = []
-    for ds_sid in args.subjects:
+    for ds_sid in subjects:
         if not (CACHE / f"{ds_sid}.npz").exists():
             print(f"[skip] {ds_sid} no long cache", flush=True); continue
-        rows, subj = run_subject(ds_sid)
+        rows, subj = run_subject(ds_sid, args.substrate)
         all_rows += rows
         json.dump(subj, open(OUT / "per_subject" / f"{ds_sid}.json", "w"), indent=2, ensure_ascii=False)
         print(f"[{ds_sid}] {len(rows)} window-rows, {subj['n_used']} sz, parity_fail={subj['n_parity_fail']}, "
-              f"degen={subj['axis']['axis_degenerate']}, uncertA/B={subj['axis']['source_focus_uncertain_a']}/"
-              f"{subj['axis']['source_focus_uncertain_b']}", flush=True)
+              f"degen={subj['axis']['axis_degenerate']}, swap={subj['axis']['swap_class']}, "
+              f"n_axial_mid={subj['axis']['n_axial_mid']}", flush=True)
     with open(OUT / "per_seizure_metrics.csv", "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=CSV_COLS, extrasaction="ignore")
         w.writeheader(); w.writerows(all_rows)

@@ -42,13 +42,24 @@ def test_positive_mass_share_stable_with_negative_mean():
     groups = {"a": "axial_mid", "b": "non_axial", "c": "non_axial", "d": "source_core"}
     pms = fd.positive_mass_share(zmean, groups)
     assert pms["axial_mid"] == pytest.approx(4 / 6) and pms["non_axial"] == pytest.approx(2 / 6)
-    assert pms["source_core"] == 0.0
-    assert sum(pms.values()) == pytest.approx(1.0)
+    assert pms["source_core"] == 0.0              # present group, no positive mass -> 0
+    assert np.isnan(pms["axis_end_noncore"])      # absent group -> NaN (not measurable)
+    assert np.nansum(list(pms.values())) == pytest.approx(1.0)
 
 
-def test_positive_mass_share_all_nonpositive_is_zero():
+def test_positive_mass_share_present_nonpositive_is_zero_absent_is_nan():
     pms = fd.positive_mass_share({"a": -1.0, "b": -2.0}, {"a": "axial_mid", "b": "non_axial"})
-    assert all(v == 0.0 for v in pms.values())
+    assert pms["axial_mid"] == 0.0 and pms["non_axial"] == 0.0           # present, no positive mass
+    assert np.isnan(pms["source_core"]) and np.isnan(pms["axis_end_noncore"])  # absent
+
+
+def test_positive_mass_share_empty_corridor_is_nan_not_zero():
+    # 548/583 case: NO axial_mid contacts -> NaN, not a misleading 0 line
+    zmean = {"a": 3.0, "b": 1.0}
+    groups = {"a": "source_core", "b": "non_axial"}
+    pms = fd.positive_mass_share(zmean, groups)
+    assert np.isnan(pms["axial_mid"]) and np.isnan(pms["axis_end_noncore"])
+    assert pms["source_core"] == pytest.approx(0.75) and pms["non_axial"] == pytest.approx(0.25)
 
 
 def test_field_gradient_recovers_known_direction():

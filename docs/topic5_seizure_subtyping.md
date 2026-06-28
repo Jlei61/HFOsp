@@ -208,6 +208,20 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 ---
 
+### 3.6 发作内 field 动力学：轴向走廊 vs 非轴向随发作进程（2026-06-28，exploratory，broad 暗示 / narrow 扩队列证否 → 不稳健）
+
+**测什么**：一次发作从头到尾，电活动"空间形状"怎么变。按间期两模板把触点分块——两模板各自最早响应的小核（端点）、两核**之间**的"走廊"中段、离轴的横向触点——看随发作进程走廊（轴向）相对活动是否**减弱**、横向是否**增强**、整体是否更同步、场方向是否漂移。
+
+**怎么测**：每 10s 窗算各触点相对发作前 baseline 的 robust-z（和 A 线同口径），比四分区的"正质量占比"；每次发作算 progress 与走廊占比的 Spearman ρ（期望<0）/ 非轴向占比的 ρ（期望>0），每被试再对各发作的 ρ 做 Wilcoxon（**发作=重复单位**）。队列=broad 9（8 swap + E916 非 swap）+ narrow 7 平行批（用每模板**端点 compact core** 构轴，证明**不必 swap**）；source 核 = 每模板最早 compact top-2-3，非 decision_k 整串。
+
+**结论（broad + narrow 扩队列后）**：发作场随时间**在变**（GIF 可见）、整体**仍贴间期轴**（maxAB 不降反升）；但"轴向走廊变弱/非轴向变强"**不是稳健现象**——**broad 有暗示**（轴向 median ρ<0 在 5/8、非轴向 ρ>0 在 8/8），**narrow 扩队列不复现甚至反向**（轴向 ρ<0 仅 3/7、非轴向 ρ>0 仅 2/7；E1146 轴向 ρ=+0.52、E442 +0.37）；两队列各仅 1 被试 Wilcoxon 显著。**扩队列调查把 broad 的方向暗示证否了一半 → 依队列/substrate/走廊厚度而变。** 非 swap 确能构轴（E442/E916 swap=none 有走廊；E916 发作太短无趋势）。**与 A 线"轴共享"在时间维一致（maxAB 保持），但方向减弱假设阴性。** caveat：z-ER 中后期偏示意，场图/GIF 只作相对空间形状看。
+
+**paper 用途**：本图模式（间期 **A|B 锚** + 发作场演化 + **GIF 直观看发作场的传播变化**）保留为 **supplementary**。
+
+完整方法 + 数值表 + parity + 图/动画说明：`docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md`。
+
+---
+
 ## 4. 已知 caveat
 
 1. **gap_perm bug-fix 实测影响小**：cohort 28 个 ok rows 上 Δgap_perm 中位 −0.0007、
@@ -227,6 +241,10 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
    2022 *Brain Communications* 不能作为 pipeline 直接溯源。
 7. **`over_split_flag` 是 descriptive flag，不是过切检验**：真正过切判定需要
    gap_perm（正确 null）+ 视觉 diagnostic + sensitivity 三方一致。
+8. **z-ER 中后期偏示意 + 方向假设不稳健（§3.6 field 动力学）**：baseline-robust-z 相对发作前安静期
+   归一，越往发作中后期越不可靠 → 场图/GIF/轨迹中后期只作**相对空间形状**看。"轴向走廊变弱"在 broad
+   有暗示但 **narrow 扩队列证否**（多反向）→ 非稳健现象，不进 claim。"走廊"**不必 swap**（非 swap 端点
+   也能构轴），但需非退化轴 + 中段有电极（broad 8/9、narrow 7/7 可测；253 双侧无中段电极不可测）。
 
 ---
 
@@ -243,6 +261,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/echo_gate/stage1_proxy_triage_2026-06-08.md` — Stage 1 ictal-template-echo gate（ER 代理）：ER 代理 echo = **共享粗锚**非 specific-path-replay（coarse positive 但 anchor-matched FLAT + bad-data self-check clean）
 - `docs/archive/topic5/dynamic_echo/stage2b_sentinel_2026-06-12.md` — **Stage 2b early-ictal dynamic-pattern echo sentinel（gate NOT PASSED，B=500 n=3，exploratory）**：早发作动态有模板相关结构（过 channel max-null）但**非稳定早期路径复演**——峰时偏晚、confirmatory 早窗方向逐发作变号、yuquan within-shaft 塌掉 → **共享粗解剖/杆级锚为主**，细化并一致于 Stage 1。**未进 cohort、不支持路径复演主张**；first-onset recruitment（Stage 2，量错失败）的接替。
 - `docs/archive/topic5/ictal_direction_clustering_2026-06-27.md` — **发作早期方向无监督两类 ↔ 间期 A/B（exploratory，negative）**：6 个干净 ECoG、宽带+快活动全无 two_class_mapped；唯一真两堆的 442 其两堆与间期模板对不齐到超随机（two_class_unmapped）。防自欺=主方向+散点 null（弃纯单峰）+ best-pair 旋转 null + 预锁轴质量门；与 A 线一致=粗网络/解剖锚非方向两类重放。
+- `docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md` — **发作内 field 动力学 pilot（exploratory，broad 暗示 / narrow 扩队列证否 → 不稳健）**：broad 9（轴向 ρ<0 5/8、非轴向 ρ>0 8/8 暗示）vs narrow 7 平行批（ρ<0 仅 3/7、非轴向 2/7，多反向，E1146 轴向 +0.52）→ 方向减弱假设非稳健、依队列/substrate；非 swap 也能用模板端点构轴（不必 swap）；图/GIF 模式 = paper supplementary；z-ER 中后期偏示意。
 
 ---
 

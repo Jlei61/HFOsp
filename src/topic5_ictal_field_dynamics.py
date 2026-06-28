@@ -58,14 +58,17 @@ def axis_partition(names, pos, core_a, core_b, *, mid_band=(0.25, 0.75), degen_f
 
 
 def positive_mass_share(zmean, groups):
+    """Rectified-mass fraction per group. A group with ZERO finite-z contacts returns NaN
+    (= not measurable, e.g. no corridor), NOT 0.0 (which would read as 'present but inactive')."""
     rect = {n: max(float(v), 0.0) for n, v in zmean.items() if np.isfinite(v)}
+    present = {groups[n] for n in zmean if n in groups and np.isfinite(zmean[n])}
+    out = {g: (0.0 if g in present else float("nan")) for g in GROUPS}
     total = sum(rect.values())
-    out = {g: 0.0 for g in GROUPS}
     if total <= 0:
         return out
     for n, r in rect.items():
         g = groups.get(n)
-        if g in out:
+        if g in present:
             out[g] += r / total
     return out
 
