@@ -159,7 +159,9 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 > - **Step 1 substrate qualification（slow OFF, single core, 2026-06-28）**：见 `docs/archive/topic4/m3a_v2_substrate_qualification_2026-06-28.md`；
 >   runner `scripts/run_m3a_v2_substrate_qualification.py` → `results/topic4_m3a_v2_substrate_qual/qualification_results.json`。
 >   **YES——局部沿轴自限间期事件存在且可达（8/192 全 5 判据过，AR 是 localize 杠杆：AR=2 全场→AR=4–6 局部 R~0.4/F_off~0.1/沿轴传播）。** 解开了 closed-loop 死结。
->   **caveat：自限是边缘的（最稳 AR=6/g=10/nu=0.48/kick=3.0 仅 3/4 seed；衬底坐在 ignition/self-limit 刀刃、无宽稳窗）→ Step 2/3 必须多 seed、per-seed 报告。** 下一步=Step 2（只开 q_I，预期 expanded axial）。
+>   **broad sweep（864 runs, multi-seed, +Lever 2）找到 4/4 稳健区：`AR=4, g=8, nu=0.46, kick=3.0`（R~0.39/S~0.99/F_off~0.13/peak~44Hz, 8/8 seed 自限，fresh seed 复验过）。**
+>   自限稳健由 **AR↓ + nu↓** 主导，**Lever 2（surround 抑制 l_EI/C_EI）边际平、不灵**（诚实负结果，与 memory M2 无 containment window 一致）；c4 returned 仍是瓶颈但低 AR/nu 推到 4/4。
+>   下一步=Step 2（在稳健衬底上只开 q_I，预期 expanded axial；低 peak 选项 AR=4/g=5/l_EI=1.0/C_EI=400 peak32 留 headroom 备用）。
 
 ## 7. 合并与 worktree
 

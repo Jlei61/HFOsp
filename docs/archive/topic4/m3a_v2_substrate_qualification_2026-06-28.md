@@ -49,5 +49,37 @@ for s in 1 2 3 4; do python scripts/run_m3a_v2_substrate_qualification.py \
 
 - **Step 1 = YES（衬底合格）**：局部沿轴自限间期事件存在且可达（AR 是 localize 杠杆）。这解开了上一轮 closed-loop 的死结（之前只有全场事件→ q_I 均匀耗竭→无结构可分）。
 - **caveat（承重）**：自限是**边缘**的（最稳 3/4 seed），衬底坐在 ignition/self-limit 刀刃上，无宽稳健窗（均质衬底 all-or-nothing 的残留）。→ Step 2/3 必须**多 seed 跑**，用自限的 seed 作干净 baseline，per-seed 报告，别用单 seed 下结论。
-- **canonical 合格衬底（Step 2/3 用）**：`AR=6, g=10, w_EE=1.0, nu=0.48, kick=3.0, core_mean=16.5, core_std=1.0, core_r=1.0, r_kick=0.3, L=10, single core @ −axis end`。
-- **下一步 = Step 2（只开 q_I）**：在此衬底上加 q_I(x,t)，预期 interictal axial → expanded axial（S_axis 仍高、F_off 低–中、仍 returned）；若直接 runaway 说明 q_I 太强/太宽。然后 Step 3 加 g_K 看 S_axis↓/F_off↑/仍 returned（核心闭环）。proxy 按用户方案 2（真实电流 / regression 标定 β_K）在 Step 3 overlay 时做。
+- **canonical 合格衬底**：§2 的窄搜只到 3/4（边缘）；**§4 broad sweep 找到 4/4 稳健区，canonical 升级为 `AR=4, g=8, nu=0.46`（见 §4）**。
+- **下一步 = Step 2（只开 q_I）**：在稳健衬底上加 q_I(x,t)，预期 interictal axial → expanded axial（S_axis 仍高、F_off 低–中、仍 returned）；若直接 runaway 说明 q_I 太强/太宽。然后 Step 3 加 g_K 看 S_axis↓/F_off↑/仍 returned（核心闭环）。proxy 按用户方案 2（真实电流 / regression 标定 β_K）在 Step 3 overlay 时做。
+
+## §4 broad sweep landscape（multi-seed, Lever 2, 2026-06-28）
+
+用户route A："多扫参数+组合，不要一个过了就停"。`scripts/run_m3a_v2_substrate_sweep.py` → `results/topic4_m3a_v2_substrate_qual/sweep_results.json`。**216 配置 × 4 seed = 864 runs，752s。** 加了 §2 没扫的 **Lever 2（surround 抑制 `l_EI` 宽度 × `C_EI` 输入数）**。每配置稳健度 = 4 seed 里几个全 5 判据过。
+
+**结果：9 配置 4/4 全稳健、28 配置 ≥3/4**——**稳健自限衬底确实存在**（§2 窄搜只到 3/4 是因为没扫到低 AR / 低 nu）。
+
+**每杠杆边际 PASS 率（哪个值真帮 robustness）**：
+
+| 杠杆 | 边际 PASS 率（按值） | 判读 |
+|---|---|---|
+| **AR** | 4→**0.41**, 6→0.31, 8→0.22 | **低 AR（=4）最稳**；高 AR 波太长/慢→难自限。§2 选的 AR=6 偏边缘。 |
+| **nu** | 0.46→**0.42**, 0.48→0.27, 0.5→0.24 | **低 nu（=0.46）最稳**——主导自限的旋钮。 |
+| g | 5→0.34, 8→0.33, 12→0.26 | 中等 g（5–8）好；g=12 反而略伤（过抑制→伤 c1/c2/c5）。 |
+| **l_EI (Lever 2 宽)** | 0.25→0.32, 0.5→0.33, 0.75→0.29, 1.0→0.31 | **基本平——Lever 2 宽度不帮自限（诚实负结果）。** |
+| **C_EI (Lever 2 输入数)** | 200→0.29, 400→0.33 | 微弱（+0.04），不是主导。 |
+
+**每判据通过率（瓶颈）**：c3_contained 1.0、clean 1.0、c1_local 0.92、c2_axial 0.85、c5_propagating 0.74、**c4_returned 0.46（仍是瓶颈）**——但低 AR + 低 nu 把它推到 4/4。
+
+**主结论**：**自限稳健由 AR↓ + nu↓ 主导，不是 Lever 2。** 用户的 surround-inhibition 假设合理但实测**不灵**（l_EI/C_EI 边际平）——把抑制摊宽只是更弥散，没造出 containment window（与 memory M2 "无 containment window" 一致）。
+
+**9 个 4/4 配置全是 AR=4（一个 AR=6）、nu=0.46**。**fresh seed 5–8 复验 top-3 全 4/4**（returned 4/4）→ 稳健区跨 8 seed 成立、非 seed 1–4 fluke：
+
+| 配置 | R_area | S_axis | F_off | peak(Hz) | seeds 1–4 | seeds 5–8 |
+|---|---|---|---|---|---|---|
+| AR=4 g=5 l_EI=1.0 C_EI=400 nu=0.46 | 0.38 | 1.00 | 0.11 | **32** | 4/4 | 4/4 |
+| AR=4 g=8 l_EI=0.5 C_EI=200 nu=0.46 | 0.39 | 0.99 | 0.13 | 44 | 4/4 | 4/4 |
+| AR=4 g=8 l_EI=0.25 C_EI=200 nu=0.46 | 0.39 | 0.99 | 0.14 | 39 | 4/4 | 4/4 |
+
+**canonical 稳健衬底（Step 2 用）= `AR=4, g=8, w_EE=1.0, nu=0.46, kick=3.0, l_EI=0.5, C_EI=200, core_mean=16.5, core_std=1.0, core_r=1.0, r_kick=0.3, L=10, single core @ −axis end`**（R~0.39, S~0.99, F_off~0.13, peak~44Hz, 8/8 seed 自限）。Step 2 加 q_I 会升兴奋度，低 peak（headroom）选项 `AR=4 g=5 l_EI=1.0 C_EI=400`（peak 32）留更多余量备用。
+
+复现：`python scripts/run_m3a_v2_substrate_sweep.py`（默认 grid 即上表）。

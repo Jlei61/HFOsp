@@ -70,7 +70,8 @@ def run_one(cfg):
     axis_unit = np.array([np.cos(theta), np.sin(theta)])
     p = Params(g=cfg["g"], L=L, density=cfg["density"], T=cfg["T"], dt=0.1,
                nu_ext_ratio=cfg["nu"], seed=seed,
-               w_EE=0.1575 * cfg["w_EE_scale"], l_EE=cfg["l_EE"], C_EE=cfg["C_EE"])
+               w_EE=0.1575 * cfg["w_EE_scale"], l_EE=cfg["l_EE"], C_EE=cfg["C_EE"],
+               l_EI=cfg.get("l_EI", 0.250), C_EI=cfg.get("C_EI", 200))   # Lever 2: surround inhibition
     rng = np.random.default_rng(seed)
     pos, labels, NE, NI = place_neurons(p, rng)
     net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta, AR=cfg["AR"],
@@ -119,6 +120,7 @@ def run_one(cfg):
                 c5_propagating=bool(onset_span > 8.0 and r_axial > 0.5),
                 clean=bool(not ignited))
     return dict(**{k: cfg[k] for k in ("AR", "g", "w_EE_scale", "nu", "kick")},
+                l_EI=cfg.get("l_EI", 0.250), C_EI=cfg.get("C_EI", 200), seed=seed,
                 n_onsets=int(ever.sum()), R_area=_round(R_area), S_axis=_round(S_axis),
                 F_offaxis=_round(F_off), G_PR=_round(G_PR), returned=bool(sl["returned"]),
                 tail_complete=bool(sl["tail_complete"]), onset_span_ms=_round(onset_span, 1),
