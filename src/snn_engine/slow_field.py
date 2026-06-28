@@ -66,6 +66,27 @@ class SpatialSlowFieldConfig:
     eta_K: float = 1.0        # coupling strength of g_K into the membrane
     a0_K: float = 0.0
     a50_K: float = 1.0
+    # ---- h_G(t) global inhibitory recovery scalar (M3A-v2.2, §B6) ----
+    use_hG: bool = False       # OFF by default -> h_G stays hG_init -> byte-parity
+    eta_G: float = 0.0         # coupling of h_G into E membrane
+    tau_G: float = 600.0       # ms, h_G decay
+    k_G: float = 0.0           # build-rate STRENGTH knob; 0 -> no build (still decays)
+    hG_max: float = 1.0        # ceiling
+    hG_init: float = 0.0       # initial h_G (parity requires 0)
+    # ---- h_G sensor (fast EMA + soft-area + Hill thresholds), §B6 ----
+    tau_s: float = 15.0        # ms, FAST EMA for the recovery sensor (separate from tau_a)
+    r_A: float = 0.0           # soft recruited-area reference level (B sensor)
+    Delta_A: float = 1.0       # soft recruited-area slope (B sensor)
+    M50: float = 1.0           # Hill half-trigger for M
+    B50: float = 0.5           # Hill half-trigger for B
+    Pi50: float = 0.45         # Hill half-trigger for Pi
+    n_M: float = 4.0           # Hill exponent M
+    n_B: float = 4.0           # Hill exponent B
+    n_Pi: float = 4.0          # Hill exponent Pi
+    # ---- optional q_I replenish driven by h_G (arm F only; ablated separately) ----
+    lambda_G: float = 0.0      # 0 -> primary arm E; >0 -> arm F
+    # ---- proxy phase-plane h_G term ----
+    beta_G: float = 1.0        # weight in Y_new = P_global - beta_G*h_G
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -82,6 +103,25 @@ class SpatialSlowFieldConfig:
             raise ValueError(f"gK_max must be >= 0, got {self.gK_max}")
         if self.n_grid < 2:
             raise ValueError(f"n_grid must be >= 2, got {self.n_grid}")
+        # ---- h_G (M3A-v2.2, §B6) ----
+        if self.tau_s <= 0.0:
+            raise ValueError(f"tau_s must be > 0, got {self.tau_s}")
+        if self.tau_G <= 0.0:
+            raise ValueError(f"tau_G must be > 0, got {self.tau_G}")
+        if self.k_G < 0.0:
+            raise ValueError(f"k_G must be >= 0, got {self.k_G}")
+        if self.hG_max < 0.0:
+            raise ValueError(f"hG_max must be >= 0, got {self.hG_max}")
+        if self.eta_G < 0.0:
+            raise ValueError(f"eta_G must be >= 0, got {self.eta_G}")
+        if self.lambda_G < 0.0:
+            raise ValueError(f"lambda_G must be >= 0, got {self.lambda_G}")
+        if self.Delta_A <= 0.0:
+            raise ValueError(f"Delta_A must be > 0, got {self.Delta_A}")
+        for nm, v in (("M50", self.M50), ("B50", self.B50), ("Pi50", self.Pi50),
+                      ("n_M", self.n_M), ("n_B", self.n_B), ("n_Pi", self.n_Pi)):
+            if v <= 0.0:
+                raise ValueError(f"{nm} must be > 0, got {v}")
 
 
 # ---------------------------------------------------------------------------
