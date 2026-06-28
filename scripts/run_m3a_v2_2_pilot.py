@@ -116,14 +116,24 @@ def _run(S, slow, nu_fn, seed):
                          V_th_per_neuron=S["vth"])         # T comes from p.T (set in build)
 
 
+def _c1_branch(m0):
+    """C1 contract (encoded, not inferred): B 'protocol_changed_substrate' iff the slow-off run
+    ALREADY produced a returned single-event phenotype (interictal_axial / expanded_axial /
+    ictal_like_candidate -- ANY clean returned event, axial OR broken) -> do NOT attribute recovery
+    to slow vars. A 'failure_mode_preserved' otherwise (runaway / tonic-or-multiburst / no clean
+    event = the v2.1 all-or-none failure mode persists -> the stress baseline for testing h_G)."""
+    graded_returned = m0["recovery"] and m0["class_label"] in (
+        "interictal_axial", "expanded_axial", "ictal_like_candidate")
+    return "B_protocol_changed_substrate" if graded_returned else "A_failure_mode_preserved"
+
+
 def run_pilot(substrate="primary", seed=1, T=500.0, r_hold=0.6, fast=False):
     sub = S2.SUBSTRATES[substrate]
     S = S2.build(sub, seed, T=T)                          # build returns a DICT; T flows into p.T
 
     # (1) slow-off baseline -> C1 branch  (seed reset inside _run -> paired)
     m0 = _segment_and_classify(_run(S, None, _drive(S, r_hold), seed), S)
-    graded_returned = m0["recovery"] and m0["class_label"] in ("interictal_axial", "expanded_axial")
-    c1 = "B_protocol_changed_substrate" if graded_returned else "A_failure_mode_preserved"
+    c1 = _c1_branch(m0)
 
     # (2) Exp-0 sensor calibration over a small r_hold LADDER (slow-off) -> C6 fail-closed.
     #     A single run cannot be BOTH returned-axial AND runaway -> a ladder is required.

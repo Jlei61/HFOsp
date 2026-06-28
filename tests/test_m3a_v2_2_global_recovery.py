@@ -173,6 +173,11 @@ def test_step_hG_script_overrides_ode():
     for _ in range(100):
         fld.step(spk, None, 0.1)                          # t>5 -> script 0.7
     assert fld.h_G == 0.7                                 # exact, ODE skipped
+    # out-of-range script clips to [0, hG_max] (the §B6 bound holds even for replayed traces)
+    fld2, nE2, nI2 = _tiny_field(use_hG=True, hG_max=1.0)
+    fld2.hG_script = lambda t: 5.0
+    fld2.step(np.zeros(nE2 + nI2, bool), None, 0.1)
+    assert fld2.h_G == 1.0                                # clipped to hG_max
 
 
 def test_step_hG_no_nan_long_random():
@@ -288,6 +293,18 @@ def test_event_window_tonic_and_multiburst_fail_closed():
     assert _event_window(base, dt) is None                   # no event
 
 
+def test_c1_branch_encodes_contract():
+    # C1 must label ANY returned single-event phenotype (incl ictal_like_candidate) as B
+    # (protocol changed the substrate); runaway / tonic / no-clean-event -> A (failure preserved).
+    from scripts.run_m3a_v2_2_pilot import _c1_branch
+    for cls in ("interictal_axial", "expanded_axial", "ictal_like_candidate"):
+        assert _c1_branch({"recovery": True, "class_label": cls}) == "B_protocol_changed_substrate"
+    for cls in ("runaway", "INSUFFICIENT", "INSUFFICIENT_FOR_EVENT_PHENOTYPE"):
+        assert _c1_branch({"recovery": False, "class_label": cls}) == "A_failure_mode_preserved"
+    # a "returned" INSUFFICIENT (no clean event) is still A, not B
+    assert _c1_branch({"recovery": True, "class_label": "INSUFFICIENT"}) == "A_failure_mode_preserved"
+
+
 @pytest.mark.slow            # 4 short real sims; RNG reset per arm => order-invariant
 def test_pilot_arm_order_invariance():
     import importlib
@@ -322,8 +339,9 @@ def test_fig_m3a_v2_2_visual_diagnostic_contract():
     import importlib
     import inspect
     mod = importlib.import_module("scripts.paper_figures.plot_fig_m3a_v2_2_dynamics")
-    # (a) non-directional mechanism axis: the script must NOT reintroduce a directed arrow
-    src = inspect.getsource(mod)
+    # (a) non-directional mechanism axis: check BOTH the v2.2 module AND the STEP4 panel it
+    #     delegates the actual axis drawing to (the v2.2 module draws no axis itself).
+    src = inspect.getsource(mod) + inspect.getsource(mod.STEP4._plot_mechanism)
     assert 'arrowstyle="-|>"' not in src and 'arrowstyle="->"' not in src
     # (b) visual-diagnostic framing is explicit
     assert mod.STATUS == "visual diagnostic, not a new statistical sweep"
