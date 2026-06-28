@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
 from slow_field import SpatialSlowField, SpatialSlowFieldConfig  # noqa: E402
 from src.topic4_m3a_v2_2_sensors import (  # noqa: E402
     hill, global_M, global_B, global_participation, chi_G)
+from src.topic4_m3a_v2_phenotype import proxy_phase_point, region_masks  # noqa: E402
 
 
 def _tiny_field(use_hG=False, **cfgkw):
@@ -213,3 +214,26 @@ def test_lambdaG_zero_no_replenish_positive_refills_faster():
     q_armF = q_after(1.0 / 250.0)                     # arm F: replenish on
     assert q_armF > q_armE                            # F refills q_I faster
     assert abs(q_armE - 0.4) < 1e-6                   # arm E: k_q=0 -> q_I unchanged
+
+
+# ===========================================================================
+# Task 7 -- proxy phase plane Y = P_global - beta_G*h_G (X invariant)
+# ===========================================================================
+def test_proxy_hG_lowers_Y_not_X():
+    fld, nE, nI = _tiny_field(use_hG=True)
+    masks = region_masks(fld.L, fld.cfg.n_grid, center=(5.0, 5.0),
+                         u_axis=(1.0, 1.0), corridor_halfwidth=1.5)
+    fld.h_G = 0.0
+    X0, Y0 = proxy_phase_point(fld, masks, lgr=2.0, beta_K=1.0, beta_G=0.8)
+    fld.h_G = 1.5
+    X1, Y1 = proxy_phase_point(fld, masks, lgr=2.0, beta_K=1.0, beta_G=0.8)
+    assert abs(X1 - X0) < 1e-9                        # X invariant under uniform h_G
+    assert abs(Y1 - (Y0 - 0.8 * 1.5)) < 1e-9          # Y drops by beta_G*h_G
+
+
+def test_proxy_betaG_default_zero_backcompat():
+    fld, nE, nI = _tiny_field(use_hG=True); fld.h_G = 3.0
+    masks = region_masks(fld.L, fld.cfg.n_grid, (5.0, 5.0), (1.0, 1.0), 1.5)
+    X, Y = proxy_phase_point(fld, masks, 2.0, 1.0)    # beta_G defaults 0 -> old behavior
+    Xb, Yb = proxy_phase_point(fld, masks, 2.0, 1.0, beta_G=0.0)
+    assert (X, Y) == (Xb, Yb)

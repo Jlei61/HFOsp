@@ -188,13 +188,16 @@ def region_pressure(q_I_region, g_K_region, lgr, beta_K, eps=1e-9):
     return float(np.log(lgr) - np.mean(np.log(q + eps)) - beta_K * np.mean(gk))
 
 
-def proxy_phase_point(field, region_masks, lgr, beta_K):
+def proxy_phase_point(field, region_masks, lgr, beta_K, beta_G=0.0):
     """Returns (X, Y): X = P_axis - P_offaxis (axis-dominance: >0 axis leads, drops/negative as
-    off-axis catches up = axis-breaking); Y = P_global (whole-sheet pressure; matches the spectral
-    Y=alpha_global for overlay; Y up & not returning = runaway risk). `field` exposes q_I, g_K
-    lattices; region_masks selects axis / offaxis / global lattice cells. Task 10."""
+    off-axis catches up = axis-breaking); Y = P_global - beta_G*h_G (whole-sheet pressure minus
+    the global recovery; matches the spectral Y=alpha_global for overlay; Y up & not returning =
+    runaway risk). The -beta_G*h_G term is UNIFORM so it cancels in X (h_G never fakes axis-breaking,
+    M3A-v2.2 §B6); beta_G defaults 0 -> identical to the pre-h_G behavior. `field` exposes q_I, g_K
+    lattices (+ optional scalar h_G); region_masks selects axis / offaxis / global lattice cells."""
     def P(name):
         m = region_masks[name]
         return region_pressure(field.q_I[m], field.g_K[m], lgr, beta_K)
     P_axis, P_off, P_global = P("axis"), P("offaxis"), P("global")
-    return (P_axis - P_off, P_global)            # X = axis dominance (>0 axis leads), Y = global pressure
+    hG = float(getattr(field, "h_G", 0.0))
+    return (P_axis - P_off, P_global - beta_G * hG)   # X = axis dominance; Y = global pressure - recovery
