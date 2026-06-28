@@ -21,6 +21,8 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
 
 from slow_field import SpatialSlowField, SpatialSlowFieldConfig  # noqa: E402
+from src.topic4_m3a_v2_2_sensors import (  # noqa: E402
+    hill, global_M, global_B, global_participation, chi_G)
 
 
 def _tiny_field(use_hG=False, **cfgkw):
@@ -56,3 +58,37 @@ def test_config_rejects_negative_kG_and_lambdaG():
 def test_config_rejects_nonpositive_hill_thresholds():
     with pytest.raises(ValueError):
         SpatialSlowFieldConfig(M50=0.0).validate()
+
+
+# ===========================================================================
+# Task 3 -- sensors (M/B/Pi + chi_G smooth-AND)
+# ===========================================================================
+def test_sensor_hill_half_at_z50():
+    assert abs(hill(2.0, 2.0, 4.0) - 0.5) < 1e-9
+    assert hill(0.0, 1.0, 4.0) == 0.0
+    assert hill(1e6, 1.0, 4.0) > 0.999
+
+
+def test_sensor_participation_single_hot_low_uniform_high():
+    n = 8
+    hot = np.zeros((n, n)); hot[0, 0] = 1.0
+    uni = np.ones((n, n))
+    assert global_participation(hot) < 0.05           # ~1/N_x
+    assert global_participation(uni) > 0.99           # ~1
+
+
+def test_sensor_B_soft_between_0_and_1():
+    field = np.linspace(-2, 2, 16).reshape(4, 4)
+    b = global_B(field, r_A=0.0, Delta_A=1.0)
+    assert 0.0 < b < 1.0
+
+
+def test_chi_low_for_local_axial_high_for_global():
+    n = 16
+    local = np.zeros((n, n)); local[7:9, :] = 1.0     # thin axial stripe
+    Ml, Bl, Pl = global_M(local), global_B(local, 0.0, 0.3), global_participation(local)
+    glob = np.full((n, n), 1.0)                        # broad high recruitment
+    Mg, Bg, Pg = global_M(glob), global_B(glob, 0.0, 0.3), global_participation(glob)
+    chi_local = chi_G(Ml, Bl, Pl, 0.5, 0.5, 0.45, 4, 4, 4)
+    chi_glob = chi_G(Mg, Bg, Pg, 0.5, 0.5, 0.45, 4, 4, 4)
+    assert chi_local < 0.1 < chi_glob
