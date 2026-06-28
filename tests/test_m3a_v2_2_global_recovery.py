@@ -256,3 +256,60 @@ def test_drive_release_drops_back():
     f = ramp_release_drive(1.0, 0.2, 0.6, t0=100.0, t_ramp=100.0, t_release=500.0)
     assert abs(f(300.0) - 0.6) < 1e-9        # holding
     assert abs(f(600.0) - 0.2) < 1e-9        # after release: back to r0
+
+
+# ===========================================================================
+# Task 9 -- pilot runner: (time,neuron) lock, segmentation fail-closed,
+#           paired/order-invariant RNG, C1 branch + C6 eligibility + screen wording
+# ===========================================================================
+def test_participation_time_neuron_semantics():
+    # (time, neuron) LOCK: E_spk_bool[time, neuron]. Neuron 0 fires t-steps 30..40, neuron 1 35..45.
+    from scripts.run_m3a_v2_2_pilot import _participation
+    T, N = 100, 4
+    E = np.zeros((T, N), bool)
+    E[30:41, 0] = True
+    E[35:46, 1] = True
+    ever, onset = _participation(E, 0, T, dt=0.1)
+    assert list(ever) == [True, True, False, False]          # collapse TIME (axis 0) -> per-NEURON
+    assert abs(onset[0] - 3.0) < 1e-9 and abs(onset[1] - 3.5) < 1e-9   # argmax(axis0)*dt + i_on*dt
+    assert np.isnan(onset[2]) and np.isnan(onset[3])
+
+
+def test_event_window_tonic_and_multiburst_fail_closed():
+    from scripts.run_m3a_v2_2_pilot import _event_window
+    dt, n = 0.1, 2000
+    base = np.full(n, 1.0)                                    # flat baseline (sd=0); thr ~ 1.0
+    r1 = base.copy(); r1[800:830] = 50.0                     # ONE short burst
+    assert _event_window(r1, dt)[2] == "single_event"
+    r2 = base.copy(); r2[800:815] = 50.0; r2[1200:1215] = 50.0   # TWO separated bursts
+    assert _event_window(r2, dt)[2] == "TONIC_OR_MULTIBURST"
+    r3 = base.copy(); r3[500:] = 50.0                        # long tonic plateau (>=tonic_thr of record)
+    assert _event_window(r3, dt)[2] == "TONIC_OR_MULTIBURST"
+    assert _event_window(base, dt) is None                   # no event
+
+
+@pytest.mark.slow            # 4 short real sims; RNG reset per arm => order-invariant
+def test_pilot_arm_order_invariance():
+    import importlib
+    mod = importlib.import_module("scripts.run_m3a_v2_2_pilot")
+    S = mod.S2.build(mod.S2.SUBSTRATES["primary"], 1, T=120.0)
+    nuA, nuB = mod._drive(S, 0.50), mod._drive(S, 0.75)
+    a1 = mod._run(S, None, nuA, 1)["E_spk_bool"]
+    b1 = mod._run(S, None, nuB, 1)["E_spk_bool"]             # B after A
+    b2 = mod._run(S, None, nuB, 1)["E_spk_bool"]             # B again
+    a2 = mod._run(S, None, nuA, 1)["E_spk_bool"]             # A after B
+    assert np.array_equal(a1, a2) and np.array_equal(b1, b2)  # each arm unchanged by run order
+
+
+@pytest.mark.slow            # runs 3 short REAL SNN sims (slow-off + 1-rung ladder + q_I+g_K)
+def test_pilot_smoke():
+    import importlib
+    mod = importlib.import_module("scripts.run_m3a_v2_2_pilot")
+    out = mod.run_pilot(substrate="primary", seed=1, T=120.0, fast=True)   # fast -> 1-rung ladder
+    assert out["slow_off"]["c1_branch"] in ("A_failure_mode_preserved", "B_protocol_changed_substrate")
+    assert out["exp0"]["eligibility"] in ("eligible", "UNCALIBRATED")
+    assert out["qI_gK_pilot"]["class_label"] in (
+        "interictal_axial", "expanded_axial", "ictal_like_candidate", "runaway",
+        "INSUFFICIENT", "INSUFFICIENT_FOR_EVENT_PHENOTYPE")
+    assert out["qI_gK_pilot"]["segmentation_status"] in ("single_event", "TONIC_OR_MULTIBURST", "no_event")
+    assert "NOT seizure mechanism validation" in out["meta"]["screen_type"]
