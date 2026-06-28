@@ -34,6 +34,37 @@ from src.sef_hfo_snn_metrics import onset_axis  # source-space instrument (metho
 
 
 # ---------------------------------------------------------------------------
+# Field-grid coordinate convention (THE single source of truth for readout coords).
+# A(x) from slow_field.firing_rate_field is indexed field[iy, ix] with ix from x=pos[:,0],
+# iy from y=pos[:,1]. Anything that maps field cells to coordinates (offaxis_fraction,
+# region masks, the proxy) MUST use make_field_grid_xy so coords and A(x) are aligned --
+# a transpose here systematically flips axis/off-axis attribution. Pinned by
+# test_field_grid_xy_matches_firing_rate_field_and_offaxis (uses one synthetic field, x!=y).
+# ---------------------------------------------------------------------------
+def make_field_grid_xy(L, n_grid):
+    """(n_grid, n_grid, 2) cell-CENTER coordinates matching firing_rate_field's field[iy, ix]:
+    grid_xy[iy, ix] = (x=(ix+0.5)*L/n_grid, y=(iy+0.5)*L/n_grid). x varies along ix (axis 1),
+    y along iy (axis 0)."""
+    c = (np.arange(n_grid) + 0.5) * L / n_grid
+    gx = np.broadcast_to(c[None, :], (n_grid, n_grid))      # x along ix (axis 1)
+    gy = np.broadcast_to(c[:, None], (n_grid, n_grid))      # y along iy (axis 0)
+    return np.stack([gx, gy], axis=-1)
+
+
+def region_masks(L, n_grid, center, u_axis, corridor_halfwidth):
+    """axis / offaxis / global lattice masks aligned to field[iy, ix] (via make_field_grid_xy).
+    axis = cells within corridor_halfwidth perpendicular of the axis line through center; offaxis =
+    the rest; global = all. Used by proxy_phase_point and the pilot."""
+    grid_xy = make_field_grid_xy(L, n_grid)
+    u = np.asarray(u_axis, float); u = u / np.linalg.norm(u)
+    u_perp = np.array([-u[1], u[0]])
+    d = grid_xy - np.asarray(center, float)
+    perp = np.abs(d[..., 0] * u_perp[0] + d[..., 1] * u_perp[1])
+    axis_mask = perp <= corridor_halfwidth
+    return {"axis": axis_mask, "offaxis": ~axis_mask, "global": np.ones((n_grid, n_grid), bool)}
+
+
+# ---------------------------------------------------------------------------
 # Per-event source-space metrics (§B5.6).
 # ---------------------------------------------------------------------------
 def recruitment_area(A, theta_A):

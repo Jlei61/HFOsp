@@ -36,6 +36,7 @@ from slow_field import (                                # noqa: E402
 from src.topic4_m3a_v2_phenotype import (              # noqa: E402
     recruitment_area, axis_score, offaxis_fraction, participation_ratio, event_recovery,
     classify_event, PhenotypeGates, region_pressure, proxy_phase_point,
+    make_field_grid_xy, region_masks,
 )
 
 
@@ -403,6 +404,29 @@ def test_offaxis_fraction_on_axis_vs_off_axis():
     off_axis = (np.abs(gy - L / 2) > 1.5).astype(float)        # mass away from the axis
     assert offaxis_fraction(on_axis, grid_xy, center, u_axis, corridor_halfwidth=0.6) < 0.1
     assert offaxis_fraction(off_axis, grid_xy, center, u_axis, corridor_halfwidth=0.6) > 0.8
+
+
+def test_field_grid_xy_matches_firing_rate_field_and_offaxis():
+    """Grid-convention lock (pilot P1-b): ONE synthetic field validates the field[iy,ix] convention
+    end-to-end. make_field_grid_xy must align with firing_rate_field's output, and region_masks +
+    offaxis_fraction must read it consistently. x0 != y0 so a transpose would fail loudly."""
+    L, n = 6.0, 24
+    grid_xy = make_field_grid_xy(L, n)
+    # (a) a single spike at a known (x,y): the field PEAK cell's grid_xy must equal (x,y)
+    x0, y0 = 1.5, 4.5
+    field = firing_rate_field(np.array([True]), np.array([[x0, y0]]), L, n, sigma=0.3)
+    iy, ix = np.unravel_index(int(field.argmax()), field.shape)
+    assert abs(grid_xy[iy, ix, 0] - x0) < L / n and abs(grid_xy[iy, ix, 1] - y0) < L / n
+    # (b) masks + offaxis_fraction consistent with the SAME convention (axis = horizontal y=L/2 line)
+    center = np.array([L / 2, L / 2]); u_axis = np.array([1.0, 0.0])
+    masks = region_masks(L, n, center, u_axis, corridor_halfwidth=0.9)   # 3*sigma -> clean margin
+    on_field = firing_rate_field(np.array([True]), np.array([[L / 2, L / 2]]), L, n, sigma=0.3)
+    off_field = firing_rate_field(np.array([True]), np.array([[L / 2, L / 2 + 2.0]]), L, n, sigma=0.3)
+    assert offaxis_fraction(on_field, grid_xy, center, u_axis, 0.9) < 0.05
+    assert offaxis_fraction(off_field, grid_xy, center, u_axis, 0.9) > 0.8
+    iy_on, ix_on = np.unravel_index(int(on_field.argmax()), on_field.shape)
+    iy_off, ix_off = np.unravel_index(int(off_field.argmax()), off_field.shape)
+    assert masks["axis"][iy_on, ix_on] and masks["offaxis"][iy_off, ix_off]
 
 
 def test_participation_ratio_bounds():
