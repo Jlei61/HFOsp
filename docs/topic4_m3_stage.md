@@ -85,6 +85,14 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 空间场给每个位置自己的慢状态，让破轴**可被表示、可被检出**。公式见 `docs/snn_core_model_equations.md §B5`，
 实现计划 + red-TDD 骨架见 §6。仍是 **screen**：破轴是否真发生是经验问题，移交延后的 ablation。
 
+**M3A-v2 closed-loop screen 收口（M3A-V2-1，2026-06-28，详见 §6 进度 + A 线分文档）** — 空间场实现到 green 后，
+四步 closed-loop screen（field-only pilot → Step 1 衬底鉴定 → Step 2 q_I → Step 3 q_I+g_K → Step 4 低-q）
+**一致 NEGATIVE**：**field 层载体正**（field-only sanity：σ_q>σ_K 的持续活动能造出离轴易激性优势），**但当前
+SNN 的事件时标 / 状态轨迹触发不了它**——衬底全或无 / 全场（给不出局部可部分填充事件、采样的 kq 网格内没有
+稳定中间低-q 带、离轴招募只在 runaway 出现且无刹车能控）。三件事对账：**为什么推 = field 层成立 / 怎么推 =
+没推到受控离轴 / 怎么回来 = g_K 只 suppress 非"招募后恢复"**。**支持"当前 regime 不闭合"，不支持"慢变量机制
+总体失败"。** 后续 D_EE（削轴向 relay）或事件协议 / 衬底重做是新方向（非当前 spec，待用户定）。
+
 ## 3. B 线 · 谱相图 / W-场（→ 分文档 m3b_stage_conclusion）
 
 **测了什么** — 把这块带核薄片**线性化**，算出它天生最先放大哪些空间本征模式，扫"核兴奋度 × 全局去抑制"
@@ -166,9 +174,9 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 >   **q_I 单独给不出 expanded axial**——returned run 全 R 不变（max dR=+0.016）轴向完好；会长大的全 runaway + 轴读出崩（headroom 最少的 sensitivity 衬底；**F_off 仍低~0.14，未证 off-axis recruitment**）。
 >   **scope-limited（非"结构性"满话）**：当前单事件 + q_init=1 + dq≤0.30 + 3 衬底；几何半边可审计（`axis_reach_frac=1.0` 于 L=10&16，见 `L16_control.json` + raw_rows）。**未测低-q 初始态。** 结论=支持把 g_K 作下一步必要测试（q_I-only 缺终止机制），**但 g_K 能否把 runaway 变 returned recruitment 仍未证**——Step 3 判决。
 > - **Step 3 q_I+g_K rescue scout（2026-06-28）= 机制不闭合（NEGATIVE, informative）**：见 `docs/archive/topic4/m3a_v2_step3_qI_gK_2026-06-28.md`；runner `scripts/run_m3a_v2_step3_qI_gK.py` → `results/topic4_m3a_v2_step3_qIgK/step3_results.json`。boundary 点 × σ_q/σ_K × **Γ_K∈{0,0.5,1,1.5,2}**（η_K 标定）× 4 seed。**432 g_K cell：298 B_oversuppress、127 C2_still_axial、7 C1_runaway、A(off-axis recruitment)=0、RESCUED=0。g_K 是刹车**（疲劳正确压轴 gap +0.118），**不重定向离轴**：**F_off 没达 recruitment gate**（max dF +0.08；4 个小升全 still-axial）、**q_off 轻–中降但从未<0.7（min 0.735）= 没进低-q permissive regime**（55ms 事件来不及耗深离轴——field-probe 持续活动有、closed-loop 单事件无的差距）。g_K 把 runaway 转 returned 但成 **suppressed/axis-dominant（R 0.05–0.50）非 off-axis**。**Γ_K target vs achieved**：target 2.0→achieved median 0.08（事件被压短 g_K 来不及积累，须同时报）。**Step 3 不能证伪整体机制——fork A 低-q 未测。****fork（用户 C2 路）**：最该试=**低-q 初始态/持续事件 regime**（补 timescale 缺口）；次选 D_EE。**M3A-v2 closed-loop 机制当前 regime 未闭合；field-only sanity 仍正。**
-> - **Step 4 fork A 低-q 初始态（2026-06-28）= NEGATIVE → M3A-v2 closed-loop 线收口**：见 `docs/archive/topic4/m3a_v2_step4_lowq_2026-06-28.md`；runner `scripts/run_m3a_v2_step4_lowq.py`（preload/washout/probe 三相 + 记录起点态 + qonly/braked + 严格判据）→ `results/topic4_m3a_v2_step4_lowq/{step4_lowq_small,step4_lowq_finer}.json`。
->   **0/24 success。preload 的 q 双稳无稳定中间态**（kq 扫 0.02–0.10：~0.9 浅 或 crash 到 ~0.02–0.18，**0.5–0.7 落不住**——全场事件→q 均匀耗→spatial 退化成 uniform）。**唯一够 q<0.7 是 crash 态 → probe 出 off-axis（F=0.635）但 runaway，braked 也救不回（太爆，dynamic g_K 太晚）**；浅 q → 无 off-axis / braked over-suppress。
->   **收口结论（用户 §7 预判）**：**field-only 载体正，但当前 SNN 事件时标/状态轨迹触发不了空间机制**——衬底全或无/全场：无局部事件、无稳定中间低-q 态、off-axis 只在 runaway 出现而无刹车能控。**closed-loop 机制当前 SNN regime 未闭合。** 后续才值得 D_EE（削 relay）或事件协议/衬底重做（新方向、非当前 spec、待用户定）。
+> - **Step 4 fork A 低-q 初始态（M3A-V2-1，2026-06-28）= NEGATIVE → M3A-v2 closed-loop 线收口**：见 `docs/archive/topic4/m3a_v2_step4_lowq_2026-06-28.md`；runner `scripts/run_m3a_v2_step4_lowq.py`（preload/washout/probe 三相 + 记录起点态 + qonly/braked + 严格判据；`--out-name` 选输出名、meta 记录实际 `substrates/seeds/kq`）→ `results/topic4_m3a_v2_step4_lowq/{step4_lowq_small,step4_lowq_finer}.json`。
+>   **success：small 0/24、finer 0/12、合计 0/36。** preload 后的 q 在**采样的 kq 网格里没有稳定中间低-q 带——是个 sharp transition**：要么浅耗竭无效（q_global ~0.87–0.98），要么 crash 到 ~0.015–0.18，**0.5–0.7 一个点都没采到**（sampled-grid 观察，**不是** saddle/双稳态结构存在性证明）。**唯一够 q<0.7 是 crash 态 → probe 出 off-axis（F=0.635、R=1.0）但 returned=False（runaway），braked 也救不回（太爆、dynamic g_K 太晚）**；浅 q → 无 off-axis / braked over-suppress。本轮只测 **q-preloaded braked probe**；full-state（带 g_K 走完 preload）是有意未测变体。
+>   **收口结论（用户 §7 预判；三件事对账）**：**为什么推 = field 层成立**（field-only 正）；**怎么推 = 未达成**（closed-loop 没推到受控离轴，off-axis 只在 runaway）；**怎么回来 = 方式不对**（g_K 只 suppress，非"发作样招募后恢复"）。**field-only 载体正，但当前 SNN 事件时标/状态轨迹触发不了空间机制**（衬底全或无/全场）。**closed-loop 机制当前 SNN regime 未闭合——支持"当前 regime 不闭合"，不支持"慢变量机制总体失败"。** 后续才值得 D_EE（削 relay）或事件协议/衬底重做（新方向、非当前 spec，待用户定，本轮不开始）。
 > - **M3A-v2.2（sustained 协议 + 全局恢复变量 `h_G` 载体，2026-06-29）= NEGATIVE，承接 Step 4 三岔**：见
 >   `docs/archive/topic4/m3a_v2_2_carrier_exploration_2026-06-29.md`。新做 (a) 持续 ramp+HOLD 驱动协议（runner 级
 >   `nu_signal_fn`，**引擎未碰**）补 timescale 缺口；(b) 全局活动触发恢复变量 `h_G`（`M/B/Π` 传感器 + smooth-AND，
