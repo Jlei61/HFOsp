@@ -24,6 +24,7 @@ from slow_field import SpatialSlowField, SpatialSlowFieldConfig  # noqa: E402
 from src.topic4_m3a_v2_2_sensors import (  # noqa: E402
     hill, global_M, global_B, global_participation, chi_G)
 from src.topic4_m3a_v2_phenotype import proxy_phase_point, region_masks  # noqa: E402
+from src.topic4_m3a_v2_2_protocol import ramp_hold_drive, ramp_release_drive  # noqa: E402
 
 
 def _tiny_field(use_hG=False, **cfgkw):
@@ -237,3 +238,21 @@ def test_proxy_betaG_default_zero_backcompat():
     X, Y = proxy_phase_point(fld, masks, 2.0, 1.0)    # beta_G defaults 0 -> old behavior
     Xb, Yb = proxy_phase_point(fld, masks, 2.0, 1.0, beta_G=0.0)
     assert (X, Y) == (Xb, Yb)
+
+
+# ===========================================================================
+# Task 8 -- sustained ramp+HOLD / release drive builders (nu_signal_fn)
+# ===========================================================================
+def test_drive_ramp_hold_shape():
+    f = ramp_hold_drive(nu_theta=1.0, r0=0.2, r_hold=0.6, t0=100.0, t_ramp=200.0)
+    assert abs(f(0.0) - 0.2) < 1e-9          # before ramp: r0
+    assert abs(f(100.0) - 0.2) < 1e-9        # ramp start
+    assert abs(f(200.0) - 0.4) < 1e-9        # mid-ramp: halfway
+    assert abs(f(300.0) - 0.6) < 1e-9        # ramp end: r_hold
+    assert abs(f(9999.0) - 0.6) < 1e-9       # HOLD: stays r_hold (never released)
+
+
+def test_drive_release_drops_back():
+    f = ramp_release_drive(1.0, 0.2, 0.6, t0=100.0, t_ramp=100.0, t_release=500.0)
+    assert abs(f(300.0) - 0.6) < 1e-9        # holding
+    assert abs(f(600.0) - 0.2) < 1e-9        # after release: back to r0
