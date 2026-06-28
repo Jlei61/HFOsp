@@ -548,7 +548,9 @@ fail-closed 合同约束；空间场的接口扩展**延后**（合同 §9 defer
 > `docs/superpowers/specs/2026-06-28-sef-hfo-m3a-v2.2-global-recovery-design.md`；
 > 实现计划见 `docs/superpowers/plans/2026-06-28-sef-hfo-m3a-v2.2-global-recovery-plan.md`。
 > 仍是 **mechanism screen**：`h_G` 是 global recovery/restraint 变量，**非**发作机制 validation。
-> OFF-by-default：`use_hG=False ⇒ h_G≡0 ⇒` 与 `slow=None` 字节一致（硬退化门）。
+> OFF-by-default：`use_hG=False` 把 `h_G` 对膜电流与 step 的耦合**硬门控为零** ⇒ **engine-output 与
+> `slow=None` 字节一致**（当 `q_I/g_K` 也中性时）。注意是**有效耦合为零**、非内部 state 数学恒等 0
+> （`hG_init`≠0 时标量 `h_G` 本身非 0，但不进任何输出）。
 
 把"回来"从局部 `g_K`（§B5.3）分出去：`h_G(t)` 是**全局标量**，只看**网络整体活动**（非轴/旁分区）。
 机制链 `ignite/expand (q_I↓) → redirect/limit (g_K↑) → terminate/recover (h_G↑)` 里它只管最后一步。

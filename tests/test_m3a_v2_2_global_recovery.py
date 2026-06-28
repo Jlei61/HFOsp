@@ -305,6 +305,18 @@ def test_c1_branch_encodes_contract():
     assert _c1_branch({"recovery": True, "class_label": "INSUFFICIENT"}) == "A_failure_mode_preserved"
 
 
+def test_pilot_json_strict_no_nan():
+    # research artifacts must be STRICT JSON: NaN S_axis (INSUFFICIENT events) -> null, not bare NaN.
+    import json
+    from scripts.run_m3a_v2_2_pilot import _json_safe
+    raw = {"S_axis": float("nan"), "nested": [1.0, float("inf")], "ok": "x", "n": 3}
+    with pytest.raises(ValueError):
+        json.dumps(raw, allow_nan=False)                  # raw NaN/Inf is NOT strict JSON
+    s = json.dumps(_json_safe(raw), allow_nan=False)      # sanitized -> strict JSON (no raise)
+    back = json.loads(s)
+    assert back["S_axis"] is None and back["nested"][1] is None and back["ok"] == "x" and back["n"] == 3
+
+
 @pytest.mark.slow            # 4 short real sims; RNG reset per arm => order-invariant
 def test_pilot_arm_order_invariance():
     import importlib

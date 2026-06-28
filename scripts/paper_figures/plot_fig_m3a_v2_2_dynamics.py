@@ -112,6 +112,10 @@ def _compose_case(case):
 
 def _write_readme(summaries):
     lines = ["# M3A-v2.2 key-dynamics visual diagnostic\n",
+             "> **当前渲染口径**：在当前采样下，5 个 case 全部读出 fail-closed 的 "
+             "`TONIC_OR_MULTIBURST` / `INSUFFICIENT_FOR_EVENT_PHENOTYPE`——这只说明 fail-closed 正常工作，"
+             "**不构成 “部分填充” 或 “恢复轨道” 候选**。要画真正的 key-dynamics 候选图，必须等正式 pilot "
+             "跑出 clean single-event / returned anchor 之后再画。\n",
              "这组图是 **visual diagnostic**，不是新的统计 sweep。它把 v2.2 pilot 的关键动力学场景",
              "（持续 ramp+HOLD 驱动下的 slow-off 基线、`q_I+g_K` 载体、Exp-0 的 r_hold ladder）",
              "用 Topic-4 四列标准画出来：`mechanism | tempA source | tempB source | electrode readout`。",
@@ -140,13 +144,16 @@ def main():
         print(f"[plot] {case['case_id']}", flush=True)
         summaries.append(_compose_case(case))
     _write_readme(summaries)
-    (OUT / "m3a_v2_2_dynamics_metadata.json").write_text(json.dumps(
+    (OUT / "m3a_v2_2_dynamics_metadata.json").write_text(json.dumps(PILOT._json_safe(
         {"figure": FIG_NAME, "status": STATUS,
          "source_of_truth": ["results/topic4_m3a_v2_2_pilot/pilot_results.json"],
          "notes": ["Mechanism-panel axis is scaffold ORIENTATION only (non-directional, no arrowhead).",
                    "Shading labels source identity, not propagation/seizure direction.",
-                   "Carrier + pilot scenarios only; closed-loop h_G ideal-orbit figure is deferred."],
-         "cases": summaries}, indent=2))
+                   "Carrier + pilot scenarios only; closed-loop h_G ideal-orbit figure is deferred.",
+                   "CURRENT RENDER = fail-closed tonic/multiburst readout under the sustained protocol; "
+                   "it is NOT a partial-fill or recovery candidate. A key-dynamics candidate figure "
+                   "requires a real pilot producing clean single-event / returned anchors first."],
+         "cases": summaries}), indent=2, allow_nan=False))   # strict JSON (NaN -> null)
     for s in summaries:
         print(f"wrote {ROOT / s['outputs']['png']}", flush=True)
     print(f"wrote {OUT / 'README.md'}", flush=True)

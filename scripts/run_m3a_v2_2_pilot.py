@@ -13,6 +13,7 @@ This is a necessary-condition SCREEN, not a seizure-mechanism validation (meta.s
 from __future__ import annotations
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -165,6 +166,19 @@ def run_pilot(substrate="primary", seed=1, T=500.0, r_hold=0.6, fast=False):
                 slow_off=dict(c1_branch=c1, **m0), exp0=exp0, qI_gK_pilot=m2)
 
 
+def _json_safe(obj):
+    """Recursively map non-finite floats (NaN/Inf -- e.g. S_axis=NaN on INSUFFICIENT events) to None
+    so the artifact is STRICT JSON. A research artifact must not rely on a lax parser; callers pair
+    this with json.dumps(..., allow_nan=False)."""
+    if isinstance(obj, float):
+        return obj if math.isfinite(obj) else None
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_json_safe(v) for v in obj]
+    return obj
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--substrates", nargs="+", default=["primary"])
@@ -176,7 +190,8 @@ def main():
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / "pilot_results.json").write_text(json.dumps(
-        dict(meta=dict(substrates=a.substrates, seeds=a.seeds, T=a.T, carrier_only=True), rows=rows), indent=2))
+        _json_safe(dict(meta=dict(substrates=a.substrates, seeds=a.seeds, T=a.T, carrier_only=True), rows=rows)),
+        indent=2, allow_nan=False))                       # strict JSON (NaN S_axis -> null)
     print(f"wrote {out / 'pilot_results.json'}")
 
 
