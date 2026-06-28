@@ -155,7 +155,11 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 >   一句话（锁定口径）：**field-only mechanism sanity positive**（载体在地图层面 σ_q>σ_K 因果地造出"旁边追上主轴"的离轴易激性优势，剂量可控）；
 >   **但闭环 ictal-like broken-axis transition NOT established**——这块衬底踢出的是全场招募事件（R_area~0.65，非局部沿轴行波），
 >   q_I 被均匀抽干（主轴=旁边 gap≈0），强耗竭只 runaway。瓶颈在 **substrate regime**（substrate enters full-field recruitment before
->   localized axial propagation），不在 M3A-v2 慢变量。**下一步=找 substrate regime，不是 ablation。** proxy β_K=0.3 相对膜 η_K=1.0 低估疲劳、滞后报 off-axis 追上。
+>   localized axial propagation），不在 M3A-v2 慢变量。proxy β_K=0.3 相对膜 η_K=1.0 低估疲劳、滞后报 off-axis 追上。
+> - **Step 1 substrate qualification（slow OFF, single core, 2026-06-28）**：见 `docs/archive/topic4/m3a_v2_substrate_qualification_2026-06-28.md`；
+>   runner `scripts/run_m3a_v2_substrate_qualification.py` → `results/topic4_m3a_v2_substrate_qual/qualification_results.json`。
+>   **YES——局部沿轴自限间期事件存在且可达（8/192 全 5 判据过，AR 是 localize 杠杆：AR=2 全场→AR=4–6 局部 R~0.4/F_off~0.1/沿轴传播）。** 解开了 closed-loop 死结。
+>   **caveat：自限是边缘的（最稳 AR=6/g=10/nu=0.48/kick=3.0 仅 3/4 seed；衬底坐在 ignition/self-limit 刀刃、无宽稳窗）→ Step 2/3 必须多 seed、per-seed 报告。** 下一步=Step 2（只开 q_I，预期 expanded axial）。
 
 ## 7. 合并与 worktree
 
