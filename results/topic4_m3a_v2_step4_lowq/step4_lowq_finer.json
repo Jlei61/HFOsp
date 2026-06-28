@@ -1,17 +1,24 @@
 {
   "meta": {
     "date": "2026-06-28",
-    "step": "Step 4 fork A low-q preload->washout->probe (small)",
+    "step": "Step 4 fork A low-q preload->washout->probe (q-preloaded braked probe)",
+    "substrates": [
+      "primary",
+      "sensitivity"
+    ],
+    "seeds": [
+      1
+    ],
     "kq_levels": [
-      0.02,
-      0.05,
-      0.1
+      0.06,
+      0.07,
+      0.08
     ],
     "n_preload": 4,
     "kk_probe": 1.0,
     "eta_K_probe": 60.0,
     "n_runs": 18,
-    "wall_s": 228.7,
+    "wall_s": 292.5,
     "n_success": 0
   },
   "raw_rows": [

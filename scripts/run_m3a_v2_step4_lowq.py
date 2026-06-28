@@ -6,16 +6,20 @@ MANY events first (preload), let the network go quiet (washout), THEN probe a st
 the probe event recruit OFF-AXIS / globally and still return, *because* q_I is already depleted?
 
 Phases (per review gate):
-  PRELOAD: N repeated kicks on the SAME slow field -> q_I depletes (spatially, axis most + sigma_q
-           spread off-axis). full version also builds g_K.
+  PRELOAD: N repeated kicks on the SAME slow field with k_K=0 -> q_I depletes (spatially, axis most +
+           sigma_q spread off-axis). g_K is NOT built during preload (k_K=0); it acts only during the
+           PROBE (braked condition). So this harness tests a *q-preloaded braked probe*, NOT a full
+           (q + g_K) preloaded state. Full-state preload -- carrying g_K through the preload kicks --
+           is a deliberate UNTESTED variant; it would need a second preload group with k_K>0.
   WASHOUT: the probe is a FRESH run (V reset); its pre-kick window [20,120) is the quiet check.
   PROBE:   one standard kick; read out + the recorded probe-START state.
 
-Conditions (this first SMALL scan):
-  - baseline      : q_init=1, no field (the normal axial event).
-  - spatial_qonly : preload depletes q (k_K=0), RESET g_K=0, probe -> 'is depleted-q permissiveness
-                    enough for off-axis?'
-  - spatial_full  : preload depletes q AND builds g_K, keep both, probe -> 'does the real slow state work?'
+Conditions:
+  - baseline : q_init=1, no field (the normal axial event).
+  - qonly    : probe the q-preloaded (depleted) state with NO brake (g_K=0) -> 'is depleted-q
+               permissiveness alone enough for controlled off-axis recruitment?'
+  - braked   : probe the SAME q-preloaded state WITH a dynamic g_K brake (k_K>0) -> 'can a fatigue brake
+               turn a depleted-q event into returned off-axis recruitment instead of runaway?'
   (uniform-low-q clamp control added when expanding, matched to the achieved q_global.)
 
 Every probe row records q_{axis,off,global}_init, gK_{axis,off}_init, rate_pre_probe,
@@ -23,8 +27,9 @@ pre_probe_ignited -- without these we cannot attribute an effect to the low-q st
 Success (strict, NOT just S_axis down): returned AND F_off up (or G_PR up) AND R_area up AND not
 tonic-pinned AND not pre-igniting.
 
-SMALL first (2 seeds x 2 depths x 3 conditions x 2 substrates). Expand only once q_off_init<0.7 with a
-quiet pre-probe is observed. DESCRIPTIVE screen.
+SMALL first (2 substrates x 2 seeds x 3 kq-levels, each -> baseline+qonly+braked). The exact scan
+(substrates/seeds/kq) is recorded in the output meta and selected via CLI; the output filename is set
+by --out-name. Expand only once q_off_init<0.7 with a quiet pre-probe is observed. DESCRIPTIVE screen.
 """
 import os
 
@@ -143,21 +148,25 @@ def main():
     ap.add_argument("--kq", type=float, nargs="+", default=KQ_LEVELS)
     ap.add_argument("--workers", type=int, default=16)
     ap.add_argument("--out", default=OUT_DIR)
+    ap.add_argument("--out-name", default="step4_lowq_small.json",
+                    help="output filename (e.g. step4_lowq_finer.json for the finer kq scan)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     tasks = [(s, sd, kq) for s in a.substrates for sd in a.seeds for kq in a.kq]
-    print(f"Step 4 low-q (SMALL): {len(tasks)} (substrate,seed,kq) tasks, N_preload={N_PRELOAD}", flush=True)
+    print(f"Step 4 low-q [{a.out_name}]: {len(tasks)} (substrate,seed,kq) tasks, "
+          f"substrates={a.substrates} seeds={a.seeds} kq={a.kq} N_preload={N_PRELOAD}", flush=True)
     t0 = time.time()
     with mp.Pool(min(a.workers, len(tasks))) as pool:
         raw = [r for rows in pool.map(worker, tasks) for r in rows]
     wall = time.time() - t0
     probes = [r for r in raw if r["condition"] != "baseline"]
     n_success = sum(r.get("success", False) for r in probes)
-    json.dump(dict(meta=dict(date="2026-06-28", step="Step 4 fork A low-q preload->washout->probe (small)",
-                             kq_levels=KQ_LEVELS, n_preload=N_PRELOAD, kk_probe=KK_PROBE,
+    json.dump(dict(meta=dict(date="2026-06-28", step="Step 4 fork A low-q preload->washout->probe "
+                             "(q-preloaded braked probe)", substrates=a.substrates, seeds=a.seeds,
+                             kq_levels=list(a.kq), n_preload=N_PRELOAD, kk_probe=KK_PROBE,
                              eta_K_probe=ETA_K_PROBE, n_runs=len(raw), wall_s=round(wall, 1),
                              n_success=n_success),
-                   raw_rows=raw), open(os.path.join(a.out, "step4_lowq_small.json"), "w"), indent=2)
+                   raw_rows=raw), open(os.path.join(a.out, a.out_name), "w"), indent=2)
     print(f"\n{len(raw)} rows in {wall:.0f}s. SUCCESS={n_success}/{len(probes)}", flush=True)
     print("GATE CHECK — did preload reach q_off_init<0.7 with a QUIET pre-probe?")
     print(f"{'sub':11} {'sd':>2} {'kq':>5} {'cond':9} | {'q[ax/off/glob]_init':>22} {'gK[ax]':>6} "
@@ -169,7 +178,7 @@ def main():
               f"{str(r.get('gK_axis_init')):>6} {str(r.get('rate_pre_probe')):>8} "
               f"{str(r.get('pre_probe_ignited'))[0]:>5} | {r['R_area']} {r['S_axis']} {r['F_off']} "
               f"{str(r['returned'])[0]:>4} {str(r.get('dF','')):>6} {r.get('success','')}")
-    print(f"\nwrote {os.path.join(a.out, 'step4_lowq_small.json')}", flush=True)
+    print(f"\nwrote {os.path.join(a.out, a.out_name)}", flush=True)
 
 
 if __name__ == "__main__":
