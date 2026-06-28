@@ -313,3 +313,20 @@ def test_pilot_smoke():
         "INSUFFICIENT", "INSUFFICIENT_FOR_EVENT_PHENOTYPE")
     assert out["qI_gK_pilot"]["segmentation_status"] in ("single_event", "TONIC_OR_MULTIBURST", "no_event")
     assert "NOT seizure mechanism validation" in out["meta"]["screen_type"]
+
+
+# ===========================================================================
+# Task 10 -- key-dynamics visual diagnostic (non-directional axis; framing)
+# ===========================================================================
+def test_fig_m3a_v2_2_visual_diagnostic_contract():
+    import importlib
+    import inspect
+    mod = importlib.import_module("scripts.paper_figures.plot_fig_m3a_v2_2_dynamics")
+    # (a) non-directional mechanism axis: the script must NOT reintroduce a directed arrow
+    src = inspect.getsource(mod)
+    assert 'arrowstyle="-|>"' not in src and 'arrowstyle="->"' not in src
+    # (b) visual-diagnostic framing is explicit
+    assert mod.STATUS == "visual diagnostic, not a new statistical sweep"
+    # (c) the key dynamics scenarios are present (slow-off + q_I+g_K carrier, at minimum)
+    ids = {c["case_id"] for c in mod.CASES}
+    assert {"slow_off_baseline", "qI_gK_sustained"} <= ids
