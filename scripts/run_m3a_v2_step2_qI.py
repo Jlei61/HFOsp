@@ -81,9 +81,9 @@ class RecordingSlowField(SpatialSlowField):
         self.q_glob_tr.append(float(self.q_I.mean()))
 
 
-def build(sub, seed, T=T_SIM):
-    """Single-core anisotropic substrate (Step-1 recipe)."""
-    L, theta = 10.0, np.radians(45.0)
+def build(sub, seed, T=T_SIM, L=10.0):
+    """Single-core anisotropic substrate (Step-1 recipe). L overridable for the L-invariance control."""
+    theta = np.radians(45.0)
     axis_unit = np.array([np.cos(theta), np.sin(theta)])
     p = Params(g=sub["g"], L=L, density=100.0, T=T, dt=0.1, nu_ext_ratio=sub["nu"], seed=seed,
                w_EE=0.1575, l_EE=0.380, C_EE=800, l_EI=sub["l_EI"], C_EI=sub["C_EI"])
@@ -122,12 +122,21 @@ def _readout(res, S, slow=None):
     t = np.arange(len(rate)) * dt
     pk_t = sl["peak_t"]; tail = rate[t >= pk_t]
     tail_auc = float(np.maximum(tail - sl["rest_rate"], 0).sum() * dt)
+    # geometry (P1-3 auditable): how far along the axis core->far-end the event reached, and what
+    # fraction of the axial corridor it filled. axis_reach_frac~1 => event spans the axis (no axial
+    # room to expand); corridor_fill_frac~1 => corridor saturated.
+    u_perp = np.array([-u[1], u[0]])
+    ax = (posE - c) @ u; core_ax = float((S["core_xy"] - c) @ u); far_ax = float(ax.max())
+    reach = ((float(ax[ever].max()) - core_ax) / (far_ax - core_ax)) if (ever.any() and far_ax > core_ax) else 0.0
+    in_corr = np.abs((posE - c) @ u_perp) <= CORRIDOR_HW
+    fill = float((ever & in_corr).sum()) / max(1, int(in_corr.sum()))
     row = dict(n_onsets=int(ever.sum()), R_area=_round(recruitment_area(A, A_thr)),
                S_axis=_round(axis_score(posE, onset, u)),
                F_off=_round(offaxis_fraction(A, gxy, c, u, CORRIDOR_HW)),
                T_event=_round(sl["burst_duration_ms"], 1), peak_rate=_round(sl["peak"], 1),
                returned=bool(sl["returned"] and sl["tail_complete"]), T_return=_round(pk_t, 1),
-               tail_AUC=_round(tail_auc, 1), pre_ignited=bool(ig))
+               tail_AUC=_round(tail_auc, 1), pre_ignited=bool(ig),
+               axis_reach_frac=_round(reach), corridor_fill_frac=_round(fill))
     if slow is not None:
         qa, qo, qg = min(slow.q_axis_tr), min(slow.q_off_tr), min(slow.q_glob_tr)
         row.update(q_axis_min=_round(qa), q_off_min=_round(qo), q_global_min=_round(qg),

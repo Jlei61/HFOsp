@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "purpose": "L-invariance of axial reach (Step 2 geometry control)",
+    "note": "axis_reach_frac~1 at both L => event spans full axis => no axial room to expand; corridor_fill_frac~1 => corridor saturated"
+  },
+  "rows": [
+    {
+      "substrate": "primary",
+      "seed": 1,
+      "L": 10.0,
+      "NE": 8000,
+      "R_area": 0.4062,
+      "S_axis": 0.9998,
+      "F_off": 0.1299,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7076,
+      "returned": true
+    },
+    {
+      "substrate": "primary",
+      "seed": 1,
+      "L": 16.0,
+      "NE": 20480,
+      "R_area": 0.2891,
+      "S_axis": 1.0,
+      "F_off": 0.1365,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7817,
+      "returned": true
+    },
+    {
+      "substrate": "primary",
+      "seed": 2,
+      "L": 10.0,
+      "NE": 8000,
+      "R_area": 0.377,
+      "S_axis": 0.9915,
+      "F_off": 0.1142,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.6735,
+      "returned": true
+    },
+    {
+      "substrate": "primary",
+      "seed": 2,
+      "L": 16.0,
+      "NE": 20480,
+      "R_area": 0.2764,
+      "S_axis": 1.0,
+      "F_off": 0.1223,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7683,
+      "returned": true
+    },
+    {
+      "substrate": "sensitivity",
+      "seed": 1,
+      "L": 10.0,
+      "NE": 8000,
+      "R_area": 0.4111,
+      "S_axis": 0.9971,
+      "F_off": 0.13,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7287,
+      "returned": true
+    },
+    {
+      "substrate": "sensitivity",
+      "seed": 1,
+      "L": 16.0,
+      "NE": 20480,
+      "R_area": 0.2939,
+      "S_axis": 0.9999,
+      "F_off": 0.1367,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7988,
+      "returned": true
+    },
+    {
+      "substrate": "sensitivity",
+      "seed": 2,
+      "L": 10.0,
+      "NE": 8000,
+      "R_area": 0.3877,
+      "S_axis": 0.9785,
+      "F_off": 0.1192,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7103,
+      "returned": true
+    },
+    {
+      "substrate": "sensitivity",
+      "seed": 2,
+      "L": 16.0,
+      "NE": 20480,
+      "R_area": 0.2842,
+      "S_axis": 0.9997,
+      "F_off": 0.123,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7868,
+      "returned": true
+    },
+    {
+      "substrate": "backup",
+      "seed": 1,
+      "L": 10.0,
+      "NE": 8000,
+      "R_area": 0.3818,
+      "S_axis": 0.9992,
+      "F_off": 0.1072,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.6582,
+      "returned": true
+    },
+    {
+      "substrate": "backup",
+      "seed": 1,
+      "L": 16.0,
+      "NE": 20480,
+      "R_area": 0.2607,
+      "S_axis": 0.9976,
+      "F_off": 0.0864,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.7215,
+      "returned": true
+    },
+    {
+      "substrate": "backup",
+      "seed": 2,
+      "L": 10.0,
+      "NE": 8000,
+      "R_area": 0.3408,
+      "S_axis": 0.9993,
+      "F_off": 0.0983,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.596,
+      "returned": true
+    },
+    {
+      "substrate": "backup",
+      "seed": 2,
+      "L": 16.0,
+      "NE": 20480,
+      "R_area": 0.251,
+      "S_axis": 0.9952,
+      "F_off": 0.0773,
+      "axis_reach_frac": 1.0,
+      "corridor_fill_frac": 0.6991,
+      "returned": true
+    }
+  ]
+}

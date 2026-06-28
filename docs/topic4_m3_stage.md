@@ -163,7 +163,8 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 >   自限稳健由 **AR↓ + nu↓** 主导（AR 是 localize 梯度非硬阈，AR=2 高 g 下也能贴界过——见 AR=2 boundary probe）；**Lever 2（surround 抑制 l_EI/C_EI）边际平、不灵**（诚实负，合 memory M2 无 containment window）。机器可审计：sweep_results.json（raw_rows 带 gate flags + fresh + ar2 probe + canonical per-seed）+ multiseed_results.json。
 > - **Step 2 q_I-only（g_K=0, D_EE=1, 2026-06-28）= NEGATIVE（informative）**：见 `docs/archive/topic4/m3a_v2_step2_qI_2026-06-28.md`；runner `scripts/run_m3a_v2_step2_qI.py` → `results/topic4_m3a_v2_step2_qI/step2_results.json`。
 >   3 衬底 × 4 σ_q × 3 q_min × 5 Δq_axis × 4 seed（k_q 用 baseline 重放标定，K_q mass-normalized）。**576 q_I run：532 A_no_effect、44 E_runaway、B_expanded_axial=0。**
->   **q_I 单独给不出 expanded axial**——returned run 全 R 不变（max dR=+0.016）轴向完好；会长大的全 runaway（headroom 最少的 sensitivity 衬底）。**结构性原因**：踢出事件已沿整条轴端到端（axial reach=1.0, L=10&16 同）+ corridor-saturated → 无沿轴扩张余地，q_I 只能往离轴推、无 g_K 刹车则 runaway。**直接 motivate Step 3（g_K 刹车是缺的那块）。**
+>   **q_I 单独给不出 expanded axial**——returned run 全 R 不变（max dR=+0.016）轴向完好；会长大的全 runaway + 轴读出崩（headroom 最少的 sensitivity 衬底；**F_off 仍低~0.14，未证 off-axis recruitment**）。
+>   **scope-limited（非"结构性"满话）**：当前单事件 + q_init=1 + dq≤0.30 + 3 衬底；几何半边可审计（`axis_reach_frac=1.0` 于 L=10&16，见 `L16_control.json` + raw_rows）。**未测低-q 初始态。** 结论=支持把 g_K 作下一步必要测试（q_I-only 缺终止机制），**但 g_K 能否把 runaway 变 returned recruitment 仍未证**——Step 3 判决。
 
 ## 7. 合并与 worktree
 
