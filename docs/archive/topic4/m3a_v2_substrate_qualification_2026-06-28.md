@@ -10,7 +10,7 @@
 **怎么测**：单个低阈值核放在轴的一端，局部踢一下，波往另一端单向传——这样 onset 时间沿轴**有序排列**（区别于"整片同时点燃"）。一个事件要同时满足 5 条才算合格：① 范围不大（R_area 0.05–0.5）② 沿轴（S_axis>0.7）③ 关在走廊里（F_offaxis<0.25）④ 自己平息（returned）⑤ **真的在传播**（onset 沿轴跨度>8ms 且 onset-位置相关 |r|>0.5，不是近同步点燃）+ 踢前不自点火。扫各向异性 AR、抑制 g、递归兴奋 w_EE、背景 nu、踢力度。
 
 **揭示了什么**：
-- **衬底合格了——局部沿轴自限事件确实存在（8/192 配置全 5 条过，seed=1）。** 比上一轮"只有全场事件"是实质进步。**关键旋钮是各向异性 AR**：AR=2 全场（R~0.65），AR=4–6 把事件压成局部（R~0.4）+ 关进走廊（F_off~0.1–0.2）+ 沿轴传播（span~55ms，r_axial~0.7–0.85）。需要**满 w_EE（不能削弱递归兴奋，0.7 反而失败）**——是 AR 把事件**localize**，不是削弱兴奋。
+- **衬底合格了——局部沿轴自限事件确实存在（8/192 配置全 5 条过，seed=1）。** 比上一轮"只有全场事件"是实质进步。**关键旋钮是各向异性 AR（是个 localize 梯度，不是硬阈值）**：AR 越低事件越大（早期 L=8/12 pilot 里 AR=2 给 R~0.65），AR=4–6 把事件压成局部（R~0.4）+ 关进走廊（F_off~0.1–0.2）+ 沿轴传播（span~55ms，r_axial~0.7–0.85）。**注意 AR=2 不是绝对"全场"**——在更高 g 下也能过判据（AR=2/g=6.5/kick=2.5 → R~0.47 mean、2/4 seed 过，只是刚贴着 R_area<0.5 上界；见 §4 AR=2 boundary probe，6/18 配置至少 1 seed 过）。所以这是**趋势/梯度，不是"AR=2 一定全场"的断言**。需要**满 w_EE（削弱递归兴奋 0.7 反而失败）**——是 AR 把事件 localize，不是削弱兴奋。
 - **空间合格稳健、时间自限边缘**：同一配置跨 seed，"局部+沿轴+传播"每次都成立（R_area/S_axis/r_axial 跨 seed 稳）；但**自限（returned）只有边缘 2–4 中 2–3 个 seed**——衬底正好坐在"自限 vs 失控"的刀刃上。
 - **nu 有个陡崖**：nu=0.4 踢不动（R~0.03 小 blip，trivially returns，但不沿轴/不够大）；nu≈0.48–0.5 才是真传播事件，但自限边缘。中间没有"又是真事件又稳健自限"的宽窗——这是均质衬底 all-or-nothing 的细分辨率版（AR 把它从"全场 vs 无"挪到"边缘局部 vs 小 blip"，是进步但仍窄）。
 - **最稳配置**：`AR=6, g=10, w_EE=1.0, nu=0.48, kick=3.0`（+ 单核 core_mean=16.5/core_r=1.0，L=10）→ R_area~0.36、S_axis~1.0、F_off~0.11、传播、**自限 3/4 seed**。这是搜到的最稳；更高 g 帮一点自限（g=10 比 g=6.5 的 returned 略好），但到不了 4/4。
@@ -80,6 +80,11 @@ for s in 1 2 3 4; do python scripts/run_m3a_v2_substrate_qualification.py \
 | AR=4 g=8 l_EI=0.5 C_EI=200 nu=0.46 | 0.39 | 0.99 | 0.13 | 44 | 4/4 | 4/4 |
 | AR=4 g=8 l_EI=0.25 C_EI=200 nu=0.46 | 0.39 | 0.99 | 0.14 | 39 | 4/4 | 4/4 |
 
-**canonical 稳健衬底（Step 2 用）= `AR=4, g=8, w_EE=1.0, nu=0.46, kick=3.0, l_EI=0.5, C_EI=200, core_mean=16.5, core_std=1.0, core_r=1.0, r_kick=0.3, L=10, single core @ −axis end`**（R~0.39, S~0.99, F_off~0.13, peak~44Hz, 8/8 seed 自限）。Step 2 加 q_I 会升兴奋度，低 peak（headroom）选项 `AR=4 g=5 l_EI=1.0 C_EI=400`（peak 32）留更多余量备用。
+**canonical 稳健衬底（Step 2 用，3 档；review P1-5：因为 Lever 2 不灵，主 baseline 不应锁 l_EI=0.5）**：
+- **primary（主 baseline）= `AR=4, g=8, w_EE=1.0, nu=0.46, kick=3.0, l_EI=0.25, C_EI=200, core_mean=16.5, core_std=1.0, core_r=1.0, r_kick=0.3, L=10, single core @ −axis`** —— **用默认 I→E 结构（l_EI=0.25），不引入 Lever 2 confound**；**seed 1–8 全 8/8 PASS**，mean R~0.40/S~0.99/F_off~0.14/peak~42Hz（见 multiseed_results.json）。
+- **matched sensitivity = 同 primary 但 `l_EI=0.5`** —— 验证 Lever 2 不改结论（l_EI 边际平，预期同）。
+- **headroom backup = `AR=4, g=5, l_EI=1.0, C_EI=400`（peak~32）** —— **强 surround-inhibition 版，只做备用**（Step 2 加 q_I 时更多 self-limit 余量），**不做主 baseline**（带 Lever 2 confound）。
+
+**机器可审计 artifact（review P1-2/3/4）**：`sweep_results.json` 含 `raw_rows`（864 条 per-seed，每条带 6 个 gate flag）、`fresh_seed_rows`（canonical × seed 5–8）、`ar2_boundary_probe`、`canonical_candidates`（primary/matched/headroom × seed 1–8 per-run metrics）；primary canonical × seed 1–8 另存 `multiseed_results.json`。
 
 复现：`python scripts/run_m3a_v2_substrate_sweep.py`（默认 grid 即上表）。
