@@ -114,7 +114,9 @@ python scripts/paper_figures/plot_fig_subject_snn.py \
 
 Fig4B KMeans verification (4 blocks: clustered heatmap | per-channel rank | cluster profile | model-vs-real
 similarity matrix with ★ perm-p). Rank heatmap/distribution/profile use the mature canonical plotters;
-heatmap rank colorbar is horizontal under the x-label; the 2×2 matrix uses stars only (no numbers), aspect=equal.
+heatmap rank colorbar is vertical on the right side of the heatmap; the 2×2 matrix uses stars only (no numbers), aspect=equal.
+Display labels use template names, not raw KMeans ids: `t_a` is red, `t_b` is blue.
+This is the canonical **modeling-KMeans companion** pattern for SNN readout figures; detailed visual contract lives in `docs/figure_style_guide.md` under Topic 4.
 
 ```bash
 python scripts/paper_figures/plot_fig_subject_snn_kmeans2.py \
@@ -144,7 +146,7 @@ Accepted contract / honesty:
   (earliest) region + the E->E long-axis band.
 - readout = spontaneous twoend run; spontaneous bidirectionality is seed-dependent
   (seed3 balanced 6/8; seed1/2 reverse-dominant 1/8,1/7).
-- Fig4B clean events: n=14, C0/C1 = 6/8, direction purity = 1.00,
+- Fig4B clean events: n=14, `t_a/t_b` = 6/8, direction purity = 1.00,
   within-cluster tau = 0.939, shared-overlap corr = -0.69.
 - `k_dir=2` sparse-electrode readout (load-bearing relaxation vs the standard k_dir=3).
 - E958 (sparse subdural grid) is a negative case (events too local to read direction).
