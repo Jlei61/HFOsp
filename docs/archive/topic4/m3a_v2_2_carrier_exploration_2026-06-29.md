@@ -58,6 +58,12 @@ clamp 复查（[[project_topic4_m3a_v2_1_qigk_clamp_verdict]]）**同向收敛**
   （seed 22/30，R≈0.08，S_axis≈0.97 仍高），**0 partial-fill 候选**。最高 F_off=0.58 只出现在 **tonic（fail-closed）** 态、不是干净事件。
 - **Stage 3（h_G smoke）：SKIPPED**——gate 未过（Exp-0 不可标定 + 无候选），按设计不跑闭环 h_G。
 
+**L-sensitivity（L=10 vs L=16，排除"薄片太小导致动力学不一致"）**
+
+主跑 L=10。补跑 **L=16**（411 runs, 1.79h，C1 ladder 全 3 衬底 + primary `q_I+g_K`；geometry 已入 artifact）
+**给出一致负结论**：slow-off C1-A **100%**（240/240，比 L=10 的 99.7% 更彻底）、**0 干净事件**（L=10 backup 那 2 个在 L=16 也没出现）、Exp-0 仍 `UNCALIBRATED`、`q_I+g_K` **0 partial-fill 候选**（171 runs 全 tonic）。
+→ **负结论 L-robust**，不是 sheet-size artifact。结果目录 `results/topic4_m3a_v2_2_explore/20260629_083937/`（run_config + per_run 含 `L/density/AR/g/l_EI/C_EI/nu`）。
+
 ## 机制判读（为什么 negative）
 
 跟 [[project_topic4_m3a_v2_1_qigk_clamp_verdict]]（独立 clamp 复查，1560 摆法 0 受控旁路）**同向**：

@@ -178,6 +178,8 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 >   **`q_I+g_K` 载体 0 partial-fill 候选**（primary 1920 + backup·0.85 补 544，全 tonic/fail-closed；唯一干净事件是
 >   backup 小沿轴 blip R≈0.08/S≈0.97，加 `q_I+g_K` 也不破轴）。**与独立 clamp 复查（memory
 >   `project_topic4_m3a_v2_1_qigk_clamp_verdict`）同向收敛 = 载体图景本身不足**。Stage-3 `h_G` 闭环按 gate 设计 **SKIPPED**。
+>   **负结论 L-robust**（L=16 复跑 411 sim 一致：C1-A 100%、0 干净事件、0 候选）。结果图
+>   `results/paper-ready-figure/fig_m3a_v2_2_explore_summary/`（读 sweep 的统计汇总）+ `fig_m3a_v2_2_dynamics/`（四列动力学示意）。
 >   **收口：NO-GO 继续调 `q_I/g_K`；下一杠杆 `D_EE`（relay depression）或衬底/事件协议重做**——瓶颈在衬底拓扑、不在恢复变量。
 >   `h_G` 载体（已实现、测齐、字节奇偶守）保留备用，拿到干净 partial-fill 候选前不开闭环大扫。
 
