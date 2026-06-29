@@ -40,12 +40,15 @@ STATUS = "visual diagnostic, not a new statistical sweep"
 FIG_NAME = "fig_m3a_v2_2_dynamics"
 OUT = ROOT / "results" / "paper-ready-figure" / FIG_NAME / "figures"
 
+# Representative cases from the 3184-sim sweep (results/topic4_m3a_v2_2_explore/): the protocol's
+# fail-closed tonic (slow-off and q_I+g_K) + the ONLY clean event found (backup r=0.85, seed 22).
 CASES = [
-    {"case_id": "slow_off_baseline", "label": "slow-off (C1 baseline)", "slow": None, "r_hold": 0.60, "seed": 1},
-    {"case_id": "qI_gK_sustained", "label": "q_I + g_K sustained", "slow": "qI_gK", "r_hold": 0.60, "seed": 1},
-    {"case_id": "ladder_low", "label": "slow-off r_hold=0.50", "slow": None, "r_hold": 0.50, "seed": 1},
-    {"case_id": "ladder_mid", "label": "slow-off r_hold=0.60", "slow": None, "r_hold": 0.60, "seed": 1},
-    {"case_id": "ladder_high", "label": "slow-off r_hold=0.75", "slow": None, "r_hold": 0.75, "seed": 1},
+    {"case_id": "slow_off_tonic", "label": "slow-off (sustained) — fail-closed tonic",
+     "substrate": "primary", "slow": None, "r_hold": 0.65, "seed": 1},
+    {"case_id": "qI_gK_tonic", "label": "q_I + g_K carrier — still fail-closed tonic",
+     "substrate": "primary", "slow": "qI_gK", "r_hold": 0.60, "seed": 1},
+    {"case_id": "backup_clean_blip", "label": "backup r=0.85 — the only clean event (tiny axial blip)",
+     "substrate": "backup", "slow": None, "r_hold": 0.85, "seed": 22},
 ]
 
 
@@ -63,7 +66,7 @@ def _run_probe(case, source, T=500.0):
     """Mirror the single-core probe at one scaffold end (source identity), under the SUSTAINED
     ramp+HOLD protocol (no kick: KICK_BOOST=0). Builds the `run` dict the Step-4 panels expect."""
     seed = int(case["seed"])
-    S = PILOT.S2.build(PILOT.S2.SUBSTRATES["primary"], seed, T=T)
+    S = PILOT.S2.build(PILOT.S2.SUBSTRATES[case["substrate"]], seed, T=T)
     S["core_xy"] = STEP4._source_xy(S, source)
     S["vth"] = STEP4._source_vth(S, source)
     contacts, names = STEP4._contacts(S)
@@ -146,7 +149,10 @@ def main():
     _write_readme(summaries)
     (OUT / "m3a_v2_2_dynamics_metadata.json").write_text(json.dumps(PILOT._json_safe(
         {"figure": FIG_NAME, "status": STATUS,
-         "source_of_truth": ["results/topic4_m3a_v2_2_pilot/pilot_results.json"],
+         "source_of_truth": ["results/topic4_m3a_v2_2_explore/<stamp>/per_run.jsonl (3184-sim sweep)",
+                             "results/paper-ready-figure/fig_m3a_v2_2_explore_summary/ (result summary)"],
+         "note_on_cases": "representative cases re-simulated for the four-panel view; the statistical "
+                          "verdict lives in the sweep + the explore_summary figure, not in these single seeds",
          "notes": ["Mechanism-panel axis is scaffold ORIENTATION only (non-directional, no arrowhead).",
                    "Shading labels source identity, not propagation/seizure direction.",
                    "Carrier + pilot scenarios only; closed-loop h_G ideal-orbit figure is deferred.",
