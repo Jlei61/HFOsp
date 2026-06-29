@@ -125,13 +125,12 @@ def _write_readme(summaries):
              "mechanism 面板的轴线只表示 scaffold 朝向（**无箭头、非传播/发作方向**）；",
              "shading 标的是 source identity，不是方向。统计口径在 pilot JSON + tests，本图不下结论。\n"]
     blurbs = {
-        "slow_off_baseline": ("持续驱动下不加任何慢变量的基线。看它是否仍是全或无 / 不回到基线（C1-A），"
-                              "还是协议本身就变温和（C1-B）。", "事件是否回落、是否全场招募。"),
-        "qI_gK_sustained": ("同一持续协议 + `q_I`（推）+ `g_K`（刹）载体。看刹车在有积分窗口时能否把蔓延"
-                            "限在中途、造出部分填充。", "范围是否仍铺满全场、轴向是否仍主导。"),
-        "ladder_low": ("Exp-0 标定 ladder 低档（r_hold=0.50）slow-off 锚点。", "属于 returned-axial 还是 runaway。"),
-        "ladder_mid": ("Exp-0 标定 ladder 中档（r_hold=0.60）slow-off 锚点。", "属于 returned-axial 还是 runaway。"),
-        "ladder_high": ("Exp-0 标定 ladder 高档（r_hold=0.75）slow-off 锚点。", "属于 returned-axial 还是 runaway。"),
+        "slow_off_tonic": ("持续 ramp+HOLD 驱动、不加任何慢变量的代表态。看它在驱动按住下是否仍铺成一片 "
+                           "tonic（fail-closed），而不是局部可部分填充的事件。", "tempA/tempB 源是否铺满轴向走廊、readout 是否 tonic 抬升。"),
+        "qI_gK_tonic": ("同一持续协议 + `q_I`（推）+ `g_K`（刹）载体的代表态。看刹车在有积分窗口时是否仍把"
+                        "事件铺成宽轴向带（fail-closed），而非造出受控的部分填充。", "tempB 面板的宽轴向绿带 = expanded/tonic 招募；非受控离轴。"),
+        "backup_clean_blip": ("整轮 3184 次扫描里**唯一**的干净事件（backup、r_hold=0.85、seed 22）。它是一个"
+                              "**小沿轴 blip**（范围~8%、轴向性~0.97），不是破轴/离轴。", "tempA/tempB 源的 onset 稀疏小事件；落在 partial-fill 目标框之外（见汇总图右）。"),
     }
     for s in summaries:
         cid = s["case"]["case_id"]
