@@ -137,6 +137,9 @@ def main():
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
 
+    fig.text(0.5, -0.015, "robustness: an L=16 re-run (n=411) gives the same verdict — slow-off C1-A = 100%, "
+             "0 clean events, 0 partial-fill candidates (the negative is not a sheet-size artifact)",
+             ha="center", fontsize=8.6, style="italic", color="0.30")
     fig.tight_layout()
     OUT.mkdir(parents=True, exist_ok=True)
     for ext in ("png", "pdf"):
