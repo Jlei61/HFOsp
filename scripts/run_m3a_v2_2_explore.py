@@ -87,9 +87,9 @@ def _metrics_row(m):
 
 
 class Explorer:
-    def __init__(self, out, soft_h, hard_h, T):
+    def __init__(self, out, soft_h, hard_h, T, L=10.0, density=100.0):
         self.out = out
-        self.soft_h, self.hard_h, self.T = soft_h, hard_h, T
+        self.soft_h, self.hard_h, self.T, self.L, self.density = soft_h, hard_h, T, L, density
         self.t0 = time.time()
         self.rows = []
         self.jsonl = open(out / "per_run.jsonl", "a", buffering=1)   # line-buffered (crash-safe)
@@ -113,8 +113,12 @@ class Explorer:
         print(line, flush=True)
 
     def record(self, stage, substrate, seed, r_hold, slow_kind, slow_params, m):
+        sub = P.S2.SUBSTRATES[substrate]
+        geom = dict(L=self.L, density=self.density, AR=sub["AR"], g=sub["g"],
+                    l_EI=sub["l_EI"], C_EI=sub["C_EI"], nu=sub["nu"])   # geometry/scale provenance (P1)
         row = dict(stage=stage, substrate=substrate, seed=int(seed), r_hold=float(r_hold), T=self.T,
-                   slow_kind=slow_kind, **(slow_params or {}), **_metrics_row(m), elapsed_h=round(self.hours(), 4))
+                   **geom, slow_kind=slow_kind, **(slow_params or {}), **_metrics_row(m),
+                   elapsed_h=round(self.hours(), 4))
         row = P._json_safe(row)
         self.rows.append(row)
         self.jsonl.write(json.dumps(row, allow_nan=False) + "\n")
@@ -146,7 +150,7 @@ class Explorer:
             for seed in seeds:
                 if not self.hard_ok():
                     self.log("  HARD budget hit in Stage 1 -- stopping."); return n
-                S = P.S2.build(P.S2.SUBSTRATES[sub], int(seed), T=self.T)
+                S = P.S2.build(P.S2.SUBSTRATES[sub], int(seed), T=self.T, L=self.L)
                 for rh in r_holds:
                     if not self.hard_ok():
                         self.log("  HARD budget hit mid-ladder -- stopping."); return n
@@ -198,7 +202,7 @@ class Explorer:
                  f"n_combos={len(combos)}")
         n = 0
         for sub_seed in seeds:
-            S = P.S2.build(P.S2.SUBSTRATES[substrate], int(sub_seed), T=self.T)
+            S = P.S2.build(P.S2.SUBSTRATES[substrate], int(sub_seed), T=self.T, L=self.L)
             for rh in band:
                 for (q_min, k_q, k_K, eta_K) in combos:
                     if not self.hard_ok():
@@ -225,7 +229,7 @@ class Explorer:
         self.log(f"STAGE 3 h_G TINY smoke (gate passed): substrate={substrate} band={band} "
                  f"combos={hg_combos} -- output 'completed/failed' only, NO recovery claim")
         rh = band[0]
-        S = P.S2.build(P.S2.SUBSTRATES[substrate], int(seed), T=self.T)
+        S = P.S2.build(P.S2.SUBSTRATES[substrate], int(seed), T=self.T, L=self.L)
         n = 0
         for (eta_G, k_G, tau_G) in hg_combos:
             if not self.hard_ok():
@@ -265,6 +269,8 @@ def main():
     ap.add_argument("--stage1-seeds", type=int, default=10)
     ap.add_argument("--stage2-seeds", type=int, default=5)
     ap.add_argument("--smoke-only", action="store_true")
+    ap.add_argument("--L", type=float, default=10.0)        # sheet size (geometry / scale; P1)
+    ap.add_argument("--density", type=float, default=100.0)
     ap.add_argument("--out-root", default=str(ROOT / "results" / "topic4_m3a_v2_2_explore"))
     a = ap.parse_args()
 
@@ -274,14 +280,17 @@ def main():
 
     R_HOLDS = [0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.85]
     cfg = dict(stamp=stamp, soft_hours=a.soft_hours, hard_hours=a.hard_hours, T=a.T,
+               L=a.L, density=a.density,                                   # geometry / scale (P1)
+               t_ramp=200.0, t0=50.0, drive="ramp_hold (nu_signal_fn; engine untouched)",
                stage1_seeds=a.stage1_seeds, stage2_seeds=a.stage2_seeds, r_holds=R_HOLDS,
                substrates_available=list(P.S2.SUBSTRATES.keys()),
+               substrate_geometry={k: dict(P.S2.SUBSTRATES[k]) for k in P.S2.SUBSTRATES},
                scope="pilot-gate / necessary-condition screen -- NOT seizure mechanism validation")
     (out / "run_config.json").write_text(json.dumps(cfg, indent=2))
     (out / "git_head.txt").write_text(_git(["rev-parse", "HEAD"]) + "\n" + _git(["log", "--oneline", "-1"]))
     (out / "git_status.txt").write_text(_git(["status", "--short", "--branch"]))
 
-    ex = Explorer(out, a.soft_hours, a.hard_hours, a.T)
+    ex = Explorer(out, a.soft_hours, a.hard_hours, a.T, L=a.L, density=a.density)
     state = dict(out=str(out), stamp=stamp, stages={})
     try:
         smoke = ex.stage0()

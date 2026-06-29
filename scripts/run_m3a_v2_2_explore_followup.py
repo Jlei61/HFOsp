@@ -24,20 +24,26 @@ import run_m3a_v2_2_pilot as P      # noqa: E402  _json_safe
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--L", type=float, default=10.0)        # geometry / scale (P1: L-sensitivity)
+    a = ap.parse_args()
     stamp = _dt.datetime.now().strftime("%Y%m%d_%H%M%S")
-    out = ROOT / "results" / "topic4_m3a_v2_2_explore" / f"{stamp}_followup"
+    tag = "followup" if a.L == 10.0 else f"followup_L{a.L:g}"
+    out = ROOT / "results" / "topic4_m3a_v2_2_explore" / f"{stamp}_{tag}"
     out.mkdir(parents=True, exist_ok=True)
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(ROOT), text=True).strip()
     (out / "git_head.txt").write_text(head)
     (out / "run_config.json").write_text(json.dumps(dict(
-        kind="focused-followup", stamp=stamp, T=500.0,
+        kind="focused-followup", stamp=stamp, T=500.0, L=a.L, density=100.0,
+        substrate_geometry={k: dict(EXP.P.S2.SUBSTRATES[k]) for k in EXP.P.S2.SUBSTRATES},
         targets=[dict(substrate="backup", r_holds=[0.80, 0.85, 0.90], seeds="1-30",
                       why="only slow-off clean single-events"),
                  dict(substrate="sensitivity", r_holds=[0.65, 0.70], seeds="1-15",
                       why="false band (tonic-recovery transition) -- completeness")],
         scope="pilot-gate carrier check; NOT a mechanism validation"), indent=2))
 
-    ex = EXP.Explorer(out, soft_h=3.0, hard_h=4.0, T=500.0)
+    ex = EXP.Explorer(out, soft_h=3.0, hard_h=4.0, T=500.0, L=a.L)
     q_mins, k_Ks = [0.25, 0.35, 0.50, 0.65], [0.3, 0.6, 1.0, 1.5]
     core = [(qm, 0.3, kK, 1.0) for qm in q_mins for kK in k_Ks]          # 16-combo core grid
     try:
