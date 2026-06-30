@@ -87,7 +87,6 @@ def panel_A(ax, subjects):
     ax.set_xticklabels(labels, rotation=40, ha="right", fontsize=8)
     ax.set_ylabel("Median|corr| (within-shaft null, obs)", fontsize=9)
     ax.set_title("A  Per-subject similarity: raw → smoothed → grid", fontsize=9, fontweight="bold")
-    ax.legend(fontsize=7, loc="lower right", framealpha=0.7)
     ax.yaxis.set_minor_locator(mticker.MultipleLocator(0.05))
     ax.grid(axis="y", linestyle=":", linewidth=0.6, alpha=0.6, zorder=0)
     # horizontal tick legend note
@@ -105,55 +104,57 @@ def panel_A(ax, subjects):
 
 
 # ---------------------------------------------------------------------------
-# Panel B — geometry-ladder slopegraph
+# Panel B — per-step delta plot
 # ---------------------------------------------------------------------------
 def panel_B(ax, subjects):
-    """One line per subject across {R1, R2, R3}; highlights smooth vs grid steps."""
-    rungs = ["R1", "R2", "R3"]
-    x_pos = [0, 1, 2]
+    """Grouped bars: smooth_delta (R1→R2) and grid_delta (R2→R3) per subject.
 
-    cmap = plt.cm.tab10
-    colors = [cmap(i % 10) for i in range(len(subjects))]
+    Answers: how much does each geometry step move the similarity?  Distinct from
+    Panel A's absolute-height-vs-null view (CLAUDE.md §7 — one question per panel).
+    """
+    n = len(subjects)
+    if n == 0:
+        ax.text(0.5, 0.5, "No ok subjects", ha="center", va="center", transform=ax.transAxes)
+        return
 
-    for si, s in enumerate(subjects):
-        obs = [_safe(s, r, "within_shaft", "obs_subject") for r in rungs]
-        label = s["subject_id"].replace("epilepsiae_", "E").replace("yuquan_", "Y")
-        finite = [(x, o) for x, o in zip(x_pos, obs) if np.isfinite(o)]
-        if len(finite) < 2:
-            continue
-        xs, ys = zip(*finite)
-        ax.plot(xs, ys, "o-", color=colors[si], alpha=0.8, linewidth=1.5,
-                markersize=5, label=label)
+    labels = [s["subject_id"].replace("epilepsiae_", "E").replace("yuquan_", "Y")
+              for s in subjects]
+    x = np.arange(n)
+    bar_w = 0.35
 
-    ax.set_xticks(x_pos)
-    ax.set_xticklabels(["R1\n(raw Pearson)", "R2\n(in-plane\nsmoothed)", "R3\n(grid field)"],
-                        fontsize=8)
-    ax.set_ylabel("Median|corr| (within-shaft null)", fontsize=9)
-    ax.set_title("B  Geometry ladder: per-subject trajectory", fontsize=9, fontweight="bold")
-    ax.legend(fontsize=7, loc="lower right", framealpha=0.7, ncol=2)
-    ax.grid(axis="y", linestyle=":", linewidth=0.6, alpha=0.6)
+    smooth_vals, grid_vals = [], []
+    for s in subjects:
+        sd = _safe(s, "smooth_delta")
+        if not np.isfinite(sd):  # robustness fallback: compute from R1/R2 obs
+            sd = (_safe(s, "R2", "within_shaft", "obs_subject")
+                  - _safe(s, "R1", "within_shaft", "obs_subject"))
+        gd = _safe(s, "grid_delta")
+        if not np.isfinite(gd):  # robustness fallback: compute from R2/R3 obs
+            gd = (_safe(s, "R3", "within_shaft", "obs_subject")
+                  - _safe(s, "R2", "within_shaft", "obs_subject"))
+        smooth_vals.append(sd)
+        grid_vals.append(gd)
 
-    # annotate step contributions at top
-    smooth_ds = [_safe(s, "smooth_delta") for s in subjects if "smooth_delta" in s]
-    grid_ds = [_safe(s, "grid_delta") for s in subjects if "grid_delta" in s]
-    finite_sd = [v for v in smooth_ds if np.isfinite(v)]
-    finite_gd = [v for v in grid_ds if np.isfinite(v)]
-    if finite_sd:
-        ax.annotate(f"smooth Δ median={np.median(finite_sd):+.3f}",
-                    xy=(0.5, 0.01), xycoords="axes fraction",
-                    fontsize=7, ha="center", color="#555555")
-    if finite_gd:
-        ax.annotate(f"grid Δ median={np.median(finite_gd):+.3f}",
-                    xy=(0.5, 0.065), xycoords="axes fraction",
-                    fontsize=7, ha="center", color="#555555")
+    ax.bar(x - bar_w / 2, smooth_vals, width=bar_w, color="#fdae61", alpha=0.85,
+           label="same-plane smoothing (R1→R2)", zorder=3)
+    ax.bar(x + bar_w / 2, grid_vals, width=bar_w, color="#d73027", alpha=0.85,
+           label="grid (R2→R3)", zorder=3)
 
-    all_obs = [_safe(s, r, "within_shaft", "obs_subject") for s in subjects for r in rungs]
-    vals = [v for v in all_obs if np.isfinite(v)]
-    if vals:
-        lo, hi = min(vals), max(vals)
-        pad = (hi - lo) * 0.15 + 0.02
-        ax.set_ylim(max(0, lo - pad), min(1.05, hi + pad))
-    ax.set_xlim(-0.4, 2.4)
+    ax.axhline(0, color="black", linewidth=0.8, linestyle="-", zorder=4)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=40, ha="right", fontsize=8)
+    ax.set_ylabel("Δ similarity (contribution of each geometry step)", fontsize=9)
+    ax.set_title("B  Per-subject geometry step contributions (R1→R2 vs R2→R3)",
+                 fontsize=9, fontweight="bold")
+    ax.legend(fontsize=7, loc="upper right", framealpha=0.7)
+    ax.yaxis.set_minor_locator(mticker.MultipleLocator(0.05))
+    ax.grid(axis="y", linestyle=":", linewidth=0.6, alpha=0.6, zorder=0)
+
+    all_vals = [v for v in smooth_vals + grid_vals if np.isfinite(v)]
+    if all_vals:
+        lo, hi = min(all_vals), max(all_vals)
+        pad = max((hi - lo) * 0.15, 0.05)
+        ax.set_ylim(lo - pad, hi + pad)
 
 
 # ---------------------------------------------------------------------------
@@ -182,7 +183,8 @@ def panel_C(ax, subjects):
     ax.set_xticklabels(labels_x, fontsize=8)
     ax.set_xlabel("Gaussian bandwidth multiplier (applied to canonical σ)", fontsize=9)
     ax.set_ylabel("R2 obs (within-shaft null)", fontsize=9)
-    ax.set_title("C  Bandwidth robustness: R2 across σ-sweep", fontsize=9, fontweight="bold")
+    ax.set_title("C  Bandwidth robustness: in-plane smoothed similarity (R2) across σ-sweep",
+                 fontsize=9, fontweight="bold")
     ax.legend(fontsize=7, loc="lower right", framealpha=0.7, ncol=2)
     ax.grid(axis="y", linestyle=":", linewidth=0.6, alpha=0.6)
 
@@ -227,7 +229,8 @@ def panel_D(ax, subjects):
         if l not in seen:
             seen.add(l)
             unique.append((h, l))
-    ax.legend(*zip(*unique), fontsize=7, loc="lower right", framealpha=0.7)
+    if unique:
+        ax.legend(*zip(*unique), fontsize=7, loc="lower right", framealpha=0.7)
 
     ax.set_xlabel("Null p95 threshold", fontsize=9)
     ax.set_ylabel("Observed value (within-shaft)", fontsize=9)
