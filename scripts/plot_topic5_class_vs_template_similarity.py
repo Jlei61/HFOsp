@@ -38,7 +38,17 @@ from src.propagation_contact_plane_readout import make_plane_grid, corr_pair_mir
 
 GEOM = _ROOT / "results/spatial_modulation/propagation_geometry_broad/observation_readout/real_subjects"
 OUT = _ROOT / "results/topic5_ictal_recruitment/event_resolved_alignment"
-COL_A, COL_B = "#5b8c5a", "#8c5a8c"   # class A (green) / class B (purple) — neutral, not the swap red/blue
+COL_A, COL_B = "#d62728", "#1f77b4"   # class A/B semantic colors, matched to rank/swap figures
+FS_AXIS_LABEL = 20
+FS_XTICK_LEFT = 24
+FS_TICK = 14
+FS_ANNOT = 12.5
+FS_LEGEND = 12.5
+
+
+def _despine(ax):
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
 
 
 def _subject_sim(ds_sid):
@@ -97,46 +107,55 @@ def main():
     allc = np.vstack([cA, cB]) if cA.size and cB.size else (cA if cA.size else cB)
     rho_all = spearmanr(allc[:, 0], allc[:, 1]).correlation
 
-    fig, ax = plt.subplots(1, 2, figsize=(13.0, 5.6))
+    fig, ax = plt.subplots(
+        1, 2, figsize=(13.6, 6.8),
+        gridspec_kw={"width_ratios": [0.86, 1.0]},
+    )
     # Panel A — per-subject field similarity by class
     data = [simA, simB]
-    parts = ax[0].violinplot(data, positions=[0, 1], widths=0.8, showmedians=True)
+    parts = ax[0].violinplot(data, positions=[0, 1], widths=0.46, showmedians=True)
     for pc, c in zip(parts["bodies"], (COL_A, COL_B)):
         pc.set_facecolor(c); pc.set_alpha(0.45)
     for key in ("cmedians", "cmaxes", "cmins", "cbars"):
         if key in parts:
             parts[key].set_color("0.3")
+            parts[key].set_linewidth(1.6)
     rng = np.random.default_rng(0)
+    y_lower = min(0.55, min(simA + simB) - 0.05)
+    y_upper = 1.035
+    stat_y = y_lower + 0.035
     for x, d, c in ((0, simA, COL_A), (1, simB, COL_B)):
-        ax[0].scatter(x + (rng.random(len(d)) - 0.5) * 0.22, d, s=34, color=c, edgecolors="white",
-                      linewidths=0.5, zorder=3)
-        ax[0].text(x, 1.012, f"median {np.median(d):.3f}\nmin {np.min(d):.3f}  (n={len(d)})",
-                   ha="center", va="bottom", fontsize=9)
-    ax[0].set_xticks([0, 1]); ax[0].set_xticklabels(["propagation class A", "propagation class B"])
-    ax[0].set_ylabel("spatial similarity of the two interictal fields  |r|")
-    ax[0].set_ylim(min(0.55, min(simA + simB) - 0.05), 1.06)
+        ax[0].scatter(x + (rng.random(len(d)) - 0.5) * 0.13, d, s=40, color=c, edgecolors="white",
+                      linewidths=0.6, zorder=3)
+        ax[0].text(x, stat_y, f"median $\\mathbf{{{np.median(d):.3f}}}$\nmin {np.min(d):.3f}  (n={len(d)})",
+                   ha="center", va="bottom", fontsize=FS_ANNOT, color="0.18")
+    ax[0].set_xticks([0, 1])
+    ax[0].set_xticklabels(["Template A", "Template B"], fontsize=FS_XTICK_LEFT)
+    ax[0].set_ylabel("field similarity  |r|", fontsize=FS_AXIS_LABEL, labelpad=12)
+    ax[0].set_ylim(y_lower, y_upper)
     ax[0].axhline(1.0, color="0.7", lw=0.8, ls=":")
-    ax[0].set_title("per subject: event-aggregated class field vs aggregate-template field", fontsize=10.5)
+    ax[0].tick_params(axis="both", labelsize=FS_TICK, width=1.1, length=5)
+    _despine(ax[0])
 
     # Panel B — pooled contact-level agreement
     ax[1].plot([0, 1], [0, 1], color="0.6", lw=1.0, ls="--", zorder=1)
     ax[1].scatter(cA[:, 0], cA[:, 1], s=16, color=COL_A, alpha=0.5, label="class A contacts", zorder=2)
     ax[1].scatter(cB[:, 0], cB[:, 1], s=16, color=COL_B, alpha=0.5, label="class B contacts", zorder=2)
-    ax[1].set_xlabel("aggregate-template propagation order (early 0 → late 1)")
-    ax[1].set_ylabel("event-aggregated propagation order (early 0 → late 1)")
+    ax[1].set_xlabel("aggregate-template order\n(0 early → 1 late)",
+                     fontsize=FS_AXIS_LABEL, labelpad=12)
+    ax[1].set_ylabel("event-aggregated order\n(0 early → 1 late)",
+                     fontsize=FS_AXIS_LABEL, labelpad=12)
     ax[1].set_xlim(-0.03, 1.03); ax[1].set_ylim(-0.03, 1.03); ax[1].set_aspect("equal", adjustable="box")
     ax[1].text(0.03, 0.97, f"all contacts, all subjects\nSpearman r = {rho_all:.3f}  (n={allc.shape[0]})",
-               va="top", fontsize=9, bbox=dict(boxstyle="round", fc="white", ec="0.7", alpha=0.9))
-    ax[1].set_title("contact level: do the two methods order contacts the same?", fontsize=10.5)
-    ax[1].legend(loc="lower right", fontsize=8.5, framealpha=0.9)
+               va="top", fontsize=FS_ANNOT, bbox=dict(boxstyle="round", fc="white", ec="0.7", alpha=0.9))
+    ax[1].tick_params(axis="both", labelsize=FS_TICK, width=1.1, length=5)
+    ax[1].legend(loc="lower right", fontsize=FS_LEGEND, framealpha=0.9)
+    _despine(ax[1])
+    for a in ax:
+        a.yaxis.set_label_coords(-0.13, 0.5)
 
     med = np.median(simA + simB)
-    fig.suptitle(f"Building the interictal field from a class's events ≈ projecting its aggregate template "
-                 f"(broad cohort, N={len(rows)}; median field |r| = {med:.3f})", fontsize=12)
-    fig.text(0.5, 0.005, "EXPLORATORY construct-equivalence: the two field-construction methods agree, so the "
-             "aggregate template is a faithful stand-in; the A/B difference lives in per-event dispersion, not the "
-             "aggregate field.", ha="center", fontsize=8.5, color="0.4")
-    fig.tight_layout(rect=(0, 0.03, 1, 0.95))
+    fig.subplots_adjust(left=0.085, right=0.985, bottom=0.18, top=0.97, wspace=0.42)
     figdir = Path(args.out) / "figures"; figdir.mkdir(parents=True, exist_ok=True)
     fp = figdir / "class_vs_template_field_similarity_cohort.png"
     fig.savefig(fp, dpi=140); plt.close(fig)
