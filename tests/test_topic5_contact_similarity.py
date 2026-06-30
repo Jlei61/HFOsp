@@ -1,10 +1,16 @@
 """TDD tests for topic5_contact_similarity.kernel_smooth_at_contacts.
 
 Task 1: grid-free Gaussian contact kernel proven equal to smooth_field.
+Task 2: polarity-free maxAB similarity (raw + same-plane kernel, mirror-faithful).
 """
 import numpy as np
 import pytest
-from src.topic5_contact_similarity import kernel_smooth_at_contacts
+from scipy.stats import pearsonr
+from src.topic5_contact_similarity import (
+    kernel_smooth_at_contacts,
+    contact_corr,
+    polarity_free_maxab,
+)
 from src.propagation_contact_plane_readout import smooth_field, make_plane_grid
 
 
@@ -39,3 +45,45 @@ def test_kernel_reduces_to_self_value_as_sigma_to_zero():
     pts, vals, sup = _toy_pts()
     out = kernel_smooth_at_contacts(vals, pts, pts, sup, sigma=1e-4)
     assert np.allclose(out, vals, atol=1e-6)
+
+
+# ---------------------------------------------------------------------------
+# Task 2: polarity-free maxAB similarity
+# ---------------------------------------------------------------------------
+
+def test_raw_mode_is_plain_abs_pearson():
+    rng = np.random.default_rng(0)
+    rank = rng.random(8); val = 2 * rank + rng.normal(0, 0.1, 8)
+    pts = rng.random((8, 2)); sup = np.ones(8)
+    got = contact_corr(rank, val, mode="raw", source_pts=pts, support=sup, sigma=0.3)
+    assert np.isclose(abs(got), abs(pearsonr(rank, val)[0]))
+
+
+def test_kernel_sigma_to_zero_equals_raw():
+    rng = np.random.default_rng(1)
+    rank = rng.random(10); val = rng.random(10)
+    pts = rng.random((10, 2)); sup = np.ones(10)
+    raw = contact_corr(rank, val, mode="raw", source_pts=pts, support=sup, sigma=0.3)
+    ker = contact_corr(rank, val, mode="kernel", source_pts=pts, support=sup, sigma=1e-4)
+    assert np.isclose(raw, ker, atol=1e-4)
+
+
+def test_maxab_takes_better_template():
+    rng = np.random.default_rng(2)
+    val = rng.random(12)
+    rank_a = rng.random(12)              # unrelated to val
+    rank_b = val + rng.normal(0, 0.01, 12)  # strongly related
+    pts = rng.random((12, 2)); sup = np.ones(12)
+    mab = polarity_free_maxab(rank_a, rank_b, val, mode="raw",
+                              source_pts=pts, support=sup, sigma=0.3)
+    assert mab > 0.9   # picks template B
+
+
+def test_maxab_sign_free_reverse_passes():
+    """Sign-free: a perfectly reversed rank is a true positive (|corr|=1)."""
+    rng = np.random.default_rng(3)
+    val = rng.random(12); rank_a = -val   # reversed
+    pts = rng.random((12, 2)); sup = np.ones(12)
+    mab = polarity_free_maxab(rank_a, None, val, mode="raw",
+                              source_pts=pts, support=sup, sigma=0.3)
+    assert np.isclose(mab, 1.0, atol=1e-6)
