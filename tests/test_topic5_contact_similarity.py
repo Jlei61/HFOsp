@@ -141,6 +141,53 @@ def test_abs_mirror_max_then_abs_not_abs_then_max():
         "test would not catch a regression")
 
 
+# ---------------------------------------------------------------------------
+# Task 3: per-seizure → median-over-seizures null fold (pluggable statistic)
+# ---------------------------------------------------------------------------
+
+def test_fold_matches_p95_med():
+    # draws[sz] = [B], obs[sz]; replicate np.nanmedian(draws, axis=0) then pct95
+    from src.topic5_contact_similarity import fold_subject
+    rng = np.random.default_rng(4)
+    obs = [0.6, 0.7, 0.5]
+    null = [list(rng.random(50)) for _ in range(3)]
+    out = fold_subject(obs, null)
+    expect_dist = np.nanmedian(np.asarray(null, float), axis=0)
+    assert np.isclose(out["obs_subject"], np.median(obs))
+    assert np.isclose(out["null_q"]["p95"], np.nanpercentile(expect_dist, 95))
+    assert out["passed"] == bool(np.median(obs) > np.nanpercentile(expect_dist, 95))
+
+
+def test_subject_null_recomputes_maxab_each_draw():
+    """The null statistic must be the MAX-selected statistic, so a 2-template
+    stat_fn yields a higher null upper tail than a single-template stat_fn."""
+    from src.topic5_contact_similarity import subject_null
+    rng = np.random.default_rng(5)
+    names = [f"A{i}" for i in range(1, 7)] + [f"B{i}" for i in range(1, 7)]
+    vals = {0: rng.random(12)}
+    def stat_max(v):   # closure that internally takes max over 2 templates
+        return max(abs(np.corrcoef(v, rng.random(12))[0, 1]),
+                   abs(np.corrcoef(v, rng.random(12))[0, 1]))
+    def stat_one(v):
+        return abs(np.corrcoef(v, rng.random(12))[0, 1])
+    r_max = subject_null(stat_max, vals, names, shuffle="channel", B=200, seed=1)
+    r_one = subject_null(stat_one, vals, names, shuffle="channel", B=200, seed=1)
+    assert r_max["null_q"]["p95"] >= r_one["null_q"]["p95"]
+
+
+def test_within_shaft_never_crosses_shaft():
+    from src.topic5_axis_alignment import within_shaft_shuffle
+    from src.propagation_skeleton_geometry import parse_shaft
+    rng = np.random.default_rng(6)
+    names = ["A1", "A2", "A3", "B1", "B2", "B3"]
+    vals = np.arange(6.0)
+    out = within_shaft_shuffle(vals, names, rng)
+    # multiset within each shaft preserved
+    for sh in ("A", "B"):
+        idx = [i for i, n in enumerate(names) if parse_shaft(n)[0] == sh]
+        assert sorted(out[idx]) == sorted(vals[idx])
+
+
 def test_kernel_mirror_flips_eval_y_not_x():
     """I2: white-box pin — mirror=True negates eval-pt y, not x, not both.
 

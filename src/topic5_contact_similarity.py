@@ -3,6 +3,9 @@ grid-free counterparts of the field maxAB. See
 docs/superpowers/specs/2026-06-30-topic5-contact-similarity-ladder-design.md."""
 import numpy as np
 from scipy.stats import pearsonr
+from src.topic5_axis_alignment import (
+    within_shaft_shuffle, channel_shuffle, anchor_matched_shuffle, effective_shuffle_n,
+)
 
 
 def kernel_smooth_at_contacts(values, source_pts, eval_pts, support, sigma):
@@ -101,3 +104,74 @@ def polarity_free_maxab(rank_a, rank_b, value, *, mode, source_pts, support, sig
                       support=support, sigma=sigma)
     vals = [v for v in (r_a, r_b) if np.isfinite(v)]
     return float(max(vals)) if vals else np.nan
+
+
+# ---------------------------------------------------------------------------
+# Task 3: per-seizure → median-over-seizures null fold (pluggable statistic)
+# ---------------------------------------------------------------------------
+
+# Maps shuffle name → lambda(v, names, anchor, rng) with correct arg shape per shuffle type
+_SHUFFLE = {
+    "within_shaft":  lambda v, names, anchor, rng: within_shaft_shuffle(v, names, rng),
+    "channel":       lambda v, names, anchor, rng: channel_shuffle(v, rng),
+    "anchor_matched": lambda v, names, anchor, rng: anchor_matched_shuffle(v, anchor, rng),
+}
+
+# Maps subject_null shuffle name → effective_shuffle_n kind string
+_SHUFFLE_KIND = {
+    "within_shaft": "within_shaft",
+    "channel": "channel",
+    "anchor_matched": "anchor",
+}
+
+MIN_EFFECTIVE_SHUFFLE_N = 4
+
+
+def fold_subject(per_sz_obs, per_sz_null):
+    """Fold per-seizure observations and null draws into a subject-level result.
+
+    obs_subject = median over seizures of the per-seizure stat.
+    null distribution = per-draw median over seizures (replicates _p95_med in runner).
+    null_q: p5/p50/p95/p99 of that B-length distribution.
+    passed = obs_subject > null_q["p95"].
+    """
+    obs = np.asarray(per_sz_obs, float)
+    obs_subject = float(np.nanmedian(obs))
+    dist = np.nanmedian(np.asarray(per_sz_null, float), axis=0)   # [B] median-over-seizures
+    q = {f"p{p}": float(np.nanpercentile(dist, p)) for p in (5, 50, 95, 99)}
+    return {"obs_subject": obs_subject, "null_q": q,
+            "passed": bool(obs_subject > q["p95"])}
+
+
+def subject_null(stat_fn, sz_value_vectors, names, *, shuffle, B, seed, anchor_by_sz=None):
+    """Per-seizure × B null loop with median fold.
+
+    stat_fn: callable(values: ndarray) -> float — recomputes the similarity stat per draw.
+    sz_value_vectors: dict {seizure_idx: ndarray of contact values}.
+    names: channel name list aligned to values.
+    shuffle: one of "channel", "within_shaft", "anchor_matched".
+    B: number of null draws.
+    seed: integer seed for reproducibility.
+    anchor_by_sz: optional dict {seizure_idx: anchor array} for anchor_matched shuffle.
+    """
+    rng = np.random.default_rng(seed)
+    shuf = _SHUFFLE[shuffle]
+    per_sz_obs, per_sz_null = [], []
+    for idx, vals in sz_value_vectors.items():
+        anchor = None if anchor_by_sz is None else anchor_by_sz.get(idx)
+        r = stat_fn(vals)
+        if not np.isfinite(r):
+            continue
+        per_sz_obs.append(r)
+        per_sz_null.append([stat_fn(shuf(vals, names, anchor, rng)) for _ in range(B)])
+    if not per_sz_obs:
+        return {"status": "no_resolvable_seizure"}
+    # Use first seizure's anchor for effective_shuffle_n (symmetric across seizures)
+    first_anchor = None if anchor_by_sz is None else anchor_by_sz.get(
+        next(iter(sz_value_vectors), None))
+    eff = effective_shuffle_n(names, first_anchor, _SHUFFLE_KIND[shuffle])
+    out = fold_subject(per_sz_obs, per_sz_null)
+    out["effective_shuffle_n"] = eff
+    out["n_seizures"] = len(per_sz_obs)
+    out["status"] = "INSUFFICIENT_NULL" if eff < MIN_EFFECTIVE_SHUFFLE_N else "ok"
+    return out
