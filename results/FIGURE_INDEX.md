@@ -126,6 +126,7 @@
 | [topic5_ictal_template_echo/figures/](topic5_ictal_template_echo/figures/) | Stage 1 ictal-template-echo（anchor vs path） |
 | [topic5_dynamic_echo/sentinel/figures/](topic5_dynamic_echo/sentinel/figures/) | Stage 2b 动态回响哨兵 |
 | [topic5_ictal_recruitment/axis_alignment/figures/](topic5_ictal_recruitment/axis_alignment/figures/) | A 线 axis alignment 可视化 |
+| [topic5_ictal_recruitment/contact_similarity/figures/](topic5_ictal_recruitment/contact_similarity/figures/) | 触点相似性几何阶梯 (R1 无几何 / R2 同平面触点核 / R3 场)：判定间期↔发作相似性来自几何平滑还是网格 (sensitivity)；含 hfa 敏感性 |
 | [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
 | [topic1_topic5_bridge/figures/](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 桥接（q1 / q1prime 系列） |
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
