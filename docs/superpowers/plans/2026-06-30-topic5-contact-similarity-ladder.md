@@ -28,48 +28,34 @@ Copied verbatim from `docs/superpowers/specs/2026-06-30-topic5-contact-similarit
 
 ---
 
-### Task 0: Worktree environment + clean baseline
+### Task 0: Verify input-data access (worktree reads inputs from main tree)
 
-**Files:**
-- Create (symlink): `results` → main-tree results
-- No code change.
+**Files:** No code change.
 
-**Context:** This worktree is checked out from `origin/main`; `results/` is gitignored so the t0 feature cache, axis records (`*_t_a.json`/`*_t_b.json`), and the existing maxAB artifact exist ONLY in the main working tree. The implementation reads those, and outputs must land in the canonical results tree.
+**Context:** This worktree is checked out from `origin/main`; `results/` exists as a **real directory** but the **gitignored INPUTS** — t0 feature cache, axis records (`*_t_a.json`/`*_t_b.json`), the existing maxAB artifact — live ONLY in the main working tree at `/home/honglab/leijiaxin/HFOsp/results`. Do **NOT** symlink the whole `results/` (`[ -e results ]` is already true, so a guarded symlink is a silent no-op and inputs stay missing). The runner (Task 5) reads inputs via `--input-results-root` (default `results`; pass the main-tree path in this worktree) and writes outputs into the worktree `results/` (gitignored locally).
 
-- [ ] **Step 1: Symlink the shared (gitignored) results tree into the worktree**
+- [ ] **Step 1: Confirm the main-tree input paths resolve**
 
 ```bash
-cd /home/honglab/leijiaxin/HFOsp/.claude/worktrees/topic5-contact-similarity
-[ -e results ] || ln -s /home/honglab/leijiaxin/HFOsp/results results
-ls results/topic5_ictal_recruitment/t0_feature_cache/ | head -3
-ls results/topic5_ictal_recruitment/axis_alignment/axis_alignment_broadband_max_ab_B1000.json
+ROOT=/home/honglab/leijiaxin/HFOsp/results
+ls "$ROOT/topic5_ictal_recruitment/t0_feature_cache/" | head -2
+ls "$ROOT/topic5_ictal_recruitment/axis_alignment/axis_alignment_broadband_max_ab_B1000.json"
+ls "$ROOT/spatial_modulation/propagation_geometry/observation_readout/real_subjects/" | grep _t_a | head -2
 ```
-Expected: cache `.npz` files listed; the maxAB artifact path resolves.
+Expected: cache `.npz`, the maxAB json, and `*_t_a.json` records all listed.
 
-- [ ] **Step 2: Confirm the axis records (t_a/t_b) location used by the A-line runner**
-
-```bash
-python -c "from scripts.run_topic5_axis_alignment import AXIS_DIR, CACHE_DIR; print('AXIS_DIR', AXIS_DIR); print('CACHE_DIR', CACHE_DIR)"
-ls $(python -c "from scripts.run_topic5_axis_alignment import AXIS_DIR; print(AXIS_DIR)") | grep _t_a | head -3
-```
-Expected: prints the dirs; lists `*_t_a.json` records.
-
-- [ ] **Step 3: Baseline test run (existing topic5 axis-alignment tests must pass)**
+- [ ] **Step 2: Baseline tests (src is tracked/shared, importable in the worktree)**
 
 ```bash
 python -m pytest tests/ -k "axis_alignment or contact_plane or skeleton_geometry" -q
 ```
 Expected: PASS (or report pre-existing failures and ask before proceeding).
 
-- [ ] **Step 4: Commit the symlink ignore (only if `results` symlink shows in status)**
+- [ ] **Step 3: Record the worktree invocation convention**
 
-```bash
-git status --short
-# results symlink should be gitignored (results/ is ignored). If it appears, add to .git/info/exclude:
-grep -qx "/results" .git/info/exclude 2>/dev/null || echo "/results" >> .git/info/exclude
-git status --short   # expect clean
-```
-Expected: clean working tree (symlink not tracked).
+Every `run_topic5_contact_similarity.py` call in this worktree passes
+`--input-results-root /home/honglab/leijiaxin/HFOsp/results`
+(the default `results` is correct only in a normal main-tree checkout). No commit (no file change).
 
 ---
 
@@ -109,9 +95,12 @@ def test_kernel_matches_smooth_field_on_grid():
     pts, vals, sup = _toy_pts()
     sigma = 0.3
     X, Y = make_plane_grid()
-    grid_pts = np.column_stack([X.ravel(), Y.ravel()])
-    field = smooth_field(pts, vals, sup, X, Y, sigma_xy=sigma)   # read smooth_field sig; adapt call
-    T = field["T"] if isinstance(field, dict) else field
+    grid_pts = np.column_stack([X.ravel(), Y.ravel()])   # (N,2): column_stack of two 1D arrays is correct
+    record = {"channels": [{"x_norm": float(p[0]), "y_norm": float(p[1]),
+                            "support": float(s), "typical_rank": float(v)}
+                           for p, s, v in zip(pts, sup, vals)]}
+    field = smooth_field(record, X, Y, sigma_xy=sigma, s_thresh=0.0)  # real sig: record-first, returns {"T","S"}
+    T = field["T"]
     mine = kernel_smooth_at_contacts(vals, pts, grid_pts, sup, sigma).reshape(X.shape)
     m = np.isfinite(T) & np.isfinite(mine)
     assert m.sum() > 100
@@ -195,7 +184,7 @@ git commit -m "feat(topic5): grid-free contact kernel equal to smooth_field"
   - `contact_corr(rank, value, *, mode, source_pts, support, sigma, mirror=False) -> float` (single-template signed Pearson; `mode in {"raw","kernel"}`).
   - `polarity_free_maxab(rank_a, rank_b, value, *, mode, source_pts, support, sigma) -> float` (= `max(|abs_mirror_corr_A|, |abs_mirror_corr_B|)`, replicating `_abs_corr`+`window_maxab`).
 
-**Replication contract (read `src/topic5_axis_alignment.py:41` `_abs_corr`, `src/propagation_contact_plane_readout.py:285` `corr_pair_mirror_invariant`, `scripts/run_topic5_axis_alignment.py:117-127` `window_maxab`):** per template `t`, `r_t = abs(max(c_identity, c_mirror))` for kernel mode (mirror = activation field evaluated at y-flipped eval points; rank field stays identity), `r_t = abs(pearson(rank, value))` for raw mode. `maxAB = max(r_A, r_B)`; if `t_b` absent, `maxAB = r_A`.
+**Replication contract (read `scripts/run_topic5_axis_alignment.py:59` `_abs_corr` (script-level, replicate locally), `src/propagation_contact_plane_readout.py:285` `corr_pair_mirror_invariant`, `scripts/run_topic5_axis_alignment.py:117-127` `window_maxab`):** per template `t`, `r_t = abs(max(c_identity, c_mirror))` for kernel mode (mirror = activation field evaluated at y-flipped eval points; rank field stays identity), `r_t = abs(pearson(rank, value))` for raw mode. `maxAB = max(r_A, r_B)`; if `t_b` absent, `maxAB = r_A`.
 
 - [ ] **Step 1: Write failing tests**
 
@@ -522,12 +511,12 @@ git commit -m "feat(topic5): sequence-sanity spearman/kendall track"
 - Consumes: all of `src.topic5_contact_similarity`; plus `make_field_record`, `matched_channels` (`src/topic5_axis_alignment.py`), `make_plane_grid`, `R_smooth_rank` (`src/propagation_contact_plane_readout.py`), and the IO pattern of `scripts/run_topic5_axis_alignment.py:_subject` (lines 72-190 — meta/cache load, eligible_idxs loop, `bact__idx` anchor).
 - Produces: per-subject JSON + `cohort_summary.{json,csv}` under `results/topic5_ictal_recruitment/contact_similarity/`.
 
-**Per-subject context (build once, reuse for all rungs):** load `{ds_sid}_t_a.json` (+ t_b), `matched = matched_channels(...)` (require ≥6); build plane: `source_pts` = `np.column_stack([c["x_norm"], c["y_norm"]] for c in matched)`, `support` = `[c["support"] for c in matched]` (read field record keys), `sigma` = `R_smooth_rank(make_field_record(matched, rank_a), X, Y, None, S_THRESH)["sigma_xy"]` (frozen on t_a, reused everywhere — matches `run_topic5_axis_alignment.py:101`). Load per-seizure `bb_auc__{idx}` vectors (≥6 finite) and `bact__{idx}` anchors for `idx in meta["eligible_idxs"]`.
+**Per-subject context (build once, reuse for all rungs):** input dirs derive from `--input-results-root` (default `results`): `CACHE_DIR=<root>/topic5_ictal_recruitment/t0_feature_cache`, `AXIS_DIR=<root>/spatial_modulation/propagation_geometry/observation_readout/real_subjects`, `MAXAB_REF=<root>/topic5_ictal_recruitment/axis_alignment` (literal relative paths from `run_topic5_axis_alignment.py:53-54`). Load `{ds_sid}_t_a.json` (+ t_b), `matched = matched_channels(...)` (require ≥6); build plane: `source_pts = np.array([[c["x_norm"], c["y_norm"]] for c in matched], float)` (shape **(n,2)** — NOT `column_stack`, which gives (2,n)), `support = np.array([c["support"] for c in matched], float)`, `sigma = R_smooth_rank(make_field_record(matched, rank_a), X, Y, None, S_THRESH)["sigma_xy"]` (frozen on t_a, reused everywhere — matches `run_topic5_axis_alignment.py:101`). Load per-seizure `bb_auc__{idx}` vectors (≥6 finite) and `bact__{idx}` anchors for `idx in meta["eligible_idxs"]`.
 
 **Three per-seizure statistics (closures over context):**
 - `R1(vals) = polarity_free_maxab(rank_a, rank_b, vals, mode="raw", source_pts, support, sigma)`
 - `R2(vals) = polarity_free_maxab(..., mode="kernel", ..., sigma=sigma)`
-- `R3(vals)` = field maxAB: replicate `window_maxab` exactly — `R_smooth_rank(make_field_record(matched, vals), X, Y, sigma, S_THRESH)` then `_abs_corr` vs `F_inter_a`/`F_inter_b`, max. **Import/reuse `_abs_corr` and the field builders so R3 is byte-faithful to the A-line.**
+- `R3(vals)` = field maxAB: replicate `window_maxab` exactly — `R_smooth_rank(make_field_record(matched, vals), X, Y, sigma, S_THRESH)` then `_abs_corr` vs `F_inter_a`/`F_inter_b`, max. **`_abs_corr` is replicated locally in the runner (it is script-level in `run_topic5_axis_alignment.py:59`, NOT importable); field builders reused from src. R3 must be byte-faithful to the A-line — the Task 7 cross-check enforces this (existing runner uses the same `RNG_SEED=20260614`, so R3 should reproduce the published maxAB closely).**
 
 **σ-sweep:** R2 also at `sigma*0.5`, `sigma*2`.
 
@@ -576,8 +565,15 @@ Mirror `scripts/run_topic5_axis_alignment.py` for arg parsing, `AXIS_DIR`/`CACHE
 import json, numpy as np
 from pathlib import Path
 from src.topic5_contact_similarity import polarity_free_maxab, sequence_maxab, subject_null
-from src.topic5_axis_alignment import make_field_record, matched_channels, _abs_corr
-from src.propagation_contact_plane_readout import make_plane_grid, R_smooth_rank, S_THRESH
+from src.topic5_axis_alignment import make_field_record, matched_channels
+from src.propagation_contact_plane_readout import (
+    make_plane_grid, R_smooth_rank, corr_pair_mirror_invariant, S_THRESH, OVERLAP_MIN,
+)
+
+
+def _abs_corr(Fi, Fj):   # local copy: run_topic5_axis_alignment._abs_corr is script-level, NOT importable
+    r = corr_pair_mirror_invariant(Fi["T"], Fi["S"], Fj["T"], Fj["S"], S_THRESH, OVERLAP_MIN)["corr"]
+    return abs(r) if r is not None and np.isfinite(r) else np.nan
 
 SESOI = 0.05
 SIGMA_SWEEP = (0.5, 1.0, 2.0)
@@ -592,7 +588,7 @@ def _ctx(ds_sid, activation):
     # X, Y = make_plane_grid()
     # F_inter_a = R_smooth_rank(make_field_record(matched, rank_a), X, Y, None, S_THRESH)
     # sigma = F_inter_a["sigma_xy"]; F_inter_b = (R_smooth_rank(..., sigma, ...) if t_b else None)
-    # source_pts = np.column_stack([[c["x_norm"], c["y_norm"]] for c in matched])
+    # source_pts = np.array([[c["x_norm"], c["y_norm"]] for c in matched], float)   # (n,2), NOT column_stack
     # support = np.array([c["support"] for c in matched], float)
     # sz_vals = {idx: cache[f"{activation}__{idx}"][m_in_cache] (>=6 finite)}
     # anchor = {idx: cache[f"bact__{idx}"][m_in_cache]} when present
@@ -664,7 +660,7 @@ Expected: PASS (finite obs for all rungs).
 
 - [ ] **Step 5: Implement `main()` + cohort summary + R3 cross-check**
 
-`main()` iterates the eligible cohort (same discovery as `run_topic5_axis_alignment.main`), writes `per_subject/{ds_sid}.json`, and a `cohort_summary.{json,csv}` with: per-subject pass flags (R1/R2/R3 within_shaft), `grid_delta`/`smooth_delta`, and cohort rows. Add the cohort equivalence read-out:
+`main()` adds args `--input-results-root` (default `results`; rebases `CACHE_DIR`/`AXIS_DIR`/`MAXAB_REF`), `--out-dir` (default `results/topic5_ictal_recruitment/contact_similarity`), `--activation`, `--B 1000`, `--seed 20260614`. It iterates the eligible cohort (same discovery as `run_topic5_axis_alignment.main`), writes `per_subject/{ds_sid}.json` and `cohort_summary.{json,csv}` with: per-subject pass flags (R1/R2/R3 within_shaft), `grid_delta`/`smooth_delta`, cohort rows. Add the cohort equivalence read-out:
 
 ```python
 deltas = np.array([s["grid_delta"] for s in subjects if s["status"] == "ok"])
@@ -772,7 +768,7 @@ git commit -m "feat(topic5): contact-similarity ladder cohort results + figure i
 - §8 results dir + 3 panels + README → Tasks 5/6. ✓
 - §9 conclusion language → enforced in README/summary text (Task 6/7), not code.
 
-**2. Placeholder scan:** `_ctx` body is described as a structured comment pointing at exact `run_topic5_axis_alignment.py` line ranges to replicate (loaders are existing, faithful-copy required) — this is reuse-direction, not an undefined reference; the function's outputs are fully enumerated. R3's `S_THRESH`/`make_field_record`/`_abs_corr` are existing. No "TODO/TBD".
+**2. Placeholder scan:** `_ctx` body is a structured comment pointing at exact `run_topic5_axis_alignment.py` line ranges to replicate (loaders existing, faithful-copy required) — reuse-direction, not an undefined reference; outputs fully enumerated. `S_THRESH`/`OVERLAP_MIN`/`make_field_record`/`corr_pair_mirror_invariant` imported from src; `_abs_corr` replicated locally (script-level, not importable). No "TODO/TBD".
 
 **3. Type consistency:** `polarity_free_maxab(rank_a, rank_b, value, *, mode, source_pts, support, sigma)` used identically in Tasks 2 and 5. `subject_null(stat_fn, sz_value_vectors, names, *, shuffle, B, seed, anchor_by_sz)` consistent Tasks 3/5. `fold_subject` keys (`obs_subject`,`null_q`,`passed`) consistent. ✓
 
