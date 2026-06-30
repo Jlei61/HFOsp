@@ -29,3 +29,9 @@ PR-6 supp §9 swap × clinical SOZ set-relationship figures（typology + overlap
 **关注点**：S⊊E 优势是否保持（masked typology 仍多 partial / S⊊E），enrichment_over_lagPat
 strict ∩ informative n=5 sign p masked ≈ 0.66（仍 NULL）；channel-selection circular
 caveat: lagPat 已对 SOZ 富集。
+
+### template_source_soz_overlap_top3.{png,pdf}
+逐 subject 检查两个 stable_k=2 template 的 source 端 top-3 通道是否落在 clinical SOZ 内。
+左图是每个 subject 的 T_a/T_b source1-3 SOZ 命中矩阵，右图是两个 template 的 source-SOZ
+比例散点；exact channel list 写在同级 `../template_source_soz_overlap_top2_top3.csv`。
+**关注点**：这是 source 端和 clinical SOZ 的重叠描述，不是全脑定位性能；lagPat 通道宇宙本身已偏向 SOZ，必须按 within-lagPat caveat 解释。
