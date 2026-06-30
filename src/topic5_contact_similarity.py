@@ -96,7 +96,7 @@ def polarity_free_maxab(rank_a, rank_b, value, *, mode, source_pts, support, sig
     r_a = _abs_mirror(rank_a, value, mode=mode, source_pts=source_pts,
                       support=support, sigma=sigma)
     if rank_b is None:
-        return r_a
+        return float(r_a)
     r_b = _abs_mirror(rank_b, value, mode=mode, source_pts=source_pts,
                       support=support, sigma=sigma)
     vals = [v for v in (r_a, r_b) if np.isfinite(v)]
