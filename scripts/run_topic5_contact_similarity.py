@@ -322,10 +322,13 @@ def main():
     }
     if ok:
         deltas = np.array([s["grid_delta"] for s in ok if np.isfinite(s["grid_delta"])], float)
-        smooth = np.array([s["smooth_delta"] for s in ok], float)
-        summary["smooth_delta_median"] = float(np.median(smooth))
-        slo, shi = _bootstrap_median_ci(smooth, args.seed)
-        summary["smooth_delta_ci"] = [slo, shi]
+        smooth = np.array([s["smooth_delta"] for s in ok if np.isfinite(s["smooth_delta"])], float)
+        if smooth.size > 0:
+            summary["smooth_delta_median"] = float(np.median(smooth))
+            slo, shi = _bootstrap_median_ci(smooth, args.seed)
+            summary["smooth_delta_ci"] = [slo, shi]
+        else:
+            summary["smooth_delta_ci"] = None
         if deltas.size > 0:
             summary["grid_delta_median"] = float(np.median(deltas))
             glo, ghi = _bootstrap_median_ci(deltas, args.seed)
@@ -350,7 +353,10 @@ def main():
                   f"negligible(|.|<{SESOI})={summary['grid_negligible']}")
         else:
             print("  grid_delta: all subjects filtered (non-finite grid_delta)")
-        print(f"  smooth_delta median={summary['smooth_delta_median']:+.4f}")
+        if summary.get("smooth_delta_ci") is not None:
+            print(f"  smooth_delta median={summary['smooth_delta_median']:+.4f}")
+        else:
+            print("  smooth_delta: all subjects filtered (non-finite smooth_delta)")
         print(f"  pass within_shaft: R1={summary['n_pass_R1_within_shaft']} "
               f"R2={summary['n_pass_R2_within_shaft']} R3={summary['n_pass_R3_within_shaft']} /{len(ok)}")
     if cc["status"] == "ok":

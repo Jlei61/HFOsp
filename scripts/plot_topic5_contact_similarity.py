@@ -6,7 +6,7 @@ Writes results/topic5_ictal_recruitment/contact_similarity/figures/*.png
 Four independent panels (CLAUDE.md §7 — one question per panel):
   A  per-subject grouped bars  R1/R2/R3 obs  + per-rung null p95 tick
      Q: do all three similarity rungs agree per subject?
-  B  geometry-ladder slopegraph  one line / subject across {R1, R2, R3}
+  B  per-subject delta bars — smooth_delta (R1→R2, same-plane smoothing) + grid_delta (R2→R3, grid)
      Q: how much does in-plane Gaussian smoothing (R1→R2) vs grid
         interpolation (R2→R3) each contribute?
   C  σ-sweep  R2 obs vs bandwidth multiplier {0.5×, 1×, 2×}
@@ -275,7 +275,7 @@ def make_figure(summary_path: Path, out_dir: Path, activation: str = "broadband"
 
     fig.suptitle(
         f"Contact-similarity ladder · {act_label} · n={n_ok} subjects\n"
-        "Within-shaft null (B=permutation draws); horizontal tick = null p95",
+        "Within-shaft null (B=permutation draws); Panel A horizontal tick = null p95",
         fontsize=10, y=0.97
     )
 
