@@ -168,10 +168,10 @@ R3（`run_topic5_axis_alignment.py`）是**先逐 seizure 算、再被试内取 
 - `src/topic5_contact_similarity.py`（核心新原件，单一职责：触点层相似性 + 同平面/3D 触点核 + null）
   - `median_nn_spacing` 复用现有（R2 主版直接取 R3 σ，不需重算；3D 版仅 R2b 用，按需加 `_median_nn_spacing_3d`）
   - `kernel_smooth_at_contacts(values, source_pts, eval_pts, support, sigma)` — 仿 `smooth_field`（`src/propagation_contact_plane_readout.py:230`）的核数学；**显式区分源点/评估点**（mirror 通过传入 y-翻转的 `eval_pts` 实现，源点不动，见 §3.1）；恒等档 `eval_pts=source_pts=触点`（含自权重）；返回每评估点平滑值
-  - `contact_similarity(rank, value, *, mode)` — `mode='raw'`（R1，unweighted Pearson）/ `mode='kernel'`（R2，同平面触点核后 Pearson）；统一返回带符号 corr
+  - `contact_corr(rank, value, *, mode, source_pts, support, sigma, mirror=False)` — `mode='raw'`（R1，unweighted Pearson）/ `mode='kernel'`（R2，同平面触点核后 Pearson）；统一返回带符号 corr（实现名；规划稿旧名 `contact_similarity` 已废止）
   - `polarity_free_maxab(rank_a, rank_b, value, *, mode, ...)` — 对 A/B 各算取 `max(|·|)`；`mode='kernel'` 复刻 R3 的 y-mirror（对 field-2 翻转**评估点** y 重算后取 max，源点不动，见 §3.1），`mode='raw'` 无 mirror
-  - `within_shaft_null(...)` — **逐 seizure × B 打乱、每 draw 重算 maxAB、按 §5.0 median-over-seizures 折叠**（与 R1/R2/R3 共用折叠 helper），返回完整 null 分位（p5/p50/p95/p99）+ 观测分位 + `effective_shuffle_n`；`anchor_matched` 档 anchor 取 `bact__idx`
-  - `sequence_similarity(rank, value)` — Spearman + Kendall（sequence-sanity track）；可复用 `_spearman_on_intersection`（`src/ictal_er_rank.py:596`）的名键交集模式
+  - `subject_null(stat_fn, sz_value_vectors, names, *, shuffle, B, seed, anchor_by_sz=None)` — **逐 seizure × B 打乱、每 draw 重算 maxAB、按 §5.0 median-over-seizures 折叠**（与 R1/R2/R3 共用折叠 helper），返回完整 null 分位（p5/p50/p95/p99）+ 观测分位 + `effective_shuffle_n`；`anchor_matched` 档 anchor 取 `bact__idx`（实现名；规划稿旧名 `within_shaft_null` 已废止）
+  - `sequence_maxab(rank_a, rank_b, value, *, method)` — Spearman + Kendall（sequence-sanity track）；可复用 `_spearman_on_intersection`（`src/ictal_er_rank.py:596`）的名键交集模式（实现名；规划稿旧名 `sequence_similarity` 已废止）
 - `scripts/run_topic5_contact_similarity.py` — 遍历队列：载 `t_a/t_b` + `bb_auc`（+`hfa_auc`）；算 R1/R2/R2b(opt)/R3(只读)/σ 扫描/sequence-sanity；写 per-subject JSON + `cohort_summary.{json,csv}`
 - `scripts/plot_topic5_contact_similarity.py` — 三面板（§8.3）+ 中文 `figures/README.md`
 - `tests/test_topic5_contact_similarity.py` — TDD（§10）
@@ -246,7 +246,7 @@ R3（`run_topic5_axis_alignment.py`）是**先逐 seizure 算、再被试内取 
 - 仅 R2b：`src/seeg_coord_loader.py`：`load_subject_coords` L416、`assert_coord_result_is_mm_for_main_analysis` L882
 
 **新建**
-- `src/topic5_contact_similarity.py`（§8.1）：`kernel_smooth_at_contacts`、`contact_similarity`、`polarity_free_maxab`、`within_shaft_null`、`sequence_similarity`（+ R2b 用 `_median_nn_spacing_3d` 与 3D 距离矩阵 `cdist`，按需）
+- `src/topic5_contact_similarity.py`（§8.1）：`kernel_smooth_at_contacts`、`contact_corr`、`polarity_free_maxab`、`subject_null`、`sequence_maxab`（+ R2b 用 `_median_nn_spacing_3d` 与 3D 距离矩阵 `cdist`，按需）（注：实现代码函数名为权威；规划稿旧名 `contact_similarity` / `within_shaft_null` / `sequence_similarity` 已废止）
 - `scripts/run_topic5_contact_similarity.py`、`scripts/plot_topic5_contact_similarity.py`、`tests/test_topic5_contact_similarity.py`
 
 ### 评审契约记录（2026-06-30 一轮 review，核实后采纳）

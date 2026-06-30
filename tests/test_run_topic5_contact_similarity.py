@@ -31,6 +31,24 @@ def test_run_subject_smoke():
     assert np.isfinite(res["grid_delta"]) and np.isfinite(res["smooth_delta"])
 
 
+def test_negligible_within_band():
+    """CI strictly inside ±SESOI → grid_negligible True."""
+    from scripts.run_topic5_contact_similarity import _negligible
+    assert _negligible(-0.04, 0.04, 0.05) is True
+
+
+def test_negligible_outside_band_hi():
+    """Upper CI edge outside SESOI → grid_negligible False."""
+    from scripts.run_topic5_contact_similarity import _negligible
+    assert _negligible(-0.04, 0.06, 0.05) is False
+
+
+def test_negligible_outside_band_lo():
+    """Lower CI edge outside SESOI → grid_negligible False."""
+    from scripts.run_topic5_contact_similarity import _negligible
+    assert _negligible(-0.06, 0.04, 0.05) is False
+
+
 def test_negative_control_scrambled_activation_fails():
     """Bad-data regression: spatially scrambled ictal activation must NOT pass any
     rung's within-shaft null. Sign-free, so a *reversed* rank would still pass — the

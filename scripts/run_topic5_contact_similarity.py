@@ -251,9 +251,15 @@ def _r3_cross_check(subjects, maxab_ref, activation, *, atol=0.03):
             "per_subject": rows}
 
 
+def _negligible(lo, hi, sesoi):
+    """True iff bootstrap CI is strictly within ±sesoi (TOST-style equivalence)."""
+    return bool(lo > -sesoi and hi < sesoi)
+
+
 def _pass(rung):
-    p = rung.get("within_shaft", {}).get("passed") if "within_shaft" in rung else None
-    return p
+    """True only when within_shaft.status=='ok' AND passed is True (M1: no silent INSUFFICIENT_NULL pass)."""
+    ws = rung.get("within_shaft", {})
+    return bool(ws.get("status") == "ok" and ws.get("passed"))
 
 
 def _write_cohort_csv(path, subjects):
@@ -334,18 +340,18 @@ def main():
             glo, ghi = _bootstrap_median_ci(deltas, args.seed)
             summary["grid_delta_ci"] = [glo, ghi]
             # TOST-style equivalence: is the grid contribution negligible (|median| within SESOI)?
-            summary["grid_negligible"] = bool(glo > -SESOI and ghi < SESOI)
+            summary["grid_negligible"] = _negligible(glo, ghi, SESOI)
         else:
             summary["grid_delta_ci"] = None
             summary["grid_negligible"] = None
     summary["r3_cross_check"] = _r3_cross_check(subjects, maxab_ref, args.activation)
     summary["per_subject"] = subjects
 
-    json.dump(summary, open(out_dir / "cohort_summary.json", "w"), indent=2, ensure_ascii=False)
-    _write_cohort_csv(out_dir / "cohort_summary.csv", subjects)
+    json.dump(summary, open(out_dir / f"cohort_summary_{args.activation}.json", "w"), indent=2, ensure_ascii=False)
+    _write_cohort_csv(out_dir / f"cohort_summary_{args.activation}.csv", subjects)
 
     cc = summary["r3_cross_check"]
-    print(f"\nwrote {out_dir}/cohort_summary.{{json,csv}}  (n_ok={len(ok)})")
+    print(f"\nwrote {out_dir}/cohort_summary_{args.activation}.{{json,csv}}  (n_ok={len(ok)})")
     if ok:
         if summary.get("grid_delta_ci") is not None:
             print(f"  grid_delta median={summary['grid_delta_median']:+.4f} "
