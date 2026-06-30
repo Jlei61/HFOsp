@@ -180,6 +180,10 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 >   `project_topic4_m3a_v2_1_qigk_clamp_verdict`）同向收敛 = 载体图景本身不足**。Stage-3 `h_G` 闭环按 gate 设计 **SKIPPED**。
 >   **负结论 L-robust**（L=16 复跑 411 sim 一致：C1-A 100%、0 干净事件、0 候选）。结果图
 >   `results/paper-ready-figure/fig_m3a_v2_2_explore_summary/`（读 sweep 的统计汇总）+ `fig_m3a_v2_2_dynamics/`（四列动力学示意）。
+>   另有三个**单轨迹 visual-diagnostic GIF**（开环、非 sweep，直观看"为什么失败"，详见 archive §附 + `results/FIGURE_INDEX.md`）：
+>   `fig_m3a_v2_2_hG_runaway_transition/`（全局恢复 `h_G` 打开但减法式刹车拉不回 runaway）、
+>   `fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/`（`q_I` 载体 + 轴向 `g_K` 疲劳，E1146 真实电极几何）、
+>   `fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/`（刺激 vs 不刺激对照：中段触点 `V_th` clamp 把 runaway 推后 +834 ms，关刺激后才反弹——外部预防式压制示意，非治疗/recovery 主张）。
 >   **收口：NO-GO 继续调 `q_I/g_K`；下一杠杆 `D_EE`（relay depression）或衬底/事件协议重做**——瓶颈在衬底拓扑、不在恢复变量。
 >   `h_G` 载体（已实现、测齐、字节奇偶守）保留备用，拿到干净 partial-fill 候选前不开闭环大扫。
 

@@ -73,6 +73,33 @@ clamp 复查（[[project_topic4_m3a_v2_1_qigk_clamp_verdict]]）**同向收敛**
 
 **口径**：这是"**当前载体 + 当前协议不闭合**"，**不是**"慢变量机制总体失败"，更**不是**任何发作/恢复主张。
 
+### 附：h_G 全局恢复 runaway-transition 单轨迹 GIF（visual diagnostic，开环，非闭环大扫）
+
+为了直观回答"把全局抑制恢复标量 `h_G` 打开后，间期 axis-like→runaway 的转变长什么样"，做了一个
+**单轨迹** GIF（`results/paper-ready-figure/fig_m3a_v2_2_hG_runaway_transition/`），和 v2.1 的
+`fig_m3a_v2_1_qigk_runaway_transition` **同一条轨迹**（同 substrate/seed/多脉冲驱动/`q_I` 载体），唯一区别是
+`use_hG=True`。M50/B50/Pi50 由 `--probe`（eta_G=0 不反馈）测得的局部事件天花板 vs runaway 地板取**几何中点**
+（M:0.031/0.373→0.11，B:0.508/0.592→0.55，Pi:0.300/0.997→0.55），使 `χ_G≈2e-4` 穿过局部事件、`≈0.52` 进入 runaway。
+
+两件事：
+- **全局性传感器工作正常**：`h_G` 在 130/400/670 ms 的局部沿轴事件期间基本不升（`χ_G≈0`），只在 runaway
+  （onset 771 ms）后陡升到 0.94——它没误伤局部事件。
+- **但减法式全局刹车拉不回 runaway**：`eta_G` 开环阶梯（0,2,4,6,8,12,20,40,80）**结构性无效**——runaway onset
+  恒为 771 ms、末段 ~471 Hz、`h_G` 恒到 0.94，即便把 `eta_G·h_G` 加到 ~75 mV（reset 11→threshold 18 = 7 mV 跨度
+  的 >10 倍）也纹丝不动。`I^net_i -= η_G h_G`（仅-E）是个减法常量，减不动一个已经饱和的 recurrent-excitation 雪崩。
+  **印证主结论**：瓶颈在 recurrent E→E relay-to-completion 衬底，不在恢复变量。
+
+这是**开环、单轨迹的可视化诊断**（把 §B6 减法耦合作用在一条已知 runaway 上看效果），**不是**被 gate 拦下的
+**闭环** `h_G` partial-fill 大扫（后者仍 SKIPPED）；也**不**主张 recovery / 闭环成立。阶梯原始 9 行存
+`fig.../figures/eta_G_ladder.json`。
+
+另有一个 **q_I 载体 + 轴向 g_K 疲劳版（E1146 真实电极几何）** `results/paper-ready-figure/fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/`：
+同轨迹但顶部画**抑制资源 `q_I(t)`（mean+min）+ 轴向区域 `g_K` 疲劳**（legend 右上角）、`h_G` 关、去掉底注、左图 E→E 梯度画成**椭圆**。
+直观看 `q_I`（min=轴向走廊先耗竭）掉到地板 + `g_K` 累积→局部沿轴小事件铺成全场 runaway（757 ms）。同一脚本
+`--layout subject1146 --top qI --no-footer`。**机制岔路（重要）**：本图 `g_K` 膜耦合**关**（`eta_K=0`，只建起来可视化、不改轨迹）；
+若 `g_K` **真耦合**到 nominal（`eta_K=1`、`gK_max=1`），它在**小事件期**就把核压住、**直接阻止 runaway**（实测 max~24 Hz、`q_I` 几乎不耗竭、无 runaway）——
+这是 `g_K`=limit 成功限流（与 M2 "只压" 同向），是另一张图。注意这跟 eta_G 全局减法刹车不同：g_K 在**点火前**局部建起来才有效，**点火后**减法刹车仍拉不回。
+
 ## Go / No-Go（下一步）
 
 - **NO-GO**：继续在这套 `q_I/g_K` 载体 + sustained 协议上调参 / 扫 h_G 闭环——载体图景已被两条独立线（clamp 复查 + 本次 sustained 扫）判为不足。
