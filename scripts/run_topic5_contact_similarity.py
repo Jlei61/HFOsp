@@ -179,12 +179,21 @@ def run_subject(ds_sid, *, activation="broadband", B=1000, seed=RNG_SEED,
     for name, fn in stats.items():
         rung = {}
         for nm in ("within_shaft", "channel", "anchor_matched"):
-            if nm == "anchor_matched" and ctx["anchor"] is None:
-                rung[nm] = {"status": "no_anchor"}   # subject lacks per-channel baseline-activity
+            if nm == "anchor_matched":
+                if ctx["anchor"] is None:
+                    rung[nm] = {"status": "no_anchor"}
+                    continue
+                # mirror A-line: only draw nulls for seizures whose bact anchor is finite
+                sz_anchor = {idx: v for idx, v in ctx["sz_vals"].items()
+                             if idx in ctx["anchor"] and np.all(np.isfinite(ctx["anchor"][idx]))}
+                if not sz_anchor:
+                    rung[nm] = {"status": "no_anchor"}
+                    continue
+                rung[nm] = subject_null(fn, sz_anchor, ctx["names_m"], shuffle=nm,
+                                        B=B, seed=seed, anchor_by_sz=ctx["anchor"])
                 continue
             rung[nm] = subject_null(fn, ctx["sz_vals"], ctx["names_m"], shuffle=nm,
-                                    B=B, seed=seed,
-                                    anchor_by_sz=ctx["anchor"] if nm == "anchor_matched" else None)
+                                    B=B, seed=seed, anchor_by_sz=None)
         out[name] = rung
     # sigma sweep on R2 (same-plane smoothing scale sensitivity), within-shaft null
     out["R2_sigma_sweep"] = {}
@@ -203,7 +212,7 @@ def run_subject(ds_sid, *, activation="broadband", B=1000, seed=RNG_SEED,
         out["sequence"][method] = subject_null(seq, ctx["sz_vals"], ctx["names_m"],
                                                shuffle="within_shaft", B=B, seed=seed)
     # paired subject-level deltas (real obs, deterministic): where does the signal live?
-    g = lambda r: out[r]["within_shaft"]["obs_subject"]
+    g = lambda r: out[r]["within_shaft"].get("obs_subject", float("nan"))
     out["smooth_delta"] = float(g("R2") - g("R1"))   # same-plane smoothing contribution
     out["grid_delta"] = float(g("R3") - g("R2"))     # grid contribution
     return out
@@ -295,9 +304,10 @@ def main():
         json.dump(res, open(out_dir / "per_subject" / f"{ds_sid}.json", "w"),
                   indent=2, ensure_ascii=False)
         if res["status"] == "ok":
+            r3_obs = res['R3']['within_shaft'].get('obs_subject', float('nan'))
             print(f"  {ds_sid}: R1={_pass(res['R1'])} R2={_pass(res['R2'])} R3={_pass(res['R3'])} | "
                   f"smooth_d={res['smooth_delta']:+.3f} grid_d={res['grid_delta']:+.3f} "
-                  f"(R3_obs={res['R3']['within_shaft']['obs_subject']:.3f}) n_sz={res['n_seizures']}",
+                  f"(R3_obs={r3_obs:.3f}) n_sz={res['n_seizures']}",
                   flush=True)
         else:
             print(f"  {ds_sid}: {res['status']}", flush=True)
@@ -311,16 +321,20 @@ def main():
         "n_pass_R3_within_shaft": sum(bool(_pass(s["R3"])) for s in ok),
     }
     if ok:
-        grid = np.array([s["grid_delta"] for s in ok], float)
+        deltas = np.array([s["grid_delta"] for s in ok if np.isfinite(s["grid_delta"])], float)
         smooth = np.array([s["smooth_delta"] for s in ok], float)
-        summary["grid_delta_median"] = float(np.median(grid))
         summary["smooth_delta_median"] = float(np.median(smooth))
-        glo, ghi = _bootstrap_median_ci(grid, args.seed)
-        summary["grid_delta_ci"] = [glo, ghi]
-        # TOST-style equivalence: is the grid contribution negligible (|median| within SESOI)?
-        summary["grid_negligible"] = bool(glo > -SESOI and ghi < SESOI)
         slo, shi = _bootstrap_median_ci(smooth, args.seed)
         summary["smooth_delta_ci"] = [slo, shi]
+        if deltas.size > 0:
+            summary["grid_delta_median"] = float(np.median(deltas))
+            glo, ghi = _bootstrap_median_ci(deltas, args.seed)
+            summary["grid_delta_ci"] = [glo, ghi]
+            # TOST-style equivalence: is the grid contribution negligible (|median| within SESOI)?
+            summary["grid_negligible"] = bool(glo > -SESOI and ghi < SESOI)
+        else:
+            summary["grid_delta_ci"] = None
+            summary["grid_negligible"] = None
     summary["r3_cross_check"] = _r3_cross_check(subjects, maxab_ref, args.activation)
     summary["per_subject"] = subjects
 
@@ -330,9 +344,12 @@ def main():
     cc = summary["r3_cross_check"]
     print(f"\nwrote {out_dir}/cohort_summary.{{json,csv}}  (n_ok={len(ok)})")
     if ok:
-        print(f"  grid_delta median={summary['grid_delta_median']:+.4f} "
-              f"CI=[{summary['grid_delta_ci'][0]:+.4f},{summary['grid_delta_ci'][1]:+.4f}] "
-              f"negligible(|.|<{SESOI})={summary['grid_negligible']}")
+        if summary.get("grid_delta_ci") is not None:
+            print(f"  grid_delta median={summary['grid_delta_median']:+.4f} "
+                  f"CI=[{summary['grid_delta_ci'][0]:+.4f},{summary['grid_delta_ci'][1]:+.4f}] "
+                  f"negligible(|.|<{SESOI})={summary['grid_negligible']}")
+        else:
+            print("  grid_delta: all subjects filtered (non-finite grid_delta)")
         print(f"  smooth_delta median={summary['smooth_delta_median']:+.4f}")
         print(f"  pass within_shaft: R1={summary['n_pass_R1_within_shaft']} "
               f"R2={summary['n_pass_R2_within_shaft']} R3={summary['n_pass_R3_within_shaft']} /{len(ok)}")
