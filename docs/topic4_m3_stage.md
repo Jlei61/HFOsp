@@ -202,5 +202,10 @@ SNN 的事件时标 / 状态轨迹触发不了它**——衬底全或无 / 全�
   `scripts/build_m3b_spectral_outputs.py`、`tests/test_topic4_m3b_spectral_phase.py`，M3B commit
   `32ba62d`→当前）；artifacts/figures 在 ignored 的 `results/topic4_sef_hfo/m3b_spectral_phase_map/`，
   由脚本再生。
-- worktree `topic4-m3a-a2`、`topic4-m1` 阶段性收口后关闭（clean，`git worktree remove` 不丢提交，分支留存）；
-  `topic4-m3`（m3-hub）保留。
+- worktree `topic4-m3a-a2`、`topic4-m1` 阶段性收口后关闭（clean，`git worktree remove` 不丢提交，分支留存）。
+- **2026-06-30 收口清理**：M3A-v2 线收口后，剩余 worktree 全部关闭（`git worktree remove`，提交不丢、分支留存）——
+  `topic4-m3`（m3-hub，M3B round1 WIP 已 checkpoint 到 `topic4-snn-m3-hub` 分支）、`topic4-m3a-v2-1`
+  （v2.1 收口/handoff commit 已 cherry-pick 进本分支 `codex/topic4-m3a-v2-2`；qigk gap-sweep 脚本 checkpoint 到
+  `codex/topic4-m3a-v2-1` 分支留存）。删除已并入/空壳分支 `codex/topic4-m3a-v2-spatial-field`、
+  `topic5-ictal-field-dynamics`（0 独有 commit、内容已在本分支）；`topic5-part2-event-load`（NEGATIVE 收口、54 独有
+  commit）删分支前打 `archive/topic5-part2-event-load` 标签保命。现仅主 checkout 一个 worktree。
