@@ -2,7 +2,7 @@
 grid-free counterparts of the field maxAB. See
 docs/superpowers/specs/2026-06-30-topic5-contact-similarity-ladder-design.md."""
 import numpy as np
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr, kendalltau
 from src.topic5_axis_alignment import (
     within_shaft_shuffle, channel_shuffle, anchor_matched_shuffle, effective_shuffle_n,
 )
@@ -102,6 +102,34 @@ def polarity_free_maxab(rank_a, rank_b, value, *, mode, source_pts, support, sig
         return float(r_a)
     r_b = _abs_mirror(rank_b, value, mode=mode, source_pts=source_pts,
                       support=support, sigma=sigma)
+    vals = [v for v in (r_a, r_b) if np.isfinite(v)]
+    return float(max(vals)) if vals else np.nan
+
+
+# ---------------------------------------------------------------------------
+# Task 4: sequence-sanity (Spearman + Kendall), geometry-free rank similarity
+# ---------------------------------------------------------------------------
+
+def _seq_corr(rank, value, method):
+    a = np.asarray(rank, float); b = np.asarray(value, float)
+    m = np.isfinite(a) & np.isfinite(b)
+    if m.sum() < 3:
+        return np.nan
+    fn = spearmanr if method == "spearman" else kendalltau
+    c = fn(a[m], b[m])[0]
+    return abs(float(c)) if np.isfinite(c) else np.nan
+
+
+def sequence_maxab(rank_a, rank_b, value, *, method):
+    """Polarity-free max(|corr_A|, |corr_B|) using Spearman or Kendall.
+
+    rank_b is None → single-template subject, returns |corr_A|.
+    method: "spearman" or "kendall".
+    """
+    r_a = _seq_corr(rank_a, value, method)
+    if rank_b is None:
+        return r_a
+    r_b = _seq_corr(rank_b, value, method)
     vals = [v for v in (r_a, r_b) if np.isfinite(v)]
     return float(max(vals)) if vals else np.nan
 

@@ -11,6 +11,7 @@ from src.topic5_contact_similarity import (
     _pearson_over_contacts,
     contact_corr,
     polarity_free_maxab,
+    sequence_maxab,
 )
 from src.propagation_contact_plane_readout import smooth_field, make_plane_grid
 
@@ -186,6 +187,24 @@ def test_within_shaft_never_crosses_shaft():
     for sh in ("A", "B"):
         idx = [i for i, n in enumerate(names) if parse_shaft(n)[0] == sh]
         assert sorted(out[idx]) == sorted(vals[idx])
+
+
+# ---------------------------------------------------------------------------
+# Task 4: sequence-sanity (Spearman + Kendall)
+# ---------------------------------------------------------------------------
+
+def test_sequence_spearman_monotone():
+    val = np.array([1.0, 2, 3, 4, 5, 6])
+    rank_a = np.array([6.0, 5, 4, 3, 2, 1])   # reversed monotone -> |spearman|=1
+    s = sequence_maxab(rank_a, None, val, method="spearman")
+    assert np.isclose(s, 1.0, atol=1e-9)
+
+
+def test_sequence_kendall_runs():
+    rng = np.random.default_rng(7)
+    val = rng.random(10); ra = rng.random(10); rb = val.copy()
+    k = sequence_maxab(ra, rb, val, method="kendall")
+    assert 0.9 < k <= 1.0   # template B identical -> tau ~ 1
 
 
 def test_kernel_mirror_flips_eval_y_not_x():
