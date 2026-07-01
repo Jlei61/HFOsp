@@ -29,6 +29,43 @@ CACHE = _ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"
 _STATE_PREFIX = {"legacy_bb_1_45": "bb", "legacy_hfa_60_100": "hfa"}
 
 
+def get_contact_alignment() -> tuple[object, str]:
+    """Return ``(contact_alignment, source)``.
+
+    Prefer the real Phase-1 ``src.topic5_v2_band_scan.contact_alignment``; fall
+    back to the verbatim contract shim while Phase 1 is in flight. Deterministic
+    correlation → identical output either way (source recorded for provenance).
+    """
+    try:
+        from src.topic5_v2_band_scan import contact_alignment  # type: ignore
+        return contact_alignment, "band_scan"
+    except (ImportError, AttributeError):
+        from src._topic5_v2_p1_contract_shim import contact_alignment
+        return contact_alignment, "contract_shim"
+
+
+def get_null_fns() -> tuple[dict | None, str]:
+    """Return ``(fns, source)`` for the science-critical Phase-1 null builders.
+
+    ``fns`` = ``{spatial_constrained_permute, order_null_rank_pair,
+    rebuild_typical_rank}`` from ``src.topic5_v2_band_scan`` once Phase 1 lands
+    Tasks 8/9, else ``None`` (these are NOT shimmed — the null construction is the
+    contract). Consumers with ``None`` emit observed stats + a ``pending_phase1``
+    null status; they never fabricate a null.
+    """
+    try:
+        from src.topic5_v2_band_scan import (  # type: ignore
+            spatial_constrained_permute, order_null_rank_pair, rebuild_typical_rank,
+        )
+        return ({
+            "spatial_constrained_permute": spatial_constrained_permute,
+            "order_null_rank_pair": order_null_rank_pair,
+            "rebuild_typical_rank": rebuild_typical_rank,
+        }, "band_scan")
+    except (ImportError, AttributeError):
+        return None, "pending_phase1"
+
+
 def state_prefix(state_band: str) -> str:
     """Map a state_band name to its ``ictal_field_long_cache`` key prefix."""
     try:
@@ -141,8 +178,16 @@ def load_subject_preictal(ds_sid: str, substrate: str, cfg: dict) -> dict:
                   f"(avail={available:.1f}<req={required:.1f})" if seizures
                   else "no_eligible_preictal_window")
         return {**base, "status": "skipped", "skip_reason": reason,
-                "available_pre_sec": float(available), "seizures": [], "n_seizures": 0}
+                "available_pre_sec": float(available),
+                "seizures": [], "n_seizures": 0, "n_seizures_total": len(seizures)}
+
+    # Tractability cap for per-perm refit nulls: keep the first `max_seizures`
+    # (deterministic, by seizure idx); n_seizures_total keeps the cap transparent.
+    n_total = len(seizures)
+    max_sz = int(cfg["preictal"].get("max_seizures", 0) or 0)
+    if max_sz > 0 and n_total > max_sz:
+        seizures = seizures[:max_sz]
 
     return {**base, "status": "ok", "skip_reason": "",
             "available_pre_sec": float(available),
-            "seizures": seizures, "n_seizures": len(seizures)}
+            "seizures": seizures, "n_seizures": len(seizures), "n_seizures_total": n_total}

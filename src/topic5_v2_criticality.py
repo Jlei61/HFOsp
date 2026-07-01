@@ -141,8 +141,24 @@ def prepare_var_window(X: np.ndarray, standardize: bool = True) -> np.ndarray:
     n_ch, n_t = arr.shape
     t = np.arange(n_t, dtype=float)
     out = np.zeros((n_ch, n_t), dtype=float)
+    finite_rows = np.isfinite(arr).all(axis=1)
 
-    for ch in range(n_ch):
+    # Fast vectorized path for fully-finite channels (the common envelope case):
+    # demean -> linear detrend (lstsq) -> standardize, all channels at once.
+    fidx = np.flatnonzero(finite_rows)
+    if fidx.size:
+        Xf = arr[fidx] - arr[fidx].mean(axis=1, keepdims=True)
+        if n_t >= 3:
+            design = np.vstack([t, np.ones_like(t)]).T
+            coef, *_ = np.linalg.lstsq(design, Xf.T, rcond=None)
+            Xf = Xf - (design @ coef).T
+        if standardize:
+            sd = Xf.std(axis=1, keepdims=True)
+            Xf = np.divide(Xf, sd, out=np.zeros_like(Xf), where=sd > 0.0)
+        out[fidx] = Xf
+
+    # Per-channel fallback for channels carrying any NaN.
+    for ch in np.flatnonzero(~finite_rows):
         x = arr[ch].astype(float, copy=True)
         finite = np.isfinite(x)
         if not np.any(finite):

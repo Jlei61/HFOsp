@@ -5,6 +5,8 @@ preictal:
   early_baseline_rel: [-120.0, -90.0]
   late_preictal_rel: [-30.0, 0.0]
   min_required_pre_sec: 90.0
+  hop_sec: 0.1
+  max_seizures: 12                       # tractability cap for per-perm refit nulls; n_seizures_total logged
 susceptibility:
   band_for_envelope: legacy_bb_1_45
   features: [variance, lag1_autocorr, line_length_rate]
