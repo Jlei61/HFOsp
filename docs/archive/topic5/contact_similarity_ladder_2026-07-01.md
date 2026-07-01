@@ -85,4 +85,77 @@ python scripts/plot_topic5_contact_similarity.py --activation hfa     --out-dir 
 
 - **Supports ONLY**: "Spatially weighted contact-level similarity captures the same coarse interictal–ictal spatial scaffold as the gridded field readout, indicating the field result is driven mainly by local spatial smoothing rather than grid interpolation." — a useful spatial readout / sensitivity metric.
 - **Does NOT support**: "effectively characterizes the epileptic pathological network." Evidence: within-shaft pass counts DROP R1→R3 (6/5/4 broadband, 9/7/5 hfa) — no increased cohort-positive evidence.
-- **Upgrade** to a pathological-network claim requires clinical validation (SOZ/resection/outcome, propagation endpoint, cross-window stability). The R2b 3D sensitivity (in progress) is a defensive check against a 2D-projection artifact, NOT such a clinical upgrade.
+- **Upgrade** to a pathological-network claim requires clinical validation (SOZ/resection/outcome, propagation endpoint, cross-window stability). The R2b native-3D sensitivity (§5 below, now complete) is a defensive check against a 2D-projection artifact, NOT such a clinical upgrade.
+
+---
+
+## 5. R2b native-3D 灵敏度复核（B=1000 全队列，已核验）
+
+> 代码：`scripts/augment_topic5_r2b_3d.py` + `scripts/plot_topic5_r2b_sensitivity.py`
+>       （核心复用 `src/topic5_contact_similarity.py` 的 n-D 触点核 + `src/seeg_coord_loader.py` + `src/propagation_skeleton_geometry.parse_shaft`）
+> 结果：`results/topic5_ictal_recruitment/contact_similarity/r2b_summary_{broadband,hfa}.json`、`r2b_coverage_{band}.csv`、`figures/r2b_sensitivity_{band}.png`（均 gitignored；见 §5.4 复现命令）
+> 计划：`docs/superpowers/plans/2026-07-01-topic5-r2b-3d-sensitivity.md`
+> Tier：sensitivity/robustness（非 primary cohort claim）
+
+### 5.0 这一档在问什么（朴素话）
+
+R1/R2/R3 里所有几何处理都发生在一个 **2D「触点平面」**上——先对每根电极杆做横切 PCA 得到一个平面，再把触点投到这个平面上算相似度。审稿人自然会问：会不会正是「把 3D 排布压成一个 2D 平面」这一步、而不是触点真实的解剖排布，制造了那些相似的数字？
+
+R2b 就是把这个 2D 平面换成触点的**原生 3D 毫米坐标**（直接算三维欧氏距离），其它一切都不动：同一批触点、同一个「同电极杆内打乱」零假设、同一冻结带宽逻辑、mirror 都关掉、同一 B=1000 / seed=20260614。为了公平对照，2D 那一级也在**完全相同的公共触点子集上、同样关掉 mirror** 重算一遍，记作 R2_nm。主比较 = **R2b − R2_nm**（两者都 no-mirror、同一公共子集）——如果这个差落在 ±0.05（SESOI 最小关注差）以内，就说明「换成真三维坐标」看不出可分辨的差别，2D 平面读出已经够用。
+
+「公共子集」= 既在 2D 轴记录里、又有合法 mm 3D 坐标的那批触点；两级（R2_nm/R2b）都只用这批，绝不拿全通道的旧 R2 去比缩水通道的 R2b。坐标必须是毫米（mm 硬门 P1-3）；每个被试各用各的坐标系（Epilepsiae=MNI152-mm、Yuquan=fs-native-RAS-mm），**从不跨被试合并点云**。
+
+### 5.1 数字（主比较 = R2b − R2_nm，仅 r2b_status=ok 被试）
+
+| 量 | 宽频 broadband | 高频 hfa |
+|---|---|---|
+| n_ok | **18** / 19 | **18** / 19 |
+| R2b − R2_nm 队列中位 | **+0.0001** | **+0.0012** |
+| bootstrap CI | **[−0.0099, +0.0077]** | **[−0.0051, +0.0107]** |
+| SESOI=±0.05 等价检验 | **通过**（CI 严格落在 ±0.05 内） | **通过** |
+| n_ok_insufficient_null（两级零假设都不欠功率） | **0** | **0** |
+| R3 provenance 逐位对照（augment 记录的 stored-R3 == `cohort_summary_{band}.json` R3 within_shaft obs） | **18/18 一致** | **18/18 一致** |
+
+> stored-R3 一致性说明 augment 没有把基线 `cohort_summary_{band}.json` 漂移/覆盖（该文件 mtime 保持在 augment 运行前，R3 的 81×81 网格未重算）。R2_nm 与 R2b 的 `obs_subject` 对所有 ok 被试均为有限值。
+
+### 5.2 覆盖（coverage）
+
+- **n_ok = 18 / 19（两个激活量都一样）**；唯一非 ok 的被试是 `epilepsiae_139`，落入 `NA_insufficient`——它只有 1 根电极杆（`n_shafts_common=1 < 2`），within-shaft 零假设在单杆上退化，与 §1 R1/R2/R3 主表里被排除的原因一致。
+- **NA 分解（两个激活量都相同）**：`{NA_ineligible:0, NA_coords:0, NA_units:0, NA_insufficient:1, NA_degenerate:0, NA_no_null:0}`。
+- **因缺坐标丢弃的触点数 = 0**：每个 ok 被试的匹配 2D 触点数 = 公共 3D 触点数（`n_common == n_matched_2d`，逐被试见 `r2b_coverage_{band}.csv`），即所有匹配触点都拿到了合法 mm 3D 坐标，没有任何触点因坐标缺失被丢。
+- **坐标单位**：全部 mm（Epilepsiae 18 例 `mni152_1mm`，Yuquan 1 例 `fs_native_ras_mm`），无 voxel、无静默回退。
+
+### 5.3 三选一判读（基于实测；守窄口径）
+
+实测：宽频与高频两个激活量下，**R2b − R2_nm 的 bootstrap CI 都严格落在 ±SESOI(0.05) 之内**（宽频 [−0.0099,+0.0077]、高频 [−0.0051,+0.0107]），等价检验双双通过 → 命中判读**第一支**：
+
+> **原生三维几何相对 2D 触点平面没有带来可分辨的额外信息；2D 平面读出已经够用，当前结论稳定。** 换句话说，§3 那个「场的高相似度主要来自平面几何平滑」的结论不是「压成 2D 平面」这一步造出来的伪影——把平面换成真三维坐标，观测相似度实质不变。
+
+未命中的另两支（仅供对照，本次数据不适用）：
+- 若 CI 整体高于 +SESOI（`R2b > R2_nm`）→ 「原生三维携带超出 2D 平面的额外信息（补充性）」；
+- 若 CI 整体低于 −SESOI（`R2b < R2_nm`）→ 「把结论收窄到 2D 平面读出」。
+
+**口径边界（严格守窄）**：本节只回答「2D 平面几何 vs 原生三维几何」这一个技术问题，是灵敏度/稳健性附注。**绝不**据此写「刻画了病理网络 / characterizes the pathological network」——那需要 §4 Scope block 列的临床验证（SOZ/切除/预后、传播端点、跨窗稳定性），R2b 不是这种升级。A 线主结论（间期传播轴 = 患者内共享粗骨架 readout）不受本节影响。
+
+### 5.4 复现命令（逐字）
+
+```bash
+python scripts/augment_topic5_r2b_3d.py --activation broadband --B 1000 --seed 20260614 --input-results-root /home/honglab/leijiaxin/HFOsp/results --out-dir /home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/contact_similarity
+python scripts/augment_topic5_r2b_3d.py --activation hfa       --B 1000 --seed 20260614 --input-results-root /home/honglab/leijiaxin/HFOsp/results --out-dir /home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/contact_similarity
+python scripts/plot_topic5_r2b_sensitivity.py --out-dir /home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/contact_similarity
+```
+
+标定耗时 ≈ 25–26 min/band（单核，B=1000，两级零假设 R2_nm+R2b 各跑一遍）。`r2b_summary_{band}.json` / `r2b_coverage_{band}.csv` / `figures/r2b_sensitivity_{band}.png` 均被 `results/` 顶层 `.gitignore` 忽略；本文档 + `figures/README.md` 是唯一随分支走的记录。（注：两个激活量并发跑时共享同一 `per_subject_r2b/` 中间目录、后写覆盖先写——该目录只是 provenance，不被图消费；band-specific 的 `r2b_summary_{band}.json` 才是权威产出，交叉核对由重放 augment 的确定性 stored-R3 读取完成。）
+
+### 5.5 六个 NA 代码朴素话（figures README 同步）
+
+augment 对每个被试给出的 `r2b_status` 只有 `ok` 或以下六种 NA 之一，含义：
+
+- **NA_ineligible** — 这个被试连触点相似性阶梯的**基础上下文**都没建起来（`_ctx` 返回空：没匹配到发作触点 / 缺 T0 缓存），根本没进 R2b 这一级。
+- **NA_coords** — 拿不到该被试触点的 **3D 毫米坐标**：坐标文件缺失、加载器报错、或坐标的通道顺序与匹配通道顺序对不上（不敢乱对齐索引）。
+- **NA_units** — 拿到了坐标但**不是毫米单位**（例如体素 voxel）。mm 硬门（P1-3）直接拒绝，**不做静默回退**。
+- **NA_insufficient** — 「既有 2D 平面记录、又有合法 mm 3D 坐标」的**公共触点子集太小**：公共触点 < 6，或跨的电极杆 < 2，或没有任何一次发作在公共子集上凑够 ≥6 个有限值。（本次唯一一例 `epilepsiae_139` 就是单杆 → 跨杆数 < 2。）
+- **NA_degenerate** — 公共子集的 **3D 点云退化**：所有触点坐标几乎重合 → 3D 最近邻间距中位数 = 0 → 高斯核带宽 `sigma_3d ≤ 0` 无法定义。
+- **NA_no_null** — **零假设 harness 没给出观测统计量**：R2_nm / R2b 两级里至少一级没能产出 `obs_subject`。
+
+本次全队列（两个激活量）只出现 `NA_insufficient` 一例，其余五种代码计数均为 0。
