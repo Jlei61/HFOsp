@@ -88,6 +88,7 @@ order null：所有频带都正（Δ+0.12-0.19）但 band-generic（非频带特
 4. **max-T family 含 4 个与 primary 重叠的 composite**（保守，FWER 仍控住，但损 power）——全量可考虑只用 7 primary。
 5. **未跑**：Gate B/C（残差 feature 全量 null）、narrow 全量、final n_perm=1000、全量 confound-adjusted。
 6. **signed 方向度量不跨 substrate 稳健**：broad 低频正/高频负，narrow 多为负——因 signed 依赖 per-subject template-a 定向，跨 substrate 不可比。用**方向-不变的 |maxab|**（平的）+ **spatial-null Δ**（频带特异）作可信度量，不报 signed flip 为发现。
+7. **composite band（LVFA_13_80 / ripple_full / ripple_safe）结构上封顶在 broadband_recruitment**：残差 cache 只建 7 个 primary，故 composite 的 common_resid_p/aperiodic_p 恒 NaN → 永远过不了 Gate B/C（whole-branch review 的 Important-interpretation 项）。读 gate_summary 时注意：composite 的 tier ≤ broadband_recruitment 是设计使然，非"频带不特异"的证据。Gate B/C 只在 7 primary 上判。
 
 ---
 

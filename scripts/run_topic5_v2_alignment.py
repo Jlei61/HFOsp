@@ -12,7 +12,7 @@ contact_alignment（窗值 vs 间期 typical_rank 的 signed Spearman，定向�
 
 固定掩膜 = 该被试的 analysis_channels（跨所有频带同一批触点），落地为 analysis_channels ∩ mapped ∩
 cache（analysis_channels 含无几何坐标的触点，需与 mapped 求交）。--feature raw 读 v2 band cache；
-common_resid/aperiodic_resid 读残差 cache（Task 10b/11b，未建成，分支已就位）。
+common_resid/aperiodic_resid 读残差 cache（Task 10b/11b 已建成，同结构 keys）。
 
 设计: docs/superpowers/specs/2026-07-01-topic5-v2-hfo-critical-mode-design.md; plan Task 7 (P1-d)。
 """
@@ -120,7 +120,7 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
     if not fpath.exists():
         raise FileNotFoundError(
             f"{feature} cache missing for {ds_sid}: {fpath}. "
-            f"(raw=v2 band cache Task 6; common_resid=Task 10b; aperiodic_resid=Task 11b — not built yet.)")
+            f"(raw=v2 band cache Task 6; common_resid=Task 10b; aperiodic_resid=Task 11b — build the feature cache first.)")
     fcache = np.load(fpath, allow_pickle=True)
     raw_side = json.loads((RAW_CACHE_DIR / f"{ds_sid}.json").read_text())  # mask + QC are feature-independent
     cache_names = [str(x) for x in fcache["channels"]]
