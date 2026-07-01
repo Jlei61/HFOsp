@@ -98,3 +98,34 @@ def test_order_null_depcheck_broad_strength_domain(tmp_path):
         assert x["axis_set"] == "broad", f"{x['subject']} axis_set={x['axis_set']!r}"
         assert x["order_null_strength"] in {"strong", "weak_downgrade", "missing"}, \
             f"{x['subject']} bad strength {x['order_null_strength']!r}"
+
+
+@pytest.mark.integration
+def test_v2_alignment_raw_smoke_epilepsiae_139(tmp_path):
+    """Task 7: raw early-ictal alignment tables for epilepsiae_139 (broad substrate).
+
+    Subject-fixed analysis mask (same contacts across every band); window -> seizure
+    median -> subject median; broad/narrow never pooled. Asserts the subject_summary
+    carries a PRIMARY composite band (``ripple_full_80_250``) AND the legacy reproduction
+    band (``legacy_bb_1_45``), all rows ``axis_set=broad`` on the PRIMARY fixed-mask path
+    (``used_fixed_mask=True``), and that legacy_bb carries the QC-2 record columns."""
+    r = subprocess.run([sys.executable, "scripts/run_topic5_v2_alignment.py",
+                        "--feature", "raw", "--substrate", "broad",
+                        "--subjects", "epilepsiae_139", "--outdir", str(tmp_path)],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, f"{r.stdout}\n{r.stderr}"
+    subj_csv = tmp_path / "broad" / "phase1_alignment_raw_subject_summary.csv"
+    assert subj_csv.exists(), f"missing subject_summary\n{r.stdout}\n{r.stderr}"
+    rows = list(csv.DictReader(open(subj_csv)))
+    assert rows, "empty subject_summary"
+    bands = {x["band"] for x in rows}
+    assert "ripple_full_80_250" in bands, f"missing ripple_full_80_250 row; bands={bands}"
+    assert "legacy_bb_1_45" in bands, f"missing legacy_bb_1_45 row; bands={bands}"
+    for x in rows:
+        assert x["axis_set"] == "broad", f"{x['band']} axis_set={x['axis_set']!r}"
+        assert x["used_fixed_mask"] == "True", f"{x['band']} used_fixed_mask={x['used_fixed_mask']!r}"
+        assert x["feature"] == "raw", f"{x['band']} feature={x['feature']!r}"
+    legacy = next(x for x in rows if x["band"] == "legacy_bb_1_45")
+    # QC-2 (P1-d) record-only cross-check columns must be populated for the legacy band.
+    assert legacy["fixed_mask_delta"] != "", "legacy_bb missing fixed_mask_delta (QC-2 record)"
+    assert legacy["n_channels_dropped_by_fixed_mask"] != "", "legacy_bb missing n_channels_dropped_by_fixed_mask"
