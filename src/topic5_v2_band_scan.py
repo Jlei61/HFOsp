@@ -158,3 +158,26 @@ def spatial_constrained_permute(names, values_by_name, shaft_by_name, coord_by_n
     return perm_values, {"spatial_null_strength": spatial_null_strength,
                           "n_effectively_permutable": n_effectively_permutable,
                           "n_singleton_groups": n_singleton_groups}
+
+
+def common_field_residual(band_vals_by_name, common_field_vals_by_name):
+    """OLS residual of a band's per-contact field on a common field (Gate B raw material, issue #14).
+
+    Aligns on names present & finite in BOTH inputs, fits a degree-1 line
+    band ~ slope*cf + intercept over those shared points, and returns the
+    per-contact residual. Fewer than 3 shared finite points can't support a
+    meaningful line fit, so this returns {} rather than fabricate a residual.
+
+    The caller (Task 10b) supplies common_field_vals_by_name two ways -- the
+    all-band 1-250 field and a leave-one-band-out field -- and calls this
+    once per choice; this function is agnostic to which one it was given.
+    """
+    names = [n for n in band_vals_by_name if n in common_field_vals_by_name
+             and np.isfinite(band_vals_by_name[n]) and np.isfinite(common_field_vals_by_name[n])]
+    if len(names) < 3:
+        return {}
+    band = np.array([band_vals_by_name[n] for n in names], float)
+    cf = np.array([common_field_vals_by_name[n] for n in names], float)
+    slope, intercept = np.polyfit(cf, band, 1)
+    return {n: float(band_vals_by_name[n] - (slope * common_field_vals_by_name[n] + intercept))
+            for n in names}

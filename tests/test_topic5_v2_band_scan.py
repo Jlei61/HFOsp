@@ -2,7 +2,7 @@ import numpy as np
 from src.topic5_v2_band_scan import (
     load_phase1_config, line_noise_bin_mask, band_bin_selection,
     masked_band_power_trace, robust_z_with_flags, channel_artifact_flags,
-    contact_alignment, spatial_constrained_permute,
+    contact_alignment, spatial_constrained_permute, common_field_residual,
 )
 def test_config_rev2_keys():
     c = load_phase1_config()
@@ -84,3 +84,29 @@ def test_spatial_fallback_reports_strength():
     perm,st=spatial_constrained_permute(names,vals,shaft,coord,np.random.default_rng(0),"within_shaft",4)
     assert sorted(perm[n] for n in ["A1","A2","A3","A4"])==[0.0,1.0,2.0,3.0]
     assert st["n_singleton_groups"]>=1 and "spatial_null_strength" in st
+
+
+def test_common_field_residual_collinear_is_zero():
+    names = [f"c{i}" for i in range(8)]
+    cf = {n: v for n, v in zip(names, [1.0, 2.0, 3.5, 4.0, 6.0, 7.5, 9.0, 10.0])}
+    band = {n: 2.0 * cf[n] + 1.0 for n in names}          # exact line -> nothing left over
+    resid = common_field_residual(band, cf)
+    assert set(resid) == set(names)
+    assert all(abs(resid[n]) < 1e-9 for n in names)
+
+
+def test_common_field_residual_band_specific_bump_survives():
+    names = [f"c{i}" for i in range(30)]                  # enough contacts that one outlier
+    cf = {n: float(i) for i, n in enumerate(names)}        # doesn't dominate the OLS fit
+    band = dict(cf)                                        # band tracks common field 1:1...
+    bump, delta = names[15], 5.0
+    band[bump] = cf[bump] + delta                          # ...except one spatially-specific bump
+    resid = common_field_residual(band, cf)
+    assert abs(resid[bump] - delta) < 0.3                  # bump survives residualization (Gate B)
+    assert all(abs(resid[n]) < 0.3 for n in names if n != bump)
+
+
+def test_common_field_residual_below_three_shared_points_is_empty():
+    cf = {"c0": 1.0, "c1": 2.0}                            # only 2 shared finite points
+    band = {"c0": 2.0, "c1": 4.0}
+    assert common_field_residual(band, cf) == {}
