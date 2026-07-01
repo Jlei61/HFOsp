@@ -335,3 +335,47 @@ def test_v2_nulls_raw_smoke_epilepsiae_139(tmp_path):
     # order_null_strength must be a legal Task-9 domain value.
     assert all(x["order_null_strength"] in {"strong", "weak_downgrade", "missing"} for x in rows), \
         f"bad order_null_strength values: {set(x['order_null_strength'] for x in rows)}"
+
+
+@pytest.mark.integration
+def test_v2_gates_raw_smoke_epilepsiae_139(tmp_path):
+    """Task 14 (script): Gate A/B/C decision table + max-over-bands FWER null for epilepsiae_139
+    (broad, raw). Generate a TINY raw null (n_perm=20, single subject) then run the gate script
+    reading it, asserting the gate summary CSV carries the decision columns INCLUDING
+    max_over_bands_p + interpretation_tier. Fully isolated to tmp (no shared-tree / canonical writes).
+
+    epilepsiae_139 is a single small subject: within-shaft permute degenerates to
+    subject_wide_weak and the order-null rebuild is weak_downgrade, so NO band can pass a FORMAL
+    Gate A (P1-c strength gate + the order weak_downgrade rule) -> every band tier is
+    'weak_negative', even bands whose spatial p<alpha with a positive delta. Gate B/C stay False
+    (no common_resid/aperiodic summaries in this raw-only smoke)."""
+    rn = subprocess.run([sys.executable, "scripts/run_topic5_v2_nulls.py",
+                         "--feature", "raw", "--n-perm", "20", "--subjects", "epilepsiae_139",
+                         "--substrate", "broad", "--outdir", str(tmp_path)],
+                        cwd=ROOT, capture_output=True, text=True)
+    assert rn.returncode == 0, f"{rn.stdout}\n{rn.stderr}"
+    rg = subprocess.run([sys.executable, "scripts/run_topic5_v2_gates.py",
+                         "--substrate", "broad", "--outdir", str(tmp_path)],
+                        cwd=ROOT, capture_output=True, text=True)
+    assert rg.returncode == 0, f"{rg.stdout}\n{rg.stderr}"
+    gate_csv = tmp_path / "broad" / "phase1_gate_summary.csv"
+    assert gate_csv.exists(), f"missing gate summary\n{rg.stdout}\n{rg.stderr}"
+    rows = list(csv.DictReader(open(gate_csv)))
+    assert rows, "empty gate summary"
+    required = {"axis_set", "cohort", "band", "feature", "gate_A_spatial_pass", "gate_A_order_pass",
+                "gate_B_frequency_specific_pass", "gate_C_HFO_specific_pass", "cohort_delta",
+                "cohort_null_z", "cohort_empirical_p", "max_over_bands_p", "n_subjects_valid",
+                "interpretation_tier"}
+    tiers = {"strongest", "frequency_specific", "broadband_recruitment", "weak_negative"}
+    for x in rows:
+        assert required <= set(x), f"gate summary missing cols {required - set(x)}"
+        assert x["axis_set"] == "broad", f"{x['band']} axis_set={x['axis_set']!r}"
+        assert x["feature"] == "raw", f"{x['band']} feature={x['feature']!r}"
+        assert x["max_over_bands_p"] != "", f"{x['band']} empty max_over_bands_p"
+        float(x["max_over_bands_p"])  # parseable float
+        assert x["interpretation_tier"] in tiers, f"{x['band']} bad tier {x['interpretation_tier']!r}"
+    # 139 single small subject: subject_wide_weak spatial + weak_downgrade order -> no formal Gate A.
+    for x in rows:
+        assert x["gate_A_spatial_pass"] == "False", f"{x['band']} spatial passed on subject_wide_weak"
+        assert x["gate_A_order_pass"] == "False", f"{x['band']} order passed on weak_downgrade"
+        assert x["interpretation_tier"] == "weak_negative", f"{x['band']} tier={x['interpretation_tier']}"
