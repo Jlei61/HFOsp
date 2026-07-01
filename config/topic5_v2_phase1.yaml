@@ -1,0 +1,48 @@
+# config/topic5_v2_phase1.yaml  (rev2)
+power:
+  spectrogram_win_sec: 1.0
+  spectrogram_hop_sec: 0.1
+epoch:
+  field_window_sec: 10.0
+  field_step_sec: 5.0
+  main_rel: [0.0, 20.0]
+  ictal_fraction_min: 0.5
+bands:
+  primary:                                   # HALF-OPEN [lo, hi)
+    - [delta_HYP_slow, 1, 4]
+    - [theta_preictal_PAC, 4, 8]
+    - [alpha_sharp_leq13, 8, 13]
+    - [beta_LVFA_low, 13, 30]
+    - [gamma_LVFA, 30, 80]
+    - [hg_low_ripple, 80, 150]
+    - [ripple_high, 150, 250]
+  composites:                                # CLOSED [lo, hi]
+    - [low_HYP_1_13, 1, 13]
+    - [LVFA_13_80, 13, 80]
+    - [ripple_full_80_250, 80, 250]
+    - [ripple_safe_80_220, 80, 220]
+  primary_interval: half_open
+  composite_interval: closed
+repro_bands:                                 # legacy reproduction ONLY (from OLD cache, not v2-recomputed)
+  bb: legacy_bb_1_45
+  hfa: legacy_hfa_60_100
+line_noise: {mains_hz: 50.0, harmonics_hz: [50,100,150,200,250], halfwidth_hz: 2.0, min_effective_bandwidth_frac: 0.5}
+edge: {fs512_hi_safe_hz: 220.0}
+artifact: {flatline_mad_eps: 1.0e-9, saturation_abs_z: 12.0, saturation_frac: 0.02}
+metrics:
+  primary: align_abs_maxab
+  signed_fixed_orientation: align_signed_oriented
+  sensitivity: [align_signed_a, align_signed_b, align_signed_posthoc_max, align_spearman_a, align_spearman_b]
+cohorts: {axis_sets: [broad, narrow], never_pool_axis_sets: true}
+common_field: {broadband_band: [1, 250], leave_one_band_out: true}
+nulls:
+  n_perm_smoke: 20
+  n_perm_dev: 100
+  n_perm_final: 1000
+  seed: 20260701
+  alpha: 0.05
+  spatial: within_shaft
+  min_group_for_shaft: 4
+  order_null_min_corr_to_geo: 0.90
+  confound_covariates: [hfo_rate, baseline_band_power, broadband_1_250, shaft_position]
+tolerances: {legacy_subject_median_abs: 0.02}
