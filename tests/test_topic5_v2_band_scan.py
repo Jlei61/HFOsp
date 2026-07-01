@@ -3,6 +3,7 @@ from src.topic5_v2_band_scan import (
     load_phase1_config, line_noise_bin_mask, band_bin_selection,
     masked_band_power_trace, robust_z_with_flags, channel_artifact_flags,
     contact_alignment, spatial_constrained_permute, common_field_residual,
+    aperiodic_corrected_excess_power,
 )
 def test_config_rev2_keys():
     c = load_phase1_config()
@@ -124,3 +125,31 @@ def test_common_field_residual_excludes_nonshared_and_nonfinite():
     assert set(resid) == set(names)                         # all 4 injected contacts excluded
     assert all(abs(resid[n]) < 1e-9 for n in names)          # exclusion happened before the OLS
                                                               # fit -> clean contacts undisturbed
+
+
+def test_aperiodic_corrected_excess_power_recovers_pure_1f():
+    freqs = np.arange(1, 201, 1.0)
+    slope_true, offset_true = -2.0, 2.0
+    psd = 10 ** offset_true * freqs ** slope_true          # exact power law, no bump anywhere
+    line_mask = np.zeros_like(freqs, dtype=bool)
+    out = aperiodic_corrected_excess_power(freqs, psd, 90, 110, line_mask)
+    assert out["ok"] is True
+    assert abs(out["slope"] - slope_true) < 1e-6
+    assert out["fit_r2"] > 1 - 1e-6
+    assert abs(out["excess_power"]) < 1e-6                 # no bump -> ~0 (floating-point noise only)
+
+
+def test_aperiodic_corrected_excess_power_detects_band_localized_bump():
+    freqs = np.arange(1, 201, 1.0)
+    psd_pure = 10 ** 2.0 * freqs ** -2.0
+    line_mask = np.zeros_like(freqs, dtype=bool)
+    bump = 0.05 * np.exp(-0.5 * ((freqs - 100.0) / 5.0) ** 2)   # localized Gaussian bump @100Hz
+    psd_bump = psd_pure + bump
+    out_bump = aperiodic_corrected_excess_power(freqs, psd_bump, 90, 110, line_mask)
+    out_ctrl = aperiodic_corrected_excess_power(freqs, psd_bump, 30, 50, line_mask)  # no bump here
+    assert out_bump["ok"] is True and out_ctrl["ok"] is True
+    assert 0.5 <= out_bump["fit_r2"] < 1.0                 # a real (non-iterative) fit is nudged
+                                                            # down by the bump, yet still clears min_r2
+    assert out_bump["excess_power"] > 0.3                  # clear detection (true bump mass ~0.6)
+    assert out_ctrl["excess_power"] < 0.05                 # no bump present -> near zero
+    assert out_bump["excess_power"] > out_ctrl["excess_power"] + 0.2   # clearly larger, not tautological

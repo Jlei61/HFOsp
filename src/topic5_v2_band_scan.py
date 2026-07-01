@@ -181,3 +181,58 @@ def common_field_residual(band_vals_by_name, common_field_vals_by_name):
     slope, intercept = np.polyfit(cf, band, 1)
     return {n: float(band_vals_by_name[n] - (slope * common_field_vals_by_name[n] + intercept))
             for n in names}
+
+
+def aperiodic_corrected_excess_power(freqs, psd_ch, lo, hi, line_mask,
+                                      fit_lo=1, fit_hi=200, min_r2=0.5, half_open=False):
+    """Guarded log-log 1/f (aperiodic) fit + band excess power (Gate C raw material, issue #15).
+
+    Fits log10(psd) ~ slope*log10(freq) + offset by OLS over the closed range
+    [fit_lo, fit_hi], excluding line-mask bins and non-positive/non-finite psd.
+    `ok` requires the fit_r2 (coefficient of determination of that log-log fit)
+    to clear `min_r2` AND at least ~10 valid fit points; a bad/failed fit
+    reports ok=False and excess_power=nan rather than fabricate a number.
+
+    Over the BAND bins (same half_open convention + line/non-positive
+    exclusions as band_bin_selection), the aperiodic floor is
+    10**(slope*log10(f)+offset); excess_power sums max(psd - floor, 0) per
+    bin -- power ABOVE the fitted 1/f floor, clipped at zero so a below-floor
+    bin can't cancel an above-floor bin elsewhere in the band.
+
+    Named excess_power, not "oscillatory_power": this is a single non-iterative
+    fit (no FOOOF-style peak removal before fitting the aperiodic), so a bump
+    surviving the floor is evidence of excess power, not proof it is
+    oscillatory.
+    """
+    freqs = np.asarray(freqs, float)
+    psd_ch = np.asarray(psd_ch, float)
+    line_mask = np.asarray(line_mask, bool)
+    finite_pos = np.isfinite(psd_ch) & (psd_ch > 0) & (freqs > 0)
+
+    fit_mask, _, _ = band_bin_selection(freqs, fit_lo, fit_hi, line_mask, half_open=False)
+    fit_valid = fit_mask & finite_pos
+    n_fit = int(fit_valid.sum())
+    if n_fit < 10:
+        return {"excess_power": float("nan"), "fit_r2": float("nan"),
+                "slope": float("nan"), "offset": float("nan"), "ok": False}
+
+    x = np.log10(freqs[fit_valid]); y = np.log10(psd_ch[fit_valid])
+    slope, offset = np.polyfit(x, y, 1)
+    ss_res = np.sum((y - (slope * x + offset)) ** 2)
+    ss_tot = np.sum((y - np.mean(y)) ** 2)
+    fit_r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 1.0
+    ok = bool(fit_r2 >= min_r2 and n_fit >= 10)
+
+    band_mask, _, _ = band_bin_selection(freqs, lo, hi, line_mask, half_open=half_open)
+    band_valid = band_mask & finite_pos
+    if not ok:
+        excess_power = float("nan")
+    elif not band_valid.any():
+        excess_power = 0.0
+    else:
+        f_band, psd_band = freqs[band_valid], psd_ch[band_valid]
+        aperiodic_pred = 10.0 ** (slope * np.log10(f_band) + offset)
+        excess_power = float(np.sum(np.maximum(psd_band - aperiodic_pred, 0.0)))
+
+    return {"excess_power": excess_power, "fit_r2": float(fit_r2),
+            "slope": float(slope), "offset": float(offset), "ok": ok}
