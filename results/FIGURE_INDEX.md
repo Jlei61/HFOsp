@@ -128,7 +128,7 @@
 | [topic5_ictal_template_echo/figures/](topic5_ictal_template_echo/figures/) | Stage 1 ictal-template-echo（anchor vs path） |
 | [topic5_dynamic_echo/sentinel/figures/](topic5_dynamic_echo/sentinel/figures/) | Stage 2b 动态回响哨兵 |
 | [topic5_ictal_recruitment/axis_alignment/figures/](topic5_ictal_recruitment/axis_alignment/figures/) | A 线 axis alignment 可视化 |
-| [topic5_ictal_recruitment/contact_similarity/figures/](topic5_ictal_recruitment/contact_similarity/figures/) | 触点相似性几何阶梯 (R1 无几何 / R2 同平面触点核 / R3 场)：判定间期↔发作相似性来自几何平滑还是网格 (sensitivity)；含 hfa 敏感性 |
+| [topic5_ictal_recruitment/contact_similarity/figures/](topic5_ictal_recruitment/contact_similarity/figures/) | 触点相似性几何阶梯 (R1 无几何 / R2 同平面触点核 / R3 场)：判定间期↔发作相似性来自几何平滑还是网格 (sensitivity)；含 hfa；+ R2b native-3D 灵敏度 (r2b_sensitivity_{band}.png)：native-3D vs 2D-plane 等价通过(2D 平面足够) |
 | [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
 | [topic5_ictal_recruitment/directional_clustering/figures/](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类 ↔ 间期 A/B（每被试玫瑰 + 442 间期事件 hist×两色发作方向类；exploratory negative，6 ECoG 全无 two_class_mapped） |
 | [topic5_ictal_recruitment/event_resolved_alignment/figures/](topic5_ictal_recruitment/event_resolved_alignment/figures/) | A 线 event-resolved 二级：逐间期事件(A/B 两类)对发作场的对齐分布 + 事件级离散度（PILOT 3 epi，exploratory，broad 底物） |

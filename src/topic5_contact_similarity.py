@@ -33,7 +33,7 @@ def kernel_smooth_at_contacts(values, source_pts, eval_pts, support, sigma):
     ev = np.asarray(eval_pts, float)
     if not (sigma > 0):
         raise ValueError(f"sigma must be > 0, got {sigma}")
-    # MUST match smooth_field's sig2 exactly: sig2 = 2.0 * sigma_xy ** 2
+    # numerically identical (to atol) to smooth_field's sig2 = 2.0 * sigma_xy ** 2
     sig2 = 2.0 * float(sigma) * float(sigma)
     coord_ok = np.isfinite(src).all(axis=1)     # NaN-coord sources never contribute
     out = np.full(ev.shape[0], np.nan)

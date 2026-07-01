@@ -114,7 +114,7 @@ R2b 就是把这个 2D 平面换成触点的**原生 3D 毫米坐标**（直接�
 | bootstrap CI | **[−0.0099, +0.0077]** | **[−0.0051, +0.0107]** |
 | SESOI=±0.05 等价检验 | **通过**（CI 严格落在 ±0.05 内） | **通过** |
 | n_ok_insufficient_null（两级零假设都不欠功率） | **0** | **0** |
-| R3 provenance 逐位对照（augment 记录的 stored-R3 == `cohort_summary_{band}.json` R3 within_shaft obs） | **18/18 一致** | **18/18 一致** |
+| R3 provenance 读回核对（augment 从 `cohort_summary_{band}.json` 读回 R3 within_shaft obs，全部存在且可解析；反漂移的真正保证是该文件 mtime 未变=R3 未重算——非独立重算比对） | **18/18** | **18/18** |
 
 > stored-R3 一致性说明 augment 没有把基线 `cohort_summary_{band}.json` 漂移/覆盖（该文件 mtime 保持在 augment 运行前，R3 的 81×81 网格未重算）。R2_nm 与 R2b 的 `obs_subject` 对所有 ok 被试均为有限值。
 
