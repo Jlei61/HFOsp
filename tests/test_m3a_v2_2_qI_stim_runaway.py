@@ -23,7 +23,8 @@ for p in (ENG, os.path.join(ROOT, "scripts"), ROOT, PFIG):
         sys.path.insert(0, p)
 
 # new comparison script (pure helpers)
-from plot_fig_m3a_v2_2_qI_stim_runaway_gif import _select_middle_contacts, _stim_site_center  # noqa: E402
+from plot_fig_m3a_v2_2_qI_stim_runaway_gif import (  # noqa: E402
+    _select_middle_contacts, _stim_site_center, _select_both_foci_contacts)
 # the edited continuous-sim loop (stim params) lives in the companion runaway script
 from plot_fig_m3a_v2_2_hG_runaway_transition_gif import (  # noqa: E402
     ProtocolConfig, _build, _simulate_continuous)
@@ -74,6 +75,23 @@ def test_stim_site_center_middle_is_sheet_center():
 def test_stim_site_center_rejects_unknown():
     with pytest.raises(ValueError):
         _stim_site_center({"center": [0.0, 0.0], "layout": {"foci": [[1.0, 2.0], [8.0, 2.0]]}}, "nope")
+
+
+# ===========================================================================
+# Both-foci stim site: union of the ICL contacts nearest each focus
+# ===========================================================================
+def test_select_both_foci_contacts_covers_both_ends():
+    names = ["ICL1", "ICL2", "ICL3", "ICL4", "ICL5", "ICL6", "ICL7", "ICL8"]
+    contacts = np.array([[float(k), 0.0] for k in range(1, 9)], float)  # ICL1..8 at x=1..8
+    idx = _select_both_foci_contacts(names, contacts, np.array([1.0, 0.0]), np.array([8.0, 0.0]), n=2)
+    assert [names[i] for i in idx] == ["ICL1", "ICL2", "ICL7", "ICL8"]  # 2 nearest each end, union sorted
+
+
+def test_select_both_foci_contacts_dedups_overlap():
+    names = ["ICL1", "ICL2", "ICL3", "ICL4"]
+    contacts = np.array([[float(k), 0.0] for k in range(1, 5)], float)
+    idx = _select_both_foci_contacts(names, contacts, np.array([2.0, 0.0]), np.array([2.5, 0.0]), n=2)
+    assert len(idx) == len(set(idx.tolist())) and list(idx) == sorted(idx)
 
 
 # ===========================================================================

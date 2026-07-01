@@ -380,3 +380,15 @@ earliest-onset endpoint (the first-kicked focus tempA, contacts ICL8-11), bottom
 Default run: no-stim 758 ms; endpoint delays to 1171 ms (+414, breaks through inside the window);
 middle delays to 1592 ms (+834, only after stim OFF) -- middle wins, because it blocks the
 propagation corridor for BOTH foci while endpoint stim only silences one focus.
+
+**Both-foci stim:**
+
+```
+python scripts/paper_figures/plot_fig_m3a_v2_2_qI_stim_runaway_gif.py --mode no_stim_vs_both_foci
+```
+
+Stim clamps BOTH focus endpoints (union of the n ICL contacts nearest each focus, ICL1-4 + ICL8-11 =
+8 contacts) vs no stim. Default run: no-stim 758 ms; both-foci delays to 1606 ms (+848) with rebound
+after stim OFF -- essentially tied with middle stim (+834) despite ~2x the stimulated footprint
+(3102 vs 1749 E cells). Blocking the corridor == silencing both generators for delaying runaway;
+the delay is set mostly by the stim-window length, not the stimulated area.

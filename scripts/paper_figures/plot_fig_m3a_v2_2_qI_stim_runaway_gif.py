@@ -90,11 +90,24 @@ def _stim_site_center(S, site: str) -> np.ndarray:
     raise ValueError(f"unknown stim site {site!r} (use 'middle' or 'earliest-endpoint')")
 
 
+def _select_both_foci_contacts(names, contacts, focus_a, focus_b, n: int = 4) -> np.ndarray:
+    """Union of the `n` ICL contacts nearest each focus (stimulate BOTH event generators),
+    de-duplicated and sorted ascending."""
+    ia = _select_middle_contacts(names, contacts, focus_a, n=n)
+    ib = _select_middle_contacts(names, contacts, focus_b, n=n)
+    return np.array(sorted(set(ia.tolist()) | set(ib.tolist())), dtype=int)
+
+
 def _build_target(S, site: str, radius: float, n: int) -> dict:
-    """Pick the `n` ICL contacts around the `site` anchor and the E-cell clamp mask around them."""
+    """Pick the ICL contacts for a stim `site` and the E-cell clamp mask around them.
+      'middle' / 'earliest-endpoint' -> n contacts around one anchor point
+      'both-foci'                    -> n contacts around EACH focus (both generators)."""
     contacts, names = H._contacts(S)
-    center = _stim_site_center(S, site)
-    idx = _select_middle_contacts(names, contacts, center, n=n)
+    if site in ("both-foci", "both"):
+        idx = _select_both_foci_contacts(names, contacts, H._source_xy(S, "tempA"),
+                                         H._source_xy(S, "tempB"), n=n)
+    else:
+        idx = _select_middle_contacts(names, contacts, _stim_site_center(S, site), n=n)
     mask = _electrode_e_mask(S["net"]["pos"], np.asarray(S["labels"]) == 0, contacts[idx], radius)
     return dict(idx=idx, contacts=contacts[idx], mask=mask,
                 names=[names[i] for i in idx], n_E=int(mask.sum()))
@@ -336,35 +349,35 @@ no-stim runaway: `{base_rt}` ms；最早端点刺激 runaway: `{ep_rt}` ms（触
     (out_dir / "README.md").write_text(text)
 
 
-def _write_readme_no_stim(base_rt, mid, stim_on, stim_off, out_dir: Path):
-    stim_rt = mid["m"]["runaway_start_ms"]
-    stim_names = ", ".join(mid["tgt"]["names"])
+def _write_readme_no_stim(base_rt, arm, site_label, stem, stim_on, stim_off, out_dir: Path):
+    stim_rt = arm["m"]["runaway_start_ms"]
+    stim_names = ", ".join(arm["tgt"]["names"])
     if stim_rt is None:
         outcome = f"刺激臂在整段仿真窗口内**没有** runaway（no-stim 在 {base_rt} ms 已 runaway）。"
     elif base_rt is not None:
-        outcome = f"刺激把 runaway 从 {base_rt} ms 推后到 {stim_rt} ms（晚了 {stim_rt - base_rt:.0f} ms），关刺激后才反弹。"
+        outcome = f"刺激把 runaway 从 {base_rt} ms 推后到 {stim_rt} ms（晚了 {stim_rt - base_rt:.0f} ms）。"
     else:
         outcome = f"刺激臂 runaway={stim_rt} ms。"
-    text = f"""# M3A-v2.2 q_I build-up -> runaway：刺激 vs 不刺激 对照 GIF（E1146 几何）
+    text = f"""# M3A-v2.2 q_I build-up -> runaway：刺激 @ {site_label} vs 不刺激（E1146 几何）
 
-### qI_stim_runaway_comparison.gif
+### {stem}.gif
 
 连续单轨迹 **visual diagnostic**，不是统计 sweep。和 `fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146`
 **同一套衬底/种子/多脉冲驱动/q_I 载体**；两臂唯一区别 = 刺激臂在 `[{stim_on:.0f}, {stim_off:.0f}] ms`
-把中段 4 个真实触点 `{stim_names}` 附近的兴奋性细胞 V_th clamp（暂时点不着）。刺激只改阈值比较、不动任何
-随机数，所以两臂在刺激开之前**逐比特一致**（对照才成立）。
+把 **{site_label}** 的真实触点 `{stim_names}` 附近的兴奋性细胞 V_th clamp（暂时点不着）。刺激只改阈值比较、
+不动任何随机数，所以两臂在刺激开之前**逐比特一致**（对照才成立）。
 
 **布局**：两行（上 = 不刺激，下 = 刺激）× 该图三栏——`permissivity(1-q_I)` | 实时 2D SNN 活动 |
 （上）`q_I`(mean+min)+轴向 `g_K` 疲劳轨迹（刺激行额外叠一条 no-stim 的 mean q_I 灰虚线做直接对照）／
 （下）连续 SEEG readout。刺激窗蓝色阴影、刺激触点蓝方块；各臂 runaway 红虚线。
 
-**这条轨迹里看到的**：{outcome}机制=刺激按住中段→该次"要把它点着"的间期事件被压成局部/压掉→放电少→
+**这条轨迹里看到的**：{outcome}机制=刺激按住 {site_label}→"要把它点着"的间期事件被压成局部/压掉→放电少→
 抑制资源 `q_I` 少磨（甚至缓慢回血）→越晚到地板→越晚/不 runaway。
 
 **红线**：**visual diagnostic**、外部预防式压制**示意**，**不**主张电刺激治发作 / recovery / 破轴；
 和内部恢复变量（`h_G`/`g_K` 减法刹车拉不回饱和雪崩）是不同问题；runaway / tonic 不是 ictal-like 事件。
 
-### qI_stim_runaway_comparison_final.png / .pdf
+### {stem}_final.png / .pdf
 
 GIF 末帧静态快照。no-stim runaway: `{base_rt}` ms；stim runaway: `{stim_rt}` ms；刺激触点：`{stim_names}`。
 """
@@ -377,9 +390,10 @@ def _arm_metrics(m):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", choices=["no_stim_vs_middle", "endpoint_vs_middle"],
+    ap.add_argument("--mode", choices=["no_stim_vs_middle", "no_stim_vs_both_foci", "endpoint_vs_middle"],
                     default="no_stim_vs_middle",
                     help="no_stim_vs_middle: baseline vs middle-ICL stim; "
+                         "no_stim_vs_both_foci: baseline vs stim on BOTH foci; "
                          "endpoint_vs_middle: earliest-onset endpoint stim vs middle stim")
     ap.add_argument("--stim-on", type=float, default=500.0)
     ap.add_argument("--stim-off", type=float, default=1400.0)
@@ -394,15 +408,25 @@ def main():
     os.chdir(ROOT)
     on, off = float(args.stim_on), float(args.stim_off)
 
-    stem = "qI_stim_site_compare" if args.mode == "endpoint_vs_middle" else "qI_stim_runaway_comparison"
-    default_fig = ("fig_m3a_v2_2_qI_stim_site_compare" if args.mode == "endpoint_vs_middle" else FIG_NAME)
+    # per-mode figure stem / dir + (for the no-stim modes) the single stim site + labels
+    STEM = {"endpoint_vs_middle": "qI_stim_site_compare",
+            "no_stim_vs_middle": "qI_stim_runaway_comparison",
+            "no_stim_vs_both_foci": "qI_stim_both_foci_comparison"}
+    DEFAULT_FIG = {"endpoint_vs_middle": "fig_m3a_v2_2_qI_stim_site_compare",
+                   "no_stim_vs_middle": FIG_NAME,
+                   "no_stim_vs_both_foci": "fig_m3a_v2_2_qI_stim_both_foci"}
+    NO_STIM_SITE = {"no_stim_vs_middle": ("middle", "中段", "middle"),
+                    "no_stim_vs_both_foci": ("both-foci", "两个灶", "both foci")}
+    stem = STEM[args.mode]
+    default_fig = DEFAULT_FIG[args.mode]
     fig_name = args.fig_name or (f"{default_fig}_epilepsiae_1146" if args.layout == "subject1146" else default_fig)
     cfg = H.ProtocolConfig(
         layout=str(args.layout), top="qI", use_gK=True, eta_K=0.0, use_hG=False,
         T=float(args.T), n_pulses=int(args.n_pulses), seed=int(args.seed), fig_name=fig_name,
     )
     t0 = time.time()
-    sites = ["earliest-endpoint", "middle"] if args.mode == "endpoint_vs_middle" else ["middle"]
+    sites = (["earliest-endpoint", "middle"] if args.mode == "endpoint_vs_middle"
+             else [NO_STIM_SITE[args.mode][0]])
     bundle = _run(cfg, sites, radius=args.stim_radius, n=args.n_stim_contacts, stim_on=on, stim_off=off)
     S = bundle["S"]; geo = S.get("layout", {}).get("label", "Stage5 geometry")
     base_m = bundle["base_m"]; base_rt = base_m["runaway_start_ms"]
@@ -431,22 +455,23 @@ def main():
                                 **_arm_metrics(mid["m"])}}
         _write_readme_site_compare(base_rt, ep, mid, on, off, out_dir)
     else:
-        mid = bundle["arms"]["middle"]; mid_rt = mid["m"]["runaway_start_ms"]
+        site_key, zh_label, en_label = NO_STIM_SITE[args.mode]
+        arm = bundle["arms"][site_key]; arm_rt = arm["m"]["runaway_start_ms"]
         rows = [
             dict(res=bundle["base_res"], m=base_m, stim_contacts=None, baseline_qmean=None, row_title="no stim"),
-            dict(res=mid["res"], m=mid["m"], stim_contacts=mid["tgt"]["contacts"], baseline_qmean=base_qmean,
-                 row_title=f"stim ({','.join(mid['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
+            dict(res=arm["res"], m=arm["m"], stim_contacts=arm["tgt"]["contacts"], baseline_qmean=base_qmean,
+                 row_title=f"stim @ {en_label} ({','.join(arm['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
         ]
-        main_title = f"q_I build-up $\\rightarrow$ runaway: stimulation vs no stimulation ({geo}) | t={{t:.0f}} ms"
-        footer_text = (f"no-stim runaway={base_rt} ms | stim runaway={mid_rt} ms ({_delay_str(mid_rt, base_rt)}) | "
-                       f"min q_I end: no-stim={base_m['q_min_final']} stim={mid['m']['q_min_final']} | "
-                       f"stim E cells={mid['tgt']['n_E']}")
+        main_title = f"q_I build-up $\\rightarrow$ runaway: stim @ {en_label} vs no stim ({geo}) | t={{t:.0f}} ms"
+        footer_text = (f"no-stim runaway={base_rt} ms | stim @ {en_label}={arm_rt} ms ({_delay_str(arm_rt, base_rt)}) | "
+                       f"min q_I end: no-stim={base_m['q_min_final']} stim={arm['m']['q_min_final']} | "
+                       f"stim E cells={arm['tgt']['n_E']}")
         gif, png, pdf, activity_vmax = _render_frames(bundle, cfg, rows, stim_on=on, stim_off=off,
                                                       out_dir=out_dir, stem=stem, main_title=main_title,
                                                       footer_text=footer_text)
-        stim_meta = {"middle": {"contacts": mid["tgt"]["names"], "target_E_cells": mid["tgt"]["n_E"],
-                                **_arm_metrics(mid["m"])}}
-        _write_readme_no_stim(base_rt, mid, on, off, out_dir)
+        stim_meta = {site_key: {"contacts": arm["tgt"]["names"], "target_E_cells": arm["tgt"]["n_E"],
+                                **_arm_metrics(arm["m"])}}
+        _write_readme_no_stim(base_rt, arm, zh_label, stem, on, off, out_dir)
 
     meta = {
         "figure": fig_name,
