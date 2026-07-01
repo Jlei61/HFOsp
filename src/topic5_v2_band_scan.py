@@ -44,3 +44,26 @@ def channel_artifact_flags(logpower, z, sat_abs_z, sat_frac, flatline_mad_eps):
     sat=np.where(np.isfinite(sat), sat, False)
     bad=flat|sat
     return {"flatline":flat, "saturation":sat, "bad_channel":bad}
+
+
+def contact_alignment(vals_by_name, rank_a_by_name, rank_b_by_name, oriented_template="a"):
+    from scipy.stats import spearmanr, pearsonr
+    def _one(rank_by):
+        names=[n for n in vals_by_name if n in rank_by
+               and np.isfinite(vals_by_name[n]) and np.isfinite(rank_by[n])]
+        if len(names)<4: return None
+        v=np.array([vals_by_name[n] for n in names]); r=np.array([rank_by[n] for n in names])
+        if np.std(v)==0 or np.std(r)==0: return None
+        return {"sp":float(spearmanr(v,r).statistic),"pe":float(pearsonr(v,r)[0]),"n":len(names)}
+    a,b=_one(rank_a_by_name),_one(rank_b_by_name)
+    def g(o,k,d=float("nan")): return o[k] if o else d
+    # tie-break: on an exact |sp| tie, prefer the larger raw signed value —
+    # a post-hoc cherry-picker reports whichever template looks more
+    # confirmatory, not whichever was evaluated first.
+    posthoc=max([o for o in (a,b) if o], key=lambda o:(abs(o["sp"]),o["sp"]), default=None)
+    return {"signed_pearson_a":g(a,"pe"),"signed_spearman_a":g(a,"sp"),
+            "signed_pearson_b":g(b,"pe"),"signed_spearman_b":g(b,"sp"),
+            "align_signed_oriented":(g(a,"sp") if oriented_template=="a" else g(b,"sp")),
+            "align_signed_posthoc_max":(posthoc["sp"] if posthoc else float("nan")),
+            "align_abs_maxab_contact":max([abs(o["sp"]) for o in (a,b) if o], default=float("nan")),
+            "n_contacts_a":g(a,"n",0),"n_contacts_b":g(b,"n",0)}

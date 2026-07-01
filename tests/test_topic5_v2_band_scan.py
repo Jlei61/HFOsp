@@ -2,6 +2,7 @@ import numpy as np
 from src.topic5_v2_band_scan import (
     load_phase1_config, line_noise_bin_mask, band_bin_selection,
     masked_band_power_trace, robust_z_with_flags, channel_artifact_flags,
+    contact_alignment,
 )
 def test_config_rev2_keys():
     c = load_phase1_config()
@@ -63,3 +64,13 @@ def test_band_power_flags_and_edge():
     zz=z.copy(); zz[1,:]=50.0                                        # saturate ch1
     fl=channel_artifact_flags(out["logpower"], zz, 12.0, 0.02, 1e-9)
     assert fl["saturation"][1] and fl["bad_channel"][1]
+
+
+def test_signed_orientation_is_fixed_not_posthoc():
+    names=[f"c{i}" for i in range(8)]
+    ra={n:float(i) for i,n in enumerate(names)}; rb={n:float(7-i) for i,n in enumerate(names)}
+    vals={n:float(7-i) for i,n in enumerate(names)}     # tracks B (anti-A)
+    out=contact_alignment(vals, ra, rb, oriented_template="a")
+    assert out["signed_spearman_a"] < -0.9              # anti-correlated with A
+    assert out["align_signed_oriented"] == out["signed_spearman_a"]   # fixed to A regardless
+    assert out["align_signed_posthoc_max"] > 0.9        # posthoc would pick B (positive)
