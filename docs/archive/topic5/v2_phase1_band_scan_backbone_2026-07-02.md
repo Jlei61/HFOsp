@@ -78,6 +78,11 @@ delta/alpha/low_HYP/legacy_bb  Δ~+0.02-0.04  p~0.22-0.27  5-6/9   ← 不超
 ```
 order null：所有频带都正（Δ+0.12-0.19）但 band-generic（非频带特异）、p 多 NS at n=100、且 gate-guarded + 轻度 anti-conservative（见 §4）→ 证据弱于 spatial。
 
+**★ NARROW (n=7) spatial null（跨队列对照，重要）**：**所有频带都超出空间平滑 null**（Δ+0.07-0.16 p~0.01-0.06 5-6/7），**包括低频/宽带**（delta +0.132 p=0.010、low_HYP +0.162 p=0.010、legacy_bb +0.111 p=0.020）——是 **band-generic**，**不复现 broad 的中高频特异**。两点跨队列结论：
+- **一致（robust）**：**两个队列 obs 都超出空间平滑 null**（broad 中高频超、narrow 全频段超，p<0.05，多数被试）→ **确实存在超出纯平滑的空间特异对齐**（描述性；形式化 Gate A 仍被 strength 门卡住）。注意"|maxab| 平"不等于"纯平滑"——null 中位数更低（~0.44），obs（~0.55）超出它。
+- **不一致（NOT robust）**：**哪个频带**（频带特异性 = Gate B 的问题）——broad 频带特异（LVFA/fast），narrow band-generic（含宽带）。→ **频带特异主张不跨队列稳健**；narrow 的 band-generic 反而更像 spec 的 **broadband-recruitment 档**（G_HFO 预测宽带招募，非频带特异）。
+- **诚实底线**：稳健的是"对齐超平滑"（Gate-A 描述性），不稳健的是"频带特异"（Gate-B）。整体倾向 **"G_HFO 标记一条超出平滑的空间招募通路，但频带特异性 + 形式化验证均未确立"**。
+
 ---
 
 ## 4. 已知局限 + 全量前待定项（承重，勿忽略）
