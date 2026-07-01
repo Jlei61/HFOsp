@@ -24,6 +24,7 @@ Copied verbatim from `docs/superpowers/specs/2026-06-30-topic5-contact-similarit
 - R2 = R3 minus grid: reuse R3's `x_norm/y_norm` + `sigma_xy` + `support`; mirror flips **eval points** y only.
 - R3 recomputed in this runner at the same B/seed/statistic (NOT just read); cross-check vs existing artifact; does not change A-line main result.
 - Results dir: `results/topic5_ictal_recruitment/contact_similarity/`. Subject-level only, no cross-dataset point-cloud pooling.
+- Output-name contract (P1-1, matches `axis_alignment` convention): ONE namespaced dir, not one dir per activation — filenames carry the activation (`cohort_summary_{activation}.{json,csv}`), not the directory name. No `contact_similarity_hfa/`.
 - Tier: sensitivity/robustness; no new cohort claim. Conclusion language gated per spec §9.
 
 ---
@@ -509,7 +510,7 @@ git commit -m "feat(topic5): sequence-sanity spearman/kendall track"
 
 **Interfaces:**
 - Consumes: all of `src.topic5_contact_similarity`; plus `make_field_record`, `matched_channels` (`src/topic5_axis_alignment.py`), `make_plane_grid`, `R_smooth_rank` (`src/propagation_contact_plane_readout.py`), and the IO pattern of `scripts/run_topic5_axis_alignment.py:_subject` (lines 72-190 — meta/cache load, eligible_idxs loop, `bact__idx` anchor).
-- Produces: per-subject JSON + `cohort_summary.{json,csv}` under `results/topic5_ictal_recruitment/contact_similarity/`.
+- Produces: per-subject JSON + `cohort_summary_{activation}.{json,csv}` under `results/topic5_ictal_recruitment/contact_similarity/` (namespaced-in-one-dir; same activation-in-both-runs writes into the SAME dir, matching `axis_alignment`'s `axis_alignment_{band}_max_ab_B1000.json` convention — no per-activation subdir).
 
 **Per-subject context (build once, reuse for all rungs):** input dirs derive from `--input-results-root` (default `results`): `CACHE_DIR=<root>/topic5_ictal_recruitment/t0_feature_cache`, `AXIS_DIR=<root>/spatial_modulation/propagation_geometry/observation_readout/real_subjects`, `MAXAB_REF=<root>/topic5_ictal_recruitment/axis_alignment` (literal relative paths from `run_topic5_axis_alignment.py:53-54`). Load `{ds_sid}_t_a.json` (+ t_b), `matched = matched_channels(...)` (require ≥6); build plane: `source_pts = np.array([[c["x_norm"], c["y_norm"]] for c in matched], float)` (shape **(n,2)** — NOT `column_stack`, which gives (2,n)), `support = np.array([c["support"] for c in matched], float)`, `sigma = R_smooth_rank(make_field_record(matched, rank_a), X, Y, None, S_THRESH)["sigma_xy"]` (frozen on t_a, reused everywhere — matches `run_topic5_axis_alignment.py:101`). Load per-seizure `bb_auc__{idx}` vectors (≥6 finite) and `bact__{idx}` anchors for `idx in meta["eligible_idxs"]`.
 
@@ -660,7 +661,7 @@ Expected: PASS (finite obs for all rungs).
 
 - [ ] **Step 5: Implement `main()` + cohort summary + R3 cross-check**
 
-`main()` adds args `--input-results-root` (default `results`; rebases `CACHE_DIR`/`AXIS_DIR`/`MAXAB_REF`), `--out-dir` (default `results/topic5_ictal_recruitment/contact_similarity`), `--activation`, `--B 1000`, `--seed 20260614`. It iterates the eligible cohort (same discovery as `run_topic5_axis_alignment.main`), writes `per_subject/{ds_sid}.json` and `cohort_summary.{json,csv}` with: per-subject pass flags (R1/R2/R3 within_shaft), `grid_delta`/`smooth_delta`, cohort rows. Add the cohort equivalence read-out:
+`main()` adds args `--input-results-root` (default `results`; rebases `CACHE_DIR`/`AXIS_DIR`/`MAXAB_REF`), `--out-dir` (default `results/topic5_ictal_recruitment/contact_similarity`), `--activation`, `--B 1000`, `--seed 20260614`. It iterates the eligible cohort (same discovery as `run_topic5_axis_alignment.main`), writes `per_subject/{ds_sid}.json` and `cohort_summary_{activation}.{json,csv}` with: per-subject pass flags (R1/R2/R3 within_shaft), `grid_delta`/`smooth_delta`, cohort rows. Add the cohort equivalence read-out:
 
 ```python
 deltas = np.array([s["grid_delta"] for s in subjects if s["status"] == "ok"])
@@ -687,7 +688,7 @@ git commit -m "feat(topic5): contact-similarity ladder runner (R1/R2/R3 + sweep 
 - Create: `results/topic5_ictal_recruitment/contact_similarity/figures/README.md`
 
 **Interfaces:**
-- Consumes: `cohort_summary.json` + `per_subject/*.json` from Task 5.
+- Consumes: `cohort_summary_{activation}.json` (default `<out-dir>/cohort_summary_{activation}.json`, matching the runner's naming; `--summary` overrides) + `per_subject/*.json` from Task 5.
 
 **Panels (spec §8.3; §7 multi-panel discipline — each answers ONE question):**
 - **A** per-subject grouped bars: R1/R2/R3 `obs_subject` with within-shaft `null_q.p95` as a marker/band. Q: do the three rungs agree per subject?
@@ -699,7 +700,7 @@ git commit -m "feat(topic5): contact-similarity ladder runner (R1/R2/R3 + sweep 
 
 - [ ] **Step 2: Generate figures**
 
-Run: `python scripts/plot_topic5_contact_similarity.py`
+Run: `python scripts/plot_topic5_contact_similarity.py --activation broadband --out-dir results/topic5_ictal_recruitment/contact_similarity` (and again with `--activation hfa`).
 Expected: PNGs written under `results/topic5_ictal_recruitment/contact_similarity/figures/`.
 
 - [ ] **Step 3: Eyeball the figures** (render → inspect → fix; per the figure self-contained rule). Confirm panels are readable, legends shared, axes tight.
@@ -726,12 +727,12 @@ git commit -m "feat(topic5): contact-similarity ladder figures + README"
 python scripts/run_topic5_contact_similarity.py --activation broadband --B 1000
 python scripts/run_topic5_contact_similarity.py --activation hfa --B 1000
 ```
-Expected: `cohort_summary.{json,csv}` + `per_subject/*.json` written; log prints R3 cross-check pass count.
+Expected: `cohort_summary_{broadband,hfa}.{json,csv}` written into the SAME `contact_similarity/` dir (no `_hfa` subdir) + `per_subject/*.json`; log prints R3 cross-check pass count.
 
 - [ ] **Step 2: Verify R3 cross-check + eligibility counts**
 
 ```bash
-python -c "import json; s=json.load(open('results/topic5_ictal_recruitment/contact_similarity/cohort_summary.json')); print('n_ok', s['n_ok']); print('grid_ci', s['grid_delta_ci'], 'negligible', s['grid_negligible'])"
+python -c "import json; s=json.load(open('results/topic5_ictal_recruitment/contact_similarity/cohort_summary_broadband.json')); print('n_ok', s['n_ok']); print('grid_ci', s['grid_delta_ci'], 'negligible', s['grid_negligible'])"
 ```
 Expected: prints cohort n, grid-delta CI, equivalence verdict. Confirm n matches the axis_alignment maxAB cohort.
 
@@ -745,7 +746,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add results/FIGURE_INDEX.md results/topic5_ictal_recruitment/contact_similarity/cohort_summary.json results/topic5_ictal_recruitment/contact_similarity/cohort_summary.csv
+git add results/FIGURE_INDEX.md results/topic5_ictal_recruitment/contact_similarity/cohort_summary_broadband.json results/topic5_ictal_recruitment/contact_similarity/cohort_summary_broadband.csv results/topic5_ictal_recruitment/contact_similarity/cohort_summary_hfa.json results/topic5_ictal_recruitment/contact_similarity/cohort_summary_hfa.csv
 git commit -m "feat(topic5): contact-similarity ladder cohort results + figure index"
 ```
 

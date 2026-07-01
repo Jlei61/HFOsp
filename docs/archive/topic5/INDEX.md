@@ -15,6 +15,10 @@
 - 唯一过最严 joint null 的 hfa 细对齐：full 干净复现（Wilcox=0.022）但**奇数半不显著（0.078）→ 非 split-half 稳健**；负对照四层全部非显著=非假阳性。
 - 结论 = real-but-not-robust，**维持灵敏度档、不升 primary**；升格须独立第二队列。主线粗骨架不受影响。
 
+### `contact_similarity_ladder_2026-07-01.md` — 触点相似性几何阶梯（R1 无几何 / R2 同平面触点核 / R3 场）
+- n=18（两激活量），场统计量数值抬高主要来自平面几何平滑（同时抬高信号与零假设，超零假设被试数反而 R1→R3 下降）；网格步无可分辨增益（SESOI=0.05 等价检验未过）；R3 与 A 线主统计逐位一致（0/18 偏差）。
+- 灵敏度/稳健性复核，非新的队列级主张；主线粗骨架结论不受影响。
+
 ## PR 系列
 
 ### `pr1_seizure_clustering/` — Per-subject seizure subtyping (z-ER tensor + 1−Spearman + UPGMA)

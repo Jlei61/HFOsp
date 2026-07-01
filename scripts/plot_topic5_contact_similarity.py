@@ -1,6 +1,6 @@
 """Topic5 contact-similarity ladder — cohort visualisation.
 
-Reads  results/topic5_ictal_recruitment/contact_similarity/cohort_summary.json
+Reads  results/topic5_ictal_recruitment/contact_similarity/cohort_summary_{activation}.json
 Writes results/topic5_ictal_recruitment/contact_similarity/figures/*.png
 
 Four independent panels (CLAUDE.md §7 — one question per panel):
@@ -29,8 +29,17 @@ import numpy as np
 # ---------------------------------------------------------------------------
 # defaults
 # ---------------------------------------------------------------------------
-_DEF_IN = "results/topic5_ictal_recruitment/contact_similarity/cohort_summary.json"
-_DEF_OUT_DIR = "results/topic5_ictal_recruitment/contact_similarity/figures"
+# --out-dir is the ladder's namespaced dir (matches axis_alignment convention: one
+# dir, filenames carry the activation); figures land in <out-dir>/figures/.
+_DEF_OUT_DIR = "results/topic5_ictal_recruitment/contact_similarity"
+
+
+def _default_summary_path(out_dir, activation):
+    """Default cohort_summary path for (out_dir, activation) — must match the
+    runner's `cohort_summary_{activation}.json` naming
+    (scripts/run_topic5_contact_similarity.py:350)."""
+    return Path(out_dir) / f"cohort_summary_{activation}.json"
+
 
 RUNG_LABELS = {"R1": "R1 (raw Pearson)", "R2": "R2 (in-plane smoothed)", "R3": "R3 (grid field)"}
 RUNG_COLORS = {"R1": "#4575b4", "R2": "#fdae61", "R3": "#d73027"}
@@ -289,18 +298,20 @@ def make_figure(summary_path: Path, out_dir: Path, activation: str = "broadband"
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--summary", default=_DEF_IN, help="path to cohort_summary.json")
+    ap.add_argument("--activation", choices=["broadband", "hfa"], default="broadband")
+    ap.add_argument("--summary", default=None,
+                    help="override path to cohort_summary_{activation}.json "
+                         "(default: <out-dir>/cohort_summary_{activation}.json)")
     ap.add_argument("--out-dir", default=_DEF_OUT_DIR)
     args = ap.parse_args()
 
-    summary_path = Path(args.summary)
+    out_dir = Path(args.out_dir)
+    summary_path = Path(args.summary) if args.summary else _default_summary_path(out_dir, args.activation)
     if not summary_path.exists():
-        raise FileNotFoundError(f"cohort_summary.json not found: {summary_path}\n"
+        raise FileNotFoundError(f"cohort_summary_{args.activation}.json not found: {summary_path}\n"
                                 "Run scripts/run_topic5_contact_similarity.py first.")
 
-    data = json.load(open(summary_path))
-    activation = data.get("activation", "broadband")
-    make_figure(summary_path, Path(args.out_dir), activation)
+    make_figure(summary_path, out_dir / "figures", args.activation)
 
 
 if __name__ == "__main__":
