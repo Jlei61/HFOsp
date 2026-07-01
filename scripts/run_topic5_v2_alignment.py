@@ -300,7 +300,9 @@ def main():
         if d["band"] == legacy_band and d["used_fixed_mask"] is True \
                 and d["n_channels_dropped_by_fixed_mask"] == 0:
             delta = d["fixed_mask_delta"]
-            assert np.isfinite(delta) and abs(delta) <= tol, (
+            if not np.isfinite(delta):
+                continue  # degenerate subject (no valid legacy early windows) -> record-only; not a mask bug, don't abort the cohort run (review T7-M3)
+            assert abs(delta) <= tol, (
                 f"QC-2 invariant violated: {d['subject']} legacy_bb fixed_mask_delta={delta} > tol={tol} "
                 f"with n_channels_dropped_by_fixed_mask==0 (fixed mask must be a no-op on the pool).")
 
