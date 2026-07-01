@@ -203,3 +203,94 @@ def test_common_resid_cache_and_alignment_epilepsiae_139(tmp_path):
     for x in rows:
         assert x["feature"] == "common_resid", f"{x['band']} feature={x['feature']!r}"
         assert x["axis_set"] == "broad", f"{x['band']} axis_set={x['axis_set']!r}"
+
+
+def test_aperiodic_vectorized_excess_matches_helper():
+    """Task 11b core math: the build script's VECTORIZED per-(channel,time-bin) band excess equals
+    the scalar Task-11 helper ``aperiodic_corrected_excess_power`` cell-by-cell (the vectorization
+    is a perf refactor — fit the log-log 1/f ONCE per (c,tt), reuse for every band — NOT a different
+    computation). Synthetic pure-1/f PSD + a ripple bump on one (channel,bin); fast (no subprocess)."""
+    import numpy as np
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from scripts.build_topic5_v2_aperiodic_cache import _excess_traces, FIT_LO, FIT_HI, MIN_R2
+    from src.topic5_v2_band_scan import aperiodic_corrected_excess_power, line_noise_bin_mask
+    rng = np.random.default_rng(0)
+    f = np.arange(0, 257, 1.0)                                  # 1 Hz bins to 256 (fs=512-like grid)
+    n_ch, n_time = 3, 5
+    base = np.where(f > 0, f, 1.0) ** (-1.6)                    # pure aperiodic 1/f
+    Sxx = np.empty((n_ch, f.size, n_time))
+    for c in range(n_ch):
+        for tt in range(n_time):
+            Sxx[c, :, tt] = base * (1.0 + 0.05 * rng.standard_normal(f.size))
+    Sxx = np.abs(Sxx) + 1e-9
+    Sxx[1, (f >= 150) & (f < 250), 2] += 3.0 * base[(f >= 150) & (f < 250)]  # a real ripple bump on one cell
+    lm = line_noise_bin_mask(f, [50, 100, 150, 200, 250], 2.0)
+    specs = [("gamma_LVFA", 30.0, 80.0), ("hg_low_ripple", 80.0, 150.0), ("ripple_high", 150.0, 250.0)]
+    out = _excess_traces(f, Sxx, lm, specs, FIT_LO, FIT_HI, MIN_R2)
+    for name, lo, hi in specs:
+        assert out[name].shape == (n_ch, n_time)
+        for c in range(n_ch):
+            for tt in range(n_time):
+                ref = aperiodic_corrected_excess_power(
+                    f, Sxx[c, :, tt], lo, hi, lm, fit_lo=FIT_LO, fit_hi=FIT_HI,
+                    min_r2=MIN_R2, half_open=True)["excess_power"]
+                got = float(out[name][c, tt])
+                if np.isnan(ref):
+                    assert np.isnan(got), f"{name} c{c} t{tt}: helper nan, vectorized {got}"
+                else:
+                    assert abs(got - ref) <= 1e-6 * abs(ref) + 1e-9, \
+                        f"{name} c{c} t{tt}: vectorized {got} != helper {ref}"
+    # the bump cell must carry clearly more ripple excess than the other cells (sanity, not tautology).
+    # ripple-band 1/f PSD is tiny (~f**-1.6), so compare RELATIVELY, not with an absolute margin.
+    other_max = float(np.nanmax(np.delete(out["ripple_high"], 2, axis=1)[1]))
+    assert out["ripple_high"][1, 2] > 10.0 * (other_max + 1e-9)
+
+
+@pytest.mark.integration
+def test_aperiodic_cache_and_alignment_epilepsiae_139(tmp_path):
+    """Task 11b (Gate C input): build the aperiodic-residual (1/f-corrected band excess) cache for
+    epilepsiae_139, then run the alignment with ``--feature aperiodic_resid`` pointing at that cache
+    and assert the ``aperiodic_resid`` subject_summary exists with PRIMARY-band rows.
+
+    Gate C asks: does a band carry OSCILLATORY EXCESS above the 1/f background (aligned to G_HFO)?
+    The cache has the SAME npz structure/keys as the raw band cache (``{B}__zt__{idx}`` /
+    ``{B}__relt__{idx}`` / ``channels``) plus the reused ``analysis_channels`` sidecar, so the
+    alignment reads it exactly like the raw cache. Fully isolated: cache + alignment CSVs -> tmp."""
+    import json
+    import numpy as np
+    cache_dir = tmp_path / "aperiodic_resid_cache"
+    rb = subprocess.run([sys.executable, "scripts/build_topic5_v2_aperiodic_cache.py",
+                         "--subjects", "epilepsiae_139", "--substrate", "broad",
+                         "--outdir", str(cache_dir)], cwd=ROOT, capture_output=True, text=True)
+    assert rb.returncode == 0, f"{rb.stdout}\n{rb.stderr}"
+    npz = cache_dir / "epilepsiae_139.npz"
+    sidecar = cache_dir / "epilepsiae_139.json"
+    assert npz.exists(), f"missing aperiodic npz\n{rb.stdout}\n{rb.stderr}"
+    assert sidecar.exists(), f"missing aperiodic sidecar\n{rb.stdout}"
+    z = np.load(npz, allow_pickle=True)
+    assert "channels" in z, "aperiodic cache missing channels array"
+    # per-(primary band, seizure) zt/relt keys — SAME structure as the raw band cache.
+    assert any(k.startswith("gamma_LVFA__zt__") for k in z.files), f"no primary zt; {list(z.files)[:6]}"
+    assert any(k.startswith("gamma_LVFA__relt__") for k in z.files), "no primary relt"
+    side = json.loads(sidecar.read_text())
+    assert side["analysis_channels_basis"] == "primary_bands_validity", side.get("analysis_channels_basis")
+    assert side["analysis_channels"], "aperiodic sidecar analysis_channels empty"
+    assert side.get("feature") == "aperiodic_resid", side.get("feature")
+
+    ra = subprocess.run([sys.executable, "scripts/run_topic5_v2_alignment.py",
+                         "--feature", "aperiodic_resid", "--substrate", "broad",
+                         "--subjects", "epilepsiae_139", "--feature-cache-dir", str(cache_dir),
+                         "--outdir", str(tmp_path / "align_out")], cwd=ROOT, capture_output=True, text=True)
+    assert ra.returncode == 0, f"{ra.stdout}\n{ra.stderr}"
+    subj_csv = tmp_path / "align_out" / "broad" / "phase1_alignment_aperiodic_resid_subject_summary.csv"
+    assert subj_csv.exists(), f"missing aperiodic_resid subject_summary\n{ra.stdout}\n{ra.stderr}"
+    rows = list(csv.DictReader(open(subj_csv)))
+    assert rows, "empty aperiodic_resid subject_summary"
+    primary = {"delta_HYP_slow", "theta_preictal_PAC", "alpha_sharp_leq13", "beta_LVFA_low",
+               "gamma_LVFA", "hg_low_ripple", "ripple_high"}
+    bands = {x["band"] for x in rows}
+    assert bands & primary, f"no primary band rows in aperiodic_resid summary; bands={bands}"
+    for x in rows:
+        assert x["feature"] == "aperiodic_resid", f"{x['band']} feature={x['feature']!r}"
+        assert x["axis_set"] == "broad", f"{x['band']} axis_set={x['axis_set']!r}"
