@@ -110,3 +110,17 @@ def test_common_field_residual_below_three_shared_points_is_empty():
     cf = {"c0": 1.0, "c1": 2.0}                            # only 2 shared finite points
     band = {"c0": 2.0, "c1": 4.0}
     assert common_field_residual(band, cf) == {}
+
+
+def test_common_field_residual_excludes_nonshared_and_nonfinite():
+    names = [f"c{i}" for i in range(6)]
+    cf = {n: v for n, v in zip(names, [1.0, 2.0, 3.5, 4.0, 6.0, 7.5])}
+    band = {n: 2.0 * cf[n] + 1.0 for n in names}           # exact line -> clean residual ~0
+    band["nan_in_band"], cf["nan_in_band"] = np.nan, 100.0  # band value NaN, cf finite
+    band["nan_in_cf"], cf["nan_in_cf"] = 100.0, np.nan      # band finite, cf value NaN
+    band["band_only"] = 999.0                               # key present in band dict only
+    cf["cf_only"] = 999.0                                   # key present in cf dict only
+    resid = common_field_residual(band, cf)
+    assert set(resid) == set(names)                         # all 4 injected contacts excluded
+    assert all(abs(resid[n]) < 1e-9 for n in names)          # exclusion happened before the OLS
+                                                              # fit -> clean contacts undisturbed
