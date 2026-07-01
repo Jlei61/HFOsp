@@ -1,6 +1,7 @@
 # src/topic5_v2_band_scan.py
 from __future__ import annotations
 from pathlib import Path
+import warnings
 import numpy as np, yaml
 _ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _ROOT / "config/topic5_v2_phase1.yaml"
@@ -274,3 +275,73 @@ def confound_residual_rank(rank_by_name, covariate_maps, overfit_min_ratio=3):
     beta, *_ = np.linalg.lstsq(X, y, rcond=None)
     combined = {n: float(v) for n, v in zip(names, y - X @ beta)}
     return {"single": single, "combined": combined}
+
+
+def rebuild_typical_rank(events_bool, event_lag, agg="mean"):
+    """Rebuild a per-channel typical timing rank from an event x channel table (Patch F, Task 9).
+
+    events_bool : (n_events, n_ch) bool -- per-event channel PARTICIPATION.
+    event_lag   : (n_events, n_ch) float -- per-event per-channel lag/timing value
+                  (NaN where not participating).
+    agg='mean'  : for each channel, aggregate its lags over the events it PARTICIPATES in
+                  (nanmean over events), then dense-rank channels by aggregated lag
+                  (argsort-of-argsort; earliest lag -> smallest rank).
+
+    Phantom-rank discipline (AGENTS.md lagPatRank): a channel that NEVER participates
+    (``events_bool[:, c].sum() == 0``) receives NaN rank, never a fabricated finite rank
+    -- this masking is the whole point of the null. Finite rank <=> the channel
+    participates in >=1 event AND has a finite aggregated lag; the non-participation
+    columns are dropped BEFORE the cross-channel argsort so they can never be ranked.
+    """
+    events_bool = np.asarray(events_bool, bool)
+    event_lag = np.asarray(event_lag, float)
+    n_ch = events_bool.shape[1]
+    if agg != "mean":
+        raise ValueError(f"unsupported agg: {agg!r}")
+    participates = events_bool.sum(axis=0) > 0
+    lag_where_part = np.where(events_bool, event_lag, np.nan)     # only participating lags count
+    agg_lag = np.full(n_ch, np.nan, dtype=float)
+    if participates.any():
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)  # all-NaN participating col -> NaN (kept out of rank)
+            agg_lag[participates] = np.nanmean(lag_where_part[:, participates], axis=0)
+    rank = np.full(n_ch, np.nan, dtype=float)
+    rankable = participates & np.isfinite(agg_lag)
+    idx = np.where(rankable)[0]
+    if idx.size:
+        rank[idx] = np.argsort(np.argsort(agg_lag[idx])).astype(float)
+    return rank
+
+
+def _order_null_one_template(events_bool, event_lag, rng):
+    """One template's HFO-rate-preserving order null: WITHIN each event, permute the lag
+    VALUES among that event's participating channels (participation is untouched -- every
+    channel keeps its exact participation COUNT but gets a shuffled lag), then rebuild the
+    typical rank. Destroys timing ORDER while preserving participation/HFO-rate topography."""
+    events_bool = np.asarray(events_bool, bool)
+    event_lag = np.asarray(event_lag, float)
+    permuted = event_lag.copy()
+    for e in range(events_bool.shape[0]):
+        idx = np.where(events_bool[e])[0]
+        if idx.size > 1:
+            permuted[e, idx] = rng.permutation(event_lag[e, idx])   # shuffle lags among participants
+    return rebuild_typical_rank(events_bool, permuted)
+
+
+def order_null_rank_pair(events_a, lag_a, events_b, lag_b, rng):
+    """HFO-rate-preserving order-null PAIR (A/B) (Patch F, Task 9).
+
+    Rebuild EACH template independently from its own event table under a within-event lag
+    permutation that preserves each channel's participation count, then rebuild the typical
+    rank. Returns ``(rank_a_null, rank_b_null)``.
+
+    ``np.isfinite(rank_a_null)`` equals the participation mask ``events_a.sum(0) > 0`` (same
+    for B): the null PRESERVES HFO-rate/participation topography and DESTROYS only the timing
+    order -- separating "interictal timing GEOMETRY carries information" from "alignment just
+    tracks HFO-rich contacts". If ``events_b is None`` -> ``rank_b_null = None`` (downstream
+    A/B-max uses A only, flagged).
+    """
+    rank_a_null = _order_null_one_template(events_a, lag_a, rng)
+    rank_b_null = (None if events_b is None
+                   else _order_null_one_template(events_b, lag_b, rng))
+    return rank_a_null, rank_b_null

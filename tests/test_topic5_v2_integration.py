@@ -75,3 +75,26 @@ def test_band_cache_smoke_epilepsiae_139(tmp_path):
     some_idx = next(iter(rip))
     assert f"ripple_full_80_250__zt__{some_idx}" in z, "missing per-(band,seizure) z trace"
     assert f"ripple_full_80_250__relt__{some_idx}" in z, "missing per-(band,seizure) relt vector"
+
+
+@pytest.mark.integration
+def test_order_null_depcheck_broad_strength_domain(tmp_path):
+    """Task 9 (relaxed, issue #12): the order-null dependency check runs for --substrate broad,
+    writes the depcheck CSV with the required columns, and EVERY order_null_strength is one of
+    {strong, weak_downgrade, missing}. Does NOT assert ">=1 strong" -- that is a QC print; the
+    script exits 0 (with a stderr warning) even if no subject reaches strong."""
+    r = subprocess.run([sys.executable, "scripts/run_topic5_v2_order_null_depcheck.py",
+                        "--substrate", "broad", "--outdir", str(tmp_path)],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    csv_path = tmp_path / "broad" / "phase1_order_null_depcheck.csv"
+    assert csv_path.exists(), f"missing depcheck CSV\n{r.stdout}\n{r.stderr}"
+    rows = list(csv.DictReader(open(csv_path)))
+    assert rows, "empty depcheck CSV"
+    required = {"subject", "axis_set", "has_event_data_a", "has_event_data_b",
+                "corr_rebuilt_vs_geo_a", "corr_rebuilt_vs_geo_b", "order_null_strength"}
+    for x in rows:
+        assert required <= set(x), f"missing cols {required - set(x)} for {x.get('subject')}"
+        assert x["axis_set"] == "broad", f"{x['subject']} axis_set={x['axis_set']!r}"
+        assert x["order_null_strength"] in {"strong", "weak_downgrade", "missing"}, \
+            f"{x['subject']} bad strength {x['order_null_strength']!r}"

@@ -187,3 +187,11 @@ def test_confound_residual_rank_combined_guarded_by_overfit_ratio():
     out_at = confound_residual_rank(rank9, {"cov1": cov1, "cov2": cov2})
     assert isinstance(out_at["combined"], dict)
     assert all(abs(v) < 1e-6 for v in out_at["combined"].values())
+
+
+def test_order_null_pair_preserves_counts_both_templates():
+    from src.topic5_v2_band_scan import rebuild_typical_rank, order_null_rank_pair
+    eb=np.array([[1,1,1,0],[1,1,1,1],[1,0,1,1]],bool); lag=np.array([[0,1,2,np.nan],[0,1,2,3],[0,np.nan,1,2]],float)
+    r=rebuild_typical_rank(eb,lag); assert np.nanargmin(r)==0 and np.nanargmax(r)==3
+    ra,rb=order_null_rank_pair(eb,lag,eb,lag,np.random.default_rng(0))
+    assert (eb.sum(0)>0).tolist()==np.isfinite(ra).tolist()==np.isfinite(rb).tolist()
