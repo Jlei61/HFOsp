@@ -2,7 +2,7 @@ import numpy as np
 from src.topic5_v2_band_scan import (
     load_phase1_config, line_noise_bin_mask, band_bin_selection,
     masked_band_power_trace, robust_z_with_flags, channel_artifact_flags,
-    contact_alignment,
+    contact_alignment, spatial_constrained_permute,
 )
 def test_config_rev2_keys():
     c = load_phase1_config()
@@ -74,3 +74,13 @@ def test_signed_orientation_is_fixed_not_posthoc():
     assert out["signed_spearman_a"] < -0.9              # anti-correlated with A
     assert out["align_signed_oriented"] == out["signed_spearman_a"]   # fixed to A regardless
     assert out["align_signed_posthoc_max"] > 0.9        # posthoc would pick B (positive)
+
+
+def test_spatial_fallback_reports_strength():
+    names=["A1","A2","A3","A4","B1"]                      # B has 1 -> singleton
+    vals={n:float(i) for i,n in enumerate(names)}
+    shaft={"A1":"A","A2":"A","A3":"A","A4":"A","B1":"B"}
+    coord={n:(float(i),0.0) for i,n in enumerate(names)}
+    perm,st=spatial_constrained_permute(names,vals,shaft,coord,np.random.default_rng(0),"within_shaft",4)
+    assert sorted(perm[n] for n in ["A1","A2","A3","A4"])==[0.0,1.0,2.0,3.0]
+    assert st["n_singleton_groups"]>=1 and "spatial_null_strength" in st

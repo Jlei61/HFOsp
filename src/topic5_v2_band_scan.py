@@ -67,3 +67,94 @@ def contact_alignment(vals_by_name, rank_a_by_name, rank_b_by_name, oriented_tem
             "align_signed_posthoc_max":(posthoc["sp"] if posthoc else float("nan")),
             "align_abs_maxab_contact":max([abs(o["sp"]) for o in (a,b) if o], default=float("nan")),
             "n_contacts_a":g(a,"n",0),"n_contacts_b":g(b,"n",0)}
+
+
+def _nearest_distance_bins(orphan_names, coord_by_name, min_group):
+    # Tier-2 fallback: greedily bin leftover (shaft-too-small) contacts by
+    # coordinate distance into groups of exactly min_group, nearest-neighbour
+    # first; tie-break by original order for determinism. Contacts left over
+    # after the last full bin (too few remaining) are returned separately.
+    pos = {n: i for i, n in enumerate(orphan_names)}
+    remaining = list(orphan_names)
+    bins = []
+    while len(remaining) >= min_group:
+        seed = remaining[0]
+        seed_xy = np.asarray(coord_by_name[seed], float)
+        others = sorted(remaining[1:], key=lambda n: (
+            float(np.linalg.norm(np.asarray(coord_by_name[n], float) - seed_xy)), pos[n]))
+        group = [seed] + others[:min_group - 1]
+        bins.append(group)
+        remaining = [n for n in remaining if n not in group]
+    return bins, remaining
+
+
+def spatial_constrained_permute(names, values_by_name, shaft_by_name, coord_by_name,
+                                 rng, mode, min_group):
+    """Spatially-constrained permutation null (Gate A spatial null, issue #10).
+
+    Permutes per-contact VALUES (contacts keep identity; values move) inside a
+    spatial constraint, at three tiers of strength (strongest first):
+      1. within-shaft  - a shaft's contacts are permuted among themselves
+         whenever that shaft has >= min_group FINITE values (mode="within_shaft",
+         the only mode wired to config nulls.spatial today).
+      2. distance-bin fallback - contacts whose native shaft is too small are
+         pooled by nearest coordinate distance into bins of size min_group.
+      3. subject-wide fallback - contacts distance-binning still can't reach
+         min_group for are pooled with each other (not with tier-1/2 contacts;
+         those groups stay isolated) and permuted as one leftover pool (weakest
+         null; flags subject_wide_weak).
+    Non-finite values never move (nothing sensible to permute into them); they
+    pass through unchanged.
+
+    Reported spatial_null_strength is the WEAKEST tier actually invoked for this
+    call: a call that is mostly within-shaft but needs even one subject-wide
+    fallback contact cannot claim within_shaft_strong (P1-c: only
+    within_shaft_strong supports a formal Gate A pass; the rest are
+    descriptive/sensitivity only).
+    """
+    if mode != "within_shaft":
+        raise ValueError(f"unsupported spatial null mode: {mode!r}")
+
+    names = list(names)
+    is_finite = {n: bool(np.isfinite(float(values_by_name[n]))) for n in names}
+
+    shaft_groups = {}
+    for n in names:
+        shaft_groups.setdefault(shaft_by_name[n], []).append(n)
+    n_singleton_groups = sum(1 for members in shaft_groups.values() if len(members) == 1)
+
+    def shuffled_map(group):
+        vals = rng.permutation([values_by_name[n] for n in group])
+        return {n: float(v) for n, v in zip(group, vals)}
+
+    perm_values = dict(values_by_name)
+    n_effectively_permutable = 0
+    used_distance_bin = used_subject_wide = False
+    leftover_finite = []
+    for members in shaft_groups.values():
+        finite_members = [n for n in members if is_finite[n]]
+        if len(finite_members) >= min_group:
+            perm_values.update(shuffled_map(finite_members))
+            n_effectively_permutable += len(finite_members)
+        else:
+            leftover_finite.extend(finite_members)
+
+    if leftover_finite:
+        bins, remainder = _nearest_distance_bins(leftover_finite, coord_by_name, min_group)
+        if bins:
+            used_distance_bin = True
+            for group in bins:
+                perm_values.update(shuffled_map(group))
+                n_effectively_permutable += len(group)
+        if remainder:
+            used_subject_wide = True
+            if len(remainder) >= 2:
+                perm_values.update(shuffled_map(remainder))
+                n_effectively_permutable += len(remainder)
+
+    spatial_null_strength = ("subject_wide_weak" if used_subject_wide else
+                              "distance_bin_fallback" if used_distance_bin else
+                              "within_shaft_strong")
+    return perm_values, {"spatial_null_strength": spatial_null_strength,
+                          "n_effectively_permutable": n_effectively_permutable,
+                          "n_singleton_groups": n_singleton_groups}
