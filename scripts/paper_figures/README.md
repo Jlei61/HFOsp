@@ -366,3 +366,17 @@ as a gray dashed reference. Output
 Default run: no-stim runaway 758 ms; stim holds it off through the window and it rebounds at
 1592 ms (+834 ms) after stim OFF -- suppressing the q_I-depleting interictal events postpones
 the transition; it returns once the drive resumes. NOT a permanent prevention claim.
+
+**Site comparison (earliest-onset endpoint vs middle):**
+
+```
+python scripts/paper_figures/plot_fig_m3a_v2_2_qI_stim_runaway_gif.py --mode endpoint_vs_middle
+```
+
+Runs 3 arms (baseline + endpoint-stim + middle-stim) and renders two stim rows: top = stim at the
+earliest-onset endpoint (the first-kicked focus tempA, contacts ICL8-11), bottom = stim at the middle
+(ICL4-7), both vs the no-stim mean-q_I gray reference. Output
+`results/paper-ready-figure/fig_m3a_v2_2_qI_stim_site_compare_epilepsiae_1146/figures/`.
+Default run: no-stim 758 ms; endpoint delays to 1171 ms (+414, breaks through inside the window);
+middle delays to 1592 ms (+834, only after stim OFF) -- middle wins, because it blocks the
+propagation corridor for BOTH foci while endpoint stim only silences one focus.

@@ -22,8 +22,8 @@ for p in (ENG, os.path.join(ROOT, "scripts"), ROOT, PFIG):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-# new comparison script (pure helper) -- does not exist yet => RED at import
-from plot_fig_m3a_v2_2_qI_stim_runaway_gif import _select_middle_contacts  # noqa: E402
+# new comparison script (pure helpers)
+from plot_fig_m3a_v2_2_qI_stim_runaway_gif import _select_middle_contacts, _stim_site_center  # noqa: E402
 # the edited continuous-sim loop (stim params) lives in the companion runaway script
 from plot_fig_m3a_v2_2_hG_runaway_transition_gif import (  # noqa: E402
     ProtocolConfig, _build, _simulate_continuous)
@@ -53,6 +53,27 @@ def test_select_middle_contacts_ignores_non_icl_shafts():
     center = np.array([0.15, 0.0])  # nearest points are SCL, but we must pick ICL only
     idx = _select_middle_contacts(names, contacts, center, n=2)
     assert all(names[i].startswith("ICL") for i in idx)
+
+
+# ===========================================================================
+# Stim-site center: "earliest-endpoint" == first-kicked focus (tempA); "middle" == sheet center
+# ===========================================================================
+def test_stim_site_center_earliest_endpoint_is_first_kicked_focus():
+    S = {"center": [5.0, 5.0], "axis_unit": [1.0, 0.0], "L": 10.0,
+         "layout": {"foci": [[1.0, 2.0], [8.0, 2.0]]}}
+    c = _stim_site_center(S, "earliest-endpoint")
+    # tempA = foci[0] is kicked first (pulse k=0), so it is the earliest-onset endpoint
+    assert list(np.asarray(c)) == [1.0, 2.0]
+
+
+def test_stim_site_center_middle_is_sheet_center():
+    S = {"center": [5.0, 5.0], "layout": {"foci": [[1.0, 2.0], [8.0, 2.0]]}}
+    assert list(np.asarray(_stim_site_center(S, "middle"))) == [5.0, 5.0]
+
+
+def test_stim_site_center_rejects_unknown():
+    with pytest.raises(ValueError):
+        _stim_site_center({"center": [0.0, 0.0], "layout": {"foci": [[1.0, 2.0], [8.0, 2.0]]}}, "nope")
 
 
 # ===========================================================================

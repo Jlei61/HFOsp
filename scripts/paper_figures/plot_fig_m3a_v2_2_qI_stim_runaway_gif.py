@@ -78,6 +78,28 @@ def _electrode_e_mask(pos, is_E, stim_contacts, radius: float) -> np.ndarray:
     return np.asarray(is_E, bool) & (d.min(axis=1) <= radius)
 
 
+def _stim_site_center(S, site: str) -> np.ndarray:
+    """Anchor point the stim contacts are chosen around, per site policy:
+      'middle'            -> the sheet center (between the two foci)
+      'earliest-endpoint' -> the focus kicked FIRST (tempA = foci[0]; pulse k=0), i.e. the
+                             earliest-onset axial endpoint."""
+    if site == "middle":
+        return np.asarray(S["center"], float)
+    if site in ("earliest-endpoint", "endpoint"):
+        return np.asarray(H._source_xy(S, "tempA"), float)
+    raise ValueError(f"unknown stim site {site!r} (use 'middle' or 'earliest-endpoint')")
+
+
+def _build_target(S, site: str, radius: float, n: int) -> dict:
+    """Pick the `n` ICL contacts around the `site` anchor and the E-cell clamp mask around them."""
+    contacts, names = H._contacts(S)
+    center = _stim_site_center(S, site)
+    idx = _select_middle_contacts(names, contacts, center, n=n)
+    mask = _electrode_e_mask(S["net"]["pos"], np.asarray(S["labels"]) == 0, contacts[idx], radius)
+    return dict(idx=idx, contacts=contacts[idx], mask=mask,
+                names=[names[i] for i in idx], n_E=int(mask.sum()))
+
+
 # ===========================================================================
 # Per-arm rendering (mirrors the companion qI layout, drawn into one grid row)
 # ===========================================================================
@@ -208,85 +230,115 @@ def _draw_arm(fig, row_spec, S, res, metrics, cfg, qi, frame_steps, q_frames,
 
 
 # ===========================================================================
-# Two-arm run + render
+# Multi-arm run + generic multi-row render
 # ===========================================================================
-def run_compare(cfg, *, stim_on, stim_off, stim_radius, n_stim):
+def _run(cfg, sites, *, radius, n, stim_on, stim_off):
+    """Build ONE substrate, run the no-stim baseline plus one stim arm per site in `sites`. Every arm
+    re-seeds identically, so each stim arm is byte-identical to the baseline until stim_on."""
     S = H._build(cfg)
-    contacts, names = H._contacts(S)
-    center = np.asarray(S["center"], float)
-    stim_idx = _select_middle_contacts(names, contacts, center, n=n_stim)
-    stim_contacts = contacts[stim_idx]
-    is_E = (np.asarray(S["labels"]) == 0)
-    target = _electrode_e_mask(S["net"]["pos"], is_E, stim_contacts, stim_radius)
-
     base_res = H._simulate_continuous(S, cfg, record_gif=True)
-    stim_res = H._simulate_continuous(S, cfg, record_gif=True,
-                                      stim_target=target, stim_on=stim_on, stim_off=stim_off)
     base_m = H._activity_metrics(base_res, S, cfg)
-    stim_m = H._activity_metrics(stim_res, S, cfg)
-    return dict(S=S, base_res=base_res, stim_res=stim_res, base_m=base_m, stim_m=stim_m,
-                stim_idx=stim_idx, stim_contacts=stim_contacts,
-                target_E=int(target.sum()), names=names)
+    arms = {}
+    for site in sites:
+        tgt = _build_target(S, site, radius, n)
+        res = H._simulate_continuous(S, cfg, record_gif=True,
+                                     stim_target=tgt["mask"], stim_on=stim_on, stim_off=stim_off)
+        arms[site] = dict(res=res, m=H._activity_metrics(res, S, cfg), tgt=tgt)
+    return dict(S=S, base_res=base_res, base_m=base_m, arms=arms)
 
 
-def render(bundle, cfg, *, stim_on, stim_off, out_dir: Path):
-    S = bundle["S"]; base_res = bundle["base_res"]; stim_res = bundle["stim_res"]
-    base_m = bundle["base_m"]; stim_m = bundle["stim_m"]
-    dt = S["p"].dt; T = float(S["p"].T)
-    frame_steps = base_res["q_frame_steps"]
-    af_base, vals_b = _activity_fields(base_res, S, frame_steps, dt, cfg.activity_window_ms)
-    af_stim, vals_s = _activity_fields(stim_res, S, frame_steps, dt, cfg.activity_window_ms)
-    allvals = vals_b + vals_s
-    activity_vmax = max(1.0, float(np.percentile(np.concatenate(allvals), 98))) if allvals else 1.0
-    z_base = _zlfp(base_res); z_stim = _zlfp(stim_res)
-    base_qmean = base_res["trace_qI_mean"]
-    geo = S.get("layout", {}).get("label", "Stage5 geometry")
-    stim_names = [bundle["names"][i] for i in bundle["stim_idx"]]
+def _render_frames(bundle, cfg, rows, *, stim_on, stim_off, out_dir: Path, stem, main_title, footer_text):
+    """Render N rows (one `_draw_arm` each) as an animated GIF + final PNG/PDF. Each row dict:
+    {res, m, row_title, stim_contacts|None, baseline_qmean|None}. A shared activity vmax is used
+    across all rows so the 2D-activity colormaps are comparable."""
+    S = bundle["S"]; T = float(S["p"].T); dt = S["p"].dt
+    frame_steps = bundle["base_res"]["q_frame_steps"]
+    af, z, vals = [], [], []
+    for r in rows:
+        a, v = _activity_fields(r["res"], S, frame_steps, dt, cfg.activity_window_ms)
+        af.append(a); z.append(_zlfp(r["res"])); vals += v
+    activity_vmax = max(1.0, float(np.percentile(np.concatenate(vals), 98))) if vals else 1.0
     out_dir.mkdir(parents=True, exist_ok=True)
-
+    gif = out_dir / f"{stem}.gif"; png = out_dir / f"{stem}_final.png"; pdf = out_dir / f"{stem}_final.pdf"
     frames = []
-    gif = out_dir / "qI_stim_runaway_comparison.gif"
-    png = out_dir / "qI_stim_runaway_comparison_final.png"
-    pdf = out_dir / "qI_stim_runaway_comparison_final.pdf"
     for qi, step in enumerate(frame_steps):
         last = qi == len(frame_steps) - 1
-        tm_cursor = T if last else float(base_res["times"][step])
-        fig = plt.figure(figsize=(14.0, 9.7), facecolor="white")
-        outer = fig.add_gridspec(2, 1, left=0.055, right=0.985, bottom=0.065, top=0.9, hspace=0.30)
-        _draw_arm(fig, outer[0], S, base_res, base_m, cfg, qi, frame_steps, base_res["q_frames"],
-                  af_base[qi], z_base, activity_vmax, row_title="no stim", tm_cursor=tm_cursor)
-        _draw_arm(fig, outer[1], S, stim_res, stim_m, cfg, qi, frame_steps, stim_res["q_frames"],
-                  af_stim[qi], z_stim, activity_vmax,
-                  row_title=f"stim ({','.join(stim_names)}, {stim_on:.0f}–{stim_off:.0f} ms)",
-                  tm_cursor=tm_cursor, stim_contacts=bundle["stim_contacts"],
-                  stim_on=stim_on, stim_off=stim_off, baseline_qmean=base_qmean)
+        tm_cursor = T if last else float(bundle["base_res"]["times"][step])
+        fig = plt.figure(figsize=(14.0, 4.9 * len(rows)), facecolor="white")
+        outer = fig.add_gridspec(len(rows), 1, left=0.055, right=0.985, bottom=0.065, top=0.9, hspace=0.30)
+        for ri, r in enumerate(rows):
+            is_stim = r.get("stim_contacts") is not None
+            _draw_arm(fig, outer[ri], S, r["res"], r["m"], cfg, qi, frame_steps, r["res"]["q_frames"],
+                      af[ri][qi], z[ri], activity_vmax, row_title=r["row_title"], tm_cursor=tm_cursor,
+                      stim_contacts=r.get("stim_contacts"),
+                      stim_on=(stim_on if is_stim else None), stim_off=(stim_off if is_stim else None),
+                      baseline_qmean=r.get("baseline_qmean"))
         fig.text(0.016, 0.955, "A", fontsize=18, fontweight="bold")
-        fig.suptitle(f"q_I build-up $\\rightarrow$ runaway: stimulation vs no stimulation "
-                     f"({geo}) | t={tm_cursor:.0f} ms", fontsize=12.0, fontweight="bold", y=0.975)
-        base_rt = base_m["runaway_start_ms"]; stim_rt = stim_m["runaway_start_ms"]
-        delay = ("prevented within T" if stim_rt is None else
-                 (f"+{stim_rt - base_rt:.0f} ms later" if base_rt is not None else f"{stim_rt:.0f} ms"))
-        fig.text(0.50, 0.022,
-                 f"no-stim runaway={base_rt} ms | stim runaway={stim_rt} ms ({delay}) | "
-                 f"min q_I end: no-stim={base_m['q_min_final']} stim={stim_m['q_min_final']} | "
-                 f"stim E cells={bundle['target_E']}",
-                 fontsize=8.0, ha="center", color="0.2")
+        fig.suptitle(main_title.format(t=tm_cursor), fontsize=12.0, fontweight="bold", y=0.975)
+        fig.text(0.50, 0.022, footer_text, fontsize=8.0, ha="center", color="0.2")
         if last:
             fig.savefig(png, dpi=170, bbox_inches="tight", facecolor="white")
             fig.savefig(pdf, bbox_inches="tight", facecolor="white")
         fig.canvas.draw()
         frames.append(np.asarray(fig.canvas.buffer_rgba())[:, :, :3].copy())
         plt.close(fig)
-
     frames.extend([frames[-1]] * 8)
     imageio.mimsave(gif, frames, duration=0.11, loop=0)
     return gif, png, pdf, activity_vmax
 
 
-def _write_readme(bundle, cfg, stim_on, stim_off, out_dir: Path):
-    base_rt = bundle["base_m"]["runaway_start_ms"]
-    stim_rt = bundle["stim_m"]["runaway_start_ms"]
-    stim_names = ", ".join(bundle["names"][i] for i in bundle["stim_idx"])
+def _delay_str(rt, base_rt):
+    if rt is None:
+        return "no runaway in window"
+    if base_rt is None:
+        return f"{rt:.0f} ms"
+    return f"+{rt - base_rt:.0f} ms"
+
+
+def _write_readme_site_compare(base_rt, ep, mid, stim_on, stim_off, out_dir: Path):
+    ep_rt, mid_rt = ep["m"]["runaway_start_ms"], mid["m"]["runaway_start_ms"]
+    ep_names = ", ".join(ep["tgt"]["names"]); mid_names = ", ".join(mid["tgt"]["names"])
+    if ep_rt is not None and mid_rt is not None:
+        better = "中段" if mid_rt > ep_rt else ("最早端点" if ep_rt > mid_rt else "两者相当")
+        cmp_line = (f"最早端点把 runaway 推到 {ep_rt} ms（{_delay_str(ep_rt, base_rt)}），"
+                    f"中段推到 {mid_rt} ms（{_delay_str(mid_rt, base_rt)}）；**{better}压得更后**。")
+    else:
+        cmp_line = (f"最早端点 runaway={ep_rt} ms，中段 runaway={mid_rt} ms（None=整段仿真窗口内没 runaway）；"
+                    f"None 的那个把 runaway 完全压在窗口外，更狠。")
+    text = f"""# M3A-v2.2 q_I runaway：刺激位点对照 — 最早端点 vs 中段（E1146 几何）
+
+### qI_stim_site_compare.gif
+
+连续单轨迹 **visual diagnostic**，不是统计 sweep。和 `fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146`
+**同一套衬底/种子/多脉冲驱动/q_I 载体**；三条轨迹（不刺激基线 + 两种刺激位点）在刺激开之前**逐比特一致**
+（刺激只改阈值比较、不动随机数）。图里只画两条刺激臂做直接对比。
+
+**布局**：两行——上 = **刺激最早起始的端点** `{ep_names}`（最先被点火的灶 tempA 那一端）、
+下 = **刺激中段** `{mid_names}`；两行都在 `[{stim_on:.0f}, {stim_off:.0f}] ms` 施刺激。每行三栏：
+`permissivity(1-q_I)` | 实时 2D SNN 活动 |（上）`q_I`(mean+min)+轴向 `g_K` 疲劳（**叠一条 no-stim 的
+mean q_I 灰虚线做基线对照**）／（下）连续 SEEG readout。刺激窗蓝色阴影、刺激触点蓝方块、runaway 红虚线。
+
+**这条轨迹里看到的**：不刺激基线 runaway={base_rt} ms。{cmp_line}
+机制直觉——打端点=直接掐掉那个灶的点火（但另一个灶还在放电磨刹车）；打中段=两灶都点得着但传不过去、
+每次事件更小。谁更省抑制资源 `q_I`、把 runaway 推得更后，就是这张图要比的。
+
+**红线（务必照读）**：
+- **visual diagnostic**，外部预防式压制**示意**，**不**主张电刺激治发作 / recovery / 闭环 / 破轴。
+- runaway / tonic 饱和**不是** ictal-like 事件。
+
+### qI_stim_site_compare_final.png / .pdf
+
+GIF 末帧静态快照，核对两条刺激臂末态、runaway 时刻、readout 是否非空。
+
+no-stim runaway: `{base_rt}` ms；最早端点刺激 runaway: `{ep_rt}` ms（触点 `{ep_names}`）；
+中段刺激 runaway: `{mid_rt}` ms（触点 `{mid_names}`）。
+"""
+    (out_dir / "README.md").write_text(text)
+
+
+def _write_readme_no_stim(base_rt, mid, stim_on, stim_off, out_dir: Path):
+    stim_rt = mid["m"]["runaway_start_ms"]
+    stim_names = ", ".join(mid["tgt"]["names"])
     if stim_rt is None:
         outcome = f"刺激臂在整段仿真窗口内**没有** runaway（no-stim 在 {base_rt} ms 已 runaway）。"
     elif base_rt is not None:
@@ -309,24 +361,26 @@ def _write_readme(bundle, cfg, stim_on, stim_off, out_dir: Path):
 **这条轨迹里看到的**：{outcome}机制=刺激按住中段→该次"要把它点着"的间期事件被压成局部/压掉→放电少→
 抑制资源 `q_I` 少磨（甚至缓慢回血）→越晚到地板→越晚/不 runaway。
 
-**红线（务必照读）**：
-- 这是 **visual diagnostic**，外部预防式压制的**示意**，**不**主张电刺激治发作 / recovery / 闭环成立 / 破轴。
-- 和内部恢复变量（`h_G`/`g_K` 减法刹车，已另证拉不回饱和雪崩）是**不同问题**：这里压的是 runaway **形成前**的
-  driver，不是去 abort 已经烧起来的 runaway。
-- runaway / tonic 饱和**不是** ictal-like 事件。
+**红线**：**visual diagnostic**、外部预防式压制**示意**，**不**主张电刺激治发作 / recovery / 破轴；
+和内部恢复变量（`h_G`/`g_K` 减法刹车拉不回饱和雪崩）是不同问题；runaway / tonic 不是 ictal-like 事件。
 
 ### qI_stim_runaway_comparison_final.png / .pdf
 
-GIF 末帧静态快照，核对两臂末态、runaway 时刻、readout 是否非空。
-
-no-stim runaway: `{base_rt}` ms；stim runaway: `{stim_rt}` ms；刺激触点：`{stim_names}`；
-刺激覆盖 E 细胞数：`{bundle['target_E']}`。
+GIF 末帧静态快照。no-stim runaway: `{base_rt}` ms；stim runaway: `{stim_rt}` ms；刺激触点：`{stim_names}`。
 """
     (out_dir / "README.md").write_text(text)
 
 
+def _arm_metrics(m):
+    return {k: m[k] for k in ("runaway_start_ms", "max_rate_hz", "q_mean_final", "q_min_final")}
+
+
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--mode", choices=["no_stim_vs_middle", "endpoint_vs_middle"],
+                    default="no_stim_vs_middle",
+                    help="no_stim_vs_middle: baseline vs middle-ICL stim; "
+                         "endpoint_vs_middle: earliest-onset endpoint stim vs middle stim")
     ap.add_argument("--stim-on", type=float, default=500.0)
     ap.add_argument("--stim-off", type=float, default=1400.0)
     ap.add_argument("--stim-radius", type=float, default=2.0)
@@ -338,39 +392,80 @@ def main():
     ap.add_argument("--fig-name", default=None)
     args = ap.parse_args()
     os.chdir(ROOT)
+    on, off = float(args.stim_on), float(args.stim_off)
 
-    fig_name = args.fig_name or (f"{FIG_NAME}_epilepsiae_1146" if args.layout == "subject1146" else FIG_NAME)
+    stem = "qI_stim_site_compare" if args.mode == "endpoint_vs_middle" else "qI_stim_runaway_comparison"
+    default_fig = ("fig_m3a_v2_2_qI_stim_site_compare" if args.mode == "endpoint_vs_middle" else FIG_NAME)
+    fig_name = args.fig_name or (f"{default_fig}_epilepsiae_1146" if args.layout == "subject1146" else default_fig)
     cfg = H.ProtocolConfig(
         layout=str(args.layout), top="qI", use_gK=True, eta_K=0.0, use_hG=False,
         T=float(args.T), n_pulses=int(args.n_pulses), seed=int(args.seed), fig_name=fig_name,
     )
     t0 = time.time()
-    bundle = run_compare(cfg, stim_on=args.stim_on, stim_off=args.stim_off,
-                         stim_radius=args.stim_radius, n_stim=args.n_stim_contacts)
+    sites = ["earliest-endpoint", "middle"] if args.mode == "endpoint_vs_middle" else ["middle"]
+    bundle = _run(cfg, sites, radius=args.stim_radius, n=args.n_stim_contacts, stim_on=on, stim_off=off)
+    S = bundle["S"]; geo = S.get("layout", {}).get("label", "Stage5 geometry")
+    base_m = bundle["base_m"]; base_rt = base_m["runaway_start_ms"]
+    base_qmean = bundle["base_res"]["trace_qI_mean"]
     out_dir = H._out_dir(fig_name)
-    gif, png, pdf, activity_vmax = render(bundle, cfg, stim_on=args.stim_on, stim_off=args.stim_off, out_dir=out_dir)
+
+    if args.mode == "endpoint_vs_middle":
+        ep, mid = bundle["arms"]["earliest-endpoint"], bundle["arms"]["middle"]
+        ep_rt, mid_rt = ep["m"]["runaway_start_ms"], mid["m"]["runaway_start_ms"]
+        rows = [
+            dict(res=ep["res"], m=ep["m"], stim_contacts=ep["tgt"]["contacts"], baseline_qmean=base_qmean,
+                 row_title=f"stim @ earliest endpoint ({','.join(ep['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
+            dict(res=mid["res"], m=mid["m"], stim_contacts=mid["tgt"]["contacts"], baseline_qmean=base_qmean,
+                 row_title=f"stim @ middle ({','.join(mid['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
+        ]
+        main_title = f"q_I runaway: stim @ earliest endpoint vs @ middle ({geo}) | t={{t:.0f}} ms"
+        footer_text = (f"no-stim runaway={base_rt} ms | earliest-endpoint={ep_rt} ms ({_delay_str(ep_rt, base_rt)}) | "
+                       f"middle={mid_rt} ms ({_delay_str(mid_rt, base_rt)}) | "
+                       f"stim E cells: endpoint={ep['tgt']['n_E']} middle={mid['tgt']['n_E']}")
+        gif, png, pdf, activity_vmax = _render_frames(bundle, cfg, rows, stim_on=on, stim_off=off,
+                                                      out_dir=out_dir, stem=stem, main_title=main_title,
+                                                      footer_text=footer_text)
+        stim_meta = {"earliest_endpoint": {"contacts": ep["tgt"]["names"], "target_E_cells": ep["tgt"]["n_E"],
+                                           **_arm_metrics(ep["m"])},
+                     "middle": {"contacts": mid["tgt"]["names"], "target_E_cells": mid["tgt"]["n_E"],
+                                **_arm_metrics(mid["m"])}}
+        _write_readme_site_compare(base_rt, ep, mid, on, off, out_dir)
+    else:
+        mid = bundle["arms"]["middle"]; mid_rt = mid["m"]["runaway_start_ms"]
+        rows = [
+            dict(res=bundle["base_res"], m=base_m, stim_contacts=None, baseline_qmean=None, row_title="no stim"),
+            dict(res=mid["res"], m=mid["m"], stim_contacts=mid["tgt"]["contacts"], baseline_qmean=base_qmean,
+                 row_title=f"stim ({','.join(mid['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
+        ]
+        main_title = f"q_I build-up $\\rightarrow$ runaway: stimulation vs no stimulation ({geo}) | t={{t:.0f}} ms"
+        footer_text = (f"no-stim runaway={base_rt} ms | stim runaway={mid_rt} ms ({_delay_str(mid_rt, base_rt)}) | "
+                       f"min q_I end: no-stim={base_m['q_min_final']} stim={mid['m']['q_min_final']} | "
+                       f"stim E cells={mid['tgt']['n_E']}")
+        gif, png, pdf, activity_vmax = _render_frames(bundle, cfg, rows, stim_on=on, stim_off=off,
+                                                      out_dir=out_dir, stem=stem, main_title=main_title,
+                                                      footer_text=footer_text)
+        stim_meta = {"middle": {"contacts": mid["tgt"]["names"], "target_E_cells": mid["tgt"]["n_E"],
+                                **_arm_metrics(mid["m"])}}
+        _write_readme_no_stim(base_rt, mid, on, off, out_dir)
 
     meta = {
         "figure": fig_name,
-        "status": ("visual diagnostic, two arms (stim vs no-stim) on ONE shared trajectory; EXTERNAL "
-                   "preventive V_th-clamp of the central ICL contacts during a finite window; NOT a "
-                   "treatment/recovery/closed-loop claim, NOT a statistical sweep; runaway/tonic is never ictal-like"),
+        "mode": args.mode,
+        "status": ("visual diagnostic; EXTERNAL preventive V_th-clamp of ICL contacts during a finite "
+                   "window; NOT a treatment/recovery/closed-loop claim, NOT a statistical sweep; "
+                   "runaway/tonic is never ictal-like"),
         "companion_baseline": "fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146 (same q_I trajectory, no stim)",
-        "geometry": bundle["S"].get("layout", {}).get("label", "Stage5 geometry"),
+        "geometry": geo,
         "config": {**{k: getattr(cfg, k) for k in (
             "seed", "T", "pulse_start", "pulse_interval", "n_pulses", "pulse_duration",
             "kick_boost", "r_kick", "q_min", "k_q", "sigma_q", "tau_q", "use_gK", "eta_K",
             "use_hG", "core_mean", "core_radius", "layout")},
-            "stim_on_ms": args.stim_on, "stim_off_ms": args.stim_off,
-            "stim_radius_mm": args.stim_radius, "n_stim_contacts": args.n_stim_contacts,
-            "stim_contacts": [bundle["names"][i] for i in bundle["stim_idx"]],
-            "stim_target_E_cells": bundle["target_E"]},
-        "metrics": {
-            "no_stim": {k: bundle["base_m"][k] for k in ("runaway_start_ms", "max_rate_hz", "q_mean_final", "q_min_final")},
-            "stim": {k: bundle["stim_m"][k] for k in ("runaway_start_ms", "max_rate_hz", "q_mean_final", "q_min_final")},
-            "runaway_delay_ms": (None if bundle["stim_m"]["runaway_start_ms"] is None or bundle["base_m"]["runaway_start_ms"] is None
-                                 else round(bundle["stim_m"]["runaway_start_ms"] - bundle["base_m"]["runaway_start_ms"], 1)),
-        },
+            "stim_on_ms": on, "stim_off_ms": off,
+            "stim_radius_mm": args.stim_radius, "n_stim_contacts": args.n_stim_contacts},
+        "metrics": {"no_stim": _arm_metrics(base_m), **stim_meta,
+                    "runaway_delay_ms": {site: (None if a["m"]["runaway_start_ms"] is None or base_rt is None
+                                                else round(a["m"]["runaway_start_ms"] - base_rt, 1))
+                                         for site, a in bundle["arms"].items()}},
         "outputs": {"gif": str(gif.relative_to(ROOT)), "final_png": str(png.relative_to(ROOT)),
                     "final_pdf": str(pdf.relative_to(ROOT))},
         "colorbars": {"permissivity_vmin": 0.0, "permissivity_vmax": 1.0,
@@ -378,8 +473,7 @@ def main():
         "parity": "arms byte-identical until stim_on (clamp changes only the V_th comparison, no rng draw)",
         "wall_s": round(time.time() - t0, 1),
     }
-    (out_dir / "qI_stim_runaway_comparison_metadata.json").write_text(json.dumps(meta, indent=2))
-    _write_readme(bundle, cfg, args.stim_on, args.stim_off, out_dir)
+    (out_dir / f"{stem}_metadata.json").write_text(json.dumps(meta, indent=2))
     print(f"wrote {gif}")
     print(f"wrote {png}")
     print(json.dumps(meta["metrics"], indent=2))
