@@ -154,3 +154,52 @@ def test_confound_maps_smoke_epilepsiae_139(tmp_path):
         assert isinstance(m[key], dict) and m[key], f"{key} map is empty"
     # hfo_rate is a per-channel interictal event-count topography (>=1 positive count).
     assert any(float(v) > 0 for v in m["hfo_rate"].values()), "hfo_rate all zero"
+
+
+@pytest.mark.integration
+def test_common_resid_cache_and_alignment_epilepsiae_139(tmp_path):
+    """Task 10b (Gate B input): build the leave-one-band-out (LOBO) common-field residual cache
+    for epilepsiae_139, then run the alignment with ``--feature common_resid`` pointing at that
+    residual cache and assert the ``common_resid`` subject_summary exists with PRIMARY-band rows.
+
+    The residual cache has the SAME npz structure/keys as the raw band cache (``{B}__zt__{idx}`` /
+    ``{B}__relt__{idx}`` / ``channels``) plus the reused ``analysis_channels`` sidecar, so the
+    alignment reads it exactly like the raw cache (same fixed-mask + ``primary_bands_validity``
+    basis asserts). Fully isolated: residual cache and alignment CSVs both go to tmp dirs."""
+    import json
+    import numpy as np
+    cache_dir = tmp_path / "common_resid_cache"
+    rb = subprocess.run([sys.executable, "scripts/build_topic5_v2_common_resid_cache.py",
+                         "--subjects", "epilepsiae_139", "--substrate", "broad",
+                         "--outdir", str(cache_dir)], cwd=ROOT, capture_output=True, text=True)
+    assert rb.returncode == 0, f"{rb.stdout}\n{rb.stderr}"
+    npz = cache_dir / "epilepsiae_139.npz"
+    sidecar = cache_dir / "epilepsiae_139.json"
+    assert npz.exists(), f"missing residual npz\n{rb.stdout}\n{rb.stderr}"
+    assert sidecar.exists(), f"missing residual sidecar\n{rb.stdout}"
+    z = np.load(npz, allow_pickle=True)
+    assert "channels" in z, "residual cache missing channels array"
+    # residual cache carries per-(primary band, seizure) zt/relt keys — SAME structure as band cache.
+    assert any(k.startswith("gamma_LVFA__zt__") for k in z.files), f"no primary residual zt; {list(z.files)[:6]}"
+    assert any(k.startswith("gamma_LVFA__relt__") for k in z.files), "no primary residual relt"
+    # reused sidecar keeps the fixed-mask contract the alignment asserts on.
+    side = json.loads(sidecar.read_text())
+    assert side["analysis_channels_basis"] == "primary_bands_validity", side.get("analysis_channels_basis")
+    assert side["analysis_channels"], "residual sidecar analysis_channels empty"
+
+    ra = subprocess.run([sys.executable, "scripts/run_topic5_v2_alignment.py",
+                         "--feature", "common_resid", "--substrate", "broad",
+                         "--subjects", "epilepsiae_139", "--feature-cache-dir", str(cache_dir),
+                         "--outdir", str(tmp_path / "align_out")], cwd=ROOT, capture_output=True, text=True)
+    assert ra.returncode == 0, f"{ra.stdout}\n{ra.stderr}"
+    subj_csv = tmp_path / "align_out" / "broad" / "phase1_alignment_common_resid_subject_summary.csv"
+    assert subj_csv.exists(), f"missing common_resid subject_summary\n{ra.stdout}\n{ra.stderr}"
+    rows = list(csv.DictReader(open(subj_csv)))
+    assert rows, "empty common_resid subject_summary"
+    primary = {"delta_HYP_slow", "theta_preictal_PAC", "alpha_sharp_leq13", "beta_LVFA_low",
+               "gamma_LVFA", "hg_low_ripple", "ripple_high"}
+    bands = {x["band"] for x in rows}
+    assert bands & primary, f"no primary band rows in common_resid summary; bands={bands}"
+    for x in rows:
+        assert x["feature"] == "common_resid", f"{x['band']} feature={x['feature']!r}"
+        assert x["axis_set"] == "broad", f"{x['band']} axis_set={x['axis_set']!r}"

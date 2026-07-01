@@ -105,15 +105,18 @@ def _band_good_names(zt, cache_names, qc):
     return {cache_names[i] for i in range(n) if finite[i] and cache_names[i] not in bad}
 
 
-def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False):
+def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cache_dir=None):
     """Emit window rows for one subject. Returns (window_rows, legacy_unmasked_rows, n_dropped).
     legacy_unmasked_rows = full-pool (unmasked) align_abs_maxab of the legacy band, per window —
-    the same-window baseline the QC-2 (P1-d) fixed-mask delta is measured against."""
+    the same-window baseline the QC-2 (P1-d) fixed-mask delta is measured against.
+    ``feature_cache_dir`` overrides the z-trace cache dir (default = canonical FEATURE_CACHE_DIR
+    per feature); used for isolated smoke tests of the residual caches (10b/11b)."""
     ctx = load_context(ds_sid, substrate)
     long_meta = json.loads((LONG_CACHE / f"{ds_sid}.json").read_text())
     off_by_idx = {int(k): float(v["eeg_offset_rel"]) for k, v in long_meta["seizure"].items()}
 
-    fpath = FEATURE_CACHE_DIR[feature] / f"{ds_sid}.npz"
+    feat_dir = feature_cache_dir or FEATURE_CACHE_DIR[feature]
+    fpath = feat_dir / f"{ds_sid}.npz"
     if not fpath.exists():
         raise FileNotFoundError(
             f"{feature} cache missing for {ds_sid}: {fpath}. "
@@ -265,9 +268,13 @@ def main():
     ap.add_argument("--substrate", choices=list(SUBJECTS_BY_SUB), default="broad")
     ap.add_argument("--subjects", nargs="*", default=None)
     ap.add_argument("--outdir", default=None, help="output root (default results/.../v2_band_scan)")
+    ap.add_argument("--feature-cache-dir", default=None,
+                    help="override the --feature z-trace cache dir (default: canonical per-feature dir). "
+                         "Production leaves this unset; used for isolated smoke tests of 10b/11b residual caches.")
     ap.add_argument("--sensitivity", action="store_true",
                     help="band-wise (per-band good) mask instead of the subject-fixed mask (NOT primary)")
     args = ap.parse_args()
+    feat_dir = Path(args.feature_cache_dir) if args.feature_cache_dir else FEATURE_CACHE_DIR[args.feature]
     cfg = load_phase1_config()
     _all_bands, _primary, legacy_band = _config_bands(cfg)
     tol = float(cfg["tolerances"]["legacy_subject_median_abs"])
@@ -278,11 +285,12 @@ def main():
 
     all_windows, legacy_unmasked_by_sub, n_dropped_by_sub = [], {}, {}
     for ds_sid in subjects:
-        if not (FEATURE_CACHE_DIR[args.feature] / f"{ds_sid}.npz").exists():
+        if not (feat_dir / f"{ds_sid}.npz").exists():
             print(f"[skip] {ds_sid} no {args.feature} cache", flush=True)
             continue
         rows, legacy_unmasked, n_dropped = run_subject(
-            ds_sid, args.substrate, args.feature, cfg, sensitivity=args.sensitivity)
+            ds_sid, args.substrate, args.feature, cfg, sensitivity=args.sensitivity,
+            feature_cache_dir=feat_dir)
         all_windows += rows
         subject = ds_sid.split("_", 1)[1]
         legacy_unmasked_by_sub[(subject, args.substrate)] = legacy_unmasked
