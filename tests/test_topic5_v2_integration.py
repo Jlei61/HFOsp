@@ -66,7 +66,10 @@ def test_band_cache_smoke_epilepsiae_139(tmp_path):
         assert qc["eff_frac"] < 1.0, f"sz{idx} eff_frac={qc['eff_frac']} (line-noise mask should bite)"
         assert qc["fs_edge_flag"] is True, f"sz{idx} fs_edge_flag={qc['fs_edge_flag']} (250>220 on 512Hz)"
         assert "n_band_bins" in qc and "low_baseline_channels" in qc and "bad_channels" in qc
-    assert isinstance(meta["analysis_channels"], list), "analysis_channels must be a list"
+    # validity-only good-set (issue #8, task 6b): saturation on genuinely-seizing high-ripple
+    # channels no longer drives the fixed mask, so analysis_channels must not collapse to empty.
+    assert isinstance(meta["analysis_channels"], list) and meta["analysis_channels"], \
+        f"analysis_channels must be a non-empty list, got {meta['analysis_channels']!r}"
     z = np.load(npz, allow_pickle=True)
     assert "channels" in z
     some_idx = next(iter(rip))

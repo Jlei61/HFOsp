@@ -17,10 +17,16 @@ Outputs, per band ``B`` and seizure ``idx``:
   - sidecar JSON: per ``(B, idx)`` ``{eff_frac, fs_edge_flag, n_band_bins,
     low_baseline_channels, bad_channels}`` PLUS a subject-level ``analysis_channels``.
 
-``analysis_channels`` (SCIENCE CONTRACT, issue #8): the channel NAMES that are finite AND
-not-bad across ALL PRIMARY bands — i.e. the intersection, over every (primary band x seizure)
-that was computed, of {channel is finite in z AND not flagged bad_channel}. A channel bad in
-ANY primary band (in any seizure) is excluded. This fixed mask is what downstream PRIMARY
+``analysis_channels`` (SCIENCE CONTRACT, issue #8): the channel NAMES that are VALID — finite
+in z AND not low-baseline — across ALL PRIMARY bands. I.e. the intersection, over every (primary
+band x seizure) that was computed, of {channel is finite in z AND not flagged low_baseline}. Only
+genuine "can't compute z" validity failures (flatline / degenerate baseline) shrink this fixed
+mask; SATURATION is deliberately NOT used here. The saturation flag (|z|>12 for >2% of bins)
+fires on genuinely-seizing high-ripple channels — band-power-z legitimately spikes during a
+seizure — so excluding it would be circular: it would drop the ictal signal we want to measure,
+and z is baseline-self-normalized so magnitude can't separate seizure from amplifier clipping.
+``bad_channels`` (flatline|saturation) stays in the sidecar as a downstream sensitivity
+diagnostic; it just no longer drives this fixed mask. This mask is what downstream PRIMARY
 metrics use (band-wise mask is sensitivity-only). Nyquist-unavailable primary bands (512 Hz
 subjects can still do hi<256; 256 Hz subjects drop hi>=128) do not constrain the intersection.
 
@@ -58,9 +64,11 @@ from scripts.build_topic5_ictal_field_long_cache import (  # noqa: E402
 from scripts.run_topic5_ictal_field_dynamics import SUBJECTS_BY_SUB  # noqa: E402
 from scripts.run_topic5_t0_eligibility import BROAD_BAND  # noqa: E402  (legacy bb edges, source of truth)
 from src import topic5_ictal_recruitment as recruit  # noqa: E402
+from src.topic5_ictal_recruitment import _spectrogram_on_hop  # noqa: E402
 from src.ictal_onset_extraction import resolve_baseline_window  # noqa: E402
 from src.topic5_v2_band_scan import (  # noqa: E402
-    load_phase1_config, masked_band_power_trace, robust_z_with_flags, channel_artifact_flags)
+    load_phase1_config, line_noise_bin_mask, band_bin_selection,
+    robust_z_with_flags, channel_artifact_flags)
 
 OUT_ROOT = _ROOT / "results/topic5_ictal_recruitment/v2_band_scan"
 
@@ -131,15 +139,31 @@ def build_subject(ds_sid, substrate, specs, primary_names, cfg, out_root):
             drops.append({"idx": idx, "reason": f"chan_mismatch:{len(ch)}vs{len(channels)}"})
             continue
         seizure_idxs.append(idx)
+        # Change A (perf): compute the spectrogram + line-noise bin mask ONCE per seizure — the
+        # expensive part is the FFT over ~1000s of hop bins x n_ch — then integrate EVERY band
+        # from that single Sxx. The old code called masked_band_power_trace once per band, and it
+        # recomputed the full spectrogram internally each time (~12x redundant). _spectrogram_on_hop
+        # is deterministic, so the per-band math below is byte-for-byte what masked_band_power_trace
+        # did; stored z is unchanged (legacy_bb stays bit-identical to the long cache).
+        try:
+            f, t, Sxx = _spectrogram_on_hop(sw.signal, sw.fs, spec_win, spec_hop)
+        except ValueError as e:                           # win_sec needs more samples than we have
+            drops.append({"idx": idx, "reason": f"spectrogram:{e}"})
+            continue
+        line_mask = line_noise_bin_mask(f, harmonics, halfwidth)
+        nyq = float(sw.fs) / 2.0
+        relt = (np.asarray(t, float) - float(sw.pre_sec)).astype(np.float32)
         for name, lo, hi, half_open, _role in specs:
-            try:
-                res = masked_band_power_trace(sw.signal, sw.fs, lo, hi, spec_win, spec_hop,
-                                              harmonics, halfwidth, fs512_hi_safe,
-                                              half_open=half_open)
-            except ValueError as e:                       # Nyquist gate / empty band after mask
-                skipped_bands.setdefault(name, str(e))
+            if hi >= nyq:                                 # Nyquist gate (was inside masked_band_power_trace)
+                skipped_bands.setdefault(name, f"band hi {hi} >= Nyquist {nyq} for fs={sw.fs}")
                 continue
-            logp = res["logpower"]
+            bmask, eff_frac, n_band = band_bin_selection(f, lo, hi, line_mask, half_open=half_open)
+            if not bmask.any():                           # band empty after line-noise mask
+                skipped_bands.setdefault(name, f"no bins in ({lo},{hi}) after line mask")
+                continue
+            power = Sxx[:, bmask, :].sum(axis=1)
+            logp = np.log(np.maximum(power, 1e-30))
+            fs_edge_flag = bool(float(sw.fs) <= 512.0 and float(hi) > fs512_hi_safe)
             bl = resolve_baseline_window(logp.shape[1], hop_sec=spec_hop, pre_sec=sw.pre_sec,
                                          buffer_sec=GUARD_SEC, eeg_onset_rel_sec=eeg_rel,
                                          min_baseline_valid_sec=MIN_BASELINE_SEC)
@@ -151,32 +175,37 @@ def build_subject(ds_sid, substrate, specs, primary_names, cfg, out_root):
                 continue
             flags = channel_artifact_flags(logp, z, sat_abs_z, sat_frac, flatline_eps)
             bad = np.asarray(flags["bad_channel"], bool)
-            relt = (np.asarray(res["t"], float) - float(sw.pre_sec)).astype(np.float32)
+            sat = np.asarray(flags["saturation"], bool)   # bad minus low_baseline (disjoint from flatline)
             arrays[f"{name}__zt__{idx}"] = z.astype(np.float32)
             arrays[f"{name}__relt__{idx}"] = relt
             bands_qc.setdefault(name, {})[str(idx)] = {
-                "eff_frac": float(res["eff_frac"]),
-                "fs_edge_flag": bool(res["fs_edge_flag"]),
-                "n_band_bins": int(res["n_band_bins"]),
+                "eff_frac": float(eff_frac),
+                "fs_edge_flag": fs_edge_flag,
+                "n_band_bins": int(n_band),
                 "low_baseline_channels": _names_where(low, channels),
-                "bad_channels": _names_where(bad, channels),
+                "bad_channels": _names_where(bad, channels),       # flatline|saturation (diagnostic only)
+                "saturation_channels": _names_where(sat, channels),  # inspectable; not in the fixed mask
             }
+            # Change B (science): analysis-mask good-set = VALIDITY only (finite AND not
+            # low-baseline). Excluding saturation here would be circular (see the module docstring):
+            # |z|>12 fires on genuinely-seizing high-ripple channels, which is the ictal signal we
+            # want to keep. bad_channels above still records flatline|saturation for sensitivity.
             finite = np.any(np.isfinite(z), axis=1)
-            good = finite & ~bad                          # finite AND not-bad (issue #8)
+            good = finite & ~low                          # validity-only (issue #8; drop saturation)
             good_by_band_idx[(name, idx)] = {channels[i] for i in np.flatnonzero(good)}
 
     if channels is None or not arrays:
         print(f"  [{ds_sid}] nothing cached ({len(drops)} loader drops)", flush=True)
         return False
 
-    # analysis_channels = intersection over (primary band x seizure) of good names. Degenerate
-    # smoke/dev case (no primary band in the build set): fall back to intersecting over the bands
-    # that WERE built, recorded via analysis_channels_basis (never a production path — full builds
-    # include all 7 primary bands).
+    # analysis_channels = intersection over (primary band x seizure) of VALID (finite, not
+    # low-baseline) names. Degenerate smoke/dev case (no primary band in the build set): fall back
+    # to intersecting over the bands that WERE built, recorded via analysis_channels_basis (never a
+    # production path — full builds include all 7 primary bands).
     built_band_names = sorted({b for (b, _i) in good_by_band_idx})
     primary_built = [b for b in built_band_names if b in primary_names]
     basis = primary_built if primary_built else built_band_names
-    basis_label = "primary_bands" if primary_built else "all_built_bands_fallback"
+    basis_label = "primary_bands_validity" if primary_built else "all_built_bands_validity_fallback"
     analysis_set = None
     for (name, _idx), gset in good_by_band_idx.items():
         if name not in basis:
