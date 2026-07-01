@@ -277,15 +277,23 @@ def confound_residual_rank(rank_by_name, covariate_maps, overfit_min_ratio=3):
     return {"single": single, "combined": combined}
 
 
-def rebuild_typical_rank(events_bool, event_lag, agg="mean"):
+def rebuild_typical_rank(events_bool, event_lag, agg="median"):
     """Rebuild a per-channel typical timing rank from an event x channel table (Patch F, Task 9).
 
     events_bool : (n_events, n_ch) bool -- per-event channel PARTICIPATION.
     event_lag   : (n_events, n_ch) float -- per-event per-channel lag/timing value
                   (NaN where not participating).
-    agg='mean'  : for each channel, aggregate its lags over the events it PARTICIPATES in
-                  (nanmean over events), then dense-rank channels by aggregated lag
-                  (argsort-of-argsort; earliest lag -> smallest rank).
+    agg='median' (default): for each channel, aggregate its lags over the events it
+                  PARTICIPATES in (nanmedian over events), then dense-rank channels by
+                  aggregated lag (argsort-of-argsort; earliest lag -> smallest rank). This
+                  is the PRODUCER aggregator (the ``typical_rank`` field in the
+                  propagation_geometry planes is nanmedian-over-events) -- Gate A's
+                  OBSERVED statistic compares against that producer typical_rank as G_HFO,
+                  so any rebuild (order null or dependency check) must use the same
+                  aggregator or it is testing a different geometry than what was observed
+                  (review T9).
+    agg='mean'  : same aggregation but nanmean over events. Kept for callers that need it
+                  explicitly; not the producer's aggregator.
 
     Phantom-rank discipline (AGENTS.md lagPatRank): a channel that NEVER participates
     (``events_bool[:, c].sum() == 0``) receives NaN rank, never a fabricated finite rank
@@ -296,15 +304,16 @@ def rebuild_typical_rank(events_bool, event_lag, agg="mean"):
     events_bool = np.asarray(events_bool, bool)
     event_lag = np.asarray(event_lag, float)
     n_ch = events_bool.shape[1]
-    if agg != "mean":
+    if agg not in ("mean", "median"):
         raise ValueError(f"unsupported agg: {agg!r}")
+    aggfunc = np.nanmedian if agg == "median" else np.nanmean
     participates = events_bool.sum(axis=0) > 0
     lag_where_part = np.where(events_bool, event_lag, np.nan)     # only participating lags count
     agg_lag = np.full(n_ch, np.nan, dtype=float)
     if participates.any():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)  # all-NaN participating col -> NaN (kept out of rank)
-            agg_lag[participates] = np.nanmean(lag_where_part[:, participates], axis=0)
+            agg_lag[participates] = aggfunc(lag_where_part[:, participates], axis=0)
     rank = np.full(n_ch, np.nan, dtype=float)
     rankable = participates & np.isfinite(agg_lag)
     idx = np.where(rankable)[0]

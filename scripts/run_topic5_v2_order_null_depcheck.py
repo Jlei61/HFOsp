@@ -123,7 +123,10 @@ def eval_subject(ds_sid: str, cfg: dict, axis_set: str, min_corr: float) -> dict
         if int(sel.sum()) == 0:
             continue
         # (n_ch, n_sel) -> (n_sel, n_ch) event x channel; masked normalized rank = event_lag.
-        rebuilt = rebuild_typical_rank(bundle["bools"][:, sel].T, bundle["masked"][:, sel].T)
+        # agg="median" explicit: must match the producer's own typical_rank aggregator
+        # (nanmedian over events, see module docstring above) or this compares rebuilt
+        # geometry against a different geometry than what Gate A actually observed.
+        rebuilt = rebuild_typical_rank(bundle["bools"][:, sel].T, bundle["masked"][:, sel].T, agg="median")
         rho = _spearman_shared(rebuilt, producer)
         if rho is None:
             continue
