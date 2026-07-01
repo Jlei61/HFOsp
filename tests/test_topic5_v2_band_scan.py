@@ -34,3 +34,18 @@ def test_config_band_edges_and_null_params_locked():
     assert n["order_null_min_corr_to_geo"] == 0.90
     assert c["tolerances"]["legacy_subject_median_abs"] == 0.02
     assert c["cohorts"]["axis_sets"] == ["broad", "narrow"] and c["cohorts"]["never_pool_axis_sets"] is True
+
+
+import numpy as np
+from src.topic5_v2_band_scan import line_noise_bin_mask, band_bin_selection
+def test_half_open_bands_do_not_share_boundary_bin():
+    f = np.arange(0, 251, 1.0); lm = line_noise_bin_mask(f, [50,100,150,200,250], 2.0)
+    # delta [1,4) and theta [4,8): 4 Hz belongs to theta only
+    dmask,_,_ = band_bin_selection(f, 1, 4, lm, half_open=True)
+    tmask,_,_ = band_bin_selection(f, 4, 8, lm, half_open=True)
+    assert not dmask[f==4].any() and tmask[f==4].all()
+    # composite closed keeps hi
+    cmask,_,_ = band_bin_selection(f, 80, 250, lm, half_open=False)
+    assert not cmask[f==250].any()             # 250 is line harmonic -> masked anyway
+    _, eff_bb, _ = band_bin_selection(f, 1, 45, lm, half_open=False)
+    assert eff_bb == 1.0
