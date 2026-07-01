@@ -101,8 +101,16 @@ def run_subject(ds_sid, substrate, cfg, n_perm, seed):
 
 
 def _apply_nulls(row, field, sub, align_fn, null_fns, cfg, n_perm, seed):  # pragma: no cover - Stage C
-    """Placeholder for the Phase-1 spatial + order null (activated once band_scan lands)."""
-    raise NotImplementedError("Phase-1 null builders not yet integrated (Stage C).")
+    """Spatial + order null (Stage C). Until wired, preserve OBSERVED K + flag loudly.
+
+    If Phase-1 exports the null builders before Stage C is implemented, we must NOT
+    lose the observed statistics (skip-all) nor fabricate a null: mark the strength
+    columns so the gap is explicit and re-run once Stage C lands.
+    """
+    row["spatial_null_strength"] = "band_scan_present_stage_c_unwired"
+    row["order_null_strength"] = "band_scan_present_stage_c_unwired"
+    print(f"[NOTE] {row['subject']} {row.get('feature','')}: Phase-1 null fns present but Stage-C "
+          f"null loop not yet wired; observed K kept, null pending.", file=sys.stderr)
 
 
 def main(argv=None):

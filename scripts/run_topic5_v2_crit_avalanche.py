@@ -143,8 +143,12 @@ def run_subject(ds_sid, substrate, cfg, n_perm, seed):
 
 
 def _apply_nulls(row, sub, av, null_fns, cfg, n_perm, seed):  # pragma: no cover - Stage C
-    """Placeholder for Phase-1 spatial + order null on atm_forward_displacement."""
-    raise NotImplementedError("Phase-1 null builders not yet integrated (Stage C).")
+    """Spatial + order null on atm_forward_displacement (Stage C). Until wired, preserve
+    OBSERVED ATM stats + flag loudly (never skip-all, never fabricate a null)."""
+    row["spatial_null_strength"] = "band_scan_present_stage_c_unwired"
+    row["order_null_strength"] = "band_scan_present_stage_c_unwired"
+    print(f"[NOTE] {row['subject']}: Phase-1 null fns present but Stage-C null loop not yet "
+          f"wired; observed ATM kept, null pending.", file=sys.stderr)
 
 
 def main(argv=None):
