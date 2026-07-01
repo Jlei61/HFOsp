@@ -80,3 +80,9 @@ python scripts/plot_topic5_contact_similarity.py --activation hfa     --out-dir 
 - **不改变主线**：A 线主结论（间期传播轴 = 患者内共享粗骨架 readout）不受影响；本复核只回答
   "R3 场统计量的数值大小依赖几何处理的哪一步"，是灵敏度/稳健性附注，不是新的队列级主张。
 - **Tier**：sensitivity/robustness（非 primary cohort claim），与 `docs/superpowers/plans/2026-06-30-topic5-contact-similarity-ladder.md` Global Constraints 一致。
+
+### Scope block（英文原文逐字保留，供论文/跨 topic 引用）
+
+- **Supports ONLY**: "Spatially weighted contact-level similarity captures the same coarse interictal–ictal spatial scaffold as the gridded field readout, indicating the field result is driven mainly by local spatial smoothing rather than grid interpolation." — a useful spatial readout / sensitivity metric.
+- **Does NOT support**: "effectively characterizes the epileptic pathological network." Evidence: within-shaft pass counts DROP R1→R3 (6/5/4 broadband, 9/7/5 hfa) — no increased cohort-positive evidence.
+- **Upgrade** to a pathological-network claim requires clinical validation (SOZ/resection/outcome, propagation endpoint, cross-window stability). The R2b 3D sensitivity (in progress) is a defensive check against a 2D-projection artifact, NOT such a clinical upgrade.
