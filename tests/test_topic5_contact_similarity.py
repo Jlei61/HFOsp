@@ -244,3 +244,48 @@ def test_kernel_mirror_flips_eval_y_not_x():
     # Sanity: fixture is y-asymmetric so mirror must differ from identity
     assert not np.isclose(got_mirror, got_identity, atol=1e-4), (
         "mirror=True equals mirror=False — fixture is degenerate or y-flip has no effect")
+
+
+# ---------------------------------------------------------------------------
+# R2b-3D sensitivity: generalize kernel_smooth_at_contacts to n-D (2D + 3D)
+# ---------------------------------------------------------------------------
+
+def test_kernel_3d_hand_weights():
+    # 3 contacts in 3D; hand-compute the Nadaraya-Watson output at one eval point
+    pts = np.array([[0., 0., 0.], [1., 0., 0.], [0., 0., 2.]]); vals = np.array([1., 2., 3.]); sup = np.ones(3); sigma = 1.0
+    out = kernel_smooth_at_contacts(vals, pts, pts, sup, sigma)
+    sig2 = 2.0 * sigma * sigma
+    # eval at pts[0]: d2 to each = [0,1,4]; w=exp(-d2/sig2)
+    w = np.exp(-np.array([0., 1., 4.]) / sig2); exp0 = (w * vals).sum() / w.sum()
+    assert np.isclose(out[0], exp0)
+
+
+def test_kernel_2d_regression_unchanged():
+    # 2D path must be numerically identical to before generalization (protect the cross-check test)
+    rng = np.random.default_rng(0); pts = rng.random((6, 2)); vals = rng.random(6); sup = np.ones(6)
+    out = kernel_smooth_at_contacts(vals, pts, pts, sup, 0.3)
+    # recompute with an explicit 2-col Euclidean reference
+    ref = np.array([((np.exp(-(((pts - pts[i]) ** 2).sum(1)) / (2 * 0.3 ** 2)) * vals).sum()
+                      / np.exp(-(((pts - pts[i]) ** 2).sum(1)) / (2 * 0.3 ** 2)).sum()) for i in range(6)])
+    assert np.allclose(out, ref)
+
+
+def test_kernel_nan_coords_excluded():
+    # a source contact with NaN coord must not contribute to any weight
+    pts = np.array([[0., 0.], [np.nan, np.nan], [1., 0.]]); vals = np.array([1., 9., 2.]); sup = np.ones(3)
+    out = kernel_smooth_at_contacts(vals, pts, pts, sup, 0.5)
+    assert np.isfinite(out[0]) and np.isfinite(out[2])  # value 9 (NaN-coord) must not leak in
+
+
+def test_kernel_sigma_nonpositive_raises():
+    pts = np.array([[0., 0.], [1., 0.]]); vals = np.array([1., 2.]); sup = np.ones(2)
+    with pytest.raises((ValueError,)):
+        kernel_smooth_at_contacts(vals, pts, pts, sup, 0.0)
+
+
+def test_median_nn_spacing_hand_values():
+    from src.topic5_contact_similarity import median_nn_spacing
+    pts = np.array([[0., 0., 0.], [3., 0., 0.]])
+    assert np.isclose(median_nn_spacing(pts), 3.0)
+    pts_identical = np.array([[1., 1.], [1., 1.], [1., 1.]])
+    assert median_nn_spacing(pts_identical) == 0.0
