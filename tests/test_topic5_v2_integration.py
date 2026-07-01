@@ -129,3 +129,28 @@ def test_v2_alignment_raw_smoke_epilepsiae_139(tmp_path):
     # QC-2 (P1-d) record-only cross-check columns must be populated for the legacy band.
     assert legacy["fixed_mask_delta"] != "", "legacy_bb missing fixed_mask_delta (QC-2 record)"
     assert legacy["n_channels_dropped_by_fixed_mask"] != "", "legacy_bb missing n_channels_dropped_by_fixed_mask"
+
+
+@pytest.mark.integration
+def test_confound_maps_smoke_epilepsiae_139(tmp_path):
+    """Task 12a: build the per-contact confound covariate maps for one subject (broad).
+
+    These maps let downstream residualize G_HFO against confounds (HFO rate, baseline power,
+    shaft position) so alignment claims are about TIMING GEOMETRY, not rate/power topography.
+    Asserts the JSON exists and carries non-empty per-contact hfo_rate / baseline_band_power /
+    shaft_position maps for epilepsiae_139."""
+    import json
+    r = subprocess.run([sys.executable, "scripts/build_topic5_v2_confound_maps.py",
+                        "--subjects", "epilepsiae_139", "--substrate", "broad",
+                        "--outdir", str(tmp_path)], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, f"{r.stdout}\n{r.stderr}"
+    out = tmp_path / "broad" / "phase1_confound_maps.json"
+    assert out.exists(), f"missing confound maps json\n{r.stdout}\n{r.stderr}"
+    data = json.loads(out.read_text())
+    assert "epilepsiae_139" in data, f"no epilepsiae_139 entry; keys={list(data)}"
+    m = data["epilepsiae_139"]
+    for key in ("hfo_rate", "baseline_band_power", "shaft_position"):
+        assert key in m, f"missing {key} map"
+        assert isinstance(m[key], dict) and m[key], f"{key} map is empty"
+    # hfo_rate is a per-channel interictal event-count topography (>=1 positive count).
+    assert any(float(v) > 0 for v in m["hfo_rate"].values()), "hfo_rate all zero"
