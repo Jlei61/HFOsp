@@ -294,3 +294,44 @@ def test_aperiodic_cache_and_alignment_epilepsiae_139(tmp_path):
     for x in rows:
         assert x["feature"] == "aperiodic_resid", f"{x['band']} feature={x['feature']!r}"
         assert x["axis_set"] == "broad", f"{x['band']} axis_set={x['axis_set']!r}"
+
+
+@pytest.mark.integration
+def test_v2_nulls_raw_smoke_epilepsiae_139(tmp_path):
+    """Task 13 (Gate A statistical core): two-layer null smoke for epilepsiae_139 (broad, raw,
+    n_perm=20). Each permutation recomputes the FULL alignment statistic (window->seizure->subject
+    median); subject is the unit. Two null_types share one permutation-level long table (required
+    for max-over-bands): 'spatial' (within-shaft permute of the ictal field vs the UNPERMUTED
+    interictal HFO geometry) and 'order' (observed ictal field vs an HFO-rate-preserving,
+    timing-shuffled REBUILD of the interictal geometry).
+
+    Asserts the perm-long parquet carries perm_id rows for BOTH spatial and order (plus the
+    observed perm_id=-1 rows) and the subject summary carries null_z / empirical_p /
+    order_null_strength. Fully isolated to tmp (no shared-tree writes)."""
+    import pandas as pd
+    r = subprocess.run([sys.executable, "scripts/run_topic5_v2_nulls.py",
+                        "--feature", "raw", "--n-perm", "20", "--subjects", "epilepsiae_139",
+                        "--substrate", "broad", "--outdir", str(tmp_path)],
+                       cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, f"{r.stdout}\n{r.stderr}"
+    perm = tmp_path / "broad" / "phase1_null_perm_subject_long.parquet"
+    assert perm.exists(), f"missing perm-long parquet\n{r.stdout}\n{r.stderr}"
+    df = pd.read_parquet(perm)
+    for col in ("subject", "axis_set", "feature", "null_type", "band", "perm_id", "perm_subject_median"):
+        assert col in df.columns, f"perm-long missing col {col}; has {list(df.columns)}"
+    null_types = set(df["null_type"])
+    assert {"spatial", "order"} <= null_types, f"perm-long null_type={null_types} (need both)"
+    # BOTH null types must carry real permutation rows (perm_id>=0), not just the observed row.
+    for nt in ("spatial", "order"):
+        sub = df[(df["null_type"] == nt) & (df["perm_id"] >= 0)]
+        assert len(sub) > 0, f"{nt} null has no perm_id>=0 rows"
+    assert (df["perm_id"] == -1).any(), "no observed (perm_id=-1) rows in perm-long"
+    summ = tmp_path / "broad" / "phase1_null_subject_summary.csv"
+    assert summ.exists(), f"missing subject summary\n{r.stdout}"
+    rows = list(csv.DictReader(open(summ)))
+    assert rows, "empty subject summary"
+    for col in ("null_z", "empirical_p", "order_null_strength"):
+        assert all(col in x for x in rows), f"summary missing col {col}"
+    # order_null_strength must be a legal Task-9 domain value.
+    assert all(x["order_null_strength"] in {"strong", "weak_downgrade", "missing"} for x in rows), \
+        f"bad order_null_strength values: {set(x['order_null_strength'] for x in rows)}"
