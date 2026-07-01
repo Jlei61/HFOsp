@@ -31,6 +31,7 @@ See docs/superpowers/plans/2026-07-01-topic5-r2b-3d-sensitivity.md Task 3.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 import warnings
@@ -44,7 +45,9 @@ if str(_ROOT) not in sys.path:
 warnings.filterwarnings("ignore", message="Mean of empty slice")
 warnings.filterwarnings("ignore", message="invalid value encountered")
 
-from scripts.run_topic5_contact_similarity import _ctx, ACTIVATION_KEY
+from scripts.run_topic5_contact_similarity import (
+    _ctx, ACTIVATION_KEY, _negligible, _bootstrap_median_ci, SESOI,
+)
 from src.topic5_contact_similarity import contact_corr, subject_null, median_nn_spacing
 from src.seeg_coord_loader import (
     load_subject_coords, assert_coord_result_is_mm_for_main_analysis,
@@ -57,6 +60,14 @@ MIN_FINITE_PER_SZ = 6
 RNG_SEED = 20260614
 DEF_ROOT = "results"
 DEF_OUT = "results/topic5_ictal_recruitment/contact_similarity"
+
+# every non-"ok" value augment_subject() can return (module docstring, augment_subject).
+NA_REASONS = ("NA_ineligible", "NA_coords", "NA_units", "NA_insufficient",
+              "NA_degenerate", "NA_no_null")
+
+COVERAGE_COLUMNS = ["subject_id", "n_matched_2d", "n_coord_mapped_3d", "n_common",
+                    "n_shafts_common", "coord_space", "coord_units", "r2b_status",
+                    "missing_channels"]
 
 
 def _maxab_nomirror(rank_a, rank_b, source_pts, support, sigma):
@@ -227,6 +238,76 @@ def _to_jsonable(obj):
     return obj
 
 
+def _write_coverage_csv(path, results):
+    """r2b_coverage_{activation}.csv — one row per subject, exact COVERAGE_COLUMNS."""
+    with open(path, "w", newline="") as fh:
+        w = csv.writer(fh)
+        w.writerow(COVERAGE_COLUMNS)
+        for r in results:
+            w.writerow([
+                r["subject_id"], r.get("n_matched_2d", ""), r.get("n_coord_mapped_3d", ""),
+                r.get("n_common", ""), r.get("n_shafts_common", ""), r.get("coord_space", ""),
+                r.get("coord_units", ""), r["r2b_status"],
+                ";".join(r.get("missing_channels") or []),
+            ])
+
+
+def _null_insufficient(res):
+    """True if EITHER recomputed rung's within-shaft null was underpowered (few
+    effective shuffles). M-1: r2b_status=='ok' only guarantees obs_subject is
+    finite for both rungs -- it does NOT mean the null threshold is trustworthy,
+    so this must be checked and reported separately, not inferred from status."""
+    return any(res.get(rung, {}).get("status") == "INSUFFICIENT_NULL"
+               for rung in ("R2_nm", "R2b"))
+
+
+def _build_summary(results, *, activation, B, seed):
+    """r2b_summary_{activation}.json payload: per-subject trimmed fields + cohort
+    r2b_minus_r2nm median/CI/SESOI verdict, computed on r2b_status=='ok' subjects
+    only (M-1), plus the INSUFFICIENT_NULL and NA-reason breakdowns."""
+    n_na_by_reason = {reason: 0 for reason in NA_REASONS}
+    for r in results:
+        if r["r2b_status"] != "ok":
+            n_na_by_reason[r["r2b_status"]] = n_na_by_reason.get(r["r2b_status"], 0) + 1
+
+    ok = [r for r in results if r["r2b_status"] == "ok"]
+    n_ok_insufficient_null = sum(1 for r in ok if _null_insufficient(r))
+
+    per_subject = [{
+        "subject_id": r["subject_id"],
+        "R2_nm": r.get("R2_nm"),
+        "R2b": r.get("R2b"),
+        "r2b_minus_r2nm": r.get("r2b_minus_r2nm"),
+        "r2b_minus_r2main": r.get("r2b_minus_r2main"),
+        "r2b_status": r["r2b_status"],
+        # not part of the Task 4 minimal schema, but needed by the R1/R2_nm/R2b
+        # ladder figure (Panel B) without re-reading per_subject_r2b/*.json.
+        "r1_obs_stored": (r.get("stored_cross_check") or {}).get("r1_obs"),
+    } for r in results]
+
+    summary = {
+        "activation": activation, "B": int(B), "seed": int(seed),
+        "n_subjects": len(results), "n_ok": len(ok),
+        "n_na_by_reason": n_na_by_reason,
+        "n_ok_insufficient_null": n_ok_insufficient_null,
+    }
+
+    deltas = [r.get("r2b_minus_r2nm") for r in ok]
+    deltas = [d for d in deltas if d is not None and np.isfinite(d)]
+    if deltas:
+        lo, hi = _bootstrap_median_ci(deltas, seed)
+        summary["r2b_minus_r2nm_median"] = float(np.median(deltas))
+        summary["r2b_minus_r2nm_ci"] = [lo, hi]
+        summary["r2b_minus_r2nm_negligible"] = _negligible(lo, hi, SESOI)
+    else:
+        summary["r2b_minus_r2nm_median"] = None
+        summary["r2b_minus_r2nm_ci"] = None
+        summary["r2b_minus_r2nm_negligible"] = None
+
+    summary["per_subject"] = per_subject
+    return summary
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--activation", choices=list(ACTIVATION_KEY), default="broadband")
@@ -269,13 +350,22 @@ def main():
                   f"(n_common={res.get('n_common')}, "
                   f"n_matched={res.get('n_matched_2d')})", flush=True)
 
-    n_ok = sum(1 for r in results if r["r2b_status"] == "ok")
-    deltas = [r["r2b_minus_r2nm"] for r in results
-              if r["r2b_status"] == "ok" and np.isfinite(r["r2b_minus_r2nm"])]
-    print(f"\n[r2b-3d] n_ok={n_ok}/{len(results)}", flush=True)
-    if deltas:
-        print(f"  r2b_minus_r2nm median={np.median(deltas):+.4f} "
-              f"(n={len(deltas)})", flush=True)
+    _write_coverage_csv(out_dir / f"r2b_coverage_{args.activation}.csv", results)
+    summary = _build_summary(results, activation=args.activation, B=args.B, seed=args.seed)
+    json.dump(_to_jsonable(summary),
+              open(out_dir / f"r2b_summary_{args.activation}.json", "w"),
+              indent=2, ensure_ascii=False)
+
+    print(f"\n[r2b-3d] n_ok={summary['n_ok']}/{len(results)} "
+          f"| n_ok_insufficient_null={summary['n_ok_insufficient_null']}", flush=True)
+    print(f"  NA breakdown: {summary['n_na_by_reason']}", flush=True)
+    if summary["r2b_minus_r2nm_median"] is not None:
+        lo, hi = summary["r2b_minus_r2nm_ci"]
+        print(f"  r2b_minus_r2nm median={summary['r2b_minus_r2nm_median']:+.4f} "
+              f"CI=[{lo:+.4f},{hi:+.4f}] negligible(|.|<{SESOI})="
+              f"{summary['r2b_minus_r2nm_negligible']}", flush=True)
+    print(f"wrote {out_dir}/r2b_coverage_{args.activation}.csv, "
+          f"r2b_summary_{args.activation}.json", flush=True)
 
 
 if __name__ == "__main__":

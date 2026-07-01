@@ -206,3 +206,127 @@ def test_real_subject_smoke_1146():
     assert np.isfinite(out["r2b_minus_r2nm"])
     assert out["n_common"] >= 6
     assert out["n_shafts_common"] >= 2
+
+
+# --------------------------------------------------------------------------- Task 4: coverage CSV
+
+def _fixture_results():
+    """5 synthetic per-subject dicts spanning ok / each NA reason / INSUFFICIENT_NULL,
+    shaped like real augment_subject() output (only the fields the coverage/summary
+    writers touch)."""
+    return [
+        {  # ok, both rungs' null well-powered
+            "subject_id": "epilepsiae_A", "r2b_status": "ok",
+            "n_matched_2d": 10, "n_coord_mapped_3d": 9, "n_common": 9,
+            "n_shafts_common": 3, "coord_space": "mni152_1mm", "coord_units": "mm",
+            "missing_channels": ["A5"],
+            "R2_nm": {"status": "ok", "obs_subject": 0.50},
+            "R2b": {"status": "ok", "obs_subject": 0.55},
+            "r2b_minus_r2nm": 0.20, "r2b_minus_r2main": 0.10,
+            "stored_cross_check": {"r1_obs": 0.30},
+        },
+        {  # ok, but R2b null is INSUFFICIENT_NULL (M-1: must NOT be silently trusted)
+            "subject_id": "epilepsiae_B", "r2b_status": "ok",
+            "n_matched_2d": 8, "n_coord_mapped_3d": 8, "n_common": 8,
+            "n_shafts_common": 2, "coord_space": "mni152_1mm", "coord_units": "mm",
+            "missing_channels": [],
+            "R2_nm": {"status": "ok", "obs_subject": 0.40},
+            "R2b": {"status": "INSUFFICIENT_NULL", "obs_subject": 0.60,
+                    "effective_shuffle_n": 2},
+            "r2b_minus_r2nm": 0.30, "r2b_minus_r2main": 0.05,
+            "stored_cross_check": {"r1_obs": 0.20},
+        },
+        {  # NA_insufficient: dropped before rungs are computed
+            "subject_id": "epilepsiae_C", "r2b_status": "NA_insufficient",
+            "n_matched_2d": 8, "n_coord_mapped_3d": 3, "n_common": 3,
+            "n_shafts_common": 1, "missing_channels": ["c1", "c2", "c3", "c4", "c5"],
+        },
+        {  # NA_units: coord_space/coord_units ARE set (loaded), assert raised after
+            "subject_id": "epilepsiae_D", "r2b_status": "NA_units",
+            "n_matched_2d": 7, "coord_space": "mri_native_voxel_ijk",
+            "coord_units": "voxel", "missing_channels": [],
+        },
+        {  # NA_coords: coords never loaded -> no coord_space/coord_units keys at all
+            "subject_id": "epilepsiae_E", "r2b_status": "NA_coords",
+            "n_matched_2d": 6, "missing_channels": [],
+        },
+    ]
+
+
+def test_coverage_csv_exact_columns(tmp_path):
+    """r2b_coverage_{activation}.csv header must be EXACTLY the 9 spec'd columns,
+    in order, and every row (ok or NA) must be present with graceful blanks for
+    fields an NA subject never reached."""
+    import csv as csv_mod
+
+    results = _fixture_results()
+    out_csv = tmp_path / "r2b_coverage_broadband.csv"
+    aug._write_coverage_csv(out_csv, results)
+
+    with open(out_csv, newline="") as fh:
+        reader = csv_mod.reader(fh)
+        header = next(reader)
+        rows = list(reader)
+
+    assert header == ["subject_id", "n_matched_2d", "n_coord_mapped_3d", "n_common",
+                      "n_shafts_common", "coord_space", "coord_units", "r2b_status",
+                      "missing_channels"]
+    assert len(rows) == len(results)
+    by_id = {r[0]: r for r in rows}
+    assert by_id["epilepsiae_A"][7] == "ok"
+    assert by_id["epilepsiae_A"][8] == "A5"
+    # NA_coords never reached the coord loader -> blank coord_space/coord_units, not a crash
+    assert by_id["epilepsiae_E"][5] == "" and by_id["epilepsiae_E"][6] == ""
+    assert by_id["epilepsiae_D"][6] == "voxel"
+
+
+# --------------------------------------------------------------------------- Task 4: cohort summary
+
+def test_build_summary_na_reasons_and_insufficient_null():
+    """M-1: n_ok counts only r2b_status=='ok'; n_ok_insufficient_null is reported
+    SEPARATELY (subject B is r2b_status='ok' but R2b's null was underpowered --
+    must not be silently folded into a clean-looking 'ok' count)."""
+    results = _fixture_results()
+    summary = aug._build_summary(results, activation="broadband", B=10, seed=1)
+
+    assert summary["n_subjects"] == 5
+    assert summary["n_ok"] == 2
+    assert summary["n_ok_insufficient_null"] == 1  # only subject B
+    assert summary["n_na_by_reason"]["NA_insufficient"] == 1
+    assert summary["n_na_by_reason"]["NA_units"] == 1
+    assert summary["n_na_by_reason"]["NA_coords"] == 1
+    assert summary["n_na_by_reason"]["NA_ineligible"] == 0
+    assert summary["n_na_by_reason"]["NA_degenerate"] == 0
+    assert summary["n_na_by_reason"]["NA_no_null"] == 0
+    assert sum(summary["n_na_by_reason"].values()) == 3
+
+    # deltas = [0.20, 0.30] (both ok subjects) -> median 0.25, well outside SESOI=0.05
+    assert summary["r2b_minus_r2nm_median"] == pytest.approx(0.25)
+    lo, hi = summary["r2b_minus_r2nm_ci"]
+    assert lo <= summary["r2b_minus_r2nm_median"] <= hi
+    assert summary["r2b_minus_r2nm_negligible"] is False
+
+    # per-subject trimmed entries carry r1_obs_stored for the ladder figure (Panel B)
+    per = {p["subject_id"]: p for p in summary["per_subject"]}
+    assert per["epilepsiae_A"]["r1_obs_stored"] == pytest.approx(0.30)
+    assert per["epilepsiae_C"]["r1_obs_stored"] is None
+
+
+def test_build_summary_negligible_true_when_deltas_tiny():
+    """Deterministic negligible=True fixture: |r2b_minus_r2nm| stays well inside
+    +-SESOI(0.05) for every ok subject regardless of bootstrap resample noise."""
+    results = [
+        {"subject_id": "epilepsiae_A", "r2b_status": "ok",
+         "R2_nm": {"status": "ok", "obs_subject": 0.5}, "R2b": {"status": "ok", "obs_subject": 0.505},
+         "r2b_minus_r2nm": 0.005, "r2b_minus_r2main": None, "stored_cross_check": {}},
+        {"subject_id": "epilepsiae_B", "r2b_status": "ok",
+         "R2_nm": {"status": "ok", "obs_subject": 0.5}, "R2b": {"status": "ok", "obs_subject": 0.497},
+         "r2b_minus_r2nm": -0.003, "r2b_minus_r2main": None, "stored_cross_check": {}},
+        {"subject_id": "epilepsiae_C", "r2b_status": "ok",
+         "R2_nm": {"status": "ok", "obs_subject": 0.5}, "R2b": {"status": "ok", "obs_subject": 0.51},
+         "r2b_minus_r2nm": 0.010, "r2b_minus_r2main": None, "stored_cross_check": {}},
+    ]
+    summary = aug._build_summary(results, activation="broadband", B=10, seed=1)
+    assert summary["n_ok"] == 3
+    assert summary["n_ok_insufficient_null"] == 0
+    assert summary["r2b_minus_r2nm_negligible"] is True
