@@ -28,6 +28,7 @@
 | 4 观测层 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/stage2_summary.png](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | 虚拟 SEEG 把模型读回成方向/模板 |
 | 5 ictal 回响 | [topic5_ictal_template_echo/figures/echo_anchor_not_path.png](topic5_ictal_template_echo/figures/) | 发作期通道顺序是否回响间期模板（共享粗锚 vs 具体路径） |
 | 5 桥接 | [topic1_topic5_bridge/figures/q1prime_cohort_effect.png](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 的队列效应 |
+| 5 V2 state 层 | [topic5_ictal_recruitment/v2_criticality/figures/phase2_state_layer_alignment.png](topic5_ictal_recruitment/v2_criticality/figures/) | 发作前"变脆状态"是否沿间期 HFO 几何排布（EXPLORATORY，偏阴性；动力学 leg 0/16 显著）|
 | 5 子型×方向 | [topic5_ictal_recruitment/subtype_direction/figures/cohort_C_to_A_connection_broadband.png](topic5_ictal_recruitment/subtype_direction/figures/) | C 线：发作子型是否决定激活方向 + 与 A 线奇偶不稳的连接（队列不可行/无信号） |
 | 5 方向两类 | [topic5_ictal_recruitment/directional_clustering/figures/epilepsiae_442__classes_vs_interictal_hist_broadband.png](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类是否对应间期 A/B（6 ECoG 全无 two_class_mapped；442 真两堆但对不齐；防自欺 null） |
 
