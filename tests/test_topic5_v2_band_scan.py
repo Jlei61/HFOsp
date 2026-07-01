@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from src.topic5_v2_band_scan import (
     load_phase1_config, line_noise_bin_mask, band_bin_selection,
     masked_band_power_trace, robust_z_with_flags, channel_artifact_flags,
@@ -67,6 +68,22 @@ def test_band_power_flags_and_edge():
     assert fl["saturation"][1] and fl["bad_channel"][1]
 
 
+def test_channel_artifact_flags_excludes_nan_frames_from_saturation_fraction():
+    # A channel with SOME NaN frames (no baseline coverage in that stretch) plus a
+    # saturating fraction among the FINITE frames only: NaN frames must be excluded
+    # from the denominator of the saturation fraction, not counted as "not saturated"
+    # (that would dilute a genuinely-saturated channel below sat_frac and hide it).
+    logpower = np.zeros((2, 10))
+    z = np.zeros((2, 10))
+    z[1, :8] = np.nan             # 8/10 frames NaN for channel 1
+    z[1, 8:] = 50.0                # both remaining finite frames saturate (|z|>12)
+    fl = channel_artifact_flags(logpower, z, sat_abs_z=12.0, sat_frac=0.5, flatline_mad_eps=1e-9)
+    assert fl["saturation"][1], "finite-only fraction = 2/2 = 1.0 > 0.5 must flag saturated"
+    assert fl["bad_channel"][1]
+    assert not fl["flatline"][1]          # 2 finite frames -> not all-nonfinite
+    assert not fl["saturation"][0]        # untouched all-zero channel stays clean
+
+
 def test_signed_orientation_is_fixed_not_posthoc():
     names=[f"c{i}" for i in range(8)]
     ra={n:float(i) for i,n in enumerate(names)}; rb={n:float(7-i) for i,n in enumerate(names)}
@@ -85,6 +102,64 @@ def test_spatial_fallback_reports_strength():
     perm,st=spatial_constrained_permute(names,vals,shaft,coord,np.random.default_rng(0),"within_shaft",4)
     assert sorted(perm[n] for n in ["A1","A2","A3","A4"])==[0.0,1.0,2.0,3.0]
     assert st["n_singleton_groups"]>=1 and "spatial_null_strength" in st
+
+
+def test_spatial_permute_within_shaft_no_cross_shaft_leakage_when_both_qualify():
+    names = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]        # both shafts >= min_group=4
+    vals = {"A1": 0.0, "A2": 1.0, "A3": 2.0, "A4": 3.0,
+            "B1": 10.0, "B2": 11.0, "B3": 12.0, "B4": 13.0}
+    shaft = {n: n[0] for n in names}
+    coord = {n: (float(i), 0.0) for i, n in enumerate(names)}
+    perm, st = spatial_constrained_permute(names, vals, shaft, coord,
+                                            np.random.default_rng(1), "within_shaft", 4)
+    assert sorted(perm[n] for n in ("A1", "A2", "A3", "A4")) == [0.0, 1.0, 2.0, 3.0]   # A's own
+    assert sorted(perm[n] for n in ("B1", "B2", "B3", "B4")) == [10.0, 11.0, 12.0, 13.0]  # B's own
+    assert st["spatial_null_strength"] == "within_shaft_strong"
+    assert st["n_effectively_permutable"] == 8
+
+
+def test_spatial_permute_tier2_distance_bin_pools_two_small_shafts():
+    names = ["C1", "C2", "D1", "D2"]                    # each shaft has 2 < min_group=4
+    vals = {"C1": 1.0, "C2": 2.0, "D1": 3.0, "D2": 4.0}
+    shaft = {"C1": "C", "C2": "C", "D1": "D", "D2": "D"}
+    coord = {"C1": (0.0, 0.0), "C2": (1.0, 0.0), "D1": (2.0, 0.0), "D2": (3.0, 0.0)}
+    perm, st = spatial_constrained_permute(names, vals, shaft, coord,
+                                            np.random.default_rng(2), "within_shaft", 4)
+    assert st["spatial_null_strength"] == "distance_bin_fallback"
+    assert st["n_effectively_permutable"] == 4
+    assert sorted(perm[n] for n in names) == [1.0, 2.0, 3.0, 4.0]   # pooled bin permutes together
+
+
+def test_spatial_permute_tier3_subject_wide_real_shuffle_when_leftover_ge_2():
+    names = ["E1", "E2", "F1"]                          # 3 leftover, below min_group=4,
+    vals = {"E1": 5.0, "E2": 6.0, "F1": 7.0}            # too few even for one distance bin
+    shaft = {"E1": "E", "E2": "E", "F1": "F"}
+    coord = {"E1": (0.0, 0.0), "E2": (1.0, 0.0), "F1": (2.0, 0.0)}
+    perm, st = spatial_constrained_permute(names, vals, shaft, coord,
+                                            np.random.default_rng(3), "within_shaft", 4)
+    assert st["spatial_null_strength"] == "subject_wide_weak"
+    assert st["n_effectively_permutable"] == 3          # real shuffle applied (size>=2)
+    assert sorted(perm[n] for n in names) == [5.0, 6.0, 7.0]
+
+
+def test_spatial_permute_unsupported_mode_raises():
+    names = ["A1", "A2"]
+    vals = {"A1": 0.0, "A2": 1.0}
+    shaft = {"A1": "A", "A2": "A"}
+    coord = {"A1": (0.0, 0.0), "A2": (1.0, 0.0)}
+    with pytest.raises(ValueError):
+        spatial_constrained_permute(names, vals, shaft, coord,
+                                     np.random.default_rng(0), "unconstrained", 4)
+
+
+def test_spatial_permute_min_group_below_2_raises():
+    names = ["A1", "A2"]
+    vals = {"A1": 0.0, "A2": 1.0}
+    shaft = {"A1": "A", "A2": "A"}
+    coord = {"A1": (0.0, 0.0), "A2": (1.0, 0.0)}
+    with pytest.raises(AssertionError):
+        spatial_constrained_permute(names, vals, shaft, coord,
+                                     np.random.default_rng(0), "within_shaft", 1)
 
 
 def test_common_field_residual_collinear_is_zero():
@@ -155,6 +230,19 @@ def test_aperiodic_corrected_excess_power_detects_band_localized_bump():
     assert out_bump["excess_power"] > out_ctrl["excess_power"] + 0.2   # clearly larger, not tautological
 
 
+def test_aperiodic_corrected_excess_power_zero_valid_band_bins_is_nan_not_zero():
+    freqs = np.arange(1, 201, 1.0)
+    slope_true, offset_true = -2.0, 2.0
+    psd = 10 ** offset_true * freqs ** slope_true          # exact power law everywhere...
+    band_idx = (freqs >= 90) & (freqs <= 110)
+    psd = psd.copy()
+    psd[band_idx] = np.nan                                  # ...except ZERO valid bins in [90,110]
+    line_mask = np.zeros_like(freqs, dtype=bool)
+    out = aperiodic_corrected_excess_power(freqs, psd, 90, 110, line_mask)  # fit range [1,200] intact
+    assert out["ok"] is True                                # fit still succeeds off-band (179 valid pts)
+    assert np.isnan(out["excess_power"])                    # zero real band bins != flat spectrum -> nan
+
+
 def test_confound_residual_rank_single_always_computed_and_correct():
     names = [f"c{i}" for i in range(8)]
     rank = {n: 2.0 * i + 1.0 for i, n in enumerate(names)}          # G_HFO rank stand-in, linear in index
@@ -187,6 +275,19 @@ def test_confound_residual_rank_combined_guarded_by_overfit_ratio():
     out_at = confound_residual_rank(rank9, {"cov1": cov1, "cov2": cov2})
     assert isinstance(out_at["combined"], dict)
     assert all(abs(v) < 1e-6 for v in out_at["combined"].values())
+
+
+def test_confound_residual_rank_combined_uses_jointly_aligned_n_not_len_rank():
+    # covariate map covers FEWER names than rank (3 entirely absent) -- the overfit guard
+    # and the combined dict's count must both use the jointly-aligned n_contacts, not len(rank).
+    names_rank = [f"c{i}" for i in range(10)]
+    rank = {n: float(i) for i, n in enumerate(names_rank)}
+    partial_cov = {f"c{i}": float(i) for i in range(7)}     # c7,c8,c9 missing entirely
+    out = confound_residual_rank(rank, {"partial_cov": partial_cov})
+    assert isinstance(out["combined"], dict)                 # 7 contacts >= 3*1+3=6 -> guard passes
+    assert len(out["combined"]) == 7                         # jointly-aligned count...
+    assert len(out["combined"]) < len(rank)                  # ...strictly fewer than len(rank)=10
+    assert set(out["combined"]) == set(partial_cov)
 
 
 def test_order_null_pair_preserves_counts_both_templates():
@@ -247,6 +348,21 @@ def test_gate_flags_reject_each_pvalue_and_delta_at_alpha_boundary():
     assert gate_pass_flags(**_gate_kwargs(order_delta=0.0))["gate_A_order"] is False
     assert gate_pass_flags(**_gate_kwargs(common_resid_p=0.05))["gate_B_freq_specific"] is False
     assert gate_pass_flags(**_gate_kwargs(aperiodic_p=0.05))["gate_C_hfo_specific"] is False
+
+
+def test_gate_flags_additional_alpha_boundary_and_order_strength_missing():
+    from src.topic5_v2_band_scan import gate_pass_flags
+    # band_max_over_bands_p==alpha (not <alpha): the observed band delta must beat the
+    # max-over-bands null strictly, not tie it.
+    assert gate_pass_flags(**_gate_kwargs(band_max_over_bands_p=0.05))["gate_B_freq_specific"] is False
+    # common_resid_delta==0.0 (not >0): same boundary discipline as the other delta checks.
+    assert gate_pass_flags(**_gate_kwargs(common_resid_delta=0.0))["gate_B_freq_specific"] is False
+    # aperiodic_delta==0.0 (not >0): fails gate_C on its own.
+    assert gate_pass_flags(**_gate_kwargs(aperiodic_delta=0.0))["gate_C_hfo_specific"] is False
+    # order_strength=="missing" (anything other than the literal "weak_downgrade") must still
+    # pass gate_A_order -- proves the check is a != negative-match against one banned value,
+    # not a =="strong" positive allowlist.
+    assert gate_pass_flags(**_gate_kwargs(order_strength="missing"))["gate_A_order"] is True
 
 
 def test_gate_b_needs_positive_common_resid_delta_and_band_beats_max_over_bands_null():

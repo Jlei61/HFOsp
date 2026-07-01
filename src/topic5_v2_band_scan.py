@@ -41,8 +41,9 @@ def robust_z_with_flags(logpower, baseline_idx, hop_sec, min_baseline_valid_sec)
 def channel_artifact_flags(logpower, z, sat_abs_z, sat_frac, flatline_mad_eps):
     z=np.asarray(z,float); flat=np.all(~np.isfinite(z),axis=1)
     with np.errstate(invalid="ignore"):
-        sat=np.nanmean(np.abs(z)>float(sat_abs_z), axis=1) > float(sat_frac)
-    sat=np.where(np.isfinite(sat), sat, False)
+        bad_bool = np.abs(z) > float(sat_abs_z)
+        bad_bool = np.where(np.isnan(z), np.nan, bad_bool)   # NaN frames excluded from the
+        sat=np.nanmean(bad_bool, axis=1) > float(sat_frac)   # fraction, not counted as not-saturated
     bad=flat|sat
     return {"flatline":flat, "saturation":sat, "bad_channel":bad}
 
@@ -115,6 +116,7 @@ def spatial_constrained_permute(names, values_by_name, shaft_by_name, coord_by_n
     """
     if mode != "within_shaft":
         raise ValueError(f"unsupported spatial null mode: {mode!r}")
+    assert min_group >= 2, f"min_group must be >= 2, got {min_group!r}"
 
     names = list(names)
     is_finite = {n: bool(np.isfinite(float(values_by_name[n]))) for n in names}

@@ -69,10 +69,11 @@ def _old_subject_median(legacy_rows, ds_sid, band):
 
 def run_axis(substrate, out_root, tol):
     legacy_rows = list(csv.DictReader(open(LEGACY_CSV_BY_AXIS[substrate])))
-    out_rows, failures = [], []
+    out_rows, failures, skipped = [], [], []
     for ds_sid in SUBJECTS_BY_SUB[substrate]:
         if not (CACHE / f"{ds_sid}.npz").exists():
             print(f"[skip] {ds_sid} no long cache", flush=True)
+            skipped.append(ds_sid)
             continue
         new = _new_subject_medians(ds_sid, substrate)
         subject = ds_sid.split("_", 1)[1]
@@ -101,7 +102,7 @@ def run_axis(substrate, out_root, tol):
     max_abs = max((abs(r["delta"]) for r in out_rows if np.isfinite(r["delta"])), default=float("nan"))
     print(f"[done] {substrate}: {len(out_rows)} rows -> {outpath} | max|delta|={max_abs:.2e} "
           f"| tol={tol} | failures={len(failures)}", flush=True)
-    return out_rows, failures, outpath
+    return out_rows, failures, outpath, skipped
 
 
 def main():
@@ -113,7 +114,19 @@ def main():
     args = ap.parse_args()
     tol = float(load_phase1_config()["tolerances"]["legacy_subject_median_abs"])
     out_root = Path(args.outdir) if args.outdir else OUT_ROOT
-    _rows, failures, _outpath = run_axis(args.substrate, out_root, tol)
+    _rows, failures, _outpath, skipped = run_axis(args.substrate, out_root, tol)
+    # Hard gate (review T4): a MISSING long cache must not silently pass as an empty/partial
+    # cohort -- every SUBJECTS_BY_SUB[substrate] subject contributes exactly one bb row and one
+    # hfa row, or the gate fails loudly instead of exiting 0 on a false pass (empty out_rows ->
+    # empty failures -> old code exited 0).
+    expected_rows = 2 * len(SUBJECTS_BY_SUB[args.substrate])  # bb+hfa per subject
+    if skipped or len(_rows) != expected_rows:
+        print(f"[FAIL] {args.substrate} legacy reproduction: missing long cache for "
+              f"{len(skipped)}/{len(SUBJECTS_BY_SUB[args.substrate])} subject(s) "
+              f"({', '.join(skipped) if skipped else 'none'}) -- got {len(_rows)} rows, expected "
+              f"{expected_rows} (bb+hfa per subject); hard gate cannot pass on a partial cohort",
+              file=sys.stderr, flush=True)
+        sys.exit(1)
     if failures:
         print(f"[FAIL] {args.substrate} legacy reproduction over tol (|delta|>{tol}): "
               + ", ".join(f"{s}/{b}={d:+.4f}" for s, b, d in failures), file=sys.stderr, flush=True)
