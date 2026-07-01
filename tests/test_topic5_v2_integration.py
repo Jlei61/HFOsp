@@ -38,3 +38,37 @@ def test_iter_subject_seizure_windows_yields_for_epilepsiae_139(monkeypatch):
         sw = yielded[int(k)]
         assert abs(float(sw.pre_sec) - s["pre_sec"]) < 1e-6, f"pre_sec drift sz{k}"
         assert abs(float(sw.post_sec) - s["post_sec"]) < 1e-6, f"post_sec drift sz{k}"
+
+
+@pytest.mark.integration
+def test_band_cache_smoke_epilepsiae_139(tmp_path):
+    """Task 6: build the multi-band masked band-power cache for one 512 Hz subject (2 bands)
+    and check the npz + sidecar contract. Writes to an isolated tmp dir (never the shared tree).
+
+    ``ripple_full_80_250`` on epilepsiae_139 (fs=512): line-noise harmonics (100/150/200/250)
+    fall inside [80,250] -> masked out -> ``eff_frac < 1``; hi 250 > fs512_hi_safe 220 ->
+    ``fs_edge_flag`` True. A subject-level ``analysis_channels`` fixed mask is written."""
+    import json
+    import numpy as np
+    r = subprocess.run([sys.executable, "scripts/build_topic5_v2_band_cache.py",
+                        "--subjects", "epilepsiae_139",
+                        "--bands", "legacy_bb_1_45", "ripple_full_80_250",
+                        "--outdir", str(tmp_path)], cwd=ROOT, capture_output=True, text=True)
+    assert r.returncode == 0, f"{r.stdout}\n{r.stderr}"
+    npz = tmp_path / "cache" / "epilepsiae_139.npz"
+    sidecar = tmp_path / "cache" / "epilepsiae_139.json"
+    assert npz.exists(), f"missing npz\n{r.stdout}\n{r.stderr}"
+    assert sidecar.exists(), f"missing sidecar json\n{r.stdout}"
+    meta = json.loads(sidecar.read_text())
+    rip = meta["bands"]["ripple_full_80_250"]
+    assert rip, "no ripple_full_80_250 (band,seizure) QC entries"
+    for idx, qc in rip.items():
+        assert qc["eff_frac"] < 1.0, f"sz{idx} eff_frac={qc['eff_frac']} (line-noise mask should bite)"
+        assert qc["fs_edge_flag"] is True, f"sz{idx} fs_edge_flag={qc['fs_edge_flag']} (250>220 on 512Hz)"
+        assert "n_band_bins" in qc and "low_baseline_channels" in qc and "bad_channels" in qc
+    assert isinstance(meta["analysis_channels"], list), "analysis_channels must be a list"
+    z = np.load(npz, allow_pickle=True)
+    assert "channels" in z
+    some_idx = next(iter(rip))
+    assert f"ripple_full_80_250__zt__{some_idx}" in z, "missing per-(band,seizure) z trace"
+    assert f"ripple_full_80_250__relt__{some_idx}" in z, "missing per-(band,seizure) relt vector"
