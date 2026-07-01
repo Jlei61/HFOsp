@@ -3,7 +3,7 @@ from src.topic5_v2_band_scan import (
     load_phase1_config, line_noise_bin_mask, band_bin_selection,
     masked_band_power_trace, robust_z_with_flags, channel_artifact_flags,
     contact_alignment, spatial_constrained_permute, common_field_residual,
-    aperiodic_corrected_excess_power,
+    aperiodic_corrected_excess_power, confound_residual_rank,
 )
 def test_config_rev2_keys():
     c = load_phase1_config()
@@ -153,3 +153,37 @@ def test_aperiodic_corrected_excess_power_detects_band_localized_bump():
     assert out_bump["excess_power"] > 0.3                  # clear detection (true bump mass ~0.6)
     assert out_ctrl["excess_power"] < 0.05                 # no bump present -> near zero
     assert out_bump["excess_power"] > out_ctrl["excess_power"] + 0.2   # clearly larger, not tautological
+
+
+def test_confound_residual_rank_single_always_computed_and_correct():
+    names = [f"c{i}" for i in range(8)]
+    rank = {n: 2.0 * i + 1.0 for i, n in enumerate(names)}          # G_HFO rank stand-in, linear in index
+    collinear = {n: float(i) for i, n in enumerate(names)}          # rank = 2*collinear + 1 exactly
+    unrelated = {n: abs(i - 3.5) for i, n in enumerate(names)}      # symmetric V-shape: exactly zero
+                                                                     # correlation with the linear rank above
+    out = confound_residual_rank(rank, {"collinear": collinear, "unrelated": unrelated})
+    assert set(out["single"]) == {"collinear", "unrelated"}         # single always has every covariate
+    assert all(abs(v) < 1e-9 for v in out["single"]["collinear"].values())      # exact line -> ~0
+    mean_rank = float(np.mean(list(rank.values())))
+    for n in names:                                                 # zero-corr cov -> slope 0, resid = rank - mean
+        assert abs(out["single"]["unrelated"][n] - (rank[n] - mean_rank)) < 1e-9
+
+
+def test_confound_residual_rank_combined_guarded_by_overfit_ratio():
+    # below threshold: 2 covariates -> need >= 3*2+3=9 contacts; only 8 given -> combined None
+    names8 = [f"c{i}" for i in range(8)]
+    cov8 = {"cov1": {n: float(i) for i, n in enumerate(names8)},
+            "cov2": {n: float(i % 3) for i, n in enumerate(names8)}}
+    rank8 = {n: float(i) for i, n in enumerate(names8)}
+    out_below = confound_residual_rank(rank8, cov8)
+    assert out_below["single"] and out_below["combined"] is None    # single unaffected by the guard
+
+    # at threshold: 9 contacts meets 3*2+3=9 exactly (>= is inclusive); rank is an EXACT
+    # linear combo of the two covariates -> combined residuals ~0
+    names9 = [f"c{i}" for i in range(9)]
+    cov1 = {n: float(i) for i, n in enumerate(names9)}
+    cov2 = {n: float(i % 3) for i, n in enumerate(names9)}
+    rank9 = {n: 3.0 * cov1[n] - 2.0 * cov2[n] + 5.0 for n in names9}
+    out_at = confound_residual_rank(rank9, {"cov1": cov1, "cov2": cov2})
+    assert isinstance(out_at["combined"], dict)
+    assert all(abs(v) < 1e-6 for v in out_at["combined"].values())

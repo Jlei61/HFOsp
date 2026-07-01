@@ -236,3 +236,41 @@ def aperiodic_corrected_excess_power(freqs, psd_ch, lo, hi, line_mask,
 
     return {"excess_power": excess_power, "fit_r2": float(fit_r2),
             "slope": float(slope), "offset": float(offset), "ok": ok}
+
+
+def confound_residual_rank(rank_by_name, covariate_maps, overfit_min_ratio=3):
+    """Residualize the G_HFO rank against confound covariates (Patch H raw material, Task 12).
+
+    `single`: for EACH covariate independently, OLS-residualizes rank on that one
+    covariate via `common_field_residual` (identical present-and-finite alignment +
+    degree-1 polyfit + <3-shared-points -> {} guard as the band/common-field case;
+    here rank plays "band" and the covariate plays "common field"). Always computed,
+    one entry per covariate in `covariate_maps`, regardless of the guard below --
+    downstream alignment-to-timing-geometry claims want the single-covariate view
+    even when the joint fit is overfitting-guarded away.
+
+    `combined`: OLS-residualizes rank on ALL covariates JOINTLY (multiple regression,
+    design matrix [1, cov_1, cov_2, ...] solved by `np.linalg.lstsq`), aligned on names
+    finite across rank AND EVERY covariate (a stricter alignment than `single`, which
+    only requires the one covariate in play to be finite). Guarded against overfitting:
+    with p = len(covariate_maps) covariates the fit has p+1 free parameters, so
+    `combined` is only attempted when the jointly-aligned n_contacts >=
+    overfit_min_ratio*p + 3; otherwise returns None rather than fit an
+    under-determined regression.
+    """
+    single = {cov: common_field_residual(rank_by_name, cov_map)
+              for cov, cov_map in covariate_maps.items()}
+
+    cov_names = list(covariate_maps)
+    names = [n for n in rank_by_name if np.isfinite(rank_by_name[n])
+             and all(n in covariate_maps[c] and np.isfinite(covariate_maps[c][n]) for c in cov_names)]
+    n_contacts = len(names)
+    if n_contacts < overfit_min_ratio * len(cov_names) + 3:
+        return {"single": single, "combined": None}
+
+    y = np.array([rank_by_name[n] for n in names], float)
+    X = np.column_stack([np.ones(n_contacts)] +
+                         [np.array([covariate_maps[c][n] for n in names], float) for c in cov_names])
+    beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+    combined = {n: float(v) for n, v in zip(names, y - X @ beta)}
+    return {"single": single, "combined": combined}
