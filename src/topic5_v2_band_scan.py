@@ -228,7 +228,7 @@ def aperiodic_corrected_excess_power(freqs, psd_ch, lo, hi, line_mask,
     if not ok:
         excess_power = float("nan")
     elif not band_valid.any():
-        excess_power = 0.0
+        excess_power = float("nan")  # zero real bins in band != measured-flat spectrum; exclude (review T11)
     else:
         f_band, psd_band = freqs[band_valid], psd_ch[band_valid]
         aperiodic_pred = 10.0 ** (slope * np.log10(f_band) + offset)
