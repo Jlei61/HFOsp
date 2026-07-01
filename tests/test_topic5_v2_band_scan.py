@@ -195,3 +195,94 @@ def test_order_null_pair_preserves_counts_both_templates():
     r=rebuild_typical_rank(eb,lag); assert np.nanargmin(r)==0 and np.nanargmax(r)==3
     ra,rb=order_null_rank_pair(eb,lag,eb,lag,np.random.default_rng(0))
     assert (eb.sum(0)>0).tolist()==np.isfinite(ra).tolist()==np.isfinite(rb).tolist()
+
+
+def _gate_kwargs(**overrides):
+    # "everything passes" baseline (Gate A+B+C all True on a ripple band); each test
+    # below flips exactly the variable(s) it is probing and leaves the rest passing.
+    base = dict(spatial_p=0.01, spatial_delta=1.0, spatial_strength="within_shaft_strong",
+                order_p=0.01, order_delta=1.0, order_strength="strong",
+                common_resid_p=0.01, common_resid_delta=1.0,
+                aperiodic_p=0.01, aperiodic_delta=1.0,
+                band_max_over_bands_p=0.01, band="ripple_safe_80_220",
+                fs_subset=True, alpha=0.05)
+    base.update(overrides)
+    return base
+
+
+def test_gate_a_spatial_needs_within_shaft_strong_not_weaker_fallback_tiers():
+    from src.topic5_v2_band_scan import gate_pass_flags
+    assert gate_pass_flags(**_gate_kwargs())["gate_A_spatial"] is True
+    for weak in ("subject_wide_weak", "distance_bin_fallback"):     # P1-c: neither weaker
+        flags = gate_pass_flags(**_gate_kwargs(spatial_strength=weak))  # spatial-null tier
+        assert flags["gate_A_spatial"] is False                     # can pass formal Gate A
+
+
+def test_gate_a_order_rejects_weak_downgrade_strength():
+    from src.topic5_v2_band_scan import gate_pass_flags
+    assert gate_pass_flags(**_gate_kwargs())["gate_A_order"] is True
+    flags = gate_pass_flags(**_gate_kwargs(order_strength="weak_downgrade"))
+    assert flags["gate_A_order"] is False
+
+
+def test_gate_a_requires_both_spatial_and_order_p1b():
+    from src.topic5_v2_band_scan import gate_pass_flags
+    assert gate_pass_flags(**_gate_kwargs())["gate_A"] is True                 # both pass
+    spatial_only = gate_pass_flags(**_gate_kwargs(order_strength="weak_downgrade"))
+    assert spatial_only["gate_A_spatial"] is True and spatial_only["gate_A"] is False
+    order_only = gate_pass_flags(**_gate_kwargs(spatial_strength="subject_wide_weak"))
+    assert order_only["gate_A_order"] is True and order_only["gate_A"] is False
+    neither = gate_pass_flags(**_gate_kwargs(spatial_strength="subject_wide_weak",
+                                              order_strength="weak_downgrade"))
+    assert neither["gate_A"] is False
+
+
+def test_gate_flags_reject_each_pvalue_and_delta_at_alpha_boundary():
+    from src.topic5_v2_band_scan import gate_pass_flags
+    # p==alpha (not <alpha) and delta==0 (not >0) must fail the SAME variable's own
+    # sub-gate, not just ride along with some other passing variable in the rule.
+    assert gate_pass_flags(**_gate_kwargs(spatial_p=0.05))["gate_A_spatial"] is False
+    assert gate_pass_flags(**_gate_kwargs(spatial_delta=0.0))["gate_A_spatial"] is False
+    assert gate_pass_flags(**_gate_kwargs(order_p=0.05))["gate_A_order"] is False
+    assert gate_pass_flags(**_gate_kwargs(order_delta=0.0))["gate_A_order"] is False
+    assert gate_pass_flags(**_gate_kwargs(common_resid_p=0.05))["gate_B_freq_specific"] is False
+    assert gate_pass_flags(**_gate_kwargs(aperiodic_p=0.05))["gate_C_hfo_specific"] is False
+
+
+def test_gate_b_needs_positive_common_resid_delta_and_band_beats_max_over_bands_null():
+    from src.topic5_v2_band_scan import gate_pass_flags
+    assert gate_pass_flags(**_gate_kwargs())["gate_B_freq_specific"] is True
+    neg_delta = gate_pass_flags(**_gate_kwargs(common_resid_delta=-1.0))
+    assert neg_delta["gate_B_freq_specific"] is False
+    not_band_specific = gate_pass_flags(**_gate_kwargs(band_max_over_bands_p=0.5))  # this band
+    assert not_band_specific["gate_B_freq_specific"] is False        # is not beating the null
+    gate_a_fails_first = gate_pass_flags(**_gate_kwargs(order_strength="weak_downgrade"))
+    assert gate_a_fails_first["gate_B_freq_specific"] is False       # gate_B needs gate_A first
+
+
+def test_gate_c_needs_ripple_band_membership_and_aperiodic_pass():
+    from src.topic5_v2_band_scan import gate_pass_flags
+    full_cohort = gate_pass_flags(**_gate_kwargs(band="ripple_safe_80_220"))
+    assert full_cohort["gate_C_hfo_specific"] is True
+    fs1024_subset = gate_pass_flags(**_gate_kwargs(band="ripple_full_80_250", fs_subset=False))
+    assert fs1024_subset["gate_C_hfo_specific"] is True     # fs_subset itself doesn't gate --
+                                                              # both ripple bands are eligible
+    non_ripple = gate_pass_flags(**_gate_kwargs(band="gamma_LVFA"))
+    assert non_ripple["gate_B_freq_specific"] is True and non_ripple["gate_C_hfo_specific"] is False
+    bad_aperiodic = gate_pass_flags(**_gate_kwargs(aperiodic_delta=-1.0))
+    assert bad_aperiodic["gate_C_hfo_specific"] is False
+
+
+def test_gate_tier_maps_flags_to_interpretation():
+    from src.topic5_v2_band_scan import gate_pass_flags, gate_tier
+    strongest_flags = gate_pass_flags(**_gate_kwargs(band="ripple_safe_80_220"))
+    assert gate_tier(strongest_flags, "ripple_safe_80_220") == "strongest"
+
+    freq_specific_flags = gate_pass_flags(**_gate_kwargs(band="gamma_LVFA"))
+    assert gate_tier(freq_specific_flags, "gamma_LVFA") == "frequency_specific"
+
+    broadband_flags = gate_pass_flags(**_gate_kwargs(band_max_over_bands_p=0.5))
+    assert gate_tier(broadband_flags, "ripple_safe_80_220") == "broadband_recruitment"
+
+    weak_flags = gate_pass_flags(**_gate_kwargs(spatial_strength="subject_wide_weak"))
+    assert gate_tier(weak_flags, "ripple_safe_80_220") == "weak_negative"

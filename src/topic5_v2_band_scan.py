@@ -354,3 +354,75 @@ def order_null_rank_pair(events_a, lag_a, events_b, lag_b, rng):
     rank_b_null = (None if events_b is None
                    else _order_null_one_template(events_b, lag_b, rng))
     return rank_a_null, rank_b_null
+
+
+_GATE_C_ELIGIBLE_BANDS = frozenset({"ripple_safe_80_220", "ripple_full_80_250"})
+
+
+def gate_pass_flags(spatial_p, spatial_delta, spatial_strength, order_p, order_delta, order_strength,
+                     common_resid_p, common_resid_delta, aperiodic_p, aperiodic_delta,
+                     band_max_over_bands_p, band, fs_subset, alpha):
+    """Gate A/B/C pass flags from explicit per-(subject/cohort, axis_set, band) statistics (Task 14, issue #17).
+
+    Pure decision function: every quantity a rule reads is a positional argument (P1-b) --
+    no closures, no config lookups -- so "is this variable used in a rule" can be checked
+    directly against "is this variable in the signature".
+
+    Gate A (spatial alignment) needs BOTH sub-gates (P1-b):
+      gate_A_spatial = spatial_p<alpha and spatial_delta>0 and spatial_strength=='within_shaft_strong'
+      gate_A_order   = order_p<alpha  and order_delta>0  and order_strength!='weak_downgrade'
+      gate_A         = gate_A_spatial and gate_A_order
+    P1-c: spatial_strength in {'subject_wide_weak','distance_bin_fallback'} (the two weaker
+    fallback tiers of `spatial_constrained_permute`) can never satisfy gate_A_spatial, even
+    with a significant p and a positive delta -- those tiers are descriptive/sensitivity only.
+    Symmetrically, order_strength=='weak_downgrade' (no interictal event data to rebuild the
+    order null from, Task 9 dep-check) can never satisfy gate_A_order.
+
+    Gate B (frequency-specific) requires gate_A first, then a positive common-field-residual
+    delta (the band beats the leave-one-band-out common field, not just the raw field) AND
+    band_max_over_bands_p<alpha (the observed band delta beats the max-over-bands null -- this
+    band is not simply the best of many bands sampled by chance).
+
+    Gate C (HFO-specific) requires gate_B first, restricts to the two Gate-C-eligible ripple
+    bands (`ripple_safe_80_220` full-cohort, `ripple_full_80_250` fs1024-subset -- both are
+    already-eligible band NAMES; fs_subset does not additionally gate anything here, it is
+    accepted only for caller bookkeeping), and requires the aperiodic (1/f) residual to also
+    be significant and positive (the ripple excess survives 1/f control, not just raw power).
+    """
+    gate_A_spatial = (spatial_p < alpha) and (spatial_delta > 0) and (spatial_strength == "within_shaft_strong")
+    gate_A_order = (order_p < alpha) and (order_delta > 0) and (order_strength != "weak_downgrade")
+    gate_A = gate_A_spatial and gate_A_order
+    gate_B_freq_specific = (gate_A and (common_resid_p < alpha) and (common_resid_delta > 0)
+                             and (band_max_over_bands_p < alpha))
+    gate_C_hfo_specific = (gate_B_freq_specific and (band in _GATE_C_ELIGIBLE_BANDS)
+                            and (aperiodic_p < alpha) and (aperiodic_delta > 0))
+    return {"gate_A_spatial": gate_A_spatial, "gate_A_order": gate_A_order, "gate_A": gate_A,
+            "gate_B_freq_specific": gate_B_freq_specific, "gate_C_hfo_specific": gate_C_hfo_specific}
+
+
+def gate_tier(flags, band):
+    """Map Gate A/B/C pass flags to a one-word interpretation tier (Task 14, rev1 tier map).
+
+    Each tier is the deepest gate that passed. Every deeper gate already requires the
+    shallower ones (gate_B_freq_specific implies gate_A; gate_C_hfo_specific implies
+    gate_B_freq_specific), so checking deepest-first is sufficient and the tiers are mutually
+    exclusive by construction:
+      'strongest'             -- gate_C_hfo_specific passed AND band is a Gate-C-eligible
+                                  ripple band (redundant with gate_C's own band check when
+                                  flags came from gate_pass_flags on this same band, but keeps
+                                  gate_tier self-consistent if flags/band are ever supplied
+                                  from different sources).
+      'frequency_specific'    -- gate_B_freq_specific passed, gate_C did not (frequency-specific
+                                  recruitment, not necessarily HFO/ripple-specific after 1/f control).
+      'broadband_recruitment' -- gate_A passed, gate_B did not (G_HFO predicts broadband ictal
+                                  recruitment -- a valid positive result, not a failure).
+      'weak_negative'         -- gate_A did not pass (apparent alignment does not clear the
+                                  spatial/order nulls; not a timing-geometry mechanism).
+    """
+    if flags["gate_C_hfo_specific"] and band in _GATE_C_ELIGIBLE_BANDS:
+        return "strongest"
+    if flags["gate_B_freq_specific"]:
+        return "frequency_specific"
+    if flags["gate_A"]:
+        return "broadband_recruitment"
+    return "weak_negative"
