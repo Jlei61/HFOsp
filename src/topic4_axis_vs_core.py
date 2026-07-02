@@ -54,3 +54,28 @@ def runaway_delay_ms(runaway_stim, runaway_nostim, T):
         return float("nan")
     rs = float(T) if runaway_stim is None else float(runaway_stim)
     return float(rs - float(runaway_nostim))
+
+
+def count_events_pre_runaway(af, bin_w, runaway_ms, detect_events, *, baseline_ms=(5.0, 50.0),
+                             cal_frac_burst=0.5, cal_frac_train=0.15, ramp_ms=50.0,
+                             train_min_runaway_ms=300.0):
+    """Count discrete events on the active-fraction series ``af`` (bin width ``bin_w`` ms).
+
+    A LATE runaway (a train, e.g. the kick at ~757 ms) would let its big detonation peak set the
+    event bar ~13x above the small near-baseline pre-runaway train and hide it (the record-peak
+    confound the spontaneous runner documents). So for ``runaway_ms >= train_min_runaway_ms`` the bar
+    is calibrated from the pre-runaway window (minus the last ``ramp_ms`` detonation ramp) with a
+    sensitive fraction ``cal_frac_train``; for an IMMEDIATE burst the whole record is used with
+    ``cal_frac_burst``. ``detect_events`` is injected (``src.sef_hfo_events.detect_events``) so this
+    module stays engine-free and the count is unit-testable. Returns ``(n_events, bar)``."""
+    af = np.asarray(af, float)
+    nb0, nb1 = int(baseline_ms[0] / bin_w), int(baseline_ms[1] / bin_w)
+    if runaway_ms is not None and runaway_ms >= train_min_runaway_ms:
+        af_c = af[:max(int(round((runaway_ms - ramp_ms) / bin_w)), 1)]
+        frac = cal_frac_train
+    else:
+        af_c = af
+        frac = cal_frac_burst
+    floor = float(np.percentile(af_c[nb0:nb1], 95)) if (nb1 <= len(af_c) and nb1 > nb0) else float(af_c.min())
+    bar = floor + frac * (float(af_c.max()) - floor)
+    return len(detect_events(af_c, bin_w, event_on_frac=bar)), bar

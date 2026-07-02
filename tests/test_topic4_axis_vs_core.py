@@ -13,7 +13,8 @@ for _p in (os.path.join(ROOT, "scripts"), os.path.join(ROOT, "scripts", "paper_f
         sys.path.insert(0, _p)
 
 from src.topic4_axis_vs_core import (linear_montage, split_source_axis,  # noqa: E402
-                                     select_footprint, onset_time_field, runaway_delay_ms)
+                                     select_footprint, onset_time_field, runaway_delay_ms,
+                                     count_events_pre_runaway)
 
 
 def test_linear_montage_centered_and_spaced():
@@ -71,6 +72,33 @@ def test_runaway_delay_ms():
     assert np.isnan(runaway_delay_ms(100.0, None, 2500.0))                     # no baseline runaway
 
 
+def _synthetic_train_af(nbins=1000):
+    # 3 near-baseline train bumps + a big late detonation peak (mimics the kick trajectory)
+    af = np.full(nbins, 0.005)
+    for c in (200, 450, 700):
+        af[c - 20:c + 20] = 0.030
+    af[755:900] = 0.480
+    return af
+
+
+def test_count_events_pre_runaway_train_not_buried_by_late_peak():
+    from src.sef_hfo_events import detect_events
+    af = _synthetic_train_af(); bin_w, runaway_ms = 1.0, 760.0
+    n, bar = count_events_pre_runaway(af, bin_w, runaway_ms, detect_events)
+    assert n == 3, f"expected 3 pre-runaway train bumps, got {n}"          # sensitive pre-runaway bar
+    # the naive whole-record 0.5x-peak bar is set by the 0.48 detonation and buries the ~0.03 train
+    floor = float(np.percentile(af[5:50], 95))
+    naive_bar = floor + 0.5 * (af.max() - floor)
+    assert len(detect_events(af, bin_w, event_on_frac=naive_bar)) <= 1     # record-peak confound
+
+
+def test_count_events_pre_runaway_immediate_burst_is_one():
+    from src.sef_hfo_events import detect_events
+    af = np.full(200, 0.005); af[60:190] = 0.48                            # one burst (past baseline win)
+    n, _ = count_events_pre_runaway(af, 1.0, 60.0, detect_events)          # runaway<300 -> whole record
+    assert n == 1
+
+
 def _fake_small_core_S(L=20.0, core_radius=3.0):
     # deterministic synthetic sheet: E cells on a grid, I cells appended; centre core.
     import numpy as np
@@ -109,6 +137,11 @@ def test_figure_b_renders_from_fixture(tmp_path):
              "arms": {"no_stim": {"runaway_ms": 50.0},
                       "core_stim": {"runaway_ms": 120.0, "runaway_delay_ms": 70.0},
                       "axis_stim": {"runaway_ms": 160.0, "runaway_delay_ms": 110.0}}}
+    geom = {"foci": [[3.5, 8.5], [16.5, 8.5]], "L": 20.0, "core_r": 1.5,
+            "names": [f"ICL{i}" for i in range(1, 12)],
+            "contacts": [[3.5 + i * 1.3, 8.5] for i in range(11)],
+            "core_contacts": ["ICL8", "ICL9", "ICL10", "ICL11"],
+            "axis_contacts": ["ICL4", "ICL5", "ICL6", "ICL7"]}
     out = tmp_path / "figs"; out.mkdir()
-    F.render_figure_b(small, F.KICK_REF, out)
+    F.render_figure_b(small, F.KICK_REF, out, kick_geom=geom)   # exercise the E1146 geometry path
     assert (out / "axis_vs_core.png").exists() and (out / "axis_vs_core.png").stat().st_size > 0

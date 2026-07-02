@@ -42,11 +42,45 @@ for _p in (str(ROOT), str(ROOT / "scripts"), str(ROOT / "scripts" / "paper_figur
 
 from src import topic4_axis_vs_core as AV  # noqa: E402
 
-# Cited E1146 kick delays (committed fig_m3a_v2_2_qI_stim_site_compare metadata): baseline 757.5 ms;
-# core/endpoint stim -> 1171.3 ms (+413.8); axis/middle stim -> 1591.9 ms (+834.4). Footprint 4 each.
+# Documented canonical E1146 kick delays (drift tripwire only). The rendered figure does NOT use
+# these numbers -- load_kick_ref() reads them from the committed site_compare metadata and asserts
+# against this constant, so a regenerated metadata that drifts raises instead of silently diverging.
 KICK_REF = {"baseline_ms": 757.5, "core_ms": 1171.3, "axis_ms": 1591.9,
             "core_delay": 413.8, "axis_delay": 834.4, "footprint": 4}
+SITE_COMPARE_META = ("results/paper-ready-figure/fig_m3a_v2_2_qI_stim_site_compare_epilepsiae_1146"
+                     "/figures/qI_stim_site_compare_metadata.json")
+FIGDATA_1146 = "results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_twoend_equal_tsrc_s3.npz"
 FIG_DIR = "results/paper-ready-figure/fig_stage4_axis_vs_core_difficulty/figures"
+
+
+def load_kick_ref():
+    """Read the cited E1146 stim delays from the committed site_compare metadata (no hard-code in the
+    render path). Asserts internal consistency (delay == runaway - baseline) and axis(middle corridor)
+    >= core(endpoint). Returns the delays + the endpoint/middle contact names + footprint."""
+    m = json.loads((ROOT / SITE_COMPARE_META).read_text())["metrics"]
+    base = float(m["no_stim"]["runaway_start_ms"])
+    core = float(m["earliest_endpoint"]["runaway_start_ms"])   # endpoint stim  == "core"
+    axis = float(m["middle"]["runaway_start_ms"])              # middle corridor == "axis"
+    core_delay, axis_delay = core - base, axis - base
+    dd = m.get("runaway_delay_ms", {})
+    if "earliest-endpoint" in dd:                              # cross-check the recorded delay block
+        assert abs(float(dd["earliest-endpoint"]) - core_delay) < 0.5, "endpoint delay drift"
+        assert abs(float(dd["middle"]) - axis_delay) < 0.5, "middle delay drift"
+    assert axis_delay >= core_delay, "expected axis(middle corridor) >= core(endpoint) at the chokepoint"
+    return {"baseline_ms": base, "core_ms": core, "axis_ms": axis,
+            "core_delay": core_delay, "axis_delay": axis_delay,
+            "core_contacts": list(m["earliest_endpoint"].get("contacts", [])),
+            "axis_contacts": list(m["middle"].get("contacts", [])),
+            "footprint": len(m["earliest_endpoint"].get("contacts", [])) or 4}
+
+
+def load_kick_geom(kref):
+    """E1146 real electrode geometry (foci + all contacts) from the subject-SNN figdata, tagged with
+    the endpoint(core)/middle(axis) contact names from `kref`, for drawing the chokepoint panel."""
+    fd = np.load(ROOT / FIGDATA_1146, allow_pickle=True)
+    return {"foci": np.asarray(fd["foci"], float), "contacts": np.asarray(fd["contacts"], float),
+            "names": [str(x) for x in fd["names"]], "L": float(fd["L"]), "core_r": float(fd["core_r"]),
+            "core_contacts": list(kref["core_contacts"]), "axis_contacts": list(kref["axis_contacts"])}
 QI_MEAN_COL, QI_MIN_COL, GK_COL, RATE_COL = "#1f7a5a", "#7fc4a6", "#b8860b", "#333333"
 CORE_STIM_COL, AXIS_STIM_COL, NOSTIM_COL = "#c0392b", "#2e86c1", "#888888"
 ROW_TITLE = {"big": "big核 r=6（自发）", "small": "small核 r=3（自发）", "kick": "kick 两灶（外部戳）"}
@@ -81,22 +115,10 @@ def simulate_row(kind):
     rate_s = H._smooth_rate(rate_hz, DT, 20.0)
     runaway_ms = H._first_sustained(rate_s, DT, 120.0, 100.0)
     af, bin_w = C.active_fraction(res["E_spk_bool"], DT, C.BIN_MS)
-    nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
-    # n_events counts the discrete train BEFORE the sheet detonates. A LATE runaway (kick ~757 ms):
-    # calibrate off the pre-runaway window minus the last 50 ms (detonation ramp) so the small train
-    # isn't buried by the runaway peak (record-peak confound), AND use a SENSITIVE bar (0.15 vs the
-    # standard 0.5) because the train rides near baseline (bumps ~3% active) so a 0.5x-peak bar filters
-    # the smaller early bumps -> reads 2; 0.15 counts the 3 separable whole-sheet bumps (t~190/457/695
-    # ms) the q_I staircase shows. IMMEDIATE burst (big/small, runaway <~60 ms): whole record = 1 event.
-    if runaway_ms is not None and runaway_ms >= 300.0:
-        af_c = af[:max(int(round((runaway_ms - 50.0) / bin_w)), 1)]
-        cal_frac = 0.15
-    else:
-        af_c = af
-        cal_frac = C.CAL_FRAC
-    floor = float(np.percentile(af_c[nb0:nb1], 95)) if (nb1 <= len(af_c) and nb1 > nb0) else float(af_c.min())
-    bar = floor + cal_frac * (float(af_c.max()) - floor)
-    n_events = len(C.detect_events(af_c, bin_w, event_on_frac=bar))
+    # n_events: discrete events before the sheet detonates. A late runaway (kick) would let its big
+    # peak bury the small near-baseline pre-runaway train; the helper uses a sensitive pre-runaway bar
+    # for that case and the whole-record bar for an immediate big/small burst (see AV docstring + test).
+    n_events, _bar = AV.count_events_pre_runaway(af, bin_w, runaway_ms, C.detect_events)
     # col1 shows ONE representative event's spatial ignition (is the front contained, or does it fill
     # the sheet?). For the self-igniting cores the single burst IS the whole trajectory; for the
     # kicked two-foci case, restrict col1 to the first evoked-event window (before the train floods
@@ -110,8 +132,20 @@ def simulate_row(kind):
     # "front fills the sheet" = cumulative fraction of E cells that ever fired in this event; the
     # per-bin max_active_frac saturates at ~0.5 (tau_ref_E=2 ms -> <=half the cells fire per 1 ms bin).
     frac_ever_fired = float(np.isfinite(onset).mean())
+    # Ignition-synchrony evidence (spec G-A4): onset_spread = range of first-spike times in the
+    # representative event (a wide spread => a recruitment GRADIENT, not a synchronous flash);
+    # core_sync10 = fraction of the low-threshold core's E cells firing within 10 ms of the first core
+    # spike (big/small only; kick's subject1146 build has no single core_mask).
+    fon = onset[np.isfinite(onset)]
+    onset_spread_ms = float(fon.max() - fon.min()) if fon.size else float("nan")
+    core_sync10 = float("nan")
+    if kind in ("big", "small") and "core_mask" in S:
+        oc = onset[np.asarray(S["core_mask"], bool)[:S["NE"]]]
+        oc = oc[np.isfinite(oc)]
+        if oc.size:
+            core_sync10 = float((oc <= oc.min() + 10.0).mean())
     return dict(kind=kind, posE=np.asarray(S["posE"], float), onset=onset,
-                frac_ever_fired=frac_ever_fired,
+                frac_ever_fired=frac_ever_fired, onset_spread_ms=onset_spread_ms, core_sync10=core_sync10,
                 times=np.asarray(res["times"], float), rate_s=rate_s,
                 qI_mean=np.asarray(res["trace_qI_mean"], float), qI_min=np.asarray(res["trace_qI_min"], float),
                 gK=np.asarray(res["trace_gK_axial"], float), runaway_ms=runaway_ms,
@@ -141,7 +175,8 @@ def render_figure_a(rows_data, out_dir):
         ax_geom.set_xlim(0, d["L"]); ax_geom.set_ylim(0, d["L"]); ax_geom.set_aspect("equal")
         ax_geom.set_xlabel("x (mm)", fontsize=8); ax_geom.set_ylabel("y (mm)", fontsize=8)
         ax_geom.tick_params(labelsize=7)
-        ax_geom.set_title(f"{ROW_TITLE[d['kind']]}｜源空间点火时刻", fontsize=10, fontweight="bold")
+        ax_geom.set_title(f"{ROW_TITLE[d['kind']]}｜点火展布 {d.get('onset_spread_ms', float('nan')):.0f} ms",
+                          fontsize=10, fontweight="bold")
         cb = fig.colorbar(sc, ax=ax_geom, fraction=0.046, pad=0.02)
         cb.set_label("点火时刻 onset (ms) 早→晚", fontsize=7.5); cb.ax.tick_params(labelsize=6.5)
         # --- col2: E-rate (left) + q_I / g_K (right twin) ---
@@ -161,7 +196,8 @@ def render_figure_a(rows_data, out_dir):
             h1, l1 = ax_tr.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
             ax_tr.legend(h1 + h2, l1 + l2, loc="upper right", fontsize=6.8, frameon=False, ncol=2)
     fig.suptitle("为什么自发单灶出不了「一串分开的小事件」：要能自燃就得过自持阈值，一过就铺满停不下来\n"
-                 "big 整片同步爆（无梯度）｜small 前锋铺满到边界（只是变慢）｜kick 从外部供给事件串",
+                 "big / small 自发单灶都快速冲进 runaway、全片被招募（出不了分离事件；big r=6 更快）｜"
+                 "只有 kick 从外部供给事件串",
                  fontsize=11.5, fontweight="bold")
     fig.text(0.5, 0.006, "visual diagnostic；within-model 单轨迹；runaway/tonic 非 ictal 事件；"
              "col1 每行独立归一化（各行时标差 ~15×）", ha="center", fontsize=8, style="italic", color="0.3")
@@ -171,14 +207,40 @@ def render_figure_a(rows_data, out_dir):
     plt.close(fig)
 
 
-def render_figure_b(small, kick_ref, out_dir):
+def _draw_kick_geometry(ax, g):
+    """Draw the E1146 two-foci chokepoint: foci A/B + the corridor between them, endpoint(core)
+    contacts red, middle(axis) contacts blue -- so the reader SEES why the middle is a shared
+    chokepoint (both foci's activity must pass through it) while the core can't be fully covered."""
+    contacts = np.asarray(g["contacts"], float); names = list(g["names"]); L = float(g["L"])
+    foci = np.asarray(g["foci"], float)
+    ax.plot(foci[:, 0], foci[:, 1], color="0.55", lw=1.2, zorder=1)                 # corridor A--B
+    for f, lab in zip(foci, ("A", "B")):
+        ax.add_patch(plt.Circle(f, float(g["core_r"]), fill=False, ec="crimson", lw=1.4, ls="--", zorder=4))
+        ax.text(f[0], f[1] + 0.6, lab, ha="center", va="bottom", color="crimson", fontweight="bold", fontsize=9)
+    cset, aset = set(g.get("core_contacts", [])), set(g.get("axis_contacts", []))
+    core_i = [i for i, n in enumerate(names) if n in cset]
+    axis_i = [i for i, n in enumerate(names) if n in aset]
+    other = [i for i in range(len(names)) if i not in set(core_i) | set(axis_i)]
+    ax.scatter(contacts[other, 0], contacts[other, 1], c="lightgray", s=20, zorder=2)
+    ax.scatter(contacts[core_i, 0], contacts[core_i, 1], c=CORE_STIM_COL, s=42, zorder=3, label="core-stim（端点）")
+    ax.scatter(contacts[axis_i, 0], contacts[axis_i, 1], c=AXIS_STIM_COL, s=42, zorder=3, label="axis-stim（中段走廊）")
+    ax.set_xlim(0, L); ax.set_ylim(0, L); ax.set_aspect("equal"); ax.tick_params(labelsize=6.5)
+    ax.set_xlabel("x (mm)", fontsize=8); ax.set_ylabel("y (mm)", fontsize=8)
+    ax.set_title("kick 两灶（E1146 真实电极几何）", fontsize=10)
+    ax.legend(loc="upper right", fontsize=7)
+
+
+def render_figure_b(small, kick_ref, out_dir, kick_geom=None):
     out_dir = Path(out_dir)
     fig, axes = plt.subplots(2, 2, figsize=(11, 7))
-    # --- kick row (cited E1146; established axis >= core at 2-source chokepoint geometry) ---
+    # --- kick row (cited E1146; established axis >= core at the 2-source chokepoint geometry) ---
     axk_geom, axk_bar = axes[0]
-    axk_geom.set_title("kick 两灶：core=端点, axis=中段走廊"); axk_geom.axis("off")
-    axk_geom.text(0.5, 0.5, "E1146 两灶几何\ncore=端点电极\naxis=中段走廊\n（引用已提交结果）",
-                  ha="center", va="center", transform=axk_geom.transAxes, fontsize=11)
+    if kick_geom is not None:
+        _draw_kick_geometry(axk_geom, kick_geom)
+    else:
+        axk_geom.set_title("kick 两灶：core=端点, axis=中段走廊"); axk_geom.axis("off")
+        axk_geom.text(0.5, 0.5, "E1146 两灶几何\ncore=端点电极\naxis=中段走廊\n（引用已提交结果）",
+                      ha="center", va="center", transform=axk_geom.transAxes, fontsize=11)
     axk_bar.bar(["core-stim", "axis-stim"], [kick_ref["core_delay"], kick_ref["axis_delay"]],
                 color=[CORE_STIM_COL, AXIS_STIM_COL])
     axk_bar.set_ylabel("runaway 推迟 (ms)")
@@ -229,6 +291,8 @@ def main():
         for d in rows:
             print(f"ROW {d['kind']} n_events={d['n_events']} runaway_ms={d['runaway_ms']} "
                   f"frac_ever={round(d['frac_ever_fired'], 4)} "
+                  f"onset_spread_ms={round(d['onset_spread_ms'], 1)} "
+                  f"core_sync10={round(d['core_sync10'], 3)} "
                   f"max_active_frac={round(d['max_active_frac'], 4)}", flush=True)
         render_figure_a(rows, out_dir)
         np.savez(out_dir / "_figA_af_traces.npz",   # diagnostic: iterate n_events offline if needed
@@ -239,7 +303,10 @@ def main():
     if args.figure in ("B", "both"):
         small_path = ROOT / "results" / "topic4_sef_hfo" / "axis_vs_core" / "small_core_stim.json"
         small = json.loads(small_path.read_text())
-        render_figure_b(small, KICK_REF, out_dir)
+        kref = load_kick_ref()                                   # read cited delays from metadata
+        assert abs(kref["core_delay"] - KICK_REF["core_delay"]) < 1.0 and \
+            abs(kref["axis_delay"] - KICK_REF["axis_delay"]) < 1.0, "E1146 metadata drifted from documented KICK_REF"
+        render_figure_b(small, kref, out_dir, kick_geom=load_kick_geom(kref))
         print(f"wrote {out_dir / 'axis_vs_core.png'}", flush=True)
     print("DONE_AXIS_VS_CORE_FIGURE", flush=True)
     return 0
