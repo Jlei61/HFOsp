@@ -10,7 +10,7 @@ if ROOT not in sys.path:
 
 from src.topic4_offaxis_surround_stim import (axis_frame, project_contacts,  # noqa: E402
     classify_axis_corridor, select_offaxis_surround_contacts,
-    select_onaxis_corridor_contacts, electrode_e_mask)
+    select_onaxis_corridor_contacts, onaxis_effective_halfwidth, electrode_e_mask)
 
 
 def _planar_grid():
@@ -57,6 +57,18 @@ def test_onaxis_same_N_and_in_corridor():
     corridor = classify_axis_corridor(contacts, fr, 1.5)
     assert corridor[on].all() and not core[on].any()                            # in corridor, not core
     assert set(on.tolist()).isdisjoint(set(off.tolist()))                        # on/off disjoint
+
+
+def test_onaxis_falls_back_to_nearest_axis_when_corridor_sparse():
+    # all contacts are 3 mm off-axis (none within a 1.5 mm corridor); on-axis must still find N by
+    # falling back to nearest-axis, and the effective halfwidth flags the degraded comparator.
+    xs = [3, 5, 7, 9, 11]
+    contacts = np.array([[x, 5 + s] for s in (-3.0, 3.0) for x in xs], float)
+    fr = axis_frame([3.0, 5.0], [11.0, 5.0])
+    on = select_onaxis_corridor_contacts(contacts, fr, np.zeros(len(contacts), bool),
+                                         N=4, corridor_halfwidth_mm=1.5)
+    assert len(on) == 4
+    assert onaxis_effective_halfwidth(contacts, fr, on) >= 1.5   # degraded: beyond nominal corridor
 
 
 def test_insufficient_offaxis_raises():

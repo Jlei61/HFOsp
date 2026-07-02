@@ -75,17 +75,30 @@ def select_offaxis_surround_contacts(contacts, frame, core_contact_mask, N, corr
 
 def select_onaxis_corridor_contacts(contacts, frame, core_contact_mask, N, corridor_halfwidth_mm,
                                     along_pad_mm=0.0):
-    """N on-axis-corridor comparator contacts: in the axis corridor, NOT a core contact. Nearest the
-    axis center along-wise, lower index first. Raises ValueError if fewer than N are available."""
+    """N on-axis comparator contacts: NEAREST the pathological axis (smallest perpendicular distance),
+    within the along-interval, NOT a core contact. Genuine in-corridor contacts
+    (|off| <= corridor_halfwidth_mm) are preferred, but the selection falls back to the nearest-axis
+    contacts when the thin corridor is under-sampled (real sparse montages) -- the caller should
+    report the selection's effective off-axis span (see `onaxis_effective_halfwidth`) to flag a
+    degraded comparator. Raises ValueError if fewer than N non-core in-interval contacts exist."""
     pr = project_contacts(contacts, frame)
     core = np.asarray(core_contact_mask, bool)
-    corridor = classify_axis_corridor(contacts, frame, corridor_halfwidth_mm, along_pad_mm)
-    idx = np.flatnonzero(corridor & (~core)).tolist()
-    idx.sort(key=lambda i: (abs(float(pr["along"][i])), i))
-    if len(idx) < N:
-        raise ValueError(f"insufficient on-axis corridor contacts: {len(idx)} < {N} "
-                         f"(corridor_halfwidth_mm={corridor_halfwidth_mm})")
-    return np.array(sorted(idx[:N]))
+    near = _near_interval(pr, frame, along_pad_mm)
+    hw = float(corridor_halfwidth_mm)
+    cand = np.flatnonzero(near & (~core)).tolist()
+    cand.sort(key=lambda i: (0 if abs(float(pr["off"][i])) <= hw else 1,   # in-corridor first,
+                             abs(float(pr["off"][i])), abs(float(pr["along"][i])), i))  # then nearest-axis
+    if len(cand) < N:
+        raise ValueError(f"insufficient on-axis (near-interval, non-core) contacts: {len(cand)} < {N}")
+    return np.array(sorted(cand[:N]))
+
+
+def onaxis_effective_halfwidth(contacts, frame, indices):
+    """Max perpendicular (off-axis) distance among the selected on-axis contacts -- used to flag a
+    DEGRADED on-axis comparator (large value => the 'on-axis' arm is not really on the axis)."""
+    pr = project_contacts(contacts, frame)
+    idx = np.asarray(indices, int)
+    return float(np.abs(pr["off"][idx]).max()) if idx.size else float("nan")
 
 
 def electrode_e_mask(posE, contacts, indices, radius_mm):
