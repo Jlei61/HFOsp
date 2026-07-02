@@ -11,13 +11,15 @@
   "figure_A_difficulty_3row": {
     "question": "why a spontaneous single focus cannot self-generate a discrete-event train",
     "rows": {
-      "big": {"build": "_build_stage4_patch(core_radius=6)", "T": 200, "n_events": 1, "runaway_ms": 23.0, "frac_ever_fired": 1.0, "gate_G-A1": "PASS (1 event & runaway<60ms)", "read": "synchronous whole-disk blast"},
-      "small": {"build": "_build_stage4_patch(core_radius=3)", "T": 200, "n_events": 1, "runaway_ms": 42.8, "frac_ever_fired": 1.0, "gate_G-A2": "PASS (1 event & frac_ever>0.5 & runaway present)", "read": "focal ignition, front fills the whole sheet"},
-      "kick": {"build": "_build_subject1146 (E1146 two foci)", "T": 1000, "n_events": 3, "runaway_ms": 757.5, "frac_ever_fired": 0.22, "gate_G-A3": "PASS (>=3 pre-runaway events)", "read": "externally-supplied train (q_I 3-step staircase) -> runaway; col1 = first evoked event (contained corridor)"}
+      "big": {"build": "_build_stage4_patch(core_radius=6)", "T": 200, "n_events": 1, "runaway_ms": 23.0, "frac_ever_fired": 1.0, "onset_spread_ms": 99.1, "core_sync10": 0.006, "gate_G-A1": "PASS (1 event & runaway<60ms)", "read": "fast runaway, whole sheet recruited over a ~99ms onset gradient -- NOT a synchronous flash (core_sync10=0.006)"},
+      "small": {"build": "_build_stage4_patch(core_radius=3)", "T": 200, "n_events": 1, "runaway_ms": 42.8, "frac_ever_fired": 1.0, "onset_spread_ms": 134.9, "core_sync10": 0.004, "gate_G-A2": "PASS (1 event & frac_ever>0.5 & runaway present)", "read": "focal ignition, front fills the whole sheet over a ~135ms onset gradient (slower than big)"},
+      "kick": {"build": "_build_subject1146 (E1146 two foci)", "T": 1000, "n_events": 3, "runaway_ms": 757.5, "frac_ever_fired": 0.22, "onset_spread_ms": 95.9, "core_sync10": null, "gate_G-A3": "PASS (>=3 pre-runaway events)", "read": "externally-supplied train (q_I 3-step staircase) -> runaway; col1 = first evoked event (contained corridor)"}
     },
     "metric_notes": {
       "frac_ever_fired": "cumulative fraction of E cells that ever fired in the representative event; used instead of max_active_frac which saturates at ~0.5 (tau_ref_E=2ms -> <=half the cells fire per 1ms bin)",
-      "kick_n_events": "the 5 delivered pulses cluster into 3 separable whole-sheet bumps (t~190/457/695ms); counted with a bar sensitive to the near-baseline train (0.15x-peak, not the standard 0.5x which over-filters the smallest bump)"
+      "kick_n_events": "the 5 delivered pulses cluster into 3 separable whole-sheet bumps (t~190/457/695ms); counted with a bar sensitive to the near-baseline train (0.15x-peak, not the standard 0.5x); logic in src.topic4_axis_vs_core.count_events_pre_runaway (unit-tested: train=3, record-peak=1, immediate-burst=1)",
+      "onset_spread_ms": "range of first-spike times in the representative event (big 99 / small 135 / kick 96 ms). A wide spread => a recruitment GRADIENT, not a synchronous flash -- so the figure does NOT claim 'synchronous blast / no gradient' (review P1-1)",
+      "core_sync10": "fraction of the low-threshold core's E cells firing within 10 ms of the first core spike (big/small only): big 0.006, small 0.004 -- both tiny, i.e. the core ignites as a spreading wave, not together (spec G-A4 evidence, confirming the honest reframe)"
     }
   },
   "figure_B_axis_vs_core": {
@@ -33,7 +35,10 @@
       "G-B3_parity": "arms share substrate/seed/RNG; differ only by the intervention_vth_at_time V_th clamp; stim_on=0",
       "G-B4_effect_present": "both delays > 0 (core +37.1, axis +8.1)",
       "G-B5_claim": "axis >= core - 10 : PASS for kick chokepoint, FAIL for single central core (honest, reported not forced)",
-      "disjoint_clamp": "r_stim=2.0 > half-pitch(1.2) so clamp disks intersect; core arm gets boundary cells (axis_mask &= ~core_mask), keeping the two clamp sets disjoint and the fairness unit per-contact"
+      "disjoint_clamp": "r_stim=2.0 > half-pitch(1.2) so clamp disks intersect; core arm gets boundary cells (axis_mask &= ~core_mask), keeping the two clamp sets disjoint and the fairness unit per-contact",
+      "preventive_clamp_scope": "small-core stim window is [0,300) with stim_on=0 -> a PREVENTIVE fixed-window clamp, NOT post-propagation blocking. Conservative for the negative core>axis result; a true propagation-block would need an event-relative window (core-onset -> before axis/boundary arrival) (review P1-3)",
+      "mask_counts": "n_stim_E core=2132 vs axis=1875 (boundary cells assigned to core); the fairness unit is CONTACT count (4 each) and the E-cell asymmetry is conservative for axis>=core (review eng)",
+      "kick_ref_provenance": "E1146 delays read from committed fig_m3a_v2_2_qI_stim_site_compare metadata via load_kick_ref() (internal-consistency + drift assert, no hard-code in the render path); the kick panel draws the real E1146 foci + endpoint(core, ICL8-11)/middle(axis, ICL4-7) contacts + corridor from figdata (review P1-2)"
     }
   },
   "provenance": {
