@@ -3,18 +3,18 @@
 
 Per subject: build the all-clean contact pool from the ictal field long
 cache, compute interictal HFO participation per contact, classify contacts
-into axis / non-axis-strict / ambiguous (frozen `classify_contacts`), check
-the axis/non-axis geometry gate (frozen `geometry_sufficient`), and count
-P3/I1 sliding windows per seizure (frozen `phase_bin_range` +
-`sliding_windows`). Writes `feasibility.csv` for the human pilot-lock
-decision (Task 3 Step 6, done by the controller — NOT this script). See
+into axis / non-axis-strict / ambiguous, and check the axis/non-axis
+geometry gate, via the shared `scripts._topic5_v3_io.classify_subject_contacts`
+(single source of truth also reused by Tasks 6/8/9) — then count P3/I1
+sliding windows per seizure (frozen `phase_bin_range` + `sliding_windows`).
+Writes `feasibility.csv` for the human pilot-lock decision (Task 3 Step 6,
+done by the controller — NOT this script). See
 docs/superpowers/plans/2026-07-02-topic5-v3a-mode-transition.md Task 3.
 """
 from __future__ import annotations
 
 import argparse
 import csv
-import json
 import sys
 from pathlib import Path
 
@@ -24,20 +24,14 @@ _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts._topic5_v2_crit_io import load_context, shaft_of  # noqa: E402
+from scripts._topic5_v3_io import CACHE, classify_subject_contacts  # noqa: E402
 from scripts.run_topic5_ictal_field_dynamics import SUBJECTS_BY_SUB  # noqa: E402
-from src.interictal_propagation import load_subject_propagation_events  # noqa: E402
 from src.topic5_v3_mode_transition import (  # noqa: E402
-    classify_contacts,
-    geometry_sufficient,
     i1_range,
     load_v3_config,
     phase_bin_range,
     sliding_windows,
 )
-
-CACHE = _ROOT / "results/topic5_ictal_recruitment/ictal_field_long_cache"
-LAGPAT_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
 
 CSV_COLS = [
     "subject", "cohort", "n_seizures", "eeg_onset_rel_median", "eeg_offset_rel_median",
@@ -78,60 +72,13 @@ def _n_windows(relt: np.ndarray, onset: float, offset: float, dur: float, phase:
     return len(sliding_windows(relt, rng[0], rng[1], cfg["phases"]["window_sec"], cfg["phases"]["step_sec"]))
 
 
-def _load_participation(subj: str, all_clean: list) -> tuple[dict, str]:
-    """Interictal HFO participation per clean contact.
-
-    The 0.0 default for contacts absent from the lagPat pool IS the non-axis
-    definition (a contact that never fires an interictal HFO has
-    participation 0 < thresh -> non-axis-strict). On lagPat load failure,
-    participation is all-0 for every clean contact (classification still
-    proceeds via axis_template_names) rather than crashing the subject.
-    """
-    try:
-        ev = load_subject_propagation_events(LAGPAT_ROOT / subj / "all_recs")
-        part_raw = {n: float(np.mean(ev["bools"][i])) for i, n in enumerate(ev["channel_names"])}
-        return {n: part_raw.get(n, 0.0) for n in all_clean}, ""
-    except Exception as exc:  # noqa: BLE001 - external mount, any failure must not crash the cohort
-        return {n: 0.0 for n in all_clean}, f"lagpat_load_failed:{type(exc).__name__}:{exc}"
-
-
-def _axis_template_names(ctx: dict, all_clean_set: set) -> list:
-    """Names with finite ``typical_rank`` in either template, intersected with ``all_clean``."""
-    names = set()
-    for rec in (ctx["ta"], ctx["tb"]):
-        for c in rec["channels"]:
-            r = c.get("typical_rank", np.nan)
-            if np.isfinite(r) and c["name"] in all_clean_set:
-                names.add(c["name"])
-    return sorted(names)
-
-
 def run_subject(ds_sid: str, cohort: str, cfg: dict) -> dict:
-    _, subj = ds_sid.split("_", 1)
     row = {"subject": ds_sid, "cohort": cohort, **_FAILURE_ROW}
     try:
-        ctx = load_context(ds_sid, cohort)
+        cc = classify_subject_contacts(ds_sid, cohort, cfg)
+        all_clean = cc["all_clean"]
+        meta = cc["meta"]
         data = np.load(CACHE / f"{ds_sid}.npz", allow_pickle=True)
-        cache_names = [str(x) for x in data["channels"]]
-        meta = json.loads((CACHE / f"{ds_sid}.json").read_text())
-
-        drops = set(map(str, meta.get("drops", [])))
-        all_clean = [n for n in cache_names if n not in drops]
-        all_clean_set = set(all_clean)
-
-        participation, skip_reason = _load_participation(subj, all_clean)
-        if skip_reason:
-            print(f"[warn] {ds_sid} ({cohort}): {skip_reason}", flush=True)
-
-        axis_template_names = _axis_template_names(ctx, all_clean_set)
-        cl = classify_contacts(
-            all_clean, axis_template_names, participation,
-            cfg["geometry"]["nonaxis_hfo_participation_max"],
-        )
-        shafts_with_both = len(
-            {shaft_of(n) for n in cl["is_axis"]} & {shaft_of(n) for n in cl["is_nonaxis_strict"]}
-        )
-        geom_ok, _geom_reason = geometry_sufficient(cl["n_axis"], cl["n_nonaxis"], shafts_with_both, cfg)
 
         onset_l, offset_l, dur_l, usable_pre_l, usable_ictal_l = [], [], [], [], []
         n_windows_p3_l, n_windows_i1_l = [], []
@@ -171,13 +118,13 @@ def run_subject(ds_sid: str, cohort: str, cfg: dict) -> dict:
             "usable_pre_sec": _median_or(usable_pre_l, float("nan")),
             "usable_ictal_sec": _median_or(usable_ictal_l, float("nan")),
             "n_contacts_all_clean": len(all_clean),
-            "n_axis": cl["n_axis"],
-            "n_nonaxis": cl["n_nonaxis"],
-            "n_ambiguous": cl["n_ambiguous"],
+            "n_axis": cc["n_axis"],
+            "n_nonaxis": cc["n_nonaxis"],
+            "n_ambiguous": cc["n_ambiguous"],
             "n_windows_P3": _median_or(n_windows_p3_l, 0.0),
             "n_windows_I1": _median_or(n_windows_i1_l, 0.0),
             "i1_eligible": bool(i1_eligible_any),
-            "geometry_sufficient": bool(geom_ok),
+            "geometry_sufficient": bool(cc["geometry_sufficient"]),
         })
     except Exception as exc:  # noqa: BLE001 - never silently drop a subject
         print(f"[skip] {ds_sid} ({cohort}): {type(exc).__name__}: {exc}", flush=True)

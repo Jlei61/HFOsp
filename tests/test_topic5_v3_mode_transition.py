@@ -1,5 +1,6 @@
 import numpy as np
 
+from scripts._topic5_v3_io import channel_is_valid
 from src.topic5_v3_mode_transition import (
     axis_nonaxis_vectors,
     beta_axis,
@@ -12,6 +13,13 @@ from src.topic5_v3_mode_transition import (
     sliding_windows,
     subspace_projectors,
 )
+
+
+def test_channel_is_valid():
+    assert channel_is_valid(np.array([np.nan, np.nan, np.nan, np.nan])) is False   # all-NaN
+    assert channel_is_valid(np.array([1.0, 2.0])) is False                        # <3 finite samples
+    assert channel_is_valid(np.array([3.0, 3.0, 3.0, 3.0])) is False              # flat/degenerate (std=0)
+    assert channel_is_valid(np.array([1.0, 2.0, 3.0, 4.0, 5.0])) is True          # >=3 finite, std>0
 
 
 def test_v3_config_keys():
