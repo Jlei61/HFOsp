@@ -2,13 +2,17 @@ import numpy as np
 
 from scripts._topic5_v3_io import channel_is_valid
 from src.topic5_v3_mode_transition import (
+    atm_lag0,
+    atm_offdiag,
     axis_nonaxis_vectors,
     beta_axis,
     classify_contacts,
+    compartment_flux,
     geometry_sufficient,
     i1_range,
     label_permute,
     load_v3_config,
+    net_offaxis_flux,
     phase_bin_range,
     rank_forward,
     rate_preserving_shuffle,
@@ -215,3 +219,66 @@ def test_label_permute_preserves_counts_and_shaft():
     assert a_axis_before == 2 and b_axis_before == 1
     assert a_axis_after == a_axis_before                                # per-shaft axis count preserved
     assert b_axis_after == b_axis_before
+
+
+def test_atm_offdiag_zero_diagonal_and_renorm():
+    # ch0 active t0,t1,t3; ch1 active t2; ch2 active t4,t5.
+    # Transitions: 0->0 (self), 0->1, 1->0, 0->2, 2->2 (self). Row 2's only
+    # transition is a pure self-loop, so once excluded it has no
+    # off-diagonal mass left.
+    active = np.array([
+        [True,  True,  False, True,  False, False],
+        [False, False, True,  False, False, False],
+        [False, False, False, False, True,  True ],
+    ])
+    atm = atm_offdiag(active)
+
+    assert np.allclose(np.diag(atm), 0.0)                 # diagonal exactly zero everywhere
+    row_sums = atm.sum(axis=1)
+    assert np.isclose(row_sums[0], 1.0)                    # renormalized over remaining off-diag mass
+    assert np.isclose(row_sums[1], 1.0)                    # already off-diagonal only -> unchanged
+    assert np.isclose(row_sums[2], 0.0)                    # pure self-loop row -> all-zero, no div-by-zero
+    assert np.allclose(atm[0], [0.0, 0.5, 0.5])
+    assert np.allclose(atm[1], [1.0, 0.0, 0.0])
+
+
+def test_net_offaxis_flux_positive_for_A_to_N_cascade():
+    # axis={0,1} fire at t0 and t3; nonaxis={2,3} fire at t1 and t4; t2/t5 are
+    # quiet. Every recorded transition is axis(t)->nonaxis(t+1); nonaxis(t1)
+    # is followed by a quiet bin, so N->A is never recorded (zero, not just
+    # small).
+    active = np.zeros((4, 6), dtype=bool)
+    active[0, [0, 3]] = True
+    active[1, [0, 3]] = True
+    active[2, [1, 4]] = True
+    active[3, [1, 4]] = True
+    axis_idx = np.array([0, 1])
+    nonaxis_idx = np.array([2, 3])
+
+    atm = atm_offdiag(active)
+    flux = net_offaxis_flux(atm, axis_idx, nonaxis_idx, "source_mean")
+
+    assert flux > 0.0
+
+
+def test_source_mean_invariant_to_empty_nonaxis_count():
+    # axis={0,1} and nonaxis={2,3} each send all their mass to the other
+    # compartment (nonzero in BOTH directions, so a wrong compartment-size
+    # denominator would visibly move net_offaxis_flux once nonaxis grows).
+    atm = np.array([
+        [0.0, 0.0, 0.5, 0.5],
+        [0.0, 0.0, 0.5, 0.5],
+        [0.5, 0.5, 0.0, 0.0],
+        [0.5, 0.5, 0.0, 0.0],
+    ])
+    axis_idx = np.array([0, 1])
+    nonaxis_idx = np.array([2, 3])
+    net_before = net_offaxis_flux(atm, axis_idx, nonaxis_idx, "source_mean")
+
+    # Extend with 2 never-active non-axis contacts: all-zero rows + columns.
+    padded = np.zeros((6, 6))
+    padded[:4, :4] = atm
+    nonaxis_idx_ext = np.array([2, 3, 4, 5])
+    net_after = net_offaxis_flux(padded, axis_idx, nonaxis_idx_ext, "source_mean")
+
+    assert np.isclose(net_before, net_after)   # fails under a /compartment-size denominator

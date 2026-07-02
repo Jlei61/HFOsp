@@ -15,6 +15,8 @@ import numpy as np
 import yaml
 from scipy.stats import spearmanr
 
+from src.topic5_v2_criticality import avalanche_atm
+
 _ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _ROOT / "config" / "topic5_v3.yaml"
 
@@ -377,3 +379,117 @@ def label_permute(
     new_axis.sort()
     new_nonaxis.sort()
     return new_axis, new_nonaxis
+
+
+def atm_offdiag(active_bool: np.ndarray) -> np.ndarray:
+    """Avalanche transition matrix with self-transitions excluded.
+
+    Row-normalizes ``active_bool`` via V2 ``avalanche_atm``, zeroes the
+    diagonal, and renormalizes each row over its remaining off-diagonal
+    mass so nonzero rows sum back to 1. A row with no off-diagonal mass
+    left (e.g. a contact whose only recorded transition was a pure
+    self-loop) stays all-zero rather than dividing by zero. This is
+    ``ATM[i,j] = P(j@t+1 | i@t, j != i)`` (spec Sec 6.3): self-persistence
+    is excluded so it cannot inflate apparent propagation.
+    """
+    full = avalanche_atm(active_bool)
+    n_ch = full.shape[0]
+    offdiag = full.copy()
+    offdiag[np.arange(n_ch), np.arange(n_ch)] = 0.0
+    row_sum = offdiag.sum(axis=1, keepdims=True)
+    return np.divide(offdiag, row_sum, out=np.zeros_like(offdiag), where=row_sum > 0)
+
+
+def atm_lag0(active_bool: np.ndarray) -> np.ndarray:
+    """Same-time co-activation control: ``M[i,j] = P(j@t | i@t)`` for ``i != j``.
+
+    Counts bins where ``i`` and ``j`` are simultaneously active, divided by
+    the number of bins ``i`` is active; the diagonal is forced to zero
+    (``i`` excluded from its own conditioning set). A contact that is never
+    active has no bins to condition on and gets an all-zero row rather than
+    dividing by zero. This is the lag0 common-drive control (spec Sec 6.3):
+    a global burst can co-activate many contacts within the same bin with
+    no real propagation, and ``ATM_lag0`` isolates exactly that so
+    ``ATM_lag1_specific = ATM_lag1 - ATM_lag0`` can subtract it out.
+    """
+    active = np.asarray(active_bool, dtype=bool)
+    n_ch = active.shape[0]
+    active_f = active.astype(float)
+    co_counts = active_f @ active_f.T
+    n_active_i = active_f.sum(axis=1, keepdims=True)
+    m = np.divide(co_counts, n_active_i, out=np.zeros((n_ch, n_ch)), where=n_active_i > 0)
+    m[np.arange(n_ch), np.arange(n_ch)] = 0.0
+    return m
+
+
+def compartment_flux(
+    atm: np.ndarray, axis_idx: np.ndarray, nonaxis_idx: np.ndarray, normalization: str
+) -> dict:
+    """Axis <-> non-axis compartment flux summary from a diagonal-free ATM.
+
+    ``atm`` is expected to already have a zero diagonal (``atm_offdiag`` or
+    ``atm_lag0`` output) — ``atm[i].sum()`` is then exactly the row's
+    off-diagonal outgoing mass, with no re-derivation needed here.
+
+    ``flux_A2N_sum``/``flux_N2A_sum`` are the raw sum of ``atm[i,j]`` over
+    the axis-source x non-axis-target block (resp. non-axis-source x
+    axis-target) — descriptive, and grows with compartment size.
+
+    ``flux_A2N`` (``normalization="source_mean"``, primary) is the mean,
+    over axis sources that are ACTIVE (``atm[i].sum() > 0``), of that
+    source's outgoing mass into the non-axis target set. ``flux_N2A``
+    mirrors this for non-axis sources. A compartment with zero active
+    sources gets flux 0.0. Averaging over ACTIVE sources — not compartment
+    size — is what keeps ``source_mean`` invariant to padding either
+    compartment with never-active contacts.
+
+    ``normalization`` selects which pair is echoed into ``flux_A2N``/
+    ``flux_N2A``: ``"source_mean"`` copies the mean-based pair, ``"sum"``
+    copies the raw-sum pair. The ``_sum`` keys are always the raw sum
+    regardless of ``normalization``.
+    """
+    mat = np.asarray(atm, dtype=float)
+    axis_idx = np.asarray(axis_idx, dtype=int)
+    nonaxis_idx = np.asarray(nonaxis_idx, dtype=int)
+
+    flux_a2n_sum = float(mat[np.ix_(axis_idx, nonaxis_idx)].sum())
+    flux_n2a_sum = float(mat[np.ix_(nonaxis_idx, axis_idx)].sum())
+
+    def _source_mean(source_idx: np.ndarray, target_idx: np.ndarray) -> float:
+        if source_idx.size == 0 or target_idx.size == 0:
+            return 0.0
+        active = mat[source_idx].sum(axis=1) > 0.0
+        if not np.any(active):
+            return 0.0
+        target_mass = mat[np.ix_(source_idx, target_idx)].sum(axis=1)
+        return float(target_mass[active].mean())
+
+    flux_a2n_mean = _source_mean(axis_idx, nonaxis_idx)
+    flux_n2a_mean = _source_mean(nonaxis_idx, axis_idx)
+
+    if normalization == "source_mean":
+        flux_a2n, flux_n2a = flux_a2n_mean, flux_n2a_mean
+    elif normalization == "sum":
+        flux_a2n, flux_n2a = flux_a2n_sum, flux_n2a_sum
+    else:
+        raise ValueError(f"unknown normalization: {normalization!r}")
+
+    return {
+        "flux_A2N": flux_a2n,
+        "flux_N2A": flux_n2a,
+        "flux_A2N_sum": flux_a2n_sum,
+        "flux_N2A_sum": flux_n2a_sum,
+    }
+
+
+def net_offaxis_flux(
+    atm: np.ndarray, axis_idx: np.ndarray, nonaxis_idx: np.ndarray, normalization: str
+) -> float:
+    """Net axis -> non-axis avalanche flux: ``flux_A2N - flux_N2A``.
+
+    Both terms come from ``compartment_flux`` under the same
+    ``normalization`` (``"source_mean"`` -> primary source-normalized pair,
+    ``"sum"`` -> descriptive raw-sum pair).
+    """
+    flux = compartment_flux(atm, axis_idx, nonaxis_idx, normalization)
+    return float(flux["flux_A2N"] - flux["flux_N2A"])
