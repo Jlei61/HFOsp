@@ -13,6 +13,7 @@ from typing import Mapping
 
 import numpy as np
 import yaml
+from scipy.stats import spearmanr
 
 _ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _ROOT / "config" / "topic5_v3.yaml"
@@ -134,3 +135,164 @@ def sliding_windows(
             windows.append((ws, we))
         ws += step_n
     return windows
+
+
+def rank_forward(ta_rank: dict) -> dict:
+    """Rescale interictal ``typical_rank`` to a signed forward-order axis.
+
+    Only names with a finite ``typical_rank`` are kept (non-participating
+    contacts carry non-finite values upstream and are dropped, not
+    remapped). Finite values are linearly rescaled to ``[-1, +1]``
+    (earliest rank -> -1, latest rank -> +1); if every finite value ties
+    (``rmax == rmin``) every name maps to ``0.0`` instead of dividing by
+    zero.
+    """
+    finite = {name: float(r) for name, r in ta_rank.items() if np.isfinite(r)}
+    if not finite:
+        return {}
+    values = np.array(list(finite.values()))
+    rmin, rmax = float(values.min()), float(values.max())
+    if rmax == rmin:
+        return {name: 0.0 for name in finite}
+    return {name: 2.0 * (r - rmin) / (rmax - rmin) - 1.0 for name, r in finite.items()}
+
+
+def beta_axis(metric_by_name: dict, rank_forward: dict) -> float:
+    """Signed Spearman correlation between ``metric_by_name`` and ``rank_forward``.
+
+    Restricted to names present in both dicts with finite values in both —
+    these are the axis contacts. Returns ``nan`` if fewer than 4 valid pairs
+    (Spearman on <4 points is not meaningful).
+    """
+    xs: list[float] = []
+    ys: list[float] = []
+    for name, rank_val in rank_forward.items():
+        if name not in metric_by_name:
+            continue
+        metric_val = metric_by_name[name]
+        if np.isfinite(metric_val) and np.isfinite(rank_val):
+            xs.append(float(metric_val))
+            ys.append(float(rank_val))
+    if len(xs) < 4:
+        return float("nan")
+    r, _ = spearmanr(xs, ys)
+    return float(r)
+
+
+def classify_contacts(
+    all_clean: list, axis_template_names: list, hfo_participation: dict, thresh: float
+) -> dict:
+    """Partition ``all_clean`` into three disjoint classes.
+
+    ``axis_template_names`` is membership only — the caller has already
+    decided which names count as axis (finite typical_rank OR in
+    axis_partition source/mid/end); this does not recompute that. The
+    remaining clean contacts split on ``hfo_participation`` vs ``thresh``:
+    below is non-axis-strict (feeds ``P_N``), at/above is ambiguous_hfo
+    (stays in the all-clean VAR state ``X`` but is excluded from both
+    ``P_A`` and ``P_N``).
+    """
+    axis_set = set(axis_template_names)
+    is_axis: list = []
+    is_nonaxis_strict: list = []
+    is_ambiguous_hfo: list = []
+    for name in all_clean:
+        if name in axis_set:
+            is_axis.append(name)
+        elif hfo_participation.get(name, 0.0) >= thresh:
+            is_ambiguous_hfo.append(name)
+        else:
+            is_nonaxis_strict.append(name)
+    is_axis.sort()
+    is_nonaxis_strict.sort()
+    is_ambiguous_hfo.sort()
+    return {
+        "is_axis": is_axis,
+        "is_nonaxis_strict": is_nonaxis_strict,
+        "is_ambiguous_hfo": is_ambiguous_hfo,
+        "n_axis": len(is_axis),
+        "n_nonaxis": len(is_nonaxis_strict),
+        "n_ambiguous": len(is_ambiguous_hfo),
+    }
+
+
+def subspace_projectors(
+    names: list, axis_names: list, nonaxis_names: list
+) -> tuple[np.ndarray, np.ndarray]:
+    """Diagonal 0/1 projection matrices onto the axis / non-axis-strict subspaces.
+
+    Ambiguous contacts (in ``names`` but in neither ``axis_names`` nor
+    ``nonaxis_names``) are 0 in both ``P_A`` and ``P_N``.
+    """
+    axis_set = set(axis_names)
+    nonaxis_set = set(nonaxis_names)
+    a_diag = np.array([1.0 if name in axis_set else 0.0 for name in names])
+    n_diag = np.array([1.0 if name in nonaxis_set else 0.0 for name in names])
+    return np.diag(a_diag), np.diag(n_diag)
+
+
+def axis_nonaxis_vectors(
+    names: list, rank_forward: dict, axis_names: list, nonaxis_names: list
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Three length-``len(names)`` vectors ordered by ``names``.
+
+    ``e_axis_mean``/``e_nonaxis_mean`` are UNIFORM unit indicators over
+    their respective positions (not participation-weighted); ambiguous
+    positions are 0 in both. ``e_nonaxis_mean`` is then Gram-Schmidt
+    orthogonalized against ``e_axis_mean`` and renormalized — a no-op in
+    value since axis/non-axis are disjoint (already orthogonal), but keeps
+    the construction explicit for future non-disjoint use. ``e_axis_grad``
+    weights axis contacts by ``rank_forward`` (0 elsewhere) and
+    L2-normalizes; an all-zero weighting (e.g. all-zero ``rank_forward``,
+    or no axis contacts) returns the zero vector rather than dividing by
+    zero.
+    """
+    axis_set = set(axis_names)
+    nonaxis_set = set(nonaxis_names)
+    is_axis = np.array([name in axis_set for name in names])
+    is_nonaxis = np.array([name in nonaxis_set for name in names])
+
+    n_axis = int(is_axis.sum())
+    e_axis_mean = is_axis.astype(float)
+    if n_axis > 0:
+        e_axis_mean = e_axis_mean / np.sqrt(n_axis)
+
+    n_nonaxis = int(is_nonaxis.sum())
+    e_nonaxis_mean = is_nonaxis.astype(float)
+    if n_nonaxis > 0:
+        e_nonaxis_mean = e_nonaxis_mean / np.sqrt(n_nonaxis)
+    e_nonaxis_mean = e_nonaxis_mean - (e_nonaxis_mean @ e_axis_mean) * e_axis_mean
+    norm_nonaxis = np.linalg.norm(e_nonaxis_mean)
+    if norm_nonaxis > 0:
+        e_nonaxis_mean = e_nonaxis_mean / norm_nonaxis
+
+    grad_weights = np.array(
+        [rank_forward.get(name, 0.0) if is_axis[i] else 0.0 for i, name in enumerate(names)]
+    )
+    norm_grad = np.linalg.norm(grad_weights)
+    e_axis_grad = grad_weights / norm_grad if norm_grad > 0 else np.zeros(len(names))
+
+    return e_axis_mean, e_axis_grad, e_nonaxis_mean
+
+
+def geometry_sufficient(
+    n_axis: int, n_nonaxis: int, shafts_with_both: int, cfg: dict
+) -> tuple[bool, str]:
+    """Whether axis/non-axis geometry is sufficient for downstream VAR/subspace work.
+
+    Checks ``n_axis``/``n_nonaxis`` against ``cfg["geometry"]["min_n_axis"]``/
+    ``min_n_nonaxis`` and requires at least one shaft carrying both classes
+    (so the non-axis subspace isn't confounded with shaft identity). Returns
+    a human-readable ``reason`` for the feasibility CSV: ``"ok"`` when
+    sufficient, else the first failing condition.
+    """
+    geo = cfg["geometry"]
+    min_axis = geo["min_n_axis"]
+    min_nonaxis = geo["min_n_nonaxis"]
+    if n_axis < min_axis:
+        return False, f"n_axis<{min_axis}"
+    if n_nonaxis < min_nonaxis:
+        return False, f"n_nonaxis<{min_nonaxis}"
+    if shafts_with_both < 1:
+        return False, "no_shaft_with_both"
+    return True, "ok"

@@ -1,10 +1,13 @@
 import numpy as np
 
 from src.topic5_v3_mode_transition import (
+    axis_nonaxis_vectors,
+    classify_contacts,
     i1_range,
     load_v3_config,
     phase_bin_range,
     sliding_windows,
+    subspace_projectors,
 )
 
 
@@ -53,3 +56,15 @@ def test_sliding_windows_full_windows_only():
 
     short = sliding_windows(relt, 0, int(round(6.0 / dt)), window_sec, step_sec)
     assert len(short) == 0                                 # < window_sec -> 0 windows
+
+
+def test_three_class_and_uniform_nonaxis_vector():
+    cfg = load_v3_config(); thr = cfg["geometry"]["nonaxis_hfo_participation_max"]
+    part = {"a0":.5,"a1":.5,"a2":.5,"a3":.5,"a4":.5,"n0":.0,"n1":.02,"n2":.0,"amb":.4}
+    cl = classify_contacts(list(part), ["a0","a1","a2","a3","a4"], part, thr)
+    assert cl["n_axis"] == 5 and cl["n_nonaxis"] == 3 and cl["n_ambiguous"] == 1   # 'amb' high part, no rank
+    names = list(part)
+    e_am, e_ag, e_nm = axis_nonaxis_vectors(names, {n:0. for n in names},
+                                            ["a0","a1","a2","a3","a4"], ["n0","n1","n2"])
+    assert np.isclose(np.linalg.norm(e_nm), 1.0) and abs(e_am @ e_nm) < 1e-9   # unit + orthogonal
+    assert np.allclose(e_nm[[names.index(n) for n in ["n0","n1","n2"]]], e_nm[names.index("n0")])  # uniform, not part-weighted
