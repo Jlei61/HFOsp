@@ -202,6 +202,7 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
         "delta_net_offaxis_flux_raw": obs_delta, "n_seizures": n_seizures,
     })
     if not np.isfinite(obs_delta):
+        row.update({"status": "skipped", "skip_reason": "nonfinite_flux"})
         print(f"[warn] {ds_sid} ({cohort}): geometry ok but no paired P3/I1 flux (obs_delta NaN)", flush=True)
         return row
 
@@ -247,16 +248,25 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
     p_label, _, _ = _delta_stats(obs_delta, delta_label)
     p_spatial, _, _ = _delta_stats(obs_delta, delta_spatial)
 
+    if not np.isfinite(surplus):
+        row.update({"status": "skipped", "skip_reason": "nonfinite_flux"})
+        print(f"[warn] {ds_sid} ({cohort}): geometry ok but surplus is non-finite", flush=True)
+        return row
+
     # ---- lag1-specific downgrade for common drive (lag1 - lag0) ----
     lag0_p3 = _median_net_flux(_atms(p3_acts, atm_lag0), axis_idx, nonaxis_idx)
     lag0_i1 = _median_net_flux(_atms(i1_acts, atm_lag0), axis_idx, nonaxis_idx)
     lag1_specific_delta = (flux_i1 - lag0_i1) - (flux_p3 - lag0_p3)
     common_drive_sensitive = bool(lag1_specific_delta <= 0)
 
-    # ---- leave-one-contact: recompute obs_delta ONLY per drop (cheaper than a
-    # per-drop null; see brief). pass = sign(surplus) survives every drop ----
+    # ---- leave-one-contact: recompute RAW obs_delta per drop (cheaper than a
+    # per-drop null; see brief), then convert each to a surplus using the
+    # ALREADY-COMPUTED full-data rate-null median (no re-run of the null).
+    # pass = sign(surplus) survives every drop, on the surplus basis — raw
+    # obs_delta can disagree in sign with the null-corrected surplus. ----
     n = len(all_clean)
-    drop_deltas = []
+    median_rate_null_full = float(np.median(delta_rate))
+    drop_surpluses = []
     for d in range(n):
         keep = np.ones(n, dtype=bool)
         keep[d] = False
@@ -266,25 +276,29 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
         d_nonaxis = new_of_old[nonaxis_idx[nonaxis_idx != d]]
         d_p3 = [a[keep] for a in p3_acts]
         d_i1 = [a[keep] for a in i1_acts]
-        drop_deltas.append(_obs_delta_from_acts(d_p3, d_i1, d_axis, d_nonaxis))
-    leave_one_min = float(np.min(drop_deltas)) if drop_deltas else float("nan")
+        dd = _obs_delta_from_acts(d_p3, d_i1, d_axis, d_nonaxis)
+        drop_surpluses.append(dd - median_rate_null_full)
+    leave_one_min = float(np.min(drop_surpluses)) if drop_surpluses else float("nan")
     sign_surplus = np.sign(surplus)
-    leave_one_pass = bool(sign_surplus != 0 and all(np.sign(dd) == sign_surplus for dd in drop_deltas))
+    leave_one_pass = bool(
+        sign_surplus != 0 and all(np.sign(ds) == sign_surplus for ds in drop_surpluses)
+    )
 
     max_source = _max_source_contribution(i1_atms, axis_idx, nonaxis_idx)
 
     # ---- axis-only control: relabel all non-axis -> axis (non-axis empty).
     # By construction net flux collapses to ~0 (no non-axis target/source), so
-    # axis_only_flux_delta ~ 0 and the pass reduces to obs_delta > 0. NEAR-
-    # TRIVIAL-BY-CONSTRUCTION (flagged in the report) — implemented literally
-    # per the brief so Task 10 can decide whether to strengthen it. ----
+    # axis_only_flux_delta ~ 0 and the pass reduces to surplus > 0 (null-
+    # corrected basis, not raw obs_delta). NEAR-TRIVIAL-BY-CONSTRUCTION
+    # (flagged in the report) — implemented literally per the brief so Task 10
+    # can decide whether to strengthen it. ----
     axis_all = np.array(sorted(set(axis_idx.tolist()) | set(nonaxis_idx.tolist())), dtype=int)
     empty_nonaxis = np.array([], dtype=int)
     axis_only_flux_delta = (
         _median_net_flux(i1_atms, axis_all, empty_nonaxis)
         - _median_net_flux(p3_atms, axis_all, empty_nonaxis)
     )
-    axis_only_control_pass = bool(axis_only_flux_delta < obs_delta)
+    axis_only_control_pass = bool(axis_only_flux_delta < surplus)
 
     # ---- onset jitter +-10 s: reload windows at shifted anchors (i1_eligible
     # gate stays at shift 0 inside the loader), recompute obs_delta, require
