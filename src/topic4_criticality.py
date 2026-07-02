@@ -37,27 +37,34 @@ def load_crit_config(path: str | Path | None = None) -> Dict[str, Any]:
 # --------------------------------------------------------------------------- #
 
 
-def slow_to_ratefield_sign_ok(cfg: Dict[str, Any]) -> Dict[str, bool]:
+def slow_to_ratefield_sign_ok(cfg: Dict[str, Any]) -> Dict[str, Dict[str, bool]]:
     """#P1-1 sign-test: for each slow_to_ratefield var, raising it must NOT raise E excitability.
 
     Reads ``eta_K``/``eta_G`` off ``cfg["slow_to_ratefield"]`` (config/topic4_criticality.yaml
-    #P1-1 lock) and probes each var independently on a small single-core operating point:
+    #P1-1 lock) and probes each var independently on a small single-core operating point.
+
+    Returns a STRUCTURED per-var dict of component bools (not one flat pass/fail) because q_I is
+    intentionally held to a rate-only criterion while g_K/h_G are held to the strict
+    alpha_1+rate criterion -- a flat bool would make a downstream reader (e.g. T3c attribution)
+    misread q_I as having passed the SAME strict gate g_K/h_G passed:
 
     * ``q_I`` -- already wired via ``InhibitionField.q`` scaling ``W_EI`` (target=E_inhibition,
-      pre-existing path); raise ``q_global``. Criterion: mean rE not higher -- this is q_I's own
-      pre-existing, documented contract ("Lower q -> weaker brake -> more event-prone", see
-      ``build_inhibition_field``'s module comment). ``W_EI`` enters BOTH muE (subtracted) and
-      varE (added, squared), so raising q_I also raises sigmaE; near a threshold-adjacent
-      operating point the LIF gain's sigma-sensitivity can transiently outweigh its mu-sensitivity,
-      so alpha_1 is not required to fall in lockstep (verified empirically: robust across a
-      q in [0.84, 1.0] scan, not a probe-point fluke) -- the controller's own sign-test intent note
-      scopes the stronger "AND lower alpha_1" claim to hG/gK only, never to q_I.
+      pre-existing path); raise ``q_global``. Criterion: ``rate_not_higher`` (mean rE not higher)
+      -- this is q_I's own pre-existing, documented contract ("Lower q -> weaker brake -> more
+      event-prone", see ``build_inhibition_field``'s module comment). ``W_EI`` enters BOTH muE
+      (subtracted) and varE (added, squared), so raising q_I also raises sigmaE; near a
+      threshold-adjacent operating point the LIF gain's sigma-sensitivity can transiently outweigh
+      its mu-sensitivity, so alpha_1 is not required to fall in lockstep (verified empirically:
+      robust across a q in [0.84, 1.0] scan, not a probe-point fluke) -- the controller's own
+      sign-test intent note scopes the stronger "AND lower alpha_1" claim to hG/gK only, never to
+      q_I. Its dict carries the fixed marker ``alpha1_not_required=True`` (not a probe result) so
+      downstream code can tell q_I's gate apart from g_K/h_G's without re-deriving the physics.
     * ``g_K`` -- Task 2.5 wiring, ``muE -= eta_K*gK_field`` (target=E_current, per-cell); raise a
-      uniform field. Criterion: alpha_1 not higher AND mean rE not higher (#P1-1's literal claim).
+      uniform field. Criteria: ``alpha1_not_higher`` AND ``rate_not_higher`` (#P1-1's literal claim).
     * ``h_G`` -- Task 2.5 wiring, ``muE -= eta_G*hG_scalar`` (target=E_current, global scalar);
-      raise the scalar. Criterion: alpha_1 not higher AND mean rE not higher (#P1-1's literal claim).
-      g_K/h_G are pure muE-only additive shifts (varE has zero dependence on either), so both
-      criteria hold together cleanly -- unlike q_I's weight-scaling path.
+      raise the scalar. Criteria: ``alpha1_not_higher`` AND ``rate_not_higher`` (#P1-1's literal
+      claim). g_K/h_G are pure muE-only additive shifts (varE has zero dependence on either), so
+      both criteria hold together cleanly -- unlike q_I's weight-scaling path.
 
     Only consumes ``src.topic4_m3b_spectral_phase``'s generic ``gK_field``/``hG_scalar``/``eta_K``/
     ``eta_G`` keywords -- that module has no knowledge of this config's schema.
@@ -83,13 +90,13 @@ def slow_to_ratefield_sign_ok(cfg: Dict[str, Any]) -> Dict[str, bool]:
 
     a0, r0 = alpha1_and_rate(solve_operating_point(grid, kernels, exc, inh_lo))
 
-    def rate_not_higher(op_hi) -> bool:
+    def rate_ok(op_hi) -> bool:
         _, r1 = alpha1_and_rate(op_hi)
         return bool(r1 <= r0 + 1e-9)
 
-    def alpha1_and_rate_not_higher(op_hi) -> bool:
-        a1, r1 = alpha1_and_rate(op_hi)
-        return bool(a1 <= a0 + 1e-9 and r1 <= r0 + 1e-9)
+    def alpha1_ok(op_hi) -> bool:
+        a1, _ = alpha1_and_rate(op_hi)
+        return bool(a1 <= a0 + 1e-9)
 
     inh_hi = build_inhibition_field(grid, core, q_global=0.99)
     op_qI = solve_operating_point(grid, kernels, exc, inh_hi)
@@ -100,9 +107,9 @@ def slow_to_ratefield_sign_ok(cfg: Dict[str, Any]) -> Dict[str, bool]:
     op_hG = solve_operating_point(grid, kernels, exc, inh_lo, hG_scalar=2.0, eta_G=eta_G)
 
     return {
-        "q_I": rate_not_higher(op_qI),
-        "g_K": alpha1_and_rate_not_higher(op_gK),
-        "h_G": alpha1_and_rate_not_higher(op_hG),
+        "q_I": {"rate_not_higher": rate_ok(op_qI), "alpha1_not_required": True},
+        "g_K": {"rate_not_higher": rate_ok(op_gK), "alpha1_not_higher": alpha1_ok(op_gK)},
+        "h_G": {"rate_not_higher": rate_ok(op_hG), "alpha1_not_higher": alpha1_ok(op_hG)},
     }
 
 

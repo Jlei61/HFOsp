@@ -104,11 +104,17 @@ def test_slow_to_ratefield_g_K_sign_lowers_excitability():
 def test_slow_to_ratefield_sign_ok_all_three_pass():
     """The #P1-1 sign-test deliverable: slow_to_ratefield_sign_ok reads eta_K/eta_G off
     load_crit_config()'s slow_to_ratefield block and confirms q_I (already-wired via inh.q),
-    g_K, and h_G all lower excitability when raised."""
+    g_K, and h_G all lower excitability when raised. Structured per-var dict (user P1-3)
+    distinguishes q_I's rate-only criterion from g_K/h_G's strict alpha_1+rate criterion."""
     from src.topic4_criticality import slow_to_ratefield_sign_ok, load_crit_config
 
-    result = slow_to_ratefield_sign_ok(load_crit_config())
-    assert result == {"q_I": True, "g_K": True, "h_G": True}
+    r = slow_to_ratefield_sign_ok(load_crit_config())
+    assert r["q_I"]["rate_not_higher"] is True
+    assert r["q_I"]["alpha1_not_required"] is True
+    assert r["g_K"]["rate_not_higher"] is True
+    assert r["g_K"]["alpha1_not_higher"] is True
+    assert r["h_G"]["rate_not_higher"] is True
+    assert r["h_G"]["alpha1_not_higher"] is True
 
 
 # --- Task 3a-1: operating-point quality gate -- rate_mismatch (abs+rel floor), adiabatic_index,
