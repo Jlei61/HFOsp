@@ -170,9 +170,20 @@ def _agg_cached(cache_phase: list, fn) -> float:
 
 
 def _p_upper(obs: float, perm: np.ndarray) -> float:
-    """One-sided-upper Δ-null p: ``(1 + #{perm >= obs}) / (1 + n_perm)``."""
-    n = int(perm.size)
-    return (1 + int(np.sum(perm >= obs))) / (1 + n)
+    """One-sided-upper Δ-null p over FINITE draws only:
+    ``(1 + #{finite >= obs}) / (1 + finite.size)``.
+
+    A perm draw can be NaN (e.g. a degenerate phase/block/label refit leaves a
+    phase with no valid mode-shift); NaN never satisfies ``>=``, so counting it
+    toward the denominator without ever counting it toward the numerator would
+    silently deflate p (same class of bug as H3a's ``_p_lower`` / H3b's
+    ``_delta_stats`` fixes). If no draw is finite the null is undefined here
+    and this returns NaN rather than a fabricated p.
+    """
+    finite = perm[np.isfinite(perm)]
+    if finite.size == 0:
+        return float("nan")
+    return (1 + int(np.sum(finite >= obs))) / (1 + finite.size)
 
 
 def _perm_arrays(perm_fn, n_perm: int, seed: int, n_out: int) -> list:
@@ -350,9 +361,11 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
     p_block = _p_upper(obs_delta, delta_block)
     p_label = _p_upper(obs_delta, delta_label)
 
-    med_l = float(np.median(delta_label))
-    mad_l = float(np.median(np.abs(delta_label - med_l)))
-    mode_shift_label_z = float((obs_delta - med_l) / mad_l) if mad_l > 0 else float("nan")
+    med_l = float(np.nanmedian(delta_label))
+    mad_l = float(np.nanmedian(np.abs(delta_label - med_l)))
+    mode_shift_label_z = (
+        float((obs_delta - med_l) / mad_l) if np.isfinite(mad_l) and mad_l > 0 else float("nan")
+    )
 
     # ---- descriptive: raw + 2D-consistency mode-shift deltas ----
     mode_shift_raw_delta = agg_i1["ms_raw"] - agg_p3["ms_raw"]

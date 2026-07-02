@@ -117,14 +117,24 @@ def _median_net_flux(atms: list, axis_idx: np.ndarray, nonaxis_idx: np.ndarray) 
 def _delta_stats(obs_delta: float, delta_perm: np.ndarray) -> tuple[float, float, float]:
     """One-sided-upper p, null-corrected surplus, and robust z on a Δ null.
 
-    ``p = (1 + #{delta_perm >= obs_delta}) / (1 + n_perm)`` (H3b expects
-    delta > 0). ``surplus = obs_delta - median(delta_perm)``;
-    ``z = surplus / MAD(delta_perm)`` (NaN when MAD == 0).
+    ``p = (1 + #{finite >= obs_delta}) / (1 + finite.size)`` over the FINITE
+    subset of ``delta_perm`` only (H3b expects delta > 0). A perm draw can be
+    NaN (e.g. a degenerate rate/label/spatial shuffle leaves a phase with no
+    valid flux); NaN never satisfies ``>=``, so counting it toward the
+    denominator without ever counting it toward the numerator would silently
+    deflate p (same class of bug as H3a's ``_p_lower`` fix). If no draw is
+    finite the null is undefined here and this returns ``(nan, nan, nan)``
+    rather than a fabricated p/surplus/z.
+
+    ``surplus = obs_delta - median(finite)``; ``z = surplus / MAD(finite)``
+    (NaN when MAD == 0).
     """
-    n_perm = int(delta_perm.size)
-    p = (1 + int(np.sum(delta_perm >= obs_delta))) / (1 + n_perm)
-    med = float(np.median(delta_perm))
-    mad = float(np.median(np.abs(delta_perm - med)))
+    finite = delta_perm[np.isfinite(delta_perm)]
+    if finite.size == 0:
+        return float("nan"), float("nan"), float("nan")
+    p = (1 + int(np.sum(finite >= obs_delta))) / (1 + finite.size)
+    med = float(np.median(finite))
+    mad = float(np.median(np.abs(finite - med)))
     surplus = float(obs_delta - med)
     z = float(surplus / mad) if mad > 0 else float("nan")
     return p, surplus, z
@@ -265,7 +275,7 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
     # pass = sign(surplus) survives every drop, on the surplus basis — raw
     # obs_delta can disagree in sign with the null-corrected surplus. ----
     n = len(all_clean)
-    median_rate_null_full = float(np.median(delta_rate))
+    median_rate_null_full = float(np.nanmedian(delta_rate))  # same NaN-dilution class as _delta_stats
     drop_surpluses = []
     for d in range(n):
         keep = np.ones(n, dtype=bool)
