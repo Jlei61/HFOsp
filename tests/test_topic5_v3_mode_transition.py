@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from scripts._topic5_v3_io import channel_is_valid
 from src.topic5_v3_mode_transition import (
@@ -240,6 +241,41 @@ def test_atm_offdiag_zero_diagonal_and_renorm():
     assert np.isclose(row_sums[2], 0.0)                    # pure self-loop row -> all-zero, no div-by-zero
     assert np.allclose(atm[0], [0.0, 0.5, 0.5])
     assert np.allclose(atm[1], [1.0, 0.0, 0.0])
+
+
+def test_atm_lag0_coactivation():
+    # 4 contacts x 6 time bins; contact 3 is never active.
+    # ch0 active t0-t3 (rate 4); ch1 active t0,t1,t4 (rate 3); ch2 active t0
+    # only (rate 1); ch3 never active. Co-active bins: {0,1} at t0,t1 (2
+    # bins); {0,2} at t0 (1 bin).
+    active = np.array([
+        [True,  True,  True,  True,  False, False],
+        [True,  True,  False, False, True,  False],
+        [True,  False, False, False, False, False],
+        [False, False, False, False, False, False],
+    ])
+    m = atm_lag0(active)
+
+    assert np.allclose(np.diag(m), 0.0)      # i != j: diagonal forced to zero
+    assert np.allclose(m[3], 0.0)            # never-active contact -> all-zero row, no div-by-zero
+
+    assert np.isclose(m[0, 1], 2 / 4)        # P(1@t | 0@t) = co(0,1)/n_active(0) = 2/4
+    assert np.isclose(m[1, 0], 2 / 3)        # P(0@t | 1@t) = co(0,1)/n_active(1) = 2/3 (asymmetric ordered pair)
+    assert np.isclose(m[0, 2], 1 / 4)        # P(2@t | 0@t) = co(0,2)/n_active(0) = 1/4
+    assert np.isclose(m[2, 0], 1.0)          # P(0@t | 2@t) = co(0,2)/n_active(2) = 1/1
+
+
+def test_compartment_flux_rejects_nonzero_diagonal():
+    atm = np.array([
+        [0.1, 0.5, 0.4],
+        [0.5, 0.0, 0.5],
+        [0.5, 0.5, 0.0],
+    ])
+    axis_idx = np.array([0])
+    nonaxis_idx = np.array([1, 2])
+
+    with pytest.raises(ValueError):
+        compartment_flux(atm, axis_idx, nonaxis_idx, "source_mean")
 
 
 def test_net_offaxis_flux_positive_for_A_to_N_cascade():

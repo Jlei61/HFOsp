@@ -15,7 +15,7 @@ import numpy as np
 import yaml
 from scipy.stats import spearmanr
 
-from src.topic5_v2_criticality import avalanche_atm
+from src.topic5_v2_criticality import _as_2d_bool, avalanche_atm
 
 _ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _ROOT / "config" / "topic5_v3.yaml"
@@ -412,7 +412,7 @@ def atm_lag0(active_bool: np.ndarray) -> np.ndarray:
     no real propagation, and ``ATM_lag0`` isolates exactly that so
     ``ATM_lag1_specific = ATM_lag1 - ATM_lag0`` can subtract it out.
     """
-    active = np.asarray(active_bool, dtype=bool)
+    active = _as_2d_bool(active_bool)
     n_ch = active.shape[0]
     active_f = active.astype(float)
     co_counts = active_f @ active_f.T
@@ -427,9 +427,12 @@ def compartment_flux(
 ) -> dict:
     """Axis <-> non-axis compartment flux summary from a diagonal-free ATM.
 
-    ``atm`` is expected to already have a zero diagonal (``atm_offdiag`` or
+    ``atm`` must already have a zero diagonal (``atm_offdiag`` or
     ``atm_lag0`` output) — ``atm[i].sum()`` is then exactly the row's
-    off-diagonal outgoing mass, with no re-derivation needed here.
+    off-diagonal outgoing mass, with no re-derivation needed here. This
+    precondition is enforced: a non-zero diagonal raises ``ValueError``
+    rather than silently double-counting self-transitions as source
+    activity.
 
     ``flux_A2N_sum``/``flux_N2A_sum`` are the raw sum of ``atm[i,j]`` over
     the axis-source x non-axis-target block (resp. non-axis-source x
@@ -449,6 +452,10 @@ def compartment_flux(
     regardless of ``normalization``.
     """
     mat = np.asarray(atm, dtype=float)
+    if not np.allclose(np.diag(mat), 0.0):
+        raise ValueError(
+            "compartment_flux requires a diagonal-free ATM (call atm_offdiag/atm_lag0 first)"
+        )
     axis_idx = np.asarray(axis_idx, dtype=int)
     nonaxis_idx = np.asarray(nonaxis_idx, dtype=int)
 
