@@ -355,12 +355,18 @@ def adiabatic_index(slow_speed, alpha1, slow_scale, eps=1e-9):
 _REQ = ["converged", "saturated", "residual_rms", "rate_mismatch_abs", "rate_mismatch_rel",
         "slow_mismatch_rel", "adiabatic_index", "alpha_drift_index"]
 
+_NUMERIC_REQ = ["residual_rms", "rate_mismatch_abs", "rate_mismatch_rel",
+                "slow_mismatch_rel", "adiabatic_index", "alpha_drift_index"]
+
 
 def qualify_point(f, cfg):
     g = cfg["quality_gate"]
     for k in _REQ:
         if k not in f or f[k] is None:
             return (False, f"missing_{k}")                               # #5 fail-closed
+    for k in _NUMERIC_REQ:
+        if not np.isfinite(f[k]):
+            return (False, f"nonfinite_{k}")                              # user 1-1: NaN/inf fail-closed
     if not f["converged"]:
         return (False, "nonconverged")
     if f["saturated"]:

@@ -133,3 +133,29 @@ def test_quality_gate_all_review_fixes():
     assert (not bad) and why2 == "alpha_drift_too_fast"                         # #7 enforced
     miss, why3 = qualify_point({"converged": True, "saturated": False, "residual_rms": 1e-6}, c)
     assert (not miss) and why3.startswith("missing_")                          # #5 fail-closed
+
+
+# --- user fix 1-1: every gate is a '>=' comparison, and 'nan >= tol' is False in Python, so a
+# bad point with e.g. residual_rms=nan passed every gate and returned (True, "qualified") --
+# a fail-OPEN hole. qualify_point must reject non-finite (nan or inf) values on the 6 NUMERIC
+# required fields (not the two booleans converged/saturated). ---
+
+def test_qualify_point_rejects_nonfinite_numeric_fields():
+    import numpy as np
+    from src.topic4_criticality import qualify_point, load_crit_config
+
+    c = load_crit_config()
+    baseline = {"converged": True, "saturated": False, "residual_rms": 1e-6, "rate_mismatch_abs": 0.01,
+        "rate_mismatch_rel": 0.01, "slow_mismatch_rel": 0.01, "adiabatic_index": 0.05, "alpha_drift_index": 0.05}
+
+    ok, why = qualify_point(dict(baseline), c)
+    assert ok and why == "qualified"                                          # all-finite baseline still passes
+
+    numeric_fields = ["residual_rms", "rate_mismatch_abs", "rate_mismatch_rel",
+                       "slow_mismatch_rel", "adiabatic_index", "alpha_drift_index"]
+    for field in numeric_fields:
+        for bad_value in (np.nan, np.inf):
+            f = dict(baseline)
+            f[field] = bad_value
+            bad, why_bad = qualify_point(f, c)
+            assert (not bad) and why_bad == f"nonfinite_{field}", (field, bad_value, why_bad)
