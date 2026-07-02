@@ -551,3 +551,42 @@ def solve_branches(grid, kernels, exc, inh, cfg: Dict[str, Any], *, prev=None, s
             op=rep_op,
         ))
     return branches
+
+
+# --------------------------------------------------------------------------- #
+# Non-normality: numerical abscissa + directional finite-time gain (Task 3a-4, #15/#16/#17) #
+# --------------------------------------------------------------------------- #
+# spec §non-normality: a stable operator (every eigenvalue's real part < 0) can still transiently
+# amplify a perturbation before it decays if J is non-normal. numerical_abscissa bounds that growth
+# from the SYMMETRIC (Hermitian) part of J -- it can be positive even when alpha_1 < 0.
+# directional_finite_time_gain_curve tracks the amplification along a specific direction b (the
+# core-perturbation direction, not the full operator norm -- #15 review-resolved as directional, not
+# operator, per plan Task 3a-4 "directional-vs-operator") over a set of horizons.
+# transient_amplification_present flags a stable-but-transiently-amplifying operator, with alpha_1>=0
+# guarded off (that is modal growth, not a stable transient -- #17).
+
+
+def numerical_abscissa(J) -> float:
+    """Max eigenvalue of J's Hermitian part -- can be positive even when every eigenvalue of
+    (non-normal) J has negative real part (#16 -- .conj().T keeps this complex-safe)."""
+    Jm = np.asarray(J)
+    S = 0.5 * (Jm + Jm.conj().T)
+    return float(np.max(np.linalg.eigvalsh(S).real))
+
+
+def directional_finite_time_gain_curve(J, b, horizons_ms) -> Dict[str, float]:
+    """{horizon_ms: ||exp(J*T) b|| / ||b||} along direction b, one entry per horizon.
+
+    REUSES topic4_m3b_spectral_phase.transient_gain: its matrix-free ||exp(M*T) b||/||b||
+    (via expm_multiply) already IS this per-horizon directional gain (#15) -- not
+    re-implemented here (§6.1)."""
+    from src.topic4_m3b_spectral_phase import transient_gain
+    return {str(int(T)): transient_gain(J, b, T) for T in horizons_ms}
+
+
+def transient_amplification_present(curve, alpha1, gain_thresh: float = 1.5) -> bool:
+    """True iff J is stable (alpha1 < 0) AND some horizon's directional gain exceeds
+    gain_thresh. alpha1 >= 0 is modal growth, not a stable transient (#17)."""
+    if alpha1 >= 0:
+        return False
+    return max(curve.values()) > gain_thresh

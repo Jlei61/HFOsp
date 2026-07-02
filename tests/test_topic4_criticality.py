@@ -327,6 +327,90 @@ def test_left_mode_input_projection_scale_invariant_to_raw_left_column():
     assert scaled == pytest.approx(base, abs=1e-9)
 
 
+# --- Task 3a-4: non-normality -- numerical_abscissa (max eigenvalue of J's Hermitian part; can be
+# positive even when every eigenvalue of J has negative real part -- the non-normality signature,
+# #16 conj().T complex-safe), directional_finite_time_gain_curve (REUSES
+# topic4_m3b_spectral_phase.transient_gain's matrix-free ||exp(J*T) b||/||b|| -- same per-horizon
+# directional gain, not re-implemented per §6.1, #15), and transient_amplification_present's
+# alpha1>=0 guard (modal growth is not a stable transient, #17). Verbatim from
+# .superpowers/sdd/task-3a-4-brief.md Step 1. ---
+
+def test_nonnormality_review_fixes():
+    import numpy as np
+    from src.topic4_criticality import numerical_abscissa, transient_amplification_present
+
+    J = np.array([[-1., 10.], [0., -2.]])
+    assert numerical_abscissa(J) > 0                                          # #16
+    assert transient_amplification_present({"10": 3.0}, alpha1=-0.5)          # stable + gain -> True
+    assert not transient_amplification_present({"10": 3.0}, alpha1=0.2)       # #17 alpha>=0 -> modal growth, not transient
+
+
+# --- supplementary: the brief's verbatim test above never exercises transient_amplification_present's
+# other branch (stable AND gain at-or-below threshold -> False) -- add it directly so both branches
+# of the 2-line gate are covered, not just the alpha1>=0 short-circuit. ---
+
+def test_transient_amplification_present_false_when_gain_at_or_below_threshold():
+    from src.topic4_criticality import transient_amplification_present
+
+    assert not transient_amplification_present({"10": 1.5}, alpha1=-0.5)      # ==thresh -> not '>' -> False
+    assert not transient_amplification_present({"10": 1.0}, alpha1=-0.5)      # stable but no amplification
+
+
+# --- supplementary: directional_finite_time_gain_curve itself has ZERO direct invocation in the
+# brief's Step-1 test (transient_amplification_present is only exercised with a literal curve dict)
+# -- the same zero-coverage gap the T3a-3 review caught on left_mode_input_projection (F1: "naive
+# value-test can't catch a bug because the wrong and right forms produce identical output" -- here
+# the risk is inverted: an UNTESTED reuse wiring could silently regress to a no-op or wrong shape
+# and nothing would fail). Cross-check the reused function's output against an INDEPENDENTLY
+# hand-computed ||exp(J*T) b||/||b|| (test-side scipy.linalg.expm is fine -- §6.1 only forbids a
+# duplicate expm implementation in src) AND against transient_gain directly, on the SAME non-normal
+# J as above with a non-eigenvector direction b=[0,1] that genuinely transiently amplifies (peak
+# gain ~2.3 at T=1ms, verified by direct numerical scan before writing this test). ---
+
+def test_directional_finite_time_gain_curve_matches_expm_and_transient_gain():
+    import numpy as np
+    from scipy.linalg import expm
+    from src.topic4_criticality import directional_finite_time_gain_curve
+    from src.topic4_m3b_spectral_phase import transient_gain
+
+    J = np.array([[-1., 10.], [0., -2.]])   # same non-normal example as test_nonnormality_review_fixes
+    b = np.array([0., 1.])                  # NOT an eigenvector of J -> shows genuine transient growth
+    horizons = [1, 2, 5]
+
+    curve = directional_finite_time_gain_curve(J, b, horizons)
+    assert set(curve.keys()) == {"1", "2", "5"}
+    for T in horizons:
+        expected = np.linalg.norm(expm(J * T) @ b) / np.linalg.norm(b)
+        assert curve[str(T)] == pytest.approx(expected, rel=1e-9)
+        assert curve[str(T)] == pytest.approx(transient_gain(J, b, T), rel=1e-9)   # exact reuse tie-in
+    assert max(curve.values()) > 1.5        # b=[0,1] genuinely transiently amplifies before decaying
+
+
+# --- supplementary: numerical_abscissa's OWN review finding #16 is specifically "use .conj().T,
+# keep complex-safe" -- but the brief's Step-1 test uses a REAL J, where .conj().T and plain .T are
+# identical, so that test cannot actually distinguish the fix from a plain-.T regression. A 2x2
+# COMPLEX J also cannot distinguish them (2x2 Hermitian eigenvalues depend only on the OFF-DIAGONAL
+# MAGNITUDE, which conjugation never changes -- verified by hand before writing this test); n>=3 is
+# required because eigenvalues there generically depend on the relative PHASE between off-diagonal
+# entries too. This 3x3 complex J was verified numerically to make plain .T and .conj().T diverge
+# (1.619 vs 1.549) before being committed as a test. ---
+
+def test_numerical_abscissa_is_complex_safe_not_plain_transpose():
+    import numpy as np
+    from src.topic4_criticality import numerical_abscissa
+
+    J = np.array([
+        [0.0 + 0.0j, 1.0 + 2.0j, 0.5 - 1.0j],
+        [-3.0 + 0.0j, 0.0 + 0.0j, 2.0 + 0.5j],
+        [1.0 + 0.0j, -1.0 + 1.0j, 0.0 + 0.0j],
+    ])
+    correct = numerical_abscissa(J)                                            # uses .conj().T
+    wrong = float(np.max(np.linalg.eigvalsh(0.5 * (J + J.T)).real))             # #16 regression: plain .T
+    assert correct == pytest.approx(1.5487428421097742, abs=1e-9)
+    assert wrong == pytest.approx(1.6190508031916435, abs=1e-9)
+    assert abs(correct - wrong) > 1e-3                                          # genuinely distinguishes the fix
+
+
 def test_left_mode_input_projection_matches_core_controllability_single_mode():
     from src.topic4_m3b_spectral_phase import (
         Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
