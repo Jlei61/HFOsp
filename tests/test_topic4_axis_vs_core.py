@@ -99,3 +99,16 @@ def test_build_small_core_targets_fairness():
     assert len(t["core_contact_idx"]) == 4 == len(t["axis_contact_idx"])                 # fixed footprint
     assert t["core_mask"].sum() > 0 and t["axis_mask"].sum() > 0
     assert (t["core_mask"] & t["axis_mask"]).sum() == 0                                  # disjoint clamp sets
+
+
+def test_figure_b_renders_from_fixture(tmp_path):
+    import plot_fig_stage4_axis_vs_core_difficulty as F
+    small = {"config": {"N": 4}, "n_source_contacts": 5,
+             "contacts": [[i * 1.0, 10.0] for i in range(11)],
+             "core_contact_idx": [4, 5, 6, 7], "axis_contact_idx": [2, 3, 8, 9],
+             "arms": {"no_stim": {"runaway_ms": 50.0},
+                      "core_stim": {"runaway_ms": 120.0, "runaway_delay_ms": 70.0},
+                      "axis_stim": {"runaway_ms": 160.0, "runaway_delay_ms": 110.0}}}
+    out = tmp_path / "figs"; out.mkdir()
+    F.render_figure_b(small, F.KICK_REF, out)
+    assert (out / "axis_vs_core.png").exists() and (out / "axis_vs_core.png").stat().st_size > 0
