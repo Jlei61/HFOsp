@@ -45,6 +45,17 @@ def _eligible_complete(ds_sid, inv_rows):
     return out
 
 
+def _anchor_epoch(inv):
+    """Onset anchor (epoch) for span/pre/post windowing. Clinical onset when present (epilepsiae);
+    EEG-onset fallback when ``clin_onset_epoch`` is absent/blank (yuquan — its inventory has ONLY
+    ``eeg_onset_epoch``, and ``extract_seizure_window`` already anchors yuquan windows on eeg_onset,
+    so BOTH producer sites here — iter + build_subject — MUST mirror that same anchor or span/pre/post
+    would disagree). epilepsiae keeps clin_onset -> ``float(raw)`` is byte-identical to the committed
+    long cache (fallback never fires). Centralized (§5/§6.1) so the two sites can't drift apart."""
+    raw = inv.get("clin_onset_epoch")
+    return float(raw) if raw not in (None, "", "None") else float(inv["eeg_onset_epoch"])
+
+
 def iter_subject_seizure_windows(ds_sid, substrate=None, drops=None):
     """Yield ``(idx, sw, eeg_rel)`` for each eligible + extractable seizure of ``ds_sid``.
 
@@ -70,7 +81,7 @@ def iter_subject_seizure_windows(ds_sid, substrate=None, drops=None):
         inv = inv_rows[idx]
         try:
             eeg_dur = float(inv["eeg_duration_sec"])
-            clin_on = float(inv["clin_onset_epoch"])
+            clin_on = _anchor_epoch(inv)   # clin_onset (epilepsiae) or eeg_onset fallback (yuquan)
             eeg_off_rel = float(inv["eeg_offset_epoch"]) - clin_on
             eeg_on_rel = float(inv["eeg_onset_epoch"]) - clin_on  # parse guards inv_field drop (used by consumer)
         except (KeyError, TypeError, ValueError) as e:
@@ -106,7 +117,7 @@ def build_subject(ds_sid):
                                  "eeg-rel clipped); per-seizure pre_sec in seizure[idx]"}}
     for idx, sw, eeg_rel in iter_subject_seizure_windows(ds_sid, drops=drops):
         inv = inv_rows[idx]
-        clin_on = float(inv["clin_onset_epoch"])
+        clin_on = _anchor_epoch(inv)   # same anchor as iter_subject_seizure_windows (yuquan -> eeg_onset)
         eeg_dur = float(inv["eeg_duration_sec"])
         eeg_off_rel = float(inv["eeg_offset_epoch"]) - clin_on
         eeg_on_rel = float(inv["eeg_onset_epoch"]) - clin_on

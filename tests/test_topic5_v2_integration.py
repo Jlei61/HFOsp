@@ -41,6 +41,26 @@ def test_iter_subject_seizure_windows_yields_for_epilepsiae_139(monkeypatch):
 
 
 @pytest.mark.integration
+def test_iter_subject_seizure_windows_yuquan_eeg_onset_fallback(monkeypatch):
+    """yuquan inventory has NO ``clin_onset_epoch`` (only ``eeg_onset_epoch``). ``extract_seizure_window``
+    is already yuquan-aware (anchors on eeg_onset, sets ``sw.eeg_onset_epoch=None``), but the wrapper's
+    redundant ``inv["clin_onset_epoch"]`` read dropped EVERY yuquan seizure with ``inv_field:KeyError``.
+    The fallback (``clin_onset_epoch`` else ``eeg_onset_epoch``, matching what extract_seizure_window
+    anchors on internally) must let the audit-eligible seizures through, anchored on eeg_onset
+    (``eeg_rel`` None). zhangkexuan audit-eligible = {0,2,4}; idx2/idx4 are real (25s/27s) so >=2 expected.
+    This mixed-anchor path is the repo's EXISTING yuquan convention, not a new one."""
+    monkeypatch.chdir(ROOT)
+    from scripts.build_topic5_ictal_field_long_cache import iter_subject_seizure_windows
+    drops = []
+    items = list(iter_subject_seizure_windows("yuquan_zhangkexuan", "narrow", drops=drops))
+    assert len(items) >= 2, f"yuquan yielded {len(items)} windows (expected >=2); drops={drops}"
+    for idx, sw, eeg_rel in items:
+        assert eeg_rel is None, "yuquan anchors on eeg_onset -> sw.eeg_onset_epoch None -> eeg_rel None"
+        assert sw.clin_onset_epoch is not None, "anchor (=eeg_onset value) must be set on sw"
+        assert float(sw.pre_sec) >= 130.0, "PRE_FEATURE_SEC floor applies to yuquan too"
+
+
+@pytest.mark.integration
 def test_band_cache_smoke_epilepsiae_139(tmp_path):
     """Task 6: build the multi-band masked band-power cache for one 512 Hz subject (2 bands)
     and check the npz + sidecar contract. Writes to an isolated tmp dir (never the shared tree).
@@ -363,9 +383,10 @@ def test_v2_gates_raw_smoke_epilepsiae_139(tmp_path):
     rows = list(csv.DictReader(open(gate_csv)))
     assert rows, "empty gate summary"
     required = {"axis_set", "cohort", "band", "feature", "gate_A_spatial_pass", "gate_A_order_pass",
-                "gate_B_frequency_specific_pass", "gate_C_HFO_specific_pass", "cohort_delta",
-                "cohort_null_z", "cohort_empirical_p", "max_over_bands_p", "n_subjects_valid",
-                "interpretation_tier"}
+                "gate_B_frequency_specific_pass", "gate_C_HFO_specific_pass",
+                "cohort_perm_p_spatial", "cohort_perm_delta_spatial", "cohort_perm_p_order",  # §2 primary
+                "cohort_null_z", "cohort_empirical_p_median_of_p", "max_over_bands_p",  # §2 diagnostic
+                "n_subjects_valid", "interpretation_tier"}
     tiers = {"strongest", "frequency_specific", "broadband_recruitment", "weak_negative"}
     for x in rows:
         assert required <= set(x), f"gate summary missing cols {required - set(x)}"

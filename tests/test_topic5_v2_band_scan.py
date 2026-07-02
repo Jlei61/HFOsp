@@ -402,3 +402,42 @@ def test_gate_tier_maps_flags_to_interpretation():
 
     weak_flags = gate_pass_flags(**_gate_kwargs(spatial_strength="subject_wide_weak"))
     assert gate_tier(weak_flags, "ripple_safe_80_220") == "weak_negative"
+
+
+def test_cohort_perm_ps_per_band_delta_and_max_over_bands():
+    """§2 subject-level cohort permutation: per-band p = add-one P(perm cohort-median >= obs
+    cohort-median); per-band delta = obs cohort-median − null cohort-median; max-over-bands =
+    Westfall-Young null-centered max-T. Synthetic 2-band / 3-subject / 4-perm table with all
+    subjects identical per (band,perm) so the cohort median = the per-subject value. This is the
+    §2 statistic that REPLACES median-of-per-subject-p as the gate decision p."""
+    import pandas as pd
+    from scripts.run_topic5_v2_gates import _cohort_perm_ps
+    perm_vals = {"hi": {-1: 0.9, 0: 0.3, 1: 0.4, 2: 0.5, 3: 0.6},
+                 "lo": {-1: 0.5, 0: 0.3, 1: 0.4, 2: 0.5, 3: 0.6}}
+    rows = [dict(subject=s, feature="raw", null_type="spatial", band=band, perm_id=pid,
+                 perm_subject_median=v)
+            for band, byp in perm_vals.items() for pid, v in byp.items() for s in ("s1", "s2", "s3")]
+    per_p, per_delta, mob = _cohort_perm_ps(pd.DataFrame(rows), "raw", "spatial", ["hi", "lo"])
+    assert abs(per_p["hi"] - 0.2) < 1e-9      # obs 0.9 beats all 4 perms -> (1+0)/5
+    assert abs(per_p["lo"] - 0.6) < 1e-9      # obs 0.5 -> #{perm>=0.5}=2 -> (1+2)/5
+    assert abs(per_delta["hi"] - (0.9 - 0.45)) < 1e-9   # null cohort median = median(.3,.4,.5,.6)=.45
+    assert abs(per_delta["lo"] - (0.5 - 0.45)) < 1e-9
+    assert abs(mob["hi"] - 0.2) < 1e-9        # obs_delta .45 vs perm_max_delta max .15 -> (1+0)/5
+    assert abs(mob["lo"] - 0.6) < 1e-9        # obs_delta .05 -> #{perm_max>=.05}=2 -> (1+2)/5
+
+
+def test_order_closure_strong_subset_threshold_not_weakest_wins():
+    """§3 LOCK (2026-07-02): order closure runs on the order_strength=='strong' subset and is
+    'evaluable' iff n_strong >= ceil(0.5*n_order_evaluable) (non-missing). A single 'missing'
+    subject must NOT weakest-wins the whole cohort order inference to 'missing'."""
+    import pandas as pd
+    from scripts.run_topic5_v2_gates import _order_closure_subset
+    rows = [dict(subject=f"s{i}", feature="raw", null_type="order", order_null_strength="strong") for i in range(13)]
+    rows += [dict(subject=f"w{i}", feature="raw", null_type="order", order_null_strength="weak_downgrade") for i in range(6)]
+    rows += [dict(subject="m0", feature="raw", null_type="order", order_null_strength="missing")]
+    strong, n_eval, closure = _order_closure_subset(pd.DataFrame(rows), "raw")
+    assert len(strong) == 13 and n_eval == 19 and closure == "strong"   # 13 >= ceil(0.5*19)=10
+    rows2 = [dict(subject=f"s{i}", feature="raw", null_type="order", order_null_strength="strong") for i in range(4)]
+    rows2 += [dict(subject=f"w{i}", feature="raw", null_type="order", order_null_strength="weak_downgrade") for i in range(6)]
+    strong2, n_eval2, closure2 = _order_closure_subset(pd.DataFrame(rows2), "raw")
+    assert len(strong2) == 4 and n_eval2 == 10 and closure2 == "weak_downgrade"   # 4 < ceil(0.5*10)=5

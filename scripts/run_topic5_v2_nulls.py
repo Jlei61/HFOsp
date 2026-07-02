@@ -328,11 +328,14 @@ def build_confound_adjusted(ds_sid, substrate, feature, ctx, ta_rank, obs_window
 
 # --------------------------------------------------------------------------- per-subject driver
 def run_subject_nulls(ds_sid, substrate, feature, cfg, n_perm, seed, feat_dir, order_min_corr,
-                      confound_maps_path, confound_null):
+                      confound_maps_path, confound_null, min_group_override=None):
     ctx, ta_rank, tb_rank, obs_windows, fixed_mask = precompute_observed(
         ds_sid, substrate, feature, cfg, feat_dir)
     subject = ds_sid.split("_", 1)[1]
-    min_group = int(cfg["nulls"]["min_group_for_shaft"])
+    # §1 min3 sensitivity: --min-group overrides the primary min_group=4 (config). Lower min_group
+    # lets shorter shafts (>= min_group contacts) qualify for within-shaft permutation. NOTE: min3 is
+    # a SENSITIVITY tier only (spec §1) — it does NOT promote to formal primary Gate A.
+    min_group = int(min_group_override) if min_group_override is not None else int(cfg["nulls"]["min_group_for_shaft"])
     bands = sorted(obs_windows)
     if not bands:
         return [], [], [], {"ds_sid": ds_sid, "n_bands": 0, "reason": "no_valid_early_windows"}
@@ -436,6 +439,9 @@ def main():
     ap.add_argument("--confound-null", action="store_true",
                     help="also run a SPATIAL null (n_perm draws) on each confound-adjusted rank "
                          "(resid_null_z/resid_empirical_p); default off (deterministic adjustment only)")
+    ap.add_argument("--min-group", type=int, default=None,
+                    help="override nulls.min_group_for_shaft (§1 min3 SENSITIVITY within-shaft; "
+                         "default = config 4 = formal primary). min3 does NOT promote to formal Gate A.")
     args = ap.parse_args()
 
     cfg = load_phase1_config()
@@ -458,7 +464,7 @@ def main():
             continue
         perm_rows, summary_rows, confound_rows, info = run_subject_nulls(
             ds_sid, args.substrate, args.feature, cfg, n_perm, seed, feat_dir, order_min_corr,
-            confound_maps_path, confound_null_n)
+            confound_maps_path, confound_null_n, min_group_override=args.min_group)
         all_perm += perm_rows
         all_summary += summary_rows
         all_confound += confound_rows
@@ -481,6 +487,7 @@ def main():
     meta = {"generated_by": "run_topic5_v2_nulls.py", "feature": args.feature,
             "substrate": args.substrate, "seed": seed, "n_perm": n_perm,
             "spatial_mode": cfg["nulls"]["spatial"], "min_group_for_shaft": cfg["nulls"]["min_group_for_shaft"],
+            "min_group_override": args.min_group,
             "order_null_min_corr_to_geo": order_min_corr, "alpha": cfg["nulls"]["alpha"],
             "confound_maps": str(confound_maps_path), "confound_maps_present": confound_maps_path.exists(),
             "confound_null_n": confound_null_n, "subjects": subjects, "per_subject": per_subject}

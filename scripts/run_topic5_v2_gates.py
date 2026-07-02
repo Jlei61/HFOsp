@@ -66,9 +66,12 @@ _ORDER_TIER = {"strong": 3, "weak_downgrade": 2, "missing": 1}
 PRIMARY_NULL_TYPE = "spatial"
 
 GATE_COLS = ["axis_set", "cohort", "band", "feature", "gate_A_spatial_pass", "gate_A_order_pass",
-             "gate_B_frequency_specific_pass", "gate_C_HFO_specific_pass", "cohort_delta",
-             "cohort_null_z", "cohort_empirical_p", "max_over_bands_p", "n_subjects_valid",
-             "interpretation_tier", "spatial_null_strength", "order_null_strength"]
+             "gate_B_frequency_specific_pass", "gate_C_HFO_specific_pass",
+             "cohort_perm_p_spatial", "cohort_perm_delta_spatial", "cohort_perm_p_order",
+             "max_over_bands_p", "cohort_delta_median_of_subj", "cohort_null_z",
+             "cohort_empirical_p_median_of_p", "n_subjects_valid",
+             "interpretation_tier", "spatial_null_strength", "order_null_strength",
+             "n_order_strong_subset", "n_order_evaluable"]
 
 
 def _f(x):
@@ -118,48 +121,75 @@ def _cohort_strengths(summ_df, feature):
     return out
 
 
+def _order_closure_subset(summ_df, feature):
+    """§3 order-null closure subset (LOCK 2026-07-02). The order cohort inference runs on the
+    ``order_strength=='strong'`` subset — NOT the weakest-wins cohort — because a single 'missing'
+    subject (no interictal events to rebuild, e.g. epilepsiae_916) would otherwise weakest-wins the
+    whole cohort order strength to 'missing' and NaN out the 13 strong subjects' timing signal.
+    Returns (strong_subjects:set, n_order_evaluable:int, closure_strength:str); closure is
+    'strong' iff ``n_strong >= ceil(0.5 * n_order_evaluable)`` (n_order_evaluable = subjects with
+    order_strength in {strong, weak_downgrade}, i.e. non-'missing'), else 'weak_downgrade'."""
+    o = summ_df[(summ_df["feature"] == feature) & (summ_df["null_type"] == "order")]
+    strong = set(o[o["order_null_strength"] == "strong"]["subject"].astype(str))
+    evaluable = set(o[o["order_null_strength"].isin(["strong", "weak_downgrade"])]["subject"].astype(str))
+    n_eval = len(evaluable)
+    closure = "strong" if (n_eval > 0 and len(strong) >= int(np.ceil(0.5 * n_eval))) else "weak_downgrade"
+    return strong, n_eval, closure
+
+
 # --------------------------------------------------------------------------- max-over-bands FWER null
-def _max_over_bands_p(perm_df, feature, null_type, family_bands):
-    """Family-wise max-over-bands p per band (Westfall-Young max-T on null-centered cohort deltas).
+def _cohort_perm_ps(perm_df, feature, null_type, family_bands):
+    """§2 subject-level cohort permutation of the median statistic. Returns
+    ``(per_band_p, per_band_delta, max_over_bands_p)``.
 
-    per (band b, perm_id p): cohort_stat[b,p] = median over subjects of perm_subject_median.
-    null_median[b] = median over p>=0 of cohort_stat[b,p]        (per-band centering constant).
-    obs_cohort_delta[b]  = cohort_stat[b,-1]     − null_median[b].
-    perm_cohort_delta[b,p] = cohort_stat[b,p]    − null_median[b]  (centering makes bands comparable
-                                                                     before the max — else the max is
-                                                                     dominated by the smoothest band).
-    perm_max_delta[p]    = max over b∈family of perm_cohort_delta[b,p].
-    max_over_bands_p[b]  = add-one P(perm_max_delta >= obs_cohort_delta[b]).
+    per (band b, perm_id p): cohort_stat[b,p] = median over subjects of perm_subject_median (skipna).
+      • per_band_p[b]    = add-one P(cohort_stat[b, perm p>=0] >= cohort_stat[b, obs=-1]).  This is the
+        §2 PRIMARY cohort inference that REPLACES the retired median-of-per-subject-p as the gate p
+        (no direction assumed — a cohort perm can be stronger OR weaker than median-of-p).
+      • per_band_delta[b] = cohort_stat[b,-1] − median_over_perms(cohort_stat[b,p]) (cohort effect size;
+        this is the delta the gate reads, consistent with per_band_p — not the median of per-subject deltas).
+      • max_over_bands_p[b] = Westfall-Young family-wise max-T on NULL-CENTERED cohort deltas: center
+        each band by its own null_median (else the max is dominated by the smoothest band), take the
+        per-perm max over bands, and compare each band's observed centered delta against that max
+        distribution. The winning band gets P(perm max-band delta >= observed max-band delta).
 
-    The winning (observed-max) band gets exactly the brief's P(perm max-band delta >= observed
-    max-band delta); every weaker band gets a larger p ("this band is not simply the best of many
-    bands sampled by chance"). Returns band -> p for bands in `family_bands`."""
+    All three share ONE cohort_stat pivot. Bands with no rows / no obs -> NaN."""
     sub = perm_df[(perm_df["feature"] == feature) & (perm_df["null_type"] == null_type)
                   & (perm_df["band"].isin(family_bands))].copy()
     sub["perm_subject_median"] = pd.to_numeric(sub["perm_subject_median"], errors="coerce")
     coh = (sub.groupby(["band", "perm_id"])["perm_subject_median"]
            .apply(lambda s: float(np.nanmedian(s.to_numpy(float))) if np.isfinite(s.to_numpy(float)).any()
                   else float("nan")).reset_index())
+    per_band_p = {str(b): float("nan") for b in family_bands}
+    per_band_delta = {str(b): float("nan") for b in family_bands}
+    mob = {str(b): float("nan") for b in family_bands}
+    if coh.empty:
+        return per_band_p, per_band_delta, mob
     piv = coh.pivot(index="perm_id", columns="band", values="perm_subject_median")
     null_piv = piv[piv.index >= 0]
     if -1 not in piv.index or null_piv.empty:
-        return {b: float("nan") for b in family_bands}
+        return per_band_p, per_band_delta, mob
     null_median = null_piv.median(axis=0)                          # per band (skipna)
+    obs = piv.loc[-1]
+    # (1) per-band cohort permutation p + (2) per-band cohort delta
+    for b in piv.columns:
+        col = null_piv[b].to_numpy(float)
+        col = col[np.isfinite(col)]
+        ob = float(obs[b])
+        if np.isfinite(ob) and col.size:
+            per_band_p[str(b)] = float((1 + int(np.sum(col >= ob))) / (1 + col.size))
+            per_band_delta[str(b)] = float(ob - float(null_median[b]))
+    # (3) family-wise max-over-bands (null-centered max-T)
     perm_delta = null_piv.subtract(null_median, axis=1)            # (n_perm, n_band), null-centered
-    perm_max_delta = perm_delta.max(axis=1).to_numpy(float)        # per perm, max over bands (skipna)
+    perm_max_delta = perm_delta.max(axis=1).to_numpy(float)
     perm_max_delta = perm_max_delta[np.isfinite(perm_max_delta)]
     n_perm = int(perm_max_delta.size)
-    obs_delta = (piv.loc[-1] - null_median)
-    out = {}
+    obs_delta = (obs - null_median)
     for b in piv.columns:
         od = float(obs_delta[b])
-        if not np.isfinite(od) or n_perm == 0:
-            out[str(b)] = float("nan")
-        else:
-            out[str(b)] = float((1 + int(np.sum(perm_max_delta >= od))) / (1 + n_perm))
-    for b in family_bands:                                         # bands with no rows -> NaN
-        out.setdefault(str(b), float("nan"))
-    return out
+        if np.isfinite(od) and n_perm:
+            mob[str(b)] = float((1 + int(np.sum(perm_max_delta >= od))) / (1 + n_perm))
+    return per_band_p, per_band_delta, mob
 
 
 # --------------------------------------------------------------------------- optional Gate B/C features
@@ -189,10 +219,20 @@ def build_gate_rows(sub_dir, substrate, feature, cfg):
 
     family_bands = sorted(set(str(b) for b in perm_df["band"].unique()) - repro_bands)
 
-    coh_spatial = _cohort_from_summary(summ_df, feature, PRIMARY_NULL_TYPE)
-    coh_order = _cohort_from_summary(summ_df, feature, "order")
+    coh_spatial = _cohort_from_summary(summ_df, feature, PRIMARY_NULL_TYPE)   # median-of-p: DIAGNOSTIC (§2 retired from gate)
+    coh_order = _cohort_from_summary(summ_df, feature, "order")               # median-of-p: DIAGNOSTIC
     strengths = _cohort_strengths(summ_df, feature)
-    mob = _max_over_bands_p(perm_df, feature, PRIMARY_NULL_TYPE, family_bands)
+    # §2: the gate DECISION p/delta switch from median-of-per-subject-p to the subject-level cohort
+    # permutation (per_band_p + per_band cohort delta); median-of-p above is kept only as a diagnostic column.
+    sp_perm_p, sp_perm_delta, mob = _cohort_perm_ps(perm_df, feature, PRIMARY_NULL_TYPE, family_bands)
+    # §3: order cohort perm runs on the order_strength=='strong' SUBSET (not weakest-wins), so one
+    # 'missing' subject cannot NaN out the whole cohort order inference.
+    strong_subj, n_order_eval, order_closure = _order_closure_subset(summ_df, feature)
+    if order_closure == "strong" and strong_subj:
+        or_perm_p, or_perm_delta, _mob_order = _cohort_perm_ps(
+            perm_df[perm_df["subject"].astype(str).isin(strong_subj)], feature, "order", family_bands)
+    else:
+        or_perm_p, or_perm_delta = {}, {}
     coh_common = _read_feature_cohort(sub_dir, "common_resid", PRIMARY_NULL_TYPE)
     coh_aperi = _read_feature_cohort(sub_dir, "aperiodic_resid", PRIMARY_NULL_TYPE)
 
@@ -200,25 +240,27 @@ def build_gate_rows(sub_dir, substrate, feature, cfg):
     for band in family_bands:
         sp = coh_spatial.get(band, {})
         orr = coh_order.get(band, {})
-        sp_strength, or_strength = strengths.get(band, (None, None))
+        sp_strength, _or_weakest = strengths.get(band, (None, None))   # spatial keeps weakest-wins (§1)
+        or_strength = order_closure                                     # §3: strong-subset closure, NOT weakest-wins
         band_mob = _f(mob.get(band))
 
-        # Forward fix #2: a 'missing' (or absent) order null must NOT slip through gate_A_order via the
-        # `strength != 'weak_downgrade'` clause — feed NaN order_p/delta so `order_p < alpha` fails.
-        if or_strength is None or or_strength == "missing":
+        # §3: order gate uses the strong-subset cohort perm; 'weak_downgrade' closure -> NaN p (disabled),
+        # so gate_A_order fails honestly (order_p<alpha is False on NaN) — never laundered through.
+        if or_strength == "weak_downgrade":
             order_p, order_delta = float("nan"), float("nan")
         else:
-            order_p, order_delta = _f(orr.get("empirical_p")), _f(orr.get("delta"))
+            order_p, order_delta = _f(or_perm_p.get(band)), _f(or_perm_delta.get(band))   # §2 cohort perm on §3 strong subset
 
         cr = coh_common.get(band, {})
         ap = coh_aperi.get(band, {})
 
         # Forward fix #1: every numeric input is a native python float (via _f) before the and-chain.
+        # §2: spatial_p/spatial_delta are the cohort-permutation values (NOT median-of-per-subject-p).
         flags = gate_pass_flags(
-            spatial_p=_f(sp.get("empirical_p")), spatial_delta=_f(sp.get("delta")),
+            spatial_p=_f(sp_perm_p.get(band)), spatial_delta=_f(sp_perm_delta.get(band)),
             spatial_strength=(sp_strength if sp_strength is not None else "subject_wide_weak"),
             order_p=order_p, order_delta=order_delta,
-            order_strength=(or_strength if or_strength is not None else "missing"),
+            order_strength=or_strength,   # §3 closure: 'strong' (strong-subset evaluable) or 'weak_downgrade'
             common_resid_p=_f(cr.get("empirical_p")), common_resid_delta=_f(cr.get("delta")),
             aperiodic_p=_f(ap.get("empirical_p")), aperiodic_delta=_f(ap.get("delta")),
             band_max_over_bands_p=band_mob, band=band, fs_subset=substrate, alpha=alpha)
@@ -230,10 +272,17 @@ def build_gate_rows(sub_dir, substrate, feature, cfg):
             "gate_A_order_pass": bool(flags["gate_A_order"]),
             "gate_B_frequency_specific_pass": bool(flags["gate_B_freq_specific"]),
             "gate_C_HFO_specific_pass": bool(flags["gate_C_hfo_specific"]),
-            "cohort_delta": _f(sp.get("delta")), "cohort_null_z": _f(sp.get("null_z")),
-            "cohort_empirical_p": _f(sp.get("empirical_p")), "max_over_bands_p": band_mob,
+            # §2 PRIMARY cohort inference (drives the gate):
+            "cohort_perm_p_spatial": _f(sp_perm_p.get(band)),
+            "cohort_perm_delta_spatial": _f(sp_perm_delta.get(band)),
+            "cohort_perm_p_order": order_p,
+            "max_over_bands_p": band_mob,
+            # DIAGNOSTIC (median-of-per-subject; retired from the gate decision, §2):
+            "cohort_delta_median_of_subj": _f(sp.get("delta")), "cohort_null_z": _f(sp.get("null_z")),
+            "cohort_empirical_p_median_of_p": _f(sp.get("empirical_p")),
             "n_subjects_valid": int(sp.get("n", 0)), "interpretation_tier": tier,
-            "spatial_null_strength": sp_strength, "order_null_strength": or_strength})
+            "spatial_null_strength": sp_strength, "order_null_strength": or_strength,
+            "n_order_strong_subset": len(strong_subj), "n_order_evaluable": n_order_eval})
     return rows, family_bands
 
 
