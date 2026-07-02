@@ -8,7 +8,22 @@ date 2026-07-02 · 状态：spec（运行前锁定，待 user sign-off）· 前�
 
 ---
 
-## §1 空间-null strength hierarchy（LOCK；取代"单一 within_shaft_strong 才算"）
+## §0 Cohort lock（2026-07-02 user sign-off：补齐 field-similarity 全 20 队列）
+
+Phase-1 backbone 沿用了发作内场动力学脚本手挑的 13 被试（broad 9 / narrow 7），**欠采样**于 field-similarity（`axis_alignment_*_max_ab_B1000.json`，per_subject n=20 = 18 epilepsiae + 2 yuquan: xuxinyi, zhangkexuan）。**P1b 队列锁定为补齐全 20。**
+
+可行性已核实（`t0_eligibility_audit.csv` + `ICTAL_REFERENCE` 含 yuquan）——7 个新被试全部有 analysis_eligible 发作、`iter_subject_seizure_windows` 可跑通，无需新建原始数据：
+`epilepsiae_1084`(72 elig)、`epilepsiae_548`(26)、`epilepsiae_583`(22)、`epilepsiae_590`(12)、`epilepsiae_922`(28)、`yuquan_xuxinyi`(3)、`yuquan_zhangkexuan`(3)。
+
+映射到两套几何（`observation_readout/real_subjects/*_t_a.json` 已存在）：
+- **narrow（核心）：7 → 20**（全 20 都有 narrow 几何）。
+- **broad：9 → 17**（442/548/958 只有 narrow 几何、无 broad 几何 → 不入 broad）。
+
+构建：`build_topic5_v2_band_cache.py --subjects <7 new>`（cache substrate-independent，建一次两 geometry 共用）；随后 alignment/nulls/gates 在 narrow / broad 上重跑。**cohort 是描述性事实层的锁，不改任何 §1–§6 的 null/tier 口径。**
+
+> **⚠️ 2026-07-02 执行发现（待 user 决策，暂未最终锁）**：18 个 epilepsiae（1084/548/583/590/922 + 已有 13）全部干净可建。**2 个 yuquan（xuxinyi/zhangkexuan）被真实数据模型不兼容阻塞**：yuquan 发作 inventory 只有 `eeg_onset_epoch`、**无 `clin_onset_epoch`**，而整条 field-dynamics 长窗/早窗管线以临床起始为 0 点 → `iter_subject_seizure_windows` 全 drop；且这 2 人各仅 1–2 个真发作（余为零时长标记）。**当前可干净达成 = narrow 18 / broad 15**（epilepsiae-only、统一临床起始锚、统一数据集）。达 20 需改 loader 让 yuquan 改锚 `eeg_onset`（+"早期"0 点定义在 2 人上与其余 18 不同的 caveat + 薄 n）。默认推荐 18-clean，yuquan 作为可选增量。
+
+## §1 空间-null strength hierarchy（LOCK；取代“单一 within_shaft_strong 才算”）
 
 运行前冻结四档 + 各自允许的主张层级：
 
@@ -39,7 +54,8 @@ gateA_fwer_p    = (1+#{maxT_perm >= max_band obs_cohort_stat})/(1+N)            
 
 - **T13 anti-conservatism 显式化**：每被试/模板记录 **unshuffled-event-rebuild vs producer typical_rank 的 corr**（现只用它分 strong/weak_downgrade at 0.90）作可审计诊断列；报告 order-p 时并列该 corr，读者可见 obs(producer)-vs-null(rebuild) 的 gap。
 - **B-only-template 对称性**（review 边角）：若某被试 producer 有 F_a+F_b 但 event-rebuild-B <4 有限 → observed maxes over {A,B}、null 只 over {A}（额外 anti-conservative）。修：null 与 observed **max over 同一模板集**（用 observed 的 `F_inter_b is None` 决定）。
-- **闭合口径**：narrow order-null 结论 = strong 子集（≥0.90）的 cohort perm（§2）+ 上述对称化 + final n_perm。若 strong 子集 n 太小（现 4/7）→ 明确降级为 `weak_order_null / rank-stratified only, strongest timing-geometry claim disabled`（rev2 设计的关键防线）。**narrow 若 order-null 不闭合 → narrow 主张只能写"aligns with HFO-derived core geometry/topography"，不写"timing order"**。
+- **闭合口径**：narrow order-null 结论 = strong 子集（≥0.90）的 cohort perm（§2）+ 上述对称化 + final n_perm。若 strong 子集 n 太小 → 明确降级为 `weak_order_null / rank-stratified only, strongest timing-geometry claim disabled`（rev2 设计的关键防线）。**narrow 若 order-null 不闭合 → narrow 主张只能写"aligns with HFO-derived core geometry/topography"，不写"timing order"**。
+- **weak-disable 阈值（LOCK，2026-07-02 user sign-off）**：order closure = **`strong`(evaluable) iff `n_strong >= ceil(0.5 × n_order_evaluable)`**，其中 `n_order_evaluable` = order_strength ∈ {strong, weak_downgrade} 的被试数（即非 `missing`）；否则 `weak_downgrade`(disabled)。**这取代 order 强度的 weakest-wins**：dev-100 暴露一个 `missing` 被试（epilepsiae_916，无 interictal 事件可重建）在 weakest-wins 下把整个 cohort order 掉成 `missing`→order_p 全 NaN，错误地丢掉 13 个 strong 被试的顺序信号。full-20 现值：strong 13、order_evaluable 19（strong+weak）、missing 1 → 13 ≥ ceil(0.5×19)=10 → **order closure evaluable**（strong 子集 cohort perm）。spatial 侧不受影响（§1 仍 weakest-wins：formal Gate A 要求全体 within_shaft_strong，min3 是独立 sensitivity）。
 
 ## §4 broad↔narrow：用三个 QC 钉死（现在是 inference，不是结果）
 
