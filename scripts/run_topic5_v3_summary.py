@@ -135,6 +135,7 @@ def _dynamics_view(row: dict | None) -> dict:
 
 _SUSCEPTIBILITY_DEFAULT = {
     "status": "skipped", "module_direction_correct": False, "beta_axis_P3_reliable": False,
+    "module_null_pass": False,
 }
 
 
@@ -148,6 +149,7 @@ def _susceptibility_view(row: dict | None) -> dict:
         "status": row["status"],
         "module_direction_correct": _to_bool(row["module_direction_correct"]),
         "beta_axis_P3_reliable": _to_bool(row["beta_axis_P3_reliable"]),
+        "module_null_pass": _to_bool(row["module_null_pass"]),
     }
 
 
@@ -191,8 +193,15 @@ def _subject_row(subject: str, cohort: str, av: dict, dyn: dict, susc: dict) -> 
     # vetoed it — record this regardless of whether H3c ends up carrying
     # subject_support anyway, so the audit trail never silently disappears.
     common_drive_downgrade = bool(av["module_support_flag"] and av["common_drive_sensitive"])
-    # H3a strengthens the narrative only; it can never set subject_support.
-    h3a_strengthens = bool(susc["module_direction_correct"] and susc["beta_axis_P3_reliable"])
+    # H3a strengthens the narrative only when it is SIGNIFICANT -- i.e. it
+    # also clears its own Delta-null gate (module_null_pass = p_spatial_delta
+    # < alpha AND p_label_delta < alpha, Task 9). Direction-correct + a
+    # reliable P3 baseline alone is not "significant". It can never set
+    # subject_support either way.
+    h3a_strengthens = bool(
+        susc["module_direction_correct"] and susc["beta_axis_P3_reliable"]
+        and susc["module_null_pass"]
+    )
 
     return {
         "subject": subject, "cohort": cohort,

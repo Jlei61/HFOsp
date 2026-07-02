@@ -5,7 +5,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
 import pytest
+from scipy.stats import wilcoxon
+
+from scripts.run_topic5_v3_summary import _holm_correct_2, _tier_verdict, _wilcoxon_greater
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -343,3 +347,115 @@ def test_summary_joins_real_dev_csvs_and_assigns_tier(tmp_path):
     rows_b = list(csv.DictReader((broad_dir / "v3_summary_subject.csv").open()))
     assert len(rows_b) == 9, rows_b
     assert SUMMARY_COLS <= set(rows_b[0]), f"missing cols: {SUMMARY_COLS - set(rows_b[0])}"
+
+
+# ---------------------------------------------------------------------------
+# Task 10 pure-function unit tests (no data/IO, NOT @pytest.mark.integration):
+# the 3 helpers that decide the study's tier verdict. The overall
+# subject_support/tier/state_v3_supported LOGIC is verified correct (review);
+# these pin the exact arithmetic/boundary behavior so a future edit can't
+# silently drift it.
+# ---------------------------------------------------------------------------
+def test_holm_correct_2():
+    # Concrete case: the smaller p is x2, the larger is x1.
+    assert _holm_correct_2(0.01, 0.04) == pytest.approx((0.02, 0.04))
+    assert _holm_correct_2(0.04, 0.01) == pytest.approx((0.04, 0.02))
+
+    # Tie: naive per-slot multipliers would give (0.06, 0.03) -- a reversal
+    # (the higher-rank slot ending up SMALLER). The running-max step-down
+    # must enforce non-decreasing order, clamping both to (0.06, 0.06).
+    assert _holm_correct_2(0.03, 0.03) == pytest.approx((0.06, 0.06))
+
+    # NaN passthrough: m=2 is fixed by pre-registration, not by how many of
+    # the 2 raw p-values happen to be finite this run -- the finite slot is
+    # still treated as "the smaller of 2" (x2, not x1), and the NaN slot
+    # stays NaN without acquiring a fabricated multiplier of its own.
+    h1, h2 = _holm_correct_2(0.02, float("nan"))
+    assert h1 == pytest.approx(0.04)
+    assert math.isnan(h2)
+    h1, h2 = _holm_correct_2(float("nan"), 0.02)
+    assert math.isnan(h1)
+    assert h2 == pytest.approx(0.04)
+
+
+def test_wilcoxon_greater():
+    positive = np.array([0.10, 0.20, 0.30, 0.15, 0.25, 0.05, 0.40, 0.35, 0.50, 0.45])
+    negative = -positive
+
+    p_pos = _wilcoxon_greater(positive)
+    p_neg = _wilcoxon_greater(negative)
+
+    assert p_pos < 0.01, p_pos  # clearly-positive delta -> small p
+    assert p_neg > 0.5, p_neg  # clearly-negative delta -> large (wrong-direction) p
+
+    # Confirm this really is alternative="greater" (not two-sided/"less"):
+    # a direct scipy call with the same alternative must match exactly.
+    _, p_pos_direct = wilcoxon(positive, alternative="greater")
+    assert p_pos == pytest.approx(p_pos_direct)
+
+
+def _verdict_block(h3b_pass=False, h3c_pass=False, n_support=0, med_h3b=0.0, med_h3c=0.0):
+    """Minimal cohort-block dict carrying only the keys `_tier_verdict` reads."""
+    return {
+        "cohort_h3b_pass": h3b_pass,
+        "cohort_h3c_pass": h3c_pass,
+        "n_subject_support": n_support,
+        "median_delta_h3b": med_h3b,
+        "median_delta_h3c": med_h3c,
+    }
+
+
+def test_tier_verdict_narrow_primary():
+    # (a) narrow cohort-level pass, broad has nothing -> tier 3.
+    v = _tier_verdict(_verdict_block(h3b_pass=True, med_h3b=0.10), _verdict_block())
+    assert v["tier"] == 3
+    assert v["state_v3_supported"] is True
+    assert v["broad_replicates"] is False
+
+    # (b) narrow passes H3c AND broad passes the SAME endpoint (H3c), same
+    # direction -> broad replication promotes narrow's tier to 4.
+    v = _tier_verdict(
+        _verdict_block(h3c_pass=True, med_h3c=0.05),
+        _verdict_block(h3c_pass=True, med_h3c=0.03),
+    )
+    assert v["tier"] == 4
+    assert v["state_v3_supported"] is True
+    assert v["broad_replicates"] is True
+
+    # (c) narrow passes H3b, broad passes the DIFFERENT endpoint (H3c) ->
+    # no promotion, stays tier 3.
+    v = _tier_verdict(
+        _verdict_block(h3b_pass=True, med_h3b=0.10),
+        _verdict_block(h3c_pass=True, med_h3c=0.03),
+    )
+    assert v["tier"] == 3
+    assert v["broad_replicates"] is False
+
+    # (d) broad passes fully but narrow does NOT cohort-pass -> broad can
+    # never lead; tier is capped at whatever narrow's OWN (lower) evidence
+    # gives (here 2, from narrow's 1 subject-level support), not promoted
+    # by broad's full pass.
+    v = _tier_verdict(
+        _verdict_block(n_support=1, med_h3b=0.02),
+        _verdict_block(h3b_pass=True, med_h3b=0.20),
+    )
+    assert v["tier"] == 2
+    assert v["broad_cohort_pass"] is True  # recorded...
+    assert v["narrow_cohort_pass"] is False  # ...but never promotes narrow
+
+    # (e) >=1 narrow subject-level support, no narrow cohort pass -> tier 2.
+    v = _tier_verdict(
+        _verdict_block(n_support=1, med_h3b=0.02, med_h3c=-0.01),
+        _verdict_block(),
+    )
+    assert v["tier"] == 2
+    assert v["state_v3_supported"] is False
+
+    # (f) narrow cohort direction correct (median delta > 0) but not
+    # significant (no cohort_*_pass) and no subject-level support -> tier 1.
+    v = _tier_verdict(
+        _verdict_block(n_support=0, med_h3b=0.05, med_h3c=-0.02),
+        _verdict_block(),
+    )
+    assert v["tier"] == 1
+    assert v["state_v3_supported"] is False
