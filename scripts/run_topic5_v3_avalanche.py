@@ -299,7 +299,7 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
     d_m10 = obs_delta_at(-10.0)
     onset_jitter_pass = bool(np.sign(d_p10) == np.sign(obs_delta) == np.sign(d_m10))
 
-    module_direction = bool(obs_delta > 0)
+    module_direction = bool(surplus > 0)
     module_null_pass = bool(p_rate < alpha and p_label < alpha)
     module_support = bool(module_direction and module_null_pass)
 
