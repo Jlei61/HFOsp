@@ -69,9 +69,10 @@ def simulate_row(kind):
                                k_K=1.5, tau_K=150.0, sigma_K=0.5, k_q=0.25, tau_q=5000.0, sigma_q=1.5,
                                q_min=0.05, core_mean=16.5, core_std=1.5, core_radius=3.0, drive=0.6,
                                L=20.0, T=200.0, n_pulses=0, seed=1)
-    else:  # kick — E1146 two-foci, short T shows the train (default schedule: pulses at 130/265/400)
+    else:  # kick — E1146 two-foci; T=1000 spans the cited baseline runaway (~757 ms, config matches
+           # the committed qI_stim_site_compare: k_q=0.18, eta_K=0, pulses @130/265/400/535/670…)
         cfg = H.ProtocolConfig(layout="subject1146", top="qI", use_gK=True, use_hG=False, eta_K=0.0,
-                               k_q=0.18, tau_q=5000.0, sigma_q=1.5, q_min=0.05, T=500.0, seed=1)
+                               k_q=0.18, tau_q=5000.0, sigma_q=1.5, q_min=0.05, T=1000.0, seed=1)
     S = H._build(cfg)
     DT = float(S["p"].dt); assert abs(DT - C.DT) < 1e-12
     vth = S["patch_vth"] if kind in ("big", "small") else None
@@ -83,8 +84,21 @@ def simulate_row(kind):
     floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
     bar = floor + C.CAL_FRAC * (float(af.max()) - floor)
     n_events = len(C.detect_events(af, bin_w, event_on_frac=bar))
-    return dict(kind=kind, posE=np.asarray(S["posE"], float),
-                onset=AV.onset_time_field(res["E_spk_bool"], DT),
+    # col1 shows ONE representative event's spatial ignition (is the front contained, or does it fill
+    # the sheet?). For the self-igniting cores the single burst IS the whole trajectory; for the
+    # kicked two-foci case, restrict col1 to the first evoked-event window (before the train floods
+    # the sheet at the ~757 ms runaway) so it shows a CONTAINED corridor event, not the runaway flood.
+    if kind == "kick":
+        w_end = int(round((cfg.pulse_start + cfg.pulse_interval) / DT))   # up to the 2nd pulse (~265 ms)
+        spk_col1 = res["E_spk_bool"][:w_end]
+    else:
+        spk_col1 = res["E_spk_bool"]
+    onset = AV.onset_time_field(spk_col1, DT)
+    # "front fills the sheet" = cumulative fraction of E cells that ever fired in this event; the
+    # per-bin max_active_frac saturates at ~0.5 (tau_ref_E=2 ms -> <=half the cells fire per 1 ms bin).
+    frac_ever_fired = float(np.isfinite(onset).mean())
+    return dict(kind=kind, posE=np.asarray(S["posE"], float), onset=onset,
+                frac_ever_fired=frac_ever_fired,
                 times=np.asarray(res["times"], float), rate_s=rate_s,
                 qI_mean=np.asarray(res["trace_qI_mean"], float), qI_min=np.asarray(res["trace_qI_min"], float),
                 gK=np.asarray(res["trace_gK_axial"], float),
@@ -129,7 +143,7 @@ def render_figure_a(rows_data, out_dir):
         if d["runaway_ms"] is not None:
             ax_tr.axvline(d["runaway_ms"], color="crimson", lw=1.1, ls="--", zorder=6)
         ax_tr.set_title(f"n_events={d['n_events']}｜runaway={_fmt(d['runaway_ms'])} ms｜"
-                        f"max active frac={d['max_active_frac']:.2f}", fontsize=9)
+                        f"铺满 frac_ever={d.get('frac_ever_fired', float('nan')):.2f}", fontsize=9)
         if ri == 0:
             h1, l1 = ax_tr.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
             ax_tr.legend(h1 + h2, l1 + l2, loc="upper right", fontsize=6.8, frameon=False, ncol=2)
@@ -201,6 +215,7 @@ def main():
         rows = [simulate_row(k) for k in ("big", "small", "kick")]
         for d in rows:
             print(f"ROW {d['kind']} n_events={d['n_events']} runaway_ms={d['runaway_ms']} "
+                  f"frac_ever={round(d['frac_ever_fired'], 4)} "
                   f"max_active_frac={round(d['max_active_frac'], 4)}", flush=True)
         render_figure_a(rows, out_dir)
         print(f"wrote {out_dir / 'difficulty_3row.png'}", flush=True)
