@@ -136,6 +136,9 @@ class ProtocolConfig:
     core_mean: float = 16.5
     core_std: float = 1.0
     core_radius: float = 1.0
+    # ---- Stage-4 spontaneous big-focus (single core, no kick; layout="stage4_patch") ----
+    drive: float = 0.6         # nu_ext_ratio for the stage4_patch build (spontaneous background drive)
+    L: float = 20.0            # sheet size for stage4_patch (subject1146/stage5 set L internally)
     gif_dt_ms: float = 20.0
     activity_window_ms: float = 10.0
     # ---- layout / top-panel / footer (presentation) ----
@@ -147,7 +150,10 @@ class ProtocolConfig:
 
 def _source_xy(S: dict, source: str) -> np.ndarray:
     if "layout" in S and "foci" in S["layout"]:
-        return np.asarray(S["layout"]["foci"][0 if source == "tempA" else 1], float)
+        foci = S["layout"]["foci"]
+        if S["layout"].get("kind") == "stage4_patch" or len(foci) == 1:
+            return np.asarray(foci[0], float)             # single focus: any source -> the one core
+        return np.asarray(foci[0 if source == "tempA" else 1], float)
     sign = -1.0 if source == "tempA" else 1.0
     return np.asarray(S["center"], float) + sign * 0.6 * (float(S["L"]) / 2.0) * np.asarray(S["axis_unit"], float)
 
@@ -226,8 +232,39 @@ def _build_slow(S: dict, cfg: ProtocolConfig):
 def _build(cfg: ProtocolConfig):
     if cfg.layout == "subject1146":
         return _build_subject1146(cfg)
+    if cfg.layout == "stage4_patch":
+        return _build_stage4_patch(cfg)
     S = S2.build(S2.SUBSTRATES[cfg.substrate], cfg.seed, T=cfg.T)
     S["masks"] = region_masks(S["L"], S2.N_GRID, S["center"], S["axis_unit"], S2.CORRIDOR_HW)
+    return S
+
+
+def _build_stage4_patch(cfg: "ProtocolConfig"):
+    """ONE large isotropic excitable disk at the sheet centre (Stage-4 extended_patch),
+    spontaneous (no kick). Built directly via sample_core_field (the runner's build_lesion_vth
+    extended_patch path passes elongation/axis_unit, which the current sample_core_field signature
+    does not accept -- a pre-existing runner drift). Substrate params are the CANONICAL Stage-4
+    spontaneous runner values (source of truth: run_sef_hfo_snn_cm_spontaneous_readout.py:520-525 ->
+    Params(g=3.6, ...), CLI defaults AR=2.0 / theta=45deg / density=100 / drive=0.6), NOT
+    S2.SUBSTRATES (g=8.0/AR=4.0 = the v2 kick-driven substrate, a DIFFERENT regime)."""
+    L = float(cfg.L)
+    theta_rad = np.deg2rad(45.0)                      # canonical Stage-4 theta (runner CLI default)
+    axis_unit = np.array([np.cos(theta_rad), np.sin(theta_rad)])
+    center = np.array([L / 2.0, L / 2.0])
+    p = Params(g=3.6, L=L, density=100.0, T=cfg.T, dt=0.1, nu_ext_ratio=cfg.drive, seed=cfg.seed)
+    rng = np.random.default_rng(cfg.seed)
+    pos, labels, NE, NI = place_neurons(p, rng)
+    net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta_rad, AR=2.0, verbose=False)
+    pos = net["pos"]
+    is_E = np.zeros(NE + NI, bool); is_E[:NE] = True
+    cf = sample_core_field(pos, is_E, center, cfg.core_radius, np.random.default_rng(cfg.seed + 7),
+                           core_mean=cfg.core_mean, core_std=cfg.core_std, base_mean=18.0)
+    layout = {"kind": "stage4_patch", "label": "Stage-4 big focus", "foci": [center.tolist()],
+              "core_r": float(cfg.core_radius), "axis_unit": axis_unit.tolist(), "L": L}
+    S = dict(p=p, net=net, NE=NE, NI=NI, posE=pos[:NE], posI=pos[NE:], N=NE + NI, labels=labels,
+             axis_unit=axis_unit, center=center, L=L, layout=layout,
+             core_mask=cf["core_mask"], patch_vth=cf["vth"])
+    S["masks"] = region_masks(L, S2.N_GRID, center, axis_unit, S2.CORRIDOR_HW)
     return S
 
 
@@ -253,13 +290,21 @@ def _build_subject1146(cfg: ProtocolConfig):
 
 
 def _simulate_continuous(S: dict, cfg: ProtocolConfig, *, record_gif: bool,
-                         stim_target=None, stim_on=None, stim_off=None, clamp_level: float = 1e6):
+                         stim_target=None, stim_on=None, stim_off=None, clamp_level: float = 1e6,
+                         vth=None, abort_on_runaway: bool = False, abort_check_every: int = 25):
     """Continuous q_I build-up loop. Optional `stim_target` (full-network bool mask) clamps its
     E cells' V_th to `clamp_level` during [stim_on, stim_off) via the parity-tested
     `intervention_vth_at_time` -- the ONLY behavioural addition. With stim_target=None (or
     stim_on=None) the threshold helper returns base_vth unchanged and NO rng draw is added, so the
     no-stim path stays byte-identical to the original loop (the stim-vs-no-stim arms therefore share
-    a bit-identical trajectory until stim_on)."""
+    a bit-identical trajectory until stim_on).
+
+    `vth` (full-N float) overrides the default `_two_core_vth` (Stage-4 passes the single-big-core
+    threshold field). `abort_on_runaway=True` breaks the loop at the first onset of the SHARED
+    runaway criterion (`_smooth_rate` 20 ms + `_first_sustained` 120 Hz / 100 ms, 80%-rule),
+    truncates every per-step array, and sets `res["aborted_ms"]` (float; None if never aborted) --
+    the abort and post-hoc detectors agree by construction. Both new kwargs default to the original
+    behaviour (vth=None -> _two_core_vth; abort off), so existing callers are byte-identical."""
     p = S["p"]
     net = S["net"]
     net["rng"] = np.random.default_rng(int(cfg.seed) + 3101)
@@ -302,12 +347,12 @@ def _simulate_continuous(S: dict, cfg: ProtocolConfig, *, record_gif: bool,
     is_E = labels == 0
     pulses = _pulse_schedule(cfg)
     masks = {}
-    for source in ("tempA", "tempB"):
+    for source in sorted({pl["source"] for pl in pulses}):     # only sources that actually fire
         center = _source_xy(S, source)
         masks[source] = is_E & (np.linalg.norm(pos - center, axis=1) <= cfg.r_kick)
 
     slow = _build_slow(S, cfg)
-    vth = _two_core_vth(S, cfg)
+    vth = _two_core_vth(S, cfg) if vth is None else np.asarray(vth, float)
     contacts, names = _contacts(S)
     rec = LFPRecorder(p, pos, labels, sites=contacts) if record_gif else None
 
@@ -325,6 +370,7 @@ def _simulate_continuous(S: dict, cfg: ProtocolConfig, *, record_gif: bool,
     axis_mask = S["masks"]["axis"]        # axial-corridor lattice mask (n_grid x n_grid)
     gK_axial_trace = np.zeros(nsteps)     # per-step mean g_K over the axial region
     stim_active = np.zeros(nsteps, dtype=bool)   # per-step: is the V_th clamp window open
+    aborted_step = None                          # set to t if early-abort fires (shared criterion)
 
     t_wall = time.time()
     for t in range(nsteps):
@@ -371,6 +417,13 @@ def _simulate_continuous(S: dict, cfg: ProtocolConfig, *, record_gif: bool,
             q_frames.append(slow.q_I.copy())
             q_frame_steps.append(t)
 
+        # Early-abort on the SHARED runaway criterion (rate_E holds spike COUNTS -> convert to Hz).
+        if abort_on_runaway and t >= abort_check_every and (t % abort_check_every == 0):
+            _rate_hz = rate_E[:t + 1] / NE / dt * 1e3
+            if _first_sustained(_smooth_rate(_rate_hz, dt, 20.0), dt, 120.0, 100.0) is not None:
+                aborted_step = t
+                break
+
         if spk.any():
             spE = np.where(spk[:NE])[0]; spI = np.where(spk[NE:])[0]
             if spE.size:
@@ -385,6 +438,19 @@ def _simulate_continuous(S: dict, cfg: ProtocolConfig, *, record_gif: bool,
                 if tot:
                     idx = np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt) + np.repeat(st, cnt)
                     np.add.at(ring_sI, ((t + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
+
+    if aborted_step is not None:
+        # executed steps 0..aborted_step (slow.step ran once per step -> its traces are already
+        # length k); truncate every nsteps-preallocated per-step array to match.
+        k = aborted_step + 1
+        nsteps = k
+        rate_E = rate_E[:k]
+        E_spk_bool = E_spk_bool[:k]
+        if lfp_trace is not None:
+            lfp_trace = lfp_trace[:k]
+        qI_min_trace = qI_min_trace[:k]
+        gK_axial_trace = gK_axial_trace[:k]
+        stim_active = stim_active[:k]
 
     return {
         "times": np.arange(nsteps) * dt,
@@ -406,6 +472,7 @@ def _simulate_continuous(S: dict, cfg: ProtocolConfig, *, record_gif: bool,
         "trace_gK_axial": gK_axial_trace,
         "stim_active": stim_active,
         "stim_window": (None if stim_target is None or stim_on is None else (float(stim_on), float(stim_off))),
+        "aborted_ms": (aborted_step * dt) if aborted_step is not None else None,
         "wall_s": time.time() - t_wall,
     }
 
