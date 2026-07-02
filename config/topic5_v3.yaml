@@ -11,16 +11,16 @@ phases:
   I1_post_guard_sec: 2.0            # short fallback: [+10, offset - post_guard]
 geometry:
   state_band: legacy_bb_1_45
-  nonaxis_hfo_participation_max: 0.10   # OPEN pilot (Task 3)
-  beta_axis_reliability_min: 0.20       # OPEN pilot
+  nonaxis_hfo_participation_max: 0.10   # pilot-locked 2026-07-02 (feasibility narrow 7/7; clean split: non-axis part=0.0 vs axis>=0.34)
+  beta_axis_reliability_min: 0.20       # pilot-locked 2026-07-02 (H3a supportive-only, non-load-bearing)
   min_n_axis: 5
   min_n_nonaxis: 3
 dynamics:
   var_ridge_alpha: 1.0
   demean_within_window: true            # mean-energy rise must not become coupling
   standardize_within_window: false      # would erase real variance/gain
-  lowrank: 6                            # OPEN pilot
-  finite_horizon_k: 3                   # k* primary
+  lowrank: 6                            # pilot-locked 2026-07-02 (dominant-mode extraction; all-clean 30-124 contacts)
+  finite_horizon_k: 3                   # k* primary (confirmed 2026-07-02)
   finite_horizon_profile: [1, 2, 3, 5]
   mode_shift_normalization: density     # density (÷rank) primary
   h3c_require_label_null: true
