@@ -1,4 +1,5 @@
 import csv
+import json
 import math
 import subprocess
 import sys
@@ -251,3 +252,94 @@ def test_susceptibility_runs_on_eligible_subject(tmp_path):
     # H3a is SUPPORTIVE-ONLY: module_support_flag must NEVER be True, even
     # for an eligible ok-status subject with a finite, direction-correct delta.
     assert row["module_support_flag"] == "False", row
+
+
+# Task 10 summary — joins the 3 co-primary/context CSVs and assigns `tier`
+# (Task 10 ONLY; no earlier task computes tier). The plan/brief describe the
+# required FIELDS, not a literal ordered CSV_COLS list like Tasks 6/8/9 --
+# this set IS the schema Task 10 introduces for `v3_summary_subject.csv`.
+SUMMARY_COLS = {
+    "subject", "cohort", "geometry_insufficient",
+    "h3b_path", "h3c_path", "subject_support", "support_driver",
+    "common_drive_downgrade", "h3a_strengthens",
+    "delta_net_offaxis_flux_surplus", "delta_mode_shift_density",
+}
+
+
+@pytest.mark.integration
+def test_summary_joins_real_dev_csvs_and_assigns_tier(tmp_path):
+    """Task 10: join narrow's (+ broad's) real dev CSVs, verify the
+    subject_support gate stack and the JSON tier-verdict contract.
+
+    n_perm-independent (reads already-computed flags/deltas/p-values from
+    Tasks 6/8/9's dev CSVs on disk), so this is a structural/join-logic
+    check against real data, NOT a re-verification of those tasks' own
+    permutation math.
+    """
+    narrow_dir = tmp_path / "narrow_out"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_topic5_v3_summary.py",
+            "--cohort", "narrow",
+            "--outdir", str(narrow_dir),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+
+    csv_path = narrow_dir / "v3_summary_subject.csv"
+    json_path = narrow_dir / "v3_cohort_tier.json"
+    assert csv_path.exists() and json_path.exists(), result.stderr
+
+    rows = list(csv.DictReader(csv_path.open()))
+    assert len(rows) == 7, rows  # narrow's full cohort -- never silently dropped
+    assert SUMMARY_COLS <= set(rows[0]), f"missing cols: {SUMMARY_COLS - set(rows[0])}"
+
+    payload = json.loads(json_path.read_text())
+    assert payload["tier"] in (0, 1, 2, 3, 4), payload
+    assert isinstance(payload["state_v3_supported"], bool), payload
+    assert "narrow" in payload and "broad" in payload, payload  # never pooled
+    for cohort_key in ("narrow", "broad"):
+        block = payload[cohort_key]
+        for pkey in ("p_h3b", "p_h3c", "p_holm_h3b", "p_holm_h3c"):
+            assert pkey in block, (cohort_key, block)
+    assert payload["narrow"]["n_geometry_sufficient"] == 7, payload["narrow"]
+
+    # CSV and JSON must agree on how many subjects actually support (no
+    # drift between the per-subject artifact and the cohort-level count).
+    n_support_csv = sum(1 for r in rows if r["subject_support"] == "True")
+    assert n_support_csv == payload["narrow"]["n_subject_support"], (rows, payload["narrow"])
+
+    # Currently-known real fact (Task 6/8 dev, n_perm=100): epilepsiae_1096
+    # is narrow's only H3b module_support_flag=True subject, but it fails
+    # BOTH onset_jitter_pass and (not common_drive_sensitive) -- exactly the
+    # "downgrade" this task must surface, not silently drop. epilepsiae_1125
+    # is narrow's only H3c module_support_flag=True subject and clears every
+    # H3c_path gate. Net: narrow subject-level support = 1, driven by H3c.
+    by_subject = {r["subject"]: r for r in rows}
+    assert by_subject["epilepsiae_1096"]["common_drive_downgrade"] == "True", by_subject["epilepsiae_1096"]
+    assert by_subject["epilepsiae_1096"]["subject_support"] == "False", by_subject["epilepsiae_1096"]
+    assert by_subject["epilepsiae_1125"]["h3c_path"] == "True", by_subject["epilepsiae_1125"]
+    assert by_subject["epilepsiae_1125"]["subject_support"] == "True", by_subject["epilepsiae_1125"]
+    assert payload["narrow"]["n_subject_support"] == 1, payload["narrow"]
+
+    # broad cohort: same script, own subject count (9), never pooled with narrow.
+    broad_dir = tmp_path / "broad_out"
+    result_b = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_topic5_v3_summary.py",
+            "--cohort", "broad",
+            "--outdir", str(broad_dir),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert result_b.returncode == 0, result_b.stderr
+    rows_b = list(csv.DictReader((broad_dir / "v3_summary_subject.csv").open()))
+    assert len(rows_b) == 9, rows_b
+    assert SUMMARY_COLS <= set(rows_b[0]), f"missing cols: {SUMMARY_COLS - set(rows_b[0])}"
