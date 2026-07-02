@@ -2,10 +2,13 @@ import numpy as np
 
 from src.topic5_v3_mode_transition import (
     axis_nonaxis_vectors,
+    beta_axis,
     classify_contacts,
+    geometry_sufficient,
     i1_range,
     load_v3_config,
     phase_bin_range,
+    rank_forward,
     sliding_windows,
     subspace_projectors,
 )
@@ -68,3 +71,63 @@ def test_three_class_and_uniform_nonaxis_vector():
                                             ["a0","a1","a2","a3","a4"], ["n0","n1","n2"])
     assert np.isclose(np.linalg.norm(e_nm), 1.0) and abs(e_am @ e_nm) < 1e-9   # unit + orthogonal
     assert np.allclose(e_nm[[names.index(n) for n in ["n0","n1","n2"]]], e_nm[names.index("n0")])  # uniform, not part-weighted
+
+
+def test_rank_forward_sign_convention():
+    rf = rank_forward({"a": 1.0, "b": 2.0, "c": 3.0})
+    assert rf["a"] == -1.0 and rf["b"] == 0.0 and rf["c"] == 1.0   # earliest->-1, middle->0, latest->+1
+
+    tied = rank_forward({"a": 5.0, "b": 5.0, "c": 5.0})
+    assert tied == {"a": 0.0, "b": 0.0, "c": 0.0}                  # all-tied -> all 0.0, no div-by-zero
+
+    dropped = rank_forward({"a": 1.0, "b": float("nan"), "c": 3.0, "d": float("inf")})
+    assert set(dropped) == {"a", "c"}                              # non-finite names excluded entirely
+    assert dropped["a"] == -1.0 and dropped["c"] == 1.0            # rescale uses only the finite survivors
+
+
+def test_beta_axis_signed_and_threshold():
+    rf = {"a": -1.0, "b": -0.33, "c": 0.33, "d": 1.0}
+    increasing = {"a": 1.0, "b": 2.0, "c": 3.0, "d": 4.0}   # tracks rf order -> positive correlation
+    decreasing = {"a": 4.0, "b": 3.0, "c": 2.0, "d": 1.0}   # inverts rf order -> negative correlation
+
+    b_up = beta_axis(increasing, rf)
+    b_down = beta_axis(decreasing, rf)
+    assert b_up > 0 and np.isclose(b_up, 1.0)               # monotonic increasing -> beta_axis ~= +1
+    assert b_down < 0 and np.isclose(b_down, -1.0)          # monotonic decreasing -> beta_axis ~= -1
+
+    few_pairs = beta_axis({"a": 1.0, "b": 2.0, "c": 3.0}, rf)                     # only 3 names in common
+    assert np.isnan(few_pairs)
+    few_finite = beta_axis({"a": 1.0, "b": 2.0, "c": 3.0, "d": float("nan")}, rf)  # 4th pair non-finite
+    assert np.isnan(few_finite)
+
+
+def test_subspace_projectors_excludes_ambiguous():
+    names = ["a0", "a1", "n0", "n1", "amb"]                # 'amb' is in neither axis_names nor nonaxis_names
+    P_A, P_N = subspace_projectors(names, ["a0", "a1"], ["n0", "n1"])
+
+    assert P_A.shape == (5, 5) and P_N.shape == (5, 5)
+
+    expected_P_A = np.diag([1.0, 1.0, 0.0, 0.0, 0.0])
+    expected_P_N = np.diag([0.0, 0.0, 1.0, 1.0, 0.0])
+    assert np.array_equal(P_A, expected_P_A)   # exact diagonal incl. all off-diagonal zeros
+    assert np.array_equal(P_N, expected_P_N)
+
+    amb_idx = names.index("amb")
+    assert P_A[amb_idx, amb_idx] == 0.0 and P_N[amb_idx, amb_idx] == 0.0   # ambiguous is 0 in BOTH
+
+
+def test_geometry_sufficient_and_gate():
+    cfg = load_v3_config()
+    assert cfg["geometry"]["min_n_axis"] == 5 and cfg["geometry"]["min_n_nonaxis"] == 3
+
+    ok, reason = geometry_sufficient(5, 3, 1, cfg)
+    assert ok is True and reason == "ok"
+
+    ok, reason = geometry_sufficient(4, 3, 1, cfg)                     # axis shortfall
+    assert ok is False and "n_axis" in reason and len(reason) > 0
+
+    ok, reason = geometry_sufficient(5, 2, 1, cfg)                     # non-axis shortfall
+    assert ok is False and "n_nonaxis" in reason and len(reason) > 0
+
+    ok, reason = geometry_sufficient(5, 3, 0, cfg)                     # no shaft carries both classes
+    assert ok is False and "shaft" in reason and len(reason) > 0
