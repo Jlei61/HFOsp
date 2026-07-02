@@ -88,6 +88,15 @@ def test_sliding_windows_full_windows_only():
     assert len(short) == 0                                 # < window_sec -> 0 windows
 
 
+def test_sliding_windows_degenerate_relt():
+    # An onset-jitter shift can push a short seizure's phase window entirely
+    # past the seizure end, leaving a 0- or 1-sample envelope whose relt has
+    # no defined spacing (np.diff is empty -> median is NaN). This must
+    # degrade to "no windows", never raise ValueError from int(round(nan)).
+    assert sliding_windows(np.array([]), 0, 0, 10.0, 5.0) == []       # 0-sample relt
+    assert sliding_windows(np.array([0.0]), 0, 1, 10.0, 5.0) == []    # 1-sample relt
+
+
 def test_three_class_and_uniform_nonaxis_vector():
     cfg = load_v3_config(); thr = cfg["geometry"]["nonaxis_hfo_participation_max"]
     part = {"a0":.5,"a1":.5,"a2":.5,"a3":.5,"a4":.5,"n0":.0,"n1":.02,"n2":.0,"amb":.4}

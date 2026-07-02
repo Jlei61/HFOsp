@@ -125,9 +125,20 @@ def sliding_windows(
     tail is dropped rather than clipped to ``stop``. The ``>= 3``-sample
     guard is kept as a defensive floor (subsumed for realistic configs, but
     still checked).
+
+    A degenerate ``relt`` (fewer than 2 samples, so no spacing is defined, or
+    a non-finite/non-positive median spacing) has no well-defined time axis
+    and therefore no windows: returns ``[]`` rather than propagating a NaN
+    ``dt`` into ``int(round(...))`` (which raises ``ValueError``). This can
+    happen when an onset-jitter shift pushes a short seizure's phase window
+    entirely past the seizure end, leaving a 0- or 1-sample envelope.
     """
     relt = np.asarray(relt, dtype=float)
+    if relt.size < 2:
+        return []
     dt = float(np.median(np.diff(relt)))
+    if not np.isfinite(dt) or dt <= 0:
+        return []
     window_n = int(round(window_sec / dt))
     step_n = int(round(step_sec / dt))
     windows: list[tuple[int, int]] = []
