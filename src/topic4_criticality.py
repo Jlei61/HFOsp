@@ -590,3 +590,166 @@ def transient_amplification_present(curve, alpha1, gain_thresh: float = 1.5) -> 
     if alpha1 >= 0:
         return False
     return max(curve.values()) > gain_thresh
+
+
+# --------------------------------------------------------------------------- #
+# Trajectory verdict (Task 3a-5a) -- the 3-way PRE-REGISTERED classification.    #
+# --------------------------------------------------------------------------- #
+# spec §0/§1/§4: given per-point frozen-Jacobian read-outs along an approach
+# trajectory, decide ONE of three PRE-REGISTERED verdicts -- smooth_CSD /
+# hard_jump_no_CSD / unresolved_operating_point. The verdict is NEUTRAL: no
+# outcome presupposes alpha1->0; "saturated"/"runaway" is a saturation LABEL, not
+# an alpha1 reading. Pure logic over a list of point-dicts (no SNN here -- the SNN
+# evaluator that PRODUCES the point-dicts is T3a-5b).
+
+_CONTINUATION_OK = frozenset({                       # spec §4 / #2/#3
+    "low_branch_disappears_before_alpha0",
+    "low_branch_remains_far_from_alpha0_until_jump",
+})
+
+
+def _tau_ms_of(alpha1: float) -> float:
+    """tau = -1/alpha1 for alpha1<0 (spec §1/§2); alpha1>=0 -> +inf (no finite decay time).
+    Same tau_fast convention as adiabatic_index (line 359)."""
+    return (-1.0 / alpha1) if alpha1 < 0 else float("inf")
+
+
+def _saturated_transition_after(points, last_q_time, jump_window_ms):
+    """The saturated point that FOLLOWS the last qualified point within jump_window_ms
+    (spec §4 "sim enters saturated/runaway within jump_window"), else None. #18: a
+    saturated point OUTSIDE the window does not count. The returned point is where the
+    branch-continuation flags live (per the brief's hard/noc fixtures)."""
+    for p in points:
+        if p.get("saturated") is True:
+            dt = p["time_ms"] - last_q_time
+            if 0.0 <= dt <= jump_window_ms:
+                return p
+    return None
+
+
+def _trajectory_verdict(points, q, cfg, alpha_near_zero_tol, alpha_margin_hard) -> str:
+    """The pure 3-way decision for ONE (alpha_near_zero_tol, alpha_margin_hard) pair.
+    Called once for the primary thresholds and once per threshold_sweep cell (#4). The
+    #19/#20 gates do not depend on the two thresholds, so a gated trajectory returns
+    unresolved for every sweep cell (making its stability visible)."""
+    from scipy.stats import spearmanr
+
+    gate = cfg["quality_gate"]
+    vc = cfg["verdict"]
+    n_total = len(points)
+
+    # Clause #19 (count/fraction gate) -- denominator is ALL points, not just low-branch.
+    if len(q) < gate["min_qualified_points"]:
+        return "unresolved_operating_point"
+    if n_total == 0 or (len(q) / n_total) < gate["min_qualified_fraction"]:
+        return "unresolved_operating_point"
+
+    last_q_time = q[-1]["time_ms"]
+    jw = vc["jump_window_ms"]
+
+    # Clause #20 (ambiguity) -- a qualified point on ambiguous_branch is NOT in q (see the q
+    # filter in classify_trajectory), but any ambiguous_branch point within jump_window_ms of
+    # the last qualified low-branch point means branch identity is not clean -> unresolved.
+    for p in points:
+        if p.get("branch_id") == "ambiguous_branch" and abs(p["time_ms"] - last_q_time) <= jw:
+            return "unresolved_operating_point"
+
+    alphas = [p["alpha1"] for p in q]
+    max_alpha = max(alphas)                                                   # #3.1 closest-to-0
+    last_alpha = alphas[-1]
+
+    # smooth_CSD (spec §0): leading real-part eigenvalue smoothly approaches 0 along q --
+    # (a) closest-to-0 within tol, (b) monotone rise (Spearman), (c) tau (=-1/alpha1) grows.
+    tau_growth = _tau_ms_of(alphas[-1]) / _tau_ms_of(alphas[0])
+    rho = spearmanr(alphas, list(range(len(alphas)))).correlation   # NaN if degenerate -> fails >=
+    if (max_alpha >= -alpha_near_zero_tol
+            and rho >= vc["smooth_min_alpha_spearman"]
+            and tau_growth >= vc["smooth_min_tau_growth_ratio"]):
+        return "smooth_CSD"
+
+    # hard_jump_no_CSD (spec §4, clauses #2/#3): last qualified low-branch point still has a
+    # clear margin from 0, NO alpha1 trend reached near-zero, sim saturates within the window,
+    # AND branch continuation confirmed no skipped low-branch alpha1~=0 point. The two
+    # continuation flags are read from the SATURATED/transition point (brief hard/noc fixtures).
+    trans = _saturated_transition_after(points, last_q_time, jw)             # #18 window-gated
+    if (last_alpha < -alpha_margin_hard
+            and max_alpha < -alpha_near_zero_tol
+            and trans is not None
+            and trans.get("branch_continuation_checked") is True             # #2 absence/False -> unresolved
+            and trans.get("continuation_status") in _CONTINUATION_OK):       # #3
+        return "hard_jump_no_CSD"
+
+    # spec §0/§4: operating point / branch identity / adiabatic conditions not cleanly met.
+    return "unresolved_operating_point"
+
+
+def classify_trajectory(points, cfg) -> dict:
+    """3-way pre-registered verdict over an approach-trajectory of frozen-Jacobian point-dicts.
+
+    Each point dict carries at least ``time_ms``, ``alpha1`` (continuous-time leading
+    real-part eigenvalue, per-ms; None on saturated points), ``qualified`` (bool from
+    qualify_point), ``branch_id`` ("low_branch"/"ambiguous_branch"/"saturated_branch"/...),
+    and -- on the saturated/transition point of a hard jump -- ``branch_continuation_checked``
+    + ``continuation_status`` (spec §4).
+
+    Returns the primary ``verdict`` (spec §0/§4), the report fields (§1, names per #3.1),
+    per-point ``tau_ms``/``instability_growth_time_ms``, and ``threshold_sensitivity`` (#4:
+    the verdict re-run over cfg["verdict"]["threshold_sweep"]).
+    """
+    vc = cfg["verdict"]
+
+    # Clause q: qualified low-branch points only. A qualified point on ambiguous_branch is
+    # excluded HERE (and separately triggers the #20 gate inside _trajectory_verdict).
+    q = [p for p in points if p.get("qualified") is True and p.get("branch_id") == "low_branch"]
+
+    # Primary verdict at the config-of-record thresholds.
+    verdict = _trajectory_verdict(points, q, cfg,
+                                  vc["alpha_near_zero_tol_per_ms"],
+                                  vc["alpha_margin_hard_per_ms"])
+
+    # Report fields (#3.1: alpha1_closest_to_zero_pre_onset is MAX, since for alpha1<0 the value
+    # closest to 0 is the largest). None when q is empty (nothing to summarize).
+    if q:
+        alphas = [p["alpha1"] for p in q]
+        alpha1_closest = max(alphas)
+        last_stable = alphas[-1]
+        jump_distance = abs(last_stable)
+    else:
+        alpha1_closest = last_stable = jump_distance = None
+
+    # tau_ms (only where alpha1<0) / instability_growth_time_ms (only where alpha1>0), over every
+    # point carrying a finite numeric alpha1 (§1). The alpha1>=0 (unqualified, unstable) points
+    # get an instability growth time rather than a decay tau (progress.md T3a-5).
+    tau_ms = []
+    instability_growth_time_ms = []
+    for p in points:
+        a = p.get("alpha1")
+        if a is None or not np.isfinite(a):
+            continue
+        if a < 0:
+            tau_ms.append({"time_ms": p["time_ms"], "tau_ms": -1.0 / a})
+        elif a > 0:
+            instability_growth_time_ms.append(
+                {"time_ms": p["time_ms"], "instability_growth_time_ms": 1.0 / a})
+
+    # threshold_sensitivity (#4): re-run the verdict over the alpha_near_zero_tol x
+    # alpha_margin_hard sweep grids so verdict stability across thresholds is visible.
+    sweep = vc["threshold_sweep"]
+    threshold_sensitivity = [
+        {"alpha_near_zero_tol_per_ms": nz, "alpha_margin_hard_per_ms": mh,
+         "verdict": _trajectory_verdict(points, q, cfg, nz, mh)}
+        for nz in sweep["alpha_near_zero_tol_per_ms"]
+        for mh in sweep["alpha_margin_hard_per_ms"]
+    ]
+
+    return {
+        "verdict": verdict,
+        "n_qualified_points": len(q),
+        "qualified_fraction": (len(q) / len(points)) if points else 0.0,
+        "alpha1_closest_to_zero_pre_onset": alpha1_closest,
+        "last_stable_alpha1": last_stable,
+        "jump_distance_to_alpha0": jump_distance,
+        "tau_ms": tau_ms,
+        "instability_growth_time_ms": instability_growth_time_ms,
+        "threshold_sensitivity": threshold_sensitivity,
+    }

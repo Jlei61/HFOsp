@@ -431,3 +431,58 @@ def test_left_mode_input_projection_matches_core_controllability_single_mode():
     subspace = left_mode_input_projection(res.left, res.right, (0,), b_core)
     single = core_controllability(res.left[:, 0], g, core)
     assert subspace == pytest.approx(single, abs=1e-9)
+
+
+# --- Task 3a-5a: classify_trajectory 3-way pre-registered verdict (brief Steps 1-4). Pure
+# LOGIC over synthetic point-dicts (no SNN). Verbatim from .superpowers/sdd/task-3a-5-brief.md
+# Step 1 (naming #3.1, jump-window #18, fraction #19, ambiguity #20, continuation #2). ---
+
+import numpy as np
+from src.topic4_criticality import classify_trajectory
+
+
+def _pts(alphas, t0=0, dt=10, branch="low_branch"):
+    return [{"time_ms": t0 + i * dt, "alpha1": a, "qualified": True, "branch_id": branch,
+             "branch_continuation_checked": True}
+            for i, a in enumerate(alphas)]
+
+
+def test_verdicts():
+    c = load_crit_config()
+    smooth = _pts(np.linspace(-0.5, -0.001, 8)) + [
+        {"time_ms": 80, "alpha1": None, "qualified": False, "saturated": True,
+         "branch_id": "saturated_branch"}]
+    r = classify_trajectory(smooth, c)
+    assert r["verdict"] == "smooth_CSD"
+    assert r["alpha1_closest_to_zero_pre_onset"] == max(
+        p["alpha1"] for p in smooth if p["qualified"])   # #3.1 max not min
+    hard = _pts(np.linspace(-0.6, -0.2, 8)) + [
+        {"time_ms": 85, "alpha1": None, "qualified": False, "saturated": True,
+         "branch_id": "saturated_branch", "branch_continuation_checked": True,
+         "continuation_status": "low_branch_remains_far_from_alpha0_until_jump"}]
+    r2 = classify_trajectory(hard, c)
+    assert r2["verdict"] == "hard_jump_no_CSD" and r2["jump_distance_to_alpha0"] == abs(hard[7]["alpha1"])
+
+
+def test_hard_requires_continuation_and_window_and_fraction_and_ambiguity():
+    c = load_crit_config()
+    # #2 no continuation -> unresolved
+    noc = _pts(np.linspace(-0.6, -0.2, 8))
+    noc[-1]["branch_continuation_checked"] = False
+    noc += [{"time_ms": 85, "alpha1": None, "qualified": False, "saturated": True,
+             "branch_id": "saturated_branch"}]
+    assert classify_trajectory(noc, c)["verdict"] == "unresolved_operating_point"
+    # #18 saturation outside window -> unresolved
+    late = _pts(np.linspace(-0.6, -0.2, 8)) + [
+        {"time_ms": 10000, "alpha1": None, "qualified": False, "saturated": True,
+         "branch_id": "saturated_branch", "branch_continuation_checked": True}]
+    assert classify_trajectory(late, c)["verdict"] == "unresolved_operating_point"
+    # #19 too few qualified fraction -> unresolved
+    many = _pts(np.linspace(-0.5, -0.001, 5)) + [
+        {"time_ms": 100 + i, "alpha1": None, "qualified": False, "branch_id": "low_branch"}
+        for i in range(95)]
+    assert classify_trajectory(many, c)["verdict"] == "unresolved_operating_point"
+    # #20 ambiguous near transition -> unresolved
+    amb = _pts(np.linspace(-0.5, -0.001, 8))
+    amb[-1]["branch_id"] = "ambiguous_branch"
+    assert classify_trajectory(amb, c)["verdict"] == "unresolved_operating_point"
