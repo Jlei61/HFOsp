@@ -115,9 +115,12 @@ def sliding_windows(
 ) -> list[tuple[int, int]]:
     """Sliding ``(window_start_idx, window_end_idx)`` half-open pairs over ``[start, stop)``.
 
-    Samples-per-second is derived from the median spacing of ``relt``. The
-    trailing window is clipped to ``stop``; any window left with fewer than
-    3 samples is dropped.
+    Samples-per-second is derived from the median spacing of ``relt``. Only
+    full-length windows are emitted: a window is kept only if it spans the
+    complete ``window_sec`` within ``[start, stop)``; the partial trailing
+    tail is dropped rather than clipped to ``stop``. The ``>= 3``-sample
+    guard is kept as a defensive floor (subsumed for realistic configs, but
+    still checked).
     """
     relt = np.asarray(relt, dtype=float)
     dt = float(np.median(np.diff(relt)))
@@ -125,8 +128,8 @@ def sliding_windows(
     step_n = int(round(step_sec / dt))
     windows: list[tuple[int, int]] = []
     ws = start
-    while ws < stop:
-        we = min(ws + window_n, stop)
+    while ws + window_n <= stop:
+        we = ws + window_n
         if we - ws >= 3:
             windows.append((ws, we))
         ws += step_n
