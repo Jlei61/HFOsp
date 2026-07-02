@@ -1,6 +1,6 @@
 # Topic 4 — M3-v2.2 approach-to-runaway 临界性：谱相图 + 轨迹 overlay（path a）· Design
 
-date 2026-07-02 · 状态：design **rev2**（并入 review 6 阻断点 + 命名/度量 + provenance + SNN spot-check + 3×3 correspondence + virtual-SEEG estimator 合同 + Topic5 接口向量）· 分支 `codex/topic4-criticality`（worktree，base `codex/topic4-m3a-v2-2`@e01c08b）· rev1 已 commit `6c376d0`
+date 2026-07-02 · 状态：design **rev2.1**（rev2 六阻断点 + amend：P1-1 `hG→ratefield` transform 锁 / P1-2 spot-check 拆 rate-field + input-projected 两层 / P1-3 本征对层=**扩** `rate_eigenpairs`（已有 left/right+bio+controllability）非新建）· 分支 `codex/topic4-criticality`（worktree，base `codex/topic4-m3a-v2-2`@e01c08b）· rev1 已 commit `6c376d0`
 
 > **方法学 base = M3B-next 设计** `docs/superpowers/specs/2026-06-27-sef-hfo-m3b-spectral-phase-map-design.md`；机器 `src/topic4_m3b_spectral_phase.py`。本 spec 应用到 M3-v2.2 approach-to-runaway 回答"临界慢化"，**执行只认 rev2**。
 > **执行 gate**：T4（correspondence）等 topic5 phase2；T1–T3d 不消费 phase2，可并行 prep（模型侧，不写 correspondence 结论）。
@@ -8,8 +8,8 @@ date 2026-07-02 · 状态：design **rev2**（并入 review 6 阻断点 + 命名
 > **代码现实（已核实，承重——分清"接线" vs"需扩 M3B 模块"）**：
 > - **`J` 是连续时间**（`build_jacobian_dense` 对角 `−1/TAU_ME`、`−1/TAU_AMPA`；matvec = `dz/dt`）→ `α₁=Re(λ₁)` **per-ms**，`τ=−1/α₁` ms。**operator_type=continuous_jacobian 已确认**。
 > - **`solve_operating_point` 现无 init 参数**（单一 `mean_field` 播种）→ **branch 协议（阻断 4）需给 solver 加 warm-start `(rE,rI)` init**（扩展，非接线）。
-> - **`leading_rate_eigenpair` 只取单个右本征向量**（无 left-eigvec、无 complex-pair loading、无 next-distinct gap）→ **阻断 5 + core_controllability 需扩本征对/度量层**（扩展）。
-> - **已存在可复用**：`finite_time_gain`、dt-independent `residual`、`saturated`/`converged`、rate-branch 本征选择、`core_overlap`/`globality`。**需新建**：slow-var 有限差分、mode-shaped 扰动注入器（spot-check）、virtual-SEEG estimator import（复用 topic5）。
+> - **`rate_eigenpairs`（line 784）已返回 left+right 本征向量 + biorthonormal residual + controllability 基础**（`_dense_eig(left=True,right=True)`；`ψ_i^H φ_i=1` 归一 line 805-810；`EigResult(lam,R,L,status,res_r,res_l,bio,floor)`；`mode_frequency_hz` 确认 λ 单位 1/ms）→ 阻断 5 **不是新建 left eigensolver**，而是**扩现有 `rate_eigenpairs` 输出+metrics**：complex-pair invariant-subspace loading、next-distinct gap（现 `spectral_gap`=`e[0].real−e[1].real` 会被 conjugate pair 人工归零）、pair-level controllability、artifact 暴露。（旧 `leading_rate_eigenpair` 才是单右向量，非本任务用的。）
+> - **已存在可复用**：`rate_eigenpairs`（left/right+bio+controllability）、`finite_time_gain`、dt-independent `residual`、`saturated`/`converged`、`core_overlap`/`globality`。**需扩/新建**：`solve_operating_point` init（branch）、`rate_eigenpairs` 的 complex-pair/next-distinct/pair-controllability/artifact、`g_K`/`h_G` 入 `_moments()`（P1-1）、slow-var 有限差分、rate-field 扰动 spot-check + input-projected SNN 扰动（P1-2）、virtual-SEEG estimator import（复用 topic5）。
 
 ---
 
@@ -70,8 +70,8 @@ M3B 带饱和 + 高/低放电支 → 多平衡点。**需给 `solve_operating_po
 ## 6. 本征模 + mode class（阻断 5，需扩本征对层）
 
 - **complex conjugate pair 当一个实不变 2D 子空间**：`mode_loading_i=sqrt(|v_pair1_i|²+|v_pair2_i|²)`；mode class（`core_overlap`/`axis_score`/`globality`）算在**非负 loading / 不变子空间能量**上，**不用**本征向量正负号。
-- **谱隙**：`alpha_gap = alpha1 − alpha_next_distinct`；`alpha_next_distinct` **不能**是 conjugate pair 的另一成员（否则 gap 人工=0）。
-- **left eigenvector**（需新建）：`core_controllability = |ψ_m^T b_core|`（核扰动能否激发该模）。
+- **谱隙**：`alpha_gap = alpha1 − alpha_next_distinct`；`alpha_next_distinct` **不能**是 conjugate pair 的另一成员（否则 gap 人工=0）。**现 `spectral_gap`=`e[0].real−e[1].real` 需改 next-distinct。**
+- **left eigenvector（已有，扩 metric）**：`rate_eigenpairs` 已算 biorthonormal L → `core_controllability=|ψ_m^H b_core|` 直接可得；扩 **pair-level** controllability（complex pair 作一体）+ artifact 暴露。**非新建 eigensolver。**
 
 ---
 
@@ -100,6 +100,7 @@ M3B 带饱和 + 高/低放电支 → 多平衡点。**需给 `solve_operating_po
 
 ## 9. slow-var 归因：partial + trajectory contribution（§4 两层）
 
+- **前置（P1-1，承重）：slow-var→rate-field 入口必须在 T0 锁**（否则 `∂α₁/∂h_G` 是**名义导数非机制导数**）。`q_I` 已入 op（`inh.q` 缩放 I→E）；**`g_K`/`h_G` 现不在 `_moments()`**，按 §B6 加：`h_G`=全局 `muE −= η_G·h_G`（**E-only、全局均一**）、`g_K`=局部 `muE −= η_K·g_K(x)`。每个 transform 锁 单位 / 符号 / 作用对象(E-only) / 全局-vs-局部 / **sign-test**（见 §18 `slow_to_ratefield`）。
 - **A local partial sensitivity**：`∂α₁/∂q_I`、`∂α₁/∂g_K`、`∂α₁/∂h_G`，**central difference** `(α(x+δ)−α(x−δ))/(2δ)`，**两侧 op 都 qualified** 否则该导数 `invalid`。
 - **B trajectory contribution**：`contrib_x=(∂α₁/∂x)·(dx/ds)` → 答"哪个慢变量**实际**把系统推向 softening/hard-jump"（敏感度大但轨迹上变化小 ≠ 实际贡献大）。
 - **Figure**：`α₁(s)` + partial sensitivities(s) + trajectory contributions(s)。比单纯 facet 更直接（facet 作 sensitivity 补充）。
@@ -112,9 +113,12 @@ M3B 带饱和 + 高/低放电支 → 多平衡点。**需给 `solve_operating_po
 
 ---
 
-## 11. SNN spot-check（§6，T3b，需 mode-shaped 扰动注入器）
+## 11. spot-check 两层（P1-2）：rate-field 本征模扰动（primary）+ input-projected SNN（consistency）
 
-frozen-Jacobian 是否真解释原模型的扰动恢复——**审稿必问**。每条轨迹选 4 类点：`early_stable` / `closest_to_zero` / `last_qualified` / `post_jump_saturated`（仅描述，不做线性恢复）。每 qualified 点沿 `{leading, axis, nonaxis/global, random_orthogonal}` mode **扰动**（需新建 mode-shaped 注入器：按 mode loading 空间加权注入 δ），SNN 量 `observed_recovery_time/observed_peak_gain/return_to_op_success/nonlinear_escape_probability`。**验收**：`predicted_tau` vs `observed_recovery_time` 单调；`predicted_finite_time_gain` vs `observed_peak_gain` 正相关。
+frozen-Jacobian 是否真解释原模型扰动恢复——**审稿必问**。但 rate-field eigenmode 有 +/− 分量、复相位、E/I/synaptic-state 成分，**SNN 里不能简单"按 loading 注入 δ"**（只给 E 加正电流测到的是 **input-shape** response，非 eigenmode response）。故拆两层：
+
+- **T3b-rate（primary，全可控）**：在 **rate-field 非线性模型**里扰动 `z* + ε·Re(v_mode)`（可扰全 6-field 状态），积分非线性 rate-field，量恢复时间/峰值增益。**验收**：`predicted_tau` vs 观测恢复**单调**、`predicted_finite_time_gain` vs 峰值增益**正相关**（对冻结 Jacobian 的干净同族检验）。
+- **T3b-snn（可实现版，弱）**：SNN 里**只扰 E external current**，明确叫 **input-projected mode perturbation**（非严格 eigenmode）。每轨迹选 4 类点 `early_stable/closest_to_zero/last_qualified/post_jump_saturated`（末者仅描述）。**验收写成方向一致 / 单调一致，不写严格验证 τ**（input-projected ≠ 真本征模，严格 τ 会假失败）。
 
 ---
 
@@ -160,9 +164,9 @@ frozen-Jacobian 是否真解释原模型的扰动恢复——**审稿必问**。
 - **T0** config + terminology lock（operator/units、verdict/quality-gate/branch/finite-time-gain/h_G-step/virtual-SEEG estimator 合同；§18 YAML）。
 - **T1**（wiring）v2.2→interface export；fixture 必过 `phase_map_trajectory`；真实 fail-closed；provenance hash。
 - **T2**（扩：normalized 轴）normalized phase grid，mapping_id/hash 对齐 T1；2D atlas + phase_recovery/h_G conditional 层；invalid/saturated/nonconverged masks。
-- **T3a**（扩：solver init + 本征层 + 非正规）branch-aware op（**加 solve_operating_point init**）+ qualified low-branch mask（§3）+ `α₁/gap/mode/finite-time-gain/numerical_abscissa`（§6/§7）+ verdict（§4）。**Figure**：`α₁=0`+mode-class 相图 + v2.2 overlay。
-- **T3b**（新建：mode-shaped 注入器）linear-response SNN spot-check（§11）。
-- **T3c**（新建：finite-diff）slow-var attribution partial + trajectory contribution（§9）。
+- **T3a**（扩：solver init + `rate_eigenpairs` metrics + 非正规）branch-aware op（**加 `solve_operating_point` init**）+ qualified low-branch mask（§3）+ `α₁`/**next-distinct gap**/**complex-pair loading mode**/finite-time-gain/numerical_abscissa（**扩现有 `rate_eigenpairs` 输出+metrics，非新建 eigensolver**，§6/§7）+ verdict（§4）。**Figure**：`α₁=0`+mode-class 相图 + v2.2 overlay。
+- **T3b**（两层，§11）**T3b-rate**=rate-field 本征模扰动 spot-check（primary，扰全 6-field 状态）；**T3b-snn**=input-projected E-current 扰动（方向一致验收，非严格 τ）。
+- **T3c**（P1-1 transform 在 T0 锁 + finite-diff）`g_K`/`h_G` 入 `_moments()`（locked transform + sign-test）+ slow-var partial `∂α₁/∂{q_I,g_K,h_G}` + trajectory contribution（§9）。
 - **T3d** controls（no-core/isotropic/shuffled-core/branch-control/ramp-rate，§12）。
 - **T4**（gated on phase2）3×3 correspondence（§13）+ virtual-SEEG proxy 复用 topic5 estimator（§14）+ mode observability + Topic5 接口向量（§15）+ honest-ceiling 文本。
 - **milestone 建议**：T1+T2+T3a = 第一里程碑（先出 branch-aware 相图 + verdict），再 T3b/c/d；避免 all-of-T3 才有结果。**依赖**：T1‖(T3c/T3b 的纯函数部分)；T3a 依赖 T1+T2；T4 依赖 T3 + phase2。
@@ -199,6 +203,10 @@ mode:
   core_overlap_definition: ...
   spectral_gap_policy: next_distinct_real_part
 finite_time_gain: {horizons_ms: [10,25,50,100,250,500], norm: weighted_l2, report_numerical_abscissa: true}
+slow_to_ratefield:            # P1-1: how each slow var enters the rate-field operator (lock + sign test)
+  q_I: {target: E_inhibition, entry: inh_q_scales_WEI, uniform: false, sign_test: required}   # already in solve_operating_point
+  g_K: {target: E_current, entry: 'muE -= eta_K*g_K(x)', uniform: false, eta_K: ..., sign_test: required}
+  h_G: {target: E_current, entry: 'muE -= eta_G*h_G',    uniform: true,  eta_G: ..., sign_test: required}
 slow_sensitivity:
   finite_difference: central
   step_fraction_qI: ...
