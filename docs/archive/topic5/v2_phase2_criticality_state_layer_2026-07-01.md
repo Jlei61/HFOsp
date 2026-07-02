@@ -2,6 +2,8 @@
 
 date 2026-07-01 · 状态：**EXPLORATORY，preliminary（pending Phase-1 空间/顺序 null + Gate A）** · 分支 `topic5-v2-phase2`（隔离 worktree，off `topic5-v2-phase1`）
 
+> **降级定位（2026-07-02 加）**：本结果是 **restricted axial preictal-only sanity check**——在"只看 −120~0s、只用两段窗、限于 HFO 几何匹配触点、无显式非轴向假设、按 relt=0 而非 eeg_onset 锚定"的受限实现下没得到 state 支持。**它不判定**模型真正的预测（发作早期 **轴向组织减弱 + 非轴向活动/流/模态放大**）。后继设计见 `docs/superpowers/specs/2026-07-02-topic5-v3a-mode-transition-design.md`（V3a data-side mode transition）。**可保留的耐用产出 = 动力学腿的方法学定律**：raw λmax≈0.95 被 phase/block surrogate 解释掉 → 今后所有 λmax/VAR/DMD/Jacobian 一律报 `λ_surplus`（观测 − surrogate 中位数），不报 raw。**不能写的 claim**：不能说"没有临界性 / 发作前没有 state projection"；不能把 λmax≈0.95 当临界；不能把 avalanche rank-coupling 当传播；不能把 −120~−30 差分当 onset-proximal transition；不能把 axis-only M_loading 当全脑模态。
+
 > 归档定位：这是 V2 三层框架里 **state 层** 的探索性执行报告。主结论目前是**偏阴性/弱**，且按设计 Phase 2 单独不能下"致痫临界通路"结论——那需要 Phase 1 的三道门（Gate A/B/C）先过。数值表见 §4；主文档只引摘要 + 本链接。
 
 ---
