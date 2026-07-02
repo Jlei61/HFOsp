@@ -79,11 +79,21 @@ def simulate_row(kind):
     res = H._simulate_continuous(S, cfg, record_gif=False, vth=vth)
     rate_hz = np.asarray(res["rate_E"], float)
     rate_s = H._smooth_rate(rate_hz, DT, 20.0)
+    runaway_ms = H._first_sustained(rate_s, DT, 120.0, 100.0)
     af, bin_w = C.active_fraction(res["E_spk_bool"], DT, C.BIN_MS)
     nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
-    floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
-    bar = floor + C.CAL_FRAC * (float(af.max()) - floor)
-    n_events = len(C.detect_events(af, bin_w, event_on_frac=bar))
+    # n_events counts the discrete train BEFORE the sheet detonates. A LATE runaway (kick ~757 ms)
+    # must not raise the event bar for the small pre-runaway train events (the record-peak confound
+    # the C runner documents) -> calibrate the bar from the pre-runaway window minus the last 50 ms
+    # (the detonation ramp). For an IMMEDIATE burst (big/small, runaway <~60 ms) there is no train:
+    # the whole record is the single one_shot_burst event.
+    if runaway_ms is not None and runaway_ms >= 300.0:
+        af_c = af[:max(int(round((runaway_ms - 50.0) / bin_w)), 1)]
+    else:
+        af_c = af
+    floor = float(np.percentile(af_c[nb0:nb1], 95)) if (nb1 <= len(af_c) and nb1 > nb0) else float(af_c.min())
+    bar = floor + C.CAL_FRAC * (float(af_c.max()) - floor)
+    n_events = len(C.detect_events(af_c, bin_w, event_on_frac=bar))
     # col1 shows ONE representative event's spatial ignition (is the front contained, or does it fill
     # the sheet?). For the self-igniting cores the single burst IS the whole trajectory; for the
     # kicked two-foci case, restrict col1 to the first evoked-event window (before the train floods
@@ -101,9 +111,9 @@ def simulate_row(kind):
                 frac_ever_fired=frac_ever_fired,
                 times=np.asarray(res["times"], float), rate_s=rate_s,
                 qI_mean=np.asarray(res["trace_qI_mean"], float), qI_min=np.asarray(res["trace_qI_min"], float),
-                gK=np.asarray(res["trace_gK_axial"], float),
-                runaway_ms=H._first_sustained(rate_s, DT, 120.0, 100.0),
+                gK=np.asarray(res["trace_gK_axial"], float), runaway_ms=runaway_ms,
                 n_events=n_events, L=float(S["L"]), max_active_frac=float(af.max()),
+                af=af, bin_w=float(bin_w),
                 center=np.asarray(S["center"], float), core_r=float(S["layout"]["core_r"]),
                 foci=np.asarray(S["layout"]["foci"], float))
 
@@ -218,6 +228,10 @@ def main():
                   f"frac_ever={round(d['frac_ever_fired'], 4)} "
                   f"max_active_frac={round(d['max_active_frac'], 4)}", flush=True)
         render_figure_a(rows, out_dir)
+        np.savez(out_dir / "_figA_af_traces.npz",   # diagnostic: iterate n_events offline if needed
+                 **{f"{d['kind']}_af": np.asarray(d["af"], float) for d in rows},
+                 **{f"{d['kind']}_binw": float(d["bin_w"]) for d in rows},
+                 **{f"{d['kind']}_run": (np.nan if d["runaway_ms"] is None else float(d["runaway_ms"])) for d in rows})
         print(f"wrote {out_dir / 'difficulty_3row.png'}", flush=True)
     if args.figure in ("B", "both"):
         small_path = ROOT / "results" / "topic4_sef_hfo" / "axis_vs_core" / "small_core_stim.json"
