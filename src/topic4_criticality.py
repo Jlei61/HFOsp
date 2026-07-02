@@ -696,6 +696,13 @@ def classify_trajectory(points, cfg) -> dict:
     per-point ``tau_ms``/``instability_growth_time_ms``, and ``threshold_sensitivity`` (#4:
     the verdict re-run over cfg["verdict"]["threshold_sweep"]).
     """
+    # Review (Important): callers are not guaranteed to hand in points pre-sorted by time_ms
+    # (e.g. assembled from more than one source). Sort FIRST so every downstream read of the
+    # ordered sequence -- q[-1]/last_q_time, the Spearman index order, tau-growth (first-q vs
+    # last-q) -- is computed on a deterministic time order, not caller-dependent list order.
+    # A no-op on an already-sorted or empty list.
+    points = sorted(points, key=lambda p: p["time_ms"])
+
     vc = cfg["verdict"]
 
     # Clause q: qualified low-branch points only. A qualified point on ambiguous_branch is

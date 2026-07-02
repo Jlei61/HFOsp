@@ -486,3 +486,31 @@ def test_hard_requires_continuation_and_window_and_fraction_and_ambiguity():
     amb = _pts(np.linspace(-0.5, -0.001, 8))
     amb[-1]["branch_id"] = "ambiguous_branch"
     assert classify_trajectory(amb, c)["verdict"] == "unresolved_operating_point"
+
+
+# --- Task 3a-5a review (Important): classify_trajectory read q[-1]/alphas[-1] assuming
+# `points` arrives pre-sorted ascending by time_ms, but nothing sorted or asserted that. A
+# caller assembling points from more than one source (e.g. this file's own _pts(...) +
+# [saturated(...)] idiom, or a future T3a-5b producer) could hand in a differently-ordered
+# list with the SAME values and get a DIFFERENT verdict silently -- the reviewer reproduced a
+# smooth_CSD -> unresolved flip just by shuffling list order. DETERMINISTIC reorder (full
+# list(reversed(...)), no unseeded shuffle) of the brief's own smooth_CSD and hard_jump_no_CSD
+# fixtures from test_verdicts above. ---
+
+def test_classify_trajectory_verdict_is_reorder_invariant():
+    c = load_crit_config()
+
+    smooth = _pts(np.linspace(-0.5, -0.001, 8)) + [
+        {"time_ms": 80, "alpha1": None, "qualified": False, "saturated": True,
+         "branch_id": "saturated_branch"}]
+    r = classify_trajectory(smooth, c)
+    r_reordered = classify_trajectory(list(reversed(smooth)), c)
+    assert r_reordered["verdict"] == r["verdict"] == "smooth_CSD"
+    assert r_reordered["last_stable_alpha1"] == r["last_stable_alpha1"]
+    assert r_reordered["alpha1_closest_to_zero_pre_onset"] == r["alpha1_closest_to_zero_pre_onset"]
+
+    hard = _pts(np.linspace(-0.6, -0.2, 8)) + [
+        {"time_ms": 85, "alpha1": None, "qualified": False, "saturated": True,
+         "branch_id": "saturated_branch", "branch_continuation_checked": True,
+         "continuation_status": "low_branch_remains_far_from_alpha0_until_jump"}]
+    assert classify_trajectory(list(reversed(hard)), c)["verdict"] == "hard_jump_no_CSD"
