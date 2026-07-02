@@ -1,13 +1,17 @@
 """Integration TDD for Task 1 — M3A-v2.2 approach-criticality, Milestone 1.
 
-Two contracts:
+Three contracts:
 1. Byte-parity: run_transition() reproduces the golden fixture captured from the
    figure code BEFORE factoring (all sim output hashes + the deterministic events).
 2. Two-layer fail-closed export: the hand-built calibrated fixture handoff PASSES
    (proves the M3A->M3B interface machinery is wired), while the REAL v2.2 export
    legitimately fails closed (uncalibrated mapping -> refused), never silently upgraded.
+3. CLI smoke: the 3 criticality entrypoints (export.py/atlas.py/verdict.py) parse --help
+   cleanly, and run_topic4_crit_verdict.py's lazily-imported deps (invisible to --help,
+   since it imports them inside its worker fn) import cleanly standalone -- both always-run,
+   no figdata required.
 
-Both tests re-run the full T=1600ms SNN transition sim (~3-4 min each) -> @integration.
+The first two tests re-run the full T=1600ms SNN transition sim (~3-4 min each) -> @integration.
 They require the subject1146 figdata artifact (gitignored results/ tree); skipped if absent.
 """
 import hashlib
@@ -102,9 +106,15 @@ def test_atlas_is_conditional_and_not_verdict_source(tmp_path):
 # subprocess-run all 3 end-to-end.
 #
 # COVERAGE TRADEOFF (logged, not silently skipped): the ALWAYS-RUN smoke below
-# (test_cli_help_smoke) covers import+argparse wiring for all 3 CLIs -- catches the
-# common CLI breakage mode (import errors, argparse misconfiguration) in well under a
-# second each, with no figdata and no SNN run. Full subprocess end-to-end is exercised
+# (test_cli_help_smoke) catches the common CLI breakage mode (import errors, argparse
+# misconfiguration) in well under a second each, with no figdata and no SNN run -- but its
+# import coverage is NOT uniform across all 3 CLIs. run_topic4_crit_export.py and
+# run_topic4_crit_atlas.py import their src.* deps at MODULE SCOPE, so --help genuinely
+# exercises those imports. run_topic4_crit_verdict.py instead imports its deps LAZILY, inside
+# build_and_write_verdict(), so --help short-circuits at argparse.parse_args() before ever
+# reaching them -- its dep-import coverage comes from the companion
+# test_verdict_cli_lazy_deps_importable below instead (always-run, no figdata needed). Full
+# subprocess end-to-end is exercised
 # ONLY for run_topic4_crit_verdict.py, the milestone's main deliverable CLI, behind
 # @integration (test_verdict_cli_end_to_end_subprocess). run_topic4_crit_export.py and
 # run_topic4_crit_atlas.py are NOT routinely end-to-end subprocess-tested (SNN cost);
@@ -134,6 +144,17 @@ def test_cli_help_smoke(script):
     )
     assert result.returncode == 0, f"stdout={result.stdout}\nstderr={result.stderr}"
     assert "Traceback" not in result.stderr, result.stderr
+
+
+def test_verdict_cli_lazy_deps_importable():
+    """run_topic4_crit_verdict.py imports its deps lazily (inside the worker fn), so the --help
+    smoke never reaches them. Import them directly so a break in the fragile sef_hfo_transition_sim
+    interim-bridge is caught in a figdata-less clone (where the @integration e2e is skipped)."""
+    code = "import src.sef_hfo_transition_sim, src.sef_hfo_m3a_export, src.topic4_criticality"
+    result = subprocess.run(
+        [sys.executable, "-c", f"import sys; sys.path.insert(0, {str(ROOT)!r}); {code}"],
+        capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, f"stdout={result.stdout}\nstderr={result.stderr}"
 
 
 @pytest.mark.integration
