@@ -403,7 +403,9 @@ _SAT_RATE_KHZ: float = 0.10           # >> any self-limited interictal op (balan
 def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
                           inh: InhibitionField, *, ratio: float = 1.0, w_ee_mult: float = 1.0,
                           source: str = "ratefield_steady", dt: float = 0.5, t_max: float = 2500.0,
-                          tol: float = 1e-9, gain_h: float = _GAIN_H) -> OperatingPoint:
+                          tol: float = 1e-9, gain_h: float = _GAIN_H,
+                          gK_field: np.ndarray | None = None, hG_scalar: float = 0.0,
+                          eta_K: float = 1.0, eta_G: float = 1.0) -> OperatingPoint:
     """Solve the heterogeneous operating point by deterministic rate-field integration-to-steady.
 
     Forward-Euler integration of the 6-field rate model (the same dynamics ``integrate_lif_field``
@@ -415,6 +417,14 @@ def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
     Non-settled low-rate points are flagged ``unresolved``; high-rate branches are flagged
     ``saturated`` (=> mode_class 'runaway', never 'axial'). The per-cell gains gE_i, gI_i are the
     diagonal scales of the finite Jacobian (TDD-5).
+
+    ``gK_field``/``hG_scalar`` are the T2.5 ``slow_to_ratefield`` wiring (#P1-1, config-of-record
+    ``config/topic4_criticality.yaml``): additive E-only drive shifts, ``muE -= eta_K*gK_field``
+    (per-cell ``(n,n)`` K-current field, applied only when ``gK_field is not None``) and
+    ``muE -= eta_G*hG_scalar`` (global uniform recovery-current scalar). Both live inside
+    ``_moments()`` so the shifted op is self-consistent (steady-state integration AND the final
+    gE/gI gain both see it); muI is untouched. Defaults are additive-zero, so existing callers get
+    byte-identical output.
     """
     n = grid.n
     wee = w_ee_mult * W_EE
@@ -438,6 +448,9 @@ def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
 
     def _moments():
         muE = TAU_ME * (C_EE * wee * sEE - C_EI * wEI * sEI) + muxE + exc.mu_core
+        muE = muE - eta_G * hG_scalar                       # h_G: global uniform recovery current
+        if gK_field is not None:
+            muE = muE - eta_K * gK_field                     # g_K: per-cell K-current field
         muI = TAU_MI * (C_IE * W_IE * sIE - C_II * wII * sII) + muxI
         varE = TAU_ME * (C_EE * wee ** 2 * sEE + C_EI * wEI ** 2 * sEI) + TAU_ME * JX_E ** 2 * nuext
         varI = TAU_MI * (C_IE * W_IE ** 2 * sIE + C_II * wII ** 2 * sII) + TAU_MI * JX_I ** 2 * nuext

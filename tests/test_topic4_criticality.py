@@ -47,3 +47,65 @@ def test_invert_phase_transform_round_trips_apply_transform():
         for x in xs:
             phase = _apply_transform(transform, x)
             assert _invert_phase_transform(transform, phase) == pytest.approx(x, abs=1e-9)
+
+
+# --- Task 2.5: slow_to_ratefield -- g_K/h_G wired into solve_operating_point's muE (#P1-1 sign
+# lock). Brief .superpowers/sdd/task-2.5-brief.md Step 1 test translated to the REAL m3b API per
+# the controller's VERIFIED T2.5 notes (.superpowers/sdd/progress.md): ExcitabilityField.from_core /
+# InhibitionField.uniform / positional make_core_mask do not exist; use build_excitability_field /
+# build_inhibition_field / make_core_mask(kind=, radius=). EigResult.eigenvalues is correct as-is. ---
+
+def test_slow_to_ratefield_h_G_sign_lowers_excitability():
+    """Raising h_G (global recovery current) must not raise alpha_1 or mean rE (#P1-1)."""
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+        solve_operating_point, build_jacobian_dense, rate_eigenpairs,
+    )
+    g = Grid(n=6, L=5.0)
+    k = build_kernels(g, ell_perp=0.6)
+    core = make_core_mask(g, kind="single", radius=0.9)
+    exc = build_excitability_field(g, core, mu_core=1.0)
+    inh = build_inhibition_field(g, core, q_global=0.94)
+
+    op0 = solve_operating_point(g, k, exc, inh)
+    a0 = rate_eigenpairs(build_jacobian_dense(g, k, op0), g).eigenvalues[0].real
+
+    hi = solve_operating_point(g, k, exc, inh, hG_scalar=2.0, eta_G=1.0)  # more global recovery current
+    a1 = rate_eigenpairs(build_jacobian_dense(g, k, hi), g).eigenvalues[0].real
+
+    assert a1 <= a0 + 1e-9        # h_G suppresses E -> alpha1 not higher
+    assert hi.rE.mean() <= op0.rE.mean() + 1e-9
+
+
+def test_slow_to_ratefield_g_K_sign_lowers_excitability():
+    """Raising g_K (per-cell K-current field), the newly-wired path alongside h_G, must not raise
+    alpha_1 or mean rE (#P1-1)."""
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+        solve_operating_point, build_jacobian_dense, rate_eigenpairs,
+    )
+    g = Grid(n=6, L=5.0)
+    k = build_kernels(g, ell_perp=0.6)
+    core = make_core_mask(g, kind="single", radius=0.9)
+    exc = build_excitability_field(g, core, mu_core=1.0)
+    inh = build_inhibition_field(g, core, q_global=0.94)
+
+    op0 = solve_operating_point(g, k, exc, inh)
+    a0 = rate_eigenpairs(build_jacobian_dense(g, k, op0), g).eigenvalues[0].real
+
+    hi = solve_operating_point(g, k, exc, inh, gK_field=np.full((g.n, g.n), 2.0), eta_K=1.0)
+    a1 = rate_eigenpairs(build_jacobian_dense(g, k, hi), g).eigenvalues[0].real
+
+    assert a1 <= a0 + 1e-9        # g_K suppresses E -> alpha1 not higher
+    assert hi.rE.mean() <= op0.rE.mean() + 1e-9
+
+
+def test_slow_to_ratefield_sign_ok_all_three_pass():
+    """The #P1-1 sign-test deliverable: slow_to_ratefield_sign_ok reads eta_K/eta_G off
+    load_crit_config()'s slow_to_ratefield block and confirms q_I (already-wired via inh.q),
+    g_K, and h_G all lower excitability when raised."""
+    from src.topic4_criticality import slow_to_ratefield_sign_ok, load_crit_config
+
+    result = slow_to_ratefield_sign_ok(load_crit_config())
+    assert result == {"q_I": True, "g_K": True, "h_G": True}

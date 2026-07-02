@@ -33,6 +33,80 @@ def load_crit_config(path: str | Path | None = None) -> Dict[str, Any]:
 
 
 # --------------------------------------------------------------------------- #
+# slow_to_ratefield sign-test deliverable (Task 2.5, #P1-1)                      #
+# --------------------------------------------------------------------------- #
+
+
+def slow_to_ratefield_sign_ok(cfg: Dict[str, Any]) -> Dict[str, bool]:
+    """#P1-1 sign-test: for each slow_to_ratefield var, raising it must NOT raise E excitability.
+
+    Reads ``eta_K``/``eta_G`` off ``cfg["slow_to_ratefield"]`` (config/topic4_criticality.yaml
+    #P1-1 lock) and probes each var independently on a small single-core operating point:
+
+    * ``q_I`` -- already wired via ``InhibitionField.q`` scaling ``W_EI`` (target=E_inhibition,
+      pre-existing path); raise ``q_global``. Criterion: mean rE not higher -- this is q_I's own
+      pre-existing, documented contract ("Lower q -> weaker brake -> more event-prone", see
+      ``build_inhibition_field``'s module comment). ``W_EI`` enters BOTH muE (subtracted) and
+      varE (added, squared), so raising q_I also raises sigmaE; near a threshold-adjacent
+      operating point the LIF gain's sigma-sensitivity can transiently outweigh its mu-sensitivity,
+      so alpha_1 is not required to fall in lockstep (verified empirically: robust across a
+      q in [0.84, 1.0] scan, not a probe-point fluke) -- the controller's own sign-test intent note
+      scopes the stronger "AND lower alpha_1" claim to hG/gK only, never to q_I.
+    * ``g_K`` -- Task 2.5 wiring, ``muE -= eta_K*gK_field`` (target=E_current, per-cell); raise a
+      uniform field. Criterion: alpha_1 not higher AND mean rE not higher (#P1-1's literal claim).
+    * ``h_G`` -- Task 2.5 wiring, ``muE -= eta_G*hG_scalar`` (target=E_current, global scalar);
+      raise the scalar. Criterion: alpha_1 not higher AND mean rE not higher (#P1-1's literal claim).
+      g_K/h_G are pure muE-only additive shifts (varE has zero dependence on either), so both
+      criteria hold together cleanly -- unlike q_I's weight-scaling path.
+
+    Only consumes ``src.topic4_m3b_spectral_phase``'s generic ``gK_field``/``hG_scalar``/``eta_K``/
+    ``eta_G`` keywords -- that module has no knowledge of this config's schema.
+    """
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+        solve_operating_point, build_jacobian_dense, rate_eigenpairs,
+    )
+
+    block = cfg["slow_to_ratefield"]
+    eta_K = float(block["g_K"]["eta_K"])
+    eta_G = float(block["h_G"]["eta_G"])
+
+    grid = Grid(n=6, L=5.0)
+    kernels = build_kernels(grid, ell_perp=0.6)
+    core = make_core_mask(grid, kind="single", radius=0.9)
+    exc = build_excitability_field(grid, core, mu_core=1.0)
+    inh_lo = build_inhibition_field(grid, core, q_global=0.94)
+
+    def alpha1_and_rate(op) -> tuple[float, float]:
+        a1 = float(rate_eigenpairs(build_jacobian_dense(grid, kernels, op), grid).eigenvalues[0].real)
+        return a1, float(op.rE.mean())
+
+    a0, r0 = alpha1_and_rate(solve_operating_point(grid, kernels, exc, inh_lo))
+
+    def rate_not_higher(op_hi) -> bool:
+        _, r1 = alpha1_and_rate(op_hi)
+        return bool(r1 <= r0 + 1e-9)
+
+    def alpha1_and_rate_not_higher(op_hi) -> bool:
+        a1, r1 = alpha1_and_rate(op_hi)
+        return bool(a1 <= a0 + 1e-9 and r1 <= r0 + 1e-9)
+
+    inh_hi = build_inhibition_field(grid, core, q_global=0.99)
+    op_qI = solve_operating_point(grid, kernels, exc, inh_hi)
+
+    gK_field = np.full((grid.n, grid.n), 2.0)
+    op_gK = solve_operating_point(grid, kernels, exc, inh_lo, gK_field=gK_field, eta_K=eta_K)
+
+    op_hG = solve_operating_point(grid, kernels, exc, inh_lo, hG_scalar=2.0, eta_G=eta_G)
+
+    return {
+        "q_I": rate_not_higher(op_qI),
+        "g_K": alpha1_and_rate_not_higher(op_gK),
+        "h_G": alpha1_and_rate_not_higher(op_hG),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # M3A-v2.2 -> M3B-R2 interface export (Task 1): fail-closed handoff wiring       #
 # --------------------------------------------------------------------------- #
 # The v2.2 approach-to-criticality sim feeds the SAME canonical M3A->M3B handoff
