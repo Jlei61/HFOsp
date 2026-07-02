@@ -52,9 +52,9 @@ def test_export_fixture_passes_and_real_is_fail_closed(tmp_path):
     from src.sef_hfo_transition_sim import default_transition_config
     assert export_fixture_handoff(tmp_path / "fix") == "phase_map_trajectory"     # machinery proven
     v = export_v2_2_handoff(tmp_path / "real", default_transition_config("subject1146", "qI"))
-    assert v in {"phase_map_trajectory", "mechanism_candidate_only", "refused"}   # never silently upgraded
-    if v != "phase_map_trajectory":
-        assert (tmp_path / "real" / "m3a_interface_audit.json").exists()          # blocking reason written
+    assert v != "phase_map_trajectory"   # real uncalibrated v2.2 MUST refuse the overlay (fail-closed)
+    audit = json.loads((tmp_path / "real" / "m3a_interface_audit.json").read_text())
+    assert audit["cond1_sign_tests_passed"] is False   # refusal is because the mapping isn't sign-calibrated
 
 
 @pytest.mark.integration
