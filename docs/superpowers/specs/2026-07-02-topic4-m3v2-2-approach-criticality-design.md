@@ -1,109 +1,230 @@
 # Topic 4 — M3-v2.2 approach-to-runaway 临界性：谱相图 + 轨迹 overlay（path a）· Design
 
-date 2026-07-02 · 状态：design **post-review rev1**（并入 P1-1..P1-4）· 分支 `codex/topic4-criticality`（worktree，base `codex/topic4-m3a-v2-2`@e01c08b）· 未 commit
+date 2026-07-02 · 状态：design **rev2**（并入 review 6 阻断点 + 命名/度量 + provenance + SNN spot-check + 3×3 correspondence + virtual-SEEG estimator 合同 + Topic5 接口向量）· 分支 `codex/topic4-criticality`（worktree，base `codex/topic4-m3a-v2-2`@e01c08b）· rev1 已 commit `6c376d0`
 
-> **方法学 base = 现有 M3B-next 设计**：`docs/superpowers/specs/2026-06-27-sef-hfo-m3b-spectral-phase-map-design.md`（冻结-Jacobian 谱相图 + M3A→M3B overlay 合同）。机器已实现于 `src/topic4_m3b_spectral_phase.py`；本 spec 只把它**应用到 M3-v2.2 approach-to-runaway 轨迹**回答"临界慢化"问题。
-> **rev1 review 修（承重）**：(P1-1) `α₁→0` **不预设**为 runaway 机制——预注册三类 verdict；(P1-2) 冻结-Jacobian 加 operating-point 质量门；(P1-3) `h_G`/recovery 不能被 2D 图投影掉——加 facet 或 `∂α₁/∂slow` 导数；(P1-4) T1 两层 fail-closed + correspondence 改 2×2 + virtual-SEEG proxy 可检测性对照。
-> **执行 gate**：T4（correspondence）**等 topic5 phase2** 落地。T1–T3（两 prereq + 相图 + CSD 读数）不消费 phase2，可并行 prep。
+> **方法学 base = M3B-next 设计** `docs/superpowers/specs/2026-06-27-sef-hfo-m3b-spectral-phase-map-design.md`；机器 `src/topic4_m3b_spectral_phase.py`。本 spec 应用到 M3-v2.2 approach-to-runaway 回答"临界慢化"，**执行只认 rev2**。
+> **执行 gate**：T4（correspondence）等 topic5 phase2；T1–T3d 不消费 phase2，可并行 prep（模型侧，不写 correspondence 结论）。
+
+> **代码现实（已核实，承重——分清"接线" vs"需扩 M3B 模块"）**：
+> - **`J` 是连续时间**（`build_jacobian_dense` 对角 `−1/TAU_ME`、`−1/TAU_AMPA`；matvec = `dz/dt`）→ `α₁=Re(λ₁)` **per-ms**，`τ=−1/α₁` ms。**operator_type=continuous_jacobian 已确认**。
+> - **`solve_operating_point` 现无 init 参数**（单一 `mean_field` 播种）→ **branch 协议（阻断 4）需给 solver 加 warm-start `(rE,rI)` init**（扩展，非接线）。
+> - **`leading_rate_eigenpair` 只取单个右本征向量**（无 left-eigvec、无 complex-pair loading、无 next-distinct gap）→ **阻断 5 + core_controllability 需扩本征对/度量层**（扩展）。
+> - **已存在可复用**：`finite_time_gain`、dt-independent `residual`、`saturated`/`converged`、rate-branch 本征选择、`core_overlap`/`globality`。**需新建**：slow-var 有限差分、mode-shaped 扰动注入器（spot-check）、virtual-SEEG estimator import（复用 topic5）。
 
 ---
 
 ## 0. 摘要（朴素话）
 
-我们看 M3-v2.2 从**安静**逼近**全场一起猛烈放电、停不下来**（下称"失控"）那条路上，系统"受一下扰动后要多久才平复"这个恢复时间，是不是越来越长（临界慢化）——**但我们不预设它一定会**。
+我们看 M3-v2.2 从**安静**逼近**全场失控**那条路上，系统"受一下扰动后要多久平复"是不是越来越长（临界慢化）——**不预设它会**。**怎么测**：不用方差/自相关代理（数据侧才用），而是每个慢状态点线性化、**直接算**领头本征值实部 `α₁`；且**只在系统确实停在准静态平衡点附近、能被线性化的点上读**（不然算子不是真恢复算子）；有固定核、无平移对称，**不能用 Brunel 平面波**，整张异质 Jacobian 数值求本征模。**揭示什么**：三种预注册结局（平滑变脆 / 硬跳 / 不可测），若变脆是哪个模式（局部/沿轴/全局，M3B 示全局）、哪个慢变量推、是否伴非正规瞬态放大；再与 topic5 phase2 对照，分清"模型能算的本体"和"稀疏电极代理看不看得到"。
 
-**怎么测**：不用"活动抖动变大/自相关变大"去**估**（那是数据侧的代理），而是**直接算**——把这张带固定低阈值核的有限网络，在逼近路上每个慢状态点线性化，求领头本征值实部 `α₁`（恢复时间 `τ=−1/α₁`）。**两条纪律**：① **只在系统确实停在某个平衡点附近、能被线性化的点上读**（不然线性化出来的算子不是真正的"受扰恢复"算子，见 §1 质量门）；② 有固定核 → 无平移对称 → **不能用 Brunel 平面波**，必须整张异质 Jacobian 数值求本征模。
+**锁定口径（rev2，抗审稿）**：本 spec **不把 `α₁→0` 当预期结论**，而作三类预注册 verdict 之一。`smooth_CSD` 要求在 **branch-aware、quasi-static、非饱和** operating point 上，**continuous-time** leading real-part eigenvalue 平滑接近 0，**且经 SNN 扰动 spot-check 支持**。`hard_jump_no_CSD` 要求**最后合格 low-branch 点仍与 0 有明确 margin**、随后 simulation 进入 saturated/runaway、**且 branch continuation 未发现被跳过的 low-branch `α₁≈0`**。若 operating point / branch identity / adiabatic 条件不成立，判 `unresolved_operating_point`，**不当阴性**。
 
-**揭示什么**：**预注册三种结局**——平滑变脆（`α₁` 平滑趋 0=临界慢化）、**硬跳**（工作点非线性饱和、直接跳到高放电支，`α₁` 还没到 0 就跳过去=没有慢化）、不可线性化（逼近太快/无稳定平衡点）。**关键背景**：M3B 已知"失控格是按**放电饱和**归类的、那里 `α₁` 可仍为负"（`classify_mode`：`saturated⇒runaway`，与 `α₁` 符号无关；且有 `α₁<0` 的点正是间期自限瞬态）——所以**硬跳是活跃假设，不是要去证 `α₁→0`**。若真有变脆：是哪个空间模式（局部/沿轴/**全局**，M3B 示全局）、哪个慢变量（`q_I`/`g_K`/`h_G`）在推。与 topic5 phase2 对照时，还要分清"模型能算的本体"和"数据只能用的代理"能不能在稀疏电极上被看到。
-
-（内部归档代号：runaway=`saturated` op（`_SAT_RATE_KHZ`）；frozen-Jacobian `α₁=Re(λ₁)`/`τ=−1/α₁`；verdict∈{smooth_CSD, hard_jump_no_CSD, unresolved_operating_point}；op 质量门 op_status/converged/residual/`‖rate_sim−z_star‖`/saturated；mode class local/axial/global；`∂α₁/∂{q_I,g_K,h_G}`；M3A→M3B interface D1 normalized phase grid；`build_handoff_from_sim`；`classify_mode` line 954；α₁<0 interictal transient line 1548。）
+（内部归档代号：`operator_type∈{continuous_jacobian,discrete_transition}`；`α₁=Re(λ₁)` per-ms / `ρ=max|eig(A)|` / `α=log ρ/dt`；verdict∈{smooth_CSD,hard_jump_no_CSD,unresolved_operating_point}；quality gate converged∧¬saturated∧residual_rms∧rate_mismatch_rel∧slow_mismatch_rel∧adiabatic_index；branch∈{low,high,saturated,ambiguous}；`finite_time_gain`/numerical_abscissa；`∂α₁/∂{q_I,g_K,h_G}`；mode_observability=‖G_seeg·v‖/‖v‖；`classify_mode` line954 saturated⇒runaway。）
 
 ---
 
-## 1. 核心问题 + 预注册 verdict + operating-point 质量门
+## 1. Q1/Q2 + verdict + 报告量（命名已修）
 
-**Q1（有没有 / 哪一类）** — **预注册三类 verdict（P1-1，不预设 α₁→0）**：
-- `smooth_CSD`：合格点上 `α₁(s)` 平滑趋 0、`τ(s)` 发散 = 临界慢化本体。
-- `hard_jump_no_CSD`：工作点非线性饱和/跳到高放电支时 `α₁` 仍明显 < 0（跳前没趋 0）= 硬跳、被动预警窗≈0。
-- `unresolved_operating_point`：approach 期无稳定平衡点可线性化（见质量门）。
+**Q1（三类预注册 verdict）**：`smooth_CSD` / `hard_jump_no_CSD` / `unresolved_operating_point`（定义见 §0 锁定口径 + §4 严格判据）。
 
-**报告量（不只"是否单调趋 0"，P1-1）**：`min_alpha1_pre_onset`（onset 前 α₁ 最接近 0 的值）、`last_stable_alpha1`（最后一个合格点的 α₁）、`jump_distance_to_alpha0`（跳变发生时 α₁ 离 0 还有多远）、`n_qualified_points`。
+**报告量（命名修 3.1/3.2）**：
+- `alpha1_closest_to_zero_pre_onset`（= onset 前合格点里 α₁ 的 **max**，因 α₁<0 时最接近 0 是最大值；**不叫 min**）
+- `last_stable_alpha1`；`jump_distance_to_alpha0 = abs(last_stable_alpha1)`（正数）
+- `n_qualified_points` / `qualified_fraction`
+- `tau_ms = −1/α₁` **仅当 α₁<0**；`α₁≥0 → tau=NaN`，另存 `instability_growth_time = 1/α₁ (α₁>0)`
 
-**Q2（哪个 mode / 谁推）**：`α₁→0`（若有）的是哪个 mode（`core_overlap`/`axis_score`/`globality` 判 local/axial/global）；谱隙 `α₁−α₂` 是否收缩；非正规 `finite_time_gain` 沿轴如何；**哪个 slow-var 推 α₁**（见 §3 h_G 层）。
-
-**operating-point 质量门（P1-2，承重）**：每个轨迹点存 `op_status`、`converged`、fixed-point `residual`、`rate_mismatch=‖rate_sim(t)−z_star‖`、`saturated`（这些字段 `OperatingPoint` 已有：converged/residual/saturated）。**CSD 只在 quasi-static 合格点读**：`converged ∧ ¬saturated ∧ residual<res_tol ∧ rate_mismatch<mismatch_tol`。不合格点标 `trajectory_not_linearizable`，**不进** α₁ 趋势（ramp/onset 期系统远离不动点时，围绕 z_star 的 J ≠ 真实扰动恢复算子）。`trajectory_not_linearizable` 与 `hard_jump_no_CSD` 是**不同** verdict（前者=测不了，后者=测得了且没慢化）。
-
----
-
-## 2. 两个 prereq（path a 真实工作量；含 T1 fail-closed）
-
-现有 M3B 相图 **不是 overlay-ready**：`build_m3b_spectral_outputs.py` 是 **raw-knob atlas**（`mu_core×q_global`），显式标 `m3a_overlay_consumable=False`（合同 D1 要 normalized grid）。故 path (a) 需：
-
-- **P1 — M3-v2.2 → interface export（复用现成 exporter）**：v2.2 continuous 协议（`_simulate_continuous`/`run_transition`）→ `sim+events` → `src/sef_hfo_m3a_export.py::build_handoff_from_sim(sim, events, dt_ms, mapping_id="m3a_v2_2_approach", gk_enabled=...)` + `write_handoff_artifacts(...)`（产 5 件合同 artifact），照 `scripts/run_a2_axisbreak_sweep.py` 调法。
-  - **T1 两层验收（P1-4，fail-closed）**：(a) **fixture** 必须能拿到 `overlay_verdict==phase_map_trajectory`（证机器通）；(b) **真实 v2.2 artifact** 若过不了 sign-cal / rate-matched control / Gate A，**必须 fail-closed**：`overlay_verdict∈{mechanism_candidate_only, refused}` + 写明阻断原因，**绝不放水**降 gate 去凑 T3。
-- **P2 — normalized phase grid 重建（合同 D1）**：相图轴改 normalized `phase_x_core × phase_y_global ∈ [0,1]`（extent=`phase_coord_ranges.json`），`axes_built_from_slow_to_rate_mapping_id` = P1 同一 mapping id；`m3a_overlay_consumable=True`。
-
-**两 prereq 都不消费 phase2** → 可并行 prep。
+**Q2（哪个 mode / 谁推 / 有无非正规放大）**：mode class（§6）；slow-var 归因（§9）；非正规瞬态（§7）。
 
 ---
 
-## 3. 谱相图 + 轨迹 overlay + h_G 层（path a 主体）
+## 2. operator 单位合同（阻断 1，承重）
 
-1. 用 `topic4_m3b_spectral_phase.py`（`solve_operating_point`/`build_jacobian_dense`/`rate_eigenpairs`/`spectral_gap`/`finite_time_gain`/`core_overlap`/`globality`/`classify_mode`）在 **normalized** 网格建相图；每格存领头 5–10 eigenpair + `α₁=0` 等值线 + mode class + 谱隙 + finite-time-gain。
-2. overlay P1 的 `phase_trajectory.csv`（**仅当** T1 真实 gate 通过；否则不画正式 overlay，只保留 mechanism-candidate 说明 — P1-4 fail-closed）。
-3. 沿合格轨迹点读 Q1 verdict + 报告量 + Q2 mode。
-4. **h_G / recovery 层（P1-3，承重）** — 2D 图 `phase_x_core×phase_y_global` 会把 recovery 投影掉，而 `h_G` 正是 v2.2 核心新增；故加**最小一层**二选一（或都做）：
-   - **facet**：在几个固定 `phase_recovery`/`h_G` 档位重算相图；
-   - **导数（更直接归因）**：沿合格轨迹点有限差分 `∂α₁/∂q_I`、`∂α₁/∂g_K`、`∂α₁/∂h_G`（各扰一个 slow-var 重解 op + 重算 α₁），报最大 `|∂α₁/∂·|` 与符号 = **谁推临界 / 谁改软硬**。否则只答 q/global 轨迹，答不了 h_G。
-5. **控制**（M3B design §7）：no-core homogeneous、isotropic `AR=1`、shuffled core thresholds 作 CSD 归因坏数据回归（至少这三）。
+主指标 `α₁` **仅指 continuous-time frozen-Jacobian 的 leading real-part eigenvalue**（已核实本仓 `J` 连续时间，`α₁` per-ms）。若某实现输入是**离散更新矩阵** `A`：`ρ=max|eig(A)|`；`α=log(ρ)/dt`；`τ=−1/α`。`τ=−1/α` **只在 α<0 且 continuous-time normalized 后**定义。每个 spectrum artifact **强制存**：`operator_type`、`dt_ms`、`eig_raw`、`alpha1_per_ms`、`alpha1_per_s`、`tau_ms`、`tau_s`、`stability_margin`。**理由**：模型 α₁ / 数据 VAR λmax / DMD eigenvalue 都叫"leading eigenvalue"但单位不同，不锁死会在 correspondence 里静默混淆。
 
 ---
 
-## 4. 与 topic5 phase2 的 correspondence（2×2，分本体 vs 代理可检测性 — P1-4）
+## 3. operating-point 质量门（阻断 2，承重）
 
-数据侧（phase2，并行 session，目前偏阴）用**代理**（variance/AR1/VAR λmax/branching）；模型侧用**本体**（frozen-Jacobian `α₁`/mode）。**不能只按同阴/同阳判"对应"**，必须分清模型本体与数据代理的**可观测性**：
+每个轨迹点存：`op_status`、`converged`、`residual_rms`、`rate_mismatch_rms`、`rate_mismatch_rel`、`slow_mismatch_rel`、`slow_speed`、`adiabatic_index`（或 `alpha_drift_index`）、`saturated`。
 
-| | 数据代理 阳性 | 数据代理 阴性 |
+- **归一化 mismatch（非裸 L2）**：`rate_mismatch_rms=sqrt(mean((rate_sim−z_star)²))`；`rate_mismatch_rel=rate_mismatch_rms/(median(|z_star|)+eps)`。
+- **slow_mismatch**：op 在某 slow-state 上解出；若 `q_I/g_K/h_G` 读数 ≠ sim state → `slow_mismatch_rel` 超标即不合格（只比 rate 不够）。
+- **adiabatic gate**：`slow_speed=‖d slow/dt‖`；`adiabatic_index=slow_speed·tau_fast/slow_scale`（`tau_fast=−1/α₁, α₁<0`）或 `alpha_drift_index=|dα₁/dt|/(α₁²+eps)`。太大 → 系统被 ramp 拖着跑，**不是**准静态小扰动恢复 → 标 `trajectory_not_quasistatic`。
+
+**qualified = converged ∧ ¬saturated ∧ residual_rms<res_tol ∧ rate_mismatch_rel<mismatch_tol ∧ slow_mismatch_rel<slow_mismatch_tol ∧ adiabatic_index<adiabatic_tol**。**CSD 趋势只读 qualified 点**；不合格点带 reason（`nonconverged/saturated/high_residual/rate_mismatch/slow_mismatch/not_quasistatic`），归入 `trajectory_not_linearizable`（≠ `hard_jump_no_CSD`：前者测不了、后者测得了且没慢化）。
+
+---
+
+## 4. hard_jump_no_CSD 严格判据（阻断 3）
+
+`hard_jump_no_CSD` **iff**：last `N_pre` qualified **low-branch** 点存在 ∧ `last_stable_alpha1 < −alpha_margin_hard` ∧ 无 α₁ 趋势达 `alpha_near_zero_tol` ∧ sim 在 `jump_window` 内进入 saturated/runaway ∧ **branch continuation 确认未跳过合格 low-branch α₁≈0 点**。否则（solver 直接跳 high-branch、或轨迹已离 op）→ `unresolved_operating_point`，**不判 hard jump**。
+
+---
+
+## 5. branch-aware operating point（阻断 4，需扩 solver）
+
+M3B 带饱和 + 高/低放电支 → 多平衡点。**需给 `solve_operating_point` 加 init 参数**（现无），每格/每轨迹点从 `{low_rate, previous_point, high_rate, random_small(opt)}` 求解 → 按 rate 距离聚类 → 标 `{low_branch, high_branch, saturated_branch, ambiguous_branch}`。每点存 `n_branches_found/branch_id/branch_rate_mean/branch_saturated/branch_alpha1/branch_residual/branch_selected_reason`。**CSD 主分析只读 `low_branch`/`approach_branch`**。low branch 消失而 high branch 稳定 = fold/hysteresis/hard-jump 关键信息。
+
+---
+
+## 6. 本征模 + mode class（阻断 5，需扩本征对层）
+
+- **complex conjugate pair 当一个实不变 2D 子空间**：`mode_loading_i=sqrt(|v_pair1_i|²+|v_pair2_i|²)`；mode class（`core_overlap`/`axis_score`/`globality`）算在**非负 loading / 不变子空间能量**上，**不用**本征向量正负号。
+- **谱隙**：`alpha_gap = alpha1 − alpha_next_distinct`；`alpha_next_distinct` **不能**是 conjugate pair 的另一成员（否则 gap 人工=0）。
+- **left eigenvector**（需新建）：`core_controllability = |ψ_m^T b_core|`（核扰动能否激发该模）。
+
+---
+
+## 7. non-normality 必报（阻断 6，进 T3a 验收）
+
+稳定系统（所有 Re(λ)<0）仍可因非正规性短时放大。**必报**：`numerical_abscissa = max eig((J+Jᵀ)/2)`；`henrici_departure` 或 `commutator_norm`；`G_T=‖exp(J·T)‖₂`，`G_max` over `T∈{10,25,50,100,250,500}ms`，`T_at_G_max`。verdict 加 secondary tag `transient_amplification_present`。四类机制解释：
+
+| α₁ | finite-time gain | 机制 |
 |---|---|---|
-| **模型 `α₁→0`** | 支持"可观测的全局模临界慢化" | 观测窗/SEEG 通道/代理不够敏感 **或** 模型-数据错位 → **必须**跑 virtual-SEEG proxy 对照才能分辨 |
-| **模型 无 `α₁→0`** | 真数据可能走另一机制 / 代理受 confound | 一致阴性 → 支持硬跳变 / 短预警窗 |
+| →0 | 高 | smooth CSD + 非正规放大 |
+| →0 | 低 | 经典 smooth CSD |
+| <0 | 高 | stable-but-amplifying / 非正规 approach-to-runaway |
+| <0 | 低 | hard jump / 无被动预警 |
 
-**virtual-SEEG proxy 可检测性对照（P1-4，T4 内小对照）**：在**同一条**模型轨迹上，把活动经虚拟 SEEG 读出层（M3B Round-1 已有）→ 跑**数据侧那套** AR1/VAR-λmax/branching estimator → 看模型的 `α₁→0`（若有）在 ~10ch 包络代理上**看不看得到**。这把"模型本体有 vs 数据代理测得到"分开，让 2×2 可判读。**这不是**之前 retract 的大 program，只是 T4 里的一个观测性对照。
-
----
-
-## 5. 红线 / honest ceilings（继承 M3B design §10）
-
-- 单个本征值 ≠ 发作；`α₁>0` 不证临床发作起始；runaway ≠ 真发作。
-- 谱相图=机制地图，SNN 行为才是表型检验（`α₁→0` 预测须 SNN spot-check 佐证）。
-- 有核 → 不声称平面波 `k` 模解释固定核事件。
-- CSD 在已知会失稳系统里出现 = 本体度量成立，**非**"证明模型预测发作"。
-- **不预设 α₁→0**（P1-1）：runaway 在 M3B 是**饱和**归类，`α₁` 可仍为负；三类 verdict 中性预注册。
+**对 Topic5 关键**：数据侧 VAR λmax 阴性**不排除**模型侧短时 gain 或 axis→nonaxis 瞬态放大。
 
 ---
 
-## 6. Tasks（lean；机器已存在，主要 wiring + 应用）
+## 8. 两 prereq + provenance（§2 + §5 硬化）
 
-- **T0**：本 spec + `config/topic4_criticality.yaml`（相图网格、mapping_id、`res_tol`/`mismatch_tol`、verdict 阈值）。
-- **T1（P1，两层 fail-closed）**：v2.2→interface export runner（复用 `build_handoff_from_sim`+`write_handoff_artifacts`）；TDD (a) fixture→`phase_map_trajectory`；(b) 真实 gate 不过→`refused/mechanism_candidate_only`+原因。
-- **T2（P2）**：normalized phase grid 重建（同 mapping_id）；`m3a_overlay_consumable=True`。
-- **T3**：谱相图（normalized）+ overlay（仅真实 gate 通过）+ 沿合格点 verdict/报告量/mode（**含 op 质量门 P1-2**）+ **h_G facet 或 `∂α₁/∂slow` 导数（P1-3）** + 控制（no-core/isotropic/shuffled-core）。**Figure**：`α₁=0` + mode-class 相图 + v2.2 轨迹 overlay + slow-var 敏感度。
-- **T4（gated on phase2）**：2×2 correspondence + **virtual-SEEG proxy 可检测性对照** + honest-ceiling 措辞。
-- **依赖**：T1‖T2 并行（不需 phase2）；T3 依赖 T1+T2；T4 依赖 T3 + phase2。
+- **P1 v2.2→interface export**：`build_handoff_from_sim(sim, events, dt_ms, mapping_id="m3a_v2_2_approach", gk_enabled=..., hG_enabled=...)`+`write_handoff_artifacts`；照 `run_a2_axisbreak_sweep.py`。**T1 两层 fail-closed**：fixture **必**过 `phase_map_trajectory`；真实 v2.2 不过 sign-cal/rate-matched/Gate A → `refused/mechanism_candidate_only`+原因，**不放水**。
+- **P2 normalized grid（合同 D1）**：轴 normalized `phase_x_core×phase_y_global∈[0,1]`，`axes_built_from_slow_to_rate_mapping_id`=P1 同 id。**若 `phase_x×phase_y` 不能唯一定 op（因 h_G 被投影）→ atlas 明确命名 `conditional_2d_atlas_at_phase_recovery=…`，不冒充完整 phase map。**
+- **provenance（必存）**：P1 `mapping_id/mapping_hash/source_branch/source_commit/sim_config_hash/events_hash/phase_coord_ranges_hash/gk_enabled/hG_enabled/slow_var_names/slow_var_units/rate_transform/axis_normalization_version`；P2 `axes_built_from_slow_to_rate_mapping_id/_hash/phase_{x,y,recovery}_definition/grid_extent/grid_resolution`。
 
 ---
 
-## 7. Self-Review
+## 9. slow-var 归因：partial + trajectory contribution（§4 两层）
 
-1. Placeholder：网格/`res_tol`/`mismatch_tol`/verdict 阈值在 T0 config 锁；mode-class 用 `classify_mode` metric 定义。**OK**。
-2. 一致性：verdict 三类（§0/§1）中性、grounded 在 `classify_mode` saturated⇒runaway；质量门（§1）用 `OperatingPoint` 现有字段 + rate_mismatch；`trajectory_not_linearizable`≠`hard_jump_no_CSD`；h_G 导数（§3）答 Q2；T1 fail-closed（§2）与 §4 2×2 一致。**OK**。
-3. Scope：单 plan（T0–T4，机器已存在，主要 wiring）；不含数据侧（topic5 拥有）、不含 reduced/Epileptor（retracted）。**OK**。
-4. Ambiguity：path=a；CSD 本体=α₁（非代理）；不预设 α₁→0；机制归因=slow-var 导数 + mode class；correspondence=2×2 分本体/代理。**OK**。
+- **A local partial sensitivity**：`∂α₁/∂q_I`、`∂α₁/∂g_K`、`∂α₁/∂h_G`，**central difference** `(α(x+δ)−α(x−δ))/(2δ)`，**两侧 op 都 qualified** 否则该导数 `invalid`。
+- **B trajectory contribution**：`contrib_x=(∂α₁/∂x)·(dx/ds)` → 答"哪个慢变量**实际**把系统推向 softening/hard-jump"（敏感度大但轨迹上变化小 ≠ 实际贡献大）。
+- **Figure**：`α₁(s)` + partial sensitivities(s) + trajectory contributions(s)。比单纯 facet 更直接（facet 作 sensitivity 补充）。
 
 ---
 
-## 8. 执行 gate / results / commit
+## 10. α₁=0 contour mask 纪律（3.3）
 
-- **gate**：T4 等 topic5 phase2。**T1–T3 不消费 phase2，可并行 prep**（模型侧，不写 correspondence 结论）。
-- **results 目录（rev1 定）**：新建 `results/topic4_criticality/`（approach-to-criticality 项目，非仅 M3B phase map）；normalized atlas provenance 记于此，需要时**引用**旧 `results/topic4_sef_hfo/m3b_spectral_phase_map/`，但 **T4 correspondence 不埋回 M3B 目录**。
-- **commit 策略（待用户，rev1 提出）**：spec/plan 现为 worktree untracked。建议**执行前把 spec + plan commit 到本分支**（显式路径），避免"以为记录了但没进 git"。待用户点头。
+相图三层 mask：`qualified_low_branch` / `saturated` / `nonconverged_or_invalid`。**`α₁=0` contour 只画在 `qualified_low_branch` 内**（否则 contour 穿 saturated/nonconverged 区，看似机制边界实为 solver artifact）。
+
+---
+
+## 11. SNN spot-check（§6，T3b，需 mode-shaped 扰动注入器）
+
+frozen-Jacobian 是否真解释原模型的扰动恢复——**审稿必问**。每条轨迹选 4 类点：`early_stable` / `closest_to_zero` / `last_qualified` / `post_jump_saturated`（仅描述，不做线性恢复）。每 qualified 点沿 `{leading, axis, nonaxis/global, random_orthogonal}` mode **扰动**（需新建 mode-shaped 注入器：按 mode loading 空间加权注入 δ），SNN 量 `observed_recovery_time/observed_peak_gain/return_to_op_success/nonlinear_escape_probability`。**验收**：`predicted_tau` vs `observed_recovery_time` 单调；`predicted_finite_time_gain` vs `observed_peak_gain` 正相关。
+
+---
+
+## 12. 控制（三类 + branch/ramp 两类，§9）
+
+已有 `no-core homogeneous` / `isotropic AR=1` / `shuffled core thresholds`；**加** `branch-control`（同格 low/high init 求解，验 α₁ 图非 solver-init artifact；出 low/high/selected atlas）+ `ramp-rate control`（slow/original/fast ramp：smooth_CSD 若本体，慢 ramp 更易见 α₁→0 + τ↑；原 ramp 太快则本体有 softening 但轨迹代理看不到 → 解释 `unresolved`/`not_quasistatic`）。
+
+---
+
+## 13. correspondence 3×3（阻断 §7，含 unresolved 单列）
+
+| 模型 verdict | 数据代理 阳性 | 数据代理 阴性 | 数据代理 不可判读 |
+|---|---|---|---|
+| **smooth_CSD** | 可观测 CSD 支持 | 需 virtual-SEEG 判可检测性 | 数据不足 |
+| **hard_jump_no_CSD** | 数据另机制 / 代理 confound | 一致支持短预警窗 / 硬跳 | 数据不足 |
+| **unresolved_operating_point** | 不做 correspondence | 不做 correspondence | 不做 correspondence |
+
+`unresolved` **不是**阴性、**不并入** "模型无 α₁→0"；它=不可测。
+
+---
+
+## 14. virtual-SEEG proxy（阻断 §8，复用 topic5 同一 estimator）
+
+**必须**调用 topic5 phase2 **同一** AR1/VAR-λmax/branching/avalanche code path，同 window/sampling/envelope/channel-count/contact-mask/surrogate/subject-level aggregation——**不允许**写"模型侧简化版"（否则分不清差异来自模型/观测层/estimator 实现）。三读出：`source_all_nodes_proxy` / `virtual_SEEG_all_available_contacts_proxy` / `virtual_SEEG_matched_10ch_proxy`（**matched_10ch 必须有**，Topic5 就是稀疏 SEEG：模型本体 α₁→0 但 10ch 看不到 → 数据阴性不能反驳模型）。**mode observability**：`mode_observability=‖G_seeg·v_mode‖/‖v_mode‖`（`axis_/global_/nonaxis_`），`G_seeg`=虚拟-SEEG gain matrix → 可明说"模型有 smooth CSD 但 leading mode 对当前 montage 低可观测，故数据代理阴性可解释"。
+*（依赖：import topic5 estimator code；T4 gated on phase2，届时该 code 应可得。）*
+
+---
+
+## 15. Topic5 接口预测向量（§13，喂数据侧下一轮 axial-weakening + non-axis-amplification）
+
+模型侧除 mode class 外，输出可直接喂 Topic5 的：`model_leading_mode_loading` / `model_axis_projection` / `model_nonaxis_projection` / `model_globality` / `model_axis_to_nonaxis_gain` / `model_nonaxis_gain` / `model_mode_observability_under_SEEG`。使 Topic5 用同一 `e_axis`/`e_nonaxis` 测"模型预测的可放大 mode 是否在真实 SEEG 的 non-axis criticality 指标里出现"（否则模型说 global、数据说 non-axis 难对齐）。
+
+---
+
+## 16. 红线（继承 M3B §10 + rev2）
+
+单本征值≠发作；`α₁>0` 不证临床发作；runaway≠真发作；谱相图=机制地图，SNN=表型检验；有核不声称平面波 k 模；CSD 在已知会失稳系统里出现=本体度量成立非"证明预测发作"；**不预设 α₁→0**（runaway 是饱和归类，α₁ 可仍为负）。
+
+---
+
+## 17. Tasks（rev2 结构；标注 wiring vs 扩展）
+
+- **T0** config + terminology lock（operator/units、verdict/quality-gate/branch/finite-time-gain/h_G-step/virtual-SEEG estimator 合同；§18 YAML）。
+- **T1**（wiring）v2.2→interface export；fixture 必过 `phase_map_trajectory`；真实 fail-closed；provenance hash。
+- **T2**（扩：normalized 轴）normalized phase grid，mapping_id/hash 对齐 T1；2D atlas + phase_recovery/h_G conditional 层；invalid/saturated/nonconverged masks。
+- **T3a**（扩：solver init + 本征层 + 非正规）branch-aware op（**加 solve_operating_point init**）+ qualified low-branch mask（§3）+ `α₁/gap/mode/finite-time-gain/numerical_abscissa`（§6/§7）+ verdict（§4）。**Figure**：`α₁=0`+mode-class 相图 + v2.2 overlay。
+- **T3b**（新建：mode-shaped 注入器）linear-response SNN spot-check（§11）。
+- **T3c**（新建：finite-diff）slow-var attribution partial + trajectory contribution（§9）。
+- **T3d** controls（no-core/isotropic/shuffled-core/branch-control/ramp-rate，§12）。
+- **T4**（gated on phase2）3×3 correspondence（§13）+ virtual-SEEG proxy 复用 topic5 estimator（§14）+ mode observability + Topic5 接口向量（§15）+ honest-ceiling 文本。
+- **milestone 建议**：T1+T2+T3a = 第一里程碑（先出 branch-aware 相图 + verdict），再 T3b/c/d；避免 all-of-T3 才有结果。**依赖**：T1‖(T3c/T3b 的纯函数部分)；T3a 依赖 T1+T2；T4 依赖 T3 + phase2。
+
+---
+
+## 18. T0 config（`config/topic4_criticality.yaml`）
+
+```yaml
+operator: {type: continuous_jacobian, dt_ms: null, alpha_units: per_ms, tau_units: ms}
+quality_gate:
+  residual_rms_tol: ...        # dt-independent max |rhs|
+  rate_mismatch_rel_tol: ...
+  slow_mismatch_rel_tol: ...
+  adiabatic_index_tol: ...
+  alpha_drift_index_tol: ...
+  min_qualified_points: ...
+  min_qualified_fraction: ...
+verdict:
+  alpha_near_zero_tol: ...
+  alpha_margin_hard: ...
+  jump_window_ms: ...
+  smooth_min_tau_growth_ratio: ...
+  smooth_min_alpha_spearman: ...
+  unresolved_if_branch_ambiguous: true
+branching:
+  solve_inits: [low_rate, previous_point, high_rate, random_small]
+  branch_cluster_rate_tol: ...
+  selected_branch: approach_low_branch
+mode:
+  complex_pair_policy: invariant_subspace_loading
+  axis_score_definition: ...
+  globality_definition: participation_ratio
+  core_overlap_definition: ...
+  spectral_gap_policy: next_distinct_real_part
+finite_time_gain: {horizons_ms: [10,25,50,100,250,500], norm: weighted_l2, report_numerical_abscissa: true}
+slow_sensitivity:
+  finite_difference: central
+  step_fraction_qI: ...
+  step_fraction_gK: ...
+  step_fraction_hG: ...
+  require_both_sides_qualified: true
+virtual_seeg:
+  use_topic5_estimator_code: true
+  channel_sets: [source_all_nodes, virtual_all_contacts, matched_10ch]
+  same_windows_as_topic5: true
+  same_surrogates_as_topic5: true
+```
+
+---
+
+## 19. 执行 gate / results / commit
+
+- **gate**：T4 等 topic5 phase2；T1–T3d 并行 prep（模型侧、不写 correspondence 结论）。
+- **results**：新 `results/topic4_criticality/`（引用旧 `results/topic4_sef_hfo/m3b_spectral_phase_map/` 作 provenance，T4 correspondence 不埋回 M3B 目录）。
+- **commit**：rev1 已 commit（`6c376d0`）；本 rev2 随即 commit；执行只认 rev2。
+
+---
+
+## 20. Self-Review
+
+1. Placeholder：所有 tol/阈值在 §18 config 锁；`...` 是 config 待标定值非遗漏。**OK**。
+2. 一致性：operator 单位（§2）confirmed continuous；quality gate（§3）用现有 residual/saturated/converged + 新 rate/slow/adiabatic；hard_jump（§4）需 branch continuation（§5）；complex/left（§6）+ 非正规（§7）标注需扩；correspondence 3×3（§13）unresolved 单列；virtual-SEEG（§14）复用 topic5；verdict 三类中性（§0/§1）grounded classify_mode。**OK**。
+3. Scope：单 plan T0–T4（wiring + M3B 模块定点扩展，已在"代码现实"标清）；不含数据侧（topic5 拥有）、不含 reduced/Epileptor（retracted）。**OK**。
+4. Ambiguity：α₁=continuous per-ms；不预设 α₁→0；branch-aware low-branch only；complex-pair invariant-subspace loading；correspondence 分本体/代理/不可测。**OK**。
