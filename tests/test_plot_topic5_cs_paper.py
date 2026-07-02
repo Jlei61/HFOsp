@@ -18,7 +18,7 @@ if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 from scripts.plot_topic5_cs_paper import (
-    REPRESENTATIVE_SUBJECT, _load_subject_ctx, fig1, fig2, fig3, save_fig,
+    REPRESENTATIVE_SUBJECT, _load_subject_ctx, fig1, fig2, fig2_sup, fig3, save_fig,
 )
 
 ROOT = "/home/honglab/leijiaxin/HFOsp/results"
@@ -62,23 +62,33 @@ def test_fig1_renders(tmp_path, ctx):
     assert out.exists() and out.stat().st_size > 5000
 
 
-def test_fig2_renders(tmp_path, ctx, cohort_summary):
-    fig = fig2(ctx, cohort_summary)
+def test_fig2_renders(tmp_path, ctx):
+    # single rankdisp panel (+ twin axis for the ictal-energy track)
+    fig = fig2(ctx)
     axes = fig.get_axes()
-    assert len(axes) >= 3   # axL, axR, axL2 (twin)
-    axL, axR = axes[0], axes[1]
+    assert len(axes) >= 2   # axL + axL2 (twin)
+    axL = axes[0]
     assert axL.get_title() and axL.get_xlabel() and axL.get_ylabel()
     assert axL.get_legend() is not None
-    assert axR.get_title() and axR.get_xlabel()
     out = save_fig(fig, tmp_path / "fig2_rank_comparison.png")
+    assert out.exists() and out.stat().st_size > 5000
+
+
+def test_fig2_sup_renders(tmp_path, cohort_summary):
+    fig = fig2_sup(cohort_summary, REPRESENTATIVE_SUBJECT)
+    ax = fig.get_axes()[0]
+    assert ax.get_title() and ax.get_xlabel()
+    assert ax.get_legend() is not None
+    out = save_fig(fig, tmp_path / "fig2_sup_maxab_vs_null.png")
     assert out.exists() and out.stat().st_size > 5000
 
 
 def test_fig3_renders(tmp_path, ctx, cohort_summary, r2b_summary):
     fig = fig3(ctx, cohort_summary, r2b_summary)
+    assert fig._suptitle is not None and fig._suptitle.get_text()
     axes = fig.get_axes()
-    assert len(axes) >= 4
-    for ax in axes:
-        assert ax.get_title() != "" or ax.images or ax.collections
+    assert len(axes) >= 5   # 2 maps + distance + 2 equivalence scatters (+ colorbar)
+    with_content = [ax for ax in axes if ax.get_title() or ax.images or ax.collections]
+    assert len(with_content) >= 5
     out = save_fig(fig, tmp_path / "fig3_vs_field.png")
     assert out.exists() and out.stat().st_size > 5000

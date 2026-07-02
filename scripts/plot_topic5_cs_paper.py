@@ -59,10 +59,13 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from src.plot_style import DPI_PUB, FS_LABEL, FS_TICK, FS_TITLE, style_panel
-from src.topic5_contact_similarity import kernel_smooth_at_contacts
+from src.topic5_contact_similarity import kernel_smooth_at_contacts, median_nn_spacing
 from src.topic5_axis_alignment import make_field_record
 from src.propagation_contact_plane_readout import (
     R_smooth_rank, S_THRESH, X_LO, X_HI, Y_EXT,
+)
+from src.seeg_coord_loader import (
+    load_subject_coords, assert_coord_result_is_mm_for_main_analysis,
 )
 from scripts.run_topic5_contact_similarity import _ctx, DEF_ROOT, DEF_OUT, SESOI
 
@@ -185,9 +188,10 @@ def fig1(ctx: dict) -> plt.Figure:
 
 # --------------------------------------------------------------------------- Fig 2: rank comparison
 
-def fig2(ctx: dict, cohort_summary: dict) -> plt.Figure:
-    """LEFT: rankdisp-style direct contact-rank comparison for the representative subject.
-    RIGHT: cohort within-shaft null context (null-比-null, mode a)."""
+def fig2(ctx: dict) -> plt.Figure:
+    """Rankdisp-style direct contact-rank comparison for the representative subject:
+    spatially-weighted interictal rank (template A red / B blue) vs ictal early-
+    broadband-energy rank, contacts sorted source→sink along template A."""
     pts = ctx["source_pts"]
     sup = np.asarray(ctx["support"], float)
     sigma = float(ctx["sigma"])
@@ -218,12 +222,7 @@ def fig2(ctx: dict, cohort_summary: dict) -> plt.Figure:
     cands = [(lab, r) for lab, r in (("A", _corr(w_a)), ("B", _corr(w_b))) if np.isfinite(r)]
     max_lab, max_r = max(cands, key=lambda t: abs(t[1])) if cands else ("n/a", float("nan"))
 
-    fig = plt.figure(figsize=(17.0, 6.8))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.35, 1.0], wspace=0.55)
-    axL = fig.add_subplot(gs[0, 0])
-    axR = fig.add_subplot(gs[0, 1])
-
-    # ---- LEFT: representative-subject rank comparison ----
+    fig, axL = plt.subplots(figsize=(8.8, 6.6))
     x = np.arange(len(order))
     axL.plot(x, w_a[order], "-o", color=COL_TEMPLATE_A, ms=6, lw=1.8, zorder=3,
              label="template A — spatially-weighted interictal rank")
@@ -249,14 +248,18 @@ def fig2(ctx: dict, cohort_summary: dict) -> plt.Figure:
     h1, l1 = axL.get_legend_handles_labels()
     h2, l2 = axL2.get_legend_handles_labels()
     axL.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=FS_TICK - 4, frameon=False)
-    axL.set_title(
-        f"{ctx['subject_id']} — direct contact-rank comparison\n"
-        f"maxAB match: template {max_lab}, |r|={abs(max_r):.2f} "
-        "(illustrative same-plane correlation, single subject)",
-        fontsize=FS_LABEL - 1,
-    )
+    axL.set_title(f"{ctx['subject_id']} — 间期 rank(模板 A 红/B 蓝) vs 发作能量 rank"
+                  f"  ·  maxAB=模板{max_lab} r={max_r:+.2f}(符号无关, 示意)",
+                  fontsize=FS_LABEL - 1)
 
-    # ---- RIGHT: cohort within-shaft null context ----
+    fig.tight_layout()
+    return fig
+
+
+def fig2_sup(cohort_summary: dict, star_subject: str) -> plt.Figure:
+    """Cohort per-subject maxAB (R2 spatially-weighted obs) vs its within-shaft
+    shuffle null p95 (null-比-null): spatial weighting raises the observed
+    similarity but also raises the null, so only a minority clear it."""
     rows = []
     for s in cohort_summary.get("per_subject", []):
         if s.get("status") != "ok":
@@ -271,24 +274,21 @@ def fig2(ctx: dict, cohort_summary: dict) -> plt.Figure:
     rows.sort(key=lambda r: r["r2_obs"])
     n = len(rows)
     y = np.arange(n)
-    r2_obs = [r["r2_obs"] for r in rows]
-    r1_obs = [r["r1_obs"] for r in rows]
 
+    fig, axR = plt.subplots(figsize=(8.4, 6.8))
     for yi, r in zip(y, rows):
         axR.plot([r["r2_p95"], r["r2_p95"]], [yi - 0.32, yi + 0.32], color="0.35", lw=2.2, zorder=2)
-    axR.scatter(r2_obs, y, s=70, color="#fdae61", edgecolors="black", linewidths=0.6, zorder=3,
-               label="R2 obs (spatially-weighted, in-plane)")
-    axR.scatter(r1_obs, y, s=46, facecolors="none", edgecolors="0.55", linewidths=1.2, zorder=1,
-               label="R1 obs (raw, no geometry)")
+    axR.scatter([r["r2_obs"] for r in rows], y, s=70, color="#fdae61", edgecolors="black",
+                linewidths=0.6, zorder=3, label="R2 obs (spatially-weighted, in-plane)")
+    axR.scatter([r["r1_obs"] for r in rows], y, s=46, facecolors="none", edgecolors="0.55",
+                linewidths=1.2, zorder=1, label="R1 obs (raw, no geometry)")
     axR.plot([], [], color="0.35", lw=2.2, label="within-shaft-shuffle null p95")
     for yi, r in zip(y, rows):
-        if r["subject_id"] == ctx["subject_id"]:
+        if r["subject_id"] == star_subject:
             axR.scatter([r["r2_obs"]], [yi], s=190, facecolors="none", edgecolors="black",
-                       linewidths=1.8, zorder=4, marker="*",
-                       label=f"{ctx['subject_id']} (left panel)")
-
+                        linewidths=1.8, zorder=4, marker="*", label=star_subject)
     axR.set_yticks(y)
-    ylabels = axR.set_yticklabels([r["subject_id"] for r in rows], fontsize=FS_TICK - 4)
+    ylabels = axR.set_yticklabels([r["subject_id"] for r in rows], fontsize=FS_TICK - 3)
     for lbl, r in zip(ylabels, rows):
         if r["passed"]:
             lbl.set_fontweight("bold")
@@ -297,20 +297,17 @@ def fig2(ctx: dict, cohort_summary: dict) -> plt.Figure:
     n_pass_r1 = cohort_summary.get("n_pass_R1_within_shaft")
     n_pass_r2 = cohort_summary.get("n_pass_R2_within_shaft")
     axR.set_title(
-        f"cohort within-shaft null context (n={n_ok})\n"
+        f"per-subject maxAB vs within-shaft null (n={n_ok})\n"
         f"clears null: R1={n_pass_r1}/{n_ok}  R2={n_pass_r2}/{n_ok}  "
         "(bold label = R2 clears null)",
         fontsize=FS_LABEL - 2,
     )
     handles, labels = axR.get_legend_handles_labels()
     seen = dict(zip(labels, handles))
-    axR.legend(seen.values(), seen.keys(), loc="lower right", fontsize=FS_TICK - 5, frameon=False)
+    axR.legend(seen.values(), seen.keys(), loc="lower right", fontsize=FS_TICK - 4,
+               frameon=True, facecolor="white", framealpha=0.9, edgecolor="0.8")
     style_panel(axR)
-
-    # NOTE: fig.tight_layout() is not compatible with twinx() axes (axL2) and
-    # visibly collapses the gap between axL2's right-side ylabel and axR's
-    # y-tick subject labels; rely on the gridspec wspace + explicit margins.
-    fig.subplots_adjust(left=0.06, right=0.965, top=0.84, bottom=0.28, wspace=0.42)
+    fig.tight_layout()
     return fig
 
 
@@ -340,11 +337,56 @@ def _scatter_vs_diag(ax, xv, yv, color, xlabel, ylabel, title, annotation=None):
     style_panel(ax)
 
 
+def _dist_2d_vs_3d_panel(ax, ctx: dict) -> None:
+    """σ-normalized inter-contact distance scatter: 2D-plane vs native-3D (mm).
+    Each distance is divided by its own space's median nearest-neighbor spacing
+    (σ_xy for the normalized plane, σ_3D for mm) — the same bandwidth the Gaussian
+    kernel weights on — so the y=x diagonal is meaningful. Points hugging the
+    diagonal ⇒ the 2D plane preserves the relative neighbor structure the kernel
+    uses ⇒ the 2D-plane and native-3D weightings are ~identical ⇒ why R2b ≈ R2_nm.
+    Same common-subset + mm hard gate as scripts/augment_topic5_r2b_3d.py."""
+    from itertools import combinations
+    ds, subj = ctx["subject_id"].split("_", 1)
+    cr = load_subject_coords(ds, subj, ctx["names_m"], allow_voxel_fallback=False)
+    assert_coord_result_is_mm_for_main_analysis(cr)
+    coords_all = np.asarray(cr.coords_array_in_requested_order, float)
+    mask = np.asarray(cr.mapped_mask_in_requested_order, bool) & np.isfinite(coords_all).all(axis=1)
+    idx = np.where(mask)[0]
+    c3 = coords_all[idx]
+    p2 = np.asarray(ctx["source_pts"], float)[idx]
+    sigma_xy = float(ctx["sigma"])
+    sigma_3d = float(median_nn_spacing(c3))
+
+    ij = list(combinations(range(len(idx)), 2))
+    d2 = np.array([np.linalg.norm(p2[i] - p2[j]) for i, j in ij]) / sigma_xy
+    d3 = np.array([np.linalg.norm(c3[i] - c3[j]) for i, j in ij]) / sigma_3d
+    r = float(pearsonr(d2, d3)[0])
+
+    hi = float(max(d2.max(), d3.max())) * 1.05
+    ax.plot([0, hi], [0, hi], color="0.4", lw=1.4, ls="--", zorder=1, label="y = x")
+    ax.scatter(d2, d3, s=26, color="#4a7db5", edgecolors="black", linewidths=0.3,
+               alpha=0.75, zorder=3)
+    ax.set_xlim(0, hi)
+    ax.set_ylim(0, hi)
+    ax.set_aspect("equal")
+    ax.set_xlabel("2D-plane 触点间距离 / σ_xy", fontsize=FS_TICK - 2)
+    ax.set_ylabel("native-3D 触点间距离 / σ_3D", fontsize=FS_TICK - 2)
+    ax.set_title(f"{ctx['subject_id']}：触点间距离 2D vs 3D\n（各按自身 σ 归一,{len(idx)} 触点）",
+                 fontsize=FS_TICK - 1, pad=10)
+    ax.text(0.04, 0.97, f"Pearson r = {r:.3f}\n触点近共面 → 平面近乎无损保留三维几何",
+            transform=ax.transAxes, fontsize=FS_TICK - 4, ha="left", va="top",
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="0.80",
+                      linewidth=0.5, alpha=0.92))
+    ax.legend(fontsize=FS_TICK - 4, frameon=False, loc="lower right")
+    style_panel(ax)
+
+
 def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
-    """LEFT: same weighted-interictal-rank quantity at contacts vs the gridded field
-    for the representative subject (visually the same shape). RIGHT: cohort R2-vs-R3
-    (grid step: no distinguishable gain, CI wider than ±SESOI — not a strict-zero
-    claim) and R2b-vs-R2_nm (native-3D: equivalence PASSES within ±SESOI)."""
+    """(a) same weighted-interictal-rank quantity at contacts vs the gridded field
+    (same shape); (b) 2D-plane vs native-3D σ-normalized inter-contact distances
+    (why 2D ≈ 3D); (c) cohort R2-vs-R3 (grid step: no distinguishable gain, CI wider
+    than ±SESOI — not strict-zero) and R2b-vs-R2_nm (native-3D: equivalence PASSES
+    within ±SESOI)."""
     pts = ctx["source_pts"]
     sup = np.asarray(ctx["support"], float)
     sigma = float(ctx["sigma"])
@@ -355,50 +397,48 @@ def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
     T_show = np.where(field["mask"], field["T"], np.nan)
     xlim, ylim = _plane_bounds(pts)
 
-    fig = plt.figure(figsize=(17.5, 7.4))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.15, 1.0], wspace=0.32,
-                         left=0.02, right=0.98, top=0.82, bottom=0.10)
-    gsL = gs[0, 0].subgridspec(1, 2, wspace=0.08)
-    axL1 = fig.add_subplot(gsL[0, 0])
-    axL2 = fig.add_subplot(gsL[0, 1])
-    gsR = gs[0, 1].subgridspec(2, 1, hspace=0.95)
-    axR1 = fig.add_subplot(gsR[0, 0])
-    axR2 = fig.add_subplot(gsR[1, 0])
+    fig = plt.figure(figsize=(16.5, 9.2))
+    outer = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.05], hspace=0.42,
+                             left=0.045, right=0.925, top=0.90, bottom=0.075)
+    gsT = outer[0].subgridspec(1, 2, wspace=0.14)
+    axMap1 = fig.add_subplot(gsT[0, 0])
+    axMap2 = fig.add_subplot(gsT[0, 1])
+    gsB = outer[1].subgridspec(1, 3, wspace=0.42)
+    axDist = fig.add_subplot(gsB[0, 0])
+    axR1 = fig.add_subplot(gsB[0, 1])
+    axR2 = fig.add_subplot(gsB[0, 2])
 
-    # ---- LEFT: contact-weighted vs gridded field, same quantity ----
-    sc = axL1.scatter(pts[:, 0], pts[:, 1], c=w_contacts, cmap="viridis", vmin=0, vmax=1, s=170,
-                      edgecolors="black", linewidths=1.0, zorder=3)
-    axL1.set_title("不铺网格：触点上的空间加权",
-                   fontsize=FS_LABEL - 2)
-
+    # (a) TOP: contact-weighted map vs gridded field. Same xlim/ylim + aspect='auto'
+    # so both fill their cells identically — the comparison is contact-scatter vs
+    # grid-field of the SAME subject (both stretched the same), so "same shape" reads
+    # directly without the elongated-plane whitespace that equal-aspect would leave.
+    axMap1.scatter(pts[:, 0], pts[:, 1], c=w_contacts, cmap="viridis", vmin=0, vmax=1, s=170,
+                   edgecolors="black", linewidths=1.0, zorder=3)
+    axMap1.set_title(f"① 不铺网格：触点上的空间加权（{ctx['subject_id']}）", fontsize=FS_LABEL - 2)
     cmap_field = plt.cm.viridis.copy()
     cmap_field.set_bad(color="white")
-    im2 = axL2.imshow(T_show, origin="lower", extent=(X_LO, X_HI, -Y_EXT, Y_EXT), aspect="equal",
-               cmap=cmap_field, vmin=0, vmax=1)
-    axL2.scatter(pts[:, 0], pts[:, 1], c=w_contacts, cmap="viridis", vmin=0, vmax=1, s=45,
-                edgecolors="black", linewidths=0.5, zorder=3)
-    axL2.set_title("铺网格：81×81 场（同一量）",
-                   fontsize=FS_LABEL - 2)
-
-    for ax in (axL1, axL2):
+    im2 = axMap2.imshow(T_show, origin="lower", extent=(X_LO, X_HI, -Y_EXT, Y_EXT), aspect="auto",
+                        cmap=cmap_field, vmin=0, vmax=1)
+    axMap2.scatter(pts[:, 0], pts[:, 1], c=w_contacts, cmap="viridis", vmin=0, vmax=1, s=55,
+                   edgecolors="black", linewidths=0.6, zorder=3)
+    axMap2.set_title("② 铺网格：81×81 场（同一量）", fontsize=FS_LABEL - 2)
+    for ax in (axMap1, axMap2):
         ax.set_xlim(*xlim)
         ax.set_ylim(*ylim)
         ax.set_xticks([])
         ax.set_yticks([])
         for spine in ax.spines.values():
             spine.set_visible(False)
+    # shared colorbar to the right of the map pair; scatter and imshow share
+    # vmin=0/vmax=1/cmap so im2 reads the common scale.
+    cb = fig.colorbar(im2, ax=[axMap1, axMap2], location="right", shrink=0.78,
+                      pad=0.015, aspect=26)
+    cb.set_label("interictal rank (0=source → 1=sink)", fontsize=FS_LABEL - 4)
 
-    # colorbar attaches directly to axL2's gridded-field imshow (right edge), not
-    # floating between the left and right panel groups; scatter (sc) and imshow
-    # (im2) share vmin=0/vmax=1/cmap so either mappable reads the same scale.
-    pos2 = axL2.get_position()
-    cbar_ax = fig.add_axes((pos2.x1 + 0.008, pos2.y0, 0.011, pos2.height))
-    cb = fig.colorbar(im2, cax=cbar_ax)
-    cb.set_label("interictal rank\n(0=early/source → 1=late)", fontsize=FS_LABEL - 4)
-    fig.text(0.235, 0.94, f"{ctx['subject_id']} — same quantity, contact vs grid",
-             ha="center", fontsize=FS_LABEL, fontweight="bold")
+    # (b) 2D-plane vs native-3D σ-normalized inter-contact distances
+    _dist_2d_vs_3d_panel(axDist, ctx)
 
-    # ---- RIGHT top: cohort R2 vs R3 ----
+    # (c) cohort equivalence: R2 vs R3 (grid) and R2b vs R2_nm (native-3D)
     r2v, r3v = [], []
     for s in cohort_summary.get("per_subject", []):
         if s.get("status") != "ok":
@@ -415,13 +455,11 @@ def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
     ann1 = (f"grid_delta median={gd_med:+.3f}\nCI=[{gd_ci[0]:+.3f},{gd_ci[1]:+.3f}]  n={len(r2v)}"
             if gd_med is not None else "grid_delta: n/a")
     _scatter_vs_diag(axR1, r2v, r3v, "#d73027",
-                     "R2 obs (in-plane smoothed contact similarity)",
-                     "R3 obs (gridded field similarity)",
-                     "grid vs contact rank (R2 vs R3):\nno distinguishable gain "
-                     "(CI wider than ±SESOI, not zero)", ann1)
+                     "R2 obs (in-plane smoothed contact)",
+                     "R3 obs (gridded field)",
+                     "网格 vs 触点 (R2 vs R3)：\n未见可分辨增益 (CI 宽于 ±SESOI, 非零)", ann1)
     axR1.legend(fontsize=FS_TICK - 5, frameon=False, loc="lower right")
 
-    # ---- RIGHT bottom: cohort R2b vs R2_nm ----
     nmv, bv = [], []
     for s in r2b_summary.get("per_subject", []):
         if s.get("r2b_status") != "ok":
@@ -434,15 +472,15 @@ def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
     nmv, bv = np.array(nmv), np.array(bv)
     rb_med = r2b_summary.get("r2b_minus_r2nm_median")
     rb_ci = r2b_summary.get("r2b_minus_r2nm_ci")
-    ann2 = (f"r2b_minus_r2nm median={rb_med:+.4f}\nCI=[{rb_ci[0]:+.3f},{rb_ci[1]:+.3f}]  n={len(nmv)}"
+    ann2 = (f"r2b−r2nm median={rb_med:+.4f}\nCI=[{rb_ci[0]:+.3f},{rb_ci[1]:+.3f}]  n={len(nmv)}"
             if rb_med is not None else "r2b_minus_r2nm: n/a")
     _scatter_vs_diag(axR2, nmv, bv, "#1F4E9C",
-                     "R2_nm obs (2D-plane, no mirror)", "R2b obs (native-3D mm, no mirror)",
-                     "native-3D vs 2D-plane (R2_nm vs R2b):\n"
-                     "equivalence PASSES (CI within ±SESOI)", ann2)
+                     "R2_nm obs (2D-plane)", "R2b obs (native-3D mm)",
+                     "native-3D vs 2D-plane (R2_nm vs R2b)：\n等价通过 (CI 落在 ±SESOI 内)", ann2)
 
-    fig.suptitle("触点加权 ≈ 铺网格场的同一形状；native-3D 等价通过（无可分辨增益），"
-                 "网格未见可分辨增益（CI 宽于 SESOI，非零）", fontsize=FS_TITLE - 1, y=1.02)
+    fig.suptitle("上：触点加权 ≈ 铺网格场（同一形状）　·　"
+                 "下：2D 平面保留三维邻居结构 → 网格与 native-3D 均无可分辨增益 / 等价通过",
+                 fontsize=FS_TITLE - 2, y=0.975)
     return fig
 
 
@@ -467,9 +505,10 @@ def main():
     r2b_summary = json.load(open(out_dir / f"r2b_summary_{args.activation}.json"))
 
     p1 = save_fig(fig1(ctx), fig_dir / "fig1_spatial_weighting_schematic.png")
-    p2 = save_fig(fig2(ctx, cohort_summary), fig_dir / "fig2_rank_comparison.png")
+    p2 = save_fig(fig2(ctx), fig_dir / "fig2_rank_comparison.png")
+    p2s = save_fig(fig2_sup(cohort_summary, args.subject), fig_dir / "fig2_sup_maxab_vs_null.png")
     p3 = save_fig(fig3(ctx, cohort_summary, r2b_summary), fig_dir / "fig3_vs_field.png")
-    for p in (p1, p2, p3):
+    for p in (p1, p2, p2s, p3):
         print(f"wrote {p}")
 
 
