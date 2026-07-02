@@ -441,7 +441,9 @@ def _branch_field_distance(a_rE: np.ndarray, b_rE: np.ndarray, floor: float) -> 
     return rms / scale
 
 
-def solve_branches(grid, kernels, exc, inh, cfg: Dict[str, Any], *, prev=None, seed_key=None) -> list:
+def solve_branches(grid, kernels, exc, inh, cfg: Dict[str, Any], *, prev=None, seed_key=None,
+                   gK_field=None, hG_scalar: float = 0.0, eta_K: float = 1.0,
+                   eta_G: float = 1.0) -> list:
     """Branch-aware operating-point protocol (spec §5, plan T3a-2).
 
     Solves ``cfg["branching"]["solve_inits"]`` from several initial conditions via
@@ -455,6 +457,14 @@ def solve_branches(grid, kernels, exc, inh, cfg: Dict[str, Any], *, prev=None, s
     ``prev``: an ``OperatingPoint`` (e.g. the previous trajectory point's selected low branch)
     enables the ``previous_point`` warm start; when ``prev is None`` that ``solve_inits`` entry is
     skipped (nothing to warm-start from -- e.g. the first point of a trajectory).
+
+    ``gK_field``/``hG_scalar``/``eta_K``/``eta_G`` are the T2.5 ``slow_to_ratefield`` shift, forwarded
+    to EVERY per-init ``solve_operating_point`` so the branch protocol solves at the SAME shifted
+    operating point the trajectory eval reads out (T3a-5b: g_K's per-cell field / h_G's global scalar
+    become load-bearing here -- the T2.5 review flagged this as the point where a heterogeneous g_K
+    field is exercised). The Jacobian/eigen read-out downstream needs no change: ``build_jacobian_dense``
+    reads the gains off the already-shifted op. Defaults (``gK_field=None``, ``hG_scalar=0.0``) are
+    additive-zero -> byte-parity with every existing caller.
 
     ``seed_key`` seeds ``random_small`` DETERMINISTICALLY via ``np.random.default_rng(seed_key)``
     directly. numpy's ``SeedSequence`` hashes an int/tuple seed STABLY across processes; Python's
@@ -487,7 +497,9 @@ def solve_branches(grid, kernels, exc, inh, cfg: Dict[str, Any], *, prev=None, s
                      "rI": rng.uniform(0.0, _BRANCH_RANDOM_SMALL_MAX_KHZ, size=shape)}
         else:
             raise ValueError(f"unknown branching.solve_inits entry {name!r}")
-        solved.append((name, solve_operating_point(grid, kernels, exc, inh, init=init)))
+        solved.append((name, solve_operating_point(
+            grid, kernels, exc, inh, init=init,
+            gK_field=gK_field, hG_scalar=hG_scalar, eta_K=eta_K, eta_G=eta_G)))
 
     # --- #9 cluster by FIELD distance: greedy, compare each new point against each existing
     # cluster's first (deterministic, solve_inits-order) member. ---
@@ -760,3 +772,404 @@ def classify_trajectory(points, cfg) -> dict:
         "instability_growth_time_ms": instability_growth_time_ms,
         "threshold_sensitivity": threshold_sensitivity,
     }
+
+
+# --------------------------------------------------------------------------- #
+# Real 3-D trajectory evaluation (Task 3a-5b) -- the ACTUAL verdict SOURCE.      #
+# --------------------------------------------------------------------------- #
+# spec §2/§3/§4/§5: run the frozen-Jacobian read-out on the ACTUAL M3A-v2.2 slow
+# trajectory (q_I(t) disinhibition + h_G(t) global recovery; g_K(t) fatigue only
+# when the sim coupled it), NOT by sampling the 2-D atlas. For each SUBSAMPLED
+# landmark: build the reduced operating point at that slow-state, run the branch
+# protocol (warm-started), read the leading eigenvalue + eigen-metrics on the LOW
+# branch, gate the point (spec §3), and finally classify_trajectory the sequence.
+# The verdict carries verdict_source="actual_trajectory" (Hard-QC #1: NOT the atlas).
+
+_N_TRAJECTORY_LANDMARKS: int = 48        # subsample of the ~10^4-step SNN trace (PERF, T2 review)
+_CRIT_OP_GRID_N: int = 6                 # modest spatial grid for the op-solves (atlas-family)
+_CRIT_CORE_RADIUS: float = 0.9           # single-core mask radius (atlas-consistent)
+
+
+def _crit_op_context(cfg: Dict[str, Any]):
+    """The reduced frozen-Jacobian op family shared by the trajectory eval AND the branch-
+    continuation check, so both re-solve on a byte-identical (grid, kernels, core, b_core).
+    mu_core=0.0 (atlas-consistent, build_conditional_atlas): the approach is driven by q_I
+    disinhibition + h_G/g_K shifts, NOT by a core excitability bump."""
+    import src.topic4_m3b_spectral_phase as spm
+    grid = spm.Grid(n=_CRIT_OP_GRID_N, L=float(cfg["atlas"]["grid_L"]))
+    kernels = spm.build_kernels(grid)
+    core = spm.make_core_mask(grid, kind="single", radius=_CRIT_CORE_RADIUS)
+    b_core = spm.core_perturbation_vector(grid, core)
+    return grid, kernels, core, b_core
+
+
+def _slow_inputs_at(sim, idx: int, mapping: Dict[str, Any], *, inject_gK: bool, inject_hG: bool):
+    """Slow-state -> reduced-op knobs at trace index ``idx``.
+
+    q_global = sheet-mean q_I; q_core = (min q_I / mean q_I) -- the CORE-vs-sheet gradient expressed
+    as build_inhibition_field's core MULTIPLIER (q[core] = q_global*q_core). Both are clamped to the
+    mapping's calibrated input domain [input_min, input_max] (the only use of ``mapping`` here -- the
+    raw-value path needs no forward transform). g_K/h_G are injected only when the sim dynamically
+    coupled them (use_gK is False by default in the v2.2 config, so g_K's fatigue trace accumulates
+    but did NOT feed back -> not injected, keeping the reduced op faithful to the actual trajectory)."""
+    import numpy as np
+    dom = mapping["coordinates"]["phase_y_global"]["transform"]
+    qlo, qhi = float(dom["input_min"]), float(dom["input_max"])
+    q_mean = float(sim["trace_qI_mean"][idx])
+    q_min = float(sim["trace_qI_min"][idx])
+    q_global = float(np.clip(q_mean, qlo, qhi))
+    q_core = float(np.clip(q_min / max(q_mean, 1e-9), qlo, qhi))
+    gK_value = float(np.clip(float(sim["trace_gK_axial"][idx]), 0.0, 1.0)) if inject_gK else None
+    hG_scalar = float(np.clip(float(sim["trace_hG"][idx]), 0.0, 1.0)) if inject_hG else 0.0
+    return {"q_global": q_global, "q_core": q_core, "gK_value": gK_value, "hG_scalar": hG_scalar}
+
+
+def _fields_from_slow(grid, core, slow_inputs: Dict[str, Any], cfg: Dict[str, Any]):
+    """(exc, inh, gK_field, hG_scalar, eta_K, eta_G) for solve_branches from a slow-input dict."""
+    import numpy as np
+    import src.topic4_m3b_spectral_phase as spm
+    exc = spm.build_excitability_field(grid, core, mu_core=0.0)
+    inh = spm.build_inhibition_field(grid, core, q_global=float(slow_inputs["q_global"]),
+                                     q_core=float(slow_inputs["q_core"]))
+    stf = cfg["slow_to_ratefield"]
+    eta_K = float(stf["g_K"]["eta_K"])
+    eta_G = float(stf["h_G"]["eta_G"])
+    gk = slow_inputs.get("gK_value")
+    gK_field = np.full((grid.n, grid.n), float(gk)) if gk is not None else None
+    hG_scalar = float(slow_inputs.get("hG_scalar") or 0.0)
+    return exc, inh, gK_field, hG_scalar, eta_K, eta_G
+
+
+def _low_branch_at(grid, kernels, core, slow_inputs, cfg, *, prev, seed_key):
+    """solve_branches at one slow-state -> (low_Branch or None, branches, sat_any, dominant_reason).
+
+    ``dominant_reason`` labels a point with NO low branch: saturated_branch if any branch saturated
+    (a runaway/fold -- so classify_trajectory can see the jump), else ambiguous_branch if any branch
+    is ambiguous (triggers the #20 gate), else the highest-rate branch's own reason."""
+    exc, inh, gK_field, hG_scalar, eta_K, eta_G = _fields_from_slow(grid, core, slow_inputs, cfg)
+    branches = solve_branches(grid, kernels, exc, inh, cfg, prev=prev, seed_key=seed_key,
+                              gK_field=gK_field, hG_scalar=hG_scalar, eta_K=eta_K, eta_G=eta_G)
+    low = next((b for b in branches if b.branch_selected_reason == "low_branch"), None)
+    sat_any = any(b.op.saturated for b in branches)
+    if sat_any:
+        dominant = "saturated_branch"
+    elif any(b.branch_selected_reason == "ambiguous_branch" for b in branches):
+        dominant = "ambiguous_branch"
+    elif branches:
+        dominant = max(branches, key=lambda b: b.branch_rate_mean).branch_selected_reason
+    else:
+        dominant = "saturated_branch"
+    return low, branches, sat_any, dominant
+
+
+def _neighbors(arr, i):
+    """(left, right) immediate indices (i-1 / i+1) with FINITE arr, else None on that side."""
+    n = len(arr)
+    left = i - 1 if (i - 1 >= 0 and np.isfinite(arr[i - 1])) else None
+    right = i + 1 if (i + 1 < n and np.isfinite(arr[i + 1])) else None
+    return left, right
+
+
+def _scalar_central_diff(arr, t, i):
+    """Central finite difference d(arr)/d(t) at i using immediate finite neighbors; one-sided at an
+    end or across a None/NaN neighbor; None if neither side is usable (isolated finite point)."""
+    left, right = _neighbors(arr, i)
+    if left is not None and right is not None:
+        return float((arr[right] - arr[left]) / (t[right] - t[left]))
+    if right is not None and np.isfinite(arr[i]):
+        return float((arr[right] - arr[i]) / (t[right] - t[i]))
+    if left is not None and np.isfinite(arr[i]):
+        return float((arr[i] - arr[left]) / (t[i] - t[left]))
+    return None
+
+
+def _vec_central_diff(mat, t, i):
+    """Row-wise central difference of a (L, d) slow-state matrix wrt t at i (the slow velocity). Every
+    column is finite at every landmark (slow vars exist regardless of op resolution), so always defined."""
+    n = mat.shape[0]
+    if n == 1:
+        return np.zeros(mat.shape[1])
+    if i == 0:
+        return (mat[1] - mat[0]) / (t[1] - t[0])
+    if i == n - 1:
+        return (mat[i] - mat[i - 1]) / (t[i] - t[i - 1])
+    return (mat[i + 1] - mat[i - 1]) / (t[i + 1] - t[i - 1])
+
+
+def evaluate_actual_trajectory_points(sim, mapping, cfg) -> list:
+    """Frozen-Jacobian read-out on the ACTUAL M3A-v2.2 slow trajectory (#1 -- the verdict SOURCE).
+
+    Runs the branch-aware operating-point protocol + leading-eigenvalue read-out at ~``
+    _N_TRAJECTORY_LANDMARKS`` subsampled landmarks of ``sim`` (from ``run_transition``), returning one
+    JSON-serializable point dict per landmark. Each carries at least ``time_ms``, ``alpha1``
+    (continuous-time leading real-part eigenvalue, per-ms; None on saturated / unresolved points),
+    ``qualified`` (Python bool), ``branch_id`` + the eigen-metrics (``alpha_gap``,
+    ``left_mode_input_projection``, ``numerical_abscissa``, ``directional_gain``, ``mode_class``) and
+    the quality-gate fields (``rate_mismatch_*``, ``slow_mismatch_rel``, ``adiabatic_index``,
+    ``alpha_drift_index``). Consumed by ``classify_trajectory`` (via ``build_trajectory_verdict``).
+
+    Contract highlights (T3a-5b brief + T3a-5a review carry-forward):
+    * warm start -- each landmark's branch solve is seeded from the PREVIOUS landmark's low-branch op.
+    * F3 EMPTY-GUARD -- on an unresolved / empty spectrum the eigen-metric fns are NEVER called
+      (they index [0] / argmax an empty array); the point is marked unqualified ("eig_unresolved").
+    * finite-alpha1 invariant -- a ``qualified`` point ALWAYS carries a finite ``alpha1`` (asserted).
+    * Python bool -- ``qualified`` is a built-in bool, not np.bool_ (classify_trajectory identity check).
+    * alpha1>=0 (unstable) points keep their finite positive alpha1 but get adiabatic_index=+inf ->
+      qualify_point rejects them (correct: modal growth, excluded from the CSD trend).
+    """
+    import numpy as np
+    import src.topic4_m3b_spectral_phase as spm
+
+    grid, kernels, core, b_core = _crit_op_context(cfg)
+    inject_gK = bool(sim.get("use_gK", False))
+    inject_hG = bool(sim.get("use_hG", True))
+    floor = float(cfg["quality_gate"]["rate_scale_floor"])
+    min_sep = float(cfg["mode"]["next_distinct_min_sep_per_ms"])
+    imag_tol = float(cfg["mode"]["imag_tol_per_ms"])
+    horizons = cfg["finite_time_gain"]["horizons_ms"]
+
+    times = np.asarray(sim["times"], float)
+    rate_E = np.asarray(sim["rate_E"], float)
+    nsteps = times.size
+    land = np.unique(np.linspace(0, nsteps - 1, _N_TRAJECTORY_LANDMARKS).astype(int))
+
+    # --- Pass 1: per-landmark op-solve + low-branch eigen read-out (warm-started) ---
+    recs: list = []
+    prev_low_op = None
+    for i, idx in enumerate(land):
+        idx = int(idx)
+        slow_inputs = _slow_inputs_at(sim, idx, mapping, inject_gK=inject_gK, inject_hG=inject_hG)
+        low, branches, sat_any, dominant = _low_branch_at(
+            grid, kernels, core, slow_inputs, cfg, prev=prev_low_op, seed_key=(1000 + i,))
+        rec = {
+            "time_ms": float(times[idx]), "slow_inputs": slow_inputs,
+            "q_global": slow_inputs["q_global"], "q_core": slow_inputs["q_core"],
+            "n_branches_found": int(len(branches)),
+            "snn_rate_kHz": float(rate_E[idx]) / 1000.0,
+            "_alpha1": float("nan"),
+            "_slow_vec": np.array([slow_inputs["q_global"], slow_inputs["q_core"],
+                                   slow_inputs["hG_scalar"], (slow_inputs["gK_value"] or 0.0)], float),
+        }
+        if low is None:
+            # No low branch (fold / all-saturated): unqualified. Carry the saturation LABEL so
+            # classify_trajectory's _saturated_transition_after can see the jump.
+            rec.update({"alpha1": None, "qualified": False, "branch_id": dominant,
+                        "saturated": bool(sat_any), "reason": "no_low_branch",
+                        "op_rate_kHz": None, "residual_rms": None, "converged": False,
+                        "rate_mismatch_abs": None, "rate_mismatch_rel": None, "slow_mismatch_rel": None,
+                        "alpha_gap": None, "left_mode_input_projection": None,
+                        "numerical_abscissa": None, "directional_gain": None,
+                        "directional_gain_peak": None, "freq_hz": None,
+                        "mode_class": ("runaway" if sat_any else "unresolved")})
+            recs.append(rec)
+            continue
+
+        op = low.op
+        prev_low_op = op                                                  # warm-start next landmark
+        J = spm.build_jacobian_dense(grid, kernels, op)
+        res = spm.rate_eigenpairs(J, grid)
+        op_rate_kHz = float(op.rE.mean())
+        # rate_mismatch (spec §3): rate_sim = SNN population rate (kHz); z_star = reduced-op fixed
+        # point rate (kHz). Both in the op's native kHz (rate_scale_floor is kHz); SNN rate_E is Hz.
+        rm_abs, rm_rel = rate_mismatch(np.array([rec["snn_rate_kHz"]]), np.array([op_rate_kHz]), floor)
+        rec.update({"branch_id": "low_branch", "saturated": bool(op.saturated),
+                    "op_rate_kHz": op_rate_kHz, "residual_rms": float(op.residual),
+                    "converged": bool(op.converged), "rate_mismatch_abs": float(rm_abs),
+                    "rate_mismatch_rel": float(rm_rel),
+                    # op solved AT the exact sim slow-state -> no slow re-derivation mismatch (spec §3).
+                    "slow_mismatch_rel": 0.0})
+
+        # F3 EMPTY-GUARD (T3a-3 review, matches analyze_spectral_point:1069-1070): never call the
+        # eigen-metric fns on an unresolved / empty spectrum -- they crash on an empty array.
+        if res.status != "resolved" or res.eigenvalues.size == 0:
+            rec.update({"alpha1": None, "qualified": False, "reason": "eig_unresolved",
+                        "alpha_gap": None, "left_mode_input_projection": None,
+                        "numerical_abscissa": None, "directional_gain": None,
+                        "directional_gain_peak": None, "freq_hz": None, "mode_class": "unresolved"})
+            recs.append(rec)
+            continue
+
+        alpha1 = float(res.eigenvalues[0].real)
+        rec["_alpha1"] = alpha1
+        # leading invariant SUBSPACE (a complex conjugate pair, or a near-degenerate real group).
+        # Read the mode SHAPE off the NON-NEGATIVE subspace loading (pair_loading), NOT a single
+        # signed eigenvector -- otherwise a leading complex pair's shape flips with the arbitrary
+        # eigenvector sign/phase (spec §6: mode class on the invariant-subspace energy, sign-free).
+        idxs = spm.leading_subspace_indices(res.eigenvalues, min_sep=min_sep, imag_tol=imag_tol)
+        loading = spm.pair_loading(res.right, idxs, grid)               # (n,n) non-negative subspace E-loading
+        mode_core_overlap = float(spm.core_overlap(loading, grid, core))
+        mode_globality = float(spm.globality(loading, grid))
+        gain_curve = directional_finite_time_gain_curve(J, b_core, horizons)
+        ftg20 = spm.transient_gain(J, b_core, 20.0)                      # atlas-consistent mode-class window
+        mode_class = spm.classify_mode(
+            growth=alpha1, core_overlap_=mode_core_overlap, globality_=mode_globality,
+            elongation_axis=spm.elongation_axis_score(loading, grid, kernels.theta),
+            off_axis=spm.off_axis_score(loading, grid, kernels.theta),
+            finite_time_gain_=float(ftg20), saturated=bool(op.saturated))
+        rec.update({
+            "alpha1": alpha1,
+            "alpha_gap": float(spm.next_distinct_gap(res.eigenvalues, min_sep)),
+            "left_mode_input_projection": float(
+                spm.left_mode_input_projection(res.left, res.right, idxs, b_core)),
+            "numerical_abscissa": float(numerical_abscissa(J)),
+            "directional_gain": {k: float(v) for k, v in gain_curve.items()},
+            "directional_gain_peak": float(max(gain_curve.values())),
+            "freq_hz": float(spm.mode_frequency_hz(res.eigenvalues[0])),
+            "mode_core_overlap": mode_core_overlap, "mode_globality": mode_globality,
+            "leading_subspace_dim": int(len(idxs)),
+            "mode_class": str(mode_class),
+        })
+        recs.append(rec)
+
+    # --- Pass 2: finite-difference gate fields (slow_speed / adiabatic / alpha-drift) + qualify ---
+    t_arr = np.array([r["time_ms"] for r in recs], float)
+    a_arr = np.array([r["_alpha1"] for r in recs], float)               # NaN where alpha1 is None
+    slow_mat = np.array([r["_slow_vec"] for r in recs], float)          # (L, 4), always finite
+    points: list = []
+    for i, r in enumerate(recs):
+        r["slow_speed"] = float(np.linalg.norm(_vec_central_diff(slow_mat, t_arr, i)))
+        if r["alpha1"] is None:
+            # already unqualified upstream (no_low_branch / eig_unresolved) -- no gate re-run.
+            r.update({"adiabatic_index": None, "alpha_drift_index": None})
+        else:
+            slow_scale = max(float(np.linalg.norm(slow_mat[i])), 1e-6)
+            adiab = adiabatic_index(r["slow_speed"], r["alpha1"], slow_scale)     # +inf when alpha1>=0
+            dadt = _scalar_central_diff(a_arr, t_arr, i)
+            adrift = (abs(dadt) / (r["alpha1"] ** 2 + 1e-9)) if dadt is not None else 0.0
+            r["adiabatic_index"] = float(adiab) if np.isfinite(adiab) else float("inf")
+            r["alpha_drift_index"] = float(adrift)
+            fields = {"converged": r["converged"], "saturated": r["saturated"],
+                      "residual_rms": r["residual_rms"], "rate_mismatch_abs": r["rate_mismatch_abs"],
+                      "rate_mismatch_rel": r["rate_mismatch_rel"],
+                      "slow_mismatch_rel": r["slow_mismatch_rel"],
+                      "adiabatic_index": r["adiabatic_index"], "alpha_drift_index": r["alpha_drift_index"]}
+            ok, reason = qualify_point(fields, cfg)
+            # INVARIANT (T3a-5a review): a qualified point MUST carry a finite alpha1 (classify_
+            # trajectory's max(alphas) needs it). Structurally true on this branch; assert defensively.
+            if ok and not np.isfinite(r["alpha1"]):
+                ok, reason = False, "nonfinite_alpha1"
+            r["qualified"] = bool(ok)                                    # Python bool (identity check)
+            r["reason"] = reason
+        r.pop("_alpha1", None)
+        r.pop("_slow_vec", None)
+        points.append(r)
+    return points
+
+
+def check_low_branch_continuation_between(pt_a, pt_b, cfg) -> dict:
+    """Branch-continuation bisection between the last-qualified low-branch point ``pt_a`` and the
+    first saturated/transition point ``pt_b`` (spec §4, clauses #2/#3).
+
+    Interpolates the slow state across ``cfg["verdict"]["branch_continuation_n_bisect"]`` midpoints,
+    re-solves the low branch (warm-started from pt_a's low branch), and reports whether the low branch
+    either (a) DISAPPEARS before its alpha1 reaches near-zero (fold), or (b) REMAINS far from alpha1=0
+    all the way to the jump -- both confirm no near-critical low-branch state was skipped, so
+    ``hard_jump_no_CSD`` is admissible. If some interpolated low branch DOES reach near-zero, that is a
+    skipped alpha1~=0 point: the status is NOT in ``_CONTINUATION_OK`` and classify_trajectory falls to
+    ``unresolved`` (never a false hard jump).
+
+    Returns ``{branch_continuation_checked: True (Python bool -- classify_trajectory checks `is True`,
+    and np.bool_(True) is True -> False), continuation_status, n_bisect, bisection_max_low_alpha1}``.
+    """
+    import src.topic4_m3b_spectral_phase as spm
+
+    grid, kernels, core, _b = _crit_op_context(cfg)
+    n_bisect = int(cfg["verdict"]["branch_continuation_n_bisect"])
+    near_zero_tol = float(cfg["verdict"]["alpha_near_zero_tol_per_ms"])
+    a = pt_a["slow_inputs"]
+    b = pt_b["slow_inputs"]
+
+    # warm-start from pt_a's own low branch (re-solved from its stored slow-inputs).
+    low0, _br, _sa, _dm = _low_branch_at(grid, kernels, core, a, cfg, prev=None, seed_key=(8000,))
+    prev = low0.op if low0 is not None else None
+
+    disappeared = False
+    reached_zero = False
+    max_low_alpha = None
+    for k in range(1, n_bisect + 1):
+        frac = k / (n_bisect + 1)
+        s = {
+            "q_global": (1 - frac) * a["q_global"] + frac * b["q_global"],
+            "q_core": (1 - frac) * a["q_core"] + frac * b["q_core"],
+            "hG_scalar": (1 - frac) * (a.get("hG_scalar") or 0.0) + frac * (b.get("hG_scalar") or 0.0),
+            "gK_value": (None if (a.get("gK_value") is None or b.get("gK_value") is None)
+                         else (1 - frac) * a["gK_value"] + frac * b["gK_value"]),
+        }
+        low, _br, _sat, _dm = _low_branch_at(grid, kernels, core, s, cfg, prev=prev, seed_key=(8100 + k,))
+        if low is None:
+            disappeared = True                                          # low branch gone before alpha0
+            break
+        prev = low.op
+        res = spm.rate_eigenpairs(spm.build_jacobian_dense(grid, kernels, low.op), grid)
+        if res.status == "resolved" and res.eigenvalues.size > 0:
+            a1 = float(res.eigenvalues[0].real)
+            max_low_alpha = a1 if max_low_alpha is None else max(max_low_alpha, a1)
+            if a1 >= -near_zero_tol:
+                reached_zero = True                                     # a skipped low-branch alpha0 point
+                break
+
+    if reached_zero:
+        status = "low_branch_reaches_alpha0_before_jump"                # NOT in _CONTINUATION_OK
+    elif disappeared:
+        status = "low_branch_disappears_before_alpha0"
+    else:
+        status = "low_branch_remains_far_from_alpha0_until_jump"
+    return {"branch_continuation_checked": True, "continuation_status": status,
+            "n_bisect": n_bisect, "bisection_max_low_alpha1": max_low_alpha}
+
+
+def build_trajectory_verdict(sim, mapping, cfg) -> tuple:
+    """Orchestrate the T3a-5b verdict (spec §2/§4): evaluate the real trajectory, run the
+    branch-continuation check across the last-qualified -> first-saturated jump (attaching its flags
+    on the transition point where classify_trajectory reads them), classify_trajectory the sequence,
+    and assemble the ``trajectory_verdict.json`` payload.
+
+    verdict_source="actual_trajectory" (Hard-QC #1: NOT the 2-D atlas). operator_type=
+    continuous_jacobian, alpha_units=per_ms (spec §2 unit lock). Returns (payload, points)."""
+    import numpy as np
+
+    points = evaluate_actual_trajectory_points(sim, mapping, cfg)
+
+    # last qualified low-branch point + first saturated point AFTER it -> continuation check;
+    # attach the flags on the SATURATED transition point (classify_trajectory reads them there).
+    q = [p for p in points if p.get("qualified") is True and p.get("branch_id") == "low_branch"]
+    continuation = None
+    if q:
+        last_q = q[-1]
+        trans = next((p for p in points if p.get("saturated") is True
+                      and p["time_ms"] > last_q["time_ms"]), None)
+        if trans is not None:
+            continuation = check_low_branch_continuation_between(last_q, trans, cfg)
+            trans.update(continuation)
+
+    verdict = classify_trajectory(points, cfg)
+
+    # per-point leading alpha1 series (per-ms) over finite-alpha1 points (Hard-QC #2 alpha1_per_ms).
+    alpha1_per_ms = [{"time_ms": p["time_ms"], "alpha1_per_ms": p["alpha1"]}
+                     for p in points if p.get("alpha1") is not None]
+
+    payload = dict(verdict)
+    payload.update({
+        "verdict_source": "actual_trajectory",                          # Hard-QC #1 guard (NOT atlas)
+        "operator_type": cfg["operator"]["type"],                       # continuous_jacobian (spec §2)
+        "alpha_units": cfg["operator"]["alpha_units"],                  # per_ms
+        "alpha1_per_ms": alpha1_per_ms,
+        "operator_gain_computed": False,                                # Hard-QC #8 (directional, not ||exp(JT)||2)
+        "finite_time_gain_kind": cfg["finite_time_gain"]["mode"],       # directional_core -> 'directional_gain' (#10)
+        "tier": cfg.get("tier"),
+        "branch_continuation": continuation,
+        "provenance": {
+            "mapping_id": mapping.get("slow_to_rate_mapping_id"),
+            "n_landmarks": len(points),
+            "n_qualified": verdict["n_qualified_points"],
+            "grid_n": _CRIT_OP_GRID_N, "grid_L": float(cfg["atlas"]["grid_L"]),
+            "core_radius": _CRIT_CORE_RADIUS, "mu_core": 0.0,
+            "slow_vars_injected": (["q_I"]
+                                   + (["g_K"] if bool(sim.get("use_gK", False)) else [])
+                                   + (["h_G"] if bool(sim.get("use_hG", True)) else [])),
+            "dt_ms": (float(sim["dt_ms"]) if sim.get("dt_ms") is not None else None),
+            "n_sim_steps": int(np.asarray(sim["times"]).size),
+        },
+        "points": points,
+    })
+    return payload, points

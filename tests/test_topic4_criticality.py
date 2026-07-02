@@ -514,3 +514,70 @@ def test_classify_trajectory_verdict_is_reorder_invariant():
          "branch_id": "saturated_branch", "branch_continuation_checked": True,
          "continuation_status": "low_branch_remains_far_from_alpha0_until_jump"}]
     assert classify_trajectory(list(reversed(hard)), c)["verdict"] == "hard_jump_no_CSD"
+
+
+# --- Task 3a-5b: evaluate_actual_trajectory_points / check_low_branch_continuation_between run the
+# REAL reduced-op solves, but WITHOUT the SNN -- a hand-built synthetic sim (q_I depleting from
+# stable toward disinhibited) exercises the whole op-solve + eigen + gate + F3-guard path fast. The
+# load-bearing carry-forward invariants (T3a-5a review): every point's `qualified` is a PYTHON bool
+# (classify_trajectory checks `is True`; np.bool_(True) is False under `is`), and a qualified point
+# ALWAYS carries a finite alpha1. The full real-SNN verdict runs in test_topic4_crit_integration.py. ---
+
+def _synth_sim(n=8):
+    t = np.linspace(0.0, 700.0, n)
+    q = np.linspace(0.99, 0.30, n)          # inhibitory resource depletes: stable -> disinhibited
+    return {"times": t, "rate_E": np.linspace(1.0, 80.0, n),          # Hz
+            "trace_qI_mean": q, "trace_qI_min": q * 0.95,
+            "trace_gK_axial": np.linspace(0.0, 0.3, n), "trace_hG": np.linspace(0.0, 0.2, n),
+            "dt_ms": 0.5, "events": [{"t_on": 600.0, "t_off": 700.0, "t_peak": 650.0}],
+            "use_gK": False, "use_hG": True}
+
+
+def test_evaluate_actual_trajectory_points_invariants():
+    from src.topic4_criticality import evaluate_actual_trajectory_points, load_crit_config
+    from src.sef_hfo_m3a_export import default_precalib_mapping_and_ranges
+
+    mapping, _ = default_precalib_mapping_and_ranges("m3a_v2_2_approach")
+    pts = evaluate_actual_trajectory_points(_synth_sim(8), mapping, load_crit_config())
+
+    assert len(pts) >= 6
+    assert [p["time_ms"] for p in pts] == sorted(p["time_ms"] for p in pts)   # time-ordered landmarks
+    for p in pts:
+        assert {"time_ms", "alpha1", "qualified", "branch_id", "slow_inputs"}.issubset(p)
+        assert p["qualified"] is True or p["qualified"] is False              # Python bool (C12)
+        if p["qualified"] is True:
+            assert p["branch_id"] == "low_branch"
+            assert p["alpha1"] is not None and np.isfinite(p["alpha1"])       # finite-alpha1 invariant (C11)
+            assert p["slow_mismatch_rel"] == 0.0                              # op solved AT the sim slow-state
+
+
+def test_check_low_branch_continuation_returns_python_bool_and_status():
+    from src.topic4_criticality import check_low_branch_continuation_between, load_crit_config
+
+    pt_a = {"slow_inputs": {"q_global": 0.95, "q_core": 0.98, "gK_value": None, "hG_scalar": 0.0}}
+    pt_b = {"slow_inputs": {"q_global": 0.30, "q_core": 0.95, "gK_value": None, "hG_scalar": 0.2}}
+    r = check_low_branch_continuation_between(pt_a, pt_b, load_crit_config())
+
+    assert r["branch_continuation_checked"] is True                          # Python bool (C12)
+    assert r["continuation_status"] in {
+        "low_branch_disappears_before_alpha0",
+        "low_branch_remains_far_from_alpha0_until_jump",
+        "low_branch_reaches_alpha0_before_jump"}
+    assert r["n_bisect"] == 8
+
+
+def test_build_trajectory_verdict_payload_shape():
+    """The orchestrator returns a payload with the pre-registered enum + the operator-unit lock +
+    verdict_source (Hard-QC #1/#2), on a synthetic (no-SNN) trajectory."""
+    from src.topic4_criticality import build_trajectory_verdict, load_crit_config
+    from src.sef_hfo_m3a_export import default_precalib_mapping_and_ranges
+
+    mapping, _ = default_precalib_mapping_and_ranges("m3a_v2_2_approach")
+    payload, points = build_trajectory_verdict(_synth_sim(10), mapping, load_crit_config())
+
+    assert payload["verdict"] in {"smooth_CSD", "hard_jump_no_CSD", "unresolved_operating_point"}
+    assert payload["verdict_source"] == "actual_trajectory"                  # NOT the 2-D atlas
+    assert payload["operator_type"] == "continuous_jacobian"
+    assert payload["alpha_units"] == "per_ms"
+    assert payload["operator_gain_computed"] is False                        # directional gain, not operator norm
+    assert isinstance(payload["points"], list) and len(payload["points"]) == len(points)

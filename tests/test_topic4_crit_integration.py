@@ -59,6 +59,29 @@ def test_export_fixture_passes_and_real_is_fail_closed(tmp_path):
 
 @pytest.mark.integration
 @_needs_figdata
+def test_trajectory_verdict_is_actual_trajectory_and_enum(tmp_path):
+    """Task 3a-5b crux: the verdict is computed from the REAL 3-D slow trajectory (incl h_G(t)),
+    NOT by sampling the 2-D atlas -> verdict_source=="actual_trajectory" AND verdict in the
+    pre-registered 3-enum. Runs the v2.2 SNN once + writes trajectory_verdict.json + Figure 1."""
+    import importlib
+    m = importlib.import_module("scripts.run_topic4_crit_verdict")
+    payload = m.build_and_write_verdict(tmp_path)
+    enum = {"smooth_CSD", "hard_jump_no_CSD", "unresolved_operating_point"}
+    assert payload["verdict_source"] == "actual_trajectory"     # #1 NOT the 2-D atlas
+    assert payload["verdict"] in enum
+    # the written JSON carries the same guard + enum (strict-parser safe, non-finite sanitized).
+    j = json.loads((tmp_path / "trajectory_verdict.json").read_text())
+    assert j["verdict_source"] == "actual_trajectory"
+    assert j["verdict"] in enum
+    assert j["operator_type"] == "continuous_jacobian" and j["alpha_units"] == "per_ms"
+    assert (tmp_path / "figures" / "trajectory_criticality_verdict.png").exists()
+    assert (tmp_path / "STATUS.md").exists()
+    # overlay refused for the real uncalibrated v2.2 -> no atlas overlay drawn (Hard-QC #7).
+    assert j["overlay_drawn"] is False
+
+
+@pytest.mark.integration
+@_needs_figdata
 def test_atlas_is_conditional_and_not_verdict_source(tmp_path):
     from src.topic4_criticality import build_conditional_atlas, load_crit_config
     from src.sef_hfo_m3a_export import default_precalib_mapping_and_ranges
