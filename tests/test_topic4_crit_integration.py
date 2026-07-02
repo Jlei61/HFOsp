@@ -12,6 +12,7 @@ They require the subject1146 figdata artifact (gitignored results/ tree); skippe
 """
 import hashlib
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -92,3 +93,66 @@ def test_atlas_is_conditional_and_not_verdict_source(tmp_path):
     assert meta["atlas_name"].startswith("conditional_2d_atlas_at_phase_recovery=")
     assert meta["verdict_source"] == "actual_trajectory_not_atlas"          # #1 guard
     assert meta["axes_built_from_slow_to_rate_mapping_id"] == "m3a_v2_2_approach"
+
+
+# ---------------------------------------------------------------------------
+# T3a-6 (last task, Milestone 1): CLI smoke tests for the 3 criticality entrypoints
+# (run_topic4_crit_export.py / _atlas.py / _verdict.py). All 3 CLIs run the SNN
+# internally (export ~2-4min, atlas ~12min, verdict ~6min) -- too slow to routinely
+# subprocess-run all 3 end-to-end.
+#
+# COVERAGE TRADEOFF (logged, not silently skipped): the ALWAYS-RUN smoke below
+# (test_cli_help_smoke) covers import+argparse wiring for all 3 CLIs -- catches the
+# common CLI breakage mode (import errors, argparse misconfiguration) in well under a
+# second each, with no figdata and no SNN run. Full subprocess end-to-end is exercised
+# ONLY for run_topic4_crit_verdict.py, the milestone's main deliverable CLI, behind
+# @integration (test_verdict_cli_end_to_end_subprocess). run_topic4_crit_export.py and
+# run_topic4_crit_atlas.py are NOT routinely end-to-end subprocess-tested (SNN cost);
+# their underlying library functions (export_v2_2_handoff, build_conditional_atlas)
+# already get full-SNN integration coverage from the two @integration tests above
+# (test_export_fixture_passes_and_real_is_fail_closed,
+# test_atlas_is_conditional_and_not_verdict_source) -- just not through the CLI /
+# argparse layer itself. A full export/atlas CLI subprocess run remains a
+# manual/@integration-only concern if that layer ever needs its own coverage.
+# ---------------------------------------------------------------------------
+_CLI_SCRIPTS = [
+    "run_topic4_crit_export.py",
+    "run_topic4_crit_atlas.py",
+    "run_topic4_crit_verdict.py",
+]
+
+
+@pytest.mark.parametrize("script", _CLI_SCRIPTS)
+def test_cli_help_smoke(script):
+    """Always-run, no figdata / no SNN needed: --help must exit 0 with no traceback.
+    Catches import errors / argparse misconfiguration -- the common CLI failure mode --
+    in well under a second per script (module-level imports still run, but --help short-
+    circuits inside argparse.parse_args() before any sim/library call)."""
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / script), "--help"],
+        capture_output=True, text=True, timeout=60,
+    )
+    assert result.returncode == 0, f"stdout={result.stdout}\nstderr={result.stderr}"
+    assert "Traceback" not in result.stderr, result.stderr
+
+
+@pytest.mark.integration
+@_needs_figdata
+def test_verdict_cli_end_to_end_subprocess(tmp_path):
+    """Real subprocess invocation of the milestone's main deliverable CLI -- distinct from
+    test_trajectory_verdict_is_actual_trajectory_and_enum above, which imports
+    build_and_write_verdict directly. This test instead proves the actual
+    argparse -> main() -> build_and_write_verdict wiring works end-to-end as a script.
+    Runs the v2.2 SNN once (~6 min). Writes into tmp_path (--out-dir) so the committed
+    results/topic4_criticality workflow output is never clobbered."""
+    cmd = [sys.executable, str(ROOT / "scripts" / "run_topic4_crit_verdict.py"),
+           "--out-dir", str(tmp_path), "--layout", "subject1146", "--top", "qI"]
+    try:
+        subprocess.run(cmd, capture_output=True, text=True, timeout=900, check=True)
+    except subprocess.CalledProcessError as e:
+        pytest.fail(f"verdict CLI failed (rc={e.returncode}):\nSTDOUT={e.stdout}\nSTDERR={e.stderr}")
+    assert (tmp_path / "trajectory_verdict.json").exists()
+    assert (tmp_path / "STATUS.md").exists()
+    payload = json.loads((tmp_path / "trajectory_verdict.json").read_text())
+    assert payload["verdict_source"] == "actual_trajectory"
+    assert payload["verdict"] in {"smooth_CSD", "hard_jump_no_CSD", "unresolved_operating_point"}
