@@ -3,4 +3,5 @@ testpaths = ["tests"]
 addopts = "--ignore=ReplayIED"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests that re-run a full SNN sim / need result artifacts (deselect with '-m \"not integration\"')",
 ]
