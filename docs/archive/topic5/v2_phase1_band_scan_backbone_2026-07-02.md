@@ -6,7 +6,26 @@ date 2026-07-02 · 分支 `topic5-v2-phase1-build`（worktree `/home/honglab/lei
 
 ---
 
-## 0. 摘要（朴素话）
+## 口径修正 + tier 纪律（user review 2026-07-02，SUPERSEDES 下方 §0/§3 的措辞）
+
+**tier（按 rev2 §1.1 证据阶梯，锁定）**：停在 **candidate scaffold / broadband-recruitment tier**。**禁止**升级到 timing-order mechanism / pathological critical mode。最稳的正结论只能写成：
+> **HFO-derived core geometry may mark a shared, band-generic early-ictal recruitment scaffold**（不是 ripple/HFO-specific replay，也不是 timing-order mechanism）。
+
+**措辞降级（承重）**：
+- ❌"相似超过任何平滑空间场的巧合" / "沿着它铺开" / "共享底座"（肯定）
+- ✅ **suggestive spatial co-structure**；**空间共定位 / 共享空间梯度**（不是 temporal propagation——现度量是 early-window 空间图相关，非时间传播方向，除非 Phase 3 做出 temporal recruitment）；**may mark a shared scaffold**。
+
+**formal Gate A = UNEVALUABLE（非 failed-by-effect-size），且 weak-null 正证据很可能被高估**：预设的 within-shaft strong 空间 null 因 SEEG 杆稀疏无法满足（0/11），退化成 subject_wide_weak 后**不再保持杆内局部空间自相关**——在过大尺度打乱 → **让 observed map 看起来更显著（anti-conservative）**。所以现在只能写"formal within-shaft Gate A 未可评估 / unresolved；weak/global-null 下描述性为正，但该正证据可能因 null 过弱而偏高"，**不能**写"过了空间 null"。
+
+**narrow ORDER null（补上——之前漏报，非缺失）**：narrow 跑了 order null，**4/7 被试 strong**（1146/253/384/958），3/7 weak_downgrade（gate-blocked）；obs **band-generic** 超出"保放电率、打乱时序"的 null（所有频带 Δ+0.16~+0.27，n_perm=100 分辨率下限 p=0.010，6-7/7）。→ narrow **不止贴 HFO-rich 触点拓扑**，strong 子集里对齐依赖**时序顺序**（超出放电率地形）。**但**：band-generic（非 HFO-specific）、dev n_perm=100（p 触底）、仅 4/7 strong、且 order null 有 T13 轻度 anti-conservative（obs=producer vs null=event-rebuild）→ 时序-order 主张只到"strong 子集描述性支持"，未闭合。
+
+**cohort 显著性口径修正**：删掉我之前"改 per-band cohort permutation p 只会加强"的说法——**可能加强也可能变弱**（被试异质性 + maxT 校正）。正确做法：用 **subject-level cohort permutation of the median statistic + max-over-bands**（`cohort_stat_perm[band,perm]=median_over_subjects(subject_stat_perm)`；`maxT_perm=max_over_bands`），**不再用 median-of-per-subject-p 作主推断**。
+
+**四个诚实标签（放正式报告首页）**：`legacy reproduction: PASS` · `weak/global spatial-null evidence: positive (likely inflated)` · `formal within-shaft Gate A: unresolved (null-strength gated, 0/11)` · `Gate B/C: pending`。
+
+**下一步 spec（运行前锁定）**：见 `docs/superpowers/specs/2026-07-02-topic5-v2-phase1b-gate-closure-spec.md`（P1 空间-null hierarchy + subject-level cohort permutation + narrow order-null 闭合 + broad↔narrow channel-pool ablation；min_group=3 用 exact/enumerated 排列，不升级为 formal primary 除非写进修订 hierarchy）。
+
+## 0. 摘要（朴素话，措辞见上方"口径修正"，频带特异描述已降级为 narrow band-generic）
 
 **测了什么**：癫痫病人发作**刚起头 20 秒**里，每个频带（δ→ripple）的能量在电极阵列上"点亮"成一张空间图；间期时同一批触点各自有一条"平时谁先谁后"的 HFO 传播几何（G_HFO）。我们问：发作早期某频带的能量场，长得像不像间期这张顺序几何图，而且这种像**能不能扛过三道质疑**——(A) 只是空间涂抹？(B) 只是宽带整体招募？(C) 只是 1/f 背景？
 
