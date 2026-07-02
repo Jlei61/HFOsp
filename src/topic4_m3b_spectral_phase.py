@@ -1635,3 +1635,73 @@ def non_normal_axial_readout(J: np.ndarray, grid: Grid, core: CoreMask, *, theta
         "self_limited": bool(gains[-1] < peak.gain),
         "axial": bool(max_axis > 0.15),
     }
+
+
+# ---------------------------------------------------------------------------
+# Criticality Milestone 1, T3a-3: eigen-metrics on the frozen-Jacobian spectrum
+#
+# spectral_gap (TDD-7, above) is alpha_1 - alpha_2 by raw array order; it reads 0 when the leading
+# mode is a complex-conjugate pair (the "second" eigenvalue is just the pair partner, not a
+# competing mode). next_distinct_gap fixes this by skipping same-real-part entries.
+# leading_subspace_indices then generalizes "the leading mode" to "the leading invariant SUBSPACE"
+# (a conjugate pair, or several near-degenerate real modes), so pair_loading /
+# left_mode_input_projection can read the spatial field / core-input coupling of the whole subspace
+# instead of an arbitrary single member. Both reuse existing machinery -- mode_e_field (TDD-6 state
+# unpacking) and the biorthonormalization rate_eigenpairs applies internally (TDD-6) -- generalized
+# from one mode to a subspace of modes, rather than re-deriving either.
+# ---------------------------------------------------------------------------
+def next_distinct_gap(eigenvalues: np.ndarray, min_sep: float = 1e-3) -> float:
+    """alpha_1 minus the first real part more than ``min_sep`` away from alpha_1.
+
+    Unlike ``spectral_gap`` (a1 - a2 by raw array order), this SKIPS a leading complex-conjugate
+    partner (identical real part) so the gap reflects genuine mode competition, not the trivial
+    pair split. Returns +inf if every eigenvalue is within ``min_sep`` of the leader."""
+    re = np.sort(np.real(np.asarray(eigenvalues)))[::-1]
+    a1 = re[0]
+    for r in re[1:]:
+        if abs(a1 - r) > min_sep:
+            return float(a1 - r)
+    return float("inf")
+
+
+def leading_subspace_indices(eigenvalues: np.ndarray, min_sep: float = 1e-3,
+                             imag_tol: float = 1e-3) -> tuple[int, ...]:
+    """Indices spanning the leading invariant subspace of ``eigenvalues``.
+
+    If the leading eigenvalue is complex (``|Im| > imag_tol``), the leading mode is a conjugate
+    PAIR: returns (leader, conjugate partner). Otherwise returns every index within ``min_sep`` of
+    the leading real part (a near-degenerate group of real modes)."""
+    ev = np.asarray(eigenvalues)
+    i = int(np.argmax(ev.real))
+    if abs(ev[i].imag) > imag_tol:
+        j = int(np.argmin(np.abs(ev - np.conj(ev[i]))))          # conjugate partner
+        return (i, j)
+    return tuple(int(x) for x in np.where(np.abs(ev.real - ev[i].real) <= min_sep)[0])
+
+
+def pair_loading(R: np.ndarray, idx: tuple[int, ...], grid: Grid) -> np.ndarray:
+    """Subspace-level spatial E-field loading: sqrt(sum_{k in idx} |mode_e_field(R[:,k], grid)|^2).
+
+    Combines a leading invariant subspace (e.g. from ``leading_subspace_indices``) into one
+    non-negative (n,n) spatial map. Reuses ``mode_e_field`` for the rE-block unpacking rather than
+    re-deriving the state layout."""
+    acc = np.zeros((grid.n, grid.n))
+    for k in idx:
+        acc = acc + np.abs(mode_e_field(R[:, k], grid)) ** 2
+    return np.sqrt(acc)
+
+
+def left_mode_input_projection(L: np.ndarray, R: np.ndarray, idx: tuple[int, ...],
+                               b_core: np.ndarray) -> float:
+    """Subspace-level generalization of ``core_controllability``: how strongly a core perturbation
+    excites the leading invariant subspace, sqrt(sum_{k in idx} |psi_k^H b_core|^2).
+
+    Each mode is biorthonormalized against its own right eigenvector first (``psi_k = L[:,k] /
+    conj(L[:,k]^H R[:,k])``, the same normalization ``rate_eigenpairs`` applies internally) so the
+    projection does not depend on the arbitrary scale of raw left/right eigenvectors."""
+    acc = 0.0
+    for k in idx:
+        c = np.vdot(L[:, k], R[:, k])
+        psi = L[:, k] / np.conj(c) if abs(c) > 1e-300 else L[:, k] / (np.linalg.norm(L[:, k]) + 1e-300)
+        acc += abs(np.vdot(psi, b_core)) ** 2
+    return float(np.sqrt(acc))

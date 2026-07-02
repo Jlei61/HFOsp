@@ -233,3 +233,33 @@ def test_solve_branches_random_small_seed_key_none_does_not_crash():
     b1 = solve_branches(g, k, exc, inh, load_crit_config())
     b2 = solve_branches(g, k, exc, inh, load_crit_config())
     assert [x.branch_id for x in b1] == [x.branch_id for x in b2]
+
+
+# --- Task 3a-3: eigen-metrics on the frozen Jacobian's spectrum -- next_distinct_gap fixes
+# spectral_gap's (TDD-7) conjugate-pair blind spot (raw a1-a2 array-order reads 0 when the leading
+# mode is a complex-conjugate pair); leading_subspace_indices generalizes "the leading mode" to
+# "the leading invariant subspace" (the pair, or a near-degenerate real group); pair_loading then
+# builds a real non-negative spatial field from that subspace via the existing mode_e_field
+# state-unpacking helper (not a hardcoded re-derivation). Verbatim from
+# .superpowers/sdd/task-3a-3-brief.md Step 1. ---
+
+def test_next_distinct_gap_and_leading_subspace():
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import next_distinct_gap, leading_subspace_indices
+
+    ev = np.array([-0.1 + 3j, -0.1 - 3j, -0.5 + 0j])
+    assert abs(next_distinct_gap(ev, min_sep=1e-3) - 0.4) < 1e-9            # skips conjugate member
+    assert set(leading_subspace_indices(ev, min_sep=1e-3, imag_tol=1e-3)) == {0, 1}   # conj pair
+
+
+def test_pair_loading_uses_state_helper_nonneg():
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import Grid, pair_loading
+
+    g = Grid(n=2, L=1.0)
+    N = g.size
+    v1 = np.zeros(6 * N, complex)
+    v1[0] = 1 + 1j
+    R = np.column_stack([v1, np.conj(v1)])
+    load = pair_loading(R, (0, 1), g)                        # via mode_e_field, not hardcoded unpacking
+    assert load.shape == (g.n, g.n) and np.all(load >= 0)
