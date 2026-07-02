@@ -89,6 +89,24 @@ date 2026-07-02 · 分支 `topic5-v2-phase1-build`（worktree `/home/honglab/lei
 
 **读表纪律（勿过读）**：格子是**平滑场的 |corr| 幅度**，相对 0 天然偏高（平滑 + 取绝对值，随机场也给正值）——这是**描述性幅度 + 频带轮廓**，**不是显著性判决**。"是否真存在相关"须看能否超过空间 / 顺序 / 1-f null（= P1b spec §1–§3、§5，尚未跑，held on user go）。per-subject 异质大（548/583/590/916 ~0.85–0.95；620/442/139 低）；yuquan 两行 n_sz=1/2、eeg-onset 锚，个体值几乎无发作间稳健性。数据来源：`results/topic5_ictal_recruitment/v2_band_scan/{narrow,broad}/phase1_alignment_raw_subject_summary.csv`（`align_abs_maxab`，`used_fixed_mask=True`）。
 
+## Formal-null 结果（narrow full-20 · **PRELIMINARY dev n_perm=100** · broad + full n_perm=1000 pending）
+
+> 判读 frame = spec §EXP（**exploratory null-positive spatial scaffold**）。以下是 dev（n_perm=100，p 触底 0.0099、subject-wide 弱 null）预览；full-1000（detached+resumable 跑着）+ broad 跑完升级本节。**当前不作 formal / final 结论。**
+
+**怎么测的（朴素话）**：把每个发作早期频带能量空间图与间期 HFO geometry 场对齐（§EXP primary endpoint = raw alignment），问它能否超过两种巧合——(A) 把发作能量图在同一根电极杆内洗牌（spatial null）；(B) 保留"哪些触点 HFO 多"、只打乱间期时序（order null）。统计 = subject-level cohort permutation of the median + max-over-bands（§2；**7 primary bands 为 FWER family**，composite descriptive）。
+
+**narrow（core 池 n=20，dev preview）**：
+- **band-generic null-positive（弱 null 下）**：7 primary bands 里 **6/7** 的 cohort 排列 p 与 max-over-bands FWER 都 <0.05（δ/θ/α/β/γ/hg-low-ripple；仅 ripple_high 不过），delta 正。→ 对齐超过空间平滑 null **不是某频带独有，是跨频段的 spatial recruitment**。
+- **⚠️ 但这是 subject-wide 弱 null**：只有 **2/20** 被试达 within_shaft_strong（SEEG 杆稀疏），cohort weakest-wins → subject_wide_weak，**formal within-shaft Gate A unresolved**（不是 passed 也不是 failed）；弱 null 破坏杆内局部自相关 → anti-conservative，上面的显著性**很可能被抬高**。
+- **order null（supportive/secondary）**：strong 子集 **13/20**，所有频带 cohort 排列 p 正（扣掉 HFO 富集地形后仍对上）。band-generic + anti-conservative caveat → 只作辅助证据，**不升 timing-order 机制**。
+
+**broad（扩展池 n=17）**：full-20 broad formal null **pending full-1000**（dev-13 曾见 fast/LVFA-enriched：beta / LVFA_13_80 / high-gamma 正、beta+LVFA 过 max-over-bands，ripple 经 FWER 掉）。跑完补。
+
+**结论（§EXP 锁定 wording，preliminary）**：
+> 本阶段结果支持：间期 HFO-derived geometry 可能标记一种发作早期空间招募 scaffold；在 narrow/core 读出更强、更 band-generic。因 formal within-shaft spatial null 尚未可评估、weak/global null 可能偏乐观，目前只作**探索性 null-positive spatial co-structure**，不上升为 HFO-specific / LVFA-specific / timing-order 机制。
+
+**tags**：`legacy: PASS` · `raw observed alignment: positive, narrow>broad, band-generic` · `spatial null (weak/subject-wide): 6/7 primary FWER-positive (dev n=100, likely inflated)` · `formal within-shaft Gate A: unresolved (2/20 strong)` · `order null (strong subset 13/20): supportive` · `full n_perm=1000 + broad: pending` · `Gate B/C: not run (supplementary per §EXP)`。
+
 ## 0. 摘要（朴素话，措辞见上方"口径修正"，频带特异描述已降级为 narrow band-generic）
 
 **测了什么**：癫痫病人发作**刚起头 20 秒**里，每个频带（δ→ripple）的能量在电极阵列上"点亮"成一张空间图；间期时同一批触点各自有一条"平时谁先谁后"的 HFO 传播几何（G_HFO）。我们问：发作早期某频带的能量场，长得像不像间期这张顺序几何图，而且这种像**能不能扛过三道质疑**——(A) 只是空间涂抹？(B) 只是宽带整体招募？(C) 只是 1/f 背景？
