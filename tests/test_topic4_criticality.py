@@ -263,3 +263,87 @@ def test_pair_loading_uses_state_helper_nonneg():
     R = np.column_stack([v1, np.conj(v1)])
     load = pair_loading(R, (0, 1), g)                        # via mode_e_field, not hardcoded unpacking
     assert load.shape == (g.n, g.n) and np.all(load >= 0)
+
+
+# --- Task 3a-3 review F2: leading_subspace_indices's complex branch paired the leading eigenvalue
+# with argmin(|ev - conj(ev[i])|) UNCONDITIONALLY. If the true conjugate partner was truncated out
+# of the array (e.g. rate_eigenpairs(n_modes=...) split a pair), that unconditional pairing
+# silently mis-pairs: alone, it self-pairs to (0,0) (inflating downstream loadings by sqrt(2));
+# with an unrelated real mode present, it fake-pairs to (0,1). Fixed to only accept the candidate
+# as a genuine partner (different index AND within imag_tol of the true conjugate); otherwise it
+# falls back to the lone-mode tuple (i,). ---
+
+def test_leading_subspace_indices_no_fake_pair_when_partner_truncated():
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import leading_subspace_indices
+
+    # true partner missing (only an unrelated real mode is present) -> must not fake-pair with it
+    ev = np.array([-0.1 + 3j, -0.5])
+    assert leading_subspace_indices(ev, min_sep=1e-3, imag_tol=1e-3) == (0,)
+
+
+def test_leading_subspace_indices_lone_complex_mode_not_self_paired():
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import leading_subspace_indices
+
+    # single complex eigenvalue, no partner anywhere in the array -> must not self-pair to (0, 0)
+    ev = np.array([-0.1 + 3j])
+    assert leading_subspace_indices(ev, min_sep=1e-3, imag_tol=1e-3) == (0,)
+
+
+# --- Task 3a-3 review F1: left_mode_input_projection had zero test coverage. Its
+# biorthonormalization (psi = L[:,k] / conj(c), c = vdot(L[:,k], R[:,k])) is subtle: the reviewer
+# proved that abs(vdot(l/c, b)) and abs(vdot(l/conj(c), b)) are mathematically IDENTICAL (both
+# reduce to abs(vdot(l, b)) / abs(c)), so a value-only test cannot catch a conj(c) bug. Covered in
+# three parts: (1) a hand-verified value check for wiring/sum/sqrt/idx bugs, (2) the
+# scale-invariance property that DOES distinguish the two forms (only the correct
+# self-normalizing psi is invariant to an arbitrary rescale of the RAW left column), and (3) a
+# regression tie-in showing the idx=(0,) single-mode case reduces exactly to the existing trusted
+# core_controllability helper. ---
+
+def test_left_mode_input_projection_value_check():
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import left_mode_input_projection
+
+    L = np.array([[3., 0.], [0., 5.]])
+    R = np.eye(2)
+    b = np.array([1., 1.])
+    # c0=3, psi0=l0/3=[1,0], vdot(psi0,b)=1; c1=5, psi1=l1/5=[0,1], vdot(psi1,b)=1; sqrt(1^2+1^2)
+    assert left_mode_input_projection(L, R, (0, 1), b) == pytest.approx(np.sqrt(2), abs=1e-9)
+
+
+def test_left_mode_input_projection_scale_invariant_to_raw_left_column():
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import left_mode_input_projection
+
+    L = np.array([[3., 0.], [0., 5.]], dtype=complex)
+    R = np.eye(2, dtype=complex)
+    b = np.array([1., 1.], dtype=complex)
+    base = left_mode_input_projection(L, R, (0,), b)
+
+    L_scaled = L.copy()
+    L_scaled[:, 0] *= (2 + 3j)      # arbitrary nonzero complex rescale of the RAW left column
+    scaled = left_mode_input_projection(L_scaled, R, (0,), b)
+    assert scaled == pytest.approx(base, abs=1e-9)
+
+
+def test_left_mode_input_projection_matches_core_controllability_single_mode():
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+        solve_operating_point, build_jacobian_dense, rate_eigenpairs,
+        core_perturbation_vector, core_controllability, left_mode_input_projection,
+    )
+
+    g = Grid(n=6, L=5.0)
+    k = build_kernels(g, ell_perp=0.6)
+    core = make_core_mask(g, kind="single", radius=0.9)
+    exc = build_excitability_field(g, core, mu_core=1.0)
+    inh = build_inhibition_field(g, core, q_global=0.94)
+
+    op = solve_operating_point(g, k, exc, inh)
+    res = rate_eigenpairs(build_jacobian_dense(g, k, op), g)
+    b_core = core_perturbation_vector(g, core)
+
+    subspace = left_mode_input_projection(res.left, res.right, (0,), b_core)
+    single = core_controllability(res.left[:, 0], g, core)
+    assert subspace == pytest.approx(single, abs=1e-9)

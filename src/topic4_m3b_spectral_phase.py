@@ -1668,14 +1668,22 @@ def leading_subspace_indices(eigenvalues: np.ndarray, min_sep: float = 1e-3,
                              imag_tol: float = 1e-3) -> tuple[int, ...]:
     """Indices spanning the leading invariant subspace of ``eigenvalues``.
 
-    If the leading eigenvalue is complex (``|Im| > imag_tol``), the leading mode is a conjugate
-    PAIR: returns (leader, conjugate partner). Otherwise returns every index within ``min_sep`` of
-    the leading real part (a near-degenerate group of real modes)."""
+    If the leading eigenvalue is complex (``|Im| > imag_tol``), the leading mode is normally a
+    conjugate PAIR: returns (leader, conjugate partner). But the partner may have been truncated
+    out of ``eigenvalues`` (e.g. ``rate_eigenpairs(n_modes=...)`` split a pair) -- in that case the
+    nearest-to-conjugate candidate is not a genuine partner, and pairing with it anyway would
+    either self-pair (inflating downstream loadings by sqrt(2)) or fake-pair with an unrelated
+    mode. So the candidate is only accepted as the partner if it is a different index AND within
+    ``imag_tol`` of the true conjugate; otherwise this returns the lone-mode tuple (i,). If the
+    leading eigenvalue is real, returns every index within ``min_sep`` of the leading real part (a
+    near-degenerate group of real modes)."""
     ev = np.asarray(eigenvalues)
     i = int(np.argmax(ev.real))
     if abs(ev[i].imag) > imag_tol:
-        j = int(np.argmin(np.abs(ev - np.conj(ev[i]))))          # conjugate partner
-        return (i, j)
+        j = int(np.argmin(np.abs(ev - np.conj(ev[i]))))          # nearest candidate partner
+        if j != i and abs(ev[j] - np.conj(ev[i])) <= imag_tol:   # genuine conjugate partner present
+            return (i, j)
+        return (i,)                                              # partner absent (truncated) -> lone complex mode
     return tuple(int(x) for x in np.where(np.abs(ev.real - ev[i].real) <= min_sep)[0])
 
 
