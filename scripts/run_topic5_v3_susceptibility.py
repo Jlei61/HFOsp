@@ -120,19 +120,27 @@ def _base_row(ds_sid: str, cohort: str) -> dict:
 def _line_length_rate(env: np.ndarray) -> np.ndarray:
     """Per-contact line-length rate over the FULL phase span (brief step 3).
 
-    ``llr[c] = sum(abs(diff(E[c]))) / (n_t - 1)`` — NOT
+    ``llr[c] = sum(abs(diff(x))) / (x.size - 1)`` where ``x`` is channel
+    ``c``'s samples restricted to finite values — NOT
     ``src.topic5_v2_criticality.contact_susceptibility``'s late-minus-early
     delta (that helper compares two SUB-windows within one call; here we want
     the raw per-phase absolute roughness of the WHOLE phase span, no
     windowing). ``contact_susceptibility`` is referenced only for the
-    line-length-rate FORMULA, never called directly. A phase span with fewer
-    than 2 samples returns all-NaN rather than dividing by zero.
+    line-length-rate FORMULA, never called directly. Matches that helper's
+    ``_linelength`` finite-sample handling: an interior NaN sample is
+    filtered out and the rate is computed over the remaining finite subset,
+    rather than propagating to NaN the whole channel; a channel needs at
+    least 3 finite samples to form a diff, else it returns NaN for that
+    channel alone.
     """
     env = np.asarray(env, dtype=float)
-    n_t = env.shape[1]
-    if n_t < 2:
-        return np.full(env.shape[0], float("nan"))
-    return np.sum(np.abs(np.diff(env, axis=1)), axis=1) / (n_t - 1)
+    out = np.full(env.shape[0], float("nan"))
+    for c in range(env.shape[0]):
+        x = env[c][np.isfinite(env[c])]
+        if x.size < 3:
+            continue
+        out[c] = np.sum(np.abs(np.diff(x))) / (x.size - 1)
+    return out
 
 
 def _median_abs_beta(llr_dicts: list, names: list, rf: dict) -> float:
@@ -155,14 +163,23 @@ def _median_abs_beta(llr_dicts: list, names: list, rf: dict) -> float:
 
 
 def _p_lower(obs: float, perm: np.ndarray) -> float:
-    """One-sided-LOWER Δ-null p: ``(1 + #{perm <= obs}) / (1 + n_perm)``.
+    """One-sided-LOWER Δ-null p over FINITE draws only: ``(1 + #{finite <= obs}) / (1 + finite.size)``.
 
     H3a expects ``delta_beta_axis_strength < 0`` (axial order weakens into
     I1) — the mirror of H3b/H3c's one-sided-UPPER convention. Do not reuse an
-    upper-tail helper here.
+    upper-tail helper here. A perm draw can be NaN (the label null can
+    relabel a former non-axis contact into "axis"; that contact was never in
+    the interictal template, so it has no ``rank_forward`` entry, and
+    ``beta_axis`` can end up with fewer than 4 valid pairs and return NaN).
+    NaN never satisfies ``<=``, so counting it toward the denominator without
+    ever counting it toward the numerator would silently deflate p. Restrict
+    both counts to the finite subset; if no draw is finite the null is
+    undefined here and this returns NaN rather than a fabricated p.
     """
-    n = int(perm.size)
-    return (1 + int(np.sum(perm <= obs))) / (1 + n)
+    finite = perm[np.isfinite(perm)]
+    if finite.size == 0:
+        return float("nan")
+    return (1 + int(np.sum(finite <= obs))) / (1 + finite.size)
 
 
 def _phase_llr(env0: dict, all_clean: list, phase: str) -> tuple[list, set]:
@@ -256,9 +273,11 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
     p_spatial = _p_lower(obs_delta, delta_spatial)
     p_label = _p_lower(obs_delta, delta_label)
 
-    med_s = float(np.median(delta_spatial))
-    mad_s = float(np.median(np.abs(delta_spatial - med_s)))
-    beta_axis_delta_null_z = float((obs_delta - med_s) / mad_s) if mad_s > 0 else float("nan")
+    med_s = float(np.nanmedian(delta_spatial))
+    mad_s = float(np.nanmedian(np.abs(delta_spatial - med_s)))
+    beta_axis_delta_null_z = (
+        float((obs_delta - med_s) / mad_s) if np.isfinite(mad_s) and mad_s > 0 else float("nan")
+    )
 
     # ---- onset jitter +-10 s: reload windows at shifted anchors (i1_eligible
     # gate stays at shift 0 inside the loader), recompute obs_delta, require
