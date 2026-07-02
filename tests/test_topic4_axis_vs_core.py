@@ -7,6 +7,10 @@ import pytest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
+for _p in (os.path.join(ROOT, "scripts"), os.path.join(ROOT, "scripts", "paper_figures"),
+           os.path.join(ROOT, "src", "snn_engine")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from src.topic4_axis_vs_core import (linear_montage, split_source_axis,  # noqa: E402
                                      select_footprint, onset_time_field, runaway_delay_ms)
@@ -65,3 +69,33 @@ def test_runaway_delay_ms():
     assert np.isclose(runaway_delay_ms(1591.9, 757.5, 2500.0), 834.4)
     assert np.isclose(runaway_delay_ms(None, 757.5, 2500.0), 2500.0 - 757.5)   # prevented within T
     assert np.isnan(runaway_delay_ms(100.0, None, 2500.0))                     # no baseline runaway
+
+
+def _fake_small_core_S(L=20.0, core_radius=3.0):
+    # deterministic synthetic sheet: E cells on a grid, I cells appended; centre core.
+    import numpy as np
+    xs = np.linspace(1, L - 1, 24)
+    gx, gy = np.meshgrid(xs, xs)
+    posE = np.column_stack([gx.ravel(), gy.ravel()])
+    posI = posE[:50] + 0.1
+    pos = np.vstack([posE, posI])
+    NE = len(posE); N = len(pos)
+    labels = np.zeros(N, int); labels[NE:] = 1
+    center = np.array([L / 2, L / 2]); u = np.array([np.cos(np.pi / 4), np.sin(np.pi / 4)])
+    core_mask = np.zeros(N, bool)
+    core_mask[:NE] = np.linalg.norm(posE - center, axis=1) <= core_radius
+    return dict(net={"pos": pos}, posE=posE, posI=posI, N=N, NE=NE, labels=labels,
+               center=center, axis_unit=u, L=L, core_mask=core_mask,
+               layout={"kind": "stage4_patch", "foci": [center.tolist()], "core_r": core_radius})
+
+
+def test_build_small_core_targets_fairness():
+    from run_stage4_axis_vs_core_stim import build_small_core_targets
+    S = _fake_small_core_S(core_radius=3.0)
+    t = build_small_core_targets(S, core_radius=3.0, n_contacts=11, pitch=1.2, r_stim=2.0, N=4)
+    is_E = np.asarray(S["labels"]) == 0
+    assert t["core_mask"].shape[0] == S["N"] and t["axis_mask"].shape[0] == S["N"]
+    assert (t["core_mask"] & ~is_E).sum() == 0 and (t["axis_mask"] & ~is_E).sum() == 0   # E only
+    assert len(t["core_contact_idx"]) == 4 == len(t["axis_contact_idx"])                 # fixed footprint
+    assert t["core_mask"].sum() > 0 and t["axis_mask"].sum() > 0
+    assert (t["core_mask"] & t["axis_mask"]).sum() == 0                                  # disjoint clamp sets
