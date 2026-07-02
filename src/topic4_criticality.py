@@ -551,8 +551,14 @@ def solve_branches(grid, kernels, exc, inh, cfg: Dict[str, Any], *, prev=None, s
     branches: list = []
     for ci, members in enumerate(clusters):
         rep_op = solved[members[0]][1]
-        alpha1 = float(
-            rate_eigenpairs(build_jacobian_dense(grid, kernels, rep_op), grid).eigenvalues[0].real)
+        # F3 EMPTY-GUARD (matches evaluate_actual_trajectory_points, review finding): an unresolved /
+        # empty spectrum cannot be indexed [0] -- fall back to NaN rather than crash. branch_alpha1 is
+        # a descriptive JSON field computed AFTER `reasons` (branch selection) is already finalized
+        # above, so a NaN here cannot perturb which cluster is low/high/saturated/ambiguous.
+        _eig = rate_eigenpairs(build_jacobian_dense(grid, kernels, rep_op), grid)
+        alpha1 = (float(_eig.eigenvalues[0].real)
+                  if (_eig.status == "resolved" and _eig.eigenvalues.size > 0)
+                  else float("nan"))
         branches.append(Branch(
             branch_id=ci,
             branch_rate_mean=float(rep_op.rE.mean()),

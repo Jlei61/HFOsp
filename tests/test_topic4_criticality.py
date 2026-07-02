@@ -235,6 +235,43 @@ def test_solve_branches_random_small_seed_key_none_does_not_crash():
     assert [x.branch_id for x in b1] == [x.branch_id for x in b2]
 
 
+# --- Robustness review (T3a-5b capstone finding): solve_branches's per-cluster branch_alpha1 read
+# (`rate_eigenpairs(...).eigenvalues[0]`) IndexErrors/ValueErrors on an unresolved/empty spectrum --
+# the same failure mode the F3 EMPTY-GUARD already handles in evaluate_actual_trajectory_points a
+# few lines away. Guard added: branch_alpha1 falls back to NaN, never crashes. branch_alpha1 is a
+# purely descriptive field computed in the per-branch loop AFTER `reasons` (the saturated/low/high/
+# ambiguous labeling) is already finalized from branch_rate_mean + op.saturated -- so NaN here cannot
+# perturb branch selection. ---
+
+def test_solve_branches_degenerate_spectrum_gives_nan_alpha1_not_crash(monkeypatch):
+    import math
+    import numpy as np
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+    )
+    import src.topic4_m3b_spectral_phase as spm
+    from src.topic4_criticality import solve_branches, load_crit_config
+
+    g = Grid(n=6, L=5.0)
+    k = build_kernels(g, ell_perp=0.6)
+    core = make_core_mask(g, kind="single", radius=0.9)
+    exc = build_excitability_field(g, core, mu_core=0.9)
+    inh = build_inhibition_field(g, core, q_global=0.94)
+
+    empty = np.empty((6 * g.size, 0))
+    degenerate = spm.EigResult(np.array([]), empty, empty, "unresolved", np.inf, np.inf, np.inf, False)
+    # solve_branches does `from src.topic4_m3b_spectral_phase import ... rate_eigenpairs` INSIDE its
+    # body (fresh lookup every call) -- patch the source module's attribute, not a nonexistent
+    # module-level name in topic4_criticality.
+    monkeypatch.setattr(spm, "rate_eigenpairs", lambda J, grid, **kw: degenerate)
+
+    branches = solve_branches(g, k, exc, inh, load_crit_config(), seed_key=(2, 3))   # must not raise
+    assert len(branches) > 0
+    for b in branches:
+        assert math.isnan(b.branch_alpha1)
+        assert b.branch_selected_reason in {"low_branch", "high_branch", "saturated_branch", "ambiguous_branch"}
+
+
 # --- Task 3a-3: eigen-metrics on the frozen Jacobian's spectrum -- next_distinct_gap fixes
 # spectral_gap's (TDD-7) conjugate-pair blind spot (raw a1-a2 array-order reads 0 when the leading
 # mode is a complex-conjugate pair); leading_subspace_indices generalizes "the leading mode" to
