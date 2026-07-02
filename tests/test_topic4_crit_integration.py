@@ -55,3 +55,17 @@ def test_export_fixture_passes_and_real_is_fail_closed(tmp_path):
     assert v in {"phase_map_trajectory", "mechanism_candidate_only", "refused"}   # never silently upgraded
     if v != "phase_map_trajectory":
         assert (tmp_path / "real" / "m3a_interface_audit.json").exists()          # blocking reason written
+
+
+@pytest.mark.integration
+@_needs_figdata
+def test_atlas_is_conditional_and_not_verdict_source(tmp_path):
+    from src.topic4_criticality import build_conditional_atlas, load_crit_config
+    from src.sef_hfo_m3a_export import default_precalib_mapping_and_ranges
+    m, r = default_precalib_mapping_and_ranges("m3a_v2_2_approach")
+    build_conditional_atlas(m, r, load_crit_config(), out_dir=tmp_path)
+    meta = json.loads((tmp_path / "finite_jacobian_grid.json").read_text())
+    assert meta["m3a_overlay_consumable"] is True
+    assert meta["atlas_name"].startswith("conditional_2d_atlas_at_phase_recovery=")
+    assert meta["verdict_source"] == "actual_trajectory_not_atlas"          # #1 guard
+    assert meta["axes_built_from_slow_to_rate_mapping_id"] == "m3a_v2_2_approach"

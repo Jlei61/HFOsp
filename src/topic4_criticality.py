@@ -11,10 +11,12 @@ docs/superpowers/specs/2026-07-02-topic4-m3v2-2-approach-criticality-design.md);
 kept to the config loader only for now.
 """
 from __future__ import annotations
+import json
 import os
 from pathlib import Path
 from typing import Any, Dict
 
+import numpy as np
 import yaml
 
 _DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config" / "topic4_criticality.yaml"
@@ -130,3 +132,128 @@ def export_v2_2_handoff(out_dir, cfg: Dict[str, Any]) -> str:
     )
     audit = write_handoff_artifacts(str(out_dir), **h)
     return audit["overlay_verdict"]
+
+
+# --------------------------------------------------------------------------- #
+# Conditional 2-D atlas (Task 2): VISUALIZATION/CONTEXT ONLY -- NEVER the verdict #
+# --------------------------------------------------------------------------- #
+# This runs BEFORE g_K/h_G are wired into solve_operating_point (Task 2.5). The atlas's two
+# axes -- phase_x_core and phase_y_global -- are both inhibition-efficacy knobs
+# (src.topic4_m3b_spectral_phase.build_inhibition_field's q_core/q_global) already handled by
+# solve_operating_point; phase_recovery (g_K) is FIXED/projected-out, not injected. The verdict
+# for whether the M3-v2.2 trajectory approaches criticality NEVER comes from this atlas -- it
+# comes from the actual trajectory (Task 3a-5); the `verdict_source` meta field is the guard
+# against a future reader mistaking this 2-D slice for that verdict.
+
+
+def _invert_phase_transform(transform: Dict[str, Any], phase: float) -> float:
+    """Invert a mapping coordinate transform: normalized phase in [0,1] -> raw slow-var value.
+
+    Mirrors src.sef_hfo_m3_interface._apply_transform's TRANSFORM_TYPES enum (identity/affine/
+    reciprocal_affine) but solves for the input, not the output. Needed because the atlas is
+    built over normalized phase nodes while solve_operating_point needs the raw knob (q_core /
+    q_global), and no inverse of that transform exists elsewhere in the codebase.
+    """
+    ttype = transform["type"]
+    a = float(transform.get("a", 1.0))
+    b = float(transform.get("b", 0.0))
+    if ttype == "identity":
+        return float(phase)
+    if ttype == "affine":
+        return (float(phase) - b) / a
+    if ttype == "reciprocal_affine":
+        return a / (float(phase) - b)
+    raise ValueError(f"unknown transform.type {ttype!r}")
+
+
+def _resolve_phase_recovery(cfg: Dict[str, Any]) -> tuple[str, float]:
+    """Resolve the FIXED phase_recovery slice the atlas is conditioned on.
+
+    Only policy=trajectory_median is implemented (the current config-of-record,
+    config/topic4_criticality.yaml atlas.phase_recovery_condition): the median of the T1
+    trajectory's raw g_K trace (trace_gK_axial), from the SAME default v2.2 transition run
+    T1's golden fixture is captured against (re-use, not re-invent, per CLAUDE.md 6.1). g_K is
+    NOT injected into the atlas op-solve (Task 2.5 wires that); this value is provenance
+    recorded into atlas_name only.
+    """
+    cond = cfg["atlas"]["phase_recovery_condition"]
+    policy = cond["policy"]
+    if policy != "trajectory_median":
+        raise NotImplementedError(
+            f"phase_recovery_condition.policy={policy!r} not implemented; "
+            "only 'trajectory_median' is wired (config-of-record).")
+    from src.sef_hfo_transition_sim import run_transition, default_transition_config
+    res = run_transition(default_transition_config())
+    value = float(np.median(res["trace_gK_axial"]))
+    return policy, value
+
+
+def build_conditional_atlas(mapping: Dict[str, Any], ranges: Dict[str, Any],
+                            cfg: Dict[str, Any], out_dir) -> Dict[str, Any]:
+    """Build the conditional 2-D phase atlas and write finite_jacobian_grid.json.
+
+    Scans a normalized phase_x_core x phase_y_global grid in [0,1] (atlas.normalized_grid_n
+    nodes per axis) at a FIXED phase_recovery slice (provenance recorded in atlas_name),
+    inverting the mapping's on-axis transforms to the raw q_core / q_global inhibition knobs
+    solve_operating_point already understands via build_inhibition_field -- mu_core stays 0.0
+    and g_K is never injected (not wired until Task 2.5). VISUALIZATION/CONTEXT ONLY: the
+    verdict_source meta field always reads "actual_trajectory_not_atlas".
+    """
+    import src.topic4_m3b_spectral_phase as spm
+
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    policy, phase_recovery_value = _resolve_phase_recovery(cfg)
+    mapping_id = mapping["slow_to_rate_mapping_id"]
+
+    n = int(cfg["atlas"]["normalized_grid_n"])
+    x_range = ranges["phase_x_core"]
+    y_range = ranges["phase_y_global"]
+    phase_x_vals = np.linspace(float(x_range["min"]), float(x_range["max"]), n)
+    phase_y_vals = np.linspace(float(y_range["min"]), float(y_range["max"]), n)
+    x_transform = mapping["coordinates"]["phase_x_core"]["transform"]
+    y_transform = mapping["coordinates"]["phase_y_global"]["transform"]
+
+    # Modest spatial grid -- the atlas is viz-only, a large grid would make ~n^2 phase nodes
+    # minutes-to-hours. n=8, L=grid_L matches the established M3B primary phase-map grid
+    # (scripts/build_m3b_spectral_outputs.py).
+    grid = spm.Grid(n=8, L=float(cfg["atlas"]["grid_L"]))
+    kernels = spm.build_kernels(grid)
+    core = spm.make_core_mask(grid, kind="single", radius=0.9)
+
+    points: list = []
+    rows: list = []
+    for py in phase_y_vals:
+        q_global = _invert_phase_transform(y_transform, float(py))
+        for px in phase_x_vals:
+            q_core = _invert_phase_transform(x_transform, float(px))
+            p = spm.analyze_spectral_point(grid, kernels, core, mu_core=0.0,
+                                           q_global=q_global, q_core=q_core)
+            points.append(p)
+            row = p.as_row()
+            row["phase_x_core"] = float(px)
+            row["phase_y_global"] = float(py)
+            rows.append(row)
+
+    meta = {
+        "m3a_overlay_consumable": True,
+        "atlas_name": f"conditional_2d_atlas_at_phase_recovery={policy}:{phase_recovery_value:.6g}",
+        "verdict_source": "actual_trajectory_not_atlas",
+        "axes_built_from_slow_to_rate_mapping_id": mapping_id,
+        "axis_space": "normalized_unit",
+        "x_axis": "phase_x_core (normalized core inhibition-exhaustion phase; raw knob q_core)",
+        "y_axis": "phase_y_global (normalized global inhibition-exhaustion phase; raw knob q_global)",
+        "phase_recovery_policy": policy,
+        "phase_recovery_value": phase_recovery_value,
+        "normalized_grid_n": n,
+        "grid_n": grid.n, "grid_L": grid.L,
+        "phase_x_values": [float(v) for v in phase_x_vals],
+        "phase_y_values": [float(v) for v in phase_y_vals],
+        "unresolved_fraction": spm.unresolved_fraction(points),
+        "mode_class_counts": {c: sum(1 for p in points if p.mode_class == c)
+                              for c in sorted({p.mode_class for p in points})},
+        "points": rows,
+    }
+    (out_dir / "finite_jacobian_grid.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    return meta
