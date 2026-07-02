@@ -331,3 +331,48 @@ def build_conditional_atlas(mapping: Dict[str, Any], ranges: Dict[str, Any],
     }
     (out_dir / "finite_jacobian_grid.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
     return meta
+
+
+# --------------------------------------------------------------------------- #
+# Operating-point quality gate (Task 3a-1, #5/#7/#8)                            #
+# --------------------------------------------------------------------------- #
+
+
+def rate_mismatch(rate_sim, z_star, rate_scale_floor):
+    import numpy as np
+    a = np.asarray(rate_sim, float).ravel()
+    b = np.asarray(z_star, float).ravel()
+    rms = float(np.sqrt(np.mean((a - b) ** 2)))
+    scale = max(float(np.median(np.abs(b))), float(rate_scale_floor))     # #8 quiet-branch floor
+    return rms, rms / scale
+
+
+def adiabatic_index(slow_speed, alpha1, slow_scale, eps=1e-9):
+    tf = (-1.0 / alpha1) if alpha1 < 0 else float("inf")
+    return float(slow_speed) * tf / (float(slow_scale) + eps)
+
+
+_REQ = ["converged", "saturated", "residual_rms", "rate_mismatch_abs", "rate_mismatch_rel",
+        "slow_mismatch_rel", "adiabatic_index", "alpha_drift_index"]
+
+
+def qualify_point(f, cfg):
+    g = cfg["quality_gate"]
+    for k in _REQ:
+        if k not in f or f[k] is None:
+            return (False, f"missing_{k}")                               # #5 fail-closed
+    if not f["converged"]:
+        return (False, "nonconverged")
+    if f["saturated"]:
+        return (False, "saturated")
+    if f["residual_rms"] >= g["residual_rms_tol"]:
+        return (False, "high_residual")
+    if f["rate_mismatch_abs"] >= g["rate_mismatch_abs_tol"] and f["rate_mismatch_rel"] >= g["rate_mismatch_rel_tol"]:
+        return (False, "rate_mismatch")                                   # #8 both abs AND rel
+    if f["slow_mismatch_rel"] >= g["slow_mismatch_rel_tol"]:
+        return (False, "slow_mismatch")
+    if f["adiabatic_index"] >= g["adiabatic_index_tol"]:
+        return (False, "not_quasistatic")
+    if f["alpha_drift_index"] >= g["alpha_drift_index_tol"]:
+        return (False, "alpha_drift_too_fast")                            # #7
+    return (True, "qualified")

@@ -109,3 +109,27 @@ def test_slow_to_ratefield_sign_ok_all_three_pass():
 
     result = slow_to_ratefield_sign_ok(load_crit_config())
     assert result == {"q_I": True, "g_K": True, "h_G": True}
+
+
+# --- Task 3a-1: operating-point quality gate -- rate_mismatch (abs+rel floor), adiabatic_index,
+# and qualify_point's fail-closed missing-field + alpha-drift gates. Verbatim from
+# .superpowers/sdd/task-3a-1-brief.md Step 1. ---
+
+def test_quality_gate_all_review_fixes():
+    import numpy as np
+    from src.topic4_criticality import rate_mismatch, adiabatic_index, qualify_point, load_crit_config
+
+    c = load_crit_config()
+    a, r = rate_mismatch(np.array([2.1, 2.1]), np.array([2.0, 2.0]), 0.05)
+    assert abs(r - 0.05) < 1e-9
+    aq, rq = rate_mismatch(np.array([0.06, 0.0]), np.array([0.0, 0.0]), 0.05)   # #8 quiet branch: floor prevents blow-up
+    assert rq < 1.0
+    assert abs(adiabatic_index(1.0, -2.0, 1.0) - 0.5) < 1e-9   # eps=1e-9 floor perturbs bit-exact ==0.5; same tol as rate_mismatch check above
+    ok, why = qualify_point({"converged": True, "saturated": False, "residual_rms": 1e-6, "rate_mismatch_abs": 0.01,
+        "rate_mismatch_rel": 0.01, "slow_mismatch_rel": 0.01, "adiabatic_index": 0.05, "alpha_drift_index": 0.05}, c)
+    assert ok and why == "qualified"
+    bad, why2 = qualify_point({"converged": True, "saturated": False, "residual_rms": 1e-6, "rate_mismatch_abs": 0.01,
+        "rate_mismatch_rel": 0.01, "slow_mismatch_rel": 0.01, "adiabatic_index": 0.05, "alpha_drift_index": 0.9}, c)
+    assert (not bad) and why2 == "alpha_drift_too_fast"                         # #7 enforced
+    miss, why3 = qualify_point({"converged": True, "saturated": False, "residual_rms": 1e-6}, c)
+    assert (not miss) and why3.startswith("missing_")                          # #5 fail-closed
