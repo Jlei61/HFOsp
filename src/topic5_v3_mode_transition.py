@@ -13,9 +13,10 @@ from typing import Mapping
 
 import numpy as np
 import yaml
+import scipy.linalg
 from scipy.stats import spearmanr
 
-from src.topic5_v2_criticality import _as_2d_bool, avalanche_atm
+from src.topic5_v2_criticality import _as_2d_bool, avalanche_atm, prepare_var_window, var1_ridge
 
 _ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _ROOT / "config" / "topic5_v3.yaml"
@@ -500,3 +501,154 @@ def net_offaxis_flux(
     """
     flux = compartment_flux(atm, axis_idx, nonaxis_idx, normalization)
     return float(flux["flux_A2N"] - flux["flux_N2A"])
+
+
+def demean_window(X: np.ndarray) -> np.ndarray:
+    """Per-contact within-window demean + linear detrend; no standardize.
+
+    Thin wrapper around V2 ``prepare_var_window(X, standardize=False)``. The
+    dynamics layer (reactivity gains, mode-shift) measures each contact's
+    variance directly, so standardizing away its scale would erase exactly
+    the signal these estimators are built to see.
+    """
+    return prepare_var_window(X, standardize=False)
+
+
+def project_2d(X: np.ndarray, e_axis: np.ndarray, e_nonaxis: np.ndarray) -> np.ndarray:
+    """Project ``X`` (n_contacts, n_t) onto the ``(axis, non-axis)`` pair -> ``Z`` (2, n_t).
+
+    ``Q = vstack([e_axis, e_nonaxis])``, ``Z = Q @ X``. The caller is
+    responsible for demeaning ``X`` first (``demean_window``); this function
+    only projects.
+    """
+    Q = np.vstack([np.asarray(e_axis, dtype=float), np.asarray(e_nonaxis, dtype=float)])
+    return Q @ np.asarray(X, dtype=float)
+
+
+def direct_2d_var(Z: np.ndarray, alpha: float) -> np.ndarray:
+    """Fit the direct 2D VAR operator ``B`` on the projected ``(axis, non-axis)`` pair.
+
+    Thin wrapper around V2 ``var1_ridge`` — the primary, well-posed dynamics
+    operator (2D, unlike the ``n_contacts``-dimensional full VAR).
+    """
+    return var1_ridge(Z, alpha)
+
+
+def lowrank_var(X: np.ndarray, rank: int, alpha: float) -> tuple[np.ndarray, np.ndarray]:
+    """Low-rank (SVD/DMD-style) VAR: demean -> SVD -> ridge-VAR on the top-``rank`` latent coords.
+
+    ``Xc = demean_window(X)``; ``U, S, Vt = svd(Xc, full_matrices=False)``;
+    ``U_r = U[:, :rank]`` (orthonormal latent basis); ``q = U_r.T @ Xc``
+    (latent-space time series); ``B_r = var1_ridge(q, alpha)``. This is the
+    H3c subspace mode-shift carrier (well-posed on the 60-124-contact
+    all-clean pool, unlike full ridge-VAR). ``rank`` is clipped to
+    ``min(Xc.shape)`` (the number of SVD components ``svd`` can actually
+    return) rather than raising when a caller requests more components than
+    exist.
+    """
+    Xc = demean_window(X)
+    U, _S, _Vt = np.linalg.svd(Xc, full_matrices=False)
+    rank_eff = min(int(rank), U.shape[1])
+    U_r = U[:, :rank_eff]
+    q = U_r.T @ Xc
+    B_r = var1_ridge(q, alpha)
+    return B_r, U_r
+
+
+def map_lowrank_vector_to_contacts(u_r: np.ndarray, U_r: np.ndarray) -> np.ndarray:
+    """Map a latent-space vector back to contact space and L2-normalize.
+
+    ``u_c = U_r @ u_r``. A zero-norm result (degenerate ``U_r``/``u_r``) is
+    returned unnormalized rather than dividing by zero — it is already the
+    zero vector in that case.
+    """
+    u_c = np.asarray(U_r, dtype=float) @ np.asarray(u_r, dtype=float)
+    norm = np.linalg.norm(u_c)
+    return u_c / norm if norm > 0 else u_c
+
+
+def finite_time_gain(A: np.ndarray, k: int) -> float:
+    """Finite-time singular gain ``sigma_max(A^k)``.
+
+    Captures non-normal transient amplification: a stable matrix
+    (``spectral_radius(A) < 1``) can still have ``finite_time_gain(A, k) >
+    1`` for small ``k`` if ``A`` is strongly non-normal (large off-diagonal
+    shear) — the spectral radius alone would miss this.
+    """
+    Ak = np.linalg.matrix_power(np.asarray(A, dtype=float), int(k))
+    return float(np.linalg.svd(Ak, compute_uv=False)[0])
+
+
+def dominant_right_singular_vector(A: np.ndarray, k: int) -> np.ndarray:
+    """Input direction maximally amplified by ``A^k`` (dominant right singular vector).
+
+    For a non-normal system, the direction of largest finite-time
+    amplification is a singular vector, not an eigenvector — this is what
+    gets mapped back to contact space for the H3c mode-shift estimator.
+    """
+    Ak = np.linalg.matrix_power(np.asarray(A, dtype=float), int(k))
+    _U, _S, Vt = np.linalg.svd(Ak, full_matrices=False)
+    return Vt[0]
+
+
+def subspace_mode_shift(
+    u_contact: np.ndarray, P_N: np.ndarray, P_A: np.ndarray, normalization: str
+) -> float:
+    """Non-axis vs axis subspace energy of a contact-space vector.
+
+    ``energy_X = ||P_X @ u||**2`` for ``X`` in ``{N, A}``. ``"density"``
+    (primary) divides each energy by that subspace's rank (``trace`` of the
+    0/1 projector = its contact count), so unequal-size subspaces are
+    compared per-contact: ``||P_N u||**2/rank(P_N) - ||P_A u||**2/rank(P_A)``.
+    ``"raw"`` is the undivided difference (descriptive only — grows with the
+    larger compartment's size). A zero-rank subspace contributes 0.0 to the
+    density term rather than dividing by zero.
+    """
+    u = np.asarray(u_contact, dtype=float)
+    energy_n = float(np.linalg.norm(np.asarray(P_N, dtype=float) @ u) ** 2)
+    energy_a = float(np.linalg.norm(np.asarray(P_A, dtype=float) @ u) ** 2)
+    if normalization == "raw":
+        return energy_n - energy_a
+    if normalization == "density":
+        rank_n = float(np.trace(P_N))
+        rank_a = float(np.trace(P_A))
+        term_n = energy_n / rank_n if rank_n > 0 else 0.0
+        term_a = energy_a / rank_a if rank_a > 0 else 0.0
+        return term_n - term_a
+    raise ValueError(f"unknown normalization: {normalization!r}")
+
+
+def discrete_reactivity(A: np.ndarray) -> float:
+    """One-step discrete-time singular gain: ``finite_time_gain(A, 1) == sigma_max(A)``."""
+    return finite_time_gain(A, 1)
+
+
+def continuous_reactivity_approx(A: np.ndarray, dt: float) -> tuple[float, bool]:
+    """Continuous-time numerical-abscissa approximation via ``J = logm(A) / dt``.
+
+    This is only meaningful when the discrete-time operator ``A`` has a
+    well-defined real continuous-time generator: ``scipy.linalg.logm`` can
+    fail outright (e.g. an exactly singular ``A``) or land on the complex
+    branch (e.g. a negative real eigenvalue), neither of which is a valid
+    rate matrix. ``logm_ok`` is True only when ``logm`` succeeds and its
+    result is finite and effectively real (max absolute imaginary part <
+    1e-8); only then is ``val`` — the numerical abscissa
+    ``lambda_max((J + J.T) / 2)`` — meaningful. The raw discrete ``A`` must
+    never be fed to ``(A + A.T) / 2`` directly; ``logm`` is what converts the
+    discrete-time map into a continuous-time generator first. On any
+    failure this returns ``(nan, False)``.
+    """
+    mat = np.asarray(A, dtype=float)
+    dt_f = float(dt)
+    try:
+        J, _errest = scipy.linalg.logm(mat, disp=False)
+    except Exception:
+        return float("nan"), False
+    J = J / dt_f
+    if not np.all(np.isfinite(J)):
+        return float("nan"), False
+    imag_max = float(np.max(np.abs(J.imag))) if np.iscomplexobj(J) else 0.0
+    if imag_max >= 1e-8:
+        return float("nan"), False
+    sym = (J.real + J.real.T) / 2.0
+    return float(np.max(np.linalg.eigvalsh(sym))), True

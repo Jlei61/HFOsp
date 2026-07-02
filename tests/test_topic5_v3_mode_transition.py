@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from scripts._topic5_v3_io import channel_is_valid
+from src.topic5_v2_criticality import var1_ridge
 from src.topic5_v3_mode_transition import (
     atm_lag0,
     atm_offdiag,
@@ -9,16 +10,26 @@ from src.topic5_v3_mode_transition import (
     beta_axis,
     classify_contacts,
     compartment_flux,
+    continuous_reactivity_approx,
+    demean_window,
+    direct_2d_var,
+    discrete_reactivity,
+    dominant_right_singular_vector,
+    finite_time_gain,
     geometry_sufficient,
     i1_range,
     label_permute,
     load_v3_config,
+    lowrank_var,
+    map_lowrank_vector_to_contacts,
     net_offaxis_flux,
     phase_bin_range,
+    project_2d,
     rank_forward,
     rate_preserving_shuffle,
     shaft_constrained_permute,
     sliding_windows,
+    subspace_mode_shift,
     subspace_projectors,
 )
 
@@ -318,3 +329,106 @@ def test_source_mean_invariant_to_empty_nonaxis_count():
     net_after = net_offaxis_flux(padded, axis_idx, nonaxis_idx_ext, "source_mean")
 
     assert np.isclose(net_before, net_after)   # fails under a /compartment-size denominator
+
+
+# --- Task 7: dynamics pure (2D VAR + low-rank map-back + singular gain + density mode-shift) ---
+
+
+def test_lowrank_maps_to_contacts_and_density_mode_shift():
+    rng = np.random.default_rng(0); X = rng.standard_normal((8, 300))
+    B_r, U_r = lowrank_var(X, rank=3, alpha=1.0)
+    u_r = dominant_right_singular_vector(B_r, k=3)
+    u_c = map_lowrank_vector_to_contacts(u_r, U_r)
+    assert u_c.shape == (8,) and np.isclose(np.linalg.norm(u_c), 1.0)
+    PN = np.diag([0,0,0,0,0,1,1,1.]); PA = np.diag([1,1,1,1,1,0,0,0.])
+    ms = subspace_mode_shift(u_c, PN, PA, "density")
+    assert -1.0 <= ms <= 1.0
+
+
+def test_singular_gain_nonnormal():
+    A = np.array([[0.5, 5.0],[0.0, 0.5]])
+    assert max(abs(np.linalg.eigvals(A))) < 1.0 and finite_time_gain(A, 1) > 1.0
+
+
+def test_demean_window_no_standardize():
+    rng = np.random.default_rng(1)
+    base = rng.standard_normal(200)
+    X = np.stack([base + 100.0, 10.0 * base + 500.0, base - 50.0])   # row1 scaled 10x, all big means
+    Xd = demean_window(X)
+
+    assert Xd.shape == X.shape
+    assert np.allclose(Xd.mean(axis=1), 0.0, atol=1e-8)               # per-contact mean removed
+    stds = Xd.std(axis=1)
+    assert np.isclose(stds[1] / stds[0], 10.0, rtol=0.05)             # scale NOT standardized away
+    assert np.isclose(stds[2], stds[0], rtol=1e-6)                    # pure mean-shift keeps std unchanged
+
+
+def test_subspace_mode_shift_density_vs_raw():
+    P_N = np.diag([0., 0., 1., 1.])    # rank(P_N) = 2
+    P_A = np.diag([1., 1., 0., 0.])    # rank(P_A) = 2
+    u_all_n = np.array([0., 0., 1., 0.])
+    u_all_a = np.array([0., 1., 0., 0.])
+    assert subspace_mode_shift(u_all_n, P_N, P_A, "density") > 0.0     # energy-in-N -> positive
+    assert subspace_mode_shift(u_all_a, P_N, P_A, "density") < 0.0     # energy-in-A -> negative
+
+    # unequal-rank subspaces: density (/rank) and raw must diverge numerically.
+    P_N2 = np.diag([0., 0., 0., 1.])   # rank 1
+    P_A2 = np.diag([1., 1., 1., 0.])   # rank 3
+    u_split = np.array([0.6, 0.0, 0.0, 0.8])   # energy_n=0.64, energy_a=0.36
+    raw = subspace_mode_shift(u_split, P_N2, P_A2, "raw")
+    density = subspace_mode_shift(u_split, P_N2, P_A2, "density")
+    assert np.isclose(raw, 0.64 - 0.36)
+    assert np.isclose(density, 0.64 / 1.0 - 0.36 / 3.0)
+    assert not np.isclose(raw, density)
+
+
+def test_continuous_reactivity_logm_flag():
+    A_ok = np.diag([0.5, 0.7])
+    result = continuous_reactivity_approx(A_ok, dt=1.0)
+    assert isinstance(result, tuple) and len(result) == 2
+    val, logm_ok = result
+    assert logm_ok is True and np.isfinite(val)
+    assert np.isclose(val, np.log(0.7))    # J=logm(A)/dt diagonal -> lambda_max = ln(0.7)
+
+    A_bad = np.array([[-0.5, 0.0], [0.0, 0.5]])   # negative eigenvalue -> complex logm branch
+    val_bad, logm_ok_bad = continuous_reactivity_approx(A_bad, dt=1.0)
+    assert logm_ok_bad is False and np.isnan(val_bad)
+
+
+def test_project_2d_and_direct_2d_var():
+    X = np.array([[1., 2., 3., 4.], [10., 20., 30., 40.], [0., 1., 0., 1.]])
+    e_axis = np.array([1., 0., 0.])
+    e_nonaxis = np.array([0., 1., 0.])
+    Z = project_2d(X, e_axis, e_nonaxis)
+
+    assert Z.shape == (2, 4)
+    assert np.array_equal(Z[0], X[0])       # e_axis picks out row 0 exactly
+    assert np.array_equal(Z[1], X[1])       # e_nonaxis picks out row 1 exactly
+
+    B = direct_2d_var(Z, alpha=1.0)
+    assert B.shape == (2, 2)
+    assert np.allclose(B, var1_ridge(Z, 1.0))   # direct_2d_var is the plain var1_ridge wrapper
+
+
+def test_discrete_reactivity_matches_singular_gain():
+    A = np.array([[0.5, 5.0], [0.0, 0.5]])
+    assert discrete_reactivity(A) == finite_time_gain(A, 1)
+    assert np.isclose(discrete_reactivity(A), np.linalg.svd(A, compute_uv=False)[0])
+
+
+def test_lowrank_var_clips_rank_to_available_components():
+    rng = np.random.default_rng(2)
+    X = rng.standard_normal((4, 50))                # min(Xc.shape) = 4 available SVD components
+    B_r, U_r = lowrank_var(X, rank=10, alpha=1.0)    # rank request (10) exceeds available (4)
+
+    assert U_r.shape == (4, 4)                # clipped to 4, not padded to 10
+    assert B_r.shape == (4, 4)
+
+
+def test_map_lowrank_vector_to_contacts_zero_norm_guard():
+    U_r = np.zeros((5, 2))       # degenerate low-rank basis
+    u_r = np.array([1.0, -1.0])
+    u_c = map_lowrank_vector_to_contacts(u_r, U_r)
+
+    assert u_c.shape == (5,)
+    assert np.allclose(u_c, 0.0)     # zero-norm guard: no division by zero, stays the zero vector
