@@ -160,6 +160,23 @@ def test_rate_preserving_shuffle_preserves_rate():
     assert np.array_equal(active, original)                            # input not mutated
 
 
+def test_rate_preserving_shuffle_permutes_rows_independently():
+    active = np.zeros((2, 20), dtype=bool)
+    active[0, [0, 1, 2, 5, 9, 13, 14, 15]] = True          # row sum = 8, asymmetric pattern
+    active[1] = active[0]                                  # row 1 starts identical to row 0
+    original = active.copy()
+
+    shuffled = rate_preserving_shuffle(active, np.random.default_rng(0))
+
+    assert np.array_equal(shuffled.sum(axis=1), active.sum(axis=1))   # per-row rate exactly preserved
+    assert np.array_equal(active, original)                            # input not mutated
+    # Crux: each row must draw its own independent permutation (destroys cross-contact
+    # timing). A shared/single permutation applied to all rows would leave two
+    # identical input rows identical after shuffling; per-row independence means
+    # they diverge.
+    assert not np.array_equal(shuffled[0], shuffled[1])
+
+
 def test_shaft_constrained_permute_stays_within_shaft():
     values = {"A1": 1.0, "A2": 2.0, "A3": 3.0, "B1": 10.0, "B2": 20.0}
     shafts = {"A1": "A", "A2": "A", "A3": "A", "B1": "B", "B2": "B"}
