@@ -178,3 +178,76 @@ def test_dynamics_runs_on_eligible_subject(tmp_path):
     assert row["status"] == "ok", row
     for col in ("delta_mode_shift_density", "p_phase", "p_label", "mode_shift_2D_consistency"):
         assert math.isfinite(float(row[col])), (col, row)
+
+
+# Full Task-9 susceptibility CSV column contract (plan Task 9; NO `tier`, and
+# NO geometry_sufficient/n_axis/n_nonaxis/n_ambiguous -- unlike Tasks 6/8,
+# those columns are not part of this task's contract).
+SUSCEPTIBILITY_COLS = {
+    "subject", "cohort", "status", "skip_reason", "K_primary_metric",
+    "beta_axis_P3", "beta_axis_I1", "beta_axis_P3_reliable",
+    "delta_beta_axis_strength", "beta_axis_delta_null_z",
+    "p_spatial_delta", "p_label_delta", "onset_jitter_pass", "n_seizures",
+    "module_support_flag", "module_direction_correct", "module_null_pass",
+}
+
+
+@pytest.mark.integration
+def test_susceptibility_writes_csv_even_if_skipped(tmp_path):
+    # A subject whose context/cache cannot be loaded still gets a full row
+    # (never silently drop a subject); the header must carry every contract
+    # column. A bogus subject id exercises the skip path fast (no null loop).
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_topic5_v3_susceptibility.py",
+            "--cohort", "narrow",
+            "--subjects", "epilepsiae_000000",
+            "--n-perm", "20",
+            "--outdir", str(tmp_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+
+    csv_path = tmp_path / "v3_susceptibility_subject.csv"
+    assert csv_path.exists(), result.stderr
+    reader = csv.DictReader(csv_path.open())
+    assert SUSCEPTIBILITY_COLS <= set(reader.fieldnames), (
+        f"missing cols: {SUSCEPTIBILITY_COLS - set(reader.fieldnames)}"
+    )
+    rows = list(reader)
+    assert rows, "expected >=1 row"
+    assert rows[0]["status"] == "skipped", rows[0]
+
+
+@pytest.mark.integration
+def test_susceptibility_runs_on_eligible_subject(tmp_path):
+    # Task-3 auto-selected integration subject (narrow: 30 clean / 8 axis /
+    # 22 non-axis / 6 i1-eligible seizures) with a small n-perm smoke.
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/run_topic5_v3_susceptibility.py",
+            "--cohort", "narrow",
+            "--subjects", "epilepsiae_253",
+            "--n-perm", "20",
+            "--outdir", str(tmp_path),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+
+    csv_path = tmp_path / "v3_susceptibility_subject.csv"
+    rows = {r["subject"]: r for r in csv.DictReader(csv_path.open())}
+    assert "epilepsiae_253" in rows, rows
+    row = rows["epilepsiae_253"]
+    assert row["status"] == "ok", row
+    assert math.isfinite(float(row["delta_beta_axis_strength"])), row
+    # H3a is SUPPORTIVE-ONLY: module_support_flag must NEVER be True, even
+    # for an eligible ok-status subject with a finite, direction-correct delta.
+    assert row["module_support_flag"] == "False", row
