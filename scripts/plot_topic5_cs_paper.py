@@ -4,8 +4,11 @@ Plan: docs/superpowers/plans/2026-07-02-topic5-contact-similarity-paper-figures.
 
 Narrow 口径 (verbatim discipline, all captions/titles): spatially-weighted contact
 rank captures the same coarse interictal<->ictal spatial scaffold as the gridded
-field; grid & native-3D add no distinguishable info. NEVER "predicts /
-characterizes the pathological network." Single-subject panels (fig1, fig2-left,
+field. native-3D adds no distinguishable info beyond the 2D-plane rank (CI within
+±SESOI -> equivalence PASSES); the grid step shows no distinguishable gain over
+the same-plane contact rank, but its CI is wider than ±SESOI, so this is NOT a
+strict-zero claim. NEVER "predicts / characterizes the pathological network."
+Single-subject panels (fig1, fig2-left,
 fig3-left) are illustrative; the cohort null-context (fig2-right, fig3-right) is
 the honest counterweight.
 
@@ -25,8 +28,9 @@ Three figures, one shared loader `_load_subject_ctx`:
          source->sink along template A. RIGHT: cohort null context — R2 obs vs
          its within-shaft-shuffle null p95, R1 obs as a light contrast.
   fig3 — LEFT: same weighted-rank quantity at contacts vs the gridded field
-         (visually the same shape). RIGHT: cohort R2-vs-R3 and R2b-vs-R2_nm
-         scatters, both hugging y=x -> grid/3D add nothing distinguishable.
+         (visually the same shape). RIGHT: cohort R2-vs-R3 (grid: no
+         distinguishable gain, CI wider than ±SESOI, not zero) and R2b-vs-R2_nm
+         (native-3D: equivalence PASSES within ±SESOI) scatters.
 """
 from __future__ import annotations
 
@@ -102,12 +106,21 @@ def save_fig(fig: plt.Figure, path) -> Path:
 
 def fig1(ctx: dict) -> plt.Figure:
     """3-step method cartoon: input dots -> Gaussian-kernel spatial weighting -> smoothed output.
-    Pure method illustration — no statistics, no claim."""
+    Pure method illustration — no statistics, no claim.
+
+    Uses an EXAGGERATED display-only sigma (~4x median nearest-neighbor contact
+    spacing) for the ② kernel-illustration radius AND the ③ smoothed output, so
+    the smoothing effect is visible on sparse contacts (at ~2-3x the blending is
+    too subtle to see at this contact density). This sigma_display is NOT the
+    frozen analysis sigma (ctx["sigma"]) used everywhere else in the paper — it
+    exists only to make this schematic legible."""
     pts = ctx["source_pts"]
     sup = np.asarray(ctx["support"], float)
-    sigma = float(ctx["sigma"])
     rank_a = np.asarray(ctx["rank_a"], float)
-    smoothed = kernel_smooth_at_contacts(rank_a, pts, pts, sup, sigma)
+    nn = np.linalg.norm(pts[:, None, :] - pts[None, :, :], axis=-1)
+    np.fill_diagonal(nn, np.inf)
+    sigma_display = 4.0 * float(np.median(nn.min(axis=1)))
+    smoothed = kernel_smooth_at_contacts(rank_a, pts, pts, sup, sigma_display)
     xlim, ylim = _plane_bounds(pts)
     n = pts.shape[0]
 
@@ -125,11 +138,11 @@ def fig1(ctx: dict) -> plt.Figure:
     # focal contacts = the two extremes along x_norm (illustrative, not the axis endpoints)
     focal_idx = sorted({int(np.argmin(pts[:, 0])), int(np.argmax(pts[:, 0]))})
     for fi in focal_idx:
-        circ = plt.Circle((pts[fi, 0], pts[fi, 1]), sigma, facecolor="0.6",
+        circ = plt.Circle((pts[fi, 0], pts[fi, 1]), sigma_display, facecolor="0.6",
                           edgecolor="0.4", alpha=0.18, zorder=1)
         ax.add_patch(circ)
         d2 = ((pts - pts[fi]) ** 2).sum(axis=1)
-        w = sup * np.exp(-d2 / (2.0 * sigma ** 2))
+        w = sup * np.exp(-d2 / (2.0 * sigma_display ** 2))
         wn = w / w.max() if w.max() > 0 else w
         for j in range(n):
             if j == fi:
@@ -163,7 +176,10 @@ def fig1(ctx: dict) -> plt.Figure:
 
     fig.suptitle(f"Spatial-weighting method schematic — {ctx['subject_id']} "
                  "(illustrative, no statistics)", fontsize=FS_TITLE, y=1.03)
-    fig.tight_layout(rect=(0.0, 0.0, 0.94, 1.0))
+    fig.text(0.47, -0.01,
+             f"示意用 σ(放大)={sigma_display:.3f} ≈ 4×中位最近邻触点间距,非分析所用 σ",
+             ha="center", fontsize=FS_TICK - 2, color="#999")
+    fig.tight_layout(rect=(0.0, 0.02, 0.94, 1.0))
     return fig
 
 
@@ -312,7 +328,7 @@ def _scatter_vs_diag(ax, xv, yv, color, xlabel, ylabel, title, annotation=None):
     ax.set_aspect("equal")
     ax.set_xlabel(xlabel, fontsize=FS_TICK - 3)
     ax.set_ylabel(ylabel, fontsize=FS_TICK - 3)
-    ax.set_title(title, fontsize=FS_TICK - 2, pad=10)
+    ax.set_title(title, fontsize=FS_TICK - 2, pad=34)
     if annotation:
         # top-left corner: both panels hug the y=x diagonal, so the off-diagonal
         # corner is data-sparse and safe for a compact stats box (matches the
@@ -327,7 +343,8 @@ def _scatter_vs_diag(ax, xv, yv, color, xlabel, ylabel, title, annotation=None):
 def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
     """LEFT: same weighted-interictal-rank quantity at contacts vs the gridded field
     for the representative subject (visually the same shape). RIGHT: cohort R2-vs-R3
-    and R2b-vs-R2_nm scatters — both hug y=x -> grid/3D add nothing distinguishable."""
+    (grid step: no distinguishable gain, CI wider than ±SESOI — not a strict-zero
+    claim) and R2b-vs-R2_nm (native-3D: equivalence PASSES within ±SESOI)."""
     pts = ctx["source_pts"]
     sup = np.asarray(ctx["support"], float)
     sigma = float(ctx["sigma"])
@@ -356,7 +373,7 @@ def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
 
     cmap_field = plt.cm.viridis.copy()
     cmap_field.set_bad(color="white")
-    axL2.imshow(T_show, origin="lower", extent=(X_LO, X_HI, -Y_EXT, Y_EXT), aspect="equal",
+    im2 = axL2.imshow(T_show, origin="lower", extent=(X_LO, X_HI, -Y_EXT, Y_EXT), aspect="equal",
                cmap=cmap_field, vmin=0, vmax=1)
     axL2.scatter(pts[:, 0], pts[:, 1], c=w_contacts, cmap="viridis", vmin=0, vmax=1, s=45,
                 edgecolors="black", linewidths=0.5, zorder=3)
@@ -371,8 +388,12 @@ def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
         for spine in ax.spines.values():
             spine.set_visible(False)
 
-    cbar_ax = fig.add_axes((0.475, 0.15, 0.011, 0.68))
-    cb = fig.colorbar(sc, cax=cbar_ax)
+    # colorbar attaches directly to axL2's gridded-field imshow (right edge), not
+    # floating between the left and right panel groups; scatter (sc) and imshow
+    # (im2) share vmin=0/vmax=1/cmap so either mappable reads the same scale.
+    pos2 = axL2.get_position()
+    cbar_ax = fig.add_axes((pos2.x1 + 0.008, pos2.y0, 0.011, pos2.height))
+    cb = fig.colorbar(im2, cax=cbar_ax)
     cb.set_label("interictal rank\n(0=early/source → 1=late)", fontsize=FS_LABEL - 4)
     fig.text(0.235, 0.94, f"{ctx['subject_id']} — same quantity, contact vs grid",
              ha="center", fontsize=FS_LABEL, fontweight="bold")
@@ -396,7 +417,8 @@ def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
     _scatter_vs_diag(axR1, r2v, r3v, "#d73027",
                      "R2 obs (in-plane smoothed contact similarity)",
                      "R3 obs (gridded field similarity)",
-                     "does the grid add anything? (R2 vs R3)", ann1)
+                     "grid vs contact rank (R2 vs R3):\nno distinguishable gain "
+                     "(CI wider than ±SESOI, not zero)", ann1)
     axR1.legend(fontsize=FS_TICK - 5, frameon=False, loc="lower right")
 
     # ---- RIGHT bottom: cohort R2b vs R2_nm ----
@@ -416,10 +438,11 @@ def fig3(ctx: dict, cohort_summary: dict, r2b_summary: dict) -> plt.Figure:
             if rb_med is not None else "r2b_minus_r2nm: n/a")
     _scatter_vs_diag(axR2, nmv, bv, "#1F4E9C",
                      "R2_nm obs (2D-plane, no mirror)", "R2b obs (native-3D mm, no mirror)",
-                     "does native-3D add anything? (R2_nm vs R2b)", ann2)
+                     "native-3D vs 2D-plane (R2_nm vs R2b):\n"
+                     "equivalence PASSES (CI within ±SESOI)", ann2)
 
-    fig.suptitle("Grid & native-3D add no distinguishable information beyond the "
-                 "contact-weighted rank", fontsize=FS_TITLE - 1, y=1.02)
+    fig.suptitle("触点加权 ≈ 铺网格场的同一形状；native-3D 等价通过（无可分辨增益），"
+                 "网格未见可分辨增益（CI 宽于 SESOI，非零）", fontsize=FS_TITLE - 1, y=1.02)
     return fig
 
 
