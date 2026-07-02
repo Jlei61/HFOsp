@@ -82,17 +82,20 @@ def simulate_row(kind):
     runaway_ms = H._first_sustained(rate_s, DT, 120.0, 100.0)
     af, bin_w = C.active_fraction(res["E_spk_bool"], DT, C.BIN_MS)
     nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
-    # n_events counts the discrete train BEFORE the sheet detonates. A LATE runaway (kick ~757 ms)
-    # must not raise the event bar for the small pre-runaway train events (the record-peak confound
-    # the C runner documents) -> calibrate the bar from the pre-runaway window minus the last 50 ms
-    # (the detonation ramp). For an IMMEDIATE burst (big/small, runaway <~60 ms) there is no train:
-    # the whole record is the single one_shot_burst event.
+    # n_events counts the discrete train BEFORE the sheet detonates. A LATE runaway (kick ~757 ms):
+    # calibrate off the pre-runaway window minus the last 50 ms (detonation ramp) so the small train
+    # isn't buried by the runaway peak (record-peak confound), AND use a SENSITIVE bar (0.15 vs the
+    # standard 0.5) because the train rides near baseline (bumps ~3% active) so a 0.5x-peak bar filters
+    # the smaller early bumps -> reads 2; 0.15 counts the 3 separable whole-sheet bumps (t~190/457/695
+    # ms) the q_I staircase shows. IMMEDIATE burst (big/small, runaway <~60 ms): whole record = 1 event.
     if runaway_ms is not None and runaway_ms >= 300.0:
         af_c = af[:max(int(round((runaway_ms - 50.0) / bin_w)), 1)]
+        cal_frac = 0.15
     else:
         af_c = af
+        cal_frac = C.CAL_FRAC
     floor = float(np.percentile(af_c[nb0:nb1], 95)) if (nb1 <= len(af_c) and nb1 > nb0) else float(af_c.min())
-    bar = floor + C.CAL_FRAC * (float(af_c.max()) - floor)
+    bar = floor + cal_frac * (float(af_c.max()) - floor)
     n_events = len(C.detect_events(af_c, bin_w, event_on_frac=bar))
     # col1 shows ONE representative event's spatial ignition (is the front contained, or does it fill
     # the sheet?). For the self-igniting cores the single burst IS the whole trajectory; for the
