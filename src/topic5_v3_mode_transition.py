@@ -296,3 +296,84 @@ def geometry_sufficient(
     if shafts_with_both < 1:
         return False, "no_shaft_with_both"
     return True, "ok"
+
+
+def _coerce_rng(rng) -> np.random.Generator:
+    """Accept an ``np.random.Generator`` or an int seed; return a ``Generator``."""
+    if isinstance(rng, np.random.Generator):
+        return rng
+    return np.random.default_rng(rng)
+
+
+def shaft_constrained_permute(
+    values_by_name: dict, shaft_by_name: dict, rng
+) -> dict:
+    """Shaft-spatial null: shuffle values, not positions, within each shaft.
+
+    Groups ``values_by_name`` keys by ``shaft_by_name[name]``; within each
+    shaft, the multiset of values is randomly reassigned across that
+    shaft's own contact names. A contact never receives a value from a
+    different shaft, and single-contact shafts are unchanged (nothing to
+    permute against).
+    """
+    rng = _coerce_rng(rng)
+    shafts: dict[str, list] = {}
+    for name in values_by_name:
+        shafts.setdefault(shaft_by_name[name], []).append(name)
+
+    out: dict = {}
+    for names in shafts.values():
+        values = [values_by_name[name] for name in names]
+        order = rng.permutation(len(values))
+        for name, idx in zip(names, order):
+            out[name] = values[idx]
+    return out
+
+
+def rate_preserving_shuffle(active_bool: np.ndarray, rng) -> np.ndarray:
+    """Rate-preserving null: permute each contact's time bins independently.
+
+    ``active_bool`` has shape ``(n_contacts, n_time)``. Each row is
+    reordered along the time axis using its own independent random
+    permutation, so each row's activation count (per-contact rate) is
+    preserved exactly while cross-contact temporal alignment is destroyed.
+    Returns a new array; ``active_bool`` is never written to.
+    """
+    rng = _coerce_rng(rng)
+    arr = np.asarray(active_bool, dtype=bool)
+    out = np.empty_like(arr)
+    n_time = arr.shape[1]
+    for i in range(arr.shape[0]):
+        out[i] = arr[i, rng.permutation(n_time)]
+    return out
+
+
+def label_permute(
+    axis_names: list, nonaxis_names: list, shaft_by_name: dict, rng
+) -> tuple[list, list]:
+    """Axis/non-axis label null: shuffle labels within each shaft.
+
+    Restricted to the union of ``axis_names`` and ``nonaxis_names``. Groups
+    those names by ``shaft_by_name[name]``; within each shaft, the
+    axis/non-axis label vector is randomly permuted across that shaft's own
+    names, which preserves that shaft's axis count exactly (and therefore
+    the global axis/non-axis counts, since they are just the sum over
+    shafts). All-axis or all-non-axis shafts are unaffected because
+    permuting a uniform label vector is a no-op — no swap is possible.
+    """
+    rng = _coerce_rng(rng)
+    axis_set = set(axis_names)
+    shafts: dict[str, list] = {}
+    for name in list(axis_names) + list(nonaxis_names):
+        shafts.setdefault(shaft_by_name[name], []).append(name)
+
+    new_axis: list = []
+    new_nonaxis: list = []
+    for names in shafts.values():
+        labels = [name in axis_set for name in names]
+        order = rng.permutation(len(labels))
+        for name, idx in zip(names, order):
+            (new_axis if labels[idx] else new_nonaxis).append(name)
+    new_axis.sort()
+    new_nonaxis.sort()
+    return new_axis, new_nonaxis

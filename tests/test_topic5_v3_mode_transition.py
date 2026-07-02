@@ -7,9 +7,12 @@ from src.topic5_v3_mode_transition import (
     classify_contacts,
     geometry_sufficient,
     i1_range,
+    label_permute,
     load_v3_config,
     phase_bin_range,
     rank_forward,
+    rate_preserving_shuffle,
+    shaft_constrained_permute,
     sliding_windows,
     subspace_projectors,
 )
@@ -139,3 +142,59 @@ def test_geometry_sufficient_and_gate():
 
     ok, reason = geometry_sufficient(5, 3, 0, cfg)                     # no shaft carries both classes
     assert ok is False and "shaft" in reason and len(reason) > 0
+
+
+def test_rate_preserving_shuffle_preserves_rate():
+    active = np.zeros((4, 20), dtype=bool)
+    active[0, [1, 5, 9]] = True                            # row sum = 3
+    active[1, [0, 2, 4, 6, 10, 13, 15]] = True             # row sum = 7
+    active[2, :12] = True                                  # row sum = 12
+    active[3, :] = True                                    # row sum = 20
+    original = active.copy()
+
+    shuffled = rate_preserving_shuffle(active, np.random.default_rng(0))
+
+    assert shuffled.shape == active.shape
+    assert shuffled.dtype == np.bool_
+    assert np.array_equal(shuffled.sum(axis=1), active.sum(axis=1))   # per-row rate exactly preserved
+    assert np.array_equal(active, original)                            # input not mutated
+
+
+def test_shaft_constrained_permute_stays_within_shaft():
+    values = {"A1": 1.0, "A2": 2.0, "A3": 3.0, "B1": 10.0, "B2": 20.0}
+    shafts = {"A1": "A", "A2": "A", "A3": "A", "B1": "B", "B2": "B"}
+
+    permuted = shaft_constrained_permute(values, shafts, np.random.default_rng(0))
+
+    assert set(permuted) == set(values)
+    a_names = [n for n in values if shafts[n] == "A"]
+    b_names = [n for n in values if shafts[n] == "B"]
+    # per-shaft multiset of values is preserved (shuffled among that shaft's own contacts only)
+    assert sorted(permuted[n] for n in a_names) == sorted(values[n] for n in a_names)
+    assert sorted(permuted[n] for n in b_names) == sorted(values[n] for n in b_names)
+    for n in a_names:
+        assert permuted[n] in [values[m] for m in a_names]              # never crosses into shaft B
+    for n in b_names:
+        assert permuted[n] in [values[m] for m in b_names]              # never crosses into shaft A
+
+
+def test_label_permute_preserves_counts_and_shaft():
+    axis = ["A1", "A2", "B1"]
+    nonaxis = ["A3", "B2", "B3"]
+    shafts = {"A1": "A", "A2": "A", "A3": "A", "B1": "B", "B2": "B", "B3": "B"}
+
+    new_axis, new_nonaxis = label_permute(axis, nonaxis, shafts, np.random.default_rng(0))
+
+    assert len(new_axis) == len(axis) == 3                             # global axis count preserved
+    assert len(new_nonaxis) == len(nonaxis) == 3                       # global non-axis count preserved
+    union = set(axis) | set(nonaxis)
+    assert set(new_axis) | set(new_nonaxis) == union                   # every name from the union, none new
+    assert set(new_axis) & set(new_nonaxis) == set()                   # no name double-labeled
+
+    a_axis_before = sum(1 for n in axis if shafts[n] == "A")           # shaft A: 2 axis (A1, A2)
+    b_axis_before = sum(1 for n in axis if shafts[n] == "B")           # shaft B: 1 axis (B1)
+    a_axis_after = sum(1 for n in new_axis if shafts[n] == "A")
+    b_axis_after = sum(1 for n in new_axis if shafts[n] == "B")
+    assert a_axis_before == 2 and b_axis_before == 1
+    assert a_axis_after == a_axis_before                                # per-shaft axis count preserved
+    assert b_axis_after == b_axis_before
