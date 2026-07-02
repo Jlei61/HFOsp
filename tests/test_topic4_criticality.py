@@ -165,3 +165,71 @@ def test_qualify_point_rejects_nonfinite_numeric_fields():
             f[field] = bad_value
             bad, why_bad = qualify_point(f, c)
             assert (not bad) and why_bad == f"nonfinite_{field}", (field, bad_value, why_bad)
+
+
+# --- Task 3a-2: solve_operating_point(init=) warm-start (scalar|array, #10) + solve_branches
+# field-distance branch protocol (#9) with a deterministic random_small seed (#11). Brief
+# .superpowers/sdd/task-3a-2-brief.md Steps 1/5, API-translated per the controller's VERIFIED
+# T3a-2/T2.5 notes (.superpowers/sdd/progress.md): ExcitabilityField.from_core/InhibitionField.uniform/
+# positional make_core_mask do not exist; use build_excitability_field/build_inhibition_field/
+# make_core_mask(kind=, radius=) as in the T2.5 tests above. ---
+
+def test_init_accepts_scalar_and_array():
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+        solve_operating_point,
+    )
+    g = Grid(n=6, L=5.0)
+    k = build_kernels(g, ell_perp=0.6)
+    core = make_core_mask(g, kind="single", radius=0.9)
+    exc = build_excitability_field(g, core, mu_core=0.9)
+    inh = build_inhibition_field(g, core, q_global=0.94)
+
+    lo = solve_operating_point(g, k, exc, inh, init={"rE": 1e-3, "rI": 1e-3})        # scalar
+    prev = solve_operating_point(g, k, exc, inh, init={"rE": lo.rE, "rI": lo.rI})    # array (#10)
+    assert prev.rE.shape == (g.n, g.n)
+
+
+def test_branches_labeled_by_field_distance_deterministic():
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+    )
+    from src.topic4_criticality import solve_branches, load_crit_config
+
+    g = Grid(n=6, L=5.0)
+    k = build_kernels(g, ell_perp=0.6)
+    core = make_core_mask(g, kind="single", radius=0.9)
+    exc = build_excitability_field(g, core, mu_core=0.9)
+    inh = build_inhibition_field(g, core, q_global=0.94)
+
+    b1 = solve_branches(g, k, exc, inh, load_crit_config(), seed_key=(2, 3))
+    b2 = solve_branches(g, k, exc, inh, load_crit_config(), seed_key=(2, 3))    # #11 same seed_key -> identical
+    assert [x.branch_id for x in b1] == [x.branch_id for x in b2]
+    assert all(hasattr(x, "branch_field_distance_to_low") for x in b1)          # #9 field-level
+
+    allowed_reasons = {"low_branch", "high_branch", "saturated_branch", "ambiguous_branch"}
+    for x in b1:
+        assert hasattr(x, "branch_rate_mean")
+        assert hasattr(x, "branch_alpha1")
+        assert hasattr(x, "branch_residual")
+        assert x.branch_selected_reason in allowed_reasons
+    # the low_rate-seeded solve must register as (part of) the low branch in this non-saturated regime
+    assert any(x.branch_selected_reason == "low_branch" for x in b1)
+
+
+def test_solve_branches_random_small_seed_key_none_does_not_crash():
+    """#11 seed_key=None must use a fixed literal fallback (never hash(None))."""
+    from src.topic4_m3b_spectral_phase import (
+        Grid, build_kernels, make_core_mask, build_excitability_field, build_inhibition_field,
+    )
+    from src.topic4_criticality import solve_branches, load_crit_config
+
+    g = Grid(n=6, L=5.0)
+    k = build_kernels(g, ell_perp=0.6)
+    core = make_core_mask(g, kind="single", radius=0.9)
+    exc = build_excitability_field(g, core, mu_core=0.9)
+    inh = build_inhibition_field(g, core, q_global=0.94)
+
+    b1 = solve_branches(g, k, exc, inh, load_crit_config())
+    b2 = solve_branches(g, k, exc, inh, load_crit_config())
+    assert [x.branch_id for x in b1] == [x.branch_id for x in b2]

@@ -400,12 +400,24 @@ class OperatingPoint:
 _SAT_RATE_KHZ: float = 0.10           # >> any self-limited interictal op (balanced rest ~ 2.5e-4 kHz)
 
 
+def _init_field(x, shape: tuple[int, int]) -> np.ndarray:
+    """Broadcast a warm-start seed to a full ``(n, n)`` field: a bare scalar becomes a constant
+    field; an array-like is used as-is (shape-checked). Used by ``solve_operating_point``'s
+    ``init=`` (T3a-2, #10 -- branch-protocol warm-start)."""
+    if np.isscalar(x):
+        return np.full(shape, float(x))
+    arr = np.asarray(x, dtype=float)
+    assert arr.shape == shape, f"init field has shape {arr.shape}, expected {shape}"
+    return arr
+
+
 def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
                           inh: InhibitionField, *, ratio: float = 1.0, w_ee_mult: float = 1.0,
                           source: str = "ratefield_steady", dt: float = 0.5, t_max: float = 2500.0,
                           tol: float = 1e-9, gain_h: float = _GAIN_H,
                           gK_field: np.ndarray | None = None, hG_scalar: float = 0.0,
-                          eta_K: float = 1.0, eta_G: float = 1.0) -> OperatingPoint:
+                          eta_K: float = 1.0, eta_G: float = 1.0,
+                          init: dict | None = None) -> OperatingPoint:
     """Solve the heterogeneous operating point by deterministic rate-field integration-to-steady.
 
     Forward-Euler integration of the 6-field rate model (the same dynamics ``integrate_lif_field``
@@ -425,6 +437,14 @@ def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
     ``_moments()`` so the shifted op is self-consistent (steady-state integration AND the final
     gE/gI gain both see it); muI is untouched. Defaults are additive-zero, so existing callers get
     byte-identical output.
+
+    ``init`` (T3a-2, #10) is an optional ``{"rE": ..., "rI": ...}`` warm-start seed -- each value
+    scalar or an ``(n, n)`` array (see ``_init_field``) -- used by the branch protocol
+    (``src.topic4_criticality.solve_branches``) to solve the SAME operating point from several
+    starting conditions (low/high/previous-point/random) and discover which rate branch each one
+    lands on. ``init=None`` (the default) is BYTE-PARITY with every existing caller: it reproduces
+    the exact ``mean_field``-seeded (with its bare ``1e-3`` fallback) initial condition below,
+    unchanged.
     """
     n = grid.n
     wee = w_ee_mult * W_EE
@@ -434,13 +454,17 @@ def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
     wEI = inh.q * W_EI                                       # (n,n) effective I->E weight
     wII = inh.q * W_II if inh.scale_II else np.full((n, n), W_II)
 
-    try:
-        base = mean_field(ratio, w_ee_mult, strict=False)
-        rE = np.full((n, n), max(base["nuE"], 1e-6))
-        rI = np.full((n, n), max(base["nuI"], 1e-6))
-    except Exception:
-        rE = np.full((n, n), 1e-3)
-        rI = np.full((n, n), 1e-3)
+    if init is not None:
+        rE = _init_field(init["rE"], (n, n))
+        rI = _init_field(init["rI"], (n, n))
+    else:
+        try:
+            base = mean_field(ratio, w_ee_mult, strict=False)
+            rE = np.full((n, n), max(base["nuE"], 1e-6))
+            rI = np.full((n, n), max(base["nuI"], 1e-6))
+        except Exception:
+            rE = np.full((n, n), 1e-3)
+            rI = np.full((n, n), 1e-3)
     sEE = convolve_periodic(rE, kernels.K_EE)
     sEI = convolve_periodic(rI, kernels.K_I)
     sIE = convolve_periodic(rE, kernels.K_I)

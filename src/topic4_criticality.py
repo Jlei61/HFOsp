@@ -13,6 +13,7 @@ kept to the config loader only for now.
 from __future__ import annotations
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict
 
@@ -389,3 +390,164 @@ def qualify_point(f, cfg):
     if f["alpha_drift_index"] >= g["alpha_drift_index_tol"]:
         return (False, "alpha_drift_too_fast")                            # #7
     return (True, "qualified")
+
+
+# --------------------------------------------------------------------------- #
+# Branch-aware operating-point protocol (Task 3a-2, #9 field-distance / #11 deterministic seed) #
+# --------------------------------------------------------------------------- #
+# spec §5: solve_operating_point's steady-state solve can land on different rate branches
+# depending on where it starts (a quiescent low-rate fixed point vs. a saturated/high-rate one).
+# solve_branches probes several warm starts (cfg["branching"]["solve_inits"]) and clusters the
+# results so CSD reads only the low/approach branch, never silently averaging across a fold.
+
+_BRANCH_LOW_RATE_SEED_KHZ: float = 1e-3    # "low_rate" warm start -- same magnitude as
+                                            # solve_operating_point's own pre-mean_field fallback.
+_BRANCH_HIGH_RATE_SEED_KHZ: float = 0.20   # "high_rate" warm start -- ~2x m3b's saturation
+                                            # threshold (topic4_m3b_spectral_phase._SAT_RATE_KHZ=0.10
+                                            # kHz), biasing the solve toward a high/saturated branch.
+_BRANCH_RANDOM_SMALL_MAX_KHZ: float = 0.01  # "random_small" warm start upper bound -- small
+                                             # relative to saturation; probes alternate near-quiescent ICs.
+
+
+@dataclass
+class Branch:
+    """One clustered rate-branch found by ``solve_branches`` from a single (grid, exc, inh) point.
+
+    The six plan fields (``branch_id``.. ``branch_selected_reason``) are the JSON-serializable
+    summary. ``op`` (the cluster's representative ``OperatingPoint``) is carried alongside because
+    a branch is only USABLE downstream (T3a-5's low-branch spectral read-out, and its own
+    ``previous_point`` warm-start on the NEXT trajectory point) if the actual operating point is
+    reachable, not just its scalar summary.
+    """
+    branch_id: int
+    branch_rate_mean: float
+    branch_field_distance_to_low: float
+    branch_alpha1: float
+    branch_residual: float
+    branch_selected_reason: str
+    op: Any
+
+
+def _branch_field_distance(a_rE: np.ndarray, b_rE: np.ndarray, floor: float) -> float:
+    """#9 FIELD-level (not scalar-rate) branch distance: RMS over the whole rE spatial field,
+    normalized by the larger of the two fields' own median-|rE| scale (or ``floor`` when both are
+    quiet/near-zero) -- so two structurally different spatial solutions cannot be conflated just
+    because their means happen to agree, and a near-zero denominator cannot blow up the ratio.
+    Reuses ``quality_gate.rate_scale_floor`` (the same "quiet-branch absolute floor" ``rate_mismatch``
+    already applies) rather than inventing a second floor concept.
+    """
+    rms = float(np.sqrt(np.mean((a_rE - b_rE) ** 2)))
+    scale = max(float(floor), float(np.median(np.abs(a_rE))), float(np.median(np.abs(b_rE))))
+    return rms / scale
+
+
+def solve_branches(grid, kernels, exc, inh, cfg: Dict[str, Any], *, prev=None, seed_key=None) -> list:
+    """Branch-aware operating-point protocol (spec §5, plan T3a-2).
+
+    Solves ``cfg["branching"]["solve_inits"]`` from several initial conditions via
+    ``solve_operating_point(init=...)`` (T3a-2 #10), clusters the results by FIELD distance (#9,
+    ``_branch_field_distance`` / ``branch_cluster_field_tol``), and labels each cluster
+    ``saturated_branch`` (any member ``op.saturated``) / ``low_branch`` / ``high_branch`` (by rate,
+    among the remaining clusters) / ``ambiguous_branch`` (a cluster mixes saturated and
+    non-saturated members, or -- rare, unexercised by the T3a-2 config -- a 3rd+ distinct
+    non-saturated regime that is neither the lowest nor the highest).
+
+    ``prev``: an ``OperatingPoint`` (e.g. the previous trajectory point's selected low branch)
+    enables the ``previous_point`` warm start; when ``prev is None`` that ``solve_inits`` entry is
+    skipped (nothing to warm-start from -- e.g. the first point of a trajectory).
+
+    ``seed_key`` seeds ``random_small`` DETERMINISTICALLY via ``np.random.default_rng(seed_key)``
+    directly. numpy's ``SeedSequence`` hashes an int/tuple seed STABLY across processes; Python's
+    built-in ``hash()`` is PROCESS-SALTED (``PYTHONHASHSEED``) and would silently break the "same
+    seed_key -> identical branches" contract (#11) the first time this ran under a different
+    hash seed, even though two calls in the SAME process would appear deterministic. Never use
+    ``hash()`` here. ``seed_key=None`` falls back to the fixed literal seed ``0`` (never
+    ``hash(None)``).
+    """
+    from src.topic4_m3b_spectral_phase import solve_operating_point, build_jacobian_dense, rate_eigenpairs
+
+    bc = cfg["branching"]
+    floor = float(cfg["quality_gate"]["rate_scale_floor"])
+    tol = float(bc["branch_cluster_field_tol"])
+    shape = (grid.n, grid.n)
+
+    solved: list = []                                          # [(init_name, OperatingPoint), ...]
+    for name in bc["solve_inits"]:
+        if name == "low_rate":
+            init = {"rE": _BRANCH_LOW_RATE_SEED_KHZ, "rI": _BRANCH_LOW_RATE_SEED_KHZ}
+        elif name == "high_rate":
+            init = {"rE": _BRANCH_HIGH_RATE_SEED_KHZ, "rI": _BRANCH_HIGH_RATE_SEED_KHZ}
+        elif name == "previous_point":
+            if prev is None:
+                continue                                        # nothing to warm-start from yet
+            init = {"rE": prev.rE, "rI": prev.rI}
+        elif name == "random_small":
+            rng = np.random.default_rng(0 if seed_key is None else seed_key)   # #11 -- stable, no hash()
+            init = {"rE": rng.uniform(0.0, _BRANCH_RANDOM_SMALL_MAX_KHZ, size=shape),
+                     "rI": rng.uniform(0.0, _BRANCH_RANDOM_SMALL_MAX_KHZ, size=shape)}
+        else:
+            raise ValueError(f"unknown branching.solve_inits entry {name!r}")
+        solved.append((name, solve_operating_point(grid, kernels, exc, inh, init=init)))
+
+    # --- #9 cluster by FIELD distance: greedy, compare each new point against each existing
+    # cluster's first (deterministic, solve_inits-order) member. ---
+    clusters: list = []                                          # list[list[int]] (indices into solved)
+    for i, (_, op) in enumerate(solved):
+        placed = False
+        for cluster in clusters:
+            ref_op = solved[cluster[0]][1]
+            if _branch_field_distance(op.rE, ref_op.rE, floor) <= tol:
+                cluster.append(i)
+                placed = True
+                break
+        if not placed:
+            clusters.append([i])
+
+    # --- label: saturated / ambiguous (mixed-saturation) / provisional rate-branch ---
+    reasons: dict = {}
+    provisional: list = []                                        # [(cluster_idx, members), ...]
+    for ci, members in enumerate(clusters):
+        sat_flags = {solved[m][1].saturated for m in members}
+        if len(sat_flags) > 1:
+            reasons[ci] = "ambiguous_branch"
+        elif True in sat_flags:
+            reasons[ci] = "saturated_branch"
+        else:
+            provisional.append((ci, members))
+
+    # low/high by rate, across the provisional (non-saturated, non-mixed) clusters.
+    provisional.sort(key=lambda cm: solved[cm[1][0]][1].rE.mean())
+    for rank, (ci, _members) in enumerate(provisional):
+        if rank == 0:
+            reasons[ci] = "low_branch"
+        elif rank == len(provisional) - 1:
+            reasons[ci] = "high_branch"
+        else:
+            reasons[ci] = "ambiguous_branch"      # 3rd+ distinct non-saturated regime: fits neither
+                                                    # binary label cleanly (documented fallback).
+
+    # --- #9 distance-to-low reference: the (post-label) low_branch cluster's representative op;
+    # if none was labeled low_branch (e.g. every solve saturated), fall back to the deterministic
+    # "low_rate"-seeded solve itself when present, else the first solved item. ---
+    low_ci = next((ci for ci, r in reasons.items() if r == "low_branch"), None)
+    if low_ci is not None:
+        low_ref_rE = solved[clusters[low_ci][0]][1].rE
+    else:
+        low_rate_idx = next((i for i, (name, _) in enumerate(solved) if name == "low_rate"), 0)
+        low_ref_rE = solved[low_rate_idx][1].rE
+
+    branches: list = []
+    for ci, members in enumerate(clusters):
+        rep_op = solved[members[0]][1]
+        alpha1 = float(
+            rate_eigenpairs(build_jacobian_dense(grid, kernels, rep_op), grid).eigenvalues[0].real)
+        branches.append(Branch(
+            branch_id=ci,
+            branch_rate_mean=float(rep_op.rE.mean()),
+            branch_field_distance_to_low=_branch_field_distance(rep_op.rE, low_ref_rE, floor),
+            branch_alpha1=alpha1,
+            branch_residual=float(rep_op.residual),
+            branch_selected_reason=reasons[ci],
+            op=rep_op,
+        ))
+    return branches
