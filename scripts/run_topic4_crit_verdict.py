@@ -101,6 +101,22 @@ def _write_status(out_dir: Path, payload: dict) -> None:
     a1 = payload.get("last_stable_alpha1")
     a1s = f"{a1:.4g}" if isinstance(a1, (int, float)) else "n/a"
     injected = ", ".join(prov["slow_vars_injected"])
+    subreason = payload.get("unresolved_subreason")
+    # M1 closeout: when branch-continuation found a skipped alpha1=0 crossing between sampled
+    # points, the unresolved bullet gets the SPECIFIC reason (undersampling, not a solver failure)
+    # instead of the generic one -- text is §8-compliant plain language, do not paraphrase.
+    unresolved_text = (
+        "没看清，但原因很具体：抽到的合格快照上，回弹速率 α₁ 一直明显为负（离“一推就失稳”的临界点还有余量），"
+        "所以够不上“平滑软着陆”的判据；但在最后一个合格快照和跑飞之间做二分补检时，发现低支的 α₁ 在两个相邻抽样点之间"
+        f"**穿过了 0**（补检里最高冲到 +{payload['branch_continuation']['bisection_max_low_alpha1']:.3g} per ms）——"
+        "也就是说临界边界很可能就落在这段没被抽到的空隙里。既然确实存在一个被跳过的 α₁≈0 过渡，就不能判成“无预警硬跳”；"
+        "又因为这个过渡没被合格快照采到，也不能确认“平滑软着陆”。所以当前正确结论是：transition 区间抽样密度不够、"
+        "临界边界可能被漏采，判为 unresolved——这是采样分辨率的问题，不是求解器坏了、也不是工作点不可信。"
+        "下一步（Milestone-2）在这段空隙里加密抽样即可定位这个穿零点，并判断穿零处的主模态是沿轴向、非轴向还是全局。"
+        if subreason == "alpha0_crossing_between_sampled_trajectory_points" else
+        "没看清：合格低支点太少、分支身份不干净、或系统已被 ramp 拖着跑而非"
+        "准静态小扰动恢复——在当前口径下判不了软着陆还是硬跳。"
+    )
     lines = [
         "# M3A-v2.2 approach-to-criticality — frozen-Jacobian verdict (PRELIMINARY)",
         "",
@@ -123,8 +139,7 @@ def _write_status(out_dir: Path, payload: dict) -> None:
                           "τ 同步拉长——像“临界慢化”式的软着陆。",
             "hard_jump_no_CSD": f"看起来不像软着陆：合格低支点的 α₁ 一直离 0 有明显余量（末点 α₁≈{a1s}），"
                                 "随后系统在很短窗口内直接跳进饱和/跑飞；分支延续核验确认中间没有被跳过的 α₁≈0 低支点。",
-            "unresolved_operating_point": "没看清：合格低支点太少、分支身份不干净、或系统已被 ramp 拖着跑而非"
-                                          "准静态小扰动恢复——在当前口径下判不了软着陆还是硬跳。",
+            "unresolved_operating_point": unresolved_text,
         }.get(v, ""),
         "",
         "## Overlay 决策",
@@ -134,13 +149,18 @@ def _write_status(out_dir: Path, payload: dict) -> None:
         "",
         "## 关键字段（内部归档代号，括号补注）",
         f"- verdict = `{v}`（∈ smooth_CSD / hard_jump_no_CSD / unresolved_operating_point）",
-        f"- verdict_source = `{payload.get('verdict_source')}`（来自真实 3-D 轨迹，不是 2-D atlas）",
+        f"- verdict_source = `{payload.get('verdict_source')}`"
+        "（来自真实 3-D 仿真轨迹（M3A-v2.2 approach trajectory），不是 2-D atlas）",
         f"- operator_type = `{payload.get('operator_type')}`，alpha_units = `{payload.get('alpha_units')}`",
         f"- tier = `{payload.get('tier')}`",
+        f"- unresolved_subreason = `{subreason}`；continuation_source = `{payload.get('continuation_source')}`",
         "",
         "阈值敏感性、每点 α₁/τ、mode-class、非正规放大（numerical_abscissa / directional_gain）见 "
         "`trajectory_verdict.json`；诊断图见 `figures/trajectory_criticality_verdict.png`。",
         "",
+        "## 实现说明（INTERIM_BRIDGE）",
+        "本里程碑为保证“单一仿真源 + 逐比特不走样（byte-parity）”，让库层临时包一层去调用旧的画图脚本作为仿真的唯一来源。"
+        "这不是长期干净的 model API。Milestone-2 在做 SNN 扰动实验前，应把依赖方向倒过来、暴露一个干净的 仿真/扰动 API。",
     ]
     (out_dir / "STATUS.md").write_text("\n".join(lines), encoding="utf-8")
 
@@ -226,7 +246,19 @@ def _plot_verdict(fig_dir: Path, payload: dict, onset) -> None:
              f"qualified low-branch landmarks   ·   {n_sat} saturated (no α₁, not plotted)   ·   {overlay_note}",
              ha="center", fontsize=8.5, color="#444444")
 
-    fig.tight_layout(rect=(0, 0.06, 1, 0.88))
+    # M1 closeout: branch-continuation found a skipped alpha1=0 crossing between sampled points --
+    # annotate it directly on the figure (English, matching the other subtitle labels) and give the
+    # 3-line header a bit more room (top=0.88 -> 0.84) so it does not crowd the subplot titles.
+    layout_top = 0.88
+    if payload.get("unresolved_subreason") == "alpha0_crossing_between_sampled_trajectory_points":
+        bc = payload.get("branch_continuation") or {}
+        fig.text(0.5, 0.855,
+                 "continuation: low branch crosses α₁≈0 between sampled points "
+                 f"(bisection max α₁ ≈ {bc.get('bisection_max_low_alpha1'):+.2g})",
+                 ha="center", fontsize=8.5, color="#444444")
+        layout_top = 0.84
+
+    fig.tight_layout(rect=(0, 0.06, 1, layout_top))
     fig.savefig(fig_dir / "trajectory_criticality_verdict.png", dpi=150, bbox_inches="tight")
     plt.close(fig)
     _write_fig_readme(fig_dir, payload)
@@ -234,12 +266,17 @@ def _plot_verdict(fig_dir: Path, payload: dict, onset) -> None:
 
 def _write_fig_readme(fig_dir: Path, payload: dict) -> None:
     v = payload["verdict"]
+    subreason_note = (
+        "（unresolved 的具体原因：合格快照上 α₁ 仍为负，但分支延续补检发现低支 α₁ 在两个抽样点之间穿过 0"
+        "——临界边界落在采样空隙里，属采样不足，非求解失败。）"
+        if payload.get("unresolved_subreason") == "alpha0_crossing_between_sampled_trajectory_points" else ""
+    )
     txt = (
         "### trajectory_criticality_verdict.png\n"
         "这张图诊断 M3A-v2.2 那条“抑制耗尽→跑飞”的真实轨迹是不是“临界慢化式软着陆”。左图把每个"
         "合格快照的主特征值 α₁ 画在失抑制轴上（红虚线是 α₁=0 临界线，灰点是不合格点仅作背景，颜色是"
         "mode-class）；右图把回弹时间 τ=−1/α₁ 沿时间画出来（对数轴），看它有没有在跑飞前拉长。"
-        f"当前判定：{v}。overlay 是否叠加见标题注记（未标定映射时 REFUSED，不画 atlas 背景）。\n"
+        f"当前判定：{v}。{subreason_note}overlay 是否叠加见标题注记（未标定映射时 REFUSED，不画 atlas 背景）。\n"
         "**关注点**：左图 α₁ 是平滑逼近 0（软着陆）还是一直离 0 有余量后直接跳（硬跳）；右图 τ 有没有临界式发散。\n"
     )
     (fig_dir / "README.md").write_text(txt, encoding="utf-8")
@@ -251,7 +288,28 @@ def main() -> int:
                     help="directory for trajectory_verdict.json / STATUS.md / figures/")
     ap.add_argument("--layout", default="subject1146", choices=["stage5", "subject1146"])
     ap.add_argument("--top", default="qI", choices=["hG", "qI"])
+    ap.add_argument("--from-json", default=None,
+                    help="re-render trajectory_verdict.json/STATUS.md/figure from an EXISTING "
+                         "trajectory_verdict.json (patched with unresolved_subreason/"
+                         "continuation_source) -- no SNN re-run, no build_and_write_verdict")
     args = ap.parse_args()
+
+    if args.from_json:
+        from src.topic4_criticality import unresolved_subreason
+        out_dir = Path(args.out_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        payload = json.loads(Path(args.from_json).read_text())
+        payload["unresolved_subreason"] = unresolved_subreason(
+            payload["verdict"], payload.get("branch_continuation"))
+        payload["continuation_source"] = "actual_slow_space"
+        (out_dir / "trajectory_verdict.json").write_text(
+            json.dumps(_sanitize(payload), indent=1), encoding="utf-8")
+        _write_status(out_dir, payload)
+        _plot_verdict(out_dir / "figures", payload, payload["provenance"]["runaway_onset_ms"])
+        print(f"re-rendered from {args.from_json}  verdict={payload['verdict']}  "
+              f"unresolved_subreason={payload['unresolved_subreason']}  out_dir={out_dir}")
+        return 0
+
     payload = build_and_write_verdict(args.out_dir, layout=args.layout, top=args.top)
     assert payload["verdict"] in _ENUM, payload["verdict"]
     print(f"verdict={payload['verdict']}  verdict_source={payload['verdict_source']}  "

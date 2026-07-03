@@ -618,3 +618,27 @@ def test_build_trajectory_verdict_payload_shape():
     assert payload["alpha_units"] == "per_ms"
     assert payload["operator_gain_computed"] is False                        # directional gain, not operator norm
     assert isinstance(payload["points"], list) and len(payload["points"]) == len(points)
+
+
+# --- M1 closeout: unresolved_subreason -- the SPECIFIC reason an unresolved verdict is unresolved
+# when branch-continuation found a skipped alpha1=0 crossing between sampled trajectory points
+# (undersampling, not a solver failure), vs. every other case where there is nothing specific to say. ---
+
+def test_unresolved_subreason_alpha0_crossing_and_negatives():
+    from src.topic4_criticality import unresolved_subreason
+
+    assert unresolved_subreason(
+        "unresolved_operating_point",
+        {"continuation_status": "low_branch_reaches_alpha0_before_jump"},
+    ) == "alpha0_crossing_between_sampled_trajectory_points"
+
+    # a smooth/hard verdict never gets this subreason, even with the same continuation status
+    assert unresolved_subreason(
+        "smooth_CSD", {"continuation_status": "low_branch_reaches_alpha0_before_jump"}) is None
+    assert unresolved_subreason(
+        "hard_jump_no_CSD", {"continuation_status": "low_branch_reaches_alpha0_before_jump"}) is None
+    # unresolved for a DIFFERENT continuation_status, or no continuation at all -> no specific subreason
+    assert unresolved_subreason(
+        "unresolved_operating_point",
+        {"continuation_status": "low_branch_remains_far_from_alpha0_until_jump"}) is None
+    assert unresolved_subreason("unresolved_operating_point", None) is None

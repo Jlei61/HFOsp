@@ -1124,6 +1124,15 @@ def check_low_branch_continuation_between(pt_a, pt_b, cfg) -> dict:
             "n_bisect": n_bisect, "bisection_max_low_alpha1": max_low_alpha}
 
 
+def unresolved_subreason(verdict, continuation):
+    """Specific subreason for an unresolved verdict when branch-continuation found an alpha1=0
+    crossing between sampled trajectory points (undersampled transition, NOT a solver failure)."""
+    if (verdict == "unresolved_operating_point" and continuation
+            and continuation.get("continuation_status") == "low_branch_reaches_alpha0_before_jump"):
+        return "alpha0_crossing_between_sampled_trajectory_points"
+    return None
+
+
 def build_trajectory_verdict(sim, mapping, cfg) -> tuple:
     """Orchestrate the T3a-5b verdict (spec §2/§4): evaluate the real trajectory, run the
     branch-continuation check across the last-qualified -> first-saturated jump (attaching its flags
@@ -1178,4 +1187,7 @@ def build_trajectory_verdict(sim, mapping, cfg) -> tuple:
         },
         "points": points,
     })
+    payload["unresolved_subreason"] = unresolved_subreason(payload["verdict"], continuation)
+    payload["continuation_source"] = "actual_slow_space"                    # bisection runs in the
+    # real 3-D slow-state space (q_I/g_K/h_G), NOT the 2-D atlas.
     return payload, points
