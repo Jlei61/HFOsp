@@ -30,7 +30,11 @@ avalanche:
   z_threshold: 2.0
   bin_sec: 0.1
   flux_normalization: source_mean       # per-source mean, not summed
-  require_lag1_specific_positive: false # downgrade (not hard gate) initially
+  # common-drive control: the avalanche run RECORDS `common_drive_sensitive`
+  # (lag1_specific_delta <= 0); the summary applies it in subject_support (hard
+  # AND per plan §Task10) and also records `common_drive_downgrade`. This key is
+  # unwired/reserved (the run never self-gates on lag1_specific).
+  require_lag1_specific_positive: false
 statistics:
   primary_pvalue_on_delta_null: true
   co_primary_correction: holm
