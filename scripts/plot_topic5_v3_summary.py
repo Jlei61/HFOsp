@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 """Topic 5 V3a mode-transition — result figure (Task 11, integration).
 
-Plain-language questions (EXPLORATORY; this figure must read honestly as a
-TIER-2 / NOT-SUPPORTED result, not a positive finding):
+Plain-language questions (EXPLORATORY; on the FINAL paired data this figure
+must read honestly as a FRAGILE positive -- the off-axis-flux endpoint reaches
+the top mechanical tier but is null-relative + common-drive-dominated + weakly
+individually-robust, and the mode-direction endpoint is null; a candidate
+data-side signal, NOT an established transition):
 
   Panel A (top row) - "Does the non-axis co-primary Delta move P3->I1?" One
   point per subject for each co-primary endpoint (H3b net-off-axis-flux
@@ -118,9 +121,33 @@ def _panel_a_data(indir: Path, cohort: str) -> dict:
     dyn = _read_csv_rows(indir / cohort / "v3_dynamics_subject.csv")
     h3b = {r["subject"]: (_f(r["delta_net_offaxis_flux_surplus"]), r.get("module_support_flag") == "True")
            for r in av}
+    # raw (uncorrected) I1-P3 flux per subject — overlaid as open markers so the
+    # reader sees the raw flux mostly DECREASES while the null-corrected surplus
+    # is positive (the "amplification" is relative to the rate baseline).
+    h3b_raw = {r["subject"]: _f(r.get("delta_net_offaxis_flux_raw", "nan")) for r in av}
     h3c = {r["subject"]: (_f(r["delta_mode_shift_density"]), r.get("module_support_flag") == "True")
            for r in dyn}
-    return {"h3b": h3b, "h3c": h3c}
+    return {"h3b": h3b, "h3c": h3c, "h3b_raw": h3b_raw}
+
+
+def _h3b_caveats(indir: Path) -> dict:
+    """Per-cohort honesty stats for the caption: how many ok-status subjects
+    have a NEGATIVE raw flux Δ (so the surplus is null-relative, not absolute)
+    and how many are ``common_drive_sensitive`` (lag1~lag0 co-activation, not
+    directed propagation). Read straight from the avalanche CSV so they always
+    match the rendered points.
+    """
+    out: dict = {}
+    for cohort in ("narrow", "broad"):
+        rows = [r for r in _read_csv_rows(indir / cohort / "v3_avalanche_subject.csv")
+                if r.get("status") == "ok"]
+        raw = [_f(r.get("delta_net_offaxis_flux_raw", "nan")) for r in rows]
+        out[cohort] = {
+            "n_ok": len(rows),
+            "n_raw_neg": sum(1 for v in raw if np.isfinite(v) and v < 0),
+            "n_common_drive": sum(1 for r in rows if r.get("common_drive_sensitive") == "True"),
+        }
+    return out
 
 
 def _load_tier_payload(indir: Path) -> dict:
@@ -273,6 +300,10 @@ def _plot_panel_a(ax, cohort_data: dict, key: str, ylabel: str, subtitle: str) -
                 ax.scatter(sx, sy, s=78, color=color, edgecolor="black", linewidth=1.6, zorder=4)
             med = float(np.median([d for _, d, _ in finite]))
             ax.plot([xs[0] - 0.4, xs[-1] + 0.4], [med, med], color=color, lw=2.8, zorder=5)
+            if key == "h3b":  # open markers = raw (uncorrected) flux Δ
+                raw = cohort_data[cohort].get("h3b_raw", {})
+                rys = [raw.get(s, np.nan) for s, _, _ in finite]
+                ax.scatter(xs, rys, s=30, facecolor="none", edgecolor=color, linewidth=1.1, alpha=0.8, zorder=2)
             block_center = float(xs.mean())
             cursor = xs[-1] + 1.0
         else:
@@ -288,6 +319,12 @@ def _plot_panel_a(ax, cohort_data: dict, key: str, ylabel: str, subtitle: str) -
     ax.set_xlim(-0.8, cursor - gap + 0.8)
     ax.set_ylabel(ylabel, fontsize=8.8)
     ax.set_title(subtitle, fontsize=9.8, loc="left")
+    if key == "h3b":  # explain filled (surplus/endpoint) vs open (raw/uncorrected)
+        h = [plt.Line2D([0], [0], marker="o", color="none", markerfacecolor="0.4",
+                        markeredgecolor="white", markersize=7, label="null-corrected surplus (the endpoint)"),
+             plt.Line2D([0], [0], marker="o", color="none", markerfacecolor="none",
+                        markeredgecolor="0.4", markersize=6.5, label="raw Δ (uncorrected; mostly < 0)")]
+        ax.legend(handles=h, loc="upper left", fontsize=6.4, frameon=False, handletextpad=0.3)
 
 
 def _plot_panel_b(ax, traj_by_cohort: dict, key: str, ylabel: str, subtitle: str) -> None:
@@ -333,71 +370,45 @@ def _fmt_p(x) -> str:
     return "n/a" if not np.isfinite(x) else f"{x:.3f}"
 
 
-_ENDPOINT_PLAIN = {"h3b": "the off-axis-flux endpoint", "h3c": "the mode-transition endpoint"}
+def _tier_caption(tier_payload: dict, caveats: dict) -> str:
+    """Honest-fragile caption for the FINAL paired result.
 
-
-def _tier_caption(tier_payload: dict) -> str:
-    """Build the honesty caption FROM the live tier JSON's booleans (not a
-    fixed prose template) so the sentence stays correct whichever of the 4
-    qualitative regimes (narrow pass/fail x broad replicates/not) the FINAL
-    n_perm=1000 rerun lands in -- only the NUMBERS are expected to move a
-    little; this function's branch must not silently mis-describe a
-    different regime if the pattern itself shifts.
-
-    Plain language first, internal plan bookkeeping (the tier number /
-    state_v3_supported flag) only as a trailing parenthetical -- this is a
-    reader-facing figure, not an archive doc (style guide Sec 0.2 / CLAUDE.md
-    Sec 8: no bare internal codenames in axis/legend/title/caption text).
+    The seizure-paired statistic reaches the top mechanical tier (off-axis-flux
+    endpoint significant in both cohorts), but the positive is fragile and must
+    NOT read as an established transition: (1) raw flux mostly decreases
+    (surplus is null-relative); (2) mostly common-drive co-activation, not
+    directed propagation; (3) weak individual robustness; (4) the more specific
+    mode-direction endpoint is null. Plain language first; the tier/supported
+    bookkeeping only in a trailing parenthetical (CLAUDE.md Sec 8).
     """
     nb, bb = tier_payload["narrow"], tier_payload["broad"]
-    tier = tier_payload["tier"]
-    supported = tier_payload["state_v3_supported"]
-    narrow_pass = tier_payload["narrow_cohort_pass"]
-    broad_pass = tier_payload["broad_cohort_pass"]
-    broad_replicates = tier_payload["broad_replicates"]
-
-    lead = "EXPLORATORY, data-side only (no forecasting)."
-    narrow_txt = (
-        f" Primary cohort (narrow, n={nb['n_geometry_sufficient']}): neither endpoint clears cohort-level "
-        f"significance after multiple-comparison correction (p={_fmt_p(nb['p_holm_h3b'])} for the off-axis-flux "
-        f"endpoint, p={_fmt_p(nb['p_holm_h3c'])} for the mode-transition endpoint; both above the 0.05 threshold)"
-        if not narrow_pass else
-        f" Primary cohort (narrow, n={nb['n_geometry_sufficient']}): at least one endpoint DOES clear "
-        f"cohort-level significance (p={_fmt_p(nb['p_holm_h3b'])} / p={_fmt_p(nb['p_holm_h3c'])})"
+    nc = caveats["narrow"]
+    lead = "EXPLORATORY, data-side only (paired within-seizure P3->I1, n_perm=1000)."
+    stat = (
+        f" The rate-null-corrected off-axis-flux surplus reaches cohort significance in the primary cohort "
+        f"(Wilcoxon Holm p={_fmt_p(nb['p_holm_h3b'])}; robust to leave-one-subject-out) and is same-direction "
+        f"in replication (p={_fmt_p(bb['p_holm_h3b'])}) -- mechanically the top tier."
     )
-    narrow_txt += (
-        f"; only {nb['n_subject_support']} of {nb['n_geometry_sufficient']} subjects individually pass every "
-        "robustness check for either endpoint."
+    caveat = (
+        " But this is a FRAGILE positive, NOT an established axis->non-axis transition: "
+        f"(1) the RAW (uncorrected) flux mostly DECREASES P3->I1 ({nc['n_raw_neg']}/{nc['n_ok']} primary "
+        "subjects; open markers) -- the surplus is elevation vs the rate baseline, not an absolute rise; "
+        f"(2) {nc['n_common_drive']}/{nc['n_ok']} primary subjects are common-drive-sensitive (lag1~lag0) -- "
+        "largely simultaneous co-activation, not directed propagation; "
+        f"(3) only {nb['n_subject_support']}/{nb['n_geometry_sufficient']} primary subjects pass every individual "
+        "robustness check; (4) the more specific mode-direction endpoint is NULL "
+        f"(p={_fmt_p(nb['p_holm_h3c'])} primary / p={_fmt_p(bb['p_holm_h3c'])} replication)."
     )
-    broad_txt = (
-        f" Replication-only cohort (broad, n={bb['n_geometry_sufficient']}, never combined with narrow): "
-        f"p={_fmt_p(bb['p_holm_h3b'])} / p={_fmt_p(bb['p_holm_h3c'])}."
+    net = (
+        " Net: a candidate data-side off-axis-recruitment signal, pending mechanism validation (V3b) and "
+        "sensitivity gates -- not established support."
     )
-    if not narrow_pass:
-        lean = ""
-        if broad_pass:
-            which = _ENDPOINT_PLAIN["h3b" if bb["cohort_h3b_pass"] else "h3c"]
-            lean = (f" Broad alone clearing {which} is a one-cohort lean, NOT a replicated finding, "
-                    "since the primary cohort did not clear it first.")
-        verdict_txt = (
-            " Net verdict: no robust evidence that seizure onset moves activity off the interictal HFO pathway "
-            "in the primary cohort." + lean
-        )
-    elif broad_replicates:
-        verdict_txt = (
-            " Net verdict: the replication cohort moves the SAME endpoint in the SAME direction as the primary "
-            "cohort -- the strongest evidence tier this design can reach."
-        )
-    else:
-        verdict_txt = (
-            " Net verdict: the primary cohort shows a real effect, but the replication cohort does not move the "
-            "same endpoint in the same direction, so this stops short of a replicated finding."
-        )
-    bookkeeping = f" (internal bookkeeping: evidence tier {tier}/4, formally supported={supported})"
-    return lead + narrow_txt + broad_txt + verdict_txt + bookkeeping
+    book = (f" (internal bookkeeping: evidence tier {tier_payload['tier']}/4, "
+            f"formally supported={tier_payload['state_v3_supported']}.)")
+    return lead + stat + caveat + net + book
 
 
-def _build_figure(panel_a: dict, panel_b: dict, tier_payload: dict) -> "plt.Figure":
+def _build_figure(panel_a: dict, panel_b: dict, tier_payload: dict, caveats: dict) -> "plt.Figure":
     fig, axes = plt.subplots(2, 2, figsize=(13.5, 11.0))
     (axA_b, axA_c), (axB_b, axB_c) = axes
 
@@ -453,46 +464,47 @@ def _build_figure(panel_a: dict, panel_b: dict, tier_payload: dict) -> "plt.Figu
     fig.legend(handles=legend_handles, loc="upper center", ncol=4, frameon=False,
                fontsize=8.6, bbox_to_anchor=(0.5, 1.012))
 
-    caption = _tier_caption(tier_payload)
-    fig.text(0.5, 0.006, caption, ha="center", va="bottom", fontsize=7.9, wrap=True,
+    caption = _tier_caption(tier_payload, caveats)
+    fig.text(0.5, 0.006, caption, ha="center", va="bottom", fontsize=7.6, wrap=True,
              bbox={"boxstyle": "round", "facecolor": "0.96", "edgecolor": "0.8"})
 
-    supported = tier_payload["state_v3_supported"]
     fig.suptitle(
-        "Topic 5 V3a -- seizure axis-to-non-axis mode transition, P3->I1 (EXPLORATORY; "
-        f"{'SUPPORTED' if supported else 'NOT supported'} in the primary cohort)",
-        fontsize=12.5, y=1.075, fontweight="bold",
+        "Topic 5 V3a -- seizure axis-to-non-axis, P3->I1: a fragile, null-relative off-axis-flux "
+        "signal (EXPLORATORY); mode-direction endpoint null",
+        fontsize=11.8, y=1.075, fontweight="bold",
     )
     return fig
 
 
-def _write_readme(outdir: Path, tier_payload: dict) -> Path:
-    """Chinese ``figures/README.md`` per AGENTS.md format (``### filename`` +
-    2-4 sentences + trailing ``**关注点**：`` line), written AFTER the PNG so
-    every number quoted here always matches THIS exact render (CLAUDE.md Sec
-    8 plain-language-first discipline: what was measured / how / what it
-    shows, with the tier/state_v3_supported bookkeeping only in a trailing
-    parenthetical -- never the primary language).
+def _write_readme(outdir: Path, tier_payload: dict, caveats: dict) -> Path:
+    """Chinese ``figures/README.md`` (AGENTS.md format), written AFTER the PNG
+    so every number matches THIS render. Honest-fragile framing: the paired
+    statistic reaches the top mechanical tier but the positive is fragile
+    (null-relative + common-drive + weak individual robustness + mode leg null);
+    tier/supported bookkeeping only in a trailing parenthetical (CLAUDE.md Sec 8).
     """
     nb, bb = tier_payload["narrow"], tier_payload["broad"]
+    nc = caveats["narrow"]
     tier = tier_payload["tier"]
     supported = tier_payload["state_v3_supported"]
-    lean_txt = ""
-    if not tier_payload["narrow_cohort_pass"] and tier_payload["broad_cohort_pass"]:
-        lean_txt = "；复制队列里有一个指标看到了显著偏移，但因为主力队列没有过，这不能算复制成功"
     body = (
         "### v3_mode_transition_summary.png\n\n"
-        "这张图检验：发作真正开始前后（发作前 30~10 秒到发作后 10~30 秒），系统里最容易被放大的"
-        "活动方向/连锁流向，是不是从一条病人自己间期就走熟的固定电极通路，转移到了通路之外的电极和"
-        f"方向上。上排是每个病人这段时间前后的变化量（narrow 是主力队列 n={nb['n_geometry_sufficient']}，"
-        f"broad 只作复制 n={bb['n_geometry_sufficient']}、从不与主力队列合并）；下排把同样两个指标画成"
-        "发作前 2 分钟到发作后的完整时间线，发作起始前后 10 秒用灰色底纹标出，只作缓冲、不进主结论。\n\n"
-        "实测下来：主力队列里两个指标都没有整体、稳健地偏离 0，只有 "
-        f"{nb['n_subject_support']}/{nb['n_geometry_sufficient']} 个病人在个体层面同时过了全部稳健性检验"
-        f"{lean_txt}。总体是一次探索性的偏阴性结果：没有看到稳健证据表明发作开始把活动系统性地搬出间期"
-        f"通路（内部记账：evidence tier {tier}/4，formally supported={supported}）。\n\n"
-        "**关注点**：看两行四张子图的点/线是不是整体贴着 0（没有系统性偏移），以及黑色描边的点（个体"
-        "通过全部稳健性检验的病人）数量很少——这就是偏阴性结论的直接视觉来源。\n"
+        "这张图检验：发作真正开始前后（发作前 30~10 秒 → 发作后 10~30 秒，**每次发作按它自己的脑电起始"
+        "配对**），系统里最容易被放大的连锁流向/活动方向，是不是从病人间期就走熟的固定高频通路，转移到"
+        f"通路之外的电极上。上排是每个病人这段时间的前后变化量（narrow 主力队列 n={nb['n_geometry_sufficient']}，"
+        f"broad 只作复制 n={bb['n_geometry_sufficient']}、从不与主力合并）；下排是发作前 2 分钟到发作后的完整"
+        "时间线，起始前后 10 秒（O）灰色底纹只作缓冲。\n\n"
+        "实测（配对、正式 n_perm=1000）：扣掉每触点放电率随机基线后的『非轴向净流增量』在主力+复制队列"
+        "**都达到了队列级显著**（判读机械上到顶档），但这是一个**很脆的阳性**，不能读成『轴→非轴模态转移"
+        f"成立』——① 未校正的原始流大多在下降（{nc['n_raw_neg']}/{nc['n_ok']} 个主力病人，空心点）：所谓"
+        f"『放大』是相对随机基线、不是绝对上升；② {nc['n_common_drive']}/{nc['n_ok']} 个主力病人以同时共激活"
+        f"为主（lag1≈lag0），不是定向传导；③ 只有 {nb['n_subject_support']}/{nb['n_geometry_sufficient']} 个病人"
+        "个体层面过了全部稳健性检验；④ 更能代表『方向转移』的模态腿是阴的。总体是一个数据侧候选信号，"
+        f"待机制侧(V3b)与敏感性检验，不是确立的支持（内部记账：evidence tier {tier}/4，"
+        f"formally supported={supported}）。\n\n"
+        "**关注点**：上排左子图里，**空心点（原始流）大多在 0 以下、实心点（扣基线后的增量）在 0 以上**"
+        "——这就是『相对基线偏高、绝对在降』的直接视觉证据；再看黑色描边的个体稳健点极少、以及右侧模态"
+        "子图整体贴着 0。\n"
     )
     readme_path = outdir / "README.md"
     readme_path.write_text(body, encoding="utf-8")
@@ -515,18 +527,19 @@ def main():
     cfg = load_v3_config()
 
     panel_a = {c: _panel_a_data(indir, c) for c in ("narrow", "broad")}
+    caveats = _h3b_caveats(indir)
     tier_payload = _load_tier_payload(indir)
 
     print("[fig] computing Panel B observed-only phase trajectories from the field cache "
           "(race-free w.r.t. any Panel-A rerun; ~1-2 min)...", flush=True)
     panel_b = {c: _compute_observed_trajectory(c, cfg) for c in ("narrow", "broad")}
 
-    fig = _build_figure(panel_a, panel_b, tier_payload)
+    fig = _build_figure(panel_a, panel_b, tier_payload, caveats)
     out_png = outdir / "v3_mode_transition_summary.png"
     fig.savefig(out_png, dpi=170, bbox_inches="tight")
     print(f"[fig] -> {out_png}", flush=True)
 
-    out_readme = _write_readme(outdir, tier_payload)
+    out_readme = _write_readme(outdir, tier_payload, caveats)
     print(f"[fig] -> {out_readme}", flush=True)
     return out_png
 
