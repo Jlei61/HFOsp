@@ -40,7 +40,7 @@ from src.topic5_v3_mode_transition import load_v3_config  # noqa: E402
 _RESULTS_BASE = _ROOT / "results/topic5_ictal_recruitment/v3_mode_transition"
 
 SUMMARY_COLS = [
-    "subject", "cohort", "geometry_insufficient",
+    "subject", "cohort", "geometry_insufficient", "compute_failed",
     "avalanche_status", "dynamics_status", "susceptibility_status",
     "h3b_path", "h3c_path", "subject_support", "support_driver",
     "common_drive_downgrade", "h3a_strengthens",
@@ -63,6 +63,23 @@ def _to_float(s) -> float:
         return float("nan")
 
 
+def _is_geometry_skip(skip_reason: str) -> bool:
+    """True iff ``skip_reason`` is a GENUINE geometry-insufficiency reason.
+
+    ``geometry_sufficient`` (Task 2) emits exactly three geometry failures:
+    ``n_axis<*`` / ``n_nonaxis<*`` / ``no_shaft_with_both``. Every OTHER skipped
+    reason — ``error:*`` (context/lagPat load), ``compute_error:*``,
+    ``nonfinite_*`` (geometry ok but the metric came out non-finite),
+    ``no_paired_seizures`` (geometry ok but no seizure carries BOTH phases), or
+    an empty reason from an ABSENT CSV row — is a compute/pipeline failure, NOT
+    a geometry property of the subject. Both classes are excluded from the
+    support denominator, but they are counted SEPARATELY so a staging gap or a
+    compute failure is never silently read as "this subject lacks the geometry".
+    """
+    sr = skip_reason or ""
+    return sr.startswith("n_axis<") or sr.startswith("n_nonaxis<") or sr == "no_shaft_with_both"
+
+
 def _load_rows(csv_path: Path) -> dict | None:
     """``{subject: raw DictReader row}``, or ``None`` if the file is absent.
 
@@ -79,7 +96,7 @@ def _load_rows(csv_path: Path) -> dict | None:
 
 
 _AVALANCHE_DEFAULT = {
-    "status": "skipped", "geometry_sufficient": False,
+    "status": "skipped", "skip_reason": "", "geometry_sufficient": False,
     "module_support_flag": False, "onset_jitter_pass": False,
     "leave_one_contact_pass": False, "axis_only_control_pass": False,
     "common_drive_sensitive": True, "module_direction_correct": False,
@@ -90,12 +107,14 @@ _AVALANCHE_DEFAULT = {
 def _avalanche_view(row: dict | None) -> dict:
     """H3b fields ``subject_support``/``geometry_insufficient`` need. A
     missing row (subject absent from this cohort's avalanche CSV) defaults
-    to the same shape a ``status=='skipped'`` row would have.
+    to the same shape a ``status=='skipped'`` row would have (with an empty
+    ``skip_reason`` -> classified as compute/missing, never geometry).
     """
     if row is None:
         return dict(_AVALANCHE_DEFAULT)
     return {
         "status": row["status"],
+        "skip_reason": row.get("skip_reason", ""),
         "geometry_sufficient": _to_bool(row["geometry_sufficient"]),
         "module_support_flag": _to_bool(row["module_support_flag"]),
         "onset_jitter_pass": _to_bool(row["onset_jitter_pass"]),
@@ -108,7 +127,7 @@ def _avalanche_view(row: dict | None) -> dict:
 
 
 _DYNAMICS_DEFAULT = {
-    "status": "skipped", "geometry_sufficient": False,
+    "status": "skipped", "skip_reason": "", "geometry_sufficient": False,
     "module_support_flag": False, "onset_jitter_pass": False,
     "leave_one_contact_mode_shift_pass": False, "axis_only_control_pass": False,
     "single_contact_driven": True, "module_direction_correct": False,
@@ -122,6 +141,7 @@ def _dynamics_view(row: dict | None) -> dict:
         return dict(_DYNAMICS_DEFAULT)
     return {
         "status": row["status"],
+        "skip_reason": row.get("skip_reason", ""),
         "geometry_sufficient": _to_bool(row["geometry_sufficient"]),
         "module_support_flag": _to_bool(row["module_support_flag"]),
         "onset_jitter_pass": _to_bool(row["onset_jitter_pass"]),
@@ -159,12 +179,25 @@ def _susceptibility_view(row: dict | None) -> dict:
 def _subject_row(subject: str, cohort: str, av: dict, dyn: dict, susc: dict) -> dict:
     """One ``v3_summary_subject.csv`` row: the endpoint-appropriate
     ``subject_support`` gate stack (each co-primary uses ITS OWN robustness
-    columns), the H3a context flag, and the "downgrade" audit trail.
+    columns), the geometry-insufficient vs compute-failed split, the H3a
+    context flag, and the "downgrade" audit trail.
     """
-    geometry_insufficient = (
-        av["status"] == "skipped" or not av["geometry_sufficient"]
-        or dyn["status"] == "skipped" or not dyn["geometry_sufficient"]
-    )
+    # geometry-insufficient (a real geometry property of the subject; avalanche
+    # & dynamics share the SAME classification, so a geometry-insufficient
+    # subject skips BOTH with a geometry reason) vs compute-failed (geometry ok
+    # / unknown but the endpoint still could not produce a usable delta —
+    # nonfinite metric, no paired seizures, a load/compute error, or an absent
+    # CSV row). Both are excluded from the support denominator, but must NOT be
+    # merged into one bucket (P1-3): a staging/compute gap is not "this subject
+    # lacks the geometry". Geometry takes precedence when both could apply.
+    av_geo_skip = av["status"] == "skipped" and _is_geometry_skip(av["skip_reason"])
+    dyn_geo_skip = dyn["status"] == "skipped" and _is_geometry_skip(dyn["skip_reason"])
+    geometry_insufficient = bool(av_geo_skip or dyn_geo_skip)
+
+    av_compute_skip = av["status"] != "ok" and not av_geo_skip
+    dyn_compute_skip = dyn["status"] != "ok" and not dyn_geo_skip
+    compute_failed = bool((av_compute_skip or dyn_compute_skip) and not geometry_insufficient)
+    excluded = geometry_insufficient or compute_failed
 
     h3b_path = bool(
         av["module_support_flag"] and av["onset_jitter_pass"]
@@ -176,9 +209,9 @@ def _subject_row(subject: str, cohort: str, av: dict, dyn: dict, susc: dict) -> 
         and dyn["leave_one_contact_mode_shift_pass"] and dyn["axis_only_control_pass"]
         and not dyn["single_contact_driven"]
     )
-    subject_support = bool((h3b_path or h3c_path) and not geometry_insufficient)
+    subject_support = bool((h3b_path or h3c_path) and not excluded)
 
-    if geometry_insufficient:
+    if excluded:
         support_driver = ""
     elif h3b_path and h3c_path:
         support_driver = "H3b+H3c"
@@ -206,6 +239,7 @@ def _subject_row(subject: str, cohort: str, av: dict, dyn: dict, susc: dict) -> 
     return {
         "subject": subject, "cohort": cohort,
         "geometry_insufficient": geometry_insufficient,
+        "compute_failed": compute_failed,
         "avalanche_status": av["status"], "dynamics_status": dyn["status"],
         "susceptibility_status": susc["status"],
         "h3b_path": h3b_path, "h3c_path": h3c_path,
@@ -268,7 +302,8 @@ def _holm_correct_2(p1: float, p2: float) -> tuple[float, float]:
 
 _UNAVAILABLE_COHORT_BLOCK = {
     "available": False,
-    "n_geometry_sufficient": 0, "n_geometry_insufficient": 0, "n_subject_support": 0,
+    "n_geometry_sufficient": 0, "n_geometry_insufficient": 0, "n_compute_failed": 0,
+    "n_subject_support": 0,
     "p_h3b": float("nan"), "p_h3c": float("nan"),
     "p_holm_h3b": float("nan"), "p_holm_h3c": float("nan"),
     "median_delta_h3b": float("nan"), "median_delta_h3c": float("nan"),
@@ -315,13 +350,18 @@ def _build_cohort(cohort: str, alpha: float, required: bool) -> tuple[list, dict
         for s in subjects
     ]
 
-    included = [r for r in subject_rows if not r["geometry_insufficient"]]
-    n_geo_suff = len(included)
-    n_geo_insuff = len(subject_rows) - n_geo_suff
-    n_support = sum(1 for r in included if r["subject_support"])
+    # geometry-sufficient = every subject NOT flagged geometry-insufficient
+    # (compute-failed subjects still HAVE the geometry). The support denominator
+    # (`usable`) additionally drops compute-failed subjects — both classes are
+    # excluded from support, but counted separately (P1-3).
+    n_geo_insuff = sum(1 for r in subject_rows if r["geometry_insufficient"])
+    n_compute_failed = sum(1 for r in subject_rows if r["compute_failed"])
+    n_geo_suff = len(subject_rows) - n_geo_insuff
+    usable = [r for r in subject_rows if not r["geometry_insufficient"] and not r["compute_failed"]]
+    n_support = sum(1 for r in usable if r["subject_support"])
 
-    deltas_h3b = np.array([r["delta_net_offaxis_flux_surplus"] for r in included], dtype=float)
-    deltas_h3c = np.array([r["delta_mode_shift_density"] for r in included], dtype=float)
+    deltas_h3b = np.array([r["delta_net_offaxis_flux_surplus"] for r in usable], dtype=float)
+    deltas_h3c = np.array([r["delta_mode_shift_density"] for r in usable], dtype=float)
     deltas_h3b = deltas_h3b[np.isfinite(deltas_h3b)]
     deltas_h3c = deltas_h3c[np.isfinite(deltas_h3c)]
 
@@ -344,6 +384,7 @@ def _build_cohort(cohort: str, alpha: float, required: bool) -> tuple[list, dict
     block = {
         "available": True,
         "n_geometry_sufficient": n_geo_suff, "n_geometry_insufficient": n_geo_insuff,
+        "n_compute_failed": n_compute_failed,
         "n_subject_support": n_support,
         "p_h3b": p_h3b, "p_h3c": p_h3c,
         "p_holm_h3b": p_holm_h3b, "p_holm_h3c": p_holm_h3c,
@@ -441,9 +482,12 @@ def main():
         out_json = outdir / "v3_cohort_tier.json"
         out_json.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
 
+        blk = blocks[c]
+        usable_denom = blk["n_geometry_sufficient"] - blk["n_compute_failed"]
         print(
             f"[done] {c}: {len(subject_rows_by_cohort[c])} subjects -> {out_csv} "
-            f"(n_subject_support={blocks[c]['n_subject_support']}/{blocks[c]['n_geometry_sufficient']}) "
+            f"(n_subject_support={blk['n_subject_support']}/{usable_denom} usable; "
+            f"{blk['n_geometry_insufficient']} geom-insuff, {blk['n_compute_failed']} compute-failed) "
             f"-> {out_json} (tier={verdict['tier']} state_v3_supported={verdict['state_v3_supported']})",
             flush=True,
         )

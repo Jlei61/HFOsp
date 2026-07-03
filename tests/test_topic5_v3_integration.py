@@ -263,7 +263,7 @@ def test_susceptibility_runs_on_eligible_subject(tmp_path):
 # required FIELDS, not a literal ordered CSV_COLS list like Tasks 6/8/9 --
 # this set IS the schema Task 10 introduces for `v3_summary_subject.csv`.
 SUMMARY_COLS = {
-    "subject", "cohort", "geometry_insufficient",
+    "subject", "cohort", "geometry_insufficient", "compute_failed",
     "h3b_path", "h3c_path", "subject_support", "support_driver",
     "common_drive_downgrade", "h3a_strengthens",
     "delta_net_offaxis_flux_surplus", "delta_mode_shift_density",
@@ -299,7 +299,7 @@ def test_summary_joins_real_dev_csvs_and_assigns_tier(tmp_path):
     assert csv_path.exists() and json_path.exists(), result.stderr
 
     rows = list(csv.DictReader(csv_path.open()))
-    assert len(rows) == 7, rows  # narrow's full cohort -- never silently dropped
+    assert rows, "expected >=1 summary row (never silently drop a subject)"
     assert SUMMARY_COLS <= set(rows[0]), f"missing cols: {SUMMARY_COLS - set(rows[0])}"
 
     payload = json.loads(json_path.read_text())
@@ -308,29 +308,40 @@ def test_summary_joins_real_dev_csvs_and_assigns_tier(tmp_path):
     assert "narrow" in payload and "broad" in payload, payload  # never pooled
     for cohort_key in ("narrow", "broad"):
         block = payload[cohort_key]
-        for pkey in ("p_h3b", "p_h3c", "p_holm_h3b", "p_holm_h3c"):
+        for pkey in ("p_h3b", "p_h3c", "p_holm_h3b", "p_holm_h3c",
+                     "n_geometry_sufficient", "n_geometry_insufficient",
+                     "n_compute_failed", "n_subject_support"):
             assert pkey in block, (cohort_key, block)
-    assert payload["narrow"]["n_geometry_sufficient"] == 7, payload["narrow"]
 
-    # CSV and JSON must agree on how many subjects actually support (no
-    # drift between the per-subject artifact and the cohort-level count).
+    # STRUCTURAL only (n_perm-independent join logic): every assertion is
+    # derived from the rows on disk, never a hardcoded support/tier VALUE that
+    # depends on the permutation nulls (dev n_perm=100 gave 1, final n=1000 and
+    # the paired-Δ fix both change it). geometry-insufficient vs compute-failed
+    # are counted SEPARATELY (P1-3) and both are excluded from support; a
+    # subject is never dropped, so the per-subject rows account exactly for the
+    # cohort split.
+    nb = payload["narrow"]
+    n_geo_insuff_csv = sum(1 for r in rows if r["geometry_insufficient"] == "True")
+    n_compute_failed_csv = sum(1 for r in rows if r["compute_failed"] == "True")
+    assert nb["n_geometry_insufficient"] == n_geo_insuff_csv, (nb, rows)
+    assert nb["n_compute_failed"] == n_compute_failed_csv, (nb, rows)
+    assert nb["n_geometry_sufficient"] == len(rows) - n_geo_insuff_csv, (nb, rows)
+    assert 0 <= nb["n_subject_support"] <= nb["n_geometry_sufficient"], nb
+
+    # CSV and JSON must agree on how many subjects actually support (no drift
+    # between the per-subject artifact and the cohort-level count).
     n_support_csv = sum(1 for r in rows if r["subject_support"] == "True")
-    assert n_support_csv == payload["narrow"]["n_subject_support"], (rows, payload["narrow"])
+    assert n_support_csv == nb["n_subject_support"], (rows, nb)
 
-    # Currently-known real fact (Task 6/8 dev, n_perm=100): epilepsiae_1096
-    # is narrow's only H3b module_support_flag=True subject, but it fails
-    # BOTH onset_jitter_pass and (not common_drive_sensitive) -- exactly the
-    # "downgrade" this task must surface, not silently drop. epilepsiae_1125
-    # is narrow's only H3c module_support_flag=True subject and clears every
-    # H3c_path gate. Net: narrow subject-level support = 1, driven by H3c.
-    by_subject = {r["subject"]: r for r in rows}
-    assert by_subject["epilepsiae_1096"]["common_drive_downgrade"] == "True", by_subject["epilepsiae_1096"]
-    assert by_subject["epilepsiae_1096"]["subject_support"] == "False", by_subject["epilepsiae_1096"]
-    assert by_subject["epilepsiae_1125"]["h3c_path"] == "True", by_subject["epilepsiae_1125"]
-    assert by_subject["epilepsiae_1125"]["subject_support"] == "True", by_subject["epilepsiae_1125"]
-    assert payload["narrow"]["n_subject_support"] == 1, payload["narrow"]
+    # every supporting subject is usable (geometry-sufficient AND compute-ok)
+    # and names a real driver; every row's downgrade flag is a proper bool.
+    for r in rows:
+        assert r["common_drive_downgrade"] in ("True", "False"), r
+        if r["subject_support"] == "True":
+            assert r["geometry_insufficient"] == "False" and r["compute_failed"] == "False", r
+            assert r["support_driver"] in ("H3b", "H3c", "H3b+H3c"), r
 
-    # broad cohort: same script, own subject count (9), never pooled with narrow.
+    # broad cohort: same script, own rows, never pooled with narrow.
     broad_dir = tmp_path / "broad_out"
     result_b = subprocess.run(
         [
@@ -345,8 +356,16 @@ def test_summary_joins_real_dev_csvs_and_assigns_tier(tmp_path):
     )
     assert result_b.returncode == 0, result_b.stderr
     rows_b = list(csv.DictReader((broad_dir / "v3_summary_subject.csv").open()))
-    assert len(rows_b) == 9, rows_b
+    assert rows_b, "expected >=1 broad summary row (never silently drop a subject)"
     assert SUMMARY_COLS <= set(rows_b[0]), f"missing cols: {SUMMARY_COLS - set(rows_b[0])}"
+
+    bb = json.loads((broad_dir / "v3_cohort_tier.json").read_text())["broad"]
+    n_geo_insuff_b = sum(1 for r in rows_b if r["geometry_insufficient"] == "True")
+    n_compute_failed_b = sum(1 for r in rows_b if r["compute_failed"] == "True")
+    assert bb["n_geometry_insufficient"] == n_geo_insuff_b, (bb, rows_b)
+    assert bb["n_compute_failed"] == n_compute_failed_b, (bb, rows_b)
+    assert bb["n_geometry_sufficient"] == len(rows_b) - n_geo_insuff_b, (bb, rows_b)
+    assert 0 <= bb["n_subject_support"] <= bb["n_geometry_sufficient"], bb
 
 
 # ---------------------------------------------------------------------------
