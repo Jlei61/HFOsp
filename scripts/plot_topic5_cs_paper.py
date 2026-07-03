@@ -189,69 +189,54 @@ def fig1(ctx: dict) -> plt.Figure:
 # --------------------------------------------------------------------------- Fig 2: rank comparison
 
 def fig2(ctx: dict) -> plt.Figure:
-    """Rankdisp-style direct contact-rank comparison for the representative subject:
-    spatially-weighted interictal rank (template A red / B blue) vs ictal early-
-    broadband-energy rank, contacts sorted source→sink along template A."""
+    """Vertical rank ladder for the representative subject: three per-contact orders
+    on ONE 0→1 rank axis so the reader can compare, per contact, the raw ictal energy
+    order (发作时序), the spatially-weighted interictal template (空间模板, red), and
+    the SAME interictal template BEFORE weighting (普通时序模板, blue). Contacts run
+    source→sink top→bottom (sorted by the weighted template). All three are re-ranked
+    to 0..1 so the comparison is purely ordinal (what spatial weighting does to the
+    template, and how each relates to the seizure order). Illustrative single subject;
+    cohort statistics live in fig2_sup."""
     pts = ctx["source_pts"]
     sup = np.asarray(ctx["support"], float)
     sigma = float(ctx["sigma"])
     rank_a = np.asarray(ctx["rank_a"], float)
-    rank_b = np.asarray(ctx["rank_b"], float) if ctx["rank_b"] is not None else None
     names = ctx["names_m"]
-    order = np.argsort(rank_a)          # T_a source -> sink, plot_rank_displacement.py convention
 
-    w_a = kernel_smooth_at_contacts(rank_a, pts, pts, sup, sigma)
-    w_b = kernel_smooth_at_contacts(rank_b, pts, pts, sup, sigma) if rank_b is not None else None
-    w_e = kernel_smooth_at_contacts(ctx["ictal_mean"], pts, pts, sup, sigma)
+    def _dense01(v):
+        v = np.asarray(v, float)
+        out = np.full(v.shape, np.nan)
+        fin = np.isfinite(v)
+        if int(fin.sum()) >= 2:
+            out[fin] = np.argsort(np.argsort(v[fin])) / (int(fin.sum()) - 1)
+        return out
 
-    fin_e = np.isfinite(w_e)
-    e_rank = np.full_like(w_e, np.nan)
-    if fin_e.sum() >= 2:
-        dense = np.argsort(np.argsort(w_e[fin_e]))
-        denom = max(int(fin_e.sum()) - 1, 1)
-        e_rank[fin_e] = dense / denom
+    r_spatial = _dense01(kernel_smooth_at_contacts(rank_a, pts, pts, sup, sigma))  # 空间模板 (weighted)
+    r_plain = _dense01(rank_a)                                                     # 普通时序模板 (raw template)
+    r_ictal = _dense01(ctx["ictal_mean"])                                          # 发作时序 (raw ictal energy)
 
-    def _corr(w):
-        if w is None:
-            return np.nan
-        m = np.isfinite(w) & fin_e
-        if m.sum() < 3:
-            return np.nan
-        return float(pearsonr(w[m], w_e[m])[0])
+    order = np.argsort(np.where(np.isfinite(r_spatial), r_spatial, np.inf))        # source→sink by weighted template
+    y = np.arange(len(order))
 
-    cands = [(lab, r) for lab, r in (("A", _corr(w_a)), ("B", _corr(w_b))) if np.isfinite(r)]
-    max_lab, max_r = max(cands, key=lambda t: abs(t[1])) if cands else ("n/a", float("nan"))
+    fig, ax = plt.subplots(figsize=(7.4, 8.8))
+    ax.plot(r_spatial[order], y, "-o", color=COL_TEMPLATE_A, ms=7, lw=2.0, zorder=4,
+            label="空间模板（模板 A 加权后）")
+    ax.plot(r_plain[order], y, "-s", color=COL_TEMPLATE_B, ms=6, lw=1.7, zorder=3,
+            label="普通时序模板（模板 A 加权前）")
+    ax.plot(r_ictal[order], y, "--D", color="black", ms=6, lw=1.5, alpha=0.85, zorder=2,
+            label="发作时序（发作早期能量顺序）")
 
-    fig, axL = plt.subplots(figsize=(8.8, 6.6))
-    x = np.arange(len(order))
-    axL.plot(x, w_a[order], "-o", color=COL_TEMPLATE_A, ms=6, lw=1.8, zorder=3,
-             label="template A — spatially-weighted interictal rank")
-    if w_b is not None:
-        axL.plot(x, w_b[order], "-o", color=COL_TEMPLATE_B, ms=6, lw=1.8, zorder=3,
-                 label="template B — spatially-weighted interictal rank")
-    axL.set_ylim(-0.03, 1.03)
-    axL.set_xticks(x)
-    axL.set_xticklabels([names[i] for i in order], rotation=60, ha="right", fontsize=FS_TICK - 3)
-    axL.set_xlabel("contact (sorted source → sink along template A)", fontsize=FS_LABEL - 1)
-    axL.set_ylabel("interictal rank\n(spatially-weighted, 0=early/source → 1=late)",
-                   fontsize=FS_LABEL - 3)
-    style_panel(axL)
-
-    axL2 = axL.twinx()
-    axL2.plot(x, e_rank[order], "--D", color="black", ms=5, lw=1.4, alpha=0.85, zorder=2,
-              label="ictal early-broadband-energy rank\n(rank of spatially-weighted bb_auc)")
-    axL2.set_ylim(-0.03, 1.03)
-    axL2.set_ylabel("ictal energy rank\n(0=lowest → 1=highest, spatially-weighted)",
-                    fontsize=FS_LABEL - 3)
-    axL2.spines["top"].set_visible(False)
-
-    h1, l1 = axL.get_legend_handles_labels()
-    h2, l2 = axL2.get_legend_handles_labels()
-    axL.legend(h1 + h2, l1 + l2, loc="upper left", fontsize=FS_TICK - 4, frameon=False)
-    axL.set_title(f"{ctx['subject_id']} — 间期 rank(模板 A 红/B 蓝) vs 发作能量 rank"
-                  f"  ·  maxAB=模板{max_lab} r={max_r:+.2f}(符号无关, 示意)",
-                  fontsize=FS_LABEL - 1)
-
+    ax.set_yticks(y)
+    ax.set_yticklabels([names[i] for i in order], fontsize=FS_TICK - 2)
+    ax.invert_yaxis()                       # source (rank 0) at top → read downward = source→sink
+    ax.set_xlim(-0.03, 1.03)
+    ax.set_xlabel("归一化 rank（0 = 源/早/低 → 1 = 汇/晚/高）", fontsize=FS_LABEL - 1)
+    ax.set_ylabel("contact（按空间模板 源 → 汇，自上而下）", fontsize=FS_LABEL - 2)
+    ax.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=True, facecolor="white",
+              framealpha=0.92, edgecolor="0.8")
+    ax.set_title(f"{ctx['subject_id']} — 发作时序 vs 空间模板 vs 普通时序模板（示意，单被试）",
+                 fontsize=FS_LABEL - 1)
+    style_panel(ax)
     fig.tight_layout()
     return fig
 

@@ -63,13 +63,12 @@ def test_fig1_renders(tmp_path, ctx):
 
 
 def test_fig2_renders(tmp_path, ctx):
-    # single rankdisp panel (+ twin axis for the ictal-energy track)
+    # single vertical rank ladder: 发作时序 vs 空间模板 vs 普通时序模板 (3 lines, one axis)
     fig = fig2(ctx)
-    axes = fig.get_axes()
-    assert len(axes) >= 2   # axL + axL2 (twin)
-    axL = axes[0]
-    assert axL.get_title() and axL.get_xlabel() and axL.get_ylabel()
-    assert axL.get_legend() is not None
+    ax = fig.get_axes()[0]
+    assert ax.get_title() and ax.get_xlabel() and ax.get_ylabel()
+    assert ax.get_legend() is not None
+    assert len(ax.get_lines()) >= 3   # the three per-contact order tracks
     out = save_fig(fig, tmp_path / "fig2_rank_comparison.png")
     assert out.exists() and out.stat().st_size > 5000
 
