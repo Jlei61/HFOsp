@@ -146,6 +146,7 @@
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
 | [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
+| [topic5_ictal_recruitment/v3_mode_transition/figures/](topic5_ictal_recruitment/v3_mode_transition/figures/) | V3a：发作开始前后，活动是否从间期固定电极通路搬到通路外（P3→I1 变化量 + 全程 phase 轨迹汇总图）；EXPLORATORY 偏阴性——narrow 主力队列两个指标均未过队列级检验，broad 复制队列一个指标有偏移但因主力队列未过不算复制成功 |
 
 ---
 

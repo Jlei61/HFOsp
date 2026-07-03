@@ -478,3 +478,34 @@ def test_tier_verdict_narrow_primary():
     )
     assert v["tier"] == 1
     assert v["state_v3_supported"] is False
+
+
+# ---------------------------------------------------------------------------
+# Task 11 result figure -- smoke test only (PNG + README exist, never a
+# numeric-value assertion: the co-primary CSVs this reads are the ones a
+# background n_perm=1000 rerun may still be updating, so only STRUCTURE is
+# checked here). Panel B recomputes the observed-only (no permutation nulls)
+# phase trajectory for the WHOLE cohort straight from the field cache, so
+# this genuinely costs real wall-clock time (~1-2 min) -- the same class of
+# cost as this file's other real-data @pytest.mark.integration tests.
+# ---------------------------------------------------------------------------
+@pytest.mark.integration
+def test_plot_summary_produces_png_and_readme(tmp_path):
+    result = subprocess.run(
+        [sys.executable, "scripts/plot_topic5_v3_summary.py", "--outdir", str(tmp_path)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=600,
+    )
+    assert result.returncode == 0, result.stderr
+
+    png_path = tmp_path / "v3_mode_transition_summary.png"
+    assert png_path.exists(), result.stderr
+    assert png_path.stat().st_size > 0, "PNG must not be empty"
+
+    readme_path = tmp_path / "README.md"
+    assert readme_path.exists(), result.stderr
+    readme_text = readme_path.read_text(encoding="utf-8")
+    assert "v3_mode_transition_summary.png" in readme_text
+    assert "关注点" in readme_text
