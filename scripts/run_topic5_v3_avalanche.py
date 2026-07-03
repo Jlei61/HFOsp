@@ -5,15 +5,22 @@ Plain-language question (EXPLORATORY): from late-preictal (P3) to early-ictal
 (I1), does the avalanche activation FLOW move OFF the fixed interictal HFO
 axis onto non-axis contacts? We measure a per-seizure per-phase
 ``net_offaxis_flux`` (source-normalized axis->non-axis minus non-axis->axis
-avalanche transition mass, self-transitions excluded), take the median over a
-subject's seizures per phase, and ask whether ``flux_I1 - flux_P3`` is larger
-than chance.
+avalanche transition mass, self-transitions excluded). Because P3->I1 is a
+WITHIN-SEIZURE change, the contrast is PAIRED BY SEIZURE: only seizures that
+carry BOTH phases contribute (``common_ids = P3_ids ∩ I1_ids``),
+``delta(sz) = flux_I1(sz) - flux_P3(sz)`` is formed per seizure, and
+``obs_delta`` is the subject-median of those per-seizure deltas — NOT
+``median(I1-seizures) - median(P3-seizures)``, which would silently mix a
+P3-only and an I1-only seizure population when short seizures have P3 but no
+eligible I1 window. ``n_seizures`` is ``len(common_ids)``.
 
 Δ-NULL DISCIPLINE (plan rev2 item 7 — the co-primary trap): the p-value is on
 the Δ(I1-P3) permutation distribution, NOT per-phase-null then subtract. Each
-permutation applies its null to BOTH P3 and I1, recomputes both phase medians,
-and forms ``delta_perm = flux_I1_perm - flux_P3_perm`` — see
-``_delta_null_distribution``, the single place that owns this invariant.
+permutation applies its null to BOTH phases of EACH common seizure, forms the
+per-seizure ``delta_perm(sz) = flux_I1_perm(sz) - flux_P3_perm(sz)``, and takes
+the subject-median over common seizures — the SAME paired aggregation as
+``obs_delta``. See ``_delta_null_distribution``, the single place that owns the
+per-perm subtraction invariant.
 
 Three nulls (plan / brief):
   - rate (PRIMARY, gating): ``rate_preserving_shuffle`` per seizure per phase;
@@ -97,21 +104,40 @@ def _base_row(ds_sid: str, cohort: str) -> dict:
 
 # ---------------------------------------------------------------------------
 # flux primitives (source-normalized net axis->non-axis, self-transitions out)
+#
+# P3->I1 is a WITHIN-SEIZURE change, so every quantity is PAIRED BY SEIZURE: a
+# metric is computed per seizure per phase, only seizures present in BOTH
+# phases (``common_ids``) contribute, and the subject statistic is the median
+# of the per-seizure differences (median of differences, NOT difference of the
+# two per-phase medians). Each null forms the same paired delta inside the perm.
 # ---------------------------------------------------------------------------
-def _atms(acts_list: list, atm_fn) -> list:
-    return [atm_fn(a) for a in acts_list]
+def _flux_sz(acts: np.ndarray, atm_fn, axis_idx: np.ndarray, nonaxis_idx: np.ndarray) -> float:
+    """Net off-axis flux for ONE seizure's activation matrix under ``atm_fn``."""
+    return net_offaxis_flux(atm_fn(acts), axis_idx, nonaxis_idx, "source_mean")
 
 
-def _median_net_flux(atms: list, axis_idx: np.ndarray, nonaxis_idx: np.ndarray) -> float:
-    """Median over seizures of ``net_offaxis_flux`` from precomputed ATMs.
+def _paired_delta_median(m_p3: dict, m_i1: dict, common_ids: list) -> float:
+    """Subject-median over common seizures of ``metric_I1(sz) - metric_P3(sz)``.
 
-    Empty phase (no seizures with this phase) -> NaN, so a phase absent for the
-    whole subject propagates NaN into ``obs_delta`` rather than a fake 0.
+    A per-seizure delta that is non-finite (a degenerate phase for that
+    seizure) is dropped before the median; an empty result -> NaN (never a
+    fake 0). This is the paired within-seizure aggregation the P3->I1 contrast
+    requires: the median of per-seizure differences, NOT the difference of the
+    two per-phase medians (which would mix a P3-only and an I1-only seizure
+    population when the two phase sets differ).
     """
-    if not atms:
-        return float("nan")
-    vals = [net_offaxis_flux(m, axis_idx, nonaxis_idx, "source_mean") for m in atms]
-    return float(np.median(vals))
+    deltas = [m_i1[sz] - m_p3[sz] for sz in common_ids if np.isfinite(m_i1[sz] - m_p3[sz])]
+    return float(np.median(deltas)) if deltas else float("nan")
+
+
+def _phase_median(m_by_sz: dict, common_ids: list) -> float:
+    """Subject-median over common seizures of one phase's per-seizure metric.
+
+    Keeps the reported per-phase columns on the SAME paired seizure set as
+    ``obs_delta`` (finite-filtered; empty -> NaN).
+    """
+    vals = [m_by_sz[sz] for sz in common_ids if np.isfinite(m_by_sz[sz])]
+    return float(np.median(vals)) if vals else float("nan")
 
 
 def _delta_stats(obs_delta: float, delta_perm: np.ndarray) -> tuple[float, float, float]:
@@ -144,30 +170,38 @@ def _delta_null_distribution(perm_delta, n_perm: int, seed: int) -> np.ndarray:
     """THE Δ(I1-P3) permutation-null owner.
 
     For each perm ``p``, a fresh ``np.random.default_rng(seed + p)`` is passed
-    to ``perm_delta(rng)``, which must apply the null to BOTH phases and return
-    ``flux_I1_perm - flux_P3_perm`` computed inside that call. Because the
-    subtraction happens per-perm (never per-phase-null then subtract at the
-    end), the returned distribution is the null of the Δ statistic itself —
-    which is exactly what ``_delta_stats`` compares ``obs_delta`` against.
+    to ``perm_delta(rng)``, which must apply the null to BOTH phases of each
+    common seizure and return the paired subject-median ``delta_perm`` computed
+    inside that call. Because the subtraction happens per-seizure per-perm
+    (never per-phase-null then subtract at the end), the returned distribution
+    is the null of the Δ statistic itself — which is exactly what
+    ``_delta_stats`` compares ``obs_delta`` against.
     """
     return np.array([perm_delta(np.random.default_rng(seed + p)) for p in range(n_perm)], dtype=float)
 
 
-def _obs_delta_from_acts(p3_acts, i1_acts, axis_idx, nonaxis_idx) -> float:
-    """Raw ``flux_I1 - flux_P3`` (no null) from lag1 off-diagonal ATMs."""
-    flux_p3 = _median_net_flux(_atms(p3_acts, atm_offdiag), axis_idx, nonaxis_idx)
-    flux_i1 = _median_net_flux(_atms(i1_acts, atm_offdiag), axis_idx, nonaxis_idx)
-    return flux_i1 - flux_p3
+def _paired_obs_delta(
+    p3_by_id: dict, i1_by_id: dict, common_ids: list,
+    axis_idx: np.ndarray, nonaxis_idx: np.ndarray,
+) -> float:
+    """Paired raw obs_delta (lag1 off-diagonal flux) over common seizures."""
+    m_p3 = {sz: _flux_sz(p3_by_id[sz], atm_offdiag, axis_idx, nonaxis_idx) for sz in common_ids}
+    m_i1 = {sz: _flux_sz(i1_by_id[sz], atm_offdiag, axis_idx, nonaxis_idx) for sz in common_ids}
+    return _paired_delta_median(m_p3, m_i1, common_ids)
 
 
-def _phase_acts(env: dict, phase: str, z_thr: float) -> tuple[list, set]:
-    """Activation matrices (rows ordered by all_clean) for one phase + the seizure ids."""
-    acts, sz_ids = [], set()
+def _phase_acts(env: dict, phase: str, z_thr: float) -> dict:
+    """``{seizure_idx: activation matrix}`` (rows ordered by all_clean) for one phase.
+
+    Keyed by seizure id so the caller can intersect P3 and I1 on common ids —
+    short seizures carry P3 but no I1-eligible window, so the two phase sets
+    differ and must be PAIRED, not medianed independently.
+    """
+    out: dict = {}
     for sz in env["seizures"]:
         if phase in sz["phases"]:
-            acts.append(activations_from_z(sz["phases"][phase], z_thr))
-            sz_ids.add(sz["idx"])
-    return acts, sz_ids
+            out[sz["idx"]] = activations_from_z(sz["phases"][phase], z_thr)
+    return out
 
 
 def _max_source_contribution(i1_atms, axis_idx, nonaxis_idx) -> float:
@@ -195,60 +229,71 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
 
     env0 = load_subject_phase_envelopes(ds_sid, cohort, cfg, ["P3", "I1"], onset_shift=0.0, cls=cc)
     axis_idx, nonaxis_idx = env0["axis_idx"], env0["nonaxis_idx"]
-    p3_acts, p3_ids = _phase_acts(env0, "P3", z_thr)
-    i1_acts, i1_ids = _phase_acts(env0, "I1", z_thr)
-    n_seizures = len(p3_ids | i1_ids)  # union of seizures contributing to either phase median
+    p3_by_id = _phase_acts(env0, "P3", z_thr)
+    i1_by_id = _phase_acts(env0, "I1", z_thr)
+    common_ids = sorted(set(p3_by_id) & set(i1_by_id))  # ONLY seizures carrying BOTH phases
+    n_seizures = len(common_ids)
+    row["n_seizures"] = n_seizures
 
-    # precompute lag1 ATMs once (label/axis-only/max-source/observed reuse them)
-    p3_atms = _atms(p3_acts, atm_offdiag)
-    i1_atms = _atms(i1_acts, atm_offdiag)
-    flux_p3 = _median_net_flux(p3_atms, axis_idx, nonaxis_idx)
-    flux_i1 = _median_net_flux(i1_atms, axis_idx, nonaxis_idx)
-    obs_delta = flux_i1 - flux_p3
+    if n_seizures == 0:
+        # No seizure has both P3 and I1 -> the paired obs_delta is undefined.
+        row.update({"status": "skipped", "skip_reason": "no_paired_seizures"})
+        print(f"[skip] {ds_sid} ({cohort}): geometry ok but no seizure carries BOTH P3 and I1", flush=True)
+        return row
+
+    # per-seizure lag1 off-diagonal ATMs (observed / label / axis-only / max-source reuse them)
+    p3_atm_by_sz = {sz: atm_offdiag(p3_by_id[sz]) for sz in common_ids}
+    i1_atm_by_sz = {sz: atm_offdiag(i1_by_id[sz]) for sz in common_ids}
+
+    # per-seizure observed lag1 flux -> paired obs_delta + paired per-phase columns
+    f1_p3 = {sz: net_offaxis_flux(p3_atm_by_sz[sz], axis_idx, nonaxis_idx, "source_mean") for sz in common_ids}
+    f1_i1 = {sz: net_offaxis_flux(i1_atm_by_sz[sz], axis_idx, nonaxis_idx, "source_mean") for sz in common_ids}
+    flux_p3 = _phase_median(f1_p3, common_ids)
+    flux_i1 = _phase_median(f1_i1, common_ids)
+    obs_delta = _paired_delta_median(f1_p3, f1_i1, common_ids)
 
     row.update({
         "status": "ok", "skip_reason": "",
         "net_offaxis_flux_P3": flux_p3, "net_offaxis_flux_I1": flux_i1,
-        "delta_net_offaxis_flux_raw": obs_delta, "n_seizures": n_seizures,
+        "delta_net_offaxis_flux_raw": obs_delta,
     })
     if not np.isfinite(obs_delta):
         row.update({"status": "skipped", "skip_reason": "nonfinite_flux"})
-        print(f"[warn] {ds_sid} ({cohort}): geometry ok but no paired P3/I1 flux (obs_delta NaN)", flush=True)
+        print(f"[warn] {ds_sid} ({cohort}): geometry ok but no finite paired P3/I1 flux (obs_delta NaN)", flush=True)
         return row
 
-    # ---- Δ-null distributions (three nulls; delta formed inside each perm) ----
+    # ---- Δ-null distributions (three nulls; each forms the PAIRED delta over
+    # common seizures inside the perm — same aggregation as obs_delta) ----
     name_pos = {n: i for i, n in enumerate(all_clean)}
 
     def rate_perm(rng):
-        def flux(acts):
-            if not acts:
-                return float("nan")
-            atms = [atm_offdiag(rate_preserving_shuffle(a, rng)) for a in acts]
-            return _median_net_flux(atms, axis_idx, nonaxis_idx)
-        return flux(i1_acts) - flux(p3_acts)
+        # rate-preserving shuffle drawn INDEPENDENTLY per seizure per phase.
+        m_p3 = {sz: _flux_sz(rate_preserving_shuffle(p3_by_id[sz], rng), atm_offdiag, axis_idx, nonaxis_idx)
+                for sz in common_ids}
+        m_i1 = {sz: _flux_sz(rate_preserving_shuffle(i1_by_id[sz], rng), atm_offdiag, axis_idx, nonaxis_idx)
+                for sz in common_ids}
+        return _paired_delta_median(m_p3, m_i1, common_ids)
 
     def label_perm(rng):
         new_axis, new_nonaxis = label_permute(is_axis_names, is_nonaxis_names, shaft_by_name, rng)
         ai = np.array([name_pos[n] for n in new_axis], dtype=int)
         ni = np.array([name_pos[n] for n in new_nonaxis], dtype=int)
-        return _median_net_flux(i1_atms, ai, ni) - _median_net_flux(p3_atms, ai, ni)
+        m_p3 = {sz: net_offaxis_flux(p3_atm_by_sz[sz], ai, ni, "source_mean") for sz in common_ids}
+        m_i1 = {sz: net_offaxis_flux(i1_atm_by_sz[sz], ai, ni, "source_mean") for sz in common_ids}
+        return _paired_delta_median(m_p3, m_i1, common_ids)
 
     values_by_name = {n: i for i, n in enumerate(all_clean)}
 
     def spatial_perm(rng):
-        # ONE within-shaft row scramble per perm, applied to every seizure and
-        # both phases (labels fixed). Choice: spatial arrangement is an
+        # ONE within-shaft row scramble per perm, applied to every common
+        # seizure and both phases (labels fixed). Spatial arrangement is an
         # electrode property, so the scramble is drawn once per perm (like the
         # label null) rather than per-seizure.
         permuted = shaft_constrained_permute(values_by_name, shaft_by_name, rng)
         perm_rows = np.array([permuted[n] for n in all_clean], dtype=int)
-
-        def flux(acts):
-            if not acts:
-                return float("nan")
-            atms = [atm_offdiag(a[perm_rows]) for a in acts]
-            return _median_net_flux(atms, axis_idx, nonaxis_idx)
-        return flux(i1_acts) - flux(p3_acts)
+        m_p3 = {sz: _flux_sz(p3_by_id[sz][perm_rows], atm_offdiag, axis_idx, nonaxis_idx) for sz in common_ids}
+        m_i1 = {sz: _flux_sz(i1_by_id[sz][perm_rows], atm_offdiag, axis_idx, nonaxis_idx) for sz in common_ids}
+        return _paired_delta_median(m_p3, m_i1, common_ids)
 
     delta_rate = _delta_null_distribution(rate_perm, n_perm, seed)
     delta_label = _delta_null_distribution(label_perm, n_perm, seed)
@@ -263,17 +308,20 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
         print(f"[warn] {ds_sid} ({cohort}): geometry ok but surplus is non-finite", flush=True)
         return row
 
-    # ---- lag1-specific downgrade for common drive (lag1 - lag0) ----
-    lag0_p3 = _median_net_flux(_atms(p3_acts, atm_lag0), axis_idx, nonaxis_idx)
-    lag0_i1 = _median_net_flux(_atms(i1_acts, atm_lag0), axis_idx, nonaxis_idx)
-    lag1_specific_delta = (flux_i1 - lag0_i1) - (flux_p3 - lag0_p3)
+    # ---- lag1-specific downgrade for common drive: paired per-seizure
+    # (lag1 - lag0) delta over common seizures. ----
+    f0_p3 = {sz: net_offaxis_flux(atm_lag0(p3_by_id[sz]), axis_idx, nonaxis_idx, "source_mean") for sz in common_ids}
+    f0_i1 = {sz: net_offaxis_flux(atm_lag0(i1_by_id[sz]), axis_idx, nonaxis_idx, "source_mean") for sz in common_ids}
+    ls_p3 = {sz: f1_p3[sz] - f0_p3[sz] for sz in common_ids}
+    ls_i1 = {sz: f1_i1[sz] - f0_i1[sz] for sz in common_ids}
+    lag1_specific_delta = _paired_delta_median(ls_p3, ls_i1, common_ids)
     common_drive_sensitive = bool(lag1_specific_delta <= 0)
 
-    # ---- leave-one-contact: recompute RAW obs_delta per drop (cheaper than a
-    # per-drop null; see brief), then convert each to a surplus using the
-    # ALREADY-COMPUTED full-data rate-null median (no re-run of the null).
-    # pass = sign(surplus) survives every drop, on the surplus basis — raw
-    # obs_delta can disagree in sign with the null-corrected surplus. ----
+    # ---- leave-one-contact: recompute the PAIRED raw obs_delta per drop
+    # (cheaper than a per-drop null; see brief), then convert each to a surplus
+    # using the ALREADY-COMPUTED full-data rate-null median (no re-run of the
+    # null). pass = sign(surplus) survives every drop, on the surplus basis —
+    # raw obs_delta can disagree in sign with the null-corrected surplus. ----
     n = len(all_clean)
     median_rate_null_full = float(np.nanmedian(delta_rate))  # same NaN-dilution class as _delta_stats
     drop_surpluses = []
@@ -284,9 +332,9 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
         new_of_old[keep] = np.arange(int(keep.sum()))
         d_axis = new_of_old[axis_idx[axis_idx != d]]
         d_nonaxis = new_of_old[nonaxis_idx[nonaxis_idx != d]]
-        d_p3 = [a[keep] for a in p3_acts]
-        d_i1 = [a[keep] for a in i1_acts]
-        dd = _obs_delta_from_acts(d_p3, d_i1, d_axis, d_nonaxis)
+        d_p3 = {sz: p3_by_id[sz][keep] for sz in common_ids}
+        d_i1 = {sz: i1_by_id[sz][keep] for sz in common_ids}
+        dd = _paired_obs_delta(d_p3, d_i1, common_ids, d_axis, d_nonaxis)
         drop_surpluses.append(dd - median_rate_null_full)
     leave_one_min = float(np.min(drop_surpluses)) if drop_surpluses else float("nan")
     sign_surplus = np.sign(surplus)
@@ -294,30 +342,33 @@ def _run_ok_subject(ds_sid, cohort, cfg, cc, n_perm, row) -> dict:
         sign_surplus != 0 and all(np.sign(ds) == sign_surplus for ds in drop_surpluses)
     )
 
-    max_source = _max_source_contribution(i1_atms, axis_idx, nonaxis_idx)
+    max_source = _max_source_contribution(
+        [i1_atm_by_sz[sz] for sz in common_ids], axis_idx, nonaxis_idx
+    )
 
     # ---- axis-only control: relabel all non-axis -> axis (non-axis empty).
     # By construction net flux collapses to ~0 (no non-axis target/source), so
     # axis_only_flux_delta ~ 0 and the pass reduces to surplus > 0 (null-
     # corrected basis, not raw obs_delta). NEAR-TRIVIAL-BY-CONSTRUCTION
     # (flagged in the report) — implemented literally per the brief so Task 10
-    # can decide whether to strengthen it. ----
+    # can decide whether to strengthen it. Paired over common seizures. ----
     axis_all = np.array(sorted(set(axis_idx.tolist()) | set(nonaxis_idx.tolist())), dtype=int)
     empty_nonaxis = np.array([], dtype=int)
-    axis_only_flux_delta = (
-        _median_net_flux(i1_atms, axis_all, empty_nonaxis)
-        - _median_net_flux(p3_atms, axis_all, empty_nonaxis)
-    )
+    aa_p3 = {sz: net_offaxis_flux(p3_atm_by_sz[sz], axis_all, empty_nonaxis, "source_mean") for sz in common_ids}
+    aa_i1 = {sz: net_offaxis_flux(i1_atm_by_sz[sz], axis_all, empty_nonaxis, "source_mean") for sz in common_ids}
+    axis_only_flux_delta = _paired_delta_median(aa_p3, aa_i1, common_ids)
     axis_only_control_pass = bool(axis_only_flux_delta < surplus)
 
     # ---- onset jitter +-10 s: reload windows at shifted anchors (i1_eligible
-    # gate stays at shift 0 inside the loader), recompute obs_delta, require
-    # sign stability. cls reused to skip the expensive context/lagPat reload. ----
+    # gate stays at shift 0 inside the loader), recompute the PAIRED obs_delta
+    # (common set RE-DERIVED at the shifted anchor), require sign stability.
+    # cls reused to skip the expensive context/lagPat reload. ----
     def obs_delta_at(shift):
         env = load_subject_phase_envelopes(ds_sid, cohort, cfg, ["P3", "I1"], onset_shift=shift, cls=cc)
-        p3s, _ = _phase_acts(env, "P3", z_thr)
-        i1s, _ = _phase_acts(env, "I1", z_thr)
-        return _obs_delta_from_acts(p3s, i1s, env["axis_idx"], env["nonaxis_idx"])
+        p3s = _phase_acts(env, "P3", z_thr)
+        i1s = _phase_acts(env, "I1", z_thr)
+        common = sorted(set(p3s) & set(i1s))
+        return _paired_obs_delta(p3s, i1s, common, env["axis_idx"], env["nonaxis_idx"])
 
     d_p10 = obs_delta_at(10.0)
     d_m10 = obs_delta_at(-10.0)

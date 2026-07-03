@@ -13,8 +13,13 @@ this question and is referenced only for the line-length-rate FORMULA, per
 the brief). ``beta_axis`` (signed Spearman between this roughness and the
 axis contacts' fixed interictal forward rank) measures how strongly the
 roughness still follows the axis's forward order; ``|beta_axis|`` is the
-axial-order STRENGTH regardless of sign. We take the median of ``|beta_axis|``
-over a subject's seizures per phase and ask whether it SHRINKS (P3 -> I1).
+axial-order STRENGTH regardless of sign. Because P3->I1 is a WITHIN-SEIZURE
+change, the contrast is PAIRED BY SEIZURE: only seizures carrying BOTH phases
+contribute (``common_ids = P3_ids ∩ I1_ids``), the per-seizure
+``delta(sz) = |beta_I1|(sz) − |beta_P3|(sz)`` is formed, and ``obs_delta`` is the
+subject-median of those per-seizure deltas (``n_seizures = len(common_ids)``) —
+we ask whether this axial order SHRINKS (P3 -> I1), NOT whether
+``median(I1-seizures) − median(P3-seizures)`` does.
 
 H3a IS SUPPORTIVE-ONLY (plan §2/§7): axial weakening can be explained by
 seizure-wide SNR/saturation/coverage effects, not specifically by "axis ->
@@ -26,8 +31,10 @@ regardless of direction or null outcome (see ``_run_ok_subject``).
 Δ-NULL DISCIPLINE (plan rev2 item 7 — the co-primary trap, still enforced
 here even though H3a is non-gating): the p-value is on the Δ(I1−P3)
 permutation distribution, NOT per-phase-null then subtract. Each permutation
-applies its null to BOTH P3 and I1 and forms
-``delta_perm = |beta_I1|_perm − |beta_P3|_perm`` INSIDE the call.
+applies its null to BOTH phases of EACH common seizure and forms the
+per-seizure ``delta_perm(sz) = |beta_I1|_perm(sz) − |beta_P3|_perm(sz)``, then
+the subject-median over common seizures — the SAME paired aggregation as
+``obs_delta``.
 
 H3a expects ``delta_beta_axis_strength < 0`` (order weakens) — the MIRROR of
 H3b/H3c's ``> 0`` convention, so the p-value is one-sided LOWER:
@@ -143,22 +150,34 @@ def _line_length_rate(env: np.ndarray) -> np.ndarray:
     return out
 
 
-def _median_abs_beta(llr_dicts: list, names: list, rf: dict) -> float:
-    """Median over seizures of ``|beta_axis|``, restricted to ``names``.
+def _abs_beta_sz(llr_by_name: dict, names: list, rf: dict) -> float:
+    """``|beta_axis|`` for ONE seizure, restricted to ``names`` (finite pairs).
 
-    ``metric_by_name`` is rebuilt per seizure from that seizure's observed
-    (or permuted) line-length-rate dict, restricted to ``names`` — the TRUE
-    axis set for the observed/spatial-null path, or the label-null's
-    PERMUTED axis set. Per-seizure NaN betas (fewer than 4 valid pairs) are
-    filtered before the median (an empty/degenerate phase propagates NaN,
-    never a fake 0).
+    ``metric`` is that seizure's observed (or permuted) line-length-rate dict
+    restricted to ``names`` — the TRUE axis set for the observed/spatial-null
+    path, or the label-null's PERMUTED axis set. Fewer than 4 valid pairs ->
+    NaN (never a fake 0), so a degenerate phase propagates NaN.
     """
-    vals = []
-    for llr_by_name in llr_dicts:
-        metric = {n: llr_by_name[n] for n in names if n in llr_by_name}
-        b = beta_axis(metric, rf)
-        if np.isfinite(b):
-            vals.append(abs(b))
+    metric = {n: llr_by_name[n] for n in names if n in llr_by_name}
+    b = beta_axis(metric, rf)
+    return abs(b) if np.isfinite(b) else float("nan")
+
+
+def _paired_delta_median(m_p3: dict, m_i1: dict, common_ids: list) -> float:
+    """Subject-median over common seizures of ``metric_I1(sz) - metric_P3(sz)``.
+
+    Median of per-seizure differences (the paired within-seizure change), NOT
+    the difference of the two per-phase medians (which would mix a P3-only and
+    an I1-only seizure population). Non-finite per-seizure deltas are dropped;
+    empty -> NaN.
+    """
+    deltas = [m_i1[sz] - m_p3[sz] for sz in common_ids if np.isfinite(m_i1[sz] - m_p3[sz])]
+    return float(np.median(deltas)) if deltas else float("nan")
+
+
+def _phase_median(m_by_sz: dict, common_ids: list) -> float:
+    """Subject-median over common seizures of one phase's per-seizure metric."""
+    vals = [m_by_sz[sz] for sz in common_ids if np.isfinite(m_by_sz[sz])]
     return float(np.median(vals)) if vals else float("nan")
 
 
@@ -182,14 +201,17 @@ def _p_lower(obs: float, perm: np.ndarray) -> float:
     return (1 + int(np.sum(finite <= obs))) / (1 + finite.size)
 
 
-def _phase_llr(env0: dict, all_clean: list, phase: str) -> tuple[list, set]:
-    """Per-seizure ``{name: llr}`` dicts (rows ordered by ``all_clean``) for one phase."""
-    llr_dicts, sz_ids = [], set()
+def _phase_llr(env0: dict, all_clean: list, phase: str) -> dict:
+    """``{seizure_idx: {name: llr}}`` (rows ordered by ``all_clean``) for one phase.
+
+    Keyed by seizure id so the caller can pair P3 and I1 on common seizures
+    (short seizures carry P3 but no I1-eligible window).
+    """
+    out: dict = {}
     for sz in env0["seizures"]:
         if phase in sz["phases"]:
-            llr_dicts.append(dict(zip(all_clean, _line_length_rate(sz["phases"][phase]))))
-            sz_ids.add(sz["idx"])
-    return llr_dicts, sz_ids
+            out[sz["idx"]] = dict(zip(all_clean, _line_length_rate(sz["phases"][phase])))
+    return out
 
 
 def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, row: dict) -> dict:
@@ -218,46 +240,55 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
     rf = rank_forward(typical_rank)
 
     # ---- observed metric: line-length rate over the WHOLE phase span, per
-    # contact, per seizure (no sliding windows — unlike Task 8). ----
+    # contact, per seizure (no sliding windows — unlike Task 8). PAIRED BY
+    # SEIZURE: only seizures carrying BOTH phases contribute. ----
     env0 = load_subject_phase_envelopes(ds_sid, cohort, cfg, ["P3", "I1"], onset_shift=0.0, cls=cc)
-    p3_llr, p3_ids = _phase_llr(env0, all_clean, "P3")
-    i1_llr, i1_ids = _phase_llr(env0, all_clean, "I1")
-    n_seizures = len(p3_ids | i1_ids)  # union of seizures contributing to either phase median
+    p3_llr_by_id = _phase_llr(env0, all_clean, "P3")
+    i1_llr_by_id = _phase_llr(env0, all_clean, "I1")
+    common_ids = sorted(set(p3_llr_by_id) & set(i1_llr_by_id))  # ONLY seizures with BOTH phases
+    n_seizures = len(common_ids)
+    row["n_seizures"] = n_seizures
 
-    beta_p3 = _median_abs_beta(p3_llr, is_axis_names, rf)
-    beta_i1 = _median_abs_beta(i1_llr, is_axis_names, rf)
-    obs_delta = beta_i1 - beta_p3
+    if n_seizures == 0:
+        row.update({"status": "skipped", "skip_reason": "no_paired_seizures"})
+        print(f"[skip] {ds_sid} ({cohort}): geometry ok but no seizure carries BOTH P3 and I1", flush=True)
+        return row
+
+    beta_p3_sz = {sz: _abs_beta_sz(p3_llr_by_id[sz], is_axis_names, rf) for sz in common_ids}
+    beta_i1_sz = {sz: _abs_beta_sz(i1_llr_by_id[sz], is_axis_names, rf) for sz in common_ids}
+    beta_p3 = _phase_median(beta_p3_sz, common_ids)
+    beta_i1 = _phase_median(beta_i1_sz, common_ids)
+    obs_delta = _paired_delta_median(beta_p3_sz, beta_i1_sz, common_ids)
     beta_p3_reliable = bool(beta_p3 >= rel_min)
 
     row.update({
         "status": "ok", "skip_reason": "",
         "beta_axis_P3": beta_p3, "beta_axis_I1": beta_i1,
         "beta_axis_P3_reliable": beta_p3_reliable,
-        "delta_beta_axis_strength": obs_delta, "n_seizures": n_seizures,
+        "delta_beta_axis_strength": obs_delta,
     })
     if not np.isfinite(obs_delta):
         row.update({"status": "skipped", "skip_reason": "nonfinite_beta_delta"})
-        print(f"[warn] {ds_sid} ({cohort}): geometry ok but no paired P3/I1 beta_axis (obs_delta NaN)", flush=True)
+        print(f"[warn] {ds_sid} ({cohort}): geometry ok but no finite paired P3/I1 beta_axis (obs_delta NaN)", flush=True)
         return row
 
-    # ---- Δ-null distributions (both nulls form Δ INSIDE each perm; H3a
-    # expects delta<0 -> LOWER-tail p, mirroring H3b/H3c's upper-tail). ----
+    # ---- Δ-null distributions (both nulls form the PAIRED Δ over common
+    # seizures INSIDE each perm; H3a expects delta<0 -> LOWER-tail p,
+    # mirroring H3b/H3c's upper-tail). ----
     def spatial_perm(rng):
         # "(per phase per seizure)" per the brief: an INDEPENDENT
         # shaft-constrained value-shuffle of the line-length-rate metric is
         # drawn for EVERY (seizure, phase) pair inside this one perm (NOT a
         # single draw applied everywhere, unlike the label null below) — the
         # shared `rng` state is consumed sequentially across these draws.
-        def one_phase(llr_dicts):
-            vals = []
-            for llr_by_name in llr_dicts:
-                perm_metric = shaft_constrained_permute(llr_by_name, shaft_by_name, rng)
-                restricted = {n: perm_metric[n] for n in is_axis_names if n in perm_metric}
-                b = beta_axis(restricted, rf)
-                if np.isfinite(b):
-                    vals.append(abs(b))
-            return float(np.median(vals)) if vals else float("nan")
-        return one_phase(i1_llr) - one_phase(p3_llr)
+        def beta_sz(llr_by_name):
+            perm_metric = shaft_constrained_permute(llr_by_name, shaft_by_name, rng)
+            restricted = {n: perm_metric[n] for n in is_axis_names if n in perm_metric}
+            b = beta_axis(restricted, rf)
+            return abs(b) if np.isfinite(b) else float("nan")
+        m_p3 = {sz: beta_sz(p3_llr_by_id[sz]) for sz in common_ids}
+        m_i1 = {sz: beta_sz(i1_llr_by_id[sz]) for sz in common_ids}
+        return _paired_delta_median(m_p3, m_i1, common_ids)
 
     def label_perm(rng):
         # ONE draw per perm — axis/non-axis identity is a per-contact
@@ -265,7 +296,9 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
         # convention). rf stays FIXED; only which contacts get read out
         # against it changes (the PERMUTED axis set).
         new_axis, _new_nonaxis = label_permute(is_axis_names, is_nonaxis_names, shaft_by_name, rng)
-        return _median_abs_beta(i1_llr, new_axis, rf) - _median_abs_beta(p3_llr, new_axis, rf)
+        m_p3 = {sz: _abs_beta_sz(p3_llr_by_id[sz], new_axis, rf) for sz in common_ids}
+        m_i1 = {sz: _abs_beta_sz(i1_llr_by_id[sz], new_axis, rf) for sz in common_ids}
+        return _paired_delta_median(m_p3, m_i1, common_ids)
 
     delta_spatial = np.array([spatial_perm(np.random.default_rng(seed + p)) for p in range(n_perm)])
     delta_label = np.array([label_perm(np.random.default_rng(seed + p)) for p in range(n_perm)])
@@ -280,13 +313,17 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
     )
 
     # ---- onset jitter +-10 s: reload windows at shifted anchors (i1_eligible
-    # gate stays at shift 0 inside the loader), recompute obs_delta, require
-    # sign stability. cls reused to skip the expensive context/lagPat reload. ----
+    # gate stays at shift 0 inside the loader), recompute the PAIRED obs_delta
+    # (common set RE-DERIVED at the shifted anchor), require sign stability. cls
+    # reused to skip the expensive context/lagPat reload. ----
     def obs_delta_at(shift):
         env = load_subject_phase_envelopes(ds_sid, cohort, cfg, ["P3", "I1"], onset_shift=shift, cls=cc)
-        p3s, _ = _phase_llr(env, all_clean, "P3")
-        i1s, _ = _phase_llr(env, all_clean, "I1")
-        return _median_abs_beta(i1s, is_axis_names, rf) - _median_abs_beta(p3s, is_axis_names, rf)
+        p3s = _phase_llr(env, all_clean, "P3")
+        i1s = _phase_llr(env, all_clean, "I1")
+        common = sorted(set(p3s) & set(i1s))
+        m_p3 = {sz: _abs_beta_sz(p3s[sz], is_axis_names, rf) for sz in common}
+        m_i1 = {sz: _abs_beta_sz(i1s[sz], is_axis_names, rf) for sz in common}
+        return _paired_delta_median(m_p3, m_i1, common)
 
     d_p10 = obs_delta_at(10.0)
     d_m10 = obs_delta_at(-10.0)

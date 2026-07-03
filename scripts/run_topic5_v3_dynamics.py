@@ -10,13 +10,21 @@ singular vector of ``A^k*`` (the most-amplified input direction), map it back to
 contact space (``u_c``), and measure a per-contact ``density`` mode-shift =
 ``‖P_N u_c‖²/rank(P_N) − ‖P_A u_c‖²/rank(P_A)`` (non-axis energy minus axis
 energy, each per-contact so unequal subspace sizes are comparable). We take the
-median over a window, then over a phase's seizures, and ask whether
-``mode_shift_I1 − mode_shift_P3`` is larger than chance.
+median over a window -> per seizure. Because P3->I1 is a WITHIN-SEIZURE change,
+the contrast is PAIRED BY SEIZURE: only seizures carrying BOTH phases contribute
+(``common_ids = P3_ids ∩ I1_ids``), ``delta(sz) = mode_shift_I1(sz) −
+mode_shift_P3(sz)`` is formed per seizure, and ``obs_delta`` is the
+subject-median of those per-seizure deltas — NOT ``median(I1-seizures) −
+median(P3-seizures)``, which would silently mix a P3-only and an I1-only seizure
+population when short seizures have P3 but no eligible I1. ``n_seizures`` is
+``len(common_ids)``.
 
 Δ-NULL DISCIPLINE (plan rev2 item 7 — the co-primary trap): the p-value is on
 the Δ(I1−P3) permutation distribution, NOT per-phase-null then subtract. Each
-permutation applies its null to BOTH P3 and I1, recomputes both phase medians,
-and forms ``delta_perm = mode_shift_I1_perm − mode_shift_P3_perm``.
+permutation applies its null to BOTH phases of EACH common seizure, forms the
+per-seizure ``delta_perm(sz) = mode_shift_I1_perm(sz) − mode_shift_P3_perm(sz)``,
+then the subject-median over common seizures — the SAME paired aggregation as
+``obs_delta``.
 
 THREE gating nulls (all on the Δ statistic; H3c expects delta > 0):
   - phase  ``p_phase``: per window ``phase_randomize_surrogate`` -> refit
@@ -127,46 +135,89 @@ def _base_row(ds_sid: str, cohort: str, cfg: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# window slicing + aggregation (median over windows -> per seizure; median over
-# seizures -> subject). Shared by observed / phase / block passes.
+# window slicing + PAIRED-BY-SEIZURE aggregation. P3->I1 is a within-seizure
+# change, so per-window scalars are medianed to a per-seizure value keyed by
+# seizure id; only seizures present in BOTH phases (``common_ids``) contribute,
+# and every subject statistic is the median of per-seizure differences (median
+# of differences, NOT difference of the two per-phase medians). Shared by
+# observed / phase / block / cached passes.
 # ---------------------------------------------------------------------------
 def _windows_of(env: np.ndarray, hop: float, win_sec: float, step_sec: float) -> list:
     relt_syn = np.arange(env.shape[1]) * hop
     return sliding_windows(relt_syn, 0, env.shape[1], win_sec, step_sec)
 
 
-def _agg_windows(envs: list, fn, n_out: int, hop: float, win_sec: float, step_sec: float) -> tuple:
-    """Median over windows (per seizure) then median over seizures, per component.
+def _agg_windows_by_sz(env_by_id: dict, fn, n_out: int, hop: float, win_sec: float, step_sec: float) -> dict:
+    """``{seizure_idx: (comp0, ..., comp_{n_out-1})}`` = per-seizure median over windows.
 
-    ``fn(Xw)`` returns a length-``n_out`` tuple; each component is finite-filtered
-    within a seizure before the window-median, and empty phases propagate NaN
-    (never a fake 0) into ``obs_delta``.
+    ``fn(Xw)`` returns a length-``n_out`` tuple; each component is
+    finite-filtered within a seizure before the window-median (empty window set
+    -> NaN, never a fake 0). Keyed by seizure id so the caller can pair P3 and
+    I1 on common ids.
     """
-    sz_meds: list = [[] for _ in range(n_out)]
-    for env in envs:
+    out: dict = {}
+    for sz, env in env_by_id.items():
         outs = [fn(env[:, ws:we]) for ws, we in _windows_of(env, hop, win_sec, step_sec)]
+        comps = []
         for k in range(n_out):
             col = [o[k] for o in outs if np.isfinite(o[k])]
-            if col:
-                sz_meds[k].append(float(np.median(col)))
-    return tuple(float(np.median(s)) if s else float("nan") for s in sz_meds)
+            comps.append(float(np.median(col)) if col else float("nan"))
+        out[sz] = tuple(comps)
+    return out
 
 
-def _agg_cached(cache_phase: list, fn) -> float:
-    """Median over windows then seizures for a cached per-window ``u_c`` list.
+def _paired_delta(sz_p3: dict, sz_i1: dict, key, common_ids: list) -> float:
+    """Subject-median over common seizures of ``sz_i1[sz][key] - sz_p3[sz][key]``.
 
-    ``cache_phase`` is a list (over contributing seizures) of lists (over that
-    seizure's windows) of contact-space ``u_c`` vectors; ``fn(u_c) -> float``.
-    Used by the label null / leave-one / axis-only / top-fraction, none of which
-    refit the VAR (they reuse the OBSERVED ``u_c``).
+    ``key`` indexes either a per-seizure tuple (perm passes; ``key`` is an int)
+    or a per-seizure scalar dict (observed pass; ``key`` is a name). Per-seizure
+    deltas that are non-finite are dropped; empty -> NaN.
     """
-    sz_meds: list = []
-    for sz_u in cache_phase:
-        vals = [fn(u) for u in sz_u]
-        vals = [v for v in vals if np.isfinite(v)]
-        if vals:
-            sz_meds.append(float(np.median(vals)))
-    return float(np.median(sz_meds)) if sz_meds else float("nan")
+    deltas = []
+    for sz in common_ids:
+        d = sz_i1[sz][key] - sz_p3[sz][key]
+        if np.isfinite(d):
+            deltas.append(d)
+    return float(np.median(deltas)) if deltas else float("nan")
+
+
+def _phase_col(sz_scal: dict, key, common_ids: list) -> float:
+    """Subject-median over common seizures of one phase's per-seizure scalar."""
+    vals = [sz_scal[sz][key] for sz in common_ids if np.isfinite(sz_scal[sz][key])]
+    return float(np.median(vals)) if vals else float("nan")
+
+
+def _cached_sz_median(u_list: list, fn) -> float:
+    """Median over a seizure's windows of a cached-``u_c`` fn (finite-filtered)."""
+    vals = [fn(u) for u in u_list]
+    vals = [v for v in vals if np.isfinite(v)]
+    return float(np.median(vals)) if vals else float("nan")
+
+
+def _agg_cached_paired(cache_p3: dict, cache_i1: dict, fn, common_ids: list) -> float:
+    """Paired delta over common seizures for a cached per-window ``u_c`` fn (NO refit).
+
+    ``cache_*`` are ``{seizure_idx: [u_c per window]}`` dicts. Used by the label
+    null / leave-one / axis-only, none of which refit the VAR (they reuse the
+    OBSERVED ``u_c``).
+    """
+    deltas = []
+    for sz in common_ids:
+        d = _cached_sz_median(cache_i1[sz], fn) - _cached_sz_median(cache_p3[sz], fn)
+        if np.isfinite(d):
+            deltas.append(d)
+    return float(np.median(deltas)) if deltas else float("nan")
+
+
+def _agg_cached_phase(cache_phase: dict, fn, common_ids: list) -> float:
+    """Median over common seizures of a cached per-window ``u_c`` fn (single phase).
+
+    Used by the I1-only single-contact top-energy-fraction, restricted to the
+    common seizures that feed ``obs_delta``.
+    """
+    vals = [_cached_sz_median(cache_phase[sz], fn) for sz in common_ids]
+    vals = [v for v in vals if np.isfinite(v)]
+    return float(np.median(vals)) if vals else float("nan")
 
 
 def _p_upper(obs: float, perm: np.ndarray) -> float:
@@ -201,15 +252,17 @@ def _perm_arrays(perm_fn, n_perm: int, seed: int, n_out: int) -> list:
     return [np.array(c, dtype=float) for c in cols]
 
 
-def _observed(envs: list, geom: dict, cfg: dict) -> tuple:
-    """Observed per-phase aggregates + per-window ``u_c`` cache + flat cv/logm lists.
+def _observed(env_by_id: dict, geom: dict, cfg: dict) -> tuple:
+    """Per-SEIZURE observed scalars + per-window ``u_c`` cache + flat cv/logm lists.
 
-    Returns ``(agg, cache, cv_flat, logm_flat)`` where ``agg`` holds the
-    median-over-windows/seizures of every per-window scalar (density/raw
-    mode-shift, 2D singular mode-shift, 2D spectral radius, axis/non-axis 2D
-    gains), ``cache`` is the per-window ``u_c`` (for label/leave-one/axis-only/
-    top-fraction reuse — no refit), and ``cv_flat``/``logm_flat`` are flat
-    per-window lists (full-D cv R² and 2D-VAR ``logm`` quality).
+    Returns ``(sz_scal, cache, cv_flat, logm_flat)`` where ``sz_scal`` is
+    ``{seizure_idx: {key: median-over-windows}}`` for every per-window scalar
+    (density/raw mode-shift, 2D singular mode-shift, 2D spectral radius,
+    axis/non-axis 2D gains), ``cache`` is ``{seizure_idx: [u_c per window]}``
+    (for label/leave-one/axis-only/top-fraction reuse — no refit), and
+    ``cv_flat``/``logm_flat`` are flat per-window lists (full-D cv R² and 2D-VAR
+    ``logm`` quality — subject-level VAR-quality descriptives, not paired).
+    Keyed by seizure id so the caller pairs P3 and I1 on common seizures.
     """
     rank = int(cfg["dynamics"]["lowrank"])
     alpha = float(cfg["dynamics"]["var_ridge_alpha"])
@@ -221,11 +274,11 @@ def _observed(envs: list, geom: dict, cfg: dict) -> tuple:
     e_axis, e_nonaxis = geom["e_axis"], geom["e_nonaxis"]
 
     keys = ("ms_density", "ms_raw", "ms_2d", "lambda2d", "gain_axis", "gain_nonaxis")
-    scal: dict = {k: [] for k in keys}
-    cache: list = []
+    sz_scal: dict = {}
+    cache: dict = {}
     cv_flat: list = []
     logm_flat: list = []
-    for env in envs:
+    for sz, env in env_by_id.items():
         u_list: list = []
         win_scal: dict = {k: [] for k in keys}
         for ws, we in _windows_of(env, hop, win_sec, step_sec):
@@ -247,13 +300,12 @@ def _observed(envs: list, geom: dict, cfg: dict) -> tuple:
             cv_flat.append(cv_one_step_r2(Xd, alpha, 5))
             _val, logm_ok = continuous_reactivity_approx(B2, hop)
             logm_flat.append(bool(logm_ok))
-        cache.append(u_list)
+        cache[sz] = u_list
+        sz_scal[sz] = {}
         for k in keys:
             vv = [x for x in win_scal[k] if np.isfinite(x)]
-            if vv:
-                scal[k].append(float(np.median(vv)))
-    agg = {k: (float(np.median(v)) if v else float("nan")) for k, v in scal.items()}
-    return agg, cache, cv_flat, logm_flat
+            sz_scal[sz][k] = float(np.median(vv)) if vv else float("nan")
+    return sz_scal, cache, cv_flat, logm_flat
 
 
 def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, row: dict) -> dict:
@@ -294,28 +346,41 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
     )
     geom = {"P_N": P_N, "P_A": P_A, "e_axis": e_axis_mean, "e_nonaxis": e_nonaxis_mean}
 
-    # ---- envelopes (P3 + I1, rows ordered by all_clean) ----
+    # ---- envelopes (P3 + I1, rows ordered by all_clean), keyed by seizure id ----
     env0 = load_subject_phase_envelopes(ds_sid, cohort, cfg, ["P3", "I1"], onset_shift=0.0, cls=cc)
-    envs_p3 = [sz["phases"]["P3"] for sz in env0["seizures"] if "P3" in sz["phases"]]
-    envs_i1 = [sz["phases"]["I1"] for sz in env0["seizures"] if "I1" in sz["phases"]]
-    p3_ids = {sz["idx"] for sz in env0["seizures"] if "P3" in sz["phases"]}
-    i1_ids = {sz["idx"] for sz in env0["seizures"] if "I1" in sz["phases"]}
-    n_seizures = len(p3_ids | i1_ids)
+    p3_by_id = {sz["idx"]: sz["phases"]["P3"] for sz in env0["seizures"] if "P3" in sz["phases"]}
+    i1_by_id = {sz["idx"]: sz["phases"]["I1"] for sz in env0["seizures"] if "I1" in sz["phases"]}
+    common_ids = sorted(set(p3_by_id) & set(i1_by_id))  # ONLY seizures carrying BOTH phases
+    n_seizures = len(common_ids)
+    row["n_ch_fit"] = len(all_clean)
+    row["n_seizures"] = n_seizures
 
-    agg_p3, cache_p3, cv_p3, logm_p3 = _observed(envs_p3, geom, cfg)
-    agg_i1, cache_i1, cv_i1, logm_i1 = _observed(envs_i1, geom, cfg)
-    obs_delta = agg_i1["ms_density"] - agg_p3["ms_density"]
+    if n_seizures == 0:
+        # No seizure has both P3 and I1 -> the paired obs_delta is undefined.
+        row.update({"status": "skipped", "skip_reason": "no_paired_seizures"})
+        print(f"[skip] {ds_sid} ({cohort}): geometry ok but no seizure carries BOTH P3 and I1", flush=True)
+        return row
+
+    # observed pass over ALL P3/I1 seizures (cheap, one-time; feeds the
+    # subject-level cv/logm quality flags); the pairing below selects common ids.
+    sz_p3, cache_p3, cv_p3, logm_p3 = _observed(p3_by_id, geom, cfg)
+    sz_i1, cache_i1, cv_i1, logm_i1 = _observed(i1_by_id, geom, cfg)
+    obs_delta = _paired_delta(sz_p3, sz_i1, "ms_density", common_ids)
 
     row.update({
         "status": "ok", "skip_reason": "",
-        "mode_shift_density_P3": agg_p3["ms_density"], "mode_shift_density_I1": agg_i1["ms_density"],
+        "mode_shift_density_P3": _phase_col(sz_p3, "ms_density", common_ids),
+        "mode_shift_density_I1": _phase_col(sz_i1, "ms_density", common_ids),
         "delta_mode_shift_density": obs_delta,
-        "n_ch_fit": len(all_clean), "n_seizures": n_seizures,
     })
     if not np.isfinite(obs_delta):
         row.update({"status": "skipped", "skip_reason": "nonfinite_mode_shift"})
-        print(f"[warn] {ds_sid} ({cohort}): geometry ok but no paired P3/I1 mode-shift (obs_delta NaN)", flush=True)
+        print(f"[warn] {ds_sid} ({cohort}): geometry ok but no finite paired P3/I1 mode-shift (obs_delta NaN)", flush=True)
         return row
+
+    # perm passes touch ONLY the common seizures (the paired-delta set)
+    p3_common = {sz: p3_by_id[sz] for sz in common_ids}
+    i1_common = {sz: i1_by_id[sz] for sz in common_ids}
 
     # ---- per-window helpers reused by the refit nulls / onset jitter ----
     def ms_window(Xw):
@@ -323,7 +388,8 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
         u_c = map_lowrank_vector_to_contacts(dominant_right_singular_vector(B_r, kstar), U_r)
         return subspace_mode_shift(u_c, P_N, P_A, "density")
 
-    # ---- Δ-null distributions (three nulls; delta formed INSIDE each perm) ----
+    # ---- Δ-null distributions (three nulls; each forms the PAIRED delta over
+    # common seizures INSIDE the perm — same aggregation as obs_delta) ----
     def phase_perm(rng):
         # one phase-randomized surrogate per window -> BOTH the low-rank
         # mode-shift and the 2D spectral radius (lambda_surplus reuses these).
@@ -334,24 +400,25 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
             ms = subspace_mode_shift(u_c, P_N, P_A, "density")
             B2 = direct_2d_var(project_2d(demean_window(Xs), e_axis_mean, e_nonaxis_mean), alpha)
             return (ms, spectral_radius(B2))
-        ms_p3, lam_p3 = _agg_windows(envs_p3, fn, 2, hop, win_sec, step_sec)
-        ms_i1, lam_i1 = _agg_windows(envs_i1, fn, 2, hop, win_sec, step_sec)
-        return (ms_i1 - ms_p3, lam_p3, lam_i1)
+        szp = _agg_windows_by_sz(p3_common, fn, 2, hop, win_sec, step_sec)
+        szi = _agg_windows_by_sz(i1_common, fn, 2, hop, win_sec, step_sec)
+        return (_paired_delta(szp, szi, 0, common_ids),
+                _phase_col(szp, 1, common_ids), _phase_col(szi, 1, common_ids))
 
     def block_perm(rng):
         def fn(Xw):
             return (ms_window(block_shuffle_surrogate(Xw, block_n, rng)),)
-        (ms_p3,) = _agg_windows(envs_p3, fn, 1, hop, win_sec, step_sec)
-        (ms_i1,) = _agg_windows(envs_i1, fn, 1, hop, win_sec, step_sec)
-        return (ms_i1 - ms_p3,)
+        szp = _agg_windows_by_sz(p3_common, fn, 1, hop, win_sec, step_sec)
+        szi = _agg_windows_by_sz(i1_common, fn, 1, hop, win_sec, step_sec)
+        return (_paired_delta(szp, szi, 0, common_ids),)
 
     def label_perm(rng):
         # NO refit: keep observed u_c, permute labels within shaft (same A/N
-        # counts) -> new projectors -> recompute density mode-shift.
+        # counts) -> new projectors -> recompute density mode-shift, paired.
         new_axis, new_nonaxis = label_permute(is_axis_names, is_nonaxis_names, shaft_by_name, rng)
         P_A2, P_N2 = subspace_projectors(all_clean, new_axis, new_nonaxis)
         g = lambda u: subspace_mode_shift(u, P_N2, P_A2, "density")  # noqa: E731
-        return (_agg_cached(cache_i1, g) - _agg_cached(cache_p3, g),)
+        return (_agg_cached_paired(cache_p3, cache_i1, g, common_ids),)
 
     delta_phase, lam_p3_perm, lam_i1_perm = _perm_arrays(phase_perm, n_perm, seed, 3)
     (delta_block,) = _perm_arrays(block_perm, n_perm, seed, 1)
@@ -367,27 +434,29 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
         float((obs_delta - med_l) / mad_l) if np.isfinite(mad_l) and mad_l > 0 else float("nan")
     )
 
-    # ---- descriptive: raw + 2D-consistency mode-shift deltas ----
-    mode_shift_raw_delta = agg_i1["ms_raw"] - agg_p3["ms_raw"]
-    mode_shift_2D_consistency = agg_i1["ms_2d"] - agg_p3["ms_2d"]
+    # ---- descriptive: raw + 2D-consistency mode-shift deltas (paired) ----
+    mode_shift_raw_delta = _paired_delta(sz_p3, sz_i1, "ms_raw", common_ids)
+    mode_shift_2D_consistency = _paired_delta(sz_p3, sz_i1, "ms_2d", common_ids)
 
     # ---- lambda_surplus (NEVER raw lambda) + axis/non-axis 2D gains ----
-    lambda_surplus_P3 = agg_p3["lambda2d"] - float(np.nanmedian(lam_p3_perm))
-    lambda_surplus_I1 = agg_i1["lambda2d"] - float(np.nanmedian(lam_i1_perm))
-    gain_axis_delta = agg_i1["gain_axis"] - agg_p3["gain_axis"]
-    gain_nonaxis_delta = agg_i1["gain_nonaxis"] - agg_p3["gain_nonaxis"]
+    # per-phase observed lambda is the common-seizure median; the phase-null
+    # median (lam_*_perm) is likewise paired over common seizures.
+    lambda_surplus_P3 = _phase_col(sz_p3, "lambda2d", common_ids) - float(np.nanmedian(lam_p3_perm))
+    lambda_surplus_I1 = _phase_col(sz_i1, "lambda2d", common_ids) - float(np.nanmedian(lam_i1_perm))
+    gain_axis_delta = _paired_delta(sz_p3, sz_i1, "gain_axis", common_ids)
+    gain_nonaxis_delta = _paired_delta(sz_p3, sz_i1, "gain_nonaxis", common_ids)
 
     # ---- continuous-reactivity quality flags (descriptive) ----
     logm_all = logm_p3 + logm_i1
     logm_quality_flag = bool(logm_all and (float(np.mean(logm_all)) >= 0.5))
     reactivity_cont_available = bool(any(logm_all))
 
-    # ---- single-contact energy (median across I1 windows; u_c² sign-invariant) ----
+    # ---- single-contact energy (median across common-seizure I1 windows; u_c² sign-invariant) ----
     def top_frac(u):
         e = np.asarray(u, dtype=float) ** 2
         s = float(e.sum())
         return float(e.max() / s) if s > 0 else float("nan")
-    top_contact_energy_fraction = _agg_cached(cache_i1, top_frac)
+    top_contact_energy_fraction = _agg_cached_phase(cache_i1, top_frac, common_ids)
     single_contact_driven = bool(
         np.isfinite(top_contact_energy_fraction) and top_contact_energy_fraction > frac_max
     )
@@ -402,7 +471,7 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
             if nv > 0:
                 v = v / nv
             return subspace_mode_shift(v, P_N, P_A, "density")
-        return _agg_cached(cache_i1, g) - _agg_cached(cache_p3, g)
+        return _agg_cached_paired(cache_p3, cache_i1, g, common_ids)
     sgn = np.sign(obs_delta)
     drops = [drop_delta(c) for c in range(len(all_clean))]
     leave_one_pass = bool(sgn != 0 and all(np.isfinite(d) and np.sign(d) == sgn for d in drops))
@@ -413,21 +482,23 @@ def _run_ok_subject(ds_sid: str, cohort: str, cfg: dict, cc: dict, n_perm: int, 
     axis_all = sorted(set(is_axis_names) | set(is_nonaxis_names))
     P_A_all, P_N_empty = subspace_projectors(all_clean, axis_all, [])
     h = lambda u: subspace_mode_shift(u, P_N_empty, P_A_all, "density")  # noqa: E731
-    axis_only_mode_shift_control = _agg_cached(cache_i1, h) - _agg_cached(cache_p3, h)
+    axis_only_mode_shift_control = _agg_cached_paired(cache_p3, cache_i1, h, common_ids)
     axis_only_control_pass = bool(
         np.isfinite(axis_only_mode_shift_control) and axis_only_mode_shift_control < obs_delta
     )
 
     # ---- onset jitter +-10 s: reload windows at shifted anchors (i1_eligible
-    # gate stays at shift 0 inside the loader), recompute obs_delta, require
-    # sign stability. cls reused to skip the expensive context/lagPat reload. ----
+    # gate stays at shift 0 inside the loader), recompute the PAIRED obs_delta
+    # (common set RE-DERIVED at the shifted anchor), require sign stability. cls
+    # reused to skip the expensive context/lagPat reload. ----
     def obs_delta_at(shift):
         env = load_subject_phase_envelopes(ds_sid, cohort, cfg, ["P3", "I1"], onset_shift=shift, cls=cc)
-        p3s = [sz["phases"]["P3"] for sz in env["seizures"] if "P3" in sz["phases"]]
-        i1s = [sz["phases"]["I1"] for sz in env["seizures"] if "I1" in sz["phases"]]
-        (m3,) = _agg_windows(p3s, lambda Xw: (ms_window(Xw),), 1, hop, win_sec, step_sec)
-        (m1,) = _agg_windows(i1s, lambda Xw: (ms_window(Xw),), 1, hop, win_sec, step_sec)
-        return m1 - m3
+        p3s = {sz["idx"]: sz["phases"]["P3"] for sz in env["seizures"] if "P3" in sz["phases"]}
+        i1s = {sz["idx"]: sz["phases"]["I1"] for sz in env["seizures"] if "I1" in sz["phases"]}
+        common = sorted(set(p3s) & set(i1s))
+        szp = _agg_windows_by_sz({sz: p3s[sz] for sz in common}, lambda Xw: (ms_window(Xw),), 1, hop, win_sec, step_sec)
+        szi = _agg_windows_by_sz({sz: i1s[sz] for sz in common}, lambda Xw: (ms_window(Xw),), 1, hop, win_sec, step_sec)
+        return _paired_delta(szp, szi, 0, common)
     d_p10 = obs_delta_at(10.0)
     d_m10 = obs_delta_at(-10.0)
     onset_jitter_pass = bool(np.sign(d_p10) == np.sign(obs_delta) == np.sign(d_m10))
