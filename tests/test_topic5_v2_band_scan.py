@@ -457,3 +457,69 @@ def test_cohort_perm_ps_max_family_excludes_composites_from_fwer():
     assert abs(mob["P"] - 0.2) < 1e-9      # P obs_delta .45 vs perm-max(over P) .15 -> (1+0)/5
     assert abs(mob["C"] - 0.4) < 1e-9      # C obs_delta .10 ; #{perm-max(over P) >= .10}=1 (.15) -> (1+1)/5
     assert abs(per_p["C"] - 0.4) < 1e-9    # per-band p over ALL bands: C obs .55 -> #{perm>=.55}=1 -> (1+1)/5
+
+
+def test_aperiodic_fit_qc():
+    """W1 Task 1.1 (Gate C input): the aperiodic cache emits 1/f-fit QC so a Gate-C negative can be
+    judged real (good fits) vs an artifact of bad fits. A KNOWN 1/f slope + a clean band bump ->
+    high median fit r2 and ZERO failed fits; a flat/white spectrum -> low r2 and (nearly) all fits
+    fail the min_r2 gate. The QC is OBSERVATIONAL: it reads the fit arrays ``_excess_traces`` already
+    computes and returns them under ``return_qc=True`` without altering the excess traces (residual
+    bit-identity is separately covered by ``test_aperiodic_vectorized_excess_matches_helper``)."""
+    import sys as _sys
+    from pathlib import Path as _Path
+    _root = _Path(__file__).resolve().parents[1]
+    if str(_root) not in _sys.path:
+        _sys.path.insert(0, str(_root))
+    from scripts.build_topic5_v2_aperiodic_cache import _excess_traces, FIT_LO, FIT_HI, MIN_R2
+
+    freqs = np.arange(0, 251, 1.0)                        # DC..250 Hz, like a real spectrogram grid
+    line_mask = line_noise_bin_mask(freqs, [50, 100, 150, 200, 250], 2.0)
+    specs = [("hg_low_ripple", 80.0, 150.0), ("gamma_LVFA", 30.0, 80.0)]
+    n_ch, n_time = 3, 4
+
+    # (a) KNOWN 1/f slope + a clean band bump -> high r2, zero failed fits.
+    slope_true, offset_true = -2.0, 2.0
+    psd_1f = np.where(freqs > 0, 10.0 ** offset_true * np.where(freqs > 0, freqs, 1.0) ** slope_true, 0.0)
+    bump = 0.3 * (10.0 ** offset_true * 100.0 ** slope_true) * np.exp(-0.5 * ((freqs - 100.0) / 4.0) ** 2)
+    psd_clean = psd_1f + bump
+    rng_a = np.random.default_rng(11)                     # per-cell jitter so the excess trace varies
+    Sxx_clean = np.empty((n_ch, freqs.size, n_time))      # (else its variance would be a trivial 0)
+    for c in range(n_ch):
+        for tt in range(n_time):
+            Sxx_clean[c, :, tt] = psd_clean * (1.0 + 0.02 * rng_a.standard_normal(freqs.size))
+    Sxx_clean = np.abs(Sxx_clean) + 1e-12
+    out_c, qc_c = _excess_traces(freqs, Sxx_clean, line_mask, specs, FIT_LO, FIT_HI, MIN_R2, return_qc=True)
+
+    for k in ("median_fit_r2", "fraction_failed_fits", "n_valid_freq_bins", "line_noise_bins_excluded"):
+        assert k in qc_c, f"missing QC field {k}"
+    assert qc_c["median_fit_r2"] > 0.9                    # a near-perfect log-log line
+    assert qc_c["fraction_failed_fits"] == 0.0           # every (channel,time-bin) fit clears min_r2
+
+    # n_valid_freq_bins = fit bins in [1,200] after line exclusion; line_noise_bins_excluded = dropped
+    fit_mask, _, n_range = band_bin_selection(freqs, FIT_LO, FIT_HI, line_mask, half_open=False)
+    assert qc_c["n_valid_freq_bins"] == int(fit_mask.sum())
+    assert qc_c["line_noise_bins_excluded"] == int(n_range - fit_mask.sum())
+    assert qc_c["line_noise_bins_excluded"] > 0          # 50/100/150/200 harmonics fall inside [1,200]
+
+    # residual_variance_by_band is derived (in build_subject) from these excess traces
+    resid_var = {name: float(np.nanvar(out_c[name])) for name, _, _ in specs}
+    assert set(resid_var) == {"hg_low_ripple", "gamma_LVFA"}
+    assert resid_var["hg_low_ripple"] > 0.0              # the 100 Hz bump lands in [80,150)
+    assert np.isfinite(resid_var["gamma_LVFA"])
+
+    # RESIDUAL BIT-IDENTITY: return_qc=False keeps the pre-QC contract (a bare dict), and the excess
+    # traces are byte-for-byte identical to the return_qc=True ones -> the QC branch is observational
+    # only and cannot have changed a single cached residual value (the npz is robust_z of these traces).
+    out_default = _excess_traces(freqs, Sxx_clean, line_mask, specs, FIT_LO, FIT_HI, MIN_R2)
+    assert isinstance(out_default, dict) and set(out_default) == set(out_c)
+    for name, _, _ in specs:
+        assert np.array_equal(out_default[name], out_c[name], equal_nan=True), \
+            f"{name}: excess trace differs between return_qc False/True -- QC branch is NOT observational"
+
+    # (b) flat / white spectrum -> low r2, (nearly) all fits fail the min_r2 gate.
+    rng_b = np.random.default_rng(20260704)
+    Sxx_flat = np.abs(rng_b.standard_normal((n_ch, freqs.size, n_time))) + 1.0   # positive, no 1/f trend
+    _out_f, qc_f = _excess_traces(freqs, Sxx_flat, line_mask, specs, FIT_LO, FIT_HI, MIN_R2, return_qc=True)
+    assert qc_f["median_fit_r2"] < 0.5                   # no log-log line -> r2 well below min_r2
+    assert qc_f["fraction_failed_fits"] > 0.5            # -> the fits fail the gate

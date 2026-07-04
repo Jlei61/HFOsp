@@ -86,7 +86,7 @@ def _primary_band_specs(cfg):
     return [(row[0], float(row[1]), float(row[2])) for row in cfg["bands"]["primary"]]
 
 
-def _excess_traces(freqs, Sxx, line_mask, band_specs, fit_lo, fit_hi, min_r2):
+def _excess_traces(freqs, Sxx, line_mask, band_specs, fit_lo, fit_hi, min_r2, return_qc=False):
     """Vectorized per-(channel,time-bin) aperiodic-corrected band excess power (Gate C raw material).
 
     Mirrors ``src.topic5_v2_band_scan.aperiodic_corrected_excess_power`` EXACTLY (asserted cell-by-cell
@@ -98,12 +98,22 @@ def _excess_traces(freqs, Sxx, line_mask, band_specs, fit_lo, fit_hi, min_r2):
     Returns ``{name: (n_ch,n_time) float64}`` with NaN where the fit is not ``ok`` (n valid fit bins
     < 10 or ``fit_r2 < min_r2``) or the band has no valid bin (Task-11 contract). Columns holding a
     non-positive/non-finite PSD bin in the fit range (never for a clean PSD) fall back to the scalar
-    helper per ``(c,tt)`` so the result stays byte-for-byte the helper's."""
+    helper per ``(c,tt)`` so the result stays byte-for-byte the helper's.
+
+    With ``return_qc=True`` ALSO returns ``(out, fit_qc)`` — a purely OBSERVATIONAL 1/f-fit QC dict
+    (W1 Task 1.1, Gate C input) read off the arrays this function already computes; the excess traces
+    ``out`` are byte-for-byte identical whether or not QC is requested (the default ``return_qc=False``
+    path is untouched). ``fit_qc`` counts every ``(channel,time-bin)`` as one attempted fit:
+    ``fraction_failed_fits`` = fraction with ``r2<min_r2`` OR ``n_fit<10`` OR a non-finite/non-positive
+    fit bin (all three collapse into ``~ok``); ``median_fit_r2`` is over the cells whose r2 is genuinely
+    computed (``all_fit_ok``, i.e. excluding the scalar-helper patch cells whose vectorized r2 is a
+    placeholder); ``n_valid_freq_bins`` = fit bins after line exclusion; ``line_noise_bins_excluded`` =
+    fit-range bins dropped as mains harmonics (via ``band_bin_selection``)."""
     freqs = np.asarray(freqs, float)
     n_ch, _n_freq, n_time = Sxx.shape
     fin = np.isfinite(Sxx) & (Sxx > 0) & (freqs > 0)[None, :, None]     # helper finite_pos: isfinite & psd>0 & f>0
 
-    fit_mask, _, _ = band_bin_selection(freqs, fit_lo, fit_hi, line_mask, half_open=False)  # CLOSED, like the helper
+    fit_mask, _, n_fit_range_total = band_bin_selection(freqs, fit_lo, fit_hi, line_mask, half_open=False)  # CLOSED, like the helper
     n_fit = int(fit_mask.sum())
     # common case: every fit bin is positive-finite -> closed-form OLS over ALL (c,tt) at once.
     all_fit_ok = np.all(fin[:, fit_mask, :], axis=1)                    # (n_ch,n_time); False -> patch via helper
@@ -152,7 +162,20 @@ def _excess_traces(freqs, Sxx, line_mask, band_specs, fit_lo, fit_hi, min_r2):
                 out[name][c, tt] = aperiodic_corrected_excess_power(
                     freqs, psd, lo, hi, line_mask, fit_lo=fit_lo, fit_hi=fit_hi,
                     min_r2=min_r2, half_open=True)["excess_power"]
-    return out
+    if not return_qc:
+        return out
+    # OBSERVATIONAL 1/f-fit QC (W1 Task 1.1) off the SAME arrays; does not touch ``out``.
+    n_total = int(ok.size)                                             # every (channel,time-bin) is one attempted fit
+    n_failed = int((~ok).sum())                                        # ~ok = r2<min_r2 OR n_fit<10 OR bad fit bin
+    median_r2 = float(np.median(fit_r2[all_fit_ok])) if bool(all_fit_ok.any()) else float("nan")
+    fit_qc = {
+        "median_fit_r2": median_r2,
+        "fraction_failed_fits": (n_failed / n_total) if n_total else float("nan"),
+        "n_failed_fits": n_failed, "n_total_fits": n_total,           # raw counts -> cohort-POOLED fraction
+        "n_valid_freq_bins": int(n_fit),                              # fit bins after line exclusion
+        "line_noise_bins_excluded": int(n_fit_range_total - n_fit),   # mains-harmonic bins dropped in the fit range
+    }
+    return out, fit_qc
 
 
 def build_subject(ds_sid, substrate, band_specs, cfg, out_dir):
@@ -176,6 +199,7 @@ def build_subject(ds_sid, substrate, band_specs, cfg, out_dir):
 
     arrays = {}
     bands_qc = {}                 # {band: {str(idx): qc}}
+    seizure_fit_qc = {}           # {str(idx): 1/f-fit QC (band-independent) + residual_variance_by_band}
     band_seizure_fail = []        # [(band, idx, reason)] robust-z degeneracies
     skipped_bands = {}            # {band: reason} Nyquist (subject-level)
     drops = []
@@ -205,7 +229,8 @@ def build_subject(ds_sid, substrate, band_specs, cfg, out_dir):
             drops.append({"idx": idx, "reason": "all_primary_bands_nyquist_skipped"})
             continue
 
-        excess = _excess_traces(f, Sxx, line_mask, present, FIT_LO, FIT_HI, MIN_R2)  # {name: (n_ch,n_time) f64}
+        excess, fit_qc = _excess_traces(f, Sxx, line_mask, present, FIT_LO, FIT_HI, MIN_R2,
+                                        return_qc=True)  # excess {name:(n_ch,n_time) f64}; fit_qc observational
         n_time = Sxx.shape[2]
         relt = (np.asarray(t, float) - float(sw.pre_sec)).astype(np.float32)
         # baseline segment depends on n_time + pre_sec + eeg_rel (NOT the band) -> resolve ONCE per
@@ -214,6 +239,7 @@ def build_subject(ds_sid, substrate, band_specs, cfg, out_dir):
                                      buffer_sec=GUARD_SEC, eeg_onset_rel_sec=eeg_rel,
                                      min_baseline_valid_sec=MIN_BASELINE_SEC)
         wrote_any = False
+        resid_var_by_band = {}                         # {band: nanvar of its aperiodic-corrected excess trace}
         for name, _lo, _hi in present:
             exc = excess[name]                         # (n_ch,n_time) f64; NaN on bad fit / no band bin
             try:                                       # baseline-robust-z the EXCESS trace directly (not log'd)
@@ -230,9 +256,12 @@ def build_subject(ds_sid, substrate, band_specs, cfg, out_dir):
                 "n_low_baseline_channels": int(np.asarray(low, bool).sum()),
                 "baseline_idx": [int(bl.start_idx), int(bl.end_idx)],
             }
+            resid_var_by_band[name] = float(np.nanvar(exc))   # W1 Task 1.1 QC: variance of the excess trace
             wrote_any = True
         if wrote_any:
             seizure_idxs.append(idx)
+            # per-seizure 1/f-fit QC (band-independent scalars) + this seizure's per-band excess variance
+            seizure_fit_qc[str(idx)] = {**fit_qc, "residual_variance_by_band": resid_var_by_band}
 
     if channels is None or not arrays:
         print(f"  [{ds_sid}] nothing cached ({len(drops)} loader drops)", flush=True)
@@ -262,6 +291,7 @@ def build_subject(ds_sid, substrate, band_specs, cfg, out_dir):
         "skipped_bands": skipped_bands,               # Nyquist (subject-level)
         "band_seizure_fail": [{"band": b, "idx": i, "reason": r} for b, i, r in band_seizure_fail],
         "bands": bands_qc,                            # per (band, idx) aperiodic QC
+        "fit_qc": seizure_fit_qc,                      # per-seizure 1/f-fit QC (W1 Task 1.1, Gate C input)
         "drops": drops,
     }
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -272,6 +302,84 @@ def build_subject(ds_sid, substrate, band_specs, cfg, out_dir):
           f"analysis_channels={len(side.get('analysis_channels', []))}/{len(channels)} | "
           f"skipped={list(skipped_bands)} | {len(drops)} drops", flush=True)
     return True
+
+
+def _aggregate_cohort_qc(out_dir, threshold=0.2):
+    """Roll up the per-subject 1/f-fit QC (each sidecar's ``aperiodic.fit_qc``) into a cohort
+    ``aperiodic_qc.json`` (W1 Task 1.1, Gate C input).
+
+    测了什么 / why: Gate C 判 ripple 的能量在 1/f 背景之外是否还有余量。这个判断只有当那条 1/f
+    背景线本身拟合得好时才可信。这里把每个被试、每个发作、每个 (触点,时间点) 的拟合好坏汇总成一个
+    队列数字：拟合失败的比例。若失败比例够低 (< threshold)，则 Gate C 的"没看到 ripple 特异余量"是
+    一个真阴性；否则 Gate C 只能当描述性结论。
+
+    Reads WHATEVER subject sidecars are present that carry a ``fit_qc`` block, so a partial /
+    single-subject run yields a partial cohort file (sidecars predating the QC are skipped). The LOCK:
+    cohort ``fraction_failed_fits`` POOLED over every (channel,time-bin) fit across all subjects/
+    seizures (not a mean of per-subject fractions) < ``threshold`` -> ``aperiodic_trustworthy``."""
+    per_subject = []
+    band_pool = {}                                     # band -> {failed, total, r2:[per-(subj,sz) median]}
+    tot_failed = tot_total = 0
+    subj_medians = []
+    for jp in sorted(Path(out_dir).glob("*.json")):
+        if jp.name == "aperiodic_qc.json":
+            continue                                   # never parse our own output as a subject sidecar
+        try:
+            meta = json.loads(jp.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        fit_qc = (meta.get("aperiodic") or {}).get("fit_qc") or {}
+        if not fit_qc:
+            continue                                   # sidecar predates the QC (or nothing cached)
+        s_failed = s_total = 0
+        s_r2 = []
+        for _idx, sz in fit_qc.items():
+            f_, t_ = int(sz.get("n_failed_fits", 0)), int(sz.get("n_total_fits", 0))
+            s_failed += f_
+            s_total += t_
+            r2 = sz.get("median_fit_r2")
+            r2 = float(r2) if (r2 is not None and np.isfinite(r2)) else None
+            if r2 is not None:
+                s_r2.append(r2)
+            for band in (sz.get("residual_variance_by_band") or {}):   # a band's presence marks it built here
+                bp = band_pool.setdefault(band, {"failed": 0, "total": 0, "r2": []})
+                bp["failed"] += f_
+                bp["total"] += t_
+                if r2 is not None:
+                    bp["r2"].append(r2)
+        subj_frac = (s_failed / s_total) if s_total else float("nan")
+        subj_med = float(np.median(s_r2)) if s_r2 else float("nan")
+        tot_failed += s_failed
+        tot_total += s_total
+        if np.isfinite(subj_med):
+            subj_medians.append(subj_med)
+        per_subject.append({"subject": jp.stem, "n_seizures": len(fit_qc),
+                            "median_fit_r2": subj_med, "fraction_failed_fits": subj_frac,
+                            "n_failed_fits": s_failed, "n_total_fits": s_total})
+
+    cohort_frac = (tot_failed / tot_total) if tot_total else float("nan")
+    by_band = {b: {"median_fit_r2": (float(np.median(v["r2"])) if v["r2"] else float("nan")),
+                   "fraction_failed_fits": (v["failed"] / v["total"]) if v["total"] else float("nan"),
+                   "n_failed_fits": v["failed"], "n_total_fits": v["total"]}
+               for b, v in sorted(band_pool.items())}
+    cohort = {
+        "aperiodic_trustworthy": bool(np.isfinite(cohort_frac) and cohort_frac < threshold),
+        "fraction_failed_fits": cohort_frac,           # cohort, POOLED over all (channel,time-bin) fits
+        "trustworthy_threshold": threshold,
+        "median_fit_r2": float(np.median(subj_medians)) if subj_medians else float("nan"),
+        "n_subjects": len(per_subject),
+        "n_failed_fits": tot_failed, "n_total_fits": tot_total,
+        "fit_range_hz": [FIT_LO, FIT_HI], "min_r2": MIN_R2,
+        "by_band": by_band,
+        "per_subject": per_subject,
+    }
+    Path(out_dir).mkdir(parents=True, exist_ok=True)
+    json.dump(cohort, open(Path(out_dir) / "aperiodic_qc.json", "w"), indent=2, ensure_ascii=False)
+    verdict = "TRUSTWORTHY" if cohort["aperiodic_trustworthy"] else "DESCRIPTIVE-ONLY"
+    print(f"[v2-aperiodic-qc] {len(per_subject)} subj | cohort fraction_failed_fits={cohort_frac:.4f} "
+          f"(thr {threshold}) -> aperiodic_trustworthy={cohort['aperiodic_trustworthy']} [{verdict}] | "
+          f"median_fit_r2={cohort['median_fit_r2']:.4f} -> {Path(out_dir) / 'aperiodic_qc.json'}", flush=True)
+    return cohort
 
 
 def main():
@@ -301,6 +409,7 @@ def main():
             build_subject(ds_sid, args.substrate, band_specs, cfg, out_dir)
         except Exception as e:
             print(f"  SUBJECT ERROR {type(e).__name__}: {e}", flush=True)
+    _aggregate_cohort_qc(out_dir)                       # cohort 1/f-fit QC roll-up over whatever sidecars exist
     print("V2 APERIODIC CACHE DONE", flush=True)
 
 
