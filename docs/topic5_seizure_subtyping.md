@@ -1,5 +1,14 @@
 # Topic 5：Seizure-related analysis (per-subject subtype + 下游 pre-ictal / outcome)
 
+> **🆕 V2 新重点（2026-07-01，design rev2 收紧完，待 writing-plans）：间期 HFO 几何 = 病理【候选】临界模态。**
+> 三层框架 —— trait：间期 HFO timing 几何 = **candidate** 病理临界模态（升级需证据阶梯）；state：发作前临界性沿这条模态升高；
+> expression：发作起始通过 **phenotype 特异的频带**沿这条模态招募（频带=发作机制的 readout，非技术参数）。
+> 核心问题从"哪个频带最像间期几何"升级为"**哪种发作起始机制沿间期 HFO 通路被重新招募**"。
+> **三个 gate（取代单一 go/no-go）**：A 空间平滑 null / B 频带特异（超 broadband）/ C HFO 特异（1-f+common-field 残差存活）；每层不过各有可发表结论（如 Gate B 不过 = "预测宽带招募非窄带 HFO"）。
+> **防循环两条命门**：必须过 **HFO-rate-preserving timing-order null**（否则 timing geometry 退化成 HFO-rate topography）；`hfo_rich` phenotype 须**独立来源**（不能用同一 ripple-power outcome 定义再验 ripple 对齐）。
+> 设计见 `docs/superpowers/specs/2026-07-01-topic5-v2-hfo-critical-mode-design.md`（rev2）；数值+文献 handoff 见 `docs/archive/topic5/ictal_band_sweep_handoff_2026-07-01.md`。
+> V1（network-axis，下方 2026-06-14 主线）是 V2 前身/基础，未被推翻，且 V2 不默认把 stable scaffold 升级成 unstable mode。
+
 > **主线结果（2026-06-14）：network-axis A+B 已执行**——间期传播轴 ↔ 发作早期激活共享一根粗网络骨架（18 Epilepsiae 队列稳），细对齐仅快活动量稳；符号自由共线，非逐点重放。见 §3.0 + 归档 `axis_alignment_AB_result_2026-06-14.md`。
 > 状态：**探索性 (exploratory) — PR-0 + PR-1 落地，audit-rerun 完成 (2026-05-10)，yuquan 扩展 (2026-05-10 PR-0.1)**。PR-1 cohort z-ER 聚类有 1 张 cohort 主结果（`figures/per_subject/`，25 subjects），cohort-level "真子型断言" 仍依赖 sensitivity；PR-2+ 未启动。
 > 范围：以 ictal seizure 本身为研究对象——subject 内的 seizure subtype carve-out + 下游 pre-ictal / outcome / propagation 关联。

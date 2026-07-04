@@ -33,6 +33,17 @@ from scripts.analyze_topic5_v2_subject_phenotype import (  # noqa: E402
     spearman_phenotype_gate,
 )
 
+# Task 3.1 (W3 "when?"): peri-ictal epoch grid + hard pre-window gate.
+import yaml  # noqa: E402
+from scripts.run_topic5_v2_alignment import (  # noqa: E402
+    _epoch_grid, _epoch_region, _window_admitted, _ictal_fraction_ok, _window_frames)
+from scripts.run_topic5_ictal_field_dynamics import _ictal_fraction  # noqa: E402
+from src.topic5_v2_band_scan import load_phase1_config  # noqa: E402
+
+_CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
+_PHASE1_CFG = _CONFIG_DIR / "topic5_v2_phase1.yaml"
+_PERI_CFG = _CONFIG_DIR / "topic5_v2_phase1_v2_periictal.yaml"
+
 # ---------------------------------------------------------------------------
 # Synthetic single-subject fixtures with KNOWN, hand-computable feature values
 # ---------------------------------------------------------------------------
@@ -387,3 +398,101 @@ def test_spearman_phenotype_gate():
                                               [1, 2, 3, 4, 5, 6])
     assert n == 5
     assert passes is True
+
+
+# ---------------------------------------------------------------------------
+# Task 3.1 (W3 "when?"): peri-ictal epoch grid (-100->+20s) + hard pre-window gate.
+# The peri-ictal admission + ictal-fraction EXEMPTION + region partition are OPT-IN
+# (epoch.admit_pre_ictal_windows); the DEFAULT [0,20] window set must stay unchanged (C1).
+# ---------------------------------------------------------------------------
+
+def test_periictal_grid_pre_windows_survive():
+    """Peri-ictal config (main_rel=[-100,20], window=10, step=5): pre-ictal windows (EEG-frame
+    win_end_rel_eeg<=0) are ADMITTED and SURVIVE the ictal-fraction floor (exempt, icf~0 by
+    construction, legitimately pre-ictal); the grid reaches EEG -100; deep pre-ictal windows carry a
+    pre-region label. Synthetic seizure: eeg_onset_rel=0 (so EEG frame == relt frame), relt covers
+    [-100, 20]. Routes through the production _window_frames so it exercises the real frame mapping."""
+    cfg = load_phase1_config(_PERI_CFG)
+    assert cfg["epoch"]["admit_pre_ictal_windows"] is True
+    grid, r1 = _epoch_grid(cfg)
+    r0 = float(cfg["epoch"]["main_rel"][0])
+    ictal_min = float(cfg["epoch"]["ictal_fraction_min"])
+    admit_pre = True
+
+    relt = np.round(np.arange(-100.0, 20.0 + 1e-9, 0.1), 3)   # covers [-100, 20]
+    off, on = 15.0, 0.0                                       # ictal = [0, 15]; EEG onset at relt=0
+
+    surviving = []
+    for st, en in grid:                                       # st,en are EEG-frame bounds (peri)
+        if not _window_admitted(st, en, r0, r1, admit_pre):
+            continue
+        st_relt, en_relt, wcr, wcr_eeg = _window_frames(st, en, on, admit_pre)
+        if ((relt >= st_relt) & (relt <= en_relt)).sum() == 0:   # recording-boundary drop (zmv is None)
+            continue
+        icf = _ictal_fraction(relt, st_relt, en_relt, off)
+        if not _ictal_fraction_ok(icf, ictal_min, en, admit_pre):   # en = EEG-frame end (grid=EEG)
+            continue
+        surviving.append(dict(win_center_rel_eeg=wcr_eeg, win_end_rel_eeg=en,
+                              ictal_fraction=icf, epoch_region=_epoch_region(wcr_eeg)))
+
+    centers = [w["win_center_rel_eeg"] for w in surviving]
+    assert min(centers) <= -90                               # grid reaches EEG -100 (first center -95)
+
+    pre = [w for w in surviving if w["win_end_rel_eeg"] <= 0]   # windows entirely before EEG onset
+    assert len(pre) > 0                                      # pre-windows survive (not all filtered)
+    assert all(w["ictal_fraction"] < ictal_min for w in pre) # they are icf-exempt (icf~0), NOT filtered
+
+    deep_pre = [w for w in surviving if w["win_center_rel_eeg"] <= -15]   # EEG center well before onset
+    assert len(deep_pre) > 0
+    assert all(w["epoch_region"] in {"far_pre", "mid_pre", "near_pre"} for w in deep_pre)
+
+
+def test_periictal_grid_eeg_frame_nonzero_onset():
+    """The peri-ictal grid is the EEG-ONSET frame (not clinical/relt). With eeg_onset_rel != 0:
+    win_center_rel_eeg tiles a CLEAN [-100,20] (EEG frame) so epoch_region always bins to one of the
+    5 named regions (no out-of-partition); win_center_rel == win_center_rel_eeg + eeg_onset_rel (relt
+    frame); and the relt slice bounds shift by eeg_onset_rel (so the cache is read at the physically
+    correct time). This is the fix for large EEG-vs-clinical gaps (down to -86s in cohort)."""
+    cfg = load_phase1_config(_PERI_CFG)
+    grid, r1 = _epoch_grid(cfg)
+    admit_pre = True
+    on = -40.0                                               # EEG onset 40s BEFORE relt=0 (clinical)
+    for st, en in grid:                                      # EEG-frame bounds
+        st_relt, en_relt, wcr, wcr_eeg = _window_frames(st, en, on, admit_pre)
+        assert -100.0 <= wcr_eeg <= 20.0                    # EEG-frame center is clean, always in-range
+        assert wcr_eeg == pytest.approx((st + en) / 2.0)    # == grid center (grid IS the EEG frame)
+        assert wcr == pytest.approx(wcr_eeg + on)           # relt center = EEG center + eeg_onset_rel
+        assert st_relt == pytest.approx(st + on)            # relt slice shifted by eeg_onset_rel
+        assert en_relt == pytest.approx(en + on)
+        assert _epoch_region(wcr_eeg) in {"far_pre", "mid_pre", "near_pre", "peri_onset", "early_post"}
+
+    # DEFAULT mode: grid IS the relt frame; EEG center = relt center - eeg_onset_rel (may leave range)
+    st, en = grid[0]
+    sr, er, wcr_d, wcr_eeg_d = _window_frames(st, en, on, admit_pre=False)
+    assert (sr, er) == pytest.approx((st, en))              # relt slice == grid (no shift)
+    assert wcr_d == pytest.approx((st + en) / 2.0)
+    assert wcr_eeg_d == pytest.approx(wcr_d - on)
+
+
+def test_default_config_unchanged_no_pre_windows():
+    """DEFAULT config (main_rel=[0,20], admit_pre_ictal_windows absent): backward-compat (C1). The
+    [0,20] admitted-window SET is exactly the locked Phase-1 set and NO admitted window is a pre-ictal
+    window (win_end_rel<=0) -- the peri-ictal exemption must NOT leak into default mode."""
+    cfg = load_phase1_config()                               # canonical phase1.yaml
+    assert cfg["epoch"].get("admit_pre_ictal_windows", False) is False
+    grid, r1 = _epoch_grid(cfg)
+    r0 = float(cfg["epoch"]["main_rel"][0])
+    admit_pre = False
+    admitted = [(st, en) for st, en in grid if _window_admitted(st, en, r0, r1, admit_pre)]
+    assert admitted
+    assert all(en > 0 for st, en in admitted)                # no pre-window (win_end_rel<=0) admitted
+    assert {(round(st, 3), round(en, 3)) for st, en in admitted} == {
+        (-5.0, 5.0), (0.0, 10.0), (5.0, 15.0), (10.0, 20.0), (15.0, 25.0)}
+
+
+def test_periictal_config_matches_phase1_nonepoch():
+    """Drift guard: the peri-ictal yaml is identical to phase1.yaml in EVERY section except `epoch`."""
+    base = yaml.safe_load(_PHASE1_CFG.read_text())
+    peri = yaml.safe_load(_PERI_CFG.read_text())
+    assert base.pop("epoch") != peri.pop("epoch")            # epoch DID change
+    assert base == peri                                      # everything else byte-identical

@@ -46,7 +46,8 @@ METRIC_COLS = ["align_abs_maxab", "align_signed_oriented", "align_signed_posthoc
                "signed_spearman_a", "signed_spearman_b", "n_contacts"]
 
 WINDOW_COLS = ["subject", "axis_set", "seizure", "band", "feature", "win_start_rel", "win_end_rel",
-               "win_center_rel", "ictal_fraction", "strict_onset", "align_abs_maxab",
+               "win_center_rel", "win_center_rel_eeg", "eeg_onset_rel", "epoch_region",
+               "ictal_fraction", "strict_onset", "align_abs_maxab",
                "align_signed_oriented", "align_signed_posthoc_max", "signed_spearman_a",
                "signed_spearman_b", "n_contacts", "band_eff_frac", "fs_edge_flag", "used_fixed_mask"]
 SEIZURE_COLS = ["subject", "axis_set", "seizure", "band", "feature", "used_fixed_mask", "n_windows",
@@ -63,23 +64,110 @@ def _config_bands(cfg):
     return primary + composites + [legacy], primary, legacy
 
 
+# Peri-ictal region partition (W3 "when?"). EXCLUSIVE, LOCK — computed on the EEG-anchored window
+# center t_eeg = win_center_rel - eeg_onset_rel. Half-open [lo, hi) for all bins; early_post takes
+# the closed upper edge [10, 20] so no window lands in two regions. (Resolves the plan sketch's
+# overlapping early_post:(0,20) / peri_onset:(-10,10) into a clean partition.)
+EPOCH_REGION_BINS = (("far_pre", -100.0, -60.0), ("mid_pre", -60.0, -30.0),
+                     ("near_pre", -30.0, -10.0), ("peri_onset", -10.0, 10.0),
+                     ("early_post", 10.0, 20.0))
+
+
+def _epoch_region(t_eeg):
+    """EXCLUSIVE partition of the EEG-anchored window center t_eeg into one peri-ictal region name.
+    In PERI-ICTAL mode t_eeg = win_center_rel_eeg is the grid center in [-95, 20], so every window
+    bins to exactly one of the 5 named regions (no out-of-partition). Returns '' only for centers
+    outside [-100, 20], which arises in DEFAULT [0,20] mode where t_eeg = relt_center - eeg_onset_rel
+    can leave the range (the default run does not use the EEG axis; Task 3.2 filters to the 5 regions
+    regardless)."""
+    if not np.isfinite(t_eeg):
+        return ""
+    for name, lo, hi in EPOCH_REGION_BINS:
+        if name == "early_post":
+            if lo <= t_eeg <= hi:                    # closed upper edge on the last bin only
+                return name
+        elif lo <= t_eeg < hi:
+            return name
+    return ""
+
+
+def _window_admitted(st, en, r0, r1, admit_pre):
+    """Grid-window admission. DEFAULT (Phase-1/W1, admit_pre False): only early-overlap windows
+    (win_end_rel>0 AND win_start_rel<r1) — UNCHANGED. PERI-ICTAL (admit_pre True, W3): any window
+    overlapping [r0, r1], so pre-ictal windows down to r0 (win_end_rel<=0) are admitted too."""
+    return (en > r0 and st < r1) if admit_pre else (en > 0 and st < r1)
+
+
+def _ictal_fraction_ok(icf, ictal_min, win_end_eeg, admit_pre):
+    """ictal-fraction floor with the PERI-ICTAL pre-window EXEMPTION. Pre-ictal windows (admit_pre
+    AND win_end_eeg<=0, entirely before EEG onset) are exempt (icf~0 by construction — legitimately
+    pre-ictal, must not be silently filtered). All other windows keep the Phase-1 rule
+    finite(icf) AND icf>=ictal_min. `win_end_eeg` is the EEG-frame window end (= the grid end in
+    peri-ictal mode, where the grid IS the EEG-onset frame)."""
+    if admit_pre and win_end_eeg <= 0:
+        return True
+    return bool(np.isfinite(icf) and icf >= ictal_min)
+
+
+def _window_frames(st, en, eeg_onset_rel, admit_pre):
+    """Map one grid window to (relt slice bounds st_relt/en_relt, relt center, EEG-frame center).
+
+    PERI-ICTAL (admit_pre True; W3): the grid IS the EEG-onset frame — [st, en] are EEG-frame bounds
+    tiling [-100, 20] RELATIVE TO EEG ONSET. The physical window is read from the relt-indexed cache
+    by shifting the bounds by +eeg_onset_rel (relt = EEG-frame + eeg_onset_rel). win_center_rel_eeg is
+    then the clean grid center, always in [-100, 20], so epoch_region bins on a clean EEG axis. This
+    is the fix for large EEG-vs-clinical gaps (|eeg_onset_rel| up to ~86s in cohort): building the
+    grid in the clinical/relt frame and re-anchoring post-hoc left win_center_rel_eeg ranging far
+    outside [-100, 20] and never sampling EEG far_pre for large-gap seizures.
+
+    DEFAULT (admit_pre False; Phase-1/W1): the grid IS the relt frame — [st, en] are relt bounds
+    (no shift); the EEG-frame center is the relt center minus eeg_onset_rel (may fall outside
+    [-100, 20], but the default [0, 20] run does not use the EEG axis). BYTE-IDENTICAL to Phase-1."""
+    if admit_pre:
+        st_relt, en_relt = st + eeg_onset_rel, en + eeg_onset_rel
+        win_center_rel_eeg = (st + en) / 2.0
+        win_center_rel = win_center_rel_eeg + eeg_onset_rel
+    else:
+        st_relt, en_relt = st, en
+        win_center_rel = (st + en) / 2.0
+        win_center_rel_eeg = win_center_rel - eeg_onset_rel
+    return st_relt, en_relt, win_center_rel, win_center_rel_eeg
+
+
 def _epoch_grid(cfg):
-    """Fixed epoch grid (config `epoch`). A window (start, start+w) is a candidate iff it OVERLAPS
-    the early-ictal region (0, main_rel[1]): win_end_rel>0 AND win_start_rel<main_rel[1] — this
-    interval-overlap rule admits onset-straddling windows (start<0) and past-20s windows, which the
-    `strict_onset` flag then distinguishes. Grid anchored at main_rel[0], stepped by field_step_sec.
-    ictal_fraction is applied per-seizure (needs the offset), not here."""
+    """Fixed epoch grid (config `epoch`), stepped by field_step_sec, anchored at main_rel[0].
+
+    DEFAULT (admit_pre_ictal_windows absent/False; Phase-1/W1): a window (start, start+w) is a
+    candidate iff it OVERLAPS the early-ictal region (0, main_rel[1]): win_end_rel>0 AND
+    win_start_rel<main_rel[1] — admits onset-straddling (start<0) and past-20s windows, which the
+    `strict_onset` flag distinguishes. UNCHANGED.
+
+    PERI-ICTAL (admit_pre_ictal_windows True; W3 "when?"): tile the FULL [main_rel[0], main_rel[1]]
+    span (main_rel[0]=-100) as EEG-ONSET-FRAME windows, admitting every window overlapping [r0, r1] —
+    i.e. pre-ictal windows down to main_rel[0] (EEG-frame end <=0). These bounds are interpreted in
+    the EEG-onset frame by `_window_frames` (the relt slice is shifted per-seizure by eeg_onset_rel);
+    the numeric grid is identical to the default only for eeg_onset_rel=0. ictal_fraction is applied
+    per-seizure (needs the offset), not here."""
     e = cfg["epoch"]
     w, step = float(e["field_window_sec"]), float(e["field_step_sec"])
     r0, r1 = float(e["main_rel"][0]), float(e["main_rel"][1])
-    k_lo = int(np.floor((-w - r0) / step)) - 1
-    k_hi = int(np.ceil((r1 - r0) / step)) + 1
+    admit_pre = bool(e.get("admit_pre_ictal_windows", False))
     grid = []
-    for k in range(k_lo, k_hi + 1):
-        st = r0 + k * step
-        en = st + w
-        if en > 0 and st < r1:                       # VALID-EARLY overlap rule (part 1)
-            grid.append((float(st), float(en)))
+    if admit_pre:
+        k_hi = int(np.ceil((r1 - r0) / step))
+        for k in range(0, k_hi + 1):
+            st = r0 + k * step
+            en = st + w
+            if _window_admitted(st, en, r0, r1, admit_pre):    # overlap [r0, r1]; pre-ictal admitted
+                grid.append((float(st), float(en)))
+    else:
+        k_lo = int(np.floor((-w - r0) / step)) - 1
+        k_hi = int(np.ceil((r1 - r0) / step)) + 1
+        for k in range(k_lo, k_hi + 1):
+            st = r0 + k * step
+            en = st + w
+            if _window_admitted(st, en, r0, r1, admit_pre):    # VALID-EARLY overlap rule (part 1)
+                grid.append((float(st), float(en)))
     return grid, r1
 
 
@@ -114,6 +202,12 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
     ctx = load_context(ds_sid, substrate)
     long_meta = json.loads((LONG_CACHE / f"{ds_sid}.json").read_text())
     off_by_idx = {int(k): float(v["eeg_offset_rel"]) for k, v in long_meta["seizure"].items()}
+    # eeg_onset_rel = EEG onset in the relt frame (builder: eeg_onset_epoch - clin_onset). 0 for
+    # yuquan (relt=0 IS EEG onset); for epilepsiae relt=0 is CLINICAL onset so the offset is EEG-minus-
+    # clinical and can be either sign and LARGE (usually EEG leads -> <0, down to ~-86s; occasionally
+    # EEG lags, e.g. 384 ~+36s). W3 PRIMARY anchor = EEG onset: the peri-ictal grid IS the EEG-onset
+    # frame, so per seizure we shift the relt slice bounds by this offset (see _window_frames).
+    eeg_onset_by_idx = {int(k): float(v["eeg_onset_rel"]) for k, v in long_meta["seizure"].items()}
 
     feat_dir = feature_cache_dir or FEATURE_CACHE_DIR[feature]
     fpath = feat_dir / f"{ds_sid}.npz"
@@ -146,6 +240,8 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
     ta_rank, tb_rank = _resolve_ta_tb_rank(ctx)
     all_bands, _primary, legacy_band = _config_bands(cfg)
     grid, r1 = _epoch_grid(cfg)
+    r0 = float(cfg["epoch"]["main_rel"][0])
+    admit_pre = bool(cfg["epoch"].get("admit_pre_ictal_windows", False))
     ictal_min = float(cfg["epoch"]["ictal_fraction_min"])
     subject = ds_sid.split("_", 1)[1]
     band_qc = raw_side.get("bands", {})
@@ -155,6 +251,7 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
         off = off_by_idx.get(idx)
         if off is None:
             continue
+        on = eeg_onset_by_idx[idx]                   # present iff off is (same long_meta keys)
         for band in all_bands:
             zt_key, relt_key = f"{band}__zt__{idx}", f"{band}__relt__{idx}"
             if zt_key not in fcache.files:            # band Nyquist-skipped for this subject/seizure
@@ -164,14 +261,17 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
             eff = float(qc.get("eff_frac", float("nan")))
             edge = bool(qc.get("fs_edge_flag", False))
             win_mask = (_band_good_names(zt, cache_names, qc) & set(pool)) if sensitivity else mask_set
-            for st, en in grid:
-                if not (en > 0 and st < r1):
+            for st, en in grid:                              # peri: EEG-frame bounds; default: relt bounds
+                if not _window_admitted(st, en, r0, r1, admit_pre):    # VALID-EARLY / peri-ictal admission
                     continue
-                zmv, _sub = _slice(zt, relt, st, en)
-                if zmv is None:
-                    continue
-                icf = _ictal_fraction(relt, st, en, off)
-                if not (np.isfinite(icf) and icf >= ictal_min):   # VALID-EARLY rule (part 2)
+                # peri-ictal: grid is the EEG-onset frame; slice the relt cache at the +eeg_onset_rel-
+                # shifted bounds so the physically-correct time is read. default: grid IS the relt frame.
+                st_relt, en_relt, win_center_rel, win_center_rel_eeg = _window_frames(st, en, on, admit_pre)
+                zmv, _sub = _slice(zt, relt, st_relt, en_relt)
+                if zmv is None:                                        # recording-boundary drop (no zero-fill):
+                    continue                                           # deep EEG far_pre past the cache edge legitimately drops
+                icf = _ictal_fraction(relt, st_relt, en_relt, off)
+                if not _ictal_fraction_ok(icf, ictal_min, en, admit_pre):  # en = EEG-frame end (grid=EEG); floor + pre-window EXEMPTION
                     continue
                 zmn_pool = _zmean_by_name(zmv, cache_names, pool)          # full-pool window means
                 zmn = {n: v for n, v in zmn_pool.items() if n in win_mask}  # RESTRICT to fixed mask
@@ -180,9 +280,11 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
                 ca = contact_alignment(zmn, ta_rank, tb_rank, oriented_template="a")
                 rows.append(dict(
                     subject=subject, axis_set=substrate, seizure=idx, band=band, feature=feature,
-                    win_start_rel=round(st, 3), win_end_rel=round(en, 3),
-                    win_center_rel=round((st + en) / 2.0, 3), ictal_fraction=round(icf, 4),
-                    strict_onset=bool(st >= 0 and en <= r1),
+                    win_start_rel=round(st_relt, 3), win_end_rel=round(en_relt, 3),   # relt-frame slice bounds (provenance)
+                    win_center_rel=round(win_center_rel, 3), ictal_fraction=round(icf, 4),
+                    win_center_rel_eeg=round(win_center_rel_eeg, 3), eeg_onset_rel=round(on, 3),
+                    epoch_region=_epoch_region(win_center_rel_eeg),    # EEG-frame center -> clean 5-bin partition
+                    strict_onset=bool(st_relt >= 0 and en_relt <= r1),
                     align_abs_maxab=window_maxab(ctx, zmn),
                     align_signed_oriented=ca["align_signed_oriented"],
                     align_signed_posthoc_max=ca["align_signed_posthoc_max"],
@@ -273,9 +375,13 @@ def main():
                          "Production leaves this unset; used for isolated smoke tests of 10b/11b residual caches.")
     ap.add_argument("--sensitivity", action="store_true",
                     help="band-wise (per-band good) mask instead of the subject-fixed mask (NOT primary)")
+    ap.add_argument("--config", default=None,
+                    help="config path (default: canonical config/topic5_v2_phase1.yaml, [0,20] behavior "
+                         "unchanged). W3 passes config/topic5_v2_phase1_v2_periictal.yaml (main_rel=[-100,20], "
+                         "admit_pre_ictal_windows=true).")
     args = ap.parse_args()
     feat_dir = Path(args.feature_cache_dir) if args.feature_cache_dir else FEATURE_CACHE_DIR[args.feature]
-    cfg = load_phase1_config()
+    cfg = load_phase1_config(args.config)
     _all_bands, _primary, legacy_band = _config_bands(cfg)
     tol = float(cfg["tolerances"]["legacy_subject_median_abs"])
     subjects = args.subjects or SUBJECTS_BY_SUB[args.substrate]
