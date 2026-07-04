@@ -1,7 +1,8 @@
 # Topic 5 — 间期传播场外推到发作隐身 territory：方向延伸检验（design spec）
 
 - 日期：2026-06-30
-- 状态：**design spec，待用户 review；未进实现**
+- 状态：**CLOSED-NEGATIVE（2026-07-01 restructure）。** 本 spec 只锁**一个**问题 = 间期顺序场预测发作**招募顺序**(z-ER `r_sz`)。结果阴性——发作招募顺序跨发作本就不稳，无可预测的稳定方向（见 `docs/archive/topic5/field_extrapolation_pilot_2026-06-30.md` 第一版段）。
+- **能量问题（间期顺序场 → 发作早期能量空间分布）是另一个问题，另开 spec**：`docs/superpowers/specs/2026-07-01-topic5-energy-field-extrapolation-design.md`。本 spec 不再扩展，保留作 order-问题的设计记录；正文下述 z-ER/带符号口径仅对 order 问题有效。
 - 触发：合作者/审稿人质疑现有"间期↔发作方向一致"主张只覆盖间期参与电极、信息增益有限
 - 分支：当前在 `codex/topic4-m3a-v2-2` —— ⚠️ 实现前须切干净 Topic 5 base（见 §10）
 
