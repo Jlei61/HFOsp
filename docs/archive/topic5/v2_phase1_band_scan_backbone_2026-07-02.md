@@ -129,7 +129,7 @@ date 2026-07-02 · 分支 `topic5-v2-phase1-build`（worktree `/home/honglab/lei
 - artifacts（n_perm=1000）：`results/topic5_ictal_recruitment/v2_band_scan/{narrow,broad}/phase1_{gate,null_raw,alignment_raw}_*`
 - 代码：`src/topic5_v2_band_scan.py` + `scripts/run_topic5_v2_{alignment,nulls,gates}.py`（34 纯测绿）
 - spec：`docs/superpowers/specs/2026-07-02-topic5-v2-phase1b-gate-closure-spec.md`（§EXP frame + §0–§8 锁）
-- 下一步 plan：`docs/superpowers/plans/2026-07-04-topic5-v2-phase1-v2-scaffold-closure.md`
+- 下一步 plan：`docs/superpowers/plans/2026-07-04-topic5-v2-phase1-v2-scaffold-refinement.md`
 
 ## 0. 摘要（朴素话，措辞见上方"口径修正"，频带特异描述已降级为 narrow band-generic）
 
