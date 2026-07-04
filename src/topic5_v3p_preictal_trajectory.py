@@ -13,6 +13,21 @@ import numpy as np
 import yaml
 from scipy import stats
 
+from src.topic5_v2_criticality import activations_from_z
+from src.topic5_v3_mode_transition import (
+    atm_offdiag,
+    atm_lag0,
+    net_offaxis_flux,
+    demean_window,
+    lowrank_var,
+    dominant_right_singular_vector,
+    map_lowrank_vector_to_contacts,
+    subspace_mode_shift,
+    project_2d,
+    direct_2d_var,
+    beta_axis,
+)
+
 _ROOT = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _ROOT / "config" / "topic5_v3p.yaml"
 
@@ -105,3 +120,120 @@ def residualize_slope(values, centers, covariates, estimator) -> float:
         return float("nan")
     resid = y[m] - X @ beta
     return slope_over_windows(resid, t[m], estimator)
+
+_WINDOW_METRIC_KEYS = (
+    "net_offaxis_flux_lag1", "net_offaxis_flux_lag0",
+    "mode_shift_density", "mode_singular_gap",
+    "nonaxis_activation_rate", "n_activation_events",
+    "global_energy", "axial_energy",
+    "N_self_sustain_lag1", "N_self_sustain_lag0",
+    "gain_axis", "gain_nonaxis", "beta_axis_strength",
+)
+
+def extract_window_metrics(env_win, geom, v3cfg) -> dict:
+    """One preictal window's bb-envelope -> a dict of scalar metrics (Task 7 trajectory atom).
+
+    ``env_win`` is ``(n_all_clean, n_t)``, rows ordered by ``geom["names"]``.
+    Reuses the frozen V3a dynamics/avalanche math
+    (``src.topic5_v3_mode_transition``) + V2 ``activations_from_z`` + this
+    module's Task-3 ``within_compartment_flux``/``global_axial_energy``.
+    Every estimator below is independently try/except-guarded: a degenerate
+    window (``n_t < 2``, an empty axis/non-axis index, a rank-0 SVD) leaves
+    only the affected key(s) ``nan`` rather than raising -- Task 7 loops
+    this over many windows per subject and one bad window must not kill the
+    whole trajectory.
+    """
+    env = np.asarray(env_win, dtype=float)
+    names = geom["names"]
+    axis_idx = np.asarray(geom["axis_idx"], dtype=int)
+    nonaxis_idx = np.asarray(geom["nonaxis_idx"], dtype=int)
+    P_A, P_N = geom["P_A"], geom["P_N"]
+    e_axis_mean, e_nonaxis_mean = geom["e_axis_mean"], geom["e_nonaxis_mean"]
+    rank_fwd = geom["rank_forward"]
+
+    dyn = v3cfg["dynamics"]
+    lowrank = int(dyn["lowrank"])
+    k_star = int(dyn["finite_horizon_k"])
+    alpha = float(dyn["var_ridge_alpha"])
+    z_thr = float(v3cfg["avalanche"]["z_threshold"])
+
+    out = {k: float("nan") for k in _WINDOW_METRIC_KEYS}
+
+    active = None
+    try:
+        active = activations_from_z(env, z_thr)
+        out["n_activation_events"] = int(active.sum())
+    except Exception:
+        active = None
+
+    if active is not None:
+        try:
+            out["nonaxis_activation_rate"] = float(active[nonaxis_idx].mean())
+        except Exception:
+            pass
+
+        atm1 = None
+        try:
+            atm1 = atm_offdiag(active)
+            out["net_offaxis_flux_lag1"] = net_offaxis_flux(atm1, axis_idx, nonaxis_idx, "source_mean")
+        except Exception:
+            atm1 = None
+        if atm1 is not None:
+            try:
+                out["N_self_sustain_lag1"] = within_compartment_flux(atm1, nonaxis_idx)
+            except Exception:
+                pass
+
+        atm0 = None
+        try:
+            atm0 = atm_lag0(active)
+            out["net_offaxis_flux_lag0"] = net_offaxis_flux(atm0, axis_idx, nonaxis_idx, "source_mean")
+        except Exception:
+            atm0 = None
+        if atm0 is not None:
+            try:
+                out["N_self_sustain_lag0"] = within_compartment_flux(atm0, nonaxis_idx)
+            except Exception:
+                pass
+
+    A_lr = U_r = None
+    try:
+        A_lr, U_r = lowrank_var(env, lowrank, alpha)
+    except Exception:
+        A_lr, U_r = None, None
+    if A_lr is not None:
+        try:
+            sv = np.linalg.svd(np.linalg.matrix_power(A_lr, k_star), compute_uv=False)
+            if sv.size >= 2 and sv[1] != 0:
+                out["mode_singular_gap"] = float(sv[0] / sv[1])
+        except Exception:
+            pass
+        try:
+            u_r = dominant_right_singular_vector(A_lr, k_star)
+            u_c = map_lowrank_vector_to_contacts(u_r, U_r)
+            out["mode_shift_density"] = subspace_mode_shift(u_c, P_N, P_A, "density")
+        except Exception:
+            pass
+
+    try:
+        out["global_energy"], out["axial_energy"] = global_axial_energy(env, axis_idx)
+    except Exception:
+        pass
+
+    try:
+        Z = project_2d(demean_window(env), e_axis_mean, e_nonaxis_mean)
+        B = direct_2d_var(Z, alpha)
+        out["gain_axis"] = float(np.linalg.norm(B[:, 0]))
+        out["gain_nonaxis"] = float(np.linalg.norm(B[:, 1]))
+    except Exception:
+        pass
+
+    try:
+        metric_by_name = {
+            names[i]: float(np.nanmean(np.abs(np.diff(env[i])))) for i in range(len(names))
+        }
+        out["beta_axis_strength"] = abs(beta_axis(metric_by_name, rank_fwd))
+    except Exception:
+        pass
+
+    return out

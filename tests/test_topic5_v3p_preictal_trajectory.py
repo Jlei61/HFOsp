@@ -1,5 +1,6 @@
 import numpy as np
-from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows, within_compartment_flux, global_axial_energy, residualize_slope
+from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows, within_compartment_flux, global_axial_energy, residualize_slope, extract_window_metrics
+from src.topic5_v3_mode_transition import subspace_projectors, axis_nonaxis_vectors, rank_forward, load_v3_config
 
 def test_v3p_config_keys():
     c = load_v3p_config()
@@ -70,3 +71,23 @@ def test_residualize_nan_when_insufficient_dof_for_covariate_count():
     assert np.isnan(residualize_slope(vals, t, [cov1, cov2], "ols"))   # 3 windows, 3 design cols -> no residual DOF -> nan (was artifactual ~0)
     # and 1-covariate with 3 windows still proceeds (unchanged behavior):
     assert np.isfinite(residualize_slope(np.array([0.3, 0.6, 0.9]), t, [cov1], "ols"))
+
+def test_extract_window_metrics_keys_and_flux_sign():
+    rng = np.random.default_rng(0); names = [f"A{i}" for i in range(6)]
+    axis = names[:3]; nonaxis = names[3:]
+    P_A, P_N = subspace_projectors(names, axis, nonaxis)
+    rf = rank_forward({n: float(i) for i, n in enumerate(axis)})
+    e_am, e_ag, e_nm = axis_nonaxis_vectors(names, rf, axis, nonaxis)
+    # scripted axis->non-axis cascade: axis fires at t, non-axis at t+1
+    n_t = 200; env = rng.standard_normal((6, n_t)) * 0.1
+    env[:3, :-1] += 4.0 * (rng.random((3, n_t - 1)) > 0.6)
+    env[3:, 1:] += env[:3, :-1]                       # non-axis echoes axis one step later
+    geom = {"names": names, "axis_idx": np.array([0,1,2]), "nonaxis_idx": np.array([3,4,5]),
+            "P_A": P_A, "P_N": P_N, "e_axis_mean": e_am, "e_nonaxis_mean": e_nm, "rank_forward": rf}
+    m = extract_window_metrics(env, geom, load_v3_config())
+    for k in ["net_offaxis_flux_lag1","net_offaxis_flux_lag0","mode_shift_density","mode_singular_gap",
+              "nonaxis_activation_rate","n_activation_events","global_energy","axial_energy",
+              "N_self_sustain_lag1","N_self_sustain_lag0","gain_axis","gain_nonaxis","beta_axis_strength"]:
+        assert k in m
+    # lag1 (delayed A->N flow) exceeds lag0 (same-time co-activation) for a scripted one-step cascade
+    assert np.isfinite(m["net_offaxis_flux_lag1"]) and m["net_offaxis_flux_lag1"] > m["net_offaxis_flux_lag0"]
