@@ -23,3 +23,32 @@ def load_v3p_config(path: str | Path | None = None) -> dict:
     if not isinstance(cfg, Mapping):
         raise ValueError(f"V3p config must be a mapping: {cfg_path}")
     return dict(cfg)
+
+def _finite_pairs(y, t):
+    y = np.asarray(y, float); t = np.asarray(t, float)
+    m = np.isfinite(y) & np.isfinite(t)
+    return y[m], t[m]
+
+def theil_sen_slope(y, t) -> float:
+    y, t = _finite_pairs(y, t)
+    if y.size < 2 or np.unique(t).size < 2:
+        return float("nan")
+    return float(stats.theilslopes(y, t)[0])
+
+def spearman_trend(y, t) -> float:
+    y, t = _finite_pairs(y, t)
+    if y.size < 3 or np.unique(y).size < 2 or np.unique(t).size < 2:
+        return float("nan")
+    return float(stats.spearmanr(y, t).correlation)
+
+def slope_over_windows(values, centers, estimator) -> float:
+    if estimator == "theil_sen":
+        return theil_sen_slope(values, centers)
+    if estimator == "spearman":
+        return spearman_trend(values, centers)
+    if estimator == "ols":
+        y, t = _finite_pairs(values, centers)
+        if y.size < 2 or np.unique(t).size < 2:
+            return float("nan")
+        return float(np.polyfit(t, y, 1)[0])
+    raise ValueError(f"unknown estimator: {estimator!r}")
