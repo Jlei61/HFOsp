@@ -62,3 +62,11 @@ def test_residualize_keeps_orthogonal_trend():
     vals = 0.3 * t + 2.0 * glob
     resid_slope = residualize_slope(vals, t, [glob], "ols")
     assert abs(resid_slope - 0.3) < 0.05             # orthogonal non-axis trend survives
+
+def test_residualize_nan_when_insufficient_dof_for_covariate_count():
+    t = np.arange(3.0)
+    vals = np.array([10.0, -20.0, 30.0])
+    cov1 = np.array([1.0, 2.0, 3.0]); cov2 = np.array([0.0, 1.0, 0.5])
+    assert np.isnan(residualize_slope(vals, t, [cov1, cov2], "ols"))   # 3 windows, 3 design cols -> no residual DOF -> nan (was artifactual ~0)
+    # and 1-covariate with 3 windows still proceeds (unchanged behavior):
+    assert np.isfinite(residualize_slope(np.array([0.3, 0.6, 0.9]), t, [cov1], "ols"))

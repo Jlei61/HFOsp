@@ -90,13 +90,13 @@ def residualize_slope(values, centers, covariates, estimator) -> float:
     residual slope shrinks toward 0 — this is the documented floor (spec
     Sec 7), NOT evidence the non-axis rise is absent. NaN-safe: windows
     with any non-finite value/covariate are dropped; rank-deficient design
-    or <2 surviving windows -> nan."""
+    or fewer than `len(covariates)+2` surviving windows -> nan."""
     y = np.asarray(values, float); t = np.asarray(centers, float)
     cov = [np.asarray(c, float) for c in covariates]
     m = np.isfinite(y) & np.isfinite(t)
     for c in cov:
         m &= np.isfinite(c)
-    if m.sum() < 3:
+    if m.sum() < len(cov) + 2:
         return float("nan")
     X = np.column_stack([np.ones(m.sum())] + [c[m] for c in cov])
     try:
