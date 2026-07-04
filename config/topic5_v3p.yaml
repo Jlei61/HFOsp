@@ -32,6 +32,8 @@ nulls_v3p:                               # rev1 new null / QC knobs
 co_primary:
   endpoints: [net_offaxis_flux_surplus_slope, mode_shift_density_surplus_slope]
   correction: holm
+summary:                                 # Task 9 tier-ladder knob (spec Sec 8)
+  min_subject_support_narrow: 2          # narrow tier-3 needs a Holm-passed leg AND >= this many subject_support==True
 inherit_v3_config: topic5_v3             # geometry+dynamics+avalanche+nulls locked there
 nulls: {n_perm_smoke: 20, n_perm_dev: 100, n_perm_final: 1000, seed: 20260703, alpha: 0.05}
 cohorts: {primary: narrow, replication: broad, never_pool: true}

@@ -5,6 +5,9 @@ the mounted artifacts (ictal field long cache + lagPat + rank-displacement
 JSON) and checks the `feasibility.csv` contract columns exist. See
 docs/superpowers/plans/2026-07-03-topic5-v3p-preictal-trajectory.md Task 1.
 """
+import csv
+import json
+
 import pytest
 import pandas as pd
 import numpy as np
@@ -78,3 +81,235 @@ def test_v3p_trajectory_h3pa_h3pd_columns(tmp_path):
         assert np.isfinite(row["N_self_sustain_lag1_specific_slope"])
         assert np.isfinite(row["gain_nonaxis_surplus_slope"])
         assert 0.0 <= row["p_label_slope_a"] <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# Task 9 -- summary + tier verdict (Holm co-primary). Unlike the tests above,
+# this does NOT need real mounted data: given an already-computed trajectory
+# CSV, the tier ladder / subject_support / Holm-correction / broad_core-vs-
+# broad_expanded logic is pure arithmetic over its columns, so a small
+# hand-verified synthetic fixture makes it exactly (not just "runs without
+# crashing") checkable. Every p-value asserted below was cross-checked
+# directly against ``scipy.stats.wilcoxon(..., alternative="greater")``: for
+# n same-signed distinct values the exact one-sided p is 1/2**n, and Holm-2
+# doubles whichever raw p is smaller (capped at 1).
+# ---------------------------------------------------------------------------
+_V3P_ROW_DEFAULTS = dict(
+    status="ok", geometry_sufficient=True, in_broad_core=False,
+    label_null_underpowered=False,
+    module_support_flag_b=False, onset_jitter_pass_b=True,
+    leave_one_contact_flux_pass=True, axis_only_flux_control_pass=True,
+    near_onset_dependent_b=False,
+    module_support_flag_c=False, onset_jitter_pass_c=True,
+    single_contact_driven=False, leave_one_contact_mode_pass=True,
+    axis_only_mode_control_pass=True, near_onset_dependent_c=False,
+    beta_axis_strength_slope=-0.1, p_label_slope_a=0.2, beta_axis_reliable=True,
+    net_offaxis_flux_surplus_slope=0.0, net_offaxis_flux_slope_z=0.0,
+    mode_shift_density_surplus_slope=0.0, mode_shift_density_slope_z=0.0,
+)
+_V3P_FIELDNAMES = ["subject", "cohort"] + list(_V3P_ROW_DEFAULTS.keys())
+
+
+def _v3p_row(subject, cohort, z_b=0.0, z_c=0.0, supported=False, **overrides):
+    """One synthetic ``v3p_trajectory_subject.csv`` row: exactly the columns
+    ``run_topic5_v3p_summary._subject_row`` reads (brief Task 9: "a few rows
+    with controlled module_support_flag_b/c, slope_label_z, gate columns,
+    in_broad_core, status"). ``supported=True`` flips the FULL H3p-b gate
+    stack on so the row clears ``subject_support`` via the flux leg.
+    """
+    row = dict(_V3P_ROW_DEFAULTS)
+    row["subject"], row["cohort"] = subject, cohort
+    row["net_offaxis_flux_slope_z"] = z_b
+    row["mode_shift_density_slope_z"] = z_c
+    if supported:
+        row["module_support_flag_b"] = True
+    row.update(overrides)
+    return row
+
+
+def _write_v3p_trajectory_csv(path, rows):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=_V3P_FIELDNAMES)
+        w.writeheader()
+        w.writerows(rows)
+
+
+def test_v3p_summary_tier_ladder_holm_and_broad_core_divergence(tmp_path):
+    """narrow: 6 eligible subjects with H3p-b slope_label_z=[6,5,4,3,2,1]
+    (exact one-sided Wilcoxon p=1/64=0.015625; Holm-doubled=0.03125<0.05) +
+    3/6 individually gate-stack-supported (>= config min_subject_support_narrow=2)
+    -> narrow tier-3. A 7th row is status=skipped/geometry_sufficient=True
+    with an otherwise full "looks supported" gate stack and an extreme
+    z=-100 -- it MUST be excluded from every denominator/population despite
+    geometry_sufficient=True (brief: "geometry_insufficient/status==skipped
+    ... EXCLUDED").
+    broad_core (6 subjects, same z_b pattern) independently ALSO clears the
+    same H3p-b Holm bar -> would replicate narrow's leg alone
+    (tier_broad_core=4). broad_expanded adds 3 admitted candidates with
+    strongly opposite-signed z_b=[-10,-9,-8]; pooled over n=9 the same test
+    is no longer significant (p_holm_b=1.0) -- rev2's "expansion adds power,
+    never rescues a curated-subset null" (and, symmetrically, must not let a
+    bad expansion silently borrow the core's clean pass either) -> tier
+    stays 3. ``tier != tier_broad_core`` proves the two are genuinely
+    computed from different row subsets, not aliased.
+    """
+    from scripts.run_topic5_v3p_summary import main
+
+    narrow_rows = [
+        _v3p_row("epilepsiae_9001", "narrow", z_b=6.0, z_c=-3.0, supported=True),
+        _v3p_row("epilepsiae_9002", "narrow", z_b=5.0, z_c=-2.0, supported=True),
+        _v3p_row("epilepsiae_9003", "narrow", z_b=4.0, z_c=-1.0, supported=True),
+        _v3p_row("epilepsiae_9004", "narrow", z_b=3.0, z_c=-1.0, supported=False),
+        _v3p_row("epilepsiae_9005", "narrow", z_b=2.0, z_c=-2.0, supported=False),
+        _v3p_row("epilepsiae_9006", "narrow", z_b=1.0, z_c=-3.0, supported=False),
+        _v3p_row("epilepsiae_9099", "narrow", z_b=-100.0, z_c=100.0, supported=True,
+                 status="skipped", geometry_sufficient=True),
+    ]
+    broad_core_rows = [
+        _v3p_row("epilepsiae_8001", "broad", z_b=6.0, z_c=-3.0, supported=True, in_broad_core=True),
+        _v3p_row("epilepsiae_8002", "broad", z_b=5.0, z_c=-2.0, in_broad_core=True),
+        _v3p_row("epilepsiae_8003", "broad", z_b=4.0, z_c=-1.0, in_broad_core=True),
+        _v3p_row("epilepsiae_8004", "broad", z_b=3.0, z_c=-1.0, in_broad_core=True),
+        _v3p_row("epilepsiae_8005", "broad", z_b=2.0, z_c=-2.0, in_broad_core=True),
+        _v3p_row("epilepsiae_8006", "broad", z_b=1.0, z_c=-3.0, in_broad_core=True),
+    ]
+    broad_expanded_only_rows = [
+        _v3p_row("epilepsiae_8101", "broad", z_b=-10.0, z_c=-1.0, in_broad_core=False),
+        _v3p_row("epilepsiae_8102", "broad", z_b=-9.0, z_c=-1.0, in_broad_core=False),
+        _v3p_row("epilepsiae_8103", "broad", z_b=-8.0, z_c=-1.0, in_broad_core=False),
+    ]
+
+    _write_v3p_trajectory_csv(tmp_path / "narrow" / "v3p_trajectory_subject.csv", narrow_rows)
+    _write_v3p_trajectory_csv(
+        tmp_path / "broad" / "v3p_trajectory_subject.csv", broad_core_rows + broad_expanded_only_rows
+    )
+
+    main(["--indir", str(tmp_path)])
+
+    with (tmp_path / "narrow" / "v3p_summary_subject.csv").open(newline="") as fh:
+        narrow_summary_rows = list(csv.DictReader(fh))
+    assert len(narrow_summary_rows) == 7
+    assert "tier" not in narrow_summary_rows[0]  # tier assigned ONLY in the cohort JSON
+    excl = next(r for r in narrow_summary_rows if r["subject"] == "epilepsiae_9099")
+    assert excl["excluded_from_denominator"] == "True"
+    assert excl["subject_support"] == "False"  # status=skipped overrides a look-alike full gate stack
+
+    narrow_payload = json.loads((tmp_path / "narrow" / "v3p_cohort_tier.json").read_text())
+    broad_payload = json.loads((tmp_path / "broad" / "v3p_cohort_tier.json").read_text())
+    assert narrow_payload == broad_payload  # same joint verdict written to both cohort dirs, never pooled into one
+    assert "tier" not in narrow_payload["narrow"]  # nested per-cohort block carries no tier either
+
+    payload = narrow_payload
+    narrow_blk = payload["narrow"]
+    assert (narrow_blk["n_total"], narrow_blk["n_eligible"], narrow_blk["n_excluded"]) == (7, 6, 1)
+    assert narrow_blk["n_subject_support"] == 3
+    assert narrow_blk["p_wilcoxon_b"] == pytest.approx(0.015625)
+    assert narrow_blk["p_holm_b"] == pytest.approx(0.03125)
+    assert narrow_blk["p_holm_c"] == pytest.approx(1.0)
+    assert (narrow_blk["cohort_b_pass"], narrow_blk["cohort_c_pass"]) == (True, False)
+
+    broad_blk, core_blk = payload["broad"], payload["broad_core"]
+    assert (broad_blk["n_eligible"], core_blk["n_eligible"]) == (9, 6)
+    assert broad_blk["p_holm_b"] == pytest.approx(1.0)     # dragged down by the 3 admitted candidates
+    assert core_blk["p_holm_b"] == pytest.approx(0.03125)  # curated 9 alone still replicates cleanly
+    assert (broad_blk["cohort_b_pass"], core_blk["cohort_b_pass"]) == (False, True)
+
+    assert payload["broad_expanded_replicates"] is False
+    assert payload["broad_core_replicates"] is True
+    assert payload["tier"] == 3            # a bad expansion must not borrow the core's clean pass
+    assert payload["tier_broad_core"] == 4  # ... even though the curated core alone would say 4
+    assert payload["state_v3p_supported"] is True
+    assert payload["pre_registered_negative"] is False
+
+
+def test_v3p_summary_tier4_never_rescued_by_expansion_when_core_null(tmp_path):
+    """rev2's PRIMARY stated concern, the mirror image of the divergence test
+    above: if broad_core alone does NOT replicate narrow's H3p-b leg, admitting
+    more candidate subjects into broad_expanded must NEVER manufacture a
+    tier-4 replication the curated 9 do not themselves show ("expansion adds
+    power, never rescues a curated-subset null"). Constructed so the raw
+    broad_expanded arithmetic alone WOULD clear Holm (sanity-asserted below)
+    while broad_core does not -- this is exactly the case the earlier
+    divergence test's mutation check (dropping "and broad_core_replicates"
+    from the tier formula) could NOT catch, because there broad_expanded
+    itself already failed too.
+    """
+    from scripts.run_topic5_v3p_summary import main
+
+    narrow_rows = [
+        _v3p_row("epilepsiae_9001", "narrow", z_b=6.0, z_c=-3.0, supported=True),
+        _v3p_row("epilepsiae_9002", "narrow", z_b=5.0, z_c=-2.0, supported=True),
+        _v3p_row("epilepsiae_9003", "narrow", z_b=4.0, z_c=-1.0, supported=True),
+        _v3p_row("epilepsiae_9004", "narrow", z_b=3.0, z_c=-1.0, supported=False),
+        _v3p_row("epilepsiae_9005", "narrow", z_b=2.0, z_c=-2.0, supported=False),
+        _v3p_row("epilepsiae_9006", "narrow", z_b=1.0, z_c=-3.0, supported=False),
+    ]
+    # broad_core (6): mixed sign, clearly not Wilcoxon-significant alone.
+    broad_core_rows = [
+        _v3p_row("epilepsiae_5001", "broad", z_b=-2.0, z_c=-1.0, in_broad_core=True),
+        _v3p_row("epilepsiae_5002", "broad", z_b=-1.0, z_c=-1.0, in_broad_core=True),
+        _v3p_row("epilepsiae_5003", "broad", z_b=-1.0, z_c=-1.0, in_broad_core=True),
+        _v3p_row("epilepsiae_5004", "broad", z_b=1.0, z_c=-1.0, in_broad_core=True),
+        _v3p_row("epilepsiae_5005", "broad", z_b=1.0, z_c=-1.0, in_broad_core=True),
+        _v3p_row("epilepsiae_5006", "broad", z_b=1.2, z_c=-1.0, in_broad_core=True),
+    ]
+    # 6 admitted candidates, all strongly positive -- alone they tip the
+    # POOLED n=12 expanded set to a raw p small enough to survive Holm, even
+    # though the curated core (above) shows nothing.
+    broad_expanded_only_rows = [
+        _v3p_row(f"epilepsiae_51{i:02d}", "broad", z_b=50.0 + i, z_c=-1.0, in_broad_core=False)
+        for i in range(6)
+    ]
+
+    _write_v3p_trajectory_csv(tmp_path / "narrow" / "v3p_trajectory_subject.csv", narrow_rows)
+    _write_v3p_trajectory_csv(
+        tmp_path / "broad" / "v3p_trajectory_subject.csv", broad_core_rows + broad_expanded_only_rows
+    )
+
+    main(["--indir", str(tmp_path)])
+    payload = json.loads((tmp_path / "narrow" / "v3p_cohort_tier.json").read_text())
+
+    # sanity: confirms the scenario is real -- expanded WOULD look significant
+    # in isolation, while core does not (the interesting case, not a typo).
+    assert payload["broad"]["p_holm_b"] == pytest.approx(0.02685546875)
+    assert payload["broad_core"]["p_holm_b"] == pytest.approx(1.0)
+
+    assert payload["broad_expanded_replicates"] is True
+    assert payload["broad_core_replicates"] is False
+    assert payload["tier"] == 3             # NOT rescued to 4 by the expansion
+    assert payload["tier_broad_core"] == 3  # core alone also caps at narrow's own tier-3
+
+
+def test_v3p_summary_honest_negative_tier(tmp_path):
+    """Descriptive-direction-only path (tier rung 1): narrow's 3 subjects
+    show a barely-positive H3p-b median (0.2) nowhere near Wilcoxon
+    significance (n=3, mixed signs) and none individually clears the full
+    gate stack -> no cohort Holm pass, 0 subject_support -> tier=1,
+    ``pre_registered_negative=True`` -- V3p's honest-negative path (never
+    rescued by a single subject) must be reachable, not just the positive one.
+    """
+    from scripts.run_topic5_v3p_summary import main
+
+    narrow_rows = [
+        _v3p_row("epilepsiae_7001", "narrow", z_b=0.5, z_c=-0.5),
+        _v3p_row("epilepsiae_7002", "narrow", z_b=-0.3, z_c=-0.3),
+        _v3p_row("epilepsiae_7003", "narrow", z_b=0.2, z_c=-0.2),
+    ]
+    broad_rows = [
+        _v3p_row("epilepsiae_6001", "broad", z_b=0.1, z_c=-0.4, in_broad_core=True),
+        _v3p_row("epilepsiae_6002", "broad", z_b=-0.2, z_c=-0.1, in_broad_core=True),
+        _v3p_row("epilepsiae_6003", "broad", z_b=0.05, z_c=-0.2, in_broad_core=True),
+    ]
+    _write_v3p_trajectory_csv(tmp_path / "narrow" / "v3p_trajectory_subject.csv", narrow_rows)
+    _write_v3p_trajectory_csv(tmp_path / "broad" / "v3p_trajectory_subject.csv", broad_rows)
+
+    main(["--indir", str(tmp_path)])
+    payload = json.loads((tmp_path / "narrow" / "v3p_cohort_tier.json").read_text())
+
+    assert (payload["narrow"]["cohort_b_pass"], payload["narrow"]["cohort_c_pass"]) == (False, False)
+    assert payload["narrow"]["n_subject_support"] == 0
+    assert payload["tier"] == 1
+    assert payload["tier_broad_core"] == 1
+    assert payload["state_v3p_supported"] is False
+    assert payload["pre_registered_negative"] is True
