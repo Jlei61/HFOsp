@@ -89,23 +89,35 @@ date 2026-07-02 · 分支 `topic5-v2-phase1-build`（worktree `/home/honglab/lei
 
 **读表纪律（勿过读）**：格子是**平滑场的 |corr| 幅度**，相对 0 天然偏高（平滑 + 取绝对值，随机场也给正值）——这是**描述性幅度 + 频带轮廓**，**不是显著性判决**。"是否真存在相关"须看能否超过空间 / 顺序 / 1-f null（= P1b spec §1–§3、§5，尚未跑，held on user go）。per-subject 异质大（548/583/590/916 ~0.85–0.95；620/442/139 低）；yuquan 两行 n_sz=1/2、eeg-onset 锚，个体值几乎无发作间稳健性。数据来源：`results/topic5_ictal_recruitment/v2_band_scan/{narrow,broad}/phase1_alignment_raw_subject_summary.csv`（`align_abs_maxab`，`used_fixed_mask=True`）。
 
-## Formal-null 结果（narrow full-20 · **PRELIMINARY dev n_perm=100** · broad + full n_perm=1000 pending）
+## Formal-null 结果 + 验收（**full n_perm=1000 · narrow+broad · 2026-07-04**）
 
-> 判读 frame = spec §EXP（**exploratory null-positive spatial scaffold**）。以下是 dev（n_perm=100，p 触底 0.0099、subject-wide 弱 null）预览；full-1000（detached+resumable 跑着）+ broad 跑完升级本节。**当前不作 formal / final 结论。**
+> 判读 frame = spec §EXP。**验收结论：可作为 Phase-1 exploratory candidate-scaffold result（cohort 层）验收；不可作 formal Gate A / 任何机制结论。** 四条 caveat 写死：per-subject 弱一致 · weak-null 反保守 · formal within-shaft Gate A 未评估 · Gate B/C 未跑。
 
-**怎么测的（朴素话）**：把每个发作早期频带能量空间图与间期 HFO geometry 场对齐（§EXP primary endpoint = raw alignment），问它能否超过两种巧合——(A) 把发作能量图在同一根电极杆内洗牌（spatial null）；(B) 保留"哪些触点 HFO 多"、只打乱间期时序（order null）。统计 = subject-level cohort permutation of the median + max-over-bands（§2；**7 primary bands 为 FWER family**，composite descriptive）。
+**怎么测的**：发作 onset 后 0–20s 各频带能量空间场 vs 间期 HFO geometry 场对齐（§EXP primary endpoint = raw alignment），问能否超过 (A) 杆内洗牌 spatial null、(B) 保留 HFO 富集地形只打乱时序的 order null。统计 = subject-level cohort permutation of the median + max-over-bands（§2；**7 primary bands 为 FWER family**）。
 
-**narrow（core 池 n=20，dev preview）**：
-- **band-generic null-positive（弱 null 下）**：7 primary bands 里 **6/7** 的 cohort 排列 p 与 max-over-bands FWER 都 <0.05（δ/θ/α/β/γ/hg-low-ripple；仅 ripple_high 不过），delta 正。→ 对齐超过空间平滑 null **不是某频带独有，是跨频段的 spatial recruitment**。
-- **⚠️ 但这是 subject-wide 弱 null**：只有 **2/20** 被试达 within_shaft_strong（SEEG 杆稀疏），cohort weakest-wins → subject_wide_weak，**formal within-shaft Gate A unresolved**（不是 passed 也不是 failed）；弱 null 破坏杆内局部自相关 → anti-conservative，上面的显著性**很可能被抬高**。
-- **order null（supportive/secondary）**：strong 子集 **13/20**，所有频带 cohort 排列 p 正（扣掉 HFO 富集地形后仍对上）。band-generic + anti-conservative caveat → 只作辅助证据，**不升 timing-order 机制**。
+**① cohort 层（primary endpoint，n_perm=1000）**
 
-**broad（扩展池 n=17）**：full-20 broad formal null **pending full-1000**（dev-13 曾见 fast/LVFA-enriched：beta / LVFA_13_80 / high-gamma 正、beta+LVFA 过 max-over-bands，ripple 经 FWER 掉）。跑完补。
+| | narrow (n=20) | broad (n=17) |
+|---|---|---|
+| primary 7 带过**空间 null**（FWER，p≈.001–.008） | **6/7** | **6/7** |
+| primary 7 带过 **order null**（strong 子集 13） | **7/7** | **7/7** |
+| 唯一不过 FWER 的带 | ripple_high | ripple_high |
+| spatial null 强度（cohort weakest-wins） | subject_wide_weak | subject_wide_weak |
 
-**结论（§EXP 锁定 wording，preliminary）**：
-> 本阶段结果支持：间期 HFO-derived geometry 可能标记一种发作早期空间招募 scaffold；在 narrow/core 读出更强、更 band-generic。因 formal within-shaft spatial null 尚未可评估、weak/global null 可能偏乐观，目前只作**探索性 null-positive spatial co-structure**，不上升为 HFO-specific / LVFA-specific / timing-order 机制。
+→ 跨频段超过弱空间 null + order null；**NOT ripple-specific**（ripple_high 两池最弱）。
 
-**tags**：`legacy: PASS` · `raw observed alignment: positive, narrow>broad, band-generic` · `spatial null (weak/subject-wide): 6/7 primary FWER-positive (dev n=100, likely inflated)` · `formal within-shaft Gate A: unresolved (2/20 strong)` · `order null (strong subset 13/20): supportive` · `full n_perm=1000 + broad: pending` · `Gate B/C: not run (supplementary per §EXP)`。
+**② per-subject 稳定性（承重 caveat，之前 cohort 6/7 掩盖了它）**：cohort 6/7 是**聚合**结果、**不是** per-subject 稳健。narrow **中位 subject 只 2/7 带显著**（δ>0 & 该 subject 自身 p<.05），**≥5/7 仅 3/20**（1096/1146/1150）、**≥4/7 仅 6/20**；broad 中位 3/7、≥5/7=7/17（触点更密 n_con~20）。跨两池都稳的只 **1146/1150/384**；**1146 是唯一 within_shaft_strong + 多带阳**（narrow 5/7、broad 7/7；n=1 非 cohort）。**无单一 phenotype**（strength/n_sz/n_con/maxab 混杂），且多带阳 subject 大多**不是** within_shaft_strong。
+
+**③ 频带梯度**：narrow **基本平**（HF−low≈+0.000，真 band-generic）；broad **轻微 β(13–30) 峰**（cohort med delta 0.110，HF−low +0.014）——"fast/LVFA"只是 β 单带略高、非 HF 平台。ripple_high 两池最弱（叠加 256Hz Nyquist 丢带 + ripple 能量更局灶、场平滑对齐弱）。
+
+**④ formal within-shaft Gate A = unresolved**：仅 **2/20**（narrow）达 within_shaft_strong → cohort subject_wide_weak；弱 null 破坏杆内局部自相关 → **反保守 → 正面很可能被抬高**。**SEEG 杆几何硬限制，不是样本量、不是 effect size**。
+
+**⑤ Gate B/C = 未跑**（common_resid/aperiodic residual cache = 0）→ **宽带招募 / 1-f / confound 未排除**。
+
+**验收口径（accepted wording，可直接引用）**：
+> 在 20-subject（narrow）/17（broad）队列、n_perm=1000 下，发作 onset 后 0–20s 的多频带能量空间场与间期 HFO-derived geometry 的对齐，在 **cohort 层**跨频段超过弱/全局空间 null（FWER 后 6/7 primary，唯 ripple_high 不过）及 order null（strong 子集）。支持一个 **candidate early-ictal spatial recruitment scaffold（field-level suggestive spatial co-structure）**。**限定**：(i) 效应为 **cohort 统计倾向、per-subject 弱一致**（narrow 中位 2/7、≥5/7 仅 3/20）；(ii) 仅在 **weak/global spatial null** 下成立、**formal within-shaft Gate A 未可评估**（2/20），显著性**可能被抬高**；(iii) **Gate B/C 未跑**，未排除宽带招募/aperiodic；(iv) 仅 onset 后短窗、未覆盖 pre-ictal。**band-generic**（narrow 平 / broad 轻微 β 峰）、**NOT ripple-specific**。**不作** HFO-/LVFA-/ripple-specific、timing-order replay、formal Gate A passed。
+
+**tags**：`legacy: PASS` · `cohort exploratory null-positive (6/7 primary FWER, weak null, likely inflated)` · `per-subject: WEAK (narrow median 2/7, ≥5/7 only 3/20)` · `formal within-shaft Gate A: unresolved (2/20)` · `order (strong 13): supportive` · `band-generic (narrow flat / broad mild β) · NOT ripple-specific` · `Gate B/C: NOT run` · `time: onset+0–20s only` · **`verdict: Phase-1 exploratory candidate-scaffold ACCEPTED (cohort-level); NOT formal/mechanism`**。
 
 ## 0. 摘要（朴素话，措辞见上方"口径修正"，频带特异描述已降级为 narrow band-generic）
 
