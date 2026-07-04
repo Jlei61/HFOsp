@@ -1,55 +1,60 @@
 #!/usr/bin/env python
-"""Topic 5 V3a mode-transition — result figure (Task 11, integration).
+"""Topic 5 V3a mode-transition -- result figures (redesigned 2026-07-04).
 
-Plain-language questions (EXPLORATORY; on the FINAL paired data this figure
-must read honestly as a FRAGILE positive -- the off-axis-flux endpoint reaches
-the top mechanical tier but is null-relative + common-drive-dominated + weakly
-individually-robust, and the mode-direction endpoint is null; a candidate
-data-side signal, NOT an established transition):
+Two PNGs, both written by ``main()``:
 
-  Panel A (top row) - "Does the non-axis co-primary Delta move P3->I1?" One
-  point per subject for each co-primary endpoint (H3b net-off-axis-flux
-  surplus, H3c mode-shift density), grouped into the narrow (PRIMARY) block
-  and the broad (REPLICATION-ONLY) block, with a zero line and a cohort
-  median tick. Subjects whose own ``module_support_flag`` is True (passed
-  direction + both/three of that endpoint's own null gates) get a
-  black-outlined marker so the reader can see how few subjects actually
-  carry the story.
+  ``v3_mode_transition_summary.png`` (MAIN) -- the ONE story this figure must
+  make obvious, honest-fragile: the off-axis-flux endpoint (H3b) is
+  cohort-significant but FRAGILE (raw flux mostly decreases -> null-relative;
+  mostly common-drive; weak individual robustness); the mode-direction
+  endpoint (H3c) is NULL. A clean 1x2, one endpoint per panel (CLAUDE.md
+  Sec 7): left = per-subject P3->I1 Delta in off-axis flux (FILLED =
+  null-corrected surplus, the endpoint; OPEN = raw, same color, hollow);
+  right = per-subject P3->I1 Delta in mode-shift density (FILLED only, no
+  raw). ONE shared legend (<=4 entries), ONE short caption -- replacing the
+  old 2x2 (2 endpoint + 2 trajectory panels), its two legends (a top 4-item
+  legend + a per-panel mini-legend) and its 5-line wall-of-text caption. No
+  internal codenames (H3b/H3c/tier/module_support) in titles/axes/legend --
+  plain quantity names only (figure_style_guide.md Sec 0.2 / CLAUDE.md Sec
+  7-8); the tier/supported bookkeeping lives in the archive doc, not this
+  figure. The old per-subject "passes its own robustness checks" black-ring
+  marker is removed entirely -- that fact ("only 1/7 individually robust")
+  is caption TEXT now, not a marker.
 
-  Panel B (bottom row) - "Is there peri-ictal structure across the WHOLE
-  trajectory (P0..I3), not just the P3->I1 endpoints?" Cohort-median OBSERVED
-  (no permutation null) trajectory of the two raw metrics
-  (``net_offaxis_flux``, ``mode_shift_density``) across all 8 phase bins,
-  narrow vs broad, with the onset buffer window (O, +-10 s) shaded — O is
-  descriptive/buffer only, never part of the primary P3->I1 contrast.
+  ``v3_mode_transition_trajectory.png`` (SUPPLEMENTARY) -- the peri-ictal
+  phase trajectory (P0..I3, onset buffer O shaded) moved OUT of the main
+  figure into its own file: cohort-median OBSERVED (no permutation nulls)
+  trajectory of the same two raw metrics, so "is there structure across the
+  WHOLE window, not just the P3/I1 endpoints" is still answerable without
+  cluttering the main result. Reuses ``_plot_panel_b`` and
+  ``_compute_observed_trajectory`` UNCHANGED (only the figure they are
+  assembled into is new).
 
-H3b and H3c live in incommensurable units (flux is O(0.01-0.8), density is
-O(0.0001-0.05)), so each row gets two sub-axes (one per endpoint) rather than
-one shared y-axis — this is a units split, not a second scientific question
-(CLAUDE.md #7): Panel A always asks "did the Delta move", Panel B always asks
-"is there trajectory structure", regardless of which endpoint's column you
-read.
-
-Panel A reads the co-primary CSVs from ``--indir`` (default: the canonical
-``results/topic5_ictal_recruitment/v3_mode_transition`` tree, so the
-committed script always re-renders on whatever the pipeline last wrote there
--- point ``--indir`` at a frozen snapshot for a race-free dev/eyeball render
-while a background rerun is overwriting the canonical CSVs).
-
-Panel B is computed OBSERVED-ONLY (no permutation nulls) directly from the
-ictal-field long cache via ``scripts._topic5_v3_io.load_subject_phase_envelopes``
-plus the SAME pure metric chains the run scripts use:
+Main-figure data comes from the co-primary CSVs under ``--indir`` (default:
+the canonical ``results/topic5_ictal_recruitment/v3_mode_transition`` tree,
+so the committed script always re-renders on whatever the pipeline last
+wrote there -- point ``--indir`` at a frozen snapshot for a race-free
+dev/eyeball render while a background rerun is overwriting the canonical
+CSVs). The supplementary trajectory is computed OBSERVED-ONLY (no
+permutation nulls) directly from the ictal-field long cache via
+``scripts._topic5_v3_io.load_subject_phase_envelopes`` plus the SAME pure
+metric chains the run scripts use:
   H3b: ``activations_from_z -> atm_offdiag -> net_offaxis_flux``, median over
        seizures carrying that phase.
   H3c: per sliding window, ``lowrank_var -> dominant_right_singular_vector(k*)
        -> map_lowrank_vector_to_contacts -> subspace_mode_shift(..., "density")``,
        median over windows -> per seizure -> median over seizures.
 This always reads the (race-free) field cache and the fixed
-``SUBJECTS_BY_SUB`` cohort lists, never ``--indir`` -- so Panel B is already
-"final" regardless of which permutation rerun is in flight for Panel A.
+``SUBJECTS_BY_SUB`` cohort lists, never ``--indir`` -- so it is already
+"final" regardless of which permutation rerun is in flight for the main
+figure.
 
 See docs/superpowers/plans/2026-07-02-topic5-v3a-mode-transition.md Task 11
 and docs/superpowers/specs/2026-07-02-topic5-v3a-mode-transition-design.md.
+This redesign supersedes the original Task-11 2x2 layout (2026-07-04 figure
+cleanup: unclear main message, misused legend, wall-of-text caption, wrong
+layout -- see docs/archive/topic5/v3a_mode_transition_2026-07-04.md for the
+full honest-fragile writeup this figure summarizes).
 """
 from __future__ import annotations
 
@@ -57,6 +62,7 @@ import argparse
 import csv
 import json
 import sys
+import textwrap
 from pathlib import Path
 
 import matplotlib
@@ -88,12 +94,12 @@ from src.topic5_v3_mode_transition import (  # noqa: E402
 
 _DEFAULT_INDIR = _ROOT / "results/topic5_ictal_recruitment/v3_mode_transition"
 COHORT_COLOR = {"narrow": "#c0603a", "broad": "#3b6fb0"}
-COHORT_ROLE = {"narrow": "primary", "broad": "replication-only"}
+COHORT_ROLE = {"narrow": "primary", "broad": "replication"}
 PHASES = ["P0", "P1", "P2", "P3", "O", "I1", "I2", "I3"]
 
 
 # ---------------------------------------------------------------------------
-# Panel A: read the already-computed co-primary subject CSVs (--indir)
+# Main-figure data: read the already-computed co-primary subject CSVs (--indir)
 # ---------------------------------------------------------------------------
 def _f(x) -> float:
     try:
@@ -106,27 +112,25 @@ def _read_csv_rows(path: Path) -> list:
     return list(csv.DictReader(path.open())) if path.exists() else []
 
 
-def _panel_a_data(indir: Path, cohort: str) -> dict:
-    """``{"h3b": {subject: (delta, module_support_flag)}, "h3c": {...}}``.
+def _endpoint_subject_deltas(indir: Path, cohort: str) -> dict:
+    """``{"h3b": {subject: delta}, "h3c": {subject: delta}, "h3b_raw": {...}}``.
 
-    Reads each endpoint's OWN CSV and OWN ``module_support_flag`` column
-    (avalanche's for H3b, dynamics' for H3c) -- not the summary's combined
-    ``subject_support`` -- per the brief ("subjects whose module_support_flag
-    == True"). A row with a non-finite delta (skipped/geometry-insufficient
-    subject) is kept in the dict but filtered out by the plotting helper, so
-    a subject absent from one endpoint's CSV never silently disappears from
-    the other endpoint's sub-axis.
+    Reads each endpoint's OWN CSV (avalanche for H3b, dynamics for H3c). A
+    row with a non-finite delta (skipped/geometry-insufficient subject) is
+    kept in the dict but filtered out by the plotting helper, so a subject
+    absent from one endpoint's CSV never silently disappears from the other
+    endpoint's panel. The redesigned figure no longer marks individual
+    ``module_support_flag`` subjects (that fact is cohort-level caption
+    text now, not a per-point marker), so this no longer reads that column.
     """
     av = _read_csv_rows(indir / cohort / "v3_avalanche_subject.csv")
     dyn = _read_csv_rows(indir / cohort / "v3_dynamics_subject.csv")
-    h3b = {r["subject"]: (_f(r["delta_net_offaxis_flux_surplus"]), r.get("module_support_flag") == "True")
-           for r in av}
+    h3b = {r["subject"]: _f(r["delta_net_offaxis_flux_surplus"]) for r in av}
     # raw (uncorrected) I1-P3 flux per subject — overlaid as open markers so the
     # reader sees the raw flux mostly DECREASES while the null-corrected surplus
     # is positive (the "amplification" is relative to the rate baseline).
     h3b_raw = {r["subject"]: _f(r.get("delta_net_offaxis_flux_raw", "nan")) for r in av}
-    h3c = {r["subject"]: (_f(r["delta_mode_shift_density"]), r.get("module_support_flag") == "True")
-           for r in dyn}
+    h3c = {r["subject"]: _f(r["delta_mode_shift_density"]) for r in dyn}
     return {"h3b": h3b, "h3c": h3c, "h3b_raw": h3b_raw}
 
 
@@ -166,9 +170,9 @@ def _load_tier_payload(indir: Path) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Panel B: observed-only (no perms) phase trajectory straight from the field
-# cache. Always uses the canonical SUBJECTS_BY_SUB list and the (race-free)
-# ictal_field_long_cache -- independent of --indir.
+# Supplementary-figure data: observed-only (no perms) phase trajectory
+# straight from the field cache. Always uses the canonical SUBJECTS_BY_SUB
+# list and the (race-free) ictal_field_long_cache -- independent of --indir.
 # ---------------------------------------------------------------------------
 def _windows_of(n_t: int, hop: float, win_sec: float, step_sec: float) -> list:
     """Same synthetic-relt sliding-window helper the dynamics run script uses
@@ -266,65 +270,81 @@ def _compute_observed_trajectory(cohort: str, cfg: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# plotting
+# plotting -- main figure (endpoint panels) + supplementary figure (trajectory)
 # ---------------------------------------------------------------------------
-def _plot_panel_a(ax, cohort_data: dict, key: str, ylabel: str, subtitle: str) -> None:
-    """One sub-axis: per-subject P3->I1 Delta for ONE co-primary endpoint.
+def _p_annotation(nb: dict, bb: dict, key: str, ndec: int) -> str:
+    """"cohort Holm p: narrow <p> / broad <p> (<0.05|n.s.|mixed)" -- the ONE
+    top-left per-panel annotation that replaces the removed per-subject
+    robustness marker. ``ndec`` controls decimal places (3 for the
+    borderline-significant off-axis-flux endpoint, 2 for the clearly-null
+    mode-direction endpoint -- more precision where the significance
+    boundary actually matters).
+    """
+    def fmt(x: float) -> str:
+        return "n/a" if not np.isfinite(x) else f"{x:.{ndec}f}"
+
+    p_n, p_b = nb[f"p_holm_{key}"], bb[f"p_holm_{key}"]
+    both_pass = bool(nb[f"cohort_{key}_pass"] and bb[f"cohort_{key}_pass"])
+    both_ns = bool(not nb[f"cohort_{key}_pass"] and not bb[f"cohort_{key}_pass"])
+    tag = "<0.05" if both_pass else ("n.s." if both_ns else "mixed")
+    return f"cohort Holm p: narrow {fmt(p_n)} / broad {fmt(p_b)} ({tag})"
+
+
+def _plot_endpoint_panel(ax, cohort_data: dict, key: str, ylabel: str, title: str,
+                          p_annotation: str, show_raw: bool) -> None:
+    """ONE main-figure panel: per-subject P3->I1 Delta for ONE endpoint.
 
     x = subjects grouped into a narrow (primary) block then a broad
-    (replication-only) block, separated by a vertical divider; each subject
-    is one point; a dashed zero line; a thick cohort-median tick spanning
-    each block; subjects with module_support_flag==True get a black-outlined
-    marker (larger + black edge) so the reader sees exactly how many/which
-    subjects carry the story, not just the cohort median.
+    (replication) block, separated by a thin vertical divider; a dashed
+    zero line; a thick cohort-median tick spanning each block. FILLED
+    marker = the endpoint value itself (colored by cohort) -- for the
+    off-axis-flux panel (``show_raw=True``) an OPEN marker of the same
+    color overlays the raw (uncorrected) Delta, the direct visual evidence
+    that the surplus is elevated relative to a raw baseline that mostly
+    DECREASES, not an absolute rise. No per-subject "passes its own
+    robustness checks" marker (removed in the 2026-07-04 redesign -- that
+    fact is cohort-level caption text, not a marker) and no per-panel
+    legend (the ONE shared bottom legend explains filled/open once for the
+    whole figure).
     """
     ax.axhline(0.0, color="0.55", lw=1.1, ls="--", zorder=1)
     cursor = 0.0
-    gap = 1.3
+    gap = 1.2
     xtick_pos: list = []
     xtick_lab: list = []
     for cohort in ("narrow", "broad"):
         items = sorted(cohort_data[cohort][key].items())
-        finite = [(s, d, flg) for s, (d, flg) in items if np.isfinite(d)]
+        finite = [(s, d) for s, d in items if np.isfinite(d)]
         n = len(finite)
         color = COHORT_COLOR[cohort]
         if n:
             xs = cursor + np.arange(n, dtype=float)
-            plain = [(x, d) for x, (_, d, flg) in zip(xs, finite) if not flg]
-            strong = [(x, d) for x, (_, d, flg) in zip(xs, finite) if flg]
-            if plain:
-                px, py = zip(*plain)
-                ax.scatter(px, py, s=46, color=color, alpha=0.75, edgecolor="white", linewidth=0.6, zorder=3)
-            if strong:
-                sx, sy = zip(*strong)
-                ax.scatter(sx, sy, s=78, color=color, edgecolor="black", linewidth=1.6, zorder=4)
-            med = float(np.median([d for _, d, _ in finite]))
-            ax.plot([xs[0] - 0.4, xs[-1] + 0.4], [med, med], color=color, lw=2.8, zorder=5)
-            if key == "h3b":  # open markers = raw (uncorrected) flux Δ
+            ys = [d for _, d in finite]
+            ax.scatter(xs, ys, s=55, color=color, alpha=0.85, edgecolor="white", linewidth=0.6, zorder=3)
+            med = float(np.median(ys))
+            ax.plot([xs[0] - 0.4, xs[-1] + 0.4], [med, med], color=color, lw=2.8, zorder=4)
+            if show_raw:
                 raw = cohort_data[cohort].get("h3b_raw", {})
-                rys = [raw.get(s, np.nan) for s, _, _ in finite]
-                ax.scatter(xs, rys, s=30, facecolor="none", edgecolor=color, linewidth=1.1, alpha=0.8, zorder=2)
+                rys = [raw.get(s, np.nan) for s, _ in finite]
+                ax.scatter(xs, rys, s=38, facecolor="none", edgecolor=color, linewidth=1.2, alpha=0.9, zorder=2)
             block_center = float(xs.mean())
             cursor = xs[-1] + 1.0
         else:
             block_center = cursor
         xtick_pos.append(block_center)
-        xtick_lab.append(f"{cohort}\n({COHORT_ROLE[cohort]}, n={n})")
+        xtick_lab.append(f"{cohort} ({COHORT_ROLE[cohort]})\nn={n}")
         cursor += gap
         if cohort == "narrow":
-            ax.axvline(cursor - gap / 2, color="0.82", lw=1.1, zorder=0)
+            ax.axvline(cursor - gap / 2, color="0.8", lw=1.1, zorder=0)
 
     ax.set_xticks(xtick_pos)
-    ax.set_xticklabels(xtick_lab, fontsize=8.3)
+    ax.set_xticklabels(xtick_lab, fontsize=9.8)
     ax.set_xlim(-0.8, cursor - gap + 0.8)
-    ax.set_ylabel(ylabel, fontsize=8.8)
-    ax.set_title(subtitle, fontsize=9.8, loc="left")
-    if key == "h3b":  # explain filled (surplus/endpoint) vs open (raw/uncorrected)
-        h = [plt.Line2D([0], [0], marker="o", color="none", markerfacecolor="0.4",
-                        markeredgecolor="white", markersize=7, label="null-corrected surplus (the endpoint)"),
-             plt.Line2D([0], [0], marker="o", color="none", markerfacecolor="none",
-                        markeredgecolor="0.4", markersize=6.5, label="raw Δ (uncorrected; mostly < 0)")]
-        ax.legend(handles=h, loc="upper left", fontsize=6.4, frameon=False, handletextpad=0.3)
+    ax.margins(y=0.22)
+    ax.set_ylabel(ylabel, fontsize=11.0)
+    ax.set_title(title, fontsize=12.2, loc="left", fontweight="bold")
+    ax.text(0.02, 0.95, p_annotation, transform=ax.transAxes, fontsize=8.6,
+            style="italic", color="0.3", ha="left", va="top")
 
 
 def _plot_panel_b(ax, traj_by_cohort: dict, key: str, ylabel: str, subtitle: str) -> None:
@@ -366,122 +386,127 @@ def _plot_panel_b(ax, traj_by_cohort: dict, key: str, ylabel: str, subtitle: str
     )
 
 
-def _fmt_p(x) -> str:
-    return "n/a" if not np.isfinite(x) else f"{x:.3f}"
-
-
-def _tier_caption(tier_payload: dict, caveats: dict) -> str:
-    """Honest-fragile caption for the FINAL paired result.
-
-    The seizure-paired statistic reaches the top mechanical tier (off-axis-flux
-    endpoint significant in both cohorts), but the positive is fragile and must
-    NOT read as an established transition: (1) raw flux mostly decreases
-    (surplus is null-relative); (2) mostly common-drive co-activation, not
-    directed propagation; (3) weak individual robustness; (4) the more specific
-    mode-direction endpoint is null. Plain language first; the tier/supported
-    bookkeeping only in a trailing parenthetical (CLAUDE.md Sec 8).
+def _short_caption(tier_payload: dict, caveats: dict) -> str:
+    """The ONE short caption for the MAIN figure -- replaces the old 5-line
+    wall-of-text caption. Plain quantity names only, no tier/module_support
+    codenames (those stay in the archive doc); the two fraction numbers are
+    read live from the per-subject CSVs (via ``tier_payload``/``caveats``)
+    so they always match this render. Wrapped to a fixed character width
+    (not matplotlib's ``wrap=True``, which under-wraps centered fig.text)
+    so it reliably renders as 2 lines.
     """
-    nb, bb = tier_payload["narrow"], tier_payload["broad"]
+    nb = tier_payload["narrow"]
     nc = caveats["narrow"]
-    lead = "EXPLORATORY, data-side only (paired within-seizure P3->I1, n_perm=1000)."
-    stat = (
-        f" The rate-null-corrected off-axis-flux surplus reaches cohort significance in the primary cohort "
-        f"(Wilcoxon Holm p={_fmt_p(nb['p_holm_h3b'])}; robust to leave-one-subject-out) and is same-direction "
-        f"in replication (p={_fmt_p(bb['p_holm_h3b'])}) -- mechanically the top tier."
+    text = (
+        "Paired within-seizure P3→I1, n_perm=1000. The off-axis-flux surplus (filled) is "
+        "cohort-significant and leave-one-subject-out robust in both cohorts, but the raw flux "
+        f"(open) mostly decreases ({nc['n_raw_neg']}/{nc['n_ok']} narrow), is mostly common-drive "
+        f"co-activation, and only {nb['n_subject_support']}/{nb['n_geometry_sufficient']} narrow "
+        "subjects are individually robust; the mode-direction endpoint is null. → a fragile "
+        "data-side candidate signal, not an established axis→non-axis transition (detail: README)."
     )
-    caveat = (
-        " But this is a FRAGILE positive, NOT an established axis->non-axis transition: "
-        f"(1) the RAW (uncorrected) flux mostly DECREASES P3->I1 ({nc['n_raw_neg']}/{nc['n_ok']} primary "
-        "subjects; open markers) -- the surplus is elevation vs the rate baseline, not an absolute rise; "
-        f"(2) {nc['n_common_drive']}/{nc['n_ok']} primary subjects are common-drive-sensitive (lag1~lag0) -- "
-        "largely simultaneous co-activation, not directed propagation; "
-        f"(3) only {nb['n_subject_support']}/{nb['n_geometry_sufficient']} primary subjects pass every individual "
-        "robustness check; (4) the more specific mode-direction endpoint is NULL "
-        f"(p={_fmt_p(nb['p_holm_h3c'])} primary / p={_fmt_p(bb['p_holm_h3c'])} replication)."
-    )
-    net = (
-        " Net: a candidate data-side off-axis-recruitment signal, pending mechanism validation (V3b) and "
-        "sensitivity gates -- not established support."
-    )
-    book = (f" (internal bookkeeping: evidence tier {tier_payload['tier']}/4, "
-            f"formally supported={tier_payload['state_v3_supported']}.)")
-    return lead + stat + caveat + net + book
+    return "\n".join(textwrap.wrap(text, width=220))
 
 
-def _build_figure(panel_a: dict, panel_b: dict, tier_payload: dict, caveats: dict) -> "plt.Figure":
-    fig, axes = plt.subplots(2, 2, figsize=(13.5, 11.0))
-    (axA_b, axA_c), (axB_b, axB_c) = axes
+def _build_main_figure(endpoint_data: dict, tier_payload: dict, caveats: dict) -> "plt.Figure":
+    """The ONE main result figure: a clean 1x2, one endpoint per panel
+    (CLAUDE.md Sec 7), ONE shared legend (<=4 entries), ONE short caption --
+    replacing the old 2x2 (2 endpoint + 2 trajectory panels, two legends, a
+    5-line caption, no single clear takeaway).
+    """
+    fig, (ax_flux, ax_mode) = plt.subplots(1, 2, figsize=(13.0, 6.3))
 
-    # Sub-axis titles name the QUANTITY only (no H3b/H3c plan-internal
-    # codename -- style guide Sec 0.2 / CLAUDE.md Sec 8: internal labels
-    # never go in reader-facing title/axis/legend text). The two columns
-    # stay visually paired top-to-bottom by repeating the same quantity name.
-    _plot_panel_a(axA_b, panel_a, "h3b",
-                  "Δ net off-axis flux surplus\n(null-corrected, I1 minus P3)",
-                  "off-axis flux surplus")
-    _plot_panel_a(axA_c, panel_a, "h3c",
-                  "Δ mode-shift density\n(I1 minus P3)",
-                  "mode-transition density")
-    _plot_panel_b(axB_b, panel_b, "h3b",
+    nb, bb = tier_payload["narrow"], tier_payload["broad"]
+    _plot_endpoint_panel(
+        ax_flux, endpoint_data, "h3b",
+        "Δ off-axis flux (I1−P3)",
+        "① off-axis flux — surplus significant, but raw mostly decreases",
+        _p_annotation(nb, bb, "h3b", 3),
+        show_raw=True,
+    )
+    _plot_endpoint_panel(
+        ax_mode, endpoint_data, "h3c",
+        "Δ mode-shift density (I1−P3)",
+        "② mode-transition direction — null",
+        _p_annotation(nb, bb, "h3c", 2),
+        show_raw=False,
+    )
+
+    fig.tight_layout(rect=(0.02, 0.17, 0.98, 0.94))
+
+    legend_handles = [
+        plt.Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=COHORT_COLOR["narrow"],
+                   markeredgecolor=COHORT_COLOR["narrow"], markersize=8, label="narrow"),
+        plt.Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=COHORT_COLOR["broad"],
+                   markeredgecolor=COHORT_COLOR["broad"], markersize=8, label="broad"),
+        plt.Line2D([0], [0], marker="o", linestyle="none", markerfacecolor="0.4", markeredgecolor="white",
+                   markersize=8, label="● filled = null-corrected surplus (endpoint)"),
+        plt.Line2D([0], [0], marker="o", linestyle="none", markerfacecolor="none", markeredgecolor="0.4",
+                   markersize=8, label="○ open = raw Δ"),
+    ]
+    fig.legend(handles=legend_handles, loc="lower center", ncol=4, frameon=False,
+               fontsize=9.2, bbox_to_anchor=(0.5, 0.095), columnspacing=1.6, handletextpad=0.4)
+
+    caption = _short_caption(tier_payload, caveats)
+    fig.text(0.5, 0.01, caption, ha="center", va="bottom", fontsize=8.0)
+
+    fig.suptitle(
+        "Topic 5 V3a — seizure axis→non-axis (paired P3→I1, EXPLORATORY): "
+        "a fragile off-axis-flux signal; mode-direction null",
+        fontsize=12.8, fontweight="bold", y=0.975,
+    )
+    return fig
+
+
+def _build_trajectory_figure(trajectory_data: dict) -> "plt.Figure":
+    """SUPPLEMENTARY figure (``v3_mode_transition_trajectory.png``): the
+    peri-ictal phase trajectory moved OUT of the main figure (2026-07-04
+    redesign). A clean 1x2, reusing ``_plot_panel_b`` UNCHANGED -- one panel
+    per raw metric, narrow vs broad, O-buffer shaded; its own legend/
+    caption/suptitle since this is now a standalone file, not a row of the
+    main figure.
+    """
+    fig, (ax_flux, ax_mode) = plt.subplots(1, 2, figsize=(13.0, 5.6))
+
+    _plot_panel_b(ax_flux, trajectory_data, "h3b",
                   "net off-axis flux\n(observed, source-normalized)",
                   "off-axis flux -- phase trajectory (observed)")
-    _plot_panel_b(axB_c, panel_b, "h3c",
+    _plot_panel_b(ax_mode, trajectory_data, "h3c",
                   "mode-shift density\n(observed, non-axis minus axis)",
                   "mode-transition density -- phase trajectory (observed)")
 
-    fig.tight_layout(rect=(0.01, 0.065, 0.99, 0.905), h_pad=7.0)
-
-    # The "B" row banner must sit in the gap between row A's FULL rendered
-    # extent (axes box + its two-line x-tick labels) and row B's FULL extent
-    # (its own title) -- get_position() alone only covers the axes frame and
-    # would let the banner collide with row A's tick labels (as it did before
-    # this fix). get_tightbbox() includes tick labels/titles, so the gap
-    # midpoint computed from it is robust to font-size/label-length changes.
-    fig.canvas.draw()
-    renderer = fig.canvas.get_renderer()
-    bbox_a = axA_b.get_tightbbox(renderer).transformed(fig.transFigure.inverted())
-    bbox_b = axB_b.get_tightbbox(renderer).transformed(fig.transFigure.inverted())
-    row_gap_y = (bbox_a.y0 + bbox_b.y1) / 2.0
-
-    fig.text(0.5, 0.955,
-              "A - does the non-axis co-primary Δ move P3->I1? (per-subject points, cohort-median bar, zero line)",
-              ha="center", fontsize=10.5, fontweight="bold")
-    fig.text(0.5, row_gap_y,
-              "B - is there peri-ictal structure across the WHOLE trajectory (P0..I3), not just P3/I1? "
-              "(observed cohort-median, no permutation nulls)",
-              ha="center", fontsize=10.5, fontweight="bold")
+    fig.tight_layout(rect=(0.02, 0.15, 0.98, 0.92))
 
     legend_handles = [
-        plt.Line2D([0], [0], marker="o", color="none", markerfacecolor=COHORT_COLOR["narrow"],
-                    markersize=8, label="narrow (primary cohort)"),
-        plt.Line2D([0], [0], marker="o", color="none", markerfacecolor=COHORT_COLOR["broad"],
-                    markersize=8, label="broad (replication-only, never pooled)"),
-        plt.Line2D([0], [0], marker="o", color="none", markerfacecolor="0.5", markeredgecolor="black",
-                    markeredgewidth=1.6, markersize=9, label="subject individually passes its own endpoint's checks"),
-        plt.Line2D([0], [0], marker="o", color="none", markerfacecolor="0.5", markeredgecolor="white",
-                    markeredgewidth=0.6, markersize=7, label="subject does not"),
+        plt.Line2D([0], [0], marker="o", color=COHORT_COLOR["narrow"], lw=2.0, markersize=6,
+                   label="narrow (primary)"),
+        plt.Line2D([0], [0], marker="o", color=COHORT_COLOR["broad"], lw=2.0, markersize=6,
+                   label="broad (replication)"),
     ]
-    fig.legend(handles=legend_handles, loc="upper center", ncol=4, frameon=False,
-               fontsize=8.6, bbox_to_anchor=(0.5, 1.012))
+    fig.legend(handles=legend_handles, loc="lower center", ncol=2, frameon=False,
+               fontsize=9.5, bbox_to_anchor=(0.5, 0.06))
 
-    caption = _tier_caption(tier_payload, caveats)
-    fig.text(0.5, 0.006, caption, ha="center", va="bottom", fontsize=7.6, wrap=True,
-             bbox={"boxstyle": "round", "facecolor": "0.96", "edgecolor": "0.8"})
+    caption = "\n".join(textwrap.wrap(
+        "Supplementary to v3_mode_transition_summary.png: cohort-median OBSERVED trajectory (no "
+        "permutation nulls) across all 8 seizure phases (P0–P3 preictal → O onset buffer "
+        "→ I1–I3 ictal); O is a descriptive buffer only, never part of the primary "
+        "P3→I1 contrast in the main figure (detail: README).",
+        width=190,
+    ))
+    fig.text(0.5, 0.005, caption, ha="center", va="bottom", fontsize=8.0)
 
     fig.suptitle(
-        "Topic 5 V3a -- seizure axis-to-non-axis, P3->I1: a fragile, null-relative off-axis-flux "
-        "signal (EXPLORATORY); mode-direction endpoint null",
-        fontsize=11.8, y=1.075, fontweight="bold",
+        "Topic 5 V3a supplementary — peri-ictal phase trajectory (observed, no permutation nulls)",
+        fontsize=12.3, fontweight="bold", y=0.965,
     )
     return fig
 
 
 def _write_readme(outdir: Path, tier_payload: dict, caveats: dict) -> Path:
-    """Chinese ``figures/README.md`` (AGENTS.md format), written AFTER the PNG
-    so every number matches THIS render. Honest-fragile framing: the paired
-    statistic reaches the top mechanical tier but the positive is fragile
-    (null-relative + common-drive + weak individual robustness + mode leg null);
-    tier/supported bookkeeping only in a trailing parenthetical (CLAUDE.md Sec 8).
+    """Chinese ``figures/README.md`` (AGENTS.md format): one ``### filename``
+    section per PNG, written AFTER both PNGs so every number matches THIS
+    render. Honest-fragile framing throughout (2026-07-04 redesign: clean
+    1x2 main figure + a separate supplementary trajectory PNG).
     """
     nb, bb = tier_payload["narrow"], tier_payload["broad"]
     nc = caveats["narrow"]
@@ -491,20 +516,31 @@ def _write_readme(outdir: Path, tier_payload: dict, caveats: dict) -> Path:
         "### v3_mode_transition_summary.png\n\n"
         "这张图检验：发作真正开始前后（发作前 30~10 秒 → 发作后 10~30 秒，**每次发作按它自己的脑电起始"
         "配对**），系统里最容易被放大的连锁流向/活动方向，是不是从病人间期就走熟的固定高频通路，转移到"
-        f"通路之外的电极上。上排是每个病人这段时间的前后变化量（narrow 主力队列 n={nb['n_geometry_sufficient']}，"
-        f"broad 只作复制 n={bb['n_geometry_sufficient']}、从不与主力合并）；下排是发作前 2 分钟到发作后的完整"
-        "时间线，起始前后 10 秒（O）灰色底纹只作缓冲。\n\n"
-        "实测（配对、正式 n_perm=1000）：扣掉每触点放电率随机基线后的『非轴向净流增量』在主力+复制队列"
-        "**都达到了队列级显著**（判读机械上到顶档），但这是一个**很脆的阳性**，不能读成『轴→非轴模态转移"
-        f"成立』——① 未校正的原始流大多在下降（{nc['n_raw_neg']}/{nc['n_ok']} 个主力病人，空心点）：所谓"
-        f"『放大』是相对随机基线、不是绝对上升；② {nc['n_common_drive']}/{nc['n_ok']} 个主力病人以同时共激活"
-        f"为主（lag1≈lag0），不是定向传导；③ 只有 {nb['n_subject_support']}/{nb['n_geometry_sufficient']} 个病人"
-        "个体层面过了全部稳健性检验；④ 更能代表『方向转移』的模态腿是阴的。总体是一个数据侧候选信号，"
-        f"待机制侧(V3b)与敏感性检验，不是确立的支持（内部记账：evidence tier {tier}/4，"
-        f"formally supported={supported}）。\n\n"
-        "**关注点**：上排左子图里，**空心点（原始流）大多在 0 以下、实心点（扣基线后的增量）在 0 以上**"
-        "——这就是『相对基线偏高、绝对在降』的直接视觉证据；再看黑色描边的个体稳健点极少、以及右侧模态"
-        "子图整体贴着 0。\n"
+        "通路之外的电极上。**左图**是每个病人『非轴向净流』的前后变化量，**右图**是『模态转移方向』的前后"
+        f"变化量（narrow 主力队列 n={nb['n_geometry_sufficient']}，broad 只作复制 "
+        f"n={bb['n_geometry_sufficient']}、从不与主力合并）；每张子图里**实心点**=扣除放电率随机基线后的"
+        "增量（承重端点），**空心点**（只出现在左图）=未扣基线的原始变化量。\n\n"
+        "实测（配对、正式 n_perm=1000）：扣掉每触点放电率随机基线后的『非轴向净流增量』（左图实心点）在"
+        "主力+复制队列都达到了队列级显著（判读机械上到顶档），但这是一个**很脆的阳性**，不能读成『轴→非轴"
+        f"模态转移成立』——① 左图空心点（未扣基线的原始流）大多在下降（{nc['n_raw_neg']}/{nc['n_ok']} 个"
+        f"主力病人）：所谓『放大』是相对随机基线、不是绝对上升；② {nc['n_common_drive']}/{nc['n_ok']} 个"
+        "主力病人以同时共激活为主（lag1≈lag0），不是定向传导；③ 只有 "
+        f"{nb['n_subject_support']}/{nb['n_geometry_sufficient']} 个病人个体层面过了全部稳健性检验（这条"
+        "只写进文字说明，图上不再画黑色描边的『个体稳健』标记）；④ 右图『模态转移方向』端点是阴的（两队列 "
+        "Holm p 都远高于 0.05）。总体是一个数据侧候选信号，待机制侧(V3b)与敏感性检验，不是确立的支持"
+        f"（内部记账：evidence tier {tier}/4，formally supported={supported}）。\n\n"
+        "**关注点**：左图里**空心点（原始流）大多落在 0 以下、实心点（扣基线后的增量）落在 0 以上**——这"
+        "就是『相对基线偏高、绝对在降』的直接视觉证据；右图的点整体紧贴 0 线，两个队列的中位线都几乎不偏离"
+        "零，与左图的偏移形成对比。\n\n"
+        "### v3_mode_transition_trajectory.png\n\n"
+        "这张图是补充材料：不只看发作前后两个端点，而是把发作前 2 分钟到发作后的整段时间线（P0…P3 发作前 "
+        "→ O 起始缓冲 → I1…I3 发作后）都画出来，看『非轴向净流』（左）和『模态转移方向』（右）在这条完整"
+        "时间线上有没有结构，而不只是两个端点之间的一个变化量。两条线（narrow/broad）都是队列中位数，"
+        "**没有做置换检验**（纯描述性的『实测长什么样』，不是承重统计）；起始前后 10 秒（O，灰色底纹）只是"
+        "缓冲窗口，不算进主图 P3→I1 的承重对比。\n\n"
+        "**关注点**：两条队列曲线在灰色缓冲窗口前后都没有明显的单调爬升或断崖式变化，更像是围绕各自基线的"
+        "轻微波动——这不影响主图『P3→I1 两个端点之间确实有队列级变化』的结论，只是说明这个变化在更细的时间"
+        "颗粒度上没有呈现出贯穿全程的清楚趋势。\n"
     )
     readme_path = outdir / "README.md"
     readme_path.write_text(body, encoding="utf-8")
@@ -514,9 +550,9 @@ def _write_readme(outdir: Path, tier_payload: dict, caveats: dict) -> Path:
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--indir", default=str(_DEFAULT_INDIR),
-                    help="Panel-A co-primary CSV tree root (default: canonical results path). "
-                         "Panel B always reads the canonical field cache + SUBJECTS_BY_SUB, "
-                         "independent of --indir.")
+                    help="Main-figure co-primary CSV tree root (default: canonical results path). "
+                         "The supplementary trajectory figure always reads the canonical field cache "
+                         "+ SUBJECTS_BY_SUB, independent of --indir.")
     ap.add_argument("--outdir", default=None, help="default: <indir>/figures")
     args = ap.parse_args()
 
@@ -526,18 +562,22 @@ def main():
 
     cfg = load_v3_config()
 
-    panel_a = {c: _panel_a_data(indir, c) for c in ("narrow", "broad")}
+    endpoint_data = {c: _endpoint_subject_deltas(indir, c) for c in ("narrow", "broad")}
     caveats = _h3b_caveats(indir)
     tier_payload = _load_tier_payload(indir)
 
-    print("[fig] computing Panel B observed-only phase trajectories from the field cache "
-          "(race-free w.r.t. any Panel-A rerun; ~1-2 min)...", flush=True)
-    panel_b = {c: _compute_observed_trajectory(c, cfg) for c in ("narrow", "broad")}
-
-    fig = _build_figure(panel_a, panel_b, tier_payload, caveats)
+    fig_main = _build_main_figure(endpoint_data, tier_payload, caveats)
     out_png = outdir / "v3_mode_transition_summary.png"
-    fig.savefig(out_png, dpi=170, bbox_inches="tight")
+    fig_main.savefig(out_png, dpi=170, bbox_inches="tight")
     print(f"[fig] -> {out_png}", flush=True)
+
+    print("[fig] computing supplementary phase trajectory (observed-only, no permutation nulls) "
+          "from the field cache (race-free w.r.t. any main-figure rerun; ~1-2 min)...", flush=True)
+    trajectory_data = {c: _compute_observed_trajectory(c, cfg) for c in ("narrow", "broad")}
+    fig_traj = _build_trajectory_figure(trajectory_data)
+    out_traj_png = outdir / "v3_mode_transition_trajectory.png"
+    fig_traj.savefig(out_traj_png, dpi=170, bbox_inches="tight")
+    print(f"[fig] -> {out_traj_png}", flush=True)
 
     out_readme = _write_readme(outdir, tier_payload, caveats)
     print(f"[fig] -> {out_readme}", flush=True)
