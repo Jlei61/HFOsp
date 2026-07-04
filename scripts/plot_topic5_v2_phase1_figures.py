@@ -12,6 +12,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
+import matplotlib.patheffects as pe
 import numpy as np
 import pandas as pd
 import yaml
@@ -46,44 +47,46 @@ def _load(sub):
 # ---------------------------------------------------------------- F1 observed heatmap
 def fig1_observed():
     bands = PRIMARY + COMPOSITE
-    # diverging red-blue centered at the pooled cohort median (red = above-typical alignment, blue = below);
-    # center is the SAME across both panels so narrow/broad are directly comparable.
-    allv = []
-    for sub, _ in SUBS:
-        a, _, _ = _load(sub)
-        allv += pd.to_numeric(a[a.band.isin(PRIMARY)].align_abs_maxab, errors="coerce").dropna().tolist()
-    vc = round(float(np.median(allv)), 2)
-    norm = TwoSlopeNorm(vmin=0.40, vcenter=vc, vmax=0.95)
+    norm = TwoSlopeNorm(vmin=0.35, vcenter=0.5, vmax=0.90)                    # < 0.5 blue, > 0.5 red
     fig, axes = plt.subplots(1, 2, figsize=(14, 8), gridspec_kw={"width_ratios": [20, 17]})
     im = None
     for ax, (sub, n) in zip(axes, SUBS):
-        a, _, _ = _load(sub)
+        a, nl, _ = _load(sub)
         piv = a.pivot_table(index="subject", columns="band", values="align_abs_maxab", aggfunc="median")
         piv = piv.reindex(columns=bands)
         piv = piv.loc[piv[PRIMARY].median(axis=1).sort_values(ascending=False).index]   # 高在上
+        sp = nl[nl.null_type == "spatial"].copy()                                         # per-cell 显著: 该 subject 自身空间 null
+        sp["delta"] = pd.to_numeric(sp.delta, errors="coerce")
+        sp["empirical_p"] = pd.to_numeric(sp.empirical_p, errors="coerce")
+        sig = {(str(r.subject), r.band): bool(r.delta > 0 and r.empirical_p < 0.05) for r in sp.itertuples()}
         med = piv.median(axis=0)
-        M = np.vstack([piv.values, med.values])                                          # 末行=cohort median
+        M = np.vstack([piv.values, med.values])
         ylabs = [_short(s) for s in piv.index] + ["cohort median"]
         im = ax.imshow(M, aspect="auto", cmap="RdBu_r", norm=norm)
+        for i, subj in enumerate(piv.index):
+            for j, b in enumerate(bands):
+                if sig.get((str(subj), b), False):
+                    ax.text(j, i, "*", ha="center", va="center", fontsize=9, color="white", fontweight="bold",
+                            path_effects=[pe.withStroke(linewidth=1.3, foreground="black")])
         ax.set_xticks(range(len(bands))); ax.set_xticklabels([SHORT[b] for b in bands], fontsize=8)
         ax.set_yticks(range(len(ylabs))); ax.set_yticklabels(ylabs, fontsize=7)
-        ax.axhline(len(piv) - 0.5, color="k", lw=1.5)                                     # 分隔 cohort median
+        ax.axhline(len(piv) - 0.5, color="k", lw=1.5)
         ax.axvline(len(PRIMARY) - 0.5, color="k", ls="--", lw=2.5)                        # primary(7) | composite(4)
         ax.set_title(f"{sub}  (n={n})", fontsize=12)
-        for j in range(M.shape[1]):                                                       # 数值标注 cohort median 行
+        for j in range(M.shape[1]):
             if np.isfinite(M[-1, j]):
                 ax.text(j, M.shape[0] - 1, f"{M[-1,j]:.2f}", ha="center", va="center", fontsize=6, color="k")
     cbar = fig.colorbar(im, ax=axes, fraction=0.03, pad=0.02)
-    cbar.set_label(f"maxAB |corr|   (red = higher / blue = lower; diverging at pooled median {vc})", fontsize=10)
-    fig.suptitle("F1 · Observed alignment: early-ictal multi-band energy field <-> interictal HFO-derived geometry\n"
-                 "descriptive magnitude (smoothed-field |corr|); narrow > broad; band-generic.  "
-                 "dashed line = primary (7) | composite (4) bands", fontsize=11)
+    cbar.set_label("maxAB |corr|   (blue < 0.5 < red)", fontsize=10)
+    fig.suptitle("F1 · Observed maxAB alignment (subject × band): narrow > broad, band-generic   ·   "
+                 "* = subject self-null p<0.05", fontsize=12)
     _save(fig, "phase1_F1_observed_maxAB_heatmap.png")
 
 
 # ---------------------------------------------------------------- F2 per-band null result
 def fig2_null_perband():
-    fig, axes = plt.subplots(1, 2, figsize=(15, 7), sharey=True)
+    SIG_C, NS_C = "#c44e52", "#cfcfcf"                                        # muted red / light gray (柔和)
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6.5), sharey=True)
     for ax, (sub, n) in zip(axes, SUBS):
         _, nl, g = _load(sub)
         sp = nl[(nl.null_type == "spatial") & (nl.band.isin(PRIMARY))].copy()
@@ -92,36 +95,30 @@ def fig2_null_perband():
         for xi, b in enumerate(PRIMARY):
             d = sp[sp.band == b].delta.dropna().values
             sig = float(gg.loc[b, "max_over_bands_p"]) < 0.05
-            col = "crimson" if sig else "lightgray"
-            if len(d) >= 2:                                                                # per-subject Δ violin
-                vp = ax.violinplot([d], positions=[xi], widths=0.85, showmedians=False, showextrema=True)
-                vp["bodies"][0].set_facecolor(col); vp["bodies"][0].set_edgecolor("k")
-                vp["bodies"][0].set_alpha(0.55)
-                for key in ("cbars", "cmins", "cmaxes"):
-                    if vp.get(key) is not None:
-                        vp[key].set_color("gray"); vp[key].set_linewidth(1.0)
-            else:
-                ax.scatter([xi] * len(d), d, s=30, c=col, edgecolors="k", zorder=4)
+            col = SIG_C if sig else NS_C
+            if len(d) >= 2:
+                vp = ax.violinplot([d], positions=[xi], widths=0.85, showmedians=False, showextrema=False)
+                vp["bodies"][0].set_facecolor(col); vp["bodies"][0].set_edgecolor("gray")
+                vp["bodies"][0].set_alpha(0.40)
+            jit = np.random.default_rng(xi).uniform(-0.085, 0.085, len(d))                # 背景点(per-subject Δ)
+            ax.scatter(xi + jit, d, s=15, c="#333333", alpha=0.75, edgecolors="none", zorder=4)
             cd = float(gg.loc[b, "cohort_perm_delta_spatial"])
-            ax.hlines(cd, xi - 0.35, xi + 0.35, color="k", lw=3, zorder=6)                 # cohort Δ (tested stat)
+            ax.hlines(cd, xi - 0.33, xi + 0.33, color="k", lw=2.5, zorder=6)              # cohort Δ (tested)
             top = np.nanmax(d) if len(d) else cd
             ax.annotate("*" if sig else "n.s.", (xi, top + 0.03), ha="center",
-                        fontsize=17 if sig else 10, color="crimson" if sig else "gray",
+                        fontsize=17 if sig else 10, color=SIG_C if sig else "gray",
                         weight="bold" if sig else "normal")
-        ax.axhline(0, color="k", lw=1.0)
+        ax.axhline(0, color="gray", lw=0.7, zorder=1)                                     # 0 线减细
         ax.set_xticks(range(len(PRIMARY)))
-        ax.set_xticklabels([SHORT[b] for b in PRIMARY], fontsize=12)          # 两行(symbol/freq)避免横向重叠
+        ax.set_xticklabels([SHORT[b] for b in PRIMARY], fontsize=12)
         ax.tick_params(axis="y", labelsize=13)
         nsig = int((pd.to_numeric(g[g.in_primary_family == True].max_over_bands_p, errors="coerce") < 0.05).sum())
-        ax.set_title(f"{sub}  (n={n})  ·  {nsig}/7 primary pass family-wise correction", fontsize=14)
-        ax.grid(alpha=0.3, axis="y")
-    axes[0].set_ylabel("cohort alignment - spatial-null median   (Δ per subject)", fontsize=15)
-    fig.suptitle("F2 · Formal-null: per-subject Δ distribution (violin) vs the weak / subject-wide spatial null\n"
-                 "violin = per-subject Δ; black bar = cohort Δ (tested); crimson * = band passes the max-over-bands "
-                 "family-wise (FWER) correction.\nripple_high weakest -> NOT ripple-specific.  "
-                 "WEAK null -> anti-conservative, likely inflated; formal within-shaft Gate A unresolved (2/20).",
-                 fontsize=11)
-    fig.tight_layout(rect=[0, 0, 1, 0.87])
+        ax.set_title(f"{sub}  (n={n})  ·  {nsig}/7 pass family-wise correction", fontsize=14)
+        ax.grid(alpha=0.25, axis="y")
+    axes[0].set_ylabel("cohort alignment − spatial-null median   (Δ per subject)", fontsize=15)
+    fig.suptitle("F2 · Per-subject Δ vs weak spatial null (violin + points; black bar = cohort Δ)   ·   "
+                 "* = family-wise significant", fontsize=12)
+    fig.tight_layout(rect=[0, 0, 1, 0.93])
     _save(fig, "phase1_F2_null_per_band.png")
 
 
