@@ -73,28 +73,38 @@ DEFAULT_SEED = 0
 # aggregation: window -> seizure -> subject
 # ---------------------------------------------------------------------------
 def compute_subject_bins(df: pd.DataFrame, primary_bands) -> pd.DataFrame:
-    """window(median over 7 primary bands) -> seizure_bin(median over windows in bin)
-    -> subject_bin(median over seizures). Returns long: [subject, epoch_region, subject_bin, n_seizures].
+    """window(median over the PRESENT primary bands) -> seizure_bin(median over windows in bin)
+    -> subject_bin(median over seizures). Returns long: [subject, epoch_region, subject_bin,
+    n_seizures, median_n_bands].
 
     Only raw feature + the 7 primary bands + the 5 named epoch_region bins participate. A window is
     keyed by (subject, seizure, win_start_rel, win_end_rel) (bit-identical across that window's bands);
-    epoch_region is constant within a window. Non-finite align_abs_maxab is dropped before the medians."""
+    epoch_region is constant within a window. Non-finite align_abs_maxab is dropped before the medians.
+
+    Band-set transparency: the per-window score is the median over the primary bands PRESENT in that
+    window. ~7% of windows carry only 5 of the 7 primary bands -- the two dropped are always the
+    80-250 Hz HFA bands (hg_low_ripple, ripple_high), which get skipped together per window. Median-
+    over-present is deliberate (a strict all-7 gate would further thin the sparser far-from-onset
+    windows); n_bands is carried up as median_n_bands per (subject,bin) so the mix is auditable."""
     d = df[df["feature"] == "raw"]
     d = d[d["band"].isin(list(primary_bands))]
     d = d[d["epoch_region"].isin(BIN_ORDER)]
     d = d[np.isfinite(pd.to_numeric(d["align_abs_maxab"], errors="coerce"))].copy()
     if d.empty:
-        return pd.DataFrame(columns=["subject", "epoch_region", "subject_bin", "n_seizures"])
+        return pd.DataFrame(columns=["subject", "epoch_region", "subject_bin",
+                                     "n_seizures", "median_n_bands"])
     d["align_abs_maxab"] = d["align_abs_maxab"].astype(float)
 
-    # per-window scaffold score = median align_abs_maxab over the primary bands present in the window
+    # per window: scaffold score = median over present primary bands; n_bands = # primary bands present
     win = d.groupby(["subject", "seizure", "win_start_rel", "win_end_rel"], as_index=False).agg(
-        bg=("align_abs_maxab", "median"), epoch_region=("epoch_region", "first"))
-    # per (subject, seizure, bin) = median of bg over that bin's windows
-    sz = win.groupby(["subject", "seizure", "epoch_region"], as_index=False)["bg"].median()
-    # per (subject, bin) = median over that subject's seizures (+ how many seizures contribute)
+        bg=("align_abs_maxab", "median"), n_bands=("band", "nunique"),
+        epoch_region=("epoch_region", "first"))
+    # per (subject, seizure, bin) = median of bg (+ median n_bands) over that bin's windows
+    sz = win.groupby(["subject", "seizure", "epoch_region"], as_index=False).agg(
+        bg=("bg", "median"), n_bands=("n_bands", "median"))
+    # per (subject, bin) = median over that subject's seizures (+ #seizures, + median n_bands)
     subj = sz.groupby(["subject", "epoch_region"], as_index=False).agg(
-        subject_bin=("bg", "median"), n_seizures=("bg", "size"))
+        subject_bin=("bg", "median"), n_seizures=("bg", "size"), median_n_bands=("n_bands", "median"))
     return subj
 
 
@@ -217,7 +227,7 @@ def build_tables(n_perm: int = DEFAULT_N_PERM, seed: int = DEFAULT_SEED):
             merged.insert(1, "pool", pool)
             merged["bin_center"] = merged["epoch_region"].map(BIN_CENTERS)
             traj_rows.append(merged[["anchor", "pool", "subject", "epoch_region",
-                                     "bin_center", "subject_bin", "n_seizures"]])
+                                     "bin_center", "subject_bin", "n_seizures", "median_n_bands"]])
             # contrasts
             con = compute_contrasts(wide, n_perm=n_perm, seed=seed)
             con.insert(0, "anchor", anchor)

@@ -144,8 +144,9 @@ def make_figure():
                    fontsize=11.5, loc="left", fontweight="bold")
     # coverage caveat (brief): far pre-ictal bin is thinner for large EEG-clinical-gap seizures.
     axA1.text(0.005, -0.42, "far pre-ictal bin is thinner: large EEG-clinical-gap seizures map their "
-              "EEG -100..-60s beyond the -130s cache.\nMarkers = cohort median; bars = subject IQR "
-              "(q25-q75).  EEG anchor offset left, clinical anchor offset right.",
+              "EEG -100..-60s beyond the -130s cache.\n~7% of windows (every bin) score over 5 of 7 "
+              "primary bands -- the two 80-250 Hz HFA bands drop together there.\nMarkers = cohort "
+              "median; bars = subject IQR (q25-q75).  EEG anchor offset left, clinical anchor offset right.",
               transform=axA1.transAxes, fontsize=7.6, color="0.35", va="top")
 
     _panel_B(axB, con)
