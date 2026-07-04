@@ -41,6 +41,11 @@ from scripts.run_topic5_v2_alignment import (  # noqa: E402
 from scripts.run_topic5_ictal_field_dynamics import _ictal_fraction  # noqa: E402
 from src.topic5_v2_band_scan import load_phase1_config  # noqa: E402
 
+# Task 3.2 (W3 "when?"): peri-ictal scaffold-score trajectory + subject-level sign-flip.
+from scripts.run_topic5_v2_trajectory import (  # noqa: E402
+    BIN_ORDER, CONTRASTS, compute_subject_bins, subject_bin_wide,
+    signflip_test, compute_contrasts)
+
 _CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
 _PHASE1_CFG = _CONFIG_DIR / "topic5_v2_phase1.yaml"
 _PERI_CFG = _CONFIG_DIR / "topic5_v2_phase1_v2_periictal.yaml"
@@ -537,3 +542,128 @@ def test_periictal_config_matches_phase1_nonepoch():
     peri = yaml.safe_load(_PERI_CFG.read_text())
     assert base.pop("epoch") != peri.pop("epoch")            # epoch DID change
     assert base == peri                                      # everything else byte-identical
+
+
+# ---------------------------------------------------------------------------
+# Task 3.2 (W3 "when?"): peri-ictal scaffold-score trajectory + subject-level SIGN-FLIP.
+# Aggregation LOCK (window->seizure->subject->cohort): per-window scaffold = median align_abs_maxab
+# over the 7 PRIMARY bands; per (subject,seizure,bin) = median over that bin's windows; per
+# (subject,bin) = median over that subject's seizures. Contrasts are per-subject PAIRED diffs; a
+# subject missing either bin is EXCLUDED from THAT contrast. Main test = subject-level sign-flip.
+# ---------------------------------------------------------------------------
+
+def _synth_traj_long():
+    """Peri-ictal window-long frame with hand-set per-(subject,bin) scaffold scores.
+
+    Per (subject, bin): 3 seizures with per-seizure targets base+{-0.02, 0, +0.10} -> the MEDIAN
+    over seizures is the middle value = base (proves seizure-level median, robust to the +0.10
+    outlier; a mean would give base+0.027). Per (seizure, bin): 2 windows, each window's 7 primary
+    bands are symmetric around the seizure target (band offsets sum to 0 -> median over bands ==
+    seizure target; two identical windows -> median over windows == seizure target). Decoys per
+    window: a composite (non-primary) band with a wild value, and a feature!='raw' row -- both MUST
+    be excluded. S4 has NO far_pre windows (paired-exclusion for the two far_pre contrasts)."""
+    band_off = [-0.06, -0.04, -0.02, 0.0, 0.02, 0.04, 0.06]     # sum 0 -> median==target
+    sz_off = [-0.02, 0.0, 0.10]                                 # median over 3 == middle == +0.0
+    bases = {
+        "S1": {"far_pre": 0.30, "mid_pre": 0.32, "near_pre": 0.42, "peri_onset": 0.50, "early_post": 0.70},
+        "S2": {"far_pre": 0.32, "mid_pre": 0.34, "near_pre": 0.40, "peri_onset": 0.52, "early_post": 0.68},
+        "S3": {"far_pre": 0.28, "mid_pre": 0.30, "near_pre": 0.44, "peri_onset": 0.48, "early_post": 0.72},
+        "S4": {"mid_pre": 0.31, "near_pre": 0.41, "peri_onset": 0.49, "early_post": 0.69},  # NO far_pre
+    }
+    rows = []
+    for subj, binmap in bases.items():
+        for bi, (binname, base) in enumerate(binmap.items()):
+            for sz, so in enumerate(sz_off):
+                seiz_target = base + so
+                for wi in range(2):                            # 2 windows per seizure per bin
+                    ws = 100.0 * bi + wi                       # unique bounds within (subject,seizure)
+                    for band in PRIMARY_BANDS:
+                        rows.append(dict(subject=subj, seizure=sz, band=band, feature="raw",
+                                         win_start_rel=ws, win_end_rel=ws + 10.0,
+                                         epoch_region=binname,
+                                         align_abs_maxab=seiz_target + band_off[PRIMARY_BANDS.index(band)]))
+                    # decoy composite band (non-primary) -> excluded from the 7-band median
+                    rows.append(dict(subject=subj, seizure=sz, band="low_HYP_1_13", feature="raw",
+                                     win_start_rel=ws, win_end_rel=ws + 10.0, epoch_region=binname,
+                                     align_abs_maxab=0.99))
+                    # decoy non-raw feature -> excluded
+                    rows.append(dict(subject=subj, seizure=sz, band="delta_HYP_slow", feature="adjusted",
+                                     win_start_rel=ws, win_end_rel=ws + 10.0, epoch_region=binname,
+                                     align_abs_maxab=99.0))
+    return pd.DataFrame(rows)
+
+
+def test_trajectory_contrasts():
+    """window->seizure->subject aggregation + the 3 paired contrasts + directions + paired exclusion.
+
+    subject_bin[bin] recovers the injected base (median over seizures / windows / 7 primary bands,
+    ignoring the composite + non-raw decoys). Contrasts are per-subject paired diffs; S4 (no far_pre)
+    drops out of the two far_pre contrasts (n=3) but stays in post_minus_near_pre (n=4). All three
+    cohort median diffs are POSITIVE with the hand-computed values."""
+    df = _synth_traj_long()
+    subj = compute_subject_bins(df, PRIMARY_BANDS)
+    wide = subject_bin_wide(subj)
+
+    # subject_bin recovers the injected base (decoys ignored)
+    assert wide.loc["S1", "far_pre"] == pytest.approx(0.30)
+    assert wide.loc["S1", "early_post"] == pytest.approx(0.70)
+    assert wide.loc["S3", "near_pre"] == pytest.approx(0.44)
+    assert wide.loc["S2", "peri_onset"] == pytest.approx(0.52)
+    assert np.isnan(wide.loc["S4", "far_pre"])                  # S4 has no far_pre
+
+    # n_seizures per (subject, bin) counts the 3 distinct seizures
+    s1_far = subj[(subj.subject == "S1") & (subj.epoch_region == "far_pre")].iloc[0]
+    assert int(s1_far.n_seizures) == 3
+
+    con = compute_contrasts(wide)
+
+    def _row(name):
+        return con[con.contrast == name].iloc[0]
+
+    c_nf = _row("near_pre_minus_far_pre")            # diffs S1=.12 S2=.08 S3=.16 -> median .12
+    assert int(c_nf.n_subjects) == 3                 # S4 excluded (no far_pre)
+    assert c_nf.cohort_median_diff == pytest.approx(0.12)
+
+    c_pf = _row("post_minus_far_pre")                # diffs S1=.40 S2=.36 S3=.44 -> median .40
+    assert int(c_pf.n_subjects) == 3                 # S4 excluded (no far_pre)
+    assert c_pf.cohort_median_diff == pytest.approx(0.40)
+
+    c_pn = _row("post_minus_near_pre")               # diffs all = .28; S4 = .69-.41 = .28 -> median .28
+    assert int(c_pn.n_subjects) == 4                 # S4 INCLUDED (has both near_pre & early_post)
+    assert c_pn.cohort_median_diff == pytest.approx(0.28)
+
+    assert (con["cohort_median_diff"] > 0).all()     # every contrast is a rise (pre < post)
+    assert set(con["contrast"]) == {n for n, _, _ in CONTRASTS}
+
+
+def test_subject_signflip():
+    """Subject-level sign-flip permutation (the MAIN test). Statistic = median(d_i); null = symmetric
+    about 0; two-sided. Exact enumeration of 2^n for n<=14, random n_perm otherwise. All-positive
+    diffs -> small p; symmetric-about-0 diffs -> p==1; a single subject cannot reject (p==1); the
+    random path is deterministic under a fixed seed."""
+    # all-positive, n=10 -> exact enumeration. obs median = 0.55; 32/1024 perms reach |median|>=0.55.
+    res = signflip_test(np.array([0.1 * i for i in range(1, 11)]))
+    assert res["n"] == 10
+    assert res["method"] == "exact"
+    assert res["median_diff"] == pytest.approx(0.55)
+    assert res["p_signflip"] == pytest.approx(32 / 1024)
+    assert res["p_signflip"] < 0.05
+
+    # symmetric about 0, n=6 -> exact. obs median = 0 -> every sign-flip has |median|>=0 -> p==1.
+    res = signflip_test(np.array([-0.3, -0.2, -0.1, 0.1, 0.2, 0.3]))
+    assert res["method"] == "exact"
+    assert res["median_diff"] == pytest.approx(0.0)
+    assert res["p_signflip"] == pytest.approx(1.0)
+
+    # a single subject cannot reject (both sign flips give |median|==|obs|) -> p==1.
+    res = signflip_test(np.array([0.5]))
+    assert res["n"] == 1
+    assert res["p_signflip"] == pytest.approx(1.0)
+
+    # random path (n=20 > 14), strongly positive -> tiny p; identical across calls (deterministic).
+    d = np.arange(1, 21) / 100.0
+    r1 = signflip_test(d, n_perm=20000, seed=0)
+    r2 = signflip_test(d, n_perm=20000, seed=0)
+    assert r1["method"] == "random"
+    assert r1["p_signflip"] == r2["p_signflip"]          # deterministic under fixed seed
+    assert r1["p_signflip"] < 0.001
