@@ -511,7 +511,11 @@ def test_v3p_plot_summary_degrades_gracefully_without_panel_c(tmp_path):
     is absent". A subject CSV missing BOTH slope-z columns entirely (an
     older/incomplete upstream write) must still render a (2-row) figure,
     never crash."""
-    from scripts.plot_topic5_v3p_summary import main
+    import matplotlib.pyplot as plt
+    from scripts.plot_topic5_v3p_summary import (
+        main, _build_figure, _load_subject_rows, _load_window_rows,
+        _load_tier_payload, _panel_c_available,
+    )
 
     subj_fields = ["subject", "cohort", "in_broad_core", "net_offaxis_flux_surplus_slope",
                    "p_label_slope_b", "mode_shift_density_surplus_slope", "p_label_slope_c"]
@@ -533,4 +537,17 @@ def test_v3p_plot_summary_degrades_gracefully_without_panel_c(tmp_path):
 
     png_path = out_paths[0]
     assert png_path.exists() and png_path.stat().st_size > 0
-    assert (png_path.parent / "README.md").exists()
+    readme_path = png_path.parent / "README.md"
+    assert readme_path.exists() and readme_path.stat().st_size > 0
+
+    # Lock the *2-row* degradation directly (not just "did not crash"):
+    # derive panel-C availability exactly as main() does -- it must be False --
+    # and a rebuilt figure must then have exactly 2 rows x 2 cols (4 axes); a
+    # 3-row panel-C figure would have 6.
+    subject_rows = _load_subject_rows(tmp_path)
+    panel_c_on = _panel_c_available(subject_rows)
+    assert panel_c_on is False
+    fig = _build_figure(subject_rows, _load_window_rows(tmp_path),
+                        _load_tier_payload(tmp_path), panel_c_on)
+    assert len(fig.axes) == 4
+    plt.close(fig)

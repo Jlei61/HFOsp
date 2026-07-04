@@ -99,7 +99,10 @@ def _b(x) -> bool:
 
 
 def _read_csv_rows(path: Path) -> list:
-    return list(csv.DictReader(path.open())) if path.exists() else []
+    if not path.exists():
+        return []
+    with path.open(newline="") as fh:
+        return list(csv.DictReader(fh))
 
 
 def _load_subject_rows(indir: Path) -> dict:
@@ -237,8 +240,7 @@ def _plot_trajectory_panel(ax, traj_by_cohort: dict, ylabel: str, title: str) ->
         his = [d[PHASES[i]]["q75"] for i in xs]
         color = COHORT_COLOR[cohort]
         ax.fill_between(xs, los, his, color=color, alpha=0.16, lw=0, zorder=2)
-        ax.plot(xs, means, "-o", color=color, lw=2.2, ms=6.5, mec="white", mew=0.7,
-                label=f"{cohort} ({COHORT_ROLE[cohort]})", zorder=4)
+        ax.plot(xs, means, "-o", color=color, lw=2.2, ms=6.5, mec="white", mew=0.7, zorder=4)
     ax.set_xticks(range(len(PHASES)))
     ax.set_xticklabels(PHASES, fontsize=10.2)
     ax.set_xlim(-0.4, len(PHASES) - 0.6)
