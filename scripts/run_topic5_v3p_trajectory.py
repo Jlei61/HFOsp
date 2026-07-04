@@ -103,7 +103,7 @@ PREICTAL_PHASES = ["P0", "P1", "P2", "P3"]
 # `tier` -- Task 9 only). Order matches the brief.
 CSV_COLS = [
     # --- base / provenance ---
-    "subject", "cohort", "status", "skip_reason", "geometry_sufficient",
+    "subject", "cohort", "in_broad_core", "status", "skip_reason", "geometry_sufficient",
     "n_axis", "n_nonaxis", "n_ambiguous", "n_seizures_used",
     # --- H3p-b flux slope ---
     "net_offaxis_flux_slope_raw", "net_offaxis_flux_surplus_slope",
@@ -176,16 +176,26 @@ _METRIC_DEFAULTS = {
 }
 
 
-def _base_row(subj: str, cohort: str, v3cfg: dict, v3pcfg: dict) -> dict:
-    """Full-schema row for a subject; constants (rank/k*/estimator/span) filled unconditionally."""
+def _base_row(subj: str, cohort: str, in_broad_core: bool, v3cfg: dict, v3pcfg: dict) -> dict:
+    """Full-schema row for a subject; constants (rank/k*/estimator/span) filled unconditionally.
+
+    ``subject`` is the FULL ds_sid (e.g. ``epilepsiae_253``) to key-match the
+    feasibility CSV + config ``broad_core``/``candidates_epilepsiae`` (Task 9 join).
+    ``in_broad_core`` = membership in config ``cohort_expansion.broad_core`` (the
+    curated 9), evaluated identically for both cohorts so Task 9 can report
+    ``broad_core`` alongside ``broad_expanded`` (tier-4 needs the direction to hold
+    on the core). ``slope_span="full+guard"`` is provenance: BOTH spans are computed
+    (headline = full; the ``_guard`` columns carry the onset-guard span).
+    """
     return {
-        "subject": subj, "cohort": cohort, "status": "skipped", "skip_reason": "",
+        "subject": subj, "cohort": cohort, "in_broad_core": bool(in_broad_core),
+        "status": "skipped", "skip_reason": "",
         "geometry_sufficient": False, "n_axis": 0, "n_nonaxis": 0, "n_ambiguous": 0,
         "n_seizures_used": 0,
         "rank_used": int(v3cfg["dynamics"]["lowrank"]),
         "k_star": int(v3cfg["dynamics"]["finite_horizon_k"]),
         "trend_estimator": v3pcfg["trend"]["estimator"],
-        "slope_span": "full",
+        "slope_span": "full+guard",
         **_METRIC_DEFAULTS,
     }
 
@@ -225,19 +235,20 @@ def _build_geom(cc: dict) -> dict:
     }
 
 
-def _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0, with_atoms=True):
+def _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0):
     """Per-seizure preictal windows on the REAL relt time axis.
 
     For each eligible seizure and each preictal phase P0..P3, slide the frozen
     ``sliding_windows`` (real relt, V3a window contract) and record each window's
     ``t_center = mean(relt[ws:we]) - onset`` (the slope's x-axis, anchored on the
     UNSHIFTED onset even under jitter so a shift only moves which windows land in
-    the span, not the axis). ``with_atoms`` precomputes the per-window null atoms
-    (``extract_window_metrics`` for the 13 metrics + ``active``/``atm1``/``atm0``/
-    ``u_c`` for the label/rate/spatial/leave-one nulls); jitter reloads set it too
-    (it needs flux/mode per window). Only seizures with >= ``min_windows_for_slope``
-    FULL-span preictal windows are kept. Returns ``(seizures, dt)`` where ``dt`` is
-    the real median relt spacing (drives ``block_n`` for the block-shuffle null).
+    the span, not the axis). Each window carries its precomputed per-window atoms
+    (``extract_window_metrics`` for the 13 metrics + ``active``/``atm1``/``u_c`` for
+    the label/rate/spatial/leave-one nulls + ``ms_2d``/``cv``) -- the observed pass,
+    the nulls, and the onset-jitter reloads all consume them. Only seizures with
+    >= ``min_windows_for_slope`` FULL-span preictal windows are kept. Returns
+    ``(seizures, dt)`` where ``dt`` is the real median relt spacing (drives
+    ``block_n`` for the block-shuffle null).
     """
     z_thr = float(v3cfg["avalanche"]["z_threshold"])
     lowrank = int(v3cfg["dynamics"]["lowrank"])
@@ -285,37 +296,36 @@ def _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0, with_ato
                 env_w = bb_zt[:, ws:we]
                 t_center = float(np.mean(relt[ws:we])) - onset
                 wd = {"ws": int(ws), "we": int(we), "t_center": t_center, "phase": phase}
-                if with_atoms:
-                    wd["m"] = extract_window_metrics(env_w, geom, v3cfg)
-                    # per-window null atoms (degenerate-safe: a bad window leaves
-                    # zeros, contributing 0 to nulls rather than crashing the loop).
-                    # lag0 flux is read from ``m`` (extract_window_metrics owns its
-                    # own atm_lag0), so only the lag1 ATM is materialized here.
-                    try:
-                        active = activations_from_z(env_w, z_thr)
-                        atm1 = atm_offdiag(active)
-                    except Exception:
-                        active = np.zeros((n, max(1, we - ws)), dtype=bool)
-                        atm1 = np.zeros((n, n))
-                    try:
-                        A_lr, U_r = lowrank_var(env_w, lowrank, alpha)
-                        u_c = map_lowrank_vector_to_contacts(
-                            dominant_right_singular_vector(A_lr, kstar), U_r
-                        )
-                    except Exception:
-                        u_c = np.zeros(n)
-                    try:
-                        B2 = direct_2d_var(project_2d(demean_window(env_w), e_axis_mean, e_nonaxis_mean), alpha)
-                        u2 = dominant_right_singular_vector(B2, kstar)
-                        ms_2d = float(u2[1] ** 2 - u2[0] ** 2)
-                    except Exception:
-                        ms_2d = float("nan")
-                    try:
-                        cv = float(cv_one_step_r2(demean_window(env_w), alpha, 5))
-                    except Exception:
-                        cv = float("nan")
-                    wd.update({"active": active, "atm1": atm1,
-                               "u_c": u_c, "ms_2d": ms_2d, "cv": cv})
+                wd["m"] = extract_window_metrics(env_w, geom, v3cfg)
+                # per-window null atoms (degenerate-safe: a bad window leaves
+                # zeros, contributing 0 to nulls rather than crashing the loop).
+                # lag0 flux is read from ``m`` (extract_window_metrics owns its
+                # own atm_lag0), so only the lag1 ATM is materialized here.
+                try:
+                    active = activations_from_z(env_w, z_thr)
+                    atm1 = atm_offdiag(active)
+                except Exception:
+                    active = np.zeros((n, max(1, we - ws)), dtype=bool)
+                    atm1 = np.zeros((n, n))
+                try:
+                    A_lr, U_r = lowrank_var(env_w, lowrank, alpha)
+                    u_c = map_lowrank_vector_to_contacts(
+                        dominant_right_singular_vector(A_lr, kstar), U_r
+                    )
+                except Exception:
+                    u_c = np.zeros(n)
+                try:
+                    B2 = direct_2d_var(project_2d(demean_window(env_w), e_axis_mean, e_nonaxis_mean), alpha)
+                    u2 = dominant_right_singular_vector(B2, kstar)
+                    ms_2d = float(u2[1] ** 2 - u2[0] ** 2)
+                except Exception:
+                    ms_2d = float("nan")
+                try:
+                    cv = float(cv_one_step_r2(demean_window(env_w), alpha, 5))
+                except Exception:
+                    cv = float("nan")
+                wd.update({"active": active, "atm1": atm1,
+                           "u_c": u_c, "ms_2d": ms_2d, "cv": cv})
                 windows.append(wd)
 
         n_full = sum(1 for w in windows if full_lo <= w["t_center"] <= full_hi)
@@ -399,7 +409,7 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
     GUARD = tuple(v3pcfg["preictal"]["span_guard_rel"])
     PROX = tuple(v3pcfg["preictal"]["span_proximal_rel"])
 
-    seizures, dt = _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0, with_atoms=True)
+    seizures, dt = _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0)
     n_used = len(seizures)
     row["n_seizures_used"] = n_used
     if n_used == 0:
@@ -409,12 +419,12 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
     block_n = max(1, int(round(float(v3cfg["dynamics"]["block_len_sec"]) / dt)))
 
     # ---- window-detail rows (span="full"; every preictal window is full-span) ----
-    subj_bare = row["subject"]
+    subj = row["subject"]  # full ds_sid
     for sz in seizures:
         for w in sz["windows"]:
             m = w["m"]
             window_rows.append({
-                "subject": subj_bare, "cohort": cohort, "seizure_idx": sz["idx"],
+                "subject": subj, "cohort": cohort, "seizure_idx": sz["idx"],
                 "span": "full", "phase": w["phase"], "t_center": w["t_center"],
                 "net_offaxis_flux_lag1": m["net_offaxis_flux_lag1"],
                 "net_offaxis_flux_lag0": m["net_offaxis_flux_lag0"],
@@ -674,7 +684,7 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
     # ---- onset jitter +-10 s: reload windows at shifted anchors, require the
     # observed slope's SIGN to survive (2 reloads shared by flux + mode) ----
     jitter_szs = {
-        sh: _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=sh, with_atoms=True)[0]
+        sh: _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=sh)[0]
         for sh in (10.0, -10.0)
     }
 
@@ -775,10 +785,9 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
     return row
 
 
-def run_subject(ds_sid, cohort, v3cfg, v3pcfg, n_perm, window_rows):
+def run_subject(ds_sid, cohort, in_broad_core, v3cfg, v3pcfg, n_perm, window_rows):
     """One CSV row. geometry_insufficient / load failure / no-windows -> skipped (full row)."""
-    subj_bare = ds_sid.split("_", 1)[1] if "_" in ds_sid else ds_sid
-    row = _base_row(subj_bare, cohort, v3cfg, v3pcfg)
+    row = _base_row(ds_sid, cohort, in_broad_core, v3cfg, v3pcfg)
     try:
         cc = classify_subject_contacts(ds_sid, cohort, v3cfg)
     except Exception as exc:  # noqa: BLE001 - external mount; never drop a subject
@@ -812,7 +821,7 @@ def main(argv=None):
     ap.add_argument("--n-perm", type=int, default=None, help="default cfg nulls.n_perm_final (1000)")
     ap.add_argument(
         "--subjects", nargs="+", default=None,
-        help="bare subject ids (e.g. 253 1125); '__none__' writes a header-only CSV",
+        help="subject ids, bare (253) or full (epilepsiae_253); '__none__' writes a header-only CSV",
     )
     args = ap.parse_args(argv)
 
@@ -825,16 +834,31 @@ def main(argv=None):
     )
     outdir.mkdir(parents=True, exist_ok=True)
 
-    entries = list(SUBJECTS_BY_SUB[args.cohort])
+    # Roster: narrow = the 7 primary; broad = broad_expanded = broad_core (9) +
+    # admitted candidates_epilepsiae (4, all admitted at Task-1 gap_min=0.0) = 13,
+    # never pooled. `in_broad_core` is config broad_core membership (uniform for
+    # both cohorts) so Task 9 can slice broad down to the curated core.
+    exp = v3pcfg["cohort_expansion"]
+    broad_core_set = set(exp["broad_core"])
+    if args.cohort == "broad":
+        entries = list(exp["broad_core"]) + list(exp.get("candidates_epilepsiae", []))
+    else:
+        entries = list(SUBJECTS_BY_SUB["narrow"])
     if args.subjects:
         if args.subjects == ["__none__"]:
             entries = []  # header-only CSV (skipped-path contract test)
         else:
-            wanted = set(args.subjects)
-            entries = [e for e in entries if (e.split("_", 1)[1] if "_" in e else e) in wanted]
+            wanted = set(args.subjects)  # accept full ds_sid OR bare id
+            entries = [
+                e for e in entries
+                if e in wanted or (e.split("_", 1)[1] if "_" in e else e) in wanted
+            ]
 
     window_rows: list = []
-    rows = [run_subject(ds_sid, args.cohort, v3cfg, v3pcfg, n_perm, window_rows) for ds_sid in entries]
+    rows = [
+        run_subject(ds_sid, args.cohort, ds_sid in broad_core_set, v3cfg, v3pcfg, n_perm, window_rows)
+        for ds_sid in entries
+    ]
 
     out_csv = outdir / "v3p_trajectory_subject.csv"
     with open(out_csv, "w", newline="") as fh:

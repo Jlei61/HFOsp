@@ -43,7 +43,7 @@ def test_v3p_trajectory_runs_on_eligible_subject(tmp_path):
     from scripts.run_topic5_v3p_trajectory import main
     main(["--cohort", "narrow", "--outdir", str(tmp_path), "--n-perm", "50", "--subjects", "253"])
     df = pd.read_csv(tmp_path / "v3p_trajectory_subject.csv")
-    row = df[df.subject.astype(str) == "253"].iloc[0]
+    row = df[df.subject.astype(str) == "epilepsiae_253"].iloc[0]
     if row["status"] == "ok":
         assert np.isfinite(row["net_offaxis_flux_surplus_slope"])
         assert np.isfinite(row["mode_shift_density_surplus_slope"])
