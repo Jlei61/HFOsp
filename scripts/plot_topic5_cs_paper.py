@@ -69,7 +69,8 @@ from src.seeg_coord_loader import (
 )
 from scripts.run_topic5_contact_similarity import _ctx, DEF_ROOT, DEF_OUT, SESOI
 
-REPRESENTATIVE_SUBJECT = "epilepsiae_1146"   # 15 contacts, 2 shafts, passes R1/R2/R3 within-shaft null
+REPRESENTATIVE_SUBJECT = "epilepsiae_1146"   # fig1 schematic + fig3 maps/2D-vs-3D: 15 ch, 2 shafts, near-coplanar
+FIG2_SUBJECT = "epilepsiae_1084"             # fig2 ladder: spatial weighting improves ictal match (raw|r|0.64→wtd|r|0.78)
 COL_TEMPLATE_A = "#B71C2B"   # red — matches scripts/plot_rank_displacement.py convention
 COL_TEMPLATE_B = "#1F4E9C"   # blue
 
@@ -270,7 +271,7 @@ def fig2(ctx: dict) -> plt.Figure:
     return fig
 
 
-def fig2_sup(cohort_summary: dict, star_subject: str) -> plt.Figure:
+def fig2_sup(cohort_summary: dict) -> plt.Figure:
     """Cohort per-subject maxAB (R2 spatially-weighted obs) vs its within-shaft
     shuffle null p95 (null-比-null): spatial weighting raises the observed
     similarity but also raises the null, so only a minority clear it."""
@@ -297,10 +298,6 @@ def fig2_sup(cohort_summary: dict, star_subject: str) -> plt.Figure:
     axR.scatter([r["r1_obs"] for r in rows], y, s=46, facecolors="none", edgecolors="0.55",
                 linewidths=1.2, zorder=1, label="R1 obs (raw, no geometry)")
     axR.plot([], [], color="0.35", lw=2.2, label="within-shaft-shuffle null p95")
-    for yi, r in zip(y, rows):
-        if r["subject_id"] == star_subject:
-            axR.scatter([r["r2_obs"]], [yi], s=190, facecolors="none", edgecolors="black",
-                        linewidths=1.8, zorder=4, marker="*", label=star_subject)
     axR.set_yticks(y)
     ylabels = axR.set_yticklabels([r["subject_id"] for r in rows], fontsize=FS_TICK - 3)
     for lbl, r in zip(ylabels, rows):
@@ -506,7 +503,10 @@ def main():
                     help="root holding the gitignored T0 cache + axis records (default: results)")
     ap.add_argument("--out-dir", default=DEF_OUT,
                     help="contact-similarity results dir (holds cohort_summary_*.json + figures/)")
-    ap.add_argument("--subject", default=REPRESENTATIVE_SUBJECT)
+    ap.add_argument("--subject", default=REPRESENTATIVE_SUBJECT,
+                    help="subject for fig1 schematic + fig3 maps/2D-vs-3D")
+    ap.add_argument("--fig2-subject", default=FIG2_SUBJECT,
+                    help="subject for the fig2 rank ladder (weighting-improves-match illustration)")
     ap.add_argument("--activation", choices=["broadband", "hfa"], default="broadband")
     args = ap.parse_args()
 
@@ -515,12 +515,13 @@ def main():
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     ctx = _load_subject_ctx(args.subject, args.activation, args.input_results_root)
+    ctx_fig2 = _load_subject_ctx(args.fig2_subject, args.activation, args.input_results_root)
     cohort_summary = json.load(open(out_dir / f"cohort_summary_{args.activation}.json"))
     r2b_summary = json.load(open(out_dir / f"r2b_summary_{args.activation}.json"))
 
     p1 = save_fig(fig1(ctx), fig_dir / "fig1_spatial_weighting_schematic.png")
-    p2 = save_fig(fig2(ctx), fig_dir / "fig2_rank_comparison.png")
-    p2s = save_fig(fig2_sup(cohort_summary, args.subject), fig_dir / "fig2_sup_maxab_vs_null.png")
+    p2 = save_fig(fig2(ctx_fig2), fig_dir / "fig2_rank_comparison.png")
+    p2s = save_fig(fig2_sup(cohort_summary), fig_dir / "fig2_sup_maxab_vs_null.png")
     p3 = save_fig(fig3(ctx, cohort_summary, r2b_summary), fig_dir / "fig3_vs_field.png")
     for p in (p1, p2, p2s, p3):
         print(f"wrote {p}")

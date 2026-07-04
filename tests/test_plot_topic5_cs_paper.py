@@ -74,7 +74,7 @@ def test_fig2_renders(tmp_path, ctx):
 
 
 def test_fig2_sup_renders(tmp_path, cohort_summary):
-    fig = fig2_sup(cohort_summary, REPRESENTATIVE_SUBJECT)
+    fig = fig2_sup(cohort_summary)
     ax = fig.get_axes()[0]
     assert ax.get_title() and ax.get_xlabel()
     assert ax.get_legend() is not None
