@@ -82,3 +82,26 @@ def global_axial_energy(env_win, axis_rows) -> tuple[float, float]:
     axis_rows = np.asarray(axis_rows, int)
     a = float(np.nanmean(row_energy[axis_rows])) if axis_rows.size else 0.0
     return g, a
+
+def residualize_slope(values, centers, covariates, estimator) -> float:
+    """Slope of the residual of `values` after OLS-regressing on
+    `covariates` (each an array aligned to `values`). Conservative: if a
+    covariate is collinear with time, the shared trend is absorbed and the
+    residual slope shrinks toward 0 — this is the documented floor (spec
+    Sec 7), NOT evidence the non-axis rise is absent. NaN-safe: windows
+    with any non-finite value/covariate are dropped; rank-deficient design
+    or <2 surviving windows -> nan."""
+    y = np.asarray(values, float); t = np.asarray(centers, float)
+    cov = [np.asarray(c, float) for c in covariates]
+    m = np.isfinite(y) & np.isfinite(t)
+    for c in cov:
+        m &= np.isfinite(c)
+    if m.sum() < 3:
+        return float("nan")
+    X = np.column_stack([np.ones(m.sum())] + [c[m] for c in cov])
+    try:
+        beta, *_ = np.linalg.lstsq(X, y[m], rcond=None)
+    except np.linalg.LinAlgError:
+        return float("nan")
+    resid = y[m] - X @ beta
+    return slope_over_windows(resid, t[m], estimator)

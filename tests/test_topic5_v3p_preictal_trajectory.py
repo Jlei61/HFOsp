@@ -1,5 +1,5 @@
 import numpy as np
-from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows, within_compartment_flux, global_axial_energy
+from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows, within_compartment_flux, global_axial_energy, residualize_slope
 
 def test_v3p_config_keys():
     c = load_v3p_config()
@@ -46,3 +46,19 @@ def test_global_axial_energy():
     env = np.array([[1.0, -1.0], [2.0, -2.0], [0.0, 0.0]])   # 3 contacts x 2 t; mean|.| rows = 1,2,0
     g, a = global_axial_energy(env, np.array([0, 1]))
     assert abs(g - 1.0) < 1e-9 and abs(a - 1.5) < 1e-9        # global mean over all rows; axial over rows 0,1
+
+def test_residualize_strips_global_and_is_conservative_under_collinearity():
+    t = np.arange(20.0)
+    glob = 0.4 * t                                   # global energy IS collinear with time
+    # non-axis metric = 2*global + a genuinely orthogonal rise
+    orth = np.where(t % 2 == 0, 1.0, -1.0) * 0.1     # zero net slope, orthogonal to t
+    vals = 2.0 * glob + orth
+    resid_slope = residualize_slope(vals, t, [glob], "theil_sen")
+    assert abs(resid_slope) < 0.02                   # collinear global stripped -> conservative ~0 (documented floor)
+
+def test_residualize_keeps_orthogonal_trend():
+    t = np.arange(20.0)
+    glob = np.sin(t)                                 # global uncorrelated with linear time
+    vals = 0.3 * t + 2.0 * glob
+    resid_slope = residualize_slope(vals, t, [glob], "ols")
+    assert abs(resid_slope - 0.3) < 0.05             # orthogonal non-axis trend survives
