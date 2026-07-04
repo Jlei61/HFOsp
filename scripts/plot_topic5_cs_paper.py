@@ -189,53 +189,82 @@ def fig1(ctx: dict) -> plt.Figure:
 # --------------------------------------------------------------------------- Fig 2: rank comparison
 
 def fig2(ctx: dict) -> plt.Figure:
-    """Vertical rank ladder for the representative subject: three per-contact orders
-    on ONE 0→1 rank axis so the reader can compare, per contact, the raw ictal energy
-    order (发作时序), the spatially-weighted interictal template (空间模板, red), and
-    the SAME interictal template BEFORE weighting (普通时序模板, blue). Contacts run
-    source→sink top→bottom (sorted by the weighted template). All three are re-ranked
-    to 0..1 so the comparison is purely ordinal (what spatial weighting does to the
-    template, and how each relates to the seizure order). Illustrative single subject;
-    cohort statistics live in fig2_sup."""
+    """Vertical rank ladder for the representative subject on the natural integer rank
+    axis (1..n; all contacts participate, so no [0,1] renormalization). Three per-
+    contact rank sequences, contacts sorted by the ictal (seizure) order so the seizure
+    is a clean 1..n reference:
+      - 发作 (black)               : ictal early-broadband-energy rank
+      - 间期·空间加权最像 (red)    : whichever WEIGHTED template A/B best matches ictal
+      - 间期·非空间加权最像 (blue) : whichever RAW template A/B best matches ictal
+    "best matches" = max sign-free |corr| (the ladder's maxAB rule); the winning
+    template is oriented so its rank runs WITH the seizure direction (propagation
+    direction is arbitrary / sign-free). Illustrative single subject; cohort null in
+    fig2_sup."""
     pts = ctx["source_pts"]
     sup = np.asarray(ctx["support"], float)
     sigma = float(ctx["sigma"])
     rank_a = np.asarray(ctx["rank_a"], float)
+    rank_b = np.asarray(ctx["rank_b"], float) if ctx["rank_b"] is not None else None
+    ictal = np.asarray(ctx["ictal_mean"], float)
     names = ctx["names_m"]
 
-    def _dense01(v):
+    def _int_rank(v):                       # dense integer rank 1..m over finite entries
         v = np.asarray(v, float)
         out = np.full(v.shape, np.nan)
         fin = np.isfinite(v)
         if int(fin.sum()) >= 2:
-            out[fin] = np.argsort(np.argsort(v[fin])) / (int(fin.sum()) - 1)
+            out[fin] = np.argsort(np.argsort(v[fin])) + 1.0
         return out
 
-    r_spatial = _dense01(kernel_smooth_at_contacts(rank_a, pts, pts, sup, sigma))  # 空间模板 (weighted)
-    r_plain = _dense01(rank_a)                                                     # 普通时序模板 (raw template)
-    r_ictal = _dense01(ctx["ictal_mean"])                                          # 发作时序 (raw ictal energy)
+    def _best_and_orient(cands, ref):       # max |corr| over A/B, then orient to +corr with ref
+        m = np.isfinite(ref)
+        best = None
+        for lab, v in cands:
+            mm = m & np.isfinite(v)
+            if int(mm.sum()) < 3:
+                continue
+            r = float(pearsonr(v[mm], ref[mm])[0])
+            if best is None or abs(r) > abs(best[2]):
+                best = (lab, v, r)
+        lab, v, r = best
+        return lab, (v if r >= 0 else -v), r
 
-    order = np.argsort(np.where(np.isfinite(r_spatial), r_spatial, np.inf))        # source→sink by weighted template
+    raw_cands = [("A", rank_a)] + ([("B", rank_b)] if rank_b is not None else [])
+    wtd_cands = [("A", kernel_smooth_at_contacts(rank_a, pts, pts, sup, sigma))]
+    if rank_b is not None:
+        wtd_cands.append(("B", kernel_smooth_at_contacts(rank_b, pts, pts, sup, sigma)))
+
+    raw_lab, raw_v, _ = _best_and_orient(raw_cands, ictal)
+    wtd_lab, wtd_v, _ = _best_and_orient(wtd_cands, ictal)
+
+    ri = _int_rank(ictal)                   # 发作
+    rraw = _int_rank(raw_v)                 # 间期·非空间加权最像
+    rwtd = _int_rank(wtd_v)                 # 间期·空间加权最像
+
+    order = np.argsort(np.where(np.isfinite(ri), ri, np.inf))   # contacts in seizure order
     y = np.arange(len(order))
+    n = int(np.isfinite(ri).sum())
 
-    fig, ax = plt.subplots(figsize=(7.4, 8.8))
-    ax.plot(r_spatial[order], y, "-o", color=COL_TEMPLATE_A, ms=7, lw=2.0, zorder=4,
-            label="空间模板（模板 A 加权后）")
-    ax.plot(r_plain[order], y, "-s", color=COL_TEMPLATE_B, ms=6, lw=1.7, zorder=3,
-            label="普通时序模板（模板 A 加权前）")
-    ax.plot(r_ictal[order], y, "--D", color="black", ms=6, lw=1.5, alpha=0.85, zorder=2,
-            label="发作时序（发作早期能量顺序）")
+    fig, ax = plt.subplots(figsize=(7.8, 8.8))
+    ax.plot(ri[order], y, "--D", color="black", ms=6, lw=1.6, alpha=0.9, zorder=2,
+            label="发作（发作早期能量 rank）")
+    ax.plot(rwtd[order], y, "-o", color=COL_TEMPLATE_A, ms=7, lw=2.0, zorder=4,
+            label=f"间期·空间加权最像（模板 {wtd_lab}）")
+    ax.plot(rraw[order], y, "-s", color=COL_TEMPLATE_B, ms=6, lw=1.7, zorder=3,
+            label=f"间期·非空间加权最像（模板 {raw_lab}）")
 
     ax.set_yticks(y)
     ax.set_yticklabels([names[i] for i in order], fontsize=FS_TICK - 2)
-    ax.invert_yaxis()                       # source (rank 0) at top → read downward = source→sink
-    ax.set_xlim(-0.03, 1.03)
-    ax.set_xlabel("归一化 rank（0 = 源/早/低 → 1 = 汇/晚/高）", fontsize=FS_LABEL - 1)
-    ax.set_ylabel("contact（按空间模板 源 → 汇，自上而下）", fontsize=FS_LABEL - 2)
+    ax.invert_yaxis()                       # seizure-earliest (rank 1) at top
+    ax.set_xlim(0.3, n + 0.7)
+    ax.set_xticks(range(1, n + 1))
+    ax.set_xlabel("rank（1 … n；发作=按发作早期能量，间期模板方向已按发作对齐）",
+                  fontsize=FS_LABEL - 2)
+    ax.set_ylabel("contact（按发作 rank 自上而下）", fontsize=FS_LABEL - 2)
     ax.legend(loc="upper right", fontsize=FS_TICK - 2, frameon=True, facecolor="white",
               framealpha=0.92, edgecolor="0.8")
-    ax.set_title(f"{ctx['subject_id']} — 发作时序 vs 空间模板 vs 普通时序模板（示意，单被试）",
-                 fontsize=FS_LABEL - 1)
+    ax.set_title(f"{ctx['subject_id']} — 发作 vs 间期空间加权最像 vs 间期非空间加权最像（示意，单被试）",
+                 fontsize=FS_LABEL - 2)
     style_panel(ax)
     fig.tight_layout()
     return fig
