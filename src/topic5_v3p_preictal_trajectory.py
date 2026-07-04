@@ -52,3 +52,33 @@ def slope_over_windows(values, centers, estimator) -> float:
             return float("nan")
         return float(np.polyfit(t, y, 1)[0])
     raise ValueError(f"unknown estimator: {estimator!r}")
+
+def within_compartment_flux(atm, idx, normalization="source_mean") -> float:
+    """Self-sustain: mean over ACTIVE sources i in idx of that source's
+    outgoing mass into the SAME set idx. Mirrors V3a compartment_flux
+    source_mean but for the N x N block. Requires a diagonal-free ATM."""
+    mat = np.asarray(atm, float)
+    if not np.allclose(np.diag(mat), 0.0):
+        raise ValueError("within_compartment_flux requires a diagonal-free ATM")
+    idx = np.asarray(idx, int)
+    if idx.size == 0:
+        return 0.0
+    active = mat[idx].sum(axis=1) > 0.0
+    if not np.any(active):
+        return 0.0
+    block_mass = mat[np.ix_(idx, idx)].sum(axis=1)   # into the same set (diag already 0)
+    if normalization == "source_mean":
+        return float(block_mass[active].mean())
+    if normalization == "sum":
+        return float(block_mass.sum())
+    raise ValueError(f"unknown normalization: {normalization!r}")
+
+def global_axial_energy(env_win, axis_rows) -> tuple[float, float]:
+    """Per-window energy scalars: mean over rows of the within-window mean
+    |envelope|. global = all rows; axial = axis rows only (0.0 if none)."""
+    env = np.asarray(env_win, float)
+    row_energy = np.nanmean(np.abs(env), axis=1)
+    g = float(np.nanmean(row_energy)) if row_energy.size else float("nan")
+    axis_rows = np.asarray(axis_rows, int)
+    a = float(np.nanmean(row_energy[axis_rows])) if axis_rows.size else 0.0
+    return g, a

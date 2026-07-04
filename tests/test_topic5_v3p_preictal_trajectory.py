@@ -1,5 +1,5 @@
 import numpy as np
-from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows
+from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows, within_compartment_flux, global_axial_energy
 
 def test_v3p_config_keys():
     c = load_v3p_config()
@@ -32,3 +32,17 @@ def test_slope_over_windows_nan_safe_and_dispatch():
     assert abs(slope_over_windows(y2, t2, "theil_sen") - 0.5) < 1e-9   # drops the NaN window
     assert abs(slope_over_windows(y, t, "ols") - 0.5) < 1e-9
     assert np.isnan(slope_over_windows(y[:1], t[:1], "theil_sen"))      # <2 points
+
+def test_within_compartment_flux_self_sustain():
+    # 4 contacts, N = {2,3}; strong 2->3 and 3->2 mass, diagonal already zero
+    atm = np.zeros((4, 4))
+    atm[2, 3] = 0.6; atm[3, 2] = 0.4; atm[0, 1] = 0.9   # axis-internal, ignored by N block
+    val = within_compartment_flux(atm, np.array([2, 3]), "source_mean")
+    assert abs(val - 0.5) < 1e-9                          # mean of active N-source outgoing-into-N mass (0.6, 0.4)
+    assert within_compartment_flux(atm, np.array([2, 3]) , "source_mean") == \
+           within_compartment_flux(np.pad(atm, ((0,1),(0,1))), np.array([2, 3]), "source_mean")  # padding never-active row invariant
+
+def test_global_axial_energy():
+    env = np.array([[1.0, -1.0], [2.0, -2.0], [0.0, 0.0]])   # 3 contacts x 2 t; mean|.| rows = 1,2,0
+    g, a = global_axial_energy(env, np.array([0, 1]))
+    assert abs(g - 1.0) < 1e-9 and abs(a - 1.5) < 1e-9        # global mean over all rows; axial over rows 0,1
