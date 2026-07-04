@@ -36,7 +36,8 @@ from scripts.analyze_topic5_v2_subject_phenotype import (  # noqa: E402
 # Task 3.1 (W3 "when?"): peri-ictal epoch grid + hard pre-window gate.
 import yaml  # noqa: E402
 from scripts.run_topic5_v2_alignment import (  # noqa: E402
-    _epoch_grid, _epoch_region, _window_admitted, _ictal_fraction_ok, _window_frames)
+    _epoch_grid, _epoch_region, _window_admitted, _ictal_fraction_ok, _window_frames,
+    _ictal_fraction_eeg)
 from scripts.run_topic5_ictal_field_dynamics import _ictal_fraction  # noqa: E402
 from src.topic5_v2_band_scan import load_phase1_config  # noqa: E402
 
@@ -472,6 +473,46 @@ def test_periictal_grid_eeg_frame_nonzero_onset():
     assert (sr, er) == pytest.approx((st, en))              # relt slice == grid (no shift)
     assert wcr_d == pytest.approx((st + en) / 2.0)
     assert wcr_eeg_d == pytest.approx(wcr_d - on)
+
+
+def test_eeg_anchor_icf_recovers_post_onset_windows():
+    """EEG-anchored icf fix (Task 3.2 Step 0). Large EEG-clinical gap (eeg_onset_rel=-50): the EEG
+    post-onset windows (win_center_rel_eeg in (0,20] -- inside the EEG seizure, yet their relt center is
+    still < 0 = before CLINICAL onset) SURVIVE the ictal-fraction floor under the EEG anchor (ictal =
+    [eeg_onset_rel, eeg_offset_rel]); under the OLD clinical-anchored icf (ictal = [0, eeg_offset_rel])
+    those SAME windows have icf=0 and are FILTERED (the load-bearing Task-3.1 bug). Their EEG-frame end
+    en>0, so they are NOT the admit_pre pre-window exemption -- the ONLY reason they survive is the
+    EEG-anchored icf floor. Routes through the production frame/icf helpers."""
+    cfg = load_phase1_config(_PERI_CFG)
+    grid, r1 = _epoch_grid(cfg)
+    r0 = float(cfg["epoch"]["main_rel"][0])
+    ictal_min = float(cfg["epoch"]["ictal_fraction_min"])
+    admit_pre = True
+    on, off = -50.0, 30.0                                     # EEG onset 50s before clinical; EEG offset relt=30
+    relt = np.round(np.arange(-100.0, 40.0 + 1e-9, 0.1), 3)   # spans the whole large-gap seizure
+
+    recovered = []               # EEG post-onset windows the EEG anchor KEEPS but the clinical icf DROPS
+    for st, en in grid:
+        if not _window_admitted(st, en, r0, r1, admit_pre):
+            continue
+        st_relt, en_relt, wcr, wcr_eeg = _window_frames(st, en, on, admit_pre, anchor="eeg")
+        if not (0.0 < wcr_eeg <= 20.0):                       # only EEG post-onset windows
+            continue
+        if ((relt >= st_relt) & (relt <= en_relt)).sum() == 0:   # recording-boundary drop
+            continue
+        icf_eeg = _ictal_fraction_eeg(relt, st_relt, en_relt, on, off)   # EEG-anchored ictal [on, off] (fixed)
+        icf_clin = _ictal_fraction(relt, st_relt, en_relt, off)          # clinical-anchored ictal [0, off] (bug)
+        keeps_eeg = _ictal_fraction_ok(icf_eeg, ictal_min, en, admit_pre)
+        keeps_clin = _ictal_fraction_ok(icf_clin, ictal_min, en, admit_pre)
+        assert en > 0                                         # EEG-frame end > 0 -> NOT pre-window exempt
+        if keeps_eeg and not keeps_clin:
+            recovered.append(dict(wcr_eeg=wcr_eeg, icf_eeg=icf_eeg, icf_clin=icf_clin,
+                                  region=_epoch_region(wcr_eeg)))
+
+    assert len(recovered) > 0                                 # the fix recovers >=1 post-EEG-onset window
+    assert all(w["icf_eeg"] >= ictal_min for w in recovered) # genuinely ictal under the EEG anchor
+    assert all(w["icf_clin"] == 0.0 for w in recovered)      # icf=0 under the clinical anchor -> filtered
+    assert all(w["region"] in {"peri_onset", "early_post"} for w in recovered)
 
 
 def test_default_config_unchanged_no_pre_windows():

@@ -109,21 +109,36 @@ def _ictal_fraction_ok(icf, ictal_min, win_end_eeg, admit_pre):
     return bool(np.isfinite(icf) and icf >= ictal_min)
 
 
-def _window_frames(st, en, eeg_onset_rel, admit_pre):
+def _ictal_fraction_eeg(relt, lo, hi, eeg_onset_rel, eeg_offset_rel):
+    """EEG-anchored ictal fraction (W3 Task 3.2, anchor='eeg'): fraction of the in-window relt samples
+    that fall inside the EEG seizure span [eeg_onset_rel, eeg_offset_rel]. Parallels the imported
+    clinical-anchored `_ictal_fraction` (which uses the FIXED clinical-onset floor 0); the EEG-onset floor
+    lets post-EEG-onset yet pre-CLINICAL windows of large EEG-clinical-gap seizures (eeg_onset_rel down to
+    ~-86s) count as ictal instead of being filtered as icf~0 — the Task-3.1 clinical-anchor bug. ONLY the
+    eeg-anchor peri path calls this; the clin-anchor + DEFAULT paths keep the legacy `_ictal_fraction`."""
+    m = (relt >= lo) & (relt <= hi)
+    if m.sum() == 0:
+        return float("nan")
+    wt = relt[m]
+    return float(np.mean((wt >= eeg_onset_rel) & (wt <= eeg_offset_rel)))
+
+
+def _window_frames(st, en, eeg_onset_rel, admit_pre, anchor="eeg"):
     """Map one grid window to (relt slice bounds st_relt/en_relt, relt center, EEG-frame center).
 
-    PERI-ICTAL (admit_pre True; W3): the grid IS the EEG-onset frame — [st, en] are EEG-frame bounds
-    tiling [-100, 20] RELATIVE TO EEG ONSET. The physical window is read from the relt-indexed cache
-    by shifting the bounds by +eeg_onset_rel (relt = EEG-frame + eeg_onset_rel). win_center_rel_eeg is
-    then the clean grid center, always in [-100, 20], so epoch_region bins on a clean EEG axis. This
-    is the fix for large EEG-vs-clinical gaps (|eeg_onset_rel| up to ~86s in cohort): building the
-    grid in the clinical/relt frame and re-anchoring post-hoc left win_center_rel_eeg ranging far
-    outside [-100, 20] and never sampling EEG far_pre for large-gap seizures.
+    PERI-ICTAL eeg anchor (admit_pre True, anchor='eeg'; W3 PRIMARY): the grid IS the EEG-onset frame —
+    [st, en] are EEG-frame bounds tiling [-100, 20] RELATIVE TO EEG ONSET. The physical window is read
+    from the relt-indexed cache by shifting the bounds by +eeg_onset_rel (relt = EEG-frame + eeg_onset_rel).
+    win_center_rel_eeg is then the clean grid center, always in [-100, 20], so epoch_region bins on a clean
+    EEG axis. This is the fix for large EEG-vs-clinical gaps (|eeg_onset_rel| up to ~86s in cohort): building
+    the grid in the clinical/relt frame and re-anchoring post-hoc left win_center_rel_eeg ranging far outside
+    [-100, 20] and never sampling EEG far_pre for large-gap seizures.
 
-    DEFAULT (admit_pre False; Phase-1/W1): the grid IS the relt frame — [st, en] are relt bounds
-    (no shift); the EEG-frame center is the relt center minus eeg_onset_rel (may fall outside
-    [-100, 20], but the default [0, 20] run does not use the EEG axis). BYTE-IDENTICAL to Phase-1."""
-    if admit_pre:
+    PERI-ICTAL clin anchor (admit_pre True, anchor='clin'; W3 SENSITIVITY) and DEFAULT (admit_pre False;
+    Phase-1/W1): the grid IS the relt/clinical frame — [st, en] are relt bounds (NO shift); the EEG-frame
+    center is the relt center minus eeg_onset_rel (may fall outside [-100, 20]). The default [0, 20] run does
+    not use the EEG axis. This branch is BYTE-IDENTICAL to Phase-1 for the default path (admit_pre False)."""
+    if admit_pre and anchor == "eeg":
         st_relt, en_relt = st + eeg_onset_rel, en + eeg_onset_rel
         win_center_rel_eeg = (st + en) / 2.0
         win_center_rel = win_center_rel_eeg + eeg_onset_rel
@@ -193,7 +208,7 @@ def _band_good_names(zt, cache_names, qc):
     return {cache_names[i] for i in range(n) if finite[i] and cache_names[i] not in bad}
 
 
-def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cache_dir=None):
+def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cache_dir=None, anchor="eeg"):
     """Emit window rows for one subject. Returns (window_rows, legacy_unmasked_rows, n_dropped).
     legacy_unmasked_rows = full-pool (unmasked) align_abs_maxab of the legacy band, per window —
     the same-window baseline the QC-2 (P1-d) fixed-mask delta is measured against.
@@ -261,17 +276,20 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
             eff = float(qc.get("eff_frac", float("nan")))
             edge = bool(qc.get("fs_edge_flag", False))
             win_mask = (_band_good_names(zt, cache_names, qc) & set(pool)) if sensitivity else mask_set
-            for st, en in grid:                              # peri: EEG-frame bounds; default: relt bounds
+            for st, en in grid:                              # peri eeg: EEG-frame bounds; peri clin/default: relt bounds
                 if not _window_admitted(st, en, r0, r1, admit_pre):    # VALID-EARLY / peri-ictal admission
                     continue
-                # peri-ictal: grid is the EEG-onset frame; slice the relt cache at the +eeg_onset_rel-
-                # shifted bounds so the physically-correct time is read. default: grid IS the relt frame.
-                st_relt, en_relt, win_center_rel, win_center_rel_eeg = _window_frames(st, en, on, admit_pre)
+                # peri eeg: grid is the EEG-onset frame; slice the relt cache at the +eeg_onset_rel-shifted
+                # bounds so the physical time is read. peri clin + default: grid IS the relt/clinical frame.
+                st_relt, en_relt, win_center_rel, win_center_rel_eeg = _window_frames(st, en, on, admit_pre, anchor)
                 zmv, _sub = _slice(zt, relt, st_relt, en_relt)
                 if zmv is None:                                        # recording-boundary drop (no zero-fill):
-                    continue                                           # deep EEG far_pre past the cache edge legitimately drops
-                icf = _ictal_fraction(relt, st_relt, en_relt, off)
-                if not _ictal_fraction_ok(icf, ictal_min, en, admit_pre):  # en = EEG-frame end (grid=EEG); floor + pre-window EXEMPTION
+                    continue                                           # deep far_pre past the cache edge legitimately drops
+                if admit_pre and anchor == "eeg":                      # EEG-anchored ictal [eeg_onset_rel, eeg_offset_rel]
+                    icf = _ictal_fraction_eeg(relt, st_relt, en_relt, on, off)
+                else:                                                  # clinical-anchored [0, eeg_offset_rel] (default + clin), UNCHANGED
+                    icf = _ictal_fraction(relt, st_relt, en_relt, off)
+                if not _ictal_fraction_ok(icf, ictal_min, en, admit_pre):  # en = anchor-frame window end; floor + pre-window EXEMPTION
                     continue
                 zmn_pool = _zmean_by_name(zmv, cache_names, pool)          # full-pool window means
                 zmn = {n: v for n, v in zmn_pool.items() if n in win_mask}  # RESTRICT to fixed mask
@@ -283,7 +301,8 @@ def run_subject(ds_sid, substrate, feature, cfg, sensitivity=False, feature_cach
                     win_start_rel=round(st_relt, 3), win_end_rel=round(en_relt, 3),   # relt-frame slice bounds (provenance)
                     win_center_rel=round(win_center_rel, 3), ictal_fraction=round(icf, 4),
                     win_center_rel_eeg=round(win_center_rel_eeg, 3), eeg_onset_rel=round(on, 3),
-                    epoch_region=_epoch_region(win_center_rel_eeg),    # EEG-frame center -> clean 5-bin partition
+                    epoch_region=_epoch_region(win_center_rel if (admit_pre and anchor == "clin")
+                                               else win_center_rel_eeg),  # eeg/default: EEG-frame center; clin: relt center
                     strict_onset=bool(st_relt >= 0 and en_relt <= r1),
                     align_abs_maxab=window_maxab(ctx, zmn),
                     align_signed_oriented=ca["align_signed_oriented"],
@@ -379,9 +398,16 @@ def main():
                     help="config path (default: canonical config/topic5_v2_phase1.yaml, [0,20] behavior "
                          "unchanged). W3 passes config/topic5_v2_phase1_v2_periictal.yaml (main_rel=[-100,20], "
                          "admit_pre_ictal_windows=true).")
+    ap.add_argument("--anchor", choices=["eeg", "clin"], default=None,
+                    help="PERI-ICTAL onset anchor (W3 Task 3.2). Default reads epoch.anchor (fallback 'eeg'). "
+                         "eeg (PRIMARY): grid + ictal-fraction floor anchored to EEG onset — recovers "
+                         "post-EEG-onset windows of large EEG-clinical-gap seizures. clin (SENSITIVITY): "
+                         "relt/clinical frame, icf floor [0, eeg_offset_rel]. IGNORED in DEFAULT [0,20] mode "
+                         "(admit_pre_ictal_windows off): that path stays byte-identical regardless of anchor.")
     args = ap.parse_args()
     feat_dir = Path(args.feature_cache_dir) if args.feature_cache_dir else FEATURE_CACHE_DIR[args.feature]
     cfg = load_phase1_config(args.config)
+    anchor = args.anchor or cfg["epoch"].get("anchor", "eeg")
     _all_bands, _primary, legacy_band = _config_bands(cfg)
     tol = float(cfg["tolerances"]["legacy_subject_median_abs"])
     subjects = args.subjects or SUBJECTS_BY_SUB[args.substrate]
@@ -396,13 +422,13 @@ def main():
             continue
         rows, legacy_unmasked, n_dropped = run_subject(
             ds_sid, args.substrate, args.feature, cfg, sensitivity=args.sensitivity,
-            feature_cache_dir=feat_dir)
+            feature_cache_dir=feat_dir, anchor=anchor)
         all_windows += rows
         subject = ds_sid.split("_", 1)[1]
         legacy_unmasked_by_sub[(subject, args.substrate)] = legacy_unmasked
         n_dropped_by_sub[(subject, args.substrate)] = n_dropped
         print(f"[{ds_sid}] {len(rows)} window-rows, n_dropped_by_fixed_mask={n_dropped}, "
-              f"axis_set={args.substrate}, feature={args.feature}", flush=True)
+              f"axis_set={args.substrate}, feature={args.feature}, anchor={anchor}", flush=True)
 
     seizure_rows = _seizure_summary(all_windows)
     subject_rows = _subject_summary(seizure_rows, args.feature, legacy_band,
