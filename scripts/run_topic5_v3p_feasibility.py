@@ -53,11 +53,9 @@ CSV_COLS = [
     "n_seizures_ge_min_windows", "cohort_viable",
 ]
 
-# Defaults for a subject whose context/cache cannot be loaded at all (this
-# also covers `cohort="yuquan"`, which has no real SUBSTRATE wiring yet in
-# `scripts.run_topic5_ictal_field_dynamics` -- a KeyError there lands here)
-# -- the row still exists (never silently drop a subject); a [skip] line on
-# stdout carries the reason (feasibility.csv's column contract is fixed, no
+# Defaults for a subject whose context/cache cannot be loaded at all -- the
+# row still exists (never silently drop a subject); a [skip] line on stdout
+# carries the reason (feasibility.csv's column contract is fixed, no
 # skip_reason column). `admitted` is computed after this dict is merged in
 # (roster is grandfathered regardless of load success).
 _FAILURE_ROW = {
@@ -245,7 +243,11 @@ def main(argv=None):
     if args.include_candidates:
         exp = v3pcfg["cohort_expansion"]
         entries += [(ds_sid, "broad", "candidate") for ds_sid in exp.get("candidates_epilepsiae", [])]
-        entries += [(ds_sid, "yuquan", "candidate") for ds_sid in exp.get("candidates_yuquan", [])]
+        # yuquan candidates load via the EXISTING "broad" substrate (no separate "yuquan"
+        # SUBSTRATE wiring exists; the yuquan _t_a/_t_b geometry + rank_displacement JSONs live
+        # in the broad dirs). They remain a SEPARATE cross-dataset supplement, never pooled into
+        # broad_expanded -- identifiable by the `yuquan_` ds_sid prefix + roster_status="candidate".
+        entries += [(ds_sid, "broad", "candidate") for ds_sid in exp.get("candidates_yuquan", [])]
 
     if args.subjects:
         wanted = set(args.subjects)

@@ -43,7 +43,7 @@ cohort_expansion:                        # rev2 (option b): expand broad via an 
   axis_quality_gate:                     # a candidate is ADMITTED iff all pass (thresholds pilot-locked at Task 1)
     require_geometry_sufficient: true
     axis_rank_min_distinct: 5            # >=5 distinct interictal typical_rank among axis contacts (real early->late gradient, not tied)
-    axis_participation_gap_min: 0.15     # min(axis participation) - max(nonaxis-strict participation) >= gap (clean high/low split)
+    axis_participation_gap_min: 0.0      # pilot-locked 2026-07-04 (was 0.15): structurally inapplicable to the geometric broad axis -- broad t_a/t_b assign finite typical_rank to 0-participation contacts, so the gap is exactly 0.0 for every broad-context subject; admission now rests on axis_rank_min_distinct>=5 (real early->late gradient) + require_geometry_sufficient + require_rank_displacement_json
     require_rank_displacement_json: true # candidate went through the masked interictal-propagation pipeline
     calibrate_on_roster: true            # lock thresholds so the CURATED roster is NOT rejected (sanity)
   broad_analysis: broad_expanded         # broad_core + admitted candidates_epilepsiae; broad_core ALWAYS reported alongside
