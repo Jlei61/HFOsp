@@ -441,3 +441,19 @@ def test_order_closure_strong_subset_threshold_not_weakest_wins():
     rows2 += [dict(subject=f"w{i}", feature="raw", null_type="order", order_null_strength="weak_downgrade") for i in range(6)]
     strong2, n_eval2, closure2 = _order_closure_subset(pd.DataFrame(rows2), "raw")
     assert len(strong2) == 4 and n_eval2 == 10 and closure2 == "weak_downgrade"   # 4 < ceil(0.5*10)=5
+
+
+def test_cohort_perm_ps_max_family_excludes_composites_from_fwer():
+    """§EXP/#4: the Westfall-Young perm-max is taken over max_family (7 primary bands) ONLY. A
+    composite band not in max_family is still scored per-band, and its max_over_bands_p is measured
+    against the PRIMARY-family null ceiling — so composites cannot inflate/dilute the primary FWER."""
+    import pandas as pd
+    from scripts.run_topic5_v2_gates import _cohort_perm_ps
+    perm_vals = {"P": {-1: 0.9, 0: 0.3, 1: 0.4, 2: 0.5, 3: 0.6},    # primary, in max_family
+                 "C": {-1: 0.55, 0: 0.3, 1: 0.4, 2: 0.5, 3: 0.6}}   # composite, NOT in max_family
+    rows = [dict(subject=s, feature="raw", null_type="spatial", band=b, perm_id=pid, perm_subject_median=v)
+            for b, byp in perm_vals.items() for pid, v in byp.items() for s in ("s1", "s2", "s3")]
+    per_p, per_delta, mob = _cohort_perm_ps(pd.DataFrame(rows), "raw", "spatial", ["P", "C"], max_family=["P"])
+    assert abs(mob["P"] - 0.2) < 1e-9      # P obs_delta .45 vs perm-max(over P) .15 -> (1+0)/5
+    assert abs(mob["C"] - 0.4) < 1e-9      # C obs_delta .10 ; #{perm-max(over P) >= .10}=1 (.15) -> (1+1)/5
+    assert abs(per_p["C"] - 0.4) < 1e-9    # per-band p over ALL bands: C obs .55 -> #{perm>=.55}=1 -> (1+1)/5

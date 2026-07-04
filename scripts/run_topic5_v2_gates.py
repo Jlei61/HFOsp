@@ -65,7 +65,8 @@ _ORDER_TIER = {"strong": 3, "weak_downgrade": 2, "missing": 1}
 # also tested against their own spatial null (does the residual field's alignment beat spatial smoothness).
 PRIMARY_NULL_TYPE = "spatial"
 
-GATE_COLS = ["axis_set", "cohort", "band", "feature", "gate_A_spatial_pass", "gate_A_order_pass",
+GATE_COLS = ["axis_set", "cohort", "band", "feature", "in_primary_family",
+             "gate_A_spatial_pass", "gate_A_order_pass",
              "gate_B_frequency_specific_pass", "gate_C_HFO_specific_pass",
              "cohort_perm_p_spatial", "cohort_perm_delta_spatial", "cohort_perm_p_order",
              "max_over_bands_p", "cohort_delta_median_of_subj", "cohort_null_z",
@@ -138,9 +139,17 @@ def _order_closure_subset(summ_df, feature):
 
 
 # --------------------------------------------------------------------------- max-over-bands FWER null
-def _cohort_perm_ps(perm_df, feature, null_type, family_bands):
+def _cohort_perm_ps(perm_df, feature, null_type, bands, max_family=None):
     """§2 subject-level cohort permutation of the median statistic. Returns
     ``(per_band_p, per_band_delta, max_over_bands_p)``.
+
+    ``bands`` = all bands to score per-band (primary + composite). ``max_family`` = the pre-specified
+    hypothesis family the Westfall-Young max-over-bands is taken over (default = ``bands``). §EXP/#4
+    LOCK: the primary endpoint's FWER family is the 7 PRIMARY bands only; composites are scored
+    per-band (descriptive) and their max_over_bands_p is measured against the PRIMARY-family null
+    ceiling (so a composite "beats the primary family null max" is interpretable but not a member of
+    the pre-specified family). Passing overlapping composites INTO the max family would double-count
+    correlated bands and inflate the FWER correction.
 
     per (band b, perm_id p): cohort_stat[b,p] = median over subjects of perm_subject_median (skipna).
       • per_band_p[b]    = add-one P(cohort_stat[b, perm p>=0] >= cohort_stat[b, obs=-1]).  This is the
@@ -154,15 +163,16 @@ def _cohort_perm_ps(perm_df, feature, null_type, family_bands):
         distribution. The winning band gets P(perm max-band delta >= observed max-band delta).
 
     All three share ONE cohort_stat pivot. Bands with no rows / no obs -> NaN."""
+    max_family = list(max_family) if max_family is not None else list(bands)
     sub = perm_df[(perm_df["feature"] == feature) & (perm_df["null_type"] == null_type)
-                  & (perm_df["band"].isin(family_bands))].copy()
+                  & (perm_df["band"].isin(bands))].copy()
     sub["perm_subject_median"] = pd.to_numeric(sub["perm_subject_median"], errors="coerce")
     coh = (sub.groupby(["band", "perm_id"])["perm_subject_median"]
            .apply(lambda s: float(np.nanmedian(s.to_numpy(float))) if np.isfinite(s.to_numpy(float)).any()
                   else float("nan")).reset_index())
-    per_band_p = {str(b): float("nan") for b in family_bands}
-    per_band_delta = {str(b): float("nan") for b in family_bands}
-    mob = {str(b): float("nan") for b in family_bands}
+    per_band_p = {str(b): float("nan") for b in bands}
+    per_band_delta = {str(b): float("nan") for b in bands}
+    mob = {str(b): float("nan") for b in bands}
     if coh.empty:
         return per_band_p, per_band_delta, mob
     piv = coh.pivot(index="perm_id", columns="band", values="perm_subject_median")
@@ -171,7 +181,7 @@ def _cohort_perm_ps(perm_df, feature, null_type, family_bands):
         return per_band_p, per_band_delta, mob
     null_median = null_piv.median(axis=0)                          # per band (skipna)
     obs = piv.loc[-1]
-    # (1) per-band cohort permutation p + (2) per-band cohort delta
+    # (1) per-band cohort permutation p + (2) per-band cohort delta (over ALL `bands`)
     for b in piv.columns:
         col = null_piv[b].to_numpy(float)
         col = col[np.isfinite(col)]
@@ -179,16 +189,18 @@ def _cohort_perm_ps(perm_df, feature, null_type, family_bands):
         if np.isfinite(ob) and col.size:
             per_band_p[str(b)] = float((1 + int(np.sum(col >= ob))) / (1 + col.size))
             per_band_delta[str(b)] = float(ob - float(null_median[b]))
-    # (3) family-wise max-over-bands (null-centered max-T)
-    perm_delta = null_piv.subtract(null_median, axis=1)            # (n_perm, n_band), null-centered
-    perm_max_delta = perm_delta.max(axis=1).to_numpy(float)
-    perm_max_delta = perm_max_delta[np.isfinite(perm_max_delta)]
-    n_perm = int(perm_max_delta.size)
-    obs_delta = (obs - null_median)
-    for b in piv.columns:
-        od = float(obs_delta[b])
-        if np.isfinite(od) and n_perm:
-            mob[str(b)] = float((1 + int(np.sum(perm_max_delta >= od))) / (1 + n_perm))
+    # (3) family-wise max-over-bands (null-centered max-T) — perm-max taken over `max_family` ONLY
+    mf = [b for b in max_family if b in null_piv.columns]
+    if mf:
+        perm_delta = null_piv[mf].subtract(null_median[mf], axis=1)   # (n_perm, |max_family|), null-centered
+        perm_max_delta = perm_delta.max(axis=1).to_numpy(float)
+        perm_max_delta = perm_max_delta[np.isfinite(perm_max_delta)]
+        n_perm = int(perm_max_delta.size)
+        obs_delta = (obs - null_median)                              # all bands, centered
+        for b in piv.columns:
+            od = float(obs_delta[b])
+            if np.isfinite(od) and n_perm:
+                mob[str(b)] = float((1 + int(np.sum(perm_max_delta >= od))) / (1 + n_perm))
     return per_band_p, per_band_delta, mob
 
 
@@ -217,20 +229,26 @@ def build_gate_rows(sub_dir, substrate, feature, cfg):
     perm_df = pd.read_parquet(perm_path)
     summ_df = pd.read_csv(summ_path)
 
-    family_bands = sorted(set(str(b) for b in perm_df["band"].unique()) - repro_bands)
+    family_bands = sorted(set(str(b) for b in perm_df["band"].unique()) - repro_bands)  # primary + composite (per-band scored)
+    # §EXP/#4 LOCK: the Westfall-Young FWER family is the 7 PRIMARY bands only; composites are scored
+    # per-band (descriptive) and their max_over_bands_p is measured against the PRIMARY null ceiling.
+    primary_bands = set(b[0] for b in cfg["bands"]["primary"])
+    primary_family = [b for b in family_bands if b in primary_bands]
 
     coh_spatial = _cohort_from_summary(summ_df, feature, PRIMARY_NULL_TYPE)   # median-of-p: DIAGNOSTIC (§2 retired from gate)
     coh_order = _cohort_from_summary(summ_df, feature, "order")               # median-of-p: DIAGNOSTIC
     strengths = _cohort_strengths(summ_df, feature)
     # §2: the gate DECISION p/delta switch from median-of-per-subject-p to the subject-level cohort
     # permutation (per_band_p + per_band cohort delta); median-of-p above is kept only as a diagnostic column.
-    sp_perm_p, sp_perm_delta, mob = _cohort_perm_ps(perm_df, feature, PRIMARY_NULL_TYPE, family_bands)
+    sp_perm_p, sp_perm_delta, mob = _cohort_perm_ps(perm_df, feature, PRIMARY_NULL_TYPE,
+                                                    family_bands, max_family=primary_family)
     # §3: order cohort perm runs on the order_strength=='strong' SUBSET (not weakest-wins), so one
     # 'missing' subject cannot NaN out the whole cohort order inference.
     strong_subj, n_order_eval, order_closure = _order_closure_subset(summ_df, feature)
     if order_closure == "strong" and strong_subj:
         or_perm_p, or_perm_delta, _mob_order = _cohort_perm_ps(
-            perm_df[perm_df["subject"].astype(str).isin(strong_subj)], feature, "order", family_bands)
+            perm_df[perm_df["subject"].astype(str).isin(strong_subj)], feature, "order",
+            family_bands, max_family=primary_family)
     else:
         or_perm_p, or_perm_delta = {}, {}
     coh_common = _read_feature_cohort(sub_dir, "common_resid", PRIMARY_NULL_TYPE)
@@ -268,6 +286,7 @@ def build_gate_rows(sub_dir, substrate, feature, cfg):
 
         rows.append({
             "axis_set": substrate, "cohort": substrate, "band": band, "feature": feature,
+            "in_primary_family": bool(band in primary_bands),   # §EXP/#4: composites are descriptive-only
             "gate_A_spatial_pass": bool(flags["gate_A_spatial"]),
             "gate_A_order_pass": bool(flags["gate_A_order"]),
             "gate_B_frequency_specific_pass": bool(flags["gate_B_freq_specific"]),

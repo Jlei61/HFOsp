@@ -457,21 +457,44 @@ def main():
                           else outroot / args.substrate / "phase1_confound_maps.json")
     confound_null_n = n_perm if args.confound_null else 0
 
+    # Per-subject CHECKPOINT + RESUME (long full-n_perm runs get killed by session teardown; a restart
+    # with identical args reloads finished subjects from _partial and only re-runs the rest, so at most
+    # one subject's work is lost per kill). run_key pins the reuse contract — a partial from a different
+    # n_perm/seed/min_group/order_min_corr is ignored and recomputed.
+    partial_dir = outdir / f"_partial_{args.feature}"
+    partial_dir.mkdir(parents=True, exist_ok=True)
+    run_key = {"n_perm": n_perm, "seed": seed, "min_group_override": args.min_group,
+               "order_min_corr": order_min_corr, "confound_null_n": confound_null_n,
+               "substrate": args.substrate, "feature": args.feature}
     all_perm, all_summary, all_confound, per_subject = [], [], [], []
     for ds_sid in subjects:
         if not (feat_dir / f"{ds_sid}.npz").exists():
             print(f"[skip] {ds_sid} no {args.feature} cache", flush=True)
             continue
-        perm_rows, summary_rows, confound_rows, info = run_subject_nulls(
-            ds_sid, args.substrate, args.feature, cfg, n_perm, seed, feat_dir, order_min_corr,
-            confound_maps_path, confound_null_n, min_group_override=args.min_group)
+        mark = partial_dir / f"{ds_sid}.marker.json"
+        if mark.exists() and json.loads(mark.read_text()).get("run_key") == run_key:
+            perm_rows = pd.read_parquet(partial_dir / f"{ds_sid}.perm.parquet").to_dict("records")
+            summary_rows = pd.read_csv(partial_dir / f"{ds_sid}.summary.csv").to_dict("records")
+            cpath = partial_dir / f"{ds_sid}.confound.csv"
+            confound_rows = (pd.read_csv(cpath).to_dict("records")
+                             if cpath.exists() and cpath.stat().st_size > 0 else [])
+            info = json.loads(mark.read_text())["info"]
+            print(f"[resume] {ds_sid} from checkpoint ({len(perm_rows)} perm rows)", flush=True)
+        else:
+            perm_rows, summary_rows, confound_rows, info = run_subject_nulls(
+                ds_sid, args.substrate, args.feature, cfg, n_perm, seed, feat_dir, order_min_corr,
+                confound_maps_path, confound_null_n, min_group_override=args.min_group)
+            pd.DataFrame(perm_rows, columns=PERM_COLS).to_parquet(partial_dir / f"{ds_sid}.perm.parquet", index=False)
+            _write_csv(partial_dir / f"{ds_sid}.summary.csv", SUMMARY_COLS, summary_rows)
+            _write_csv(partial_dir / f"{ds_sid}.confound.csv", CONFOUND_COLS, confound_rows)
+            mark.write_text(json.dumps({"run_key": run_key, "info": info}))
+            print(f"[{ds_sid}] {info['n_bands']} bands, order={info.get('order_null_strength')}, "
+                  f"spatial_worst={info.get('spatial_strength_worst')}, confound={info.get('confound_note')}, "
+                  f"n_perm={n_perm} [checkpointed]", flush=True)
         all_perm += perm_rows
         all_summary += summary_rows
         all_confound += confound_rows
         per_subject.append(info)
-        print(f"[{ds_sid}] {info['n_bands']} bands, order={info.get('order_null_strength')}, "
-              f"spatial_worst={info.get('spatial_strength_worst')}, confound={info.get('confound_note')}, "
-              f"n_perm={n_perm}", flush=True)
 
     stem = f"phase1_null_{args.feature}"
     # perm-long parquet: canonical feature-infixed + bare alias (the smoke asserts the bare name; the

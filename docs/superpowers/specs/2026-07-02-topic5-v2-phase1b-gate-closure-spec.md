@@ -8,6 +8,25 @@ date 2026-07-02 · 状态：spec（运行前锁定，待 user sign-off）· 前�
 
 ---
 
+## §EXP 探索性 null-positive frame + primary endpoint LOCK（user sign-off 2026-07-02 · GOVERNS 全 P1b 判读）
+
+**主结论从"频带机制"降到"空间 scaffold / recruitment map 超过 null"。** 最稳一句话：
+> 间期 HFO-derived geometry 与发作早期能量空间图之间存在 **suggestive spatial co-structure**；它可能标记一个 **early-ictal recruitment scaffold**；在 narrow/core 触点池里更清楚；但**不能**说是 HFO-specific / LVFA-specific / temporal propagation，也**不能**说 formal within-shaft Gate A 已通过。
+
+**Primary endpoint LOCK**：主 endpoint = **raw early-ictal band field vs HFO-derived geometry 是否超过 spatial null**（§2 cohort permutation of the median statistic + max-over-bands）。**Gate B/C（common_resid / aperiodic）= 补充证据，NOT 必须通过的门**（探索阶段不追 1/f-corrected spectral specificity）。order null = secondary / supportive（§3；band-generic + anti-conservative caveat）。
+
+**Exploratory success criterion（LOCK）**：
+> A band/substrate is exploratory-positive iff the cohort-level observed alignment exceeds the pre-specified null distribution after max-over-bands correction — regardless of whether the positive band is LVFA, ripple, broadband, or low-frequency.
+
+**broad / narrow 分开判读，不要求同一频带过**：broad 报 "fast/LVFA-enriched bands 在 spatial null 中最强"；narrow 报 "core geometry band-generic null-positive"。共同结论 = **spatial recruitment scaffold**，不是频带机制一致。
+
+**报告结论 wording（可直接用）**：
+> [EN] In this exploratory phase, early-ictal band-power spatial fields showed positive alignment with interictal HFO-derived geometry. The effect was stronger in the narrow/core channel pool and was largely band-generic in the expanded 20-subject observed table. Dev null analyses suggest the observed alignment can exceed spatially smoothed null fields, especially in broad fast/LVFA bands and across bands in the narrow/core pool. Therefore the result supports a candidate early-ictal spatial recruitment scaffold, not a ripple-specific replay mechanism or a timing-order mechanism.
+> [中] 本阶段结果支持：间期 HFO-derived geometry 可能标记了一种发作早期空间招募 scaffold；在 narrow/core 读出更强、更 band-generic；broad 中 dev-null 下 fast/LVFA 段较突出。因 formal within-shaft spatial null 尚未可评估、weak/global null 可能偏乐观，目前只作探索性 null-positive spatial co-structure，不上升为 HFO-specific / LVFA-specific 机制结论。
+
+**禁用措辞**：证明 HFO 传播被发作重放 · HFO 与 LVFA 机制一致 · ripple-specific · temporal propagation · 正式通过 Gate A · 超过任何空间随机场。
+**允许措辞**：exploratory null-positive · suggestive spatial co-structure · candidate early-ictal recruitment scaffold · band-generic in narrow/core · fast/LVFA-enriched in broad dev-null · formal within-shaft Gate A unresolved。
+
 ## §0 Cohort lock（2026-07-02 user sign-off：补齐 field-similarity 全 20 队列）
 
 Phase-1 backbone 沿用了发作内场动力学脚本手挑的 13 被试（broad 9 / narrow 7），**欠采样**于 field-similarity（`axis_alignment_*_max_ab_B1000.json`，per_subject n=20 = 18 epilepsiae + 2 yuquan: xuxinyi, zhangkexuan）。**P1b 队列锁定为补齐全 20。**
