@@ -11,7 +11,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib import cm
+from matplotlib.colors import TwoSlopeNorm
 import numpy as np
 import pandas as pd
 import yaml
@@ -46,6 +46,14 @@ def _load(sub):
 # ---------------------------------------------------------------- F1 observed heatmap
 def fig1_observed():
     bands = PRIMARY + COMPOSITE
+    # diverging red-blue centered at the pooled cohort median (red = above-typical alignment, blue = below);
+    # center is the SAME across both panels so narrow/broad are directly comparable.
+    allv = []
+    for sub, _ in SUBS:
+        a, _, _ = _load(sub)
+        allv += pd.to_numeric(a[a.band.isin(PRIMARY)].align_abs_maxab, errors="coerce").dropna().tolist()
+    vc = round(float(np.median(allv)), 2)
+    norm = TwoSlopeNorm(vmin=0.40, vcenter=vc, vmax=0.95)
     fig, axes = plt.subplots(1, 2, figsize=(14, 8), gridspec_kw={"width_ratios": [20, 17]})
     im = None
     for ax, (sub, n) in zip(axes, SUBS):
@@ -56,56 +64,64 @@ def fig1_observed():
         med = piv.median(axis=0)
         M = np.vstack([piv.values, med.values])                                          # 末行=cohort median
         ylabs = [_short(s) for s in piv.index] + ["cohort median"]
-        im = ax.imshow(M, aspect="auto", cmap="viridis", vmin=0.4, vmax=0.95)
-        ax.set_xticks(range(len(bands))); ax.set_xticklabels([SHORT[b] for b in bands], fontsize=7)
+        im = ax.imshow(M, aspect="auto", cmap="RdBu_r", norm=norm)
+        ax.set_xticks(range(len(bands))); ax.set_xticklabels([SHORT[b] for b in bands], fontsize=8)
         ax.set_yticks(range(len(ylabs))); ax.set_yticklabels(ylabs, fontsize=7)
-        ax.axhline(len(piv) - 0.5, color="w", lw=2)                                       # 分隔 cohort median
-        ax.set_title(f"{sub}  (n={n})", fontsize=11)
-        for i in range(M.shape[0]):                                                       # 数值标注 cohort median 行
-            if i == M.shape[0] - 1:
-                for j in range(M.shape[1]):
-                    if np.isfinite(M[i, j]):
-                        ax.text(j, i, f"{M[i,j]:.2f}", ha="center", va="center", fontsize=6, color="w")
+        ax.axhline(len(piv) - 0.5, color="k", lw=1.5)                                     # 分隔 cohort median
+        ax.axvline(len(PRIMARY) - 0.5, color="k", ls="--", lw=2.5)                        # primary(7) | composite(4)
+        ax.set_title(f"{sub}  (n={n})", fontsize=12)
+        for j in range(M.shape[1]):                                                       # 数值标注 cohort median 行
+            if np.isfinite(M[-1, j]):
+                ax.text(j, M.shape[0] - 1, f"{M[-1,j]:.2f}", ha="center", va="center", fontsize=6, color="k")
     cbar = fig.colorbar(im, ax=axes, fraction=0.03, pad=0.02)
-    cbar.set_label("maxAB  |corr|  (early-ictal band field vs interictal HFO geometry, A/B max)", fontsize=9)
-    fig.suptitle("F1 · Observed alignment: early-ictal multi-band energy field ↔ interictal HFO-derived geometry\n"
-                 "descriptive magnitude (smoothed-field |corr|, inflated vs 0); narrow > broad; band-generic",
-                 fontsize=11)
+    cbar.set_label(f"maxAB |corr|   (red = higher / blue = lower; diverging at pooled median {vc})", fontsize=10)
+    fig.suptitle("F1 · Observed alignment: early-ictal multi-band energy field <-> interictal HFO-derived geometry\n"
+                 "descriptive magnitude (smoothed-field |corr|); narrow > broad; band-generic.  "
+                 "dashed line = primary (7) | composite (4) bands", fontsize=11)
     _save(fig, "phase1_F1_observed_maxAB_heatmap.png")
 
 
 # ---------------------------------------------------------------- F2 per-band null result
 def fig2_null_perband():
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(15, 7), sharey=True)
     for ax, (sub, n) in zip(axes, SUBS):
         _, nl, g = _load(sub)
         sp = nl[(nl.null_type == "spatial") & (nl.band.isin(PRIMARY))].copy()
         sp["delta"] = pd.to_numeric(sp.delta, errors="coerce")
         gg = g.set_index("band")
         for xi, b in enumerate(PRIMARY):
-            subj_d = sp[sp.band == b].delta.dropna().values
-            ax.scatter(np.full(len(subj_d), xi) + np.random.default_rng(xi).uniform(-.13, .13, len(subj_d)),
-                       subj_d, s=22, c="lightgray", edgecolors="none", zorder=3)          # per-subject delta
+            d = sp[sp.band == b].delta.dropna().values
+            sig = float(gg.loc[b, "max_over_bands_p"]) < 0.05
+            col = "crimson" if sig else "lightgray"
+            if len(d) >= 2:                                                                # per-subject Δ violin
+                vp = ax.violinplot([d], positions=[xi], widths=0.85, showmedians=False, showextrema=True)
+                vp["bodies"][0].set_facecolor(col); vp["bodies"][0].set_edgecolor("k")
+                vp["bodies"][0].set_alpha(0.55)
+                for key in ("cbars", "cmins", "cmaxes"):
+                    if vp.get(key) is not None:
+                        vp[key].set_color("gray"); vp[key].set_linewidth(1.0)
+            else:
+                ax.scatter([xi] * len(d), d, s=30, c=col, edgecolors="k", zorder=4)
             cd = float(gg.loc[b, "cohort_perm_delta_spatial"])
-            fwer = float(gg.loc[b, "max_over_bands_p"])
-            sig = fwer < 0.05
-            ax.scatter([xi], [cd], s=170, c="crimson" if sig else "lightgray",
-                       edgecolors="k", linewidths=0.8, zorder=6)                           # cohort delta
-            ax.annotate("*" if sig else "n.s.", (xi, cd), xytext=(0, 9 if sig else 7),
-                        textcoords="offset points", ha="center", fontsize=11 if sig else 7,
-                        color="crimson" if sig else "gray", weight="bold" if sig else "normal")
-        ax.axhline(0, color="k", lw=0.8)
-        ax.set_xticks(range(len(PRIMARY))); ax.set_xticklabels([SHORT[b].replace("\n", " ") for b in PRIMARY],
-                                                               fontsize=7, rotation=0)
+            ax.hlines(cd, xi - 0.35, xi + 0.35, color="k", lw=3, zorder=6)                 # cohort Δ (tested stat)
+            top = np.nanmax(d) if len(d) else cd
+            ax.annotate("*" if sig else "n.s.", (xi, top + 0.03), ha="center",
+                        fontsize=17 if sig else 10, color="crimson" if sig else "gray",
+                        weight="bold" if sig else "normal")
+        ax.axhline(0, color="k", lw=1.0)
+        ax.set_xticks(range(len(PRIMARY)))
+        ax.set_xticklabels([SHORT[b] for b in PRIMARY], fontsize=12)          # 两行(symbol/freq)避免横向重叠
+        ax.tick_params(axis="y", labelsize=13)
         nsig = int((pd.to_numeric(g[g.in_primary_family == True].max_over_bands_p, errors="coerce") < 0.05).sum())
-        ax.set_title(f"{sub}  (n={n})  ·  {nsig}/7 primary pass FWER", fontsize=11)
+        ax.set_title(f"{sub}  (n={n})  ·  {nsig}/7 primary pass family-wise correction", fontsize=14)
         ax.grid(alpha=0.3, axis="y")
-    axes[0].set_ylabel("cohort alignment − spatial-null median  (Δ)", fontsize=9)
-    fig.suptitle("F2 · Formal-null: cohort alignment exceeds the (weak / subject-wide) spatial null\n"
-                 "grey = per-subject Δ; large = cohort Δ (crimson* = passes max-over-bands FWER). "
-                 "ripple_high weakest → NOT ripple-specific. WEAK null → anti-conservative, likely inflated; "
-                 "formal within-shaft Gate A unresolved (2/20).", fontsize=10)
-    fig.tight_layout(rect=[0, 0, 1, 0.90])
+    axes[0].set_ylabel("cohort alignment - spatial-null median   (Δ per subject)", fontsize=15)
+    fig.suptitle("F2 · Formal-null: per-subject Δ distribution (violin) vs the weak / subject-wide spatial null\n"
+                 "violin = per-subject Δ; black bar = cohort Δ (tested); crimson * = band passes the max-over-bands "
+                 "family-wise (FWER) correction.\nripple_high weakest -> NOT ripple-specific.  "
+                 "WEAK null -> anti-conservative, likely inflated; formal within-shaft Gate A unresolved (2/20).",
+                 fontsize=11)
+    fig.tight_layout(rect=[0, 0, 1, 0.87])
     _save(fig, "phase1_F2_null_per_band.png")
 
 
