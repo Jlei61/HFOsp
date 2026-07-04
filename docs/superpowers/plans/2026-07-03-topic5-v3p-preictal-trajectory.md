@@ -11,16 +11,22 @@
 ## Global Constraints (spec rev0 — every task inherits these; values copied verbatim)
 
 - **EXPLORATORY tier. NO forecasting/prediction** — no lead-time, AUC, forward classifier, "pre-warn" claim. V3p = trend description + null adjudication, not a predictor.
-- **Preictal-only.** Primary time leg uses `P0/P1/P2/P3` (−120~−10 s) ONLY; never `O/I1/I2/I3/Post`. **eeg-onset anchored** (each seizure's `eeg_onset_rel`, NOT cache `relt=0`).
-- **Trend = slope, not two-window Δ.** Per-seizure **Theil-Sen** slope over preictal windows (primary effect size); Spearman ρ(metric, t) companion; OLS alt. **Subject value = median over seizures.**
-- **Co-primary = H3p-b `net_offaxis_flux_surplus_slope` + H3p-c `mode_shift_density_surplus_slope`** (`surplus_slope = obs_slope − median(label-null slope)`); **Holm-corrected at cohort level.** H3p-a `beta_axis_strength_slope` < 0 is **supportive-only** (`module_support_flag` always False). H3p-d (burden/self-sustain/gain) secondary. **Support = H3p-b OR H3p-c.**
-- **label-null-of-slope is the PRIMARY adjudicator** for "non-axis-specific vs global pre-ictal rise" (within-shaft axis/non-axis label permute → recompute whole trajectory → refit slope). Regression residualization (`*_slope_resid`, vs `global_energy(t)` + `axial_energy(t)`) is **sensitivity only** — a conservative floor (collinearity with time may over-strip); `*_slope_resid ≈ 0` does NOT overturn a label-null positive.
+- **Preictal-only.** Primary time leg uses `P0/P1/P2/P3` ONLY; never `O/I1/I2/I3/Post`. **eeg-onset anchored** (each seizure's `eeg_onset_rel`, NOT cache `relt=0`).
+- **(rev1) onset-guard two-track span.** Every co-primary metric is computed on BOTH `full=[−120,−10]` (headline) AND `guard=[−120,−20]` (`guard_sec=max(10, jitter=10)`). **Strong support requires BOTH tracks to pass same-direction;** full-only pass → `near_onset_dependent=True` (tier capped at 2). `proximal=[−60,−10]` is a sensitivity slope.
+- **Trend = slope, not two-window Δ.** Per-seizure **Theil-Sen** slope over preictal windows (primary effect size); Spearman ρ(metric, t) companion; OLS alt. **Subject value = median over seizures.** (Empirically ~17–18 windows/seizure both cohorts → `min_windows_for_slope=8` non-binding.)
+- **Co-primary = H3p-b `net_offaxis_flux_surplus_slope` + H3p-c `mode_shift_density_surplus_slope`** (`surplus_slope = obs_slope − median(label-null slope)`); **Holm-corrected at cohort level.** H3p-a `beta_axis_strength_slope` < 0 is **supportive-only** (`module_support_flag_a` always False). H3p-d (burden/self-sustain/gain) secondary. **Support = H3p-b OR H3p-c.**
+- **(rev1) Hardened module gates.** `module_support_flag_b = direction ∧ p_label_slope_b<α ∧ p_rate_slope_b<α ∧ lag1_specific_slope>0` (rate + lag0-common-drive are HARD gates, not secondary). `module_support_flag_c = direction ∧ p_label_slope_c<α ∧ p_phase_slope_c<α ∧ p_block_slope_c<α` (**strong**; label+one-temporal = **weak**, not support). `lag1_specific = lag1_net_offaxis_flux − lag0_net_offaxis_flux`.
+- **label-null-of-slope is the PRIMARY adjudicator** for "non-axis-specific vs global pre-ictal rise" (within-shaft axis/non-axis label permute → recompute whole trajectory → refit slope). Regression residualization (`*_slope_resid`, vs `global_energy(t)` + `axial_energy(t)`) is **sensitivity only** — conservative floor (collinearity may over-strip); `*_slope_resid ≈ 0` does NOT overturn a label-null positive.
+- **(rev1) rate-preserving null is PER-WINDOW.** For the H3p-b rate null, `rate_preserving_shuffle` is applied **within each window independently** (preserves per-contact per-window activation rate, destroys only within-window lagged pairing) — NOT across the whole preictal span (which would flatten the burden trajectory and cause false positives).
 - **Geometry/dynamics inherited from V3a, already pilot-locked** in `config/topic5_v3.yaml`: `nonaxis_hfo_participation_max`, `beta_axis_reliability_min=0.20`, `lowrank=6`, `finite_horizon_k=3` (k*), `single_contact_energy_frac_max=0.50`, `z_threshold=2.0`. **Do not re-pilot these.** Non-axis = pure interictal HFO participation, **data/ictal/preictal-blind** (anti-circularity). Three-class contacts; `P_A/P_N` = axis + non-axis-strict only.
 - **VAR/DMD demean within window, no standardize** (`demean_window`). λ never raw — always `λ_surplus`. mode-shift uses the **singular vector**, density-normalized (÷ subspace rank). ATM `i≠j`.
 - **Subject is the unit;** window→seizure(Theil-Sen)→subject(median). **narrow = primary cohort, broad = replication, NEVER pooled.**
 - **Self-built nulls** (inherited): `label_permute` (shaft-constrained), `rate_preserving_shuffle`, `shaft_constrained_permute`. `p=(1+#exceed)/(1+n_perm)`; trend one-sided (H3p-a other tail). Cohort aggregation on `slope_label_z=(obs−median(null))/MAD(null)`; Wilcoxon signed-rank; H3p-b/H3p-c Holm-corrected.
+- **(rev1) time-order null** (secondary sensitivity): per seizure circularly shift/shuffle window order, keep metric values + labels, refit slope → `time_order_p_{b,c}` (tests "closer-to-onset = stronger" order-dependence; not a hard gate).
+- **(rev1) QC columns (emit, mostly non-gating):** H3p-c singular-vector stability `mode_singular_gap_median=median(σ1/σ2 of A^{k*})`, `mode_vector_stable`, `cv_r2`; H3p-b sparsity `n_activation_events_pre`, `n_active_windows_pre`, `h3b_activation_sufficient` (sparse activations → 0 flux NOT treated as negative); label-null power `n_label_permutable_shafts`, `n_label_permutable_{axis,nonaxis}`, `n_unique_label_permutations_est`, `label_null_entropy`, `label_null_underpowered` (<100 effective perms). **Empirically narrow 1146 shaftBoth=1, 1096/1125=2 → underpowered candidates.**
+- **(rev1) H3p-d relative/hardened metrics:** gain leg uses `gain_shift_slope = slope(gain_nonaxis − gain_axis)` (keep `gain_nonaxis_surplus_slope` for reference); self-sustain uses `N_self_sustain_lag1_specific_slope = lag1_slope − lag0_slope` (≤0 → "synchronous co-activation" not "self-sustain chain"); burden reports raw + label-surplus + resid.
 - **Verdict = tier 0–5** (Task 9 only); `state_v3p_supported = tier≥3`; V3p max tier 4. Module scripts emit `module_support_flag/module_direction_correct/module_null_pass`, NOT tier.
-- **`geometry_insufficient` → flagged, NOT negative.** Short pre-onset recording (< `min_windows_for_slope` in all seizures) → feasibility-insufficient, NOT negative. onset jitter ±10 s must hold. **Pre-registered negative acceptable; never rescue 1125** (single subject → descriptive case-series only).
+- **`geometry_insufficient` → flagged, NOT negative.** Short pre-onset recording (< `min_windows_for_slope` all seizures) → feasibility-insufficient, NOT negative. onset jitter ±10 s must hold. **(rev1) `near_onset_dependent` (full-only pass) → tier cap 2; `label_null_underpowered` → excluded from strong-positive denominator.** **Pre-registered negative acceptable; never rescue 1125** (single subject → descriptive case-series only).
 - **New-file commits use `git add <files>` (not `-am`).** Real-data scripts `@pytest.mark.integration` + `--outdir`.
 
 ## File Structure
@@ -50,9 +56,11 @@
 # config/topic5_v3p.yaml
 preictal:
   phases: [P0, P1, P2, P3]
-  span_full_rel: [-120.0, -10.0]
+  span_full_rel: [-120.0, -10.0]         # headline primary (rev1: user kept)
+  span_guard_rel: [-120.0, -20.0]        # rev1: jitter-safe onset guard (also co-primary)
   span_proximal_rel: [-60.0, -10.0]      # sensitivity slope span
-  min_windows_for_slope: 8               # OPEN pilot (Task 1 gate)
+  guard_sec: 10.0                        # guard_end = onset - max(10, jitter)
+  min_windows_for_slope: 8               # empirically non-binding (~17-18/sz both cohorts)
 trend:
   estimator: theil_sen                   # primary
   companions: [spearman, ols]
@@ -60,12 +68,22 @@ trend:
     net_offaxis_flux: greater
     mode_shift_density: greater
     nonaxis_activation_burden: greater
-    N_self_sustain: greater
-    gain_nonaxis: greater
+    N_self_sustain_lag1_specific: greater
+    gain_shift: greater
     beta_axis_strength: less             # H3p-a supportive
+gates:                                   # rev1 hardened module gates
+  h3b_require: [p_label, p_rate, lag1_specific_positive]
+  h3c_require: [p_label, p_phase, p_block]   # all -> strong; label+1 temporal -> weak
+  require_both_spans: true               # strong support needs full AND guard
 residualization:
   covariates: [global_energy, axial_energy]
   primary_adjudicator: label_null_slope   # regression residual is sensitivity only
+nulls_v3p:                               # rev1 new null / QC knobs
+  rate_null_per_window: true             # preserve per-window rate, shuffle within-window only
+  time_order_null: true
+  label_null_min_unique_perms: 100       # < -> label_null_underpowered
+  mode_singular_gap_min: 1.2             # OPEN pilot; < -> mode_vector_stable=False
+  h3b_min_activation_events: 20          # OPEN pilot; < -> h3b_activation_sufficient=False
 co_primary:
   endpoints: [net_offaxis_flux_surplus_slope, mode_shift_density_surplus_slope]
   correction: holm
@@ -84,7 +102,12 @@ def test_v3p_config_keys():
     c = load_v3p_config()
     assert c["preictal"]["phases"] == ["P0", "P1", "P2", "P3"]
     assert c["preictal"]["span_full_rel"] == [-120.0, -10.0]
+    assert c["preictal"]["span_guard_rel"] == [-120.0, -20.0]      # rev1 onset guard
     assert c["trend"]["estimator"] == "theil_sen"
+    assert c["gates"]["h3b_require"] == ["p_label", "p_rate", "lag1_specific_positive"]
+    assert c["gates"]["h3c_require"] == ["p_label", "p_phase", "p_block"]
+    assert c["gates"]["require_both_spans"] is True
+    assert c["nulls_v3p"]["rate_null_per_window"] is True and c["nulls_v3p"]["time_order_null"] is True
     assert c["residualization"]["primary_adjudicator"] == "label_null_slope"
     assert c["co_primary"]["correction"] == "holm"
     assert c["co_primary"]["endpoints"] == ["net_offaxis_flux_surplus_slope", "mode_shift_density_surplus_slope"]
@@ -131,7 +154,7 @@ def load_v3p_config(path: str | Path | None = None) -> dict:
 **Files:** Create `scripts/run_topic5_v3p_feasibility.py`; Test `tests/test_topic5_v3p_integration.py`.
 **Interfaces:**
 - Consumes: V3a `scripts._topic5_v3_io.classify_subject_contacts`, `load_subject_phase_envelopes`; V3a `src.topic5_v3_mode_transition.sliding_windows`, `geometry_sufficient`; Task-0 `load_v3p_config`; V3a `load_v3_config`.
-- Produces: `feasibility.csv` cols: `subject, cohort, n_seizures, n_windows_P0, n_windows_P1, n_windows_P2, n_windows_P3, n_windows_preictal_total, usable_pre_sec, n_contacts_all_clean, n_axis, n_nonaxis, n_ambiguous, n_shaft_with_axis_and_nonaxis, geometry_sufficient, n_seizures_ge_min_windows, cohort_viable`.
+- Produces: `feasibility.csv` cols: `subject, cohort, n_seizures, n_windows_P0, n_windows_P1, n_windows_P2, n_windows_P3, n_windows_full_total, n_windows_guard_total, usable_pre_sec, n_contacts_all_clean, n_axis, n_nonaxis, n_ambiguous, n_shaft_with_axis_and_nonaxis, n_unique_label_permutations_est, label_null_underpowered, geometry_sufficient, n_seizures_ge_min_windows, cohort_viable`. **(rev1: guard-span window total + label-null permutability surfaced here so underpowered subjects — narrow 1146/1096/1125 — are flagged at the pilot gate.)**
 
 **Contract:** per subject: `classify_subject_contacts` (V3a; source of truth for pool + axis/non-axis) → `load_subject_phase_envelopes(ds_sid, cohort, v3cfg, phases=["P0","P1","P2","P3"])`. For each seizure sum `sliding_windows` counts over the four preictal phase envelopes (window_sec/step_sec from `v3cfg["phases"]`); `n_seizures_ge_min_windows` = seizures whose preictal window total ≥ `min_windows_for_slope`. `geometry_sufficient` via V3a helper (min_n_axis=5, min_n_nonaxis=3, ≥1 shaft-with-both). `cohort_viable` is a post-hoc cohort roll-up (True when ≥4 subjects have `geometry_sufficient AND n_seizures_ge_min_windows≥1`).
 
@@ -348,9 +371,9 @@ def residualize_slope(values, centers, covariates, estimator) -> float:
 **Files:** Modify `src/topic5_v3p_preictal_trajectory.py`; Test same. **Reuse** V3a `atm_offdiag`, `net_offaxis_flux`, `demean_window`, `lowrank_var`, `dominant_right_singular_vector`, `map_lowrank_vector_to_contacts`, `subspace_mode_shift`, `project_2d`, `direct_2d_var`, `beta_axis`; V2 `activations_from_z`; Task-3 `within_compartment_flux`, `global_axial_energy`. **Do NOT reuse V2 `contact_susceptibility`** — its question is a late−early **Δ** between two sub-windows, not a within-window roughness **level** (CLAUDE.md §6.1 helper-question mismatch); the per-contact line-length rate is computed inline (see Contract).
 **Interfaces:**
 - Consumes: `geom` dict = `{names, axis_idx, nonaxis_idx, P_A, P_N, e_axis_mean, e_nonaxis_mean, rank_forward}` (built once per subject by the runner from V3a `subspace_projectors`/`axis_nonaxis_vectors`/`rank_forward`); `v3cfg` = inherited `load_v3_config()` (for `lowrank`, `finite_horizon_k`, `var_ridge_alpha`, `z_threshold`).
-- Produces: `extract_window_metrics(env_win, geom, v3cfg) -> dict` with keys `net_offaxis_flux, mode_shift_density, nonaxis_activation_rate, global_energy, axial_energy, N_self_sustain, gain_axis, gain_nonaxis, beta_axis_strength`.
+- Produces: `extract_window_metrics(env_win, geom, v3cfg) -> dict` with keys `net_offaxis_flux_lag1, net_offaxis_flux_lag0, mode_shift_density, mode_singular_gap, nonaxis_activation_rate, n_activation_events, global_energy, axial_energy, N_self_sustain_lag1, N_self_sustain_lag0, gain_axis, gain_nonaxis, beta_axis_strength`. **(rev1: lag1 AND lag0 for both flux legs — the runner forms `lag1_specific = lag1 − lag0`; `mode_singular_gap` + `n_activation_events` are QC.)**
 
-**Contract:** `env_win` = `(n_all_clean, n_t)` bb-envelope slice (rows ordered by `all_clean`, as `load_subject_phase_envelopes` returns). All dynamics on `demean_window(env_win)`. Activations via `activations_from_z(env_win, z_threshold)`. `net_offaxis_flux = net_offaxis_flux(atm_offdiag(active), axis_idx, nonaxis_idx, "source_mean")`. `mode_shift_density`: `A_lowrank,U_r=lowrank_var(env_win, lowrank, alpha)`; `u_r=dominant_right_singular_vector(A_lowrank, k*)`; `u_c=map_lowrank_vector_to_contacts(u_r,U_r)`; `subspace_mode_shift(u_c, P_N, P_A, "density")`. `N_self_sustain=within_compartment_flux(atm_offdiag(active), nonaxis_idx)`. gains: `B=direct_2d_var(project_2d(demean_window(env_win), e_axis_mean, e_nonaxis_mean), alpha)`, `gain_axis=‖B[:,0]‖`, `gain_nonaxis=‖B[:,1]‖`. `nonaxis_activation_rate=active[nonaxis_idx].mean()`. `global_energy,axial_energy=global_axial_energy(env_win, axis_idx)`. `beta_axis_strength=abs(beta_axis({names[i]: float(np.nanmean(np.abs(np.diff(env_win[i])))) for i in range(len(names))}, rank_forward))` — per-contact within-window **line-length rate (roughness)** computed inline (mean absolute successive difference); NOT V2 `contact_susceptibility` (§6.1 mismatch). Any degenerate window (too few time samples, empty subspace, <2 time samples for `diff`) → the affected key is `nan` (never raises).
+**Contract:** `env_win` = `(n_all_clean, n_t)` bb-envelope slice (rows ordered by `all_clean`). All dynamics on `demean_window(env_win)`. Activations via `active = activations_from_z(env_win, z_threshold)`; `n_activation_events = int(active.sum())`. **Flux both lags:** `atm1=atm_offdiag(active)` (lag1), `atm0=atm_lag0(active)` (lag0 same-time co-activation); `net_offaxis_flux_lag1=net_offaxis_flux(atm1, axis_idx, nonaxis_idx, "source_mean")`, `net_offaxis_flux_lag0=net_offaxis_flux(atm0, axis_idx, nonaxis_idx, "source_mean")`. `mode_shift_density`: `A_lowrank,U_r=lowrank_var(env_win, lowrank, alpha)`; `sv=svd(matrix_power(A_lowrank,k*), compute_uv=False)`, `mode_singular_gap = sv[0]/sv[1]` (nan if <2 sv or sv[1]==0); `u_r=dominant_right_singular_vector(A_lowrank, k*)`; `u_c=map_lowrank_vector_to_contacts(u_r,U_r)`; `subspace_mode_shift(u_c, P_N, P_A, "density")`. **Self-sustain both lags:** `N_self_sustain_lag1=within_compartment_flux(atm1, nonaxis_idx)`, `N_self_sustain_lag0=within_compartment_flux(atm0, nonaxis_idx)`. gains: `B=direct_2d_var(project_2d(demean_window(env_win), e_axis_mean, e_nonaxis_mean), alpha)`, `gain_axis=‖B[:,0]‖`, `gain_nonaxis=‖B[:,1]‖` (runner forms `gain_shift=gain_nonaxis−gain_axis`). `nonaxis_activation_rate=active[nonaxis_idx].mean()`. `global_energy,axial_energy=global_axial_energy(env_win, axis_idx)`. `beta_axis_strength=abs(beta_axis({names[i]: float(np.nanmean(np.abs(np.diff(env_win[i])))) for i in range(len(names))}, rank_forward))` — per-contact within-window **line-length rate (roughness)** inline (mean absolute successive difference); NOT V2 `contact_susceptibility` (§6.1 mismatch). Any degenerate window → the affected key is `nan` (never raises).
 
 - [ ] **Step 1: Failing test**
 
@@ -371,10 +394,12 @@ def test_extract_window_metrics_keys_and_flux_sign():
     geom = {"names": names, "axis_idx": np.array([0,1,2]), "nonaxis_idx": np.array([3,4,5]),
             "P_A": P_A, "P_N": P_N, "e_axis_mean": e_am, "e_nonaxis_mean": e_nm, "rank_forward": rf}
     m = extract_window_metrics(env, geom, load_v3_config())
-    for k in ["net_offaxis_flux","mode_shift_density","nonaxis_activation_rate","global_energy",
-              "axial_energy","N_self_sustain","gain_axis","gain_nonaxis","beta_axis_strength"]:
+    for k in ["net_offaxis_flux_lag1","net_offaxis_flux_lag0","mode_shift_density","mode_singular_gap",
+              "nonaxis_activation_rate","n_activation_events","global_energy","axial_energy",
+              "N_self_sustain_lag1","N_self_sustain_lag0","gain_axis","gain_nonaxis","beta_axis_strength"]:
         assert k in m
-    assert np.isfinite(m["net_offaxis_flux"]) and m["net_offaxis_flux"] > m["N_self_sustain"] - 1.0  # A->N leak present
+    # lag1 (delayed A->N flow) exceeds lag0 (same-time co-activation) for a scripted one-step cascade
+    assert np.isfinite(m["net_offaxis_flux_lag1"]) and m["net_offaxis_flux_lag1"] > m["net_offaxis_flux_lag0"]
 ```
 
 - [ ] **Step 2: Run fail. Step 3: Implement** (per Contract; import the V3a/V2 helpers at module top; wrap each estimator in a local finite-guard returning `nan` on empty index / degenerate SVD). **Step 4: Run pass.**
@@ -389,7 +414,7 @@ def test_extract_window_metrics_keys_and_flux_sign():
 - Consumes: Task-2 `slope_over_windows`.
 - Produces: `null_slope_distribution(resample_traj_fn, estimator, n_perm, rng) -> np.ndarray`; `surplus_and_p(obs_slope, null_slopes, direction) -> dict`.
 
-**Contract:** `resample_traj_fn(rng) -> list[(values, centers)]` is a closure the caller builds once per null TYPE (label / rate / spatial): it draws ONE permutation (e.g. `label_permute` re-index, or `rate_preserving_shuffle` of the window data) and returns the recomputed per-seizure `(metric_values, centers)` pairs. `null_slope_distribution` fits `slope_over_windows` per seizure, takes the **median over seizures** = one null subject-slope, repeats `n_perm` times. `surplus_and_p`: `surplus = obs − median(null)`; `p = (1+#{null ≥ obs})/(1+n_perm)` for `direction="greater"`, `(1+#{null ≤ obs})/(1+n_perm)` for `"less"`; `z = (obs − median)/MAD` (NaN-safe; MAD via `1.4826*median(|null−median|)`, 0→nan).
+**Contract:** `resample_traj_fn(rng) -> list[(values, centers)]` is a closure the caller (Task 7) builds once per null TYPE and returns the recomputed per-seizure `(metric_values, centers)` pairs under one draw. **rev1: four closure types** — (a) **label** (`label_permute` re-index of axis/non-axis → rebuild `geom_perm` → recompute atom), (b) **rate-per-window** (`rate_preserving_shuffle` applied WITHIN each window's `active` independently, preserving per-window rate, then recompute flux), (c) **spatial** (`shaft_constrained_permute`), (d) **time-order** (circularly shift/shuffle the window ORDER, keeping each window's metric value + labels — permutes `centers`↔`values` pairing to test order-dependence). `null_slope_distribution` fits `slope_over_windows` per seizure, takes the **median over seizures** = one null subject-slope, repeats `n_perm` times. `surplus_and_p`: `surplus = obs − median(null)`; `p = (1+#{null ≥ obs})/(1+n_perm)` for `direction="greater"`, `(1+#{null ≤ obs})/(1+n_perm)` for `"less"`; `z = (obs − median)/MAD` (NaN-safe; MAD via `1.4826*median(|null−median|)`, 0→nan).
 
 - [ ] **Step 1: Failing test**
 
@@ -448,21 +473,24 @@ def surplus_and_p(obs_slope, null_slopes, direction) -> dict:
 **Files:** Create `scripts/run_topic5_v3p_trajectory.py`; Test `tests/test_topic5_v3p_integration.py`.
 **Interfaces:**
 - Consumes: Tasks 2–6 pure fns; V3a io `load_subject_phase_envelopes`/`classify_subject_contacts`; V3a `subspace_projectors`, `axis_nonaxis_vectors`, `rank_forward`, `label_permute`, `rate_preserving_shuffle`, `shaft_constrained_permute`; V2 `shaft_of`.
-- Produces: `v3p_trajectory_subject.csv` (co-primary cols below) + `v3p_window_detail.csv` (`subject, cohort, seizure_idx, phase, t_center, net_offaxis_flux, mode_shift_density, nonaxis_activation_rate, global_energy, axial_energy, N_self_sustain`).
+- Produces: `v3p_trajectory_subject.csv` (co-primary cols below) + `v3p_window_detail.csv` (`subject, cohort, seizure_idx, span, phase, t_center, net_offaxis_flux_lag1, net_offaxis_flux_lag0, mode_shift_density, mode_singular_gap, nonaxis_activation_rate, n_activation_events, global_energy, axial_energy, N_self_sustain_lag1, N_self_sustain_lag0, gain_axis, gain_nonaxis`).
 
 **Subject CSV co-primary cols:** `subject, cohort, status, skip_reason, geometry_sufficient, n_axis, n_nonaxis, n_ambiguous, n_seizures_used,`
 `net_offaxis_flux_slope_raw, net_offaxis_flux_surplus_slope, net_offaxis_flux_slope_resid, net_offaxis_flux_slope_z, p_label_slope_b, p_rate_slope_b, p_spatial_slope_b, proximal_flux_slope, spearman_rho_flux, leave_one_contact_flux_pass, axis_only_flux_control_pass, onset_jitter_pass_b, module_support_flag_b, module_direction_correct_b, module_null_pass_b,`
 `mode_shift_density_slope_raw, mode_shift_density_surplus_slope, mode_shift_density_slope_resid, mode_shift_density_slope_z, p_label_slope_c, p_phase_slope_c, p_block_slope_c, mode_shift_2D_consistency_slope, top_contact_energy_fraction, single_contact_driven, leave_one_contact_mode_pass, axis_only_mode_control_pass, onset_jitter_pass_c, rank_used, k_star, spearman_rho_mode, module_support_flag_c, module_direction_correct_c, module_null_pass_c,`
+**rev1 co-primary additions** — naming convention: the **unsuffixed** `*_surplus_slope`/`*_slope_z`/`p_label_slope_{b,c}` = the **`full` (headline)** span; each also gets a **`_guard`** companion (`net_offaxis_flux_surplus_slope_guard, net_offaxis_flux_slope_z_guard, p_label_slope_b_guard, mode_shift_density_surplus_slope_guard, mode_shift_density_slope_z_guard, p_label_slope_c_guard`). Plus: `near_onset_dependent_b, near_onset_dependent_c, lag1_specific_slope, common_drive_sensitive, mode_singular_gap_median, mode_vector_stable, cv_r2, n_activation_events_pre, n_active_windows_pre, h3b_activation_sufficient, h3c_support_grade, time_order_p_b, time_order_p_c, n_label_permutable_shafts, n_unique_label_permutations_est, label_null_underpowered,`
 `trend_estimator, slope_span`. **(no `tier`.)**
 
 **Contract:**
 - Build `geom` once per subject (`subspace_projectors`, `axis_nonaxis_vectors`, `rank_forward` from `classify_subject_contacts`; `shaft_by_name` via `shaft_of`).
-- **Observed:** per seizure, per preictal window (`load_subject_phase_envelopes` phases `P0..P3`), call `extract_window_metrics` → per-seizure metric trajectories `(values, centers=t_center)`; `slope_over_windows(..., "theil_sen")` per seizure; **subject obs = median over seizures**. Only seizures with ≥ `min_windows_for_slope` preictal windows count.
+- **Observed (rev1: two spans):** per seizure, per preictal window (`load_subject_phase_envelopes` phases `P0..P3`), call `extract_window_metrics` → per-seizure metric trajectories `(values, centers=t_center)`. **Compute every co-primary slope + null on BOTH `full=[−120,−10]` AND `guard=[−120,−20]` spans** (windows filtered by `t_center` range). `slope_over_windows(..., "theil_sen")` per seizure; **subject obs = median over seizures**. Only seizures with ≥ `min_windows_for_slope` preictal windows count.
 - **label-null (PRIMARY):** `resample_traj_fn` = closure that (a) draws `label_permute(axis_names, nonaxis_names, shaft_by_name, rng)`, (b) rebuilds `geom_perm` (P_A/P_N/idx from permuted labels), (c) recomputes each seizure's flux & mode-shift trajectory via `extract_window_metrics(env, geom_perm, v3cfg)`. `null_slope_distribution(...)` → `surplus_and_p(obs, null, "greater")` → `net_offaxis_flux_surplus_slope`/`mode_shift_density_surplus_slope`, `p_label_slope_{b,c}`, `_slope_z`.
-- **secondary nulls:** flux `p_rate_slope_b` (rate_preserving_shuffle of active bins) + `p_spatial_slope_b` (shaft_constrained_permute); mode-shift `p_phase_slope_c`/`p_block_slope_c` (phase-randomize/block-shuffle of `env_win`). Same `null_slope_distribution` machinery, different `resample_traj_fn`.
+- **nulls (rev1 HARD, not secondary):** flux `p_rate_slope_b` (**rate-per-window**: `rate_preserving_shuffle` applied within each window's `active` independently) + `p_spatial_slope_b` (`shaft_constrained_permute`); `lag1_specific_slope = slope(net_offaxis_flux_lag1 − net_offaxis_flux_lag0)`, `common_drive_sensitive = lag1_specific_slope <= 0`. mode-shift `p_phase_slope_c` + `p_block_slope_c` (phase-randomize + block-shuffle of `env_win`) — **both HARD**. `time_order_p_{b,c}` via the time-order closure (sensitivity).
 - **residualization (sensitivity):** `net_offaxis_flux_slope_resid`/`mode_shift_density_slope_resid` = `residualize_slope(metric_traj, centers, [global_energy_traj, axial_energy_traj], "theil_sen")` per seizure → median over seizures.
-- **gates:** `top_contact_energy_fraction=max(u_c²)/Σu_c²`; `single_contact_driven = > single_contact_energy_frac_max`; `leave_one_contact_*_pass` = surplus-slope sign survives dropping any one non-axis contact; `axis_only_*_control_pass` = surplus-slope not reproduced when non-axis relabeled to axis; `onset_jitter_pass_* = ` direction stable under ±10 s onset shift (recompute obs slope at `onset_shift∈{−10,+10}`).
-- `module_support_flag_b = direction_correct ∧ p_label_slope_b<alpha`; `module_support_flag_c = direction_correct ∧ p_label_slope_c<alpha ∧ p_block_slope_c<alpha` (dynamics keeps the phase/block guard). `geometry_insufficient`/`<min_windows` all seizures → `status=skipped`. narrow + broad separate; never pooled. `slope_span` primary=`full`; also write a `proximal_flux_slope` on `[-60,-10]`.
+- **label-null power QC (rev1):** `n_label_permutable_shafts` = #shafts with both axis & non-axis-strict; `n_unique_label_permutations_est = exp(Σ_shaft log C(n_shaft, k_axis_shaft))`; `label_null_underpowered = n_unique_label_permutations_est < label_null_min_unique_perms (100)`.
+- **QC (rev1):** `mode_singular_gap_median = median` over windows of `mode_singular_gap`; `mode_vector_stable = gap_median ≥ mode_singular_gap_min`; `n_activation_events_pre`/`n_active_windows_pre`; `h3b_activation_sufficient = n_activation_events_pre ≥ h3b_min_activation_events`.
+- **gates:** `top_contact_energy_fraction=max(u_c²)/Σu_c²`; `single_contact_driven = > single_contact_energy_frac_max`; `leave_one_contact_*_pass`; `axis_only_*_control_pass`; `onset_jitter_pass_*` stable under ±10 s.
+- **rev1 hardened module flags** (unsuffixed p = full/headline span): `module_support_flag_b = direction_correct ∧ p_label_slope_b<α ∧ p_label_slope_b_guard<α ∧ p_rate_slope_b<α ∧ (lag1_specific_slope>0)`; `h3c_support_grade = "strong" if (p_label_slope_c<α ∧ p_label_slope_c_guard<α ∧ p_phase_slope_c<α ∧ p_block_slope_c<α) else "weak" if (p_label_slope_c<α ∧ (p_phase_slope_c<α ∨ p_block_slope_c<α)) else "none"`, `module_support_flag_c = direction_correct ∧ h3c_support_grade=="strong"`. `near_onset_dependent_{b,c} = (full passes) ∧ ¬(guard passes)`. `geometry_insufficient`/`<min_windows` all seizures → `status=skipped`. narrow + broad separate; never pooled. `proximal_flux_slope` on `[-60,-10]` (sensitivity).
 
 - [ ] **Step 1: Failing integration test (two-tier)**
 
@@ -496,9 +524,9 @@ def test_v3p_trajectory_runs_on_eligible_subject(tmp_path):
 
 **Files:** Modify `scripts/run_topic5_v3p_trajectory.py`; Test `tests/test_topic5_v3p_integration.py`.
 **Interfaces:**
-- Produces: additional subject-CSV cols: `K_primary_metric(=line_length_rate), beta_axis_strength_slope, beta_axis_reliable, beta_axis_slope_z, p_label_slope_a, module_support_flag_a(=False),` `nonaxis_activation_burden_slope_raw, nonaxis_activation_burden_slope_resid, burden_slope_z, p_label_burden,` `N_self_sustain_slope, N_self_sustain_slope_z, p_label_selfsustain,` `gain_nonaxis_surplus_slope, gain_axis_slope, gain_nonaxis_slope_z`.
+- Produces: additional subject-CSV cols: `K_primary_metric(=line_length_rate), beta_axis_strength_slope, beta_axis_reliable, beta_axis_slope_z, p_label_slope_a, module_support_flag_a(=False),` `nonaxis_activation_burden_slope_raw, nonaxis_activation_burden_slope_label_surplus, nonaxis_activation_burden_slope_resid, burden_slope_z, p_label_burden,` `N_self_sustain_lag1_slope, N_self_sustain_lag0_slope, N_self_sustain_lag1_specific_slope, N_self_sustain_slope_z, p_label_selfsustain,` `gain_axis_slope, gain_nonaxis_slope, gain_shift_slope, gain_nonaxis_surplus_slope, gain_shift_slope_z`.
 
-**Contract:** reuse the SAME per-seizure window loop already computing the atom (do not re-load). H3p-a `beta_axis_strength` trajectory → Theil-Sen slope, expected `< 0`, `p_label_slope_a` via `surplus_and_p(obs, null, "less")`; `beta_axis_reliable = median(|β_axis|) ≥ beta_axis_reliability_min` (else slope not interpretable); **`module_support_flag_a` hard-coded False** (supportive-only). H3p-d: `nonaxis_activation_burden_slope_{raw,resid}` (resid vs global_energy trajectory), `N_self_sustain_slope`, `gain_nonaxis_surplus_slope` (obs slope − phase/block null-slope median); all with `_z` from `surplus_and_p`. All directions `greater` except beta_axis.
+**Contract:** reuse the SAME per-seizure window loop already computing the atom (do not re-load). H3p-a `beta_axis_strength` trajectory → Theil-Sen slope, expected `< 0`, `p_label_slope_a` via `surplus_and_p(obs, null, "less")`; `beta_axis_reliable = median(|β_axis|) ≥ beta_axis_reliability_min` (else not interpretable); **`module_support_flag_a` hard-coded False** (supportive-only). H3p-d (rev1): burden reports `_raw` + `_label_surplus` (obs − label-null median) + `_resid` (vs `global_activation_rate(t)`); **`N_self_sustain_lag1_specific_slope = slope(N_self_sustain_lag1) − slope(N_self_sustain_lag0)`** (≤0 → synchronous co-activation, NOT self-sustain — record but don't claim self-sustain); **gain leg primary = `gain_shift_slope = slope(gain_nonaxis − gain_axis)`** (relative; `gain_nonaxis_surplus_slope` kept for reference). All with `_z` from `surplus_and_p`; directions `greater` except beta_axis.
 
 - [ ] **Step 1: Failing integration test** (eligible subject → `beta_axis_strength_slope`, `nonaxis_activation_burden_slope_resid`, `N_self_sustain_slope`, `gain_nonaxis_surplus_slope`, `module_support_flag_a==False` present + `p_label_slope_a` in [0,1]). **Step 2: Run fail. Step 3: Implement. Step 4: Run pass.**
 - [ ] **Step 5: Commit** — `git commit -am "feat(topic5-v3p): supportive beta_axis slope (H3p-a) + secondary burden/self-sustain/gain slopes (H3p-d)"`
@@ -513,7 +541,7 @@ def test_v3p_trajectory_runs_on_eligible_subject(tmp_path):
 - Produces: `v3p_summary_subject.csv` + `v3p_cohort_tier.json` per cohort. **tier assigned ONLY here.**
 
 **Contract:**
-- `subject_support = (module_support_flag_b OR module_support_flag_c) AND onset_jitter_pass AND (not single_contact_driven) AND leave_one_contact_pass AND axis_only_control_pass`. H3p-a significant only strengthens; never sole. `geometry_insufficient`/`skipped` excluded from denominator.
+- `subject_support = (module_support_flag_b OR module_support_flag_c) AND onset_jitter_pass AND (not single_contact_driven) AND leave_one_contact_pass AND axis_only_control_pass AND (not near_onset_dependent_of_the_supporting_leg) AND (not label_null_underpowered)`. H3p-a significant only strengthens; never sole. `geometry_insufficient`/`skipped` excluded from denominator. **(rev1: `near_onset_dependent` → that leg does not count as strong support; `label_null_underpowered` subject excluded from the strong-positive denominator.)**
 - **cohort-level: Holm-correct the two co-primary p-values** — take the per-subject `slope_label_z` for H3p-b and H3p-c, Wilcoxon signed-rank (one-sided, direction correct) on subject-median across the cohort → two raw p; Holm-adjust the pair. narrow tier-3 needs a Holm-passed H3p-b OR H3p-c + subject-support count ≥ (config threshold, default ≥2).
 - `tier`: 0 none / 1 descriptive-direction-only / 2 ≥1 subject support, no cohort direction / 3 **narrow cohort co-primary (Holm-passed)** / 4 narrow + broad same-direction replication / (5 = model-side, out of scope). `state_v3p_supported = tier>=3`. **narrow + broad never pooled.** Emit `pre_registered_negative` flag = True when tier ≤ 1 (honest-negative path).
 
@@ -546,13 +574,13 @@ pytest tests/test_topic5_v3p_preictal_trajectory.py -v
 pytest -m integration tests/test_topic5_v3p_integration.py -v
 ```
 
-- [ ] **Hard QC:** windows eeg-onset anchored + **preictal-only** (no O/I1/I2/I3); trend = **Theil-Sen slope** (median over seizures); **support = H3p-b OR H3p-c**, H3p-a `module_support_flag` always False + only interpretable if `beta_axis_reliable`; **label-null-of-slope is the primary p** (surplus = obs − null median); residualization reported but **never gates** (collinearity floor documented); VAR **demeaned within window**; λ reported as `λ_surplus`; mode-shift = density-normalized singular-vector; ATM `i≠j`; `single_contact_driven`/`axis_only_control`/`leave_one_contact` computed (not asserted); **H3p-b/H3p-c Holm-corrected** at cohort level; tier only in summary; narrow primary / broad replication / **never pooled**; `geometry_insufficient` ≠ negative; jitter ±10 s stable; **no forecasting** language anywhere; **1125 (or any single subject) → descriptive case only, never rescues a cohort negative.**
+- [ ] **Hard QC:** windows eeg-onset anchored + **preictal-only** (no O/I1/I2/I3); trend = **Theil-Sen slope** (median over seizures); **support = H3p-b OR H3p-c**, H3p-a `module_support_flag_a` always False + only interpretable if `beta_axis_reliable`; **label-null-of-slope is the primary p** (surplus = obs − null median); residualization reported but **never gates** (collinearity floor documented); VAR **demeaned within window**; λ reported as `λ_surplus`; mode-shift = density-normalized singular-vector; ATM `i≠j`; `single_contact_driven`/`axis_only_control`/`leave_one_contact` computed (not asserted); **H3p-b/H3p-c Holm-corrected** at cohort level; tier only in summary; narrow primary / broad replication / **never pooled**; `geometry_insufficient` ≠ negative; jitter ±10 s stable; **no forecasting** language anywhere; **1125 (or any single subject) → descriptive case only, never rescues a cohort negative.** **(rev1) two-span (full+guard) both required for strong support; `near_onset_dependent` (full-only) → tier cap 2; H3p-b HARD gates `p_rate_slope_b` + `lag1_specific_slope>0`; rate null is PER-WINDOW; H3p-c HARD gates `p_phase_slope_c` + `p_block_slope_c` (strong vs weak grade); `gain_shift = gain_nonaxis − gain_axis`; `N_self_sustain_lag1_specific` (lag1−lag0); QC `mode_singular_gap_median`/`mode_vector_stable`/`h3b_activation_sufficient`/`label_null_underpowered` emitted, underpowered → excluded from strong-positive denominator.**
 
 ---
 
 ## Self-Review
 
-1. **Spec coverage:** preictal-only P0..P3 → Task 1/7 (`phases=["P0".."P3"]`); Theil-Sen slope → Task 2; co-primary flux+mode-shift → Task 7; label-null primary adjudicator → Task 6/7 (`null_slope_distribution` label closure); regression residual sensitivity → Task 4/7; N→N self-sustain → Task 3/8; H3p-a supportive (`module_support_flag=False`) → Task 8; H3p-d secondary → Task 8; Holm co-primary + tier → Task 9; geometry/dynamics inherited-locked → Global Constraints + Task 5 (`v3cfg=load_v3_config`); read-only V3a reuse / new-files-only → File Structure + every task; feasibility gate + min_windows lock → Task 1; onset jitter → Task 7; figure 2–3 panels → Task 10; no-forecasting/negative-acceptable → Global Constraints + Task 9 (`pre_registered_negative`). **Covered.**
+1. **Spec coverage:** preictal-only P0..P3 → Task 1/7; Theil-Sen slope → Task 2; co-primary flux+mode-shift → Task 7; label-null primary adjudicator → Task 6/7; regression residual sensitivity → Task 4/7; N→N self-sustain → Task 3/8; H3p-a supportive (`module_support_flag_a=False`) → Task 8; H3p-d secondary → Task 8; Holm co-primary + tier → Task 9; geometry/dynamics inherited-locked → Global Constraints + Task 5; read-only V3a reuse / new-files-only → File Structure; feasibility gate → Task 1; onset jitter → Task 7; figure → Task 10; no-forecasting/negative-acceptable → Global Constraints + Task 9. **rev1 coverage:** onset-guard two-span (full+guard, `near_onset_dependent`) → Global Constraints + config + Task 7 (Observed/flags); H3p-b HARD rate + lag1_specific → Task 5 (lag0/lag1 flux) + Task 7 flags; rate-null-per-window → Task 6 closure + Task 7; H3p-c HARD phase+block + strong/weak grade → Task 7; singular-gap/`mode_vector_stable`/`cv_r2` → Task 5 (`mode_singular_gap`) + Task 7; `h3b_activation_sufficient`/`n_activation_events_pre` → Task 5 + Task 7; `gain_shift_slope` → Task 5 (gain_axis/nonaxis) + Task 8; `N_self_sustain_lag1_specific` → Task 5 (lag0/lag1) + Task 8; label-perm QC + `label_null_underpowered` → Task 1 + Task 7 + Task 9 denominator; time-order null → Task 6 closure + Task 7. **Covered.**
 2. **Placeholder scan:** pure fns (Tasks 2–6) literal tests + full impl; runners (Tasks 1,7,8,9,10) exact columns + contract + null/gate logic as code; OPEN `min_windows_for_slope` pilot-locked at Task 1. **OK.**
 3. **Type consistency:** `slope_over_windows` (Task 2) → 4/6/7/8; `within_compartment_flux`/`global_axial_energy` (Task 3) → 5; `residualize_slope` (Task 4) → 7/8; `extract_window_metrics(env_win, geom, v3cfg)` (Task 5) → 7/8; `null_slope_distribution(resample_traj_fn,...)`/`surplus_and_p(obs, null, direction)` (Task 6) → 7/8; subject-CSV col names (Task 7/8) → 9 join; `slope_label_z` (Task 7/8) → 9 Wilcoxon. **Consistent.**
 
