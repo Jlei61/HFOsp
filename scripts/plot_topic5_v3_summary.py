@@ -398,12 +398,14 @@ def _short_caption(tier_payload: dict, caveats: dict) -> str:
     nb = tier_payload["narrow"]
     nc = caveats["narrow"]
     text = (
-        "Paired within-seizure P3→I1, n_perm=1000. The off-axis-flux surplus (filled) is "
-        "cohort-significant and leave-one-subject-out robust in both cohorts, but the raw flux "
-        f"(open) mostly decreases ({nc['n_raw_neg']}/{nc['n_ok']} narrow), is mostly common-drive "
-        f"co-activation, and only {nb['n_subject_support']}/{nb['n_geometry_sufficient']} narrow "
-        "subjects are individually robust; the mode-direction endpoint is null. → a fragile "
-        "data-side candidate signal, not an established axis→non-axis transition (detail: README)."
+        "Paired within-seizure P3→I1, n_perm=1000. The off-axis-flux surplus (filled) clears cohort "
+        "significance in both cohorts, but it is FRAGILE: the raw flux (open) mostly decreases "
+        f"({nc['n_raw_neg']}/{nc['n_ok']} narrow), is mostly common-drive co-activation, only "
+        f"{nb['n_subject_support']}/{nb['n_geometry_sufficient']} narrow subjects are individually "
+        "robust, and the PRIMARY-cohort significance is knife-edge (Holm p=0.031 — drops >0.05 if any "
+        "single narrow subject bar one is removed; only the replication cohort is drop-robust); the "
+        "mode-direction endpoint is null. → a fragile data-side candidate signal, not an established "
+        "axis→non-axis transition (detail: README)."
     )
     return "\n".join(textwrap.wrap(text, width=220))
 
