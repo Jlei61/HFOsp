@@ -198,6 +198,54 @@ def test_seizure_consistency_zero_median_is_nan():
     assert np.isnan(prof["within_subject_seizure_consistency"])
 
 
+def test_n_sz_counts_distinct_seizures_not_align_n_seizures():
+    """n_sz = distinct seizures in the per-seizure frame (robust to HFA bands
+    dropping seizures), NOT align_df's per-band n_seizures."""
+    rows = []
+    # seizures 0,1: all 7 primary bands; seizures 2,3,4: only low bands (HFA dropped)
+    for sz in (0, 1):
+        for band in PRIMARY_BANDS:
+            rows.append(dict(subject="S1", axis_set="narrow", seizure=sz, band=band,
+                             feature="raw", align_abs_maxab=0.5, n_contacts=12.0))
+    for sz in (2, 3, 4):
+        for band in LOW_BAND:
+            rows.append(dict(subject="S1", axis_set="narrow", seizure=sz, band=band,
+                             feature="raw", align_abs_maxab=0.5, n_contacts=12.0))
+    seizure_df = pd.DataFrame(rows)
+    # align_df deliberately reports n_seizures=2 to prove n_sz ignores it.
+    prof = subject_profile(_synth_null_df(), _synth_align_df(n_seizures=2), seizure_df,
+                           PRIMARY_BANDS)
+    assert prof["n_sz"] == 5  # distinct {0,1,2,3,4}, not align n_seizures=2
+
+
+def test_non_raw_rows_are_excluded_from_align_and_seizure():
+    """feature != 'raw' rows must not leak into align/seizure aggregates."""
+    align = _synth_align_df()
+    decoy_a = align.iloc[[0]].copy()
+    decoy_a["feature"] = "adjusted"
+    decoy_a["align_abs_maxab"] = 99.0  # would blow up maxab_primary if not filtered
+    align = pd.concat([align, decoy_a], ignore_index=True)
+
+    seiz = _synth_seizure_df()
+    decoy_s = seiz.iloc[[0]].copy()
+    decoy_s["feature"] = "adjusted"
+    decoy_s["seizure"] = 999          # would inflate n_sz to 4 if not filtered
+    seiz = pd.concat([seiz, decoy_s], ignore_index=True)
+
+    prof = subject_profile(_synth_null_df(), align, seiz, PRIMARY_BANDS)
+    assert prof["maxab_primary"] == pytest.approx(0.40)
+    assert prof["n_sz"] == 3
+
+
+@pytest.mark.filterwarnings("error::RuntimeWarning")
+def test_empty_align_returns_nan_maxab_without_warning():
+    """Zero align rows -> maxab_primary is NaN with no RuntimeWarning."""
+    empty_align = _synth_align_df().iloc[0:0]  # same columns, zero rows
+    prof = subject_profile(_synth_null_df(), empty_align, _synth_seizure_df(),
+                           PRIMARY_BANDS)
+    assert np.isnan(prof["maxab_primary"])
+
+
 # ---------------------------------------------------------------------------
 # Real-data smoke test: bad-data-regression acceptance gate (brief "Acceptance gate")
 # ---------------------------------------------------------------------------
@@ -223,18 +271,24 @@ def test_acceptance_gate_reproduces_phase1_baseline():
     assert len(narrow) == 20
     assert len(broad) == 17
 
-    # Even-pool median uses lower-middle convention (statistics.median_low) so that the
-    # narrow pool (n=20) reproduces the locked baseline value 2 (np.median would give 2.5).
+    # Median convention pinned in ALL THREE forms so no downstream task (2.2/2.3) can
+    # read a phantom regression under either convention: narrow is even-n (20) ->
+    # np.median 2.5 while statistics.median_low 2 (the Phase-1 archive "2"); broad is
+    # odd-n (17) -> both 3. count(n_sig>=4) is the convention-free, load-bearing stat.
     n_nar = narrow["n_sig_7bands"].astype(int).tolist()
     n_brd = broad["n_sig_7bands"].astype(int).tolist()
     assert statistics.median_low(n_nar) == 2
+    assert np.median(n_nar) == pytest.approx(2.5)
+    assert sum(v >= 4 for v in n_nar) == 6
     assert statistics.median_low(n_brd) == 3
+    assert np.median(n_brd) == pytest.approx(3.0)
+    assert sum(v >= 4 for v in n_brd) == 7
 
     ge4_nar = set(narrow.loc[narrow["n_sig_7bands"] >= 4, "subject"].astype(str))
     ge4_brd = set(broad.loc[broad["n_sig_7bands"] >= 4, "subject"].astype(str))
     assert len(ge4_nar) == 6
     assert len(ge4_brd) == 7
-    assert {"1146", "1150", "384"}.issubset(ge4_nar & ge4_brd)
+    assert (ge4_nar & ge4_brd) == {"1146", "1150", "384"}
 
 
 def test_band_group_membership_is_disjoint_partition():

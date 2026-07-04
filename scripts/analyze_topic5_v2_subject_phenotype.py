@@ -21,6 +21,7 @@ Output: results/topic5_ictal_recruitment/v2_band_scan/phase1_v2_subject_phenotyp
 from __future__ import annotations
 
 import argparse
+import statistics
 from pathlib import Path
 
 import numpy as np
@@ -174,9 +175,18 @@ def subject_profile(null_df: pd.DataFrame, align_df: pd.DataFrame,
     lvfa_score = _grp_median(LVFA_BAND)
     hfa_score = _grp_median(HFA_RIPPLE)
 
-    # align-subject frame over primary bands
-    al = align_df[align_df["band"].isin(primary_bands)]
-    maxab_primary = float(np.nanmedian(al["align_abs_maxab"].to_numpy(dtype=float)))
+    # align-subject frame over the 7 primary bands (feature=='raw' only)
+    al = align_df[(align_df["feature"] == "raw") & (align_df["band"].isin(primary_bands))]
+    maxab_vals = al["align_abs_maxab"].to_numpy(dtype=float)
+    if maxab_vals.size == 0 or not np.isfinite(maxab_vals).any():
+        maxab_primary = float("nan")  # empty / all-NaN align -> clean NaN, no RuntimeWarning
+    else:
+        maxab_primary = float(np.nanmedian(maxab_vals))
+
+    # per-seizure frame (feature=='raw' only); n_sz = distinct-seizure count, robust to
+    # HFA bands dropping seizures. _seizure_consistency filters further to primary bands.
+    sz_raw = seizure_df[seizure_df["feature"] == "raw"]
+    n_sz = int(sz_raw["seizure"].nunique())
 
     return {
         "subject": subject,
@@ -191,8 +201,8 @@ def subject_profile(null_df: pd.DataFrame, align_df: pd.DataFrame,
         "HF_minus_low": hfa_score - low_score,
         "ripple_rank": _descending_rank(deltas, primary_bands, "ripple_high"),
         "profile_entropy": _positive_profile_entropy(deltas),
-        "within_subject_seizure_consistency": _seizure_consistency(seizure_df, primary_bands),
-        "n_sz": _scalar_int(al["n_seizures"]),
+        "within_subject_seizure_consistency": _seizure_consistency(sz_raw, primary_bands),
+        "n_sz": n_sz,
         "n_contacts": _scalar_int(al["n_contacts"]),
         "maxab_primary": maxab_primary,
         "spatial_strength": _mode(spat["spatial_null_strength"]),
@@ -246,13 +256,20 @@ def main(argv=None):
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_df.to_csv(out_path, index=False)
 
+    # Median convention pinned here (downstream 2.2/2.3 build on this): the narrow pool
+    # is even-n (20) so np.median = 2.5 while statistics.median_low = 2; the Phase-1
+    # archive "2" is median_low of the identical n_sig distribution (a median
+    # convention, NOT a data change). count(n_sig>=4) [n_ge4/n_total] is the
+    # convention-free, load-bearing statistic. All three are reported per pool.
     for substrate in ("narrow", "broad"):
         sub = out_df[out_df["substrate"] == substrate]
-        n_sig = sub["n_sig_7bands"].astype(int)
-        ge4 = sorted(sub.loc[n_sig >= 4, "subject"].astype(str))
-        print(f"[{substrate}] n_subj={len(sub)} "
-              f"median_n_sig={float(np.median(n_sig)):.1f} "
-              f"count(>=4)={int((n_sig >= 4).sum())} ge4={ge4}")
+        n_sig = sub["n_sig_7bands"].astype(int).tolist()
+        n_ge4 = int(sum(v >= 4 for v in n_sig))
+        ge4 = sorted(sub.loc[sub["n_sig_7bands"] >= 4, "subject"].astype(str))
+        print(f"[{substrate}] n_total={len(n_sig)} "
+              f"median_n_sig={float(np.median(n_sig)):.2f} "
+              f"median_n_sig_low={statistics.median_low(n_sig)} "
+              f"n_ge4={n_ge4}/{len(n_sig)} ge4={ge4}")
     print(f"wrote {out_path} ({len(out_df)} rows)")
     return out_df
 
