@@ -53,7 +53,7 @@
 | **R3 — field（只读）** | 现有：网格（81×81）平滑 + support-masked 像素 Pearson + mirror/abs maxAB | 同平面平滑 **+ 网格** |
 
 **R2 与 R3 的唯一差别必须是"网格 vs 触点评估"**，其余一律复刻 R3，否则减法不干净。具体：
-- **极性处理复刻 R3**：R3 经 `corr_pair_mirror_invariant` 做 y-mirror（横向 PCA 轴符号本就任意）取 max，再 abs，再 A/B 取 max。R2 也用同一套——对 field-2 用 y-翻转后的 `y_norm` 重算"触点核平滑值"、与恒等取 max，再 abs，再 A/B maxAB。R1 无位置，mirror 无意义，只有 abs + A/B maxAB。
+- **极性处理复刻 R3**：R3 经 `corr_pair_mirror_invariant` 做 y-mirror（横向 PCA 轴符号本就任意，对应 `np.flip(F2,axis=0)`）取 max，再 abs，再 A/B 取 max。R2 复刻,但**mirror 只翻评估点 y、不翻源点**：activation 的源点（值所在触点）留在原位 `(x_k,y_k)`,把它的触点核场在 y-翻转的**评估点** `(x_i,−y_i)` 上求值得 `F2m_i`,与 `F1`（间期场,原评估点 `(x_i,y_i)`）在触点 i 上相关,取 `max(corr_identity, corr_mirror)`,再 abs,再 A/B maxAB。R1 无位置,mirror 无意义,只有 abs + A/B maxAB。
 - **support 只进核、不进最终相关**：R2 的最终 Pearson 在触点上**等权**（每触点一次），support 仅参与核加权（邻居权重）。R3 的像素 Pearson 隐含密度加权（密集触点区像素多=权重大）。**这个"像素密度加权 vs 触点等权"之差，正是网格效应本身**，不是 bug。
 
 **两个减法的科学含义**（仅在 R2 与 R3 同平面/同 σ/同 support/同极性处理时成立）：
@@ -89,10 +89,20 @@
 
 ## 5. Null 与统计合同
 
+### 5.0 逐发作聚合（与现有 R3 完全同口径——硬合同）
+
+R3（`run_topic5_axis_alignment.py`）是**先逐 seizure 算、再被试内取 median**，null 同口径。R1/R2 必须逐字复刻这个折叠，否则三档不可比：
+- `sim_s` = 每个 eligible seizure 的 maxAB（极性自由）；
+- `obs_subject = median_s(sim_s)`（= 现有 `real_med = np.median(real)`，L162）；
+- null：对每个 seizure 做 B 次打乱得 `sim_{s,b}`；**第 b 个被试级 null draw = `median_s(sim_{s,b})`**；被试级 null 分布 = 这 B 个 median，再取分位（= 现有 `_p95_med`：`dist = np.nanmedian(draws, axis=0)` 后 `nanpercentile(dist,95)`，L64-69）；
+- `pass = obs_subject > null95`。
+- eligible seizure 门：逐 seizure 配对触点有限值 ≥6（= 现有 L141）；split-half 子集过滤沿用 `eligible_idxs`。
+- **R1/R2/R3 共用同一个折叠 helper**，保证 seizure 维度处理完全一致。
+
 ### 5.1 主 null：within-shaft 打乱
 
 - 复用 `within_shaft_shuffle`（`src/topic5_axis_alignment.py:54`，按 `parse_shaft` 分组、组内置换、保多重集、绝不跨杆）。
-- 辅助 null：`channel_shuffle`（全打乱，弱对照）、`anchor_matched_shuffle`（按激活分位置换，控激活幅度）。
+- 辅助 null：`channel_shuffle`（全打乱，弱对照）、`anchor_matched_shuffle`（**anchor = `bact__idx` 基线活动**的分位置换，控"源端本就更活跃"；anchor 必须取 baseline activity，**不得**按当前发作激活分位分箱——现有 runner L154 已如此传入，锁死防漂）。
 
 ### 5.2 maxAB selection 进入每个 null draw（防选择偏置）
 
@@ -100,15 +110,16 @@
 
 ### 5.3 判据（sign-free）
 
-- 每被试每档：观测 `obs = max(|sim_A|, |sim_B|)`；`pass = obs > null 的 95 分位`（单侧、极性自由）。
+- 每被试每档：观测 `obs = obs_subject = median_s(max(|sim_{s,A}|, |sim_{s,B}|))`（逐发作折叠见 §5.0）；`pass = obs > null95`（单侧、极性自由）。
 - `signed corr`（A/B 各自的带符号 Pearson）只作 sidecar：报 source 端热 / sink 端热，**不进 pass/fail**。
 - `effective_shuffle_n < MIN`（`effective_shuffle_n`，`src/topic5_axis_alignment.py:137`，数实际移动的通道）→ 标 `INSUFFICIENT_NULL`，**不静默判通过**。
 - **保存完整 null 分位数**（至少 p5/p50/p95/p99 + 观测分位），不仅保存 p 值。
 
-### 5.4 阶梯减法的统计
+### 5.4 阶梯减法的统计 + equivalence margin（SESOI）
 
-- `R3 − R2`、`R2 − R1`：报 **paired Δ 分布 + CI**（被试为单位，bootstrap 或符号检验 CI）。
-- **不预设 arbitrary δ_grid 阈值**；gate 围绕 paired Δ 的 CI 是否排除"有意义效应"来陈述（见 §6）。
+- `R3 − R2`、`R2 − R1`：报 **paired Δ 分布 + CI**（被试为单位 `obs_subject`，bootstrap 或符号检验 CI）。
+- **预注册 SESOI = 0.05**（最小关心效应；lockable）。等价性判据（TOST 式）：**仅当** paired Δ 的 CI 完全落在 ±SESOI 内，才可陈述"该步骤增益可忽略"；否则只能说"未见可分辨增益"。
+- CI 含 0 但宽于 ±SESOI = **没看清**，不是"无贡献"（这正是 P1 等价性要点）。
 
 ---
 
@@ -117,7 +128,7 @@
 ### 6.1 队列级陈述（每条都绑定一个数值判据）
 
 1. **几何无关已足够**：R1 通过的被试占比。高 → "对主结论而言 field 非必要条件"（措辞见 §9）。
-2. **网格惰性**（field 非网格依赖）：`R3 − R2` 的 paired Δ CI 是否包含 0 / 排除有意义效应；且 R2 在这些被试上通过。CI 贴 0 → "网格没加东西，R2 复现 field"。
+2. **网格惰性**（field 非网格依赖）：`R3 − R2` 的 paired Δ；**仅当 CI ⊂ ±SESOI（等价性通过）** → "网格增益可忽略，R2 复现 field 读出"；CI 含 0 但更宽 → "未见可分辨网格增益"（非"无贡献"）。
 3. **平滑稳健**：R2 的 pass/fail 判据在 `σ ∈ {0.5,1,2}×` 三档下是否翻转。不翻 → "不是带宽调出来的"。
 4. **field 依赖平滑/网格读出**（最伤情形）：R3 通过但 R2 不通过的被试 → 计数点名。措辞为"field 依赖平滑/网格读出"，**不写"假象"**（且因 R2 已与 R3 同平面/同 σ/同 support/同 null，此解释才成立）。
 
@@ -133,18 +144,20 @@
 
 ## 7. 预注册参数（实现前锁定，写进运行配置）
 
-| 参数 | 含义 | 暂定值（实现时核定后锁） |
+| 参数 | 含义 | 预注册值（已锁） |
 |---|---|---|
-| `MIN_CH` | 最少配对触点数（否则不入队列） | 与 axis_alignment 同口径（核定） |
-| `MIN_SHAFTS` | 最少电极杆数（within-shaft null 不退化） | 2 |
-| `MIN_EFFECTIVE_SHUFFLE_N` | 实际移动通道数下限 | 核定（否则 `INSUFFICIENT_NULL`） |
-| `B` | null 置换次数 | 2000 |
-| `seed` | 固定随机种子 | 固定（写入产物 provenance） |
+| `MIN_CH` | 最少配对触点数（= 现有 A-line L91 口径） | **6** |
+| `MIN_SHAFTS` | 最少电极杆数（within-shaft null 不退化） | **2** |
+| `MIN_EFFECTIVE_SHUFFLE_N` | 实际移动通道数下限 | **4**（否则 `INSUFFICIENT_NULL`） |
+| `MIN_FINITE_PER_SZ` | 逐 seizure 配对触点有限值下限（= 现有 L141） | **6** |
+| `B` | null 置换次数（= 现有 maxAB 文件 B1000） | **1000** |
+| `seed` | 固定随机种子 | **20260614** |
+| `SESOI` | 等价性边界（§5.4） | **0.05** |
 | `sigma_xy` | R2 主版核宽 | = R3 冻结值（不另估） |
 | `sigma_sweep` | R2 sensitivity | {0.5, 1, 2} × `sigma_xy` |
 | 相关类型 | ladder primary / sequence-sanity | Pearson / (Spearman + Kendall) |
 
-`require t_a`（必须）；`t_b` 可选（缺则单模板，null 同步单模板）。
+`require t_a`（必须）；`t_b` 可选（需 ≥4 有限值，= 现有 L114；缺则单模板，null 同步单模板）。
 
 ---
 
@@ -154,10 +167,10 @@
 
 - `src/topic5_contact_similarity.py`（核心新原件，单一职责：触点层相似性 + 同平面/3D 触点核 + null）
   - `median_nn_spacing` 复用现有（R2 主版直接取 R3 σ，不需重算；3D 版仅 R2b 用，按需加 `_median_nn_spacing_3d`）
-  - `kernel_smooth_at_contacts(values, pts, support, sigma)` — 仿 `smooth_field`（`src/propagation_contact_plane_readout.py:230`）的核数学，但评估点 = 触点（含自权重），返回每触点平滑值
+  - `kernel_smooth_at_contacts(values, source_pts, eval_pts, support, sigma)` — 仿 `smooth_field`（`src/propagation_contact_plane_readout.py:230`）的核数学；**显式区分源点/评估点**（mirror 通过传入 y-翻转的 `eval_pts` 实现，源点不动，见 §3.1）；恒等档 `eval_pts=source_pts=触点`（含自权重）；返回每评估点平滑值
   - `contact_similarity(rank, value, *, mode)` — `mode='raw'`（R1，unweighted Pearson）/ `mode='kernel'`（R2，同平面触点核后 Pearson）；统一返回带符号 corr
-  - `polarity_free_maxab(rank_a, rank_b, value, *, mode, ...)` — 对 A/B 各算取 `max(|·|)`；`mode='kernel'` 复刻 R3 的 y-mirror（对 field-2 用翻转 `y_norm` 重算后取 max），`mode='raw'` 无 mirror
-  - `within_shaft_null(rank_a, rank_b, value, names, *, mode, B, seed)` — 每 draw 重算 maxAB，返回完整 null 分位 + 观测分位 + `effective_shuffle_n`
+  - `polarity_free_maxab(rank_a, rank_b, value, *, mode, ...)` — 对 A/B 各算取 `max(|·|)`；`mode='kernel'` 复刻 R3 的 y-mirror（对 field-2 翻转**评估点** y 重算后取 max，源点不动，见 §3.1），`mode='raw'` 无 mirror
+  - `within_shaft_null(...)` — **逐 seizure × B 打乱、每 draw 重算 maxAB、按 §5.0 median-over-seizures 折叠**（与 R1/R2/R3 共用折叠 helper），返回完整 null 分位（p5/p50/p95/p99）+ 观测分位 + `effective_shuffle_n`；`anchor_matched` 档 anchor 取 `bact__idx`
   - `sequence_similarity(rank, value)` — Spearman + Kendall（sequence-sanity track）；可复用 `_spearman_on_intersection`（`src/ictal_er_rank.py:596`）的名键交集模式
 - `scripts/run_topic5_contact_similarity.py` — 遍历队列：载 `t_a/t_b` + `bb_auc`（+`hfa_auc`）；算 R1/R2/R2b(opt)/R3(只读)/σ 扫描/sequence-sanity；写 per-subject JSON + `cohort_summary.{json,csv}`
 - `scripts/plot_topic5_contact_similarity.py` — 三面板（§8.3）+ 中文 `figures/README.md`
@@ -165,7 +178,7 @@
 
 ### 8.2 只读复用
 
-- R3 场 maxAB：读 `run_topic5_axis_alignment.py` 既有 per-subject 输出（不重算）。
+- **R3 在新 runner 中按同一 `B=1000`/`seed=20260614`/`statistic=max_ab`/折叠重算**（与 R1/R2 完全同口径、存完整分位 p5/p50/p95/p99），并**交叉校验**新 R3 vs 既有 `axis_alignment_broadband_max_ab_B1000.json`（及 `hfa_max_ab_B1000`）在 MC 误差内一致。理由：既有 maxAB 文件只存 `*_null_p95`/`*_null_median`、B=1000、无完整分位，直接只读与本 spec 的"完整分位 + 三档同 B/seed/折叠"合同不匹配。**声明：R3 重算不改 A-line 主结果，仅为 ladder 同构。**
 - 几何/平滑原件：`smooth_field` / `_support_corr` / `corr_pair_mirror_invariant` / `make_field_record` / `matched_channels`（位置见 §11）。
 - 打乱件：`within_shaft_shuffle` / `anchor_matched_shuffle` / `channel_shuffle` / `effective_shuffle_n`。
 - 坐标（仅 R2b）：`load_subject_coords` + `assert_coord_result_is_mm_for_main_analysis` + `parse_shaft`。
@@ -194,7 +207,7 @@
 - "field 依赖平滑/网格读出（R3 过、R2 不过）。"
 
 **禁止**：
-- ✗ "`R3−R2` = 纯网格贡献"——除非明确 R2 与 R3 同 2D 平面 + 同 σ + 同 support（本设计已满足，但措辞需带这个前提）。
+- ✗ "`R3−R2` = 纯网格贡献 / 网格无贡献 / 网格没加东西"——"纯网格"须带"R2 与 R3 同 2D 平面 + 同 σ + 同 support + 同极性处理"前提（本设计已满足）；"增益可忽略"须 SESOI 等价性通过（§5.4），否则只能说"未见可分辨网格增益"。
 - ✗ "R1 过 ⇒ field 没用 / 是假象"——应说"field 非必要条件，但仍有形态/support 读出价值"。
 - ✗ "R3 过 R2 不过 ⇒ 假象"——应说"依赖平滑/网格读出"，且须先确认 R2 坐标系/support/σ/null 与 R3 同构（本设计构造上同构）。
 - ✗ 任何 forward/reverse 方向主张——本分析 sign-free，方向只在 sidecar 描述。
@@ -214,6 +227,10 @@
 8. 退化：单杆 → `INSUFFICIENT_NULL`；缺 `t_b` → 单模板路径且 null 同步单模板。
 9. like-for-like：R1/R2/R3 喂的 `matched` 通道集合一致（断言三档同一 channel 列表）。
 10. provenance：产物含 `seed`、`B`、`sigma_xy`、输入文件路径、loader 版本。
+11. seizure 折叠：多 seizure 输入 → `obs=median_s`、null 第 b draw = `median_s(sim_{s,b})`（与 `_p95_med`：`nanmedian(draws,axis=0)` 后 p95 数值一致的小算例）。
+12. R2 mirror：翻**评估点** y（非源点）→ 与 R3 网格 `np.flip(F2,axis=0)` 在共线小算例上同号一致。
+13. equivalence：构造 `|Δ|<SESOI` 与 `|Δ|>SESOI` 两算例 → 等价性判据分别给"增益可忽略"/"未见可分辨"。
+14. R3 交叉校验：新 R3 @ `B=1000`/`seed=20260614`/`max_ab` 与既有 `*_max_ab_B1000.json` 的 `real_median_abs_corr`/`within_shaft_null_p95` 在 MC 误差内一致。
 
 ---
 
@@ -239,3 +256,12 @@
 - **P1-c**：指标族锁死。拆两条独立输出：field-like Pearson ladder（专答 ablation）vs Spearman/Kendall sequence sanity（专答序列像不像）。
 - **软化**：见 §9 措辞模板（"field 非必要但仍有形态/support 价值"；"依赖平滑/网格读出"非"假象"；`R3−R2=网格`须带同构前提）。
 - **硬合同**：见 §5/§7（固定 B/seed、保存完整 null 分位、丢 arbitrary δ_grid 改报 paired Δ + CI、eligibility 门、R2 复用 field support、R1 用 unweighted raw 不混解释）。
+
+### 评审契约记录（2026-06-30 第二轮 review，核实代码后采纳）
+- **P0 逐发作聚合**：现有 R3 是逐 seizure maxAB → 被试内 `median_s`（`real_med` L162），null 第 b draw = `median_s(sim_{s,b})`（`_p95_med` `nanmedian(draws,axis=0)` L64-69）。核实属实——原 spec 漏了 seizure 维度,R1/R2 会与 R3 不可比。改：§5.0 加折叠硬合同,R1/R2/R3 共用折叠 helper。
+- **P1 R3 only-read 不匹配**：核实只有 `*_max_ab_B1000.json`（B=1000、仅存 p95/median、无完整分位）；B2000 是非 maxAB 变体。改：R3 在新 runner 同 `B=1000`/`seed=20260614`/`max_ab`/折叠重算 + 存完整分位 + 交叉校验既有文件;声明不改 A-line 主结果（§8.2）。
+- **P1 equivalence margin**：CI 含 0 ≠ 无贡献。改：§5.4 预注册 `SESOI=0.05` + TOST 式等价判据;§6.1/§9 措辞改"增益可忽略（等价通过）"/"未见可分辨增益"。
+- **P1 预注册不留"核定"**：核实 `MIN_CH<6` 即现有 A-line L91 口径。锁:`MIN_CH=6`、`MIN_EFFECTIVE_SHUFFLE_N=4`、`MIN_FINITE_PER_SZ=6`(L141)、`t_b≥4`(L114)、`B=1000`、`seed=20260614`、`SESOI=0.05`（§7）。
+- **P1-5a R2 mirror 语义**：核实 R3 mirror = `np.flip(F2,axis=0)`（翻评估场 y）。改:`kernel_smooth_at_contacts` 签名区分 `source_pts`/`eval_pts`;mirror 只翻 `eval_pts` y、源点不动（§3.1/§8.1）。
+- **P1-5b anchor 来源**：核实现有 runner L154 已用 `anchor = data["bact__idx"]`(基线活动),`anchor_matched_shuffle` 按其分位分箱(L70-92),非按当前激活。已正确,§5.1 锁死防新 runner 漂移。
+- **措辞收紧（点 4）**：R1 过=field 非必要条件(非无价值);R2≈R3=触点核复现 field 读出;R3 过 R2 不过=依赖网格/像素 support 读出(非假象);R3−R2 无 SESOI 通过不写"无贡献"（§9）。
