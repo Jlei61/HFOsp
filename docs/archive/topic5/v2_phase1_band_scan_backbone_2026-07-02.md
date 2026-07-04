@@ -119,6 +119,18 @@ date 2026-07-02 · 分支 `topic5-v2-phase1-build`（worktree `/home/honglab/lei
 
 **tags**：`legacy: PASS` · `cohort exploratory null-positive (6/7 primary FWER, weak null, likely inflated)` · `per-subject: WEAK (narrow median 2/7, ≥5/7 only 3/20)` · `formal within-shaft Gate A: unresolved (2/20)` · `order (strong 13): supportive` · `band-generic (narrow flat / broad mild β) · NOT ripple-specific` · `Gate B/C: NOT run` · `time: onset+0–20s only` · **`verdict: Phase-1 exploratory candidate-scaffold ACCEPTED (cohort-level); NOT formal/mechanism`**。
 
+**图（paper-ready = Fig3-Sup1，Fig3-A field concordance 的多频带 supplement）**：3 panel 各答一个独立问题，遵 figure_style_guide §0。
+- **A 观测层** `results/topic5_ictal_recruitment/v2_band_scan/figures/phase1_F1_observed_maxAB_heatmap.png` — subject×band maxAB 热图（红蓝 diverging 蓝<0.5<红、显著 cell 标白星=自身 null p<0.05、primary\|composite 黑虚线、末行 cohort 中位）：narrow>broad、band-generic。
+- **B 形式化 null** `.../figures/phase1_F2_null_per_band.png` — 每 primary 带 per-subject Δ violin+背景点、cohort Δ 黑条、`*`=过 family-wise：两池 6/7 过、ripple_high n.s.（NOT ripple-specific）。
+- **C per-subject caveat** `.../figures/phase1_F3_per_subject_stability.png` — 每 subject 显著频带数：cohort 6/7 是**聚合**、narrow 中位 2/7（承重 caveat）。
+- **paper-ready 副本（Fig3-Sup1）**：`results/paper-ready-figure/fig3_sup1_multiband_field_alignment/figures/fig3sup1_{A,B,C}_*.{png,pdf}`；脚本 `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`（复用 `scripts/plot_topic5_v2_phase1_figures.py`）。
+
+**关键路径（整体验收索引）**：
+- artifacts（n_perm=1000）：`results/topic5_ictal_recruitment/v2_band_scan/{narrow,broad}/phase1_{gate,null_raw,alignment_raw}_*`
+- 代码：`src/topic5_v2_band_scan.py` + `scripts/run_topic5_v2_{alignment,nulls,gates}.py`（34 纯测绿）
+- spec：`docs/superpowers/specs/2026-07-02-topic5-v2-phase1b-gate-closure-spec.md`（§EXP frame + §0–§8 锁）
+- 下一步 plan：`docs/superpowers/plans/2026-07-04-topic5-v2-phase1-v2-scaffold-closure.md`
+
 ## 0. 摘要（朴素话，措辞见上方"口径修正"，频带特异描述已降级为 narrow band-generic）
 
 **测了什么**：癫痫病人发作**刚起头 20 秒**里，每个频带（δ→ripple）的能量在电极阵列上"点亮"成一张空间图；间期时同一批触点各自有一条"平时谁先谁后"的 HFO 传播几何（G_HFO）。我们问：发作早期某频带的能量场，长得像不像间期这张顺序几何图，而且这种像**能不能扛过三道质疑**——(A) 只是空间涂抹？(B) 只是宽带整体招募？(C) 只是 1/f 背景？

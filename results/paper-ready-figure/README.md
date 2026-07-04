@@ -27,6 +27,13 @@
 - `fig3_field_concordance_cohort_stat/` — **Fig3-A**：cohort 级 Data-vs-Null 统计面板
   （maxAB 可评估 subject 上间期传播场与发作早期激活场整体高于 channel-shuffle null）。
   脚本 `scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py`。
+- `fig3_sup1_multiband_field_alignment/` — **Fig3-Sup1**（V2 Phase-1，multi-band supplement）：3 panel
+  A 观测 subject×band maxAB 热图（narrow>broad、band-generic）/ B 每 primary 带 per-subject Δ vs 弱空间
+  null violin（6/7 过 family-wise、ripple_high n.s.=NOT ripple-specific）/ C per-subject 稳定性（cohort
+  6/7 是聚合、narrow 中位 2/7 = 承重 caveat）。**tier=exploratory candidate scaffold（cohort 层，非
+  formal/机制）**；formal within-shaft Gate A 未评估(2/20)、Gate B/C 未跑。脚本
+  `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档
+  `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`。
 
 ## Fig4 — Subject-specific SNN 读出（病人真实电极几何）
 
