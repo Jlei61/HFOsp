@@ -91,3 +91,32 @@ def test_extract_window_metrics_keys_and_flux_sign():
         assert k in m
     # lag1 (delayed A->N flow) exceeds lag0 (same-time co-activation) for a scripted one-step cascade
     assert np.isfinite(m["net_offaxis_flux_lag1"]) and m["net_offaxis_flux_lag1"] > m["net_offaxis_flux_lag0"]
+
+def test_extract_window_metrics_never_raises_on_degenerate_windows():
+    # SAME 6-contact geom as the atom test above; the load-bearing invariant Task 7's
+    # per-subject loop depends on: one degenerate window must not raise / drop keys.
+    names = [f"A{i}" for i in range(6)]
+    axis = names[:3]; nonaxis = names[3:]
+    P_A, P_N = subspace_projectors(names, axis, nonaxis)
+    rf = rank_forward({n: float(i) for i, n in enumerate(axis)})
+    e_am, e_ag, e_nm = axis_nonaxis_vectors(names, rf, axis, nonaxis)
+    geom = {"names": names, "axis_idx": np.array([0,1,2]), "nonaxis_idx": np.array([3,4,5]),
+            "P_A": P_A, "P_N": P_N, "e_axis_mean": e_am, "e_nonaxis_mean": e_nm, "rank_forward": rf}
+    cfg = load_v3_config()
+    expected = {"net_offaxis_flux_lag1","net_offaxis_flux_lag0","mode_shift_density","mode_singular_gap",
+                "nonaxis_activation_rate","n_activation_events","global_energy","axial_energy",
+                "N_self_sustain_lag1","N_self_sustain_lag0","gain_axis","gain_nonaxis","beta_axis_strength"}
+    degenerate = [
+        np.zeros((6, 1)),      # n_t=1: no successive diff / VAR sample pair
+        np.zeros((6, 2)),      # zero-variance window
+        np.ones((6, 200)),     # all-constant window
+    ]
+    for env in degenerate:
+        m = extract_window_metrics(env, geom, cfg)   # must NOT raise
+        assert set(m.keys()) == expected
+        for k, v in m.items():
+            # every value is a real scalar (finite or nan); n_activation_events is the
+            # brief-mandated int count (int(active.sum())), the rest are floats -> admit
+            # both, but forbid inf / non-scalar (a silently-broken estimator).
+            assert isinstance(v, (int, float)), f"{k}={v!r} is not a scalar"
+            assert np.isfinite(v) or np.isnan(v), f"{k}={v!r} is inf"

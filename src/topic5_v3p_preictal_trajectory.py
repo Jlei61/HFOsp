@@ -175,10 +175,13 @@ def extract_window_metrics(env_win, geom, v3cfg) -> dict:
         atm1 = None
         try:
             atm1 = atm_offdiag(active)
-            out["net_offaxis_flux_lag1"] = net_offaxis_flux(atm1, axis_idx, nonaxis_idx, "source_mean")
         except Exception:
             atm1 = None
         if atm1 is not None:
+            try:
+                out["net_offaxis_flux_lag1"] = net_offaxis_flux(atm1, axis_idx, nonaxis_idx, "source_mean")
+            except Exception:
+                pass
             try:
                 out["N_self_sustain_lag1"] = within_compartment_flux(atm1, nonaxis_idx)
             except Exception:
@@ -187,10 +190,13 @@ def extract_window_metrics(env_win, geom, v3cfg) -> dict:
         atm0 = None
         try:
             atm0 = atm_lag0(active)
-            out["net_offaxis_flux_lag0"] = net_offaxis_flux(atm0, axis_idx, nonaxis_idx, "source_mean")
         except Exception:
             atm0 = None
         if atm0 is not None:
+            try:
+                out["net_offaxis_flux_lag0"] = net_offaxis_flux(atm0, axis_idx, nonaxis_idx, "source_mean")
+            except Exception:
+                pass
             try:
                 out["N_self_sustain_lag0"] = within_compartment_flux(atm0, nonaxis_idx)
             except Exception:
