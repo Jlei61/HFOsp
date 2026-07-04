@@ -1,0 +1,46 @@
+phases:
+  window_sec: 10.0
+  step_sec: 5.0
+  hop_sec: 0.1
+  span_pre_sec: 120.0
+  span_post_sec: 60.0
+  P3_rel: [-30.0, -10.0]
+  O_rel: [-10.0, 10.0]              # buffer only
+  I1_rel: [10.0, 30.0]
+  I1_min_duration_sec: 30.0         # primary I1 requires duration >= this
+  I1_post_guard_sec: 2.0            # short fallback: [+10, offset - post_guard]
+geometry:
+  state_band: legacy_bb_1_45
+  nonaxis_hfo_participation_max: 0.10   # pilot-locked 2026-07-02 (feasibility narrow 7/7; clean split: non-axis part=0.0 vs axis>=0.34)
+  beta_axis_reliability_min: 0.20       # pilot-locked 2026-07-02 (H3a supportive-only, non-load-bearing)
+  min_n_axis: 5
+  min_n_nonaxis: 3
+dynamics:
+  var_ridge_alpha: 1.0
+  demean_within_window: true            # mean-energy rise must not become coupling
+  standardize_within_window: false      # would erase real variance/gain
+  lowrank: 6                            # pilot-locked 2026-07-02 (dominant-mode extraction; all-clean 30-124 contacts)
+  finite_horizon_k: 3                   # k* primary (confirmed 2026-07-02)
+  finite_horizon_profile: [1, 2, 3, 5]
+  mode_shift_normalization: density     # density (÷rank) primary
+  h3c_require_label_null: true
+  surrogates: [phase_randomize, block_shuffle]
+  block_len_sec: 2.0
+avalanche:
+  z_threshold: 2.0
+  bin_sec: 0.1
+  flux_normalization: source_mean       # per-source mean, not summed
+  # common-drive control: the avalanche run RECORDS `common_drive_sensitive`
+  # (lag1_specific_delta <= 0); the summary applies it in subject_support (hard
+  # AND per plan §Task10) and also records `common_drive_downgrade`. This key is
+  # unwired/reserved (the run never self-gates on lag1_specific).
+  require_lag1_specific_positive: false
+statistics:
+  primary_pvalue_on_delta_null: true
+  co_primary_correction: holm
+  primary_endpoints: [H3b_delta_net_offaxis_flux_surplus, H3c_delta_mode_shift_density]
+  single_contact_energy_frac_max: 0.50
+nulls: {n_perm_smoke: 20, n_perm_dev: 100, n_perm_final: 1000, seed: 20260702, alpha: 0.05}
+cohorts: {primary: narrow, replication: broad, never_pool: true}
+jitter_sec: [5.0, 10.0, 15.0]
+tier: exploratory
