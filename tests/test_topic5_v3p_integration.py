@@ -194,6 +194,9 @@ def test_v3p_summary_tier_ladder_holm_and_broad_core_divergence(tmp_path):
     excl = next(r for r in narrow_summary_rows if r["subject"] == "epilepsiae_9099")
     assert excl["excluded_from_denominator"] == "True"
     assert excl["subject_support"] == "False"  # status=skipped overrides a look-alike full gate stack
+    by_subj = {r["subject"]: r for r in narrow_summary_rows}
+    assert by_subj["epilepsiae_9001"]["subject_support"] == "True"
+    assert by_subj["epilepsiae_9001"]["support_driver"] == "H3p-b"  # b-leg names itself as the driver
 
     narrow_payload = json.loads((tmp_path / "narrow" / "v3p_cohort_tier.json").read_text())
     broad_payload = json.loads((tmp_path / "broad" / "v3p_cohort_tier.json").read_text())
@@ -313,3 +316,104 @@ def test_v3p_summary_honest_negative_tier(tmp_path):
     assert payload["tier_broad_core"] == 1
     assert payload["state_v3p_supported"] is False
     assert payload["pre_registered_negative"] is True
+
+
+def test_v3p_summary_underpowered_subject_excluded_from_cohort_denominator(tmp_path):
+    """Fix 1 (spec §7/§8/§11 "不计强阳性分母"): a ``label_null_underpowered``
+    subject is a POPULATION-level exclusion (same class as
+    geometry_insufficient/skipped), not merely a subject_support demotion --
+    it must drop from BOTH the support-fraction denominator (``n_eligible``)
+    AND the cohort Wilcoxon z population, exactly like a skipped subject.
+
+    Constructed so the exclusion is DECISIVE, not cosmetic: 6 clean subjects
+    with H3p-b z=[6,5,4,3,2,1] alone give p_holm_b=0.03125 (cohort_b_pass=True).
+    A 7th subject is status=ok + geometry_sufficient=True (so NEITHER of the
+    other two exclusion rules would catch it) but label_null_underpowered=True,
+    carrying an extreme z_b=-100 that -- IF wrongly included -- drags the
+    same Wilcoxon to p_holm_b=0.297 (cohort_b_pass=False). Every assertion
+    below therefore flips between the pre-fix (included) and post-fix
+    (excluded) code: a genuine RED->GREEN lock, not a no-op on this fixture.
+    (On the ACTUAL cohort no subject is underpowered, so the production run is
+    unaffected -- this test guards the general case + future data.)
+    """
+    from scripts.run_topic5_v3p_summary import main
+
+    rows = [
+        _v3p_row("epilepsiae_4001", "narrow", z_b=6.0, z_c=-3.0, supported=True),
+        _v3p_row("epilepsiae_4002", "narrow", z_b=5.0, z_c=-2.0, supported=True),
+        _v3p_row("epilepsiae_4003", "narrow", z_b=4.0, z_c=-1.0),
+        _v3p_row("epilepsiae_4004", "narrow", z_b=3.0, z_c=-1.0),
+        _v3p_row("epilepsiae_4005", "narrow", z_b=2.0, z_c=-2.0),
+        _v3p_row("epilepsiae_4006", "narrow", z_b=1.0, z_c=-3.0),
+        # status=ok + geometry_sufficient -> ONLY the label_null_underpowered
+        # rule can exclude it; a module-supported-looking gate stack + extreme
+        # z that WOULD swing the Wilcoxon if (wrongly) counted.
+        _v3p_row("epilepsiae_4099", "narrow", z_b=-100.0, z_c=100.0, supported=True,
+                 label_null_underpowered=True),
+    ]
+    _write_v3p_trajectory_csv(tmp_path / "narrow" / "v3p_trajectory_subject.csv", rows)
+    main(["--cohort", "narrow", "--indir", str(tmp_path)])
+
+    with (tmp_path / "narrow" / "v3p_summary_subject.csv").open(newline="") as fh:
+        by_subj = {r["subject"]: r for r in csv.DictReader(fh)}
+    # still APPEARS in the per-subject CSV (never silently dropped), but flagged
+    # out of the denominator and granted no support
+    assert len(by_subj) == 7
+    assert by_subj["epilepsiae_4099"]["excluded_from_denominator"] == "True"
+    assert by_subj["epilepsiae_4099"]["subject_support"] == "False"
+
+    blk = json.loads((tmp_path / "narrow" / "v3p_cohort_tier.json").read_text())["narrow"]
+    # (a) NOT counted in n_eligible -- 6 clean, not 7
+    assert (blk["n_total"], blk["n_eligible"], blk["n_excluded"]) == (7, 6, 1)
+    # (b) its z did NOT enter the Wilcoxon -- p is what the 6 clean give alone
+    assert blk["p_wilcoxon_b"] == pytest.approx(0.015625)
+    assert blk["p_holm_b"] == pytest.approx(0.03125)
+    assert blk["cohort_b_pass"] is True
+
+
+def test_v3p_summary_h3pc_leg_is_a_discriminating_branch(tmp_path):
+    """Fix 2: prove the H3p-c gate stack genuinely drives subject_support and
+    that EACH of its conjuncts individually can zero it. No other fixture sets
+    ``module_support_flag_c=True``, so Python's ``and`` short-circuits on the
+    always-default-False flag and the five downstream c-leg conjuncts
+    (onset_jitter_pass_c / single_contact_driven / leave_one_contact_mode_pass
+    / axis_only_mode_control_pass / near_onset_dependent_c) are never
+    evaluated for effect -- a bug in any of them would pass every other test.
+
+    Fix 3 (folded in): row c001 also exercises the ``axis_weakening_supportive``
+    TRUE branch (elsewhere only its False branch is hit) via
+    p_label_slope_a<alpha + beta_axis_reliable + slope<0, and asserts
+    support_driver on a real supporting row.
+    """
+    from scripts.run_topic5_v3p_summary import main
+
+    rows = [
+        # c-leg fully supporting, b-leg off -> support DRIVEN BY H3p-c;
+        # p_label_slope_a<alpha -> axis_weakening_supportive TRUE as well.
+        _v3p_row("epilepsiae_c001", "narrow", z_c=3.0, module_support_flag_c=True,
+                 p_label_slope_a=0.01),
+        # each c-leg conjunct flipped to its failing value (c otherwise supporting)
+        _v3p_row("epilepsiae_c002", "narrow", z_c=3.0, module_support_flag_c=True, onset_jitter_pass_c=False),
+        _v3p_row("epilepsiae_c003", "narrow", z_c=3.0, module_support_flag_c=True, single_contact_driven=True),
+        _v3p_row("epilepsiae_c004", "narrow", z_c=3.0, module_support_flag_c=True, leave_one_contact_mode_pass=False),
+        _v3p_row("epilepsiae_c005", "narrow", z_c=3.0, module_support_flag_c=True, axis_only_mode_control_pass=False),
+        _v3p_row("epilepsiae_c006", "narrow", z_c=3.0, module_support_flag_c=True, near_onset_dependent_c=True),
+    ]
+    _write_v3p_trajectory_csv(tmp_path / "narrow" / "v3p_trajectory_subject.csv", rows)
+    main(["--cohort", "narrow", "--indir", str(tmp_path)])
+    with (tmp_path / "narrow" / "v3p_summary_subject.csv").open(newline="") as fh:
+        by_subj = {r["subject"]: r for r in csv.DictReader(fh)}
+
+    # c-path alone drives support, names itself the driver, sets the c-leg
+    # column True and the b-leg column False
+    assert by_subj["epilepsiae_c001"]["subject_support"] == "True"
+    assert by_subj["epilepsiae_c001"]["support_driver"] == "H3p-c"
+    assert by_subj["epilepsiae_c001"]["mode_transition_supported"] == "True"
+    assert by_subj["epilepsiae_c001"]["nonaxis_flux_amplification_supported"] == "False"
+    assert by_subj["epilepsiae_c001"]["axis_weakening_supportive"] == "True"  # Fix 3 TRUE branch
+
+    # each c-leg conjunct individually zeroes the c-path
+    for sid in ("epilepsiae_c002", "epilepsiae_c003", "epilepsiae_c004",
+                "epilepsiae_c005", "epilepsiae_c006"):
+        assert by_subj[sid]["subject_support"] == "False", sid
+        assert by_subj[sid]["support_driver"] == "none", sid

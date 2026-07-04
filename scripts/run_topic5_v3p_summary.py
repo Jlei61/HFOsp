@@ -97,12 +97,19 @@ def _subject_row(raw: dict, alpha: float) -> dict:
     ``single_contact_driven`` only exists for the mode-shift (H3p-c) leg in
     the trajectory CSV (there is no flux-leg analogue of "one contact's
     eigenvector weight dominates"), so it gates ONLY ``mode_transition_supported``.
-    ``label_null_underpowered`` is a subject-level (not leg-level) QC column
-    and gates BOTH legs.
+    ``label_null_underpowered`` is a subject-level (not leg-level) QC column:
+    it gates both legs' support AND (spec Sec 7/8/11) excludes the subject from
+    the cohort denominator + Wilcoxon population, like a skipped subject.
     """
     status = raw["status"]
-    excluded = bool(status != "ok")
     label_null_underpowered = _to_bool(raw["label_null_underpowered"])
+    # label_null_underpowered is a POPULATION-level exclusion (spec Sec 7/8/11
+    # "不计强阳性分母"), same class as skipped / geometry_insufficient: it drops
+    # the subject from BOTH the support-fraction denominator AND the cohort
+    # Wilcoxon z population, not merely from its own subject_support. (The
+    # per-leg `and not label_null_underpowered` below still governs the emitted
+    # nonaxis_flux_amplification_supported / mode_transition_supported columns.)
+    excluded = bool(status != "ok" or label_null_underpowered)
 
     h3pb_path = bool(
         _to_bool(raw["module_support_flag_b"])
