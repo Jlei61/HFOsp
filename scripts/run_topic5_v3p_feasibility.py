@@ -226,7 +226,7 @@ def main(argv=None):
     )
     ap.add_argument(
         "--include-candidates", action="store_true",
-        help="also probe cohort_expansion.candidates_epilepsiae (broad context) + candidates_yuquan (yuquan context)",
+        help="also probe cohort_expansion.candidates_epilepsiae (broad context)",
     )
     args = ap.parse_args(argv)
 
@@ -243,11 +243,6 @@ def main(argv=None):
     if args.include_candidates:
         exp = v3pcfg["cohort_expansion"]
         entries += [(ds_sid, "broad", "candidate") for ds_sid in exp.get("candidates_epilepsiae", [])]
-        # yuquan candidates load via the EXISTING "broad" substrate (no separate "yuquan"
-        # SUBSTRATE wiring exists; the yuquan _t_a/_t_b geometry + rank_displacement JSONs live
-        # in the broad dirs). They remain a SEPARATE cross-dataset supplement, never pooled into
-        # broad_expanded -- identifiable by the `yuquan_` ds_sid prefix + roster_status="candidate".
-        entries += [(ds_sid, "broad", "candidate") for ds_sid in exp.get("candidates_yuquan", [])]
 
     if args.subjects:
         wanted = set(args.subjects)

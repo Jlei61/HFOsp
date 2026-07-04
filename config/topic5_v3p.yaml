@@ -39,7 +39,7 @@ cohort_expansion:                        # rev2 (option b): expand broad via an 
   broad_core: [epilepsiae_139, epilepsiae_253, epilepsiae_1077, epilepsiae_1096, epilepsiae_1125,
                epilepsiae_1150, epilepsiae_620, epilepsiae_635, epilepsiae_916]   # curated (swap-positive 8 + E916)
   candidates_epilepsiae: [epilepsiae_1084, epilepsiae_583, epilepsiae_590, epilepsiae_922]
-  candidates_yuquan: [yuquan_xuxinyi, yuquan_zhangkexuan]   # cross-dataset supplement, NEVER pooled with epilepsiae
+  candidates_yuquan: []   # dropped 2026-07-04 (user decision): yuquan interictal-HFO participation unavailable in-pipeline (data in Yuquan tree, not the epilepsia LAGPAT_ROOT classify_subject_contacts hardcodes). narrow+broad unaffected.
   axis_quality_gate:                     # a candidate is ADMITTED iff all pass (thresholds pilot-locked at Task 1)
     require_geometry_sufficient: true
     axis_rank_min_distinct: 5            # >=5 distinct interictal typical_rank among axis contacts (real early->late gradient, not tied)
