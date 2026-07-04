@@ -32,13 +32,15 @@ date 2026-07-04 · 分支 `topic5-v2-phase1` · tier（pre-registered 天花板�
 
 **结果（存活频段数 = max_over_bands_p<0.05，7 primary）**：
 
-| feature | narrow (n=20) | broad (n=16*) | 说明 |
+| feature | narrow (n=20，主·干净扣除梯) | broad (matched n=16*) | 说明 |
 |---|---|---|---|
-| RAW | 6/7（唯 ripple_high 不过） | 6/7（唯 ripple_high 不过） | Phase-1 基线 ✓ |
-| **common_resid** | **4/7**（δ, α, γ, hg） | **4/7**（θ, α, β, γ） | **α+γ 两池都存活** → 频段特异残差层，**非纯宽带** |
+| RAW | 6/7（唯 ripple_high 不过） | **3/7**（δ, α, β）〔matched n=16；n=17 Phase-1 基线 = 6/7〕 | broad 计数受队列大小影响，见下 |
+| **common_resid** | **4/7**（δ, α, γ, hg） | **4/7**（θ, α, β, γ） | **α+γ 两池都存活** → 频段特异残差层，**非纯宽带（Outcome B）** |
 | **aperiodic_resid** | **1/7**（γ） | **2/7**（γ, ripple_high†） | **γ 两池都存活** = 唯一扛过两道扣除；余大半 1/f-可归因 |
 
-\* broad = 16（排除 epilepsiae_1146 = 唯一 within_shaft_strong 离群、单被试 n_perm=1000 单线程 ~2h 计算受限；1146 已在 narrow 全量分析；排除这个**强**离群是**保守**（只会降低 broad 存活），1146-broad 后台补跑中，结论对其稳健）。
+**⚠️ broad 计数受队列大小影响（承重·like-for-like，CLAUDE.md §5）**：broad 三行都算在 **matched n=16** 上。**排除 1146 让 raw 从 n=17 的 6/7 掉到 n=16 的 3/7**——1146 是强正向被试（broad n_sig 7/7）撑高了 raw，而 residual 受其影响小，故 broad 上 common_resid(4/7) 竟 **≥** matched-raw(3/7)。**所以 broad 的"存活频段数"不是干净的逐级扣除梯**。**承重证据不是 broad 计数，而是：(i) narrow(n=20) 干净扣除梯 6→4→1；(ii) 跨池 band-identity——α+γ 过 common_resid 两池、γ 过 aperiodic 两池——与队列大小无关。** Outcome B（common_resid ≥2/7）两池都成立。
+
+\* broad=16（排除 epilepsiae_1146）：排除理由 = **单被试 n_perm=1000 单线程 ~2h（OMP 不助，Python-loop permute）计算受限** + 1146 是**强正向离群**（broad n_sig 7/7）——排除强正向被试是**保守**（matched raw 6/7→3/7 印证只会降低存活）。1146 已在 narrow 全量分析（narrow 里它是 within_shaft_strong；**broad 里是 subject_wide_weak**——within_shaft_strong 是 narrow 属性、不迁移到 broad context）。1146-broad 后台补跑中，结论对其稳健。
 † ripple_high broad 的"存活"= **假象**，见 §1.1 sanity。
 
 **判读（accepted wording，LOCK）**：
