@@ -1,0 +1,51 @@
+# config/topic5_v3p.yaml
+preictal:
+  phases: [P0, P1, P2, P3]
+  span_full_rel: [-120.0, -10.0]         # headline primary (rev1: user kept)
+  span_guard_rel: [-120.0, -20.0]        # rev1: jitter-safe onset guard (also co-primary)
+  span_proximal_rel: [-60.0, -10.0]      # sensitivity slope span
+  guard_sec: 10.0                        # guard_end = onset - max(10, jitter)
+  min_windows_for_slope: 8               # empirically non-binding (~17-18/sz both cohorts)
+trend:
+  estimator: theil_sen                   # primary
+  companions: [spearman, ols]
+  slope_direction:                       # expected sign per leg
+    net_offaxis_flux: greater
+    mode_shift_density: greater
+    nonaxis_activation_burden: greater
+    N_self_sustain_lag1_specific: greater
+    gain_shift: greater
+    beta_axis_strength: less             # H3p-a supportive
+gates:                                   # rev1 hardened module gates
+  h3b_require: [p_label, p_rate, lag1_specific_positive]
+  h3c_require: [p_label, p_phase, p_block]   # all -> strong; label+1 temporal -> weak
+  require_both_spans: true               # strong support needs full AND guard
+residualization:
+  covariates: [global_energy, axial_energy]
+  primary_adjudicator: label_null_slope   # regression residual is sensitivity only
+nulls_v3p:                               # rev1 new null / QC knobs
+  rate_null_per_window: true             # preserve per-window rate, shuffle within-window only
+  time_order_null: true
+  label_null_min_unique_perms: 100       # < -> label_null_underpowered
+  mode_singular_gap_min: 1.2             # OPEN pilot; < -> mode_vector_stable=False
+  h3b_min_activation_events: 20          # OPEN pilot; < -> h3b_activation_sufficient=False
+co_primary:
+  endpoints: [net_offaxis_flux_surplus_slope, mode_shift_density_surplus_slope]
+  correction: holm
+inherit_v3_config: topic5_v3             # geometry+dynamics+avalanche+nulls locked there
+nulls: {n_perm_smoke: 20, n_perm_dev: 100, n_perm_final: 1000, seed: 20260703, alpha: 0.05}
+cohorts: {primary: narrow, replication: broad, never_pool: true}
+cohort_expansion:                        # rev2 (option b): expand broad via an axis-quality gate
+  broad_core: [epilepsiae_139, epilepsiae_253, epilepsiae_1077, epilepsiae_1096, epilepsiae_1125,
+               epilepsiae_1150, epilepsiae_620, epilepsiae_635, epilepsiae_916]   # curated (swap-positive 8 + E916)
+  candidates_epilepsiae: [epilepsiae_1084, epilepsiae_583, epilepsiae_590, epilepsiae_922]
+  candidates_yuquan: [yuquan_xuxinyi, yuquan_zhangkexuan]   # cross-dataset supplement, NEVER pooled with epilepsiae
+  axis_quality_gate:                     # a candidate is ADMITTED iff all pass (thresholds pilot-locked at Task 1)
+    require_geometry_sufficient: true
+    axis_rank_min_distinct: 5            # >=5 distinct interictal typical_rank among axis contacts (real early->late gradient, not tied)
+    axis_participation_gap_min: 0.15     # min(axis participation) - max(nonaxis-strict participation) >= gap (clean high/low split)
+    require_rank_displacement_json: true # candidate went through the masked interictal-propagation pipeline
+    calibrate_on_roster: true            # lock thresholds so the CURATED roster is NOT rejected (sanity)
+  broad_analysis: broad_expanded         # broad_core + admitted candidates_epilepsiae; broad_core ALWAYS reported alongside
+jitter_sec: [5.0, 10.0, 15.0]
+tier: exploratory
