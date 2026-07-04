@@ -500,12 +500,16 @@ def test_plot_summary_produces_png_and_readme(tmp_path):
     )
     assert result.returncode == 0, result.stderr
 
-    png_path = tmp_path / "v3_mode_transition_summary.png"
+    png_path = tmp_path / "v3_axis_vs_offaxis_narrow.png"
     assert png_path.exists(), result.stderr
     assert png_path.stat().st_size > 0, "PNG must not be empty"
+    # all four per-cohort figures are written (2 main + 2 supplementary)
+    for name in ("v3_axis_vs_offaxis_broad.png",
+                 "v3_mode_direction_narrow.png", "v3_mode_direction_broad.png"):
+        assert (tmp_path / name).exists(), f"missing {name}: {result.stderr}"
 
     readme_path = tmp_path / "README.md"
     assert readme_path.exists(), result.stderr
     readme_text = readme_path.read_text(encoding="utf-8")
-    assert "v3_mode_transition_summary.png" in readme_text
+    assert "v3_axis_vs_offaxis_narrow.png" in readme_text
     assert "关注点" in readme_text

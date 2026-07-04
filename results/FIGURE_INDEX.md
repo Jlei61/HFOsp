@@ -146,7 +146,7 @@
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
 | [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
-| [topic5_ictal_recruitment/v3_mode_transition/figures/](topic5_ictal_recruitment/v3_mode_transition/figures/) | V3a：发作开始前后，活动是否从间期固定电极通路搬到通路外（同一批发作内配对的 P3→I1 变化量 + 全程 phase 轨迹）；EXPLORATORY **脆弱阳性**——配对后非轴向净流增量在主(Holm 0.031)+复制(0.008)队列都队列级显著(tier4 机械/supported)，但 null-relative(原始流大多在降)+同时共激活为主(lag1≈lag0)+个体稳健性弱(流腿 0/7)+模态腿全阴 → 数据侧候选信号非确立的模态转移，pending sensitivity/V3b。详见 docs/archive/topic5/v3a_mode_transition_2026-07-04.md |
+| [topic5_ictal_recruitment/v3_mode_transition/figures/](topic5_ictal_recruitment/v3_mode_transition/figures/) | V3a：发作开始前后，活动是否从间期固定电极通路搬到通路外（**每队列一张、真实秒数横轴**：主图 `v3_axis_vs_offaxis_{narrow,broad}` 沿轴组织度 vs 离轴流随时间、扣发作前基线，看 onset 前后是否反向张开；附图 `v3_mode_direction_{narrow,broad}` 模态方向阴性）；EXPLORATORY **脆弱阳性**——配对后非轴向净流增量在主(Holm 0.031)+复制(0.008)队列都队列级显著(tier4 机械/supported)，但 null-relative(原始流大多在降)+同时共激活为主(lag1≈lag0)+个体稳健性弱(流腿 0/7)+模态腿全阴 → 数据侧候选信号非确立的模态转移，pending sensitivity/V3b。详见 docs/archive/topic5/v3a_mode_transition_2026-07-04.md |
 
 ---
 

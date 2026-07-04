@@ -111,7 +111,7 @@ bash .superpowers/sdd/run_final_nperm1000.sh              # paired n_perm=1000, 
 pytest tests/test_topic5_v3_mode_transition.py -q          # 29 passed
 pytest -m integration tests/test_topic5_v3_integration.py  # 11 integration
 ```
-产物：`results/topic5_ictal_recruitment/v3_mode_transition/{narrow,broad}/v3_{avalanche,dynamics,susceptibility,summary}_subject.csv + v3_cohort_tier.json`；图 `figures/v3_mode_transition_summary.png` + `figures/README.md`。
+产物：`results/topic5_ictal_recruitment/v3_mode_transition/{narrow,broad}/v3_{avalanche,dynamics,susceptibility,summary}_subject.csv + v3_cohort_tier.json`；图（2026-07-04 real-time 重设计，**每队列一张、真实秒数横轴、无 P/O/I 代号**）：主图 `figures/v3_axis_vs_offaxis_{narrow,broad}.png`（沿轴组织度 `|β_axis|` vs 离轴流 `net_offaxis_flux` 随相对 eeg-onset 秒数、各扣发作前 baseline，看两线是否在 onset 反向张开——实测不张开）＋附图 `figures/v3_mode_direction_{narrow,broad}.png`（H3c 模态方向密度，压 0 线阴性）＋ `figures/README.md`。承重 −20→+20s 配对 Holm-p 只作图内小标注（原始轨迹画不出 null-relative surplus）。
 
 **下一步（不救 1125、按预注册）**：
 - **V3p**（preictal-only 非轴向轨迹，spec/plan 已写 `topic5-v3p-preictal-trajectory`）：只看发作前 2 分钟非轴向流/可放大方向是否**逐渐爬升**、是否专门集中在非轴向触点——避开 I1 信噪比塌 + onset 对比脏。
