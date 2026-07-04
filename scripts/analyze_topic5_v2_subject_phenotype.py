@@ -66,6 +66,7 @@ _OUTPUT_COLUMNS = [
     "spatial_strength",
     "order_strength",
     "anchor",
+    "tier",
 ]
 
 
@@ -139,6 +140,27 @@ def _seizure_consistency(seizure_df: pd.DataFrame, primary_bands) -> float:
     q1, q3 = np.percentile(per_sz, [25.0, 75.0])
     iqr = float(q3 - q1)
     return float(1.0 - iqr / abs(med))
+
+
+def assign_tier(n_sig_7bands: int, n_positive_delta_7bands: int) -> str:
+    """Three-tier subject label (Task 2.2 brief; thresholds + precedence LOCKED).
+
+    strong:       n_sig_7bands >= 4
+    directional:  n_positive_delta_7bands >= 5  AND  n_sig_7bands < 4
+    weak_absent:  n_positive_delta_7bands < 5
+
+    Precedence: `strong` wins whenever n_sig_7bands >= 4, regardless of
+    n_positive_delta_7bands; else `directional`; else `weak_absent`. Subject-level
+    significance is very sensitive to seizure count -- a subject with only 2-3
+    seizures can fail every band's p<0.05 test even with all 7 bands positive.
+    `directional` names that "consistent direction but underpowered" case
+    separately from truly weak/absent subjects (brief "Why three tiers").
+    """
+    if n_sig_7bands >= 4:
+        return "strong"
+    if n_positive_delta_7bands >= 5:
+        return "directional"
+    return "weak_absent"
 
 
 # --- core: one subject --------------------------------------------------------
@@ -224,7 +246,7 @@ def load_substrate_frames(substrate_dir):
 
 
 def build_phenotype_table(null_df, align_df, seizure_df, substrate, primary_bands):
-    """One phenotype row per subject in a substrate; adds the `substrate` column."""
+    """One phenotype row per subject in a substrate; adds the `substrate` and `tier` columns."""
     rows = []
     for subject in sorted(null_df["subject"].astype(str).unique()):
         nd = null_df[null_df["subject"].astype(str) == subject]
@@ -232,6 +254,7 @@ def build_phenotype_table(null_df, align_df, seizure_df, substrate, primary_band
         sd = seizure_df[seizure_df["subject"].astype(str) == subject]
         prof = subject_profile(nd, ad, sd, primary_bands)
         prof["substrate"] = substrate
+        prof["tier"] = assign_tier(prof["n_sig_7bands"], prof["n_positive_delta_7bands"])
         rows.append(prof)
     df = pd.DataFrame(rows)
     return df.reindex(columns=_OUTPUT_COLUMNS)

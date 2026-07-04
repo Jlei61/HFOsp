@@ -28,6 +28,7 @@ from scripts.analyze_topic5_v2_subject_phenotype import (  # noqa: E402
     subject_profile,
     load_substrate_frames,
     build_phenotype_table,
+    assign_tier,
 )
 
 # ---------------------------------------------------------------------------
@@ -296,3 +297,16 @@ def test_band_group_membership_is_disjoint_partition():
     assert LOW_BAND + LVFA_BAND + HFA_RIPPLE  # non-empty
     assert set(LOW_BAND) | set(LVFA_BAND) | set(HFA_RIPPLE) == set(PRIMARY_BANDS)
     assert len(LOW_BAND) + len(LVFA_BAND) + len(HFA_RIPPLE) == len(PRIMARY_BANDS) == 7
+
+
+# ---------------------------------------------------------------------------
+# Task 2.2: three-tier subject label (thresholds + precedence LOCKED, brief §"The task")
+# ---------------------------------------------------------------------------
+
+def test_three_tier_labels():
+    """Boundary values for the three tiers; exact labels, strong precedence over directional."""
+    assert assign_tier(n_sig_7bands=4, n_positive_delta_7bands=4) == "strong"
+    assert assign_tier(n_sig_7bands=3, n_positive_delta_7bands=6) == "directional"
+    assert assign_tier(n_sig_7bands=3, n_positive_delta_7bands=4) == "weak_absent"
+    assert assign_tier(n_sig_7bands=5, n_positive_delta_7bands=5) == "strong"  # strong wins
+    assert assign_tier(n_sig_7bands=0, n_positive_delta_7bands=4) == "weak_absent"
