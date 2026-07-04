@@ -61,7 +61,7 @@ broad-16 aperiodic ripple_high 过 FWER（max_over_bands_p=0.022），触发 Tas
 
 ### 1.2 单-covariate confound（Task 1.4 Step 2-3，descriptive · deferred）
 
-confound maps（每触点 hfo_rate / baseline_band_power / broadband_1_250 / **shaft_position（用杆序索引，非 along_axis_mm，防自证循环）**）已在 20/17 构建（`{narrow,broad}/phase1_confound_maps.json`）。单-covariate confound-adjusted alignment（把 G_HFO 的 typical_rank 对每个 covariate 残差化后重对齐、单-covariate 为主不塞 combined 大模型）是一项 **descriptive robustness follow-up**。**核心 W1 结论（Outcome B、非纯宽带、NOT ripple-specific）不依赖它**——common_resid 的 LOBO 已控宽带成分；confound 只是补充"对齐是否也不被 HFO-率/功率/杆位地形解释"。confound-adjusted 逐 covariate 数值待补（`run_topic5_v2_nulls.py --confound-maps <path>`，descriptive）。
+单-covariate confound-adjusted alignment（扣每触点 hfo_rate / baseline_band_power / **shaft_position（用杆序索引，非 along_axis_mm，防自证循环）** 后 G_HFO 对齐是否存活；单-covariate 为主不塞 combined 大模型）是一项 **descriptive robustness follow-up，本阶段未完成**：`build_topic5_v2_confound_maps.py` 因每触点重算 baseline 谱图而极慢（in-session 单被试 >30min → 已中止）。**核心 W1 结论（Outcome B、非纯宽带、NOT ripple-specific）不依赖它**——common_resid 的 LOBO 已控宽带成分；confound 只补充"对齐是否也不被 HFO-率/功率/杆位地形解释"。复现：`build_topic5_v2_confound_maps.py --subjects <20>`（建议后台/更快实现）后 `run_topic5_v2_nulls.py --confound-maps <path> --confound-null`（descriptive、单-covariate）。
 
 ---
 
