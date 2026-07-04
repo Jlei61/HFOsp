@@ -29,6 +29,8 @@ from scripts.analyze_topic5_v2_subject_phenotype import (  # noqa: E402
     load_substrate_frames,
     build_phenotype_table,
     assign_tier,
+    assign_band_profile_group,
+    spearman_phenotype_gate,
 )
 
 # ---------------------------------------------------------------------------
@@ -310,3 +312,78 @@ def test_three_tier_labels():
     assert assign_tier(n_sig_7bands=3, n_positive_delta_7bands=4) == "weak_absent"
     assert assign_tier(n_sig_7bands=5, n_positive_delta_7bands=5) == "strong"  # strong wins
     assert assign_tier(n_sig_7bands=0, n_positive_delta_7bands=4) == "weak_absent"
+
+
+# ---------------------------------------------------------------------------
+# Task 2.3: descriptive band-gradient buckets + Spearman phenotype-hunt gate
+# (both DESCRIPTIVE; cutoffs are bucketing labels, the gate is a report filter --
+#  NOT a KMeans/statistical subtype claim, NOT a formal test threshold; brief §Step1/2)
+# ---------------------------------------------------------------------------
+
+def test_band_profile_group_buckets():
+    """The 4 descriptive buckets + weak_absent precedence + the ±0.05 / 0.6 cutoffs.
+
+    Cutoffs are DESCRIPTIVE bucketing labels (not thresholds of any test).
+    weak_absent tier is assigned FIRST regardless of the signed gradient.
+    """
+    # weak_absent precedence: overrides both an HFA-leaning and a low-leaning gradient
+    assert assign_band_profile_group(hf_minus_low=+0.20, band_genericity_index=1.0,
+                                     tier="weak_absent") == "weak_absent"
+    assert assign_band_profile_group(hf_minus_low=-0.20, band_genericity_index=0.0,
+                                     tier="weak_absent") == "weak_absent"
+
+    # low_leaning : HF_minus_low < -0.05  (non-weak_absent tier)
+    assert assign_band_profile_group(hf_minus_low=-0.10, band_genericity_index=0.71,
+                                     tier="directional") == "low_leaning"
+    # hf_leaning : HF_minus_low > +0.05
+    assert assign_band_profile_group(hf_minus_low=+0.10, band_genericity_index=0.57,
+                                     tier="strong") == "hf_leaning"
+    # flat_generic : |HF_minus_low| <= 0.05 AND band_genericity_index >= 0.6
+    assert assign_band_profile_group(hf_minus_low=0.0, band_genericity_index=0.80,
+                                     tier="strong") == "flat_generic"
+
+    # boundary: exactly -0.05 is NOT low_leaning (strict <); with high genericity -> flat_generic
+    assert assign_band_profile_group(hf_minus_low=-0.05, band_genericity_index=0.86,
+                                     tier="directional") == "flat_generic"
+    # boundary: exactly +0.05 is NOT hf_leaning (strict >); with high genericity -> flat_generic
+    assert assign_band_profile_group(hf_minus_low=+0.05, band_genericity_index=0.86,
+                                     tier="strong") == "flat_generic"
+
+
+def test_spearman_phenotype_gate():
+    """LOCKED phenotype gate: flag "predicts" ONLY if |r| > 0.4 AND p < 0.05.
+
+    Returns (r, p, n, passes). A strong monotonic feature passes; a near-zero-r
+    feature does NOT; a high-|r| but non-significant (small-n) feature does NOT
+    (the AND is load-bearing); a constant feature yields NaN and does NOT pass.
+    """
+    target = [1, 2, 3, 4, 5, 6]
+
+    # strong monotonic predictor: r == 1.0, p ~ 0  -> passes
+    r, p, n, passes = spearman_phenotype_gate([10, 20, 30, 40, 50, 60], target)
+    assert n == 6
+    assert r == pytest.approx(1.0)
+    assert p < 0.05
+    assert passes is True
+
+    # near-zero-r predictor: |r| ~ 0.26 < 0.4  -> does NOT pass (this is the expected case)
+    r, p, n, passes = spearman_phenotype_gate([1, 6, 2, 5, 3, 4], target)
+    assert abs(r) < 0.4
+    assert passes is False
+
+    # high |r| (0.8) but p >= 0.05 at n=4: AND semantics -> does NOT pass
+    r, p, n, passes = spearman_phenotype_gate([1, 2, 4, 3], [1, 2, 3, 4])
+    assert abs(r) > 0.4
+    assert p >= 0.05
+    assert passes is False
+
+    # constant predictor -> undefined correlation (NaN) -> does NOT pass, no crash
+    r, p, n, passes = spearman_phenotype_gate([5, 5, 5, 5], [1, 2, 3, 4])
+    assert np.isnan(r)
+    assert passes is False
+
+    # NaN pairs are dropped before correlating (n counts finite pairs only)
+    r, p, n, passes = spearman_phenotype_gate([10, 20, 30, 40, 50, np.nan],
+                                              [1, 2, 3, 4, 5, 6])
+    assert n == 5
+    assert passes is True

@@ -26,6 +26,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy.stats import spearmanr
 
 # --- Band contract (authoritative; see Task 2.1 brief "Band contract") --------
 PRIMARY_BANDS = [
@@ -161,6 +162,72 @@ def assign_tier(n_sig_7bands: int, n_positive_delta_7bands: int) -> str:
     if n_positive_delta_7bands >= 5:
         return "directional"
     return "weak_absent"
+
+
+# --- Task 2.3: descriptive band-gradient bucket -------------------------------
+def assign_band_profile_group(hf_minus_low: float, band_genericity_index: float,
+                              tier: str) -> str:
+    """Descriptive band-gradient bucket for ONE subject (Task 2.3 brief §Step 2).
+
+    This is a DESCRIPTIVE bucketing label, NOT a KMeans / statistical subtype
+    claim and the numbers below are NOT thresholds of any test -- they are
+    hand-picked descriptive cutoffs on the signed HFA-minus-low gradient.
+
+        weak_absent   : tier == 'weak_absent'  (assigned FIRST -- takes precedence)
+        low_leaning   : HF_minus_low < -0.05
+        hf_leaning    : HF_minus_low > +0.05
+        flat_generic  : |HF_minus_low| <= 0.05 AND band_genericity_index >= 0.6
+
+    The three non-weak_absent buckets split "the rest": in both real pools every
+    non-weak_absent subject with a flat (|HF_minus_low| <= 0.05) gradient is also
+    band-generic (>= 0.6), so `flat_lowgeneric` never occurs -- it exists only so
+    the function is total (never returns None) for hypothetical inputs.
+    """
+    if tier == "weak_absent":
+        return "weak_absent"
+    if hf_minus_low < -0.05:
+        return "low_leaning"
+    if hf_minus_low > 0.05:
+        return "hf_leaning"
+    if band_genericity_index >= 0.6:
+        return "flat_generic"
+    return "flat_lowgeneric"  # flat gradient but not band-generic (empty in real data)
+
+
+# --- Task 2.3: Spearman phenotype-hunt gate -----------------------------------
+# Candidate predictors screened against multi-band positivity (brief §Step 1).
+PHENOTYPE_TARGETS = ["n_sig_7bands", "band_genericity_index"]
+PHENOTYPE_PREDICTORS = [
+    "n_sz", "n_contacts", "maxab_primary", "within_subject_seizure_consistency",
+    "profile_entropy", "HF_minus_low", "low_band_score", "LVFA_band_score",
+    "HFA_ripple_score",
+]
+# LOCKED gate: only call a feature a "predictor" if |r| > GATE_R AND p < GATE_P.
+GATE_R = 0.4
+GATE_P = 0.05
+
+
+def spearman_phenotype_gate(x, y, r_thresh: float = GATE_R, p_thresh: float = GATE_P):
+    """Spearman correlation + the LOCKED phenotype-hunt gate for two feature vectors.
+
+    Returns (r, p, n, passes). NaN pairs (a NaN in either vector) are dropped
+    first; `n` is the finite-pair count. `passes` is True ONLY when
+    |r| > r_thresh AND p < p_thresh (both required -- the AND is load-bearing:
+    a high |r| that is not significant at small n does NOT pass). A constant
+    input (<2 distinct values) or n < 3 yields NaN r/p and passes=False.
+    This is a descriptive report filter, NOT a formal test threshold.
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    mask = np.isfinite(x) & np.isfinite(y)
+    n = int(mask.sum())
+    xv, yv = x[mask], y[mask]
+    if n < 3 or np.unique(xv).size < 2 or np.unique(yv).size < 2:
+        return (float("nan"), float("nan"), n, False)
+    r, p = spearmanr(xv, yv)
+    passes = bool(np.isfinite(r) and np.isfinite(p)
+                  and abs(r) > r_thresh and p < p_thresh)
+    return (float(r), float(p), n, passes)
 
 
 # --- core: one subject --------------------------------------------------------
