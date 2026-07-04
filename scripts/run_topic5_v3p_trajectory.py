@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Topic 5 V3p — preictal-only non-axial TRAJECTORY runner (Task 7, co-primary H3p-b + H3p-c).
+"""Topic 5 V3p — preictal-only non-axial TRAJECTORY runner (Task 7 co-primary
+H3p-b + H3p-c; Task 8 adds supportive H3p-a + secondary H3p-d).
 
 Plain-language question (EXPLORATORY): in the two minutes BEFORE eeg-onset
 (P0..P3, -120..-10 s), does the avalanche flow OFF the fixed interictal HFO
@@ -43,8 +44,28 @@ narrow (primary) and broad (replication) run SEPARATELY, never pooled. A
 ``geometry_insufficient`` subject or one with ``< min_windows_for_slope`` preictal
 windows in every seizure is FLAGGED (``status=skipped``) with a full NaN/False
 row -- never silently dropped. NO ``tier`` column (that is Task 9). Exploratory;
-no forecasting. See docs/superpowers/plans/2026-07-03-topic5-v3p-preictal-trajectory.md
-Task 7.
+no forecasting.
+
+TASK 8 (SUPPORTIVE + SECONDARY, this same window loop, FULL span only):
+  - H3p-a axial weakening (SUPPORTIVE-ONLY): per-window per-contact
+    line-length-rate roughness (already ``m["beta_axis_strength"]`` = ``|beta_axis|``)
+    -> Theil-Sen slope, expected < 0. The label-null recomputes ``beta_axis`` by
+    restricting the SAME per-window roughness dict to the PERMUTED axis set
+    against the FIXED (never re-derived) ``rank_forward`` -- mirrors
+    ``run_topic5_v3_susceptibility.py``'s H3a null exactly, just per-window
+    instead of per-phase. ``module_support_flag_a`` is HARD-CODED False.
+  - H3p-d non-axial burden/self-sustain/gain (secondary/convergent): burden
+    label-null recomputes ``active[nonaxis_idx_perm].mean()`` from the SAME
+    precomputed ``active``; ``N_self_sustain_lag1_specific_slope`` is the
+    DIFFERENCE of two independently-sloped medians (lag1_slope - lag0_slope,
+    NOT slope-of-difference -- unlike H3p-b's ``lag1_specific_slope``) so its
+    label-null recomputes both lag1/lag0 self-sustain slopes per draw from the
+    precomputed ``atm1``/``atm0`` and subtracts; ``gain_shift_slope`` IS
+    slope-of-difference (``slope(gain_nonaxis - gain_axis)``) and its label-null
+    rebuilds ``e_axis_mean``/``e_nonaxis_mean`` per draw and refits the 2D VAR
+    on the (unchanged) demeaned window.
+See docs/superpowers/plans/2026-07-03-topic5-v3p-preictal-trajectory.md
+Task 7 + Task 8.
 """
 from __future__ import annotations
 
@@ -69,8 +90,10 @@ from src.topic5_v2_criticality import (  # noqa: E402
     phase_randomize_surrogate,
 )
 from src.topic5_v3_mode_transition import (  # noqa: E402
+    atm_lag0,
     atm_offdiag,
     axis_nonaxis_vectors,
+    beta_axis,
     demean_window,
     direct_2d_var,
     dominant_right_singular_vector,
@@ -95,6 +118,7 @@ from src.topic5_v3p_preictal_trajectory import (  # noqa: E402
     residualize_slope,
     slope_over_windows,
     surplus_and_p,
+    within_compartment_flux,
 )
 
 PREICTAL_PHASES = ["P0", "P1", "P2", "P3"]
@@ -131,6 +155,18 @@ CSV_COLS = [
     "h3c_support_grade", "time_order_p_b", "time_order_p_c",
     "n_label_permutable_shafts", "n_unique_label_permutations_est", "label_null_underpowered",
     "trend_estimator", "slope_span",
+    # --- Task 8: H3p-a axial weakening (supportive-only) ---
+    "K_primary_metric", "beta_axis_strength_slope", "beta_axis_reliable",
+    "beta_axis_slope_z", "p_label_slope_a", "module_support_flag_a",
+    # --- Task 8: H3p-d non-axial activation burden (secondary) ---
+    "nonaxis_activation_burden_slope_raw", "nonaxis_activation_burden_slope_label_surplus",
+    "nonaxis_activation_burden_slope_resid", "burden_slope_z", "p_label_burden",
+    # --- Task 8: H3p-d N->N self-sustain, rev1 lag1-specific hardening ---
+    "N_self_sustain_lag1_slope", "N_self_sustain_lag0_slope",
+    "N_self_sustain_lag1_specific_slope", "N_self_sustain_slope_z", "p_label_selfsustain",
+    # --- Task 8: H3p-d relative gain shift (rev1) ---
+    "gain_axis_slope", "gain_nonaxis_slope", "gain_shift_slope",
+    "gain_nonaxis_surplus_slope", "gain_shift_slope_z",
 ]
 
 # Per-window diagnostic CSV (brief Task 7). One row per observed preictal window
@@ -173,11 +209,28 @@ _METRIC_DEFAULTS = {
     "h3c_support_grade": "none", "time_order_p_b": float("nan"), "time_order_p_c": float("nan"),
     "n_label_permutable_shafts": 0, "n_unique_label_permutations_est": float("nan"),
     "label_null_underpowered": True,
+    # --- Task 8: H3p-a (supportive-only; module_support_flag_a NEVER flips) ---
+    "beta_axis_strength_slope": float("nan"), "beta_axis_reliable": False,
+    "beta_axis_slope_z": float("nan"), "p_label_slope_a": float("nan"),
+    "module_support_flag_a": False,
+    # --- Task 8: H3p-d burden ---
+    "nonaxis_activation_burden_slope_raw": float("nan"),
+    "nonaxis_activation_burden_slope_label_surplus": float("nan"),
+    "nonaxis_activation_burden_slope_resid": float("nan"),
+    "burden_slope_z": float("nan"), "p_label_burden": float("nan"),
+    # --- Task 8: H3p-d self-sustain ---
+    "N_self_sustain_lag1_slope": float("nan"), "N_self_sustain_lag0_slope": float("nan"),
+    "N_self_sustain_lag1_specific_slope": float("nan"),
+    "N_self_sustain_slope_z": float("nan"), "p_label_selfsustain": float("nan"),
+    # --- Task 8: H3p-d gain ---
+    "gain_axis_slope": float("nan"), "gain_nonaxis_slope": float("nan"),
+    "gain_shift_slope": float("nan"), "gain_nonaxis_surplus_slope": float("nan"),
+    "gain_shift_slope_z": float("nan"),
 }
 
 
 def _base_row(subj: str, cohort: str, in_broad_core: bool, v3cfg: dict, v3pcfg: dict) -> dict:
-    """Full-schema row for a subject; constants (rank/k*/estimator/span) filled unconditionally.
+    """Full-schema row for a subject; constants (rank/k*/estimator/span/K_primary_metric) filled unconditionally.
 
     ``subject`` is the FULL ds_sid (e.g. ``epilepsiae_253``) to key-match the
     feasibility CSV + config ``broad_core``/``candidates_epilepsiae`` (Task 9 join).
@@ -196,6 +249,7 @@ def _base_row(subj: str, cohort: str, in_broad_core: bool, v3cfg: dict, v3pcfg: 
         "k_star": int(v3cfg["dynamics"]["finite_horizon_k"]),
         "trend_estimator": v3pcfg["trend"]["estimator"],
         "slope_span": "full+guard",
+        "K_primary_metric": "line_length_rate",
         **_METRIC_DEFAULTS,
     }
 
@@ -244,8 +298,9 @@ def _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0):
     UNSHIFTED onset even under jitter so a shift only moves which windows land in
     the span, not the axis). Each window carries its precomputed per-window atoms
     (``extract_window_metrics`` for the 13 metrics + ``active``/``atm1``/``u_c`` for
-    the label/rate/spatial/leave-one nulls + ``ms_2d``/``cv``) -- the observed pass,
-    the nulls, and the onset-jitter reloads all consume them. Only seizures with
+    the label/rate/spatial/leave-one nulls + ``ms_2d``/``cv`` + Task-8's
+    ``atm0``/``llr`` for the self-sustain/beta_axis label-nulls) -- the observed
+    pass, the nulls, and the onset-jitter reloads all consume them. Only seizures with
     >= ``min_windows_for_slope`` FULL-span preictal windows are kept. Returns
     ``(seizures, dt)`` where ``dt`` is the real median relt spacing (drives
     ``block_n`` for the block-shuffle null).
@@ -299,14 +354,20 @@ def _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0):
                 wd["m"] = extract_window_metrics(env_w, geom, v3cfg)
                 # per-window null atoms (degenerate-safe: a bad window leaves
                 # zeros, contributing 0 to nulls rather than crashing the loop).
-                # lag0 flux is read from ``m`` (extract_window_metrics owns its
-                # own atm_lag0), so only the lag1 ATM is materialized here.
+                # ``atm1``/``atm0`` are the RAW (unmasked-by-axis-label) ATMs so
+                # Task-8's self-sustain label-null can recompute
+                # ``within_compartment_flux(atm, idx_perm)`` for an arbitrary
+                # permuted non-axis index set; the OBSERVED lag0/lag1 flux and
+                # self-sustain values themselves are read from ``m``
+                # (extract_window_metrics owns its own internal atm_lag0/atm1).
                 try:
                     active = activations_from_z(env_w, z_thr)
                     atm1 = atm_offdiag(active)
+                    atm0 = atm_lag0(active)
                 except Exception:
                     active = np.zeros((n, max(1, we - ws)), dtype=bool)
                     atm1 = np.zeros((n, n))
+                    atm0 = np.zeros((n, n))
                 try:
                     A_lr, U_r = lowrank_var(env_w, lowrank, alpha)
                     u_c = map_lowrank_vector_to_contacts(
@@ -324,8 +385,17 @@ def _collect_seizures(ds_sid, cc, geom, v3cfg, v3pcfg, onset_shift=0.0):
                     cv = float(cv_one_step_r2(demean_window(env_w), alpha, 5))
                 except Exception:
                     cv = float("nan")
-                wd.update({"active": active, "atm1": atm1,
-                           "u_c": u_c, "ms_2d": ms_2d, "cv": cv})
+                # Task 8 H3p-a: raw per-contact line-length-rate roughness
+                # (UNRESTRICTED by axis label -- the same formula
+                # extract_window_metrics uses internally for
+                # ``beta_axis_strength``, but exposed here by NAME so the
+                # label-null can re-filter it to a PERMUTED axis set).
+                try:
+                    llr = {names[i]: float(np.nanmean(np.abs(np.diff(env_w[i])))) for i in range(n)}
+                except Exception:
+                    llr = {name: float("nan") for name in names}
+                wd.update({"active": active, "atm1": atm1, "atm0": atm0,
+                           "u_c": u_c, "ms_2d": ms_2d, "cv": cv, "llr": llr})
                 windows.append(wd)
 
         n_full = sum(1 for w in windows if full_lo <= w["t_center"] <= full_hi)
@@ -351,6 +421,41 @@ def _lag1spec_get(w):
 
 def _ms2d_get(w):
     return w["ms_2d"]
+
+
+# --- Task 8 getters (H3p-a beta_axis + H3p-d burden/self-sustain/gain) ---
+def _beta_get(w):
+    return w["m"]["beta_axis_strength"]
+
+
+def _burden_get(w):
+    return w["m"]["nonaxis_activation_rate"]
+
+
+def _selfsustain1_get(w):
+    return w["m"]["N_self_sustain_lag1"]
+
+
+def _selfsustain0_get(w):
+    return w["m"]["N_self_sustain_lag0"]
+
+
+def _gain_axis_get(w):
+    return w["m"]["gain_axis"]
+
+
+def _gain_nonaxis_get(w):
+    return w["m"]["gain_nonaxis"]
+
+
+def _gain_shift_get(w):
+    return w["m"]["gain_nonaxis"] - w["m"]["gain_axis"]
+
+
+def _global_act_get(w):
+    """Per-window activation rate over ALL clean contacts (H3p-d burden's
+    collinearity covariate) -- NOT restricted to non-axis, unlike ``_burden_get``."""
+    return float(np.asarray(w["active"], dtype=bool).mean())
 
 
 def _slope_from(seizures, getter, span, est="theil_sen"):
@@ -387,6 +492,27 @@ def _resid_slope_from(seizures, getter, span):
     return float(np.median(per_sz)) if per_sz else float("nan")
 
 
+def _resid_burden_slope_from(seizures, span):
+    """Median over seizures of the burden slope residualized against the
+    per-window GLOBAL (all-clean-contact) activation rate -- H3p-d's
+    collinearity control (spec Sec 6.4/7): a global preictal warm-up that
+    raises activation everywhere would also raise this covariate, so the
+    residual isolates burden rise beyond an overall activation increase."""
+    lo, hi = span
+    per_sz = []
+    for sz in seizures:
+        vals, centers, glob = [], [], []
+        for w in sz["windows"]:
+            if lo <= w["t_center"] <= hi:
+                vals.append(_burden_get(w))
+                centers.append(w["t_center"])
+                glob.append(_global_act_get(w))
+        s = residualize_slope(vals, centers, [glob], "theil_sen")
+        if np.isfinite(s):
+            per_sz.append(s)
+    return float(np.median(per_sz)) if per_sz else float("nan")
+
+
 # ---------------------------------------------------------------------------
 # the full metric block for a geometry-sufficient subject
 # ---------------------------------------------------------------------------
@@ -396,6 +522,7 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
     shaft_by_name, name_pos = geom["shaft_by_name"], geom["name_pos"]
     axis_idx, nonaxis_idx = geom["axis_idx"], geom["nonaxis_idx"]
     P_A, P_N = geom["P_A"], geom["P_N"]
+    rf = geom["rank_forward"]  # FIXED interictal forward rank -- Task 8 beta_axis/gain nulls never re-derive it
     lowrank = int(v3cfg["dynamics"]["lowrank"])
     kstar = int(v3cfg["dynamics"]["finite_horizon_k"])
     alpha = float(v3cfg["dynamics"]["var_ridge_alpha"])
@@ -545,10 +672,10 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
             return out
         return resample
 
-    def run_null(resample, obs, seed_off):
+    def run_null(resample, obs, seed_off, direction="greater"):
         rng = np.random.default_rng(seed + seed_off)
         null = null_slope_distribution(resample, "theil_sen", n_perm, rng)
-        return surplus_and_p(obs, null, "greater")
+        return surplus_and_p(obs, null, direction)
 
     # ---- LABEL null (PRIMARY: surplus/z/p) on full + guard for both metrics ----
     res_flux_full = run_null(label_resample(FULL, "flux"), obs_flux_full, 1)
@@ -728,6 +855,160 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
     near_onset_dependent_b = bool(lt(p_label_b) and not lt(p_label_b_guard))
     near_onset_dependent_c = bool(lt(p_label_c) and not lt(p_label_c_guard))
 
+    # =====================================================================
+    # Task 8: H3p-a beta_axis (supportive-only) + H3p-d burden / self-sustain
+    # (lag1-specific) / gain (relative shift) -- secondary/convergent. SAME
+    # seizures/windows as above; FULL span only (no guard companions).
+    # =====================================================================
+    # ---- H3p-a axial weakening: |beta_axis| trajectory, expected < 0 ----
+    beta_axis_strength_slope = _slope_from(seizures, _beta_get, FULL)
+    beta_vals = [w["m"]["beta_axis_strength"] for w in full_windows if np.isfinite(w["m"]["beta_axis_strength"])]
+    rel_min = float(v3cfg["geometry"]["beta_axis_reliability_min"])
+    beta_axis_reliable = bool(beta_vals and np.median(beta_vals) >= rel_min)
+
+    def beta_axis_label_resample(span):
+        lo, hi = span
+
+        def resample(rng):
+            # mirrors run_topic5_v3_susceptibility.py's H3a label-null exactly:
+            # restrict the (unchanged, observed) per-window roughness dict to the
+            # PERMUTED axis set, against the FIXED (never re-derived) rf -- a
+            # relabeled contact that was never in the interictal template has no
+            # rank to compare against and simply drops out of the correlation.
+            na, _nn = label_permute(axis_names, nonaxis_names, shaft_by_name, rng)
+            na_set = set(na)
+            out = []
+            for sz in seizures:
+                vals, centers = [], []
+                for w in sz["windows"]:
+                    if lo <= w["t_center"] <= hi:
+                        metric = {nm: v for nm, v in w["llr"].items() if nm in na_set}
+                        b = beta_axis(metric, rf)
+                        vals.append(abs(b) if np.isfinite(b) else float("nan"))
+                        centers.append(w["t_center"])
+                out.append((vals, centers))
+            return out
+        return resample
+
+    res_beta_a = run_null(beta_axis_label_resample(FULL), beta_axis_strength_slope, 11, direction="less")
+    p_label_slope_a, beta_axis_slope_z = res_beta_a["p"], res_beta_a["z"]
+
+    # ---- H3p-d burden: non-axis-strict activation rate slope (expected > 0) ----
+    nonaxis_activation_burden_slope_raw = _slope_from(seizures, _burden_get, FULL)
+
+    def burden_label_resample(span):
+        lo, hi = span
+
+        def resample(rng):
+            _na, nn = label_permute(axis_names, nonaxis_names, shaft_by_name, rng)
+            ni_perm = np.array([name_pos[x] for x in nn], dtype=int)
+            out = []
+            for sz in seizures:
+                vals, centers = [], []
+                for w in sz["windows"]:
+                    if lo <= w["t_center"] <= hi:
+                        a = w["active"]
+                        v = float(a[ni_perm].mean()) if ni_perm.size else float("nan")
+                        vals.append(v)
+                        centers.append(w["t_center"])
+                out.append((vals, centers))
+            return out
+        return resample
+
+    res_burden = run_null(burden_label_resample(FULL), nonaxis_activation_burden_slope_raw, 12)
+    nonaxis_activation_burden_slope_label_surplus = res_burden["surplus"]
+    burden_slope_z, p_label_burden = res_burden["z"], res_burden["p"]
+    nonaxis_activation_burden_slope_resid = _resid_burden_slope_from(seizures, FULL)
+
+    # ---- H3p-d N->N self-sustain (rev1 hardened): lag1_specific_slope is the
+    # DIFFERENCE of the two already-medianed subject-level slopes (NOT the
+    # slope of the per-window difference, unlike H3p-b's lag1_specific_slope)
+    # -- <=0 means "synchronous co-activation", not "self-sustaining chain". ----
+    N_self_sustain_lag1_slope = _slope_from(seizures, _selfsustain1_get, FULL)
+    N_self_sustain_lag0_slope = _slope_from(seizures, _selfsustain0_get, FULL)
+    N_self_sustain_lag1_specific_slope = (
+        N_self_sustain_lag1_slope - N_self_sustain_lag0_slope
+        if np.isfinite(N_self_sustain_lag1_slope) and np.isfinite(N_self_sustain_lag0_slope)
+        else float("nan")
+    )
+
+    def _selfsustain_specific_null(n_draws, rng):
+        """Per draw: same label permutation feeds BOTH lag1/lag0 self-sustain
+        trajectories (mirrors the observed lag1_slope - lag0_slope difference-
+        of-subject-level-slopes construction exactly); a single-metric
+        null_slope_distribution callback cannot express this two-metric
+        combinator, hence the bespoke loop."""
+        lo, hi = FULL
+        out = np.empty(int(n_draws), float)
+        for p in range(int(n_draws)):
+            _na, nn = label_permute(axis_names, nonaxis_names, shaft_by_name, rng)
+            ni_perm = np.array([name_pos[x] for x in nn], dtype=int)
+            s1_per_sz, s0_per_sz = [], []
+            for sz in seizures:
+                v1, v0, c = [], [], []
+                for w in sz["windows"]:
+                    if lo <= w["t_center"] <= hi:
+                        v1.append(within_compartment_flux(w["atm1"], ni_perm))
+                        v0.append(within_compartment_flux(w["atm0"], ni_perm))
+                        c.append(w["t_center"])
+                s1 = slope_over_windows(v1, c, "theil_sen")
+                s0 = slope_over_windows(v0, c, "theil_sen")
+                if np.isfinite(s1):
+                    s1_per_sz.append(s1)
+                if np.isfinite(s0):
+                    s0_per_sz.append(s0)
+            m1 = float(np.median(s1_per_sz)) if s1_per_sz else float("nan")
+            m0 = float(np.median(s0_per_sz)) if s0_per_sz else float("nan")
+            out[p] = (m1 - m0) if (np.isfinite(m1) and np.isfinite(m0)) else float("nan")
+        return out
+
+    res_selfsustain = surplus_and_p(
+        N_self_sustain_lag1_specific_slope,
+        _selfsustain_specific_null(n_perm, np.random.default_rng(seed + 13)),
+        "greater",
+    )
+    N_self_sustain_slope_z, p_label_selfsustain = res_selfsustain["z"], res_selfsustain["p"]
+
+    # ---- H3p-d gain (rev1 relative): gain_shift_slope = slope(gain_nonaxis -
+    # gain_axis) is primary (a same-system-wide-gain-rise confound would move
+    # gain_axis too and cancel in the shift); gain_nonaxis_surplus_slope kept
+    # for reference only. Label-null rebuilds e_axis_mean/e_nonaxis_mean per
+    # draw and refits the 2D VAR on the SAME (unpermuted) demeaned window. ----
+    gain_axis_slope = _slope_from(seizures, _gain_axis_get, FULL)
+    gain_nonaxis_slope = _slope_from(seizures, _gain_nonaxis_get, FULL)
+    gain_shift_slope = _slope_from(seizures, _gain_shift_get, FULL)
+
+    def gain_label_resample(span, which):
+        lo, hi = span
+
+        def resample(rng):
+            na, nn = label_permute(axis_names, nonaxis_names, shaft_by_name, rng)
+            e_a_perm, _e_g_perm, e_n_perm = axis_nonaxis_vectors(names, rf, na, nn)
+            out = []
+            for sz in seizures:
+                vals, centers = [], []
+                for w in sz["windows"]:
+                    if lo <= w["t_center"] <= hi:
+                        env_w = sz["bb_zt"][:, w["ws"]:w["we"]]
+                        try:
+                            Z = project_2d(demean_window(env_w), e_a_perm, e_n_perm)
+                            B = direct_2d_var(Z, alpha)
+                            g_a = float(np.linalg.norm(B[:, 0]))
+                            g_n = float(np.linalg.norm(B[:, 1]))
+                            v = (g_n - g_a) if which == "shift" else g_n
+                        except Exception:
+                            v = float("nan")
+                        vals.append(v)
+                        centers.append(w["t_center"])
+                out.append((vals, centers))
+            return out
+        return resample
+
+    res_gain_shift = run_null(gain_label_resample(FULL, "shift"), gain_shift_slope, 14)
+    gain_shift_slope_z = res_gain_shift["z"]
+    res_gain_nonaxis = run_null(gain_label_resample(FULL, "nonaxis"), gain_nonaxis_slope, 15)
+    gain_nonaxis_surplus_slope = res_gain_nonaxis["surplus"]
+
     row.update({
         "status": "ok", "skip_reason": "",
         # H3p-b
@@ -781,6 +1062,27 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
         "n_label_permutable_shafts": n_label_permutable_shafts,
         "n_unique_label_permutations_est": n_unique_label_permutations_est,
         "label_null_underpowered": label_null_underpowered,
+        # --- Task 8: H3p-a (supportive-only; hard-coded, never sole support) ---
+        "beta_axis_strength_slope": beta_axis_strength_slope,
+        "beta_axis_reliable": beta_axis_reliable,
+        "beta_axis_slope_z": beta_axis_slope_z,
+        "p_label_slope_a": p_label_slope_a,
+        "module_support_flag_a": False,
+        # --- Task 8: H3p-d burden ---
+        "nonaxis_activation_burden_slope_raw": nonaxis_activation_burden_slope_raw,
+        "nonaxis_activation_burden_slope_label_surplus": nonaxis_activation_burden_slope_label_surplus,
+        "nonaxis_activation_burden_slope_resid": nonaxis_activation_burden_slope_resid,
+        "burden_slope_z": burden_slope_z, "p_label_burden": p_label_burden,
+        # --- Task 8: H3p-d self-sustain (lag1-specific) ---
+        "N_self_sustain_lag1_slope": N_self_sustain_lag1_slope,
+        "N_self_sustain_lag0_slope": N_self_sustain_lag0_slope,
+        "N_self_sustain_lag1_specific_slope": N_self_sustain_lag1_specific_slope,
+        "N_self_sustain_slope_z": N_self_sustain_slope_z,
+        "p_label_selfsustain": p_label_selfsustain,
+        # --- Task 8: H3p-d gain (relative shift) ---
+        "gain_axis_slope": gain_axis_slope, "gain_nonaxis_slope": gain_nonaxis_slope,
+        "gain_shift_slope": gain_shift_slope, "gain_nonaxis_surplus_slope": gain_nonaxis_surplus_slope,
+        "gain_shift_slope_z": gain_shift_slope_z,
     })
     return row
 

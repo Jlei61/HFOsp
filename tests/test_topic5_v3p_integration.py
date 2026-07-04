@@ -48,3 +48,33 @@ def test_v3p_trajectory_runs_on_eligible_subject(tmp_path):
         assert np.isfinite(row["net_offaxis_flux_surplus_slope"])
         assert np.isfinite(row["mode_shift_density_surplus_slope"])
         assert 0.0 <= row["p_label_slope_b"] <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# Task 8 — supportive H3p-a (beta_axis) + secondary H3p-d (burden / self-sustain
+# lag1-specific / gain_shift) columns, added onto the SAME trajectory runner +
+# eligible subject as Task 7. module_support_flag_a is hard-coded False
+# (supportive-only, never sole support).
+# ---------------------------------------------------------------------------
+@pytest.mark.integration
+def test_v3p_trajectory_h3pa_h3pd_columns(tmp_path):
+    from scripts.run_topic5_v3p_trajectory import main
+    main(["--cohort", "narrow", "--outdir", str(tmp_path), "--n-perm", "50", "--subjects", "253"])
+    df = pd.read_csv(tmp_path / "v3p_trajectory_subject.csv")
+    for c in ["beta_axis_strength_slope", "beta_axis_reliable", "beta_axis_slope_z",
+              "p_label_slope_a", "module_support_flag_a",
+              "nonaxis_activation_burden_slope_raw", "nonaxis_activation_burden_slope_label_surplus",
+              "nonaxis_activation_burden_slope_resid", "burden_slope_z", "p_label_burden",
+              "N_self_sustain_lag1_slope", "N_self_sustain_lag0_slope",
+              "N_self_sustain_lag1_specific_slope", "N_self_sustain_slope_z", "p_label_selfsustain",
+              "gain_axis_slope", "gain_nonaxis_slope", "gain_shift_slope",
+              "gain_nonaxis_surplus_slope", "gain_shift_slope_z"]:
+        assert c in df.columns
+    row = df[df.subject.astype(str) == "epilepsiae_253"].iloc[0]
+    assert row["module_support_flag_a"] in (False, "False", 0)  # hard-coded, never sole support
+    if row["status"] == "ok":
+        assert np.isfinite(row["beta_axis_strength_slope"])
+        assert np.isfinite(row["nonaxis_activation_burden_slope_resid"])
+        assert np.isfinite(row["N_self_sustain_lag1_specific_slope"])
+        assert np.isfinite(row["gain_nonaxis_surplus_slope"])
+        assert 0.0 <= row["p_label_slope_a"] <= 1.0
