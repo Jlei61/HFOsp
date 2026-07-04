@@ -243,3 +243,29 @@ def extract_window_metrics(env_win, geom, v3cfg) -> dict:
         pass
 
     return out
+
+def null_slope_distribution(resample_traj_fn, estimator, n_perm, rng) -> np.ndarray:
+    out = np.empty(int(n_perm), float)
+    for p in range(int(n_perm)):
+        per_sz = resample_traj_fn(rng)
+        slopes = [slope_over_windows(v, c, estimator) for v, c in per_sz]
+        slopes = [s for s in slopes if np.isfinite(s)]
+        out[p] = float(np.median(slopes)) if slopes else float("nan")
+    return out
+
+def surplus_and_p(obs_slope, null_slopes, direction) -> dict:
+    null = np.asarray(null_slopes, float)
+    null = null[np.isfinite(null)]
+    n = null.size
+    if n == 0 or not np.isfinite(obs_slope):
+        return {"surplus": float("nan"), "p": float("nan"), "z": float("nan")}
+    med = float(np.median(null))
+    if direction == "greater":
+        p = (1 + int(np.sum(null >= obs_slope))) / (1 + n)
+    elif direction == "less":
+        p = (1 + int(np.sum(null <= obs_slope))) / (1 + n)
+    else:
+        raise ValueError(f"unknown direction: {direction!r}")
+    mad = 1.4826 * float(np.median(np.abs(null - med)))
+    z = (obs_slope - med) / mad if mad > 0 else float("nan")
+    return {"surplus": float(obs_slope - med), "p": float(p), "z": float(z)}

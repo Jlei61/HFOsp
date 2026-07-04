@@ -1,5 +1,5 @@
 import numpy as np
-from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows, within_compartment_flux, global_axial_energy, residualize_slope, extract_window_metrics
+from src.topic5_v3p_preictal_trajectory import load_v3p_config, theil_sen_slope, spearman_trend, slope_over_windows, within_compartment_flux, global_axial_energy, residualize_slope, extract_window_metrics, null_slope_distribution, surplus_and_p
 from src.topic5_v3_mode_transition import subspace_projectors, axis_nonaxis_vectors, rank_forward, load_v3_config
 
 def test_v3p_config_keys():
@@ -120,3 +120,15 @@ def test_extract_window_metrics_never_raises_on_degenerate_windows():
             # both, but forbid inf / non-scalar (a silently-broken estimator).
             assert isinstance(v, (int, float)), f"{k}={v!r} is not a scalar"
             assert np.isfinite(v) or np.isnan(v), f"{k}={v!r} is inf"
+
+def test_null_slope_distribution_and_surplus_p():
+    rng = np.random.default_rng(1); t = np.arange(15.0)
+    # resample returns flat-trend seizures (null slope ~ 0) for two seizures
+    def resample(r):
+        return [(r.standard_normal(15), t), (r.standard_normal(15), t)]
+    null = null_slope_distribution(resample, "theil_sen", n_perm=200, rng=rng)
+    assert null.shape == (200,) and abs(np.median(null)) < 0.05
+    res = surplus_and_p(0.5, null, "greater")               # obs strongly positive vs ~0 null
+    assert res["surplus"] > 0.4 and res["p"] < 0.02 and res["z"] > 3
+    res_neg = surplus_and_p(-0.5, null, "less")
+    assert res_neg["p"] < 0.02
