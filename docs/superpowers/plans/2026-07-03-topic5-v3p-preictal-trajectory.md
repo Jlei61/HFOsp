@@ -20,7 +20,7 @@
 - **(rev1) rate-preserving null is PER-WINDOW.** For the H3p-b rate null, `rate_preserving_shuffle` is applied **within each window independently** (preserves per-contact per-window activation rate, destroys only within-window lagged pairing) — NOT across the whole preictal span (which would flatten the burden trajectory and cause false positives).
 - **Geometry/dynamics inherited from V3a, already pilot-locked** in `config/topic5_v3.yaml`: `nonaxis_hfo_participation_max`, `beta_axis_reliability_min=0.20`, `lowrank=6`, `finite_horizon_k=3` (k*), `single_contact_energy_frac_max=0.50`, `z_threshold=2.0`. **Do not re-pilot these.** Non-axis = pure interictal HFO participation, **data/ictal/preictal-blind** (anti-circularity). Three-class contacts; `P_A/P_N` = axis + non-axis-strict only.
 - **VAR/DMD demean within window, no standardize** (`demean_window`). λ never raw — always `λ_surplus`. mode-shift uses the **singular vector**, density-normalized (÷ subspace rank). ATM `i≠j`.
-- **Subject is the unit;** window→seizure(Theil-Sen)→subject(median). **narrow = primary cohort, broad = replication, NEVER pooled.**
+- **Subject is the unit;** window→seizure(Theil-Sen)→subject(median). **narrow (7) = primary cohort; broad = replication; NEVER pooled.** **(rev2 option b) broad = `broad_expanded` (`broad_core` 9 + axis-quality-gate-admitted candidates); `broad_core` is ALWAYS reported alongside (expansion must not flip the curated-subset verdict). `yuquan` admitted candidates = a separate cross-dataset supplement, NEVER pooled with epilepsiae (descriptive, 3 sz each). Axis-quality gate calibrated so it never rejects the curated roster (Task 1).**
 - **Self-built nulls** (inherited): `label_permute` (shaft-constrained), `rate_preserving_shuffle`, `shaft_constrained_permute`. `p=(1+#exceed)/(1+n_perm)`; trend one-sided (H3p-a other tail). Cohort aggregation on `slope_label_z=(obs−median(null))/MAD(null)`; Wilcoxon signed-rank; H3p-b/H3p-c Holm-corrected.
 - **(rev1) time-order null** (secondary sensitivity): per seizure circularly shift/shuffle window order, keep metric values + labels, refit slope → `time_order_p_{b,c}` (tests "closer-to-onset = stronger" order-dependence; not a hard gate).
 - **(rev1) QC columns (emit, mostly non-gating):** H3p-c singular-vector stability `mode_singular_gap_median=median(σ1/σ2 of A^{k*})`, `mode_vector_stable`, `cv_r2`; H3p-b sparsity `n_activation_events_pre`, `n_active_windows_pre`, `h3b_activation_sufficient` (sparse activations → 0 flux NOT treated as negative); label-null power `n_label_permutable_shafts`, `n_label_permutable_{axis,nonaxis}`, `n_unique_label_permutations_est`, `label_null_entropy`, `label_null_underpowered` (<100 effective perms). **Empirically narrow 1146 shaftBoth=1, 1096/1125=2 → underpowered candidates.**
@@ -90,6 +90,18 @@ co_primary:
 inherit_v3_config: topic5_v3             # geometry+dynamics+avalanche+nulls locked there
 nulls: {n_perm_smoke: 20, n_perm_dev: 100, n_perm_final: 1000, seed: 20260703, alpha: 0.05}
 cohorts: {primary: narrow, replication: broad, never_pool: true}
+cohort_expansion:                        # rev2 (option b): expand broad via an axis-quality gate
+  broad_core: [epilepsiae_139, epilepsiae_253, epilepsiae_1077, epilepsiae_1096, epilepsiae_1125,
+               epilepsiae_1150, epilepsiae_620, epilepsiae_635, epilepsiae_916]   # curated (swap-positive 8 + E916)
+  candidates_epilepsiae: [epilepsiae_1084, epilepsiae_583, epilepsiae_590, epilepsiae_922]
+  candidates_yuquan: [yuquan_xuxinyi, yuquan_zhangkexuan]   # cross-dataset supplement, NEVER pooled with epilepsiae
+  axis_quality_gate:                     # a candidate is ADMITTED iff all pass (thresholds pilot-locked at Task 1)
+    require_geometry_sufficient: true
+    axis_rank_min_distinct: 5            # >=5 distinct interictal typical_rank among axis contacts (real early->late gradient, not tied)
+    axis_participation_gap_min: 0.15     # min(axis participation) - max(nonaxis-strict participation) >= gap (clean high/low split)
+    require_rank_displacement_json: true # candidate went through the masked interictal-propagation pipeline
+    calibrate_on_roster: true            # lock thresholds so the CURATED roster is NOT rejected (sanity)
+  broad_analysis: broad_expanded         # broad_core + admitted candidates_epilepsiae; broad_core ALWAYS reported alongside
 jitter_sec: [5.0, 10.0, 15.0]
 tier: exploratory
 ```
@@ -154,9 +166,10 @@ def load_v3p_config(path: str | Path | None = None) -> dict:
 **Files:** Create `scripts/run_topic5_v3p_feasibility.py`; Test `tests/test_topic5_v3p_integration.py`.
 **Interfaces:**
 - Consumes: V3a `scripts._topic5_v3_io.classify_subject_contacts`, `load_subject_phase_envelopes`; V3a `src.topic5_v3_mode_transition.sliding_windows`, `geometry_sufficient`; Task-0 `load_v3p_config`; V3a `load_v3_config`.
-- Produces: `feasibility.csv` cols: `subject, cohort, n_seizures, n_windows_P0, n_windows_P1, n_windows_P2, n_windows_P3, n_windows_full_total, n_windows_guard_total, usable_pre_sec, n_contacts_all_clean, n_axis, n_nonaxis, n_ambiguous, n_shaft_with_axis_and_nonaxis, n_unique_label_permutations_est, label_null_underpowered, geometry_sufficient, n_seizures_ge_min_windows, cohort_viable`. **(rev1: guard-span window total + label-null permutability surfaced here so underpowered subjects — narrow 1146/1096/1125 — are flagged at the pilot gate.)**
+- Produces: `feasibility.csv` cols: `subject, cohort, roster_status(roster|candidate), n_seizures, n_windows_P0, n_windows_P1, n_windows_P2, n_windows_P3, n_windows_full_total, n_windows_guard_total, usable_pre_sec, n_contacts_all_clean, n_axis, n_nonaxis, n_ambiguous, n_shaft_with_axis_and_nonaxis, n_unique_label_permutations_est, label_null_underpowered, geometry_sufficient, axis_rank_distinct, axis_participation_gap, has_rank_displacement_json, axis_quality_gate_pass, admitted, n_seizures_ge_min_windows, cohort_viable`. **(rev1: guard window total + label-null permutability — flags narrow 1146/1096/1125. rev2: `axis_quality_gate_pass`/`admitted` for the expansion candidates.)**
 
-**Contract:** per subject: `classify_subject_contacts` (V3a; source of truth for pool + axis/non-axis) → `load_subject_phase_envelopes(ds_sid, cohort, v3cfg, phases=["P0","P1","P2","P3"])`. For each seizure sum `sliding_windows` counts over the four preictal phase envelopes (window_sec/step_sec from `v3cfg["phases"]`); `n_seizures_ge_min_windows` = seizures whose preictal window total ≥ `min_windows_for_slope`. `geometry_sufficient` via V3a helper (min_n_axis=5, min_n_nonaxis=3, ≥1 shaft-with-both). `cohort_viable` is a post-hoc cohort roll-up (True when ≥4 subjects have `geometry_sufficient AND n_seizures_ge_min_windows≥1`).
+**Contract:** per subject: `classify_subject_contacts` (V3a; source of truth for pool + axis/non-axis) → `load_subject_phase_envelopes(ds_sid, cohort, v3cfg, phases=["P0","P1","P2","P3"])`. For each seizure sum `sliding_windows` counts over the four preictal phase envelopes; `n_seizures_ge_min_windows` = seizures whose preictal window total ≥ `min_windows_for_slope`. `geometry_sufficient` via V3a helper (min_n_axis=5, min_n_nonaxis=3, ≥1 shaft-with-both). `cohort_viable` = ≥4 subjects `geometry_sufficient AND n_seizures_ge_min_windows≥1`.
+- **(rev2) axis-quality gate** — run over roster (`roster_status=roster`, for calibration) AND expansion candidates (`roster_status=candidate`, from `cohort_expansion.candidates_*`, loaded under broad context / yuquan under its own context): `axis_rank_distinct` = # distinct finite interictal `typical_rank` among axis contacts (from `classify_subject_contacts`'s ctx `ta_rank`); `axis_participation_gap = min(participation[axis]) − max(participation[nonaxis_strict])`; `has_rank_displacement_json` = the candidate's `interictal_propagation_masked/rank_displacement/per_subject/<ds_sid>.json` exists. `axis_quality_gate_pass = geometry_sufficient AND axis_rank_distinct≥axis_rank_min_distinct AND axis_participation_gap≥axis_participation_gap_min AND has_rank_displacement_json`. `admitted` = `roster_status=="roster"` (grandfathered) OR (`roster_status=="candidate"` AND `axis_quality_gate_pass`).
 
 - [ ] **Step 1: Failing integration test**
 
@@ -168,14 +181,15 @@ def test_v3p_feasibility_writes_csv(tmp_path):
     out = tmp_path / "feasibility.csv"
     main(["--cohort", "narrow", "--outdir", str(tmp_path)])
     df = pd.read_csv(out)
-    for col in ["geometry_sufficient", "n_windows_P3", "n_seizures_ge_min_windows", "n_nonaxis"]:
+    for col in ["geometry_sufficient", "n_windows_P3", "n_seizures_ge_min_windows", "n_nonaxis",
+                "roster_status", "axis_quality_gate_pass", "admitted", "n_unique_label_permutations_est"]:
         assert col in df.columns
     assert len(df) >= 1
 ```
 
-- [ ] **Step 2: Run fail.** **Step 3: Implement** (import the frozen V3a io + window helpers; `main(argv)` with argparse `--cohort`, `--outdir`, optional `--subjects`). **Step 4: Run pass.**
+- [ ] **Step 2: Run fail.** **Step 3: Implement** (import the frozen V3a io + window helpers; `main(argv)` with argparse `--cohort`, `--outdir`, optional `--subjects`, `--include-candidates` [rev2: also probe `cohort_expansion.candidates_*` under broad/yuquan context, compute the axis-quality gate + `admitted`]). **Step 4: Run pass.**
 - [ ] **Step 5: Commit** — `git add scripts/run_topic5_v3p_feasibility.py tests/test_topic5_v3p_integration.py && git commit -m "feat(topic5-v3p): feasibility pilot (preictal window + geometry counts)"`
-- [ ] **Step 6 (DECISION GATE):** run `python scripts/run_topic5_v3p_feasibility.py --cohort narrow` and `--cohort broad`; inspect `feasibility.csv`. **Lock `min_windows_for_slope`** (default 8 — confirm the narrow cohort keeps ≥4 subjects with `geometry_sufficient AND ≥1 seizure ≥ min_windows`; if 8 is too strict, lower to the largest value that keeps ≥4, record in config + this line). **Auto-select one `geometry_sufficient AND n_seizures_ge_min_windows≥1` subject per cohort as the downstream integration subject** (expected: 253, the V3a integration subject). **If <4 narrow subjects qualify → STOP + report (narrow non-viable).**
+- [ ] **Step 6 (DECISION GATE):** run `--cohort narrow` and `--cohort broad` (with `--include-candidates`); inspect `feasibility.csv`. **(a) Lock `min_windows_for_slope`** (default 8 — empirically ~17–18/sz so non-binding; keep 8 unless a cohort drops <4 viable). **(b) Calibrate the axis-quality gate:** confirm `axis_quality_gate_pass=True` for ALL curated roster subjects (`roster_status=roster`); if any curated subject fails, LOOSEN `axis_rank_min_distinct`/`axis_participation_gap_min` until the roster passes (the gate must never reject the curated cohort), record locked values in config. **(c) Lock the admitted expansion set** = candidates with `admitted=True`; `broad_expanded = broad_core ∪ admitted_epilepsiae`; admitted yuquan → the `yuquan` supplement (never pooled). Record the final rosters in config + this line. **Auto-select one `admitted AND n_seizures_ge_min_windows≥1` subject per cohort as the integration subject** (expected: 253). **If <4 narrow qualify → STOP + report (narrow non-viable).**
 
 ---
 
@@ -543,7 +557,7 @@ def test_v3p_trajectory_runs_on_eligible_subject(tmp_path):
 **Contract:**
 - `subject_support = (module_support_flag_b OR module_support_flag_c) AND onset_jitter_pass AND (not single_contact_driven) AND leave_one_contact_pass AND axis_only_control_pass AND (not near_onset_dependent_of_the_supporting_leg) AND (not label_null_underpowered)`. H3p-a significant only strengthens; never sole. `geometry_insufficient`/`skipped` excluded from denominator. **(rev1: `near_onset_dependent` → that leg does not count as strong support; `label_null_underpowered` subject excluded from the strong-positive denominator.)**
 - **cohort-level: Holm-correct the two co-primary p-values** — take the per-subject `slope_label_z` for H3p-b and H3p-c, Wilcoxon signed-rank (one-sided, direction correct) on subject-median across the cohort → two raw p; Holm-adjust the pair. narrow tier-3 needs a Holm-passed H3p-b OR H3p-c + subject-support count ≥ (config threshold, default ≥2).
-- `tier`: 0 none / 1 descriptive-direction-only / 2 ≥1 subject support, no cohort direction / 3 **narrow cohort co-primary (Holm-passed)** / 4 narrow + broad same-direction replication / (5 = model-side, out of scope). `state_v3p_supported = tier>=3`. **narrow + broad never pooled.** Emit `pre_registered_negative` flag = True when tier ≤ 1 (honest-negative path).
+- `tier`: 0 none / 1 descriptive-direction-only / 2 ≥1 subject support, no cohort direction / 3 **narrow cohort co-primary (Holm-passed)** / 4 narrow + broad same-direction replication / (5 = model-side, out of scope). `state_v3p_supported = tier>=3`. **narrow + broad never pooled.** Emit `pre_registered_negative` flag = True when tier ≤ 1 (honest-negative path). **(rev2) broad replication = `broad_expanded`; ALSO compute + emit the `broad_core`-only verdict (`tier_broad_core`) — tier 4 requires the direction to hold on `broad_core` too (expansion adds power, never rescues a curated-subset null). `yuquan` supplement reported descriptively, never pooled.**
 
 - [ ] **Step 1: Failing integration test** (summary + cohort JSON have `tier`, `state_v3p_supported`, Holm-corrected `p_holm_b`/`p_holm_c`, per-cohort separation, denominator = geometry-sufficient count, `pre_registered_negative`). **Step 2: Run fail. Step 3: Implement. Step 4: Run pass.**
 - [ ] **Step 5: Commit** — `git add scripts/run_topic5_v3p_summary.py && git commit -m "feat(topic5-v3p): summary + tier 0-5 (Holm co-primary, narrow primary, honest-negative flag)"`

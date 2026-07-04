@@ -70,7 +70,7 @@ V3p 换**最干净的一个窗口**再问一次：**只看发作真正开始之�
 - **[LOCKED L9]** 判定 **tier 0–5**（§8），`state_v3p_supported=tier≥3`，V3p 最高 tier 4。
 - **[LOCKED L10]** **EXPLORATORY**，**无 forecasting**；预注册阴性可接受、不救 1125。
 - **[OPEN, pilot 定]** `min_windows_for_slope`（默认 8；**实测每发作 ~17-18 窗、两队列每发作都 ≥8，非约束**）；奇异 gap / label-perm underpowered / 激活充分 的具体阈值。
-- **[OPEN, 用户定]** **cohort 是否扩**（§10：6 个候选可扩，但非原 swap-curated 队列 → 需 axis-quality 门）。
+- **[DECIDED, 用户 option b]** **cohort 扩**：过 axis-quality 门（§10）；`broad=broad_expanded`（core 9 + admitted epilepsiae），`broad_core` 并列；yuquan 独立补充永不 pool；门阈 Task 1 pilot-lock（校准到不误杀 roster）。
 
 ---
 
@@ -219,7 +219,11 @@ window 明细 `v3p_window_detail.csv`：`subject, cohort, seizure_idx, span, pha
 | narrow | 7（1096,1125,1146,253,384,442,958） | 7/7 | 每发作 17–18 窗，全 ≥8 | **1146=1、1096/1125=2 → underpowered 候选** |
 
 **可扩候选**（cache 20 − roster 并集 13 = 7 个非 roster）：**6 个 broad-context 下 geom=OK + preictal 充裕** → `1084`（70 sz）、`583`（21）、`590`（11）、`922`（24）、`yuquan_xuxinyi`（3）、`yuquan_zhangkexuan`（3）；`548` 缺模板文件跑不了。
-**[OPEN, 用户定]** 这 6 个**不在原 swap-curated 队列**（broad=swap-positive 8 + E916），其 axis 虽可构（ax≈20）但未经 swap/compact-core 策展 → 若扩须先过 **axis-quality 门**（如 narrow compact-core 构轴通过 + 稳定模板）。**是否扩、扩进 narrow 还 broad、axis-quality 门定义 = 待用户决策**（改的是预注册队列）。
+
+**[DECIDED 2026-07-04，用户选 option (b)：扩，但过 axis-quality 门]**
+- **门（结构性，Task 1 计算 + pilot-lock，须校准到不误杀已策展 roster）**：`geometry_sufficient` AND `axis_rank_distinct ≥ 5`（轴触点上间期 typical_rank 有 ≥5 个不同值 = 真早→晚梯度，非全 tie）AND `axis_participation_gap ≥ 0.15`（min(轴参与度)−max(非轴参与度) = 清晰高/低分离）AND `has_rank_displacement_json`（候选已过 masked 间期传播流水线）。
+- **admitted**：roster 被试 grandfathered；候选须过门。
+- **队列结构**：`narrow`(7) 主，不动；`broad = broad_expanded`（`broad_core` 9 + admitted `candidates_epilepsiae` 中 1084/583/590/922 过门者），**`broad_core` 始终并列汇报**（扩展只加 power，不救策展子集的 null，tier 4 须 broad_core 同向）；admitted `yuquan`(xuxinyi/zhangkexuan) = 独立跨数据集补充，**永不 pool**，仅描述性。
 
 ---
 
@@ -242,7 +246,7 @@ window 明细 `v3p_window_detail.csv`：`subject, cohort, seizure_idx, span, pha
 ## 12. 决定项 status
 - **[LOCKED]** L1–L10 + rev1 L1b/L4b/L4c/L4d/L7b–e/L8b/L8c + preictal-only + Theil-Sen + co-primary(flux+mode) + label-null 主裁 + onset guard 双轨 + 继承 V3a + read-only。
 - **[OPEN, pilot 定]** `min_windows_for_slope`（实测非约束）；奇异 gap / label-perm underpowered / 激活充分 阈值。
-- **[OPEN, 用户定]** cohort 是否扩（§10：6 候选，需 axis-quality 门）。
+- **[DECIDED, 用户 option b]** cohort 扩：axis-quality 门 + `broad_expanded`（core 并列）+ yuquan 补充永不 pool（§10；门阈 Task 1 pilot-lock）。
 - **[本 spec 外]** 模型侧 preictal 一致性；表达层。
 
 ## 13. 核心命题（一句话）
