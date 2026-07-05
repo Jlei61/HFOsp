@@ -146,7 +146,7 @@
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
 | [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
-| [topic5_ictal_recruitment/v3p_preictal_trajectory/{narrow,broad}/figures/](topic5_ictal_recruitment/v3p_preictal_trajectory/narrow/figures/) | V3p：发作前最后两分钟（P0→P3，只看发作前，不碰 O/I1-I3）连锁活动是否逐渐搬到间期固定高频通路之外。上排=每个病人非轴向流/模态转移的爬升斜率（narrow 主力 vs broad 复制，圆=narrow/broad 核心 9 人，三角=broad 额外候选人，黑圈=该病人自己按标签置换检验显著）；中排=同两个量从 P0 到 P3 的完整轨迹（均值±IQR）；下排（可选）=换算成共同 null-relative z 尺度的补充对比。**当前图渲染自开发期合成 fixture（非真实队列数据），等 controller 跑完真实 n_perm=1000 队列后重跑脚本即被覆盖** |
+| [topic5_ictal_recruitment/v3p_preictal_trajectory/{narrow,broad}/figures/](topic5_ictal_recruitment/v3p_preictal_trajectory/narrow/figures/) | V3p：发作前最后两分钟（P0→P3，只看发作前，不碰 O/I1-I3）连锁活动是否逐渐搬到间期固定高频通路之外。上排=每个病人非轴向流/模态转移的爬升斜率（narrow 主力 vs broad 复制，圆=narrow/broad 核心 9 人，三角=broad 额外候选人，黑圈=该病人自己按标签置换检验显著）；中排=同两个量从 P0 到 P3 的完整轨迹（均值±IQR）；下排（可选）=换算成共同 null-relative z 尺度的补充对比。**图渲染自真实 n_perm=1000 大跑（2026-07-05，80 核 / 20 job / 7h35m）；结果=完整硬门阴性 tier 0（narrow 0/7 Holm 1.0/1.0、broad_expanded 0/13 Holm .685、broad_core 0/9 Holm .652，无被试过完整硬门；broad 零散单-null 命中全被硬门筛掉）；各图目录 `figures/README.md` 载对应队列真实数字** |
 
 ---
 

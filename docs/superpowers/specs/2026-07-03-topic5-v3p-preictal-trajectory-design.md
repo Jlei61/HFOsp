@@ -138,7 +138,7 @@ V3p 换**最干净的一个窗口**再问一次：**只看发作真正开始之�
 ### 6.4 H3p-d 非轴向负担 / 自持 / 相对增益（secondary/convergent；Step-last）
 - **nonaxis_activation_burden**：每窗 non-axis-strict 平均激活率 → 斜率。**残差化命门**：报 `_raw` + `_label_surplus` + `_resid`（对 `global_activation_rate(t)` 回归）。只 burden 阳性 → "小路外负担有 preictal increase，但不足以说 flow / 模态转移"。
 - **N_self_sustain（rev1 L7e 硬化）**：每窗 non-axis→non-axis `within_compartment_flux`（lag1）+ lag0 版；`N_self_sustain_lag1_specific_slope = lag1_slope − lag0_slope`；≤0 → "非轴向同步共激活"非"自持连锁"。
-- **gain_shift（rev1 L7d）**：每窗 2D-VAR `gain_nonaxis=‖B e_nonaxis_mean‖`、`gain_axis=‖B e_axis_mean‖`；`gain_shift_slope=slope(gain_nonaxis−gain_axis)` 主看；`gain_nonaxis_surplus_slope`（减 phase/block null）保留供参考。
+- **gain_shift（rev1 L7d）**：每窗 2D-VAR `gain_nonaxis=‖B e_nonaxis_mean‖`、`gain_axis=‖B e_axis_mean‖`；`gain_shift_slope=slope(gain_nonaxis−gain_axis)` 主看；`gain_nonaxis_surplus_slope`（**实现纠正=减 label-null**；此处 rev1 曾写"phase/block null"，但 gain 是 H3p-d 二级 reference-only 字段、不入任何硬门/tier，用 label-null 与其余 H3p-d 腿一致，phase/block 是 H3p-c co-primary 的门、不宜施于二级参考列——2026-07-05 whole-branch review 确认）保留供参考。
 
 ---
 
