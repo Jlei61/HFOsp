@@ -13,6 +13,7 @@ if str(_ROOT) not in sys.path:
 
 from scripts._topic5_v3_io import CACHE, classify_subject_contacts  # noqa: E402
 from src.topic5_v3c_coverage import coverage_metrics  # noqa: E402
+from src.topic5_v3c_latency import first_crossing_latency  # noqa: E402
 
 SOZ_JSON = {
     "epilepsiae": _ROOT / "results/epilepsiae_soz_core_channels.json",
@@ -42,3 +43,44 @@ def axis_soz_join(cls: dict, soz_list: list) -> dict:
     m = coverage_metrics(cls["is_axis"], soz_in_pool)
     m["soz_in_pool"] = soz_in_pool
     return m
+
+
+def extract_latency_matrix(ds_sid: str, cfg: dict, names: list, *, thresholds: list) -> list:
+    """Per eligible seizure, per contact in `names`, first-crossing latency at each
+    threshold (window/sustain from cfg['v3c']). Rows ordered 1:1 with `names`.
+
+    P1-4 FAIL-CLOSED: every name MUST exist in the cache channel list. A missing
+    contact raises ValueError rather than silently shifting the row->name
+    alignment (which would assign one contact's latency to another — a science
+    contamination bug). `names` always come from all_clean / soz_in_pool, both
+    derived from cache channels, so a miss means an upstream bug, not normal data.
+    """
+    vc = cfg["v3c"]
+    data = np.load(CACHE / f"{ds_sid}.npz", allow_pickle=True)
+    meta = json.loads((CACHE / f"{ds_sid}.json").read_text())
+    cache_names = [str(x) for x in data["channels"]]
+    name_to_row = {n: i for i, n in enumerate(cache_names)}
+    missing = [n for n in names if n not in name_to_row]
+    if missing:
+        raise ValueError(f"{ds_sid}: latency requested for contacts absent from cache: {missing}")
+    rows = [name_to_row[n] for n in names]     # 1:1 with names (fail-closed above)
+    out = []
+    for si in meta.get("eligible_idxs", []):
+        zk, rk = f"bb_zt__{si}", f"bb_relt__{si}"
+        sz = meta.get("seizure", {}).get(str(si))
+        if zk not in data.files or rk not in data.files or sz is None:
+            continue
+        onset = float(sz["eeg_onset_rel"])
+        relt = np.asarray(data[rk], dtype=float)
+        Z = np.asarray(data[zk], dtype=float)
+        kinds, secs = {}, {}
+        for thr in thresholds:
+            kk, ss = [], []
+            for r in rows:
+                kind, sec = first_crossing_latency(
+                    Z[r], relt, onset, z_cross=thr,
+                    window_sec=vc["window_sec"], sustain_frames=vc["sustain_frames"])
+                kk.append(kind); ss.append(sec)
+            kinds[thr] = kk; secs[thr] = ss
+        out.append({"idx": si, "kinds": kinds, "secs": secs})
+    return out
