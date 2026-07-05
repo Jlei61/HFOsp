@@ -143,12 +143,14 @@ def spatial_self_limited(E_spk_bool, dt, t_kick, peak_t, late_after, win, retrea
 # ---------------------------------------------------------------- assembler
 def extract_cell_metrics(res, posE, dt, t_kick, *, core_neuron_mask, center, T_min,
                          band_half, sat_ceiling, thresh_hz, retreat_factor,
-                         event_lo=None, event_hi=None) -> CellMetrics:
+                         axis_unit=None, event_lo=None, event_hi=None) -> CellMetrics:
     """Assemble a CellMetrics (src.sef_hfo_m4_phaseplane) from a simulate_kick result `res`
-    (needs res['E_spk_bool'], res['rate_E']) + E positions. `center` = sheet center; onset axis is derived
-    here. `event_lo/hi` default to [t_kick, end]. All threshold/window params come from calibration (§9.1).
-    UNITS: `sat_ceiling` and `thresh_hz` are per-neuron mean Hz; res['rate_E'] (a per-step spike COUNT) is
-    converted to Hz internally before the saturation/energy/branching comparisons."""
+    (needs res['E_spk_bool'], res['rate_E']) + E positions. `center` = the axis line's anchor point.
+    `axis_unit` = the propagation axis for f_off; if None it is DERIVED from the onset gradient, else the
+    caller's KNOWN axis is used (e.g. a subject's registered source->sink axis). `event_lo/hi` default to
+    [t_kick, end]. All threshold/window params come from calibration (§9.1). UNITS: `sat_ceiling` and
+    `thresh_hz` are per-neuron mean Hz; res['rate_E'] (a per-step spike COUNT) is converted to Hz internally
+    before the saturation/energy/branching comparisons."""
     E_spk = np.asarray(res["E_spk_bool"])
     rate = np.asarray(res["rate_E"], float)
     nsteps = E_spk.shape[0]
@@ -158,14 +160,14 @@ def extract_cell_metrics(res, posE, dt, t_kick, *, core_neuron_mask, center, T_m
         event_hi = nsteps * dt
 
     onset = onset_times(E_spk, dt, t_kick)
-    axis_unit = onset_axis(posE, onset)
+    axis_for_foff = axis_unit if axis_unit is not None else onset_axis(posE, onset)
     active = active_mask_post_kick(E_spk, dt, t_kick)
     sl = self_limit(rate, dt, t_kick)
     peak_t = float(sl["peak_t"])
 
     act_frac = peak_active_fraction(E_spk, dt, event_lo, event_hi)
     s_grad = onset_gradient_r2(posE, onset)
-    f_off = off_axis_fraction(posE, active, axis_unit, center, band_half)
+    f_off = off_axis_fraction(posE, active, axis_for_foff, center, band_half)
     core_ov = core_overlap_spikes(E_spk, dt, t_kick, core_neuron_mask)
     glob = globality_pr(E_spk, dt, t_kick)
     # rate_E is a per-step SPIKE COUNT (kick_probe.py:305), NOT Hz. Convert to per-neuron mean Hz using
