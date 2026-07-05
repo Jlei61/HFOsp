@@ -519,7 +519,7 @@ def screen_low_heterogeneity_effect(p_base, admissible_operating_points, sigma_p
 ```python
 # scripts/run_sef_hfo_step0a_stability.py
 """Step 0a: delayed dispersion + n-convergence + low-heterogeneity screen, with the
-framework Step-0a output contract (topic4_sef_itp_framework.md:810-822):
+framework Step-0a output contract (topic4_sef_hfo.md:810-822):
 phase diagram (+candidate boundary + data-locked family), growth/k* heatmap, gain & low-het shift."""
 import argparse, json
 from dataclasses import replace
@@ -1233,7 +1233,7 @@ def test_formal_gate_requires_data_locked_provenance_and_window():
 
 **Spec coverage:** delayed dispersion (Tasks 4–5) ✓; patch A screen+no-rescue (Task 6) ✓; patch B switchable recovery + report-both (Tasks 8,12) ✓; finite-pulse window+margin gate (Tasks 11–13) ✓. Review fixes #1 (Task 11 single location + README) #2 (Task 13 provenance tiers) #3 (Task 12 family scan) #4 (Task 12 report-both) #5 (Task 13 units anchoring) #6 (Tasks 11,12 adaptive+sensitivity) #7 (Task 3) #8 (Task 8 note + Task 12 dt-sens) #9 (Task 9) #10 (Task 10) — all mapped. Advisor gates: n-convergence (Task 5), bounded transcendental (Task 5), field-linearization consistency (Task 9), n↔dt (Task 8 note + Task 12).
 
-**Visualization + gate-correctness round (2026-06-02):** framework Step-0a/0b output contract (`topic4_sef_itp_framework.md:810-822`) now met — 0a emits phase diagram (+candidate boundary + data-locked family), growth/`k*` heatmap, gain & low-het shift (Task 7); 0b emits full response surface, margin waterfall, example snapshots with centroid trail (Task 12), per your Brunel-style argument chain (structure → phase → dispersion → simulation example → proxy). Two gate-polluting bugs fixed: (a) amplitude refinement now runs **real pulses** at fine amplitudes via a cached real label_fn (no nearest-coarse-label lookup) — Tasks 11–12; (b) `A_self_limited` separated from `A_event`, and **`safety_margin = A_runaway − A_self_limited`** so local-bump / global-synchronous do not inflate the margin — Tasks 11,13. Figures follow the paper-grade self-contained discipline (legends, plain-term axes, no codebase jargon).
+**Visualization + gate-correctness round (2026-06-02):** framework Step-0a/0b output contract (`topic4_sef_hfo.md:810-822`) now met — 0a emits phase diagram (+candidate boundary + data-locked family), growth/`k*` heatmap, gain & low-het shift (Task 7); 0b emits full response surface, margin waterfall, example snapshots with centroid trail (Task 12), per your Brunel-style argument chain (structure → phase → dispersion → simulation example → proxy). Two gate-polluting bugs fixed: (a) amplitude refinement now runs **real pulses** at fine amplitudes via a cached real label_fn (no nearest-coarse-label lookup) — Tasks 11–12; (b) `A_self_limited` separated from `A_event`, and **`safety_margin = A_runaway − A_self_limited`** so local-bump / global-synchronous do not inflate the margin — Tasks 11,13. Figures follow the paper-grade self-contained discipline (legends, plain-term axes, no codebase jargon).
 
 **Placeholder scan:** only the `[实跑后填…]` empirical line in the writeup (data the run produces). No code placeholders.
 

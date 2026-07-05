@@ -84,7 +84,10 @@ def _sample_partners_rot(pos_t, src_pos, C, l_par, l_perp, theta, rng,
 
 def build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE, AR,
                            verbose=False, local_scale_EI=None,
-                           w_EE_gain_core=1.0, core_mask_E=None, prune_radius=None):
+                           w_EE_gain_core=1.0, core_mask_E=None, prune_radius=None,
+                           gate_scale=0.0, l_gate=None, C_gate=None,
+                           ei_gate_scale=0.0, l_ei_gate=None, C_ei_gate=None,
+                           hub_mask_E=None, hub_long_range_C=0, l_hub_long=None, hub_gain=0.0):
     """Identical to connectivity.build_connectivity except the E->E AMPA channel
     uses a rotated elliptical-exponential kernel (theta_EE, AR). Every other
     channel is bit-identical to the original isotropic build.
@@ -100,8 +103,32 @@ def build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE, AR,
         and TARGET E neurons are BOTH in the core, multiply w_EE by w_EE_gain_core ->
         recurrent excitatory cluster. EDGE-indexed (both-in-core); source-only would heat
         out-core targets and break bare-sheet-quiet. gain==1.0 / mask None -> no-op.
-    With all three at their defaults the build is BIT-IDENTICAL to the pre-edit engine.
+    M2 extra wide I->E gate (2026-06-19, default OFF):
+      - gate_scale + l_gate + C_gate: for each E TARGET, sample C_gate EXTRA I sources within
+        a WIDE radius l_gate and add GABA edges of weight gate_scale*w_EI ON TOP of the unchanged
+        local I->E. This is the rate-toy's ADDED activity-dependent surround veto (NOT a re-tuning
+        of l_EI/C_EI, which only dilutes). gate_scale=0 (default) -> no extra rng draw, no edges.
+    M2 extra wide E->I recruit gate (2026-06-19, default OFF):
+      - ei_gate_scale + l_ei_gate + C_ei_gate: for each I TARGET, sample C_ei_gate EXTRA E sources
+        within a WIDE radius l_ei_gate and add AMPA edges of weight ei_gate_scale*w_IE ON TOP of the
+        unchanged local E->I, so the front recruits inhibitory cells AHEAD of itself (complements the
+        I->E veto). ei_gate_scale=0 (default) -> no extra rng draw, no edges.
+    M3 sparse long-range hub BROADCAST edges (2026-06-19, default OFF):
+      - hub_mask_E + hub_long_range_C + l_hub_long + hub_gain: for each E TARGET, sample
+        hub_long_range_C EXTRA E SOURCES restricted to the hub subset (hub_mask_E) within a WIDE
+        radius l_hub_long, and add AMPA E->E edges of weight hub_gain*w_EE ON TOP of the unchanged
+        local E->E, so a recruited hub broadcasts to distant E cells (the global region). hub_gain=0
+        (default) -> no extra rng draw, no edges. (hub_mask_E is the E-local hub subset from
+        src.topic4_corridor_substrate.corridor_regions.)
+    With all defaults (incl. gate_scale=0 AND ei_gate_scale=0 AND hub_gain=0) the build is
+    BIT-IDENTICAL to pre-edit.
     """
+    if gate_scale > 0.0 and (l_gate is None or C_gate is None):
+        raise ValueError("gate_scale>0 requires l_gate (mm) and C_gate (in-degree)")
+    if ei_gate_scale > 0.0 and (l_ei_gate is None or C_ei_gate is None):
+        raise ValueError("ei_gate_scale>0 requires l_ei_gate (mm) and C_ei_gate (in-degree)")
+    if hub_gain > 0.0 and (hub_mask_E is None or hub_long_range_C <= 0 or l_hub_long is None):
+        raise ValueError("hub_gain>0 requires hub_mask_E (bool len NE), hub_long_range_C>0, l_hub_long (mm)")
     w_EE, w_IE, w_EI, w_II = p.weights()
     posE = pos[:NE]
     posI = pos[NE:]
@@ -155,6 +182,37 @@ def build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE, AR,
             a_w.append(w_edge)
             a_dly.append(dly)
 
+        # ---- M3: EXTRA sparse long-range hub BROADCAST edges (default OFF). For this E target,
+        # add AMPA E->E edges from HUB SOURCES (the hub_mask_E subset) within a WIDE l_hub_long
+        # kernel, weight hub_gain*w_EE -> a recruited hub broadcasts to distant E cells (global
+        # region). Local E->E above is UNCHANGED (ADDED path). Gated on hub_gain>0 so the default
+        # path consumes NO extra rng draw -> bit-parity. (E target only; mutually exclusive with the
+        # I-target ei_gate below, so no rng-order interaction.) ----
+        if a_is_E and hub_gain > 0.0 and hub_mask_E is not None and hub_mask_E.any():
+            hub_src_E = np.flatnonzero(hub_mask_E)            # E-local hub source indices
+            cb = _sample_partners(pt, posE[hub_src_E], hub_long_range_C, l_hub_long, 0.0,
+                                  rng, self_local=None)
+            if cb.size:
+                src = hub_src_E[cb]                            # map back to E indices
+                db = np.linalg.norm(posE[src] - pt, axis=1)
+                a_rows.append(np.full(src.size, i))
+                a_cols.append(src)
+                a_w.append(np.full(src.size, (w_EE * hub_gain) * jump_ampa[i]))
+                a_dly.append(p.tau0 + db * inv_vdt)
+
+        # ---- M2: EXTRA wide E->I recruit gate (default OFF). For this I target, add AMPA edges
+        # from E sources within a WIDE l_ei_gate kernel, weight ei_gate_scale*w_IE -> the front
+        # recruits I cells AHEAD of itself. Local E->I above is UNCHANGED (ADDED path). Gated on
+        # ei_gate_scale>0 so the default path consumes NO extra rng draw -> bit-parity. ----
+        if (not a_is_E) and ei_gate_scale > 0.0:
+            ce = _sample_partners(pt, posE, C_ei_gate, l_ei_gate, 0.0, rng, self_local=None)
+            if ce.size:
+                de = np.linalg.norm(posE[ce] - pt, axis=1)
+                a_rows.append(np.full(ce.size, i))
+                a_cols.append(ce)
+                a_w.append(np.full(ce.size, (w_IE * ei_gate_scale) * jump_ampa[i]))
+                a_dly.append(p.tau0 + de * inv_vdt)
+
         # ---- inhibitory (GABA) inputs: sources in I (bit-identical) ----
         C = p.C_EI if a_is_E else p.C_II
         l = p.l_EI if a_is_E else p.l_II
@@ -172,6 +230,19 @@ def build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE, AR,
             g_cols.append(cols)
             g_w.append(np.full(cols.size, wval))
             g_dly.append(dly)
+
+        # ---- M2: EXTRA wide I->E gate (default OFF). For this E target, add GABA edges from
+        # I sources within a WIDE l_gate kernel, weight gate_scale*w_EI -> the rate-toy added
+        # surround veto. Local I->E above is UNCHANGED (this is an ADDED path). Gated on
+        # gate_scale>0 so the default path consumes NO extra rng draw -> bit-parity. ----
+        if a_is_E and gate_scale > 0.0:
+            cg = _sample_partners(pt, posI, C_gate, l_gate, 0.0, rng, self_local=None)
+            if cg.size:
+                dg = np.linalg.norm(posI[cg] - pt, axis=1)
+                g_rows.append(np.full(cg.size, i))
+                g_cols.append(cg)
+                g_w.append(np.full(cg.size, (w_EI * gate_scale) * jump_gaba[i]))
+                g_dly.append(p.tau0 + dg * inv_vdt)
 
         if verbose and (i % 1000 == 0):
             print(f"  connectivity(rot): target {i}/{NE+NI}", flush=True)

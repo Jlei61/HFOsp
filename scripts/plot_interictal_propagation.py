@@ -888,17 +888,22 @@ def _plot_rank_heatmap(
     title: str,
     show_ylabels: bool = True,
     display_bools: np.ndarray | None = None,
+    ytick_fontsize: float | None = None,
+    title_fontsize: float = 18,
+    xtick_fontsize: float = 14,
 ) -> Any:
     n_ch = display_ranks.shape[0]
     masked = _mask_phantom_cells(display_ranks, display_bools)
     im = ax.pcolormesh(masked, rasterized=True, cmap=_viridis_with_lightgray_bad())
+    if ytick_fontsize is None:
+        ytick_fontsize = 14 if n_ch > 24 else 16
     ax.set_yticks(np.arange(n_ch) + 0.5)
     ax.set_yticklabels(
         channel_names if show_ylabels else [],
-        fontsize=14 if n_ch > 24 else 16,
+        fontsize=ytick_fontsize,
     )
-    ax.set_title(title, fontsize=18)
-    ax.tick_params(axis="x", labelsize=14)
+    ax.set_title(title, fontsize=title_fontsize)
+    ax.tick_params(axis="x", labelsize=xtick_fontsize)
     return im
 
 
@@ -921,22 +926,70 @@ def _plot_daynight_strip(ax: plt.Axes, is_day: np.ndarray) -> None:
         spine.set_visible(False)
 
 
-def _plot_cluster_boundaries(ax: plt.Axes, labels_sorted: np.ndarray, n_ch: int) -> None:
+def _plot_cluster_boundaries(
+    ax: plt.Axes,
+    labels_sorted: np.ndarray,
+    n_ch: int,
+    *,
+    line_color: str = "red",
+    line_width: float = 1.5,
+    line_style: str = "--",
+    label_fontsize: float = 14,
+    label_box: bool = False,
+    boundary_band: bool = False,
+    label_names: List[str] | None = None,
+    label_y_offset: float = 0.15,
+) -> None:
     if labels_sorted.size == 0:
         return
     unique_labels = np.unique(labels_sorted)
     cursor = 0
-    for cluster_id in unique_labels:
+    for label_idx, cluster_id in enumerate(unique_labels):
         count = int(np.sum(labels_sorted == cluster_id))
         if cursor > 0:
-            ax.axvline(cursor, color="red", lw=1.5, ls="--")
+            if boundary_band:
+                ax.axvspan(
+                    cursor - 0.22,
+                    cursor + 0.22,
+                    color=line_color,
+                    alpha=0.14,
+                    lw=0,
+                    zorder=12,
+                )
+            ax.axvline(
+                cursor,
+                color=line_color,
+                lw=line_width,
+                ls=line_style,
+                alpha=0.98,
+                zorder=13,
+            )
+        text_kwargs = {}
+        if label_box:
+            text_kwargs["bbox"] = dict(
+                boxstyle="round,pad=0.18",
+                facecolor="white",
+                edgecolor=line_color,
+                linewidth=0.7,
+                alpha=0.92,
+            )
+        label_text = (
+            label_names[label_idx]
+            if label_names is not None and label_idx < len(label_names)
+            else f"C{int(cluster_id)}"
+        )
         ax.text(
             cursor + count / 2.0,
-            n_ch + 0.15,
-            f"C{int(cluster_id)} (n={count})",
-            color="red",
+            n_ch + label_y_offset,
+            f"{label_text} (n={count})",
+            color=line_color,
             ha="center",
-            fontsize=14,
+            va="bottom",
+            fontsize=label_fontsize,
+            fontweight="bold" if label_box else "normal",
+            clip_on=False,
+            zorder=14,
+            **text_kwargs,
         )
         cursor += count
 
@@ -949,9 +1002,17 @@ def _plot_rank_histogram(
     channel_order: np.ndarray,
     channel_names: List[str],
     title: str,
+    *,
+    show_ylabels: bool = True,
+    ytick_fontsize: float | None = None,
+    label_fontsize: float = 16,
+    title_fontsize: float = 18,
+    xtick_fontsize: float = 14,
 ) -> None:
     n_ch = len(channel_order)
     ordered_names = [channel_names[idx] for idx in channel_order]
+    if ytick_fontsize is None:
+        ytick_fontsize = 14 if n_ch > 24 else 16
     overlap = 0.85
     for ci_idx, ci in enumerate(channel_order):
         vals = np.asarray(ranks[ci, event_indices], dtype=float)
@@ -970,11 +1031,13 @@ def _plot_rank_histogram(
         )
         ax.axhline(y_base, color="0.8", lw=0.3)
     ax.set_yticks(np.arange(n_ch) * (1.0 - overlap))
-    ax.set_yticklabels(ordered_names, fontsize=14 if n_ch > 24 else 16)
-    ax.set_xlabel("Rank", fontsize=16)
-    ax.set_title(title, fontsize=18)
+    ax.set_yticklabels(ordered_names if show_ylabels else [], fontsize=ytick_fontsize)
+    if not show_ylabels:
+        ax.tick_params(axis="y", left=False, labelleft=False)
+    ax.set_xlabel("Rank", fontsize=label_fontsize)
+    ax.set_title(title, fontsize=title_fontsize)
     ax.set_xlim(-0.5, n_ch - 0.5)
-    ax.tick_params(axis="x", labelsize=14)
+    ax.tick_params(axis="x", labelsize=xtick_fontsize)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -988,10 +1051,21 @@ def _plot_cluster_rank_fig4(
     channel_order: np.ndarray,
     channel_names: List[str],
     title: str,
+    *,
+    ytick_fontsize: float | None = None,
+    label_fontsize: float = 16,
+    title_fontsize: float = 18,
+    xtick_fontsize: float = 14,
+    legend_fontsize: float = 14,
+    show_legend: bool = True,
+    invert_yaxis: bool = True,
+    show_ylabels: bool = True,
 ) -> None:
     """Per-cluster mean rank line + shaded mean +/- std band on fixed channel order."""
     n_ch = len(channel_order)
     ordered_names = [channel_names[idx] for idx in channel_order]
+    if ytick_fontsize is None:
+        ytick_fontsize = 14 if n_ch > 24 else 16
     unique_k = np.unique(labels)
     n_k = len(unique_k)
     _base_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b", "#e377c2", "#17becf"]
@@ -1024,14 +1098,18 @@ def _plot_cluster_rank_fig4(
         )
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(ordered_names, fontsize=14 if n_ch > 24 else 16)
+    ax.set_yticklabels(ordered_names if show_ylabels else [], fontsize=ytick_fontsize)
+    if not show_ylabels:
+        ax.tick_params(axis="y", left=False, labelleft=False)
     ax.set_ylim(-0.5, n_ch - 0.5)
-    ax.invert_yaxis()
-    ax.set_xlabel("Rank", fontsize=16)
-    ax.set_title(title, fontsize=18)
+    if invert_yaxis:
+        ax.invert_yaxis()
+    ax.set_xlabel("Rank", fontsize=label_fontsize)
+    ax.set_title(title, fontsize=title_fontsize)
     ax.set_xlim(-0.5, n_ch - 0.5)
-    ax.tick_params(axis="x", labelsize=14)
-    ax.legend(fontsize=14, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=n_k)
+    ax.tick_params(axis="x", labelsize=xtick_fontsize)
+    if show_legend:
+        ax.legend(fontsize=legend_fontsize, loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=n_k)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -1288,11 +1366,20 @@ def _ensure_pr3_readme() -> None:
     )
 
 
-def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> Path:
+def plot_pr3_subject_figure(
+    record: Dict[str, Any],
+    max_events: int = 2000,
+    display_label=None,
+    preview_style: bool = False,
+    preview_output: bool = False,
+) -> Path:
     from src.interictal_propagation import _valid_event_indices
 
     dataset = str(record["dataset"])
     subject = str(record["subject"])
+    # Reader-facing label for titles only (dir resolution + output filename still use `subject`).
+    # Lets the model figure show a paper-grade name instead of the internal pooled tag.
+    label = display_label if display_label else f"{dataset}:{subject}"
     subject_dir = _resolve_subject_dir(dataset, subject)
     loaded = _load_lagpat(subject_dir)
     ranks = np.asarray(loaded["ranks"], dtype=float)
@@ -1346,15 +1433,53 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
         best_inter_corr = k2.get("inter_cluster_corr", float("nan"))
         fwd_rev_str = ""
 
+    if preview_style:
+        fs = {
+            "heatmap_y": 21 if n_ch <= 24 else 18,
+            "title": 25,
+            "axis_title": 22,
+            "label": 21,
+            "tick": 18,
+            "cluster_label": 19,
+            "legend": 16,
+            "cbar": 18,
+            "suptitle": 26,
+            "subtitle": 20,
+        }
+        width_ratios = [6.35, 0.40]
+        fig_width = 23.4
+        right_wspace = 0.055
+        hspace = 0.44
+        grid_bounds = dict(left=0.055, right=0.952, bottom=0.105, top=0.81)
+    else:
+        fs = {
+            "heatmap_y": 14 if n_ch > 24 else 16,
+            "title": 18,
+            "axis_title": 16,
+            "label": 16,
+            "tick": 14,
+            "cluster_label": 14,
+            "legend": 14,
+            "cbar": 14,
+            "suptitle": 20,
+            "subtitle": 16,
+        }
+        width_ratios = [5, 1.0]
+        fig_width = 22
+        right_wspace = 0.15
+        hspace = 0.50
+        grid_bounds = {}
+
     # ---- 2x2 layout: left=heatmaps (wide), right=histograms (narrower) ----
     row_height = max(4.5, 0.28 * n_ch)
-    fig = plt.figure(figsize=(22, row_height * 2 + 2.5))
+    fig = plt.figure(figsize=(fig_width, row_height * 2 + (3.0 if preview_style else 2.5)))
     outer = gridspec.GridSpec(
         2, 2,
-        width_ratios=[5, 1.0],
+        width_ratios=width_ratios,
         height_ratios=[1, 1],
-        hspace=0.50,
-        wspace=0.15,
+        hspace=hspace,
+        wspace=right_wspace,
+        **grid_bounds,
     )
 
     # ---- Top-left: Raw heatmap + Day/Night strip (flush) ----
@@ -1368,23 +1493,61 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
     im = _plot_rank_heatmap(
         ax_raw, display_ranks_raw, ordered_names,
         title=(
-            f"{dataset}:{subject}  (n={valid_events.size}, "
-            f"\u03c4={all_tau:.3f}){mi_str}"
+            "Events over time" if preview_style else
+            f"{label}  (n={valid_events.size}, \u03c4={all_tau:.3f}){mi_str}"
         ),
         display_bools=display_bools_raw,
+        ytick_fontsize=fs["heatmap_y"],
+        title_fontsize=fs["title"],
+        xtick_fontsize=fs["tick"],
     )
     ax_raw.tick_params(axis="x", labelbottom=False)
     ax_raw.set_xlabel("", fontsize=1)
+    if preview_style:
+        ax_raw.text(
+            0.008,
+            1.045,
+            f"{label} | n={valid_events.size}",
+            transform=ax_raw.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=fs["axis_title"],
+            fontweight="bold",
+            clip_on=False,
+            zorder=20,
+        )
     ax_raw_strip = fig.add_subplot(raw_sub[1], sharex=ax_raw)
     _plot_daynight_strip(ax_raw_strip, day_mask)
 
     # ---- Top-right: Per-channel rank histogram (original channel order) ----
-    ax_hist_orig = fig.add_subplot(outer[0, 1])
+    if preview_style:
+        hist_sub = gridspec.GridSpecFromSubplotSpec(
+            2, 1, subplot_spec=outer[0, 1],
+            height_ratios=[20, 1], hspace=0.02,
+        )
+        ax_hist_orig = fig.add_subplot(hist_sub[0])
+        ax_hist_dummy = fig.add_subplot(hist_sub[1], sharex=ax_hist_orig)
+        ax_hist_dummy.axis("off")
+    else:
+        ax_hist_orig = fig.add_subplot(outer[0, 1])
     _plot_rank_histogram(
         ax_hist_orig, ranks, bools, valid_events,
         original_order, channel_names,
-        title="Per-channel rank distribution",
+        title="" if preview_style else "Per-channel rank distribution",
+        show_ylabels=not preview_style,
+        ytick_fontsize=fs["heatmap_y"],
+        label_fontsize=fs["label"],
+        title_fontsize=fs["axis_title"],
+        xtick_fontsize=fs["tick"],
     )
+    if preview_style:
+        ax_hist_orig.set_title(
+            "Rank dist.",
+            fontsize=fs["axis_title"],
+            fontweight="normal",
+            loc="center",
+            pad=8,
+        )
 
     # ---- Bottom-left: k_best clustered heatmap ----
     ax_clust = fig.add_subplot(outer[1, 0])
@@ -1398,6 +1561,9 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
         _plot_rank_heatmap(
             ax_clust, display_ranks_best, ordered_names, title="",
             display_bools=display_bools_best,
+            ytick_fontsize=fs["heatmap_y"],
+            title_fontsize=fs["title"],
+            xtick_fontsize=fs["tick"],
         )
         clust_title = (
             f"KMeans k={best_k}  |  within-\u03c4={best_within_tau:.3f}"
@@ -1405,15 +1571,37 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
         )
         if fwd_rev_str:
             clust_title += f"  |  {fwd_rev_str}"
-        ax_clust.set_title(clust_title, fontsize=16, pad=28)
-        _plot_cluster_boundaries(ax_clust, best_labels_sorted, n_ch)
+        ax_clust.set_title(
+            "" if preview_style else clust_title,
+            fontsize=fs["axis_title"],
+            pad=42 if preview_style else 28,
+        )
+        if preview_style:
+            _plot_cluster_boundaries(
+                ax_clust,
+                best_labels_sorted,
+                n_ch,
+                line_color="#d00000",
+                line_width=5.0,
+                line_style="-",
+                label_fontsize=fs["cluster_label"],
+                label_box=False,
+                boundary_band=True,
+                label_names=["TA", "TB"],
+                label_y_offset=0.58,
+            )
+        else:
+            _plot_cluster_boundaries(ax_clust, best_labels_sorted, n_ch)
     else:
         _plot_rank_heatmap(
             ax_clust, display_ranks_raw, ordered_names,
             title=f"KMeans k={best_k} (no labels)",
             display_bools=display_bools_raw,
+            ytick_fontsize=fs["heatmap_y"],
+            title_fontsize=fs["title"],
+            xtick_fontsize=fs["tick"],
         )
-    ax_clust.set_xlabel("Pop Events (clustered)", fontsize=16)
+    ax_clust.set_xlabel("Pop Events (clustered)", fontsize=fs["label"])
 
     # ---- Bottom-right: Per-cluster rank distribution, Fig4 style ----
     ax_cdist = fig.add_subplot(outer[1, 1])
@@ -1421,43 +1609,96 @@ def plot_pr3_subject_figure(record: Dict[str, Any], max_events: int = 2000) -> P
         _plot_cluster_rank_fig4(
             ax_cdist, ranks, bools, valid_events, best_labels,
             channel_order, channel_names,
-            title="Cluster rank distributions",
+            title="Mean rank" if preview_style else "Cluster rank distributions",
+            ytick_fontsize=fs["heatmap_y"],
+            label_fontsize=fs["label"],
+            title_fontsize=fs["axis_title"],
+            xtick_fontsize=fs["tick"],
+            legend_fontsize=fs["legend"],
+            show_legend=not preview_style,
+            invert_yaxis=not preview_style,
+            show_ylabels=not preview_style,
         )
+        if preview_style:
+            ticklabels = ax_cdist.get_xticklabels()
+            if ticklabels:
+                ticklabels[0].set_visible(False)
     else:
         _plot_rank_histogram(
             ax_cdist, ranks, bools, valid_events,
             channel_order, channel_names,
             title="Fixed-order rank distribution",
+            ytick_fontsize=fs["heatmap_y"],
+            label_fontsize=fs["label"],
+            title_fontsize=fs["axis_title"],
+            xtick_fontsize=fs["tick"],
         )
 
-    # ---- Colorbar (horizontal, below bottom-left heatmap) ----
-    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    cax = inset_axes(
-        ax_clust, width="35%", height="4%",
-        loc="lower left", bbox_to_anchor=(0.32, -0.25, 1, 1),
-        bbox_transform=ax_clust.transAxes, borderpad=0,
-    )
-    cbar = fig.colorbar(im, cax=cax, orientation="horizontal")
-    cbar.set_label("First \u2192 Last", fontsize=14)
-    cbar.ax.tick_params(labelsize=13)
+    # ---- Shared rank colorbar ----
+    if preview_style:
+        cbar = fig.colorbar(im, ax=ax_hist_orig, orientation="vertical", fraction=0.12, pad=0.09)
+    else:
+        from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+        cax = inset_axes(
+            ax_clust, width="35%", height="4%",
+            loc="lower left", bbox_to_anchor=(0.32, -0.25, 1, 1),
+            bbox_transform=ax_clust.transAxes, borderpad=0,
+        )
+        cbar = fig.colorbar(im, cax=cax, orientation="horizontal")
+    cbar.set_label("First \u2192 Last", fontsize=fs["cbar"])
+    cbar.ax.tick_params(labelsize=fs["cbar"] - 1)
 
     # ---- Suptitle ----
-    suptitle = f"{dataset}:{subject} | repro={repro_grade}"
+    suptitle = f"{label} | repro={repro_grade}"
     if repro_grade == "moderate":
         suptitle += " | WARNING: template moderate"
-    fig.suptitle(suptitle, fontsize=20, y=0.98)
+    if preview_style:
+        fig.suptitle(suptitle, fontsize=fs["suptitle"], y=0.985)
+        subtitle = (
+            f"n={valid_events.size} | \u03c4={all_tau:.3f}{mi_str} | "
+            f"KMeans k={best_k} | within-\u03c4={best_within_tau:.3f} | "
+            f"inter-corr={best_inter_corr:.2f}"
+        )
+        if fwd_rev_str:
+            subtitle += f" | {fwd_rev_str}"
+        fig.text(0.5, 0.936, subtitle, ha="center", va="center", fontsize=fs["subtitle"])
+    else:
+        fig.suptitle(suptitle, fontsize=fs["suptitle"], y=0.985)
 
     _ensure_pr3_readme()
-    out = PR3_FIG_DIR / f"{dataset}_{subject}_propagation.png"
+    out_dir = PR3_FIG_DIR / "preview_per_subject" if (preview_style and preview_output) else PR3_FIG_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if preview_style and preview_output:
+        readme = out_dir / "README.md"
+        if not readme.exists():
+            readme.write_text(
+                "# preview_per_subject\n\n"
+                "### *_propagation_preview.png\n\n"
+                "真实数据 per-subject propagation 图的预览样式。相比默认图，字体整体放大，右上 rank distribution 面板变窄并去掉重复 y 轴通道名，KMeans 分界线改为更粗的红色实线并加浅红色边界带。\n\n"
+                "**关注点**：先看下方 KMeans k=2 heatmap 的红色分类边界是否足够清楚，再看右上 rank distribution 是否不抢占版面。\n",
+                encoding="utf-8",
+            )
+    suffix = "_propagation_preview.png" if (preview_style and preview_output) else "_propagation.png"
+    out = out_dir / f"{dataset}_{subject}{suffix}"
     fig.savefig(out, dpi=200, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved {out}")
     return out
 
 
-def plot_pr3_subjects(records: List[Dict[str, Any]], max_events: int = 2000) -> None:
+def plot_pr3_subjects(
+    records: List[Dict[str, Any]],
+    max_events: int = 2000,
+    preview_style: bool = False,
+    preview_output: bool = False,
+) -> None:
     for record in records:
-        plot_pr3_subject_figure(record, max_events=max_events)
+        plot_pr3_subject_figure(
+            record,
+            max_events=max_events,
+            preview_style=preview_style,
+            preview_output=preview_output,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1706,6 +1947,16 @@ def main() -> None:
     parser.add_argument("--pr4a-followup", action="store_true", help="Generate PR-4D template-rate figures")
     parser.add_argument("--max-events", type=int, default=2000, help="Max displayed events per panel")
     parser.add_argument(
+        "--preview-style",
+        action="store_true",
+        help="For --pr3, write larger-font preview figures under figures/per_subject/preview_per_subject/.",
+    )
+    parser.add_argument(
+        "--paper-style",
+        action="store_true",
+        help="For --pr3, use the approved larger-font compact style and overwrite figures/per_subject/*.png.",
+    )
+    parser.add_argument(
         "--masked-features",
         action="store_true",
         help="Consume masked PR-2 cluster outputs and write figures under "
@@ -1740,7 +1991,12 @@ def main() -> None:
         records = _load_pr3_subject_records(args.dataset, selected_subjects)
         if not records:
             raise SystemExit("No matching per-subject propagation JSON files found.")
-        plot_pr3_subjects(records, max_events=args.max_events)
+        plot_pr3_subjects(
+            records,
+            max_events=args.max_events,
+            preview_style=args.preview_style or args.paper_style,
+            preview_output=args.preview_style and not args.paper_style,
+        )
         return
 
     if args.mi:

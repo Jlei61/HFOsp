@@ -260,7 +260,7 @@ per-subject JSON 顶层不动现有 schema；如果同时要在一个文件里�
 - Topic 1–5 主文档的科学结论引用本 topic 时，必须明示 "假设 §3.1 phantom-rank 重跑完成且方向一致"
 - 任何下游 PR plan 在 trigger 前必须检查 §3 是否有未结清的 audit 直接影响该 PR
 - AGENTS.md "Cross-PR Contract Lookups" 会增加本 topic 的 lookup 条目（待 §5i 更新）
-- **Topic 4 SEF-ITP framework**（`docs/topic4_sef_itp_framework.md` v1 lock 2026-05-20）将本 topic §3.1 phantom-rank 修复 + §5 broad re-derivation 列为 **Phase 1+ 的硬前置**；Phase 0 完成前 SEF-ITP 处于"等待修复完成的占位文档"状态。§5a–§5h 的每一 step 同时是 SEF-ITP Phase 0 子任务。
+- **Topic 4 SEF-ITP framework**（`docs/topic4_sef_hfo.md` v1 lock 2026-05-20）将本 topic §3.1 phantom-rank 修复 + §5 broad re-derivation 列为 **Phase 1+ 的硬前置**；Phase 0 完成前 SEF-ITP 处于"等待修复完成的占位文档"状态。§5a–§5h 的每一 step 同时是 SEF-ITP Phase 0 子任务。
 
 ---
 

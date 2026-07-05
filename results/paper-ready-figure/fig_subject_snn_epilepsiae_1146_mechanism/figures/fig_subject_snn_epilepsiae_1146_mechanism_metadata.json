@@ -1,0 +1,137 @@
+{
+  "figure": "fig_subject_snn_epilepsiae_1146_mechanism",
+  "source_figdata": "results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_twoend_equal_tsrc_s3.npz",
+  "source_tag": "epilepsiae_1146_twoend_equal_tsrc_s3",
+  "plot_seed": 104,
+  "posI": {
+    "posI_source": "deterministic_reconstruction_from_place_neurons",
+    "seed": 3,
+    "n_E": 32000,
+    "n_I": 8000,
+    "max_abs_diff_reconstructed_E_vs_figdata": 9.535814022854083e-07
+  },
+  "outputs": {
+    "hires": {
+      "source_core": [
+        "SCL9",
+        "ICL9",
+        "ICL11"
+      ],
+      "hidden_sink_core_not_drawn": [
+        "ICL1",
+        "ICL2",
+        "ICL3"
+      ],
+      "core_r": 1.5,
+      "theta_deg": -1.5595641056259083e-14,
+      "ee_ar": 2.0,
+      "ee_ellipse_center": [
+        9.778510217534608,
+        8.472279953280992
+      ],
+      "ee_ellipse_major_radius": 6.264996704021096,
+      "ee_ellipse_minor_radius": 3.132498352010548,
+      "L": 20.0,
+      "contact_names": [
+        "SCL6",
+        "SCL7",
+        "SCL8",
+        "SCL9",
+        "ICL1",
+        "ICL2",
+        "ICL3",
+        "ICL4",
+        "ICL5",
+        "ICL6",
+        "ICL7",
+        "ICL8",
+        "ICL9",
+        "ICL10",
+        "ICL11"
+      ],
+      "plotted_neurons": {
+        "E_background": 900,
+        "I_background": 260,
+        "E_core": 16,
+        "I_core": 6,
+        "E_total": 32000,
+        "I_total": 8000,
+        "max_E_background": 900,
+        "max_I_background": 260,
+        "core_sampling": "same_fraction_as_background",
+        "markers": {
+          "E": "triangle",
+          "I": "circle"
+        }
+      },
+      "png": "results/paper-ready-figure/fig_subject_snn_epilepsiae_1146_mechanism/figures/fig_subject_snn_epilepsiae_1146_mechanism_hires.png",
+      "pdf": "results/paper-ready-figure/fig_subject_snn_epilepsiae_1146_mechanism/figures/fig_subject_snn_epilepsiae_1146_mechanism_hires.pdf",
+      "svg": "results/paper-ready-figure/fig_subject_snn_epilepsiae_1146_mechanism/figures/fig_subject_snn_epilepsiae_1146_mechanism_hires.svg"
+    },
+    "ppt_clean": {
+      "source_core": [
+        "SCL9",
+        "ICL9",
+        "ICL11"
+      ],
+      "hidden_sink_core_not_drawn": [
+        "ICL1",
+        "ICL2",
+        "ICL3"
+      ],
+      "core_r": 1.5,
+      "theta_deg": -1.5595641056259083e-14,
+      "ee_ar": 2.0,
+      "ee_ellipse_center": [
+        9.778510217534608,
+        8.472279953280992
+      ],
+      "ee_ellipse_major_radius": 6.264996704021096,
+      "ee_ellipse_minor_radius": 3.132498352010548,
+      "L": 20.0,
+      "contact_names": [
+        "SCL6",
+        "SCL7",
+        "SCL8",
+        "SCL9",
+        "ICL1",
+        "ICL2",
+        "ICL3",
+        "ICL4",
+        "ICL5",
+        "ICL6",
+        "ICL7",
+        "ICL8",
+        "ICL9",
+        "ICL10",
+        "ICL11"
+      ],
+      "plotted_neurons": {
+        "E_background": 900,
+        "I_background": 260,
+        "E_core": 16,
+        "I_core": 6,
+        "E_total": 32000,
+        "I_total": 8000,
+        "max_E_background": 900,
+        "max_I_background": 260,
+        "core_sampling": "same_fraction_as_background",
+        "markers": {
+          "E": "triangle",
+          "I": "circle"
+        }
+      },
+      "png": "results/paper-ready-figure/fig_subject_snn_epilepsiae_1146_mechanism/figures/fig_subject_snn_epilepsiae_1146_mechanism_ppt_clean.png",
+      "pdf": "results/paper-ready-figure/fig_subject_snn_epilepsiae_1146_mechanism/figures/fig_subject_snn_epilepsiae_1146_mechanism_ppt_clean.pdf",
+      "svg": "results/paper-ready-figure/fig_subject_snn_epilepsiae_1146_mechanism/figures/fig_subject_snn_epilepsiae_1146_mechanism_ppt_clean.svg"
+    }
+  },
+  "notes": [
+    "Plotting-only; no SNN rerun.",
+    "Same E1146 template_source placement as Fig4A.",
+    "Only the source-side core is drawn; the opposite template core is retained in metadata but hidden.",
+    "E/I neurons are downsampled for presentation; exact plotted counts are in outputs.*.plotted_neurons.",
+    "E->E scaffold is drawn as an AR=2 schematic ellipse, not as a rectangular corridor.",
+    "Standalone mechanism panel for PPT use; not a new scientific result."
+  ]
+}

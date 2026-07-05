@@ -1,15 +1,18 @@
 # PR-6 rank displacement (masked) — continuous swap geometry figures
 
-Figures regenerated on the Topic 0 phantom-rank masked feature tree
-(2026-05-22 D2 Batch 1). Generator: `scripts/plot_rank_displacement.py
---masked-features`. Phantom-fix details: `docs/topic0_methodology_audits.md` §3.1。
+Figures on the Topic 0 phantom-rank masked feature tree. Cohort heatmap
+regenerated on 2026-06-26 with `scripts/plot_rank_displacement.py
+--masked-features --what cohort`; other panels are from 2026-05-22 D2 Batch 1.
+Phantom-fix details: `docs/topic0_methodology_audits.md` §3.1。
 
 ### cohort_displacement_heatmap.{png,pdf}
-Cohort rank displacement heatmap (rows = 34 stable_k=2 subjects sorted by Kendall
-τ, columns = channels by template rank). swap_class strict markers indicate the
-n_strict subset; dashed reference at 2/3。**关注点**：cohort F_norm median masked
-期望 ≈ 0.79（orig 0.80），τ median ≈ −0.24（orig −0.20），ρ(F_norm, τ) ≈ −0.92
-（强负相关持平）；PR-2.5 fwd/rev-reproduced subject 应仍聚集在 upper τ 带。
+Horizontal cohort rank displacement heatmap（columns = 34 stable_k=2 subjects
+sorted by F_norm descending；rows = rank_T_a source→sink bins）。Rank axis is capped
+at 24 bins; subjects with >24 joint-valid channels are median-binned along
+rank_T_a order, not sorted by Δr. Colorbar is capped at ±24 with extend arrows,
+so one high-channel outlier does not wash out the cohort。**关注点**：cohort F_norm
+median masked 期望 ≈ 0.79（orig 0.80）；看 source→sink 方向上的红蓝反转是否和
+bottom F_norm 轨道一致，尤其是 high-F_norm subjects。
 
 ### per_subject/<dataset>_<subject>_*.png
 Per-subject rank displacement small-multiples（34 subject）。每张图列按 rank_T_a_dense
@@ -26,3 +29,9 @@ PR-6 supp §9 swap × clinical SOZ set-relationship figures（typology + overlap
 **关注点**：S⊊E 优势是否保持（masked typology 仍多 partial / S⊊E），enrichment_over_lagPat
 strict ∩ informative n=5 sign p masked ≈ 0.66（仍 NULL）；channel-selection circular
 caveat: lagPat 已对 SOZ 富集。
+
+### template_source_soz_overlap_top3.{png,pdf}
+逐 subject 检查两个 stable_k=2 template 的 source 端 top-3 通道是否落在 clinical SOZ 内。
+左图是每个 subject 的 T_a/T_b source1-3 SOZ 命中矩阵，右图是两个 template 的 source-SOZ
+比例散点；exact channel list 写在同级 `../template_source_soz_overlap_top2_top3.csv`。
+**关注点**：这是 source 端和 clinical SOZ 的重叠描述，不是全脑定位性能；lagPat 通道宇宙本身已偏向 SOZ，必须按 within-lagPat caveat 解释。

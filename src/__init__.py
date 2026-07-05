@@ -45,14 +45,9 @@ TOPIC 3 — Spatial SOZ Modulation
   data_driven_soz            PR-T3-1 v1.1 — ⚠ OBSOLETE (superseded 2026-05-03),
                              kept as audit trail only
 
-TOPIC 4 — SEF-HFO Modeling  (docs/topic4_sef_itp_framework.md)
+TOPIC 4 — SEF-HFO Modeling  (docs/topic4_sef_hfo.md)
   topic4_attractor_diagnostics   Topic 1→4 bridge: PCA / principal-curve / λ₂ H3 probe;
                                  build_rank_feature_matrix [mask_phantom=True required]
-  sef_itp_phase1             H1 source/sink compactness + H6 spatial geometry + H2 ingest
-  sef_itp_phase2             H3 mark-independence + H4 rate/geometry instability
-  sef_itp_phase3             H5 peri-ictal spatial recruitment
-  sef_itp_phase3_trajectory  H5 v2 continuous 24h trajectory + alternative endpoints
-  sef_itp_direction_axis     H2b direction-axis disambiguation (archive supplementary only)
   sef_hfo_field              Step 0 rate field — scaffold (data-anchoring pending)
   sef_hfo_stability          Step 0a delayed linear stability + dispersion map
   sef_hfo_pulse              Step 0b finite-pulse response + wavefront classifier

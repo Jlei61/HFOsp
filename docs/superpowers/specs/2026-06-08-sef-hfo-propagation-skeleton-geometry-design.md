@@ -1,7 +1,7 @@
 # SEF-HFO 间期传播几何骨架 — 设计 spec（2026-06-08）
 
 > **状态**：探索性、**描述性测量（model-input descriptive），不是假设检验，不是 SOZ 定位器**。
-> **上游**：`docs/topic4_sef_itp_framework.md`（SEF-HFO v0.2）、数据侧 plan `docs/superpowers/plans/2026-06-06-sef-hfo-soz-localization-rate-vs-geometry.md`、low-rate 读回结论 `docs/archive/topic4/sef_hfo/low_rate_template_stability_2026-06-07.md`。
+> **上游**：`docs/topic4_sef_hfo.md`（SEF-HFO v0.2）、数据侧 plan `docs/superpowers/plans/2026-06-06-sef-hfo-soz-localization-rate-vs-geometry.md`、low-rate 读回结论 `docs/archive/topic4/sef_hfo/low_rate_template_stability_2026-06-07.md`。
 > **硬前置**：`lagPatRank` phantom-mask（Topic 0 §3.1）；本 spec 的源/汇 core 只用 phantom-safe 的 `rank_a_dense_full`（非参与通道为 NaN，已实测 40/40 验证 rank=0 不可能是 phantom）。
 
 ---

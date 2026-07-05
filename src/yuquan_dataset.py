@@ -88,8 +88,10 @@ def load_yuquan_record(
     edf_path: Path | str,
     *,
     reference: str = "car",
-    segment_sec: float = 200.0,  # accepted for API parity; not used (preload=True)
+    segment_sec: float = 200.0,  # accepted for API parity; direct crop read is used
     intracranial_only: bool = True,
+    crop_start_sec: float = 0.0,
+    crop_duration_sec: float | None = None,
 ) -> PreprocessingResult:
     """Load a yuquan SEEG EDF, filter to intracranial channels, apply reference.
 
@@ -101,11 +103,17 @@ def load_yuquan_record(
         'car' (default) for common-average reference (zero-mean per sample),
         'bipolar' for adjacent-contact pairs within each probe.
     segment_sec : float
-        Accepted for API parity with src.preprocessing.load_epilepsiae_block;
-        ignored because mne preloads the entire EDF in this loader.
+        Accepted for API parity with src.preprocessing.load_epilepsiae_block.
+        The loader reads the requested crop directly, so this parameter is
+        currently not used for chunking.
     intracranial_only : bool
         If True (default) drop scalp/scalp_ref/aux channels via
         :func:`classify_yuquan_channel`. Yuquan analyses always want this.
+    crop_start_sec : float
+        Start time within the EDF to read. Defaults to the beginning.
+    crop_duration_sec : float or None
+        Optional duration to read. ``None`` reads from ``crop_start_sec`` to
+        the end of the EDF.
     """
     import mne  # local import to keep module import cheap
 
@@ -114,10 +122,9 @@ def load_yuquan_record(
         raise FileNotFoundError(edf_path)
 
     raw = mne.io.read_raw_edf(
-        str(edf_path), preload=True, verbose=False, encoding="latin1"
+        str(edf_path), preload=False, verbose=False, encoding="latin1"
     )
     sfreq = float(raw.info["sfreq"])
-    data = raw.get_data().astype(np.float64, copy=False)
     ch_names_raw = list(raw.ch_names)
 
     if intracranial_only:
@@ -127,10 +134,25 @@ def load_yuquan_record(
                 f"No intracranial channels found in {edf_path.name}; "
                 f"first 8 raw channels: {ch_names_raw[:8]}"
             )
-        data = data[keep_idx]
         ch_names = keep_names
+        picks = keep_idx
     else:
         ch_names = [normalize_yuquan_channel_name(c) for c in ch_names_raw]
+        picks = None
+
+    crop_start_sec = max(0.0, float(crop_start_sec))
+    start_sample = int(round(crop_start_sec * sfreq))
+    start_sample = max(0, min(int(raw.n_times), start_sample))
+    if crop_duration_sec is None:
+        stop_sample = int(raw.n_times)
+    else:
+        crop_duration_sec = float(crop_duration_sec)
+        if crop_duration_sec <= 0.0:
+            raise ValueError("crop_duration_sec must be > 0 when provided")
+        stop_sample = start_sample + int(round(crop_duration_sec * sfreq))
+        stop_sample = max(start_sample, min(int(raw.n_times), stop_sample))
+    data = raw.get_data(picks=picks, start=start_sample, stop=stop_sample)
+    data = data.astype(np.float64, copy=False)
 
     bipolar_pairs = None
     if reference == "car":

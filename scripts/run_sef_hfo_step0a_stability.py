@@ -1,6 +1,6 @@
 # scripts/run_sef_hfo_step0a_stability.py
 """Step 0a: delayed dispersion + n-convergence + low-heterogeneity screen, with the
-framework Step-0a output contract (topic4_sef_itp_framework.md:810-822):
+framework Step-0a output contract (topic4_sef_hfo.md:810-822):
 phase diagram (+candidate boundary + data-locked family), growth/k* heatmap, gain & low-het shift."""
 import argparse, json
 from dataclasses import replace

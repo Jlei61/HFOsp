@@ -1,0 +1,361 @@
+"""Helpers for the Stage 3 event-triggered axial intervention probe.
+
+Scientific question (causal sufficiency, NOT a mechanism claim): after a large interictal-like
+event has already started spreading along the Stage 3 propagation axis, can an event-triggered
+intervention on the propagation corridor stop further axial spread? v1 abstracts the intervention
+as an idealized E-only threshold shutoff over a time window. See
+docs/superpowers/specs/2026-06-25-stage3-deadzone-barrier-probe-design.md.
+
+Module layout:
+  - Pure geometry / source helpers (Task 1): no engine, no I/O -> unit-tested standalone.
+  - Target masks + dynamic clamp schedule (Task 2).
+  - Baseline eligibility + replay schedule (Task 3).
+  - simulate_dynamic_vth (Task 4): a verbatim copy of the engine's simulate_kick loop with one
+    addition (time-dependent per-neuron E-threshold). Engine imports are lazy (inside the function)
+    so the pure helpers above import without the engine on path.
+"""
+import math
+import numpy as np
+
+CLAMP_LEVEL = 1e6   # mV; effectively non-excitable (V_th comparison only; V stays finite)
+
+
+# ===================== Task 1: pure geometry + source helpers =====================
+
+def band_mask(coords, normal_unit, center_point, thickness):
+    """Bool mask of points within +/- thickness/2 of the plane through `center_point` with unit
+    normal `normal_unit` -- a straight strip of width `thickness`. `coords` (M,2)."""
+    coords = np.asarray(coords, float)
+    n = np.asarray(normal_unit, float)
+    n = n / np.linalg.norm(n)
+    proj = (coords - np.asarray(center_point, float)) @ n
+    return np.abs(proj) <= thickness / 2.0
+
+
+def split_near_target_far(coords, axis_unit, center, source_focus, target_thickness):
+    """Split points into near/target/far relative to the axial target band (at `center`, width
+    `target_thickness`) oriented by the igniting `source_focus`. near = source side beyond the
+    band, far = opposite side beyond the band, target = inside the band. near & far exclude the band."""
+    coords = np.asarray(coords, float)
+    a = np.asarray(axis_unit, float); a = a / np.linalg.norm(a)
+    proj = (coords - np.asarray(center, float)) @ a
+    src_proj = float((np.asarray(source_focus, float) - np.asarray(center, float)) @ a)
+    src_sign = 1.0 if src_proj >= 0 else -1.0
+    s = proj * src_sign
+    half = target_thickness / 2.0
+    return dict(near=s > half, target=np.abs(proj) <= half, far=s < -half)
+
+
+def core_source_raw(on_neg, on_pos, delta_onset):
+    """Core-level source label INDEPENDENT of read-out readability: looks ONLY at the two
+    focus-core onset times. {neg, pos, collision, none}. None onset = that core never ignited
+    (treated as +inf). Drops the stage3.label_event `readable` gate and returns 'none' (not
+    'ambiguous') when neither core fires -- a successful stop must not vanish into 'ambiguous'."""
+    neg = math.inf if on_neg is None else float(on_neg)
+    pos = math.inf if on_pos is None else float(on_pos)
+    if neg == math.inf and pos == math.inf:
+        return "none"
+    if abs(neg - pos) <= delta_onset:
+        return "collision"
+    return "neg" if neg < pos else "pos"
+
+
+def participation_ratio(participate, region_mask, valid=None):
+    """Fraction of (valid) region cells that participated. denom = sum(region & valid); numerator =
+    sum(participate & region & valid). NaN if denom is 0. PASS `valid=free` (non-clamped cells) so an
+    intervention that clamps cells inside the far region does not deflate its own far-ratio."""
+    region = np.asarray(region_mask, bool)
+    if valid is not None:
+        region = region & np.asarray(valid, bool)
+    denom = int(region.sum())
+    if denom == 0:
+        return float("nan")
+    return float((np.asarray(participate, bool) & region).sum()) / denom
+
+
+def exclude_target_contacts(valid, target_mask):
+    """Valid contacts with the intervention-target-band contacts removed (read-out-exclusion
+    control). Returns a new array; does not mutate `valid`."""
+    return np.asarray(valid, bool) & ~np.asarray(target_mask, bool)
+
+
+# ===================== Task 2: target masks + dynamic clamp schedule =====================
+
+def intervention_vth_at_time(base_vth, target_mask, is_E, t_ms, on_ms, off_ms, clamp_level=CLAMP_LEVEL):
+    """Per-neuron V_th field at time `t_ms`. Inside [on_ms, off_ms): a COPY of base_vth with the
+    target's E cells clamped to `clamp_level`; I cells never clamped. Outside the window (or when
+    on_ms is None / target_mask is None): returns base_vth unchanged (same array -> zero-copy in the
+    hot loop, which keeps the no-/pre-intervention path bit-identical to the engine)."""
+    if on_ms is None or target_mask is None or not (on_ms <= t_ms < off_ms):
+        return base_vth
+    vth = np.asarray(base_vth, float).copy()
+    vth[np.asarray(target_mask, bool) & np.asarray(is_E, bool)] = clamp_level
+    return vth
+
+
+def make_on_axis_target(pos, is_E, axis_unit, center, thickness):
+    """On-axis intervention target: a band perpendicular to the propagation axis through `center`.
+    Returns a full-network bool mask (E+I in the band; the E-only restriction is applied at clamp
+    time by intervention_vth_at_time)."""
+    return band_mask(pos, axis_unit, center, thickness)
+
+
+def make_off_axis_target(pos, is_E, axis_unit, center, thickness, n_match, core_masks, rng, L,
+                         mode="lateral"):
+    """Count-matched off-axis control target: a mask of EXACTLY `n_match` E cells away from the
+    propagation corridor. mode='lateral' -> strip parallel to the axis, offset to the side (clean:
+    off corridor / off cores); mode='translate' -> perpendicular strip moved beyond a focus. Widens
+    the band until it has >= n_match E candidates, then subsamples to exactly n_match. Raises if the
+    chosen cells overlap either focus core."""
+    pos = np.asarray(pos, float); is_E = np.asarray(is_E, bool)
+    a = np.asarray(axis_unit, float); a = a / np.linalg.norm(a)
+    center = np.asarray(center, float)
+    perp = np.array([-a[1], a[0]])
+    if mode == "lateral":
+        normal, cpt = perp, center + 0.35 * L * perp
+    elif mode == "translate":
+        normal, cpt = a, center + 0.425 * L * a
+    else:
+        raise ValueError(f"mode must be 'lateral'|'translate', got {mode!r}")
+    t = thickness
+    band = band_mask(pos, normal, cpt, t)
+    while int((band & is_E).sum()) < n_match and t < 4.0 * thickness:
+        t *= 1.25
+        band = band_mask(pos, normal, cpt, t)
+    cand = np.flatnonzero(band & is_E)
+    if cand.size < n_match:
+        raise ValueError(f"off-axis band has {cand.size} E cells < n_match {n_match}")
+    chosen = np.sort(rng.choice(cand, size=n_match, replace=False)) if cand.size > n_match else cand
+    core_any = np.zeros(pos.shape[0], bool)
+    for cm in core_masks:
+        core_any |= np.asarray(cm, bool)
+    if core_any[chosen].any():
+        raise ValueError("off-axis target overlaps a focus core; increase the offset")
+    mask = np.zeros(pos.shape[0], bool); mask[chosen] = True
+    return mask
+
+
+def make_static_deadzone_schedule():
+    """Timing for the always-on static dead-zone control: clamp from t=0 to +inf (the placement
+    upper bound -- if even a permanent band cannot block spread, no triggered strategy at that
+    target is worth pursuing)."""
+    return dict(on_ms=0.0, off_ms=float("inf"))
+
+
+# ===================== Task 3: baseline eligibility + replay schedule =====================
+
+def baseline_eligibility(summary, min_events=20, min_per_end=3, min_cross_midline=5,
+                         min_trigger_opportunity=5, cross_midline_frac=0.05):
+    """FROZEN eligibility gate: does a NO-INTERVENTION baseline have something to stop? Encodes the
+    conclusion. cross-midline = single-source event with oracle far participation > `cross_midline_frac`.
+    trigger-opportunity = such an event whose far side activates strictly AFTER its source onset (a
+    real temporal window to intervene before far recruitment). Returns (eligible, reason, flags)."""
+    evs = summary.get("events", [])
+
+    def is_single_cross(e):
+        return (e.get("core_source_raw") in ("neg", "pos")
+                and (e.get("oracle_far_ratio") or 0.0) > cross_midline_frac)
+
+    n_cross = sum(1 for e in evs if is_single_cross(e))
+    n_opp = sum(1 for e in evs if is_single_cross(e)
+                and e.get("source_onset") is not None
+                and e.get("far_onset_time") is not None
+                and e["far_onset_time"] > e["source_onset"])
+    flags = {
+        "enough_events": summary.get("n_returned", 0) >= min_events,
+        "both_ends_fire": (summary.get("n_neg", 0) >= min_per_end
+                           and summary.get("n_pos", 0) >= min_per_end),
+        "has_cross_midline": n_cross >= min_cross_midline,
+        "has_trigger_opportunity": n_opp >= min_trigger_opportunity,
+        "n_cross_midline": n_cross, "n_trigger_opportunity": n_opp,
+    }
+    if not flags["enough_events"]:
+        return False, "too_few_events", flags
+    if not flags["both_ends_fire"]:
+        return False, "one_end_silent", flags
+    if not flags["has_cross_midline"]:
+        return False, "no_cross_midline", flags
+    if not flags["has_trigger_opportunity"]:
+        return False, "no_trigger_opportunity", flags
+    return True, "eligible", flags
+
+
+def select_first_eligible_event(events, cross_midline_frac=0.05):
+    """First event (in order) that is single-source (neg/pos) AND crosses the midline
+    (oracle_far_ratio > frac). Skips collision/none/non-crossing. None if there is none."""
+    for e in events:
+        if (e.get("core_source_raw") in ("neg", "pos")
+                and (e.get("oracle_far_ratio") or 0.0) > cross_midline_frac):
+            return e
+    return None
+
+
+def build_replay_schedule(event, trigger_delay_ms=8.0, duration_ms=40.0, allow_late=False):
+    """Oracle replay intervention schedule: fire at source_onset + trigger_delay_ms for duration_ms.
+    Rejects (ValueError) a schedule that would start at/after far-side onset unless allow_late
+    (the whole point is to intervene BEFORE far-side recruitment)."""
+    so = event.get("source_onset")
+    if so is None:
+        raise ValueError("event has no source_onset")
+    on = so + trigger_delay_ms
+    fo = event.get("far_onset_time")
+    if fo is not None and on >= fo and not allow_late:
+        raise ValueError(f"trigger {on} >= far_onset {fo}: no pre-far window (set allow_late=True)")
+    return dict(on_ms=on, off_ms=on + duration_ms, trigger_time=on,
+                source_onset=so, far_onset_time=fo, trigger_status="fired")
+
+
+def build_late_schedule(event, late_delay_ms=8.0, duration_ms=40.0):
+    """Late control schedule: fire AFTER far-side recruitment (far_onset_time + late_delay_ms). If
+    late intervention works as well as a timely one, the effect is likely global suppression, not
+    propagation stopping."""
+    fo = event.get("far_onset_time")
+    if fo is None:
+        raise ValueError("event has no far_onset_time for a late schedule")
+    on = fo + late_delay_ms
+    return dict(on_ms=on, off_ms=on + duration_ms, trigger_time=on,
+                source_onset=event.get("source_onset"), far_onset_time=fo, trigger_status="late")
+
+
+# ===================== Task 4: dynamic-Vth simulation adapter (parity-critical) =====================
+
+def simulate_dynamic_vth(p, net, base_vth, target_mask=None, is_E=None,
+                         on_ms=None, off_ms=None, clamp_level=CLAMP_LEVEL, lfp_recorder=None):
+    """Verbatim copy of src/snn_engine/kick_probe.py::simulate_kick's integration loop (recurrent
+    dynamics, RNG draw order, recorders, LFP) with the kick REMOVED and exactly ONE addition: a
+    time-dependent per-neuron V_th. `base_vth` is the static dual-focus threshold field; when a
+    schedule is given (target_mask + on_ms/off_ms) the target's E cells are clamped to clamp_level
+    during [on_ms, off_ms) via intervention_vth_at_time, else V_th_eff = base_vth every step.
+
+    PARITY CONTRACT (CLAUDE.md §6): the intervention changes ONLY the spike-threshold comparison,
+    never an RNG draw. So:
+      - no schedule -> bit-identical to simulate_kick(KICK_BOOST=0, t_kick=1e9, V_th_per_neuron=base_vth);
+      - with a schedule -> bit-identical to baseline before on_ms.
+    RNG draw order is copied EXACTLY: two rng.choice (ras_keep) at setup, then per step
+    standard_normal() then poisson(nu_vec*dt, size=N) with nu_vec the ARRAY form (== simulate_kick
+    with the kick off). Do NOT add/remove/reorder any rng call here."""
+    import time as _time
+    from params import compute_nu_theta as _compute_nu_theta   # lazy engine import (keeps pure helpers engine-free)
+
+    rng = net["rng"]
+    NE, NI = net["NE"], net["NI"]
+    N = NE + NI
+    labels = net["labels"]
+    ampa = net["ampa_by_delay"]
+    gaba = net["gaba_by_delay"]
+    M = net["max_delay_steps"] + 1
+
+    dt = p.dt
+    nsteps = int(round(p.T / dt))
+
+    # ---- precomputed decays (identical to simulate_kick) ----
+    decay_sE = np.exp(-dt / p.tau_r_AMPA)
+    decay_IE = np.exp(-dt / p.tau_d_AMPA)
+    decay_sI = np.exp(-dt / p.tau_r_GABA)
+    decay_II = np.exp(-dt / p.tau_d_GABA)
+    tau_m = np.where(labels == 0, p.tau_m_E, p.tau_m_I).astype(np.float64)
+    decay_V = np.exp(-dt / tau_m)
+    ref_steps = np.where(labels == 0, int(round(p.tau_ref_E / dt)),
+                         int(round(p.tau_ref_I / dt))).astype(np.int32)
+    ext_incr = (tau_m / p.tau_r_AMPA) * np.where(labels == 0, p.J_ext_E, p.J_ext_I)
+    ampa_bins = [d for d in range(M) if ampa[d].nnz > 0]
+    gaba_bins = [d for d in range(M) if gaba[d].nnz > 0]
+
+    nu_theta, _, _ = _compute_nu_theta(p)
+    nu_sig_const = p.nu_ext_ratio * nu_theta
+    sigma_n_inv_ms = p.sigma_n * 1e-3
+    sigma_xi = sigma_n_inv_ms * np.sqrt(p.tau_n / 2.0)
+    ou_a = np.exp(-dt / p.tau_n)
+    ou_b = sigma_xi * np.sqrt(1.0 - ou_a * ou_a)
+    xi = 0.0
+
+    base_vth = np.asarray(base_vth, float)
+    has_sched = on_ms is not None and target_mask is not None
+    if has_sched:
+        target_mask = np.asarray(target_mask, bool)
+        is_E = np.asarray(is_E, bool)
+
+    # ---- state (identical) ----
+    V = np.full(N, p.V_reset, dtype=np.float64)
+    ref = np.zeros(N, dtype=np.int32)
+    s_E = np.zeros(N); I_E = np.zeros(N)
+    s_I = np.zeros(N); I_I = np.zeros(N)
+    ring_sE = np.zeros((M, N))
+    ring_sI = np.zeros((M, N))
+
+    # ---- recorders: replicate simulate_kick's RNG-consuming raster choices EXACTLY for alignment ----
+    rate_E = np.zeros(nsteps); rate_I = np.zeros(nsteps)
+    _ras_keepE = rng.choice(NE, size=min(80, NE), replace=False)        # RNG-align (unused otherwise)
+    _ras_keepI = NE + rng.choice(NI, size=min(20, NI), replace=False)   # RNG-align (unused otherwise)
+    E_spk_bool = np.zeros((nsteps, NE), dtype=bool)
+    intervention_active = np.zeros(nsteps, dtype=bool)
+    lfp_trace = (np.zeros((nsteps, len(lfp_recorder.sites)))
+                 if lfp_recorder is not None else None)
+
+    t0 = _time.time()
+    for t in range(nsteps):
+        tm = t * dt
+        # external homogeneous Poisson rate (Eq 6) -- RNG draw #1 (standard_normal)
+        xi = ou_a * xi + ou_b * rng.standard_normal()
+        nu_now = nu_sig_const + xi
+        if nu_now < 0.0:
+            nu_now = 0.0
+
+        # synaptic gating: decay, recurrent arrivals, external
+        s_E *= decay_sE
+        s_I *= decay_sI
+        slot = t % M
+        s_E += ring_sE[slot]; ring_sE[slot] = 0.0
+        s_I += ring_sI[slot]; ring_sI[slot] = 0.0
+        nu_vec = np.full(N, max(nu_now, 0.0))                 # array form == simulate_kick (kick off)
+        ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)   # RNG draw #2 (poisson, array)
+        s_E += ext * ext_incr
+
+        # synaptic currents (low-pass of s)
+        I_E = s_E + (I_E - s_E) * decay_IE
+        I_I = s_I + (I_I - s_I) * decay_II
+        if lfp_trace is not None:
+            lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
+
+        I_net = I_E - I_I
+        # ===== the ONLY new behavior: time-dependent threshold (reuses intervention_vth_at_time) =====
+        if has_sched:
+            V_th_eff = intervention_vth_at_time(base_vth, target_mask, is_E, tm, on_ms, off_ms, clamp_level)
+            intervention_active[t] = (on_ms <= tm < off_ms)
+        else:
+            V_th_eff = base_vth
+        # ============================================================================================
+
+        # membrane (Eq 3) + refractory
+        ref -= 1
+        np.maximum(ref, 0, out=ref)
+        free = ref == 0
+        Vtmp = I_net + (V - I_net) * decay_V
+        V = np.where(free, Vtmp, p.V_reset)
+        spk = free & (V >= V_th_eff)
+        V[spk] = p.V_reset
+        ref[spk] = ref_steps[spk]
+
+        # record
+        rate_E[t] = spk[:NE].sum()
+        rate_I[t] = spk[NE:].sum()
+        E_spk_bool[t] = spk[:NE]
+        if spk.any():
+            spE = np.where(spk[:NE])[0]
+            spI = np.where(spk[NE:])[0]
+            if spE.size:
+                for d in ampa_bins:
+                    contrib = np.asarray(ampa[d][:, spE].sum(axis=1)).ravel()
+                    ring_sE[(t + d) % M] += contrib
+            if spI.size:
+                for d in gaba_bins:
+                    contrib = np.asarray(gaba[d][:, spI].sum(axis=1)).ravel()
+                    ring_sI[(t + d) % M] += contrib
+
+    rate_E_hz = rate_E / NE / dt * 1e3
+    rate_I_hz = rate_I / NI / dt * 1e3
+    return dict(times=np.arange(nsteps) * dt, rate_E=rate_E_hz, rate_I=rate_I_hz,
+                E_spk_bool=E_spk_bool, intervention_active=intervention_active,
+                NE=NE, nu_theta=nu_theta, lfp_trace=lfp_trace,
+                lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
+                wall_s=_time.time() - t0)

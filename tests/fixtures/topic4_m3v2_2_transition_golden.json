@@ -1,0 +1,26 @@
+{
+  "provenance": {
+    "layout": "subject1146",
+    "top": "qI",
+    "use_hG": true,
+    "use_gK": false,
+    "seed": 1,
+    "T": 1600.0,
+    "source_module": "scripts.paper_figures.plot_fig_m3a_v2_2_hG_runaway_transition_gif",
+    "event_detector": "_first_sustained(_smooth_rate(rate_E,dt,20),dt) runaway onset; t_off=sim end; t_peak=argmax smoothed rate"
+  },
+  "n_steps": 16000,
+  "dt_ms": 0.1,
+  "E_spk_bool_hash": "98109de2b0e2cb55b1c30639d6de3fb2569d604c2ba59729016b2f4d8afeaf19",
+  "rate_E_hash": "d0854b2c91d9948089725f06d3da85850ea8ff1ef734f2f9a8af340d725eaac5",
+  "trace_qI_mean_hash": "1ce02c91dbbec158c808be2a66389eda5632b2f15262cadf04e6cd740a5516a0",
+  "trace_qI_min_hash": "0b22a51bf8668d6cb9a584568e6de5bc7325652df3b0840a6e37b3de9116088a",
+  "trace_gK_axial_hash": "eec19bc6af0b3b6dfb97a08782c65f4bb3c3203e789a015d2008b0d689ad08be",
+  "events": [
+    {
+      "t_on": 757.5,
+      "t_off": 1599.9,
+      "t_peak": 1169.9
+    }
+  ]
+}

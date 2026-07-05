@@ -7,7 +7,7 @@
 > per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
 > `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
 >
-> 最近更新：2026-06-14。新增结论图目录时，请在对应 topic 表里补一行。
+> 最近更新：2026-06-26。新增结论图目录时，请在对应 topic 表里补一行。
 >
 > **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
 > 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
@@ -29,6 +29,7 @@
 | 5 ictal 回响 | [topic5_ictal_template_echo/figures/echo_anchor_not_path.png](topic5_ictal_template_echo/figures/) | 发作期通道顺序是否回响间期模板（共享粗锚 vs 具体路径） |
 | 5 桥接 | [topic1_topic5_bridge/figures/q1prime_cohort_effect.png](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 的队列效应 |
 | 5 子型×方向 | [topic5_ictal_recruitment/subtype_direction/figures/cohort_C_to_A_connection_broadband.png](topic5_ictal_recruitment/subtype_direction/figures/) | C 线：发作子型是否决定激活方向 + 与 A 线奇偶不稳的连接（队列不可行/无信号） |
+| 5 方向两类 | [topic5_ictal_recruitment/directional_clustering/figures/epilepsiae_442__classes_vs_interictal_hist_broadband.png](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类是否对应间期 A/B（6 ECoG 全无 two_class_mapped；442 真两堆但对不齐；防自欺 null） |
 
 ---
 
@@ -92,6 +93,11 @@
 | 目录 | 内容 |
 |---|---|
 | [topic4_sef_hfo/schematic/figures/](topic4_sef_hfo/schematic/figures/) | 机制示意图 |
+| [paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/](paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/) | **Fig4A/B/C**：E1146 真实电极布局 subject-specific SNN readout（A）+ KMeans k=2 核验（B）+ 模型 vs 真实间期模板一致性（C，forward~t_a ρ+0.87 / reverse~t_b ρ+0.62） |
+| [paper-ready-figure/fig_m3a_v2_2_hG_runaway_transition/figures/](paper-ready-figure/fig_m3a_v2_2_hG_runaway_transition/figures/) | **M3A-v2.2 全局恢复 h_G 单轨迹 GIF**（visual diagnostic，非 sweep）：间期 axis-like→runaway 转变，把全局抑制恢复标量 `h_G` 打开。`h_G` 只在 runaway 时升起（局部事件期 χ_G≈0），但 runaway **未被逆转**；`eta_G` 阶梯 0→80（>10× 膜跨度）结构性无效——减法式全局刹车拉不回饱和 recurrent 雪崩，瓶颈在 E→E 衬底。配 v2.1 `fig_m3a_v2_1_qigk_runaway_transition`（同轨迹 h_G OFF） |
+| [paper-ready-figure/fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/figures/](paper-ready-figure/fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/figures/) | **M3A-v2.2 q_I 载体 + 轴向 g_K 疲劳 runaway GIF（E1146 真实电极几何）**（visual diagnostic）：顶部画 **抑制资源 `q_I(t)`（mean+min）+ 轴向区域 `g_K` 疲劳**（h_G 关、左图 E→E 梯度画成椭圆）。看 `q_I`（min=轴向走廊先耗竭）掉到地板 + `g_K` 累积→局部小事件铺成 runaway（757 ms）。`g_K` 膜耦合关（eta_K=0，只可视化不改轨迹）；**真耦合 eta_K=1 反而在点火前就压住核、阻止 runaway**（=limit 角色，另一张图）。电极=ICL/SCL 真实触点 |
+| [paper-ready-figure/fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/figures/](paper-ready-figure/fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/figures/) | **M3A-v2.2 刺激 vs 不刺激 对照 GIF（E1146 真实电极几何）**（visual diagnostic，外部预防式压制示意，非治疗/recovery 主张）：与 `fig_m3a_v2_2_qI_runaway_transition` 同轨迹，两臂唯一区别=刺激臂在 500–1400 ms 把中段 4 触点 `ICL4–7` 附近 E 细胞 V_th clamp。两臂在刺激开前**逐比特一致**。不刺激 runaway 758 ms；刺激把间期事件压掉→`q_I` 少耗竭（窗内基本不掉，叠 no-stim 灰虚线对照）→runaway 推后到 **1592 ms（+834 ms）**，且**关刺激后才反弹**（窗内不发生）。布局=2 行（上不刺激/下刺激）× `permissivity` \| `2D 活动` \| (`q_I/g_K 轨迹` \| `SEEG readout`)。脚本 `plot_fig_m3a_v2_2_qI_stim_runaway_gif.py` |
+| [topic4_criticality/figures/](topic4_criticality/figures/) | M3A-v2.2 approach-to-criticality frozen-Jacobian 判读诊断图；当前判定 unresolved（穿零点落在采样空隙） |
 | [topic4_sef_hfo/linear_stability/figures/](topic4_sef_hfo/linear_stability/figures/) | Step 0a：LIF 自洽工作点 |
 | [topic4_sef_hfo/finite_pulse/figures/](topic4_sef_hfo/finite_pulse/figures/) | Step 0b/0d：LIF rate field 真实场 |
 | [topic4_sef_hfo/step1_noise/figures/](topic4_sef_hfo/step1_noise/figures/) | Step 1：drive × σ 联合分析 |
@@ -101,7 +107,7 @@
 | [topic4_sef_hfo/skeleton_geometry/figures/](topic4_sef_hfo/skeleton_geometry/figures/) | 几何骨架（per-subject 在子目录） |
 | [topic4_sef_hfo/observation_layer/figures/](topic4_sef_hfo/observation_layer/figures/) | 虚拟 SEEG 观测层 |
 | [topic4_sef_hfo/observation_layer/increment3a_rate_parity/figures/](topic4_sef_hfo/observation_layer/increment3a_rate_parity/figures/) | rate parity 增量 |
-| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | cm-SNN 自发（headline: stage2_summary / stage3_regime_compare） |
+| [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | cm-SNN 自发（headline: stage2_summary / stage3_regime_compare；**M2 刹车 core_model 三行图: s3_brakeoff/brakeon + s4_brakeoff/brakeon**，刹车不复现沿轴空间自限=诚实 NULL） |
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/candidate_confirm/figures/) | 候选格电极读出 train |
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a1_formal/figures/) | **axis-A A1** 阈值离散→指纹 = NULL（只改点火率不改指纹） |
 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/a3_0a_scan/figures/) | **axis-A A3** 局部 E/I 病灶 screen = NULL（不复现 V_th↓ 方向模板） |
@@ -121,15 +127,23 @@
 
 | 目录 | 内容 |
 |---|---|
-| [data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/](data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/) | ictal ER-onset timing atlas（per_seizure 子目录 339 张） |
+| [data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/](data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/) | ictal ER-onset timing atlas（per_seizure：全 371 张横向布局[上gamma/下broad，左raw/右heatmap，y轴对齐]，Epilepsiae 339 + Yuquan 32，EEG-zoom ±90s，z-ER bin=0.1s 与 field 一致；见 figures/README.md） |
 | [data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/](data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/) | PR-1 z-ER 子型聚类（per-subject 在子目录） |
 | [topic5_ictal_template_echo/figures/](topic5_ictal_template_echo/figures/) | Stage 1 ictal-template-echo（anchor vs path） |
 | [topic5_dynamic_echo/sentinel/figures/](topic5_dynamic_echo/sentinel/figures/) | Stage 2b 动态回响哨兵 |
 | [topic5_ictal_recruitment/axis_alignment/figures/](topic5_ictal_recruitment/axis_alignment/figures/) | A 线 axis alignment 可视化 |
 | [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
+| [topic5_ictal_recruitment/directional_clustering/figures/](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类 ↔ 间期 A/B（每被试玫瑰 + 442 间期事件 hist×两色发作方向类；exploratory negative，6 ECoG 全无 two_class_mapped） |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/](topic5_ictal_recruitment/event_resolved_alignment/figures/) | A 线 event-resolved 二级：逐间期事件(A/B 两类)对发作场的对齐分布 + 事件级离散度（PILOT 3 epi，exploratory，broad 底物） |
+| [topic5_ictal_recruitment/field_dynamics/figures/](topic5_ictal_recruitment/field_dynamics/figures/) | **发作内 field 动力学 pilot — broad 9（8 swap + E916 非swap）**；field_vs_ictal 形式锚发作前：间期 A\|B 锚 + 平均早期场 + progress/offset summary + 每 subject 1 个 **field 演化 GIF**（onset→offset 直观看场传播）；方向(轴向降/非轴向升)broad 有暗示但 narrow 证否=不稳健；z-ER 中后期示意 |
+| [topic5_ictal_recruitment/field_dynamics_narrow/figures/](topic5_ictal_recruitment/field_dynamics_narrow/figures/) | 同上 **narrow 平行批 7**（用间期模板端点 compact core 构轴，证明**不必 swap**）；narrow 多数被试方向反向 → broad 的方向暗示不复现（扩队列证否），exploratory |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/fields/](topic5_ictal_recruitment/event_resolved_alignment/figures/fields/) | 同上的**场图版**（用户 pivot）：A 类全事件场 \| B 类全事件场 \| 发作场，同一物理平面、左图形式 |
+| [topic5_ictal_recruitment/event_resolved_alignment/figures/class_vs_template_field_similarity_cohort.png](topic5_ictal_recruitment/event_resolved_alignment/figures/) | cohort 级：用 class 事件造的间期场 ≈ 用模板投影造的间期场（N=23 中位 \|r\|=0.985；构念等价） |
+| [topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/](topic5_ictal_recruitment/event_resolved_alignment/class_vs_template/figures/) | **6 面板/被试**（全 12 epi）：模板A\|模板B\|发作前−10..0s / 类A场\|类B场\|发作前−120..−90s；配 max-AB 统计（class 场 ≈ template 场） |
 | [topic1_topic5_bridge/figures/](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 桥接（q1 / q1prime 系列） |
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
+| [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
 
 ---
 

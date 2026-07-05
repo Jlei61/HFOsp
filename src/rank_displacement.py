@@ -174,6 +174,57 @@ def compute_swap_score_at_k(
     return 0.5 * (_jaccard(top_a, bot_b) + _jaccard(bot_a, top_b))
 
 
+def swap_nodes_at_k(
+    rank_a: np.ndarray,
+    rank_b: np.ndarray,
+    valid_mask_a: np.ndarray,
+    valid_mask_b: np.ndarray,
+    k: int,
+) -> list:
+    """Full-channel indices of the contacts that SWAP ends between the two templates at k:
+    (top_k_A ∩ bottom_k_B) ∪ (bottom_k_A ∩ top_k_B), on the joint-valid dense ranks. These are
+    EXACTLY the channels whose role flip drives compute_swap_score_at_k's Jaccard (same stable
+    top/bottom selection), so the annotated nodes match the swap_score that classified the swap."""
+    rank_a = np.asarray(rank_a, dtype=float)
+    rank_b = np.asarray(rank_b, dtype=float)
+    joint_valid = np.asarray(valid_mask_a, dtype=bool) & np.asarray(valid_mask_b, dtype=bool)
+    n_valid = int(joint_valid.sum())
+    if n_valid < 4 or k < 1 or 2 * k > n_valid:
+        return []
+    valid_idx = np.flatnonzero(joint_valid)
+    order_a = valid_idx[np.argsort(rank_a[valid_idx], kind="stable")]
+    order_b = valid_idx[np.argsort(rank_b[valid_idx], kind="stable")]
+    bot_a, top_a = set(order_a[:k].tolist()), set(order_a[-k:].tolist())
+    bot_b, top_b = set(order_b[:k].tolist()), set(order_b[-k:].tolist())
+    return sorted((top_a & bot_b) | (bot_a & top_b))
+
+
+def swap_node_groups_at_k(
+    rank_a: np.ndarray,
+    rank_b: np.ndarray,
+    valid_mask_a: np.ndarray,
+    valid_mask_b: np.ndarray,
+    k: int,
+) -> tuple:
+    """Split the swap nodes by which template they are the SOURCE (early / low rank) end in —
+    the role is bound to the channel, so each node is exactly one group:
+      source_in_A = bottom_k_A ∩ top_k_B   (early/source in A, late/sink in B)
+      source_in_B = top_k_A ∩ bottom_k_B   (late/sink in A, early/source in B)
+    Union == swap_nodes_at_k. Returns (source_in_A_idx, source_in_B_idx) as sorted full-channel idx."""
+    rank_a = np.asarray(rank_a, dtype=float)
+    rank_b = np.asarray(rank_b, dtype=float)
+    joint_valid = np.asarray(valid_mask_a, dtype=bool) & np.asarray(valid_mask_b, dtype=bool)
+    n_valid = int(joint_valid.sum())
+    if n_valid < 4 or k < 1 or 2 * k > n_valid:
+        return [], []
+    valid_idx = np.flatnonzero(joint_valid)
+    order_a = valid_idx[np.argsort(rank_a[valid_idx], kind="stable")]
+    order_b = valid_idx[np.argsort(rank_b[valid_idx], kind="stable")]
+    bot_a, top_a = set(order_a[:k].tolist()), set(order_a[-k:].tolist())
+    bot_b, top_b = set(order_b[:k].tolist()), set(order_b[-k:].tolist())
+    return sorted(bot_a & top_b), sorted(top_a & bot_b)
+
+
 def compute_swap_score_sweep(
     rank_a: np.ndarray,
     rank_b: np.ndarray,

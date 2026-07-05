@@ -218,7 +218,7 @@ H1 cohort 成员变化：
 
 把 PR-7 placeholder 替换成真实数字 + §4 reconcile 表 PR-7 行真实数字。
 
-### 5.4 Framework doc `topic4_sef_itp_framework.md` header
+### 5.4 Framework doc `topic4_sef_hfo.md` header
 
 把 PR-7 行从 "🟡 5g 重跑进行中" 改为 "✅ P3 verdict on like-for-like cohort 保持 INCONCLUSIVE"。
 

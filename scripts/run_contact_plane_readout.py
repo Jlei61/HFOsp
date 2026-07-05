@@ -238,7 +238,19 @@ def main():
                          "two halves and re-build a half-axis record per half with the SAME "
                          "build_record_from_events path as the full set. Default None = unchanged "
                          "full-set behavior. When set, default --out is real_subjects_splithalf/.")
+    ap.add_argument("--lagpat-root", default=None,
+                    help="override YUQUAN_ROOT lagPat dir (broad pool, e.g. results/lagpat_broad_dyn). "
+                         "subject_dir becomes <lagpat-root>/<subj>. Default None = canonical narrow.")
+    ap.add_argument("--rankdisp-dir", default=None,
+                    help="override rank-displacement dir (e.g. results/interictal_propagation_masked_broad/"
+                         "rank_displacement/per_subject). Default None = canonical narrow masked.")
     args = ap.parse_args()
+    if args.lagpat_root:        # broad-pool global-swap (cf. run_topic5_axis_alignment CACHE_DIR/AXIS_DIR)
+        global YUQUAN_ROOT
+        YUQUAN_ROOT = Path(args.lagpat_root)
+    if args.rankdisp_dir:
+        global RANKDISP
+        RANKDISP = Path(args.rankdisp_dir)
     # Split-mode 默认走独立子目录，避免覆盖全集 t_a/t_b 记录（用户显式 --out 时尊重）。
     if args.event_split and args.out == str(OUT):
         args.out = str(OUT_SPLITHALF)

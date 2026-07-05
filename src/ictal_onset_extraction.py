@@ -245,6 +245,7 @@ def extract_seizure_window(
     post_sec: float = 30.0,
     results_root: Path | str = Path("results"),
     reference: str = "car",
+    alias_bipolar_to_left: bool = False,
 ) -> SeizureWindow:
     """Load an intracranial signal slice around the ``seizure_idx``-th seizure.
 
@@ -350,6 +351,10 @@ def extract_seizure_window(
             f"upstream caller must drop this seizure"
         )
 
+    rel_start_sec = win_start_epoch - block_start_epoch
+    window_duration_sec = float(pre_sec) + float(post_sec)
+    loaded_window_only = False
+
     if dataset == "epilepsiae":
         from src.preprocessing import load_epilepsiae_block
         pre = load_epilepsiae_block(
@@ -359,23 +364,38 @@ def extract_seizure_window(
     else:  # yuquan
         from src.yuquan_dataset import load_yuquan_record
         pre = load_yuquan_record(
-            data_path, reference=reference, segment_sec=200.0, intracranial_only=True,
+            data_path,
+            reference=reference,
+            segment_sec=200.0,
+            intracranial_only=True,
+            crop_start_sec=rel_start_sec,
+            crop_duration_sec=window_duration_sec,
         )
         block_stem_for_window = blk["block_stem"]
+        loaded_window_only = True
 
     fs = float(pre.sfreq)
-    rel_start_sec = win_start_epoch - block_start_epoch
-    i0 = int(round(rel_start_sec * fs))
-    i1 = i0 + int(round((float(pre_sec) + float(post_sec)) * fs))
+    i0 = 0 if loaded_window_only else int(round(rel_start_sec * fs))
+    i1 = i0 + int(round(window_duration_sec * fs))
     sliced = pre.data[:, i0:i1].copy()
     n_samples_actual = sliced.shape[1]
     t_axis = (np.arange(n_samples_actual) / fs) - float(pre_sec)
+
+    ch_names_out = list(pre.ch_names)
+    if alias_bipolar_to_left and reference == "bipolar":
+        # Match the interictal lagpat naming (group_event_analysis
+        # alias_bipolar_to_left): a bipolar pair "F5-F6" is named by its left
+        # contact "F5", so High-HI/Lagpat channel names align with the figure.
+        ch_names_out = [
+            nm.split("-", 1)[0].strip() if "-" in nm else nm
+            for nm in ch_names_out
+        ]
 
     return SeizureWindow(
         signal=sliced,
         fs=fs,
         t_axis=t_axis,
-        ch_names=list(pre.ch_names),
+        ch_names=ch_names_out,
         subject=subject,
         seizure_id=sz["seizure_id"],
         block_stem=block_stem_for_window,

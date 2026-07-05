@@ -1,7 +1,7 @@
 # Topic 4 v2：SEF-HFO 空间易激场模型计划
 
 > **状态**：v0.2 plan lock draft，2026-06-01。用户确认：Topic 4 主模型路线从旧的 HR/FHN toy modeling 转为 **Spatial Excitability Field model for interictal HFO propagation (SEF-HFO)**；2026-06-01 review 后收紧为 **gain-closed + pulse-validated + control-disciplined** 版本。
-> **替代范围**：替代 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` 中 HR 主、FHN sensitivity 的 Phase 4 建模主线；保留 `docs/topic4_sef_itp_framework.md` 中已经锁定的真实数据验收合同、cohort tier、phantom-rank 修复纪律、clinical SOZ 不作为拟合标签的红线。
+> **替代范围**：替代 `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` 中 HR 主、FHN sensitivity 的 Phase 4 建模主线；保留 `docs/topic4_sef_hfo.md` 中已经锁定的真实数据验收合同、cohort tier、phantom-rank 修复纪律、clinical SOZ 不作为拟合标签的红线。
 > **不替代范围**：不重写 Topic 1 的实证发现，不解释 HFO 80-250/500 Hz carrier 的细胞生物物理，不把 template source 直接等同 clinical SOZ。
 > **2026-06-06 细化指针 + superseding note**：病理→中观→参数映射纪律（强制链 + 方向工作点上算不预设）+ 第一轮调参（连接性 E→E 核「定往哪传」+ E 阈值异质性 `Var(V_th,E)`「定哪里点着」，LIF/SNN 并行）见 `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md`。**SUPERSEDES**：本 plan 下文凡出现"降低异质性 → 更易激"这类**方向性**语言，一律以新 spec 的"方向必须在工作点上计算、不预设"为准（异质性经斜率/曲率→闭环稳定→有限扰动余量进入解释，可被 disconfirm）。承接 2026-06-04 Step-1 同质率场 NULL，走向**条件式**（too-frequent→异质核 / non-returning→先补 recovery·surround，由 `joint_A_failmode` 定），非"直接进异质核"。
 
@@ -21,7 +21,7 @@
 >
 > 受本 amendment 收紧的 **§1.3 / §4 Step 2 / §4 Step 6** 节首已加回指；§2.2 / §3.1 / §3.4 / §3.5 的 prose 由本 amendment 直接 govern，原文保留作 audit trail。**下一步**：Step 0a/0b 具体实施方案（exploratory mechanism screen 定位，预注册纪律 1–5，参数值留 scaffold）。
 
-> **2026-06-03 amendment（user 讨论敲定；与 `docs/topic4_sef_itp_framework.md` 2026-06-03 amendment 同步）**
+> **2026-06-03 amendment（user 讨论敲定；与 `docs/topic4_sef_hfo.md` 2026-06-03 amendment 同步）**
 >
 > 1. **「局部自限」→「时间离散自终止」（空间可填满 SOZ 邻域网格）**：建模目标不是空间次网格波，而是 SOZ 小邻域网格内时间离散且自终止的群体 HFO 传播事件；要锚传播 lags（模板时间结构）+ 事件包络时长，**不**锚 HFO 80–250Hz 载波频率（载波仍 out of scope）。
 > 2. **recovery 措辞收硬**（收紧上节纪律 3）：recovery 不是首选生物解释，**但必须作为并列机制分支进入 Step 0b**（**不**写成暂不做）；纯抑制自限 vs 加恢复变量自限 report-both / no-auto-select，去留由真实事件时长 / 空间范围 / 自限区宽度决定。亚临界噪声触发（"Brunel 支"）为离散事件的概念首选路径。
@@ -454,7 +454,7 @@ SEF-HFO 的贡献不是指定“钾、钠、氯、泵、胶质或抑制”哪一
 
 ## 8. Topic 4 v2 取代关系
 
-- `docs/topic4_sef_itp_framework.md` 保留为 Topic 4 formal entry，但顶部状态和 §6.5 起应指向本 v2 plan。
+- `docs/topic4_sef_hfo.md` 保留为 Topic 4 formal entry，但顶部状态和 §6.5 起应指向本 v2 plan。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` 降级为历史路线 / sensitivity，不再是主模型路线。
 - `docs/archive/topic4/sef_itp_phase4_v1/stage1_results_2026-05-28.md` 与 `stage1b_results_2026-05-28.md` 保留为 HR route 的历史探索证据。
 - 新结果目录建议：`results/topic4_sef_hfo/`，子目录按阶段命名：`linear_stability/`, `rate_field/`, `anisotropy/`, `low_heterogeneity_patch/`, `lif_snn/`, `slow_variable_bridge/`, `synthetic_vs_real/`。

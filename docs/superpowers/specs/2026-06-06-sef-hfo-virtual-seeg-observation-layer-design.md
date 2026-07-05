@@ -4,7 +4,7 @@
 >
 > **关系**：
 > - **实现**（不替换）`docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md` §5.0 调参合同 ④「虚拟 SEEG 必须走真实模板提取 pipeline（与真实数据同一套：通道序、rank template、forward/reverse），不另起炉灶」与 §7 Track 连接 验收（「isotropic + aligned-shaft 控制必须失败；旋转 θ_EE → 模板方向跟着转，旋转电极杆 → 模板方向不变」）。那个 spec **断言**了这条读出链，但没有实现它；本 spec 就是缺失的那一段。
-> - **承接** `docs/topic4_sef_itp_framework.md` §6.5 Step 2/Step 4：「synthetic data 必须走真实 PR-2 / PR-2.5 / endpoint pipeline」「虚拟 SEEG 用突触电流 proxy + envelope」「方向先场后真实 pipeline」「全套 shaft controls」。
+> - **承接** `docs/topic4_sef_hfo.md` §6.5 Step 2/Step 4：「synthetic data 必须走真实 PR-2 / PR-2.5 / endpoint pipeline」「虚拟 SEEG 用突触电流 proxy + envelope」「方向先场后真实 pipeline」「全套 shaft controls」。
 > - **保留**（不触碰）framework 已锁的 H1–H6 真实数据验收合同、cohort tier、phantom-rank 纪律、clinical SOZ 不作拟合标签红线、v0.2 核心边界（不解释 clinical seizure onset，不解释 HFO 80–250 Hz carrier）。
 > - **不冲突** framework §8.1（HFO carrier 不分 E/I）：本观测层**不产生也不检测** 80–250 Hz 载波；它在 event-envelope 层工作，下游接入点是事件 + 通道时序，不是带通检测。
 

@@ -1,0 +1,21 @@
+{
+  "audited_slow_to_rate_mapping_id": "m3a_v2_2_approach",
+  "cond1_sign_tests_passed": false,
+  "cond1_source": "slow_to_rate_mapping.json",
+  "cond2_same_mapping_and_ranges": true,
+  "cond2_source": "finite_jacobian_grid.axes_built_from_slow_to_rate_mapping_id",
+  "cond3_in_range_or_flagged": false,
+  "cond3_out_of_range_fraction": 0.7142857142857143,
+  "cond4_phenotype_movement_beyond_rate": false,
+  "cond4_source": "dynamic_slowvars_summary.json",
+  "on_axis_coords": [
+    "phase_x_core",
+    "phase_y_global"
+  ],
+  "projected_out_coords": [
+    "phase_recovery"
+  ],
+  "gate_used": "A",
+  "overlay_verdict": "refused",
+  "overlay_allowed": false
+}

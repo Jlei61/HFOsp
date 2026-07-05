@@ -267,7 +267,7 @@
 - **Topic 1**: 内事件动态学——within-event propagation + synchrony；PR-4B/4C/5/6/7 持续；见 `docs/topic1_within_event_dynamics.md`
 - **Topic 2**: 事件间时序——~2Hz 周期性已归因；PR-3 stereotypy robustness pending；见 `docs/topic2_between_event_dynamics.md`
 - **Topic 3**: 空间 SOZ 归属——PR-1 完成 (Yuquan n=9)；PR-2 Epilepsiae 三层 i/l/e gradient pending；见 `docs/topic3_spatial_soz_modulation.md`
-- **Topic 4**: SEF-ITP attractor 框架——Phase 1 runner 刚 land；见 `docs/topic4_sef_itp_framework.md`
+- **Topic 4**: SEF-ITP attractor 框架——Phase 1 runner 刚 land；见 `docs/topic4_sef_hfo.md`
 - **Topic 5**: Seizure subtyping (z-ER)；exploratory；见 `docs/topic5_seizure_subtyping.md`
 
 工程侧 forward TODO：

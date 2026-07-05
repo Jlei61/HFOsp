@@ -762,7 +762,7 @@ Replace the current document (or use Edit to splice) so the file starts with:
 > 状态：当前正式入口（**2026-05-22 重排**：把 K=2 stability + fwd/rev swap geometry 升到第一序结论；详见 §0 §-anchor 迁移表）
 > 范围：只讨论单个间期群体事件内部的时序组织，包括传播刻板性与事件级同步性。
 > **Paper 1 架构性 framework**：`docs/paper1_framework_sba.md`（SBA framework：单核心假设 + 5 sharp predictions + 失败模式）。本 topic 的 PR-2 / PR-2.5 / PR-6 / PR-7 / 待立 PR-9 全部受该框架统辖。
-> **Topic 4 模型层 framework（2026-05-20 lock）**：`docs/topic4_sef_itp_framework.md`（SEF-ITP：空间易激场模型，H1–H6 + Phase 0–4 路线）。**Phase 0 解锁 2026-05-21**：phantom-rank 修复 5a–5h 完成 + coord loader v3.1 落地。
+> **Topic 4 模型层 framework（2026-05-20 lock）**：`docs/topic4_sef_hfo.md`（SEF-ITP：空间易激场模型，H1–H6 + Phase 0–4 路线）。**Phase 0 解锁 2026-05-21**：phantom-rank 修复 5a–5h 完成 + coord loader v3.1 落地。
 
 ---
 
@@ -1255,7 +1255,7 @@ Replace the old §4 / §5 / §6 / §7 / §8 / §9 / §10 / §11 with:
 4. **pre-ictal vs baseline endpoint anatomy**：reuse PR-2.7 seizure-triggered window，
    看 endpoint 集合是否偏移
 5. **未来模型层 (PR-T4-1 BHPN-toy / PR-T4-2 BHPN-fit / SEF-ITP Phase 1)**：硬前置见
-   `docs/paper1_framework_sba.md` + `docs/topic4_sef_itp_framework.md`；Phase 0 已解锁
+   `docs/paper1_framework_sba.md` + `docs/topic4_sef_hfo.md`；Phase 0 已解锁
    (2026-05-21)，Phase 1 可启动，但需先完成 `load_subject_for_phase1()` integration PR
 
 **Out of scope（保持冻结）**：在当前数据上重新调 endpoint 定义；重做 PR-2/3/4/4B
@@ -1312,7 +1312,7 @@ Replace the old §4 / §5 / §6 / §7 / §8 / §9 / §10 / §11 with:
 
 - [`docs/paper1_framework_sba.md`](paper1_framework_sba.md) — Paper 1 架构性 framework
   （SBA 单核心假设 + P1–P5 + BHPN-toy/fit + 5 dumb baseline + 失败模式）
-- [`docs/topic4_sef_itp_framework.md`](topic4_sef_itp_framework.md) — Topic 4 模型层
+- [`docs/topic4_sef_hfo.md`](topic4_sef_hfo.md) — Topic 4 模型层
   framework（SEF-ITP H1–H6 + Phase 0–4 路线）
 - [`docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md`](archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md)
   — PR-T4-1 BHPN-toy plan-of-record

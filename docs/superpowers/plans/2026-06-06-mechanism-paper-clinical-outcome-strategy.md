@@ -105,7 +105,7 @@
 
 ## 6. 机制模型并行线（= NC 脊椎核心，不依赖结局）
 
-SEF-HFO 生成模型**闭合**：异质核(Step 3) / spiking(Step 4) 的生成存在性 + 合成走真实 pipeline + 对照(isotropic/aligned-shaft) 过不了。当前状态：Step 0 机制尺度 + 各向异性判别 PASS；同质率场存在性 = NULL（移交异质核/spiking）。详见 `docs/topic4_sef_itp_framework.md` + `docs/archive/topic4/sef_itp_phase4_v2/`。
+SEF-HFO 生成模型**闭合**：异质核(Step 3) / spiking(Step 4) 的生成存在性 + 合成走真实 pipeline + 对照(isotropic/aligned-shaft) 过不了。当前状态：Step 0 机制尺度 + 各向异性判别 PASS；同质率场存在性 = NULL（移交异质核/spiking）。详见 `docs/topic4_sef_hfo.md` + `docs/archive/topic4/sef_itp_phase4_v2/`。
 
 ## 7. 期刊定位（诚实版）
 

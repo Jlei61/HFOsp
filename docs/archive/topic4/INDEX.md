@@ -1,6 +1,6 @@
 # Topic 4 Archive Index — Model layer
 
-> **Topic 4 formal entry（2026-06-01 起）**：`docs/topic4_sef_itp_framework.md` (**SEF-HFO / SEF-ITP framework v0.2**)
+> **Topic 4 formal entry（2026-06-01 起）**：`docs/topic4_sef_hfo.md` (**SEF-HFO / SEF-ITP framework v0.2**)
 > **上游 SBA framework**：`docs/paper1_framework_sba.md`（v1.1.2 lock 2026-04-30 / PR-7 addendum 2026-05-01）—— SEF-ITP 取代其 BHPN-toy / BHPN-fit toy-mechanism 部分；保留其 P1/P2/P3/P5 红线
 > **硬前置**：`docs/topic0_methodology_audits.md` §3.1 phantom-rank 修复 + §5 broad re-derivation roadmap（已解锁；后续 runner 仍必须使用 masked features）
 > **范围**：Topic 1 / Topic 3 实验数据之上的模型层；当前主路径 = SEF-HFO（间期 HFO 传播的空间易激场模型）
@@ -10,7 +10,7 @@
 
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
-- 主文档：`docs/topic4_sef_itp_framework.md`
+- 主文档：`docs/topic4_sef_hfo.md`
 - v0.2 plan：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际进入稳定性分析
 - 保留 v1 真实数据验收合同（H1–H6）：endpoint compactness / source-sink reversal / mark independence + stable geometry / rate-geometry decoupling / pre-post-ictal endpoint shift / participation-field segregation
@@ -26,6 +26,11 @@
 - 2026-06-08 → 06-14 **cm-SNN 观测层 = Step 4 spiking 执行线（异质核 + 各向异性连接 + 真实 4mm 虚拟 SEEG，L=20/d100，探索性）**：存在性从 Step-1 同质率场 NULL 移交到这里后的 spiking 验证。
   - **Stage 2 结构层闭合（站得住）**：`docs/archive/topic4/sef_hfo/snn_cm_spontaneous_bidirectional_2026-06-11.md` —— 单灶分开跑、池化正/反事件成 synthetic subject，过真实 masked pipeline → `stable_k=2` + 两套相反模板可复现 + 端点互换 `strict`。**定位=仪器闭合**（管线能认出稳定可复现端点互换的相反模板），**非机制重现**（单一连接轴 → 模板空间近 1 维 → `stable_k≈2` 半被迫）。
   - **Stage 3 探索阶段（已收束，timing 主问未被检验）**：`docs/archive/topic4/sef_hfo/stage3_regime_screen_2026-06-14.md`（pilot = `stage3_twoend_equal_pilot_2026-06-13.md`）—— 二端等强病灶放同一张网自发，想测"网络自己的事件序列是否标签-时序独立"。扫遍工作点（核间距/异质宽度/平均门槛/驱动/错相位）都没拿到"两头都干净自发、低碰撞、平衡双向"的可用区（默认 drive 共点火 / 低 drive 静默 / dephase 碰撞 / 唯一低碰撞候选率太低）。改做事件分型（621 事件）揭示 **局部事件=猛点火但传不远（contained/relay-failure），区分局部↔全局靠持续时间+扩散而非成核能量；源层面双端成核存在但 per-cell 不平衡；可读大事件带方向但负端干净、正端读出对半**。**支持**"正反模板来自同轴两端随机成核"（源层面），**不支持**"平衡独立长时序双源列车"。"很多小局部 + 少数模板化大事件"层级更像真实 HFO。**timing 独立性主问从未被检验（没造出测试床），不写主结论**；回落 Stage 2 结构层。"NULL/no-go/pass-fail" 早期措辞已被该文档 reframe 段撤回。runner = `scripts/run_sef_hfo_snn_cm_spontaneous_readout.py` + `run_stage3_regime_screen.sh`；分型 = `scripts/analyze_stage3_event_types.py`；纯 helper = `src/sef_hfo_stage3.py`（含 `pilot_gate` + 块感知 `synthetic_label_sequence`）。
+- 2026-06-16 → 06-28 **M0→M3 机制建模线（异质核 + 慢变量 + 谱相图，机制 screen 未 PASS）**：主文档 `docs/topic4_m3_stage.md`（一个主文档 + A/B 分文档）。
+  - **M0/M1/M2 一致性**：均质衬底"空间自限"难、不靠压死活动（M0 lever-exhausted；M1 E→E STD 给时间不给空间自限、事件铺满；M2 前沿抑制只压率不压 reach、钳制腿缺席、≠ Liou-Abbott 完整机制）→ 转 M3。M1/M2 归档在分支 `topic4-snn-m1-recovery`（`m1_recovery_stage2_NULL_2026-06-18.md` / `m2_shunting_gate_result_2026-06-19.md`）。
+  - **M3A 慢变量（A 线分文档）**：`sef_hfo/m3a_stage_conclusion_2026-06-27.md`（A1/A1b/A1c/A2）。决定性纠正：A2-P **源空间逐细胞 onset 梯度**推翻"同步爆发"判读——高许可度大态 = 沿两核轴的**相干招募波**（onset~位置 R²≈0.87、梯度沿轴 align≈1.0、40k-神经元 SNN）。
+  - **M3B 谱相图（B 线分文档）**：`sef_hfo/m3b_stage_conclusion_2026-06-28.md`。Brunel 式有限-Jacobian = **SPM-PASS frozen map**；§5 非正规瞬态 = 骨架特异自限轴向；**SNN 口径已纠正**（B 线内置 tiny grid 是错仪器假阴，轴向 spiking 验证在 A2-P 为正）。机器 `src/topic4_m3b_spectral_phase.py`（TDD-0..15 绿）+ 设计锁 `sef_hfo/m3b_jacobian_design_LOCKED_2026-06-27.md`。
+  - **方法学锁**：判"慢变量/算子有没有改传播"的正确仪器 = **源空间逐细胞 onset 梯度**，非接触空间方向可读性 / 双核 collision / 放电空间拉伸 / 主导本征模式。
 
 ## 数据侧（paper-A）：rate vs 传播几何（探索性，与上面的模型侧并行）
 
@@ -54,7 +59,7 @@
 
 ### `pr_t4_1_bhpn_toy/` — BHPN-toy plan（**SUPERSEDED 2026-05-20**）
 - `pr_t4_1_bhpn_toy_plan_2026-05-01.md` — plan-of-record v2，**已被 SEF-ITP 取代**
-  - 顶部有 SUPERSEDED banner 指向 `docs/topic4_sef_itp_framework.md`
+  - 顶部有 SUPERSEDED banner 指向 `docs/topic4_sef_hfo.md`
   - 保留为历史归档：v2 修订过程（rotating-frame rank / direction-agnostic mark dependence / TDD unit vs integration 拆分）作为方法学训练范例；其中 "k=2 是对称 Hebbian 数学必然，不是 mechanism discovery" 是触发 SEF-ITP 转向的关键认知
 
 ### HR/FHN 节点动力学路线（Phase 4 v1）— **整体 SUPERSEDED 2026-06-01，全部集中在此**
@@ -62,10 +67,10 @@
 - **文档**：`sef_itp_phase4_v1/stage1_results_2026-05-28.md`、`stage1b_results_2026-05-28.md`（HR 单节点 regime + burst-envelope 标定，均已加 SUPERSEDED 头）
 - **spec**：`docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md`（HR/FHN route 设计，已加 SUPERSEDED 头）
 - **结果图**：`results/topic4_sef_itp/phase4_hr_route_SUPERSEDED/`（HR 单节点相图 + regime map + envelope 标定图；含 `_SUPERSEDED_README.md`）
-- 保留为历史 audit trail / sensitivity，**不是当前路线**。当前路线 = SEF-HFO v0.2（`docs/topic4_sef_itp_framework.md` + `sef_itp_phase4_v2/`，结果 `results/topic4_sef_hfo/`）。
+- 保留为历史 audit trail / sensitivity，**不是当前路线**。当前路线 = SEF-HFO v0.2（`docs/topic4_sef_hfo.md` + `sef_itp_phase4_v2/`，结果 `results/topic4_sef_hfo/`）。
 
 ## 跨文档链接
 
-- `docs/topic4_sef_itp_framework.md` §9.1 — SBA framework 取代 / 保留范围
-- `docs/topic4_sef_itp_framework.md` §13 — 历史文档索引（含本 INDEX 反向链接）
+- `docs/topic4_sef_hfo.md` §9.1 — SBA framework 取代 / 保留范围
+- `docs/topic4_sef_hfo.md` §13 — 历史文档索引（含本 INDEX 反向链接）
 - `docs/topic0_methodology_audits.md` §5h — Topic 4 attractor on masked re-run 是 SEF-ITP Phase 0 子步

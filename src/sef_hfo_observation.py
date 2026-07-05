@@ -58,11 +58,30 @@ def merge_montages(montages) -> VirtualMontage:
     return VirtualMontage(contacts, names, provenance="parametric_multi_shaft")
 
 
-def from_real_geometry(*args, **kwargs):
-    """Layer-2 stub (spec §7): 3D real SEEG coords -> 2D model frame. Loud-fail
-    until the per-patient heterogeneity round builds it."""
-    raise NotImplementedError(
-        "real-geometry montage (3D->2D registration) is layer 2; see spec §7")
+def from_real_geometry(geom, scale_key="norm_scale_mm") -> VirtualMontage:
+    """Real-geometry montage from a propagation-geometry dict's PRECOMPUTED 2D plane.
+
+    The field-swap subject-SNN plan (2026-06-26) uses the per-template propagation
+    geometry JSONs, which already carry a 2D contact plane per channel
+    (`x_norm`/`y_norm` in [0,1]; mm = x_norm * geom[scale_key]). So no 3D->2D
+    registration is needed here -- this is the 2D-precomputed path.
+
+    The original 3D->2D registration path (raw SEEG mm coords) is still LAYER 2 /
+    UNBUILT: if the input has no precomputed `x_norm`, raise NotImplementedError
+    (loud fail, never a plausible stand-in -- CLAUDE.md §6 stub clause).
+    """
+    chans = geom.get("channels") if isinstance(geom, dict) else None
+    if not chans or "x_norm" not in chans[0]:
+        raise NotImplementedError(
+            "from_real_geometry: 3D->2D registration is layer 2; this path needs "
+            "precomputed x_norm/y_norm in the geometry dict (spec §7 / field-swap plan §3B)")
+    scale = float(geom[scale_key])
+    coords = np.array([[c["x_norm"] * scale, c["y_norm"] * scale] for c in chans], float)
+    names = [c["name"] for c in chans]
+    m = VirtualMontage(coords, names, provenance="real_geometry_2d")
+    if not m.spans_2d():
+        raise ValueError("from_real_geometry: real contact plane collapses to <2D (rank<2)")
+    return m
 
 
 def grid_coords(n: int, L: float) -> np.ndarray:
