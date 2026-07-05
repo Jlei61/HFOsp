@@ -226,15 +226,26 @@ I_E   = s_E + (I_E - s_E)*decay_IE   # 约 L250  单路合并 AMPA 电流
 ```
 
 所以到达 `slow.apply_currents(I_E, I_I, labels)`（约 L257）的 `I_E` 已经是 `external + recurrent` 合并。
-只除 recurrent 那部分，就必须在上游把 `s_E` 拆成两路：外部一路 $s_E^{\text{ff}}\!\to\!I_E^{\text{ff}}$、
-recurrent 一路 $s_E^{\text{rec}}\!\to\!I_E^{\text{rec}}$。
+所以到达 `slow.apply_currents(I_E, I_I, labels)`（约 L257）的 `I_E` 已经是 `external + recurrent` 合并。
 
-默认路径必须满足**精确数值奇偶**：当 $\alpha_G=0,\ \beta_G=0,\ S_G=0$ 时 $I_E^{\text{ff}}+I_E^{\text{rec}}\equiv\text{old }I_E$
-（AMPA 双指数动力学线性：两路各自用**同一个** $\text{decay}_{IE}$ 低通再相加，逐字节等于旧的单路 `I_E`）。
+**首选实现（parity-preserving，本轮已实现并锁定）：不字面拆 `s_E`，而是保留合并 `I_E` 一字节不动，另外并行追踪
+一路"只含 recurrent 到达"的 `I_E_rec`，除法效果写成减去被削掉的 recurrent 电流：**
 
-安全实现路线：(1) 在 `simulate_kick` 里拆 AMPA 状态；(2) 外部增量（`ext * ext_incr`）留 `s_E_ff`；
-(3) 延迟 recurrent 到达（`ring_sE[slot]`）留 `s_E_rec`；(4) `I_E_ff`/`I_E_rec` 用**同一个** `decay_IE`；
-(5) 只在 `use_SG=True` 时把两路传给 slow / pool 层；(6) 默认 caller 仍看到 `I_E = I_E_ff + I_E_rec`（byte-parity）。
+$$
+\Delta I_{E,rec}=I_{E,rec}\,\frac{\alpha_G S_G}{1+\alpha_G S_G},\qquad
+I^{\text{net}}_{E}=I_E-\Delta I_{E,rec}\ \equiv\ I_E^{\text{ff}}+\frac{I_E^{\text{rec}}}{1+\alpha_G S_G}
+$$
+
+代数等价：$I_E-I_{E,rec}\frac{\alpha_G S_G}{1+\alpha_G S_G}=(I_E-I_{E,rec})+\frac{I_{E,rec}}{1+\alpha_G S_G}=I_E^{\text{ff}}+I_E^{\text{rec}}/D_G$。
+**这比字面拆 $s_E^{\text{ff}}/s_E^{\text{rec}}$ 再相加更利于 parity**：当 $\alpha_G S_G=0$，$\Delta I_{E,rec}$ **精确为 0**、合并 `I_E`
+完全不动 → **逐字节 parity**；字面两路拆分因浮点非结合（$ac+bc\ne(a+b)c$）只能 allclose、拿不到精确 parity。
+
+实现（已锁，见 `kick_probe.py` / `slow_field.py`）：(1) `simulate_kick` gated on `use_SG` 额外累一路 `s_E_rec`
+（**只加 `ring_sE[slot]`，且必须在该 slot 被清零之前读**——否则 `I_E_rec` 读到 0、除法静默失效）→ `I_E_rec`
+（同一个 `decay_IE` 低通）；合并 `I_E` 累加不变。(2) `use_SG` 时把 `I_E_rec` 传给 4-参 `apply_currents`，在 E 细胞减
+$\Delta I_{E,rec}+\beta_{SG}S_G$（代码里 `beta_SG`，避开已存在的 `beta_G` 配置字段）。(3) 默认 `use_SG=False` 不追踪、
+走原 3-参 `apply_currents` → 逐字节 parity。(4) `use_SG` + `alpha_G>0/beta_SG>0` 但缺 `I_E_rec` → **RuntimeError**
+（防 `S_G` 建起来却对膜无效的静默假阴性）。
 
 **不要除总的 `I_E`。** 除 feedforward 触发输入会把科学问题从"稳定 recurrent runaway"变成"衰减触发"。
 

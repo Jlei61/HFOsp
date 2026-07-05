@@ -93,12 +93,24 @@ In `src/snn_engine/kick_probe.py`, after the state init `s_I = np.zeros(N); I_I 
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
 ```
 
-Inside the loop, right after the combined `s_E += ext * ext_incr` / `I_E = s_E + (I_E - s_E)*decay_IE` block (~`:246-250`), add:
+**HARD CONSTRAINT (承重):** the recurrent accumulator must add `ring_sE[slot]` **before that slot is cleared**.
+The engine zeroes it at `s_E += ring_sE[slot]; ring_sE[slot] = 0.0` (~`:246`), so the `s_E_rec += ring_sE[slot]`
+read MUST go **inside the ring block, before that clear** — NOT after the `I_E` low-pass (by then the slot is 0
+and `I_E_rec` would read 0 → divisive silently no-ops). Split the two pieces:
+
+In the ring block (~`:240-247`), before `s_E += ring_sE[slot]; ring_sE[slot] = 0.0`:
 
 ```python
         if track_rec:
+            # HARD CONSTRAINT: read ring_sE[slot] HERE, before the next line clears it.
             s_E_rec *= decay_sE
-            s_E_rec += ring_sE[slot]                     # RECURRENT arrivals only (no ext)
+            s_E_rec += ring_sE[slot]                     # RECURRENT arrivals only (no ext), pre-zeroing
+```
+
+Then, right after the combined `I_E = s_E + (I_E - s_E)*decay_IE` low-pass (~`:259`), add the recurrent low-pass:
+
+```python
+        if track_rec:
             I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
 ```
 
