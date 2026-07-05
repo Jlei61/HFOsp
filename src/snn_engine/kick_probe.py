@@ -241,8 +241,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         s_I *= decay_sI
         slot = t % M
         if track_rec:
+            # HARD CONSTRAINT: read ring_sE[slot] HERE, BEFORE the next line clears it (ring_sE[slot]=0.0).
+            # Moving this read after the clear makes I_E_rec read 0 -> divisive term silently no-ops.
             s_E_rec *= decay_sE
-            s_E_rec += ring_sE[slot]                     # recurrent arrivals only (same slot, pre-zeroing)
+            s_E_rec += ring_sE[slot]                     # recurrent (E->E / E->I) arrivals only, pre-zeroing
         s_E += ring_sE[slot]; ring_sE[slot] = 0.0
         s_I += ring_sI[slot]; ring_sI[slot] = 0.0
         if ee_std_on:

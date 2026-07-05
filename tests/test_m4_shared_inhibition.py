@@ -24,6 +24,11 @@ from slow_field import (  # noqa: E402
 )
 
 DT = 0.1
+# r50 for the smoke: rE_fast peaks ~1.0 during the kick burst but the fast (tau_s) EMA keeps the
+# sensor field small, so r50=0.3 puts Psi_G's half-recruitment in range -> S_G builds to ~0.24 and the
+# divisive arm cuts recruitment ~20% (20105->15715 E spikes at alpha_G=6). Calibrated empirically; the
+# scientific Task-6 sensor calibration is a separate pre-req.
+R50_SMOKE = 0.3
 
 
 def _net(L=6.0, T=250.0, seed=1, density=100.0, nu=0.6):
@@ -132,16 +137,58 @@ def test_use_SG_off_matches_slow_none_engine_output():
            hashlib.sha1(b["E_spk_bool"].tobytes()).hexdigest()
 
 
-def test_alpha_G_does_not_increase_recruitment():
-    # divisive pool can only reduce recurrent E gain -> total E spikes non-increasing vs neutral pool.
-    def total(alpha_G):
+def test_use_SG_true_neutral_is_byte_identical_to_slow_none():
+    # LOAD-BEARING (P0): use_SG=True with alpha_G=0, beta_SG=0 opens track_rec (s_E_rec/I_E_rec) AND the
+    # pool step (rE_fast, mu_G, S_G build), but the divisive term is EXACTLY 0 -> the FULL engine output
+    # must be byte-identical to slow=None. Catches any stray float touch / ordering / RNG draw the pool
+    # path might introduce. A spiking net diverges chaotically on any ULP difference, so this is strict.
+    from lfp import LFPRecorder
+    sites = np.array([[2., 2.], [3., 3.], [4., 4.]])
+
+    def run(with_pool):
+        p, net, NE, NI = _net(T=200.0)
+        net["rng"] = np.random.default_rng(5)
+        rec = LFPRecorder(p, net["pos"], net["labels"], sites=sites)
+        slow = _slow_for(p, net, use_SG=True, alpha_G=0.0, beta_SG=0.0) if with_pool else None
+        res = simulate_kick(p, net, KICK_BOOST=6.0, r_kick=1.5,
+                            V_th_per_neuron=np.full(NE + NI, 16.5), lfp_recorder=rec, slow=slow)
+        return res, net["rng"].bit_generator.state
+
+    a, rng_a = run(False)
+    b, rng_b = run(True)
+    assert hashlib.sha1(a["E_spk_bool"].tobytes()).hexdigest() == \
+           hashlib.sha1(b["E_spk_bool"].tobytes()).hexdigest()   # spikes byte-identical
+    assert np.array_equal(a["rate_E"], b["rate_E"])
+    assert np.array_equal(a["lfp_trace"], b["lfp_trace"])        # sub-threshold recorder identical
+    assert rng_a == rng_b                                        # zero added RNG draws
+
+
+def test_active_pool_without_I_E_rec_raises():
+    # P2: an active pool (alpha_G>0) that never receives I_E_rec would build S_G with NO membrane
+    # effect -> silent false negative. apply_currents must RAISE, not no-op.
+    f, nE, nI = _pool_field(use_SG=True, alpha_G=2.0)
+    f.S_G = 0.5
+    N = nE + nI
+    import pytest
+    with pytest.raises(RuntimeError, match="I_E_rec"):
+        f.apply_currents(np.full(N, 3.0), np.zeros(N), labels=None, I_E_rec=None)
+
+
+def test_alpha_G_reduces_recruitment_and_pool_is_driven():
+    # Strengthened smoke: (a) the pool sensor is GENUINELY driven (S_G builds in both arms), and
+    # (b) with beta_SG=0 the divisive arm does not increase recruitment. r50_psi tuned to the rate-field
+    # scale so the pool actually bites (see the r50 calibration note below).
+    def run(alpha_G):
         p, net, NE, NI = _net(T=300.0)
         net["rng"] = np.random.default_rng(7)
-        slow = _slow_for(p, net, use_SG=True, alpha_G=alpha_G, tau_mu=30.0, tau_S=80.0,
-                         r0_psi=0.0, r50_psi=1.0, n_psi=2.0, p_pool=3.0, S_max=1.0)
+        slow = _slow_for(p, net, use_SG=True, alpha_G=alpha_G, beta_SG=0.0, tau_mu=30.0, tau_S=80.0,
+                         r0_psi=0.0, r50_psi=R50_SMOKE, n_psi=2.0, p_pool=3.0, S_max=1.0)
         res = simulate_kick(p, net, KICK_BOOST=8.0, r_kick=1.5,
                             V_th_per_neuron=np.full(NE + NI, 16.5), slow=slow)
-        return float(res["E_spk_bool"].sum())
-    n0 = total(0.0)
-    n_big = total(6.0)
-    assert n_big <= n0 + 1e-9                           # divisive pool never increases recruitment
+        max_SG = max(slow.trace_SG) if slow.trace_SG else 0.0
+        return float(res["E_spk_bool"].sum()), max_SG
+
+    n0, sg0 = run(0.0)
+    n_big, sg_big = run(6.0)
+    assert sg0 > 0.05 and sg_big > 0.05          # pool sensor genuinely driven in BOTH arms (not stuck at 0)
+    assert n_big <= n0 + 1e-9                     # divisive (beta_SG=0) does not increase recruitment

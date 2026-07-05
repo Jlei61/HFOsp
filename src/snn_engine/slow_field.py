@@ -260,6 +260,11 @@ class SpatialSlowField:
         out[:nE] = (I_E[:nE] - qI_E * I_I[:nE]
                     - self.cfg.eta_K * gK_E
                     - self.cfg.eta_G * hG_eff)                         # global recovery scalar (E only)
+        if self.cfg.use_SG and I_E_rec is None and (self.cfg.alpha_G > 0.0 or self.cfg.beta_SG > 0.0):
+            raise RuntimeError(                                        # §6: loud failure beats silent contamination
+                "use_SG with alpha_G>0 or beta_SG>0 requires I_E_rec (recurrent-only current), got None. "
+                "The pool would build S_G with NO membrane effect (silent false negative). Drive M4 through "
+                "simulate_kick (which tracks I_E_rec); do not use a caller that omits it.")
         if self.cfg.use_SG and I_E_rec is not None:                   # §5 divisive recurrent-gain (E only)
             aS = self.cfg.alpha_G * self.S_G
             frac = aS / (1.0 + aS)                                     # aS=0 -> 0 (exact -> byte-parity)
