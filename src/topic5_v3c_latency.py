@@ -10,6 +10,8 @@ from __future__ import annotations
 import numpy as np
 from scipy.stats import spearmanr
 
+from src.topic5_v3_mode_transition import _coerce_rng, label_permute
+
 
 def first_crossing_latency(z_trace_1d, relt, onset, *, z_cross, window_sec, sustain_frames):
     z = np.asarray(z_trace_1d, dtype=float)
@@ -85,3 +87,32 @@ def assay_valid(qc: dict, cfg: dict) -> bool:
         and (np.isfinite(qc["thr_spearman"]) and qc["thr_spearman"] >= g["thr_spearman_min"])
         and qc["n_informative"] >= lat["min_informative_seizures"]
     )
+
+
+def auc_late(surplus_vals, soz_vals) -> float:
+    s = np.asarray(surplus_vals, dtype=float); z = np.asarray(soz_vals, dtype=float)
+    if s.size == 0 or z.size == 0:
+        return float("nan")
+    gt = np.sum(s[:, None] > z[None, :])
+    eq = np.sum(s[:, None] == z[None, :])
+    return float((gt + 0.5 * eq) / (s.size * z.size))
+
+
+def delta_t(surplus_secs, soz_secs) -> float:
+    s = np.asarray(surplus_secs, dtype=float); z = np.asarray(soz_secs, dtype=float)
+    return float(np.nanmedian(s) - np.nanmedian(z))
+
+
+def auc_null_distribution(surplus_vals, soz_vals, shaft_by_name, surplus_names, soz_names,
+                          *, n_perm, rng) -> np.ndarray:
+    """Within-shaft relabel of surplus/soz-core over A∩S ∪ A∖S, preserving per-shaft
+    surplus count; recompute auc_late (spec §5.5 primary label null)."""
+    rng = _coerce_rng(rng)
+    val_by_name = {**{n: float(v) for n, v in zip(surplus_names, surplus_vals)},
+                   **{n: float(v) for n, v in zip(soz_names, soz_vals)}}
+    out = np.empty(n_perm, dtype=float)
+    for i in range(n_perm):
+        new_surplus, new_soz = label_permute(surplus_names, soz_names, shaft_by_name, rng)
+        out[i] = auc_late(np.array([val_by_name[n] for n in new_surplus]),
+                          np.array([val_by_name[n] for n in new_soz]))
+    return out

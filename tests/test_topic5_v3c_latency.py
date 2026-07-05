@@ -1,6 +1,7 @@
 import numpy as np
 from src.topic5_v3c_latency import first_crossing_latency, latency_seconds, encode_latency_for_rank
 from src.topic5_v3c_latency import censoring_tallies, rank_diagnostics, threshold_stability, assay_valid
+from src.topic5_v3c_latency import auc_late, delta_t, auc_null_distribution
 from src.topic5_v3_mode_transition import load_v3_config
 
 RELT = np.round(np.arange(-5.0, 30.001, 0.1), 3)   # onset at 0.0
@@ -54,3 +55,23 @@ def test_assay_valid_gates():
     assert assay_valid(bad_t0, cfg) is False
     bad_finite = {**good, "finite_frac": 0.37}
     assert assay_valid(bad_finite, cfg) is False
+
+
+def test_auc_late_direction():
+    soz = np.array([1.0, 2.0, 3.0]); surplus = np.array([4.0, 5.0, 6.0])  # surplus later
+    assert auc_late(surplus, soz) == 1.0                                   # H-B extreme
+    assert auc_late(soz, surplus) == 0.0                                   # surplus earlier
+    assert auc_late(np.array([2.0, 2.0]), np.array([2.0, 2.0])) == 0.5     # all ties
+
+
+def test_delta_t_seconds():
+    assert delta_t(np.array([5.0, 7.0]), np.array([1.0, 3.0])) == 4.0
+    assert np.isfinite(delta_t(np.array([5.0, np.nan]), np.array([1.0])))  # nan (censored) skipped
+
+
+def test_auc_null_preserves_and_varies():
+    shaft = {n: "H" for n in ["H1", "H2", "H3", "H4"]}
+    surplus_names = ["H1", "H2"]; soz_names = ["H3", "H4"]
+    sv = np.array([10.0, 10.0]); zv = np.array([0.0, 0.0])                 # obs AUC=1.0
+    null = auc_null_distribution(sv, zv, shaft, surplus_names, soz_names, n_perm=200, rng=0)
+    assert null.shape == (200,) and 0.0 <= np.median(null) <= 1.0
