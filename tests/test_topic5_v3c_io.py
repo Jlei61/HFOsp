@@ -1,7 +1,7 @@
 import pytest
 
 from src.topic5_v3_mode_transition import load_v3_config
-from scripts._topic5_v3c_io import load_soz, axis_soz_join, V3C_SUBJECTS, extract_latency_matrix
+from scripts._topic5_v3c_io import load_soz, axis_soz_join, V3C_SUBJECTS, extract_latency_matrix, load_axis_coords
 
 
 def test_v3c_subject_lists():
@@ -41,3 +41,11 @@ def test_extract_latency_matrix_fails_closed_on_missing_contact():
     cfg = load_v3_config()
     with pytest.raises(ValueError, match="absent from cache"):
         extract_latency_matrix("epilepsiae_139", cfg, ["HL1", "NOT_A_REAL_CONTACT"], thresholds=[2.0])
+
+
+def test_load_axis_coords_missing_returns_empty(monkeypatch):
+    import scripts._topic5_v3c_io as io
+    def boom(*a, **k):
+        raise FileNotFoundError("no MRI")
+    monkeypatch.setattr(io, "load_subject_coords", boom)
+    assert load_axis_coords("epilepsiae", "999", ["A1"]) == {}

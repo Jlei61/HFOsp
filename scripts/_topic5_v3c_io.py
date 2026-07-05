@@ -14,6 +14,7 @@ if str(_ROOT) not in sys.path:
 from scripts._topic5_v3_io import CACHE, classify_subject_contacts  # noqa: E402
 from src.topic5_v3c_coverage import coverage_metrics  # noqa: E402
 from src.topic5_v3c_latency import first_crossing_latency  # noqa: E402
+from src.seeg_coord_loader import load_subject_coords  # noqa: E402
 
 SOZ_JSON = {
     "epilepsiae": _ROOT / "results/epilepsiae_soz_core_channels.json",
@@ -83,4 +84,21 @@ def extract_latency_matrix(ds_sid: str, cfg: dict, names: list, *, thresholds: l
                 kk.append(kind); ss.append(sec)
             kinds[thr] = kk; secs[thr] = ss
         out.append({"idx": si, "kinds": kinds, "secs": secs})
+    return out
+
+
+def load_axis_coords(dataset: str, subject: str, names: list) -> dict:
+    """{name: ras_mm coord} for `names`; {} if MRI/SQL missing (V3c-3 falls back
+    to shaft-only metrics — no silent coord fabrication)."""
+    try:
+        res = load_subject_coords(dataset, subject, names)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"[coords-skip] {dataset}_{subject}: {type(exc).__name__}: {exc}", flush=True)
+        return {}
+    out = {}
+    coords = res.coords_array_in_requested_order      # (n, 3), NaN for missing
+    mask = res.mapped_mask_in_requested_order          # (n,) bool, index-aligned to names
+    for i, n in enumerate(names):
+        if bool(mask[i]) and np.all(np.isfinite(coords[i])):
+            out[n] = np.asarray(coords[i], dtype=float)
     return out
