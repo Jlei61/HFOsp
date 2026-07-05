@@ -32,32 +32,31 @@ date 2026-07-04 · 分支 `topic5-v2-phase1` · tier（pre-registered 天花板�
 
 **结果（存活频段数 = max_over_bands_p<0.05，7 primary）**：
 
-| feature | narrow (n=20，主·干净扣除梯) | broad (matched n=16*) | 说明 |
+| feature | narrow (n=20) | broad (n=17) | 说明 |
 |---|---|---|---|
-| RAW | 6/7（唯 ripple_high 不过） | **3/7**（δ, α, β）〔matched n=16；n=17 Phase-1 基线 = 6/7〕 | broad 计数受队列大小影响，见下 |
+| RAW | 6/7（唯 ripple_high 不过） | 6/7（唯 ripple_high 不过） | Phase-1 基线 ✓ |
 | **common_resid** | **4/7**（δ, α, γ, hg） | **4/7**（θ, α, β, γ） | **α+γ 两池都存活** → 频段特异残差层，**非纯宽带（Outcome B）** |
-| **aperiodic_resid** | **1/7**（γ） | **2/7**（γ, ripple_high†） | **γ 两池都存活** = 唯一扛过两道扣除；余大半 1/f-可归因 |
+| **aperiodic_resid** | **1/7**（γ） | **3/7**（β, γ, ripple_high†） | **γ = 唯一两池都扛过两道扣除的带**；余大半 1/f-可归因（β 仅 broad；ripple 见 §1.1） |
 
-**⚠️ broad 计数受队列大小影响（承重·like-for-like，CLAUDE.md §5）**：broad 三行都算在 **matched n=16** 上。**排除 1146 让 raw 从 n=17 的 6/7 掉到 n=16 的 3/7**——1146 是强正向被试（broad n_sig 7/7）撑高了 raw，而 residual 受其影响小，故 broad 上 common_resid(4/7) 竟 **≥** matched-raw(3/7)。**所以 broad 的"存活频段数"不是干净的逐级扣除梯**。**承重证据不是 broad 计数，而是：(i) narrow(n=20) 干净扣除梯 6→4→1；(ii) 跨池 band-identity——α+γ 过 common_resid 两池、γ 过 aperiodic 两池——与队列大小无关。** Outcome B（common_resid ≥2/7）两池都成立。
+两池 raw→common_resid→aperiodic 都是**干净的全队列扣除梯**（narrow n=20：6→4→1；broad n=17：6→4→3）。**承重结论 = (i) 两梯都往下掉、只 α+γ（common_resid）/ γ（aperiodic）跨池一致；(ii) 与队列大小无关的跨池 band-identity。** Outcome B（common_resid ≥2/7）两池都成立。
 
-\* broad=16（排除 epilepsiae_1146）：排除理由 = **单被试 n_perm=1000 单线程 ~2h（OMP 不助，Python-loop permute）计算受限** + 1146 是**强正向离群**（broad n_sig 7/7）——排除强正向被试是**保守**（matched raw 6/7→3/7 印证只会降低存活）。1146 已在 narrow 全量分析（narrow 里它是 within_shaft_strong；**broad 里是 subject_wide_weak**——within_shaft_strong 是 narrow 属性、不迁移到 broad context）。1146-broad 后台补跑中，结论对其稳健。
-† ripple_high broad 的"存活"= **假象**，见 §1.1 sanity。
+broad 的 **epilepsiae_1146**（该被试 n_perm=1000 单线程 ~2h、OMP 不助 Python-loop permute）最后单独后台补跑并入 n=17。含它 vs 不含它（n=16）：common_resid 都 4/7；aperiodic 2/7→**3/7**（β 也进）、ripple 仍在且**更强**（见 §1.1）；结论不变。1146 在 narrow 是 within_shaft_strong、broad 是 subject_wide_weak（该 null-强度标签是 narrow 属性、不迁移到 broad）。
+† ripple_high broad 的 aperiodic "存活"= **假象**，见 §1.1 sanity（**不是** ripple 对齐变强）。
 
 **判读（accepted wording，LOCK）**：
 > 对齐**不是纯宽带招募/共有场**（common_resid 后两池各 4/7 存活、α+γ 一致 → 存在频段特异残差层）——即 **Outcome B**，非 Outcome A。但扣掉 1/f 后只剩 **gamma_LVFA** 两池稳存活，说明那个频段特异层**大半可归因于 1/f 背景**；只有 gamma 扛过宽带+1/f 两道扣除。**（gamma 存活是描述性事实，不构成"LVFA-specific 机制"主张——tier 禁。）**
 
 ### 1.1 Outcome C sanity — broad ripple 的 aperiodic "存活" = 假象（DESCRIPTIVE ONLY）
 
-broad-16 aperiodic ripple_high 过 FWER（max_over_bands_p=0.022），触发 Task 1.4 强制 sanity（与 Phase-1"ripple 最弱"矛盾）。**六项全指向假象 → 只描述、绝不写 HFO/ripple 特异**：
+broad-17 aperiodic ripple_high 过 FWER（max_over_bands_p=0.006，含 1146 后比 n=16 的 0.022 更强），触发 Task 1.4 强制 sanity（与 Phase-1"ripple 最弱"矛盾）。**五项全指向假象 → 只描述、绝不写 HFO/ripple 特异**：
 
-1. **多重比较天花板假象**：aperiodic ripple 的 cohort 中位 delta = **0.010 < raw 的 0.036** —— 扣 1/f 让 ripple 对齐**更低**，不是更高；"存活"只是 1/f 把别的频段压下去、max-over-bands 天花板降了，ripple 才**相对**冒头，非绝对增益。
-2. **存活不随效应量**：narrow aperiodic ripple 中位 delta **更高（0.052）却没过 FWER**（0.156）。
-3. **cohort 异质**：broad 16 人里 9 正 7 负，916/922 强负（−0.25 / −0.27）。
-4. **采样边界带偏**：fs=512Hz 的 253（ripple 150–250Hz 贴奈奎斯特 256、edge_safe=220）是最强正向 driver 之一。
-5. **池间不一致**：narrow 不显著、broad 才显著。
-6. 与 raw（ripple 从未过 FWER）+ Phase-1 矛盾。
+1. **ripple 实测对齐没变强**（承重·已纠正）：ripple 的**实际对齐幅度 |maxab| 扣 1/f 后基本不变**——broad 0.587→0.582、narrow 0.684→0.699。扣 1/f **没让 ripple 对齐变强**。它能过 aperiodic FWER 只因 **①其它 4 段（δ/θ/α/hg）被 1/f 扣没了 → max-over-bands 天花板降；②稀疏的 aperiodic 残差场空间 null 更低 → 同对齐下 delta 更高**——两者都是**家族/null 效应，不是 ripple-excess 对齐增益**。（先前 §1.1 用"aperiodic ripple 每被试中位 delta 0.010 < raw 0.036"论证是**混淆的**——跨 feature 比 delta 混了不同 null；干净口径是实测 |maxab|，见上。）
+2. **存活不随 ripple 信号强度**：narrow aperiodic ripple **正被试比例更高（13/20 vs broad 10/17）、中位 delta 也不低（0.052）却没过 FWER**（0.156）；broad 过 → "存活"跟的是**家族/池**，不是 ripple 本身强度。
+3. **cohort 异质**：broad 17 人里 10 正 7 负，916/922 强负（−0.25 / −0.27）。
+4. **采样边界带偏**：fs=512Hz 的 253（ripple 150–250Hz 贴奈奎斯特 256、edge_safe=220）是最强正向 driver 之一（delta +0.137）。
+5. **与 raw + Phase-1 矛盾**：raw ripple 从未过 FWER（broad 0.47、narrow 0.33、Phase-1 最弱带）。
 
-拟合 QC 干净（r²0.79、每 sz 排除 18 个工频 bin）→ 不是拟合失败，是**真·天花板假象**。
+拟合 QC 干净（r²0.79、失败 1.7%、每 sz 排除 18 个工频 bin）→ 不是拟合失败，是**家族天花板 + 稀疏残差 null 的假象**。
 
 ### 1.2 单-covariate confound（Task 1.4 Step 2-3，descriptive · deferred）
 
@@ -106,7 +105,7 @@ broad-16 aperiodic ripple_high 过 FWER（max_over_bands_p=0.022），触发 Tas
 2. **weak/global spatial null 下成立、formal within-shaft Gate A 未评估**（2/20、反保守 likely inflated）——所有"存活"都在弱空间 null 尺度。
 3. **W1 residual**：非纯宽带（Outcome B）但大半 1/f-可归因、只 gamma 扛过两道扣除、**NOT ripple-specific**（broad ripple 假象）。
 4. **EEG↔clinical 锚差大**（临床锚会误导 when 判读）。
-5. **broad = 16**（1146 计算受限排除；保守；后台补跑）。confound（Task 1.4）descriptive、[pending]。
+5. **broad = 17**（epilepsiae_1146 单被试 n_perm=1000 单线程 ~2h、后台单独补跑并入 n=17；含 vs 不含它结论不变：common_resid 都 4/7、aperiodic 2/7→3/7、ripple 假象两版都在）。confound（Task 1.4）descriptive、deferred（maps 构建过慢中止）。
 
 ---
 

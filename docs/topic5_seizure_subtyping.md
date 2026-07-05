@@ -264,7 +264,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - **who**：cohort 6/7 是**聚合**、per-subject 弱（≥4/7 仅 **6/20**）、无单一表型预测（Spearman 全 <0.4 门；过闸特征都是同向量再描述）、band-generic。→ **subject-heterogeneous**。
 - **when**：**发作前已高且平**（近前−远前≈0，无爬升）+ **起始处不大上抬**（broad 符号翻转 p≈0.005 支持、narrow 临界 p≈0.06/Wilcoxon<0.05）、**EEG 锚更清**（临床起始常早于 EEG 起始几十秒 → 临床锚抹平上抬）。→ **preictal-present + modest onset increment**。
 
-**⚠️工程教训**：并行 numpy nulls worker 必须 `OMP_NUM_THREADS=1`（否则 26 worker×80 核 BLAS 超订 → 单被试 crawl，7h/40min 之差）；broad=16（1146=**强正向离群**（broad n_sig 7/7）、单被试 n_perm=1000 单线程 ~2h、OMP 不助（Python-loop permute）→ 排除；保守（matched raw 6/7→3/7 印证只降存活）、已在 narrow 全量、后台补跑；within_shaft_strong 仅 narrow 属性、broad 里是 subject_wide_weak）。
+**⚠️工程教训**：并行 numpy nulls worker 必须 `OMP_NUM_THREADS=1`（否则 26 worker×80 核 BLAS 超订 → 单被试 crawl，7h/40min 之差）；broad **1146** 单被试 n_perm=1000 单线程 ~2h、OMP 不助（Python-loop permute）→ 单独后台补跑并入 **n=17**（含它 common_resid 仍 4/7、aperiodic 2/7→3/7、结论不变；within_shaft_strong 仅 narrow 属性、broad 里 subject_wide_weak）。
 
 **不能写**：formal Gate A/B/C passed · HFO-/LVFA-/ripple-specific · timing-order replay · criticality/机制 · 过任何空间随机场。完整数值 + 承重 caveat + 禁 claim：`docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md`。
 
@@ -316,7 +316,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md` — **发作内 field 动力学 pilot（exploratory，broad 暗示 / narrow 扩队列证否 → 不稳健）**：broad 9（轴向 ρ<0 5/8、非轴向 ρ>0 8/8 暗示）vs narrow 7 平行批（ρ<0 仅 3/7、非轴向 2/7，多反向，E1146 轴向 +0.52）→ 方向减弱假设非稳健、依队列/substrate；非 swap 也能用模板端点构轴（不必 swap）；图/GIF 模式 = paper supplementary；z-ER 中后期偏示意。
 - `docs/archive/topic5/v2_phase2_criticality_state_layer_2026-07-01.md` — **V2a 发作前 criticality/state 层（exploratory，restricted-axial sanity check → 偏阴性）**：动力学腿 M_loading 0/16 + λ 趋势 0/16 显著（phase+block surrogate）；方法学定律 = 今后 λ 报 surplus 不报 raw；rank-coupling≠传播。不判定模型 axial-weakening/non-axial 预测 → reframe 到 V3a。
 - `docs/superpowers/specs/2026-07-02-topic5-v3a-mode-transition-design.md` — **V3a 设计（axis→non-axis mode transition，data-side H3a/b/c）**：eeg-onset 锚定 phase grid、2D 投影算子 + 非正规 reactivity、纯间期 HFO 非轴向（防循环）、compartment flux、自建 null、narrow 主。姊妹 spec V3b（M3B 模型–数据一致性 H3d）待写。
-- `docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md` — **V2 表达层三问收口（Phase-1-v2，exploratory candidate scaffold refinement）**：**survive** = 非纯宽带（common_resid 两池 4/7、α+γ 一致 = Outcome B）但大半 1/f-可归因（aperiodic 只 gamma_LVFA 稳）、ripple broad"存活"=多重比较天花板假象 → **NOT ripple-specific**；**who** = cohort 6/7 聚合、≥4/7 仅 6/20、无单一表型、band-generic（subject-heterogeneous）；**when** = 发作前已高且平 + 起始处小上抬（broad 符号翻转 p≈0.005、narrow 临界）、EEG 锚更清（preictal-present + modest onset increment）。broad=16（1146 计算受限 + 强正向离群排除，保守；within_shaft_strong 仅 narrow 属性）。⚠️并行 numpy nulls 必须 OMP_NUM_THREADS=1。
+- `docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md` — **V2 表达层三问收口（Phase-1-v2，exploratory candidate scaffold refinement）**：**survive** = 非纯宽带（common_resid 两池 4/7、α+γ 一致 = Outcome B）但大半 1/f-可归因（aperiodic 只 gamma_LVFA 稳）、ripple broad"存活"=多重比较天花板假象 → **NOT ripple-specific**；**who** = cohort 6/7 聚合、≥4/7 仅 6/20、无单一表型、band-generic（subject-heterogeneous）；**when** = 发作前已高且平 + 起始处小上抬（broad 符号翻转 p≈0.005、narrow 临界）、EEG 锚更清（preictal-present + modest onset increment）。broad=17（1146 单被试~2h 后台补跑并入；含 vs n=16 结论不变）。⚠️并行 numpy nulls 必须 OMP_NUM_THREADS=1。
 
 ---
 
