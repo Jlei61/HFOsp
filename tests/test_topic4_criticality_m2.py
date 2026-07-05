@@ -66,3 +66,33 @@ def test_localize_alpha0_crossing_brackets_zero():
     assert out["alpha_left"] < 0.0                       # last neg before crossing
     assert out["crossing_frac"] is not None
     assert 470.0 < out["alpha0_crossing_time_ms"] < 520.0  # M1 idx14->idx15 window
+
+
+# --- T1 review FIX 1 (Critical): op_solve_quality is a FOLD-APPROPRIATE residual bar, not the
+# solver's strict 1e-9 converged flag. Near-fold ops (residual ~1e-3-4e-3) never hit converged=True
+# yet read a stable spectrum, so both sides must still be quality=True. ---
+def test_op_solve_quality_is_residual_based_not_strict_converged():
+    cfg = load_crit_config(); grid, kernels, core, _ = _crit_op_context(cfg)
+    m2cfg = m2.load_m2_config()
+    out = m2.localize_alpha0_crossing(_points(), grid, kernels, core, cfg, m2cfg)
+    assert out["op_solve_quality_left"] is True
+    assert out["op_solve_quality_right"] is True
+    op = out["_crossing_op"]
+    assert op is not None
+    # documents the rule is residual-based: the crossing op is NOT strictly converged (>1e-9) yet
+    # sits within the fold-appropriate tolerance -> quality=True despite converged=False.
+    assert float(op.residual) > 1e-9
+    assert float(op.residual) <= m2cfg["densification"]["op_residual_tol"]
+    assert op.converged is False
+
+
+# --- T1 review FIX 2 (spec §3.1 output gap): branch_identity_clean must be present in the return
+# (feeds the §5.0 ignition base gate) and True on the real crossing, where M1's continuation check
+# reports the low branch stays continuous and reaches alpha0 (no branch jump/fold). ---
+def test_branch_identity_clean_present_and_true_on_real_crossing():
+    cfg = load_crit_config(); grid, kernels, core, _ = _crit_op_context(cfg)
+    m2cfg = m2.load_m2_config()
+    out = m2.localize_alpha0_crossing(_points(), grid, kernels, core, cfg, m2cfg)
+    assert "branch_identity_clean" in out
+    assert out["branch_identity_clean"] is True
+    assert out["_branch_continuation_status"] == "low_branch_reaches_alpha0_before_jump"

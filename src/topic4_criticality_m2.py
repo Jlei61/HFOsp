@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 import src.topic4_m3b_spectral_phase as spm
-from src.topic4_criticality import _fields_from_slow
+from src.topic4_criticality import _fields_from_slow, check_low_branch_continuation_between
 
 _REPO = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _REPO / "config/topic4_criticality_m2.yaml"
@@ -106,31 +106,64 @@ def alpha1_and_eig(grid, kernels, op):
     return float(res.eigenvalues[0].real), res, J
 
 
-def _op_solve_quality(op, res):
-    """op_solve_quality (spec rev2.1): converged (via non-saturation) AND resolved spectrum.
-    Distinct from stability_read_quality (alpha1<0) -- see localize_alpha0_crossing's
+def _op_solve_quality(op, res, op_residual_tol):
+    """op_solve_quality (spec rev2.2 §3.1/§8): the op-solve is usable for a spectral read-out iff
+    its fixed-point residual is within a FOLD-APPROPRIATE tolerance (``op_residual_tol``, NOT the
+    solver's strict 1e-9 ``converged`` bar) AND it is not saturated AND its spectrum resolved.
+
+    Rev2.1 keyed this off ``not op.saturated`` only, which reported quality=True for near-fold ops
+    whose residual (~1e-3-4e-3) never reaches the strict 1e-9 converged bar. Rev2.2 (user decision):
+    near-fold ops legitimately never fully converge, but their alpha1/mode reads ARE stable, so the
+    strict ``converged`` flag would wrongly fail the §5.0 ignition gate; a residual tolerance is the
+    right bar. ``op.residual`` is the OperatingPoint's stored fixed-point residual (max rate-of-change
+    magnitude, src.topic4_m3b_spectral_phase.solve_operating_point), so no field_rhs recompute is
+    needed. Distinct from stability_read_quality (alpha1<0) -- see localize_alpha0_crossing's
     alpha_left/alpha_right (always <0/>=0 respectively when both are numeric)."""
-    return bool(op is not None and not op.saturated and res is not None
+    return bool(op is not None and float(op.residual) <= float(op_residual_tol)
+                and not op.saturated and res is not None
                 and res.status == "resolved" and res.eigenvalues.size > 0)
 
 
 def localize_alpha0_crossing(points, grid, kernels, core, cfg_crit, m2cfg):
-    """Dense alpha0-crossing localizer (spec rev2.1 M2 Task 1).
+    """Dense alpha0-crossing localizer (spec rev2.2 M2 Task 1).
 
     Brackets the last-qualified low-branch M1 point -> the first saturated M1 point that
     follows it, coarse-scans ``densification.coarse_K`` fracs of the interpolated slow-space
     between them (``interp_slow``), then recursively bisects the first neg->(>=0 or gone)
     sub-bracket to ``crossing_width_ms_tol`` (or ``max_bisect_hard_cap`` levels). Multi-crossing
     coarse scans are flagged (``crossing_status="multiple_alpha0_crossings"``) but only the
-    first crossing is localized. Returns ``_crossing_op``/``_crossing_res`` for later tasks
-    (shape scoring at the crossing).
+    first crossing is localized.
+
+    ``op_solve_quality_left/right`` use a fold-appropriate residual bar (``op_residual_tol``, spec
+    rev2.2), NOT the solver's strict 1e-9 converged flag -- near-fold ops never fully converge but
+    read a stable spectrum. ``branch_identity_clean`` (spec §3.1, feeds the §5.0 ignition base gate)
+    reuses M1's ``check_low_branch_continuation_between`` across the crossing bracket. Returns
+    ``_crossing_op``/``_crossing_res`` for later tasks (shape scoring at the crossing).
     """
     dcfg = m2cfg["densification"]
+    op_residual_tol = dcfg["op_residual_tol"]
     q = [p for p in points if p.get("qualified") and p.get("branch_id") == "low_branch"]
     last_q = q[-1]
     trans = next(p for p in points if p.get("saturated") and p["time_ms"] > last_q["time_ms"])
     a, b = last_q["slow_inputs"], trans["slow_inputs"]
     span_ms = trans["time_ms"] - last_q["time_ms"]
+
+    # branch_identity_clean (spec §3.1; feeds the §5.0 ignition base gate): reuse M1's
+    # check_low_branch_continuation_between across the SAME last-qualified-low -> first-saturated
+    # bracket the crossing is localized in. The low branch is a clean single continuous low-approach
+    # (no branch jump) iff that check reports it stayed continuous and smoothly REACHED alpha0
+    # ("low_branch_reaches_alpha0_before_jump"). The other two M1 statuses both involve a jump that
+    # replaces a smooth crossing -- "..._disappears_before_alpha0" is a mid-bracket fold, and
+    # "..._remains_far_from_alpha0_until_jump" literally jumps (its name ends _until_jump) without a
+    # low-branch approach -- so neither is branch-identity-clean for the purpose of trusting the
+    # localized crossing. Mirrors M1's own `checked is True and status == ...` defensive idiom;
+    # bounded (reuses M1's helper, does NOT rebuild solve_branches). The raw status is surfaced as
+    # `_branch_continuation_status` (private-key convention, like `_crossing_op`) for auditability.
+    cont = check_low_branch_continuation_between(last_q, trans, cfg_crit)
+    branch_identity_clean = bool(
+        cont.get("branch_continuation_checked") is True
+        and cont.get("continuation_status") == "low_branch_reaches_alpha0_before_jump")
+    _branch_continuation_status = cont.get("continuation_status")
 
     # (a) coarse scan (warm-start chain along the low branch)
     fracs = list(np.linspace(0.0, 1.0, dcfg["coarse_K"]))
@@ -159,6 +192,8 @@ def localize_alpha0_crossing(points, grid, kernels, core, cfg_crit, m2cfg):
                 "crossing_frac": None, "crossing_width_ms": None,
                 "alpha_left": None, "alpha_right": None, "crossing_status": status,
                 "op_solve_quality_left": False, "op_solve_quality_right": False,
+                "branch_identity_clean": branch_identity_clean,
+                "_branch_continuation_status": _branch_continuation_status,
                 "_crossing_op": None, "_crossing_res": None}
 
     def alpha_at(frac, prev_op):
@@ -182,11 +217,19 @@ def localize_alpha0_crossing(points, grid, kernels, core, cfg_crit, m2cfg):
     # leaving alpha_right stuck at a placeholder None even though the coarse scan already resolved
     # a genuine >=0 reading at hi_fr). Refined below whenever the loop actually revisits the hi side.
     alpha_right, op_right, res_right, _sa2, _s_hi = alpha_at(hi_fr, op_left)
+    if alpha_right is not None and not np.isfinite(alpha_right):
+        # non-finite alpha1 from a non-saturated-but-unresolved near-fold op is not a usable
+        # hi-side reading -- treat it as "low gone" (same as the loop's NaN guard below).
+        alpha_right, op_right, res_right = None, None, None
     for _lvl in range(dcfg["max_bisect_hard_cap"]):
         mid = 0.5 * (lo_fr + hi_fr)
         a1m, opm, resm, sat_any, sm = alpha_at(mid, prevb)
-        if opm is None or a1m is None:
-            # low branch disappeared -> crossing is a fold at/below mid; tighten from below
+        if opm is None or a1m is None or not np.isfinite(a1m):
+            # low branch gone (saturated -> opm/a1m None) OR a non-finite alpha1 from a
+            # non-converged/unresolved near-fold op -> tighten hi_fr. FIX 3: a NaN a1m must NOT
+            # fall through to the `else` and be mis-read as a crossed (>=0) reading (nan<0 is
+            # False in Python), which would narrow hi_fr off a meaningless value and could set the
+            # returned crossing alpha1 to NaN. Matches the coarse-scan's np.isfinite guard.
             hi_fr = mid
             alpha_right, op_right, res_right = None, None, None
             continue
@@ -209,6 +252,8 @@ def localize_alpha0_crossing(points, grid, kernels, core, cfg_crit, m2cfg):
     return {"alpha0_crossing_time_ms": float(t_cross), "alpha0_crossing_slow_state": best["slow"],
             "crossing_frac": float(best["frac"]), "crossing_width_ms": float(crossing_width_ms),
             "alpha_left": alpha_left, "alpha_right": alpha_right, "crossing_status": status,
-            "op_solve_quality_left": _op_solve_quality(op_left, res_left),
-            "op_solve_quality_right": _op_solve_quality(op_right, res_right),
+            "op_solve_quality_left": _op_solve_quality(op_left, res_left, op_residual_tol),
+            "op_solve_quality_right": _op_solve_quality(op_right, res_right, op_residual_tol),
+            "branch_identity_clean": branch_identity_clean,
+            "_branch_continuation_status": _branch_continuation_status,
             "_crossing_op": best["op"], "_crossing_res": best["res"]}

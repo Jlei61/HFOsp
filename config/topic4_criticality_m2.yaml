@@ -1,4 +1,4 @@
-# Topic 4 M3-v2.2 criticality Milestone 2 — spec rev2.1 §8
+# Topic 4 M3-v2.2 criticality Milestone 2 — spec rev2.2 §8
 basis:
   theta: THETA_EE            # resolved to np.pi/4 by loader
   embedding: rE_block
@@ -10,6 +10,10 @@ densification:
   coarse_K: 5
   crossing_width_ms_tol: 1.0
   max_bisect_hard_cap: 16
+  op_residual_tol: 1.0e-2      # spec §8 rev2.2: fold-appropriate residual bar for op_solve_quality
+                               # (near-fold ops never reach the solver's strict 1e-9 converged bar,
+                               # but their alpha1/mode reads are stable; strict converged would fail
+                               # the §5.0 ignition gate and defeat the readout).
 ignition:
   core_localized_overlap_thresh: 0.8
   core_localized_globality_thresh: 0.3
