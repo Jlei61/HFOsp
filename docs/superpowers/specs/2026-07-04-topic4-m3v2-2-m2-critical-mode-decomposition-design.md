@@ -1,6 +1,6 @@
 # Topic 4 — M3-v2.2 Approach-Criticality — Milestone 2: Dense α₀ Crossing + Two-Stage Linear-Ignition / Nonlinear-Spread Readout · Design
 
-date 2026-07-04（rev2.3 2026-07-05）· 状态 **design rev2.3 — in execution (SDD)**（rev2.2 → rev2.3（T3 review）：off_axis sentinel 用**渐近尾 horizon 一致规则**（`sentinel_min_horizon_ms=250`，§2.3）替代单一 horizon；gain 形式 **sign-off = full-state self-gain**（M1 precedent，§3.3），E-rate-projected 精细化 deferred）（rev1.1 → rev2：两段式 ignition/spread 重构；rev2 → rev2.1：折入用户 GO-review 4 项 P1 契约钉死——① pilot 语言降调（exploratory de-risk，正式待 T2/T4/T5 注册）② nonaxis gain 三态阈值 ③ epsilon pass/fail 锁死 ④ ignition/spread enum 显式化；**rev2.1 → rev2.2**（T1 review，用户 2026-07-05）：`op_solve_quality` 改 **fold-appropriate 残差容差**（`op_residual_tol=1e-2`）而非严格 1e-9 `converged`（near-fold op 稳定但不收敛到 1e-9；否则 §5.0 ignition gate 恒 fail 废掉 core_localized 读数）+ `branch_identity_clean` 纳入 T1）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。**用户 2026-07-05 审阅=90/100 GO、无 P0；建议 M1 PR #6 先合、M2 impl 以 M1-merged main 为 base（避免 rebase 混科学+工程）。**
+date 2026-07-04（rev2.4 2026-07-05）· 状态 **design rev2.4 — in execution (SDD)**（rev2.2 → rev2.3（T3 review）：off_axis sentinel 用**渐近尾 horizon 一致规则**（`sentinel_min_horizon_ms=250`，§2.3）替代单一 horizon；gain 形式 **sign-off = full-state self-gain**（M1 precedent，§3.3），E-rate-projected 精细化 deferred；rev2.3 → rev2.4（T4 review，用户 2026-07-05 决定 C）：真实轨迹 `nonlinear_spread=epsilon_sensitive→undetermined`（大抑制 kick 未点火使 onset 不一致）——**主 verdict 保留预注册 undetermined**（§5），并加 **descriptive-only** `descriptive_igniting_note`（点火子集 onset/endgame + 未点火组，§1/§4.3），禁当 spread 头条）（rev1.1 → rev2：两段式 ignition/spread 重构；rev2 → rev2.1：折入用户 GO-review 4 项 P1 契约钉死——① pilot 语言降调（exploratory de-risk，正式待 T2/T4/T5 注册）② nonaxis gain 三态阈值 ③ epsilon pass/fail 锁死 ④ ignition/spread enum 显式化；**rev2.1 → rev2.2**（T1 review，用户 2026-07-05）：`op_solve_quality` 改 **fold-appropriate 残差容差**（`op_residual_tol=1e-2`）而非严格 1e-9 `converged`（near-fold op 稳定但不收敛到 1e-9；否则 §5.0 ignition gate 恒 fail 废掉 core_localized 读数）+ `branch_identity_clean` 纳入 T1）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。**用户 2026-07-05 审阅=90/100 GO、无 P0；建议 M1 PR #6 先合、M2 impl 以 M1-merged main 为 base（避免 rebase 混科学+工程）。**
 
 > **方法学 base** = M1 spec `2026-07-02-topic4-m3v2-2-approach-criticality-design.md` + M1 code。M2 **复用** M1 判读器 + 特征模指标，只新加：dense α₀ localization、two-core ignition 确认、nonlinear-footprint spread readout、gain/leak 方向向量（nonaxis 降为 sentinel）。
 > **执行 gate**：M2 全模型侧，不消费 topic5 phase2。Topic5 correspondence 留 M3。
@@ -29,7 +29,7 @@ M1 的尺子在真实 v2.2 **仿真**轨迹上说"看不清"：抽样快照上�
 - (h) **shape 分数不当分类器**：core_overlap+globality 判 ignition class；axis_elongation 的核内符号**不稳**（单核 +0.55 / 双核 −0.99 / 足迹 +0.1..0.8 抖），只作描述量、不承重。
 - (i) tier=`model_side_preliminary`，从不声称"模型证明发作/CSD"；global runaway ≠ 真发作。
 
-（内部归档代号：`axis_elongation`(=elongation_axis_score)/`axis_wavevector_alignment`(=phase_gradient_axis_score, 无向)/`off_axis`/`globality`/`core_overlap`；ignition `class`∈{core_localized, delocalized, ambiguous}、`delocalized_subtype`∈{corridor_lit, global_like, multi_core}；spread `onset`∈{axial, core_only, global_first, off_axis, undetermined}/`endgame`∈{self_limited, global_flooding, marginal, undetermined}/`off_axis`∈{absent, present, undetermined}/`depth_dependent`/`epsilon_sensitivity`∈{pass, epsilon_sensitive}；gain 方向 `e_global`/`e_axis_gradient`/`e_nonaxis(sentinel)`；`csd_verdict=unresolved_operating_point`(M1, 不变)。）
+（内部归档代号：`axis_elongation`(=elongation_axis_score)/`axis_wavevector_alignment`(=phase_gradient_axis_score, 无向)/`off_axis`/`globality`/`core_overlap`；ignition `class`∈{core_localized, delocalized, ambiguous}、`delocalized_subtype`∈{corridor_lit, global_like, multi_core}；spread `onset`∈{axial, core_only, global_first, off_axis, undetermined}/`endgame`∈{self_limited, global_flooding, marginal, undetermined}/`off_axis`∈{absent, present, undetermined}/`depth_dependent`/`epsilon_sensitivity`∈{pass, epsilon_sensitive}、`descriptive_igniting_note`(descriptive-only, rev2.4)；gain 方向 `e_global`/`e_axis_gradient`/`e_nonaxis(sentinel)`；`csd_verdict=unresolved_operating_point`(M1, 不变)。）
 
 ---
 
@@ -63,6 +63,7 @@ nonlinear_spread:            # 「往哪扩」— field_rhs 非线性足迹积�
   footprint_trajectory       # active_frac(t)/core_overlap(t)/elongation(t)/off_axis(t)/globality(t)
   control_minus_kick         # bool：已扣 v=0 控制残漂（必 true 否则该段 undetermined）
   epsilon_sensitivity        # pass | epsilon_sensitive（§4.3 pass/fail 锁死）
+  descriptive_igniting_note  # DESCRIPTIVE ONLY（非主 verdict，rev2.4）：epsilon_sensitive-by-onset 时报 igniting 子集观察（n_igniting / igniting onset+endgame / non-igniting combos）；主 verdict 仍 undetermined
 
 interpretation               # 自然语言合成，e.g.
                              # "core ignition followed by axial transient and possible global endgame"
@@ -155,6 +156,7 @@ unresolved_subreason         # null | alpha0_not_localized | branch_ambiguous |
 - **off_axis ∈ {absent, present, undetermined}**：`absent` if `off_axis` 全程 < `off_axis_score_tol`；`present`/`undetermined` 按 §2.3 两门规则（未破两门禁写传播结论）。
 - **depth_dependent**：≥2 深度的 endgame 不同（如 at_crossing 自限、just_past 漫开）→ true。
 - **epsilon_sensitivity（pass/fail 锁死）**：跑全 `epsilon_rel=[0.01,0.05]` × `polarities=[-1,+1]`（4 组）。**pass** = `onset` ∧ `off_axis` 在 4 组里**全一致**（`epsilon_onset_agreement=all`）**且** `endgame` **majority ≥3/4 一致**（`epsilon_endgame_agreement=majority`；endgame 允许 marginal 抖动）；否则 **fail** → `epsilon_sensitivity=epsilon_sensitive`，`nonlinear_spread` 段判 undetermined、`unresolved_subreason=unresolved_nonlinear_spread`（ignition 段不受影响仍报）。
+- **descriptive igniting-subset 注（rev2.4，C 决定，用户 2026-07-05）**：当 `epsilon_sensitive` 由 **onset 不一致**触发、且分歧来自"部分扰动未点火"（`core_only` = active_frac 未上升）时，**主 verdict 仍 `undetermined`**（§5 预注册规则不事后改），但**必须**并报 descriptive-only 字段 `descriptive_igniting_note`：`n_igniting_of_total`（各深度点火组数/4）、`igniting_onset`（点火子集内 onset，若一致报之）、`igniting_endgame`、`non_igniting_combos`（列出未点火的 ε/pol + 原因）+ 显式 caveat `"DESCRIPTIVE ONLY — primary nonlinear_spread verdict is undetermined (pre-registered §4.3); NOT a spread claim"`。**禁**把此 note 当 spread 结论/头条（防 §6.3 pronoun 误扩）。
 - **control_minus_kick**：必 true（否则 spread undetermined）。
 
 ---
