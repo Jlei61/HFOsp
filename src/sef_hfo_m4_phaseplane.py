@@ -71,6 +71,27 @@ class GuardThresholds:
     b_delta_eps: float = 0.05  # bounded: window/cycle-avg branching <= 1 + eps
 
 
+def calibrate_guards_from_references(flood, axial, base=None, margin=0.05):
+    """Derive §9.1 guard thresholds from arm-0 TRIVIAL reference instances (spec §9.1 step 1-3): set the
+    theta_* so the TRIVIAL-A flood and TRIVIAL-B axial-retreat reference cells are EXCLUDED by `margin`.
+    `flood`/`axial` are CellMetrics of the reference instances; act_min/sgrad_min/b_delta_eps come from
+    `base` (fixed go-quality floors, NOT trivial-derived). Pure -> unit-testable without simulation."""
+    th = base or GuardThresholds()
+
+    def clip(v):
+        return float(min(1.0, max(0.0, v)))
+
+    return GuardThresholds(
+        theta_core=clip(flood.core_overlap - margin),   # TRIVIAL-A: core_overlap>theta_core -> below flood
+        theta_glob=clip(flood.globality + margin),       # TRIVIAL-A: globality<theta_glob -> above flood
+        theta_off=clip(axial.f_off + margin),            # TRIVIAL-B: f_off<theta_off -> above axial-retreat
+        act_min=th.act_min,
+        act_high=clip(flood.act_frac - margin),          # TRIVIAL-A: act_frac>=act_high -> at/below flood
+        sgrad_min=th.sgrad_min,
+        b_delta_eps=th.b_delta_eps,
+    )
+
+
 @dataclass(frozen=True)
 class CellMetrics:
     """One phase-plane cell's readouts (already computed from its simulation, upstream)."""

@@ -12,7 +12,7 @@ sys.path.insert(0, ROOT)
 from src.sef_hfo_m4_phaseplane import (  # noqa: E402
     q_core, derive_core_mask, GuardThresholds, CellMetrics, CellVerdict,
     is_bounded, is_trivial_A, is_trivial_B, classify_cell,
-    largest_contiguous, go_plane_verdict,
+    largest_contiguous, go_plane_verdict, calibrate_guards_from_references,
 )
 
 
@@ -123,6 +123,18 @@ def test_largest_contiguous_4connected():
                   [0, 0, 1, 0]], dtype=bool)
     assert largest_contiguous(g) == 3                              # top-left L of 3; the 2 on the right are separate
     assert largest_contiguous(np.zeros((3, 3), bool)) == 0
+
+
+def test_calibrate_guards_excludes_reference_instances():
+    # arm-0 TRIVIAL-A flood + TRIVIAL-B axial-retreat references -> calibrated guards must FLAG them.
+    flood = _core_cell(act_frac=0.9, core_overlap=0.85, globality=0.15)
+    axial = _core_cell(f_off=0.05, self_limited=True)
+    g = calibrate_guards_from_references(flood, axial, margin=0.05)
+    assert is_trivial_A(flood, g)          # the flood reference is now caught as TRIVIAL-A
+    assert is_trivial_B(axial, g)          # the axial-retreat reference is caught as TRIVIAL-B
+    # a genuine localized bounded core (moderate act_frac, high globality, off-axis some) is NOT flagged
+    core = _core_cell(act_frac=0.3, core_overlap=0.6, globality=0.5, f_off=0.3, self_limited=False)
+    assert not is_trivial_A(core, g) and not is_trivial_B(core, g)
 
 
 def test_go_plane_verdict_go_and_nogo_cases():
