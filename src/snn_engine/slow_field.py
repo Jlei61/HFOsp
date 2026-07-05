@@ -88,6 +88,17 @@ class SpatialSlowFieldConfig:
     lambda_G: float = 0.0      # 0 -> primary arm E; >0 -> arm F
     # ---- proxy phase-plane h_G term ----
     beta_G: float = 1.0        # weight in Y_new = P_global - beta_G*h_G
+    # ---- M4 divisive shared inhibitory pool S_G (rev4 spec §3-§5; OFF by default -> byte-parity) ----
+    use_SG: bool = False       # master gate; False -> no pool alloc/evolution, apply_currents unchanged
+    alpha_G: float = 0.0       # divisive strength: I_rec_E -> I_rec_E/(1+alpha_G*S_G)
+    beta_SG: float = 0.0       # OPTIONAL small subtractive pool current (arm 1/3); NOT beta_G (h_G proxy)
+    r0_psi: float = 0.0        # Psi_G recruitment onset
+    r50_psi: float = 1.0       # Psi_G half-recruitment
+    n_psi: float = 2.0         # Psi_G steepness
+    p_pool: float = 3.0        # A_G p-norm exponent (2-4 focal; 1 = area/mean); swept diagnostic
+    tau_mu: float = 40.0       # ms, pool activation low-pass (fast)
+    tau_S: float = 120.0       # ms, pool output low-pass
+    S_max: float = 1.0         # pool output ceiling
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -123,6 +134,15 @@ class SpatialSlowFieldConfig:
                       ("n_M", self.n_M), ("n_B", self.n_B), ("n_Pi", self.n_Pi)):
             if v <= 0.0:
                 raise ValueError(f"{nm} must be > 0, got {v}")
+        # ---- M4 pool (rev4 §3-§5) ----
+        if self.alpha_G < 0.0:
+            raise ValueError(f"alpha_G must be >= 0, got {self.alpha_G}")
+        if self.beta_SG < 0.0:
+            raise ValueError(f"beta_SG must be >= 0, got {self.beta_SG}")
+        for nm, v in (("p_pool", self.p_pool), ("tau_mu", self.tau_mu), ("tau_S", self.tau_S),
+                      ("S_max", self.S_max), ("r50_psi", self.r50_psi), ("n_psi", self.n_psi)):
+            if v <= 0.0:
+                raise ValueError(f"{nm} must be > 0, got {v}")
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +161,23 @@ def aq_drive(rE, rI, eta_E, eta_I):
     it). Factored out + unit-pinned so `step` cannot silently drop the r_I term and degrade
     into pure-E depletion. Implemented per the plan (Task 5)."""
     return eta_E * np.asarray(rE, float) + eta_I * np.asarray(rI, float)
+
+
+def psi_recruit(r, r0, r50, n):
+    """M4 per-location recruitment nonlinearity Psi_G(r)=[r-r0]_+^n/(r50^n+[r-r0]_+^n) (rev4 spec §3).
+    Elementwise; range [0,1). Sub-threshold background (r<=r0) -> 0. This is the natural single readout
+    that replaces the old M/B/P95 sensors: <Psi_G(r_E)>_x is a soft recruited-area measure."""
+    x = np.maximum(np.asarray(r, dtype=float) - r0, 0.0)
+    xn = x ** n
+    return xn / (r50 ** n + xn)
+
+
+def pnorm_pool(z, p):
+    """M4 pooled drive A_G=[<z^p>_x]^(1/p) over ALL elements (rev4 spec §3). z in [0,1], p>=1.
+    p=1 -> soft recruited-area mean; larger p (2-4) -> focal-sensitive (mean<->max knob), so a strong
+    focal/core recruits the pool before participation is global."""
+    z = np.asarray(z, dtype=float)
+    return float(np.mean(z ** p)) ** (1.0 / p)
 
 
 def _grid_index(pos, L, n_grid):
@@ -204,10 +241,17 @@ class SpatialSlowField:
         self._alpha_s = None
         self.hG_script = None                                        # clamp/surrogate override (Deferred)
         self.trace_hG = []; self.trace_M = []; self.trace_B = []; self.trace_Pi = []
+        # ---- M4 shared inhibitory pool (rev4 spec §4); mu_G=pool activation, S_G=pool output ----
+        self.mu_G = 0.0
+        self.S_G = 0.0
+        self.trace_muG = []; self.trace_SG = []; self.trace_AG = []
 
-    def apply_currents(self, I_E, I_I, labels=None):
-        """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) for E cells; I_E - I_I for I
-        cells. q_I==1, g_K==0 -> returns I_E - I_I exactly (parity). Task 4."""
+    def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
+        """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
+        q_I==1, g_K==0, h_G off -> returns I_E - I_I exactly (parity).
+        M4 (use_SG AND I_E_rec given): additionally subtract the removed recurrent current on E cells
+        dI_rec = I_E_rec[:nE]*(alpha_G*S_G/(1+alpha_G*S_G)) + beta_SG*S_G  (divide recurrent E only,
+        rev4 §5). alpha_G*S_G==0 AND beta_SG==0 -> dI_rec exactly 0 -> byte-parity."""
         qI_E = self.q_I[self._iyE, self._ixE]                          # (nE,)
         gK_E = self.g_K[self._iyE, self._ixE]
         out = np.asarray(I_E, float) - np.asarray(I_I, float)          # I cells: I_E - I_I
@@ -216,6 +260,10 @@ class SpatialSlowField:
         out[:nE] = (I_E[:nE] - qI_E * I_I[:nE]
                     - self.cfg.eta_K * gK_E
                     - self.cfg.eta_G * hG_eff)                         # global recovery scalar (E only)
+        if self.cfg.use_SG and I_E_rec is not None:                   # §5 divisive recurrent-gain (E only)
+            aS = self.cfg.alpha_G * self.S_G
+            frac = aS / (1.0 + aS)                                     # aS=0 -> 0 (exact -> byte-parity)
+            out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
         return out
 
     def threshold(self, V_th_base):
@@ -250,10 +298,11 @@ class SpatialSlowField:
             np.clip(self.g_K, 0.0, cfg.gK_max, out=self.g_K)
         self.trace_qI_mean.append(float(self.q_I.mean()))
         self.trace_gK_mean.append(float(self.g_K.mean()))
-        if cfg.use_hG:                                            # §B6 global recovery
+        if cfg.use_hG or cfg.use_SG:                              # FAST (tau_s) EMA needed by h_G and/or S_G
             if self._alpha_s is None:
                 self._alpha_s = 1.0 - np.exp(-dt / cfg.tau_s)
             self.rE_fast += self._alpha_s * (rE_inst - self.rE_fast)   # FAST sensor EMA
+        if cfg.use_hG:                                            # §B6 global recovery
             M = global_M(self.rE_fast)                            # sensors ALWAYS computed (trace sync)
             B = global_B(self.rE_fast, cfg.r_A, cfg.Delta_A)
             Pi = global_participation(self.rE_fast)
@@ -268,4 +317,12 @@ class SpatialSlowField:
                 np.clip(self.q_I, cfg.q_min, 1.0, out=self.q_I)
             self.trace_M.append(M); self.trace_B.append(B); self.trace_Pi.append(Pi)
             self.trace_hG.append(self.h_G)                       # traces ALWAYS synced under use_hG
+        if cfg.use_SG:                                            # §4 M4 shared inhibitory pool advance
+            z_G = psi_recruit(self.rE_fast, cfg.r0_psi, cfg.r50_psi, cfg.n_psi)
+            A_G = pnorm_pool(z_G, cfg.p_pool)                     # single natural readout (no M/B/P95)
+            self.mu_G += dt * (-self.mu_G + A_G) / cfg.tau_mu     # forward Euler (h_G-style integration)
+            self.mu_G = float(np.clip(self.mu_G, 0.0, 1.0))
+            self.S_G += dt * (-self.S_G + cfg.S_max * self.mu_G) / cfg.tau_S
+            self.S_G = float(np.clip(self.S_G, 0.0, cfg.S_max))
+            self.trace_AG.append(A_G); self.trace_muG.append(self.mu_G); self.trace_SG.append(self.S_G)
         self._t += dt
