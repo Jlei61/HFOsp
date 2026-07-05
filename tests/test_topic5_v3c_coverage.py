@@ -4,6 +4,7 @@ import numpy as np
 
 from src.topic5_v3_mode_transition import load_v3_config
 from src.topic5_v3c_coverage import coverage_metrics, coverage_null_distribution
+from src.topic5_v3c_coverage import surplus_spatial_metrics, distance_null_distribution
 from scripts.run_topic5_v3c_coverage import cohort_median_null
 
 
@@ -64,3 +65,17 @@ def test_cohort_median_null_percentile():
     res = cohort_median_null(subject_obs, subject_nulls)
     assert res["obs_cohort_median"] == 1.0
     assert res["p_value"] < 0.01 and res["n_perm"] == 500
+
+
+def test_surplus_spatial_contiguous_and_distance():
+    coords = {"H1": np.array([0., 0, 0]), "H2": np.array([1., 0, 0]), "H3": np.array([2., 0, 0]),
+              "S1": np.array([0., 0, 0])}
+    m = surplus_spatial_metrics(["H1", "H2", "H3"], ["S1"], coords, {n: "H" for n in ["H1", "H2", "H3"]})
+    assert m["n_shafts_with_surplus"] == 1 and m["max_contiguous_run"] == 3
+    assert m["mean_min_dist_to_soz"] == (0.0 + 1.0 + 2.0) / 3
+
+
+def test_distance_null_empty_without_coords():
+    null = distance_null_distribution(["H1"], ["H1", "H2"], ["S1"], {}, {"H1": "H", "H2": "H"},
+                                      n_perm=50, rng=0)
+    assert null.size == 0
