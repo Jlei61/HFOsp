@@ -39,6 +39,13 @@ spread:
   epsilon_endgame_agreement: majority
 gain:
   horizons_ms: [10, 25, 50, 100, 250, 500]
+  sentinel_min_horizon_ms: 250   # spec rev2.3 §2.3/§8: the off_axis sentinel reads only the
+                                 # ASYMPTOTIC-tail horizons (T >= this) and requires them to AGREE.
+                                 # Short/mid horizons carry a compact-e_nonaxis core-compactness
+                                 # transient (the gain gate is non-monotone across horizons), so a
+                                 # single hand-picked horizon was fragile/result-shoppy. Tail =
+                                 # [250, 500]; both tail decisions must match else off_axis =
+                                 # undetermined (mirrors §4.3 epsilon_sensitivity across-sweep rule).
 perturbation:
   epsilon_rel: [0.01, 0.05]
   max_time_ms: 300

@@ -131,6 +131,10 @@ def test_off_axis_sentinel_absent_on_core_localized_crossing():
     s = m2.off_axis_sentinel(crossing, grid, kernels, core, m2cfg)
     assert s["off_axis"] == "absent"
     assert "core-compactness residual" in s["annotation"]
+    # rev2.3: verdict comes from asymptotic-tail agreement, self-documented for audit. On the real
+    # crossing BOTH tail horizons read absent, so the verdict is a robust (not single-horizon) absent.
+    assert s["sentinel_tail_horizons_ms"] == [250, 500]
+    assert s["off_axis_per_tail_decision"] == ["absent", "absent"]
 
 
 def test_off_axis_present_requires_both_gates():
@@ -145,3 +149,22 @@ def test_off_axis_present_requires_both_gates():
     v3 = m2._off_axis_decision(off_axis_score=0.01, gain_nonaxis=0.01,
                                gain_axis=0.20, gain_global=0.05, m2cfg=m2cfg)
     assert v3 == "absent"
+
+
+# --- Task 3 rev2.3: asymptotic-tail agreement rule. When the two tail horizons yield DIFFERENT
+# per-horizon decisions the sentinel must return "undetermined" (kills the single-horizon fragility).
+def test_off_axis_tail_disagreement_yields_undetermined():
+    m2cfg = m2.load_m2_config()
+    # off_axis_score is horizon-independent, so the score gate is constant across the tail; only the
+    # gain gate varies. Here score gate is CLOSED (0.01 < 0.05 tol) at both tail horizons, but the
+    # gain gate is closed at 250 (nonaxis 0.01 << axis 0.20 -> absent) and open at 500 (nonaxis 0.40,
+    # excess 0.30 >= 0.10 tol, ratio 4.0 >= 1.25 tol -> undetermined, since score gate stays closed).
+    gains = {
+        "e_axis_gradient": {250: 0.20, 500: 0.10},
+        "e_global": {250: 0.05, 500: 0.05},
+        "e_nonaxis": {250: 0.01, 500: 0.40},
+    }
+    verdict, tail, per_tail = m2._off_axis_tail_agreement(gains, off_axis_score=0.01, m2cfg=m2cfg)
+    assert tail == [250, 500]
+    assert per_tail == ["absent", "undetermined"]   # tail horizons disagree
+    assert verdict == "undetermined"

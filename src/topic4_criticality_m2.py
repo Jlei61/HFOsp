@@ -399,34 +399,22 @@ def read_linear_ignition(crossing, grid, kernels, core, cfg_crit, m2cfg, points)
 # --------------------------------------------------------------------------- #
 # Task 3: projected operator gain/leak + nonaxis off_axis sentinel             #
 # --------------------------------------------------------------------------- #
-# Productionizes spec §2.3/§3.3. `embed_rE` places a grid-space E-rate direction into the rE
-# block of the full 6-field state (rE,rI,sEE,sEI,sIE,sII per spm.STATE_FIELDS), the other 5
-# blocks zero -- mirrors spm's own `core_perturbation_vector`/`finite_time_gain` convention (full
-# 6N-state `transient_gain`, i.e. NOT a rE-block-only readout after evolving), just generalized
-# from the fixed core-perturbation direction to the T0 basis directions (e_axis_gradient/
-# e_global) plus the crossing-specific e_nonaxis residual. `e_nonaxis` is downgraded to a
-# SENTINEL/negative-control (spec §0-c/§2.3): `off_axis` only ever reaches "present" when BOTH the
-# shape-score gate and the gain-excess/ratio gate break; below that, no propagation conclusion may
-# be drawn (spec §2.3/§7 "禁写任何侧向/离轴传播结论").
+# Productionizes spec §2.3/§3.3 (rev2.3). `embed_rE` places a grid-space E-rate direction into the
+# rE block of the full 6-field state (rE,rI,sEE,sEI,sIE,sII per spm.STATE_FIELDS), the other 5
+# blocks zero. `projected_gains` reads the FULL-STATE self-gain ‖exp(JT)·embed_rE(e)‖/‖e‖ via M1's
+# `spm.transient_gain` -- NOT the spec §3.3 literal ‖P_Y·rE(...)‖ E-rate-block projection, which is
+# DEFERRED (spec rev2.3 §3.3 sign-off: full-state self-gain is the intended reading, consistent with
+# M1's own `finite_time_gain`/`core_perturbation_vector` precedent; the sentinel is a negative-
+# control whose PRIMARY is the score gate, so the gain gate is only a secondary relative comparison).
+# `e_nonaxis` is downgraded to a SENTINEL/negative-control (spec §0-c/§2.3): `off_axis` only ever
+# reaches "present" when BOTH the shape-score gate and the gain-excess/ratio gate break; below that,
+# no propagation conclusion may be drawn (spec §2.3/§7 "禁写任何侧向/离轴传播结论"). The sentinel
+# reads the ASYMPTOTIC-TAIL horizons (T >= gain.sentinel_min_horizon_ms) and requires tail agreement
+# (rev2.3 §2.3): short/mid horizons carry a compact-e_nonaxis core-compactness transient that made a
+# single-horizon read non-monotone/fragile; see `_off_axis_tail_agreement`.
 
 _NONAXIS_ANNOTATION = ("nonaxis_residual = core-compactness residual in a core-localized mode, "
                        "NOT sideways propagation")
-
-# Fixed representative horizon (ms) for the off_axis sentinel's axis/global/nonaxis gain
-# comparison ("near-recovery horizon", task brief), picked empirically off the real crossing (not
-# hand-picked in the abstract): tabulating all 6 `gain.horizons_ms` [10,25,50,100,250,500] on the
-# real core-localized crossing shows off_axis_score pinned ~0 throughout (T-independent shape
-# score -> the score gate never breaks, so "present" is never reachable regardless of horizon),
-# while the GAIN gate flips: at T=10/50/100ms e_nonaxis transiently out-gains axis/global (a short-
-# horizon local-amplification burst, expected for a compact direction and EXACTLY the "core-
-# compactness read as spread" misreading the pilot findings doc (§3/§5 item 5) warns about); by
-# T=250/500ms that burst has decayed and e_nonaxis settles back under axis/global at BOTH horizons
-# (self-consistent, not a one-point coincidence). 250ms is chosen over 500ms only for scale
-# robustness (T=500ms gains are ~1e-4-1e-2, closer to the near-fold crossing op's own solve
-# imprecision, spec rev2.2 op_residual_tol). A SINGLE fixed horizon (not a per-direction max-over-
-# horizons) keeps axis/global/nonaxis compared at the identical evolution time -- a per-direction
-# max would let each direction pick its own best moment, which would not be apples-to-apples.
-_OFF_AXIS_SENTINEL_HORIZON_MS = 250
 
 
 def embed_rE(e, grid, kernels):
@@ -437,9 +425,9 @@ def embed_rE(e, grid, kernels):
 
 
 def projected_gains(J, grid, kernels, dirs, horizons):
-    """{direction_name: {horizon_ms: gain}}, one directional finite-time gain curve per named
-    direction: embed via `embed_rE`, propagate through exp(J*T) (`spm.transient_gain`, spec
-    §3.3)."""
+    """{direction_name: {horizon_ms: gain}}: full-state self-gain ‖exp(J*T)·embed_rE(e)‖/‖e‖ per
+    named direction, one curve over `horizons` (M1 `spm.transient_gain` precedent; spec rev2.3 §3.3
+    sign-off -- full-state self-gain, NOT the deferred ‖P_Y·rE(...)‖ E-rate-block projection)."""
     out = {}
     for name, e in dirs.items():
         b = embed_rE(e, grid, kernels)
@@ -464,6 +452,34 @@ def _off_axis_decision(*, off_axis_score, gain_nonaxis, gain_axis, gain_global, 
     return "undetermined"
 
 
+def _off_axis_tail_agreement(gains, off_axis_score, m2cfg):
+    """Asymptotic-tail agreement rule for the off_axis sentinel (spec rev2.3 §2.3/§8).
+
+    Returns ``(verdict, tail_horizons, per_tail_decisions)``. The single-horizon read was fragile:
+    ``e_nonaxis`` is a spatially compact direction, so it shows a short/mid-horizon local-
+    amplification burst (the pilot-doc "core-compactness read as spread" artifact,
+    docs/superpowers/specs/2026-07-04-topic4-m2-pilot-findings.md §3/§5 item 5) that makes the gain
+    gate NON-MONOTONE across horizons -- on the real crossing the raw `_off_axis_decision` reads
+    undetermined at 10/50/100ms but absent at 25/250/500ms. rev2.3 reads only the ASYMPTOTIC-tail
+    horizons (``T >= gain.sentinel_min_horizon_ms``, = [250, 500]) where the transient has decayed,
+    and REQUIRES them to agree (mirrors §4.3 epsilon_sensitivity's across-sweep agreement): the
+    shared verdict if every tail decision is identical, else ``"undetermined"``. ``off_axis_score``
+    is horizon-independent (a static shape score), so the score gate is constant across the tail;
+    only the gain gate can vary between tail horizons."""
+    gcfg = m2cfg["gain"]
+    min_T = gcfg["sentinel_min_horizon_ms"]
+    tail = [int(T) for T in gcfg["horizons_ms"] if int(T) >= min_T]
+    decisions = [
+        _off_axis_decision(off_axis_score=off_axis_score,
+                           gain_nonaxis=gains["e_nonaxis"][T],
+                           gain_axis=gains["e_axis_gradient"][T],
+                           gain_global=gains["e_global"][T], m2cfg=m2cfg)
+        for T in tail
+    ]
+    verdict = decisions[0] if len(set(decisions)) == 1 else "undetermined"
+    return verdict, tail, decisions
+
+
 def off_axis_sentinel(crossing, grid, kernels, core, m2cfg) -> dict:
     """`e_nonaxis` off_axis sentinel / negative-control at the alpha0 crossing (spec §2.3/§3.3).
 
@@ -475,11 +491,15 @@ def off_axis_sentinel(crossing, grid, kernels, core, m2cfg) -> dict:
     span(e_global, e_axis_gradient); when its norm is below `nonaxis_direction_min_norm`, the
     direction carries no meaningful energy to test -- this is NOT filled with a random control
     direction (spec §2.3): `nonaxis_source_policy` records the reason, `nonaxis_gain=NaN`, and
-    `off_axis` is hard-set to `"absent"` WITHOUT going through `_off_axis_decision` (a NaN gain
-    must never reach the both-gates arithmetic).
+    `off_axis` is hard-set to `"absent"` WITHOUT going through the tail rule (a NaN gain must never
+    reach the both-gates arithmetic); its `off_axis_per_tail_decision` is `None` (short-circuited).
 
-    Gains are compared at a single FIXED horizon (`_OFF_AXIS_SENTINEL_HORIZON_MS`, see its
-    module-level comment) so axis/global/nonaxis are read at the identical evolution time.
+    The verdict comes from `_off_axis_tail_agreement` over the ASYMPTOTIC-tail horizons (spec rev2.3
+    §2.3): both tail horizons must agree, else `undetermined`. The chosen tail + the per-tail
+    decision list are persisted (`sentinel_tail_horizons_ms`, `off_axis_per_tail_decision`) so a
+    reviewer can see WHY the verdict came out as it did. The reported scalar `axis_gain`/
+    `global_gain`/`nonaxis_gain` are the representative values at the tail anchor (min tail
+    horizon).
     """
     bcfg = m2cfg["basis"]
     theta = kernels.theta
@@ -498,9 +518,11 @@ def off_axis_sentinel(crossing, grid, kernels, core, m2cfg) -> dict:
 
     J = spm.build_jacobian_dense(grid, kernels, crossing["_crossing_op"])
     gains = projected_gains(J, grid, kernels, dirs, m2cfg["gain"]["horizons_ms"])
-    T = _OFF_AXIS_SENTINEL_HORIZON_MS
-    gain_axis = gains["e_axis_gradient"][T]
-    gain_global = gains["e_global"][T]
+    gcfg = m2cfg["gain"]
+    anchor = int(gcfg["sentinel_min_horizon_ms"])          # min tail horizon = representative scalar
+    tail_horizons = [int(T) for T in gcfg["horizons_ms"] if int(T) >= anchor]
+    gain_axis = gains["e_axis_gradient"][anchor]
+    gain_global = gains["e_global"][anchor]
 
     if e_nonaxis is None:
         return {
@@ -510,16 +532,18 @@ def off_axis_sentinel(crossing, grid, kernels, core, m2cfg) -> dict:
             "global_gain": gain_global,
             "annotation": _NONAXIS_ANNOTATION,
             "nonaxis_source_policy": "unavailable_low_residual_energy",
+            "sentinel_tail_horizons_ms": tail_horizons,
+            "off_axis_per_tail_decision": None,           # low-residual short-circuit; tail rule not run
         }
 
-    gain_nonaxis = gains["e_nonaxis"][T]
-    decision = _off_axis_decision(off_axis_score=off_axis_score, gain_nonaxis=gain_nonaxis,
-                                  gain_axis=gain_axis, gain_global=gain_global, m2cfg=m2cfg)
+    verdict, tail, per_tail = _off_axis_tail_agreement(gains, off_axis_score, m2cfg)
     return {
-        "off_axis": decision,
-        "nonaxis_gain": gain_nonaxis,
+        "off_axis": verdict,
+        "nonaxis_gain": gains["e_nonaxis"][anchor],
         "axis_gain": gain_axis,
         "global_gain": gain_global,
         "annotation": _NONAXIS_ANNOTATION,
         "nonaxis_source_policy": "available_residual_direction",
+        "sentinel_tail_horizons_ms": tail,
+        "off_axis_per_tail_decision": per_tail,
     }
