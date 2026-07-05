@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 import src.topic4_m3b_spectral_phase as spm
+from src.topic4_criticality import _fields_from_slow
 
 _REPO = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _REPO / "config/topic4_criticality_m2.yaml"
@@ -57,3 +58,157 @@ def shape_scores_at(res, grid, kernels, core) -> dict:
         "leading_eigenvalue_imag": float(lead.imag),
         "_loading": loading,
     }
+
+
+# --------------------------------------------------------------------------- #
+# Task 1: dense alpha0-crossing localization (bracket -> coarse scan -> bisect) #
+# --------------------------------------------------------------------------- #
+# Productionizes results/topic4_criticality_m2/pilots/m2_pilots.py's PILOT 2 (a)+(b). The
+# crossing is localized on the REAL interpolated slow-space between the M1 verdict's last
+# qualified low-branch point and the first saturated point that follows it -- never the 2-D
+# atlas (spec rev2.1 constraint). `low_solve_fast` deliberately uses a SINGLE warm-started
+# solve_operating_point, not the full 4-init solve_branches protocol: the coarse scan +
+# bisection re-solve the low branch many times near a fold, and the full branch protocol is
+# overkill for tracking ONE already-identified low branch densely (see m2_pilots.py's module
+# docstring for the same scout-speed rationale; ~4x fewer op-solves, same low-branch physics).
+
+
+def interp_slow(a, b, frac):
+    """Linear interpolation of a slow_inputs dict (exactly M1's
+    check_low_branch_continuation_between; ported from m2_pilots.py's `_interp_slow`)."""
+    return {
+        "q_global": (1 - frac) * a["q_global"] + frac * b["q_global"],
+        "q_core": (1 - frac) * a["q_core"] + frac * b["q_core"],
+        "hG_scalar": (1 - frac) * (a.get("hG_scalar") or 0.0) + frac * (b.get("hG_scalar") or 0.0),
+        "gK_value": (None if (a.get("gK_value") is None or b.get("gK_value") is None)
+                     else (1 - frac) * a["gK_value"] + frac * b["gK_value"]),
+    }
+
+
+def low_solve_fast(grid, kernels, core, slow_inputs, cfg, prev_op):
+    """Single warm-started solve_operating_point on the low branch (ported from m2_pilots.py's
+    `_low_solve_fast`)."""
+    exc, inh, gK_field, hG_scalar, eta_K, eta_G = _fields_from_slow(grid, core, slow_inputs, cfg)
+    init = None if prev_op is None else {"rE": prev_op.rE, "rI": prev_op.rI}
+    op = spm.solve_operating_point(grid, kernels, exc, inh, gK_field=gK_field, hG_scalar=hG_scalar,
+                                   eta_K=eta_K, eta_G=eta_G, init=init)
+    sat = bool(op.saturated)
+    return op, sat
+
+
+def alpha1_and_eig(grid, kernels, op):
+    """(alpha1, EigResult, J) at an OperatingPoint; alpha1=nan on unresolved/empty spectrum
+    (ported verbatim from m2_pilots.py's `_alpha1_and_eig`)."""
+    J = spm.build_jacobian_dense(grid, kernels, op)
+    res = spm.rate_eigenpairs(J, grid)
+    if res.status != "resolved" or res.eigenvalues.size == 0:
+        return float("nan"), res, J
+    return float(res.eigenvalues[0].real), res, J
+
+
+def _op_solve_quality(op, res):
+    """op_solve_quality (spec rev2.1): converged (via non-saturation) AND resolved spectrum.
+    Distinct from stability_read_quality (alpha1<0) -- see localize_alpha0_crossing's
+    alpha_left/alpha_right (always <0/>=0 respectively when both are numeric)."""
+    return bool(op is not None and not op.saturated and res is not None
+                and res.status == "resolved" and res.eigenvalues.size > 0)
+
+
+def localize_alpha0_crossing(points, grid, kernels, core, cfg_crit, m2cfg):
+    """Dense alpha0-crossing localizer (spec rev2.1 M2 Task 1).
+
+    Brackets the last-qualified low-branch M1 point -> the first saturated M1 point that
+    follows it, coarse-scans ``densification.coarse_K`` fracs of the interpolated slow-space
+    between them (``interp_slow``), then recursively bisects the first neg->(>=0 or gone)
+    sub-bracket to ``crossing_width_ms_tol`` (or ``max_bisect_hard_cap`` levels). Multi-crossing
+    coarse scans are flagged (``crossing_status="multiple_alpha0_crossings"``) but only the
+    first crossing is localized. Returns ``_crossing_op``/``_crossing_res`` for later tasks
+    (shape scoring at the crossing).
+    """
+    dcfg = m2cfg["densification"]
+    q = [p for p in points if p.get("qualified") and p.get("branch_id") == "low_branch"]
+    last_q = q[-1]
+    trans = next(p for p in points if p.get("saturated") and p["time_ms"] > last_q["time_ms"])
+    a, b = last_q["slow_inputs"], trans["slow_inputs"]
+    span_ms = trans["time_ms"] - last_q["time_ms"]
+
+    # (a) coarse scan (warm-start chain along the low branch)
+    fracs = list(np.linspace(0.0, 1.0, dcfg["coarse_K"]))
+    prev, scan = None, []
+    for fr in fracs:
+        op, sat = low_solve_fast(grid, kernels, core, interp_slow(a, b, fr), cfg_crit, prev)
+        if not sat and op is not None: prev = op
+        a1 = (float("nan") if sat else alpha1_and_eig(grid, kernels, op)[0])
+        scan.append({"frac": float(fr), "alpha1": (None if (sat or not np.isfinite(a1)) else float(a1)), "sat": sat})
+    defined = [(s["frac"], s["alpha1"]) for s in scan if s["alpha1"] is not None]
+    sign_changes = sum(1 for (_, x), (_, y) in zip(defined, defined[1:]) if (x < 0) != (y < 0))
+    status = "multiple_alpha0_crossings" if sign_changes > 1 else ("single" if defined else "none")
+
+    # first neg -> (>=0 or gone) sub-bracket (m2_pilots.py:pilot2 lines 201-208)
+    lo_fr, hi_fr = None, None
+    for i in range(len(scan) - 1):
+        cur, nxt = scan[i], scan[i + 1]
+        cur_neg = (cur["alpha1"] is not None and cur["alpha1"] < 0)
+        nxt_cross = (nxt["alpha1"] is None) or (nxt["alpha1"] is not None and nxt["alpha1"] >= 0)
+        if cur_neg and nxt_cross:
+            lo_fr, hi_fr = cur["frac"], nxt["frac"]
+            break
+
+    if lo_fr is None:
+        return {"alpha0_crossing_time_ms": None, "alpha0_crossing_slow_state": None,
+                "crossing_frac": None, "crossing_width_ms": None,
+                "alpha_left": None, "alpha_right": None, "crossing_status": status,
+                "op_solve_quality_left": False, "op_solve_quality_right": False,
+                "_crossing_op": None, "_crossing_res": None}
+
+    def alpha_at(frac, prev_op):
+        s = interp_slow(a, b, frac)
+        op, sat = low_solve_fast(grid, kernels, core, s, cfg_crit, prev_op)
+        if sat:
+            return None, None, None, True, s        # low branch gone (saturated) at this frac
+        a1, res, _J = alpha1_and_eig(grid, kernels, op)
+        return a1, op, res, sat, s
+
+    # (b) bisect the sub-bracket (m2_pilots.py:pilot2 lines 210-233, verbatim except: (1)
+    # max_bisect_hard_cap replaces the hard-coded 8-level cap; (2) a width-in-ms stop
+    # ((hi_fr-lo_fr)*span_ms < crossing_width_ms_tol) replaces the frac/alpha tolerance).
+    # warm-start the bisection from lo_fr's low op
+    alpha_left, op_left, res_left, _sa, s_lo = alpha_at(lo_fr, None)
+    prevb = op_left
+    best = {"frac": lo_fr, "alpha1": alpha_left, "op": op_left, "res": res_left, "slow": s_lo}
+    # Initial hi_fr reading (NOT in pilot2, which never re-derives it -- added here because
+    # alpha_right/op_solve_quality_right are new output fields the pilot never had: without this,
+    # a non-monotone dip near the crossing can keep every bisected midpoint on the negative side,
+    # leaving alpha_right stuck at a placeholder None even though the coarse scan already resolved
+    # a genuine >=0 reading at hi_fr). Refined below whenever the loop actually revisits the hi side.
+    alpha_right, op_right, res_right, _sa2, _s_hi = alpha_at(hi_fr, op_left)
+    for _lvl in range(dcfg["max_bisect_hard_cap"]):
+        mid = 0.5 * (lo_fr + hi_fr)
+        a1m, opm, resm, sat_any, sm = alpha_at(mid, prevb)
+        if opm is None or a1m is None:
+            # low branch disappeared -> crossing is a fold at/below mid; tighten from below
+            hi_fr = mid
+            alpha_right, op_right, res_right = None, None, None
+            continue
+        prevb = opm
+        if a1m < 0:
+            lo_fr = mid
+            best = {"frac": mid, "alpha1": a1m, "op": opm, "res": resm, "slow": sm}
+            alpha_left, op_left, res_left = a1m, opm, resm
+        else:
+            hi_fr = mid
+            best = {"frac": mid, "alpha1": a1m, "op": opm, "res": resm, "slow": sm}
+            alpha_right, op_right, res_right = a1m, opm, resm
+        if (hi_fr - lo_fr) * span_ms < dcfg["crossing_width_ms_tol"]:
+            best = {"frac": mid, "alpha1": a1m, "op": opm, "res": resm, "slow": sm}
+            break
+
+    # width in ms over the idx14->idx15 time bracket:
+    crossing_width_ms = (hi_fr - lo_fr) * span_ms
+    t_cross = (1 - best["frac"]) * last_q["time_ms"] + best["frac"] * trans["time_ms"]
+    return {"alpha0_crossing_time_ms": float(t_cross), "alpha0_crossing_slow_state": best["slow"],
+            "crossing_frac": float(best["frac"]), "crossing_width_ms": float(crossing_width_ms),
+            "alpha_left": alpha_left, "alpha_right": alpha_right, "crossing_status": status,
+            "op_solve_quality_left": _op_solve_quality(op_left, res_left),
+            "op_solve_quality_right": _op_solve_quality(op_right, res_right),
+            "_crossing_op": best["op"], "_crossing_res": best["res"]}

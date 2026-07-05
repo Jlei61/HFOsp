@@ -5,6 +5,8 @@ Contract (verbatim from task brief .superpowers/sdd/task-0-brief.md Step 2):
   - basis_vectors returns unit-norm, mutually orthogonal e_global / e_axis_gradient.
   - load_m2_config resolves the "THETA_EE" sentinel to a float.
 """
+import json
+
 import numpy as np
 
 from src.topic4_criticality import load_crit_config, _crit_op_context
@@ -47,3 +49,20 @@ def test_load_m2_config_resolves_theta():
     cfg = m2.load_m2_config()
     assert cfg["basis"]["off_axis_score_tol"] == 0.05
     assert isinstance(cfg["basis"]["theta"], float)      # "THETA_EE" -> np.pi/4
+
+
+# --- Task 1: dense alpha0 localization (bracket -> coarse scan -> bisect), verbatim from
+# task brief .superpowers/sdd/task-1-brief.md Step 1 ---
+def _points():
+    p = m2._REPO / "results/topic4_criticality/trajectory_verdict.json"   # M1 deliverable
+    return json.loads(p.read_text())["points"]
+
+
+def test_localize_alpha0_crossing_brackets_zero():
+    cfg = load_crit_config(); grid, kernels, core, _ = _crit_op_context(cfg)
+    m2cfg = m2.load_m2_config()
+    out = m2.localize_alpha0_crossing(_points(), grid, kernels, core, cfg, m2cfg)
+    assert out["crossing_status"] in ("single", "multiple_alpha0_crossings")
+    assert out["alpha_left"] < 0.0                       # last neg before crossing
+    assert out["crossing_frac"] is not None
+    assert 470.0 < out["alpha0_crossing_time_ms"] < 520.0  # M1 idx14->idx15 window
