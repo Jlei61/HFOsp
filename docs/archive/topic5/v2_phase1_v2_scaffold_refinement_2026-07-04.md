@@ -2,6 +2,8 @@
 
 date 2026-07-04 · 分支 `topic5-v2-phase1` · tier（pre-registered 天花板，锁定）= **exploratory candidate scaffold refinement**（**不是** formal spatial-null positive / HFO-/LVFA-/ripple-specific / timing-order replay / criticality / 机制）
 
+> **承重 caveat（首页速读；详见 §4）**：① per-subject 弱（narrow ≥4/7 仅 6/20，cohort 6/7 是聚合）· ② 只在 **weak/global 空间 null** 下成立、**formal within-shaft Gate A 未评估**（§1 是 residual survival，**不是** "Gate B/C passed"）· ③ W1 residual 非纯宽带但**大半 1/f-可归因、只 gamma 稳、NOT ripple-specific**· ④ when 以 **EEG-onset 为主锚**（clinical 锚会抹平上抬）· ⑤ "trait-like" 只到 **distal-preictal-present**（缺 >1h 非-periictal baseline）· ⑥ confound 未闭合（deferred）。
+
 > 前身 = Phase-1 已验收（`v2_phase1_band_scan_backbone_2026-07-02.md`）：20/17 队列、n_perm=1000，发作 onset 后 0–20s 多频带能量空间场与间期 HFO-derived geometry (G_HFO) 对齐，cohort 层跨频段超过弱/全局空间 null（FWER 6/7 primary）+ order null（strong 子集），band-generic、NOT ripple-specific；但 per-subject 弱、formal within-shaft Gate A 未评估、Gate B/C 未跑、仅 onset 短窗。Phase-1-v2 回答由此打开的三个必要问题：**survive? / who? / when?**
 
 ---
@@ -18,14 +20,18 @@ date 2026-07-04 · 分支 `topic5-v2-phase1` · tier（pre-registered 天花板�
 
 - **when?** —— 骨架**发作前就已经高且平**（远/近发作前无爬升），发作起始处有个**不大的上抬**（broad 池符号翻转支持、narrow 临界），且这个上抬只有锚在**电生理(EEG)起始**时才看得清（锚临床起始会被抹平，因为 EEG 起始常比临床早几十秒）。→ 修饰语 **preictal-present（静态解剖易感场）+ modest onset increment**。
 
-**一句话（最稳口径，可直接引用）**：
-> Interictal HFO-derived geometry marks a broad, largely trait-like early-ictal spatial recruitment scaffold that overlaps a shared low-to-mid-frequency (partly aperiodic) field: it is heterogeneous across subjects, present pre-ictally with a modest onset-associated increment (clearer under an EEG-onset anchor), carries a frequency-specific residual layer beyond broadband recruitment (robust only for gamma after 1/f control), and is **not** ripple/HFO-specific.
+**一句话（最稳口径，可直接引用；同步进主文档 §3.9）**：
+> Phase-1-v2 refines the original early-ictal scaffold result into a subject-heterogeneous, largely trait-like HFO-derived susceptibility scaffold. The scaffold is not ripple/HFO-specific; it partly survives common-field residualization, but most frequency structure is absorbed by aperiodic/1-f control, leaving only a descriptive gamma residual layer. It is distal-preictal-present (high and flat before onset) with a modest onset-associated increment that is clearer under an EEG-onset anchor. Its critical-mode status remains untested and should be addressed next by HFO-axis criticality projection and HFO-constrained model–data consistency.
+
+（限定：**distal-preictal-present ≠ 已证 trait field** —— W3 只覆盖 −100→+20s，远前已高但缺 >1h 的非-periictal baseline，所以写 "distal-preictal-present, trait-like candidate scaffold"，不写 "trait network/field 已证"。见承重 caveat #6。）
 
 ---
 
-## 1. W1「扛得住吗？」— Gate B/C（residual 存活；n_perm=1000）
+## 1. W1「扛得住吗？」— residual survival under weak spatial null（n_perm=1000）
 
-**测了什么 / 怎么测的**：把两样平凡的替代解释分别扣掉，再看对齐能不能超过"杆内洗牌"的空间随机场（cohort 层 subject-level permutation of the median + max-over-bands FWER，7 primary 为 family；判据 = `max_over_bands_p < 0.05` 存活）。**注意：formal within-shaft Gate A 仍未评估（cohort 空间 null 强度 = subject_wide_weak），所以看的是各 residual 自己的 cohort-perm FWER 存活，不是 formal gate flag。**
+**命名（P1-1，避免误读）**：本节是 **residual survival analyses under a weak spatial null**，**不是** "Gate B/C passed"。formal Gate B/C flags 在 `phase1_gate_summary.csv` 里全是 **weak-negative**（formal within-shaft Gate A 未过 → gate closure 未达成）；本节用的是 Gate B/C 的 **cohort-perm machinery**（residual alignment × max-over-bands FWER）对**残差场**做存活检验。凡引用本节数字，写 "residual survival"，勿写 "gate passed"。
+
+**测了什么 / 怎么测的**：把两样平凡的替代解释分别扣掉，再看对齐能不能超过"杆内洗牌"的空间随机场（cohort 层 subject-level permutation of the median + max-over-bands FWER，7 primary 为 family；判据 = `max_over_bands_p < 0.05` 存活）。**注意：formal within-shaft Gate A 仍未评估（cohort 空间 null 强度 = subject_wide_weak），所以看的是各 residual 自己的 cohort-perm FWER 存活，不是 formal gate flag。** 单表汇总在 `phase1_residual_survival_summary.csv`（`summarize_topic5_v2_residual_survival.py`，3 feature × 2 池全列，避免只读 `phase1_gate_summary.csv`〔只反映最后跑的 raw〕而误判。）
 
 - **common_resid（LOBO 共有场残差）**：每个频段功率减去其余 6 个 primary 频段的平均（= 各频段共享的宽带成分），只留该频段自己的偏离。
 - **aperiodic_resid（1/f 残差）**：每个通道把 1/f 背景拟合成直线扣掉，只留超出背景的正的部分。**1/f 拟合质检已过**：cohort median r²≈0.79、失败率 1.7%（<20% 门）→ 检验可信（失败率高才只能描述性）。
@@ -55,6 +61,7 @@ broad-17 aperiodic ripple_high 过 FWER（max_over_bands_p=0.006，含 1146 后�
 3. **cohort 异质**：broad 17 人里 10 正 7 负，916/922 强负（−0.25 / −0.27）。
 4. **采样边界带偏**：fs=512Hz 的 253（ripple 150–250Hz 贴奈奎斯特 256、edge_safe=220）是最强正向 driver 之一（delta +0.137）。
 5. **与 raw + Phase-1 矛盾**：raw ripple 从未过 FWER（broad 0.47、narrow 0.33、Phase-1 最弱带）。
+6. **近奈奎斯特排除敏感性（read-only 复算 broad aperiodic perm-long，不 recompute）**：把采样贴奈奎斯特的被试逐层剔除，broad aperiodic ripple_high 的 FWER **单调退向阈值**——全 17 人 **0.006** → 去 fs=512 {253,139}(n=15) **0.007** → 去含任何 fs≤512 recording 的 {253,139,384,583}(n=13) **0.027**（仍<0.05 但已贴边）。同一梯度下 **gamma_LVFA 恒 0.001 不动**（证明退化非纯 n↓ 功率损失），而 **beta_LVFA 从 0.006 塌到 0.267（n=13 不再存活）**。→ ripple 的 aperiodic "存活"**对近奈奎斯特被试不稳健**，gamma 才是唯一不动的带。**这加固"非 ripple 特异"，不救 ripple**（复现：filter broad aperiodic perm-long 去 {253,139,384,583} 后 `_cohort_perm_ps`）。
 
 拟合 QC 干净（r²0.79、失败 1.7%、每 sz 排除 18 个工频 bin）→ 不是拟合失败，是**家族天花板 + 稀疏残差 null 的假象**。
 
@@ -104,16 +111,19 @@ broad-17 aperiodic ripple_high 过 FWER（max_over_bands_p=0.006，含 1146 后�
 1. **per-subject 弱**：narrow ≥4/7 仅 6/20（cohort 6/7 是聚合）。
 2. **weak/global spatial null 下成立、formal within-shaft Gate A 未评估**（2/20、反保守 likely inflated）——所有"存活"都在弱空间 null 尺度。
 3. **W1 residual**：非纯宽带（Outcome B）但大半 1/f-可归因、只 gamma 扛过两道扣除、**NOT ripple-specific**（broad ripple 假象）。
-4. **EEG↔clinical 锚差大**（临床锚会误导 when 判读）。
-5. **broad = 17**（epilepsiae_1146 单被试 n_perm=1000 单线程 ~2h、后台单独补跑并入 n=17；含 vs 不含它结论不变：common_resid 都 4/7、aperiodic 2/7→3/7、ripple 假象两版都在）。confound（Task 1.4）descriptive、deferred（maps 构建过慢中止）。
+4. **EEG↔clinical 锚差大**（临床锚会误导 when 判读；when 结论以 **EEG-onset 为主、clinical-onset 为敏感性**）。
+5. **broad = 17**（epilepsiae_1146 单被试 n_perm=1000 单线程 ~2h、后台单独补跑并入 n=17；含 vs 不含它结论不变：common_resid 都 4/7、aperiodic 2/7→3/7、ripple 假象两版都在）。
+6. **"trait-like" 只到 distal-preictal-present**：W3 覆盖 −100→+20s，远前已高但**缺 >1h 的非-periictal / sleep-wake matched baseline**——full trait 证明是下一步（若 nonperiictal ≈ far_pre ≈ near_pre 且仅 early_post 小升，才是真 trait scaffold）。
+7. **confound 未闭合**（Task 1.4 descriptive、deferred；maps 构建过慢中止）：核心 W1（Outcome B / 非纯宽带 / NOT ripple）不依赖它（common_resid 已控宽带），但**下一版若要主张 "HFO event geometry 比 HFO-rate / baseline-power / shaft-position 更有信息"，confound covariate maps 必须补跑**（不再是可选附属）。
 
 ---
 
 ## 5. 路径 / artifacts / tests
 
 - **代码**：`scripts/analyze_topic5_v2_subject_phenotype.py`（W2）· `scripts/run_topic5_v2_trajectory.py` + `plot_topic5_v2_W3_trajectory.py`（W3）· `run_topic5_v2_alignment.py`（peri-ictal EEG-frame + `--anchor` + `--config`）· `build_topic5_v2_aperiodic_cache.py`（+QC）· `run_topic5_v2_{nulls,gates}.py`（residual，复用）
+- **merge-hardening（本轮 review 补）**：`summarize_topic5_v2_residual_survival.py` → `phase1_residual_survival_summary.csv`（3 feature×2 池单表，防误读 gate_summary）· `run_topic5_v2_residual_chain.sh`（committed launcher，`OMP/MKL/OPENBLAS/NUMEXPR/VECLIB=1` baked + resumable parallel + run manifest 到 `results/run_logs/`）· `run_topic5_v2_nulls.py` **overwrite guard**（`assert_no_cohort_clobber`：拒绝用更小的 subset run 覆盖更大的 cohort combined；`--allow-overwrite-combined` 显式豁免）。
 - **artifacts**（`results/topic5_ictal_recruitment/v2_band_scan/`）：`phase1_v2_subject_phenotype.csv`（+band_profile）· `periictal/`(eeg)+`periictal_clin/`(clin) window_long + `phase1_v2_alignment_trajectory.csv` + `phase1_v2_trajectory_contrasts.csv` · `{common_resid,aperiodic_resid}_cache/`+`aperiodic_qc.json` · `{narrow,broad}/phase1_{null,gate}_{common_resid,aperiodic_resid}_*`
 - **图**：`figures/phase1_v2_W2_subject_phenotype.png` · `figures/phase1_v2_W3_trajectory.png`（+ figures/README.md）
-- **tests**：`tests/test_topic5_v2_phase1_v2.py`（W2+W3, 20）· `tests/test_topic5_v2_band_scan.py`（+aperiodic QC, 36）
+- **tests**：`tests/test_topic5_v2_phase1_v2.py`（W2+W3, 20）· `tests/test_topic5_v2_band_scan.py`（+aperiodic QC, 36）· `tests/test_topic5_v2_integration.py::test_nulls_overwrite_guard_refuses_subset_clobber`（overwrite guard）
 - **commits**：cd692ce/0465f8a(2.1) f3c6531(2.2) d479001(2.3) [3.1 in 3d6d839] 98c1187(3.2 Step0) c8720bf(3.2b) 8f1ddf1(3.2b-fu) 11575ce(1.1 QC) [+ 1.3/1.4 archive TBD]
 - **plan/spec**：`docs/superpowers/plans/2026-07-04-topic5-v2-phase1-v2-scaffold-refinement.md` · `docs/superpowers/specs/2026-07-02-topic5-v2-phase1b-gate-closure-spec.md`（§EXP/§2/§5/§6）

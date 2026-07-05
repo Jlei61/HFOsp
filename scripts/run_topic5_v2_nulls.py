@@ -425,6 +425,29 @@ def _write_csv(path, cols, rows):
             w.writerow(r)
 
 
+def assert_no_cohort_clobber(combined_path, n_this, allow_overwrite):
+    """Refuse to overwrite a larger cohort combined output with a smaller (subset) run.
+
+    A `--subjects <single>` job writes a 1-subject combined summary that silently clobbers
+    the cohort artifact (this bit us: a broad-1146 rerun overwrote the broad-17 combined).
+    Compare against the EXISTING file's subject count rather than a hardcoded cohort N because
+    SUBJECTS_BY_SUB holds the stale 7/9 lists, not the true 20/17 cohort. Cohort shrinks that
+    are intentional pass --allow-overwrite-combined.
+    """
+    if allow_overwrite or not combined_path.exists():
+        return
+    try:
+        n_existing = int(pd.read_csv(combined_path, usecols=["subject"])["subject"].nunique())
+    except Exception:
+        return  # unreadable / schema drift → do not block a legitimate rewrite
+    if n_existing > n_this:
+        raise RuntimeError(
+            f"Refusing to overwrite {combined_path.name} (has {n_existing} subjects) with a smaller "
+            f"{n_this}-subject run — this prevents a single-/subset-subject job from clobbering the "
+            f"cohort combined output. Aggregate the full cohort (--subjects <full list>) or pass "
+            f"--allow-overwrite-combined for an intentional cohort shrink.")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--feature", choices=list(FEATURE_CACHE_DIR), default="raw")
@@ -442,6 +465,9 @@ def main():
     ap.add_argument("--min-group", type=int, default=None,
                     help="override nulls.min_group_for_shaft (§1 min3 SENSITIVITY within-shaft; "
                          "default = config 4 = formal primary). min3 does NOT promote to formal Gate A.")
+    ap.add_argument("--allow-overwrite-combined", action="store_true",
+                    help="override the guard that refuses to overwrite a larger cohort combined output "
+                         "with a smaller subset run (intentional cohort shrink only)")
     args = ap.parse_args()
 
     cfg = load_phase1_config()
@@ -497,6 +523,11 @@ def main():
         per_subject.append(info)
 
     stem = f"phase1_null_{args.feature}"
+    # Overwrite guard (both the feature-infixed and the bare-alias combined) BEFORE writing anything,
+    # so a subset run aborts without leaving a half-clobbered artifact tree.
+    n_this = len({r["subject"] for r in all_summary})
+    for name in (f"{stem}_subject_summary.csv", "phase1_null_subject_summary.csv"):
+        assert_no_cohort_clobber(outdir / name, n_this, args.allow_overwrite_combined)
     # perm-long parquet: canonical feature-infixed + bare alias (the smoke asserts the bare name; the
     # infixed copy survives across features so the multi-feature full run never clobbers itself).
     perm_df = pd.DataFrame(all_perm, columns=PERM_COLS)

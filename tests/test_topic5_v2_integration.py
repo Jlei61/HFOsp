@@ -357,6 +357,29 @@ def test_v2_nulls_raw_smoke_epilepsiae_139(tmp_path):
         f"bad order_null_strength values: {set(x['order_null_strength'] for x in rows)}"
 
 
+def test_nulls_overwrite_guard_refuses_subset_clobber(tmp_path):
+    """Merge guard (P1-4): a subset (fewer-subject) run must NOT overwrite a larger cohort
+    combined summary. A `--subjects <single>` job writing a 1-subject combined once clobbered
+    the broad-17 cohort artifact; the guard compares against the EXISTING file's subject count."""
+    import importlib.util, pandas as pd
+    spec = importlib.util.spec_from_file_location(
+        "run_topic5_v2_nulls_mod", ROOT / "scripts" / "run_topic5_v2_nulls.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    combined = tmp_path / "phase1_null_raw_subject_summary.csv"
+    pd.DataFrame({"subject": ["a", "b", "c"], "band": ["x", "x", "x"]}).to_csv(combined, index=False)
+    # 1-subject run against an existing 3-subject cohort combined -> refused.
+    with pytest.raises(RuntimeError, match="Refusing to overwrite"):
+        mod.assert_no_cohort_clobber(combined, n_this=1, allow_overwrite=False)
+    # --allow-overwrite-combined bypasses (intentional cohort shrink).
+    mod.assert_no_cohort_clobber(combined, n_this=1, allow_overwrite=True)
+    # equal / larger run (cohort rebuild or grow) is allowed.
+    mod.assert_no_cohort_clobber(combined, n_this=3, allow_overwrite=False)
+    mod.assert_no_cohort_clobber(combined, n_this=5, allow_overwrite=False)
+    # first write (no existing file) is allowed.
+    mod.assert_no_cohort_clobber(tmp_path / "does_not_exist.csv", n_this=1, allow_overwrite=False)
+
+
 @pytest.mark.integration
 def test_v2_gates_raw_smoke_epilepsiae_139(tmp_path):
     """Task 14 (script): Gate A/B/C decision table + max-over-bands FWER null for epilepsiae_139

@@ -262,7 +262,12 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 **结论（三问；tier = candidate scaffold，不越 formal/机制）**：
 - **survive**：对齐**非纯宽带**（扣 LOBO 共有场后两池各 **4/7** primary 过 cohort-perm FWER、**α+γ 一致** = 频段特异残差层，Outcome B）；但**大半 1/f-可归因**（扣 1/f 后只 **gamma_LVFA** 两池稳；余塌）；**ripple 在 broad 扣 1/f 后"存活"= 多重比较天花板假象**（+ fs512 贴奈奎斯特被试带偏、绝对对齐反低于 raw、narrow 不显著、与 Phase-1 矛盾）→ **绝不 HFO/ripple 特异**。1/f 拟合 QC 干净（r²≈0.79、失败 1.7%）。
 - **who**：cohort 6/7 是**聚合**、per-subject 弱（≥4/7 仅 **6/20**）、无单一表型预测（Spearman 全 <0.4 门；过闸特征都是同向量再描述）、band-generic。→ **subject-heterogeneous**。
-- **when**：**发作前已高且平**（近前−远前≈0，无爬升）+ **起始处不大上抬**（broad 符号翻转 p≈0.005 支持、narrow 临界 p≈0.06/Wilcoxon<0.05）、**EEG 锚更清**（临床起始常早于 EEG 起始几十秒 → 临床锚抹平上抬）。→ **preictal-present + modest onset increment**。
+- **when**：**发作前已高且平**（近前−远前≈0，无爬升）+ **起始处不大上抬**（broad 符号翻转 p≈0.005 支持、narrow 临界 p≈0.06/Wilcoxon<0.05）、**EEG 锚更清**（临床起始常早于 EEG 起始几十秒 → 临床锚抹平上抬；when 结论 **EEG-onset 为主、clinical-onset 为敏感性**）。→ **distal-preictal-present + modest onset increment**（"trait-like" 只到 distal-present，缺 >1h 非-periictal baseline，非已证 trait field）。
+
+**一句话（可直接引用）**：
+> Phase-1-v2 refines the original early-ictal scaffold result into a subject-heterogeneous, largely trait-like HFO-derived susceptibility scaffold. The scaffold is not ripple/HFO-specific; it partly survives common-field residualization, but most frequency structure is absorbed by aperiodic/1-f control, leaving only a descriptive gamma residual layer. Its critical-mode status remains untested and should be addressed next by HFO-axis criticality projection and HFO-constrained model–data consistency.
+
+**验收（2026-07-05 review）**：科学 = **PASS**（限 exploratory candidate scaffold refinement）；工程 = **conditional pass → 合并前 merge-hardening 已补**（overwrite guard `assert_no_cohort_clobber` + committed launcher `run_topic5_v2_residual_chain.sh` OMP=1/manifest + 单表 `phase1_residual_survival_summary.csv`）。**命名（P1-1）**：§1 是 **residual survival under weak spatial null**，`phase1_gate_summary.csv` 的 formal Gate flags 仍 weak-negative，勿写 "Gate B/C passed"。下一步（非本阶段）= HFO-axis criticality + model–data consistency，不再扩频段。
 
 **⚠️工程教训**：并行 numpy nulls worker 必须 `OMP_NUM_THREADS=1`（否则 26 worker×80 核 BLAS 超订 → 单被试 crawl，7h/40min 之差）；broad **1146** 单被试 n_perm=1000 单线程 ~2h、OMP 不助（Python-loop permute）→ 单独后台补跑并入 **n=17**（含它 common_resid 仍 4/7、aperiodic 2/7→3/7、结论不变；within_shaft_strong 仅 narrow 属性、broad 里 subject_wide_weak）。
 
