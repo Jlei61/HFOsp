@@ -1,176 +1,230 @@
-# Topic 4 — M3-v2.2 Approach-Criticality — Milestone 2: Dense α₀ Crossing + Axis/Global/Non-axis Critical Mode Decomposition · Design
+# Topic 4 — M3-v2.2 Approach-Criticality — Milestone 2: Dense α₀ Crossing + Two-Stage Linear-Ignition / Nonlinear-Spread Readout · Design
 
-date 2026-07-04 · 状态 **design rev1.1**（rev1 → rev1.1：折入用户设计评审 P1-1/P1-2/P1-3 + 10 点 required edits + **A' 决定**）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。
+date 2026-07-04（rev2 2026-07-05）· 状态 **design rev2**（rev1.1 → rev2：折入 round-1/round-2 de-risk pilots + 用户 2026-07-05 审阅 = 两段式 ignition/spread 重构）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。
 
-> **方法学 base** = M1 spec `2026-07-02-topic4-m3v2-2-approach-criticality-design.md` + M1 code。M2 **复用** M1 判读器 + 特征模指标，只新加：dense α₀ localization、THETA_EE 模态分类的显式持久化、gain/leak 方向向量、minimal rate-field perturbation。
+> **方法学 base** = M1 spec `2026-07-02-topic4-m3v2-2-approach-criticality-design.md` + M1 code。M2 **复用** M1 判读器 + 特征模指标，只新加：dense α₀ localization、two-core ignition 确认、nonlinear-footprint spread readout、gain/leak 方向向量（nonaxis 降为 sentinel）。
 > **执行 gate**：M2 全模型侧，不消费 topic5 phase2。Topic5 correspondence 留 M3。
-> **A'（核实后锁定）**：本征模住在 **m3b 率场网格 `Grid(n=6)`（单核, THETA_EE=π/4 轴）**，**不在** subject1146 SNN/电极空间。**mode 分类用 THETA_EE 二阶矩 shape 分数（复用 M1）**；**gain/leak 用 rate-field state space 里归一化的方向向量**。**`phase_gradient_axis_score` 是无向 wavevector 轴对齐、不是 early→late signed**（`|F|²`+`cos(2(β−θ))` 对 180° 对称）——禁写 "signed early→late"；真要方向性需另做相位/时序定义（**deferred**）。
+> **rev2 pilot 依据（决定性，承重）**：见 `docs/superpowers/specs/2026-07-04-topic4-m2-pilot-findings.md` §6（round-1）+ §7（round-2）。两轮 pilot 一致证明：**穿零处线性临界模态永远是 core-localized（核心点火），两核条件下也 symmetry-break 到单核、走廊全暗；"往哪扩"要看非线性足迹，答案是沿轴起→全场收/自限、`off_axis≈0`（绝不侧向）**。故 rev1.1 的"线性临界模态 = axial/global/nonaxis 三分类当主 verdict"是**切错层级**，rev2 改两段式。
+> **A'（核实后锁定，rev2 role 调整）**：本征模住在 **m3b 率场网格 `Grid(n=6)`（单核, THETA_EE=π/4 轴）**，**不在** subject1146 SNN/电极空间。THETA_EE 二阶矩 shape 分数（复用 M1）在 rev2 里**不再当轴/全局/离轴分类器**，而是：core_overlap+globality → ignition class；axis_elongation/off_axis/wavevector → ignition 模态**描述量 + off_axis sentinel**。**`phase_gradient_axis_score` 是无向 wavevector 轴对齐、不是 early→late signed**（`|F|²`+`cos(2(β−θ))` 对 180° 对称）——禁写 "signed early→late"。
 
 ---
 
 ## 0. 摘要（朴素话）+ 锁定口径
 
-M1 的尺子在真实 v2.2 **仿真**轨迹上说"看不清"：抽样快照上恢复速率 α₁ 还明显为负，但分支延续补检发现低支 α₁ 在两个抽样点之间穿过 0（+0.189）。M2 做两件事：**(1) 把穿零点加密定位出来**（真实三维慢状态里递归二分）；**(2) 判穿零处那个变软/失稳模态的空间形状**——沿模型传播轴（轴向）、全场同步（全局）、还是离轴残差（非轴向）。
+M1 的尺子在真实 v2.2 **仿真**轨迹上说"看不清"：抽样快照上恢复速率 α₁ 还明显为负，但分支延续补检发现低支 α₁ 在两个抽样点之间穿过 0（+0.189）。**这个"看不清"（CSD 欠采样）结论 M2 不改**——M2 只把穿零点加密定位出来，并新增一套**两段式判读**回答两个**不同层级**的问题：
 
-**核心科学问题**：失控前的临界模态，是沿传播轴变软，还是轴向减弱、非轴向/全局模态接管。
+1. **线性临界模态判"在哪点火"**（ignition locus）。pilot 已决定性给出答案：**`core_localized`**（缩在被去抑制的核心里），两核条件下也 symmetry-break 到单核、中间走廊全暗。这是**机制真实**的结局（双几何证实），**升为一等、可报告字段**——但它**不取代** M1 的 CSD `unresolved`，两个读数并存。
+2. **非线性足迹判"往哪扩"**（spread character）。pilot 已决定性给出答案：**沿轴起（`onset=axial`）→ 要么自限缩回、要么低幅全场招募（`endgame=self_limited | global_flooding`），`off_axis` 全程≈0（绝不侧向）**，且自限还是漫开**取决于过临界多深**（`depth_dependent`）。这是"往哪扩"的**主裁**，从线性模态形状挪到非线性足迹。
 
-**怎么测**：本征模在一张 m3b 率场网格上（有一条内建的 E→E 传播轴 THETA_EE）。判"轴/离轴/全局"用**模态的空间形状分数**（沿轴拉长 / 离轴拉长 / 全场均匀度 / 波矢轴对齐——都是无向的二阶矩量，M1 已有）；判"往哪个方向扰动会被放大"用**归一化方向向量**的有限时间增益/泄漏。最后用最小 rate-field 扰动 spot-check 验证这套线性化读数真能预测扰动响应。
+**核心科学问题（rev2）**：失控 = **在哪点火** + **往哪扩** 两问。线性模态答前者（核心点火）；非线性足迹答后者（沿轴→全局/自限）。原来想在**一个线性模态**上贴 axial/global/nonaxis 标签是切错层级——那个模态永远是核心点火，会稳健地对不上、落 unclassified、把真答案藏起来。
 
-**锁定口径（抗审稿）**：(a) **global ≠ nonaxis**——全场同步 vs 离轴残差是不同生物学解释，JSON/图必须拆 subtype。(b) **分类用二阶矩 shape 分数，不用线性投影残差能量**（后者对轴向拉长钝感、且 nonaxis 高维残差 raw energy 天然偏大 → 维度污染）。(c) **分类只在 m3b `Grid(n=6)`/THETA_EE 空间做，不碰 subject1146 电极轴**。(d) **无向即无向**：wavevector 对齐 ≠ early→late 方向。(e) 判决预注册三类 {axial_supported / off_axis_global_supported / unresolved} + 强制 subtype + base gate 前置。(f) M2b 与 M2a 矛盾 → `verdict=unresolved`, `unresolved_subreason=linear_mode_candidate_unvalidated`（**不做第四顶层 verdict**）。(g) tier=`model_side_preliminary`，从不声称"模型证明发作/CSD"。
+**锁定口径（抗审稿）**：
+- (a) **两段式**：`linear_ignition`（点火位置）与 `nonlinear_spread`（铺开方式）是两个独立读数；**不**把 spread 判读贴到线性模态上。
+- (b) **`linear_ignition=core_localized` 是新增字段、不取代 M1 CSD `unresolved`**。M2 输出同时带 `csd_verdict=unresolved_operating_point`（M1 结论不变）与 `linear_ignition_mode=core_localized`（新）。
+- (c) **nonaxis 从主判据降为 sentinel / negative-control**（`off_axis: absent/present`）。若算 `e_nonaxis gain`，**必须注明**它在 core-localized 模态里代表"核心紧致残差"、**不是**侧向传播（防与数据侧"离轴/非轴向招募"混写）。
+- (d) **"沿轴 vs 全场"是时间相位、不是单帧/单本征模的 static 标签**：`spread_onset` / `spread_endgame` 分两个字段沿 t 报。
+- (e) **global ≠ nonaxis** 仍拆；但两者在本模型侧都被 pilot 证伪为"主铺开方向"（线性核紧致、非线性 off_axis≈0）。
+- (f) **near-fold caveat（承重）**：两核 own-crossing 的 α₁=+0.189 **不是 α₀≈0 临界形状**，是 fold 后第一段正值。two-core 确认的精确陈述 = "two-core low-branch crossing / near-fold 后 leading mode 仍 core-localized"，**不写成**精确临界形状。
+- (g) **对称去抑制近似（承重）**：两核共享一个 `q_core` 标量。故 two-core 证的是"**即使给轴向双核机会，也不自然铺走廊**"，**不是** subject1146 真实双源慢变量完全复现。
+- (h) **shape 分数不当分类器**：core_overlap+globality 判 ignition class；axis_elongation 的核内符号**不稳**（单核 +0.55 / 双核 −0.99 / 足迹 +0.1..0.8 抖），只作描述量、不承重。
+- (i) tier=`model_side_preliminary`，从不声称"模型证明发作/CSD"；global runaway ≠ 真发作。
 
-（内部归档代号：`axis_elongation`(=elongation_axis_score)/`axis_wavevector_alignment`(=phase_gradient_axis_score, 无向)/`off_axis`/`globality`/`core_overlap`；gain 方向 `e_global`/`e_axis_gradient`/`e_nonaxis`；`nonaxis_source_policy=critical_residual_direction`|`unavailable_low_residual_energy`；verdict∈{axial_supported, off_axis_global_supported, unresolved}；subtype∈{axial_elongation, axial_wavevector, mixed_axis, global, nonaxis_residual, mixed_axis_global, mixed_axis_nonaxis, mixed_global_nonaxis, unclassified}。）
-
----
-
-## 1. 核心问题 + verdict（结构化）
-
-**Q**：穿零处临界模态的空间形状 = 轴向 / 离轴 / 全局？
-
-**结构化 verdict（保留 M2a 信息 + 不破坏三类预注册）**：
-```
-linear_mode_shape_verdict   # 仅从 shape 分数：axial / off_axis / global / mixed_* / unclassified
-projected_gain_verdict      # 从方向向量 gain/leak：谁被放大 / axis→X leak
-perturbation_validation_status  # supportive / neutral_or_underpowered / contradicted / failed
-final_verdict               # ∈ {axial_supported, off_axis_global_supported, unresolved}  ← 唯一预注册三类
-subtype                     # 强制拆，global ≠ nonaxis（见 §5）
-unresolved_subreason        # null | linear_mode_candidate_unvalidated | multiple_alpha0_crossings | not_cleanly_localized | ...
-```
-`linear_mode_candidate_unvalidated`（M2b 反驳 M2a）是 `final_verdict=unresolved` 的一个 `unresolved_subreason`，**不是**第四个顶层 verdict。
+（内部归档代号：`axis_elongation`(=elongation_axis_score)/`axis_wavevector_alignment`(=phase_gradient_axis_score, 无向)/`off_axis`/`globality`/`core_overlap`；ignition class∈{core_localized, delocalized, ambiguous}；spread `onset`∈{axial, ...}/`endgame`∈{self_limited, global_flooding, ...}/`off_axis`∈{absent, present}/`depth_dependent`；gain 方向 `e_global`/`e_axis_gradient`/`e_nonaxis(sentinel)`；`csd_verdict=unresolved_operating_point`(M1, 不变)。）
 
 ---
 
-## 2. 基（A'，承重）— 分类用 shape 分数、gain 用方向向量
+## 1. 两段式 verdict（结构化）+ M1 CSD 并存
 
-### 2.1 分类空间 = m3b `Grid(n=6)` / THETA_EE（不碰 subject1146）
-本征模的 rE-loading（`mode_e_field` / 复对 `pair_loading`）在 `Grid(n=6, L)` 上；轴 = `kernels.theta = THETA_EE = π/4`。**subject1146 的 `axis_unit`/`axis_mask`/`theta_rad` 只喂仿真、产生慢状态轨迹，不进本征模分类。**
+**Q**：失控前 (1) 在哪点火？(2) 往哪扩？
 
-### 2.2 模态 shape 分数（复用 M1，全部无向；M2 必须显式**计算 + 持久化**）
-| 代号 | M1 函数（THETA_EE） | 测 | 范围 |
+**结构化 verdict（rev2 两段式）**：
+```
+csd_verdict                  # = unresolved_operating_point  ← M1 结论，M2 不改，仅并存展示
+                             #   (α₀ 穿零欠采样；M2 dense-localize 但不翻此结论)
+
+linear_ignition:             # 「在哪点火」— 冻结-Jacobian 临界模态 @ α₀ crossing（单核网格）
+  class                      # core_localized(primary) | delocalized | ambiguous
+  core_overlap               # 高 → 局域（pilot: 0.98–0.995）
+  globality                  # 低 → 局域（pilot: 0.03–0.06）
+  two_core_symmetry_break    # bool：two-core 确认——模态缩单核、走廊暗
+  corridor_power             # ≈0 确认非轴向走廊（pilot: 0.000）
+  shape_descriptors:         # 次级描述量（承重 caveat：核内 elong 符号不稳，仅描述）
+    axis_elongation          # 描述用，不承重（sign unstable on coarse grid）
+    off_axis                 # sentinel：应 ≈0
+    axis_wavevector_alignment
+  near_fold_note             # two-core crossing α₁ 为 fold 后首段正值、非精确 α₀≈0
+
+nonlinear_spread:            # 「往哪扩」— field_rhs 非线性足迹积分（spread 主裁）
+  onset                      # axial | ...   （扩张窗内 elongation>0 ∧ off_axis≈0）
+  endgame                    # self_limited | global_flooding | ...
+  off_axis                   # absent(sentinel: off_axis≈0 全程) | present
+  depth_dependent            # bool：自限 vs 漫开取决于过临界深度
+  footprint_trajectory       # active_frac(t)/core_overlap(t)/elongation(t)/off_axis(t)/globality(t)
+  control_minus_kick         # bool：已扣 v=0 控制残漂
+  epsilon_sensitivity        # ε/polarity 间一致性
+
+interpretation               # 自然语言合成，e.g.
+                             # "core ignition followed by axial transient and possible global endgame"
+
+base_gate_passed             # bool（§5.0）
+unresolved_subreason         # null | alpha0_not_localized | branch_ambiguous |
+                             #   multiple_alpha0_crossings | jvp_gate_failed |
+                             #   ignition_not_localized | spread_underpowered | ...
+```
+
+**要点**：
+- `csd_verdict` 与 `linear_ignition`/`nonlinear_spread` **是三个不同问题**——CSD（α₁ 是否平滑穿零）、ignition（在哪点火）、spread（往哪扩）。M2 回答后两个、并存展示第一个（不改）。
+- **不再有** `final_verdict ∈ {axial_supported / off_axis_global_supported}` 这个线性三分类顶层——它被两段式取代。
+- ignition 或 spread 任一段过不了 base/quality 门 → 该段落 `class/onset=…undetermined`，`unresolved_subreason` 记原因；**另一段仍可报**（两段解耦）。
+
+---
+
+## 2. 基（A'，rev2 role 调整）— shape 分数作描述量+sentinel、gain 方向 nonaxis 降 sentinel
+
+### 2.1 分析空间 = m3b `Grid(n=6)` / THETA_EE（不碰 subject1146）
+本征模的 rE-loading（`mode_e_field` / 复对 `pair_loading`）在 `Grid(n=6, L)` 上；轴 = `kernels.theta = THETA_EE = π/4`。**subject1146 的 `axis_unit`/`axis_mask`/`theta_rad` 只喂仿真、产生慢状态轨迹，不进本征模分析。**
+
+### 2.2 模态 shape 分数（复用 M1，全部无向；M2 计算 + 持久化，但 role = 描述量/sentinel 非分类器）
+| 代号 | M1 函数（THETA_EE） | 测 | rev2 role |
 |---|---|---|---|
-| `axis_elongation` | `elongation_axis_score` | loading 沿 THETA_EE 的空间拉长 | [-1,1]（+沿轴 / −垂直） |
-| `axis_wavevector_alignment` | `phase_gradient_axis_score` | wavevector 沿 THETA_EE（**无向**） | [-1,1] |
-| `off_axis` | `off_axis_score` | 垂直 THETA_EE 的拉长功率 | [0,1] |
-| `globality` | `globality` | participation ratio（1=全场均匀） | [0,1] |
-| `core_overlap` | `core_overlap` | E-power 落核内比例 | [0,1] |
-**P1-2**：M1 eval 当前只算 `elongation_axis`+`off_axis`、只持久化 `mode_class/core_overlap/globality`；**M2 必须补算 `axis_wavevector_alignment` 并把 5 个连续分数全部写进 JSON**（不从 `mode_class` 反推）。复对：用 invariant-subspace loading，不用单向量符号。
+| `core_overlap` | `core_overlap` | E-power 落核内比例 | **ignition class 主判据**（高→局域）|
+| `globality` | `globality` | participation ratio（1=全场均匀）| **ignition class 主判据**（低→局域）|
+| `off_axis` | `off_axis_score` | 垂直 THETA_EE 的拉长功率 | **sentinel**（应≈0；线性&非线性都作离轴 negative-control）|
+| `axis_elongation` | `elongation_axis_score` | loading 沿 THETA_EE 的拉长 | **描述量，不承重**（核内符号不稳）|
+| `axis_wavevector_alignment` | `phase_gradient_axis_score` | wavevector 沿 THETA_EE（**无向**）| 描述量 |
+**持久化**：5 个连续分数全部写进 JSON（不从 class 反推）。复对：用 invariant-subspace loading（`pair_loading`），不用单向量符号。
 
-### 2.3 gain/leak 方向向量（分开的一套，rate-field state space，归一化）
+### 2.3 gain/leak 方向向量（rate-field state space，归一化；nonaxis 降 sentinel）
 - `e_global` = normalize(uniform over grid E cells)。
-- `e_axis_gradient` = normalize(沿 THETA_EE 的线性坐标梯度 `s = x·cosθ + y·sinθ`, centered)。（这是**方向**，与 §2.2 的 shape 分数是两回事：shape 分数判形状、方向向量判扰动响应。）
-- `e_nonaxis` = normalize(leading-mode rE-loading − 投到 span(e_global, e_axis_gradient) 的分量)（临界残差方向）。**低范数即 invalid**：`if ‖residual‖ < nonaxis_direction_min_norm → nonaxis_source_policy=unavailable_low_residual_energy, nonaxis gain=NaN`（**不用 random 填**；如需 control 另报 `random_nonaxis_control_gain`，非主）。
-- **Full-state 嵌入**：`B_X = embed_rE(e_X)`（rE block=方向，其余 5 个 state block=0）；readout = `exp(JT)·B_X` 的 rE block 再投影。明说是 **E-rate observable subspaces**。
+- `e_axis_gradient` = normalize(沿 THETA_EE 的线性坐标梯度 `s = x·cosθ + y·sinθ`, centered)。
+- `e_nonaxis` = normalize(leading-mode rE-loading − 投到 span(e_global, e_axis_gradient) 的分量)（临界残差方向）。**rev2 role = sentinel / negative-control**：
+  - `off_axis: absent` if `off_axis_score < off_axis_sentinel_tol`（默认 0.05）**且** nonaxis gain 不显著超 axis/global gain；否则 `present`。
+  - **若报 `e_nonaxis gain`，JSON+图必须并写注记**：`"nonaxis_residual = core-compactness residual in a core-localized mode, NOT sideways propagation"`。
+  - 低范数即 invalid：`if ‖residual‖ < nonaxis_direction_min_norm(1e-3) → off_axis=absent, nonaxis gain=NaN`（不用 random 填；如需 control 另报 `random_nonaxis_control_gain`）。
+- **Full-state 嵌入**：`B_X = embed_rE(e_X)`（rE block=方向，其余 5 state block=0）；readout = `exp(JT)·B_X` 的 rE block 再投影。明说是 **E-rate observable subspaces**。
 
 ---
 
-## 3. M2a — dense α₀ localization + shape 分类 + projected gain/leak
+## 3. M2a — dense α₀ localization + linear_ignition readout
 
-### 3.1 dense α₀ localization（残留#1 + P0-crossing/nonmonotone + quality 拆两层）
-- **coarse 预扫**：M1 last-qualified↔first-saturated bracket 内先均匀取 K 个点（config，默认 5）算 α₁。若 sign change > 1 → `crossing_status=multiple_alpha0_crossings`（取第一个做定位，但 `final_verdict` 不能 supported 除非模态类在各 crossing 稳定；否则 `unresolved_subreason=multiple_alpha0_crossings`）。
+### 3.1 dense α₀ localization（carried verbatim from rev1.1；穿零真实、欠采样、需定位）
+- **coarse 预扫**：M1 last-qualified↔first-saturated bracket 内先均匀取 K 个点（config，默认 5）算 α₁。若 sign change > 1 → `crossing_status=multiple_alpha0_crossings`（取第一个做定位；`unresolved_subreason=multiple_alpha0_crossings` 除非 ignition class 在各 crossing 稳定）。
 - **递归二分**（线性插值 slow state q_I/g_K/h_G）：每层中点重解 low branch（`solve_branches` warm-start）、算 α₁、检查 branch identity。停止：`crossing_width_ms < crossing_width_ms_tol`（默认 1.0）或达 `max_bisect_levels = min(hard_cap=16, max(8, ceil(log2(initial_width_ms/tol))+2))`。
-- **quality 拆两层（P0）**：
+- **quality 拆两层（carried）**：
   - `op_solve_quality`：converged ∧ residual ok ∧ branch identity clean ∧ 非 solver artifact。
-  - `stability_read_quality`：α₁<0 ∧ τ defined ∧ quasi-static recovery 可解释。
-  - τ 等"恢复量"**只在 α₁<0 侧解读**。
+  - `stability_read_quality`：α₁<0 ∧ τ defined ∧ quasi-static recovery 可解释。τ 等"恢复量"**只在 α₁<0 侧解读**。
 - 输出：`alpha0_crossing_time_ms`、`alpha0_crossing_slow_state`、`crossing_width_ms`、`alpha_left/alpha_right`、`branch_identity_clean`、`op_solve_quality_left/right`、`crossing_status`。
 
-### 3.2 mode shape 分类 at crossing
-在 α₀ crossing 慢状态求 op + Jacobian + `rate_eigenpairs`；取 leading subspace（complex pair 当 2D 不变子空间 `leading_subspace_indices`）；算 §2.2 的 5 个连续 shape 分数（复对用 `pair_loading`）+ `mode_class`。全部持久化。
+### 3.2 linear_ignition readout at crossing（rev2：ignition 非分类）
+在 α₀ crossing 慢状态求 op + Jacobian + `rate_eigenpairs`；取 leading subspace（complex pair 当 2D 不变子空间 `leading_subspace_indices`）；算 §2.2 的 5 个连续 shape 分数（复对用 `pair_loading`）。
+- **ignition class**：`core_localized` if `core_overlap ≥ core_localized_overlap_thresh`（默认 0.8）∧ `globality ≤ core_localized_globality_thresh`（默认 0.3）；否则 `delocalized` / `ambiguous`（见 §5.1）。
+- **two-core 确认（新）**：用 `make_core_mask(kind="two", radius=0.9, separation=2.4)`（两核沿 THETA_EE、中间走廊在轴上），在 two-core **自己的** low-branch crossing/near-fold 慢状态重解 + 取 leading mode，算逐区功率（coreA/coreB/corridor）。`two_core_symmetry_break = (max(coreA,coreB) ≥ two_core_single_core_thresh 0.9) ∧ (corridor_power ≤ corridor_dark_thresh 0.05)`。**near_fold_note 必写**：该点 α₁ 为 fold 后首段正值、非精确 α₀≈0（§0-f）；对称去抑制近似（§0-g）。
+- 全部持久化到 `linear_ignition`（§1）。
 
-### 3.3 projected operator gain/leak（方向向量）
-预注册 horizons（复用 M1 `[10,25,50,100,250,500]` ms）。对穿零处（+ 可选 pre/post-crossing）算 source∈{axis_gradient, global, nonaxis} × target∈{axis_gradient, global, nonaxis} 的 directional gain：
-`gain_X_to_Y(T) = ‖P_Y · rE(exp(JT)·embed_rE(e_X))‖ / ‖e_X‖`（复用 M1 `transient_gain`；`e_X` 已归一）。off-diagonal 即 leak（`leak_axis_to_nonaxis` / `leak_axis_to_global` / `return_nonaxis_to_axis`）。
-- axis source 就是 `e_axis_gradient`（1 个方向；shape 的 occupancy/wavevector 是分类概念、不是扰动方向）。
-- nonaxis source = `e_nonaxis`（临界残差方向）；低范数 → invalid（§2.3）。artifact 明写 `nonaxis_source_policy`，**不冒充** full `‖P_N exp(JT) P_N‖`。
+### 3.3 projected operator gain/leak（方向向量；nonaxis=sentinel）
+预注册 horizons（复用 M1 `[10,25,50,100,250,500]` ms）。对穿零处（+ 可选 pre/post-crossing）算 source∈{axis_gradient, global} × target 的 directional gain：
+`gain_X_to_Y(T) = ‖P_Y · rE(exp(JT)·embed_rE(e_X))‖ / ‖e_X‖`（复用 M1 `transient_gain`）。
+- `e_nonaxis` gain **只作 sentinel**（§2.3）：报 `off_axis: absent/present` + 强制注记"核心紧致残差非侧向传播"；**不**冒充 full `‖P_N exp(JT) P_N‖`、**不**当主铺开判据。
 
 ---
 
-## 4. M2b — minimal rate-field perturbation spot-check（残留#2 + P1-3 硬门）
+## 4. M2b — nonlinear-footprint spread readout（rev2：spread 主裁，升级）
 
-### 4.1 field_rhs 一致性硬门（P1-3，M2b 前置）
-`field_rhs`（`m3b:670`）的 Jacobian 就是 `build_jacobian_dense`——但当前 `field_rhs` **缺 g_K/h_G shift**（T2.5 审查遗留 Minor）。**M2 T4 第一步**：给 `field_rhs` 补 `gK_field`/`hG_scalar`（与 `solve_operating_point` 同源），并加**硬门测试**：同一 shifted op 上，`(field_rhs(z*+εu)−field_rhs(z*−εu))/(2ε) ≈ build_jacobian_dense@u`（finite-diff JVP 匹配）。不过此门，M2b 不许跑。
+### 4.1 field_rhs 一致性硬门（P1-3，carried，M2b 前置）
+`field_rhs`（`m3b:670`）的 Jacobian 就是 `build_jacobian_dense`——但当前 `field_rhs` **缺 g_K/h_G shift**（T2.5 审查遗留 Minor）。**M2 T4 第一步**：给 `field_rhs` 补 `gK_field`/`hG_scalar`（与 `solve_operating_point` 同源），并加**硬门测试**：同一 shifted op 上，`(field_rhs(z*+εu)−field_rhs(z*−εu))/(2ε) ≈ build_jacobian_dense@u`（finite-diff JVP 匹配）。**不过此门，M2b 不许跑**（`unresolved_subreason=jvp_gate_failed`）。pilot 确认本轨迹 hG≈0、`field_rhs` shift-gap 不阻塞，但正确性要求此门（M2b 是通用工具）。
 
-### 4.2 扰动 spot-check
-点：`early_stable` / `last_sampled_qualified` / `just_before_alpha0` / `just_after_alpha0`（末者若 op_solve_quality clean）。
-方向（同 E-rate norm）：`critical_eigenspace` / `axis_gradient` / `global` / `nonaxis_critical_residual` / `random_orthogonal_control`。复对 `critical_eigenspace`：实向量 → ±Re(v)；复对 → 沿归一 Re(v)、Im(v)、以及最大短时 rE 增益的相位方向，summary 取 max + median。
-积分器（复用 §4.1 修好的 `field_rhs`）：从 `z*+ε·v` 起步、积分、测 `observed_peak_gain`/`observed_recovery_time`/`return_to_op_success`/`escape_probability`/`observed_{axis,global,nonaxis}_leak`。**跑 ±ε**（nonlinear 可能不对称）。config：`epsilon_rel=[0.01,0.05]`、`max_time_ms=1000`、`dt_ms=0.1`、`recovery_radius_rel=0.05`、`escape_rate_khz=_SAT_RATE_KHZ`(=M1 饱和阈)、`polarities=[-1,1]`。
+### 4.2 footprint 积分 = spread 主裁（rev2 升级）
+- **点**：`at_crossing`（α₀）+ `just_past`（过 fold 一点）**至少两个过临界深度**（判 `depth_dependent`）；可选 `just_before`。
+- **扰动方向**（同 E-rate norm）：`core_kick`（核内单位扰动）为主；`critical_eigenspace`（leading Re(v)）+ `random_orthogonal_control` 为辅。复对：沿归一 Re(v)、Im(v)、最大短时 rE 增益相位方向，summary 取 max+median。
+- **积分器**（复用 §4.1 修好的 `field_rhs`）：从 `z*+ε·v` 起步、前向积分，**同跑 v=0 控制、报 kick−control 的 δrE(t)**（扣工作点自身残漂——近 fold op-solve 不完全收敛 `fixedpoint_residual≈1–4e-3）。**跑 ±ε**（nonlinear 不对称）。
+- **每采样时刻算 footprint 量**：`active_frac`、`core_overlap`、`elongation_axis`、`off_axis`、`globality`、`peak_δRE`；escape = max rE > `_SAT_RATE_KHZ`。
+- config：`epsilon_rel=[0.01,0.05]`、`max_time_ms=300`（自限/漫开在此尺度已分清，pilot）、`dt_ms=0.1`、`recovery_radius_rel=0.05`、`escape_rate_khz=_SAT_RATE_KHZ`、`polarities=[-1,1]`、`footprint_sample_ms=[2,5,10,20,30,50,75,100,200,300]`。
 
-### 4.3 perturbation_validation_status（定量，P1/§11）
-```
-supportive: 预测主导方向的 observed_peak_gain 在 top-2；且不比 axis/global/nonaxis 备选低 > margin
-contradicted: 预测主导方向在 observed_peak_gain 或 recovery_time 里垫底（两 ε × 两 polarity 都是）
-neutral_or_underpowered: ε/polarity 间不一致 或 所有响应都小
-failed: 积分数值失败 / 无有效恢复量
-```
-`contradicted` → `final_verdict=unresolved, unresolved_subreason=linear_mode_candidate_unvalidated`（保留 `linear_mode_shape_verdict` + `projected_gain_verdict`）。
+### 4.3 nonlinear_spread verdict（从 footprint 读，定量）
+- **onset**：`axial` if 扩张窗（`active_frac` 上升段）内 `elongation_axis > axial_onset_thresh`（默认 0.2）∧ `off_axis < off_axis_sentinel_tol`（0.05）；否则记实际形态。
+- **endgame**：`global_flooding` if `active_frac(t_max) ≥ flood_active_thresh`（默认 0.9）；`self_limited` if 峰后 `active_frac ≤ self_limit_active_thresh`（默认 0.1）且未 escape；边界→`marginal`。
+- **off_axis**：`absent` if `off_axis` 全程 < off_axis_sentinel_tol；否则 `present`（+ 记峰值）。
+- **depth_dependent**：≥2 深度的 endgame 不同（如 at_crossing 自限、just_past 漫开）→ true。
+- **epsilon_sensitivity**：ε/polarity 间 onset/endgame 是否一致；不一致 → `spread_underpowered`（该段 undetermined）。
+- **control_minus_kick**：必 true（否则 spread undetermined）。
 
 ---
 
 ## 5. 验收门（预注册，跑前锁 — "门编码结论非存在"）
 
-### 5.0 base gate（先过，否则 unresolved）
-`alpha0 crossing localized in actual slow-space`（§3.1）∧ `op_solve_quality clean on both bracketing sides` ∧ `branch identity remains low/approach near crossing`（no ambiguous）∧ `α₁ sign change bracketed`（且非 multiple crossings 未解释）∧ complex-pair policy applied ∧ 5 个 shape 分数已算。（**不要求** crossing 后侧仍 stable-recovery qualified；τ 只在 α₁<0 侧解读。）
+### 5.0 base gate（先过，否则该段 undetermined）
+- **ignition 段**：`alpha0 crossing localized in actual slow-space`（§3.1）∧ `op_solve_quality clean on crossing side` ∧ `branch identity remains low/approach near crossing` ∧ 5 个 shape 分数已算。
+- **spread 段**：`field_rhs JVP 硬门 pass`（§4.1）∧ `control_minus_kick` ∧ 积分数值未 fail。
 
-### 5.1 shape 分类（linear_mode_shape_verdict，决策树而非能量分区）
-> shape 分数量纲不同、不自然求和为 1，故用决策树 + 阈值 + sensitivity（非 raw energy dominance）。
-- `global` if `globality >= global_thresh`（默认 0.5）∧ 各向异性低（`|axis_elongation|` 与 `off_axis` 都 < iso_thresh 0.2）。
-- `axial` if `axis_elongation >= axis_thresh`（默认 0.3）∧ `axis_elongation − off_axis >= margin`（默认 0.15）。subtype：`axial_elongation` / `axial_wavevector`（看 `axis_wavevector_alignment` 是否也高）/ `mixed_axis`。
-- `off_axis`(→nonaxis_residual) if `off_axis >= offaxis_thresh`（默认 0.3）∧ `off_axis − max(0, axis_elongation) >= margin`。
-- 两条同时满足 / 边界 → `mixed_axis_global` / `mixed_axis_nonaxis` / `mixed_global_nonaxis`；都不满足 → `unclassified`。
-- `threshold_sensitivity`：`global_thresh∈[0.45,0.5,0.6]`、`axis/offaxis_thresh∈[0.25,0.3,0.4]`、`margin∈[0.10,0.15,0.20]`；分类翻则文字写 "X but threshold-sensitive"。
+### 5.1 linear_ignition gate（rev2：ignition class，非轴/全局/离轴分类）
+- `core_localized` iff `core_overlap ≥ 0.8` ∧ `globality ≤ 0.3`（阈见 §8）。
+- `two_core_symmetry_break` iff 单核占比 ≥ 0.9 ∧ `corridor_power ≤ 0.05`（§3.2）。
+- `off_axis`（ignition sentinel）：`absent` iff `off_axis_score < 0.05`。
+- `delocalized` if `globality ≥ 0.5` ∧ core_overlap 低；`ambiguous` 否则。
+- `ignition_sensitivity`：`core_localized_overlap_thresh∈[0.7,0.8,0.9]`、`globality_thresh∈[0.2,0.3,0.4]`；class 翻则文字写 "core_localized but threshold-sensitive"。
+- **near_fold_note / 对称去抑制近似** 必随 two_core_symmetry_break 一并写（§0-f/g）。
 
-### 5.2 final_verdict（合 shape + gain + perturbation）
-- `axial_supported` iff `linear_mode_shape_verdict=axial` ∧ projected axis gain 不被 global/nonaxis gain 反驳（§5.4）∧ `perturbation_validation_status ≠ contradicted`。
-- `off_axis_global_supported` iff (`linear_mode_shape_verdict ∈ {global, off_axis/nonaxis}`) or (`projected gain_global/gain_nonaxis 明显超 axis gain near α₀`) ∧ `perturbation_validation_status ≠ contradicted`。**subtype MUST split** global vs nonaxis_residual vs mixed_*。
-- 否则 / 冲突 / 未定位 / multiple crossings / M2b contradicted → `unresolved`（带 subreason）。
+### 5.2 nonlinear_spread gate（rev2：spread 主裁 = footprint）
+- `onset` / `endgame` / `off_axis` / `depth_dependent` 按 §4.3 定量阈判。
+- 要求：`control_minus_kick=true` ∧ `epsilon_sensitivity` 一致 ∧ ≥2 深度已跑。任一不满足 → spread 段 undetermined（`spread_underpowered`），**但 ignition 段仍报**。
 
-### 5.3 unresolved（任一）
-α₀ 未紧致定位 ∨ branch ambiguous ∨ multiple crossings 未解释 ∨ shape 分类 unclassified ∨ shape 与 gain 冲突（§5.4）∨ M2b contradicted ∨ shape class 在 tiny continuation 变化下不稳。
+### 5.3 interpretation 合成
+`interpretation` 由 `linear_ignition.class` + `nonlinear_spread.{onset,endgame,off_axis}` 机械拼：
+`"{class} ignition followed by {onset} transient and {endgame}; off_axis {off_axis}"`。**禁**把 spread 结论回贴到 linear mode（"临界模态是 axial"）；**禁**把 core_localized 说成"取代 CSD unresolved"。
 
-### 5.4 gain_conflict（定量，P1/§12）
-`gain_conflict if`：`linear_mode_shape_verdict = X` 但 `projected self-gain / dominant response class = Y ≠ X` 且 `gain_Y − gain_X >= gain_conflict_margin`（默认 0.20）且跨 `>= gain_conflict_min_horizons`（默认 2，取近恢复尺度的 horizons）。
+### 5.4 undetermined（任一段）
+ignition：α₀ 未紧致定位 ∨ branch ambiguous ∨ multiple crossings 未解释 ∨ core_overlap/globality 边界不稳。
+spread：JVP 门 fail ∨ control 未扣 ∨ ε/polarity 不一致 ∨ <2 深度 ∨ 积分 fail。
+两段解耦：一段 undetermined 不拖累另一段。
 
 ---
 
-## 6. 已定残留 + 评审 required edits（全折入）
-1. densification：递归二分，停 `crossing_width<1.0ms` 或动态 `max_bisect_levels`（hard_cap 16）；每层重解 + branch/quality check + coarse 预扫多穿零。
-2. perturbation integrator：复用 **修好的 `field_rhs`**（§4.1，含 g_K/h_G shift + JVP 硬门）；config 数值全给（§4.2）。
-3. substrate：`subject1146`（同 M1 轨迹）。
-4. **A'**：THETA_EE 二阶矩 shape 分类 + 方向向量 gain；不碰 subject1146 电极轴。
-5. `axis_signed` → `axis_wavevector_alignment`（**无向**）；禁 "early→late signed"；directional 需另做（deferred）。
-6. **持久化 5 个连续 shape 分数**（非只 mode_class）。
-7. base gate 拆 `op_solve_quality` / `stability_read_quality`；α₀ 后侧不要求 stable-recovery qualified。
-8. `linear_mode_candidate_unvalidated` = `unresolved` subreason（非第四顶层）。
-9. nonaxis 方向低范数 → invalid（非高维 raw energy）。
-10. gain_conflict + perturbation_validation 定量化；basis sanity 图。
+## 6. 已定改动 + pilot 折入（rev2）
+1. **两段式 verdict**：`csd_verdict`(M1, 不变) + `linear_ignition`(点火) + `nonlinear_spread`(铺开) + `interpretation`；弃线性 {axial/global/nonaxis} 顶层三分类。
+2. **linear_ignition = core_localized 一等字段**（core_overlap+globality）+ **two-core 对称破缺确认**（走廊暗）；**不取代 M1 CSD unresolved**。
+3. **nonlinear_spread 主裁 = field_rhs 足迹**（onset/endgame/off_axis/depth_dependent + control-minus-kick + ε 敏感）；spread 判读从线性模态挪走。
+4. **nonaxis 降 sentinel / negative-control**（`off_axis: absent/present`）+ 强制"核心紧致残差非侧向传播"注记。
+5. **"沿轴 vs 全场" = 时间相位**（onset/endgame 两字段），非单帧 static 标签。
+6. **near-fold caveat**（two-core α₁=+0.189 非 α₀≈0）+ **对称去抑制近似** 必写。
+7. dense α₀ localization（§3.1）、base gate quality 两层拆、complex-pair invariant-subspace、5 连续 shape 分数持久化、field_rhs shift + JVP 硬门 —— 全 carried from rev1.1。
+8. `axis_signed` → `axis_wavevector_alignment`（无向）；禁 "early→late signed"；directional 需另做（deferred）。
 
 ---
 
 ## 7. 红线 / tier
-`model_side_preliminary`；单本征值≠发作；global runaway≠真发作；谱=机制地图；**禁"模型证明发作/CSD"**；**禁"真数据"（用 actual v2.2 SIMULATION trajectory）**；**global ≠ nonaxis**；分类用二阶矩 shape 分数非线性投影残差；**wavevector 对齐 ≠ early→late 方向**；分类只在 THETA_EE 网格空间、不碰 subject1146 电极轴；M2b 矛盾→unresolved(subreason)。
+`model_side_preliminary`；单本征值≠发作；global runaway≠真发作；谱=机制地图；**禁"模型证明发作/CSD"**；**禁"真数据"（用 actual v2.2 SIMULATION trajectory）**；**禁"core_localized 取代/翻转 M1 CSD unresolved"**（并存，非替换）；**禁把 spread 结论回贴线性模态**；**禁"放弃 nonaxis"**（是降 sentinel/negative-control）；**禁把 two-core α₁=+0.189 写成精确 α₀≈0 临界形状**（fold 后首段正值）；**禁"two-core 复现 subject1146 真实双源慢变量"**（对称去抑制近似）；**global ≠ nonaxis**；**wavevector 对齐 ≠ early→late 方向**；分类/模态只在 THETA_EE 网格空间、不碰 subject1146 电极轴。
+**与数据的关系（边界）**：本模型侧支持 **core ignition → axial transient → global/endgame**；**不支持**真正 sideways/off-axis 传播。**若真实数据关键现象是离轴招募 → 当前衬底未解释完**，后续动 structural scaffold / D_EE / subject-specific geometry，**非**继续调这个线性分类器。
 **DEFER（非 M2）**：directional early→late（相位/时序定义）；SNN perturbation；slow-var attribution；full controls；Topic5 correspondence → M2.5 / M3。
 
 ---
 
 ## 8. config / results / 复用
-- **config** 新 `config/topic4_criticality_m2.yaml`：`basis`(theta=THETA_EE, embedding=rE_block, nonaxis_direction_min_norm=1e-3)；`densification`(coarse_K=5, crossing_width_ms_tol=1.0, max_bisect_hard_cap=16)；`gain`(horizons 复用 M1, gain_conflict_margin=0.20, gain_conflict_min_horizons=2)；`perturbation`(epsilon_rel=[0.01,0.05], max_time_ms=1000, dt_ms=0.1, recovery_radius_rel=0.05, escape_rate_khz=_SAT_RATE_KHZ, polarities=[-1,1])；`classify`(global_thresh=0.5, iso_thresh=0.2, axis_thresh=0.3, offaxis_thresh=0.3, margin=0.15, sweep grids)。
-- **results** `results/topic4_criticality_m2/`：`dense_trajectory_verdict.json`（结构化，§1）、`alpha0_crossing.json`、`continuation_trace.csv`、`mode_decomposition.json`、`perturbation_spotcheck.json`、`figures/`(+ README 中文 + FIGURE_INDEX)。
-- **复用 M1**：`solve_branches`/`build_jacobian_dense`/`rate_eigenpairs`/`leading_subspace_indices`/`pair_loading`/`mode_e_field`/`elongation_axis_score`/`off_axis_score`/`phase_gradient_axis_score`/`globality`/`core_overlap`/`transient_gain`/`check_low_branch_continuation_between`/`qualify_point`/`field_rhs`(补 shift)。
+- **config** 新 `config/topic4_criticality_m2.yaml`：
+  - `basis`(theta=THETA_EE, embedding=rE_block, nonaxis_direction_min_norm=1e-3, off_axis_sentinel_tol=0.05)；
+  - `densification`(coarse_K=5, crossing_width_ms_tol=1.0, max_bisect_hard_cap=16)；
+  - `ignition`(core_localized_overlap_thresh=0.8, core_localized_globality_thresh=0.3, sweep [0.7,0.8,0.9]×[0.2,0.3,0.4])；
+  - `two_core_confirm`(kind=two, radius=0.9, separation=2.4, single_core_thresh=0.9, corridor_dark_thresh=0.05)；
+  - `spread`(axial_onset_thresh=0.2, flood_active_thresh=0.9, self_limit_active_thresh=0.1, footprint_sample_ms=[2,5,10,20,30,50,75,100,200,300])；
+  - `gain`(horizons 复用 M1)；
+  - `perturbation`(epsilon_rel=[0.01,0.05], max_time_ms=300, dt_ms=0.1, recovery_radius_rel=0.05, escape_rate_khz=_SAT_RATE_KHZ, polarities=[-1,1])。
+- **results** `results/topic4_criticality_m2/`：`ignition_spread_verdict.json`（两段式，§1）、`alpha0_crossing.json`、`continuation_trace.csv`、`linear_ignition.json`（含 two-core 逐区）、`nonlinear_spread.json`（footprint 轨迹）、`figures/`(+ README 中文 + FIGURE_INDEX)。
+- **复用 M1**：`solve_branches`/`build_jacobian_dense`/`rate_eigenpairs`/`leading_subspace_indices`/`pair_loading`/`mode_e_field`/`elongation_axis_score`/`off_axis_score`/`phase_gradient_axis_score`/`globality`/`core_overlap`/`transient_gain`/`check_low_branch_continuation_between`/`qualify_point`/`make_core_mask`/`field_rhs`(补 shift)。pilot 脚本 `results/topic4_criticality_m2/pilots/m2_pilots{,_round2}.py` 是 ignition/spread 读数的 reference 实现。
 
 ---
 
 ## 9. tasks 概览（plan 细化，逐步 TDD + 门编码为阈值）
-- **T0** config + gain 方向向量基（`e_global`/`e_axis_gradient`/`e_nonaxis`，归一 + 低范数 invalid）+ **shape-score sanity tests**：①合成 loading 沿 THETA_EE 拉长 → `axis_elongation` 高、`off_axis` 低；②垂直拉长 → `off_axis` 高；③各向同性/全局 → `globality` 高、axis/offaxis 不乱报。
-- **T1** dense α₀ localization（coarse 预扫多穿零 + 递归二分 + quality 两层 + base gate + crossing outputs）。
-- **T2** shape 分类 at crossing（补算 `axis_wavevector_alignment`；持久化 5 连续分数；复对 invariant-subspace）。
-- **T3** projected gain/leak（方向向量, transient_gain, `nonaxis_source_policy`, gain_conflict）。
-- **T4** `field_rhs` 补 g_K/h_G shift + **JVP 硬门** → rate-field perturbation integrator + spot-check（±ε, 复对方向, perturbation_validation_status）。
-- **T5** verdict（base gate + 决策树分类 + subtype + sensitivity + gain_conflict + M2b-contradiction → 结构化 JSON §1）+ 图（穿零处 shape 分数条 + gain 矩阵 + τ-crossing + **basis sanity panel**：axis 方向/e_axis_gradient/critical loading/critical residual）+ README 中文。
+- **T0** config + gain 方向向量基（`e_global`/`e_axis_gradient`/`e_nonaxis` sentinel，归一 + 低范数 invalid）+ **shape-score sanity tests**：①合成 loading 沿 THETA_EE 拉长 → `axis_elongation` 高、`off_axis` 低；②垂直拉长 → `off_axis` 高（sentinel present）；③各向同性/全局 → `globality` 高。
+- **T1** dense α₀ localization（coarse 预扫多穿零 + 递归二分 + quality 两层 + base gate + crossing outputs）。carried from rev1.1。
+- **T2** linear_ignition readout（crossing 单核 mode → core_overlap/globality → class；补算持久化 5 连续分数；复对 invariant-subspace）+ **two-core 对称破缺确认**（逐区功率、走廊暗、near_fold_note、对称近似注记）。
+- **T3** projected gain/leak（`e_axis_gradient`/`e_global` gain；`e_nonaxis` **只作 sentinel** + 强制注记）。
+- **T4** `field_rhs` 补 g_K/h_G shift + **JVP 硬门** → nonlinear-footprint integrator + spread readout（≥2 深度、±ε、复对方向、control-minus-kick、onset/endgame/off_axis/depth_dependent）。**spread 主裁**。
+- **T5** 两段式 verdict（base gate 两段 + ignition class + two-core 确认 + spread footprint 判读 + interpretation 机械合成 + sensitivity → 结构化 JSON §1，并存 `csd_verdict`）+ 图（**ignition panel**：crossing mode loading + two-core 逐区 + core_overlap/globality；**spread panel**：footprint active_frac(t)/off_axis(t)/elongation(t) 多深度；basis sanity）+ README 中文。
 
 ---
 
 ## 10. Self-Review
 1. **Placeholder**：阈值全在 §5/§8 锁；无 TBD。
-2. **一致性**：A'（shape 分类 vs 方向 gain）贯穿 §2/§3/§5；`axis_wavevector_alignment` 无向、§1/§2/§7 一致；`linear_mode_candidate_unvalidated`=subreason 非顶层（§1/§4/§5）；global≠nonaxis 强制拆（§1/§5）。
+2. **一致性**：两段式（ignition/spread）贯穿 §0/§1/§3/§4/§5；`csd_verdict` 并存不改（§0-b/§1/§7）；nonaxis=sentinel（§0-c/§2.3/§3.3/§5.1/§7）；沿轴vs全局=时间相位（§0-d/§4.3/§5.3）；near-fold + 对称近似（§0-f/g/§3.2/§5.1/§7）；`axis_wavevector_alignment` 无向（§2.2/§7）。
 3. **Scope**：单 spec T0-T5 model-side；directional early→late / SNN / attribution / controls / Topic5 defer。
-4. **Ambiguity**：分类空间=THETA_EE 网格（非 subject1146）；shape 分数≠扰动方向；nonaxis 方向低范数 invalid；field_rhs shift + JVP 硬门；分类用决策树+sensitivity（非能量分区）。
-5. **评审闭环**：P1-1（rename+无向）、P1-2（持久化连续分数）、P1-3（field_rhs JVP 硬门）+ 10 required edits 全折入 §2/§4/§5/§6。
+4. **Ambiguity**：分析空间=THETA_EE 网格（非 subject1146）；shape 分数=描述量/sentinel 非分类器；ignition class 由 core_overlap+globality；spread 由 footprint；nonaxis 低范数 invalid；field_rhs shift + JVP 硬门；两段解耦（一段 undetermined 不拖另一段）。
+5. **pilot 闭环**：round-1（core-localized headline）+ round-2（two-core 稳健 + footprint axial→global never off-axis）决定性折入 §0/§1/§3/§4/§5/§7；用户 2026-07-05 审阅 5 改动 + 精确 wording 全折入。
