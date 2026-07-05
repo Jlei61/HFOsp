@@ -44,8 +44,8 @@ from slow_field import SpatialSlowField, SpatialSlowFieldConfig  # noqa: E402
 from src.sef_hfo_snn_metrics import onset_times            # noqa: E402
 from src.sef_hfo_m4_metrics import extract_cell_metrics    # noqa: E402
 from src.sef_hfo_m4_phaseplane import (                    # noqa: E402
-    GuardThresholds, calibrate_guards_from_references, classify_cell,
-    q_core as q_core_of, go_plane_verdict,
+    calibrate_guards_from_references, classify_cell, go_plane_verdict,
+    CalibrationError, validate_reference_metrics,
 )
 
 OUT_DIR = os.path.join(ROOT, "results", "topic4_m4")
@@ -62,10 +62,11 @@ T_MIN_MS = 60.0            # persist: burst sustained >= this after the kick
 BAND_HALF_MM = 1.0         # f_off: perpendicular band half-width around the onset axis
 THRESH_HZ = 10.0           # branching: supra-threshold bins (matches pre_kick_ignition rest ref)
 RETREAT_FACTOR = 0.5       # spatial self-limit: late extent < this * peak extent
-SAT_CEILING_FRAC = 0.5     # saturation ceiling = this * NE (per-step count) -> runaway guard
+SAT_CEILING_FRAC = 0.5     # saturation ceiling (per-neuron Hz) = this * single-neuron max (1000/tau_ref_E)
 
 # ---- calibration params (REVIEW POINTS) ----
-R50_PCTL = 90.0            # Psi_G r50 = this percentile of the peak-window rE_fast (focal-in-range)
+R50_FRAC = 0.3             # Psi_G r50 = this * the rE_fast TIME-peak (half-recruitment inside burst range)
+R50_MIN_PEAK = 1e-3        # fail-closed: rE_fast time-peak <= this -> pool sensor never saw activity
 Q_FLOOD = None             # reference q_core for TRIVIAL-A flood (default = min of the q grid)
 Q_AXIAL = None             # reference q_core for TRIVIAL-B axial-retreat (default = median of the q grid)
 GUARD_MARGIN = 0.05        # exclude references by this margin
@@ -74,6 +75,7 @@ GUARD_MARGIN = 0.05        # exclude references by this margin
 Q_GRID = np.round(np.linspace(0.25, 1.0, 8), 3)           # q_core axis
 ALPHA_GRID = np.round(np.linspace(0.0, 8.0, 8), 3)        # alpha_G axis
 K_MIN = 3                                                  # go(plane): min contiguous go cells
+LABELS = ["decay", "blip", "trivial_A", "trivial_B", "runaway", "other_nogo", "go"]   # classify_cell labels
 
 
 def build_substrate(seed=1):
@@ -120,22 +122,37 @@ def derive_core(S):
     return fin & (onset <= thr)
 
 
+def _r50_from_peak(trace_rEfast_max):
+    """Pure fail-closed rule (fix P1-1): r50 = R50_FRAC * time-peak of the rE_fast spatial-max trace.
+    Raise CalibrationError on an empty trace or a peak <= R50_MIN_PEAK (pool sensor never saw activity)."""
+    if not trace_rEfast_max:
+        raise CalibrationError("calibrate_r50: no rE_fast trace recorded (use_SG off?)")
+    peak = float(np.max(trace_rEfast_max))                              # time peak of the spatial-max rE_fast
+    if not np.isfinite(peak) or peak <= R50_MIN_PEAK:
+        raise CalibrationError(f"calibrate_r50: no valid rE_fast peak (peak={peak:.3g} <= {R50_MIN_PEAK}); "
+                               "the calibration kick did not drive the pool sensor")
+    return peak * R50_FRAC                                               # half-recruitment inside the burst range
+
+
 def calibrate_r50(S, core):
-    """Pick Psi_G r50 from the peak-window rE_fast scale so the pool bites (the flagged pre-req: default
-    r50=1.0 is above the fast-EMA sensor scale). Runs a neutral (alpha_G=0) pool kick and reads rE_fast."""
-    slow = _make_slow(S, q_core_val=Q_GRID.min(), r50=1.0, alpha_G=0.0)   # r50 here only affects unused pool
+    """Pick Psi_G r50 from the rE_fast TIME PEAK (fix P1-1: NOT slow.rE_fast at sim end, which is the
+    post-burst decay ~0). Uses slow.trace_rEfast_max (per-step spatial-max recorded under use_SG)."""
+    slow = _make_slow(S, q_core_val=Q_GRID.min(), r50=1.0, alpha_G=0.0)   # r50 here only affects the unused pool
     _freeze_qcore(slow, core, Q_GRID.min())
     _run(S, slow=slow)
-    peak = float(np.max(slow.rE_fast))
-    # r50 = a high percentile of the active rE_fast cells at the trace end is unstable (post-burst decay);
-    # use a fraction of the observed peak so Psi_G's half-recruitment sits inside the burst range.
-    return max(1e-3, peak * (R50_PCTL / 100.0))
+    return _r50_from_peak(slow.trace_rEfast_max)
+
+
+def _sat_ceiling_hz(S):
+    """Saturation ceiling in per-neuron Hz (fix P1-2): SAT_CEILING_FRAC * single-neuron max rate
+    (1000/tau_ref_E). rate_E (a per-step count) is converted to Hz inside extract_cell_metrics."""
+    return SAT_CEILING_FRAC * (1000.0 / S["p"].tau_ref_E)
 
 
 def _extract(S, core, res):
     return extract_cell_metrics(
         res, S["posE"], DT, T_KICK, core_neuron_mask=core, center=_core_centroid(S, core),
-        T_min=T_MIN_MS, band_half=BAND_HALF_MM, sat_ceiling=SAT_CEILING_FRAC * S["NE"],
+        T_min=T_MIN_MS, band_half=BAND_HALF_MM, sat_ceiling=_sat_ceiling_hz(S),
         thresh_hz=THRESH_HZ, retreat_factor=RETREAT_FACTOR)
 
 
@@ -162,52 +179,111 @@ def run_cell(S, core, r50, guards, q_core_val, alpha_G, beta_SG):
 
 
 def sweep(S, core, r50, guards):
-    """arm 0 (baseline q_I+g_K+h_G off, pool off), arm 1 (beta_SG subtractive), arm 2 (alpha_G divisive)."""
+    """arm 0 (baseline pool off), arm 1 (beta_SG subtractive), arm 2 (alpha_G divisive). Returns per-arm go
+    grids, label grids (integer codes into LABELS), and per-cell rows."""
     arms = {"arm0_baseline": dict(alpha_G=0.0, beta_SG=0.0),
             "arm1_subtractive": dict(alpha_G=0.0, beta_SG=1.0),
             "arm2_divisive": dict(alpha_G=None, beta_SG=0.0)}   # arm2 alpha_G swept per cell
-    grids = {}
-    rows = []
+    go_grids = {}; label_grids = {}; rows = []
     for name, arm in arms.items():
         go = np.zeros((len(Q_GRID), len(ALPHA_GRID)), dtype=bool)
+        lbl = np.full((len(Q_GRID), len(ALPHA_GRID)), LABELS.index("other_nogo"), dtype=int)
         for iq, q in enumerate(Q_GRID):
             for ia, a in enumerate(ALPHA_GRID):
                 aG = a if arm["alpha_G"] is None else arm["alpha_G"]
                 bG = arm["beta_SG"]
                 v, m, maxS = run_cell(S, core, r50, guards, float(q), float(aG), float(bG))
                 go[iq, ia] = v.go
+                lbl[iq, ia] = LABELS.index(v.label) if v.label in LABELS else LABELS.index("other_nogo")
                 rows.append(dict(arm=name, q_core=float(q), alpha_G=float(aG), beta_SG=float(bG),
                                  label=v.label, go=v.go, max_S_G=round(maxS, 4),
                                  metrics={k: round(getattr(m, k), 4) if isinstance(getattr(m, k), float)
                                           else getattr(m, k) for k in m.__dataclass_fields__}))
-        grids[name] = go
-    return grids, rows
+        go_grids[name] = go; label_grids[name] = lbl
+    return go_grids, label_grids, rows
 
 
-def plot_and_readme(grids, rows, verdict, out_dir):
+_LABEL_COLORS = {"decay": "#e8e8e8", "blip": "#b8b8b8", "trivial_A": "#f4a261", "trivial_B": "#a97155",
+                 "runaway": "#e63946", "other_nogo": "#6c757d", "go": "#2a9d8f"}
+
+
+def plot_and_readme(go_grids, label_grids, verdict, label_counts, out_dir):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    from matplotlib.patches import Patch
     figdir = os.path.join(out_dir, "figures")
     os.makedirs(figdir, exist_ok=True)
-    fig, axes = plt.subplots(1, len(grids), figsize=(4 * len(grids), 3.6), constrained_layout=True)
-    if len(grids) == 1:
-        axes = [axes]
-    for ax, (name, go) in zip(axes, grids.items()):
-        ax.imshow(go.astype(float), origin="lower", aspect="auto", cmap="Greens", vmin=0, vmax=1,
-                  extent=[ALPHA_GRID.min(), ALPHA_GRID.max(), Q_GRID.min(), Q_GRID.max()])
+    ext = [ALPHA_GRID.min(), ALPHA_GRID.max(), Q_GRID.min(), Q_GRID.max()]
+    n = len(go_grids)
+
+    # Figure 1: go cells (green) per arm
+    fig, axes = plt.subplots(1, n, figsize=(4 * n, 3.6), constrained_layout=True)
+    for ax, (name, go) in zip(np.atleast_1d(axes), go_grids.items()):
+        ax.imshow(go.astype(float), origin="lower", aspect="auto", cmap="Greens", vmin=0, vmax=1, extent=ext)
         ax.set_title(name); ax.set_xlabel("alpha_G"); ax.set_ylabel("q_core")
     fig.suptitle(f"M4 Pass-1 phase-plane — go cells (green).  verdict: {verdict['verdict']}")
-    fig.savefig(os.path.join(figdir, "phase_plane_qcore_alpha.png"), dpi=140)
-    plt.close(fig)
-    with open(os.path.join(figdir, "README.md"), "w") as f:
-        f.write("### phase_plane_qcore_alpha.png\n\n"
-                "M4 Pass-1 go/no-go 相平面（rev4 §9.1）。每张子图一个臂（arm0 基线 / arm1 纯减法 / arm2 除法），"
-                "横轴 alpha_G、纵轴 q_core，绿色格=go(cell)（有界+自维持+大范围+空间结构+非 TRIVIAL-A/B）。\n\n"
-                f"**关注点**：arm2（除法）是否开出一片**连通**的绿区（面积≥K_MIN={K_MIN}），且该绿区在 arm1"
-                "（纯减法）里**不存在**——这是 go(plane) 的判据；当前 verdict = "
-                f"`{verdict['verdict']}`（arm2 最大连通={verdict['arm2_max_contiguous']}, "
-                f"arm1={verdict['arm1_max_contiguous']}）。\n")
+    fig.savefig(os.path.join(figdir, "phase_plane_qcore_alpha.png"), dpi=140); plt.close(fig)
+
+    # Figure 2: full label phase diagram per arm (decay/blip/trivial_A/trivial_B/runaway/other_nogo/go)
+    cmap = ListedColormap([_LABEL_COLORS[l] for l in LABELS])
+    fig, axes = plt.subplots(1, n, figsize=(4 * n, 3.9))
+    for ax, (name, lbl) in zip(np.atleast_1d(axes), label_grids.items()):
+        ax.imshow(lbl, origin="lower", aspect="auto", cmap=cmap, vmin=-0.5, vmax=len(LABELS) - 0.5, extent=ext)
+        ax.set_title(name); ax.set_xlabel("alpha_G"); ax.set_ylabel("q_core")
+    fig.legend(handles=[Patch(color=_LABEL_COLORS[l], label=l) for l in LABELS], loc="lower center",
+               ncol=len(LABELS), fontsize=7, frameon=False, bbox_to_anchor=(0.5, -0.01))
+    fig.suptitle("M4 Pass-1 phase-plane — cell labels")
+    fig.tight_layout(rect=[0, 0.09, 1, 0.95])
+    fig.savefig(os.path.join(figdir, "phase_plane_labels.png"), dpi=140, bbox_inches="tight"); plt.close(fig)
+
+    counts_md = "".join(f"- {name}: " + ", ".join(f"{k}={v}" for k, v in c.items() if v) + "\n"
+                        for name, c in label_counts.items())
+    open(os.path.join(figdir, "README.md"), "w").write(
+        "### phase_plane_qcore_alpha.png\n\n"
+        "M4 Pass-1 go/no-go 相平面（rev4 §9.1）。三张子图=三个臂（arm0 基线 / arm1 纯减法 / arm2 除法），"
+        "横轴 alpha_G、纵轴 q_core，绿色格=go(cell)（有界+自维持+大范围+空间结构+非 TRIVIAL-A/B）。\n\n"
+        f"**关注点**：arm2（除法）是否开出一片**连通**的绿区（≥K_MIN={K_MIN}）且该绿区在 arm1 里**不存在**——"
+        f"go(plane) 判据；当前 verdict=`{verdict['verdict']}`（arm2 最大连通={verdict['arm2_max_contiguous']}, "
+        f"arm1={verdict['arm1_max_contiguous']}）。\n\n"
+        "### phase_plane_labels.png\n\n"
+        "同一扫描的**完整标签**相图：每格分类为 decay / blip / trivial_A（低幅全场 skirt）/ trivial_B（轴向自限）"
+        "/ runaway / other_nogo / go，看非 go 格具体属于哪种失败模式。\n\n"
+        "**关注点**：go 区是否被 trivial_A / trivial_B 夹住、runaway 是否集中在低 q_core、高 alpha_G 角是否把 "
+        "runaway 压回有界。\n\n"
+        "### 各臂 label 计数\n\n" + counts_md)
+
+
+def _m2d(m):
+    return {k: (round(getattr(m, k), 4) if isinstance(getattr(m, k), float) else getattr(m, k))
+            for k in m.__dataclass_fields__}
+
+
+def _label_counts(rows, arm_names):
+    return {name: {lab: sum(1 for r in rows if r["arm"] == name and r["label"] == lab) for lab in LABELS}
+            for name in arm_names}
+
+
+def _write_json(out_dir, obj):
+    json.dump(obj, open(os.path.join(out_dir, "phase_plane.json"), "w"), indent=2)
+
+
+def _report(meta, flood, axial, guards, val, label_counts, verdict, calibration_valid):
+    print("\n===== M4 Pass-1 phase-plane report =====")
+    print(f"calibration_valid = {calibration_valid}")
+    print(f"n_core={meta['n_core']}  r50_psi={meta.get('r50_psi')}  sat_ceiling_hz={meta['sat_ceiling_hz']}")
+    print(f"reference q_flood={meta.get('q_flood')} q_axial={meta.get('q_axial')}")
+    print(f"  flood (want TRIVIAL-A): {_m2d(flood)}")
+    print(f"  axial (want TRIVIAL-B): {_m2d(axial)}")
+    print(f"  reference_validation: {val['reasons'] or 'OK (flood_ok & axial_ok)'}")
+    if not calibration_valid:
+        print("=> CALIBRATION INVALID: NO sweep, NO verdict written.\n"); return
+    print(f"guards = {guards.__dict__}")
+    for name, counts in label_counts.items():
+        print(f"  {name}: " + ", ".join(f"{k}={v}" for k, v in counts.items() if v))
+    print(f"go_plane_verdict = {verdict}")
+    print("(M4 Pass-1 bounded-core / nontrivial-intermediate SCREEN — NOT proven seizure mechanism.)\n")
 
 
 def main():
@@ -224,21 +300,40 @@ def main():
     t0 = time.time()
     S = build_substrate(a.seed)
     core = derive_core(S)
-    r50 = calibrate_r50(S, core)
-    flood, axial, q_flood, q_axial = reference_metrics(S, core, r50)
+    meta = dict(spec="2026-07-05 rev4 §8.1/§9.1", seed=a.seed, n_core=int(core.sum()),
+                sat_ceiling_hz=round(_sat_ceiling_hz(S), 2), tau_ref_E_ms=S["p"].tau_ref_E,
+                rate_hz_conversion="rate_E / NE / dt * 1e3 (per-neuron mean Hz)",
+                q_grid=Q_GRID.tolist(), alpha_grid=ALPHA_GRID.tolist(), k_min=K_MIN)
+    # ---- calibration (fail-closed) ----
+    try:
+        r50 = calibrate_r50(S, core)
+        flood, axial, q_flood, q_axial = reference_metrics(S, core, r50)
+    except CalibrationError as e:
+        meta["calibration_error"] = str(e)
+        _write_json(a.out, dict(meta=meta, calibration_valid=False, verdict=None,
+                                calibration_failed=dict(stage="calibrate_r50/reference", reason=str(e))))
+        print(f"CALIBRATION FAILED (no sweep, no verdict): {e}")
+        return
+    val = validate_reference_metrics(flood, axial)
+    meta.update(r50_psi=round(r50, 5), q_flood=q_flood, q_axial=q_axial,
+                flood_metrics=_m2d(flood), axial_metrics=_m2d(axial), reference_validation=val)
+    if not val["valid"]:
+        _write_json(a.out, dict(meta=meta, calibration_valid=False, verdict=None,
+                                calibration_failed=dict(stage="validate_reference_metrics",
+                                                        reasons=val["reasons"])))
+        _report(meta, flood, axial, None, val, None, None, calibration_valid=False)
+        return
     guards = calibrate_guards_from_references(flood, axial, margin=GUARD_MARGIN)
-    grids, rows = sweep(S, core, r50, guards)
-    verdict = go_plane_verdict(grids["arm2_divisive"], grids["arm1_subtractive"], K_MIN)
-    wall = time.time() - t0
-    out = dict(meta=dict(spec="2026-07-05 rev4 §8.1/§9.1", seed=a.seed, n_core=int(core.sum()),
-                         r50_psi=round(r50, 5), q_flood=q_flood, q_axial=q_axial,
-                         guards=guards.__dict__, q_grid=Q_GRID.tolist(), alpha_grid=ALPHA_GRID.tolist(),
-                         k_min=K_MIN, wall_s=round(wall, 1)),
-               verdict=verdict, rows=rows)
-    json.dump(out, open(os.path.join(a.out, "phase_plane.json"), "w"), indent=2)
-    plot_and_readme(grids, rows, verdict, a.out)
-    print(f"verdict={verdict['verdict']} (arm2={verdict['arm2_max_contiguous']}, "
-          f"arm1={verdict['arm1_max_contiguous']}); wrote {a.out}/phase_plane.json in {wall:.0f}s")
+    meta["guards"] = guards.__dict__
+    # ---- sweep (only after calibration is VALID) ----
+    go_grids, label_grids, rows = sweep(S, core, r50, guards)
+    verdict = go_plane_verdict(go_grids["arm2_divisive"], go_grids["arm1_subtractive"], K_MIN)
+    label_counts = _label_counts(rows, list(go_grids))
+    meta["wall_s"] = round(time.time() - t0, 1)
+    _write_json(a.out, dict(meta=meta, calibration_valid=True, verdict=verdict,
+                            label_counts=label_counts, rows=rows))
+    plot_and_readme(go_grids, label_grids, verdict, label_counts, a.out)
+    _report(meta, flood, axial, guards, val, label_counts, verdict, calibration_valid=True)
 
 
 if __name__ == "__main__":

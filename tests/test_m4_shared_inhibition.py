@@ -93,6 +93,21 @@ def test_SG_off_by_default_no_pool_evolution():
     assert f.S_G == 0.0 and f.mu_G == 0.0               # OFF -> no evolution
 
 
+def test_trace_rEfast_max_records_time_peak_not_final():
+    # fix P1-1: r50 calibration needs the rE_fast TIME peak, not the post-burst final value. Drive a burst
+    # then go quiet; the recorded time-peak must exceed the decayed final rE_fast.
+    f, nE, nI = _pool_field(r50_psi=0.3)
+    burst = np.zeros(nE + nI, dtype=bool); burst[:nE] = True
+    quiet = np.zeros(nE + nI, dtype=bool)
+    for _ in range(200):
+        f.step(burst, labels=None, dt=DT)
+    for _ in range(400):
+        f.step(quiet, labels=None, dt=DT)
+    assert len(f.trace_rEfast_max) == 600                          # recorded every step under use_SG
+    assert max(f.trace_rEfast_max) > 1e-3                          # the burst genuinely drove the sensor
+    assert max(f.trace_rEfast_max) > float(f.rE_fast.max()) + 1e-9  # time-peak > post-burst final (the bug)
+
+
 # ---------------------------------------------------------------- Task 4: divisive membrane + arms
 def test_apply_currents_exact_parity_when_alpha_zero():
     f, nE, nI = _pool_field(use_SG=True, alpha_G=0.0)

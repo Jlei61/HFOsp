@@ -92,6 +92,46 @@ def calibrate_guards_from_references(flood, axial, base=None, margin=0.05):
     )
 
 
+class CalibrationError(RuntimeError):
+    """Raised when §9.1 calibration cannot complete (no valid rE_fast peak, or the arm-0 reference
+    instances are not legitimate TRIVIAL-A / TRIVIAL-B). The runner catches it, writes calibration_failed
+    diagnostics, and does NOT sweep or emit a formal verdict."""
+
+
+# Reference-legitimacy criteria — what makes a VALID arm-0 TRIVIAL reference (§9.1 step 1; REVIEW POINTS).
+FLOOD_MIN_ACT = 0.5     # a real flood recruits >= half the field
+FLOOD_MAX_GLOB = 0.4    # low-amplitude skirt: globality below this
+AXIAL_MAX_FOFF = 0.3    # axis-confined: off-axis fraction below this
+AXIAL_MIN_ACT = 0.05    # a real event (not a blip)
+
+
+def validate_reference_metrics(flood, axial):
+    """Verify the arm-0 references are LEGITIMATE TRIVIAL-A (flood) / TRIVIAL-B (axial-retreat) instances
+    BEFORE they calibrate guards (§9.1 step 1). A flood must be whole-field + low-globality skirt; an axial
+    must be axis-confined + self-limited + a real event. Returns {valid, flood_ok, axial_ok, *_checks,
+    reasons}. If not valid, calibration is meaningless -> caller MUST NOT sweep; write calibration_failed."""
+    flood_checks = {
+        f"act_frac>={FLOOD_MIN_ACT}": bool(flood.act_frac >= FLOOD_MIN_ACT),
+        f"globality<={FLOOD_MAX_GLOB}": bool(flood.globality <= FLOOD_MAX_GLOB),
+    }
+    axial_checks = {
+        "self_limited": bool(axial.self_limited),
+        f"f_off<={AXIAL_MAX_FOFF}": bool(axial.f_off <= AXIAL_MAX_FOFF),
+        f"act_frac>={AXIAL_MIN_ACT}": bool(axial.act_frac >= AXIAL_MIN_ACT),
+    }
+    flood_ok = all(flood_checks.values())
+    axial_ok = all(axial_checks.values())
+    reasons = []
+    if not flood_ok:
+        reasons.append("flood is not a legitimate TRIVIAL-A (whole-field low-amplitude skirt): failed "
+                       + ", ".join(k for k, v in flood_checks.items() if not v))
+    if not axial_ok:
+        reasons.append("axial is not a legitimate TRIVIAL-B (axis-confined self-limited event): failed "
+                       + ", ".join(k for k, v in axial_checks.items() if not v))
+    return {"valid": bool(flood_ok and axial_ok), "flood_ok": flood_ok, "axial_ok": axial_ok,
+            "flood_checks": flood_checks, "axial_checks": axial_checks, "reasons": reasons}
+
+
 @dataclass(frozen=True)
 class CellMetrics:
     """One phase-plane cell's readouts (already computed from its simulation, upstream)."""

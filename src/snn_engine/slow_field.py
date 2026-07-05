@@ -245,6 +245,7 @@ class SpatialSlowField:
         self.mu_G = 0.0
         self.S_G = 0.0
         self.trace_muG = []; self.trace_SG = []; self.trace_AG = []
+        self.trace_rEfast_max = []      # per-step spatial-max of rE_fast (for r50 sensor-scale calibration)
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -330,4 +331,5 @@ class SpatialSlowField:
             self.S_G += dt * (-self.S_G + cfg.S_max * self.mu_G) / cfg.tau_S
             self.S_G = float(np.clip(self.S_G, 0.0, cfg.S_max))
             self.trace_AG.append(A_G); self.trace_muG.append(self.mu_G); self.trace_SG.append(self.S_G)
+            self.trace_rEfast_max.append(float(self.rE_fast.max()))   # time trace of the sensor-field peak
         self._t += dt

@@ -146,7 +146,9 @@ def extract_cell_metrics(res, posE, dt, t_kick, *, core_neuron_mask, center, T_m
                          event_lo=None, event_hi=None) -> CellMetrics:
     """Assemble a CellMetrics (src.sef_hfo_m4_phaseplane) from a simulate_kick result `res`
     (needs res['E_spk_bool'], res['rate_E']) + E positions. `center` = sheet center; onset axis is derived
-    here. `event_lo/hi` default to [t_kick, end]. All threshold/window params come from calibration (§9.1)."""
+    here. `event_lo/hi` default to [t_kick, end]. All threshold/window params come from calibration (§9.1).
+    UNITS: `sat_ceiling` and `thresh_hz` are per-neuron mean Hz; res['rate_E'] (a per-step spike COUNT) is
+    converted to Hz internally before the saturation/energy/branching comparisons."""
     E_spk = np.asarray(res["E_spk_bool"])
     rate = np.asarray(res["rate_E"], float)
     nsteps = E_spk.shape[0]
@@ -166,9 +168,14 @@ def extract_cell_metrics(res, posE, dt, t_kick, *, core_neuron_mask, center, T_m
     f_off = off_axis_fraction(posE, active, axis_unit, center, band_half)
     core_ov = core_overlap_spikes(E_spk, dt, t_kick, core_neuron_mask)
     glob = globality_pr(E_spk, dt, t_kick)
-    b_avg = branching_ratio(rate, dt, t_kick, thresh_hz)
-    mono_sat = monotonic_saturation(rate, dt, t_kick, sat_ceiling)
-    fin_e = finite_energy_ok(rate, dt, t_kick, sat_ceiling)
+    # rate_E is a per-step SPIKE COUNT (kick_probe.py:305), NOT Hz. Convert to per-neuron mean Hz using
+    # the engine's own readout formula rate_E/NE/dt*1e3 (kick_probe.py:360) so `sat_ceiling` (Hz) and
+    # `thresh_hz` (Hz) are meaningful. self_limit above stays on the raw rate (it is ratio-based).
+    NE = E_spk.shape[1]
+    rate_hz = rate / NE / dt * 1e3
+    b_avg = branching_ratio(rate_hz, dt, t_kick, thresh_hz)             # thresh_hz = per-neuron Hz
+    mono_sat = monotonic_saturation(rate_hz, dt, t_kick, sat_ceiling)   # sat_ceiling = per-neuron Hz
+    fin_e = finite_energy_ok(rate_hz, dt, t_kick, sat_ceiling)
     self_lim = spatial_self_limited(E_spk, dt, t_kick, peak_t, late_after=80.0, win=40.0,
                                     retreat_factor=retreat_factor)
 

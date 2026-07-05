@@ -13,6 +13,7 @@ from src.sef_hfo_m4_phaseplane import (  # noqa: E402
     q_core, derive_core_mask, GuardThresholds, CellMetrics, CellVerdict,
     is_bounded, is_trivial_A, is_trivial_B, classify_cell,
     largest_contiguous, go_plane_verdict, calibrate_guards_from_references,
+    validate_reference_metrics,
 )
 
 
@@ -123,6 +124,20 @@ def test_largest_contiguous_4connected():
                   [0, 0, 1, 0]], dtype=bool)
     assert largest_contiguous(g) == 3                              # top-left L of 3; the 2 on the right are separate
     assert largest_contiguous(np.zeros((3, 3), bool)) == 0
+
+
+def test_validate_reference_metrics_gates_illegit_references():
+    # legit references: a whole-field low-globality flood + an axis-confined self-limited axial.
+    flood = _core_cell(act_frac=0.8, globality=0.2, core_overlap=0.8)
+    axial = _core_cell(f_off=0.1, self_limited=True, act_frac=0.2)
+    v = validate_reference_metrics(flood, axial)
+    assert v["valid"] and v["flood_ok"] and v["axial_ok"]
+    # a bounded localized core mistaken for a flood (low act_frac) -> flood illegitimate -> invalid, no reasons empty
+    v2 = validate_reference_metrics(_core_cell(act_frac=0.2, globality=0.5), axial)
+    assert (not v2["valid"]) and (not v2["flood_ok"]) and v2["reasons"]
+    # an "axial" that did not retreat (self_limited False) -> axial illegitimate -> invalid
+    v3 = validate_reference_metrics(flood, _core_cell(f_off=0.1, self_limited=False, act_frac=0.2))
+    assert (not v3["valid"]) and (not v3["axial_ok"])
 
 
 def test_calibrate_guards_excludes_reference_instances():

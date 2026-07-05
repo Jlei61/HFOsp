@@ -92,6 +92,33 @@ def test_extract_cell_metrics_end_to_end():
     assert 0.0 <= m.globality <= 1.0
 
 
+def test_extract_uses_per_neuron_hz_for_ceiling():
+    # fix P1-2: rate_E is a per-step COUNT; the ceiling is per-neuron Hz. 3 of NE=10 firing each step at
+    # dt=1.0 -> 3/10/1*1e3 = 300 Hz. With a 250 Hz ceiling -> finite_energy False. If extract compared the
+    # raw COUNT 3 to 250 it would be True -> asserting False proves the Hz conversion is applied.
+    NE = 10; nsteps = 60; dt = 1.0
+    posE = np.random.default_rng(0).uniform(0, 6, (NE, 2))
+    core = np.zeros(NE, bool); core[:2] = True
+    spk = np.zeros((nsteps, NE), bool)
+    spk[10:40, :3] = True
+    res = {"E_spk_bool": spk, "rate_E": spk.sum(axis=1).astype(float)}
+    m = extract_cell_metrics(res, posE, dt, t_kick=5.0, core_neuron_mask=core, center=posE[core].mean(0),
+                             T_min=5.0, band_half=1.0, sat_ceiling=250.0, thresh_hz=10.0, retreat_factor=0.5)
+    assert not m.finite_energy                     # 300 Hz > 250 Hz ceiling -> Hz conversion applied
+
+
+def test_r50_from_peak_fail_closed():
+    # fix P1-1: r50 from the rE_fast TIME-peak trace; fail closed on empty / no-activity traces.
+    import importlib
+    import pytest
+    R = importlib.import_module("scripts.run_m4_phaseplane")
+    with pytest.raises(R.CalibrationError):
+        R._r50_from_peak([])                        # empty trace -> fail closed
+    with pytest.raises(R.CalibrationError):
+        R._r50_from_peak([0.0, 0.0])                # peak below R50_MIN_PEAK -> fail closed
+    assert abs(R._r50_from_peak([0.5, 1.0, 0.3]) - 1.0 * R.R50_FRAC) < 1e-9   # r50 = R50_FRAC * time-peak
+
+
 def test_runner_imports_without_running_and_refuses():
     # importing the runner must NOT run any simulation; main() without --confirm-run must refuse.
     import importlib
