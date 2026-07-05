@@ -1,0 +1,532 @@
+{
+ "csd_verdict": "unresolved_operating_point",
+ "linear_ignition": {
+  "class": "core_localized",
+  "delocalized_subtype": null,
+  "core_overlap": 0.9940611012564615,
+  "globality": 0.11243893497005339,
+  "two_core_symmetry_break": true,
+  "corridor_power": 0.0,
+  "shape_descriptors": {
+   "axis_elongation": 0.022403059854368496,
+   "off_axis": 1.3335008475237516e-20,
+   "axis_wavevector_alignment": 0.28526899480414786
+  },
+  "near_fold_note": "two-core crossing alpha1 is a post-fold first-positive value, not a precise alpha0~0 critical shape; two cores share one q_core (symmetric-disinhibition approximation) -> proves corridor stays dark given an axial two-core opportunity, not subject1146 dual-source reproduction.",
+  "ignition_sensitivity": "stable",
+  "off_axis_sentinel": {
+   "off_axis": "absent",
+   "nonaxis_gain": 0.04872888937130455,
+   "axis_gain": 0.08736802089234887,
+   "global_gain": 0.016953853323699287,
+   "annotation": "nonaxis_residual = core-compactness residual in a core-localized mode, NOT sideways propagation",
+   "nonaxis_source_policy": "available_residual_direction",
+   "sentinel_tail_horizons_ms": [
+    250,
+    500
+   ],
+   "off_axis_per_tail_decision": [
+    "absent",
+    "absent"
+   ]
+  },
+  "crossing": {
+   "alpha0_crossing_time_ms": 501.5421875,
+   "alpha0_crossing_slow_state": {
+    "q_global": 0.9108950028778366,
+    "q_core": 0.8521544916211825,
+    "hG_scalar": 1.852357907038426e-06,
+    "gK_value": null
+   },
+   "crossing_frac": 0.734375,
+   "crossing_width_ms": 0.5328125000000004,
+   "alpha_left": -0.005426491384648118,
+   "alpha_right": 0.005500460644969333,
+   "crossing_status": "single",
+   "op_solve_quality_left": true,
+   "op_solve_quality_right": true,
+   "branch_identity_clean": true
+  }
+ },
+ "nonlinear_spread": {
+  "onset": "undetermined",
+  "endgame": "undetermined",
+  "off_axis": "undetermined",
+  "depth_dependent": false,
+  "footprint_trajectory": {
+   "at_crossing": {
+    "core_kick": [
+     {
+      "globality": 0.1362243487465224,
+      "elongation_axis": 8.38381728089809e-05,
+      "off_axis": 2.886999163810382e-19,
+      "wavevec_axis": 0.22035783218053567,
+      "core_overlap": 0.9999662275566856,
+      "peak_dRE": 0.0016148620929443249,
+      "t_ms": 2.0,
+      "max_rE_kick": 0.005294507454371611,
+      "active_frac": 0.1388888888888889
+     },
+     {
+      "globality": 0.10546798770156379,
+      "elongation_axis": 0.0017257030989831616,
+      "off_axis": 2.391833659752473e-19,
+      "wavevec_axis": 0.12095705911574735,
+      "core_overlap": 0.9994646523396618,
+      "peak_dRE": 0.002708167174504043,
+      "t_ms": 5.0,
+      "max_rE_kick": 0.008041614945504023,
+      "active_frac": 0.1388888888888889
+     },
+     {
+      "globality": 0.07794497019726394,
+      "elongation_axis": 0.015207827415811014,
+      "off_axis": 6.900903443688627e-20,
+      "wavevec_axis": 0.014183918083270774,
+      "core_overlap": 0.9964562568789218,
+      "peak_dRE": 0.004943076387294134,
+      "t_ms": 10.0,
+      "max_rE_kick": 0.012236102929673663,
+      "active_frac": 0.19444444444444445
+     },
+     {
+      "globality": 0.15553480470564876,
+      "elongation_axis": 0.20570817932530522,
+      "off_axis": 1.936031313650469e-22,
+      "wavevec_axis": -0.04339079743421593,
+      "core_overlap": 0.9141585420585452,
+      "peak_dRE": 0.0040106467779429085,
+      "t_ms": 20.0,
+      "max_rE_kick": 0.009718932890520657,
+      "active_frac": 0.3611111111111111
+     },
+     {
+      "globality": 0.20369530770589925,
+      "elongation_axis": 0.48272886662222314,
+      "off_axis": 1.2240278736631971e-21,
+      "wavevec_axis": -0.1551763388071598,
+      "core_overlap": 0.7125057678085498,
+      "peak_dRE": 0.0025365600125633663,
+      "t_ms": 30.0,
+      "max_rE_kick": 0.006134597221727528,
+      "active_frac": 0.5277777777777778
+     },
+     {
+      "globality": 0.24936777141262925,
+      "elongation_axis": 0.4873450781322322,
+      "off_axis": 7.232125090737957e-24,
+      "wavevec_axis": 0.10532174866701315,
+      "core_overlap": 0.6379868967783238,
+      "peak_dRE": 0.0007383298844297272,
+      "t_ms": 50.0,
+      "max_rE_kick": 0.003878673952426525,
+      "active_frac": 0.5277777777777778
+     },
+     {
+      "globality": 0.11329450482180553,
+      "elongation_axis": 0.35076350125911415,
+      "off_axis": 1.1228266796790618e-20,
+      "wavevec_axis": -0.3584312215111192,
+      "core_overlap": 0.8765567007311112,
+      "peak_dRE": 0.0023033810275839726,
+      "t_ms": 75.0,
+      "max_rE_kick": 0.005941002511469071,
+      "active_frac": 0.3611111111111111
+     },
+     {
+      "globality": 0.18172176113509186,
+      "elongation_axis": 0.27031032077817035,
+      "off_axis": 2.2364865260675553e-20,
+      "wavevec_axis": 0.14676506432207104,
+      "core_overlap": 0.8284258121135479,
+      "peak_dRE": 0.0006087142737401822,
+      "t_ms": 100.0,
+      "max_rE_kick": 0.003742809611155073,
+      "active_frac": 0.4722222222222222
+     },
+     {
+      "globality": 0.14484653951828314,
+      "elongation_axis": 0.32762291847865516,
+      "off_axis": 8.673753323958703e-20,
+      "wavevec_axis": 0.20770800371813458,
+      "core_overlap": 0.8176094308039695,
+      "peak_dRE": 0.00017169737444276342,
+      "t_ms": 200.0,
+      "max_rE_kick": 0.0041214391734748345,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.02855164897184376,
+      "elongation_axis": 0.5234709115993276,
+      "off_axis": 1.1368647154591536e-20,
+      "wavevec_axis": 0.14228468992861204,
+      "core_overlap": 0.9869377850573136,
+      "peak_dRE": 0.0003855807946884235,
+      "t_ms": 300.0,
+      "max_rE_kick": 0.003808370412928859,
+      "active_frac": 0.027777777777777776
+     }
+    ],
+    "critical_mode": [
+     {
+      "globality": 0.11146912821942376,
+      "elongation_axis": 0.006350400790700044,
+      "off_axis": 9.227167513890908e-08,
+      "wavevec_axis": 0.014695003250431883,
+      "core_overlap": 0.9983913499246935,
+      "peak_dRE": 0.0003782313133466452,
+      "t_ms": 2.0,
+      "max_rE_kick": 0.003679644637255504,
+      "active_frac": 0.08333333333333333
+     },
+     {
+      "globality": 0.11112936104724537,
+      "elongation_axis": 0.00019732348423362,
+      "off_axis": 0.0007746587832389027,
+      "wavevec_axis": 0.0025768084891069016,
+      "core_overlap": 0.9999162311435718,
+      "peak_dRE": 0.0003106257458423507,
+      "t_ms": 5.0,
+      "max_rE_kick": 0.005333440741374379,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.10976120227487879,
+      "elongation_axis": 0.0665742170714276,
+      "off_axis": 0.07624685516584646,
+      "wavevec_axis": -0.05279856512753993,
+      "core_overlap": 0.9807994690081387,
+      "peak_dRE": 0.00015112112466851612,
+      "t_ms": 10.0,
+      "max_rE_kick": 0.007293936207920733,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.0929906871049956,
+      "elongation_axis": 0.025150040015039045,
+      "off_axis": 0.2086508676936782,
+      "wavevec_axis": 0.04173945246649588,
+      "core_overlap": 0.9932725941479107,
+      "peak_dRE": 0.00038923839357994,
+      "t_ms": 20.0,
+      "max_rE_kick": 0.00571472033287911,
+      "active_frac": 0.08333333333333333
+     },
+     {
+      "globality": 0.09689370228792438,
+      "elongation_axis": 0.010064778861233204,
+      "off_axis": 0.19187720567646527,
+      "wavevec_axis": -0.00849370265649821,
+      "core_overlap": 0.9966182719187209,
+      "peak_dRE": 0.00033713815469756667,
+      "t_ms": 30.0,
+      "max_rE_kick": 0.003934890133876894,
+      "active_frac": 0.19444444444444445
+     },
+     {
+      "globality": 0.11126224682288827,
+      "elongation_axis": 0.0012405239131825377,
+      "off_axis": 0.03756971188174917,
+      "wavevec_axis": -0.00403054159488572,
+      "core_overlap": 0.999088143485761,
+      "peak_dRE": 0.000308739254732366,
+      "t_ms": 50.0,
+      "max_rE_kick": 0.0038547654483417374,
+      "active_frac": 0.25
+     },
+     {
+      "globality": 0.09675448723199974,
+      "elongation_axis": 0.007940881804063464,
+      "off_axis": 0.19510339093974624,
+      "wavevec_axis": -0.00036978096307821847,
+      "core_overlap": 0.9968272593588747,
+      "peak_dRE": 0.0002725277897725892,
+      "t_ms": 75.0,
+      "max_rE_kick": 0.003656613151938179,
+      "active_frac": 0.1388888888888889
+     },
+     {
+      "globality": 0.10248323786824481,
+      "elongation_axis": 0.05576774374464449,
+      "off_axis": 0.21874812219185127,
+      "wavevec_axis": -0.04783676808078489,
+      "core_overlap": 0.9804950653218356,
+      "peak_dRE": 0.00017184857324563678,
+      "t_ms": 100.0,
+      "max_rE_kick": 0.004164685941311393,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.16973641844317255,
+      "elongation_axis": 0.3428394466804152,
+      "off_axis": 0.015487620779595828,
+      "wavevec_axis": 0.10307044225233339,
+      "core_overlap": 0.881297845677371,
+      "peak_dRE": 3.0238763532567606e-05,
+      "t_ms": 200.0,
+      "max_rE_kick": 0.003974897659513044,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.09680825001660344,
+      "elongation_axis": 0.09025338676317281,
+      "off_axis": 0.17065982686936912,
+      "wavevec_axis": 0.04943287545646471,
+      "core_overlap": 0.9696978035735063,
+      "peak_dRE": 3.160551130245706e-05,
+      "t_ms": 300.0,
+      "max_rE_kick": 0.0034282016374288004,
+      "active_frac": 0.027777777777777776
+     }
+    ]
+   },
+   "just_past": {
+    "core_kick": [
+     {
+      "globality": 0.13422845040175627,
+      "elongation_axis": 9.21910717541007e-05,
+      "off_axis": 5.899393825222077e-22,
+      "wavevec_axis": 0.2114936637927222,
+      "core_overlap": 0.9999627719760863,
+      "peak_dRE": 0.0017059660897509816,
+      "t_ms": 2.0,
+      "max_rE_kick": 0.006192885846676927,
+      "active_frac": 0.1388888888888889
+     },
+     {
+      "globality": 0.08750715152595252,
+      "elongation_axis": 0.0022881482982508757,
+      "off_axis": 1.1837996932988363e-21,
+      "wavevec_axis": 0.0726290279494034,
+      "core_overlap": 0.9993827854307865,
+      "peak_dRE": 0.002936046808369311,
+      "t_ms": 5.0,
+      "max_rE_kick": 0.01038373099856291,
+      "active_frac": 0.1388888888888889
+     },
+     {
+      "globality": 0.06053348408344198,
+      "elongation_axis": 0.029751991878716064,
+      "off_axis": 3.5683631854428212e-22,
+      "wavevec_axis": -0.04356567314478032,
+      "core_overlap": 0.9946385700364266,
+      "peak_dRE": 0.005219670136233567,
+      "t_ms": 10.0,
+      "max_rE_kick": 0.01616675306106413,
+      "active_frac": 0.3611111111111111
+     },
+     {
+      "globality": 0.1749869627797816,
+      "elongation_axis": 0.3232473728340146,
+      "off_axis": 2.233806220265938e-24,
+      "wavevec_axis": -0.12581150795912455,
+      "core_overlap": 0.8489847381363909,
+      "peak_dRE": 0.0038830860982974977,
+      "t_ms": 20.0,
+      "max_rE_kick": 0.011813346584787974,
+      "active_frac": 0.3611111111111111
+     },
+     {
+      "globality": 0.1795979956702067,
+      "elongation_axis": 0.3861839537777379,
+      "off_axis": 1.6587833934187062e-23,
+      "wavevec_axis": 0.09364211996779996,
+      "core_overlap": 0.772420448751928,
+      "peak_dRE": 0.004300394048762644,
+      "t_ms": 30.0,
+      "max_rE_kick": 0.008896314655122084,
+      "active_frac": 0.5277777777777778
+     },
+     {
+      "globality": 0.2108624640028328,
+      "elongation_axis": 0.41964979999286384,
+      "off_axis": 2.7139759376401507e-24,
+      "wavevec_axis": 0.10917926275672335,
+      "core_overlap": 0.7001416719907949,
+      "peak_dRE": 0.001834981753570236,
+      "t_ms": 50.0,
+      "max_rE_kick": 0.005923004441825758,
+      "active_frac": 0.5277777777777778
+     },
+     {
+      "globality": 0.09753620559634224,
+      "elongation_axis": 0.49699148127300896,
+      "off_axis": 1.1571477607971696e-23,
+      "wavevec_axis": -0.45662501479796835,
+      "core_overlap": 0.8252077864202011,
+      "peak_dRE": 0.004065343569217694,
+      "t_ms": 75.0,
+      "max_rE_kick": 0.009374472691137638,
+      "active_frac": 0.5277777777777778
+     },
+     {
+      "globality": 0.1475604822916935,
+      "elongation_axis": 0.23921481063690295,
+      "off_axis": 2.0533416028776852e-23,
+      "wavevec_axis": 0.18050093071918785,
+      "core_overlap": 0.8630992453674728,
+      "peak_dRE": 0.0030913877420239437,
+      "t_ms": 100.0,
+      "max_rE_kick": 0.006735029472297322,
+      "active_frac": 0.5277777777777778
+     },
+     {
+      "globality": 0.13608859241402774,
+      "elongation_axis": 0.18492951605336,
+      "off_axis": 3.0266982633626476e-22,
+      "wavevec_axis": 0.1999978680236532,
+      "core_overlap": 0.900818149453082,
+      "peak_dRE": 0.007719629319101867,
+      "t_ms": 200.0,
+      "max_rE_kick": 0.010600981198325699,
+      "active_frac": 0.5277777777777778
+     },
+     {
+      "globality": 0.18384463174360963,
+      "elongation_axis": 0.4470301236573851,
+      "off_axis": 1.599781920270568e-23,
+      "wavevec_axis": 0.1970515254138338,
+      "core_overlap": 0.7584552690497284,
+      "peak_dRE": 0.049936944545813176,
+      "t_ms": 300.0,
+      "max_rE_kick": 0.05267062713115951,
+      "active_frac": 1.0
+     }
+    ],
+    "critical_mode": [
+     {
+      "globality": 0.11120524677801737,
+      "elongation_axis": 0.0006723768765795082,
+      "off_axis": 0.00016031285900540407,
+      "wavevec_axis": 0.004729580170847064,
+      "core_overlap": 0.9995763433756482,
+      "peak_dRE": 0.00038643355121683893,
+      "t_ms": 2.0,
+      "max_rE_kick": 0.0044869223907655475,
+      "active_frac": 0.08333333333333333
+     },
+     {
+      "globality": 0.11136459646508144,
+      "elongation_axis": 0.004403291502041882,
+      "off_axis": 1.0438519895338757e-05,
+      "wavevec_axis": -0.013081644661498847,
+      "core_overlap": 0.9988605809994043,
+      "peak_dRE": 0.0003231140439639386,
+      "t_ms": 5.0,
+      "max_rE_kick": 0.007447684600615442,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.11727292919927172,
+      "elongation_axis": 0.10523768151550904,
+      "off_axis": 0.011851903649759295,
+      "wavevec_axis": -0.07433272173207732,
+      "core_overlap": 0.9693967835530594,
+      "peak_dRE": 0.0001877940610830963,
+      "t_ms": 10.0,
+      "max_rE_kick": 0.01094741623612878,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.09789877934868833,
+      "elongation_axis": 0.04036403052425086,
+      "off_axis": 0.1708587333146697,
+      "wavevec_axis": 0.04489797895577039,
+      "core_overlap": 0.9886024941338966,
+      "peak_dRE": 0.0003530245662990597,
+      "t_ms": 20.0,
+      "max_rE_kick": 0.00793238328339001,
+      "active_frac": 0.08333333333333333
+     },
+     {
+      "globality": 0.10371480292577413,
+      "elongation_axis": 0.0075155443687417904,
+      "off_axis": 0.13428068481598773,
+      "wavevec_axis": -0.011924961604046123,
+      "core_overlap": 0.997661643708569,
+      "peak_dRE": 0.00047451816606264904,
+      "t_ms": 30.0,
+      "max_rE_kick": 0.005070433233859579,
+      "active_frac": 0.19444444444444445
+     },
+     {
+      "globality": 0.10780416034806439,
+      "elongation_axis": 0.005743005346264704,
+      "off_axis": 0.09444379740524592,
+      "wavevec_axis": -0.011830434690487564,
+      "core_overlap": 0.9981809644453082,
+      "peak_dRE": 0.0005271476482265579,
+      "t_ms": 50.0,
+      "max_rE_kick": 0.004615195894050946,
+      "active_frac": 0.4166666666666667
+     },
+     {
+      "globality": 0.08891412720808353,
+      "elongation_axis": 0.012063084245369386,
+      "off_axis": 0.2568079713704195,
+      "wavevec_axis": 0.01180548071354313,
+      "core_overlap": 0.9941741489583062,
+      "peak_dRE": 0.0005311960118018315,
+      "t_ms": 75.0,
+      "max_rE_kick": 0.0053922913616073626,
+      "active_frac": 0.1388888888888889
+     },
+     {
+      "globality": 0.10281906011847111,
+      "elongation_axis": 0.029424974762723072,
+      "off_axis": 0.1621617999976321,
+      "wavevec_axis": -0.02992484793941527,
+      "core_overlap": 0.9893882723148022,
+      "peak_dRE": 0.000428575963297029,
+      "t_ms": 100.0,
+      "max_rE_kick": 0.0042357163165647,
+      "active_frac": 0.3055555555555556
+     },
+     {
+      "globality": 0.11420451735541234,
+      "elongation_axis": 0.4209720406284336,
+      "off_axis": 0.11254231277014573,
+      "wavevec_axis": -0.14118744153099932,
+      "core_overlap": 0.823945823198378,
+      "peak_dRE": 0.00011306692810056883,
+      "t_ms": 200.0,
+      "max_rE_kick": 0.004632230254452244,
+      "active_frac": 0.027777777777777776
+     },
+     {
+      "globality": 0.14256133149870004,
+      "elongation_axis": 0.10428381141572643,
+      "off_axis": 0.046556226121493405,
+      "wavevec_axis": 0.07598985922128583,
+      "core_overlap": 0.9753948017031995,
+      "peak_dRE": 5.880798381983129e-05,
+      "t_ms": 300.0,
+      "max_rE_kick": 0.004093754335132526,
+      "active_frac": 0.027777777777777776
+     }
+    ]
+   }
+  },
+  "control_minus_kick": true,
+  "epsilon_sensitivity": "epsilon_sensitive",
+  "descriptive_igniting_note": {
+   "n_igniting_of_total": {
+    "at_crossing": "3/4",
+    "just_past": "3/4"
+   },
+   "igniting_onset": "axial",
+   "igniting_endgame": "self_limited",
+   "non_igniting_combos": [
+    {
+     "eps_rel": 0.05,
+     "polarity": -1,
+     "reason": "suppressing kick, active_frac did not rise"
+    }
+   ],
+   "caveat": "DESCRIPTIVE ONLY \u2014 primary nonlinear_spread verdict is undetermined (pre-registered \u00a74.3); NOT a spread claim"
+  }
+ },
+ "interpretation": "core_localized ignition followed by undetermined transient and undetermined; off_axis undetermined",
+ "base_gate_passed": true,
+ "unresolved_subreason": "unresolved_nonlinear_spread"
+}

@@ -4,14 +4,16 @@ Productionizes the M2 de-risk pilots (results/topic4_criticality_m2/pilots/*.py)
 Spec: docs/superpowers/specs/2026-07-04-topic4-m3v2-2-m2-critical-mode-decomposition-design.md (rev2.1).
 """
 from __future__ import annotations
+import json
 from pathlib import Path
 import numpy as np
 import yaml
 import src.topic4_m3b_spectral_phase as spm
-from src.topic4_criticality import _fields_from_slow, check_low_branch_continuation_between
+from src.topic4_criticality import _fields_from_slow, check_low_branch_continuation_between, _crit_op_context
 
 _REPO = Path(__file__).resolve().parents[1]
 _DEFAULT_CFG = _REPO / "config/topic4_criticality_m2.yaml"
+_M1_VERDICT_PATH = _REPO / "results/topic4_criticality/trajectory_verdict.json"
 
 
 def load_m2_config(path=None) -> dict:
@@ -925,4 +927,130 @@ def read_nonlinear_spread(crossing, points, grid, kernels, core, b_core, cfg_cri
         "descriptive_igniting_note": descriptive_igniting_note,
         "_epsilon_sweep_detail": epsilon_detail,
         "_depth_aggregate": depth_agg,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Task 5: two-stage verdict assembly (ignition/spread) + M1 CSD co-display    #
+# --------------------------------------------------------------------------- #
+# Wires T1 (localize_alpha0_crossing) -> T2 (read_linear_ignition) + T3 (off_axis_sentinel) ->
+# T4 (read_nonlinear_spread) into the spec §1 two-stage verdict. `csd_verdict` is M1's OWN
+# unresolved_operating_point verdict (results/topic4_criticality/trajectory_verdict.json), read
+# fresh here and displayed alongside -- M2 never recomputes or overrides it (spec §0-b/§7).
+
+
+def _ignition_base_gate(crossing) -> bool:
+    """spec §5.0 ignition base gate: the alpha0 crossing must be localized (both `_crossing_op`/
+    `_crossing_res` populated -- T1's real "no crossing found" path returns both None) AND
+    `op_solve_quality_left`/`op_solve_quality_right` are SEPARATE fields that must BOTH read True
+    (T1 review note, progress.md: do not read one side alone as "fully clean") AND
+    `branch_identity_clean`. When all three hold, the 5 continuous shape scores (spec §5.0's 4th
+    conjunct) are guaranteed computable -- `shape_scores_at` only needs a resolved `_crossing_res`,
+    which `op_solve_quality_left`/`_right` already required -- so there is no separate "5 scores
+    present" check to perform here (it would always be a no-op once the other three hold)."""
+    if crossing.get("_crossing_op") is None or crossing.get("_crossing_res") is None:
+        return False
+    return bool(crossing["op_solve_quality_left"]) and bool(crossing["op_solve_quality_right"]) \
+        and bool(crossing["branch_identity_clean"])
+
+
+def _undetermined_linear_ignition() -> dict:
+    """`linear_ignition` when the §5.0 base gate fails (spec §5.4): nothing could be scored, so
+    `class` falls into the pre-registered `ambiguous` bucket (no 4th enum value invented -- spec §0
+    fixes `class` in {core_localized, delocalized, ambiguous}) and every descriptive/derived field
+    is None. Unreachable on the actual v2.2 SIMULATION crossing (T1-T4 all confirm
+    `base_gate_passed` is True there); kept for a future subject/trajectory whose crossing
+    genuinely fails to localize or breaks its quality/branch-identity gate."""
+    return {
+        "class": "ambiguous", "delocalized_subtype": None,
+        "core_overlap": None, "globality": None,
+        "two_core_symmetry_break": None, "corridor_power": None,
+        "shape_descriptors": None, "near_fold_note": None,
+        "ignition_sensitivity": None, "off_axis_sentinel": None,
+    }
+
+
+def _undetermined_nonlinear_spread() -> dict:
+    """`nonlinear_spread` when the §5.0 ignition base gate fails: there is no localized crossing to
+    define the `at_crossing` depth (spec's crossing IS the primary object T4 integrates from), so
+    the whole segment reads undetermined -- the same shape `read_nonlinear_spread` itself already
+    reports on its own internal `op_cross is None` fallback (spec §5.4), reproduced here directly
+    so T5 need not call into T4 (and pay for its `just_past`-only partial compute) at all."""
+    return {
+        "onset": "undetermined", "endgame": "undetermined", "off_axis": "undetermined",
+        "depth_dependent": None, "footprint_trajectory": None,
+        "control_minus_kick": None, "epsilon_sensitivity": "epsilon_sensitive",
+        "descriptive_igniting_note": None,
+    }
+
+
+def _unresolved_subreason(crossing, base_gate_passed, sp):
+    """spec §1/§5.4 `unresolved_subreason`, decoupled per segment (ignition checked first since
+    `nonlinear_spread`'s own `at_crossing` depth depends on the SAME crossing T1 localizes;
+    `epsilon_sensitivity` is an orthogonal spread-only gate checked second). `alpha0_not_localized`
+    is the SPECIFIC "T1 found no crossing at all" case; `ignition_not_localized` covers the base
+    gate failing for any other reason (quality/branch-identity)."""
+    if not base_gate_passed:
+        return ("alpha0_not_localized" if crossing.get("_crossing_op") is None
+                else "ignition_not_localized")
+    if sp["epsilon_sensitivity"] != "pass":
+        return "unresolved_nonlinear_spread"
+    return None
+
+
+def _interpretation(ig, sp) -> str:
+    """spec §5.3 mechanical compose (task brief Step 3, verbatim): glue `nonlinear_spread`'s own
+    onset/endgame/off_axis onto `linear_ignition`'s class -- NEVER re-glue spread onto the linear
+    mode itself (e.g. never "the critical mode is axial"; spec §5.3/§7)."""
+    return (f"{ig['class']} ignition followed by {sp['onset']} transient and {sp['endgame']}; "
+            f"off_axis {sp['off_axis']}")
+
+
+def build_ignition_spread_verdict(points, cfg_crit, m2cfg) -> dict:
+    """The spec §1 two-stage verdict: `csd_verdict` (M1, unchanged, read fresh from
+    ``results/topic4_criticality/trajectory_verdict.json``) co-displayed with `linear_ignition`
+    (T2 `read_linear_ignition`, plus T3 `off_axis_sentinel` nested at
+    `linear_ignition["off_axis_sentinel"]` -- spec §3.3 is part of the same "M2a" ignition bucket
+    as §3.2) and `nonlinear_spread` (T4 `read_nonlinear_spread`, passed through unchanged -- its
+    own return dict already matches spec §1's `nonlinear_spread` schema field-for-field, so no
+    reshaping is needed). `interpretation` is the §5.3 mechanical compose. `base_gate_passed`/
+    `unresolved_subreason` implement §5.0/§5.4: when the alpha0 crossing is not localized or fails
+    its quality/branch-identity gate, `read_linear_ignition`/`off_axis_sentinel`/
+    `read_nonlinear_spread` are NOT called (two of the three would crash on a None
+    `_crossing_res`) -- both segments report their own undetermined shape instead (§5.4, the two
+    segments stay decoupled).
+
+    `linear_ignition["crossing"]` carries T1's full (unstripped) crossing dict forward -- needed by
+    the CLI to re-derive the crossing-mode-loading/basis-sanity figures without a second expensive
+    op-solve (mirrors T3's own "recompute shape_scores_at, cheap, no re-solve" precedent) and kept
+    for traceability (`alpha0_crossing_time_ms`/`crossing_frac`/etc.). Private (`_`-prefixed,
+    non-JSON-serializable) fields anywhere in the returned tree -- `crossing`'s own `_crossing_op`/
+    `_crossing_res`, `linear_ignition`'s `_two_core_crossing`/`_two_core_region_frac`/
+    `_two_core_axis_profile`, `nonlinear_spread`'s `_epsilon_sweep_detail`/`_depth_aggregate` -- are
+    intentionally NOT stripped here (mirrors M1's own build/write split, run_topic4_crit_verdict.py):
+    stripping happens at JSON-write time in the CLI, so the in-memory return stays fully
+    introspectable for tests/figures.
+    """
+    grid, kernels, core, b_core = _crit_op_context(cfg_crit)
+    csd_verdict = json.loads(_M1_VERDICT_PATH.read_text())["verdict"]
+
+    crossing = localize_alpha0_crossing(points, grid, kernels, core, cfg_crit, m2cfg)
+    base_gate_passed = _ignition_base_gate(crossing)
+
+    if base_gate_passed:
+        ig = read_linear_ignition(crossing, grid, kernels, core, cfg_crit, m2cfg, points)
+        ig["off_axis_sentinel"] = off_axis_sentinel(crossing, grid, kernels, core, m2cfg)
+        sp = read_nonlinear_spread(crossing, points, grid, kernels, core, b_core, cfg_crit, m2cfg)
+    else:
+        ig = _undetermined_linear_ignition()
+        sp = _undetermined_nonlinear_spread()
+    ig["crossing"] = crossing
+
+    return {
+        "csd_verdict": csd_verdict,
+        "linear_ignition": ig,
+        "nonlinear_spread": sp,
+        "interpretation": _interpretation(ig, sp),
+        "base_gate_passed": base_gate_passed,
+        "unresolved_subreason": _unresolved_subreason(crossing, base_gate_passed, sp),
     }
