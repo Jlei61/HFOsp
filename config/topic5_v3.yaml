@@ -44,3 +44,41 @@ nulls: {n_perm_smoke: 20, n_perm_dev: 100, n_perm_final: 1000, seed: 20260702, a
 cohorts: {primary: narrow, replication: broad, never_pool: true}
 jitter_sec: [5.0, 10.0, 15.0]
 tier: exploratory
+
+v3c:
+  hop_sec: 0.1
+  z_cross: 2.0
+  z_cross_sensitivity: [1.5, 2.5]
+  window_sec: 30.0
+  window_sec_sensitivity: 20.0
+  onset_buffer_sec: -2.0          # sensitivity: window start = onset + buffer
+  sustain_frames: 3
+  coverage:
+    min_soz: 1
+    min_axis: 1
+  spatial:
+    min_subjects_for_primary: 3   # cohort spatial claim needs >=3 coord-eligible subjects (review P1)
+  latency:
+    min_surplus: 3                # |A∖S| >= 3
+    min_covered_soz: 3            # |A∩S| >= 3 (primary contrast group)
+    min_seizures: 2
+    min_informative_seizures: 2
+  assay_qc:
+    finite_frac_min: 0.40
+    t0_frac_max: 0.50
+    uniq_ranks_min: 4
+    thr_spearman_min: 0.5
+    cens_frac_flag: 0.40          # > this -> censoring-sensitive (needs sensitivity agreement)
+    informative_min_unique_ranks: 3
+  interpretation:
+    auc_hb_min: 0.60
+    subject_hb_auc_min: 0.55
+    delta_t_hb_min_sec: 2.0
+    auc_ha_band: [0.45, 0.55]
+  nulls:
+    n_perm: 1000
+    seed: 20260704
+  cohorts:
+    primary: broad
+    replication: narrow
+    never_pool: true
