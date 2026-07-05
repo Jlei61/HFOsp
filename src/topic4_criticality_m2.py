@@ -715,6 +715,67 @@ def _aggregate_depth(detail):
            "onset": onset, "endgame": endgame, "off_axis": off_axis}
 
 
+# spec rev2.4 §4.3 (C decision) — the EXACT caveat string the descriptive note must carry.
+_IGNITING_NOTE_CAVEAT = ("DESCRIPTIVE ONLY — primary nonlinear_spread verdict is undetermined "
+                         "(pre-registered §4.3); NOT a spread claim")
+
+
+def _label_unanimous_or_distribution(labels):
+    """A single label string if every entry agrees, else a ``{label: count}`` distribution dict
+    (spec rev2.4 §4.3 `igniting_onset` "点火子集内 onset，若一致报之" — unanimous → scalar, else
+    report the distribution). Both forms are JSON-serializable."""
+    counts = {}
+    for lbl in labels:
+        counts[lbl] = counts.get(lbl, 0) + 1
+    return labels[0] if len(counts) == 1 else counts
+
+
+def _descriptive_igniting_note(epsilon_detail, epsilon_sensitivity):
+    """DESCRIPTIVE-ONLY igniting-subset note (spec rev2.4 §4.3, user decision C 2026-07-05).
+
+    PURELY ADDITIVE — it NEVER changes the primary `onset`/`endgame`/`off_axis`/`epsilon_sensitivity`
+    verdict (those stay pre-registered per §5; CLAUDE.md §5 "no post-hoc rule change"). It only
+    SUMMARIZES the per-(depth,eps,pol) breakdown the sweep already produced, for the specific case
+    where the epsilon gate FAILED *because* an onset disagreement is (at least partly) explained by
+    perturbations that did not ignite (`core_only` = active_frac did not rise past `expand_active_delta`).
+
+    Returns None unless ALL of: (a) `epsilon_sensitivity == "epsilon_sensitive"`, (b) onset is
+    NON-unanimous at the primary `at_crossing` depth (i.e. onset — not off_axis/endgame — is what
+    broke the gate), (c) at least one `at_crossing` combo is `core_only` (so the disagreement DOES
+    stem from non-ignition; a disagreement purely between igniting classes returns None, per the
+    spec's "disagreement isn't from non-igniting -> None"). `igniting_onset`/`igniting_endgame`/
+    `non_igniting_combos` are read at the PRIMARY `at_crossing` depth (the depth whose pass/fail gates
+    the verdict — matches the reviewer's scalar examples); `n_igniting_of_total` spans every non-empty
+    depth for a robustness glance. NEVER a spread claim (caveat string + CLAUDE.md §6.3)."""
+    if epsilon_sensitivity != "epsilon_sensitive":
+        return None
+    primary = epsilon_detail.get("at_crossing") or []
+    if not primary:
+        return None
+    if len({d["onset"] for d in primary}) == 1:
+        return None                        # onset AGREED — the sensitivity is off_axis/endgame, not onset
+    igniting = [d for d in primary if d["onset"] != "core_only"]
+    non_igniting = [d for d in primary if d["onset"] == "core_only"]
+    if not non_igniting:
+        return None                        # disagreement is between igniting classes, NOT from non-ignition
+    n_igniting_of_total = {
+        depth: f"{sum(1 for d in det if d['onset'] != 'core_only')}/{len(det)}"
+        for depth, det in epsilon_detail.items() if det
+    }
+    non_igniting_combos = [
+        {"eps_rel": d["eps_rel"], "polarity": d["polarity"],
+         "reason": f"{'suppressing' if d['polarity'] < 0 else 'excitatory'} kick, active_frac did not rise"}
+        for d in non_igniting
+    ]
+    return {
+        "n_igniting_of_total": n_igniting_of_total,
+        "igniting_onset": _label_unanimous_or_distribution([d["onset"] for d in igniting]),
+        "igniting_endgame": _label_unanimous_or_distribution([d["endgame"] for d in igniting]),
+        "non_igniting_combos": non_igniting_combos,
+        "caveat": _IGNITING_NOTE_CAVEAT,
+    }
+
+
 def _run_depth_sweep(grid, kernels, op, core, theta, b_core, m2cfg, *,
                      gK_field, hG_scalar, eta_K, eta_G):
     """The full epsilon_rel x polarity `core_kick` sweep (spec §4.2/§4.3, "扰动方向...core_kick 为
@@ -847,6 +908,12 @@ def read_nonlinear_spread(crossing, points, grid, kernels, core, b_core, cfg_cri
     jp_endgame = depth_agg["just_past"]["endgame"]
     depth_dependent = bool(ac_endgame is not None and jp_endgame is not None and ac_endgame != jp_endgame)
 
+    # DESCRIPTIVE-ONLY (spec rev2.4 §4.3, decision C): when the epsilon gate failed by an onset
+    # disagreement driven by non-igniting perturbations, additionally report the igniting-subset
+    # observation. This does NOT touch the primary verdict above (which stays pre-registered
+    # undetermined); None whenever the gate passed or the failure wasn't onset-by-non-ignition.
+    descriptive_igniting_note = _descriptive_igniting_note(epsilon_detail, epsilon_sensitivity)
+
     return {
         "onset": onset,
         "endgame": endgame,
@@ -855,6 +922,7 @@ def read_nonlinear_spread(crossing, points, grid, kernels, core, b_core, cfg_cri
         "footprint_trajectory": footprint_trajectory,
         "control_minus_kick": True,
         "epsilon_sensitivity": epsilon_sensitivity,
+        "descriptive_igniting_note": descriptive_igniting_note,
         "_epsilon_sweep_detail": epsilon_detail,
         "_depth_aggregate": depth_agg,
     }

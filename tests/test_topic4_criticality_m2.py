@@ -223,6 +223,67 @@ def test_spread_onset_and_endgame_on_synthetic_trajectory():
     assert m2._spread_off_axis(blip, onset_blip, m2cfg) == "undetermined"
 
 
+# --- Task 4 rev2.4 (review decision C): descriptive-only igniting-subset note. Fast synthetic unit
+# test (no 90s solve) for `_descriptive_igniting_note` — emit case + all three None branches + the
+# non-unanimous igniting_onset distribution branch. The REAL-crossing assertion (note present on the
+# actual v2.2 crossing + primary verdict unchanged) lives in test_nonlinear_spread_* below, reusing
+# that test's already-computed `sp` rather than paying the 90s solve twice. ---
+_IGNITING_CAVEAT = ("DESCRIPTIVE ONLY — primary nonlinear_spread verdict is undetermined "
+                    "(pre-registered §4.3); NOT a spread claim")
+
+
+def test_descriptive_igniting_note_emit_and_none_cases():
+    # 3/4 ignite (axial), 1/4 non-igniting (core_only, suppressing pol=-1) at BOTH depths — the exact
+    # shape of the real-crossing breakdown -> emit; igniting_onset unanimous "axial",
+    # igniting_endgame "self_limited", one non-igniting (0.05, -1) combo.
+    detail = {
+        "at_crossing": [
+            {"eps_rel": 0.01, "polarity": -1, "onset": "axial", "endgame": "self_limited"},
+            {"eps_rel": 0.01, "polarity": 1, "onset": "axial", "endgame": "self_limited"},
+            {"eps_rel": 0.05, "polarity": -1, "onset": "core_only", "endgame": "self_limited"},
+            {"eps_rel": 0.05, "polarity": 1, "onset": "axial", "endgame": "self_limited"},
+        ],
+        "just_past": [
+            {"eps_rel": 0.01, "polarity": -1, "onset": "axial", "endgame": "self_limited"},
+            {"eps_rel": 0.01, "polarity": 1, "onset": "axial", "endgame": "self_limited"},
+            {"eps_rel": 0.05, "polarity": -1, "onset": "core_only", "endgame": "self_limited"},
+            {"eps_rel": 0.05, "polarity": 1, "onset": "axial", "endgame": "global_flooding"},
+        ],
+    }
+    note = m2._descriptive_igniting_note(detail, "epsilon_sensitive")
+    assert note is not None
+    assert note["n_igniting_of_total"] == {"at_crossing": "3/4", "just_past": "3/4"}
+    assert note["igniting_onset"] == "axial"
+    assert note["igniting_endgame"] == "self_limited"
+    assert note["non_igniting_combos"] == [
+        {"eps_rel": 0.05, "polarity": -1, "reason": "suppressing kick, active_frac did not rise"}]
+    assert note["caveat"] == _IGNITING_CAVEAT
+
+    # None cases:
+    assert m2._descriptive_igniting_note(detail, "pass") is None                 # gate PASSED
+    agreed = {"at_crossing": [dict(d, onset="axial") for d in detail["at_crossing"]]}
+    assert m2._descriptive_igniting_note(agreed, "epsilon_sensitive") is None    # onset AGREED (not onset-driven)
+    no_coreonly = {"at_crossing": [                                              # disagreement between
+        {"eps_rel": 0.01, "polarity": -1, "onset": "axial", "endgame": "self_limited"},   # two IGNITING
+        {"eps_rel": 0.01, "polarity": 1, "onset": "global_first", "endgame": "marginal"}, # classes, no
+        {"eps_rel": 0.05, "polarity": -1, "onset": "axial", "endgame": "self_limited"},   # core_only
+        {"eps_rel": 0.05, "polarity": 1, "onset": "axial", "endgame": "self_limited"},
+    ]}
+    assert m2._descriptive_igniting_note(no_coreonly, "epsilon_sensitive") is None
+
+    # igniting subset itself split (axial + global_first) WITH a non-igniting core_only present ->
+    # still emit (disagreement DOES include non-ignition); igniting_onset reports the DISTRIBUTION.
+    split = {"at_crossing": [
+        {"eps_rel": 0.01, "polarity": -1, "onset": "axial", "endgame": "self_limited"},
+        {"eps_rel": 0.01, "polarity": 1, "onset": "global_first", "endgame": "marginal"},
+        {"eps_rel": 0.05, "polarity": -1, "onset": "core_only", "endgame": "self_limited"},
+        {"eps_rel": 0.05, "polarity": 1, "onset": "axial", "endgame": "self_limited"},
+    ]}
+    note2 = m2._descriptive_igniting_note(split, "epsilon_sensitive")
+    assert note2 is not None
+    assert note2["igniting_onset"] == {"axial": 2, "global_first": 1}   # non-unanimous -> distribution
+
+
 def test_nonlinear_spread_axial_onset_off_axis_absent():
     cfg = load_crit_config(); grid, kernels, core, b_core = _crit_op_context(cfg)
     m2cfg = m2.load_m2_config()
@@ -234,3 +295,17 @@ def test_nonlinear_spread_axial_onset_off_axis_absent():
     # trajectory sanity: off-axis power stays ~0 across all sampled steps
     for fm in sp["footprint_trajectory"]["at_crossing"]["core_kick"]:
         assert fm["off_axis"] < 0.1
+
+    # rev2.4 decision C: on the ACTUAL v2.2 SIMULATION crossing the epsilon gate fails by an
+    # onset-vs-non-ignition disagreement (3/4 igniting axial, the eps_rel=0.05/pol=-1 suppressing
+    # kick doesn't ignite), so the descriptive-only note MUST be present and report the 3/4 split +
+    # unanimous igniting onset — AND the primary verdict must stay undetermined (note doesn't leak).
+    assert sp["epsilon_sensitivity"] == "epsilon_sensitive"
+    assert sp["onset"] == "undetermined"
+    assert sp["endgame"] == "undetermined"
+    assert sp["off_axis"] == "undetermined"
+    note = sp["descriptive_igniting_note"]
+    assert note is not None
+    assert note["n_igniting_of_total"] == {"at_crossing": "3/4", "just_past": "3/4"}
+    assert note["igniting_onset"] == "axial"
+    assert note["caveat"] == _IGNITING_CAVEAT
