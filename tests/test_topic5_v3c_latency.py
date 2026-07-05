@@ -75,3 +75,13 @@ def test_auc_null_preserves_and_varies():
     sv = np.array([10.0, 10.0]); zv = np.array([0.0, 0.0])                 # obs AUC=1.0
     null = auc_null_distribution(sv, zv, shaft, surplus_names, soz_names, n_perm=200, rng=0)
     assert null.shape == (200,) and 0.0 <= np.median(null) <= 1.0
+
+
+def test_latency_eligible_gate():
+    from scripts.run_topic5_v3c_latency import latency_eligible
+    cfg = load_v3_config()
+    ok = {"n_surplus": 10, "n_covered": 4}
+    assert latency_eligible(ok, True, cfg) is True
+    assert latency_eligible(ok, False, cfg) is False           # assay invalid -> descriptive only
+    assert latency_eligible({"n_surplus": 2, "n_covered": 4}, True, cfg) is False   # too few surplus
+    assert latency_eligible({"n_surplus": 10, "n_covered": 2}, True, cfg) is False  # too few A∩S
