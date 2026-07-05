@@ -4,6 +4,7 @@ import numpy as np
 
 from src.topic5_v3_mode_transition import load_v3_config
 from src.topic5_v3c_coverage import coverage_metrics, coverage_null_distribution
+from scripts.run_topic5_v3c_coverage import cohort_median_null
 
 
 def test_v3c_config_keys():
@@ -53,3 +54,13 @@ def test_coverage_null_soz_shuffle_regression():
     null_when_soz_offaxis = coverage_null_distribution(axis, all_clean, ["H3", "H4"], shaft, n_perm=200, rng=1)
     # observed coverage(axis={H1,H2}, soz={H3,H4}) = 0; null spans 0..1 -> observed not above null
     assert null_when_soz_offaxis.mean() > 0.0
+
+
+def test_cohort_median_null_percentile():
+    # 3 subjects, each with an obs coverage and a null array; cohort stat = median over subjects
+    subject_obs = [1.0, 1.0, 0.7]
+    rng = np.random.default_rng(0)
+    subject_nulls = [rng.uniform(0, 0.6, size=500) for _ in range(3)]   # nulls well below obs
+    res = cohort_median_null(subject_obs, subject_nulls)
+    assert res["obs_cohort_median"] == 1.0
+    assert res["p_value"] < 0.01 and res["n_perm"] == 500
