@@ -257,3 +257,140 @@ def localize_alpha0_crossing(points, grid, kernels, core, cfg_crit, m2cfg):
             "branch_identity_clean": branch_identity_clean,
             "_branch_continuation_status": _branch_continuation_status,
             "_crossing_op": best["op"], "_crossing_res": best["res"]}
+
+
+# --------------------------------------------------------------------------- #
+# Task 2: linear_ignition readout + two-core symmetry-break confirmation        #
+# --------------------------------------------------------------------------- #
+# Productionizes results/topic4_criticality_m2/pilots/m2_pilots_round2.py's PILOT A (two-core
+# crossing-mode decomposition). `_region_masks`/`_region_breakdown` are ported (the pilots dir is
+# gitignored scratch, spec §8 -- not importable) from pilotA's own helpers of the same name
+# (m2_pilots_round2.py lines 66-89), unchanged except that `h`/`radius` come from the caller
+# (cfg-driven here) instead of pilotA's module-level TWO_CORE_SEP/TWO_CORE_RADIUS constants.
+
+
+def _region_masks(grid, core2, theta, *, h, radius):
+    """core-A (axis-positive), core-B (axis-negative), on-axis corridor-between, off-core-rest
+    (ported verbatim from m2_pilots_round2.py's `_region_masks`, lines 66-75)."""
+    X, Y = grid.coords()
+    s = X * np.cos(theta) + Y * np.sin(theta)              # along-axis coord
+    perp = -X * np.sin(theta) + Y * np.cos(theta)          # perpendicular coord
+    maskA = core2.mask & (s > 0)
+    maskB = core2.mask & (s < 0)
+    corridor = (~core2.mask) & (np.abs(s) <= h) & (np.abs(perp) <= radius)   # axial strip between cores
+    rest = ~(maskA | maskB | corridor)
+    return {"coreA": maskA, "coreB": maskB, "corridor_axial": corridor, "offcore_rest": rest}, s
+
+
+def _region_breakdown(loading, grid, core2, theta, *, h, radius):
+    """Fraction of E-power (loading**2) in each region + along-axis power profile (ported
+    verbatim from m2_pilots_round2.py's `_region_breakdown`, lines 78-89)."""
+    p = np.abs(loading) ** 2
+    tot = float(p.sum()) + 1e-300
+    regions, s = _region_masks(grid, core2, theta, h=h, radius=radius)
+    frac = {k: float(p[m].sum() / tot) for k, m in regions.items()}
+    # along-axis power profile (coarse bins over s)
+    order = np.argsort(s.ravel())
+    s_sorted = s.ravel()[order]
+    p_sorted = p.ravel()[order]
+    prof = [{"s": float(sv), "power_frac": float(pv / tot)} for sv, pv in zip(s_sorted, p_sorted) if pv / tot > 1e-4]
+    return frac, prof
+
+
+def _classify_ignition(*, core_overlap, globality, axis_elongation, off_axis,
+                       corridor_power, n_core_peaks, m2cfg):
+    """Ignition class classifier (spec §5.1; brief Step 3, verbatim). `core_overlap`+`globality`
+    are the ONLY gate for `core_localized` -- axis_elongation/off_axis/corridor_power/n_core_peaks
+    only disambiguate `delocalized_subtype` once the mode has already failed that gate."""
+    ig = m2cfg["ignition"]
+    if core_overlap >= ig["core_localized_overlap_thresh"] and globality <= ig["core_localized_globality_thresh"]:
+        return "core_localized", None
+    if globality >= ig["delocalized_globality_thresh"]:
+        if corridor_power >= ig["corridor_lit_thresh"]:
+            return "delocalized", "corridor_lit"
+        if abs(axis_elongation) < ig["iso_thresh"] and off_axis < ig["iso_thresh"]:
+            return "delocalized", "global_like"
+        if n_core_peaks >= 2:
+            return "delocalized", "multi_core"
+        return "delocalized", "global_like"
+    return "ambiguous", None
+
+
+def _ignition_sensitivity(core_overlap, globality, m2cfg):
+    """Threshold-sweep stability check for the `core_localized` gate (spec §5.1
+    `ignition_sensitivity`; brief Step 3, verbatim)."""
+    ig = m2cfg["ignition"]; flips = []
+    for ot in ig["overlap_sweep"]:
+        for gt in ig["globality_sweep"]:
+            flips.append(core_overlap >= ot and globality <= gt)
+    return "core_localized but threshold-sensitive" if not all(flips) and any(flips) else "stable"
+
+
+def read_linear_ignition(crossing, grid, kernels, core, cfg_crit, m2cfg, points) -> dict:
+    """linear_ignition readout at the alpha0 crossing (spec §3.2/§1) + two-core symmetry-break
+    confirmation (spec §3.2 "two-core 确认"; §0-f near-fold caveat + §0-g symmetric-disinhibition
+    approximation caveat).
+
+    ``crossing`` is T1's ``localize_alpha0_crossing`` output for the SINGLE-core ``core`` -- its
+    ``_crossing_res`` is scored here to derive the primary ignition class. The two-core
+    confirmation is a CLEAN REUSE of T1's own ``localize_alpha0_crossing``, called again with a
+    two-core mask standing in for ``core``: `low_solve_fast`/`_fields_from_slow` thread whatever
+    ``core`` they are given into `build_excitability_field`/`build_inhibition_field`, so swapping
+    in a two-core mask re-solves the low branch under a two-core geometry where BOTH cores are
+    disinhibited by the SAME scalar `q_core` (spec §0-g "symmetric-disinhibition approximation")
+    and finds THAT geometry's own alpha0 crossing along the same M1 last-qualified->first-saturated
+    bracket (expected earlier than the single-core crossing, ~frac 0.53 per pilotA -- the two-core
+    system saturates sooner). This re-runs M1's `check_low_branch_continuation_between` a second
+    time (~another minute); acceptable for a one-shot per-subject readout (task brief).
+    """
+    scores = shape_scores_at(crossing["_crossing_res"], grid, kernels, core)
+
+    # Primary (single-core) ignition class: on a single-core geometry there is no "corridor"
+    # (nothing sits "between" one core) and exactly one physical core region exists, so
+    # corridor_power=0.0 / n_core_peaks=1 for THIS call. Neither value can change the outcome
+    # here: on the real crossing core_overlap/globality already satisfy `core_localized`, which
+    # short-circuits _classify_ignition before either argument is read.
+    cls, subtype = _classify_ignition(
+        core_overlap=scores["core_overlap"], globality=scores["globality"],
+        axis_elongation=scores["axis_elongation"], off_axis=scores["off_axis"],
+        corridor_power=0.0, n_core_peaks=1, m2cfg=m2cfg)
+
+    tcc = m2cfg["two_core_confirm"]
+    theta = kernels.theta
+    core2 = spm.make_core_mask(grid, kind="two", radius=tcc["radius"], separation=tcc["separation"])
+    two_crossing = localize_alpha0_crossing(points, grid, kernels, core2, cfg_crit, m2cfg)
+    two_scores = shape_scores_at(two_crossing["_crossing_res"], grid, kernels, core2)
+    region_frac, axis_profile = _region_breakdown(
+        two_scores["_loading"], grid, core2, theta, h=0.5 * tcc["separation"], radius=tcc["radius"])
+
+    corridor_axial = region_frac["corridor_axial"]
+    max_single_core = max(region_frac["coreA"], region_frac["coreB"])
+    two_core_symmetry_break = bool(max_single_core >= tcc["single_core_thresh"]
+                                    and corridor_axial <= tcc["corridor_dark_thresh"])
+
+    near_fold_note = (
+        "two-core crossing alpha1 is a post-fold first-positive value, not a precise "
+        "alpha0~0 critical shape; two cores share one q_core (symmetric-disinhibition "
+        "approximation) -> proves corridor stays dark given an axial two-core opportunity, "
+        "not subject1146 dual-source reproduction.")
+
+    sensitivity = _ignition_sensitivity(scores["core_overlap"], scores["globality"], m2cfg)
+
+    return {
+        "class": cls,
+        "delocalized_subtype": subtype,
+        "core_overlap": scores["core_overlap"],
+        "globality": scores["globality"],
+        "two_core_symmetry_break": two_core_symmetry_break,
+        "corridor_power": corridor_axial,
+        "shape_descriptors": {
+            "axis_elongation": scores["axis_elongation"],
+            "off_axis": scores["off_axis"],
+            "axis_wavevector_alignment": scores["axis_wavevector_alignment"],
+        },
+        "near_fold_note": near_fold_note,
+        "ignition_sensitivity": sensitivity,
+        "_two_core_region_frac": region_frac,
+        "_two_core_axis_profile": axis_profile,
+        "_two_core_crossing": two_crossing,
+    }

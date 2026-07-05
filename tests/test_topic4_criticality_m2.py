@@ -96,3 +96,27 @@ def test_branch_identity_clean_present_and_true_on_real_crossing():
     assert "branch_identity_clean" in out
     assert out["branch_identity_clean"] is True
     assert out["_branch_continuation_status"] == "low_branch_reaches_alpha0_before_jump"
+
+
+# --- Task 2: linear_ignition readout + two-core symmetry-break confirmation, verbatim from
+# task brief .superpowers/sdd/task-2-brief.md Step 1 ---
+def test_linear_ignition_core_localized_on_real_crossing():
+    cfg = load_crit_config(); grid, kernels, core, _ = _crit_op_context(cfg)
+    m2cfg = m2.load_m2_config(); pts = _points()
+    crossing = m2.localize_alpha0_crossing(pts, grid, kernels, core, cfg, m2cfg)
+    ig = m2.read_linear_ignition(crossing, grid, kernels, core, cfg, m2cfg, pts)
+    assert ig["class"] == "core_localized"
+    assert ig["core_overlap"] >= m2cfg["ignition"]["core_localized_overlap_thresh"]
+    assert ig["globality"] <= m2cfg["ignition"]["core_localized_globality_thresh"]
+    assert ig["two_core_symmetry_break"] is True
+    assert ig["corridor_power"] <= m2cfg["two_core_confirm"]["corridor_dark_thresh"]
+    assert "post-fold" in ig["near_fold_note"] and "symmetric" in ig["near_fold_note"]
+
+
+def test_ignition_class_delocalized_on_global_loading():
+    cfg = load_crit_config(); grid, kernels, core, _ = _crit_op_context(cfg)
+    m2cfg = m2.load_m2_config()
+    cls, sub = m2._classify_ignition(core_overlap=0.2, globality=0.8,
+                                     axis_elongation=0.0, off_axis=0.0,
+                                     corridor_power=0.0, n_core_peaks=1, m2cfg=m2cfg)
+    assert cls == "delocalized" and sub == "global_like"
