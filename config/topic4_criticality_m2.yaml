@@ -1,0 +1,43 @@
+# Topic 4 M3-v2.2 criticality Milestone 2 — spec rev2.1 §8
+basis:
+  theta: THETA_EE            # resolved to np.pi/4 by loader
+  embedding: rE_block
+  nonaxis_direction_min_norm: 1.0e-3
+  off_axis_score_tol: 0.05
+  nonaxis_gain_excess_tol: 0.10
+  nonaxis_gain_ratio_tol: 1.25
+densification:
+  coarse_K: 5
+  crossing_width_ms_tol: 1.0
+  max_bisect_hard_cap: 16
+ignition:
+  core_localized_overlap_thresh: 0.8
+  core_localized_globality_thresh: 0.3
+  overlap_sweep: [0.7, 0.8, 0.9]
+  globality_sweep: [0.2, 0.3, 0.4]
+  delocalized_globality_thresh: 0.5
+  iso_thresh: 0.2
+  corridor_lit_thresh: 0.2
+two_core_confirm:
+  kind: two
+  radius: 0.9
+  separation: 2.4
+  single_core_thresh: 0.9
+  corridor_dark_thresh: 0.05
+spread:
+  axial_onset_thresh: 0.2
+  expand_active_delta: 0.1
+  global_thresh: 0.5
+  flood_active_thresh: 0.9
+  self_limit_active_thresh: 0.1
+  footprint_sample_ms: [2, 5, 10, 20, 30, 50, 75, 100, 200, 300]
+  epsilon_onset_agreement: all
+  epsilon_endgame_agreement: majority
+gain:
+  horizons_ms: [10, 25, 50, 100, 250, 500]
+perturbation:
+  epsilon_rel: [0.01, 0.05]
+  max_time_ms: 300
+  dt_ms: 0.1
+  recovery_radius_rel: 0.05
+  polarities: [-1, 1]
