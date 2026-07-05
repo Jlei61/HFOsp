@@ -96,14 +96,30 @@ def surplus_spatial_metrics(surplus_names, soz_names, coords_by_name, shaft_by_n
     }
 
 
-def distance_null_distribution(surplus_names, axis_names, soz_names, coords_by_name,
+def distance_null_distribution(surplus_names, all_clean, soz_names, coords_by_name,
                                shaft_by_name, *, n_perm, rng) -> np.ndarray:
+    """Same-shaft distance null (spec §6, redesigned 2026-07-05 after the original
+    'relabel surplus over axis' null was proven structurally p≡1.0).
+
+    Relabels the surplus set within each shaft over the clean **non-SOZ** background
+    (``all_clean ∖ S ∖ surplus``), preserving per-shaft surplus count, then recomputes
+    ``mean_min_dist`` to SOZ. Question: is the actual axis-surplus ``A∖S`` closer to
+    SOZ than an equal-per-shaft random draw of clean non-SOZ contacts?
+
+    Why NOT relabel over the axis (``A∩S ∪ A∖S``): the covered set ``A∩S`` **are** SOZ
+    contacts (distance 0 to themselves), so any relabel that drew one as null-surplus
+    injected a spurious distance-0, forcing the observed surplus to be the null maximum
+    regardless of data (lower-tail p ≡ 1.0). Excluding SOZ from the candidate pool
+    makes the gate informative. Empty array if no coords.
+    """
     if not coords_by_name or not any(n in coords_by_name for n in soz_names):
         return np.array([])
     rng = _coerce_rng(rng)
-    covered = [n for n in axis_names if n not in set(surplus_names)]
+    soz_set = set(soz_names)
+    surplus_set = set(surplus_names)
+    background = [n for n in all_clean if n not in soz_set and n not in surplus_set]
     out = np.empty(n_perm, dtype=float)
     for i in range(n_perm):
-        new_surplus, _ = label_permute(surplus_names, covered, shaft_by_name, rng)
+        new_surplus, _ = label_permute(surplus_names, background, shaft_by_name, rng)
         out[i] = _mean_min_dist(new_surplus, soz_names, coords_by_name)
     return out

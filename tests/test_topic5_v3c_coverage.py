@@ -79,3 +79,19 @@ def test_distance_null_empty_without_coords():
     null = distance_null_distribution(["H1"], ["H1", "H2"], ["S1"], {}, {"H1": "H", "H2": "H"},
                                       n_perm=50, rng=0)
     assert null.size == 0
+
+
+def test_distance_null_excludes_soz_from_pool():
+    # Regression for the structural p≡1.0 bug: the null relabels surplus over the
+    # same-shaft NON-SOZ clean background (all_clean ∖ S), so a SOZ contact (which
+    # sits at distance 0 to itself) can NEVER be drawn as null-surplus. If SOZ were
+    # in the pool, the null would contain a spurious 0 and the observed (surplus)
+    # would be forced to the null maximum. Here S1 shares shaft "H" with surplus A2.
+    coords = {"S1": np.array([0., 0, 0]), "A2": np.array([5., 0, 0]), "B3": np.array([6., 0, 0])}
+    shaft = {"S1": "H", "A2": "H", "B3": "H"}
+    all_clean = ["S1", "A2", "B3"]
+    null = distance_null_distribution(["A2"], all_clean, ["S1"], coords, shaft, n_perm=300, rng=0)
+    assert null.size == 300
+    assert null.min() >= 5.0                  # SOZ excluded -> no spurious distance-0 in the null
+    # observed (surplus A2 at dist 5) is the CLOSE end of the null, not trivially the max
+    assert np.mean(null <= 5.0) < 1.0
