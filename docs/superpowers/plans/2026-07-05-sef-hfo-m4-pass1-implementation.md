@@ -512,17 +512,38 @@ git commit -m "test(m4): end-to-end smoke — use_SG off == slow=None; alpha_G d
 
 ---
 
-## Task 6 (SIM GATE — DO NOT EXECUTE until user review): `q_core × alpha_G` phase-plane + §9.1 go/no-go
+## Task 6 (SIM GATE — ASSEMBLED, NOT EXECUTED): `q_core × alpha_G` phase-plane + §9.1 go/no-go
 
-> This task is written for completeness so the reviewer sees the full Pass-1 shape. **It runs simulations (the scientific experiment).** Per the user's instruction, STOP after Task 5; run Task 6 only after the plan + implementation are reviewed.
+> **Status: assembled for review (2026-07-05), NOT run.** All decision + metric logic is implemented and
+> unit-tested with synthetic inputs (no sim). The runner `scripts/run_m4_phaseplane.py` **runs simulations**
+> and is import-safe + gated behind `--confirm-run` (without it, `main()` prints REFUSED and returns).
+> Run only after the plan + implementation are reviewed.
 
-**Files:**
-- Create: `src/sef_hfo_m4_phaseplane.py` — `derive_core_mask(...)`, `q_core(...)`, per-cell classifier (`persist/bounded/act_frac/S_grad/F_off/core_overlap/globality`), `classify_cell(...)` implementing §9.1 TRIVIAL-A/B exclusions + `go(cell)`.
-- Create: `scripts/run_m4_phaseplane.py` — sweep `q_core ∈ [q_min,1] × alpha_G ∈ [0,alpha_max]` for arm 0 (baseline) / arm 1 (`beta_SG`) / arm 2 (`alpha_G` divisive); write `results/topic4_m4/phase_plane_qcore_alpha.{json,png}` + `figures/README.md`.
+**Files (assembled):**
+- `src/sef_hfo_m4_phaseplane.py` — PURE decision fns: `q_core`, `derive_core_mask`, `is_bounded`,
+  `is_trivial_A/B`, `classify_cell` (§9.1 go/no-go), `largest_contiguous`, `go_plane_verdict`,
+  `calibrate_guards_from_references`. 16 tests.
+- `src/sef_hfo_m4_metrics.py` — PURE metric extraction from a `simulate_kick` result (reuses
+  `src.sef_hfo_snn_metrics`): `s_grad`(R²)/`f_off`/`core_overlap`/`globality`(PR)/`branching`/
+  `monotonic_saturation`/`finite_energy` + SPATIAL `self_limited` (distinct from temporal `tail_returns`)
+  → `extract_cell_metrics` → `CellMetrics`. 7 tests.
+- `scripts/run_m4_phaseplane.py` — orchestration: `build_substrate` → `derive_core` → `calibrate_r50`
+  → `reference_metrics` + `calibrate_guards_from_references` → `sweep` (arm0/arm1/arm2) → `go_plane_verdict`
+  → `results/topic4_m4/phase_plane.{json,png}` + `figures/README.md`. `main()` gated on `--confirm-run`.
 
-**Pre-req (also gated):** derive `m_core` from an arm-0 kick's first-activation map; generate arm-0 TRIVIAL-A/TRIVIAL-B reference instances and **calibrate** `theta_core/theta_glob/theta_off` to exclude them; LOCK the values into the spec's §9.1 calibration table BEFORE the sweep.
+**Review points (science contract, called out in-file):** the metric-extraction params (`T_MIN_MS`,
+`BAND_HALF_MM`, `THRESH_HZ`, `RETREAT_FACTOR`, `SAT_CEILING_FRAC`); the definitional choices in
+`sef_hfo_m4_metrics` (s_grad=R², globality=PR, self_limited=spatial-retreat); the reference q_core picks
+(`Q_FLOOD`/`Q_AXIAL`) + guard `MARGIN`; the `r50` percentile (`R50_PCTL`); grid + `K_MIN`.
 
-**Success gate (§9.1):** go(plane) = ≥ K_min contiguous go(cell) present in arm 2 but NOT arm 1, none explained by TRIVIAL-A/TRIVIAL-B. A clean no-go is a valid result.
+**Pre-req (gated, inside the runner):** `derive_core` (arm-0 first-activation map) → core mask;
+`calibrate_r50` (rE_fast peak scale — the flagged pre-req); `reference_metrics` (arm-0 flood + axial)
+→ `calibrate_guards_from_references`. All run only under `--confirm-run`.
+
+**To run (after approval):** `python scripts/run_m4_phaseplane.py --confirm-run`.
+
+**Success gate (§9.1):** go(plane) = ≥ K_min contiguous go(cell) present in arm 2 but NOT arm 1, none
+explained by TRIVIAL-A/TRIVIAL-B. A clean no-go is a valid result.
 
 ---
 
