@@ -57,8 +57,8 @@ _RESULTS_BASE = _ROOT / "results/topic5_ictal_recruitment/v3p_preictal_trajector
 SUMMARY_COLS = [
     "subject", "cohort", "in_broad_core", "status", "geometry_sufficient",
     "excluded_from_denominator",
-    "net_offaxis_flux_surplus_slope", "net_offaxis_flux_slope_z",
-    "mode_shift_density_surplus_slope", "mode_shift_density_slope_z",
+    "net_offaxis_flux_surplus_slope", "net_offaxis_flux_slope_z", "z_in_cohort_b",
+    "mode_shift_density_surplus_slope", "mode_shift_density_slope_z", "z_in_cohort_c",
     "nonaxis_flux_amplification_supported", "mode_transition_supported",
     "axis_weakening_supportive",
     "subject_support", "support_driver",
@@ -152,15 +152,27 @@ def _subject_row(raw: dict, alpha: float) -> dict:
         and np.isfinite(p_label_slope_a) and p_label_slope_a < alpha
     )
 
+    # did THIS subject's z actually enter the cohort Wilcoxon population
+    # (`_cohort_block`'s ``np.isfinite`` filter, applied AFTER the
+    # ``excluded_from_denominator`` filter)? A subject can be ``not excluded``
+    # (status=='ok', not label_null_underpowered) yet still carry a NaN z from
+    # a degenerate (label-null MAD=0) draw -- e.g. epilepsiae_1146's flux leg
+    # -- which silently drops out of the Wilcoxon today; surfacing it here
+    # makes that drop visible per subject instead of only via the aggregate count.
+    net_offaxis_flux_slope_z = _to_float(raw["net_offaxis_flux_slope_z"])
+    mode_shift_density_slope_z = _to_float(raw["mode_shift_density_slope_z"])
+    z_in_cohort_b = bool((not excluded) and np.isfinite(net_offaxis_flux_slope_z))
+    z_in_cohort_c = bool((not excluded) and np.isfinite(mode_shift_density_slope_z))
+
     return {
         "subject": raw["subject"], "cohort": raw["cohort"],
         "in_broad_core": _to_bool(raw["in_broad_core"]),
         "status": status, "geometry_sufficient": _to_bool(raw["geometry_sufficient"]),
         "excluded_from_denominator": excluded,
         "net_offaxis_flux_surplus_slope": _to_float(raw["net_offaxis_flux_surplus_slope"]),
-        "net_offaxis_flux_slope_z": _to_float(raw["net_offaxis_flux_slope_z"]),
+        "net_offaxis_flux_slope_z": net_offaxis_flux_slope_z, "z_in_cohort_b": z_in_cohort_b,
         "mode_shift_density_surplus_slope": _to_float(raw["mode_shift_density_surplus_slope"]),
-        "mode_shift_density_slope_z": _to_float(raw["mode_shift_density_slope_z"]),
+        "mode_shift_density_slope_z": mode_shift_density_slope_z, "z_in_cohort_c": z_in_cohort_c,
         "nonaxis_flux_amplification_supported": h3pb_path,
         "mode_transition_supported": h3pc_path,
         "axis_weakening_supportive": axis_weakening_supportive,
@@ -214,6 +226,13 @@ def _holm_correct_2(p1: float, p2: float) -> tuple[float, float]:
     return float(holm[0]), float(holm[1])
 
 
+_DEGENERATE_NULL_NOTE = (
+    "a subject counted here has a finite label-null p but a non-finite slope_z "
+    "(label-null MAD=0, a degenerate/zero-dispersion null -- e.g. epilepsiae_1146's "
+    "flux leg): its z is silently excluded from the cohort Wilcoxon by the existing "
+    "np.isfinite filter, so n_eligible can exceed the number of z-values actually tested"
+)
+
 _UNAVAILABLE_BLOCK = {
     "available": False,
     "n_total": 0, "n_eligible": 0, "n_excluded": 0, "n_subject_support": 0,
@@ -221,10 +240,33 @@ _UNAVAILABLE_BLOCK = {
     "p_holm_b": float("nan"), "p_holm_c": float("nan"),
     "median_slope_z_b": float("nan"), "median_slope_z_c": float("nan"),
     "cohort_b_pass": False, "cohort_c_pass": False, "cohort_pass": False,
+    "n_flux_label_null_mad_zero": 0, "n_mode_label_null_mad_zero": 0,
+    "degenerate_null_note": _DEGENERATE_NULL_NOTE,
 }
 
 
-def _cohort_block(rows: list[dict], alpha: float) -> dict:
+def _count_mad_zero(raw_rows: list[dict]) -> tuple[int, int]:
+    """``(n_flux_mad_zero, n_mode_mad_zero)`` over ``raw_rows`` (a cohort's raw
+    ``v3p_trajectory_subject.csv`` DictReader rows): count subjects whose
+    label-null p is finite but slope_z is non-finite (MAD=0 degenerate null).
+    Derived directly from the EXISTING ``p_label_slope_{b,c}`` /
+    ``*_slope_z`` columns, so it also works on CSVs written before this
+    hardening (no re-run needed).
+    """
+    n_b = n_c = 0
+    for r in raw_rows:
+        if np.isfinite(_to_float(r.get("p_label_slope_b"))) and not np.isfinite(
+            _to_float(r.get("net_offaxis_flux_slope_z"))
+        ):
+            n_b += 1
+        if np.isfinite(_to_float(r.get("p_label_slope_c"))) and not np.isfinite(
+            _to_float(r.get("mode_shift_density_slope_z"))
+        ):
+            n_c += 1
+    return n_b, n_c
+
+
+def _cohort_block(rows: list[dict], alpha: float, raw_rows: list[dict] | None = None) -> dict:
     """One cohort's (narrow / broad_expanded / broad_core) aggregate stats.
 
     ``rows`` are ALREADY-typed ``_subject_row`` dicts. The denominator for
@@ -254,6 +296,8 @@ def _cohort_block(rows: list[dict], alpha: float) -> dict:
     cohort_b_pass = bool(np.isfinite(p_holm_b) and p_holm_b < alpha and med_b > 0)
     cohort_c_pass = bool(np.isfinite(p_holm_c) and p_holm_c < alpha and med_c > 0)
 
+    n_flux_mad_zero, n_mode_mad_zero = _count_mad_zero(raw_rows if raw_rows is not None else [])
+
     return {
         "available": True,
         "n_total": n_total, "n_eligible": n_eligible, "n_excluded": n_total - n_eligible,
@@ -263,6 +307,8 @@ def _cohort_block(rows: list[dict], alpha: float) -> dict:
         "median_slope_z_b": med_b, "median_slope_z_c": med_c,
         "cohort_b_pass": cohort_b_pass, "cohort_c_pass": cohort_c_pass,
         "cohort_pass": bool(cohort_b_pass or cohort_c_pass),
+        "n_flux_label_null_mad_zero": n_flux_mad_zero, "n_mode_label_null_mad_zero": n_mode_mad_zero,
+        "degenerate_null_note": _DEGENERATE_NULL_NOTE,
     }
 
 
@@ -393,7 +439,7 @@ def main(argv=None):
             continue
         typed = [_subject_row(r, alpha) for r in raw]
         subject_rows[c] = typed
-        blocks[c] = _cohort_block(typed, alpha)
+        blocks[c] = _cohort_block(typed, alpha, raw)
 
     # broad_core: the SAME broad rows, sliced by `in_broad_core` (spec Sec 10
     # rev2) -- never its own CLI cohort, never its own CSV, always derived.
@@ -401,7 +447,36 @@ def main(argv=None):
         blocks["broad_core"] = dict(_UNAVAILABLE_BLOCK)
     else:
         core_rows = [r for r in subject_rows["broad"] if r["in_broad_core"]]
-        blocks["broad_core"] = _cohort_block(core_rows, alpha)
+        core_raw_rows = [r for r in raw_by_cohort["broad"] if _to_bool(r["in_broad_core"])]
+        blocks["broad_core"] = _cohort_block(core_rows, alpha, core_raw_rows)
+
+    # provenance (Change 4 hardening): the AUTHORITATIVE admission.json roster
+    # record if `run_topic5_v3p_feasibility.py --include-candidates` already
+    # wrote one under indir_base, else the same broad_core/candidates_epilepsiae
+    # config fields trajectory.py's OWN fallback uses (admission_source names
+    # which path was taken).
+    admission_path = indir_base / "admission.json"
+    if admission_path.exists():
+        admission = json.loads(admission_path.read_text())
+        provenance = {
+            "broad_core": admission.get("broad_core", []),
+            "candidates_epilepsiae": admission.get("candidates_epilepsiae", []),
+            "admitted_candidates": admission.get("admitted_candidates", []),
+            "excluded": admission.get("excluded", []),
+            "broad_expanded": admission.get("broad_expanded", []),
+            "admission_source": "admission.json",
+        }
+    else:
+        exp = v3pcfg["cohort_expansion"]
+        candidates_epilepsiae = list(exp.get("candidates_epilepsiae", []))
+        provenance = {
+            "broad_core": list(exp["broad_core"]),
+            "candidates_epilepsiae": candidates_epilepsiae,
+            "admitted_candidates": list(candidates_epilepsiae),  # config-fallback: no gate result available
+            "excluded": [],
+            "broad_expanded": list(exp["broad_core"]) + candidates_epilepsiae,
+            "admission_source": "config-fallback",
+        }
 
     verdict = _tier_verdict(blocks["narrow"], blocks["broad"], blocks["broad_core"], min_support_narrow)
     payload = {
@@ -413,6 +488,7 @@ def main(argv=None):
         "narrow_tier3_met": verdict["narrow_tier3_met"],
         "broad_expanded_replicates": verdict["broad_expanded_replicates"],
         "broad_core_replicates": verdict["broad_core_replicates"],
+        "provenance": provenance,
         "narrow": blocks["narrow"], "broad": blocks["broad"], "broad_core": blocks["broad_core"],
     }
 

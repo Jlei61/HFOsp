@@ -71,6 +71,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import sys
 from pathlib import Path
 
@@ -122,6 +123,7 @@ from src.topic5_v3p_preictal_trajectory import (  # noqa: E402
 )
 
 PREICTAL_PHASES = ["P0", "P1", "P2", "P3"]
+RESULTS_BASE = _ROOT / "results/topic5_ictal_recruitment/v3p_preictal_trajectory"
 
 # Subject CSV column contract (brief Task 7; co-primary + rev1 additions; NO
 # `tier` -- Task 9 only). Order matches the brief.
@@ -154,6 +156,7 @@ CSV_COLS = [
     "n_activation_events_pre", "n_active_windows_pre", "h3b_activation_sufficient",
     "h3c_support_grade", "time_order_p_b", "time_order_p_c",
     "n_label_permutable_shafts", "n_unique_label_permutations_est", "label_null_underpowered",
+    "flux_label_null_mad_zero", "mode_label_null_mad_zero",
     "trend_estimator", "slope_span",
     # --- Task 8: H3p-a axial weakening (supportive-only) ---
     "K_primary_metric", "beta_axis_strength_slope", "beta_axis_reliable",
@@ -209,6 +212,7 @@ _METRIC_DEFAULTS = {
     "h3c_support_grade": "none", "time_order_p_b": float("nan"), "time_order_p_c": float("nan"),
     "n_label_permutable_shafts": 0, "n_unique_label_permutations_est": float("nan"),
     "label_null_underpowered": True,
+    "flux_label_null_mad_zero": False, "mode_label_null_mad_zero": False,
     # --- Task 8: H3p-a (supportive-only; module_support_flag_a NEVER flips) ---
     "beta_axis_strength_slope": float("nan"), "beta_axis_reliable": False,
     "beta_axis_slope_z": float("nan"), "p_label_slope_a": float("nan"),
@@ -695,6 +699,12 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
 
     surplus_flux = res_flux_full["surplus"]
     surplus_mode = res_mode_full["surplus"]
+    # degenerate label-null guard (rev2 hardening): p finite but z non-finite
+    # means the label-null had zero dispersion (MAD=0) -- p is still a valid
+    # rank-based statistic, but z (and any z-based cohort aggregation) is
+    # undefined for this subject (e.g. epilepsiae_1146's flux leg).
+    flux_label_null_mad_zero = bool(np.isfinite(res_flux_full["p"]) and not np.isfinite(res_flux_full["z"]))
+    mode_label_null_mad_zero = bool(np.isfinite(res_mode_full["p"]) and not np.isfinite(res_mode_full["z"]))
 
     # ---- residualization (sensitivity), spearman companion, lag1-specific ----
     resid_flux = _resid_slope_from(seizures, _flux_get, FULL)
@@ -1062,6 +1072,8 @@ def _run_ok_subject(ds_sid, cohort, cc, geom, v3cfg, v3pcfg, n_perm, row, window
         "n_label_permutable_shafts": n_label_permutable_shafts,
         "n_unique_label_permutations_est": n_unique_label_permutations_est,
         "label_null_underpowered": label_null_underpowered,
+        "flux_label_null_mad_zero": flux_label_null_mad_zero,
+        "mode_label_null_mad_zero": mode_label_null_mad_zero,
         # --- Task 8: H3p-a (supportive-only; hard-coded, never sole support) ---
         "beta_axis_strength_slope": beta_axis_strength_slope,
         "beta_axis_reliable": beta_axis_reliable,
@@ -1132,18 +1144,30 @@ def main(argv=None):
     n_perm = args.n_perm if args.n_perm is not None else int(v3pcfg["nulls"]["n_perm_final"])
     outdir = (
         Path(args.outdir) if args.outdir
-        else _ROOT / "results/topic5_ictal_recruitment/v3p_preictal_trajectory" / args.cohort
+        else RESULTS_BASE / args.cohort
     )
     outdir.mkdir(parents=True, exist_ok=True)
 
-    # Roster: narrow = the 7 primary; broad = broad_expanded = broad_core (9) +
-    # admitted candidates_epilepsiae (4, all admitted at Task-1 gap_min=0.0) = 13,
-    # never pooled. `in_broad_core` is config broad_core membership (uniform for
-    # both cohorts) so Task 9 can slice broad down to the curated core.
+    # Roster: narrow = the 7 primary; broad = broad_expanded, read from the
+    # `admission.json` AUTHORITATIVE roster record (written by
+    # `run_topic5_v3p_feasibility.py --include-candidates`) when present, else
+    # falls back to config broad_core (9) + candidates_epilepsiae (4, all
+    # admitted at Task-1 gap_min=0.0) -- both currently identical (=13),
+    # never pooled. `in_broad_core` is config broad_core membership (uniform
+    # for both cohorts) so Task 9 can slice broad down to the curated core.
     exp = v3pcfg["cohort_expansion"]
     broad_core_set = set(exp["broad_core"])
     if args.cohort == "broad":
-        entries = list(exp["broad_core"]) + list(exp.get("candidates_epilepsiae", []))
+        admission_path = RESULTS_BASE / "admission.json"
+        if admission_path.exists():
+            entries = list(json.loads(admission_path.read_text())["broad_expanded"])
+        else:
+            print(
+                f"[warn] admission.json not found at {admission_path}; using config broad_expanded "
+                f"(run feasibility --include-candidates to harden)",
+                flush=True,
+            )
+            entries = list(exp["broad_core"]) + list(exp.get("candidates_epilepsiae", []))
     else:
         entries = list(SUBJECTS_BY_SUB["narrow"])
     if args.subjects:

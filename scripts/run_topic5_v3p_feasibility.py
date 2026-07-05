@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import math
 import sys
 from pathlib import Path
@@ -41,6 +42,19 @@ from src.topic5_v3p_preictal_trajectory import load_v3p_config  # noqa: E402
 
 PREICTAL_PHASES = ["P0", "P1", "P2", "P3"]
 RANK_DISPLACEMENT_JSON_DIR = _ROOT / "results/interictal_propagation_masked/rank_displacement/per_subject"
+RESULTS_BASE = _ROOT / "results/topic5_ictal_recruitment/v3p_preictal_trajectory"
+
+# 2 yuquan subjects were considered for cohort_expansion but dropped PRE-GATE
+# (2026-07-04 user decision; config/topic5_v3p.yaml `cohort_expansion.candidates_yuquan: []`):
+# interictal-HFO participation is unavailable in the V3p mount -- Yuquan raw
+# data lives in the Yuquan tree, not the epilepsia LAGPAT_ROOT that
+# `classify_subject_contacts` hardcodes -- so they never reach the
+# axis_quality_gate at all.
+YUQUAN_DROPPED_PRE_GATE = ["yuquan_xuxinyi", "yuquan_zhangkexuan"]
+YUQUAN_DROPPED_REASON = (
+    "interictal HFO participation unavailable in the V3p mount (Yuquan data "
+    "not on the epilepsia LAGPAT_ROOT); dropped pre-gate"
+)
 
 CSV_COLS = [
     "subject", "cohort", "roster_status", "n_seizures",
@@ -216,6 +230,40 @@ def run_subject(ds_sid: str, load_cohort: str, roster_status: str, v3cfg: dict, 
     return row
 
 
+def build_admission_dict(
+    candidate_rows: list, narrow_roster: list, broad_core_roster: list, gate_cfg: dict,
+) -> dict:
+    """Pure builder for the AUTHORITATIVE ``admission.json`` roster record.
+
+    ``candidate_rows`` are ``run_subject()`` rows with ``roster_status ==
+    "candidate"`` (only ``subject``/``axis_quality_gate_pass`` are read).
+    Roster subjects (narrow/broad_core) are grandfathered ``admitted=True``
+    and never gated, so they're passed in as plain id lists, not rows.
+    ``gate_cfg`` is ``v3pcfg["cohort_expansion"]["axis_quality_gate"]``.
+    """
+    candidates_epilepsiae = [r["subject"] for r in candidate_rows]
+    admitted_candidates = [r["subject"] for r in candidate_rows if r["axis_quality_gate_pass"]]
+    excluded = [
+        {"subject": r["subject"], "reason": "failed axis_quality_gate"}
+        for r in candidate_rows if not r["axis_quality_gate_pass"]
+    ]
+    excluded += [{"subject": sid, "reason": YUQUAN_DROPPED_REASON} for sid in YUQUAN_DROPPED_PRE_GATE]
+    return {
+        "narrow": list(narrow_roster),
+        "broad_core": list(broad_core_roster),
+        "candidates_epilepsiae": candidates_epilepsiae,
+        "admitted_candidates": admitted_candidates,
+        "excluded": excluded,
+        "broad_expanded": list(broad_core_roster) + admitted_candidates,
+        "axis_quality_gate": {
+            "axis_participation_gap_min": gate_cfg["axis_participation_gap_min"],
+            "axis_rank_min_distinct": gate_cfg["axis_rank_min_distinct"],
+            "require_geometry_sufficient": gate_cfg["require_geometry_sufficient"],
+            "require_rank_displacement_json": gate_cfg["require_rank_displacement_json"],
+        },
+    }
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--cohort", choices=["narrow", "broad"], required=True)
@@ -273,6 +321,23 @@ def main(argv=None):
         f"geometry_sufficient AND n_seizures_ge_min_windows>=1)",
         flush=True,
     )
+
+    if args.include_candidates:
+        candidate_rows = [r for r in rows if r["roster_status"] == "candidate"]
+        admission = build_admission_dict(
+            candidate_rows, SUBJECTS_BY_SUB["narrow"], v3pcfg["cohort_expansion"]["broad_core"],
+            v3pcfg["cohort_expansion"]["axis_quality_gate"],
+        )
+        RESULTS_BASE.mkdir(parents=True, exist_ok=True)
+        admission_path = RESULTS_BASE / "admission.json"
+        with open(admission_path, "w") as fh:
+            json.dump(admission, fh, indent=2)
+        print(
+            f"[done] admission.json -> {admission_path} "
+            f"(admitted_candidates={len(admission['admitted_candidates'])}/"
+            f"{len(admission['candidates_epilepsiae'])}, broad_expanded={len(admission['broad_expanded'])})",
+            flush=True,
+        )
 
 
 if __name__ == "__main__":

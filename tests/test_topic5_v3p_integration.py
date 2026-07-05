@@ -26,6 +26,90 @@ def test_v3p_feasibility_writes_csv(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# Hardening (2026-07-05) -- admission.json AUTHORITATIVE roster artifact.
+# `build_admission_dict` is a pure helper (no mounted data needed): it is
+# unit-tested directly against synthetic per-subject gate results, per the
+# brief's "prefer factoring pure helpers so tests are fast + deterministic".
+# ---------------------------------------------------------------------------
+def test_v3p_build_admission_dict_schema_and_gate_logic():
+    from scripts.run_topic5_v3p_feasibility import build_admission_dict, YUQUAN_DROPPED_PRE_GATE
+
+    candidate_rows = [
+        {"subject": "epilepsiae_1084", "axis_quality_gate_pass": True},
+        {"subject": "epilepsiae_583", "axis_quality_gate_pass": True},
+        {"subject": "epilepsiae_590", "axis_quality_gate_pass": True},
+        {"subject": "epilepsiae_922", "axis_quality_gate_pass": False},  # exercises the failing branch
+    ]
+    narrow_roster = ["epilepsiae_1096", "epilepsiae_1125", "epilepsiae_1146", "epilepsiae_253",
+                     "epilepsiae_384", "epilepsiae_442", "epilepsiae_958"]
+    broad_core_roster = ["epilepsiae_139", "epilepsiae_253", "epilepsiae_1077", "epilepsiae_1096",
+                         "epilepsiae_1125", "epilepsiae_1150", "epilepsiae_620", "epilepsiae_635",
+                         "epilepsiae_916"]
+    # config carries an extra `calibrate_on_roster` key -- must be dropped,
+    # not passed through, so the schema matches exactly.
+    gate_cfg = {
+        "axis_participation_gap_min": 0.0, "axis_rank_min_distinct": 5,
+        "require_geometry_sufficient": True, "require_rank_displacement_json": True,
+        "calibrate_on_roster": True,
+    }
+
+    admission = build_admission_dict(candidate_rows, narrow_roster, broad_core_roster, gate_cfg)
+
+    for key in ["narrow", "broad_core", "candidates_epilepsiae", "admitted_candidates",
+                "excluded", "broad_expanded", "axis_quality_gate"]:
+        assert key in admission
+
+    assert admission["narrow"] == narrow_roster
+    assert admission["broad_core"] == broad_core_roster
+    assert admission["candidates_epilepsiae"] == [
+        "epilepsiae_1084", "epilepsiae_583", "epilepsiae_590", "epilepsiae_922",
+    ]
+    assert admission["admitted_candidates"] == ["epilepsiae_1084", "epilepsiae_583", "epilepsiae_590"]
+    assert admission["broad_expanded"] == broad_core_roster + [
+        "epilepsiae_1084", "epilepsiae_583", "epilepsiae_590",
+    ]
+
+    excluded_subjects = {e["subject"] for e in admission["excluded"]}
+    assert excluded_subjects == {"epilepsiae_922", *YUQUAN_DROPPED_PRE_GATE}
+    yuquan_excl = [e for e in admission["excluded"] if e["subject"] in YUQUAN_DROPPED_PRE_GATE]
+    assert len(yuquan_excl) == 2
+    assert all("V3p mount" in e["reason"] for e in yuquan_excl)
+
+    assert admission["axis_quality_gate"] == {
+        "axis_participation_gap_min": 0.0, "axis_rank_min_distinct": 5,
+        "require_geometry_sufficient": True, "require_rank_displacement_json": True,
+    }
+    assert "calibrate_on_roster" not in admission["axis_quality_gate"]
+
+
+@pytest.mark.integration
+def test_v3p_feasibility_include_candidates_writes_admission_json(tmp_path, monkeypatch):
+    """`main()` wiring: `--include-candidates` writes `RESULTS_BASE/admission.json`
+    (redirected here via monkeypatch so this never touches the real results
+    tree). `--subjects` restricts to 1 real broad_core roster id + 1 real
+    candidate id to keep this fast -- `narrow`/`broad_core` are still the FULL
+    hardcoded lists (never gated), only `candidates_epilepsiae` reflects the
+    `--subjects` filter.
+    """
+    import scripts.run_topic5_v3p_feasibility as feas_mod
+    monkeypatch.setattr(feas_mod, "RESULTS_BASE", tmp_path)
+    feas_mod.main([
+        "--cohort", "broad", "--outdir", str(tmp_path / "feasibility"),
+        "--include-candidates", "--subjects", "620", "1084",
+    ])
+    admission = json.loads((tmp_path / "admission.json").read_text())
+    for key in ["narrow", "broad_core", "candidates_epilepsiae", "admitted_candidates",
+                "excluded", "broad_expanded", "axis_quality_gate"]:
+        assert key in admission
+    assert len(admission["narrow"]) == 7
+    assert len(admission["broad_core"]) == 9
+    assert admission["candidates_epilepsiae"] == ["epilepsiae_1084"]
+    assert admission["admitted_candidates"] == ["epilepsiae_1084"]  # real gate: admitted at gap_min=0.0
+    assert admission["broad_expanded"][:9] == admission["broad_core"]
+    assert admission["broad_expanded"][9:] == ["epilepsiae_1084"]
+
+
+# ---------------------------------------------------------------------------
 # Task 7 trajectory runner — the two-tier integration contract (brief Step 1).
 # Tier 1: header-only CSV must still carry the co-primary columns (skipped path).
 # Tier 2: an eligible subject (253) produces finite co-primary surplus slopes +
@@ -84,6 +168,38 @@ def test_v3p_trajectory_h3pa_h3pd_columns(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# Hardening (2026-07-05) -- `--cohort broad` reads its roster from
+# `RESULTS_BASE/admission.json`'s `broad_expanded` list when present (Change
+# 2), else falls back to config broad_core + candidates_epilepsiae with a
+# printed [warn]. `RESULTS_BASE` is monkeypatched to `tmp_path` so this never
+# touches the real results tree. Both tests use FAKE / absent-cache subject
+# ids -- `classify_subject_contacts` fails fast (no cache file), producing a
+# `skipped` row -- so these prove the ROSTER SOURCE without real per-subject
+# compute (fast, deterministic).
+# ---------------------------------------------------------------------------
+def test_v3p_trajectory_broad_uses_admission_json_roster(tmp_path, monkeypatch):
+    import scripts.run_topic5_v3p_trajectory as traj_mod
+    monkeypatch.setattr(traj_mod, "RESULTS_BASE", tmp_path)
+    (tmp_path / "admission.json").write_text(
+        json.dumps({"broad_expanded": ["epilepsiae_FAKE1", "epilepsiae_FAKE2"]})
+    )
+    outdir = tmp_path / "out"
+    traj_mod.main(["--cohort", "broad", "--outdir", str(outdir), "--n-perm", "5"])
+
+    df = pd.read_csv(outdir / "v3p_trajectory_subject.csv")
+    assert sorted(df["subject"]) == ["epilepsiae_FAKE1", "epilepsiae_FAKE2"]
+    assert (df["status"] == "skipped").all()
+
+
+def test_v3p_trajectory_broad_falls_back_to_config_without_admission_json(tmp_path, monkeypatch, capsys):
+    import scripts.run_topic5_v3p_trajectory as traj_mod
+    monkeypatch.setattr(traj_mod, "RESULTS_BASE", tmp_path)  # no admission.json written here
+    outdir = tmp_path / "out"
+    traj_mod.main(["--cohort", "broad", "--outdir", str(outdir), "--n-perm", "5", "--subjects", "__none__"])
+    assert "admission.json not found" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------------------
 # Task 9 -- summary + tier verdict (Holm co-primary). Unlike the tests above,
 # this does NOT need real mounted data: given an already-computed trajectory
 # CSV, the tier ladder / subject_support / Holm-correction / broad_core-vs-
@@ -106,6 +222,11 @@ _V3P_ROW_DEFAULTS = dict(
     beta_axis_strength_slope=-0.1, p_label_slope_a=0.2, beta_axis_reliable=True,
     net_offaxis_flux_surplus_slope=0.0, net_offaxis_flux_slope_z=0.0,
     mode_shift_density_surplus_slope=0.0, mode_shift_density_slope_z=0.0,
+    # finite by default (paired with the finite z defaults above) so
+    # `_count_mad_zero` reads mad_zero=False unless a test deliberately sets
+    # z to NaN -- these are the raw label-null p's `_subject_row` does NOT
+    # type/return, only `_count_mad_zero` reads them straight off `raw`.
+    p_label_slope_b=1.0, p_label_slope_c=1.0,
 )
 _V3P_FIELDNAMES = ["subject", "cohort"] + list(_V3P_ROW_DEFAULTS.keys())
 
@@ -417,6 +538,77 @@ def test_v3p_summary_h3pc_leg_is_a_discriminating_branch(tmp_path):
                 "epilepsiae_c005", "epilepsiae_c006"):
         assert by_subj[sid]["subject_support"] == "False", sid
         assert by_subj[sid]["support_driver"] == "none", sid
+
+
+# ---------------------------------------------------------------------------
+# Hardening (2026-07-05) -- provenance (admission.json roster record) +
+# degenerate-null transparency (label-null MAD=0, e.g. epilepsiae_1146's
+# flux leg). Both are DERIVED from columns the trajectory CSV already has --
+# no new trajectory columns required, so this also covers CSVs written
+# before this hardening.
+# ---------------------------------------------------------------------------
+def test_v3p_summary_provenance_and_degenerate_null_transparency(tmp_path):
+    from scripts.run_topic5_v3p_summary import main
+
+    admission = {
+        "narrow": ["epilepsiae_1096"], "broad_core": ["epilepsiae_139"],
+        "candidates_epilepsiae": ["epilepsiae_1084"], "admitted_candidates": ["epilepsiae_1084"],
+        "excluded": [{"subject": "yuquan_xuxinyi", "reason": "dropped pre-gate"}],
+        "broad_expanded": ["epilepsiae_139", "epilepsiae_1084"],
+        "axis_quality_gate": {"axis_participation_gap_min": 0.0, "axis_rank_min_distinct": 5,
+                               "require_geometry_sufficient": True, "require_rank_displacement_json": True},
+    }
+    (tmp_path / "admission.json").write_text(json.dumps(admission))
+
+    narrow_rows = [
+        _v3p_row("epilepsiae_9001", "narrow", z_b=1.0, z_c=-1.0),
+        # the 1146-style degenerate case: label-null p finite, slope_z NaN
+        # (MAD=0); status=ok / not label_null_underpowered -> NOT excluded
+        # any other way, so this is the actual mystery the note explains.
+        _v3p_row("epilepsiae_1146", "narrow", z_b=float("nan"), z_c=-1.0, p_label_slope_b=0.523),
+        # excluded via label_null_underpowered but with a FINITE z_b -- must
+        # still read z_in_cohort_b=False (excluded, not merely "isfinite(z)").
+        _v3p_row("epilepsiae_9099", "narrow", z_b=5.0, z_c=-1.0, label_null_underpowered=True),
+    ]
+    _write_v3p_trajectory_csv(tmp_path / "narrow" / "v3p_trajectory_subject.csv", narrow_rows)
+    _write_v3p_trajectory_csv(tmp_path / "broad" / "v3p_trajectory_subject.csv", [])
+
+    main(["--indir", str(tmp_path)])
+
+    payload = json.loads((tmp_path / "narrow" / "v3p_cohort_tier.json").read_text())
+    assert payload["provenance"]["admission_source"] == "admission.json"
+    assert payload["provenance"]["broad_expanded"] == ["epilepsiae_139", "epilepsiae_1084"]
+    assert payload["provenance"]["excluded"] == admission["excluded"]
+
+    assert payload["narrow"]["n_flux_label_null_mad_zero"] == 1
+    assert payload["narrow"]["n_mode_label_null_mad_zero"] == 0
+    assert "degenerate_null_note" in payload["narrow"]
+
+    with (tmp_path / "narrow" / "v3p_summary_subject.csv").open(newline="") as fh:
+        by_subj = {r["subject"]: r for r in csv.DictReader(fh)}
+    assert by_subj["epilepsiae_1146"]["z_in_cohort_b"] == "False"  # NaN z never enters the Wilcoxon
+    assert by_subj["epilepsiae_1146"]["z_in_cohort_c"] == "True"   # finite z_c DOES enter
+    assert by_subj["epilepsiae_9001"]["z_in_cohort_b"] == "True"
+    assert by_subj["epilepsiae_9099"]["z_in_cohort_b"] == "False"  # excluded despite finite z_b
+
+
+def test_v3p_summary_provenance_config_fallback_without_admission_json(tmp_path):
+    """No admission.json under --indir -> provenance is built straight from
+    config `cohort_expansion` (matches the ACTUAL current production run,
+    which predates admission.json), `admission_source` flips to
+    "config-fallback"."""
+    from scripts.run_topic5_v3p_summary import main
+
+    narrow_rows = [_v3p_row("epilepsiae_9001", "narrow", z_b=1.0, z_c=-1.0)]
+    _write_v3p_trajectory_csv(tmp_path / "narrow" / "v3p_trajectory_subject.csv", narrow_rows)
+    _write_v3p_trajectory_csv(tmp_path / "broad" / "v3p_trajectory_subject.csv", [])
+
+    main(["--indir", str(tmp_path)])  # no admission.json written under tmp_path
+
+    payload = json.loads((tmp_path / "narrow" / "v3p_cohort_tier.json").read_text())
+    assert payload["provenance"]["admission_source"] == "config-fallback"
+    assert len(payload["provenance"]["broad_core"]) == 9
+    assert len(payload["provenance"]["candidates_epilepsiae"]) == 4
 
 
 # ---------------------------------------------------------------------------
