@@ -168,3 +168,69 @@ def test_off_axis_tail_disagreement_yields_undetermined():
     assert tail == [250, 500]
     assert per_tail == ["absent", "undetermined"]   # tail horizons disagree
     assert verdict == "undetermined"
+
+
+# --- Task 4: field_rhs shift fix + JVP hard gate (tests/test_topic4_m3b_spectral_phase.py) +
+# nonlinear footprint spread, verbatim from task brief .superpowers/sdd/task-4-brief.md Steps 1/5 ---
+
+# Fast synthetic unit tests (no real-crossing solve) for the epsilon-sensitivity aggregation rule +
+# the standalone off_axis sentinel -- the brief gives `_spread_onset`/`_spread_endgame` verbatim but
+# NOT the "all agree"/"majority" aggregation or the full-trajectory off_axis verdict; these lock the
+# judgment calls this task had to make (mirrors Task 3's own precedent of unit-testing
+# `_off_axis_decision`/`_off_axis_tail_agreement` directly with synthetic data).
+def test_all_agree_and_majority_aggregation_rules():
+    assert m2._all_agree(["axial", "axial", "axial", "axial"]) == "axial"
+    assert m2._all_agree(["axial", "axial", "core_only", "axial"]) is None   # not unanimous
+    assert m2._majority(["self_limited", "self_limited", "self_limited", "global_flooding"], 3) == "self_limited"
+    assert m2._majority(["self_limited", "self_limited", "global_flooding", "global_flooding"], 3) is None  # 2-2 split
+
+
+def test_spread_onset_and_endgame_on_synthetic_trajectory():
+    m2cfg = m2.load_m2_config()
+    # rises then falls back near baseline, elongated along axis, off_axis stays 0 throughout
+    # -> axial onset, self_limited endgame, off_axis sentinel absent.
+    traj = [
+        {"active_frac": 0.0, "elongation_axis": 0.0, "off_axis": 0.0, "globality": 0.05},
+        {"active_frac": 0.1, "elongation_axis": 0.1, "off_axis": 0.0, "globality": 0.05},
+        {"active_frac": 0.5, "elongation_axis": 0.4, "off_axis": 0.0, "globality": 0.2},
+        {"active_frac": 0.05, "elongation_axis": 0.5, "off_axis": 0.0, "globality": 0.05},
+    ]
+    assert m2._spread_onset(traj, m2cfg) == "axial"
+    assert m2._spread_endgame(traj, None, m2cfg) == "self_limited"
+    assert m2._spread_off_axis(traj, "axial", m2cfg) == "absent"
+
+    # active_frac never rises above its initial value -> core_only (no expansion at all).
+    flat = [dict(fm, active_frac=0.02) for fm in traj]
+    assert m2._spread_onset(flat, m2cfg) == "core_only"
+
+    # active_frac floods to near-1.0 at the end -> global_flooding (checked before self-limit).
+    flood = [dict(fm) for fm in traj]; flood[-1]["active_frac"] = 0.95
+    assert m2._spread_endgame(flood, None, m2cfg) == "global_flooding"
+
+    # off_axis sustained through the expansion window (not just a single-step blip) -> onset reads
+    # "off_axis" (sentinel breaks) and the full-trajectory verdict reads "present".
+    offax = [dict(fm, off_axis=0.2) for fm in traj]
+    onset_off = m2._spread_onset(offax, m2cfg)
+    assert onset_off == "off_axis"
+    assert m2._spread_off_axis(offax, onset_off, m2cfg) == "present"
+
+    # a single-step off_axis blip that does NOT survive into the expansion-window mean -> onset
+    # stays "axial" (the mean is still < tol), but the full-trajectory PEAK gate still breaks ->
+    # "undetermined" (peak gate fired, expansion-mean gate did not -- never "present" on one gate).
+    blip = [dict(fm) for fm in traj]; blip[0]["off_axis"] = 0.2   # only the FIRST (pre-expansion) sample
+    onset_blip = m2._spread_onset(blip, m2cfg)
+    assert onset_blip == "axial"
+    assert m2._spread_off_axis(blip, onset_blip, m2cfg) == "undetermined"
+
+
+def test_nonlinear_spread_axial_onset_off_axis_absent():
+    cfg = load_crit_config(); grid, kernels, core, b_core = _crit_op_context(cfg)
+    m2cfg = m2.load_m2_config()
+    crossing = m2.localize_alpha0_crossing(_points(), grid, kernels, core, cfg, m2cfg)
+    sp = m2.read_nonlinear_spread(crossing, _points(), grid, kernels, core, b_core, cfg, m2cfg)
+    assert sp["onset"] in ("axial", "core_only", "global_first", "off_axis", "undetermined")
+    assert sp["off_axis"] in ("absent", "present", "undetermined")
+    assert sp["control_minus_kick"] is True
+    # trajectory sanity: off-axis power stays ~0 across all sampled steps
+    for fm in sp["footprint_trajectory"]["at_crossing"]["core_kick"]:
+        assert fm["off_axis"] < 0.1
