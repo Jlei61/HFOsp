@@ -85,3 +85,28 @@ def test_latency_eligible_gate():
     assert latency_eligible(ok, False, cfg) is False           # assay invalid -> descriptive only
     assert latency_eligible({"n_surplus": 2, "n_covered": 4}, True, cfg) is False   # too few surplus
     assert latency_eligible({"n_surplus": 10, "n_covered": 2}, True, cfg) is False  # too few A∩S
+
+
+def test_interpret_latency_four_way():
+    from scripts.run_topic5_v3c_summary import interpret_latency
+    cfg = load_v3_config()
+    # H-B: AUC>=0.60, majority>0.55, SIGNED delta_t>=+2, null sig, sensitivity concordant
+    assert interpret_latency(0.66, [0.6, 0.7, 0.58, 0.62], 3.0, 0.01, True, cfg) == "H-B_supported"
+    # P1-3: identical but delta_t NEGATIVE (contradictory) -> NOT H-B (abs() would wrongly pass)
+    assert interpret_latency(0.66, [0.6, 0.7, 0.58, 0.62], -3.0, 0.01, True, cfg) != "H-B_supported"
+    # P1-5: H-B numbers but censor/t0 sensitivity NOT concordant -> NOT H-B
+    assert interpret_latency(0.66, [0.6, 0.7, 0.58, 0.62], 3.0, 0.01, False, cfg) != "H-B_supported"
+    # H-A compatible (descriptive): AUC in [0.45,0.55], small |delta_t|
+    assert interpret_latency(0.50, [0.49, 0.51, 0.50], 0.5, 0.6, True, cfg) == "H-A_compatible"
+    # surplus EARLIER (low tail): AUC<=0.40 and delta_t<=-2 -> distinct category, not indeterminate
+    assert interpret_latency(0.34, [0.3, 0.35, 0.4], -3.0, 0.2, True, cfg) == "surplus_earlier_unverified"
+    # indeterminate: mixed direction, null not sig, outside HA band
+    assert interpret_latency(0.57, [0.7, 0.4, 0.6], 1.0, 0.3, True, cfg) == "indeterminate"
+
+
+def test_spatial_primary_ok_requires_min_subjects():
+    from scripts.run_topic5_v3c_summary import _spatial_primary_ok
+    cfg = load_v3_config()
+    assert _spatial_primary_ok({"n_spatial_eligible": 4, "p_value": 0.01}, cfg) is True
+    assert _spatial_primary_ok({"n_spatial_eligible": 1, "p_value": 0.01}, cfg) is False  # too few subjects
+    assert _spatial_primary_ok({"n_spatial_eligible": 4, "p_value": 0.20}, cfg) is False  # null not sig
