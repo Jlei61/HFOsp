@@ -167,6 +167,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     ref = np.zeros(N, dtype=np.int32)
     s_E = np.zeros(N); I_E = np.zeros(N)
     s_I = np.zeros(N); I_I = np.zeros(N)
+    # ---- M4: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
+    # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
+    # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
+    track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False))
+    if track_rec:
+        s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
     ring_sE = np.zeros((M, N))
     ring_sI = np.zeros((M, N))
 
@@ -234,6 +240,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         s_E *= decay_sE
         s_I *= decay_sI
         slot = t % M
+        if track_rec:
+            s_E_rec *= decay_sE
+            s_E_rec += ring_sE[slot]                     # recurrent arrivals only (same slot, pre-zeroing)
         s_E += ring_sE[slot]; ring_sE[slot] = 0.0
         s_I += ring_sI[slot]; ring_sI[slot] = 0.0
         if ee_std_on:
@@ -249,12 +258,17 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # ----- synaptic currents (low-pass of s) -----
         I_E = s_E + (I_E - s_E) * decay_IE
         I_I = s_I + (I_I - s_I) * decay_II
+        if track_rec:
+            I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
         if lfp_trace is not None:                       # current-based LFP at custom sites
             lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
 
         # slow layer off (slow=None)
         if slow is not None:
-            I_net = slow.apply_currents(I_E, I_I, labels)
+            if track_rec:
+                I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
+            else:
+                I_net = slow.apply_currents(I_E, I_I, labels)
             # off-by-default hook: under slow, use the per-neuron threshold substrate when provided
             # (lets z/g_K ride a heterogeneous core); V_th_per_neuron=None -> uniform p.V_th (unchanged).
             base_vth = p.V_th if V_th_per_neuron is None else V_th_per_neuron
