@@ -1,7 +1,9 @@
 import math
 
+import numpy as np
+
 from src.topic5_v3_mode_transition import load_v3_config
-from src.topic5_v3c_coverage import coverage_metrics
+from src.topic5_v3c_coverage import coverage_metrics, coverage_null_distribution
 
 
 def test_v3c_config_keys():
@@ -26,3 +28,28 @@ def test_coverage_metrics_basic():
 def test_coverage_metrics_empty_soz():
     m = coverage_metrics(["a", "b"], [])
     assert math.isnan(m["coverage"]) and m["n_missed"] == 0 and m["surplus"] == ["a", "b"]
+
+
+def _shaft(name):  # "H1".."H4" -> "H"; "G12" -> "G"
+    return "".join(c for c in name if not c.isdigit())
+
+
+def test_coverage_null_preserves_axis_count_and_size():
+    all_clean = ["H1", "H2", "H3", "H4", "G1", "G2", "G3", "G4"]
+    axis = ["H1", "H2", "G1"]                      # per-shaft: H=2, G=1
+    soz = ["H1", "H2"]
+    shaft = {n: _shaft(n) for n in all_clean}
+    null = coverage_null_distribution(axis, all_clean, soz, shaft, n_perm=200, rng=0)
+    assert null.shape == (200,)
+    # coverage = |A_null ∩ {H1,H2}| / 2 ; A_null always has H=2 of {H1..H4}, G=1 of {G1..G4}
+    assert set(np.unique(null)).issubset({0.0, 0.5, 1.0})
+    assert null.max() == 1.0 and null.min() == 0.0     # both extremes reachable within shaft H
+
+
+def test_coverage_null_soz_shuffle_regression():
+    # If S is shuffled to non-axis positions, observed coverage should sit inside the null (not high)
+    all_clean = ["H1", "H2", "H3", "H4"]
+    axis = ["H1", "H2"]; shaft = {n: "H" for n in all_clean}
+    null_when_soz_offaxis = coverage_null_distribution(axis, all_clean, ["H3", "H4"], shaft, n_perm=200, rng=1)
+    # observed coverage(axis={H1,H2}, soz={H3,H4}) = 0; null spans 0..1 -> observed not above null
+    assert null_when_soz_offaxis.mean() > 0.0
