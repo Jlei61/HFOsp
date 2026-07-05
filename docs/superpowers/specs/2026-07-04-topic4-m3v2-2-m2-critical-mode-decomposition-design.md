@@ -1,6 +1,6 @@
 # Topic 4 — M3-v2.2 Approach-Criticality — Milestone 2: Dense α₀ Crossing + Two-Stage Linear-Ignition / Nonlinear-Spread Readout · Design
 
-date 2026-07-04（rev2.2 2026-07-05）· 状态 **design rev2.2 — in execution (SDD)**（rev1.1 → rev2：两段式 ignition/spread 重构；rev2 → rev2.1：折入用户 GO-review 4 项 P1 契约钉死——① pilot 语言降调（exploratory de-risk，正式待 T2/T4/T5 注册）② nonaxis gain 三态阈值 ③ epsilon pass/fail 锁死 ④ ignition/spread enum 显式化；**rev2.1 → rev2.2**（T1 review，用户 2026-07-05）：`op_solve_quality` 改 **fold-appropriate 残差容差**（`op_residual_tol=1e-2`）而非严格 1e-9 `converged`（near-fold op 稳定但不收敛到 1e-9；否则 §5.0 ignition gate 恒 fail 废掉 core_localized 读数）+ `branch_identity_clean` 纳入 T1）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。**用户 2026-07-05 审阅=90/100 GO、无 P0；建议 M1 PR #6 先合、M2 impl 以 M1-merged main 为 base（避免 rebase 混科学+工程）。**
+date 2026-07-04（rev2.3 2026-07-05）· 状态 **design rev2.3 — in execution (SDD)**（rev2.2 → rev2.3（T3 review）：off_axis sentinel 用**渐近尾 horizon 一致规则**（`sentinel_min_horizon_ms=250`，§2.3）替代单一 horizon；gain 形式 **sign-off = full-state self-gain**（M1 precedent，§3.3），E-rate-projected 精细化 deferred）（rev1.1 → rev2：两段式 ignition/spread 重构；rev2 → rev2.1：折入用户 GO-review 4 项 P1 契约钉死——① pilot 语言降调（exploratory de-risk，正式待 T2/T4/T5 注册）② nonaxis gain 三态阈值 ③ epsilon pass/fail 锁死 ④ ignition/spread enum 显式化；**rev2.1 → rev2.2**（T1 review，用户 2026-07-05）：`op_solve_quality` 改 **fold-appropriate 残差容差**（`op_residual_tol=1e-2`）而非严格 1e-9 `converged`（near-fold op 稳定但不收敛到 1e-9；否则 §5.0 ignition gate 恒 fail 废掉 core_localized 读数）+ `branch_identity_clean` 纳入 T1）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。**用户 2026-07-05 审阅=90/100 GO、无 P0；建议 M1 PR #6 先合、M2 impl 以 M1-merged main 为 base（避免 rebase 混科学+工程）。**
 
 > **方法学 base** = M1 spec `2026-07-02-topic4-m3v2-2-approach-criticality-design.md` + M1 code。M2 **复用** M1 判读器 + 特征模指标，只新加：dense α₀ localization、two-core ignition 确认、nonlinear-footprint spread readout、gain/leak 方向向量（nonaxis 降为 sentinel）。
 > **执行 gate**：M2 全模型侧，不消费 topic5 phase2。Topic5 correspondence 留 M3。
@@ -100,6 +100,7 @@ unresolved_subreason         # null | alpha0_not_localized | branch_ambiguous |
 - `e_axis_gradient` = normalize(沿 THETA_EE 的线性坐标梯度 `s = x·cosθ + y·sinθ`, centered)。
 - `e_nonaxis` = normalize(leading-mode rE-loading − 投到 span(e_global, e_axis_gradient) 的分量)（临界残差方向）。**rev2 role = sentinel / negative-control**（阈值全 config，跑前锁 §8）：
   - **`off_axis` 三态判据（钉死）**：`present` **仅当**两门都破——`off_axis_score ≥ off_axis_score_tol`（默认 0.05）**且** nonaxis gain 显著超 axis/global（`gain_nonaxis − max(gain_axis, gain_global) ≥ nonaxis_gain_excess_tol`（默认 0.10）**且** `gain_nonaxis / max(gain_axis, gain_global) ≥ nonaxis_gain_ratio_tol`（默认 1.25））；两门都不破 → `absent`；只破一门 / 边界 → `undetermined`。
+  - **horizon 稳健化（rev2.3，T3 review）**：gain 门在**渐近尾 horizons**（config `sentinel_min_horizon_ms=250` 及以上，即 [250,500]）各评一次 `_off_axis_decision`；**尾内全一致** → 该结局，不一致 → `undetermined`。短 horizons（10–100ms）处紧致 `e_nonaxis` 会瞬态 out-gain axis/global = §2.3 已警告的"核心紧致误读为传播"伪迹，故 sentinel **只读渐近尾且要求尾内一致**（镜像 §4.3 epsilon_sensitivity 的 across-sweep 一致规则），避免单一任意 horizon 的脆弱性 / result-shopping。
   - **未达"present"两门时，只能写 `off_axis: absent` 或 `undetermined`，禁写任何侧向/离轴传播结论**（防 §6.3 pronoun 误扩）。
   - **若报 `e_nonaxis gain`，JSON+图必须并写注记**：`"nonaxis_residual = core-compactness residual in a core-localized mode, NOT sideways propagation"`。
   - 低范数即 invalid：`if ‖residual‖ < nonaxis_direction_min_norm(1e-3) → off_axis=absent, nonaxis gain=NaN`（不用 random 填；如需 control 另报 `random_nonaxis_control_gain`）。
@@ -124,8 +125,9 @@ unresolved_subreason         # null | alpha0_not_localized | branch_ambiguous |
 - 全部持久化到 `linear_ignition`（§1）。
 
 ### 3.3 projected operator gain/leak（方向向量；nonaxis=sentinel）
-预注册 horizons（复用 M1 `[10,25,50,100,250,500]` ms）。对穿零处（+ 可选 pre/post-crossing）算 source∈{axis_gradient, global} × target 的 directional gain：
-`gain_X_to_Y(T) = ‖P_Y · rE(exp(JT)·embed_rE(e_X))‖ / ‖e_X‖`（复用 M1 `transient_gain`）。
+预注册 horizons（复用 M1 `[10,25,50,100,250,500]` ms）。对穿零处算各方向 source∈{axis_gradient, global, nonaxis(sentinel)} 的 **full-state self-gain**：
+`gain_X(T) = ‖exp(JT)·embed_rE(e_X)‖ / ‖e_X‖`（**复用 M1 `transient_gain`，全 6-field 态范数——与 M1 `finite_time_gain` 同惯例**）。
+- **gain 形式 sign-off（rev2.3，spec-owner，T3 review）**：spec 早稿写过 E-rate-projected `‖P_Y·rE(…)‖` 形式，但 sentinel 是 **negative-control**（主判据 = `off_axis_score` 门；gain 门为**次级相对比较**）；full-state self-gain 足够且与 M1 precedent 一致，采纳之。**E-rate-block-projected 精细化 = DEFERRED**——仅当未来某穿零 `off_axis_score ≥ off_axis_score_tol` 打开 score 门、gain 门真正承重时再评（届时紧致 `e_nonaxis` 与弥散 `e_global` 向非-rE 场的耦合差异才可能影响比较公平性）。
 - `e_nonaxis` gain **只作 sentinel**（§2.3）：报 `off_axis: absent/present` + 强制注记"核心紧致残差非侧向传播"；**不**冒充 full `‖P_N exp(JT) P_N‖`、**不**当主铺开判据。
 
 ---
@@ -212,7 +214,7 @@ spread：JVP 门 fail ∨ control 未扣 ∨ ε/polarity 不一致 ∨ <2 深度
   - `ignition`(core_localized_overlap_thresh=0.8, core_localized_globality_thresh=0.3, sweep [0.7,0.8,0.9]×[0.2,0.3,0.4]; **delocalized**: globality_thresh=0.5, iso_thresh=0.2, corridor_lit_thresh=0.2)；
   - `two_core_confirm`(kind=two, radius=0.9, separation=2.4, single_core_thresh=0.9, corridor_dark_thresh=0.05)；
   - `spread`(axial_onset_thresh=0.2, **expand_active_delta=0.1, global_thresh=0.5**, flood_active_thresh=0.9, self_limit_active_thresh=0.1, footprint_sample_ms=[2,5,10,20,30,50,75,100,200,300]; **epsilon_onset_agreement=all, epsilon_endgame_agreement=majority**)；
-  - `gain`(horizons 复用 M1)；
+  - `gain`(horizons 复用 M1；**sentinel_min_horizon_ms=250**（off_axis sentinel 只读 ≥ 此的渐近尾 horizons + 要求尾内一致，rev2.3）)；
   - `perturbation`(epsilon_rel=[0.01,0.05], max_time_ms=300, dt_ms=0.1, recovery_radius_rel=0.05, escape_rate_khz=_SAT_RATE_KHZ, polarities=[-1,1])。
 - **results** `results/topic4_criticality_m2/`：`ignition_spread_verdict.json`（两段式，§1）、`alpha0_crossing.json`、`continuation_trace.csv`、`linear_ignition.json`（含 two-core 逐区）、`nonlinear_spread.json`（footprint 轨迹）、`figures/`(+ README 中文 + FIGURE_INDEX)。
 - **复用 M1**：`solve_branches`/`build_jacobian_dense`/`rate_eigenpairs`/`leading_subspace_indices`/`pair_loading`/`mode_e_field`/`elongation_axis_score`/`off_axis_score`/`phase_gradient_axis_score`/`globality`/`core_overlap`/`transient_gain`/`check_low_branch_continuation_between`/`qualify_point`/`make_core_mask`/`field_rhs`(补 shift)。pilot 脚本 `results/topic4_criticality_m2/pilots/m2_pilots{,_round2}.py` 是 ignition/spread 读数的 reference 实现。
