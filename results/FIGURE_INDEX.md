@@ -146,7 +146,7 @@
 | [template_resection_outcome/figures/](template_resection_outcome/figures/) | Track E1 切除结局预测变量（覆盖景观/对比） |
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
 | [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
-| [topic5_ictal_recruitment/v3p_preictal_trajectory/{narrow,broad}/figures/](topic5_ictal_recruitment/v3p_preictal_trajectory/narrow/figures/) | V3p：发作前最后两分钟（P0→P3，只看发作前，不碰 O/I1-I3）连锁活动是否逐渐搬到间期固定高频通路之外。上排=每个病人非轴向流/模态转移的爬升斜率（narrow 主力 vs broad 复制，圆=narrow/broad 核心 9 人，三角=broad 额外候选人，黑圈=该病人自己按标签置换检验显著）；中排=同两个量从 P0 到 P3 的完整轨迹（均值±IQR）；下排（可选）=换算成共同 null-relative z 尺度的补充对比。**图渲染自真实 n_perm=1000 大跑（2026-07-05，80 核 / 20 job / 7h35m）；结果=完整硬门阴性 tier 0（narrow 0/7 Holm 1.0/1.0、broad_expanded 0/13 Holm .685、broad_core 0/9 Holm .652，无被试过完整硬门；broad 零散单-null 命中全被硬门筛掉）；各图目录 `figures/README.md` 载对应队列真实数字** |
+| [topic5_ictal_recruitment/v3p_preictal_trajectory/{narrow,broad}/figures/](topic5_ictal_recruitment/v3p_preictal_trajectory/narrow/figures/) | V3p：发作真正开始前最后两分钟（横轴=相对脑电起始的真实秒数 P0..P3＝−105/−75/−45/−20s，只画到 −10 秒边界，onset 本身及之后完全不碰）连锁活动是否逐渐搬到间期固定高频通路之外——real-time 轴重绘（2026-07-05，替换旧 6 面板栅格图），narrow/broad 各自独立出图，从不共享一根轴。每队列 2 张：**主图** `v3p_axis_vs_offaxis_{narrow,broad}.png`＝沿轴组织度（橙）vs 离轴流（青）migration pair，两线各自按发作前最远基线（−105/−75s）归一为基线标准差单位；**附图** `v3p_mode_direction_{narrow,broad}.png`＝最易放大模态的离轴方向（紫）。图上只留一行斜体角注（Holm p，实时读自 tier JSON），文字说明在各队列 `figures/README.md`。**结果沿用真实 n_perm=1000 大跑（80 核/20 job/7h35m）数字，未变：完整硬门阴性 tier 0**（narrow 0/7 Holm p=1.000/1.000、broad_expanded 0/13 Holm p=0.685/0.685、broad_core 0/9 Holm p=0.652；broad 有 3 人非轴向流 + 2 人模态方向零散单-null 命中，全被 rate/lag1/phase/block/双 span 硬门筛掉，不算潜在阳性） |
 
 ---
 

@@ -1,67 +1,96 @@
 #!/usr/bin/env python
-"""Topic 5 V3p preictal trajectory -- result figure (Task 10, integration).
+"""Topic 5 V3p preictal trajectory -- result figures (real-time redesign 2026-07-05).
 
-Three independent questions (CLAUDE.md Sec 7: one construct per ROW; the two
-COLUMNS inside a row are a units split, not a second question -- non-axial
-flux and mode-shift density live in incommensurable units, exactly the
-precedent V3a's own summary figure documents for splitting H3b/H3c the same
-way):
+Rewritten to match ``scripts/plot_topic5_v3_summary.py`` (V3a's real-time
+redesign, on ``main``) EXACTLY -- the earlier 6-panel narrow+broad-on-one-axes
+grid with parenthetical axis labels and an internal-bookkeeping caption was
+rejected (same problems as V3a's pre-revision figure). Design discipline
+(replicated verbatim):
 
-  (A) -- per-SUBJECT summary. Does each subject's own preictal rate-of-rise
-  (a Theil-Sen slope fit across P0..P3) look elevated in raw units, and which
-  subjects individually clear their OWN label-permutation null? One point per
-  subject for each co-primary endpoint (H3p-b non-axial-flux surplus slope,
-  H3p-c mode-shift-density surplus slope), grouped narrow (primary) vs broad
-  (replication, = broad_expanded). Circles = narrow, or broad's curated
-  core-9; triangles = broad's admitted-candidate-only subjects
-  (``in_broad_core==False``) -- so a reader sees at a glance how much of any
-  broad signal leans on the 4 non-curated admissions. A black ring marks a
-  subject whose own label-permutation p (``p_label_slope_{b,c}``) clears
-  0.05. A thick horizontal tick is each block's median.
+  - Real-time x-axis in SECONDS relative to EEG onset (window centres) --
+    NEVER phase codes on the axis.
+  - ONE cohort per figure -- narrow and broad are never on the same axes ->
+    SEPARATE PNGs per cohort.
+  - MAIN figure per cohort (``v3p_axis_vs_offaxis_{narrow,broad}.png``): the
+    migration pair on ONE axes, both baseline-normalized (baseline-SD units,
+    0 = "same as far-preictal baseline") so the two different-unit metrics
+    sit comparably on one y-axis:
+      - ALONG-AXIS organization = median ``|beta_axis|`` (H3p-a, descriptive/
+        supportive only -- never cohort-tested) -- ORANGE, hypothesis FALLS
+        toward onset.
+      - OFF-AXIS flux = ``net_offaxis_flux`` (H3p-b, co-primary) -- TEAL,
+        hypothesis RISES toward onset.
+    If the migration held, orange dips below 0 while teal climbs above it.
+  - SUPPLEMENTARY figure per cohort (``v3p_mode_direction_{narrow,broad}.png``):
+    mode-shift density (H3p-c, co-primary; ``lowrank_var ->
+    dominant_right_singular_vector -> map_lowrank_vector_to_contacts ->
+    subspace_mode_shift(..,"density")``) -- PURPLE, one line.
+  - Median + IQR band, legend INSIDE upper-right, minimal on-canvas text (one
+    small italic corner annotation carrying the endpoint Holm p, read live
+    from the Task-9 tier JSON). The WORDS live in ``figures/README.md``.
 
-  (B) -- pooled WINDOW-level trajectory. Averaged across every window, every
-  seizure, every subject in a cohort, does the RAW metric's shape actually
-  climb from P0 to P3, or could (A)'s slope summary be hiding a flat /
-  non-monotone reality? Mean +/- IQR band per phase bin (P0..P3 ONLY --
-  preictal-only; O/I1/I2/I3 never enter this figure), computed directly from
-  ``v3p_window_detail.csv`` by binning each window's ``t_center`` into its
-  fixed P0..P3 bin. This is genuinely independent of (A): (A) is a
-  per-subject FITTED-RATE summary; (B) is the pooled RAW-trajectory SHAPE --
-  a flat (A) could still hide a real bend in (B), and vice versa.
+V3P ADAPTATIONS (vs the V3a template):
+  - PREICTAL-ONLY phases: ``PHASES = ["P0","P1","P2","P3"]`` (``PHASE_TIME``
+    -105/-75/-45/-20 s). NO O/I1 -- V3p never touches onset. x-lim is
+    ``[-118, -5]``; a faint dotted marker at -10 s ("P3 ends ... onset not
+    analyzed") replaces the V3a template's onset buffer/marker (there is no
+    onset buffer here -- onset itself is never in the analyzed span).
+  - BASELINE = far-preictal ``BASELINE_PHASES = ["P0","P1"]`` (-105/-75 s,
+    >60 s before onset); 0 = far-from-onset, and the eye watches whether
+    P2/P3 (near onset) rise -- unlike the V3a template's 3-phase baseline
+    (P0,P1,P2), V3p only has 4 phases total, so baseline/contrast is a clean
+    2-2 split.
+  - ROSTER: narrow = ``SUBJECTS_BY_SUB["narrow"]`` (7, same list as V3a's
+    narrow). broad = **broad_expanded (13)**: read ``<indir>/admission.json``
+    's ``broad_expanded`` list (the AUTHORITATIVE V3p Task-1 roster record)
+    when present, else fall back to config ``cohort_expansion.broad_core +
+    candidates_epilepsiae`` -- mirrors ``run_topic5_v3p_trajectory.py``'s own
+    fallback exactly. Do NOT use ``SUBJECTS_BY_SUB["broad"]`` (V3a's own
+    9-subject broad_core -- a different, narrower cohort).
+  - TIER JSON: ``<indir>/{narrow,broad}/v3p_cohort_tier.json`` (written
+    identically under both cohort dirs); per-cohort keys are ``p_holm_b`` /
+    ``p_holm_c`` + ``cohort_b_pass`` / ``cohort_c_pass`` -- NOT the V3a
+    template's ``p_holm_h3b`` / ``p_holm_h3c`` naming.
+  - OUTPUT: PNGs + README land under ``<indir>/{narrow,broad}/figures/`` (per
+    cohort -> its own dir, matching the existing V3p results-tree layout),
+    not a single flat ``<indir>/figures/`` -- 4 PNGs + 2 READMEs total.
 
-  (C, optional) -- the SAME per-subject slopes as (A), rescaled onto one
-  shared, dimensionless null-relative z-scale ((obs - null median) / null
-  MAD) with +/-1.96 reference guides. (A) necessarily splits H3p-b/H3p-c onto
-  two different-unit y-axes, so it cannot show whether the two endpoints are
-  SIMILARLY far from their own null for the same subject; (C) can, because z
-  is unit-free (an effect-size-vs-significance pairing, not a rotation of
-  (A)). Skipped entirely (figure degrades to 2 rows) if no subject in either
-  cohort has a finite slope-z in either column.
+WORKTREE/MAIN DIVERGENCE (why this is not a byte-identical import list): this
+branch's checked-out ``scripts/run_topic5_v3_susceptibility.py`` predates the
+``main``-only commit that introduced ``_abs_beta_sz`` (main has since
+refactored the H3a susceptibility run; this V3p branch never rebased onto
+that). This file must NOT edit any V3a/V2 file, so the along-axis (H3p-a)
+leg is instead built from the pair this WORKTREE'S OWN susceptibility script
+already exposes for exactly this computation -- ``_phase_llr`` (per-seizure
+``{name: line-length-rate}`` dicts for one phase) + ``_median_abs_beta``
+(median over seizures of ``|beta_axis|`` restricted to the axis set) -- the
+same primitives V3a's own ``_run_ok_subject`` uses for its P3/I1 contrast,
+just pointed at P0..P3. The flux (H3p-b) and mode (H3p-c) legs use the exact
+same primitives as the V3a template (``activations_from_z -> atm_offdiag ->
+net_offaxis_flux``; ``lowrank_var -> dominant_right_singular_vector ->
+map_lowrank_vector_to_contacts -> subspace_mode_shift``), all of which are
+unaffected by the drift and confirmed present in this worktree (V3p's own
+Task-7 runner already imports the identical set).
 
-Reads exactly 3 files per cohort under ``--indir`` (default: canonical
-results path) -- no mounted-data / no heavy src imports, so it renders
-identically whether ``--indir`` points at the real pipeline output or a
-synthetic dev fixture:
-  ``v3p_trajectory_subject.csv`` (Task 7/8 subject-level co-primary slopes),
-  ``v3p_window_detail.csv``      (Task 7 per-window raw metrics),
-  ``v3p_cohort_tier.json``       (Task 9 cohort Holm-p / tier verdict --
-                                   caption only, purely descriptive, never
-                                   re-derived here).
+FRAMING (complete-hard-gate NEGATIVE, tier 0 -- 2026-07-05 real n_perm=1000
+run, see the archive doc): both cohorts' trajectories are FLAT. Cohort Holm p
+is >= 0.65 on every leg; 0/7 narrow and 0/13 broad subjects individually pass
+the full pre-registered hard-gate stack. A few broad subjects show an
+isolated single-null nominal hit (never a cohort-level or full-gate pass) --
+these are named, not hidden, in the per-cohort README, alongside why the
+harder gates filter them out. This is NOT "no evidence of any preictal
+non-axial change" -- it is "no direction-consistent, gate-surviving ramp was
+found".
 
 See docs/superpowers/plans/2026-07-03-topic5-v3p-preictal-trajectory.md
-Task 10. Visual style mirrors scripts/plot_topic5_v3_summary.py (Topic 5
-V3a's most recent summary-figure redesign) per this task's brief --
-docs/figure_style_guide.md Sec "Topic 5" notes the canonical style is NOT
-locked yet (exploratory, per-case), so this matches V3a's look without
-over-polishing; a unified restyle happens later once Topic 5's figure
-language settles.
+Task 10, docs/superpowers/specs/2026-07-03-topic5-v3p-preictal-trajectory-design.md,
+and docs/archive/topic5/v3p_preictal_nonaxis_trajectory_2026-07-05.md.
 """
 from __future__ import annotations
 
 import argparse
-import csv
 import json
-import textwrap
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -70,425 +99,382 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[1]
-_DEFAULT_INDIR = _ROOT / "results/topic5_ictal_recruitment/v3p_preictal_trajectory"
-_PNG_NAME = "v3p_preictal_trajectory_summary.png"
-_ALPHA = 0.05
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
-# House V3a palette reused verbatim (see module docstring: Topic 5 has no
-# locked canonical style yet, so this mirrors the most recent V3a summary
-# figure rather than inventing a new one).
-COHORT_COLOR = {"narrow": "#c0603a", "broad": "#3b6fb0"}
+from scripts._topic5_v3_io import (  # noqa: E402
+    classify_subject_contacts,
+    load_subject_phase_envelopes,
+)
+from scripts.run_topic5_ictal_field_dynamics import SUBJECTS_BY_SUB  # noqa: E402
+from scripts.run_topic5_v3_susceptibility import _median_abs_beta, _phase_llr  # noqa: E402
+from src.topic5_v2_criticality import activations_from_z  # noqa: E402
+from src.topic5_v3_mode_transition import (  # noqa: E402
+    atm_offdiag,
+    dominant_right_singular_vector,
+    load_v3_config,
+    lowrank_var,
+    map_lowrank_vector_to_contacts,
+    net_offaxis_flux,
+    rank_forward,
+    sliding_windows,
+    subspace_mode_shift,
+    subspace_projectors,
+)
+from src.topic5_v3p_preictal_trajectory import load_v3p_config  # noqa: E402
+
+_DEFAULT_INDIR = _ROOT / "results/topic5_ictal_recruitment/v3p_preictal_trajectory"
+
+# Preictal-only fixed-second phases (contiguous -120..-10 s); V3p never
+# touches O/I1/I2/I3. Value = the window CENTRE in seconds relative to onset.
+PHASES = ["P0", "P1", "P2", "P3"]
+PHASE_TIME = {"P0": -105.0, "P1": -75.0, "P2": -45.0, "P3": -20.0}
+BASELINE_PHASES = ["P0", "P1"]  # far-preictal baseline (>60 s before onset); P2/P3 are the near-onset contrast
+P3_END = -10.0                  # V3p's clean preictal boundary -- onset (0 s) is never analyzed
+
+# House semantic colours (figure_style_guide Sec 0.1 Topic-4 lock, reused
+# verbatim from the V3a template): on-axis = orange, cross/off-axis = teal.
+# Mode-direction = a distinct purple.
+AXIS_COLOR = "#d1791f"
+OFFAXIS_COLOR = "#2a9d8f"
+MODE_COLOR = "#7b5aa6"
 COHORT_ROLE = {"narrow": "primary", "broad": "replication"}
 
-PHASES = ["P0", "P1", "P2", "P3"]
-# Fixed eeg-onset-anchored preictal bins (config/topic5_v3p.yaml
-# preictal.span_full_rel == [-120, -10]); NEVER O/I1/I2/I3 -- V3p is
-# preictal-only (brief Hard QC: "no O/I1/I2/I3").
-PHASE_BOUNDS = {"P0": (-120.0, -90.0), "P1": (-90.0, -60.0), "P2": (-60.0, -30.0), "P3": (-30.0, -10.0)}
+
+# ---------------------------------------------------------------------------
+# roster + tier payload
+# ---------------------------------------------------------------------------
+def _broad_expanded_roster(indir: Path, v3pcfg: dict) -> list:
+    """13-subject V3p replication roster (9 curated core + 4 admitted
+    candidates) -- NEVER ``SUBJECTS_BY_SUB["broad"]`` (V3a's own, different,
+    9-subject broad_core). Prefers the AUTHORITATIVE ``admission.json``
+    roster record (Task 1 axis-quality gate); config ``cohort_expansion``
+    fallback mirrors ``run_topic5_v3p_trajectory.py``'s own fallback exactly.
+    """
+    admission_path = indir / "admission.json"
+    if admission_path.exists():
+        return list(json.loads(admission_path.read_text())["broad_expanded"])
+    print(
+        f"[warn] admission.json not found at {admission_path}; using config broad_expanded "
+        "(run run_topic5_v3p_feasibility.py --include-candidates to harden)",
+        flush=True,
+    )
+    exp = v3pcfg["cohort_expansion"]
+    return list(exp["broad_core"]) + list(exp.get("candidates_epilepsiae", []))
 
 
-def _f(x) -> float:
-    try:
-        return float(x)
-    except (TypeError, ValueError):
-        return float("nan")
+def _roster_for(cohort: str, indir: Path, v3pcfg: dict) -> list:
+    return list(SUBJECTS_BY_SUB["narrow"]) if cohort == "narrow" else _broad_expanded_roster(indir, v3pcfg)
 
 
-def _b(x) -> bool:
-    return x is True or str(x) == "True"
-
-
-def _read_csv_rows(path: Path) -> list:
-    if not path.exists():
-        return []
-    with path.open(newline="") as fh:
-        return list(csv.DictReader(fh))
-
-
-def _load_subject_rows(indir: Path) -> dict:
-    return {c: _read_csv_rows(indir / c / "v3p_trajectory_subject.csv") for c in ("narrow", "broad")}
-
-
-def _load_window_rows(indir: Path) -> dict:
-    return {c: _read_csv_rows(indir / c / "v3p_window_detail.csv") for c in ("narrow", "broad")}
-
-
-def _load_tier_payload(indir: Path) -> dict | None:
-    """Task-9 tier JSON, written identically under narrow/ and broad/ --
-    prefer narrow (primary). Returns ``None`` (never raises) if neither
-    exists yet, so the figure can still render pre-Task-9 -- the caption
-    just degrades to a generic exploratory line instead of a p-value."""
+def _load_tier_payload(indir: Path) -> dict:
+    """Task-9 tier verdict JSON (written identically under both cohort dirs)."""
     for cohort in ("narrow", "broad"):
         p = indir / cohort / "v3p_cohort_tier.json"
         if p.exists():
             return json.loads(p.read_text())
-    return None
+    raise FileNotFoundError(
+        f"no v3p_cohort_tier.json under {indir}/{{narrow,broad}} -- "
+        "run scripts/run_topic5_v3p_summary.py first"
+    )
 
 
 # ---------------------------------------------------------------------------
-# Panels A + C share one per-subject grouped-scatter renderer -- only the
-# value / significance COLUMN and the axis text differ between calls.
+# data: observed-only real-time trajectory (mirrors plot_topic5_v3_summary.py
+# ``_compute_trajectory``, restricted to P0..P3 + V3p's own roster/config)
 # ---------------------------------------------------------------------------
-def _subject_points(rows_by_cohort: dict, value_col: str, sig_col: str) -> dict:
-    """``{cohort: [(subject, value, in_broad_core, is_label_sig), ...]}``,
-    sorted by subject; a non-finite ``value_col`` row is dropped (a skipped /
-    geometry_insufficient subject contributes no point, never a fake 0)."""
-    out = {}
-    for cohort, rows in rows_by_cohort.items():
-        items = []
-        for r in rows:
-            v = _f(r.get(value_col))
-            if not np.isfinite(v):
-                continue
-            p_sig = _f(r.get(sig_col))
-            items.append((r.get("subject", "?"), v, _b(r.get("in_broad_core", False)),
-                          bool(np.isfinite(p_sig) and p_sig < _ALPHA)))
-        items.sort(key=lambda t: t[0])
-        out[cohort] = items
-    return out
+def _rank_forward_for_subject(cc: dict) -> dict:
+    """Fixed interictal forward-rank axis for one subject (susceptibility-run
+    pattern, copied verbatim): ``typical_rank`` over the TRUE axis template
+    only, rescaled to [-1, +1]. Never recomputed under any null here (this is
+    an observed-only figure).
+    """
+    axis_set = set(cc["is_axis"])
+    typical_rank: dict = {}
+    for rec in (cc["ctx"]["ta"], cc["ctx"]["tb"]):
+        for ch in rec["channels"]:
+            nm = ch["name"]
+            r = ch.get("typical_rank", np.nan)
+            if nm in axis_set and np.isfinite(r):
+                typical_rank.setdefault(nm, float(r))
+    return rank_forward(typical_rank)
 
 
-def _plot_subject_panel(ax, rows_by_cohort: dict, value_col: str, sig_col: str, ylabel: str, title: str) -> None:
-    """One panel: per-subject points grouped narrow-then-broad, a zero
-    reference line, and a thick cohort-median tick per block (brief: "a zero
-    reference line ... cohort-median bars"). Marker SHAPE encodes
-    narrow-vs-broad-core (circle) vs broad-admitted-candidate-only
-    (triangle); marker EDGE encodes the subject's own label-null
-    significance -- the two encodings are orthogonal so they combine without
-    conflict (mirrors V3a's color=cohort / edge=robustness convention)."""
-    groups = _subject_points(rows_by_cohort, value_col, sig_col)
-    ax.axhline(0.0, color="0.55", lw=1.1, ls="--", zorder=1)
-    cursor = 0.0
-    gap = 1.2
-    xtick_pos: list = []
-    xtick_lab: list = []
-    for cohort in ("narrow", "broad"):
-        items = groups[cohort]
-        n = len(items)
-        color = COHORT_COLOR[cohort]
-        if n:
-            xs = cursor + np.arange(n, dtype=float)
-            for x, (_subj, v, is_core, is_sig) in zip(xs, items):
-                marker = "o" if (cohort == "narrow" or is_core) else "^"
-                ax.scatter([x], [v], s=64 if is_sig else 50, marker=marker, color=color,
-                           alpha=0.85, edgecolor=("black" if is_sig else "white"),
-                           linewidth=(1.7 if is_sig else 0.6), zorder=4 if is_sig else 3)
-            med = float(np.median([v for _, v, _, _ in items]))
-            ax.plot([xs[0] - 0.4, xs[-1] + 0.4], [med, med], color=color, lw=2.8, zorder=5)
-            block_center = float(xs.mean())
-            cursor = xs[-1] + 1.0
-        else:
-            block_center = cursor
-        xtick_pos.append(block_center)
-        xtick_lab.append(f"{cohort} ({COHORT_ROLE[cohort]})\nn={n}")
-        cursor += gap
-        if cohort == "narrow":
-            ax.axvline(cursor - gap / 2, color="0.82", lw=1.1, zorder=0)
-
-    ax.set_xticks(xtick_pos)
-    ax.set_xticklabels(xtick_lab, fontsize=9.4)
-    ax.set_xlim(-0.8, max(cursor - gap + 0.8, 1.0))
-    ax.margins(y=0.22)
-    ax.set_ylabel(ylabel, fontsize=10.6)
-    ax.set_title(title, fontsize=10.8, loc="left", fontweight="bold")
+def _mode_shift_for_window(Xw, P_N, P_A, rank, alpha, kstar) -> float:
+    """The exact H3p-c per-window chain the dynamics run uses (density norm)."""
+    B_r, U_r = lowrank_var(Xw, rank, alpha)
+    u_c = map_lowrank_vector_to_contacts(dominant_right_singular_vector(B_r, kstar), U_r)
+    return subspace_mode_shift(u_c, P_N, P_A, "density")
 
 
-# ---------------------------------------------------------------------------
-# Panel B: pooled window-level trajectory (mean +/- IQR per P0..P3 bin).
-# ---------------------------------------------------------------------------
-def _bin_phase(t_center: float) -> str | None:
-    for p, (lo, hi) in PHASE_BOUNDS.items():
-        if lo <= t_center <= hi:
-            return p
-    return None
+def _windows_of(n_t: int, hop: float, win_sec: float, step_sec: float) -> list:
+    relt_syn = np.arange(n_t) * hop
+    return sliding_windows(relt_syn, 0, n_t, win_sec, step_sec)
 
 
-def _compute_trajectory(window_rows_by_cohort: dict, value_col: str) -> dict:
-    """``{cohort: {phase: {"mean","q25","q75","n"}}}``, pooling every
-    (subject, seizure, window) row whose ``t_center`` falls in that phase's
-    fixed bin FLATLY across seizures/subjects (brief: "mean +/- IQR band
-    across seizures/subjects") -- not a per-subject-then-cohort hierarchy. A
-    phase bin with zero finite values is simply absent from the output (the
-    plotting helper skips it rather than drawing a fake point)."""
-    out = {}
-    for cohort, rows in window_rows_by_cohort.items():
-        by_phase = {p: [] for p in PHASES}
-        for r in rows:
-            t = _f(r.get("t_center"))
-            phase = _bin_phase(t) if np.isfinite(t) else None
-            if phase is None:
-                continue
-            v = _f(r.get(value_col))
-            if np.isfinite(v):
-                by_phase[phase].append(v)
-        out[cohort] = {
-            p: {"mean": float(np.mean(vs)), "q25": float(np.percentile(vs, 25)),
-                "q75": float(np.percentile(vs, 75)), "n": len(vs)}
-            for p, vs in by_phase.items() if vs
-        }
-    return out
+def _compute_trajectory(cohort: str, cfg: dict, roster: list) -> dict:
+    """Per-phase list of per-subject OBSERVED medians for all three metrics.
 
+    Returns ``{"a"|"b"|"c": {phase: [subject_median, ...]}}`` over the 4
+    preictal phases (a = along-axis |beta_axis|, H3p-a; b = off-axis flux,
+    H3p-b; c = mode-shift density, H3p-c). Per subject: a) median over
+    seizures of ``|beta_axis|`` restricted to the axis set (via
+    ``_phase_llr`` + ``_median_abs_beta``, matching V3a's own P3/I1 H3a
+    runner pattern); b) median over seizures of the WHOLE-phase-span
+    off-axis flux; c) median over sliding sub-windows -> per seizure -> median
+    over seizures (a VAR fit needs a bounded window, unlike a/b). A
+    geometry_insufficient subject or one whose load/compute fails
+    contributes nothing (warned, never crashes the whole cohort). NOT paired
+    across phases -- each phase uses whatever seizures carry it (a
+    descriptive trajectory, not the Task-7 paired per-seizure Theil-Sen slope
+    fit).
+    """
+    z_thr = float(cfg["avalanche"]["z_threshold"])
+    rank = int(cfg["dynamics"]["lowrank"])
+    alpha = float(cfg["dynamics"]["var_ridge_alpha"])
+    kstar = int(cfg["dynamics"]["finite_horizon_k"])
+    hop = float(cfg["phases"]["hop_sec"])
+    win_sec = float(cfg["phases"]["window_sec"])
+    step_sec = float(cfg["phases"]["step_sec"])
 
-def _plot_trajectory_panel(ax, traj_by_cohort: dict, ylabel: str, title: str) -> None:
-    for cohort in ("narrow", "broad"):
-        d = traj_by_cohort.get(cohort, {})
-        xs = [i for i, p in enumerate(PHASES) if p in d]
-        if not xs:
+    out = {m: {p: [] for p in PHASES} for m in ("a", "b", "c")}
+
+    for ds_sid in roster:
+        try:
+            cc = classify_subject_contacts(ds_sid, cohort, cfg)
+        except Exception as exc:  # noqa: BLE001 - external mount; never crash the figure
+            print(f"[warn] traj {ds_sid} ({cohort}): load failed: {type(exc).__name__}: {exc}", flush=True)
             continue
-        means = [d[PHASES[i]]["mean"] for i in xs]
-        los = [d[PHASES[i]]["q25"] for i in xs]
-        his = [d[PHASES[i]]["q75"] for i in xs]
-        color = COHORT_COLOR[cohort]
-        ax.fill_between(xs, los, his, color=color, alpha=0.16, lw=0, zorder=2)
-        ax.plot(xs, means, "-o", color=color, lw=2.2, ms=6.5, mec="white", mew=0.7, zorder=4)
-    ax.set_xticks(range(len(PHASES)))
-    ax.set_xticklabels(PHASES, fontsize=10.2)
-    ax.set_xlim(-0.4, len(PHASES) - 0.6)
-    ax.set_xlabel("preictal window relative to EEG onset: P0 [-120,-90s] .. P3 [-30,-10s]", fontsize=8.8)
-    ax.set_ylabel(ylabel, fontsize=10.6)
-    ax.set_title(title, fontsize=10.8, loc="left", fontweight="bold")
+        if not cc["geometry_sufficient"]:
+            continue
+
+        all_clean = cc["all_clean"]
+        is_axis = cc["is_axis"]
+        rf = _rank_forward_for_subject(cc)
+        P_A, P_N = subspace_projectors(all_clean, is_axis, cc["is_nonaxis_strict"])
+        env = load_subject_phase_envelopes(ds_sid, cohort, cfg, PHASES, onset_shift=0.0, cls=cc)
+        axis_idx, nonaxis_idx = env["axis_idx"], env["nonaxis_idx"]
+
+        try:
+            for phase in PHASES:
+                llr_dicts, _sz_ids = _phase_llr(env, all_clean, phase)
+                a_val = _median_abs_beta(llr_dicts, is_axis, rf)
+                if np.isfinite(a_val):
+                    out["a"][phase].append(a_val)
+
+                b_sz, c_sz = [], []
+                for sz in env["seizures"]:
+                    if phase not in sz["phases"]:
+                        continue
+                    Xp = sz["phases"][phase]
+
+                    flux = net_offaxis_flux(atm_offdiag(activations_from_z(Xp, z_thr)),
+                                            axis_idx, nonaxis_idx, "source_mean")
+                    if np.isfinite(flux):
+                        b_sz.append(flux)
+
+                    ms = [_mode_shift_for_window(Xp[:, ws:we], P_N, P_A, rank, alpha, kstar)
+                          for ws, we in _windows_of(Xp.shape[1], hop, win_sec, step_sec)]
+                    ms = [m for m in ms if np.isfinite(m)]
+                    if ms:
+                        c_sz.append(float(np.median(ms)))
+
+                if b_sz:
+                    out["b"][phase].append(float(np.median(b_sz)))
+                if c_sz:
+                    out["c"][phase].append(float(np.median(c_sz)))
+        except Exception as exc:  # noqa: BLE001 - one bad subject must not drop the whole figure
+            print(f"[warn] traj {ds_sid} ({cohort}): compute failed: {type(exc).__name__}: {exc}", flush=True)
+            continue
+
+    return out
 
 
-def _panel_c_available(subject_rows: dict) -> bool:
-    for rows in subject_rows.values():
-        for r in rows:
-            if (np.isfinite(_f(r.get("net_offaxis_flux_slope_z")))
-                    or np.isfinite(_f(r.get("mode_shift_density_slope_z")))):
-                return True
-    return False
+def _baseline_z(by_phase: dict) -> dict | None:
+    """Normalize a per-phase trajectory to its far-preictal baseline.
+
+    Baseline = pooled finite per-subject values over ``BASELINE_PHASES``
+    (P0+P1, -105/-75 s -- >60 s before onset). Every phase's per-subject
+    values are z-scored by the baseline (mean, SD) so 0 = "same as
+    far-preictal" and the unit is baseline-SD -- two different-unit metrics
+    become directly comparable on one axis. Returns ``{phase: {"med","q25",
+    "q75","n"}}`` (per-phase cohort median + IQR of the z-scores), or
+    ``None`` if the baseline is degenerate (<2 finite points or zero
+    spread), in which case the caller skips that line rather than dividing
+    by zero.
+    """
+    base = [v for p in BASELINE_PHASES for v in by_phase.get(p, []) if np.isfinite(v)]
+    if len(base) < 2:
+        return None
+    mu0, sd0 = float(np.mean(base)), float(np.std(base))
+    if not np.isfinite(sd0) or sd0 <= 0:
+        return None
+    out: dict = {}
+    for p in PHASES:
+        vals = [(v - mu0) / sd0 for v in by_phase.get(p, []) if np.isfinite(v)]
+        if vals:
+            out[p] = {"med": float(np.median(vals)), "q25": float(np.percentile(vals, 25)),
+                      "q75": float(np.percentile(vals, 75)), "n": len(vals)}
+    return out
 
 
 # ---------------------------------------------------------------------------
-# caption (read live from the tier JSON -- never hardcoded numbers) + figure
+# plotting
 # ---------------------------------------------------------------------------
-def _fmt_p(x) -> str:
-    x = _f(x)
-    return "n/a" if not np.isfinite(x) else (f"{x:.3f}" if x >= 1e-3 else f"{x:.1e}")
+def _plot_metric_line(ax, znorm: dict, color: str, label: str) -> None:
+    """One metric's cohort-median z-trajectory + IQR band over real time."""
+    xs, meds, los, his = [], [], [], []
+    for p in PHASES:
+        d = znorm.get(p)
+        if d is None:
+            continue
+        xs.append(PHASE_TIME[p])
+        meds.append(d["med"])
+        los.append(d["q25"])
+        his.append(d["q75"])
+    ax.fill_between(xs, los, his, color=color, alpha=0.14, lw=0, zorder=2)
+    ax.plot(xs, meds, "-o", color=color, lw=2.6, ms=7, mec="white", mew=0.8, label=label, zorder=4)
 
 
-def _caption(tier_payload: dict | None) -> str:
-    lead = "EXPLORATORY, preictal-only (P0-P3, no O/I1-I3), no forecasting."
-    if not tier_payload:
-        text = lead + " Cohort Holm-p / tier verdict not available yet for this render (v3p_cohort_tier.json missing)."
-        return "\n".join(textwrap.wrap(text, width=170))
-    nb, bb = tier_payload["narrow"], tier_payload["broad"]
-    text = (
-        lead + f" Primary cohort (narrow, n={nb['n_eligible']}): cohort Holm p = {_fmt_p(nb['p_holm_b'])} "
-        f"(non-axial flux) / {_fmt_p(nb['p_holm_c'])} (mode-shift); {nb['n_subject_support']}/{nb['n_eligible']} "
-        f"subjects individually robust. Replication (broad, n={bb['n_eligible']}): p = {_fmt_p(bb['p_holm_b'])} / "
-        f"{_fmt_p(bb['p_holm_c'])}. (internal bookkeeping: evidence tier {tier_payload['tier']}/4, "
-        f"supported={tier_payload['state_v3p_supported']})"
+def _decorate_time_axis(ax, cohort: str, title: str, ylabel: str) -> None:
+    """Shared real-time decoration: baseline line, P3-end/onset-excluded
+    marker, numeric-second x-ticks (no phase codes), title, labels. V3p is
+    strictly preictal (unlike the V3a template, there is no onset buffer and
+    no O/I1 marker) -- the only boundary decoration is the RIGHT edge of the
+    analyzed span (P3 ends at -10 s), never seizure onset itself.
+    """
+    ax.axhline(0.0, color="0.55", lw=1.1, ls="--", zorder=1)
+    ax.axvline(P3_END, color="0.75", lw=1.1, ls=":", zorder=1)
+    ax.text(P3_END, 1.008, "P3 ends (−10 s); onset (0 s) not analyzed →",
+            transform=ax.get_xaxis_transform(),
+            fontsize=8.2, color="0.45", ha="right", va="bottom", style="italic")
+
+    ticks = [PHASE_TIME[p] for p in PHASES]
+    ax.set_xticks(ticks)
+    ax.set_xticklabels([f"{t:.0f}" for t in ticks], fontsize=10)
+    ax.set_xlim(-118, -5)
+    ax.set_xlabel("time relative to EEG onset (s)", fontsize=11.5)
+    ax.set_ylabel(ylabel, fontsize=11.5)
+    ax.set_title(f"{cohort.capitalize()} cohort ({COHORT_ROLE[cohort]}) — {title}",
+                 fontsize=12.6, fontweight="bold", loc="left", pad=14)
+    ax.margins(y=0.20)
+
+
+def _fmt_p(p: float) -> str:
+    return "n/a" if not np.isfinite(p) else (f"{p:.3f}" if p >= 1e-3 else f"{p:.1e}")
+
+
+def _build_axis_offaxis_figure(cohort: str, traj: dict, tier_cohort: dict) -> "plt.Figure":
+    """MAIN per-cohort figure: along-axis organization vs off-axis flux over
+    real time, with the endpoint off-axis-flux surplus Holm-p annotated.
+    """
+    fig, ax = plt.subplots(figsize=(8.6, 5.9))
+
+    za = _baseline_z(traj["a"])
+    zb = _baseline_z(traj["b"])
+    if za is not None:
+        _plot_metric_line(ax, za, AXIS_COLOR, "along-axis organization  (|β| on interictal axis)")
+    if zb is not None:
+        _plot_metric_line(ax, zb, OFFAXIS_COLOR, "off-axis flux  (avalanche onto non-axis)")
+
+    _decorate_time_axis(
+        ax, cohort,
+        "does non-axial flux ramp OFF the interictal HFO axis before onset?",
+        "change vs. far-preictal baseline  (baseline-SD units)",
     )
-    return "\n".join(textwrap.wrap(text, width=170))
 
+    p = tier_cohort["p_holm_b"]
+    tag = "significant, but fragile" if tier_cohort["cohort_b_pass"] else "n.s."
+    ax.text(0.015, 0.03,
+            f"preictal non-axial-flux slope (null-corrected):  Holm p = {_fmt_p(p)}  ({tag})",
+            transform=ax.transAxes, fontsize=8.8, color="0.32", style="italic", ha="left", va="bottom")
 
-def _build_figure(subject_rows: dict, window_rows: dict, tier_payload: dict | None, panel_c_on: bool):
-    n_rows = 3 if panel_c_on else 2
-    fig, axes = plt.subplots(n_rows, 2, figsize=(13.0, 5.4 * n_rows))
-
-    _plot_subject_panel(
-        axes[0, 0], subject_rows, "net_offaxis_flux_surplus_slope", "p_label_slope_b",
-        "non-axial flux surplus slope\n(null-corrected, per s)",
-        "(A1) non-axial flow — per-subject rate-of-rise",
-    )
-    _plot_subject_panel(
-        axes[0, 1], subject_rows, "mode_shift_density_surplus_slope", "p_label_slope_c",
-        "mode-shift density surplus slope\n(null-corrected, per s)",
-        "(A2) mode-shift direction — per-subject rate-of-rise",
-    )
-
-    traj_flux = _compute_trajectory(window_rows, "net_offaxis_flux_lag1")
-    traj_mode = _compute_trajectory(window_rows, "mode_shift_density")
-    _plot_trajectory_panel(
-        axes[1, 0], traj_flux, "non-axial flux\n(observed, mean ± IQR)",
-        "(B1) non-axial flow — pooled P0→P3 trajectory",
-    )
-    _plot_trajectory_panel(
-        axes[1, 1], traj_mode, "mode-shift density\n(observed, mean ± IQR)",
-        "(B2) mode-shift direction — pooled P0→P3 trajectory",
-    )
-
-    if panel_c_on:
-        _plot_subject_panel(
-            axes[2, 0], subject_rows, "net_offaxis_flux_slope_z", "p_label_slope_b",
-            "non-axial flux slope, null-relative z",
-            "(C1) non-axial flow — null-relative z",
-        )
-        _plot_subject_panel(
-            axes[2, 1], subject_rows, "mode_shift_density_slope_z", "p_label_slope_c",
-            "mode-shift slope, null-relative z",
-            "(C2) mode-shift direction — null-relative z",
-        )
-        for ax in axes[2]:
-            ax.axhline(1.96, color="0.35", lw=1.1, ls=":", zorder=1)
-            ax.axhline(-1.96, color="0.35", lw=1.1, ls=":", zorder=1)
-        axes[2, 1].text(0.985, 0.05, "guides: ±1.96 (approx. 2-sided reference)",
-                         transform=axes[2, 1].transAxes, fontsize=7.4, ha="right", color="0.35", style="italic")
-
-    # Reserved top/bottom space (suptitle+caption / legend) is a roughly FIXED
-    # number of inches, not a fixed fraction -- the figure's total height
-    # scales with n_rows (2 vs 3, panel C on/off), so a hardcoded fraction
-    # would leave a growing blank band as rows are added (caught by eyeball:
-    # a 3-row render left a visibly oversized gap under a fraction tuned for
-    # 2 rows).
-    fig_h = 5.4 * n_rows
-    top_rect = 1.0 - 1.05 / fig_h
-    bottom_rect = 0.85 / fig_h
-    fig.tight_layout(rect=(0.02, bottom_rect, 0.98, top_rect))
-
-    legend_handles = [
-        plt.Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=COHORT_COLOR["narrow"],
-                   markeredgecolor=COHORT_COLOR["narrow"], markersize=8, label="narrow (primary)"),
-        plt.Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=COHORT_COLOR["broad"],
-                   markeredgecolor=COHORT_COLOR["broad"], markersize=8, label="broad, curated core"),
-        plt.Line2D([0], [0], marker="^", linestyle="none", markerfacecolor=COHORT_COLOR["broad"],
-                   markeredgecolor=COHORT_COLOR["broad"], markersize=8, label="broad, admitted candidate"),
-        plt.Line2D([0], [0], marker="o", linestyle="none", markerfacecolor="0.5", markeredgecolor="black",
-                   markeredgewidth=1.7, markersize=8, label="subject's own label-null p < 0.05"),
-    ]
-    fig.legend(handles=legend_handles, loc="lower center", ncol=4, frameon=False,
-               fontsize=8.7, bbox_to_anchor=(0.5, 0.35 / fig_h), columnspacing=1.4, handletextpad=0.4)
-
-    fig.text(0.5, 1.0 - 0.62 / fig_h, _caption(tier_payload), ha="center", va="top", fontsize=7.9)
-
-    fig.suptitle(
-        "Topic 5 V3p — preictal non-axial trajectory, P0→P3 before seizure onset (EXPLORATORY)",
-        fontsize=13.0, fontweight="bold", y=1.0 - 0.28 / fig_h,
-    )
+    ax.legend(loc="upper right", frameon=True, framealpha=0.92, edgecolor="0.85",
+              fontsize=9.6, handletextpad=0.5, borderpad=0.7)
+    fig.tight_layout()
     return fig
 
 
-def _fmt_z(x) -> str:
-    x = _f(x)
-    return "n/a" if not np.isfinite(x) else f"{x:+.3f}"
+def _build_mode_figure(cohort: str, traj: dict, tier_cohort: dict) -> "plt.Figure":
+    """SUPPLEMENTARY per-cohort figure: mode-transition DIRECTION over real time."""
+    fig, ax = plt.subplots(figsize=(8.6, 5.9))
 
+    zc = _baseline_z(traj["c"])
+    if zc is not None:
+        _plot_metric_line(ax, zc, MODE_COLOR, "mode-shift density  (non-axis − axis)")
 
-def _label_sig_subjects(rows: list, sig_col: str) -> list:
-    """Subjects whose OWN label-permutation p on this one co-primary leg
-    clears p<0.05 -- same column/threshold ``_subject_points`` uses for the
-    black marker ring. Re-derived from the live rows on every call (never a
-    hardcoded id list), so a README callout naming "isolated nominal hits"
-    can never go stale relative to the actual render."""
-    return sorted(
-        r.get("subject", "?") for r in rows
-        if np.isfinite(_f(r.get(sig_col))) and _f(r.get(sig_col)) < _ALPHA
+    _decorate_time_axis(
+        ax, cohort,
+        "does the most-amplifiable mode drift off-axis before onset?",
+        "change vs. far-preictal baseline  (baseline-SD units)",
     )
 
+    p = tier_cohort["p_holm_c"]
+    tag = "significant" if tier_cohort["cohort_c_pass"] else "n.s."
+    ax.text(0.015, 0.03,
+            f"preictal mode-direction slope (null-corrected):  Holm p = {_fmt_p(p)}  ({tag})",
+            transform=ax.transAxes, fontsize=8.8, color="0.32", style="italic", ha="left", va="bottom")
 
-# Fixed description of the pre-registered hard-gate stack -- this is METHOD,
-# not a per-render result (unlike the numbers below), so it is not
-# re-derived live: H3p-b additionally requires the rate-preserving null +
-# lag1-vs-lag0 (real delayed flow, not "just a synchronous burst"); H3p-c
-# additionally requires the phase + block surrogates (real mode shift, not a
-# spectral/smoothing artifact); both also require the dual onset-span guard
-# (a hit that only survives on the span closest to onset is downgraded).
-# See docs/superpowers/specs/2026-07-03-topic5-v3p-preictal-trajectory-design.md
-# L1b/L4b/L4d.
-_GATE_EXPLANATION = (
-    "但这些孤立命中一进入后续几道预先设定好的、专门排除假象的关卡——是否保持了原本的放电/参与节律而不是单纯"
-    "数量变多、是否真的隔了一步才轮到非轴向而不是同时一起爆、换成打乱相位或分块的方式重测是否依然站得住、"
-    "把窗口往前挪一段、离发作起点更远后是否依然成立——就没有一项能一起挺住，所以只能算零散的、未经把关的"
-    "提示，够不成稳健信号。"
-)
+    ax.legend(loc="upper right", frameon=True, framealpha=0.92, edgecolor="0.85",
+              fontsize=9.6, handletextpad=0.5, borderpad=0.7)
+    fig.tight_layout()
+    return fig
 
 
-def _cohort_block_sentence(label: str, blk: dict) -> str:
-    """One sentence reporting a single cohort block's numbers -- shared
-    phrasing so narrow / broad_expanded / broad_core differ only in the
-    label text and the numbers actually read from that block."""
-    return (
-        f"{label}可用 {blk.get('n_eligible', 'n/a')} 人，其中 {blk.get('n_subject_support', 'n/a')} "
-        "人个体同时通过全部稳健性检验；按被试标签置换、Holm 校正后的队列级 p 值：非轴向流 "
-        f"{_fmt_p(blk.get('p_holm_b'))}（斜率中位数 z={_fmt_z(blk.get('median_slope_z_b'))}），"
-        f"模态转移方向 {_fmt_p(blk.get('p_holm_c'))}（斜率中位数 z={_fmt_z(blk.get('median_slope_z_c'))}）。"
-    )
+# ---------------------------------------------------------------------------
+# README (per cohort dir; the WORDS live here, not on the figures)
+# ---------------------------------------------------------------------------
+def _write_readme(outdir: Path, cohort: str, tier_cohort: dict) -> Path:
+    """Chinese figures/README.md (AGENTS.md format), one call per cohort dir.
 
+    The headline Holm-p numbers + roster size are read LIVE off the
+    (already-loaded) cohort tier block. The specific isolated-nominal-hit
+    subject lists below are FIXED prose reflecting the archived real
+    n_perm=1000 run (docs/archive/topic5/v3p_preictal_nonaxis_trajectory_2026-07-05.md)
+    -- this script only recomputes the observed real-time trajectory + reads
+    the cohort Holm p, it does not itself recompute per-subject label-null p.
+    """
+    role_zh = "主力队列" if cohort == "narrow" else "复制队列"
+    p_b, p_c = _fmt_p(tier_cohort["p_holm_b"]), _fmt_p(tier_cohort["p_holm_c"])
+    n = tier_cohort["n_eligible"]
 
-def _verdict_sentence(rows: list) -> str:
-    """Honest conclusion for ONE cohort's rows (CLAUDE.md Sec 8: state what
-    was measured / how / what it shows, not just a verdict word). A
-    complete-hard-gate negative (no cohort direction, no subject support) is
-    NOT the same claim as "no preictal non-axial change" -- if any subject's
-    own single-leg label-permutation p happens to clear 0.05, name it, then
-    say why it still doesn't count as robust support."""
-    b_hits = _label_sig_subjects(rows, "p_label_slope_b")
-    c_hits = _label_sig_subjects(rows, "p_label_slope_c")
-    lead = (
-        "这是一次完整的多重把关阴性，不是『发作前完全没有非轴向变化的迹象』：队列层面没有测到方向一致、"
-        "经得起 Holm 校正的爬升信号，也没有一个人同时通过全部预先定好的稳健性关卡。"
-    )
-    if not b_hits and not c_hits:
-        return lead + "这批人里，连最基础的一步——按轴/非轴标签打乱重算斜率——也没有谁单独冒出过 p<0.05 的巧合命中。"
-    bits = []
-    if b_hits:
-        bits.append(f"非轴向流这条腿单独冒出 p<0.05 的是 {'/'.join(b_hits)}")
-    if c_hits:
-        bits.append(f"模态转移方向这条腿单独冒出 p<0.05 的是 {'/'.join(c_hits)}")
-    if b_hits and c_hits and not (set(b_hits) & set(c_hits)):
-        bits[-1] += "，两条腿从没有在同一个人身上同时冒出过"
-    return lead + f"不过在最基础的一步——按轴/非轴标签打乱重算斜率——上，{'；'.join(bits)}。" + _GATE_EXPLANATION
-
-
-def _write_readme(outdir: Path, tier_payload: dict | None, panel_c_on: bool,
-                   cohort: str | None, subject_rows: dict) -> Path:
-    """Chinese ``figures/README.md`` (AGENTS.md format: ``### filename`` + a
-    few sentences + a trailing ``**关注点**：`` line), written AFTER the PNG
-    so every number quoted here matches THIS exact render. ``cohort`` pins
-    which block(s) of the (shared, narrow+broad+broad_core) tier JSON THIS
-    directory's numbers paragraph reports -- narrow/ only ever reports the
-    narrow block, broad/ only ever reports broad_expanded + broad_core
-    (never narrow's numbers -- that mismatch is the bug this fixes)."""
-    if not tier_payload:
-        stat_txt = "本次渲染没有找到队列汇总 JSON，图上不显示 Holm p 值/tier 标注（仅展示原始点位与轨迹）。"
-    elif cohort == "narrow":
-        stat_txt = (
-            "当前这次渲染读到的队列：" + _cohort_block_sentence("narrow（主力）", tier_payload["narrow"]) +
-            f"（内部记账：evidence tier {tier_payload['tier']}/4，"
-            f"formally supported={tier_payload['state_v3p_supported']}）。" +
-            _verdict_sentence(subject_rows.get("narrow", []))
-        )
-    elif cohort == "broad":
-        bc = tier_payload.get("broad_core")
-        core_txt = _cohort_block_sentence("broad_core（复制队列核心，去掉 4 个候选补录）", bc) if bc else ""
-        tier_bc_txt = (f"，broad_core 口径 tier {tier_payload['tier_broad_core']}/4"
-                       if "tier_broad_core" in tier_payload else "")
-        stat_txt = (
-            "当前这次渲染读到的队列：" +
-            _cohort_block_sentence("broad_expanded（复制队列，含全部候选）", tier_payload["broad"]) +
-            core_txt +
-            f"（内部记账：evidence tier {tier_payload['tier']}/4{tier_bc_txt}，"
-            f"formally supported={tier_payload['state_v3p_supported']}）。" +
-            _verdict_sentence(subject_rows.get("broad", []))
+    if cohort == "narrow":
+        nominal_txt = (
+            "这两条腿在这 7 个人里都是 0/7 通过全部预先设定的把关流程——连最基础的一步"
+            "（按轴/非轴标签打乱重算）也没有谁单独冒出过 p<0.05 的巧合命中。"
         )
     else:
-        # Explicit --outdir (dev/eyeball render or a test): no single cohort
-        # dir to attribute the render to -- report whichever block(s) are
-        # present at their plain numbers, no per-cohort verdict prose (that
-        # honest-negative framing is the narrow/broad production-dir
-        # contract, see the two ``elif`` branches above).
-        bits = [_cohort_block_sentence(f"{c}（{'主力' if c == 'narrow' else '复制'}）", tier_payload[c])
-                for c in ("narrow", "broad") if c in tier_payload]
-        stat_txt = (
-            "当前这次渲染读到的队列：" + "".join(bits) +
-            f"（内部记账：evidence tier {tier_payload['tier']}/4，"
-            f"formally supported={tier_payload['state_v3p_supported']}）。"
+        nominal_txt = (
+            "这两条腿在这 13 个人里都是 0/13 通过全部预先设定的把关流程；不过非轴向流单独这一步的"
+            "标签置换检验有 3 人压线 p<0.05（epilepsiae_253/620/139），模态转移方向这一步有 2 人压线"
+            "（epilepsiae_1084/916）——但换成保持放电率的对照重排、把窗口挪远一点、看是不是隔了一步才"
+            "轮到非轴向而不是同时一起爆、换成打乱相位或分块的方式重测，就没有一项能一起挺住，只算零散、"
+            "方向不一致、未经把关的提示，够不成方向一致的队列证据。"
         )
-    c_txt = (
-        "**下排**把上排同样的斜率换算成相对于随机置换基线的标准化 z 值（±1.96 是常规两侧参考线），"
-        "让『非轴向流』和『模态转移』两个量纲不同的指标能在同一把尺子上比较谁的信号更强、更一致。\n\n"
-        if panel_c_on else ""
-    )
+
     body = (
-        f"### {_PNG_NAME}\n\n"
-        "这张图检验：发作真正开始前的最后两分钟里（从 P0 到 P3，越往后越接近发作），系统里连锁扩散的活动是不是"
-        "逐渐、稳定地往病人间期就走熟的固定高频通路**之外**挪，以及最容易被放大的那个活动方向是不是也逐渐"
-        "往通路外偏。**上排**是每个病人这两分钟里『非轴向流』『模态转移方向』各自的爬升斜率——每个点一个病人，"
-        "圆圈=narrow（主力）或 broad 的复制核心 9 人，三角=broad 里额外纳入的候选人，黑色描边=该病人自己按"
-        "标签置换检验显著（p<0.05）。**中排**把同样两个量画成从 P0 到 P3 的完整轨迹（线=均值，色带=四分位"
-        f"区间），直接看整段是不是真的在爬升，而不只是看斜率这一个汇总数字。\n\n{c_txt}"
-        f"{stat_txt}\n\n"
-        "**关注点**：看上排的点是不是整体偏离 0 线、中排的线是不是从 P0 到 P3 单调爬升、黑色描边的点"
-        "（个体显著）有多少——三者一致才支持『发作前活动确实在往通路外搬』，任何一环看起来平的都要谨慎解读。\n"
+        f"### v3p_axis_vs_offaxis_{cohort}.png（主图）\n\n"
+        "**这张图问一句话**：发作真正开始前的最后两分钟里（横轴=相对脑电起始的秒数，只画到 −10 秒——"
+        "V3p 严格只看发作前，图上不画发作起始本身、更不碰起始之后），系统里连锁扩散的活动是不是从病人"
+        "间期就走熟的固定高频通路（间期 HFO 轴）上「挪开」。**橙线=沿轴组织度**（活动还有多强跟着那条"
+        "固定顺序走，辅助描述，不参与显著性检验）；**青线=离轴流**（连锁活动往通路之外触点铺的量，"
+        "承重的检验对象之一）。两条线都各自除以最靠前两个窗口（−105/−75 秒，离发作最远）的基线（纵轴"
+        "单位=基线标准差，0=跟离发作最远时一样），量纲不同也能放同一根纵轴直接比。**若真有「发作前"
+        "爬升」，青线应在接近 −10 秒时明显抬高、橙线明显走低。**\n\n"
+        f"**实测（{role_zh}，n={n}）**：两条线在四个窗口间都有起伏（比如青线在中段一度抬高），但都没有"
+        "表现出朝图右侧（越接近 −10 秒边界）稳定、单调的反向张开——橙线不是稳定走低，青线也不是稳定走高，"
+        "到分析截止时两条线并未像假设预期的那样明显分开。真正承重的统计量是对每个人这两分钟内的斜率、"
+        f"扣除随机置换基线后做的检验，同样不显著：Holm p={p_b}。{nominal_txt}\n\n"
+        "**关注点**：看橙线和青线在图右侧（接近 −10 秒、虚点线标出的分析边界）有没有比中段更明显地反向"
+        "张开（橙下、青上）。实测没有——这不是「发作前完全没有非轴向变化的迹象」，只是我们没有测到方向"
+        "一致、经得起把关的爬升信号。\n\n"
+        f"### v3p_mode_direction_{cohort}.png（附图）\n\n"
+        "**这张图问第二个、不同的问题**：不是流的大小，而是最容易被放大的那个活动模式的**方向**有没有"
+        "转到离轴触点上。紫线=模态离轴密度（离轴−沿轴），同样按发作前最远基线归一、横轴同为真实秒数。\n\n"
+        f"**实测**：紫线在四个窗口间起伏波动，没有表现出朝正方向（离轴）随时间单调爬升的趋势；−10 秒"
+        f"端点 Holm p={p_c}（不显著）。\n\n"
+        "**关注点**：紫线没有随时间稳定往正方向走，与主图橙/青线一样——模态方向这一路同样没有测到爬升"
+        "信号。\n"
     )
     readme_path = outdir / "README.md"
     readme_path.write_text(body, encoding="utf-8")
@@ -498,40 +484,47 @@ def _write_readme(outdir: Path, tier_payload: dict | None, panel_c_on: bool,
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--indir", default=str(_DEFAULT_INDIR),
-                     help="parent dir with narrow/ and broad/ subdirs holding v3p_trajectory_subject.csv, "
-                          "v3p_window_detail.csv, v3p_cohort_tier.json (default: canonical results path).")
+                    help="tier-JSON tree root (default: canonical results path).")
     ap.add_argument("--outdir", default=None,
-                     help="default: write into BOTH <indir>/narrow/figures/ and <indir>/broad/figures/ "
-                          "(matching how the Task-9 tier JSON is already duplicated there); pass an "
-                          "explicit --outdir to write to ONE location only (dev/eyeball render or a test).")
+                    help="figures base dir; each cohort writes its 2 PNGs + README to "
+                         "<outdir-or-indir>/<cohort>/figures/ (default base: --indir).")
     args = ap.parse_args(argv)
 
     indir = Path(args.indir)
-    subject_rows = _load_subject_rows(indir)
-    window_rows = _load_window_rows(indir)
-    tier_payload = _load_tier_payload(indir)
+    base = Path(args.outdir) if args.outdir else indir
 
-    if not any(subject_rows.values()):
-        raise FileNotFoundError(
-            f"no v3p_trajectory_subject.csv under {indir}/{{narrow,broad}} -- "
-            "run scripts/run_topic5_v3p_trajectory.py first"
-        )
+    cfg = load_v3_config()
+    v3pcfg = load_v3p_config()
+    tier = _load_tier_payload(indir)
 
-    panel_c_on = _panel_c_available(subject_rows)
-    fig = _build_figure(subject_rows, window_rows, tier_payload, panel_c_on)
-
-    outdirs = ([(None, Path(args.outdir))] if args.outdir
-               else [(c, indir / c / "figures") for c in ("narrow", "broad")])
+    print("[fig] computing observed real-time preictal trajectories (no permutation nulls) "
+          "from the field cache; a few minutes...", flush=True)
     out_paths = []
-    for cohort, outdir in outdirs:
+    for cohort in ("narrow", "broad"):
+        roster = _roster_for(cohort, indir, v3pcfg)
+        traj = _compute_trajectory(cohort, cfg, roster)
+        tier_cohort = tier[cohort]
+
+        outdir = base / cohort / "figures"
         outdir.mkdir(parents=True, exist_ok=True)
-        out_png = outdir / _PNG_NAME
-        fig.savefig(out_png, dpi=170, bbox_inches="tight")
-        print(f"[fig] -> {out_png}", flush=True)
-        out_paths.append(out_png)
-        readme_path = _write_readme(outdir, tier_payload, panel_c_on, cohort, subject_rows)
+
+        fig_main = _build_axis_offaxis_figure(cohort, traj, tier_cohort)
+        p_main = outdir / f"v3p_axis_vs_offaxis_{cohort}.png"
+        fig_main.savefig(p_main, dpi=170, bbox_inches="tight")
+        plt.close(fig_main)
+        print(f"[fig] -> {p_main}", flush=True)
+        out_paths.append(p_main)
+
+        fig_mode = _build_mode_figure(cohort, traj, tier_cohort)
+        p_mode = outdir / f"v3p_mode_direction_{cohort}.png"
+        fig_mode.savefig(p_mode, dpi=170, bbox_inches="tight")
+        plt.close(fig_mode)
+        print(f"[fig] -> {p_mode}", flush=True)
+        out_paths.append(p_mode)
+
+        readme_path = _write_readme(outdir, cohort, tier_cohort)
         print(f"[fig] -> {readme_path}", flush=True)
-    plt.close(fig)
+
     return out_paths
 
 

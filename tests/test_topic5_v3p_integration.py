@@ -612,134 +612,34 @@ def test_v3p_summary_provenance_config_fallback_without_admission_json(tmp_path)
 
 
 # ---------------------------------------------------------------------------
-# Task 10 -- result figure (co-primary surplus slopes + preictal trajectory).
-# A pure rendering smoke test: a tiny synthetic per-cohort fixture (no
-# mounted data, no real pipeline run needed) -- just checks the figure
-# (2 co-primary-endpoint rows + a pooled trajectory row + the optional
-# null-relative-z row, since this fixture DOES carry slope-z values) renders
-# without crashing and that the PNG + README land on disk, non-empty. Uses
-# its own minimal fieldnames list (NOT ``_V3P_ROW_DEFAULTS``/
-# ``_write_v3p_trajectory_csv`` above, which are Task-9-scoped and do not
-# carry ``p_label_slope_{b,c}``) so this test stays fully independent of the
-# Task-9 fixture machinery.
+# Task 10 -- result figures (real-time redesign, 2026-07-05, matches
+# scripts/plot_topic5_v3_summary.py -- V3a's revised style). The plot script
+# no longer reads precomputed CSVs in its render loop: it recomputes the 3
+# observed metric trajectories straight off the mounted ictal-field cache
+# (``classify_subject_contacts`` + ``load_subject_phase_envelopes``, same as
+# the V3a template), so a synthetic-fixture unit test can no longer stand in
+# for this -- this IS a real render-smoke against the real results tree
+# (mirrors ``test_v3p_feasibility_writes_csv``'s real-cohort-run style
+# above). One PNG per (cohort, figure-kind) = 4 total, 2 per-cohort READMEs.
 # ---------------------------------------------------------------------------
-def _write_csv_rows(path, fieldnames, rows):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=fieldnames)
-        w.writeheader()
-        w.writerows(rows)
+@pytest.mark.integration
+def test_v3p_plot_summary_renders_4_pngs_and_readmes_on_real_data(tmp_path):
+    from scripts.plot_topic5_v3p_summary import main, _DEFAULT_INDIR
 
+    out_paths = main(["--indir", str(_DEFAULT_INDIR), "--outdir", str(tmp_path)])
 
-def test_v3p_plot_summary_renders_png_and_readme(tmp_path):
-    from scripts.plot_topic5_v3p_summary import main
+    assert len(out_paths) == 4
+    names = sorted(p.name for p in out_paths)
+    assert names == sorted([
+        "v3p_axis_vs_offaxis_narrow.png", "v3p_axis_vs_offaxis_broad.png",
+        "v3p_mode_direction_narrow.png", "v3p_mode_direction_broad.png",
+    ])
+    for p in out_paths:
+        assert p.exists() and p.stat().st_size > 0
 
-    subj_fields = ["subject", "cohort", "in_broad_core",
-                   "net_offaxis_flux_surplus_slope", "net_offaxis_flux_slope_z", "p_label_slope_b",
-                   "mode_shift_density_surplus_slope", "mode_shift_density_slope_z", "p_label_slope_c"]
-    narrow_subj = [
-        dict(subject="epilepsiae_1096", cohort="narrow", in_broad_core=False,
-             net_offaxis_flux_surplus_slope=0.0018, net_offaxis_flux_slope_z=2.4, p_label_slope_b=0.02,
-             mode_shift_density_surplus_slope=0.0002, mode_shift_density_slope_z=-0.3, p_label_slope_c=0.4),
-        dict(subject="epilepsiae_1125", cohort="narrow", in_broad_core=False,
-             net_offaxis_flux_surplus_slope=0.0004, net_offaxis_flux_slope_z=0.6, p_label_slope_b=0.3,
-             mode_shift_density_surplus_slope=0.00005, mode_shift_density_slope_z=0.2, p_label_slope_c=0.4),
-        dict(subject="epilepsiae_253", cohort="narrow", in_broad_core=False,
-             net_offaxis_flux_surplus_slope=-0.0006, net_offaxis_flux_slope_z=-0.4, p_label_slope_b=0.6,
-             mode_shift_density_surplus_slope=-0.0001, mode_shift_density_slope_z=-1.1, p_label_slope_c=0.7),
-    ]
-    broad_subj = [
-        dict(subject="epilepsiae_139", cohort="broad", in_broad_core=True,
-             net_offaxis_flux_surplus_slope=0.0012, net_offaxis_flux_slope_z=1.8, p_label_slope_b=0.03,
-             mode_shift_density_surplus_slope=0.0001, mode_shift_density_slope_z=0.4, p_label_slope_c=0.5),
-        dict(subject="epilepsiae_620", cohort="broad", in_broad_core=True,
-             net_offaxis_flux_surplus_slope=0.0003, net_offaxis_flux_slope_z=0.2, p_label_slope_b=0.5,
-             mode_shift_density_surplus_slope=-0.00003, mode_shift_density_slope_z=-0.2, p_label_slope_c=0.6),
-        dict(subject="epilepsiae_583", cohort="broad", in_broad_core=False,
-             net_offaxis_flux_surplus_slope=0.0009, net_offaxis_flux_slope_z=0.5, p_label_slope_b=0.4,
-             mode_shift_density_surplus_slope=0.00006, mode_shift_density_slope_z=0.1, p_label_slope_c=0.5),
-    ]
-    _write_csv_rows(tmp_path / "narrow" / "v3p_trajectory_subject.csv", subj_fields, narrow_subj)
-    _write_csv_rows(tmp_path / "broad" / "v3p_trajectory_subject.csv", subj_fields, broad_subj)
-
-    win_fields = ["subject", "cohort", "seizure_idx", "span", "phase", "t_center",
-                  "net_offaxis_flux_lag1", "mode_shift_density"]
-    rng = np.random.default_rng(0)
-    win_bounds = [(-118, -92), (-88, -62), (-58, -32), (-28, -12)]
-    for cohort, subs in (("narrow", ["epilepsiae_1096", "epilepsiae_1125"]), ("broad", ["epilepsiae_139"])):
-        rows = []
-        for sid in subs:
-            for sz in range(2):
-                for i, (lo, hi) in enumerate(win_bounds):
-                    rows.append(dict(
-                        subject=sid, cohort=cohort, seizure_idx=sz, span="full", phase=f"P{i}",
-                        t_center=float(rng.uniform(lo, hi)),
-                        net_offaxis_flux_lag1=0.1 + 0.02 * i + float(rng.normal(0, 0.01)),
-                        mode_shift_density=0.01 + 0.002 * i + float(rng.normal(0, 0.001)),
-                    ))
-        _write_csv_rows(tmp_path / cohort / "v3p_window_detail.csv", win_fields, rows)
-
-    # minimal tier payload -- exactly the keys _caption() reads
-    tier_payload = {
-        "tier": 2, "state_v3p_supported": False,
-        "narrow": {"n_eligible": 3, "n_subject_support": 1, "p_holm_b": 0.08, "p_holm_c": 0.6},
-        "broad": {"n_eligible": 3, "n_subject_support": 1, "p_holm_b": 0.1, "p_holm_c": 0.55},
-    }
     for cohort in ("narrow", "broad"):
-        (tmp_path / cohort / "v3p_cohort_tier.json").write_text(json.dumps(tier_payload))
-
-    outdir = tmp_path / "figures"
-    out_paths = main(["--indir", str(tmp_path), "--outdir", str(outdir)])
-
-    assert len(out_paths) == 1
-    png_path = out_paths[0]
-    assert png_path.exists() and png_path.stat().st_size > 0
-    readme_path = png_path.parent / "README.md"
-    assert readme_path.exists() and readme_path.stat().st_size > 0
-
-
-def test_v3p_plot_summary_degrades_gracefully_without_panel_c(tmp_path):
-    """Brief: "the plot must degrade gracefully if the optional panel C data
-    is absent". A subject CSV missing BOTH slope-z columns entirely (an
-    older/incomplete upstream write) must still render a (2-row) figure,
-    never crash."""
-    import matplotlib.pyplot as plt
-    from scripts.plot_topic5_v3p_summary import (
-        main, _build_figure, _load_subject_rows, _load_window_rows,
-        _load_tier_payload, _panel_c_available,
-    )
-
-    subj_fields = ["subject", "cohort", "in_broad_core", "net_offaxis_flux_surplus_slope",
-                   "p_label_slope_b", "mode_shift_density_surplus_slope", "p_label_slope_c"]
-    rows = [dict(subject="epilepsiae_1096", cohort="narrow", in_broad_core=False,
-                  net_offaxis_flux_surplus_slope=0.001, p_label_slope_b=0.2,
-                  mode_shift_density_surplus_slope=0.0001, p_label_slope_c=0.5)]
-    _write_csv_rows(tmp_path / "narrow" / "v3p_trajectory_subject.csv", subj_fields, rows)
-    _write_csv_rows(tmp_path / "broad" / "v3p_trajectory_subject.csv", subj_fields, [])
-
-    win_fields = ["subject", "cohort", "seizure_idx", "span", "phase", "t_center",
-                  "net_offaxis_flux_lag1", "mode_shift_density"]
-    win_rows = [dict(subject="epilepsiae_1096", cohort="narrow", seizure_idx=0, span="full",
-                      phase="P0", t_center=-100.0, net_offaxis_flux_lag1=0.1, mode_shift_density=0.01)]
-    _write_csv_rows(tmp_path / "narrow" / "v3p_window_detail.csv", win_fields, win_rows)
-    _write_csv_rows(tmp_path / "broad" / "v3p_window_detail.csv", win_fields, [])
-
-    outdir = tmp_path / "figures"
-    out_paths = main(["--indir", str(tmp_path), "--outdir", str(outdir)])  # no v3p_cohort_tier.json at all
-
-    png_path = out_paths[0]
-    assert png_path.exists() and png_path.stat().st_size > 0
-    readme_path = png_path.parent / "README.md"
-    assert readme_path.exists() and readme_path.stat().st_size > 0
-
-    # Lock the *2-row* degradation directly (not just "did not crash"):
-    # derive panel-C availability exactly as main() does -- it must be False --
-    # and a rebuilt figure must then have exactly 2 rows x 2 cols (4 axes); a
-    # 3-row panel-C figure would have 6.
-    subject_rows = _load_subject_rows(tmp_path)
-    panel_c_on = _panel_c_available(subject_rows)
-    assert panel_c_on is False
-    fig = _build_figure(subject_rows, _load_window_rows(tmp_path),
-                        _load_tier_payload(tmp_path), panel_c_on)
-    assert len(fig.axes) == 4
-    plt.close(fig)
+        readme = tmp_path / cohort / "figures" / "README.md"
+        assert readme.exists() and readme.stat().st_size > 0
+        text = readme.read_text()
+        assert f"v3p_axis_vs_offaxis_{cohort}.png" in text
+        assert f"v3p_mode_direction_{cohort}.png" in text
