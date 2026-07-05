@@ -120,3 +120,28 @@ def test_ignition_class_delocalized_on_global_loading():
                                      axis_elongation=0.0, off_axis=0.0,
                                      corridor_power=0.0, n_core_peaks=1, m2cfg=m2cfg)
     assert cls == "delocalized" and sub == "global_like"
+
+
+# --- Task 3: projected gain/leak + nonaxis off_axis sentinel, verbatim from task brief
+# .superpowers/sdd/task-3-brief.md Step 1 ---
+def test_off_axis_sentinel_absent_on_core_localized_crossing():
+    cfg = load_crit_config(); grid, kernels, core, _ = _crit_op_context(cfg)
+    m2cfg = m2.load_m2_config()
+    crossing = m2.localize_alpha0_crossing(_points(), grid, kernels, core, cfg, m2cfg)
+    s = m2.off_axis_sentinel(crossing, grid, kernels, core, m2cfg)
+    assert s["off_axis"] == "absent"
+    assert "core-compactness residual" in s["annotation"]
+
+
+def test_off_axis_present_requires_both_gates():
+    m2cfg = m2.load_m2_config()
+    # score gate open but gain gate closed -> NOT present
+    v = m2._off_axis_decision(off_axis_score=0.09, gain_nonaxis=0.10,
+                              gain_axis=0.20, gain_global=0.05, m2cfg=m2cfg)
+    assert v == "undetermined"
+    v2 = m2._off_axis_decision(off_axis_score=0.09, gain_nonaxis=0.40,
+                               gain_axis=0.10, gain_global=0.05, m2cfg=m2cfg)
+    assert v2 == "present"
+    v3 = m2._off_axis_decision(off_axis_score=0.01, gain_nonaxis=0.01,
+                               gain_axis=0.20, gain_global=0.05, m2cfg=m2cfg)
+    assert v3 == "absent"

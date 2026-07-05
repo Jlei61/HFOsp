@@ -394,3 +394,132 @@ def read_linear_ignition(crossing, grid, kernels, core, cfg_crit, m2cfg, points)
         "_two_core_axis_profile": axis_profile,
         "_two_core_crossing": two_crossing,
     }
+
+
+# --------------------------------------------------------------------------- #
+# Task 3: projected operator gain/leak + nonaxis off_axis sentinel             #
+# --------------------------------------------------------------------------- #
+# Productionizes spec §2.3/§3.3. `embed_rE` places a grid-space E-rate direction into the rE
+# block of the full 6-field state (rE,rI,sEE,sEI,sIE,sII per spm.STATE_FIELDS), the other 5
+# blocks zero -- mirrors spm's own `core_perturbation_vector`/`finite_time_gain` convention (full
+# 6N-state `transient_gain`, i.e. NOT a rE-block-only readout after evolving), just generalized
+# from the fixed core-perturbation direction to the T0 basis directions (e_axis_gradient/
+# e_global) plus the crossing-specific e_nonaxis residual. `e_nonaxis` is downgraded to a
+# SENTINEL/negative-control (spec §0-c/§2.3): `off_axis` only ever reaches "present" when BOTH the
+# shape-score gate and the gain-excess/ratio gate break; below that, no propagation conclusion may
+# be drawn (spec §2.3/§7 "禁写任何侧向/离轴传播结论").
+
+_NONAXIS_ANNOTATION = ("nonaxis_residual = core-compactness residual in a core-localized mode, "
+                       "NOT sideways propagation")
+
+# Fixed representative horizon (ms) for the off_axis sentinel's axis/global/nonaxis gain
+# comparison ("near-recovery horizon", task brief), picked empirically off the real crossing (not
+# hand-picked in the abstract): tabulating all 6 `gain.horizons_ms` [10,25,50,100,250,500] on the
+# real core-localized crossing shows off_axis_score pinned ~0 throughout (T-independent shape
+# score -> the score gate never breaks, so "present" is never reachable regardless of horizon),
+# while the GAIN gate flips: at T=10/50/100ms e_nonaxis transiently out-gains axis/global (a short-
+# horizon local-amplification burst, expected for a compact direction and EXACTLY the "core-
+# compactness read as spread" misreading the pilot findings doc (§3/§5 item 5) warns about); by
+# T=250/500ms that burst has decayed and e_nonaxis settles back under axis/global at BOTH horizons
+# (self-consistent, not a one-point coincidence). 250ms is chosen over 500ms only for scale
+# robustness (T=500ms gains are ~1e-4-1e-2, closer to the near-fold crossing op's own solve
+# imprecision, spec rev2.2 op_residual_tol). A SINGLE fixed horizon (not a per-direction max-over-
+# horizons) keeps axis/global/nonaxis compared at the identical evolution time -- a per-direction
+# max would let each direction pick its own best moment, which would not be apples-to-apples.
+_OFF_AXIS_SENTINEL_HORIZON_MS = 250
+
+
+def embed_rE(e, grid, kernels):
+    """Embed a grid-space (N,) E-rate direction into the full 6N state (rE block=e, else 0)."""
+    z = np.zeros(6 * grid.n * grid.n)     # 6 fields rE,rI,sEE,sEI,sIE,sII
+    z[: grid.n * grid.n] = e
+    return z
+
+
+def projected_gains(J, grid, kernels, dirs, horizons):
+    """{direction_name: {horizon_ms: gain}}, one directional finite-time gain curve per named
+    direction: embed via `embed_rE`, propagate through exp(J*T) (`spm.transient_gain`, spec
+    §3.3)."""
+    out = {}
+    for name, e in dirs.items():
+        b = embed_rE(e, grid, kernels)
+        out[name] = {int(T): float(spm.transient_gain(J, b, float(T))) for T in horizons}
+    return out
+
+
+def _off_axis_decision(*, off_axis_score, gain_nonaxis, gain_axis, gain_global, m2cfg):
+    """Both-gates off_axis three-state decision (spec §2.3, verbatim thresholds). `present` only
+    if BOTH the shape-score gate (`off_axis_score_tol`) and the gain gate (excess AND ratio over
+    max(axis, global)) break; neither breaks -> `absent`; exactly one (or a boundary case) ->
+    `undetermined`. Below `present`, callers must never read this as a propagation conclusion."""
+    bcfg = m2cfg["basis"]
+    denom = max(gain_axis, gain_global, 1e-300)
+    score_gate = off_axis_score >= bcfg["off_axis_score_tol"]
+    gain_gate = ((gain_nonaxis - max(gain_axis, gain_global)) >= bcfg["nonaxis_gain_excess_tol"]
+                 and (gain_nonaxis / denom) >= bcfg["nonaxis_gain_ratio_tol"])
+    if score_gate and gain_gate:
+        return "present"
+    if not score_gate and not gain_gate:
+        return "absent"
+    return "undetermined"
+
+
+def off_axis_sentinel(crossing, grid, kernels, core, m2cfg) -> dict:
+    """`e_nonaxis` off_axis sentinel / negative-control at the alpha0 crossing (spec §2.3/§3.3).
+
+    Re-derives the crossing's shape scores + loading (`shape_scores_at` on
+    ``crossing["_crossing_res"]`` -- the same source T2's `read_linear_ignition` scores, but
+    recomputed here because this function takes the raw T1 `crossing` dict directly, not T2's
+    `linear_ignition` output) and the crossing Jacobian (`spm.build_jacobian_dense` on
+    ``crossing["_crossing_op"]``). `e_nonaxis` is T0's `nonaxis_direction` residual outside
+    span(e_global, e_axis_gradient); when its norm is below `nonaxis_direction_min_norm`, the
+    direction carries no meaningful energy to test -- this is NOT filled with a random control
+    direction (spec §2.3): `nonaxis_source_policy` records the reason, `nonaxis_gain=NaN`, and
+    `off_axis` is hard-set to `"absent"` WITHOUT going through `_off_axis_decision` (a NaN gain
+    must never reach the both-gates arithmetic).
+
+    Gains are compared at a single FIXED horizon (`_OFF_AXIS_SENTINEL_HORIZON_MS`, see its
+    module-level comment) so axis/global/nonaxis are read at the identical evolution time.
+    """
+    bcfg = m2cfg["basis"]
+    theta = kernels.theta
+
+    scores = shape_scores_at(crossing["_crossing_res"], grid, kernels, core)
+    loading = scores["_loading"]
+    off_axis_score = scores["off_axis"]
+
+    e_nonaxis, _frac_resid, _frac_global, _frac_axis = nonaxis_direction(
+        loading, grid, theta, bcfg["nonaxis_direction_min_norm"])
+
+    b = basis_vectors(grid, theta)
+    dirs = {"e_axis_gradient": b["e_axis_gradient"], "e_global": b["e_global"]}
+    if e_nonaxis is not None:
+        dirs["e_nonaxis"] = e_nonaxis
+
+    J = spm.build_jacobian_dense(grid, kernels, crossing["_crossing_op"])
+    gains = projected_gains(J, grid, kernels, dirs, m2cfg["gain"]["horizons_ms"])
+    T = _OFF_AXIS_SENTINEL_HORIZON_MS
+    gain_axis = gains["e_axis_gradient"][T]
+    gain_global = gains["e_global"][T]
+
+    if e_nonaxis is None:
+        return {
+            "off_axis": "absent",
+            "nonaxis_gain": float("nan"),
+            "axis_gain": gain_axis,
+            "global_gain": gain_global,
+            "annotation": _NONAXIS_ANNOTATION,
+            "nonaxis_source_policy": "unavailable_low_residual_energy",
+        }
+
+    gain_nonaxis = gains["e_nonaxis"][T]
+    decision = _off_axis_decision(off_axis_score=off_axis_score, gain_nonaxis=gain_nonaxis,
+                                  gain_axis=gain_axis, gain_global=gain_global, m2cfg=m2cfg)
+    return {
+        "off_axis": decision,
+        "nonaxis_gain": gain_nonaxis,
+        "axis_gain": gain_axis,
+        "global_gain": gain_global,
+        "annotation": _NONAXIS_ANNOTATION,
+        "nonaxis_source_policy": "available_residual_direction",
+    }
