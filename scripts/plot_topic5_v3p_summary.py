@@ -358,21 +358,121 @@ def _build_figure(subject_rows: dict, window_rows: dict, tier_payload: dict | No
     return fig
 
 
-def _write_readme(outdir: Path, tier_payload: dict | None, panel_c_on: bool) -> Path:
+def _fmt_z(x) -> str:
+    x = _f(x)
+    return "n/a" if not np.isfinite(x) else f"{x:+.3f}"
+
+
+def _label_sig_subjects(rows: list, sig_col: str) -> list:
+    """Subjects whose OWN label-permutation p on this one co-primary leg
+    clears p<0.05 -- same column/threshold ``_subject_points`` uses for the
+    black marker ring. Re-derived from the live rows on every call (never a
+    hardcoded id list), so a README callout naming "isolated nominal hits"
+    can never go stale relative to the actual render."""
+    return sorted(
+        r.get("subject", "?") for r in rows
+        if np.isfinite(_f(r.get(sig_col))) and _f(r.get(sig_col)) < _ALPHA
+    )
+
+
+# Fixed description of the pre-registered hard-gate stack -- this is METHOD,
+# not a per-render result (unlike the numbers below), so it is not
+# re-derived live: H3p-b additionally requires the rate-preserving null +
+# lag1-vs-lag0 (real delayed flow, not "just a synchronous burst"); H3p-c
+# additionally requires the phase + block surrogates (real mode shift, not a
+# spectral/smoothing artifact); both also require the dual onset-span guard
+# (a hit that only survives on the span closest to onset is downgraded).
+# See docs/superpowers/specs/2026-07-03-topic5-v3p-preictal-trajectory-design.md
+# L1b/L4b/L4d.
+_GATE_EXPLANATION = (
+    "但这些孤立命中一进入后续几道预先设定好的、专门排除假象的关卡——是否保持了原本的放电/参与节律而不是单纯"
+    "数量变多、是否真的隔了一步才轮到非轴向而不是同时一起爆、换成打乱相位或分块的方式重测是否依然站得住、"
+    "把窗口往前挪一段、离发作起点更远后是否依然成立——就没有一项能一起挺住，所以只能算零散的、未经把关的"
+    "提示，够不成稳健信号。"
+)
+
+
+def _cohort_block_sentence(label: str, blk: dict) -> str:
+    """One sentence reporting a single cohort block's numbers -- shared
+    phrasing so narrow / broad_expanded / broad_core differ only in the
+    label text and the numbers actually read from that block."""
+    return (
+        f"{label}可用 {blk.get('n_eligible', 'n/a')} 人，其中 {blk.get('n_subject_support', 'n/a')} "
+        "人个体同时通过全部稳健性检验；按被试标签置换、Holm 校正后的队列级 p 值：非轴向流 "
+        f"{_fmt_p(blk.get('p_holm_b'))}（斜率中位数 z={_fmt_z(blk.get('median_slope_z_b'))}），"
+        f"模态转移方向 {_fmt_p(blk.get('p_holm_c'))}（斜率中位数 z={_fmt_z(blk.get('median_slope_z_c'))}）。"
+    )
+
+
+def _verdict_sentence(rows: list) -> str:
+    """Honest conclusion for ONE cohort's rows (CLAUDE.md Sec 8: state what
+    was measured / how / what it shows, not just a verdict word). A
+    complete-hard-gate negative (no cohort direction, no subject support) is
+    NOT the same claim as "no preictal non-axial change" -- if any subject's
+    own single-leg label-permutation p happens to clear 0.05, name it, then
+    say why it still doesn't count as robust support."""
+    b_hits = _label_sig_subjects(rows, "p_label_slope_b")
+    c_hits = _label_sig_subjects(rows, "p_label_slope_c")
+    lead = (
+        "这是一次完整的多重把关阴性，不是『发作前完全没有非轴向变化的迹象』：队列层面没有测到方向一致、"
+        "经得起 Holm 校正的爬升信号，也没有一个人同时通过全部预先定好的稳健性关卡。"
+    )
+    if not b_hits and not c_hits:
+        return lead + "这批人里，连最基础的一步——按轴/非轴标签打乱重算斜率——也没有谁单独冒出过 p<0.05 的巧合命中。"
+    bits = []
+    if b_hits:
+        bits.append(f"非轴向流这条腿单独冒出 p<0.05 的是 {'/'.join(b_hits)}")
+    if c_hits:
+        bits.append(f"模态转移方向这条腿单独冒出 p<0.05 的是 {'/'.join(c_hits)}")
+    if b_hits and c_hits and not (set(b_hits) & set(c_hits)):
+        bits[-1] += "，两条腿从没有在同一个人身上同时冒出过"
+    return lead + f"不过在最基础的一步——按轴/非轴标签打乱重算斜率——上，{'；'.join(bits)}。" + _GATE_EXPLANATION
+
+
+def _write_readme(outdir: Path, tier_payload: dict | None, panel_c_on: bool,
+                   cohort: str | None, subject_rows: dict) -> Path:
     """Chinese ``figures/README.md`` (AGENTS.md format: ``### filename`` + a
     few sentences + a trailing ``**关注点**：`` line), written AFTER the PNG
-    so every number quoted here matches THIS exact render."""
-    if tier_payload:
-        nb = tier_payload["narrow"]
+    so every number quoted here matches THIS exact render. ``cohort`` pins
+    which block(s) of the (shared, narrow+broad+broad_core) tier JSON THIS
+    directory's numbers paragraph reports -- narrow/ only ever reports the
+    narrow block, broad/ only ever reports broad_expanded + broad_core
+    (never narrow's numbers -- that mismatch is the bug this fixes)."""
+    if not tier_payload:
+        stat_txt = "本次渲染没有找到队列汇总 JSON，图上不显示 Holm p 值/tier 标注（仅展示原始点位与轨迹）。"
+    elif cohort == "narrow":
         stat_txt = (
-            f"当前这次渲染读到的队列：narrow（主力）可用 {nb['n_eligible']} 人，其中 "
-            f"{nb['n_subject_support']} 人个体过了全部稳健性检验；按被试标签置换、Holm 校正后的队列级 p 值："
-            f"非轴向流 {_fmt_p(nb['p_holm_b'])}，模态转移方向 {_fmt_p(nb['p_holm_c'])}"
+            "当前这次渲染读到的队列：" + _cohort_block_sentence("narrow（主力）", tier_payload["narrow"]) +
+            f"（内部记账：evidence tier {tier_payload['tier']}/4，"
+            f"formally supported={tier_payload['state_v3p_supported']}）。" +
+            _verdict_sentence(subject_rows.get("narrow", []))
+        )
+    elif cohort == "broad":
+        bc = tier_payload.get("broad_core")
+        core_txt = _cohort_block_sentence("broad_core（复制队列核心，去掉 4 个候选补录）", bc) if bc else ""
+        tier_bc_txt = (f"，broad_core 口径 tier {tier_payload['tier_broad_core']}/4"
+                       if "tier_broad_core" in tier_payload else "")
+        stat_txt = (
+            "当前这次渲染读到的队列：" +
+            _cohort_block_sentence("broad_expanded（复制队列，含全部候选）", tier_payload["broad"]) +
+            core_txt +
+            f"（内部记账：evidence tier {tier_payload['tier']}/4{tier_bc_txt}，"
+            f"formally supported={tier_payload['state_v3p_supported']}）。" +
+            _verdict_sentence(subject_rows.get("broad", []))
+        )
+    else:
+        # Explicit --outdir (dev/eyeball render or a test): no single cohort
+        # dir to attribute the render to -- report whichever block(s) are
+        # present at their plain numbers, no per-cohort verdict prose (that
+        # honest-negative framing is the narrow/broad production-dir
+        # contract, see the two ``elif`` branches above).
+        bits = [_cohort_block_sentence(f"{c}（{'主力' if c == 'narrow' else '复制'}）", tier_payload[c])
+                for c in ("narrow", "broad") if c in tier_payload]
+        stat_txt = (
+            "当前这次渲染读到的队列：" + "".join(bits) +
             f"（内部记账：evidence tier {tier_payload['tier']}/4，"
             f"formally supported={tier_payload['state_v3p_supported']}）。"
         )
-    else:
-        stat_txt = "本次渲染没有找到队列汇总 JSON，图上不显示 Holm p 值/tier 标注（仅展示原始点位与轨迹）。"
     c_txt = (
         "**下排**把上排同样的斜率换算成相对于随机置换基线的标准化 z 值（±1.96 是常规两侧参考线），"
         "让『非轴向流』和『模态转移』两个量纲不同的指标能在同一把尺子上比较谁的信号更强、更一致。\n\n"
@@ -420,15 +520,16 @@ def main(argv=None):
     panel_c_on = _panel_c_available(subject_rows)
     fig = _build_figure(subject_rows, window_rows, tier_payload, panel_c_on)
 
-    outdirs = [Path(args.outdir)] if args.outdir else [indir / c / "figures" for c in ("narrow", "broad")]
+    outdirs = ([(None, Path(args.outdir))] if args.outdir
+               else [(c, indir / c / "figures") for c in ("narrow", "broad")])
     out_paths = []
-    for outdir in outdirs:
+    for cohort, outdir in outdirs:
         outdir.mkdir(parents=True, exist_ok=True)
         out_png = outdir / _PNG_NAME
         fig.savefig(out_png, dpi=170, bbox_inches="tight")
         print(f"[fig] -> {out_png}", flush=True)
         out_paths.append(out_png)
-        readme_path = _write_readme(outdir, tier_payload, panel_c_on)
+        readme_path = _write_readme(outdir, tier_payload, panel_c_on, cohort, subject_rows)
         print(f"[fig] -> {readme_path}", flush=True)
     plt.close(fig)
     return out_paths
