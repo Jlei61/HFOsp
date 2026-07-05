@@ -1,6 +1,6 @@
 # Topic 4 — M3-v2.2 Approach-Criticality — Milestone 2: Dense α₀ Crossing + Two-Stage Linear-Ignition / Nonlinear-Spread Readout · Design
 
-date 2026-07-04（rev2.1 2026-07-05）· 状态 **design rev2.1 — GO for writing-plans**（rev1.1 → rev2：两段式 ignition/spread 重构；rev2 → rev2.1：折入用户 GO-review 4 项 P1 契约钉死——① pilot 语言降调（exploratory de-risk，正式待 T2/T4/T5 注册）② nonaxis gain 三态阈值 ③ epsilon pass/fail 锁死 ④ ignition/spread enum 显式化）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。**用户 2026-07-05 审阅=90/100 GO、无 P0；建议 M1 PR #6 先合、M2 impl 以 M1-merged main 为 base（避免 rebase 混科学+工程）。**
+date 2026-07-04（rev2.2 2026-07-05）· 状态 **design rev2.2 — in execution (SDD)**（rev1.1 → rev2：两段式 ignition/spread 重构；rev2 → rev2.1：折入用户 GO-review 4 项 P1 契约钉死——① pilot 语言降调（exploratory de-risk，正式待 T2/T4/T5 注册）② nonaxis gain 三态阈值 ③ epsilon pass/fail 锁死 ④ ignition/spread enum 显式化；**rev2.1 → rev2.2**（T1 review，用户 2026-07-05）：`op_solve_quality` 改 **fold-appropriate 残差容差**（`op_residual_tol=1e-2`）而非严格 1e-9 `converged`（near-fold op 稳定但不收敛到 1e-9；否则 §5.0 ignition gate 恒 fail 废掉 core_localized 读数）+ `branch_identity_clean` 纳入 T1）· 分支 `topic4-criticality-m2`（worktree, base `codex/topic4-criticality`@1207e85, off M1）· 前置：**M1 (frozen-Jacobian verdict instrument) COMPLETE** — real-v2.2 verdict=`unresolved_operating_point`（低支 α₁ 在两抽样点间穿 0 至 +0.189，采样漏采）。**用户 2026-07-05 审阅=90/100 GO、无 P0；建议 M1 PR #6 先合、M2 impl 以 M1-merged main 为 base（避免 rebase 混科学+工程）。**
 
 > **方法学 base** = M1 spec `2026-07-02-topic4-m3v2-2-approach-criticality-design.md` + M1 code。M2 **复用** M1 判读器 + 特征模指标，只新加：dense α₀ localization、two-core ignition 确认、nonlinear-footprint spread readout、gain/leak 方向向量（nonaxis 降为 sentinel）。
 > **执行 gate**：M2 全模型侧，不消费 topic5 phase2。Topic5 correspondence 留 M3。
@@ -113,7 +113,7 @@ unresolved_subreason         # null | alpha0_not_localized | branch_ambiguous |
 - **coarse 预扫**：M1 last-qualified↔first-saturated bracket 内先均匀取 K 个点（config，默认 5）算 α₁。若 sign change > 1 → `crossing_status=multiple_alpha0_crossings`（取第一个做定位；`unresolved_subreason=multiple_alpha0_crossings` 除非 ignition class 在各 crossing 稳定）。
 - **递归二分**（线性插值 slow state q_I/g_K/h_G）：每层中点重解 low branch（`solve_branches` warm-start）、算 α₁、检查 branch identity。停止：`crossing_width_ms < crossing_width_ms_tol`（默认 1.0）或达 `max_bisect_levels = min(hard_cap=16, max(8, ceil(log2(initial_width_ms/tol))+2))`。
 - **quality 拆两层（carried）**：
-  - `op_solve_quality`：converged ∧ residual ok ∧ branch identity clean ∧ 非 solver artifact。
+  - `op_solve_quality`：`residual ≤ op_residual_tol`（**fold-appropriate 残差容差，非严格 converged 旗**——穿零 near-fold op 的解达不到 solver 内部 1e-9 `converged` 硬线（残差~1e-3，pilot 已知性质）但 α₁/模态读数跨 bracket 稳定；故用残差容差 gate 掉真发散解、保住 near-fold 穿零可报 core_localized。rev2.2 决定，用户 2026-07-05）∧ ¬saturated ∧ resolved spectrum ∧ `branch_identity_clean`（低支跨穿零 bracket 连续，用 M1 `check_low_branch_continuation_between`）∧ 非 solver artifact。
   - `stability_read_quality`：α₁<0 ∧ τ defined ∧ quasi-static recovery 可解释。τ 等"恢复量"**只在 α₁<0 侧解读**。
 - 输出：`alpha0_crossing_time_ms`、`alpha0_crossing_slow_state`、`crossing_width_ms`、`alpha_left/alpha_right`、`branch_identity_clean`、`op_solve_quality_left/right`、`crossing_status`。
 
@@ -208,7 +208,7 @@ spread：JVP 门 fail ∨ control 未扣 ∨ ε/polarity 不一致 ∨ <2 深度
 ## 8. config / results / 复用
 - **config** 新 `config/topic4_criticality_m2.yaml`：
   - `basis`(theta=THETA_EE, embedding=rE_block, nonaxis_direction_min_norm=1e-3, **off_axis_score_tol=0.05, nonaxis_gain_excess_tol=0.10, nonaxis_gain_ratio_tol=1.25**)；
-  - `densification`(coarse_K=5, crossing_width_ms_tol=1.0, max_bisect_hard_cap=16)；
+  - `densification`(coarse_K=5, crossing_width_ms_tol=1.0, max_bisect_hard_cap=16, **op_residual_tol=1.0e-2**（fold-appropriate；pilot near-fold 残差 1e-3–4e-3 过关、真发散解仍拦；rev2.2）)；
   - `ignition`(core_localized_overlap_thresh=0.8, core_localized_globality_thresh=0.3, sweep [0.7,0.8,0.9]×[0.2,0.3,0.4]; **delocalized**: globality_thresh=0.5, iso_thresh=0.2, corridor_lit_thresh=0.2)；
   - `two_core_confirm`(kind=two, radius=0.9, separation=2.4, single_core_thresh=0.9, corridor_dark_thresh=0.05)；
   - `spread`(axial_onset_thresh=0.2, **expand_active_delta=0.1, global_thresh=0.5**, flood_active_thresh=0.9, self_limit_active_thresh=0.1, footprint_sample_ms=[2,5,10,20,30,50,75,100,200,300]; **epsilon_onset_agreement=all, epsilon_endgame_agreement=majority**)；
