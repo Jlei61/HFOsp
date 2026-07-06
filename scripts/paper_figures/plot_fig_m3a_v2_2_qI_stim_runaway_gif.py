@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -135,9 +136,19 @@ def _activity_fields(res, S, frame_steps, dt, window_ms):
     return out, vals
 
 
+def _range_label(names):
+    """Compact a consecutive same-shaft contact list, e.g. [ICL8,ICL9,ICL10,ICL11] -> 'ICL8–11'."""
+    m = [re.match(r"([A-Za-z]+)(\d+)$", str(n)) for n in names]
+    if names and all(m) and len({x.group(1) for x in m}) == 1:
+        nums = sorted(int(x.group(2)) for x in m)
+        if nums == list(range(nums[0], nums[-1] + 1)):
+            return f"{m[0].group(1)}{nums[0]}–{nums[-1]}"
+    return ",".join(str(n) for n in names)
+
+
 def _draw_arm(fig, row_spec, S, res, metrics, cfg, qi, frame_steps, q_frames,
               activity_field, zlfp, activity_vmax, *, row_title, tm_cursor,
-              stim_contacts=None, stim_on=None, stim_off=None, baseline_qmean=None):
+              stim_contacts=None, stim_on=None, stim_off=None, baseline_qmean=None, x_end_ms=None):
     L = S["L"]
     contacts = res["contacts"]
     names = res["names"]
@@ -145,6 +156,7 @@ def _draw_arm(fig, row_spec, S, res, metrics, cfg, qi, frame_steps, q_frames,
     times = res["times"]
     runaway = metrics["runaway_start_ms"]
     T = float(S["p"].T)
+    x_end = float(x_end_ms) if x_end_ms is not None else T
     win = None if stim_on is None else (stim_on, min(stim_off, T))
     rg = row_spec.subgridspec(1, 3, width_ratios=[1.0, 1.0, 2.15], wspace=0.18)
 
@@ -167,7 +179,7 @@ def _draw_arm(fig, row_spec, S, res, metrics, cfg, qi, frame_steps, q_frames,
     H._draw_contacts(ax0, contacts, names)
     _stim_marks(ax0)
     H._style_spatial(ax0, L)
-    ax0.set_title(f"{row_title} — permissivity (1-$q_I$)", fontsize=8.2, fontweight="bold", pad=3)
+    ax0.set_title(f"{row_title} · permissivity 1$-q_I$", fontsize=7.6, fontweight="bold", pad=3)
     fig.colorbar(im0, ax=ax0, fraction=0.046, pad=0.02).ax.tick_params(labelsize=6)
 
     # --- col 1: real-time 2D SNN E activity ---
@@ -203,7 +215,7 @@ def _draw_arm(fig, row_spec, S, res, metrics, cfg, qi, frame_steps, q_frames,
     axg.axvline(tm_cursor, color="black", lw=1.1, alpha=0.9, zorder=7)
     if runaway is not None:
         axg.axvline(runaway, color="crimson", lw=1.0, ls="--", alpha=0.9, zorder=6)
-    axg.set_xlim(0.0, T); axg.set_ylim(-0.03, 1.05)
+    axg.set_xlim(0.0, x_end); axg.set_ylim(-0.03, 1.05)
     axg.tick_params(axis="x", labelbottom=False, length=2.0)
     axg.tick_params(axis="y", labelsize=6.2, length=2.0)
     axg.set_ylabel("$q_I,\\ g_K$", fontsize=7.4)
@@ -227,7 +239,7 @@ def _draw_arm(fig, row_spec, S, res, metrics, cfg, qi, frame_steps, q_frames,
     ax2.axvline(tm_cursor, color="black", lw=1.1, alpha=0.9, zorder=7)
     if runaway is not None:
         ax2.axvline(runaway, color="crimson", lw=1.0, ls="--", alpha=0.9, zorder=6)
-    ax2.set_xlim(0.0, T)
+    ax2.set_xlim(0.0, x_end)
     ax2.set_yticks(trace_y); ax2.set_yticklabels(names, fontsize=6.2)
     for tick, nm in zip(ax2.get_yticklabels(), names):
         tick.set_color(H._shaft_color(nm, shafts))
@@ -260,12 +272,19 @@ def _run(cfg, sites, *, radius, n, stim_on, stim_off):
     return dict(S=S, base_res=base_res, base_m=base_m, arms=arms)
 
 
-def _render_frames(bundle, cfg, rows, *, stim_on, stim_off, out_dir: Path, stem, main_title, footer_text):
+def _render_frames(bundle, cfg, rows, *, stim_on, stim_off, out_dir: Path, stem, main_title, footer_text,
+                   gif_end_ms=None, x_end_ms=None):
     """Render N rows (one `_draw_arm` each) as an animated GIF + final PNG/PDF. Each row dict:
     {res, m, row_title, stim_contacts|None, baseline_qmean|None}. A shared activity vmax is used
-    across all rows so the 2D-activity colormaps are comparable."""
+    across all rows so the 2D-activity colormaps are comparable. `gif_end_ms` (optional) truncates
+    the ANIMATION to frames with t <= gif_end_ms so the final frame freezes on a chosen contrast
+    moment; the sim/metrics are unaffected (the full trajectory still drives runaway detection), and
+    the final-frame time cursor reads gif_end_ms rather than T."""
     S = bundle["S"]; T = float(S["p"].T); dt = S["p"].dt
     frame_steps = bundle["base_res"]["q_frame_steps"]
+    if gif_end_ms is not None:
+        frame_steps = [s for s in frame_steps if float(bundle["base_res"]["times"][s]) <= float(gif_end_ms)]
+    end_time = float(gif_end_ms) if gif_end_ms is not None else T
     af, z, vals = [], [], []
     for r in rows:
         a, v = _activity_fields(r["res"], S, frame_steps, dt, cfg.activity_window_ms)
@@ -276,7 +295,7 @@ def _render_frames(bundle, cfg, rows, *, stim_on, stim_off, out_dir: Path, stem,
     frames = []
     for qi, step in enumerate(frame_steps):
         last = qi == len(frame_steps) - 1
-        tm_cursor = T if last else float(bundle["base_res"]["times"][step])
+        tm_cursor = end_time if last else float(bundle["base_res"]["times"][step])
         fig = plt.figure(figsize=(14.0, 4.9 * len(rows)), facecolor="white")
         outer = fig.add_gridspec(len(rows), 1, left=0.055, right=0.985, bottom=0.065, top=0.9, hspace=0.30)
         for ri, r in enumerate(rows):
@@ -285,7 +304,7 @@ def _render_frames(bundle, cfg, rows, *, stim_on, stim_off, out_dir: Path, stem,
                       af[ri][qi], z[ri], activity_vmax, row_title=r["row_title"], tm_cursor=tm_cursor,
                       stim_contacts=r.get("stim_contacts"),
                       stim_on=(stim_on if is_stim else None), stim_off=(stim_off if is_stim else None),
-                      baseline_qmean=r.get("baseline_qmean"))
+                      baseline_qmean=r.get("baseline_qmean"), x_end_ms=x_end_ms)
         fig.text(0.016, 0.955, "A", fontsize=18, fontweight="bold")
         fig.suptitle(main_title.format(t=tm_cursor), fontsize=12.0, fontweight="bold", y=0.975)
         fig.text(0.50, 0.022, footer_text, fontsize=8.0, ha="center", color="0.2")
@@ -400,6 +419,13 @@ def main():
     ap.add_argument("--stim-radius", type=float, default=2.0)
     ap.add_argument("--n-stim-contacts", type=int, default=4)
     ap.add_argument("--T", type=float, default=2300.0)
+    ap.add_argument("--gif-end-ms", type=float, default=None,
+                    help="truncate the ANIMATION to t<=this (sim/metrics unaffected); freezes the "
+                         "final frame on a chosen contrast moment, e.g. --gif-end-ms 1400 ends at "
+                         "stim-window close where endpoint has run away but middle still holds")
+    ap.add_argument("--x-end-ms", type=float, default=None,
+                    help="cap the trace/readout time axis at this (default: full T); keep T long "
+                         "enough to still DETECT late runaways, e.g. --T 1750 --x-end-ms 1600")
     ap.add_argument("--n-pulses", type=int, default=17)
     ap.add_argument("--seed", type=int, default=H.ProtocolConfig.seed)
     ap.add_argument("--layout", choices=["stage5", "subject1146"], default="subject1146")
@@ -438,17 +464,18 @@ def main():
         ep_rt, mid_rt = ep["m"]["runaway_start_ms"], mid["m"]["runaway_start_ms"]
         rows = [
             dict(res=ep["res"], m=ep["m"], stim_contacts=ep["tgt"]["contacts"], baseline_qmean=base_qmean,
-                 row_title=f"stim @ earliest endpoint ({','.join(ep['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
+                 row_title=f"stim @ earliest endpoint ({_range_label(ep['tgt']['names'])})"),
             dict(res=mid["res"], m=mid["m"], stim_contacts=mid["tgt"]["contacts"], baseline_qmean=base_qmean,
-                 row_title=f"stim @ middle ({','.join(mid['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
+                 row_title=f"stim @ middle ({_range_label(mid['tgt']['names'])})"),
         ]
-        main_title = f"q_I runaway: stim @ earliest endpoint vs @ middle ({geo}) | t={{t:.0f}} ms"
+        main_title = f"q_I runaway — endpoint vs middle stim · {geo} · t={{t:.0f}} ms"
         footer_text = (f"no-stim runaway={base_rt} ms | earliest-endpoint={ep_rt} ms ({_delay_str(ep_rt, base_rt)}) | "
                        f"middle={mid_rt} ms ({_delay_str(mid_rt, base_rt)}) | "
                        f"stim E cells: endpoint={ep['tgt']['n_E']} middle={mid['tgt']['n_E']}")
         gif, png, pdf, activity_vmax = _render_frames(bundle, cfg, rows, stim_on=on, stim_off=off,
                                                       out_dir=out_dir, stem=stem, main_title=main_title,
-                                                      footer_text=footer_text)
+                                                      footer_text=footer_text, gif_end_ms=args.gif_end_ms,
+                                                      x_end_ms=args.x_end_ms)
         stim_meta = {"earliest_endpoint": {"contacts": ep["tgt"]["names"], "target_E_cells": ep["tgt"]["n_E"],
                                            **_arm_metrics(ep["m"])},
                      "middle": {"contacts": mid["tgt"]["names"], "target_E_cells": mid["tgt"]["n_E"],
@@ -460,15 +487,16 @@ def main():
         rows = [
             dict(res=bundle["base_res"], m=base_m, stim_contacts=None, baseline_qmean=None, row_title="no stim"),
             dict(res=arm["res"], m=arm["m"], stim_contacts=arm["tgt"]["contacts"], baseline_qmean=base_qmean,
-                 row_title=f"stim @ {en_label} ({','.join(arm['tgt']['names'])}, {on:.0f}–{off:.0f} ms)"),
+                 row_title=f"stim @ {en_label} ({_range_label(arm['tgt']['names'])})"),
         ]
-        main_title = f"q_I build-up $\\rightarrow$ runaway: stim @ {en_label} vs no stim ({geo}) | t={{t:.0f}} ms"
+        main_title = f"q_I runaway — {en_label} stim vs no stim · {geo} · t={{t:.0f}} ms"
         footer_text = (f"no-stim runaway={base_rt} ms | stim @ {en_label}={arm_rt} ms ({_delay_str(arm_rt, base_rt)}) | "
                        f"min q_I end: no-stim={base_m['q_min_final']} stim={arm['m']['q_min_final']} | "
                        f"stim E cells={arm['tgt']['n_E']}")
         gif, png, pdf, activity_vmax = _render_frames(bundle, cfg, rows, stim_on=on, stim_off=off,
                                                       out_dir=out_dir, stem=stem, main_title=main_title,
-                                                      footer_text=footer_text)
+                                                      footer_text=footer_text, gif_end_ms=args.gif_end_ms,
+                                                      x_end_ms=args.x_end_ms)
         stim_meta = {site_key: {"contacts": arm["tgt"]["names"], "target_E_cells": arm["tgt"]["n_E"],
                                 **_arm_metrics(arm["m"])}}
         _write_readme_no_stim(base_rt, arm, zh_label, stem, on, off, out_dir)
@@ -486,7 +514,8 @@ def main():
             "kick_boost", "r_kick", "q_min", "k_q", "sigma_q", "tau_q", "use_gK", "eta_K",
             "use_hG", "core_mean", "core_radius", "layout")},
             "stim_on_ms": on, "stim_off_ms": off,
-            "stim_radius_mm": args.stim_radius, "n_stim_contacts": args.n_stim_contacts},
+            "stim_radius_mm": args.stim_radius, "n_stim_contacts": args.n_stim_contacts,
+            "gif_end_ms": args.gif_end_ms, "x_end_ms": args.x_end_ms},
         "metrics": {"no_stim": _arm_metrics(base_m), **stim_meta,
                     "runaway_delay_ms": {site: (None if a["m"]["runaway_start_ms"] is None or base_rt is None
                                                 else round(a["m"]["runaway_start_ms"] - base_rt, 1))
