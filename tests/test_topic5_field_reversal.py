@@ -276,3 +276,23 @@ def test_contact_gate_detects_reversal():
     assert out["signed_spearman"] < -0.9
     assert out["percentile"] < 5.0
     assert out["passed"] is True
+
+
+# Task 6 tests: loo_reproducibility (denoising supplement, §6)
+
+from src.topic5_field_reversal import loo_reproducibility
+
+
+def test_field_beats_contact_when_neighbors_more_reliable():
+    # smooth spatial gradient + heavy per-contact per-event noise -> a contact's own train
+    # estimate is noisy, but its neighbors pin the true value (field LOO should win).
+    plane, names = _two_shaft_plane()
+    n_ch = len(names)
+    true = np.linspace(0, 1, n_ch)
+    rng0 = np.random.default_rng(7)
+    n_ev = 60
+    masked = true[:, None] + rng0.normal(0, 0.6, (n_ch, n_ev))     # noisy per event
+    bundle = {"masked": masked, "labels": np.array([0] * 30 + [1] * 30),
+              "channel_names": list(names), "bools": np.isfinite(masked)}
+    out = loo_reproducibility(bundle, plane, n_split=25, rng=np.random.default_rng(3), sigma=None)
+    assert out["field_rho"] > out["contact_rho"]

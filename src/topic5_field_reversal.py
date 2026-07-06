@@ -198,3 +198,67 @@ def contact_reversal_gate(cav0: dict, cav1: dict, *, n_perm: int = 1000, rng, mi
                  "null_p05": float(pcts[0]), "null_p50": float(pcts[1]), "null_p95": float(pcts[2]),
                  "passed": bool(place["percentile"] < 5.0 and obs < 0.0)})
     return base
+
+
+def _loo_field_predict(names, plane_xy, values, support, sigma):
+    """LOO kernel regression at each contact from OTHER contacts. Returns (pred, den) where
+    den = support-weighted kernel mass at the contact (the field support at that location,
+    directly comparable to S_THRESH — the caller NaNs contacts with den < s_thresh)."""
+    pts = np.array([plane_xy[n] for n in names], float)
+    v = np.array([values[n] for n in names], float)
+    sup = np.array([support[n] for n in names], float)
+    d2 = ((pts[:, None, :] - pts[None, :, :]) ** 2).sum(-1)
+    W = sup[None, :] * np.exp(-d2 / (2.0 * sigma ** 2))
+    np.fill_diagonal(W, 0.0)                      # LOO: exclude self
+    den = W.sum(1)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        pred = np.where(den > 1e-12, (W @ v) / den, np.nan)
+    return pred, den
+
+
+def _class_split_rhos(masked, bools, names, plane_xy, cols, sigma, rng, s_thresh):
+    perm = rng.permutation(cols); half = perm.size // 2
+    if half < 1:
+        return None
+    a, b = perm[:half], perm[half:]
+    with np.errstate(invalid="ignore"):
+        train = np.array([np.nanmean(masked[c, a]) if np.any(np.isfinite(masked[c, a])) else np.nan
+                          for c in range(len(names))])
+        held = np.array([np.nanmean(masked[c, b]) if np.any(np.isfinite(masked[c, b])) else np.nan
+                         for c in range(len(names))])
+    train_part = np.asarray(bools)[:, a].mean(axis=1)         # per-contact participation on train half
+    order = [names[i] for i in range(len(names))
+             if names[i] in plane_xy and np.isfinite(train[i]) and train_part[i] > 0]
+    if len(order) < 3:
+        return None
+    tv = {n: float(train[names.index(n)]) for n in order}
+    sup = {n: float(train_part[names.index(n)]) for n in order}       # participation weight, NOT 1.0
+    pred, den = _loo_field_predict(order, plane_xy, tv, sup, sigma)
+    # S_THRESH gate: spatially-isolated contacts (low kernel mass) -> NaN, so field & contact
+    # are scored on the SAME definable-contact intersection (spec §6 common-support fairness).
+    loo_by = {n: (float(pred[j]) if den[j] >= s_thresh else np.nan) for j, n in enumerate(order)}
+    common = [n for n in order if np.isfinite(held[names.index(n)]) and np.isfinite(loo_by[n])]
+    if len(common) < 3:
+        return None
+    hv = np.array([held[names.index(n)] for n in common])
+    cv = np.array([tv[n] for n in common])                            # contact scored on SAME common set
+    fv = np.array([loo_by[n] for n in common])
+    return (float(spearmanr(cv, hv).correlation), float(spearmanr(fv, hv).correlation), len(common))
+
+
+def loo_reproducibility(bundle, plane_ref, *, n_split=50, rng, sigma, s_thresh=S_THRESH) -> dict:
+    X, Y = make_plane_grid()
+    if sigma is None:
+        sigma = class_template_sigma(plane_ref, X=X, Y=Y)
+    masked = bundle["masked"]; bools = np.asarray(bundle["bools"]); names = list(bundle["channel_names"])
+    labels = np.asarray(bundle["labels"]); plane_xy = build_plane_xy(plane_ref)
+    c_rhos, f_rhos, ncs = [], [], []
+    for g in (0, 1):
+        cols = np.where(labels == g)[0]
+        for _ in range(n_split):
+            r = _class_split_rhos(masked, bools, names, plane_xy, cols, sigma, rng, s_thresh)
+            if r is not None:
+                c_rhos.append(r[0]); f_rhos.append(r[1]); ncs.append(r[2])
+    return {"contact_rho": float(np.nanmean(c_rhos)) if c_rhos else float("nan"),
+            "field_rho": float(np.nanmean(f_rhos)) if f_rhos else float("nan"),
+            "n_contacts_common": int(np.median(ncs)) if ncs else 0}
