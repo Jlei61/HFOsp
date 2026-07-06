@@ -35,6 +35,13 @@
   formal/机制）**；formal within-shaft Gate A 未评估(2/20)、Gate B/C 未跑。脚本
   `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档
   `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`。
+- `fig_topic5_field_extrapolation_energy/` — **Topic 5 energy-field paper-ready 主图**：A E1146 真实电极布局上的测试设计
+  （core-field vs own-order 预测 hidden seizure energy）/ B cohort Δ 直接裁决 / C 证据阶梯。
+  结论边界：network extension supported，但 core-field 不系统性优于 hidden 电极自身间期顺序。
+  脚本 `scripts/paper_figures/plot_fig_topic5_field_extrapolation_energy.py`。
+- `fig_topic5_network_extension_null/` — **Topic 5 network-extension three-way 独立统计图**：每个频段同图放
+  core-field prediction / hidden own-order C1 / channel-shuffle null，三条 bracket 分别裁决 core>null、
+  own>null、core>own。脚本 `scripts/paper_figures/plot_fig_topic5_network_extension_null.py`。
 
 ## Fig4 — Subject-specific SNN 读出（病人真实电极几何）
 
