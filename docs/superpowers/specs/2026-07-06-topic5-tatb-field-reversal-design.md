@@ -47,7 +47,7 @@
 - **channel-shuffle（粗底参照）**：`channel_shuffle` 全触点打乱，给「有没有任何粗共享结构」地板。
 - **random re-split（仅描述对照，非推断）**：忽略 A/B 标签随机分两半、各建场、corr(half1,half2)；分布≈正，实测 A/B≈负，一眼看出反向不是「切两半」artifact。**标 non-inferential**（不付 KMeans「最分离一刀」选择成本，当推断 null 反保守；「存不存在两模板」是 PR-2 已答，不在此重打）。
 - **per-subject**：观测 corr 的 null 左尾 percentile（`placement_in_distribution`）；pass = percentile < 5 **且** corr < 0。
-- **cohort**：二项检验 pass 数 vs 5%；**broad / narrow 各报、永不 pool**；多模板被试 `subject_first_fold` 折成一代表值防 pseudo-replication。无 band sweep → **不需 selcorr 选择校正**。
+- **cohort**：二项检验 pass 数 vs 5%；**v1 broad-only（narrow deferred，§8）**；每被试一个 A/B 反向 corr（不需多模板折叠）。无 band sweep → **不需 selcorr 选择校正**。
 - **报告铁律**：实测 corr 永远跟 within-shaft null 带一起出，**不出裸 corr**。
 
 ## 5. 表示层 head-to-head（Route B：场主 + 触点灵敏度）
@@ -78,10 +78,11 @@
 - **sensitivity 小扫** `{0.5, 1, 2} × median_nn`，报去噪结论对带宽稳不稳；**主结论只认主 sigma**（防多重比较 fishing）。
 - 注：ladder R2 复用了场的带宽，故与本检验差的**更多是「问的问题」、不一定是尺度**；带宽仍由本 spec 显式钉。
 
-## 8. 合格口径 / 队列风险
+## 8. 合格口径 / 队列范围（【broad-only】v1）
 
-- **合格** = 同 event-resolved：需 A/B 两模板（k=2）+ 触点坐标。broad ≈ 9–11 / narrow ≈ 7（精确 n 由 run 时合格门定）。
-- **⚠️ narrow = compact-core**（触点挤、可能 1–2 杆）→ within-shaft null **高风险大面积撞 `effective_shuffle_n` 守卫**。处理 = 守卫统一施加，**由非退化被试数自动定 narrow tier**：非退化太少 → narrow 自动降 case-series（结论编码进 QC 门，不预先拍板 run/不run）。narrow 另出 native-3D（R2b 式）对照防 2D 投影 artifact（sensitivity）。
+- **⚠️ v1 = broad substrate 唯一**。`load_event_labels_ranks(broad=False)` **硬抛 `NotImplementedError`**（narrow field-metric loader 原作者明确未建，`topic5_event_resolved_alignment.py:95-97`）。narrow 需新 loader 工作、且是 within-shaft null 高退化风险的 compact-core → **降为独立 follow-up plan（loader-first），不在 v1**。
+- **合格（broad）** = broad planes 存在（`GEOM_BROAD/{ds_sid}_t_{a,b}.json`）+ `stable_k==chosen_k==2` + `map_clusters_to_templates` 不 ambiguous。**不需 ictal**（本检验 TA-vs-TB 纯间期，drop 掉 pilot 的 ictal 依赖）→ 合格池比 field_dynamics(n≈9) 更大更干净，精确 n 由 run 时合格门定。
+- **退化守卫**：compact/few-shaft broad 被试仍可能撞 `effective_shuffle_n` 弱-null 守卫 → 标 `degenerate_null`、剔出推断计数、仍描述报（§4）。
 
 ## 9. 1146 机制个案图（【P1】措辞收紧）
 
