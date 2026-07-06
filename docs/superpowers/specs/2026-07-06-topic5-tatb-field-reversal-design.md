@@ -78,11 +78,12 @@
 - **sensitivity 小扫** `{0.5, 1, 2} × median_nn`，报去噪结论对带宽稳不稳；**主结论只认主 sigma**（防多重比较 fishing）。
 - 注：ladder R2 复用了场的带宽，故与本检验差的**更多是「问的问题」、不一定是尺度**；带宽仍由本 spec 显式钉。
 
-## 8. 合格口径 / 队列范围（【broad-only】v1）
+## 8. 合格口径 / 队列范围（broad + narrow 双底物）
 
-- **⚠️ v1 = broad substrate 唯一**。`load_event_labels_ranks(broad=False)` **硬抛 `NotImplementedError`**（narrow field-metric loader 原作者明确未建，`topic5_event_resolved_alignment.py:95-97`）。narrow 需新 loader 工作、且是 within-shaft null 高退化风险的 compact-core → **降为独立 follow-up plan（loader-first），不在 v1**。
-- **合格（broad）** = broad planes 存在（`GEOM_BROAD/{ds_sid}_t_{a,b}.json`）+ `stable_k==chosen_k==2` + `map_clusters_to_templates` 不 ambiguous。**不需 ictal**（本检验 TA-vs-TB 纯间期，drop 掉 pilot 的 ictal 依赖）→ 合格池比 field_dynamics(n≈9) 更大更干净，精确 n 由 run 时合格门定。
-- **退化守卫**：compact/few-shaft broad 被试仍可能撞 `effective_shuffle_n` 弱-null 守卫 → 标 `degenerate_null`、剔出推断计数、仍描述报（§4）。
+- **两底物都做，broad-vs-narrow = 核心 sensitivity**。narrow = compact-core：**若 broad 反向而 narrow 不反向，机制解释完全不同**（反向是粗/远场现象、非核心属性）；若 narrow 也反向，主张更强、深到 SOZ 核。**narrow 退化（compact/few-shaft 撞弱-null 守卫）本身是要报告的结果，不是预先跳过**——把「loader 没建」当「narrow 不可行」= 把工程现状写成数据结论，禁止。
+- **narrow loader（Task 0）**：`load_event_labels_ranks(broad=False)` 原被 event-resolved pilot stub 成 `NotImplementedError`（pilot 自身 scoping，**非数据墙**）。narrow 数据齐全（**35 被试**有 narrow planes+labels，多于 broad 的 26）：narrow labels=`results/interictal_propagation_masked/per_subject`，narrow geometry=`propagation_geometry/observation_readout/real_subjects/{ds_sid}_t_{a,b}.json`，narrow lagpat=canonical 池（`_subject_dir(dataset, root, subject)`，yuquan root `/mnt/yuquan_data/yuquan_24h_edf`），**复用同一 C1 producer-template 证明作 loud 守卫**（错池 → C1 硬 raise，不静默）。
+- **合格（每底物）** = 该底物 planes 存在 + `stable_k==chosen_k==2` + `map_clusters_to_templates` 不 ambiguous。**不需 ictal**（纯间期 TA-vs-TB）。broad / narrow **各报、永不 pool**。
+- **退化守卫 + 逐被试问责**：`effective_shuffle_n` 按真正进统计的触点算；退化被试标 `degenerate_null`、剔出推断计数，但**每被试逐条报「为什么进/不进」**（`no_planes` / `c1_violation` / `cluster_map_ambiguous` / `insufficient_overlap` / `degenerate_null` / `ok`）——narrow 若大面积退化，这张问责表就是结果。
 
 ## 9. 1146 机制个案图（【P1】措辞收紧）
 

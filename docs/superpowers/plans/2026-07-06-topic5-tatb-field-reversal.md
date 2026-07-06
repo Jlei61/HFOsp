@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Formally test, per broad-substrate subject, whether the two interictal propagation templates' smoothed fields (TA_field, TB_field) are signed-anti-correlated beyond a within-shaft permutation null — plus a denoising supplement (field vs contact axis reproducibility).
+**Goal:** Formally test, per subject on BOTH broad and narrow (compact-core) substrates, whether the two interictal propagation templates' smoothed fields (TA_field, TB_field) are signed-anti-correlated beyond a within-shaft permutation null — plus a denoising supplement (field vs contact axis reproducibility) and a broad-vs-narrow sensitivity.
 
-**Architecture:** One new pure-math module `src/topic5_field_reversal.py` (reversal metric + null gate + contact head-to-head + random-split contrast + LOO reproducibility + cohort binomial), driven by one runner and one plotter. Reuses the existing contact-plane smoother, the A-line within-shaft null, and the event-resolved broad loader. No new data-loading primitives; broad substrate only.
+**Architecture:** One new pure-math module `src/topic5_field_reversal.py` (reversal metric + null gate + contact head-to-head + random-split contrast + LOO reproducibility + cohort binomial), driven by one runner and one plotter. Reuses the existing contact-plane smoother, the A-line within-shaft null, and the event-resolved loader — extended to the narrow substrate in Task 0 (a bounded mirror of the broad path, same C1 proof). broad and narrow reported separately (never pooled); broad-vs-narrow is the key sensitivity.
 
 **Tech Stack:** Python 3, numpy, scipy.stats (spearmanr), matplotlib (Agg). pytest for TDD.
 
@@ -12,7 +12,7 @@
 
 Copied verbatim from spec `docs/superpowers/specs/2026-07-06-topic5-tatb-field-reversal-design.md`. Every task's requirements implicitly include these:
 
-- **Substrate: broad only.** `load_event_labels_ranks(broad=False)` raises `NotImplementedError`; narrow is a separate future plan. (spec §8)
+- **Substrate: broad AND narrow.** narrow's `load_event_labels_ranks(broad=False)` was stubbed (`NotImplementedError`) by the event-resolved pilot — **Task 0 un-stubs it** (narrow data verified: 35 subjects with planes+labels, more than broad's 26). Run BOTH; **broad-vs-narrow is the key sensitivity**; narrow degeneracy (compact-core few-shaft) is a REPORTED per-subject result (with an enter/skip reason), never a silent skip. broad/narrow reported separately, never pooled. (spec §8)
 - **Shared frame (P0):** TA and TB fields MUST be built on ONE frame = the reference template `t_a`'s normalized readout plane (`GEOM_BROAD/{ds_sid}_t_a.json`). Never correlate a field on `plane_a` against a field on `plane_b`. (spec §3.1)
 - **Value (P1):** per-contact value = `class_aggregate_contact_values(bundle, label)[name]["value"]` (masked normalized-rank class mean). NEVER display `_rank01`. (spec §3.2)
 - **Smoother (P1):** stat fields use `field_from_contact_values(...) → R_smooth_rank` with `sigma = class_template_sigma(plane_ref)` (= median-nn) and `s_thresh = S_THRESH = 0.15`. FORBIDDEN: `_smooth_rank_field_mm`, `VIS_SIGMA_MULT=2.5`, `VIS_SIGMA_MIN_MM=6.0`, `VIS_MASK_REL=0.02`. (spec §10/§12)
@@ -68,6 +68,97 @@ random_split_contrast(bundle, plane_ref, *, X, Y, sigma, n_split=200, rng, s_thr
 contact_reversal_gate(cav0, cav1, *, n_perm=1000, rng, min_eff=6) -> dict
 loo_reproducibility(bundle, plane_ref, *, n_split=50, rng, sigma) -> dict
 cohort_binomial(pass_flags: Sequence[bool]) -> dict
+```
+
+---
+
+### Task 0: Substrate-general event loader (un-stub narrow)
+
+**Why first:** narrow is the key sensitivity (spec §8); the loader is the only thing blocking it, and it is a bounded mirror of the broad path (different label/lagpat dirs, SAME C1 producer-template proof). Everything downstream (Tasks 1-7) is already substrate-agnostic (operates on `cav0/cav1/plane_ref`).
+
+**Files:**
+- Modify: `src/topic5_event_resolved_alignment.py` (`load_event_labels_ranks`, add `_narrow_lagpat_dir`)
+- Test: `tests/test_topic5_field_reversal.py`
+
+**Interfaces:**
+- Produces: `load_event_labels_ranks(dataset, subject, broad=False, labels_dir=None, lagpat_dir=None)` returns the SAME bundle schema as `broad=True` (no `NotImplementedError`). narrow defaults: `labels_dir="results/interictal_propagation_masked/per_subject"`, lagpat via `_narrow_lagpat_dir(dataset, subject)`.
+
+**Path resolution (verify, don't assume — C1 is the guardrail):** narrow lagpat = the canonical per-subject pool that produced the `interictal_propagation_masked` labels. Reuse `scripts/run_interictal_propagation.py`'s `_subject_dir(dataset, root, subject)` / `_epilepsiae_subject_dir` resolution (canonical artifact root: yuquan `/mnt/yuquan_data/yuquan_24h_edf`; epilepsiae root per that script), globbing `*_lagPat_withFreqCent.npz`. If the resolved dir is the wrong pool, the existing C1 proof (`_legacy_hist_mean_rank` reproduce producer template) HARD-RAISES — so mis-resolution fails loud, never silent. **Confirm on 2-3 real narrow subjects (below) BEFORE trusting the path.**
+
+- [ ] **Step 1: Write the failing test (integration — skips if data roots absent)**
+
+```python
+import os, pytest
+from pathlib import Path
+from src.topic5_event_resolved_alignment import load_event_labels_ranks
+
+_NARROW_LABELS = Path("results/interictal_propagation_masked/per_subject")
+
+def _a_narrow_subject():
+    # first stable_k==2 narrow-labelled subject (deterministic pick)
+    import json
+    for p in sorted(_NARROW_LABELS.glob("*.json")):
+        ac = json.load(open(p)).get("adaptive_cluster", {})
+        if ac.get("stable_k") == 2 and ac.get("chosen_k") == 2:
+            return p.stem
+    return None
+
+@pytest.mark.skipif(not _NARROW_LABELS.exists(), reason="narrow labels not mounted")
+def test_narrow_loader_returns_broad_schema_and_passes_c1():
+    ds_sid = _a_narrow_subject()
+    if ds_sid is None:
+        pytest.skip("no stable_k==2 narrow subject")
+    dataset, subject = ds_sid.split("_", 1)
+    bundle = load_event_labels_ranks(dataset, subject, broad=False)   # must NOT raise
+    for k in ("masked", "bools", "labels", "channel_names", "cluster_template_ranks", "n_blocks"):
+        assert k in bundle
+    assert bundle["masked"].shape[0] == len(bundle["channel_names"])
+    assert set(np.unique(bundle["labels"])) <= {0, 1}
+```
+
+- [ ] **Step 2: Run test to verify it fails**
+
+Run: `pytest tests/test_topic5_field_reversal.py -k "narrow_loader" -v`
+Expected: FAIL with `NotImplementedError: narrow substrate path ... not built`
+
+- [ ] **Step 3: Implement the narrow branch**
+
+In `src/topic5_event_resolved_alignment.py`, add the helper (mirror `_broad_lagpat_dir`; reuse `run_interictal_propagation` resolution — import `_subject_dir` or replicate its ~10 lines):
+
+```python
+def _narrow_lagpat_dir(dataset: str, subject: str, root: Optional[str] = None) -> Path:
+    """Canonical (narrow) per-subject lagPat pool that produced interictal_propagation_masked
+    labels. C1 proof is the guardrail: a wrong pool raises. root defaults to the canonical
+    artifact root."""
+    from scripts.run_interictal_propagation import _subject_dir  # reuse (do not reinvent)
+    canonical = Path(root) if root else Path("/mnt/yuquan_data/yuquan_24h_edf")
+    return _subject_dir(dataset, canonical, subject)
+```
+
+Replace the `if not broad: raise NotImplementedError(...)` block with substrate-aware defaults, and make the lagpat line substrate-aware:
+
+```python
+    if labels_dir is None:
+        labels_dir = ("results/interictal_propagation_masked_broad/per_subject" if broad
+                      else "results/interictal_propagation_masked/per_subject")
+    ...
+    lp = Path(lagpat_dir) if lagpat_dir else (_broad_lagpat_dir(dataset, subject) if broad
+                                              else _narrow_lagpat_dir(dataset, subject))
+```
+
+Change the signature default `labels_dir: str = "results/interictal_propagation_masked_broad/per_subject"` → `labels_dir: Optional[str] = None` (broad callers unaffected — the None branch restores the broad default). Delete the `NotImplementedError` raise.
+
+- [ ] **Step 4: Verify — run test + confirm C1 on 2-3 real narrow subjects**
+
+Run: `pytest tests/test_topic5_field_reversal.py -k "narrow_loader" -v` → PASS
+Run: `python -c "from src.topic5_event_resolved_alignment import load_event_labels_ranks as L; [print(s, L('epilepsiae', s.split('_',1)[1], broad=False)['masked'].shape) for s in ['<narrow_subj_1>','<narrow_subj_2>']]"`
+Expected: prints `(n_ch, n_ev)` with NO C1 `ValueError`. If C1 raises → the narrow lagpat pool is wrong; fix `_narrow_lagpat_dir` before proceeding (loud failure = working as designed).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/topic5_event_resolved_alignment.py tests/test_topic5_field_reversal.py
+git commit -m "feat(topic5): un-stub narrow substrate in load_event_labels_ranks (C1-guarded)"
 ```
 
 ---
@@ -745,7 +836,7 @@ git commit -m "feat(topic5): cohort binomial over non-degenerate reversal passes
 
 ---
 
-### Task 8: Runner (broad loading, per-subject + cohort, bandwidth sweep)
+### Task 8: Runner (both substrates, per-subject + cohort, bandwidth sweep)
 
 **Files:**
 - Create: `scripts/run_topic5_field_reversal.py`
@@ -755,19 +846,24 @@ git commit -m "feat(topic5): cohort binomial over non-degenerate reversal passes
 - Consumes: all Task 1-7 functions; `load_event_labels_ranks`, `map_clusters_to_templates`, `class_aggregate_contact_values`, `make_plane_grid`. Reuses the exact loading sequence from `scripts/run_topic5_event_resolved_alignment.py:89-114` (planes → bundle → cluster map → reference plane), MINUS the ictal block.
 - Produces: `results/topic5_ictal_recruitment/field_reversal/per_subject/{ds_sid}.json` + `cohort_summary.json`.
 
-**Per-subject flow (broad):**
-1. Require `GEOM_BROAD/{ds_sid}_t_a.json` and `_t_b.json`; else `status="no_broad_planes"`.
-2. `bundle = load_event_labels_ranks(dataset, subject)` (catch `ValueError`→`c1_violation`, `NotImplementedError`→`narrow_unsupported`, `FileNotFoundError`→`load_error`).
-3. `ta_rank/tb_rank` from each plane's `typical_rank` in `bundle["channel_names"]` order; `cmap = map_clusters_to_templates(c0, c1, ta_rank, tb_rank)`; if `cmap["ambiguous"]` → `status="cluster_map_ambiguous"`.
-4. **Reference frame = the plane mapped to `t_a`** (P0): `plane_ref = {plane_a if cmap["map"][k]=="t_a"}`. Concretely `plane_ref = plane_a if "t_a" in cmap["map"].values() with plane_a` — since `plane_of={"t_a":plane_a,"t_b":plane_b}`, `plane_ref = plane_of["t_a"] = plane_a`. Label→class: `cav_for_ta = class_aggregate_contact_values(bundle, [k for k,v in cmap["map"].items() if v=="t_a"][0])`, `cav_for_tb` similarly. `cav0 := cav_for_ta`, `cav1 := cav_for_tb`.
-5. Gate at primary sigma: `within_shaft_reversal_gate(plane_ref, cav0, cav1, X, Y, sigma=None, n_perm, rng, min_eff)`.
+Geometry roots: `GEOM = {"broad": ".../propagation_geometry_broad/observation_readout/real_subjects", "narrow": ".../propagation_geometry/observation_readout/real_subjects"}` (both under `--input-results-root`).
+
+**Per-subject flow, parameterized by `substrate ∈ {"broad","narrow"}`** (run BOTH; results kept separate, never pooled):
+1. Require `GEOM[substrate]/{ds_sid}_t_a.json` and `_t_b.json`; else `reason="no_planes"`.
+2. `bundle = load_event_labels_ranks(dataset, subject, broad=(substrate=="broad"))` (catch `ValueError`→`reason="c1_violation"`, `FileNotFoundError`→`reason="load_error"`). Task 0 means narrow no longer raises `NotImplementedError`.
+3. `ta_rank/tb_rank` from each plane's `typical_rank` in `bundle["channel_names"]` order; `cmap = map_clusters_to_templates(c0, c1, ta_rank, tb_rank)`; if `cmap["ambiguous"]` → `reason="cluster_map_ambiguous"`.
+4. **Reference frame = t_a's plane** (P0): `plane_ref, ta_label, tb_label = pick_reference(cmap, plane_a, plane_b)` (Task 8 helper). `cav0 = class_aggregate_contact_values(bundle, ta_label)`, `cav1 = class_aggregate_contact_values(bundle, tb_label)`.
+5. Gate at primary sigma: `within_shaft_reversal_gate(plane_ref, cav0, cav1, X=X, Y=Y, sigma=None, n_perm=n_perm, rng=rng, min_eff=min_eff)`. `reason` = `"insufficient_overlap"` / `"degenerate_null"` / `"ok"` from the gate result.
 6. `channel_floor(...)`, `random_split_contrast(bundle, plane_ref, ...)`, `contact_reversal_gate(cav0, cav1, ...)`, `loo_reproducibility(bundle, plane_ref, ...)`.
-7. **Bandwidth sweep:** re-run only `within_shaft_reversal_gate` at `sigma ∈ {0.5,1,2} × class_template_sigma(plane_ref)` → `sweep` dict. Primary result = the `1.0×` entry (identical to step 5).
-8. Write per-subject JSON with all of the above + `cluster_map`, `n_channels`, `status="ok"`.
+7. **Bandwidth sweep:** re-run only `within_shaft_reversal_gate` at `sigma ∈ {0.5,1,2} × class_template_sigma(plane_ref)` → `sweep` dict. Primary = the `1.0×` entry (identical to step 5).
+8. Write `per_subject/{substrate}/{ds_sid}.json` with all of the above + `cluster_map`, `n_channels`, `substrate`, `reason`, `status` (`"ok"` iff a gate ran; else the skip `reason`).
 
-**Cohort:** collect `passed` from non-degenerate `ok` subjects → `cohort_binomial`; also field_rho vs contact_rho paired Wilcoxon (`scipy.stats.wilcoxon`) over `ok` subjects → `cohort_summary.json`.
+**Cohort (per substrate, plus the sensitivity):**
+- Per substrate: `cohort_binomial(passed for non-degenerate ok subjects)`; field_rho-vs-contact_rho paired `scipy.stats.wilcoxon` over ok subjects.
+- **Accountability table** (spec §8): per substrate, count of each `reason` — this table IS the result when narrow degenerates. Write it; never drop it.
+- **broad-vs-narrow sensitivity:** for subjects `ok` in BOTH substrates, per-subject `(signed_corr_broad, signed_corr_narrow, passed_broad, passed_narrow)` + the 2×2 pass concordance. Write to `cohort_summary.json` under `sensitivity_broad_vs_narrow`. Do NOT pool; report as "broad K_b/N_b vs narrow K_n/N_n, of which J passed both".
 
-**CLI:** mutually-exclusive required `--subjects ds_sid...` XOR `--cohort` (explicit gate; no implicit run). `--n-perm` (default 1000), `--n-split` (200), `--loo-split` (50), `--min-eff` (6), `--out`.
+**CLI:** required `--subjects ds_sid...` XOR `--cohort` (explicit; no implicit run). `--substrate {broad,narrow,both}` default `both`. `--input-results-root` (labels+geometry live in the main tree, gitignored — default `/home/honglab/leijiaxin/HFOsp/results`). `--root` (canonical lagpat root for narrow, default `/mnt/yuquan_data/yuquan_24h_edf`). `--n-perm` (1000), `--n-split` (200), `--loo-split` (50), `--min-eff` (6), `--out`. `--cohort` discovers subjects per substrate by globbing `GEOM[substrate]/*_t_a.json`.
 
 - [ ] **Step 1: Write the failing test (eligibility gate is pure enough to unit-test)**
 
@@ -803,8 +899,8 @@ Then `_run_subject(ds_sid, ...)` per the flow above (steps 1-8), and `main()` wi
 - [ ] **Step 4: Run test + a real single-subject smoke run**
 
 Run: `pytest tests/test_topic5_field_reversal.py -k "reference_frame" -v` → PASS
-Run: `python scripts/run_topic5_field_reversal.py --subjects epilepsiae_1077 --n-perm 200`
-Expected: writes `results/topic5_ictal_recruitment/field_reversal/per_subject/epilepsiae_1077.json` with `status` in {`ok`,`cluster_map_ambiguous`,`no_broad_planes`,...}; if `ok`, prints signed_corr + percentile + degenerate_null.
+Run: `python scripts/run_topic5_field_reversal.py --subjects epilepsiae_1077 --substrate both --n-perm 200`
+Expected: writes `results/topic5_ictal_recruitment/field_reversal/per_subject/{broad,narrow}/epilepsiae_1077.json`, each with `substrate`, `reason` (one of `no_planes`/`c1_violation`/`cluster_map_ambiguous`/`insufficient_overlap`/`degenerate_null`/`ok`), and — if `ok` — signed_corr + percentile + degenerate_null. Narrow may legitimately land `degenerate_null` (compact-core) — that is a valid recorded outcome, not a failure.
 
 - [ ] **Step 5: Commit**
 
@@ -824,12 +920,14 @@ git commit -m "feat(topic5): field-reversal runner (broad, per-subject + cohort 
 **Interfaces:**
 - Consumes: per-subject JSONs + `cohort_summary.json` from Task 8. For the field panels, mirror `scripts/plot_topic5_event_resolved_fields.py` (shared-frame display via `_subject_display_frame`; **display-only** smoothing is fine here — figures may use VIS constants, stats do not).
 
-**Panels (CLAUDE.md §7 — one question per panel, no redundancy):**
-1. **Per-subject** (`per_subject/{ds_sid}.png`): TA_field | TB_field (shared frame) | observed signed_corr marked on its within-shaft null histogram + channel-floor null + random-split contrast strip. One figure answers "is this subject's TA/TB reversed beyond within-shaft?".
-2. **Cohort null-forest** (`field_reversal_null_forest.png`): per subject, observed signed_corr vs its within-shaft null 5th-pctile, sorted; black = passed; footnote = `cohort_binomial` k/n + p. (mirror `field_concordance_null_forest`.)
-3. **Head-to-head** (`field_vs_contact_headtohead.png`): field passes vs contact passes (paired), answering "does the field buy robustness?".
-4. **Supplement** (`loo_reproducibility.png`): per-subject field_rho vs contact_rho paired, Wilcoxon in footnote.
-5. **1146 case** (`case_1146_mechanism.png`): left = raw contact values + fitted direction; right = shared-frame field + candidate physical-axis readout. Wording: "candidate physical-axis readout", NOT "true axis". **Verify the phenomenon on real 1146 data first; if unsupported, switch subject or drop this panel** (spec §9).
+**Panels (CLAUDE.md §7 — one question per panel, no redundancy). Panels 1-4 rendered per substrate (`{substrate}/` subdir); broad and narrow never overlaid on the same axes (never pooled):**
+1. **Per-subject** (`{substrate}/per_subject/{ds_sid}.png`): TA_field | TB_field (shared frame) | observed signed_corr on its within-shaft null histogram + channel-floor null + random-split contrast strip. Answers "is this subject's TA/TB reversed beyond within-shaft?".
+2. **Cohort null-forest** (`{substrate}/field_reversal_null_forest.png`): per subject, observed signed_corr vs its within-shaft null 5th-pctile, sorted; black = passed; footnote = `cohort_binomial` k/n + p. (mirror `field_concordance_null_forest`.)
+3. **Head-to-head** (`{substrate}/field_vs_contact_headtohead.png`): field passes vs contact passes (paired) — "does the field buy robustness?".
+4. **Supplement** (`{substrate}/loo_reproducibility.png`): per-subject field_rho vs contact_rho paired, Wilcoxon in footnote.
+5. **Accountability** (`accountability.png`): per substrate, stacked bar of `reason` counts (`ok`/`degenerate_null`/`cluster_map_ambiguous`/`insufficient_overlap`/`no_planes`/`c1_violation`). Answers "who entered narrow vs broad and why" — this is the result when narrow degenerates (spec §8). ONE figure, both substrates side by side.
+6. **Broad-vs-narrow sensitivity** (`field_reversal_broad_vs_narrow.png`): for subjects `ok` in both, per-subject `signed_corr_broad` vs `signed_corr_narrow` (paired) + a 2×2 pass concordance inset. Answers "does the reversal survive at the compact SOZ core, or is it a coarse/distal phenomenon?" — the key sensitivity.
+7. **1146 case** (`case_1146_mechanism.png`): left = raw contact values + fitted direction; right = shared-frame field + candidate physical-axis readout. Wording: "candidate physical-axis readout", NOT "true axis". **Verify the phenomenon on real 1146 data first; if unsupported, switch subject or drop this panel** (spec §9).
 
 - [ ] **Step 1** Write `figures/README.md` (Chinese, per-figure "展示什么 / 关注点", per AGENTS.md format) — AFTER the figures render, not before.
 - [ ] **Step 2** Implement the plotter; render on the cohort output.
@@ -865,8 +963,8 @@ git commit -m "docs(topic5): index + pointer for TA/TB field-reversal gate"
 ## Self-Review
 
 **1. Spec coverage:**
-- §2 claim tiers/red-lines → archive doc (Task 10) + reporting-rule comments; §3.1 shared frame (P0) → Task 2 + Task 8 `pick_reference` + TDD. §3.2 raw value/no-mirror → Tasks 1-2 TDD. §4 within-shaft primary + effective_n + degenerate + pass rule → Task 3. channel floor + random-split → Task 4. §5 contact head-to-head → Task 5 + plot Task 9. §6 LOO supplement (common-support, LOO exclude) → Task 6. §7 bandwidth sweep → Task 8 step 7. §8 broad-only + no-ictal eligibility → Task 8 flow. §9 1146 wording/verify-first → Task 9 panel 5. §10 no-VIS smoother → satisfied by reusing `class_template_sigma`/`field_from_contact_values` (Task 2). §12 TDD list → covered across Tasks 1-7. **No gaps.**
-- **Deferred (out of v1 scope, stated in spec §8):** narrow substrate (loader raises `NotImplementedError`).
+- §2 claim tiers/red-lines → archive doc (Task 10) + reporting-rule comments; §3.1 shared frame (P0) → Task 2 + Task 8 `pick_reference` + TDD. §3.2 raw value/no-mirror → Tasks 1-2 TDD. §4 within-shaft primary + effective_n + degenerate + pass rule → Task 3. channel floor + random-split → Task 4. §5 contact head-to-head → Task 5 + plot Task 9. §6 LOO supplement (common-support, LOO exclude) → Task 6. §7 bandwidth sweep → Task 8 step 7. §8 broad+narrow eligibility + narrow loader + degeneracy-as-reported-result + broad-vs-narrow sensitivity + no-ictal → **Task 0** + Task 8 flow + Task 9 panels 5-6. §9 1146 wording/verify-first → Task 9 panel 7. §10 no-VIS smoother → satisfied by reusing `class_template_sigma`/`field_from_contact_values` (Task 2). §12 TDD list → covered across Tasks 0-7. **No gaps.**
+- **Scope:** both substrates in v1 (narrow un-stubbed in Task 0). Narrow degeneracy, if it occurs, is a reported per-subject result (accountability table), not a skip.
 
 **2. Placeholder scan:** stat Tasks 1-7 carry full test+impl code. Tasks 8-9 (IO/plot) specify exact loader calls + panel contract and reference the mirror scripts — acceptable for a skilled dev; no "TBD/handle edge cases".
 
