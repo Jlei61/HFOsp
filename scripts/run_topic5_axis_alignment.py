@@ -48,7 +48,13 @@ from src.topic5_axis_alignment import (matched_channels, make_field_record,
                                        channel_shuffle, within_shaft_shuffle, anchor_matched_shuffle,
                                        within_shaft_anchor_shuffle, effective_shuffle_n, along_axis_sign)
 
-ACTIVATION_KEY = {"broadband": "bb_auc", "hfa": "hfa_auc", "ramp": "ramp", "ei": "ei_like"}
+ACTIVATION_KEY = {
+    "broadband": "bb_auc",          # legacy 1-45 Hz
+    "broadband150": "bb150_auc",    # sensitivity 1-150 Hz
+    "hfa": "hfa_auc",
+    "ramp": "ramp",
+    "ei": "ei_like",
+}
 
 CACHE_DIR = Path("results/topic5_ictal_recruitment/t0_feature_cache")
 AXIS_DIR = Path("results/spatial_modulation/propagation_geometry/observation_readout/real_subjects")

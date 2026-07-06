@@ -25,7 +25,8 @@
 ## Fig3 — 间期传播场 vs 发作早期激活场一致性
 
 - `fig3_field_concordance_cohort_stat/` — **Fig3-A**：cohort 级 Data-vs-Null 统计面板
-  （maxAB 可评估 subject 上间期传播场与发作早期激活场整体高于 channel-shuffle null）。
+  （maxAB 可评估 subject 上间期传播场与发作早期激活场整体高于 channel-shuffle null）。正式图现在包含
+  `BB 1-45 maxAB`、line-noise-masked `BB 1-150 maxAB` 和 `HFA 60-100 maxAB` 三组配对统计。
   脚本 `scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py`。
 - `fig3_sup1_multiband_field_alignment/` — **Fig3-Sup1**（V2 Phase-1，multi-band supplement）：3 panel
   A 观测 subject×band maxAB 热图（narrow>broad、band-generic）/ B 每 primary 带 per-subject Δ vs 弱空间

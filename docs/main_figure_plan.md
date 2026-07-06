@@ -83,8 +83,8 @@ Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计�
 - 输出目录：`results/paper-ready-figure/fig3_field_concordance_cohort_stat/figures/`
 - 正式文件：`field_concordance_cohort_stat.png` / `field_concordance_cohort_stat.pdf`
 - 复现入口：`scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py`
-- 数据来源：`results/topic5_ictal_recruitment/axis_alignment/axis_alignment_{broadband,hfa}_max_ab_B1000.json`
-- 图形合同：按参考图风格画两组 `Data` vs `Null` 的 violin + box + subject 点；左侧为 `Broadband maxAB`，右侧为 `HFA maxAB`；不写 `All candidates`，不画背景网格线，不混入 broad fallback。严格 maxAB 可评估 subject 为 19 个，因为 `yuquan_xuxinyi` 只有 broad 几何、没有 maxAB。
+- 数据来源：`results/topic5_ictal_recruitment/axis_alignment/axis_alignment_{broadband,broadband150,hfa}_max_ab_B1000.json`
+- 图形合同：按参考图风格画三组 `Data` vs `Null` 的 violin + box + subject 点，并用浅灰线连接同一 subject 的 paired Data/Null 值；三组为 `BB 1-45 maxAB`、`BB 1-150 maxAB`、`HFA 60-100 maxAB`。不写 `All candidates`，不画背景网格线，不混入 broad fallback。当前 maxAB 可评估 subject 为 20 个；`BB 1-150` 为 line-noise-masked sensitivity，原 `bb_auc` 仍是 legacy 1-45 Hz。
 
 **当前口径**：
 

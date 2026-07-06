@@ -2,10 +2,11 @@
 """Paper Fig3 panel: field concordance Data-vs-Null cohort statistic.
 
 The panel is intentionally not a per-subject board. It compresses maxAB-eligible
-subjects into two Data-vs-Null comparisons:
+subjects into three Data-vs-Null comparisons:
 
-1. Broadband maxAB.
-2. HFA maxAB.
+1. Legacy broadband 1-45 Hz maxAB.
+2. Line-noise-masked broadband 1-150 Hz maxAB.
+3. HFA 60-100 Hz maxAB.
 
 Null is the matched channel-shuffle null median of the selected candidate. This
 visualizes a cohort-level shift above null; the formal pass gate remains the
@@ -31,12 +32,14 @@ OUT_DIR = (
 )
 
 CANDIDATES = {
-    "Broadband maxAB": "axis_alignment_broadband_max_ab_B1000.json",
-    "HFA maxAB": "axis_alignment_hfa_max_ab_B1000.json",
+    "BB 1-45 maxAB": "axis_alignment_broadband_max_ab_B1000.json",
+    "BB 1-150 maxAB": "axis_alignment_broadband150_max_ab_B1000.json",
+    "HFA 60-100 maxAB": "axis_alignment_hfa_max_ab_B1000.json",
 }
 COMPARISONS = [
-    ("Broadband maxAB", ["Broadband maxAB"]),
-    ("HFA maxAB", ["HFA maxAB"]),
+    ("BB 1-45 maxAB", ["BB 1-45 maxAB"]),
+    ("BB 1-150 maxAB", ["BB 1-150 maxAB"]),
+    ("HFA 60-100 maxAB", ["HFA 60-100 maxAB"]),
 ]
 
 
@@ -125,7 +128,8 @@ def _add_violin_box_points(
     rng: np.random.Generator,
     point_face: str,
     point_edge: str,
-) -> None:
+    jitter: np.ndarray | None = None,
+) -> np.ndarray:
     parts = ax.violinplot(
         [values],
         positions=[x],
@@ -150,17 +154,20 @@ def _add_violin_box_points(
         whiskerprops={"color": edgecolor, "linewidth": 1.0},
         capprops={"color": edgecolor, "linewidth": 1.0},
     )
-    jitter = rng.normal(0.0, 0.045, size=len(values))
+    if jitter is None:
+        jitter = rng.normal(0.0, 0.045, size=len(values))
+    point_x = np.full(len(values), x) + jitter
     ax.scatter(
-        np.full(len(values), x) + jitter,
+        point_x,
         values,
         s=25,
         facecolors=point_face,
         edgecolors=point_edge,
         linewidths=0.8,
         alpha=0.9,
-        zorder=3,
+        zorder=4,
     )
+    return point_x
 
 
 def _add_sig_bracket(ax: plt.Axes, x1: float, x2: float, y: float, text: str) -> None:
@@ -171,15 +178,15 @@ def _add_sig_bracket(ax: plt.Axes, x1: float, x2: float, y: float, text: str) ->
 
 def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
     rng = np.random.default_rng(20260626)
-    fig, ax = plt.subplots(figsize=(5.8, 4.1))
+    fig, ax = plt.subplots(figsize=(7.2, 4.1))
 
-    positions = {"Broadband maxAB": (1.0, 1.75), "HFA maxAB": (3.05, 3.8)}
-    for group in groups:
+    positions = [(1.0, 1.72), (3.05, 3.77), (5.1, 5.82)]
+    for group, (x_data, x_null) in zip(groups, positions):
         label = group["label"]
-        x_data, x_null = positions[label]
         data = np.array([r["data"] for r in group["rows"]], dtype=float)
         null = np.array([r["null"] for r in group["rows"]], dtype=float)
-        _add_violin_box_points(
+        paired_jitter = rng.normal(0.0, 0.035, size=len(data))
+        data_x = _add_violin_box_points(
             ax,
             data,
             x_data,
@@ -188,8 +195,9 @@ def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
             rng=rng,
             point_face="#5f86a3",
             point_edge="white",
+            jitter=paired_jitter,
         )
-        _add_violin_box_points(
+        null_x = _add_violin_box_points(
             ax,
             null,
             x_null,
@@ -198,7 +206,17 @@ def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
             rng=rng,
             point_face="#888888",
             point_edge="white",
+            jitter=paired_jitter,
         )
+        for x0, y0, x1, y1 in zip(data_x, data, null_x, null):
+            ax.plot(
+                [x0, x1],
+                [y0, y1],
+                color="0.45",
+                linewidth=0.65,
+                alpha=0.28,
+                zorder=3,
+            )
         ymax = max(float(np.nanmax(data)), float(np.nanmax(null)))
         _add_sig_bracket(ax, x_data, x_null, ymax + 0.055, _p_stars(group["summary"]["wilcoxon_p_data_gt_null_median"]))
         ax.text(
@@ -212,9 +230,9 @@ def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
         )
 
     ax.set_ylabel("Field concordance |r|", fontsize=11)
-    ax.set_xticks([1.0, 1.75, 3.05, 3.8])
-    ax.set_xticklabels(["Data", "Null", "Data", "Null"], fontsize=10)
-    ax.set_xlim(0.45, 4.35)
+    ax.set_xticks([x for pair in positions for x in pair])
+    ax.set_xticklabels(["Data", "Null"] * len(positions), fontsize=10)
+    ax.set_xlim(0.45, 6.35)
     ax.set_ylim(0.0, 1.12)
     ax.spines[["top", "right"]].set_visible(False)
     ax.tick_params(axis="both", width=1.0)
@@ -227,15 +245,22 @@ def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
 
 
 def _write_readme(groups: list[dict], out_dir: Path) -> None:
-    all_s = groups[0]["summary"]
-    hfa_s = groups[1]["summary"]
+    lines = []
+    for g in groups:
+        s = g["summary"]
+        lines.append(
+            f"{g['label']}：n={s['n']}，Wilcoxon one-sided "
+            f"p={_fmt_p(s['wilcoxon_p_data_gt_null_median'])}，"
+            f"{s['n_data_gt_null']}/{s['n']} data>null"
+        )
+    summary_text = "；".join(lines)
     text = f"""# Fig3 field concordance Data-vs-Null statistic
 
 ### field_concordance_cohort_stat.png / field_concordance_cohort_stat.pdf
 
-按参考图风格绘制：每一组都是 `Data` vs `Null` 的 violin + box + subject 点，不显示 subject 名字。左侧是 `Broadband maxAB`，右侧是 `HFA maxAB`；两侧都使用当前 maxAB artifact 中可评估的 subject，不再写 `All candidates`，也不混入 broad fallback。当前可评估 subject 数：Broadband maxAB n={all_s['n']}，HFA maxAB n={hfa_s['n']}。
+按参考图风格绘制：每一组都是 `Data` vs `Null` 的 violin + box + subject 点，并用浅灰线连接同一 subject 的配对 Data/Null 值，不显示 subject 名字。三组分别是 `BB 1-45 maxAB`、`BB 1-150 maxAB` 和 `HFA 60-100 maxAB`；都使用当前 maxAB artifact 中可评估的 subject，不写 `All candidates`，也不混入 broad fallback。
 
-**关注点**：Broadband maxAB 的 Data 高于 channel-null median（n={all_s['n']}，Wilcoxon one-sided p={_fmt_p(all_s['wilcoxon_p_data_gt_null_median'])}，{all_s['n_data_gt_null']}/{all_s['n']} data>null）；HFA maxAB 同样高于 null（n={hfa_s['n']}，p={_fmt_p(hfa_s['wilcoxon_p_data_gt_null_median'])}，{hfa_s['n_data_gt_null']}/{hfa_s['n']} data>null）。这张图展示 cohort-level shift above null；formal pass 仍以 selection-corrected p95/p-value 表为准。
+**关注点**：{summary_text}。这张图展示 cohort-level shift above null；formal pass 仍以 selection-corrected p95/p-value 表为准。`BB 1-150 maxAB` 是新增 sensitivity，原 `bb_auc` 仍是 legacy 1-45 Hz。
 """
     (out_dir / "README.md").write_text(text)
 
