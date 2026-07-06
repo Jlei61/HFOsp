@@ -22,6 +22,7 @@ from src.topic5_axis_robustness import (
     cos_unit,
     held_out_axis_score,
     axis_robustness_splits,
+    random_axis_null_score,
 )
 
 
@@ -98,6 +99,52 @@ def test_held_out_axis_score_high_for_matching_low_for_orthogonal():
     # a non-finite train axis (unresolved split) must not crash -- NaN score, not an exception
     unresolved = held_out_axis_score((float("nan"), float("nan")), plane_xy, held_values)
     assert np.isnan(unresolved["rho"])
+
+
+def _balanced_grid_synthetic():
+    """8 x-levels x 5 y-levels = 40 points; EVERY y value appears at EVERY x value -> x and y
+    are exactly uncorrelated by construction (same "balanced factorial" idea as
+    _two_shaft_synthetic, just more points). held value = y itself (pure y-trend). More points
+    than _two_shaft_synthetic (n=8) on purpose: at n=8, Spearman rho from a random direction is
+    quantized into only a handful of discrete rungs (confirmed by hand: the median of 200
+    random-direction draws jumps between roughly -0.49/0/+0.49 depending on seed) -- not a fair
+    testbed for "a random direction sits near the null's own median." At n=40 the null
+    distribution is smooth enough for that check to be seed-stable."""
+    xs_levels = range(8)
+    ys_levels = (-2, -1, 0, 1, 2)
+    plane_xy = {}
+    held_values = {}
+    i = 0
+    for xv in xs_levels:
+        for yv in ys_levels:
+            name = f"C{i}"; i += 1
+            plane_xy[name] = (float(xv), float(yv))
+            held_values[name] = float(yv)
+    return plane_xy, held_values
+
+
+def test_random_axis_null_score_real_axis_clears_null_random_direction_sits_near_it():
+    """(c) random_axis_null_score is the chance-level null for held_out_axis_score: "does a
+    real axis predict held-out order better than a random direction would, given THIS subject's
+    OWN contact geometry?" -- not an assumed textbook rho=0, but the median of MANY (n_random)
+    actual random-direction draws on the SAME plane. On the balanced grid (x, y exactly
+    uncorrelated by construction) with held value = y itself: the REAL matching axis (0,1) must
+    clear the null median by a wide margin (it captures the y-trend perfectly); a direction
+    ORTHOGONAL to the trend (1,0) -- itself simply one instance of "a random direction" -- must
+    land close to the null's own median, not conspicuously above or below it."""
+    plane_xy, held_values = _balanced_grid_synthetic()
+    rng = np.random.default_rng(7)
+
+    null = random_axis_null_score(plane_xy, held_values, n_random=200, rng=rng)
+    assert null["n_random"] == 200
+    assert null["n_common"] == len(plane_xy)
+    assert np.isfinite(null["median"])
+
+    matching = held_out_axis_score((0.0, 1.0), plane_xy, held_values)["rho"]
+    orthogonal = held_out_axis_score((1.0, 0.0), plane_xy, held_values)["rho"]
+
+    assert matching - null["median"] > 0.5          # real axis clears the null by a wide margin
+    assert abs(orthogonal - null["median"]) < 0.2    # an uninformative direction sits ~at null
 
 
 def test_axis_robustness_splits_independent_axis_failure_does_not_block_others():

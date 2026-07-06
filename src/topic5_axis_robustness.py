@@ -28,6 +28,7 @@ from src.propagation_contact_plane_readout import S_THRESH
 from src.propagation_skeleton_geometry import parse_shaft
 
 MIN_POINTS = 3   # same floor as MIN_PLANE_CONTACTS elsewhere in this pipeline
+N_RANDOM_AXES = 200   # random-direction draws per split for the chance-level null (spec: "MANY, e.g. 200")
 
 
 # --------------------------------------------------------------------------- shared estimator
@@ -149,6 +150,41 @@ def held_out_axis_score(unit: Tuple[float, float], plane_xy: Dict[str, tuple],
     return {"rho": (float(rho) if np.isfinite(rho) else float("nan")), "n_common": len(common)}
 
 
+# --------------------------------------------------------------------------- random-axis null
+def random_axis_null_score(plane_xy: Dict[str, tuple], held_values: Dict[str, float], *,
+                           n_random: int = N_RANDOM_AXES, rng: np.random.Generator,
+                           min_points: int = MIN_POINTS) -> dict:
+    """The chance-level NULL for held_out_axis_score: does a real axis (raw_contact / field /
+    sequence) predict held-out propagation order better than a RANDOM direction would, given
+    THIS subject's own contact geometry? Draws `n_random` unit directions uniformly on the same
+    shared 2D plane (angle ~ Uniform[0, 2*pi)) and scores EACH one with the exact same
+    held_out_axis_score used for the three real axes -- same real-coordinate projection, same
+    Spearman-vs-held-out-mean, same min_points/finite handling -- so every comparison is
+    apples-to-apples (no bespoke re-implementation that could silently drift from the real-axis
+    scorer's contract).
+
+    Returns {"rhos": [...finite scores...], "median": float, "n_random": int, "n_common": int}.
+    `median` is this subject's (or this split's) OWN chance level given its particular contact
+    layout -- NOT an assumed textbook zero: a lopsided or clustered contact geometry can shift
+    the chance level away from 0 (this is exactly why the null must be drawn per-subject/
+    per-split from the SAME contacts, not asserted analytically). `n_common` mirrors
+    held_out_axis_score's own field (identical on every draw -- it depends only on
+    plane_xy/held_values, never on the direction) so callers can apply the same eligibility
+    floor. `median` is NaN if no draw resolves (mirrors held_out_axis_score's own NaN
+    convention when common contacts < min_points)."""
+    thetas = rng.uniform(0.0, 2.0 * np.pi, size=n_random)
+    rhos = []
+    n_common = 0
+    for theta in thetas:
+        unit = (float(np.cos(theta)), float(np.sin(theta)))
+        scored = held_out_axis_score(unit, plane_xy, held_values, min_points=min_points)
+        n_common = scored["n_common"]     # same every draw: depends only on plane_xy/held_values
+        if np.isfinite(scored["rho"]):
+            rhos.append(scored["rho"])
+    median = float(np.median(rhos)) if rhos else float("nan")
+    return {"rhos": rhos, "median": median, "n_random": int(n_random), "n_common": int(n_common)}
+
+
 # --------------------------------------------------------------------------- split harness
 def _aggregate_over_events(masked: np.ndarray, names: Sequence[str], cols: np.ndarray) -> dict:
     """Per-contact masked-rank mean over the given event columns -> {name:{value,support}}
@@ -163,21 +199,27 @@ def _aggregate_over_events(masked: np.ndarray, names: Sequence[str], cols: np.nd
 
 def axis_robustness_splits(bundle: dict, plane_ref: dict, label: int, *, X, Y, sigma,
                            n_split: int, rng: np.random.Generator,
-                           s_thresh: float = S_THRESH) -> list:
+                           s_thresh: float = S_THRESH, n_random_axes: int = N_RANDOM_AXES) -> list:
     """For ONE class label (TA or TB): n_split random halves of THAT class's events.
     train-half -> raw_contact_axis + field_axis + sequence_axis (same sigma/grid/s_thresh as
     the primary stat path, spec §3.1 P0). held-out-half -> per-contact mean value. Each split
-    contributes ONE row {"raw_rho","field_rho","sequence_rho","n_common"}, scored by
+    contributes ONE row {"raw_rho","field_rho","sequence_rho","null_rho","n_common"}, scored by
     held_out_axis_score against the SAME held-out half and the SAME common-contact set
     (n_common depends only on plane_xy ∩ held_values, not on any axis's unit vector, so it is
-    identical across the three scores whenever they are computed).
+    identical across the three real-axis scores whenever they are computed).
 
-    Each axis type is scored INDEPENDENTLY per split (NaN for whichever axis fails to
+    `null_rho` = random_axis_null_score(...)["median"]: the SAME held-out half, the SAME
+    plane_xy, scored against `n_random_axes` random directions instead of a fitted axis -- this
+    split's own chance-level baseline. Drawn from the SAME `rng` passed in (not a fresh
+    generator), so the whole cohort run stays deterministic given one top-level seed.
+
+    Each REAL axis type is scored INDEPENDENTLY per split (NaN for whichever axis fails to
     resolve): sequence_axis is structurally degenerate whenever a class plane has a single
     shaft (shaft-mean collapse -> one constant value -> zero gradient, on EVERY split, by
     construction) -- that must not discard perfectly good raw_contact/field scores for the
     SAME split just because sequence_axis happened to fail. A split is dropped entirely only
-    if NONE of the three axes resolve, or fewer than min_points held-out contacts are common."""
+    if NONE of the three real axes resolve, or fewer than min_points held-out contacts are
+    common (null_rho is computed only for KEPT splits, same drop rule as before -- unchanged)."""
     from src.topic5_event_resolved_alignment import field_from_contact_values, build_plane_xy
 
     masked = bundle["masked"]; names = list(bundle["channel_names"])
@@ -210,6 +252,7 @@ def axis_robustness_splits(bundle: dict, plane_ref: dict, label: int, *, X, Y, s
         seq_rho = held_out_axis_score(seq["unit"], plane_xy, held_values)["rho"] if seq["ok"] else float("nan")
         if not (np.isfinite(raw_rho) or np.isfinite(field_rho) or np.isfinite(seq_rho)):
             continue
+        null_rho = random_axis_null_score(plane_xy, held_values, n_random=n_random_axes, rng=rng)["median"]
         out.append({"raw_rho": raw_rho, "field_rho": field_rho, "sequence_rho": seq_rho,
-                    "n_common": n_common})
+                    "null_rho": null_rho, "n_common": n_common})
     return out

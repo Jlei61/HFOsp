@@ -17,6 +17,13 @@ fold TA/TB to one per-subject number BY MEAN. broad and narrow are run and repor
 SEPARATELY, never pooled (spec §8). Every requested subject gets a per-subject JSON with an
 explicit `reason` (no_planes / load_error / c1_violation / plane_not_built /
 cluster_map_ambiguous / ok) -- never a silent skip or a crash.
+
+NULL supplement (per user request, 2026-07-06): every held-out split also scores
+`N_RANDOM_AXES` random directions on the same plane (`random_axis_null_score`) -- "does this
+axis predict held-out order better than a random direction would, given this subject's own
+contact geometry?" Folds the SAME way as the three real axes (median-over-splits ->
+subject_summary.held_out_null_mean via _fold_mean), and the cohort stage adds ONE paired
+Wilcoxon (`alternative="greater"`) per real axis vs this null, per substrate.
 """
 from __future__ import annotations
 
@@ -38,7 +45,7 @@ from src.topic5_event_resolved_alignment import (
 from src.propagation_contact_plane_readout import make_plane_grid, S_THRESH
 from src.topic5_axis_robustness import (
     raw_contact_axis, field_axis_from_field, sequence_axis, axis_angle, cos_unit,
-    axis_robustness_splits)
+    axis_robustness_splits, N_RANDOM_AXES)
 
 OUT = Path("results/topic5_ictal_recruitment/field_reversal/axis_robustness")
 RNG_SEED = 20260706
@@ -46,6 +53,7 @@ REASONS = ("no_planes", "load_error", "c1_violation", "plane_not_built",
            "cluster_map_ambiguous", "ok")
 DIVERGENCE_LARGE_DEG = 45.0
 DIVERGENCE_HUGE_DEG = 90.0
+AXIS_VS_SEQUENCE_TIE_DELTA = 0.03   # |raw_contact - sequence| held-out rho tie band (figure footnote)
 
 
 def _vec_in_order(name_to_val, order):
@@ -74,9 +82,11 @@ def _geom(input_results_root: Path) -> dict:
     }
 
 
-def _class_axes(bundle, plane_ref, label, *, X, Y, sigma, n_split, rng, s_thresh=S_THRESH) -> dict:
+def _class_axes(bundle, plane_ref, label, *, X, Y, sigma, n_split, rng, s_thresh=S_THRESH,
+                n_random_axes=N_RANDOM_AXES) -> dict:
     """Full-class (no-split) three axes + divergence/agreement scalars, plus the held-out
-    split scores (a few dozen splits), for ONE class label (TA or TB)."""
+    split scores (a few dozen splits) AND the random-axis chance-level null, for ONE class
+    label (TA or TB)."""
     cav = class_aggregate_contact_values(bundle, label)
     plane_xy = build_plane_xy(plane_ref)
     rc = raw_contact_axis(cav, plane_xy)
@@ -88,13 +98,17 @@ def _class_axes(bundle, plane_ref, label, *, X, Y, sigma, n_split, rng, s_thresh
     fa = field_axis_from_field(field, X, Y, s_thresh)
 
     splits = axis_robustness_splits(bundle, plane_ref, label, X=X, Y=Y, sigma=sigma,
-                                    n_split=n_split, rng=rng, s_thresh=s_thresh)
+                                    n_split=n_split, rng=rng, s_thresh=s_thresh,
+                                    n_random_axes=n_random_axes)
     # Each axis type is scored independently per split (axis_robustness_splits: one axis
     # failing to resolve, e.g. sequence_axis on a single-shaft montage, does not discard the
-    # other two) -- so each column's own finite entries are its own usable-split set.
+    # other two) -- so each column's own finite entries are its own usable-split set. null_rho
+    # is attached by axis_robustness_splits to every KEPT split (same drop rule as the three
+    # real axes), so it folds the same way.
     raw_rhos = [d["raw_rho"] for d in splits if np.isfinite(d["raw_rho"])]
     field_rhos = [d["field_rho"] for d in splits if np.isfinite(d["field_rho"])]
     seq_rhos = [d["sequence_rho"] for d in splits if np.isfinite(d["sequence_rho"])]
+    null_rhos = [d["null_rho"] for d in splits if np.isfinite(d["null_rho"])]
 
     return {
         "n_events": int(np.sum(np.asarray(bundle["labels"]) == label)),
@@ -106,9 +120,11 @@ def _class_axes(bundle, plane_ref, label, *, X, Y, sigma, n_split, rng, s_thresh
         "held_out_n_splits_raw": len(raw_rhos),
         "held_out_n_splits_field": len(field_rhos),
         "held_out_n_splits_sequence": len(seq_rhos),
+        "held_out_n_splits_null": len(null_rhos),
         "held_out_raw_median": float(np.median(raw_rhos)) if raw_rhos else float("nan"),
         "held_out_field_median": float(np.median(field_rhos)) if field_rhos else float("nan"),
         "held_out_sequence_median": float(np.median(seq_rhos)) if seq_rhos else float("nan"),
+        "held_out_null_median": float(np.median(null_rhos)) if null_rhos else float("nan"),
     }
 
 
@@ -120,7 +136,7 @@ def _fold_mean(a, b):
     return float(np.mean(vals)) if vals else float("nan")
 
 
-def _run_subject(ds_sid, substrate, *, geom_dir, X, Y, rng, n_split):
+def _run_subject(ds_sid, substrate, *, geom_dir, X, Y, rng, n_split, n_random_axes=N_RANDOM_AXES):
     dataset, subject = ds_sid.split("_", 1)
     out = {"ds_sid": ds_sid, "dataset": dataset, "subject": subject, "substrate": substrate}
 
@@ -165,7 +181,7 @@ def _run_subject(ds_sid, substrate, *, geom_dir, X, Y, rng, n_split):
     per_class = {}
     for label, cls_name in [(ta_label, "TA"), (tb_label, "TB")]:
         per_class[cls_name] = _class_axes(bundle, plane_ref, label, X=X, Y=Y, sigma=sigma,
-                                          n_split=n_split, rng=rng)
+                                          n_split=n_split, rng=rng, n_random_axes=n_random_axes)
     out["per_class"] = per_class
     out["base_sigma"] = float(sigma)
 
@@ -178,6 +194,7 @@ def _run_subject(ds_sid, substrate, *, geom_dir, X, Y, rng, n_split):
         "held_out_raw_mean": _fold_mean(ta["held_out_raw_median"], tb["held_out_raw_median"]),
         "held_out_field_mean": _fold_mean(ta["held_out_field_median"], tb["held_out_field_median"]),
         "held_out_sequence_mean": _fold_mean(ta["held_out_sequence_median"], tb["held_out_sequence_median"]),
+        "held_out_null_mean": _fold_mean(ta["held_out_null_median"], tb["held_out_null_median"]),
         "cos_ta_tb_axis_anti": cos_unit(ta["raw_contact_unit"], tb_neg_unit),
     }
     out["reason"] = "ok"
@@ -226,6 +243,16 @@ def _divergence_stats(ok_records):
     }
 
 
+def _tie_band_counts(pairs, delta):
+    """(n_a_gt_b, n_b_gt_a, n_tie) on (a - b) against a +/-delta tie band; non-finite pairs
+    excluded (same finite-pair convention as _paired_wilcoxon)."""
+    diffs = [a - b for a, b in pairs if np.isfinite(a) and np.isfinite(b)]
+    n_a = int(sum(1 for d in diffs if d > delta))
+    n_b = int(sum(1 for d in diffs if d < -delta))
+    n_tie = int(sum(1 for d in diffs if abs(d) <= delta))
+    return n_a, n_b, n_tie
+
+
 def _aggregate_cohort(records):
     accountability = {r: 0 for r in REASONS}
     for rec in records:
@@ -237,6 +264,12 @@ def _aggregate_cohort(records):
     pairs_raw_seq = [(r["subject_summary"]["held_out_raw_mean"],
                       r["subject_summary"]["held_out_sequence_mean"]) for r in ok]
     raw_beats_seq_all = _paired_wilcoxon(pairs_raw_seq, alternative="greater")
+    n_coord_gt_shaft, n_shaft_gt_coord, n_tie_coord_shaft = _tie_band_counts(
+        pairs_raw_seq, AXIS_VS_SEQUENCE_TIE_DELTA)
+    raw_beats_seq_all.update({
+        "n_coord_gt_shaft_delta": n_coord_gt_shaft, "n_shaft_gt_coord_delta": n_shaft_gt_coord,
+        "n_tie_delta": n_tie_coord_shaft, "tie_delta": AXIS_VS_SEQUENCE_TIE_DELTA,
+    })
 
     large_div = [r for r in ok if np.isfinite(r["subject_summary"]["angle_sequence_raw_mean"])
                 and r["subject_summary"]["angle_sequence_raw_mean"] > DIVERGENCE_LARGE_DEG]
@@ -252,10 +285,27 @@ def _aggregate_cohort(records):
     field_vs_raw["n_field_wins"] = sum(1 for f, r in finite_fr if f > r)
     field_vs_raw["n_paired"] = len(finite_fr)
 
+    # NEW: each real axis vs the random-axis chance-level null (subject_summary.held_out_*_mean
+    # vs held_out_null_mean, folded TA/TB by the SAME _fold_mean as the axes themselves).
+    # "does this reading predict held-out propagation order better than a random direction?"
+    pairs_raw_null = [(r["subject_summary"]["held_out_raw_mean"],
+                       r["subject_summary"]["held_out_null_mean"]) for r in ok]
+    raw_beats_null = _paired_wilcoxon(pairs_raw_null, alternative="greater")
+
+    pairs_seq_null = [(r["subject_summary"]["held_out_sequence_mean"],
+                       r["subject_summary"]["held_out_null_mean"]) for r in ok]
+    seq_beats_null = _paired_wilcoxon(pairs_seq_null, alternative="greater")
+
+    pairs_field_null = [(r["subject_summary"]["held_out_field_mean"],
+                         r["subject_summary"]["held_out_null_mean"]) for r in ok]
+    field_beats_null = _paired_wilcoxon(pairs_field_null, alternative="greater")
+
     cos_vals = [r["subject_summary"]["cos_raw_field_mean"] for r in ok]
     cos_vals = [v for v in cos_vals if np.isfinite(v)]
     anti_vals = [r["subject_summary"]["cos_ta_tb_axis_anti"] for r in ok]
     anti_vals = [v for v in anti_vals if np.isfinite(v)]
+    null_vals = [r["subject_summary"]["held_out_null_mean"] for r in ok]
+    null_vals = [v for v in null_vals if np.isfinite(v)]
 
     return {
         "n_subjects": len(records), "n_ok": len(ok), "accountability": accountability,
@@ -263,8 +313,12 @@ def _aggregate_cohort(records):
         "raw_contact_beats_sequence_wilcoxon_all_ok": raw_beats_seq_all,
         "raw_contact_beats_sequence_wilcoxon_large_divergence_subset": raw_beats_seq_large,
         "field_vs_raw_contact_near_null_wilcoxon": field_vs_raw,
+        "raw_contact_beats_random_axis_null_wilcoxon": raw_beats_null,
+        "sequence_beats_random_axis_null_wilcoxon": seq_beats_null,
+        "field_beats_random_axis_null_wilcoxon": field_beats_null,
         "cos_raw_field_median": (float(np.median(cos_vals)) if cos_vals else float("nan")),
         "cos_ta_tb_axis_antiparallel_median": (float(np.median(anti_vals)) if anti_vals else float("nan")),
+        "held_out_null_mean_median": (float(np.median(null_vals)) if null_vals else float("nan")),
     }
 
 
@@ -280,6 +334,8 @@ def main():
                     help="root containing spatial_modulation/propagation_geometry{,_broad} "
                          "(labels+geometry live in the main tree, gitignored, not the worktree)")
     ap.add_argument("--n-split", type=int, default=30, help="held-out splits per class (a few dozen)")
+    ap.add_argument("--n-random-axes", type=int, default=N_RANDOM_AXES,
+                    help="random directions per split for the chance-level null (default 200)")
     ap.add_argument("--out", default=str(OUT))
     args = ap.parse_args()
 
@@ -302,7 +358,7 @@ def main():
         for ds_sid in subjects:
             print(f"[run] {substrate}/{ds_sid} ...", flush=True)
             res = _run_subject(ds_sid, substrate, geom_dir=geom_dir, X=X, Y=Y, rng=rng,
-                               n_split=args.n_split)
+                               n_split=args.n_split, n_random_axes=args.n_random_axes)
             json.dump(res, open(outdir / "per_subject" / substrate / f"{ds_sid}.json", "w"), indent=2)
             print(f"    reason={res['reason']}", flush=True)
             records.append(res)
