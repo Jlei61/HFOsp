@@ -159,3 +159,22 @@ augment 对每个被试给出的 `r2b_status` 只有 `ok` 或以下六种 NA 之
 - **NA_no_null** — **零假设 harness 没给出观测统计量**：R2_nm / R2b 两级里至少一级没能产出 `obs_subject`。
 
 本次全队列（两个激活量）只出现 `NA_insufficient` 一例，其余五种代码计数均为 0。
+
+---
+
+## 6. paper-grade 图集（figure redesign，2026-07-04；producer=`scripts/plot_topic5_cs_paper.py`）
+
+把这套阶梯做成四张 paper 图，讲同一条稳健性故事「场的价值来自平面空间平滑、不来自铺网格；2D 平面几何足够」。产物 `results/topic5_ictal_recruitment/contact_similarity/figures/{fig1_spatial_weighting_schematic,fig2_rank_comparison,fig2_sup_maxab_vs_null,fig3_vs_field}.png`（gitignored；逐图中文说明在同目录 `figures/README.md`，随分支走）。复现：
+
+```bash
+python scripts/plot_topic5_cs_paper.py --input-results-root /home/honglab/leijiaxin/HFOsp/results --out-dir /home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/contact_similarity
+```
+
+- **fig1（方法示意，被试 epilepsiae_1146）** — 纯讲「怎么把每触点一个值铺成连续空间地图」：输入 → 高斯核加权 → 输出三步。示意用放大的 σ（标注「示意用 σ，非分析所用 σ」），不含任何统计。
+- **fig2（rank 阶梯，被试 epilepsiae_1084）** — 竖排整数名次 1…n（所有触点参与，不归一化）；三条线 = 发作早期能量名次(黑) / 间期空间加权后 A/B 里最像发作的模板(红) / 同侧未加权最像的(蓝)；均按符号无关 |相关| 选、方向按发作对齐。**1084 是从 18 人里专门挑的「加权有帮助」正面例子**（|相关| 0.64→0.78），只说明空间平滑「能」拉近间期模板与发作顺序（机制层面），**不是队列主张**。
+- **fig2_sup（队列 null-比-null）** — 每被试 R2 观测(加权) vs 同杆内打乱 null p95 vs R1 观测(未加权)。诚实口径：加权抬观测也抬 null，过 null 人数 R1=6/18 → R2=5/18（加权后更像发作的被试只有 7/18）。fig2 的单被试正面例子必须与本图一起读。
+- **fig3（vs 场 + 2D↔3D，被试 epilepsiae_1146）** — 上排：触点加权散点 vs 81×81 铺网格场 = 同一形状；下排三张定量散点：(左) 每对触点 2D 平面距离 vs 原生 3D mm 距离各按自身 σ 归一 → 贴 y=x（1146 触点近共面，Pearson r≈1.000）解释「为什么 2D≈3D」；(中) 全队列 R2 vs R3 = 网格未见可分辨增益(CI 宽于 ±SESOI，非零)；(右) 全队列 R2_nm vs R2b = native-3D 等价通过。
+
+**被试分工**：fig1/fig3 用 1146（触点近共面，最适合讲 2D≈3D 几何）；fig2 用 1084（加权改善对齐最干净的正面例子）。两图各用最适合自身论点的被试，标题都写明被试 ID。
+
+**口径锁（严格守窄，同 §4）**：fig2 的「加权更像」是**手挑的单被试正面示意**（机制：空间平滑能改善对齐），**绝不**升级成「加权在队列上改善预测」或「刻画病理网络」——队列判据永远看 fig2_sup（加权不净超 null）。网格步(R2→R3) 与 native-3D(R2_nm→R2b) 是**两档不同结论**，措辞分开：网格「未见可分辨增益、非零」，native-3D「等价通过」。
