@@ -28,6 +28,12 @@ itself works -- h_G ~ 0 through the local axial events, ~0.94 only on the runawa
 Run (probe sensor scale first, then render the figure with defaults):
     python scripts/paper_figures/plot_fig_m3a_v2_2_hG_runaway_transition_gif.py --probe
     python scripts/paper_figures/plot_fig_m3a_v2_2_hG_runaway_transition_gif.py
+
+FACTORING (Topic 4 criticality, Task 1): this module OWNS the canonical transition-sim body
+(`_build` + `_simulate_continuous`). The no-GIF entry that the M3A->M3B criticality handoff
+consumes is `src.sef_hfo_transition_sim.run_transition`, which wraps those two functions
+unchanged (byte-parity guarded by tests/test_topic4_crit_integration.py) and adds `events` +
+`dt_ms`. Keep the RNG draw order in `_simulate_continuous` frozen or the golden fixture breaks.
 """
 from __future__ import annotations
 

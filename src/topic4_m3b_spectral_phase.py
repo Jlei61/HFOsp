@@ -400,10 +400,24 @@ class OperatingPoint:
 _SAT_RATE_KHZ: float = 0.10           # >> any self-limited interictal op (balanced rest ~ 2.5e-4 kHz)
 
 
+def _init_field(x, shape: tuple[int, int]) -> np.ndarray:
+    """Broadcast a warm-start seed to a full ``(n, n)`` field: a bare scalar becomes a constant
+    field; an array-like is used as-is (shape-checked). Used by ``solve_operating_point``'s
+    ``init=`` (T3a-2, #10 -- branch-protocol warm-start)."""
+    if np.isscalar(x):
+        return np.full(shape, float(x))
+    arr = np.asarray(x, dtype=float)
+    assert arr.shape == shape, f"init field has shape {arr.shape}, expected {shape}"
+    return arr
+
+
 def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
                           inh: InhibitionField, *, ratio: float = 1.0, w_ee_mult: float = 1.0,
                           source: str = "ratefield_steady", dt: float = 0.5, t_max: float = 2500.0,
-                          tol: float = 1e-9, gain_h: float = _GAIN_H) -> OperatingPoint:
+                          tol: float = 1e-9, gain_h: float = _GAIN_H,
+                          gK_field: np.ndarray | None = None, hG_scalar: float = 0.0,
+                          eta_K: float = 1.0, eta_G: float = 1.0,
+                          init: dict | None = None) -> OperatingPoint:
     """Solve the heterogeneous operating point by deterministic rate-field integration-to-steady.
 
     Forward-Euler integration of the 6-field rate model (the same dynamics ``integrate_lif_field``
@@ -415,6 +429,22 @@ def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
     Non-settled low-rate points are flagged ``unresolved``; high-rate branches are flagged
     ``saturated`` (=> mode_class 'runaway', never 'axial'). The per-cell gains gE_i, gI_i are the
     diagonal scales of the finite Jacobian (TDD-5).
+
+    ``gK_field``/``hG_scalar`` are the T2.5 ``slow_to_ratefield`` wiring (#P1-1, config-of-record
+    ``config/topic4_criticality.yaml``): additive E-only drive shifts, ``muE -= eta_K*gK_field``
+    (per-cell ``(n,n)`` K-current field, applied only when ``gK_field is not None``) and
+    ``muE -= eta_G*hG_scalar`` (global uniform recovery-current scalar). Both live inside
+    ``_moments()`` so the shifted op is self-consistent (steady-state integration AND the final
+    gE/gI gain both see it); muI is untouched. Defaults are additive-zero, so existing callers get
+    byte-identical output.
+
+    ``init`` (T3a-2, #10) is an optional ``{"rE": ..., "rI": ...}`` warm-start seed -- each value
+    scalar or an ``(n, n)`` array (see ``_init_field``) -- used by the branch protocol
+    (``src.topic4_criticality.solve_branches``) to solve the SAME operating point from several
+    starting conditions (low/high/previous-point/random) and discover which rate branch each one
+    lands on. ``init=None`` (the default) is BYTE-PARITY with every existing caller: it reproduces
+    the exact ``mean_field``-seeded (with its bare ``1e-3`` fallback) initial condition below,
+    unchanged.
     """
     n = grid.n
     wee = w_ee_mult * W_EE
@@ -424,13 +454,17 @@ def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
     wEI = inh.q * W_EI                                       # (n,n) effective I->E weight
     wII = inh.q * W_II if inh.scale_II else np.full((n, n), W_II)
 
-    try:
-        base = mean_field(ratio, w_ee_mult, strict=False)
-        rE = np.full((n, n), max(base["nuE"], 1e-6))
-        rI = np.full((n, n), max(base["nuI"], 1e-6))
-    except Exception:
-        rE = np.full((n, n), 1e-3)
-        rI = np.full((n, n), 1e-3)
+    if init is not None:
+        rE = _init_field(init["rE"], (n, n))
+        rI = _init_field(init["rI"], (n, n))
+    else:
+        try:
+            base = mean_field(ratio, w_ee_mult, strict=False)
+            rE = np.full((n, n), max(base["nuE"], 1e-6))
+            rI = np.full((n, n), max(base["nuI"], 1e-6))
+        except Exception:
+            rE = np.full((n, n), 1e-3)
+            rI = np.full((n, n), 1e-3)
     sEE = convolve_periodic(rE, kernels.K_EE)
     sEI = convolve_periodic(rI, kernels.K_I)
     sIE = convolve_periodic(rE, kernels.K_I)
@@ -438,6 +472,9 @@ def solve_operating_point(grid: Grid, kernels: Kernels, exc: ExcitabilityField,
 
     def _moments():
         muE = TAU_ME * (C_EE * wee * sEE - C_EI * wEI * sEI) + muxE + exc.mu_core
+        muE = muE - eta_G * hG_scalar                       # h_G: global uniform recovery current
+        if gK_field is not None:
+            muE = muE - eta_K * gK_field                     # g_K: per-cell K-current field
         muI = TAU_MI * (C_IE * W_IE * sIE - C_II * wII * sII) + muxI
         varE = TAU_ME * (C_EE * wee ** 2 * sEE + C_EI * wEI ** 2 * sEI) + TAU_ME * JX_E ** 2 * nuext
         varI = TAU_MI * (C_IE * W_IE ** 2 * sIE + C_II * wII ** 2 * sII) + TAU_MI * JX_I ** 2 * nuext
@@ -1598,3 +1635,81 @@ def non_normal_axial_readout(J: np.ndarray, grid: Grid, core: CoreMask, *, theta
         "self_limited": bool(gains[-1] < peak.gain),
         "axial": bool(max_axis > 0.15),
     }
+
+
+# ---------------------------------------------------------------------------
+# Criticality Milestone 1, T3a-3: eigen-metrics on the frozen-Jacobian spectrum
+#
+# spectral_gap (TDD-7, above) is alpha_1 - alpha_2 by raw array order; it reads 0 when the leading
+# mode is a complex-conjugate pair (the "second" eigenvalue is just the pair partner, not a
+# competing mode). next_distinct_gap fixes this by skipping same-real-part entries.
+# leading_subspace_indices then generalizes "the leading mode" to "the leading invariant SUBSPACE"
+# (a conjugate pair, or several near-degenerate real modes), so pair_loading /
+# left_mode_input_projection can read the spatial field / core-input coupling of the whole subspace
+# instead of an arbitrary single member. Both reuse existing machinery -- mode_e_field (TDD-6 state
+# unpacking) and the biorthonormalization rate_eigenpairs applies internally (TDD-6) -- generalized
+# from one mode to a subspace of modes, rather than re-deriving either.
+# ---------------------------------------------------------------------------
+def next_distinct_gap(eigenvalues: np.ndarray, min_sep: float = 1e-3) -> float:
+    """alpha_1 minus the first real part more than ``min_sep`` away from alpha_1.
+
+    Unlike ``spectral_gap`` (a1 - a2 by raw array order), this SKIPS a leading complex-conjugate
+    partner (identical real part) so the gap reflects genuine mode competition, not the trivial
+    pair split. Returns +inf if every eigenvalue is within ``min_sep`` of the leader."""
+    re = np.sort(np.real(np.asarray(eigenvalues)))[::-1]
+    a1 = re[0]
+    for r in re[1:]:
+        if abs(a1 - r) > min_sep:
+            return float(a1 - r)
+    return float("inf")
+
+
+def leading_subspace_indices(eigenvalues: np.ndarray, min_sep: float = 1e-3,
+                             imag_tol: float = 1e-3) -> tuple[int, ...]:
+    """Indices spanning the leading invariant subspace of ``eigenvalues``.
+
+    If the leading eigenvalue is complex (``|Im| > imag_tol``), the leading mode is normally a
+    conjugate PAIR: returns (leader, conjugate partner). But the partner may have been truncated
+    out of ``eigenvalues`` (e.g. ``rate_eigenpairs(n_modes=...)`` split a pair) -- in that case the
+    nearest-to-conjugate candidate is not a genuine partner, and pairing with it anyway would
+    either self-pair (inflating downstream loadings by sqrt(2)) or fake-pair with an unrelated
+    mode. So the candidate is only accepted as the partner if it is a different index AND within
+    ``imag_tol`` of the true conjugate; otherwise this returns the lone-mode tuple (i,). If the
+    leading eigenvalue is real, returns every index within ``min_sep`` of the leading real part (a
+    near-degenerate group of real modes)."""
+    ev = np.asarray(eigenvalues)
+    i = int(np.argmax(ev.real))
+    if abs(ev[i].imag) > imag_tol:
+        j = int(np.argmin(np.abs(ev - np.conj(ev[i]))))          # nearest candidate partner
+        if j != i and abs(ev[j] - np.conj(ev[i])) <= imag_tol:   # genuine conjugate partner present
+            return (i, j)
+        return (i,)                                              # partner absent (truncated) -> lone complex mode
+    return tuple(int(x) for x in np.where(np.abs(ev.real - ev[i].real) <= min_sep)[0])
+
+
+def pair_loading(R: np.ndarray, idx: tuple[int, ...], grid: Grid) -> np.ndarray:
+    """Subspace-level spatial E-field loading: sqrt(sum_{k in idx} |mode_e_field(R[:,k], grid)|^2).
+
+    Combines a leading invariant subspace (e.g. from ``leading_subspace_indices``) into one
+    non-negative (n,n) spatial map. Reuses ``mode_e_field`` for the rE-block unpacking rather than
+    re-deriving the state layout."""
+    acc = np.zeros((grid.n, grid.n))
+    for k in idx:
+        acc = acc + np.abs(mode_e_field(R[:, k], grid)) ** 2
+    return np.sqrt(acc)
+
+
+def left_mode_input_projection(L: np.ndarray, R: np.ndarray, idx: tuple[int, ...],
+                               b_core: np.ndarray) -> float:
+    """Subspace-level generalization of ``core_controllability``: how strongly a core perturbation
+    excites the leading invariant subspace, sqrt(sum_{k in idx} |psi_k^H b_core|^2).
+
+    Each mode is biorthonormalized against its own right eigenvector first (``psi_k = L[:,k] /
+    conj(L[:,k]^H R[:,k])``, the same normalization ``rate_eigenpairs`` applies internally) so the
+    projection does not depend on the arbitrary scale of raw left/right eigenvectors."""
+    acc = 0.0
+    for k in idx:
+        c = np.vdot(L[:, k], R[:, k])
+        psi = L[:, k] / np.conj(c) if abs(c) > 1e-300 else L[:, k] / (np.linalg.norm(L[:, k]) + 1e-300)
+        acc += abs(np.vdot(psi, b_core)) ** 2
+    return float(np.sqrt(acc))
