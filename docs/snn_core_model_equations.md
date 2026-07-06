@@ -325,6 +325,278 @@ $$
 
 因此 A1b 的 local-global 地形只支持“局部化易激性优势 / 全局 restraint”作为状态坐标；A1c 只说明全局动态刹车有 timing 作用但空间上不干净；A2 当前支持 $q_{\text{core}}$ 耗竭 + $g_K$ 恢复可以产生 expanded axial recruitment 候选，还没有证明完整的 interictal -> ictal-like -> recovery 转换。
 
+## B5. M3A-v2 空间慢变量场（spatial slow-variable field）
+
+> **本节状态**：公式 + 计划锁定（2026-06-28），实现走 red-TDD，见
+> `docs/superpowers/plans/2026-06-28-sef-hfo-m3a-v2-spatial-slowvar-field-plan.md`。
+> 仍是 **mechanism screen**：下面的 `ictal-like recruitment candidate` 是一个**检出标签**，
+> **不是**发作主张。破轴（轴向主导被打破）是否真的发生是**经验问题**，移交延后的 ablation（§B5.8）。
+> v2 造的是**探测器 + 机制载体**，不预设破轴一定发生。
+
+### B5.0 为什么从两标量油箱升级到空间场
+
+v1（§B2 `q_core`·`q_global`，两个**标量**油箱）能把事件沿轴推大（expanded axial recruitment），
+但**结构上无法表示破轴**：两个全局标量没有**空间历史**——“轴向疲劳的同时周边许可度上升”这件事
+没有自由度去承载，只要 E→E scaffold 还在，全局去抑制通常只会继续**加强**轴向，而不是让离轴/全局模式追上来。
+
+v2 给每个位置一份自己的慢状态：抑制资源场 $q_I(x,t)$ 与疲劳/恢复场 $g_K(x,t)$。于是机制链
+
+$$
+\underbrace{\text{局部资源耗竭 } q_I\!\downarrow}_{\text{推轴向扩大}}
+\;\rightarrow\;
+\underbrace{\text{轴向通道疲劳 } g_{K,\text{axis}}\!\uparrow \;+\; \text{周边许可度上升 } q_{I,\text{offaxis}}\!\downarrow}_{\text{降低轴向优势}}
+\;\rightarrow\;
+\underbrace{\text{破轴 / 离轴·全局·低-}k\text{ 招募}}_{\text{ictal-like candidate}}
+\;\rightarrow\;
+\underbrace{\text{恢复变量终止 + }q\text{ 回灌}}_{\text{returned}}
+$$
+
+**可被表示、可被检出**。最小 v2 = $q_I + g_K$；$D_{EE}$（§B5.4）是延后的可选第二阶段。
+
+### B5.1 空间活动场（firing-rate fields）
+
+把 E / I 的 spike 平滑成空间率场（卷积核 $K_r$ + 时间 EMA $\tau_a$）：
+
+$$
+r_E(x,t)=K_r * \sum_{i\in E}S_i(t)\,\delta(x-x_i),\qquad
+r_I(x,t)=K_r * \sum_{i\in I}S_i(t)\,\delta(x-x_i)
+$$
+
+**实现**：每 $dt$ 把当步 spike bin 到 $n_{\text{grid}}\times n_{\text{grid}}$ 网格，空间卷积各向同性高斯 $\sigma_r$，
+对结果做时间 EMA（系数 $\alpha_a=1-e^{-dt/\tau_a}$）。复用 `src/sef_hfo_field.py` 的
+`isotropic_gaussian` + `convolve_periodic`（FFT 周期卷积）。
+
+- $K_r,\sigma_r$：spike→率场的空间平滑核 / 宽度（mm）。
+- $\tau_a$：率场时间 EMA，是慢变量看到的“活动”平滑尺度。
+- $x_i$：神经元 $i$ 在 $L\times L$ 薄片上的连续坐标（mm）。
+
+### B5.2 抑制资源场 $q_I(x,t)$
+
+$$
+\partial_t q_I(x,t)=\frac{1-q_I(x,t)}{\tau_q}-k_q\,f\!\big(a_q(x,t)\big)\,q_I(x,t),
+\qquad q_{\min}\le q_I\le 1
+$$
+
+驱动项（抑制资源主要随**抑制使用**耗竭，故 $\eta_I\ge\eta_E$）：
+
+$$
+a_q(x,t)=K_q*\big[\eta_E\,r_E(x,t)+\eta_I\,r_I(x,t)\big]
+$$
+
+饱和函数（避免单个 spike 就把油箱抽干）：
+
+$$
+f(a)=\frac{[a-a_0]_+}{a_{50}+[a-a_0]_+},\qquad
+f(a_0)=0,\;\; f(a_0+a_{50})=\tfrac12,\;\; f\to1\ (a\to\infty)
+$$
+
+施加到 E 细胞抑制（$I$ 细胞 $q_I\equiv1$）：
+
+$$
+s_i^{\text{inh}}=q_I(x_i,t)\quad(i\in E)
+$$
+
+**归约**：$q_I\equiv1\Rightarrow s_i^{\text{inh}}=1$（无去抑制，回到 §A 基线）；$q_I$ **空间均匀** $=q_{\text{global}}$
+则复现 §B2 的标量 `RegionalResource`（global-only，$q_{\text{core}}=1$）。$k_q=0$ 即关（off-by-default 字节奇偶）。
+
+- $\tau_q,k_q,q_{\min}$：恢复时间常数 / 耗竭率（主旋钮）/ 下界。
+- $K_q,\sigma_q$：去抑制活动感知核 / 宽度；**结构不变量 $\sigma_q>\sigma_K$**（去抑制足迹**宽**）。
+- $\eta_E,\eta_I$：率场权重，默认 $\eta_E=0.3,\eta_I=1.0$（抑制资源跟抑制使用）。
+- $a_0,a_{50}$：饱和起点 / 半饱和点。
+
+### B5.3 疲劳 / 恢复场 $g_K(x,t)$
+
+$$
+\partial_t g_K(x,t)=-\frac{g_K(x,t)}{\tau_K}+k_K\,f\!\big(a_K(x,t)\big)\,\big(g_K^{\max}-g_K(x,t)\big),
+\qquad 0\le g_K\le g_K^{\max}
+$$
+
+$k_K$ 是 build-rate **强度旋钮**（不是 on/off 开关）：$(g_K^{\max}-g_K)$ 因子让 build 内禀有界、不靠 clip 兜底，
+定点 $g_K^{*}=g_K^{\max}\,k_K f\tau_K/(1+k_K f\tau_K)<g_K^{\max}$；同样活动下 $k_K$ 越大 $g_K$ 升得越快、稳态越高。
+$k_K=0\Rightarrow$ build 项恒为 0，$g_K$ 只衰减、从 0 出发恒为 0（off-by-default 字节奇偶）。
+
+驱动（第一版只随 **E 活动**累积、只作用 E 细胞）：
+
+$$
+a_K(x,t)=K_K*r_E(x,t)
+$$
+
+施加：
+
+$$
+I_i^{\text{net}}\mathrel{-}=\eta_K\,g_K(x_i,t)\quad(i\in E)
+$$
+
+**关键核宽关系（承重，TDD 锁）**：$\sigma(K_q)>\sigma(K_K)$——去抑制足迹**宽**、疲劳足迹**窄**。
+直觉：$q_I$ 代表局部网络状态 / 抑制可用度，可影响活动区**周围**（让周边许可度上升）；
+$g_K$ 是使用依赖性恢复，应更**局部**，只压真正高放电的轴向通道。注意 $g_K$ **单独**通常只让轴向活动**停**、
+不让离轴接管；它必须与 $q_{I,\text{offaxis}}\!\downarrow$ 配合才能破轴（§B5.0 机制链）。
+
+- $\tau_K,k_K,g_K^{\max}$：衰减时间常数 / **build-rate 强度旋钮**（$k_K=0$ 即关 → 字节奇偶）/ 上界。
+- $K_K,\sigma_K$：疲劳活动感知核 / 宽度（**窄**）。
+- $\eta_K$：$g_K$ 进膜的耦合强度。
+
+### B5.4 可选 E→E depression $D_{EE}(x,t)$（stage-2，**本轮只写公式不实现**）
+
+$$
+\partial_t D_{EE}(x,t)=\frac{1-D_{EE}(x,t)}{\tau_D}-k_D\,f\!\big(a_D(x,t)\big)\,D_{EE}(x,t),
+\qquad D_{\min}\le D_{EE}\le 1
+$$
+
+$a_D=K_D*r_E$；施加到 E→E 突触（presynaptic 位置疲劳→relay 减弱）：
+
+$$
+J_{ij}^{EE,\text{eff}}(t)=D_{EE}(x_j,t)\,J_{ij}^{EE}
+$$
+
+**口径**：$D_{\min}\approx0.5\sim0.8$（**不要**掉到 0，否则只是把通道关掉、不是发作样招募）。
+只有当 $q_I+g_K$ 不足以降 axis score 时才开。本轮**无实现、无 TDD**。
+
+### B5.5 慢变量全开时的膜方程
+
+$$
+\tau_m^a\dot V_i=-V_i+I_i^E-q_I(x_i,t)\,I_i^I-\eta_K\,g_K(x_i,t)
+\qquad(\text{+ stage-2 时 }D_{EE}\text{ 改 }J^{EE})
+$$
+
+基线 $q_I\equiv1,\,g_K\equiv0$ 退回 §A1 的 $\tau_m^a\dot V_i=-V_i+I_i^E-I_i^I$（**字节奇偶**：等价 `slow=None`）。
+
+### B5.6 四类状态 operational 判据（验收 gate）
+
+**承重纪律**：$S_{\text{axis}}$ 必须用**源空间逐细胞 onset 梯度**算（§4 方法学锁；复用
+`src/sef_hfo_snn_metrics.py::onset_axis`），**不是**触点空间方向、**不是** collision、**不是**放电拉伸。
+
+每个事件算 6 个量：
+
+$$
+R_{\text{area}}=\tfrac1N\textstyle\sum_x\mathbf 1[A(x)>\theta_A]
+\quad(\text{招募面积}),\qquad
+T_{\text{event}}=t_{\text{off}}-t_{\text{on}}\quad(\text{时长})
+$$
+
+$$
+S_{\text{axis}}=\frac{|v_{\text{event}}\cdot\hat u_{EE}|}{\|v_{\text{event}}\|},
+\;\; v_{\text{event}}=\texttt{onset\_axis}(\text{pos}_E,\text{onset})
+\qquad
+F_{\text{offaxis}}=\frac{\sum_{x\notin\text{corridor}}A(x)}{\sum_x A(x)}
+$$
+
+$$
+G_{\text{PR}}=\frac{\big(\sum_x A(x)\big)^2}{N\sum_x A(x)^2}\;(\text{globality}),\qquad
+\text{recovery}=\big[\bar r_E(\text{post})\le r_{\text{base}}+m\sigma_{\text{base}}\big]
+$$
+
+四类（结构锁定，阈值待标定）：
+
+| 状态 | $R_{\text{area}}$ | $S_{\text{axis}}$ | $F_{\text{offaxis}}/G_{\text{PR}}$ | recovery |
+| --- | --- | --- | --- | --- |
+| **interictal axial event** | 小 | 高 | 低 | 是 |
+| **expanded axial recruitment** | 中–大 | **仍高** | 低–中 | 是 |
+| **ictal-like recruitment candidate** | 大 | **明显↓** | **明显↑** | 是 |
+| **runaway** | 大 | 任意 | 任意 | **否** |
+
+**最关键边界**：expanded axial $\neq$ ictal-like。ictal-like 是**四条件 AND**：$R_{\text{area}}$ **大**（$\ge$ `area_large`）
+$\wedge$ $S_{\text{axis}}$ **明显↓**（$<$ `axis_broken`）$\wedge$（$F_{\text{offaxis}}$↑ $\vee$ $G_{\text{PR}}$↑）$\wedge$ recovery；
+缺任意一条都不是。即使事件很强，只要 $S_{\text{axis}}$ 仍高 **且** $F_{\text{offaxis}}$ 仍低 **且** $G_{\text{PR}}$ 没明显升，
+它就只是 expanded axial。**尤其：小事件（$R_{\text{area}}$ 小）即使破轴/离轴也不是 ictal-like**——size 是必要条件，
+光破轴不够（否则一个局部偶发的离轴噪声 blip 会被误读成发作样）。
+**坏数据回归**：有限 onset 数 $<\texttt{min\_onsets}$ 或 $S_{\text{axis}}=$ NaN $\Rightarrow$ `INSUFFICIENT`，
+**不分类**（绝不默认成 ictal-like）。
+
+### B5.7 相图（两层）
+
+**proxy（在线，从场轨迹）**：区域 $R\in\{\text{axis},\text{offaxis},\text{global}\}$ 的有效招募压力
+
+$$
+P_R(t)=\log(\mathrm{lgr}_R)-\big\langle\log(q_I(x,t)+\epsilon)\big\rangle_R-\beta_K\big\langle g_K(x,t)\big\rangle_R,
+\qquad
+X=P_{\text{axis}}-P_{\text{offaxis}},\;\; Y=P_{\text{global}}
+$$
+
+**符号约定**：$q_I\!\downarrow$（去抑制）$\Rightarrow -\langle\log q_I\rangle\!\uparrow\Rightarrow$ 该区 pressure $P\!\uparrow$。故 **axis-dominant**
+（轴更去抑制、$q_{I,\text{axis}}$ 低）$\Rightarrow X=P_{\text{axis}}-P_{\text{offaxis}}>0$；**off-axis 追上**（$q_{I,\text{offaxis}}\!\downarrow$）
+$\Rightarrow X\!\downarrow$（可转负）= 破轴。$Y$ 取 **global** region pressure（与下面 spectral $Y_{\text{spec}}=\alpha_{\text{global}}$ 对齐、
+便于 overlay；用 global mask，非 dead arg）；$Y\!\uparrow$ 且不回 = runaway 风险。
+
+**spectral（冻结 Jacobian，复用 §B 线 `src/topic4_m3b_spectral_phase.py`）**：
+
+$$
+X_{\text{spec}}=\alpha_{\text{axis}}-\alpha_{\text{global}},\quad
+Y_{\text{spec}}=\alpha_{\text{global}},\qquad
+\alpha_\bullet=\max_{m\in\bullet}\mathrm{Re}(\lambda_m)
+$$
+
+B 线相图 overlay 仍受 `src/sef_hfo_m3_interface.py`（D1 归一化轴 / D2 5%越界 / D3 recovery 无损投影）
+fail-closed 合同约束；空间场的接口扩展**延后**（合同 §9 deferred）。
+
+### B5.8 红线 / 口径 / 延后
+
+- **仍是 mechanism screen**；ictal-like 是检出标签，**禁**“已证明发作机制 / Abbott 成立 / v2 过间期-发作两态”。
+- **破轴是否发生 = 经验问题**，移交延后的 **ablation**（A=固定 scaffold 无慢变量；B=只 $q_I$；C=$q_I+g_K$ 主模型；
+  D=+$D_{EE}$）。本轮**不建 ablation runner、不写机制主张**。
+- **风险（用户 §10）**：$q_I$ 耗竭最强处往往**就是** axis，可能只**放大** axis 而不破轴。破轴靠
+  $\sigma_q>\sigma_K$ 的核宽差 + $g_{K,\text{axis}}\!\uparrow$ 的 balance；调参序：加宽 $K_q$ → 降 $q_{\min}$ →
+  加强 $g_K$ build-up →（仍不够才）开 $D_{EE}$。**若只见 expanded axial，不是模型失败，是 balance 不足。**
+- 模块：场动力学 `src/snn_engine/slow_field.py::SpatialSlowField`（实现 `simulate_kick` 的 slow 协议）；
+  事件读出 + 四类分类器 + proxy 相图 `src/topic4_m3a_v2_phenotype.py`。
+
+---
+
+## B6. M3A-v2.2 全局抑制性恢复变量 `h_G(t)`（global inhibitory recovery）
+
+> **本节状态**：公式锁定（2026-06-28）。实验结构 / 硬合同（C1–C9）见
+> `docs/superpowers/specs/2026-06-28-sef-hfo-m3a-v2.2-global-recovery-design.md`；
+> 实现计划见 `docs/superpowers/plans/2026-06-28-sef-hfo-m3a-v2.2-global-recovery-plan.md`。
+> 仍是 **mechanism screen**：`h_G` 是 global recovery/restraint 变量，**非**发作机制 validation。
+> OFF-by-default：`use_hG=False` 把 `h_G` 对膜电流与 step 的耦合**硬门控为零** ⇒ **engine-output 与
+> `slow=None` 字节一致**（当 `q_I/g_K` 也中性时）。注意是**有效耦合为零**、非内部 state 数学恒等 0
+> （`hG_init`≠0 时标量 `h_G` 本身非 0，但不进任何输出）。
+
+把"回来"从局部 `g_K`（§B5.3）分出去：`h_G(t)` 是**全局标量**，只看**网络整体活动**（非轴/旁分区）。
+机制链 `ignite/expand (q_I↓) → redirect/limit (g_K↑) → terminate/recover (h_G↑)` 里它只管最后一步。
+
+### B6.1 传感器（快 EMA 率场 `r̃_E`，时间常数 `τ_s`，独立于 §B5.1 的 `τ_a`）
+
+$$
+M(t)=\langle \tilde r_E\rangle_x,\qquad
+B(t)=\Big\langle \sigma\!\big(\tfrac{\tilde r_E-r_A}{\Delta_A}\big)\Big\rangle_x,\qquad
+\Pi(t)=\frac{\big(\sum_x\tilde r_E\big)^2}{N_x\sum_x\tilde r_E^2+\epsilon}
+$$
+
+`M`=总活动强度，`B`=软参与面积（`σ`=logistic，非硬阈），`Π`=空间 participation/globality
+（单热点→低、大范围均匀→高）。
+
+### B6.2 平滑 AND 触发 + 有界 build ODE + 膜耦合（仅 E）
+
+$$
+\chi_G=H_{n_M}(M;M_{50})\,H_{n_B}(B;B_{50})\,H_{n_\Pi}(\Pi;\Pi_{50}),\qquad
+H_n(z;z_{50})=\frac{z^n}{z^n+z_{50}^n}
+$$
+
+$$
+\dot h_G=-\frac{h_G}{\tau_G}+k_G\,\chi_G\,(h_G^{\max}-h_G),\quad 0\le h_G\le h_G^{\max},\qquad
+I^{\text{net}}_i\mathrel{-}=\eta_G\,h_G\ \ (i\in E)
+$$
+
+`k_G=0` 即**不 build**（不是不 decay：`-h_G/τ_G` 衰减项始终在）。小局部轴向事件 `χ_G≈0`（不触发）；
+近失控时 `M/B/Π` 都上来、`χ_G` 自然变大、`h_G` 接管。`I` 细胞先不加 `h_G`。
+
+### B6.3 可选 q 回灌（仅 arm F，单独消融）+ 相图新 Y + clamp/surrogate
+
+$$
+\partial_t q_I \mathrel{+}= \lambda_G\,h_G\,(1-q_I)\quad(\text{arm E: }\lambda_G=0),\qquad
+Y^{\text{new}}=P_{\text{global}}-\beta_G h_G
+$$
+
+`X` 不变（`-β_G h_G` 对 axis/offaxis/global 一视同仁、差分抵消）→ **`h_G` 不伪造破轴**。
+`hG_script` 非空时跳过 ODE、`h_G=\text{clip}(hG\_script(t),0,h_G^{\max})`（恒定钳制相图 / onset-gated 假 `h_G`）。
+
+- `τ_s,r_A,Δ_A`：快 EMA 时间常数 / 软面积参考 / 斜率。`M50/B50/Π50,n_*`：Hill 半触发 / 指数。
+- `τ_G,k_G,h_G^max,η_G`：衰减时间常数 / build 强度旋钮（`k_G=0`→不 build → 字节奇偶）/ 上界 / 膜耦合强度。
+- `λ_G`：q 回灌强度（arm F secondary）。`β_G`：相图 Y 中 `h_G` 权重。
+- 模块：`src/snn_engine/slow_field.py::SpatialSlowField`（`h_G` 态 + `hG_script`）；传感器纯函数
+  `src/topic4_m3a_v2_2_sensors.py`；持续驱动 `src/topic4_m3a_v2_2_protocol.py`（runner 级 `nu_signal_fn`，不碰引擎）。
+
 ---
 
 ## 出处
@@ -333,4 +605,6 @@ $$
 - 阈值 core：`src/sef_hfo_heterogeneity.py::sample_core_field`
 - 自发读出：`scripts/run_sef_hfo_snn_cm_spontaneous_readout.py`
 - Fig4/5：`scripts/paper_figures/{plot_fig_subject_snn,plot_fig5_core_model_s3_brakeoff}.py`
-- M3A：`src/snn_engine/slow_vars.py` / `RegionalResource`
+- M3A v1：`src/snn_engine/slow_vars.py` / `RegionalResource`（标量 $q_{\text{core}}/q_{\text{global}}$）
+- M3A-v2 空间场：`src/snn_engine/slow_field.py` / `SpatialSlowField`；读出 `src/topic4_m3a_v2_phenotype.py`；
+  源空间 onset 仪器 `src/sef_hfo_snn_metrics.py`；率场卷积 `src/sef_hfo_field.py`；谱相图 `src/topic4_m3b_spectral_phase.py`

@@ -22,6 +22,7 @@ No statistical PASS gate. All annotations are descriptive.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import subprocess
 import sys
@@ -31,7 +32,7 @@ from typing import Dict, List, Optional, Tuple
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.colors import TwoSlopeNorm
+from matplotlib.colors import BoundaryNorm, ListedColormap, TwoSlopeNorm
 
 WORKTREE_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(WORKTREE_ROOT))
@@ -126,6 +127,249 @@ def load_cohort_records() -> List[dict]:
         d["is_candidate"] = _is_pr25_candidate(d)
         records.append(d)
     return records
+
+
+def _short_subject_label(record: dict) -> str:
+    dataset = str(record.get("dataset", ""))
+    subject = str(record.get("subject", ""))
+    prefix = "epi" if dataset == "epilepsiae" else "yuq"
+    return f"{prefix}_{subject}"
+
+
+def _source_channels_from_dense_rank(
+    channel_names: List[str],
+    dense_rank: List[float],
+    joint_valid: List[bool],
+    top_n: int,
+) -> List[str]:
+    """Return source-side top_n channels by ascending dense rank.
+
+    Uses the same joint-valid channel universe as rank_displacement so both
+    templates are compared inside the same lagPat-valid set. Sorting is by
+    dense rank with original channel order as deterministic tie-breaker.
+    """
+    rank = np.asarray(dense_rank, dtype=float)
+    valid = np.asarray(joint_valid, dtype=bool)
+    entries = []
+    for i, (ch, r, is_valid) in enumerate(zip(channel_names, rank, valid)):
+        if not is_valid or not np.isfinite(r) or r < 0:
+            continue
+        entries.append((float(r), i, ch))
+    entries.sort(key=lambda x: (x[0], x[1]))
+    return [ch for _, _, ch in entries[:top_n]]
+
+
+def build_template_source_soz_rows(
+    records: List[dict], top_ns: Tuple[int, ...] = (2, 3)
+) -> List[dict]:
+    """Per-subject top source channels for template A/B and SOZ overlap."""
+    rows: List[dict] = []
+    for record in records:
+        pair = record["primary_pair"]
+        channel_names = pair["channel_names"]
+        joint_valid = pair["joint_valid"]
+        rank_a = pair["rank_a_dense_full"]
+        rank_b = pair["rank_b_dense_full"]
+        soz_channels = set(record.get("soz_channels") or [])
+        swap_sweep = pair.get("swap_sweep") or {}
+        set_rel = pair.get("clinical_soz_set_relation") or {}
+        has_clinical_soz = set_rel.get("exit_reason") != "no_clinical_soz"
+
+        for top_n in top_ns:
+            src_a = _source_channels_from_dense_rank(
+                channel_names, rank_a, joint_valid, top_n
+            )
+            src_b = _source_channels_from_dense_rank(
+                channel_names, rank_b, joint_valid, top_n
+            )
+            hit_a = [ch for ch in src_a if ch in soz_channels]
+            hit_b = [ch for ch in src_b if ch in soz_channels]
+            union_src = sorted(set(src_a) | set(src_b))
+            union_hit = [ch for ch in union_src if ch in soz_channels]
+
+            denom_a = len(src_a)
+            denom_b = len(src_b)
+            denom_union = len(union_src)
+            rows.append({
+                "dataset": record["dataset"],
+                "subject": record["subject"],
+                "stem": f"{record['dataset']}_{record['subject']}",
+                "short_label": _short_subject_label(record),
+                "top_n": top_n,
+                "swap_class": swap_sweep.get("swap_class", "unknown"),
+                "decision_k": swap_sweep.get("decision_k"),
+                "n_valid": pair.get("n_valid"),
+                "has_clinical_soz": has_clinical_soz,
+                "n_soz_in_lagpat": set_rel.get("n_S"),
+                "template_a_sources": ";".join(src_a),
+                "template_a_soz_hits": ";".join(hit_a),
+                "template_a_n_soz": len(hit_a) if has_clinical_soz else "",
+                "template_a_frac_soz": (
+                    len(hit_a) / denom_a
+                    if has_clinical_soz and denom_a > 0 else ""
+                ),
+                "template_b_sources": ";".join(src_b),
+                "template_b_soz_hits": ";".join(hit_b),
+                "template_b_n_soz": len(hit_b) if has_clinical_soz else "",
+                "template_b_frac_soz": (
+                    len(hit_b) / denom_b
+                    if has_clinical_soz and denom_b > 0 else ""
+                ),
+                "union_sources": ";".join(union_src),
+                "union_soz_hits": ";".join(union_hit),
+                "union_n_soz": len(union_hit) if has_clinical_soz else "",
+                "union_frac_soz": (
+                    len(union_hit) / denom_union
+                    if has_clinical_soz and denom_union > 0 else ""
+                ),
+            })
+    return rows
+
+
+def write_template_source_soz_csv(rows: List[dict], path: Path) -> None:
+    if not rows:
+        return
+    fieldnames = list(rows[0].keys())
+    with path.open("w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def plot_template_source_soz_overlap(
+    records: List[dict], out_stem: Path
+) -> None:
+    """Subject-wise template-A/B source overlap with clinical SOZ.
+
+    Figure uses top-3 source channels. The companion CSV written by main()
+    includes both top-2 and top-3 exact channel lists.
+    """
+    top_n = 3
+    rows = [
+        r for r in build_template_source_soz_rows(records, top_ns=(top_n,))
+        if r["top_n"] == top_n
+    ]
+    swap_order = {"strict": 0, "candidate": 1, "none": 2, "unknown": 3}
+
+    def _sort_key(r: dict) -> tuple:
+        frac_a = r["template_a_frac_soz"] if r["template_a_frac_soz"] != "" else -1
+        frac_b = r["template_b_frac_soz"] if r["template_b_frac_soz"] != "" else -1
+        return (
+            swap_order.get(r["swap_class"], 3),
+            0 if r["has_clinical_soz"] else 1,
+            -float(frac_a),
+            -float(frac_b),
+            r["short_label"],
+        )
+
+    rows = sorted(rows, key=_sort_key)
+    n_rows = len(rows)
+    matrix = np.zeros((n_rows, top_n * 2), dtype=int)
+    labels = []
+    ytick_colors = []
+    class_colors = {
+        "strict": "black",
+        "candidate": "0.35",
+        "none": "0.55",
+        "unknown": "0.65",
+    }
+
+    for ri, r in enumerate(rows):
+        labels.append(r["short_label"])
+        ytick_colors.append(class_colors.get(r["swap_class"], "0.65"))
+        soz = set()
+        if r["has_clinical_soz"]:
+            soz = set((r["template_a_soz_hits"] + ";" + r["template_b_soz_hits"]).strip(";").split(";"))
+            soz.discard("")
+        src_a = [x for x in r["template_a_sources"].split(";") if x]
+        src_b = [x for x in r["template_b_sources"].split(";") if x]
+        for ci, ch in enumerate(src_a + src_b):
+            if not r["has_clinical_soz"]:
+                matrix[ri, ci] = 0  # no clinical SOZ JSON
+            elif ch in soz:
+                matrix[ri, ci] = 2  # source channel overlaps SOZ
+            else:
+                matrix[ri, ci] = 1  # source channel does not overlap SOZ
+
+    fig, axes = plt.subplots(
+        1, 2, figsize=(13.2, max(7.2, 0.24 * n_rows)),
+        gridspec_kw={"width_ratios": [1.05, 0.95]},
+    )
+    ax_h, ax_s = axes
+
+    cmap = ListedColormap(["0.90", "#D9CBB7", "#B71C2B"])
+    norm = BoundaryNorm([-0.5, 0.5, 1.5, 2.5], cmap.N)
+    ax_h.imshow(matrix, aspect="auto", cmap=cmap, norm=norm, interpolation="nearest")
+    ax_h.axvline(top_n - 0.5, color="white", linewidth=2.0)
+    ax_h.set_xticks(np.arange(top_n * 2))
+    ax_h.set_xticklabels(
+        [f"T_a src{i}" for i in range(1, top_n + 1)]
+        + [f"T_b src{i}" for i in range(1, top_n + 1)],
+        rotation=45, ha="right", fontsize=FS_TICK - 2,
+    )
+    ax_h.set_yticks(np.arange(n_rows))
+    ax_h.set_yticklabels(labels, fontsize=max(5, FS_TICK - 5))
+    for tick, color in zip(ax_h.get_yticklabels(), ytick_colors):
+        tick.set_color(color)
+    ax_h.set_title("(A) source top-3 SOZ membership", fontsize=FS_TITLE, loc="left")
+    ax_h.tick_params(length=0)
+    for spine in ax_h.spines.values():
+        spine.set_visible(False)
+
+    legend_handles = [
+        mpatches.Patch(color="#B71C2B", label="source in clinical SOZ"),
+        mpatches.Patch(color="#D9CBB7", label="source outside SOZ"),
+        mpatches.Patch(color="0.90", label="no clinical SOZ JSON"),
+    ]
+    ax_h.legend(
+        handles=legend_handles, loc="upper left", bbox_to_anchor=(0.0, -0.11),
+        fontsize=FS_TICK - 3, frameon=False, ncol=1,
+    )
+
+    marker_style = {
+        "strict": ("o", "black", "black", 0.8, 85),
+        "candidate": ("o", "none", "0.35", 1.3, 85),
+        "none": ("^", "0.84", "0.55", 0.7, 48),
+        "unknown": ("x", "0.65", "0.65", 0.9, 55),
+    }
+    for cls in ("none", "candidate", "strict", "unknown"):
+        pts = [
+            r for r in rows
+            if r["swap_class"] == cls and r["has_clinical_soz"]
+            and r["template_a_frac_soz"] != ""
+            and r["template_b_frac_soz"] != ""
+        ]
+        if not pts:
+            continue
+        marker, face, edge, lw, size = marker_style[cls]
+        ax_s.scatter(
+            [float(r["template_a_frac_soz"]) for r in pts],
+            [float(r["template_b_frac_soz"]) for r in pts],
+            marker=marker, s=size, facecolors=face, edgecolors=edge,
+            linewidths=lw, label=cls, zorder=4, alpha=0.9,
+        )
+    ax_s.plot([-0.02, 1.02], [-0.02, 1.02], color="0.6", linestyle=":", linewidth=1.0)
+    ax_s.set_xlim(-0.05, 1.05)
+    ax_s.set_ylim(-0.05, 1.05)
+    ax_s.set_xlabel("Template A source top-3 SOZ fraction", fontsize=FS_LABEL)
+    ax_s.set_ylabel("Template B source top-3 SOZ fraction", fontsize=FS_LABEL)
+    ax_s.set_title("(B) source-SOZ fraction by template", fontsize=FS_TITLE, loc="left")
+    ax_s.legend(
+        loc="center left", bbox_to_anchor=(1.02, 0.5),
+        fontsize=FS_TICK - 2, frameon=False,
+    )
+    style_panel(ax_s)
+
+    n_missing = sum(1 for r in rows if not r["has_clinical_soz"])
+    fig.suptitle(
+        "Template source top-3 vs clinical SOZ — masked stable_k=2 subjects "
+        f"(n={n_rows}, no clinical SOZ JSON={n_missing})",
+        fontsize=FS_TITLE + 1, y=0.995,
+    )
+    fig.tight_layout(rect=[0, 0.06, 0.955, 0.965])
+    for ext in ("png", "pdf"):
+        fig.savefig(f"{out_stem}.{ext}", dpi=DPI_PUB, bbox_inches="tight")
+    plt.close(fig)
 
 
 def sort_by_kendall_tau(records: List[dict]) -> List[dict]:
@@ -1054,6 +1298,7 @@ def main() -> None:
         choices=[
             "all", "cohort", "per_subject", "swap",
             "clinical-soz-set-relation", "clinical-soz-overlap",
+            "template-source-soz",
         ],
     )
     ap.add_argument(
@@ -1118,6 +1363,15 @@ def main() -> None:
         )
         out_stem = FIG_DIR / "swap_clinical_soz_overlap"
         plot_strict_candidate_overlap(summary_path, out_stem)
+        print(f"Wrote {out_stem.name}.{{png,pdf}}")
+
+    if args.what in ("all", "template-source-soz"):
+        rows = build_template_source_soz_rows(records, top_ns=(2, 3))
+        csv_path = RES_DIR / "template_source_soz_overlap_top2_top3.csv"
+        write_template_source_soz_csv(rows, csv_path)
+        out_stem = FIG_DIR / "template_source_soz_overlap_top3"
+        plot_template_source_soz_overlap(records, out_stem)
+        print(f"Wrote {csv_path}")
         print(f"Wrote {out_stem.name}.{{png,pdf}}")
 
     if args.what in ("all", "swap"):

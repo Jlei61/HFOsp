@@ -1,0 +1,32 @@
+{
+  "figure": "fig_subject_snn_epilepsiae_1146_CR1p5_S4_T20000_20260706",
+  "subject": "epilepsiae_1146 (ICL strip; cr1.5 seed4 T=20000)",
+  "twoend_tag": "epilepsiae_1146_tsrc_cr1p5_s4_T20000_20260706",
+  "source_tag": "epilepsiae_1146_source_tsrc_s1",
+  "sink_tag": "epilepsiae_1146_sink_tsrc_s1",
+  "placement": "template_source (earliest-3 of each template = the two template sources)",
+  "source_core": [
+    "SCL9",
+    "ICL9",
+    "ICL11"
+  ],
+  "sink_core": [
+    "ICL1",
+    "ICL2",
+    "ICL3"
+  ],
+  "twoend_spontaneous_dir": "5/11",
+  "source_only_dir": "5/0",
+  "sink_only_dir": "0/9",
+  "single_run_mode": false,
+  "readout_window_ms": 20000.0,
+  "readout_events": {
+    "forward_events": 5,
+    "reverse_events": 11
+  },
+  "notes": [
+    "Plotting-only; no SNN rerun.",
+    "Mechanism + readout = spontaneous twoend run; tempA/tempB panels = source-only/sink-only runs.",
+    "k_dir=2 sparse-electrode readout; real-geometry plane-fit (no core-anchoring)."
+  ]
+}

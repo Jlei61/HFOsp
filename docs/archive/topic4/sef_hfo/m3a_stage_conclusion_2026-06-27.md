@@ -60,6 +60,26 @@ M3A 要回答的不是单纯“能不能从短事件变成长事件”，而是�
 
 归档：`docs/archive/topic4/sef_hfo/m3a_a2_abbott_lg_pilot_recap_2026-06-26.md`
 
+### M3A-v2: 空间慢变量场 closed-loop screen（M3A-V2-1，2026-06-28）
+
+A2 的两个**标量**油箱（`q_core`/`q_global`）没有空间历史——"轴向疲劳的同时周边许可度上升 → 破轴"这件事结构上承载不了。M3A-v2 把它们升级成**空间场** `q_I(x,t)`（抑制资源，宽核 σ_q）+ `g_K(x,t)`（疲劳/恢复，窄核 σ_K），实现到 green，然后做了一条四步 closed-loop screen。**结论：一致 NEGATIVE——载体（field 层）正，但当前 SNN 闭环触发不了它。**
+
+按本 doc 的"三件事"对账：
+
+- **为什么推（成立）**：field-only pilot 正。给一段持续 prescribed 活动，`σ_q>σ_K` 的场确实在地图层面造出"旁边追上主轴"的离轴易激性优势，剂量可控。**局部资源耗竭这个方向对。**
+- **怎么推（未达成）**：把场接回 SNN 闭环，**没有一次推到"受控离轴 / 全局招募"**。
+  - **Step 1 衬底鉴定**：先确认稳健局部沿轴自限事件存在（AR=4/nu=0.46，8/8 seed）——解开闭环死结。
+  - **Step 2 q_I only**：事件本就 corridor-saturated（`axis_reach=1.0`），q_I 推大就直接 runaway，不是离轴。
+  - **Step 3 q_I+g_K**：g_K 是刹车（疲劳正确压轴），只**终止 / 缩小**轴向事件、不重定向离轴；离轴 q 许可度始终没形成（`q_off` 从未 < 0.7）。唯一出现 off-axis（F=0.635）是在 runaway。
+  - **Step 4 低-q（fork A，补"先把 q 耗低再 probe"）**：采样的 kq 网格里 q **没有稳定中间低-q 带（sharp transition）**——要么浅耗竭无效（q~0.9）、要么 crash（q ~0.015–0.18）；够 `q<0.7` 的只有 crash 态，probe 出 off-axis 但 runaway、刹不回。**small 0/24、finer 0/12、合计 0/36 success。**
+- **怎么回来（方式不对）**：g_K **能**把活动压回来，但走的是 **suppress**（把轴向事件刹短 / 刹死），**不是**"完成发作样离轴招募之后再恢复"。
+
+**M3A-v2 能写**：空间慢变量场是一个 sound 的 field-level 载体（sanity 正）；闭环不闭合是**当前 SNN 衬底（全或无 / 全场事件、采样网格内无稳定中间低-q 态）**的问题，**不是**"慢变量机制总体失败"。
+**M3A-v2 不能写**：① "已破轴 / 已出现发作样离轴招募"（off-axis 只在 runaway）；② "证明存在 saddle / 双稳态结构"（Step 4 只是采样网格上的 sharp-transition 观察）；③ "g_K 把 runaway rescue 成发作样招募后恢复"（它只 suppress）；④ "慢变量机制被证伪"（field-only 仍正，且 full-state preload 等变体未测）。
+**下一步（新方向、非当前 spec、待用户定，本轮不开始）**：`D_EE(x,t)` 削轴向 relay scaffold 优势让离轴能竞争（前提仍要先解决衬底给不出局部可部分填充事件）；或事件协议 / 衬底重做，让系统先产生更长、更局部、可部分填充的 preictal-like activity。
+
+归档：`docs/archive/topic4/m3a_v2_{field_pilot,substrate_qualification,step2_qI,step3_qI_gK,step4_lowq}_2026-06-28.md`（各 archive 顶部带可复现命令 + JSON）；进度链见 `docs/topic4_m3_stage.md §6`。
+
 ## 当前能写什么
 
 可以写：

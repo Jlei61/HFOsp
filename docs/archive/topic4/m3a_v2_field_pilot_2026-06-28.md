@@ -1,0 +1,93 @@
+# M3A-v2 空间慢变量场 — 实现后首轮 pilot（descriptive screen, 2026-06-28）
+
+> **状态**：mechanism screen / pilot（计划里 ablation 与标定都是延后项，本轮是延后项的*探索性*首看）。
+> **禁**："已证明发作机制 / Abbott 成立 / v2 过间期-发作两态 / 破轴已证"。破轴主张受 ablation gate，**未解锁**。
+> **可复现 artifact**：`scripts/run_m3a_v2_field_pilot.py` → `results/topic4_m3a_v2_field_pilot/pilot_results.json`（固定 `seed=1`）。
+> 本文档下面的数值表**由该 runner 生成**；要复跑 / 改参数 / 审计 grid convention（`make_field_grid_xy`，field[iy,ix]）+ proxy 计算，直接跑该脚本（`--experiment {all,baseline,fieldmap,closedloop,localize}`）。
+
+## 朴素摘要（测了什么 / 怎么测 / 揭示了什么）
+
+**测了什么**：我们给那张"会放电的神经元薄片"加了两张随时间变化的地图——一张记每个位置"还剩多少抑制力气"（用多了会被抽干、慢慢回血），一张记每个位置"放电放累了多少"（放多了会疲劳、慢慢恢复）。想看的是：当活动沿着一条主轴反复跑，这两张地图会不会把薄片改造成"主轴跑累了、旁边反而更容易点着"的样子——也就是活动有没有可能从"沿主轴走"翻成"往旁边/全场扩散"。
+
+**怎么测**：分两层。(1) **只看地图**——人为让主轴那条走廊持续放电，盯着两张地图怎么变、旁边相对主轴是不是变得更易兴奋。(2) **闭环**——在真的神经网络上，先调到"踢一下才点火、不踢就安静"的干净状态，踢一下让一个核点火，看事件是不是沿主轴传播，再把两张慢变量地图接上，看事件的活动会不会把地图改造成破轴的样子。
+
+**揭示了什么**：
+- **只看地图（field-only）：mechanism SANITY positive（载体能造离轴易激性优势，*不是*闭环发作机制成立）。** 持续的主轴活动确实把薄片改造成"旁边比主轴更易点着"——而且**去抑制的作用范围要比疲劳的范围宽**（spec 锁的 σ_q>σ_K）这件事是**因果**的：范围一样宽时主轴守住，范围越宽旁边越能追上来（单调的剂量关系）。真正"破对称"的是**疲劳只压主轴**这件事；宽去抑制让旁边在"松绑"上跟主轴打平，于是"主轴额外累"这点就占了上风。注意：这是人为 corridor 驱动证明的"**这个载体能记录并制造离轴优势地形**"，**不是**闭环发作已成立。
+- **闭环：ictal-like broken-axis transition NOT established——卡点不在慢变量，在衬底。** 这张薄片踢出来的事件是**全场招募**（一踢就点着 65%–100% 的格子），不是"沿主轴的局部行波"。全场招募 → 抑制力气在**整片均匀**被抽干（主轴和旁边抽到一样：0.0225 vs 0.0225），主轴/旁边的差别被抹平，慢变量地图那套"宽 vs 窄"的机关**根本没东西可分**；把抽干调强只会让全片塌到底 → 失控（runaway）。换踢的力度/递归增益都救不回来：要么踢不动（事件不传播），要么一传播就全场。
+- **一句话判读（锁定口径）**：M3A-v2 空间慢变量场提供了一个合理的**机制载体**，并在 field-only probe 中显示宽去抑制 + 窄疲劳可以产生**离轴易激性优势**（field-only mechanism sanity positive）；但**闭环 SNN 还没有产生 ictal-like broken-axis recruitment**，because the substrate enters full-field recruitment before localized axial propagation。瓶颈在 **substrate regime**，不在慢变量参数。**下一步 = 继续找 substrate regime（造局部沿轴传播事件），不是 ablation。**
+
+---
+
+## §1 配方（复现用）
+
+**衬底**（`build_lesion_vth` twoend_equal 配方，复刻 `run_stage3_axial_intervention_probe.py` 口径）：
+- `Params(g=3.6, L=10.0, density=100.0, T=400, dt=0.1, nu_ext_ratio=drive, seed=1)`；`build_connectivity_rot(theta_EE=45°, AR=2.0)`。
+- 双焦核：`sample_core_field` 两次（neg/pos 各在 `center ± sep_frac*half*axis_unit`，`sep_frac=0.6`，`core_r=1.5`，`core_mean`，`core_std=1.5`，base 18），vth = 两场 `np.minimum`。
+- 踢：`simulate_kick(KICK_BOOST, kick_center=foci[0], r_kick=0.5, t_kick=150, V_th_per_neuron=vth, slow=SpatialSlowField(...))`。
+
+**源空间读出**（方法学锁）：`onset_times`→`onset_axis` 算 `S_axis`（沿轴 onset 梯度）；事件窗 `firing_rate_field` 算 A(x) → `recruitment_area`/`offaxis_fraction`/`participation_ratio`；`self_limit` 给 recovery；`pre_kick_ignition` 排除踢前自点火；`classify_event` 四类。`grid_xy` 用 `field[iy,ix]` 约定（x 沿 ix、y 沿 iy）——与合成测试的转置约定不同，闭环里必须对齐。
+
+## §2 baseline：干净轴向事件 regime（slow OFF）
+
+L=10、core_mean 17.5–18.0、`t_kick=150`、`KICK_BOOST=2`，扫 drive：
+
+| drive | pre-ignite | n_onsets | S_axis | R_area | G_PR | recovery | label |
+|---|---|---|---|---|---|---|---|
+| 0.40–0.55 | **False**（安静） | ~4000 | **1.00** | 0.62–0.70 | 0.61–0.69 | True | expanded_axial |
+| 0.70 | True（~33ms 自点火，污染） | — | 0.5–0.6 | — | — | — | — |
+
+口径：**drive ≤ 0.55** 是"踢一下才点火"的干净 regime；踢出的事件 onset **完全沿轴**（S_axis=1.0，各向异性 E→E 连接让波沿轴传）但**招募是全场**（R_area~0.65、G_PR~0.65）——即 expanded_axial = 大范围招募 + 轴向 onset。drive=0.70 双核在踢前自点火（与 memory 一致）。
+
+## §3 只看地图：机制 map（field-only probe，σ_q 扫描）
+
+人为让主轴走廊持续放电（n_corridor≈696 E），σ_K=0.5、eta_K=1.0、k_q=k_K=0.05、tau_q=tau_K=500ms（从生理 5000ms 压到 500ms 让机制在可行步数内展开）、tau_a=20。mask-mean 主轴 vs 旁边，net = (1−q_I) − eta_K·g_K（松绑减疲劳的一阶兴奋度代理）；mech = net_off − net_axis（>0 = 旁边更易兴奋 = **离轴易激性优势**，破轴的*必要载体*，非破轴已证）：
+
+| σ_q | qI[ax/off] | gK[ax/off] | net[ax/off] | **mech** | X(β=0.3) | X(β=η_K=1.0) |
+|---|---|---|---|---|---|---|
+| 0.50（≈σ_K，无差控制） | 0.415/0.755 | 0.659/0.350 | −0.074/−0.106 | **−0.032 主轴守住** | +0.918 | +0.702 |
+| 1.00 | 0.342/0.588 | 同上 | −0.001/+0.062 | +0.062 | +0.716 | +0.500 |
+| 1.50（spec 默认） | 0.280/0.413 | 同上 | +0.061/+0.236 | +0.175 | +0.445 | +0.230 |
+| 2.00 | 0.241/0.305 | 同上 | +0.100/+0.345 | +0.245 | +0.225 | +0.009 |
+| 2.50 | 0.221/0.255 | 同上 | +0.120/+0.395 | +0.274 | +0.098 | **−0.117** |
+| 3.00 | 0.211/0.233 | 同上 | +0.130/+0.417 | +0.287 | +0.031 | **−0.184** |
+
+判读：
+- **mech 随 σ_q 单调上升**，σ_q=σ_K（无宽度差）时为负（主轴守住）——**σ_q>σ_K 的宽度差是 off-axis 追上的因果条件**，剂量关系干净。计划 tune-order"先加宽 K_q"在地图层面**被验证**。
+- **g_K（疲劳）是破对称者**（各 σ_q 行 gK 恒为 0.659/0.350，只压主轴）；宽 σ_q 让旁边在"松绑"(1−q_I) 上跟主轴打平，于是"主轴额外有疲劳"这点占上风。
+- **proxy 发现**：X(β=0.3，spec-ish) 在 net 已 +0.287 倒向旁边时仍报正（"主轴主导"），只在 σ_q=3 才近 0；X(β=η_K=1.0) 在 σ_q≈2 过零、σ_q≥2.5 转负，**才**跟上 net。即 **spec proxy 的 β_K=0.3 相对膜耦合 η_K=1.0 低估了疲劳，系统性滞后/低报 off-axis 追上**。建议（pilot 级，非改 spec）：proxy 的 β_K 应与 η_K 绑定，去抑制项的函数形 −log(q_I) 也与膜的 −q_I 不同（−log 过度放大深耗竭）——overlay/§B5.7 解读时需注意。
+
+## §4 闭环：机制接不上（global events → 均匀耗竭 → runaway）
+
+干净 regime（drive=0.5、core_mean=17.5），单次踢，slow OFF vs slow ON（k_q=k_K=0.5 强耗竭、tau 压到 500、tau_a=20）：
+
+| 配置 | label | S_axis | R_area | qI[ax/off] | gap | gK[ax] |
+|---|---|---|---|---|---|---|
+| slow OFF | expanded_axial | 1.00 | 0.67 | — | — | — |
+| slow ON σ_q=1.5 | **runaway** | 0.99 | **1.0** | 0.0225/0.0225 | **+0.000** | 0.986 |
+| slow ON σ_q=2.5 | **runaway** | 0.99 | **1.0** | 0.0225/0.0225 | **+0.000** | 0.986 |
+
+- 事件**全场招募**（R_area→1.0）→ q_I **均匀**抽干（主轴=旁边，gap=0.000）→ σ_q 的宽窄差**完全无效**（没有 axis/off 结构可分）→ 强耗竭只把全片塌到底 → **runaway**（非破轴）。
+
+**localize 检查**（能不能造出局部传播事件？drive=0.45，扫 KICK_BOOST × g）：
+
+| KICK_BOOST | n_onsets | S_axis | R_area | 结果 |
+|---|---|---|---|---|
+| 0.5 | 2 | — | 0.05 | INSUFFICIENT（踢不动） |
+| 1.0 | 25 | 0.32 | 0.04 | 小 blip，不沿轴、不传播 |
+| 2.0 | ~4000 | 1.00 | 0.51–0.65 | 全场招募 |
+
+g=3.6→6.0 同型。**全或无点火**：要么不传播（小、非轴向），要么一传播即全场——**无"局部沿轴行波"窗口**。与 memory 核心教训一致（均质衬底自发只出同步/全场招募非局部行波）。
+
+## §5 判读：param/substrate vs mechanism
+
+- **慢变量载体（M3A-v2 新增的）：field-only mechanism sanity positive**——地图层面剂量可控地产生离轴易激性优势，控制（σ_q=σ_K）通过，σ_q>σ_K 因果。**这是 sanity（载体能造离轴优势地形），不是闭环发作机制成立。**
+- **闭环卡点：衬底 regime（全场事件），是早就存在的老问题，不是新慢变量场的问题。** 全场事件 → 均匀耗竭 → 机制无结构可分；强耗竭 → runaway。
+- 计划 §B5.8 口径："若只见 expanded_axial 是 balance 不足非模型失败"——这里更准确是：**不是 balance、是衬底给不出机制要的局部沿轴事件**。下一杠杆在**衬底（怎么造局部传播）**，不在慢变量参数（参数在地图层面已 work）。
+
+## §6 caveats / 下一步候选（未承诺）
+
+- caveats：(1) field-only 是地图层面、非闭环 spike；(2) net 是静态一阶兴奋度代理、非全非线性动力学；(3) tau 压缩到 500ms（生理 5000ms）；(4) field-only 用 mask-mean（旁边 mask 含近走廊格子，量级偏保守）。
+- 候选下一步（衬底向，均非 M3A-v2 慢变量向）：找局部传播 regime（更大 L？更低 E→E 增益/工作点？distal seed 而非核踢？）——但这是 memory 反复记录的硬问题，独立于 M3A-v2。
+- proxy β_K=η_K 对齐（§B5.7 overlay 解读）——pilot 级建议，待用户定是否改 spec。
+
+**承重锁回链**：破轴未证（闭环未 engage）；ablation 仍未跑；本轮全为 descriptive screen。主文档结论口径不变。

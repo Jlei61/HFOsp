@@ -7,7 +7,8 @@ E1146 readout used in Fig4A and draws the legacy KMeans=2 rank diagnostic in the
 (`_plot_rank_histogram` / `_plot_rank_heatmap` + `_plot_cluster_boundaries` /
 `_plot_cluster_rank_fig4` from scripts/plot_interictal_propagation.py). No simulation rerun.
 
-Three blocks (one row): per-channel rank distribution | clustered event heatmap | cluster rank profiles.
+Four blocks (one row): clustered event heatmap | per-channel rank distribution |
+cluster rank profiles | model-vs-real template matrix.
 """
 from __future__ import annotations
 
@@ -23,6 +24,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import spearmanr
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 ROOT = Path(__file__).resolve().parents[2]
 RUN = ROOT / "results/topic4_sef_hfo/field_swap_subject_snn"
@@ -40,44 +42,79 @@ from scripts.paper_figures.plot_fig_subject_snn_realvsmodel import (  # noqa: E4
     _real_templates, _sim_matrix, _matrix_panel)
 
 
-_CL_COLORS = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e"]
+TA_COLOR = "#d62728"
+TB_COLOR = "#1f77b4"
+TA_SUB_COLORS = [TA_COLOR, "#f28e8c", "#b2182b"]
+TB_SUB_COLORS = [TB_COLOR, "#6baed6", "#08519c"]
+_CL_COLORS = [TA_COLOR, TB_COLOR, "#2ca02c", "#ff7f0e"]
 MIN_DIR_EVENTS = 3   # both forward AND reverse need >= this many events for the fwd-rev x t_a/t_b matrix
 
 
-def _hist_aligned(ax, R, max_rank, names, viridis_n):
+def _hist_aligned(
+    ax,
+    R,
+    max_rank,
+    names,
+    viridis_n,
+    *,
+    y_centers=None,
+    ylim=None,
+    show_ylabels=True,
+):
     """Per-channel rank histogram on the heatmap's 1-unit coordinate (channel display-row i in band
     [i,i+1]) so its y-axis aligns with the heatmap + cluster panels. Canonical viridis-per-channel look."""
     n_ch = R.shape[0]
+    y_centers = np.asarray(y_centers if y_centers is not None else np.arange(n_ch) + 0.5, dtype=float)
+    row_step = float(np.nanmedian(np.abs(np.diff(np.sort(y_centers))))) if n_ch > 1 else 1.0
     for i in range(n_ch):
         vals = R[i][np.isfinite(R[i])]
         if vals.size == 0:
             continue
         hist, _ = np.histogram(vals, bins=np.arange(max_rank + 2) - 0.5)
-        h = hist / max(1, vals.size) * 0.82
-        ax.bar(np.arange(max_rank + 1), h, bottom=i + 0.09, width=1.0,
+        h = hist / max(1, vals.size) * row_step * 0.74
+        ax.bar(np.arange(max_rank + 1), h, bottom=y_centers[i] - h / 2.0, width=1.0,
                color=plt.cm.viridis(i / max(1, viridis_n - 1)), alpha=0.8, linewidth=0)
-        ax.axhline(i, color="0.9", lw=0.3)
-    ax.set_ylim(0, n_ch); ax.set_yticks(np.arange(n_ch) + 0.5); ax.set_yticklabels(names)
+        ax.axhline(y_centers[i], color="0.9", lw=0.3)
+    ax.set_ylim(ylim if ylim is not None else (0, n_ch))
+    ax.set_yticks(y_centers)
+    ax.set_yticklabels(names if show_ylabels else [])
+    if not show_ylabels:
+        ax.tick_params(axis="y", left=False, labelleft=False)
     ax.set_xlim(-0.5, max_rank + 0.5); ax.set_xlabel("Rank")
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
 
 
-def _cluster_aligned(ax, R, labels, max_rank, names):
+def _cluster_aligned(
+    ax,
+    R,
+    labels,
+    max_rank,
+    names,
+    *,
+    y_centers=None,
+    ylim=None,
+    cluster_display=None,
+    cluster_order=None,
+):
     """Per-cluster mean+/-std rank line on the heatmap's 1-unit coordinate (channel center i+0.5)."""
     n_ch = R.shape[0]
-    y = np.arange(n_ch) + 0.5
-    for k, cid in enumerate(sorted(set(labels.tolist()))):
+    y = np.asarray(y_centers if y_centers is not None else np.arange(n_ch) + 0.5, dtype=float)
+    order = cluster_order if cluster_order is not None else sorted(set(labels.tolist()))
+    for k, cid in enumerate(order):
         mask = labels == cid
         mean = np.full(n_ch, np.nan); std = np.full(n_ch, np.nan)
         for i in range(n_ch):
             v = R[i, mask]; v = v[np.isfinite(v)]
             if v.size:
                 mean[i] = v.mean(); std[i] = v.std()
-        fin = np.isfinite(mean); col = _CL_COLORS[k % len(_CL_COLORS)]
+        fin = np.isfinite(mean)
+        display = (cluster_display or {}).get(int(cid), {})
+        col = display.get("color", _CL_COLORS[k % len(_CL_COLORS)])
+        label = display.get("label", f"C{int(cid)}")
         ax.fill_betweenx(y[fin], (mean - std)[fin], (mean + std)[fin], color=col, alpha=0.15, lw=0)
-        ax.plot(mean[fin], y[fin], "-o", color=col, lw=2.0, ms=5, label=f"C{int(cid)} (n={int(mask.sum())})")
-    ax.set_ylim(0, n_ch); ax.set_yticks(y); ax.set_yticklabels(names)
+        ax.plot(mean[fin], y[fin], "-o", color=col, lw=2.0, ms=5, label=f"{label} (n={int(mask.sum())})")
+    ax.set_ylim(ylim if ylim is not None else (0, n_ch)); ax.set_yticks(y); ax.set_yticklabels(names)
     ax.set_xlim(-0.5, max_rank + 0.5); ax.set_xlabel("Rank")
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
@@ -122,6 +159,44 @@ def _direction_purity(labels, signs):
     return float(purity), conf
 
 
+def _cluster_display_from_direction(labels, conf):
+    """Map unsupervised cluster ids to template names for display.
+
+    In this panel the model templates are defined by event direction:
+    forward-majority cluster -> t_a, reverse-majority cluster -> t_b.
+    If KMeans only splits one direction, display the clusters as same-template
+    subclusters (for example, t_b-1/t_b-2) instead of faking a t_a/t_b pair.
+    """
+    clusters = sorted(set(labels.tolist()))
+    majority = []
+    for row, cid in enumerate(clusters):
+        is_forward = conf[row, 0] >= conf[row, 1]
+        majority.append((int(cid), "forward" if is_forward else "reverse"))
+    dir_counts = {
+        direction: sum(1 for _, d in majority if d == direction)
+        for direction in ("forward", "reverse")
+    }
+    dir_seen = {"forward": 0, "reverse": 0}
+    display = {}
+    for cid, direction in majority:
+        dir_seen[direction] += 1
+        is_forward = direction == "forward"
+        base = "t_a" if is_forward else "t_b"
+        if dir_counts[direction] > 1:
+            label = f"{base}-{dir_seen[direction]}"
+            colors = TA_SUB_COLORS if is_forward else TB_SUB_COLORS
+            color = colors[(dir_seen[direction] - 1) % len(colors)]
+        else:
+            label = base
+            color = TA_COLOR if is_forward else TB_COLOR
+        display[int(cid)] = {
+            "label": label,
+            "color": color,
+            "direction": direction,
+        }
+    return display
+
+
 def _shared_corr(ranks, labels):
     clusters = sorted(set(labels.tolist()))
     if len(clusters) != 2:
@@ -141,7 +216,36 @@ def _shared_corr(ranks, labels):
     return float(spearmanr(m0[shared], m1[shared]).correlation), int(shared.sum())
 
 
-def compose(tag, fig_name, min_participation, montage="narrow"):
+def _cluster_display_order(labels, cluster_display):
+    """Return cluster ids in reader-facing template order.
+
+    Raw KMeans ids are arbitrary. For the figure, show template semantics:
+    t_a/forward first, then t_b/reverse, with same-template subclusters kept
+    in their numeric suffix order. Metadata still stores the raw C ids.
+    """
+    def key(cid):
+        info = cluster_display[int(cid)]
+        label = info["label"]
+        direction_rank = 0 if info["direction"] == "forward" else 1
+        suffix = 0
+        if "-" in label:
+            try:
+                suffix = int(label.rsplit("-", 1)[1])
+            except ValueError:
+                suffix = 0
+        return (direction_rank, suffix, int(cid))
+
+    return sorted(set(labels.tolist()), key=key)
+
+
+def compose(
+    tag,
+    fig_name,
+    min_participation,
+    montage="narrow",
+    preview_style=False,
+    display_min_channel_frac=0.0,
+):
     readout, figdata = _load(tag)
     k_dir = int(readout.get("k_dir", 2))
     events = [ev for ev in readout["events"]
@@ -152,6 +256,23 @@ def compose(tag, fig_name, min_participation, montage="narrow"):
     all_names = sorted({n for ev in events for n, v in (ev.get("ranks") or {}).items() if v is not None})
     ordered_names = _axis_order(figdata, all_names)          # source -> sink channel order
     ranks, bools = _rank_matrix(events, ordered_names)       # (n_ch, n_ev) in display order
+    dropped_display_channels = []
+    if display_min_channel_frac > 0:
+        frac = np.mean(np.isfinite(ranks), axis=1)
+        keep = frac >= float(display_min_channel_frac)
+        if int(keep.sum()) < 3:
+            raise RuntimeError(
+                f"display_min_channel_frac={display_min_channel_frac} leaves "
+                f"only {int(keep.sum())} channels"
+            )
+        dropped_display_channels = [
+            {"channel": n, "participation_frac": float(frac[i])}
+            for i, n in enumerate(ordered_names)
+            if not bool(keep[i])
+        ]
+        ordered_names = [n for i, n in enumerate(ordered_names) if bool(keep[i])]
+        ranks = ranks[keep, :]
+        bools = bools[keep, :]
     signs = np.asarray([float(ev["sign"]) for ev in events])
     n_ch, n_ev = ranks.shape
     channel_order = np.arange(n_ch)                           # ranks already in ordered_names order
@@ -164,6 +285,7 @@ def compose(tag, fig_name, min_participation, montage="narrow"):
         raise RuntimeError(f"KMeans labels length {labels.shape} != event count {n_ev}")
 
     purity, conf = _direction_purity(labels, signs)
+    cluster_display = _cluster_display_from_direction(labels, conf)
     active_inter = float(result["inter_cluster_corr_matrix"][0][1])
     shared_corr, shared_n = _shared_corr(ranks, labels)
     within_tau = float(result.get("within_cluster_tau_mean", np.nan))
@@ -206,49 +328,134 @@ def compose(tag, fig_name, min_participation, montage="narrow"):
             t.set_fontsize(tick)
         ax.tick_params(axis="both", labelsize=tick)
 
-    fig = plt.figure(figsize=(16.0, 4.4), facecolor="white")
-    gs = fig.add_gridspec(1, 4, width_ratios=[4.6, 1.0, 1.3, 0.85], wspace=0.40,
-                          left=0.05, right=0.975, top=0.88, bottom=0.22)
+    if preview_style:
+        fig_size = (17.8, 5.1)
+        width_ratios = [5.45, 0.58, 1.02, 1.34]
+        wspace = 0.32
+        top = 0.86
+        bottom = 0.24
+        fs = {"title": 15.5, "label": 13.0, "tick": 11.2, "cluster": 12.5}
+    else:
+        fig_size = (17.2, 4.6)
+        width_ratios = [5.35, 0.62, 1.02, 1.32]
+        wspace = 0.34
+        top = 0.88
+        bottom = 0.22
+        fs = {"title": 11.5, "label": 10.0, "tick": 8.5, "cluster": 8.5}
+
+    fig = plt.figure(figsize=fig_size, facecolor="white")
+    gs = fig.add_gridspec(1, 4, width_ratios=width_ratios, wspace=wspace,
+                          left=0.05, right=0.975, top=top, bottom=bottom)
 
     # block 1 (LEFT): clustered event heatmap (canonical pcolormesh) + cluster boundaries
-    ev_order = np.argsort(labels, kind="stable")
-    ax_hm = fig.add_subplot(gs[0, 0])
+    cluster_order = _cluster_display_order(labels, cluster_display)
+    ev_order = np.concatenate([np.where(labels == cid)[0] for cid in cluster_order])
+    display_id = {int(cid): i for i, cid in enumerate(cluster_order)}
+    labels_for_boundaries = np.asarray([display_id[int(cid)] for cid in labels[ev_order]], dtype=int)
+    heatmap_gs = gs[0, 0].subgridspec(1, 2, width_ratios=[1.0, 0.045], wspace=0.035)
+    ax_hm = fig.add_subplot(heatmap_gs[0, 0])
+    cax_hm = fig.add_subplot(heatmap_gs[0, 1])
     im = _plot_rank_heatmap(ax_hm, ranks[:, ev_order], ordered_names, "",
                             show_ylabels=True, display_bools=bools[:, ev_order])
-    _plot_cluster_boundaries(ax_hm, labels[ev_order], n_ch)
-    ax_hm.set_xlabel("pop events", fontsize=10)
-    for txt in ax_hm.texts:               # canonical C0/C1 cluster labels -> smaller
-        txt.set_fontsize(8.5)
-    _shrink(ax_hm)
-    ax_hm.set_title("Pop events (clustered)", fontsize=11.5, pad=16)  # lift above C0/C1 labels
-    cb = fig.colorbar(im, ax=ax_hm, orientation="horizontal", fraction=0.045, pad=0.20)  # below x-label
-    cb.set_label("First → Last", fontsize=8.5); cb.ax.tick_params(labelsize=7.5)
+    if preview_style:
+        _plot_cluster_boundaries(
+            ax_hm,
+            labels_for_boundaries,
+            n_ch,
+            line_color="#d00000",
+            line_width=3.4,
+            line_style="-",
+            label_fontsize=fs["cluster"],
+            label_box=True,
+            boundary_band=True,
+            label_names=[cluster_display[int(c)]["label"] for c in cluster_order],
+        )
+    else:
+        _plot_cluster_boundaries(
+            ax_hm,
+            labels_for_boundaries,
+            n_ch,
+            label_names=[cluster_display[int(c)]["label"] for c in cluster_order],
+        )
+    ax_hm.set_xlabel("pop events", fontsize=fs["label"])
+    for txt in ax_hm.texts:
+        txt.set_fontsize(fs["cluster"])
+        for info in cluster_display.values():
+            if txt.get_text().startswith(info["label"]):
+                txt.set_color(info["color"])
+                bbox = txt.get_bbox_patch()
+                if bbox is not None:
+                    bbox.set_edgecolor(info["color"])
+    _shrink(ax_hm, title=fs["title"], label=fs["label"], tick=fs["tick"])
+    ax_hm.set_title("Pop events (clustered)", fontsize=fs["title"], pad=18 if preview_style else 16)
+    cb = fig.colorbar(im, cax=cax_hm, orientation="vertical")
+    cb.set_label("First → Last", fontsize=fs["tick"])
+    cb.ax.tick_params(labelsize=fs["tick"] - 1.0)
+    hm_ylim = ax_hm.get_ylim()
+    hm_yticks = ax_hm.get_yticks()
+    hm_ylabels = [tick.get_text() for tick in ax_hm.get_yticklabels()]
 
-    # block 2 (MIDDLE): per-channel rank distribution, SAME 1-unit channel y as the heatmap (sharey)
-    ax_h = fig.add_subplot(gs[0, 1], sharey=ax_hm)
-    _hist_aligned(ax_h, ranks, max_rank, ordered_names, n_ch)
-    ax_h.set_title("Per-channel rank", fontsize=11.5)
-    _shrink(ax_h)
+    # block 2 (MIDDLE): per-channel rank distribution. Its row centers are copied from the
+    # left heatmap's actual y ticks, so channel rows align exactly even if the canonical heatmap
+    # changes y-axis direction or tick placement.
+    ax_h = fig.add_subplot(gs[0, 1])
+    _hist_aligned(
+        ax_h,
+        ranks,
+        max_rank,
+        hm_ylabels,
+        n_ch,
+        y_centers=hm_yticks,
+        ylim=hm_ylim,
+        show_ylabels=not preview_style,
+    )
+    ax_h.set_title("Rank dist.", fontsize=fs["title"])
+    _shrink(ax_h, title=fs["title"], label=fs["label"], tick=fs["tick"])
 
-    # block 3 (MIDDLE-RIGHT): cluster rank profiles, SAME 1-unit channel y (sharey -> aligned)
-    ax_cr = fig.add_subplot(gs[0, 2], sharey=ax_hm)
-    _cluster_aligned(ax_cr, ranks, labels, max_rank, ordered_names)
-    ax_cr.set_title("Cluster rank profile", fontsize=11.5)
-    ax_cr.legend(frameon=False, fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=2)
-    _shrink(ax_cr)
+    # block 3 (MIDDLE-RIGHT): cluster rank profiles, same copied heatmap y ticks.
+    ax_cr = fig.add_subplot(gs[0, 2])
+    _cluster_aligned(
+        ax_cr,
+        ranks,
+        labels,
+        max_rank,
+        hm_ylabels,
+        y_centers=hm_yticks,
+        ylim=hm_ylim,
+        cluster_display=cluster_display,
+        cluster_order=cluster_order,
+    )
+    ax_cr.set_title("Cluster rank profile", fontsize=fs["title"])
+    ax_cr.legend(frameon=False, fontsize=fs["tick"], loc="upper right", borderaxespad=0.2, handlelength=1.35)
+    _shrink(ax_cr, title=fs["title"], label=fs["label"], tick=fs["tick"])
 
     # block 4 (RIGHT): model-vs-real template similarity matrix -- only when BOTH directions present
-    # (gate). One-direction readout -> N/A panel (the fwd/rev x t_a/t_b mapping would be fake).
+    # (gate). Keep the 2x2 matrix square by putting its colorbar in a separate sub-axis; a normal
+    # fig.colorbar(ax=...) silently steals width from the matrix axis and can make the panel look
+    # visually compressed in the paper layout.
     ax_m = fig.add_subplot(gs[0, 3])
     if bidirectional:
         im_m = _matrix_panel(ax_m, Msim, Psim)
-        ax_m.set_title("model vs real\n(★ perm p)", fontsize=10)
-        fig.colorbar(im_m, ax=ax_m, fraction=0.05, pad=0.08, label="ρ model vs real")
+        ax_m.set_title("model vs real templates\n(★ perm p)", fontsize=fs["label"])
+        ax_m.set_box_aspect(1.0)
+        cax_m = inset_axes(
+            ax_m,
+            width="7%",
+            height="100%",
+            loc="lower left",
+            bbox_to_anchor=(1.08, 0.0, 1.0, 1.0),
+            bbox_transform=ax_m.transAxes,
+            borderpad=0,
+        )
+        cb_m = fig.colorbar(im_m, cax=cax_m)
+        cb_m.set_label("ρ model vs real", fontsize=fs["tick"])
+        cb_m.ax.tick_params(labelsize=fs["tick"] - 1.0)
     else:
         ax_m.axis("off")
+        ax_m.set_box_aspect(1.0)
         ax_m.text(0.5, 0.5, f"model vs real\nN/A\n\none-direction only\n(fwd={n_fwd}, rev={n_rev})\n"
                   f"≥{MIN_DIR_EVENTS} each needed",
-                  ha="center", va="center", fontsize=9.5, color="#b00",
+                  ha="center", va="center", fontsize=fs["label"], color="#b00",
                   transform=ax_m.transAxes,
                   bbox=dict(boxstyle="round", fc="#fff3f3", ec="#b00", lw=1.0))
 
@@ -262,16 +469,28 @@ def compose(tag, fig_name, min_participation, montage="narrow"):
 
     metadata = {
         "figure": stem, "companion_to": fig_name, "input_tag": tag,
+        "preview_style": bool(preview_style),
         "plotters": "canonical _plot_rank_heatmap + _plot_cluster_boundaries (heatmap); "
                     "_hist_aligned + _cluster_aligned (canonical-styled, on heatmap 1-unit coord so the "
                     "3 left panels share an aligned channel y-axis via sharey)",
         "event_filter": f"sign is not None and n_part >= 2*k_dir ({2 * k_dir})",
+        "display_min_channel_frac": float(display_min_channel_frac),
+        "dropped_display_channels": dropped_display_channels,
         "n_events": n_ev, "n_forward": n_fwd, "n_reverse": n_rev,
         "bidirectional": bidirectional, "min_dir_events_gate": MIN_DIR_EVENTS,
         "channels_displayed": ordered_names,
         "kmeans": {
             "k": 2, "min_participation": int(min_participation), "labels": labels.tolist(),
             "cluster_sizes": {f"C{c}": int(np.sum(labels == c)) for c in sorted(set(labels.tolist()))},
+            "display_cluster_order": [f"C{int(c)}" for c in cluster_order],
+            "display_labels": {
+                f"C{c}": {
+                    "label": cluster_display[int(c)]["label"],
+                    "color": cluster_display[int(c)]["color"],
+                    "direction": cluster_display[int(c)]["direction"],
+                }
+                for c in sorted(set(labels.tolist()))
+            },
             "direction_confusion_rows_cluster_cols_forward_reverse": conf.tolist(),
             "direction_purity": purity, "within_cluster_tau_mean": within_tau,
             "active_inter_cluster_corr": active_inter,
@@ -298,9 +517,22 @@ def compose(tag, fig_name, min_participation, montage="narrow"):
             "on >= MIN_DIR_EVENTS of each direction (one-direction subjects -> N/A, not a fake swap).",
             "Full/active imputed inter-cluster corr is not the main direction readout; "
             "shared-overlap corr + direction purity are the cleaner direction judges.",
+            "If both KMeans clusters have the same direction, display labels are same-template "
+            "subclusters (e.g. t_b-1/t_b-2), not a fake t_a/t_b pair.",
         ],
     }
     (outdir / f"{stem}_metadata.json").write_text(json.dumps(metadata, indent=2))
+    readme = outdir / "README.md"
+    if not readme.exists():
+        readme.write_text(
+            f"# {fig_name}\n\n"
+            "### " + stem + ".png / .pdf\n\n"
+            "KMeans k=2 subject-level preview rendered from the subject-SNN readout artifact. "
+            "This preview uses larger fonts, a narrower rank-distribution panel with no repeated "
+            "y-axis labels, and a stronger red cluster boundary on the clustered event heatmap.\n\n"
+            "**关注点**：先看左侧 KMeans heatmap 的红色分界是否清楚，再看 rank distribution 是否不抢占宽度。\n",
+            encoding="utf-8",
+        )
     print(f"wrote {png}\nwrote {pdf}")
     print(json.dumps(metadata["kmeans"], indent=2))
     return outdir
@@ -313,8 +545,30 @@ def main():
     ap.add_argument("--fig-name", default="fig_subject_snn_epilepsiae_1146")
     ap.add_argument("--min-participation", type=int, default=3)
     ap.add_argument("--montage", default="narrow", choices=["narrow", "broad"])
+    ap.add_argument(
+        "--preview-style",
+        action="store_true",
+        help="Render the enlarged-font / narrow-rank-distribution preview style without changing defaults.",
+    )
+    ap.add_argument(
+        "--display-min-channel-frac",
+        type=float,
+        default=0.0,
+        help=(
+            "Optional active-contact display/KMeans filter. Channels participating in less than this "
+            "fraction of clean events are excluded from the KMeans panel and similarity matrix. "
+            "Default 0 keeps the full readout channel set."
+        ),
+    )
     a = ap.parse_args()
-    compose(a.tag, a.fig_name, a.min_participation, a.montage)
+    compose(
+        a.tag,
+        a.fig_name,
+        a.min_participation,
+        a.montage,
+        preview_style=a.preview_style,
+        display_min_channel_frac=a.display_min_channel_frac,
+    )
 
 
 if __name__ == "__main__":

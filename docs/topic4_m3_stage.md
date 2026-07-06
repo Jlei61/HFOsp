@@ -79,6 +79,20 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
 > 两态 / 大范围沿轴 recruitment = 发作 / 连接 scaffold 从各向异性变各向同性"。Gate A（可投到 B 线相图的
 > 慢状态轨迹）可以先过，**不能自动升级成 Gate B（seizure-like phenotype）**。
 
+**→ M3A-v2（空间慢变量场，2026-06-28 计划锁定）** — 把 v1 的两个**标量**油箱
+（`q_core`·`q_global`）升级成**空间场** $q_I(x,t)$（抑制资源）+ $g_K(x,t)$（疲劳/恢复）。动机：两个全局标量
+没有**空间历史**，"轴向疲劳的同时周边许可度上升 → 破轴" 这件事结构上承载不了（标量去抑制只会继续**加强**轴向）；
+空间场给每个位置自己的慢状态，让破轴**可被表示、可被检出**。公式见 `docs/snn_core_model_equations.md §B5`，
+实现计划 + red-TDD 骨架见 §6。仍是 **screen**：破轴是否真发生是经验问题，移交延后的 ablation。
+
+**M3A-v2 closed-loop screen 收口（M3A-V2-1，2026-06-28，详见 §6 进度 + A 线分文档）** — 空间场实现到 green 后，
+四步 closed-loop screen（field-only pilot → Step 1 衬底鉴定 → Step 2 q_I → Step 3 q_I+g_K → Step 4 低-q）
+**一致 NEGATIVE**：**field 层载体正**（field-only sanity：σ_q>σ_K 的持续活动能造出离轴易激性优势），**但当前
+SNN 的事件时标 / 状态轨迹触发不了它**——衬底全或无 / 全场（给不出局部可部分填充事件、采样的 kq 网格内没有
+稳定中间低-q 带、离轴招募只在 runaway 出现且无刹车能控）。三件事对账：**为什么推 = field 层成立 / 怎么推 =
+没推到受控离轴 / 怎么回来 = g_K 只 suppress 非"招募后恢复"**。**支持"当前 regime 不闭合"，不支持"慢变量机制
+总体失败"。** 后续 D_EE（削轴向 relay）或事件协议 / 衬底重做是新方向（非当前 spec，待用户定）。
+
 ## 3. B 线 · 谱相图 / W-场（→ 分文档 m3b_stage_conclusion）
 
 **测了什么** — 把这块带核薄片**线性化**，算出它天生最先放大哪些空间本征模式，扫"核兴奋度 × 全局去抑制"
@@ -136,6 +150,51 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
    coords，见 `src/sef_hfo_m3_interface.py`）满足后才做；当前 B 线相图是 raw-knob 原子图，
    `m3a_overlay_consumable=False`，不能被直接 overlay。
 
+> **M3A-v2 落地状态（2026-06-28）** — 上面第 1–2 步（四类 phenotype gate + 源空间 onset canonical
+> readout）已收敛为可执行 spec + 计划：
+> - 公式：`docs/snn_core_model_equations.md §B5`（空间场 $q_I/g_K$、四类判据、proxy/spectral 相图、红线）。
+> - 计划：`docs/superpowers/plans/2026-06-28-sef-hfo-m3a-v2-spatial-slowvar-field-plan.md`（10 任务，逐任务 TDD）。
+> - red-TDD 骨架：`tests/test_m3a_v2_spatial_slowvars.py`（40 红 + 1 `@slow` 红，含 2026-06-28 review 加固的
+>   `k_K` bounded build / `area_large` size gate / `Y=P_global` / `aq_drive` `eta_I` 加权 4 条合同）；stub
+>   `src/snn_engine/slow_field.py::SpatialSlowField` + `src/topic4_m3a_v2_phenotype.py`。
+> - 延后（plan 本轮不建）：$D_{EE}$ 场、ablation A/B/C/D 机制证明。**破轴主张受 ablation gate，未解锁。**
+> - **实现后首轮 pilot（2026-06-28，descriptive screen）**：见 `docs/archive/topic4/m3a_v2_field_pilot_2026-06-28.md`；
+>   可复现 runner `scripts/run_m3a_v2_field_pilot.py` → `results/topic4_m3a_v2_field_pilot/pilot_results.json`。
+>   一句话（锁定口径）：**field-only mechanism sanity positive**（载体在地图层面 σ_q>σ_K 因果地造出"旁边追上主轴"的离轴易激性优势，剂量可控）；
+>   **但闭环 ictal-like broken-axis transition NOT established**——这块衬底踢出的是全场招募事件（R_area~0.65，非局部沿轴行波），
+>   q_I 被均匀抽干（主轴=旁边 gap≈0），强耗竭只 runaway。瓶颈在 **substrate regime**（substrate enters full-field recruitment before
+>   localized axial propagation），不在 M3A-v2 慢变量。proxy β_K=0.3 相对膜 η_K=1.0 低估疲劳、滞后报 off-axis 追上。
+> - **Step 1 substrate qualification（slow OFF, single core, 2026-06-28）**：见 `docs/archive/topic4/m3a_v2_substrate_qualification_2026-06-28.md`；
+>   runner `scripts/run_m3a_v2_substrate_qualification.py` → `results/topic4_m3a_v2_substrate_qual/qualification_results.json`。
+>   **YES——局部沿轴自限间期事件存在且可达（8/192 全 5 判据过，AR 是 localize 杠杆：AR=2 全场→AR=4–6 局部 R~0.4/F_off~0.1/沿轴传播）。** 解开了 closed-loop 死结。
+>   **broad sweep（864 runs multi-seed +Lever 2）找到 4/4 稳健区。primary canonical（默认 I→E 结构、无 Lever 2 confound）= `AR=4, g=8, l_EI=0.25, C_EI=200, nu=0.46, kick=3.0`**（mean R~0.40/S~0.99/F_off~0.14/peak~42Hz, **seed 1–8 全 8/8**）。
+>   自限稳健由 **AR↓ + nu↓** 主导（AR 是 localize 梯度非硬阈，AR=2 高 g 下也能贴界过——见 AR=2 boundary probe）；**Lever 2（surround 抑制 l_EI/C_EI）边际平、不灵**（诚实负，合 memory M2 无 containment window）。机器可审计：sweep_results.json（raw_rows 带 gate flags + fresh + ar2 probe + canonical per-seed）+ multiseed_results.json。
+> - **Step 2 q_I-only（g_K=0, D_EE=1, 2026-06-28）= NEGATIVE（informative）**：见 `docs/archive/topic4/m3a_v2_step2_qI_2026-06-28.md`；runner `scripts/run_m3a_v2_step2_qI.py` → `results/topic4_m3a_v2_step2_qI/step2_results.json`。
+>   3 衬底 × 4 σ_q × 3 q_min × 5 Δq_axis × 4 seed（k_q 用 baseline 重放标定，K_q mass-normalized）。**576 q_I run：532 A_no_effect、44 E_runaway、B_expanded_axial=0。**
+>   **q_I 单独给不出 expanded axial**——returned run 全 R 不变（max dR=+0.016）轴向完好；会长大的全 runaway + 轴读出崩（headroom 最少的 sensitivity 衬底；**F_off 仍低~0.14，未证 off-axis recruitment**）。
+>   **scope-limited（非"结构性"满话）**：当前单事件 + q_init=1 + dq≤0.30 + 3 衬底；几何半边可审计（`axis_reach_frac=1.0` 于 L=10&16，见 `L16_control.json` + raw_rows）。**未测低-q 初始态。** 结论=支持把 g_K 作下一步必要测试（q_I-only 缺终止机制），**但 g_K 能否把 runaway 变 returned recruitment 仍未证**——Step 3 判决。
+> - **Step 3 q_I+g_K rescue scout（2026-06-28）= 机制不闭合（NEGATIVE, informative）**：见 `docs/archive/topic4/m3a_v2_step3_qI_gK_2026-06-28.md`；runner `scripts/run_m3a_v2_step3_qI_gK.py` → `results/topic4_m3a_v2_step3_qIgK/step3_results.json`。boundary 点 × σ_q/σ_K × **Γ_K∈{0,0.5,1,1.5,2}**（η_K 标定）× 4 seed。**432 g_K cell：298 B_oversuppress、127 C2_still_axial、7 C1_runaway、A(off-axis recruitment)=0、RESCUED=0。g_K 是刹车**（疲劳正确压轴 gap +0.118），**不重定向离轴**：**F_off 没达 recruitment gate**（max dF +0.08；4 个小升全 still-axial）、**q_off 轻–中降但从未<0.7（min 0.735）= 没进低-q permissive regime**（55ms 事件来不及耗深离轴——field-probe 持续活动有、closed-loop 单事件无的差距）。g_K 把 runaway 转 returned 但成 **suppressed/axis-dominant（R 0.05–0.50）非 off-axis**。**Γ_K target vs achieved**：target 2.0→achieved median 0.08（事件被压短 g_K 来不及积累，须同时报）。**Step 3 不能证伪整体机制——fork A 低-q 未测。****fork（用户 C2 路）**：最该试=**低-q 初始态/持续事件 regime**（补 timescale 缺口）；次选 D_EE。**M3A-v2 closed-loop 机制当前 regime 未闭合；field-only sanity 仍正。**
+> - **Step 4 fork A 低-q 初始态（M3A-V2-1，2026-06-28）= NEGATIVE → M3A-v2 closed-loop 线收口**：见 `docs/archive/topic4/m3a_v2_step4_lowq_2026-06-28.md`；runner `scripts/run_m3a_v2_step4_lowq.py`（preload/washout/probe 三相 + 记录起点态 + qonly/braked + 严格判据；`--out-name` 选输出名、meta 记录实际 `substrates/seeds/kq`）→ `results/topic4_m3a_v2_step4_lowq/{step4_lowq_small,step4_lowq_finer}.json`。
+>   **success：small 0/24、finer 0/12、合计 0/36。** preload 后的 q 在**采样的 kq 网格里没有稳定中间低-q 带——是个 sharp transition**：要么浅耗竭无效（q_global ~0.87–0.98），要么 crash 到 ~0.015–0.18，**0.5–0.7 一个点都没采到**（sampled-grid 观察，**不是** saddle/双稳态结构存在性证明）。**唯一够 q<0.7 是 crash 态 → probe 出 off-axis（F=0.635、R=1.0）但 returned=False（runaway），braked 也救不回（太爆、dynamic g_K 太晚）**；浅 q → 无 off-axis / braked over-suppress。本轮只测 **q-preloaded braked probe**；full-state（带 g_K 走完 preload）是有意未测变体。
+>   **收口结论（用户 §7 预判；三件事对账）**：**为什么推 = field 层成立**（field-only 正）；**怎么推 = 未达成**（closed-loop 没推到受控离轴，off-axis 只在 runaway）；**怎么回来 = 方式不对**（g_K 只 suppress，非"发作样招募后恢复"）。**field-only 载体正，但当前 SNN 事件时标/状态轨迹触发不了空间机制**（衬底全或无/全场）。**closed-loop 机制当前 SNN regime 未闭合——支持"当前 regime 不闭合"，不支持"慢变量机制总体失败"。** 后续才值得 D_EE（削 relay）或事件协议/衬底重做（新方向、非当前 spec，待用户定，本轮不开始）。
+> - **M3A-v2.2（sustained 协议 + 全局恢复变量 `h_G` 载体，2026-06-29）= NEGATIVE，承接 Step 4 三岔**：见
+>   `docs/archive/topic4/m3a_v2_2_carrier_exploration_2026-06-29.md`。新做 (a) 持续 ramp+HOLD 驱动协议（runner 级
+>   `nu_signal_fn`，**引擎未碰**）补 timescale 缺口；(b) 全局活动触发恢复变量 `h_G`（`M/B/Π` 传感器 + smooth-AND，
+>   off-by-default 字节奇偶，spec `docs/snn_core_model_equations.md §B6`，`tests/test_m3a_v2_2_global_recovery.py` 29 过）。
+>   **自主扫 3184 次仿真（~5.7h，分支 `codex/topic4-m3a-v2-2`，driver `scripts/run_m3a_v2_2_explore.py` fc65a61 +
+>   followup b87cd45）：持续协议没改掉"全或无"**——slow-off C1 **718/720 失败模式保留**、Exp-0 全程 `UNCALIBRATED`；
+>   **`q_I+g_K` 载体 0 partial-fill 候选**（primary 1920 + backup·0.85 补 544，全 tonic/fail-closed；唯一干净事件是
+>   backup 小沿轴 blip R≈0.08/S≈0.97，加 `q_I+g_K` 也不破轴）。**与独立 clamp 复查（memory
+>   `project_topic4_m3a_v2_1_qigk_clamp_verdict`）同向收敛 = 载体图景本身不足**。Stage-3 `h_G` 闭环按 gate 设计 **SKIPPED**。
+>   **负结论 L-robust**（L=16 复跑 411 sim 一致：C1-A 100%、0 干净事件、0 候选）。结果图
+>   `results/paper-ready-figure/fig_m3a_v2_2_explore_summary/`（读 sweep 的统计汇总）+ `fig_m3a_v2_2_dynamics/`（四列动力学示意）。
+>   另有三个**单轨迹 visual-diagnostic GIF**（开环、非 sweep，直观看"为什么失败"，详见 archive §附 + `results/FIGURE_INDEX.md`）：
+>   `fig_m3a_v2_2_hG_runaway_transition/`（全局恢复 `h_G` 打开但减法式刹车拉不回 runaway）、
+>   `fig_m3a_v2_2_qI_runaway_transition_epilepsiae_1146/`（`q_I` 载体 + 轴向 `g_K` 疲劳，E1146 真实电极几何）、
+>   `fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/`（刺激 vs 不刺激对照：中段触点 `V_th` clamp 把 runaway 推后 +834 ms，关刺激后才反弹——外部预防式压制示意，非治疗/recovery 主张）。
+>   **收口：NO-GO 继续调 `q_I/g_K`；下一杠杆 `D_EE`（relay depression）或衬底/事件协议重做**——瓶颈在衬底拓扑、不在恢复变量。
+>   `h_G` 载体（已实现、测齐、字节奇偶守）保留备用，拿到干净 partial-fill 候选前不开闭环大扫。
+
 ## 7. 合并与 worktree
 
 - A 线证据来自 `topic4-m3a-a2` worktree 的 A1/A1b/A1c/A2 screen + `results/topic4_sef_hfo/m3a_slowvars/`。
@@ -143,5 +202,10 @@ L=20mm SNN）。之前两次判 FAIL 用错了仪器：(1) 触点空间方向可
   `scripts/build_m3b_spectral_outputs.py`、`tests/test_topic4_m3b_spectral_phase.py`，M3B commit
   `32ba62d`→当前）；artifacts/figures 在 ignored 的 `results/topic4_sef_hfo/m3b_spectral_phase_map/`，
   由脚本再生。
-- worktree `topic4-m3a-a2`、`topic4-m1` 阶段性收口后关闭（clean，`git worktree remove` 不丢提交，分支留存）；
-  `topic4-m3`（m3-hub）保留。
+- worktree `topic4-m3a-a2`、`topic4-m1` 阶段性收口后关闭（clean，`git worktree remove` 不丢提交，分支留存）。
+- **2026-06-30 收口清理**：M3A-v2 线收口后，剩余 worktree 全部关闭（`git worktree remove`，提交不丢、分支留存）——
+  `topic4-m3`（m3-hub，M3B round1 WIP 已 checkpoint 到 `topic4-snn-m3-hub` 分支）、`topic4-m3a-v2-1`
+  （v2.1 收口/handoff commit 已 cherry-pick 进本分支 `codex/topic4-m3a-v2-2`；qigk gap-sweep 脚本 checkpoint 到
+  `codex/topic4-m3a-v2-1` 分支留存）。删除已并入/空壳分支 `codex/topic4-m3a-v2-spatial-field`、
+  `topic5-ictal-field-dynamics`（0 独有 commit、内容已在本分支）；`topic5-part2-event-load`（NEGATIVE 收口、54 独有
+  commit）删分支前打 `archive/topic5-part2-event-load` 标签保命。现仅主 checkout 一个 worktree。

@@ -1,0 +1,140 @@
+{
+  "figure": "fig_subject_snn_epilepsiae_1146_CR1p5_S4_T20000_20260706_kmeans2",
+  "companion_to": "fig_subject_snn_epilepsiae_1146_CR1p5_S4_T20000_20260706",
+  "input_tag": "epilepsiae_1146_tsrc_cr1p5_s4_T20000_20260706",
+  "preview_style": false,
+  "plotters": "canonical _plot_rank_heatmap + _plot_cluster_boundaries (heatmap); _hist_aligned + _cluster_aligned (canonical-styled, on heatmap 1-unit coord so the 3 left panels share an aligned channel y-axis via sharey)",
+  "event_filter": "sign is not None and n_part >= 2*k_dir (4)",
+  "display_min_channel_frac": 0.3,
+  "dropped_display_channels": [
+    {
+      "channel": "SCL9",
+      "participation_frac": 0.125
+    },
+    {
+      "channel": "ICL11",
+      "participation_frac": 0.1875
+    },
+    {
+      "channel": "ICL10",
+      "participation_frac": 0.1875
+    },
+    {
+      "channel": "ICL9",
+      "participation_frac": 0.25
+    }
+  ],
+  "n_events": 16,
+  "n_forward": 5,
+  "n_reverse": 11,
+  "bidirectional": true,
+  "min_dir_events_gate": 3,
+  "channels_displayed": [
+    "ICL8",
+    "ICL7",
+    "ICL6",
+    "ICL5",
+    "ICL4",
+    "ICL3",
+    "ICL2",
+    "ICL1"
+  ],
+  "kmeans": {
+    "k": 2,
+    "min_participation": 3,
+    "labels": [
+      1,
+      1,
+      0,
+      1,
+      0,
+      0,
+      1,
+      0,
+      1,
+      1,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0
+    ],
+    "cluster_sizes": {
+      "C0": 8,
+      "C1": 8
+    },
+    "display_cluster_order": [
+      "C1",
+      "C0"
+    ],
+    "display_labels": {
+      "C0": {
+        "label": "t_b",
+        "color": "#1f77b4",
+        "direction": "reverse"
+      },
+      "C1": {
+        "label": "t_a",
+        "color": "#d62728",
+        "direction": "forward"
+      }
+    },
+    "direction_confusion_rows_cluster_cols_forward_reverse": [
+      [
+        0,
+        8
+      ],
+      [
+        5,
+        3
+      ]
+    ],
+    "direction_purity": 0.8125,
+    "within_cluster_tau_mean": 0.43579050110071893,
+    "active_inter_cluster_corr": -0.9132233209773138,
+    "shared_overlap_corr": -0.938590635448906,
+    "shared_overlap_n_channels": 8,
+    "candidate_forward_reverse_pairs": [
+      {
+        "cluster_a": 0,
+        "cluster_b": 1,
+        "spearman_r": -0.9132233209773138,
+        "label": "candidate_forward_reverse"
+      }
+    ]
+  },
+  "similarity_matrix_panel": {
+    "valid": true,
+    "model_templates_built_by": "event sign (forward = sign>0 events, reverse = sign<0 events), NOT cluster label",
+    "rows_model_fwd_rev_cols_data_ta_tb_spearman": [
+      [
+        0.9132233209773138,
+        -0.938590635448906
+      ],
+      [
+        -0.9761904761904763,
+        1.0
+      ]
+    ],
+    "directional_perm_p": [
+      [
+        0.0025997400259974,
+        0.000999900009999
+      ],
+      [
+        0.00029997000299970003,
+        9.999000099990002e-05
+      ]
+    ],
+    "perm_p_direction": "diagonal one-sided positive, off-diagonal one-sided negative (swap-predicted)",
+    "stars": "panel shows directional channel-shuffle permutation p as stars only; color = Spearman \u03c1"
+  },
+  "notes": [
+    "Plotting-only; no SNN rerun.",
+    "Rank heatmap + rank distribution + cluster profiles drawn by the MATURE canonical functions (same as the per_subject propagation figure), not hand-rolled.",
+    "Model fwd/rev templates built by EVENT SIGN (not cluster label); similarity matrix GATED on >= MIN_DIR_EVENTS of each direction (one-direction subjects -> N/A, not a fake swap).",
+    "Full/active imputed inter-cluster corr is not the main direction readout; shared-overlap corr + direction purity are the cleaner direction judges.",
+    "If both KMeans clusters have the same direction, display labels are same-template subclusters (e.g. t_b-1/t_b-2), not a fake t_a/t_b pair."
+  ]
+}

@@ -61,6 +61,7 @@
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际计算进入稳定性分析
 - 6 条 pre-registered 预测：H1 endpoint 空间紧凑 / H2 source-sink 反向几何 / H3 mark independence + stable geometry / H4 rate-geometry 解耦 / H5 发作邻近 endpoint identity shift / H6 participation-field 空间分隔
 - 建模路线：effective gain → linear dispersion map → finite-pulse response map → 2D rate field + geometry controls → LIF E-I SNN → 抽象慢变量 feasibility bridge；旧 HR/FHN Phase 4 route 降级为历史探索 / sensitivity
+- **当前执行状态（2026-06-29，建模线收口为机制 screen）**：建模路线已执行到慢变量阶段。M0→M1→M2 在均质衬底上一致显示"空间自限难、不靠压死"→ 转 M3；M3 A 线（源空间逐细胞 onset 梯度）= 沿轴相干招募波（R²≈0.87、40k SNN），B 线（谱相图）§5 非正规瞬态 = 骨架特异自限轴向，两线互证；M3A 慢变量场探索（v2 / v2.1 clamp 复查 / v2.2 sustained+`h_G`）**一致 NEGATIVE** = 当前 SNN regime + 载体图景不足以把沿轴事件改道成离轴/全局发作样招募，下一杠杆 = 连接结构 `D_EE` / 衬底重做（非继续调慢变量）。**机制 screen 通过、发作机制未 validate。** M-stage 主文档：`docs/topic4_m3_stage.md`（A/B 分文档 + worktree 处置见其 §13 / §7）
 
 ### Topic 5：Seizure-related analysis（subject 内 seizure subtype + 下游 pre-ictal/outcome）
 
@@ -72,6 +73,7 @@
   - 每 subject 内多个 ictal seizure 是否需要按 within-subject pathway 切 subtype（PR-1）
   - subtype 在 pre-ictal / propagation / outcome 是否表现出系统差异（PR-2+，未启动）
   - subtype 与 SOZ propagation pattern 是否互相印证（待立 PR）
+- **当前状态（network-skeleton 重定位 + 发作内 field pilot 2026-06-28）**：A 线已从"发作特异路径回放"重定位为"患者内稳定网络骨架读出"（间期/发作共用粗粒度锚点）；replay / subtype / load / drift 系列假设均阴性。最近做的发作内 field 动力学 pilot（§3.6）= **exploratory**：发作场随时间在变但整体仍贴间期主轴，"轴向走廊变弱 / 离轴变强"在 broad 队列有暗示、narrow 扩队列证否一半 → 非稳健、依队列/走廊几何，只进 supplementary。archive：`docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md`
 
 ---
 
@@ -93,11 +95,15 @@ lagPat 群体事件框架的 SOZ / non-SOZ 对比受结构性选择偏差污染�
 
 SEF-HFO v0.2（2026-06-01 plan lock draft）把 Topic 4 主模型收紧为一个可证伪机制闭环：低异质性不能直接等同近临界，必须先进入群体输入-输出曲线并改变局部 gain；线性稳定性只给小扰动地图，有限幅脉冲图才证明“能点燃但不失控”；稳定模板和高通道身份偏置必须高于电极几何 / 采样方式 controls。文献 framing 采用“具体细胞机制多样、中观动力学收敛”的安全口径：离子、泵、胶质、抑制和连接结构都可能改变易激性与恢复能力，但 SEF-HFO 只抽象检验 HFO 群体事件的自限传播、有限扰动响应、事件率调制和空间招募。旧 HR/FHN Phase 4 route 降级为历史探索 / sensitivity。真实数据验收合同仍沿用 v1 的 6 条预测（H1–H6），但 v0.2 建模主指标改为 held-out rank stability、split-half / odd-even stability、inter-template anti-correlation、self-limited pulse response 和 controls fail；`k=2` 与 raw identity bias 只作描述性输出。下一步主线是先做 effective gain + linear dispersion + finite-pulse response，再跑 2D rate field 和真实模板 pipeline。
 
+**当前进展（2026-06-29，建模执行收口）**：我们把这个"易激斑块"模型从纸面推进到了仿真。先问最基本的——一片性质均匀的神经组织，能不能自己长出"一次放电点着、沿一条固定通路传一段、然后自己停下来"的事件？能，但它有个顽固脾气：要么整片一起亮、要么很快被压死，很难做到"只铺开一小片就停"。我们顺着这个脾气一路加机制（局部恢复、向前的抑制、会缓慢变化的局部易激/疲劳地形），想让放电学会"拐到旁边去"（对应真实发作里活动从原通路扩散到别处）。到目前为止没成功——不是这些机制想法本身错，而是当前这版仿真衬底的图景撑不起它：放电只会沿原轴越铺越大或直接失控，没有出现"受控地改道到旁边"。所以结论定为"机制层面的探针通过了（这种组织确实能点着、能沿轴传、能自限），但'像真实发作那样改道/全局招募'这一步还没在模型里验证出来"，下一步该动的是神经元之间的连接结构本身，而不是继续拧这两个慢变量旋钮。（内部归档代号：M0–M3 stage screen、M3A-v2/v2.1/v2.2 carrier exploration NEGATIVE、`D_EE` 下一杠杆；主文档 `docs/topic4_m3_stage.md`）
+
 **H2b 方向轴诊断（archive-only supplementary，2026-05-25 v1.0.2）**：H2 spatial-layer cohort claim 之上 archive-only 的几何方向诊断 phase，问"swap 是否仅来自正交无关 source"。strict verdict 在 23 个可测 subject 上 0 个 `axis_reversal`（permutation null 在 `decision_k ≈ n_universe / 2` 时自由度退化）；descriptive shape 在 swap_class∈{strict, candidate} 合并 9 个可测 subject 上 5 个 `axis_reversal_shaped` + 0 个 `dual_source_shaped` + 4 个 `unclear`（含 3 个 PCA 单 shaft 退化）。**Scope 红线**：H2b 仅 falsify "正交无关 source" 假说，**不能** 区分 "同一病理核心轴双向读取" 与 "同轴双端独立 seed"（两者都预测 cos(v_A, −v_B) ≈ +1）。区分必须做 Round 2（per-event seed 聚类 + rank-distance 连续梯度 + source 各自相对 SOZ 关系，未实施）。**不进** framework v1.0.7 §3 H 主清单。详见 `docs/archive/topic4/sef_itp_direction_axis/{phase_h2b_direction_axis_plan_2026-05-25.md (v1.0.2), cohort_run_2026-05-25.md}`。
 
 ### Topic 5
 
 PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subject 上落地（exploratory，2026-05-10 audit-corrected）：约 64% subject-band 找到 ≥2 morphological subtypes，与 Schroeder 2020 *PNAS* within-patient pathway-variability 先验一致。442/548 sentinel 视觉支持 z-ER 抓得到 user 标的视觉异类（recall=100%）；548 gamma k=7 标为 high-heterogeneity / fine subdivision candidate（需 sensitivity）；916/1077 因 status filter / n_ok 失效不能作 sentinel。下游 PR 必须 per-subtype 不 per-subject。
+
+**当前进展（network-skeleton 重定位 + 发作内 field pilot）**：这条线后来重定位了——我们原本以为间期网络轴是"发作时那条传播路径的预演/回放"，但证据指向它其实是患者自己一张**粗粒度的稳定网络锚点图**，间期和发作大体共用同一张图，而不是发作特异的路径回放（回放/子型/负荷/漂移一系列假设都没看到信号）。最近做的发作内 field pilot 想看：一次发作从头到尾，电活动的"空间形状"会不会从"贴着间期那条主轴"逐渐拐向"离轴/横向"。结果是：场确实随时间在变、但整体仍贴着间期主轴；"轴向变弱、离轴变强"这个方向性假设在小队列里有点苗头、扩到更多被试后被证否了一半——它依赖具体队列和走廊几何，不是稳健现象，只作 exploratory/supplementary，不进主结论。（内部归档代号：A-line network-skeleton pivot、ictal field dynamics pilot broad 暗示 / narrow 证否；archive `docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md`）
 
 ---
 

@@ -1,0 +1,112 @@
+import numpy as np
+from src.topic5_v3c_latency import first_crossing_latency, latency_seconds, encode_latency_for_rank
+from src.topic5_v3c_latency import censoring_tallies, rank_diagnostics, threshold_stability, assay_valid
+from src.topic5_v3c_latency import auc_late, delta_t, auc_null_distribution
+from src.topic5_v3_mode_transition import load_v3_config
+
+RELT = np.round(np.arange(-5.0, 30.001, 0.1), 3)   # onset at 0.0
+
+
+def test_first_crossing_finite():
+    z = np.zeros_like(RELT); z[(RELT >= 5.0)] = 3.0            # crosses at +5s, sustained
+    kind, sec = first_crossing_latency(z, RELT, 0.0, z_cross=2.0, window_sec=30.0, sustain_frames=3)
+    assert kind == "finite" and abs(sec - 5.0) < 1e-6
+
+
+def test_first_crossing_t0():
+    z = np.full_like(RELT, 3.0)                                # already hot at onset
+    kind, sec = first_crossing_latency(z, RELT, 0.0, z_cross=2.0, window_sec=30.0, sustain_frames=3)
+    assert kind == "t0" and sec == 0.0
+
+
+def test_first_crossing_censored_and_transient():
+    z = np.zeros_like(RELT); z[(RELT >= 5.0) & (RELT < 5.15)] = 3.0   # 2 frames only -> not sustained
+    kind, sec = first_crossing_latency(z, RELT, 0.0, z_cross=2.0, window_sec=30.0, sustain_frames=3)
+    assert kind == "censored" and np.isnan(sec)
+
+
+def test_encodings():
+    assert latency_seconds("finite", 5.0) == 5.0 and latency_seconds("t0", 0.0) == 0.0
+    assert np.isnan(latency_seconds("censored", float("nan")))
+    assert encode_latency_for_rank("censored", float("nan"), window_sec=30.0) == 31.0
+    assert encode_latency_for_rank("t0", 0.0, window_sec=30.0) == 0.0
+
+
+def test_censoring_tallies():
+    t = censoring_tallies(["finite", "finite", "t0", "censored"])
+    assert t["finite_frac"] == 0.5 and t["t0_frac"] == 0.25 and t["cens_frac"] == 0.25
+
+
+def test_rank_diagnostics_ties():
+    d = rank_diagnostics(np.array([1.0, 1.0, 2.0, 3.0]))
+    assert d["uniq_ranks"] == 3 and d["max_tie_block"] == 2
+
+
+def test_threshold_stability_monotone():
+    a = np.array([1.0, 2.0, 3.0, 4.0]); b = np.array([1.1, 2.2, 2.9, 4.5])
+    assert threshold_stability(a, b) > 0.9
+
+
+def test_assay_valid_gates():
+    cfg = load_v3_config()
+    good = {"finite_frac": 0.6, "t0_frac": 0.2, "uniq_ranks_med": 8, "thr_spearman": 0.8, "n_informative": 4}
+    assert assay_valid(good, cfg) is True
+    bad_t0 = {**good, "t0_frac": 0.56}                         # 1077-like
+    assert assay_valid(bad_t0, cfg) is False
+    bad_finite = {**good, "finite_frac": 0.37}
+    assert assay_valid(bad_finite, cfg) is False
+
+
+def test_auc_late_direction():
+    soz = np.array([1.0, 2.0, 3.0]); surplus = np.array([4.0, 5.0, 6.0])  # surplus later
+    assert auc_late(surplus, soz) == 1.0                                   # H-B extreme
+    assert auc_late(soz, surplus) == 0.0                                   # surplus earlier
+    assert auc_late(np.array([2.0, 2.0]), np.array([2.0, 2.0])) == 0.5     # all ties
+
+
+def test_delta_t_seconds():
+    assert delta_t(np.array([5.0, 7.0]), np.array([1.0, 3.0])) == 4.0
+    assert np.isfinite(delta_t(np.array([5.0, np.nan]), np.array([1.0])))  # nan (censored) skipped
+
+
+def test_auc_null_preserves_and_varies():
+    shaft = {n: "H" for n in ["H1", "H2", "H3", "H4"]}
+    surplus_names = ["H1", "H2"]; soz_names = ["H3", "H4"]
+    sv = np.array([10.0, 10.0]); zv = np.array([0.0, 0.0])                 # obs AUC=1.0
+    null = auc_null_distribution(sv, zv, shaft, surplus_names, soz_names, n_perm=200, rng=0)
+    assert null.shape == (200,) and 0.0 <= np.median(null) <= 1.0
+
+
+def test_latency_eligible_gate():
+    from scripts.run_topic5_v3c_latency import latency_eligible
+    cfg = load_v3_config()
+    ok = {"n_surplus": 10, "n_covered": 4}
+    assert latency_eligible(ok, True, cfg) is True
+    assert latency_eligible(ok, False, cfg) is False           # assay invalid -> descriptive only
+    assert latency_eligible({"n_surplus": 2, "n_covered": 4}, True, cfg) is False   # too few surplus
+    assert latency_eligible({"n_surplus": 10, "n_covered": 2}, True, cfg) is False  # too few A∩S
+
+
+def test_interpret_latency_four_way():
+    from scripts.run_topic5_v3c_summary import interpret_latency
+    cfg = load_v3_config()
+    # H-B: AUC>=0.60, majority>0.55, SIGNED delta_t>=+2, null sig, sensitivity concordant
+    assert interpret_latency(0.66, [0.6, 0.7, 0.58, 0.62], 3.0, 0.01, True, cfg) == "H-B_supported"
+    # P1-3: identical but delta_t NEGATIVE (contradictory) -> NOT H-B (abs() would wrongly pass)
+    assert interpret_latency(0.66, [0.6, 0.7, 0.58, 0.62], -3.0, 0.01, True, cfg) != "H-B_supported"
+    # P1-5: H-B numbers but censor/t0 sensitivity NOT concordant -> NOT H-B
+    assert interpret_latency(0.66, [0.6, 0.7, 0.58, 0.62], 3.0, 0.01, False, cfg) != "H-B_supported"
+    # H-A compatible (descriptive): AUC in [0.45,0.55], small |delta_t|
+    assert interpret_latency(0.50, [0.49, 0.51, 0.50], 0.5, 0.6, True, cfg) == "H-A_compatible"
+    # surplus EARLIER (low tail): AUC<=0.40 and delta_t<=-2 -> distinct category, not indeterminate
+    assert interpret_latency(0.34, [0.3, 0.35, 0.4], -3.0, 0.2, True, cfg) == "surplus_earlier_unverified"
+    # indeterminate: mixed direction, null not sig, outside HA band
+    assert interpret_latency(0.57, [0.7, 0.4, 0.6], 1.0, 0.3, True, cfg) == "indeterminate"
+
+
+def test_spatial_primary_ok_requires_min_subjects():
+    from scripts.run_topic5_v3c_summary import _spatial_primary_ok
+    cfg = load_v3_config()
+    assert _spatial_primary_ok({"n_spatial_eligible": 4, "p_value": 0.01}, cfg) is True
+    assert _spatial_primary_ok({"n_spatial_eligible": 1, "p_value": 0.01}, cfg) is False  # too few subjects
+    assert _spatial_primary_ok({"n_spatial_eligible": 4, "p_value": 0.20}, cfg) is False  # null not sig

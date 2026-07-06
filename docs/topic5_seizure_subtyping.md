@@ -1,5 +1,14 @@
 # Topic 5：Seizure-related analysis (per-subject subtype + 下游 pre-ictal / outcome)
 
+> **🆕 V2 新重点（2026-07-01，design rev2 收紧完，待 writing-plans）：间期 HFO 几何 = 病理【候选】临界模态。**
+> 三层框架 —— trait：间期 HFO timing 几何 = **candidate** 病理临界模态（升级需证据阶梯）；state：发作前临界性沿这条模态升高；
+> expression：发作起始通过 **phenotype 特异的频带**沿这条模态招募（频带=发作机制的 readout，非技术参数）。
+> 核心问题从"哪个频带最像间期几何"升级为"**哪种发作起始机制沿间期 HFO 通路被重新招募**"。
+> **三个 gate（取代单一 go/no-go）**：A 空间平滑 null / B 频带特异（超 broadband）/ C HFO 特异（1-f+common-field 残差存活）；每层不过各有可发表结论（如 Gate B 不过 = "预测宽带招募非窄带 HFO"）。
+> **防循环两条命门**：必须过 **HFO-rate-preserving timing-order null**（否则 timing geometry 退化成 HFO-rate topography）；`hfo_rich` phenotype 须**独立来源**（不能用同一 ripple-power outcome 定义再验 ripple 对齐）。
+> 设计见 `docs/superpowers/specs/2026-07-01-topic5-v2-hfo-critical-mode-design.md`（rev2）；数值+文献 handoff 见 `docs/archive/topic5/ictal_band_sweep_handoff_2026-07-01.md`。
+> V1（network-axis，下方 2026-06-14 主线）是 V2 前身/基础，未被推翻，且 V2 不默认把 stable scaffold 升级成 unstable mode。
+
 > **主线结果（2026-06-14）：network-axis A+B 已执行**——间期传播轴 ↔ 发作早期激活共享一根粗网络骨架（18 Epilepsiae 队列稳），细对齐仅快活动量稳；符号自由共线，非逐点重放。见 §3.0 + 归档 `axis_alignment_AB_result_2026-06-14.md`。
 > 状态：**探索性 (exploratory) — PR-0 + PR-1 落地，audit-rerun 完成 (2026-05-10)，yuquan 扩展 (2026-05-10 PR-0.1)**。PR-1 cohort z-ER 聚类有 1 张 cohort 主结果（`figures/per_subject/`，25 subjects），cohort-level "真子型断言" 仍依赖 sensitivity；PR-2+ 未启动。
 > 范围：以 ictal seizure 本身为研究对象——subject 内的 seizure subtype carve-out + 下游 pre-ictal / outcome / propagation 关联。
@@ -208,6 +217,69 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 ---
 
+### 3.6 发作内 field 动力学：轴向走廊 vs 非轴向随发作进程（2026-06-28，exploratory，broad 暗示 / narrow 扩队列证否 → 不稳健）
+
+**测什么**：一次发作从头到尾，电活动"空间形状"怎么变。按间期两模板把触点分块——两模板各自最早响应的小核（端点）、两核**之间**的"走廊"中段、离轴的横向触点——看随发作进程走廊（轴向）相对活动是否**减弱**、横向是否**增强**、整体是否更同步、场方向是否漂移。
+
+**怎么测**：每 10s 窗算各触点相对发作前 baseline 的 robust-z（和 A 线同口径），比四分区的"正质量占比"；每次发作算 progress 与走廊占比的 Spearman ρ（期望<0）/ 非轴向占比的 ρ（期望>0），每被试再对各发作的 ρ 做 Wilcoxon（**发作=重复单位**）。队列=broad 9（8 swap + E916 非 swap）+ narrow 7 平行批（用每模板**端点 compact core** 构轴，证明**不必 swap**）；source 核 = 每模板最早 compact top-2-3，非 decision_k 整串。
+
+**结论（broad + narrow 扩队列后）**：发作场随时间**在变**（GIF 可见）、整体**仍贴间期轴**（maxAB 不降反升）；但"轴向走廊变弱/非轴向变强"**不是稳健现象**——**broad 有暗示**（轴向 median ρ<0 在 5/8、非轴向 ρ>0 在 8/8），**narrow 扩队列不复现甚至反向**（轴向 ρ<0 仅 3/7、非轴向 ρ>0 仅 2/7；E1146 轴向 ρ=+0.52、E442 +0.37）；两队列各仅 1 被试 Wilcoxon 显著。**扩队列调查把 broad 的方向暗示证否了一半 → 依队列/substrate/走廊厚度而变。** 非 swap 确能构轴（E442/E916 swap=none 有走廊；E916 发作太短无趋势）。**与 A 线"轴共享"在时间维一致（maxAB 保持），但方向减弱假设阴性。** caveat：z-ER 中后期偏示意，场图/GIF 只作相对空间形状看。
+
+**paper 用途**：本图模式（间期 **A|B 锚** + 发作场演化 + **GIF 直观看发作场的传播变化**）保留为 **supplementary**。
+
+完整方法 + 数值表 + parity + 图/动画说明：`docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md`。
+
+---
+
+### 3.7 发作前 criticality/state 层是否投影到间期 HFO 几何（2026-07-01，V2a，exploratory，restricted-axial sanity check → 偏阴性，已 reframe 到 V3a）
+
+**测什么**：真发作前最后约两分钟，几种"要失稳的迹象"——每触点变脆程度（易感场 K_t = variance/lag-1 autocorr/line-length rate 的 late−early 变化）、主导动力学模态落点（M_loading）、连锁激活前向流量（avalanche）——是否沿间期 HFO 传播轴 `G_HFO` 排布。
+
+**怎么测**：state 信号 = 宽带能量 baseline-robust-z（`bb_zt`，只取发作前段）。subject 为单位（窗→发作→被试→队列中位数），broad/narrow 不 pool。动力学腿用 phase+block surrogate（各 1000 次，自建）；易感场/avalanche 的空间/顺序 null 当时依赖并发 session 的 Phase-1（未建）→ 挂 `pending_phase1`，**不假造 null**。
+
+**结论**：**受限实现下没支持**——三条腿队列有符号中位数≈0 且被试间符号不一致（非"平均掉"）；唯一有真实（时间）null 的动力学腿 **M_loading 0/16、λ 趋势 0/16 显著**（两种 surrogate 都过）。**最耐用的产出 = 方法学定律**：raw λmax≈0.90–0.95 被 surrogate 解释掉（宽带 envelope 平滑本身造高自相关）→ **今后所有 λmax/VAR/DMD/Jacobian 一律报 `λ_surplus`（观测 − surrogate 中位数），不报 raw**。方法学副产：avalanche rank-coupling 0.64–0.91 但前向流量≈0（自持假象非传播）→ 主指标必须用前向位移，不用 rank-coupling。
+
+**定位（重要）**：这是 **restricted axial preictal-only sanity check**（只看 −120~0s、两段窗、限 HFO 匹配触点、按 relt=0 而非 eeg_onset 锚定、无显式非轴向假设），**不判定**模型真正的预测（发作早期**轴向组织减弱 + 非轴向活动/流/模态放大**）。已 reframe 到 V3a。**不能写**："发作前没有临界性/state projection"、把 λmax≈0.95 当临界、把 rank-coupling 当传播。
+
+完整方法 + 数值表 + 禁止 claim：`docs/archive/topic5/v2_phase2_criticality_state_layer_2026-07-01.md`；后继设计：`docs/superpowers/specs/2026-07-02-topic5-v3a-mode-transition-design.md`（V3a axis→non-axis mode transition）。**工具库存见 §7。**
+
+---
+
+### 3.8 发作"轴向→非轴向"模态转移（2026-07-04，V3a，exploratory，**脆弱阳性 · pending sensitivity/V3b**）
+
+**测什么**：发作一启动，系统里最容易被放大的方向/连锁流向，会不会从那条固定的间期 HFO 小路搬到小路之外的触点上——非轴向连锁流放大（H3b）+ 密度归一奇异模态转向非轴（H3c）为 co-primary，轴向减弱（H3a）仅辅助。承重锚 发作前 30~10s（P3）→ 早发作 10~30s（I1），每发作按其脑电起始**在同一批发作内前后配对**，被试为单位，narrow 主 / broad 复制不合并。
+
+**怎么测**：非轴向 = 纯间期 HFO 参与度定义（对发作全盲，防循环）；率保/密度归一/相位/块/标签自建零假设各 1000 次；p 算在 Δ(I1−P3) 置换分布上；λ 只报 surplus。
+
+**结论（脆弱阳性，暂不可当确立结论）**：扣掉每触点放电率随机基线后的**非轴向净流增量**在主队列（Holm-p 0.031，刚过 0.05）和复制队列（0.008）都达到队列级显著 → 判读机械上到 tier 4 / `state_v3_supported=True`。**但五个来源使它很脆**：① 未校正的原始流大多在**下降**（主队列 5/7）——所谓"放大"是相对基线偏高、不是绝对增加；② 主队列 6/7 以**同时共激活**为主（lag1≈lag0），不是定向传导；③ 个体稳健性几乎全塌（流腿 0/7 过完整稳健门，`subject_support` 主队列 1/7、broad 0/9）；④ 更能代表"方向转移"的**模态腿(H3c)全阴**（Holm 0.89/0.63）；⑤ **主队列显著本身对单被试不稳健**——去掉主队列 7 个被试中任一（除 442）Holm 都翻到 0.0625 失败（6/7 drop 不通过），只有复制队列去一稳，即 tier-4 依赖 narrow 恰好这 7 个的配置。所以这是**数据侧候选信号，不是确立的"轴→非轴模态转移"**；机制升级要 V3b。**关键**：这个 tier-4 是"同一批发作内配对"修复后从 tier-2 翻上来的——未配对（P3、I1 拿不同发作子集相减）的错配噪声把一个符号一致的效应打散成不显著（如 253 −0.191→+0.035）；个别被试 1125 三腿方向最一致。
+
+**不能写**："V3a 成立 / 发作发生模态转移"、"off-axis flux 增加"、把它当定向传导、上机制主张、把 broad 单独当主结论。完整方法+逐被试数值表+禁止 claim：`docs/archive/topic5/v3a_mode_transition_2026-07-04.md`；后继：V3p（preictal-only 轨迹）/ V3b（模型–数据一致性）。
+
+### 3.9 V2 表达层三问收口（2026-07-04，Phase-1-v2，exploratory **candidate scaffold refinement**；✅ **已验收 2026-07-06**）
+
+> **✅ 验收核心科学结论（用户 2026-07-06 定，本部分接受口径）**：
+> **间期传播模式（interictal HFO 谁先谁后的顺序几何 G_HFO）与发作早期的宽带能量在空间上相关**——这是**队列一致、承重**的结论（对齐扣掉 1/f 后大半塌成宽带、只 gamma 一薄层残留、per-subject 弱 6/20）。**频带偏向性是个别患者现象（per-patient band bias），不是队列级机制主张**——所以频段特异性从"cohort Outcome B"降级为"少数患者的频带 leaning"。tier 仍 = exploratory candidate scaffold refinement（弱空间 null、非 formal gate）。**禁**：把频带偏向写成 cohort 机制 / HFO-/LVFA-/ripple-specific / formal gate passed / criticality。
+
+**测什么**：Phase-1 确认了"间期 HFO 几何 (G_HFO) ↔ 发作早期多频带能量场"的 cohort 层对齐（band-generic、非 ripple 独有）后，回答三个必要问题——**扛得住吗（survive：把宽带/1-f 扣掉后还在？）· 谁有（who：少数驱动？）· 什么时候（when：发作前已在还是点着才现？）**。
+
+**结论（三问；tier = candidate scaffold，不越 formal/机制）**：
+- **survive**：对齐**非纯宽带**（扣 LOBO 共有场后两池各 **4/7** primary 过 cohort-perm FWER、**α+γ 一致** = 频段特异残差层，Outcome B）；但**大半 1/f-可归因**（扣 1/f 后只 **gamma_LVFA** 两池稳；余塌）；**ripple 在 broad 扣 1/f 后"存活"= 多重比较天花板假象**（+ fs512 贴奈奎斯特被试带偏、绝对对齐反低于 raw、narrow 不显著、与 Phase-1 矛盾）→ **绝不 HFO/ripple 特异**。1/f 拟合 QC 干净（r²≈0.79、失败 1.7%）。
+- **who**：cohort 6/7 是**聚合**、per-subject 弱（≥4/7 仅 **6/20**）、无单一表型预测（Spearman 全 <0.4 门；过闸特征都是同向量再描述）、band-generic。→ **subject-heterogeneous**。**跨被试一致性（F3，per-band 单边 Wilcoxon signed-rank Δ>0）再确认**：每频段只 ~60–80% 被试为正，narrow 5/7 raw、仅 **1/7 Holm**（δ）；broad 4/7 raw、**0/7 Holm**、连 **γ 都 10/17 阳、raw p=0.215 n.s.**。即 F2 的 6/7 是**空间-null permutation**（被试内洗牌、已声明弱 null 反保守）聚合出来的，**跨被试标准检验一测就勉强**——这正是把"频带偏向=个别患者现象"钉实的证据（permutation vs Wilcoxon 的差＝异质性本身）。
+- **when**：**发作前已高且平**（近前−远前≈0，无爬升）+ **起始处不大上抬**（broad 符号翻转 p≈0.005 支持、narrow 临界 p≈0.06/Wilcoxon<0.05）、**EEG 锚更清**（临床起始常早于 EEG 起始几十秒 → 临床锚抹平上抬；when 结论 **EEG-onset 为主、clinical-onset 为敏感性**）。→ **distal-preictal-present + modest onset increment**（"trait-like" 只到 distal-present，缺 >1h 非-periictal baseline，非已证 trait field）。
+
+**一句话（可直接引用）**：
+> Phase-1-v2 refines the original early-ictal scaffold result into a subject-heterogeneous, largely trait-like HFO-derived susceptibility scaffold. The scaffold is not ripple/HFO-specific; it partly survives common-field residualization, but most frequency structure is absorbed by aperiodic/1-f control, leaving only a descriptive gamma residual layer. Its critical-mode status remains untested and should be addressed next by HFO-axis criticality projection and HFO-constrained model–data consistency.
+
+**验收（2026-07-05 review → 2026-07-06 accepted）**：科学 = **PASS**（限 exploratory candidate scaffold refinement，核心口径见上方 ✅ 块）；工程 = **conditional pass → merge-hardening 已补**（overwrite guard `assert_no_cohort_clobber` + committed launcher `run_topic5_v2_residual_chain.sh` OMP=1/manifest + 单表 `phase1_residual_survival_summary.csv`）。**命名（P1-1）**：§1 是 **residual survival under weak spatial null**，`phase1_gate_summary.csv` 的 formal Gate flags 仍 weak-negative，勿写 "Gate B/C passed"。下一步（非本阶段）= HFO-axis criticality + model–data consistency，不再扩频段。
+
+**图（paper-grade，narrow/broad 各一版，2026-07-06 重制）**：`figures/phase1_F1_observed_maxAB_heatmap_{narrow,broad}.png`（subject×band maxAB，行按显著频段数降序）· `phase1_F2_null_per_band_{narrow,broad}.png`（per-band cohort Δ vs 弱空间 null）· `phase1_v2_W1_aperiodic_{narrow,broad}.png`（A: 一条触点 PSD + log-log 1/f 拟合 + band 轴；B: **residual 存活小方阵**〔扣宽带→扣1/f，raw 层不重复=见 F2〕，塌到只 γ）。band 命名 R=80–150 / FR=150–250。生成：`plot_topic5_v2_phase1_figures.py` + `plot_topic5_v2_W1_aperiodic.py`。
+
+**⚠️工程教训**：并行 numpy nulls worker 必须 `OMP_NUM_THREADS=1`（否则 26 worker×80 核 BLAS 超订 → 单被试 crawl，7h/40min 之差）；broad **1146** 单被试 n_perm=1000 单线程 ~2h、OMP 不助（Python-loop permute）→ 单独后台补跑并入 **n=17**（含它 common_resid 仍 4/7、aperiodic 2/7→3/7、结论不变；within_shaft_strong 仅 narrow 属性、broad 里 subject_wide_weak）。
+
+**不能写**：formal Gate A/B/C passed · HFO-/LVFA-/ripple-specific · timing-order replay · criticality/机制 · 过任何空间随机场。完整数值 + 承重 caveat + 禁 claim：`docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md`。
+
+---
+
 ## 4. 已知 caveat
 
 1. **gap_perm bug-fix 实测影响小**：cohort 28 个 ok rows 上 Δgap_perm 中位 −0.0007、
@@ -227,6 +299,14 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
    2022 *Brain Communications* 不能作为 pipeline 直接溯源。
 7. **`over_split_flag` 是 descriptive flag，不是过切检验**：真正过切判定需要
    gap_perm（正确 null）+ 视觉 diagnostic + sensitivity 三方一致。
+8. **z-ER 中后期偏示意 + 方向假设不稳健（§3.6 field 动力学）**：baseline-robust-z 相对发作前安静期
+   归一，越往发作中后期越不可靠 → 场图/GIF/轨迹中后期只作**相对空间形状**看。"轴向走廊变弱"在 broad
+   有暗示但 **narrow 扩队列证否**（多反向）→ 非稳健现象，不进 claim。"走廊"**不必 swap**（非 swap 端点
+   也能构轴），但需非退化轴 + 中段有电极（broad 8/9、narrow 7/7 可测；253 双侧无中段电极不可测）。
+9. **λ_surplus 方法学定律 + eeg-onset 锚定（§3.7 V2a）**：宽带 envelope 平滑本身造高自相关，raw λmax≈0.95
+   被 phase/block surrogate 解释掉 → 今后所有 λmax/VAR/DMD/Jacobian **只报 λ_surplus（观测−surrogate 中位数），不报 raw**。
+   avalanche **rank-coupling≠传播**（自持假象 0.64–0.91 但前向流≈0），主指标用前向位移。时间上 cache `relt=0`
+   ≠电生理 onset（`eeg_onset_rel` 偏移数秒）→ 发作前/发作窗必须按 `eeg_onset_rel` 锚定，不用 relt=0。
 
 ---
 
@@ -243,6 +323,10 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/echo_gate/stage1_proxy_triage_2026-06-08.md` — Stage 1 ictal-template-echo gate（ER 代理）：ER 代理 echo = **共享粗锚**非 specific-path-replay（coarse positive 但 anchor-matched FLAT + bad-data self-check clean）
 - `docs/archive/topic5/dynamic_echo/stage2b_sentinel_2026-06-12.md` — **Stage 2b early-ictal dynamic-pattern echo sentinel（gate NOT PASSED，B=500 n=3，exploratory）**：早发作动态有模板相关结构（过 channel max-null）但**非稳定早期路径复演**——峰时偏晚、confirmatory 早窗方向逐发作变号、yuquan within-shaft 塌掉 → **共享粗解剖/杆级锚为主**，细化并一致于 Stage 1。**未进 cohort、不支持路径复演主张**；first-onset recruitment（Stage 2，量错失败）的接替。
 - `docs/archive/topic5/ictal_direction_clustering_2026-06-27.md` — **发作早期方向无监督两类 ↔ 间期 A/B（exploratory，negative）**：6 个干净 ECoG、宽带+快活动全无 two_class_mapped；唯一真两堆的 442 其两堆与间期模板对不齐到超随机（two_class_unmapped）。防自欺=主方向+散点 null（弃纯单峰）+ best-pair 旋转 null + 预锁轴质量门；与 A 线一致=粗网络/解剖锚非方向两类重放。
+- `docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md` — **发作内 field 动力学 pilot（exploratory，broad 暗示 / narrow 扩队列证否 → 不稳健）**：broad 9（轴向 ρ<0 5/8、非轴向 ρ>0 8/8 暗示）vs narrow 7 平行批（ρ<0 仅 3/7、非轴向 2/7，多反向，E1146 轴向 +0.52）→ 方向减弱假设非稳健、依队列/substrate；非 swap 也能用模板端点构轴（不必 swap）；图/GIF 模式 = paper supplementary；z-ER 中后期偏示意。
+- `docs/archive/topic5/v2_phase2_criticality_state_layer_2026-07-01.md` — **V2a 发作前 criticality/state 层（exploratory，restricted-axial sanity check → 偏阴性）**：动力学腿 M_loading 0/16 + λ 趋势 0/16 显著（phase+block surrogate）；方法学定律 = 今后 λ 报 surplus 不报 raw；rank-coupling≠传播。不判定模型 axial-weakening/non-axial 预测 → reframe 到 V3a。
+- `docs/superpowers/specs/2026-07-02-topic5-v3a-mode-transition-design.md` — **V3a 设计（axis→non-axis mode transition，data-side H3a/b/c）**：eeg-onset 锚定 phase grid、2D 投影算子 + 非正规 reactivity、纯间期 HFO 非轴向（防循环）、compartment flux、自建 null、narrow 主。姊妹 spec V3b（M3B 模型–数据一致性 H3d）待写。
+- `docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md` — **V2 表达层三问收口（Phase-1-v2，exploratory candidate scaffold refinement）**：**survive** = 非纯宽带（common_resid 两池 4/7、α+γ 一致 = Outcome B）但大半 1/f-可归因（aperiodic 只 gamma_LVFA 稳）、ripple broad"存活"=多重比较天花板假象 → **NOT ripple-specific**；**who** = cohort 6/7 聚合、≥4/7 仅 6/20、无单一表型、band-generic（subject-heterogeneous）；**when** = 发作前已高且平 + 起始处小上抬（broad 符号翻转 p≈0.005、narrow 临界）、EEG 锚更清（preictal-present + modest onset increment）。broad=17（1146 单被试~2h 后台补跑并入；含 vs n=16 结论不变）。⚠️并行 numpy nulls 必须 OMP_NUM_THREADS=1。
 
 ---
 
@@ -290,3 +374,15 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 - `results/run_logs/cohort_zer_20260509_2104.log` — pre-audit cohort run
 - `results/run_logs/cohort_zer_audit_20260510_1045.log` — audit-rerun (channel-block null + ch-order check)
+
+### V2a criticality/state 层辅助工具（2026-07-01，22 tests pass）
+
+- `src/topic5_v2_criticality.py` — 纯函数：contact_susceptibility、ridge-VAR 套件（prepare_var_window 向量化 / var_window_ok / var1_ridge / spectral_radius / leading_eigvec / recovery_tau / cv_one_step_r2）、surrogate（block_shuffle / phase_randomize）、avalanche（activations_from_z / avalanche_atm / branching_ratio / atm_forward_displacement / atm_direction_index / atm_rank_coupling_spearman）
+- `scripts/_topic5_v2_crit_io.py` — 共享 plumbing：load_context + ictal_field_long_cache 发作前段 → matched-contact 包络 E；state_prefix / shaft_of / window_index_range / get_contact_alignment（band_scan-or-shim）/ get_null_fns
+- `scripts/run_topic5_v2_crit_{susceptibility,dynamics,avalanche,summary}.py` — 三腿 + 汇总 runner（subject 为单位、broad/narrow 不 pool、skip 记录）
+- `scripts/plot_topic5_v2_crit_summary.py` — 结果双面板图（3-leg 对齐 + 前向流 vs 自相关方法学核验）
+- `src/_topic5_v2_p1_contract_shim.py` — 临时 contact_alignment shim（逐字复刻 Phase-1 Task-5，band_scan 落地后自动退役）
+- `config/topic5_v2_phase2.yaml` — 相位窗 / surrogate / seizure cap 配置
+- 测试：`tests/test_topic5_v2_criticality.py` + `test_topic5_v2_crit_io.py` + `test_topic5_v2_crit_dynamics.py` + `test_topic5_v2_crit_legs.py` = **22 tests pass**
+- 结果：`results/topic5_ictal_recruitment/v2_criticality/{broad,narrow}/phase2_*_subject.csv` + `figures/phase2_state_layer_alignment.png` + `figures/README.md`
+- 复用边界（→ V3a）：io/surrogate/ATM primitives 直接继承；时间窗（改 eeg-onset 锚定 grid）、几何（改 signed axis + 非轴向）、null（自建 spatial/order/label/rate-preserving）需重写。
