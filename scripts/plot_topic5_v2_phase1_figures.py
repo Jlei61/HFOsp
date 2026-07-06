@@ -18,6 +18,17 @@ import matplotlib.patheffects as pe
 import numpy as np
 import pandas as pd
 import yaml
+from scipy.stats import wilcoxon
+
+
+def _holm(pvals):
+    """Holm step-down FWER adjustment (inline; avoids a statsmodels dep)."""
+    p = np.asarray(pvals, float); m = len(p); order = np.argsort(p)
+    adj = np.empty(m); running = 0.0
+    for rank, idx in enumerate(order):
+        running = max(running, (m - rank) * p[idx])
+        adj[idx] = min(running, 1.0)
+    return adj
 
 ROOT = Path(__file__).resolve().parents[1]
 V2 = ROOT / "results/topic5_ictal_recruitment/v2_band_scan"
@@ -173,6 +184,56 @@ def fig3_subject_stability():
     _save(fig, "phase1_F3_per_subject_stability.png")
 
 
+# ------------------------------------------------ F3 between-subject consistency (one-sided Wilcoxon)
+def fig3_between_subject_consistency():
+    """Per-band between-subject consistency: fraction of subjects with Δ>0 + one-sided Wilcoxon
+    signed-rank (H1: Δ>0). Complements F2 — F2 asks "does the cohort beat the weak SPATIAL null"
+    (permutation, per-subject spatial shuffle); THIS asks "is the per-subject Δ robustly positive
+    ACROSS subjects" (between-subject). The gap quantifies the subject-heterogeneity: the permutation
+    aggregates within-subject significance (6/7), but between subjects only ~65-80% of subjects are
+    positive and a standard test is marginal → per-patient bias, not a strong cohort-general effect."""
+    HOLM_C, RAW_C, NS_C = "#c44e52", "#dd8452", "#cfcfcf"                     # Holm-sig / raw-only / n.s.
+    for sub, n in SUBS:                                                       # narrow / broad = 独立图
+        _, nl, _ = _load(sub)
+        sp = nl[(nl.null_type == "spatial") & (nl.band.isin(PRIMARY))].copy()
+        sp["delta"] = pd.to_numeric(sp.delta, errors="coerce")
+        frac, npos, ntot, wraw = [], [], [], []
+        for b in PRIMARY:
+            d = sp[sp.band == b]["delta"].dropna().values
+            dz = d[d != 0]                                                    # wilcoxon drops exact zeros
+            p = float(wilcoxon(dz, alternative="greater").pvalue) if len(dz) else float("nan")
+            frac.append(float((d > 0).mean())); npos.append(int((d > 0).sum()))
+            ntot.append(len(d)); wraw.append(p)
+        wholm = _holm(wraw)
+        fig, ax = plt.subplots(figsize=(9.5, 6.2))
+        x = np.arange(len(PRIMARY))
+        for xi, b in enumerate(PRIMARY):
+            col = HOLM_C if wholm[xi] < 0.05 else (RAW_C if wraw[xi] < 0.05 else NS_C)
+            ax.bar(xi, frac[xi], width=0.7, color=col, edgecolor="gray", alpha=0.9, zorder=2)
+            ax.text(xi, frac[xi] + 0.015, f"p={wraw[xi]:.3f}" + ("★" if wholm[xi] < 0.05 else ""),
+                    ha="center", va="bottom", fontsize=11, fontweight="bold" if wraw[xi] < 0.05 else "normal")
+            ax.text(xi, 0.03, f"{npos[xi]}/{ntot[xi]}", ha="center", va="bottom", fontsize=11,
+                    color="white" if frac[xi] > 0.18 else "black", zorder=3)
+        ax.axhline(0.5, ls="--", color="#888888", lw=1.3, zorder=1)
+        ax.text(len(PRIMARY) - 0.55, 0.5, " 50% (Δ symmetric)", va="bottom", ha="right", fontsize=10, color="#777777")
+        ax.set_ylim(0, 1.1)
+        ax.set_xticks(x); ax.set_xticklabels([SHORT[b] for b in PRIMARY], fontsize=15)
+        ax.tick_params(axis="y", labelsize=13)
+        ax.set_ylabel("fraction of subjects with Δ > 0\n(between-subject, per band)", fontsize=14)
+        nr = int((np.asarray(wraw) < 0.05).sum()); nh = int((wholm < 0.05).sum())
+        ax.set_title(f"F3 · {sub} (n={n}) — between-subject consistency of the per-band alignment\n"
+                     f"one-sided Wilcoxon signed-rank (Δ>0): {nr}/7 raw p<0.05, {nh}/7 Holm  ·  "
+                     "complements F2's spatial-null permutation (per-subject weak / heterogeneous)", fontsize=11.5)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.grid(alpha=0.2, axis="y")
+        handles = [Patch(fc=HOLM_C, alpha=0.9, ec="gray", label="Wilcoxon Holm p<0.05"),
+                   Patch(fc=RAW_C, alpha=0.9, ec="gray", label="raw p<0.05 only (Holm n.s.)"),
+                   Patch(fc=NS_C, alpha=0.9, ec="gray", label="n.s.")]
+        ax.legend(handles=handles, loc="upper right", fontsize=11, framealpha=0.92)
+        fig.tight_layout()
+        _save(fig, f"phase1_F3_between_subject_consistency_{sub}.png")
+
+
 def _save(fig, name):
     FIGDIR.mkdir(parents=True, exist_ok=True)
     out = FIGDIR / name
@@ -185,3 +246,4 @@ if __name__ == "__main__":
     fig1_observed()
     fig2_null_perband()
     fig3_subject_stability()
+    fig3_between_subject_consistency()

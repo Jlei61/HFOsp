@@ -264,7 +264,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 **结论（三问；tier = candidate scaffold，不越 formal/机制）**：
 - **survive**：对齐**非纯宽带**（扣 LOBO 共有场后两池各 **4/7** primary 过 cohort-perm FWER、**α+γ 一致** = 频段特异残差层，Outcome B）；但**大半 1/f-可归因**（扣 1/f 后只 **gamma_LVFA** 两池稳；余塌）；**ripple 在 broad 扣 1/f 后"存活"= 多重比较天花板假象**（+ fs512 贴奈奎斯特被试带偏、绝对对齐反低于 raw、narrow 不显著、与 Phase-1 矛盾）→ **绝不 HFO/ripple 特异**。1/f 拟合 QC 干净（r²≈0.79、失败 1.7%）。
-- **who**：cohort 6/7 是**聚合**、per-subject 弱（≥4/7 仅 **6/20**）、无单一表型预测（Spearman 全 <0.4 门；过闸特征都是同向量再描述）、band-generic。→ **subject-heterogeneous**。
+- **who**：cohort 6/7 是**聚合**、per-subject 弱（≥4/7 仅 **6/20**）、无单一表型预测（Spearman 全 <0.4 门；过闸特征都是同向量再描述）、band-generic。→ **subject-heterogeneous**。**跨被试一致性（F3，per-band 单边 Wilcoxon signed-rank Δ>0）再确认**：每频段只 ~60–80% 被试为正，narrow 5/7 raw、仅 **1/7 Holm**（δ）；broad 4/7 raw、**0/7 Holm**、连 **γ 都 10/17 阳、raw p=0.215 n.s.**。即 F2 的 6/7 是**空间-null permutation**（被试内洗牌、已声明弱 null 反保守）聚合出来的，**跨被试标准检验一测就勉强**——这正是把"频带偏向=个别患者现象"钉实的证据（permutation vs Wilcoxon 的差＝异质性本身）。
 - **when**：**发作前已高且平**（近前−远前≈0，无爬升）+ **起始处不大上抬**（broad 符号翻转 p≈0.005 支持、narrow 临界 p≈0.06/Wilcoxon<0.05）、**EEG 锚更清**（临床起始常早于 EEG 起始几十秒 → 临床锚抹平上抬；when 结论 **EEG-onset 为主、clinical-onset 为敏感性**）。→ **distal-preictal-present + modest onset increment**（"trait-like" 只到 distal-present，缺 >1h 非-periictal baseline，非已证 trait field）。
 
 **一句话（可直接引用）**：

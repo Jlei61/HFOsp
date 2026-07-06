@@ -20,8 +20,12 @@ subject×band 的发作 onset 后 0–20s 能量空间场 vs 间期 HFO 几何 m
 **B「扣 1/f 前后存活塌缩」= residual 存活小方阵**：行＝两层 residual 控制（− broadband／− 1/f），列＝7 primary 频段；格填色＝该残差场仍过 max-over-bands FWER（弱空间 null）、灰＝不过，格内写 p 值；γ 的 −1/f 格＝金色（唯一两池都稳）。**故意不画 raw 层和 Δ 高度**——raw 是 F2 的信息（标题"raw baseline 6/7 → see F2"），Δ 是 F2 的 y 轴，都不重复。从上往下读＝塌缩：narrow 4 格 → 只剩 γ；broad 4 格 → β/γ/FR 3 格，但只 γ 金色 robust，β 近奈奎斯特脆弱、FR＝family-ceiling 假象（标题标注）。
 **关注点**：A 看"1/f 是 log-log 一条直线扣掉、鼓包落在哪个 band"；B 看"扣 1/f 后填色格缩到只 γ"＝频段特异大半是 1/f 背景、**NOT ripple-specific**；γ 残差是描述性、**非 LVFA-specific 机制**。承重口径＝间期传播 ↔ 发作早期宽带能量相关，频带偏向是个别患者现象。
 
+### phase1_F3_between_subject_consistency_{narrow,broad}.png
+**（新 F3，2026-07-06）per-band 跨被试一致性**：柱=每频段有多少被试 Δ>0（fraction，柱底标 n_pos/n），柱上标**单边 Wilcoxon signed-rank**（H1: Δ>0）raw p、★=过 Holm；色＝crimson 过 Holm / amber 仅 raw<0.05 / gray n.s.；虚线=50%（Δ 对称）。**和 F2 问不同问题**：F2=过**空间** null（permutation，被试内洗牌，6/7）；此图=**跨被试**是否稳健为正（Wilcoxon）。结果 narrow 5/7 raw、**仅 1/7 Holm（δ）**；broad 4/7 raw、**0/7 Holm**，且 **γ 只 10/17 阳、raw p=0.215 n.s.**。→ 量化了"per-subject 弱 / heterogeneous"：permutation 把被试内显著聚合成 6/7，但跨被试只 ~60–80% 一致、标准检验勉强 → **频带偏向=个别患者现象**（呼应验收口径）。**注意**：这不推翻"过空间 null"（那是 F2 的承重口径、已声明弱 null 反保守），是补一条更保守的跨被试镜头。
+**关注点**：柱高＝一致性（~60–80%，无一压到全阳）；broad γ 连 raw 都 n.s.（对 gamma 故事的真 caveat）；permutation(F2) vs Wilcoxon(F3) 的差＝异质性本身。
+
 ### phase1_F3_per_subject_stability.png
-每 subject 显著频带数 n_sig（Δ>0 且该 subject 自身 null p<0.05，of 7 primary），按 n_sig 排序、条色=空间 null 强度档（深蓝=within-shaft strong / 中=distance-bin / 浅=subject-wide weak）。暴露 cohort 6/7 是**聚合**：narrow 中位仅 2/7、≥5/7 仅 3/20；多带阳 subject 大多不是 within-shaft-strong（唯 1146 深蓝且高）。
+（旧 F3，per-subject 角度）每 subject 显著频带数 n_sig（Δ>0 且该 subject 自身 null p<0.05，of 7 primary），按 n_sig 排序、条色=空间 null 强度档（深蓝=within-shaft strong / 中=distance-bin / 浅=subject-wide weak）。暴露 cohort 6/7 是**聚合**：narrow 中位仅 2/7、≥5/7 仅 3/20；多带阳 subject 大多不是 within-shaft-strong（唯 1146 深蓝且高）。**与上面的新 F3 是同一 caveat 的两个 marginal**（旧=per-subject 计数、新=per-band 跨被试检验）；留哪张待定。
 **关注点**：cohort 6/7 ≠ per-subject 稳健——这张是整份验收的承重 caveat。
 
 ### phase1_v2_W2_subject_phenotype.png
