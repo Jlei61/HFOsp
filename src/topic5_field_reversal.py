@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Dict, Optional, Sequence
 
 import numpy as np
-from scipy.stats import spearmanr
+from scipy.stats import spearmanr, binomtest
 
 from src.propagation_contact_plane_readout import (
     _support_corr, S_THRESH, OVERLAP_MIN, make_plane_grid, placement_in_distribution)
@@ -262,3 +262,18 @@ def loo_reproducibility(bundle, plane_ref, *, n_split=50, rng, sigma, s_thresh=S
     return {"contact_rho": float(np.nanmean(c_rhos)) if c_rhos else float("nan"),
             "field_rho": float(np.nanmean(f_rhos)) if f_rhos else float("nan"),
             "n_contacts_common": int(np.median(ncs)) if ncs else 0}
+
+
+def cohort_binomial(pass_flags: Sequence[bool]) -> dict:
+    """One-sided binomial test of pass count vs 0.05 expected rate over non-degenerate subjects.
+
+    pass_flags: sequence of boolean pass/fail flags.
+    Returns: {"n": n_subjects, "k": n_passes, "p_binom": float} where n=0 → p_binom=NaN.
+    Test is one-sided `greater` against the null p=0.05.
+    """
+    flags = [bool(x) for x in pass_flags]
+    n = len(flags)
+    k = int(sum(flags))
+    if n == 0:
+        return {"n": 0, "k": 0, "p_binom": float("nan")}
+    return {"n": n, "k": k, "p_binom": float(binomtest(k, n, 0.05, alternative="greater").pvalue)}

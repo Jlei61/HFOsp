@@ -360,3 +360,15 @@ def test_class_split_rhos_s_thresh_gate_excludes_moderately_isolated_contact():
     assert out is not None
     _, _, n_common = out
     assert n_common == 3     # M excluded by the s_thresh gate; only Ca/Cb/Cc survive
+
+
+# Task 7 tests: cohort_binomial
+
+from src.topic5_field_reversal import cohort_binomial
+
+
+def test_cohort_binomial():
+    out = cohort_binomial([True, True, True, False, False, False, False, False])
+    assert out["n"] == 8 and out["k"] == 3
+    assert out["p_binom"] < 0.05        # 3/8 >> 5% expected
+    assert cohort_binomial([])["n"] == 0
