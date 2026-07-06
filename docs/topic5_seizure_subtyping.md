@@ -120,6 +120,8 @@ split_half_robust=False；负对照四层全部非显著=非假阳性。结论 =
 - 图：`figures/axis_hardening_fig{1_patient_level,2_null_hierarchy,3_window_sensitivity}.png`（fig3 承载
   "非发作特异 = scaffold"判读）。**待用户目视复核。**
 
+**TA/TB 场反向门（A 线上游补充 gate，2026-07-06，preliminary，待签核）**：broad+narrow 双底物分开报告；间期两模板（TA/TB）摊成空间场后确为反向对（逐病人二项 gate 过自己同杆零假设：broad 7/26 p=2.2e-4、narrow 9/26 p=2.8e-6），但"场平滑比离散触点更去噪"未获支持（留一法头对头，contact 在两个底物全部 26/26 病人都赢 field，p=3.0e-8）。本条为缩减 n_perm=300 的初步数值，待 n_perm=1000 全量复核 + 用户签核完成前不进入本文档正式结论，完整两面结果见归档 `docs/archive/topic5/field_reversal_2026-07-06.md`。
+
 ### 3.1 PR-0：v2.3 Layer A ictal ER timing atlas
 
 每 subject 一张 (gamma+broad) 主 atlas + 每 seizure 一张 per-seizure PNG。
