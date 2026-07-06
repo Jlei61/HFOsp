@@ -44,14 +44,7 @@ def _load(d):
 
 
 def _best_rows():
-    m = {}
-    for d in DIRS:
-        for r in _load(d):
-            ag = 0.0 if not r["use_SG"] else r["alpha_G"]
-            key = (round(r["k_q"], 2), round(ag, 1))
-            if key not in m or r["T"] > m[key][0]["T"]:
-                m[key] = ([r] if key not in m or r["T"] > m[key][0]["T"] else m[key][0]), 0
-    # collect ALL rows per key too (for multi-seed at (0.10,16))
+    """allrows[(k_q, alpha_G)] = every row across dirs; best = the longest-T row (most trustworthy verdict)."""
     allrows = {}
     for d in DIRS:
         for r in _load(d):
@@ -84,7 +77,7 @@ def main():
             vg[i, j] = _verdict(r)
             if r is not None:
                 rate[i, j] = r["max_rate_hz"]
-                txt[i, j] = "bnd" if vg[i, j] == 0 else ("?" if vg[i, j] == 1 else
+                txt[i][j] = "bnd" if vg[i, j] == 0 else ("?" if vg[i, j] == 1 else
                                                          (f"{r['runaway_ms']:.0f}" if r["runaway_ms"] else "·"))
     fig, ax = plt.subplots(1, 2, figsize=(13.5, 4.4))
     fig.suptitle("M4 dynamic phase diagram ($k_q\\times\\alpha_G$, longest-T verdict per cell): the ONLY bounded "
