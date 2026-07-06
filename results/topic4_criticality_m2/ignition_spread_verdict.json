@@ -14,6 +14,26 @@
   },
   "near_fold_note": "two-core crossing alpha1 is a post-fold first-positive value, not a precise alpha0~0 critical shape; two cores share one q_core (symmetric-disinhibition approximation) -> proves corridor stays dark given an axial two-core opportunity, not subject1146 dual-source reproduction.",
   "ignition_sensitivity": "stable",
+  "two_core_region_frac": {
+   "coreA": 9.780014544356735e-13,
+   "coreB": 0.9954533848126439,
+   "corridor_axial": 0.0,
+   "offcore_rest": 0.004546615186377938
+  },
+  "two_core_axis_profile": [
+   {
+    "s": -2.3570226039551585,
+    "power_frac": 0.004546366490608016
+   },
+   {
+    "s": -1.7677669529663689,
+    "power_frac": 0.4977267834730899
+   },
+   {
+    "s": -1.7677669529663689,
+    "power_frac": 0.4977266013395539
+   }
+  ],
   "off_axis_sentinel": {
    "off_axis": "absent",
    "nonaxis_gain": 0.04872888937130455,
@@ -45,7 +65,8 @@
    "crossing_status": "single",
    "op_solve_quality_left": true,
    "op_solve_quality_right": true,
-   "branch_identity_clean": true
+   "branch_identity_clean": true,
+   "branch_continuation_status": "low_branch_reaches_alpha0_before_jump"
   }
  },
  "nonlinear_spread": {
@@ -524,6 +545,98 @@
     }
    ],
    "caveat": "DESCRIPTIVE ONLY \u2014 primary nonlinear_spread verdict is undetermined (pre-registered \u00a74.3); NOT a spread claim"
+  },
+  "epsilon_sweep_detail": {
+   "at_crossing": [
+    {
+     "eps_rel": 0.01,
+     "polarity": -1,
+     "onset": "axial",
+     "endgame": "self_limited",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.0021449231204047187
+    },
+    {
+     "eps_rel": 0.01,
+     "polarity": 1,
+     "onset": "axial",
+     "endgame": "self_limited",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.0021449231204047187
+    },
+    {
+     "eps_rel": 0.05,
+     "polarity": -1,
+     "onset": "core_only",
+     "endgame": "self_limited",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.0021449231204047187
+    },
+    {
+     "eps_rel": 0.05,
+     "polarity": 1,
+     "onset": "axial",
+     "endgame": "self_limited",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.0021449231204047187
+    }
+   ],
+   "just_past": [
+    {
+     "eps_rel": 0.01,
+     "polarity": -1,
+     "onset": "axial",
+     "endgame": "self_limited",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.00368990047484899
+    },
+    {
+     "eps_rel": 0.01,
+     "polarity": 1,
+     "onset": "axial",
+     "endgame": "self_limited",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.00368990047484899
+    },
+    {
+     "eps_rel": 0.05,
+     "polarity": -1,
+     "onset": "core_only",
+     "endgame": "self_limited",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.00368990047484899
+    },
+    {
+     "eps_rel": 0.05,
+     "polarity": 1,
+     "onset": "axial",
+     "endgame": "global_flooding",
+     "off_axis": "absent",
+     "escaped_at_ms": null,
+     "fixedpoint_residual": 0.00368990047484899
+    }
+   ]
+  },
+  "depth_aggregate": {
+   "at_crossing": {
+    "pass": false,
+    "onset": null,
+    "endgame": "self_limited",
+    "off_axis": "absent"
+   },
+   "just_past": {
+    "pass": false,
+    "onset": null,
+    "endgame": "self_limited",
+    "off_axis": "absent"
+   }
   }
  },
  "interpretation": "core_localized ignition followed by undetermined transient and undetermined; off_axis undetermined",

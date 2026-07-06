@@ -40,14 +40,35 @@ _DEPTH_STYLE = {
 }
 
 
+# Only these `_`-prefixed working fields are genuinely NON-JSON-serializable / duplicative and must
+# be dropped from the written JSON: `_crossing_op`/`_crossing_res` are live OperatingPoint/EigResult
+# objects, and `_two_core_crossing` re-nests another copy of those same objects. Every OTHER
+# `_`-prefixed field in the verdict tree (`_two_core_region_frac`, `_two_core_axis_profile`,
+# `_epsilon_sweep_detail`, `_depth_aggregate`, `_branch_continuation_status`) is a plain
+# dict/list/str of the audit evidence STATUS.md tells readers to find in this JSON -- those are kept.
+_SANITIZE_STRIP = {"_crossing_op", "_crossing_res", "_two_core_crossing"}
+
+
 def _sanitize(obj):
-    """Recursively drop `_`-prefixed keys (private/non-JSON-serializable working fields -- e.g.
-    `_crossing_op`/`_crossing_res`/`_two_core_crossing`/`_epsilon_sweep_detail`) AND replace
-    non-finite floats (NaN from off_axis_sentinel's low-residual short-circuit) with None, so the
-    written JSON is a clean, strict-parser-safe public schema (mirrors M1's own `_sanitize`,
-    run_topic4_crit_verdict.py -- combined here with the T5 spec-owner note's private-field trim)."""
+    """Prepare the in-memory verdict for JSON: (1) drop the genuinely non-serializable / duplicate
+    working fields named in ``_SANITIZE_STRIP``; (2) for every OTHER ``_``-prefixed key, strip the
+    leading underscore so the audit evidence STATUS.md points at (``two_core_region_frac`` /
+    ``two_core_axis_profile`` / ``epsilon_sweep_detail`` / ``depth_aggregate`` /
+    ``branch_continuation_status``) lands as a PUBLIC JSON key rather than one that reads as
+    "private" -- otherwise the STATUS "见 ignition_spread_verdict.json" reference is a false pointer;
+    (3) replace non-finite floats (NaN from off_axis_sentinel's low-residual short-circuit) with None
+    so the file is strict-parser safe. The rename happens ONLY here at write time -- the in-memory
+    tree keeps its ``_``-prefixed keys, so upstream T2/T4 code and the committed tests that assert on
+    the literal ``_branch_continuation_status`` (tests/test_topic4_criticality_m2.py) are untouched.
+    (The non-finite-float cleanup follows M1's own ``_sanitize``, run_topic4_crit_verdict.py; the
+    underscore handling is new to T5 -- M1 has no ``_``-prefixed working fields.)"""
     if isinstance(obj, dict):
-        return {k: _sanitize(v) for k, v in obj.items() if not k.startswith("_")}
+        out = {}
+        for k, v in obj.items():
+            if k in _SANITIZE_STRIP:
+                continue
+            out[k[1:] if k.startswith("_") else k] = _sanitize(v)
+        return out
     if isinstance(obj, list):
         return [_sanitize(v) for v in obj]
     if isinstance(obj, float):
@@ -79,11 +100,20 @@ def build_and_write_verdict(out_dir) -> dict:
     return verdict
 
 
+def _audit_get(d: dict, public_name: str):
+    """Read an audit field whether it still carries its in-memory leading underscore (the
+    ``build_and_write_verdict`` path passes the raw in-memory verdict) or has been renamed to its
+    public key in the written JSON (the ``--from-json`` path reads the sanitized file)."""
+    v = d.get(public_name)
+    return v if v is not None else d.get("_" + public_name)
+
+
 def _write_status(out_dir: Path, verdict: dict) -> None:
     """STATUS.md -- plain-language (CLAUDE.md §8): 测了什么/怎么测的/揭示了什么, codes in parens."""
     ig = verdict["linear_ignition"]
     sp = verdict["nonlinear_spread"]
     note = sp.get("descriptive_igniting_note")
+    region_frac = _audit_get(ig, "two_core_region_frac") or {}
 
     if note is not None:
         n_ac = note["n_igniting_of_total"].get("at_crossing", "?/4")
@@ -131,13 +161,13 @@ def _write_status(out_dir: Path, verdict: dict) -> None:
         "（不是少数服从多数）。",
         "",
         "## 揭示了什么",
-        f"**着火点位置**：在我们能达到的精度内看得很清楚——失稳确实是从原来那个局部病灶点着的，"
+        f"**着火点位置**：在当前这个 v2.2 模型、这条仿真轨迹上，最先要点着（变软）的那个花样稳稳地缩在原来那一小撮病灶细胞里，"
         f"不是全网一起烧起来的（集中度打分 {ig.get('core_overlap')}，1 = 完全集中在病灶、"
         f"0 = 摊满全场；打分越低说明摊得越开的“摊开度”另有一项，读数 {ig.get('globality')}）。"
         f"这个结论换成双病灶对照场景重新验证过一遍，结果一样：一个病灶几乎全亮"
-        f"（{(ig.get('_two_core_region_frac') or {}).get('coreB', 'n/a')}），"
+        f"（{region_frac.get('coreB', 'n/a')}），"
         f"另一个几乎全暗，中间走廊几乎不亮"
-        f"（{(ig.get('_two_core_region_frac') or {}).get('corridor_axial', 'n/a')}）。"
+        f"（{region_frac.get('corridor_axial', 'n/a')}）。"
         "这一段跟上一轮 M1 的“翻转时机没看清”并列存在——两个不同问题的两个答案，"
         "谁都没有推翻或取代对方。",
         "",

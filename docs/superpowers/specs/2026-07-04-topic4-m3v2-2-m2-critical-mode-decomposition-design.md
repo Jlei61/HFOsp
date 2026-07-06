@@ -203,7 +203,7 @@ spread：JVP 门 fail ∨ control 未扣 ∨ ε/polarity 不一致 ∨ <2 深度
 ---
 
 ## 7. 红线 / tier
-`model_side_preliminary`；单本征值≠发作；global runaway≠真发作；谱=机制地图；**禁把 round-1/round-2 pilot 当正式 milestone 结论**（探索性 de-risk scout；core_localized / axial-onset 正式结论待 T2/T4/T5 注册流程确认）；**禁"模型证明发作/CSD"**；**禁"真数据"（用 actual v2.2 SIMULATION trajectory）**；**禁"core_localized 取代/翻转 M1 CSD unresolved"**（并存，非替换）；**禁把 spread 结论回贴线性模态**；**禁"放弃 nonaxis"**（是降 sentinel/negative-control）；**禁把 two-core α₁=+0.189 写成精确 α₀≈0 临界形状**（fold 后首段正值）；**禁"two-core 复现 subject1146 真实双源慢变量"**（对称去抑制近似）；**global ≠ nonaxis**；**wavevector 对齐 ≠ early→late 方向**；分类/模态只在 THETA_EE 网格空间、不碰 subject1146 电极轴。
+`model_side_preliminary`；单本征值≠发作；global runaway≠真发作；谱=机制地图；**禁把 round-1/round-2 pilot 当正式 milestone 结论**（探索性 de-risk scout；core_localized / axial-onset 正式结论待 T2/T4/T5 注册流程确认）；**禁"模型证明发作/CSD"**；**禁"真数据"（用 actual v2.2 SIMULATION trajectory）**；**禁"core_localized 取代/翻转 M1 CSD unresolved"**（并存，非替换）；**禁把 `linear_ignition=core_localized` 写成"机制上确认发作从病灶核心开始"**（模型侧读数 ≠ 真实数据机制验证；正确口径 = "在当前 v2.2 模型和这条轨迹上，线性点火模态稳定定位在病灶核心"，用户 2026-07-05 P1）；**禁把 spread 结论回贴线性模态**；**禁"放弃 nonaxis"**（是降 sentinel/negative-control）；**禁把 two-core α₁=+0.189 写成精确 α₀≈0 临界形状**（fold 后首段正值）；**禁"two-core 复现 subject1146 真实双源慢变量"**（对称去抑制近似）；**global ≠ nonaxis**；**wavevector 对齐 ≠ early→late 方向**；分类/模态只在 THETA_EE 网格空间、不碰 subject1146 电极轴。
 **与数据的关系（边界）**：本模型侧支持 **core ignition → axial transient → global/endgame**；**不支持**真正 sideways/off-axis 传播。**若真实数据关键现象是离轴招募 → 当前衬底未解释完**，后续动 structural scaffold / D_EE / subject-specific geometry，**非**继续调这个线性分类器。
 **DEFER（非 M2）**：directional early→late（相位/时序定义）；SNN perturbation；slow-var attribution；full controls；Topic5 correspondence → M2.5 / M3。
 

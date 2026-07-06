@@ -110,8 +110,22 @@ def test_cli_smoke_writes_verdict(tmp_path):
     assert (tmp_path / "figures" / "ignition_panel.png").exists()
     assert (tmp_path / "figures" / "spread_panel.png").exists()
     assert (tmp_path / "figures" / "basis_sanity.png").exists()
-    # the written JSON is private-field-clean (spec-owner note: strip before writing).
-    assert "_crossing_op" not in json.dumps(v) and "_crossing_res" not in json.dumps(v)
+
+    dumped = json.dumps(v)
+    # (a) the genuinely NON-serializable / duplicate working fields are stripped from the JSON.
+    for private in ("_crossing_op", "_crossing_res", "_two_core_crossing"):
+        assert private not in dumped, private
+    # (b) but the JSON-serializable AUDIT fields STATUS.md points readers to ("阈值敏感性、逐区功率、
+    # 逐 (depth, epsilon_rel, polarity) 明细见 ignition_spread_verdict.json") ARE present, renamed
+    # public (leading underscore dropped) -- else the STATUS reference is a false pointer (T5 review).
+    assert v["linear_ignition"]["two_core_region_frac"]["corridor_axial"] == 0.0
+    assert "two_core_axis_profile" in v["linear_ignition"]
+    assert "branch_continuation_status" in v["linear_ignition"]["crossing"]
+    assert "epsilon_sweep_detail" in v["nonlinear_spread"]
+    assert "depth_aggregate" in v["nonlinear_spread"]
+    # and no `_`-prefixed key survives anywhere in the written public schema.
+    import re
+    assert not re.search(r'"_[A-Za-z]', dumped), "a private (_-prefixed) key leaked into the JSON"
 
 
 def test_cli_lazy_deps_importable():
