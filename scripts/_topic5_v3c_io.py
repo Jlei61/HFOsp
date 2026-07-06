@@ -21,12 +21,11 @@ SOZ_JSON = {
     "yuquan": _ROOT / "results/yuquan_soz_core_channels.json",
 }
 
-# broad = broad-classifiable SOZ subjects (442/958 lack broad cache -> narrow only, spec §3.3)
-V3C_SUBJECTS = {
-    "broad": ["epilepsiae_139", "epilepsiae_253", "epilepsiae_635", "epilepsiae_1077",
-              "epilepsiae_1096", "epilepsiae_1150", "epilepsiae_1146"],
-    "narrow": ["epilepsiae_1096", "epilepsiae_1146", "epilepsiae_253",
-               "epilepsiae_442", "epilepsiae_958"],
+# Per-cohort interictal propagation-axis pool (classify_subject_contacts needs it):
+# broad classification fails without the broad pool file (e.g. 442/548/958 -> narrow only).
+AXIS_POOL = {
+    "broad": _ROOT / "results/interictal_propagation_masked_broad/per_subject",
+    "narrow": _ROOT / "results/interictal_propagation_masked/per_subject",
 }
 
 
@@ -35,6 +34,32 @@ def load_soz(dataset: str, subject: str) -> list:
     path = SOZ_JSON[dataset]
     data = json.loads(path.read_text())
     return list(data.get(subject, []))
+
+
+def _discover_cohort(cohort: str) -> list:
+    """Data-derived cohort: subjects that have (a) an ictal recruitment cache,
+    (b) a propagation-axis pool file for this cohort, and (c) a clinical SOZ list.
+
+    Replaces the earlier hand-coded list, which under-counted (broad 7 vs 11,
+    narrow 5 vs 14) — the list was copied from an incomplete feasibility probe.
+    Yuquan subjects are held: their interictal participation files are absent, so
+    the axis is derivable but participation-based non-axis separation is degraded.
+    """
+    if not CACHE.exists() or not AXIS_POOL[cohort].exists():
+        return []
+    cached = {p.stem for p in CACHE.glob("*.npz")}
+    pooled = {p.stem for p in AXIS_POOL[cohort].glob("*.json")}
+    out = []
+    for stem in sorted(cached & pooled):
+        if not stem.startswith("epilepsiae_"):
+            continue
+        dataset, subj = stem.split("_", 1)
+        if load_soz(dataset, subj):
+            out.append(stem)
+    return out
+
+
+V3C_SUBJECTS = {"broad": _discover_cohort("broad"), "narrow": _discover_cohort("narrow")}
 
 
 def axis_soz_join(cls: dict, soz_list: list) -> dict:
