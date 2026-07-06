@@ -95,6 +95,22 @@
 
 ---
 
+### 2.6 axis-level robustness（新增，用户 2026-07-06 Option-B）：读方向要用坐标、不是杆序；平滑不额外加分
+
+**测了什么（白话）**：一个病人两套间期模板，每套都能读出「传播往哪个方向走」。三种读法：(a) **坐标轴** = 用触点真实二维坐标对发放先后做直线拟合；(b) **杆序轴（坐标盲）** = 只看触点插在哪根电极杆、丢掉杆内位置（把每根杆的值压成一个数再拟合）；(c) **平滑轴** = 先把触点值铺成空间场再拟合。1146 那个担心：多个 early 触点分布在两根杆上、真入口在两杆之间时，只按杆读会误成「A 杆→B 杆」。
+
+**怎么测的**：砍两半事件，一半定方向、另一半验证——三种轴各自「沿轴投影预测另一半发放顺序」的 Spearman ρ（held-out）。null = 每个病人自己几何下、200 个随机方向的 held-out ρ 中位（随机方向该 ≈0）。每种轴对 null 配对 Wilcoxon；坐标 vs 杆序也配对。broad/narrow 分开、TA/TB 折叠、**永不 pool**。
+
+**揭示了什么**：
+- **三种读法都超过随机 null**（都抓到真顺序）：broad raw_contact p=1.5e-8（26/26）、sequence p=7.5e-8（25/26）；narrow raw_contact p=3.7e-9（28/28）、sequence p=5.5e-5（20/26）。**但坐标盲（杆序）超得少、边际更散**——紧核里好几个病人 held-out ρ 掉到 0 附近甚至以下（见三联图 narrow 组）。
+- **坐标 > 杆序 显著**：broad p=1.2e-3（coord>shaft/shaft>coord/tie=13/2/11）、**narrow p=1.3e-5（19/2/5，更强）**。
+- **坐标盲会严重跑偏**：分歧 `angle(sequence, raw_contact)` >45° 的被试 broad **3/26（11.5%）**、narrow **9/26（34.6%，超三分之一）**；个别近正交/相反（E1077 broad TB 164°、E1146 narrow TB 105°，见个案图）。**紧核 SOZ 核尤其容易被杆序带偏**（触点挤、多杆）。`poor_planarity` 标签预测不了它（1077 非 poor-planar 却最强）。
+- **平滑不额外加分（如实阴性）**：field vs raw_contact 近平（broad 13/26 field 赢、narrow 7/28，都不显著），两者方向几乎重合（cos 中位 **0.996/0.997**）→ **有坐标就够，平滑不是关键。**
+
+**结论口径（红线）**：**读传播方向要用真实坐标；按电极 / 杆顺序（坐标盲）读，在一部分病人（宽池一成、紧核三成）会明显读错、个别接近正交或相反，紧核尤甚；平滑本身不额外加分——是「坐标」救回几何、不是「平滑」。** 原始「场更鲁棒 / 去噪」动机被 §2.4（per-contact LOO）+ 本 §2.6（axis）一起收窄成：**真正救回几何一致方向的是「用坐标」，场平滑没在坐标之上加分。不写「场去噪 / 真实传播轴」。** tier = supplement（方法学 note）。
+
+**工件**：`src/topic5_axis_robustness.py`（三轴 + `axis_angle` + `held_out_axis_score` + `random_axis_null_score`，5 单测）、`scripts/{run,plot}_topic5_axis_robustness.py`、图 `axis_robustness/figures/{axis_three_way_comparison,divergence_distribution,case_axes}.png`（复刻 `plot_fig_topic5_network_extension_null.py` 三联样式）、`axis_robustness/cohort_summary.json`。复现：`python scripts/run_topic5_axis_robustness.py`（`--input-results-root` 指主树 results）。
+
 ## 3. 图（完整逐图中文说明见 `results/topic5_ictal_recruitment/field_reversal/figures/README.md`）
 
 全部位于 `results/topic5_ictal_recruitment/field_reversal/figures/`：
