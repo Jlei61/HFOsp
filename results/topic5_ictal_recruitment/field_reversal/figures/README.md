@@ -26,11 +26,11 @@
 
 **关注点**：单看"过没过自己零假设"这个二元问题，场和触点表现几乎打平，场没有明显买到更多"过关"的病人——这一层面的答案和下面 `loo_reproducibility` 的连续精度层面答案不同，两者分开看，不要合并成一句"场没用"。
 
-### broad/loo_reproducibility.png / narrow/loo_reproducibility.png — 去噪假设的直接检验（关键阴性结果）
+### broad/loo_reproducibility.png / narrow/loo_reproducibility.png — 逐触点 LOO 重建 sanity（**降级，非 axis test**）
 
 留一法可复现性：每个病人一对点——用训练半段事件重建的场，在被拿掉的触点位置做预测（`field`），vs 直接用训练半段触点原始均值做预测（`contact`），都跟保留半段的真实均值比较跨触点 Spearman。浅灰线连接同一病人的两个值。
 
-**关注点**：`contact` 在全部 26 个 `broad` 病人和全部 26 个 `narrow` 病人里都比 `field` 更准（配对 Wilcoxon p=3.0e-8，两个底物一致）——摊成平滑空间场**没有**让方向估计的留出精度变得更稳，反而更差。这是本次分析里最干净的阴性结果：把离散电极序列铺成加权空间场，不是对传播方向估计的"去噪"，至少在留一预测精度这个标准下不是。
+**关注点**：`contact` 在全部 26 个 `broad`、26 个 `narrow` 病人里都比 `field` 更准（配对 Wilcoxon p=3.0e-8）。**但这测的是「逐触点重建」，不是传播轴 / 方向的鲁棒性**——该检验天然偏向触点 self-mean（大量事件平均的高 SNR 量），邻居插值必糊掉 contact-specific 信息。「场是否给更鲁棒的传播方向」由 axis-level supplement 另测（进行中）。**别把这张读成「场没用 / 去噪被证伪」**。
 
 ### broad/field_reversal_null_forest.png / narrow/field_reversal_null_forest.png — 逐病人诊断图（辅助，非正式结论图）
 

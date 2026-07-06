@@ -57,20 +57,33 @@
 - **contact（灵敏度）**：无几何，直接对 TA/TB 逐触点值算 **signed Spearman**（rank 数据自然度量）+ 同构 within-shaft null。
 - **「场更鲁棒吗」= field 过 null 病人数 − contact 过 null 病人数**（及 per-subject 超-null 余量的配对差）。**比较落在「各自超不超自己的 null」层，不比原始 corr 幅值**（故 field-Pearson vs contact-Spearman 度量不同不影响，与 ladder R1/R2/R3 同做法）。把你原来的假设从「预设」变成**逐层被测结果**。
 
-## 6. Supplement：去噪可复现性（【P1】预锁定义，免疫幅值膨胀）
+## 6. Supplement：轴/方向鲁棒性（axis-level，robustness 正主）+ per-contact 重建 sanity（降级）
 
-反向 corr **幅值**（场更接近 −1）单独不能证去噪——平滑机械地把幅值往 ±1 推。干净证据 = **held-out 预测精度**：
+「场是否给更鲁棒的**传播方向**读出」= 原始动机的真问题。**两层不能混**：per-contact 重建（§6b，降级 sanity）≠ 轴/方向鲁棒性（§6a，robustness 正主）。**旧 §6（LOO）测的是前者，被误当后者——本 rev 纠正**（用户审阅 2026-07-06）。
 
-**预锁定义**（每个 class、每个 split）：
-1. **train-half** 建两个预测器：(a) **raw contact vector** = train 半各触点 mean rank；(b) **shared-frame smoothed field**（§3 同 frame/grid/sigma/s_thresh）。
-2. **held-out half** 求各触点 mean rank，作**预测目标**。
-3. 比较两预测器对 held-out per-contact mean rank 的精度（跨触点 Spearman）：
-   - **contact 预测** contact c = train-c raw mean rank；
-   - **field 预测** contact c = **LOO 场值**——用 train 半**剔除 c 本身**重建的平滑场在 c 位置取值（**必须 LOO 排除目标 contact，杜绝自我平滑泄漏**）。
-4. **两预测器的跨触点 Spearman 必须在「两者都有定义」的同一触点集上算**——LOO 场值在**空间孤立触点**（无近邻支撑、S<s_thresh）处为 NaN 被剔，若 field 只在子集算、contact 在全集算就是**静默偏置**。取交集触点。
-5. **subject 内先折叠 A/B**（两类读数取代表值），**再 cohort 配对 Wilcoxon**（field 精度 > contact 精度?）。
-- 结构可复用 `split_half_axis_validation`（`propagation_skeleton_geometry.py:535`）的分半 + bootstrap 骨架，但**预测器是 LOO 平滑场值、非 spatial-axis 投影**（那是不同的量，不照搬）。
-- **tier = supplement**，回答「更鲁棒」的机制侧，非 primary cohort claim。
+### 6a. axis-level robustness（robustness 问题的正主）
+
+**三种轴（同一 P0 共享 2D 平面）**：
+- `sequence_axis`（**坐标盲**，专服务 1146 诊断）：只用电极序列 / 杆结构（**不用真坐标**）读出的方向——1146 失败模式（多个 early 触点分布两杆 → 误读「A 杆→B 杆」）就出在这。**具体读法在 pilot 定并在 1146 真数据上验证它确实复现 A→B 误读**（候选：按电极 identity 排 1D 序、rank~序位；或按 shaft 分组的 early/late 归属方向）。
+- `raw_contact_axis`（**坐标 LS、不平滑**）：`rank_i ~ 1 + x_i + y_i` over contacts，加权 LS（权重 = 触点 support），β=(β_x,β_y)、early→late。
+- `field_axis`（**先平滑再 LS**）：`T(x,y) ~ 1 + x + y` over supported grid pixels，加权 LS（权重 = field support S）。**同一估计器**——`raw_contact` 与 `field` **只差「是否先空间平滑」**，不差轴提取器。
+- source/sink 质心差 = **diagnostic / 解释图**，非 primary（top/bottom quantile 易受少数触点 + 阈值影响）。
+
+**主指标 = 轴的 held-out 顺序预测（测「稳 + 对」，免疫幅值膨胀）**：每 split，train 半估 axis（raw_contact / field 各一）；held-out 半得每触点 mean rank；用 train-axis 的沿轴投影预测 held-out rank；分数 = `Spearman(along-axis projection, held-out mean rank)`。**主 head-to-head = `raw_contact_axis` vs `field_axis`**（公平隔离「平滑是否带来 axis gain」）；cohort 配对 Wilcoxon（field > raw_contact?）+ bootstrap CI。**角度稳定度（两半轴夹角）= 次指标**（只测方差，判不了「稳但错」的轴）。
+
+**1146 型几何诊断 + 个案图 = `sequence_axis` vs `field_axis`**（**不是** raw_contact vs field——raw_contact 已用坐标、复现不出序列失败）：逐被试标 sequence 轴是否「跨杆主导」而 field 轴是否「沿杆几何一致」；cohort 计数 + 1146 个案（sequence 轴 A→B vs field 轴 两杆间→沿 A）。
+
+**TA/TB 轴反平行**：`cos(field_axis_TA, −field_axis_TB)`——轴层面的反向，补 §3 per-pixel signed corr。per subject + cohort。
+
+**帧**：共享 2D 平面主；**native-3D 作 sensitivity**（1146 poor-planarity 个案必须在图/supplement 标 3D，防审稿）。**tier = supplement**（robustness 侧），broad/narrow 分开、TA/TB 分开、永不 pool。
+
+**预期风险（如实标 tier）**：逐触点 rank 已很稳（§6b），`raw_contact` 轴可能本来也稳 → held-out/角度有可能**近平**；真正判别力大概率在 **1146 型几何一致性（bias）**，但它无 ground truth、cohort 指标须小心。**pilot-first**：先 1146 + 3–5 典型 subject，看 `field_axis` held-out 是否真 > `raw_contact`，且 1146 是否 `sequence_axis` 错 / `field_axis` 几何一致；pilot 过再 cohort。
+
+### 6b. per-contact LOO 重建 sanity check（**降级**，原 §6，改名，**非 axis test**）
+
+（原预锁 LOO 定义，Task 6 已实现，保留不变）每 split：train-half 建 (a) raw contact vector、(b) shared-frame 平滑场；held-out-half 求 per-contact mean rank；**contact 预测** = train-c raw mean rank，**field 预测** = LOO 场值（train 半剔除 c 本身重建、c 位置取值，`den<s_thresh` 剔）；两者在交集触点上跨触点 Spearman；subject 内折 A/B 再 cohort 配对。
+- **这个检验天然偏向触点 self-mean**——每个触点的间期均值是**大量事件平均出来的高 SNR 量**，拿掉它、用邻居插值估它本质是插值，必糊掉 contact-specific 信息。它测的是**逐触点重建**，**不是**轴 / 方向鲁棒性（1146 那种失败模式它根本没碰）。
+- **tier = sanity check**；结果**不叫「去噪」**（不写「denoising refuted」）。「场是否更鲁棒」的答案在 §6a。
 
 ## 7. 带宽旋钮（回应「之前平滑范围和 field 有差别」）
 
