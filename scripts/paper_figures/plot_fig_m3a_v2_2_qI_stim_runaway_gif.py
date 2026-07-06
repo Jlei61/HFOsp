@@ -137,13 +137,22 @@ def _activity_fields(res, S, frame_steps, dt, window_ms):
 
 
 def _range_label(names):
-    """Compact a consecutive same-shaft contact list, e.g. [ICL8,ICL9,ICL10,ICL11] -> 'ICL8–11'."""
+    """Compact same-shaft consecutive runs, e.g. [ICL8..ICL11] -> 'ICL8–11' and the two-group
+    both-foci set [ICL1..ICL4, ICL8..ICL11] -> 'ICL1–4,ICL8–11'. Falls back to a plain join when
+    the names are not a single-shaft integer sequence."""
     m = [re.match(r"([A-Za-z]+)(\d+)$", str(n)) for n in names]
-    if names and all(m) and len({x.group(1) for x in m}) == 1:
-        nums = sorted(int(x.group(2)) for x in m)
-        if nums == list(range(nums[0], nums[-1] + 1)):
-            return f"{m[0].group(1)}{nums[0]}–{nums[-1]}"
-    return ",".join(str(n) for n in names)
+    if not (names and all(m) and len({x.group(1) for x in m}) == 1):
+        return ",".join(str(n) for n in names)
+    pref = m[0].group(1)
+    nums = sorted(int(x.group(2)) for x in m)
+    runs, lo, prev = [], nums[0], nums[0]
+    for n in nums[1:]:
+        if n == prev + 1:
+            prev = n
+        else:
+            runs.append((lo, prev)); lo = prev = n
+    runs.append((lo, prev))
+    return ",".join(f"{pref}{a}–{b}" if b > a else f"{pref}{a}" for a, b in runs)
 
 
 def _draw_arm(fig, row_spec, S, res, metrics, cfg, qi, frame_steps, q_frames,
