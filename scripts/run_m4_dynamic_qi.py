@@ -63,6 +63,21 @@ ARMS = [
     ("kq0.18_pool_aG6",  0.18, True,  6.0),
 ]
 
+# ---- --sweep: dynamic (k_q x alpha_G) phase diagram = depletion-rate x pool-strength. Each k_q row has one
+#      no_pool baseline (does q_I deplete to runaway?) + an alpha_G ladder (does S_G bound it, and how strong
+#      must it be?). Same substrate + same noise seed across cells (build once + fork COW). ----
+KQ_GRID = [0.10, 0.18, 0.25, 0.35, 0.50]
+ALPHA_GRID = [2.0, 4.0, 6.0, 8.0, 12.0]
+
+
+def _sweep_arms():
+    arms = []
+    for kq in KQ_GRID:
+        arms.append((f"kq{kq:.2f}_no_pool", kq, False, 0.0))
+        for ag in ALPHA_GRID:
+            arms.append((f"kq{kq:.2f}_aG{ag:04.1f}", kq, True, ag))
+    return arms
+
 
 def _smooth(rate, dt, win_ms=20.0):
     n = max(1, int(round(win_ms / dt)))
@@ -150,22 +165,28 @@ def main():
     ap = argparse.ArgumentParser(description="M4 dynamic q_I spontaneous experiment (RUNS SIMULATIONS)")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--T", type=float, default=T_DYN)
-    ap.add_argument("--workers", type=int, default=len(ARMS))
+    ap.add_argument("--workers", type=int, default=None)
     ap.add_argument("--out", default=OUT_DIR)
+    ap.add_argument("--sweep", action="store_true",
+                    help="run the (k_q x alpha_G) dynamic phase diagram instead of the 4 fixed arms")
     ap.add_argument("--confirm-run", action="store_true")
     a = ap.parse_args()
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
         return
+    arms = _sweep_arms() if a.sweep else ARMS
+    if a.sweep and a.out == OUT_DIR:
+        a.out = OUT_DIR + "_sweep"
+    workers = a.workers if a.workers else min(len(arms), 40)
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
     S = PP.build_substrate(a.seed)
     S["p"].T = a.T                                                    # long spontaneous window (build is T-independent)
     _S["S"] = S                                                       # set BEFORE Pool -> fork COW-shares the net
     print(f"substrate: E1146 {PP.MONTAGE} L={S['L']} N={S['N']} src={S['src_xy'].round(1)} snk={S['snk_xy'].round(1)} "
-          f"T={a.T} arms={[x[0] for x in ARMS]}", flush=True)
-    with mp.Pool(min(a.workers, len(ARMS))) as pool:
-        rows = pool.map(_worker, ARMS)
+          f"T={a.T} n_arms={len(arms)} workers={workers} sweep={a.sweep}", flush=True)
+    with mp.Pool(min(workers, len(arms))) as pool:
+        rows = pool.map(_worker, arms)
     wall = time.time() - t0
     meta = dict(experiment="M4 dynamic q_I spontaneous (two axial foci, E1146 twoend_equal)",
                 subject=PP.SUBJECT, montage=PP.MONTAGE, L=float(S["L"]), N=int(S["N"]), seed=a.seed, T=a.T,
@@ -173,8 +194,9 @@ def main():
                 axis_unit=S["axis_unit"].tolist(), center=S["center"].tolist(),
                 qI=dict(tau_q=TAU_Q, sigma_q=SIGMA_Q, q_min=Q_MIN, tau_a=TAU_A),
                 pool=dict(r50_psi=R50_PSI, tau_mu=TAU_MU, tau_S=TAU_S),
-                runaway_criterion=dict(hz=RUNAWAY_HZ, dur_ms=RUNAWAY_DUR_MS),
-                arms=[dict(label=l, k_q=kq, use_SG=u, alpha_G=ag) for (l, kq, u, ag) in ARMS],
+                runaway_criterion=dict(hz=RUNAWAY_HZ, dur_ms=RUNAWAY_DUR_MS), sweep=bool(a.sweep),
+                kq_grid=(KQ_GRID if a.sweep else None), alpha_grid=(ALPHA_GRID if a.sweep else None),
+                arms=[dict(label=l, k_q=kq, use_SG=u, alpha_G=ag) for (l, kq, u, ag) in arms],
                 wall_s=round(wall, 1))
     # summary JSON (small) + full npz (traces + movies) for the figure/GIF
     summary = dict(meta=meta, rows=[{k: v for k, v in r.items()
