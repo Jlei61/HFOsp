@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 NPZ = ROOT / "results/topic4_m4_dynamic/dynamic_qi_traces.npz"
 OUT = ROOT / "results/paper-ready-figure/fig_m4_dynamic_qi/figures"
 
-NE, DT = 32000, 0.1
+DT = 0.1
 MOVIE_BIN_MS = 25.0
 CORE_R = 1.5
 N_FRAMES = 32                                        # 0..800 ms (quiescent -> ignition ~350 -> whole-field spread)
@@ -31,8 +31,8 @@ ARMS = [("kq0.35_no_pool", "no pool  ($\\alpha_G$=0)"), ("kq0.35_pool_aG6", "poo
 
 def _rate_hz_in_frame(rate, fi):
     bs = int(round(MOVIE_BIN_MS / DT))
-    seg = rate[fi * bs:(fi + 1) * bs]
-    return float(seg.mean()) / NE / DT * 1e3 if seg.size else 0.0
+    seg = rate[fi * bs:(fi + 1) * bs]                # res rate_E is already per-neuron Hz
+    return float(seg.mean()) if seg.size else 0.0
 
 
 def main():

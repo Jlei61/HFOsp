@@ -9,9 +9,9 @@ Reads the 4-arm run (results/topic4_m4_dynamic/dynamic_qi_traces.npz) and tells 
   D S_G(t)      : the shared divisive pool building up — the M4 BRAKE's response.
 
 Colours: no_pool = warm (crimson), pool = cool (blue); k_q 0.35 = solid, 0.18 = dashed (style_guide §0).
-UNITS: res rate is a per-step spike COUNT; converted to per-neuron mean Hz = count/NE/dt*1e3. The runaway
-detector (_first_sustained, pilot convention) fires on the smoothed COUNT >= 120 == 37.5 Hz/neuron; that
-level is drawn as a reference line, NOT relabelled Hz silently.
+UNITS: res["rate_E"] is ALREADY per-neuron mean Hz (kick_probe.py:363 converts rate_E/NE/dt*1e3 before
+returning), so it is plotted directly. The runner's runaway detector fires on the smoothed rate >= 120 Hz
+for 100 ms; that 120 Hz level is drawn as a reference line.
 
 Plotting-only. Output: results/paper-ready-figure/fig_m4_dynamic_qi/figures/.
 """
@@ -32,15 +32,11 @@ ROOT = Path(__file__).resolve().parents[2]
 NPZ = ROOT / "results/topic4_m4_dynamic/dynamic_qi_traces.npz"
 OUT = ROOT / "results/paper-ready-figure/fig_m4_dynamic_qi/figures"
 
-NE, DT = 32000, 0.1
+DT = 0.1
 CORE_R = 1.5                                          # PP.CORE_R (source/sink core radius)
-RUNAWAY_COUNT = 120.0                                # _first_sustained threshold (per-step count)
+RUNAWAY_HZ = 120.0                                   # runner _first_sustained threshold (res rate_E is Hz)
 NO_POOL_C, POOL_C = "#c1272d", "#1f6fb2"
 LS = {0.35: "-", 0.18: "--"}
-
-
-def _hz(count):
-    return np.asarray(count, float) / NE / DT * 1e3
 
 
 def _arm(d, label):
@@ -92,18 +88,21 @@ def main():
 
     # ---- C activity + runaway ----
     c = ax[1, 0]
+    peak_all = 0.0
     for l in labels:
         m = arms[l]["meta"]; col = POOL_C if m["use_SG"] else NO_POOL_C
-        c.plot(t, _hz(arms[l]["rate"]), color=col, ls=LS[m["k_q"]], lw=1.1, alpha=0.9)
-    c.axhline(_hz(RUNAWAY_COUNT), color="0.35", lw=0.9, ls="--")
-    c.text(t[-1], _hz(RUNAWAY_COUNT) + 3, "runaway level (37.5 Hz/neuron, 100 ms)", ha="right", va="bottom",
+        c.plot(t, arms[l]["rate"], color=col, ls=LS[m["k_q"]], lw=1.1, alpha=0.9)   # res rate_E is Hz
+        peak_all = max(peak_all, float(arms[l]["rate"].max()))
+    c.axhline(RUNAWAY_HZ, color="0.35", lw=0.9, ls="--")
+    c.text(t[-1], RUNAWAY_HZ + 8, "runaway level (120 Hz/neuron, 100 ms)", ha="right", va="bottom",
            fontsize=7.5, color="0.35")
     # the single detected event spans the whole sustained runaway; mark its onset (cleaner than shading)
     ev = arms["kq0.35_no_pool"]["events"]
     if ev.size:
         c.axvline(ev[0, 0], color="0.55", lw=0.8, ls=":")
-        c.text(ev[0, 0] + 40, 150, "first event $\\to$\nsustained runaway", fontsize=7.5, color="0.4", va="top")
-    c.set_xlim(0, t[-1])
+        c.text(ev[0, 0] + 40, 0.95 * peak_all, "first event $\\to$\nsustained runaway", fontsize=7.5,
+               color="0.4", va="top")
+    c.set_xlim(0, t[-1]); c.set_ylim(0, 1.05 * peak_all)
     c.set_title("C  population activity + runaway onset", fontsize=11, loc="left")
     c.set_xlabel("time (ms)"); c.set_ylabel("per-neuron rate (Hz)")
 
@@ -138,7 +137,7 @@ def main():
     for l in labels:
         m = arms[l]["meta"]
         print(f"  {l:18} verdict={m['verdict']:16} runaway_ms={m['runaway_ms']} "
-              f"peak={_hz(arms[l]['rate']).max():.0f}Hz S_G_max={m['S_G_max']}")
+              f"peak={arms[l]['rate'].max():.0f}Hz S_G_max={m['S_G_max']}")
 
 
 if __name__ == "__main__":

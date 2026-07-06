@@ -112,6 +112,19 @@ def _spatial_movie(spk, posE, L, dt):
     return np.asarray(frames, dtype=np.float32)
 
 
+def _spatial_coverage(movie, active_thresh=0.1, tail_frames=8):
+    """Spatial extent of activity from the downsampled movie (n_frames, G, G) of E-active fractions --
+    answers 'did the event fill the whole sheet?' (whole-field runaway) rather than staying core-local.
+    active_area = fraction of grid cells whose activity fraction exceeds active_thresh; tail = last frames."""
+    if movie.size == 0:
+        return dict(active_area_peak=0.0, active_area_tail=0.0, tail_frac_gt_0p5=0.0)
+    per_frame = (movie > active_thresh).mean(axis=(1, 2))          # active-area fraction per frame
+    tail = movie[-tail_frames:]
+    return dict(active_area_peak=round(float(per_frame.max()), 4),
+                active_area_tail=round(float((tail > active_thresh).mean()), 4),
+                tail_frac_gt_0p5=round(float((tail > 0.5).mean()), 4))
+
+
 def run_arm(S, label, k_q, use_SG, alpha_G):
     p = S["p"]
     cfg = SpatialSlowFieldConfig(use_qI=True, use_gK=False, k_q=k_q, k_K=0.0, sigma_q=SIGMA_Q, sigma_K=0.5,
@@ -141,9 +154,10 @@ def run_arm(S, label, k_q, use_SG, alpha_G):
     return dict(
         label=label, k_q=k_q, use_SG=use_SG, alpha_G=alpha_G, seed=S["seed"], T=p.T,
         n_events=len(events), n_pre_runaway=int(n_pre), runaway_ms=runaway, verdict=verdict,
-        max_rate_hz=round(float(rate_s.max()), 1),
+        max_rate_hz=round(float(rate_s.max()), 1),                  # res rate_E is already Hz (kick_probe:363)
         q_mean_final=round(float(slow.q_I.mean()), 4), q_min_final=round(float(slow.q_I.min()), 4),
         S_G_max=round(float(max(slow.trace_SG)) if slow.trace_SG else 0.0, 4),
+        **_spatial_coverage(movie),                                # active_area_peak/tail + tail_frac_gt_0p5
         wall_s=round(time.time() - t0, 1),
         # traces (per-step) for the figure + a downsampled movie for the GIF:
         trace_qI_mean=np.asarray(slow.trace_qI_mean, np.float32),
@@ -169,14 +183,25 @@ def main():
     ap.add_argument("--out", default=OUT_DIR)
     ap.add_argument("--sweep", action="store_true",
                     help="run the (k_q x alpha_G) dynamic phase diagram instead of the 4 fixed arms")
+    ap.add_argument("--cells", default=None,
+                    help="explicit 'k_q:alpha_G' cells (comma-sep), e.g. '0.10:12,0.18:12'; use_SG on when aG>0. "
+                         "For T=5000 survivor confirmation runs.")
     ap.add_argument("--confirm-run", action="store_true")
     a = ap.parse_args()
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
         return
-    arms = _sweep_arms() if a.sweep else ARMS
-    if a.sweep and a.out == OUT_DIR:
-        a.out = OUT_DIR + "_sweep"
+    if a.cells:
+        arms = []
+        for tok in a.cells.split(","):
+            kq, ag = (float(x) for x in tok.split(":"))
+            arms.append((f"kq{kq:.2f}_aG{ag:04.1f}" if ag > 0 else f"kq{kq:.2f}_no_pool", kq, ag > 0, ag))
+    elif a.sweep:
+        arms = _sweep_arms()
+    else:
+        arms = ARMS
+    if a.out == OUT_DIR:
+        a.out = OUT_DIR + ("_sweep" if a.sweep else "_confirm" if a.cells else "")
     workers = a.workers if a.workers else min(len(arms), 40)
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
