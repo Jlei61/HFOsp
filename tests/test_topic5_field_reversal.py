@@ -384,3 +384,16 @@ def test_reference_frame_is_ta_plane(monkeypatch):
     plane_a = {"channels": [{"name": "A1"}]}; plane_b = {"channels": [{"name": "B1"}]}
     ref, ta_label, tb_label = R.pick_reference(cmap, plane_a, plane_b)
     assert ref is plane_a and ta_label == 1 and tb_label == 0
+
+
+# Task 8 review-fix test: _plane_usable guards against status-only (unbuilt) geometry planes
+# (real-data crash: NARROW t_a/t_b for some subjects are descriptive_only records with no
+# "channels" key -- _run_subject must detect this and return reason="plane_not_built" instead
+# of crashing on plane_a["channels"]).
+
+from scripts.run_topic5_field_reversal import _plane_usable
+
+
+def test_plane_usable_guards_status_only_record():
+    assert _plane_usable({"status": "descriptive_only", "swap_class": "none"}) is False
+    assert _plane_usable({"channels": [{"name": "A1"}]}) is True

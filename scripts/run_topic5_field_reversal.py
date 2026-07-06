@@ -42,12 +42,18 @@ RNG_SEED = 20260706
 SIGMA_MULTS = (0.5, 1.0, 2.0)
 # Reason taxonomy (spec §8 accountability table). "ok" == a real gate ran (not degenerate,
 # not insufficient overlap); every other value is a recorded skip, never a crash.
-REASONS = ("no_planes", "load_error", "c1_violation", "cluster_map_ambiguous",
-           "insufficient_overlap", "degenerate_null", "ok")
+REASONS = ("no_planes", "load_error", "c1_violation", "plane_not_built",
+           "cluster_map_ambiguous", "insufficient_overlap", "degenerate_null", "ok")
 
 
 def _vec_in_order(name_to_val, order):
     return np.array([name_to_val.get(n, np.nan) for n in order], float)
+
+
+def _plane_usable(plane: dict) -> bool:
+    """False for status-only records (e.g. status="descriptive_only") that have no
+    "channels" key -- the geometry plane was never built for this subject/template."""
+    return isinstance(plane, dict) and "channels" in plane
 
 
 def pick_reference(cmap, plane_a, plane_b):
@@ -86,6 +92,13 @@ def _run_subject(ds_sid, substrate, *, geom_dir, X, Y, rng, n_perm, n_split, loo
         return out
 
     plane_a = json.load(open(ta_f)); plane_b = json.load(open(tb_f))
+    if not (_plane_usable(plane_a) and _plane_usable(plane_b)):
+        # NARROW-substrate status-only records (status="descriptive_only") have no "channels"
+        # key -- the geometry plane was never built for this subject. Record and move on;
+        # do not crash the whole cohort on plane_a["channels"]/plane_b["channels"].
+        out.update(reason="plane_not_built", status="plane_not_built",
+                   plane_a_status=plane_a.get("status"), plane_b_status=plane_b.get("status"))
+        return out
     order = bundle["channel_names"]
     out["n_channels"] = len(order)
     ta_rank = _vec_in_order({c["name"]: c["typical_rank"] for c in plane_a["channels"]}, order)
