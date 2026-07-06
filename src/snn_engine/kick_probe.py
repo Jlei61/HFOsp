@@ -90,7 +90,7 @@ def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba
 
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
-                  V_th_per_neuron=None, ee_std_u=0.0, ee_std_tau_ms=0.0,
+                  V_th_per_neuron=None, perturb=None, ee_std_u=0.0, ee_std_tau_ms=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None):
@@ -278,6 +278,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         else:
             V_th_eff = p.V_th if V_th_per_neuron is None else V_th_per_neuron
 
+        # off-by-default reversibility/basin perturbation (perturb=None -> no float touched -> byte-parity):
+        # inhibitory_pulse = transiently RAISE the E threshold (suppress E firing) WITHOUT touching q_I.
+        if perturb is not None and perturb["kind"] == "inhibitory_pulse" and perturb["t0"] <= tm < perturb["t1"]:
+            V_th_eff = np.asarray(V_th_eff, float) + perturb["val"] * is_E
+
         # ----- membrane (Eq 3) + refractory -----
         ref -= 1
         np.maximum(ref, 0, out=ref)
@@ -300,6 +305,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
         if slow is not None:
             slow.step(spk, labels, dt)
+            # qI_refill = transiently RESET the inhibitory resource to `val` (directly repair the slow var).
+            if perturb is not None and perturb["kind"] == "qI_refill" and perturb["t0"] <= tm < perturb["t1"]:
+                slow.q_I[:] = perturb["val"]
 
         # ----- record -----
         rate_E[t] = spk[:NE].sum()

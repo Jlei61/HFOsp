@@ -54,6 +54,10 @@ DT = 0.1
 MOVIE_BIN_MS = 25.0                                        # downsampled spatial-activity movie frame width
 MOVIE_GRID = 24                                            # movie spatial resolution (MOVIE_GRID x MOVIE_GRID)
 RUNAWAY_HZ, RUNAWAY_DUR_MS = 120.0, 100.0                  # _first_sustained runaway criterion (pilot)
+# ---- reversibility / basin perturbation test (2 arms, on the aG16 bounded state; NOT a termination test) ----
+T_PERTURB0, T_PERTURB1 = 8000.0, 8500.0                    # 500ms transient during the settled bounded state
+QI_REFILL_VAL = 1.0                                        # qI_refill arm: reset q_I to 1.0 (directly repair slow var)
+INHIB_DVTH = 15.0                                          # inhibitory_pulse arm: raise E V_th +15mV (fully suppress firing, q_I untouched)
 
 # ---- arms: (label, k_q depletion rate, use_SG, alpha_G) ----
 ARMS = [
@@ -77,6 +81,17 @@ def _sweep_arms():
         for ag in ALPHA_GRID:
             arms.append((f"kq{kq:.2f}_aG{ag:04.1f}", kq, True, ag))
     return arms
+
+
+def _reversibility_arms():
+    """3 arms at the aG16 bounded operating point (k_q=0.10). P1-3: qI_refill and inhibitory_pulse answer
+    DIFFERENT questions -> reported as separate arms, never merged. baseline = un-perturbed control."""
+    base = (0.10, True, 16.0)
+    return [
+        ("aG16_baseline", *base, None),
+        ("aG16_qI_refill", *base, dict(kind="qI_refill", t0=T_PERTURB0, t1=T_PERTURB1, val=QI_REFILL_VAL)),
+        ("aG16_inhib_pulse", *base, dict(kind="inhibitory_pulse", t0=T_PERTURB0, t1=T_PERTURB1, val=INHIB_DVTH)),
+    ]
 
 
 def _smooth(rate, dt, win_ms=20.0):
@@ -125,7 +140,7 @@ def _spatial_coverage(movie, active_thresh=0.1, tail_frames=8):
                 tail_frac_gt_0p5=round(float((tail > 0.5).mean()), 4))
 
 
-def run_arm(S, label, k_q, use_SG, alpha_G):
+def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None):
     p = S["p"]
     cfg = SpatialSlowFieldConfig(use_qI=True, use_gK=False, k_q=k_q, k_K=0.0, sigma_q=SIGMA_Q, sigma_K=0.5,
                                  q_min=Q_MIN, q_init=1.0, tau_q=TAU_Q, tau_a=TAU_A,
@@ -135,7 +150,7 @@ def run_arm(S, label, k_q, use_SG, alpha_G):
     S["net"]["rng"] = np.random.default_rng(S["seed"])
     t0 = time.time()
     res = simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
-                        t_kick=1e9, V_th_per_neuron=S["vth"])                 # SPONTANEOUS (no kick)
+                        t_kick=1e9, V_th_per_neuron=S["vth"], perturb=perturb)   # SPONTANEOUS (no kick)
     spk = res["E_spk_bool"]
     rate = np.asarray(res["rate_E"], float)
     af, bin_w = C.active_fraction(spk, DT, C.BIN_MS)
@@ -153,6 +168,7 @@ def run_arm(S, label, k_q, use_SG, alpha_G):
     movie = _spatial_movie(spk, S["posE"], S["L"], DT)
     return dict(
         label=label, k_q=k_q, use_SG=use_SG, alpha_G=alpha_G, seed=S["seed"], T=p.T,
+        perturb_kind=(perturb["kind"] if perturb else None),
         n_events=len(events), n_pre_runaway=int(n_pre), runaway_ms=runaway, verdict=verdict,
         max_rate_hz=round(float(rate_s.max()), 1),                  # res rate_E is already Hz (kick_probe:363)
         q_mean_final=round(float(slow.q_I.mean()), 4), q_min_final=round(float(slow.q_I.min()), 4),
@@ -186,12 +202,16 @@ def main():
     ap.add_argument("--cells", default=None,
                     help="explicit 'k_q:alpha_G' cells (comma-sep), e.g. '0.10:12,0.18:12'; use_SG on when aG>0. "
                          "For T=5000 survivor confirmation runs.")
+    ap.add_argument("--reversibility", action="store_true",
+                    help="basin perturbation test on the aG16 bounded state: baseline / qI_refill / inhibitory_pulse")
     ap.add_argument("--confirm-run", action="store_true")
     a = ap.parse_args()
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
         return
-    if a.cells:
+    if a.reversibility:
+        arms = _reversibility_arms()
+    elif a.cells:
         arms = []
         for tok in a.cells.split(","):
             kq, ag = (float(x) for x in tok.split(":"))
@@ -201,7 +221,8 @@ def main():
     else:
         arms = ARMS
     if a.out == OUT_DIR:
-        a.out = OUT_DIR + ("_sweep" if a.sweep else "_confirm" if a.cells else "")
+        a.out = OUT_DIR + ("_reversibility" if a.reversibility else "_sweep" if a.sweep
+                           else "_confirm" if a.cells else "")
     workers = a.workers if a.workers else min(len(arms), 40)
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
@@ -221,7 +242,8 @@ def main():
                 pool=dict(r50_psi=R50_PSI, tau_mu=TAU_MU, tau_S=TAU_S),
                 runaway_criterion=dict(hz=RUNAWAY_HZ, dur_ms=RUNAWAY_DUR_MS), sweep=bool(a.sweep),
                 kq_grid=(KQ_GRID if a.sweep else None), alpha_grid=(ALPHA_GRID if a.sweep else None),
-                arms=[dict(label=l, k_q=kq, use_SG=u, alpha_G=ag) for (l, kq, u, ag) in arms],
+                arms=[dict(label=a[0], k_q=a[1], use_SG=a[2], alpha_G=a[3],
+                           perturb=(a[4]["kind"] if len(a) > 4 and a[4] else None)) for a in arms],
                 wall_s=round(wall, 1))
     # summary JSON (small) + full npz (traces + movies) for the figure/GIF
     summary = dict(meta=meta, rows=[{k: v for k, v in r.items()
