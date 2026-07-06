@@ -296,3 +296,67 @@ def test_field_beats_contact_when_neighbors_more_reliable():
               "channel_names": list(names), "bools": np.isfinite(masked)}
     out = loo_reproducibility(bundle, plane, n_split=25, rng=np.random.default_rng(3), sigma=None)
     assert out["field_rho"] > out["contact_rho"]
+
+
+# Task 6 discriminator tests: coverage finding (CLAUDE.md §6) — the committed test above
+# cannot fail if either the participation-weighting clause or the s_thresh gate clause were
+# silently reverted (its fixture has all-finite data -> participation trivially 1.0, and
+# compact geometry -> kernel mass always >> S_THRESH). These two tests isolate each clause.
+
+from src.topic5_field_reversal import _loo_field_predict, _class_split_rhos
+from src.propagation_contact_plane_readout import S_THRESH
+
+
+def test_loo_field_predict_uses_participation_support_not_hardcoded_one():
+    # 3 collinear contacts, sigma=1.0. B's two neighbors (A, C) are equidistant, so with
+    # uniform support B's LOO prediction is the plain average of A and C (2.0). Dropping
+    # A's participation support to 0.1 (heavily discounted neighbor) must pull B's
+    # prediction AWAY from A's value (1.0) and TOWARD C's value (3.0) -- IFF `support` is
+    # genuinely used as a per-contact kernel weight. A `sup=1.0`-hardcoded implementation
+    # would ignore the `support` argument entirely, so both calls below would be
+    # bit-identical and this test would fail.
+    names = ["A", "B", "C"]
+    plane_xy = {"A": (0.0, 0.0), "B": (1.0, 0.0), "C": (2.0, 0.0)}
+    values = {"A": 1.0, "B": 2.0, "C": 3.0}
+    sigma = 1.0
+
+    sup_uniform = {"A": 1.0, "B": 1.0, "C": 1.0}
+    sup_skewed = {"A": 0.1, "B": 1.0, "C": 1.0}
+    pred_u, _ = _loo_field_predict(names, plane_xy, values, sup_uniform, sigma)
+    pred_s, _ = _loo_field_predict(names, plane_xy, values, sup_skewed, sigma)
+
+    j = names.index("B")
+    assert not np.isclose(pred_u[j], pred_s[j])
+    assert abs(pred_s[j] - values["C"]) < abs(pred_u[j] - values["C"])
+
+
+def test_class_split_rhos_s_thresh_gate_excludes_moderately_isolated_contact():
+    # 3 mutually-close "core" contacts (Ca, Cb, Cc) each reach den ~2.0 (>> S_THRESH=0.15)
+    # purely from each other. M sits at distance 0.40 from the core: close enough that
+    # `_loo_field_predict`'s internal `den > 1e-12` numerical floor does NOT NaN it (its den
+    # is nowhere near underflow), but far enough that its den sits BELOW S_THRESH. This
+    # isolates the s_thresh gate from the 1e-12 floor -- den lands strictly inside
+    # (1e-12, S_THRESH), so only a gate that checks `den >= s_thresh` specifically (not just
+    # `den > 1e-12`) will exclude M.
+    sigma = 0.15
+    names = ["Ca", "Cb", "Cc", "M"]
+    plane_xy = {"Ca": (0.0, 0.0), "Cb": (0.01, 0.0), "Cc": (0.0, 0.01), "M": (0.40, 0.0)}
+    base_vals = {"Ca": 1.0, "Cb": 2.0, "Cc": 3.0, "M": 10.0}
+    n_ev = 10
+    masked = np.array([[base_vals[n]] * n_ev for n in names], float)    # constant per contact
+    bools = np.ones_like(masked, dtype=bool)                            # fully participating
+    cols = np.arange(n_ev)
+
+    # Pin the intent explicitly: M's den is provably between the 1e-12 floor and S_THRESH,
+    # while the 3 core contacts clear S_THRESH on their own (not incidentally excluded too).
+    _, den = _loo_field_predict(names, plane_xy, base_vals, {n: 1.0 for n in names}, sigma)
+    m_den = den[names.index("M")]
+    assert 1e-12 < m_den < S_THRESH
+    for n in ("Ca", "Cb", "Cc"):
+        assert den[names.index(n)] >= S_THRESH
+
+    rng = np.random.default_rng(0)
+    out = _class_split_rhos(masked, bools, names, plane_xy, cols, sigma, rng, S_THRESH)
+    assert out is not None
+    _, _, n_common = out
+    assert n_common == 3     # M excluded by the s_thresh gate; only Ca/Cb/Cc survive
