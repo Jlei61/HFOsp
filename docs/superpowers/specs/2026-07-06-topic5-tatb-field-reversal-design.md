@@ -69,9 +69,14 @@
 - `field_axis`（**先平滑再 LS**）：`T(x,y) ~ 1 + x + y` over supported grid pixels，加权 LS（权重 = field support S）。**同一估计器**——`raw_contact` 与 `field` **只差「是否先空间平滑」**，不差轴提取器。
 - source/sink 质心差 = **diagnostic / 解释图**，非 primary（top/bottom quantile 易受少数触点 + 阈值影响）。
 
-**主指标 = 轴的 held-out 顺序预测（测「稳 + 对」，免疫幅值膨胀）**：每 split，train 半估 axis（raw_contact / field 各一）；held-out 半得每触点 mean rank；用 train-axis 的沿轴投影预测 held-out rank；分数 = `Spearman(along-axis projection, held-out mean rank)`。**主 head-to-head = `raw_contact_axis` vs `field_axis`**（公平隔离「平滑是否带来 axis gain」）；cohort 配对 Wilcoxon（field > raw_contact?）+ bootstrap CI。**角度稳定度（两半轴夹角）= 次指标**（只测方差，判不了「稳但错」的轴）。
+**【pilot 结论 2026-07-06（n=5 broad）→ 本 §6a 定向重构，走 Option-B】**
+- **field vs raw_contact = 近平**（held-out 2/5 favor field、3/5 favor raw，最强反例 1077 是 raw 明显赢；`cos(raw_contact, field)` 0.94–1.00）——「平滑比坐标直线拟合更 robust」**不成立**（正中下方预警）。**保留为如实阴性**，不再作 primary。
+- **`sequence_axis` 定义已锁** = 每触点折叠成其 shaft support-加权均值、再走同一加权 LS（「只看在哪根杆、丢杆内位置」= 坐标盲）；`epilepsiae_1146`、**尤其 1077** 上它与坐标-aware 轴分歧 49.6°/72.8°、70.4°/**148.8°**，其余 3 个 <20°。**`poor_planarity` 预测不了它**（1077 非 poor-planar 却最强；1125 是却没事）→ **个案按数据选（1077 为 primary case，不是 1146）**。
 
-**1146 型几何诊断 + 个案图 = `sequence_axis` vs `field_axis`**（**不是** raw_contact vs field——raw_contact 已用坐标、复现不出序列失败）：逐被试标 sequence 轴是否「跨杆主导」而 field 轴是否「沿杆几何一致」；cohort 计数 + 1146 个案（sequence 轴 A→B vs field 轴 两杆间→沿 A）。
+**Option-B cohort（本 §6a 实际主张；broad/narrow 分开、TA/TB 折叠、永不 pool）**：
+- **primary = 坐标盲会不会误导 + 坐标-aware 能不能救**：(a) **分歧分布** = `angle(sequence_axis, raw_contact_axis)` 的 cohort 分布 + 大分歧（>45°、>90°）被试数/比例；(b) 坐标-aware 是否**泛化更好**（非只「不同」）= held-out ρ 配对 `raw_contact > sequence`（在大分歧子集上应显著）。held-out 分数 = `Spearman(沿 train-axis 投影, held-out per-contact mean rank)`。
+- **secondary（如实阴性）= `field` vs `raw_contact` 近平** + `cos(raw_contact, field)` 高 → **「用坐标」就够，平滑不额外加分**。
+- **结论红线**：主张 = **「读传播方向要用真实坐标；按电极 / 杆顺序（坐标盲）读，在部分被试（多杆入口几何）会严重误导」**；**不**主张「场平滑去噪 / 场更鲁棒」。case 图 = `sequence_axis` vs `raw_contact_axis`（+field 叠加，示 field≈raw_contact），1077 primary + 1146。
 
 **TA/TB 轴反平行**：`cos(field_axis_TA, −field_axis_TB)`——轴层面的反向，补 §3 per-pixel signed corr。per subject + cohort。
 
