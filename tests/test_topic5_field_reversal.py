@@ -111,3 +111,53 @@ def test_membership_mismatch_names_used_is_cav1_on_plane():
     X, Y = make_plane_grid()
     out = build_reversal_fields(plane_ref, cav0, cav1, X=X, Y=Y)
     assert "A6" not in out["names_used"]
+
+
+# Task 3 tests: within_shaft_reversal_gate (primary null)
+
+from src.topic5_field_reversal import within_shaft_reversal_gate
+
+
+def _two_shaft_plane():
+    # two shafts A (x=0 column) and B (x=1 column), 6 contacts each, along-shaft y gradient
+    names, xy = [], {}
+    for sh, x in (("A", 0.0), ("B", 1.0)):
+        for i in range(6):
+            n = f"{sh}{i+1}"; names.append(n); xy[n] = (x, 0.15 * i)
+    return {"channels": [{"name": n, "x_norm": xy[n][0], "y_norm": xy[n][1],
+                          "typical_rank": 0.0, "support": 1.0} for n in names]}, names
+
+
+def test_along_shaft_reversal_beats_within_shaft_null():
+    plane, names = _two_shaft_plane()
+    # cav0 rises along y; cav1 is the along-shaft reverse -> anti-correlated fields
+    cav0 = {n: {"value": float(n[1:]), "support": 1.0} for n in names}
+    cav1 = {n: {"value": float(7 - int(n[1:])), "support": 1.0} for n in names}
+    rng = np.random.default_rng(0)
+    out = within_shaft_reversal_gate(plane, cav0, cav1, X=None, Y=None, sigma=None,
+                                     n_perm=200, rng=rng, overlap_min=10)
+    assert out["signed_corr"] < 0
+    assert out["percentile"] < 5.0          # observed below within-shaft null
+    assert out["passed"] is True
+    assert out["degenerate_null"] is False
+
+
+def test_singleton_shafts_flagged_degenerate():
+    # every contact on its own shaft -> nothing permutable within-shaft.
+    # Toy-scaffolding note: parse_shaft() (src/propagation_skeleton_geometry.py _NAME_RE)
+    # groups by ALPHABETIC PREFIX only, so "S0".."S7" would all share shaft "S" (one
+    # 8-member shaft, not 8 singletons) -> effective_n=8, NOT degenerate at min_eff=6.
+    # Use 8 distinct single-letter prefixes so each contact is genuinely alone on its
+    # shaft (mirrors real SEEG naming: shaft-prefix + contact-ordinal). Only the naming
+    # scheme changed; contact count (8), coordinates, values, and all gate params are
+    # unchanged from the brief.
+    names = [f"{chr(ord('A') + i)}1" for i in range(8)]
+    plane = {"channels": [{"name": n, "x_norm": 0.1 * i, "y_norm": 0.0,
+                           "typical_rank": 0.0, "support": 1.0} for i, n in enumerate(names)]}
+    cav0 = {n: {"value": float(i), "support": 1.0} for i, n in enumerate(names)}
+    cav1 = {n: {"value": float(8 - i), "support": 1.0} for i, n in enumerate(names)}
+    rng = np.random.default_rng(0)
+    out = within_shaft_reversal_gate(plane, cav0, cav1, X=None, Y=None, sigma=None,
+                                     n_perm=50, rng=rng, min_eff=6, overlap_min=10)
+    assert out["degenerate_null"] is True
+    assert out["passed"] is False

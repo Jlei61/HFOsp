@@ -10,9 +10,11 @@ from typing import Dict, Optional, Sequence
 
 import numpy as np
 
-from src.propagation_contact_plane_readout import _support_corr, S_THRESH, OVERLAP_MIN
+from src.propagation_contact_plane_readout import (
+    _support_corr, S_THRESH, OVERLAP_MIN, make_plane_grid, placement_in_distribution)
 from src.topic5_event_resolved_alignment import (
     field_from_contact_values, class_template_sigma, build_plane_xy)
+from src.topic5_axis_alignment import within_shaft_shuffle, channel_shuffle, effective_shuffle_n
 
 
 def signed_reversal_corr(field0: dict, field1: dict,
@@ -53,3 +55,53 @@ def build_reversal_fields(plane_ref: dict, cav0: dict, cav1: dict, *,
                                        sigma=sigma, X=X, Y=Y, s_thresh=s_thresh)
     return {"field0": field0, "field1": field1, "sigma": float(sigma),
             "names_used": _finite_on_plane(cav1, plane_xy)}
+
+
+def _perm_cav(cav: dict, names_used: Sequence[str], perm_values: np.ndarray) -> dict:
+    """cav with values on names_used replaced by perm_values (support/others untouched)."""
+    out = dict(cav)
+    for n, v in zip(names_used, perm_values):
+        out[n] = {"value": float(v), "support": cav[n]["support"]}
+    return out
+
+
+def within_shaft_reversal_gate(plane_ref, cav0, cav1, *, X, Y, sigma=None,
+                               n_perm=1000, rng, min_eff=6,
+                               s_thresh=S_THRESH, overlap_min=OVERLAP_MIN) -> dict:
+    """Primary null: is the observed TA/TB signed reversal corr beyond a within-shaft
+    permutation of TB's (cav1) VALUES (support/coords/names fixed)? degenerate_null if too
+    few channels are actually permutable (effective_shuffle_n on names_used < min_eff).
+    passed = not degenerate AND left-tail percentile<5 AND signed_corr<0 (spec §4/§12)."""
+    if X is None or Y is None:
+        X, Y = make_plane_grid()
+    built = build_reversal_fields(plane_ref, cav0, cav1, X=X, Y=Y, sigma=sigma, s_thresh=s_thresh)
+    names_used = built["names_used"]
+    obs = signed_reversal_corr(built["field0"], built["field1"], s_thresh, overlap_min)
+    eff = int(effective_shuffle_n(names_used, None, "within_shaft"))
+    degenerate = eff < min_eff
+    base = {"signed_corr": obs["signed_corr"], "n_overlap": obs["n_overlap"],
+            "insufficient_overlap": obs["insufficient_overlap"],
+            "effective_n": eff, "degenerate_null": bool(degenerate),
+            "sigma": built["sigma"], "null_corrs": [],
+            "null_p05": float("nan"), "null_p50": float("nan"), "null_p95": float("nan"),
+            "percentile": float("nan"), "passed": False}
+    if degenerate or obs["insufficient_overlap"] or obs["signed_corr"] is None:
+        return base
+    vals1 = np.array([cav1[n]["value"] for n in names_used], float)
+    null = []
+    for _ in range(n_perm):
+        perm = within_shaft_shuffle(vals1, names_used, rng)
+        cav1p = _perm_cav(cav1, names_used, perm)
+        fp = build_reversal_fields(plane_ref, cav0, cav1p, X=X, Y=Y,
+                                   sigma=built["sigma"], s_thresh=s_thresh)
+        r = signed_reversal_corr(fp["field0"], fp["field1"], s_thresh, overlap_min)
+        if r["signed_corr"] is not None:
+            null.append(r["signed_corr"])
+    null = np.asarray(null, float)
+    place = placement_in_distribution(obs["signed_corr"], null)   # percentile = %(null < obs)
+    pcts = np.nanpercentile(null, [5, 50, 95]) if null.size else [np.nan, np.nan, np.nan]
+    base.update({"null_corrs": null.tolist(),
+                 "null_p05": float(pcts[0]), "null_p50": float(pcts[1]), "null_p95": float(pcts[2]),
+                 "percentile": place["percentile"],
+                 "passed": bool(place["percentile"] < 5.0 and obs["signed_corr"] < 0.0)})
+    return base
