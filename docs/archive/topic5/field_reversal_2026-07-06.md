@@ -31,7 +31,7 @@
   - **"场更鲁棒吗" = 被测子问题**，由 (i) field vs contact 过 null 病人数差（§2.3）+ (ii) LOO 可复现性配对（§2.4）回答。本次结果 = field 更差 → 如实写「场没买到鲁棒性、只抬了原始数值」。
   - **禁写（即使反向门过）**：❌「发作会选择 TA 或 TB 极性」；❌「field 证明真实传播方向 / ground truth 方向」；❌ 方向重放；❌ 证明两模板存在（PR-2 gap_perm 已证）；❌ 有效刻画病理网络。上述极性/真方向类主张须 supplement（本文档 §2.4）AND 后续独立 ictal-polarity 检验都过才解锁——本次分析不含 ictal-polarity 检验。
 
-**本次（preliminary, n_perm=300）落点**：按上面"过"的字面判据，`broad` 与 `narrow` 的逐被试二项检验都显著（§2.1）——满足反向门的通过条件。但因为是缩减 `n_perm` 跑批、且未经用户签核，**这条结论目前只记录在本 archive，不写入 `docs/topic5_seizure_subtyping.md` 的正式接受档**（CLAUDE.md §5：preliminary numbers go to archive only）。去噪 supplement 的落点很清楚——REFUTED，见 §2.4。
+**本次（preliminary, n_perm=300）落点**：按上面"过"的字面判据，`broad` 与 `narrow` 的逐被试二项检验都显著（§2.1）——满足反向门的通过条件。但因为是缩减 `n_perm` 跑批、且未经用户签核，**精确数值只记录在本 archive；`docs/topic5_seizure_subtyping.md` 与 `results/FIGURE_INDEX.md` 只放不含具体 p 值/分数的定性 preliminary 指针，不进入正式接受档**（CLAUDE.md §5：preliminary numbers go to archive only）。去噪 supplement 的落点很清楚——REFUTED，见 §2.4。
 
 ---
 
