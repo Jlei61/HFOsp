@@ -372,3 +372,15 @@ def test_cohort_binomial():
     assert out["n"] == 8 and out["k"] == 3
     assert out["p_binom"] < 0.05        # 3/8 >> 5% expected
     assert cohort_binomial([])["n"] == 0
+
+
+# Task 8 test: runner's pick_reference (P0 reference frame = the plane mapped to t_a)
+
+
+def test_reference_frame_is_ta_plane(monkeypatch):
+    # cluster 1 maps to t_a -> plane_ref must be plane_a and cav0 must be class-1 aggregate
+    from scripts import run_topic5_field_reversal as R
+    cmap = {"map": {0: "t_b", 1: "t_a"}, "ambiguous": False}
+    plane_a = {"channels": [{"name": "A1"}]}; plane_b = {"channels": [{"name": "B1"}]}
+    ref, ta_label, tb_label = R.pick_reference(cmap, plane_a, plane_b)
+    assert ref is plane_a and ta_label == 1 and tb_label == 0
