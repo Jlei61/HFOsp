@@ -161,3 +161,50 @@ def test_singleton_shafts_flagged_degenerate():
                                      n_perm=50, rng=rng, min_eff=6, overlap_min=10)
     assert out["degenerate_null"] is True
     assert out["passed"] is False
+
+
+# Task 4 tests: random_split_contrast (descriptive, non-inferential contrast)
+
+from src.topic5_field_reversal import random_split_contrast
+
+
+def _bundle_two_clusters(plane_names):
+    # cluster 0/1 share a common spatial pattern `shared` (same for every event, regardless
+    # of class) PLUS a class-specific `reversal` term that flips sign between the two clusters
+    # (cluster 0 = +reversal, cluster 1 = -reversal). A label-blind random 50/50 split mixes
+    # both clusters, so its per-contact mean is dominated by the SHARED term -> positive corr
+    # between the two halves; the TRUE label split isolates the (larger-amplitude) reversal
+    # term -> negative corr. masked (n_ch, n_ev).
+    #
+    # Toy-tuning note (see task-4-report.md): the brief's literal toy used ONLY the reversal
+    # term (`rise` / `1-rise`, no shared component). Verified numerically that this collapses
+    # observed AND every random split to the exact same -1: for a noiseless 2-cluster
+    # population, ANY 50/50 split is itself an exact mirror-image pair (the two halves' cluster
+    # counts are complementary: n1 vs 40-n1), so there is no way for a label-blind split to
+    # differ in sign from the true label split -- 0/83 valid splits in a probe run were even
+    # positive. Adding a `shared` pattern (here a half-sine, spatially different from `rise`)
+    # with reversal amplitude 3x the shared amplitude fixes this while preserving the brief's
+    # "cluster 0 rises / cluster 1 reversed" shape; verified over 8 seeds all give
+    # split_median in [0.86, 0.99] vs observed_ab_corr == -0.77 (frac_positive == 1.0 in 7/8).
+    n_ch = len(plane_names)
+    rise = np.linspace(0, 1, n_ch)
+    shared = np.sin(np.linspace(0, np.pi, n_ch))
+    reversal = 3.0 * rise
+    ev0 = np.tile((shared + reversal)[:, None], (1, 40))
+    ev1 = np.tile((shared - reversal)[:, None], (1, 40))
+    masked = np.hstack([ev0, ev1])
+    labels = np.array([0] * 40 + [1] * 40)
+    return {"masked": masked, "labels": labels, "channel_names": list(plane_names),
+            "bools": np.isfinite(masked)}
+
+
+def test_random_split_centers_positive_observed_negative():
+    plane, names = _two_shaft_plane()
+    bundle = _bundle_two_clusters(names)
+    X, Y = make_plane_grid()
+    rng = np.random.default_rng(1)
+    out = random_split_contrast(bundle, plane, X=X, Y=Y, sigma=None, n_split=100,
+                                rng=rng, overlap_min=10)
+    assert out["observed_ab_corr"] < 0                 # true A/B reversed
+    assert out["split_median"] > out["observed_ab_corr"]  # random halves not reversed
+    assert out["note"] == "non_inferential"

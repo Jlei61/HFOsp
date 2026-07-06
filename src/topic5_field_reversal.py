@@ -105,3 +105,64 @@ def within_shaft_reversal_gate(plane_ref, cav0, cav1, *, X, Y, sigma=None,
                  "percentile": place["percentile"],
                  "passed": bool(place["percentile"] < 5.0 and obs["signed_corr"] < 0.0)})
     return base
+
+
+def _aggregate_over_events(masked: np.ndarray, names: Sequence[str], cols: np.ndarray) -> dict:
+    """Per-contact masked-rank mean over the given event columns -> {name:{value,support}}."""
+    sub = masked[:, cols]
+    with np.errstate(invalid="ignore"):
+        val = np.where(np.all(np.isnan(sub), axis=1), np.nan, np.nanmean(sub, axis=1))
+    sup = np.isfinite(sub).mean(axis=1)
+    return {n: {"value": float(val[i]), "support": float(sup[i])} for i, n in enumerate(names)}
+
+
+def channel_floor(plane_ref, cav0, cav1, *, X, Y, sigma, n_perm, rng,
+                  s_thresh=S_THRESH, overlap_min=OVERLAP_MIN) -> dict:
+    """Coarse-floor null: within_shaft_reversal_gate's null shape, but TB's values are
+    fully permuted across ALL contacts (channel_shuffle) rather than within-shaft only.
+    Answers "is there any coarse shared structure at all", not a same-shaft-controlled test."""
+    built = build_reversal_fields(plane_ref, cav0, cav1, X=X, Y=Y, sigma=sigma, s_thresh=s_thresh)
+    names = built["names_used"]
+    obs = signed_reversal_corr(built["field0"], built["field1"], s_thresh, overlap_min)
+    vals1 = np.array([cav1[n]["value"] for n in names], float)
+    null = []
+    for _ in range(n_perm):
+        cav1p = _perm_cav(cav1, names, channel_shuffle(vals1, rng))
+        fp = build_reversal_fields(plane_ref, cav0, cav1p, X=X, Y=Y, sigma=built["sigma"], s_thresh=s_thresh)
+        r = signed_reversal_corr(fp["field0"], fp["field1"], s_thresh, overlap_min)
+        if r["signed_corr"] is not None:
+            null.append(r["signed_corr"])
+    null = np.asarray(null, float)
+    place = placement_in_distribution(obs["signed_corr"], null) if null.size else {"percentile": float("nan")}
+    pcts = np.nanpercentile(null, [5, 50, 95]) if null.size else [np.nan, np.nan, np.nan]
+    return {"null_corrs": null.tolist(), "percentile": place["percentile"],
+            "null_p05": float(pcts[0]), "null_p50": float(pcts[1]), "null_p95": float(pcts[2])}
+
+
+def random_split_contrast(bundle, plane_ref, *, X, Y, sigma, n_split=200, rng,
+                          s_thresh=S_THRESH, overlap_min=OVERLAP_MIN) -> dict:
+    """Descriptive, NON-INFERENTIAL contrast: split events into 2 random balanced halves,
+    ignoring the true A/B labels, and correlate the two halves' fields. Shows that the
+    observed (labelled) A/B reversal is not merely an artifact of "splitting events in two" —
+    random splits should center positive while the true A/B corr is negative."""
+    masked = bundle["masked"]; names = list(bundle["channel_names"]); n_ev = masked.shape[1]
+    if sigma is None:
+        sigma = class_template_sigma(plane_ref, X=X, Y=Y, s_thresh=s_thresh)
+    # observed A/B (true labels)
+    labels = np.asarray(bundle["labels"])
+    cav0 = _aggregate_over_events(masked, names, np.where(labels == 0)[0])
+    cav1 = _aggregate_over_events(masked, names, np.where(labels == 1)[0])
+    b = build_reversal_fields(plane_ref, cav0, cav1, X=X, Y=Y, sigma=sigma, s_thresh=s_thresh)
+    obs = signed_reversal_corr(b["field0"], b["field1"], s_thresh, overlap_min)["signed_corr"]
+    splits = []
+    for _ in range(n_split):
+        perm = rng.permutation(n_ev); half = n_ev // 2
+        ch = _aggregate_over_events(masked, names, perm[:half])
+        cl = _aggregate_over_events(masked, names, perm[half:])
+        fb = build_reversal_fields(plane_ref, ch, cl, X=X, Y=Y, sigma=sigma, s_thresh=s_thresh)
+        r = signed_reversal_corr(fb["field0"], fb["field1"], s_thresh, overlap_min)["signed_corr"]
+        if r is not None:
+            splits.append(r)
+    return {"split_corrs": splits, "split_median": float(np.median(splits)) if splits else float("nan"),
+            "observed_ab_corr": (float(obs) if obs is not None else float("nan")),
+            "note": "non_inferential"}
