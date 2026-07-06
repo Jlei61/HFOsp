@@ -1,14 +1,24 @@
 # Topic 5 V2 Phase-1 图 — interictal HFO geometry ↔ early-ictal multi-band energy field alignment
 
-判读 tier = **exploratory candidate early-ictal spatial recruitment scaffold（cohort 层；非 formal/机制）**。数据 = full n_perm=1000（narrow n=20 / broad n=17）。样式遵 `docs/figure_style_guide.md` §0（紧坐标 / 单共享 colorbar / render→目视）；按 user 要求 F1 用红蓝 diverging（非 viridis）、F2 用 muted-red 标显著。脚本 `scripts/plot_topic5_v2_phase1_figures.py`。三图各答一个独立科学问题（§7）。
+判读 tier = **exploratory candidate early-ictal spatial recruitment scaffold（cohort 层；非 formal/机制）**。数据 = full n_perm=1000（narrow n=20 / broad n=17）。
 
-### phase1_F1_observed_maxAB_heatmap.png
-subject×band 的发作 onset 后 0–20s 能量空间场 vs 间期 HFO 几何 maxAB |corr| 热图（**红蓝 diverging，以 0.5 为心（蓝<0.5<红，突出弱对齐的蓝格）；显著 cell（该 subject 自身空间 null p<0.05）标白星黑边**，两池同心可比；末行=cohort 中位带数值；**黑虚线分隔 primary(7) | composite(4)**）。narrow(20) 整体偏红、broad(17) 偏蓝 → narrow>broad 一眼；无单频带列独占（band-generic）。是描述性幅度（平滑场 |corr| 相对 0 天然偏高），不是显著性判决。
-**关注点**：narrow>broad + band-generic + 上红下蓝的 per-subject 异质（呼应 F3）；别把颜色当显著（显著看 F2）。
+**✅ 验收核心结论（2026-07-06）**：**间期传播模式（HFO 顺序几何 G_HFO）与发作早期宽带能量空间相关 = 队列一致的承重结论**；**频带偏向性是个别患者现象（per-patient band bias），非队列级机制主张**。
 
-### phase1_F2_null_per_band.png
-每 primary 频带的 per-subject Δ（对齐 − 该 subject 自身弱空间 null 中位）**violin 分布 + 背景散点（每点=1 subject）**；柔和 muted-red(过)/gray(n.s.)；**黑横条=cohort Δ（被检验的统计量）**；crimson `*`=该带过 max-over-bands **family-wise (FWER) 校正**、`n.s.`=不过。FWER=家族错误率，控制"7 带里出现任意假阳性"的总概率（非单带侥幸）。两池都 6/7 primary 过、唯 ripple_high n.s. → **NOT ripple-specific**。
-**关注点**：正面只在 weak/subject-wide null 下（反保守、likely inflated），formal within-shaft Gate A 未评估（2/20）；ripple 最弱；violin 很宽、下缘常压到 0 以下（per-subject 异质，呼应 F3）。
+**图集约定（2026-07-06 重制）**：F1 / F2 / W1 都 **narrow / broad 各一版独立文件**（不并排）；ticks + 内部字放大；band 命名 **R = 80–150 Hz（ripple）· FR = 150–250 Hz（fast ripple）**。W1 是新增的 **1/f 主图**（这部分核心 = 看 1/f）。F3 仍单张合并。脚本 `plot_topic5_v2_phase1_figures.py`（F1/F2/F3）+ `plot_topic5_v2_W1_aperiodic.py`（W1）。每图各答一个独立科学问题（CLAUDE.md §7）。
+
+### phase1_F1_observed_maxAB_heatmap_{narrow,broad}.png
+subject×band 的发作 onset 后 0–20s 能量空间场 vs 间期 HFO 几何 maxAB |corr| 热图（红蓝 diverging，以 0.5 为心，蓝<0.5<红；**行按每被试显著 primary 频段数降序**〔显著多的在上〕；显著 cell〔该 subject 自身空间 null p<0.05〕标白星黑边；末行=cohort 中位带数值；黑虚线分隔 primary(7) | composite(4)，band 名 δ/θ/α/β/γ/R/FR | low/LVFA/Rf/Rs）。narrow / broad **各一版独立文件**。narrow 版整体偏红、broad 版偏蓝 → narrow>broad；无单频带列独占（band-generic）。描述性幅度（平滑场 |corr| 相对 0 天然偏高），非显著性判决。
+**关注点**：行序＝显著频段数（顶端多星、底端稀疏，呼应 F3 的 per-subject 异质）；narrow>broad + band-generic；别把颜色当显著（显著看 F2）。
+
+### phase1_F2_null_per_band_{narrow,broad}.png
+每 primary 频带的 per-subject Δ（对齐 − 该 subject 自身弱空间 null 中位）**violin 分布 + 背景散点（每点=1 subject）**；柔和 muted-red(过)/gray(n.s.)；**黑横条=cohort Δ（被检验的统计量）**；crimson `*`=该带过 max-over-bands **family-wise (FWER) 校正**、`n.s.`=不过。narrow / broad **各一版独立文件**；star 保持在框内（比例 headroom）、去右上 spine、legend 移框外右上（否则遮住最右 R 星）。FWER 控制"7 带里出现任意假阳性"的总概率。两池都 6/7 primary 过、唯 **FR（150–250）n.s.** → **NOT ripple/FR-specific**。
+**关注点**：正面只在 weak/subject-wide null 下（反保守、likely inflated），formal within-shaft Gate A 未评估（2/20）；FR 最弱；violin 很宽、下缘常压到 0 以下（per-subject 异质，呼应 F3）。
+
+### phase1_v2_W1_aperiodic_{narrow,broad}.png
+**这部分的 1/f 主图**（回答"扣掉 1/f 背景后还剩什么"——本部分核心）。narrow / broad 各一版。
+**A「1/f 怎么测的」**：一条代表性触点的基线功率谱（log-log 黑线）+ **实测拟合的 1/f 直线**（红虚线，log-log OLS over [1,200] Hz，标 slope/r²）+ 灰阴影＝超出 1/f 地板的余量（band excess）+ 竖灰带＝挖掉的工频 bin；**顶部 band 轴**（δ/θ/α/β/γ/R/FR 落在各自频率区间，让人知道每个鼓包属于哪个频带）。选点＝clean-hugging fit（r²≥0.96、低 overshoot）里 gamma-excess 最大的触点。
+**B「扣 1/f 前后存活塌缩」= residual 存活小方阵**：行＝两层 residual 控制（− broadband／− 1/f），列＝7 primary 频段；格填色＝该残差场仍过 max-over-bands FWER（弱空间 null）、灰＝不过，格内写 p 值；γ 的 −1/f 格＝金色（唯一两池都稳）。**故意不画 raw 层和 Δ 高度**——raw 是 F2 的信息（标题"raw baseline 6/7 → see F2"），Δ 是 F2 的 y 轴，都不重复。从上往下读＝塌缩：narrow 4 格 → 只剩 γ；broad 4 格 → β/γ/FR 3 格，但只 γ 金色 robust，β 近奈奎斯特脆弱、FR＝family-ceiling 假象（标题标注）。
+**关注点**：A 看"1/f 是 log-log 一条直线扣掉、鼓包落在哪个 band"；B 看"扣 1/f 后填色格缩到只 γ"＝频段特异大半是 1/f 背景、**NOT ripple-specific**；γ 残差是描述性、**非 LVFA-specific 机制**。承重口径＝间期传播 ↔ 发作早期宽带能量相关，频带偏向是个别患者现象。
 
 ### phase1_F3_per_subject_stability.png
 每 subject 显著频带数 n_sig（Δ>0 且该 subject 自身 null p<0.05，of 7 primary），按 n_sig 排序、条色=空间 null 强度档（深蓝=within-shaft strong / 中=distance-bin / 浅=subject-wide weak）。暴露 cohort 6/7 是**聚合**：narrow 中位仅 2/7、≥5/7 仅 3/20；多带阳 subject 大多不是 within-shaft-strong（唯 1146 深蓝且高）。

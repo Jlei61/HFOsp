@@ -1,6 +1,8 @@
 # Topic 5 V2 Phase-1-v2 — Candidate Scaffold Refinement (survive? / who? / when?)
 
-date 2026-07-04 · 分支 `topic5-v2-phase1` · tier（pre-registered 天花板，锁定）= **exploratory candidate scaffold refinement**（**不是** formal spatial-null positive / HFO-/LVFA-/ripple-specific / timing-order replay / criticality / 机制）
+date 2026-07-04（✅ **accepted 2026-07-06**）· 分支 `topic5-v2-phase1` · tier（pre-registered 天花板，锁定）= **exploratory candidate scaffold refinement**（**不是** formal spatial-null positive / HFO-/LVFA-/ripple-specific / timing-order replay / criticality / 机制）
+
+> **✅ 验收核心结论（用户 2026-07-06 定）**：**间期传播模式（G_HFO 顺序几何）与发作早期宽带能量空间相关 = 队列一致的承重结论**（对齐扣 1/f 后大半塌成宽带、只 gamma 一薄层残留、per-subject 6/20）。**频带偏向性 = 个别患者现象（per-patient band bias），非队列级机制主张**（频段特异从 cohort Outcome B 降级为少数患者 band leaning）。下方 §1 的 common_resid 4/7 / aperiodic gamma-only 是此口径的支撑证据，不是要升级成 cohort 频段机制。
 
 > **承重 caveat（首页速读；详见 §4）**：① per-subject 弱（narrow ≥4/7 仅 6/20，cohort 6/7 是聚合）· ② 只在 **weak/global 空间 null** 下成立、**formal within-shaft Gate A 未评估**（§1 是 residual survival，**不是** "Gate B/C passed"）· ③ W1 residual 非纯宽带但**大半 1/f-可归因、只 gamma 稳、NOT ripple-specific**· ④ when 以 **EEG-onset 为主锚**（clinical 锚会抹平上抬）· ⑤ "trait-like" 只到 **distal-preictal-present**（缺 >1h 非-periictal baseline）· ⑥ confound 未闭合（deferred）。
 
@@ -124,6 +126,7 @@ broad-17 aperiodic ripple_high 过 FWER（max_over_bands_p=0.006，含 1146 后�
 - **merge-hardening（本轮 review 补）**：`summarize_topic5_v2_residual_survival.py` → `phase1_residual_survival_summary.csv`（3 feature×2 池单表，防误读 gate_summary）· `run_topic5_v2_residual_chain.sh`（committed launcher，`OMP/MKL/OPENBLAS/NUMEXPR/VECLIB=1` baked + resumable parallel + run manifest 到 `results/run_logs/`）· `run_topic5_v2_nulls.py` **overwrite guard**（`assert_no_cohort_clobber`：拒绝用更小的 subset run 覆盖更大的 cohort combined；`--allow-overwrite-combined` 显式豁免）。
 - **artifacts**（`results/topic5_ictal_recruitment/v2_band_scan/`）：`phase1_v2_subject_phenotype.csv`（+band_profile）· `periictal/`(eeg)+`periictal_clin/`(clin) window_long + `phase1_v2_alignment_trajectory.csv` + `phase1_v2_trajectory_contrasts.csv` · `{common_resid,aperiodic_resid}_cache/`+`aperiodic_qc.json` · `{narrow,broad}/phase1_{null,gate}_{common_resid,aperiodic_resid}_*`
 - **图**：`figures/phase1_v2_W2_subject_phenotype.png` · `figures/phase1_v2_W3_trajectory.png`（+ figures/README.md）
+- **图（2026-07-06 重制，paper-grade，narrow/broad 各一版、放大字体、band 命名 R=80–150/FR=150–250）**：`figures/phase1_F1_observed_maxAB_heatmap_{narrow,broad}.png`（行按显著 primary 频段数降序）· `phase1_F2_null_per_band_{narrow,broad}.png`（per-band Δ vs 弱空间 null；star 不超框、legend 框外、去右上 spine）· `phase1_v2_W1_aperiodic_{narrow,broad}.png`（**新增 1/f 主图**——A: 代表触点 PSD + log-log 1/f 拟合 + 顶部 band 轴；B: **residual 存活小方阵**，只画扣宽带/扣1/f 两层〔raw 层=F2、不重复；不画 Δ〕，格填=过 FWER、格内写 max-over-bands p，塌到只 γ〕。生成器 `plot_topic5_v2_W1_aperiodic.py`。
 - **tests**：`tests/test_topic5_v2_phase1_v2.py`（W2+W3, 20）· `tests/test_topic5_v2_band_scan.py`（+aperiodic QC, 36）· `tests/test_topic5_v2_integration.py::test_nulls_overwrite_guard_refuses_subset_clobber`（overwrite guard）
 - **commits**：cd692ce/0465f8a(2.1) f3c6531(2.2) d479001(2.3) [3.1 in 3d6d839] 98c1187(3.2 Step0) c8720bf(3.2b) 8f1ddf1(3.2b-fu) 11575ce(1.1 QC) [+ 1.3/1.4 archive TBD]
 - **plan/spec**：`docs/superpowers/plans/2026-07-04-topic5-v2-phase1-v2-scaffold-refinement.md` · `docs/superpowers/specs/2026-07-02-topic5-v2-phase1b-gate-closure-spec.md`（§EXP/§2/§5/§6）

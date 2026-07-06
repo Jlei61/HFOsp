@@ -255,7 +255,10 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 **不能写**："V3a 成立 / 发作发生模态转移"、"off-axis flux 增加"、把它当定向传导、上机制主张、把 broad 单独当主结论。完整方法+逐被试数值表+禁止 claim：`docs/archive/topic5/v3a_mode_transition_2026-07-04.md`；后继：V3p（preictal-only 轨迹）/ V3b（模型–数据一致性）。
 
-### 3.9 V2 表达层三问收口（2026-07-04，Phase-1-v2，exploratory **candidate scaffold refinement**）
+### 3.9 V2 表达层三问收口（2026-07-04，Phase-1-v2，exploratory **candidate scaffold refinement**；✅ **已验收 2026-07-06**）
+
+> **✅ 验收核心科学结论（用户 2026-07-06 定，本部分接受口径）**：
+> **间期传播模式（interictal HFO 谁先谁后的顺序几何 G_HFO）与发作早期的宽带能量在空间上相关**——这是**队列一致、承重**的结论（对齐扣掉 1/f 后大半塌成宽带、只 gamma 一薄层残留、per-subject 弱 6/20）。**频带偏向性是个别患者现象（per-patient band bias），不是队列级机制主张**——所以频段特异性从"cohort Outcome B"降级为"少数患者的频带 leaning"。tier 仍 = exploratory candidate scaffold refinement（弱空间 null、非 formal gate）。**禁**：把频带偏向写成 cohort 机制 / HFO-/LVFA-/ripple-specific / formal gate passed / criticality。
 
 **测什么**：Phase-1 确认了"间期 HFO 几何 (G_HFO) ↔ 发作早期多频带能量场"的 cohort 层对齐（band-generic、非 ripple 独有）后，回答三个必要问题——**扛得住吗（survive：把宽带/1-f 扣掉后还在？）· 谁有（who：少数驱动？）· 什么时候（when：发作前已在还是点着才现？）**。
 
@@ -267,7 +270,9 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 **一句话（可直接引用）**：
 > Phase-1-v2 refines the original early-ictal scaffold result into a subject-heterogeneous, largely trait-like HFO-derived susceptibility scaffold. The scaffold is not ripple/HFO-specific; it partly survives common-field residualization, but most frequency structure is absorbed by aperiodic/1-f control, leaving only a descriptive gamma residual layer. Its critical-mode status remains untested and should be addressed next by HFO-axis criticality projection and HFO-constrained model–data consistency.
 
-**验收（2026-07-05 review）**：科学 = **PASS**（限 exploratory candidate scaffold refinement）；工程 = **conditional pass → 合并前 merge-hardening 已补**（overwrite guard `assert_no_cohort_clobber` + committed launcher `run_topic5_v2_residual_chain.sh` OMP=1/manifest + 单表 `phase1_residual_survival_summary.csv`）。**命名（P1-1）**：§1 是 **residual survival under weak spatial null**，`phase1_gate_summary.csv` 的 formal Gate flags 仍 weak-negative，勿写 "Gate B/C passed"。下一步（非本阶段）= HFO-axis criticality + model–data consistency，不再扩频段。
+**验收（2026-07-05 review → 2026-07-06 accepted）**：科学 = **PASS**（限 exploratory candidate scaffold refinement，核心口径见上方 ✅ 块）；工程 = **conditional pass → merge-hardening 已补**（overwrite guard `assert_no_cohort_clobber` + committed launcher `run_topic5_v2_residual_chain.sh` OMP=1/manifest + 单表 `phase1_residual_survival_summary.csv`）。**命名（P1-1）**：§1 是 **residual survival under weak spatial null**，`phase1_gate_summary.csv` 的 formal Gate flags 仍 weak-negative，勿写 "Gate B/C passed"。下一步（非本阶段）= HFO-axis criticality + model–data consistency，不再扩频段。
+
+**图（paper-grade，narrow/broad 各一版，2026-07-06 重制）**：`figures/phase1_F1_observed_maxAB_heatmap_{narrow,broad}.png`（subject×band maxAB，行按显著频段数降序）· `phase1_F2_null_per_band_{narrow,broad}.png`（per-band cohort Δ vs 弱空间 null）· `phase1_v2_W1_aperiodic_{narrow,broad}.png`（A: 一条触点 PSD + log-log 1/f 拟合 + band 轴；B: **residual 存活小方阵**〔扣宽带→扣1/f，raw 层不重复=见 F2〕，塌到只 γ）。band 命名 R=80–150 / FR=150–250。生成：`plot_topic5_v2_phase1_figures.py` + `plot_topic5_v2_W1_aperiodic.py`。
 
 **⚠️工程教训**：并行 numpy nulls worker 必须 `OMP_NUM_THREADS=1`（否则 26 worker×80 核 BLAS 超订 → 单被试 crawl，7h/40min 之差）；broad **1146** 单被试 n_perm=1000 单线程 ~2h、OMP 不助（Python-loop permute）→ 单独后台补跑并入 **n=17**（含它 common_resid 仍 4/7、aperiodic 2/7→3/7、结论不变；within_shaft_strong 仅 narrow 属性、broad 里 subject_wide_weak）。
 
