@@ -12,8 +12,8 @@
 
 Copied verbatim from spec `docs/superpowers/specs/2026-07-06-topic5-tatb-field-reversal-design.md`. Every task's requirements implicitly include these:
 
-- **Substrate: broad AND narrow.** narrow's `load_event_labels_ranks(broad=False)` was stubbed (`NotImplementedError`) by the event-resolved pilot — **Task 0 un-stubs it** (narrow data verified: 35 subjects with planes+labels, more than broad's 26). Run BOTH; **broad-vs-narrow is the key sensitivity**; narrow degeneracy (compact-core few-shaft) is a REPORTED per-subject result (with an enter/skip reason), never a silent skip. broad/narrow reported separately, never pooled. (spec §8)
-- **Shared frame (P0):** TA and TB fields MUST be built on ONE frame = the reference template `t_a`'s normalized readout plane (`GEOM_BROAD/{ds_sid}_t_a.json`). Never correlate a field on `plane_a` against a field on `plane_b`. (spec §3.1)
+- **Substrate: broad AND narrow.** narrow's `load_event_labels_ranks(broad=False)` was stubbed (`NotImplementedError`) by the event-resolved pilot — **Task 0 un-stubs it**. narrow verified feasible, layered denominators: narrow planes = **35** (raw availability); narrow `stable_k==2` + planes = **29** (pre-map eligible); broad `stable_k==2` + planes = **26**. Final inferential N per substrate is smaller (after cluster_map / overlap / degenerate_null). Run BOTH; **broad-vs-narrow is the key sensitivity**; narrow degeneracy (compact-core few-shaft) is a REPORTED per-subject result (with an enter/skip reason), never a silent skip. broad/narrow reported separately, never pooled. (spec §8)
+- **Shared frame (P0):** TA and TB fields MUST be built on ONE frame = the reference template `t_a`'s normalized readout plane **for that substrate** (`GEOM[substrate]/{ds_sid}_t_a.json`; **broad and narrow have DIFFERENT planes — never place narrow values on the broad plane**). Never correlate a field on `plane_a` against a field on `plane_b`. (spec §3.1)
 - **Value (P1):** per-contact value = `class_aggregate_contact_values(bundle, label)[name]["value"]` (masked normalized-rank class mean). NEVER display `_rank01`. (spec §3.2)
 - **Smoother (P1):** stat fields use `field_from_contact_values(...) → R_smooth_rank` with `sigma = class_template_sigma(plane_ref)` (= median-nn) and `s_thresh = S_THRESH = 0.15`. FORBIDDEN: `_smooth_rank_field_mm`, `VIS_SIGMA_MULT=2.5`, `VIS_SIGMA_MIN_MM=6.0`, `VIS_MASK_REL=0.02`. (spec §10/§12)
 - **Metric:** signed Pearson via `_support_corr` (identity orientation only, NO y-mirror), `overlap_min = OVERLAP_MIN = 25`, tested on the **negative** tail. (spec §3.2)
@@ -29,7 +29,7 @@ Copied verbatim from spec `docs/superpowers/specs/2026-07-06-topic5-tatb-field-r
 
 - **Create** `src/topic5_field_reversal.py` — all pure-math (no file IO, no argparse, no matplotlib). One responsibility: given per-subject class-aggregate values + a reference plane, produce the reversal gate / contact head-to-head / random-split / LOO reproducibility results.
 - **Create** `tests/test_topic5_field_reversal.py` — TDD for every invariant in Global Constraints.
-- **Create** `scripts/run_topic5_field_reversal.py` — broad data loading (reuses the `run_topic5_event_resolved_alignment.py` loading pattern), per-subject JSON + `cohort_summary.json`, bandwidth sweep. Refuses implicit cohort runs.
+- **Create** `scripts/run_topic5_field_reversal.py` — both-substrate data loading (reuses the `run_topic5_event_resolved_alignment.py` loading pattern + Task 0 narrow loader), per-substrate per-subject JSON + `cohort_summary.json`, bandwidth sweep. Refuses implicit cohort runs.
 - **Create** `scripts/plot_topic5_field_reversal.py` — per-subject panels, cohort null-forest, head-to-head, supplement, 1146 case; writes `figures/README.md`.
 - **Create** `results/topic5_ictal_recruitment/field_reversal/` (runner output; gitignored data).
 
@@ -83,7 +83,7 @@ cohort_binomial(pass_flags: Sequence[bool]) -> dict
 **Interfaces:**
 - Produces: `load_event_labels_ranks(dataset, subject, broad=False, labels_dir=None, lagpat_dir=None)` returns the SAME bundle schema as `broad=True` (no `NotImplementedError`). narrow defaults: `labels_dir="results/interictal_propagation_masked/per_subject"`, lagpat via `_narrow_lagpat_dir(dataset, subject)`.
 
-**Path resolution (verify, don't assume — C1 is the guardrail):** narrow lagpat = the canonical per-subject pool that produced the `interictal_propagation_masked` labels. Reuse `scripts/run_interictal_propagation.py`'s `_subject_dir(dataset, root, subject)` / `_epilepsiae_subject_dir` resolution (canonical artifact root: yuquan `/mnt/yuquan_data/yuquan_24h_edf`; epilepsiae root per that script), globbing `*_lagPat_withFreqCent.npz`. If the resolved dir is the wrong pool, the existing C1 proof (`_legacy_hist_mean_rank` reproduce producer template) HARD-RAISES — so mis-resolution fails loud, never silent. **Confirm on 2-3 real narrow subjects (below) BEFORE trusting the path.**
+**Path resolution (verify, don't assume — C1 is the guardrail):** narrow lagpat = the canonical per-subject pool that produced the `interictal_propagation_masked` labels. Reuse `scripts/run_interictal_propagation.py`'s **dataset-specific roots** `YUQUAN_ROOT = /mnt/yuquan_data/yuquan_24h_edf` and `EPILEPSIAE_ROOT = /mnt/epilepsia_data/interilca_inter_results/all_data_lns` (lines 46-47) + its `_subject_dir(dataset, root, subject)` resolver, globbing `*_lagPat_withFreqCent.npz`. **Pick the root BY DATASET — feeding the Yuquan root to an Epilepsiae subject builds a wrong path.** If the resolved dir is the wrong pool, the existing C1 proof (`_legacy_hist_mean_rank` reproduce producer template) HARD-RAISES — mis-resolution fails loud, never silent. **Confirm on 2-3 real narrow subjects (below) BEFORE trusting the path.**
 
 - [ ] **Step 1: Write the failing test (integration — skips if data roots absent)**
 
@@ -126,13 +126,12 @@ Expected: FAIL with `NotImplementedError: narrow substrate path ... not built`
 In `src/topic5_event_resolved_alignment.py`, add the helper (mirror `_broad_lagpat_dir`; reuse `run_interictal_propagation` resolution — import `_subject_dir` or replicate its ~10 lines):
 
 ```python
-def _narrow_lagpat_dir(dataset: str, subject: str, root: Optional[str] = None) -> Path:
+def _narrow_lagpat_dir(dataset: str, subject: str) -> Path:
     """Canonical (narrow) per-subject lagPat pool that produced interictal_propagation_masked
-    labels. C1 proof is the guardrail: a wrong pool raises. root defaults to the canonical
-    artifact root."""
-    from scripts.run_interictal_propagation import _subject_dir  # reuse (do not reinvent)
-    canonical = Path(root) if root else Path("/mnt/yuquan_data/yuquan_24h_edf")
-    return _subject_dir(dataset, canonical, subject)
+    labels. Dataset-specific root (reuse, do NOT reinvent); C1 proof is the guardrail."""
+    from scripts.run_interictal_propagation import _subject_dir, YUQUAN_ROOT, EPILEPSIAE_ROOT
+    root = YUQUAN_ROOT if dataset == "yuquan" else EPILEPSIAE_ROOT
+    return _subject_dir(dataset, root, subject)
 ```
 
 Replace the `if not broad: raise NotImplementedError(...)` block with substrate-aware defaults, and make the lagpat line substrate-aware:
@@ -369,7 +368,7 @@ git commit -m "feat(topic5): shared-frame dual-field builder (P0 frame + P1 raw 
 
 **Interfaces:**
 - Consumes: `within_shaft_shuffle`, `effective_shuffle_n` (topic5_axis_alignment), `placement_in_distribution`, `build_reversal_fields`, `signed_reversal_corr`
-- Produces: `within_shaft_reversal_gate(plane_ref, cav0, cav1, *, X, Y, sigma=None, n_perm=1000, rng, min_eff=6, s_thresh=S_THRESH, overlap_min=OVERLAP_MIN) -> {"signed_corr","n_overlap","effective_n","degenerate_null":bool,"null_corrs":list,"null_p95":float,"percentile":float,"passed":bool,"sigma":float}`. Null = permute cav1 **values** within shaft (support/coords/names fixed), rebuild TB field, recompute corr. `degenerate_null` if `effective_n < min_eff` (computed on `names_used`). `passed = (not degenerate) and percentile<5 and signed_corr<0`.
+- Produces: `within_shaft_reversal_gate(plane_ref, cav0, cav1, *, X, Y, sigma=None, n_perm=1000, rng, min_eff=6, s_thresh=S_THRESH, overlap_min=OVERLAP_MIN) -> {"signed_corr","n_overlap","effective_n","degenerate_null":bool,"null_corrs":list,"null_p05":float,"null_p50":float,"null_p95":float,"percentile":float,"passed":bool,"sigma":float}`. Null = permute cav1 **values** within shaft (support/coords/names fixed), rebuild TB field, recompute corr. `degenerate_null` if `effective_n < min_eff` (computed on `names_used`). `passed = (not degenerate) and percentile<5 and signed_corr<0`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -449,7 +448,8 @@ def within_shaft_reversal_gate(plane_ref, cav0, cav1, *, X, Y, sigma=None,
     base = {"signed_corr": obs["signed_corr"], "n_overlap": obs["n_overlap"],
             "insufficient_overlap": obs["insufficient_overlap"],
             "effective_n": eff, "degenerate_null": bool(degenerate),
-            "sigma": built["sigma"], "null_corrs": [], "null_p95": float("nan"),
+            "sigma": built["sigma"], "null_corrs": [],
+            "null_p05": float("nan"), "null_p50": float("nan"), "null_p95": float("nan"),
             "percentile": float("nan"), "passed": False}
     if degenerate or obs["insufficient_overlap"] or obs["signed_corr"] is None:
         return base
@@ -465,8 +465,9 @@ def within_shaft_reversal_gate(plane_ref, cav0, cav1, *, X, Y, sigma=None,
             null.append(r["signed_corr"])
     null = np.asarray(null, float)
     place = placement_in_distribution(obs["signed_corr"], null)   # percentile = %(null < obs)
+    pcts = np.nanpercentile(null, [5, 50, 95]) if null.size else [np.nan, np.nan, np.nan]
     base.update({"null_corrs": null.tolist(),
-                 "null_p95": float(np.nanpercentile(null, 95)) if null.size else float("nan"),
+                 "null_p05": float(pcts[0]), "null_p50": float(pcts[1]), "null_p95": float(pcts[2]),
                  "percentile": place["percentile"],
                  "passed": bool(place["percentile"] < 5.0 and obs["signed_corr"] < 0.0)})
     return base
@@ -494,7 +495,7 @@ git commit -m "feat(topic5): within-shaft reversal gate + effective_n degeneracy
 
 **Interfaces:**
 - Produces:
-  - `channel_floor(plane_ref, cav0, cav1, *, X, Y, sigma, n_perm, rng, ...) -> {"percentile","null_p95","null_corrs"}` (same shape as gate's null section, using `channel_shuffle`).
+  - `channel_floor(plane_ref, cav0, cav1, *, X, Y, sigma, n_perm, rng, ...) -> {"percentile","null_p05","null_p50","null_p95","null_corrs"}` (same shape as gate's null section, using `channel_shuffle`).
   - `random_split_contrast(bundle, plane_ref, *, X, Y, sigma, n_split=200, rng, ...) -> {"split_corrs":list,"split_median":float,"observed_ab_corr":float,"note":"non_inferential"}` — split events into 2 random balanced halves ignoring labels; aggregate each half's per-contact masked-rank mean; build both fields on `plane_ref`; corr. `observed_ab_corr` = the true class-0-vs-class-1 corr.
 
 - [ ] **Step 1: Write the failing test**
@@ -557,8 +558,9 @@ def channel_floor(plane_ref, cav0, cav1, *, X, Y, sigma, n_perm, rng,
             null.append(r["signed_corr"])
     null = np.asarray(null, float)
     place = placement_in_distribution(obs["signed_corr"], null) if null.size else {"percentile": float("nan")}
+    pcts = np.nanpercentile(null, [5, 50, 95]) if null.size else [np.nan, np.nan, np.nan]
     return {"null_corrs": null.tolist(), "percentile": place["percentile"],
-            "null_p95": float(np.nanpercentile(null, 95)) if null.size else float("nan")}
+            "null_p05": float(pcts[0]), "null_p50": float(pcts[1]), "null_p95": float(pcts[2])}
 
 
 def random_split_contrast(bundle, plane_ref, *, X, Y, sigma, n_split=200, rng,
@@ -608,7 +610,7 @@ git commit -m "feat(topic5): channel-floor null + non-inferential random-split c
 
 **Interfaces:**
 - Consumes: `scipy.stats.spearmanr`, `within_shaft_shuffle`, `effective_shuffle_n`, `placement_in_distribution`
-- Produces: `contact_reversal_gate(cav0, cav1, *, n_perm=1000, rng, min_eff=6) -> {"signed_spearman","effective_n","degenerate_null","percentile","null_p95","passed"}` — NO geometry: signed Spearman between the two per-contact value vectors (over contacts finite in both), within-shaft null on cav1 values.
+- Produces: `contact_reversal_gate(cav0, cav1, *, n_perm=1000, rng, min_eff=6) -> {"signed_spearman","effective_n","degenerate_null","percentile","null_p05","null_p50","null_p95","passed"}` — NO geometry: signed Spearman between the two per-contact value vectors (over contacts finite in both), within-shaft null on cav1 values.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -646,14 +648,16 @@ def contact_reversal_gate(cav0, cav1, *, n_perm=1000, rng, min_eff=6) -> dict:
     degenerate = eff < min_eff or len(common) < 3
     obs = float(spearmanr(v0, v1).correlation) if len(common) >= 3 else float("nan")
     base = {"signed_spearman": obs, "effective_n": eff, "degenerate_null": bool(degenerate),
-            "percentile": float("nan"), "null_p95": float("nan"), "passed": False}
+            "percentile": float("nan"), "null_p05": float("nan"), "null_p50": float("nan"),
+            "null_p95": float("nan"), "passed": False}
     if degenerate or not np.isfinite(obs):
         return base
     null = np.array([spearmanr(v0, within_shaft_shuffle(v1, common, rng)).correlation
                      for _ in range(n_perm)], float)
     place = placement_in_distribution(obs, null)
+    pcts = np.nanpercentile(null, [5, 50, 95])
     base.update({"percentile": place["percentile"],
-                 "null_p95": float(np.nanpercentile(null, 95)),
+                 "null_p05": float(pcts[0]), "null_p50": float(pcts[1]), "null_p95": float(pcts[2]),
                  "passed": bool(place["percentile"] < 5.0 and obs < 0.0)})
     return base
 ```
@@ -679,7 +683,7 @@ git commit -m "feat(topic5): contact-level signed-Spearman reversal head-to-head
 - Test: `tests/test_topic5_field_reversal.py`
 
 **Interfaces:**
-- Produces: `loo_reproducibility(bundle, plane_ref, *, n_split=50, rng, sigma) -> {"field_rho":float,"contact_rho":float,"n_contacts_common":int}`. Per class, per split: train-half raw per-contact mean rank; held-out-half per-contact mean rank; **contact** prediction = train raw value; **field** prediction = LOO kernel regression at each contact's location from OTHER train contacts (target contact excluded). Spearman(pred, held) over contacts finite in **all three** (train, held, LOO-field). Fold A/B, mean over splits.
+- Produces: `loo_reproducibility(bundle, plane_ref, *, n_split=50, rng, sigma, s_thresh=S_THRESH) -> {"field_rho":float,"contact_rho":float,"n_contacts_common":int}`. Per class, per split: train-half raw per-contact mean rank; held-out-half per-contact mean rank; **contact** prediction = train raw value; **field** prediction = LOO kernel regression from OTHER train contacts (target excluded), weighted by **train-half participation** (NOT 1.0), with contacts whose kernel mass `den < s_thresh` NaN'd (spatially isolated). Spearman(pred, held) over contacts finite in **all three** (train, held, gated LOO-field) — the SAME intersection for both predictors. Fold A/B, mean over splits.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -710,7 +714,9 @@ Expected: FAIL with `ImportError: cannot import name 'loo_reproducibility'`
 
 ```python
 def _loo_field_predict(names, plane_xy, values, support, sigma):
-    """LOO kernel regression at each contact: value <- support-weighted mean of OTHER contacts."""
+    """LOO kernel regression at each contact from OTHER contacts. Returns (pred, den) where
+    den = support-weighted kernel mass at the contact (the field support at that location,
+    directly comparable to S_THRESH — the caller NaNs contacts with den < s_thresh)."""
     pts = np.array([plane_xy[n] for n in names], float)
     v = np.array([values[n] for n in names], float)
     sup = np.array([support[n] for n in names], float)
@@ -720,10 +726,10 @@ def _loo_field_predict(names, plane_xy, values, support, sigma):
     den = W.sum(1)
     with np.errstate(invalid="ignore", divide="ignore"):
         pred = np.where(den > 1e-12, (W @ v) / den, np.nan)
-    return pred
+    return pred, den
 
 
-def _class_split_rhos(masked, names, plane_xy, cols, sigma, rng):
+def _class_split_rhos(masked, bools, names, plane_xy, cols, sigma, rng, s_thresh):
     perm = rng.permutation(cols); half = perm.size // 2
     if half < 1:
         return None
@@ -733,33 +739,37 @@ def _class_split_rhos(masked, names, plane_xy, cols, sigma, rng):
                           for c in range(len(names))])
         held = np.array([np.nanmean(masked[c, b]) if np.any(np.isfinite(masked[c, b])) else np.nan
                          for c in range(len(names))])
-    on_plane = [i for i, n in enumerate(names) if n in plane_xy]
-    idx = np.array(on_plane, int)
-    tv = {names[i]: train[i] for i in idx if np.isfinite(train[i])}
-    sup = {names[i]: 1.0 for i in tv}
-    order = list(tv.keys())
-    loo = _loo_field_predict(order, plane_xy, tv, sup, sigma)
-    loo_by = {n: loo[j] for j, n in enumerate(order)}
+    train_part = np.asarray(bools)[:, a].mean(axis=1)         # per-contact participation on train half
+    order = [names[i] for i in range(len(names))
+             if names[i] in plane_xy and np.isfinite(train[i]) and train_part[i] > 0]
+    if len(order) < 3:
+        return None
+    tv = {n: float(train[names.index(n)]) for n in order}
+    sup = {n: float(train_part[names.index(n)]) for n in order}       # participation weight, NOT 1.0
+    pred, den = _loo_field_predict(order, plane_xy, tv, sup, sigma)
+    # S_THRESH gate: spatially-isolated contacts (low kernel mass) -> NaN, so field & contact
+    # are scored on the SAME definable-contact intersection (spec §6 common-support fairness).
+    loo_by = {n: (float(pred[j]) if den[j] >= s_thresh else np.nan) for j, n in enumerate(order)}
     common = [n for n in order if np.isfinite(held[names.index(n)]) and np.isfinite(loo_by[n])]
     if len(common) < 3:
         return None
     hv = np.array([held[names.index(n)] for n in common])
-    cv = np.array([tv[n] for n in common])
+    cv = np.array([tv[n] for n in common])                            # contact scored on SAME common set
     fv = np.array([loo_by[n] for n in common])
     return (float(spearmanr(cv, hv).correlation), float(spearmanr(fv, hv).correlation), len(common))
 
 
-def loo_reproducibility(bundle, plane_ref, *, n_split=50, rng, sigma) -> dict:
+def loo_reproducibility(bundle, plane_ref, *, n_split=50, rng, sigma, s_thresh=S_THRESH) -> dict:
     X, Y = make_plane_grid()
     if sigma is None:
         sigma = class_template_sigma(plane_ref, X=X, Y=Y)
-    masked = bundle["masked"]; names = list(bundle["channel_names"])
+    masked = bundle["masked"]; bools = np.asarray(bundle["bools"]); names = list(bundle["channel_names"])
     labels = np.asarray(bundle["labels"]); plane_xy = build_plane_xy(plane_ref)
     c_rhos, f_rhos, ncs = [], [], []
     for g in (0, 1):
         cols = np.where(labels == g)[0]
         for _ in range(n_split):
-            r = _class_split_rhos(masked, names, plane_xy, cols, sigma, rng)
+            r = _class_split_rhos(masked, bools, names, plane_xy, cols, sigma, rng, s_thresh)
             if r is not None:
                 c_rhos.append(r[0]); f_rhos.append(r[1]); ncs.append(r[2])
     return {"contact_rho": float(np.nanmean(c_rhos)) if c_rhos else float("nan"),
@@ -846,7 +856,15 @@ git commit -m "feat(topic5): cohort binomial over non-degenerate reversal passes
 - Consumes: all Task 1-7 functions; `load_event_labels_ranks`, `map_clusters_to_templates`, `class_aggregate_contact_values`, `make_plane_grid`. Reuses the exact loading sequence from `scripts/run_topic5_event_resolved_alignment.py:89-114` (planes → bundle → cluster map → reference plane), MINUS the ictal block.
 - Produces: `results/topic5_ictal_recruitment/field_reversal/per_subject/{ds_sid}.json` + `cohort_summary.json`.
 
-Geometry roots: `GEOM = {"broad": ".../propagation_geometry_broad/observation_readout/real_subjects", "narrow": ".../propagation_geometry/observation_readout/real_subjects"}` (both under `--input-results-root`).
+Geometry roots (real paths, under `--input-results-root`, default `/home/honglab/leijiaxin/HFOsp/results` — labels+geometry live in the main tree, gitignored, NOT in the worktree):
+
+```python
+input_results_root = Path(args.input_results_root)
+GEOM = {
+    "broad":  input_results_root / "spatial_modulation" / "propagation_geometry_broad" / "observation_readout" / "real_subjects",
+    "narrow": input_results_root / "spatial_modulation" / "propagation_geometry" / "observation_readout" / "real_subjects",
+}
+```
 
 **Per-subject flow, parameterized by `substrate ∈ {"broad","narrow"}`** (run BOTH; results kept separate, never pooled):
 1. Require `GEOM[substrate]/{ds_sid}_t_a.json` and `_t_b.json`; else `reason="no_planes"`.
@@ -884,7 +902,7 @@ Expected: FAIL with `ModuleNotFoundError: scripts.run_topic5_field_reversal`
 
 - [ ] **Step 3: Write the runner**
 
-Mirror `scripts/run_topic5_event_resolved_alignment.py` for `_ROOT`/sys.path, `GEOM_BROAD`, `_vec_in_order`. Implement `pick_reference(cmap, plane_a, plane_b)`:
+Mirror `scripts/run_topic5_event_resolved_alignment.py` for `_ROOT`/sys.path and `_vec_in_order`; use the `GEOM[substrate]` dict above (NOT the pilot's hardcoded `GEOM_BROAD`). Implement `pick_reference(cmap, plane_a, plane_b)`:
 
 ```python
 def pick_reference(cmap, plane_a, plane_b):
@@ -894,7 +912,7 @@ def pick_reference(cmap, plane_a, plane_b):
     return plane_of["t_a"], inv["t_a"], inv["t_b"]
 ```
 
-Then `_run_subject(ds_sid, ...)` per the flow above (steps 1-8), and `main()` with the CLI. Write per-subject JSON. `--cohort` iterates the discovered broad subjects (glob `GEOM_BROAD/*_t_a.json`).
+Then `_run_subject(ds_sid, substrate, ...)` per the flow above (steps 1-8), and `main()` with the CLI. Write per-substrate per-subject JSON. `--cohort` iterates discovered subjects per substrate (glob `GEOM[substrate]/*_t_a.json`).
 
 - [ ] **Step 4: Run test + a real single-subject smoke run**
 
@@ -945,7 +963,7 @@ git commit -m "feat(topic5): field-reversal figures + README"
 
 **Files:**
 - Modify: `results/FIGURE_INDEX.md` (append the new figure dir)
-- Modify: `docs/topic5_seizure_subtyping.md` (one pointer line under §3.0 network-axis: "TA/TB 场反向门 = A-line 上游 gate；broad-only；结果见 archive")
+- Modify: `docs/topic5_seizure_subtyping.md` (one pointer line under §3.0 network-axis: "TA/TB 场反向门 = A-line 上游 gate；broad+narrow 双底物；结果见 archive")
 - Create: `docs/archive/topic5/field_reversal_<result-date>.md` (results archive — filled after the cohort run, with plain-language 测了什么/怎么测/揭示了什么 per CLAUDE.md §8; leave a `preliminary, pending review` tag until the user signs off)
 
 - [ ] **Step 1** Append FIGURE_INDEX entry.

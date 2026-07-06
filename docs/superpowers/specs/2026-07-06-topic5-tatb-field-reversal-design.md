@@ -47,7 +47,7 @@
 - **channel-shuffle（粗底参照）**：`channel_shuffle` 全触点打乱，给「有没有任何粗共享结构」地板。
 - **random re-split（仅描述对照，非推断）**：忽略 A/B 标签随机分两半、各建场、corr(half1,half2)；分布≈正，实测 A/B≈负，一眼看出反向不是「切两半」artifact。**标 non-inferential**（不付 KMeans「最分离一刀」选择成本，当推断 null 反保守；「存不存在两模板」是 PR-2 已答，不在此重打）。
 - **per-subject**：观测 corr 的 null 左尾 percentile（`placement_in_distribution`）；pass = percentile < 5 **且** corr < 0。
-- **cohort**：二项检验 pass 数 vs 5%；**v1 broad-only（narrow deferred，§8）**；每被试一个 A/B 反向 corr（不需多模板折叠）。无 band sweep → **不需 selcorr 选择校正**。
+- **cohort**：二项检验 pass 数 vs 5%；**broad / narrow 各报、永不 pool（§8）**；每被试每底物一个 A/B 反向 corr（不需多模板折叠）。无 band sweep → **不需 selcorr 选择校正**。
 - **报告铁律**：实测 corr 永远跟 within-shaft null 带一起出，**不出裸 corr**。
 
 ## 5. 表示层 head-to-head（Route B：场主 + 触点灵敏度）
@@ -81,7 +81,7 @@
 ## 8. 合格口径 / 队列范围（broad + narrow 双底物）
 
 - **两底物都做，broad-vs-narrow = 核心 sensitivity**。narrow = compact-core：**若 broad 反向而 narrow 不反向，机制解释完全不同**（反向是粗/远场现象、非核心属性）；若 narrow 也反向，主张更强、深到 SOZ 核。**narrow 退化（compact/few-shaft 撞弱-null 守卫）本身是要报告的结果，不是预先跳过**——把「loader 没建」当「narrow 不可行」= 把工程现状写成数据结论，禁止。
-- **narrow loader（Task 0）**：`load_event_labels_ranks(broad=False)` 原被 event-resolved pilot stub 成 `NotImplementedError`（pilot 自身 scoping，**非数据墙**）。narrow 数据齐全（**35 被试**有 narrow planes+labels，多于 broad 的 26）：narrow labels=`results/interictal_propagation_masked/per_subject`，narrow geometry=`propagation_geometry/observation_readout/real_subjects/{ds_sid}_t_{a,b}.json`，narrow lagpat=canonical 池（`_subject_dir(dataset, root, subject)`，yuquan root `/mnt/yuquan_data/yuquan_24h_edf`），**复用同一 C1 producer-template 证明作 loud 守卫**（错池 → C1 硬 raise，不静默）。
+- **narrow loader（Task 0）**：`load_event_labels_ranks(broad=False)` 原被 event-resolved pilot stub 成 `NotImplementedError`（pilot 自身 scoping，**非数据墙**）。**分层分母**：narrow planes=**35**（raw availability）；过 `stable_k==2` pre-map=**29**；broad 对应=**26**；**最终 inferential N 更小**（再过 cluster_map/overlap/degenerate，勿把 35 误读成 eligible N）。narrow labels=`results/interictal_propagation_masked/per_subject`，narrow geometry=`propagation_geometry/observation_readout/real_subjects/{ds_sid}_t_{a,b}.json`，narrow lagpat=canonical 池（`_subject_dir(dataset, root, subject)`，**dataset-specific root**：yuquan `YUQUAN_ROOT=/mnt/yuquan_data/yuquan_24h_edf`、epi `EPILEPSIAE_ROOT=/mnt/epilepsia_data/interilca_inter_results/all_data_lns`），**复用同一 C1 producer-template 证明作 loud 守卫**（错池 → C1 硬 raise，不静默）。
 - **合格（每底物）** = 该底物 planes 存在 + `stable_k==chosen_k==2` + `map_clusters_to_templates` 不 ambiguous。**不需 ictal**（纯间期 TA-vs-TB）。broad / narrow **各报、永不 pool**。
 - **退化守卫 + 逐被试问责**：`effective_shuffle_n` 按真正进统计的触点算；退化被试标 `degenerate_null`、剔出推断计数，但**每被试逐条报「为什么进/不进」**（`no_planes` / `c1_violation` / `cluster_map_ambiguous` / `insufficient_overlap` / `degenerate_null` / `ok`）——narrow 若大面积退化，这张问责表就是结果。
 
