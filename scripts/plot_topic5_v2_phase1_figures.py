@@ -50,9 +50,7 @@ def _load(sub):
 def fig1_observed():
     bands = PRIMARY + COMPOSITE
     norm = TwoSlopeNorm(vmin=0.35, vcenter=0.5, vmax=0.90)                    # < 0.5 blue, > 0.5 red
-    fig, axes = plt.subplots(1, 2, figsize=(14, 8), gridspec_kw={"width_ratios": [20, 17]})
-    im = None
-    for ax, (sub, n) in zip(axes, SUBS):
+    for sub, n in SUBS:                                                       # narrow / broad = 独立图
         a, nl, _ = _load(sub)
         piv = a.pivot_table(index="subject", columns="band", values="align_abs_maxab", aggfunc="median")
         piv = piv.reindex(columns=bands)
@@ -67,36 +65,38 @@ def fig1_observed():
         med = piv.median(axis=0)
         M = np.vstack([piv.values, med.values])
         ylabs = [_short(s) for s in piv.index] + ["cohort median"]
+        fig, ax = plt.subplots(figsize=(9.5, 0.46 * len(ylabs) + 2.0))                    # 高度随行数
         im = ax.imshow(M, aspect="auto", cmap="RdBu_r", norm=norm)
         for i, subj in enumerate(piv.index):
             for j, b in enumerate(bands):
                 if sig.get((str(subj), b), False):
-                    ax.text(j, i, "*", ha="center", va="center", fontsize=9, color="white", fontweight="bold",
-                            path_effects=[pe.withStroke(linewidth=1.3, foreground="black")])
-        ax.set_xticks(range(len(bands))); ax.set_xticklabels([SHORT[b] for b in bands], fontsize=8)
-        ax.set_yticks(range(len(ylabs))); ax.set_yticklabels(ylabs, fontsize=7)
+                    ax.text(j, i, "*", ha="center", va="center", fontsize=14, color="white", fontweight="bold",
+                            path_effects=[pe.withStroke(linewidth=1.6, foreground="black")])
+        ax.set_xticks(range(len(bands))); ax.set_xticklabels([SHORT[b] for b in bands], fontsize=13)
+        ax.set_yticks(range(len(ylabs))); ax.set_yticklabels(ylabs, fontsize=12)
         ax.axhline(len(piv) - 0.5, color="k", lw=1.5)
         ax.axvline(len(PRIMARY) - 0.5, color="k", ls="--", lw=2.5)                        # primary(7) | composite(4)
-        ax.set_title(f"{sub}  (n={n})", fontsize=12)
+        ax.set_title(f"F1 · {sub} (n={n}) — observed maxAB |corr| (subject × band)\n"
+                     "rows ↓ by # significant primary bands   ·   * = subject self-null p<0.05", fontsize=13)
         for j in range(M.shape[1]):
             if np.isfinite(M[-1, j]):
-                ax.text(j, M.shape[0] - 1, f"{M[-1,j]:.2f}", ha="center", va="center", fontsize=6, color="k")
-    cbar = fig.colorbar(im, ax=axes, fraction=0.03, pad=0.02)
-    cbar.set_label("maxAB |corr|   (blue < 0.5 < red)", fontsize=10)
-    fig.suptitle("F1 · Observed maxAB alignment (subject × band): narrow > broad, band-generic   ·   "
-                 "* = subject self-null p<0.05   ·   rows ↓ by # significant primary bands", fontsize=12)
-    _save(fig, "phase1_F1_observed_maxAB_heatmap.png")
+                ax.text(j, M.shape[0] - 1, f"{M[-1,j]:.2f}", ha="center", va="center", fontsize=9, color="k")
+        cbar = fig.colorbar(im, ax=ax, fraction=0.045, pad=0.02)
+        cbar.set_label("maxAB |corr|  (blue < 0.5 < red)", fontsize=13)
+        cbar.ax.tick_params(labelsize=11)
+        fig.tight_layout()
+        _save(fig, f"phase1_F1_observed_maxAB_heatmap_{sub}.png")
 
 
 # ---------------------------------------------------------------- F2 per-band null result
 def fig2_null_perband():
     SIG_C, NS_C = "#c44e52", "#cfcfcf"                                        # muted red / light gray (柔和)
-    fig, axes = plt.subplots(1, 2, figsize=(15, 6.5), sharey=True)
-    for ax, (sub, n) in zip(axes, SUBS):
+    for sub, n in SUBS:                                                       # narrow / broad = 独立图
         _, nl, g = _load(sub)
         sp = nl[(nl.null_type == "spatial") & (nl.band.isin(PRIMARY))].copy()
         sp["delta"] = pd.to_numeric(sp.delta, errors="coerce")
         gg = g.set_index("band")
+        fig, ax = plt.subplots(figsize=(9.5, 6.8))
         stars = []                                                                        # (xi, sig); drawn after ylim headroom so they stay in the box
         for xi, b in enumerate(PRIMARY):
             d = sp[sp.band == b].delta.dropna().values
@@ -107,9 +107,9 @@ def fig2_null_perband():
                 vp["bodies"][0].set_facecolor(col); vp["bodies"][0].set_edgecolor("gray")
                 vp["bodies"][0].set_alpha(0.40)
             jit = np.random.default_rng(xi).uniform(-0.085, 0.085, len(d))                # 背景点(per-subject Δ)
-            ax.scatter(xi + jit, d, s=15, c="#333333", alpha=0.75, edgecolors="none", zorder=4)
+            ax.scatter(xi + jit, d, s=24, c="#333333", alpha=0.75, edgecolors="none", zorder=4)
             cd = float(gg.loc[b, "cohort_perm_delta_spatial"])
-            ax.hlines(cd, xi - 0.33, xi + 0.33, color="k", lw=2.5, zorder=6)              # cohort Δ (tested)
+            ax.hlines(cd, xi - 0.33, xi + 0.33, color="k", lw=2.8, zorder=6)              # cohort Δ (tested)
             stars.append((xi, sig))
         ax.axhline(0, color="gray", lw=0.7, zorder=1)                                     # 0 线减细
         y0, y1 = ax.get_ylim()
@@ -117,24 +117,24 @@ def fig2_null_perband():
         ax.set_ylim(y0, y1 + 0.12 * rng)                                                  # 比例 headroom: star row 不贴顶/不超框
         for xi, sig in stars:
             ax.annotate("*" if sig else "n.s.", (xi, y1 + 0.035 * rng), ha="center", va="bottom",
-                        fontsize=17 if sig else 10, color=SIG_C if sig else "gray",
+                        fontsize=21 if sig else 12, color=SIG_C if sig else "gray",
                         weight="bold" if sig else "normal", annotation_clip=True)
         ax.set_xticks(range(len(PRIMARY)))
-        ax.set_xticklabels([SHORT[b] for b in PRIMARY], fontsize=12)
-        ax.tick_params(axis="y", labelsize=13)
+        ax.set_xticklabels([SHORT[b] for b in PRIMARY], fontsize=15)
+        ax.tick_params(axis="y", labelsize=14)
         nsig = int((pd.to_numeric(g[g.in_primary_family == True].max_over_bands_p, errors="coerce") < 0.05).sum())
-        ax.set_title(f"{sub}  (n={n})  ·  {nsig}/7 FWER-sig", fontsize=12)                  # panel id（去掉的是 suptitle，非此）
+        ax.set_title(f"F2 · {sub} (n={n})  ·  {nsig}/7 pass FWER", fontsize=15)
         ax.grid(alpha=0.25, axis="y")
         ax.spines[["top", "right"]].set_visible(False)                                     # 去右上框
-    axes[0].set_ylabel("cohort alignment − spatial-null median   (Δ per subject)", fontsize=15)
-    handles = [Patch(facecolor=SIG_C, alpha=0.4, edgecolor="gray", label="band passes FWER"),
-               Patch(facecolor=NS_C, alpha=0.4, edgecolor="gray", label="n.s. band"),
-               Line2D([0], [0], color="k", lw=2.5, label="cohort Δ (tested)"),
-               Line2D([0], [0], marker="o", ls="none", color="#333333", ms=5, label="per-subject Δ")]
-    axes[1].legend(handles=handles, loc="upper left", bbox_to_anchor=(1.01, 1.0),
-                   fontsize=9, framealpha=0.92)                                            # legend 右上（框外，不压数据）
-    fig.tight_layout()
-    _save(fig, "phase1_F2_null_per_band.png")
+        ax.set_ylabel("cohort alignment − spatial-null median   (Δ per subject)", fontsize=15)
+        handles = [Patch(facecolor=SIG_C, alpha=0.4, edgecolor="gray", label="band passes FWER"),
+                   Patch(facecolor=NS_C, alpha=0.4, edgecolor="gray", label="n.s. band"),
+                   Line2D([0], [0], color="k", lw=2.8, label="cohort Δ (tested)"),
+                   Line2D([0], [0], marker="o", ls="none", color="#333333", ms=7, label="per-subject Δ")]
+        ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.005, 1.0),
+                  fontsize=11, framealpha=0.92)                                            # legend 右上（框外，不遮 star 行）
+        fig.tight_layout()
+        _save(fig, f"phase1_F2_null_per_band_{sub}.png")
 
 
 # ---------------------------------------------------------------- F3 per-subject stability
