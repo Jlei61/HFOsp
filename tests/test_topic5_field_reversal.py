@@ -74,3 +74,40 @@ def test_insufficient_overlap_flagged():
     out = signed_reversal_corr({"T": xx + yy, "S": S0}, {"T": -(xx + yy), "S": S1})
     assert out["insufficient_overlap"] is True
     assert out["n_overlap"] < 25
+
+
+# Task 2 tests: build_reversal_fields
+
+from src.topic5_field_reversal import build_reversal_fields
+from src.propagation_contact_plane_readout import make_plane_grid
+
+
+def _toy_plane(names, xy):
+    return {"channels": [{"name": n, "x_norm": xy[n][0], "y_norm": xy[n][1],
+                          "typical_rank": 0.0, "support": 1.0} for n in names]}
+
+
+def test_both_fields_on_same_frame_and_sigma():
+    names = [f"A{i}" for i in range(1, 7)] + [f"B{i}" for i in range(1, 7)]
+    xy = {n: (0.1 * i, 0.0) for i, n in enumerate(names)}
+    plane_ref = _toy_plane(names, xy)
+    cav0 = {n: {"value": float(i), "support": 1.0} for i, n in enumerate(names)}
+    cav1 = {n: {"value": float(len(names) - i), "support": 1.0} for i, n in enumerate(names)}  # reversed
+    X, Y = make_plane_grid()
+    out = build_reversal_fields(plane_ref, cav0, cav1, X=X, Y=Y)
+    assert out["field0"] is not None and out["field1"] is not None
+    # same sigma used for both (single float returned)
+    assert out["field0"]["sigma_xy"] == out["field1"]["sigma_xy"] == out["sigma"]
+    assert set(out["names_used"]) == set(names)
+
+
+def test_membership_mismatch_names_used_is_cav1_on_plane():
+    names = [f"A{i}" for i in range(1, 7)]
+    xy = {n: (0.1 * i, 0.0) for i, n in enumerate(names)}
+    plane_ref = _toy_plane(names, xy)
+    cav0 = {n: {"value": 1.0, "support": 1.0} for n in names}
+    cav1 = {n: {"value": 1.0, "support": 1.0} for n in names[:5]}     # A6 absent in cav1
+    cav1["A6"] = {"value": np.nan, "support": 0.0}
+    X, Y = make_plane_grid()
+    out = build_reversal_fields(plane_ref, cav0, cav1, X=X, Y=Y)
+    assert "A6" not in out["names_used"]
