@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 from matplotlib import gridspec
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch, Polygon
+from matplotlib.patches import Ellipse, Patch
 
 ROOT = Path(__file__).resolve().parents[2]
 RUN = ROOT / "results/topic4_sef_hfo/field_swap_subject_snn"
@@ -66,11 +66,22 @@ def _style(ax, L):
         sp.set_linewidth(0.8); sp.set_color("0.25")
 
 
-def _ee_band(center, foci, u, p, core_r):
-    half_w = max(1.5 * core_r, 1.6)
-    proj = (np.asarray(foci) - center) @ u
-    a = center + u * (float(proj.min()) - 2.0); b = center + u * (float(proj.max()) + 2.0)
-    return np.vstack([a + half_w * p, b + half_w * p, b - half_w * p, a - half_w * p])
+def _ee_ellipse(foci, core_r, theta_deg):
+    """Visualize the anisotropic E->E long-axis footprint as an oriented ellipse."""
+    foci = np.asarray(foci, float)
+    major = float(np.linalg.norm(foci[1] - foci[0]) / 2.0 + 2.0)
+    minor = max(1.5 * float(core_r), 1.6)
+    return Ellipse(
+        xy=np.mean(foci, axis=0),
+        width=2.0 * major,
+        height=2.0 * minor,
+        angle=float(theta_deg),
+        facecolor=FWD_SHADE,
+        edgecolor=AXIS_COL,
+        lw=1.3,
+        alpha=0.28,
+        zorder=3,
+    )
 
 
 def _draw_contacts(ax, contacts, names, shafts, core_a, core_b):
@@ -93,18 +104,17 @@ def _plot_mechanism(ax, fd, core_a, core_b, shafts):
     pos = np.asarray(fd["posE"], float); v = np.asarray(fd["vth"], float)
     foci = np.asarray(fd["foci"], float); contacts = np.asarray(fd["contacts"], float)
     names = [str(x) for x in fd["names"]]; L = float(fd["L"]); core_r = float(fd["core_r"])
-    u, p = _axis(float(fd["theta_deg"])); center = np.array([L / 2, L / 2])
+    u, _ = _axis(float(fd["theta_deg"]))
     ax.scatter(pos[:, 0], pos[:, 1], c=np.clip(18.0 - v, 0.0, None), s=DOT, cmap="plasma",
                vmin=0.0, vmax=1.2, alpha=ALPHA, linewidths=0, rasterized=True, zorder=2)
-    ax.add_patch(Polygon(_ee_band(center, foci, u, p, core_r), closed=True, fc=FWD_SHADE,
-                         ec=AXIS_COL, lw=1.3, alpha=0.28, zorder=3))
+    ax.add_patch(_ee_ellipse(foci, core_r, float(fd["theta_deg"])))
     for i, f in enumerate(foci):
         ax.add_patch(plt.Circle(f, core_r, fill=False, ec="crimson", lw=1.25, ls="--", zorder=7))
         ax.text(f[0], f[1] + 1.0, "A" if i == 0 else "B", fontsize=9, color="crimson",
                 fontweight="bold", ha="center", va="bottom",
                 path_effects=[pe.withStroke(linewidth=2.0, foreground="white")])
-    ax.annotate("", xy=foci[1], xytext=foci[0],
-                arrowprops=dict(arrowstyle="-|>", color=AXIS_COL, lw=1.7), zorder=8)
+    ax.plot([foci[0, 0], foci[1, 0]], [foci[0, 1], foci[1, 1]],
+            color=AXIS_COL, lw=1.7, alpha=0.95, zorder=8)
     _draw_contacts(ax, contacts, names, shafts, core_a, core_b)
     ax.set_title("mechanism", fontsize=9.5, fontweight="bold", pad=5); _style(ax, L)
 
@@ -192,7 +202,7 @@ def _plot_readout(ax, fd, events, order, names, shafts, window_ms=5000.0):
     return {"forward_events": n_fwd, "reverse_events": n_rev}
 
 
-def compose(twoend_tag, source_tag, sink_tag, fig_name, subject_label):
+def compose(twoend_tag, source_tag, sink_tag, fig_name, subject_label, readout_window_ms=5000.0):
     to, tfd = _load(twoend_tag)            # twoend (spontaneous) -> mechanism + readout
     # single-run mode: if no dedicated source/sink runs, take the tempA/tempB event panels
     # from the twoend run's own best forward / best reverse spontaneous events (rep_fwd/rep_rev).
@@ -218,7 +228,15 @@ def compose(twoend_tag, source_tag, sink_tag, fig_name, subject_label):
     # driven-pooled runs supply time-adjusted readout_window_events matching the concatenated trace;
     # spontaneous runs fall back to the run's own events.
     readout_evs = to.get("readout_window_events", to["events"])
-    stats = _plot_readout(fig.add_subplot(gs[0, 3]), tfd, readout_evs, order, names, shafts)
+    stats = _plot_readout(
+        fig.add_subplot(gs[0, 3]),
+        tfd,
+        readout_evs,
+        order,
+        names,
+        shafts,
+        window_ms=float(readout_window_ms),
+    )
     fig.text(0.012, 0.925, "A", fontsize=19, fontweight="bold")
 
     outdir = ROOT / f"results/paper-ready-figure/{fig_name}/figures"
@@ -234,6 +252,7 @@ def compose(twoend_tag, source_tag, sink_tag, fig_name, subject_label):
                 source_only_dir=(None if single else f"{so['dir_forward']}/{so['dir_reverse']}"),
                 sink_only_dir=(None if single else f"{ko['dir_forward']}/{ko['dir_reverse']}"),
                 single_run_mode=single,
+                readout_window_ms=float(readout_window_ms),
                 readout_events=stats,
                 notes=["Plotting-only; no SNN rerun.",
                        ("Single-run mode: mechanism + readout + tempA/tempB event panels ALL from the one "
@@ -254,8 +273,9 @@ def main():
     ap.add_argument("--sink-tag", default=None, help="omit for single-run mode (tempB from twoend rep_rev)")
     ap.add_argument("--fig-name", default="fig_subject_snn_epilepsiae_1146")
     ap.add_argument("--label", default="epilepsiae_1146 (ICL strip)")
+    ap.add_argument("--readout-window-ms", type=float, default=5000.0)
     a = ap.parse_args()
-    compose(a.twoend_tag, a.source_tag, a.sink_tag, a.fig_name, a.label)
+    compose(a.twoend_tag, a.source_tag, a.sink_tag, a.fig_name, a.label, a.readout_window_ms)
 
 
 if __name__ == "__main__":

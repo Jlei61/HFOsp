@@ -44,6 +44,8 @@ from scripts.paper_figures.plot_fig_subject_snn_realvsmodel import (  # noqa: E4
 
 TA_COLOR = "#d62728"
 TB_COLOR = "#1f77b4"
+TA_SUB_COLORS = [TA_COLOR, "#f28e8c", "#b2182b"]
+TB_SUB_COLORS = [TB_COLOR, "#6baed6", "#08519c"]
 _CL_COLORS = [TA_COLOR, TB_COLOR, "#2ca02c", "#ff7f0e"]
 MIN_DIR_EVENTS = 3   # both forward AND reverse need >= this many events for the fwd-rev x t_a/t_b matrix
 
@@ -83,11 +85,23 @@ def _hist_aligned(
         ax.spines[s].set_visible(False)
 
 
-def _cluster_aligned(ax, R, labels, max_rank, names, *, y_centers=None, ylim=None, cluster_display=None):
+def _cluster_aligned(
+    ax,
+    R,
+    labels,
+    max_rank,
+    names,
+    *,
+    y_centers=None,
+    ylim=None,
+    cluster_display=None,
+    cluster_order=None,
+):
     """Per-cluster mean+/-std rank line on the heatmap's 1-unit coordinate (channel center i+0.5)."""
     n_ch = R.shape[0]
     y = np.asarray(y_centers if y_centers is not None else np.arange(n_ch) + 0.5, dtype=float)
-    for k, cid in enumerate(sorted(set(labels.tolist()))):
+    order = cluster_order if cluster_order is not None else sorted(set(labels.tolist()))
+    for k, cid in enumerate(order):
         mask = labels == cid
         mean = np.full(n_ch, np.nan); std = np.full(n_ch, np.nan)
         for i in range(n_ch):
@@ -150,14 +164,35 @@ def _cluster_display_from_direction(labels, conf):
 
     In this panel the model templates are defined by event direction:
     forward-majority cluster -> t_a, reverse-majority cluster -> t_b.
+    If KMeans only splits one direction, display the clusters as same-template
+    subclusters (for example, t_b-1/t_b-2) instead of faking a t_a/t_b pair.
     """
-    display = {}
-    for row, cid in enumerate(sorted(set(labels.tolist()))):
+    clusters = sorted(set(labels.tolist()))
+    majority = []
+    for row, cid in enumerate(clusters):
         is_forward = conf[row, 0] >= conf[row, 1]
+        majority.append((int(cid), "forward" if is_forward else "reverse"))
+    dir_counts = {
+        direction: sum(1 for _, d in majority if d == direction)
+        for direction in ("forward", "reverse")
+    }
+    dir_seen = {"forward": 0, "reverse": 0}
+    display = {}
+    for cid, direction in majority:
+        dir_seen[direction] += 1
+        is_forward = direction == "forward"
+        base = "t_a" if is_forward else "t_b"
+        if dir_counts[direction] > 1:
+            label = f"{base}-{dir_seen[direction]}"
+            colors = TA_SUB_COLORS if is_forward else TB_SUB_COLORS
+            color = colors[(dir_seen[direction] - 1) % len(colors)]
+        else:
+            label = base
+            color = TA_COLOR if is_forward else TB_COLOR
         display[int(cid)] = {
-            "label": "t_a" if is_forward else "t_b",
-            "color": TA_COLOR if is_forward else TB_COLOR,
-            "direction": "forward" if is_forward else "reverse",
+            "label": label,
+            "color": color,
+            "direction": direction,
         }
     return display
 
@@ -181,7 +216,36 @@ def _shared_corr(ranks, labels):
     return float(spearmanr(m0[shared], m1[shared]).correlation), int(shared.sum())
 
 
-def compose(tag, fig_name, min_participation, montage="narrow", preview_style=False):
+def _cluster_display_order(labels, cluster_display):
+    """Return cluster ids in reader-facing template order.
+
+    Raw KMeans ids are arbitrary. For the figure, show template semantics:
+    t_a/forward first, then t_b/reverse, with same-template subclusters kept
+    in their numeric suffix order. Metadata still stores the raw C ids.
+    """
+    def key(cid):
+        info = cluster_display[int(cid)]
+        label = info["label"]
+        direction_rank = 0 if info["direction"] == "forward" else 1
+        suffix = 0
+        if "-" in label:
+            try:
+                suffix = int(label.rsplit("-", 1)[1])
+            except ValueError:
+                suffix = 0
+        return (direction_rank, suffix, int(cid))
+
+    return sorted(set(labels.tolist()), key=key)
+
+
+def compose(
+    tag,
+    fig_name,
+    min_participation,
+    montage="narrow",
+    preview_style=False,
+    display_min_channel_frac=0.0,
+):
     readout, figdata = _load(tag)
     k_dir = int(readout.get("k_dir", 2))
     events = [ev for ev in readout["events"]
@@ -192,6 +256,23 @@ def compose(tag, fig_name, min_participation, montage="narrow", preview_style=Fa
     all_names = sorted({n for ev in events for n, v in (ev.get("ranks") or {}).items() if v is not None})
     ordered_names = _axis_order(figdata, all_names)          # source -> sink channel order
     ranks, bools = _rank_matrix(events, ordered_names)       # (n_ch, n_ev) in display order
+    dropped_display_channels = []
+    if display_min_channel_frac > 0:
+        frac = np.mean(np.isfinite(ranks), axis=1)
+        keep = frac >= float(display_min_channel_frac)
+        if int(keep.sum()) < 3:
+            raise RuntimeError(
+                f"display_min_channel_frac={display_min_channel_frac} leaves "
+                f"only {int(keep.sum())} channels"
+            )
+        dropped_display_channels = [
+            {"channel": n, "participation_frac": float(frac[i])}
+            for i, n in enumerate(ordered_names)
+            if not bool(keep[i])
+        ]
+        ordered_names = [n for i, n in enumerate(ordered_names) if bool(keep[i])]
+        ranks = ranks[keep, :]
+        bools = bools[keep, :]
     signs = np.asarray([float(ev["sign"]) for ev in events])
     n_ch, n_ev = ranks.shape
     channel_order = np.arange(n_ch)                           # ranks already in ordered_names order
@@ -267,7 +348,10 @@ def compose(tag, fig_name, min_participation, montage="narrow", preview_style=Fa
                           left=0.05, right=0.975, top=top, bottom=bottom)
 
     # block 1 (LEFT): clustered event heatmap (canonical pcolormesh) + cluster boundaries
-    ev_order = np.argsort(labels, kind="stable")
+    cluster_order = _cluster_display_order(labels, cluster_display)
+    ev_order = np.concatenate([np.where(labels == cid)[0] for cid in cluster_order])
+    display_id = {int(cid): i for i, cid in enumerate(cluster_order)}
+    labels_for_boundaries = np.asarray([display_id[int(cid)] for cid in labels[ev_order]], dtype=int)
     heatmap_gs = gs[0, 0].subgridspec(1, 2, width_ratios=[1.0, 0.045], wspace=0.035)
     ax_hm = fig.add_subplot(heatmap_gs[0, 0])
     cax_hm = fig.add_subplot(heatmap_gs[0, 1])
@@ -276,7 +360,7 @@ def compose(tag, fig_name, min_participation, montage="narrow", preview_style=Fa
     if preview_style:
         _plot_cluster_boundaries(
             ax_hm,
-            labels[ev_order],
+            labels_for_boundaries,
             n_ch,
             line_color="#d00000",
             line_width=3.4,
@@ -284,14 +368,14 @@ def compose(tag, fig_name, min_participation, montage="narrow", preview_style=Fa
             label_fontsize=fs["cluster"],
             label_box=True,
             boundary_band=True,
-            label_names=[cluster_display[int(c)]["label"] for c in sorted(set(labels.tolist()))],
+            label_names=[cluster_display[int(c)]["label"] for c in cluster_order],
         )
     else:
         _plot_cluster_boundaries(
             ax_hm,
-            labels[ev_order],
+            labels_for_boundaries,
             n_ch,
-            label_names=[cluster_display[int(c)]["label"] for c in sorted(set(labels.tolist()))],
+            label_names=[cluster_display[int(c)]["label"] for c in cluster_order],
         )
     ax_hm.set_xlabel("pop events", fontsize=fs["label"])
     for txt in ax_hm.texts:
@@ -339,6 +423,7 @@ def compose(tag, fig_name, min_participation, montage="narrow", preview_style=Fa
         y_centers=hm_yticks,
         ylim=hm_ylim,
         cluster_display=cluster_display,
+        cluster_order=cluster_order,
     )
     ax_cr.set_title("Cluster rank profile", fontsize=fs["title"])
     ax_cr.legend(frameon=False, fontsize=fs["tick"], loc="upper right", borderaxespad=0.2, handlelength=1.35)
@@ -389,12 +474,15 @@ def compose(tag, fig_name, min_participation, montage="narrow", preview_style=Fa
                     "_hist_aligned + _cluster_aligned (canonical-styled, on heatmap 1-unit coord so the "
                     "3 left panels share an aligned channel y-axis via sharey)",
         "event_filter": f"sign is not None and n_part >= 2*k_dir ({2 * k_dir})",
+        "display_min_channel_frac": float(display_min_channel_frac),
+        "dropped_display_channels": dropped_display_channels,
         "n_events": n_ev, "n_forward": n_fwd, "n_reverse": n_rev,
         "bidirectional": bidirectional, "min_dir_events_gate": MIN_DIR_EVENTS,
         "channels_displayed": ordered_names,
         "kmeans": {
             "k": 2, "min_participation": int(min_participation), "labels": labels.tolist(),
             "cluster_sizes": {f"C{c}": int(np.sum(labels == c)) for c in sorted(set(labels.tolist()))},
+            "display_cluster_order": [f"C{int(c)}" for c in cluster_order],
             "display_labels": {
                 f"C{c}": {
                     "label": cluster_display[int(c)]["label"],
@@ -429,6 +517,8 @@ def compose(tag, fig_name, min_participation, montage="narrow", preview_style=Fa
             "on >= MIN_DIR_EVENTS of each direction (one-direction subjects -> N/A, not a fake swap).",
             "Full/active imputed inter-cluster corr is not the main direction readout; "
             "shared-overlap corr + direction purity are the cleaner direction judges.",
+            "If both KMeans clusters have the same direction, display labels are same-template "
+            "subclusters (e.g. t_b-1/t_b-2), not a fake t_a/t_b pair.",
         ],
     }
     (outdir / f"{stem}_metadata.json").write_text(json.dumps(metadata, indent=2))
@@ -460,8 +550,25 @@ def main():
         action="store_true",
         help="Render the enlarged-font / narrow-rank-distribution preview style without changing defaults.",
     )
+    ap.add_argument(
+        "--display-min-channel-frac",
+        type=float,
+        default=0.0,
+        help=(
+            "Optional active-contact display/KMeans filter. Channels participating in less than this "
+            "fraction of clean events are excluded from the KMeans panel and similarity matrix. "
+            "Default 0 keeps the full readout channel set."
+        ),
+    )
     a = ap.parse_args()
-    compose(a.tag, a.fig_name, a.min_participation, a.montage, preview_style=a.preview_style)
+    compose(
+        a.tag,
+        a.fig_name,
+        a.min_participation,
+        a.montage,
+        preview_style=a.preview_style,
+        display_min_channel_frac=a.display_min_channel_frac,
+    )
 
 
 if __name__ == "__main__":

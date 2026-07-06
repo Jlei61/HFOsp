@@ -49,6 +49,10 @@
 - `fig_subject_snn_epilepsiae_1146_COVERAGE_VARIANT/` — **覆盖优先对照样张**，被 archive
   `docs/archive/topic4/sef_hfo/cohort_field_swap_snn_coverage_tradeoff_2026-06-27.md` 引用为证据；
   保留（非 scratch）。
+- `fig_subject_snn_epilepsiae_1146_CR1p5_S4_T20000_20260706/` — **E1146 小核长时重跑版**：
+  `core_r=1.5, seed=4, T=20000 ms`，Fig4A 使用椭圆 E→E 长轴 footprint + 完整 20 秒 readout；
+  Fig4B 使用 active-contact KMeans（>=30% clean-event participation）减少灰格。双向仍存在但偏
+  reverse（5/11），KMeans purity=0.8125；用于长时 sensitivity，不替代 headline seed3 正式图。
 
 **Cohort（按主题打包）：**
 
