@@ -260,3 +260,19 @@ def test_signed_reversal_corr_none_field_no_crash():
     out = signed_reversal_corr(None, {"T": np.zeros((3, 3)), "S": np.ones((3, 3))})
     assert out["insufficient_overlap"] is True
     assert out["signed_corr"] is None
+
+
+# Task 5 tests: contact_reversal_gate (head-to-head, no geometry)
+
+from src.topic5_field_reversal import contact_reversal_gate
+
+
+def test_contact_gate_detects_reversal():
+    names = [f"A{i}" for i in range(1, 7)] + [f"B{i}" for i in range(1, 7)]
+    cav0 = {n: {"value": float(i), "support": 1.0} for i, n in enumerate(names)}
+    cav1 = {n: {"value": float(len(names) - i), "support": 1.0} for i, n in enumerate(names)}
+    rng = np.random.default_rng(2)
+    out = contact_reversal_gate(cav0, cav1, n_perm=200, rng=rng)
+    assert out["signed_spearman"] < -0.9
+    assert out["percentile"] < 5.0
+    assert out["passed"] is True

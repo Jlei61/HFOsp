@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Dict, Optional, Sequence
 
 import numpy as np
+from scipy.stats import spearmanr
 
 from src.propagation_contact_plane_readout import (
     _support_corr, S_THRESH, OVERLAP_MIN, make_plane_grid, placement_in_distribution)
@@ -171,3 +172,29 @@ def random_split_contrast(bundle, plane_ref, *, X, Y, sigma, n_split=200, rng,
     return {"split_corrs": splits, "split_median": float(np.median(splits)) if splits else float("nan"),
             "observed_ab_corr": (float(obs) if obs is not None else float("nan")),
             "note": "non_inferential"}
+
+
+def contact_reversal_gate(cav0: dict, cav1: dict, *, n_perm: int = 1000, rng, min_eff: int = 6) -> dict:
+    """No-geometry head-to-head signed Spearman between two per-contact value vectors (over
+    contacts finite in both), within-shaft null on cav1 values. passed = not degenerate AND
+    left-tail percentile<5 AND signed_spearman<0 (spec §4)."""
+    common = [n for n in cav0 if n in cav1
+              and np.isfinite(cav0[n]["value"]) and np.isfinite(cav1[n]["value"])]
+    v0 = np.array([cav0[n]["value"] for n in common], float)
+    v1 = np.array([cav1[n]["value"] for n in common], float)
+    eff = int(effective_shuffle_n(common, None, "within_shaft"))
+    degenerate = eff < min_eff or len(common) < 3
+    obs = float(spearmanr(v0, v1).correlation) if len(common) >= 3 else float("nan")
+    base = {"signed_spearman": obs, "effective_n": eff, "degenerate_null": bool(degenerate),
+            "percentile": float("nan"), "null_p05": float("nan"), "null_p50": float("nan"),
+            "null_p95": float("nan"), "passed": False}
+    if degenerate or not np.isfinite(obs):
+        return base
+    null = np.array([spearmanr(v0, within_shaft_shuffle(v1, common, rng)).correlation
+                     for _ in range(n_perm)], float)
+    place = placement_in_distribution(obs, null)
+    pcts = np.nanpercentile(null, [5, 50, 95])
+    base.update({"percentile": place["percentile"],
+                 "null_p05": float(pcts[0]), "null_p50": float(pcts[1]), "null_p95": float(pcts[2]),
+                 "passed": bool(place["percentile"] < 5.0 and obs < 0.0)})
+    return base
