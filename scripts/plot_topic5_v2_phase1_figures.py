@@ -12,6 +12,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 import matplotlib.patheffects as pe
 import numpy as np
 import pandas as pd
@@ -24,8 +26,8 @@ cfg = yaml.safe_load(open(ROOT / "config/topic5_v2_phase1.yaml"))
 PRIMARY = [b[0] for b in cfg["bands"]["primary"]]
 COMPOSITE = [b[0] for b in cfg["bands"]["composites"]]
 SHORT = {"delta_HYP_slow": "δ\n1-4", "theta_preictal_PAC": "θ\n4-8", "alpha_sharp_leq13": "α\n8-13",
-         "beta_LVFA_low": "β\n13-30", "gamma_LVFA": "γ\n30-80", "hg_low_ripple": "hgR\n80-150",
-         "ripple_high": "R\n150-250", "low_HYP_1_13": "low\n1-13", "LVFA_13_80": "LVFA\n13-80",
+         "beta_LVFA_low": "β\n13-30", "gamma_LVFA": "γ\n30-80", "hg_low_ripple": "R\n80-150",
+         "ripple_high": "FR\n150-250", "low_HYP_1_13": "low\n1-13", "LVFA_13_80": "LVFA\n13-80",
          "ripple_full_80_250": "Rf\n80-250", "ripple_safe_80_220": "Rs\n80-220"}
 STRENGTH_C = {"within_shaft_strong": "#08519c", "distance_bin_fallback": "#6baed6",
               "subject_wide_weak": "#c6dbef"}   # 深=强 null，浅=弱 null
@@ -54,11 +56,14 @@ def fig1_observed():
         a, nl, _ = _load(sub)
         piv = a.pivot_table(index="subject", columns="band", values="align_abs_maxab", aggfunc="median")
         piv = piv.reindex(columns=bands)
-        piv = piv.loc[piv[PRIMARY].median(axis=1).sort_values(ascending=False).index]   # 高在上
         sp = nl[nl.null_type == "spatial"].copy()                                         # per-cell 显著: 该 subject 自身空间 null
         sp["delta"] = pd.to_numeric(sp.delta, errors="coerce")
         sp["empirical_p"] = pd.to_numeric(sp.empirical_p, errors="coerce")
         sig = {(str(r.subject), r.band): bool(r.delta > 0 and r.empirical_p < 0.05) for r in sp.itertuples()}
+        # 行序：显著 primary band 数降序（并列按 primary maxAB 中位降序），显著多的在上
+        n_sig = pd.Series({s: sum(sig.get((str(s), b), False) for b in PRIMARY) for s in piv.index})
+        order = pd.DataFrame({"n_sig": n_sig, "med": piv[PRIMARY].median(axis=1)})
+        piv = piv.loc[order.sort_values(["n_sig", "med"], ascending=[False, False]).index]
         med = piv.median(axis=0)
         M = np.vstack([piv.values, med.values])
         ylabs = [_short(s) for s in piv.index] + ["cohort median"]
@@ -79,7 +84,7 @@ def fig1_observed():
     cbar = fig.colorbar(im, ax=axes, fraction=0.03, pad=0.02)
     cbar.set_label("maxAB |corr|   (blue < 0.5 < red)", fontsize=10)
     fig.suptitle("F1 · Observed maxAB alignment (subject × band): narrow > broad, band-generic   ·   "
-                 "* = subject self-null p<0.05", fontsize=12)
+                 "* = subject self-null p<0.05   ·   rows ↓ by # significant primary bands", fontsize=12)
     _save(fig, "phase1_F1_observed_maxAB_heatmap.png")
 
 
@@ -92,6 +97,7 @@ def fig2_null_perband():
         sp = nl[(nl.null_type == "spatial") & (nl.band.isin(PRIMARY))].copy()
         sp["delta"] = pd.to_numeric(sp.delta, errors="coerce")
         gg = g.set_index("band")
+        stars = []                                                                        # (xi, sig); drawn after ylim headroom so they stay in the box
         for xi, b in enumerate(PRIMARY):
             d = sp[sp.band == b].delta.dropna().values
             sig = float(gg.loc[b, "max_over_bands_p"]) < 0.05
@@ -104,21 +110,30 @@ def fig2_null_perband():
             ax.scatter(xi + jit, d, s=15, c="#333333", alpha=0.75, edgecolors="none", zorder=4)
             cd = float(gg.loc[b, "cohort_perm_delta_spatial"])
             ax.hlines(cd, xi - 0.33, xi + 0.33, color="k", lw=2.5, zorder=6)              # cohort Δ (tested)
-            top = np.nanmax(d) if len(d) else cd
-            ax.annotate("*" if sig else "n.s.", (xi, top + 0.03), ha="center",
-                        fontsize=17 if sig else 10, color=SIG_C if sig else "gray",
-                        weight="bold" if sig else "normal")
+            stars.append((xi, sig))
         ax.axhline(0, color="gray", lw=0.7, zorder=1)                                     # 0 线减细
+        y0, y1 = ax.get_ylim()
+        rng = y1 - y0
+        ax.set_ylim(y0, y1 + 0.12 * rng)                                                  # 比例 headroom: star row 不贴顶/不超框
+        for xi, sig in stars:
+            ax.annotate("*" if sig else "n.s.", (xi, y1 + 0.035 * rng), ha="center", va="bottom",
+                        fontsize=17 if sig else 10, color=SIG_C if sig else "gray",
+                        weight="bold" if sig else "normal", annotation_clip=True)
         ax.set_xticks(range(len(PRIMARY)))
         ax.set_xticklabels([SHORT[b] for b in PRIMARY], fontsize=12)
         ax.tick_params(axis="y", labelsize=13)
         nsig = int((pd.to_numeric(g[g.in_primary_family == True].max_over_bands_p, errors="coerce") < 0.05).sum())
-        ax.set_title(f"{sub}  (n={n})  ·  {nsig}/7 pass family-wise correction", fontsize=14)
+        ax.set_title(f"{sub}  (n={n})  ·  {nsig}/7 FWER-sig", fontsize=12)                  # panel id（去掉的是 suptitle，非此）
         ax.grid(alpha=0.25, axis="y")
+        ax.spines[["top", "right"]].set_visible(False)                                     # 去右上框
     axes[0].set_ylabel("cohort alignment − spatial-null median   (Δ per subject)", fontsize=15)
-    fig.suptitle("F2 · Per-subject Δ vs weak spatial null (violin + points; black bar = cohort Δ)   ·   "
-                 "* = family-wise significant", fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.93])
+    handles = [Patch(facecolor=SIG_C, alpha=0.4, edgecolor="gray", label="band passes FWER"),
+               Patch(facecolor=NS_C, alpha=0.4, edgecolor="gray", label="n.s. band"),
+               Line2D([0], [0], color="k", lw=2.5, label="cohort Δ (tested)"),
+               Line2D([0], [0], marker="o", ls="none", color="#333333", ms=5, label="per-subject Δ")]
+    axes[1].legend(handles=handles, loc="upper left", bbox_to_anchor=(1.01, 1.0),
+                   fontsize=9, framealpha=0.92)                                            # legend 右上（框外，不压数据）
+    fig.tight_layout()
     _save(fig, "phase1_F2_null_per_band.png")
 
 
