@@ -1,0 +1,202 @@
+"""M4 DYNAMIC q_I experiment (user redirect 2026-07-06): the frozen-q_I phase-plane can't reach runaway
+because runaway is a *dynamic* q_I-depletion phenomenon (repeated axial replay depletes the inhibitory
+resource until it crosses the separatrix). Here two SMALL axial spontaneous foci (E1146 source/sink) fire
+repeatedly under background noise, q_I depletes across events (k_q>0, NOT frozen), and we watch whether q_I
+crosses into runaway -- WITH vs WITHOUT the M4 shared divisive pool S_G.
+
+Reuses: run_m4_phaseplane.build_substrate (E1146 twoend_equal, L=20, SNN Stage-5 layout);
+run_sef_hfo_snn_cm_spontaneous_readout (active_fraction/detect_events); pilot_stage4_spontaneous_qI
+(spontaneous dynamic-q_I mechanic + _first_sustained runaway detector + verdict). Blessed q_I params from
+run_m3a_v2_step2_qI (tau_q=5000, sigma_q=1.5, q_min=0.05, tau_a=20).
+
+Question this answers (the two the user posed):
+  no_pool (S_G off): does q_I deplete to the separatrix -> runaway in the window? -> (a) just not long enough
+                     before, vs (b) heterogeneity keeps q_I off the separatrix.
+  pool   (S_G on) : does S_G bound the q_I-depletion-driven runaway into a bounded, sustained middle state
+                    (the middle region that q_I depletion ALONE lacks -- M3A sharp-bistability, m3_stage §67)?
+
+*** RUNS SIMULATIONS -- gated behind --confirm-run. Parallel via a fork Pool (build the substrate ONCE, share
+    read-only by copy-on-write; each arm is an independent long spontaneous run). ***
+"""
+import os
+
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+
+import argparse                                            # noqa: E402
+import json                                                # noqa: E402
+import multiprocessing as mp                               # noqa: E402
+import sys                                                 # noqa: E402
+import time                                                # noqa: E402
+
+import numpy as np                                         # noqa: E402
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
+sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
+
+import run_m4_phaseplane as PP                             # noqa: E402  (E1146 build_substrate, R_KICK etc.)
+import run_sef_hfo_snn_cm_spontaneous_readout as C        # noqa: E402  (active_fraction / detect_events)
+from kick_probe import simulate_kick                       # noqa: E402
+from slow_field import SpatialSlowField, SpatialSlowFieldConfig  # noqa: E402
+
+OUT_DIR = os.path.join(ROOT, "results", "topic4_m4_dynamic")
+
+# ---- dynamic q_I (blessed run_m3a_v2_step2_qI) ----
+TAU_Q, TAU_A, SIGMA_Q, Q_MIN = 5000.0, 20.0, 1.5, 0.05
+# ---- M4 pool sensor (r50 ~ the phase-plane-calibrated rE_fast scale; REVIEW POINT) ----
+R50_PSI, N_PSI, P_POOL, TAU_MU, TAU_S, S_MAX = 0.4, 2.0, 3.0, 30.0, 80.0, 1.0
+# ---- spontaneous run ----
+T_DYN = 5000.0                                             # ms (long enough for a train of events)
+DT = 0.1
+MOVIE_BIN_MS = 25.0                                        # downsampled spatial-activity movie frame width
+MOVIE_GRID = 24                                            # movie spatial resolution (MOVIE_GRID x MOVIE_GRID)
+RUNAWAY_HZ, RUNAWAY_DUR_MS = 120.0, 100.0                  # _first_sustained runaway criterion (pilot)
+
+# ---- arms: (label, k_q depletion rate, use_SG, alpha_G) ----
+ARMS = [
+    ("kq0.35_no_pool",   0.35, False, 0.0),
+    ("kq0.35_pool_aG6",  0.35, True,  6.0),
+    ("kq0.18_no_pool",   0.18, False, 0.0),
+    ("kq0.18_pool_aG6",  0.18, True,  6.0),
+]
+
+
+def _smooth(rate, dt, win_ms=20.0):
+    n = max(1, int(round(win_ms / dt)))
+    return np.convolve(np.asarray(rate, float), np.ones(n) / n, mode="same")
+
+
+def _first_sustained(rate, dt, threshold_hz=RUNAWAY_HZ, dur_ms=RUNAWAY_DUR_MS):
+    above = np.asarray(rate) >= threshold_hz
+    n = max(1, int(round(dur_ms / dt)))
+    if above.size < n:
+        return None
+    c = np.convolve(above.astype(float), np.ones(n), mode="valid")
+    idx = np.flatnonzero(c >= 0.80 * n)
+    return None if idx.size == 0 else round(float(idx[0] * dt), 1)
+
+
+def _spatial_movie(spk, posE, L, dt):
+    """Downsampled spatial-activity movie: per MOVIE_BIN_MS frame, fraction of E neurons active per
+    MOVIE_GRID x MOVIE_GRID cell. Small (~n_frames x GRID x GRID). For the runaway GIF."""
+    nsteps, NE = spk.shape
+    bs = int(round(MOVIE_BIN_MS / dt))
+    ix = np.clip((posE[:, 0] / L * MOVIE_GRID).astype(int), 0, MOVIE_GRID - 1)
+    iy = np.clip((posE[:, 1] / L * MOVIE_GRID).astype(int), 0, MOVIE_GRID - 1)
+    cell = iy * MOVIE_GRID + ix
+    counts = np.bincount(cell, minlength=MOVIE_GRID * MOVIE_GRID).astype(float)
+    counts[counts == 0] = 1.0                                          # per-cell neuron count (for fraction)
+    frames = []
+    for b0 in range(0, nsteps, bs):
+        active = spk[b0:b0 + bs].any(axis=0)                          # neurons active in this frame
+        fc = np.bincount(cell[active], minlength=MOVIE_GRID * MOVIE_GRID).astype(float)
+        frames.append((fc / counts).reshape(MOVIE_GRID, MOVIE_GRID))
+    return np.asarray(frames, dtype=np.float32)
+
+
+def run_arm(S, label, k_q, use_SG, alpha_G):
+    p = S["p"]
+    cfg = SpatialSlowFieldConfig(use_qI=True, use_gK=False, k_q=k_q, k_K=0.0, sigma_q=SIGMA_Q, sigma_K=0.5,
+                                 q_min=Q_MIN, q_init=1.0, tau_q=TAU_Q, tau_a=TAU_A,
+                                 use_SG=use_SG, alpha_G=alpha_G, beta_SG=0.0, r0_psi=0.0, r50_psi=R50_PSI,
+                                 n_psi=N_PSI, p_pool=P_POOL, tau_mu=TAU_MU, tau_S=TAU_S, S_max=S_MAX)
+    slow = SpatialSlowField(S["N"], 18.0, S["posE"], S["posI"], S["L"], cfg=cfg)
+    S["net"]["rng"] = np.random.default_rng(S["seed"])
+    t0 = time.time()
+    res = simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
+                        t_kick=1e9, V_th_per_neuron=S["vth"])                 # SPONTANEOUS (no kick)
+    spk = res["E_spk_bool"]
+    rate = np.asarray(res["rate_E"], float)
+    af, bin_w = C.active_fraction(spk, DT, C.BIN_MS)
+    nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
+    floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
+    bar = floor + C.CAL_FRAC * (float(af.max()) - floor)
+    events = C.detect_events(af, bin_w, event_on_frac=bar)
+    rate_s = _smooth(rate, DT)
+    runaway = _first_sustained(rate_s, DT)
+    n_pre = sum(1 for e in events if runaway is None or e["t_on"] < runaway - 20.0)
+    verdict = ("no_runaway" if runaway is None
+               else "train_then_runaway" if (n_pre >= 2 and runaway > 200.0)
+               else "one_shot_burst" if (runaway <= 200.0 or n_pre == 0)
+               else "few_events_then_runaway")
+    movie = _spatial_movie(spk, S["posE"], S["L"], DT)
+    return dict(
+        label=label, k_q=k_q, use_SG=use_SG, alpha_G=alpha_G, seed=S["seed"], T=p.T,
+        n_events=len(events), n_pre_runaway=int(n_pre), runaway_ms=runaway, verdict=verdict,
+        max_rate_hz=round(float(rate_s.max()), 1),
+        q_mean_final=round(float(slow.q_I.mean()), 4), q_min_final=round(float(slow.q_I.min()), 4),
+        S_G_max=round(float(max(slow.trace_SG)) if slow.trace_SG else 0.0, 4),
+        wall_s=round(time.time() - t0, 1),
+        # traces (per-step) for the figure + a downsampled movie for the GIF:
+        trace_qI_mean=np.asarray(slow.trace_qI_mean, np.float32),
+        trace_SG=np.asarray(slow.trace_SG, np.float32) if slow.trace_SG else np.zeros(0, np.float32),
+        rate=rate.astype(np.float32), af=af.astype(np.float32), bin_w=float(bin_w),
+        events=[(round(e["t_on"], 1), round(e["t_off"], 1)) for e in events],
+        movie=movie, q_field_final=slow.q_I.astype(np.float32),
+    )
+
+
+_S = {}
+
+
+def _worker(arm):
+    return run_arm(_S["S"], *arm)
+
+
+def main():
+    ap = argparse.ArgumentParser(description="M4 dynamic q_I spontaneous experiment (RUNS SIMULATIONS)")
+    ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument("--T", type=float, default=T_DYN)
+    ap.add_argument("--workers", type=int, default=len(ARMS))
+    ap.add_argument("--out", default=OUT_DIR)
+    ap.add_argument("--confirm-run", action="store_true")
+    a = ap.parse_args()
+    if not a.confirm_run:
+        print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
+        return
+    os.makedirs(a.out, exist_ok=True)
+    t0 = time.time()
+    S = PP.build_substrate(a.seed)
+    S["p"].T = a.T                                                    # long spontaneous window (build is T-independent)
+    _S["S"] = S                                                       # set BEFORE Pool -> fork COW-shares the net
+    print(f"substrate: E1146 {PP.MONTAGE} L={S['L']} N={S['N']} src={S['src_xy'].round(1)} snk={S['snk_xy'].round(1)} "
+          f"T={a.T} arms={[x[0] for x in ARMS]}", flush=True)
+    with mp.Pool(min(a.workers, len(ARMS))) as pool:
+        rows = pool.map(_worker, ARMS)
+    wall = time.time() - t0
+    meta = dict(experiment="M4 dynamic q_I spontaneous (two axial foci, E1146 twoend_equal)",
+                subject=PP.SUBJECT, montage=PP.MONTAGE, L=float(S["L"]), N=int(S["N"]), seed=a.seed, T=a.T,
+                src_xy=S["src_xy"].tolist(), snk_xy=S["snk_xy"].tolist(),
+                axis_unit=S["axis_unit"].tolist(), center=S["center"].tolist(),
+                qI=dict(tau_q=TAU_Q, sigma_q=SIGMA_Q, q_min=Q_MIN, tau_a=TAU_A),
+                pool=dict(r50_psi=R50_PSI, tau_mu=TAU_MU, tau_S=TAU_S),
+                runaway_criterion=dict(hz=RUNAWAY_HZ, dur_ms=RUNAWAY_DUR_MS),
+                arms=[dict(label=l, k_q=kq, use_SG=u, alpha_G=ag) for (l, kq, u, ag) in ARMS],
+                wall_s=round(wall, 1))
+    # summary JSON (small) + full npz (traces + movies) for the figure/GIF
+    summary = dict(meta=meta, rows=[{k: v for k, v in r.items()
+                                     if k not in ("trace_qI_mean", "trace_SG", "rate", "af", "movie", "q_field_final")}
+                                    for r in rows])
+    json.dump(summary, open(os.path.join(a.out, "dynamic_qi_summary.json"), "w"), indent=2)
+    np.savez_compressed(os.path.join(a.out, "dynamic_qi_traces.npz"),
+                        posE=S["posE"].astype(np.float32), src_xy=S["src_xy"], snk_xy=S["snk_xy"],
+                        L=float(S["L"]), meta=json.dumps(meta),
+                        **{f"{r['label']}__{k}": r[k] for r in rows
+                           for k in ("trace_qI_mean", "trace_SG", "rate", "af", "movie", "q_field_final")},
+                        **{f"{r['label']}__events": np.asarray(r["events"], float) for r in rows},
+                        **{f"{r['label']}__meta": json.dumps({k: v for k, v in r.items()
+                            if k not in ("trace_qI_mean", "trace_SG", "rate", "af", "movie", "q_field_final", "events")})
+                           for r in rows})
+    print("\n===== M4 dynamic q_I report =====")
+    for r in rows:
+        print(f"  {r['label']:20} verdict={r['verdict']:22} n_events={r['n_events']:3} runaway_ms={r['runaway_ms']} "
+              f"max_rate={r['max_rate_hz']}Hz q_final=[{r['q_min_final']},{r['q_mean_final']}] S_G_max={r['S_G_max']}")
+    print(f"wrote {a.out}/dynamic_qi_summary.json + dynamic_qi_traces.npz in {wall:.0f}s")
+    print("(M4 dynamic screen -- q_I-depletion vs S_G bounding; NOT a proven seizure-mechanism claim.)")
+
+
+if __name__ == "__main__":
+    main()
