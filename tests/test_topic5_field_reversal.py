@@ -208,3 +208,55 @@ def test_random_split_centers_positive_observed_negative():
     assert out["observed_ab_corr"] < 0                 # true A/B reversed
     assert out["split_median"] > out["observed_ab_corr"]  # random halves not reversed
     assert out["note"] == "non_inferential"
+
+
+# Task 4 review-fix tests: channel_floor None-corr guard + signed_reversal_corr None-field guard
+
+from src.topic5_field_reversal import channel_floor
+
+
+def test_channel_floor_well_behaved():
+    plane, names = _two_shaft_plane()
+    cav0 = {n: {"value": float(n[1:]), "support": 1.0} for n in names}
+    cav1 = {n: {"value": float(7 - int(n[1:])), "support": 1.0} for n in names}
+    X, Y = make_plane_grid()
+    rng = np.random.default_rng(0)
+    out = channel_floor(plane, cav0, cav1, X=X, Y=Y, sigma=None, n_perm=200,
+                        rng=rng, overlap_min=10)
+    assert np.isfinite(out["percentile"])
+    assert np.isfinite(out["null_p05"])
+    assert np.isfinite(out["null_p50"])
+    assert np.isfinite(out["null_p95"])
+    assert len(out["null_corrs"]) > 0
+
+
+def test_channel_floor_tied_value_returns_empty_null_without_crash():
+    # Repro (review finding): TB's cav1 has P,Q exactly tied at 5.0, plus a 3rd valid contact R
+    # placed far outside the plane grid (X in [-0.5,1.5], Y in [-1,1]) so R contributes exactly
+    # zero weight (float underflow) everywhere on the grid, yet still counts toward
+    # MIN_PLANE_CONTACTS=3. The OBSERVED TB field is therefore exactly constant (5.0) over the
+    # whole masked region -> zero variance -> signed_reversal_corr returns signed_corr=None
+    # (insufficient_overlap=True). channel_shuffle's random permutations often move the "9.0"
+    # value onto P or Q (in-grid), breaking the constant field, so those draws DO produce a
+    # finite null entry -> null ends up non-empty. Before Fix 1, channel_floor then called
+    # placement_in_distribution(None, non_empty_null) -> np.isfinite(None) -> TypeError.
+    names = ["P", "Q", "R"]
+    xy = {"P": (0.0, 0.0), "Q": (0.2, 0.0), "R": (100.0, 100.0)}
+    plane = {"channels": [{"name": n, "x_norm": xy[n][0], "y_norm": xy[n][1],
+                          "typical_rank": 0.0, "support": 1.0} for n in names]}
+    cav0 = {"P": {"value": 1.0, "support": 1.0}, "Q": {"value": 2.0, "support": 1.0},
+            "R": {"value": 3.0, "support": 1.0}}
+    cav1 = {"P": {"value": 5.0, "support": 1.0}, "Q": {"value": 5.0, "support": 1.0},
+            "R": {"value": 9.0, "support": 1.0}}
+    X, Y = make_plane_grid()
+    rng = np.random.default_rng(0)
+    out = channel_floor(plane, cav0, cav1, X=X, Y=Y, sigma=0.15, n_perm=200,
+                        rng=rng, overlap_min=10)
+    assert out["null_corrs"] == []
+    assert np.isnan(out["percentile"])
+
+
+def test_signed_reversal_corr_none_field_no_crash():
+    out = signed_reversal_corr(None, {"T": np.zeros((3, 3)), "S": np.ones((3, 3))})
+    assert out["insufficient_overlap"] is True
+    assert out["signed_corr"] is None

@@ -25,6 +25,8 @@ def signed_reversal_corr(field0: dict, field1: dict,
     field{0,1} = {"T","S"} on the SAME grid/frame. Negative => reversed pair. Returns
     signed_corr (None if unusable), n_overlap, insufficient_overlap (overlap<overlap_min).
     """
+    if field0 is None or field1 is None:
+        return {"signed_corr": None, "n_overlap": 0, "insufficient_overlap": True}
     corr, n = _support_corr(field0["T"], field1["T"], field0["S"], field1["S"], s_thresh)
     insufficient = (n < overlap_min) or (not np.isfinite(corr))
     return {"signed_corr": (float(corr) if np.isfinite(corr) else None),
@@ -124,6 +126,9 @@ def channel_floor(plane_ref, cav0, cav1, *, X, Y, sigma, n_perm, rng,
     built = build_reversal_fields(plane_ref, cav0, cav1, X=X, Y=Y, sigma=sigma, s_thresh=s_thresh)
     names = built["names_used"]
     obs = signed_reversal_corr(built["field0"], built["field1"], s_thresh, overlap_min)
+    if obs["insufficient_overlap"] or obs["signed_corr"] is None:
+        return {"null_corrs": [], "percentile": float("nan"),
+                "null_p05": float("nan"), "null_p50": float("nan"), "null_p95": float("nan")}
     vals1 = np.array([cav1[n]["value"] for n in names], float)
     null = []
     for _ in range(n_perm):
