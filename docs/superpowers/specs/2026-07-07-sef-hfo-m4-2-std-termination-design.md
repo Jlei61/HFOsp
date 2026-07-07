@@ -154,7 +154,9 @@ state。**全程唯一的 kick 是 §7.1 的 post-offset `retrigger_probe`。**
   恢复,§4)、`gK_max=1.0`(引擎默认);`k_K` 在 plan 阶段标定一次(取"bounded 事件内 gK build 到 ~O(1)·gK_max"
   的值)后固定,不进扫描轴。** 否则 P3 有隐藏自由度。
 - **诊断读出(per-run,非扫描)`(⟨x_dep⟩, ⟨q_I⟩)`**:弛豫振荡投影。**`x_dep` 现在只活在 loop 内
-  (`kick_probe.py` L186)、无输出 → 需 §8B 的 `dump_ee_std_trace` instrumentation 才能取。**
+  (`kick_probe.py` L186)、无输出 → 需 §8B 的 `dump_ee_std_trace` instrumentation 才能取;记录点在 spike
+  depletion(L371)之后、非 recovery(L259)之后。Arm 0(STD off)输出 constant `x_dep≡1.0` trace,使 Arm0/Arm1
+  诊断对齐(availability 无耗竭 = 1)。**
   - `⟨x_dep⟩` = `x_dep`(per-E-neuron)在 axis/active E 群上的均值;`⟨q_I⟩` = `q_I`(lattice 场)在同一 axis
     区上的均值。**两者表示不同(per-neuron vs lattice),读出时必须映射到同一 axis 区**(§6.2)。
   - 预期干净终止轨道:间期 `(1,1)` → onset `q_I↓, x_dep≈1` → bounded `q_I≈floor, x_dep↓` → termination
@@ -255,15 +257,18 @@ M4-2B 才碰它。不作第一版验收。
   active / axis / core 的 `x_dep_mean / x_dep_min / x_dep_tail`(per-step 或降采样),喂 §5 诊断
   `(⟨x_dep⟩, ⟨q_I⟩)`。不传 → 不 alloc、byte-parity。
 - **state-continuous retrigger hook(M4-2A 必做):** §7.1 的 `retrigger_probe` 要"终止后充分恢复再打一发新
-  kick",但 `simulate_kick`(L91)现在**只有单个** KICK_BOOST/t_kick 窗、也**不返回可续跑的膜/突触/slow 状态**。
-  三条实现路(本 spec 选 (a),plan 落地):
-  - **(a) 同一长仿真里第二个 kick schedule(首选):** 给 `simulate_kick` 加第二个 `(t_kick2, KICK_BOOST2)` 窗
-    (或 kick-schedule 列表)。同一 seed、同一连续状态,最干净;复用现有 `kick_center`/`r_kick`,只加时间窗。
-  - **(b) 导出 / 恢复连续状态:** 返回 `(V, ref, s_E, I_E, s_I, I_I, ring_*, x_dep, slow.{q_I,g_K,S_G,mu_G})`,
-    第二段从该状态续跑。灵活但接口面大。
-  - **(c) 近似:两遍同 seed 复现 + 固定 probe time(fallback):** 第一遍测 offset,第二遍同 seed 重跑到
-    `t_reprobe` 再打 kick。**边界**:仅当仿真对 seed 完全确定、且第二遍前缀与第一遍逐位一致才成立;`t_reprobe`
-    固定(非自适应到实际 offset)。不作首选。
+  kick",但 `simulate_kick`(L91)现在**只有单个** KICK_BOOST/t_kick 窗、也**不返回可续跑的膜/突触/slow 状态**;
+  且 offset 是分类结果、**跑完才知道**,不能在单次 run 里在线设 `t_kick2`。**[LOCK] 契约 = 两遍同 seed +
+  pre-probe identity(adaptive `t_kick2`):**
+  - 机制 = 给 `simulate_kick` 加第二个 kick 窗 `(t_kick2, KICK_BOOST2)`(复用 `kick_center`/`r_kick`;
+    `t_kick2=None` 时 byte-parity)。
+  - **Pass 1**:`t_kick2=None` 跑到 `T`,`classify_termination` → `termination_class` + `offset`。
+  - **Pass 2**(仅 `terminate_clean`):同 seed、同参、`t_kick2 = offset + few×max(ee_std_tau_ms, tau_q)`,
+    **断言 `t<t_kick2` 轨迹与 Pass 1 逐点一致**(pre-probe identity;仿真对 seed 确定 → 第二窗分支在
+    `t<t_kick2` 不触发,故由构造成立;runtime 断言 + 单测兜底),再从 `t≥t_kick2` 读 `retrigger_probe`。
+  - `termination_class ≠ terminate_clean` → `retrigger_probe = not_run`(不跑 Pass 2)。
+  - **fallback**(仅 offset 稳定时):单次 run + 固定保守 `t_kick2`,省一半跑。**一个 cell 只用一种,不混用。**
+  - 导出 / 恢复连续状态(返回全状态第二段续跑)= 备选,接口面大,不首选。
 
 **C. runner 待接线(`run_m4_dynamic_qi.py`,纯 config / orchestration):**
 - `run_arm` 现在写死 `use_gK=False, k_K=0.0`,且**不透传** `ee_std_u`/`ee_std_tau_ms` 给 `simulate_kick`

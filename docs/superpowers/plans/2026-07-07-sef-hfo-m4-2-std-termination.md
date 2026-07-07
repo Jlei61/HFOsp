@@ -87,33 +87,48 @@ def simulate_kick(p, net, KICK_BOOST, slow=None, ..., ee_std_u=0.0, ee_std_tau_m
 `t_kick2=None` (default) → branch skipped → no RNG/float change → byte-parity. The `nu_vec` poisson draw already
 happens every step; adding to `nu_vec` draws no extra RNG.
 
-- [ ] **Step 3: `x_dep` trace recorder (gated).** Near the recorders (`~:215`), allocate only when asked:
+- [ ] **Step 3: `x_dep` trace recorder (gated; Arm 0 emits constant ones).** Near the recorders (`~:215`),
+  allocate whenever asked — **NOT gated on `ee_std_on`**: Arm 0 (`ee_std_u=0`) must still emit a trace so the
+  `(⟨x_dep⟩,⟨q_I⟩)` diagnostic aligns with Arm 1 (P1-b):
 
 ```python
-        rec_ee = dump_ee_std_trace and ee_std_on
-        if rec_ee:
+        if dump_ee_std_trace:
             xdep_mean = np.zeros(nsteps); xdep_min = np.zeros(nsteps)
             xdep_mask_mean = np.zeros(nsteps) if ee_std_trace_maskE is not None else None
 ```
-Inside the loop, AFTER the `x_dep` recovery/deplete are applied for the step (so the trace reflects post-update
-availability), record:
+**Recording point (承重 phase, P1-c):** record at the **END of the step, AFTER the spike-depletion
+`x_dep[spE] *= (1-ee_std_u)` at ~`:371`** — NOT after the early recovery at `:259`. Recovery (`:259`) and
+depletion (`:371`) sit at different loop locations; recording after recovery only would miss the current step's
+depletion → the trace lags one step. When STD is off (`ee_std_on=False`), `x_dep` is not allocated → emit
+constant **1.0** (availability fully recovered, no depression):
 
 ```python
-        if rec_ee:
-            xdep_mean[t] = x_dep.mean(); xdep_min[t] = x_dep.min()
-            if xdep_mask_mean is not None:
-                xdep_mask_mean[t] = x_dep[ee_std_trace_maskE].mean()
+        if dump_ee_std_trace:
+            if ee_std_on:
+                xdep_mean[t] = x_dep.mean(); xdep_min[t] = x_dep.min()
+                if xdep_mask_mean is not None: xdep_mask_mean[t] = x_dep[ee_std_trace_maskE].mean()
+            else:                                   # Arm 0: STD off -> availability == 1.0 everywhere
+                xdep_mean[t] = 1.0; xdep_min[t] = 1.0
+                if xdep_mask_mean is not None: xdep_mask_mean[t] = 1.0
 ```
-Add `xdep_mean`/`xdep_min`/`xdep_mask_mean` to the returned dict (only when `rec_ee`). When `dump_ee_std_trace=False`
-or `ee_std_u=0` → nothing allocated/written → parity.
+Add `xdep_mean`/`xdep_min`/`xdep_mask_mean` to the returned dict when `dump_ee_std_trace`. `dump_ee_std_trace=False`
+(default) → nothing allocated/written → byte-parity. Arm 0 with `dump_ee_std_trace=True` → **constant-ones trace**
+(schema aligned with Arm 1).
 
-- [ ] **Step 4: Parity test — expect default path byte-identical.** Add to `tests/test_m4_2_termination.py` a test
-  that runs `simulate_kick` twice (once as today, once with the new params at their defaults) and asserts
-  `E_spk_bool`, `rate_E`, and final RNG state are byte-identical. Also assert `ee_std_u>0, dump_ee_std_trace=False`
-  path is unaffected by the trace param.
+- [ ] **Step 4: Three engine tests in `tests/test_m4_2_termination.py`.**
+  1. **`test_default_param_byte_identical`** — `simulate_kick` today vs with all new params at their defaults →
+     `E_spk_bool`, `rate_E`, final RNG state byte-identical. Also: `ee_std_u>0, dump_ee_std_trace=False` path
+     unaffected by the trace param.
+  2. **`test_second_kick_prewindow_identity` (P1-a pre-probe identity):** same seed, run A (`t_kick2=None`) vs run
+     B (`t_kick2=t2, KICK_BOOST2>0`); for all `t < t2`, `E_spk_bool`/`rate_E`/`I_E` (and `slow.q_I`/`S_G`, `x_dep`
+     if traced) MUST be byte-identical (the `t_kick2` branch is skipped for `t<t2` by construction; the test guards
+     it stays so). Only `t≥t2` may differ. **This is what makes `retrigger_probe` interpretable (Task 4).**
+  3. **`test_xdep_trace_phase` (P1-c):** a tiny toy run with `ee_std_u>0` and a known E spike at step `t*`; assert
+     `xdep_mean[t*]` reflects the **post-depletion** value (strictly `< 1` right after the spike), i.e. recorded
+     after `:371`, not after `:259`.
 
-Run: `python -m pytest tests/test_m4_2_termination.py -q -k parity` and `python -m pytest tests/test_a1c_feedback.py -q`
-Expected: parity PASS; `test_T9_*` PASS; **`test_T8_engine_blessed` FAILS** (source hash changed — expected).
+Run: `python -m pytest tests/test_m4_2_termination.py -q` and `python -m pytest tests/test_a1c_feedback.py -q`
+Expected: 3 new tests PASS; `test_T9_*` PASS; **`test_T8_engine_blessed` FAILS** (source hash changed — expected).
 
 - [ ] **Step 5: Re-bless `kick_probe.py`** (only after Step 4 parity PASS).
 
@@ -149,6 +164,8 @@ git commit -m "feat(m4-2): gated x_dep trace + second-kick window in simulate_ki
 
 - [ ] **Step 2: Record the trace + retrigger outputs.** Add `xdep_mean`/`xdep_min`/`xdep_mask_mean` and (if a
   retrigger was scheduled) the post-`t_kick2` activity window to the per-run result dict, so Task 3 can classify.
+  **Arm 0 (`ee_std_u=0`) still calls with `dump_ee_std_trace=True` → constant-ones `xdep_*` trace** (P1-b; schema
+  aligned with Arm 1 for the `(⟨x_dep⟩,⟨q_I⟩)` diagnostic; see Task 1 Step 3).
 
 - [ ] **Step 3: Parity — `ee_std_u=0` reproduces current runs.** Add a runner-level test (or a manual check
   logged in the PR) that `run_arm(..., ee_std_u=0.0, retrigger=None)` gives the same `verdict`/`rate` as the
@@ -210,14 +227,28 @@ git commit -m "feat(m4-2): classify_termination two-field classifier + synthetic
   Write the pinned values into the spec §5.
 
 - [ ] **Step 2: `--p1` orchestration (import-safe, `main()` gated on `--confirm-run`).** For each cell: Arm 0
-  (`ee_std_u=0`) and Arm 1 (`ee_std_u>0`), spontaneous, gK off, `T=15000`, with a retrigger scheduled after a
-  recovery window `t_kick2 = offset + few×max(ee_std_tau_ms, tau_q)` (offset detected from the first pass, or a
-  fixed conservative `t_kick2` per spec §8B option (a)). Emit per-cell `termination_class` + `retrigger_probe` +
-  `(⟨x_dep⟩, ⟨q_I⟩)` diagnostic. OMP=1, fork-COW workers like the existing `--sweep`.
+  (`ee_std_u=0`) and Arm 1 (`ee_std_u>0`), spontaneous, gK off, `T=15000`. Emit per-cell `termination_class` +
+  `retrigger_probe` + `(⟨x_dep⟩, ⟨q_I⟩)` diagnostic. OMP=1, fork-COW workers like the existing `--sweep`.
 
-- [ ] **Step 3: Run ONE timing cell.** One Arm-1 cell at `T=15000` + retrigger on the anchor point; measure
-  wall-clock. **Write the measured per-cell and projected P1-total wall-clock back into spec §9.** This is the
-  compute budget the user approves before the full sweep.
+  **[LOCK] retrigger contract = two-pass same-seed + pre-probe identity (NOT online offset) (P1-a).** `offset` is a
+  classification result known only after a full run, and `simulate_kick` is not a pausable state machine → `t_kick2`
+  CANNOT be set online. One cell uses ONE of the two modes, never mixed:
+  - **Pass 1:** `t_kick2=None`, same seed, run to `T`. `classify_termination` → `termination_class` + `offset`.
+  - **Pass 2 (only if `termination_class==terminate_clean`):** SAME seed, SAME params, `t_kick2 = offset +
+    few×max(ee_std_tau_ms, tau_q)`, `KICK_BOOST2>0` on source core. **Assert pre-probe identity at runtime**: for
+    `t<t_kick2`, pass-2 `E_spk_bool`/`rate`/`q_I`/`S_G`/`x_dep` byte-identical to pass 1 (guaranteed by construction
+    + `test_second_kick_prewindow_identity`). Read `retrigger_probe` from `t≥t_kick2`.
+  - `termination_class != terminate_clean` → `retrigger_probe = not_run` (no pass 2).
+  - (Fallback, only if offset proves stable: single run + fixed conservative `t_kick2`. Do NOT mix with two-pass
+    within a cell.)
+  This doubles run count **for terminate_clean cells only**; factor into the Task-4 wall-clock budget.
+
+- [ ] **Step 3: Run ONE timing cell (MEDIUM STD point, not strong) (§4).** One Arm-1 cell at the anchor with a
+  **medium** STD setting (`ee_std_u≈0.1–0.2`, `ee_std_tau_ms≈1000`) — NOT a strong point (`u=0.5, tau=200`), which
+  would bias the one-cell feedback toward `suppress`/`fade`. `T=15000` pass 1 + (only if `terminate_clean`) the
+  pass-2 retrigger; measure pass-1 and pass-2 wall-clock separately. **Write the measured per-cell (×2 for
+  terminate_clean) and projected P1-total wall-clock back into spec §9.** This is the compute budget the user
+  approves before the full sweep.
 
 - [ ] **Step 4: STOP.** Report to the user: (a) timing cell result (does that one cell terminate? classes?),
   (b) P1 wall-clock budget, (c) confirm grids. **DO NOT run the full P1 multi-seed sweep** until the user approves.
