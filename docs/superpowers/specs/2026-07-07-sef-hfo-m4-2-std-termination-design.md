@@ -289,7 +289,9 @@ M4-2B 才碰它。不作第一版验收。
     `baseline_af` 取,显式传给 `classify_termination`。
   - **fail-closed(P1-b):** pass-2 必须跑到 ≥ `t_kick2 + probe_window`;放不下则**报错(RuntimeError)**,**不**静默
     `not_run`(会误杀潜在成功 cell)。`run_cell_with_retrigger` 把 `min_T = t_kick2 + probe_window` 传给 run_fn,
-    run_fn(`run_arm` 的 `T_ms`)据此延长 pass-2 的 T。
+    run_fn(`run_arm` 的 `T_ms`)据此延长 pass-2 的 T。**例外:** pass-2 若 `runaway_ms` 非空(re-kick → 失控,
+    early-stop 在 probe window 前截断),直接 `retrigger_probe=fail` + 记 `pass2_runaway_ms`,**不报错**(那是
+    合法的 fail=不可撤回的再点火,非 contract 违反)。
   - **入口:** `scripts/run_m4_dynamic_qi.py --p1-timing-cell`(**ONE** cell,非 sweep;写 `p1_timing_cell.json` +
     `.npz`,字段 `termination_class/retrigger_probe/runaway_ms/t_kick2_ms/baseline_af` + `xdep/qI/rate/wall_s`)。
 

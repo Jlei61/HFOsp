@@ -138,7 +138,7 @@ def run_cell_with_retrigger(run_fn, bin_ms, *, recovery_ms=5000.0, recovery_fact
     cls, info = classify_termination(af1, bin_ms, baseline=base, runaway_ms=res1.get("runaway_ms"))
     out = dict(termination_class=cls, offset_ms=info["offset_ms"], t_kick2_ms=None,
                peak=info["peak"], baseline_af=info["baseline"], runaway_ms=info["runaway_ms"],
-               retrigger_probe="not_run")
+               retrigger_probe="not_run", pass2_runaway_ms=None)
     if cls != "terminate_clean":
         return out
     t2 = info["offset_ms"] + recovery_factor * recovery_ms
@@ -149,13 +149,17 @@ def run_cell_with_retrigger(run_fn, bin_ms, *, recovery_ms=5000.0, recovery_fact
     i_ov = min(af1.size, af2.size, i2)
     if not np.array_equal(af1[:i_ov], af2[:i_ov]):        # pre-probe identity guard (runtime, per spec §8B)
         raise RuntimeError("pre-probe identity violated: pass-2 prefix != pass-1 for t < t_kick2")
+    out["t_kick2_ms"] = t2
+    out["pass2_runaway_ms"] = res2.get("runaway_ms")
+    if out["pass2_runaway_ms"] is not None:              # re-kick drove pass-2 into runaway -> NOT a bounded re-event;
+        out["retrigger_probe"] = "fail"                 # early-stop truncates before the probe window (expected) -> fail, not raise
+        return out
     probe_bins = int(round(probe_window_ms / bin_ms))
-    if i2 + probe_bins > af2.size:                        # FAIL-CLOSED: run_fn did not run pass-2 long enough
+    if i2 + probe_bins > af2.size:                        # FAIL-CLOSED: non-runaway short pass-2 = genuine contract violation
         raise RuntimeError(
             f"retrigger probe window did not fit: need pass-2 length >= {i2 + probe_bins} bins "
             f"(t_kick2={t2:.0f}ms + probe {probe_window_ms:.0f}ms), got {af2.size}. "
             f"run_fn must run pass-2 to >= t_kick2 + probe_window (extend T2), not truncate.")
-    out["t_kick2_ms"] = t2
     out["retrigger_probe"] = retrigger_verdict("terminate_clean", post_af=af2[i2:i2 + probe_bins],
                                                baseline=base, ref_peak=info["peak"])
     return out

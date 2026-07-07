@@ -282,8 +282,25 @@ def test_retrigger_orch_uses_runner_baseline():
 
 
 def test_retrigger_orch_raises_when_probe_doesnt_fit():
-    # pass-2 that ignores min_T (too short) must FAIL-CLOSED (RuntimeError), NOT silently return not_run (P1-b).
+    # pass-2 that ignores min_T (too short) with NO runaway must FAIL-CLOSED (RuntimeError), NOT silently
+    # return not_run (P1-b) -- a genuine contract violation (run_fn didn't run long enough).
     def fake(t2, kb, min_T=None):
-        return {"af": _CLEAN, "runaway_ms": None, "baseline_af": BASE}      # ignores min_T -> pass2 too short
+        return {"af": _CLEAN, "runaway_ms": None, "baseline_af": BASE}      # ignores min_T, no runaway -> too short
     with pytest.raises(RuntimeError):
         run_cell_with_retrigger(fake, BIN)                                  # default recovery -> t2 huge -> raise
+
+
+def test_retrigger_orch_pass2_runaway_is_fail_not_raise():
+    # if the re-kick drives pass-2 into runaway, early-stop truncates BEFORE the probe window; that must be
+    # retrigger_probe='fail' (re-kick -> runaway = NOT a bounded re-event), NOT a RuntimeError (which would
+    # leave the cell with no result). The runaway_ms explains the short trace.
+    def fake(t2, kb, min_T=None):
+        if t2 is None:
+            return {"af": _CLEAN, "runaway_ms": None, "baseline_af": BASE}
+        i2 = int(round(t2 / BIN))
+        af2 = np.concatenate([_CLEAN[:i2], _seg((0.9, 30))])               # re-kick -> runaway -> truncated short
+        return {"af": af2, "runaway_ms": t2 + 15.0, "baseline_af": BASE}
+    out = run_cell_with_retrigger(fake, BIN, recovery_ms=100.0, recovery_factor=1.0)
+    assert out["termination_class"] == "terminate_clean"
+    assert out["retrigger_probe"] == "fail"                                # runaway re-ignition = fail, not raise
+    assert out["pass2_runaway_ms"] is not None
