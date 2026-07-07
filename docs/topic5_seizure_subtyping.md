@@ -120,7 +120,7 @@ split_half_robust=False；负对照四层全部非显著=非假阳性。结论 =
 - 图：`figures/axis_hardening_fig{1_patient_level,2_null_hierarchy,3_window_sensitivity}.png`（fig3 承载
   "非发作特异 = scaffold"判读）。**待用户目视复核。**
 
-**TA/TB 场反向门（A 线上游补充 gate，2026-07-06，preliminary，待签核）**：broad+narrow 双底物分开报告；间期两模板（TA/TB）摊成空间场后**确为反向对**（逐病人对着自己同杆零假设，两个底物都有显著子集病人过门），但**逐触点 LOO 重建这一层，场不优于触点 self-mean**（该检验天然偏向高 SNR 的触点均值，测的是逐触点重建、**非传播轴鲁棒性**）。**「场是否给更鲁棒的传播方向」axis-level supplement 已回答（archive §2.6）：读方向要用真实坐标、别按电极 / 杆顺序（坐标盲）读——坐标读法显著优于杆序读法、紧核 SOZ 核尤甚；平滑本身不额外加分（field≈坐标）。**本条为缩减 n_perm 的初步结果，正式全量复核 + 用户签核前不进入本文档正式结论；**精确数值与两面完整结果仅见归档** `docs/archive/topic5/field_reversal_2026-07-06.md`（CLAUDE.md §5：preliminary numbers go to archive only）。
+**TA/TB 场反向门（A 线上游补充 gate，2026-07-06；n_perm=1000 正式全量已复核，待用户签核）**：broad+narrow 双底物分开报告；间期两模板（TA/TB）摊成空间场后**初步提示呈反向关系**（逐病人对着自己同杆零假设，两个底物都有显著子集病人过门；**n_perm=1000 正式全量复核已完成、反向仍成立，待用户签核定稿**，勿写「确为」），但**逐触点 LOO 重建这一层，场不优于触点 self-mean**（该检验天然偏向高 SNR 的触点均值，测的是逐触点重建、**非传播轴鲁棒性**）。**「场是否给更鲁棒的传播方向」axis-level supplement 已回答（archive §2.7）：读方向要用真实坐标、别用坐标盲的杆折叠读法（把每根杆压成一个均值、丢掉杆内位置，≠ 按电极名字排序）——坐标读法显著优于杆折叠读法、紧核 SOZ 核尤甚；平滑本身不额外加分（field≈坐标）。**本条 n_perm=1000 正式全量复核已完成（2026-07-07），用户签核前暂不写入本文档正式结论；**精确数值与两面完整结果仅见归档** `docs/archive/topic5/field_reversal_2026-07-06.md`（CLAUDE.md §5：preliminary numbers go to archive only）。
 
 ### 3.1 PR-0：v2.3 Layer A ictal ER timing atlas
 

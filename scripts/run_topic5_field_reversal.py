@@ -167,6 +167,27 @@ def _wilcoxon_field_vs_contact(ok_records):
         return {"n": len(pairs), "statistic": None, "p_value": None, "note": str(e)}
 
 
+def _aggregate_sweep(ok_records):
+    """§7 bandwidth sensitivity, cohort level: for each sigma multiplier, how many ok
+    subjects still pass the within-shaft reversal gate (cohort binomial) + median
+    signed_corr. Answers 'is the reversal robust to bandwidth choice, or a smoothing
+    artifact?'. Keyed by multiplier ('0.5x'/'1.0x'/'2.0x'); 1.0x IS the primary gate."""
+    out = {}
+    if not ok_records:
+        return out
+    keys = sorted({k for r in ok_records for k in r.get("sweep", {})},
+                  key=lambda s: float(s.rstrip("x")))
+    for key in keys:
+        entries = [r["sweep"][key] for r in ok_records if key in r.get("sweep", {})]
+        passed = [bool(e["passed"]) for e in entries if e.get("passed") is not None]
+        corrs = [e["signed_corr"] for e in entries
+                 if e.get("signed_corr") is not None and np.isfinite(e["signed_corr"])]
+        out[key] = {"n": len(passed), "n_pass": int(sum(passed)),
+                    "binomial": cohort_binomial(passed) if passed else None,
+                    "median_signed_corr": float(np.median(corrs)) if corrs else None}
+    return out
+
+
 def _aggregate_cohort(records):
     accountability = {r: 0 for r in REASONS}
     for rec in records:
@@ -178,7 +199,8 @@ def _aggregate_cohort(records):
     wil = _wilcoxon_field_vs_contact(ok)
     return {"n_subjects": len(records), "n_ok": len(ok),
             "accountability": accountability, "binomial": binom,
-            "field_vs_contact_wilcoxon": wil}
+            "field_vs_contact_wilcoxon": wil,
+            "bandwidth_sweep": _aggregate_sweep(ok)}
 
 
 def _sensitivity_broad_vs_narrow(records_by_substrate):

@@ -12,17 +12,17 @@
 
 **为什么值得单独做**：A-line 主线只做了「间期模板 A vs 发作早期激活」，且刻意**符号自由**（不判方向重放，`topic5_seizure_subtyping.md:69`）。它从未把「TA 与 TB 两个间期模板彼此是不是反的」做成检验。现有 swap 节点图（event-resolved pilot 2026-06-25）明确是「纯展示、无统计」。本 spec 补这个上游 gate。
 
-**与 contact-similarity ladder 的关系（防混淆）**：ladder 测的是**间期↔发作相似度的幅值**（加平滑→观测与 null 一起抬→过 null 数没涨），讲的是**幅值膨胀**。本 spec 的去噪假设是**另一回事**：平滑能不能把**方向估计的方差降下来**。两者正交；ladder 对去噪假设未证过。**但幅值膨胀这条在「反向 corr 幅值」上确实会转移**——所以去噪的干净证据用**方差/可复现性**（§6），不用幅值。
+**与 contact-similarity ladder 的关系（防混淆）**：ladder 测的是**间期↔发作相似度的幅值**（加平滑→观测与 null 一起抬→过 null 数没涨），讲的是**幅值膨胀**。本 spec 关心的「方向鲁棒性」是**另一回事**：读传播方向时，坐标读法是不是比坐标盲（杆折叠）读法更稳更对。两者正交；ladder 对此未证过。**幅值膨胀这条在「反向 corr 幅值」上会转移**——所以方向鲁棒性的干净证据用**轴的 held-out 方向预测（§6a）**；**per-contact LOO（§6b）只作逐点重建 sanity、不是方向检验**；都不用幅值。
 
 ## 2. 科学问题、假设、结论边界（验收 gate 编码结论）
 
 - **H_primary（反向门）**：per-subject，signed corr(TA_field, TB_field) 显著**为负**，且强于 within-shaft 重排 null。
-- **H_supplement（去噪可复现性）**：场的 held-out 预测比触点更准（§6）。这是「更鲁棒」字面意义上、且**免疫幅值膨胀**的直接检验。
+- **H_supplement（方向鲁棒性 = §6a axis-level）**：坐标读法的轴是否比坐标盲（杆折叠）读法在 held-out 上更好地预测发放方向——这才是「更鲁棒方向」的直接检验（免疫幅值膨胀）。**per-contact LOO（§6b）只是逐点重建 sanity，非方向鲁棒性。**
 
 **三档结论 + 边界红线（写结果时逐字守）**：
 - **过**（field 版 K/n 病人过自己 within-shaft null，分底物二项显著）：可写「TA/TB 间期传播场在共享空间轴上反向对齐，超出同杆重排——**TA/TB 是同一根空间 scaffold 的两个相反遍历方向**，membership-robust 的几何 readout」。
 - **不过**：「反向对齐落在空间自相关预期内——forward/reverse 配对在场层部分是空间平滑 artifact」。**有价值的阴性**，非「无信号」。
-- **「场更鲁棒吗」= 被测子问题**，由 (i) field vs contact 过 null 病人数差（§5）+ (ii) 可复现性配对（§6）回答。field 更差（ladder 先验 6→5→4）→ **如实写「场没买到鲁棒性、只抬了原始数值」**。
+- **「方向读法哪个更鲁棒」= 被测子问题**，由 **§6a 轴的 held-out 方向预测**（坐标 vs 坐标盲/杆折叠 vs 随机轴 null）回答。**per-contact LOO（§6b）不回答方向问题**（它测逐点重建，天然偏向高 SNR 的触点自均值）。
 - **禁写（即使反向门过）**：❌「发作会选择 TA 或 TB 极性」；❌「field 证明真实传播方向 / ground truth 方向」；❌ 方向重放；❌ 证明两模板存在（PR-2 gap_perm 已干）；❌ 有效刻画病理网络。**上述极性/真方向类主张须 supplement（§6）AND 后续独立 ictal-polarity 检验都过才解锁**，本 spec 不含 ictal-polarity 检验。
 
 ## 3. 统计对象与度量（含 P0 shared-frame 硬合同）
@@ -76,9 +76,9 @@
 **Option-B cohort（本 §6a 实际主张；broad/narrow 分开、TA/TB 折叠、永不 pool）**：
 - **primary = 坐标盲会不会误导 + 坐标-aware 能不能救**：(a) **分歧分布** = `angle(sequence_axis, raw_contact_axis)` 的 cohort 分布 + 大分歧（>45°、>90°）被试数/比例；(b) 坐标-aware 是否**泛化更好**（非只「不同」）= held-out ρ 配对 `raw_contact > sequence`（在大分歧子集上应显著）。held-out 分数 = `Spearman(沿 train-axis 投影, held-out per-contact mean rank)`。
 - **secondary（如实阴性）= `field` vs `raw_contact` 近平** + `cos(raw_contact, field)` 高 → **「用坐标」就够，平滑不额外加分**。
-- **结论红线**：主张 = **「读传播方向要用真实坐标；按电极 / 杆顺序（坐标盲）读，在部分被试（多杆入口几何）会严重误导」**；**不**主张「场平滑去噪 / 场更鲁棒」。case 图 = `sequence_axis` vs `raw_contact_axis`（+field 叠加，示 field≈raw_contact），1077 primary + 1146。
+- **结论红线**：主张 = **「读传播方向要用真实坐标；把每根杆内触点压成一个杆均值、丢掉杆内位置（坐标盲）再读，在部分被试（多杆入口几何）会严重误导」**（注：坐标盲 = **shaft-collapsed 后仍用真实坐标拟合**，**不是**「按电极名字/插入顺序排序」）；**不**主张「场平滑去噪 / 场更鲁棒 / 找到真实传播轴」。case 图 = `sequence_axis` vs `raw_contact_axis`（+field 叠加，示 field≈raw_contact），1077 primary + 1146。
 
-**TA/TB 轴反平行**：`cos(field_axis_TA, −field_axis_TB)`——轴层面的反向，补 §3 per-pixel signed corr。per subject + cohort。
+**TA/TB 轴反平行（仅辅助，不替代 §3 反向主门）**：`cos(field_axis_TA, −field_axis_TB)` 中位 ≈ broad 0.61 / narrow 0.67——只是轴层面的反向补充读数，**不够强到单独承载「反向对」结论**；反向主门仍是 §3 的 per-pixel signed corr vs within-shaft null。per subject + cohort。
 
 **帧**：共享 2D 平面主；**native-3D 作 sensitivity**（1146 poor-planarity 个案必须在图/supplement 标 3D，防审稿）。**tier = supplement**（robustness 侧），broad/narrow 分开、TA/TB 分开、永不 pool。
 
