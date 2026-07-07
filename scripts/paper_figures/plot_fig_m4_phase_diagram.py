@@ -30,7 +30,7 @@ KQS = [0.10, 0.18, 0.25, 0.35, 0.50]
 ALPHAS = [0.0, 2.0, 4.0, 6.0, 8.0, 12.0, 16.0, 20.0, 24.0]
 RUNAWAY_HZ, Q_FLOOR = 120.0, 0.05
 DIRS = ["topic4_m4_dynamic_sweep", "topic4_m4_dynamic_confirm", "topic4_m4_dynamic_delay",
-        "topic4_m4_dynamic_longconfirm", "topic4_m4_dynamic_extend",
+        "topic4_m4_dynamic_longconfirm", "topic4_m4_dynamic_extend", "topic4_m4_dynamic_confirm2",
         "topic4_m4_dynamic_multiseed/seed2", "topic4_m4_dynamic_multiseed/seed3",
         "topic4_m4_dynamic_multiseed/seed4"]
 # verdict codes / colours: 0 bounded, 1 uncertain, 2 runaway, 3 no-data
