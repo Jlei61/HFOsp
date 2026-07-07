@@ -240,6 +240,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         xdep_mean = np.zeros(nsteps); xdep_min = np.zeros(nsteps)
         xdep_mask_mean = np.zeros(nsteps) if ee_std_trace_maskE is not None else None
 
+        def _rec_xdep(tt):                       # record x_dep for step tt (called at end-of-step AND at early-stop break)
+            if ee_std_on:
+                xdep_mean[tt] = x_dep.mean(); xdep_min[tt] = x_dep.min()
+                if xdep_mask_mean is not None:
+                    xdep_mask_mean[tt] = x_dep[ee_std_trace_maskE].mean()
+            else:                                # Arm 0 (STD off): availability == 1.0 everywhere
+                xdep_mean[tt] = 1.0; xdep_min[tt] = 1.0
+                if xdep_mask_mean is not None:
+                    xdep_mask_mean[tt] = 1.0
+
     t0 = time.time()
     for t in range(nsteps):
         tm = t * dt
@@ -341,6 +351,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             _es_run = _es_run + 1 if _es_ema >= es_thresh_hz else 0
             if _es_run >= _es_dur:
                 _stop_t = t + 1
+                if dump_ee_std_trace:            # break frame is KEPT (_stop_t=t+1) -> write its trace, else phantom 0
+                    _rec_xdep(t)                 # (pre-depletion: this frame's O(N) scatter is skipped by design)
                 break
         if dump_i_spikes:
             I_spk_bool[t] = spk[NE:]
@@ -390,15 +402,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   f"rate_E={rate_E[t]/NE/dt*1e3:.1f} Hz  elapsed {time.time()-t0:.1f}s",
                   flush=True)
 
-        if dump_ee_std_trace:                    # M4-2: record x_dep at END of step (post-depletion :371, NOT post-recovery :259)
-            if ee_std_on:
-                xdep_mean[t] = x_dep.mean(); xdep_min[t] = x_dep.min()
-                if xdep_mask_mean is not None:
-                    xdep_mask_mean[t] = x_dep[ee_std_trace_maskE].mean()
-            else:                                # Arm 0 (STD off): availability == 1.0 everywhere
-                xdep_mean[t] = 1.0; xdep_min[t] = 1.0
-                if xdep_mask_mean is not None:
-                    xdep_mask_mean[t] = 1.0
+        if dump_ee_std_trace:                    # normal frame: record post-depletion (:378), not post-recovery (:259)
+            _rec_xdep(t)
 
     if _stop_t < nsteps:                                             # runaway early-stop: truncate per-step arrays
         nsteps = _stop_t

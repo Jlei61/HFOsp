@@ -12,6 +12,7 @@ import os
 import sys
 
 import numpy as np
+import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
@@ -174,3 +175,38 @@ def test_retrigger_pass_on_bounded_reignition():
 def test_retrigger_fail_on_runaway():
     post = _seg((BASE, 20), (BASE, 0.5, 5), (0.5, 175))                              # re-ignites but never comes down
     assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "fail"
+
+
+# ============================ review round 2 fixes ============================
+def test_early_stop_trace_last_frame_written():
+    """early_stop_runaway breaks mid-loop BEFORE the trace write; the break frame is still kept in the
+    output (_stop_t=t+1), so its x_dep must be written — else it stays the init sentinel 0 and the
+    (x_dep,q_I) diagnostic shows PHANTOM depletion to 0 at the runaway frame."""
+    p, net = _net(T=400.0)
+    r = simulate_kick(p, _fresh(net), 5.0, slow=None, t_kick=50.0, r_kick=2.0,
+                      ee_std_u=0.2, ee_std_tau_ms=500.0, dump_ee_std_trace=True,
+                      early_stop_runaway=True, es_thresh_hz=1.0, es_dur_ms=30.0)
+    assert r["runaway_early_stop_ms"] is not None              # early-stop actually fired
+    assert r["xdep_min"].shape[0] == r["E_spk_bool"].shape[0]  # trace truncated to the same length
+    assert r["xdep_min"][-1] > 0.0                             # break frame written, NOT phantom 0
+
+
+def test_classify_runaway_from_engine_verdict():
+    """A run the engine flagged runaway (runaway_ms set) is 'runaway', NOT 'persist': the phase diagram
+    must tell an unbounded runaway apart from a bounded persistent attractor (both fail to terminate)."""
+    af = _seg((BASE, 40), (BASE, 0.9, 10), (0.9, 350))                    # high sustained -> 'persist' by shape
+    assert classify_termination(af, BIN, baseline=BASE)[0] == "persist"
+    assert classify_termination(af, BIN, baseline=BASE, runaway_ms=1234.0)[0] == "runaway"
+
+
+def test_classify_raises_on_bad_input():
+    with pytest.raises(ValueError):
+        classify_termination(np.array([]), BIN, baseline=BASE)
+    with pytest.raises(ValueError):
+        classify_termination(np.array([0.1, np.nan, 0.2]), BIN, baseline=BASE)
+
+
+def test_retrigger_raises_on_missing_refs():
+    post = _seg((BASE, 20), (0.4, 40), (BASE, 40))
+    with pytest.raises(ValueError):                                        # terminate_clean needs baseline+ref_peak
+        retrigger_verdict("terminate_clean", post_af=post, baseline=None, ref_peak=None)

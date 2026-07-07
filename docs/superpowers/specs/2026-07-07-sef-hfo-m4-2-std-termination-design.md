@@ -192,7 +192,7 @@ Arm 4 最后。
 每个 cell(一次长跑)输出**两个独立字段**,不合并:
 
 ```
-termination_class ∈ { persist, terminate_clean, fade, fragment, suppress, rebound }
+termination_class ∈ { persist, terminate_clean, fade, fragment, suppress, rebound, runaway }
 retrigger_probe   ∈ { pass, fail, not_run }
 ```
 
@@ -203,6 +203,9 @@ retrigger_probe   ∈ { pass, fail, not_run }
   - `fragment` = 碎裂成断续局部 burst。
   - `suppress` = STD/gK 过强,直接压死(无像样事件)。
   - `rebound` = 熄灭后自发再点火成 burst。
+  - `runaway` = 引擎 Hz 阈值判定的**失控**(经 `runaway_ms` 注入;**动力学**判据、非形态)——把**失控**与
+    `persist`(**有界**持续)分开。**承重规则:汇总表/相图必须同时报 `termination_class` 与 `runaway_ms`,不能把
+    runaway 塌进 persist**(否则读不出失败是"有界没终止"还是"根本没被 bound")。
 - `retrigger_probe` = **独立的再触发探针**:在慢变量充分恢复后(§4,`t_reprobe` > tail + ~few×`max(ee_std_tau_ms,
   tau_q)`)打一次**新 kick**(**nonzero** KICK_BOOST on source core —— 注意 primary 段是 spontaneous
   `KICK_BOOST=0`,只有 probe 段有 kick;需 §8B 的 state-continuous hook,不是 run_arm 补参数):
@@ -226,8 +229,10 @@ retrigger_probe   ∈ { pass, fail, not_run }
 →`persist`)、`gap_ms=50`(分事件的静默间隙,→`fragment`/`rebound`)、`tail_ms=None`→末 10% bins。
 `retrigger_verdict`:`reig_frac=0.50`(post-kick 峰≥此比例算重燃,否则 fizzle=`fail`)、
 `runaway_tail_frac=0.80`(post-kick 尾≥此→runaway=`fail`)。
-**真实 sanity(非阈值来源):** pass-1 无-STD runaway traces(`results/topic4_m4_dynamic_confirm/`)全判 `persist`、
-**无一 `terminate_clean`** ✓。
+**真实 sanity(非阈值来源):** pass-1 无-STD runaway traces(`results/topic4_m4_dynamic_confirm/`):仅按形态
+(不给 `runaway_ms`)→ `persist`;**给引擎 `runaway_ms` → `runaway`**(与 bounded persist 区分)。两者均**无一
+`terminate_clean`** ✓。**early-stop 截断帧也写 trace**(否则末帧假性 0 会被误读为 STD 深度耗竭;§8B + 单测
+`test_early_stop_trace_last_frame_written`)。
 
 **为什么拆两字段:** 一个 `terminate_clean` 但 `retrigger_probe=fail` 的 cell = **终止了但衬底再点不着** →
 不是真间期回归,指回 `D_EE`/衬底,而不是"M4-2 成功"。合并成单 label 会把安静尾巴当成功。

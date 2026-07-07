@@ -9,6 +9,8 @@ Two-field schema, kept SEPARATE (a quiet tail is NOT the same as a re-triggerabl
       fragment        -- intermittent short bursts, never a sustained plateau
       suppress        -- never rises meaningfully above baseline (brake too strong)
       rebound         -- one clean event, quiet gap, then a re-ignition
+      runaway         -- engine Hz-threshold flagged unbounded runaway (injected via runaway_ms; a
+                         DYNAMICAL verdict, not a trace shape -> keeps runaway distinct from bounded 'persist')
 
   retrigger_probe   = retrigger_verdict(termination_class, post_af, ...)  # is the RECOVERED state excitable?
       pass / fail / not_run  (not_run unless termination_class == terminate_clean)
@@ -23,7 +25,7 @@ time near peak; a monotone decline barely touches it.
 """
 import numpy as np
 
-CLASSES = ("persist", "terminate_clean", "fade", "fragment", "suppress", "rebound")
+CLASSES = ("persist", "terminate_clean", "fade", "fragment", "suppress", "rebound", "runaway")
 
 
 def _episodes(mask, gap_bins):
@@ -45,16 +47,24 @@ def _episodes(mask, gap_bins):
 
 def classify_termination(af, bin_ms, baseline=None, *,
                          a_min=0.05, on_frac=0.3, plateau_frac=0.9, tail_frac=0.25,
-                         min_plateau_ms=250.0, gap_ms=50.0, tail_ms=None):
+                         min_plateau_ms=250.0, gap_ms=50.0, tail_ms=None, runaway_ms=None):
     """Classify an activity trace into a termination_class. Returns (cls, info) where info carries
-    'peak', 'baseline', 'amp', 'offset_ms' (offset time for terminate_clean / fade / rebound, else None)."""
+    'peak', 'baseline', 'amp', 'offset_ms' (offset time for terminate_clean / fade / rebound, else None),
+    'runaway_ms'. If `runaway_ms` is not None (engine Hz-threshold verdict), the class is 'runaway'
+    regardless of shape -- this keeps an unbounded runaway distinct from a bounded 'persist'."""
     af = np.asarray(af, float)
+    if af.size == 0:
+        raise ValueError("classify_termination: empty af")
+    if not np.all(np.isfinite(af)):
+        raise ValueError("classify_termination: af contains non-finite values")
     n = af.size
     if baseline is None:                                   # default: median of the leading ~5% of the trace
         baseline = float(np.median(af[:max(1, n // 20)]))
     peak = float(af.max())
     amp = peak - baseline
-    info = dict(peak=peak, baseline=baseline, amp=amp, offset_ms=None)
+    info = dict(peak=peak, baseline=baseline, amp=amp, offset_ms=None, runaway_ms=runaway_ms)
+    if runaway_ms is not None:                             # engine (Hz-threshold) verdict wins: unbounded runaway,
+        return "runaway", info                             # NOT a bounded persistent attractor
     if amp < a_min:                                        # never rose above baseline -> brake killed it
         return "suppress", info
 
@@ -94,7 +104,11 @@ def retrigger_verdict(termination_class, post_af=None, baseline=None, ref_peak=N
             event peak, then comes back down); fail = fizzle (no re-ignition) or runaway (stays high)."""
     if termination_class != "terminate_clean" or post_af is None:
         return "not_run"
+    if baseline is None or ref_peak is None:
+        raise ValueError("retrigger_verdict: terminate_clean requires baseline and ref_peak")
     post_af = np.asarray(post_af, float)
+    if post_af.size == 0 or not np.all(np.isfinite(post_af)):
+        raise ValueError("retrigger_verdict: empty or non-finite post_af")
     amp = ref_peak - baseline
     if float(post_af.max()) < baseline + reig_frac * amp:  # fizzle: kick did not re-ignite an event
         return "fail"
