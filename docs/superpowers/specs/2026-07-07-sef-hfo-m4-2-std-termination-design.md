@@ -247,6 +247,13 @@ retrigger_probe   ∈ { pass, fail, not_run }
   - **reversibility 下界(正对照)**:复用 pass-1 `--reversibility`(`q_I`-refill 已证回不了间期)。若激进 STD 也
     终止不了 → "不可撤回"不是 depression 不够,是 attractor/衬底本身 → clean no-go。
 
+**结果（2026-07-08,3-seed LOCKED clean no-go）:** P1 sweep（`--p1-sweep`,seed 1/3/4,`u∈[0.05,0.5]×τ∈[1000,5000]`
+@ `k_q=0.10,alpha_G=16`）**0 个 go cell / 0 个 `terminate_clean`**:persist(u=0) → fragment(弱 STD) → suppress
+(强/慢 STD),中间无干净终止;`retrigger` 全 `not_run`;无 runaway;三 seed 逐格一致(seed4 Arm0 基线本身 fragment,
+不改 verdict)。→ **STD 单独不能把有界持续态干净终止成可再触发间期(只碎裂/压死)**;下一杠杆 = `D_EE`/衬底异质
+或更慢的离子型(slow-K / gK)终止器(§10 nuance;gK arm 此前 deferred)。详见
+`docs/archive/topic4/m4_2_std_termination_p1_sweep_2026-07-08.md` + 图 `results/topic4_m4_dynamic_p1_sweep/figures/m4_2_p1_sweep_map.png`。
+
 ### 7.3 M4-2B 极限环（advanced,不作 M4-2A 验收）
 
 ≥2 次自发事件、之间有清楚间期(`M(t) < baseline+cσ`,`q_I↑`,`x_dep↑`)。需自发 re-nucleation —— 均匀衬底
