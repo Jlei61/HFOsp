@@ -7,7 +7,7 @@
 > per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
 > `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
 >
-> 最近更新：2026-06-26。新增结论图目录时，请在对应 topic 表里补一行。
+> 最近更新：2026-07-07。新增结论图目录时，请在对应 topic 表里补一行。
 >
 > **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
 > 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
@@ -136,6 +136,7 @@
 | [topic5_dynamic_echo/sentinel/figures/](topic5_dynamic_echo/sentinel/figures/) | Stage 2b 动态回响哨兵 |
 | [topic5_ictal_recruitment/axis_alignment/figures/](topic5_ictal_recruitment/axis_alignment/figures/) | A 线 axis alignment 可视化 |
 | [paper-ready-figure/fig3_field_concordance_cohort_stat/figures/field_concordance_cohort_stat.png](paper-ready-figure/fig3_field_concordance_cohort_stat/figures/) | **Fig3-A cohort field concordance 统计图**：Data vs channel-null paired subject-level 面板；`BB 1-45 maxAB`、line-noise-masked `BB 1-150 maxAB`、`HFA 60-100 maxAB` 三组均显示 cohort-level shift above null；formal pass 仍看 selection-corrected 表 |
+| [paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png](paper-ready-figure/fig3_peri_onset_field_similarity/figures/) | **Fig3-B E1146 peri-onset field similarity 素材图**：1-150 Hz signed robust-z，`[-120,+20]s`、10 s window / 2 s step；左=maxAB `max(|r_A|,|r_B|)` scaffold trajectory，右=signed A/B polarity sidecar；single-subject material，非 cohort/formal gate |
 | [topic5_ictal_recruitment/subtype_direction/figures/](topic5_ictal_recruitment/subtype_direction/figures/) | C 线 子型×激活方向（玫瑰 + C↔A 连接） |
 | [topic5_ictal_recruitment/directional_clustering/figures/](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类 ↔ 间期 A/B（每被试玫瑰 + 442 间期事件 hist×两色发作方向类；exploratory negative，6 ECoG 全无 two_class_mapped） |
 | [topic5_ictal_recruitment/event_resolved_alignment/figures/](topic5_ictal_recruitment/event_resolved_alignment/figures/) | A 线 event-resolved 二级：逐间期事件(A/B 两类)对发作场的对齐分布 + 事件级离散度（PILOT 3 epi，exploratory，broad 底物） |

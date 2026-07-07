@@ -1,0 +1,31 @@
+{
+  "subject": "epilepsiae_1146",
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "feature": "1-150 Hz log power, per-channel baseline robust-z; signed values, maxAB |r| similarity",
+  "n_eligible_requested": 25,
+  "n_seizures_processed": 25,
+  "drops": [],
+  "outputs": {
+    "figure": "results/topic5_ictal_recruitment/field_dynamics_signed/figures/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s.png",
+    "per_seizure_csv": "results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+    "aggregate_csv": "results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv"
+  },
+  "overall": {
+    "median_of_aggregate_median": 0.6214096863262644,
+    "median_of_aggregate_variance": 0.04605353469028246,
+    "max_aggregate_median": 0.8015235522372238
+  },
+  "pre_m120_0": {
+    "median_of_aggregate_median": 0.6047998111893268,
+    "median_of_aggregate_variance": 0.04605353469028246
+  },
+  "early_0_30": {
+    "median_of_aggregate_median": 0.7936042758142597,
+    "median_of_aggregate_variance": 0.04051655230089252
+  }
+}

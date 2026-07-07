@@ -1,0 +1,37 @@
+{
+  "subject": "epilepsiae_1146",
+  "source_csv": "results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+  "time_range_sec": [
+    -120.0,
+    20.0
+  ],
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "n_seizures": 25,
+  "n_windows": 66,
+  "readouts": {
+    "maxAB_abs": {
+      "definition": "max(|r_A|, |r_B|)",
+      "median_of_window_medians": 0.6214096863262644,
+      "median_of_window_variances": 0.04605353469028247
+    },
+    "signed_A": {
+      "definition": "signed r against template A",
+      "median_of_window_medians": -0.2211573396258788,
+      "median_of_window_variances": 0.3145687020481981
+    },
+    "signed_B": {
+      "definition": "signed r against template B",
+      "median_of_window_medians": 0.2100391956092586,
+      "median_of_window_variances": 0.33514652291701097
+    }
+  },
+  "outputs": {
+    "png": "results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png",
+    "pdf": "results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.pdf"
+  }
+}

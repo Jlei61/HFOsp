@@ -94,6 +94,23 @@ Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计�
 
 **Fig3-Sup1（间期 HFO 几何 ↔ 发作早期多频带能量场 alignment，V2 Phase-1，exploratory，2026-07-04，已验收）**：把 Fig3-A 的单频段 field concordance 扩到**全 12 频带扫描**（δ→ripple）+ 诚实 null / per-subject caveat。3 panel：**A** subject×band maxAB 热图（红蓝 diverging、narrow>broad、band-generic）；**B** 每 primary 带 per-subject Δ vs 弱空间 null violin+点（两池 **6/7** 过 family-wise、唯 ripple_high n.s.=**NOT ripple-specific**）；**C** per-subject 稳定性（cohort 6/7 是**聚合**、narrow 中位仅 **2/7**、≥5/7 仅 **3/20** = **承重 caveat**）。**tier = exploratory candidate early-ictal spatial recruitment scaffold（cohort 层，非 formal/机制）**；**formal within-shaft Gate A 未评估**（2/20 within_shaft_strong、弱 null likely inflated）、**Gate B/C 未跑**、仅 onset+0–20s。**禁** HFO-/LVFA-/ripple-specific / timing-order / formal Gate A passed。复现 `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档 `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`；下一步 `docs/superpowers/plans/2026-07-04-topic5-v2-phase1-v2-scaffold-refinement.md`。
 
+### Fig3-B: E1146 peri-onset field similarity trajectory
+
+**目的**：作为 Fig3-A 的 single-subject dynamic material，展示 E1146 在 `[-120,+20]s` onset-aligned 窗口内，1-150 Hz signed robust-z 能量场与间期 propagation field template 的相似性轨迹。
+
+**当前验收版本**：
+
+- 输出目录：`results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/`
+- 正式文件：`epilepsiae_1146_peri_onset_field_similarity_paper_ready.png` / `.pdf`
+- 复现入口：`scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py --subject epilepsiae_1146`
+- 数据来源：`results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv`
+- 上游生成：`scripts/plot_topic5_signed_broadband_similarity_timecourse.py --subject epilepsiae_1146 --start-sec -120 --stop-sec 20 --band-lo 1 --band-hi 150 --window-sec 10 --step-sec 2`
+- 图形合同：双面板，A=`max(|r_A|,|r_B|)` sign-free scaffold similarity，B=signed template A/B similarity；10 s sliding window、2 s step，x 轴为 window center，xlim 贴第一个/最后一个中心点，0 s 用灰色虚线；浅线=单次 seizure，粗线=跨 seizure median，阴影=IQR；不画方差/n 的诊断下排。
+
+**当前口径**：
+
+Panel A 支持 coarse scaffold similarity 的 onset-near trajectory 目视素材；Panel B 只作为 polarity sidecar，显示 signed A/B polarity 不稳定。它不是 cohort 统计、不是 timing-order replay、也不解释完整发作期 trajectory；超过 `+20s` 的发作中比较需要 duration warping 或阶段对齐。
+
 ### Fig4: 被试特异性 SNN + KMeans readout 核验（E1146）
 
 **目的**：把同一 cm-SNN 标准底物按**病人真实电极平面**摆放，两个低阈值核放在**两类间期模板各自最早的电极区**（=两类模板的 source，轴两端），看同一虚拟 SEEG（=病人真实触点）能否读出正/反间期传播，并用无监督 KMeans 验证 readout 事件是否自然分成两类。

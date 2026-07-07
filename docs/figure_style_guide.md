@@ -125,10 +125,46 @@
 
 ---
 
-## Topic 5 · 亚型 / ictal 回响（暂不锁定）
+## Topic 5 · ictal field readout / peri-onset trajectory
 
-Topic 5 仍在探索期，canonical 图型待结论稳定后再补。现有候选见 `results/FIGURE_INDEX.md` 的 Topic 5 段
-（`topic5_ictal_template_echo/`、`topic1_topic5_bridge/` 等），暂按个案处理，不强制统一布局。
+Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field readout 图型先锁定。其它候选见
+`results/FIGURE_INDEX.md` 的 Topic 5 段，暂按个案处理，不强制统一布局。
+
+### 5a. Fig3-B：peri-onset field similarity trajectory
+
+- **示范图**：[`results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png`](../results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png)
+- **复现入口**：`scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py --subject epilepsiae_1146`
+- **上游数据**：`results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv`
+- **上游生成命令**：`python scripts/plot_topic5_signed_broadband_similarity_timecourse.py --subject epilepsiae_1146 --start-sec -120 --stop-sec 20 --band-lo 1 --band-hi 150 --window-sec 10 --step-sec 2`
+- **回答**：在同一 subject 的多次 seizure 中，onset 前后 1-150 Hz signed robust-z 能量场是否持续接近间期 propagation field scaffold；以及这种接近是否有稳定的 signed A/B polarity。
+- **布局（单行双面板）**：
+  - Panel a：`max(|r_A|, |r_B|)`，即 sign-free maxAB scaffold similarity。
+  - Panel b：signed `r_A` 与 signed `r_B`，分别对应 template A/B。
+  - 两个 panel 都使用同一时间范围、同一窗口定义、同一 seizure 集合。
+- **时间轴合同**：
+  - 数据窗口固定为 `[-120,+20]s`，10 s sliding window，2 s step。
+  - x 轴画 **window center**，因此当前显示中心范围是 `[-115,+15]s`。
+  - `xlim` 必须贴第一个/最后一个 window center，不留 Matplotlib 自动白边。
+  - 0 s 用灰色虚线标 clinical onset。
+  - 不把 `+20s` 之后的发作中轨迹直接接上；完整发作期比较必须先做 duration warping 或阶段对齐。
+- **线型 / 统计显示**：
+  - 浅细线：单次 seizure trajectory，低 alpha，只作为异质性背景。
+  - 粗线：跨 seizure median，是主视觉读出。
+  - 阴影：跨 seizure IQR；不要用 mean±SD 作主图阴影。
+  - 不画诊断下排。跨 seizure variance、`n_seizures`、drop 信息写入 summary JSON / README。
+- **配色**：
+  - maxAB：Morandi rust `#A35E48`。
+  - template A：红 `#B2182B`。
+  - template B：蓝 `#2166AC`。
+  - 单次 seizure：浅灰；不要让个体线压过 median/IQR。
+- **禁止事项**：
+  - 不用 step 图作为 paper-ready 主版；step 只可用于检查窗口边界。
+  - 不把 `maxAB |r|` 和 signed A/B 混成一个指标。
+  - 不用 1-45 Hz cache 顶替 1-150 Hz；1-150 Hz 图必须来自 line-noise-masked 1-150 Hz 原始重算或明确标为其它频段。
+  - 不把 signed A/B sidecar 写成 formal gate；当前 formal-ish scaffold 读出仍是 sign-free / maxAB 语义。
+  - 不写 replay、direction replay、timing-order replay、mechanism proof。
+
+**当前口径**：这类图是 Fig3 field concordance 的 subject-level 动态素材。Panel a 支持 coarse scaffold similarity 在 onset-near 时间轴上持续偏高；Panel b 说明 signed polarity 在 seizure 间是否稳定，只能作为 polarity sidecar。
 
 ---
 

@@ -358,9 +358,15 @@ def extract_seizure_window(
     if dataset == "epilepsiae":
         from src.preprocessing import load_epilepsiae_block
         pre = load_epilepsiae_block(
-            data_path, head_path, reference=reference, segment_sec=200.0,
+            data_path,
+            head_path,
+            reference=reference,
+            segment_sec=min(200.0, max(1.0, window_duration_sec)),
+            crop_start_sec=rel_start_sec,
+            crop_duration_sec=window_duration_sec,
         )
         block_stem_for_window = blk["block_stem"]
+        loaded_window_only = True
     else:  # yuquan
         from src.yuquan_dataset import load_yuquan_record
         pre = load_yuquan_record(
