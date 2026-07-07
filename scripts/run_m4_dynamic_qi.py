@@ -285,6 +285,65 @@ def _worker(arm):
     return run_arm(_S["S"], *arm)
 
 
+def _p1_cell_worker(cell):
+    """Pool worker for the P1 sweep. cell = (label, k_q, alpha_G, ee_std_u, ee_std_tau_ms, base_T,
+    recovery_factor, reprobe_boost). Uses the COW-shared _S['S']; runs the two-pass retrigger for one cell.
+    Returns the verdict scalars + pass-1 diagnostic traces (arrays prefixed '_')."""
+    from src.sef_hfo_m4_termination import run_cell_with_retrigger
+    label, k_q, alpha_G, u, tau, base_T, rf, rb = cell
+    S = _S["S"]
+    cap = {}
+
+    def run_fn(t_kick2, kick_boost2, min_T):
+        T_use = base_T if min_T is None else max(base_T, min_T)
+        r = run_arm(S, label, k_q, True, alpha_G, ee_std_u=u, ee_std_tau_ms=tau,
+                    t_kick2=t_kick2, KICK_BOOST2=kick_boost2, trace_xdep=True, T_ms=T_use)
+        cap["pass1" if t_kick2 is None else "pass2"] = r
+        return {"af": r["af"], "runaway_ms": r["runaway_ms"], "baseline_af": r["baseline_af"]}
+
+    recovery_ms = max(tau, TAU_Q)
+    base = dict(label=label, k_q=k_q, alpha_G=alpha_G, ee_std_u=u, ee_std_tau_ms=tau, recovery_ms=recovery_ms)
+    try:
+        v = run_cell_with_retrigger(run_fn, C.BIN_MS, recovery_ms=recovery_ms, recovery_factor=rf, reprobe_boost=rb)
+    except Exception as e:                                            # fail-loud per cell; don't kill the whole sweep
+        return dict(base, termination_class="ERROR", retrigger_probe="ERROR", error=repr(e))
+    p1 = cap["pass1"]
+    return dict(base, **v, pass1_wall_s=p1["wall_s"], pass1_verdict=p1["verdict"],
+                pass2_wall_s=(cap["pass2"]["wall_s"] if "pass2" in cap else None),
+                _af=p1["af"], _xdep_mean=p1["xdep_mean"], _xdep_min=p1["xdep_min"],
+                _qI=p1["trace_qI_mean"], _rate=p1["rate"])
+
+
+def _run_p1_sweep(out_dir, *, k_q, alpha_G, u_grid, tau_grid, base_T, recovery_factor, reprobe_boost, workers):
+    """P1 (spec §5) sweep: (ee_std_u x ee_std_tau_ms) grid at one bounded op-point + Arm 0 baseline, each a
+    two-pass retrigger cell, via Pool (COW-shared net). Writes p1_sweep_summary.json + p1_sweep_traces.npz.
+    Conservative `workers` for OOM safety (swap tiny)."""
+    os.makedirs(out_dir, exist_ok=True)
+    cells = [("p1_arm0", k_q, alpha_G, 0.0, tau_grid[0], base_T, recovery_factor, reprobe_boost)]
+    for u in u_grid:
+        for tau in tau_grid:
+            cells.append((f"p1_u{u:g}_tau{int(tau)}", k_q, alpha_G, u, tau, base_T, recovery_factor, reprobe_boost))
+    print(f"[P1 sweep] {len(cells)} cells (Arm0 + {len(u_grid)}x{len(tau_grid)}) workers={workers} T={base_T} "
+          f"kq={k_q} aG={alpha_G}", flush=True)
+    t0 = time.time()
+    with mp.Pool(min(workers, len(cells))) as pool:
+        rows = pool.map(_p1_cell_worker, cells)
+    wall = round(time.time() - t0, 1)
+    scal = [{k: v for k, v in r.items() if not k.startswith("_")} for r in rows]
+    json.dump(dict(k_q=k_q, alpha_G=alpha_G, u_grid=list(u_grid), tau_grid=list(tau_grid), base_T=base_T,
+                   recovery_factor=recovery_factor, reprobe_boost=reprobe_boost, wall_s=wall, rows=scal),
+              open(os.path.join(out_dir, "p1_sweep_summary.json"), "w"), indent=2)
+    np.savez_compressed(os.path.join(out_dir, "p1_sweep_traces.npz"),
+                        **{f"{r['label']}__{a}": r[f"_{a}"] for r in rows if "error" not in r
+                           for a in ("af", "xdep_mean", "xdep_min", "qI", "rate")})
+    print(f"[P1 sweep] done in {wall}s -> {out_dir}", flush=True)
+    for r in scal:                                                   # console map (go = terminate_clean AND retrigger pass)
+        print(f"  {r['label']:<20} class={str(r.get('termination_class')):<15} "
+              f"retrigger={str(r.get('retrigger_probe')):<8} runaway={r.get('runaway_ms')} "
+              f"pass1={r.get('pass1_wall_s')}s", flush=True)
+    return scal
+
+
 def main():
     ap = argparse.ArgumentParser(description="M4 dynamic q_I spontaneous experiment (RUNS SIMULATIONS)")
     ap.add_argument("--seed", type=int, default=1)
@@ -319,6 +378,11 @@ def main():
     ap.add_argument("--p1-ee-std-tau", type=float, default=1000.0)
     ap.add_argument("--p1-recovery-factor", type=float, default=2.0)  # t_kick2 = offset + factor*max(ee_std_tau, tau_q)
     ap.add_argument("--p1-reprobe-boost", type=float, default=3.0)
+    ap.add_argument("--p1-sweep", action="store_true",
+                    help="P1 (ee_std_u x ee_std_tau_ms) sweep + Arm0 at one op-point via Pool (conservative workers)")
+    ap.add_argument("--p1-workers", type=int, default=5)              # OOM-safe (swap tiny; other campaign live)
+    ap.add_argument("--p1-u-grid", default="0.15,0.3,0.5")
+    ap.add_argument("--p1-tau-grid", default="1000,2500,5000")
     a = ap.parse_args()
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
@@ -339,7 +403,8 @@ def main():
     else:
         arms = ARMS
     if a.out == OUT_DIR:
-        a.out = OUT_DIR + ("_p1_timing" if a.p1_timing_cell else "_reversibility" if a.reversibility
+        a.out = OUT_DIR + ("_p1_sweep" if a.p1_sweep else "_p1_timing" if a.p1_timing_cell
+                           else "_reversibility" if a.reversibility
                            else "_stimlocus" if a.stim_locus
                            else "_mechanism" if a.mechanism else "_sweep" if a.sweep
                            else "_confirm" if a.cells else "")
@@ -352,6 +417,13 @@ def main():
         _run_p1_timing_cell(S, a.out, k_q=a.p1_kq, alpha_G=a.p1_alpha_g, ee_std_u=a.p1_ee_std_u,
                             ee_std_tau_ms=a.p1_ee_std_tau, base_T=a.T, recovery_factor=a.p1_recovery_factor,
                             reprobe_boost=a.p1_reprobe_boost)
+        return
+    if a.p1_sweep:                                                   # M4-2 P1: (u x tau) sweep + Arm0, Pool, OOM-safe
+        _run_p1_sweep(a.out, k_q=a.p1_kq, alpha_G=a.p1_alpha_g,
+                      u_grid=[float(x) for x in a.p1_u_grid.split(",")],
+                      tau_grid=[float(x) for x in a.p1_tau_grid.split(",")],
+                      base_T=a.T, recovery_factor=a.p1_recovery_factor, reprobe_boost=a.p1_reprobe_boost,
+                      workers=a.p1_workers)
         return
     if a.stim_locus:
         arms = _stim_locus_arms(S, a.stim_on, a.stim_off, a.stim_radius, a.stim_dvth)
