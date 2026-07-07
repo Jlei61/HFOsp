@@ -187,7 +187,8 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
     S["net"]["rng"] = np.random.default_rng(S["seed"])
     t0 = time.time()
     res = simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
-                        t_kick=1e9, V_th_per_neuron=S["vth"], perturb=perturb)   # SPONTANEOUS (no kick)
+                        t_kick=1e9, V_th_per_neuron=S["vth"], perturb=perturb,
+                        early_stop_runaway=_EARLY_STOP["on"])          # SPONTANEOUS (no kick); truncate runaways (perf)
     spk = res["E_spk_bool"]
     rate = np.asarray(res["rate_E"], float)
     af, bin_w = C.active_fraction(spk, DT, C.BIN_MS)
@@ -208,6 +209,7 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
         perturb_kind=(perturb["kind"] if perturb else None),
         beta_SG=beta_SG, clamp_SG=(None if clamp_SG is None else float(clamp_SG)),
         n_events=len(events), n_pre_runaway=int(n_pre), runaway_ms=runaway, verdict=verdict,
+        runaway_early_stop=res.get("runaway_early_stop_ms"),        # truncation point if the sim was early-stopped
         max_rate_hz=round(float(rate_s.max()), 1),                  # res rate_E is already Hz (kick_probe:363)
         q_mean_final=round(float(slow.q_I.mean()), 4), q_min_final=round(float(slow.q_I.min()), 4),
         S_G_max=round(float(max(slow.trace_SG)) if slow.trace_SG else 0.0, 4),
@@ -224,6 +226,8 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
 
 
 _S = {}
+_EARLY_STOP = {"on": False}     # set in main: truncate runaway arms (perf) EXCEPT when the full post-event
+                                # trajectory is needed (reversibility / stim-locus rebound must be seen in full)
 
 
 def _worker(arm):
@@ -259,6 +263,8 @@ def main():
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
         return
+    # truncate runaway arms for speed EXCEPT reversibility/stim-locus (their rebound trajectory must be seen in full)
+    _EARLY_STOP["on"] = not (a.reversibility or a.stim_locus)
     if a.reversibility:
         arms = _reversibility_arms()
     elif a.stim_locus or a.mechanism:

@@ -90,7 +90,9 @@ def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba
 
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
-                  V_th_per_neuron=None, perturb=None, ee_std_u=0.0, ee_std_tau_ms=0.0,
+                  V_th_per_neuron=None, perturb=None,
+                  early_stop_runaway=False, es_thresh_hz=120.0, es_dur_ms=100.0,
+                  ee_std_u=0.0, ee_std_tau_ms=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None):
@@ -211,6 +213,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     # ---- recorders ---- (model.simulate's, kept so the RNG stream matches) ----
     rate_E = np.zeros(nsteps); rate_I = np.zeros(nsteps)
+    # runaway early-stop (perf): truncate once the 20ms-EMA per-neuron rate is sustained >= threshold -- a
+    # runaway is a saturated plateau, so simulating it fully is wasted O(N) scatter. The 20ms EMA matches the
+    # verdict's _smooth(20ms) + _first_sustained, so it fires on the SAME runaways (robust to burst oscillation).
+    # OFF (early_stop_runaway=False) -> the block below never runs -> no behaviour change.
+    _es_alpha = 1.0 - np.exp(-dt / 20.0)                 # 20ms EMA (matches runner _smooth win_ms=20)
+    _es_ema = 0.0; _es_dur = int(round(es_dur_ms / dt)); _es_run = 0; _stop_t = nsteps
     spk_t = []; spk_i = []
     ras_keepE = rng.choice(NE, size=min(80, NE), replace=False)
     ras_keepI = NE + rng.choice(NI, size=min(20, NI), replace=False)
@@ -321,6 +329,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         spk_inside[t] = spk[kick_mask].sum()
         spk_outside[t] = spk[outside_mask].sum()
         E_spk_bool[t] = spk[:NE]
+        if early_stop_runaway:                                       # runaway detected -> break before the O(N) scatter
+            _es_ema += _es_alpha * (rate_E[t] / NE / dt * 1e3 - _es_ema)   # 20ms-EMA per-neuron rate (Hz)
+            _es_run = _es_run + 1 if _es_ema >= es_thresh_hz else 0
+            if _es_run >= _es_dur:
+                _stop_t = t + 1
+                break
         if dump_i_spikes:
             I_spk_bool[t] = spk[NE:]
         if dump_drive:
@@ -369,10 +383,20 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   f"rate_E={rate_E[t]/NE/dt*1e3:.1f} Hz  elapsed {time.time()-t0:.1f}s",
                   flush=True)
 
+    if _stop_t < nsteps:                                             # runaway early-stop: truncate per-step arrays
+        nsteps = _stop_t
+        rate_E, rate_I = rate_E[:nsteps], rate_I[:nsteps]
+        E_spk_bool = E_spk_bool[:nsteps]
+        spk_inside, spk_outside = spk_inside[:nsteps], spk_outside[:nsteps]
+        if I_spk_bool is not None:
+            I_spk_bool = I_spk_bool[:nsteps]
+        if lfp_trace is not None:
+            lfp_trace = lfp_trace[:nsteps]
     rate_E_hz = rate_E / NE / dt * 1e3
     rate_I_hz = rate_I / NI / dt * 1e3
     res = dict(
         times=np.arange(nsteps) * dt,
+        runaway_early_stop_ms=(None if _stop_t >= (int(round(p.T / dt))) else round(_stop_t * dt, 1)),
         rate_E=rate_E_hz, rate_I=rate_I_hz,
         spk_inside=spk_inside, spk_outside=spk_outside,
         E_spk_bool=E_spk_bool,
