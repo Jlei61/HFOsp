@@ -281,7 +281,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # off-by-default reversibility/basin perturbation (perturb=None -> no float touched -> byte-parity):
         # inhibitory_pulse = transiently RAISE the E threshold (suppress E firing) WITHOUT touching q_I.
         if perturb is not None and perturb["kind"] == "inhibitory_pulse" and perturb["t0"] <= tm < perturb["t1"]:
-            V_th_eff = np.asarray(V_th_eff, float) + perturb["val"] * is_E
+            _tgt = perturb.get("target_mask", is_E)          # spatial stim locus (default all E -> byte-parity)
+            V_th_eff = np.asarray(V_th_eff, float) + perturb["val"] * _tgt
 
         # ----- membrane (Eq 3) + refractory -----
         ref -= 1

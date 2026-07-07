@@ -94,6 +94,40 @@ def _reversibility_arms():
     ]
 
 
+# ---- center-vs-core stimulation locus (2026-07-06 user redirect): spatial inhibitory_pulse on the aG16
+#      bounded state. SAME footprint / window / strength; only the stim LOCUS differs. GENTLE +8mV (not the
+#      reversibility arm's stronger INHIB_DVTH) so center-vs-core differences are visible, not both压死. ----
+STIM_RADIUS, STIM_DVTH = 1.5, 8.0                          # per-disk E-cell radius (mm) + inhibitory V_th bump (mV)
+STIM_ON, STIM_OFF = 8000.0, 10000.0                       # 2 s pulse on the settled bounded state
+
+
+def _e_disk_mask(S, centers, radius):
+    """Bool mask over N (E+I): E neurons within `radius` mm of ANY center; I neurons always False."""
+    posE = np.asarray(S["posE"], float); NE = posE.shape[0]
+    inE = np.zeros(NE, bool)
+    for c in centers:
+        inE |= np.linalg.norm(posE - np.asarray(c, float), axis=1) <= float(radius)
+    m = np.zeros(int(S["N"]), bool); m[:NE] = inE
+    return m
+
+
+def _stim_locus_arms(S, stim_on=STIM_ON, stim_off=STIM_OFF, radius=STIM_RADIUS, dvth=STIM_DVTH):
+    """center-vs-core stim on the aG16 bounded state (k_q=0.10, alpha_G=16). inhibitory_pulse V_th+dvth on
+    a SPATIAL target; baseline = no stim. core = source+sink cores; center = two corridor points at 0.35 /
+    0.65 along source->sink (straddle the midpoint, clear of the cores). Both = 2 disks radius `radius`
+    -> balanced footprint. Returns 5-tuples (label, k_q, use_SG, alpha_G, perturb) for run_arm."""
+    base = (0.10, True, 16.0)
+    src = np.asarray(S["src_xy"], float); snk = np.asarray(S["snk_xy"], float)
+    core_mask = _e_disk_mask(S, [src, snk], radius)
+    center_mask = _e_disk_mask(S, [src + 0.35 * (snk - src), src + 0.65 * (snk - src)], radius)
+    win = dict(t0=stim_on, t1=stim_off, val=dvth)
+    return [
+        ("aG16_stim_baseline", *base, None),
+        ("aG16_stim_center", *base, dict(kind="inhibitory_pulse", target_mask=center_mask, **win)),
+        ("aG16_stim_core", *base, dict(kind="inhibitory_pulse", target_mask=core_mask, **win)),
+    ]
+
+
 def _smooth(rate, dt, win_ms=20.0):
     n = max(1, int(round(win_ms / dt)))
     return np.convolve(np.asarray(rate, float), np.ones(n) / n, mode="same")
@@ -204,6 +238,13 @@ def main():
                          "For T=5000 survivor confirmation runs.")
     ap.add_argument("--reversibility", action="store_true",
                     help="basin perturbation test on the aG16 bounded state: baseline / qI_refill / inhibitory_pulse")
+    ap.add_argument("--stim-locus", action="store_true",
+                    help="center-vs-core spatial stim on the aG16 bounded state: baseline / center / core "
+                         "(inhibitory_pulse V_th+dvth on a spatial target; same footprint / window / strength)")
+    ap.add_argument("--stim-on", type=float, default=STIM_ON)
+    ap.add_argument("--stim-off", type=float, default=STIM_OFF)
+    ap.add_argument("--stim-radius", type=float, default=STIM_RADIUS)
+    ap.add_argument("--stim-dvth", type=float, default=STIM_DVTH)
     ap.add_argument("--confirm-run", action="store_true")
     a = ap.parse_args()
     if not a.confirm_run:
@@ -211,6 +252,8 @@ def main():
         return
     if a.reversibility:
         arms = _reversibility_arms()
+    elif a.stim_locus:
+        arms = None                                                  # built after substrate (needs geometry)
     elif a.cells:
         arms = []
         for tok in a.cells.split(","):
@@ -221,14 +264,16 @@ def main():
     else:
         arms = ARMS
     if a.out == OUT_DIR:
-        a.out = OUT_DIR + ("_reversibility" if a.reversibility else "_sweep" if a.sweep
-                           else "_confirm" if a.cells else "")
-    workers = a.workers if a.workers else min(len(arms), 40)
+        a.out = OUT_DIR + ("_reversibility" if a.reversibility else "_stimlocus" if a.stim_locus
+                           else "_sweep" if a.sweep else "_confirm" if a.cells else "")
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
     S = PP.build_substrate(a.seed)
     S["p"].T = a.T                                                    # long spontaneous window (build is T-independent)
     _S["S"] = S                                                       # set BEFORE Pool -> fork COW-shares the net
+    if a.stim_locus:
+        arms = _stim_locus_arms(S, a.stim_on, a.stim_off, a.stim_radius, a.stim_dvth)
+    workers = a.workers if a.workers else min(len(arms), 40)
     print(f"substrate: E1146 {PP.MONTAGE} L={S['L']} N={S['N']} src={S['src_xy'].round(1)} snk={S['snk_xy'].round(1)} "
           f"T={a.T} n_arms={len(arms)} workers={workers} sweep={a.sweep}", flush=True)
     with mp.Pool(min(workers, len(arms))) as pool:
