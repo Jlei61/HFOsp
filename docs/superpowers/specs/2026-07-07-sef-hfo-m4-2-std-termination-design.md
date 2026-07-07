@@ -219,6 +219,16 @@ retrigger_probe   ∈ { pass, fail, not_run }
   必须**不**判 `terminate_clean`。
 - 最终数值阈值锁进本 spec 标定表 + plan。
 
+**标定表(v1,synthetic-fixture 锁;`src/sef_hfo_m4_termination.py` 默认值,Task 3 已实现+测试):**
+`classify_termination`:`a_min=0.05`(peak−baseline 下限,不到→`suppress`)、`on_frac=0.30`(event-on 阈)、
+`plateau_frac=0.90`(**near-peak 平台判据**——平台 vs 单调衰减的判别量:flat 平台在峰值附近停留久、单调衰减几乎
+不停留)、`min_plateau_ms=250`(平台最短时长,`terminate_clean` vs `fade` 的门)、`tail_frac=0.25`(尾部仍活跃
+→`persist`)、`gap_ms=50`(分事件的静默间隙,→`fragment`/`rebound`)、`tail_ms=None`→末 10% bins。
+`retrigger_verdict`:`reig_frac=0.50`(post-kick 峰≥此比例算重燃,否则 fizzle=`fail`)、
+`runaway_tail_frac=0.80`(post-kick 尾≥此→runaway=`fail`)。
+**真实 sanity(非阈值来源):** pass-1 无-STD runaway traces(`results/topic4_m4_dynamic_confirm/`)全判 `persist`、
+**无一 `terminate_clean`** ✓。
+
 **为什么拆两字段:** 一个 `terminate_clean` 但 `retrigger_probe=fail` 的 cell = **终止了但衬底再点不着** →
 不是真间期回归,指回 `D_EE`/衬底,而不是"M4-2 成功"。合并成单 label 会把安静尾巴当成功。
 

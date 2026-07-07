@@ -21,6 +21,9 @@ from params import Params                          # noqa: E402
 from connectivity import place_neurons             # noqa: E402
 from connectivity_rot import build_connectivity_rot  # noqa: E402
 from kick_probe import simulate_kick               # noqa: E402
+from src.sef_hfo_m4_termination import (            # noqa: E402
+    classify_termination, retrigger_verdict,
+)
 
 DT = 0.1
 
@@ -100,3 +103,74 @@ def test_xdep_trace_phase_post_depletion():
     t_spk = int(fired[0])                        # first step an E neuron fires
     assert xmin[t_spk] < 1.0                      # depletion reflected SAME step -> recorded post-:371
     assert np.isclose(xmin[t_spk], 1.0 - u)       # first spike: firers deplete from 1 -> (1-u)
+
+
+# ==================================================================== Task 3: classify_termination
+# Synthetic fixtures (hand-built activity traces, NO simulation) — thresholds must classify these
+# correctly independent of sim data (avoids the "tune thresholds on the same real traces" circularity).
+BIN = 5.0
+BASE = 0.02
+
+
+def _seg(*segs):
+    """Build an activity trace: (value, n_bins) = flat; (v0, v1, n_bins) = linear ramp."""
+    out = []
+    for s in segs:
+        if len(s) == 2:
+            out.append(np.full(s[1], s[0]))
+        else:
+            out.append(np.linspace(s[0], s[1], s[2]))
+    return np.concatenate(out)
+
+
+def test_classify_terminate_clean():
+    af = _seg((BASE, 40), (BASE, 0.5, 10), (0.5, 120), (0.5, BASE, 4), (BASE, 230))  # high plateau -> sharp offset
+    cls, info = classify_termination(af, BIN, baseline=BASE)
+    assert cls == "terminate_clean"
+    assert info["offset_ms"] is not None
+
+
+def test_classify_fade():
+    af = _seg((BASE, 40), (BASE, 0.5, 3), (0.5, BASE, 200), (BASE, 160))             # monotone decline, no plateau
+    assert classify_termination(af, BIN, baseline=BASE)[0] == "fade"
+
+
+def test_classify_persist():
+    af = _seg((BASE, 40), (BASE, 0.5, 10), (0.5, 350))                               # plateau to the end
+    assert classify_termination(af, BIN, baseline=BASE)[0] == "persist"
+
+
+def test_classify_suppress():
+    af = _seg((BASE, 40), (BASE, 0.05, 5), (0.05, 20), (0.05, BASE, 5), (BASE, 330)) # never rises above a_min
+    assert classify_termination(af, BIN, baseline=BASE)[0] == "suppress"
+
+
+def test_classify_fragment():
+    af = _seg((BASE, 40), *([(BASE, 15), (0.4, 8)] * 5), (BASE, 100))                # many short intermittent bursts
+    assert classify_termination(af, BIN, baseline=BASE)[0] == "fragment"
+
+
+def test_classify_rebound():
+    af = _seg((BASE, 40), (BASE, 0.5, 10), (0.5, 100), (0.5, BASE, 4), (BASE, 60),   # clean event ...
+              (BASE, 0.4, 5), (0.4, 30), (0.4, BASE, 4), (BASE, 60))                 # ... quiet gap, then re-ignition
+    assert classify_termination(af, BIN, baseline=BASE)[0] == "rebound"
+
+
+def test_retrigger_not_run_when_not_clean():
+    assert retrigger_verdict("persist") == "not_run"
+    assert retrigger_verdict("fade") == "not_run"
+
+
+def test_retrigger_fail_on_fizzle():
+    post = np.full(200, BASE)                                                        # post-kick stays quiet
+    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "fail"
+
+
+def test_retrigger_pass_on_bounded_reignition():
+    post = _seg((BASE, 20), (BASE, 0.4, 5), (0.4, 40), (0.4, BASE, 5), (BASE, 130))  # re-igniting bounded event
+    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "pass"
+
+
+def test_retrigger_fail_on_runaway():
+    post = _seg((BASE, 20), (BASE, 0.5, 5), (0.5, 175))                              # re-ignites but never comes down
+    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "fail"
