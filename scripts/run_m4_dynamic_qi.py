@@ -25,6 +25,7 @@ os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 
 import argparse                                            # noqa: E402
+import dataclasses                                         # noqa: E402
 import json                                                # noqa: E402
 import multiprocessing as mp                               # noqa: E402
 import sys                                                 # noqa: E402
@@ -175,8 +176,8 @@ def _spatial_coverage(movie, active_thresh=0.1, tail_frames=8):
 
 
 def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None,
-            ee_std_u=0.0, ee_std_tau_ms=0.0, t_kick2=None, KICK_BOOST2=0.0, trace_xdep=False):
-    p = S["p"]
+            ee_std_u=0.0, ee_std_tau_ms=0.0, t_kick2=None, KICK_BOOST2=0.0, trace_xdep=False, T_ms=None):
+    p = S["p"] if T_ms is None else dataclasses.replace(S["p"], T=float(T_ms))   # M4-2: pass-2 extends T for the probe
     beta_SG = float(pool_extra.get("beta_SG", 0.0)) if pool_extra else 0.0     # matched-subtractive arm
     clamp_SG = pool_extra.get("clamp_SG") if pool_extra else None              # clamped-static-pool arm
     cfg = SpatialSlowFieldConfig(use_qI=True, use_gK=False, k_q=k_q, k_K=0.0, sigma_q=SIGMA_Q, sigma_K=0.5,
@@ -214,6 +215,7 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None,
         n_events=len(events), n_pre_runaway=int(n_pre), runaway_ms=runaway, verdict=verdict,
         runaway_early_stop=res.get("runaway_early_stop_ms"),        # truncation point if the sim was early-stopped
         max_rate_hz=round(float(rate_s.max()), 1),                  # res rate_E is already Hz (kick_probe:363)
+        baseline_af=round(float(floor), 5),                         # M4-2: runner baseline for classify_termination (P1-a)
         q_mean_final=round(float(slow.q_I.mean()), 4), q_min_final=round(float(slow.q_I.min()), 4),
         S_G_max=round(float(max(slow.trace_SG)) if slow.trace_SG else 0.0, 4),
         **_spatial_coverage(movie),                                # active_area_peak/tail + tail_frac_gt_0p5
@@ -231,6 +233,47 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None,
         out["xdep_mean"] = res.get("xdep_mean")
         out["xdep_min"] = res.get("xdep_min")
     return out
+
+
+def _run_p1_timing_cell(S, out_dir, *, k_q, alpha_G, ee_std_u, ee_std_tau_ms, base_T,
+                        recovery_factor, reprobe_boost):
+    """P1 (spec §5) ONE timing cell: medium-STD Arm-1 on a bounded op-point, two-pass retrigger, full JSON.
+    NOT the sweep (Task 5) -- one cell to measure wall-clock + smoke the P1 output contract. Arm 0 vs Arm 1
+    and the full grid are the (gated) sweep."""
+    from src.sef_hfo_m4_termination import run_cell_with_retrigger
+    cap = {}
+
+    def run_fn(t_kick2, kick_boost2, min_T):
+        T_use = base_T if min_T is None else max(base_T, min_T)       # pass-2 MUST cover t_kick2 + probe_window
+        r = run_arm(S, "p1_timing", k_q, True, alpha_G, ee_std_u=ee_std_u, ee_std_tau_ms=ee_std_tau_ms,
+                    t_kick2=t_kick2, KICK_BOOST2=kick_boost2, trace_xdep=True, T_ms=T_use)
+        cap["pass1" if t_kick2 is None else "pass2"] = r
+        return {"af": r["af"], "runaway_ms": r["runaway_ms"], "baseline_af": r["baseline_af"]}
+
+    recovery_ms = max(ee_std_tau_ms, TAU_Q)                           # re-trigger needs q_I recovered (slow tau_q)
+    t0 = time.time()
+    verdict = run_cell_with_retrigger(run_fn, C.BIN_MS, recovery_ms=recovery_ms,
+                                      recovery_factor=recovery_factor, reprobe_boost=reprobe_boost)
+    wall = round(time.time() - t0, 1)
+    p1, p2 = cap["pass1"], cap.get("pass2")
+    os.makedirs(out_dir, exist_ok=True)
+    result = dict(verdict, wall_s=wall, k_q=k_q, alpha_G=alpha_G, ee_std_u=ee_std_u,
+                  ee_std_tau_ms=ee_std_tau_ms, recovery_ms=recovery_ms, recovery_factor=recovery_factor,
+                  reprobe_boost=reprobe_boost, bin_ms=C.BIN_MS,
+                  pass1_wall_s=p1["wall_s"], pass1_verdict=p1["verdict"], pass1_runaway_ms=p1["runaway_ms"],
+                  pass2_wall_s=(p2["wall_s"] if p2 else None))
+    json.dump(result, open(os.path.join(out_dir, "p1_timing_cell.json"), "w"), indent=2)
+    np.savez_compressed(                                              # arrays for the (x_dep, q_I) diagnostic
+        os.path.join(out_dir, "p1_timing_cell.npz"),
+        pass1_af=p1["af"], pass1_rate=p1["rate"], pass1_xdep_mean=p1["xdep_mean"],
+        pass1_xdep_min=p1["xdep_min"], pass1_qI_mean=p1["trace_qI_mean"],
+        **({"pass2_af": p2["af"], "pass2_rate": p2["rate"], "pass2_xdep_mean": p2["xdep_mean"],
+            "pass2_xdep_min": p2["xdep_min"], "pass2_qI_mean": p2["trace_qI_mean"]} if p2 else {}))
+    print(f"[P1 timing cell] class={verdict['termination_class']} retrigger={verdict['retrigger_probe']} "
+          f"runaway_ms={verdict['runaway_ms']} t_kick2_ms={verdict['t_kick2_ms']} "
+          f"pass1_wall={p1['wall_s']}s pass2_wall={p2['wall_s'] if p2 else None}s total={wall}s -> {out_dir}",
+          flush=True)
+    return result
 
 
 _S = {}
@@ -267,6 +310,15 @@ def main():
                          "clamped-S_G. matched-subtractive beta_SG is calibrated (Definition A: same mean removed "
                          "recurrent current at the divisive steady state) from a phase-1 divisive run.")
     ap.add_argument("--confirm-run", action="store_true")
+    # ---- M4-2 P1 (spec §5): ONE timing cell (NOT the full sweep = Task 5, still gated) ----
+    ap.add_argument("--p1-timing-cell", action="store_true",
+                    help="P1 ONE timing cell: medium-STD Arm-1 two-pass retrigger + full JSON/npz (measures wall-clock)")
+    ap.add_argument("--p1-kq", type=float, default=0.10)
+    ap.add_argument("--p1-alpha-g", type=float, default=16.0)         # pass-1 confirmed-bounded strip
+    ap.add_argument("--p1-ee-std-u", type=float, default=0.15)        # medium STD (not strong -> avoids suppress bias)
+    ap.add_argument("--p1-ee-std-tau", type=float, default=1000.0)
+    ap.add_argument("--p1-recovery-factor", type=float, default=2.0)  # t_kick2 = offset + factor*max(ee_std_tau, tau_q)
+    ap.add_argument("--p1-reprobe-boost", type=float, default=3.0)
     a = ap.parse_args()
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
@@ -287,7 +339,8 @@ def main():
     else:
         arms = ARMS
     if a.out == OUT_DIR:
-        a.out = OUT_DIR + ("_reversibility" if a.reversibility else "_stimlocus" if a.stim_locus
+        a.out = OUT_DIR + ("_p1_timing" if a.p1_timing_cell else "_reversibility" if a.reversibility
+                           else "_stimlocus" if a.stim_locus
                            else "_mechanism" if a.mechanism else "_sweep" if a.sweep
                            else "_confirm" if a.cells else "")
     os.makedirs(a.out, exist_ok=True)
@@ -295,6 +348,11 @@ def main():
     S = PP.build_substrate(a.seed)
     S["p"].T = a.T                                                    # long spontaneous window (build is T-independent)
     _S["S"] = S                                                       # set BEFORE Pool -> fork COW-shares the net
+    if a.p1_timing_cell:                                              # M4-2 P1: ONE timing cell, no Pool, no sweep
+        _run_p1_timing_cell(S, a.out, k_q=a.p1_kq, alpha_G=a.p1_alpha_g, ee_std_u=a.p1_ee_std_u,
+                            ee_std_tau_ms=a.p1_ee_std_tau, base_T=a.T, recovery_factor=a.p1_recovery_factor,
+                            reprobe_boost=a.p1_reprobe_boost)
+        return
     if a.stim_locus:
         arms = _stim_locus_arms(S, a.stim_on, a.stim_off, a.stim_radius, a.stim_dvth)
     mech_div, mech_calib = None, None

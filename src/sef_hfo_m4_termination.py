@@ -118,36 +118,44 @@ def retrigger_verdict(termination_class, post_af=None, baseline=None, ref_peak=N
     return "pass"                                          # re-ignited AND came back down = bounded re-event
 
 
-def run_cell_with_retrigger(run_fn, bin_ms, *, recovery_ms=5000.0, recovery_factor=3.0, reprobe_boost=1.0):
-    """Two-pass same-seed retrigger contract (spec §8B). `run_fn(t_kick2, kick_boost2)` returns a dict with
-    'af' (per-bin activity trace) and optional 'runaway_ms'.
+def run_cell_with_retrigger(run_fn, bin_ms, *, recovery_ms=5000.0, recovery_factor=3.0,
+                            reprobe_boost=1.0, probe_window_ms=3000.0, baseline_af=None):
+    """Two-pass same-seed retrigger contract (spec §8B). `run_fn(t_kick2, kick_boost2, min_T_ms)` returns a
+    dict with 'af' (per-bin activity), optional 'runaway_ms', and 'baseline_af' (the RUNNER's baseline).
 
-      Pass 1 (t_kick2=None): classify -> termination_class, offset. Only if `terminate_clean`:
-      Pass 2 (SAME seed): second kick at t_kick2 = offset + recovery_factor*recovery_ms
-        (recovery_ms should be max(ee_std_tau_ms, tau_q) -- the slow-var recovery). ASSERT pre-probe
-        identity (pass-2 == pass-1 for t < t_kick2, guaranteed by construction), then read the
-        retrigger verdict from the post-kick window. This keeps a quiet tail distinct from a
-        re-triggerable interictal state (a terminate_clean cell can still get retrigger_probe=fail).
+      Pass 1 (t_kick2=None, min_T=None): classify using the RUNNER's baseline (NOT the naive first-5% of a
+        long trace, which an early plateau would pollute -> false 'suppress'). -> termination_class, offset.
+      Pass 2 (only if terminate_clean, SAME seed): second kick at t_kick2 = offset + recovery_factor*
+        recovery_ms (recovery_ms should be max(ee_std_tau_ms, tau_q)); run_fn is told min_T_ms =
+        t_kick2 + probe_window_ms and MUST run pass-2 at least that long -- else fail-closed RuntimeError
+        (do NOT silently return not_run and kill a potential success). ASSERT pre-probe identity, then read
+        the retrigger verdict from the [t_kick2, t_kick2+probe_window] window.
 
-    Returns dict(termination_class, retrigger_probe, offset_ms, t_kick2_ms, peak, baseline, runaway_ms)."""
-    res1 = run_fn(None, 0.0)
+    Returns dict(termination_class, retrigger_probe, offset_ms, t_kick2_ms, peak, baseline_af, runaway_ms)."""
+    res1 = run_fn(None, 0.0, None)
     af1 = np.asarray(res1["af"], float)
-    cls, info = classify_termination(af1, bin_ms, runaway_ms=res1.get("runaway_ms"))
+    base = baseline_af if baseline_af is not None else res1.get("baseline_af")   # runner baseline, not naive default
+    cls, info = classify_termination(af1, bin_ms, baseline=base, runaway_ms=res1.get("runaway_ms"))
     out = dict(termination_class=cls, offset_ms=info["offset_ms"], t_kick2_ms=None,
-               peak=info["peak"], baseline=info["baseline"], runaway_ms=info["runaway_ms"],
+               peak=info["peak"], baseline_af=info["baseline"], runaway_ms=info["runaway_ms"],
                retrigger_probe="not_run")
     if cls != "terminate_clean":
         return out
     t2 = info["offset_ms"] + recovery_factor * recovery_ms
-    res2 = run_fn(t2, reprobe_boost)
+    min_T = t2 + probe_window_ms
+    res2 = run_fn(t2, reprobe_boost, min_T)
     af2 = np.asarray(res2["af"], float)
     i2 = int(round(t2 / bin_ms))
     i_ov = min(af1.size, af2.size, i2)
     if not np.array_equal(af1[:i_ov], af2[:i_ov]):        # pre-probe identity guard (runtime, per spec §8B)
         raise RuntimeError("pre-probe identity violated: pass-2 prefix != pass-1 for t < t_kick2")
-    if i2 >= af2.size:                                    # probe window didn't fit -> caller must extend pass-2 T
-        return out
+    probe_bins = int(round(probe_window_ms / bin_ms))
+    if i2 + probe_bins > af2.size:                        # FAIL-CLOSED: run_fn did not run pass-2 long enough
+        raise RuntimeError(
+            f"retrigger probe window did not fit: need pass-2 length >= {i2 + probe_bins} bins "
+            f"(t_kick2={t2:.0f}ms + probe {probe_window_ms:.0f}ms), got {af2.size}. "
+            f"run_fn must run pass-2 to >= t_kick2 + probe_window (extend T2), not truncate.")
     out["t_kick2_ms"] = t2
-    out["retrigger_probe"] = retrigger_verdict("terminate_clean", post_af=af2[i2:],
-                                               baseline=info["baseline"], ref_peak=info["peak"])
+    out["retrigger_probe"] = retrigger_verdict("terminate_clean", post_af=af2[i2:i2 + probe_bins],
+                                               baseline=base, ref_peak=info["peak"])
     return out

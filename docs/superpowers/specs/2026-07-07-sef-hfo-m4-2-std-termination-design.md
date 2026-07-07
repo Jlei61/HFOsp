@@ -284,6 +284,14 @@ M4-2B 才碰它。不作第一版验收。
   - `termination_class ≠ terminate_clean` → `retrigger_probe = not_run`(不跑 Pass 2)。
   - **fallback**(仅 offset 稳定时):单次 run + 固定保守 `t_kick2`,省一半跑。**一个 cell 只用一种,不混用。**
   - 导出 / 恢复连续状态(返回全状态第二段续跑)= 备选,接口面大,不首选。
+  - **baseline(P1-a):** 分类用 **runner 的 baseline**(`run_arm` 的 `baseline_af`),**不用** `classify_termination`
+    的 naive 前 5%——长跑里活动早起会污染前 5% → 假 `suppress`。`run_cell_with_retrigger` 从 run_fn 的
+    `baseline_af` 取,显式传给 `classify_termination`。
+  - **fail-closed(P1-b):** pass-2 必须跑到 ≥ `t_kick2 + probe_window`;放不下则**报错(RuntimeError)**,**不**静默
+    `not_run`(会误杀潜在成功 cell)。`run_cell_with_retrigger` 把 `min_T = t_kick2 + probe_window` 传给 run_fn,
+    run_fn(`run_arm` 的 `T_ms`)据此延长 pass-2 的 T。
+  - **入口:** `scripts/run_m4_dynamic_qi.py --p1-timing-cell`(**ONE** cell,非 sweep;写 `p1_timing_cell.json` +
+    `.npz`,字段 `termination_class/retrigger_probe/runaway_ms/t_kick2_ms/baseline_af` + `xdep/qI/rate/wall_s`)。
 
 **C. runner 待接线(`run_m4_dynamic_qi.py`,纯 config / orchestration):**
 - `run_arm` 现在写死 `use_gK=False, k_K=0.0`,且**不透传** `ee_std_u`/`ee_std_tau_ms` 给 `simulate_kick`

@@ -213,20 +213,30 @@ def test_retrigger_raises_on_missing_refs():
 
 
 # ==================================================================== Task 2: two-pass retrigger orchestrator
-# Pure logic with an INJECTED run_fn(t_kick2, kick_boost2) -> {'af','runaway_ms'} (no simulation):
-# pass 1 classifies; pass 2 (only if terminate_clean) fires the second kick at offset+recovery and
-# reads the retrigger verdict, after asserting pre-probe identity (pass-2 prefix == pass-1 for t<t_kick2).
+# Injected run_fn(t_kick2, kick_boost2, min_T_ms) -> {'af','runaway_ms','baseline_af'} (no simulation):
+# pass 1 classifies USING THE RUNNER'S baseline (not the naive first-5%); pass 2 (only if terminate_clean)
+# fires at offset+recovery and run_fn MUST run pass-2 to >= min_T (= t_kick2+probe_window) else fail-closed.
 _CLEAN = _seg((BASE, 40), (BASE, 0.5, 10), (0.5, 120), (0.5, BASE, 4), (BASE, 230))
 
 
-def test_retrigger_orch_pass():
-    def fake(t2, kb):
+def _clean_fake(prefix):
+    """run_fn: `prefix` for pass1; prefix[:i2] + bounded re-ignition for pass2, padded to honour min_T."""
+    def fake(t2, kb, min_T=None):
         if t2 is None:
-            return {"af": _CLEAN, "runaway_ms": None}
+            return {"af": prefix, "runaway_ms": None, "baseline_af": BASE}
         i2 = int(round(t2 / BIN))
-        post = _seg((BASE, 30), (BASE, 0.4, 5), (0.4, 40), (0.4, BASE, 5), (BASE, 50))  # bounded re-ignition
-        return {"af": np.concatenate([_CLEAN[:i2], post]), "runaway_ms": None}
-    out = run_cell_with_retrigger(fake, BIN, recovery_ms=100.0, recovery_factor=1.0)
+        post = _seg((BASE, 30), (BASE, 0.4, 5), (0.4, 40), (0.4, BASE, 5))       # re-ignite then come down
+        af2 = np.concatenate([prefix[:i2], post])
+        if min_T is not None:                                                     # pad quiet tail to cover probe window
+            need = int(round(min_T / BIN)) + 40
+            if af2.size < need:
+                af2 = np.concatenate([af2, np.full(need - af2.size, BASE)])
+        return {"af": af2, "runaway_ms": None, "baseline_af": BASE}
+    return fake
+
+
+def test_retrigger_orch_pass():
+    out = run_cell_with_retrigger(_clean_fake(_CLEAN), BIN, recovery_ms=100.0, recovery_factor=1.0)
     assert out["termination_class"] == "terminate_clean"
     assert out["retrigger_probe"] == "pass"
 
@@ -235,9 +245,9 @@ def test_retrigger_orch_not_run_on_persist():
     persist = _seg((BASE, 40), (BASE, 0.5, 10), (0.5, 350))
     calls = []
 
-    def fake(t2, kb):
+    def fake(t2, kb, min_T=None):
         calls.append(t2)
-        return {"af": persist, "runaway_ms": None}
+        return {"af": persist, "runaway_ms": None, "baseline_af": BASE}
     out = run_cell_with_retrigger(fake, BIN)
     assert out["termination_class"] == "persist"
     assert out["retrigger_probe"] == "not_run"
@@ -246,16 +256,34 @@ def test_retrigger_orch_not_run_on_persist():
 
 def test_retrigger_orch_runaway_not_run():
     hi = _seg((BASE, 40), (BASE, 0.9, 10), (0.9, 350))
-    out = run_cell_with_retrigger(lambda t2, kb: {"af": hi, "runaway_ms": 2000.0}, BIN)
-    assert out["termination_class"] == "runaway"          # engine verdict wins
+    out = run_cell_with_retrigger(
+        lambda t2, kb, min_T=None: {"af": hi, "runaway_ms": 2000.0, "baseline_af": BASE}, BIN)
+    assert out["termination_class"] == "runaway"          # engine Hz-verdict wins
     assert out["retrigger_probe"] == "not_run"
 
 
 def test_retrigger_orch_raises_on_identity_violation():
-    def fake(t2, kb):
+    def fake(t2, kb, min_T=None):
         if t2 is None:
-            return {"af": _CLEAN, "runaway_ms": None}
+            return {"af": _CLEAN, "runaway_ms": None, "baseline_af": BASE}
         bad = _CLEAN.copy(); bad[:50] += 0.3     # corrupt the pre-probe prefix
-        return {"af": bad, "runaway_ms": None}
+        return {"af": bad, "runaway_ms": None, "baseline_af": BASE}
     with pytest.raises(RuntimeError):
         run_cell_with_retrigger(fake, BIN, recovery_ms=100.0, recovery_factor=1.0)
+
+
+def test_retrigger_orch_uses_runner_baseline():
+    # early-onset clean event: naive first-5% baseline is polluted by the plateau -> 'suppress'; the
+    # runner's baseline (passed via run_fn's baseline_af) recovers the correct 'terminate_clean' (P1-a).
+    early = _seg((BASE, 5), (BASE, 0.5, 10), (0.5, 120), (0.5, BASE, 4), (BASE, 700))
+    assert classify_termination(early, BIN)[0] == "suppress"                # naive default baseline -> polluted
+    out = run_cell_with_retrigger(_clean_fake(early), BIN, recovery_ms=100.0, recovery_factor=1.0)
+    assert out["termination_class"] == "terminate_clean"                    # runner baseline -> correct
+
+
+def test_retrigger_orch_raises_when_probe_doesnt_fit():
+    # pass-2 that ignores min_T (too short) must FAIL-CLOSED (RuntimeError), NOT silently return not_run (P1-b).
+    def fake(t2, kb, min_T=None):
+        return {"af": _CLEAN, "runaway_ms": None, "baseline_af": BASE}      # ignores min_T -> pass2 too short
+    with pytest.raises(RuntimeError):
+        run_cell_with_retrigger(fake, BIN)                                  # default recovery -> t2 huge -> raise
