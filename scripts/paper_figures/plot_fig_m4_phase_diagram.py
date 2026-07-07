@@ -80,9 +80,10 @@ def main():
                 txt[i][j] = "bnd" if vg[i, j] == 0 else ("?" if vg[i, j] == 1 else
                                                          (f"{r['runaway_ms']:.0f}" if r["runaway_ms"] else "·"))
     fig, ax = plt.subplots(1, 2, figsize=(13.5, 4.4))
-    fig.suptitle("M4 dynamic phase diagram ($k_q\\times\\alpha_G$, longest-T verdict per cell): the ONLY bounded "
-                 "region is the narrow ($k_q$=0.10, $\\alpha_G$=16) cell — a bounded attractor candidate, not a seizure cycle",
-                 fontsize=10.8, y=1.03)
+    fig.suptitle("M4 dynamic phase diagram ($k_q\\times\\alpha_G$, longest-T verdict per cell): a narrow MARGINAL "
+                 "bound strip at $\\alpha_G$=16 — confirmed bounded (0.10,16)+(0.25,16), marginal (0.18/0.35,16); "
+                 "a bounded attractor candidate, not a seizure cycle",
+                 fontsize=10.3, y=1.03)
     xt = [("off" if a == 0 else f"{a:g}") for a in ALPHAS]
     yt = [f"{k:g}" for k in KQS]
 
@@ -101,8 +102,8 @@ def main():
         nb = sum(1 for r in seeds if _verdict(r) == 0)
         ax[0].text(ALPHAS.index(16.0), KQS.index(0.10) + 0.34, f"{nb}/{len(seeds)} seed", ha="center",
                    fontsize=6.5, color="white", fontweight="bold")
-    ax[0].legend(handles=[Patch(fc="#2e7d32", label="bounded (T=15000)"), Patch(fc="#c1272d", label="runaway"),
-                          Patch(fc="#e8873a", label="uncertain (T<15000)"), Patch(fc="#d9d9d9", label="no data yet")],
+    ax[0].legend(handles=[Patch(fc="#2e7d32", label="confirmed bounded (T=15000)"), Patch(fc="#c1272d", label="runaway"),
+                          Patch(fc="#e8873a", label="marginal / not confirmed bounded"), Patch(fc="#d9d9d9", label="no data")],
                  fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=4, frameon=False)
 
     # B peak rate
