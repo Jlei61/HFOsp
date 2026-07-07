@@ -93,6 +93,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   V_th_per_neuron=None, perturb=None,
                   early_stop_runaway=False, es_thresh_hz=120.0, es_dur_ms=100.0,
                   ee_std_u=0.0, ee_std_tau_ms=0.0,
+                  dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None):
@@ -234,6 +235,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # optional current-based LFP (|I_E|+|I_I| forward model) at custom sites (Increment-2/3)
     lfp_trace = (np.zeros((nsteps, len(lfp_recorder.sites)))
                  if lfp_recorder is not None else None)
+    # ---- M4-2: x_dep depression trace (gated; OFF -> no alloc -> byte-parity). Arm 0 (STD off) emits 1.0. ----
+    if dump_ee_std_trace:
+        xdep_mean = np.zeros(nsteps); xdep_min = np.zeros(nsteps)
+        xdep_mask_mean = np.zeros(nsteps) if ee_std_trace_maskE is not None else None
 
     t0 = time.time()
     for t in range(nsteps):
@@ -261,6 +266,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         nu_vec = np.full(N, max(nu_now, 0.0))
         if tk <= tm < tk + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST          # extra external rate, units 1/ms
+        if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
+            nu_vec[kick_mask] += KICK_BOOST2         # M4-2 post-offset retrigger probe (same source core; None -> parity)
         ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
         s_E += ext * ext_incr
         # ==================================================================================
@@ -383,6 +390,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   f"rate_E={rate_E[t]/NE/dt*1e3:.1f} Hz  elapsed {time.time()-t0:.1f}s",
                   flush=True)
 
+        if dump_ee_std_trace:                    # M4-2: record x_dep at END of step (post-depletion :371, NOT post-recovery :259)
+            if ee_std_on:
+                xdep_mean[t] = x_dep.mean(); xdep_min[t] = x_dep.min()
+                if xdep_mask_mean is not None:
+                    xdep_mask_mean[t] = x_dep[ee_std_trace_maskE].mean()
+            else:                                # Arm 0 (STD off): availability == 1.0 everywhere
+                xdep_mean[t] = 1.0; xdep_min[t] = 1.0
+                if xdep_mask_mean is not None:
+                    xdep_mask_mean[t] = 1.0
+
     if _stop_t < nsteps:                                             # runaway early-stop: truncate per-step arrays
         nsteps = _stop_t
         rate_E, rate_I = rate_E[:nsteps], rate_I[:nsteps]
@@ -392,6 +409,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             I_spk_bool = I_spk_bool[:nsteps]
         if lfp_trace is not None:
             lfp_trace = lfp_trace[:nsteps]
+        if dump_ee_std_trace:
+            xdep_mean = xdep_mean[:nsteps]; xdep_min = xdep_min[:nsteps]
+            if xdep_mask_mean is not None:
+                xdep_mask_mean = xdep_mask_mean[:nsteps]
     rate_E_hz = rate_E / NE / dt * 1e3
     rate_I_hz = rate_I / NI / dt * 1e3
     res = dict(
@@ -414,6 +435,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         res["I_global_trace"] = I_global_trace                  # (nsteps,) the per-step scalar I_global
     elif fb_static and dump_fb:
         res["I_global_trace"] = np.asarray(fb_override_trace[:nsteps], float)  # the prescribed brake (control)
+    if dump_ee_std_trace:
+        res["xdep_mean"] = xdep_mean
+        res["xdep_min"] = xdep_min
+        if xdep_mask_mean is not None:
+            res["xdep_mask_mean"] = xdep_mask_mean
     return res
 
 
