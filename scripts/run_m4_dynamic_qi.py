@@ -174,7 +174,8 @@ def _spatial_coverage(movie, active_thresh=0.1, tail_frames=8):
                 tail_frac_gt_0p5=round(float((tail > 0.5).mean()), 4))
 
 
-def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
+def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None,
+            ee_std_u=0.0, ee_std_tau_ms=0.0, t_kick2=None, KICK_BOOST2=0.0, trace_xdep=False):
     p = S["p"]
     beta_SG = float(pool_extra.get("beta_SG", 0.0)) if pool_extra else 0.0     # matched-subtractive arm
     clamp_SG = pool_extra.get("clamp_SG") if pool_extra else None              # clamped-static-pool arm
@@ -188,7 +189,9 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
     t0 = time.time()
     res = simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
                         t_kick=1e9, V_th_per_neuron=S["vth"], perturb=perturb,
-                        early_stop_runaway=_EARLY_STOP["on"])          # SPONTANEOUS (no kick); truncate runaways (perf)
+                        ee_std_u=ee_std_u, ee_std_tau_ms=ee_std_tau_ms, dump_ee_std_trace=trace_xdep,
+                        t_kick2=t_kick2, KICK_BOOST2=KICK_BOOST2,       # M4-2: STD terminator + post-offset retrigger kick
+                        early_stop_runaway=_EARLY_STOP["on"])          # spontaneous primary (KICK_BOOST=0); t_kick2 = only kick
     spk = res["E_spk_bool"]
     rate = np.asarray(res["rate_E"], float)
     af, bin_w = C.active_fraction(spk, DT, C.BIN_MS)
@@ -204,7 +207,7 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
                else "one_shot_burst" if (runaway <= 200.0 or n_pre == 0)
                else "few_events_then_runaway")
     movie = _spatial_movie(spk, S["posE"], S["L"], DT)
-    return dict(
+    out = dict(
         label=label, k_q=k_q, use_SG=use_SG, alpha_G=alpha_G, seed=S["seed"], T=p.T,
         perturb_kind=(perturb["kind"] if perturb else None),
         beta_SG=beta_SG, clamp_SG=(None if clamp_SG is None else float(clamp_SG)),
@@ -222,7 +225,12 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
         rate=rate.astype(np.float32), af=af.astype(np.float32), bin_w=float(bin_w),
         events=[(round(e["t_on"], 1), round(e["t_off"], 1)) for e in events],
         movie=movie, q_field_final=slow.q_I.astype(np.float32),
+        ee_std_u=ee_std_u, ee_std_tau_ms=ee_std_tau_ms, t_kick2_ms=t_kick2,   # M4-2 provenance
     )
+    if trace_xdep:                                                    # M4-2: (x_dep, q_I) diagnostic traces
+        out["xdep_mean"] = res.get("xdep_mean")
+        out["xdep_min"] = res.get("xdep_min")
+    return out
 
 
 _S = {}

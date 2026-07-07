@@ -116,3 +116,38 @@ def retrigger_verdict(termination_class, post_af=None, baseline=None, ref_peak=N
     if float(post_af[-tail_bins:].mean()) >= baseline + runaway_tail_frac * amp:  # stayed high -> runaway
         return "fail"
     return "pass"                                          # re-ignited AND came back down = bounded re-event
+
+
+def run_cell_with_retrigger(run_fn, bin_ms, *, recovery_ms=5000.0, recovery_factor=3.0, reprobe_boost=1.0):
+    """Two-pass same-seed retrigger contract (spec §8B). `run_fn(t_kick2, kick_boost2)` returns a dict with
+    'af' (per-bin activity trace) and optional 'runaway_ms'.
+
+      Pass 1 (t_kick2=None): classify -> termination_class, offset. Only if `terminate_clean`:
+      Pass 2 (SAME seed): second kick at t_kick2 = offset + recovery_factor*recovery_ms
+        (recovery_ms should be max(ee_std_tau_ms, tau_q) -- the slow-var recovery). ASSERT pre-probe
+        identity (pass-2 == pass-1 for t < t_kick2, guaranteed by construction), then read the
+        retrigger verdict from the post-kick window. This keeps a quiet tail distinct from a
+        re-triggerable interictal state (a terminate_clean cell can still get retrigger_probe=fail).
+
+    Returns dict(termination_class, retrigger_probe, offset_ms, t_kick2_ms, peak, baseline, runaway_ms)."""
+    res1 = run_fn(None, 0.0)
+    af1 = np.asarray(res1["af"], float)
+    cls, info = classify_termination(af1, bin_ms, runaway_ms=res1.get("runaway_ms"))
+    out = dict(termination_class=cls, offset_ms=info["offset_ms"], t_kick2_ms=None,
+               peak=info["peak"], baseline=info["baseline"], runaway_ms=info["runaway_ms"],
+               retrigger_probe="not_run")
+    if cls != "terminate_clean":
+        return out
+    t2 = info["offset_ms"] + recovery_factor * recovery_ms
+    res2 = run_fn(t2, reprobe_boost)
+    af2 = np.asarray(res2["af"], float)
+    i2 = int(round(t2 / bin_ms))
+    i_ov = min(af1.size, af2.size, i2)
+    if not np.array_equal(af1[:i_ov], af2[:i_ov]):        # pre-probe identity guard (runtime, per spec §8B)
+        raise RuntimeError("pre-probe identity violated: pass-2 prefix != pass-1 for t < t_kick2")
+    if i2 >= af2.size:                                    # probe window didn't fit -> caller must extend pass-2 T
+        return out
+    out["t_kick2_ms"] = t2
+    out["retrigger_probe"] = retrigger_verdict("terminate_clean", post_af=af2[i2:],
+                                               baseline=info["baseline"], ref_peak=info["peak"])
+    return out

@@ -23,7 +23,7 @@ from connectivity import place_neurons             # noqa: E402
 from connectivity_rot import build_connectivity_rot  # noqa: E402
 from kick_probe import simulate_kick               # noqa: E402
 from src.sef_hfo_m4_termination import (            # noqa: E402
-    classify_termination, retrigger_verdict,
+    classify_termination, retrigger_verdict, run_cell_with_retrigger,
 )
 
 DT = 0.1
@@ -210,3 +210,52 @@ def test_retrigger_raises_on_missing_refs():
     post = _seg((BASE, 20), (0.4, 40), (BASE, 40))
     with pytest.raises(ValueError):                                        # terminate_clean needs baseline+ref_peak
         retrigger_verdict("terminate_clean", post_af=post, baseline=None, ref_peak=None)
+
+
+# ==================================================================== Task 2: two-pass retrigger orchestrator
+# Pure logic with an INJECTED run_fn(t_kick2, kick_boost2) -> {'af','runaway_ms'} (no simulation):
+# pass 1 classifies; pass 2 (only if terminate_clean) fires the second kick at offset+recovery and
+# reads the retrigger verdict, after asserting pre-probe identity (pass-2 prefix == pass-1 for t<t_kick2).
+_CLEAN = _seg((BASE, 40), (BASE, 0.5, 10), (0.5, 120), (0.5, BASE, 4), (BASE, 230))
+
+
+def test_retrigger_orch_pass():
+    def fake(t2, kb):
+        if t2 is None:
+            return {"af": _CLEAN, "runaway_ms": None}
+        i2 = int(round(t2 / BIN))
+        post = _seg((BASE, 30), (BASE, 0.4, 5), (0.4, 40), (0.4, BASE, 5), (BASE, 50))  # bounded re-ignition
+        return {"af": np.concatenate([_CLEAN[:i2], post]), "runaway_ms": None}
+    out = run_cell_with_retrigger(fake, BIN, recovery_ms=100.0, recovery_factor=1.0)
+    assert out["termination_class"] == "terminate_clean"
+    assert out["retrigger_probe"] == "pass"
+
+
+def test_retrigger_orch_not_run_on_persist():
+    persist = _seg((BASE, 40), (BASE, 0.5, 10), (0.5, 350))
+    calls = []
+
+    def fake(t2, kb):
+        calls.append(t2)
+        return {"af": persist, "runaway_ms": None}
+    out = run_cell_with_retrigger(fake, BIN)
+    assert out["termination_class"] == "persist"
+    assert out["retrigger_probe"] == "not_run"
+    assert calls == [None]                       # pass-2 must NOT run for a non-terminate_clean cell
+
+
+def test_retrigger_orch_runaway_not_run():
+    hi = _seg((BASE, 40), (BASE, 0.9, 10), (0.9, 350))
+    out = run_cell_with_retrigger(lambda t2, kb: {"af": hi, "runaway_ms": 2000.0}, BIN)
+    assert out["termination_class"] == "runaway"          # engine verdict wins
+    assert out["retrigger_probe"] == "not_run"
+
+
+def test_retrigger_orch_raises_on_identity_violation():
+    def fake(t2, kb):
+        if t2 is None:
+            return {"af": _CLEAN, "runaway_ms": None}
+        bad = _CLEAN.copy(); bad[:50] += 0.3     # corrupt the pre-probe prefix
+        return {"af": bad, "runaway_ms": None}
+    with pytest.raises(RuntimeError):
+        run_cell_with_retrigger(fake, BIN, recovery_ms=100.0, recovery_factor=1.0)
