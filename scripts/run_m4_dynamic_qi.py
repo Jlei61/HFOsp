@@ -174,11 +174,14 @@ def _spatial_coverage(movie, active_thresh=0.1, tail_frames=8):
                 tail_frac_gt_0p5=round(float((tail > 0.5).mean()), 4))
 
 
-def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None):
+def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None):
     p = S["p"]
+    beta_SG = float(pool_extra.get("beta_SG", 0.0)) if pool_extra else 0.0     # matched-subtractive arm
+    clamp_SG = pool_extra.get("clamp_SG") if pool_extra else None              # clamped-static-pool arm
     cfg = SpatialSlowFieldConfig(use_qI=True, use_gK=False, k_q=k_q, k_K=0.0, sigma_q=SIGMA_Q, sigma_K=0.5,
                                  q_min=Q_MIN, q_init=1.0, tau_q=TAU_Q, tau_a=TAU_A,
-                                 use_SG=use_SG, alpha_G=alpha_G, beta_SG=0.0, r0_psi=0.0, r50_psi=R50_PSI,
+                                 use_SG=use_SG, alpha_G=alpha_G, beta_SG=beta_SG, clamp_SG=clamp_SG,
+                                 r0_psi=0.0, r50_psi=R50_PSI,
                                  n_psi=N_PSI, p_pool=P_POOL, tau_mu=TAU_MU, tau_S=TAU_S, S_max=S_MAX)
     slow = SpatialSlowField(S["N"], 18.0, S["posE"], S["posI"], S["L"], cfg=cfg)
     S["net"]["rng"] = np.random.default_rng(S["seed"])
@@ -203,6 +206,7 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None):
     return dict(
         label=label, k_q=k_q, use_SG=use_SG, alpha_G=alpha_G, seed=S["seed"], T=p.T,
         perturb_kind=(perturb["kind"] if perturb else None),
+        beta_SG=beta_SG, clamp_SG=(None if clamp_SG is None else float(clamp_SG)),
         n_events=len(events), n_pre_runaway=int(n_pre), runaway_ms=runaway, verdict=verdict,
         max_rate_hz=round(float(rate_s.max()), 1),                  # res rate_E is already Hz (kick_probe:363)
         q_mean_final=round(float(slow.q_I.mean()), 4), q_min_final=round(float(slow.q_I.min()), 4),
@@ -212,6 +216,7 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None):
         # traces (per-step) for the figure + a downsampled movie for the GIF:
         trace_qI_mean=np.asarray(slow.trace_qI_mean, np.float32),
         trace_SG=np.asarray(slow.trace_SG, np.float32) if slow.trace_SG else np.zeros(0, np.float32),
+        trace_Irec=np.asarray(slow.trace_Irec_mean, np.float32) if slow.trace_Irec_mean else np.zeros(0, np.float32),
         rate=rate.astype(np.float32), af=af.astype(np.float32), bin_w=float(bin_w),
         events=[(round(e["t_on"], 1), round(e["t_off"], 1)) for e in events],
         movie=movie, q_field_final=slow.q_I.astype(np.float32),
@@ -245,6 +250,10 @@ def main():
     ap.add_argument("--stim-off", type=float, default=STIM_OFF)
     ap.add_argument("--stim-radius", type=float, default=STIM_RADIUS)
     ap.add_argument("--stim-dvth", type=float, default=STIM_DVTH)
+    ap.add_argument("--mechanism", action="store_true",
+                    help="mechanism control on aG16 (k_q=0.10): no_pool / divisive-S_G / matched-subtractive / "
+                         "clamped-S_G. matched-subtractive beta_SG is calibrated (Definition A: same mean removed "
+                         "recurrent current at the divisive steady state) from a phase-1 divisive run.")
     ap.add_argument("--confirm-run", action="store_true")
     a = ap.parse_args()
     if not a.confirm_run:
@@ -252,8 +261,8 @@ def main():
         return
     if a.reversibility:
         arms = _reversibility_arms()
-    elif a.stim_locus:
-        arms = None                                                  # built after substrate (needs geometry)
+    elif a.stim_locus or a.mechanism:
+        arms = None                                                  # built after substrate (geometry / calibration)
     elif a.cells:
         arms = []
         for tok in a.cells.split(","):
@@ -265,7 +274,8 @@ def main():
         arms = ARMS
     if a.out == OUT_DIR:
         a.out = OUT_DIR + ("_reversibility" if a.reversibility else "_stimlocus" if a.stim_locus
-                           else "_sweep" if a.sweep else "_confirm" if a.cells else "")
+                           else "_mechanism" if a.mechanism else "_sweep" if a.sweep
+                           else "_confirm" if a.cells else "")
     os.makedirs(a.out, exist_ok=True)
     t0 = time.time()
     S = PP.build_substrate(a.seed)
@@ -273,11 +283,30 @@ def main():
     _S["S"] = S                                                       # set BEFORE Pool -> fork COW-shares the net
     if a.stim_locus:
         arms = _stim_locus_arms(S, a.stim_on, a.stim_off, a.stim_radius, a.stim_dvth)
+    mech_div, mech_calib = None, None
+    if a.mechanism:
+        # phase 1: divisive arm run SERIALLY in the parent (also caches ampa_flat for the fork). Definition A:
+        # match the subtractive to remove the SAME mean recurrent current at the divisive steady state (last 40%).
+        mech_div = run_arm(S, "mech_divisive", 0.10, True, 16.0)
+        irec, sg = mech_div["trace_Irec"], mech_div["trace_SG"]
+        w0 = int(0.6 * len(irec))
+        I_ref, S_ref = float(irec[w0:].mean()), float(sg[w0:].mean())
+        frac = 16.0 * S_ref / (1.0 + 16.0 * S_ref)                    # divisive fraction removed at steady state
+        beta_matched = (frac * I_ref / S_ref) if S_ref > 1e-9 else 0.0
+        mech_calib = dict(I_ref=round(I_ref, 5), S_ref=round(S_ref, 5), frac_removed=round(frac, 4),
+                          beta_matched=round(beta_matched, 5), rule="A: beta*S_ref = frac*I_ref (same mean removed current)")
+        print(f"[mechanism calib] I_ref={I_ref:.4f} S_ref={S_ref:.4f} frac_removed={frac:.3f} -> beta_matched={beta_matched:.4f}",
+              flush=True)
+        arms = [("mech_no_pool", 0.10, False, 0.0, None, None),
+                ("mech_matched_subtractive", 0.10, True, 0.0, None, dict(beta_SG=beta_matched)),
+                ("mech_clamped_SG", 0.10, True, 16.0, None, dict(clamp_SG=S_ref))]
     workers = a.workers if a.workers else min(len(arms), 40)
     print(f"substrate: E1146 {PP.MONTAGE} L={S['L']} N={S['N']} src={S['src_xy'].round(1)} snk={S['snk_xy'].round(1)} "
           f"T={a.T} n_arms={len(arms)} workers={workers} sweep={a.sweep}", flush=True)
     with mp.Pool(min(workers, len(arms))) as pool:
         rows = pool.map(_worker, arms)
+    if a.mechanism:
+        rows = [mech_div] + list(rows)                               # prepend the phase-1 divisive (calibration) arm
     wall = time.time() - t0
     meta = dict(experiment="M4 dynamic q_I spontaneous (two axial foci, E1146 twoend_equal)",
                 subject=PP.SUBJECT, montage=PP.MONTAGE, L=float(S["L"]), N=int(S["N"]), seed=a.seed, T=a.T,
@@ -286,23 +315,24 @@ def main():
                 qI=dict(tau_q=TAU_Q, sigma_q=SIGMA_Q, q_min=Q_MIN, tau_a=TAU_A),
                 pool=dict(r50_psi=R50_PSI, tau_mu=TAU_MU, tau_S=TAU_S),
                 runaway_criterion=dict(hz=RUNAWAY_HZ, dur_ms=RUNAWAY_DUR_MS), sweep=bool(a.sweep),
+                mechanism_calib=mech_calib,
                 kq_grid=(KQ_GRID if a.sweep else None), alpha_grid=(ALPHA_GRID if a.sweep else None),
                 arms=[dict(label=a[0], k_q=a[1], use_SG=a[2], alpha_G=a[3],
                            perturb=(a[4]["kind"] if len(a) > 4 and a[4] else None)) for a in arms],
                 wall_s=round(wall, 1))
     # summary JSON (small) + full npz (traces + movies) for the figure/GIF
     summary = dict(meta=meta, rows=[{k: v for k, v in r.items()
-                                     if k not in ("trace_qI_mean", "trace_SG", "rate", "af", "movie", "q_field_final")}
+                                     if k not in ("trace_qI_mean", "trace_SG", "trace_Irec", "rate", "af", "movie", "q_field_final")}
                                     for r in rows])
     json.dump(summary, open(os.path.join(a.out, "dynamic_qi_summary.json"), "w"), indent=2)
     np.savez_compressed(os.path.join(a.out, "dynamic_qi_traces.npz"),
                         posE=S["posE"].astype(np.float32), src_xy=S["src_xy"], snk_xy=S["snk_xy"],
                         L=float(S["L"]), meta=json.dumps(meta),
                         **{f"{r['label']}__{k}": r[k] for r in rows
-                           for k in ("trace_qI_mean", "trace_SG", "rate", "af", "movie", "q_field_final")},
+                           for k in ("trace_qI_mean", "trace_SG", "trace_Irec", "rate", "af", "movie", "q_field_final")},
                         **{f"{r['label']}__events": np.asarray(r["events"], float) for r in rows},
                         **{f"{r['label']}__meta": json.dumps({k: v for k, v in r.items()
-                            if k not in ("trace_qI_mean", "trace_SG", "rate", "af", "movie", "q_field_final", "events")})
+                            if k not in ("trace_qI_mean", "trace_SG", "trace_Irec", "rate", "af", "movie", "q_field_final", "events")})
                            for r in rows})
     print("\n===== M4 dynamic q_I report =====")
     for r in rows:

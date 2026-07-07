@@ -99,6 +99,7 @@ class SpatialSlowFieldConfig:
     tau_mu: float = 40.0       # ms, pool activation low-pass (fast)
     tau_S: float = 120.0       # ms, pool output low-pass
     S_max: float = 1.0         # pool output ceiling
+    clamp_SG: float = None     # mechanism control: if set, S_G is FROZEN at this value (static-pool arm); None -> normal dynamics
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -245,6 +246,9 @@ class SpatialSlowField:
         self.mu_G = 0.0
         self.S_G = 0.0
         self.trace_muG = []; self.trace_SG = []; self.trace_AG = []
+        self.trace_Irec_mean = []                                     # mean recurrent-E current (matched-subtractive calib)
+        if cfg.clamp_SG is not None:
+            self.S_G = float(cfg.clamp_SG)                            # static-pool arm: S_G frozen from t=0
         self.trace_rEfast_max = []      # per-step spatial-max of rE_fast (for r50 sensor-scale calibration)
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
@@ -270,6 +274,7 @@ class SpatialSlowField:
             aS = self.cfg.alpha_G * self.S_G
             frac = aS / (1.0 + aS)                                     # aS=0 -> 0 (exact -> byte-parity)
             out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
+            self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
         return out
 
     def threshold(self, V_th_base):
@@ -330,6 +335,8 @@ class SpatialSlowField:
             self.mu_G = float(np.clip(self.mu_G, 0.0, 1.0))
             self.S_G += dt * (-self.S_G + cfg.S_max * self.mu_G) / cfg.tau_S
             self.S_G = float(np.clip(self.S_G, 0.0, cfg.S_max))
+            if cfg.clamp_SG is not None:
+                self.S_G = float(cfg.clamp_SG)                        # static-pool arm: freeze S_G (mu_G still advances internally)
             self.trace_AG.append(A_G); self.trace_muG.append(self.mu_G); self.trace_SG.append(self.S_G)
             self.trace_rEfast_max.append(float(self.rE_fast.max()))   # time trace of the sensor-field peak
         self._t += dt
