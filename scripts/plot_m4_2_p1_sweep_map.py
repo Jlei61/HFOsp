@@ -108,8 +108,9 @@ axB.set_title("B  example envelopes — none is a sustained event + clean offset
 axB.legend(fontsize=8, frameon=False, loc="upper right")
 axB.spines[["top", "right"]].set_visible(False)
 
-fig.suptitle("M4-2 P1: STD cannot cleanly terminate the M4 bounded attractor — persist -> fragment -> suppress, "
-             "no terminate_clean (seeds 1/3/4 agree)", fontsize=10.5, y=1.02)
+fig.suptitle("M4-2 P1 (k_q=0.10, alpha_G=16): E->E STD does not cleanly terminate the M4 bounded state — "
+             "persist -> fragment -> suppress, no terminate_clean   [map = seed 1; seed 3/4 replicate the no-go]",
+             fontsize=10, y=1.02)
 fig.tight_layout()
 out = os.path.join(OUT, "m4_2_p1_sweep_map.png")
 fig.savefig(out, dpi=140, bbox_inches="tight")

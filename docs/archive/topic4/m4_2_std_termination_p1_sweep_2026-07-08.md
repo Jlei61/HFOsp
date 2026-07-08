@@ -1,8 +1,9 @@
-# M4-2 —— STD 终止器 P1 sweep 结果（2026-07-08, DRAFT：seed 1+3 confirmed，seed 4 running）
+# M4-2 —— STD 终止器 P1 sweep 结果（2026-07-08, LOCKED：3-seed clean no-go）
 
 > 状态：**seed 1 / 3 / 4 全确认 → clean no-go LOCKED（3-seed）**。这是 M4-2A（"STD 能否把 M4
 > pass-1 的有界持续态干净地终止成可再触发间期"）的 P1 go/no-go 结果。
-> 图：`results/topic4_m4_dynamic_p1_sweep/figures/m4_2_p1_sweep_map.png`（+ `figures/README.md`）。
+> 图：`results/topic4_m4_dynamic_p1_sweep/figures/`：`m4_2_p1_sweep_map.png`（(u,τ) 分类 map,seed=1）+
+> `m4_2_p1_mechanism.png`（persist/fragment/suppress 慢变量轨迹）+ 中文 `README.md`。
 > spec：`docs/superpowers/specs/2026-07-07-sef-hfo-m4-2-std-termination-design.md`（§5 P1 / §7.2 go-no-go）。
 
 ---
@@ -20,7 +21,12 @@ M4-2 打开**神经元放得越多、递归自持输入被削得越狠**的机�
 **揭示了什么：** 加 STD 只把持续态推向两个极端,**中间没有"干净终止"这一档**：不加 → 持续不灭；STD 弱 →
 碎裂成一串断续小爆（~15–33 次 / 15 秒,没有一次完整发作）；STD 强/慢 → 直接压死。**没有任何一格出现"一次
 持续发作 → 陡然熄灭 → 安静但可再点"。** 也就是：**在这个衬底 + 这个工作点,光靠削递归自持不能造出发作
-终止；只能碎裂或压死。** seed 1 与 seed 3 的图**逐格一致**。
+终止；只能碎裂或压死。**
+
+**注意分母（承重）：** seed 1/3 的无-STD 基线（Arm0）是 pass-1 那个 **bounded persist** 态,是同质分母,支持
+"从同一有界持续态出发、STD 终止失败";**seed 4 的 Arm0 本身已偏 fragment**（aG16 仅 3/4-seed 干净有界,与 pass-1
+multiseed 一致）,故 seed 4 只作 **seed-robustness**（同样无 terminate_clean）,**不作"同一 bounded attractor 出发
+终止失败"的同质分母证据**。
 
 ---
 
@@ -79,10 +85,17 @@ suppress 7）。**注意:seed=4 的 Arm0(u=0) 本身 = `fragment`（非 seed1/3 
 
 ## 3. 机制
 
-STD 削 recurrent 自持,能结束当前这一次放电；但事件一结束,衬底仍"上着膛"（`q_I` 在慢时标 `tau_q=5000`
-上还没回充、背景驱动仍在）→ STD 一旦恢复就立刻再点火 → 变成 burst 振荡（fragment）,而不是"一次事件后静息"。
-STD 太强则在事件成形前就压死（suppress）。**STD 只是调制正在进行的态,造不出"间期 ↔ 单次发作"的分离。**
-这与 M4 pass-1 的"不可撤回"发现一致,并把它钉到机制层面。
+代表轨迹（图 `m4_2_p1_mechanism.png`,活动 + sheet-mean `q_I` + STD 可用度 `x_dep`）显示,判别在 **STD 恢复时标**:
+- **fragment（弱 STD / 快恢复,u0.15/τ1000）:** `x_dep` 在两次 burst 之间快速回充（τ=1000）→ recurrent 自驱恢复
+  → 在事件真正终止前又点火 → burst 振荡;`q_I` 在这 15 秒里**仍在慢慢排空**（1→~0.15,**不是**一开始就钉在地板——
+  这一点纠正了初稿"q_I primed"的粗糙说法）。
+- **suppress（强/慢 STD,u0.5/τ5000）:** `x_dep` 被抽干且回充慢 → recurrent 自驱被杀 → 活动死掉 → `q_I` 因无活动
+  可排反而**维持高位**（~0.8）。
+- **persist（无 STD）:** `q_I` 排到地板、活动自持不熄、`x_dep≡1`。
+
+两头之间没有"`x_dep` 恰好结束一次事件、又压住足够久不再点火"的窗口 → 无 terminate_clean。**这是与 M4 pass-1
+"不可撤回"一致（consistent with）的轨迹级解释——3-seed、单工作点、本 STD 网格内,不是普适证明。**（`S_G` 未存,
+本图用 activity + q_I + x_dep 三条,足够读出恢复时标机制。）
 
 ## 4. 验收（spec §7.2）
 
@@ -90,12 +103,22 @@ STD 太强则在事件成形前就压死（suppress）。**STD 只是调制正�
 → **clean no-go（3-seed LOCKED）**：STD 单独不足以把 M4 pass-1 的有界持续态干净地终止成可再触发的间期。
 （§7.2 明确:干净 no-go 是合法结果,加强"下一杠杆"结论,不是把 M4-2 悄悄证伪。）
 
+**结论口径（scoped,承重）:**
+- **能支持:** 在**当前 E1146 衬底、当前 pass-1 工作点（`k_q=0.10, alpha_G=16`）、当前 STD 参数网格、3 个 seed**
+  检查内,E→E presynaptic STD **单独**没有产生 clean, re-triggerable termination;它把系统推向 persist /
+  fragment / suppress,而不是 re-triggerable interictal recovery。
+- **不能支持:**（a）STD 作为生理机制**普遍**不能终止发作;（b）M4 **所有**工作点都 no-go;（c）已"证明必须"换
+  D_EE 或 gK。以上是 no-go **指示**的方向,不是已证结论。
+
 ## 5. 下一杠杆
 
-- **D_EE / 衬底异质**：均匀率场衬底给不出事件后的非兴奋（可再触发）静息态；需结构连接或异质核提供 separation。
-- **更慢的离子型终止器**：Epileptor 谱系用 slow-K / pump（`g_K`-adjacent）作**主**慢渗透变量（spec §10 nuance）;
-  STD 是快 recurrent-侧,可能太快→碎裂。gK arm（spec Arm 3）此前 deferred,是自然的下一个候选。
-- **Framing 锁**：措辞用 "actual M4-2 **SIMULATION**",绝不 "real data"。
+两条最清楚的分叉（**待用户定,非自主决策**）:
+- **若目标 = "终止 + postictal brake"** → 优先 **mild/slow gK arm**（spec Arm 3,此前 deferred）:它最直接接住这次
+  no-go 暴露的"事件后仍可再点火"问题;Epileptor 谱系用 slow-K / pump（`g_K`-adjacent）作**主**慢渗透终止变量,
+  比快 recurrent-侧 STD（太快 → 碎裂）更合适（spec §10 nuance）。
+- **若目标 = "从衬底上拆掉不可撤回性"** → 转 **D_EE / 衬底异质**:均匀率场衬底给不出事件后的非兴奋（可再触发）
+  静息态,需结构连接或异质核提供 separation。
+- **Framing 锁**：措辞用 "actual M4-2 **SIMULATION**",绝不 "real data";上面是 no-go **指示**的方向,不是"已证必须换"。
 
 ## 6. 复现
 

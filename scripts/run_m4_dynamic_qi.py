@@ -27,6 +27,7 @@ os.environ.setdefault("MKL_NUM_THREADS", "1")
 import argparse                                            # noqa: E402
 import dataclasses                                         # noqa: E402
 import json                                                # noqa: E402
+import subprocess                                          # noqa: E402
 import multiprocessing as mp                               # noqa: E402
 import sys                                                 # noqa: E402
 import time                                                # noqa: E402
@@ -314,7 +315,7 @@ def _p1_cell_worker(cell):
                 _qI=p1["trace_qI_mean"], _rate=p1["rate"])
 
 
-def _run_p1_sweep(out_dir, *, k_q, alpha_G, u_grid, tau_grid, base_T, recovery_factor, reprobe_boost, workers):
+def _run_p1_sweep(out_dir, *, seed, k_q, alpha_G, u_grid, tau_grid, base_T, recovery_factor, reprobe_boost, workers):
     """P1 (spec §5) sweep: (ee_std_u x ee_std_tau_ms) grid at one bounded op-point + Arm 0 baseline, each a
     two-pass retrigger cell, via Pool (COW-shared net). Writes p1_sweep_summary.json + p1_sweep_traces.npz.
     Conservative `workers` for OOM safety (swap tiny)."""
@@ -329,9 +330,19 @@ def _run_p1_sweep(out_dir, *, k_q, alpha_G, u_grid, tau_grid, base_T, recovery_f
     with mp.Pool(min(workers, len(cells))) as pool:
         rows = pool.map(_p1_cell_worker, cells)
     wall = round(time.time() - t0, 1)
+    for r in rows:
+        r["seed"] = seed                                             # provenance in EVERY row (P1-2: don't rely on dir name)
     scal = [{k: v for k, v in r.items() if not k.startswith("_")} for r in rows]
-    json.dump(dict(k_q=k_q, alpha_G=alpha_G, u_grid=list(u_grid), tau_grid=list(tau_grid), base_T=base_T,
-                   recovery_factor=recovery_factor, reprobe_boost=reprobe_boost, wall_s=wall, rows=scal),
+    try:
+        git_sha = subprocess.run(["git", "-C", ROOT, "rev-parse", "--short", "HEAD"],
+                                 capture_output=True, text=True).stdout.strip() or None
+    except Exception:
+        git_sha = None
+    prov = dict(seed=seed, subject=getattr(PP, "SUBJECT", None), montage=getattr(PP, "MONTAGE", None),
+                git_sha=git_sha, argv=sys.argv, T=base_T)
+    json.dump(dict(seed=seed, k_q=k_q, alpha_G=alpha_G, u_grid=list(u_grid), tau_grid=list(tau_grid),
+                   base_T=base_T, recovery_factor=recovery_factor, reprobe_boost=reprobe_boost, wall_s=wall,
+                   provenance=prov, rows=scal),
               open(os.path.join(out_dir, "p1_sweep_summary.json"), "w"), indent=2)
     np.savez_compressed(os.path.join(out_dir, "p1_sweep_traces.npz"),
                         **{f"{r['label']}__{a}": r[f"_{a}"] for r in rows if "error" not in r
@@ -419,7 +430,7 @@ def main():
                             reprobe_boost=a.p1_reprobe_boost)
         return
     if a.p1_sweep:                                                   # M4-2 P1: (u x tau) sweep + Arm0, Pool, OOM-safe
-        _run_p1_sweep(a.out, k_q=a.p1_kq, alpha_G=a.p1_alpha_g,
+        _run_p1_sweep(a.out, seed=a.seed, k_q=a.p1_kq, alpha_G=a.p1_alpha_g,
                       u_grid=[float(x) for x in a.p1_u_grid.split(",")],
                       tau_grid=[float(x) for x in a.p1_tau_grid.split(",")],
                       base_T=a.T, recovery_factor=a.p1_recovery_factor, reprobe_boost=a.p1_reprobe_boost,

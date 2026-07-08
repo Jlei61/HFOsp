@@ -249,9 +249,11 @@ retrigger_probe   ∈ { pass, fail, not_run }
 
 **结果（2026-07-08,3-seed LOCKED clean no-go）:** P1 sweep（`--p1-sweep`,seed 1/3/4,`u∈[0.05,0.5]×τ∈[1000,5000]`
 @ `k_q=0.10,alpha_G=16`）**0 个 go cell / 0 个 `terminate_clean`**:persist(u=0) → fragment(弱 STD) → suppress
-(强/慢 STD),中间无干净终止;`retrigger` 全 `not_run`;无 runaway;三 seed 逐格一致(seed4 Arm0 基线本身 fragment,
-不改 verdict)。→ **STD 单独不能把有界持续态干净终止成可再触发间期(只碎裂/压死)**;下一杠杆 = `D_EE`/衬底异质
-或更慢的离子型(slow-K / gK)终止器(§10 nuance;gK arm 此前 deferred)。详见
+(强/慢 STD),中间无干净终止;`retrigger` 全 `not_run`;无 runaway。**分母:seed 1/3 在 bounded-persist 基线上 no-go
+(同质分母);seed 4 作 seed-robustness——其 Arm0 基线本身 fragment(aG16 仅 3/4-seed 干净有界),不算同质分母,但同样
+无 terminate_clean。** → **STD 单独在此工作点/网格/3 seed 内不能把有界持续态干净终止成可再触发间期(只碎裂/压死);
+非普适、非全工作点结论。** 下一杠杆(no-go 指示,非"必须"):`D_EE`/衬底异质 或更慢离子型(slow-K / gK)终止器
+(§10 nuance;gK arm 此前 deferred)。详见
 `docs/archive/topic4/m4_2_std_termination_p1_sweep_2026-07-08.md` + 图 `results/topic4_m4_dynamic_p1_sweep/figures/m4_2_p1_sweep_map.png`。
 
 ### 7.3 M4-2B 极限环（advanced,不作 M4-2A 验收）
