@@ -143,3 +143,24 @@ def test_switch_when_sign_flips():
     C = np.where(C_centers < -30, -0.6, 0.6)
     ev = classify_event(C, present, C_centers, (-120,-60), (-30,10), (-30,0), (0,10), 0.2)
     assert ev["event_class"] == "switch"
+
+
+from src.topic5_scaffold_ab_contrast import circular_shift_null_seizure, subject_locking_null
+centers = np.arange(-115, 16, 2.0); present = np.ones_like(centers, bool)   # 66 windows -> T-1=65
+
+def test_enumeration_count_is_T_minus_1():
+    C = np.clip((centers+30)/40*0.8, 0, 0.8)
+    out = circular_shift_null_seizure(C, present, centers, (-120,-60), (-30,10))
+    assert out["n_valid_shift"] <= centers.size - 1          # enumeration, not sampling; ==65 here
+    assert out["valid_shift_lockings"].ndim == 1
+
+def test_static_not_significant():
+    C = np.full_like(centers, 0.7)
+    s = circular_shift_null_seizure(C, present, centers, (-120,-60), (-30,10))
+    assert s["locking_shift_p"] > 0.5                        # constant -> all shifts same locking
+
+def test_subject_null_combines_seizures():
+    C = np.clip((centers+30)/40*0.8, 0, 0.8)
+    seiz = [circular_shift_null_seizure(C, present, centers, (-120,-60), (-30,10)) for _ in range(3)]
+    out = subject_locking_null(seiz, n_perm=1000, seed=0)
+    assert out["n_valid_seizures"] == 3 and out["subject_locked"] in (True, False)

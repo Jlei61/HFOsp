@@ -325,3 +325,85 @@ def classify_event(C_AB, present, centers, far_pre, near_onset, near_pre, early_
         "polar_near_pre": _polar(C_AB, present, centers, *near_pre),
         "polar_early_ictal": _polar(C_AB, present, centers, *early_ictal),
     }
+
+
+def circular_shift_null_seizure(C_AB, present, centers, far_pre, near_onset, n_valid_shift_min=40):
+    """Exhaustive per-seizure circular-shift null for the locking statistic.
+
+    A single seizure's C_AB(t) has only T windows, so a non-zero circular shift has only
+    T-1 unique realizations -- sampling 1000 shifts would just repeat these T-1 values with
+    fake precision. So this is an EXACT test: enumerate every shift in 1..T-1 (never rng
+    sampling). Both C_AB and present are rolled by the SAME shift (the observed state moves
+    together); centers/far_pre/near_onset (the window definition) stay fixed. locking_statistic
+    is reused unmodified for both the observed value and every shifted value -- no re-derivation
+    of the polar math. A shift is invalid (skipped, not counted) when locking_statistic returns
+    NaN for it (its own <3-present-window guard on the shifted near/far side).
+    """
+    C_AB = np.asarray(C_AB, float)
+    present = np.asarray(present, bool)
+    centers = np.asarray(centers, float)
+
+    locking_obs = locking_statistic(C_AB, present, centers, far_pre, near_onset)["locking"]
+
+    T = len(centers)
+    shift_lockings = []
+    for shift in range(1, T):
+        rolled_C = np.roll(C_AB, shift)
+        rolled_present = np.roll(present, shift)
+        L = locking_statistic(rolled_C, rolled_present, centers, far_pre, near_onset)["locking"]
+        if np.isfinite(L):
+            shift_lockings.append(L)
+
+    valid_shift_lockings = np.array(shift_lockings, float)
+    n_valid_shift = valid_shift_lockings.size
+
+    if n_valid_shift == 0 or not np.isfinite(locking_obs):
+        locking_shift_p = float("nan")
+    else:
+        locking_shift_p = float((1 + np.sum(valid_shift_lockings >= locking_obs)) / (n_valid_shift + 1))
+
+    status = "ok" if n_valid_shift >= n_valid_shift_min else "insufficient"
+
+    return {
+        "locking_obs": locking_obs,
+        "valid_shift_lockings": valid_shift_lockings,
+        "locking_shift_p": locking_shift_p,
+        "n_valid_shift": n_valid_shift,
+        "status": status,
+    }
+
+
+def subject_locking_null(per_seizure, n_perm=1000, seed=0):
+    """Subject-level combinatorial null, combining independent per-seizure exhaustive nulls.
+
+    Each seizure's own null is exhaustive (T-1 values, exact). At the subject level, drawing
+    one value per seizure per permutation and taking the median across seizures gives a joint
+    space far larger than any single seizure's T-1 -- so n_perm=1000 resampling is legitimate
+    here (unlike at the seizure level). Caller is expected to pass only status=="ok" seizures,
+    but this function still guards defensively: only entries with finite locking_obs and a
+    non-empty valid_shift_lockings are used.
+    """
+    usable = [s for s in per_seizure
+              if np.isfinite(s["locking_obs"]) and len(s["valid_shift_lockings"]) > 0]
+    n_valid_seizures = len(usable)
+
+    L_obs = float(np.median([s["locking_obs"] for s in usable])) if usable else float("nan")
+
+    rng = np.random.default_rng(seed)
+    L_null = np.full(n_perm, np.nan)
+    for i in range(n_perm):
+        if usable:
+            draws = [rng.choice(s["valid_shift_lockings"]) for s in usable]
+            L_null[i] = np.median(draws)
+
+    L_null_p95 = float(np.percentile(L_null, 95))
+    subject_locked = bool(L_obs > L_null_p95)
+    p = float((1 + np.sum(L_null >= L_obs)) / (n_perm + 1))
+
+    return {
+        "L_obs": L_obs,
+        "L_null_p95": L_null_p95,
+        "subject_locked": subject_locked,
+        "p": p,
+        "n_valid_seizures": n_valid_seizures,
+    }
