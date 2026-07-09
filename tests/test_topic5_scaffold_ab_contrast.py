@@ -119,3 +119,27 @@ def test_axis_present_low_dof_when_mostly_singletons():
     E = np.random.default_rng(1).normal(size=(6, 8))
     out = axis_present(E, names, d["eA"], d["eB"], np.random.default_rng(1))
     assert out["low_dof"] and not out["testable"]
+
+
+from src.topic5_scaffold_ab_contrast import locking_statistic, classify_event
+C_centers = np.arange(-115, 16, 2.0)              # window_start+WINDOW/2, 66 窗中心
+present = np.ones_like(C_centers, bool)
+
+def test_static_gives_zero_locking():
+    C = np.full_like(C_centers, 0.7)               # constant, A side
+    out = locking_statistic(C, present, C_centers, (-120,-60), (-30,10))
+    assert abs(out["locking"]) < 1e-9              # near - far = 0
+    ev = classify_event(C, present, C_centers, (-120,-60), (-30,10), (-30,0), (0,10), 0.2)
+    assert ev["event_class"] == "persistent"
+
+def test_ramp_gives_positive_locking_and_selection():
+    C = np.clip((C_centers+30)/40*0.8, 0, 0.8)     # far~0 -> near +0.8
+    out = locking_statistic(C, present, C_centers, (-120,-60), (-30,10))
+    assert out["locking"] > 0.3
+    ev = classify_event(C, present, C_centers, (-120,-60), (-30,10), (-30,0), (0,10), 0.2)
+    assert ev["event_class"] == "selection"
+
+def test_switch_when_sign_flips():
+    C = np.where(C_centers < -30, -0.6, 0.6)
+    ev = classify_event(C, present, C_centers, (-120,-60), (-30,10), (-30,0), (0,10), 0.2)
+    assert ev["event_class"] == "switch"

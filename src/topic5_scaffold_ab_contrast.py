@@ -221,3 +221,107 @@ def axis_present(window_vals_joint, names_joint, eA, eB, rng, n_perm=1000, alpha
     }
     return {"present": present, "within_shaft_p": within_shaft_p, "testable": testable,
             "low_dof": low_dof, "qc": qc}
+
+
+def label_sides(C_AB, present, delta_side=0.2):
+    """Per-window side label: 'A' (C_AB>=delta_side), 'B' (C_AB<=-delta_side), else 'unlabeled'.
+
+    Both thresholds additionally require `present`; NaN C_AB never satisfies either
+    inequality (numpy NaN comparisons are always False) so it falls through to 'unlabeled'.
+    """
+    C_AB = np.asarray(C_AB, float)
+    present = np.asarray(present, bool)
+    is_a = present & (C_AB >= delta_side)
+    is_b = present & (C_AB <= -delta_side)
+    return np.select([is_a, is_b], ["A", "B"], default="unlabeled")
+
+
+def _range_mask(C_AB, present, centers, lo, hi):
+    """Half-open [lo, hi) on window centers, AND present, AND finite C_AB.
+
+    Half-open is used consistently for all four named ranges (far_pre, near_onset,
+    near_pre, early_ictal): near_pre/early_ictal share a boundary (0s) and must not
+    double-count it, and using the same rule for far_pre/near_onset is equivalent
+    there (no boundary collision) while keeping one consistent convention.
+    """
+    return (centers >= lo) & (centers < hi) & present & np.isfinite(C_AB)
+
+
+def _polar(C_AB, present, centers, lo, hi):
+    """abs(mean C_AB) over range&present&finite windows; NaN if <3 such windows."""
+    mask = _range_mask(C_AB, present, centers, lo, hi)
+    if mask.sum() < 3:
+        return float("nan")
+    return float(abs(np.mean(C_AB[mask])))
+
+
+def _signed_mean(C_AB, present, centers, lo, hi):
+    """Plain (signed) mean C_AB over range&present&finite windows; NaN if none present.
+
+    No <3 gate here (unlike _polar) -- far_side/near_side use this directly per spec;
+    an empty selection yields NaN, which sign_label naturally maps to 'none'.
+    """
+    mask = _range_mask(C_AB, present, centers, lo, hi)
+    if mask.sum() == 0:
+        return float("nan")
+    return float(np.mean(C_AB[mask]))
+
+
+def _sign_label(value, delta_side):
+    if value >= delta_side:
+        return "A"
+    if value <= -delta_side:
+        return "B"
+    return "none"
+
+
+def locking_statistic(C_AB, present, centers, far_pre, near_onset):
+    """Near-onset lateral polarization vs. far-preictal baseline polarization.
+
+    polar_X = abs(mean C_AB) over windows in range X (AND present, AND finite),
+    so opposite-side seizures don't cancel across windows and a static-but-strong
+    side yields locking~=0 (near-far). NaN if either side has <3 present windows.
+    """
+    C_AB = np.asarray(C_AB, float)
+    present = np.asarray(present, bool)
+    centers = np.asarray(centers, float)
+
+    polar_far = _polar(C_AB, present, centers, *far_pre)
+    polar_near = _polar(C_AB, present, centers, *near_onset)
+    return {"polar_far": polar_far, "polar_near": polar_near, "locking": polar_near - polar_far}
+
+
+def classify_event(C_AB, present, centers, far_pre, near_onset, near_pre, early_ictal, delta_side):
+    """Classify one seizure's far->near lateral evolution plus descriptive polar values.
+
+    far_side/near_side: sign_label of the signed mean C_AB over far_pre/near_onset
+    (AND present, AND finite); event_class from the far_side/near_side pair:
+      'selection'  : far_side=='none' and near_side in {A,B}
+      'switch'     : far_side and near_side both in {A,B} and far_side != near_side
+      'persistent' : far_side == near_side and both in {A,B}
+      'none'       : otherwise
+    polar_near_pre/polar_early_ictal are descriptive-only (abs mean, NaN if <3 present).
+    """
+    C_AB = np.asarray(C_AB, float)
+    present = np.asarray(present, bool)
+    centers = np.asarray(centers, float)
+
+    far_side = _sign_label(_signed_mean(C_AB, present, centers, *far_pre), delta_side)
+    near_side = _sign_label(_signed_mean(C_AB, present, centers, *near_onset), delta_side)
+
+    if far_side == "none" and near_side in ("A", "B"):
+        event_class = "selection"
+    elif far_side in ("A", "B") and near_side in ("A", "B") and far_side != near_side:
+        event_class = "switch"
+    elif far_side == near_side and far_side in ("A", "B"):
+        event_class = "persistent"
+    else:
+        event_class = "none"
+
+    return {
+        "far_side": far_side,
+        "near_side": near_side,
+        "event_class": event_class,
+        "polar_near_pre": _polar(C_AB, present, centers, *near_pre),
+        "polar_early_ictal": _polar(C_AB, present, centers, *early_ictal),
+    }
