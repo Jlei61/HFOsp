@@ -51,3 +51,39 @@ def test_joint_hard_degenerate_when_templates_identical():
     axis_b = {"channels": [{"name": n, "typical_rank": i} for i,n in enumerate(names)]}  # B==A
     out = derive_joint_contacts(matched, axis_b, np.random.default_rng(1).normal(size=(10,6)))
     assert out["status"] == "hard_degenerate"
+
+
+from src.topic5_scaffold_ab_contrast import contrast_timecourse
+
+
+def test_contrast_direct_is_source_of_truth():
+    rng = np.random.default_rng(0)
+    ranks_a = np.arange(8.0)
+    ranks_b = ranks_a[::-1].copy()
+    d = build_D_AB(ranks_a, ranks_b)
+    E = rng.normal(size=(5, 8))
+    out = contrast_timecourse(E, d["D_AB"], d["eA"], d["eB"])
+    for w in range(5):
+        assert abs(out["C_AB"][w] - np.corrcoef(E[w], d["D_AB"])[0, 1]) < 1e-9
+
+
+def test_closed_form_only_on_full_finite():
+    ranks_a = np.arange(8.0)
+    ranks_b = ranks_a[::-1].copy()
+    d = build_D_AB(ranks_a, ranks_b)
+    E = np.random.default_rng(1).normal(size=(1, 8))
+    o = contrast_timecourse(E, d["D_AB"], d["eA"], d["eB"])
+    rho = d["rho_AB"]
+    closed = (o["r_A"][0] - o["r_B"][0]) / np.sqrt(2 * (1 - rho))
+    assert abs(o["C_AB"][0] - closed) < 1e-9
+
+
+def test_partial_window_uses_direct_not_closed():
+    ranks_a = np.arange(8.0)
+    ranks_b = ranks_a[::-1].copy()
+    d = build_D_AB(ranks_a, ranks_b)
+    E = np.random.default_rng(2).normal(size=(1, 8))
+    E[0, 3] = np.nan
+    o = contrast_timecourse(E, d["D_AB"], d["eA"], d["eB"])
+    m = np.isfinite(E[0])
+    assert abs(o["C_AB"][0] - np.corrcoef(E[0, m], d["D_AB"][m])[0, 1]) < 1e-9

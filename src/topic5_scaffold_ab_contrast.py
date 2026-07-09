@@ -88,3 +88,46 @@ def derive_joint_contacts(matched, axis_b, window_vals, f_min_win=0.9, n_joint_m
         "tier": tier,
         "n_joint": len(idx)
     }
+
+
+def _pear(a, b):
+    """Direct Pearson correlation on finite subset only. Returns NaN if <3 finite or zero variance."""
+    m = np.isfinite(a) & np.isfinite(b)
+    if m.sum() < 3:
+        return np.nan
+    x, y = a[m] - a[m].mean(), b[m] - b[m].mean()
+    dn = np.sqrt((x * x).sum() * (y * y).sum())
+    return float((x * y).sum() / dn) if dn > 1e-12 else np.nan
+
+
+def contrast_timecourse(window_vals_joint, D_AB, eA, eB):
+    """Compute direct correlations per window on finite-contact subset.
+
+    Parameters
+    ----------
+    window_vals_joint : array-like, shape (n_windows, n_joint)
+        Ictal energy per window per joint contact.
+    D_AB : ndarray, shape (n_joint,)
+        Contrast vector (eA - eB).
+    eA : ndarray, shape (n_joint,)
+        Standardized template-A rank.
+    eB : ndarray, shape (n_joint,)
+        Standardized template-B rank.
+
+    Returns
+    -------
+    dict
+        C_AB : ndarray, length n_windows
+            Correlation of window energy with D_AB (direct Pearson on finite subset).
+        r_A : ndarray, length n_windows
+            Correlation of window energy with eA.
+        r_B : ndarray, length n_windows
+            Correlation of window energy with eB.
+        maxAB : ndarray, length n_windows
+            max(|r_A|, |r_B|) per window.
+    """
+    E = np.asarray(window_vals_joint, float)
+    C = np.array([_pear(E[w], D_AB) for w in range(E.shape[0])])
+    rA = np.array([_pear(E[w], eA) for w in range(E.shape[0])])
+    rB = np.array([_pear(E[w], eB) for w in range(E.shape[0])])
+    return {"C_AB": C, "r_A": rA, "r_B": rB, "maxAB": np.maximum(np.abs(rA), np.abs(rB))}
