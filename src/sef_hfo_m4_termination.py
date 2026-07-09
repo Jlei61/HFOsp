@@ -100,8 +100,10 @@ def classify_termination(af, bin_ms, baseline=None, *,
 def retrigger_verdict(termination_class, post_af=None, baseline=None, ref_peak=None, *,
                       reig_frac=0.5, runaway_tail_frac=0.8, tail_ms=None, bin_ms=5.0):
     """Verdict for the post-offset re-trigger kick window. `not_run` unless the event terminated cleanly.
-    pass  = the recovered state re-ignites a BOUNDED event (rises to a substantial fraction of the original
-            event peak, then comes back down); fail = fizzle (no re-ignition) or runaway (stays high)."""
+    reignite_bounded = the recovered state re-ignites a BOUNDED event (rises to a substantial fraction of
+                       the original event peak, then comes back down);
+    attenuated       = fizzle (no re-ignition);
+    runaway          = stays high (runaway re-ignition)."""
     if termination_class != "terminate_clean" or post_af is None:
         return "not_run"
     if baseline is None or ref_peak is None:
@@ -111,11 +113,11 @@ def retrigger_verdict(termination_class, post_af=None, baseline=None, ref_peak=N
         raise ValueError("retrigger_verdict: empty or non-finite post_af")
     amp = ref_peak - baseline
     if float(post_af.max()) < baseline + reig_frac * amp:  # fizzle: kick did not re-ignite an event
-        return "fail"
+        return "attenuated"                                # was "fail" -> postictal refractory (P1-5/Task 6)
     tail_bins = int(round(tail_ms / bin_ms)) if tail_ms else max(1, post_af.size // 5)
     if float(post_af[-tail_bins:].mean()) >= baseline + runaway_tail_frac * amp:  # stayed high -> runaway
-        return "fail"
-    return "pass"                                          # re-ignited AND came back down = bounded re-event
+        return "runaway"                                   # was "fail"
+    return "reignite_bounded"                              # was "pass" -> re-ignited AND came back down
 
 
 def run_cell_with_retrigger(run_fn, bin_ms, *, recovery_ms=5000.0, recovery_factor=3.0,
@@ -152,7 +154,7 @@ def run_cell_with_retrigger(run_fn, bin_ms, *, recovery_ms=5000.0, recovery_fact
     out["t_kick2_ms"] = t2
     out["pass2_runaway_ms"] = res2.get("runaway_ms")
     if out["pass2_runaway_ms"] is not None:              # re-kick drove pass-2 into runaway -> NOT a bounded re-event;
-        out["retrigger_probe"] = "fail"                 # early-stop truncates before the probe window (expected) -> fail, not raise
+        out["retrigger_probe"] = "runaway"              # early-stop truncates before the probe window (expected) -> runaway, not raise
         return out
     probe_bins = int(round(probe_window_ms / bin_ms))
     if i2 + probe_bins > af2.size:                        # FAIL-CLOSED: non-runaway short pass-2 = genuine contract violation

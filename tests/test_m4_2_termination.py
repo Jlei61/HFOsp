@@ -162,19 +162,19 @@ def test_retrigger_not_run_when_not_clean():
     assert retrigger_verdict("fade") == "not_run"
 
 
-def test_retrigger_fail_on_fizzle():
+def test_retrigger_attenuated_on_fizzle():
     post = np.full(200, BASE)                                                        # post-kick stays quiet
-    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "fail"
+    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "attenuated"
 
 
-def test_retrigger_pass_on_bounded_reignition():
+def test_retrigger_reignite_bounded_on_bounded_reignition():
     post = _seg((BASE, 20), (BASE, 0.4, 5), (0.4, 40), (0.4, BASE, 5), (BASE, 130))  # re-igniting bounded event
-    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "pass"
+    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "reignite_bounded"
 
 
-def test_retrigger_fail_on_runaway():
+def test_retrigger_runaway_on_runaway():
     post = _seg((BASE, 20), (BASE, 0.5, 5), (0.5, 175))                              # re-ignites but never comes down
-    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "fail"
+    assert retrigger_verdict("terminate_clean", post_af=post, baseline=BASE, ref_peak=0.5) == "runaway"
 
 
 # ============================ review round 2 fixes ============================
@@ -212,6 +212,9 @@ def test_retrigger_raises_on_missing_refs():
         retrigger_verdict("terminate_clean", post_af=post, baseline=None, ref_peak=None)
 
 
+# Legacy test name reference note: "fail" → "attenuated" (fizzle) or "runaway" (stayed high); "pass" → "reignite_bounded"
+
+
 # ==================================================================== Task 2: two-pass retrigger orchestrator
 # Injected run_fn(t_kick2, kick_boost2, min_T_ms) -> {'af','runaway_ms','baseline_af'} (no simulation):
 # pass 1 classifies USING THE RUNNER'S baseline (not the naive first-5%); pass 2 (only if terminate_clean)
@@ -235,10 +238,10 @@ def _clean_fake(prefix):
     return fake
 
 
-def test_retrigger_orch_pass():
+def test_retrigger_orch_reignite_bounded():
     out = run_cell_with_retrigger(_clean_fake(_CLEAN), BIN, recovery_ms=100.0, recovery_factor=1.0)
     assert out["termination_class"] == "terminate_clean"
-    assert out["retrigger_probe"] == "pass"
+    assert out["retrigger_probe"] == "reignite_bounded"
 
 
 def test_retrigger_orch_not_run_on_persist():
@@ -290,9 +293,9 @@ def test_retrigger_orch_raises_when_probe_doesnt_fit():
         run_cell_with_retrigger(fake, BIN)                                  # default recovery -> t2 huge -> raise
 
 
-def test_retrigger_orch_pass2_runaway_is_fail_not_raise():
+def test_retrigger_orch_pass2_runaway_is_runaway_not_raise():
     # if the re-kick drives pass-2 into runaway, early-stop truncates BEFORE the probe window; that must be
-    # retrigger_probe='fail' (re-kick -> runaway = NOT a bounded re-event), NOT a RuntimeError (which would
+    # retrigger_probe='runaway' (re-kick -> runaway = NOT a bounded re-event), NOT a RuntimeError (which would
     # leave the cell with no result). The runaway_ms explains the short trace.
     def fake(t2, kb, min_T=None):
         if t2 is None:
@@ -302,5 +305,5 @@ def test_retrigger_orch_pass2_runaway_is_fail_not_raise():
         return {"af": af2, "runaway_ms": t2 + 15.0, "baseline_af": BASE}
     out = run_cell_with_retrigger(fake, BIN, recovery_ms=100.0, recovery_factor=1.0)
     assert out["termination_class"] == "terminate_clean"
-    assert out["retrigger_probe"] == "fail"                                # runaway re-ignition = fail, not raise
+    assert out["retrigger_probe"] == "runaway"                             # runaway re-ignition = runaway, not raise
     assert out["pass2_runaway_ms"] is not None
