@@ -20,9 +20,12 @@ Outputs to ``results/topic5_ictal_recruitment/scaffold_ab_switching/per_subject/
   <ds_sid>_scaffold_ab_summary.json      (table 3: per-subject summary + drops)
   <ds_sid>_scaffold_ab_contrast.npz      (per-seizure C_AB/present arrays for the plotter)
 
-CLI: ``--subject <ds_sid> [--gate-nperm N] [--seed S]``. Fail-closed per seizure;
-if the subject has no template-B axis or no usable seizure, a drop summary is
-written (no crash).
+CLI: ``--subject <ds_sid> [--gate-nperm N] [--seed S]`` (single subject) or
+``--all-ok [--gate-nperm N] [--seed S]`` (batch over every Fig3-B paper-index
+status==ok subject; writes ``cohort_index.json``/``.csv``). Fail-closed per
+seizure and per subject; if a subject has no template-B axis, no usable
+seizure, or raises unexpectedly, a drop is recorded and the batch continues
+(no crash).
 """
 from __future__ import annotations
 
@@ -52,6 +55,7 @@ from scripts.run_topic5_fig3b_maxab_spatial_null import (  # noqa: E402
     STOP_SEC,
     WINDOW_SEC,
     _keep_window,
+    _ok_subjects,
     _seizure_args,
 )
 from src.topic5_scaffold_ab_contrast import (  # noqa: E402
@@ -318,14 +322,108 @@ def run_subject(ds_sid: str, gate_nperm: int, seed: int) -> dict:
     return summary
 
 
+# --------------------------------------------------------------------------
+# --all-ok batch (mirrors run_topic5_fig3b_maxab_spatial_null's fail-closed
+# batch + cohort index pattern; reuses its _ok_subjects() paper-index reader).
+# --------------------------------------------------------------------------
+COHORT_JSON = OUT_DIR / "cohort_index.json"
+COHORT_CSV = OUT_DIR / "cohort_index.csv"
+COHORT_COLS = ["subject", "status", "drop_reason", "template_pair_tier", "rho_AB",
+               "n_seizures", "n_valid_seizures", "H1_eligible", "testable", "low_dof",
+               "subject_locked", "H1_p", "L_obs", "n_joint"]
+
+
+def _record_from_summary(summ: dict) -> dict:
+    """Cohort-index row from a per-subject summary dict (ok or drop status).
+
+    `_drop_summary` always populates `axis_present`/`H1` sub-dicts (with None/False
+    placeholders) but omits `n_kept_seizures`/`n_joint` entirely, so those two use
+    `.get(...)` -> None for drop rows.
+    """
+    ax = summ.get("axis_present") or {}
+    h1 = summ.get("H1") or {}
+    return {
+        "subject": summ["subject"],
+        "status": summ["status"],
+        "drop_reason": summ.get("drop_reason") or "",
+        "template_pair_tier": summ.get("template_pair_tier"),
+        "rho_AB": summ.get("rho_AB"),
+        "n_seizures": summ.get("n_kept_seizures"),
+        "n_valid_seizures": h1.get("n_valid_seizures"),
+        "H1_eligible": h1.get("H1_eligible"),
+        "testable": ax.get("testable"),
+        "low_dof": ax.get("low_dof"),
+        "subject_locked": h1.get("subject_locked"),
+        "H1_p": h1.get("p"),
+        "L_obs": h1.get("L_obs"),
+        "n_joint": summ.get("n_joint"),
+    }
+
+
+def _write_cohort_index(records: list[dict]) -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    with COHORT_CSV.open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=COHORT_COLS, extrasaction="ignore")
+        w.writeheader()
+        for rec in records:
+            w.writerow({c: rec.get(c, "") for c in COHORT_COLS})
+    n_ok = sum(1 for r in records if r["status"] == "ok")
+    COHORT_JSON.write_text(json.dumps({
+        "generated_by": "scripts/run_topic5_scaffold_ab_switching.py",
+        "spec": "docs/superpowers/specs/2026-07-09-topic5-v3d-scaffold-ab-lateral-switching-design.md",
+        "tier": "per-subject H1 verdicts (pre-registered primary hypothesis test, spec §3/§6); "
+                "subject_locked is a per-subject result, not yet a cohort-level claim -- see spec "
+                "§4 for the two-axis tier layering (template_pair_tier x axis_present testability) "
+                "that must accompany any subject_locked count.",
+        "n_subjects": len(records), "n_ok": n_ok, "n_drop": len(records) - n_ok,
+        "subjects": records,
+    }, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def run_batch(gate_nperm: int, seed: int) -> None:
+    """Fail-closed batch over every Fig3-B paper-index status==ok subject (spec §12 step 5)."""
+    subjects = _ok_subjects()
+    print(f"processing {len(subjects)} subject(s)", flush=True)
+    records = []
+    for i, ds_sid in enumerate(subjects, 1):
+        t0 = time.time()
+        print(f"[{i}/{len(subjects)}] {ds_sid} ...", flush=True)
+        try:
+            summ = run_subject(ds_sid, gate_nperm, seed)
+            rec = _record_from_summary(summ)
+            if summ["status"] == "ok":
+                print(f"    ok   tier={rec['template_pair_tier']} rho_AB={rec['rho_AB']} "
+                      f"H1_eligible={rec['H1_eligible']} locked={rec['subject_locked']} "
+                      f"({time.time() - t0:.0f}s)", flush=True)
+            else:
+                print(f"    drop {rec['drop_reason']} ({time.time() - t0:.0f}s)", flush=True)
+        except Exception as exc:  # fail-closed: unexpected per-subject failure -> drop, batch continues
+            rec = {c: None for c in COHORT_COLS}
+            rec["subject"] = ds_sid
+            rec["status"] = "drop"
+            rec["drop_reason"] = f"{type(exc).__name__}: {exc}"
+            print(f"    DROP (exception) {rec['drop_reason']} ({time.time() - t0:.0f}s)", flush=True)
+        records.append(rec)
+        _write_cohort_index(records)  # incremental: survives a mid-batch interruption
+    n_ok = sum(1 for r in records if r["status"] == "ok")
+    print(f"\nDONE: {n_ok}/{len(records)} ok -> {COHORT_CSV}", flush=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--subject", default="epilepsiae_1146")
+    ap.add_argument("--all-ok", action="store_true",
+                    help="batch: every subject with an observed Fig3-B figure (paper index "
+                         "status==ok); writes cohort_index.json/.csv, fail-closed per subject")
     ap.add_argument("--gate-nperm", type=int, default=1000,
                     help="within-shaft null permutations for axis_present (locked default 1000; "
                          "use 200 for a fast preview render)")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
+
+    if args.all_ok:
+        run_batch(args.gate_nperm, args.seed)
+        return
 
     t0 = time.time()
     summ = run_subject(args.subject, args.gate_nperm, args.seed)
