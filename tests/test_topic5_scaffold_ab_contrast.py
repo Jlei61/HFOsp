@@ -164,3 +164,130 @@ def test_subject_null_combines_seizures():
     seiz = [circular_shift_null_seizure(C, present, centers, (-120,-60), (-30,10)) for _ in range(3)]
     out = subject_locking_null(seiz, n_perm=1000, seed=0)
     assert out["n_valid_seizures"] == 3 and out["subject_locked"] in (True, False)
+
+
+# ---------------------------------------------------------------------------
+# Sec6.4 bad-data regressions: each test below pins one scientific conclusion
+# from the spec to a concrete pass/fail check, so a future refactor that
+# breaks the underlying claim fails loudly here instead of drifting silently.
+# ---------------------------------------------------------------------------
+
+def test_regression_flat_noise_not_on_scaffold():
+    # Energy with no relation to either propagation template must NOT look like it lives
+    # on the scaffold: axis_present's within-shaft null should reject it at most windows.
+    # 8 monopolar contacts on 2 full shafts (A1-A4, B1-B4) so the within-shaft shuffle null
+    # has resolution (24*24=576 realizations; see rationale note on
+    # test_axis_present_true_when_energy_matches_template above).
+    names = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
+    ranks_a = list(range(8))
+    ranks_b = ranks_a[::-1]
+    matched = _mk_matched(names, ranks_a)
+    axis_b = {"channels": [{"name": n, "typical_rank": r} for n, r in zip(names, ranks_b)]}
+
+    rng = np.random.default_rng(0)
+    wv = rng.normal(size=(66, 8))          # pure noise, unrelated to either template
+    out = derive_joint_contacts(matched, axis_b, wv)
+    assert out["status"] == "ok" and out["tier"] == "reciprocal"
+
+    pres = axis_present(wv[:, out["idx"]], out["names"], out["eA"], out["eB"], rng)
+    assert pres["testable"]                # not vacuously gated by low_dof
+    assert pres["present"].mean() < 0.3    # actual seed=0 value: 0.0606
+
+
+def test_regression_static_on_axis_persistent_not_locked():
+    # A channel-energy pattern that sits ON the A-source template but is CONSTANT across
+    # time is a static anatomical readout, not a dynamic recruitment event: locking and the
+    # seizure-level shift-null must both say "not locked", and classify_event must call it
+    # 'persistent' (same side far and near), never 'selection'/'switch'.
+    ranks_a = np.arange(8.0)
+    ranks_b = ranks_a[::-1].copy()
+    d = build_D_AB(ranks_a, ranks_b)
+
+    wv = np.tile(3 * d["eA"], (66, 1))     # constant, strongly A-source every window
+    C_AB = contrast_timecourse(wv, d["D_AB"], d["eA"], d["eB"])["C_AB"]
+    assert np.nanstd(C_AB) < 1e-6 and np.nanmedian(C_AB) > 0.9   # actual: std=0.0, median=1.0
+
+    present_ = np.ones(66, bool)
+    lock = locking_statistic(C_AB, present_, C_centers, (-120, -60), (-30, 10))
+    assert abs(lock["locking"]) < 1e-9
+
+    shift = circular_shift_null_seizure(C_AB, present_, C_centers, (-120, -60), (-30, 10))
+    assert shift["locking_shift_p"] > 0.5
+
+    ev = classify_event(C_AB, present_, C_centers, (-120, -60), (-30, 10), (-30, 0), (0, 10), 0.2)
+    assert ev["event_class"] == "persistent"
+
+
+def test_regression_ramp_to_onset_is_locked():
+    # Contrast that sits near zero far-preictal and ramps to strongly on-template near onset
+    # IS dynamically locked: both the near>far polarization statistic and the exhaustive
+    # per-seizure circular-shift null (the only valid null at single-seizure T=66) must
+    # detect it.
+    ranks_a = np.arange(8.0)
+    ranks_b = ranks_a[::-1].copy()
+    d = build_D_AB(ranks_a, ranks_b)
+    n_joint = d["D_AB"].shape[0]
+
+    rng = np.random.default_rng(0)         # seed=2 gives shift_p=0.061 (fails <0.05) -- verified
+    alpha = np.clip((C_centers + 30) / 40, 0, 1) * 4.0     # 0 far-pre -> 4.0 by onset
+    wv = alpha[:, None] * d["D_AB"][None, :] + rng.normal(scale=0.05, size=(66, n_joint))
+    C_AB = contrast_timecourse(wv, d["D_AB"], d["eA"], d["eB"])["C_AB"]
+    present_ = np.ones(66, bool)
+
+    lock = locking_statistic(C_AB, present_, C_centers, (-120, -60), (-30, 10))
+    assert lock["locking"] > 0.2                            # actual seed=0 value: 0.989
+
+    shift = circular_shift_null_seizure(C_AB, present_, C_centers, (-120, -60), (-30, 10))
+    assert shift["locking_shift_p"] < 0.05                  # actual seed=0 value: 0.0152 (=1/66, the floor)
+
+
+def test_regression_degenerate_AB_exits():
+    # When template B is literally identical to template A, derive_joint_contacts must gate
+    # the pair out via status ('hard_degenerate'). eA/eB/D_AB are still present in the
+    # returned dict (computed before the tier check), but D_AB collapses to the zero vector,
+    # so any attempt to use it downstream yields no usable C_AB (all-NaN) rather than a
+    # silently-wrong number -- status is what actually gates use, not key presence.
+    names = [f"A{i}-A{i+1}" for i in range(6)]
+    ranks = [0, 1, 2, 3, 4, 5]
+    matched = _mk_matched(names, ranks)
+    axis_b = {"channels": [{"name": n, "typical_rank": r} for n, r in zip(names, ranks)]}  # B == A
+
+    wv = np.random.default_rng(3).normal(size=(10, 6))
+    out = derive_joint_contacts(matched, axis_b, wv)
+    assert out["status"] == "hard_degenerate"
+
+    probe = contrast_timecourse(wv, out["D_AB"], out["eA"], out["eB"])
+    assert np.all(np.isnan(probe["C_AB"]))
+
+
+def test_regression_mirror_invariance_removed():
+    # The raw-contact C_AB contrast is computed directly from contact energies and
+    # rank-derived eA/eB/D_AB -- it never touches plane coordinates (x_norm/y_norm). Flipping
+    # every contact's y_norm sign (as if mirroring the projection plane) must leave C_AB
+    # bit-for-bit unchanged: there is no plane-orientation ambiguity for this statistic.
+    names = [f"A{i}-A{i+1}" for i in range(6)]
+    ranks_a = [0, 1, 2, 3, 4, 5]
+    ranks_b = ranks_a[::-1]
+    matched = [{"name": n, "typical_rank": ra, "x_norm": 0.1 * i, "y_norm": 0.5 - 0.1 * i, "support": 1.0}
+               for i, (n, ra) in enumerate(zip(names, ranks_a))]
+    axis_b = {"channels": [{"name": n, "typical_rank": rb} for n, rb in zip(names, ranks_b)]}
+    wv = np.random.default_rng(11).normal(size=(12, 6))
+
+    out1 = derive_joint_contacts(matched, axis_b, wv)
+    assert out1["status"] == "ok"
+    c1 = contrast_timecourse(wv[:, out1["idx"]], out1["D_AB"], out1["eA"], out1["eB"])["C_AB"]
+
+    for m in matched:
+        m["y_norm"] = -m["y_norm"]
+    out2 = derive_joint_contacts(matched, axis_b, wv)
+    c2 = contrast_timecourse(wv[:, out2["idx"]], out2["D_AB"], out2["eA"], out2["eB"])["C_AB"]
+
+    assert np.allclose(c1, c2, equal_nan=True)
+
+
+from src.topic5_scaffold_ab_contrast import label_sides
+
+
+def test_label_sides_thresholds():
+    out = label_sides(np.array([0.3, -0.3, 0.1, 0.9]), np.array([True, True, True, False]), 0.2)
+    assert list(out) == ["A", "B", "unlabeled", "unlabeled"]   # last: present=False gates it despite 0.9
