@@ -90,3 +90,35 @@ def test_load_shunt_step_elementwise_on_1d_array():
     n_new, a = load_shunt_step(n, u, dt=1.0, p=p)
     assert n_new.shape == (3,) and a.shape == (3,)
     assert np.all((n_new >= p.n_min) & (n_new <= p.n_max))   # all clamped in range
+
+
+# Task 2: a-response metrics (Δa_IED / R_A)
+from src.sef_hfo_m4_load_shunt import event_triggered_a_response, compute_R_A
+
+
+def test_event_triggered_a_response_positive_bump():
+    dt = 1.0
+    a = np.zeros(1000)
+    a[500:600] = 0.4                            # a bump right after t=500
+    delta = event_triggered_a_response(a, [500], dt, pre_ms=100, post0_ms=10, post1_ms=90)
+    assert delta == pytest.approx(0.4, abs=1e-9)
+
+
+def test_event_triggered_skips_events_without_full_window():
+    dt = 1.0
+    a = np.zeros(200)
+    # event at 10 has no room for pre=100 -> skipped; event at 100 is fine
+    a[100:150] = 0.2
+    delta = event_triggered_a_response(a, [10, 100], dt, pre_ms=100, post0_ms=0, post1_ms=50)
+    assert delta == pytest.approx(0.2, abs=1e-9)
+
+
+def test_event_triggered_raises_when_no_usable_event():
+    a = np.zeros(50)
+    with pytest.raises(ValueError):
+        event_triggered_a_response(a, [10], 1.0, pre_ms=100, post0_ms=0, post1_ms=50)
+
+
+def test_R_A_ratio_and_soft_gate_flag():
+    assert compute_R_A(0.5, 0.05) == pytest.approx(10.0)
+    assert compute_R_A(0.5, 0.0) == float("inf")     # IED did not move a -> soft ictal gate

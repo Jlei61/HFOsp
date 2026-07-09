@@ -60,3 +60,29 @@ def load_shunt_step(n, u_n, dt: float, p: LoadShuntParams):
     n_new = np.clip(n + dt * dn, p.n_min, p.n_max)
     a = np.clip(p.a_max * hill_pi(n_new, p), 0.0, p.a_max)
     return n_new, a
+
+
+def event_triggered_a_response(a_trace, event_idx, dt, *, pre_ms, post0_ms, post1_ms):
+    """Mean a in [t+post0, t+post1] minus mean a in [t-pre, t], averaged over events.
+    a_trace is 1D (per-step). Events without a full pre/post window are skipped.
+    Raises if no event has a full window."""
+    a = np.asarray(a_trace, float)
+    pre = int(round(pre_ms / dt)); p0 = int(round(post0_ms / dt)); p1 = int(round(post1_ms / dt))
+    deltas = []
+    for i in event_idx:
+        i = int(i)
+        if i - pre < 0 or i + p1 > a.size:
+            continue
+        deltas.append(a[i + p0:i + p1].mean() - a[i - pre:i].mean())
+    if not deltas:
+        raise ValueError("no events with a full pre/post window")
+    return float(np.mean(deltas))
+
+
+def compute_R_A(delta_a_ictal, delta_a_ied):
+    """Duty-cycle ratio: sustained-ictal a-accumulation over single-IED a-bump.
+    R_A >> 1 is the sensor-free signature (spec 6.1). Returns inf when the IED did
+    not move a at all (delta_a_ied <= 0) -> caller flags a soft ictal gate."""
+    if delta_a_ied <= 0:
+        return float("inf")
+    return float(delta_a_ictal / delta_a_ied)
