@@ -87,3 +87,35 @@ def test_partial_window_uses_direct_not_closed():
     o = contrast_timecourse(E, d["D_AB"], d["eA"], d["eB"])
     m = np.isfinite(E[0])
     assert abs(o["C_AB"][0] - np.corrcoef(E[0, m], d["D_AB"][m])[0, 1]) < 1e-9
+
+
+from src.topic5_scaffold_ab_contrast import axis_present
+
+
+def test_axis_present_true_when_energy_matches_template():
+    # 8 joint contacts on 2 multi-contact shafts (A, B), 4 contacts each, interleaved by rank
+    # (idx 0,2,4,6 -> A1..A4; idx 1,3,5,7 -> B1..B4). NOTE: a literal "4 shafts of 2" split
+    # (as sketched in the plan doc) was verified NOT to work here -- with only 2 possible
+    # within-shaft orderings per shaft, 4 such shafts give just 2**4=16 distinct null
+    # realizations, so the "everyone stays put" realization alone ties the observed value
+    # with probability 1/16 (~0.0625), which floors the best-achievable p above alpha=0.05
+    # regardless of signal strength (verified by exhaustive enumeration). Two shafts of 4
+    # contacts (24*24=576 realizations) clears that floor with a wide margin.
+    ranks_a = np.arange(8.0)
+    ranks_b = ranks_a[::-1].copy()
+    d = build_D_AB(ranks_a, ranks_b)
+    names = ["A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4"]
+    E = np.tile(d["eA"], (6, 1)) + np.random.default_rng(0).normal(scale=0.05, size=(6, 8))
+    out = axis_present(E, names, d["eA"], d["eB"], np.random.default_rng(0))
+    assert out["testable"] and out["present"].mean() > 0.5
+
+
+def test_axis_present_low_dof_when_mostly_singletons():
+    # 8 joint contacts, each its own shaft (A1,B1,...,H1) -> 0 multi-contact shafts.
+    ranks_a = np.arange(8.0)
+    ranks_b = ranks_a[::-1].copy()
+    d = build_D_AB(ranks_a, ranks_b)
+    names = ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1"]
+    E = np.random.default_rng(1).normal(size=(6, 8))
+    out = axis_present(E, names, d["eA"], d["eB"], np.random.default_rng(1))
+    assert out["low_dof"] and not out["testable"]
