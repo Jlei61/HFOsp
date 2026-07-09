@@ -108,6 +108,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     poisson internals).
     """
     e_gaba = p.E_gaba if e_gaba is None else e_gaba   # M2 shunting GABA reversal (=V_reset); default path unused
+    E_A = e_gaba                                      # M4-3A a-shunt reversal; reuses the resolved e_gaba default
     rng = net["rng"]
     NE, NI = net["NE"], net["NI"]
     N = NE + NI
@@ -314,7 +315,17 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         np.maximum(ref, 0, out=ref)
         free = ref == 0
         if slow is not None:
-            Vtmp = I_net + (V - I_net) * decay_V
+            # M4-3A conductance a-shunt (form A). uses_shunt() is SpatialSlowField-only (Task 4); the
+            # OTHER "slow" implementers (FrozenSlowVars/SlowVars, RegionalResource) have no a-shunt
+            # concept, so hasattr guards them onto the literal parity path below (plan-correction for
+            # polymorphic slow=; mirrors the getattr(...,'use_SG',False) duck-typing a few lines up).
+            if hasattr(slow, "uses_shunt") and slow.uses_shunt():
+                g = np.zeros_like(V)
+                g[:slow.nE] = slow.shunt_g_at_E()                  # E-only; I cells g=0 -> parity
+                V_inf = (I_net + g * E_A) / (1.0 + g)              # a NEVER divides signed net (reversal-clamped)
+                Vtmp = V_inf + (V - V_inf) * decay_V ** (1.0 + g)
+            else:
+                Vtmp = I_net + (V - I_net) * decay_V               # literal pre-change path -> byte parity
         elif fb_on:
             # A1c: extra global inhibition on E cells -> effective inhibition (I_I + I_global) on E only.
             ig_t = feedback_gain * r_ema if fb_dyn else float(fb_override_trace[t])
