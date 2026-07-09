@@ -297,6 +297,67 @@ def plot_cohort_stat_narrow(per_subject_by_substrate: dict, cohort_summary: dict
     print(f"[fig] {out_png}")
 
 
+# --------------------------------------------------------------------------- significance scatter
+def plot_significance_scatter(per_subject_by_substrate: dict, cohort_summary: dict, out_dir: Path):
+    """Cohort significance-wedge scatter. One dot per subject: x = that subject's own
+    within-shaft null 5th percentile (personal threshold), y = observed signed_corr. The
+    per-subject gate passes when the dot is below BOTH y=0 and the y=x diagonal (observed
+    more negative than its own null p05) -- those K dots are filled. This shows the K
+    significant subjects AND why the rest do NOT count: a negative r that still sits above
+    the subject's own (also-negative) null. narrow primary, broad twin; never pooled."""
+    sig_fill = {"narrow": "#1f6b55", "broad": "#c1622f"}
+    order = ["narrow", "broad"]
+    allv = []
+    for s in order:
+        for r in _ok_records(per_subject_by_substrate[s]).values():
+            allv += [r["gate"]["signed_corr"], r["gate"].get("null_p05")]
+    allv = [v for v in allv if v is not None and np.isfinite(v)]
+    lo, hi = min(allv) - 0.08, max(max(allv), 0.0) + 0.08
+
+    fig, axes = plt.subplots(1, 2, figsize=(10.6, 5.4), sharex=True, sharey=True)
+    for ax, s in zip(axes, order):
+        ok = _ok_records(per_subject_by_substrate[s])
+        ds = sorted(ok)
+        y = np.array([ok[k]["gate"]["signed_corr"] for k in ds], float)
+        x = np.array([ok[k]["gate"]["null_p05"] for k in ds], float)
+        passed = np.array([bool(ok[k]["gate"]["passed"]) for k in ds])
+        binom = cohort_summary[s]["binomial"]
+
+        gx = np.linspace(lo, hi, 200)
+        ax.fill_between(gx, lo, np.minimum(gx, 0.0), color=sig_fill[s], alpha=0.08, zorder=0)
+        ax.plot(gx, gx, ls="--", color="0.55", lw=1.1, zorder=1)   # y = x (own null p05)
+        ax.axhline(0.0, ls=":", color="0.45", lw=1.0, zorder=1)    # y = 0
+        ax.scatter(x[~passed], y[~passed], s=58, facecolors="white", edgecolors="#9a9a9a",
+                   linewidths=1.2, zorder=3, label=f"not significant ({int(np.sum(~passed))})")
+        ax.scatter(x[passed], y[passed], s=74, facecolors=sig_fill[s], edgecolors="white",
+                   linewidths=0.8, zorder=4, label=f"significant ({int(np.sum(passed))})")
+
+        ax.set_xlim(lo, hi); ax.set_ylim(lo, hi); ax.set_aspect("equal")
+        ax.set_xlabel("this subject's own within-shaft null (5th pct)", fontsize=9.5)
+        ax.spines[["top", "right"]].set_visible(False)
+        ax.set_title(f"{s}" + ("  (SOZ-core)" if s == "narrow" else "  (wide pool)"),
+                     fontsize=12, fontweight="bold", loc="left")
+        ax.text(0.97, 0.03,
+                f"significant {binom['k']}/{binom['n']}\nbinomial p={_fmt_p(binom['p_binom'])}\n"
+                f"expected by chance ≈{0.05 * binom['n']:.1f}",
+                transform=ax.transAxes, fontsize=8.6, va="bottom", ha="right",
+                bbox=dict(boxstyle="round,pad=0.35", fc="white", ec="0.7", alpha=0.93))
+        ax.legend(loc="upper left", fontsize=8.4, frameon=False)
+        ax.text(0.44, 0.26, "significance wedge\n(below 0 AND below own null)",
+                transform=ax.transAxes, fontsize=7.6, color=sig_fill[s], style="italic",
+                va="center", ha="left", zorder=2)
+
+    axes[0].set_ylabel("observed TA–TB field reversal (signed r)", fontsize=10)
+    fig.suptitle("Per-subject reversal significance across the cohort — filled = beats its own within-shaft null\n"
+                 "narrow | broad, never pooled · a negative r alone is not enough; it must clear that subject's own null",
+                 fontsize=9.7, y=1.0)
+    fig.subplots_adjust(left=0.08, right=0.98, top=0.85, bottom=0.12, wspace=0.06)
+    out_png = out_dir / "field_reversal_significance_scatter.png"
+    fig.savefig(out_png, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"[fig] {out_png}")
+
+
 # --------------------------------------------------------------------------- diagnostic supplement
 def plot_null_forest(per_subject: dict, substrate: str, out_png: Path):
     """Brief panel 2 diagnostic supplement (optional, not a paper panel): observed vs own null
@@ -613,6 +674,7 @@ def main():
     print("[1/6] cohort_stat (headline) ...")
     plot_cohort_stat(per_subject, cohort_summary, OUT_DIR)
     plot_cohort_stat_narrow(per_subject, cohort_summary, OUT_DIR)
+    plot_significance_scatter(per_subject, cohort_summary, OUT_DIR)
 
     print("[2/6] accountability ...")
     plot_accountability(cohort_summary, OUT_DIR / "accountability.png")

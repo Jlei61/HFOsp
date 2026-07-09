@@ -20,6 +20,12 @@
 
 **关注点**：这是 narrow 底物「队列整体是不是往负偏」的可视化，正式过/不过仍以脚注的逐病人二项 gate（9/26）为准；青绿/暖砂配色只为和蓝/灰的 field-similarity 图区分，不承载额外含义。
 
+### field_reversal_significance_scatter.png — 哪些患者「显著反向」（cohort 楔形散点）
+
+一张 cohort 级散点（**不是** per-subject 面板）：每个患者一个点，横轴 = 这个患者**自己**同杆零假设的第 5 百分位（他个人的显著门槛），纵轴 = 实测带符号相关。判决门 = 点落在 **y=0 以下 且 y=x 对角线以下**（实测比自己零假设的最负 5% 还要负）——落在左下这个**楔形**里的就是「显著反向」，填色；其余空心。`narrow` **9/26** 填青绿、`broad` **6/26** 填赭石（`broad` 底物记 wide pool），两底物分开、永不 pool；脚注给二项 p 和「纯随机期望 ≈1.3」。
+
+**关注点**：这张图同时回答「有几个显著」和「**为什么只有这几个**」——空心点里很多实测相关其实是负的，但它们贴在对角线上或以上，说明那点负相关没有超过该患者自己电极几何能碰巧造出的负相关，不算数。承重结论因此是「显著人数（9/26、6/26）**远多于**纯随机的 ≈1.3」，不是「人人都显著」。
+
 ### accountability.png — 谁进了队列、为什么
 
 `broad`/`narrow` 并排的分组条形图，横轴 = 8 种可能的入组结果（`no_planes`/`load_error`/`c1_violation`/`plane_not_built`/`cluster_map_ambiguous`/`insufficient_overlap`/`degenerate_null`/`ok`），纵轴 = 病人数。`broad` 26 个候选全部 `ok`；`narrow` 35 个候选里 6 个因为标签本身不满足"稳定两簇"前提被挡在门外（`c1_violation`）、1 个几何平面没建成（`plane_not_built`）、2 个因为可打乱的触点太少而判定零假设退化（`degenerate_null`），剩下 26 个 `ok`。
