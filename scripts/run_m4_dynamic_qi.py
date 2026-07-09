@@ -454,6 +454,119 @@ def _run_m43a_sweep(out_dir, *, seed, k_q, alpha_G, alpha_grid, tau_grid, base_T
     return scal
 
 
+def _m43a_ablation_cell(S, k_q, alpha_G, alpha_A, tau_n, eta_A, base_T, recovery_factor, reprobe_boost):
+    """One (alpha_A, tau_n, eta_A) two-pass + early-probe retrigger cell for the D11 mechanism-specificity
+    ablation (Task 9, spec §4.2 point 3). Mirrors _m43a_cell_worker's run_fn / run_cell_with_retrigger / go
+    composite body exactly, but exposes eta_A as a free parameter: _m43a_cell_worker's cell tuple (Task 8,
+    `label, k_q, alpha_G, alpha_A, tau_n, base_T, rf, rb`) has no eta_A slot, since the discovery sweep always
+    ran with the run_arm default M43A_ETA_A=0.0. Widening that fixed-shape tuple for a 3-cell control that
+    isn't Pool-parallelized anyway would be more invasive than this small sibling. Returns a scalar-only row
+    (verdict + go + D_A diagnostics + the steady-state (a, I_rec_E) window means the matched-eta calibration
+    needs) -- no large arrays retained, since the caller doesn't dump an npz for this control."""
+    from src.sef_hfo_m4_termination import run_cell_with_retrigger
+    cap = {}
+
+    def run_fn(t_kick2, kick_boost2, min_T):
+        T_use = base_T if min_T is None else max(base_T, min_T)
+        r = run_arm(S, "m43a_ablation", k_q, True, alpha_G, use_A=True, alpha_A=alpha_A, tau_n=tau_n,
+                    eta_A=eta_A, t_kick2=t_kick2, KICK_BOOST2=kick_boost2, dump_shunt_trace=True, T_ms=T_use)
+        cap["pass1" if t_kick2 is None else "pass2"] = r
+        return {"af": r["af"], "runaway_ms": r["runaway_ms"], "baseline_af": r["baseline_af"]}
+
+    recovery_ms = max(tau_n, TAU_Q)
+    v = run_cell_with_retrigger(run_fn, C.BIN_MS, recovery_ms=recovery_ms, recovery_factor=recovery_factor,
+                                reprobe_boost=reprobe_boost, early_offset_ms=M43A_EARLY_OFFSET_MS)
+    go = (v["termination_class"] == "terminate_clean" and v.get("retrigger_early") == "attenuated"
+          and v["retrigger_probe"] == "reignite_bounded")
+    p1 = cap["pass1"]
+    row = dict(alpha_A=alpha_A, tau_n=tau_n, eta_A=eta_A, k_q=k_q, alpha_G=alpha_G,
+              recovery_ms=recovery_ms, go=bool(go), **v,
+              pass1_wall_s=p1["wall_s"], pass1_verdict=p1["verdict"],
+              pass2_wall_s=(cap["pass2"]["wall_s"] if "pass2" in cap else None))
+    a_tr, irec_tr = p1["a_trace"], p1["trace_Irec"]
+    if a_tr is not None and len(a_tr):                                # diagnostic: D_A = 1 + alpha_A*a (spec §8)
+        D_A = 1.0 + alpha_A * np.asarray(a_tr, float)
+        row.update(D_A_mean=float(D_A.mean()), D_A_p95=float(np.percentile(D_A, 95)), D_A_max=float(D_A.max()))
+        w0 = int(0.6 * len(a_tr))                          # steady-state window = last 40% (Definition A
+        row["a_ref"] = float(np.mean(np.asarray(a_tr, float)[w0:]))   # convention, same as --mechanism's beta_matched)
+    if irec_tr is not None and len(irec_tr):
+        w0 = int(0.6 * len(irec_tr))
+        row["I_ref"] = float(np.mean(np.asarray(irec_tr, float)[w0:]))
+    return row
+
+
+def _run_m43a_ablation(S, out_dir, *, seed, k_q, alpha_G, alpha_A, tau_n, base_T, recovery_factor, reprobe_boost):
+    """M4-3A D11 mechanism-specificity control (Task 9): at ONE (alpha_A, tau_n) op-point, run shunt_only
+    (alpha_A>0, eta_A=0 -- pure divisive conductance shunt) / subtractive_only (alpha_A=0, eta_A matched to
+    shunt_only's mean removed recurrent-E current at steady state) / hybrid (both). Sequential, not Pool: only
+    3 cells, and subtractive_only/hybrid's eta_A is CALIBRATED from shunt_only's own diagnostics, so they
+    cannot run before it anyway (mirrors the existing --mechanism block's serial-then-calibrate pattern, not
+    _run_m43a_sweep's Pool/COW pattern, which has no such cross-cell dependency). Fail-loud PER VARIANT: one
+    variant's exception becomes an ERROR row and does not abort the other two (mirrors _m43a_cell_worker's
+    per-cell try/except). Writes m43a_ablation.json (rows + eta_matched + calibration record + provenance)."""
+    os.makedirs(out_dir, exist_ok=True)
+    print(f"[M4-3A ablation] k_q={k_q} alpha_G={alpha_G} alpha_A={alpha_A} tau_n={tau_n} seed={seed}", flush=True)
+    t0 = time.time()
+
+    def _cell(variant, aA, eA):
+        try:
+            row = _m43a_ablation_cell(S, k_q, alpha_G, aA, tau_n, eA, base_T, recovery_factor, reprobe_boost)
+        except Exception as e:                                       # fail-loud per variant; don't kill the other two
+            row = dict(alpha_A=aA, tau_n=tau_n, eta_A=eA, k_q=k_q, alpha_G=alpha_G,
+                      termination_class="ERROR", retrigger_probe="ERROR", go=False, error=repr(e))
+        row["variant"] = variant
+        return row
+
+    r_sh = _cell("shunt_only", alpha_A, 0.0)
+    # ---- matched-eta calibration (Definition A, mirrors the existing --mechanism beta_matched recipe for the
+    # S_G pool: "same mean removed recurrent current at the divisive steady state", swapping (alpha_G, S_G) for
+    # (alpha_A, a). FIRST-ORDER APPROXIMATION (documented, not silently guessed -- brief's explicit allowance):
+    # the real engine mechanism is a reversal-clamped CONDUCTANCE shunt (kick_probe.py:322-326, form (A) of spec
+    # §3.2): V_inf=(I_net+g_A*E_A)/(1+g_A), Vtmp=V_inf+(V-V_inf)*decay_V**(1+g_A) -- a joint target-shift +
+    # time-constant change with no logged I_net/I_dep trace to invert exactly. Absent that trace, this treats
+    # the shunt AS IF it divisively reduced I_rec_E by D_A=1+alpha_A*a (the same diagnostic already logged by
+    # Task 8), i.e. removed a mean current of frac_removed*I_ref, then sizes a constant eta_A so the subtractive
+    # term removes that SAME mean current at its own steady-state a_ref. ----
+    a_ref = r_sh.get("a_ref", 0.0) or 0.0
+    I_ref = r_sh.get("I_ref", 0.0) or 0.0
+    frac_removed = (alpha_A * a_ref / (1.0 + alpha_A * a_ref)) if a_ref > 1e-9 else 0.0
+    mean_current_removed = frac_removed * I_ref
+    eta_matched = (mean_current_removed / a_ref) if a_ref > 1e-9 else 0.0
+    formula = ("eta_matched = frac_removed * I_ref / a_ref, frac_removed = alpha_A*a_ref/(1+alpha_A*a_ref) "
+              "(D_A-implied divisive fraction of I_rec_E removed at steady state); a_ref/I_ref = mean "
+              "a_trace/trace_Irec over shunt_only pass-1's last 40% (Definition A steady-state window, same "
+              "convention as the --mechanism beta_matched SG-pool calibration). First-order approximation: "
+              "treats the reversal-clamped conductance shunt (kick_probe.py:322-326) as if it divisively "
+              "reduced I_rec_E by D_A=1+alpha_A*a; ignores the literal (I_net+g_A*E_A)/(1+g_A) target-shift + "
+              "decay_V**(1+g_A) time-constant change, since no I_net/I_dep trace is logged to invert that "
+              "exactly. a_ref<=1e-9 -> eta_matched=0.0 (shunt never engaged; nothing to match).")
+
+    r_sub = _cell("subtractive_only", 0.0, eta_matched)
+    r_hy = _cell("hybrid", alpha_A, eta_matched)
+    rows = [r_sh, r_sub, r_hy]
+    wall = round(time.time() - t0, 1)
+
+    try:
+        git_sha = subprocess.run(["git", "-C", ROOT, "rev-parse", "--short", "HEAD"],
+                                 capture_output=True, text=True).stdout.strip() or None
+    except Exception:
+        git_sha = None
+    prov = dict(seed=seed, subject=getattr(PP, "SUBJECT", None), montage=getattr(PP, "MONTAGE", None),
+                git_sha=git_sha, argv=sys.argv, T=base_T)
+    out = dict(rows=rows, alpha_A=alpha_A, tau_n=tau_n, eta_matched=eta_matched,
+              calibration=dict(a_ref=a_ref, I_ref=I_ref, frac_removed=frac_removed,
+                               mean_current_removed=mean_current_removed, formula=formula),
+              wall_s=wall, provenance=prov)
+    json.dump(out, open(os.path.join(out_dir, "m43a_ablation.json"), "w"), indent=2)
+    print(f"[M4-3A ablation] eta_matched={eta_matched:.5g} (a_ref={a_ref:.5g} I_ref={I_ref:.5g} "
+          f"frac_removed={frac_removed:.4f}) done in {wall}s -> {out_dir}", flush=True)
+    for r in rows:                                                    # console map (go = terminate_clean AND early/late)
+        print(f"  {r['variant']:<18} class={str(r.get('termination_class')):<15} "
+              f"early={str(r.get('retrigger_early')):<12} retrigger={str(r.get('retrigger_probe')):<15} "
+              f"go={r.get('go')} eta_A={r.get('eta_A')}", flush=True)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description="M4 dynamic q_I spontaneous experiment (RUNS SIMULATIONS)")
     ap.add_argument("--seed", type=int, default=1)
@@ -500,6 +613,12 @@ def main():
     ap.add_argument("--m43a-alpha-grid", default="2,4,8")
     ap.add_argument("--m43a-tau-grid", default="5000,20000,40000")
     ap.add_argument("--m43a-workers", type=int, default=5)            # OOM-safe (swap tiny; other campaign live)
+    # ---- M4-3A D11 (spec §4.2 point 3): mechanism-specificity ablation @ ONE (alpha_A, tau_n) point ----
+    ap.add_argument("--m43a-ablation", action="store_true",
+                    help="D11 mechanism control: shunt_only(eta_A=0) / subtractive_only(alpha_A=0, eta_A "
+                         "matched to shunt_only's mean removed I_rec_E) / hybrid, at the P1 op-point")
+    ap.add_argument("--m43a-abl-alpha", type=float, default=6.0)
+    ap.add_argument("--m43a-abl-tau", type=float, default=20000.0)
     a = ap.parse_args()
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
@@ -521,6 +640,7 @@ def main():
         arms = ARMS
     if a.out == OUT_DIR:
         a.out = OUT_DIR + ("_m43a_sweep" if a.m43a_sweep
+                           else "_m43a_ablation" if a.m43a_ablation
                            else "_p1_sweep" if a.p1_sweep else "_p1_timing" if a.p1_timing_cell
                            else "_reversibility" if a.reversibility
                            else "_stimlocus" if a.stim_locus
@@ -549,6 +669,11 @@ def main():
                         tau_grid=[float(x) for x in a.m43a_tau_grid.split(",")],
                         base_T=a.T, recovery_factor=a.p1_recovery_factor, reprobe_boost=a.p1_reprobe_boost,
                         workers=a.m43a_workers)
+        return
+    if a.m43a_ablation:                 # M4-3A D11: shunt-only vs matched-subtractive vs hybrid @ ONE op-point
+        _run_m43a_ablation(S, a.out, seed=a.seed, k_q=a.p1_kq, alpha_G=a.p1_alpha_g,
+                           alpha_A=a.m43a_abl_alpha, tau_n=a.m43a_abl_tau, base_T=a.T,
+                           recovery_factor=a.p1_recovery_factor, reprobe_boost=a.p1_reprobe_boost)
         return
     if a.stim_locus:
         arms = _stim_locus_arms(S, a.stim_on, a.stim_off, a.stim_radius, a.stim_dvth)

@@ -20,3 +20,16 @@ def test_m43a_sweep_tiny_runs_and_writes_schema(tmp_path):
                     "retrigger_probe", "go", "seed"):     # retrigger_early is conditional (terminate_clean only)
             assert key in r
     assert summ["provenance"]["seed"] == 1
+
+
+def test_m43a_ablation_three_variants(tmp_path):
+    """D11 mechanism-specificity control at ONE (alpha_A, tau_n) point: shunt_only / subtractive_only
+    (matched-eta) / hybrid -> all 3 rows present."""
+    out = tmp_path / "abl"
+    cmd = [sys.executable, "scripts/run_m4_dynamic_qi.py", "--m43a-ablation", "--confirm-run",
+           "--seed", "1", "--T", "800", "--m43a-abl-alpha", "6", "--m43a-abl-tau", "20000",
+           "--out", str(out)]
+    subprocess.run(cmd, check=True, cwd=os.getcwd())
+    abl = json.load(open(glob.glob(str(out / "*ablation.json"))[0]))
+    variants = {r["variant"] for r in abl["rows"]}
+    assert variants == {"shunt_only", "subtractive_only", "hybrid"}
