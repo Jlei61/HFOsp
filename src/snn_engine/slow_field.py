@@ -33,6 +33,7 @@ import numpy as np
 
 from src.sef_hfo_field import isotropic_gaussian, convolve_periodic
 from src.topic4_m3a_v2_2_sensors import global_M, global_B, global_participation, chi_G  # §B6 sensors
+from src.sef_hfo_m4_load_shunt import LoadShuntParams, load_shunt_step  # M4-3A n->a load/shunt ODE
 
 
 # ---------------------------------------------------------------------------
@@ -100,6 +101,22 @@ class SpatialSlowFieldConfig:
     tau_S: float = 120.0       # ms, pool output low-pass
     S_max: float = 1.0         # pool output ceiling
     clamp_SG: float = None     # mechanism control: if set, S_G is FROZEN at this value (static-pool arm); None -> normal dynamics
+    # ---- n(x,t) load -> a(x,t) shunt field, M4-3A ----
+    use_A: bool = False        # master gate; False -> byte-parity
+    k_n: float = 0.0           # load build rate; 0 -> OFF -> byte-parity
+    tau_n: float = 20000.0     # ms, load recovery (SLOW; keep > tau_q)
+    rho_n: float = 0.0         # load consumption via Pi(n)
+    n_base: float = 0.0        # Hill offset / baseline load
+    n50: float = 0.5           # Hill half-point
+    hill_h: float = 2.0        # Hill exponent
+    a_max: float = 1.0         # shunt ceiling
+    alpha_A: float = 0.0       # divisive conductance gain: g_A = alpha_A * a
+    eta_A: float = 0.0         # subtractive bias gain: -eta_A * a (E cells)
+    sigma_n: float = 1.5       # mm, K_n width (default = sigma_q, WIDE)
+    u_n0: float = 0.0          # baseline drive set-point (constant, from Arm0)
+    n_min: float = 0.0
+    n_max: float = 10.0
+    g_A_max: float = 20.0      # conductance cap
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -144,6 +161,9 @@ class SpatialSlowFieldConfig:
                       ("S_max", self.S_max), ("r50_psi", self.r50_psi), ("n_psi", self.n_psi)):
             if v <= 0.0:
                 raise ValueError(f"{nm} must be > 0, got {v}")
+        # ---- M4-3A n->a load/shunt field ----
+        if self.use_A and self.sigma_n <= 0.0:
+            raise ValueError("sigma_n must be > 0 when use_A")
 
 
 # ---------------------------------------------------------------------------
@@ -224,6 +244,8 @@ class SpatialSlowField:
         positions for binning + sampling, validate cfg. Implemented per the plan (Task 4)."""
         self.cfg = cfg or SpatialSlowFieldConfig()
         self.cfg.validate()
+        if self.cfg.use_A:
+            self._load_shunt_params().validate()   # Task 1 LoadShuntParams.validate(), never auto-invoked otherwise
         self.N = int(N); self.nE = int(np.asarray(posE).shape[0]); self.L = float(L)
         self.posE = np.asarray(posE, float); self.posI = np.asarray(posI, float)
         n = self.cfg.n_grid
@@ -250,6 +272,13 @@ class SpatialSlowField:
         if cfg.clamp_SG is not None:
             self.S_G = float(cfg.clamp_SG)                            # static-pool arm: S_G frozen from t=0
         self.trace_rEfast_max = []      # per-step spatial-max of rE_fast (for r50 sensor-scale calibration)
+        # ---- n(x,t) load -> a(x,t) shunt field (M4-3A) ----
+        self.n_load = np.full((n, n), self.cfg.n_base, dtype=float)
+        self.a_shunt = np.zeros((n, n), dtype=float)
+        self._Kn = isotropic_gaussian(n, L, self.cfg.sigma_n)
+        self.trace_n_mean = []
+        self.trace_a_mean = []
+        self.trace_un_mean = []                     # P1-4: field-derived drive u_n (for P0b param lock)
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -265,6 +294,9 @@ class SpatialSlowField:
         out[:nE] = (I_E[:nE] - qI_E * I_I[:nE]
                     - self.cfg.eta_K * gK_E
                     - self.cfg.eta_G * hG_eff)                         # global recovery scalar (E only)
+        if self.cfg.use_A and self.cfg.eta_A != 0.0:               # M4-3A subtractive bias (E only)
+            aE = self.a_shunt[self._iyE, self._ixE]
+            out[:nE] -= self.cfg.eta_A * aE
         if self.cfg.use_SG and I_E_rec is None and (self.cfg.alpha_G > 0.0 or self.cfg.beta_SG > 0.0):
             raise RuntimeError(                                        # §6: loud failure beats silent contamination
                 "use_SG with alpha_G>0 or beta_SG>0 requires I_E_rec (recurrent-only current), got None. "
@@ -276,6 +308,26 @@ class SpatialSlowField:
             out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
             self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
         return out
+
+    def _load_shunt_params(self):
+        c = self.cfg
+        return LoadShuntParams(tau_n=c.tau_n, k_n=c.k_n, rho_n=c.rho_n, n_base=c.n_base,
+                               n50=c.n50, hill_h=c.hill_h, a_max=c.a_max, u_n0=c.u_n0,
+                               n_min=c.n_min, n_max=c.n_max)
+
+    def uses_shunt(self) -> bool:
+        """True iff the conductance shunt actually couples (P1-1). Needs use_A AND k_n!=0
+        (else a==0 forever -> must take the literal parity path in kick_probe) AND alpha_A!=0.
+        The parity gate keys on uses_shunt()==False; do NOT drop the k_n!=0 term."""
+        return bool(self.cfg.use_A and self.cfg.k_n != 0.0 and self.cfg.alpha_A != 0.0)
+
+    def shunt_g_at_E(self) -> np.ndarray:
+        """Per-E-neuron conductance g_A = alpha_A * a, clipped to [0, g_A_max].
+        Returns zeros(nE) when shunt off -> kick_probe takes the literal parity branch."""
+        if not self.uses_shunt():
+            return np.zeros(self.nE, dtype=float)
+        aE = self.a_shunt[self._iyE, self._ixE]
+        return np.clip(self.cfg.alpha_A * aE, 0.0, self.cfg.g_A_max)
 
     def threshold(self, V_th_base):
         """Protocol passthrough: v2 rides the heterogeneous core threshold unchanged
@@ -307,6 +359,13 @@ class SpatialSlowField:
             fk = saturation(a_K, cfg.a0_K, cfg.a50_K)
             self.g_K += dt * (-self.g_K / cfg.tau_K + cfg.k_K * fk * (cfg.gK_max - self.g_K))
             np.clip(self.g_K, 0.0, cfg.gK_max, out=self.g_K)
+        if cfg.use_A:                                               # M4-3A load -> shunt
+            u_n = convolve_periodic(self.rE, self._Kn)              # field-derived drive K_n * rE (EMA rE)
+            self.trace_un_mean.append(float(u_n.mean()))            # P1-4: dump real u_n even when k_n=0 (P0b lock)
+            if cfg.k_n != 0.0:                                      # evolve load ONLY when active -> parity when k_n=0
+                self.n_load, self.a_shunt = load_shunt_step(self.n_load, u_n, dt, self._load_shunt_params())
+        self.trace_n_mean.append(float(self.n_load.mean()))
+        self.trace_a_mean.append(float(self.a_shunt.mean()))
         self.trace_qI_mean.append(float(self.q_I.mean()))
         self.trace_gK_mean.append(float(self.g_K.mean()))
         if cfg.use_hG or cfg.use_SG:                              # FAST (tau_s) EMA needed by h_G and/or S_G
