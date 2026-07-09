@@ -62,6 +62,7 @@
 - 6 条 pre-registered 预测：H1 endpoint 空间紧凑 / H2 source-sink 反向几何 / H3 mark independence + stable geometry / H4 rate-geometry 解耦 / H5 发作邻近 endpoint identity shift / H6 participation-field 空间分隔
 - 建模路线：effective gain → linear dispersion map → finite-pulse response map → 2D rate field + geometry controls → LIF E-I SNN → 抽象慢变量 feasibility bridge；旧 HR/FHN Phase 4 route 降级为历史探索 / sensitivity
 - **当前执行状态（2026-06-29，建模线收口为机制 screen）**：建模路线已执行到慢变量阶段。M0→M1→M2 在均质衬底上一致显示"空间自限难、不靠压死"→ 转 M3；M3 A 线（源空间逐细胞 onset 梯度）= 沿轴相干招募波（R²≈0.87、40k SNN），B 线（谱相图）§5 非正规瞬态 = 骨架特异自限轴向，两线互证；M3A 慢变量场探索（v2 / v2.1 clamp 复查 / v2.2 sustained+`h_G`）**一致 NEGATIVE** = 当前 SNN regime + 载体图景不足以把沿轴事件改道成离轴/全局发作样招募，下一杠杆 = 连接结构 `D_EE` / 衬底重做（非继续调慢变量）。**机制 screen 通过、发作机制未 validate。** M-stage 主文档：`docs/topic4_m3_stage.md`（A/B 分文档 + worktree 处置见其 §13 / §7）
+- **M4 / M4-2 update（2026-07-08/09，分支 `topic4-m4-divisive-sg` 未 merge）**：M3 之后新增"除法共享抑制池"这一杠杆。**M4 pass-1** = 活动依赖的除法池能把 q_I 耗竭 runaway 打开成**窄窗口有界持续态**（bounded 第三态机制筛过），但空间宽、marginal、**不可撤回/不自终止**（池只 bound 不 terminate；archive `docs/archive/topic4/sef_hfo/m4_pass1_divisive_shared_pool_acceptance_2026-07-09.md`）。**M4-2** = 在该有界工作点加 E→E 短时程疲劳（STD）当终止器，扫削竭 × 恢复网格 + 3 seed：**全 map 0 terminate_clean**——STD 只把系统碎裂或压死，做不出"一次干净发作 → 可再触发间期"（scoped clean no-go，此衬底/工作点/网格/3-seed 内，非普适；archive `docs/archive/topic4/m4_2_std_termination_p1_sweep_2026-07-08.md`）。**结论 = 下一杠杆仍指向 `D_EE`/衬底异质 或更慢离子型（slow-K / gK）终止器，与 M3A 收口一致。**
 
 ### Topic 5：Seizure-related analysis（subject 内 seizure subtype + 下游 pre-ictal/outcome）
 
