@@ -18,3 +18,36 @@ def test_template_pair_tier_boundaries():
     assert template_pair_tier(0.0)  == "oblique"
     assert template_pair_tier(0.5)  == "aligned"
     assert template_pair_tier(0.9)  == "hard_degenerate"
+
+
+from src.topic5_scaffold_ab_contrast import derive_joint_contacts
+
+
+def _mk_matched(names, ranks):
+    return [{"name": n, "typical_rank": r, "x_norm": i*0.1, "y_norm": 0.0, "support": 1.0}
+            for i, (n, r) in enumerate(zip(names, ranks))]
+
+
+def test_joint_requires_finite_in_A_B_and_windows():
+    names = [f"A{i}-A{i+1}" for i in range(6)]
+    matched = _mk_matched(names, [0,1,2,3,4,5])
+    axis_b = {"channels": [{"name": n, "typical_rank": 5-i} for i,n in enumerate(names)]}
+    wv = np.random.default_rng(0).normal(size=(10, 6))
+    out = derive_joint_contacts(matched, axis_b, wv)
+    assert out["status"] == "ok" and out["n_joint"] == 6 and out["tier"] == "reciprocal"
+
+
+def test_joint_insufficient_when_lt_6():
+    names = [f"A{i}-A{i+1}" for i in range(4)]
+    matched = _mk_matched(names, [0,1,2,3])
+    axis_b = {"channels": [{"name": n, "typical_rank": 3-i} for i,n in enumerate(names)]}
+    out = derive_joint_contacts(matched, axis_b, np.zeros((10,4)))
+    assert out["status"] == "insufficient_joint"
+
+
+def test_joint_hard_degenerate_when_templates_identical():
+    names = [f"A{i}-A{i+1}" for i in range(6)]
+    matched = _mk_matched(names, [0,1,2,3,4,5])
+    axis_b = {"channels": [{"name": n, "typical_rank": i} for i,n in enumerate(names)]}  # B==A
+    out = derive_joint_contacts(matched, axis_b, np.random.default_rng(1).normal(size=(10,6)))
+    assert out["status"] == "hard_degenerate"
