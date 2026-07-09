@@ -33,3 +33,15 @@ def test_m43a_ablation_three_variants(tmp_path):
     abl = json.load(open(glob.glob(str(out / "*ablation.json"))[0]))
     variants = {r["variant"] for r in abl["rows"]}
     assert variants == {"shunt_only", "subtractive_only", "hybrid"}
+    # Config-level invariants: guard against parameter-swap failures
+    by = {r["variant"]: r for r in abl["rows"]}
+    eta_m = abl["eta_matched"]
+    # shunt_only: pure divisive shunt (alpha_A = the swept point, eta_A = 0)
+    assert by["shunt_only"]["alpha_A"] == abl["alpha_A"]
+    assert by["shunt_only"]["eta_A"] == 0.0
+    # subtractive_only: no shunt (alpha_A = 0), eta_A = the matched value
+    assert by["subtractive_only"]["alpha_A"] == 0.0
+    assert by["subtractive_only"]["eta_A"] == eta_m
+    # hybrid: both engaged (alpha_A = swept point, eta_A = matched)
+    assert by["hybrid"]["alpha_A"] == abl["alpha_A"]
+    assert by["hybrid"]["eta_A"] == eta_m
