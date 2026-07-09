@@ -74,6 +74,21 @@
 
 Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计，也不是模型图。它支持“事件反复进入稳定传播模板”的可视化叙事；cohort-level 数字仍要由 masked propagation summary / matching-index 统计面板承载。TA/TB 只是同一 subject 内两类模板的图上别名，不跨 subject 合并。
 
+### Fig3-Sup2: 发作原始波形与标准频带谱前置解释图
+
+**目的**：作为 Fig3 的 explanatory / QC supplement，在进入 z-ER、field projection 和 maxAB 相似性之前，先用一个真实 seizure 说明三件事：baseline 是 z 标准化参考窗，不是发作前最后几秒；EEG onset 可以早于 clinical onset；Fig3-A/B 的 0-10 s field input 是早期 ictal 能量场，不是原始 z-ER 图本身。
+
+**当前示例版本**：
+
+- 输出目录：`results/paper-ready-figure/fig3_sup2_raw_spectral_context/figures/`
+- 示例文件：`epilepsiae_1146_seizure_07_raw_spectral_context.png` / `.pdf`
+- 复现入口：`scripts/paper_figures/plot_fig3_raw_spectral_context.py --subject epilepsiae_1146 --seizure-idx 7`
+- 图形合同：三行共享同一条连续 `[-120,+20]s` x 轴。上排为 lagPat joint-valid 电极的 raw stacked traces；中排为一个代表性 lagPat 单通道的 baseline-normalized TFR（dB vs baseline）；下排为同一代表通道 alpha/beta/gamma/HFA/1-150 Hz 相对 baseline 的能量增强轨迹。图面同时标出 baseline window、EEG-onset neighborhood、clinical onset 后 0-10 s field input、EEG onset 和 clinical onset。
+
+**当前口径**：
+
+这张图只承担解释和质控作用，不是 cohort 统计，也不证明 timing-order replay、direction replay 或机制。它作为 Fig3 supplement 引用，帮助读者先理解原始发作信号、baseline 选择和 early-field input 的关系；主结论仍由 Fig3-A cohort 统计和 Fig3-B / spatial-null material 承载。
+
 ### Fig3-A: 间期传播场与发作早期激活场的 cohort 级一致性
 
 **目的**：用一个紧凑 Data-vs-Null 统计面板说明，间期 HFO 传播场和发作早期激活场在 maxAB 可评估 subject 层面整体高于 channel-shuffle null；不再展示 per-subject board。
@@ -94,7 +109,7 @@ Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计�
 
 **Fig3-Sup1（间期 HFO 几何 ↔ 发作早期多频带能量场 alignment，V2 Phase-1，exploratory，2026-07-04，已验收）**：把 Fig3-A 的单频段 field concordance 扩到**全 12 频带扫描**（δ→ripple）+ 诚实 null / per-subject caveat。3 panel：**A** subject×band maxAB 热图（红蓝 diverging、narrow>broad、band-generic）；**B** 每 primary 带 per-subject Δ vs 弱空间 null violin+点（两池 **6/7** 过 family-wise、唯 ripple_high n.s.=**NOT ripple-specific**）；**C** per-subject 稳定性（cohort 6/7 是**聚合**、narrow 中位仅 **2/7**、≥5/7 仅 **3/20** = **承重 caveat**）。**tier = exploratory candidate early-ictal spatial recruitment scaffold（cohort 层，非 formal/机制）**；**formal within-shaft Gate A 未评估**（2/20 within_shaft_strong、弱 null likely inflated）、**Gate B/C 未跑**、仅 onset+0–20s。**禁** HFO-/LVFA-/ripple-specific / timing-order / formal Gate A passed。复现 `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档 `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`；下一步 `docs/superpowers/plans/2026-07-04-topic5-v2-phase1-v2-scaffold-refinement.md`。
 
-### Fig3-B: E1146 peri-onset field similarity trajectory
+### Fig3-B: peri-onset field similarity trajectory（E1146 示范 + 全 subject material pool）
 
 **目的**：作为 Fig3-A 的 single-subject dynamic material，展示 E1146 在 `[-120,+20]s` onset-aligned 窗口内，1-150 Hz signed robust-z 能量场与间期 propagation field template 的相似性轨迹。
 
@@ -110,6 +125,12 @@ Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计�
 **当前口径**：
 
 Panel A 支持 coarse scaffold similarity 的 onset-near trajectory 目视素材；Panel B 只作为 polarity sidecar，显示 signed A/B polarity 不稳定。它不是 cohort 统计、不是 timing-order replay、也不解释完整发作期 trajectory；超过 `+20s` 的发作中比较需要 duration warping 或阶段对齐。
+
+**全 subject 扩展（2026-07-07）**：同一 locked pipeline（1-150 Hz summed spectrogram log power、notch 滤波输入 50/100/150/200 Hz、**无额外 FFT-bin line mask**、per-channel baseline robust-z、`[-120,+20]s`、10 s window / 2 s step）已推广到所有有间期传播模板轴（`results/spatial_modulation/propagation_geometry/observation_readout/real_subjects/<subject>_t_a.json`）的 35 个 subject，逐 subject 出同一张双面板 paper-ready 图。批处理 fail-closed：`scripts/paper_figures/run_fig3_peri_onset_all_subjects.py`；主索引 `results/paper-ready-figure/fig3_peri_onset_field_similarity/fig3_peri_onset_subject_index.{csv,json}` 每 subject 记录 status / drop_reason / n_seizures / n_windows / maxAB + signed A/B 摘要 / source_csv / figure_png / figure_pdf。当前 **20/35 出图**（18 Epilepsiae + 2 Yuquan），**15/35 drop**——全部因为上游 T0 eligibility 缓存缺失（`t0_feature_cache` / `ictal_field_long_cache` 无该 subject 文件，其中 13/15 是 Yuquan），属"上游前置步骤未跑"而非"本身不可分析"；补跑上游 T0 eligibility 后可再纳入。**tier 不变**：这是 Fig3-B 的 per-subject material pool，不是 formal cohort statistic；正式 cohort shift 仍是 Fig3-A Data-vs-Null panel。
+
+**maxAB 空间置换 null（两档）+ 时间维校正（2026-07-08→09）**：给 maxAB 面板加**两个被试内空间置换 null + 时间维多重比较校正**。两 null 都保持同一批 seizure / 时间窗 / A|B 模板 / 场平滑 / maxAB 逻辑，只打乱每窗 per-channel 能量值、完整重跑读出、对 seizure 取中位（每次 seizure 独立置换，R=1000；向量化读出与 exact `score()` 一致到机器精度）。两档强度：**all-contact**（`channel_shuffle`，值在全部触点间打乱＝最弱）、**within-shaft**（`within_shaft_shuffle`，值只在每根杆(shaft)内打乱＝保留"哪根杆热"的植入几何，**主 null**）。三档显著性：pointwise（逐窗未校正）< maxT（逐窗 FWER，Nichols-Holmes）< cluster（Maris-Oostenveld 时间维、对持续抬升敏感＝paper-facing"显著区间"）。复现 `scripts/run_topic5_fig3b_maxab_spatial_null.py --all-ok`（`--rebuild-from-stats` 从 `.npz` 只重算校正/重画，`--verify` 校验向量化=exact）；输出 `results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/`（逐 subject 图 + stats CSV + `.npz` + `fig3b_maxab_spatial_null_index.{csv,json}`）。
+
+**关键发现（换强 null 后大幅收紧）**：弱的 all-contact null 几乎人人过（19/20 至少 1 窗 pointwise），主要只说明"不是完全随机的场"。换主 within-shaft null + cluster 校正后：**13/20** 还有任何 within-shaft 特异结构（≥1 cluster 窗）、**9/20** 有实打实 cluster（≥6 窗）、只 **7/20** 扛过严苛 maxT、只 **2/20**（E922、E1146）在 maxT 下稳健（≥10 窗）。**塌缩案例**：E548 对 all-contact 是 64/66，换 within-shaft 后 **cluster 0**（图上观测 rust 线整段贴着蓝色 within-shaft null 带）；E1084 26→0。即这些 subject 之前"强"的相似度**几乎全是杆级植入几何**，不是杆内模板特异。**口径收紧**：发作前后能量场对间期骨架的相似，多数 subject 主要由电极摆放几何解释；只有少数（严苛口径 2–7/20）在时间校正下仍显示超出杆几何的模板特异性。**within-shaft null 分辨力依赖每根杆触点数**（见 index `n_singleton_shafts`；单触点杆无法杆内打乱，如 E1150 3/4 杆单触点，其 within-shaft 口径偏弱、两 null 甚至非严格嵌套）。**只检验 maxAB scaffold**，不做 onset increment / signed A/B / 多频带；**tier 不变**：per-subject 素材，非 formal cohort spatial gate。（特征＝1-150 Hz summed spectrogram log power，notch 输入，无额外 FFT-bin line mask，与观测 Fig3-B 一致。）
 
 ### Fig4: 被试特异性 SNN + KMeans readout 核验（E1146）
 

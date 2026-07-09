@@ -35,6 +35,12 @@
   formal/机制）**；formal within-shaft Gate A 未评估(2/20)、Gate B/C 未跑。脚本
   `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档
   `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`。
+- `fig3_sup2_raw_spectral_context/` — **Fig3-Sup2**：单次真实发作的 raw traces + baseline-normalized
+  TFR + 标准频带能量增强解释图。A 行展示 E1146 lagPat joint-valid 电极；B/C 使用代表性 lagPat
+  单通道（当前 `seizure_idx=7`, `SCL9`，按 onset→early-ictal 窗口内 alpha/beta/gamma/HFA/1-150 Hz
+  共同增强自动选择）展示 `dB vs baseline`。用途是解释 baseline、EEG onset、clinical onset 与
+  early-field input 的关系；**explanatory/QC supplement，不是 cohort 统计或 replay 证据**。脚本
+  `scripts/paper_figures/plot_fig3_raw_spectral_context.py`。
 - `fig_topic5_field_extrapolation_energy/` — **Topic 5 energy-field paper-ready 主图**：A E1146 真实电极布局上的测试设计
   （core-field vs own-order 预测 hidden seizure energy）/ B cohort Δ 直接裁决 / C 证据阶梯。
   结论边界：network extension supported，但 core-field 不系统性优于 hidden 电极自身间期顺序。
