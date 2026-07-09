@@ -50,6 +50,12 @@ OUT_DIR = os.path.join(ROOT, "results", "topic4_m4_dynamic")
 TAU_Q, TAU_A, SIGMA_Q, Q_MIN = 5000.0, 20.0, 1.5, 0.05
 # ---- M4 pool sensor (r50 ~ the phase-plane-calibrated rE_fast scale; REVIEW POINT) ----
 R50_PSI, N_PSI, P_POOL, TAU_MU, TAU_S, S_MAX = 0.4, 2.0, 3.0, 30.0, 80.0, 1.0
+# ---- M4-3A load->shunt defaults (spec Global Constraints; docs/superpowers/specs/
+#      2026-07-09-sef-hfo-m4-3-continuous-shunting-axis-coordinate-design.md); tau_n SLOW (> TAU_Q) ----
+M43A_TAU_N, M43A_N50, M43A_HILL_H, M43A_A_MAX = 20000.0, 0.4, 2.0, 1.0
+M43A_RHO_N, M43A_K_N, M43A_ETA_A, M43A_UN0 = 0.1, 1.0, 0.0, 0.0
+M43A_GA_MAX = 20.0
+M43A_EARLY_OFFSET_MS = 750.0                # P1-5 early refractory probe offset (Task 7 additive)
 # ---- spontaneous run ----
 T_DYN = 5000.0                                             # ms (long enough for a train of events)
 DT = 0.1
@@ -177,7 +183,10 @@ def _spatial_coverage(movie, active_thresh=0.1, tail_frames=8):
 
 
 def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None,
-            ee_std_u=0.0, ee_std_tau_ms=0.0, t_kick2=None, KICK_BOOST2=0.0, trace_xdep=False, T_ms=None):
+            ee_std_u=0.0, ee_std_tau_ms=0.0, t_kick2=None, KICK_BOOST2=0.0, trace_xdep=False, T_ms=None,
+            use_A=False, alpha_A=0.0, tau_n=M43A_TAU_N, k_n=M43A_K_N, rho_n=M43A_RHO_N, n_base=0.0,
+            n50=M43A_N50, hill_h=M43A_HILL_H, a_max=M43A_A_MAX, eta_A=M43A_ETA_A, sigma_n=SIGMA_Q,
+            u_n0=M43A_UN0, g_A_max=M43A_GA_MAX, dump_shunt_trace=False):
     p = S["p"] if T_ms is None else dataclasses.replace(S["p"], T=float(T_ms))   # M4-2: pass-2 extends T for the probe
     beta_SG = float(pool_extra.get("beta_SG", 0.0)) if pool_extra else 0.0     # matched-subtractive arm
     clamp_SG = pool_extra.get("clamp_SG") if pool_extra else None              # clamped-static-pool arm
@@ -185,7 +194,11 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None,
                                  q_min=Q_MIN, q_init=1.0, tau_q=TAU_Q, tau_a=TAU_A,
                                  use_SG=use_SG, alpha_G=alpha_G, beta_SG=beta_SG, clamp_SG=clamp_SG,
                                  r0_psi=0.0, r50_psi=R50_PSI,
-                                 n_psi=N_PSI, p_pool=P_POOL, tau_mu=TAU_MU, tau_S=TAU_S, S_max=S_MAX)
+                                 n_psi=N_PSI, p_pool=P_POOL, tau_mu=TAU_MU, tau_S=TAU_S, S_max=S_MAX,
+                                 # M4-3A load->shunt (use_A=False by default -> byte-parity, §6.3 Global Constraints):
+                                 use_A=use_A, alpha_A=alpha_A, tau_n=tau_n, k_n=k_n, rho_n=rho_n, n_base=n_base,
+                                 n50=n50, hill_h=hill_h, a_max=a_max, eta_A=eta_A, sigma_n=sigma_n,
+                                 u_n0=u_n0, g_A_max=g_A_max)
     slow = SpatialSlowField(S["N"], 18.0, S["posE"], S["posI"], S["L"], cfg=cfg)
     S["net"]["rng"] = np.random.default_rng(S["seed"])
     t0 = time.time()
@@ -233,6 +246,9 @@ def run_arm(S, label, k_q, use_SG, alpha_G, perturb=None, pool_extra=None,
     if trace_xdep:                                                    # M4-2: (x_dep, q_I) diagnostic traces
         out["xdep_mean"] = res.get("xdep_mean")
         out["xdep_min"] = res.get("xdep_min")
+    if dump_shunt_trace:                                              # M4-3A: (a, n) diagnostic traces (Task 4 fields)
+        out["a_trace"] = np.asarray(slow.trace_a_mean, np.float32)
+        out["n_trace"] = np.asarray(slow.trace_n_mean, np.float32)
     return out
 
 
@@ -355,6 +371,89 @@ def _run_p1_sweep(out_dir, *, seed, k_q, alpha_G, u_grid, tau_grid, base_T, reco
     return scal
 
 
+def _m43a_cell_worker(cell):
+    """Pool worker for the M4-3A (alpha_A x tau_n) discovery sweep. cell = (label, k_q, alpha_G, alpha_A,
+    tau_n, base_T, recovery_factor, reprobe_boost). Mirrors _p1_cell_worker but sweeps the Task-4 n->a
+    load/shunt field (use_A=True, alpha_A, tau_n) instead of the ee_std STD terminator. Arm0 (alpha_A=0.0)
+    is the M4-1 bounded-persist baseline (uses_shunt() False -- a computed but has zero membrane effect).
+    Uses the COW-shared _S['S']; runs the two-pass + early-probe retrigger (Task 7) for one cell. Returns
+    the verdict scalars + the go composite + the D_A diagnostic (spec §8) + pass-1 traces (prefixed '_')."""
+    from src.sef_hfo_m4_termination import run_cell_with_retrigger
+    label, k_q, alpha_G, alpha_A, tau_n, base_T, rf, rb = cell
+    S = _S["S"]
+    cap = {}
+    try:
+        def run_fn(t_kick2, kick_boost2, min_T):
+            T_use = base_T if min_T is None else max(base_T, min_T)
+            r = run_arm(S, label, k_q, True, alpha_G, use_A=True, alpha_A=alpha_A, tau_n=tau_n,
+                        t_kick2=t_kick2, KICK_BOOST2=kick_boost2, dump_shunt_trace=True, T_ms=T_use)
+            cap["pass1" if t_kick2 is None else "pass2"] = r
+            return {"af": r["af"], "runaway_ms": r["runaway_ms"], "baseline_af": r["baseline_af"]}
+
+        recovery_ms = max(tau_n, TAU_Q)                               # re-trigger needs both q_I and n recovered
+        v = run_cell_with_retrigger(run_fn, C.BIN_MS, recovery_ms=recovery_ms, recovery_factor=rf,
+                                    reprobe_boost=rb, early_offset_ms=M43A_EARLY_OFFSET_MS)
+    except Exception as e:                                             # fail-loud per cell; don't kill the whole sweep
+        return dict(label=label, alpha_A=alpha_A, tau_n=tau_n, k_q=k_q, alpha_G=alpha_G,
+                    termination_class="ERROR", retrigger_probe="ERROR", go=False, error=repr(e))
+    go = (v["termination_class"] == "terminate_clean"                  # spec §7/D5: late AND early both required
+          and v.get("retrigger_early") == "attenuated"                 # absent (None) unless terminate_clean -> go=False
+          and v["retrigger_probe"] == "reignite_bounded")               # retrigger_probe = late window (Task 7)
+    p1 = cap["pass1"]
+    row = dict(label=label, alpha_A=alpha_A, tau_n=tau_n, k_q=k_q, alpha_G=alpha_G,
+              recovery_ms=recovery_ms, go=bool(go), **v,
+              pass1_wall_s=p1["wall_s"], pass1_verdict=p1["verdict"],
+              pass2_wall_s=(cap["pass2"]["wall_s"] if "pass2" in cap else None),
+              _af=p1["af"], _a_trace=p1["a_trace"], _n_trace=p1["n_trace"], _rate=p1["rate"])
+    a_tr = p1["a_trace"]
+    if a_tr is not None and len(a_tr):                                 # diagnostic: D_A = 1 + alpha_A*a (spec §8)
+        D_A = 1.0 + alpha_A * np.asarray(a_tr, float)
+        row.update(D_A_mean=float(D_A.mean()), D_A_p95=float(np.percentile(D_A, 95)), D_A_max=float(D_A.max()))
+    return row
+
+
+def _run_m43a_sweep(out_dir, *, seed, k_q, alpha_G, alpha_grid, tau_grid, base_T, recovery_factor,
+                    reprobe_boost, workers):
+    """M4-3A (spec §4.1/§8) discovery sweep: (alpha_A x tau_n) grid at the fixed M4 op-point (k_q, alpha_G)
+    + per-seed Arm0 baseline (alpha_A=0), each a two-pass + early-probe retrigger cell, via Pool (COW-shared
+    net). Writes m43a_sweep_summary.json + m43a_sweep_traces.npz. Conservative `workers` for OOM safety."""
+    os.makedirs(out_dir, exist_ok=True)
+    cells = [("m43a_arm0", k_q, alpha_G, 0.0, tau_grid[0], base_T, recovery_factor, reprobe_boost)]
+    for a_A in alpha_grid:
+        for tau in tau_grid:
+            cells.append((f"m43a_a{a_A:g}_tau{int(tau)}", k_q, alpha_G, a_A, tau, base_T,
+                          recovery_factor, reprobe_boost))
+    print(f"[M4-3A sweep] {len(cells)} cells (Arm0 + {len(alpha_grid)}x{len(tau_grid)}) workers={workers} "
+          f"T={base_T} kq={k_q} aG={alpha_G}", flush=True)
+    t0 = time.time()
+    with mp.Pool(min(workers, len(cells))) as pool:
+        rows = pool.map(_m43a_cell_worker, cells)
+    wall = round(time.time() - t0, 1)
+    for r in rows:
+        r["seed"] = seed                                             # provenance in EVERY row, incl. ERROR (P1-2 pattern)
+    scal = [{k: v for k, v in r.items() if not k.startswith("_")} for r in rows]
+    try:
+        git_sha = subprocess.run(["git", "-C", ROOT, "rev-parse", "--short", "HEAD"],
+                                 capture_output=True, text=True).stdout.strip() or None
+    except Exception:
+        git_sha = None
+    prov = dict(seed=seed, subject=getattr(PP, "SUBJECT", None), montage=getattr(PP, "MONTAGE", None),
+                git_sha=git_sha, argv=sys.argv, T=base_T)
+    json.dump(dict(seed=seed, k_q=k_q, alpha_G=alpha_G, alpha_grid=list(alpha_grid), tau_grid=list(tau_grid),
+                   base_T=base_T, recovery_factor=recovery_factor, reprobe_boost=reprobe_boost, wall_s=wall,
+                   provenance=prov, rows=scal),
+              open(os.path.join(out_dir, "m43a_sweep_summary.json"), "w"), indent=2)
+    np.savez_compressed(os.path.join(out_dir, "m43a_sweep_traces.npz"),
+                        **{f"{r['label']}__{a}": r[f"_{a}"] for r in rows if "error" not in r
+                           for a in ("af", "a_trace", "n_trace", "rate")})
+    print(f"[M4-3A sweep] done in {wall}s -> {out_dir}", flush=True)
+    for r in scal:                                                    # console map (go = terminate_clean AND early/late)
+        print(f"  {r['label']:<20} class={str(r.get('termination_class')):<15} "
+              f"early={str(r.get('retrigger_early')):<12} retrigger={str(r.get('retrigger_probe')):<15} "
+              f"go={r.get('go')} D_A_mean={r.get('D_A_mean')}", flush=True)
+    return scal
+
+
 def main():
     ap = argparse.ArgumentParser(description="M4 dynamic q_I spontaneous experiment (RUNS SIMULATIONS)")
     ap.add_argument("--seed", type=int, default=1)
@@ -394,6 +493,13 @@ def main():
     ap.add_argument("--p1-workers", type=int, default=5)              # OOM-safe (swap tiny; other campaign live)
     ap.add_argument("--p1-u-grid", default="0.15,0.3,0.5")
     ap.add_argument("--p1-tau-grid", default="1000,2500,5000")
+    # ---- M4-3A (spec §4.1/§8): (alpha_A x tau_n) load->shunt discovery sweep, same op-point + machinery as P1 ----
+    ap.add_argument("--m43a-sweep", action="store_true",
+                    help="M4-3A (alpha_A x tau_n) n->a load/shunt sweep + Arm0 at the P1 op-point via Pool "
+                         "(conservative workers); go = terminate_clean AND early-attenuated AND late-reignite_bounded")
+    ap.add_argument("--m43a-alpha-grid", default="2,4,8")
+    ap.add_argument("--m43a-tau-grid", default="5000,20000,40000")
+    ap.add_argument("--m43a-workers", type=int, default=5)            # OOM-safe (swap tiny; other campaign live)
     a = ap.parse_args()
     if not a.confirm_run:
         print("REFUSED: dynamic-q_I sim gate. Re-run with --confirm-run.")
@@ -414,7 +520,8 @@ def main():
     else:
         arms = ARMS
     if a.out == OUT_DIR:
-        a.out = OUT_DIR + ("_p1_sweep" if a.p1_sweep else "_p1_timing" if a.p1_timing_cell
+        a.out = OUT_DIR + ("_m43a_sweep" if a.m43a_sweep
+                           else "_p1_sweep" if a.p1_sweep else "_p1_timing" if a.p1_timing_cell
                            else "_reversibility" if a.reversibility
                            else "_stimlocus" if a.stim_locus
                            else "_mechanism" if a.mechanism else "_sweep" if a.sweep
@@ -435,6 +542,13 @@ def main():
                       tau_grid=[float(x) for x in a.p1_tau_grid.split(",")],
                       base_T=a.T, recovery_factor=a.p1_recovery_factor, reprobe_boost=a.p1_reprobe_boost,
                       workers=a.p1_workers)
+        return
+    if a.m43a_sweep:                     # M4-3A: (alpha_A x tau_n) sweep + Arm0, Pool, OOM-safe, same op-point as P1
+        _run_m43a_sweep(a.out, seed=a.seed, k_q=a.p1_kq, alpha_G=a.p1_alpha_g,
+                        alpha_grid=[float(x) for x in a.m43a_alpha_grid.split(",")],
+                        tau_grid=[float(x) for x in a.m43a_tau_grid.split(",")],
+                        base_T=a.T, recovery_factor=a.p1_recovery_factor, reprobe_boost=a.p1_reprobe_boost,
+                        workers=a.m43a_workers)
         return
     if a.stim_locus:
         arms = _stim_locus_arms(S, a.stim_on, a.stim_off, a.stim_radius, a.stim_dvth)
