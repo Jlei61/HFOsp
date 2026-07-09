@@ -159,6 +159,7 @@
 | [template_ablation_coverage/figures/](template_ablation_coverage/figures/) | 模板消融覆盖 |
 | [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
 | [topic5_ictal_recruitment/v3_mode_transition/figures/](topic5_ictal_recruitment/v3_mode_transition/figures/) | V3a：发作开始前后，活动是否从间期固定电极通路搬到通路外（**每队列一张、真实秒数横轴**：主图 `v3_axis_vs_offaxis_{narrow,broad}` 沿轴组织度 vs 离轴流随时间、扣发作前基线，看 onset 前后是否反向张开；附图 `v3_mode_direction_{narrow,broad}` 模态方向阴性）；EXPLORATORY **脆弱阳性**——配对后非轴向净流增量在主(Holm 0.031)+复制(0.008)队列都队列级显著(tier4 机械/supported)，但 null-relative(原始流大多在降)+同时共激活为主(lag1≈lag0)+个体稳健性弱(流腿 0/7)+模态腿全阴 → 数据侧候选信号非确立的模态转移，pending sensitivity/V3b。详见 docs/archive/topic5/v3a_mode_transition_2026-07-04.md |
+| [paper-ready-figure/fig_topic5_scaffold_ab/figures/](paper-ready-figure/fig_topic5_scaffold_ab/figures/) | V3d：间期传播轴的 A/B 两态占据 + 发作按类型分。**cohort 3 张**：`cohort_two_state_vs_geometry`（两态是否几何伪影 —— ρ≈0/>0 时中点仍空 ≤10% → 两态 largely real）、`cohort_ab_typing`（发作分型，cross-seizure-shuffle null **11/20 显著、9/20 可区分两型**）、`cohort_h1_nearonset_forest`（近-onset 收敛 **1/3 合格锁定、binom p=0.14 → 非队列效应**）；**per_subject/ 24 张**：每被试 per-seizure C_AB 分布（发作分成 A/B 主导）+ 时程（是否每次都切换）。口径 = 间期两模板投到发作能量：能量落两个离散态（强 A/强 B，几乎不落中点）、发作按 A/B 分型、近-onset 收敛只 442 单被试。详见 figures/README.md + spec `docs/superpowers/specs/2026-07-09-topic5-v3d-*` |
 
 ---
 
