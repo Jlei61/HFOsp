@@ -14,6 +14,12 @@
 
 **关注点**：这张图只是把"队列层面整体是不是往负方向偏"这件事画出来——`broad` 在这个问法下不显著，不代表 `broad` 没有反向个案（下面 6/26 通过自己零假设的病人是真实存在的），只说明"整体中位数偏移"和"个别病人打穿阈值"是两个不同的问法，可以给出不同答案。正式的"过/不过"判定以逐病人二项 gate（脚注里的 `cohort_binomial`）为准，本图是可视化，不是判决。
 
+### field_reversal_cohort_stat_narrow.png — narrow（SOZ 核心）单独版反向头条图
+
+只画 `narrow`（贴近临床 SOZ 核心的小触点集）这一个底物的 Data-vs-Null——反向门里 narrow 是科学上最要紧的底物（核心触点、临床相关），单独拎出来看。配色**故意换成青绿 Data / 暖砂 Null**，区别于 `field_reversal_cohort_stat.png` 以及「间期↔发作 field similarity」系列共用的蓝/灰配色，避免读者把两类图混淆。Data 中位 ≈ −0.6、多数点在 0 以下；Null 中位 ≈ −0.04、集中在 0 附近；`***` 括号 = 配对单尾 Wilcoxon（p=0.0002）。脚注同时给出正式判决层的逐病人二项 gate（9/26，p=2.8e-6）。
+
+**关注点**：这是 narrow 底物「队列整体是不是往负偏」的可视化，正式过/不过仍以脚注的逐病人二项 gate（9/26）为准；青绿/暖砂配色只为和蓝/灰的 field-similarity 图区分，不承载额外含义。
+
 ### accountability.png — 谁进了队列、为什么
 
 `broad`/`narrow` 并排的分组条形图，横轴 = 8 种可能的入组结果（`no_planes`/`load_error`/`c1_violation`/`plane_not_built`/`cluster_map_ambiguous`/`insufficient_overlap`/`degenerate_null`/`ok`），纵轴 = 病人数。`broad` 26 个候选全部 `ok`；`narrow` 35 个候选里 6 个因为标签本身不满足"稳定两簇"前提被挡在门外（`c1_violation`）、1 个几何平面没建成（`plane_not_built`）、2 个因为可打乱的触点太少而判定零假设退化（`degenerate_null`），剩下 26 个 `ok`。

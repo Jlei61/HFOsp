@@ -58,6 +58,13 @@ SUBSTRATES = ("broad", "narrow")
 REASON_ORDER = ("no_planes", "load_error", "c1_violation", "plane_not_built",
                 "cluster_map_ambiguous", "insufficient_overlap", "degenerate_null", "ok")
 COLOR_BROAD, COLOR_NARROW = "#4C72B0", "#DD8452"
+# The combined broad|narrow cohort-stat figure reuses fig3's blue-Data / gray-Null scheme,
+# which is ALSO the interictal-vs-ictal field-concordance palette
+# (scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py). The narrow-only
+# (SOZ-core) figure below deliberately switches to teal-green Data / warm-sand Null so the
+# reader never confuses it with the field-similarity figures.
+NARROW_DATA_FACE, NARROW_DATA_EDGE, NARROW_DATA_PT = "#7ec4ae", "#2b7a63", "#1f6b55"
+NARROW_NULL_FACE, NARROW_NULL_EDGE, NARROW_NULL_PT = "#e3cfa6", "#b39456", "#9c7e3f"
 # Two informative examples per substrate (one clean pass, one where the raw signed_corr looks
 # strongly negative but fails its OWN within-shaft null -- the pedagogically important case that
 # shows why the null matters, not just the raw number).
@@ -226,6 +233,68 @@ def plot_cohort_stat(per_subject_by_substrate: dict, cohort_summary: dict, out_d
     (out_dir / "field_reversal_cohort_stat_metadata.json").write_text(json.dumps(metadata, indent=2))
     print(f"[fig] {out_png}")
     return groups_meta
+
+
+# --------------------------------------------------------------------------- Fig A (narrow-only)
+def plot_cohort_stat_narrow(per_subject_by_substrate: dict, cohort_summary: dict, out_dir: Path):
+    """narrow-only (SOZ-core) view of the reversal Data-vs-Null. Same idiom as the combined
+    figure but a single group and a DISTINCT palette (teal-green Data / warm-sand Null) --
+    narrow is the scientifically central substrate (the compact clinical core), and its blue/
+    gray twin in the combined figure collides with the field-concordance palette."""
+    rng = np.random.default_rng(20260706)
+    fig, ax = plt.subplots(figsize=(4.7, 5.0))
+    x_data, x_null = 1.0, 1.9
+
+    ok = _ok_records(per_subject_by_substrate["narrow"])
+    ds_sids = sorted(ok)
+    data = np.array([ok[s]["gate"]["signed_corr"] for s in ds_sids], float)
+    null = np.array([ok[s]["gate"]["null_p50"] for s in ds_sids], float)
+    stat, p = _safe_wilcoxon(data, null, alternative="less")
+    n_lt = int(np.sum(data < null))
+    acc = cohort_summary["narrow"]["accountability"]
+    excluded = {r: c for r, c in acc.items() if r != "ok" and c > 0}
+    binom = cohort_summary["narrow"]["binomial"]
+    # Same reconcile-or-fail guard as the combined figure.
+    assert len(ds_sids) == cohort_summary["narrow"]["n_ok"], (
+        f"narrow: plotted n_ok={len(ds_sids)} != cohort_summary {cohort_summary['narrow']['n_ok']}")
+    assert binom["n"] == len(ds_sids) and binom["k"] == int(
+        np.sum([ok[s]["gate"]["passed"] for s in ds_sids])), "narrow binomial does not reconcile"
+
+    jitter = rng.normal(0.0, 0.045, size=len(data))
+    for i in range(len(data)):
+        ax.plot([x_data + jitter[i], x_null + jitter[i]], [data[i], null[i]],
+                 color="0.78", lw=0.8, zorder=2, alpha=0.85)
+    _add_violin_box_points(ax, data, x_data, facecolor=NARROW_DATA_FACE, edgecolor=NARROW_DATA_EDGE,
+                           rng=rng, point_face=NARROW_DATA_PT, point_edge="white", jitter=jitter)
+    _add_violin_box_points(ax, null, x_null, facecolor=NARROW_NULL_FACE, edgecolor=NARROW_NULL_EDGE,
+                           rng=rng, point_face=NARROW_NULL_PT, point_edge="white", jitter=jitter)
+
+    ymax = max(float(np.nanmax(data)), float(np.nanmax(null)))
+    _add_sig_bracket(ax, x_data, x_null, ymax + 0.11, _p_stars(p), h=0.07)
+    excl_str = ", ".join(f"{k}={v}" for k, v in excluded.items()) or "none"
+    footnote = (f"narrow (SOZ-core)\nn={len(data)} (excluded: {excl_str})\n"
+                f"Wilcoxon (less) p={_fmt_p(p)} {_p_stars(p)}, n(data<null)={n_lt}/{len(data)}\n"
+                f"cohort_binomial pass {binom['k']}/{binom['n']} (p={_fmt_p(binom['p_binom'])})")
+    ax.text((x_data + x_null) / 2, -0.32, footnote, transform=ax.get_xaxis_transform(),
+            ha="center", va="top", fontsize=8)
+
+    ax.axhline(0.0, color="0.3", lw=1.0, ls="--", zorder=1)
+    ax.text(x_null + 0.42, 0.03, "r = 0", fontsize=8, color="0.3", va="bottom", ha="right")
+    ax.set_ylabel("TA–TB field reversal (signed r)", fontsize=11)
+    ax.set_xticks([x_data, x_null])
+    ax.set_xticklabels(["Data", "Null"], fontsize=10)
+    ax.set_xlim(0.5, 2.4)
+    ax.set_ylim(-1.15, 1.35)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.suptitle("TA–TB field reversal — narrow (SOZ-core) substrate\n"
+                 "Data vs within-shaft Null · reversal = signed r below 0 AND below its own null",
+                 fontsize=9.6, y=0.998)
+    fig.subplots_adjust(left=0.17, right=0.95, top=0.88, bottom=0.34)
+
+    out_png = out_dir / "field_reversal_cohort_stat_narrow.png"
+    fig.savefig(out_png, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"[fig] {out_png}")
 
 
 # --------------------------------------------------------------------------- diagnostic supplement
@@ -543,6 +612,7 @@ def main():
 
     print("[1/6] cohort_stat (headline) ...")
     plot_cohort_stat(per_subject, cohort_summary, OUT_DIR)
+    plot_cohort_stat_narrow(per_subject, cohort_summary, OUT_DIR)
 
     print("[2/6] accountability ...")
     plot_accountability(cohort_summary, OUT_DIR / "accountability.png")
