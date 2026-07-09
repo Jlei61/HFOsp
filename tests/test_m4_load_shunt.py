@@ -54,3 +54,39 @@ def test_validate_rejects_bad_params():
         _p(tau_n=0.0).validate()
     with pytest.raises(ValueError):
         _p(n50=0.0).validate()
+
+
+def test_a_uses_updated_n_not_pre_step_n():
+    # a = a_max * Pi(n_new), NOT Pi(pre-step n). One step moves n 0 -> 0.8-ish; Pi(0)=0 discriminates.
+    p = _p(k_n=1.0, rho_n=0.0, tau_n=1e9)          # huge tau -> leak negligible this step
+    n0 = np.array(0.0)
+    n_new, a = load_shunt_step(n0, np.array(1.0), dt=1.0, p=p)
+    assert a == pytest.approx(p.a_max * hill_pi(n_new, p))   # uses the UPDATED n
+    assert a != pytest.approx(p.a_max * hill_pi(n0, p))      # and NOT the pre-step n (which gives 0)
+
+
+def test_subthreshold_drive_does_not_reduce_load_below_base():
+    # drive below u_n0 must rectify to 0 (no build AND no spurious negative pull). n starts at n_base,
+    # away from n_min, so an unrectified negative dn would visibly drop n (not be masked by the clamp).
+    p = _p(k_n=1.0, rho_n=0.0, n_base=2.0, u_n0=0.5, n_min=0.0)
+    n_new, a = load_shunt_step(np.array(2.0), np.array(0.2), dt=1.0, p=p)   # 0.2 < u_n0=0.5
+    assert n_new == pytest.approx(2.0)             # rectified -> stays at n_base (unrectified would give 1.7)
+
+
+def test_rho_n_consumption_decays_load_faster_than_leak():
+    # the -rho_n*Pi(n) term must subtract extra decay beyond the bare leak (verifies it is wired, right sign).
+    n0 = 1.0
+    p_leak = _p(k_n=0.0, rho_n=0.0, tau_n=5000.0, n_base=0.0)
+    p_cons = _p(k_n=0.0, rho_n=0.5, tau_n=5000.0, n_base=0.0)
+    n_leak, _ = load_shunt_step(np.array(n0), np.array(0.0), 1.0, p_leak)
+    n_cons, _ = load_shunt_step(np.array(n0), np.array(0.0), 1.0, p_cons)
+    assert n_cons < n_leak                          # consumption decays load faster than leak alone
+
+
+def test_load_shunt_step_elementwise_on_1d_array():
+    # the interface promises elementwise behavior on 1D/2D arrays (used later by SpatialSlowField).
+    p = _p(k_n=1.0, rho_n=0.0)
+    n = np.array([0.0, 5.0, 9.9]); u = np.array([1.0, 0.0, 1.0])
+    n_new, a = load_shunt_step(n, u, dt=1.0, p=p)
+    assert n_new.shape == (3,) and a.shape == (3,)
+    assert np.all((n_new >= p.n_min) & (n_new <= p.n_max))   # all clamped in range
