@@ -83,7 +83,7 @@
 
 **用户门控执行：** 0 candidate → **不进入 40s acceptance、不进入 Task 9 ablation**（无候选可验）。这符合 "有候选才进 40s/ablation"。
 
-**边界细化（rigor，seed 1，α∈{5,6,7}，τ=20000）：** 见 §6.1（结果待填 / 已填）。用于排除 runaway→fragment 过渡带里藏 terminate_clean。
+**边界细化（rigor，seed 1，α∈{5,6,7}，τ=20000）：** α=5/6/7 全 fragment、0 terminate_clean（§6.1）—— **确认 no-go 在细网格上稳健**（合计 30 格 0 go）。
 
 ## 5. 下一杠杆 & 标定说明
 
@@ -117,7 +117,15 @@ python scripts/run_m4_dynamic_qi.py --m43a-sweep --confirm-run --seed 1 --T 1500
 ```
 结果：`results/topic4_m43a_p1_seed{1,3,4}/{m43a_sweep_summary.json, m43a_sweep_traces.npz}`。per-seed wall（3 seed 并发、80 core）≈ 2h。
 
-### 6.1 边界细化结果（α∈{5,6,7}, τ=20000, seed 1）
+### 6.1 边界细化结果（α∈{5,6,7}, τ=20000, seed 1）—— 确认 no-go
 
-**待填（refinement bg `bmgf3yo1p` 运行中）。** 预期：若 5/6/7 全 runaway 或 fragment、无 terminate_clean → 确认 no-go 在
-更细网格上稳健；若某 α 出现 terminate_clean → 该点为 candidate，需按门控进 40s acceptance。
+| α_A | class | runaway_ms | go | D_A_mean |
+| --- | --- | --- | --- | --- |
+| 5 | fragment | None | False | 3.02 |
+| 6 | fragment | None | False | 3.28 |
+| 7 | fragment | None | False | 3.35 |
+
+**α=5/6/7 全 fragment，0 terminate_clean / 0 go。** → **no-go 在更细网格上稳健**。结合主网格：**runaway(α≤4) → fragment(α≥5)
+直接过渡，边界（α≈4.5）无 terminate_clean 窗。** 全 discovery 合计 **30 sweep 格（27 coarse × 3 seed + 3 refine）、0 terminate_clean、
+0 go**。（注：α=8 fragment 但 α=5,6,7 也 fragment 且不 runaway，说明 runaway 只在 α≤4 的窄弱-shunt 带出现，稍强即转 fragment；
+干净终止窗在整条 α 轴上都不存在。）
