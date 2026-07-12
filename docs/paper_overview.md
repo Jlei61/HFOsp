@@ -73,7 +73,7 @@
   - 每 subject 内多个 ictal seizure 是否需要按 within-subject pathway 切 subtype（PR-1）
   - subtype 在 pre-ictal / propagation / outcome 是否表现出系统差异（PR-2+，未启动）
   - subtype 与 SOZ propagation pattern 是否互相印证（待立 PR）
-- **当前状态（network-skeleton 重定位 + 发作内 field pilot 2026-06-28）**：A 线已从"发作特异路径回放"重定位为"患者内稳定网络骨架读出"（间期/发作共用粗粒度锚点）；replay / subtype / load / drift 系列假设均阴性。最近做的发作内 field 动力学 pilot（§3.6）= **exploratory**：发作场随时间在变但整体仍贴间期主轴，"轴向走廊变弱 / 离轴变强"在 broad 队列有暗示、narrow 扩队列证否一半 → 非稳健、依队列/走廊几何，只进 supplementary。archive：`docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md`
+- **当前状态（network-skeleton 重定位 + V3p 收口 2026-07-12）**：A 线已从"发作特异路径回放"重定位为"患者内稳定网络骨架读出"（间期/发作共用粗粒度锚点）；replay / subtype / load / drift 系列未形成稳健支持。发作内 field pilot 的 broad 方向暗示被 narrow 扩队列证否一半；V3a 的跨-onset 非轴向流信号虽机械上达 tier 4，但依赖 null-relative 增量、同时共激活且个体稳健性弱。其 preictal-only 复核 V3p 在 narrow、`broad_expanded`、`broad_core` 三层均为**完整硬门阴性（tier 0）**，未支持 onset 前最后两分钟内稳定一致的非轴向爬升。因此安全主线是：**共享粗骨架存在；渐进式 preictal state relocation 没有证据；onset-crossing 变化仍属脆弱候选。** archive：`docs/archive/topic5/v3p_preictal_nonaxis_trajectory_2026-07-05.md`
 
 ---
 
@@ -103,7 +103,7 @@ SEF-HFO v0.2（2026-06-01 plan lock draft）把 Topic 4 主模型收紧为一个
 
 PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subject 上落地（exploratory，2026-05-10 audit-corrected）：约 64% subject-band 找到 ≥2 morphological subtypes，与 Schroeder 2020 *PNAS* within-patient pathway-variability 先验一致。442/548 sentinel 视觉支持 z-ER 抓得到 user 标的视觉异类（recall=100%）；548 gamma k=7 标为 high-heterogeneity / fine subdivision candidate（需 sensitivity）；916/1077 因 status filter / n_ok 失效不能作 sentinel。下游 PR 必须 per-subtype 不 per-subject。
 
-**当前进展（network-skeleton 重定位 + 发作内 field pilot）**：这条线后来重定位了——我们原本以为间期网络轴是"发作时那条传播路径的预演/回放"，但证据指向它其实是患者自己一张**粗粒度的稳定网络锚点图**，间期和发作大体共用同一张图，而不是发作特异的路径回放（回放/子型/负荷/漂移一系列假设都没看到信号）。最近做的发作内 field pilot 想看：一次发作从头到尾，电活动的"空间形状"会不会从"贴着间期那条主轴"逐渐拐向"离轴/横向"。结果是：场确实随时间在变、但整体仍贴着间期主轴；"轴向变弱、离轴变强"这个方向性假设在小队列里有点苗头、扩到更多被试后被证否了一半——它依赖具体队列和走廊几何，不是稳健现象，只作 exploratory/supplementary，不进主结论。（内部归档代号：A-line network-skeleton pivot、ictal field dynamics pilot broad 暗示 / narrow 证否；archive `docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md`）
+**当前进展（network-skeleton 重定位 + preictal-only 收口）**：这条线后来重定位了——间期网络轴更像患者内稳定的**粗粒度网络锚点图**，而不是发作特异路径的预演。发作内 field 的 broad 方向暗示在 narrow 扩队列不复现；V3a 跨 onset 的非轴向流增量也因原始流多下降、lag1≈lag0、个体稳健性弱和模态腿阴性而只能算脆弱候选。V3p 随后把窗口严格限制在 onset 前 −120~−10 s，并用 label/rate/lag1/phase/block/双 span 完整硬门复核，三层队列均为 tier 0、完整个体支持为 0。**因此文章可承重的边界是“共享粗骨架存在，但未见稳定一致的渐进式 preictal non-axis relocation”**；这不排除其他 preictal state change，也不把 onset 后变化判死。（archive `docs/archive/topic5/v3p_preictal_nonaxis_trajectory_2026-07-05.md`）
 
 ---
 
@@ -192,6 +192,7 @@ PR-0 v2.3 ictal ER timing atlas + PR-1 z-ER subtyping 在 16 个 epilepsiae subj
 - Topic 3：SOZ 更像是“全局调制之上叠加局部短程记忆”，而不是简单地“整体更同步”或“整体更周期”。
 - Topic 5：v2.3 ictal ER atlas 显示 within-subject seizure 异质性是真现象；z-ER subtyping cohort 上 ~64% subject-band 找到 ≥2 morphological subtypes，与 Schroeder 2020 PNAS 先验一致。结论 commit 到 publication-grade 仍需 sensitivity（sentinel 442/548 已视觉过关；548 gamma k=7 / 916/1077 sentinel 失效是已知限制）。下游 PR 必须 per-subtype。
 - Topic 5（临床结局收口 Track E，2026-06-13）：Yuquan 触点级"模板网络覆盖"预测变量侧已跑通、结局标签 gating 待医院随访（E1）；Epilepsiae 切除仅叶级、触点级覆盖构造不出 = no-go feasibility（E2）。详见 `docs/topic5_seizure_subtyping.md` §3.4。
+- Topic 5（V3p，2026-07-12 整合）：在 EEG onset 前 −120~−10 s、HFO-defined non-axis 与完整多重硬门下，没有证据支持非轴向流或模态随 onset 临近稳定爬升；这是 preictal relocation 的 bounded negative，不是“发作前没有任何 state change”。
 
 ---
 

@@ -15,6 +15,11 @@
 - 唯一过最严 joint null 的 hfa 细对齐：full 干净复现（Wilcox=0.022）但**奇数半不显著（0.078）→ 非 split-half 稳健**；负对照四层全部非显著=非假阳性。
 - 结论 = real-but-not-robust，**维持灵敏度档、不升 primary**；升格须独立第二队列。主线粗骨架不受影响。
 
+### `v3p_preictal_nonaxis_trajectory_2026-07-05.md` — V3p preictal-only 非轴向轨迹完整硬门阴性
+- 只看 EEG onset 前 −120~−10 s；narrow、`broad_expanded`、`broad_core` 分层报告，三层均 tier 0，完整个体支持为 0。
+- broad 的少数 single-null nominal hits 被 rate / lag1 / phase / block / 双 span 预设硬门筛掉，不算潜在阳性。
+- 结论边界：未支持稳定一致的 preictal non-axis ramp；不等于发作前没有任何 state change，也不裁决 onset 后变化。
+
 ## PR 系列
 
 ### `pr1_seizure_clustering/` — Per-subject seizure subtyping (z-ER tensor + 1−Spearman + UPGMA)
