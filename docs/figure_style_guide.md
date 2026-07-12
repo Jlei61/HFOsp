@@ -136,6 +136,7 @@ Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field reado
 - **复现入口**：`scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py --subject epilepsiae_1146`
 - **上游数据**：`results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv`
 - **上游生成命令**：`python scripts/plot_topic5_signed_broadband_similarity_timecourse.py --subject epilepsiae_1146 --start-sec -120 --stop-sec 20 --band-lo 1 --band-hi 150 --window-sec 10 --step-sec 2`
+- **全 subject 批处理**：`scripts/paper_figures/run_fig3_peri_onset_all_subjects.py`（fail-closed 逐 subject 跑上面两步，一个 subject 失败不中断整批）；主索引 `results/paper-ready-figure/fig3_peri_onset_field_similarity/fig3_peri_onset_subject_index.{csv,json}` 汇总每 subject 的 status / drop_reason / n_seizures / n_windows / maxAB + signed A/B 摘要 / 输出路径。当前 20/35 出图，15 因缺上游 T0 eligibility 缓存 drop。每 subject 同一 locked 布局；这是 per-subject material pool，非 formal cohort gate。
 - **回答**：在同一 subject 的多次 seizure 中，onset 前后 1-150 Hz signed robust-z 能量场是否持续接近间期 propagation field scaffold；以及这种接近是否有稳定的 signed A/B polarity。
 - **布局（单行双面板）**：
   - Panel a：`max(|r_A|, |r_B|)`，即 sign-free maxAB scaffold similarity。
@@ -160,11 +161,24 @@ Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field reado
 - **禁止事项**：
   - 不用 step 图作为 paper-ready 主版；step 只可用于检查窗口边界。
   - 不把 `maxAB |r|` 和 signed A/B 混成一个指标。
-  - 不用 1-45 Hz cache 顶替 1-150 Hz；1-150 Hz 图必须来自 line-noise-masked 1-150 Hz 原始重算或明确标为其它频段。
+  - 不用 1-45 Hz cache 顶替 1-150 Hz；Fig3-B 的 1-150 Hz 特征 = notch 滤波输入（50/100/150/200Hz）后对 `[1,150]` 全 bin 求和、**无额外 FFT-bin line mask**（区别于 Fig3-A / v2 的额外 bin-mask 版本，谐波处理不同——别把两者当同一合同）；用别的频段要明确标注。
   - 不把 signed A/B sidecar 写成 formal gate；当前 formal-ish scaffold 读出仍是 sign-free / maxAB 语义。
   - 不写 replay、direction replay、timing-order replay、mechanism proof。
 
 **当前口径**：这类图是 Fig3 field concordance 的 subject-level 动态素材。Panel a 支持 coarse scaffold similarity 在 onset-near 时间轴上持续偏高；Panel b 说明 signed polarity 在 seizure 间是否稳定，只能作为 polarity sidecar。
+
+### 5b. Fig3-B maxAB 空间置换 null（两档）+ 时间维校正
+
+- **示范图**：`.../spatial_null/figures/epilepsiae_548_maxab_spatial_null.png`（观测远高 all-contact null 但**整段贴 within-shaft null**＝相似几乎全是杆几何，反例）与 `epilepsiae_1146_...png` / `epilepsiae_922_...png`（扛过 within-shaft + maxT 的稳健正例）。
+- **复现入口**：`python scripts/run_topic5_fig3b_maxab_spatial_null.py --all-ok`（`--skip-existing` 断点续；`--rebuild-from-stats` 从 `.npz` 只重算校正+重画不重跑；`--verify` 校验向量化读出与 exact `score()` 一致到机器精度）。
+- **回答**：某 subject 发作前后 maxAB scaffold similarity 是否高于**保留植入几何**的空间置换——即高相似是不是电极摆放（尤其杆级）自带的。**只检验 maxAB scaffold**，不做 onset increment / signed A/B / 多频带。
+- **两个 null（承重合同；都：同批 seizure / 时间窗 / A|B 模板 / 场平滑 sigma / maxAB 逻辑，只打乱每窗 per-channel 能量值[值换位、support 随位置不动]、完整重跑 值→`make_field_record`→support 加权平滑→镜像不变相关→`max(|r_A|,|r_B|)`、对 seizure 取中位、每次 seizure 独立置换、R=1000；禁止只洗已算好的 maxAB）**：
+  - **all-contact**（弱，`channel_shuffle`）：值在**全部触点**间打乱。
+  - **within-shaft**（强，主，`within_shaft_shuffle`）：值只在**每根杆内**打乱，保留"哪根杆热"的植入几何。
+- **三档显著性（stats CSV 里两 null 各一套，都单侧上尾）**：pointwise（逐窗 `(1+#{null≥obs})/(R+1)`，未校正）< maxT（逐窗 FWER，Nichols-Holmes 标准化 z 的窗间 max）< cluster（Maris-Oostenveld，cluster-forming=pointwise p<0.05、mass=Σz、null=每 perm 最大 cluster mass；时间维、对持续抬升敏感＝paper-facing"显著区间"）。
+- **布局（单面板）**：粗 rust=观测中位、浅 rust 带=观测 IQR；蓝虚线+蓝带=within-shaft null 中位+95%；灰点线=all-contact null 中位（仅参考）；浅 rust 竖带=within-shaft **cluster 显著区间**；蓝三角=within-shaft **maxT 显著窗**；0 s 灰虚线；图例左下不遮数据。
+- **读法（三条承重边界）**：观测 rust 是否**离开蓝色 within-shaft null 带**并成 cluster。⚠️(1) **高于 all-contact ≠ 高于 within-shaft**——E548 all-contact pointwise 64/66 但 within-shaft cluster 0（相似几乎全是杆几何）；(2) **within-shaft null 分辨力依赖每根杆触点数**（见 `summary.shaft_structure` / index `n_singleton_shafts`）——单触点杆多则 within-shaft 偏弱、两 null 可能非严格嵌套（如 E1150 3/4 杆单触点）；(3) **maxT 很严苛**（只逐窗强峰过）、**cluster 对持续抬升敏感**，报告时说清是哪一档。
+- **tier**：per-subject 素材，非 formal cohort spatial gate；不写 replay / timing-order / mechanism。
 
 ---
 

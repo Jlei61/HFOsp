@@ -11,7 +11,7 @@
 
 ## 当前已锁定合同
 
-- 频段：line-noise-masked `1-150 Hz` log power。
+- 频段：`1-150 Hz` summed spectrogram log power；notch 滤波输入（50/100/150/200 Hz），**无额外 FFT-bin line mask**（与 Fig3-A / v2 的 bin-mask 版本谐波处理不同）。
 - 归一化：per-channel baseline robust-z。
 - 时间范围：`[-120,+20]s`，onset-aligned。
 - 滑窗：10 s window，2 s step。
