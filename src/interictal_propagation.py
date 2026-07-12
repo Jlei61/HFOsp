@@ -1159,51 +1159,104 @@ def compute_legacy_mi(
     n_permutations: int = 200,
     seed: int = 0,
 ) -> Dict[str, Any]:
-    """Legacy Matching Index: each event vs template, with row-shuffle permutation test."""
+    """Matching Index: each event vs the patient template, permutation-tested.
+
+    Primary fields are the **masked** (shared-participant) statistic: each event
+    is scored only over its participating channels, matching the Methods
+    definition and consistent with every other lagPatRank consumer (Topic 0
+    §3.1). Non-participating channels carry finite phantom ranks in the raw
+    ``lagPatRank`` and must not enter the statistic.
+
+    The old full-channel behaviour (which folded phantom ranks in) is preserved
+    verbatim under ``unmasked_sensitivity`` for historical comparison, per the
+    2026-07-12 Methods-review resolution (masked primary, legacy MI sensitivity).
+    """
     n_ch, n_ev = ranks.shape
     template = _legacy_hist_mean_rank(ranks, bools)
+    n_pairs_full = n_ch * (n_ch - 1) // 2
 
-    def _mi_vector(tmpl: np.ndarray, vec: np.ndarray) -> float:
-        sign_t = np.sign(tmpl[:, None] - tmpl[None, :])
-        sign_v = np.sign(vec[:, None] - vec[None, :])
-        prod = sign_t * sign_v
-        n_pairs = n_ch * (n_ch - 1) // 2
-        if n_pairs == 0:
+    def _mi_full(vec: np.ndarray) -> float:
+        if n_pairs_full == 0:
             return 0.0
-        return float(np.sum(np.triu(prod, k=1))) / n_pairs
+        sign_t = np.sign(template[:, None] - template[None, :])
+        sign_v = np.sign(vec[:, None] - vec[None, :])
+        return float(np.sum(np.triu(sign_t * sign_v, k=1))) / n_pairs_full
 
-    mi_list = np.array([_mi_vector(template, ranks[:, i]) for i in range(n_ev)], dtype=float)
-    ori_mean = float(np.mean(mi_list))
+    def _mi_masked(vec: np.ndarray, idx: np.ndarray) -> float:
+        if idx.size < 2:
+            return np.nan
+        t = template[idx]
+        v = vec[idx]
+        sign_t = np.sign(t[:, None] - t[None, :])
+        sign_v = np.sign(v[:, None] - v[None, :])
+        return float(np.sum(np.triu(sign_t * sign_v, k=1))) / (idx.size * (idx.size - 1) // 2)
+
+    # Participating channel set per event (shared by observed + permuted scoring).
+    part_idx = [
+        np.where(bools[:, i] & np.isfinite(ranks[:, i]) & np.isfinite(template))[0]
+        for i in range(n_ev)
+    ]
+
+    full_data = np.array([_mi_full(ranks[:, i]) for i in range(n_ev)], dtype=float)
+    masked_data = np.array([_mi_masked(ranks[:, i], part_idx[i]) for i in range(n_ev)], dtype=float)
+    masked_finite = masked_data[np.isfinite(masked_data)]
+
+    full_ori = float(np.mean(full_data))
+    masked_ori = float(np.mean(masked_finite)) if masked_finite.size else np.nan
 
     rng = np.random.default_rng(seed)
-    perm_means: List[float] = []
+    full_perm_means: List[float] = []
+    masked_perm_means: List[float] = []
     for _ in range(n_permutations):
         shuffled = np.empty_like(ranks)
         for ri in range(n_ev):
             shuffled[:, ri] = rng.permutation(n_ch)
-        perm_mi = np.array([_mi_vector(template, shuffled[:, i]) for i in range(n_ev)], dtype=float)
-        perm_means.append(float(np.mean(perm_mi)))
+        fp = np.array([_mi_full(shuffled[:, i]) for i in range(n_ev)], dtype=float)
+        mp = np.array([_mi_masked(shuffled[:, i], part_idx[i]) for i in range(n_ev)], dtype=float)
+        full_perm_means.append(float(np.mean(fp)))
+        mp_finite = mp[np.isfinite(mp)]
+        masked_perm_means.append(float(np.mean(mp_finite)) if mp_finite.size else np.nan)
 
-    perm_arr = np.array(perm_means, dtype=float)
-    p_value = float(np.mean(perm_arr >= ori_mean))
+    full_perm = np.array(full_perm_means, dtype=float)
+    masked_perm = np.array(masked_perm_means, dtype=float)
+    masked_perm_finite = masked_perm[np.isfinite(masked_perm)]
+
+    full_p = float(np.mean(full_perm >= full_ori))
+    masked_p = (
+        float(np.mean(masked_perm_finite >= masked_ori))
+        if masked_perm_finite.size and np.isfinite(masked_ori)
+        else np.nan
+    )
 
     return {
         "template": template.tolist(),
-        "mi_mean": ori_mean,
-        "mi_median": float(np.median(mi_list)),
-        "mi_std": float(np.std(mi_list)),
+        "masked": True,
+        "mi_mean": masked_ori,
+        "mi_median": float(np.median(masked_finite)) if masked_finite.size else np.nan,
+        "mi_std": float(np.std(masked_finite)) if masked_finite.size else np.nan,
         "mi_distribution_percentiles": {
-            "p5": float(np.percentile(mi_list, 5)),
-            "p25": float(np.percentile(mi_list, 25)),
-            "p50": float(np.percentile(mi_list, 50)),
-            "p75": float(np.percentile(mi_list, 75)),
-            "p95": float(np.percentile(mi_list, 95)),
+            "p5": float(np.percentile(masked_finite, 5)) if masked_finite.size else np.nan,
+            "p25": float(np.percentile(masked_finite, 25)) if masked_finite.size else np.nan,
+            "p50": float(np.percentile(masked_finite, 50)) if masked_finite.size else np.nan,
+            "p75": float(np.percentile(masked_finite, 75)) if masked_finite.size else np.nan,
+            "p95": float(np.percentile(masked_finite, 95)) if masked_finite.size else np.nan,
         },
         "n_events": int(n_ev),
+        "n_events_scored": int(masked_finite.size),
         "n_permutations": int(n_permutations),
-        "permuted_mean_median": float(np.median(perm_arr)),
-        "p_value": p_value,
-        "significant": p_value < 0.05,
+        "permuted_mean_median": (
+            float(np.median(masked_perm_finite)) if masked_perm_finite.size else np.nan
+        ),
+        "p_value": masked_p,
+        "significant": bool(masked_p < 0.05) if np.isfinite(masked_p) else False,
+        "unmasked_sensitivity": {
+            "mi_mean": full_ori,
+            "mi_median": float(np.median(full_data)),
+            "mi_std": float(np.std(full_data)),
+            "permuted_mean_median": float(np.median(full_perm)),
+            "p_value": full_p,
+            "significant": bool(full_p < 0.05),
+        },
     }
 
 
