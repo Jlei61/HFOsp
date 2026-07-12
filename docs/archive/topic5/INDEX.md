@@ -20,6 +20,10 @@
 - broad 的少数 single-null nominal hits 被 rate / lag1 / phase / block / 双 span 预设硬门筛掉，不算潜在阳性。
 - 结论边界：未支持稳定一致的 preictal non-axis ramp；不等于发作前没有任何 state change，也不裁决 onset 后变化。
 
+### `contact_similarity_ladder_2026-07-01.md` — 触点相似性几何阶梯（R1 无几何 / R2 同平面触点核 / R3 场）
+- n=18（两激活量），场统计量数值抬高主要来自平面几何平滑；但平滑同时抬高信号与零假设，超零假设被试数反而随 R1→R3 下降。网格步无可分辨增益；R3 与 A 线主统计逐位一致。
+- R2b native-3D sensitivity 与 2D plane 等价通过。定位是灵敏度/稳健性复核，不是新的队列级主张；主线粗骨架结论不受影响。
+
 ## PR 系列
 
 ### `pr1_seizure_clustering/` — Per-subject seizure subtyping (z-ER tensor + 1−Spearman + UPGMA)

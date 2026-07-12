@@ -90,7 +90,10 @@ def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba
 
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
-                  V_th_per_neuron=None, ee_std_u=0.0, ee_std_tau_ms=0.0,
+                  V_th_per_neuron=None, perturb=None,
+                  early_stop_runaway=False, es_thresh_hz=120.0, es_dur_ms=100.0,
+                  ee_std_u=0.0, ee_std_tau_ms=0.0,
+                  dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None):
@@ -105,6 +108,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     poisson internals).
     """
     e_gaba = p.E_gaba if e_gaba is None else e_gaba   # M2 shunting GABA reversal (=V_reset); default path unused
+    E_A = e_gaba                                      # M4-3A a-shunt reversal; reuses the resolved e_gaba default
     rng = net["rng"]
     NE, NI = net["NE"], net["NI"]
     N = NE + NI
@@ -167,6 +171,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     ref = np.zeros(N, dtype=np.int32)
     s_E = np.zeros(N); I_E = np.zeros(N)
     s_I = np.zeros(N); I_I = np.zeros(N)
+    # ---- M4: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
+    # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
+    # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
+    track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False))
+    if track_rec:
+        s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
     ring_sE = np.zeros((M, N))
     ring_sI = np.zeros((M, N))
 
@@ -205,6 +215,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     # ---- recorders ---- (model.simulate's, kept so the RNG stream matches) ----
     rate_E = np.zeros(nsteps); rate_I = np.zeros(nsteps)
+    # runaway early-stop (perf): truncate once the 20ms-EMA per-neuron rate is sustained >= threshold -- a
+    # runaway is a saturated plateau, so simulating it fully is wasted O(N) scatter. The 20ms EMA matches the
+    # verdict's _smooth(20ms) + _first_sustained, so it fires on the SAME runaways (robust to burst oscillation).
+    # OFF (early_stop_runaway=False) -> the block below never runs -> no behaviour change.
+    _es_alpha = 1.0 - np.exp(-dt / 20.0)                 # 20ms EMA (matches runner _smooth win_ms=20)
+    _es_ema = 0.0; _es_dur = int(round(es_dur_ms / dt)); _es_run = 0; _stop_t = nsteps
     spk_t = []; spk_i = []
     ras_keepE = rng.choice(NE, size=min(80, NE), replace=False)
     ras_keepI = NE + rng.choice(NI, size=min(20, NI), replace=False)
@@ -220,6 +236,20 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # optional current-based LFP (|I_E|+|I_I| forward model) at custom sites (Increment-2/3)
     lfp_trace = (np.zeros((nsteps, len(lfp_recorder.sites)))
                  if lfp_recorder is not None else None)
+    # ---- M4-2: x_dep depression trace (gated; OFF -> no alloc -> byte-parity). Arm 0 (STD off) emits 1.0. ----
+    if dump_ee_std_trace:
+        xdep_mean = np.zeros(nsteps); xdep_min = np.zeros(nsteps)
+        xdep_mask_mean = np.zeros(nsteps) if ee_std_trace_maskE is not None else None
+
+        def _rec_xdep(tt):                       # record x_dep for step tt (called at end-of-step AND at early-stop break)
+            if ee_std_on:
+                xdep_mean[tt] = x_dep.mean(); xdep_min[tt] = x_dep.min()
+                if xdep_mask_mean is not None:
+                    xdep_mask_mean[tt] = x_dep[ee_std_trace_maskE].mean()
+            else:                                # Arm 0 (STD off): availability == 1.0 everywhere
+                xdep_mean[tt] = 1.0; xdep_min[tt] = 1.0
+                if xdep_mask_mean is not None:
+                    xdep_mask_mean[tt] = 1.0
 
     t0 = time.time()
     for t in range(nsteps):
@@ -234,6 +264,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         s_E *= decay_sE
         s_I *= decay_sI
         slot = t % M
+        if track_rec:
+            # HARD CONSTRAINT: read ring_sE[slot] HERE, BEFORE the next line clears it (ring_sE[slot]=0.0).
+            # Moving this read after the clear makes I_E_rec read 0 -> divisive term silently no-ops.
+            s_E_rec *= decay_sE
+            s_E_rec += ring_sE[slot]                     # recurrent (E->E / E->I) arrivals only, pre-zeroing
         s_E += ring_sE[slot]; ring_sE[slot] = 0.0
         s_I += ring_sI[slot]; ring_sI[slot] = 0.0
         if ee_std_on:
@@ -242,6 +277,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         nu_vec = np.full(N, max(nu_now, 0.0))
         if tk <= tm < tk + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST          # extra external rate, units 1/ms
+        if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
+            nu_vec[kick_mask] += KICK_BOOST2         # M4-2 post-offset retrigger probe (same source core; None -> parity)
         ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
         s_E += ext * ext_incr
         # ==================================================================================
@@ -249,12 +286,17 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # ----- synaptic currents (low-pass of s) -----
         I_E = s_E + (I_E - s_E) * decay_IE
         I_I = s_I + (I_I - s_I) * decay_II
+        if track_rec:
+            I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
         if lfp_trace is not None:                       # current-based LFP at custom sites
             lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
 
         # slow layer off (slow=None)
         if slow is not None:
-            I_net = slow.apply_currents(I_E, I_I, labels)
+            if track_rec:
+                I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
+            else:
+                I_net = slow.apply_currents(I_E, I_I, labels)
             # off-by-default hook: under slow, use the per-neuron threshold substrate when provided
             # (lets z/g_K ride a heterogeneous core); V_th_per_neuron=None -> uniform p.V_th (unchanged).
             base_vth = p.V_th if V_th_per_neuron is None else V_th_per_neuron
@@ -262,12 +304,28 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         else:
             V_th_eff = p.V_th if V_th_per_neuron is None else V_th_per_neuron
 
+        # off-by-default reversibility/basin perturbation (perturb=None -> no float touched -> byte-parity):
+        # inhibitory_pulse = transiently RAISE the E threshold (suppress E firing) WITHOUT touching q_I.
+        if perturb is not None and perturb["kind"] == "inhibitory_pulse" and perturb["t0"] <= tm < perturb["t1"]:
+            _tgt = perturb.get("target_mask", is_E)          # spatial stim locus (default all E -> byte-parity)
+            V_th_eff = np.asarray(V_th_eff, float) + perturb["val"] * _tgt
+
         # ----- membrane (Eq 3) + refractory -----
         ref -= 1
         np.maximum(ref, 0, out=ref)
         free = ref == 0
         if slow is not None:
-            Vtmp = I_net + (V - I_net) * decay_V
+            # M4-3A conductance a-shunt (form A). uses_shunt() is SpatialSlowField-only (Task 4); the
+            # OTHER "slow" implementers (FrozenSlowVars/SlowVars, RegionalResource) have no a-shunt
+            # concept, so hasattr guards them onto the literal parity path below (plan-correction for
+            # polymorphic slow=; mirrors the getattr(...,'use_SG',False) duck-typing a few lines up).
+            if hasattr(slow, "uses_shunt") and slow.uses_shunt():
+                g = np.zeros_like(V)
+                g[:slow.nE] = slow.shunt_g_at_E()                  # E-only; I cells g=0 -> parity
+                V_inf = (I_net + g * E_A) / (1.0 + g)              # a NEVER divides signed net (reversal-clamped)
+                Vtmp = V_inf + (V - V_inf) * decay_V ** (1.0 + g)
+            else:
+                Vtmp = I_net + (V - I_net) * decay_V               # literal pre-change path -> byte parity
         elif fb_on:
             # A1c: extra global inhibition on E cells -> effective inhibition (I_I + I_global) on E only.
             ig_t = feedback_gain * r_ema if fb_dyn else float(fb_override_trace[t])
@@ -284,6 +342,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
         if slow is not None:
             slow.step(spk, labels, dt)
+            # qI_refill = transiently RESET the inhibitory resource to `val` (directly repair the slow var).
+            if perturb is not None and perturb["kind"] == "qI_refill" and perturb["t0"] <= tm < perturb["t1"]:
+                slow.q_I[:] = perturb["val"]
 
         # ----- record -----
         rate_E[t] = spk[:NE].sum()
@@ -296,6 +357,14 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         spk_inside[t] = spk[kick_mask].sum()
         spk_outside[t] = spk[outside_mask].sum()
         E_spk_bool[t] = spk[:NE]
+        if early_stop_runaway:                                       # runaway detected -> break before the O(N) scatter
+            _es_ema += _es_alpha * (rate_E[t] / NE / dt * 1e3 - _es_ema)   # 20ms-EMA per-neuron rate (Hz)
+            _es_run = _es_run + 1 if _es_ema >= es_thresh_hz else 0
+            if _es_run >= _es_dur:
+                _stop_t = t + 1
+                if dump_ee_std_trace:            # break frame is KEPT (_stop_t=t+1) -> write its trace, else phantom 0
+                    _rec_xdep(t)                 # (pre-depletion: this frame's O(N) scatter is skipped by design)
+                break
         if dump_i_spikes:
             I_spk_bool[t] = spk[NE:]
         if dump_drive:
@@ -344,10 +413,27 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   f"rate_E={rate_E[t]/NE/dt*1e3:.1f} Hz  elapsed {time.time()-t0:.1f}s",
                   flush=True)
 
+        if dump_ee_std_trace:                    # normal frame: record post-depletion (:378), not post-recovery (:259)
+            _rec_xdep(t)
+
+    if _stop_t < nsteps:                                             # runaway early-stop: truncate per-step arrays
+        nsteps = _stop_t
+        rate_E, rate_I = rate_E[:nsteps], rate_I[:nsteps]
+        E_spk_bool = E_spk_bool[:nsteps]
+        spk_inside, spk_outside = spk_inside[:nsteps], spk_outside[:nsteps]
+        if I_spk_bool is not None:
+            I_spk_bool = I_spk_bool[:nsteps]
+        if lfp_trace is not None:
+            lfp_trace = lfp_trace[:nsteps]
+        if dump_ee_std_trace:
+            xdep_mean = xdep_mean[:nsteps]; xdep_min = xdep_min[:nsteps]
+            if xdep_mask_mean is not None:
+                xdep_mask_mean = xdep_mask_mean[:nsteps]
     rate_E_hz = rate_E / NE / dt * 1e3
     rate_I_hz = rate_I / NI / dt * 1e3
     res = dict(
         times=np.arange(nsteps) * dt,
+        runaway_early_stop_ms=(None if _stop_t >= (int(round(p.T / dt))) else round(_stop_t * dt, 1)),
         rate_E=rate_E_hz, rate_I=rate_I_hz,
         spk_inside=spk_inside, spk_outside=spk_outside,
         E_spk_bool=E_spk_bool,
@@ -365,6 +451,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         res["I_global_trace"] = I_global_trace                  # (nsteps,) the per-step scalar I_global
     elif fb_static and dump_fb:
         res["I_global_trace"] = np.asarray(fb_override_trace[:nsteps], float)  # the prescribed brake (control)
+    if dump_ee_std_trace:
+        res["xdep_mean"] = xdep_mean
+        res["xdep_min"] = xdep_min
+        if xdep_mask_mean is not None:
+            res["xdep_mask_mean"] = xdep_mask_mean
     return res
 
 

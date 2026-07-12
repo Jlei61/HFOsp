@@ -33,6 +33,7 @@ import numpy as np
 
 from src.sef_hfo_field import isotropic_gaussian, convolve_periodic
 from src.topic4_m3a_v2_2_sensors import global_M, global_B, global_participation, chi_G  # §B6 sensors
+from src.sef_hfo_m4_load_shunt import LoadShuntParams, load_shunt_step  # M4-3A n->a load/shunt ODE
 
 
 # ---------------------------------------------------------------------------
@@ -88,6 +89,34 @@ class SpatialSlowFieldConfig:
     lambda_G: float = 0.0      # 0 -> primary arm E; >0 -> arm F
     # ---- proxy phase-plane h_G term ----
     beta_G: float = 1.0        # weight in Y_new = P_global - beta_G*h_G
+    # ---- M4 divisive shared inhibitory pool S_G (rev4 spec §3-§5; OFF by default -> byte-parity) ----
+    use_SG: bool = False       # master gate; False -> no pool alloc/evolution, apply_currents unchanged
+    alpha_G: float = 0.0       # divisive strength: I_rec_E -> I_rec_E/(1+alpha_G*S_G)
+    beta_SG: float = 0.0       # OPTIONAL small subtractive pool current (arm 1/3); NOT beta_G (h_G proxy)
+    r0_psi: float = 0.0        # Psi_G recruitment onset
+    r50_psi: float = 1.0       # Psi_G half-recruitment
+    n_psi: float = 2.0         # Psi_G steepness
+    p_pool: float = 3.0        # A_G p-norm exponent (2-4 focal; 1 = area/mean); swept diagnostic
+    tau_mu: float = 40.0       # ms, pool activation low-pass (fast)
+    tau_S: float = 120.0       # ms, pool output low-pass
+    S_max: float = 1.0         # pool output ceiling
+    clamp_SG: float = None     # mechanism control: if set, S_G is FROZEN at this value (static-pool arm); None -> normal dynamics
+    # ---- n(x,t) load -> a(x,t) shunt field, M4-3A ----
+    use_A: bool = False        # master gate; False -> byte-parity
+    k_n: float = 0.0           # load build rate; 0 -> OFF -> byte-parity
+    tau_n: float = 20000.0     # ms, load recovery (SLOW; keep > tau_q)
+    rho_n: float = 0.0         # load consumption via Pi(n)
+    n_base: float = 0.0        # Hill offset / baseline load
+    n50: float = 0.5           # Hill half-point
+    hill_h: float = 2.0        # Hill exponent
+    a_max: float = 1.0         # shunt ceiling
+    alpha_A: float = 0.0       # divisive conductance gain: g_A = alpha_A * a
+    eta_A: float = 0.0         # subtractive bias gain: -eta_A * a (E cells)
+    sigma_n: float = 1.5       # mm, K_n width (default = sigma_q, WIDE)
+    u_n0: float = 0.0          # baseline drive set-point (constant, from Arm0)
+    n_min: float = 0.0
+    n_max: float = 10.0
+    g_A_max: float = 20.0      # conductance cap
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -123,6 +152,18 @@ class SpatialSlowFieldConfig:
                       ("n_M", self.n_M), ("n_B", self.n_B), ("n_Pi", self.n_Pi)):
             if v <= 0.0:
                 raise ValueError(f"{nm} must be > 0, got {v}")
+        # ---- M4 pool (rev4 §3-§5) ----
+        if self.alpha_G < 0.0:
+            raise ValueError(f"alpha_G must be >= 0, got {self.alpha_G}")
+        if self.beta_SG < 0.0:
+            raise ValueError(f"beta_SG must be >= 0, got {self.beta_SG}")
+        for nm, v in (("p_pool", self.p_pool), ("tau_mu", self.tau_mu), ("tau_S", self.tau_S),
+                      ("S_max", self.S_max), ("r50_psi", self.r50_psi), ("n_psi", self.n_psi)):
+            if v <= 0.0:
+                raise ValueError(f"{nm} must be > 0, got {v}")
+        # ---- M4-3A n->a load/shunt field ----
+        if self.use_A and self.sigma_n <= 0.0:
+            raise ValueError("sigma_n must be > 0 when use_A")
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +182,23 @@ def aq_drive(rE, rI, eta_E, eta_I):
     it). Factored out + unit-pinned so `step` cannot silently drop the r_I term and degrade
     into pure-E depletion. Implemented per the plan (Task 5)."""
     return eta_E * np.asarray(rE, float) + eta_I * np.asarray(rI, float)
+
+
+def psi_recruit(r, r0, r50, n):
+    """M4 per-location recruitment nonlinearity Psi_G(r)=[r-r0]_+^n/(r50^n+[r-r0]_+^n) (rev4 spec §3).
+    Elementwise; range [0,1). Sub-threshold background (r<=r0) -> 0. This is the natural single readout
+    that replaces the old M/B/P95 sensors: <Psi_G(r_E)>_x is a soft recruited-area measure."""
+    x = np.maximum(np.asarray(r, dtype=float) - r0, 0.0)
+    xn = x ** n
+    return xn / (r50 ** n + xn)
+
+
+def pnorm_pool(z, p):
+    """M4 pooled drive A_G=[<z^p>_x]^(1/p) over ALL elements (rev4 spec §3). z in [0,1], p>=1.
+    p=1 -> soft recruited-area mean; larger p (2-4) -> focal-sensitive (mean<->max knob), so a strong
+    focal/core recruits the pool before participation is global."""
+    z = np.asarray(z, dtype=float)
+    return float(np.mean(z ** p)) ** (1.0 / p)
 
 
 def _grid_index(pos, L, n_grid):
@@ -186,6 +244,8 @@ class SpatialSlowField:
         positions for binning + sampling, validate cfg. Implemented per the plan (Task 4)."""
         self.cfg = cfg or SpatialSlowFieldConfig()
         self.cfg.validate()
+        if self.cfg.use_A:
+            self._load_shunt_params().validate()   # Task 1 LoadShuntParams.validate(), never auto-invoked otherwise
         self.N = int(N); self.nE = int(np.asarray(posE).shape[0]); self.L = float(L)
         self.posE = np.asarray(posE, float); self.posI = np.asarray(posI, float)
         n = self.cfg.n_grid
@@ -204,10 +264,28 @@ class SpatialSlowField:
         self._alpha_s = None
         self.hG_script = None                                        # clamp/surrogate override (Deferred)
         self.trace_hG = []; self.trace_M = []; self.trace_B = []; self.trace_Pi = []
+        # ---- M4 shared inhibitory pool (rev4 spec §4); mu_G=pool activation, S_G=pool output ----
+        self.mu_G = 0.0
+        self.S_G = 0.0
+        self.trace_muG = []; self.trace_SG = []; self.trace_AG = []
+        self.trace_Irec_mean = []                                     # mean recurrent-E current (matched-subtractive calib)
+        if cfg.clamp_SG is not None:
+            self.S_G = float(cfg.clamp_SG)                            # static-pool arm: S_G frozen from t=0
+        self.trace_rEfast_max = []      # per-step spatial-max of rE_fast (for r50 sensor-scale calibration)
+        # ---- n(x,t) load -> a(x,t) shunt field (M4-3A) ----
+        self.n_load = np.full((n, n), self.cfg.n_base, dtype=float)
+        self.a_shunt = np.zeros((n, n), dtype=float)
+        self._Kn = isotropic_gaussian(n, L, self.cfg.sigma_n)
+        self.trace_n_mean = []
+        self.trace_a_mean = []
+        self.trace_un_mean = []                     # P1-4: field-derived drive u_n (for P0b param lock)
 
-    def apply_currents(self, I_E, I_I, labels=None):
-        """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) for E cells; I_E - I_I for I
-        cells. q_I==1, g_K==0 -> returns I_E - I_I exactly (parity). Task 4."""
+    def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
+        """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
+        q_I==1, g_K==0, h_G off -> returns I_E - I_I exactly (parity).
+        M4 (use_SG AND I_E_rec given): additionally subtract the removed recurrent current on E cells
+        dI_rec = I_E_rec[:nE]*(alpha_G*S_G/(1+alpha_G*S_G)) + beta_SG*S_G  (divide recurrent E only,
+        rev4 §5). alpha_G*S_G==0 AND beta_SG==0 -> dI_rec exactly 0 -> byte-parity."""
         qI_E = self.q_I[self._iyE, self._ixE]                          # (nE,)
         gK_E = self.g_K[self._iyE, self._ixE]
         out = np.asarray(I_E, float) - np.asarray(I_I, float)          # I cells: I_E - I_I
@@ -216,7 +294,40 @@ class SpatialSlowField:
         out[:nE] = (I_E[:nE] - qI_E * I_I[:nE]
                     - self.cfg.eta_K * gK_E
                     - self.cfg.eta_G * hG_eff)                         # global recovery scalar (E only)
+        if self.cfg.use_A and self.cfg.eta_A != 0.0:               # M4-3A subtractive bias (E only)
+            aE = self.a_shunt[self._iyE, self._ixE]
+            out[:nE] -= self.cfg.eta_A * aE
+        if self.cfg.use_SG and I_E_rec is None and (self.cfg.alpha_G > 0.0 or self.cfg.beta_SG > 0.0):
+            raise RuntimeError(                                        # §6: loud failure beats silent contamination
+                "use_SG with alpha_G>0 or beta_SG>0 requires I_E_rec (recurrent-only current), got None. "
+                "The pool would build S_G with NO membrane effect (silent false negative). Drive M4 through "
+                "simulate_kick (which tracks I_E_rec); do not use a caller that omits it.")
+        if self.cfg.use_SG and I_E_rec is not None:                   # §5 divisive recurrent-gain (E only)
+            aS = self.cfg.alpha_G * self.S_G
+            frac = aS / (1.0 + aS)                                     # aS=0 -> 0 (exact -> byte-parity)
+            out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
+            self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
         return out
+
+    def _load_shunt_params(self):
+        c = self.cfg
+        return LoadShuntParams(tau_n=c.tau_n, k_n=c.k_n, rho_n=c.rho_n, n_base=c.n_base,
+                               n50=c.n50, hill_h=c.hill_h, a_max=c.a_max, u_n0=c.u_n0,
+                               n_min=c.n_min, n_max=c.n_max)
+
+    def uses_shunt(self) -> bool:
+        """True iff the conductance shunt actually couples (P1-1). Needs use_A AND k_n!=0
+        (else a==0 forever -> must take the literal parity path in kick_probe) AND alpha_A!=0.
+        The parity gate keys on uses_shunt()==False; do NOT drop the k_n!=0 term."""
+        return bool(self.cfg.use_A and self.cfg.k_n != 0.0 and self.cfg.alpha_A != 0.0)
+
+    def shunt_g_at_E(self) -> np.ndarray:
+        """Per-E-neuron conductance g_A = alpha_A * a, clipped to [0, g_A_max].
+        Returns zeros(nE) when shunt off -> kick_probe takes the literal parity branch."""
+        if not self.uses_shunt():
+            return np.zeros(self.nE, dtype=float)
+        aE = self.a_shunt[self._iyE, self._ixE]
+        return np.clip(self.cfg.alpha_A * aE, 0.0, self.cfg.g_A_max)
 
     def threshold(self, V_th_base):
         """Protocol passthrough: v2 rides the heterogeneous core threshold unchanged
@@ -248,12 +359,20 @@ class SpatialSlowField:
             fk = saturation(a_K, cfg.a0_K, cfg.a50_K)
             self.g_K += dt * (-self.g_K / cfg.tau_K + cfg.k_K * fk * (cfg.gK_max - self.g_K))
             np.clip(self.g_K, 0.0, cfg.gK_max, out=self.g_K)
+        if cfg.use_A:                                               # M4-3A load -> shunt
+            u_n = convolve_periodic(self.rE, self._Kn)              # field-derived drive K_n * rE (EMA rE)
+            self.trace_un_mean.append(float(u_n.mean()))            # P1-4: dump real u_n even when k_n=0 (P0b lock)
+            if cfg.k_n != 0.0:                                      # evolve load ONLY when active -> parity when k_n=0
+                self.n_load, self.a_shunt = load_shunt_step(self.n_load, u_n, dt, self._load_shunt_params())
+        self.trace_n_mean.append(float(self.n_load.mean()))
+        self.trace_a_mean.append(float(self.a_shunt.mean()))
         self.trace_qI_mean.append(float(self.q_I.mean()))
         self.trace_gK_mean.append(float(self.g_K.mean()))
-        if cfg.use_hG:                                            # §B6 global recovery
+        if cfg.use_hG or cfg.use_SG:                              # FAST (tau_s) EMA needed by h_G and/or S_G
             if self._alpha_s is None:
                 self._alpha_s = 1.0 - np.exp(-dt / cfg.tau_s)
             self.rE_fast += self._alpha_s * (rE_inst - self.rE_fast)   # FAST sensor EMA
+        if cfg.use_hG:                                            # §B6 global recovery
             M = global_M(self.rE_fast)                            # sensors ALWAYS computed (trace sync)
             B = global_B(self.rE_fast, cfg.r_A, cfg.Delta_A)
             Pi = global_participation(self.rE_fast)
@@ -268,4 +387,15 @@ class SpatialSlowField:
                 np.clip(self.q_I, cfg.q_min, 1.0, out=self.q_I)
             self.trace_M.append(M); self.trace_B.append(B); self.trace_Pi.append(Pi)
             self.trace_hG.append(self.h_G)                       # traces ALWAYS synced under use_hG
+        if cfg.use_SG:                                            # §4 M4 shared inhibitory pool advance
+            z_G = psi_recruit(self.rE_fast, cfg.r0_psi, cfg.r50_psi, cfg.n_psi)
+            A_G = pnorm_pool(z_G, cfg.p_pool)                     # single natural readout (no M/B/P95)
+            self.mu_G += dt * (-self.mu_G + A_G) / cfg.tau_mu     # forward Euler (h_G-style integration)
+            self.mu_G = float(np.clip(self.mu_G, 0.0, 1.0))
+            self.S_G += dt * (-self.S_G + cfg.S_max * self.mu_G) / cfg.tau_S
+            self.S_G = float(np.clip(self.S_G, 0.0, cfg.S_max))
+            if cfg.clamp_SG is not None:
+                self.S_G = float(cfg.clamp_SG)                        # static-pool arm: freeze S_G (mu_G still advances internally)
+            self.trace_AG.append(A_G); self.trace_muG.append(self.mu_G); self.trace_SG.append(self.S_G)
+            self.trace_rEfast_max.append(float(self.rE_fast.max()))   # time trace of the sensor-field peak
         self._t += dt
