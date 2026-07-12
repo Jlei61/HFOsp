@@ -3,5 +3,5 @@ testpaths = ["tests"]
 addopts = "--ignore=ReplayIED"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests that require real-data artifacts (deselect with '-m \"not integration\"')",
+    "integration: marks tests that run full model/SNN paths or require result artifacts (deselect with '-m \"not integration\"')",
 ]

@@ -31,6 +31,7 @@
   - **M3A 慢变量（A 线分文档）**：`sef_hfo/m3a_stage_conclusion_2026-06-27.md`（A1/A1b/A1c/A2）。决定性纠正：A2-P **源空间逐细胞 onset 梯度**推翻"同步爆发"判读——高许可度大态 = 沿两核轴的**相干招募波**（onset~位置 R²≈0.87、梯度沿轴 align≈1.0、40k-神经元 SNN）。
   - **M3B 谱相图（B 线分文档）**：`sef_hfo/m3b_stage_conclusion_2026-06-28.md`。Brunel 式有限-Jacobian = **SPM-PASS frozen map**；§5 非正规瞬态 = 骨架特异自限轴向；**SNN 口径已纠正**（B 线内置 tiny grid 是错仪器假阴，轴向 spiking 验证在 A2-P 为正）。机器 `src/topic4_m3b_spectral_phase.py`（TDD-0..15 绿）+ 设计锁 `sef_hfo/m3b_jacobian_design_LOCKED_2026-06-27.md`。
   - **方法学锁**：判"慢变量/算子有没有改传播"的正确仪器 = **源空间逐细胞 onset 梯度**，非接触空间方向可读性 / 双核 collision / 放电空间拉伸 / 主导本征模式。
+  - **M3A-v2.2 criticality M1/M2（2026-07-12 有界验收）**：M1 `unresolved_operating_point` 保持；M2 支持 `core_localized` 起燃，但 nonlinear spread 因 epsilon/polarity sensitivity 保持 `undetermined`。结果入口 `results/topic4_criticality{,_m2}/`，主口径见 `docs/topic4_m3_stage.md §6.1`。这是 M4 上游诊断，当前主动设计层为 M4，不用这条历史结果覆盖 M4 恢复/终止设计。
 
 ## 数据侧（paper-A）：rate vs 传播几何（探索性，与上面的模型侧并行）
 

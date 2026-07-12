@@ -7,6 +7,10 @@
 > - **B 线（谱相图 / W-场）**：`docs/archive/topic4/sef_hfo/m3b_stage_conclusion_2026-06-28.md`
 >
 > 这是机制 **screen**，不是癫痫发作机制 **validation**。下面所有结论受 §"红线"约束。
+>
+> **阶段关系更新（2026-07-12）**：M3 已收口，当前主动设计层已进入 **M4**。本文新增的 criticality M1/M2
+> 只记录 M3A-v2.2 的上游失稳诊断；它不能覆盖、回退或替代 M4 的恢复/终止机制设计。下文“下一步”保留为
+> M3 当时的历史路线，M4 的最新 spec、runner 与结果文档优先。
 
 ## 0. 一句话判断
 
@@ -194,6 +198,25 @@ SNN 的事件时标 / 状态轨迹触发不了它**——衬底全或无 / 全�
 >   `fig_m3a_v2_2_qI_stim_runaway_epilepsiae_1146/`（刺激 vs 不刺激对照：中段触点 `V_th` clamp 把 runaway 推后 +834 ms，关刺激后才反弹——外部预防式压制示意，非治疗/recovery 主张）。
 >   **收口：NO-GO 继续调 `q_I/g_K`；下一杠杆 `D_EE`（relay depression）或衬底/事件协议重做**——瓶颈在衬底拓扑、不在恢复变量。
 >   `h_G` 载体（已实现、测齐、字节奇偶守）保留备用，拿到干净 partial-fill 候选前不开闭环大扫。
+
+### 6.1 Criticality M1/M2 有界验收与 M4 handoff（2026-07-12）
+
+这里的 “M1/M2” 是 **M3A-v2.2 criticality 里程碑**，不要与本文 §1 的 M1 recovery / M2 front-shunting
+阶段混淆。它们复用同一条 v2.2 仿真轨迹和 frozen-Jacobian 机器，回答的是“失稳边界在哪里、最先变软的
+空间模式在哪里”，不是再设计一个慢变量。
+
+- **Criticality M1 保持 unresolved**：原采样快照没有直接命中 `alpha0=0`；加密后确认 crossing 落在两个
+  快照之间，因此 `csd_verdict=unresolved_operating_point`，不能写成稳定 CSD 逼近已证。
+- **Criticality M2 接受一个有界阳性**：加密 crossing 附近的线性模式为 `core_localized`
+  (`core_overlap=0.994`, `globality=0.112`)；双核对照仍出现单核对称性破缺，轴向走廊功率为 0。安全解释是
+  **当前衬底的失稳从局部 core 起燃，不是全场同时软化**。
+- **非线性铺开未判定**：2 个扰动幅度 × 2 个极性中只有 3/4 真正点燃；虽然这三条都呈 axial 后自限，
+  预注册一致性门要求 4/4，因此 `nonlinear_spread` 的 onset/endgame/off-axis 全部保留 `undetermined`。
+
+这条结果收紧了 M4 的问题：M4 要处理的是**局部成核之后如何有界、终止和恢复**，而不是重新证明“能不能
+从 core 点着”。它不指定 M4 应选哪一种恢复变量，也不把任何 M4 discovery no-go 改写成机制普遍失败。
+机器和证据入口：`src/topic4_criticality.py`、`src/topic4_criticality_m2.py`、
+`results/topic4_criticality/`、`results/topic4_criticality_m2/`。
 
 ## 7. 合并与 worktree
 

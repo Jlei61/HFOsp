@@ -1,0 +1,45 @@
+# config/topic4_criticality.yaml
+operator: {type: continuous_jacobian, dt_ms: null, alpha_units: per_ms, tau_units: ms}
+quality_gate:
+  residual_rms_tol: 1.0e-4
+  rate_scale_floor: 0.05            # #8 quiet-branch absolute floor (kHz)
+  rate_mismatch_abs_tol: 0.05
+  rate_mismatch_rel_tol: 0.10
+  slow_mismatch_rel_tol: 0.05
+  adiabatic_index_tol: 0.20
+  alpha_drift_index_tol: 0.20       # #7 now actually enforced
+  min_qualified_points: 5
+  min_qualified_fraction: 0.30      # #19 now actually enforced
+verdict:
+  threshold_policy: initial_sensitivity_required     # #4
+  alpha_near_zero_tol_per_ms: 0.002                   # primary (τ≈500 ms); NOT final
+  alpha_margin_hard_per_ms: 0.01
+  threshold_sweep:                                    # #4 report verdict stability
+    alpha_near_zero_tol_per_ms: [0.001, 0.002, 0.005, 0.01, 0.02]
+    alpha_margin_hard_per_ms: [0.005, 0.01, 0.02, 0.05]
+  jump_window_ms: 100.0
+  smooth_min_tau_growth_ratio: 2.0
+  smooth_min_alpha_spearman: 0.6
+  unresolved_if_branch_ambiguous: true               # #20
+  branch_continuation_n_bisect: 8                     # #2/#3
+branching:
+  solve_inits: [low_rate, previous_point, high_rate, random_small]
+  branch_cluster_field_tol: 0.20     # #9 field-level relative distance to merge branches
+  selected_branch: approach_low_branch
+mode:
+  complex_pair_policy: invariant_subspace_loading
+  spectral_gap_policy: next_distinct_real_part
+  next_distinct_min_sep_per_ms: 1.0e-3
+  imag_tol_per_ms: 1.0e-3            # #12 |Im| above this = complex leading pair
+finite_time_gain: {horizons_ms: [10, 25, 50, 100, 250, 500], mode: directional_core, report_numerical_abscissa: true, gain_thresh: 1.5}
+slow_to_ratefield:                   # #P1-1: how each slow var enters the rate field (lock + sign test)
+  q_I: {target: E_inhibition, entry: inh_q_scales_WEI, uniform: false, sign_test: required}   # already in solve_operating_point
+  g_K: {target: E_current, entry: 'muE -= eta_K*g_K(x)', uniform: false, eta_K: 1.0, sign_test: required}
+  h_G: {target: E_current, entry: 'muE -= eta_G*h_G',    uniform: true,  eta_G: 1.0, sign_test: required}
+slow_sensitivity: {finite_difference: central, step_fraction_qI: 0.05, step_fraction_gK: 0.05, step_fraction_hG: 0.05, require_both_sides_qualified: true}
+atlas:
+  normalized_grid_n: 31
+  grid_L: 5.0
+  phase_recovery_condition: {policy: trajectory_median, fixed_value: null}   # #22
+virtual_seeg: {use_topic5_estimator_code: true, channel_sets: [source_all_nodes, virtual_all_contacts, matched_10ch], same_windows_as_topic5: true}
+tier: model_side_ground_truth_preliminary
