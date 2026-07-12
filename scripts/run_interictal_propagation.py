@@ -27,6 +27,7 @@ from src.interictal_propagation import (  # noqa: E402
     compute_temporal_cluster_dynamics,
     compute_time_split_reproducibility,
     compute_within_cluster_centered_tau,
+    compute_legacy_mi,
     load_subject_propagation_events,
     run_subject_interictal_propagation_pr1,
     summarize_pr5_novel_template_gate,
@@ -304,6 +305,84 @@ def _augment_cluster_bias(
     _save(all_results, RESULTS_DIR / "pr1_subject_summary.json")
     _save(cohort, RESULTS_DIR / "pr1_cohort_summary.json")
     logger.info("Cluster-bias augmentation done.")
+
+
+def _masked_mi_one_subject(task: tuple) -> tuple:
+    """Worker: recompute masked legacy MI for one subject and write back its JSON.
+
+    Only the ``legacy_mi`` field is rewritten; every other field is preserved.
+    Returns a lightweight ``(key, status, summary)`` tuple so the parent can
+    rebuild the cohort summary by re-reading JSONs (no large pickled payloads).
+    """
+    dataset, root_str, subject, per_subject_dir_str = task
+    subject_dir = _subject_dir(dataset, Path(root_str), subject)
+    json_path = Path(per_subject_dir_str) / f"{dataset}_{subject}.json"
+    key = f"{dataset}/{subject}"
+    if not json_path.exists():
+        return (key, "skip_no_json", None)
+    if not _has_propagation_inputs(dataset, subject_dir):
+        return (key, "skip_no_inputs", None)
+    try:
+        with open(json_path) as f:
+            existing = json.load(f)
+        loaded = load_subject_propagation_events(subject_dir)
+        mi = compute_legacy_mi(loaded["ranks"], loaded["bools"], n_permutations=200, seed=0)
+        existing["legacy_mi"] = mi
+        _save(existing, json_path)
+        return (key, "ok", {
+            "masked_mi": round(float(mi["mi_mean"]), 4),
+            "masked_p": mi["p_value"],
+            "masked_sig": mi["significant"],
+            "unmasked_mi": round(float(mi["unmasked_sensitivity"]["mi_mean"]), 4),
+        })
+    except Exception as exc:  # noqa: BLE001
+        return (key, f"error:{exc}", None)
+
+
+def _augment_masked_mi(
+    datasets_list: List,
+    per_subject_dir: Path,
+    n_workers: int = 6,
+) -> None:
+    """Recompute masked (shared-participant) legacy MI across the cohort.
+
+    Topic 0 §3.1 phantom fix reaches its last consumer: MI event-scoring now
+    excludes non-participating phantom ranks (see ``compute_legacy_mi``). Runs
+    subjects in parallel, rewrites only ``legacy_mi`` in each per-subject JSON,
+    then rebuilds ``pr1_subject_summary`` + ``pr1_cohort_summary``.
+    2026-07-12 Methods-review resolution (masked primary, legacy MI sensitivity).
+    """
+    import multiprocessing as mp
+
+    tasks = [
+        (dataset, str(root), subject, str(per_subject_dir))
+        for dataset, root, subjects, _soz in datasets_list
+        for subject in subjects
+    ]
+    logger.info("Masked-MI augment: %d subjects, %d workers", len(tasks), n_workers)
+
+    statuses: Dict[str, str] = {}
+    with mp.Pool(processes=n_workers) as pool:
+        for key, status, summary in pool.imap_unordered(_masked_mi_one_subject, tasks):
+            statuses[key] = status
+            logger.info("  %s: %s %s", key, status, summary if summary else "")
+
+    all_results: Dict[str, Dict[str, Any]] = {}
+    for dataset, root, subjects, _soz in datasets_list:
+        for subject in subjects:
+            jp = per_subject_dir / f"{dataset}_{subject}.json"
+            if jp.exists():
+                with open(jp) as f:
+                    all_results[f"{dataset}/{subject}"] = json.load(f)
+
+    cohort = summarize_propagation_cohort(all_results)
+    _save(all_results, RESULTS_DIR / "pr1_subject_summary.json")
+    _save(cohort, RESULTS_DIR / "pr1_cohort_summary.json")
+    n_ok = sum(1 for s in statuses.values() if s == "ok")
+    logger.info(
+        "Masked-MI augment done: %d/%d ok. legacy_mi cohort: %s",
+        n_ok, len(tasks), cohort.get("legacy_mi"),
+    )
 
 
 def _run_pr4a(
@@ -1567,6 +1646,10 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pr25", action="store_true", help="PR-2.5: cross-time template reproducibility only")
     parser.add_argument("--augment-cluster-bias", action="store_true",
                         help="Augment existing JSONs with within-cluster identity-bias")
+    parser.add_argument("--augment-masked-mi", action="store_true",
+                        help="Recompute masked (shared-participant) legacy MI in existing JSONs "
+                             "and rebuild the cohort summary (2026-07-12 Methods-review fix). "
+                             "Pair with --masked-features to target the masked results dir.")
     parser.add_argument("--pr4a", action="store_true", help="PR-4A: temporal occupancy dynamics only")
     parser.add_argument(
         "--pr4a-followup",
@@ -1709,6 +1792,10 @@ def main() -> None:
 
     if args.augment_cluster_bias:
         _augment_cluster_bias(datasets_list, per_subject_dir)
+        return
+
+    if args.augment_masked_mi:
+        _augment_masked_mi(datasets_list, per_subject_dir)
         return
 
     if args.pr4a:
