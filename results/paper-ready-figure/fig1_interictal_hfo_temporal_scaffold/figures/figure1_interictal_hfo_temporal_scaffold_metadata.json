@@ -1,0 +1,303 @@
+{
+  "schema_version": "paper_figure1_temporal_scaffold_panels_v3",
+  "claim_scope": "Interictal HFO population events exhibit recurrent patient-specific temporal organization.",
+  "forbidden_upgrade": "This figure alone does not establish a shared 3D propagation axis.",
+  "producer": "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
+  "panel_id_stamped": {
+    "a1": false,
+    "a2": false,
+    "b1_b2_c1_c2_d1_d2": true,
+    "note": "c1/c2 are stamped as aligned rows inside the single fig1-panelc file"
+  },
+  "composite_emitted": false,
+  "split_half_included": false,
+  "paneld1_statistic": "masked shared-participant MI (phantom ranks excluded); 40/40 significant, cohort median 0.228.",
+  "outputs": [
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela1.png",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela1.pdf",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela2.png",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela2.pdf",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb1.png",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb1.pdf",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb2.png",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb2.pdf",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelc.png",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelc.pdf",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld1.png",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld1.pdf",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld2.png",
+    "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld2.pdf"
+  ],
+  "panels": {
+    "a1": {
+      "panel_id": "a1",
+      "files": [
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela1.png",
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela1.pdf"
+      ],
+      "producer": "scripts/paper_figures/plot_fig1_single_hfo_schematic.py",
+      "reused_from": "results/paper-ready-figure/fig1_hfo_group_event_demo/figures/legacy_hfo_n178_schematic.png",
+      "source_set": "legacy manually annotated HFO morphology artifact",
+      "n_hfo_snippets": 178,
+      "artifacts": [
+        "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_pickSigs.npz",
+        "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_annot_v4.pik"
+      ],
+      "content": "178 overlaid HFO snippets + yellow mean, raw and baseline-normalized mean spectrograms"
+    },
+    "a2": {
+      "panel_id": "a2",
+      "files": [
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela2.png",
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panela2.pdf"
+      ],
+      "producer": "scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py",
+      "reused_from": "results/paper-ready-figure/fig1_hfo_group_event_demo/figures/yuquan_y3_hfo_group_event_demo.png",
+      "public_patient_label": "Yuquan Y3",
+      "artifacts": [
+        "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf",
+        "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz",
+        "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy"
+      ]
+    },
+    "b1": {
+      "panel_id": "b1",
+      "files": [
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb1.png",
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb1.pdf"
+      ],
+      "producer_source": "scripts/plot_refine_soz_validation.py",
+      "artifact_root": "results/hfo_detection/<subject>/{*_gpu.npz,_refineGpu.npz}",
+      "label_sources": [
+        "results/yuquan_soz_core_channels.json",
+        "results/epilepsiae_soz_core_channels.json"
+      ],
+      "score": "refined events_count per contact",
+      "summary": {
+        "dataset": "yuquan",
+        "n_subjects": 20,
+        "mean_subject_auc": 0.8725709572552504,
+        "median_subject_auc": 0.9132387532771389,
+        "axis_limits": {
+          "fpr": [
+            0.0,
+            1.0
+          ],
+          "tpr": [
+            0.0,
+            1.0
+          ]
+        },
+        "curve_band": "SEM across subject ROC curves after interpolation to 201 FPR points",
+        "subjects": [
+          "chengshuai",
+          "chenziyang",
+          "gaolan",
+          "hanyuxuan",
+          "huanghanwen",
+          "huangwanling",
+          "litengsheng",
+          "liyouran",
+          "pengzihang",
+          "songzishuo",
+          "sunyuanxin",
+          "wangyiyang",
+          "xuxinyi",
+          "zhangbichen",
+          "zhangjiaqi",
+          "zhangjinhan",
+          "zhangkexuan",
+          "zhaochenxi",
+          "zhaojinrui",
+          "zhourongxuan"
+        ]
+      }
+    },
+    "b2": {
+      "panel_id": "b2",
+      "files": [
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb2.png",
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelb2.pdf"
+      ],
+      "producer_source": "scripts/plot_refine_soz_validation.py",
+      "artifact_root": "results/hfo_detection/<subject>/{*_gpu.npz,_refineGpu.npz}",
+      "label_sources": [
+        "results/yuquan_soz_core_channels.json",
+        "results/epilepsiae_soz_core_channels.json"
+      ],
+      "score": "refined events_count per contact",
+      "summary": {
+        "dataset": "epilepsiae",
+        "n_subjects": 15,
+        "mean_subject_auc": 0.9547759656025334,
+        "median_subject_auc": 0.9791666666666666,
+        "axis_limits": {
+          "fpr": [
+            0.0,
+            1.0
+          ],
+          "tpr": [
+            0.0,
+            1.0
+          ]
+        },
+        "curve_band": "SEM across subject ROC curves after interpolation to 201 FPR points",
+        "subjects": [
+          "1073",
+          "1077",
+          "1084",
+          "1096",
+          "1146",
+          "1150",
+          "139",
+          "253",
+          "442",
+          "548",
+          "583",
+          "590",
+          "635",
+          "922",
+          "958"
+        ]
+      }
+    },
+    "c": {
+      "panel_id": "c",
+      "files": [
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelc.png",
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-panelc.pdf"
+      ],
+      "producer_source": "scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style",
+      "layout": "c1 above c2; identical heatmap/colorbar/right-summary column geometry",
+      "figure_size_inches": [
+        11.6,
+        6.8
+      ],
+      "axis_label_fontsize_points": 10.5,
+      "channel_label_fontsize_points": 9.5,
+      "colorbar_label_fontsize_points": 10.5,
+      "same_subject_in_c1_c2": true,
+      "panel_column_order": [
+        "event_heatmap",
+        "colorbar",
+        "rank_summary"
+      ],
+      "separate_c1_c2_files_emitted": false,
+      "subpanels": {
+        "c1": {
+          "record": "results/interictal_propagation_masked/per_subject/epilepsiae_442.json",
+          "public_patient_label": "Epilepsiae E7",
+          "n_valid_events": 6556,
+          "displayed_events": 2000,
+          "masked_features": true,
+          "daynight_strip": true,
+          "header_fields": [
+            "public_patient_label",
+            "n_valid_events"
+          ],
+          "masked_mi_mean": 0.35608426215503697,
+          "rank_distribution_helper": "scripts/plot_interictal_propagation.py::_plot_rank_histogram",
+          "rank_distribution_scaling": "original overlapping probability-normalized ridgeline",
+          "rank_distribution_channel_order": [
+            "TBA2",
+            "TBA1",
+            "TBA3",
+            "FRA1",
+            "FRA2",
+            "HRA3",
+            "HRA2",
+            "HRA4",
+            "HRA5",
+            "TBA4",
+            "FRA6",
+            "TBB2",
+            "FRA5",
+            "HRA8",
+            "TBC4"
+          ]
+        },
+        "c2": {
+          "record": "results/interictal_propagation_masked/per_subject/epilepsiae_442.json",
+          "public_patient_label": "Epilepsiae E7",
+          "n_valid_events": 6556,
+          "displayed_events": 6556,
+          "cluster_counts": {
+            "0": 4621,
+            "1": 1935
+          },
+          "all_valid_events_displayed": true,
+          "cluster_separator": {
+            "style": "white gap with gray diagonal hatch and interrupted x-axis spine",
+            "boundary_event_index": 4621,
+            "gap_half_width_events": 39
+          },
+          "mean_rank_marker_size_points": 3.5,
+          "masked_features": true,
+          "chosen_k": 2,
+          "within_cluster_tau": 0.22383149114306042,
+          "overall_tau": 0.20085628610469092,
+          "inter_template_spearman_r": 0.1714285714285714,
+          "displayed_header": ""
+        }
+      }
+    },
+    "d1": {
+      "panel_id": "d1",
+      "files": [
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld1.png",
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld1.pdf"
+      ],
+      "producer_source": "scripts/plot_interictal_propagation.py --masked-features",
+      "records": "results/interictal_propagation_masked/per_subject/*.json",
+      "matching_index": {
+        "yuquan": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.18301425643076696,
+          "null_median": 5.5666442230071815e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        },
+        "epilepsiae": {
+          "n": 20,
+          "n_significant": 20,
+          "data_median": 0.26201202560976666,
+          "null_median": 5.904675455609148e-05,
+          "p_value_mannwhitney_greater": 3.397807564086679e-08,
+          "all_mi_records_masked": true
+        }
+      },
+      "status": "masked_shared_participant",
+      "masked_mi_hard_check": true,
+      "summary_display": "shared violin_with_scatter helper: violin + box/IQR + whiskers + subject points",
+      "significance_display": "shared add_significance_bracket helper; Mann-Whitney U, data > null",
+      "y_axis_starts_at_zero": true
+    },
+    "d2": {
+      "panel_id": "d2",
+      "files": [
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld2.png",
+        "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures/fig1-paneld2.pdf"
+      ],
+      "producer_source": "scripts/plot_interictal_propagation.py --masked-features",
+      "records": "results/interictal_propagation_masked/per_subject/*.json",
+      "uplift": {
+        "n": 40,
+        "median_uplift": 0.1977050153113532,
+        "median_matching_index_uplift": 0.1977050153113532,
+        "n_above_diagonal": 40,
+        "display_labels": [
+          "Overall MI",
+          "Within-template MI"
+        ],
+        "underlying_fields": [
+          "adaptive_cluster.overall_tau",
+          "adaptive_cluster.within_cluster_tau_mean"
+        ],
+        "gray_below_diagonal_region": true,
+        "axis_limits_start_at_zero": true,
+        "dataset_legend": true
+      }
+    }
+  }
+}

@@ -1060,6 +1060,7 @@ def _plot_cluster_rank_fig4(
     show_legend: bool = True,
     invert_yaxis: bool = True,
     show_ylabels: bool = True,
+    marker_size: float = 6.0,
 ) -> None:
     """Per-cluster mean rank line + shaded mean +/- std band on fixed channel order."""
     n_ch = len(channel_order)
@@ -1093,7 +1094,7 @@ def _plot_cluster_rank_fig4(
         )
         ax.plot(
             means[valid], y_pos[valid],
-            "-o", color=line_colors[ki], lw=2.5, ms=6, zorder=10,
+            "-o", color=line_colors[ki], lw=2.5, ms=marker_size, zorder=10,
             label=f"C{int(cid)} (n={int(mask_cluster.sum())})",
         )
 
