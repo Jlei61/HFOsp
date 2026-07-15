@@ -300,6 +300,14 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 **时间分辨 sidecar（2026-07-08，exploratory 描述性，非新结论）**：把上面 "when"（单窗 onset+0–20s）扩成 `[-120,+20]s` / 10s 窗 / 2s 步的**逐频带滑窗时程**（复用同一 formal-plane mirror-invariant signed-corr + v2 band cache）。20/20 cached subjects 出图。描述性观察与 §3.10 "when" 一致并更细：**pre-onset 全频段 cohort 中位 |r|~0.70–0.76（band-generic、preictal-present）**，跨 0s 的 early−pre 增量绝大多数 ≈±0.02、**只 δ 1–4/低频 1–13 有小幅正抬升**（δ narrow +0.071 [13/20]、broad +0.080 [10/17]），无频带陡跳、正向被试仅 ~7–13/20 → **偏 band-generic-preictal-present + δ 小增量、非 onset 处频带分化**。tier = exploratory candidate scaffold，**非 formal cohort statistic**（正式 cohort shift 仍 Fig3-A）。图/索引/脚本：`results/topic5_ictal_recruitment/v2_band_timecourse/`（`figures/README.md`、`multiband_timecourse_subject_index.{csv,json}`、`cohort_pre_vs_early_delta_{broad,narrow}.csv`）、`scripts/plot_topic5_multiband_field_similarity_timecourse.py`。
 
+### 3.11 A/B 单模板梯度轴与共线共享 field（2026-07-14，exploratory，结构成立 / shared 增益未成立）
+
+把每个模板的 earliness 场定义为 `e_T=-z(rank_T)`，但传播轴正方向正式定义为 `u_T=-gradient(e_T)/||gradient(e_T)||`，即早节点→晚节点；`gradient(e_T)` 本身是晚→早，不能再直接称为传播正方向。再用两个 early→late 向量的 `|cos(u_A,u_B)|` 判线是否共线、signed cosine 判传播方向同向/反向。全 40 名 rank-displacement 输入中 28 名可建双轴，**28 名全部都有 A/B 两个方向**：14/28 共线（9 反向、5 同向），14/28 不同向。26 名具备二维几何，其中 12/26 共线；13 名 strict-stability 只是高置信分层（8/13 共线），不是“是否有方向”的门槛。这支持“存在可共享平面的共线子集”，不支持给所有患者强建 D_AB/shared axis。A/B 两轴同时翻号不改变 cosine、共线分型或 field 统计。
+
+有 ictal cache 的二维共线 field 主分母为 n=7。1–45 Hz、0–10 s 中，own maxAB 对 within-shaft null 临界（p=0.053），shared maxAB 不过 null（p=0.346），且 shared 未提高患者内观测相关（paired median Δ=−0.002，95% CI [−0.038, 0.025]，p=0.938）。strict-stability n=6 子集出现 own p=0.035 / shared p=0.002，但它是质量分层结果，不能替代 n=7 主分母；bootstrap-stable n=3 shared p=0.067。当前稳健结论是**方向与共线分型成立，shared broadband field 的超杆内解剖证据依赖稳定性筛选，统一表示的增益未成立**。完整方法、分母、common-support/HFA 敏感性与禁 claim：`docs/archive/topic5/template_gradient_shared_field_2026-07-14.md`；结果：`results/topic5_ictal_recruitment/template_axis_field/`。
+
+**Epilepsiae 直接频段读出图**（n=17，不按 QC/共线分层）：发作 field 图仅保留 17 名 Epilepsiae 双轴可估患者。Yuquan 中仅 2 人各有 3 个缓存发作条目，其余无可用发作，本图全部排除；这不改变上游“28 人可建 A/B 轴”的结构分母。own-axis maxAB 患者中位数为 HFA 0.764、1–45 Hz 0.783、1–150 Hz 0.783。1–45 与 1–150 几乎等价（跨患者 ρ=0.998、paired p=0.963），HFA 与 1–45 Hz 也高度一致（ρ=0.794、paired p=0.963）。图直接复用既有 OR-margin board 和 `plot_atlas`；图/表：`results/topic5_ictal_recruitment/template_axis_field_frequency_panel/`。
+
 ---
 
 ## 4. 已知 caveat
@@ -351,6 +359,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/v2_phase2_criticality_state_layer_2026-07-01.md` — **V2a 发作前 criticality/state 层（exploratory，restricted-axial sanity check → 偏阴性）**：动力学腿 M_loading 0/16 + λ 趋势 0/16 显著（phase+block surrogate）；方法学定律 = 今后 λ 报 surplus 不报 raw；rank-coupling≠传播。不判定模型 axial-weakening/non-axial 预测 → reframe 到 V3a。
 - `docs/superpowers/specs/2026-07-02-topic5-v3a-mode-transition-design.md` — **V3a 设计（axis→non-axis mode transition，data-side H3a/b/c）**：eeg-onset 锚定 phase grid、2D 投影算子 + 非正规 reactivity、纯间期 HFO 非轴向（防循环）、compartment flux、自建 null、narrow 主。姊妹 spec V3b（M3B 模型–数据一致性 H3d）待写。
 - `docs/archive/topic5/v3p_preictal_nonaxis_trajectory_2026-07-05.md` — **V3p preictal-only 完整硬门阴性**：narrow / `broad_expanded` / `broad_core` 均 tier 0、完整个体支持为 0；少数 broad single-null nominal hits 被预设硬门筛掉。安全口径 = 未支持稳定一致的 preictal non-axis ramp，非“发作前无 state change”。
+- `docs/archive/topic5/template_gradient_shared_field_2026-07-14.md` — **A/B 单模板梯度轴 + 共线门控共享 field**：28 名全部有双方向（14 共线/14 不同向），26 名具备二维几何（12 共线）；二维共线 ictal n=7 的 broadband shared field 不过 within-shaft null，阳性仅见 strict-stability n=6，paired shared-vs-own 无增益 → 方向分型成立，field 阳性依赖质量层。
 - `docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md` — **V2 表达层三问收口（Phase-1-v2，exploratory candidate scaffold refinement）**：**survive** = 非纯宽带（common_resid 两池 4/7、α+γ 一致 = Outcome B）但大半 1/f-可归因（aperiodic 只 gamma_LVFA 稳）、ripple broad"存活"=多重比较天花板假象 → **NOT ripple-specific**；**who** = cohort 6/7 聚合、≥4/7 仅 6/20、无单一表型、band-generic（subject-heterogeneous）；**when** = 发作前已高且平 + 起始处小上抬（broad 符号翻转 p≈0.005、narrow 临界）、EEG 锚更清（preictal-present + modest onset increment）。broad=17（1146 单被试~2h 后台补跑并入；含 vs n=16 结论不变）。⚠️并行 numpy nulls 必须 OMP_NUM_THREADS=1。
 
 ---
