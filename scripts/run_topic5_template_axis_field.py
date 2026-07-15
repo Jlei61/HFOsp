@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Full-cohort A/B gradient axes, collinearity, and own/shared ictal-field readout.
+"""Score ictal/onset energy against frozen interictal TA/TB field artifacts.
 
 Contract: docs/superpowers/specs/2026-07-14-topic5-template-gradient-shared-field-design.md
+
+This consumer never rebuilds a template axis, 2D plane, bandwidth, support, or
+interictal field.  Build those once with build_topic5_interictal_template_fields.py.
 """
 from __future__ import annotations
 
 import argparse
 import csv
 import json
-import os
 import sys
 import zlib
 from pathlib import Path
@@ -21,30 +23,18 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.interictal_propagation import load_subject_propagation_events  # noqa: E402
-from src.lagpat_rank_audit import mask_phantom_ranks  # noqa: E402
-from src.propagation_skeleton_geometry import assign_events_to_templates, parse_shaft  # noqa: E402
-from src.seeg_coord_loader import load_subject_coords  # noqa: E402
-from src.topic5_axis_alignment import (channel_shuffle, effective_shuffle_n,  # noqa: E402
-                                       within_shaft_shuffle)
-from src.topic5_template_axis_field import (compute_template_axis_pair,  # noqa: E402
-                                              make_field_scorer,
-                                              make_normalized_plane,
-                                              score_scorer_bundle_batch,
-                                              score_scorer_bundle,
-                                              z_earliness)
+from src.propagation_skeleton_geometry import parse_shaft  # noqa: E402
+from src.topic5_template_axis_field import (  # noqa: E402
+    INTERICTAL_FIELD_CONTRACT,
+    align_activation_to_interictal_field,
+    score_scorer_bundle_batch,
+    score_scorer_bundle,
+    scorers_from_interictal_record,
+)
 
-RANKDISP = ROOT / "results/interictal_propagation_masked/rank_displacement/per_subject"
+DEFAULT_INTERICTAL = ROOT / "results/interictal_propagation_masked/template_gradient_fields"
 DEFAULT_CACHE = ROOT / "results/topic5_ictal_recruitment/t0_feature_cache"
 DEFAULT_OUT = ROOT / "results/topic5_ictal_recruitment/template_axis_field"
-TEMPLATE_RECORDS = (ROOT / "results/spatial_modulation/propagation_geometry/"
-                    "observation_readout/real_subjects")
-YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
-EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
-
-
-def _subject_dir(dataset: str, subject: str) -> Path:
-    return YUQUAN_ROOT / subject if dataset == "yuquan" else EPILEPSIAE_ROOT / subject / "all_recs"
 
 
 def _seed(token: str, base: int = 0) -> int:
@@ -67,88 +57,18 @@ def _jsonable(x):
     return x
 
 
-def _load_axis_input(sid: str) -> Dict[str, object]:
-    path = RANKDISP / f"{sid}.json"
-    d = json.loads(path.read_text())
-    dataset, subject = sid.split("_", 1)
-    base = {"subject_id": sid, "dataset": dataset, "subject": subject,
-            "stable_k": d.get("stable_k")}
-    if d.get("stable_k") != 2:
-        return dict(base, status="stable_k_not_2")
-    pairs = d.get("pairs") or []
-    if not pairs:
-        return dict(base, status="missing_pair")
-    pair = pairs[0]
-    names = list(pair.get("channel_names") or [])
-    joint = np.asarray(pair.get("joint_valid"), bool)
-    rank_a = np.asarray(pair.get("rank_a_dense_full"), float)
-    rank_b = np.asarray(pair.get("rank_b_dense_full"), float)
-    if not (len(names) == len(joint) == len(rank_a) == len(rank_b)):
-        return dict(base, status="rankdisp_shape_mismatch")
-    names_joint = [names[i] for i in np.where(joint)[0]]
-    try:
-        cr = load_subject_coords(dataset, subject, names_joint)
-    except Exception as exc:
-        return dict(base, status="coordinate_load_failed", error=str(exc)[:200])
-    coords = np.asarray(cr.coords_array_in_requested_order, float)
-    mapped = np.asarray(cr.mapped_mask_in_requested_order, bool)
-    ra, rb = rank_a[joint], rank_b[joint]
-    valid = mapped & np.isfinite(coords).all(1) & np.isfinite(ra) & np.isfinite(rb)
-    if int(valid.sum()) < 6:
-        return dict(base, status="insufficient_joint_mapped", n_joint_mapped=int(valid.sum()))
-    names_used = [names_joint[i] for i in np.where(valid)[0]]
-    coords_used, ra_used, rb_used = coords[valid], ra[valid], rb[valid]
-    shafts = [parse_shaft(n)[0] for n in names_used]
-    pair_out = compute_template_axis_pair(
-        coords_used, ra_used, rb_used, shafts,
-        n_axis_boot=200, n_pair_boot=500, seed=_seed(sid, 17), line_threshold=0.50,
-    )
-    return dict(base, status=pair_out.get("status"), names=names_used, coords=coords_used,
-                rank_a=ra_used, rank_b=rb_used, shafts=shafts, axis_pair=pair_out,
-                swap_class=((pair.get("swap_sweep") or {}).get("swap_class") or "none"),
-                decision_k=(pair.get("swap_sweep") or {}).get("decision_k"))
-
-
-def _load_interictal_support(dataset: str, subject: str, rank_a_by_name: Mapping[str, float],
-                             rank_b_by_name: Mapping[str, float]) -> Dict[str, Dict[str, float]]:
-    # Canonical readout records already contain the masked, template-assigned participation
-    # fraction.  Reuse that producer output; support is independent of its legacy endpoint axis.
-    pa = TEMPLATE_RECORDS / f"{dataset}_{subject}_t_a.json"
-    pb = TEMPLATE_RECORDS / f"{dataset}_{subject}_t_b.json"
-    if pa.exists() and pb.exists():
-        da, db = json.loads(pa.read_text()), json.loads(pb.read_text())
-        sa = {str(c["name"]): float(c["support"]) for c in da.get("channels", [])}
-        sb = {str(c["name"]): float(c["support"]) for c in db.get("channels", [])}
-        # Common support remains a direct all-event participation fraction.
-        ev = load_subject_propagation_events(_subject_dir(dataset, subject))
-        bools = np.asarray(ev["bools"], bool)
-        common = {str(n): float(v) for n, v in zip(ev["channel_names"], bools.mean(axis=1))}
-        return {"a": sa, "b": sb, "common": common,
-                "n_events": {"a": None, "b": None, "unassigned": None},
-                "support_source": "canonical_template_readout_records"}
-    ev = load_subject_propagation_events(_subject_dir(dataset, subject))
-    bools = np.asarray(ev["bools"], bool)
-    if bools.ndim != 2 or bools.shape[1] == 0:
-        return {}
-    names = [str(x) for x in ev["channel_names"]]
-    ranks = np.asarray(ev["ranks"], float)
-    masked = mask_phantom_ranks(ranks, bools, normalize=True)
-    ta = np.asarray([rank_a_by_name.get(n, np.nan) for n in names], float)
-    tb = np.asarray([rank_b_by_name.get(n, np.nan) for n in names], float)
-    labels = assign_events_to_templates(masked, ta, tb)
-
-    def support_for(label):
-        sel = labels == label
-        if not np.any(sel):
-            return np.zeros(len(names), float)
-        return bools[:, sel].mean(axis=1)
-
-    sa, sb, common = support_for(0), support_for(1), bools.mean(axis=1)
-    return {"a": {n: float(v) for n, v in zip(names, sa)},
-            "b": {n: float(v) for n, v in zip(names, sb)},
-            "common": {n: float(v) for n, v in zip(names, common)},
-            "n_events": {"a": int(np.sum(labels == 0)), "b": int(np.sum(labels == 1)),
-                         "unassigned": int(np.sum(labels < 0))}}
+def _load_interictal_record(interictal_dir: Path, sid: str) -> Dict[str, object]:
+    path = interictal_dir / "per_subject" / f"{sid}.json"
+    if not path.exists():
+        dataset, subject = sid.split("_", 1)
+        return {"subject_id": sid, "dataset": dataset, "subject": subject,
+                "status": "missing_interictal_artifact",
+                "interictal_artifact": str(path)}
+    record = json.loads(path.read_text())
+    if record.get("contract") != INTERICTAL_FIELD_CONTRACT:
+        record["status"] = "unsupported_interictal_contract"
+    record["interictal_artifact"] = str(path)
+    return record
 
 
 def _load_ictal(cache_dir: Path, sid: str, feature_key: str):
@@ -166,72 +86,56 @@ def _load_ictal(cache_dir: Path, sid: str, feature_key: str):
     return {"channels": channels, "vectors": vectors, "meta": meta}
 
 
-def _make_field_bundle(axis_record: Mapping[str, object], cache_dir: Path,
-                       feature_key: str, support_mode: str) -> Dict[str, object]:
-    sid = str(axis_record["subject_id"])
+def _make_field_bundle(interictal_record: Mapping[str, object], cache_dir: Path,
+                       feature_key: str) -> Dict[str, object]:
+    sid = str(interictal_record["subject_id"])
     ictal = _load_ictal(cache_dir, sid, feature_key)
     if ictal is None:
         return {"status": "missing_ictal_cache"}
     try:
-        rank_a_by_name = dict(zip(axis_record["names"], np.asarray(axis_record["rank_a"], float)))
-        rank_b_by_name = dict(zip(axis_record["names"], np.asarray(axis_record["rank_b"], float)))
-        supports = _load_interictal_support(str(axis_record["dataset"]),
-                                            str(axis_record["subject"]),
-                                            rank_a_by_name, rank_b_by_name)
+        scorers = scorers_from_interictal_record(interictal_record)
     except Exception as exc:
-        return {"status": "interictal_support_failed", "error": str(exc)[:200]}
-    if not supports:
-        return {"status": "interictal_support_failed", "error": "empty support"}
-    support_a_by_name = supports["common"] if support_mode == "common" else supports["a"]
-    support_b_by_name = supports["common"] if support_mode == "common" else supports["b"]
-    cache_index = {n: i for i, n in enumerate(ictal["channels"])}
-    names_all = list(axis_record["names"])
-    keep = np.array([n in cache_index and support_a_by_name.get(n, 0.0) > 0
-                     and support_b_by_name.get(n, 0.0) > 0 for n in names_all])
-    if int(keep.sum()) < 6:
-        return {"status": "insufficient_field_contacts", "n_contacts": int(keep.sum())}
-    names = [names_all[i] for i in np.where(keep)[0]]
-    coords = np.asarray(axis_record["coords"], float)[keep]
-    rank_a = np.asarray(axis_record["rank_a"], float)[keep]
-    rank_b = np.asarray(axis_record["rank_b"], float)[keep]
-    support_a = np.asarray([support_a_by_name[n] for n in names], float)
-    support_b = np.asarray([support_b_by_name[n] for n in names], float)
+        return {"status": "interictal_field_unavailable", "error": str(exc)[:200]}
+    fixed = interictal_record["interictal_field"]
+    names = [str(x) for x in fixed["contact_order"]]
+    coords = np.asarray(fixed["coords"], float)
+    rank_a = np.asarray(fixed["rank_a"], float)
+    rank_b = np.asarray(fixed["rank_b"], float)
+    support_a = np.asarray(fixed["support_a"], float)
+    support_b = np.asarray(fixed["support_b"], float)
     seizure_values = {}
-    cache_ix = np.asarray([cache_index[n] for n in names], int)
     for sz, vec in ictal["vectors"].items():
-        vals = np.asarray(vec, float)[cache_ix]
-        if int(np.isfinite(vals).sum()) >= 6 and np.nanstd(vals) > 1e-12:
+        aligned = align_activation_to_interictal_field(
+            interictal_record, ictal["channels"], np.asarray(vec, float)
+        )
+        vals = np.asarray(aligned["values"], float)
+        if aligned["n_matched"] >= 6 and int(np.isfinite(vals).sum()) >= 6 \
+                and np.nanstd(vals) > 1e-12:
             seizure_values[sz] = vals
     if not seizure_values:
-        return {"status": "no_resolvable_seizure", "n_contacts": len(names)}
-
-    pair = axis_record["axis_pair"]
-    ax_a, ax_b = pair["axis_a"], pair["axis_b"]
-    own_a = make_normalized_plane(coords, ax_a["u"], origin=ax_a["xbar"])
-    own_b = make_normalized_plane(coords, ax_b["u"], origin=ax_b["xbar"])
-    if own_a.get("status") != "ok" or own_b.get("status") != "ok":
-        return {"status": "own_plane_failed", "plane_a": own_a.get("status"),
-                "plane_b": own_b.get("status")}
-    ea, eb = z_earliness(rank_a), z_earliness(rank_b)
-    scorers = {
-        "own_a": make_field_scorer(ea, own_a["points"], support_a, own_a["sigma"]),
-        "own_b": make_field_scorer(eb, own_b["points"], support_b, own_b["sigma"]),
-    }
-    plane_meta = {"own_a": own_a, "own_b": own_b}
-    if pair["relation"]["collinear"] and pair["shared_axis"].get("status") == "ok":
-        shared = make_normalized_plane(coords, pair["shared_axis"]["u"], origin=ax_a["xbar"])
-        if shared.get("status") == "ok":
-            scorers["shared_a"] = make_field_scorer(ea, shared["points"], support_a, shared["sigma"])
-            scorers["shared_b"] = make_field_scorer(eb, shared["points"], support_b, shared["sigma"])
-            plane_meta["shared"] = shared
-    seizure_mean = np.nanmean(np.vstack(list(seizure_values.values())), axis=0)
+        return {"status": "no_resolvable_seizure_on_frozen_contacts",
+                "n_contacts": len(names)}
+    seizure_stack = np.vstack(list(seizure_values.values()))
+    finite_count = np.isfinite(seizure_stack).sum(axis=0)
+    seizure_mean = np.full(seizure_stack.shape[1], np.nan, float)
+    has_value = finite_count > 0
+    seizure_mean[has_value] = (
+        np.nansum(seizure_stack[:, has_value], axis=0) / finite_count[has_value]
+    )
     return {"status": "ok", "names": names, "coords": coords, "rank_a": rank_a,
-            "rank_b": rank_b, "earliness_a": ea, "earliness_b": eb,
-            "support_a": support_a, "support_b": support_b, "support_mode": support_mode,
-            "support_source": supports.get("support_source", "recomputed_from_masked_events"),
-            "template_event_counts": supports["n_events"], "seizure_mean": seizure_mean,
+            "rank_b": rank_b,
+            "earliness_a": np.asarray(fixed["earliness_a"], float),
+            "earliness_b": np.asarray(fixed["earliness_b"], float),
+            "support_a": support_a, "support_b": support_b,
+            "support_mode": "frozen_template_specific",
+            "support_source": interictal_record.get("support_source"),
+            "template_event_counts": interictal_record.get("template_event_counts", {}),
+            "interictal_contract": interictal_record.get("contract"),
+            "interictal_fingerprint": fixed.get("fingerprint_sha256"),
+            "interictal_artifact": interictal_record.get("interictal_artifact"),
+            "seizure_mean": seizure_mean,
             "seizure_values": seizure_values,
-            "scorers": scorers, "planes": plane_meta, "n_contacts": len(names),
+            "scorers": scorers, "planes": fixed["planes"], "n_contacts": len(names),
             "n_seizures": len(seizure_values)}
 
 
@@ -268,7 +172,7 @@ def _run_field_nulls(bundle: Mapping[str, object], *, B: int, seed: int) -> Dict
            "nulls": {}}
     for mode_i, mode in enumerate(("channel", "within_shaft")):
         rng = np.random.default_rng(seed + 100003 * mode_i)
-        effective_n = effective_shuffle_n(names, None, mode)
+        effective_by_seizure = []
         per_metric_obs = {k: [] for k in metric_keys}
         per_metric_null = {k: [] for k in metric_keys}
         for sz, values in values_by_sz.items():
@@ -277,13 +181,19 @@ def _run_field_nulls(bundle: Mapping[str, object], *, B: int, seed: int) -> Dict
                 per_metric_obs[k].append(obs.get(k, np.nan))
             n = len(values)
             indices = np.tile(np.arange(n), (int(B), 1))
+            finite = np.where(np.isfinite(values))[0]
             if mode == "channel":
+                effective_by_seizure.append(len(finite) if len(finite) >= 2 else 0)
                 for b in range(int(B)):
-                    indices[b] = rng.permutation(n)
+                    indices[b, finite] = finite[rng.permutation(len(finite))]
             else:
                 groups = {}
-                for j, name in enumerate(names):
+                for j in finite:
+                    name = names[j]
                     groups.setdefault(parse_shaft(name)[0], []).append(j)
+                effective_by_seizure.append(
+                    sum(len(idx) for idx in groups.values() if len(idx) >= 2)
+                )
                 for idx in groups.values():
                     ix = np.asarray(idx, int)
                     for b in range(int(B)):
@@ -292,6 +202,7 @@ def _run_field_nulls(bundle: Mapping[str, object], *, B: int, seed: int) -> Dict
             draws = score_scorer_bundle_batch(scorers, shuffled)
             for k in metric_keys:
                 per_metric_null[k].append(np.asarray(draws.get(k, np.full(B, np.nan)), float))
+        effective_n = min(effective_by_seizure) if effective_by_seizure else 0
         metrics = {k: _fold_metric(per_metric_obs[k], np.asarray(per_metric_null[k], float),
                                    effective_n=effective_n)
                    for k in metric_keys}
@@ -300,10 +211,10 @@ def _run_field_nulls(bundle: Mapping[str, object], *, B: int, seed: int) -> Dict
 
 
 def _axis_csv_row(record: Mapping[str, object], field: Mapping[str, object]) -> Dict[str, object]:
-    row = {k: record.get(k) for k in ("subject_id", "dataset", "subject", "stable_k", "status",
-                                      "swap_class", "decision_k")}
+    row = {k: record.get(k) for k in ("subject_id", "dataset", "subject", "stable_k", "status")}
     row.update({"field_status": field.get("status"), "n_field_contacts": field.get("n_contacts"),
-                "n_seizures": field.get("n_seizures")})
+                "n_seizures": field.get("n_seizures"),
+                "interictal_contract": record.get("contract")})
     pair = record.get("axis_pair")
     if not isinstance(pair, Mapping) or pair.get("status") != "ok":
         return row
@@ -426,11 +337,14 @@ def _summarize(records: Sequence[Mapping[str, object]], B: int, feature_key: str
     strict_relation_counts = {k: sum(r["axis_pair"]["relation"]["relation"] == k
                                      for r in strict_stability)
                               for k in ("same", "reversed", "different")}
-    return {"contract": "template_gradient_shared_field_v2_early_to_late", "feature_key": feature_key,
+    return {"contract": "template_gradient_shared_field_v3_frozen_interictal", "feature_key": feature_key,
             "axis_definition": "template_propagation_axis_v2",
             "axis_direction_convention": "positive_early_to_late",
-            "support_mode": support_mode,
-            "B": int(B), "denominators": {"rankdisp_total": len(records), "axis_pair_ok": len(axis_ok),
+            "interictal_contract": INTERICTAL_FIELD_CONTRACT,
+            "support_mode": "frozen_template_specific",
+            "B": int(B), "denominators": {"interictal_artifacts_total": len(records),
+                                            "rankdisp_total": len(records),
+                                            "axis_pair_ok": len(axis_ok),
                                             "field_cache_ok": len(field_ok),
                                             **{k: len(v) for k, v in subsets.items()}},
             "axis_relation_counts_all_axis_ok": relation_counts,
@@ -442,17 +356,17 @@ def _summarize(records: Sequence[Mapping[str, object]], B: int, feature_key: str
             "claim_boundary": "exploratory; axis and collinearity frozen without ictal outcomes; early-ictal readout, not early-ictal-specific"}
 
 
-def run(subjects: Sequence[str], cache_dir: Path, out_dir: Path, *,
-        feature_key: str, support_mode: str, B: int) -> Dict[str, object]:
+def run(subjects: Sequence[str], interictal_dir: Path, cache_dir: Path, out_dir: Path, *,
+        feature_key: str, B: int) -> Dict[str, object]:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "per_subject").mkdir(exist_ok=True)
     records = []
     rows = []
     for i, sid in enumerate(subjects, 1):
-        rec = _load_axis_input(sid)
+        rec = _load_interictal_record(interictal_dir, sid)
         field: Dict[str, object] = {"status": "axis_not_available"}
         if rec.get("status") == "ok":
-            bundle = _make_field_bundle(rec, cache_dir, feature_key, support_mode)
+            bundle = _make_field_bundle(rec, cache_dir, feature_key)
             field = {k: v for k, v in bundle.items()
                      if k not in {"scorers", "seizure_values"}}
             if bundle.get("status") == "ok":
@@ -474,7 +388,7 @@ def run(subjects: Sequence[str], cache_dir: Path, out_dir: Path, *,
         w.writeheader()
         for row in rows:
             w.writerow(_jsonable(row))
-    summary = _summarize(records, B, feature_key, support_mode)
+    summary = _summarize(records, B, feature_key, "frozen_template_specific")
     (out_dir / "cohort_summary.json").write_text(
         json.dumps(_jsonable(summary), ensure_ascii=False, indent=2))
     return summary
@@ -483,15 +397,17 @@ def run(subjects: Sequence[str], cache_dir: Path, out_dir: Path, *,
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--subjects", nargs="*", default=None, help="dataset_subject tokens")
+    ap.add_argument("--interictal-dir", type=Path, default=DEFAULT_INTERICTAL)
     ap.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE)
     ap.add_argument("--out-dir", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--feature-key", default="bb_auc")
-    ap.add_argument("--support-mode", choices=["template", "common"], default="template")
     ap.add_argument("--B", type=int, default=1000)
     args = ap.parse_args()
-    subjects = args.subjects or sorted(p.stem for p in RANKDISP.glob("*.json"))
-    summary = run(subjects, args.cache_dir, args.out_dir, feature_key=args.feature_key,
-                  support_mode=args.support_mode, B=args.B)
+    subjects = args.subjects or sorted(
+        p.stem for p in (args.interictal_dir / "per_subject").glob("*.json")
+    )
+    summary = run(subjects, args.interictal_dir, args.cache_dir, args.out_dir,
+                  feature_key=args.feature_key, B=args.B)
     print(json.dumps(_jsonable(summary["denominators"]), ensure_ascii=False, indent=2))
     print(f"wrote {args.out_dir / 'axis_cohort.csv'}")
     print(f"wrote {args.out_dir / 'cohort_summary.json'}")

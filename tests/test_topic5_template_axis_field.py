@@ -1,7 +1,12 @@
 import numpy as np
 
 from src.topic5_template_axis_field import (
+    INTERICTAL_FIELD_CONTRACT,
+    align_activation_to_interictal_field,
+    assess_axis_direction_validity,
     axis_passes_qc,
+    build_interictal_template_field_record,
+    interictal_field_fingerprint,
     classify_axis_pair,
     compute_template_axis_pair,
     make_field_scorer,
@@ -10,6 +15,7 @@ from src.topic5_template_axis_field import (
     score_field_batch,
     score_scorer_bundle,
     score_scorer_bundle_batch,
+    scorers_from_interictal_record,
     shared_bisector,
 )
 
@@ -93,6 +99,21 @@ def test_axis_qc_fails_closed_on_single_shaft_or_missing_loso():
     assert not axis_passes_qc(dict(base, loso_cosine=np.nan))
 
 
+def test_direction_validity_separates_estimability_geometry_and_stability():
+    base = {"status": "ok", "n": 12, "n_shafts": 2, "effective_rank": 2,
+            "bootstrap_cosine": 0.9, "loso_cosine": 0.7}
+    valid = assess_axis_direction_validity(base)
+    assert valid["estimable"] is True
+    assert valid["geometry_2d_supported"] is True
+    assert valid["strict_stability_pass"] is True
+
+    single = assess_axis_direction_validity(dict(base, n_shafts=1, loso_cosine=np.nan))
+    assert single["estimable"] is True
+    assert single["geometry_2d_supported"] is False
+    assert single["strict_stability_pass"] is False
+    assert "single_shaft_geometry" in single["reason_codes"]
+
+
 def test_normalized_plane_and_field_score_recover_pattern():
     x, _ = _geometry(4)
     plane = make_normalized_plane(x, [1, 0, 0])
@@ -103,6 +124,68 @@ def test_normalized_plane_and_field_score_recover_pattern():
     scorer = make_field_scorer(template, pts, support, plane["sigma"])
     out = score_field(scorer, template)
     assert out["abs_r"] > 0.99
+
+
+def test_interictal_record_freezes_early_to_late_own_fields_without_ictal_input():
+    x, shafts = _geometry(31)
+    true_a = np.array([0.8, -0.4, 0.25])
+    true_a /= np.linalg.norm(true_a)
+    true_b = np.array([-0.75, 0.5, -0.1])
+    true_b /= np.linalg.norm(true_b)
+    rank_a, rank_b = x @ true_a, x @ true_b
+    support_a = np.linspace(0.2, 1.0, len(x))
+    support_b = np.linspace(1.0, 0.2, len(x))
+    names = [f"S{i // 6}{i % 6 + 1}" for i in range(len(x))]
+    record = build_interictal_template_field_record(
+        subject_id="test_subject", dataset="test", subject="subject", stable_k=2,
+        names=names, coords=x, rank_ta=rank_a, rank_tb=rank_b, shafts=shafts,
+        support_ta=support_a, support_tb=support_b, support_source="unit_test",
+        n_axis_boot=30, n_pair_boot=40, seed=11,
+    )
+    assert record["contract"] == INTERICTAL_FIELD_CONTRACT
+    assert record["axis_direction_convention"] == "positive_early_to_late"
+    assert float(np.asarray(record["axis_pair"]["axis_a"]["u"]) @ true_a) > 0.99
+    assert float(np.asarray(record["axis_pair"]["axis_b"]["u"]) @ true_b) > 0.99
+    assert record["direction_validity"]["ta"]["estimable"] is True
+    assert record["direction_validity"]["tb"]["estimable"] is True
+    assert record["interictal_field"]["status"] == "ok"
+    assert record["interictal_field"]["fingerprint_sha256"] == interictal_field_fingerprint(record)
+    assert set(("own_a", "own_b")).issubset(record["interictal_field"]["field_models"])
+
+    scorers = scorers_from_interictal_record(record)
+    assert score_field(scorers["own_a"], -rank_a)["abs_r"] > 0.99
+
+    tampered = dict(record)
+    tampered["interictal_field"] = dict(record["interictal_field"])
+    tampered["interictal_field"]["support_a"] = np.asarray(
+        record["interictal_field"]["support_a"], float
+    ).copy()
+    tampered["interictal_field"]["support_a"][0] += 0.01
+    try:
+        scorers_from_interictal_record(tampered)
+    except ValueError as exc:
+        assert "fingerprint mismatch" in str(exc)
+    else:
+        raise AssertionError("tampered frozen artifact must fail closed")
+
+
+def test_future_activation_is_name_joined_to_frozen_field_contact_order():
+    x, shafts = _geometry(32)
+    names = [f"S{i // 6}{i % 6 + 1}" for i in range(len(x))]
+    rank = x[:, 0]
+    support = np.ones(len(x))
+    record = build_interictal_template_field_record(
+        subject_id="test_subject", dataset="test", subject="subject", stable_k=2,
+        names=names, coords=x, rank_ta=rank, rank_tb=-rank, shafts=shafts,
+        support_ta=support, support_tb=support, support_source="unit_test",
+        n_axis_boot=20, n_pair_boot=20, seed=12,
+    )
+    shuffled_names = list(reversed(names))
+    shuffled_values = np.arange(len(names), dtype=float)[::-1]
+    aligned = align_activation_to_interictal_field(record, shuffled_names, shuffled_values)
+    np.testing.assert_allclose(aligned["values"], np.arange(len(names), dtype=float))
+    assert aligned["n_matched"] == len(names)
+    assert aligned["missing_names"] == []
 
 
 def test_flipping_axis_sign_only_relabels_along_coordinate_not_field_score():

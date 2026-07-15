@@ -17,6 +17,20 @@
 - field 分析使用上述触点与 ictal cache channel 的交集。主分析中，A/B 各自的 smoothing support 为该触点在分到相应模板的间期 group events 中的 participation fraction；同一模板的 own/shared/发作场/null 共用该 support，因此 own 与 shared 之间只改变平面。两模板仍限制在同一组 joint-valid 节点上。全部间期事件的共同 support 作为敏感性分析，不能替代模板自己的 support。
 - 主发作读出为 `bb_auc`：1–45 Hz、发作后 0–10 s 的 baseline-robust-z power 均值。统计单位为患者，不把触点或网格像素当独立样本。
 
+### 2.1 纯间期冻结 artifact（2026-07-15 收口）
+
+间期构建与发作读出拆成两个 producer。`scripts/build_topic5_interictal_template_fields.py`
+只读取 masked stable-k=2 TA/TB joint-valid ranks、共同有效触点、三维坐标和间期 participation support，输出
+`results/interictal_propagation_masked/template_gradient_fields/per_subject/<subject>.json`。
+每个 artifact 固定保存 TA/TB early→late 轴、三层方向有效性、own plane/field/kernel weights；共线者
+另存 shared plane/field。该 producer 禁止读取 seizure、onset、subtype 或能量数据。
+
+所有后续发作分析必须按 channel name 对齐到 artifact 的 `interictal_field.contact_order`，直接复用
+固定的 axis、plane、sigma、support、template field 和 kernel weights。发作 cache 缺少的触点保留为
+missing，不得用剩余触点重新拟合轴或平面。`decision_k`、swap、endpoint 和 D_AB 不参与该 artifact；
+它们只保留为补充方法校准。artifact 对上述冻结组件保存 SHA-256 指纹，下游加载时必须校验并在
+不一致时 fail closed。
+
 ## 3. 单模板梯度轴
 
 对每个模板拟合

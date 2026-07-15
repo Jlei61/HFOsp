@@ -10,6 +10,10 @@
 > V1（network-axis，下方 2026-06-14 主线）是 V2 前身/基础，未被推翻，且 V2 不默认把 stable scaffold 升级成 unstable mode。
 
 > **主线结果（2026-06-14）：network-axis A+B 已执行**——间期传播轴 ↔ 发作早期激活共享一根粗网络骨架（18 Epilepsiae 队列稳），细对齐仅快活动量稳；符号自由共线，非逐点重放。见 §3.0 + 归档 `axis_alignment_AB_result_2026-06-14.md`。
+> **2026-07-15 gradient-field 冻结合同**：后续任何新版 onset、seizure subtype 或早期能量读出，统一消费
+> `results/interictal_propagation_masked/template_gradient_fields/per_subject/`。这里已按患者冻结 TA/TB
+> early→late gradient axes、方向有效性和 own 2D fields；共线患者另有 shared field。发作侧只按 channel
+> name 对齐，不再用发作数据重建轴/平面。D_AB、swap、decision-k 和 endpoint 不进入主方法。
 > 状态：**探索性 (exploratory) — PR-0 + PR-1 落地，audit-rerun 完成 (2026-05-10)，yuquan 扩展 (2026-05-10 PR-0.1)**。PR-1 cohort z-ER 聚类有 1 张 cohort 主结果（`figures/per_subject/`，25 subjects），cohort-level "真子型断言" 仍依赖 sensitivity；PR-2+ 未启动。
 > 范围：以 ictal seizure 本身为研究对象——subject 内的 seizure subtype carve-out + 下游 pre-ictal / outcome / propagation 关联。
 > **不属于**：interictal 事件内部传播（topic1）、IEI/PSD（topic2）、spatial SOZ 归因（topic3）、模型层（topic4）。

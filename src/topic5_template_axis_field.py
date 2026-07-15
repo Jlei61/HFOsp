@@ -6,6 +6,7 @@ filesystem I/O; the cohort runner owns joins, caching and serialization.
 """
 from __future__ import annotations
 
+import hashlib
 from typing import Dict, Mapping, Optional, Sequence
 
 import numpy as np
@@ -16,6 +17,7 @@ from src.topic5_contact_similarity import kernel_smooth_at_contacts, median_nn_s
 
 TEMPLATE_AXIS_DEFINITION = "template_propagation_axis_v2"
 TEMPLATE_AXIS_DIRECTION = "positive_early_to_late"
+INTERICTAL_FIELD_CONTRACT = "topic5_interictal_template_fields_v1"
 
 
 def z_earliness(rank: Sequence[float]) -> np.ndarray:
@@ -103,6 +105,59 @@ def axis_passes_qc(axis: Mapping[str, object], *, boot_min: float = 0.80,
         and float(axis["bootstrap_cosine"]) >= boot_min
         and float(axis["loso_cosine"]) >= loso_min
     )
+
+
+def assess_axis_direction_validity(
+    axis: Mapping[str, object], *, boot_min: float = 0.80, loso_min: float = 0.50
+) -> Dict[str, object]:
+    """Return explicit, reusable direction-validity tiers for one template axis.
+
+    Estimability, two-dimensional sampling geometry, and resampling stability are
+    intentionally separate.  A failed strict-stability gate never erases an
+    otherwise estimable early-to-late direction.
+    """
+    estimable = bool(axis.get("status") == "ok")
+    n = int(axis.get("n", 0) or 0)
+    n_shafts = int(axis.get("n_shafts", 0) or 0)
+    effective_rank = int(axis.get("effective_rank", 0) or 0)
+    boot = axis.get("bootstrap_cosine")
+    loso = axis.get("loso_cosine")
+    boot_ok = bool(boot is not None and np.isfinite(float(boot)) and float(boot) >= boot_min)
+    loso_ok = bool(loso is not None and np.isfinite(float(loso)) and float(loso) >= loso_min)
+    geometry_2d = bool(estimable and n_shafts >= 2 and effective_rank >= 2)
+    strict = bool(
+        estimable and n >= 6 and geometry_2d and boot_ok and loso_ok
+    )
+    reasons = []
+    if not estimable:
+        reasons.append(f"axis_status:{axis.get('status', 'missing')}")
+    if estimable and n < 6:
+        reasons.append("fewer_than_6_contacts")
+    if estimable and n_shafts < 2:
+        reasons.append("single_shaft_geometry")
+    if estimable and effective_rank < 2:
+        reasons.append("effective_rank_below_2")
+    if estimable and not boot_ok:
+        reasons.append("contact_bootstrap_below_threshold")
+    if estimable and not loso_ok:
+        reasons.append("leave_one_shaft_out_below_threshold_or_unavailable")
+    return {
+        "axis_definition": TEMPLATE_AXIS_DEFINITION,
+        "direction_convention": TEMPLATE_AXIS_DIRECTION,
+        "estimable": estimable,
+        "geometry_2d_supported": geometry_2d,
+        "contact_bootstrap_stable": boot_ok,
+        "leave_one_shaft_out_stable": loso_ok,
+        "strict_stability_pass": strict,
+        "thresholds": {
+            "minimum_contacts": 6,
+            "minimum_shafts_for_2d": 2,
+            "minimum_effective_rank_for_2d": 2,
+            "bootstrap_cosine_min": float(boot_min),
+            "loso_cosine_min": float(loso_min),
+        },
+        "reason_codes": reasons,
+    }
 
 
 def classify_axis_pair(cosine: float, *, line_threshold: float = 0.50) -> Dict[str, object]:
@@ -288,6 +343,280 @@ def make_field_scorer(template_values: Sequence[float], plane_points: np.ndarray
     field = _smooth_from_weights(vals, weight_id)
     return {"template_field": field, "points": pts, "support": sup, "sigma": float(sigma),
             "weight_id": weight_id, "weight_mirror": weight_mirror}
+
+
+def build_interictal_template_field_record(
+    *,
+    subject_id: str,
+    dataset: str,
+    subject: str,
+    stable_k: int,
+    names: Sequence[str],
+    coords: np.ndarray,
+    rank_ta: Sequence[float],
+    rank_tb: Sequence[float],
+    shafts: Sequence[str],
+    support_ta: Sequence[float],
+    support_tb: Sequence[float],
+    support_source: str,
+    template_event_counts: Optional[Mapping[str, object]] = None,
+    n_axis_boot: int = 200,
+    n_pair_boot: int = 500,
+    line_threshold: float = 0.50,
+    seed: int = 0,
+) -> Dict[str, object]:
+    """Freeze one subject's interictal TA/TB axes and contact-evaluated fields.
+
+    No ictal input is accepted.  Axes use every joint-valid mapped contact.  Field
+    models use the fixed subset with positive support in both templates, and store
+    their kernel weights so future onset definitions can be scored without
+    rebuilding an axis, plane, bandwidth, or interictal field.
+    """
+    names_arr = np.asarray([str(x) for x in names], object)
+    x = np.asarray(coords, float)
+    ra = np.asarray(rank_ta, float)
+    rb = np.asarray(rank_tb, float)
+    sh = np.asarray([str(x) for x in shafts], object)
+    sa = np.asarray(support_ta, float)
+    sb = np.asarray(support_tb, float)
+    n = len(names_arr)
+    if not (x.shape == (n, 3) and len(ra) == len(rb) == len(sh) == len(sa) == len(sb) == n):
+        raise ValueError("interictal template field inputs are not contact-aligned")
+    if len(set(names_arr.tolist())) != n:
+        raise ValueError("interictal template field contact names must be unique")
+
+    pair = compute_template_axis_pair(
+        x, ra, rb, sh, n_axis_boot=n_axis_boot, n_pair_boot=n_pair_boot,
+        seed=seed, line_threshold=line_threshold,
+    )
+    record: Dict[str, object] = {
+        "contract": INTERICTAL_FIELD_CONTRACT,
+        "subject_id": str(subject_id),
+        "dataset": str(dataset),
+        "subject": str(subject),
+        "stable_k": int(stable_k),
+        "template_labels": {"a": "TA", "b": "TB"},
+        "axis_definition": TEMPLATE_AXIS_DEFINITION,
+        "axis_direction_convention": TEMPLATE_AXIS_DIRECTION,
+        "status": pair.get("status"),
+        "names": names_arr,
+        "coords": x,
+        "shafts": sh,
+        "rank_a": ra,
+        "rank_b": rb,
+        "earliness_a": z_earliness(ra),
+        "earliness_b": z_earliness(rb),
+        "support_a": sa,
+        "support_b": sb,
+        "support_source": str(support_source),
+        "template_event_counts": dict(template_event_counts or {}),
+        "axis_pair": pair,
+    }
+    if pair.get("status") != "ok":
+        record["direction_validity"] = {
+            "ta": assess_axis_direction_validity(pair.get("axis_a", {})),
+            "tb": assess_axis_direction_validity(pair.get("axis_b", {})),
+            "pair": {
+                "axis_pair_estimable": False,
+                "geometry_2d_supported": False,
+                "strict_stability_pass": False,
+            },
+        }
+        record["interictal_field"] = {"status": "axis_not_available"}
+        return record
+
+    va = assess_axis_direction_validity(pair["axis_a"])
+    vb = assess_axis_direction_validity(pair["axis_b"])
+    record["direction_validity"] = {
+        "ta": va,
+        "tb": vb,
+        "pair": {
+            "axis_pair_estimable": bool(pair.get("axis_pair_estimable")),
+            "geometry_2d_supported": bool(pair.get("geometry_2d_supported")),
+            "strict_stability_pass": bool(pair.get("strict_stability_pass")),
+            "relation": pair.get("relation"),
+            "paired_contact_bootstrap": pair.get("pair_bootstrap"),
+        },
+    }
+
+    keep = (
+        np.isfinite(x).all(1) & np.isfinite(ra) & np.isfinite(rb)
+        & np.isfinite(sa) & np.isfinite(sb) & (sa > 0) & (sb > 0)
+    )
+    if int(keep.sum()) < 6:
+        record["interictal_field"] = {
+            "status": "insufficient_positive_joint_support",
+            "n_contacts": int(keep.sum()),
+        }
+        return record
+
+    fnames = names_arr[keep]
+    fx, fra, frb = x[keep], ra[keep], rb[keep]
+    fsa, fsb = sa[keep], sb[keep]
+    fea, feb = z_earliness(fra), z_earliness(frb)
+    axa, axb = pair["axis_a"], pair["axis_b"]
+    own_a = make_normalized_plane(fx, axa["u"], origin=axa["xbar"])
+    own_b = make_normalized_plane(fx, axb["u"], origin=axb["xbar"])
+    if own_a.get("status") != "ok" or own_b.get("status") != "ok":
+        record["interictal_field"] = {
+            "status": "own_plane_failed",
+            "n_contacts": int(keep.sum()),
+            "own_ta_status": own_a.get("status"),
+            "own_tb_status": own_b.get("status"),
+        }
+        return record
+
+    scorers = {
+        "own_a": make_field_scorer(fea, own_a["points"], fsa, own_a["sigma"]),
+        "own_b": make_field_scorer(feb, own_b["points"], fsb, own_b["sigma"]),
+    }
+    planes = {"own_a": own_a, "own_b": own_b}
+    if pair["relation"].get("collinear") and pair["shared_axis"].get("status") == "ok":
+        shared = make_normalized_plane(fx, pair["shared_axis"]["u"], origin=axa["xbar"])
+        if shared.get("status") == "ok":
+            scorers["shared_a"] = make_field_scorer(fea, shared["points"], fsa, shared["sigma"])
+            scorers["shared_b"] = make_field_scorer(feb, shared["points"], fsb, shared["sigma"])
+            planes["shared"] = shared
+
+    record["interictal_field"] = {
+        "status": "ok",
+        "field_contact_policy": "joint_valid_mapped_and_positive_support_in_both_TA_TB",
+        "contact_order": fnames,
+        "coords": fx,
+        "shafts": sh[keep],
+        "rank_a": fra,
+        "rank_b": frb,
+        "earliness_a": fea,
+        "earliness_b": feb,
+        "support_a": fsa,
+        "support_b": fsb,
+        "n_contacts": int(keep.sum()),
+        "planes": planes,
+        "field_models": scorers,
+        "reuse_contract": {
+            "join": "align future activation by exact channel name to contact_order",
+            "frozen": ["axis", "plane", "bandwidth", "support", "template_field", "kernel_weights"],
+            "forbidden": "do not refit axis or plane from ictal/onset values",
+        },
+    }
+    record["interictal_field"]["fingerprint_algorithm"] = "sha256_v1"
+    record["interictal_field"]["fingerprint_sha256"] = interictal_field_fingerprint(record)
+    return record
+
+
+def interictal_field_fingerprint(record: Mapping[str, object]) -> str:
+    """Hash every frozen numerical component needed by future activation scoring."""
+    if record.get("contract") != INTERICTAL_FIELD_CONTRACT:
+        raise ValueError(f"unsupported interictal field contract: {record.get('contract')}")
+    field = record.get("interictal_field") or {}
+    if field.get("status") != "ok":
+        raise ValueError(f"interictal field unavailable: {field.get('status')}")
+    digest = hashlib.sha256()
+
+    def add_text(value: object) -> None:
+        digest.update(str(value).encode("utf-8"))
+        digest.update(b"\0")
+
+    def add_array(value: object) -> None:
+        array = np.ascontiguousarray(np.asarray(value, dtype="<f8"))
+        digest.update(str(array.shape).encode("ascii"))
+        digest.update(array.tobytes())
+
+    add_text(record.get("contract"))
+    add_text(record.get("subject_id"))
+    add_text(record.get("axis_definition"))
+    add_text(record.get("axis_direction_convention"))
+    for name in field.get("contact_order", []):
+        add_text(name)
+    for key in ("coords", "rank_a", "rank_b", "earliness_a", "earliness_b",
+                "support_a", "support_b"):
+        add_array(field[key])
+    pair = record.get("axis_pair") or {}
+    for key in ("axis_a", "axis_b"):
+        axis = pair.get(key) or {}
+        for array_key in ("u", "along", "earliness_gradient_u", "propagation_vector"):
+            add_array(axis[array_key])
+        for scalar_key in ("n", "n_shafts", "effective_rank", "R2",
+                           "bootstrap_cosine", "loso_cosine"):
+            add_text(axis.get(scalar_key))
+    relation = pair.get("relation") or {}
+    for key in ("cosine", "abs_cosine", "line_angle_deg", "collinear", "relation"):
+        add_text(relation.get(key))
+    pair_bootstrap = pair.get("pair_bootstrap") or {}
+    for key in ("p_collinear", "p_sign_stable", "robust_collinear"):
+        add_text(pair_bootstrap.get(key))
+    if (pair.get("shared_axis") or {}).get("status") == "ok":
+        add_array(pair["shared_axis"]["u"])
+    for key in sorted((field.get("planes") or {}).keys()):
+        plane = field["planes"][key]
+        add_text(key)
+        for array_key in ("points", "u", "w", "origin"):
+            add_array(plane[array_key])
+        add_text(float(plane["scale_mm"]))
+        add_text(float(plane["sigma"]))
+    for key in sorted((field.get("field_models") or {}).keys()):
+        model = field["field_models"][key]
+        add_text(key)
+        for array_key in ("template_field", "points", "support", "weight_id", "weight_mirror"):
+            add_array(model[array_key])
+        add_text(float(model["sigma"]))
+    return digest.hexdigest()
+
+
+def scorers_from_interictal_record(record: Mapping[str, object]) -> Dict[str, Dict[str, object]]:
+    """Load frozen NumPy scorer dictionaries from a serialized interictal record."""
+    if record.get("contract") != INTERICTAL_FIELD_CONTRACT:
+        raise ValueError(f"unsupported interictal field contract: {record.get('contract')}")
+    field = record.get("interictal_field") or {}
+    if field.get("status") != "ok":
+        raise ValueError(f"interictal field unavailable: {field.get('status')}")
+    expected = field.get("fingerprint_sha256")
+    if not expected or str(expected) != interictal_field_fingerprint(record):
+        raise ValueError("interictal field fingerprint mismatch")
+    models = field.get("field_models") or {}
+    required = ("own_a", "own_b")
+    if not all(k in models for k in required):
+        raise ValueError("interictal record is missing own TA/TB field models")
+    out: Dict[str, Dict[str, object]] = {}
+    for key, model in models.items():
+        out[str(key)] = {
+            "template_field": np.asarray(model["template_field"], float),
+            "points": np.asarray(model["points"], float),
+            "support": np.asarray(model["support"], float),
+            "sigma": float(model["sigma"]),
+            "weight_id": np.asarray(model["weight_id"], float),
+            "weight_mirror": np.asarray(model["weight_mirror"], float),
+        }
+    return out
+
+
+def align_activation_to_interictal_field(
+    record: Mapping[str, object], activation_names: Sequence[str], activation: Sequence[float]
+) -> Dict[str, object]:
+    """Name-align one future activation vector to the frozen interictal field order."""
+    source_names = [str(x) for x in activation_names]
+    values = np.asarray(activation, float)
+    if len(source_names) != len(values):
+        raise ValueError("activation names and values have different lengths")
+    if len(set(source_names)) != len(source_names):
+        raise ValueError("activation channel names must be unique")
+    field = record.get("interictal_field") or {}
+    target_names = [str(x) for x in field.get("contact_order", [])]
+    source_index = {name: i for i, name in enumerate(source_names)}
+    aligned = np.full(len(target_names), np.nan, float)
+    matched = np.zeros(len(target_names), bool)
+    for i, name in enumerate(target_names):
+        if name in source_index:
+            aligned[i] = values[source_index[name]]
+            matched[i] = True
+    return {
+        "values": aligned,
+        "matched_mask": matched,
+        "n_target": len(target_names),
+        "n_matched": int(matched.sum()),
+        "n_finite": int(np.isfinite(aligned).sum()),
+        "missing_names": [target_names[i] for i in np.where(~matched)[0]],
+    }
 
 
 def _smooth_from_weights(values: np.ndarray, weights: np.ndarray) -> np.ndarray:

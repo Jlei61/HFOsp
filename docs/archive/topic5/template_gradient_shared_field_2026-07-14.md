@@ -110,7 +110,9 @@
 ## 8. 产出
 
 - 代码：`src/topic5_template_axis_field.py`
-- cohort runner：`scripts/run_topic5_template_axis_field.py`
+- 纯间期 canonical producer：`scripts/build_topic5_interictal_template_fields.py`
+- canonical artifacts：`results/interictal_propagation_masked/template_gradient_fields/`
+- 发作能量 consumer：`scripts/run_topic5_template_axis_field.py`
 - 图：`scripts/plot_topic5_template_axis_field.py`
 - 测试：`tests/test_topic5_template_axis_field.py`
 - 主结果：`results/topic5_ictal_recruitment/template_axis_field/`
@@ -120,3 +122,18 @@
 - 图说明：`results/topic5_ictal_recruitment/template_axis_field/figures/README.md`
 
 所有 per-subject JSON 保留轴 QC、pair bootstrap、own/shared plane、逐发作观测和完整 B=1000 null 分布；`axis_cohort.csv` 是结构分母表，`cohort_summary.json` 是正式聚合入口。
+
+### 8.1 2026-07-15 间期 field 冻结审计
+
+间期轴和 field 已从 ictal runner 中完全拆出。新 canonical artifact 合同为
+`topic5_interictal_template_fields_v1`，不读取任何发作数据。全 40 名输入生成 per-subject record：
+28 名可估 TA/TB 双轴、26 名具备二维几何、13 名 strict-stability；28/28 可估者均保存 TA/TB
+own field，14 名宽泛共线者另存 shared field。56/56 条正式轴均满足 `u·earliness_gradient_u=-1`
+（数值误差 <5e-16），且 along 与 rank 全为正相关，确认正方向为 early→late。
+
+与旧 ictal-coupled producer 对照时，17 名相同 contact set 患者的轴、contact order 和 plane points
+逐值完全一致。Yuquan zhangkexuan 的纯间期 artifact 比旧 ictal cache 多保留 5 个合法间期触点；这是
+预期合同修正，后续 activation 以 missing 对齐，不得重新缩小 contact set 后建轴。新的 ictal consumer
+合同为 `template_gradient_shared_field_v3_frozen_interictal`，只消费冻结 artifact。每个可用 artifact
+同时保存覆盖 axis、contact order、plane、support、template field 和 kernel weights 的 SHA-256 指纹；
+consumer 加载时自动校验，任何冻结组件漂移均 fail closed。
