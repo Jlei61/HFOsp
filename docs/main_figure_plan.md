@@ -85,6 +85,7 @@ Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计�
 - 全部素材：`results/interictal_propagation_masked/template_gradient_fields/figures/`，包含 28 名可建双轴患者的单患者图和 atlas；26 人具有有效二维几何，单杆患者只保留作方向审阅，不作为最终二维示例候选。
 - 冻结输入：`results/interictal_propagation_masked/template_gradient_fields/per_subject/<subject>.json`。
 - 复现入口：`scripts/plot_topic5_interictal_template_ab_fields.py`；paper 候选同时导出 PNG/PDF。
+- 固定画图规范：`docs/topic5_interictal_field_figure_spec.md`；之后所有间期 TA/TB 场图必须复用其中的公共 payload/panel/subject/atlas 函数。
 - 图形合同：传播主轴正方向固定为 early→late；宽泛共线者使用 shared plane，其余使用 TA/TB 各自平面；transverse 正负只按电极几何固定，不根据 field 颜色调向；`sigma_display=6 mm` 仅用于显示，不替换评分时冻结的患者特异 kernel。TA/TB 使用红/蓝语义色、一个共享横轴标签和一个与 field 等高的共享 colorbar。
 
 **当前口径**：

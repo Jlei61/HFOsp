@@ -8,4 +8,6 @@
 
 当前状态是 **paper-ready candidate**，不是已锁定的最终 Fig2-E。E1146 用于延续全文的代表患者叙事；最终是否保留，应与 Fig2 其余 panel 的版面、subject 复用和信息增量一起决定。完整 28 人素材位于 `results/interictal_propagation_masked/template_gradient_fields/figures/`。
 
+固定画图规范为 `docs/topic5_interictal_field_figure_spec.md`。之后所有间期 TA/TB 场图必须复用 `plot_interictal_ab_subject()` / `plot_interictal_ab_atlas()`；需要拼版时复用 `build_interictal_ab_panel_payloads()` / `draw_interictal_rank_field_panel()`，不得复制 renderer 另写一套。
+
 **关注点**：这张图展示患者特异的间期空间传播结构；不要把它解读为发作场一致性、逐点传播重放或 cohort-level 统计证据。

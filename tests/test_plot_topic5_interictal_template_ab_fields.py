@@ -1,11 +1,34 @@
 import numpy as np
 
 from scripts.plot_topic5_interictal_template_ab_fields import (
+    INTERICTAL_FIELD_FIGURE_CONTRACT,
     _canonical_transverse_sign,
     _display_name,
     _load_yuquan_crosswalk,
     _transverse_display_signs,
+    build_interictal_ab_panel_payloads,
+    draw_interictal_rank_field_panel,
+    load_interictal_field_records,
+    plot_interictal_ab_atlas,
+    plot_interictal_ab_subject,
 )
+from scripts.plot_topic5_field_vs_ictal_swap import (
+    _field_panel,
+    draw_topic5_field_panel,
+)
+
+
+def test_public_interictal_field_figure_reuse_contract_is_locked():
+    assert INTERICTAL_FIELD_FIGURE_CONTRACT == "topic5_interictal_ab_field_figure_v1"
+    assert _field_panel is draw_topic5_field_panel
+    for function in (
+        build_interictal_ab_panel_payloads,
+        draw_interictal_rank_field_panel,
+        load_interictal_field_records,
+        plot_interictal_ab_subject,
+        plot_interictal_ab_atlas,
+    ):
+        assert callable(function)
 
 
 def test_canonical_transverse_sign_makes_dominant_component_positive():

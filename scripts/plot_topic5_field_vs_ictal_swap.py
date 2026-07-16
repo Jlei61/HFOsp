@@ -102,7 +102,7 @@ def _payload(ds_sid, rd_dir, geo_dir, activation):
     return dat
 
 
-def _field_panel(
+def draw_topic5_field_panel(
     ax, dat, vals, title, cbar_label, *, compact, labels=False, cbar=False,
     contact_outline_lw=None, contact_size=None,
 ):
@@ -141,6 +141,11 @@ def _field_panel(
             cb = plt.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
             cb.set_label(cbar_label, fontsize=FS_CBAR_LABEL)
             cb.ax.tick_params(labelsize=FS_TICK)
+
+
+# Backward-compatible alias for older Topic 5 consumers.  New interictal-field
+# figures must import the public name above instead of copying this renderer.
+_field_panel = draw_topic5_field_panel
 
 
 def _ict_labels(dat, activation):

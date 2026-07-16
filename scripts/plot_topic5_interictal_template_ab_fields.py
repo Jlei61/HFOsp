@@ -11,6 +11,10 @@ the patient-specific frozen kernels used for field scoring remain unchanged.
 Collinear TA/TB pairs use their common shared plane for both panels.  Other
 pairs use the two template-specific planes.  Contact names, swap/source rings
 and clinical overlays are deliberately omitted.
+
+The locked data, projection and visual contract is documented in
+``docs/topic5_interictal_field_figure_spec.md``.  New interictal-field figures
+must reuse this module's public payload, panel, subject or atlas functions.
 """
 from __future__ import annotations
 
@@ -36,8 +40,8 @@ from scripts.plot_contact_plane_static import _limits_with_padding
 from scripts.plot_topic5_field_vs_ictal_swap import (
     FS_CBAR_LABEL,
     FS_TICK,
-    _field_panel,
     _rank01,
+    draw_topic5_field_panel,
 )
 from src.topic5_template_axis_field import scorers_from_interictal_record
 
@@ -50,6 +54,7 @@ DEFAULT_OUTPUT = (
 )
 DEFAULT_DISPLAY_SIGMA_MM = 6.0
 DEFAULT_YUQUAN_CROSSWALK = ROOT / "docs/paper-draft/.private/yuquan_crosswalk.md"
+INTERICTAL_FIELD_FIGURE_CONTRACT = "topic5_interictal_ab_field_figure_v1"
 TA_COLOR = "#B2182B"
 TB_COLOR = "#2166AC"
 FS_XLABEL = 17
@@ -59,6 +64,15 @@ CONTACT_OUTLINE_LW = 2.7
 CONTACT_SIZE = 92
 ATLAS_CONTACT_OUTLINE_LW = 1.5
 ATLAS_CONTACT_SIZE = 46
+
+__all__ = [
+    "INTERICTAL_FIELD_FIGURE_CONTRACT",
+    "build_interictal_ab_panel_payloads",
+    "draw_interictal_rank_field_panel",
+    "load_interictal_field_records",
+    "plot_interictal_ab_atlas",
+    "plot_interictal_ab_subject",
+]
 
 
 def _load_yuquan_crosswalk(path: Path) -> Dict[str, str]:
@@ -142,10 +156,10 @@ def _transverse_display_signs(
     return sign_a, sign_b, rmse_by_sign[sign_b]
 
 
-def _panel_payload(
+def build_interictal_ab_panel_payloads(
     record: Mapping[str, object], *, display_sigma_mm: float = DEFAULT_DISPLAY_SIGMA_MM,
 ) -> Tuple[Dict[str, object], Dict[str, object], str]:
-    """Return A/B payloads accepted by the established ``_field_panel`` renderer."""
+    """Build locked TA/TB payloads for the shared Topic 5 field renderer."""
     if not np.isfinite(display_sigma_mm) or display_sigma_mm <= 0:
         raise ValueError("display_sigma_mm must be a positive finite value")
     field = record.get("interictal_field") or {}
@@ -223,13 +237,44 @@ def _panel_payload(
     return payloads[0], payloads[1], mode
 
 
-def plot_subject(
+def draw_interictal_rank_field_panel(
+    ax, payload: Mapping[str, object], template: str, *,
+    compact: bool = False, panel_title: str | None = None,
+):
+    """Draw one locked TA/TB rank-field panel using the shared renderer."""
+    template = str(template).upper()
+    if template not in {"TA", "TB"}:
+        raise ValueError("template must be TA or TB")
+    color = TA_COLOR if template == "TA" else TB_COLOR
+    title = (panel_title or "") if compact else (panel_title or template)
+    draw_topic5_field_panel(
+        ax, payload, payload["vals"], title, "early 0 → late 1",
+        compact=compact, labels=False, cbar=False,
+        contact_outline_lw=(ATLAS_CONTACT_OUTLINE_LW if compact else CONTACT_OUTLINE_LW),
+        contact_size=(ATLAS_CONTACT_SIZE if compact else CONTACT_SIZE),
+    )
+    if compact:
+        ax.title.set(color="#222222", fontsize=9)
+        ax.text(
+            0.035, 0.965, template, transform=ax.transAxes,
+            ha="left", va="top", fontsize=9, fontweight="bold", color=color,
+            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.8},
+            zorder=8,
+        )
+    else:
+        ax.title.set(color=color, fontsize=FS_PANEL_TITLE, fontweight="bold")
+    return ax
+
+
+def plot_interictal_ab_subject(
     record: Mapping[str, object], output_dir: Path, *,
     yuquan_labels: Mapping[str, str],
     display_sigma_mm: float = DEFAULT_DISPLAY_SIGMA_MM,
     output_format: str = "png",
 ) -> Path:
-    dat_a, dat_b, mode = _panel_payload(record, display_sigma_mm=display_sigma_mm)
+    dat_a, dat_b, mode = build_interictal_ab_panel_payloads(
+        record, display_sigma_mm=display_sigma_mm,
+    )
     subject_id = str(record["subject_id"])
     pretty = _display_name(subject_id, yuquan_labels)
     mode_label = "shared" if mode == "shared" else "separate"
@@ -243,20 +288,8 @@ def plot_subject(
         layout="constrained",
     )
     fig.get_layout_engine().set(w_pad=0.02, wspace=0.025)
-    _field_panel(
-        axes[0], dat_a, dat_a["vals"],
-        "TA", "early 0 → late 1",
-        compact=False, labels=False, cbar=False,
-        contact_outline_lw=CONTACT_OUTLINE_LW, contact_size=CONTACT_SIZE,
-    )
-    _field_panel(
-        axes[1], dat_b, dat_b["vals"],
-        "TB", "early 0 → late 1",
-        compact=False, labels=False, cbar=False,
-        contact_outline_lw=CONTACT_OUTLINE_LW, contact_size=CONTACT_SIZE,
-    )
-    axes[0].title.set(color=TA_COLOR, fontsize=FS_PANEL_TITLE, fontweight="bold")
-    axes[1].title.set(color=TB_COLOR, fontsize=FS_PANEL_TITLE, fontweight="bold")
+    draw_interictal_rank_field_panel(axes[0], dat_a, "TA")
+    draw_interictal_rank_field_panel(axes[1], dat_b, "TB")
     axes[0].set_anchor("E")
     axes[1].set_anchor("W")
     for ax in axes:
@@ -298,7 +331,7 @@ def plot_subject(
     return path
 
 
-def plot_atlas(
+def plot_interictal_ab_atlas(
     records: Sequence[Mapping[str, object]], output_dir: Path, *, subject_columns: int = 4,
     yuquan_labels: Mapping[str, str],
     display_sigma_mm: float = DEFAULT_DISPLAY_SIGMA_MM,
@@ -316,32 +349,18 @@ def plot_atlas(
     for index, record in enumerate(records):
         row = index // subject_columns
         col = 2 * (index % subject_columns)
-        dat_a, dat_b, mode = _panel_payload(record, display_sigma_mm=display_sigma_mm)
+        dat_a, dat_b, mode = build_interictal_ab_panel_payloads(
+            record, display_sigma_mm=display_sigma_mm,
+        )
         pretty = _display_name(str(record["subject_id"]), yuquan_labels)
         mode_tag = "shared" if mode == "shared" else "separate"
-        _field_panel(
-            axes[row, col], dat_a, dat_a["vals"], f"{pretty} · {mode_tag}", "",
-            compact=True, labels=False, cbar=False,
-            contact_outline_lw=ATLAS_CONTACT_OUTLINE_LW,
-            contact_size=ATLAS_CONTACT_SIZE,
+        draw_interictal_rank_field_panel(
+            axes[row, col], dat_a, "TA", compact=True,
+            panel_title=f"{pretty} · {mode_tag}",
         )
-        _field_panel(
-            axes[row, col + 1], dat_b, dat_b["vals"], "", "",
-            compact=True, labels=False, cbar=False,
-            contact_outline_lw=ATLAS_CONTACT_OUTLINE_LW,
-            contact_size=ATLAS_CONTACT_SIZE,
+        draw_interictal_rank_field_panel(
+            axes[row, col + 1], dat_b, "TB", compact=True,
         )
-        axes[row, col].title.set(color="#222222", fontsize=9)
-        for ax, label, color in (
-            (axes[row, col], "TA", TA_COLOR),
-            (axes[row, col + 1], "TB", TB_COLOR),
-        ):
-            ax.text(
-                0.035, 0.965, label, transform=ax.transAxes,
-                ha="left", va="top", fontsize=9, fontweight="bold", color=color,
-                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.8},
-                zorder=8,
-            )
     for index in range(n, nrows * subject_columns):
         row = index // subject_columns
         col = 2 * (index % subject_columns)
@@ -364,7 +383,9 @@ def plot_atlas(
     return path
 
 
-def _load_records(input_dir: Path, subjects: Iterable[str] | None) -> list[Dict[str, object]]:
+def load_interictal_field_records(
+    input_dir: Path, subjects: Iterable[str] | None,
+) -> list[Dict[str, object]]:
     if subjects:
         paths = [input_dir / f"{str(subject).removesuffix('.json')}.json" for subject in subjects]
     else:
@@ -401,19 +422,21 @@ def main() -> None:
     parser.add_argument("--no-atlas", action="store_true")
     args = parser.parse_args()
 
-    records = _load_records(args.input_dir, args.subjects)
+    records = load_interictal_field_records(args.input_dir, args.subjects)
     if not records:
         raise RuntimeError("no axis-estimable interictal field records found")
     yuquan_labels = _load_yuquan_crosswalk(args.yuquan_crosswalk)
     for record in records:
-        path = plot_subject(
+        path = plot_interictal_ab_subject(
             record, args.output_dir, yuquan_labels=yuquan_labels,
             display_sigma_mm=args.display_sigma_mm,
             output_format=args.format,
         )
         relation = record["axis_pair"]["relation"]["relation"]
         mode = "shared" if "shared_a" in record["interictal_field"]["field_models"] else "own"
-        dat_a, dat_b, _ = _panel_payload(record, display_sigma_mm=args.display_sigma_mm)
+        dat_a, dat_b, _ = build_interictal_ab_panel_payloads(
+            record, display_sigma_mm=args.display_sigma_mm,
+        )
         print(
             f"[fig] {path.name}  plane={mode} relation={relation} "
             f"transverse_signs={dat_a['transverse_sign']:+d}/{dat_b['transverse_sign']:+d} "
@@ -421,7 +444,7 @@ def main() -> None:
             flush=True,
         )
     if not args.no_atlas:
-        path = plot_atlas(
+        path = plot_interictal_ab_atlas(
             records, args.output_dir, yuquan_labels=yuquan_labels,
             display_sigma_mm=args.display_sigma_mm,
             output_format=args.format,
