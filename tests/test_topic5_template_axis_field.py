@@ -1,11 +1,16 @@
+import copy
+
 import numpy as np
+import pytest
 
 from src.topic5_template_axis_field import (
+    INTERICTAL_FIELD_FINGERPRINT_ALGORITHM,
     INTERICTAL_FIELD_CONTRACT,
     align_activation_to_interictal_field,
     assess_axis_direction_validity,
     axis_passes_qc,
     build_interictal_template_field_record,
+    interictal_field_quality_tier,
     interictal_field_fingerprint,
     classify_axis_pair,
     compute_template_axis_pair,
@@ -186,6 +191,63 @@ def test_future_activation_is_name_joined_to_frozen_field_contact_order():
     np.testing.assert_allclose(aligned["values"], np.arange(len(names), dtype=float))
     assert aligned["n_matched"] == len(names)
     assert aligned["missing_names"] == []
+
+
+def test_fingerprint_treats_unavailable_loso_nan_and_serialized_null_as_equal():
+    x, shafts = _geometry(33)
+    names = [f"S{i // 6}{i % 6 + 1}" for i in range(len(x))]
+    rank = x[:, 0]
+    support = np.ones(len(x))
+    record = build_interictal_template_field_record(
+        subject_id="test_subject", dataset="test", subject="subject", stable_k=2,
+        names=names, coords=x, rank_ta=rank, rank_tb=-rank, shafts=shafts,
+        support_ta=support, support_tb=support, support_source="unit_test",
+        n_axis_boot=20, n_pair_boot=20, seed=13,
+    )
+    for axis_name in ("axis_a", "axis_b"):
+        record["axis_pair"][axis_name]["loso_cosine"] = np.nan
+    record["interictal_field"]["fingerprint_sha256"] = interictal_field_fingerprint(record)
+
+    serialized = copy.deepcopy(record)
+    for axis_name in ("axis_a", "axis_b"):
+        serialized["axis_pair"][axis_name]["loso_cosine"] = None
+    assert interictal_field_fingerprint(serialized) == interictal_field_fingerprint(record)
+    scorers_from_interictal_record(serialized)
+
+
+def test_old_fingerprint_algorithm_fails_closed():
+    x, shafts = _geometry(34)
+    names = [f"S{i // 6}{i % 6 + 1}" for i in range(len(x))]
+    rank = x[:, 0]
+    support = np.ones(len(x))
+    record = build_interictal_template_field_record(
+        subject_id="test_subject", dataset="test", subject="subject", stable_k=2,
+        names=names, coords=x, rank_ta=rank, rank_tb=-rank, shafts=shafts,
+        support_ta=support, support_tb=support, support_source="unit_test",
+        n_axis_boot=20, n_pair_boot=20, seed=14,
+    )
+    assert record["interictal_field"]["fingerprint_algorithm"] == (
+        INTERICTAL_FIELD_FINGERPRINT_ALGORITHM
+    )
+    record["interictal_field"]["fingerprint_algorithm"] = "sha256_v1"
+    with pytest.raises(ValueError, match="unsupported interictal field fingerprint algorithm"):
+        scorers_from_interictal_record(record)
+
+
+def test_field_quality_tier_separates_geometry_from_strict_stability():
+    assert interictal_field_quality_tier({}) == "field_unavailable"
+    assert interictal_field_quality_tier({
+        "interictal_field": {"status": "ok"},
+        "axis_pair": {"geometry_2d_supported": False, "strict_stability_pass": False},
+    }) == "geometry_unsupported"
+    assert interictal_field_quality_tier({
+        "interictal_field": {"status": "ok"},
+        "axis_pair": {"geometry_2d_supported": True, "strict_stability_pass": False},
+    }) == "non_strict_2d"
+    assert interictal_field_quality_tier({
+        "interictal_field": {"status": "ok"},
+        "axis_pair": {"geometry_2d_supported": True, "strict_stability_pass": True},
+    }) == "strict_2d"
 
 
 def test_flipping_axis_sign_only_relabels_along_coordinate_not_field_score():

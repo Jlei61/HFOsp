@@ -102,7 +102,10 @@ def _payload(ds_sid, rd_dir, geo_dir, activation):
     return dat
 
 
-def _field_panel(ax, dat, vals, title, cbar_label, *, compact, labels=False, cbar=False):
+def _field_panel(
+    ax, dat, vals, title, cbar_label, *, compact, labels=False, cbar=False,
+    contact_outline_lw=None, contact_size=None,
+):
     """viridis field + contacts + swap-source rings (red=source in A, blue=source in B) + SOZ rings."""
     xlim, ylim, sigma = dat["frame"]["xlim"], dat["frame"]["ylim"], dat["frame"]["sigma_mm"]
     xs, ys, names, soz = dat["xs"], dat["ys"], dat["names"], dat["soz"]
@@ -113,8 +116,9 @@ def _field_panel(ax, dat, vals, title, cbar_label, *, compact, labels=False, cba
     xx, yy, vv = xs[ok], ys[ok], np.asarray(vals)[ok]
     nn = [n for n, o in zip(names, ok) if o]
     soz_ok = np.asarray(soz)[ok]
-    base_lw = 1.0 if compact else 1.7
-    ax.scatter(xx, yy, c=vv, cmap="viridis", vmin=0, vmax=1, s=40 if compact else 80, zorder=3,
+    base_lw = float(contact_outline_lw) if contact_outline_lw is not None else (1.0 if compact else 1.7)
+    marker_size = float(contact_size) if contact_size is not None else (40 if compact else 80)
+    ax.scatter(xx, yy, c=vv, cmap="viridis", vmin=0, vmax=1, s=marker_size, zorder=3,
                edgecolors=["k" if z else "white" for z in soz_ok],
                linewidths=[base_lw + 0.4 if z else base_lw for z in soz_ok])
     for grp, col in ((dat["src_a"], SRC_A_COL), (dat["src_b"], SRC_B_COL)):

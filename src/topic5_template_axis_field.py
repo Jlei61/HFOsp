@@ -18,6 +18,7 @@ from src.topic5_contact_similarity import kernel_smooth_at_contacts, median_nn_s
 TEMPLATE_AXIS_DEFINITION = "template_propagation_axis_v2"
 TEMPLATE_AXIS_DIRECTION = "positive_early_to_late"
 INTERICTAL_FIELD_CONTRACT = "topic5_interictal_template_fields_v1"
+INTERICTAL_FIELD_FINGERPRINT_ALGORITHM = "sha256_v1p1_nonfinite_canonical"
 
 
 def z_earliness(rank: Sequence[float]) -> np.ndarray:
@@ -499,7 +500,7 @@ def build_interictal_template_field_record(
             "forbidden": "do not refit axis or plane from ictal/onset values",
         },
     }
-    record["interictal_field"]["fingerprint_algorithm"] = "sha256_v1"
+    record["interictal_field"]["fingerprint_algorithm"] = INTERICTAL_FIELD_FINGERPRINT_ALGORITHM
     record["interictal_field"]["fingerprint_sha256"] = interictal_field_fingerprint(record)
     return record
 
@@ -511,9 +512,19 @@ def interictal_field_fingerprint(record: Mapping[str, object]) -> str:
     field = record.get("interictal_field") or {}
     if field.get("status") != "ok":
         raise ValueError(f"interictal field unavailable: {field.get('status')}")
+    algorithm = field.get("fingerprint_algorithm")
+    if algorithm != INTERICTAL_FIELD_FINGERPRINT_ALGORITHM:
+        raise ValueError(f"unsupported interictal field fingerprint algorithm: {algorithm}")
     digest = hashlib.sha256()
 
     def add_text(value: object) -> None:
+        # Production JSON converts unavailable NumPy NaN scalars to ``null``.
+        # Treat both representations as the same semantic value so a frozen
+        # record validates identically before and after JSON serialization.
+        if value is None or (
+            isinstance(value, (float, np.floating)) and not np.isfinite(float(value))
+        ):
+            value = "<nonfinite>"
         digest.update(str(value).encode("utf-8"))
         digest.update(b"\0")
 
@@ -523,6 +534,7 @@ def interictal_field_fingerprint(record: Mapping[str, object]) -> str:
         digest.update(array.tobytes())
 
     add_text(record.get("contract"))
+    add_text(algorithm)
     add_text(record.get("subject_id"))
     add_text(record.get("axis_definition"))
     add_text(record.get("axis_direction_convention"))
@@ -563,6 +575,19 @@ def interictal_field_fingerprint(record: Mapping[str, object]) -> str:
     return digest.hexdigest()
 
 
+def interictal_field_quality_tier(record: Mapping[str, object]) -> str:
+    """Return a descriptive input-quality tier without changing eligibility."""
+    field = record.get("interictal_field") or {}
+    if field.get("status") != "ok":
+        return "field_unavailable"
+    pair = record.get("axis_pair") or {}
+    if not bool(pair.get("geometry_2d_supported")):
+        return "geometry_unsupported"
+    if bool(pair.get("strict_stability_pass")):
+        return "strict_2d"
+    return "non_strict_2d"
+
+
 def scorers_from_interictal_record(record: Mapping[str, object]) -> Dict[str, Dict[str, object]]:
     """Load frozen NumPy scorer dictionaries from a serialized interictal record."""
     if record.get("contract") != INTERICTAL_FIELD_CONTRACT:
@@ -570,6 +595,9 @@ def scorers_from_interictal_record(record: Mapping[str, object]) -> Dict[str, Di
     field = record.get("interictal_field") or {}
     if field.get("status") != "ok":
         raise ValueError(f"interictal field unavailable: {field.get('status')}")
+    algorithm = field.get("fingerprint_algorithm")
+    if algorithm != INTERICTAL_FIELD_FINGERPRINT_ALGORITHM:
+        raise ValueError(f"unsupported interictal field fingerprint algorithm: {algorithm}")
     expected = field.get("fingerprint_sha256")
     if not expected or str(expected) != interictal_field_fingerprint(record):
         raise ValueError("interictal field fingerprint mismatch")

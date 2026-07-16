@@ -74,6 +74,23 @@
 
 Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计，也不是模型图。它支持“事件反复进入稳定传播模板”的可视化叙事；cohort-level 数字仍要由 masked propagation summary / matching-index 统计面板承载。TA/TB 只是同一 subject 内两类模板的图上别名，不跨 subject 合并。
 
+### Fig2-E: 患者特异 TA/TB 间期传播场（paper-ready 候选）
+
+**目的**：把 channel-level TA/TB propagation rank 放回患者自己的电极几何中，展示间期群体事件模板所定义的连续空间传播结构。该 panel 只使用冻结的间期轴与 field，不读取任何发作、onset、subtype 或能量数据。
+
+**当前候选版本**：
+
+- 候选目录：`results/paper-ready-figure/fig2e_interictal_template_fields/figures/`
+- 当前代表患者：`E1146`；TA/TB 两轴宽泛共线且传播方向相反，因此两幅图使用同一个 shared plane。代表患者尚未最终锁定。
+- 全部素材：`results/interictal_propagation_masked/template_gradient_fields/figures/`，包含 28 名可建双轴患者的单患者图和 atlas；26 人具有有效二维几何，单杆患者只保留作方向审阅，不作为最终二维示例候选。
+- 冻结输入：`results/interictal_propagation_masked/template_gradient_fields/per_subject/<subject>.json`。
+- 复现入口：`scripts/plot_topic5_interictal_template_ab_fields.py`；paper 候选同时导出 PNG/PDF。
+- 图形合同：传播主轴正方向固定为 early→late；宽泛共线者使用 shared plane，其余使用 TA/TB 各自平面；transverse 正负只按电极几何固定，不根据 field 颜色调向；`sigma_display=6 mm` 仅用于显示，不替换评分时冻结的患者特异 kernel。TA/TB 使用红/蓝语义色、一个共享横轴标签和一个与 field 等高的共享 colorbar。
+
+**当前口径**：
+
+Fig2-E 候选支持“间期 TA/TB 模板在患者特异电极几何中形成可视化的空间传播场”。它是 representative subject visualization，不是 cohort 统计，也不证明与发作早期能量一致；后者由 Fig3 的 field-concordance 分析独立回答。
+
 ### Fig3-Sup2: 发作原始波形与标准频带谱前置解释图
 
 **目的**：作为 Fig3 的 explanatory / QC supplement，在进入 z-ER、field projection 和 maxAB 相似性之前，先用一个真实 seizure 说明三件事：baseline 是 z 标准化参考窗，不是发作前最后几秒；EEG onset 可以早于 clinical onset；Fig3-A/B 的 0-10 s field input 是早期 ictal 能量场，不是原始 z-ER 图本身。

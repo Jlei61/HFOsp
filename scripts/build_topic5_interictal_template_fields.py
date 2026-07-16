@@ -28,9 +28,11 @@ from src.propagation_skeleton_geometry import assign_events_to_templates, parse_
 from src.seeg_coord_loader import load_subject_coords  # noqa: E402
 from src.topic5_template_axis_field import (  # noqa: E402
     INTERICTAL_FIELD_CONTRACT,
+    INTERICTAL_FIELD_FINGERPRINT_ALGORITHM,
     TEMPLATE_AXIS_DEFINITION,
     TEMPLATE_AXIS_DIRECTION,
     build_interictal_template_field_record,
+    interictal_field_quality_tier,
 )
 
 RANKDISP = ROOT / "results/interictal_propagation_masked/rank_displacement/per_subject"
@@ -237,6 +239,8 @@ def _cohort_row(record: Mapping[str, object]) -> Dict[str, object]:
     field = record.get("interictal_field") or {}
     row.update({
         "interictal_field_status": field.get("status"),
+        "fingerprint_algorithm": field.get("fingerprint_algorithm"),
+        "axis_quality_tier": interictal_field_quality_tier(record),
         "n_field_contacts": field.get("n_contacts"),
         "support_source": record.get("support_source"),
     })
@@ -282,6 +286,7 @@ def _summary(records: Sequence[Mapping[str, object]]) -> Dict[str, object]:
         "contract": INTERICTAL_FIELD_CONTRACT,
         "axis_definition": TEMPLATE_AXIS_DEFINITION,
         "axis_direction_convention": TEMPLATE_AXIS_DIRECTION,
+        "fingerprint_algorithm": INTERICTAL_FIELD_FINGERPRINT_ALGORITHM,
         "ictal_independence": "no seizure/onset/subtype/energy input is read by this producer",
         "denominators": {
             "template_pair_inputs": len(records),
@@ -313,9 +318,12 @@ subtype 或能量数据，因此后续发作定义变化时必须复用这里的
 - `interictal_field.field_models.own_a/own_b`：TA/TB 各自平面的固定 contact field、support、
   bandwidth 与 kernel weights。共线患者另有 `shared_a/shared_b`。
 - `interictal_field.fingerprint_sha256`：冻结轴、平面、support、field 与 kernel weights 的确定性指纹；
-  下游加载时自动校验，artifact 漂移会 fail closed。
+  当前算法为 `sha256_v1p1_nonfinite_canonical`，把内存中的非有限标量和 JSON `null`
+  统一为同一个语义值；下游同时校验算法版本和指纹，旧算法或 artifact 漂移都会 fail closed。
 - `axis_cohort.csv`：全 cohort 的方向质量和 TA/TB 线夹角。
 - `cohort_summary.json`：分母和关系分布。
+- `fingerprint_audit.csv` / `fingerprint_audit_summary.json`：全 cohort 序列化后重算与加载审计，
+  由 `scripts/audit_topic5_interictal_field_fingerprints.py` 生成。
 
 下游必须把新的 activation vector 按 `interictal_field.contact_order` 做 exact channel-name join；
 不得使用发作能量重新拟合轴、平面、bandwidth 或 template field。单杆患者可以有 early→late
