@@ -57,6 +57,155 @@ def _load(sub):
     return a, n, g
 
 
+def paint_observed_maxab_heatmap(piv, significance, column_labels, title, output_path, *,
+                                 group_boundaries=(), figsize=None, save_pdf=False,
+                                 median_label="cohort median"):
+    """Reusable painter from Fig3-Sup1A for a closed subject×condition matrix.
+
+    ``piv`` must already be in the scientifically declared row/column order;
+    this function performs no effect-based sorting and no statistical work.
+    """
+    med = piv.median(axis=0)
+    matrix = np.vstack([piv.to_numpy(float), med.to_numpy(float)])
+    ylabels = [_short(str(subject)) for subject in piv.index] + [median_label]
+    width = max(9.5, 0.72 * len(piv.columns) + 3.0)
+    height = 0.46 * len(ylabels) + 2.0
+    fig, ax = plt.subplots(figsize=figsize or (width, height))
+    im = ax.imshow(matrix, aspect="auto", cmap="RdBu_r",
+                   norm=TwoSlopeNorm(vmin=0.35, vcenter=0.5, vmax=0.90))
+    for i, subject in enumerate(piv.index):
+        for j, column in enumerate(piv.columns):
+            if significance.get((str(subject), column), False):
+                ax.text(j, i, "*", ha="center", va="center", fontsize=14, color="white",
+                        fontweight="bold",
+                        path_effects=[pe.withStroke(linewidth=1.6, foreground="black")])
+    ax.set_xticks(range(len(piv.columns)))
+    ax.set_xticklabels([column_labels[column] for column in piv.columns], fontsize=11)
+    ax.set_yticks(range(len(ylabels))); ax.set_yticklabels(ylabels, fontsize=10)
+    ax.axhline(len(piv) - 0.5, color="k", lw=1.5)
+    for boundary in group_boundaries:
+        ax.axvline(float(boundary) - 0.5, color="k", ls="--", lw=1.5)
+    ax.set_title(title, fontsize=13)
+    for j in range(matrix.shape[1]):
+        if np.isfinite(matrix[-1, j]):
+            ax.text(j, matrix.shape[0] - 1, f"{matrix[-1, j]:.2f}",
+                    ha="center", va="center", fontsize=8.5, color="k")
+    cbar = fig.colorbar(im, ax=ax, fraction=0.035, pad=0.02)
+    cbar.set_label("observed own maxAB |corr|", fontsize=12)
+    fig.tight_layout()
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=200, bbox_inches="tight")
+    if save_pdf:
+        fig.savefig(output_path.with_suffix(".pdf"), bbox_inches="tight")
+    plt.close(fig)
+    return output_path
+
+
+def paint_null_per_band_axis(ax, bands, labels, subject_deltas, cohort_medians,
+                             annotations, *, seed=0, ylabel=None, title=None):
+    """Reusable Fig3-Sup1B violin/subject-point/cohort-median painter."""
+    for xi, band in enumerate(bands):
+        values = np.asarray(subject_deltas.get(band, []), float)
+        values = values[np.isfinite(values)]
+        color = "#cfcfcf"
+        if len(values) >= 2 and np.nanmax(values) > np.nanmin(values):
+            vp = ax.violinplot([values], positions=[xi], widths=0.85,
+                               showmedians=False, showextrema=False)
+            vp["bodies"][0].set_facecolor(color)
+            vp["bodies"][0].set_edgecolor("gray")
+            vp["bodies"][0].set_alpha(0.40)
+        jitter = np.random.default_rng(seed + xi).uniform(-0.085, 0.085, len(values))
+        ax.scatter(xi + jitter, values, s=24, c="#333333", alpha=0.75,
+                   edgecolors="none", zorder=4)
+        cohort = cohort_medians.get(band, np.nan)
+        if np.isfinite(cohort):
+            ax.hlines(cohort, xi - 0.33, xi + 0.33, color="k", lw=2.8, zorder=6)
+        annotation = annotations.get(band)
+        if annotation:
+            ax.text(xi, 0.98, annotation, transform=ax.get_xaxis_transform(),
+                    ha="center", va="top", fontsize=9, color="0.30")
+    ax.axhline(0, color="gray", lw=0.7, zorder=1)
+    ax.set_xticks(range(len(bands)))
+    ax.set_xticklabels([labels[band] for band in bands], fontsize=11)
+    ax.tick_params(axis="y", labelsize=10)
+    if ylabel:
+        ax.set_ylabel(ylabel, fontsize=11)
+    if title:
+        ax.set_title(title, fontsize=11, loc="left")
+    ax.grid(alpha=0.25, axis="y")
+    ax.spines[["top", "right"]].set_visible(False)
+    return ax
+
+
+def plot_null_per_band_figure(bands, labels, subject_deltas, cohort_medians,
+                              pvalues, sample_sizes, title, output_path, *,
+                              ylabel="cohort alignment − spatial-null median   (Δ per subject)",
+                              save_pdf=False, seed=0):
+    """Accepted Fig3-Sup1B single-axis painter with caller-supplied closed data.
+
+    This is the original F2 visual block: one violin per band, per-subject dots,
+    the tested cohort statistic as a thick black horizontal bar, and a top-row
+    ``*``/``n.s.`` annotation.  Exact p and n are added below that annotation.
+    """
+    SIG_C, NS_C = "#c44e52", "#cfcfcf"
+    fig, ax = plt.subplots(figsize=(9.5, 6.8))
+    annotations = []
+    for xi, band in enumerate(bands):
+        values = np.asarray(subject_deltas.get(band, []), float)
+        values = values[np.isfinite(values)]
+        p = float(pvalues.get(band, np.nan))
+        marked = bool(np.isfinite(p) and p < 0.05)
+        color = SIG_C if marked else NS_C
+        if len(values) >= 2 and np.nanmax(values) > np.nanmin(values):
+            vp = ax.violinplot([values], positions=[xi], widths=0.85,
+                               showmedians=False, showextrema=False)
+            vp["bodies"][0].set_facecolor(color)
+            vp["bodies"][0].set_edgecolor("gray")
+            vp["bodies"][0].set_alpha(0.40)
+        jitter = np.random.default_rng(seed + xi).uniform(-0.085, 0.085, len(values))
+        ax.scatter(xi + jitter, values, s=24, c="#333333", alpha=0.75,
+                   edgecolors="none", zorder=4)
+        cohort = float(cohort_medians.get(band, np.nan))
+        if np.isfinite(cohort):
+            ax.hlines(cohort, xi - 0.33, xi + 0.33, color="k", lw=2.8, zorder=6)
+        annotations.append((xi, marked, p, int(sample_sizes.get(band, len(values)))))
+    ax.axhline(0, color="gray", lw=0.7, zorder=1)
+    y0, y1 = ax.get_ylim(); span = y1 - y0
+    ax.set_ylim(y0, y1 + 0.18 * span)
+    for xi, marked, p, n in annotations:
+        ax.annotate("*" if marked else "n.s.", (xi, y1 + 0.085 * span),
+                    ha="center", va="bottom", fontsize=21 if marked else 12,
+                    color=SIG_C if marked else "gray",
+                    weight="bold" if marked else "normal", annotation_clip=True)
+        ptext = f"p={p:.3g}" if np.isfinite(p) else "p=NA"
+        ax.annotate(f"{ptext}, n={n}", (xi, y1 + 0.025 * span),
+                    ha="center", va="bottom", fontsize=9.5, color="0.35",
+                    annotation_clip=True)
+    ax.set_xticks(range(len(bands)))
+    ax.set_xticklabels([labels[band] for band in bands], fontsize=15)
+    ax.tick_params(axis="y", labelsize=14)
+    ax.set_title(title, fontsize=15)
+    ax.grid(alpha=0.25, axis="y")
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.set_ylabel(ylabel, fontsize=15)
+    handles = [Patch(facecolor=SIG_C, alpha=0.4, edgecolor="gray", label="p<0.05 annotation"),
+               Patch(facecolor=NS_C, alpha=0.4, edgecolor="gray", label="n.s."),
+               Line2D([0], [0], color="k", lw=2.8, label="cohort statistic (tested)"),
+               Line2D([0], [0], marker="o", ls="none", color="#333333", ms=7,
+                      label="per-subject Δ")]
+    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.005, 1.0),
+              fontsize=11, framealpha=0.92)
+    fig.tight_layout()
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=200, bbox_inches="tight")
+    if save_pdf:
+        fig.savefig(output_path.with_suffix(".pdf"), bbox_inches="tight")
+    plt.close(fig)
+    return output_path
+
+
 # ---------------------------------------------------------------- F1 observed heatmap
 def fig1_observed():
     bands = PRIMARY + COMPOSITE

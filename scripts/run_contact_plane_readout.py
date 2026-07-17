@@ -22,6 +22,7 @@ from src.seeg_coord_loader import load_subject_coords
 from src.sef_hfo_soz_localization import classify_montage, _first_contact
 from src import propagation_skeleton_geometry as G
 from src import propagation_contact_plane_readout as R
+from src import dab_gradient_axis as DAB
 
 YUQUAN_ROOT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 EPILEPSIAE_ROOT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
@@ -31,6 +32,8 @@ SOZ_JSON = {ds: _ROOT / f"results/{ds}_soz_core_channels.json"
 OUT = _ROOT / "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects"
 OUT_SPLITHALF = _ROOT / ("results/spatial_modulation/propagation_geometry/"
                          "observation_readout/real_subjects_splithalf")
+OUT_DAB = _ROOT / ("results/spatial_modulation/propagation_geometry/"
+                   "observation_readout/real_subjects_dab")
 EXCLUDE_BAD_DATA = {("yuquan", "pengzihang")}
 
 
@@ -67,15 +70,85 @@ def _load_accepted_templates(ds, subj, names):
     return ta, tb, swap
 
 
+def _dab_axis_frame(names, ta, tb, coords, mapped):
+    """One SHARED D_AB gradient axis for the subject (axis_definition=dab_gradient_v1),
+    then full-length along / off / signed_transverse for every channel.
+
+    Both t_a and t_b records ride this ONE common axis (unlike the source/sink path where
+    each template has its own axis). Axis = D_AB 3D least-squares gradient over the joint
+    (finite ta AND finite tb AND coord-mapped) contacts; NO endpoint / source-sink / k.
+    """
+    ta = np.asarray(ta, float)
+    tb = np.asarray(tb, float)
+    coords = np.asarray(coords, float)
+    joint = np.isfinite(ta) & np.isfinite(tb) & np.asarray(mapped, bool)
+    if int(joint.sum()) < 6:
+        return {"status": "insufficient_contacts", "axis_definition": DAB.AXIS_DEFINITION}
+    dab_joint = DAB.dab_from_ranks(ta[joint], tb[joint])
+    shafts = [G.parse_shaft(names[i])[0] for i in np.where(joint)[0]]
+    ax = DAB.compute_dab_gradient_axis(coords[joint], dab_joint, shafts)
+    if ax["status"] != "ok":
+        return {"status": ax["status"], "axis_definition": DAB.AXIS_DEFINITION}
+    u, w, xbar = np.asarray(ax["u"]), np.asarray(ax["w"]), np.asarray(ax["xbar"])
+    rel = coords - xbar
+    along = rel @ u
+    resid = rel - np.outer(along, u)
+    off = np.linalg.norm(resid, axis=1)
+    signed_transverse = resid @ w
+    bad = np.isnan(coords).any(axis=1)
+    along[bad] = off[bad] = signed_transverse[bad] = np.nan
+    aj = along[joint]
+    return {
+        "status": "ok", "axis_definition": DAB.AXIS_DEFINITION,
+        "along": along, "off_axis": off, "signed_transverse": signed_transverse,
+        "axis_length": float(np.nanmax(aj) - np.nanmin(aj)) if aj.size else 0.0,
+        "pc1_variance_explained": float("nan"),
+        "qc": {k: ax[k] for k in ("R2", "matrix_rank", "effective_rank", "condition_number",
+                                  "full_rank", "within_shaft_frac", "loso_cosine",
+                                  "bootstrap_cosine", "moran_i", "n", "beta_norm", "sd_dab",
+                                  "L_poles", "n_shafts")},
+    }
+
+
 def build_record_from_events(*, dataset, subject, template_id, names, ranks, bools,
                              lag_raw, coords, mapped, soz_core, montage,
-                             lag_time_unit, spacing_mm, template_axis=None):
+                             lag_time_unit, spacing_mm, template_axis=None,
+                             axis_override=None):
     """事件数组 -> 标准化 readout record（mount-free，单测入口）。
+
+    axis_override=None（默认）: 冻结的 source/sink 端点轴路径，行为不变。
+    axis_override=<dab frame>: 用共享的 D_AB 梯度轴的 along/off/signed_transverse 直接建 record
+    （不再算端点核 / compute_axis_frame），field 值仍来自本模板的 masked rank。
 
     1D 采样判定在 compute_axis_frame 之后，用【真实】fr['off_axis'] + participating
     mask（reviewer P1：不得用全零 off-axis 提前判，会系统性误标 1D）。
     """
     masked = mask_phantom_ranks(ranks, bools, normalize=True)
+    if axis_override is not None:
+        if axis_override.get("status") != "ok":
+            return {"dataset": dataset, "subject": subject, "template_id": template_id,
+                    "status": "descriptive_only",
+                    "axis_definition": axis_override.get("axis_definition")}
+        along = np.asarray(axis_override["along"], float)
+        off = np.asarray(axis_override["off_axis"], float)
+        participating = bools.any(axis=1) & np.asarray(mapped, bool) & ~np.isnan(along)
+        samp = G.classify_sampling_geometry(names, participating, off, spacing_mm=spacing_mm)
+        soz = R.resolve_soz_overlay(list(names), soz_core, montage)
+        rec = R.build_readout_record(
+            dataset=dataset, subject=subject, template_id=template_id, names=names,
+            along_axis_mm=along, axis_length_mm=float(axis_override["axis_length"]),
+            off_axis_mm=off,
+            signed_transverse=np.asarray(axis_override["signed_transverse"], float),
+            pc1_variance_explained=float(axis_override.get("pc1_variance_explained", np.nan)),
+            masked=masked, lag_raw=lag_raw, bools=bools,
+            soz_first_contacts=soz["soz_first_contacts"], lag_time_unit=lag_time_unit,
+            one_dimensional_sampling=(samp.get("geometry") == "1D"), coords_mm=coords)
+        rec["axis_definition"] = axis_override["axis_definition"]
+        rec["axis_qc"] = axis_override.get("qc")
+        rec["soz_ambiguous"] = soz["soz_ambiguous"]
+        rec["sampling_geometry"] = samp.get("geometry")
+        rec["scalars"] = R.compute_cohort_scalars(rec)
+        return rec
     if template_axis is None:
         template_axis = np.array(
             [np.nanmean(r) if np.any(~np.isnan(r)) else np.nan for r in masked])
@@ -109,6 +182,7 @@ def build_record_from_events(*, dataset, subject, template_id, names, ranks, boo
         masked=masked, lag_raw=lag_raw, bools=bools,
         soz_first_contacts=soz["soz_first_contacts"], lag_time_unit=lag_time_unit,
         one_dimensional_sampling=one_d, coords_mm=coords)
+    rec["axis_definition"] = "source_sink_endpoint"
     rec["soz_ambiguous"] = soz["soz_ambiguous"]
     rec["sampling_geometry"] = samp.get("geometry")
     rec["scalars"] = R.compute_cohort_scalars(rec)
@@ -134,7 +208,7 @@ def _half_can_frame(half_masked, coords, mapped, k=3):
     return True, None
 
 
-def process_subject(ds, subj, split=None):
+def process_subject(ds, subj, split=None, axis_mode="source_sink"):
     ev = load_subject_propagation_events(_subject_dir(ds, subj))
     if not ev["channel_names"] or np.asarray(ev["ranks"]).size == 0:
         return [{"dataset": ds, "subject": subj, "status": "no_events"}]
@@ -155,6 +229,14 @@ def process_subject(ds, subj, split=None):
         raise KeyError(f"{ds}:{subj} load_subject_propagation_events 缺 lag_raw 键")
     lag_raw = np.where(bools, np.asarray(ev["lag_raw"], float), np.nan)
     soz_core = _soz_set(ds, subj)
+    # D_AB gradient axis is SUBJECT-level (one shared axis from both templates), not per
+    # template and not event-derived. Compute once; both t_a and t_b ride it.
+    if axis_mode == "dab_gradient" and split is not None:
+        raise NotImplementedError(
+            "dab_gradient axis + event split-half not implemented: the D_AB axis is "
+            "template-derived (subject-level); halving events does not re-fit it.")
+    dab_frame = (_dab_axis_frame(names, ta, tb, coords, mapped)
+                 if axis_mode == "dab_gradient" else None)
     out = []
     # 逐 template（A/B 两个 accepted 模板）各出一份 record（spec §8 逐模板处理）。
     # 命名 t_a/t_b：只是 rank-displacement pair 的两支，NOT dominant/minority 的科学事实。
@@ -170,7 +252,8 @@ def process_subject(ds, subj, split=None):
                 ranks=ranks[:, sel], bools=bools[:, sel], lag_raw=lag_raw[:, sel],
                 coords=coords, mapped=mapped, soz_core=soz_core,
                 montage=montage, lag_time_unit="s", spacing_mm=spacing,
-                template_axis=_template_axis(masked[:, sel]))
+                template_axis=_template_axis(masked[:, sel]),
+                axis_override=dab_frame)
             rec["swap_class"] = swap
             out.append(rec)
             continue
@@ -244,6 +327,10 @@ def main():
     ap.add_argument("--rankdisp-dir", default=None,
                     help="override rank-displacement dir (e.g. results/interictal_propagation_masked_broad/"
                          "rank_displacement/per_subject). Default None = canonical narrow masked.")
+    ap.add_argument("--axis", choices=["source_sink", "dab_gradient"], default="source_sink",
+                    help="axis definition. source_sink (default, frozen) = per-template endpoint axis; "
+                         "dab_gradient = one shared D_AB 3D gradient axis (methods_axis_gradient_rewrite.md). "
+                         "dab_gradient default --out = real_subjects_dab/.")
     args = ap.parse_args()
     if args.lagpat_root:        # broad-pool global-swap (cf. run_topic5_axis_alignment CACHE_DIR/AXIS_DIR)
         global YUQUAN_ROOT
@@ -254,6 +341,8 @@ def main():
     # Split-mode 默认走独立子目录，避免覆盖全集 t_a/t_b 记录（用户显式 --out 时尊重）。
     if args.event_split and args.out == str(OUT):
         args.out = str(OUT_SPLITHALF)
+    if args.axis == "dab_gradient" and args.out == str(OUT):
+        args.out = str(OUT_DAB)
     out = Path(args.out); out.mkdir(parents=True, exist_ok=True)
     cohort = ([tuple(s.split(":", 1)) for s in args.subjects] if args.subjects
               else discover_cohort())
@@ -263,7 +352,7 @@ def main():
     n_skip = 0
     for ds, subj in cohort:
         try:
-            recs = process_subject(ds, subj, split=args.event_split)
+            recs = process_subject(ds, subj, split=args.event_split, axis_mode=args.axis)
         except Exception as e:  # noqa: BLE001
             status = f"error: {e}"
             category = _error_category(status)
