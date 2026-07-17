@@ -15,12 +15,24 @@
 
 ## Fig1 — 间期 HFO 群体事件素材
 
-- `fig1_hfo_group_event_demo/` — **Fig1-A**：Yuquan Y1 单段间期 HFO 群体事件紧凑示例。
-  脚本 `scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py`（+ `..._prototype.py`）。
+- `fig1_hfo_group_event_demo/` — **Fig1-a1/a2 源素材**：legacy 人工标注 HFO n=178 形态图 + Yuquan Y3 群体事件示例。
+  脚本为 `scripts/paper_figures/plot_fig1_single_hfo_schematic.py` 与 `plot_fig1_hfo_group_event_legacy_style.py`；正式 panel 文件位于 `fig1_interictal_hfo_temporal_scaffold/figures/`。
 
 > Fig2（单 subject 间期传播时序素材）不在本目录：它由 Topic 1 propagation 主绘图器生成，
 > 见 `results/interictal_propagation_masked/figures/per_subject/` + `docs/fig2_temporal_propagation_panel_spec.md`。
 > Fig2-B 模板匹配预览脚本 `scripts/paper_figures/plot_fig2b_template_matching_preview.py`。
+
+- `fig2c_interictal_event_envelope_field/` — **Fig2-C paper-ready candidate**：E1146 两次真实 TA/TB
+  代表事件的 Fig1a 质心 readout + 冻结 shared-plane 包络 frame；同时输出同一合同的 2 ms 生物学步长
+  GIF。canonical producer 为 `scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py`，唯一
+  frame/GIF 规范为 `docs/fig2c_interictal_event_envelope_field_spec.md`。该合同只管 TA/TB 每行一个
+  exemplar 的单事件版本；未来多事件 GIF 单独建规范。定位是 representative
+  raw-envelope timing cross-check，不是 template-free/cohort/traveling-wave 证明。
+- `fig2e_interictal_template_fields/` — **Fig2-E paper-ready candidate**：患者特异 TA/TB 静态 rank
+  field；与 Fig2-C 共用冻结轴/平面，但不使用事件包络时间轴。
+- `fig_interictal_ab_direction_axis/` — **间期空间方向候选图**：A/B 独立 earliness gradient、过门后的共享线、
+  subject-native 脑表面 early→late 箭头与描述性解剖 overlay。主触点池与 expanded-contact sensitivity 并存；
+  脚本 `scripts/paper_figures/plot_interictal_ab_direction_axis.py`。
 
 ## Fig3 — 间期传播场 vs 发作早期激活场一致性
 

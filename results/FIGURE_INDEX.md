@@ -7,7 +7,7 @@
 > per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
 > `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
 >
-> 最近更新：2026-07-07。新增结论图目录时，请在对应 topic 表里补一行。
+> 最近更新：2026-07-17。新增结论图目录时，请在对应 topic 表里补一行。
 >
 > **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
 > 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
@@ -56,6 +56,8 @@
 | [interictal_propagation_masked/rank_displacement/figures/](interictal_propagation_masked/rank_displacement/figures/) | 连续 swap 几何（displacement / cardinality / SOZ overlap） |
 | [interictal_propagation_masked/template_anchoring/figures/](interictal_propagation_masked/template_anchoring/figures/) | endpoint 几何 + 模板对几何 |
 | [interictal_propagation_masked/template_share_switching/figures/](interictal_propagation_masked/template_share_switching/figures/) | 发作前后窗口的模板占比 + 切换 |
+| [paper-ready-figure/fig2c_interictal_event_envelope_field/figures/](paper-ready-figure/fig2c_interictal_event_envelope_field/figures/) | **Fig2-C candidate**：E1146 两次真实 TA/TB 代表事件的 Fig1a 质心 readout + 冻结 shared-plane 包络 frame；同目录含 2 ms 生物学步长 TA/TB GIF。代表性 timing cross-check，非 template-free/cohort/traveling-wave 证明；规范 `docs/fig2c_interictal_event_envelope_field_spec.md` |
+| [paper-ready-figure/fig2e_interictal_template_fields/figures/](paper-ready-figure/fig2e_interictal_template_fields/figures/) | **Fig2-E candidate**：冻结 TA/TB 模板本身的患者特异静态 rank field；与 Fig2-C 分工不同 |
 
 **传播（旧版 phantom-contaminated，部分未重跑——引用前确认是否已有 masked 对应）**
 | 目录 | 内容 |
@@ -165,7 +167,7 @@
 | [topic4_sef_hfo/event_extent_audit/figures/](topic4_sef_hfo/event_extent_audit/figures/) | M2 Task 0：真实事件轴向铺满 vs 收一段（实测≈随机对照→非自限） |
 | [topic5_ictal_recruitment/v3_mode_transition/figures/](topic5_ictal_recruitment/v3_mode_transition/figures/) | V3a：发作开始前后，活动是否从间期固定电极通路搬到通路外（**每队列一张、真实秒数横轴**：主图 `v3_axis_vs_offaxis_{narrow,broad}` 沿轴组织度 vs 离轴流随时间、扣发作前基线，看 onset 前后是否反向张开；附图 `v3_mode_direction_{narrow,broad}` 模态方向阴性）；EXPLORATORY **脆弱阳性**——配对后非轴向净流增量在主(Holm 0.031)+复制(0.008)队列都队列级显著(tier4 机械/supported)，但 null-relative(原始流大多在降)+同时共激活为主(lag1≈lag0)+个体稳健性弱(流腿 0/7)+模态腿全阴 → 数据侧候选信号非确立的模态转移，pending sensitivity/V3b。详见 docs/archive/topic5/v3a_mode_transition_2026-07-04.md |
 | [topic5_ictal_recruitment/v3p_preictal_trajectory/{narrow,broad}/figures/](topic5_ictal_recruitment/v3p_preictal_trajectory/narrow/figures/) | V3p：发作真正开始前最后两分钟（横轴=相对脑电起始的真实秒数 P0..P3＝−105/−75/−45/−20s，只画到 −10 秒边界，onset 本身及之后完全不碰）连锁活动是否逐渐搬到间期固定高频通路之外——real-time 轴重绘（2026-07-05，替换旧 6 面板栅格图），narrow/broad 各自独立出图，从不共享一根轴。每队列 2 张：**主图** `v3p_axis_vs_offaxis_{narrow,broad}.png`＝沿轴组织度（橙）vs 离轴流（青）migration pair，两线各自按发作前最远基线（−105/−75s）归一为基线标准差单位；**附图** `v3p_mode_direction_{narrow,broad}.png`＝最易放大模态的离轴方向（紫）。图上只留一行斜体角注（Holm p，实时读自 tier JSON），文字说明在各队列 `figures/README.md`。**结果沿用真实 n_perm=1000 大跑（80 核/20 job/7h35m）数字，未变：完整硬门阴性 tier 0**（narrow 0/7 Holm p=1.000/1.000、broad_expanded 0/13 Holm p=0.685/0.685、broad_core 0/9 Holm p=0.652；broad 有 3 人非轴向流 + 2 人模态方向零散单-null 命中，全被 rate/lag1/phase/block/双 span 硬门筛掉，不算潜在阳性） |
-| [paper-ready-figure/fig_topic5_scaffold_ab/figures/](paper-ready-figure/fig_topic5_scaffold_ab/figures/) | V3d：间期传播轴的 A/B 两态占据 + 发作按类型分。**cohort 3 张**：`cohort_two_state_vs_geometry`（两态是否几何伪影 —— ρ≈0/>0 时中点仍空 ≤10% → 两态 largely real）、`cohort_ab_typing`（发作分型，cross-seizure-shuffle null **11/20 显著、9/20 可区分两型**）、`cohort_h1_nearonset_forest`（近-onset 收敛 **1/3 合格锁定、binom p=0.14 → 非队列效应**）；**per_subject/ 24 张**：每被试 per-seizure C_AB 分布（发作分成 A/B 主导）+ 时程（是否每次都切换）。口径 = 间期两模板投到发作能量：能量落两个离散态（强 A/强 B，几乎不落中点）、发作按 A/B 分型、近-onset 收敛只 442 单被试。详见 figures/README.md + spec `docs/superpowers/specs/2026-07-09-topic5-v3d-*` |
+| [paper-ready-figure/fig_topic5_scaffold_ab/figures/](paper-ready-figure/fig_topic5_scaffold_ab/figures/) | V3d：间期传播轴的 A/B 两态占据 + 发作按类型分。**cohort 3 张**：`cohort_two_state_vs_geometry`（两态是否几何伪影 —— ρ≈0/>0 时中点仍空 ≤10% → 两态 largely real）、`cohort_ab_typing`（发作分型，cross-seizure-shuffle null **11/20 显著、9/20 可区分两型**）、`cohort_h1_nearonset_forest`（近-onset 收敛 **1/3 合格锁定、binom p=0.14 → 非队列效应**）；**per_subject/ 14 张**：per-seizure C_AB 分布图**全部 12 个被试**（发作分成 A/B 主导，全被试交付物）+ 时程图**只 E442、E1146 两个被试**（轴存在窗口密度够连续读出趋势才出图；其余 10 个被试窗口太稀疏、中位线会碎成孤立短线段读不出趋势，已不再渲染这张图，避免误导）。口径 = 间期两模板投到发作能量：能量落两个离散态（强 A/强 B，几乎不落中点）、发作按 A/B 分型、近-onset 收敛只 442 单被试锁定（E1146 数据量够但未锁定，作为诚实对照一并出图）。详见 figures/README.md + spec `docs/superpowers/specs/2026-07-09-topic5-v3d-*` |
 
 ---
 

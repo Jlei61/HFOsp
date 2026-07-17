@@ -7,18 +7,19 @@
 
 ## Fig1: 间期 HFO 群体事件与病理网络读出
 
-### Fig1-A: 原始群体事件示例
+### Fig1-A: 单 HFO 形态与原始群体事件示例
 
-**目的**：用最直观的原始信号说明，间期 HFO 不是孤立单通道尖峰，而是跨通道共同出现的群体事件，并且群体内部存在稳定的早晚关系。
+**目的**：先用人工标注 HFO 集合说明单个 HFO 的波形与时频形态，再用最直观的原始信号说明，间期 HFO 可跨通道共同出现，并且群体内部存在可量化的早晚关系。
 
 **当前验收版本**：
 
 - 输出目录：`results/paper-ready-figure/fig1_hfo_group_event_demo/figures/`
-- 正式文件：`yuquan_y1_hfo_group_event_demo.png` / `yuquan_y1_hfo_group_event_demo.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py`
-- 数据来源：Yuquan Y1, `FC10477Q`
+- 正式文件：`fig1-panela1.{png,pdf}` / `fig1-panela2.{png,pdf}`
+- 复现入口：`scripts/paper_figures/plot_fig1_single_hfo_schematic.py` + `plot_fig1_hfo_group_event_legacy_style.py`，由 `plot_fig1_interictal_hfo_temporal_scaffold.py` 收口到正式文件名
+- a1 数据来源：legacy `zhangkexuan_pickSigs.npz` + `zhangkexuan_annot_v4.pik`，人工标注 HFO n=178
+- a2 数据来源：Yuquan Y3, `FC10477Q`
 - 固定示例事件：packed event indices `22,237,1458`
-- 图形合同：左侧为 80-250 Hz stacked bipolar traces；右侧为 legacy-style normalized spectrogram，并用 spec-center 点/线显示群体事件内部时序。
+- 图形合同：a1 为 178 段 HFO 叠加波形 + raw/normalized mean spectrum；a2 左侧为 80–250 Hz stacked bipolar traces，右侧为 normalized magnitude spectrogram，并用主高频增强连通区的加权质心点/线显示群体事件内部时序。两者统一使用 magnitude + Gaussian σ=1.5；A1/A2 分别保留 180 ms / 50 ms 窗以匹配各自时间尺度。
 
 **当前口径**：
 
@@ -73,6 +74,23 @@
 **当前口径**：
 
 Fig2 时序图是 subject-level 真实数据素材，不是 cohort-level 统计，也不是模型图。它支持“事件反复进入稳定传播模板”的可视化叙事；cohort-level 数字仍要由 masked propagation summary / matching-index 统计面板承载。TA/TB 只是同一 subject 内两类模板的图上别名，不跨 subject 合并。
+
+### Fig2-C: 间期单事件包络传播场（paper-ready 候选）
+
+**目的**：在已经冻结的患者特异 shared axis/plane 上，用两次真实 TA/TB 代表事件展示 HFO 包络在几十毫秒内的相反时序演化，并用 Fig1a 同源 spectrogram/质心 readout 直接核对每个 field frame 的时间含义。
+
+**当前候选版本**：
+
+- 输出目录：`results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/`
+- 正式 candidate：`fig2c_candidate_E1146_interictal_event_envelope_field.{png,pdf}`
+- 动态 sidecar：`fig2c_candidate_E1146_interictal_event_envelope_field.gif`
+- 复现入口：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py --subject epilepsiae_1146`
+- 固定视觉与科学合同：`docs/fig2c_interictal_event_envelope_field_spec.md`；以后所有间期传播场 frame/GIF 必须先读该文件并复用 canonical renderer。
+- 图形合同：两行 TA/TB；每行按 `readout | readout colorbar | gap | 6 square field frames | field colorbar` 排列。E1146 静态帧为 `−8, +4, +15, +27, +38, +50 ms`；GIF 为同一窗口、2 ms 生物学帧间隔。包络场使用 `magma`、participant-only support、固定 6 mm display kernel 和 TA/TB 共同 `vmax`。
+
+**当前口径**：
+
+Fig2-C 是 raw-EEG-derived envelope timing 在既有冻结间期轴上的 representative cross-check。当前合同只覆盖 TA/TB 各一次 exemplar 的单事件版本，不覆盖多事件 event train；后续多事件 GIF 另立事件边界、逐事件 t0 与抽样规范。exemplar 分组、参与触点和显示几何仍来自模板管线，因此不是 template-free 或独立验证；单被试两次事件不能升级为 cohort-level traveling-wave 或机制证据。E1146 当前仍是 candidate，最终是否进入主图需与 Fig2 其余 panel 的信息增量共同裁决。
 
 ### Fig2-E: 患者特异 TA/TB 间期传播场（paper-ready 候选）
 
