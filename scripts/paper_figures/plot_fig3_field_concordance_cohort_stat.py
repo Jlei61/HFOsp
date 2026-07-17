@@ -22,6 +22,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Patch
 from scipy.stats import wilcoxon
 
 
@@ -130,18 +131,22 @@ def _add_violin_box_points(
     point_edge: str,
     jitter: np.ndarray | None = None,
 ) -> np.ndarray:
-    parts = ax.violinplot(
-        [values],
-        positions=[x],
-        widths=0.58,
-        showmeans=False,
-        showmedians=False,
-        showextrema=False,
-    )
-    body = parts["bodies"][0]
-    body.set_facecolor(facecolor)
-    body.set_edgecolor("none")
-    body.set_alpha(0.72)
+    # A one-subject pre-existing stratum is a descriptive case.  Keep the
+    # accepted box/point grammar but do not ask KDE-based violinplot to fit a
+    # singular one-point distribution.
+    if len(values) >= 2 and not np.allclose(values, values[0]):
+        parts = ax.violinplot(
+            [values],
+            positions=[x],
+            widths=0.58,
+            showmeans=False,
+            showmedians=False,
+            showextrema=False,
+        )
+        body = parts["bodies"][0]
+        body.set_facecolor(facecolor)
+        body.set_edgecolor("none")
+        body.set_alpha(0.72)
 
     ax.boxplot(
         [values],
@@ -176,11 +181,39 @@ def _add_sig_bracket(ax: plt.Axes, x1: float, x2: float, y: float, text: str) ->
     ax.text((x1 + x2) / 2, y + h + 0.008, text, ha="center", va="bottom", fontsize=13, fontweight="bold")
 
 
-def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
-    rng = np.random.default_rng(20260626)
-    fig, ax = plt.subplots(figsize=(7.2, 4.1))
+def plot_paired_data_null_groups(
+    groups: list[dict],
+    out_png: Path,
+    out_pdf: Path,
+    *,
+    ylabel: str = "Field concordance |r|",
+    seed: int = 20260626,
+    xaxis_mode: str = "paired",
+    figsize: tuple[float, float] | None = None,
+    pair_gap: float = 0.72,
+    group_gap: float = 2.05,
+) -> None:
+    """Reusable paired Data-vs-Null painter from the accepted Fig3 panel.
 
-    positions = [(1.0, 1.72), (3.05, 3.77), (5.1, 5.82)]
+    Callers may provide ``display_p`` and ``p_label`` in each group when the
+    formal statistic is closed upstream (for example a fixed-window maxT p).
+    The violin, box, paired subject points/lines, bracket and caption grammar
+    remain identical to the accepted reference panel.
+    """
+    if not groups:
+        raise ValueError("paired Data-vs-Null plot requires at least one group")
+    if xaxis_mode not in {"paired", "group"}:
+        raise ValueError(f"unknown xaxis_mode:{xaxis_mode}")
+    rng = np.random.default_rng(seed)
+    if figsize is None:
+        figsize = (max(7.2, group_gap * len(groups) + 1.05), 4.1)
+    fig, ax = plt.subplots(figsize=figsize)
+
+    positions = [
+        (1.0 + group_gap * i, 1.0 + pair_gap + group_gap * i)
+        for i in range(len(groups))
+    ]
+    overall_max = 0.0
     for group, (x_data, x_null) in zip(groups, positions):
         label = group["label"]
         data = np.array([r["data"] for r in group["rows"]], dtype=float)
@@ -218,30 +251,68 @@ def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
                 zorder=3,
             )
         ymax = max(float(np.nanmax(data)), float(np.nanmax(null)))
-        _add_sig_bracket(ax, x_data, x_null, ymax + 0.055, _p_stars(group["summary"]["wilcoxon_p_data_gt_null_median"]))
-        ax.text(
-            (x_data + x_null) / 2,
-            -0.145,
-            f"{label}\nn={group['summary']['n']}, p={_fmt_p(group['summary']['wilcoxon_p_data_gt_null_median'])}",
-            transform=ax.get_xaxis_transform(),
-            ha="center",
-            va="top",
-            fontsize=8.2,
+        overall_max = max(overall_max, ymax)
+        p_value = float(
+            group["display_p"] if "display_p" in group
+            else group["summary"]["wilcoxon_p_data_gt_null_median"]
         )
+        bracket_text = _p_stars(p_value)
+        if bool(group.get("p_on_bracket", False)):
+            bracket_text = f"{bracket_text}  p={_fmt_p(p_value)}"
+        _add_sig_bracket(ax, x_data, x_null, ymax + 0.055, bracket_text)
+        p_label = str(group.get("p_label", "p"))
+        caption = group.get(
+            "caption",
+            f"{label}\nn={group['summary']['n']}, {p_label}={_fmt_p(p_value)}",
+        )
+        if xaxis_mode == "paired":
+            ax.text(
+                (x_data + x_null) / 2,
+                -0.145,
+                str(caption),
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="top",
+                fontsize=8.2,
+            )
 
-    ax.set_ylabel("Field concordance |r|", fontsize=11)
-    ax.set_xticks([x for pair in positions for x in pair])
-    ax.set_xticklabels(["Data", "Null"] * len(positions), fontsize=10)
-    ax.set_xlim(0.45, 6.35)
-    ax.set_ylim(0.0, 1.12)
+    ax.set_ylabel(ylabel, fontsize=11)
+    if xaxis_mode == "group":
+        centers = [(x_data + x_null) / 2 for x_data, x_null in positions]
+        ax.set_xticks(centers)
+        ax.set_xticklabels(
+            [str(group.get("x_label", group["label"])) for group in groups],
+            fontsize=9.2,
+        )
+        ax.tick_params(axis="x", pad=4)
+        ax.legend(
+            handles=[
+                Patch(facecolor="#9fbdcf", edgecolor="#6f8fa3", label="Observed"),
+                Patch(facecolor="#d8d8d8", edgecolor="#9a9a9a", label="Channel-shuffle null"),
+            ],
+            loc="lower right",
+            frameon=False,
+            fontsize=8.2,
+            handlelength=1.15,
+        )
+    else:
+        ax.set_xticks([x for pair in positions for x in pair])
+        ax.set_xticklabels(["Data", "Null"] * len(positions), fontsize=10)
+    ax.set_xlim(0.45, positions[-1][1] + 0.53)
+    ax.set_ylim(0.0, max(1.12, overall_max + 0.16))
     ax.spines[["top", "right"]].set_visible(False)
     ax.tick_params(axis="both", width=1.0)
     ax.yaxis.grid(False)
     ax.set_axisbelow(True)
-    fig.subplots_adjust(left=0.16, right=0.98, top=0.94, bottom=0.18)
+    bottom = 0.14 if xaxis_mode == "group" else 0.18
+    fig.subplots_adjust(left=0.16, right=0.98, top=0.94, bottom=bottom)
     fig.savefig(out_png, dpi=300)
     fig.savefig(out_pdf)
     plt.close(fig)
+
+
+def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
+    plot_paired_data_null_groups(groups, out_png, out_pdf)
 
 
 def _write_readme(groups: list[dict], out_dir: Path) -> None:

@@ -190,7 +190,8 @@ def _plot_continuous_stacked(
         ymax = max(ymax, float(np.nanmax(yy)))
         ax.plot(t, yy, lw=0.38, color="0.20", alpha=0.85)
     ax.set_xlim(float(window[0]), float(window[1]))
-    pad = 0.08 * max(1.0, ymax - ymin)
+    span = ymax - ymin
+    pad = 0.08 * span if np.isfinite(span) and span > 0.0 else 0.08 * float(scale)
     ax.set_ylim(ymin - pad, ymax + pad)
     ax.set_yticks(offsets)
     ax.set_yticklabels([bipolar_alias_label(str(sw.ch_names[i])) for i in ch_idx], fontsize=6)
@@ -228,6 +229,7 @@ def _label_shaded_windows(
     post_window: tuple[float, float],
     *,
     y: float = 0.96,
+    post_label: str = "CLINICAL 0-10 s",
 ) -> None:
     items: list[tuple[float, str, str, float]] = [
         ((float(baseline[0]) + float(baseline[1])) / 2.0, "BASELINE", WINDOW_COLORS["baseline"], y),
@@ -238,7 +240,7 @@ def _label_shaded_windows(
         items.append((float(eeg_rel), "EEG ONSET", "#7A4F9A", y))
         if abs(clinical_center - float(eeg_rel)) < 12.0:
             clinical_y = y - 0.14
-    items.append((clinical_center, "CLINICAL 0-10 s", WINDOW_COLORS["early_ictal"], clinical_y))
+    items.append((clinical_center, post_label, WINDOW_COLORS["early_ictal"], clinical_y))
     for x, label, color, yy in items:
         ax.text(
             x,
