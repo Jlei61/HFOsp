@@ -20,6 +20,32 @@ def build_D_AB(rank_a, rank_b):
     return {"eA": eA, "eB": eB, "D_AB": D_AB, "rho_AB": rho_AB, "sd_D_AB": float(D_AB.std(ddof=0))}
 
 
+def build_D_AB_from_rank_pair(pair):
+    """Build D_AB from one rank-displacement pair with fail-closed schema checks.
+
+    This is the canonical bridge from the accepted interictal rank-displacement
+    artifact to field-level consumers.  It uses only ``joint_valid`` contacts and
+    preserves the pair's explicit ``channel_names`` ordering.
+    """
+    names = list(pair.get("channel_names", []))
+    rank_a = np.asarray(pair.get("rank_a_dense_full", []), float)
+    rank_b = np.asarray(pair.get("rank_b_dense_full", []), float)
+    joint = np.asarray(pair.get("joint_valid", []), bool)
+    n = len(names)
+    if rank_a.shape != (n,) or rank_b.shape != (n,) or joint.shape != (n,):
+        raise ValueError(
+            f"rank-pair length mismatch: names={n}, rank_a={rank_a.shape}, "
+            f"rank_b={rank_b.shape}, joint_valid={joint.shape}")
+    names_joint = [names[i] for i in np.flatnonzero(joint)]
+    if len(names_joint) != len(set(names_joint)):
+        raise ValueError("duplicate channel name in rank-pair joint set")
+    if not np.isfinite(rank_a[joint]).all() or not np.isfinite(rank_b[joint]).all():
+        raise ValueError("non-finite rank inside rank-pair joint_valid set")
+    out = build_D_AB(rank_a[joint], rank_b[joint])
+    return {**out, "names_joint": names_joint,
+            "rank_a_joint": rank_a[joint], "rank_b_joint": rank_b[joint]}
+
+
 def template_pair_tier(rho_AB):
     if rho_AB <= RHO_RECIPROCAL: return "reciprocal"
     if rho_AB < RHO_ALIGNED:     return "oblique"

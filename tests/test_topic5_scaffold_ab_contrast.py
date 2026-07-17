@@ -1,5 +1,7 @@
 import numpy as np
-from src.topic5_scaffold_ab_contrast import build_D_AB, template_pair_tier
+import pytest
+from src.topic5_scaffold_ab_contrast import (
+    build_D_AB, build_D_AB_from_rank_pair, template_pair_tier)
 
 
 def test_build_D_AB_earlyness_sign():
@@ -10,6 +12,26 @@ def test_build_D_AB_earlyness_sign():
     assert out["rho_AB"] < -0.99                              # anti -> rho approx -1
     zA, zB = -out["eA"], -out["eB"]
     assert abs(out["rho_AB"] - np.corrcoef(zA, zB)[0,1]) < 1e-9
+
+
+def test_build_D_AB_from_rank_pair_uses_joint_valid_and_name_order():
+    pair = {
+        "channel_names": ["A1", "A2", "B1", "B2"],
+        "rank_a_dense_full": [0.0, np.nan, 2.0, 1.0],
+        "rank_b_dense_full": [2.0, np.nan, 0.0, 1.0],
+        "joint_valid": [True, False, True, True],
+    }
+    out = build_D_AB_from_rank_pair(pair)
+    assert out["names_joint"] == ["A1", "B1", "B2"]
+    assert np.allclose(out["rank_a_joint"], [0.0, 2.0, 1.0])
+    assert out["D_AB"][0] > 0 and out["D_AB"][1] < 0
+
+
+def test_build_D_AB_from_rank_pair_rejects_length_mismatch():
+    pair = {"channel_names": ["A1", "A2"], "rank_a_dense_full": [0.0],
+            "rank_b_dense_full": [1.0, 0.0], "joint_valid": [True, True]}
+    with pytest.raises(ValueError, match="length mismatch"):
+        build_D_AB_from_rank_pair(pair)
 
 
 def test_template_pair_tier_boundaries():

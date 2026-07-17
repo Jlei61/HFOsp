@@ -5,9 +5,12 @@ Two figure types per subject, restyled to the locked palette (docs/figure_style_
 §0 + §5a) and to match scripts/paper_figures/plot_fig_topic5_scaffold_ab_cohort.py so the
 per-subject and cohort figures read as one family:
 
-  1. <ds_sid>_perseizure_dist.png  -- one row per seizure, the distribution of axis-present
-     C_AB values (raincloud). Adapted from scripts/plot_topic5_scaffold_ab_perseizure_distribution.py.
-     Shows whether a subject's seizures split into A-dominant vs B-dominant states.
+  1. <ds_sid>_perseizure_dist.png  -- one row per seizure: two small box-and-whisker
+     summaries of that seizure's axis-present C_AB values, one for the early (pre-ictal)
+     time bin and one for the late (near-onset) time bin. Row data loading adapted from
+     scripts/plot_topic5_scaffold_ab_perseizure_distribution.py; rendering is bespoke.
+     Shows whether a subject's seizures split into A-dominant vs B-dominant states, and
+     whether any given seizure's side shifts between its early and late windows.
   2. <ds_sid>_timecourse.png       -- C_AB(t) peri-onset, thin per-seizure lines + bold
      near-onset-side-aligned median. Adapted from scripts/plot_topic5_scaffold_ab_contrast_timecourse.py.
      Shows whether lateral polarization strengthens approaching seizure onset.
@@ -33,11 +36,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.cm import ScalarMappable
-from matplotlib.colors import Normalize
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
-from scipy.stats import gaussian_kde
+from matplotlib.patches import Patch, Rectangle
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -59,11 +59,15 @@ COL_BIMODAL = "#762A83"  # both sides seen (matches cohort figure's "bimodal" ca
 COL_LOWDATA = "#BDBDBD"  # too few usable windows (matches cohort figure's "low_data" category)
 COL_SZ = "0.72"          # individual seizures, timecourse
 COL_MED = "#222222"      # near-onset-aligned median, timecourse
+COL_EARLY = "#440154"    # dark viridis -- early (pre-ictal) per-seizure time-bin box
+COL_LATE = "#FDE725"     # bright viridis -- late (near-onset) per-seizure time-bin box
 
 DELTA_SIDE = 0.2         # |C_AB| side-label threshold (spec-locked)
-MIN_N_VIOLIN = 6         # min axis-present windows to draw a half-violin / not be "low data"
+MIN_N_VIOLIN = 6         # min axis-present windows to not be "low data" (row-group taxonomy)
 BIMODAL_FRAC_MIN = 0.25  # both-side mass fraction threshold for the "bimodal" row group
 MIN_N_MED = 4            # min axis_present seizures per window to draw the aligned median/IQR
+EARLY_LATE_SPLIT_S = -30.0  # window-center split: early (pre-ictal) < -30s <= late (near-onset)
+MIN_N_BOX = 3            # min windows in a time-bin to draw a box; below this, draw dots
 
 # Row-group taxonomy for the per-seizure distribution figure: which side does THIS
 # seizure's own whole-window C_AB distribution favor. Independent of (and complementary
@@ -92,6 +96,14 @@ DEFAULT_SUBJECTS = [
     "epilepsiae_1146", "epilepsiae_442", "epilepsiae_635", "epilepsiae_1125",
     "epilepsiae_590", "epilepsiae_958", "epilepsiae_1096", "epilepsiae_1150",
 ]
+
+# The timecourse figure needs a contiguous run of onset-adjacent, well-supported (>=4
+# seizures/window) time windows to read as a trend rather than disconnected fragments.
+# Only these two subjects have that: E442 (near-onset-locked, dense) and E1146 (dense,
+# not locked -- the honest contrast). The other 10 subjects' axis-present windows are too
+# sparse for a legible timecourse; render_subject() still renders their distribution
+# figure (the all-subject deliverable), just not the timecourse.
+TIMECOURSE_SUBJECTS = ["epilepsiae_442", "epilepsiae_1146"]
 
 
 def _pretty(ds_sid: str) -> str:
@@ -182,34 +194,54 @@ def _build_rows(npz, df: pd.DataFrame) -> list[dict]:
 
 
 # ============================================================================
-# Figure type 1 -- per-seizure distribution (raincloud)
+# Figure type 1 -- per-seizure distribution (early-vs-late paired boxes)
 # ============================================================================
+
+BOX_OFFSET = 0.16   # |y| offset of each time-bin box/dots from the row center
+BOX_HALF_H = 0.085  # box half-height (IQR rectangle)
+
+
+def _draw_time_bin(ax, vals: np.ndarray, y_center: float, color: str, rng: np.random.Generator) -> None:
+    """Draw one seizure's one time-bin (early or late) at y_center: a 5/25/50/75/95
+    box-and-whisker when n>=MIN_N_BOX, else individual dots (too few points for a box
+    to mean anything).
+    """
+    n = len(vals)
+    if n == 0:
+        return
+    if n < MIN_N_BOX:
+        jit = rng.uniform(-0.025, 0.025, size=n) if n > 1 else np.zeros(1)
+        ax.scatter(vals, y_center + jit, s=13, color=color, edgecolors="0.15",
+                   linewidths=0.4, alpha=0.95, zorder=5)
+        return
+    q5, q25, med, q75, q95 = np.percentile(vals, [5, 25, 50, 75, 95])
+    cap_h = BOX_HALF_H * 0.55
+    ax.plot([q5, q95], [y_center, y_center], color="0.3", lw=0.9, zorder=4)
+    ax.plot([q5, q5], [y_center - cap_h, y_center + cap_h], color="0.3", lw=0.9, zorder=4)
+    ax.plot([q95, q95], [y_center - cap_h, y_center + cap_h], color="0.3", lw=0.9, zorder=4)
+    ax.add_patch(Rectangle((q25, y_center - BOX_HALF_H), max(q75 - q25, 1e-3), 2 * BOX_HALF_H,
+                            facecolor=color, edgecolor="0.15", lw=0.7, alpha=0.9, zorder=5))
+    tick_color = "white" if color == COL_EARLY else "0.1"
+    ax.plot([med, med], [y_center - BOX_HALF_H, y_center + BOX_HALF_H], color=tick_color,
+            lw=1.4, zorder=6)
 
 
 def plot_distribution(ds_sid: str, rows: list[dict]) -> Path:
     out_png = OUT_DIR / f"{ds_sid}_perseizure_dist.png"
 
     n_rows = len(rows)
-    cmap = plt.get_cmap("viridis")
-    all_t = [d["t_present"] for d in rows if d["n_present"] > 0]
-    if all_t:
-        t_cat = np.concatenate(all_t)
-        norm = Normalize(vmin=float(t_cat.min()), vmax=float(t_cat.max()))
-    else:
-        norm = Normalize(vmin=-115.0, vmax=15.0)
-
-    row_h = 1.0
-    violin_h = 0.34
-    jitter_h = 0.28
+    row_h = 0.85  # must stay large enough that a row-group tag line (text-only, drawn in the
+                  # outside-axes label margin, see below) never touches this row's own label
+                  # line or the previous row's -- smaller row_h makes text overlap at fixed font size
     y = -row_h * np.arange(n_rows, dtype=float)  # row 0 -> y=0 (top row)
 
-    fig_h = max(6.0, n_rows * 0.40 + 2.4)
-    fig, ax = plt.subplots(figsize=(11.8, fig_h))
+    fig_h = max(2.4, n_rows * 0.335 + 1.2)
+    fig, ax = plt.subplots(figsize=(10.6, fig_h))
 
     ax.set_xlim(-1.05, 1.05)
-    y_top = 0.70  # extra headroom above row 0 so the A/B header text and the first
-                  # row-group tag (drawn just above row 0) don't crowd each other
-    y_bot = y[-1] - jitter_h - 0.25
+    y_top = 0.70  # headroom above row 0 so the A/B header text clears row 0's own late
+                  # box (offset up to +BOX_OFFSET+BOX_HALF_H=0.245) and the first row-group tag
+    y_bot = y[-1] - 0.40
     ax.set_ylim(y_bot, y_top)
 
     ax.axvspan(0, 1.05, color=COL_A, alpha=0.06, lw=0, zorder=0)
@@ -217,38 +249,33 @@ def plot_distribution(ds_sid: str, rows: list[dict]) -> Path:
     ax.axvline(0, color="0.25", lw=1.2, zorder=1)
     ax.axvline(DELTA_SIDE, color="0.45", lw=0.8, ls="--", alpha=0.7, zorder=1)
     ax.axvline(-DELTA_SIDE, color="0.45", lw=0.8, ls="--", alpha=0.7, zorder=1)
-    ax.text(0.5, y_top - 0.03, "A source side", ha="center", va="top",
+    ax.text(0.5, y_top - 0.025, "A source side", ha="center", va="top",
             fontsize=9, color=COL_A, alpha=0.85)
-    ax.text(-0.5, y_top - 0.03, "B source side", ha="center", va="top",
+    ax.text(-0.5, y_top - 0.025, "B source side", ha="center", va="top",
             fontsize=9, color=COL_B, alpha=0.85)
 
-    rng = np.random.default_rng(0)  # visual jitter only, fixed for a reproducible render
+    rng = np.random.default_rng(0)  # visual jitter only (sparse-bin dots), fixed for reproducibility
     for i, d in enumerate(rows):
         yi = y[i]
         c_vals, t_vals, n = d["c_present"], d["t_present"], d["n_present"]
 
-        if n >= MIN_N_VIOLIN and np.std(c_vals) > 1e-9:
-            kde = gaussian_kde(c_vals, bw_method="silverman")
-            xs = np.linspace(-1.0, 1.0, 200)
-            dens = kde(xs)
-            dens = dens / dens.max() * violin_h
-            ax.fill_between(xs, yi, yi + dens, color="0.35", alpha=0.35,
-                             lw=0.7, edgecolor="0.2", zorder=3)
-
         if n > 0:
-            jit = rng.uniform(-jitter_h, -0.03, size=n)
-            ax.scatter(c_vals, yi + jit, c=t_vals, cmap=cmap, norm=norm,
-                       s=16, alpha=0.85, linewidths=0.3, edgecolors="white", zorder=4)
+            early_mask = t_vals < EARLY_LATE_SPLIT_S
+            _draw_time_bin(ax, c_vals[early_mask], yi - BOX_OFFSET, COL_EARLY, rng)
+            _draw_time_bin(ax, c_vals[~early_mask], yi + BOX_OFFSET, COL_LATE, rng)
 
-        plain_ec = EVENT_CLASS_PLAIN.get(d["event_class"], d["event_class"])
-        ax.text(-0.012, yi, f"sz{d['seizure_idx']} · {plain_ec} · n={n}",
+        ax.text(-0.012, yi, f"sz{d['seizure_idx']} · n={n}",
                 transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=8,
                 clip_on=False)
 
         new_group = (i == 0) or (d["group"] != rows[i - 1]["group"])
         if new_group:
-            ax.text(-1.0, yi + 0.42, GROUP_LABEL[d["group"]], ha="left", va="center",
-                    fontsize=9.5, fontweight="bold", color=GROUP_TEXT_COLOR[d["group"]], zorder=5)
+            # Drawn in the same outside-axes label margin as the "sz<idx> ..." row labels
+            # (not at x=-1.0 inside the data area) so it can never collide with a B-dominant
+            # row's own box, which legitimately sits near C_AB=-1.
+            ax.text(-0.012, yi + row_h / 2.0, GROUP_LABEL[d["group"]],
+                    transform=ax.get_yaxis_transform(), ha="right", va="center", fontsize=9.5,
+                    fontweight="bold", color=GROUP_TEXT_COLOR[d["group"]], zorder=5, clip_on=False)
             if i > 0:
                 ax.axhline((y[i] + y[i - 1]) / 2.0, color="0.6", lw=0.7, alpha=0.6, zorder=2)
 
@@ -259,21 +286,19 @@ def plot_distribution(ds_sid: str, rows: list[dict]) -> Path:
     ax.set_xlabel(r"$C_{AB}$   (A source side  +1  $\leftrightarrow$  $-1$  B source side)",
                   fontsize=11)
     ax.set_title(f"{_pretty(ds_sid)} · per-seizure A/B state distribution",
-                 fontsize=13, fontweight="bold", pad=10)
+                 fontsize=13, fontweight="bold", pad=28)
 
-    sm = ScalarMappable(norm=norm, cmap=cmap)
-    sm.set_array([])
-    cbar = fig.colorbar(sm, ax=ax, pad=0.015, fraction=0.022, aspect=45)
-    cbar.set_label("time from onset (s)", fontsize=9)
-    cbar.ax.tick_params(labelsize=8)
-
-    fig.text(0.5, 0.005,
-              "Half-violins: per-seizure peak-normalized KDE of axis-present C_AB (shape only; "
-              f"skipped when n<{MIN_N_VIOLIN}). Points: every axis-present window, vertically "
-              "jittered, colored by time from onset (dark=far pre-ictal, bright=onset). Dashed "
-              f"lines at ±{DELTA_SIDE}: side-label threshold. Rows grouped by which side each "
-              "seizure's own distribution favors (left margin: per-seizure far→near label).",
-              ha="center", va="bottom", fontsize=7.5, color="0.35")
+    # Anchored just above the axes (outside the data area, in axes-fraction coordinates) so
+    # it can never collide with a row's boxes, however close row 0's own values sit to +-1
+    # (a data-anchored corner legend does collide for subjects like E916 sz6, whose early/late
+    # boxes sit right at the top-right corner near C_AB=+1).
+    legend_handles = [
+        Patch(facecolor=COL_EARLY, edgecolor="0.15", label="early (pre-ictal)"),
+        Patch(facecolor=COL_LATE, edgecolor="0.15", label="late (near-onset)"),
+    ]
+    ax.legend(handles=legend_handles, loc="lower right", bbox_to_anchor=(1.0, 1.01),
+              frameon=False, fontsize=8, handlelength=1.2, ncol=2, columnspacing=1.2,
+              borderaxespad=0)
 
     return _save(fig, out_png)
 
@@ -281,6 +306,22 @@ def plot_distribution(ds_sid: str, rows: list[dict]) -> Path:
 # ============================================================================
 # Figure type 2 -- C_AB(t) timecourse
 # ============================================================================
+
+
+def _contiguous_runs(mask: np.ndarray) -> list[tuple[int, int]]:
+    """Index (start, stop) pairs (stop exclusive) for each contiguous run of True in mask."""
+    runs = []
+    i, n = 0, len(mask)
+    while i < n:
+        if mask[i]:
+            j = i + 1
+            while j < n and mask[j]:
+                j += 1
+            runs.append((i, j))
+            i = j
+        else:
+            i += 1
+    return runs
 
 
 def plot_timecourse(ds_sid: str, npz, summary: dict) -> Path:
@@ -318,19 +359,27 @@ def plot_timecourse(ds_sid: str, npz, summary: dict) -> Path:
     ax.axhspan(0, 1.05, color=COL_A, alpha=0.05, lw=0, zorder=0)
     ax.axhspan(-1.05, 0, color=COL_B, alpha=0.05, lw=0, zorder=0)
 
-    # thin lines: each seizure's TRUE C_AB where axis_present (gaps where not).
+    # thin lines: each seizure's TRUE C_AB where axis_present (gaps where not). Kept very
+    # faint -- these are background context, not the readable signal (that's the median).
     cab_present = np.where(present, cab, np.nan)
     for i in range(n_sz):
-        ax.plot(centers, cab_present[i], color=COL_SZ, lw=0.7, alpha=0.35, zorder=2)
+        ax.plot(centers, cab_present[i], color=COL_SZ, lw=0.5, alpha=0.12, zorder=2)
 
-    # shaded band: cross-seizure IQR of the aligned quantity (style guide §5a convention).
-    ax.fill_between(centers, q25, q75, color=COL_MED, alpha=0.15, lw=0, zorder=3)
+    # Bold median + IQR band: draw ONLY across contiguous runs of well-supported windows
+    # (>=MIN_N_MED seizures AND consecutive grid steps). A window that drops below support
+    # or a real time gap breaks the line -- never bridge the median across sparse/missing
+    # windows, which would fabricate a trend between unrelated seizure subsets.
+    for i0, i1 in _contiguous_runs(well_supported):
+        if i1 - i0 < 2:
+            continue  # single isolated window -- no segment to draw
+        seg_t = centers[i0:i1]
+        ax.fill_between(seg_t, q25[i0:i1], q75[i0:i1], color=COL_MED, alpha=0.15, lw=0, zorder=3)
+        ax.plot(seg_t, med[i0:i1], color=COL_MED, lw=2.6, zorder=5)
 
     med_label = (f"near-onset-side-aligned median ({int(use.sum())} onset-testable seizures)"
                  if enough_valid else
                  f"near-onset-side-aligned median (all {int(use.sum())} seizures; too few pass "
                  "the near/far data gate)")
-    ax.plot(centers, med, color=COL_MED, lw=2.6, zorder=5)
 
     ax.axhline(0, color="0.30", lw=1.1, zorder=1)
     ax.axhline(DELTA_SIDE, color="0.5", lw=0.8, ls="--", alpha=0.7, zorder=1)
@@ -383,7 +432,7 @@ def plot_timecourse(ds_sid: str, npz, summary: dict) -> Path:
 # ============================================================================
 
 
-def render_subject(ds_sid: str) -> dict:
+def render_subject(ds_sid: str, render_timecourse: bool = True) -> dict:
     loaded = _load(ds_sid)
     if loaded is None:
         print(f"{ds_sid}: SKIPPED (missing per-subject artifacts)")
@@ -402,11 +451,15 @@ def render_subject(ds_sid: str) -> dict:
 
     rows = _build_rows(npz, df)
     p1 = plot_distribution(ds_sid, rows)
-    p2 = plot_timecourse(ds_sid, npz, summary)
-    print(f"{ds_sid}: wrote {p1.name}, {p2.name}  (n_seizures={len(df)}, "
-          f"n_present_total={n_present_total})")
+    if render_timecourse:
+        p2 = plot_timecourse(ds_sid, npz, summary)
+        print(f"{ds_sid}: wrote {p1.name}, {p2.name}  (n_seizures={len(df)}, "
+              f"n_present_total={n_present_total})")
+    else:
+        print(f"{ds_sid}: wrote {p1.name}  (timecourse skipped -- axis-present windows too "
+              f"sparse for a legible trend; n_seizures={len(df)}, n_present_total={n_present_total})")
     return {"subject": ds_sid, "status": "ok", "n_seizures": int(len(df)),
-            "n_present_total": n_present_total}
+            "n_present_total": n_present_total, "timecourse": render_timecourse}
 
 
 def main() -> None:
@@ -414,14 +467,20 @@ def main() -> None:
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--subject", help="single ds_sid, e.g. epilepsiae_1146")
     g.add_argument("--all", action="store_true",
-                   help=f"render the locked informative-pool subjects ({len(DEFAULT_SUBJECTS)})")
+                   help=f"render the locked informative-pool subjects ({len(DEFAULT_SUBJECTS)}); "
+                        f"timecourse only for {TIMECOURSE_SUBJECTS}")
     args = ap.parse_args()
 
-    subjects = DEFAULT_SUBJECTS if args.all else [args.subject]
-    results = [render_subject(s) for s in subjects]
+    if args.all:
+        results = [render_subject(s, render_timecourse=(s in TIMECOURSE_SUBJECTS))
+                   for s in DEFAULT_SUBJECTS]
+    else:
+        results = [render_subject(args.subject, render_timecourse=True)]
 
     n_ok = sum(1 for r in results if r["status"] == "ok")
-    print(f"\n{n_ok}/{len(results)} subjects rendered ({2 * n_ok} PNGs) -> {OUT_DIR}")
+    n_tc = sum(1 for r in results if r.get("timecourse"))
+    print(f"\n{n_ok}/{len(results)} subjects rendered (distribution: {n_ok}, "
+          f"timecourse: {n_tc}) -> {OUT_DIR}")
 
 
 if __name__ == "__main__":

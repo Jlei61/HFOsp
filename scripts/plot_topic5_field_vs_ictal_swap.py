@@ -41,6 +41,7 @@ from scripts.plot_topic5_swap_nodes_fields import (
     SUBSTRATE, _subject_data, _arrays, _ring, _legend_handles,
     SRC_A_COL, SRC_B_COL, LABEL_HALO,
 )
+from src.topic5_scaffold_ab_contrast import build_D_AB_from_rank_pair
 
 CACHE_DIR = _ROOT / "results/topic5_ictal_recruitment/t0_feature_cache"   # Epilepsiae-only ictal cache
 OUT = _ROOT / "results/topic5_ictal_recruitment/axis_alignment/figures/field_concordance/field_vs_ictal_swap"
@@ -82,12 +83,25 @@ def _rank01(vals):
     return out
 
 
-def _payload(ds_sid, rd_dir, geo_dir, activation):
-    """Swap-positive subject with ictal activation -> drawing payload, else None."""
+def _payload(ds_sid, rd_dir, geo_dir, activation, field="template_a"):
+    """Swap-positive subject with ictal activation -> drawing payload, else None.
+
+    field='template_a' (default): left field = template-A propagation order (frozen A-line figure).
+    field='dab': left field = rank01(D_AB) — the continuous A/B earliness contrast from the accepted
+    rank-displacement pairs[0] (same source as run_topic5_axis_alignment --statistic dab), laid on the
+    SAME A-line plane/support/rings; only the interictal field VALUE changes.
+    """
     dat = _subject_data(ds_sid, rd_dir, geo_dir)        # None unless swap strict/candidate + geometry
     if dat is None:
         return None
     names, xs, ys, inter, sup, soz = _arrays(dat["ta"], dat["frame"])
+    dat["field"] = field
+    if field == "dab":
+        rd = json.load(open(rd_dir / f"{ds_sid}.json"))
+        pair = rd.get("primary_pair") or (rd.get("pairs") or [{}])[0]
+        dab = build_D_AB_from_rank_pair(pair)
+        dab_by_name = dict(zip(dab["names_joint"], dab["D_AB"]))
+        inter = _rank01([dab_by_name.get(n, np.nan) for n in names])
     act = _ictal_activation(ds_sid, ACTIVATION_KEY[activation])
     if not act:                                          # no eligible ictal seizures (e.g. Yuquan) -> skip
         return None
@@ -161,12 +175,17 @@ def plot_subject(dat, substrate, activation):
     ds_sid = dat["ds_sid"]; ss = dat["ss"]
     pretty = ds_sid.replace("epilepsiae_", "E").replace("yuquan_", "Y-")
     ict_title, ict_lbl = _ict_labels(dat, activation)
+    is_dab = dat.get("field") == "dab"
+    left_title = ("interictal A/B earliness contrast — D_AB" if is_dab
+                  else "interictal propagation order — template A")
+    left_cbar = ("B-source (0) -> A-source (1)" if is_dab else "early (0) -> late (1)")
     fig, ax = plt.subplots(1, 2, figsize=(14.0, 7.4), layout="constrained")
-    _field_panel(ax[0], dat, dat["inter"], "interictal propagation order — template A",
-                 "early (0) -> late (1)", compact=False, labels=True, cbar=True)
+    _field_panel(ax[0], dat, dat["inter"], left_title, left_cbar,
+                 compact=False, labels=True, cbar=True)
     _field_panel(ax[1], dat, dat["ict"], ict_title, ict_lbl, compact=False, labels=True, cbar=True)
     nodes = sorted(dat["src_a"]) + sorted(dat["src_b"])
-    fig.suptitle(f"Patient {pretty} — interictal propagation field vs seizure-onset activation, "
+    field_tag = "continuous D_AB contrast field" if is_dab else "template-A order field"
+    fig.suptitle(f"Patient {pretty} — interictal {field_tag} vs seizure-onset activation, "
                  f"role-SWAP source nodes\n(swap={ss.get('swap_class')}, k={ss.get('decision_k')}, "
                  f"p_fw={ss.get('p_fw'):.3f}; {len(nodes)} nodes; red=source in A, blue=source in B)",
                  fontsize=FS_TITLE_SUP)
@@ -174,7 +193,7 @@ def plot_subject(dat, substrate, activation):
     fig.legend(handles=_legend_handles(), loc="outside lower center", ncol=3,
                fontsize=FS_LEGEND, frameon=False)
     OUT.mkdir(parents=True, exist_ok=True)
-    fp = OUT / f"{ds_sid}_field_vs_ictal_{substrate}.png"
+    fp = OUT / f"{ds_sid}_field_vs_ictal{'_dab' if is_dab else ''}_{substrate}.png"
     fig.savefig(fp, dpi=135, bbox_inches="tight"); plt.close(fig)
     return fp
 
@@ -204,7 +223,8 @@ def plot_all(data, substrate, activation):
                  f"activation ({ACTIVATION_LABEL[activation]}), role-SWAP source nodes ringed "
                  f"(red=source in A, blue=source in B)", fontsize=FS_TITLE_SUP)
     OUT.mkdir(parents=True, exist_ok=True)
-    fp = OUT / f"ALL_field_vs_ictal_{substrate}.png"
+    tag = "_dab" if (data and data[0].get("field") == "dab") else ""
+    fp = OUT / f"ALL_field_vs_ictal{tag}_{substrate}.png"
     fig.savefig(fp, dpi=120, bbox_inches="tight"); plt.close(fig)
     return fp
 
@@ -213,13 +233,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--substrate", choices=list(SUBSTRATE), default="broad")
     ap.add_argument("--activation", choices=list(ACTIVATION_KEY), default="broadband")
+    ap.add_argument("--field", choices=["template_a", "dab"], default="template_a",
+                    help="left interictal field: template_a order (default) or continuous D_AB contrast")
     ap.add_argument("--subjects", nargs="*", default=None)
     args = ap.parse_args()
     rd_dir, geo_dir = SUBSTRATE[args.substrate]
     subs = args.subjects or sorted(p.stem for p in rd_dir.glob("*.json"))
     data = []
     for ds_sid in subs:
-        dat = _payload(ds_sid, rd_dir, geo_dir, args.activation)
+        dat = _payload(ds_sid, rd_dir, geo_dir, args.activation, args.field)
         if dat is None:
             continue
         fp = plot_subject(dat, args.substrate, args.activation)
