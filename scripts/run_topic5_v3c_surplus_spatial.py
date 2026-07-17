@@ -20,7 +20,8 @@ from src.topic5_v3c_coverage import distance_null_distribution, surplus_spatial_
 
 OUT = _ROOT / "results/topic5_ictal_recruitment/v3c_soz_axis_coverage"
 COLS = ["subject", "cohort", "n_surplus", "n_shafts_with_surplus", "shaft_gini",
-        "max_contiguous_run", "mean_min_dist_to_soz", "dist_null_p"]
+        "max_contiguous_run", "mean_min_dist_to_soz", "dist_null_p",
+        "dist_null_q05", "dist_null_q50", "dist_null_q95"]   # per-subject null for the forest figure
 
 
 def surplus_row(ds_sid, cohort, cfg) -> dict:
@@ -37,9 +38,11 @@ def surplus_row(ds_sid, cohort, cfg) -> dict:
         # lower observed distance than null -> surplus closer to SOZ than random -> structured
         p = (float((np.sum(null <= m["mean_min_dist_to_soz"]) + 1) / (null.size + 1))
              if null.size and np.isfinite(m["mean_min_dist_to_soz"]) else float("nan"))
+        q05, q50, q95 = (np.percentile(null, [5, 50, 95]) if null.size else (np.nan, np.nan, np.nan))
         row.update({"n_surplus": j["n_surplus"], **{k: m[k] for k in
                     ("n_shafts_with_surplus", "shaft_gini", "max_contiguous_run", "mean_min_dist_to_soz")},
-                    "dist_null_p": p, "_null": null, "_obs": m["mean_min_dist_to_soz"]})
+                    "dist_null_p": p, "dist_null_q05": float(q05), "dist_null_q50": float(q50),
+                    "dist_null_q95": float(q95), "_null": null, "_obs": m["mean_min_dist_to_soz"]})
     except Exception as exc:  # noqa: BLE001
         print(f"[skip] {ds_sid} ({cohort}): {type(exc).__name__}: {exc}", flush=True)
     return row

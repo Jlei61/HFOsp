@@ -21,7 +21,8 @@ from src.topic5_v3c_latency import (auc_late, auc_null_distribution, delta_t,
 OUT = _ROOT / "results/topic5_ictal_recruitment/v3c_soz_axis_coverage"
 COLS = ["subject", "cohort", "n_covered", "n_surplus", "n_sz_used", "auc_primary",
         "auc_drop_censored", "auc_exclude_t0", "auc_sensitivity_allsoz",
-        "delta_t_sec", "auc_null_p", "eligible"]
+        "delta_t_sec", "auc_null_p", "auc_null_q05", "auc_null_q50", "auc_null_q95",
+        "eligible"]   # per-subject null quantiles for the AUC forest figure
 
 
 def latency_eligible(join: dict, qc_valid: bool, cfg: dict) -> bool:
@@ -90,12 +91,16 @@ def latency_subject_row(ds_sid, cohort, cfg, qc_map) -> dict:
         dt_med = float(np.nanmedian(dts)) if dts else float("nan")
         null_med = np.median(np.vstack(nulls), axis=0) if nulls else np.array([])
         p = float((np.sum(null_med >= auc_p) + 1) / (null_med.size + 1)) if null_med.size else float("nan")
+        q05, q50, q95 = (np.percentile(null_med, [5, 50, 95]) if null_med.size
+                         else (np.nan, np.nan, np.nan))
         row.update({"n_covered": j["n_covered"], "n_surplus": j["n_surplus"], "n_sz_used": len(mats),
                     "auc_primary": auc_p,
                     "auc_drop_censored": float(np.nanmedian(aucs_dc)) if aucs_dc else float("nan"),
                     "auc_exclude_t0": float(np.nanmedian(aucs_xt0)) if aucs_xt0 else float("nan"),
                     "auc_sensitivity_allsoz": float(np.nanmedian(aucs_s)) if aucs_s else float("nan"),
-                    "delta_t_sec": dt_med, "auc_null_p": p, "eligible": bool(eligible),
+                    "delta_t_sec": dt_med, "auc_null_p": p,
+                    "auc_null_q05": float(q05), "auc_null_q50": float(q50), "auc_null_q95": float(q95),
+                    "eligible": bool(eligible),
                     "_auc": auc_p, "_dt": dt_med, "_null_med": null_med,
                     "_auc_dc": float(np.nanmedian(aucs_dc)) if aucs_dc else float("nan"),
                     "_auc_xt0": float(np.nanmedian(aucs_xt0)) if aucs_xt0 else float("nan")})
