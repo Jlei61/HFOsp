@@ -8,6 +8,8 @@
 
 本规范用于把冻结的患者特异 TA/TB propagation rank 映射到二维电极平面，生成单患者双面板图或全 cohort atlas。它只规范**间期模板场**；发作能量场、field concordance 和动态 movie 可以复用同一低层 field renderer，但不得把其颜色、标题或统计口径混入这里。
 
+间期**单事件包络** frame/GIF 不使用本规范的静态 rank-field 版式；其唯一合同是 `docs/fig2c_interictal_event_envelope_field_spec.md`。两者共用冻结轴/平面和 6 mm display renderer，但物理量、colormap、support、时间轴与 claim boundary 不同。
+
 所有新图必须优先复用本规范列出的公共函数。不得复制现有函数后另改一套坐标、平滑、翻轴、contact 样式或 colorbar。
 
 ## 2. 数据与科学合同
