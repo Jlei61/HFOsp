@@ -11,11 +11,11 @@
 - **已实施**：`compute_legacy_mi` 主字段改为 masked shared-participant（事件仅在共同参与触点打分、置换零分布在参与集合内重排秩），旧全通道版保留为 `unmasked_sensitivity`；TDD 3 测试 + 51 回归全绿。
 - **全量重跑**：`--augment-masked-mi --masked-features` 重算 40 例 → masked 40/40 显著（cohort median 0.228；unmasked sensitivity 同 40/40、median 0.188）。产物 `results/interictal_propagation_masked/`；Figure 1 paneld1 已按 masked 重画。
 
-### 2. “共同 A–B contact plane”不是当前 field producer
+### 2. D_AB 三维梯度轴已定向，但尚未迁移到正式 producer
 
-- **现状**：附件用模板 A/B 的两个早端定义共同轴；当前 producer 分别用模板 A、B 各自的 source–sink 轴构建两个平面。
+- **现状**：轴定义已改为全部有坐标联合触点上的 \(D_{AB}\) 三维最小二乘梯度。现有绘图脚本已有原型，但正式 geometry/readout producer 仍使用各模板 source–sink 端点轴。
 - **为什么严重**：轴坐标、核距离、mirror null 和 maxAB 的统计对象都会变化。
-- **怎么关**：作者先二选一；随后统一 producer，重跑 per-subject、cohort、null 和 figure，并由 artifact 反写 Methods。
+- **怎么关**：将梯度轴抽成纯函数，迁移 geometry/readout producer，补退化与稳定性测试，然后重跑 per-subject、cohort、null 和 figure。替换方法见 methods_axis_gradient_rewrite.md。
 
 ### 3. 发作场主合同未锁定
 
@@ -63,29 +63,21 @@
 
 母稿 §"三维传播端点与传播轴"写"使用 decision_k 定义两个方向模式的 source 和 sink 触点"。但主几何 runner 用 `build_endpoint_cores(..., k_primary=3)` 固定 3（fallback 2），**不是 decision_k**。decision_k 只进 SOZ set-relation 和 broad 验证。作者定了下面 E 之后，这段必须按实际 producer 改写。
 
-### E. 怎么构建病理轴：核心口径改用 D_AB（**必须补的逻辑**，2026-07-12 定向）
+### E. 怎么构建病理轴：核心口径改用 D_AB（2026-07-13 已定向）
 
-**这是一定要补的逻辑缺口。** 方向已定：把轴的核心定义从"source/sink 端点 + swap"改成**连续的 A/B 早晚偏好场 D_AB**。理由是 D_AB 才和真实信号对得上——上面 §C 已证明能过检验的"swap"本质是"B 整体倒序"，不是几个特定触点互换；D_AB = 每触点"在 A 里有多早"减"在 B 里有多早"，正是把这个整体倒序如实写成连续场，不强行局部化、不锁 k、不背 source/sink 的因果 overclaim。
+轴定义已经锁定为连续 D_AB 三维梯度：对 joint-valid 且有坐标的全部触点计算 \(D_{AB}=e_A-e_B\)，中心化坐标和值后拟合 \(y_c=X_c\beta\)，以 \(\beta/\|\beta\|\) 作为由 B-lead 指向 A-lead 的单位轴。该定义使用全部触点，不使用端点、source/sink、decision-k 或固定 k。
 
-D_AB 已存在于 V3d：`src/topic5_scaffold_ab_contrast.py::build_D_AB`（`eA=-zscore(rank_a)`，`eB=-zscore(rank_b)`，`D_AB=eA-eB`），约等于 z 标准化的 Δr = rank_b − rank_a。
+正负 D_AB 各三分之一触点的质心只用于显示两极和报告质心间距，不参与 beta 或轴方向估计。绘图中的轴箭头必须平行于 beta；当前原型连接两极质心画箭头，尚不符合这一边界。
 
-**但 D_AB 本身不是轴——这才是本 open question 的承重部分：**
+现有原型已经完成 D_AB 构造、joint-valid/坐标筛选、三维最小二乘梯度、R²、Moran's I、杆内方差比例和极端三分位质心。仍缺：
 
-- D_AB 是每触点一个数（排名空间标量）。"轴"是脑内一个方向，必须把 D_AB 摊到三维坐标上才立得起来：轴 = D_AB 在空间里被组织的主方向（对坐标回归取梯度，或取 D_AB 两极质心连线）。
-- **只有当 D_AB 空间上极化成两团分开的极**（偏 A、偏 B 的触点各自成片且空间分得开）才谈得上真"病理轴"。若两极其实是**同一根电极杆的两头**、或空间交错/散乱，那是杆内梯度或噪声，不是轴。
-- 因此"swap"这个词与集合重合检验可以退休；但它当初想回答的问题（A/B 角色差异在空间上是不是一条真两极轴 vs 一根杆梯度）**不退休**，改用"D_AB 是否空间两极化"来问，并用同杆内打乱零假设把关（V3d `axis_present` 的 within-shaft shuffle 已是此闸）。
+1. 将梯度轴从绘图脚本抽成正式纯函数，并迁移 geometry/readout producer；
+2. 输出坐标矩阵秩、条件数以及轴的 bootstrap/leave-one-shaft-out 稳定性；
+3. 为该轴单独实现与 observed 完全同构的 null，而不是借用发作能量 axis-present 的 null；
+4. 重跑轴投影、二维 field、held-out、SOZ 和后续所有轴依赖分析；
+5. 给每个 artifact 写明 axis-definition，避免与旧 source–sink 轴混用。
 
-**两处代价（定案前看清）：**
-
-1. D_AB 只在"互为倒序"的对（`rho_AB ≤ −0.5`，`template_pair_tier=reciprocal`）上有意义；换核心口径**不扩大**队列，仍是"有对立模板"子集。
-2. "以及之后的分析"是一次真迁移：held-out 轴验证、V3c SOZ 覆盖等现在都吃 source/sink 端点，改 D_AB 口径要连带重跑，是小工程、需显式决定。
-
-**降级项：** 原"AB 各自建轴 + 余弦 cos≈−1"（def-a，见 §A）降为**模板反向的补充性几何演示**，descriptive-only；它与 `rho_AB` 投到空间是同一反向事实的另一种画法，按 CLAUDE.md §7 不得当独立证据重复主张。
-
-**两个角色别混（同一 D_AB，两种承重）：** Core 1 用 D_AB **定义间期轴** = 承重（必须证明空间两极化过同杆零假设）；V3d 那张 D_AB **触点上色图** = 补充插图、不承担检验（其检验在 C_AB 时序）。别让"只是插图"的定位渗到轴定义上。
-
-**下一步（正在做）：** 先在信息量最足的被试上把 D_AB → 三维轴这步搭出来、可视化，目视判定两极到底分不分得开、还是一根杆——这是本 open question 成不成立的命门。
-
+D_AB 梯度可以对所有非退化 accepted A/B pair 计算；共同病理轴的强解释优先限制在 reciprocal pair（\(\rho_{AB}\le-0.5\)），其余 pair 分层报告。原 A/B 各自端点轴及轴余弦降为历史敏感性或补充性反向演示。
 ## P1：不一定推翻结果，但会削弱可复现性
 
 ### 5. Yuquan 伦理表述需原始文件核对
@@ -111,9 +103,8 @@ D_AB 已存在于 V3d：`src/topic5_scaffold_ab_contrast.py::build_D_AB`（`eA=-
 
 ### 9. 空间轴的命名需要统一
 
-- 当前可靠主合同是 rank-displacement swap-\(k\) source–sink 轴。
-- “模板 A/B 占比命名”“共同病理轴”“两独立模板轴”是不同对象，不能互换。
-
+- 新正文目标是 D_AB gradient axis；旧 source–sink 轴和两独立模板轴只作为历史/敏感性定义。
+- 输出必须记录 axis-definition，避免新旧 artifact 被同一字段名混用。
 ### 10. SNN 参数需注明适用 artifact
 
 - 20 mm、40,000 神经元、\(AR=2\)、\(l_{EE}=0.380\) mm、双核心阈值参数对应已锁定工作点，不应被写成所有 runner 的通用默认。
@@ -131,22 +122,18 @@ D_AB 已存在于 V3d：`src/topic5_scaffold_ab_contrast.py::build_D_AB`（`eA=-
 
 ## 建议的最短闭环
 
-1. **补 Table S1 剩余临床源**：向医院补 Y19 介入/结局/随访、Y20 长期结局/随访，以及两例 implantation sheet。
-2. **再锁统计对象**：Kendall \(\tau\) / masked MI 二选一；field plane、频带、onset 和时间窗一次性锁定。
-3. **只重跑受影响链**：field + null + figure；若选择新 MI，再重跑 propagation summary。
+1. **先闭合 cohort crosswalk**：完成 Table S1/S2 与 analysis flow。
+2. **迁移轴 producer**：实现 D_AB gradient axis 的纯函数、质量门和测试；同步锁定 field plane、频带、onset 和时间窗。
+3. **重跑受影响链**：geometry、field、null、held-out、SOZ 和 figure。
 4. **最后补复现表**：患者特异参数、SNN 参数、seed、版本和 artifact manifest。
 5. **终稿清理**：清除全部 TBC，逐图核对 Methods、结果分母和图注。
 
-## 作者需要直接回答的 11 个问题
+## 作者需要直接回答的 7 个问题
 
 1. 能否提供 Y19 的 intervention/outcome/follow-up、Y20 的 long-term outcome/follow-up，以及两例 implantation sheet？
 2. Y19/Y20 的长期 outcome 应按 Engel、ILAE 还是原始自由文本报告？
-3. MI 是否接受改成 shared-participant Kendall \(\tau\) 为主、legacy MI 为敏感性？
-4. 二维场用每模板独立 source–sink plane，还是新建共同 A–B plane？
-5. 发作场主频带是 1–45 Hz 还是 1–150 Hz？
-6. 发作时间零点用 EEG onset 还是 clinical onset？
-7. 慢变量是否同意只放 Supplementary exploratory methods，并明确阴性边界？
-8. 能否提供 Yuquan 伦理批件或原始论文中的伦理原文用于最终核对？
-9. 主文里 source/sink 是否换成中性的 leading/trailing endpoint（把源/汇的因果读法留到 Discussion）？（见 P0-轴 §B）
-10. 【已定向，待命门验证】核心轴口径改用连续 D_AB 场（= V3d `build_D_AB`），退休 swap 集合检验、把"AB 各自建轴 + 余弦"降为补充反向演示。命门 = D_AB 是否空间两极化（vs 一根杆梯度），先在 E1146 上目视验证。（见 P0-轴 §E）
-11. 轴端点大小锁 k=3 还是 decision_k？此决定同时修正母稿 §"三维传播端点与传播轴"的事实错误。（见 P0-轴 §D）
+3. 发作场主频带是 1–45 Hz 还是 1–150 Hz？
+4. 发作时间零点用 EEG onset 还是 clinical onset？
+5. 慢变量是否同意只放 Supplementary exploratory methods，并明确阴性边界？
+6. 能否提供 Yuquan 伦理批件或原始论文中的伦理原文用于最终核对？
+7. D_AB 梯度轴的强主张是否只限 reciprocal pair，其余 accepted pair 作为分层/敏感性？
