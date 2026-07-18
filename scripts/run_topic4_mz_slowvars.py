@@ -506,32 +506,44 @@ def save_readout_bundle(S, cfg, tag, out_dir):
     return dict(tag=tag, seed=S["seed"], runaway_ms=runaway_ms, phenotype=classify_mz_run(rm, _S.get("baseline"), runaway_ms))
 
 
+def _run_cand_ms(cand):
+    """Worker: run one multiseed candidate on _S (COW). Deterministic: run_mz_cell resets net rng to S['seed']."""
+    S, baseline, anchor_ok, T = _S["S"], _S["baseline"], _S["anchor_ok"], _S["T"]
+    cfg = MZSlowVarsConfig(**cand["cfg"])
+    res, mz = run_mz_cell(S, cfg, T, early_stop=True)
+    rm, events, af, bin_w, runaway_ms = extract_run_metrics(res, DT, baseline)
+    ph = "insufficient" if not anchor_ok else classify_mz_run(rm, baseline, runaway_ms)
+    return dict(label=cand["label"], seed=S["seed"], phenotype=ph, runaway_ms=runaway_ms,
+                n_events=rm["n_events"], peak_dur=round(rm["peak_dur"], 1),
+                peak_participation=round(rm["peak_participation"], 4),
+                peak_rate=round(rm["peak_rate"], 1), peak_returned=rm["peak_returned"],
+                baseline_returning=baseline.n_events, cfg=cand["cfg"])
+
+
 def cmd_multiseed(args):
     os.makedirs(os.path.join(OUT_DIR, "per_seed"), exist_ok=True)
     cands = json.load(open(args.candidates))   # [{"label":..., "cfg":{...}, "save_readout":bool}, ...]
     T = float(args.T) if args.T else T_MULTISEED
     seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else ["1", "3", "4"])]
+    workers = int(args.workers) if args.workers else 1
     all_rows = []
     for seed in seeds:
         S = PP.build_substrate(seed)
         res0, _ = run_mz_cell(S, MZSlowVarsConfig(use_z=False, use_m=False), T, early_stop=False)
         baseline = compute_baseline_ref(res0, DT)
-        _S.update(S=S, baseline=baseline)
         anchor_ok = baseline.n_events >= MIN_BASE_EVENTS
-        for cand in cands:
-            cfg = MZSlowVarsConfig(**cand["cfg"])
-            res, mz = run_mz_cell(S, cfg, T, early_stop=True)
-            rm, events, af, bin_w, runaway_ms = extract_run_metrics(res, DT, baseline)
-            ph = "insufficient" if not anchor_ok else classify_mz_run(rm, baseline, runaway_ms)
-            row = dict(label=cand["label"], seed=seed, phenotype=ph, runaway_ms=runaway_ms,
-                       n_events=rm["n_events"], peak_dur=round(rm["peak_dur"], 1),
-                       peak_participation=round(rm["peak_participation"], 4),
-                       peak_rate=round(rm["peak_rate"], 1), peak_returned=rm["peak_returned"],
-                       baseline_returning=baseline.n_events, cfg=cand["cfg"])
-            all_rows.append(row)
-            print(f"[multiseed] {cand['label']} seed={seed} -> {ph} (runaway_ms={runaway_ms})", flush=True)
-            if cand.get("save_readout") and ph in ("expanded_bounded", "expanded_returned"):
-                save_readout_bundle(S, cfg, f"{cand['label']}_seed{seed}",
+        _S.update(S=S, baseline=baseline, anchor_ok=anchor_ok, T=T)
+        if workers > 1 and len(cands) > 1:
+            with mp.Pool(min(workers, len(cands))) as pool:
+                rows = pool.map(_run_cand_ms, cands)
+        else:
+            rows = [_run_cand_ms(c) for c in cands]
+        for r in rows:
+            print(f"[multiseed] {r['label']} seed={seed} -> {r['phenotype']} (runaway_ms={r['runaway_ms']})", flush=True)
+        all_rows.extend(rows)
+        for cand, r in zip(cands, rows):
+            if cand.get("save_readout") and r["phenotype"] in ("expanded_bounded", "expanded_returned"):
+                save_readout_bundle(S, MZSlowVarsConfig(**cand["cfg"]), f"{cand['label']}_seed{seed}",
                                     os.path.join(OUT_DIR, "readout_ready"))
     json.dump(dict(experiment="M4-MZ multiseed (seeds 1/3/4, T=15s; design §10)", T=T, seeds=seeds,
                    phenotype_counts=_counts([r["phenotype"] for r in all_rows]), rows=all_rows,

@@ -1,0 +1,50 @@
+[
+  {
+    "label": "zA_q75_tz10000",
+    "cfg": {
+      "use_z": true,
+      "use_m": false,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 10000.0
+    },
+    "save_readout": true,
+    "note": "expanded_bounded (target)",
+    "seed1_phenotype": "expanded_bounded"
+  },
+  {
+    "label": "zA_q75_tz5000",
+    "cfg": {
+      "use_z": true,
+      "use_m": false,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 5000.0
+    },
+    "save_readout": true,
+    "note": "runaway boundary (adjacent tau_z)",
+    "seed1_phenotype": "runaway"
+  },
+  {
+    "label": "zA_q50_tz10000",
+    "cfg": {
+      "use_z": true,
+      "use_m": false,
+      "I_th_EI": 1.6652801609959704,
+      "tau_z": 10000.0
+    },
+    "save_readout": true,
+    "note": "runaway boundary (adjacent I_th)",
+    "seed1_phenotype": "runaway"
+  },
+  {
+    "label": "zA_q90_tz10000",
+    "cfg": {
+      "use_z": true,
+      "use_m": false,
+      "I_th_EI": 391.66600627858674,
+      "tau_z": 10000.0
+    },
+    "save_readout": true,
+    "note": "interictal lower boundary (adjacent I_th)",
+    "seed1_phenotype": "interictal_like"
+  }
+]
