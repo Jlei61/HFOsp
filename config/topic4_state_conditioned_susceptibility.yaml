@@ -1,0 +1,53 @@
+# Topic 4 state-conditioned spatial susceptibility — config of record (design 2026-07-19).
+# The fixed scaffold backdrop is ANCHORED to the M3B interictal reference point
+# (scripts/build_m3b_spectral_outputs.py: mu_core=0.8, w_ee_mult=1.3, ratio=1.0, Grid L=5.0) and is
+# FROZEN across every state and control. The MZ z-depletion enters ONLY through the spatially
+# resolved q = clip(z_bar, q_floor, 1) field, i.e. the trajectory traverses M3B's disinhibition axis.
+# These are validity/representation choices, NOT knobs tuned against a susceptibility score (design §2).
+
+# --- coarse rate-field grid (normalized M3B units, NOT physical SNN mm) ---
+grid_n: 12                 # primary diagnostic grid (design §5)
+grid_n_sensitivity: 8      # resolution sensitivity (selected states only)
+L_norm: 5.0                # normalized square extent (matches the M3B builder's Grid(L=5.0))
+
+# --- fixed anisotropic scaffold (state-independent) ---
+ell_perp: 0.6              # M3B Gaussian kernel perp scale, coarse surrogate (design §5); ar*ell_perp = ell_par
+ar: 2.0                    # kernel aspect ratio (AR=2 anisotropy); ar=1.0 is the AR1 isotropic control
+# --- fixed-backdrop MARGIN calibration (op-status only, frozen BEFORE any susceptibility is read) ---
+# The M3B single-core phase-map anchor (mu_core=0.8, w_ee_mult=1.3, q_global sweep 1.0..0.9) puts the
+# TWO-core surrogate deep in the runaway corner once the z_bar-derived q reaches ~0.9, so it saturates
+# at `mid` (~2468 ms) -- INCONSISTENT with the SNN, which is interictal until onset (~4937 ms).
+# A resolved-fraction sweep (results/.../numerical_audit backdrop_sweep) shows w_ee_mult is the margin
+# knob (mu_core barely matters): w_ee_mult=1.05 keeps the surrogate resolved across the whole pre-onset
+# trajectory (baseline -> pre_onset_100ms) and reaches the boundary right AT onset -- matching the SNN's
+# interictal-until-onset margin. This is a numerical-margin calibration on op STATUS only, NOT tuning
+# against a susceptibility score (design §2). Anchor values retained in comments for provenance.
+mu_core: 0.6               # fixed core excitability drive (mV); M3B anchor 0.8 -> 0.6 (consistent 4/5 both seeds)
+w_ee_mult: 1.05            # recurrent E->E multiplier; M3B anchor 1.3 -> 1.05 (SNN interictal-margin match)
+ratio: 1.0                 # external-drive ratio (balanced reference)
+core_radius_norm: 0.375    # CORE_R(1.5 mm) * L_norm/L_phys(=0.25); two disks at transformed src/snk
+
+# --- E1146 sheet -> normalized affine transform (fixed for every seed and state) ---
+L_phys: 20.0               # physical sheet extent (mm)
+center_phys: [10.0, 10.0]  # physical sheet center
+
+# --- z_bar -> q inhibition-efficacy mapping ---
+q_floor: 0.05              # numerical clamp; z_min_realized~0.76 => never binds (design §3.2)
+
+# --- probe dictionary (design §6.1) ---
+p_max: 4                   # integer wave indices p,q in [-4, 4]
+gabor_sigma: 1.0           # source-centered Gabor window sigma (normalized M3B unit)
+gabor: true                # source-centered Gabor is primary; global Fourier (gabor=false) is background
+probe_center: source       # source | sink (sink is a registered sensitivity)
+
+# --- finite-time windows (ms) ---
+T_windows: [10.0, 30.0, 50.0, 75.0]   # 75 is a sensitivity
+T_primary: 30.0            # primary visual/diagnostic window (non-normal axial peak scale)
+
+# --- controls (design §7) ---
+shuffle_seed: 20260719     # fixed spatial-shuffle seed (preserves the z histogram)
+
+# --- operating-point solver ---
+op_dt: 0.5
+op_t_max: 2500.0
+op_tol: 1.0e-9
