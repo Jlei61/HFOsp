@@ -1,0 +1,294 @@
+{
+  "contract": "topic5_gradient_shared_else_own_original_f2_statistics_v1",
+  "analysis_role": "controlled replacement of endpoint field by gradient field in original narrow F2",
+  "intended_changed_input_only": "frozen gradient shared-else-own axis and field scorer",
+  "unavoidable_denominator_change": "E916 gradient axis_not_available; n=20 to n=19",
+  "retained_original_f2_contract": {
+    "source_rows": "results/topic5_ictal_recruitment/v2_band_scan/narrow/phase1_alignment_raw_window_long.csv",
+    "windows_sec": [
+      [
+        -5.0,
+        5.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        5.0,
+        15.0
+      ],
+      [
+        10.0,
+        20.0
+      ],
+      [
+        15.0,
+        25.0
+      ]
+    ],
+    "ictal_fraction_min": 0.5,
+    "folding": "window median within seizure; seizure median within subject; cohort median over subjects",
+    "fixed_mask": "primary_bands_validity intersect old endpoint mapped contacts and frozen field contacts",
+    "minimum_finite_contacts": 4,
+    "spatial_null": "within shaft then endpoint-plane distance-bin then subject-wide fallback",
+    "spatial_null_distance_coordinates": "original endpoint plane 2D",
+    "n_permutations": 1000,
+    "seed": 20260701,
+    "fwer": "null-centered Westfall-Young max-T across seven primary bands"
+  },
+  "gradient_field_contract": {
+    "axis_definition": "template_propagation_axis_v2",
+    "axis_direction_convention": "positive_early_to_late",
+    "routing": "shared_a/shared_b if complete else own_a/own_b",
+    "routing_is_outcome_independent": true
+  },
+  "bands": [
+    {
+      "band": "delta_HYP_slow",
+      "low_hz": 1.0,
+      "high_hz": 4.0,
+      "interval": "half_open",
+      "label": "δ\n1–4"
+    },
+    {
+      "band": "theta_preictal_PAC",
+      "low_hz": 4.0,
+      "high_hz": 8.0,
+      "interval": "half_open",
+      "label": "θ\n4–8"
+    },
+    {
+      "band": "alpha_sharp_leq13",
+      "low_hz": 8.0,
+      "high_hz": 13.0,
+      "interval": "half_open",
+      "label": "α\n8–13"
+    },
+    {
+      "band": "beta_LVFA_low",
+      "low_hz": 13.0,
+      "high_hz": 30.0,
+      "interval": "half_open",
+      "label": "β\n13–30"
+    },
+    {
+      "band": "gamma_LVFA",
+      "low_hz": 30.0,
+      "high_hz": 80.0,
+      "interval": "half_open",
+      "label": "γ\n30–80"
+    },
+    {
+      "band": "hg_low_ripple",
+      "low_hz": 80.0,
+      "high_hz": 150.0,
+      "interval": "half_open",
+      "label": "R\n80–150"
+    },
+    {
+      "band": "ripple_high",
+      "low_hz": 150.0,
+      "high_hz": 250.0,
+      "interval": "half_open",
+      "label": "FR\n150–250"
+    }
+  ],
+  "counts": {
+    "reference_subjects": 20,
+    "analysis_subjects": 19,
+    "epilepsiae_subjects": 17,
+    "yuquan_subjects": 2,
+    "shared_subjects": 8,
+    "own_fallback_subjects": 11,
+    "bands_passing_fwer": 3,
+    "window_rows": 5497
+  },
+  "cohort_statistics": [
+    {
+      "band": "delta_HYP_slow",
+      "low_hz": 1.0,
+      "high_hz": 4.0,
+      "interval": "half_open",
+      "label": "δ\n1–4",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.000999000999000999,
+      "cohort_perm_delta_spatial": 0.057968575561525015,
+      "max_over_bands_p": 0.000999000999000999,
+      "passes_fwer_0p05": true,
+      "median_subject_delta": 0.01783909252634419,
+      "iqr_subject_delta_low": -0.0017596112452482049,
+      "iqr_subject_delta_high": 0.060190212796455866,
+      "n_subject_delta_positive": 13
+    },
+    {
+      "band": "theta_preictal_PAC",
+      "low_hz": 4.0,
+      "high_hz": 8.0,
+      "interval": "half_open",
+      "label": "θ\n4–8",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.000999000999000999,
+      "cohort_perm_delta_spatial": 0.04781637249157855,
+      "max_over_bands_p": 0.003996003996003996,
+      "passes_fwer_0p05": true,
+      "median_subject_delta": -0.00048648804456230543,
+      "iqr_subject_delta_low": -0.018783998254076673,
+      "iqr_subject_delta_high": 0.035461052327206755,
+      "n_subject_delta_positive": 9
+    },
+    {
+      "band": "alpha_sharp_leq13",
+      "low_hz": 8.0,
+      "high_hz": 13.0,
+      "interval": "half_open",
+      "label": "α\n8–13",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.017982017982017984,
+      "cohort_perm_delta_spatial": 0.030905500885437864,
+      "max_over_bands_p": 0.12087912087912088,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": -0.003017315586642977,
+      "iqr_subject_delta_low": -0.027306085148130377,
+      "iqr_subject_delta_high": 0.029958874947413727,
+      "n_subject_delta_positive": 9
+    },
+    {
+      "band": "beta_LVFA_low",
+      "low_hz": 13.0,
+      "high_hz": 30.0,
+      "interval": "half_open",
+      "label": "β\n13–30",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.08891108891108891,
+      "cohort_perm_delta_spatial": 0.018435932834423796,
+      "max_over_bands_p": 0.4935064935064935,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": 0.005411844383943154,
+      "iqr_subject_delta_low": -0.020467913066091414,
+      "iqr_subject_delta_high": 0.048181956464885656,
+      "n_subject_delta_positive": 11
+    },
+    {
+      "band": "gamma_LVFA",
+      "low_hz": 30.0,
+      "high_hz": 80.0,
+      "interval": "half_open",
+      "label": "γ\n30–80",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.000999000999000999,
+      "cohort_perm_delta_spatial": 0.039800982207257696,
+      "max_over_bands_p": 0.02097902097902098,
+      "passes_fwer_0p05": true,
+      "median_subject_delta": 0.027992572961842654,
+      "iqr_subject_delta_low": -0.00292703484455048,
+      "iqr_subject_delta_high": 0.050920901782642636,
+      "n_subject_delta_positive": 14
+    },
+    {
+      "band": "hg_low_ripple",
+      "low_hz": 80.0,
+      "high_hz": 150.0,
+      "interval": "half_open",
+      "label": "R\n80–150",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 184,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.45454545454545453,
+      "cohort_perm_delta_spatial": 0.0015558228956353837,
+      "max_over_bands_p": 0.985014985014985,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": -0.0015064885166251596,
+      "iqr_subject_delta_low": -0.04299625841714649,
+      "iqr_subject_delta_high": 0.028184455447344603,
+      "n_subject_delta_positive": 8
+    },
+    {
+      "band": "ripple_high",
+      "low_hz": 150.0,
+      "high_hz": 250.0,
+      "interval": "half_open",
+      "label": "FR\n150–250",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 184,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.8431568431568431,
+      "cohort_perm_delta_spatial": -0.018197205650165804,
+      "max_over_bands_p": 1.0,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": -0.0058559177894664804,
+      "iqr_subject_delta_low": -0.07329182560272768,
+      "iqr_subject_delta_high": 0.029058914901258448,
+      "n_subject_delta_positive": 8
+    }
+  ],
+  "drops": [
+    {
+      "subject": "epilepsiae_916",
+      "drop_reason": "subject_failed:ValueError:epilepsiae_916:interictal_field_axis_not_available"
+    }
+  ],
+  "outputs": {
+    "event": "results/topic5_ictal_recruitment/gradient_multiband_original_f2/gradient_multiband_significance_original_f2_windows_event.csv",
+    "subject": "results/topic5_ictal_recruitment/gradient_multiband_original_f2/gradient_multiband_significance_original_f2_windows_subject.csv",
+    "cohort": "results/topic5_ictal_recruitment/gradient_multiband_original_f2/gradient_multiband_significance_original_f2_windows_cohort.csv",
+    "drops": "results/topic5_ictal_recruitment/gradient_multiband_original_f2/gradient_multiband_significance_original_f2_windows_drop_inventory.csv",
+    "routing": "results/topic5_ictal_recruitment/gradient_multiband_original_f2/gradient_multiband_significance_original_f2_windows_field_routing.csv",
+    "null_draws": "results/topic5_ictal_recruitment/gradient_multiband_original_f2/gradient_multiband_significance_original_f2_windows_subject_spatial_null_draws.parquet",
+    "figure_png": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/gradient_multiband_significance_original_f2_windows.png",
+    "figure_pdf": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/gradient_multiband_significance_original_f2_windows.pdf",
+    "figure_readme": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/README.md"
+  }
+}

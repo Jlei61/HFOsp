@@ -1,0 +1,115 @@
+{
+  "contract": {
+    "statistical_unit": "subject",
+    "within_subject_fold": "equal mean of TA and TB",
+    "primary_metric": "mean signed cosine observed minus template-rank-shuffle null median",
+    "primary_effect_interpretation": "how much better the fitted template-gradient axis represents single-event interictal propagation directions than montage-matched rank-shuffled axes",
+    "null": "shuffle template ranks over the same mapped contacts and rebuild the same axis estimator",
+    "gradient_event_gate": "mapped contacts>=6; shafts>=2; effective rank>=2; LOCO valid>=0.8; median signed cosine>=0.8",
+    "gradient_template_gate": "axis estimable; strict frozen-axis stability is sensitivity only, not an admission gate",
+    "minimum_events_per_template": 20,
+    "n_rank_shuffles": 1000,
+    "max_events_per_subject": 6000,
+    "seed": 20260717,
+    "claim_boundary": "in-sample descriptive representativeness; not held-out generalization",
+    "ictal_input": "none",
+    "paper_ready_producer": "scripts/paper_figures/plot_axis_representativeness.py"
+  },
+  "cohort": {
+    "observed_vs_rank_shuffle_null": {
+      "n": 26,
+      "observed_median": 0.4475130945158848,
+      "observed_iqr": [
+        0.33652761094530004,
+        0.5279937181586583
+      ],
+      "null_median": 0.0015331010355701166,
+      "null_iqr": [
+        -0.006473668385253678,
+        0.007089301972409539
+      ],
+      "n_observed_gt_null": 26,
+      "wilcoxon_greater_p": 1.4901161193847656e-08
+    },
+    "alignment_margin": {
+      "gradient": {
+        "n": 26,
+        "median": 0.4464269247874066,
+        "bootstrap_median_ci95": [
+          0.3634694432072397,
+          0.5091345131465215
+        ],
+        "wilcoxon_greater_than_zero_p": 1.4901161193847656e-08,
+        "n_positive": 26
+      }
+    },
+    "main_gap_improvement_deg": {
+      "gradient": {
+        "n": 26,
+        "median": 62.2744845298097,
+        "bootstrap_median_ci95": [
+          54.837694897406536,
+          71.67578063218771
+        ],
+        "wilcoxon_greater_than_zero_p": 1.4901161193847656e-08,
+        "n_positive": 26
+      }
+    },
+    "strict_stability_sensitivity": {
+      "observed_vs_rank_shuffle_null": {
+        "n": 13,
+        "observed_median": 0.5119854717276147,
+        "observed_iqr": [
+          0.4151897566416799,
+          0.5604948502503062
+        ],
+        "null_median": 0.0009484408215715938,
+        "null_iqr": [
+          -0.0012696751846130606,
+          0.005927450447324981
+        ],
+        "n_observed_gt_null": 13,
+        "wilcoxon_greater_p": 0.0001220703125
+      },
+      "alignment_margin": {
+        "n": 13,
+        "median": 0.5091345131465215,
+        "bootstrap_median_ci95": [
+          0.41645943182629297,
+          0.5716978251718217
+        ],
+        "wilcoxon_greater_than_zero_p": 0.0001220703125,
+        "n_positive": 13
+      },
+      "main_gap_improvement_deg": {
+        "n": 13,
+        "median": 71.67578063218771,
+        "bootstrap_median_ci95": [
+          59.17769135896818,
+          77.41822769031123
+        ],
+        "wilcoxon_greater_than_zero_p": 0.0001220703125,
+        "n_positive": 13
+      }
+    }
+  },
+  "cohort_flow": {
+    "n_subjects_requested": 40,
+    "n_subjects_with_traceable_inputs": 28,
+    "n_subjects_skipped": 12,
+    "n_gradient_template_rows": 56,
+    "n_eligible_gradient_template_rows": 52,
+    "n_subjects_with_both_templates_by_method": {
+      "gradient": 26
+    },
+    "n_subjects_strict_stability_sensitivity": 13
+  },
+  "n_template_rows": 56,
+  "n_subject_rows": 26,
+  "outputs": {
+    "png": "results/interictal_propagation_masked/axis_representativeness/figures/axis_representativeness_cohort.png",
+    "pdf": "results/interictal_propagation_masked/axis_representativeness/figures/axis_representativeness_cohort.pdf",
+    "paper_png": "results/paper-ready-figure/fig_axis_representativeness/figures/axis_representativeness_cohort.png",
+    "paper_pdf": "results/paper-ready-figure/fig_axis_representativeness/figures/axis_representativeness_cohort.pdf"
+  }
+}

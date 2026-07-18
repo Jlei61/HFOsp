@@ -141,15 +141,26 @@ def paint_null_per_band_axis(ax, bands, labels, subject_deltas, cohort_medians,
 def plot_null_per_band_figure(bands, labels, subject_deltas, cohort_medians,
                               pvalues, sample_sizes, title, output_path, *,
                               ylabel="cohort alignment − spatial-null median   (Δ per subject)",
-                              save_pdf=False, seed=0):
+                              save_pdf=False, seed=0, figsize=(9.5, 6.8),
+                              show_exact_annotations=True,
+                              significance_legend="p<0.05 annotation",
+                              nonsignificance_legend="n.s.",
+                              cohort_legend="cohort statistic (tested)",
+                              subject_legend="per-subject Δ",
+                              title_mode="axis", layout_rect=None,
+                              xtick_fontsize=15, ytick_fontsize=14,
+                              ylabel_fontsize=15, title_fontsize=15,
+                              legend_fontsize=11):
     """Accepted Fig3-Sup1B single-axis painter with caller-supplied closed data.
 
     This is the original F2 visual block: one violin per band, per-subject dots,
     the tested cohort statistic as a thick black horizontal bar, and a top-row
-    ``*``/``n.s.`` annotation.  Exact p and n are added below that annotation.
+    ``*``/``n.s.`` annotation.  Exact p and n are added below that annotation
+    unless ``show_exact_annotations=False``; callers then retain exact values
+    in their caption/sidecar to avoid crowding a seven-band paper panel.
     """
     SIG_C, NS_C = "#c44e52", "#cfcfcf"
-    fig, ax = plt.subplots(figsize=(9.5, 6.8))
+    fig, ax = plt.subplots(figsize=figsize)
     annotations = []
     for xi, band in enumerate(bands):
         values = np.asarray(subject_deltas.get(band, []), float)
@@ -178,25 +189,31 @@ def plot_null_per_band_figure(bands, labels, subject_deltas, cohort_medians,
                     ha="center", va="bottom", fontsize=21 if marked else 12,
                     color=SIG_C if marked else "gray",
                     weight="bold" if marked else "normal", annotation_clip=True)
-        ptext = f"p={p:.3g}" if np.isfinite(p) else "p=NA"
-        ax.annotate(f"{ptext}, n={n}", (xi, y1 + 0.025 * span),
-                    ha="center", va="bottom", fontsize=9.5, color="0.35",
-                    annotation_clip=True)
+        if show_exact_annotations:
+            ptext = f"p={p:.3g}" if np.isfinite(p) else "p=NA"
+            ax.annotate(f"{ptext}, n={n}", (xi, y1 + 0.025 * span),
+                        ha="center", va="bottom", fontsize=9.5, color="0.35",
+                        annotation_clip=True)
     ax.set_xticks(range(len(bands)))
-    ax.set_xticklabels([labels[band] for band in bands], fontsize=15)
-    ax.tick_params(axis="y", labelsize=14)
-    ax.set_title(title, fontsize=15)
+    ax.set_xticklabels([labels[band] for band in bands], fontsize=xtick_fontsize)
+    ax.tick_params(axis="y", labelsize=ytick_fontsize)
+    if title_mode == "figure":
+        fig.suptitle(title, fontsize=title_fontsize, y=0.98)
+    elif title_mode == "axis":
+        ax.set_title(title, fontsize=title_fontsize)
+    else:
+        raise ValueError(f"unknown title_mode: {title_mode}")
     ax.grid(alpha=0.25, axis="y")
     ax.spines[["top", "right"]].set_visible(False)
-    ax.set_ylabel(ylabel, fontsize=15)
-    handles = [Patch(facecolor=SIG_C, alpha=0.4, edgecolor="gray", label="p<0.05 annotation"),
-               Patch(facecolor=NS_C, alpha=0.4, edgecolor="gray", label="n.s."),
-               Line2D([0], [0], color="k", lw=2.8, label="cohort statistic (tested)"),
+    ax.set_ylabel(ylabel, fontsize=ylabel_fontsize)
+    handles = [Patch(facecolor=SIG_C, alpha=0.4, edgecolor="gray", label=significance_legend),
+               Patch(facecolor=NS_C, alpha=0.4, edgecolor="gray", label=nonsignificance_legend),
+               Line2D([0], [0], color="k", lw=2.8, label=cohort_legend),
                Line2D([0], [0], marker="o", ls="none", color="#333333", ms=7,
-                      label="per-subject Δ")]
+                      label=subject_legend)]
     ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(1.005, 1.0),
-              fontsize=11, framealpha=0.92)
-    fig.tight_layout()
+              fontsize=legend_fontsize, framealpha=0.92)
+    fig.tight_layout(rect=layout_rect)
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=200, bbox_inches="tight")

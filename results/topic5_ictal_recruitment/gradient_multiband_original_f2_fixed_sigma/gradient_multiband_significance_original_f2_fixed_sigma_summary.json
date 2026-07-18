@@ -1,0 +1,574 @@
+{
+  "contract": "topic5_gradient_shared_else_own_original_f2_subject_fixed_sigma_v1",
+  "analysis_role": "controlled gradient replacement with original F2 subject-fixed smoothing",
+  "intended_changed_input_only": "gradient shared-else-own axis and field coordinates",
+  "unavoidable_denominator_change": "E916 gradient axis_not_available; n=20 to n=19",
+  "smoothing": {
+    "policy": "subject_fixed",
+    "rule": "one selected-A-plane median-nearest-neighbor sigma per subject",
+    "shared": "shared sigma reused for shared A and B",
+    "own_fallback": "own-A sigma reused for own A and B",
+    "reused_for": [
+      "TA",
+      "TB",
+      "all bands",
+      "all windows",
+      "all seizures",
+      "all null draws"
+    ]
+  },
+  "retained_original_f2_contract": {
+    "source_rows": "results/topic5_ictal_recruitment/v2_band_scan/narrow/phase1_alignment_raw_window_long.csv",
+    "windows_sec": [
+      [
+        -5.0,
+        5.0
+      ],
+      [
+        0.0,
+        10.0
+      ],
+      [
+        5.0,
+        15.0
+      ],
+      [
+        10.0,
+        20.0
+      ],
+      [
+        15.0,
+        25.0
+      ]
+    ],
+    "ictal_fraction_min": 0.5,
+    "folding": "window median within seizure; seizure median within subject; cohort median over subjects",
+    "minimum_finite_contacts": 4,
+    "spatial_null": "within shaft then endpoint-plane distance-bin then subject-wide fallback",
+    "n_permutations": 1000,
+    "seed": 20260701,
+    "fwer": "null-centered Westfall-Young max-T across seven primary bands"
+  },
+  "counts": {
+    "reference_subjects": 20,
+    "analysis_subjects": 19,
+    "epilepsiae_subjects": 17,
+    "yuquan_subjects": 2,
+    "shared_subjects": 8,
+    "own_fallback_subjects": 11,
+    "bands_passing_fwer": 3,
+    "window_rows": 5497
+  },
+  "cohort_statistics": [
+    {
+      "band": "delta_HYP_slow",
+      "low_hz": 1.0,
+      "high_hz": 4.0,
+      "interval": "half_open",
+      "label": "δ\n1–4",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.000999000999000999,
+      "cohort_perm_delta_spatial": 0.06415246692605336,
+      "max_over_bands_p": 0.000999000999000999,
+      "passes_fwer_0p05": true,
+      "median_subject_delta": 0.016633873582200587,
+      "iqr_subject_delta_low": -0.00641052906738887,
+      "iqr_subject_delta_high": 0.060190212796455866,
+      "n_subject_delta_positive": 12
+    },
+    {
+      "band": "theta_preictal_PAC",
+      "low_hz": 4.0,
+      "high_hz": 8.0,
+      "interval": "half_open",
+      "label": "θ\n4–8",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.000999000999000999,
+      "cohort_perm_delta_spatial": 0.05744936938870082,
+      "max_over_bands_p": 0.002997002997002997,
+      "passes_fwer_0p05": true,
+      "median_subject_delta": 0.0011270211379361683,
+      "iqr_subject_delta_low": -0.01921654271440809,
+      "iqr_subject_delta_high": 0.038618637913875487,
+      "n_subject_delta_positive": 10
+    },
+    {
+      "band": "alpha_sharp_leq13",
+      "low_hz": 8.0,
+      "high_hz": 13.0,
+      "interval": "half_open",
+      "label": "α\n8–13",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.012987012987012988,
+      "cohort_perm_delta_spatial": 0.03132762116660737,
+      "max_over_bands_p": 0.12787212787212787,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": -0.003806193501981192,
+      "iqr_subject_delta_low": -0.028163125059596728,
+      "iqr_subject_delta_high": 0.022021141599461502,
+      "n_subject_delta_positive": 8
+    },
+    {
+      "band": "beta_LVFA_low",
+      "low_hz": 13.0,
+      "high_hz": 30.0,
+      "interval": "half_open",
+      "label": "β\n13–30",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.001998001998001998,
+      "cohort_perm_delta_spatial": 0.05539497541784144,
+      "max_over_bands_p": 0.003996003996003996,
+      "passes_fwer_0p05": true,
+      "median_subject_delta": 0.004096351046920854,
+      "iqr_subject_delta_low": -0.010240252326776667,
+      "iqr_subject_delta_high": 0.04705677384028423,
+      "n_subject_delta_positive": 12
+    },
+    {
+      "band": "gamma_LVFA",
+      "low_hz": 30.0,
+      "high_hz": 80.0,
+      "interval": "half_open",
+      "label": "γ\n30–80",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 207,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.002997002997002997,
+      "cohort_perm_delta_spatial": 0.034771396128192356,
+      "max_over_bands_p": 0.08291708291708291,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": 0.02175116743032901,
+      "iqr_subject_delta_low": 0.0008242912948131509,
+      "iqr_subject_delta_high": 0.04846628071207204,
+      "n_subject_delta_positive": 15
+    },
+    {
+      "band": "hg_low_ripple",
+      "low_hz": 80.0,
+      "high_hz": 150.0,
+      "interval": "half_open",
+      "label": "R\n80–150",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 184,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.4515484515484515,
+      "cohort_perm_delta_spatial": 0.0020104015106050532,
+      "max_over_bands_p": 0.9820179820179821,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": 0.00025442858625401854,
+      "iqr_subject_delta_low": -0.03335976224596879,
+      "iqr_subject_delta_high": 0.03634158992826825,
+      "n_subject_delta_positive": 10
+    },
+    {
+      "band": "ripple_high",
+      "low_hz": 150.0,
+      "high_hz": 250.0,
+      "interval": "half_open",
+      "label": "FR\n150–250",
+      "n_subjects": 19,
+      "n_epilepsiae_subjects": 17,
+      "n_yuquan_subjects": 2,
+      "n_shared_subjects": 8,
+      "n_own_fallback_subjects": 11,
+      "n_seizures": 184,
+      "n_within_shaft_strong_subjects": 2,
+      "n_distance_bin_fallback_subjects": 4,
+      "n_subject_wide_weak_subjects": 13,
+      "cohort_perm_p_spatial": 0.8511488511488512,
+      "cohort_perm_delta_spatial": -0.020158992088719407,
+      "max_over_bands_p": 1.0,
+      "passes_fwer_0p05": false,
+      "median_subject_delta": -0.014784950025764965,
+      "iqr_subject_delta_low": -0.05514079755660195,
+      "iqr_subject_delta_high": 0.01887079708424283,
+      "n_subject_delta_positive": 8
+    }
+  ],
+  "routing": [
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_1077",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 6,
+      "n_original_fixed_frozen_contacts": 6,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "76a8e2174d72c67b3342823f3835f5c0c149403ac9e1956ca6b61c6d381a41a2",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.5612536449463136,
+      "sigma_original": {
+        "own_a": 0.5612536449463136,
+        "own_b": 0.09761183772722551
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_1084",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 11,
+      "n_original_fixed_frozen_contacts": 11,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "2159bb4c6874f43df4f69f0c7b03ae70d24a9782d293df5f0204fe7096a9b4d9",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.46574089423401854,
+      "sigma_original": {
+        "shared_a": 0.46574089423401854,
+        "shared_b": 0.46574089423401854
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_1096",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 7,
+      "n_original_fixed_frozen_contacts": 7,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "4b6cdde6cc7d9e5b065356e036273263853dbc040015c2c12bcc455174fdd768",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.27404110492095346,
+      "sigma_original": {
+        "own_a": 0.27404110492095346,
+        "own_b": 0.2582866103966213
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_1125",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 7,
+      "n_original_fixed_frozen_contacts": 7,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "e6261ed71db036a4725d01e33c7b57fae9939844eb685093a60e8acf961bf079",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.46162417382412424,
+      "sigma_original": {
+        "own_a": 0.46162417382412424,
+        "own_b": 0.27919765110946615
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_1146",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 15,
+      "n_original_fixed_frozen_contacts": 15,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "18bf1de782f41878a97b940f85ff1ceedbd9dfcacb9fe79779772b44f9aae056",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.09767065932380103,
+      "sigma_original": {
+        "shared_a": 0.09767065932380103,
+        "shared_b": 0.09767065932380103
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_1150",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 9,
+      "n_original_fixed_frozen_contacts": 9,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "2b887d24828c857ba8e29916acf6ab15425befb10e98d209767e229b258a9538",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.1930518402900672,
+      "sigma_original": {
+        "own_a": 0.1930518402900672,
+        "own_b": 0.26532455547354966
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_139",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 7,
+      "n_original_fixed_frozen_contacts": 7,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "2e92e1b2a3a6e45bcee0516a8d9437abf3a15c64351c499d33d86120391178db",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.16995370336562488,
+      "sigma_original": {
+        "shared_a": 0.16995370336562488,
+        "shared_b": 0.16995370336562488
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_253",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 8,
+      "n_original_fixed_frozen_contacts": 8,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "047956c8c7495396d009077992c5710e9311eb56c1c3ca8ad7730fb59b7a970a",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.28476139872736406,
+      "sigma_original": {
+        "own_a": 0.28476139872736406,
+        "own_b": 0.2723779395189293
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_384",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 9,
+      "n_original_fixed_frozen_contacts": 9,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "1635b2e5d288426a30d03073ff69856e4e45dcc63167d53253edff793fab1fc5",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.2785453238402071,
+      "sigma_original": {
+        "shared_a": 0.2785453238402071,
+        "shared_b": 0.2785453238402071
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_442",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 15,
+      "n_original_fixed_frozen_contacts": 15,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "0baa5f7249aeba370fdbd49013fe26949657650c35cf18a0d5b45cf72fa75c41",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.14805096819927172,
+      "sigma_original": {
+        "own_a": 0.14805096819927172,
+        "own_b": 0.16141722358151153
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_548",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 11,
+      "n_original_fixed_frozen_contacts": 11,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "e85667c46008d8ac9e1a04d724a68e1b7ca9e0109ccb029a66a67143e317c36c",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.2011315345599307,
+      "sigma_original": {
+        "shared_a": 0.2011315345599307,
+        "shared_b": 0.2011315345599307
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_583",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 7,
+      "n_original_fixed_frozen_contacts": 7,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "5ddfbcd1da4ca266c4786e083d72d7cd05e51e43579aaadd4fa2902ed2296c3e",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.3867073182393461,
+      "sigma_original": {
+        "shared_a": 0.3867073182393461,
+        "shared_b": 0.3867073182393461
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_590",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 16,
+      "n_original_fixed_frozen_contacts": 16,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "4a287e1f24afb511119ddef4700a0175ebf17dbe6a97a6e0dbc17424f951e2a6",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.076695114517071,
+      "sigma_original": {
+        "shared_a": 0.076695114517071,
+        "shared_b": 0.076695114517071
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_620",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 9,
+      "n_original_fixed_frozen_contacts": 9,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "05e3c05d09cbfad5e6de8fba3c6506c07096f475cda5bd302f502c78b8ab3fd4",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.1577242953733151,
+      "sigma_original": {
+        "own_a": 0.1577242953733151,
+        "own_b": 0.4563340210166983
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_635",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 7,
+      "n_original_fixed_frozen_contacts": 7,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "fbcca1022d5ec56c997134893b8508170c8732bb259a008fb8dbded767b7d462",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.1324387744390278,
+      "sigma_original": {
+        "own_a": 0.1324387744390278,
+        "own_b": 0.12324101759728873
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_922",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 8,
+      "n_original_fixed_frozen_contacts": 8,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "58c178f824b39573540be65e52def3c3fc45a09be44c377f1ecacd6525079bfd",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.45326006137052777,
+      "sigma_original": {
+        "own_a": 0.45326006137052777,
+        "own_b": 0.6301690585963765
+      }
+    },
+    {
+      "dataset": "epilepsiae",
+      "subject": "epilepsiae_958",
+      "field_plane": "shared",
+      "score_key": "shared_maxab",
+      "n_frozen_contacts": 16,
+      "n_original_fixed_frozen_contacts": 16,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "eb52ad5be63a391a74e4936a9ab6b9179e020355cf36e8f7282be0bcd9904590",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "shared_median_nearest_neighbor_spacing",
+      "sigma_common": 0.36775393480734997,
+      "sigma_original": {
+        "shared_a": 0.36775393480734997,
+        "shared_b": 0.36775393480734997
+      }
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "yuquan_xuxinyi",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 15,
+      "n_original_fixed_frozen_contacts": 15,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "84e90c62336ffe40de6947031204f215985a5534a5cd13ad6e3d5c32bec0e268",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.13347061141406444,
+      "sigma_original": {
+        "own_a": 0.13347061141406444,
+        "own_b": 0.03476771822524633
+      }
+    },
+    {
+      "dataset": "yuquan",
+      "subject": "yuquan_zhangkexuan",
+      "field_plane": "own_fallback",
+      "score_key": "own_maxab",
+      "n_frozen_contacts": 26,
+      "n_original_fixed_frozen_contacts": 21,
+      "distance_null_coordinates": "original_endpoint_plane_2d",
+      "fingerprint_sha256": "cb675e8422e2b146106d811747e2bf2b390113dd95a58beb4e47b6f68ecbacb2",
+      "smoothing_policy": "subject_fixed",
+      "sigma_reference": "own_a_median_nearest_neighbor_spacing",
+      "sigma_common": 0.06084632024266421,
+      "sigma_original": {
+        "own_a": 0.06084632024266421,
+        "own_b": 0.0799957798586858
+      }
+    }
+  ],
+  "drops": [
+    {
+      "subject": "epilepsiae_916",
+      "drop_reason": "subject_failed:ValueError:epilepsiae_916:interictal_field_axis_not_available"
+    }
+  ],
+  "outputs": {
+    "event": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_event.csv",
+    "subject": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_subject.csv",
+    "cohort": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_cohort.csv",
+    "drops": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_drop_inventory.csv",
+    "routing": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_field_routing.csv",
+    "null_draws": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_subject_spatial_null_draws.parquet",
+    "figure_png": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/gradient_multiband_significance_original_f2_fixed_sigma.png",
+    "figure_pdf": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/gradient_multiband_significance_original_f2_fixed_sigma.pdf",
+    "figure_readme": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/README.md"
+  }
+}

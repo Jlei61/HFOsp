@@ -175,10 +175,27 @@ def _add_violin_box_points(
     return point_x
 
 
-def _add_sig_bracket(ax: plt.Axes, x1: float, x2: float, y: float, text: str) -> None:
+def _add_sig_bracket(
+    ax: plt.Axes,
+    x1: float,
+    x2: float,
+    y: float,
+    text: str,
+    *,
+    fontsize: float = 13,
+    fontweight: str = "bold",
+) -> None:
     h = 0.035
     ax.plot([x1, x1, x2, x2], [y, y + h, y + h, y], color="black", lw=1.3, clip_on=False)
-    ax.text((x1 + x2) / 2, y + h + 0.008, text, ha="center", va="bottom", fontsize=13, fontweight="bold")
+    ax.text(
+        (x1 + x2) / 2,
+        y + h + 0.008,
+        text,
+        ha="center",
+        va="bottom",
+        fontsize=fontsize,
+        fontweight=fontweight,
+    )
 
 
 def plot_paired_data_null_groups(
@@ -192,6 +209,15 @@ def plot_paired_data_null_groups(
     figsize: tuple[float, float] | None = None,
     pair_gap: float = 0.72,
     group_gap: float = 2.05,
+    ylim: tuple[float, float] | None = None,
+    connect_pairs: bool = True,
+    point_jitter_sd: float = 0.035,
+    pair_tick_labels: tuple[str, str] = ("Data", "Null"),
+    zero_reference: bool = False,
+    annotation: str | None = None,
+    annotation_xy: tuple[float, float] = (0.97, 0.60),
+    bottom: float | None = None,
+    ylabel_fontsize: float = 11,
 ) -> None:
     """Reusable paired Data-vs-Null painter from the accepted Fig3 panel.
 
@@ -218,7 +244,11 @@ def plot_paired_data_null_groups(
         label = group["label"]
         data = np.array([r["data"] for r in group["rows"]], dtype=float)
         null = np.array([r["null"] for r in group["rows"]], dtype=float)
-        paired_jitter = rng.normal(0.0, 0.035, size=len(data))
+        paired_jitter = (
+            rng.normal(0.0, point_jitter_sd, size=len(data))
+            if point_jitter_sd > 0
+            else np.zeros(len(data), dtype=float)
+        )
         data_x = _add_violin_box_points(
             ax,
             data,
@@ -241,25 +271,34 @@ def plot_paired_data_null_groups(
             point_edge="white",
             jitter=paired_jitter,
         )
-        for x0, y0, x1, y1 in zip(data_x, data, null_x, null):
-            ax.plot(
-                [x0, x1],
-                [y0, y1],
-                color="0.45",
-                linewidth=0.65,
-                alpha=0.28,
-                zorder=3,
-            )
+        if connect_pairs:
+            for x0, y0, x1, y1 in zip(data_x, data, null_x, null):
+                ax.plot(
+                    [x0, x1],
+                    [y0, y1],
+                    color="0.45",
+                    linewidth=0.65,
+                    alpha=0.28,
+                    zorder=3,
+                )
         ymax = max(float(np.nanmax(data)), float(np.nanmax(null)))
         overall_max = max(overall_max, ymax)
         p_value = float(
             group["display_p"] if "display_p" in group
             else group["summary"]["wilcoxon_p_data_gt_null_median"]
         )
-        bracket_text = _p_stars(p_value)
-        if bool(group.get("p_on_bracket", False)):
+        bracket_text = str(group.get("bracket_text", _p_stars(p_value)))
+        if "bracket_text" not in group and bool(group.get("p_on_bracket", False)):
             bracket_text = f"{bracket_text}  p={_fmt_p(p_value)}"
-        _add_sig_bracket(ax, x_data, x_null, ymax + 0.055, bracket_text)
+        _add_sig_bracket(
+            ax,
+            x_data,
+            x_null,
+            ymax + 0.055,
+            bracket_text,
+            fontsize=float(group.get("bracket_fontsize", 13)),
+            fontweight=str(group.get("bracket_fontweight", "bold")),
+        )
         p_label = str(group.get("p_label", "p"))
         caption = group.get(
             "caption",
@@ -276,7 +315,7 @@ def plot_paired_data_null_groups(
                 fontsize=8.2,
             )
 
-    ax.set_ylabel(ylabel, fontsize=11)
+    ax.set_ylabel(ylabel, fontsize=ylabel_fontsize)
     if xaxis_mode == "group":
         centers = [(x_data + x_null) / 2 for x_data, x_null in positions]
         ax.set_xticks(centers)
@@ -297,15 +336,32 @@ def plot_paired_data_null_groups(
         )
     else:
         ax.set_xticks([x for pair in positions for x in pair])
-        ax.set_xticklabels(["Data", "Null"] * len(positions), fontsize=10)
+        ax.set_xticklabels(list(pair_tick_labels) * len(positions), fontsize=10)
     ax.set_xlim(0.45, positions[-1][1] + 0.53)
-    ax.set_ylim(0.0, max(1.12, overall_max + 0.16))
+    if ylim is None:
+        ax.set_ylim(0.0, max(1.12, overall_max + 0.16))
+    else:
+        ax.set_ylim(*ylim)
+    if zero_reference:
+        ax.axhline(0.0, color="0.55", linewidth=0.8, linestyle="--", zorder=0)
+    if annotation:
+        ax.text(
+            annotation_xy[0],
+            annotation_xy[1],
+            annotation,
+            transform=ax.transAxes,
+            ha="right",
+            va="center",
+            fontsize=8.7,
+            linespacing=1.45,
+        )
     ax.spines[["top", "right"]].set_visible(False)
     ax.tick_params(axis="both", width=1.0)
     ax.yaxis.grid(False)
     ax.set_axisbelow(True)
-    bottom = 0.14 if xaxis_mode == "group" else 0.18
-    fig.subplots_adjust(left=0.16, right=0.98, top=0.94, bottom=bottom)
+    if bottom is None:
+        bottom = 0.14 if xaxis_mode == "group" else 0.18
+    fig.subplots_adjust(left=0.18, right=0.98, top=0.94, bottom=bottom)
     fig.savefig(out_png, dpi=300)
     fig.savefig(out_pdf)
     plt.close(fig)

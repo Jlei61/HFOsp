@@ -1,0 +1,160 @@
+{
+  "contract": "topic5_gradient_original_f2_subject_fixed_sigma_cross_panel_cohort_matched_sensitivity_v1",
+  "analysis_role": "cross-panel cohort-matched sensitivity",
+  "replaces_canonical_n19_primary": false,
+  "source_contract": "topic5_gradient_shared_else_own_original_f2_subject_fixed_sigma_v1",
+  "input_artifacts": {
+    "event": {
+      "path": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_event.csv",
+      "sha256": "8396346737b3afafa0ad479477767040a4e253734ecac87eb5c076ea87d6e375"
+    },
+    "subject": {
+      "path": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_subject.csv",
+      "sha256": "64b66e9461c21030188a78ecd56bfff8348ee4cb809a094b075f65ef87819d3a"
+    },
+    "routing": {
+      "path": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_field_routing.csv",
+      "sha256": "dede0f4354fbade13504aee79c4ba8678346cbd4a87aa22ee2753ff2313b845e"
+    },
+    "null_draws": {
+      "path": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_subject_spatial_null_draws.parquet",
+      "sha256": "d25ef99cf699982e7b87bb26b2a9899548d8514e127ef09644bcf7e31bfb8f47"
+    },
+    "summary": {
+      "path": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma/gradient_multiband_significance_original_f2_fixed_sigma_summary.json",
+      "sha256": "5dd0a62fa82bfe4dbbdb77d0bcb118eac7f74ef88029ff6d660edc19df599a3e"
+    },
+    "selector": {
+      "path": "results/topic5_ictal_recruitment/tspectral_field_concordance/clinical_onset_gradient_field_cohort_stat_subject.csv",
+      "sha256": "2d8d32d8e1b6919b4c9f9cf619385665893f5193821259ac53bfd8cfa080c07f"
+    },
+    "selector_drop_inventory": {
+      "path": "results/topic5_ictal_recruitment/tspectral_field_concordance/clinical_onset_gradient_field_cohort_stat_drop_inventory.csv",
+      "sha256": "b80a97826e82c360f6dc8d4acd159ca5a58ece04c423fb3059439b25a8e2c095"
+    }
+  },
+  "selection_contract": {
+    "selector_source_path": "results/topic5_ictal_recruitment/tspectral_field_concordance/clinical_onset_gradient_field_cohort_stat_subject.csv",
+    "selector_source_sha256": "2d8d32d8e1b6919b4c9f9cf619385665893f5193821259ac53bfd8cfa080c07f",
+    "selector_drop_inventory_path": "results/topic5_ictal_recruitment/tspectral_field_concordance/clinical_onset_gradient_field_cohort_stat_drop_inventory.csv",
+    "selector_drop_inventory_sha256": "b80a97826e82c360f6dc8d4acd159ca5a58ece04c423fb3059439b25a8e2c095",
+    "selector_group_id": "all_phenotype_matched",
+    "selector_basis": "predefined T_spectral spectral phenotype contract",
+    "selection_predefined_and_independent_of_current_multiband_concordance_outcomes": true,
+    "exact_included_subject_ids": [
+      "epilepsiae_1077",
+      "epilepsiae_1084",
+      "epilepsiae_1096",
+      "epilepsiae_1125",
+      "epilepsiae_1146",
+      "epilepsiae_1150",
+      "epilepsiae_139",
+      "epilepsiae_253",
+      "epilepsiae_384",
+      "epilepsiae_442",
+      "epilepsiae_548",
+      "epilepsiae_590",
+      "epilepsiae_620",
+      "epilepsiae_635",
+      "epilepsiae_922",
+      "epilepsiae_958",
+      "yuquan_xuxinyi"
+    ],
+    "exact_excluded_subject_ids": [
+      "epilepsiae_583",
+      "yuquan_zhangkexuan"
+    ],
+    "required_included_subject_ids": [
+      "epilepsiae_1146",
+      "epilepsiae_139"
+    ],
+    "expected_excluded_subject_ids": [
+      "epilepsiae_583",
+      "yuquan_zhangkexuan"
+    ],
+    "canonical_minus_matched_verified_exact": true
+  },
+  "statistical_contract": {
+    "subject_level_inputs_reused_without_rescoring": true,
+    "cohort_statistic": "median over included subjects",
+    "fwer": "null-centered Westfall-Young max-T across seven primary bands",
+    "n_permutations": 1000,
+    "bands": [
+      {
+        "band": "delta_HYP_slow",
+        "low_hz": 1.0,
+        "high_hz": 4.0,
+        "interval": "half_open",
+        "label": "δ\n1–4"
+      },
+      {
+        "band": "theta_preictal_PAC",
+        "low_hz": 4.0,
+        "high_hz": 8.0,
+        "interval": "half_open",
+        "label": "θ\n4–8"
+      },
+      {
+        "band": "alpha_sharp_leq13",
+        "low_hz": 8.0,
+        "high_hz": 13.0,
+        "interval": "half_open",
+        "label": "α\n8–13"
+      },
+      {
+        "band": "beta_LVFA_low",
+        "low_hz": 13.0,
+        "high_hz": 30.0,
+        "interval": "half_open",
+        "label": "β\n13–30"
+      },
+      {
+        "band": "gamma_LVFA",
+        "low_hz": 30.0,
+        "high_hz": 80.0,
+        "interval": "half_open",
+        "label": "γ\n30–80"
+      },
+      {
+        "band": "hg_low_ripple",
+        "low_hz": 80.0,
+        "high_hz": 150.0,
+        "interval": "half_open",
+        "label": "R\n80–150"
+      },
+      {
+        "band": "ripple_high",
+        "low_hz": 150.0,
+        "high_hz": 250.0,
+        "interval": "half_open",
+        "label": "FR\n150–250"
+      }
+    ]
+  },
+  "counts": {
+    "canonical_fixed_sigma_subjects": 19,
+    "cohort_matched_subjects": 17,
+    "excluded_subjects": 2,
+    "epilepsiae_subjects": 16,
+    "yuquan_subjects": 1,
+    "shared_subjects": 7,
+    "own_fallback_subjects": 10,
+    "bands_passing_fwer": 2,
+    "event_window_rows": 5101,
+    "subject_band_rows": 119,
+    "permutation_rows": 119119
+  },
+  "outputs": {
+    "event": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_event.csv",
+    "subject": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_subject.csv",
+    "cohort": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_cohort.csv",
+    "routing": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_field_routing.csv",
+    "exclusions": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_exclusion_inventory.csv",
+    "null_draws": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_subject_spatial_null_draws.parquet",
+    "manifest": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_manifest.json",
+    "summary": "results/topic5_ictal_recruitment/gradient_multiband_original_f2_fixed_sigma_cohort_matched/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17_summary.json",
+    "figure_png": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17.png",
+    "figure_pdf": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/gradient_multiband_significance_original_f2_fixed_sigma_cohort_matched_n17.pdf",
+    "figure_readme": "results/paper-ready-figure/fig3_gradient_multiband_significance/figures/README.md"
+  }
+}
