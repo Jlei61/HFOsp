@@ -1,0 +1,81 @@
+{
+  "subject": "epilepsiae_548",
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "feature": "1-150 Hz log power, per-channel baseline robust-z; signed values, shared-gradient maxAB |r| similarity",
+  "field_contract": "topic5_interictal_template_fields_v1",
+  "field_plane": "shared",
+  "field_scorers": [
+    "shared_a",
+    "shared_b"
+  ],
+  "own_field_fallback": false,
+  "field_fingerprint_sha256": "e85667c46008d8ac9e1a04d724a68e1b7ca9e0109ccb029a66a67143e317c36c",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "geometry_2d_supported": true,
+  "geometry_quality_tier": "strict_2d",
+  "minimum_axis_n_shafts": 3,
+  "minimum_axis_effective_rank": 3,
+  "input_eligibility": {
+    "status": "eligible_cache_ready",
+    "inventory_n": 31,
+    "cache_path": "results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_548.json",
+    "eligible_idxs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      11,
+      12,
+      13,
+      14,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      26,
+      28,
+      30
+    ],
+    "reason_code": null
+  },
+  "coverage_status": "complete_ok",
+  "coverage_fraction": 1.0,
+  "n_eligible_requested": 26,
+  "n_seizures_processed": 26,
+  "drops": [],
+  "outputs": {
+    "figure": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/figures/epilepsiae_548_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s.png",
+    "per_seizure_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_548_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+    "aggregate_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_548_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv"
+  },
+  "overall": {
+    "median_of_aggregate_median": 0.9152472305527288,
+    "median_of_aggregate_variance": 0.014754002208054189,
+    "max_aggregate_median": 0.9533321170708409
+  },
+  "pre_m120_0": {
+    "median_of_aggregate_median": 0.9092515551707441,
+    "median_of_aggregate_variance": 0.015192577076221635
+  },
+  "early_0_30": {
+    "median_of_aggregate_median": 0.9469433611647644,
+    "median_of_aggregate_variance": 0.007946731526562362
+  }
+}

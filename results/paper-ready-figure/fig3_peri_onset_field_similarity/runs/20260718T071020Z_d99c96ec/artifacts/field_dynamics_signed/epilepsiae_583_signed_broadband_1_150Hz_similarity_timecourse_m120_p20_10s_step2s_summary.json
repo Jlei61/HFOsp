@@ -1,0 +1,154 @@
+{
+  "subject": "epilepsiae_583",
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "feature": "1-150 Hz log power, per-channel baseline robust-z; signed values, shared-gradient maxAB |r| similarity",
+  "field_contract": "topic5_interictal_template_fields_v1",
+  "field_plane": "shared",
+  "field_scorers": [
+    "shared_a",
+    "shared_b"
+  ],
+  "own_field_fallback": false,
+  "field_fingerprint_sha256": "5ddfbcd1da4ca266c4786e083d72d7cd05e51e43579aaadd4fa2902ed2296c3e",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "geometry_2d_supported": true,
+  "geometry_quality_tier": "strict_2d",
+  "minimum_axis_n_shafts": 5,
+  "minimum_axis_effective_rank": 3,
+  "input_eligibility": {
+    "status": "eligible_cache_ready",
+    "inventory_n": 23,
+    "cache_path": "results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_583.json",
+    "eligible_idxs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21
+    ],
+    "reason_code": null
+  },
+  "coverage_status": "severely_partial",
+  "coverage_fraction": 0.13636363636363635,
+  "n_eligible_requested": 22,
+  "n_seizures_processed": 3,
+  "drops": [
+    {
+      "seizure_idx": 3,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 4,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 5,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 6,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 7,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 8,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 9,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 10,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 11,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 12,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 13,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 14,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 15,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 16,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 17,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 18,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 19,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 20,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 21,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    }
+  ],
+  "outputs": {
+    "figure": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/figures/epilepsiae_583_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s.png",
+    "per_seizure_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_583_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+    "aggregate_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_583_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv"
+  },
+  "overall": {
+    "median_of_aggregate_median": 0.8227796399405831,
+    "median_of_aggregate_variance": 0.01795081339133346,
+    "max_aggregate_median": 0.9660712591520103
+  },
+  "pre_m120_0": {
+    "median_of_aggregate_median": 0.8190819079846261,
+    "median_of_aggregate_variance": 0.01736192553374221
+  },
+  "early_0_30": {
+    "median_of_aggregate_median": 0.8474892122476448,
+    "median_of_aggregate_variance": 0.02455595164175111
+  }
+}

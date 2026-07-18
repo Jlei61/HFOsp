@@ -1,0 +1,56 @@
+{
+  "subject": "epilepsiae_548",
+  "source_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_548_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+  "time_range_sec": [
+    -120.0,
+    20.0
+  ],
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "field_contract": "topic5_interictal_template_fields_v1",
+  "field_plane": "shared",
+  "field_scorers": [
+    "shared_a",
+    "shared_b"
+  ],
+  "own_field_fallback": false,
+  "field_fingerprint_sha256": "e85667c46008d8ac9e1a04d724a68e1b7ca9e0109ccb029a66a67143e317c36c",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "geometry_2d_supported": true,
+  "geometry_quality_tier": "strict_2d",
+  "minimum_axis_n_shafts": 3,
+  "minimum_axis_effective_rank": 3,
+  "coverage_status": "complete_ok",
+  "coverage_fraction": 1.0,
+  "n_eligible_requested": 26,
+  "n_seizure_drops": 0,
+  "seizure_drops": [],
+  "n_seizures": 26,
+  "n_windows": 66,
+  "readouts": {
+    "maxAB_abs": {
+      "definition": "max(|r_A|, |r_B|)",
+      "median_of_window_medians": 0.9152472305527288,
+      "median_of_window_variances": 0.014754002208054189
+    },
+    "signed_A": {
+      "definition": "signed r against template A",
+      "median_of_window_medians": 0.40875026378631796,
+      "median_of_window_variances": 0.26523983176381843
+    },
+    "signed_B": {
+      "definition": "signed r against template B",
+      "median_of_window_medians": 0.8379236234694971,
+      "median_of_window_variances": 0.6842744892160205
+    }
+  },
+  "outputs": {
+    "png": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_548_peri_onset_field_similarity_paper_ready.png",
+    "pdf": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_548_peri_onset_field_similarity_paper_ready.pdf"
+  }
+}

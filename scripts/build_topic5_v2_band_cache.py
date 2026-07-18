@@ -105,7 +105,19 @@ def _names_where(flag, channels):
     return [channels[i] for i in np.flatnonzero(np.asarray(flag, bool))]
 
 
-def build_subject(ds_sid, substrate, specs, primary_names, cfg, out_root):
+def build_subject(
+    ds_sid,
+    substrate,
+    specs,
+    primary_names,
+    cfg,
+    out_root,
+    eligibility_audit,
+    eligibility_field,
+    onset_only_post_sec=None,
+    inventory_csv=None,
+    block_inventory_csv=None,
+):
     """Build the masked multi-band cache for one subject. Returns True if anything was written."""
     ln = cfg["line_noise"]
     art = cfg["artifact"]
@@ -129,7 +141,16 @@ def build_subject(ds_sid, substrate, specs, primary_names, cfg, out_root):
     fs = None
     seizure_idxs = []
 
-    for idx, sw, eeg_rel in iter_subject_seizure_windows(ds_sid, substrate, drops=drops):
+    for idx, sw, eeg_rel in iter_subject_seizure_windows(
+        ds_sid,
+        substrate,
+        drops=drops,
+        eligibility_audit=eligibility_audit,
+        eligibility_field=eligibility_field,
+        onset_only_post_sec=onset_only_post_sec,
+        inventory_csv=inventory_csv,
+        block_inventory_csv=block_inventory_csv,
+    ):
         ch = [recruit.bipolar_alias_label(c) for c in sw.ch_names]
         if channels is None:
             channels, fs = ch, float(sw.fs)
@@ -231,6 +252,11 @@ def build_subject(ds_sid, substrate, specs, primary_names, cfg, out_root):
         "baseline": {"guard_sec": GUARD_SEC, "min_baseline_sec": MIN_BASELINE_SEC,
                      "note": "robust-z baseline=[-pre_sec, min(0,eeg_onset_rel)-guard] via "
                              "resolve_baseline_window; same convention as ictal_field_long_cache"},
+        "window_contract": (
+            f"onset_only_pre130_post{float(onset_only_post_sec):g}s"
+            if onset_only_post_sec is not None
+            else "full_interval_plus_post90s"
+        ),
         "drops": drops,
     }
     cache_dir = out_root / "cache"
@@ -257,11 +283,55 @@ def main():
                     help="override output ROOT (default results/.../v2_band_scan); "
                          "writes {outdir}/cache/{ds_sid}.npz")
     ap.add_argument("--restart", action="store_true", help="rebuild even if npz exists")
+    ap.add_argument(
+        "--eligibility-audit",
+        type=Path,
+        default=None,
+        help=(
+            "override seizure eligibility CSV; required for an expanded cohort that "
+            "is not present in the frozen original t0 audit"
+        ),
+    )
+    ap.add_argument(
+        "--onset-only-post-sec",
+        type=float,
+        default=None,
+        help=(
+            "build a fixed short onset window and do not require/cover seizure offset; "
+            "intended for phenotype-onset review, not full-ictal dynamics"
+        ),
+    )
+    ap.add_argument(
+        "--eligibility-field",
+        default="analysis_eligible",
+        help=(
+            "boolean column in the eligibility CSV (default analysis_eligible; "
+            "expanded narrow sensitivity caches use narrow_cache_eligible)"
+        ),
+    )
+    ap.add_argument(
+        "--inventory-csv",
+        type=Path,
+        default=None,
+        help="optional marker-cleaned Yuquan episode inventory",
+    )
+    ap.add_argument(
+        "--block-inventory-csv",
+        type=Path,
+        default=None,
+        help="block inventory paired with --inventory-csv",
+    )
     args = ap.parse_args()
+
+    if (args.inventory_csv is None) != (args.block_inventory_csv is None):
+        ap.error("--inventory-csv and --block-inventory-csv must be provided together")
 
     cfg = load_phase1_config()
     specs, primary_names = build_band_specs(cfg, selected=args.bands)
     out_root = Path(args.outdir) if args.outdir else OUT_ROOT
+    eligibility_audit = args.eligibility_audit or (
+        _ROOT / "results/topic5_ictal_recruitment/t0_eligibility_audit.csv"
+    )
     subs = args.subjects or SUBJECTS_BY_SUB[args.substrate]
     print(f"[v2-band-cache] {len(subs)} subjects, {len(specs)} bands "
           f"({sum(r=='primary' for *_, r in specs)} primary) -> {out_root}/cache", flush=True)
@@ -271,7 +341,19 @@ def main():
             continue
         print(f"[cache] {ds_sid} ...", flush=True)
         try:
-            build_subject(ds_sid, args.substrate, specs, primary_names, cfg, out_root)
+            build_subject(
+                ds_sid,
+                args.substrate,
+                specs,
+                primary_names,
+                cfg,
+                out_root,
+                eligibility_audit,
+                args.eligibility_field,
+                args.onset_only_post_sec,
+                args.inventory_csv,
+                args.block_inventory_csv,
+            )
         except Exception as e:
             print(f"  SUBJECT ERROR {type(e).__name__}: {e}", flush=True)
     print("V2 BAND CACHE DONE", flush=True)

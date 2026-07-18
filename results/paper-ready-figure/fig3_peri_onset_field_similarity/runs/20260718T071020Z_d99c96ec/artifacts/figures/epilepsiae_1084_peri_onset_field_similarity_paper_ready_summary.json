@@ -1,0 +1,61 @@
+{
+  "subject": "epilepsiae_1084",
+  "source_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1084_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+  "time_range_sec": [
+    -120.0,
+    20.0
+  ],
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "field_contract": "topic5_interictal_template_fields_v1",
+  "field_plane": "shared",
+  "field_scorers": [
+    "shared_a",
+    "shared_b"
+  ],
+  "own_field_fallback": false,
+  "field_fingerprint_sha256": "2159bb4c6874f43df4f69f0c7b03ae70d24a9782d293df5f0204fe7096a9b4d9",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "geometry_2d_supported": true,
+  "geometry_quality_tier": "strict_2d",
+  "minimum_axis_n_shafts": 4,
+  "minimum_axis_effective_rank": 3,
+  "coverage_status": "partial_ok",
+  "coverage_fraction": 0.9861111111111112,
+  "n_eligible_requested": 72,
+  "n_seizure_drops": 1,
+  "seizure_drops": [
+    {
+      "seizure_idx": 35,
+      "reason": "ValueError: epilepsiae/1084 seizure 35: requested window ends 14.35s after block_end; upstream caller must drop this seizure"
+    }
+  ],
+  "n_seizures": 71,
+  "n_windows": 66,
+  "readouts": {
+    "maxAB_abs": {
+      "definition": "max(|r_A|, |r_B|)",
+      "median_of_window_medians": 0.5269518499832604,
+      "median_of_window_variances": 0.02818589329104213
+    },
+    "signed_A": {
+      "definition": "signed r against template A",
+      "median_of_window_medians": 0.1561838405511913,
+      "median_of_window_variances": 0.2505143676624746
+    },
+    "signed_B": {
+      "definition": "signed r against template B",
+      "median_of_window_medians": -0.0923465046659259,
+      "median_of_window_variances": 0.21985298097017802
+    }
+  },
+  "outputs": {
+    "png": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1084_peri_onset_field_similarity_paper_ready.png",
+    "pdf": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1084_peri_onset_field_similarity_paper_ready.pdf"
+  }
+}

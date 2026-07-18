@@ -246,6 +246,8 @@ def extract_seizure_window(
     results_root: Path | str = Path("results"),
     reference: str = "car",
     alias_bipolar_to_left: bool = False,
+    seizure_inventory_csv: Path | str | None = None,
+    block_inventory_csv: Path | str | None = None,
 ) -> SeizureWindow:
     """Load an intracranial signal slice around the ``seizure_idx``-th seizure.
 
@@ -277,7 +279,14 @@ def extract_seizure_window(
         )
 
     results_root = Path(results_root)
-    sz_csv, blk_csv = _resolve_inventory_paths(results_root, dataset=dataset)
+    if seizure_inventory_csv is None and block_inventory_csv is None:
+        sz_csv, blk_csv = _resolve_inventory_paths(results_root, dataset=dataset)
+    elif seizure_inventory_csv is not None and block_inventory_csv is not None:
+        sz_csv, blk_csv = Path(seizure_inventory_csv), Path(block_inventory_csv)
+    else:
+        raise ValueError(
+            "seizure_inventory_csv and block_inventory_csv must be provided together"
+        )
     sz_rows = [r for r in _read_csv_rows(sz_csv) if r["subject"] == sid]
     # The join key carries the same value (the EDF-stem-equivalent block id) on
     # both inventories, but the COLUMN NAMES differ between datasets. Yuquan
@@ -290,9 +299,12 @@ def extract_seizure_window(
         seizure_join_field = "block_id"
         block_join_field = "block_id"
     else:  # yuquan
-        sz_rows = [r for r in sz_rows if r.get("eeg_onset_epoch")]
-        sz_rows.sort(key=lambda r: float(r["eeg_onset_epoch"]))
-        onset_field = "eeg_onset_epoch"
+        # The marker-cleaned Topic-5 inventory anchors one row per episode on
+        # ``onset_epoch``.  The canonical legacy inventory only exposes
+        # ``eeg_onset_epoch``; accept both without inventing legacy row indices.
+        onset_field = "onset_epoch" if any(r.get("onset_epoch") for r in sz_rows) else "eeg_onset_epoch"
+        sz_rows = [r for r in sz_rows if r.get(onset_field)]
+        sz_rows.sort(key=lambda r: float(r[onset_field]))
         seizure_join_field = "record"
         block_join_field = "block_id"
     if not sz_rows:
@@ -358,9 +370,15 @@ def extract_seizure_window(
     if dataset == "epilepsiae":
         from src.preprocessing import load_epilepsiae_block
         pre = load_epilepsiae_block(
-            data_path, head_path, reference=reference, segment_sec=200.0,
+            data_path,
+            head_path,
+            reference=reference,
+            segment_sec=min(200.0, max(1.0, window_duration_sec)),
+            crop_start_sec=rel_start_sec,
+            crop_duration_sec=window_duration_sec,
         )
         block_stem_for_window = blk["block_stem"]
+        loaded_window_only = True
     else:  # yuquan
         from src.yuquan_dataset import load_yuquan_record
         pre = load_yuquan_record(
@@ -397,7 +415,7 @@ def extract_seizure_window(
         t_axis=t_axis,
         ch_names=ch_names_out,
         subject=subject,
-        seizure_id=sz["seizure_id"],
+        seizure_id=sz.get("seizure_id") or sz.get("clean_seizure_id") or f"{sid}_sz_{seizure_idx + 1:03d}",
         block_stem=block_stem_for_window,
         clin_onset_epoch=clin_onset_epoch,
         eeg_onset_epoch=eeg_onset_epoch,

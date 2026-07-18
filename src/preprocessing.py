@@ -456,6 +456,8 @@ def load_epilepsiae_block(
     reference: str = "car",
     drop_channels: Optional[List[str]] = None,
     segment_sec: Optional[float] = 200.0,
+    crop_start_sec: float = 0.0,
+    crop_duration_sec: Optional[float] = None,
     notch_freqs: Optional[List[float]] = None,
     notch_filter_kind: str = "iir",
 ) -> "PreprocessingResult":
@@ -475,6 +477,11 @@ def load_epilepsiae_block(
     segment_sec : float or None
         If not None, read in segments of this length to limit peak memory.
         None = read entire block at once.
+    crop_start_sec : float
+        Optional start time in seconds from block start. Defaults to 0.0.
+    crop_duration_sec : float or None
+        Optional duration in seconds to read from ``crop_start_sec``. Defaults
+        to the rest of the block.
     notch_freqs : list of float, optional
         Frequencies for notch filter (Hz). Default: [50, 100, 150, 200]
         (50 Hz power line and harmonics within the ripple band).
@@ -554,14 +561,30 @@ def load_epilepsiae_block(
     file_size = os.path.getsize(data_path)
     total_samples = file_size // bytes_per_frame
 
-    seg_samples = total_samples if segment_sec is None else int(round(segment_sec * sfreq))
-    seg_samples = max(1, min(seg_samples, total_samples))
+    crop_start_sec = max(0.0, float(crop_start_sec))
+    start_sample = int(round(crop_start_sec * sfreq))
+    start_sample = max(0, min(start_sample, total_samples))
+    if crop_duration_sec is None:
+        end_sample = total_samples
+    else:
+        end_sample = start_sample + int(round(max(0.0, float(crop_duration_sec)) * sfreq))
+        end_sample = max(start_sample, min(end_sample, total_samples))
+    samples_to_read = end_sample - start_sample
+    if samples_to_read <= 0:
+        raise ValueError(
+            f"Empty Epilepsiae crop for {data_path.name}: "
+            f"crop_start_sec={crop_start_sec}, crop_duration_sec={crop_duration_sec}"
+        )
+
+    seg_samples = samples_to_read if segment_sec is None else int(round(segment_sec * sfreq))
+    seg_samples = max(1, min(seg_samples, samples_to_read))
 
     all_data_segments: List[np.ndarray] = []
     with open(data_path, "rb") as fh:
-        offset = 0
-        while offset < total_samples:
-            read_len = min(seg_samples, total_samples - offset)
+        fh.seek(start_sample * bytes_per_frame)
+        offset = start_sample
+        while offset < end_sample:
+            read_len = min(seg_samples, end_sample - offset)
             raw_bytes = fh.read(read_len * bytes_per_frame)
             if not raw_bytes:
                 break
@@ -626,7 +649,7 @@ def load_epilepsiae_block(
         original_ch_names=list(channel_names),
         bipolar_pairs=bipolar_pairs,
         reference_type=ref_type,
-        start_time=start_time,
+        start_time=start_time + (start_sample / sfreq),
     )
 
 

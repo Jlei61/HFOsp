@@ -47,12 +47,20 @@ from src.propagation_contact_plane_readout import (make_plane_grid, R_smooth_ran
 from src.topic5_axis_alignment import (matched_channels, make_field_record,
                                        channel_shuffle, within_shaft_shuffle, anchor_matched_shuffle,
                                        within_shaft_anchor_shuffle, effective_shuffle_n, along_axis_sign)
+from src.topic5_scaffold_ab_contrast import build_D_AB_from_rank_pair, template_pair_tier
 
-ACTIVATION_KEY = {"broadband": "bb_auc", "hfa": "hfa_auc", "ramp": "ramp", "ei": "ei_like"}
+ACTIVATION_KEY = {
+    "broadband": "bb_auc",          # legacy 1-45 Hz
+    "broadband150": "bb150_auc",    # sensitivity 1-150 Hz
+    "hfa": "hfa_auc",
+    "ramp": "ramp",
+    "ei": "ei_like",
+}
 
 CACHE_DIR = Path("results/topic5_ictal_recruitment/t0_feature_cache")
 AXIS_DIR = Path("results/spatial_modulation/propagation_geometry/observation_readout/real_subjects")
 OUT = Path("results/topic5_ictal_recruitment/axis_alignment")
+RANKDISP_DIR = Path("results/interictal_propagation_masked/rank_displacement/per_subject")
 RNG_SEED = 20260614
 
 
@@ -73,8 +81,11 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
              statistic="ta"):
     """statistic: 'ta' = A-line primary (pre-registered, t_a only); 'max_ab' = sensitivity
     T_s = max(|r_{s,A}|, |r_{s,B}|) with a PAIRED null — the SAME channel shuffle is applied to
-    the activation before computing both template correlations so the selection penalty is correct.
-    Subjects without a t_b record fall back to t_a (max of one)."""
+    the activation before computing both template correlations so the selection penalty is correct;
+    'dab' = |corr(field(D_AB), ictal field)| where D_AB comes from the accepted rank-displacement
+    pair and is joined onto the A-line record's plane/support by name. The smoothing, seizure fold,
+    and null family are unchanged. Missing/malformed rank-displacement input fails closed;
+    max_ab retains its historical t_a fallback."""
     axis_f = AXIS_DIR / f"{ds_sid}_t_a.json"
     npz_f = CACHE_DIR / f"{ds_sid}.npz"
     if not axis_f.exists() or not npz_f.exists():
@@ -87,32 +98,61 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
     cache_names = [str(x) for x in data["channels"]]
     cidx = {n: i for i, n in enumerate(cache_names)}
 
-    matched = matched_channels(axis, {n: 0.0 for n in cache_names})
-    if len(matched) < 6:
-        return {"subject_id": ds_sid, "status": f"insufficient_matched_{len(matched)}"}
+    value_universe = {n: 0.0 for n in cache_names}
+    matched = matched_channels(axis, value_universe)
+    axis_b = None
+    if statistic == "max_ab":
+        axis_f_b = AXIS_DIR / f"{ds_sid}_t_b.json"
+        if axis_f_b.exists():
+            candidate_b = json.load(open(axis_f_b))
+            if candidate_b.get("channels"):
+                axis_b = candidate_b
+
+    pair_fields = {}
+    if statistic == "dab":
+        rankdisp_f = RANKDISP_DIR / f"{ds_sid}.json"
+        if not rankdisp_f.exists():
+            return {"subject_id": ds_sid, "status": "missing_rank_displacement"}
+        rankdisp = json.load(open(rankdisp_f))
+        if rankdisp.get("exit_reason") != "ok" or not rankdisp.get("pairs"):
+            return {"subject_id": ds_sid, "status": "rank_displacement_not_ok"}
+        dab = build_D_AB_from_rank_pair(rankdisp["pairs"][0])
+        dab_by_name = dict(zip(dab["names_joint"], dab["D_AB"]))
+        matched = [c for c in matched if c["name"] in dab_by_name]
+        if len(matched) < 6:
+            return {"subject_id": ds_sid, "status": f"insufficient_joint_{len(matched)}"}
+        inter = np.asarray([dab_by_name[c["name"]] for c in matched], float)
+        pair_fields = {
+            "rho_AB": float(dab["rho_AB"]),
+            "sd_D_AB": float(dab["sd_D_AB"]),
+            "template_pair_tier": template_pair_tier(dab["rho_AB"]),
+            "rank_displacement_path": str(rankdisp_f),
+            "rank_displacement_pair_index": 0,
+            "n_rank_displacement_joint": len(dab["names_joint"]),
+        }
+    else:
+        if len(matched) < 6:
+            return {"subject_id": ds_sid, "status": f"insufficient_matched_{len(matched)}"}
+        inter = np.asarray([float(c["typical_rank"]) for c in matched], float)
+
     names_m = [c["name"] for c in matched]
     m_in_cache = np.array([cidx[n] for n in names_m])
     has_anchor = any(k.startswith("bact__") for k in data.files)
 
     X, Y = make_plane_grid()
-    inter = [float(c["typical_rank"]) for c in matched]
     inter_rec = make_field_record(matched, inter)
     F_inter = R_smooth_rank(inter_rec, X, Y, None, S_THRESH)
     sigma = F_inter["sigma_xy"]
 
     # For max_ab: also build t_b interictal field (same matched channels, different ranks)
     F_inter_b = None
-    if statistic == "max_ab":
-        axis_f_b = AXIS_DIR / f"{ds_sid}_t_b.json"
-        if axis_f_b.exists():
-            axis_b = json.load(open(axis_f_b))
-            if axis_b.get("channels"):
-                matched_b = matched_channels(axis_b, {n: 0.0 for n in cache_names})
-                # re-index t_b channels to the same contact order as t_a
-                b_rank = {c["name"]: float(c["typical_rank"]) for c in matched_b}
-                inter_b = [b_rank.get(n, np.nan) for n in names_m]
-                if np.isfinite(inter_b).sum() >= 4:
-                    F_inter_b = R_smooth_rank(make_field_record(matched, inter_b), X, Y, sigma, S_THRESH)
+    if statistic == "max_ab" and axis_b is not None:
+        matched_b = matched_channels(axis_b, value_universe)
+        # re-index t_b channels to the same contact order as t_a
+        b_rank = {c["name"]: float(c["typical_rank"]) for c in matched_b}
+        inter_b = [b_rank.get(n, np.nan) for n in names_m]
+        if np.isfinite(inter_b).sum() >= 4:
+            F_inter_b = R_smooth_rank(make_field_record(matched, inter_b), X, Y, sigma, S_THRESH)
 
     def fld(vals):
         return R_smooth_rank(make_field_record(matched, vals), X, Y, sigma, S_THRESH)
@@ -145,9 +185,10 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
         if not np.isfinite(r):
             continue
         real.append(r)
-        s = along_axis_sign(inter, ict_vals)
-        if s["sign"] != 0:
-            sign_corrs.append(s["signed_corr"])
+        if statistic != "dab":
+            s = along_axis_sign(inter, ict_vals)
+            if s["sign"] != 0:
+                sign_corrs.append(s["signed_corr"])
         ch_draws.append([stat_t(channel_shuffle(ict_vals, rng)) for _ in range(B)])
         sh_draws.append([stat_t(within_shaft_shuffle(ict_vals, names_m, rng)) for _ in range(B)])
         if has_anchor and f"bact__{idx}" in data.files:
@@ -174,7 +215,10 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
     jt_p95, jt_med = _p95_med(jt_draws)
     return {
         "subject_id": ds_sid, "dataset": ds_sid.split("_", 1)[0], "status": "ok",
-        "activation": activation, "n_seizures": len(real), "n_matched_channels": len(matched),
+        "activation": activation, "statistic": statistic,
+        "interictal_definition": ("D_AB=eA-eB from rank-displacement pairs[0], joined by name"
+                                    if statistic == "dab" else statistic),
+        "n_seizures": len(real), "n_matched_channels": len(matched),
         "real_median_abs_corr": real_med,
         "channel_null_median": ch_med, "channel_null_p95": ch_p95,
         "within_shaft_null_median": sh_med, "within_shaft_null_p95": sh_p95,
@@ -186,28 +230,37 @@ def _subject(ds_sid, *, B, rng, activation="bb_auc", sz_subset=None, negative_co
         "pass_joint_null": (bool(real_med > jt_p95) if jt_p95 is not None else None),
         "effective_shuffle_n": {"channel": eff["channel"], "within_shaft": eff["within_shaft"],
                                 "anchor_matched": eff_anchor, "joint": eff_joint},
+        **pair_fields,
         **sign_fields,
     }
 
 
 def main():
-    global CACHE_DIR, AXIS_DIR   # repo global-swap convention (cf. OUT etc. module consts)
+    global CACHE_DIR, AXIS_DIR, RANKDISP_DIR   # repo global-swap convention
     ap = argparse.ArgumentParser()
     ap.add_argument("--subjects", nargs="*", default=None)
     ap.add_argument("--activation", choices=list(ACTIVATION_KEY), default="broadband")
     ap.add_argument("--B", type=int, default=1000, help="null draws per seizure (smoke: 200)")
     ap.add_argument("--cache-dir", default=str(CACHE_DIR), help="T0 feature cache (.npz/.json) dir")
     ap.add_argument("--axis-dir", default=str(AXIS_DIR), help="interictal axis record (_t_a.json) dir")
+    ap.add_argument("--dab-rankdisp-dir", default=str(RANKDISP_DIR),
+                    help="accepted rank-displacement per-subject JSON dir used only by statistic=dab")
+    ap.add_argument("--negative-control", action="store_true",
+                    help="shuffle each observed ictal field once before scoring (bad-data regression)")
     ap.add_argument("--out", default=None)
-    ap.add_argument("--statistic", choices=["ta", "max_ab"], default="ta",
+    ap.add_argument("--statistic", choices=["ta", "max_ab", "dab"], default="ta",
                     help="ta = pre-registered t_a only (primary); "
-                         "max_ab = max(|r_A|,|r_B|) with paired null (sensitivity, selection-corrected)")
+                         "max_ab = max(|r_A|,|r_B|) with paired null (sensitivity, selection-corrected); "
+                         "dab = |corr(field(D_AB), ictal field)| on joint A/B contacts")
     args = ap.parse_args()
     CACHE_DIR = Path(args.cache_dir)
     AXIS_DIR = Path(args.axis_dir)
+    RANKDISP_DIR = Path(args.dab_rankdisp_dir)
     rng = np.random.default_rng(RNG_SEED)
     act_key = ACTIVATION_KEY[args.activation]
     stat_suffix = "" if args.statistic == "ta" else f"_{args.statistic}"
+    if args.negative_control:
+        stat_suffix += "_negative_control"
     out_path = (Path(args.out) if args.out
                 else OUT / f"axis_alignment_{args.activation}{stat_suffix}_B{args.B}.json")
 
@@ -218,7 +271,8 @@ def main():
           f"B={args.B} | {len(cached)} cached subjects", flush=True)
     rows = []
     for ds_sid in cached:
-        r = _subject(ds_sid, B=args.B, rng=rng, activation=act_key, statistic=args.statistic)
+        r = _subject(ds_sid, B=args.B, rng=rng, activation=act_key,
+                     statistic=args.statistic, negative_control=args.negative_control)
         if r is None:
             continue
         rows.append(r)
@@ -234,8 +288,11 @@ def main():
 
     ok = [r for r in rows if r.get("status") == "ok"]
     epi = [r for r in ok if r["dataset"] == "epilepsiae"]
-    summ = {"activation": args.activation, "B": args.B,
-            "evidence_tier": "Epilepsiae=primary cohort; yuquan=descriptive (1 subject)",
+    summ = {"activation": args.activation, "statistic": args.statistic,
+            "negative_control": args.negative_control, "B": args.B,
+            "evidence_tier": ("D_AB candidate-axis sensitivity; does not replace frozen A-line primary"
+                              if args.statistic == "dab" else
+                              "Epilepsiae=primary cohort; yuquan=descriptive (1 subject)"),
             "n_subjects_ok": len(ok), "epilepsiae_primary": _cohort_stats(epi),
             "yuquan_descriptive": [r for r in ok if r["dataset"] == "yuquan"],
             "per_subject": rows}

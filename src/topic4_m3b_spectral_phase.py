@@ -667,9 +667,22 @@ def op_state_vector(op: OperatingPoint, kernels: Kernels, grid: Grid) -> np.ndar
     }, grid)
 
 
-def field_rhs(z: np.ndarray, grid: Grid, kernels: Kernels, op: OperatingPoint) -> np.ndarray:
+def field_rhs(z: np.ndarray, grid: Grid, kernels: Kernels, op: OperatingPoint, *,
+              gK_field: np.ndarray | None = None, hG_scalar: float = 0.0,
+              eta_K: float = 1.0, eta_G: float = 1.0) -> np.ndarray:
     """Nonlinear 6-field rate RHS, with sigma FROZEN at the op (the linearization holds sigma fixed,
-    matching _char_det). The Jacobian of this map at z* is exactly ``build_jacobian_dense``."""
+    matching _char_det). The Jacobian of this map at z* is exactly ``build_jacobian_dense``.
+
+    ``gK_field``/``hG_scalar``/``eta_K``/``eta_G`` are the SAME g_K/h_G slow-to-ratefield shift that
+    ``solve_operating_point``'s ``_moments()`` applies to muE (M2 Task 4 fix, spec
+    `2026-07-04-topic4-m3v2-2-m2-critical-mode-decomposition-design.md` §4.1). This function
+    previously omitted the shift, so at a SHIFTED op (non-default ``hG_scalar``/``gK_field``) z* was
+    NOT a fixed point of ``field_rhs`` and its finite-diff JVP did not match ``build_jacobian_dense``
+    (the omitted shift moves muE off the point ``op.gE``/``op.gI`` were actually differentiated at).
+    Defaults (``gK_field=None, hG_scalar=0.0``) are BYTE-IDENTICAL to the pre-fix behavior (``muE -
+    eta_G*0.0 == muE``, and the ``gK_field`` branch stays skipped), so every existing caller
+    (unshifted ops) is unaffected.
+    """
     s = unpack_state(z, grid)
     wee = op.wee_mult * W_EE
     q = op.inhibition.q
@@ -678,6 +691,9 @@ def field_rhs(z: np.ndarray, grid: Grid, kernels: Kernels, op: OperatingPoint) -
     muxE = TAU_ME * JX_E * op.nuext
     muxI = TAU_MI * JX_I * op.nuext
     muE = TAU_ME * (C_EE * wee * s["sEE"] - C_EI * wEI * s["sEI"]) + muxE + op.excitability.mu_core
+    muE = muE - eta_G * hG_scalar                       # h_G: global uniform recovery current
+    if gK_field is not None:
+        muE = muE - eta_K * gK_field                     # g_K: per-cell K-current field
     muI = TAU_MI * (C_IE * W_IE * s["sIE"] - C_II * wII * s["sII"]) + muxI
     drE = (-s["rE"] + _phi_field(muE, op.sigmaE, "E")) / TAU_ME
     drI = (-s["rI"] + _phi_field(muI, op.sigmaI, "I")) / TAU_MI

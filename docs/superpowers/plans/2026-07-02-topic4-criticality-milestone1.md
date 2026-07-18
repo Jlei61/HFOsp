@@ -378,7 +378,7 @@ def leading_subspace_indices(eigenvalues, min_sep=1e-3, imag_tol=1e-3):
 def pair_loading(R, idx, grid):
     import numpy as np
     from src.topic4_m3b_spectral_phase import mode_e_field                # #13 STATE-aware helper
-    acc=np.zeros((grid.n,grid.n)); 
+    acc=np.zeros((grid.n,grid.n));
     for k in idx: acc=acc+np.abs(mode_e_field(R[:,k], grid))**2
     return np.sqrt(acc)
 def left_mode_input_projection(L, R, idx, b_core):

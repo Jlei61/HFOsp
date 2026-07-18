@@ -6,6 +6,8 @@
 
 这套图用于展示单个 subject 的间期 HFO group events 如何在时间上反复呈现传播顺序，并如何被无监督聚类压缩成两类传播模板。它是 Fig2 的 subject-level 素材图，不是 cohort-level 统计图，也不是模型/SNN readout 图。
 
+本文件只规范 Fig2-A 的长时序 rank/cluster 素材。Fig2-C 的单事件包络 frame 与 TA/TB GIF 另见 `docs/fig2c_interictal_event_envelope_field_spec.md`；不得把两套 renderer、颜色或 claim 混用。
+
 默认数据源是 masked phantom-rank 修正后的真实数据：
 
 ```bash

@@ -18,6 +18,12 @@
 >
 > **M3A 慢变量边界（2026-06-28 收紧）**：A1b/A2 里的“大范围招募”不能自动叫发作样。若事件仍沿 E→E 长轴相干推进，应降级为 expanded axial recruitment / preictal-like axial expansion；只有出现轴向主导下降、离轴/全局/低-k 招募增强，并且能从高招募态恢复，才进入 ictal-like candidate。
 >
+> **M3 criticality → M4 handoff（2026-07-12）**：M3A-v2.2 criticality M1/M2 已按有界诊断验收：M1 的
+> crossing 时机仍是 `unresolved_operating_point`；M2 支持 **core-localized ignition**，但 nonlinear spread
+> 因扰动强度/极性敏感而保持 `undetermined`。当前主动机制层已经进入 **M4**：M1/M2 的代码可作为 M4
+> frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
+> 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。

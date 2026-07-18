@@ -7,9 +7,9 @@ focus per subject; an average field is a brain that does not exist).
 
   field_concordance_atlas_broadband.png   -- Panel A method schematic + Panel B 18-subject
       paired-field atlas (left = interictal propagation-order field, right = seizure-onset
-      broadband activation field, same colormap, seizure shown in its best sign/mirror so
-      "same colour in the same place = aligned"); sorted by margin |r| - Q95(null); tile border
-      dark = beats the subject's coarse channel-shuffle null, grey = not.
+      broadband activation field). Interictal order uses viridis; early-ictal energy uses Reds
+      (low = pale, high = dark red). Sorted by margin |r| - Q95(null); tile border dark = beats
+      the subject's coarse channel-shuffle null, grey = not.
   field_concordance_null_forest_broadband.png -- Panel C: per subject, the channel-shuffle null
       distribution (grey) + observed |r| (black dot) + null 95th pct (line). Same sort order.
 
@@ -111,21 +111,34 @@ def _align_lookup(activation):
     return {r["subject_id"]: r for r in d.get("per_subject", []) if r.get("status") == "ok"}
 
 
-def _field_panel(ax, xs, ys, vals, support, xlim, ylim, sigma, soz):
+def _field_panel(ax, xs, ys, vals, support, xlim, ylim, sigma, soz, *, cmap="viridis"):
     X, Y, T, _, _ = _smooth_rank_field_mm(xs, ys, vals, support, xlim, ylim, sigma)
     ax.imshow(T, origin="lower", extent=[xlim[0], xlim[1], ylim[0], ylim[1]],
-              aspect="equal", cmap="viridis", vmin=0, vmax=1)
-    ax.scatter(xs, ys, c=vals, cmap="viridis", vmin=0, vmax=1, s=14, zorder=3,
-               edgecolors=["k" if z else "white" for z in soz],
-               linewidths=[1.0 if z else 0.3 for z in soz])
+              aspect="equal", cmap=cmap, vmin=0, vmax=1)
+    xs = np.asarray(xs, float); ys = np.asarray(ys, float)
+    vals = np.asarray(vals, float); soz = np.asarray(soz, bool)
+    finite = np.isfinite(xs) & np.isfinite(ys) & np.isfinite(vals)
+    ax.scatter(xs[finite], ys[finite], c=vals[finite], cmap=cmap, vmin=0, vmax=1,
+               s=14, zorder=3,
+               edgecolors=["k" if z else "white" for z in soz[finite]],
+               linewidths=[1.0 if z else 0.3 for z in soz[finite]])
     ax.set_xlim(*xlim); ax.set_ylim(*ylim); ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values():
         s.set_visible(False)
 
 
-def plot_atlas(rows, activation, ncols=6):
+def plot_atlas(rows, activation, ncols=6, *, title_text=None, subtitle_text=None,
+               output_name=None, output_path=None, preserve_order=False,
+               save_pdf=False, tile_fontsize=9.0):
+    """Render the accepted paired-field atlas visual grammar.
+
+    ``output_path`` and ``preserve_order`` are presentation-only extensions for
+    downstream paper figures.  The legacy caller retains margin sorting and its
+    original output directory.  No field, axis, score, or null is computed here.
+    """
     rows = [r for r in rows if r is not None]
-    rows.sort(key=lambda d: -d["margin"])
+    if not preserve_order:
+        rows.sort(key=lambda d: -d["margin"])
     n = len(rows)
     nrows = int(np.ceil(n / ncols))
     fig = plt.figure(figsize=(ncols * 2.7, 2.0 + nrows * 2.35))
@@ -133,23 +146,21 @@ def plot_atlas(rows, activation, ncols=6):
     gs = fig.add_gridspec(nrows + 1, ncols * 2, height_ratios=[0.5] + [1] * nrows,
                           hspace=0.62, wspace=0.05, left=0.012, right=0.905, top=0.965, bottom=0.03)
     axA = fig.add_subplot(gs[0, :]); axA.axis("off")
-    axA.text(0.5, 0.80, "A-line field concordance across subjects", ha="center", va="center",
+    axA.text(0.5, 0.80, title_text or "A-line field concordance across subjects", ha="center", va="center",
              fontsize=17, fontweight="bold", transform=axA.transAxes)
-    axA.text(0.5, 0.40, f"per subject:  interictal template-rank field   vs   seizure-onset "
+    subtitle = subtitle_text or (f"per subject:  interictal template-rank field   vs   seizure-onset "
              f"{ACTIVATION_LABEL[activation]} activation field"
-             "          r$_s$ = | corr$_{mirror}$( F$_{interictal}$ , F$_{seizure}$ ) |",
+             "          r$_s$ = | corr$_{mirror}$( F$_{interictal}$ , F$_{seizure}$ ) |")
+    axA.text(0.5, 0.40, subtitle,
              ha="center", va="center", fontsize=10.5, transform=axA.transAxes, color="0.2")
-    axA.text(0.5, 0.10, "same colour in the same place (after sign alignment) = same spatial gradient "
-             "— this is field similarity, not direction and not replay",
-             ha="center", va="center", fontsize=9.2, transform=axA.transAxes, color="0.4", style="italic")
     last_im = None
     for k, d in enumerate(rows):
         rr, cc = k // ncols, k % ncols
         axL = fig.add_subplot(gs[rr + 1, 2 * cc])
         axR = fig.add_subplot(gs[rr + 1, 2 * cc + 1])
-        _field_panel(axL, d["xs"], d["ys"], d["inter"], d["support"], d["xlim"], d["ylim"], d["sigma"], d["soz"])
+        _field_panel(axL, d["xs"], d["ys"], d["inter"], d["support"], d["xlim"], d["ylim"], d["sigma"], d["soz"], cmap="viridis")
         vals_s = (1.0 - d["ict"]) if d["sign_neg"] else d["ict"]
-        _field_panel(axR, d["xs"], d["ys"], vals_s, d["support"], d["xlim"], d["ylim"], d["sigma"], d["soz"])
+        _field_panel(axR, d["xs"], d["ys"], vals_s, d["support"], d["xlim"], d["ylim"], d["sigma"], d["soz"], cmap="Reds")
         last_im = axR.images[-1]
         # tile border = passes coarse null?
         edge = "#1a1a1a" if d["passed"] else "#b8b8b8"
@@ -159,23 +170,24 @@ def plot_atlas(rows, activation, ncols=6):
         x1, y1 = bb2.x1 + 0.004, bb.y1 + 0.004
         fig.add_artist(Rectangle((x0, y0), x1 - x0, y1 - y0, transform=fig.transFigure,
                                  fill=False, edgecolor=edge, lw=lw, zorder=10))
-        pretty = d["ds_sid"].replace("epilepsiae_", "E")
+        pretty = (d["ds_sid"].replace("epilepsiae_", "E")
+                  .replace("yuquan_", "Y:"))
         over = f"+{d['margin']:.2f}" if d["passed"] else "n.s."
         fig.text((x0 + x1) / 2, y1 + 0.0015, f"{pretty}   |r| {d['r']:.2f}   {over}",
-                 ha="center", va="bottom", fontsize=9.0,
+                 ha="center", va="bottom", fontsize=tile_fontsize,
                  fontweight=("bold" if d["passed"] else "normal"), color=("#1a1a1a" if d["passed"] else "0.5"))
     if last_im is not None:
         cax = fig.add_axes([0.915, 0.06, 0.014, 0.5])
         cb = fig.colorbar(last_im, cax=cax)
-        cb.set_label("early / low  ->  late / high  (rank-normalized)", fontsize=8.5)
+        cb.set_label("early-ictal energy: low  →  high  (rank-normalized)", fontsize=8.5)
         cb.set_ticks([0, 1]); cb.set_ticklabels(["0", "1"])
-    fig.text(0.46, 0.005, "left = interictal propagation order   |   right = seizure-onset activation "
-             "(best sign/mirror)   ·   black ring = clinical SOZ contact   ·   dark frame = beats the "
-             "subject's own channel-shuffle null   ·   sorted by margin   ·   Epilepsiae, template A, "
-             f"{activation} 0-10 s", ha="center", fontsize=7.6, color="0.4")
-    OUT.mkdir(parents=True, exist_ok=True)
-    out = OUT / f"field_concordance_atlas_{activation}.png"
+    out = Path(output_path) if output_path is not None else (
+        OUT / (output_name or f"field_concordance_atlas_{activation}.png")
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=160, bbox_inches="tight")
+    if save_pdf:
+        fig.savefig(out.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
     return out, len(rows)
 

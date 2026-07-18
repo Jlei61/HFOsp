@@ -33,6 +33,17 @@
 
 一个面板答一个独立科学问题。同一构造的两种角度 = 冗余，删一个。X-vs-Y 联合散点只在「边际 X、边际 Y 各自看不出耦合」时才用。
 
+**0.4 论文主图定稿纪律（Fig. 1 对话锁定，2026-07-15）**
+
+- **复用原 producer，不在拼版脚本里自由发挥**：已有统计图、rank distribution、heatmap 或显著性标记函数时，正式 panel 必须直接调用原函数或做向后兼容的小参数扩展。若视觉结果与旧图不同，先核数据合同、channel order、坐标映射和 helper 调用，不先重写一种“相似画法”。
+- **同类谱图共用算法**：同一 figure 中承担对照关系的 spectrogram 必须使用同一显示量、平滑和归一化定义。质心必须从画布实际显示的高频增强量计算，并落在主增强连通区，不能用另一套权重或全局质心落到能量谷中；STFT cell、marker 与 x 轴必须共用真实坐标，左右边界不得出现自动白边。
+- **坐标起点与留白**：当量的自然下界是 0（ROC、MI、matching-uplift 等）时，正式主图 x/y 轴从 0 起。time heatmap、spectrogram 和 waveform 用显式 `xlim`/cell edges，并关闭自动 x margin。紧凑不是压缩信息：rank ridgeline 要保留原始可读宽度和形状。
+- **跨子图数据必须可核对**：同一案例的原序图和聚类重排图必须来自同一 subject、同一有效 event 全集；各 cluster 的 `n` 之和必须等于原序图的 `n`。heatmap、rank distribution 和 centroid/profile 必须共享 channel order、`ylim` 和通道中心，禁止各自排序后视觉错位。
+- **布局先对齐再装饰**：需要联合阅读的 c1/c2 放在同一文件，上下等长、列宽对齐、间距收紧；共享 colorbar 紧贴主图并放在读图顺序合理的位置。cluster 分割使用清楚的白色断带/断轴语法，必要时加灰色斜线表示省略区，不用红线冒充数据边界。
+- **主图画布只留读者需要的信息**：不要在主图标题写 `40/40`、事件总数句、内部 MI/inter-template 状态或 `events over time` 一类工程说明；这些放 caption、README 或 metadata。统计量统一用论文缩写（如 `MI`），dataset label 使用常规字重并贴近轴；标题、图例和注释不得遮挡数据点。
+- **统计图保留完整统计语法**：data-vs-null 图沿用已验证的 violin/box、whisker、subject points、error representation 和显著性括号；不得为了“简洁”删掉 p 值显著性层或不确定性。散点比较图保留零起点、参考对角线、具有含义的灰色区域和颜色图例，annotation 放在无数据区。
+- **最终检查顺序固定**：render 后同时目视 PNG 与核对 metadata；逐项检查算法一致、事件数守恒、channel 对齐、marker 注册、坐标零点、白边、标题/图例遮挡和字体层级，再生成 PDF 并提交。
+
 ---
 
 ## Topic 1 · 间期事件「按什么顺序传」
@@ -83,6 +94,34 @@
   - 两模板上下堆叠，直接看出 t_a 与 t_b 的梯度方向相反。
 - **标题约定**：`<dataset>:<subject> | t_a top, t_b bottom | SOZ overlay only, not metric input`。
 
+### 3b. Template A/B 主方向 + 解剖读出
+
+- **示范图**：[`results/paper-ready-figure/fig_interictal_ab_direction_axis/figures/yuquan_example_interictal_ab_direction_axis.png`](../results/paper-ready-figure/fig_interictal_ab_direction_axis/figures/yuquan_example_interictal_ab_direction_axis.png)
+- **复现入口**：`scripts/paper_figures/plot_interictal_ab_direction_axis.py`。
+- **回答**：两类模板是否各自形成稳定的三维 earliness gradient；两条轴是否近似共线；在共线时，A/B 真正的 `early → late` 传播方向是否同向或反向；这些方向覆盖哪些脑区。
+- **方法锁**：A/B 先分别拟合 `e_T=-z(rank_T)` 的三维梯度 `g_T`，正式传播向量固定为 `u_T=-g_T`。producer 的 `u` 与所有箭头都必须表示 early→late；原始晚→早梯度只能写作 `earliness_gradient_u`，绘图层不得再次取负。只有两轴都过冻结 QC 且 `|cos(u_A,u_B)|>=0.5` 才画共享直线。`D_AB` 只作触点相对早晚对比着色，不直接当传播箭头。
+- **布局**：左上 A/B 两个 contact-scale rank-vs-axis 拟合；左下为区域级 temporal-order overlay；右侧为 subject-native 透明脑表面、真实电极杆与红/蓝 early-to-late 箭头。SOZ 仍用黑环，并写明 overlay only。
+- **解剖边界**：区域名称不参与轴拟合或定向。主触点池不足以解析 region route 时必须写 `not resolved`；expanded-contact 版本只能叫 sensitivity。要写“复用了自然解剖梯度”，还需 cohort-level region transition，并用杆内触点 shuffle + 整杆 profile 重分配两级几何 null 分开检验杆内深度梯度与跨杆区域路线。
+
+### 3c. 患者特异 TA/TB 间期传播场（Fig2-E 候选）
+
+- **完整规范**：[`docs/topic5_interictal_field_figure_spec.md`](topic5_interictal_field_figure_spec.md)。后续所有间期 TA/TB 场图均以该文件为唯一视觉合同。
+- **示范图**：[`results/paper-ready-figure/fig2e_interictal_template_fields/figures/epilepsiae_1146_interictal_AB.png`](../results/paper-ready-figure/fig2e_interictal_template_fields/figures/epilepsiae_1146_interictal_AB.png)。
+- **复现入口**：`scripts/plot_topic5_interictal_template_ab_fields.py`；完整图复用 `plot_interictal_ab_subject()` / `plot_interictal_ab_atlas()`，拼版复用 `build_interictal_ab_panel_payloads()` / `draw_interictal_rank_field_panel()`，底层场只调用 `draw_topic5_field_panel()`。
+- **硬锁**：正式轴只读冻结 artifact 的 early→late `u`；共线才用 shared plane，否则用各自 own plane；transverse 只按电极几何定号；显示核固定 6 mm 且不得冒充评分 kernel；viridis 0=early/1=late；单患者只用一个共享 xlabel、一个 y 轴和一个与 field 等高的 colorbar。
+- **禁止**：不复制 renderer，不按颜色翻轴，不强行让 TA/TB 共面，不把单杆图解释为二维 field，不把这张间期图写成发作场一致性证据。
+
+### 3d. 间期单事件包络传播 frame / GIF（Fig2-C 候选）
+
+- **唯一规范**：[`docs/fig2c_interictal_event_envelope_field_spec.md`](fig2c_interictal_event_envelope_field_spec.md)。之后所有“间期传播场 frame / event-envelope GIF”先读该文件；不要套用静态模板场 Fig2-E 的 viridis/rank 语法。
+- **示范图**：[`results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png`](../results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png)。
+- **动态 sidecar**：同目录 `fig2c_candidate_E1146_interictal_event_envelope_field.gif`。
+- **复现入口**：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py --subject epilepsiae_1146`；core renderer 为 `scripts/plot_topic5_interictal_event_envelope_field.py`。
+- **视觉硬锁**：两行 TA/TB；左侧为方形 Fig1a readout，右侧为 6 个等高方形 frame；静态时间只到 +50 ms；包络用 `magma`，TA/TB 共享 `vmax`、各有等高 colorbar；TA 红/TB 蓝；标题只写匿名患者号；所有 frame 保留 x ticks。
+- **数据硬锁**：frozen fingerprint/contact order/shared plane 不重拟合；单带 `return_hil_enve`；participant-only support；6 mm 只作 display kernel；GIF 与静态图使用同一 exemplar/几何/色标，2 ms biological step 与 playback fps 分开记录。
+- **适用范围硬锁**：这是单事件规范——TA/TB 每行各一个 exemplar。未来多事件 GIF 必须另立事件边界、事件间隔、逐事件 t0 和抽样合同，不得把 event train 塞进本 renderer。
+- **禁止**：不称 template-free，不把 Hilbert amplitude 写成 power，不把单被试两次事件写成 cohort 传播定律、跨未采样组织的 traveling wave 或机制证明。
+
 ---
 
 ## Topic 4 · 机制模型（SEF-HFO / cm-SNN）
@@ -125,10 +164,60 @@
 
 ---
 
-## Topic 5 · 亚型 / ictal 回响（暂不锁定）
+## Topic 5 · ictal field readout / peri-onset trajectory
 
-Topic 5 仍在探索期，canonical 图型待结论稳定后再补。现有候选见 `results/FIGURE_INDEX.md` 的 Topic 5 段
-（`topic5_ictal_template_echo/`、`topic1_topic5_bridge/` 等），暂按个案处理，不强制统一布局。
+Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field readout 图型先锁定。其它候选见
+`results/FIGURE_INDEX.md` 的 Topic 5 段，暂按个案处理，不强制统一布局。
+
+### 5a. Fig3-B：peri-onset field similarity trajectory
+
+- **示范图**：[`results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png`](../results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png)
+- **复现入口**：`scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py --subject epilepsiae_1146`
+- **上游数据**：`results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv`
+- **上游生成命令**：`python scripts/plot_topic5_signed_broadband_similarity_timecourse.py --subject epilepsiae_1146 --start-sec -120 --stop-sec 20 --band-lo 1 --band-hi 150 --window-sec 10 --step-sec 2`
+- **全 subject 批处理**：`scripts/paper_figures/run_fig3_peri_onset_all_subjects.py`（fail-closed 逐 subject 跑上面两步，一个 subject 失败不中断整批）；主索引 `results/paper-ready-figure/fig3_peri_onset_field_similarity/fig3_peri_onset_subject_index.{csv,json}` 汇总每 subject 的 status / drop_reason / n_seizures / n_windows / maxAB + signed A/B 摘要 / 输出路径。当前 20/35 出图，15 因缺上游 T0 eligibility 缓存 drop。每 subject 同一 locked 布局；这是 per-subject material pool，非 formal cohort gate。
+- **回答**：在同一 subject 的多次 seizure 中，onset 前后 1-150 Hz signed robust-z 能量场是否持续接近间期 propagation field scaffold；以及这种接近是否有稳定的 signed A/B polarity。
+- **布局（单行双面板）**：
+  - Panel a：`max(|r_A|, |r_B|)`，即 sign-free maxAB scaffold similarity。
+  - Panel b：signed `r_A` 与 signed `r_B`，分别对应 template A/B。
+  - 两个 panel 都使用同一时间范围、同一窗口定义、同一 seizure 集合。
+- **时间轴合同**：
+  - 数据窗口固定为 `[-120,+20]s`，10 s sliding window，2 s step。
+  - x 轴画 **window center**，因此当前显示中心范围是 `[-115,+15]s`。
+  - `xlim` 必须贴第一个/最后一个 window center，不留 Matplotlib 自动白边。
+  - 0 s 用灰色虚线标 clinical onset。
+  - 不把 `+20s` 之后的发作中轨迹直接接上；完整发作期比较必须先做 duration warping 或阶段对齐。
+- **线型 / 统计显示**：
+  - 浅细线：单次 seizure trajectory，低 alpha，只作为异质性背景。
+  - 粗线：跨 seizure median，是主视觉读出。
+  - 阴影：跨 seizure IQR；不要用 mean±SD 作主图阴影。
+  - 不画诊断下排。跨 seizure variance、`n_seizures`、drop 信息写入 summary JSON / README。
+- **配色**：
+  - maxAB：Morandi rust `#A35E48`。
+  - template A：红 `#B2182B`。
+  - template B：蓝 `#2166AC`。
+  - 单次 seizure：浅灰；不要让个体线压过 median/IQR。
+- **禁止事项**：
+  - 不用 step 图作为 paper-ready 主版；step 只可用于检查窗口边界。
+  - 不把 `maxAB |r|` 和 signed A/B 混成一个指标。
+  - 不用 1-45 Hz cache 顶替 1-150 Hz；Fig3-B 的 1-150 Hz 特征 = notch 滤波输入（50/100/150/200Hz）后对 `[1,150]` 全 bin 求和、**无额外 FFT-bin line mask**（区别于 Fig3-A / v2 的额外 bin-mask 版本，谐波处理不同——别把两者当同一合同）；用别的频段要明确标注。
+  - 不把 signed A/B sidecar 写成 formal gate；当前 formal-ish scaffold 读出仍是 sign-free / maxAB 语义。
+  - 不写 replay、direction replay、timing-order replay、mechanism proof。
+
+**当前口径**：这类图是 Fig3 field concordance 的 subject-level 动态素材。Panel a 支持 coarse scaffold similarity 在 onset-near 时间轴上持续偏高；Panel b 说明 signed polarity 在 seizure 间是否稳定，只能作为 polarity sidecar。
+
+### 5b. Fig3-B maxAB 空间置换 null（两档）+ 时间维校正
+
+- **示范图**：`.../spatial_null/figures/epilepsiae_548_maxab_spatial_null.png`（观测远高 all-contact null 但**整段贴 within-shaft null**＝相似几乎全是杆几何，反例）与 `epilepsiae_1146_...png` / `epilepsiae_922_...png`（扛过 within-shaft + maxT 的稳健正例）。
+- **复现入口**：`python scripts/run_topic5_fig3b_maxab_spatial_null.py --all-ok`（`--skip-existing` 断点续；`--rebuild-from-stats` 从 `.npz` 只重算校正+重画不重跑；`--verify` 校验向量化读出与 exact `score()` 一致到机器精度）。
+- **回答**：某 subject 发作前后 maxAB scaffold similarity 是否高于**保留植入几何**的空间置换——即高相似是不是电极摆放（尤其杆级）自带的。**只检验 maxAB scaffold**，不做 onset increment / signed A/B / 多频带。
+- **两个 null（承重合同；都：同批 seizure / 时间窗 / A|B 模板 / 场平滑 sigma / maxAB 逻辑，只打乱每窗 per-channel 能量值[值换位、support 随位置不动]、完整重跑 值→`make_field_record`→support 加权平滑→镜像不变相关→`max(|r_A|,|r_B|)`、对 seizure 取中位、每次 seizure 独立置换、R=1000；禁止只洗已算好的 maxAB）**：
+  - **all-contact**（弱，`channel_shuffle`）：值在**全部触点**间打乱。
+  - **within-shaft**（强，主，`within_shaft_shuffle`）：值只在**每根杆内**打乱，保留"哪根杆热"的植入几何。
+- **三档显著性（stats CSV 里两 null 各一套，都单侧上尾）**：pointwise（逐窗 `(1+#{null≥obs})/(R+1)`，未校正）< maxT（逐窗 FWER，Nichols-Holmes 标准化 z 的窗间 max）< cluster（Maris-Oostenveld，cluster-forming=pointwise p<0.05、mass=Σz、null=每 perm 最大 cluster mass；时间维、对持续抬升敏感＝paper-facing"显著区间"）。
+- **布局（单面板）**：粗 rust=观测中位、浅 rust 带=观测 IQR；蓝虚线+蓝带=within-shaft null 中位+95%；灰点线=all-contact null 中位（仅参考）；浅 rust 竖带=within-shaft **cluster 显著区间**；蓝三角=within-shaft **maxT 显著窗**；0 s 灰虚线；图例左下不遮数据。
+- **读法（三条承重边界）**：观测 rust 是否**离开蓝色 within-shaft null 带**并成 cluster。⚠️(1) **高于 all-contact ≠ 高于 within-shaft**——E548 all-contact pointwise 64/66 但 within-shaft cluster 0（相似几乎全是杆几何）；(2) **within-shaft null 分辨力依赖每根杆触点数**（见 `summary.shaft_structure` / index `n_singleton_shafts`）——单触点杆多则 within-shaft 偏弱、两 null 可能非严格嵌套（如 E1150 3/4 杆单触点）；(3) **maxT 很严苛**（只逐窗强峰过）、**cluster 对持续抬升敏感**，报告时说清是哪一档。
+- **tier**：per-subject 素材，非 formal cohort spatial gate；不写 replay / timing-order / mechanism。
 
 ---
 

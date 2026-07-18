@@ -8,13 +8,13 @@ MI/uplift. Spatial-axis evidence belongs to the next main figure.
 Each scientific message is rendered as its own file under the strict
 ``fig1-panel<id>`` naming so the panels can be assembled externally:
 
-    fig1-panela   group-event phenomenon (reused Y3 demo, copied verbatim)
+    fig1-panela1  legacy manually annotated HFO morphology set (n=178)
+    fig1-panela2  group-event phenomenon (reused Y3 demo, copied verbatim)
     fig1-panelb1  Yuquan refined-HFO count -> clinical SOZ ROC
     fig1-panelb2  Epilepsiae refined-HFO count -> clinical SOZ ROC
-    fig1-panelc1  exemplar temporal order heatmap + rank distribution
-    fig1-panelc2  exemplar TA/TB clustered heatmap + mean rank
+    fig1-panelc   aligned c1 temporal-order row + c2 TA/TB clustered row
     fig1-paneld1  MI data vs permutation null (40 subjects)   [masked shared-participant]
-    fig1-paneld2  within-template Kendall-tau uplift (40 subjects)
+    fig1-paneld2  within-template matching-index uplift (40 subjects)
 
 No composite is emitted. The across-time reproducibility (split-half/odd-even)
 panel is intentionally not part of Figure 1.
@@ -36,6 +36,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+from matplotlib.lines import Line2D
 import numpy as np
 
 
@@ -55,6 +56,11 @@ DEFAULT_GROUP_EVENT = (
     ROOT
     / "results/paper-ready-figure/fig1_hfo_group_event_demo/figures"
     / "yuquan_y3_hfo_group_event_demo.png"
+)
+DEFAULT_SINGLE_HFO = (
+    ROOT
+    / "results/paper-ready-figure/fig1_hfo_group_event_demo/figures"
+    / "legacy_hfo_n178_schematic.png"
 )
 MASKED_ROOT = ROOT / "results/interictal_propagation_masked"
 HFO_ROOT = ROOT / "results/hfo_detection"
@@ -109,30 +115,48 @@ def _save_panel(fig: plt.Figure, output_dir: Path, stem: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# Panel a: reuse the Y3 group-event demo verbatim
+# Panel a: legacy HFO morphology set (a1) + Y3 group-event demo (a2)
 # ---------------------------------------------------------------------------
-def _render_panel_a(output_dir: Path, group_event_png: Path) -> dict:
-    files: list[str] = []
-    for suffix in (".png", ".pdf"):
-        src = group_event_png.with_suffix(suffix)
-        if not src.exists():
-            continue
-        dst = output_dir / f"fig1-panela{suffix}"
-        shutil.copyfile(src, dst)
-        files.append(str(dst.relative_to(ROOT)))
-    if not files:
-        raise FileNotFoundError(f"Panel a source not found: {group_event_png}")
+def _render_panel_a(output_dir: Path, single_hfo_png: Path, group_event_png: Path) -> dict:
+    def _copy(src_png: Path, stem: str) -> list[str]:
+        files: list[str] = []
+        for suffix in (".png", ".pdf"):
+            src = src_png.with_suffix(suffix)
+            if not src.exists():
+                continue
+            dst = output_dir / f"{stem}{suffix}"
+            shutil.copyfile(src, dst)
+            files.append(str(dst.relative_to(ROOT)))
+        if not files:
+            raise FileNotFoundError(f"Panel {stem} source not found: {src_png}")
+        return files
+
     return {
-        "panel_id": "a",
-        "files": files,
-        "producer": "scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py",
-        "reused_from": str(group_event_png.relative_to(ROOT)),
-        "public_patient_label": "Yuquan Y3",
-        "artifacts": [
-            "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf",
-            "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz",
-            "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy",
-        ],
+        "a1": {
+            "panel_id": "a1",
+            "files": _copy(single_hfo_png, "fig1-panela1"),
+            "producer": "scripts/paper_figures/plot_fig1_single_hfo_schematic.py",
+            "reused_from": str(single_hfo_png.relative_to(ROOT)),
+            "source_set": "legacy manually annotated HFO morphology artifact",
+            "n_hfo_snippets": 178,
+            "artifacts": [
+                "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_pickSigs.npz",
+                "ReplayIED/inter_events/yuquan_24h_perPatientAnalysis_dropRef/zhangkexuan_annot_v4.pik",
+            ],
+            "content": "178 overlaid HFO snippets + yellow mean, raw and baseline-normalized mean spectrograms",
+        },
+        "a2": {
+            "panel_id": "a2",
+            "files": _copy(group_event_png, "fig1-panela2"),
+            "producer": "scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py",
+            "reused_from": str(group_event_png.relative_to(ROOT)),
+            "public_patient_label": "Yuquan Y3",
+            "artifacts": [
+                "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf",
+                "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_gpu.npz",
+                "/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q_packedTimes.npy",
+            ],
+        },
     }
 
 
@@ -210,8 +234,8 @@ def _plot_roc(ax: plt.Axes, dataset: str, rows: list[dict]) -> dict:
     ax.set_title(label, color=color, fontsize=12, fontweight="bold", pad=6)
     ax.set_xlabel("FPR", fontsize=11)
     ax.set_ylabel("TPR", fontsize=11)
-    ax.set_xlim(-0.02, 1.02)
-    ax.set_ylim(-0.02, 1.02)
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, 1.0)
     ax.set_aspect("equal", adjustable="box")
     _style_axis(ax)
     return {
@@ -219,6 +243,7 @@ def _plot_roc(ax: plt.Axes, dataset: str, rows: list[dict]) -> dict:
         "n_subjects": int(len(rows)),
         "mean_subject_auc": float(np.mean(aucs)),
         "median_subject_auc": float(np.median(aucs)),
+        "axis_limits": {"fpr": [0.0, 1.0], "tpr": [0.0, 1.0]},
         "curve_band": "SEM across subject ROC curves after interpolation to 201 FPR points",
         "subjects": [row["subject"] for row in rows],
     }
@@ -253,6 +278,18 @@ def _load_temporal_records() -> list[dict]:
     return records
 
 
+def _assert_masked_mi_records(records: list[dict]) -> None:
+    invalid = []
+    for record in records:
+        if record.get("legacy_mi", {}).get("masked") is not True:
+            invalid.append(f"{record.get('dataset')}:{record.get('subject')}")
+    if invalid:
+        raise ValueError(
+            "Panel D requires masked MI records; unmasked/missing flag for "
+            + ", ".join(invalid)
+        )
+
+
 def _load_exemplar_arrays(record: dict, max_events: int) -> dict:
     dataset = str(record["dataset"])
     subject = str(record["subject"])
@@ -276,6 +313,9 @@ def _load_exemplar_arrays(record: dict, max_events: int) -> dict:
     clustered_order = np.argsort(display_labels, kind="stable")
     clustered_events = display_events[clustered_order]
     clustered_labels = display_labels[clustered_order]
+    clustered_order_all = np.argsort(labels, kind="stable")
+    clustered_events_all = valid_events[clustered_order_all]
+    clustered_labels_all = labels[clustered_order_all]
     corr = np.asarray(adaptive.get("inter_cluster_corr_matrix", []), dtype=float)
     inter_corr = float(corr[0, 1]) if corr.shape == (2, 2) else float("nan")
     p_value = float(record.get("legacy_mi", {}).get("p_value", np.nan))
@@ -294,7 +334,10 @@ def _load_exemplar_arrays(record: dict, max_events: int) -> dict:
         "labels": labels,
         "clustered_events": clustered_events,
         "clustered_labels": clustered_labels,
+        "clustered_events_all": clustered_events_all,
+        "clustered_labels_all": clustered_labels_all,
         "inter_corr": inter_corr,
+        "mi_mean": float(record.get("legacy_mi", {}).get("mi_mean", np.nan)),
         "p_text": p_text,
         "chosen_k": int(adaptive["chosen_k"]),
         "within_cluster_tau": float(adaptive["within_cluster_tau_mean"]),
@@ -302,59 +345,99 @@ def _load_exemplar_arrays(record: dict, max_events: int) -> dict:
     }
 
 
-def _render_exemplar_order(output_dir: Path, arr: dict, display_label: str) -> dict:
-    ranks = arr["ranks"]
-    bools = arr["bools"]
-    channel_order = arr["channel_order"]
-    display_events = arr["display_events"]
-    fig = plt.figure(figsize=(9.8, 4.0), facecolor="white")
-    outer = gridspec.GridSpec(
-        1, 2, figure=fig, width_ratios=[6.0, 1.15], wspace=0.05,
-        left=0.075, right=0.9, bottom=0.14, top=0.8,
-    )
+def _panel_c_row_axes(fig: plt.Figure, outer: gridspec.GridSpec, row: int) -> tuple:
+    """Create identical heatmap/colorbar/summary geometry for one Panel-c row."""
     left = gridspec.GridSpecFromSubplotSpec(
-        2, 1, subplot_spec=outer[0, 0], height_ratios=[20, 1], hspace=0.06,
+        2, 1, subplot_spec=outer[row, 0], height_ratios=[20, 1], hspace=0.06,
     )
-    ax_raw = fig.add_subplot(left[0])
-    ax_strip = fig.add_subplot(left[1], sharex=ax_raw)
-    ax_dist = fig.add_subplot(outer[0, 1])
-    im = propagation_plot._plot_rank_heatmap(
+    colorbar_column = gridspec.GridSpecFromSubplotSpec(
+        2, 1, subplot_spec=outer[row, 1], height_ratios=[20, 1], hspace=0.06,
+    )
+    right = gridspec.GridSpecFromSubplotSpec(
+        2, 1, subplot_spec=outer[row, 2], height_ratios=[20, 1], hspace=0.06,
+    )
+    ax_main = fig.add_subplot(left[0])
+    ax_bottom = fig.add_subplot(left[1], sharex=ax_main)
+    ax_cbar = fig.add_subplot(colorbar_column[0])
+    ax_cbar_dummy = fig.add_subplot(colorbar_column[1])
+    ax_cbar_dummy.axis("off")
+    ax_right = fig.add_subplot(right[0])
+    ax_right_dummy = fig.add_subplot(right[1], sharex=ax_right)
+    ax_right_dummy.axis("off")
+    return ax_main, ax_bottom, ax_cbar, ax_right
+
+
+def _place_panel_c_colorbar(fig: plt.Figure, image, ax_cbar: plt.Axes) -> None:
+    cbar = fig.colorbar(image, cax=ax_cbar, orientation="vertical")
+    pos = ax_cbar.get_position()
+    ax_cbar.set_position([pos.x0 - 0.018, pos.y0, pos.width, pos.height])
+    cbar.set_label("First → Last", fontsize=10.5)
+    cbar.ax.tick_params(labelsize=8.5, length=2)
+
+
+def _render_exemplar_panel(
+    output_dir: Path,
+    c1_arr: dict,
+    c1_display_label: str,
+    c2_arr: dict,
+    c2_display_label: str,
+) -> dict:
+    fig = plt.figure(figsize=(11.6, 6.8), facecolor="white")
+    outer = gridspec.GridSpec(
+        2,
+        3,
+        figure=fig,
+        width_ratios=[8.4, 0.16, 1.35],
+        height_ratios=[1, 1],
+        hspace=0.22,
+        wspace=0.13,
+        left=0.065,
+        right=0.985,
+        bottom=0.07,
+        top=0.94,
+    )
+
+    # c1: time-ordered masked events + original overlapping rank ridgelines.
+    ax_raw, ax_strip, ax_cbar1, ax_dist = _panel_c_row_axes(fig, outer, 0)
+    ranks = c1_arr["ranks"]
+    bools = c1_arr["bools"]
+    channel_order = c1_arr["channel_order"]
+    display_events = c1_arr["display_events"]
+    im1 = propagation_plot._plot_rank_heatmap(
         ax_raw,
         ranks[channel_order][:, display_events],
-        arr["ordered_names"],
-        title="Events over time",
+        c1_arr["ordered_names"],
+        title="",
         display_bools=bools[channel_order][:, display_events],
-        ytick_fontsize=8,
+        ytick_fontsize=9.5,
         title_fontsize=12,
         xtick_fontsize=8,
     )
     ax_raw.tick_params(axis="x", labelbottom=False)
     ax_raw.set_xlabel("")
-    propagation_plot._plot_daynight_strip(ax_strip, arr["day_mask"])
-    ax_strip.set_xlabel("Population events (time-ordered)  ·  strip: day (white) / night (black)", fontsize=8)
+    propagation_plot._plot_daynight_strip(ax_strip, c1_arr["day_mask"])
+    ax_strip.set_xlabel(
+        "Population events (time-ordered)  ·  strip: day (white) / night (black)",
+        fontsize=10.5,
+    )
     propagation_plot._plot_rank_histogram(
         ax_dist,
         ranks,
         bools,
-        arr["valid_events"],
-        np.arange(ranks.shape[0], dtype=int),
-        arr["channel_names"],
+        c1_arr["valid_events"],
+        channel_order,
+        c1_arr["channel_names"],
         title="Rank dist.",
         show_ylabels=False,
-        label_fontsize=8,
+        label_fontsize=10.5,
         title_fontsize=10,
-        xtick_fontsize=7,
+        xtick_fontsize=8.5,
     )
-    cbar = fig.colorbar(im, ax=ax_dist, orientation="vertical", fraction=0.14, pad=0.2)
-    cbar.set_label("First → Last", fontsize=8)
-    cbar.ax.tick_params(labelsize=7, length=2)
+    _place_panel_c_colorbar(fig, im1, ax_cbar1)
     ax_raw.text(
         0.006,
         1.07,
-        (
-            f"{display_label}  |  n={arr['valid_events'].size:,}  |  "
-            f"inter-template r={arr['inter_corr']:.2f}  |  MI {arr['p_text']}"
-        ),
+        f"{c1_display_label}  |  n={c1_arr['valid_events'].size:,}",
         transform=ax_raw.transAxes,
         ha="left",
         va="bottom",
@@ -362,101 +445,134 @@ def _render_exemplar_order(output_dir: Path, arr: dict, display_label: str) -> d
         fontweight="bold",
     )
     _panel_label(ax_raw, "c1", x=-0.06, y=1.22)
-    files = _save_panel(fig, output_dir, "fig1-panelc1")
-    return {
-        "panel_id": "c1",
-        "files": files,
-        "producer_source": "scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style",
-        "record": f"results/interictal_propagation_masked/per_subject/{arr['dataset']}_{arr['subject']}.json",
-        "public_patient_label": display_label,
-        "n_valid_events": int(arr["valid_events"].size),
-        "displayed_events": int(arr["display_events"].size),
-        "masked_features": True,
-        "daynight_strip": True,
-        "inter_template_spearman_r": arr["inter_corr"],
-        "mi_p_display": arr["p_text"],
-    }
 
-
-def _render_exemplar_template(output_dir: Path, arr: dict) -> dict:
-    ranks = arr["ranks"]
-    bools = arr["bools"]
-    channel_order = arr["channel_order"]
-    clustered_events = arr["clustered_events"]
-    fig = plt.figure(figsize=(9.8, 4.0), facecolor="white")
-    outer = gridspec.GridSpec(
-        1, 2, figure=fig, width_ratios=[6.0, 1.15], wspace=0.05,
-        left=0.075, right=0.9, bottom=0.15, top=0.74,
-    )
-    ax_cluster = fig.add_subplot(outer[0, 0])
-    ax_mean = fig.add_subplot(outer[0, 1])
-    im = propagation_plot._plot_rank_heatmap(
+    # c2: clustered opposing templates. No metric/header title is displayed.
+    ax_cluster, ax_cluster_dummy, ax_cbar2, ax_mean = _panel_c_row_axes(fig, outer, 1)
+    ax_cluster_dummy.axis("off")
+    ranks = c2_arr["ranks"]
+    bools = c2_arr["bools"]
+    channel_order = c2_arr["channel_order"]
+    clustered_events = c2_arr["clustered_events_all"]
+    im2 = propagation_plot._plot_rank_heatmap(
         ax_cluster,
         ranks[channel_order][:, clustered_events],
-        arr["ordered_names"],
+        c2_arr["ordered_names"],
         title="",
         display_bools=bools[channel_order][:, clustered_events],
-        ytick_fontsize=8,
+        ytick_fontsize=9.5,
         title_fontsize=12,
         xtick_fontsize=8,
     )
+    cluster_boundary = int(np.sum(c2_arr["clustered_labels_all"] == 0))
+    gap_half_width = max(24, int(round(0.006 * clustered_events.size)))
+    ax_cluster.axvspan(
+        cluster_boundary - gap_half_width,
+        cluster_boundary + gap_half_width,
+        facecolor="white",
+        edgecolor="0.62",
+        hatch="////",
+        linewidth=0.0,
+        zorder=12,
+    )
+    ax_cluster.plot(
+        [cluster_boundary - gap_half_width, cluster_boundary + gap_half_width],
+        [0.0, 0.0],
+        transform=ax_cluster.get_xaxis_transform(),
+        color="white",
+        lw=4,
+        solid_capstyle="butt",
+        clip_on=False,
+        zorder=13,
+    )
     propagation_plot._plot_cluster_boundaries(
         ax_cluster,
-        arr["clustered_labels"],
+        c2_arr["clustered_labels_all"],
         ranks.shape[0],
         line_color="#d00000",
-        line_width=4.0,
+        line_width=0.0,
         line_style="-",
         label_fontsize=10,
         label_box=False,
-        boundary_band=True,
+        boundary_band=False,
         label_names=["TA", "TB"],
         label_y_offset=0.5,
     )
-    ax_cluster.set_xlabel("Population events (clustered)", fontsize=9)
+    ax_cluster.set_xlabel("Population events (clustered)", fontsize=10.5)
     propagation_plot._plot_cluster_rank_fig4(
         ax_mean,
         ranks,
         bools,
-        arr["valid_events"],
-        arr["labels"],
+        c2_arr["valid_events"],
+        c2_arr["labels"],
         channel_order,
-        arr["channel_names"],
-        title="Mean rank",
-        label_fontsize=8,
+        c2_arr["channel_names"],
+        title="",
+        label_fontsize=10.5,
         title_fontsize=10,
-        xtick_fontsize=7,
+        xtick_fontsize=8.5,
         legend_fontsize=7,
         show_legend=False,
         invert_yaxis=False,
         show_ylabels=False,
+        marker_size=3.5,
     )
-    cbar = fig.colorbar(im, ax=ax_mean, orientation="vertical", fraction=0.14, pad=0.2)
-    cbar.set_label("First → Last", fontsize=8)
-    cbar.ax.tick_params(labelsize=7, length=2)
-    fig.text(
-        0.075,
-        0.95,
-        (
-            f"KMeans k={arr['chosen_k']}  |  within-template τ={arr['within_cluster_tau']:.3f}  |  "
-            f"overall τ={arr['overall_tau']:.3f}  |  inter-corr={arr['inter_corr']:.2f}"
-        ),
-        ha="left",
-        va="top",
-        fontsize=9.5,
-        fontweight="bold",
-    )
-    _panel_label(ax_cluster, "c2", x=-0.06, y=1.18)
-    files = _save_panel(fig, output_dir, "fig1-panelc2")
+    _place_panel_c_colorbar(fig, im2, ax_cbar2)
+    _panel_label(ax_cluster, "c2", x=-0.06, y=1.16)
+
+    for stale_stem in ("fig1-panelc1", "fig1-panelc2"):
+        for suffix in (".png", ".pdf"):
+            (output_dir / f"{stale_stem}{suffix}").unlink(missing_ok=True)
+    files = _save_panel(fig, output_dir, "fig1-panelc")
     return {
-        "panel_id": "c2",
+        "panel_id": "c",
         "files": files,
         "producer_source": "scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style",
-        "record": f"results/interictal_propagation_masked/per_subject/{arr['dataset']}_{arr['subject']}.json",
-        "masked_features": True,
-        "chosen_k": arr["chosen_k"],
-        "within_cluster_tau": arr["within_cluster_tau"],
-        "overall_tau": arr["overall_tau"],
+        "layout": "c1 above c2; identical heatmap/colorbar/right-summary column geometry",
+        "figure_size_inches": [11.6, 6.8],
+        "axis_label_fontsize_points": 10.5,
+        "channel_label_fontsize_points": 9.5,
+        "colorbar_label_fontsize_points": 10.5,
+        "same_subject_in_c1_c2": True,
+        "panel_column_order": ["event_heatmap", "colorbar", "rank_summary"],
+        "separate_c1_c2_files_emitted": False,
+        "subpanels": {
+            "c1": {
+                "record": f"results/interictal_propagation_masked/per_subject/{c1_arr['dataset']}_{c1_arr['subject']}.json",
+                "public_patient_label": c1_display_label,
+                "n_valid_events": int(c1_arr["valid_events"].size),
+                "displayed_events": int(c1_arr["display_events"].size),
+                "masked_features": True,
+                "daynight_strip": True,
+                "header_fields": ["public_patient_label", "n_valid_events"],
+                "masked_mi_mean": c1_arr["mi_mean"],
+                "rank_distribution_helper": "scripts/plot_interictal_propagation.py::_plot_rank_histogram",
+                "rank_distribution_scaling": "original overlapping probability-normalized ridgeline",
+                "rank_distribution_channel_order": c1_arr["ordered_names"],
+            },
+            "c2": {
+                "record": f"results/interictal_propagation_masked/per_subject/{c2_arr['dataset']}_{c2_arr['subject']}.json",
+                "public_patient_label": c2_display_label,
+                "n_valid_events": int(c2_arr["valid_events"].size),
+                "displayed_events": int(c2_arr["clustered_events_all"].size),
+                "cluster_counts": {
+                    str(cluster_id): int(np.sum(c2_arr["labels"] == cluster_id))
+                    for cluster_id in np.unique(c2_arr["labels"])
+                },
+                "all_valid_events_displayed": True,
+                "cluster_separator": {
+                    "style": "white gap with gray diagonal hatch and interrupted x-axis spine",
+                    "boundary_event_index": cluster_boundary,
+                    "gap_half_width_events": gap_half_width,
+                },
+                "mean_rank_marker_size_points": 3.5,
+                "masked_features": True,
+                "chosen_k": c2_arr["chosen_k"],
+                "within_cluster_tau": c2_arr["within_cluster_tau"],
+                "overall_tau": c2_arr["overall_tau"],
+                "inter_template_spearman_r": c2_arr["inter_corr"],
+                "displayed_header": "",
+            },
+        },
     }
 
 
@@ -464,45 +580,53 @@ def _render_exemplar_template(output_dir: Path, arr: dict) -> dict:
 # Panel d: cohort MI (d1) and within-template uplift (d2)
 # ---------------------------------------------------------------------------
 def _plot_mi(ax: plt.Axes, records: list[dict]) -> dict:
+    import scipy.stats as st
+
     colors = {"yuquan": COL_YQ, "epilepsiae": EPI_STAT_COLOR}
-    positions = {"yuquan": (0.0, 0.75), "epilepsiae": (2.0, 2.75)}
+    positions = {"yuquan": (0.0, 0.6), "epilepsiae": (1.8, 2.4)}
     summary = {}
-    for dataset in ("yuquan", "epilepsiae"):
+    bracket_tops = []
+    for group_index, dataset in enumerate(("yuquan", "epilepsiae")):
         subset = [r for r in records if r.get("dataset") == dataset]
         data = np.asarray([r["legacy_mi"]["mi_mean"] for r in subset], dtype=float)
         null = np.asarray([r["legacy_mi"]["permuted_mean_median"] for r in subset], dtype=float)
         x_data, x_null = positions[dataset]
-        vp = ax.violinplot([data, null], positions=[x_data, x_null], widths=0.55, showextrema=False)
-        for body in vp["bodies"]:
-            body.set_facecolor(colors[dataset])
-            body.set_edgecolor("none")
-            body.set_alpha(0.22)
-        jitter = np.linspace(-0.10, 0.10, len(data)) if len(data) else np.array([])
-        ax.scatter(x_data + jitter, data, s=12, color=colors[dataset], alpha=0.8, edgecolors="white", linewidths=0.25)
-        ax.scatter(x_null + jitter, null, s=10, color="0.55", alpha=0.65, edgecolors="none")
-        ax.plot([x_data - 0.18, x_data + 0.18], [np.median(data)] * 2, color="black", lw=1.2)
-        ax.plot([x_null - 0.18, x_null + 0.18], [np.median(null)] * 2, color="black", lw=1.2)
+        propagation_plot._violin_with_scatter(
+            ax, data, x_data, colors[dataset], width=0.5,
+            scatter_size=26, rng_seed=42 + group_index,
+        )
+        propagation_plot._violin_with_scatter(
+            ax, null, x_null, "#BBBBBB", width=0.5,
+            scatter_size=13, alpha_body=0.15, rng_seed=99 + group_index,
+        )
+        _, p_value = st.mannwhitneyu(data, null, alternative="greater")
+        bracket_y = float(max(np.max(data), np.max(null)) + 0.025)
+        propagation_plot._add_significance_bracket(
+            ax, x_data, x_null, bracket_y, float(p_value),
+            dy=0.015, fontsize=11,
+        )
+        bracket_tops.append(bracket_y + 0.045)
         summary[dataset] = {
             "n": len(subset),
             "n_significant": int(sum(bool(r["legacy_mi"]["significant"]) for r in subset)),
             "data_median": float(np.median(data)),
             "null_median": float(np.median(null)),
+            "p_value_mannwhitney_greater": float(p_value),
+            "all_mi_records_masked": bool(all(r["legacy_mi"].get("masked") is True for r in subset)),
         }
-    ax.set_xticks([0.0, 0.75, 2.0, 2.75])
-    ax.set_xticklabels(["Data", "Null", "Data", "Null"], fontsize=7)
-    ax.text(0.375, -0.2, "Yuquan", transform=ax.get_xaxis_transform(), ha="center", fontsize=8, fontweight="bold", color=colors["yuquan"])
-    ax.text(2.375, -0.2, "Epilepsiae", transform=ax.get_xaxis_transform(), ha="center", fontsize=8, fontweight="bold", color=colors["epilepsiae"])
-    ax.set_ylabel("Matching index", fontsize=9)
-    ax.set_title("Temporal organization exceeds null", fontsize=10, pad=6)
-    n_sig = sum(v["n_significant"] for v in summary.values())
-    n_tot = sum(v["n"] for v in summary.values())
-    ax.text(0.98, 0.94, f"{n_sig}/{n_tot} significant", transform=ax.transAxes, ha="right", va="top", fontsize=8)
+    ax.set_xticks([0.0, 0.6, 1.8, 2.4])
+    ax.set_xticklabels(["Data", "Null", "Data", "Null"], fontsize=8.5)
+    ax.text(0.3, -0.125, "Yuquan", transform=ax.get_xaxis_transform(), ha="center", fontsize=9.5)
+    ax.text(2.1, -0.125, "Epilepsiae", transform=ax.get_xaxis_transform(), ha="center", fontsize=9.5)
+    ax.set_ylabel("MI", fontsize=10.5)
+    ax.set_title("MI: data vs permutation null", fontsize=10.5, pad=8)
+    ax.set_ylim(0.0, max(0.58, max(bracket_tops)))
     _style_axis(ax)
     return summary
 
 
 def _render_mi_panel(output_dir: Path, records: list[dict]) -> dict:
-    fig, ax = plt.subplots(figsize=(4.7, 3.7), facecolor="white")
+    fig, ax = plt.subplots(figsize=(5.2, 3.9), facecolor="white")
     summary = _plot_mi(ax, records)
     _panel_label(ax, "d1", x=-0.16, y=1.14)
     files = _save_panel(fig, output_dir, "fig1-paneld1")
@@ -513,6 +637,10 @@ def _render_mi_panel(output_dir: Path, records: list[dict]) -> dict:
         "records": "results/interictal_propagation_masked/per_subject/*.json",
         "matching_index": summary,
         "status": "masked_shared_participant",
+        "masked_mi_hard_check": True,
+        "summary_display": "shared violin_with_scatter helper: violin + box/IQR + whiskers + subject points",
+        "significance_display": "shared add_significance_bracket helper; Mann-Whitney U, data > null",
+        "y_axis_starts_at_zero": True,
     }
 
 
@@ -525,30 +653,53 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
         y = float(record["adaptive_cluster"]["within_cluster_tau_mean"])
         overall.append(x)
         within.append(y)
-        ax.scatter(x, y, s=17, color=colors[record["dataset"]], alpha=0.78, edgecolors="white", linewidths=0.3)
+        ax.scatter(x, y, s=24, color=colors[record["dataset"]], alpha=0.82, edgecolors="white", linewidths=0.4)
     overall_arr = np.asarray(overall, dtype=float)
     within_arr = np.asarray(within, dtype=float)
     hi = max(0.85, float(np.nanmax([overall_arr.max(), within_arr.max()])) + 0.03)
-    ax.plot([0, hi], [0, hi], ls="--", lw=0.8, color="0.55")
-    ax.set_xlim(-0.02, hi)
-    ax.set_ylim(-0.02, hi)
-    ax.set_xlabel("Overall Kendall τ", fontsize=9)
-    ax.set_ylabel("Within-template τ", fontsize=9)
+    ax.fill_between([0, hi], [0, hi], [0, 0], color="#F0F0F0", zorder=0)
+    ax.plot([0, hi], [0, hi], ls="--", lw=0.9, color="0.55", zorder=1)
+    ax.set_xlim(0.0, hi)
+    ax.set_ylim(0.0, hi)
+    ax.set_xlabel("Overall MI", fontsize=10)
+    ax.set_ylabel("Within-template MI", fontsize=10)
     median_uplift = float(np.median(within_arr - overall_arr))
     n_above = int(np.sum(within_arr > overall_arr))
-    ax.set_title("Template-aware stereotypy", fontsize=10, pad=6)
+    ax.set_title("Template-aware MI uplift", fontsize=10.5, pad=7)
     ax.text(
-        0.04,
-        0.93,
-        f"median Δτ = {median_uplift:+.3f}\n{n_above}/{len(records)} above diagonal",
+        0.96,
+        0.055,
+        f"median ΔMI = {median_uplift:+.3f}",
         transform=ax.transAxes,
-        ha="left",
-        va="top",
-        fontsize=8,
+        ha="right",
+        va="bottom",
+        fontsize=8.5,
+        color="0.35",
+    )
+    ax.legend(
+        handles=[
+            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["yuquan"], markeredgecolor="white", markersize=6, label="Yuquan"),
+            Line2D([0], [0], marker="o", linestyle="none", markerfacecolor=colors["epilepsiae"], markeredgecolor="white", markersize=6, label="Epilepsiae"),
+        ],
+        loc="upper right",
+        frameon=False,
+        fontsize=8.5,
+        handletextpad=0.35,
+        borderaxespad=0.35,
     )
     ax.set_aspect("equal", adjustable="box")
     _style_axis(ax)
-    return {"n": int(len(records)), "median_uplift": median_uplift, "n_above_diagonal": n_above}
+    return {
+        "n": int(len(records)),
+        "median_uplift": median_uplift,
+        "median_matching_index_uplift": median_uplift,
+        "n_above_diagonal": n_above,
+        "display_labels": ["Overall MI", "Within-template MI"],
+        "underlying_fields": ["adaptive_cluster.overall_tau", "adaptive_cluster.within_cluster_tau_mean"],
+        "gray_below_diagonal_region": True,
+        "axis_limits_start_at_zero": True,
+        "dataset_legend": True,
+    }
 
 
 def _render_uplift_panel(output_dir: Path, records: list[dict]) -> dict:
@@ -567,20 +718,47 @@ def _render_uplift_panel(output_dir: Path, records: list[dict]) -> dict:
 
 def _write_readme(output_dir: Path) -> None:
     (output_dir / "README.md").write_text(
-        """### Figure 1 独立 panel（temporal scaffold）
+        """### fig1-panela1.png
 
-论文 Figure 1 拆成独立 panel 文件，命名 `fig1-panel<id>`，不再拼成一张 composite；跨时间复现（split-half）已移出本图。
+严格复用 legacy 人工标注的 178 段 HFO，展示黑色叠加波形、黄色均值及 raw/normalized 平均谱。三行 x 轴均铺满完整 0–0.6 s，首末频谱 cell 仅延展绘图边界、不修改谱值。
 
-- `fig1-panela` — 真实 Yuquan 群体 HFO 事件：80–250 Hz 波形、normalized spectrogram、时频质心顺序（复用 Y3 demo 成品，直接复制）。
-- `fig1-panelb1` / `fig1-panelb2` — Yuquan / Epilepsiae 用当前 refined-count pipeline 现场重算的 SOZ ROC。
-- `fig1-panelc1` — Epilepsiae E3（内部 artifact 958，phantom-rank 修复后）的时间顺序热图 + rank 分布。
-- `fig1-panelc2` — 同一例患的 TA/TB 聚类顺序 + mean rank。
-- `fig1-paneld1` — 40 例患者内 masked（shared-participant）MI data vs permutation null（40/40 significant，masked median 0.228；仅共同参与触点，phantom 伪秩已排除）。
-- `fig1-paneld2` — 40 例 within-template stereotypy uplift。
+**关注点**：标题应为红色 `HFO n = 178`，两张谱在 x 轴左右均不应出现白带。
 
-本图只支持“interictal HFO population events exhibit recurrent patient-specific temporal organization”。三维 SEEG 接触点空间轴不在本图中。完整输入与统计定义见同目录 `figure1_interictal_hfo_temporal_scaffold_metadata.json`。
+### fig1-panela2.png
 
-**关注点**：先看 panela 的真实群体事件与红色质心轨迹；再确认 panelc1/c2 非参与 cell 为灰色、TA/TB 分界清楚；最后核对 paneld1 的 40/40 masked MI 与 paneld2 的 40/40 uplift。
+展示 Yuquan Y3 的三个真实群体 HFO 事件及 normalized spectrogram。A1/A2 的谱量统一为 Gaussian-smoothed magnitude；A2 保留原 50 ms Hamming 窗以维持群体事件的时间分辨率，红点取主峰 ≥70% 连通增强区的同图加权质心。
+
+**关注点**：每个红点应落在对应通道的高频能量增强团内，左右外边界无白带，只有事件之间保留白色分隔线。
+
+### fig1-panelb1.png
+
+Yuquan refined-HFO count 对 clinical SOZ 的 subject-level ROC 汇总，现场重算 20 例。灰线为单被试，蓝线和阴影为 cohort mean 与 SEM。
+
+**关注点**：本 panel 是 clinical anchor，不等于传播被限制在 clinical SOZ 内。
+
+### fig1-panelb2.png
+
+Epilepsiae refined-HFO count 对 clinical SOZ 的 subject-level ROC 汇总，纳入具备可用 SOZ 标签的 15 例。紫线和阴影为 cohort mean 与 SEM。
+
+**关注点**：核对 n=15；无临床 SOZ 标签的病例不应被强行纳入。
+
+### fig1-panelc.png
+
+同一文件上下组合同一位 Epilepsiae E7 的 c1/c2。c1 展示 masked 时间顺序热图、原始 overlapping rank ridgeline 与 day/night strip；c2 将全量 6,556 个有效事件按 KMeans k=2 的 TA/TB 标签重排，并展示 mean-rank 轮廓。
+
+**关注点**：上下两排来自同一患者，TA/TB 两个 n 之和必须等于 c1 的全量 n=6,556；TA/TB 之间使用白底灰色斜线断带并截断 x 轴线；右下 mean-rank 质心 marker 缩小。
+
+### fig1-paneld1.png
+
+患者内 masked shared-participant MI data vs permutation null；严格复用原 cohort producer 的 violin + box/IQR + whiskers + subject points，并恢复 data-vs-null 显著性括号。phantom ranks 已排除。
+
+**关注点**：producer 对 40 个输入执行 `legacy_mi.masked=true` 硬检查；y 轴从 0 开始，括号显示 cohort-level data > null 检验。
+
+### fig1-paneld2.png
+
+Overall 与 within-template MI 配对散点，量化分模板后的 matching uplift。底层数值仍来自 masked `overall_tau` / `within_cluster_tau_mean` rank-concordance fields，但图面统一使用 MI 简写。画布只显示 median ΔMI，cohort 计数留给 caption/正文。
+
+**关注点**：两轴从 0 开始；对角线下方恢复灰区；右上角图例解释蓝色 Yuquan、棕色 Epilepsiae；统计文字移入无数据的右下灰区。
 """,
         encoding="utf-8",
     )
@@ -588,50 +766,61 @@ def _write_readme(output_dir: Path) -> None:
 
 def build(
     output_dir: Path,
+    single_hfo_png: Path,
     group_event_png: Path,
-    exemplar_subject: str,
-    exemplar_label: str,
+    c1_exemplar_subject: str,
+    c1_exemplar_label: str,
     max_events: int,
 ) -> dict:
     propagation_plot._apply_masked_paths()
     records = _load_temporal_records()
     if len(records) != 40:
         raise ValueError(f"Expected 40 masked temporal records, found {len(records)}")
-    exemplar = next(
+    _assert_masked_mi_records(records)
+    c1_exemplar = next(
         record
         for record in records
-        if record.get("dataset") == "epilepsiae" and str(record.get("subject")) == exemplar_subject
+        if record.get("dataset") == "epilepsiae"
+        and str(record.get("subject")) == c1_exemplar_subject
     )
-
     output_dir.mkdir(parents=True, exist_ok=True)
     _apply_rcparams()
 
-    panel_a = _render_panel_a(output_dir, group_event_png)
+    panel_a = _render_panel_a(output_dir, single_hfo_png, group_event_png)
     panel_b1 = _render_roc_panel(output_dir, "yuquan", "b1")
     panel_b2 = _render_roc_panel(output_dir, "epilepsiae", "b2")
-    arr = _load_exemplar_arrays(exemplar, max_events=max_events)
-    panel_c1 = _render_exemplar_order(output_dir, arr, display_label=exemplar_label)
-    panel_c2 = _render_exemplar_template(output_dir, arr)
+    c1_arr = _load_exemplar_arrays(c1_exemplar, max_events=max_events)
+    panel_c = _render_exemplar_panel(
+        output_dir,
+        c1_arr,
+        c1_display_label=c1_exemplar_label,
+        c2_arr=c1_arr,
+        c2_display_label=c1_exemplar_label,
+    )
     panel_d1 = _render_mi_panel(output_dir, records)
     panel_d2 = _render_uplift_panel(output_dir, records)
 
     panels = {
-        "a": panel_a,
+        **panel_a,
         "b1": panel_b1,
         "b2": panel_b2,
-        "c1": panel_c1,
-        "c2": panel_c2,
+        "c": panel_c,
         "d1": panel_d1,
         "d2": panel_d2,
     }
     outputs = [f for panel in panels.values() for f in panel["files"]]
 
     metadata = {
-        "schema_version": "paper_figure1_temporal_scaffold_panels_v2",
+        "schema_version": "paper_figure1_temporal_scaffold_panels_v3",
         "claim_scope": "Interictal HFO population events exhibit recurrent patient-specific temporal organization.",
         "forbidden_upgrade": "This figure alone does not establish a shared 3D propagation axis.",
         "producer": "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
-        "panel_id_stamped": True,
+        "panel_id_stamped": {
+            "a1": False,
+            "a2": False,
+            "b1_b2_c1_c2_d1_d2": True,
+            "note": "c1/c2 are stamped as aligned rows inside the single fig1-panelc file",
+        },
         "composite_emitted": False,
         "split_half_included": False,
         "paneld1_statistic": "masked shared-participant MI (phantom ranks excluded); 40/40 significant, cohort median 0.228.",
@@ -648,15 +837,17 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--group-event-png", type=Path, default=DEFAULT_GROUP_EVENT)
-    parser.add_argument("--exemplar-subject", default="958")
-    parser.add_argument("--exemplar-label", default="Epilepsiae E3")
+    parser.add_argument("--single-hfo-png", type=Path, default=DEFAULT_SINGLE_HFO)
+    parser.add_argument("--c1-exemplar-subject", default="442")
+    parser.add_argument("--c1-exemplar-label", default="Epilepsiae E7")
     parser.add_argument("--max-events", type=int, default=2000)
     args = parser.parse_args()
     metadata = build(
         output_dir=args.output_dir.resolve(),
+        single_hfo_png=args.single_hfo_png.resolve(),
         group_event_png=args.group_event_png.resolve(),
-        exemplar_subject=str(args.exemplar_subject),
-        exemplar_label=str(args.exemplar_label),
+        c1_exemplar_subject=str(args.c1_exemplar_subject),
+        c1_exemplar_label=str(args.c1_exemplar_label),
         max_events=int(args.max_events),
     )
     print(json.dumps(metadata["outputs"], ensure_ascii=False))

@@ -10,6 +10,10 @@
 > V1（network-axis，下方 2026-06-14 主线）是 V2 前身/基础，未被推翻，且 V2 不默认把 stable scaffold 升级成 unstable mode。
 
 > **主线结果（2026-06-14）：network-axis A+B 已执行**——间期传播轴 ↔ 发作早期激活共享一根粗网络骨架（18 Epilepsiae 队列稳），细对齐仅快活动量稳；符号自由共线，非逐点重放。见 §3.0 + 归档 `axis_alignment_AB_result_2026-06-14.md`。
+> **2026-07-15 gradient-field 冻结合同**：后续任何新版 onset、seizure subtype 或早期能量读出，统一消费
+> `results/interictal_propagation_masked/template_gradient_fields/per_subject/`。这里已按患者冻结 TA/TB
+> early→late gradient axes、方向有效性和 own 2D fields；共线患者另有 shared field。发作侧只按 channel
+> name 对齐，不再用发作数据重建轴/平面。D_AB、swap、decision-k 和 endpoint 不进入主方法。
 > 状态：**探索性 (exploratory) — PR-0 + PR-1 落地，audit-rerun 完成 (2026-05-10)，yuquan 扩展 (2026-05-10 PR-0.1)**。PR-1 cohort z-ER 聚类有 1 张 cohort 主结果（`figures/per_subject/`，25 subjects），cohort-level "真子型断言" 仍依赖 sensitivity；PR-2+ 未启动。
 > 范围：以 ictal seizure 本身为研究对象——subject 内的 seizure subtype carve-out + 下游 pre-ictal / outcome / propagation 关联。
 > **不属于**：interictal 事件内部传播（topic1）、IEI/PSD（topic2）、spatial SOZ 归因（topic3）、模型层（topic4）。
@@ -41,6 +45,12 @@
   FDR q=0.029），主指标宽带功率止于粗层。**这是符号自由的轴/梯度共线，不是"发作沿间期路线逐点重放"。**
   primary 只有宽带一条，B 线（EI-like）/ hfa / ramp 是次级 / 灵敏度读出。
   详见 §3.0 + 归档 `docs/archive/topic5/axis_alignment_AB_result_2026-06-14.md`（含 handoff）。
+- **V3p preictal-only 轨迹（2026-07-05，完整硬门阴性，已整合 2026-07-12）**：只看 EEG onset 前
+  −120~−10 s，检验沿轴组织是否减弱、非轴向连锁流或最易放大模态是否随 onset 临近持续爬升。
+  narrow 主队列、`broad_expanded` 敏感性扩展和 `broad_core` 策展核心均为 tier 0，完整个体支持为 0；
+  broad 的少数 single-null nominal hits 全被 rate / lag1 / phase / block / 双 span 预设硬门筛掉。
+  **安全结论是“未支持稳定一致的 preictal non-axis ramp”**，不是“发作前没有任何 state change”。
+  这把 V3a 收紧为跨 onset 的脆弱候选信号，而非渐进式发作前搬迁证据。详见 §3.9。
 - **PR-0 (v2.3 Layer A ictal ER timing atlas)**：cohort = 25 (15 epilepsiae audit_eligible + 9 yuquan audit_eligible + sentinel-only epilepsiae/916; topic5 PR-0.1 2026-05-10 yuquan extension)。每 subject v2.3 schema，per-seizure PNG 全 cohort 渲完。User 视觉巡视暴露 within-subject seizure pattern 异质性（442 sz=9 / 548 {13,14,24,25} / 916 {21,23,25} / 1077 sz=1），是 PR-1 的直接动机。详见 `docs/superpowers/specs/topic5_pr0_*` (待整理) + `results/data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/`。
 - **PR-1 z-ER subtype 聚类（2026-05-10 audit-corrected exploratory 版；2026-05-10 yuquan-extended）**：25 subjects (16 epilepsiae + 9 yuquan)，50 subject-band rows，33 ok / 17 insufficient_n。yuquan ok 子集 (n=5 cells, 4 subjects: litengsheng broad k=2, sunyuanxin broad k=1, zhangkexuan gamma k=2, zhaojinrui gamma k=2 + broad k=1) silhouette median 0.495 / gap_perm median 0.552 — 实际优于 epilepsiae ok 子集 (silhouette 0.418 / gap_perm 0.325)。整体 cohort silhouette median 0.444、gap_perm median 0.380。`over_split_flag` (AND 规则 `gap_perm < 0.10 AND ratio > 0.5`) cohort 命中 **0/33 ok**。Bug-fix 实测影响：pre-audit 28 个 ok rows 上 Δgap_perm 中位 −0.0007、abs_max 0.061，**0 个 over_split_flag flip**，0 个 sentinel jaccard 变化。
 - **PR-1 sentinel 视觉裁定**（user 2026-05-09 / 2026-05-10）：
@@ -245,7 +255,7 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 ---
 
-### 3.8 发作"轴向→非轴向"模态转移（2026-07-04，V3a，exploratory，**脆弱阳性 · pending sensitivity/V3b**）
+### 3.8 发作"轴向→非轴向"模态转移（2026-07-04，V3a，exploratory，**脆弱阳性 · V3p 未复现 preictal ramp / V3b pending**）
 
 **测什么**：发作一启动，系统里最容易被放大的方向/连锁流向，会不会从那条固定的间期 HFO 小路搬到小路之外的触点上——非轴向连锁流放大（H3b）+ 密度归一奇异模态转向非轴（H3c）为 co-primary，轴向减弱（H3a）仅辅助。承重锚 发作前 30~10s（P3）→ 早发作 10~30s（I1），每发作按其脑电起始**在同一批发作内前后配对**，被试为单位，narrow 主 / broad 复制不合并。
 
@@ -253,9 +263,23 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 
 **结论（脆弱阳性，暂不可当确立结论）**：扣掉每触点放电率随机基线后的**非轴向净流增量**在主队列（Holm-p 0.031，刚过 0.05）和复制队列（0.008）都达到队列级显著 → 判读机械上到 tier 4 / `state_v3_supported=True`。**但五个来源使它很脆**：① 未校正的原始流大多在**下降**（主队列 5/7）——所谓"放大"是相对基线偏高、不是绝对增加；② 主队列 6/7 以**同时共激活**为主（lag1≈lag0），不是定向传导；③ 个体稳健性几乎全塌（流腿 0/7 过完整稳健门，`subject_support` 主队列 1/7、broad 0/9）；④ 更能代表"方向转移"的**模态腿(H3c)全阴**（Holm 0.89/0.63）；⑤ **主队列显著本身对单被试不稳健**——去掉主队列 7 个被试中任一（除 442）Holm 都翻到 0.0625 失败（6/7 drop 不通过），只有复制队列去一稳，即 tier-4 依赖 narrow 恰好这 7 个的配置。所以这是**数据侧候选信号，不是确立的"轴→非轴模态转移"**；机制升级要 V3b。**关键**：这个 tier-4 是"同一批发作内配对"修复后从 tier-2 翻上来的——未配对（P3、I1 拿不同发作子集相减）的错配噪声把一个符号一致的效应打散成不显著（如 253 −0.191→+0.035）；个别被试 1125 三腿方向最一致。
 
-**不能写**："V3a 成立 / 发作发生模态转移"、"off-axis flux 增加"、把它当定向传导、上机制主张、把 broad 单独当主结论。完整方法+逐被试数值表+禁止 claim：`docs/archive/topic5/v3a_mode_transition_2026-07-04.md`；后继：V3p（preictal-only 轨迹）/ V3b（模型–数据一致性）。
+**V3p 对它的约束**：V3p 在纯发作前窗口没有复现渐进式非轴向爬升，因此 V3a 的信号最多定位为**跨 onset 的脆弱候选变化**；不能把它外推成 onset 前已经持续发展的 state relocation。
 
-### 3.9 V2 表达层三问收口（2026-07-04，Phase-1-v2，exploratory **candidate scaffold refinement**；✅ **已验收 2026-07-06**）
+**不能写**："V3a 成立 / 发作发生模态转移"、"off-axis flux 增加"、把它当定向传导、上机制主张、把 broad 单独当主结论。完整方法+逐被试数值表+禁止 claim：`docs/archive/topic5/v3a_mode_transition_2026-07-04.md`；后继：V3p（§3.9，已完成）/ V3b（模型–数据一致性，待执行）。
+
+### 3.9 发作前非轴向轨迹（2026-07-05，V3p，preictal-only，**完整硬门阴性 · tier 0**）
+
+**测什么**：只看 EEG onset 前最后两分钟（−120~−10 s），不碰 onset 或发作后数据，问三个量是否随发作临近持续变化：沿间期 HFO 轴的组织是否减弱、非轴向连锁流是否上升、最易放大模态是否转向非轴。narrow 为主队列；`broad_expanded` 是 feasibility-admitted 敏感性扩展；`broad_core` 是策展参考核心，三者不合并分母。
+
+**怎么测**：每次发作按 P0–P3 滑窗估计斜率，被试内汇总；主裁判是同杆 label-null，并叠加 rate-preserving、lag1-specific、phase、block 和 full/guard 双 span 硬门。个体支持要求 co-primary 至少一腿穿过完整硬门及稳健性检查；队列层对两条 co-primary 做 Holm 校正。所有 null 均为 1000 次。
+
+**结论**：三层队列均为 tier 0，完整个体支持为 0。narrow 两条 co-primary 的 Holm-p 均为 1.000；`broad_expanded` 均为 0.685；`broad_core` 为 0.652。broad 中确有少数 single-null nominal hits，但分散在不同被试和不同指标，方向不一致，并被预设的 rate / lag1 / phase / block / 双 span 门全部筛掉，**不构成潜在阳性**。
+
+**解释边界**：当前 SEEG 覆盖、1–45 Hz 宽带包络、−120~−10 s 和 HFO-defined non-axis 条件下，数据**未支持稳定一致的 preictal non-axis ramp**。这不等于“发作前没有任何 state change”，也不排除 onset 后变化；它只否定把 V3a 的跨-onset 脆弱信号解释成发作前已逐渐发展的非轴向搬迁。
+
+完整方法、分母、QC 与逐被试结果：`docs/archive/topic5/v3p_preictal_nonaxis_trajectory_2026-07-05.md`。代码：`src/topic5_v3p_preictal_trajectory.py`；结果：`results/topic5_ictal_recruitment/v3p_preictal_trajectory/`。
+
+### 3.10 V2 表达层三问收口（2026-07-04，Phase-1-v2，exploratory **candidate scaffold refinement**；✅ **已验收 2026-07-06**）
 
 > **✅ 验收核心科学结论（用户 2026-07-06 定，本部分接受口径）**：
 > **间期传播模式（interictal HFO 谁先谁后的顺序几何 G_HFO）与发作早期的宽带能量在空间上相关**——这是**队列一致、承重**的结论（对齐扣掉 1/f 后大半塌成宽带、只 gamma 一薄层残留、per-subject 弱 6/20）。**频带偏向性是个别患者现象（per-patient band bias），不是队列级机制主张**——所以频段特异性从"cohort Outcome B"降级为"少数患者的频带 leaning"。tier 仍 = exploratory candidate scaffold refinement（弱空间 null、非 formal gate）。**禁**：把频带偏向写成 cohort 机制 / HFO-/LVFA-/ripple-specific / formal gate passed / criticality。
@@ -277,6 +301,16 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 **⚠️工程教训**：并行 numpy nulls worker 必须 `OMP_NUM_THREADS=1`（否则 26 worker×80 核 BLAS 超订 → 单被试 crawl，7h/40min 之差）；broad **1146** 单被试 n_perm=1000 单线程 ~2h、OMP 不助（Python-loop permute）→ 单独后台补跑并入 **n=17**（含它 common_resid 仍 4/7、aperiodic 2/7→3/7、结论不变；within_shaft_strong 仅 narrow 属性、broad 里 subject_wide_weak）。
 
 **不能写**：formal Gate A/B/C passed · HFO-/LVFA-/ripple-specific · timing-order replay · criticality/机制 · 过任何空间随机场。完整数值 + 承重 caveat + 禁 claim：`docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md`。
+
+**时间分辨 sidecar（2026-07-08，exploratory 描述性，非新结论）**：把上面 "when"（单窗 onset+0–20s）扩成 `[-120,+20]s` / 10s 窗 / 2s 步的**逐频带滑窗时程**（复用同一 formal-plane mirror-invariant signed-corr + v2 band cache）。20/20 cached subjects 出图。描述性观察与 §3.10 "when" 一致并更细：**pre-onset 全频段 cohort 中位 |r|~0.70–0.76（band-generic、preictal-present）**，跨 0s 的 early−pre 增量绝大多数 ≈±0.02、**只 δ 1–4/低频 1–13 有小幅正抬升**（δ narrow +0.071 [13/20]、broad +0.080 [10/17]），无频带陡跳、正向被试仅 ~7–13/20 → **偏 band-generic-preictal-present + δ 小增量、非 onset 处频带分化**。tier = exploratory candidate scaffold，**非 formal cohort statistic**（正式 cohort shift 仍 Fig3-A）。图/索引/脚本：`results/topic5_ictal_recruitment/v2_band_timecourse/`（`figures/README.md`、`multiband_timecourse_subject_index.{csv,json}`、`cohort_pre_vs_early_delta_{broad,narrow}.csv`）、`scripts/plot_topic5_multiband_field_similarity_timecourse.py`。
+
+### 3.11 A/B 单模板梯度轴与共线共享 field（2026-07-14，exploratory，结构成立 / shared 增益未成立）
+
+把每个模板的 earliness 场定义为 `e_T=-z(rank_T)`，但传播轴正方向正式定义为 `u_T=-gradient(e_T)/||gradient(e_T)||`，即早节点→晚节点；`gradient(e_T)` 本身是晚→早，不能再直接称为传播正方向。再用两个 early→late 向量的 `|cos(u_A,u_B)|` 判线是否共线、signed cosine 判传播方向同向/反向。全 40 名 rank-displacement 输入中 28 名可建双轴，**28 名全部都有 A/B 两个方向**：14/28 共线（9 反向、5 同向），14/28 不同向。26 名具备二维几何，其中 12/26 共线；13 名 strict-stability 只是高置信分层（8/13 共线），不是“是否有方向”的门槛。这支持“存在可共享平面的共线子集”，不支持给所有患者强建 D_AB/shared axis。A/B 两轴同时翻号不改变 cosine、共线分型或 field 统计。
+
+有 ictal cache 的二维共线 field 主分母为 n=7。1–45 Hz、0–10 s 中，own maxAB 对 within-shaft null 临界（p=0.053），shared maxAB 不过 null（p=0.346），且 shared 未提高患者内观测相关（paired median Δ=−0.002，95% CI [−0.038, 0.025]，p=0.938）。strict-stability n=6 子集出现 own p=0.035 / shared p=0.002，但它是质量分层结果，不能替代 n=7 主分母；bootstrap-stable n=3 shared p=0.067。当前稳健结论是**方向与共线分型成立，shared broadband field 的超杆内解剖证据依赖稳定性筛选，统一表示的增益未成立**。完整方法、分母、common-support/HFA 敏感性与禁 claim：`docs/archive/topic5/template_gradient_shared_field_2026-07-14.md`；结果：`results/topic5_ictal_recruitment/template_axis_field/`。
+
+**Epilepsiae 直接频段读出图**（n=17，不按 QC/共线分层）：发作 field 图仅保留 17 名 Epilepsiae 双轴可估患者。Yuquan 中仅 2 人各有 3 个缓存发作条目，其余无可用发作，本图全部排除；这不改变上游“28 人可建 A/B 轴”的结构分母。own-axis maxAB 患者中位数为 HFA 0.764、1–45 Hz 0.783、1–150 Hz 0.783。1–45 与 1–150 几乎等价（跨患者 ρ=0.998、paired p=0.963），HFA 与 1–45 Hz 也高度一致（ρ=0.794、paired p=0.963）。图直接复用既有 OR-margin board 和 `plot_atlas`；图/表：`results/topic5_ictal_recruitment/template_axis_field_frequency_panel/`。
 
 ---
 
@@ -307,6 +341,8 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
    被 phase/block surrogate 解释掉 → 今后所有 λmax/VAR/DMD/Jacobian **只报 λ_surplus（观测−surrogate 中位数），不报 raw**。
    avalanche **rank-coupling≠传播**（自持假象 0.64–0.91 但前向流≈0），主指标用前向位移。时间上 cache `relt=0`
    ≠电生理 onset（`eeg_onset_rel` 偏移数秒）→ 发作前/发作窗必须按 `eeg_onset_rel` 锚定，不用 relt=0。
+10. **V3p 完整硬门阴性的边界（§3.9）**：阴性对象是 −120~−10 s 内“非轴向流/模态随 onset 临近持续爬升”的完整机制门，
+    不是所有 preictal state change。`broad_expanded` 与 `broad_core` 是不同分母；single-null nominal hits 不得写成个体支持或潜在阳性。
 
 ---
 
@@ -326,6 +362,8 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `docs/archive/topic5/ictal_field_dynamics_pilot_2026-06-28.md` — **发作内 field 动力学 pilot（exploratory，broad 暗示 / narrow 扩队列证否 → 不稳健）**：broad 9（轴向 ρ<0 5/8、非轴向 ρ>0 8/8 暗示）vs narrow 7 平行批（ρ<0 仅 3/7、非轴向 2/7，多反向，E1146 轴向 +0.52）→ 方向减弱假设非稳健、依队列/substrate；非 swap 也能用模板端点构轴（不必 swap）；图/GIF 模式 = paper supplementary；z-ER 中后期偏示意。
 - `docs/archive/topic5/v2_phase2_criticality_state_layer_2026-07-01.md` — **V2a 发作前 criticality/state 层（exploratory，restricted-axial sanity check → 偏阴性）**：动力学腿 M_loading 0/16 + λ 趋势 0/16 显著（phase+block surrogate）；方法学定律 = 今后 λ 报 surplus 不报 raw；rank-coupling≠传播。不判定模型 axial-weakening/non-axial 预测 → reframe 到 V3a。
 - `docs/superpowers/specs/2026-07-02-topic5-v3a-mode-transition-design.md` — **V3a 设计（axis→non-axis mode transition，data-side H3a/b/c）**：eeg-onset 锚定 phase grid、2D 投影算子 + 非正规 reactivity、纯间期 HFO 非轴向（防循环）、compartment flux、自建 null、narrow 主。姊妹 spec V3b（M3B 模型–数据一致性 H3d）待写。
+- `docs/archive/topic5/v3p_preictal_nonaxis_trajectory_2026-07-05.md` — **V3p preictal-only 完整硬门阴性**：narrow / `broad_expanded` / `broad_core` 均 tier 0、完整个体支持为 0；少数 broad single-null nominal hits 被预设硬门筛掉。安全口径 = 未支持稳定一致的 preictal non-axis ramp，非“发作前无 state change”。
+- `docs/archive/topic5/template_gradient_shared_field_2026-07-14.md` — **A/B 单模板梯度轴 + 共线门控共享 field**：28 名全部有双方向（14 共线/14 不同向），26 名具备二维几何（12 共线）；二维共线 ictal n=7 的 broadband shared field 不过 within-shaft null，阳性仅见 strict-stability n=6，paired shared-vs-own 无增益 → 方向分型成立，field 阳性依赖质量层。
 - `docs/archive/topic5/v2_phase1_v2_scaffold_refinement_2026-07-04.md` — **V2 表达层三问收口（Phase-1-v2，exploratory candidate scaffold refinement）**：**survive** = 非纯宽带（common_resid 两池 4/7、α+γ 一致 = Outcome B）但大半 1/f-可归因（aperiodic 只 gamma_LVFA 稳）、ripple broad"存活"=多重比较天花板假象 → **NOT ripple-specific**；**who** = cohort 6/7 聚合、≥4/7 仅 6/20、无单一表型、band-generic（subject-heterogeneous）；**when** = 发作前已高且平 + 起始处小上抬（broad 符号翻转 p≈0.005、narrow 临界）、EEG 锚更清（preictal-present + modest onset increment）。broad=17（1146 单被试~2h 后台补跑并入；含 vs n=16 结论不变）。⚠️并行 numpy nulls 必须 OMP_NUM_THREADS=1。
 
 ---
@@ -353,8 +391,10 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
 - `src/ictal_zer_features.py` — z-ER tensor extraction + binning + channel-order check
 - `src/ictal_seizure_clustering.py` — pairwise dissim, UPGMA, k selection, channel(-block) permutation null, outlier/subtype split, sentinel jaccard, EEG-realign helpers
 - `src/ictal_seizure_plotting.py` — MDS, subtype color palette, sort orders
+- `src/topic5_v3p_preictal_trajectory.py` — V3p preictal window metrics, slope/null helpers and support gates
 - `scripts/cluster_ictal_seizures.py` — CLI driver `per-subject / cohort / render`
 - `scripts/diagnostic_cluster_grid.py` — cluster-grouped per-seizure thumbnail grid
+- `scripts/run_topic5_v3p_{feasibility,trajectory,summary}.py` + `scripts/plot_topic5_v3p_summary.py` — V3p admission, cohort run, tier summary and figures
 
 ### 测试
 
@@ -369,6 +409,11 @@ mask / bin 设计变化 / bootstrap stability) 才能 commit。
   - `figures/per_subject/*.png` — 25 per-subject 4-panel PNG
   - `figures/diagnostic/*.png` — 6 cluster grid 视觉诊断
   - `figures/README.md` — cohort 视觉骨架文档（中文）
+- `results/topic5_ictal_recruitment/v3p_preictal_trajectory/`
+  - `admission.json` — `broad_core` / candidates / `broad_expanded` 权威名册与排除原因
+  - `{narrow,broad}/v3p_cohort_tier.json` — 分层 tier 与 Holm 判读
+  - `{narrow,broad}/v3p_summary_subject.csv` + `v3p_window_detail.csv` — 被试与窗口级审计表
+  - `{narrow,broad}/figures/README.md` — 逐图中文说明
 
 ### Run logs
 

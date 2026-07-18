@@ -18,7 +18,7 @@ Default output:
 results/paper-ready-figure/fig1_hfo_group_event_demo/figures/
 ```
 
-The script rebuilds the old ReplayIED-style panel from Yuquan Y1 using the
+The script rebuilds the old ReplayIED-style panel from Yuquan Y3 using the
 legacy artifact chain:
 
 - EDF: `/mnt/yuquan_data/yuquan_24h_edf/chengshuai/FC10477Q.edf`
@@ -76,6 +76,83 @@ Current accepted visual contract:
 - four panels share one channel y-order; the two right panels hide repeated channel labels
 - `TA/TB` are within-subject template aliases; do not report them as cross-subject global labels
 - top subtitle carries n/tau/MI/KMeans/within-tau/inter-corr details so it can be cropped away
+
+## Fig2-C Interictal Event Envelope Field Candidate
+
+Formal entry point:
+
+```bash
+python scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py \
+  --subject epilepsiae_1146
+```
+
+Default output:
+
+```text
+results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/
+```
+
+This producer emits the same E1146 single-event representative material as PNG + vector PDF and a
+synchronized TA/TB GIF (one exemplar per row, not an event train). The static panel uses six frames through +50 ms; the GIF uses the same two exemplars,
+frozen geometry, participant-only support, 6 mm display kernel, `magma`, and shared A/B `vmax` at a
+2 ms biological step. Default playback is 12 fps; playback fps is metadata, not biological time.
+
+Future multi-event GIFs require a separate producer/spec for event boundaries, inter-event gaps,
+per-event t0 and sampling. Do not extend this single-event renderer by concatenating events.
+
+If the default TB medoid is measurable but visually discontinuous, generate a locked-scale audit
+screen before changing the canonical exemplar:
+
+```bash
+python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
+  --subject epilepsiae_1146 --top-k 500 --n-candidates 4
+```
+
+The screen keeps TA, geometry, support, sigma, frame window and global field scale fixed. It ranks
+raw centroid/envelope metrics rather than image pixels, requires usable participation on both E1146
+shafts, and writes figures plus CSV/JSON under
+`results/paper-ready-figure/fig2c_interictal_event_envelope_field/tb_candidate_screen/`. A selected
+replacement is a direction-qualified illustrative exemplar, not an unconditional representative
+event; the screen never overwrites the canonical Fig2-C output.
+
+Before changing any interictal event-field frame or GIF, read:
+
+```text
+docs/fig2c_interictal_event_envelope_field_spec.md
+```
+
+Do not copy the renderer or relabel this template-conditioned representative figure as template-free
+or cohort-level evidence.
+
+## Interictal Template A/B Direction Axis
+
+Formal entry point:
+
+```bash
+python scripts/paper_figures/plot_interictal_ab_direction_axis.py
+```
+
+Expanded-contact anatomy sensitivity:
+
+```bash
+python scripts/paper_figures/plot_interictal_ab_direction_axis.py \
+  --pool broad \
+  --display-label "Yuquan example | expanded contact coverage" \
+  --out results/paper-ready-figure/fig_interictal_ab_direction_axis/figures/yuquan_example_expanded_interictal_ab_direction_axis.png
+```
+
+Default output:
+
+```text
+results/paper-ready-figure/fig_interictal_ab_direction_axis/figures/
+```
+
+The script fits Template A and B earliness gradients independently. It only
+constructs a shared line after both axes pass the frozen numerical/sampling QC
+and satisfy the collinearity gate. Propagation arrows are `early -> late`, not
+the positive direction of `D_AB` or of an earliness gradient. Yuquan public
+labels must be passed with `--display-label`; the script never guesses the
+private manuscript crosswalk from an artifact-folder name.
 
 ## Fig3-A Field Concordance Cohort Statistic
 

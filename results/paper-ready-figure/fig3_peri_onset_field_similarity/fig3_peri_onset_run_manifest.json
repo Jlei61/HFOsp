@@ -1,0 +1,325 @@
+{
+  "contract": "fig3_peri_onset_shared_gradient_2d_v1",
+  "run_id": "20260718T071020Z_d99c96ec",
+  "run_complete": true,
+  "canonical_run": true,
+  "artifact_publication": {
+    "mode": "immutable_run_scoped_artifacts",
+    "artifact_root": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts",
+    "canonical_completion_pointer": "results/paper-ready-figure/fig3_peri_onset_field_similarity/fig3_peri_onset_run_manifest.json",
+    "publish_order": "validate run artifacts, replace canonical index, replace canonical manifest last"
+  },
+  "denominator_flow": {
+    "n_frozen_records": 40,
+    "n_shared_pair": 14,
+    "n_fingerprint_valid_shared": 14,
+    "n_geometry_2d_shared": 12,
+    "n_inventory_available": 10,
+    "n_eligible_cache_ready": 7,
+    "n_generated": 7,
+    "n_complete_ok": 3,
+    "n_partial_ok": 3,
+    "n_severely_partial": 1,
+    "n_blocked_input": 5,
+    "geometry_excluded_subjects": [
+      "epilepsiae_139",
+      "yuquan_zhangjiaqi"
+    ]
+  },
+  "artifacts": [
+    {
+      "subject": "epilepsiae_1084",
+      "role": "source_per_seizure_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1084_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+      "size_bytes": 1789579,
+      "sha256": "5b1a29ac0f3a2488b1090136e5dd116fe00ed485631c093c8348939cbb832b25"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "source_aggregate_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1084_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv",
+      "size_bytes": 14478,
+      "sha256": "f2473d4028af9abc5a6224b216c1ada369c8ffdd9a6a55ddfedfff8f57bef88a"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "source_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1084_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_summary.json",
+      "size_bytes": 3231,
+      "sha256": "cf630964d343a365dcd24ef4401ef7598c995149816cbce1c76952b71639bfc6"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1084_peri_onset_field_similarity_paper_ready.png",
+      "size_bytes": 1308721,
+      "sha256": "ff6ef69270c3e282963119d8b33375177ea62a33e76f0ed96ae553cc3d94d0b5"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1084_peri_onset_field_similarity_paper_ready.pdf",
+      "size_bytes": 126305,
+      "sha256": "914193d1e54e9dc7674431dd94b388342fb99542b7da6a059f7c801695b07182"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "paper_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1084_peri_onset_field_similarity_paper_ready_summary.json",
+      "size_bytes": 2257,
+      "sha256": "68c8fa90b2798827019d8d02d1169c73bc6757648bcf485d12dff899a976104b"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "source_per_seizure_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+      "size_bytes": 602927,
+      "sha256": "9a83be49edc857e25e3d9612198429cf44433202d95320c8dd3f6c6bd49b6003"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "source_aggregate_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv",
+      "size_bytes": 14414,
+      "sha256": "f4c1534c3489d32184d480618724e9ba58e2007d970d430538c22ada475bf862"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "source_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_summary.json",
+      "size_bytes": 2743,
+      "sha256": "7a631ea6fd11ac6b77e872b78bbdd4d87680fd2ccc1587a0e1410b584ea20a6c"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png",
+      "size_bytes": 964411,
+      "sha256": "34b36d67e870e739e7a445fcf9db8315ce213c64d1339d9172640092abfc9da3"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.pdf",
+      "size_bytes": 59707,
+      "sha256": "90ba1640edf564e21b0cfd9a0441454528d99f121b28594e4a857b2e219006b5"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "paper_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready_summary.json",
+      "size_bytes": 2244,
+      "sha256": "eaaf7825ec0e621ca891a25a3a0dd15d2bed5a58402144c281c6660e02e94678"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "source_per_seizure_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_384_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+      "size_bytes": 151810,
+      "sha256": "6beb3ccd16a40fb25cde94aaa3b8a01b8367286aa3ca884b9cbf226c5d183d82"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "source_aggregate_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_384_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv",
+      "size_bytes": 14398,
+      "sha256": "c46cb21ab019ecb0cd6949583656fda8e9fe1811876f1c8a592affdc49f4a175"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "source_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_384_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_summary.json",
+      "size_bytes": 3075,
+      "sha256": "3b3064fdf1e609f5360e326b6cd25638f0551b640a5ae796f1fa4556af6d4e99"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_384_peri_onset_field_similarity_paper_ready.png",
+      "size_bytes": 563516,
+      "sha256": "1d17d307624f71f6430034ab75cd8de74ac1889bf2e2ff5dff3bd43853bd800b"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_384_peri_onset_field_similarity_paper_ready.pdf",
+      "size_bytes": 33883,
+      "sha256": "20c0b2acea0e0607d0e0e192e9e8ef1fc76b1e134bc8e97d3c372297478e7cf4"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "paper_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_384_peri_onset_field_similarity_paper_ready_summary.json",
+      "size_bytes": 2699,
+      "sha256": "a87f0539988c7c8061b692ff5b0b2b2d0b5efa38d8db13522e0f0aed0b0733d0"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "source_per_seizure_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_548_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+      "size_bytes": 649457,
+      "sha256": "2c6b950a3b005c533fefbcfcca8bc2d320c5867a4a0df4c026d50fc83e2aaaa5"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "source_aggregate_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_548_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv",
+      "size_bytes": 14346,
+      "sha256": "d0a65c9f40ff05d8e055d48b1d8f806dc9d00f6a3028a37ae892dd2d15c914c3"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "source_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_548_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_summary.json",
+      "size_bytes": 2569,
+      "sha256": "7f95993608576c2575d6a9f15059cbcddf7c9b2a7e0be70fe3f459826c4018f9"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_548_peri_onset_field_similarity_paper_ready.png",
+      "size_bytes": 838251,
+      "sha256": "be9f968776b83ffe577c55279364081ec01b3ad6fc125815f8841b38eaff659f"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_548_peri_onset_field_similarity_paper_ready.pdf",
+      "size_bytes": 61635,
+      "sha256": "d666b20fdc3d8262b5dfdec9ea96cf6886f502147305f55072551b854d8b1e0c"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "paper_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_548_peri_onset_field_similarity_paper_ready_summary.json",
+      "size_bytes": 2057,
+      "sha256": "8fab1b47c5de62303c07a663209377063ae649b1124dfd136fd16bdf8f7c15fb"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "source_per_seizure_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_583_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+      "size_bytes": 75387,
+      "sha256": "eced0df22b87cf091b1d8b1126b1257bf543dcee95633f8ced34ef27d140536a"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "source_aggregate_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_583_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv",
+      "size_bytes": 14333,
+      "sha256": "a7c3e7aab7a3e0e98e2344624fc1771cfcdd7d9fce908e4ca92f371c544065f6"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "source_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_583_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_summary.json",
+      "size_bytes": 4574,
+      "sha256": "284c65d521cdeea0ae79751803dd74a8d42ec883086f9133432db6ea5f50a461"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_583_peri_onset_field_similarity_paper_ready.png",
+      "size_bytes": 441671,
+      "sha256": "2b36f81c9406a2d96b12e955f1ba8014256e28a9ec063e3a52ed832c5f55d5ce"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_583_peri_onset_field_similarity_paper_ready.pdf",
+      "size_bytes": 28410,
+      "sha256": "a5021c864b835605d5da5ee3f34a00c83f59ad54303aac477b3ab7a7f7cd5524"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "paper_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_583_peri_onset_field_similarity_paper_ready_summary.json",
+      "size_bytes": 4105,
+      "sha256": "dcb4cb699bbedacb18dd639ca0e81335c288c13717ec2401c3569dc40e1d228c"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "source_per_seizure_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_590_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+      "size_bytes": 299598,
+      "sha256": "b29f031e4252a10d3a41df9fd5d3127d0b0a6578ab1ad87340590574c788bd47"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "source_aggregate_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_590_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv",
+      "size_bytes": 14424,
+      "sha256": "365f1c52a4f16f0fc55733fcaa55bb720462de664e5cc03c2384ed3ac8853ac6"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "source_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_590_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_summary.json",
+      "size_bytes": 2429,
+      "sha256": "b95313948d5cee80a36fbd63e73f175d65a53e0bf6d727bfbbce050e1d95e45d"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_590_peri_onset_field_similarity_paper_ready.png",
+      "size_bytes": 687094,
+      "sha256": "c2ca9dc8c1c1827acf534c3c3758176fcaf9c1d8a29d3b0fef97509231c6f6ad"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_590_peri_onset_field_similarity_paper_ready.pdf",
+      "size_bytes": 42785,
+      "sha256": "5b19cd54feb0197aad183f6aaed643ee2ba9bb363b4f89e4b44cdd65508200c8"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "paper_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_590_peri_onset_field_similarity_paper_ready_summary.json",
+      "size_bytes": 2058,
+      "sha256": "284758a85696a1249c7fb8253359f9245c08abb233de5536461590875c50a907"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "source_per_seizure_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_958_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+      "size_bytes": 300871,
+      "sha256": "4892a7b8150cd5b483b3c77293bfc1b8bb831aa4e20027c5bca15e768b6b3a7e"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "source_aggregate_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_958_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_aggregate.csv",
+      "size_bytes": 14445,
+      "sha256": "bb02c4c769dad6f4fea6a386627e75cab6ed1719db52405800a3b773545487e2"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "source_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_958_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_summary.json",
+      "size_bytes": 2430,
+      "sha256": "171d3eba8886fc7d3a572489095aff6768048d5def29d9833ecf37a39283b5cc"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_958_peri_onset_field_similarity_paper_ready.png",
+      "size_bytes": 741365,
+      "sha256": "88d680a453441a687fad16754d5e5f05b71ffe8b4388342936179943a76cd420"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_958_peri_onset_field_similarity_paper_ready.pdf",
+      "size_bytes": 43003,
+      "sha256": "8de71366cf840d014a13662dabfc570e64514a8ffdd06c13fdfec370f0e2a437"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "paper_summary",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_958_peri_onset_field_similarity_paper_ready_summary.json",
+      "size_bytes": 2058,
+      "sha256": "a6757e0975f31cef398ae042e23e06ac841f813ad48dc8d9b7c2061d88b1d845"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "subject": "epilepsiae_139",
+  "source_csv": "results/topic5_ictal_recruitment/field_dynamics_signed/sensitivity_1d/epilepsiae_139_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+  "time_range_sec": [
+    -120.0,
+    20.0
+  ],
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "field_contract": "topic5_interictal_template_fields_v1",
+  "field_plane": "shared",
+  "field_scorers": [
+    "shared_a",
+    "shared_b"
+  ],
+  "own_field_fallback": false,
+  "field_fingerprint_sha256": "2e92e1b2a3a6e45bcee0516a8d9437abf3a15c64351c499d33d86120391178db",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "analysis_tier": "geometry_unsupported_1d_sensitivity",
+  "geometry_2d_supported": false,
+  "minimum_axis_n_shafts": 1,
+  "minimum_axis_effective_rank": 1,
+  "canonical_2d_material_pool": false,
+  "n_seizures": 4,
+  "n_windows": 66,
+  "readouts": {
+    "maxAB_abs": {
+      "definition": "max(|r_A|, |r_B|)",
+      "median_of_window_medians": 0.7287259965740287,
+      "median_of_window_variances": 0.08149165232321184
+    },
+    "signed_A": {
+      "definition": "signed r against template A",
+      "median_of_window_medians": -0.4279634595365329,
+      "median_of_window_variances": 0.5435654673088786
+    },
+    "signed_B": {
+      "definition": "signed r against template B",
+      "median_of_window_medians": 0.4380646802656575,
+      "median_of_window_variances": 0.5129119645802549
+    }
+  },
+  "outputs": {
+    "png": "results/paper-ready-figure/fig3_peri_onset_field_similarity/sensitivity_1d/figures/epilepsiae_139_peri_onset_field_similarity_paper_ready.png",
+    "pdf": "results/paper-ready-figure/fig3_peri_onset_field_similarity/sensitivity_1d/figures/epilepsiae_139_peri_onset_field_similarity_paper_ready.pdf"
+  }
+}

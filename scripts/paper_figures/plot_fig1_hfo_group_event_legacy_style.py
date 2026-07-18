@@ -6,6 +6,12 @@ event windows are cut from EDF, bipolar-referenced, 80-250 Hz filtered,
 concatenated, and then a fresh spectrogram is computed over the concatenated
 signal. That gives the old "Normalized Spectrogram" look with one frequency
 block per channel and a mass-center trajectory per group event.
+
+Panels a1 and a2 share the same spectrogram quantity: magnitude followed by a
+Gaussian smooth (sigma=1.5).  A2 keeps its original shorter STFT window for the
+320-ms group-event display; no display-only power transform is applied.  The
+spectrogram is drawn on its real STFT time-cell edges rather than stretched with
+``imshow``, keeping the red markers registered and removing outer white strips.
 """
 
 from __future__ import annotations
@@ -24,8 +30,16 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import mne
 import numpy as np
-from scipy.ndimage import gaussian_filter
-from scipy.signal import butter, filtfilt, iirnotch, resample_poly, spectrogram
+from scipy.signal import butter, filtfilt, iirnotch, resample_poly
+
+from fig1_spectrogram_utils import (
+    ALGORITHM_ID,
+    centroid_alignment_audit,
+    compute_group_event_spectrogram_stack,
+    dominant_enhancement_centroids,
+    full_extent_edges,
+    normalise_event_spectrograms,
+)
 
 
 DEFAULT_SUBJECT_DIR = Path("/mnt/yuquan_data/yuquan_24h_edf/chengshuai")
@@ -216,85 +230,84 @@ def _load_bipolar_event_snippets(
 
 
 def _norm_specs_to_event_max(
-    all_specs_cat: np.ndarray,
+    all_centroid_weights_cat: np.ndarray,
     n_freq: int,
     spec_times: np.ndarray,
     split_borders: np.ndarray,
 ) -> np.ndarray:
-    normed = np.zeros_like(all_specs_cat, dtype=np.float64)
-    split_edges = np.asarray([0.0] + split_borders.tolist(), dtype=np.float64)
-    windows = np.vstack([split_edges[:-1], split_edges[1:]]).T
-    n_channels = all_specs_cat.shape[0] // int(n_freq)
-    for start, end in windows:
-        tmask = (spec_times > start) & (spec_times < end)
-        if not np.any(tmask):
-            continue
-        for ci in range(n_channels):
-            row_slice = slice(ci * n_freq, (ci + 1) * n_freq)
-            block = all_specs_cat[row_slice, :][:, tmask]
-            denom = float(np.nanmax(block)) if np.isfinite(block).any() else 0.0
-            if denom <= 0.0 or not np.isfinite(denom):
-                continue
-            normed[row_slice, :][:, tmask] = np.clip(block / denom, 0.0, 1.0)
-    return normed
+    return normalise_event_spectrograms(
+        all_centroid_weights_cat, n_freq, spec_times, split_borders,
+    )
 
 
 def _spec_centers(
-    channel_spec: np.ndarray,
+    channel_centroid_weight: np.ndarray,
     spec_times: np.ndarray,
     split_borders: np.ndarray,
+    edge_guard_sec: float,
+    enhancement_threshold: float,
 ) -> list[tuple[float, float]]:
-    split_edges = np.asarray([0.0] + split_borders.tolist(), dtype=np.float64)
-    centers = []
-    for start, end in np.vstack([split_edges[:-1], split_edges[1:]]).T:
-        tmask = (spec_times > start) & (spec_times < end)
-        win = np.asarray(channel_spec[:, tmask], dtype=np.float64)
-        if win.size == 0 or not np.isfinite(win).any() or np.nanmax(win) <= 0:
-            centers.append((np.nan, np.nan))
-            continue
-        win = np.nan_to_num(win, nan=0.0) ** 3
-        denom = float(np.sum(win))
-        if denom <= 0:
-            centers.append((np.nan, np.nan))
-            continue
-        weight = win / denom
-        tvals = spec_times[tmask]
-        time_grid = np.tile(tvals, (channel_spec.shape[0], 1))
-        freq_grid = np.tile(np.arange(channel_spec.shape[0]), (len(tvals), 1)).T
-        centers.append((float(np.sum(weight * time_grid)), float(np.sum(weight * freq_grid))))
-    return centers
+    """Return the weighted centroid of each dominant HFO energy enhancement.
+
+    The global centroid of a multimodal event can fall in a blue valley between
+    two bursts.  For the reader-facing marker, we therefore identify the
+    connected high-energy component containing the event's maximum and compute
+    its weighted centroid.  An STFT-window edge guard prevents concatenation
+    boundaries from being mistaken for physiological HFO enhancements.
+    """
+    return dominant_enhancement_centroids(
+        channel_centroid_weight,
+        spec_times,
+        split_borders,
+        edge_guard_sec=edge_guard_sec,
+        enhancement_threshold=enhancement_threshold,
+    )
 
 
 def _compute_legacy_specs(
     split_conti_high: np.ndarray,
     fs: float,
     split_borders: np.ndarray,
+    spec_window: str,
     spec_win_sec: float,
+    spec_overlap_sec: float,
     spec_freq_range: tuple[float, float],
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    all_specs = []
-    spec_times = None
-    spec_freqs = None
-    for row in split_conti_high:
-        freqs, times, spec = spectrogram(
-            row,
-            fs,
-            window="hamming",
-            nperseg=int(round(float(spec_win_sec) * fs)),
-            noverlap=int(round(0.8 * float(spec_win_sec) * fs)),
-            nfft=int(round(float(spec_win_sec) * fs)),
-            mode="magnitude",
-        )
-        spec = gaussian_filter(spec, sigma=1.5)
-        fmask = (freqs > float(spec_freq_range[0])) & (freqs < float(spec_freq_range[1]))
-        all_specs.append(spec[fmask])
-        spec_times = times
-        spec_freqs = freqs[fmask]
-    assert spec_times is not None and spec_freqs is not None
-    all_specs_cat = np.concatenate(all_specs, axis=0)
-    normed = _norm_specs_to_event_max(all_specs_cat, len(spec_freqs), spec_times, split_borders)
-    centers = np.asarray([_spec_centers(spec, spec_times, split_borders) for spec in all_specs])
-    return normed, spec_times, spec_freqs, centers
+    return compute_group_event_spectrogram_stack(
+        split_conti_high,
+        fs,
+        split_borders,
+        spec_window=spec_window,
+        spec_win_sec=spec_win_sec,
+        spec_overlap_sec=spec_overlap_sec,
+        spec_freq_range=spec_freq_range,
+        gaussian_sigma=1.5,
+        enhancement_threshold=0.70,
+    )
+
+
+def _full_extent_edges(centers: np.ndarray, lower: float, upper: float) -> np.ndarray:
+    """Build pcolormesh edges with exact outer bounds and true interior timing."""
+    return full_extent_edges(centers, lower, upper)
+
+
+def _centroid_alignment_audit(
+    normed_specs: np.ndarray,
+    spec_times: np.ndarray,
+    spec_freqs: np.ndarray,
+    centers: np.ndarray,
+    window_sec: float,
+    acceptance_threshold: float,
+) -> dict:
+    """Quantify whether every plotted centroid lands on displayed enhancement."""
+    return centroid_alignment_audit(
+        normed_specs,
+        spec_times,
+        spec_freqs,
+        centers,
+        window_sec,
+        acceptance_threshold,
+    )
 
 
 def _plot(
@@ -307,6 +320,7 @@ def _plot(
     centers: np.ndarray,
     split_borders: np.ndarray,
     channels: list[str],
+    display_label: str,
     output_png: Path,
     output_pdf: Path,
 ) -> None:
@@ -319,6 +333,8 @@ def _plot(
     n_channels = len(labels)
     n_freq = len(spec_freqs)
     total_t = split_conti_high.shape[1] / float(fs)
+    spec_time_edges = _full_extent_edges(spec_times, 0.0, total_t)
+    stacked_freq_edges = np.arange(n_channels * n_freq + 1, dtype=np.float64)
 
     fig = plt.figure(figsize=(6.5, 4.25))
     gs = fig.add_gridspec(1, 2, width_ratios=[0.52, 1.45], wspace=0.055)
@@ -329,11 +345,12 @@ def _plot(
     x = np.arange(split_conti_high.shape[1], dtype=np.float64) / float(fs)
     for ci in range(n_channels):
         ax_trace.plot(x, split_conti_high[ci] + ci * gap, color="black", linewidth=0.42)
-    for border in split_borders:
+    for border in split_borders[:-1]:
         ax_trace.axvline(float(border), color="#b9b9b9", linestyle="--", linewidth=0.55, alpha=0.9)
     ax_trace.set_yticks(np.arange(n_channels) * gap)
     ax_trace.set_yticklabels(labels, fontsize=8)
     ax_trace.set_xlim(0.0, total_t)
+    ax_trace.margins(x=0.0)
     ax_trace.set_ylim(-0.8 * gap, (n_channels - 0.2) * gap)
     ax_trace.invert_yaxis()
     ax_trace.set_title("80-250Hz", fontsize=10)
@@ -343,17 +360,17 @@ def _plot(
     ax_trace.spines["top"].set_visible(False)
     ax_trace.spines["right"].set_visible(False)
 
-    im = ax_spec.imshow(
+    im = ax_spec.pcolormesh(
+        spec_time_edges,
+        stacked_freq_edges,
         normed_specs,
-        origin="upper",
-        aspect="auto",
-        interpolation="nearest",
         cmap="coolwarm",
         vmin=0.0,
         vmax=1.0,
-        extent=(0.0, total_t, n_channels * n_freq, 0.0),
+        shading="flat",
+        rasterized=True,
     )
-    for border in split_borders:
+    for border in split_borders[:-1]:
         ax_spec.axvline(float(border), color="white", linestyle="-", linewidth=0.9, alpha=0.95)
     for ci in range(1, n_channels):
         ax_spec.axhline(ci * n_freq, color="#c7c7c7", linewidth=0.45, linestyle="--")
@@ -363,7 +380,10 @@ def _plot(
             t_center, f_center = centers[ci, ev]
             if not np.isfinite(t_center) or not np.isfinite(f_center):
                 continue
-            xy.append((t_center, ci * n_freq + f_center))
+            # pcolormesh row i spans [i, i+1], hence the +0.5 row-center
+            # correction.  The previous imshow version omitted this and also
+            # stretched STFT time centers, visibly displacing the red points.
+            xy.append((t_center, ci * n_freq + f_center + 0.5))
         if xy:
             arr = np.asarray(xy, dtype=np.float64)
             ax_spec.plot(arr[:, 0], arr[:, 1], color="red", linewidth=0.8, alpha=0.9, zorder=4)
@@ -379,6 +399,8 @@ def _plot(
     ax_spec.set_yticks([])
     ax_spec.set_yticklabels([])
     ax_spec.set_xlim(0.0, total_t)
+    ax_spec.set_ylim(n_channels * n_freq, 0.0)
+    ax_spec.margins(x=0.0)
     ax_spec.set_title("Normalized Spectrogram", fontsize=10)
     ax_spec.set_xlabel("Time (s)", fontsize=9)
     ax_spec.tick_params(axis="x", labelsize=8, length=2)
@@ -391,7 +413,7 @@ def _plot(
     cbar.ax.tick_params(labelsize=8, length=0)
     cbar.outline.set_visible(False)
 
-    fig.suptitle("Yuquan Y1", x=0.11, y=0.98, ha="left", fontsize=11, fontweight="bold")
+    fig.suptitle(display_label, x=0.11, y=0.98, ha="left", fontsize=11, fontweight="bold")
     fig.savefig(output_png, dpi=300, bbox_inches="tight")
     fig.savefig(output_pdf, bbox_inches="tight")
     plt.close(fig)
@@ -402,7 +424,12 @@ def main() -> None:
     parser.add_argument("--subject-dir", type=Path, default=DEFAULT_SUBJECT_DIR)
     parser.add_argument("--record", default=DEFAULT_RECORD)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--output-stem", default="yuquan_y1_hfo_group_event_demo")
+    parser.add_argument("--output-stem", default="yuquan_y3_hfo_group_event_demo")
+    parser.add_argument(
+        "--display-label",
+        default="Yuquan Y3",
+        help="Reader-facing label locked by the private Yuquan crosswalk.",
+    )
     parser.add_argument("--channels", default=DEFAULT_CHANNELS)
     parser.add_argument("--n-events", type=int, default=3)
     parser.add_argument("--n-channels", type=int, default=10)
@@ -473,7 +500,9 @@ def main() -> None:
         split_high,
         fs=fs,
         split_borders=split_borders,
+        spec_window="hamming",
         spec_win_sec=0.05,
+        spec_overlap_sec=0.04,
         spec_freq_range=(50.0, 300.0),
     )
 
@@ -481,6 +510,14 @@ def main() -> None:
     output_png = args.output_dir / f"{args.output_stem}.png"
     output_pdf = args.output_dir / f"{args.output_stem}.pdf"
     metadata_path = args.output_dir / f"{args.output_stem}_metadata.json"
+    centroid_alignment = _centroid_alignment_audit(
+        normed_specs,
+        spec_times,
+        spec_freqs,
+        spec_centers,
+        window_sec=float(args.window_sec),
+        acceptance_threshold=0.70,
+    )
     _plot(
         split_conti_high=split_high,
         fs=fs,
@@ -490,6 +527,7 @@ def main() -> None:
         centers=spec_centers,
         split_borders=split_borders,
         channels=selected_channels,
+        display_label=str(args.display_label),
         output_png=output_png,
         output_pdf=output_pdf,
     )
@@ -506,6 +544,7 @@ def main() -> None:
         },
         "selection": {
             "figure_label": "Fig1-A",
+            "display_label": str(args.display_label),
             "candidate_channels": candidate_channels,
             "selected_channels": selected_channels,
             "display_labels": [_display_label(ch) for ch in selected_channels],
@@ -525,13 +564,21 @@ def main() -> None:
             "fs_out": float(args.fs_out),
             "band_hz": [80, 250],
             "spectrogram": {
+                "algorithm_id": ALGORITHM_ID,
                 "window": "hamming",
                 "nperseg_sec": 0.05,
-                "overlap_fraction": 0.8,
+                "noverlap_sec": 0.04,
                 "freq_range_hz": [50, 300],
                 "gaussian_sigma": 1.5,
-                "normalization": "per channel per event window max, matching old ReplayIED norm_theSpec_toMaxOne",
+                "display_quantity": "Gaussian-smoothed magnitude, normalized per channel per event window max",
+                "centroid_weight": "the same Gaussian-smoothed magnitude shown in the panel",
+                "centroid_support": "weighted centroid of the connected component containing the within-event maximum at >=70% of that maximum",
+                "centroid_edge_guard_sec": 0.05,
+                "coordinate_registration": "pcolormesh on real STFT time-cell edges; centroid frequency index plotted at row center (+0.5)",
+                "x_cell_edges_sec": [0.0, float(split_high.shape[1] / float(fs))],
+                "edge_policy": "extend first/last STFT cells to the event-stack bounds; draw separators only at internal event borders",
             },
+            "centroid_alignment_audit": centroid_alignment,
             "outputs": [str(output_png), str(output_pdf)],
             "layout": {
                 "figure_size_in": [6.5, 4.25],

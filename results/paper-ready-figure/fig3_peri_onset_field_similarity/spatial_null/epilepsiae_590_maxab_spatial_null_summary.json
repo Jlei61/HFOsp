@@ -1,0 +1,109 @@
+{
+  "subject": "epilepsiae_590",
+  "tier": "single-subject material for Fig3-B; NOT a formal cohort statistic",
+  "readout": "shared-gradient maxAB similarity = max(|r_A|, |r_B|); onset-increment / signed A/B / multiband NOT tested",
+  "feature": "1-150 Hz summed spectrogram log power (notch-filtered input at 50/100/150/200 Hz; NO extra FFT-bin line mask), per-channel baseline robust-z",
+  "nulls_def": {
+    "all_contact": "channel_shuffle — permute per-channel energy values across EVERY matched contact. WEAKEST spatial control: does NOT hold shaft-level implantation geometry / same-shaft local smoothing fixed.",
+    "within_shaft": "within_shaft_shuffle — permute values only WITHIN each electrode shaft (preserves which shaft is hot / shaft geometry; the STRONGER, PRIMARY control). Power depends on shaft sizes (see shaft_structure); singleton shafts cannot be shuffled, so a subject whose similarity is carried entirely by which shaft is hot will not clear it."
+  },
+  "null_construction": "within-subject; full readout replayed per shuffle (values -> make_field_record -> support-weighted smoothing -> corr to A/B -> max|r|), median over seizures. Each seizure x replicate draws one spatial mapping and reuses it across all 66 windows, preserving null-trajectory temporal dependence. NOT a shuffle of the finished maxAB.",
+  "corrections": {
+    "pointwise_p": "one-sided per window (1 + #{null >= obs}) / (R + 1); UNCORRECTED for the 66 overlapping (10 s / 2 s) windows.",
+    "maxt_p": "Nichols-Holmes single-step maxT across windows on standardized z (family-wise per-window control, one-sided upper).",
+    "cluster": "Maris-Oostenveld cluster permutation (cluster-forming = pointwise p<0.05 on standardized z; cluster mass = sum z; null = max cluster mass per permutation). This is the paper-facing 'significant time interval' verdict."
+  },
+  "scope": "exploratory two-dimensional per-subject material; two WITHIN-subject spatial nulls, NOT a formal cohort spatial gate.",
+  "time_range_sec": [
+    -120.0,
+    20.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "n_perm": 1000,
+  "seed": 0,
+  "n_seizures": 12,
+  "n_seizure_drops": 0,
+  "seizure_drops": [],
+  "shaft_structure": {
+    "n_contacts": 16,
+    "n_shafts": 4,
+    "shaft_sizes": [
+      7,
+      5,
+      2,
+      2
+    ],
+    "n_singleton_shafts": 0
+  },
+  "n_windows": 66,
+  "obs_median_of_window_medians": 0.7993178156835264,
+  "primary_null": "within_shaft",
+  "nulls": {
+    "all_contact": {
+      "n_pointwise_p05": 2,
+      "n_maxt_p05": 0,
+      "n_cluster_sig_windows": 0,
+      "n_clusters": 2,
+      "significant_clusters": []
+    },
+    "within_shaft": {
+      "n_pointwise_p05": 9,
+      "n_maxt_p05": 0,
+      "n_cluster_sig_windows": 5,
+      "n_clusters": 6,
+      "significant_clusters": [
+        {
+          "start_sec": 7.0,
+          "end_sec": 15.0,
+          "n_windows": 5,
+          "p": 0.013986013986013986
+        }
+      ]
+    }
+  },
+  "fidelity_max_abs_err": 1.354472090042691e-14,
+  "source_observed_max_abs_err": 1.354472090042691e-14,
+  "field_contract": "topic5_interictal_template_fields_v1",
+  "field_plane": "shared",
+  "field_scorers": [
+    "shared_a",
+    "shared_b"
+  ],
+  "own_field_fallback": false,
+  "field_fingerprint_sha256": "4a287e1f24afb511119ddef4700a0175ebf17dbe6a97a6e0dbc17424f951e2a6",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "geometry_2d_supported": true,
+  "geometry_quality_tier": "strict_2d",
+  "minimum_axis_n_shafts": 4,
+  "minimum_axis_effective_rank": 3,
+  "source_per_seizure_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_590_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+  "source_per_seizure_csv_sha256": "b29f031e4252a10d3a41df9fd5d3127d0b0a6578ab1ad87340590574c788bd47",
+  "trajectory_run_id": "20260718T071020Z_d99c96ec",
+  "trajectory_manifest_sha256": "d8b3307464f008dab55f5ecc7637863b0de516b592e66639d1792634985e6bcb",
+  "source_seizure_ids": [
+    0,
+    1,
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "source_seizure_ids_sha256": "cc74fd403dc90a746bb265921a2b70849454bbe014c2fe1d64e3d86e9522e1f6",
+  "window_grid_sha256": "36876d69006fa8b2dc5904982667587d409d33c2386446f152fef686f715099b",
+  "spatial_null_algorithm_version": "fig3b_shared_gradient_matched_spatial_null_v2",
+  "permutation_coupling_version": "per_seizure_per_replicate_fixed_mapping_across_all_66_windows_v1",
+  "outputs": {
+    "figure_png": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_590_maxab_spatial_null.png",
+    "figure_pdf": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_590_maxab_spatial_null.pdf",
+    "stats_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_590_maxab_spatial_null_stats.csv",
+    "null_matrices_npz": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_590_maxab_spatial_null_matrices.npz"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "subject": "epilepsiae_384",
+  "source_csv": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_384_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv",
+  "time_range_sec": [
+    -120.0,
+    20.0
+  ],
+  "band_hz": [
+    1.0,
+    150.0
+  ],
+  "window_sec": 10.0,
+  "step_sec": 2.0,
+  "field_contract": "topic5_interictal_template_fields_v1",
+  "field_plane": "shared",
+  "field_scorers": [
+    "shared_a",
+    "shared_b"
+  ],
+  "own_field_fallback": false,
+  "field_fingerprint_sha256": "1635b2e5d288426a30d03073ff69856e4e45dcc63167d53253edff793fab1fc5",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "geometry_2d_supported": true,
+  "geometry_quality_tier": "non_strict_2d",
+  "minimum_axis_n_shafts": 4,
+  "minimum_axis_effective_rank": 3,
+  "coverage_status": "partial_ok",
+  "coverage_fraction": 0.5,
+  "n_eligible_requested": 12,
+  "n_seizure_drops": 6,
+  "seizure_drops": [
+    {
+      "seizure_idx": 8,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 9,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 10,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 11,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 13,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    },
+    {
+      "seizure_idx": 14,
+      "reason": "RuntimeError: Nyquist 128 <= requested band_hi 150"
+    }
+  ],
+  "n_seizures": 6,
+  "n_windows": 66,
+  "readouts": {
+    "maxAB_abs": {
+      "definition": "max(|r_A|, |r_B|)",
+      "median_of_window_medians": 0.7248907615537623,
+      "median_of_window_variances": 0.021996667909705996
+    },
+    "signed_A": {
+      "definition": "signed r against template A",
+      "median_of_window_medians": 0.5540859789160535,
+      "median_of_window_variances": 0.3091736343261554
+    },
+    "signed_B": {
+      "definition": "signed r against template B",
+      "median_of_window_medians": -0.5583025658102896,
+      "median_of_window_variances": 0.379426464567964
+    }
+  },
+  "outputs": {
+    "png": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_384_peri_onset_field_similarity_paper_ready.png",
+    "pdf": "results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/figures/epilepsiae_384_peri_onset_field_similarity_paper_ready.pdf"
+  }
+}

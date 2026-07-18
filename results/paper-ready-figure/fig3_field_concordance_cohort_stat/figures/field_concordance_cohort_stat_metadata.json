@@ -1,0 +1,576 @@
+{
+  "source": "results/topic5_ictal_recruitment/axis_alignment",
+  "statistic": "paired Data vs selected candidate channel-null median",
+  "selection_rules": {
+    "BB 1-45 maxAB": [
+      "BB 1-45 maxAB"
+    ],
+    "BB 1-150 maxAB": [
+      "BB 1-150 maxAB"
+    ],
+    "HFA 60-100 maxAB": [
+      "HFA 60-100 maxAB"
+    ]
+  },
+  "rows": [
+    {
+      "label": "BB 1-45 maxAB",
+      "summary": {
+        "label": "BB 1-45 maxAB",
+        "n": 20,
+        "wilcoxon_p_data_gt_null_median": 0.005344390869140625,
+        "data_median": 0.757189953322897,
+        "data_iqr": [
+          0.5921813299737057,
+          0.8356811440333449
+        ],
+        "null_median": 0.5767007448602355,
+        "null_iqr": [
+          0.49785795623292073,
+          0.6731880909361324
+        ],
+        "n_data_gt_null": 16,
+        "selected_candidates": {
+          "BB 1-45 maxAB": 20,
+          "BB 1-150 maxAB": 0,
+          "HFA 60-100 maxAB": 0
+        }
+      },
+      "per_subject": [
+        {
+          "subject_id": "epilepsiae_1077",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.7729174889910675,
+          "null": 0.7391122571181271,
+          "margin_vs_null_median": 0.03380523187294038,
+          "n_seizures": 9
+        },
+        {
+          "subject_id": "epilepsiae_1084",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.5562391563341893,
+          "null": 0.5381103457252786,
+          "margin_vs_null_median": 0.018128810608910695,
+          "n_seizures": 72
+        },
+        {
+          "subject_id": "epilepsiae_1096",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.46620615747493316,
+          "null": 0.6807116566948491,
+          "margin_vs_null_median": -0.21450549921991596,
+          "n_seizures": 8
+        },
+        {
+          "subject_id": "epilepsiae_1125",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.7679863604714534,
+          "null": 0.6706272941829131,
+          "margin_vs_null_median": 0.0973590662885403,
+          "n_seizures": 14
+        },
+        {
+          "subject_id": "epilepsiae_1146",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.8218578292357394,
+          "null": 0.42471645413034753,
+          "margin_vs_null_median": 0.3971413751053918,
+          "n_seizures": 25
+        },
+        {
+          "subject_id": "epilepsiae_1150",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.7463935461743405,
+          "null": 0.7958570028625057,
+          "margin_vs_null_median": -0.04946345668816521,
+          "n_seizures": 8
+        },
+        {
+          "subject_id": "epilepsiae_139",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.6560211752556614,
+          "null": 0.6360931738651128,
+          "margin_vs_null_median": 0.019928001390548622,
+          "n_seizures": 4
+        },
+        {
+          "subject_id": "epilepsiae_253",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.6882053666826068,
+          "null": 0.6706802356832269,
+          "margin_vs_null_median": 0.017525130999379912,
+          "n_seizures": 6
+        },
+        {
+          "subject_id": "epilepsiae_384",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.4785640615524539,
+          "null": 0.5410415454963082,
+          "margin_vs_null_median": -0.06247748394385433,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "epilepsiae_442",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.5707703221281522,
+          "null": 0.44711262054843526,
+          "margin_vs_null_median": 0.1236577015797169,
+          "n_seizures": 22
+        },
+        {
+          "subject_id": "epilepsiae_548",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.8800626638051497,
+          "null": 0.5656525646691828,
+          "margin_vs_null_median": 0.31441009913596696,
+          "n_seizures": 26
+        },
+        {
+          "subject_id": "epilepsiae_583",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.9606649923456083,
+          "null": 0.6093423581284317,
+          "margin_vs_null_median": 0.3513226342171766,
+          "n_seizures": 22
+        },
+        {
+          "subject_id": "epilepsiae_590",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.8848026403971849,
+          "null": 0.48649549695954153,
+          "margin_vs_null_median": 0.3983071434376434,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "epilepsiae_620",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.5715786757974336,
+          "null": 0.5016454426573804,
+          "margin_vs_null_median": 0.06993323314005317,
+          "n_seizures": 6
+        },
+        {
+          "subject_id": "epilepsiae_635",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.8107699574206874,
+          "null": 0.862424686073273,
+          "margin_vs_null_median": -0.05165472865258569,
+          "n_seizures": 17
+        },
+        {
+          "subject_id": "epilepsiae_916",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.7824317944206367,
+          "null": 0.7349387097209216,
+          "margin_vs_null_median": 0.04749308469971514,
+          "n_seizures": 48
+        },
+        {
+          "subject_id": "epilepsiae_922",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.6069972718569784,
+          "null": 0.5877489250512882,
+          "margin_vs_null_median": 0.01924834680569021,
+          "n_seizures": 28
+        },
+        {
+          "subject_id": "epilepsiae_958",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.5990488813657964,
+          "null": 0.5116291848834917,
+          "margin_vs_null_median": 0.08741969648230463,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "yuquan_xuxinyi",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.8964688474373166,
+          "null": 0.4800519290634626,
+          "margin_vs_null_median": 0.416416918373854,
+          "n_seizures": 3
+        },
+        {
+          "subject_id": "yuquan_zhangkexuan",
+          "candidate": "BB 1-45 maxAB",
+          "data": 0.8771510884261615,
+          "null": 0.3778810291076582,
+          "margin_vs_null_median": 0.4992700593185033,
+          "n_seizures": 3
+        }
+      ]
+    },
+    {
+      "label": "BB 1-150 maxAB",
+      "summary": {
+        "label": "BB 1-150 maxAB",
+        "n": 20,
+        "wilcoxon_p_data_gt_null_median": 0.006039619445800781,
+        "data_median": 0.7394697327475686,
+        "data_iqr": [
+          0.6044484086979818,
+          0.8425904099024518
+        ],
+        "null_median": 0.5730506601789815,
+        "null_iqr": [
+          0.4996541652664147,
+          0.6752871719163629
+        ],
+        "n_data_gt_null": 15,
+        "selected_candidates": {
+          "BB 1-45 maxAB": 0,
+          "BB 1-150 maxAB": 20,
+          "HFA 60-100 maxAB": 0
+        }
+      },
+      "per_subject": [
+        {
+          "subject_id": "epilepsiae_1077",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.7670507964116895,
+          "null": 0.7453968100733901,
+          "margin_vs_null_median": 0.021653986338299402,
+          "n_seizures": 8
+        },
+        {
+          "subject_id": "epilepsiae_1084",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.5629206130888373,
+          "null": 0.5370539875444027,
+          "margin_vs_null_median": 0.02586662554443464,
+          "n_seizures": 72
+        },
+        {
+          "subject_id": "epilepsiae_1096",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.46554369253907346,
+          "null": 0.6775758729946472,
+          "margin_vs_null_median": -0.2120321804555737,
+          "n_seizures": 8
+        },
+        {
+          "subject_id": "epilepsiae_1125",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.7663590918952762,
+          "null": 0.6728766097220336,
+          "margin_vs_null_median": 0.09348248217324262,
+          "n_seizures": 14
+        },
+        {
+          "subject_id": "epilepsiae_1146",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.8302917534866877,
+          "null": 0.42205739223193695,
+          "margin_vs_null_median": 0.40823436125475077,
+          "n_seizures": 25
+        },
+        {
+          "subject_id": "epilepsiae_1150",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.7498936069026718,
+          "null": 0.7914679390874855,
+          "margin_vs_null_median": -0.041574332184813656,
+          "n_seizures": 8
+        },
+        {
+          "subject_id": "epilepsiae_139",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.6565886855353915,
+          "null": 0.6348538647560595,
+          "margin_vs_null_median": 0.021734820779331976,
+          "n_seizures": 4
+        },
+        {
+          "subject_id": "epilepsiae_253",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.6895726871085947,
+          "null": 0.6745242715569347,
+          "margin_vs_null_median": 0.015048415551659922,
+          "n_seizures": 6
+        },
+        {
+          "subject_id": "epilepsiae_384",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.4750852358605821,
+          "null": 0.5483641669243808,
+          "margin_vs_null_median": -0.07327893106379874,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "epilepsiae_442",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.5638390953955921,
+          "null": 0.44488125266489603,
+          "margin_vs_null_median": 0.11895784273069604,
+          "n_seizures": 22
+        },
+        {
+          "subject_id": "epilepsiae_548",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.8860607390357325,
+          "null": 0.5658588319325117,
+          "margin_vs_null_median": 0.3202019071032207,
+          "n_seizures": 26
+        },
+        {
+          "subject_id": "epilepsiae_583",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.9673304919386778,
+          "null": 0.6141578226066042,
+          "margin_vs_null_median": 0.3531726693320736,
+          "n_seizures": 22
+        },
+        {
+          "subject_id": "epilepsiae_590",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.8869370517377909,
+          "null": 0.49272534538419904,
+          "margin_vs_null_median": 0.3942117063535919,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "epilepsiae_620",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.5484953983453172,
+          "null": 0.5019637718938199,
+          "margin_vs_null_median": 0.04653162645149733,
+          "n_seizures": 6
+        },
+        {
+          "subject_id": "epilepsiae_635",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.8279302272978437,
+          "null": 0.8629386424490872,
+          "margin_vs_null_median": -0.03500841515124353,
+          "n_seizures": 17
+        },
+        {
+          "subject_id": "epilepsiae_916",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.7290458585924653,
+          "null": 0.7378915518869826,
+          "margin_vs_null_median": -0.008845693294517343,
+          "n_seizures": 48
+        },
+        {
+          "subject_id": "epilepsiae_922",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.6179848464654449,
+          "null": 0.5802424884254515,
+          "margin_vs_null_median": 0.037742358039993484,
+          "n_seizures": 28
+        },
+        {
+          "subject_id": "epilepsiae_958",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.6315068498573027,
+          "null": 0.5119156530646125,
+          "margin_vs_null_median": 0.11959119679269015,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "yuquan_xuxinyi",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.8794863791497443,
+          "null": 0.4551572626488688,
+          "margin_vs_null_median": 0.42432911650087546,
+          "n_seizures": 3
+        },
+        {
+          "subject_id": "yuquan_zhangkexuan",
+          "candidate": "BB 1-150 maxAB",
+          "data": 0.8834478030158447,
+          "null": 0.38520908345279453,
+          "margin_vs_null_median": 0.49823871956305016,
+          "n_seizures": 3
+        }
+      ]
+    },
+    {
+      "label": "HFA 60-100 maxAB",
+      "summary": {
+        "label": "HFA 60-100 maxAB",
+        "n": 20,
+        "wilcoxon_p_data_gt_null_median": 0.007656097412109375,
+        "data_median": 0.7285106890524526,
+        "data_iqr": [
+          0.5419111795263762,
+          0.8335244259401335
+        ],
+        "null_median": 0.5738874201155226,
+        "null_iqr": [
+          0.5009919043254258,
+          0.6842576949380414
+        ],
+        "n_data_gt_null": 16,
+        "selected_candidates": {
+          "BB 1-45 maxAB": 0,
+          "BB 1-150 maxAB": 0,
+          "HFA 60-100 maxAB": 20
+        }
+      },
+      "per_subject": [
+        {
+          "subject_id": "epilepsiae_1077",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.8017463884919168,
+          "null": 0.7525610639805957,
+          "margin_vs_null_median": 0.04918532451132107,
+          "n_seizures": 9
+        },
+        {
+          "subject_id": "epilepsiae_1084",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.5439097729087297,
+          "null": 0.5381733818122363,
+          "margin_vs_null_median": 0.005736391096493376,
+          "n_seizures": 72
+        },
+        {
+          "subject_id": "epilepsiae_1096",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.44170626185503825,
+          "null": 0.6907264721971216,
+          "margin_vs_null_median": -0.24902021034208333,
+          "n_seizures": 8
+        },
+        {
+          "subject_id": "epilepsiae_1125",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.6339347656991474,
+          "null": 0.6791958431850811,
+          "margin_vs_null_median": -0.045261077485933665,
+          "n_seizures": 14
+        },
+        {
+          "subject_id": "epilepsiae_1146",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.5359153993793159,
+          "null": 0.42457538973627373,
+          "margin_vs_null_median": 0.11134000964304214,
+          "n_seizures": 25
+        },
+        {
+          "subject_id": "epilepsiae_1150",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.8174153085959918,
+          "null": 0.776855642171794,
+          "margin_vs_null_median": 0.04055966642419773,
+          "n_seizures": 8
+        },
+        {
+          "subject_id": "epilepsiae_139",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.7546142650485279,
+          "null": 0.6495492677510324,
+          "margin_vs_null_median": 0.10506499729749552,
+          "n_seizures": 4
+        },
+        {
+          "subject_id": "epilepsiae_253",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.7242619239688779,
+          "null": 0.6821014358516815,
+          "margin_vs_null_median": 0.042160488117196415,
+          "n_seizures": 6
+        },
+        {
+          "subject_id": "epilepsiae_384",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.6848718583622647,
+          "null": 0.5516387394853286,
+          "margin_vs_null_median": 0.13323311887693612,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "epilepsiae_442",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.5331469301108764,
+          "null": 0.4477740030772312,
+          "margin_vs_null_median": 0.08537292703364524,
+          "n_seizures": 22
+        },
+        {
+          "subject_id": "epilepsiae_548",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.9071488994799927,
+          "null": 0.565471510412304,
+          "margin_vs_null_median": 0.34167738906768863,
+          "n_seizures": 26
+        },
+        {
+          "subject_id": "epilepsiae_583",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.9458526669360974,
+          "null": 0.6060889755256375,
+          "margin_vs_null_median": 0.3397636914104599,
+          "n_seizures": 22
+        },
+        {
+          "subject_id": "epilepsiae_590",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.8638165045657012,
+          "null": 0.4894625094518192,
+          "margin_vs_null_median": 0.37435399511388207,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "epilepsiae_620",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.36079233298283875,
+          "null": 0.5048350359499614,
+          "margin_vs_null_median": -0.14404270296712263,
+          "n_seizures": 6
+        },
+        {
+          "subject_id": "epilepsiae_635",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.9036314060233359,
+          "null": 0.8692745282859184,
+          "margin_vs_null_median": 0.03435687773741747,
+          "n_seizures": 17
+        },
+        {
+          "subject_id": "epilepsiae_916",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.946531334240708,
+          "null": 0.7629368083613384,
+          "margin_vs_null_median": 0.18359452587936964,
+          "n_seizures": 48
+        },
+        {
+          "subject_id": "epilepsiae_922",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.8234270663982777,
+          "null": 0.5823033298187411,
+          "margin_vs_null_median": 0.24112373657953656,
+          "n_seizures": 28
+        },
+        {
+          "subject_id": "epilepsiae_958",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.7327594541360274,
+          "null": 0.5065104802642325,
+          "margin_vs_null_median": 0.22624897387179488,
+          "n_seizures": 12
+        },
+        {
+          "subject_id": "yuquan_xuxinyi",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.3969658691441826,
+          "null": 0.4832727422112103,
+          "margin_vs_null_median": -0.08630687306702772,
+          "n_seizures": 3
+        },
+        {
+          "subject_id": "yuquan_zhangkexuan",
+          "candidate": "HFA 60-100 maxAB",
+          "data": 0.6417993935434622,
+          "null": 0.3885070205950486,
+          "margin_vs_null_median": 0.25329237294841356,
+          "n_seizures": 3
+        }
+      ]
+    }
+  ],
+  "interpretation_boundary": "Visualizes cohort-level field-concordance shift above channel-null center. Formal pass claims still require the upstream selection-corrected null."
+}

@@ -1,0 +1,264 @@
+{
+  "contract": "fig3b_shared_gradient_matched_spatial_null_v2",
+  "run_complete": true,
+  "n_subjects": 7,
+  "n_ok": 7,
+  "field_plane": "shared",
+  "own_field_fallback": false,
+  "geometry_2d_required": true,
+  "spatial_null_algorithm_version": "fig3b_shared_gradient_matched_spatial_null_v2",
+  "permutation_coupling_version": "per_seizure_per_replicate_fixed_mapping_across_all_66_windows_v1",
+  "trajectory_run_ids": [
+    "20260718T071020Z_d99c96ec"
+  ],
+  "n_perm": [
+    1000
+  ],
+  "artifacts": [
+    {
+      "subject": "epilepsiae_1084",
+      "role": "summary_json",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_1084_maxab_spatial_null_summary.json",
+      "size_bytes": 5928,
+      "sha256": "51171f34e5e43ab6c67d19753f17d5abe6ef936b5a30bce28b794f9a62f47a5f"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_1084_maxab_spatial_null.png",
+      "size_bytes": 222297,
+      "sha256": "f9ea043776ed0c6e276a3e8cf7037cb25786996b23889c3d066ab66600aaaf07"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_1084_maxab_spatial_null.pdf",
+      "size_bytes": 23308,
+      "sha256": "e3b6db52596b038baa01389af087c57120145cd4404182e23dee2118aca7ada4"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "stats_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_1084_maxab_spatial_null_stats.csv",
+      "size_bytes": 17534,
+      "sha256": "4bdd31d59730d2397207bf0a5a1fdc06617986e3dc3a9fa44d64dccbcbd70296"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "role": "null_matrices_npz",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_1084_maxab_spatial_null_matrices.npz",
+      "size_bytes": 968464,
+      "sha256": "d69523dbff70793c0ea2dcd3d230c31486d6870ca7fe1bf3f54d5274f1138652"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "summary_json",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_1146_maxab_spatial_null_summary.json",
+      "size_bytes": 5687,
+      "sha256": "5109d7de34e2c3e9b643f4224eee59ee85f18f58dafba3242e073fed03e1013c"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_1146_maxab_spatial_null.png",
+      "size_bytes": 241971,
+      "sha256": "7b0597d75102990afd549b5090591a428625a525215558d68054545c199c6f46"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_1146_maxab_spatial_null.pdf",
+      "size_bytes": 23219,
+      "sha256": "e2c79e88e0a6de11544dac836a9c8022ec44c73b78f0af57c94aa6d64ef7c0c9"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "stats_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_1146_maxab_spatial_null_stats.csv",
+      "size_bytes": 18684,
+      "sha256": "533f20ebd391f739ec5798d123e2f82fe2fafea0e1051cf8e217d178551b50ee"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "role": "null_matrices_npz",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_1146_maxab_spatial_null_matrices.npz",
+      "size_bytes": 973049,
+      "sha256": "167b6b985f8e1e925b75170c0f6059efd72202c5c3c8d8dbd45a864b0b3be324"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "summary_json",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_384_maxab_spatial_null_summary.json",
+      "size_bytes": 4977,
+      "sha256": "cb082aa3a4679b74e05e3447e56ab959626cc482d9c26c4158e7309e1ec1d6e7"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_384_maxab_spatial_null.png",
+      "size_bytes": 280973,
+      "sha256": "551b8ff6fdbb421058db0454b13b9609946361496e8551021b0d0368f4d0c975"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_384_maxab_spatial_null.pdf",
+      "size_bytes": 22615,
+      "sha256": "7e09fbda109c35c313b547c47c4f16a76b807ff39dac894afedeb38cf8d0a0f6"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "stats_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_384_maxab_spatial_null_stats.csv",
+      "size_bytes": 17249,
+      "sha256": "adbab0f821f2fa5792265e8c515c236a508762fe1069c7be9aa907b89e016225"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "role": "null_matrices_npz",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_384_maxab_spatial_null_matrices.npz",
+      "size_bytes": 986621,
+      "sha256": "f5d4aafc7cc3aedda5f1f6d24f86f19f13b6a8dfb332ad726599d5f68f0f6ccf"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "summary_json",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_548_maxab_spatial_null_summary.json",
+      "size_bytes": 5413,
+      "sha256": "b2cd2f74ad602f14b2083de48c1f73eb97b505e7bc9ef80ef18ad8e180d3b42e"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_548_maxab_spatial_null.png",
+      "size_bytes": 190810,
+      "sha256": "6afc7c3efce34075617388e51a858a44bdae337054e0c29cde03470ae5c0013f"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_548_maxab_spatial_null.pdf",
+      "size_bytes": 22033,
+      "sha256": "7e31772e991c74a10f8d292f4250276d5828fcffbc1d7414e226931607d309c2"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "stats_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_548_maxab_spatial_null_stats.csv",
+      "size_bytes": 18209,
+      "sha256": "03c3f1cf75f12a3501abde07f25b74febe041bd6fb8eb7d54521a978596ec7b3"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "role": "null_matrices_npz",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_548_maxab_spatial_null_matrices.npz",
+      "size_bytes": 968211,
+      "sha256": "92534453c00fb1ad9238e533d0f48829adee36fbb3665d20b5dc754549bd652e"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "summary_json",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_583_maxab_spatial_null_summary.json",
+      "size_bytes": 4961,
+      "sha256": "e1cd0c5724745c5ed8313de2f26dc1635725ae961a9c4bd99f79d3a5cd6722c8"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_583_maxab_spatial_null.png",
+      "size_bytes": 282685,
+      "sha256": "c8709ceac62d55ecdd6dab96d0dcb2194171f2d41db1a00e93e9d08c30bd4565"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_583_maxab_spatial_null.pdf",
+      "size_bytes": 22491,
+      "sha256": "4a903e34225aa9453121d7660f39f542dc432151ccaa1e3a271619dd08887082"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "stats_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_583_maxab_spatial_null_stats.csv",
+      "size_bytes": 16959,
+      "sha256": "07196daeeb094de05bfa5c69602766fa62ed67bc022a57be395383bc8485b902"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "role": "null_matrices_npz",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_583_maxab_spatial_null_matrices.npz",
+      "size_bytes": 526564,
+      "sha256": "b7b07af3fe3939abe81437d40c1036020caf7d3d75bc7fe265f87296bbca1992"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "summary_json",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_590_maxab_spatial_null_summary.json",
+      "size_bytes": 5164,
+      "sha256": "68aabad12740036e0829ae98bb6c44ee0180d94fd42238b5902a475b869a4f54"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_590_maxab_spatial_null.png",
+      "size_bytes": 227938,
+      "sha256": "3b56990ff38aea5bda4bb261d1ed0e624712f8496c13561677f179a19f810b41"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_590_maxab_spatial_null.pdf",
+      "size_bytes": 22400,
+      "sha256": "a553e4ab4aeb2bf6b8d4e1eaf060a0504dfde2c081268cece4bd7a9d4ceedb6d"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "stats_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_590_maxab_spatial_null_stats.csv",
+      "size_bytes": 17379,
+      "sha256": "6514b355d7f4d1b68713549fe440268928eff603654885ace0f2741f26615d10"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "role": "null_matrices_npz",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_590_maxab_spatial_null_matrices.npz",
+      "size_bytes": 974502,
+      "sha256": "0cdafa4214939257c43e1ac57f5c76ad345c2910d4400b56a8c99aa303f9bbe4"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "summary_json",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_958_maxab_spatial_null_summary.json",
+      "size_bytes": 5041,
+      "sha256": "e86018762ea5cd6c0d1de4e4ac1745ad4a1fc5702bef979a86e3d3597e720e52"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "figure_png",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_958_maxab_spatial_null.png",
+      "size_bytes": 257610,
+      "sha256": "188c70e05061961bb8d3d105bd1e1144a88fd4db8cade1175628229485a2712e"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "figure_pdf",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/figures/epilepsiae_958_maxab_spatial_null.pdf",
+      "size_bytes": 22162,
+      "sha256": "2e8ec95fa42c4aabcfc2c01262e2c5b886c79ddd0d8d2d4390fcf5e966073f6d"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "stats_csv",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_958_maxab_spatial_null_stats.csv",
+      "size_bytes": 17582,
+      "sha256": "65b0aea5997537d9e6199540a2b07b50c3ab0ff1d12f3e35a34348c5df7223f6"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "role": "null_matrices_npz",
+      "path": "results/paper-ready-figure/fig3_peri_onset_field_similarity/spatial_null/epilepsiae_958_maxab_spatial_null_matrices.npz",
+      "size_bytes": 982125,
+      "sha256": "6e6fcb0fa787fc72c4c29574a6d8a64e453ca122aa12b8985bced6cc0d884f5e"
+    }
+  ]
+}

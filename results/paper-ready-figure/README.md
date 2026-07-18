@@ -15,17 +15,30 @@
 
 ## Fig1 — 间期 HFO 群体事件素材
 
-- `fig1_hfo_group_event_demo/` — **Fig1-A**：Yuquan Y1 单段间期 HFO 群体事件紧凑示例。
-  脚本 `scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py`（+ `..._prototype.py`）。
+- `fig1_hfo_group_event_demo/` — **Fig1-a1/a2 源素材**：legacy 人工标注 HFO n=178 形态图 + Yuquan Y3 群体事件示例。
+  脚本为 `scripts/paper_figures/plot_fig1_single_hfo_schematic.py` 与 `plot_fig1_hfo_group_event_legacy_style.py`；正式 panel 文件位于 `fig1_interictal_hfo_temporal_scaffold/figures/`。
 
 > Fig2（单 subject 间期传播时序素材）不在本目录：它由 Topic 1 propagation 主绘图器生成，
 > 见 `results/interictal_propagation_masked/figures/per_subject/` + `docs/fig2_temporal_propagation_panel_spec.md`。
 > Fig2-B 模板匹配预览脚本 `scripts/paper_figures/plot_fig2b_template_matching_preview.py`。
 
+- `fig2c_interictal_event_envelope_field/` — **Fig2-C paper-ready candidate**：E1146 两次真实 TA/TB
+  代表事件的 Fig1a 质心 readout + 冻结 shared-plane 包络 frame；同时输出同一合同的 2 ms 生物学步长
+  GIF。canonical producer 为 `scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py`，唯一
+  frame/GIF 规范为 `docs/fig2c_interictal_event_envelope_field_spec.md`。该合同只管 TA/TB 每行一个
+  exemplar 的单事件版本；未来多事件 GIF 单独建规范。定位是 representative
+  raw-envelope timing cross-check，不是 template-free/cohort/traveling-wave 证明。
+- `fig2e_interictal_template_fields/` — **Fig2-E paper-ready candidate**：患者特异 TA/TB 静态 rank
+  field；与 Fig2-C 共用冻结轴/平面，但不使用事件包络时间轴。
+- `fig_interictal_ab_direction_axis/` — **间期空间方向候选图**：A/B 独立 earliness gradient、过门后的共享线、
+  subject-native 脑表面 early→late 箭头与描述性解剖 overlay。主触点池与 expanded-contact sensitivity 并存；
+  脚本 `scripts/paper_figures/plot_interictal_ab_direction_axis.py`。
+
 ## Fig3 — 间期传播场 vs 发作早期激活场一致性
 
 - `fig3_field_concordance_cohort_stat/` — **Fig3-A**：cohort 级 Data-vs-Null 统计面板
-  （maxAB 可评估 subject 上间期传播场与发作早期激活场整体高于 channel-shuffle null）。
+  （maxAB 可评估 subject 上间期传播场与发作早期激活场整体高于 channel-shuffle null）。正式图现在包含
+  `BB 1-45 maxAB`、line-noise-masked `BB 1-150 maxAB` 和 `HFA 60-100 maxAB` 三组配对统计。
   脚本 `scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py`。
 - `fig3_sup1_multiband_field_alignment/` — **Fig3-Sup1**（V2 Phase-1，multi-band supplement）：3 panel
   A 观测 subject×band maxAB 热图（narrow>broad、band-generic）/ B 每 primary 带 per-subject Δ vs 弱空间
@@ -34,6 +47,19 @@
   formal/机制）**；formal within-shaft Gate A 未评估(2/20)、Gate B/C 未跑。脚本
   `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档
   `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`。
+- `fig3_sup2_raw_spectral_context/` — **Fig3-Sup2**：单次真实发作的 raw traces + baseline-normalized
+  TFR + 标准频带能量增强解释图。A 行展示 E1146 lagPat joint-valid 电极；B/C 使用代表性 lagPat
+  单通道（当前 `seizure_idx=7`, `SCL9`，按 onset→early-ictal 窗口内 alpha/beta/gamma/HFA/1-150 Hz
+  共同增强自动选择）展示 `dB vs baseline`。用途是解释 baseline、EEG onset、clinical onset 与
+  early-field input 的关系；**explanatory/QC supplement，不是 cohort 统计或 replay 证据**。脚本
+  `scripts/paper_figures/plot_fig3_raw_spectral_context.py`。
+- `fig_topic5_field_extrapolation_energy/` — **Topic 5 energy-field paper-ready 主图**：A E1146 真实电极布局上的测试设计
+  （core-field vs own-order 预测 hidden seizure energy）/ B cohort Δ 直接裁决 / C 证据阶梯。
+  结论边界：network extension supported，但 core-field 不系统性优于 hidden 电极自身间期顺序。
+  脚本 `scripts/paper_figures/plot_fig_topic5_field_extrapolation_energy.py`。
+- `fig_topic5_network_extension_null/` — **Topic 5 network-extension three-way 独立统计图**：每个频段同图放
+  core-field prediction / hidden own-order C1 / channel-shuffle null，三条 bracket 分别裁决 core>null、
+  own>null、core>own。脚本 `scripts/paper_figures/plot_fig_topic5_network_extension_null.py`。
 
 ## Fig4 — Subject-specific SNN 读出（病人真实电极几何）
 

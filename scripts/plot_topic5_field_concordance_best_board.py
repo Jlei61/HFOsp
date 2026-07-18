@@ -18,12 +18,15 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import textwrap
+import warnings
 from pathlib import Path
 
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 
 _ROOT = Path(__file__).resolve().parents[1]
 ALIGN = _ROOT / "results/topic5_ictal_recruitment/axis_alignment"
@@ -69,6 +72,98 @@ def _best_per_subject(data, dataset):
                      "n_candidates": len(cands)})
     rows.sort(key=lambda r: r["margin"], reverse=True)
     return rows
+
+
+def plot_or_margin_board(rows, candidates, output_path, title_text, *,
+                         xlabel=None, candidate_title=None, footer_text=None,
+                         save_pdf=False, open_label="open square = fail"):
+    """The original ``field_concordance_or_margin_board_prototype.png`` painter.
+
+    This is the prototype's plotting block promoted unchanged to a callable function.  Callers
+    provide only the candidate records and labels; the layout, marks and visual grammar remain
+    the same as the accepted prototype.
+    """
+    fig = plt.figure(figsize=(10.8, max(8.2, 0.36 * len(rows) + 2.5)))
+    gs = fig.add_gridspec(1, 2, width_ratios=[3.0, 1.25], wspace=0.03)
+    ax = fig.add_subplot(gs[0, 0])
+    axh = fig.add_subplot(gs[0, 1], sharey=ax)
+    y = np.arange(len(rows))
+
+    for i, row in enumerate(rows):
+        if row["or_pass"]:
+            ax.axhspan(i - 0.45, i + 0.45, color="#eef7ee", zorder=0)
+            axh.axhspan(i - 0.45, i + 0.45, color="#eef7ee", zorder=0)
+        else:
+            ax.axhspan(i - 0.45, i + 0.45, color="#f6f6f6", zorder=0)
+            axh.axhspan(i - 0.45, i + 0.45, color="#f6f6f6", zorder=0)
+
+    for i, row in enumerate(rows):
+        for candidate in candidates:
+            value = row["vals"].get(candidate["name"])
+            if value is not None:
+                ax.plot([value["margin"], value["margin"]], [i - 0.18, i + 0.18],
+                        color=candidate["color"], lw=1.5, alpha=0.28, zorder=1)
+        ax.scatter(row["margin"], i, s=68,
+                   color=row["color"] if row["or_pass"] else "white",
+                   edgecolor=row["color"], lw=1.8, zorder=3)
+
+    ax.axvline(0, color="0.25", lw=1.0)
+    ax.set_yticks(y)
+    ax.set_yticklabels([(row["subject_id"].replace("epilepsiae_", "E")
+                         .replace("yuquan_", "Y:")) for row in rows], fontsize=8.5)
+    for tick, row in zip(ax.get_yticklabels(), rows):
+        tick.set_fontweight("bold" if row["or_pass"] else "normal")
+        tick.set_color("black" if row["or_pass"] else "0.55")
+    ax.invert_yaxis()
+    ax.set_xlabel(xlabel or "best field-alignment margin: real |r| − channel-null p95")
+    ax.set_title(title_text, pad=12)
+    max_abs = max(abs(row["margin"]) for row in rows) + 0.04
+    ax.set_xlim(-max(0.18, max_abs * 0.45), max(0.28, max_abs))
+    ax.grid(axis="x", color="0.88", lw=0.8)
+
+    labels = [candidate["name"] for candidate in candidates]
+    axh.set_xlim(-0.5, len(labels) - 0.5)
+    axh.set_xticks(range(len(labels)))
+    axh.set_xticklabels(labels, rotation=35, ha="right", fontsize=8)
+    axh.tick_params(axis="y", left=False, labelleft=False)
+    axh.set_title(candidate_title or "which candidate passes", fontsize=10, pad=12)
+    for i, row in enumerate(rows):
+        for j, candidate in enumerate(candidates):
+            value = row["vals"].get(candidate["name"])
+            if value is None:
+                axh.scatter(j, i, marker="s", s=65, facecolor="white",
+                            edgecolor="0.85", lw=0.8)
+            elif value["pass"]:
+                axh.scatter(j, i, marker="s", s=92, facecolor=candidate["color"],
+                            edgecolor="white", lw=0.8)
+            else:
+                axh.scatter(j, i, marker="s", s=65, facecolor="white",
+                            edgecolor=candidate["color"], lw=1.3, alpha=0.8)
+    for spine in ("top", "right", "left"):
+        axh.spines[spine].set_visible(False)
+    axh.spines["bottom"].set_color("0.6")
+
+    legend = [Patch(facecolor=candidate["color"], edgecolor="white", label=candidate["name"])
+              for candidate in candidates]
+    legend.append(Patch(facecolor="white", edgecolor="0.35", label=open_label))
+    ax.legend(handles=legend, loc="lower right", fontsize=8, frameon=True)
+    footer = footer_text or (
+        "Display rule: one main point per subject = best candidate; formal OR claims still "
+        "need OR selection repeated in the null."
+    )
+    fig.text(0.012, 0.018, textwrap.fill(footer, width=145), fontsize=8, color="0.35")
+    # Shared-y axes plus the figure-level footer trigger a known benign
+    # tight_layout warning; the accepted board geometry is visually audited.
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="This figure includes Axes")
+        fig.tight_layout(rect=[0, 0.065, 1, 1])
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(output_path, dpi=180)
+    if save_pdf:
+        fig.savefig(output_path.with_suffix(".pdf"))
+    plt.close(fig)
+    return output_path
 
 
 def plot_board(rows, dataset):

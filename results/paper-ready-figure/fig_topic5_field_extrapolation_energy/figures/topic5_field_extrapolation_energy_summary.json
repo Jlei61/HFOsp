@@ -1,0 +1,59 @@
+{
+  "source": {
+    "per_subject": "results/topic5_ictal_recruitment/field_extrapolation/cohort_per_subject",
+    "final_json": "results/topic5_ictal_recruitment/field_extrapolation/energy_field_extrapolation_FINAL.json"
+  },
+  "margin_delta": 0.03,
+  "bands": {
+    "bb_auc": {
+      "label": "Broadband",
+      "n_subjects": 16,
+      "winner_counts": {
+        "core": 7,
+        "own": 5,
+        "tie": 4,
+        "three_null": 5,
+        "channel_null": 9,
+        "low_power": 2
+      },
+      "winner_counts_drop_n_hidden_lt_6": {
+        "core": 7,
+        "own": 5,
+        "tie": 2,
+        "three_null": 5,
+        "channel_null": 8,
+        "low_power": 0
+      },
+      "median_F_core_only": 0.5557359307359306,
+      "median_C1": 0.503685032063853,
+      "median_diff_F_minus_C1": 0.02318094405374499,
+      "q_channel_null": 1.1336646949718472e-07,
+      "q_F_core_gt_C1": 0.3196405911970831
+    },
+    "hfa_auc": {
+      "label": "HFA",
+      "n_subjects": 16,
+      "winner_counts": {
+        "core": 5,
+        "own": 8,
+        "tie": 3,
+        "three_null": 2,
+        "channel_null": 9,
+        "low_power": 2
+      },
+      "winner_counts_drop_n_hidden_lt_6": {
+        "core": 5,
+        "own": 7,
+        "tie": 2,
+        "three_null": 2,
+        "channel_null": 9,
+        "low_power": 0
+      },
+      "median_F_core_only": 0.44487179487179485,
+      "median_C1": 0.5167766547849699,
+      "median_diff_F_minus_C1": -0.03192816993648506,
+      "q_channel_null": 1.1336646949718472e-07,
+      "q_F_core_gt_C1": 0.7867358755816143
+    }
+  }
+}

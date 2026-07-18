@@ -2,10 +2,11 @@
 """Paper Fig3 panel: field concordance Data-vs-Null cohort statistic.
 
 The panel is intentionally not a per-subject board. It compresses maxAB-eligible
-subjects into two Data-vs-Null comparisons:
+subjects into three Data-vs-Null comparisons:
 
-1. Broadband maxAB.
-2. HFA maxAB.
+1. Legacy broadband 1-45 Hz maxAB.
+2. Line-noise-masked broadband 1-150 Hz maxAB.
+3. HFA 60-100 Hz maxAB.
 
 Null is the matched channel-shuffle null median of the selected candidate. This
 visualizes a cohort-level shift above null; the formal pass gate remains the
@@ -21,6 +22,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Patch
 from scipy.stats import wilcoxon
 
 
@@ -31,12 +33,14 @@ OUT_DIR = (
 )
 
 CANDIDATES = {
-    "Broadband maxAB": "axis_alignment_broadband_max_ab_B1000.json",
-    "HFA maxAB": "axis_alignment_hfa_max_ab_B1000.json",
+    "BB 1-45 maxAB": "axis_alignment_broadband_max_ab_B1000.json",
+    "BB 1-150 maxAB": "axis_alignment_broadband150_max_ab_B1000.json",
+    "HFA 60-100 maxAB": "axis_alignment_hfa_max_ab_B1000.json",
 }
 COMPARISONS = [
-    ("Broadband maxAB", ["Broadband maxAB"]),
-    ("HFA maxAB", ["HFA maxAB"]),
+    ("BB 1-45 maxAB", ["BB 1-45 maxAB"]),
+    ("BB 1-150 maxAB", ["BB 1-150 maxAB"]),
+    ("HFA 60-100 maxAB", ["HFA 60-100 maxAB"]),
 ]
 
 
@@ -125,19 +129,24 @@ def _add_violin_box_points(
     rng: np.random.Generator,
     point_face: str,
     point_edge: str,
-) -> None:
-    parts = ax.violinplot(
-        [values],
-        positions=[x],
-        widths=0.58,
-        showmeans=False,
-        showmedians=False,
-        showextrema=False,
-    )
-    body = parts["bodies"][0]
-    body.set_facecolor(facecolor)
-    body.set_edgecolor("none")
-    body.set_alpha(0.72)
+    jitter: np.ndarray | None = None,
+) -> np.ndarray:
+    # A one-subject pre-existing stratum is a descriptive case.  Keep the
+    # accepted box/point grammar but do not ask KDE-based violinplot to fit a
+    # singular one-point distribution.
+    if len(values) >= 2 and not np.allclose(values, values[0]):
+        parts = ax.violinplot(
+            [values],
+            positions=[x],
+            widths=0.58,
+            showmeans=False,
+            showmedians=False,
+            showextrema=False,
+        )
+        body = parts["bodies"][0]
+        body.set_facecolor(facecolor)
+        body.set_edgecolor("none")
+        body.set_alpha(0.72)
 
     ax.boxplot(
         [values],
@@ -150,17 +159,20 @@ def _add_violin_box_points(
         whiskerprops={"color": edgecolor, "linewidth": 1.0},
         capprops={"color": edgecolor, "linewidth": 1.0},
     )
-    jitter = rng.normal(0.0, 0.045, size=len(values))
+    if jitter is None:
+        jitter = rng.normal(0.0, 0.045, size=len(values))
+    point_x = np.full(len(values), x) + jitter
     ax.scatter(
-        np.full(len(values), x) + jitter,
+        point_x,
         values,
         s=25,
         facecolors=point_face,
         edgecolors=point_edge,
         linewidths=0.8,
         alpha=0.9,
-        zorder=3,
+        zorder=4,
     )
+    return point_x
 
 
 def _add_sig_bracket(ax: plt.Axes, x1: float, x2: float, y: float, text: str) -> None:
@@ -169,17 +181,45 @@ def _add_sig_bracket(ax: plt.Axes, x1: float, x2: float, y: float, text: str) ->
     ax.text((x1 + x2) / 2, y + h + 0.008, text, ha="center", va="bottom", fontsize=13, fontweight="bold")
 
 
-def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
-    rng = np.random.default_rng(20260626)
-    fig, ax = plt.subplots(figsize=(5.8, 4.1))
+def plot_paired_data_null_groups(
+    groups: list[dict],
+    out_png: Path,
+    out_pdf: Path,
+    *,
+    ylabel: str = "Field concordance |r|",
+    seed: int = 20260626,
+    xaxis_mode: str = "paired",
+    figsize: tuple[float, float] | None = None,
+    pair_gap: float = 0.72,
+    group_gap: float = 2.05,
+) -> None:
+    """Reusable paired Data-vs-Null painter from the accepted Fig3 panel.
 
-    positions = {"Broadband maxAB": (1.0, 1.75), "HFA maxAB": (3.05, 3.8)}
-    for group in groups:
+    Callers may provide ``display_p`` and ``p_label`` in each group when the
+    formal statistic is closed upstream (for example a fixed-window maxT p).
+    The violin, box, paired subject points/lines, bracket and caption grammar
+    remain identical to the accepted reference panel.
+    """
+    if not groups:
+        raise ValueError("paired Data-vs-Null plot requires at least one group")
+    if xaxis_mode not in {"paired", "group"}:
+        raise ValueError(f"unknown xaxis_mode:{xaxis_mode}")
+    rng = np.random.default_rng(seed)
+    if figsize is None:
+        figsize = (max(7.2, group_gap * len(groups) + 1.05), 4.1)
+    fig, ax = plt.subplots(figsize=figsize)
+
+    positions = [
+        (1.0 + group_gap * i, 1.0 + pair_gap + group_gap * i)
+        for i in range(len(groups))
+    ]
+    overall_max = 0.0
+    for group, (x_data, x_null) in zip(groups, positions):
         label = group["label"]
-        x_data, x_null = positions[label]
         data = np.array([r["data"] for r in group["rows"]], dtype=float)
         null = np.array([r["null"] for r in group["rows"]], dtype=float)
-        _add_violin_box_points(
+        paired_jitter = rng.normal(0.0, 0.035, size=len(data))
+        data_x = _add_violin_box_points(
             ax,
             data,
             x_data,
@@ -188,8 +228,9 @@ def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
             rng=rng,
             point_face="#5f86a3",
             point_edge="white",
+            jitter=paired_jitter,
         )
-        _add_violin_box_points(
+        null_x = _add_violin_box_points(
             ax,
             null,
             x_null,
@@ -198,44 +239,99 @@ def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
             rng=rng,
             point_face="#888888",
             point_edge="white",
+            jitter=paired_jitter,
         )
+        for x0, y0, x1, y1 in zip(data_x, data, null_x, null):
+            ax.plot(
+                [x0, x1],
+                [y0, y1],
+                color="0.45",
+                linewidth=0.65,
+                alpha=0.28,
+                zorder=3,
+            )
         ymax = max(float(np.nanmax(data)), float(np.nanmax(null)))
-        _add_sig_bracket(ax, x_data, x_null, ymax + 0.055, _p_stars(group["summary"]["wilcoxon_p_data_gt_null_median"]))
-        ax.text(
-            (x_data + x_null) / 2,
-            -0.145,
-            f"{label}\nn={group['summary']['n']}, p={_fmt_p(group['summary']['wilcoxon_p_data_gt_null_median'])}",
-            transform=ax.get_xaxis_transform(),
-            ha="center",
-            va="top",
-            fontsize=8.2,
+        overall_max = max(overall_max, ymax)
+        p_value = float(
+            group["display_p"] if "display_p" in group
+            else group["summary"]["wilcoxon_p_data_gt_null_median"]
         )
+        bracket_text = _p_stars(p_value)
+        if bool(group.get("p_on_bracket", False)):
+            bracket_text = f"{bracket_text}  p={_fmt_p(p_value)}"
+        _add_sig_bracket(ax, x_data, x_null, ymax + 0.055, bracket_text)
+        p_label = str(group.get("p_label", "p"))
+        caption = group.get(
+            "caption",
+            f"{label}\nn={group['summary']['n']}, {p_label}={_fmt_p(p_value)}",
+        )
+        if xaxis_mode == "paired":
+            ax.text(
+                (x_data + x_null) / 2,
+                -0.145,
+                str(caption),
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="top",
+                fontsize=8.2,
+            )
 
-    ax.set_ylabel("Field concordance |r|", fontsize=11)
-    ax.set_xticks([1.0, 1.75, 3.05, 3.8])
-    ax.set_xticklabels(["Data", "Null", "Data", "Null"], fontsize=10)
-    ax.set_xlim(0.45, 4.35)
-    ax.set_ylim(0.0, 1.12)
+    ax.set_ylabel(ylabel, fontsize=11)
+    if xaxis_mode == "group":
+        centers = [(x_data + x_null) / 2 for x_data, x_null in positions]
+        ax.set_xticks(centers)
+        ax.set_xticklabels(
+            [str(group.get("x_label", group["label"])) for group in groups],
+            fontsize=9.2,
+        )
+        ax.tick_params(axis="x", pad=4)
+        ax.legend(
+            handles=[
+                Patch(facecolor="#9fbdcf", edgecolor="#6f8fa3", label="Observed"),
+                Patch(facecolor="#d8d8d8", edgecolor="#9a9a9a", label="Channel-shuffle null"),
+            ],
+            loc="lower right",
+            frameon=False,
+            fontsize=8.2,
+            handlelength=1.15,
+        )
+    else:
+        ax.set_xticks([x for pair in positions for x in pair])
+        ax.set_xticklabels(["Data", "Null"] * len(positions), fontsize=10)
+    ax.set_xlim(0.45, positions[-1][1] + 0.53)
+    ax.set_ylim(0.0, max(1.12, overall_max + 0.16))
     ax.spines[["top", "right"]].set_visible(False)
     ax.tick_params(axis="both", width=1.0)
     ax.yaxis.grid(False)
     ax.set_axisbelow(True)
-    fig.subplots_adjust(left=0.16, right=0.98, top=0.94, bottom=0.18)
+    bottom = 0.14 if xaxis_mode == "group" else 0.18
+    fig.subplots_adjust(left=0.16, right=0.98, top=0.94, bottom=bottom)
     fig.savefig(out_png, dpi=300)
     fig.savefig(out_pdf)
     plt.close(fig)
 
 
+def _plot(groups: list[dict], out_png: Path, out_pdf: Path) -> None:
+    plot_paired_data_null_groups(groups, out_png, out_pdf)
+
+
 def _write_readme(groups: list[dict], out_dir: Path) -> None:
-    all_s = groups[0]["summary"]
-    hfa_s = groups[1]["summary"]
+    lines = []
+    for g in groups:
+        s = g["summary"]
+        lines.append(
+            f"{g['label']}：n={s['n']}，Wilcoxon one-sided "
+            f"p={_fmt_p(s['wilcoxon_p_data_gt_null_median'])}，"
+            f"{s['n_data_gt_null']}/{s['n']} data>null"
+        )
+    summary_text = "；".join(lines)
     text = f"""# Fig3 field concordance Data-vs-Null statistic
 
 ### field_concordance_cohort_stat.png / field_concordance_cohort_stat.pdf
 
-按参考图风格绘制：每一组都是 `Data` vs `Null` 的 violin + box + subject 点，不显示 subject 名字。左侧是 `Broadband maxAB`，右侧是 `HFA maxAB`；两侧都使用当前 maxAB artifact 中可评估的 subject，不再写 `All candidates`，也不混入 broad fallback。当前可评估 subject 数：Broadband maxAB n={all_s['n']}，HFA maxAB n={hfa_s['n']}。
+按参考图风格绘制：每一组都是 `Data` vs `Null` 的 violin + box + subject 点，并用浅灰线连接同一 subject 的配对 Data/Null 值，不显示 subject 名字。三组分别是 `BB 1-45 maxAB`、`BB 1-150 maxAB` 和 `HFA 60-100 maxAB`；都使用当前 maxAB artifact 中可评估的 subject，不写 `All candidates`，也不混入 broad fallback。
 
-**关注点**：Broadband maxAB 的 Data 高于 channel-null median（n={all_s['n']}，Wilcoxon one-sided p={_fmt_p(all_s['wilcoxon_p_data_gt_null_median'])}，{all_s['n_data_gt_null']}/{all_s['n']} data>null）；HFA maxAB 同样高于 null（n={hfa_s['n']}，p={_fmt_p(hfa_s['wilcoxon_p_data_gt_null_median'])}，{hfa_s['n_data_gt_null']}/{hfa_s['n']} data>null）。这张图展示 cohort-level shift above null；formal pass 仍以 selection-corrected p95/p-value 表为准。
+**关注点**：{summary_text}。这张图展示 cohort-level shift above null；formal pass 仍以 selection-corrected p95/p-value 表为准。`BB 1-150 maxAB` 是新增 sensitivity，原 `bb_auc` 仍是 legacy 1-45 Hz。
 """
     (out_dir / "README.md").write_text(text)
 

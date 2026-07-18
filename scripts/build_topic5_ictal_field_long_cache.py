@@ -31,16 +31,29 @@ POST_PAD = 90.0
 MAX_ICTAL_SEC = 600.0   # span 上限（疑似 status；亦防 OOM）
 
 
-def _eligible_complete(ds_sid, inv_rows):
+def _eligible_complete(
+    ds_sid,
+    inv_rows,
+    audit_path=AUDIT,
+    eligibility_field="analysis_eligible",
+    *,
+    require_complete_interval=True,
+):
     """analysis_eligible idx (audit) ∩ has_complete_eeg_interval (inventory)."""
     elig = set()
-    for r in csv.DictReader(open(AUDIT)):
-        if r["subject_id"] == ds_sid and str(r["analysis_eligible"]).strip().lower() in ("true", "1", "yes"):
+    for r in csv.DictReader(open(audit_path)):
+        if r["subject_id"] == ds_sid and str(r.get(eligibility_field, "")).strip().lower() in ("true", "1", "yes"):
             elig.add(int(r["seizure_idx"]))
     out = []
     for idx in sorted(elig):
         inv = inv_rows[idx] if idx < len(inv_rows) else {}
-        if str(inv.get("has_complete_eeg_interval", "")).strip().lower() in ("true", "1", "yes", "t"):
+        complete = str(inv.get("has_complete_eeg_interval", "")).strip().lower() in (
+            "true",
+            "1",
+            "yes",
+            "t",
+        )
+        if complete or not require_complete_interval:
             out.append(idx)
     return out
 
@@ -52,11 +65,36 @@ def _anchor_epoch(inv):
     so BOTH producer sites here — iter + build_subject — MUST mirror that same anchor or span/pre/post
     would disagree). epilepsiae keeps clin_onset -> ``float(raw)`` is byte-identical to the committed
     long cache (fallback never fires). Centralized (§5/§6.1) so the two sites can't drift apart."""
-    raw = inv.get("clin_onset_epoch")
-    return float(raw) if raw not in (None, "", "None") else float(inv["eeg_onset_epoch"])
+    for field in ("clin_onset_epoch", "onset_epoch", "eeg_onset_epoch"):
+        raw = inv.get(field)
+        if raw not in (None, "", "None"):
+            return float(raw)
+    raise KeyError("no usable onset epoch")
 
 
-def iter_subject_seizure_windows(ds_sid, substrate=None, drops=None):
+def _custom_inventory_rows(ds_sid, inventory_csv):
+    dataset, sid = ds_sid.split("_", 1)
+    if dataset != "yuquan":
+        raise ValueError("custom cleaned inventory is currently supported only for yuquan")
+    with open(inventory_csv, encoding="utf-8") as fh:
+        rows = [
+            row for row in csv.DictReader(fh)
+            if row.get("subject") == sid and row.get("onset_epoch")
+        ]
+    rows.sort(key=lambda row: float(row["onset_epoch"]))
+    return rows
+
+
+def iter_subject_seizure_windows(
+    ds_sid,
+    substrate=None,
+    drops=None,
+    eligibility_audit=AUDIT,
+    eligibility_field="analysis_eligible",
+    onset_only_post_sec=None,
+    inventory_csv=None,
+    block_inventory_csv=None,
+):
     """Yield ``(idx, sw, eeg_rel)`` for each eligible + extractable seizure of ``ds_sid``.
 
     Factored verbatim out of :func:`build_subject` so the v2 multi-band cache can reuse the exact
@@ -76,27 +114,61 @@ def iter_subject_seizure_windows(ds_sid, substrate=None, drops=None):
     cb.PRE_FEATURE_SEC = 130.0     # pre floor（与 v2_windows 一致）
     dataset, sid = ds_sid.split("_", 1)
     ref = ICTAL_REFERENCE[dataset]
-    inv_rows, _ = _inventory_rows(dataset, sid)
-    for idx in _eligible_complete(ds_sid, inv_rows):
+    inv_rows = (
+        _custom_inventory_rows(ds_sid, inventory_csv)
+        if inventory_csv is not None
+        else _inventory_rows(dataset, sid)[0]
+    )
+    onset_only = onset_only_post_sec is not None
+    if inventory_csv is not None:
+        eligible_indices = [
+            idx for idx, row in enumerate(inv_rows)
+            if str(row.get(eligibility_field, "")).strip().lower() in ("true", "1", "yes", "t")
+        ]
+    else:
+        eligible_indices = _eligible_complete(
+            ds_sid,
+            inv_rows,
+            eligibility_audit,
+            eligibility_field,
+            require_complete_interval=not onset_only,
+        )
+    for idx in eligible_indices:
         inv = inv_rows[idx]
         try:
-            eeg_dur = float(inv["eeg_duration_sec"])
             clin_on = _anchor_epoch(inv)   # clin_onset (epilepsiae) or eeg_onset fallback (yuquan)
-            eeg_off_rel = float(inv["eeg_offset_epoch"]) - clin_on
-            eeg_on_rel = float(inv["eeg_onset_epoch"]) - clin_on  # parse guards inv_field drop (used by consumer)
+            if inventory_csv is not None:
+                # The cleaned Yuquan window is already anchored on the earliest
+                # compatible seizure marker. Later markers remain search metadata.
+                eeg_on_rel = 0.0
+            else:
+                eeg_on_rel = float(inv["eeg_onset_epoch"]) - clin_on  # parse guards inv_field drop (used by consumer)
+            if onset_only:
+                eeg_dur = float("nan")
+                eeg_off_rel = float("nan")
+            else:
+                eeg_dur = float(inv["eeg_duration_sec"])
+                eeg_off_rel = float(inv["eeg_offset_epoch"]) - clin_on
         except (KeyError, TypeError, ValueError) as e:
             if drops is not None:
                 drops.append({"idx": idx, "reason": f"inv_field:{type(e).__name__}"})
             continue
-        span = max(eeg_off_rel, eeg_dur)   # P1: 覆盖 eeg offset，即使 eeg_onset 晚于 clin_onset(384 ~+36s)
-        if span > MAX_ICTAL_SEC:
-            if drops is not None:
-                drops.append({"idx": idx, "reason": f"duration_too_long_for_pilot:{span:.0f}s"})
-            continue
         pre = cb._pre_target(dataset, inv)
-        post = math.ceil(span) + POST_PAD
+        if onset_only:
+            post = float(onset_only_post_sec)
+        else:
+            span = max(eeg_off_rel, eeg_dur)   # P1: 覆盖 eeg offset，即使 eeg_onset 晚于 clin_onset(384 ~+36s)
+            if span > MAX_ICTAL_SEC:
+                if drops is not None:
+                    drops.append({"idx": idx, "reason": f"duration_too_long_for_pilot:{span:.0f}s"})
+                continue
+            post = math.ceil(span) + POST_PAD
         try:
-            sw = extract_seizure_window(f"{dataset}/{sid}", idx, pre_sec=pre, post_sec=post, reference=ref)
+            sw = extract_seizure_window(
+                f"{dataset}/{sid}", idx, pre_sec=pre, post_sec=post, reference=ref,
+                seizure_inventory_csv=inventory_csv,
+                block_inventory_csv=block_inventory_csv,
+            )
         except Exception as e:
             if drops is not None:
                 drops.append({"idx": idx, "reason": f"extract:{type(e).__name__}"})

@@ -5,9 +5,12 @@ from scripts._topic5_v3c_io import load_soz, axis_soz_join, V3C_SUBJECTS, extrac
 
 
 def test_v3c_subject_lists():
-    assert "epilepsiae_1146" in V3C_SUBJECTS["broad"]
-    assert "epilepsiae_442" in V3C_SUBJECTS["narrow"]
-    assert "epilepsiae_442" not in V3C_SUBJECTS["broad"]     # no broad cache (spec §3.3)
+    # cohort is DATA-DERIVED: cache ∩ propagation-axis pool ∩ clinical SOZ (yuquan held)
+    b, n = V3C_SUBJECTS["broad"], V3C_SUBJECTS["narrow"]
+    assert "epilepsiae_1146" in b and "epilepsiae_1084" in b   # 1084 recovered by auto-derive
+    assert "epilepsiae_442" in n and "epilepsiae_442" not in b  # narrow-only (no broad pool)
+    assert len(b) == 11 and len(n) == 14                        # was hard-coded 7/5 (under-count)
+    assert all(s.startswith("epilepsiae_") for s in b + n)      # yuquan held (participation absent)
 
 
 def test_load_soz_epilepsiae():

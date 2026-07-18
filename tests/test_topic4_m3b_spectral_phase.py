@@ -373,6 +373,33 @@ def test_jvp_matches_finite_difference_tiny_grid():
     assert np.max(np.abs(J @ v - fd)) < 1e-7
 
 
+def test_field_rhs_jvp_matches_jacobian_on_shifted_op():
+    """M2 Task 4 hard gate (spec `2026-07-04-topic4-m3v2-2-m2-critical-mode-decomposition-design.md`
+    §4.1) -- ``field_rhs`` must apply the SAME g_K/h_G shift ``solve_operating_point``'s ``_moments()``
+    applies to muE. Before the fix, a SHIFTED op's z* is NOT a fixed point of ``field_rhs`` (the
+    omitted shift moves muE off the point ``op.gE``/``op.gI`` were actually differentiated at), so its
+    finite-diff JVP does not match ``build_jacobian_dense``. NOTE: the module has no ``make_kernels``
+    (the brief's own text names ``build_kernels``) -- confirmed against the module before writing, per
+    the brief's own "confirm the exact name" instruction."""
+    grid = spm.Grid(n=6)
+    kernels = spm.build_kernels(grid)
+    core = spm.make_core_mask(grid, kind="single", radius=0.9)
+    exc = spm.build_excitability_field(grid, core, mu_core=0.0)
+    inh = spm.build_inhibition_field(grid, core, q_global=1.0, q_core=1.0)
+    op = spm.solve_operating_point(grid, kernels, exc, inh, hG_scalar=0.5, eta_G=1.0)
+    z = spm.op_state_vector(op, kernels, grid)
+    J = spm.build_jacobian_dense(grid, kernels, op)
+    assert np.linalg.norm(spm.field_rhs(z, grid, kernels, op, hG_scalar=0.5, eta_G=1.0)) < 1e-6
+    rng = np.random.default_rng(0)
+    errs = []
+    for _ in range(6):
+        v = rng.standard_normal(z.size); v /= np.linalg.norm(v)
+        fd = (spm.field_rhs(z + 1e-6 * v, grid, kernels, op, hG_scalar=0.5, eta_G=1.0)
+              - spm.field_rhs(z - 1e-6 * v, grid, kernels, op, hG_scalar=0.5, eta_G=1.0)) / 2e-6
+        errs.append(np.linalg.norm(fd - J @ v) / (np.linalg.norm(J @ v) + 1e-300))
+    assert max(errs) < 1e-4
+
+
 def test_synaptic_blocks_have_expected_time_constant_signs():
     from src.sef_hfo_lif import TAU_AMPA, TAU_GABA, TAU_ME, TAU_MI
     g, ker, op = _no_core_jac()
