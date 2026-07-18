@@ -1,0 +1,59 @@
+schema_version: topic4_early_recruitment_readout_v1
+
+reference:
+  primary_state: last_qualified_low
+  sensitivity_states: [first_qualified_low]
+
+targets:
+  states: [at_crossing, pre_runaway]
+  # On the n=8 readout grid this state remains finite for several hundred ms
+  # and crosses the saturation/runaway line at ~484 ms under the primary kick.
+  pre_runaway_frac: 0.85
+
+perturbation:
+  eps_rel: 0.05
+  polarity: 1
+  frame_dt_ms: 1.0
+  # Long enough to distinguish late recruitment from a genuinely self-limited
+  # interictal response; frames after numerical escape are never scored/displayed.
+  max_time_ms: 500.0
+
+arrival:
+  peak_fraction: 0.50
+  participation_fraction: 0.10
+  absolute_floor: 1.0e-10
+
+early_energy:
+  signal: positive_kick_minus_control_rE
+  statistic: mean_squared_excess
+  primary_window_ms: [10.0, 50.0]
+  sensitivity_windows_ms:
+    - [5.0, 30.0]
+    - [10.0, 75.0]
+  require_complete_presaturation_window: true
+
+observation:
+  montage: subject_snn
+  subject: epilepsiae_1146
+  # Same source-only substrate used by the accepted Fig4A producer. The adapter
+  # reads its contacts, foci, contact order, and 20-mm sheet; it does not rerun SNN.
+  geometry_npz: results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_source_tsrc_s1.npz
+  # M2 localizes the slow-state crossing on its frozen 6x6 grid.  The same slow
+  # coordinates are re-solved on this minimally refined grid for spatial readout.
+  readout_grid_n: 8
+  # A single similarity transform maps the M2 core to the accepted tempA/source-A
+  # focus and this downstream model-axis anchor to the tempB endpoint.
+  model_axis_anchor_mm: 2.5
+  # Subject-sheet millimetres; close to the established subject-SNN local LFP footprint.
+  kernel_width_mm: 1.5
+  # Direct-core contamination is defined by the actual transformed perturbation
+  # mask, not by the three template-source contact labels shown in Fig4A.
+  direct_core_loading_threshold: 0.5
+  field_display_sigma_mm: 3.0
+  display_window_ms: 450.0
+
+comparison:
+  min_points: 3
+  top_k: 3
+  n_permutations: 1000
+  seed: 20260718

@@ -17,6 +17,10 @@
 - [Figure 1：间期 HFO 时序组织](figure1_interictal_hfo_temporal_scaffold.md)
 - [Cohort contract 与 Supplementary Tables](cohort_contract_and_supplementary_tables.md)
 
+## 模型主图合同
+
+- [Figure 5 候选：E1146 SNN state-dependent readout](../fig5_snn_state_readout_spec.md)：锁定同一连续轨迹、单次间期事件 order、early-runaway energy、E1146 montage 与 claim boundary。
+
 ## 使用规则
 
 1. 主文方法必须能回溯到当前 producer、配置和结果 artifact。

@@ -7,7 +7,7 @@
 > per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
 > `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
 >
-> 最近更新：2026-07-17。新增结论图目录时，请在对应 topic 表里补一行。
+> 最近更新：2026-07-19。新增结论图目录时，请在对应 topic 表里补一行。
 >
 > **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
 > 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
@@ -24,7 +24,7 @@
 | 2 周期性 | [event_periodicity/figures/yuquan_cohort_psd_stack.png](event_periodicity/figures/) | 群体事件脉冲序列的功率谱（是否有周期峰） |
 | 3 空间/SOZ | [spatial_modulation/soz_comparison/figures/soz_vs_nonsoz_lag1r_paired.png](spatial_modulation/soz_comparison/figures/) | SOZ vs 非 SOZ 通道的配对差异 |
 | 3 几何骨架 | [spatial_modulation/propagation_geometry/components/path_axis/figures/along_axis_stereotypy_profile.png](spatial_modulation/propagation_geometry/components/path_axis/figures/) | 传播是否沿一条稳定空间轴 |
-| 4 模型 | [topic4_sef_hfo/snn_heterogeneity/figures/mean_scan.png](topic4_sef_hfo/snn_heterogeneity/figures/) | SNN 阈值异质核：点火边界的参数扫描 |
+| 4 模型 | [paper-ready-figure/fig5_snn_state_readout/figures/fig5_candidate_E1146_snn_state_readout.png](paper-ready-figure/fig5_snn_state_readout/figures/) | **Figure 5 candidate**：同一 E1146 SNN scaffold 的间期单事件顺序与 early-runaway 能量场 |
 | 4 观测层 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/stage2_summary.png](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | 虚拟 SEEG 把模型读回成方向/模板 |
 | 5 ictal 回响 | [topic5_ictal_template_echo/figures/echo_anchor_not_path.png](topic5_ictal_template_echo/figures/) | 发作期通道顺序是否回响间期模板（共享粗锚 vs 具体路径） |
 | 5 桥接 | [topic1_topic5_bridge/figures/q1prime_cohort_effect.png](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 的队列效应 |
@@ -97,6 +97,7 @@
 |---|---|
 | [topic4_sef_hfo/schematic/figures/](topic4_sef_hfo/schematic/figures/) | 机制示意图 |
 | [paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/](paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/) | **Fig4A/B/C**：E1146 真实电极布局 subject-specific SNN readout（A）+ KMeans k=2 核验（B）+ 模型 vs 真实间期模板一致性（C，forward~t_a ρ+0.87 / reverse~t_b ρ+0.62） |
+| [paper-ready-figure/fig5_snn_state_readout/figures/](paper-ready-figure/fig5_snn_state_readout/figures/) | **Figure 5 candidate（2026-07-19）**：同一条 E1146 连续 `q_I build-up → operational runaway` 轨迹；上方 signed 30–80 Hz virtual-SEEG，左下 exact TB event 的 15-contact recruitment rank，右下 onset-locked early-runaway energy。单轨迹 earliness–energy Spearman=0.814；4/4 SCL contact peaks 但 local E-neuron gate 0/4。支持 `same scaffold, different state` 的 observation-layer bridge，不是 clinical seizure、cohort 统计或终止/恢复证明；规范 `docs/fig5_snn_state_readout_spec.md`。 |
 | [paper-ready-figure/fig_m3a_v2_2_hG_runaway_transition/figures/](paper-ready-figure/fig_m3a_v2_2_hG_runaway_transition/figures/) | **M3A-v2.2 全局恢复 h_G 单轨迹 GIF**（visual diagnostic，非 sweep）：间期 axis-like→runaway 转变，把全局抑制恢复标量 `h_G` 打开。`h_G` 只在 runaway 时升起（局部事件期 χ_G≈0），但 runaway **未被逆转**；`eta_G` 阶梯 0→80（>10× 膜跨度）结构性无效——减法式全局刹车拉不回饱和 recurrent 雪崩，瓶颈在 E→E 衬底。配 v2.1 `fig_m3a_v2_1_qigk_runaway_transition`（同轨迹 h_G OFF） |
 | [topic4_criticality/figures/](topic4_criticality/figures/) | **M3A-v2.2 criticality M1**：frozen-Jacobian 轨迹判读；采样快照跨过失稳边界但没有直接命中 crossing，故 `csd_verdict=unresolved_operating_point`，作为历史诊断保留 |
 | [topic4_criticality_m2/figures/](topic4_criticality_m2/figures/) | **M3A-v2.2 criticality M2（2026-07-12 有界验收）**：线性起燃模式为 `core_localized`；非线性铺开对扰动强度/极性敏感，维持 `undetermined`。这是 M4 的上游诊断，不替代 M4 的恢复/终止设计 |

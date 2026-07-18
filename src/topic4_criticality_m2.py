@@ -599,12 +599,19 @@ def _footprint_metrics(dRE, grid, core, theta):
 
 
 def integrate_footprint(grid, kernels, op, core, theta, v, *, eps, dt, t_max, sample_ms,
-                        gK_field=None, hG_scalar=0.0, eta_K=1.0, eta_G=1.0):
+                        gK_field=None, hG_scalar=0.0, eta_K=1.0, eta_G=1.0,
+                        return_rate_frames=False, frame_dt_ms=1.0):
     """Integrate the (shift-fixed) `field_rhs` from z*+eps*v (and a v=0 control), report the
     kick-minus-control footprint delta_rE(t) at sample times (ported verbatim from
     m2_pilots_round2.py's `_integrate_footprint`, spec §4.1/§4.2 -- the ONLY change from the pilot is
     threading `gK_field`/`hG_scalar`/`eta_K`/`eta_G` into every `field_rhs` call). Escape when max rE
-    > `spm._SAT_RATE_KHZ`."""
+    > `spm._SAT_RATE_KHZ`.
+
+    ``return_rate_frames`` is an additive observation hook for the shared early-recruitment
+    readout.  When enabled, uniformly sampled raw ``rE_kick``/``rE_control`` fields are returned
+    without changing the legacy footprint samples or classifiers.  The default is off, preserving
+    M2's existing output byte-for-byte.
+    """
     z0 = spm.op_state_vector(op, kernels, grid)
     fix_resid = float(np.linalg.norm(spm.field_rhs(z0, grid, kernels, op, gK_field=gK_field,
                                                    hG_scalar=hG_scalar, eta_K=eta_K, eta_G=eta_G)))
@@ -612,19 +619,39 @@ def integrate_footprint(grid, kernels, op, core, theta, v, *, eps, dt, t_max, sa
     z_ctrl = z0.copy()
     nsteps = int(t_max / dt)
     sample_steps = {int(round(t / dt)) for t in sample_ms}
+    frame_steps = set()
+    frame_times, frame_kick, frame_ctrl = [], [], []
+    if return_rate_frames:
+        frame_stride = int(round(float(frame_dt_ms) / float(dt)))
+        if frame_stride < 1 or not np.isclose(frame_stride * dt, float(frame_dt_ms), atol=1e-9):
+            raise ValueError("frame_dt_ms must be a positive integer multiple of dt")
+        frame_steps = set(range(0, nsteps + 1, frame_stride))
+        frame_steps.add(nsteps)
     op_rE = op.rE
     traj = []
     escaped_at = None
     for it in range(nsteps + 1):
-        if it in sample_steps or it == nsteps:
+        footprint_sample = it in sample_steps or it == nsteps
+        frame_sample = it in frame_steps
+        if footprint_sample or frame_sample:
             rE_kick = spm.unpack_state(z_kick, grid)["rE"]
             rE_ctrl = spm.unpack_state(z_ctrl, grid)["rE"]
             dRE = rE_kick - rE_ctrl                    # perturbation response isolated from op drift
+        if footprint_sample:
             fm = _footprint_metrics(dRE, grid, core, theta)
             fm["t_ms"] = float(it * dt)
             fm["max_rE_kick"] = float(np.max(rE_kick))
             fm["active_frac"] = float(np.mean(rE_kick > op_rE + 1e-4))
             traj.append(fm)
+            if escaped_at is None and np.max(rE_kick) > spm._SAT_RATE_KHZ:
+                escaped_at = float(it * dt)
+        if frame_sample:
+            frame_times.append(float(it * dt))
+            frame_kick.append(np.asarray(rE_kick, float).copy())
+            frame_ctrl.append(np.asarray(rE_ctrl, float).copy())
+            # The readout's pre-saturation eligibility needs finer escape timing than M2's sparse
+            # diagnostic samples.  This only changes the additive returned timestamp when frame
+            # capture is requested; the default M2 path retains its legacy semantics.
             if escaped_at is None and np.max(rE_kick) > spm._SAT_RATE_KHZ:
                 escaped_at = float(it * dt)
         if it == nsteps:
@@ -635,7 +662,14 @@ def integrate_footprint(grid, kernels, op, core, theta, v, *, eps, dt, t_max, sa
                                              hG_scalar=hG_scalar, eta_K=eta_K, eta_G=eta_G)
         if not np.all(np.isfinite(z_kick)):
             escaped_at = float(it * dt); break
-    return {"fixedpoint_residual": fix_resid, "escaped_at_ms": escaped_at, "trajectory": traj}
+    out = {"fixedpoint_residual": fix_resid, "escaped_at_ms": escaped_at, "trajectory": traj}
+    if return_rate_frames:
+        out["rate_frames"] = {
+            "times_ms": np.asarray(frame_times, float),
+            "rE_kick": np.asarray(frame_kick, float),
+            "rE_control": np.asarray(frame_ctrl, float),
+        }
+    return out
 
 
 def _spread_onset(traj, m2cfg):

@@ -86,6 +86,7 @@ class ProtocolConfig:
     pulse_interval: float = 135.0
     n_pulses: int = 9
     pulse_duration: float = 18.0
+    pulse_first_source: str = "tempA"
     kick_boost: float = 3.0
     r_kick: float = 0.30
     q_min: float = 0.05
@@ -96,6 +97,9 @@ class ProtocolConfig:
     core_mean: float = 16.5
     core_std: float = 1.0
     core_radius: float = 1.0
+    core_radius_scale: float = 1.0
+    core_transverse_scale: float | None = None
+    ee_ar_override: float | None = None
     gif_dt_ms: float = 20.0
     activity_window_ms: float = 10.0
     layout: str = "stage5"
@@ -120,21 +124,54 @@ def _two_core_vth(S: dict, cfg: ProtocolConfig) -> np.ndarray:
     is_E = np.zeros(S["N"], bool)
     is_E[: S["NE"]] = True
     vth = np.full(S["N"], 18.0, float)
-    core_radius = float(S.get("layout", {}).get("core_r", cfg.core_radius))
+    core_parallel, core_transverse = _effective_core_radii(S, cfg)
+    axis = np.asarray(S["axis_unit"], float)
+    axis /= max(float(np.linalg.norm(axis)), 1e-12)
+    transverse = np.asarray([-axis[1], axis[0]], float)
     for source, off in (("tempA", 7), ("tempB", 8)):
+        center = _source_xy(S, source)
         cf = sample_core_field(
             S["net"]["pos"],
             is_E,
-            _source_xy(S, source),
-            core_radius,
+            center,
+            max(core_parallel, core_transverse),
             np.random.default_rng(int(cfg.seed) + off),
             core_mean=cfg.core_mean,
             core_std=cfg.core_std,
             base_mean=18.0,
         )
-        core = cf["core_mask"]
+        delta = np.asarray(S["net"]["pos"], float) - center[None, :]
+        ellipse = (
+            (delta @ axis / core_parallel) ** 2
+            + (delta @ transverse / core_transverse) ** 2
+            <= 1.0
+        )
+        core = is_E & ellipse
         vth[core] = cf["vth"][core]
     return vth
+
+
+def _effective_core_radius(S: dict, cfg: ProtocolConfig) -> float:
+    """Low-threshold core radius in the current simulation's millimetres."""
+    return _effective_core_radii(S, cfg)[0]
+
+
+def _effective_core_radii(S: dict, cfg: ProtocolConfig) -> tuple[float, float]:
+    """Parallel/transverse low-threshold radii in simulation millimetres."""
+    base_radius = float(S.get("layout", {}).get("core_r", cfg.core_radius))
+    parallel_scale = float(cfg.core_radius_scale)
+    transverse_scale = (
+        parallel_scale
+        if cfg.core_transverse_scale is None
+        else float(cfg.core_transverse_scale)
+    )
+    if not np.isfinite(parallel_scale) or parallel_scale <= 0.0:
+        raise ValueError(f"core_radius_scale must be positive, got {parallel_scale}")
+    if not np.isfinite(transverse_scale) or transverse_scale <= 0.0:
+        raise ValueError(
+            f"core_transverse_scale must be positive, got {transverse_scale}"
+        )
+    return base_radius * parallel_scale, base_radius * transverse_scale
 
 
 def _contacts(S: dict):
@@ -182,10 +219,16 @@ def _subject1146_layout(target_L: float) -> dict:
     axis = foci[1] - foci[0]
     axis = axis / max(float(np.linalg.norm(axis)), 1e-9)
     theta = float(np.arctan2(axis[1], axis[0]))
+    try:
+        source = str(SUBJECT1146_FIGDATA.relative_to(ROOT))
+    except ValueError:
+        # Results-light worktrees may explicitly reuse the accepted geometry
+        # from the canonical checkout; retain its absolute provenance.
+        source = str(SUBJECT1146_FIGDATA)
     return {
         "kind": "subject1146",
         "label": "E1146 geometry",
-        "source": str(SUBJECT1146_FIGDATA.relative_to(ROOT)),
+        "source": source,
         "reference_L": ref_L,
         "scale": scale,
         "contacts": contacts,
@@ -199,9 +242,14 @@ def _subject1146_layout(target_L: float) -> dict:
 
 
 def _pulse_schedule(cfg: ProtocolConfig):
+    if cfg.pulse_first_source not in {"tempA", "tempB"}:
+        raise ValueError(
+            f"pulse_first_source must be tempA or tempB, got {cfg.pulse_first_source}"
+        )
+    second = "tempB" if cfg.pulse_first_source == "tempA" else "tempA"
     out = []
     for k in range(cfg.n_pulses):
-        src = "tempA" if k % 2 == 0 else "tempB"
+        src = cfg.pulse_first_source if k % 2 == 0 else second
         t0 = cfg.pulse_start + k * cfg.pulse_interval
         out.append({"source": src, "t0": float(t0), "t1": float(t0 + cfg.pulse_duration)})
     return out
@@ -461,7 +509,12 @@ def _build_subject1146(cfg: ProtocolConfig):
     )
     rng = np.random.default_rng(cfg.seed)
     pos, labels, NE, NI = place_neurons(p, rng)
-    net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=theta, AR=sub["AR"], verbose=False)
+    ee_ar = float(sub["AR"] if cfg.ee_ar_override is None else cfg.ee_ar_override)
+    if not np.isfinite(ee_ar) or ee_ar <= 0.0:
+        raise ValueError(f"ee_ar_override must be positive, got {ee_ar}")
+    net = build_connectivity_rot(
+        p, pos, labels, NE, NI, rng, theta_EE=theta, AR=ee_ar, verbose=False
+    )
     pos = net["pos"]
     N = NE + NI
     S = dict(
@@ -659,7 +712,21 @@ def _render_gif(S, res, metrics, cfg: ProtocolConfig, out_dir: Path):
         ax0.add_patch(_axis_ellipse_patch(S))
         for source, color, label in (("tempA", PULSE_A, "A"), ("tempB", PULSE_B, "B")):
             xy = _source_xy(S, source)
-            ax0.add_patch(plt.Circle(xy, cfg.core_radius, fill=False, ec="crimson", lw=1.0, ls="--", zorder=7))
+            core_parallel, core_transverse = _effective_core_radii(S, cfg)
+            core_angle = float(
+                np.degrees(np.arctan2(S["axis_unit"][1], S["axis_unit"][0]))
+            )
+            ax0.add_patch(Ellipse(
+                xy=xy,
+                width=2.0 * core_parallel,
+                height=2.0 * core_transverse,
+                angle=core_angle,
+                fill=False,
+                ec="crimson",
+                lw=1.0,
+                ls="--",
+                zorder=7,
+            ))
             ax0.text(xy[0], xy[1] + 0.44, label, fontsize=8, color="crimson", fontweight="bold",
                      ha="center", va="bottom", path_effects=[pe.withStroke(linewidth=1.8, foreground="white")])
         _draw_contacts(ax0, contacts, names)
