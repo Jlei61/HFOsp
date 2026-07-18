@@ -1,0 +1,1185 @@
+{
+  "seed": 3,
+  "provenance_fingerprint": "166b7a211a764aa1",
+  "provenance": {
+    "git_sha": "3cda82e",
+    "engine_shas": {
+      "kick_probe.py": "5faaedab37ab",
+      "params.py": "c2036d1e1548",
+      "model.py": "e77aad35cbfa",
+      "connectivity.py": "5ad75ec5066b",
+      "connectivity_rot.py": "2aa442624fef",
+      "lfp.py": "7f079081de4e"
+    },
+    "subject": "epilepsiae_1146",
+    "montage": "narrow",
+    "dt": 0.1,
+    "seed": 3,
+    "candidate": {
+      "label": "zA_q75_tz5000",
+      "cfg": {
+        "use_z": true,
+        "use_m": false,
+        "I_th_EI": 95.19851312666987,
+        "tau_z": 5000.0
+      }
+    },
+    "T_ms": 15000.0,
+    "argv": [
+      "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/scripts/run_topic4_mz_early_field_bridge.py",
+      "--confirm-run",
+      "--seeds",
+      "3",
+      "--resume"
+    ]
+  },
+  "onset": {
+    "status": "eligible",
+    "t120_ms": 9499.3,
+    "theta_recruit": 36.47187656250003,
+    "t_recruit_ms": 9360.1,
+    "onset_diff_ms": 139.2
+  },
+  "t120_ms": 9499.3,
+  "template_eligibility": {
+    "A_to_B": {
+      "contact": true,
+      "source": true
+    },
+    "B_to_A": {
+      "contact": true,
+      "source": true
+    }
+  },
+  "maxab_eligible": true,
+  "n_returning_events": 40,
+  "within_trajectory_audit": {
+    "n_pre_runaway_returning": 29,
+    "status": "eligible"
+  },
+  "by_window": {
+    "early_0_50_ms": {
+      "window_ms": [
+        0.0,
+        50.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 461.88599734316364,
+        "dynamic_range": 3.8835003623218185,
+        "recruited": 0,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2807.92834463971,
+        "dynamic_range": 7340404332790044.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.5263281920352006,
+            "rho_b": 0.7351065022497505,
+            "rho_maxab": 0.7351065022497505,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.7351065022497505,
+            "p_one_sided": 0.08609139086091391,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.7351065022497505,
+            "p_one_sided": 0.008599140085991401,
+            "null_median": 0.1922242092650298,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.5263281920352006,
+            "earliness_energy_spearman": -0.5263281920352006,
+            "field_cosine": -0.49398666957798504,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.8855146224942285
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.7351065022497505,
+            "earliness_energy_spearman": 0.7351065022497505,
+            "field_cosine": 0.5339424149004663,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 0.9726850777431381
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.5263281920352006,
+            "rho_b": 0.7351065022497505,
+            "rho_maxab": 0.7351065022497505,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.7351065022497505,
+            "p_one_sided": 0.08609139086091391,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.7351065022497505,
+            "p_one_sided": 0.008599140085991401,
+            "null_median": 0.1922242092650298,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.5263281920352006,
+            "earliness_energy_spearman": -0.5263281920352006,
+            "field_cosine": -0.49398666957798504,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.8855146224942285
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.7351065022497505,
+            "earliness_energy_spearman": 0.7351065022497505,
+            "field_cosine": 0.5339424149004663,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 0.9726850777431381
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.5462901967187943,
+            "rho_b": 0.4127327684621299,
+            "rho_maxab": 0.5462901967187943,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5462901967187943,
+            "p_one_sided": 0.012152777777777778,
+            "null_median": 0.0126374628268119,
+            "null_p95": 0.5075160403139349,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5462901967187943,
+            "earliness_energy_spearman": 0.5462901967187943,
+            "field_cosine": 0.5104588969083967,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.1989303781172402
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4127327684621299,
+            "earliness_energy_spearman": 0.4127327684621299,
+            "field_cosine": 0.3215958850131612,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6237631913620579
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.4966696542611642,
+            "rho_b": 0.40777060104427265,
+            "rho_maxab": 0.4966696542611642,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.4966696542611642,
+            "p_one_sided": 0.024305555555555556,
+            "null_median": 0.010900245601545611,
+            "null_p95": 0.46273198418339073,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4966696542611642,
+            "earliness_energy_spearman": 0.4966696542611642,
+            "field_cosine": 0.443754689873243,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.6769092824785532
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.40777060104427265,
+            "earliness_energy_spearman": 0.40777060104427265,
+            "field_cosine": 0.31420470803142053,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.1190932166932945
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_0_100_ms": {
+      "window_ms": [
+        0.0,
+        100.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 558.1103005201119,
+        "dynamic_range": 1.823823613826338,
+        "recruited": 0,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 3100.9783042058793,
+        "dynamic_range": 35472.804505816086,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.3890251854173223,
+            "rho_b": 0.827822637668638,
+            "rho_maxab": 0.827822637668638,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.827822637668638,
+            "p_one_sided": 0.017998200179982,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.827822637668638,
+            "p_one_sided": 0.0013998600139986002,
+            "null_median": 0.19646990600669006,
+            "null_p95": 0.5673344476822398,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.3890251854173223,
+            "earliness_energy_spearman": -0.3890251854173223,
+            "field_cosine": -0.3461751044725932,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.7299628225962381
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.827822637668638,
+            "earliness_energy_spearman": 0.827822637668638,
+            "field_cosine": 0.8205538232665884,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.1599707511501458
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.3890251854173223,
+            "rho_b": 0.827822637668638,
+            "rho_maxab": 0.827822637668638,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.827822637668638,
+            "p_one_sided": 0.017998200179982,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.827822637668638,
+            "p_one_sided": 0.0013998600139986002,
+            "null_median": 0.19646990600669006,
+            "null_p95": 0.5673344476822398,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.3890251854173223,
+            "earliness_energy_spearman": -0.3890251854173223,
+            "field_cosine": -0.3461751044725932,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.7299628225962381
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.827822637668638,
+            "earliness_energy_spearman": 0.827822637668638,
+            "field_cosine": 0.8205538232665884,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.1599707511501458
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.6047922906759989,
+            "rho_b": 0.4676023263176293,
+            "rho_maxab": 0.6047922906759989,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.6047922906759989,
+            "p_one_sided": 0.001736111111111111,
+            "null_median": 0.005453971314202045,
+            "null_p95": 0.5491447338310029,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6047922906759989,
+            "earliness_energy_spearman": 0.6047922906759989,
+            "field_cosine": 0.5394507643251553,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.8675365852741211
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4676023263176293,
+            "earliness_energy_spearman": 0.4676023263176293,
+            "field_cosine": 0.4286054117557246,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6389265754103989
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.5705625674452282,
+            "rho_b": 0.47549237911483366,
+            "rho_maxab": 0.5705625674452282,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5705625674452282,
+            "p_one_sided": 0.010416666666666666,
+            "null_median": -0.008104538071825077,
+            "null_p95": 0.5232349636780749,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5705625674452282,
+            "earliness_energy_spearman": 0.5705625674452282,
+            "field_cosine": 0.4905968298886877,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.9105282033296171
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.47549237911483366,
+            "earliness_energy_spearman": 0.47549237911483366,
+            "field_cosine": 0.4008092576137588,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.7396914647897738
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_0_25_ms": {
+      "window_ms": [
+        0.0,
+        25.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 565.4632777908558,
+        "dynamic_range": 8.098231271112224,
+        "recruited": 0,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2627.4475522521616,
+        "dynamic_range": 4935110557911008.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.36156458409374664,
+            "rho_b": 0.6865409075065237,
+            "rho_maxab": 0.6865409075065237,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.6865409075065237,
+            "p_one_sided": 0.14428557144285573,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.6865409075065237,
+            "p_one_sided": 0.015598440155984402,
+            "null_median": 0.19646990600669006,
+            "null_p95": 0.5766726277950895,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.36156458409374664,
+            "earliness_energy_spearman": -0.36156458409374664,
+            "field_cosine": -0.31186215964102826,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.48872899111727436
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6865409075065237,
+            "earliness_energy_spearman": 0.6865409075065237,
+            "field_cosine": 0.3402038452131741,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 0.614044605849782
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.36156458409374664,
+            "rho_b": 0.6865409075065237,
+            "rho_maxab": 0.6865409075065237,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.6865409075065237,
+            "p_one_sided": 0.14428557144285573,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.6865409075065237,
+            "p_one_sided": 0.015598440155984402,
+            "null_median": 0.19646990600669006,
+            "null_p95": 0.5766726277950895,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.36156458409374664,
+            "earliness_energy_spearman": -0.36156458409374664,
+            "field_cosine": -0.31186215964102826,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.48872899111727436
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6865409075065237,
+            "earliness_energy_spearman": 0.6865409075065237,
+            "field_cosine": 0.3402038452131741,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 0.614044605849782
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.5679334084275505,
+            "rho_b": 0.18985062462016428,
+            "rho_maxab": 0.5679334084275505,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5679334084275505,
+            "p_one_sided": 0.003472222222222222,
+            "null_median": 0.057964529124914205,
+            "null_p95": 0.45514557702095815,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5679334084275505,
+            "earliness_energy_spearman": 0.5679334084275505,
+            "field_cosine": 0.47532140454932587,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 2.7208925082034527
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.18985062462016428,
+            "earliness_energy_spearman": 0.18985062462016428,
+            "field_cosine": 0.20165891926389357,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.9748333624235391
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.5121888119932181,
+            "rho_b": 0.24963300842725145,
+            "rho_maxab": 0.5121888119932181,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5121888119932181,
+            "p_one_sided": 0.008680555555555556,
+            "null_median": 0.06332834353434244,
+            "null_p95": 0.4145259314492913,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5121888119932181,
+            "earliness_energy_spearman": 0.5121888119932181,
+            "field_cosine": 0.41206709746206843,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 3.7895893810026884
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.24963300842725145,
+            "earliness_energy_spearman": 0.24963300842725145,
+            "field_cosine": 0.2589101014058465,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.9086405158008541
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_25_50_ms": {
+      "window_ms": [
+        25.0,
+        50.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 505.7498861563149,
+        "dynamic_range": 3.5419348154895087,
+        "recruited": 0,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 3094.784056752252,
+        "dynamic_range": 8863203648830802.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.6224402966677156,
+            "rho_b": 0.7969172591956755,
+            "rho_maxab": 0.7969172591956755,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.7969172591956755,
+            "p_one_sided": 0.0344965503449655,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.7969172591956755,
+            "p_one_sided": 0.0020997900209979003,
+            "null_median": 0.19434705763585994,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.6224402966677156,
+            "earliness_energy_spearman": -0.6224402966677156,
+            "field_cosine": -0.5112045579121375,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.711271312213261
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.7969172591956755,
+            "earliness_energy_spearman": 0.7969172591956755,
+            "field_cosine": 0.5878885671364182,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 2.0971322434797384
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.6224402966677156,
+            "rho_b": 0.7969172591956755,
+            "rho_maxab": 0.7969172591956755,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.7969172591956755,
+            "p_one_sided": 0.0344965503449655,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.7969172591956755,
+            "p_one_sided": 0.0020997900209979003,
+            "null_median": 0.19434705763585994,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.6224402966677156,
+            "earliness_energy_spearman": -0.6224402966677156,
+            "field_cosine": -0.5112045579121375,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.711271312213261
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.7969172591956755,
+            "earliness_energy_spearman": 0.7969172591956755,
+            "field_cosine": 0.5878885671364182,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 2.0971322434797384
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.538267147117247,
+            "rho_b": 0.4478018254815027,
+            "rho_maxab": 0.538267147117247,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.538267147117247,
+            "p_one_sided": 0.013888888888888888,
+            "null_median": -0.026449613733910877,
+            "null_p95": 0.49543817246268695,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.538267147117247,
+            "earliness_energy_spearman": 0.538267147117247,
+            "field_cosine": 0.5135131233899999,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 0.8214405848609786
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4478018254815027,
+            "earliness_energy_spearman": 0.4478018254815027,
+            "field_cosine": 0.359653018920709,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.5360443212783903
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.5081599089093832,
+            "rho_b": 0.41795394926051116,
+            "rho_maxab": 0.5081599089093832,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5081599089093832,
+            "p_one_sided": 0.012152777777777778,
+            "null_median": -0.009405177978921408,
+            "null_p95": 0.46430388014284446,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5081599089093832,
+            "earliness_energy_spearman": 0.5081599089093832,
+            "field_cosine": 0.463333256845207,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.3698438289167545
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.41795394926051116,
+            "earliness_energy_spearman": 0.41795394926051116,
+            "field_cosine": 0.31254481785991833,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.8524941831600995
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_50_100_ms": {
+      "window_ms": [
+        50.0,
+        100.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 794.4524146187048,
+        "dynamic_range": 4.228875808420929,
+        "recruited": 0,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 3601.3047082680887,
+        "dynamic_range": 9017579750733608.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.118995939068828,
+            "rho_b": 0.8587280161416003,
+            "rho_maxab": 0.8587280161416003,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.8587280161416003,
+            "p_one_sided": 0.0103989601039896,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.8587280161416003,
+            "p_one_sided": 0.0007999200079992001,
+            "null_median": 0.19646990600669006,
+            "null_p95": 0.5766726277950895,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.118995939068828,
+            "earliness_energy_spearman": -0.118995939068828,
+            "field_cosine": -0.15960715795599062,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": -0.31360626604494013
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.8587280161416003,
+            "earliness_energy_spearman": 0.8587280161416003,
+            "field_cosine": 0.8327692193934472,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.1134693302661365
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.118995939068828,
+            "rho_b": 0.8587280161416003,
+            "rho_maxab": 0.8587280161416003,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.8587280161416003,
+            "p_one_sided": 0.0103989601039896,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.8587280161416003,
+            "p_one_sided": 0.0007999200079992001,
+            "null_median": 0.19646990600669006,
+            "null_p95": 0.5766726277950895,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.118995939068828,
+            "earliness_energy_spearman": -0.118995939068828,
+            "field_cosine": -0.15960715795599062,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": -0.31360626604494013
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.8587280161416003,
+            "earliness_energy_spearman": 0.8587280161416003,
+            "field_cosine": 0.8327692193934472,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.1134693302661365
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.5465244250582931,
+            "rho_b": 0.5420523771548704,
+            "rho_maxab": 0.5465244250582931,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5465244250582931,
+            "p_one_sided": 0.050347222222222224,
+            "null_median": -0.03911345235267779,
+            "null_p95": 0.5442381132582221,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5465244250582931,
+            "earliness_energy_spearman": 0.5465244250582931,
+            "field_cosine": 0.5232914543916554,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.7290126036240097
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5420523771548704,
+            "earliness_energy_spearman": 0.5420523771548704,
+            "field_cosine": 0.48545382995141273,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6809623135933182
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.5493955490932644,
+            "rho_b": 0.5160464604668329,
+            "rho_maxab": 0.5493955490932644,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5493955490932644,
+            "p_one_sided": 0.022569444444444444,
+            "null_median": -0.035948774093755576,
+            "null_p95": 0.5343206115559734,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5493955490932644,
+            "earliness_energy_spearman": 0.5493955490932644,
+            "field_cosine": 0.49194341436112016,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6739232180144822
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5160464604668329,
+            "earliness_energy_spearman": 0.5160464604668329,
+            "field_cosine": 0.44117972600824024,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.5972092319836323
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    }
+  },
+  "wall_s": 8175.7,
+  "status": "complete",
+  "readout_patched": "contact energy float-window fix (\u00a78.2/\u00a78.3); source preserved; local participation not recomputed (raster not persisted)"
+}
