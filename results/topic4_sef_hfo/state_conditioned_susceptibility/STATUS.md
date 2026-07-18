@@ -58,7 +58,7 @@
 
 ## not-run / failed
 
-- **completed**：snapshot 观测器 + 映射/探针模块 + 3 种子捕获 + n=12 real-field atlas + 5 required controls（real/uniform/rotate/shuffle/z-blocked）+ AR1 + n8/n12 resolution + 线性区自检 + 主诊断图 + controls companion 图。
+- **completed**：snapshot 观测器 + 映射/探针模块 + 3 种子捕获 + n=12 real-field atlas + 5 required controls（real/uniform/rotate/shuffle/z-blocked）+ AR1 + n8/n12 resolution + 线性区自检 + 主诊断图 + controls companion 图 + **第二候选 `zA_q75_tz5000` 稳健性（P2；同一冻结背景、不同失控轨迹 onset~9.5s，同模式：放大随失效上升、偏好掉到沿轴低波数、主本征模式转轴向、强度由图案定 real≈3×uniform、方向由骨架定；见 report §4.3 + `second_candidate_sensitivity.json`）**。
 - **not_run（P4）**：dirty `topic4-early-readout` worktree 的只读对比（未依赖、未纳入结论）。
 - **failed（环境，非本改动）**：上述 7 个 M3B 构建产物合同测试。
 - **boundary（设计内）**：onset 工作点 unresolved/saturated（= runoff 边界），故最贴近失控点的易感性未测；primary estimand 端点取最后一个 resolved 状态（失控前 100 毫秒）。

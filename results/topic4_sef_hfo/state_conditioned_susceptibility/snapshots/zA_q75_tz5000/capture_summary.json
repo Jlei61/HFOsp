@@ -1,0 +1,91 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q75_tz5000",
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "geometry_consistent_across_seeds": true,
+  "all_gates_pass": true,
+  "rows": [
+    {
+      "seed": 1,
+      "onset": 9293.6,
+      "replay_runaway_ms": 9293.6,
+      "onset_match": true,
+      "missing": [],
+      "gate_pass": true,
+      "wall_s": 871.4,
+      "src_xy": [
+        3.5135135135135127,
+        8.472279953280994
+      ],
+      "snk_xy": [
+        16.56558998022413,
+        8.47227995328099
+      ],
+      "axis_unit": [
+        1.0,
+        -2.721952853909272e-16
+      ],
+      "L": 20.0
+    },
+    {
+      "seed": 3,
+      "onset": 9499.3,
+      "replay_runaway_ms": 9499.3,
+      "onset_match": true,
+      "missing": [],
+      "gate_pass": true,
+      "wall_s": 900.7,
+      "src_xy": [
+        3.5135135135135127,
+        8.472279953280994
+      ],
+      "snk_xy": [
+        16.56558998022413,
+        8.47227995328099
+      ],
+      "axis_unit": [
+        1.0,
+        -2.721952853909272e-16
+      ],
+      "L": 20.0
+    },
+    {
+      "seed": 4,
+      "onset": 9757.9,
+      "replay_runaway_ms": 9757.9,
+      "onset_match": true,
+      "missing": [],
+      "gate_pass": true,
+      "wall_s": 810.8,
+      "src_xy": [
+        3.5135135135135127,
+        8.472279953280994
+      ],
+      "snk_xy": [
+        16.56558998022413,
+        8.47227995328099
+      ],
+      "axis_unit": [
+        1.0,
+        -2.721952853909272e-16
+      ],
+      "L": 20.0
+    }
+  ],
+  "git_sha": "5ce5210",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "capture-snapshots",
+    "--candidate",
+    "zA_q75_tz5000",
+    "--seeds",
+    "1,3,4",
+    "--workers",
+    "2",
+    "--confirm-run"
+  ]
+}

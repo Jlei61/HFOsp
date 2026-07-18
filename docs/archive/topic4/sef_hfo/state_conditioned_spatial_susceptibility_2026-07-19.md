@@ -88,6 +88,29 @@ mostly from scaffold anisotropy; small residual from two-core-along-axis geometr
 at pre_onset_100ms axial 0.715 vs 0.747, ax−perp +0.089 vs +0.092 (resolution-robust). Nonlinear
 two-amplitude linear-regime check PASS at baseline (J is linear; confirms embedding/readout linearity).
 
+### 4.3 Second candidate sensitivity (`zA_q75_tz5000`, same frozen backdrop, P2)
+
+A second registered runaway trajectory (higher depletion threshold I_th_EI=95.199, tau_z=5000, onsets
+9293.6/9499.3/9757.9 ms vs the primary ~4.9 s) was captured (3 seeds, onsets exact, all gates pass) and run
+through the IDENTICAL frozen backdrop (NO re-calibration). 3-seed median trajectory (T=30 ms):
+
+| state | axial | perp | global | peak_k | eig glob | eig axis |
+|---|---|---|---|---|---|---|
+| baseline | 0.183 | 0.194 | 0.171 | 7.11 | 0.99 | 0.04 |
+| mid | 0.183 | 0.192 | 0.196 | 7.11 | 0.54 | 0.31 |
+| pre_onset_500ms | 0.466 | 0.375 | 0.417 | 1.26 | 0.17 | 0.89 |
+| pre_onset_100ms | 0.540 | 0.467 | 0.513 | 1.26 | 0.08 | 0.91 |
+| onset | 0.704 (seed1 only; seeds 3/4 unresolved) | | | 1.26 | 0.14 | 0.91 |
+
+Controls @ pre_onset_100ms (3-seed median): real axial 0.540 / ax−perp +0.074; uniform_mean 0.174 / −0.023
+(real ≈**3×** uniform → spatial pattern sets magnitude); rotated_90 +0.060, spatial_shuffle +0.036 (positive
+margin preserved); z_blocked flat (−0.007); AR1 +0.038 (≈halved → scaffold anisotropy sets direction).
+Magnitudes are somewhat lower than the primary (milder depletion at the higher threshold by the pre-onset
+points), but the **direction of the finding — gain rises, scale collapses to low-k along the axis, eigenmode
+rotates global→axial, magnitude from spatial pattern, axial direction from scaffold anisotropy — holds across
+both trajectories.** The finding is therefore not specific to one trajectory. Raw numbers:
+`results/topic4_sef_hfo/state_conditioned_susceptibility/second_candidate_sensitivity.json`.
+
 ## 5. Answers to the ten Task-8 questions
 
 1. **Replay w/o observer drift?** Yes — byte-parity proven on the real substrate; onsets exact to the ms.
