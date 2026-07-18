@@ -53,7 +53,7 @@ class MZSlowVars:
     core_mask_E is E-indexed (length NE); union of the two low-V_th cores (for core/surround traces).
     """
 
-    def __init__(self, N, V_th0, cfg=None, *, NE, core_mask_E=None):
+    def __init__(self, N, V_th0, cfg=None, *, NE, core_mask_E=None, snapshot_steps=None):
         self.cfg = cfg or MZSlowVarsConfig()
         self.N = int(N)
         self.NE = int(NE)
@@ -70,6 +70,11 @@ class MZSlowVars:
         self.z = np.ones(self.N)
         self.m = np.zeros(self.N)
         self._I_I_last = np.zeros(self.N)
+        # off-by-default slow-state snapshot observer (design §4.3): copy z_E/m_E at registered
+        # INTEGER steps only, AFTER the slow update; None -> no capture, exact simulation parity.
+        self._snap_steps = self._normalize_snapshot_steps(snapshot_steps)
+        self._step_i = 0
+        self.snapshots = {}                                     # label -> {z_E, m_E, step, captured_after_update}
         # audit traces (streaming scalars only -- NO N x T matrices)
         self.trace_z_mean = []; self.trace_z_min = []
         self.trace_z_core_mean = []; self.trace_z_surround_mean = []
@@ -114,6 +119,10 @@ class MZSlowVars:
             self.m[self.is_E] = np.maximum(mE, 0.0)            # m >= 0
             self.m[spk & self.is_E] += 1.0                     # E spike -> +1 ; I spikes ignored (E-only)
         self._record_traces(spk)
+        # snapshot AFTER the slow update + trace record -> snapshots[label].z_E.mean() == trace_z_mean[step_i]
+        if self._snap_steps is not None and self._step_i in self._snap_steps:
+            self._capture(self._snap_steps[self._step_i])
+        self._step_i += 1
 
     # ------------------------------------------------------------------ traces
     def _record_traces(self, spk):
@@ -140,3 +149,32 @@ class MZSlowVars:
         hE, _ = np.histogram(I_E[self.is_E], bins=edges)
         self.calib_hist_I_EI.append(hI.astype(np.int64))
         self.calib_hist_I_EE.append(hE.astype(np.int64))
+
+    # ------------------------------------------------------------------ snapshot observer (design §4.3)
+    @staticmethod
+    def _normalize_snapshot_steps(snapshot_steps):
+        """Validate/normalize {step: label} -> {int_step: str}; None -> None (off). Raises on
+        negative / non-integer-valued step or duplicate label (Gate B: invalid steps fail clearly)."""
+        if snapshot_steps is None:
+            return None
+        norm = {}
+        for k, v in dict(snapshot_steps).items():
+            step = int(k)
+            if step != k or step < 0:                           # k==round(t_ms/dt) must be a non-neg integer
+                raise ValueError(f"snapshot step {k!r} must be a non-negative integer (== round(t_ms/dt))")
+            norm[step] = str(v)                                 # dict keys unique -> no duplicate step
+        if len(set(norm.values())) != len(norm):
+            raise ValueError("snapshot labels must be unique")
+        return norm
+
+    def _capture(self, label):
+        """Copy ONLY z_E/m_E (E cells [:NE]) at the current step -> n_snapshots x NE (never n_steps x NE)."""
+        self.snapshots[label] = dict(
+            z_E=self.z[:self.NE].copy(), m_E=self.m[:self.NE].copy(),
+            step=int(self._step_i), captured_after_update=True,
+        )
+
+    @property
+    def n_steps_run(self):
+        """Number of step() calls executed (== simulate_kick iterations run, honoring early-stop)."""
+        return self._step_i

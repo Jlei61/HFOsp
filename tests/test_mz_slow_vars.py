@@ -217,3 +217,119 @@ def test_record_calib_side_effect_preserves_parity():
     mz.step(np.zeros(10, bool), None, 0.1)
     assert len(mz.calib_hist_I_EI) == 1             # E-cell inhibitory-current histogram captured
     assert len(mz.calib_hist_I_EE) == 1
+
+
+# ==================== slow-state snapshot observer (design §4.3 / plan Task 2 / Gate B) ====================
+# The observer copies z_E/m_E at registered INTEGER steps only, AFTER the slow update, storing an
+# n_snapshots x NE payload (never n_steps x NE). Off by default -> exact simulation parity.
+
+def _mk_snap(snapshot_steps=None, N=10, NE=8, core=(0, 1), **kw):
+    core_mask_E = np.zeros(NE, bool)
+    for i in core:
+        core_mask_E[i] = True
+    cfg = MZSlowVarsConfig(**kw)
+    return MZSlowVars(N, 18.0, cfg, NE=NE, core_mask_E=core_mask_E, snapshot_steps=snapshot_steps)
+
+
+def test_snapshot_off_by_default_no_capture_counter_advances():
+    mz = _mk_snap(snapshot_steps=None, use_z=True, I_th_EI=5.0)
+    for _ in range(5):
+        mz.apply_currents(np.zeros(10), np.full(10, 10.0), None)
+        mz.step(np.zeros(10, bool), None, 0.1)
+    assert mz.snapshots == {}
+    assert mz.n_steps_run == 5                       # counter advances harmlessly even with no capture
+
+
+def test_snapshot_captures_requested_steps_once_correct_shape():
+    mz = _mk_snap(snapshot_steps={0: "a", 3: "b"}, use_z=True, use_m=True, I_th_EI=5.0, eta_m=0.1)
+    for _ in range(5):
+        mz.apply_currents(np.ones(10), np.full(10, 6.0), None)
+        mz.step(np.zeros(10, bool), None, 0.1)
+    assert set(mz.snapshots) == {"a", "b"}
+    for lab, want_step in (("a", 0), ("b", 3)):
+        snap = mz.snapshots[lab]
+        assert snap["z_E"].shape == (mz.NE,) and snap["m_E"].shape == (mz.NE,)
+        assert snap["step"] == want_step
+        assert snap["captured_after_update"] is True
+
+
+def test_snapshot_memory_is_n_snapshots_not_n_steps():
+    mz = _mk_snap(snapshot_steps={10: "x", 100: "y"}, use_z=True, I_th_EI=5.0)
+    for _ in range(200):
+        mz.apply_currents(np.zeros(10), np.full(10, 10.0), None)
+        mz.step(np.zeros(10, bool), None, 0.1)
+    assert len(mz.snapshots) == 2                     # 200 steps but only 2 stored arrays
+
+
+def test_snapshot_mean_matches_trace_at_step():      # pins step<->trace index => time = step*dt
+    mz = _mk_snap(snapshot_steps={0: "a", 7: "b", 19: "c"}, use_z=True, I_th_EI=5.0, tau_z=200.0)
+    rng = np.random.default_rng(0)
+    for _ in range(25):
+        mz.apply_currents(np.zeros(10), rng.random(10) * 20.0, None)
+        mz.step(np.zeros(10, bool), None, 0.1)
+    for lab, step in (("a", 0), ("b", 7), ("c", 19)):
+        assert mz.snapshots[lab]["z_E"].mean() == mz.trace_z_mean[step]
+
+
+def test_snapshot_z_bounds_and_m_nonneg():
+    mz = _mk_snap(snapshot_steps={50: "s"}, use_z=True, use_m=True, I_th_EI=5.0, tau_z=50.0,
+                  eta_m=0.1, tau_adp=100.0)
+    spk = np.arange(10) < 3                            # a few E spikes -> load m
+    for _ in range(100):
+        mz.apply_currents(np.zeros(10), np.full(10, 100.0), None)
+        mz.step(spk, None, 0.1)
+    z = mz.snapshots["s"]["z_E"]; m = mz.snapshots["s"]["m_E"]
+    assert np.all((z >= 0.0) & (z <= 1.0)) and np.all(m >= 0.0)
+
+
+def test_snapshot_primary_zonly_has_m_zero():
+    mz = _mk_snap(snapshot_steps={5: "s"}, use_z=True, use_m=False, I_th_EI=5.0)
+    for _ in range(10):
+        mz.apply_currents(np.zeros(10), np.full(10, 10.0), None)
+        mz.step(np.ones(10, bool), None, 0.1)         # spikes present but use_m False -> m stays 0
+    assert np.all(mz.snapshots["s"]["m_E"] == 0.0)
+
+
+def test_snapshot_invalid_steps_raise():
+    import pytest
+    with pytest.raises(ValueError):
+        _mk_snap(snapshot_steps={-1: "a"})            # negative step
+    with pytest.raises(ValueError):
+        _mk_snap(snapshot_steps={5.5: "a"})           # non-integer-valued step
+    with pytest.raises(ValueError):
+        _mk_snap(snapshot_steps={1: "dup", 2: "dup"})  # duplicate label
+
+
+def test_snapshot_observer_does_not_perturb_engine_output():
+    from params import Params
+    from connectivity import place_neurons, build_connectivity
+    from kick_probe import simulate_kick
+
+    SEED = 1
+    p = Params(L=1.0, density=400.0, T=200.0, dt=0.1, seed=SEED, nu_ext_ratio=1.0)
+    rng = np.random.default_rng(SEED)
+    pos, labels, NE, NI = place_neurons(p, rng)
+    net = build_connectivity(p, pos, labels, NE, NI, rng, verbose=False)
+    N = NE + NI
+    vth = np.full(N, 18.0); vth[:5] = 16.0
+    center = np.array([p.L / 2, p.L / 2])
+    core_mask_E = np.zeros(NE, bool)
+
+    def run(snapshot_steps):
+        net["rng"] = np.random.default_rng(SEED)
+        mz = MZSlowVars(N, 18.0,
+                        MZSlowVarsConfig(use_z=True, use_m=True, I_th_EI=5.0, tau_z=500.0,
+                                         tau_adp=500.0, eta_m=0.05),
+                        NE=NE, core_mask_E=core_mask_E, snapshot_steps=snapshot_steps)
+        res = simulate_kick(p, net, 5.0, slow=mz, kick_center=center, r_kick=0.3,
+                            t_kick=50.0, V_th_per_neuron=vth, verbose=False)
+        return res, mz
+
+    res_off, _ = run(None)
+    res_on, mz_on = run({0: "t0", 500: "t500", 1999: "tend"})   # 200ms/0.1 = 2000 steps -> last idx 1999
+    assert np.array_equal(res_off["E_spk_bool"], res_on["E_spk_bool"])   # capture is a pure read
+    assert np.array_equal(res_off["rate_E"], res_on["rate_E"])
+    assert np.array_equal(res_off["rate_I"], res_on["rate_I"])
+    assert set(mz_on.snapshots) == {"t0", "t500", "tend"}
+    assert np.all(mz_on.z[NE:] == 1.0) and np.all(mz_on.m[NE:] == 0.0)   # I cells never modulated
+    assert mz_on.snapshots["t500"]["z_E"].mean() == mz_on.trace_z_mean[500]  # index/time pin
