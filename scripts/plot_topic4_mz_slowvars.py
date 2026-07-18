@@ -116,7 +116,7 @@ def fig_phenotype_map(summary, cal):
 def _tags(cap):
     order = ["slow_off"]
     for arm in ("A", "B", "C"):
-        order += sorted([k[:-7] for k in cap.files if k.endswith("__rate") and k.startswith(f"arm{arm}_")])
+        order += sorted([k[:-6] for k in cap.files if k.endswith("__rate") and k.startswith(f"arm{arm}_")])
     return [t for t in order if f"{t}__rate" in cap.files]
 
 
