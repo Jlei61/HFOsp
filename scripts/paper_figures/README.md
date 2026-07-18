@@ -154,7 +154,58 @@ the positive direction of `D_AB` or of an earliness gradient. Yuquan public
 labels must be passed with `--display-label`; the script never guesses the
 private manuscript crosswalk from an artifact-folder name.
 
-## Fig3-A Field Concordance Cohort Statistic
+## Fig3-A Raw SEEG and Spectral Context
+
+Formal entry point:
+
+```bash
+python scripts/paper_figures/plot_fig3_raw_spectral_context.py \
+  --subject epilepsiae_1146 --seizure-idx 7
+```
+
+Canonical output:
+
+```text
+results/paper-ready-figure/fig3a_raw_spectral_context/figures/
+```
+
+Locked visual contract:
+
+- E1146 seizure 7, CAR, 15 lagPat joint-valid contacts, spectral channel SCL9
+- raw SEEG and TFR use identical `[-120,+20] s` data-axis boundaries; TFR colorbar has a dedicated column
+- right 2x2 = low bands (1-30 Hz), gamma (30-80 Hz), high-gamma (80-150 Hz), broadband (1-150 Hz)
+- y limits are shared within each right-side row; y ticks/label appear only on the left plot of each row
+- baseline `[-120,-90) s` and clinical-onset `[0,10) s` shading only; no EEG-onset annotation or onset lines
+- no internal a/b labels; titles are limited to `E1146` and `TFR on SCL9`
+- one run writes PNG, PDF, summary JSON, and the Chinese figure README
+
+Full contract: `docs/figure_style_guide.md` §5a.
+
+## Fig3-B Interictal Timing vs Early-Ictal Shared Field Candidate
+
+Formal entry point:
+
+```bash
+python scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py
+```
+
+Default output:
+
+```text
+results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/
+```
+
+The default scans E1146's 25 complete, exact 1–150 Hz clinical checkpoints and selects seizure 15,
+the maximum positive `shared_a_signed` example. The left panel is the frozen TA timing field with a
+red semantic `TA fields` title; the right is clinical 0–10 s distal-baseline robust-z power rendered
+with `magma_r`, continuous min-max interpolation, no rank and no sign flip. Both panels use the same
+frozen shared plane, contact order, TA support, extent and 6 mm display sigma; each panel has its own
+x label. Colorbars report raw propagation rank and robust-z values, with dark colors consistently
+meaning earliest propagation or highest broadband power.
+
+Full contract: `docs/fig3b_interictal_ictal_shared_field_spec.md`.
+
+## Fig3 Field Concordance Cohort Statistic (panel letter pending)
 
 Formal entry point:
 
@@ -176,7 +227,7 @@ axis-alignment artifacts:
 
 Current visual contract:
 
-- manuscript panel label: `Fig3-A`
+- manuscript panel label: pending final Fig3 assembly; `Fig3-A` is now locked to raw spectral context
 - Data-vs-Null violin + box + subject dots, not a per-subject board
 - two comparisons: `Broadband maxAB` and `HFA maxAB`
 - strict maxAB only; no broad fallback

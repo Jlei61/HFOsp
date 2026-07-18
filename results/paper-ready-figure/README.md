@@ -20,8 +20,7 @@
 
 > Fig2（单 subject 间期传播时序素材）不在本目录：它由 Topic 1 propagation 主绘图器生成，
 > 见 `results/interictal_propagation_masked/figures/per_subject/` + `docs/fig2_temporal_propagation_panel_spec.md`。
-> Fig2-B 模板匹配预览脚本 `scripts/paper_figures/plot_fig2b_template_matching_preview.py`。
-
+> Fig2-B 模板匹配预览脚本 `scripts/paper_figures/plot_fig2b_template_matching_preview.py` 仍只作历史 preview；间期-vs-ictal paired field 已改列 Fig3-B。
 - `fig2c_interictal_event_envelope_field/` — **Fig2-C paper-ready candidate**：E1146 两次真实 TA/TB
   代表事件的 Fig1a 质心 readout + 冻结 shared-plane 包络 frame；同时输出同一合同的 2 ms 生物学步长
   GIF。canonical producer 为 `scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py`，唯一
@@ -36,7 +35,18 @@
 
 ## Fig3 — 间期传播场 vs 发作早期激活场一致性
 
-- `fig3_field_concordance_cohort_stat/` — **Fig3-A**：cohort 级 Data-vs-Null 统计面板
+- `fig3a_raw_spectral_context/` — **Fig3-A 正式版**：E1146 seizure 7 的 raw SEEG、严格对齐的 SCL9 TFR 与
+  low bands / gamma / high-gamma / broadband 2×2 band-power context。右侧按行共享 y 轴；只标 baseline 与
+  clinical-onset `[0,10) s` 阴影。脚本 `scripts/paper_figures/plot_fig3_raw_spectral_context.py`；完整规范见
+  `docs/figure_style_guide.md` §5a。
+- `fig3b_interictal_ictal_shared_field/` — **Fig3-B paper-ready candidate**：E1146 的冻结 TA timing
+  field 与当前 25 次 complete / exact 1–150 Hz 发作中 `shared_a_signed` 最高的 seizure 15 broadband power 场。
+  左右共用 shared plane、TA support、extent 和 6 mm display sigma；`TA fields` 标题固定红色，右图为 `magma_r`
+  连续 min–max 插值、无 rank/sign flip，两个 panel 各自写 xlabel。colorbar 直接报告 propagation rank / robust-z，
+  深色统一表示最早传播或最高 broadband power。
+  producer 为 `scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py`，合同为
+  `docs/fig3b_interictal_ictal_shared_field_spec.md`。
+- `fig3_field_concordance_cohort_stat/` — **Fig3 field-concordance cohort statistic（panel 编号待总拼版）**：cohort 级 Data-vs-Null 统计面板
   （maxAB 可评估 subject 上间期传播场与发作早期激活场整体高于 channel-shuffle null）。正式图现在包含
   `BB 1-45 maxAB`、line-noise-masked `BB 1-150 maxAB` 和 `HFA 60-100 maxAB` 三组配对统计。
   脚本 `scripts/paper_figures/plot_fig3_field_concordance_cohort_stat.py`。
@@ -47,12 +57,7 @@
   formal/机制）**；formal within-shaft Gate A 未评估(2/20)、Gate B/C 未跑。脚本
   `scripts/paper_figures/plot_fig3_sup1_multiband_field_alignment.py`；归档
   `docs/archive/topic5/v2_phase1_band_scan_backbone_2026-07-02.md`。
-- `fig3_sup2_raw_spectral_context/` — **Fig3-Sup2**：单次真实发作的 raw traces + baseline-normalized
-  TFR + 标准频带能量增强解释图。A 行展示 E1146 lagPat joint-valid 电极；B/C 使用代表性 lagPat
-  单通道（当前 `seizure_idx=7`, `SCL9`，按 onset→early-ictal 窗口内 alpha/beta/gamma/HFA/1-150 Hz
-  共同增强自动选择）展示 `dB vs baseline`。用途是解释 baseline、EEG onset、clinical onset 与
-  early-field input 的关系；**explanatory/QC supplement，不是 cohort 统计或 replay 证据**。脚本
-  `scripts/paper_figures/plot_fig3_raw_spectral_context.py`。
+- `fig3_sup2_raw_spectral_context/` — Fig3-A 定稿前的历史输出路径；保留溯源，不再作为 canonical panel 引用。
 - `fig_topic5_field_extrapolation_energy/` — **Topic 5 energy-field paper-ready 主图**：A E1146 真实电极布局上的测试设计
   （core-field vs own-order 预测 hidden seizure energy）/ B cohort Δ 直接裁决 / C 证据阶梯。
   结论边界：network extension supported，但 core-field 不系统性优于 hidden 电极自身间期顺序。

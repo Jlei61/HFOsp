@@ -1,0 +1,547 @@
+{
+  "schema_id": "fig3b_interictal_ictal_shared_field_candidate_v2",
+  "status": "paper-ready Fig3-B candidate",
+  "paper_role": "Fig3-B interictal timing versus early-ictal shared field",
+  "canonical_producer": "scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
+  "subject": "epilepsiae_1146",
+  "seizure_idx": 15,
+  "frozen_record": "results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1146.json",
+  "frozen_contract": "topic5_interictal_template_fields_v1",
+  "frozen_fingerprint": "18bf1de782f41878a97b940f85ff1ceedbd9dfcacb9fe79779772b44f9aae056",
+  "axis_definition": "template_propagation_axis_v2",
+  "axis_direction_convention": "positive_early_to_late",
+  "field_plane": "shared",
+  "selected_template": "A",
+  "template_selection": "TA fixed; seizure chosen by maximum positive shared_a_signed across complete exact-band E1146 checkpoints",
+  "seizure_selection": {
+    "criterion": "maximum shared_a_signed",
+    "n_candidates": 25,
+    "automatic": true,
+    "selected_seizure_idx": 15,
+    "best_available_seizure_idx": 15,
+    "rows_sorted_by_shared_a_signed": [
+      {
+        "seizure_idx": 15,
+        "seizure_id": "114601500102",
+        "shared_a_signed": 0.8699048918186656,
+        "shared_a_abs": 0.8699048918186656,
+        "shared_b_signed": -0.6455521681403795,
+        "shared_b_abs": 0.6455521681403795,
+        "shared_best_template": "A",
+        "shared_maxab": 0.8699048918186656,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 4,
+        "seizure_id": "114600400102",
+        "shared_a_signed": 0.8467652031529388,
+        "shared_a_abs": 0.8467652031529388,
+        "shared_b_signed": -0.8587438347033317,
+        "shared_b_abs": 0.8587438347033317,
+        "shared_best_template": "B",
+        "shared_maxab": 0.8587438347033317,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 9,
+        "seizure_id": "114600900102",
+        "shared_a_signed": 0.8053986405378761,
+        "shared_a_abs": 0.8053986405378761,
+        "shared_b_signed": -0.8019396808858308,
+        "shared_b_abs": 0.8019396808858308,
+        "shared_best_template": "A",
+        "shared_maxab": 0.8053986405378761,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 5,
+        "seizure_id": "114600500102",
+        "shared_a_signed": 0.7765378946250844,
+        "shared_a_abs": 0.7765378946250844,
+        "shared_b_signed": -0.4148938508932785,
+        "shared_b_abs": 0.4148938508932785,
+        "shared_best_template": "A",
+        "shared_maxab": 0.7765378946250844,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 8,
+        "seizure_id": "114600800102",
+        "shared_a_signed": 0.7496209434067173,
+        "shared_a_abs": 0.7496209434067173,
+        "shared_b_signed": -0.6859524869415269,
+        "shared_b_abs": 0.6859524869415269,
+        "shared_best_template": "A",
+        "shared_maxab": 0.7496209434067173,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 7,
+        "seizure_id": "114600700102",
+        "shared_a_signed": 0.7488793947009789,
+        "shared_a_abs": 0.7488793947009789,
+        "shared_b_signed": -0.6175508618920332,
+        "shared_b_abs": 0.6175508618920332,
+        "shared_best_template": "A",
+        "shared_maxab": 0.7488793947009789,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 10,
+        "seizure_id": "114601000102",
+        "shared_a_signed": 0.7207566104517572,
+        "shared_a_abs": 0.7207566104517572,
+        "shared_b_signed": -0.7131584900710973,
+        "shared_b_abs": 0.7131584900710973,
+        "shared_best_template": "A",
+        "shared_maxab": 0.7207566104517572,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 2,
+        "seizure_id": "114600200102",
+        "shared_a_signed": 0.7191267825782517,
+        "shared_a_abs": 0.7191267825782517,
+        "shared_b_signed": -0.3479440981508824,
+        "shared_b_abs": 0.3479440981508824,
+        "shared_best_template": "A",
+        "shared_maxab": 0.7191267825782517,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 23,
+        "seizure_id": "114602300102",
+        "shared_a_signed": 0.6742061302892399,
+        "shared_a_abs": 0.6742061302892399,
+        "shared_b_signed": -0.5936162438955525,
+        "shared_b_abs": 0.5936162438955525,
+        "shared_best_template": "A",
+        "shared_maxab": 0.6742061302892399,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 12,
+        "seizure_id": "114601200102",
+        "shared_a_signed": 0.6643118208522669,
+        "shared_a_abs": 0.6643118208522669,
+        "shared_b_signed": -0.9458355897552765,
+        "shared_b_abs": 0.9458355897552765,
+        "shared_best_template": "B",
+        "shared_maxab": 0.9458355897552765,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 1,
+        "seizure_id": "114600100102",
+        "shared_a_signed": 0.628525899414915,
+        "shared_a_abs": 0.628525899414915,
+        "shared_b_signed": -0.5970364848335334,
+        "shared_b_abs": 0.5970364848335334,
+        "shared_best_template": "A",
+        "shared_maxab": 0.628525899414915,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 6,
+        "seizure_id": "114600600102",
+        "shared_a_signed": 0.6016638959948983,
+        "shared_a_abs": 0.6016638959948983,
+        "shared_b_signed": -0.6177538345769397,
+        "shared_b_abs": 0.6177538345769397,
+        "shared_best_template": "B",
+        "shared_maxab": 0.6177538345769397,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 19,
+        "seizure_id": "114601900102",
+        "shared_a_signed": 0.45103829464332146,
+        "shared_a_abs": 0.45103829464332146,
+        "shared_b_signed": -0.18328431588370545,
+        "shared_b_abs": 0.18328431588370545,
+        "shared_best_template": "A",
+        "shared_maxab": 0.45103829464332146,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 11,
+        "seizure_id": "114601100102",
+        "shared_a_signed": 0.44360797691873843,
+        "shared_a_abs": 0.44360797691873843,
+        "shared_b_signed": -0.5443909557886504,
+        "shared_b_abs": 0.5443909557886504,
+        "shared_best_template": "B",
+        "shared_maxab": 0.5443909557886504,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 0,
+        "seizure_id": "114600000102",
+        "shared_a_signed": 0.31328754503273576,
+        "shared_a_abs": 0.31328754503273576,
+        "shared_b_signed": -0.48348608128573023,
+        "shared_b_abs": 0.48348608128573023,
+        "shared_best_template": "B",
+        "shared_maxab": 0.48348608128573023,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 14,
+        "seizure_id": "114601400102",
+        "shared_a_signed": -0.49477050669941885,
+        "shared_a_abs": 0.49477050669941885,
+        "shared_b_signed": 0.4561764156838955,
+        "shared_b_abs": 0.4561764156838955,
+        "shared_best_template": "A",
+        "shared_maxab": 0.49477050669941885,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 3,
+        "seizure_id": "114600300102",
+        "shared_a_signed": -0.5793645828489106,
+        "shared_a_abs": 0.5793645828489106,
+        "shared_b_signed": 0.31324515556415383,
+        "shared_b_abs": 0.31324515556415383,
+        "shared_best_template": "A",
+        "shared_maxab": 0.5793645828489106,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 24,
+        "seizure_id": "114602400102",
+        "shared_a_signed": -0.5968143350894686,
+        "shared_a_abs": 0.5968143350894686,
+        "shared_b_signed": 0.16100608091601154,
+        "shared_b_abs": 0.16100608091601154,
+        "shared_best_template": "A",
+        "shared_maxab": 0.5968143350894686,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 18,
+        "seizure_id": "114601800102",
+        "shared_a_signed": -0.6298554538171616,
+        "shared_a_abs": 0.6298554538171616,
+        "shared_b_signed": 0.9438705301906778,
+        "shared_b_abs": 0.9438705301906778,
+        "shared_best_template": "B",
+        "shared_maxab": 0.9438705301906778,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 25,
+        "seizure_id": "114602500102",
+        "shared_a_signed": -0.7211028623328578,
+        "shared_a_abs": 0.7211028623328578,
+        "shared_b_signed": 0.29820919878231417,
+        "shared_b_abs": 0.29820919878231417,
+        "shared_best_template": "A",
+        "shared_maxab": 0.7211028623328578,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 21,
+        "seizure_id": "114602100102",
+        "shared_a_signed": -0.7263481870187339,
+        "shared_a_abs": 0.7263481870187339,
+        "shared_b_signed": 0.81246200444861,
+        "shared_b_abs": 0.81246200444861,
+        "shared_best_template": "B",
+        "shared_maxab": 0.81246200444861,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 13,
+        "seizure_id": "114601300102",
+        "shared_a_signed": -0.8115458290382247,
+        "shared_a_abs": 0.8115458290382247,
+        "shared_b_signed": 0.6230959930733145,
+        "shared_b_abs": 0.6230959930733145,
+        "shared_best_template": "A",
+        "shared_maxab": 0.8115458290382247,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 16,
+        "seizure_id": "114601600102",
+        "shared_a_signed": -0.8182106174689183,
+        "shared_a_abs": 0.8182106174689183,
+        "shared_b_signed": 0.2284468413288338,
+        "shared_b_abs": 0.2284468413288338,
+        "shared_best_template": "A",
+        "shared_maxab": 0.8182106174689183,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 22,
+        "seizure_id": "114602200102",
+        "shared_a_signed": -0.8451171052434608,
+        "shared_a_abs": 0.8451171052434608,
+        "shared_b_signed": 0.8424343472962016,
+        "shared_b_abs": 0.8424343472962016,
+        "shared_best_template": "A",
+        "shared_maxab": 0.8451171052434608,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      },
+      {
+        "seizure_idx": 20,
+        "seizure_id": "114602000102",
+        "shared_a_signed": -0.8629434271262771,
+        "shared_a_abs": 0.8629434271262771,
+        "shared_b_signed": 0.791986669485225,
+        "shared_b_abs": 0.791986669485225,
+        "shared_best_template": "A",
+        "shared_maxab": 0.8629434271262771,
+        "is_exact_1_150": true,
+        "n_finite_contacts": 15
+      }
+    ]
+  },
+  "contact_order": [
+    "SCL6",
+    "SCL7",
+    "SCL8",
+    "SCL9",
+    "ICL1",
+    "ICL2",
+    "ICL3",
+    "ICL4",
+    "ICL5",
+    "ICL6",
+    "ICL7",
+    "ICL8",
+    "ICL9",
+    "ICL10",
+    "ICL11"
+  ],
+  "raw_interictal_rank": [
+    7.0,
+    4.0,
+    3.0,
+    0.0,
+    13.0,
+    14.0,
+    12.0,
+    11.0,
+    10.0,
+    9.0,
+    8.0,
+    6.0,
+    2.0,
+    5.0,
+    1.0
+  ],
+  "interictal_display_values": [
+    0.5,
+    0.2857142857142857,
+    0.21428571428571427,
+    0.0,
+    0.9285714285714286,
+    1.0,
+    0.8571428571428571,
+    0.7857142857142857,
+    0.7142857142857143,
+    0.6428571428571429,
+    0.5714285714285714,
+    0.42857142857142855,
+    0.14285714285714285,
+    0.35714285714285715,
+    0.07142857142857142
+  ],
+  "template_support": [
+    0.8261745382422214,
+    0.9153340771042519,
+    0.8802528821123095,
+    0.7438019090120243,
+    0.7514565513821743,
+    0.8324656005950167,
+    0.9377401760257841,
+    0.9324717986860047,
+    0.705094830792116,
+    0.5587579025660097,
+    0.7213028387256725,
+    0.8748605429527705,
+    0.8844985744390728,
+    0.8885893144911368,
+    0.8679806619561176
+  ],
+  "raw_ictal_robust_z_mean": [
+    -1.971541907259353,
+    -0.9129776938977492,
+    -0.8963536935399605,
+    -0.03843373405302776,
+    -2.8012837458108826,
+    -3.138677516858901,
+    -2.464488941982821,
+    -2.4841214778757212,
+    -1.6158930778940648,
+    -1.0888600982493406,
+    -1.0145598002059348,
+    -1.3719484457874391,
+    -1.5540573255431342,
+    -0.945064515053757,
+    -2.0868276097697676
+  ],
+  "ictal_display_values": [
+    0.3764657528135522,
+    0.7179112285637047,
+    0.7232733876461569,
+    1.0,
+    0.1088281421348938,
+    0.0,
+    0.21746308423072014,
+    0.21113050612773884,
+    0.491182160386962,
+    0.6611794304621988,
+    0.6851453838673729,
+    0.5698677893879961,
+    0.5111276087719809,
+    0.7075614549962314,
+    0.33927974081352963
+  ],
+  "ictal_extraction": {
+    "seizure_id": "114601500102",
+    "reference": "car",
+    "sample_rate_hz": 1024.0,
+    "eeg_onset_minus_clinical_sec": -10.058593988418579,
+    "extraction_pre_sec": 131.05859398841858,
+    "extraction_post_sec": 11.0,
+    "band_hz": [
+      1.0,
+      150.0
+    ],
+    "is_exact_1_150": true,
+    "spectral_window_sec": 1.0,
+    "spectral_hop_sec": 0.5,
+    "baseline_reference": "EEG onset",
+    "baseline_eeg_sec": [
+      -120.0,
+      -90.0
+    ],
+    "baseline_clinical_sec": [
+      -130.05859398841858,
+      -100.05859398841858
+    ],
+    "clinical_window_sec": [
+      0.0,
+      10.0
+    ],
+    "n_baseline_frames": 61,
+    "n_target_contacts": 15,
+    "n_matched_contacts": 15,
+    "n_finite_contacts": 15,
+    "missing_contacts": []
+  },
+  "score_audit": {
+    "observed": {
+      "shared_a_signed": 0.8699048918186656,
+      "shared_a_abs": 0.8699048918186656,
+      "shared_b_signed": -0.6455521681403795,
+      "shared_b_abs": 0.6455521681403795,
+      "shared_best_template": "A",
+      "shared_maxab": 0.8699048918186656
+    },
+    "checkpoint_comparison": {
+      "shared_a_signed": {
+        "expected": 0.8699048918186656,
+        "actual": 0.8699048918186656,
+        "abs_error": 0.0
+      },
+      "shared_a_abs": {
+        "expected": 0.8699048918186656,
+        "actual": 0.8699048918186656,
+        "abs_error": 0.0
+      },
+      "shared_b_signed": {
+        "expected": -0.6455521681403795,
+        "actual": -0.6455521681403795,
+        "abs_error": 0.0
+      },
+      "shared_b_abs": {
+        "expected": 0.6455521681403795,
+        "actual": 0.6455521681403795,
+        "abs_error": 0.0
+      },
+      "shared_best_template": {
+        "expected": "A",
+        "actual": "A"
+      },
+      "shared_maxab": {
+        "expected": 0.8699048918186656,
+        "actual": 0.8699048918186656,
+        "abs_error": 0.0
+      }
+    }
+  },
+  "checkpoint": "results/topic5_ictal_recruitment/tspectral_field_concordance/per_subject/clinical_onset_shared_field/epilepsiae_1146/seizure_015.json",
+  "checkpoint_present": true,
+  "checkpoint_max_abs_score_error": 0.0,
+  "display": {
+    "figure_size_in": [
+      7.25,
+      3.65
+    ],
+    "png_dpi": 300,
+    "display_xlim_mm": [
+      -20.573022904345923,
+      22.826977095654076
+    ],
+    "display_ylim_mm": [
+      -16.341981674293592,
+      27.058018325706406
+    ],
+    "display_sigma_mm": 6.0,
+    "smoothing_contract": "identical support, extent, and 6 mm display sigma in both panels",
+    "interictal_colormap": "viridis",
+    "ictal_colormap": "magma_r",
+    "color_semantics": "dark means earliest propagation on the left and highest broadband power on the right",
+    "interictal_colorbar_quantity": "raw propagation rank",
+    "interictal_colorbar_limits": [
+      0.0,
+      14.0
+    ],
+    "ictal_colorbar_quantity": "0-10 s mean baseline-normalized log-band-power robust z",
+    "ictal_colorbar_limits": [
+      -3.138677516858901,
+      -0.03843373405302776
+    ],
+    "interictal_transform": "min-max of frozen template rank for interpolation; colorbar restored to raw rank",
+    "ictal_transform": "continuous min-max of 0-10 s mean robust-z for interpolation; colorbar restored to robust-z; no rank; no sign flip",
+    "template_support_used_for_both_panels": "support_a",
+    "transverse_sign": -1,
+    "outputs": {
+      "png": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/epilepsiae_1146_seizure_15_interictal_ictal_shared_field.png",
+      "pdf": "/home/honglab/leijiaxin/HFOsp/results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/epilepsiae_1146_seizure_15_interictal_ictal_shared_field.pdf"
+    }
+  },
+  "claim_scope": [
+    "representative-subject bridge from a frozen interictal timing field to selected-seizure early-ictal broadband power",
+    "not a template-free reconstruction",
+    "not replay evidence, a cohort statistic, or a causal/mechanistic test"
+  ]
+}

@@ -6,6 +6,10 @@
 
 ## 主线（network-axis pivot）
 
+### `fig3a_raw_spectral_context_acceptance_2026-07-18.md` — **Fig3-A 正式画图合同与验收**
+- 锁定 E1146 seizure 7 的 raw SEEG + SCL9 TFR + 四频带 2×2 布局、严格时间轴对齐、row-shared y 轴、clinical-onset shading 和可/不可报告边界。
+- canonical producer：`scripts/paper_figures/plot_fig3_raw_spectral_context.py`；输出：`results/paper-ready-figure/fig3a_raw_spectral_context/figures/`。
+
 ### `axis_alignment_AB_result_2026-06-14.md` — **现阶段主线结果**：间期传播轴 ↔ 发作早期激活的轴对齐（A 线 primary + B 线 secondary）
 - 18 Epilepsiae 队列：粗"共享网络主轴"稳（broadband 稳赢全通道 null，FDR + LOSO 扛住）；细对齐仅快活动（hfa）稳（过最严 joint）；符号自由共线，非逐点重放。
 - 含完整方法 / 定稿数值表 / 工件清单 / handoff。计划全貌：`network_axis_pivot_plan_2026-06-13.md`（A/B 段已标 ✅ 执行）。

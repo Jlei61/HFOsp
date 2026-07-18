@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Raw peri-onset EEG + standard-band spectrum context for Topic 5 Fig3.
+"""Raw peri-onset EEG + standard-band spectrum context for Topic 5 Fig3a.
 
 This figure is a deliberately low-level bridge before z-ER / field projection:
 
-  a. stacked raw intracranial traces on one continuous peri-onset axis;
-  b. baseline-normalized TFR on the same continuous axis;
-  c. standard-band energy enhancement trajectories relative to baseline.
+  left top: stacked raw intracranial traces on one continuous peri-onset axis;
+  left bottom: baseline-normalized TFR on the same continuous axis;
+  right 2x2: low-band, gamma, high-gamma, and broadband trajectories.
 
 It is explanatory material, not a cohort statistic.
 """
@@ -21,7 +21,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
+from matplotlib.ticker import MaxNLocator
 import numpy as np
 from scipy.signal import spectrogram
 
@@ -30,24 +30,31 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.ictal_onset_extraction import extract_seizure_window  # noqa: E402
-from src.plot_style import FS_LABEL, FS_TICK, savefig_pub, style_panel  # noqa: E402
+from src.plot_style import savefig_pub, style_panel  # noqa: E402
 from src.topic5_ictal_recruitment import bipolar_alias_label  # noqa: E402
 
 
-OUT_DIR = ROOT / "results/paper-ready-figure/fig3_sup2_raw_spectral_context/figures"
+OUT_DIR = ROOT / "results/paper-ready-figure/fig3a_raw_spectral_context/figures"
 T0_CACHE = ROOT / "results/topic5_ictal_recruitment/t0_feature_cache_v2_windows"
 LAGPAT_CHANNEL_SOURCES = (
     ROOT / "results/interictal_propagation_masked/rank_displacement/per_subject",
     ROOT / "results/interictal_propagation_masked_broad/rank_displacement/per_subject",
 )
 
-STANDARD_BANDS = (
+ANALYSIS_BANDS = (
     ("alpha", 8.0, 13.0),
     ("beta", 13.0, 30.0),
+    ("low bands", 1.0, 30.0),
     ("gamma", 30.0, 80.0),
-    ("HFA", 80.0, 150.0),
-    ("1-150", 1.0, 150.0),
+    ("high-gamma", 80.0, 150.0),
+    ("broadband", 1.0, 150.0),
 )
+
+# Alpha and beta remain only in the representative-channel selection audit.
+# The paper-facing Fig3a canvas displays four non-overlapping/summary bands.
+DISPLAY_BAND_NAMES = ("low bands", "gamma", "high-gamma", "broadband")
+DISPLAY_BANDS = tuple(band for band in ANALYSIS_BANDS if band[0] in DISPLAY_BAND_NAMES)
+SELECTION_BAND_NAMES = ("alpha", "beta", "gamma", "high-gamma", "broadband")
 
 WINDOW_COLORS = {
     "baseline": "#4C78A8",
@@ -58,9 +65,10 @@ WINDOW_COLORS = {
 BAND_LINE_COLORS = {
     "alpha": "#59A14F",
     "beta": "#ECA82C",
+    "low bands": "#ECA82C",
     "gamma": "#D98C52",
-    "HFA": "#B2182B",
-    "1-150": "#5B5B5B",
+    "high-gamma": "#B2182B",
+    "broadband": "#5B5B5B",
 }
 
 
@@ -191,35 +199,25 @@ def _plot_continuous_stacked(
         ax.plot(t, yy, lw=0.38, color="0.20", alpha=0.85)
     ax.set_xlim(float(window[0]), float(window[1]))
     span = ymax - ymin
-    pad = 0.08 * span if np.isfinite(span) and span > 0.0 else 0.08 * float(scale)
-    ax.set_ylim(ymin - pad, ymax + pad)
+    if np.isfinite(span) and span > 0.0:
+        bottom_pad = 0.01 * span
+        top_pad = 0.06 * span
+    else:
+        bottom_pad = 0.01 * float(scale)
+        top_pad = 0.06 * float(scale)
+    ax.set_ylim(ymin - bottom_pad, ymax + top_pad)
     ax.set_yticks(offsets)
     ax.set_yticklabels([bipolar_alias_label(str(sw.ch_names[i])) for i in ch_idx], fontsize=6)
-    ax.tick_params(axis="x", labelsize=FS_TICK - 4)
+    ax.tick_params(axis="x", labelsize=9)
     ax.tick_params(axis="y", length=0)
     ax.spines[["top", "right", "left"]].set_visible(False)
     ax.spines["bottom"].set_linewidth(0.8)
-    ax.set_xlabel("time from clinical onset (s)", fontsize=FS_LABEL - 2)
+    ax.set_xlabel("time from clinical onset (s)", fontsize=9)
 
 
 def _shade_windows(ax: plt.Axes, baseline: tuple[float, float], eeg_rel: float | None, post_window: tuple[float, float]) -> None:
     ax.axvspan(float(baseline[0]), float(baseline[1]), color=WINDOW_COLORS["baseline"], alpha=0.10, lw=0)
-    if eeg_rel is not None:
-        ax.axvspan(float(eeg_rel) - 5.0, float(eeg_rel) + 5.0, color=WINDOW_COLORS["eeg_onset"], alpha=0.08, lw=0)
-    ax.axvspan(float(post_window[0]), float(post_window[1]), color=WINDOW_COLORS["early_ictal"], alpha=0.08, lw=0)
-
-
-def _mark_onsets(ax: plt.Axes, sw, *, label_lines: bool = True) -> None:
-    eeg_rel = _eeg_rel_sec(sw)
-    for x, label, color, ls in (
-        (eeg_rel, "EEG", "#7A4F9A", ":"),
-        (0.0, "clinical", "0.18", "--"),
-    ):
-        if x is None:
-            continue
-        ax.axvline(float(x), color=color, lw=1.0, ls=ls)
-        if label_lines:
-            ax.text(float(x), 0.98, label, transform=ax.get_xaxis_transform(), ha="right", va="top", fontsize=7, color=color, rotation=90)
+    ax.axvspan(float(post_window[0]), float(post_window[1]), color=WINDOW_COLORS["early_ictal"], alpha=0.15, lw=0)
 
 
 def _label_shaded_windows(
@@ -229,18 +227,12 @@ def _label_shaded_windows(
     post_window: tuple[float, float],
     *,
     y: float = 0.96,
-    post_label: str = "CLINICAL 0-10 s",
+    post_label: str = "CLINICAL ONSET",
 ) -> None:
     items: list[tuple[float, str, str, float]] = [
         ((float(baseline[0]) + float(baseline[1])) / 2.0, "BASELINE", WINDOW_COLORS["baseline"], y),
     ]
-    clinical_center = (float(post_window[0]) + float(post_window[1])) / 2.0
-    clinical_y = y
-    if eeg_rel is not None:
-        items.append((float(eeg_rel), "EEG ONSET", "#7A4F9A", y))
-        if abs(clinical_center - float(eeg_rel)) < 12.0:
-            clinical_y = y - 0.14
-    items.append((clinical_center, post_label, WINDOW_COLORS["early_ictal"], clinical_y))
+    items.append((float(post_window[0]), post_label, WINDOW_COLORS["early_ictal"], y))
     for x, label, color, yy in items:
         ax.text(
             x,
@@ -249,7 +241,7 @@ def _label_shaded_windows(
             transform=ax.get_xaxis_transform(),
             ha="center",
             va="top",
-            fontsize=8.5,
+            fontsize=7.0,
             fontweight="bold",
             color=color,
             bbox={"boxstyle": "round,pad=0.18", "facecolor": "white", "edgecolor": color, "linewidth": 0.7, "alpha": 0.88},
@@ -318,7 +310,10 @@ def _select_spectral_channel(
         win = (rel_t >= score_lo) & (rel_t < score_hi)
         if not np.any(win):
             continue
-        band_p95 = {name: float(np.nanpercentile(vals[win], 95)) for name, vals in curves.items()}
+        band_p95 = {
+            name: float(np.nanpercentile(curves[name][win], 95))
+            for name in SELECTION_BAND_NAMES
+        }
         min_p95 = min(band_p95.values())
         mean_p95 = float(np.mean(list(band_p95.values())))
         score = min_p95 + 0.25 * mean_p95
@@ -327,7 +322,7 @@ def _select_spectral_channel(
     if best is None:
         raise RuntimeError("could not select spectral channel")
     return best[2], {
-        "method": "max_min_95pct_db_across_alpha_beta_gamma_HFA_1_150Hz_in_onset_to_early_ictal_window",
+        "method": "max_min_95pct_db_across_alpha_beta_gamma_high_gamma_broadband_in_onset_to_early_ictal_window",
         "score_window_sec": [score_lo, score_hi],
         "score": best[0],
         "score_min_band_95pct_db": best[1],
@@ -338,7 +333,7 @@ def _select_spectral_channel(
 def _band_enhancement(freqs: np.ndarray, rel_t: np.ndarray, pxx: np.ndarray, baseline: tuple[float, float]) -> dict[str, np.ndarray]:
     bl = (rel_t >= float(baseline[0])) & (rel_t < float(baseline[1]))
     out: dict[str, np.ndarray] = {}
-    for name, lo, hi in STANDARD_BANDS:
+    for name, lo, hi in ANALYSIS_BANDS:
         mask = (freqs >= lo) & (freqs < hi)
         if not np.any(mask):
             out[name] = np.full(rel_t.shape, np.nan)
@@ -380,78 +375,95 @@ def _make_figure(
     channel_source_label: str,
     spectral_selection: dict,
 ) -> tuple[plt.Figure, dict]:
-    fig = plt.figure(figsize=(11.4, 9.4))
-    gs = fig.add_gridspec(3, 5, height_ratios=[2.05, 1.25, 1.8], hspace=0.60, wspace=0.46)
+    # Compact Fig3a layout: raw/TFR share the wide left column; the four
+    # band-energy trajectories occupy a balanced 2x2 block on the right.
+    fig = plt.figure(figsize=(12.1, 4.1))
+    outer = fig.add_gridspec(1, 2, width_ratios=[2.12, 1.0], wspace=0.11)
+    left = outer[0, 0].subgridspec(
+        2,
+        2,
+        width_ratios=[1.0, 0.018],
+        height_ratios=[1.65, 1.0],
+        hspace=0.62,
+        wspace=0.025,
+    )
+    right = outer[0, 1].subgridspec(2, 2, hspace=0.48, wspace=0.20)
     eeg_rel = _eeg_rel_sec(sw)
 
     idx = _finite_window(sw.t_axis, *x_window)
     x = sw.signal[np.asarray(ch_idx), :][:, idx[:: max(1, int(round(float(sw.fs) / 180.0)))]]
     trace_scale = max(40.0, float(np.nanpercentile(np.abs(x - np.nanmedian(x, axis=1, keepdims=True)), 95) * 3.0))
 
-    ax_raw = fig.add_subplot(gs[0, :])
+    ax_raw = fig.add_subplot(left[0, 0])
     _shade_windows(ax_raw, baseline, eeg_rel, post_window)
     _plot_continuous_stacked(ax_raw, sw, ch_idx, x_window, scale=trace_scale)
-    _mark_onsets(ax_raw, sw, label_lines=False)
     _label_shaded_windows(ax_raw, baseline, eeg_rel, post_window)
-    ax_raw.set_title("raw intracranial traces on one continuous onset axis", fontsize=FS_LABEL, pad=6)
-    style_panel(ax_raw, "a", label_x=-0.055, label_y=1.04)
+    ax_raw.set_title("E1146", fontsize=10.0, fontweight="bold", loc="left", pad=5)
+    style_panel(ax_raw)
+    ax_raw.tick_params(axis="x", labelsize=9, width=0.9, length=4)
+    ax_raw.tick_params(axis="y", labelsize=6, length=0)
 
     freqs, rel_t, db, pxx, _base = _channel_tfr(sw, spectral_idx, x_window, baseline)
     band_curves = _band_enhancement(freqs, rel_t, pxx, baseline)
 
-    ax_tfr = fig.add_subplot(gs[1, :])
+    ax_tfr = fig.add_subplot(left[1, 0])
     _shade_windows(ax_tfr, baseline, eeg_rel, post_window)
     vmax = float(np.nanpercentile(np.abs(db), 98))
     vmax = max(3.0, min(vmax, 14.0))
     mesh = ax_tfr.pcolormesh(rel_t, freqs, db, shading="auto", cmap="RdBu_r", vmin=-vmax, vmax=vmax)
-    _mark_onsets(ax_tfr, sw, label_lines=False)
     _label_shaded_windows(ax_tfr, baseline, eeg_rel, post_window, y=0.94)
     ax_tfr.set_xlim(*x_window)
     ax_tfr.set_ylim(1.0, 150.0)
-    ax_tfr.set_ylabel("frequency (Hz)", fontsize=FS_LABEL - 2)
-    ax_tfr.set_xlabel("time from clinical onset (s)", fontsize=FS_LABEL - 2)
+    ax_tfr.set_ylabel("frequency (Hz)", fontsize=9)
+    ax_tfr.set_xlabel("time from clinical onset (s)", fontsize=9)
     spectral_channel = bipolar_alias_label(str(sw.ch_names[int(spectral_idx)]))
-    ax_tfr.set_title(f"TFR on representative lagPat channel {spectral_channel}: dB vs baseline", fontsize=FS_LABEL, pad=6)
-    style_panel(ax_tfr, "b", label_x=-0.055, label_y=1.04)
-    cbar = fig.colorbar(mesh, ax=ax_tfr, pad=0.012, fraction=0.018)
-    cbar.set_label("dB vs baseline", fontsize=9)
-    cbar.ax.tick_params(labelsize=8)
+    ax_tfr.set_title(f"TFR on {spectral_channel}", fontsize=10.0, fontweight="bold", loc="left", pad=5)
+    style_panel(ax_tfr)
+    ax_tfr.tick_params(labelsize=8, width=0.9, length=4)
+    cax = fig.add_subplot(left[1, 1])
+    cbar = fig.colorbar(mesh, cax=cax)
+    cbar.ax.set_title("TFR\n(dB)", fontsize=6.5, pad=3, fontweight="bold")
+    cbar.ax.tick_params(labelsize=6, length=2)
 
     band_axes = []
-    for j, (name, lo, hi) in enumerate(STANDARD_BANDS):
-        ax = fig.add_subplot(gs[2, j])
+    band_ylim_candidates: list[tuple[float, float]] = []
+    for j, (name, lo, hi) in enumerate(DISPLAY_BANDS):
+        row = j // 2
+        col = j % 2
+        sharey_ax = band_axes[j - 1] if col == 1 else None
+        ax = fig.add_subplot(right[row, col], sharey=sharey_ax)
         _shade_windows(ax, baseline, eeg_rel, post_window)
         smoothed = _smooth_curve(band_curves[name], rel_t, smooth_sec=2.0)
-        ax.plot(rel_t, smoothed, color=BAND_LINE_COLORS[name], lw=1.7)
-        _mark_onsets(ax, sw)
-        ax.axhline(0.0, color="0.35", lw=0.7)
+        ax.plot(rel_t, smoothed, color=BAND_LINE_COLORS[name], lw=1.45)
+        ax.axhline(0.0, color="0.35", lw=0.6)
         ax.set_xlim(*x_window)
+        ax.margins(x=0)
         finite = smoothed[np.isfinite(smoothed)]
         if finite.size:
             lo_y = float(np.nanpercentile(finite, 1))
             hi_y = float(np.nanpercentile(finite, 99.5))
             span = max(1.0, hi_y - lo_y)
-            ax.set_ylim(min(-1.0, lo_y - 0.08 * span), max(2.0, hi_y + 0.08 * span))
-        ax.set_title(f"{name}\n{lo:g}-{hi:g} Hz", fontsize=8.5, pad=4)
-        ax.tick_params(labelsize=7, length=3)
-        ax.spines[["top", "right"]].set_visible(False)
-        if j == 0:
-            ax.set_ylabel("dB vs baseline", fontsize=9)
+            ylim_candidate = (min(-1.0, lo_y - 0.08 * span), max(2.0, hi_y + 0.08 * span))
         else:
-            ax.set_yticklabels([])
-        ax.set_xlabel("s", fontsize=8)
+            ylim_candidate = (-1.0, 2.0)
+        band_ylim_candidates.append(ylim_candidate)
+        ax.set_title(f"{name}\n({lo:g}-{hi:g} Hz)", fontsize=7.5, pad=2.5, fontweight="bold", linespacing=0.95)
+        ax.tick_params(labelsize=6, length=2.5, width=0.8)
+        ax.spines[["top", "right"]].set_visible(False)
+        if col == 0:
+            ax.yaxis.set_major_locator(MaxNLocator(nbins=3))
+            ax.set_ylabel("dB vs baseline", fontsize=6.5, labelpad=2)
+        else:
+            ax.tick_params(axis="y", left=False, labelleft=False)
+        ax.set_xlabel("Time (s)", fontsize=7, labelpad=1)
         band_axes.append(ax)
-    fig.text(0.012, 0.318, "c", fontsize=24, fontweight="bold", va="bottom", ha="left")
 
-    handles = [
-        Line2D([0], [0], color=WINDOW_COLORS["baseline"], lw=7, alpha=0.25, label="baseline window"),
-        Line2D([0], [0], color=WINDOW_COLORS["eeg_onset"], lw=7, alpha=0.25, label="EEG-onset neighborhood"),
-        Line2D([0], [0], color=WINDOW_COLORS["early_ictal"], lw=7, alpha=0.25, label="clinical 0-10 s field input"),
-        Line2D([0], [0], color="#7A4F9A", lw=1.2, ls=":", label="EEG onset"),
-        Line2D([0], [0], color="0.18", lw=1.2, ls="--", label="clinical onset"),
-    ]
-    fig.legend(handles=handles, frameon=False, fontsize=8, loc="lower center", bbox_to_anchor=(0.52, 0.01), ncol=5)
-    fig.subplots_adjust(left=0.085, right=0.965, top=0.94, bottom=0.15)
+    for row in range(2):
+        row_idx = (2 * row, 2 * row + 1)
+        row_lo = min(band_ylim_candidates[i][0] for i in row_idx)
+        row_hi = max(band_ylim_candidates[i][1] for i in row_idx)
+        band_axes[row_idx[0]].set_ylim(row_lo, row_hi)
+    fig.subplots_adjust(left=0.074, right=0.98, top=0.865, bottom=0.10)
 
     eeg_win = (float(eeg_rel) - 5.0, float(eeg_rel) + 5.0) if eeg_rel is not None else (float("nan"), float("nan"))
     summary = {
@@ -461,6 +473,11 @@ def _make_figure(
         "spectral_channel_selection": spectral_selection,
         "spectral_summary": "single representative lagPat channel PSD, then dB vs baseline",
         "x_window_sec": list(map(float, x_window)),
+        "paper_role": "Fig3-A raw spectral context",
+        "layout": "raw/TFR aligned on the left; low bands/gamma/high-gamma/broadband trajectories in a right-side 2x2 block",
+        "right_axis_contract": "row-shared y limits; y ticks and dB label shown only on the left panel of each row",
+        "displayed_bands": [name for name, _lo, _hi in DISPLAY_BANDS],
+        "sidecar_only_bands": [name for name, _lo, _hi in ANALYSIS_BANDS if name not in DISPLAY_BAND_NAMES],
         "band_enhancement_mean_db": {
             "baseline": _window_mean_by_band(band_curves, rel_t, baseline),
             "eeg_onset_neighborhood": _window_mean_by_band(band_curves, rel_t, eeg_win),
@@ -473,12 +490,13 @@ def _make_figure(
 def _write_readme(out_png: Path, out_pdf: Path, ds_sid: str, seizure_idx: int) -> None:
     readme = OUT_DIR / "README.md"
     readme.write_text(
-        "# Fig3-Sup2 Raw Spectral Context\n\n"
+        "# Fig3-A Raw Spectral Context\n\n"
         f"### {out_png.name} / {out_pdf.name}\n\n"
-        f"这张图使用 `{ds_sid}` 的 seizure `{seizure_idx}`，在进入 z-ER、field projection 和 maxAB 相似性之前，先展示同一批原始发作数据的三个层次：远端 baseline、EEG-onset 附近、clinical onset 后 0-10 s。"
-        "上排是连续时间轴上的 lagPat 电极原始波形，中排是一个代表性 lagPat 单通道的 baseline-normalized TFR，下排是同一代表通道的 alpha/beta/gamma/HFA/1-150 Hz 相对 baseline 的能量增强轨迹。"
+        f"这张图使用 `{ds_sid}` 的 seizure `{seizure_idx}`，在进入 z-ER、field projection 和 maxAB 相似性之前，展示远端 baseline 与 clinical onset 附近的原始发作信号。"
+        "左侧上排是连续时间轴上的 lagPat 电极原始波形，左侧下排是同一时间轴上的代表性 lagPat 单通道 baseline-normalized TFR；右侧 2×2 小图依次展示同一代表通道 low bands (1-30 Hz)、gamma (30-80 Hz)、high-gamma (80-150 Hz) 和 broadband (1-150 Hz) 相对 baseline 的能量增强轨迹。"
+        "右侧同一行共用 y 轴范围，数值 ticks 与 dB 标签只放在每行左图。图面不标 EEG onset，也不画 onset 虚线；alpha 与 beta 只保留在 summary JSON 的通道选择审计中。"
         "它只承担解释和质控作用，不是 cohort 统计，也不证明 timing-order replay 或机制。\n\n"
-        "**关注点**：baseline、EEG onset 和 clinical onset 必须在同一条 x 轴上读；baseline 是 z 标准化参考，不等于发作前最后几秒；0-10 s field projection 消费的是早期 ictal 能量场，而不是原始 z-ER 图本身。\n",
+        "**关注点**：raw SEEG 与 TFR 的时间轴必须严格对齐；baseline 是标准化参考，不等于发作前最后几秒；clinical-onset 阴影表示早期 ictal field input，而不是原始 z-ER 图本身。\n",
         encoding="utf-8",
     )
 
@@ -567,7 +585,7 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
                 "png": str(out_png.relative_to(ROOT)),
                 "pdf": str(out_pdf.relative_to(ROOT)),
             },
-            "tier": "single-seizure explanatory context; not a cohort statistic",
+            "tier": "paper-ready Fig3-A single-seizure explanatory context; not a cohort statistic",
         }
     )
     out_json = OUT_DIR / f"{stem}_summary.json"
