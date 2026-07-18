@@ -8,11 +8,12 @@
 
 **门槛（对标 M2，用户 2026-07-18 定）**：这一轮**不要求**"有界可恢复的临界招募态"（`expanded_returned`）。达标条件是模型能同时给出**间期基线**（安静、稀疏、可自恢复的事件）和 **runoff（失控/runaway）**两个 regime——和 M2 被评估的那个层级一致。
 
-**结论：达标（YES）。**
-- **间期基线**：slow-off（两慢变量都关）在 seed 1/3/4 都产生 20/22/20 个"稀疏可自恢复间期事件"（baseline-anchor **PASS**，跨 3 seed）。不是均质 sheet 的全或无。
-- **runoff/runaway**：只开 z（去抑制）在 9 格里 5 格进入持续高放电失控；且失控起始时间随去抑制**强度/速度**单调延后（q50 强耗竭 1.7s → q75 弱耗竭 9.3s）——是可调的间期→失控转变，不是瞬间全场爆。
+**结论：达标（YES），且经 P3 多 seed 复核 seed-robust。**
+- **间期基线**：slow-off（两慢变量都关）在 seed 1/3/4 都有稀疏可自恢复间期事件（标定 T=8s 时 20/22/20；P3 T=15s 时 38/40/39），baseline-anchor **PASS 跨 3 seed**。不是均质 sheet 的全或无。
+- **runoff/runaway**：只开 z（去抑制）seed=1 有 5/9 失控；失控起始随去抑制**强度/速度**单调延后（q50 强耗竭 1.7s → q75 弱耗竭 9.3s）。**P3 复核：两个失控格在 seed 1/3/4 全 3/3 失控、起始近乎一致**（q50_tz10000 ~4.7–4.9s、q75_tz5000 ~9.3–9.8s）——runoff 跨 seed 稳健。
+- **有界扩大态（超出本轮门槛，不作要求）= seed-脆弱**：唯一那格 `zA_q75_tz10000` 只在 seed=1 有界扩大，seed 3/4 退回 interictal_like（1/3）——不是稳健 regime，**不作 bounded 主张**。
 
-即：M4-MZ 复现了"间期 + 失控"两 regime（M2 层级），这一阶段目标满足。
+即：M4-MZ 复现了"间期 + 失控"两 regime 且跨 seed 稳健（M2 层级达标）；更高的"有界可恢复临界态"未稳健出现（本轮本就不要求）。
 
 ## 1. 测了什么 / 怎么测
 
@@ -40,7 +41,7 @@ phenotype counts：`{runaway:5, expanded_bounded:1, interictal_like:15, suppress
 
 - **代码全绿**：34 测试过；引擎 6 核心文件 SHA 未变，不 re-bless。
 - **标定完成且预注册**：`calibration.json`（`I_th_EI` q50/q75/q90=1.67/95.2/391.7；`eta_m_table`；arm-C 3×3 规则）。
-- **P3 多 seed 在跑**（后台 `b2lcmmokj`）：对 bounded 格 `zA_q75_tz10000` + 相邻边界格（q75_tz5000 runaway / q50_tz10000 runaway / q90_tz10000 interictal），seed 1/3/4、T=15s、4 workers 并行。查间期+runoff 与那个有界格是否跨 seed 稳健。**到此止，不进 40s acceptance、不做 field concordance。**
+- **P3 多 seed 完成**（`b2lcmmokj` → `per_seed/multiseed_summary.json`；seed 1/3/4、T=15s、4 workers 并行）：跨 seed 表 —— `zA_q75_tz5000` 3/3 runaway（9293/9499/9758ms）、`zA_q50_tz10000` 3/3 runaway（4937/4707/4862ms）、`zA_q90_tz10000` 3/3 interictal、**bounded 格 `zA_q75_tz10000` 只 seed=1（seed 3/4 退 interictal）= 1/3 seed-脆弱**。基线 38/40/39。**本轮到此止，不进 40s acceptance、不做 field concordance。**
 
 ## 5. 可报告 / 禁止报告
 
