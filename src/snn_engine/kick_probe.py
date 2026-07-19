@@ -175,6 +175,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
     # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
     track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False))
+    # Generic off-by-default conductance slow protocol.  Current slow implementations do not expose
+    # uses_conductance_membrane(), so they stay on the literal historical branch below.  MZ uses this
+    # hook to provide leak-relative GABA/sAHP terms without pretending its mV current proxies are nS.
+    conductance_slow = bool(
+        slow is not None
+        and hasattr(slow, "uses_conductance_membrane")
+        and slow.uses_conductance_membrane()
+    )
+    if conductance_slow:
+        assert not shunt_gaba, "conductance slow membrane cannot combine with the separate shunt_gaba path"
     if track_rec:
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
     ring_sE = np.zeros((M, N))
@@ -293,7 +303,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
         # slow layer off (slow=None)
         if slow is not None:
-            if track_rec:
+            if conductance_slow:
+                cond_drive, cond_g_rel, cond_g_rev = slow.membrane_terms(I_E, I_I, labels)
+            elif track_rec:
                 I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
             else:
                 I_net = slow.apply_currents(I_E, I_I, labels)
@@ -314,7 +326,17 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         ref -= 1
         np.maximum(ref, 0, out=ref)
         free = ref == 0
-        if slow is not None:
+        if conductance_slow:
+            # Exact exponential update for
+            #   tau_m dV/dt = -V + drive + sum_k g_k(E_k - V).
+            # cond_g_rel is sum(g_k/g_leak); cond_g_rev is sum(g_k/g_leak*E_k).
+            # I cells receive g=0 and cond_drive=I_E-I_I, hence remain on the literal current formula.
+            denom = 1.0 + cond_g_rel
+            V_inf = (cond_drive + cond_g_rev) / denom
+            Vtmp = V_inf + (V - V_inf) * decay_V ** denom
+            # Preserve the literal current arithmetic for I cells (the conductance protocol is E-only).
+            Vtmp[~is_E] = cond_drive[~is_E] + (V[~is_E] - cond_drive[~is_E]) * decay_V[~is_E]
+        elif slow is not None:
             # M4-3A conductance a-shunt (form A). uses_shunt() is SpatialSlowField-only (Task 4); the
             # OTHER "slow" implementers (FrozenSlowVars/SlowVars, RegionalResource) have no a-shunt
             # concept, so hasattr guards them onto the literal parity path below (plan-correction for

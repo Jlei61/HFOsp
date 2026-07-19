@@ -24,6 +24,14 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
+> **M4/MZ conductance 分阶段验收（2026-07-20）**：`L=20` 上的 exact-conductance 工作点、跨 seed 的
+> `Z` event-locked staircase，以及“有序轴向间期事件 → 广招募/方向丢失的 terminal runaway”时空表型已经
+> 验收；但 **bounded ictal state、终止和恢复均未通过**。protected additive-global GABA 只移动
+> runaway/prevention 边界，当前线性 `M` 也不能把 onset 与 delayed termination 分开，因此不得把该结果写成
+> 可恢复发作或状态切换。下一条独立机制线冻结为 presynaptic E→E resource `x_j`，先检验空间 relay depletion
+> 能否把 runaway 变成 bounded high-recruitment bout。给其他 agent 的精确 gate、复现锚、no-go 边界和图路径见
+> `docs/archive/topic4/sef_hfo/mz_conductance_stage_handoff_2026-07-20.md`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -895,6 +903,10 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - **M3 阶段主文档（机制 screen，未 PASS）**：`docs/topic4_m3_stage.md` —— M3 stage 收口（一个主文档 + A/B 分文档）。M0→M1→M2 一致性（均质衬底空间自限难、不靠压死）→ 转 M3；**A 线（慢变量）源空间逐细胞 onset 梯度 = 沿轴相干招募波**（R²≈0.87、align≈1.0、40k SNN），**B 线（谱相图）§5 非正规瞬态 = 骨架特异自限轴向放大**，两线互相印证；停在"机制 screen 通过、发作机制未 validate"。方法学锁：正确仪器=源空间 onset 梯度（非接触空间/collision/elongation/主导本征模式）。
   - **A 线分文档** `docs/archive/topic4/sef_hfo/m3a_stage_conclusion_2026-06-27.md` —— A1/A1b/A1c/A2 收口；局部资源耗竭 + 恢复项产生 expanded axial recruitment 候选，不支持完整"间期短事件 → 离轴/全局发作样招募 → 恢复"。分阶段 recap：`m3a_a1b_state_topography_2026-06-25.md` / `m3a_a1c_pilot_recap_2026-06-25.md` / `m3a_a2_abbott_lg_pilot_recap_2026-06-26.md`（§6.2 = onset 梯度重开判读）；旧 `seizure_like` 仅历史 screen 名。
   - **B 线分文档** `docs/archive/topic4/sef_hfo/m3b_stage_conclusion_2026-06-28.md` —— Brunel 式有限-Jacobian 谱相图 = **SPM-PASS frozen map**（线性算子层面）；主导本征模式全局（k=0），§5 非正规瞬态读出骨架特异自限轴向；**SNN 口径已纠正**（B 线内置 tiny grid 是错仪器假阴，轴向 spiking 验证在 A 线 A2-P 为正）；判决闸 fail-closed（无 SNN/M3A overlay/几何零模型三道桥）。机器 = `src/topic4_m3b_spectral_phase.py`（TDD-0..15 绿）+ `m3b_jacobian_design_LOCKED_2026-06-27.md`。
+- **M4/MZ conductance 阶段包（机制与边界已锁，完整 lifecycle 未 PASS）**：
+  - `docs/archive/topic4/sef_hfo/mz_conductance_stage_handoff_2026-07-20.md` —— **其他 agent 的唯一入口**：分阶段 gate、当前安全/禁止 claim、复现锚、下一机制线和 no-touch 规则。
+  - `docs/archive/topic4/sef_hfo/mz_conductance_dynamics_reflection_and_next_model_2026-07-20.md` —— 当前结果的动力学反思：conductance/global/M 各自解决了什么、为什么仍只有 terminal runaway、为何下一步转向 E→E presynaptic resource。
+  - `results/paper-ready-figure/fig_mz_conductance_current_dynamics/figures/` —— 当前阶段机制图、PDF、metadata 和中文 README；只展示“间期轴向事件 → terminal runaway”，不是最终可恢复发作态图。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
