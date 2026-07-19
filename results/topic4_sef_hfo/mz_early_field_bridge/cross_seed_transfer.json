@@ -1,0 +1,180 @@
+{
+  "experiment": "MZ early-ictal bridge cross-seed template transfer (E1146 model)",
+  "framing": "template_seed x energy_seed; mirror-invariant maxAB; maxAB-matched within-shaft null permuting the target energy field; model proxy, not seizure",
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "window": "early_0_50_ms",
+  "n_perm": 10000,
+  "maxab_matrix_rows_template_cols_energy": [
+    [
+      0.9453009843927757,
+      0.7533708035008839,
+      0.9291573243177569
+    ],
+    [
+      0.9426140434253557,
+      0.7351065022497505,
+      0.9381989893577897
+    ],
+    [
+      0.9438949606097963,
+      0.7216726039161147,
+      0.9240929684291712
+    ]
+  ],
+  "within_shaft_p_matrix": [
+    [
+      0.00039996000399960006,
+      0.0811918808119188,
+      0.00029997000299970003
+    ],
+    [
+      0.0005999400059994001,
+      0.08609139086091391,
+      0.0007999200079992001
+    ],
+    [
+      0.00019998000199980003,
+      0.09119088091190881,
+      0.000999900009999
+    ]
+  ],
+  "mean_within_column_spread_across_template_seeds": 0.006640874431544503,
+  "spread_across_energy_seed_column_means": 0.09467287411423544,
+  "energy_seed_dominates_template_seed": true,
+  "diagonal_same_seed_maxab": [
+    0.9453009843927757,
+    0.7351065022497505,
+    0.9240929684291712
+  ],
+  "offdiagonal_transfer_maxab": [
+    0.7533708035008839,
+    0.9291573243177569,
+    0.9426140434253557,
+    0.9381989893577897,
+    0.9438949606097963,
+    0.7216726039161147
+  ],
+  "cells": [
+    {
+      "template_seed": 1,
+      "energy_seed": 1,
+      "same_seed": true,
+      "rho_maxab": 0.9453009843927757,
+      "rho_a": -0.5654461466217138,
+      "rho_b": 0.9453009843927757,
+      "within_shaft_p": 0.00039996000399960006,
+      "within_shaft_null_p95": 0.7821603306346664,
+      "field_cosine": 0.856099579190269,
+      "quartile_contrast": 1.3877135338156992,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 1,
+      "energy_seed": 3,
+      "same_seed": false,
+      "rho_maxab": 0.7533708035008839,
+      "rho_a": -0.5148091782675305,
+      "rho_b": 0.7533708035008839,
+      "within_shaft_p": 0.0811918808119188,
+      "within_shaft_null_p95": 0.7838643836425864,
+      "field_cosine": 0.5538246075884595,
+      "quartile_contrast": 1.0102388861297098,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 1,
+      "energy_seed": 4,
+      "same_seed": false,
+      "rho_maxab": 0.9291573243177569,
+      "rho_a": -0.5316881677189249,
+      "rho_b": 0.9291573243177569,
+      "within_shaft_p": 0.00029997000299970003,
+      "within_shaft_null_p95": 0.7820706436342509,
+      "field_cosine": 0.8906417979115415,
+      "quartile_contrast": 1.204911418229916,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 3,
+      "energy_seed": 1,
+      "same_seed": false,
+      "rho_maxab": 0.9426140434253557,
+      "rho_a": -0.34783428343195877,
+      "rho_b": 0.9426140434253557,
+      "within_shaft_p": 0.0005999400059994001,
+      "within_shaft_null_p95": 0.770426934790279,
+      "field_cosine": 0.8505772748012279,
+      "quartile_contrast": 1.3014912991018897,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 3,
+      "energy_seed": 3,
+      "same_seed": true,
+      "rho_maxab": 0.7351065022497505,
+      "rho_a": -0.5263281920352006,
+      "rho_b": 0.7351065022497505,
+      "within_shaft_p": 0.08609139086091391,
+      "within_shaft_null_p95": 0.770426934790279,
+      "field_cosine": 0.533942418943849,
+      "quartile_contrast": 0.9726850782822857,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 3,
+      "energy_seed": 4,
+      "same_seed": false,
+      "rho_maxab": 0.9381989893577897,
+      "rho_a": -0.37529488475553446,
+      "rho_b": 0.9381989893577897,
+      "within_shaft_p": 0.0007999200079992001,
+      "within_shaft_null_p95": 0.770426934790279,
+      "field_cosine": 0.886612850493616,
+      "quartile_contrast": 1.071306319996308,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 4,
+      "energy_seed": 1,
+      "same_seed": false,
+      "rho_maxab": 0.9438949606097963,
+      "rho_a": -0.8616404368553291,
+      "rho_b": 0.9438949606097963,
+      "within_shaft_p": 0.00019998000199980003,
+      "within_shaft_null_p95": 0.7634768096307677,
+      "field_cosine": 0.8500502382524966,
+      "quartile_contrast": 1.3014912991018897,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 4,
+      "energy_seed": 3,
+      "same_seed": false,
+      "rho_maxab": 0.7216726039161147,
+      "rho_a": -0.28926500380143194,
+      "rho_b": 0.7216726039161147,
+      "within_shaft_p": 0.09119088091190881,
+      "within_shaft_null_p95": 0.7634768096307677,
+      "field_cosine": 0.5294548394515771,
+      "quartile_contrast": 0.9726850782822857,
+      "top_k_overlap": 0.3333333333333333
+    },
+    {
+      "template_seed": 4,
+      "energy_seed": 4,
+      "same_seed": true,
+      "rho_maxab": 0.9240929684291712,
+      "rho_a": -0.8124038404635959,
+      "rho_b": 0.9240929684291712,
+      "within_shaft_p": 0.000999900009999,
+      "within_shaft_null_p95": 0.7612765882773649,
+      "field_cosine": 0.8862120601982143,
+      "quartile_contrast": 1.071306319996308,
+      "top_k_overlap": 0.3333333333333333
+    }
+  ]
+}
