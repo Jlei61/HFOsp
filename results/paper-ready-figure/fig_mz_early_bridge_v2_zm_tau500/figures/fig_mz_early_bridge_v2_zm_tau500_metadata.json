@@ -1,0 +1,55 @@
+{
+  "schema_id": "topic4_mz_continuous_early_field_figure_v2_zm_tau500",
+  "status": "V2 z+m tau_adp=500; continuous native MZ trajectory; observation-layer model bridge (MZ diagnostic)",
+  "candidate": "zA_q75_tz5000__mA0p001_tau500 (use_z+use_m; I_th_EI=95.19851312666987, tau_z=5000, tau_adp=500, eta_m=0.007451594355587098)",
+  "paper_role": "same scaffold, state-dependent readout (z+m)",
+  "canonical_producer": "scripts/paper_figures/plot_fig_mz_early_bridge_v2.py",
+  "input_artifacts": {
+    "slowoff": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-early-bridge-v2/results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500/per_seed/seed1/slowoff.npz",
+    "native": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-early-bridge-v2/results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500/per_seed/seed1/native.npz",
+    "bridge_metrics": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-early-bridge-v2/results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500/per_seed/seed1/bridge_metrics.json",
+    "substrate_geometry_only": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-early-bridge-v2/results/topic4_sef_hfo/mz_slowvars/readout_ready/readout_zA_q75_tz10000_seed1.npz",
+    "bridge_provenance_fingerprint": "5245c6a612bfa54f"
+  },
+  "continuous_trace": {
+    "display_start_absolute_ms": 11850.0,
+    "display_end_absolute_ms": 13066.2,
+    "display_event_start_ms": 478.0,
+    "display_event_end_ms": 549.0,
+    "early_window_start_ms": 930.5,
+    "early_window_end_ms": 980.5,
+    "t120_display_ms": 1106.2000000000007
+  },
+  "display_event": {
+    "selection_rule": "last eligible native event in the majority slow-off direction before t_recruit; selection does not use target early energy",
+    "direction": "B_to_A",
+    "t_on_absolute_ms": 12328.0,
+    "t_off_absolute_ms": 12359.0,
+    "readout_end_absolute_ms": 12399.0,
+    "n_readable_contacts": 11,
+    "axis_spearman": -0.9636363636363637,
+    "similarity_to_slowoff_direction_template": 0.9636363636363637,
+    "descriptive_earliness_energy_spearman": 0.8090909090909091
+  },
+  "early_field": {
+    "window": "early_0_50_ms",
+    "t_recruit_absolute_ms": 12780.5,
+    "t120_absolute_ms": 12956.2,
+    "contact_n": 15
+  },
+  "formal_multievent_bridge": {
+    "rho_maxab": 0.8914887841427127,
+    "within_shaft_p": 0.0026997300269973002,
+    "tier": "formal statistic remains the held-out-validated slowoff-template bridge"
+  },
+  "spatial_rendering": {
+    "method": "3-mm Gaussian contact-readout field with smooth confidence fade on the fixed E1146 plane",
+    "substrate_grain": "fixed E-neuron positions only; no local recruitment values encoded",
+    "claim_boundary": "continuous readout field, not direct local-tissue recruitment"
+  },
+  "framing": "operational runaway is a model proxy, not clinical seizure; virtual-LFP 30-80-Hz early energy is not clinical broadband power",
+  "outputs": {
+    "png": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-early-bridge-v2/results/paper-ready-figure/fig_mz_early_bridge_v2_zm_tau500/figures/fig_mz_early_bridge_v2_zm_tau500.png",
+    "pdf": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-early-bridge-v2/results/paper-ready-figure/fig_mz_early_bridge_v2_zm_tau500/figures/fig_mz_early_bridge_v2_zm_tau500.pdf"
+  }
+}
