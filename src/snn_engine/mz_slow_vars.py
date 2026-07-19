@@ -53,9 +53,19 @@ class MZSlowVarsConfig:
     use_phi: bool = False          # optional Abbott-style spike-triggered threshold adaptation
     tau_phi: float = 100.0         # ms
     delta_phi: float = 0.0         # mV threshold increment per E spike
-    membrane_mode: str = "current"  # current | conductance (conductance is opt-in)
+    membrane_mode: str = "current"  # current | conductance | full_conductance (both conductance opt-in)
     gaba_gain: float = 1.0         # multiplier after V_match force matching
     m_conductance_gain: float = 1.0
+    # ---- FCXR: full-conductance E-cell AMPA + persistence-gated E->E relay (all OFF by default) ----
+    E_E: float = 58.0              # AMPA reversal (full_conductance only), engine V_L=0 coords
+    c_E: float = 1.0               # excitatory force-match coefficient (full_conductance only)
+    use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
+    tau_y: float = 120.0           # ms  persistence sensor time constant
+    tau_x: float = 1000.0          # ms  relay availability time constant
+    x_min: float = 0.0             # relay availability floor
+    y_gate: float = 0.0            # Hz  sensor gate (locked from slow-off Q99.9)
+    K_y: float = 5.0               # Hz  Hill half-activation above the gate
+    hill_n: int = 4                # Hill exponent
     global_gaba_fraction: float = 0.0  # gamma: local received GABA -> E-population mean replacement
     global_gaba_mode: str = "replace"  # replace | additive (local + gamma*population mean)
     z_scope: str = "total"        # total | local_only
@@ -94,6 +104,12 @@ class MZSlowVars:
         self.z = np.ones(self.N)
         self.m = np.zeros(self.N)
         self.phi = np.zeros(self.N)
+        # FCXR persistence sensor y_j (Hz) + presynaptic E->E relay availability x_j in [0,1] (E cells only).
+        # ee_relay_send is the x_j(t-) snapshot the engine scatter reads BEFORE step() updates y/x this frame
+        # (causal send scale). All three stay untouched unless cfg.use_x -> no effect on non-relay runs.
+        self.y = np.zeros(self.NE)
+        self.x_relay = np.ones(self.NE)
+        self.ee_relay_send = np.ones(self.NE)
         self._I_I_last = np.zeros(self.N)
         self._z_sensor_last_E = np.zeros(self.NE)
         self._gI_last_E = np.zeros(self.NE)
@@ -102,6 +118,7 @@ class MZSlowVars:
         self._g_global_pre_z_last = 0.0
         self._gI_mean_last = self._gI_max_last = 0.0
         self._gM_mean_last = self._gM_max_last = 0.0
+        self._gEff_mean_last = self._gErec_mean_last = 0.0   # FCXR AMPA conductance split (full_conductance)
         self._tau_ratio_mean_last = self._tau_ratio_min_last = 1.0
         self._clip_frac_last = 0.0
         # off-by-default slow-state snapshot observer (design §4.3): copy z_E/m_E at registered
@@ -124,6 +141,10 @@ class MZSlowVars:
         self.trace_gM_mean = []; self.trace_gM_max = []
         self.trace_tau_eff_ratio_mean = []; self.trace_tau_eff_ratio_min = []
         self.trace_conductance_clip_frac = []
+        # FCXR relay traces (appended only when cfg.use_x): sensor y_j (Hz) + relay availability x_j
+        self.trace_gEff_mean = []; self.trace_gErec_mean = []
+        self.trace_y_mean = []; self.trace_y_max = []
+        self.trace_x_relay_mean = []; self.trace_x_relay_min = []
         # calibration observer (slow-off only): per-step histograms of E-cell I_I / I_E
         self.calib_hist_I_EI = []; self.calib_hist_I_EE = []
 
@@ -144,10 +165,18 @@ class MZSlowVars:
         return I_net
 
     def uses_conductance_membrane(self):
-        """True only for the explicitly selected conductance branch."""
-        return self.cfg.membrane_mode == "conductance"
+        """True for either conductance branch (partial GABA-only or full AMPA+GABA)."""
+        return self.cfg.membrane_mode in ("conductance", "full_conductance")
 
-    def membrane_terms(self, I_E, I_I, labels=None):
+    def uses_split_excitation(self):
+        """True only for full_conductance: the engine must supply the recurrent AMPA component I_E_rec."""
+        return self.cfg.membrane_mode == "full_conductance"
+
+    def uses_ee_relay(self):
+        """True only when the persistence-gated presynaptic E->E relay is active (full_conductance)."""
+        return bool(self.cfg.use_x)
+
+    def membrane_terms(self, I_E, I_I, labels=None, I_E_rec=None):
         """Return ``(drive, g_rel, g_rev)`` for an exact conductance membrane update.
 
         The engine consumes these as
@@ -164,6 +193,15 @@ class MZSlowVars:
         I_I = np.asarray(I_I, float)
         if I_E.shape != (self.N,) or I_I.shape != (self.N,):
             raise ValueError(f"I_E/I_I must have shape ({self.N},)")
+        full = self.cfg.membrane_mode == "full_conductance"
+        if full and I_E_rec is None:
+            raise ValueError("full_conductance membrane_terms requires the recurrent AMPA component I_E_rec")
+        if not full and I_E_rec is not None:
+            raise ValueError("partial conductance membrane_terms does not accept I_E_rec")
+        if full:
+            I_E_rec = np.asarray(I_E_rec, float)
+            if I_E_rec.shape != (self.N,):
+                raise ValueError(f"I_E_rec must have shape ({self.N},)")
         self._I_I_last = I_I
 
         drive = I_E - I_I                         # literal current path for I cells
@@ -205,7 +243,23 @@ class MZSlowVars:
         else:
             gM = np.zeros(self.NE, dtype=float)
 
-        total = gI + gM
+        # FCXR full conductance: AMPA becomes a reversal-aware conductance toward E_E, force-matched at
+        # V_match by c_E.  Split feedforward (external) vs recurrent (E->E) is exposed for diagnostics;
+        # the x-modulation is applied at the presynaptic SCATTER (source-level) so I_E_rec already carries
+        # it -> g_E_ff+g_E_rec == c_E*I_E/(E_E-V_match).  Partial conductance keeps AMPA additive (gE=0).
+        if full:
+            denomE = c.E_E - c.v_match
+            I_ffE = np.maximum(I_E[:self.NE] - I_E_rec[:self.NE], 0.0)
+            I_recE = np.maximum(I_E_rec[:self.NE], 0.0)
+            gEff = c.c_E * I_ffE / denomE
+            gErec = c.c_E * I_recE / denomE
+            gE = gEff + gErec
+        else:
+            gEff = np.zeros(self.NE, dtype=float)
+            gErec = np.zeros(self.NE, dtype=float)
+            gE = np.zeros(self.NE, dtype=float)
+
+        total = gE + gI + gM                      # partial: gE==0 -> total==gI+gM (byte-identical)
         clip = total > c.max_total_conductance
         if np.any(clip):
             if c.fail_on_clip:
@@ -214,20 +268,26 @@ class MZSlowVars:
                     f"in {float(np.mean(clip)):.3%} of E cells"
                 )
             scale = c.max_total_conductance / total[clip]
-            gI = gI.copy(); gM = gM.copy()
+            gI = gI.copy(); gM = gM.copy(); gE = gE.copy()
             gI[clip] *= scale
             gM[clip] *= scale
-            total = gI + gM
+            gE[clip] *= scale                      # partial: gE all-zero, scaling is a no-op
+            total = gE + gI + gM
         if not (np.all(np.isfinite(total)) and np.all(total >= 0.0)):
             raise FloatingPointError("non-finite or negative MZ conductance")
 
-        drive[:self.NE] = I_E[:self.NE]
+        if full:
+            drive[:self.NE] = 0.0                             # E cells: all excitation is now conductance
+            g_rev[:self.NE] = gE * c.E_E + gI * c.e_gaba + gM * c.e_k
+        else:
+            drive[:self.NE] = I_E[:self.NE]                   # partial: AMPA stays additive (byte-identical)
+            g_rev[:self.NE] = gI * c.e_gaba + gM * c.e_k
         g_rel[:self.NE] = total
-        g_rev[:self.NE] = gI * c.e_gaba + gM * c.e_k
         if not (np.all(np.isfinite(drive)) and np.all(np.isfinite(g_rev))):
             raise FloatingPointError("non-finite MZ membrane term")
         self._gI_last_E = gI
         self._gM_last_E = gM
+        self._gEff_mean_last = float(gEff.mean()); self._gErec_mean_last = float(gErec.mean())
         self._gbar_last = I_bar
         self._g_global_pre_z_last = float(global_part)
         self._gI_mean_last = float(gI.mean()); self._gI_max_last = float(gI.max())
@@ -251,6 +311,21 @@ class MZSlowVars:
     def step(self, spk, labels, dt):
         c = self.cfg
         spk = np.asarray(spk, bool)
+        if c.use_x:
+            # FCXR relay. CAUSAL: snapshot x_j(t-) BEFORE this frame's y/x update, so the engine scatter
+            # sends the current spikes with the pre-spike relay availability (a single spike never weakens
+            # its own send; only sustained firing leaves an outgoing-relay wake).
+            np.copyto(self.ee_relay_send, self.x_relay)
+            spkE = spk[:self.NE]
+            # y_j: exact decay + per-E-spike jump of 1000/tau_y -> a Hz-unit local persistence sensor.
+            self.y *= np.exp(-dt / c.tau_y)
+            self.y[spkE] += 1000.0 / c.tau_y
+            # x_j: relax toward x_inf(y) = 1 - (1-x_min)*Hill([y-y_gate]_+; K_y, n).  x stays in [0,1].
+            u = np.maximum(self.y - c.y_gate, 0.0)
+            un = u ** c.hill_n
+            hill = un / (c.K_y ** c.hill_n + un)
+            x_inf = 1.0 - (1.0 - c.x_min) * hill
+            self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))
         if c.use_z:
             # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict); I_I >= I_th_EI -> 0 (deplete)
             z_inf_E = (self._z_sensor_last_E < c.I_th_EI).astype(float)
@@ -301,6 +376,13 @@ class MZSlowVars:
         self.trace_tau_eff_ratio_mean.append(float(self._tau_ratio_mean_last))
         self.trace_tau_eff_ratio_min.append(float(self._tau_ratio_min_last))
         self.trace_conductance_clip_frac.append(float(self._clip_frac_last))
+        if self.cfg.use_x:                                    # FCXR relay diagnostics (only when active)
+            self.trace_gEff_mean.append(float(self._gEff_mean_last))
+            self.trace_gErec_mean.append(float(self._gErec_mean_last))
+            self.trace_y_mean.append(float(self.y.mean()))
+            self.trace_y_max.append(float(self.y.max()))
+            self.trace_x_relay_mean.append(float(self.x_relay.mean()))
+            self.trace_x_relay_min.append(float(self.x_relay.min()))
 
     def _record_calib(self, I_E, I_I):
         edges = self.cfg.calib_hist_edges
@@ -342,8 +424,8 @@ class MZSlowVars:
 
     def _validate_config(self):
         c = self.cfg
-        if c.membrane_mode not in ("current", "conductance"):
-            raise ValueError("membrane_mode must be 'current' or 'conductance'")
+        if c.membrane_mode not in ("current", "conductance", "full_conductance"):
+            raise ValueError("membrane_mode must be 'current', 'conductance' or 'full_conductance'")
         if not 0.0 <= c.global_gaba_fraction <= 1.0:
             raise ValueError("global_gaba_fraction must be in [0,1]")
         if c.global_gaba_mode not in ("replace", "additive"):
@@ -367,3 +449,23 @@ class MZSlowVars:
             raise ValueError("use_m requires tau_adp>0")
         if c.use_phi and (c.tau_phi <= 0.0 or c.delta_phi < 0.0):
             raise ValueError("use_phi requires tau_phi>0 and delta_phi>=0")
+        if c.membrane_mode == "full_conductance":
+            if not (np.isfinite(c.E_E) and np.isfinite(c.c_E)):
+                raise ValueError("full_conductance requires finite E_E and c_E")
+            if c.E_E <= c.v_match:
+                raise ValueError("full_conductance requires E_E > v_match for positive AMPA force matching")
+            if c.c_E < 0.0:
+                raise ValueError("c_E must be non-negative")
+        if c.use_x:
+            if c.membrane_mode != "full_conductance":
+                raise ValueError("use_x (E->E relay) requires membrane_mode='full_conductance'")
+            if c.tau_y <= 0.0 or c.tau_x <= 0.0:
+                raise ValueError("use_x requires tau_y>0 and tau_x>0")
+            if not 0.0 <= c.x_min <= 1.0:
+                raise ValueError("x_min must be in [0,1]")
+            if c.K_y <= 0.0:
+                raise ValueError("use_x requires K_y>0")
+            if int(c.hill_n) < 1:
+                raise ValueError("use_x requires hill_n>=1")
+            if not np.isfinite(c.y_gate):
+                raise ValueError("y_gate must be finite")

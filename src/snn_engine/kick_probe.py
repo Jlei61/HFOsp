@@ -171,10 +171,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     ref = np.zeros(N, dtype=np.int32)
     s_E = np.zeros(N); I_E = np.zeros(N)
     s_I = np.zeros(N); I_I = np.zeros(N)
-    # ---- M4: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
-    # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
-    # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
-    track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False))
+    # ---- M4/FCXR: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
+    # path). Tracks the recurrent (delay-ring) component of I_E separately: M4's shared pool DIVIDES only
+    # recurrent E input; FCXR full-conductance SPLITS excitation into feedforward vs recurrent AMPA. The
+    # combined I_E accumulation below is untouched (byte-parity when neither is requested). ----
     # Generic off-by-default conductance slow protocol.  Current slow implementations do not expose
     # uses_conductance_membrane(), so they stay on the literal historical branch below.  MZ uses this
     # hook to provide leak-relative GABA/sAHP terms without pretending its mV current proxies are nS.
@@ -183,8 +183,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         and hasattr(slow, "uses_conductance_membrane")
         and slow.uses_conductance_membrane()
     )
+    split_exc = bool(
+        slow is not None
+        and hasattr(slow, "uses_split_excitation")
+        and slow.uses_split_excitation()
+    )
+    track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False)) or split_exc
     if conductance_slow:
         assert not shunt_gaba, "conductance slow membrane cannot combine with the separate shunt_gaba path"
+    if split_exc:
+        assert conductance_slow, "uses_split_excitation requires a conductance membrane"
     if track_rec:
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
     ring_sE = np.zeros((M, N))
@@ -197,6 +205,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         assert ee_std_tau_ms > 0.0, "ee_std_u>0 requires ee_std_tau_ms>0"
         x_dep = np.ones(NE)                                  # availability per E neuron, recovers to 1
         x_rec_f = ee_std_recover_factor(dt, ee_std_tau_ms)
+
+    # ---- FCXR: persistence-gated presynaptic E->E relay availability x_j (default OFF; gated on the slow
+    # protocol's uses_ee_relay()). The slow object drives y_j/x_j in slow.step() and exposes ee_relay_send
+    # == x_j(t-); this loop scales E->E edges by that pre-update value at the scatter. Mutually exclusive
+    # with M1 per-spike STD (double-scaling the same edges); requires the full_conductance split membrane. ----
+    relay_on = bool(slow is not None and hasattr(slow, "uses_ee_relay") and slow.uses_ee_relay())
+    if relay_on and ee_std_on:
+        raise ValueError("FCXR relay (slow.uses_ee_relay) and ee_std_u>0 are mutually exclusive")
+    if relay_on:
+        assert conductance_slow and split_exc, "FCXR relay requires a full_conductance split-excitation membrane"
 
     # ---- A1c: DYNAMIC GLOBAL FEEDBACK RESTRAINT (default OFF; gated on feedback_gain>0 -> bit-parity;
     # no alloc / no RNG / no float touch on the gain=0 path). I_global = feedback_gain * EMA_Hz(global E
@@ -304,7 +322,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # slow layer off (slow=None)
         if slow is not None:
             if conductance_slow:
-                cond_drive, cond_g_rel, cond_g_rev = slow.membrane_terms(I_E, I_I, labels)
+                if split_exc:   # FCXR full conductance: pass the recurrent AMPA component for the ff/rec split
+                    cond_drive, cond_g_rel, cond_g_rev = slow.membrane_terms(I_E, I_I, labels, I_E_rec=I_E_rec)
+                else:
+                    cond_drive, cond_g_rel, cond_g_rev = slow.membrane_terms(I_E, I_I, labels)
             elif track_rec:
                 I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
             else:
@@ -421,6 +442,13 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                         w_eff = ee_std_apply(a_w[idx], a_dst[idx], x_per_edge, NE)
                         np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), w_eff)
                         x_dep[spE] *= (1.0 - ee_std_u)
+                    elif relay_on:
+                        # FCXR: scale E->E edges by the persistence-gated relay availability x_j(t-) that
+                        # slow.step() snapshotted BEFORE updating y/x this frame; E->I edges untouched. No
+                        # per-spike depletion here -- x dynamics live entirely in the slow protocol.
+                        x_per_edge = np.repeat(slow.ee_relay_send[spE], cnt)
+                        w_eff = ee_std_apply(a_w[idx], a_dst[idx], x_per_edge, NE)
+                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), w_eff)
                     else:
                         np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
             if spI.size:
