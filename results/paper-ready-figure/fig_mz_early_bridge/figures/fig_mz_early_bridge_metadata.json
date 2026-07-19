@@ -1,34 +1,54 @@
 {
-  "case_seed": 1,
-  "display_event_index": 1,
-  "display_event_direction": "B_to_A",
-  "display_event_t_on_ms": 737.0,
-  "display_event_t_off_ms": 764.0,
-  "t_recruit_ms": 9078.3,
-  "t120_ms": 9293.6,
-  "primary_window": "early_0_50_ms",
-  "framing": "operational runaway = model proxy, NOT clinical seizure; virtual-LFP energy proxy",
-  "per_seed": {
-    "1": {
-      "rho_a": -0.5654461466217138,
-      "rho_b": 0.9453009843927757,
-      "rho_maxab": 0.9453009843927757,
-      "within_shaft_p": 0.00039996000399960006,
-      "within_shaft_null_p95": 0.7821603306346664
-    },
-    "3": {
-      "rho_a": -0.5263281920352006,
-      "rho_b": 0.7351065022497505,
-      "rho_maxab": 0.7351065022497505,
-      "within_shaft_p": 0.08609139086091391,
-      "within_shaft_null_p95": 0.770426934790279
-    },
-    "4": {
-      "rho_a": -0.8124038404635959,
-      "rho_b": 0.9240929684291712,
-      "rho_maxab": 0.9240929684291712,
-      "within_shaft_p": 0.000999900009999,
-      "within_shaft_null_p95": 0.7612765882773649
-    }
+  "schema_id": "topic4_mz_continuous_early_field_figure_v2",
+  "status": "Figure 5 candidate; continuous native MZ trajectory; observation-layer model bridge",
+  "paper_role": "same scaffold, state-dependent readout",
+  "canonical_producer": "scripts/paper_figures/plot_fig_mz_early_bridge_paper.py",
+  "input_artifacts": {
+    "slowoff": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/results/topic4_sef_hfo/mz_early_field_bridge/per_seed/seed1/slowoff.npz",
+    "native": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/results/topic4_sef_hfo/mz_early_field_bridge/per_seed/seed1/native.npz",
+    "bridge_metrics": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/results/topic4_sef_hfo/mz_early_field_bridge/per_seed/seed1/bridge_metrics.json",
+    "substrate_geometry_only": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/results/topic4_sef_hfo/mz_slowvars/readout_ready/readout_zA_q75_tz10000_seed1.npz",
+    "bridge_provenance_fingerprint": "324974c3aa3d6529"
+  },
+  "continuous_trace": {
+    "display_start_absolute_ms": 7500.0,
+    "display_end_absolute_ms": 9403.6,
+    "display_event_start_ms": 455.0,
+    "display_event_end_ms": 516.0,
+    "early_window_start_ms": 1578.2999999999993,
+    "early_window_end_ms": 1628.2999999999993,
+    "t120_display_ms": 1793.6000000000004
+  },
+  "display_event": {
+    "selection_rule": "last eligible native event in the majority slow-off direction before t_recruit; selection does not use target early energy",
+    "direction": "B_to_A",
+    "t_on_absolute_ms": 7955.0,
+    "t_off_absolute_ms": 7976.0,
+    "readout_end_absolute_ms": 8016.0,
+    "n_readable_contacts": 13,
+    "axis_spearman": -1.0,
+    "similarity_to_slowoff_direction_template": 0.9903723261853131,
+    "descriptive_earliness_energy_spearman": 0.9120879120879121
+  },
+  "early_field": {
+    "window": "early_0_50_ms",
+    "t_recruit_absolute_ms": 9078.3,
+    "t120_absolute_ms": 9293.6,
+    "contact_n": 15
+  },
+  "formal_multievent_bridge": {
+    "rho_maxab": 0.9453009843927757,
+    "within_shaft_p": 0.00039996000399960006,
+    "tier": "formal statistic remains the held-out-validated slowoff-template bridge"
+  },
+  "spatial_rendering": {
+    "method": "3-mm Gaussian contact-readout field with smooth confidence fade on the fixed E1146 plane",
+    "substrate_grain": "fixed E-neuron positions only; no local recruitment values encoded",
+    "claim_boundary": "continuous readout field, not direct local-tissue recruitment"
+  },
+  "framing": "operational runaway is a model proxy, not clinical seizure; virtual-LFP 30-80-Hz early energy is not clinical broadband power",
+  "outputs": {
+    "png": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/results/paper-ready-figure/fig_mz_early_bridge/figures/fig_mz_early_bridge.png",
+    "pdf": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/results/paper-ready-figure/fig_mz_early_bridge/figures/fig_mz_early_bridge.pdf"
   }
 }
