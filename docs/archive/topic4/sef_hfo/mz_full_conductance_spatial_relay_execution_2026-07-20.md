@@ -17,7 +17,9 @@
 力匹配系数 `c_E`（只允许 0.85 / 1.0 / 1.15 三档），要求它还能保留旧的间期放电工作点；然后冻结慢状态扫快系统找高支；
 再上持续度传感器与接力资源。任何一个最早的 gate 干净 no-go 都是合格交付，不为了跑出漂亮结果加旋钮。
 
-**到哪步。** 见 §1（Stage 0A 已验收）与 §2（Stage 0B 进行中）。
+**到哪步（一句话结论）。** 工程层（§1 Stage 0A）已验收；但 full-conductance 本身在锁定参数下**保留不了正常间期节律**
+（§2 Stage 0B workpoint **NO-GO**）——偏弱档静息、偏强档过热+触顶，中间没有甜区，所以按 stop rule 停在第一关，
+"接力资源"没有加（§3 层判决、§4 结论与下一步）。
 
 ## 1. Stage 0A — engineering green（ACCEPT）
 
@@ -34,9 +36,10 @@
 - commits：`f73fcfe`(design-lock) → `40246a8`(engine) → `cd5f483`(tests)。
 - Stage 0A smoke（L=20 seed1 c_E=1.0 spontaneous 1000ms）：RSS peak **6.79 GiB**（预算内），finite。
 
-## 2. Stage 0B — workpoint（进行中）
+## 2. Stage 0B — workpoint（NO-GO）
 
-（数值填充中——见 §2.1 诊断与 §2.2 workpoint 判决。）
+一句话：饱和电导把兴奋性窗口挪了位，允许的 `c_E` 三档跨"静息↔过热"，没有一档同时数值安全且保留 accepted 间期节律
+（详见 §2.1 诊断 / §2.2 seed1 正式判决 / §2.3 seed3 确认）。
 
 ### 2.1 full-conductance 兴奋性诊断（探索性，非正式 gate）
 
@@ -81,14 +84,23 @@ c_E 判决（seed1，Z/M/global off，`fail_on_clip=False` 让每格跑完再判
 
 ### 2.3 seed3 确认（seed-independence）
 
-（seed3 workpoint c_E=0.85,1.0 后台运行中，完成后填入；用于证明 silent↔hot 非 seed1 特异。）
+seed3 workpoint（c_E=0.85,1.0；reference current-model slow-off n_returning=22，复现 pilot seed3=22）**同向 NO-GO**：
+
+| c_E | phenotype | n_returning（参照 22） | settled clip | settled_safe | all_bands |
+|---|---|---:|---:|---|---|
+| 0.85 | suppress | **0** | 0.0% | True | False |
+| 1.0  | expanded_bounded | **56**（2.5×） | 0.88% | **False** | False |
+
+与 seed1 完全同一模式：`c_E=0.85` 静息 0 事件、`c_E=1.0` 过活跃（56 vs 58）+持续触顶。**silent↔hot 非 seed1 特异，
+两个 primary seed 一致 NO-GO**（seed3 verdict = `no_go_no_safe_workpoint_c_E`）。机制（tau_eff 变短 + 饱和）本就 seed-独立，
+数据佐证。
 
 ## 3. 分层判决（更新）
 
 | 层 | 判决 | 备注 |
 |---|---|---|
 | engineering green | **ACCEPT** | §1；parity 115+19 tests、re-bless |
-| workpoint pass | **NO-GO** | §2.2；无 c_E 同时数值安全+匹配 band（seed1）；seed3 确认中 |
+| workpoint pass | **NO-GO（seed 1+3 一致）** | §2.2/§2.3；两个 primary seed 都无 c_E 同时数值安全+匹配 band |
 | fast-topology gate | **不执行** | 被 workpoint NO-GO 门控（Stage 1 前置未过） |
 | sensor gate | 不执行 | 同上 |
 | temporal lifecycle | 不执行 | 同上 |
@@ -110,18 +122,3 @@ c_E 判决（seed1，Z/M/global off，`fail_on_clip=False` 让每格跑完再判
 重新预注册）：例如 (a) 允许更细/更宽的 `c_E`（当前禁止扩 bracket）；或 (b) 只让 recurrent E→E 成电导、feedforward
 外源 AMPA 保持 additive（当前设计让二者都成电导，正是它压掉 baseline 兴奋性的主因）；或 (c) 调整 drive 重配工作点
 （当前 drive 锁 0.6）。**在没有新的预注册决定前不继续**——一个正确 gate 的 NO-GO 已是合格交付。
-
-## 3. 分层判决
-
-| 层 | 判决 | 备注 |
-|---|---|---|
-| engineering green | ACCEPT | §1 |
-| workpoint pass | 进行中 | §2 |
-| fast-topology gate | pending | |
-| sensor gate | pending | |
-| temporal lifecycle | pending | |
-| spatial lifecycle | pending | |
-
-## 4. 未完成项 / 下一步
-
-（收尾时填。）
