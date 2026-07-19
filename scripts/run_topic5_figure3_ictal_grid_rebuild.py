@@ -137,13 +137,13 @@ def load_parent_events() -> pd.DataFrame:
 class SubjectField:
     """Frozen interictal geometry for one subject (routing + sigma_common + planes)."""
 
-    def __init__(self, subject: str):
+    def __init__(self, subject: str, axis: str = "gradient"):
         self.subject = subject
         path = FIELD_ROOT / f"{subject}.json"
         if not path.exists():
             raise SystemExit(f"missing frozen field: {path}")
         self.record = json.loads(path.read_text())
-        # C19 fingerprint fail-closed (raises on mismatch)
+        # C19 fingerprint fail-closed (raises on mismatch) — same frozen source for both axes
         self.scorers = scorers_from_interictal_record(self.record)
         field = self.record["interictal_field"]
         planes = field["planes"]
@@ -152,8 +152,28 @@ class SubjectField:
         self.support_b = np.asarray(field["support_b"], float)
         self.earliness_a = np.asarray(field["earliness_a"], float)
         self.earliness_b = np.asarray(field["earliness_b"], float)
-        # C3 outcome-independent routing
-        if "shared_a" in self.scorers and "shared_b" in self.scorers:
+        self.axis = axis
+        if axis == "endpoint":
+            # AXIS-ONLY: same frozen support/earliness/coords; only the projection plane
+            # changes (endpoint source->sink cores instead of the gradient axis). Per-template
+            # A/B for all subjects; fail closed on degenerate cores (NO gradient fallback).
+            coords = np.asarray(field["coords"], float)
+            ep_a = gg.build_endpoint_plane(coords, np.asarray(field["rank_a"], float), k_primary=3)
+            ep_b = gg.build_endpoint_plane(coords, np.asarray(field["rank_b"], float), k_primary=3)
+            if ep_a is None or ep_b is None:
+                raise SystemExit(f"endpoint axis degenerate for {subject} "
+                                 f"(fail closed; no gradient fallback)")
+            self.route = "endpoint"
+            self.pts_a = ep_a["points"]
+            self.pts_b = ep_b["points"]
+            self.sigma_common = float(ep_a["sigma"])   # subject_fixed: endpoint-A sigma for A & B
+            self.sigma_own_b = float(ep_b["sigma"])
+            self.endpoint_cores = {"a": {"tier": ep_a["tier"], "source_idx": ep_a["source_idx"],
+                                         "sink_idx": ep_a["sink_idx"]},
+                                   "b": {"tier": ep_b["tier"], "source_idx": ep_b["source_idx"],
+                                         "sink_idx": ep_b["sink_idx"]}}
+        # C3 outcome-independent gradient routing
+        elif "shared_a" in self.scorers and "shared_b" in self.scorers:
             self.route = "shared"
             self.pts_a = np.asarray(planes["shared"]["points"], float)
             self.pts_b = self.pts_a
@@ -397,6 +417,12 @@ def main():
     ap.add_argument("--band-omnibus-perm", type=int, default=100000)
     ap.add_argument("--smoothing-policy", choices=["subject_fixed", "frozen_per_model"],
                     default="subject_fixed")
+    ap.add_argument("--axis", choices=["gradient", "endpoint"], default="gradient",
+                    help="gradient = frozen shared-else-own planes (primary); "
+                         "endpoint = source->sink core axis, per-template A/B (axis-only sensitivity)")
+    ap.add_argument("--score-bands-only", action="store_true",
+                    help="keep the BB150 anchor in the common mask (mask unchanged) but score only "
+                         "the 7 primary bands; skip anchor scoring and parent pooled/strict/gamma groups")
     args = ap.parse_args()
 
     grids = [int(x) for x in args.grids.split(",")]
@@ -404,15 +430,20 @@ def main():
     events = load_parent_events()
     print(f"[lock] {events.subject.nunique()} subjects / {len(events)} events "
           f"(strict={int((events.phenotype=='strict').sum())}, "
-          f"gamma={int((events.phenotype=='gamma').sum())})", flush=True)
+          f"gamma={int((events.phenotype=='gamma').sum())}) axis={args.axis}", flush=True)
 
     # routing + sigma inventory (validate-only stops here after mask check)
     subjects = list(dict.fromkeys(events.subject.tolist()))
-    fields = {s: SubjectField(s) for s in subjects}
-    shared = {s for s in subjects if fields[s].route == "shared"}
-    if shared != EXPECTED_SHARED:
-        raise SystemExit(f"C3: shared routing {sorted(shared)} != expected {sorted(EXPECTED_SHARED)}")
-    print(f"[route] shared={len(shared)} own={len(subjects)-len(shared)}", flush=True)
+    fields = {s: SubjectField(s, axis=args.axis) for s in subjects}
+    if args.axis == "endpoint":
+        assert all(fields[s].route == "endpoint" for s in subjects)
+        print(f"[route] endpoint per-template A/B for all {len(subjects)} subjects "
+              f"(axis-only; vs gradient shared-else-own)", flush=True)
+    else:
+        shared = {s for s in subjects if fields[s].route == "shared"}
+        if shared != EXPECTED_SHARED:
+            raise SystemExit(f"C3: shared routing {sorted(shared)} != expected {sorted(EXPECTED_SHARED)}")
+        print(f"[route] shared={len(shared)} own={len(subjects)-len(shared)}", flush=True)
 
     if args.outdir is None and not args.validate_only:
         raise SystemExit("--outdir required unless --validate-only")
@@ -468,7 +499,8 @@ def main():
     for i, ((s, idx), info) in enumerate(per_event.items()):
         finite = info["finite"]
         acts = dict(info["activations"])
-        acts["bb150_anchor"] = info["anchor"]
+        if not args.score_bands_only:      # anchor stays IN the mask, only its scoring is skipped
+            acts["bb150_anchor"] = info["anchor"]
         seed = event_seed(s, idx, args.seed)
         perms_all = make_contact_permutations(fields[s].contact_order, finite, n_perm, seed, mode="all_contact")
         ws = gg.within_shaft_permutations(fields[s].contact_order, finite, n_perm=n_perm, seed=seed, min_group=4)
@@ -575,6 +607,8 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
     omnibus = gg.direct_band_omnibus(delta_matrix, n_perm=args.band_omnibus_perm, seed=args.seed)
     contrasts = gg.direct_band_contrasts(delta_matrix, band_labels=band_names)
 
+    sbo = getattr(args, "score_bands_only", False)   # seven-band-only (endpoint axis-only run)
+
     # ---- parent cohort: pooled / broadband / gamma (C14) -----------------
     def phenotype_activation_key(s, idx):
         return "bb150_anchor" if per_event[(s, idx)]["phenotype"] == "strict" else "gamma_LVFA"
@@ -602,24 +636,25 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
     }
     parent_cohort_rows, parent_subject_rows = [], []
     parent_null_draws = {}   # (method, group) -> (subject, n_perm)
-    for method in ("R3_%d" % grids[0], "R2"):
-        for gid, sel in selectors.items():
-            data, null, marg, order, draws = parent_group(method, sel)
-            stat = cohort_from_margins(data, null, marg, null_draws=draws)
-            stat.update({"group_id": gid, "method": method,
-                         "n_seizures": int(sum(sel(s, int(i)) for s, i in
-                                               zip(events.subject, events.seizure_idx)))})
-            parent_cohort_rows.append(stat)
-            parent_null_draws[f"{method}__{gid}"] = draws
-            for s, d, nm, mg in zip(order, data, null, marg):
-                parent_subject_rows.append({"group_id": gid, "method": method, "subject": s,
-                                            "data": d, "null_median": nm, "margin": mg})
+    if not sbo:   # parent groups use the BB150 anchor, which is not scored in bands-only runs
+        for method in ("R3_%d" % grids[0], "R2"):
+            for gid, sel in selectors.items():
+                data, null, marg, order, draws = parent_group(method, sel)
+                stat = cohort_from_margins(data, null, marg, null_draws=draws)
+                stat.update({"group_id": gid, "method": method,
+                             "n_seizures": int(sum(sel(s, int(i)) for s, i in
+                                                   zip(events.subject, events.seizure_idx)))})
+                parent_cohort_rows.append(stat)
+                parent_null_draws[f"{method}__{gid}"] = draws
+                for s, d, nm, mg in zip(order, data, null, marg):
+                    parent_subject_rows.append({"group_id": gid, "method": method, "subject": s,
+                                                "data": d, "null_median": nm, "margin": mg})
 
     # ---- R2 vs R3 paired diagnostic (C9) ---------------------------------
     r2r3_rows = []
     for s in subjects:
         idxs = events[events.subject == s].seizure_idx.astype(int).tolist()
-        for key in band_names + ["bb150_anchor"]:
+        for key in band_names + ([] if sbo else ["bb150_anchor"]):
             r3 = median_event([scored[(s, i)]["observed"].get((prim, key), np.nan) for i in idxs])
             r2 = median_event([scored[(s, i)]["observed"].get(("R2", key), np.nan) for i in idxs])
             r2r3_rows.append({"subject": s, "band": key, "r3_data": r3, "r2_data": r2,
@@ -627,8 +662,9 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
 
     # ---- pure within-shaft secondary (C12, min_group=4). PHENOTYPE-MATCHED
     # activation (strict->BB150, gamma->gamma30), same as the parent cohort — NOT
-    # BB150-uniform (F3a fix). Separate eligible denominator.
-    ws_eligible_events = [(s, i) for (s, i), m in ws_meta.items() if m["eligible"]]
+    # BB150-uniform (F3a fix). Separate eligible denominator. Skipped in bands-only
+    # runs (its strict events read the unscored BB150 anchor).
+    ws_eligible_events = [] if sbo else [(s, i) for (s, i), m in ws_meta.items() if m["eligible"]]
     ws_subjects = sorted({s for s, _ in ws_eligible_events})
     ws_subject_rows, ws_cohort_data, ws_cohort_null, ws_cohort_margin, ws_draws = [], [], [], [], []
     for s in ws_subjects:
@@ -716,13 +752,14 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
     for (s, idx) in per_event:
         pheno = per_event[(s, idx)]["phenotype"]
         pkey = "bb150_anchor" if pheno == "strict" else "gamma_LVFA"
-        r3n = scored[(s, idx)]["null"].get((prim, pkey))
-        parent_event_rows.append({
-            "subject": s, "seizure_idx": idx, "phenotype": pheno, "activation_key": pkey,
-            "r3_observed": scored[(s, idx)]["observed"].get((prim, pkey), np.nan),
-            "r2_observed": scored[(s, idx)]["observed"].get(("R2", pkey), np.nan),
-            "r3_null_median": float(np.median(r3n)) if r3n is not None else np.nan})
-        for key in band_names + ["bb150_anchor"]:
+        if not sbo:
+            r3n = scored[(s, idx)]["null"].get((prim, pkey))
+            parent_event_rows.append({
+                "subject": s, "seizure_idx": idx, "phenotype": pheno, "activation_key": pkey,
+                "r3_observed": scored[(s, idx)]["observed"].get((prim, pkey), np.nan),
+                "r2_observed": scored[(s, idx)]["observed"].get(("R2", pkey), np.nan),
+                "r3_null_median": float(np.median(r3n)) if r3n is not None else np.nan})
+        for key in band_names + ([] if sbo else ["bb150_anchor"]):
             r2n = scored[(s, idx)]["null"].get(("R2", key))
             r2_event_rows.append({
                 "subject": s, "seizure_idx": idx, "band": key,
@@ -736,7 +773,7 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
         gev = sf.build_event_scorers(np.ones(len(sf.contact_order), bool), grids[0], args.smoothing_policy)
         ga, gb = gev["grid_a"], gev["grid_b"]
         routing_rows.append({
-            "subject": s, "route": sf.route, "smoothing_policy": args.smoothing_policy,
+            "subject": s, "axis": args.axis, "route": sf.route, "smoothing_policy": args.smoothing_policy,
             "sigma_a": sa, "sigma_b": sb, "sigma_common": sf.sigma_common, "sigma_own_b": sf.sigma_own_b,
             "n_contact_order": len(sf.contact_order), "fingerprint_sha256": sf.fingerprint,
             "grid_n": ga["n"], "grid_a_x_lo": ga["x_lo"], "grid_a_x_hi": ga["x_hi"],
@@ -803,6 +840,11 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
         "seed": args.seed, "n_perm": n_perm, "grids": grids,
         "primary_grid": grids[0], "resolution_sensitivity_grid": grids[1] if len(grids) > 1 else None,
         "smoothing_policy": args.smoothing_policy,
+        "axis": args.axis,
+        "axis_note": ("endpoint = source->sink core axis (build_endpoint_cores k=3), per-template A/B "
+                      "for all subjects; NOT the shared-else-own gradient routing (axis+routing confound)"
+                      if args.axis == "endpoint" else "gradient shared-else-own (primary)"),
+        "score_bands_only": bool(getattr(args, "score_bands_only", False)),
         "r3_formula_version": gg.R3_FORMULA_VERSION,
         "s_thresh": gg.S_THRESH, "overlap_min": {str(n): gg.overlap_min_for_n(n) for n in grids},
         "band_definitions": bands, "routing_rule": "complete_shared_else_own_fallback",
@@ -839,13 +881,17 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
     }
     (outdir / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
     print(f"[write] artifacts -> {outdir}", flush=True)
-    print(f"[summary] pooled R3: " + json.dumps(
-        {k: round(v, 4) if isinstance(v, float) else v
-         for k, v in next(r for r in parent_cohort_rows
-                          if r['group_id'] == 'all_phenotype_matched' and r['method'].startswith('R3')).items()
-         if k in ("data_median", "null_median", "margin_median",
-                  "wilcoxon_one_sided_data_gt_null_p", "n_data_gt_null")}))
-    print(f"[summary] resolution p95 |r81-r161| = {conv_p95:.4f}", flush=True)
+    pooled = next((r for r in parent_cohort_rows
+                   if r['group_id'] == 'all_phenotype_matched' and r['method'].startswith('R3')), None)
+    if pooled is not None:
+        print(f"[summary] pooled R3: " + json.dumps(
+            {k: round(v, 4) if isinstance(v, float) else v for k, v in pooled.items()
+             if k in ("data_median", "null_median", "margin_median",
+                      "coherent_cohort_spatial_null_p", "n_data_gt_null")}))
+    else:
+        print(f"[summary] bands-only ({args.axis}); seven-band delta medians: " + json.dumps(
+            [round(float(r["delta_cohort_median"]), 4) for r in band_cohort_rows]))
+    print(f"[summary] resolution p95 |r161-r81| = {conv_p95:.4f}", flush=True)
 
 
 if __name__ == "__main__":

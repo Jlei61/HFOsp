@@ -610,6 +610,37 @@ def within_shaft_permutations(names: Sequence[str], finite: Sequence[bool], *,
             "n_shafts": len(groups), "min_group": int(min_group)}
 
 
+def build_endpoint_plane(coords: np.ndarray, template_rank: np.ndarray,
+                         k_primary: int = 3) -> Optional[Dict[str, object]]:
+    """Endpoint (source->sink core) axis plane for one template (axis-only experiment).
+
+    Wires the canonical swap/main-analysis endpoint axis into the same normalized-plane
+    builder the gradient field uses: ``build_endpoint_cores(rank, eligible, k_primary)``
+    -> ``compute_axis_frame`` -> axis ``u = sink_centroid - source_centroid`` ->
+    ``make_normalized_plane(coords, u)``. Returns ``None`` (fail closed, NO gradient
+    fallback) when the cores are degenerate (``descriptive_only`` tier / empty cores /
+    coincident centroids / degenerate plane span).
+    """
+    from src.propagation_skeleton_geometry import build_endpoint_cores, compute_axis_frame
+    from src.topic5_template_axis_field import make_normalized_plane
+    coords = np.asarray(coords, float)
+    eligible = ~np.isnan(coords).any(axis=1)
+    cores = build_endpoint_cores(np.asarray(template_rank, float), eligible, k_primary=k_primary)
+    if cores["tier"] == "descriptive_only" or not cores["source_idx"] or not cores["sink_idx"]:
+        return None
+    fr = compute_axis_frame(coords, cores["source_idx"], cores["sink_idx"])
+    if fr["degenerate_axis"]:
+        return None
+    u = np.asarray(fr["sink_centroid"], float) - np.asarray(fr["source_centroid"], float)
+    plane = make_normalized_plane(coords, u)
+    if plane.get("status") != "ok":
+        return None
+    return {"status": "ok", "points": np.asarray(plane["points"], float),
+            "sigma": float(plane["sigma"]), "u": np.asarray(plane["u"], float),
+            "tier": cores["tier"], "k_used": int(cores["k_used"]),
+            "source_idx": list(cores["source_idx"]), "sink_idx": list(cores["sink_idx"])}
+
+
 def loo_contact_reconstruction(points: np.ndarray, support: np.ndarray,
                                values: np.ndarray, sigma: float) -> np.ndarray:
     """Leave-one-out kernel-regression reconstruction of each contact's value.
