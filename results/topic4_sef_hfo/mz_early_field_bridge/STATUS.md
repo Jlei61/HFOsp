@@ -62,13 +62,16 @@ frozen bar) · P3 templates+fields+nulls+cohort (mostly inside runner) · P4 fig
 - [x] 1 engineering complete — fixed-bar detector, ported+reused readout, 12+8+41 tests green, resumable + --readout-only.
 - [x] 2 numerically eligible — held-out templates eligible 3/3 (both directions); complete non-degenerate 0-50ms fields 3/3.
 - [x] 3 scientific observation — direction/effect/nulls/seed-consistency reported all 3 seeds (see cohort_summary + archive §8).
-- [x] 4 bridge SUPPORTED — 3/3 seeds eligible held-out + positive contact rho_maxAB (0.945/0.735/0.924, all B_to_A),
-      source concordant 3/3, not core-driven (n_kept=15). CAVEAT: contact within-shaft null sig 2/3 (seed3 p=0.086);
-      source toroidal sig 3/3. Observation-layer diagnostic, NOT cohort proof, NOT seizure.
+- [x] 4 bridge SUPPORTED (observation-level) — 3/3 seeds eligible held-out + positive MIRROR-INVARIANT contact
+      maxAB (0.945/0.735/0.924). within-shaft null sig 2/3 (seed3 weak p=0.086). Bidirectional axis: direction is
+      noise-set (NOT a success criterion, NOT a fixed focus). Source = supplementary direction-free axis engagement
+      (toroidal sig 3/3). Core-exclusion UNINFORMATIVE (n_kept=15, nothing removed → no not-core-driven claim).
+      NOT cohort proof, NOT seizure, NOT causal.
 
-## FINAL cohort (primary 0-50ms, contact all-support)
-rho_maxAB median 0.924, range [0.735, 0.945], n_positive 3/3. Within-shaft p: 4e-4 / 0.086 / 1e-3 (seed 1/3/4).
-Source rho_maxAB 0.651/0.546/0.585, toroidal p 0.0087/0.012/0.017 (3/3 sig). Consistent B_to_A direction all seeds.
+## FINAL cohort (pre-t120 0-50ms early recruitment, contact all-support)
+Mirror-invariant rho_maxAB median 0.924, range [0.735, 0.945], n_positive 3/3. Within-shaft p: 4e-4 / 0.086 / 1e-3
+(seed 1/3/4; seed3 weak/null-overlap). Source (supplementary, direction-free axis engagement) 0.651/0.546/0.585,
+toroidal p 0.0087/0.012/0.017 (3/3 sig). Direction noise-set per seed (maxAB winner B_to_A this run, NOT a stable phenotype).
 
 ## Live checklist
 
@@ -87,7 +90,7 @@ Source rho_maxAB 0.651/0.546/0.585, toroidal p 0.0087/0.012/0.017 (3/3 sig). Con
 - [x] seed1 contact patched: rho_maxAB=0.945 (B_to_A), within-shaft p=0.0004, source 0.651 concordant.
 - [~] seeds 3,4 sims RUNNING (parallel, ~2.4h) — will --readout-only patch contact after.
 - [x] plot script + seed1 figure eyeballed (fixed to show maxAB-winning direction TB; timing↔energy concordant)
-- [x] seed4 complete (7384s) + patched: contact rho_maxAB=0.924 (B_to_A), within-shaft p=0.001, source 0.585 concordant (toroidal p=0.017). 2/2 seeds positive, same B_to_A direction, not core-driven.
+- [x] seed4 complete (7384s) + patched: contact mirror-invariant maxAB=0.924, within-shaft p=0.001; source 0.585 (toroidal p=0.017, supplementary). maxAB positive.
 - [~] seed3 running (native/readout phase); will patch + final-aggregate after
 - [ ] ~~seeds 3,4 finish~~ → --readout-only patch contact
 - [ ] cohort aggregate (--aggregate-only 1,3,4)
@@ -107,8 +110,8 @@ Source rho_maxAB 0.651/0.546/0.585, toroidal p 0.0087/0.012/0.017 (3/3 sig). Con
 ## Seed1 result (primary window 0-50ms, patched)
 - onset eligible: t120=9293.6, t_recruit=9078.3 (Δ215ms). 38 returning events; B_to_A=26, A_to_B=7, unresolved=5.
 - Templates BOTH eligible: B_to_A held-out median 0.995, A_to_B 0.361.
-- **Contact rho_maxAB=0.945 (B_to_A), within-shaft null p=0.0004 (10k MC), NOT core-loading driven (n_kept=15).**
-- Source rho_maxAB=0.651, toroidal p=0.0087 — concordant (same sign/direction).
+- **Contact mirror-invariant maxAB=0.945, within-shaft null p=0.0004 (10k MC).** (Core-exclusion uninformative: n_kept=15, nothing removed.)
+- Source (supplementary, direction-free axis engagement) rho_maxAB=0.651, toroidal p=0.0087.
 - within-trajectory pre-runaway audit: 25 events (eligible).
 - Limitation: local-tissue participation audit not persisted for seed1 (readout patch); documented follow-up.
 

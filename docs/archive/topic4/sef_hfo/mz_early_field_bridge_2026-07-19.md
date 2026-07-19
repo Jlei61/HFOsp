@@ -9,22 +9,24 @@ Overnight autonomous run. Local commits only.
 **测了什么**：同一块按「病人 E1146 电极布局」摆的模型脑组织，安静时会自己一小簇一小簇地放电，每簇事件里
 15 个虚拟电极被点亮的先后顺序跨很多次事件大致固定——这是这块组织的空间「指纹」，而且指纹有两个相反方向
 （一头先亮，或另一头先亮）。然后我们只动一个旋钮：让「抑制刹车」随强活动慢慢磨损（去抑制），同一块组织就
-慢慢滑向一次刹不住的失控放电（是模型代理，**不是临床发作**）。核心问题：失控刚点火那 0–50 毫秒能量最高的
-电极，是不是就是间期指纹里最早被点亮的那批。
+慢慢滑向一次刹不住的失控放电（是模型代理，**不是临床发作**）。核心问题：在**跨过失控阈值（t120）之前**那段
+早期招募窗里（相对 t_recruit 的 0–50 毫秒），能量最高的电极，是不是就是间期指纹里最早被点亮的那批。
 
 **怎么测的**：先只用安静段的事件搭出两个方向的「最早→最晚」排序模板，并用「留一半事件出来验证」确认它不是
 碰巧（留出的事件几乎每次都长一样，相似度约 0.99）。再拿失控点火那一瞬的能量分布跟两个模板比「先后↔能量」
 相关，取相关更高的那个方向。如果这只是电极杆几何造成的假象，把能量在同一根杆内部随机重排一万次也该达到同样
 高的相关；实测三个随机种子的真值都比随机高——其中两个明显更高（越过随机的概率约 0.0004 和 0.001），第三个
-只是勉强（约 0.09）；换成直接看神经元格子（源空间）三个种子都明显高（约 0.009–0.017）。而且这批高能量电极
-并不贴着那两个「病灶核」，去掉核附近电极后结论不变。
+只是勉强（约 0.09，弱阳性）。这是**电极层面的主结果**。换成直接看神经元格子（源空间）三个种子都明显（约
+0.009–0.017），但源空间只作**方向无关的「轴被调用」补充诊断**，不与电极合并成「跨尺度同方向」。（去核对照
+这一轮不成立：没有一个电极落在核阈值内、实际一个都没删除，所以这条检验没提供信息，**不能写成「不靠贴核」**。）
 
-**揭示了什么**：在这个模型尺度上看起来是——这块固定组织确实提供了一份可复用的空间响应模板，去抑制只是把整体
-增益推高，让失控沿着间期指纹里**同一个方向**先点燃（三个种子都指向同一方向，即使第三个种子的间期事件多数属于
-另一个方向、反而是少数派模板才对上能量）。也就是「同一支架、不同状态」在模型里说得通。但这只是「看得见相关」
-这一层，**还没到因果层**：两次仿真是同噪声重放、不是真正的状态分叉，无法区分「局部去抑制图案」和「整体增益
-上移」哪个才是原因；而且电极层面的统计强度不稳（三个种子里两个强、一个弱）。要往因果走，下一步得能把整个网络
-状态精确存档再分叉，做「原样/抹平/打乱/复位去抑制」的对照。
+**揭示了什么**：在这个模型尺度上看起来是——这块固定组织提供了一条可反复调用的**双向病理轴**，去抑制把整体
+增益推高、让早期招募能量沿这条轴的时序指纹分布；每个种子的匹配（**方向无关的 maxAB**）都是正的，但**从哪一端
+起始由噪声和当时网络状态决定，A→B 和 B→A 都是合法实现，我们不把某个固定方向在跨种子里稳定当成成功标准，也不把
+某一端当成固定发作灶**。也就是「同一支架、不同状态」在这个观测层面说得通。但这只是「看得见相关」这一层，**还没到
+因果层**：两次仿真是同噪声重放、不是真正的状态分叉，无法区分「局部去抑制图案」和「整体增益上移」哪个才是原因；
+而且电极层面的统计强度不稳（三个种子里两强一弱）。要往因果走，下一步得把整个网络状态精确存档再分叉，做「原样/
+抹平/打乱/复位去抑制」的状态匹配对照。
 
 （内部归档代号：候选 `zA_q75_tz5000`；`B_to_A` direction；`rho_maxAB`；within-shaft / toroidal-shift null；
 held-out 模板；`t_recruit`/`t120` onset；design §6–§9；completion level 4 = bridge supported diagnostic。）
@@ -107,33 +109,50 @@ configurations with all three m levels identical. No `9/9`, no `weak/mid/strong`
 ## 6. Claim boundaries (§15)
 
 Allowed if supported: a fixed patient-specific scaffold expresses reproducible interictal timing fields;
-`z`-mediated loss of inhibitory efficacy moves the same model into an operational runaway whose early energy
-field is concordant with one registered interictal direction; a model-side feasibility bridge for
-"same scaffold, different state." Forbidden: calling the runaway a clinical seizure; claiming termination /
-recovery / a full cycle; claiming `z_i` is the unique biological mechanism; claiming interictal events
-causally trigger the transition (needs event-deletion); claiming local-z causality (needs snapshot/resume);
-using Arm C as dose-response; interpreting virtual-LFP energy as clinical broadband power; choosing a
-direction/window/candidate/seed for the strongest correlation.
+`z`-mediated loss of inhibitory efficacy moves the same model into an operational runaway whose pre-t120 early
+recruitment energy field is concordant with the fixed **bidirectional** interictal timing axis (mirror-invariant
+maxAB; A→B and B→A both legitimate); a model-side observation-level feasibility bridge for "same scaffold,
+different state." Forbidden: calling the runaway a clinical seizure; claiming termination / recovery / a full
+cycle; claiming `z_i` is the unique biological mechanism; claiming interictal events causally trigger the
+transition (needs event-deletion); claiming local-z causality (needs snapshot/resume); using Arm C as
+dose-response; interpreting virtual-LFP energy as clinical broadband power; choosing a direction/window/
+candidate/seed for the strongest correlation; **claiming a fixed direction stable across seeds or a fixed
+seizure focus**; **claiming the result is not core-driven** (the exclusion removed no contact this run);
+**equating a contact virtual-LFP hotspot with preferential local-neuron recruitment**.
 
 ## 7. Completion levels (§14)
 
 1. engineering complete — fixed-bar detector, reusable readout, tests, resumable artifacts.
 2. numerically eligible — held-out template + complete non-degenerate early field exist.
 3. scientific observation — direction, effect sizes, nulls, seed consistency reported (any sign).
-4. bridge supported — ≥2/3 seeds eligible held-out + positive contact `maxAB`; source not contradictory;
-   not dependent only on direct-core loading. (Overnight diagnostic criterion, NOT cohort proof, NOT seizure.)
+4. bridge supported — ≥2/3 seeds eligible held-out + positive mirror-invariant contact `maxAB`; source not
+   contradictory (as direction-free axis engagement). (Diagnostic criterion, NOT cohort proof, NOT seizure.
+   Note: the spec's "not dependent only on direct-core loading" sub-condition was UNTESTABLE this run —
+   n_kept=15, no contact fell inside the core threshold.)
 
 ## 8. Results (seeds 1/3/4, T=15000)
 
-**Verdict: bridge SUPPORTED at the §14 level-4 diagnostic criterion** — 3/3 seeds have eligible held-out
-templates AND positive contact `rho_maxAB`, all the SAME `B_to_A` direction, source-space concordant (same
-sign), and no result depends on direct-core loading. **Honest caveats**: the contact within-shaft null is
-significant in 2/3 seeds (seed3 marginal p=0.086), so contact-level statistical strength is seed-variable;
-the source toroidal null is significant 3/3. This is an **observation-layer feasibility bridge, not mechanism,
-not cohort proof, not a seizure** (common-random-number replay, n=3 consistency only).
+**Verdict: observation-level bridge SUPPORTED.** On the fixed E1146 SNN scaffold, the **bidirectional**
+contact-level timing axis defined by slow-off interictal events predicts the early recruitment energy
+gradient in the **pre-t120** window of the z-only disinhibition trajectory: the mirror-invariant contact
+`rho_maxAB` is positive in all 3 seeds (0.945 / 0.735 / 0.924); the within-shaft null is significant in 2/3
+(seed3 weak / null-overlap, p=0.086). This supports a model-side **"same scaffold, different state"** bridge.
+It does **NOT** support causal mechanism, a complete seizure cycle, or a fixed-direction seizure focus.
 
-Cohort (primary window 0–50 ms, contact all-support): `rho_maxAB` median **0.924**, range **[0.735, 0.945]**,
-n_positive **3/3** (`cohort_summary.{json,csv}`).
+**Framing (2026-07-19 review corrections).** (a) The scaffold defines a **bidirectional** pathological axis;
+which end each event/seed starts from is noise/state-determined — A→B and B→A are both legitimate, and a fixed
+direction stable across seeds is **not** a success condition. Primary statistic = the mirror-invariant `maxAB`
+(max over the two direction templates, re-selected inside every permutation). (b) **Contact is primary; source
+is a supplementary mechanism diagnostic** reported only as *direction-free axis engagement*, never merged with
+contact into a "cross-scale same-direction" claim. (c) The 0–50 ms window is **pre-t120 early recruitment /
+transition energy** (t_recruit precedes t120 by 139–215 ms), not post-onset or seizure energy. (d)
+**Direct-core exclusion is uninformative this run**: n_kept=15 in every seed means NO contact was actually
+removed, so it cannot support "not core-driven" — that claim is dropped. (e) Denominator = **one E1146 model
+scaffold × 3 random seeds, not 3 patients**. (f) A readable contact virtual-LFP hotspot is **not** equated with
+preferential local-neuron recruitment (participation audit incomplete, Q9).
+
+Cohort (pre-t120 0–50 ms window, contact all-support): mirror-invariant `rho_maxAB` median **0.924**, range
+**[0.735, 0.945]**, n_positive **3/3** (`cohort_summary.{json,csv}`).
 
 1. **Fixed slow-off bar reused across states?** Yes. `compute_event_bar` freezes floor+bar once from slow-off
    and passes it to `detect_events` for BOTH slow-off and native; never recomputed from the native max
@@ -142,34 +161,41 @@ n_positive **3/3** (`cohort_summary.{json,csv}`).
 2. **A/B train/held-out counts + reproducibility.** All 3 seeds: BOTH direction templates eligible. Held-out
    Spearman medians — seed1: A_to_B 0.361 (7 ev, 4tr/3ho), B_to_A **0.995** (26 ev, 13/13); seed3: A_to_B
    **1.000** (27 ev), B_to_A **0.999** (12 ev); seed4: A_to_B 0.743 (16 ev), B_to_A **1.000** (20 ev).
-   Interictal is direction-imbalanced and the majority direction differs by seed (seed1/4 B_to_A-dominant,
-   seed3 A_to_B-dominant), yet the `B_to_A` template is the energy-concordant one in all three.
+   Interictal is direction-imbalanced and the majority direction differs by seed (seed1/4 B_to_A-majority,
+   seed3 A_to_B-majority) — consistent with a bidirectional axis whose per-seed balance is noise-set, not a
+   fixed direction.
 3. **t_recruit / t120 / window completeness.** All onsets eligible. seed1 t120=9293.6 / t_recruit=9078.3 (Δ215);
    seed3 9499.3 / 9360.1 (Δ139); seed4 9757.9 / 9559.3 (Δ199). Primary + all sensitivity windows complete
    (~5 s of post-onset trace at T=15000).
-4. **0–50 ms field support / dynamic range.** Contact support 15/15 all seeds, non-degenerate (dyn-range
-   seed1≈18.2, seed4≈5, seed3≈4). Source support 576/576 bins, non-degenerate.
-5. **rho_A / rho_B / rho_maxAB + nulls (0–50 ms).** Contact (B_to_A wins each): seed1 rho_maxAB **0.945**
-   (rho_a −0.565), within-shaft p **4.0e-4**; seed3 **0.735** (rho_a −0.526), p **0.086**; seed4 **0.924**
-   (rho_a −0.812), p **1.0e-3**. Quartile contrast positive (seed1 B_to_A +1.39). Source: rho_maxAB
-   0.651 / 0.546 / 0.585, toroidal p **0.0087 / 0.012 / 0.017** (3/3 significant).
-6. **Sign consistency / contact-vs-source.** All 3 seeds same sign (positive, B_to_A). Contact and source
-   both positive same direction every seed → concordant, not contradictory (multiseed Q3).
+4. **Pre-t120 early recruitment field support / dynamic range.** Contact support 15/15 all seeds,
+   non-degenerate (dyn-range seed1≈18.2, seed4≈5, seed3≈4). Source support 576/576 bins, non-degenerate.
+5. **rho_A / rho_B / mirror-invariant maxAB + nulls (pre-t120 0–50 ms).** Primary = maxAB; the winning
+   direction is descriptive only, not a success criterion. seed1 maxAB **0.945** (rho_a −0.565, rho_b +0.945),
+   within-shaft p **4.0e-4**; seed3 **0.735** (rho_a −0.526, rho_b +0.735), p **0.086** (weak / null-overlap);
+   seed4 **0.924** (rho_a −0.812, rho_b +0.924), p **1.0e-3**. Quartile contrast positive (seed1 +1.39). The
+   maxAB winner is B_to_A in all three THIS run — per the review this is NOT reported as a stable phenotype.
+6. **Consistency / source (supplementary).** Mirror-invariant contact maxAB is positive in all 3 seeds.
+   Source is a supplementary *direction-free axis engagement* diagnostic (rho_maxAB 0.651 / 0.546 / 0.585,
+   toroidal p **0.0087 / 0.012 / 0.017**, significant 3/3), reported separately and NOT combined with contact
+   into a direction-agreement claim.
 7. **Pre-runaway within-trajectory audit.** Eligible all 3 (25 / 29 / 30 pre-runaway returning events under
    the frozen bar) — secondary within-trajectory support present (not used as the primary template, §7.1).
 8. **Observation vs mechanism layer.** Observation-layer only. slow-off and native are common-random-number
    replays from t=0 (not exact state forks); establishes association + a broad z-necessity boundary, NOT that
    a local pre-transition z pattern (vs a uniform gain shift) causes the early gradient.
-9. **Optionals.** §10 z global/local snapshot decomposition: **not_run** (off-by-default observer exists,
-   not invoked). q50/tz10 sensitivity: **not_run** (primary consumed the budget). M3B projected propagator:
-   **not_run**. Local-tissue participation audit: **not_recomputed** for the contact result — the contact
-   readout was float-window-patched from saved LFP (`--readout-only`) and the native raster was not persisted;
-   documented follow-up (persist the early-window raster slice → recompute).
-10. **Largest gap + next step.** Gap: (a) contact-level significance is seed-fragile (within-shaft p sig 2/3;
-    seed3 marginal) even though the direction is consistent 3/3 and source is significant 3/3; (b) causality is
-    unproven (CRN replay). **Single next step**: exact fast+delay+slow+RNG snapshot/resume with bit-identical
-    continuation, then native / uniform-mean / shuffled / reset-z state-matched counterfactuals to separate a
-    local z pattern from a uniform gain shift, then the projected-propagator overlay.
+9. **Optionals / incomplete.** §10 z global/local decomposition: **not_run**. q50/tz10 sensitivity:
+   **not_run**. M3B projected propagator: **not_run**. Direct-core-excluded test: **uninformative** (n_kept=15,
+   nothing removed → cannot claim not-core-driven). Local-tissue participation audit: **not_recomputed** — the
+   contact readout was float-window-patched from saved LFP (`--readout-only`) and the native raster was not
+   persisted, so a contact virtual-LFP hotspot is NOT claimed as preferential local-neuron recruitment.
+   Follow-up: persist the early-window raster slice → recompute participation; add contacts inside the core so
+   core-exclusion becomes testable.
+10. **Largest gap + next step.** Gap: (a) contact-level significance is seed-fragile (within-shaft sig 2/3;
+    seed3 weak); source-space direction-free axis engagement is 3/3; (b) causality unproven (CRN replay).
+    **Next step (onset-dynamics phase)**: MZ equation crosswalk (z/m vs qI/J_K) + an onset state observer
+    (orthogonal G/X/D coordinates, no ratio parameter) + slow-off/z-only/m-only/z+m phase portraits; then, once
+    the observer is complete and checkpoint/resume is proven bit-identical, native / uniform-mean / shuffled /
+    reset-z (and m freeze/reset) state-matched counterfactuals with maxAB kept direction-invariant.
 
 ## 9. Provenance
 
