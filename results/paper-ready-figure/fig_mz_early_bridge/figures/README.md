@@ -19,16 +19,17 @@ earliness–energy Spearman 为 0.912；正式 bridge 统计仍使用 held-out-v
 maxAB（seed1=0.945，within-shaft p=0.0004），不是由这张代表性案例图重新定义。
 
 ### fig_mz_cross_seed_transfer.png / .pdf
-跨 seed 模板迁移（回答：间期时序模板是**固定 scaffold 的属性**，还是只是同 seed 噪声重放的巧合）。做法：用
-seed i 的 slow-off 方向模板去预测 seed j 的 pre-t120 失控能量场（3×3，方向无关 maxAB，每格用**打乱目标能量 seed
-在同一根杆内**的 within-shaft null 重算）。A = 3×3 迁移热图（行=模板 seed，列=能量 seed，星=within-shaft
-p<0.05）；B = 同一能量 seed 下三个模板 seed 的 maxAB 点是否收敛成一簇；C = 9 个格子里 maxAB 与非相关指标
-（场余弦、四分位能量对比）是否一起为正、随之增大。
+跨 seed 模板迁移诊断。用 seed i 的 slow-off 双向模板去预测 seed j 的 pre-t120 能量场；每格重算
+mirror-invariant maxAB 和对应的 within-shaft null。A = 3×3 描述性迁移矩阵（行=模板 seed，列=目标能量 seed）；
+B = 每个目标场下三个模板 seed 的 maxAB，短横线是每一个格子自己的 null p95，星号只标同 seed 对角格；
+C = 对每个目标 seed 直接计算「同 seed 模板 maxAB − 两个外来模板 maxAB 的中位数」。
 
-**关注点**：热图**按列几乎恒定、按行才变**（模板 seed 之间散度约 0.007 ≪ 能量 seed 之间散度约 0.095，约 13 倍）
-——说明 maxAB 由「预测哪个 seed 的能量」决定，而不是「用哪个 seed 的模板」；不同 seed 的模板收敛到同一预测，
-指向**共同的固定 scaffold**，显著削弱「只是同噪声重放巧合」的替代解释。seed3 那一列仍然弱（绿、无星、贴 null
-线）。表在 `../cross_seed_transfer.{json,csv}`。仍是观测层、非因果。
+**关注点**：同一目标场下换模板 seed 只改变约 0.007，而三个目标场之间约 0.095；更直接的 matched 差值约
++0.002 / −0.002 / −0.010，没有描述性的 same-seed 优势，因此削弱了“只是同一噪声 replay”的解释。但 3×3
+只有 **3 个目标场重复单位，不是 n=9**；而且本次 9/9 格子都由 B→A 分支赢得 maxAB，所以只能说**被调用的预测
+分支可以跨 seed 迁移**，不能宣称两个方向都已证明为 seed-invariant scaffold 属性。表在
+`results/topic4_sef_hfo/mz_early_field_bridge/cross_seed_transfer.{json,csv}`；此图是 exploratory diagnostic，
+不进入主图推断。
 
 ---
 

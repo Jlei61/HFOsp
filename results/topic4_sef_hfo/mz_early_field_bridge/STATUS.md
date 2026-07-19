@@ -1,130 +1,94 @@
 # MZ early-field bridge — STATUS
 
-Branch `codex/topic4-mz-slowvars`. Design contract:
-`docs/superpowers/specs/2026-07-19-topic4-mz-early-field-bridge-design.md`.
-8h autonomous run started 2026-07-19. Local commits only; no push/merge/rebase/PR.
+> 当前版本：**V1 observation/readout bridge，冻结于 2026-07-19**
+>
+> 分支：`codex/topic4-mz-slowvars`，local-only
+>
+> 设计合同：`docs/superpowers/specs/2026-07-19-topic4-mz-early-field-bridge-design.md`
 
-## 朴素话：这一步在测什么（plain-language, CLAUDE.md §8）
+## 一句话结论
 
-同一个「病人E1146布局」的模型底物上，我们让它先安静地自发放电（慢变量全关，slow-off），
-它会时不时冒出一小簇「间期样事件」，每簇事件里 15 个虚拟电极被点亮的**先后顺序**大致固定
-——这是这块底物的「空间指纹」。然后我们只打开一个慢变量 `z`（抑制效力随强活动被消耗 =
-去抑制），让同一底物在同一噪声实现下慢慢滑向一次「操作性失控放电」（operational runaway，
-**不是临床发作**）。核心问题：失控刚点火那一瞬（0–50 ms 窗）哪些电极/源点能量最高，是不是
-就是间期指纹里「最早被点亮」的那些？如果是，说明这块底物提供了一份可复用的空间响应模板，
-而 `z` 掉下去只是把整体增益推高——「同一支架，不同状态」。
+在一块固定的 E1146 SNN 底物上，slow-off 间期样事件给出的**双向时序轴**能够预测 `z`-only
+轨迹跨过 operational-runaway 阈值前的早期 contact 能量分布；这支持的是
+**“同一支架、状态依赖读出”的观测层可行性**，不是发作复现、因果机制或患者队列结论。
 
-判据全部预注册：模板用「留出事件」验证（不能自己验证自己）；关联用 maxAB（两个方向取大）+
-空间置换 null；三个 seed 只报一致性，不做 n=3 的 cohort p 值。所有措辞只写 operational
-runaway / virtual-LFP energy / phenomenological z，禁止写 seizure / broadband power / 因果。
+## 当前证据
 
-## Locked facts (verified from disk)
+- 分母：一块 E1146 模型底物 × seeds 1/3/4，不是 3 个患者。
+- 主统计：held-out-validated slow-off 双向模板与 `t_recruit` 后 0–50 ms、`t120` 前 contact
+  energy 的 mirror-invariant `rho_maxAB`。
+- `rho_maxAB`：0.945 / 0.735 / 0.924，中位 0.924，3/3 为正。
+- within-shaft null：p=0.0004 / 0.086 / 0.001；2/3 明确，seed3 与 null 重叠。
+- source-grid 只作方向无关的轴调用补充诊断：0.651 / 0.546 / 0.585，toroidal-shift
+  p=0.0087 / 0.012 / 0.017。它不与 contact 合并成“跨尺度同方向”结论。
+- 哪一端先起火不是结论。A→B、B→A 都是注册模板，`maxAB` 只处理镜像不变性，不定位固定发作灶。
 
-- HEAD `66a4d93`; uncommitted engine diff = off-by-default snapshot observer in
-  `src/snn_engine/mz_slow_vars.py` (snapshot_steps=None → exact parity) + 116 test lines.
-  Behavior-preserving; kept as-is; only used if optional §10 z-snapshot task is reached.
-- Primary candidate `zA_q75_tz5000`: `cfg={use_z:true,use_m:false,I_th_EI:95.19851312666987,tau_z:5000.0}`.
-  Multiseed (T=15000) → **runaway all 3 seeds**, `runaway_ms` = 9293.6 / 9499.3 / 9757.9 (seed 1/3/4);
-  slow-off baseline returning events 38 / 40 / 39. ~5 s post-onset → complete 0–50/0–100 ms window OK.
-- Sensitivity candidate `zA_q50_tz10000` (onset ~4.7–4.9 s) — ONLY if all primary deliverables done +>90 min left.
-- **Event-bar bug (spec §6) located**: `run_topic4_mz_slowvars.py::_events_from_res` (L133-141) recomputes
-  `bar = floor + C.CAL_FRAC*(af.max()-floor)` from each run's OWN af.max(). Fixed-bar detector must freeze
-  floor+bar from slow-off once (reuse `C.active_fraction/detect_events`, `C.CAL_FRAC=0.5`, `C.BIN_MS=1.0`,
-  `C.BASELINE_MS=(5,50)`) and pass that bar to both slow-off and native.
-- Shaft membership (within-shaft null) = leading-letter prefix of contact name (`_shaft` in
-  `scripts/paper_figures/plot_fig_subject_snn.py`). Registered plane: `reg{axis_unit,center,source_*,sink_*}`.
-- Reuse surface (`src/early_recruitment_readout.py`): `early_energy_field` (§8.3 + fail-closed §8.2),
-  `compare_arrival_to_energy` (§9 assoc; earliness=-rho), `permutation_null` + low-level index gens.
-  **maxAB null and source-grid toroidal-shift null are NOT in the module → written new, reusing the primitives.**
+## 跨 seed 迁移的正确口径
 
-## Architecture (new files)
+跨 seed 诊断把 seed i 的 slow-off 模板用于 seed j 的早期能量场。3×3 maxAB 主要随目标能量
+seed 改变；同一目标下模板 seed 的平均散度约 0.007，而目标场均值之间约 0.095。更直接地，
+每个目标 seed 的“同 seed 模板 − 两个外来模板中位数”为约 +0.002 / −0.002 / −0.010，
+没有描述性的 same-seed 优势。这削弱了“结果只来自同一噪声 replay”的解释。
 
-- `config/topic4_mz_early_field_bridge.yaml` — candidate, seeds, T, windows, thresholds, null params.
-- `src/topic4_mz_early_field_bridge.py` — pure functions: fixed-bar detector, 30–80 Hz peak-latency timing
-  field + readable rule, odd/even held-out template, direction labels, onset markers (t120/t_recruit),
-  contact/source early-energy fields, association, maxAB + within-shaft + toroidal nulls, core-excluded
-  support, local-tissue participation audit, eligibility/dynamic-range.
-- `scripts/run_topic4_mz_early_field_bridge.py` — per-seed runner (I/O + sim scheduling + provenance +
-  `--resume` atomic per-seed writes). Reuses `PP.build_substrate`, `MZR.run_mz_cell`, `MZR.build_core_masks`,
-  `LFPRecorder`, `C.*`, `M4._smooth/_first_sustained`.
-- `scripts/plot_topic4_mz_early_field_bridge.py` — seed1 (Fig5 grammar) + multiseed diagnostic figures.
-- `tests/test_topic4_mz_early_field_bridge.py` — the 10 required contract tests (synthetic fixtures).
+但这项扩展仍是 **exploratory diagnostic**：
 
-## Execution plan (multi-turn, background sims)
+- 统计重复单位只有 3 个目标能量场；9 个格子不是 9 个独立样本。
+- 这次 9/9 格子的 maxAB 都由 B→A 分支取胜，因此只能说**被调用的预测分支可跨 seed 迁移**；
+  不能据此宣称 A/B 两个方向都已证明为 seed-invariant scaffold 属性。
+- 原图中的 field cosine 本质仍是相关量，quartile contrast 又是在 Spearman 胜出方向上事后读取；
+  两者不再写作“独立非相关验证”。正式独立替代指标需要预先固定方向或在 null 内重做选择。
 
-P0 preflight/reuse-audit ✅ · P1 module+tests (TDD) · smoke (small T, 1 seed; check LFP shape/RAM/wall)
-· P2 background per-seed sims (serial or ≤2 parallel by RAM; each seed slow-off + native early_stop=False,
-frozen bar) · P3 templates+fields+nulls+cohort (mostly inside runner) · P4 figures + eyeball + 中文 README
-· P5 tests + STATUS + archive report + local commits. Stop launching new sims by hour 6.5.
+## Figure 5 V1
 
-## Completion-level tracker (spec §14) — FINAL
+主候选图：`results/paper-ready-figure/fig_mz_early_bridge/figures/fig_mz_early_bridge.{png,pdf}`。
 
-- [x] 1 engineering complete — fixed-bar detector, ported+reused readout, 12+8+41 tests green, resumable + --readout-only.
-- [x] 2 numerically eligible — held-out templates eligible 3/3 (both directions); complete non-degenerate 0-50ms fields 3/3.
-- [x] 3 scientific observation — direction/effect/nulls/seed-consistency reported all 3 seeds (see cohort_summary + archive §8).
-- [x] 4 bridge SUPPORTED (observation-level) — 3/3 seeds eligible held-out + positive MIRROR-INVARIANT contact
-      maxAB (0.945/0.735/0.924). within-shaft null sig 2/3 (seed3 weak p=0.086). Bidirectional axis: direction is
-      noise-set (NOT a success criterion, NOT a fixed focus). Source = supplementary direction-free axis engagement
-      (toroidal sig 3/3). Core-exclusion UNINFORMATIVE (n_kept=15, nothing removed → no not-core-driven claim).
-      NOT cohort proof, NOT seizure, NOT causal.
+- 上排是一条连续的 seed1 z-only native virtual-SEEG 轨迹，不拼接两次 replay。
+- 蓝窗是按固定规则选出的一个 native returning event；粉窗是 `t_recruit` 后 0–50 ms
+  pre-t120 early-energy window；红虚线是 operational-runaway `t120`。
+- 下排只有两个与上方窗一一对应的 contact-readout 场：exact-event recruitment order 与
+  pre-t120 energy。灰点只表示固定 E-neuron 几何，不表示局部招募。
+- 案例 exact-event 相关是描述性展示；正式统计仍来自 slow-off held-out 双向模板。
 
-## FINAL cohort (pre-t120 0-50ms early recruitment, contact all-support)
-Mirror-invariant rho_maxAB median 0.924, range [0.735, 0.945], n_positive 3/3. Within-shaft p: 4e-4 / 0.086 / 1e-3
-(seed 1/3/4; seed3 weak/null-overlap). Source (supplementary, direction-free axis engagement) 0.651/0.546/0.585,
-toroidal p 0.0087/0.012/0.017 (3/3 sig). Direction noise-set per seed (maxAB winner B_to_A this run, NOT a stable phenotype).
+跨 seed 图 `fig_mz_cross_seed_transfer.{png,pdf}` 仅作补充诊断，不作为主图证据或 n=9 推断。
 
-## Live checklist
+## 可以写 / 不可以写
 
-- [x] P0 preflight + read spec/plan/runner/readout module/engine
-- [x] deep-contract-verify enumerate invariants
-- [x] tests (green): 8 ported lib + 10 required + 1 sanity = 19 pass
-- [x] config + module + runner written (plot pending)
-- [x] smoke: N=40000 NE=32000, lfp (nsteps,15), 2 shafts SCL(4)/ICL(11), RSS 6.79GB@T2000 (~11GB@T15000), ~19min/run
-- [x] glue validated (synthetic): contact/source maxab + within-shaft/toroidal nulls + core-excluded
-- [x] seed1 sim complete (8515s ~2.4h) — onset resolved, templates both eligible
-- [x] BUG found+fixed: contact_energy_field float-window edge (t_recruit+50 vs grid 91283*0.1) mis-flagged
-      complete windows incomplete. Fix = integer-step window bounds snapped to exact grid samples +
-      regression test_2b. SOURCE path (integer steps) was unaffected.
-- [x] --readout-only patch mode: recompute CONTACT from saved LFP (no 2.4h re-sim); source preserved;
-      participation NOT recomputed (native raster not persisted — documented limitation).
-- [x] seed1 contact patched: rho_maxAB=0.945 (B_to_A), within-shaft p=0.0004, source 0.651 concordant.
-- [~] seeds 3,4 sims RUNNING (parallel, ~2.4h) — will --readout-only patch contact after.
-- [x] plot script + seed1 figure eyeballed (fixed to show maxAB-winning direction TB; timing↔energy concordant)
-- [x] seed4 complete (7384s) + patched: contact mirror-invariant maxAB=0.924, within-shaft p=0.001; source 0.585 (toroidal p=0.017, supplementary). maxAB positive.
-- [~] seed3 running (native/readout phase); will patch + final-aggregate after
-- [ ] ~~seeds 3,4 finish~~ → --readout-only patch contact
-- [ ] cohort aggregate (--aggregate-only 1,3,4)
-- [ ] multiseed figure + eyeball + figures/README.md
-- [ ] STATUS final + archive report results (+ plain-language abstract/handoff)
-- [ ] pytest full + git audit + commits
+可以写：
 
-## Commit plan (results/ is gitignored on this branch)
-- Normal commit: src/{early_recruitment_readout,topic4_mz_early_field_bridge}.py, scripts/{run,plot}_topic4_mz_early_field_bridge.py,
-  config/topic4_mz_early_field_bridge.yaml, tests/{test_early_recruitment_readout,test_topic4_mz_early_field_bridge}.py,
-  docs/archive/topic4/sef_hfo/mz_early_field_bridge_2026-07-19.md (+ bridge design spec + 8h prompt = executed contract).
-- `git add -f` (results gitignored): figures/*.png + figures/README.md + cohort_summary.{json,csv} + STATUS.md
-  (+ per_seed/*/{*.json} small). Do NOT commit the big LFP npz (intermediate; keep ignored).
-- Do NOT touch the parallel session's state_conditioned_susceptibility commits (HEAD 3cda82e) or its untracked
-  drafts (phase-portrait design, onset-dynamics prompt, susceptibility drafts) — not my work.
+> On a fixed patient-layout SNN scaffold, a held-out bidirectional interictal-like timing axis predicted
+> the spatial distribution of pre-runaway virtual-contact energy across three noise seeds, supporting an
+> observation-level same-scaffold, state-dependent-readout bridge.
 
-## Seed1 result (primary window 0-50ms, patched)
-- onset eligible: t120=9293.6, t_recruit=9078.3 (Δ215ms). 38 returning events; B_to_A=26, A_to_B=7, unresolved=5.
-- Templates BOTH eligible: B_to_A held-out median 0.995, A_to_B 0.361.
-- **Contact mirror-invariant maxAB=0.945, within-shaft null p=0.0004 (10k MC).** (Core-exclusion uninformative: n_kept=15, nothing removed.)
-- Source (supplementary, direction-free axis engagement) rho_maxAB=0.651, toroidal p=0.0087.
-- within-trajectory pre-runaway audit: 25 events (eligible).
-- Limitation: local-tissue participation audit not persisted for seed1 (readout patch); documented follow-up.
+不可以写：clinical seizure、clinical broadband power、complete seizure cycle、`z_i` 是唯一生物机制、
+某一端是固定发作灶、间期事件因果触发失控、contact 热点等于局部神经元优先招募、结果不依赖 core。
 
-## Run facts (from smoke)
-- Substrate N=40000 (NE=32000, NI=8000); contacts SCL6-9 + ICL1-11 (2 shafts).
-- Within-shaft null space 4!*11! >> 50000 -> Monte-Carlo n_perm=10000 (unrestricted 15! -> MC too).
-- Native uses early_stop=False (full 15s trace); slow-off + native are common-random-number replays
-  (run_mz_cell resets net rng to S['seed'] each call) -> matched pair, differ only in z (design §11.1).
-- Peak RSS ~11GB/run @ T=15000; free RAM 233GB; run seeds SERIALLY (1 concurrent SNN) for safety.
+## 工程验收
 
-## Open risks
+- fixed slow-off event bar 被跨状态复用；contact energy 窗口用整数步对齐，避免浮点边界误判。
+- odd/even held-out 模板、maxAB 内置换重选、within-shaft / toroidal null、fail-closed eligibility
+  均有合成合同测试。
+- 原始仿真、配置快照、per-seed JSON/NPZ 和 provenance 已保留；大 LFP/raster 中间文件不进 git。
+- 结果图都有中文 README；Figure 5 PNG/PDF 已目检。
+- cross-seed 汇总现在显式记录 3 个目标重复单位、胜出方向计数和 matched same-vs-foreign 差值；
+  CSV 使用 LF 行尾，并新增汇总合同测试。
 
-- RAM/OOM: full 15 s native early_stop=False + LFP + raster. Smoke must measure RSS before parallel.
-  Default serial (peak = 1 sim). Another session may be running SNN jobs — check free RAM before launch.
-- Native window completeness: run early_stop=False so t_recruit+100 ms is never truncated; else fail-closed.
-- Do not consume Arm C as dose-response (quarantined). Do not overwrite fig5_snn_state_readout/.
+## 尚未完成
+
+1. contact 层只有 2/3 seed 明确超过 within-shaft null，强度仍不稳。
+2. CRN replay 不是 checkpoint 后的真实状态分叉，不能区分全局去抑制增益与局部 `z_i` 图案。
+3. early-window 神经元 raster 未持久化，contact hotspot 的局部组织参与度不能审计。
+4. core-exclusion 没有删掉任何 contact，不能回答是否依赖 core loading。
+5. 跨 seed 只验证了本次被调用的 B→A 分支；双向分支的独立迁移还未建立。
+
+## V2 触发条件（等待 MZ onset-dynamics 版本）
+
+本 V1 不被后续结果覆盖。只有并行的 MZ onset-dynamics / state-conditioned artifacts 经独立验收后，
+才生成 **V2 integrated bridge**；不要提前把在跑的结果写入本结论。V2 至少要做到：
+
+1. 用完全相同的 `t_recruit`、`t120` 和 contact 模板注册到 `D_z`、`q_eff`、`A_m` 状态；
+2. 给出 state-matched checkpoint/resume 对照（native / uniform-mean / shuffled / reset z，必要时 m freeze/reset）；
+3. 区分整体去抑制、空间化易感性和 nonlinear ignition threshold 的贡献；
+4. 若持久化了早窗 raster，补局部组织参与度；
+5. V2 单独出动力学图，保留本 Figure 5 V1 作为 observation-layer exemplar，不把相图塞回这张图。
+
+如果这些条件未满足，下一版仍只能叫 readout update，不能升级为 mechanism/causal bridge。

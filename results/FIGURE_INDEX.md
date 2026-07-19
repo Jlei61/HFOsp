@@ -7,7 +7,7 @@
 > per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
 > `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
 >
-> 最近更新：2026-07-17。新增结论图目录时，请在对应 topic 表里补一行。
+> 最近更新：2026-07-19。新增结论图目录时，请在对应 topic 表里补一行。
 >
 > **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
 > 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
@@ -97,6 +97,7 @@
 |---|---|
 | [topic4_sef_hfo/schematic/figures/](topic4_sef_hfo/schematic/figures/) | 机制示意图 |
 | [paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/](paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/) | **Fig4A/B/C**：E1146 真实电极布局 subject-specific SNN readout（A）+ KMeans k=2 核验（B）+ 模型 vs 真实间期模板一致性（C，forward~t_a ρ+0.87 / reverse~t_b ρ+0.62） |
+| [paper-ready-figure/fig_mz_early_bridge/figures/](paper-ready-figure/fig_mz_early_bridge/figures/) | **Figure 5 V1 early-field bridge 候选**：同一条连续 z-only virtual-SEEG 轨迹中的 exact returning event 与 pre-t120 early-energy 窗，下面对应两个 contact-readout 场；主张限于一块 E1146 scaffold × 3 seed 的 observation-level same-scaffold/state-dependent readout。跨-seed 图是 exploratory diagnostic（3 个 target fields，非 n=9；本次只验证 B→A 胜出分支），等待 MZ onset-dynamics 验收后另做 V2 integrated bridge。 |
 | [paper-ready-figure/fig_m3a_v2_2_hG_runaway_transition/figures/](paper-ready-figure/fig_m3a_v2_2_hG_runaway_transition/figures/) | **M3A-v2.2 全局恢复 h_G 单轨迹 GIF**（visual diagnostic，非 sweep）：间期 axis-like→runaway 转变，把全局抑制恢复标量 `h_G` 打开。`h_G` 只在 runaway 时升起（局部事件期 χ_G≈0），但 runaway **未被逆转**；`eta_G` 阶梯 0→80（>10× 膜跨度）结构性无效——减法式全局刹车拉不回饱和 recurrent 雪崩，瓶颈在 E→E 衬底。配 v2.1 `fig_m3a_v2_1_qigk_runaway_transition`（同轨迹 h_G OFF） |
 | [topic4_criticality/figures/](topic4_criticality/figures/) | **M3A-v2.2 criticality M1**：frozen-Jacobian 轨迹判读；采样快照跨过失稳边界但没有直接命中 crossing，故 `csd_verdict=unresolved_operating_point`，作为历史诊断保留 |
 | [topic4_criticality_m2/figures/](topic4_criticality_m2/figures/) | **M3A-v2.2 criticality M2（2026-07-12 有界验收）**：线性起燃模式为 `core_localized`；非线性铺开对扰动强度/极性敏感，维持 `undetermined`。这是 M4 的上游诊断，不替代 M4 的恢复/终止设计 |

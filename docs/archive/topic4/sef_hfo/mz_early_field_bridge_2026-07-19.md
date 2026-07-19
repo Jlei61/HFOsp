@@ -202,3 +202,68 @@ Cohort (pre-t120 0–50 ms window, contact all-support): mirror-invariant `rho_m
 HEAD at run start `66a4d93`. Engine SHAs recorded in each per-seed `bridge_metrics.json::provenance`
 and in `results/topic4_sef_hfo/mz_early_field_bridge/provenance.json`. Config snapshot:
 `results/topic4_sef_hfo/mz_early_field_bridge/config_snapshot.yaml`.
+
+## 10. V1 整体复核与口径冻结（2026-07-19）
+
+### 一句话判断
+
+early-field bridge 已完成一个合格的**观测层桥接**：正式 contact 分析、空间 null、三 seed 重复和
+Figure 5 连续轨迹示例相互一致。最大缺口不是图，而是**因果状态分叉尚未完成**；因此当前不能从
+“同一支架在两种状态下读出相似空间场”升级为“局部 `z_i` 耗竭导致该转变”。
+
+### 完成度
+
+**完成度：82/100（V1 observation/readout 目标）**。
+
+- 已完成：fixed-bar 事件合同、held-out 双向模板、pre-t120 contact 场、maxAB-matched spatial null、
+  seeds 1/3/4、连续 Figure 5 visual grammar、可复现 artifact/provenance。
+- 扣分：contact 显著性仅 2/3 seed；local-tissue participation 与有效 core-exclusion 未完成；CRN replay
+  不是 checkpoint 后的 state-matched fork；cross-seed 扩展只有 3 个目标场且只验证了本次胜出的 B→A 分支。
+
+### P0 / P1 关键问题
+
+没有阻断 V1 观测结论的 P0。三个 P1 必须写入口径：
+
+1. **不能把跨 seed 的 3×3 当 n=9。** 9 个格子共享 3 个目标能量场；重复单位是 target seed，矩阵只作
+   描述性 transfer diagnostic。
+2. **不能把跨 seed 结果写成双向模板整体稳定。** 9/9 格子的 `maxAB` 都由 B→A 分支取胜；安全结论是
+   “本次被调用的预测分支跨 seed 可迁移”，不是“A/B 两分支均为 seed-invariant scaffold property”。
+3. **不能把 post-selection summary 当独立指标验证。** 原 field cosine 仍是相关量，quartile contrast 又是在
+   Spearman 胜出方向上读取；它们已从独立证据口径中删除。若需要 metric-robustness，必须预先冻结方向/指标，
+   或把方向选择完整嵌入相应 null。
+
+### 跨 seed 补充诊断的安全结论
+
+迁移矩阵为：
+
+```text
+template seed 1: 0.945  0.753  0.929
+template seed 3: 0.943  0.735  0.938
+template seed 4: 0.944  0.722  0.924
+                 target seeds 1 / 3 / 4
+```
+
+同一 target 下换 template seed 的平均散度约 0.007；target 场均值之间的散度约 0.095。更直接的
+same-seed maxAB 减去 foreign-template 中位数约为 +0.002 / −0.002 / −0.010。也就是说，本数据里没有
+same-seed replay 优势；这**削弱**了纯同噪声巧合解释，但不构成 scaffold causality proof。
+
+### 当前冻结 claim
+
+> 在固定 E1146 模型支架上，held-out 双向间期样时序轴能够预测三个噪声种子中 operational-runaway
+> 阈值前的 virtual-contact 早期能量分布，支持“同一支架、状态依赖读出”的观测层可行性。
+
+必须同时保留：一块模型底物而非患者队列；operational runaway 而非 clinical seizure；virtual 30–80 Hz
+energy 而非临床 broadband power；相关/迁移而非因果；contact hotspot 不等于局部神经元招募。
+
+### V2 更新锁
+
+本 V1 保留为独立 observation-layer artifact。等待 MZ onset-dynamics / state-conditioned 结果正式验收后，
+再做 **V2 integrated bridge**，并且只在以下项目齐全时升级机制口径：
+
+1. 把本分析冻结的 `t_recruit`、`t120`、模板和能量窗注册到 `D_z`、`q_eff`、`A_m`；
+2. checkpoint/resume 逐比特一致，并完成 native / uniform-mean / shuffled / reset-z 的 state-matched fork；
+3. 分开报告整体去抑制、空间化易感性、线性增益与 nonlinear ignition threshold；
+4. 补 early-window raster 后审计 local tissue participation；
+5. V2 另出动力学图，不向当前 Figure 5 塞入相图或未验收机制。
+
+若只新增相图但没有 state-matched counterfactual，下一版仍是动力学描述，不是 causal bridge。
