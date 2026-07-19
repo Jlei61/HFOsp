@@ -84,7 +84,7 @@ controls:
     settle_ms: 6000.0                        # start of the stable segment to search for the checkpoint
 
 # --- parallelism ---
-workers: 6                    # COW-shared connectivity fork workers (verified sub-OOM at smoke)
+workers: 12                   # COW-shared connectivity fork workers (each shares 13GB read-only + ~150MB/fork)
 
 # --- upstream artifacts (hashes recorded at run time into provenance) ---
 upstream:

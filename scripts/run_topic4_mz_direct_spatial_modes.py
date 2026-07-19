@@ -126,6 +126,8 @@ def build_S(seed, cfg):
     import run_m4_phaseplane as PP
     S = PP.build_substrate(seed)
     S["seed"] = seed
+    S["net"]["rng"] = np.random.default_rng(seed)          # the rng OBJECT must exist for run_loop
+                                                           # (fresh replay re-seeds it; forks overwrite its state from the checkpoint)
     ro = build_grid_readout(S["posE"], grid_n=int(cfg["grid_n"]), L_phys=float(cfg["L_phys"]),
                             L_norm=float(cfg["L_norm"]), center_phys=cfg["center_phys"])
     src_g, _ = normalize_subject_coordinates(S["src_xy"][None, :], L_phys=cfg["L_phys"],
@@ -407,7 +409,8 @@ def fixed_kick_state(S, ck, branch, cfg):
     resK = _fork_run(S, ck, branch, kick_E, window_steps=window_steps, cur_dur_steps=cur_dur,
                      freeze=True, store_spikes=True)
     ra0 = score_runaway(res0["rate_E"], DT, thresh_hz=run_hz, dur_ms=run_dur)
-    censor = right_censoring_label(ra0)
+    raK = score_runaway(resK["rate_E"], DT, thresh_hz=run_hz, dur_ms=run_dur)
+    censor = right_censoring_label(ra0)                    # no-probe control fate (right-censoring)
 
     centers = [float(c) for c in cfg["local_map_centers_ms"]]
     m0 = local_window_maps(res0["E_spk_bool"], ro, dt_ms=DT, centers_ms=centers,
@@ -432,7 +435,7 @@ def fixed_kick_state(S, ck, branch, cfg):
     thr = threshold_sensitivity_arrivals(ky["kymo"], ky["times"], ky["distances"],
                                          fracs=[float(x) for x in fk["arrival_thresh_fracs"]])
     return dict(
-        censor=censor, response_norm=response_norm(dY_full), region=reg,
+        censor=censor, kick_induced_runaway_ms=raK, response_norm=response_norm(dY_full), region=reg,
         cum_remote_over_source_final=float(cumratio[-1]) if cumratio.size else float("nan"),
         arrival_fit=fit, arrival_threshold_sensitivity={str(k): v for k, v in thr.items()},
         arrays=dict(dmaps=np.stack([dmaps[c] for c in centers]), map_centers=np.array(centers),
@@ -493,6 +496,7 @@ def _tiny_S(cfg, grid_n=6):
     from model import build_network
     p = Params(g=3.6, L=1.0, density=2000.0, T=200.0, dt=DT, nu_ext_ratio=0.9, seed=1)
     net = build_network(p, verbose=False)
+    net["rng"] = np.random.default_rng(1)
     NE, N = net["NE"], net["NE"] + net["NI"]
     posE = net["pos"][:NE]
     src_xy = np.array([0.35, 0.5]); snk_xy = np.array([0.65, 0.5])
@@ -537,11 +541,12 @@ def cmd_smoke(args, cfg):
     z0 = _fork_run(S, ck, branch, None, window_steps=200, cur_dur_steps=10, freeze=True, store_spikes=True)
     changed = not np.array_equal(a["E_spk_bool"], z0["E_spk_bool"])
     print(f"[smoke] common-RNG idempotent={crn}  perturbation_changes_output={changed}", flush=True)
-    # linearity + operator
+    # linearity + operator (workers from CLI so the smoke also exercises the fork/pickle path)
+    workers = int(args.workers or 2)
     t0 = time.time()
-    aud = linearity_audit_state(S, ck, branch, scfg, workers=1)
+    aud = linearity_audit_state(S, ck, branch, scfg, workers=workers)
     eps = aud["selection"]["epsilon"] or scfg["amplitude_ladder"][1]
-    op, basis = operator_for_state(S, ck, branch, scfg, eps, workers=1)
+    op, basis = operator_for_state(S, ck, branch, scfg, eps, workers=workers)
     n_forks = 2 * basis.shape[1] + 1
     dt_fork = (time.time() - t0) / max(n_forks, 1)
     print(f"[smoke] eps={eps} mode={aud['selection']['mode']} censor={op['censor']} "
@@ -559,41 +564,48 @@ def cmd_smoke(args, cfg):
 
 
 # ============================================================ full-density run (P0)
-def _combine_audit_selection(aud, cfg):
-    ladder = [float(a) for a in cfg["amplitude_ladder"]]
-    qual = None
-    for a in aud.values():
-        q = set(a["selection"]["qualified"])
-        qual = q if qual is None else (qual & q)
-    if not qual:
-        return dict(epsilon=None, mode="nonlinear_response_only", index=None)
-    idx = max(qual)
-    return dict(epsilon=ladder[idx], mode="operator", index=int(idx))
+def _lock_epsilon(aud, cfg):
+    """Lock ONE eps for all cells (spec §2.3). The quiet baseline is below the identifiability floor
+    (~0.1 Hz -> quantization-dominated response), so lock on the most-active state where linearity
+    actually holds: pre_onset first, then midpoint. None qualify -> nonlinear_response_only globally."""
+    for st in ("pre_onset", "midpoint"):
+        sel = aud.get(st, {}).get("selection", {})
+        if sel.get("mode") == "operator":
+            return dict(epsilon=sel["epsilon"], index=sel["index"], mode="operator", lock_state=st)
+    return dict(epsilon=None, index=None, mode="nonlinear_response_only", lock_state=None)
 
 
-def _process_state(S, ck, branch, cfg, label, seed, st, eps, mode, workers, freeze):
+def _state_verified(aud, st, lock_index):
+    """Did the locked eps pass THIS state's own linearity audit?"""
+    return bool(lock_index is not None and lock_index in aud.get(st, {}).get("selection", {}).get("qualified", []))
+
+
+def _process_state(S, ck, branch, cfg, label, seed, st, eps, mode, workers, freeze, linearity_verified=False):
     t0 = time.time()
     fk = fixed_kick_state(S, ck, branch, cfg)
     summ = dict(candidate=label, seed=seed, state=st, branch=int(branch), time_ms=branch * DT,
+                src_g=[float(x) for x in S["src_g"]], snk_g=[float(x) for x in S["snk_g"]],
+                axis_g=[float(x) for x in S["axis_g"]], linearity_verified=bool(linearity_verified),
                 fixed_kick={k: v for k, v in fk.items() if k != "arrays"})
     arrays = {f"fk_{k}": v for k, v in fk["arrays"].items()}
     if mode == "operator" and eps is not None:
         op, _ = operator_for_state(S, ck, branch, cfg, eps, workers=workers, freeze=freeze)
         summ["operator"] = dict(censor=op["censor"], sigma1=op.get("sigma1", {}),
-                                any_fork_runaway=op.get("any_fork_runaway"))
+                                any_fork_runaway=op.get("any_fork_runaway"),
+                                linearity_verified=bool(linearity_verified))
         if op["censor"] == "resolved":
             for k, v in op["arrays"].items():
                 arrays[f"op_{k}"] = v
             Tmid = int(round(cfg["T_windows_ms"][1]))
             summ["gabor"] = gabor_scan_from_operator(op["arrays"][f"M_T{Tmid}"], S, cfg)
     else:
-        summ["operator"] = dict(censor="nonlinear_response_only", note="operator skipped (eps failed linearity)")
+        summ["operator"] = dict(censor="nonlinear_response_only", note="operator skipped (no eps passed linearity)")
     summ["wall_s"] = round(time.time() - t0, 1)
     summ["provenance"] = _provenance(cfg, dict(phase="run", seed=seed, state=st, epsilon=eps))
     _dump(summ, os.path.join(OUT, "per_seed", f"state_{label}_seed{seed}_{st}.json"))
     np.savez_compressed(os.path.join(OUT, "per_seed", f"arrays_{label}_seed{seed}_{st}.npz"), **arrays)
     print(f"[run] {label} s{seed} {st} kick_norm={fk['response_norm']:.3g} "
-          f"op_censor={summ['operator'].get('censor')} ({summ['wall_s']}s)", flush=True)
+          f"op_censor={summ['operator'].get('censor')} verified={linearity_verified} ({summ['wall_s']}s)", flush=True)
 
 
 def cmd_run(args, cfg):
@@ -614,19 +626,24 @@ def cmd_run(args, cfg):
         _ensure_flat(S)
         if locked is None:
             aud = {st: linearity_audit_state(S, cks[st], branches[st], cfg, workers=workers, freeze=freeze)
-                   for st in ("baseline", "pre_onset")}
-            sel = _combine_audit_selection(aud, cfg)
-            locked = dict(lock_seed=seed, per_state=aud, locked_epsilon=sel["epsilon"], mode=sel["mode"],
-                          index=sel["index"], provenance=_provenance(cfg, dict(phase="linearity")))
+                   for st in ("baseline", "midpoint", "pre_onset")}
+            lock = _lock_epsilon(aud, cfg)
+            verified = {st: _state_verified(aud, st, lock["index"]) for st in aud}
+            locked = dict(lock_seed=seed, per_state=aud, locked_epsilon=lock["epsilon"], mode=lock["mode"],
+                          index=lock["index"], lock_state=lock["lock_state"], verified=verified,
+                          provenance=_provenance(cfg, dict(phase="linearity")))
             _dump(locked, audit_path)
-            print(f"[run] LOCKED eps={sel['epsilon']} mode={sel['mode']} on seed{seed}", flush=True)
+            print(f"[run] LOCKED eps={lock['epsilon']} mode={lock['mode']} lock_state={lock['lock_state']} "
+                  f"verified={verified}", flush=True)
         eps, mode = locked["locked_epsilon"], locked["mode"]
+        verified = locked.get("verified", {})
         for st in states:
             rj = os.path.join(OUT, "per_seed", f"state_{label}_seed{seed}_{st}.json")
             if args.resume and os.path.exists(rj):
                 print(f"[run] resume skip s{seed} {st}", flush=True)
                 continue
-            _process_state(S, cks[st], branches[st], cfg, label, seed, st, eps, mode, workers, freeze)
+            _process_state(S, cks[st], branches[st], cfg, label, seed, st, eps, mode, workers, freeze,
+                           linearity_verified=verified.get(st, False))
         del S, cks
         gc.collect()
 
@@ -766,6 +783,34 @@ def _capture_at(S, mz_cfg, branch):
 
 
 # ============================================================ aggregate + audits
+def _seeds_from_files(label):
+    seeds = set()
+    for f in glob.glob(os.path.join(OUT, "per_seed", f"state_{label}_seed*_*.json")):
+        seeds.add(int(os.path.basename(f).split("seed")[1].split("_")[0]))
+    return sorted(seeds)
+
+
+def _mode_overlaps(label, cfg):
+    """Adjacent-state U1 output-mode overlap (spec §4, sign-invariant |cos|) at the mid window: does the
+    empirical optimal-output mode reorganize between states, or stay the same shape?"""
+    Tmid = int(round(cfg["T_windows_ms"][1]))
+    out = []
+    for seed in _seeds_from_files(label):
+        u1 = {}
+        for st in cfg["primary_states"]:
+            f = os.path.join(OUT, "per_seed", f"arrays_{label}_seed{seed}_{st}.npz")
+            if os.path.exists(f):
+                d = np.load(f, allow_pickle=True)
+                if f"op_u1_T{Tmid}" in d.files:
+                    u1[st] = d[f"op_u1_T{Tmid}"]
+        row = dict(seed=seed)
+        for a, b in (("baseline", "pre_onset"), ("midpoint", "pre_onset")):
+            if a in u1 and b in u1:
+                row[f"u1_overlap_{a}_{b}"] = normalized_field_overlap(u1[a], u1[b])
+        out.append(row)
+    return out
+
+
 def cmd_aggregate(args, cfg):
     label, _, _ = _cand(cfg, args.candidate)
     per = sorted(glob.glob(os.path.join(OUT, "per_seed", f"state_{label}_seed*_*.json")))
@@ -792,7 +837,8 @@ def cmd_aggregate(args, cfg):
         if gb:
             gb_rows.append(dict(base, axial_gain=gb["axial_gain"], perp_gain=gb["perp_gain"],
                                 global_gain=gb["global_gain"], axis_minus_perp=gb["axis_minus_perp"]))
-    _dump(dict(schema_version=SCHEMA_VERSION, rows=op_rows, provenance=_provenance(cfg, dict(phase="aggregate"))),
+    _dump(dict(schema_version=SCHEMA_VERSION, rows=op_rows, mode_overlaps=_mode_overlaps(label, cfg),
+               provenance=_provenance(cfg, dict(phase="aggregate"))),
           os.path.join(OUT, "empirical_operator_summary.json"))
     _dump(dict(schema_version=SCHEMA_VERSION, rows=fk_rows), os.path.join(OUT, "fixed_kick_summary.json"))
     _dump(dict(schema_version=SCHEMA_VERSION, rows=gb_rows), os.path.join(OUT, "probe_scan_summary.json"))
