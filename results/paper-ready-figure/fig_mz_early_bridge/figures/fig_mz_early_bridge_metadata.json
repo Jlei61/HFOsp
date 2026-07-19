@@ -1,0 +1,34 @@
+{
+  "case_seed": 1,
+  "display_event_index": 1,
+  "display_event_direction": "B_to_A",
+  "display_event_t_on_ms": 737.0,
+  "display_event_t_off_ms": 764.0,
+  "t_recruit_ms": 9078.3,
+  "t120_ms": 9293.6,
+  "primary_window": "early_0_50_ms",
+  "framing": "operational runaway = model proxy, NOT clinical seizure; virtual-LFP energy proxy",
+  "per_seed": {
+    "1": {
+      "rho_a": -0.5654461466217138,
+      "rho_b": 0.9453009843927757,
+      "rho_maxab": 0.9453009843927757,
+      "within_shaft_p": 0.00039996000399960006,
+      "within_shaft_null_p95": 0.7821603306346664
+    },
+    "3": {
+      "rho_a": -0.5263281920352006,
+      "rho_b": 0.7351065022497505,
+      "rho_maxab": 0.7351065022497505,
+      "within_shaft_p": 0.08609139086091391,
+      "within_shaft_null_p95": 0.770426934790279
+    },
+    "4": {
+      "rho_a": -0.8124038404635959,
+      "rho_b": 0.9240929684291712,
+      "rho_maxab": 0.9240929684291712,
+      "within_shaft_p": 0.000999900009999,
+      "within_shaft_null_p95": 0.7612765882773649
+    }
+  }
+}
