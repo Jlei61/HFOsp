@@ -29,16 +29,33 @@ def fz():
     """两根杆：ICL 沿轴铺开（应判为 axial -> 橙），SCL 挤在一小段（transverse -> 青）。"""
     ax = np.array([-16.0, -8.0, 0.0, 8.0, 16.0, -3.0, -1.0, 1.0])
     pts = np.column_stack([ax, np.zeros(8)])
-    return dict(names=[f"ICL{i}" for i in range(1, 6)] + [f"SCL{i}" for i in range(1, 4)],
-                points_norm=pts / 20.0, points_mm=pts, analysis_sigma=0.2,
-                analysis_sigma_mm=4.0, display_sigma_mm=6.0,
-                display_xlim_mm=(-25.0, 25.0), display_ylim_mm=(-20.0, 20.0),
-                transverse_sign=1, transverse_basis_w=[1.0, 0.0, 0.0], scale_mm=20.0,
-                ax_mm=ax, shafts=np.array(["ICL"] * 5 + ["SCL"] * 3), axial_shaft="ICL",
-                rank_a=np.arange(8.0), rank_b=np.arange(8.0)[::-1],
-                support_a=np.linspace(0.2, 1.0, 8), support_b=np.linspace(1.0, 0.2, 8),
-                relation={"line_angle_deg": 47.0, "cosine": -0.68},
-                boot={"robust_collinear": False}, fingerprint="deadbeef" * 8)
+    out = dict(names=[f"ICL{i}" for i in range(1, 6)] + [f"SCL{i}" for i in range(1, 4)],
+               points_norm=pts / 20.0, points_mm=pts, analysis_sigma=0.2,
+               analysis_sigma_mm=4.0, display_sigma_mm=6.0,
+               display_xlim_mm=(-25.0, 25.0), display_ylim_mm=(-20.0, 20.0),
+               transverse_sign=1, transverse_basis_w=[1.0, 0.0, 0.0], scale_mm=20.0,
+               ax_mm=ax, shafts=np.array(["ICL"] * 5 + ["SCL"] * 3), axial_shaft="ICL",
+               rank_a=np.arange(8.0), rank_b=np.arange(8.0)[::-1],
+               support_a=np.linspace(0.2, 1.0, 8), support_b=np.linspace(1.0, 0.2, 8),
+               relation={"line_angle_deg": 47.0, "cosine": -0.68},
+               boot={"robust_collinear": False}, fingerprint="deadbeef" * 8,
+               template_field_mode="shared")
+    payloads = {}
+    for lab, vals, sup in (
+        ("TA", np.linspace(0.0, 1.0, 8), out["support_a"]),
+        ("TB", np.linspace(1.0, 0.0, 8), out["support_b"]),
+    ):
+        payloads[lab] = dict(
+            ds_sid="epilepsiae_1146", names=out["names"], xs=pts[:, 0], ys=pts[:, 1],
+            sup=np.asarray(sup, float), soz=np.zeros(8, bool), src_a=set(), src_b=set(),
+            frame=dict(xlim=out["display_xlim_mm"], ylim=out["display_ylim_mm"],
+                       sigma_mm=6.0),
+            vals=np.asarray(vals, float), transverse_sign=1,
+            rank_values=(np.arange(8.0) if lab == "TA" else np.arange(8.0)[::-1]),
+            transverse_alignment_rmse_mm=0.0,
+        )
+    out["template_payloads"] = payloads
+    return out
 
 
 def _event(fz, *, peaks_ms, part, fs=1024.0):
@@ -135,6 +152,43 @@ def test_tb_screen_prioritizes_strict_middle_complete_event_over_block_diversity
     assert [r["event_pos"] for r in got] == [1, 2]
 
 
+def test_tb_screen_readme_marks_the_locked_fig2c_event(tmp_path):
+    def row(event_pos, filename):
+        return dict(
+            event_pos=event_pos, figure_name=filename, axial_shaft="ICL",
+            centroid_vs_axis_rho=-0.9, n_middle_usable=3, n_middle_expected=3,
+            middle_peak_z_min=12.0, left_minus_right_centroid_ms=41.0,
+            shaft_counts={
+                "ICL": {"n_usable": 11, "n_participating": 11},
+                "SCL": {"n_usable": 4, "n_participating": 4},
+            },
+        )
+
+    current = row(2521, "current.png")
+    selected = [row(829, "candidate_04.png")]
+    path = S._write_readme(
+        tmp_path, selected, current, 58.2, selected_for_fig2c_event_pos=829,
+    )
+    text = path.read_text(encoding="utf-8")
+    assert "当前锁定 TB event=829" in text
+    assert "当前 Fig2-C 选定 TB 单事件" in text
+    assert "旧 medoid TB 参照事件" in text
+
+
+def test_explicit_exemplar_is_label_checked_and_auditable(monkeypatch, fz):
+    ev = {"labels": np.array([0, 1])}
+    expected = {"stem": "fake_0009"}
+    monkeypatch.setattr(P, "build_event", lambda *args: expected)
+    event, meta = P.load_explicit_exemplar(
+        fz, ev, {}, "1146", event_pos=1, label=1, tname="TB",
+    )
+    assert event is expected
+    assert meta["selected_event_pos"] == 1
+    assert "direction-qualified illustrative exemplar" in meta["caveat"]
+    with pytest.raises(ValueError, match="not requested TA"):
+        P.load_explicit_exemplar(fz, ev, {}, "1146", event_pos=1, label=0, tname="TA")
+
+
 # ------------------------------------------------------------------ readout 图层合同（fig1a 形式）
 def _readout_art(fz, e, st):
     fig, ax = plt.subplots()
@@ -210,14 +264,24 @@ def test_left_readout_row_label_and_top_xlabel_contract(fz, ta):
     order = list(np.argsort(fz["ax_mm"]))
     P._readout(
         ax, ta, fz, order, (-50.0, 200.0), P.event_stats(ta, fz),
-        template="TA", show_xlabel=False, row_label="TA",
+        title="Sample from TA", template="TA", show_xlabel=True, row_label="TA",
     )
-    assert ax.get_title() == ""
-    assert ax.get_xlabel() == ""
+    assert ax.get_title() == "Sample from TA"
+    assert ax.get_xlabel() == "time (ms)"
     assert ax.get_ylabel() == "TA"
     assert ax.yaxis.label.get_color() == P.TEMPLATE_COLORS["TA"]
-    assert ax.get_box_aspect() == pytest.approx(1.0)
+    assert ax.get_box_aspect() == pytest.approx(P.READOUT_BOX_ASPECT)
+    assert ax.title.get_position()[0] == pytest.approx(0.96)
+    assert ax.title.get_ha() == "right"
     plt.close(fig)
+
+
+def test_readout_uses_common_window_intersection_to_remove_white_edge_bars(fz, ta, tb):
+    ta = dict(ta, tile_lo_ms=-110.0, tile_hi_ms=150.0)
+    tb = dict(tb, tile_lo_ms=-90.0, tile_hi_ms=130.0)
+    assert P._common_readout_xlim(ta, tb) == pytest.approx((-90.0, 130.0))
+    with pytest.raises(ValueError, match="at least two events"):
+        P._common_readout_xlim(ta)
 
 
 # ------------------------------------------------------------------ shared field 图层合同
@@ -253,6 +317,31 @@ def test_event_field_is_exactly_the_established_physical_mm_smoother(fz, ta):
 
 def test_event_field_uses_fixed_six_mm_display_bandwidth(fz):
     assert fz["display_sigma_mm"] == P.DEFAULT_DISPLAY_SIGMA_MM == 6.0
+
+
+def test_frozen_template_panel_uses_viridis_rank_not_event_envelope(fz):
+    fig, ax = plt.subplots()
+    im = P._template_panel(ax, fz, "TA", show_y=True, show_x=True)
+    assert im.get_cmap().name == "viridis"
+    assert im.get_clim() == pytest.approx((0.0, 1.0))
+    assert ax.get_title() == "TA template"
+    assert ax.get_xlabel() == "shared TA axis (mm)"
+    assert ax.get_ylabel() == "y (mm)"
+    assert ax.collections[0].get_sizes()[0] == pytest.approx(P.TEMPLATE_CONTACT_SIZE)
+    plt.close(fig)
+
+
+def test_template_colorbar_uses_actual_ranks_and_top_title(fz):
+    fig, cax = plt.subplots(figsize=(1.0, 3.0))
+    cb, rank_range = P._template_rank_colorbar(fig, cax, fz, "TA")
+    assert rank_range == pytest.approx((0.0, 7.0))
+    assert cb.ax.get_title(loc="left") == "ranks"
+    assert cb.ax.get_title() == ""
+    assert cb.ax.yaxis.label.get_text() == ""
+    assert cb.get_ticks() == pytest.approx([0.0, 3.5, 7.0])
+    labels = [tick.get_text() for tick in cb.ax.get_yticklabels()]
+    assert labels == ["0  early", "3.5", "7  late"]
+    plt.close(fig)
 
 
 # ------------------------------------------------------------------ support 模式
@@ -310,9 +399,10 @@ def test_compact_layout_contract():
     assert P.FIELD_CBAR_WIDTH_RATIO < 0.05
     assert P.FIELD_CBAR_WIDTH_RATIO > 0.03
     assert P.GROUP_GAP_WIDTH_RATIO > P.FIELD_CBAR_WIDTH_RATIO
-    assert P.READOUT_WIDTH_RATIO == pytest.approx(1.0)
+    assert P.READOUT_WIDTH_RATIO < 0.8
+    assert P.READOUT_BOX_ASPECT > 1.0
     assert P.SPEC_CBAR_WIDTH_RATIO < P.FIELD_CBAR_WIDTH_RATIO
-    assert P.FIGURE_WIDTH_IN >= 12.5
+    assert P.FIGURE_WIDTH_IN >= 16.0
     assert 4.5 < P.FIGURE_HEIGHT_IN < 5.0
     assert P.FIELD_TICK_LABELSIZE >= 8
     assert P.CONTACT_TICK_LABELSIZE >= 8
@@ -323,21 +413,31 @@ def test_compact_layout_contract():
     assert P.TEMPLATE_LABEL_SIZE >= 12
     assert P.MAIN_TITLE_SIZE >= 15
     assert (P.READOUT_COL, P.READOUT_CBAR_COL, P.GROUP_GAP_COL, P.FRAME_COL_START) == (0, 1, 2, 3)
+    assert P.TEMPLATE_FIELD_COL > P.FIELD_CBAR_COL
+    assert P.TEMPLATE_CBAR_COL == P.N_LAYOUT_COLS - 1
     assert P._subject_title("epilepsiae_1146") == "E1146"
 
 
 def test_frame_times_are_never_duplicated():
     """承重回归：曾用「质心时刻的分位」取帧 —— 质心聚在 0-25ms 内，多个分位落到同一毫秒，
     图上出现两个 "+2 ms" 的重复帧。"""
-    fts = ief.frame_times_ms(-15.0, 40.0, P.N_FRAMES)
+    fts = P._static_frame_times(-15.0, 40.0, P.N_FRAMES)
     assert len(np.unique(np.round(fts, 1))) == len(fts) == P.N_FRAMES
     assert np.all(np.diff(fts) > 0)
+    assert 0.0 in fts
+
+
+def test_static_frame_times_insert_zero_into_locked_E1146_grid():
+    got = P._static_frame_times(-8.0, 50.0)
+    assert got == pytest.approx([-8.0, 0.0, 3.6, 15.2, 26.8, 38.4, 50.0])
+    assert P._time_label(0.0) == "0 ms"
+    assert P._time_label(3.6) == "+4 ms"
 
 
 def test_frame_window_is_tighter_than_the_old_plus_96ms_tail(fz, ta, tb):
     lo, hi = P._frame_window(ta, tb)
     assert (lo, hi) == pytest.approx((-8.0, 39.0))
-    assert P.N_FRAMES == 6
+    assert P.N_FRAMES == 7
     assert P.FRAME_MAX_POST_MS == 50.0
 
 

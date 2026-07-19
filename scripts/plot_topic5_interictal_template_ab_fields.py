@@ -167,15 +167,19 @@ def build_interictal_ab_panel_payloads(
     mode = _axis_mode(record, models)
     planes = field.get("planes") or {}
     names = [str(x) for x in field["contact_order"]]
-    rank_a = _rank01(field["rank_a"])
-    rank_b = _rank01(field["rank_b"])
+    rank_a_raw = np.asarray(field["rank_a"], float)
+    rank_b_raw = np.asarray(field["rank_b"], float)
+    rank_a = _rank01(rank_a_raw)
+    rank_b = _rank01(rank_b_raw)
 
     specs = (
-        ("shared_a", "shared", rank_a) if mode == "shared" else ("own_a", "own_a", rank_a),
-        ("shared_b", "shared", rank_b) if mode == "shared" else ("own_b", "own_b", rank_b),
+        ("shared_a", "shared", rank_a, rank_a_raw)
+        if mode == "shared" else ("own_a", "own_a", rank_a, rank_a_raw),
+        ("shared_b", "shared", rank_b, rank_b_raw)
+        if mode == "shared" else ("own_b", "own_b", rank_b, rank_b_raw),
     )
     raw = []
-    for model_key, plane_key, ranks in specs:
+    for model_key, plane_key, ranks, rank_values in specs:
         model = models[model_key]
         plane = planes[plane_key]
         scale_mm = float(plane["scale_mm"])
@@ -190,6 +194,10 @@ def build_interictal_ab_panel_payloads(
                 "xs": points_mm[:, 0],
                 "ys": points_mm[:, 1],
                 "vals": np.asarray(ranks, float),
+                # Keep the frozen integer-like ranks alongside the 0..1 display values.
+                # Embedded paper panels can therefore label their colorbars in actual ranks
+                # without changing the established field colours or refitting the field.
+                "rank_values": np.asarray(rank_values, float),
                 "sup": np.asarray(model["support"], float),
                 # The analysis kernel remains frozen in ``model['sigma']``.
                 # A fixed display-only bandwidth restores the established
@@ -230,6 +238,7 @@ def build_interictal_ab_panel_payloads(
                     "sigma_mm": item["sigma_mm"],
                 },
                 "vals": item["vals"],
+                "rank_values": item["rank_values"],
                 "transverse_sign": int(sign),
                 "transverse_alignment_rmse_mm": float(transverse_rmse),
             }
@@ -240,6 +249,7 @@ def build_interictal_ab_panel_payloads(
 def draw_interictal_rank_field_panel(
     ax, payload: Mapping[str, object], template: str, *,
     compact: bool = False, panel_title: str | None = None,
+    contact_outline_lw: float | None = None, contact_size: float | None = None,
 ):
     """Draw one locked TA/TB rank-field panel using the shared renderer."""
     template = str(template).upper()
@@ -250,8 +260,14 @@ def draw_interictal_rank_field_panel(
     draw_topic5_field_panel(
         ax, payload, payload["vals"], title, "early 0 → late 1",
         compact=compact, labels=False, cbar=False,
-        contact_outline_lw=(ATLAS_CONTACT_OUTLINE_LW if compact else CONTACT_OUTLINE_LW),
-        contact_size=(ATLAS_CONTACT_SIZE if compact else CONTACT_SIZE),
+        contact_outline_lw=(
+            float(contact_outline_lw) if contact_outline_lw is not None
+            else (ATLAS_CONTACT_OUTLINE_LW if compact else CONTACT_OUTLINE_LW)
+        ),
+        contact_size=(
+            float(contact_size) if contact_size is not None
+            else (ATLAS_CONTACT_SIZE if compact else CONTACT_SIZE)
+        ),
     )
     if compact:
         ax.title.set(color="#222222", fontsize=9)

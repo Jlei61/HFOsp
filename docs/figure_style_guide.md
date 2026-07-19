@@ -113,11 +113,13 @@
 
 ### 3d. 间期单事件包络传播 frame / GIF（Fig2-C 候选）
 
-- **唯一规范**：[`docs/fig2c_interictal_event_envelope_field_spec.md`](fig2c_interictal_event_envelope_field_spec.md)。之后所有“间期传播场 frame / event-envelope GIF”先读该文件；不要套用静态模板场 Fig2-E 的 viridis/rank 语法。
+- **唯一规范**：[`docs/fig2c_interictal_event_envelope_field_spec.md`](fig2c_interictal_event_envelope_field_spec.md)。之后所有“间期传播场 frame / event-envelope GIF”先读该文件；中间单事件 envelope field 不得套用 Fig2-E 的 viridis/rank 语法，只有最右群体模板参照场保留该语法。
 - **示范图**：[`results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png`](../results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png)。
 - **动态 sidecar**：同目录 `fig2c_candidate_E1146_interictal_event_envelope_field.gif`。
 - **复现入口**：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py --subject epilepsiae_1146`；core renderer 为 `scripts/plot_topic5_interictal_event_envelope_field.py`。
-- **视觉硬锁**：两行 TA/TB；左侧为方形 Fig1a readout，右侧为 6 个等高方形 frame；静态时间只到 +50 ms；包络用 `magma`，TA/TB 共享 `vmax`、各有等高 colorbar；TA 红/TB 蓝；标题只写匿名患者号；所有 frame 保留 x ticks。
+- **视觉硬锁**：每行按 `单事件 readout | 7 个 envelope frames | 冻结群体 template-rank field` 排列；readout 标题固定为 `Sample from TA/TB` 并在轴内靠右避开 colorbar，两行都写 `time (ms)`；x limits 取两次真实 STFT 窗的交集，不能在两端留无数据白条；静态时刻为 `−8, 0, +4, +15, +27, +38, +50 ms`。
+- **量纲硬锁**：中间 `magma` 表示单带 80–250 Hz Hilbert amplitude envelope 的 baseline robust-z，不得写成 energy/power；最右 `viridis` 表示冻结群体模板传播顺序，colorbar 顶部只写 `ranks` 并显示 artifact 实际 rank（E1146 为 0–14），端点分别写 early/late，不得再显示归一化 0–1。两幅模板场都写简短 `y (mm)`。
+- **解释边界**：最右 template field 只提供群体顺序参照，不能把左/中单事件升级成 template-free、cohort replay、二维 traveling-wave 或机制证据。
 - **数据硬锁**：frozen fingerprint/contact order/shared plane 不重拟合；单带 `return_hil_enve`；participant-only support；6 mm 只作 display kernel；GIF 与静态图使用同一 exemplar/几何/色标，2 ms biological step 与 playback fps 分开记录。
 - **适用范围硬锁**：这是单事件规范——TA/TB 每行各一个 exemplar。未来多事件 GIF 必须另立事件边界、事件间隔、逐事件 t0 和抽样合同，不得把 event train 塞进本 renderer。
 - **禁止**：不称 template-free，不把 Hilbert amplitude 写成 power，不把单被试两次事件写成 cohort 传播定律、跨未采样组织的 traveling wave 或机制证明。

@@ -63,6 +63,8 @@ from scripts.plot_contact_plane_static import _limits_with_padding, _smooth_rank
 from scripts.plot_topic5_interictal_template_ab_fields import (
     DEFAULT_DISPLAY_SIGMA_MM,
     _canonical_transverse_sign,
+    build_interictal_ab_panel_payloads,
+    draw_interictal_rank_field_panel,
 )
 from src.interictal_propagation import load_subject_propagation_events
 from src.lagpat_rank_audit import mask_phantom_ranks
@@ -84,7 +86,7 @@ ONSET_FRAC, ONSET_MIN_Z, ONSET_SUSTAIN_MS = 0.25, 5.0, 5.0
 TOP_K, SNR_MIN_Z, SNR_MIN_CH = 40, 5.0, 5
 AXIAL_MIN_CH = 6       # 沿轴杆上至少 6 个触点的峰可测 —— 4 个点量不出梯度。
                        # 这是**可测性**门（看有几个点，不看斜率），不是挑漂亮的。
-FRAME_AVG_MS, CMAP, N_FRAMES = 3.0, "magma", 6
+FRAME_AVG_MS, CMAP, N_FRAMES = 3.0, "magma", 7
 FRAME_PRE_MS, FRAME_MARGIN_MS, FRAME_MIN_POST_MS, FRAME_MAX_POST_MS = 8.0, 4.0, 35.0, 50.0
 GIF_STEP_MS, GIF_FPS = 2.0, 12
 NOTCH_HZ = (50.0, 100.0, 150.0, 200.0, 250.0)
@@ -92,15 +94,22 @@ FIG1A_CMAP = "coolwarm"
 CENTROID_FACE = "#ffb000"
 TEMPLATE_COLORS = {"TA": "#B2182B", "TB": "#2166AC"}
 FIELD_CBAR_WIDTH_RATIO = 0.045
-GROUP_GAP_WIDTH_RATIO = 0.10
-READOUT_WIDTH_RATIO = 1.00
-SPEC_CBAR_WIDTH_RATIO = 0.025
-FIGURE_WIDTH_IN = 12.5
+TEMPLATE_CBAR_WIDTH_RATIO = 0.045
+GROUP_GAP_WIDTH_RATIO = 0.08
+TEMPLATE_GAP_WIDTH_RATIO = 0.14
+READOUT_WIDTH_RATIO = 0.72
+READOUT_BOX_ASPECT = 1.18
+SPEC_CBAR_WIDTH_RATIO = 0.032
+TEMPLATE_FIELD_WIDTH_RATIO = 1.0
+TEMPLATE_CONTACT_SIZE = 38
+TEMPLATE_CONTACT_OUTLINE_LW = 1.2
+FIGURE_WIDTH_IN = 16.2
 FIGURE_HEIGHT_IN = 4.9
 FIELD_TICK_LABELSIZE = 8
 CONTACT_TICK_LABELSIZE = 8
 READOUT_TICK_LABELSIZE = 9
 CBAR_TICK_LABELSIZE = 8
+CBAR_LABELSIZE = 9
 TICK_LENGTH = 1.5
 AXIS_LABELSIZE = 12
 FRAME_TITLE_SIZE = 12
@@ -110,6 +119,11 @@ READOUT_COL = 0
 READOUT_CBAR_COL = 1
 GROUP_GAP_COL = 2
 FRAME_COL_START = 3
+FIELD_CBAR_COL = FRAME_COL_START + N_FRAMES
+TEMPLATE_GAP_COL = FIELD_CBAR_COL + 1
+TEMPLATE_FIELD_COL = TEMPLATE_GAP_COL + 1
+TEMPLATE_CBAR_COL = TEMPLATE_FIELD_COL + 1
+N_LAYOUT_COLS = TEMPLATE_CBAR_COL + 1
 PAPER_SCHEMA_ID = "fig2c_interictal_event_envelope_field_candidate_v1"
 
 
@@ -139,6 +153,9 @@ def _shared_display_geometry(shared_plane):
 def load_frozen(ds_sid):
     rec = json.load(open(FROZEN / f"{ds_sid}.json"))
     scorers_from_interictal_record(rec)                          # <- fingerprint gate (raises)
+    template_a, template_b, template_mode = build_interictal_ab_panel_payloads(
+        rec, display_sigma_mm=DEFAULT_DISPLAY_SIGMA_MM,
+    )
     f, ap = rec["interictal_field"], rec["axis_pair"]
     sh = (f.get("planes") or {}).get("shared")
     if f["status"] != "ok" or not sh or sh.get("status") != "ok":
@@ -163,7 +180,9 @@ def load_frozen(ds_sid):
                 support_a=np.asarray(f["support_a"], float),
                 support_b=np.asarray(f["support_b"], float),
                 relation=ap["relation"], boot=ap["pair_bootstrap"],
-                fingerprint=f["fingerprint_sha256"])
+                fingerprint=f["fingerprint_sha256"],
+                template_payloads={"TA": template_a, "TB": template_b},
+                template_field_mode=template_mode)
 
 
 def load_events(fz, subject):
@@ -416,6 +435,33 @@ def pick_exemplar(fz, ev, inv, subject, label, tname):
                                    "representative of all TA/TB events")
 
 
+def load_explicit_exemplar(fz, ev, inv, subject, event_pos, label, tname):
+    """Load one previously audited event without silently re-running exemplar selection."""
+    event_pos = int(event_pos)
+    if event_pos < 0 or event_pos >= len(ev["labels"]):
+        raise IndexError(f"{tname} event_pos={event_pos} is outside the event table")
+    if int(ev["labels"][event_pos]) != int(label):
+        raise ValueError(
+            f"event_pos={event_pos} is assigned to template {int(ev['labels'][event_pos])}, "
+            f"not requested {tname} label {int(label)}"
+        )
+    event = build_event(ev, event_pos, inv, subject, fz)
+    print(
+        f"  [{tname}] explicitly locked direction-qualified event #{event_pos} "
+        f"({event['stem']})",
+        flush=True,
+    )
+    meta = dict(
+        selection_mode="explicit_event_pos_after_locked_candidate_screen",
+        selected_event_pos=event_pos,
+        caveat=(
+            "direction-qualified illustrative exemplar selected under the locked candidate-screen "
+            "contract; NOT an unconditional representative of all TA/TB events"
+        ),
+    )
+    return event, meta
+
+
 # ------------------------------------------------------------------ 渲染
 def _support(mode, fz, e, which):
     if mode == "participant":
@@ -467,6 +513,26 @@ def _frame_window(ea, eb):
     )
 
 
+def _static_frame_times(t_lo, t_hi, n_frames=N_FRAMES):
+    """Keep the established six-frame grid and insert an explicit t=0 frame."""
+    t_lo, t_hi = float(t_lo), float(t_hi)
+    if int(n_frames) < 3:
+        raise ValueError("static frame grid requires at least three frames")
+    if t_lo < 0.0 < t_hi:
+        base = ief.frame_times_ms(t_lo, t_hi, int(n_frames) - 1)
+        # If the uniform grid nearly hits zero, redistribute the post-zero frames rather than
+        # printing visually duplicate 0/+1 ms titles.
+        if float(np.min(np.abs(base))) < 3.0:
+            times = np.concatenate(([t_lo], np.linspace(0.0, t_hi, int(n_frames) - 1)))
+        else:
+            times = np.sort(np.append(base, 0.0))
+    else:
+        times = ief.frame_times_ms(t_lo, t_hi, int(n_frames))
+    if len(times) != int(n_frames) or len(np.unique(np.round(times, 1))) != len(times):
+        raise ValueError(f"invalid static frame times: {np.round(times, 1)}")
+    return np.asarray(times, float)
+
+
 def _display_vmax_events(events, t_lo, t_hi):
     """One scale for any candidate set, computed from complete intervals, not sampled frames."""
     win = [
@@ -498,6 +564,25 @@ def _gif_frame_times(t_lo, t_hi, step_ms=GIF_STEP_MS):
     return times
 
 
+def _time_label(x):
+    return "0 ms" if abs(float(x)) < 0.5 else f"{float(x):+.0f} ms"
+
+
+def _common_readout_xlim(*events):
+    """Use the common recorded window so neither row contains an event-specific white strip."""
+    if len(events) < 2:
+        raise ValueError("readout x-limit requires at least two events")
+    lo = float(max(e["tile_lo_ms"] for e in events))
+    hi = float(min(e["tile_hi_ms"] for e in events))
+    if not np.isfinite([lo, hi]).all() or hi <= lo:
+        raise ValueError(f"events have no common readout window: {lo:g}..{hi:g} ms")
+    for event in events:
+        centroids = np.asarray(event["centroid_ms"], float)[np.asarray(event["usable"], bool)]
+        if centroids.size and (np.nanmin(centroids) < lo or np.nanmax(centroids) > hi):
+            raise ValueError("common readout window would crop a displayed centroid")
+    return lo, hi
+
+
 def _readout(
     ax, e, fz, order, xlim, _stats, title=None, *, template,
     show_xlabel=True, row_label=None,
@@ -526,14 +611,17 @@ def _readout(
                linewidth=0.35, zorder=5)
     ax.set_xlim(*xlim)
     ax.set_ylim(len(sel) * n_freq, 0.0)
-    ax.set_box_aspect(1.0)
+    ax.set_box_aspect(READOUT_BOX_ASPECT)
     ax.margins(x=0.0)
     ax.set_yticks((np.arange(len(sel)) + 0.5) * n_freq)
     ax.set_yticklabels([fz["names"][c] for c in sel], fontsize=CONTACT_TICK_LABELSIZE)
     if show_xlabel:
         ax.set_xlabel("time (ms)", fontsize=AXIS_LABELSIZE)
     if title:
-        ax.set_title(title, fontsize=TEMPLATE_LABEL_SIZE, color=semantic, fontweight="bold")
+        ax.set_title(
+            title, fontsize=TEMPLATE_LABEL_SIZE, color=semantic, fontweight="bold",
+            x=0.96, ha="right", pad=3,
+        )
     if row_label:
         ax.set_ylabel(
             row_label, fontsize=TEMPLATE_LABEL_SIZE,
@@ -542,6 +630,56 @@ def _readout(
     ax.tick_params(axis="x", labelsize=READOUT_TICK_LABELSIZE, length=TICK_LENGTH)
     ax.tick_params(axis="y", labelsize=CONTACT_TICK_LABELSIZE, length=0)
     return im, sel, xs, ys
+
+
+def _label_colorbar(cb, text):
+    cb.set_label(text, fontsize=CBAR_LABELSIZE, labelpad=3)
+    cb.ax.tick_params(labelsize=CBAR_TICK_LABELSIZE, length=TICK_LENGTH)
+
+
+def _template_panel(ax, fz, template, *, show_y, show_x):
+    """Embed the frozen population-template rank field via its canonical renderer."""
+    payload = fz["template_payloads"][template]
+    draw_interictal_rank_field_panel(
+        ax, payload, template, compact=False, panel_title=f"{template} template",
+        contact_size=TEMPLATE_CONTACT_SIZE,
+        contact_outline_lw=TEMPLATE_CONTACT_OUTLINE_LW,
+    )
+    ax.set_title(
+        f"{template} template", fontsize=TEMPLATE_LABEL_SIZE,
+        color=TEMPLATE_COLORS[template], fontweight="bold",
+    )
+    ax.set_xlabel("shared TA axis (mm)" if show_x else "", fontsize=AXIS_LABELSIZE)
+    ax.set_ylabel("y (mm)" if show_y else "", fontsize=AXIS_LABELSIZE)
+    ax.tick_params(axis="both", labelsize=FIELD_TICK_LABELSIZE, length=TICK_LENGTH)
+    if not show_y:
+        ax.set_yticklabels([])
+    return ax.images[-1]
+
+
+def _template_rank_colorbar(fig, cax, fz, template):
+    """Show the frozen template's actual rank numbers while preserving viridis colours."""
+    values = np.asarray(fz["template_payloads"][template]["rank_values"], float)
+    values = values[np.isfinite(values)]
+    if values.size < 2:
+        raise ValueError(f"{template}: fewer than two finite frozen ranks")
+    lo, hi = float(np.min(values)), float(np.max(values))
+    if hi <= lo:
+        raise ValueError(f"{template}: frozen rank range is degenerate")
+    mid = float(0.5 * (lo + hi))
+    ticks = [lo, mid, hi]
+
+    def fmt(value):
+        return f"{value:.0f}" if np.isclose(value, np.round(value)) else f"{value:g}"
+
+    cb = fig.colorbar(
+        ScalarMappable(Normalize(lo, hi), cmap="viridis"), cax=cax,
+    )
+    cb.set_ticks(ticks)
+    cb.set_ticklabels([f"{fmt(lo)}  early", fmt(mid), f"{fmt(hi)}  late"])
+    cb.ax.set_title("ranks", fontsize=CBAR_LABELSIZE, pad=4, loc="left")
+    cb.ax.tick_params(labelsize=CBAR_TICK_LABELSIZE, length=TICK_LENGTH)
+    return cb, (lo, hi)
 
 
 def _subject_title(ds_sid):
@@ -556,11 +694,8 @@ def render(
     pts = fz["points_mm"]
     sup = {"TA": _support(support_mode, fz, ea, "a"), "TB": _support(support_mode, fz, eb, "b")}
     t_lo, t_hi = _frame_window(ea, eb) if frame_window is None else map(float, frame_window)
-    # 窗已由质心收紧 -> 均匀取帧即可，且**必须互不重复**。
-    # 曾用「质心时刻的分位」取帧：质心聚在 0-25ms 内，多个分位落到同一毫秒 -> 重复帧。
-    fts = ief.frame_times_ms(t_lo, t_hi, N_FRAMES)
-    if len(np.unique(np.round(fts, 1))) != len(fts):
-        raise ValueError(f"duplicate frame times: {np.round(fts, 1)}")
+    # 先保留既有六帧均匀网格，再插入显式 t=0；单事件时间锚点不能从静态 panel 消失。
+    fts = _static_frame_times(t_lo, t_hi, N_FRAMES)
     # vmax 从**完整 frame 窗**算；只用离散帧会漏掉帧间窄峰。TA/TB 分别放色条，
     # 但仍使用同一个 0..vmax，避免视觉布局调整破坏跨模板的幅度可比性。
     vmax = (_display_vmax(ea, eb, t_lo, t_hi)
@@ -569,15 +704,16 @@ def render(
         raise ValueError("vmax_override must be positive and finite")
 
     order = list(np.argsort(fz["ax_mm"]))
-    readout_xlim = (float(min(e["tile_lo_ms"] for e in (ea, eb))),
-                    float(max(e["tile_hi_ms"] for e in (ea, eb))))
-    fig, axes = plt.subplots(2, N_FRAMES + 4,
+    readout_xlim = _common_readout_xlim(ea, eb)
+    fig, axes = plt.subplots(2, N_LAYOUT_COLS,
                              figsize=(FIGURE_WIDTH_IN, FIGURE_HEIGHT_IN),
                              layout="constrained",
                              gridspec_kw={
                                  "width_ratios": [READOUT_WIDTH_RATIO, SPEC_CBAR_WIDTH_RATIO,
                                                   GROUP_GAP_WIDTH_RATIO]
-                                 + [1] * N_FRAMES + [FIELD_CBAR_WIDTH_RATIO],
+                                 + [1] * N_FRAMES
+                                 + [FIELD_CBAR_WIDTH_RATIO, TEMPLATE_GAP_WIDTH_RATIO,
+                                    TEMPLATE_FIELD_WIDTH_RATIO, TEMPLATE_CBAR_WIDTH_RATIO],
                              })
     layout_engine = fig.get_layout_engine()
     if layout_engine is not None:
@@ -590,25 +726,33 @@ def render(
             )
             X, Y, T, _, _ = _event_field(fz, v, sup[lab])
             field_ax = axes[r, FRAME_COL_START + c]
-            _panel(field_ax, (X, Y), T, pts, v, e["part"], vmax, f"{x:+.0f} ms",
+            _panel(field_ax, (X, Y), T, pts, v, e["part"], vmax, _time_label(x),
                    show_y=(c == 0), show_x=(r == 1 and c == N_FRAMES // 2))
-        field_cax = axes[r, -1]
+        field_cax = axes[r, FIELD_CBAR_COL]
         field_cax.set_box_aspect(1.0 / FIELD_CBAR_WIDTH_RATIO)
         field_cb = fig.colorbar(
             ScalarMappable(Normalize(0, vmax), cmap=CMAP), cax=field_cax, extend="max",
         )
-        field_cb.ax.tick_params(labelsize=CBAR_TICK_LABELSIZE, length=TICK_LENGTH)
+        _label_colorbar(field_cb, "HFO envelope (robust z)")
         axes[r, GROUP_GAP_COL].set_axis_off()
+        axes[r, TEMPLATE_GAP_COL].set_axis_off()
         spec_im, _, _, _ = _readout(
             axes[r, READOUT_COL], e, fz, order, readout_xlim, st,
-            template=lab, show_xlabel=(r == 1), row_label=lab,
+            title=f"Sample from {lab}", template=lab, show_xlabel=True, row_label=lab,
         )
         spec_cax = axes[r, READOUT_CBAR_COL]
         spec_cax.set_box_aspect(1.0 / SPEC_CBAR_WIDTH_RATIO)
         spec_cb = fig.colorbar(spec_im, cax=spec_cax)
         spec_cb.set_ticks([0, 1])
-        spec_cb.ax.tick_params(labelsize=CBAR_TICK_LABELSIZE, length=0)
+        _label_colorbar(spec_cb, "Normalized magnitude")
         spec_cb.outline.set_visible(False)
+        _template_panel(
+            axes[r, TEMPLATE_FIELD_COL], fz, lab,
+            show_y=True, show_x=(r == 1),
+        )
+        template_cax = axes[r, TEMPLATE_CBAR_COL]
+        template_cax.set_box_aspect(1.0 / TEMPLATE_CBAR_WIDTH_RATIO)
+        _template_rank_colorbar(fig, template_cax, fz, lab)
     fig.suptitle(
         _subject_title(ds_sid), x=0.01, ha="left",
         fontsize=MAIN_TITLE_SIZE, fontweight="bold",
@@ -622,10 +766,21 @@ def render(
           f"({support_mode})", flush=True)
     return dict(t_lo_ms=float(t_lo), t_hi_ms=float(t_hi), vmax=float(vmax),
                 frame_times_ms=[float(x) for x in fts], support_mode=support_mode,
-                field_colorbars="one unlabeled bar per TA/TB row; shared 0..vmax limits",
-                readout_colorbars="one unlabeled 0..1 bar per TA/TB row",
-                panel_order="readout | readout colorbar | gap | field frames | field colorbar",
+                field_colorbars=("one labeled HFO envelope (robust z) bar per TA/TB row; "
+                                 "shared 0..vmax limits"),
+                readout_colorbars="one labeled normalized-magnitude 0..1 bar per TA/TB row",
+                template_colorbars=("one viridis bar per TA/TB row titled ranks; actual frozen "
+                                    "rank numbers with separate early/late endpoint text"),
+                template_rank_ranges={
+                    lab: [float(np.nanmin(fz["template_payloads"][lab]["rank_values"])),
+                          float(np.nanmax(fz["template_payloads"][lab]["rank_values"]))]
+                    for lab in ("TA", "TB")
+                },
+                panel_order=("single-event readout | readout colorbar | gap | event envelope "
+                             "frames | envelope colorbar | gap | frozen template rank field | "
+                             "template colorbar"),
                 readout_xlim_ms=[float(x) for x in readout_xlim],
+                readout_xlim_mode="common intersection of the two recorded STFT windows",
                 display_sigma_mm=float(fz["display_sigma_mm"]),
                 display_xlim_mm=[float(x) for x in fz["display_xlim_mm"]],
                 display_ylim_mm=[float(x) for x in fz["display_ylim_mm"]],
@@ -653,16 +808,15 @@ def render_gif(
     if not np.isfinite(vmax) or vmax <= 0:
         raise ValueError("vmax_override must be positive and finite")
     order = list(np.argsort(fz["ax_mm"]))
-    readout_xlim = (
-        float(min(e["tile_lo_ms"] for e in (ea, eb))),
-        float(max(e["tile_hi_ms"] for e in (ea, eb))),
-    )
+    readout_xlim = _common_readout_xlim(ea, eb)
 
     fig, axes = plt.subplots(
-        2, 5, figsize=(5.7, FIGURE_HEIGHT_IN), layout="constrained",
+        2, 8, figsize=(9.0, FIGURE_HEIGHT_IN), layout="constrained",
         gridspec_kw={
             "width_ratios": [READOUT_WIDTH_RATIO, SPEC_CBAR_WIDTH_RATIO,
-                             GROUP_GAP_WIDTH_RATIO, 1.0, FIELD_CBAR_WIDTH_RATIO],
+                             GROUP_GAP_WIDTH_RATIO, 1.0, FIELD_CBAR_WIDTH_RATIO,
+                             TEMPLATE_GAP_WIDTH_RATIO, TEMPLATE_FIELD_WIDTH_RATIO,
+                             TEMPLATE_CBAR_WIDTH_RATIO],
         },
     )
     layout_engine = fig.get_layout_engine()
@@ -673,7 +827,7 @@ def render_gif(
     for r, (lab, e, st) in enumerate((("TA", ea, sa), ("TB", eb, sb))):
         spec_im, _, _, _ = _readout(
             axes[r, 0], e, fz, order, readout_xlim, st,
-            template=lab, show_xlabel=(r == 1), row_label=lab,
+            title=f"Sample from {lab}", template=lab, show_xlabel=True, row_label=lab,
         )
         cursor_lines.append(
             axes[r, 0].axvline(
@@ -685,7 +839,7 @@ def render_gif(
         spec_cax.set_box_aspect(1.0 / SPEC_CBAR_WIDTH_RATIO)
         spec_cb = fig.colorbar(spec_im, cax=spec_cax)
         spec_cb.set_ticks([0, 1])
-        spec_cb.ax.tick_params(labelsize=CBAR_TICK_LABELSIZE, length=0)
+        _label_colorbar(spec_cb, "Normalized magnitude")
         spec_cb.outline.set_visible(False)
         axes[r, 2].set_axis_off()
 
@@ -698,7 +852,7 @@ def render_gif(
         field_ax = axes[r, 3]
         _panel(
             field_ax, (X, Y), T, pts, v, e["part"], vmax,
-            f"{frame_times[0]:+.0f} ms", show_y=True, show_x=(r == 1),
+            _time_label(frame_times[0]), show_y=True, show_x=(r == 1),
         )
         field_images.append(field_ax.images[-1])
         field_scatters.append(field_ax.collections[0])
@@ -709,7 +863,14 @@ def render_gif(
             ScalarMappable(Normalize(0, vmax), cmap=CMAP),
             cax=field_cax, extend="max",
         )
-        field_cb.ax.tick_params(labelsize=CBAR_TICK_LABELSIZE, length=TICK_LENGTH)
+        _label_colorbar(field_cb, "HFO envelope (robust z)")
+        axes[r, 5].set_axis_off()
+        _template_panel(
+            axes[r, 6], fz, lab, show_y=True, show_x=(r == 1),
+        )
+        template_cax = axes[r, 7]
+        template_cax.set_box_aspect(1.0 / TEMPLATE_CBAR_WIDTH_RATIO)
+        _template_rank_colorbar(fig, template_cax, fz, lab)
 
     fig.suptitle(
         _subject_title(ds_sid), x=0.01, ha="left",
@@ -728,7 +889,7 @@ def render_gif(
             _, _, T, _, _ = _event_field(fz, v, sup[lab])
             field_images[r].set_data(T)
             field_scatters[r].set_array(np.clip(v[e["part"]], 0.0, vmax))
-            field_titles[r].set_text(f"{x:+.0f} ms")
+            field_titles[r].set_text(_time_label(x))
             cursor_lines[r].set_xdata([x, x])
             artists.extend((field_images[r], field_scatters[r], field_titles[r], cursor_lines[r]))
         return artists
@@ -761,6 +922,17 @@ def render_gif(
         frame_average_ms=float(FRAME_AVG_MS), t_lo_ms=float(t_lo), t_hi_ms=float(t_hi),
         vmax=float(vmax), cmap=CMAP, display_sigma_mm=float(fz["display_sigma_mm"]),
         readout_cursor="black dashed line at the displayed field time",
+        panel_order=("single-event readout | normalized-magnitude colorbar | current envelope "
+                     "field | robust-z colorbar | frozen template rank field | rank colorbar"),
+        readout_xlim_ms=[float(x) for x in readout_xlim],
+        readout_xlim_mode="common intersection of the two recorded STFT windows",
+        template_field=("frozen viridis propagation rank; colorbar shows actual frozen rank "
+                        "numbers and separate early/late endpoint text"),
+        template_rank_ranges={
+            lab: [float(np.nanmin(fz["template_payloads"][lab]["rank_values"])),
+                  float(np.nanmax(fz["template_payloads"][lab]["rank_values"]))]
+            for lab in ("TA", "TB")
+        },
     )
 
 
@@ -773,12 +945,15 @@ def _write_paper_ready_readme(figures_dir, ds_sid, js, static_meta, gif_meta):
     stem = _paper_stem(ds_sid)
     ta = js["exemplar"]["TA"]["stats"][f"shaft_{js['axial_shaft']}"]
     tb = js["exemplar"]["TB"]["stats"][f"shaft_{js['axial_shaft']}"]
+    frame_text = ", ".join(
+        _time_label(x).removesuffix(" ms") for x in static_meta["frame_times_ms"]
+    )
     gif_block = ""
     if gif_meta is not None:
         gif_block = f"""
 ### {stem}.gif
 
-同一对 TA/TB exemplar 的动态版本。生物学时间从 {gif_meta['t_lo_ms']:+.0f} 到 {gif_meta['t_hi_ms']:+.0f} ms，帧间隔 {gif_meta['biological_step_ms']:.0f} ms；播放速度 {gif_meta['playback_fps']:.0f} fps 只用于观看，不代表真实时间倍率。左侧黑色虚线与右侧当前 field 帧严格同步。
+同一对 TA/TB exemplar 的动态版本。生物学时间从 {gif_meta['t_lo_ms']:+.0f} 到 {gif_meta['t_hi_ms']:+.0f} ms，帧间隔 {gif_meta['biological_step_ms']:.0f} ms；播放速度 {gif_meta['playback_fps']:.0f} fps 只用于观看，不代表真实时间倍率。左侧黑色虚线与中间当前 envelope field 帧严格同步，最右冻结 template rank field 保持不动。
 
 **关注点**：比较 TA/TB 热区沿冻结 shared axis 的相反移动；GIF 与静态 candidate 必须使用同一 exemplar、support、几何、6 mm display kernel 和固定 A/B 共同色标。
 """
@@ -786,7 +961,7 @@ def _write_paper_ready_readme(figures_dir, ds_sid, js, static_meta, gif_meta):
 
 ### {stem}.png / .pdf
 
-Fig2-C representative-subject 单事件候选：每行只放一个 exemplar（TA 一次、TB 一次），不是多事件 train。每行左侧为 Fig1a 同源的 normalized magnitude spectrogram 与主高频增强区质心轨迹，右侧为同一事件在冻结 shared plane 上的 participant-only 单带 HFO 包络场。静态帧固定为 `-8, +4, +15, +27, +38, +50 ms`；TA/TB 分别使用红/蓝语义色，包络场使用 `magma`，两行共享同一 `0–vmax` 数值范围。
+Fig2-C representative-subject 单事件候选：每行只放一个 exemplar（TA 一次、TB 一次），不是多事件 train。三组内容依次为：左侧 `Sample from TA/TB` normalized-magnitude spectrogram 与质心轨迹；中间 participant-only 单带 HFO Hilbert amplitude envelope 的 robust-z 场；最右冻结群体 TA/TB propagation-rank field。静态帧为 `{frame_text} ms`，显式包含 `0 ms`。中间使用 `magma` 并共享 `0–vmax`；最右使用 `viridis`，colorbar 顶部写 `ranks` 并显示 artifact 实际 rank，最低/最高端分别附 early/late。左侧两行取真实 STFT 窗的共同交集，避免无数据白边；三个 colorbar 均写明物理量。
 
 当前 E1146 的沿轴杆 {js['axial_shaft']} 质心-轴 Spearman 为 TA {ta['fig1a_centroid_vs_axis_rho']:+.3f}、TB {tb['fig1a_centroid_vs_axis_rho']:+.3f}。显示核固定为 6 mm，只控制画布连续性，不替换冻结分析 kernel。
 
@@ -898,7 +1073,7 @@ def _write_readme(ds_sid, fz, js):
 
 ### {main}
 
-左侧复用 Fig1a 的 Gaussian-smoothed magnitude、逐触点逐事件归一化、主增强区质心和真实 STFT cell 边界，并为 TA/TB 分别配置一条与 readout 等高的 0–1 色条；触点只显示名称并按 shared axis 排序，TA 轨迹为红、TB 为蓝，这条线不是跨杆物理路径。右侧两行在完全相同的 shared-plane 物理毫米坐标上显示 TA/TB 单事件包络帧，采用既有 field producer 的固定 6 mm display kernel；6 帧集中覆盖到 +50 ms 为止的质心事件主体。TA/TB 各有一条与本行 field 等高、无文字标签的色条，两条仍共享同一个数值范围。沿轴杆 {fz['axial_shaft']} 的 Fig1a 质心-轴 Spearman 为 TA {ar:+.3f}、TB {br:+.3f}。
+左侧复用 Fig1a 的 Gaussian-smoothed magnitude、逐触点逐事件归一化、主增强区质心和真实 STFT cell 边界，并明确标题为单次 `Sample from TA/TB`；上下两行都写 `time (ms)`，x limits 取两次真实 STFT 窗的共同交集，标题在轴内靠右避开 colorbar。中间两行在完全相同的 shared-plane 物理毫米坐标上显示 participant-only robust-z HFO envelope，7 帧包含显式 `0 ms` 并覆盖到 +50 ms。最右两幅调用冻结群体 TA/TB template-rank field 公共 renderer；`viridis` colorbar 顶部写 `ranks`，显示 artifact 实际 rank 数值并在最低/最高端分别附 early/late，两行 y-label 均简写为 `y (mm)`。沿轴杆 {fz['axial_shaft']} 的 Fig1a 质心-轴 Spearman 为 TA {ar:+.3f}、TB {br:+.3f}。
 
 **关注点**：比较两行质心轨迹与左侧热区移动是否同号相反；不要把单被试两次示例升级成跨二维组织的 traveling wave 证据。
 
@@ -921,7 +1096,7 @@ def _write_readme(ds_sid, fz, js):
 
 def run(
     ds_sid, *, paper_ready_dir=None, make_gif=False,
-    gif_step_ms=GIF_STEP_MS, gif_fps=GIF_FPS,
+    gif_step_ms=GIF_STEP_MS, gif_fps=GIF_FPS, tb_event_pos=None,
 ):
     dataset, subject = ds_sid.split("_", 1)
     if dataset != "epilepsiae":
@@ -934,7 +1109,12 @@ def run(
     ev = load_events(fz, subject)
     inv = _inventory(subject)
     ea, ma = pick_exemplar(fz, ev, inv, subject, 0, "TA")
-    eb, mb = pick_exemplar(fz, ev, inv, subject, 1, "TB")
+    if tb_event_pos is None:
+        eb, mb = pick_exemplar(fz, ev, inv, subject, 1, "TB")
+    else:
+        eb, mb = load_explicit_exemplar(
+            fz, ev, inv, subject, tb_event_pos, 1, "TB",
+        )
     sa, sb = event_stats(ea, fz), event_stats(eb, fz)
     for lab, e, st in (("TA", ea, sa), ("TB", eb, sb)):
         a = st[f"shaft_{fz['axial_shaft']}"]
@@ -1015,12 +1195,14 @@ def main():
     ap.add_argument("--gif", action="store_true")
     ap.add_argument("--gif-step-ms", type=float, default=GIF_STEP_MS)
     ap.add_argument("--gif-fps", type=float, default=GIF_FPS)
+    ap.add_argument("--tb-event-pos", type=int)
     args = ap.parse_args()
     if args.gif and args.paper_ready_dir is None:
         ap.error("--gif requires --paper-ready-dir")
     run(
         args.subject, paper_ready_dir=args.paper_ready_dir, make_gif=args.gif,
         gif_step_ms=args.gif_step_ms, gif_fps=args.gif_fps,
+        tb_event_pos=args.tb_event_pos,
     )
     print("DONE", flush=True)
 
