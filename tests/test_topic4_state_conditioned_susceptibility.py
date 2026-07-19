@@ -166,7 +166,10 @@ def test_end_to_end_resolved_state_has_finite_atlas_and_distinct_eigen():
     assert set(out["atlas"]["persistence"]["axial"]) <= {"G50_over_G30", "G75_over_G30"}
     assert out["eigen"]["status"] == "resolved"
     assert 0.0 <= out["eigen"]["leading_globality"] <= 1.0             # true eigenmode shape, kept distinct
-    assert arrays["q_field"].shape == (8, 8) and "peak_probe_output_rE" in arrays
+    # three DISTINCT objects saved as fields (design §3.5 + review 2026-07-19): eigenmode / V1 / U1
+    for k in ("q_field", "eigen_field", "v1_optimal_input", "u1_optimal_output", "peak_paired_output_rE"):
+        assert arrays[k].shape == (8, 8), k
+    assert out["optimal"]["sigma1"] > 0 and np.isfinite(out["optimal"]["u1_output_axis"])
 
 
 def test_leading_probe_subspace_svd_shapes():
@@ -174,3 +177,43 @@ def test_leading_probe_subspace_svd_shapes():
     svd = leading_probe_subspace_svd(R)
     assert svd["s0"] > 0 and svd["optimal_output_field"].shape == (20,)
     assert svd["optimal_probe_weights"].shape == (7,)
+
+
+def test_fixed_kick_time_response():
+    from src.topic4_state_conditioned_susceptibility import (
+        sigma1_vs_T, make_localized_kick, fixed_kick_evolution, axial_kymograph)
+    grid = Grid(n=6, L=5.0)
+    sc = _scaffold(grid, mu_core=0.5)
+    op, J, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
+    assert J is not None
+    N = grid.size
+    Ts = [0.0, 10.0, 30.0, 50.0]
+    s = sigma1_vs_T(J, grid, Ts, N)
+    assert len(s) == 4 and s[0] == 1.0 and all(np.isfinite(s))           # sigma1(0)=identity=1
+    b = make_localized_kick(grid, (-1.62, -0.38), 0.6)
+    assert abs(np.linalg.norm(b) - 1.0) < 1e-9                            # unit norm
+    ev = fixed_kick_evolution(J, grid, b, [0.0, 10.0, 30.0], N)
+    assert ev[0.0].shape == (6, 6)
+    assert np.allclose(ev[0.0], b[:N].reshape(6, 6))                      # t=0 is the kick itself
+    xs, ts, kymo = axial_kymograph(ev, grid, -0.38, band=0.5)
+    assert kymo.shape == (3, 6) and np.all(kymo >= 0)                      # (n_t, n_x), |rE|>=0
+
+
+def test_optimal_perturbation_dominates_any_probe_gain():
+    # V1 is the UNCONSTRAINED optimal finite-time input over the whole E-rate space, so sigma1 must be
+    # >= the gain of ANY single probe (the probe span is a subset of the input space).
+    from src.topic4_state_conditioned_susceptibility import optimal_finite_time_perturbation, eigen_field
+    grid = Grid(n=6, L=5.0)
+    sc = _scaffold(grid, mu_core=0.5)
+    op, J, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
+    assert J is not None
+    N = grid.size
+    opt = optimal_finite_time_perturbation(J, grid, 30.0, N)
+    assert opt["v1_field"].shape == (6, 6) and opt["u1_field"].shape == (6, 6)
+    probes = make_phase_paired_probe_dictionary(grid, p_max=3, center=(-1.62, -0.38))
+    B = probe_matrix(probes, grid)
+    R = batched_finite_time_response(J, B, 30.0)[:N, :]
+    max_probe_gain = float(np.max(np.linalg.norm(R, axis=0)))          # ||b||=1 columns
+    assert opt["sigma1"] >= max_probe_gain - 1e-9                      # unconstrained optimum dominates
+    ef = eigen_field(J, grid)
+    assert ef is not None and ef.shape == (6, 6) and np.all(ef >= 0)   # subspace loading magnitude

@@ -134,17 +134,11 @@ def plot_seed1(seed=1):
     else:
         disp_dir = elig_dirs[0] if elig_dirs else "A_to_B"
     tmpl = tm["contact_A"] if disp_dir == "A_to_B" else tm["contact_B"]
-    # representative slow-off event of the display direction (best match to the template)
-    ev_dir = [str(x) for x in so["event_dir"]]; ranks = so["event_rank_stack"]
-    disp_idx, best = None, -2.0
-    for i, dd in enumerate(ev_dir):
-        if dd != disp_dir:
-            continue
-        m = np.isfinite(tmpl) & np.isfinite(ranks[i])
-        if m.sum() >= 3 and np.ptp(tmpl[m]) > 0 and np.ptp(ranks[i][m]) > 0:
-            r = float(np.corrcoef(tmpl[m], ranks[i][m])[0, 1])
-            if r > best:
-                best, disp_idx = r, i
+    # pre-specified display example = the FIRST held-out event (odd chronological index) of the display
+    # direction. The axis is BIDIRECTIONAL; the display direction is not a fixed phenotype.
+    ev_dir = [str(x) for x in so["event_dir"]]
+    disp_events = [i for i, dd in enumerate(ev_dir) if dd == disp_dir]
+    disp_idx = disp_events[1] if len(disp_events) >= 2 else (disp_events[0] if disp_events else None)
     ev_shade = None
     if disp_idx is not None:
         ev_shade = (float(so["event_t_on"][disp_idx]), float(so["event_t_off"][disp_idx]) + 40.0)
@@ -158,7 +152,7 @@ def plot_seed1(seed=1):
     ax_so = fig.add_subplot(gs[0, :])
     _plot_trace(ax_so, so["lfp_trace"], so["times"], names,
                 "slow-off — interictal template source (30-80 Hz)",
-                shade=ev_shade, shade_label="display event window")
+                shade=ev_shade, shade_label="held-out event #1 (display-only)")
     if ev_shade:
         ax_so.legend(loc="upper right", fontsize=7, framealpha=0.9)
     ax_na = fig.add_subplot(gs[1, :])
@@ -170,18 +164,19 @@ def plot_seed1(seed=1):
     ax_na.legend(loc="upper left", fontsize=7, framealpha=0.9)
     ax_t = fig.add_subplot(gs[2, 0])
     lab = "TA" if disp_dir == "A_to_B" else "TB"
-    _plot_field(ax_t, pts, tmpl, names, f"{lab} interictal event order", "viridis",
+    _plot_field(ax_t, pts, tmpl, names, f"interictal order (display dir {lab}, bidirectional axis)", "viridis",
                 "contact rank (early->late)", src_pt=src_pt, snk_pt=snk_pt)
     ax_e = fig.add_subplot(gs[2, 1])
-    _plot_field(ax_e, pts, np.asarray(energy, float), names, "early runaway energy (0-50 ms)",
+    _plot_field(ax_e, pts, np.asarray(energy, float), names, "pre-t120 early recruitment energy (0-50 ms)",
                 "Blues", "virtual-LFP energy", src_pt=src_pt, snk_pt=snk_pt)
 
     mx = (((D["bridge_metrics"].get("by_window", {}).get(PRIMARY_WK, {}) or {}).get("contact", {})
            or {}).get("all_support", {}).get("maxab", {}) or {})
     sub = (f"onset {onset.get('status')}  t120={t120}  t_recruit={t_recruit}  "
-           f"rho_maxAB={mx.get('rho_maxab')}  (operational runaway; model proxy, not seizure)")
+           f"contact maxAB(mirror-inv)={mx.get('rho_maxab')}  "
+           f"(pre-t120 early recruitment; operational runaway, model proxy, not seizure)")
     fig.suptitle(f"MZ diagnostic — E1146 seed{seed} early-field bridge\n{sub}",
-                 fontsize=13, fontweight="bold", y=0.975)
+                 fontsize=12, fontweight="bold", y=0.975)
     os.makedirs(FIG, exist_ok=True)
     p = os.path.join(FIG, f"mz_early_field_bridge_seed{seed}.png")
     fig.savefig(p, dpi=200, bbox_inches="tight", facecolor="white")
@@ -209,30 +204,27 @@ def plot_multiseed(seeds=(1, 3, 4)):
     ax.set_xticks(list(seeds)); ax.set_xlabel("seed"); ax.set_ylabel("held-out Spearman")
     ax.set_title("Q1 template reproducibility\n(o=A→B, ^=B→A)", fontsize=10)
 
-    # Q2 early association by seed & window + within-shaft null band
+    # Q2 per-seed rho_A, rho_B (grey rings, BOTH directions) + mirror-invariant maxAB (star) + null p95
     ax = fig.add_subplot(gs[0, 1])
-    windows = [PRIMARY_WK, "early_0_100_ms", "early_0_25_ms", "early_25_50_ms", "early_50_100_ms"]
     for s in seeds:
-        bw = data[s].get("bridge_metrics", {}).get("by_window", {})
-        xs, ys, p95 = [], [], []
-        for wi, wk in enumerate(windows):
-            c = ((bw.get(wk, {}) or {}).get("contact", {}) or {}).get("all_support", {})
-            mx = (c.get("maxab") or {}); nl = (c.get("within_shaft_null") or {})
-            if mx.get("rho_maxab") is not None:
-                xs.append(wi + (s - 3) * 0.12); ys.append(mx["rho_maxab"])
-                p95.append(nl.get("null_p95"))
-        if xs:
-            ax.scatter(xs, ys, color=colors[s], s=34, label=f"seed{s}", edgecolors="k", linewidths=0.3, zorder=3)
-            for x, pv in zip(xs, p95):
-                if pv is not None:
-                    ax.plot([x, x], [0, pv], color="0.7", lw=3, alpha=0.5, zorder=1)
-    ax.axhline(0, color="0.6", lw=0.8)
-    ax.set_xticks(range(len(windows)))
-    ax.set_xticklabels([w.replace("early_", "").replace("_ms", "") for w in windows], rotation=30, fontsize=7)
-    ax.set_ylabel("contact rho_maxAB"); ax.legend(fontsize=7)
-    ax.set_title("Q2 early association vs window\n(grey bar = within-shaft null p95)", fontsize=10)
+        c = (((data[s].get("bridge_metrics", {}).get("by_window", {}).get(PRIMARY_WK, {}) or {})
+              .get("contact", {}) or {}).get("all_support", {}))
+        mx = (c.get("maxab") or {}); nl = (c.get("within_shaft_null") or {})
+        for v in (mx.get("rho_a"), mx.get("rho_b")):        # both direction associations, grey (non-winner visible)
+            if v is not None:
+                ax.scatter(s, v, s=48, facecolors="none", edgecolors="0.6", linewidths=1.3, zorder=2)
+        if mx.get("rho_maxab") is not None:                 # mirror-invariant maxAB in seed colour
+            ax.scatter(s, mx["rho_maxab"], color=colors[s], marker="*", s=200, edgecolors="k",
+                       linewidths=0.5, zorder=4, label=f"seed{s} maxAB")
+            if nl.get("null_p95") is not None:              # within-shaft null p95 (seed3 star sits at/below it)
+                ax.plot([s - 0.24, s + 0.24], [nl["null_p95"]] * 2, color="0.35", lw=2, zorder=3)
+    ax.axhline(0, color="0.6", lw=0.8); ax.set_ylim(-1.05, 1.05)
+    ax.set_xticks(list(seeds)); ax.set_xlabel("seed"); ax.set_ylabel("contact association (primary window)")
+    ax.legend(fontsize=6.5, loc="lower left")
+    ax.set_title("Q2 rho_A, rho_B (grey rings) + mirror-inv maxAB (star)\n(black line = within-shaft null p95)", fontsize=9)
 
-    # Q3 contact vs source agreement (primary window)
+    # Q3 contact vs source AXIS ENGAGEMENT magnitude (direction-free maxAB); source is supplementary,
+    # NOT merged with contact into a direction-agreement claim.
     ax = fig.add_subplot(gs[0, 2])
     for s in seeds:
         bw = data[s].get("bridge_metrics", {}).get("by_window", {}).get(PRIMARY_WK, {})
@@ -240,11 +232,11 @@ def plot_multiseed(seeds=(1, 3, 4)):
         sr = ((bw.get("source", {}) or {}).get("all_support", {}).get("maxab") or {}).get("rho_maxab")
         if c is not None and sr is not None:
             ax.scatter(c, sr, color=colors[s], s=70, label=f"seed{s}", edgecolors="k")
-    ax.axhline(0, color="0.6", lw=0.8); ax.axvline(0, color="0.6", lw=0.8)
-    ax.plot([-1, 1], [-1, 1], "0.8", lw=0.8, ls=":")
-    ax.set_xlim(-1, 1); ax.set_ylim(-1, 1)
-    ax.set_xlabel("contact rho_maxAB"); ax.set_ylabel("source rho_maxAB"); ax.legend(fontsize=7)
-    ax.set_title("Q3 contact vs source\n(same sign = concordant)", fontsize=10)
+    ax.plot([0, 1], [0, 1], "0.8", lw=0.8, ls=":")
+    ax.set_xlim(-0.1, 1); ax.set_ylim(-0.1, 1)
+    ax.set_xlabel("contact axis engagement (mirror-inv maxAB)")
+    ax.set_ylabel("source axis engagement (maxAB)"); ax.legend(fontsize=7)
+    ax.set_title("Q3 contact vs source axis engagement\n(direction-free magnitude; source supplementary)", fontsize=9)
 
     # Q5 support & dynamic range (primary window contact field)
     ax = fig.add_subplot(gs[1, 0])
@@ -288,11 +280,11 @@ def plot_multiseed(seeds=(1, 3, 4)):
 
     cs = json.load(open(os.path.join(OUT, "cohort_summary.json"))) if os.path.exists(
         os.path.join(OUT, "cohort_summary.json")) else {}
-    sub = (f"n complete={cs.get('n_seeds_complete')}  rho_maxAB median={cs.get('rho_maxab_median')}  "
+    sub = (f"n complete={cs.get('n_seeds_complete')}  mirror-inv maxAB median={cs.get('rho_maxab_median')}  "
            f"range={cs.get('rho_maxab_range')}  n_positive={cs.get('n_positive_maxab')}  "
-           f"(n=3: consistency only, no cohort p; operational runaway, model proxy)")
+           f"(3 seeds of ONE E1146 scaffold, not 3 patients; no cohort p; pre-t120 early recruitment; model proxy)")
     fig.suptitle(f"MZ early-field bridge — multiseed diagnostic (E1146 seeds {list(seeds)})\n{sub}",
-                 fontsize=13, fontweight="bold", y=0.975)
+                 fontsize=11, fontweight="bold", y=0.975)
     os.makedirs(FIG, exist_ok=True)
     p = os.path.join(FIG, "mz_early_field_bridge_multiseed.png")
     fig.savefig(p, dpi=200, bbox_inches="tight", facecolor="white")

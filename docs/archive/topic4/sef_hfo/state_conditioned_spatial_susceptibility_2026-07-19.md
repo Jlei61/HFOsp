@@ -111,6 +111,61 @@ rotates global→axial, magnitude from spatial pattern, axial direction from sca
 both trajectories.** The finding is therefore not specific to one trajectory. Raw numbers:
 `results/topic4_sef_hfo/state_conditioned_susceptibility/second_candidate_sensitivity.json`.
 
+### 4.4 Grid-resolution convergence (review 2026-07-19; `convergence_summary.json` + `figures/convergence.png`)
+
+Because `peak_k` moves rail-to-rail on n=12, the review asked whether the finding is a resolution
+artifact. The OPERATOR-based quantities (grid, not probe, based) are re-computed at n = 8/12/16/20/24
+(representative seed 1, T=30 ms; snapshots re-binned, no new SNN). At **pre_onset_100ms they are
+grid-converged from n=12 onward**:
+
+| n | σ1 | k∥ | k⊥ | eig_axis | U1_axis | eig_glob | peak_k |
+|---|---|---|---|---|---|---|---|
+| 8 | 0.929 | 0.715 | 0.626 | 0.753 | 0.449 | 0.163 | 1.26 |
+| 12 | 0.995 | 0.747 | 0.655 | 0.852 | 0.526 | 0.118 | 1.26 |
+| 16 | 1.027 | 0.767 | 0.676 | 0.877 | 0.548 | 0.140 | 1.26 |
+| 20 | 0.975 | 0.734 | 0.645 | 0.852 | 0.540 | 0.154 | 1.26 |
+| 24 | 1.029 | 0.762 | 0.674 | 0.877 | 0.551 | 0.133 | 1.26 |
+
+σ1≈1.0, k∥>k⊥, eig_axis≈0.87 (strongly axial), U1_axis≈0.55 (moderately axial), globality≈0.13 all
+stable n=12→24. **Scope of this statement**: this is a REPRESENTATIVE seed (seed 1), NOT a 3-seed median
+(3-seed consistency is established separately at n=12 in §4.1). Accurate wording: *on a representative
+seed, the pre-onset operator conclusions converge for n≥12* — so the finding is not an n=12 resolution
+artifact.
+
+`peak_k` correction (the earlier "larger p_max" wording was wrong): the pre-onset peak sits at the
+**LOWEST nonzero wavenumber** 2π/L=1.26 (the whole-sheet scale) at every n. A larger `p_max` only extends
+the HIGH-k side and CANNOT move this LOW-k rail. To test whether the true optimum is at an even larger
+scale (lower k), one needs a **larger spatial domain L**, **continuous/fractional k**, or **non-periodic
+smooth basis functions of varying width** — deferred. So all that is claimed is "preference sits at the
+largest scale the sheet holds", not a resolved interior optimal wavelength.
+
+At **baseline** the n=8 eigenmode is an anomalous point (eig_axis≈0.99); it stabilizes to non-axial only
+for n≥12 (near-degenerate leading subspace of the near-homogeneous baseline operator). Not part of the
+claim (the claim is the resolved, converged pre-onset state).
+
+### 4.5 Fixed-source-kick time response (review 2026-07-19; `time_response_summary.json` + `figures/time_response.png`)
+
+The review asked for a real time-response figure instead of compressed axial scores. Using the SAME
+source-core Gaussian kick `b_fixed` evolved under `exp(J_s t)` at each state (so the comparison isolates
+the state change, not each state's own optimal input):
+
+- **A — σ1(T)** (max finite-time gain vs window, 3-seed median): at **baseline** σ1(T) monotonically
+  decays and never exceeds 1 (no input net-amplified at any window). At **pre-onset** it crosses 1 by
+  T≈5 ms and **peaks at T≈15 ms** (peak σ1 = 1.23 at pre_onset_500ms, **1.51** at pre_onset_100ms), then
+  self-limits. So the non-normal transient **peaks EARLIER (~15 ms)** than the T=30 ms window used in
+  §4.1–4.4 (the T=30 static maps are valid but past the peak), and its peak grows as z depletes.
+- **B — fixed-kick spatial evolution** (5/10/20/30/50/100 ms): the baseline kick stays localized at the
+  source and decays; the pre-onset kick spreads into a band ALONG the axis toward the sink (with sign
+  structure by ~30 ms).
+- **C — axial kymograph** (source→sink position × time × |rE|): baseline = source-localized decay (the
+  sink stays dark); pre-onset = the response extends along the axis, the sink lights up, and it persists
+  longer.
+
+Propagation reading: baseline = local decay; pre-onset = a transient axial spread with sink recruitment
+and slower self-limiting — the non-normal axial transient shown as DYNAMICS, not scores. (The diagnostic
+figure now shows only the 5 static state-map rows; this time-response figure replaces the old compressed
+axial-score row.)
+
 ## 5. Answers to the ten Task-8 questions
 
 1. **Replay w/o observer drift?** Yes — byte-parity proven on the real substrate; onsets exact to the ms.
@@ -144,7 +199,22 @@ reproducible **axial-over-perpendicular** margin (~+0.09) set by the fixed aniso
 to rotating/shuffling the depletion field; halved for an isotropic scaffold), while the amplification
 **magnitude** depends on the spatial depletion pattern (real ≈2× uniform-mean). The interictal axis is
 **preserved and its gain strengthened before runoff**, but the axis is a fixed scaffold property amplified
-by depletion, not created or rotated by it. Result-neutral descriptions that co-apply (design §11):
+by depletion, not created or rotated by it.
+
+**Precision added after the 2026-07-19 review** (do not overstate propagation): the headline `axial_gain`
+is the gain for an input whose WAVEVECTOR is parallel to the scaffold axis (`k∥`), not an output
+propagation direction. The output-side, propagation-direction evidence is the rigorous non-normal
+decomposition (SVD of the E-rate→E-rate propagator `C·e^{JT}·B_E`, dictionary-independent): the true max
+finite-time gain `σ1` rises 0.24→0.28→0.65→**1.01** (a genuinely amplifying, >1, pattern only emerges at
+pre-onset); the **asymptotic leading eigenmode** becomes strongly axial (axis 0.06→**0.90**, globality
+0.99→0.15) while the **finite-time (30 ms) optimal OUTPUT `U1`** elongates along the axis only
+**moderately** (axis 0.06→**+0.55**) — a genuine non-normal gap (the transient has not fully aligned to the
+eigenmode at 30 ms). So "the response propagates along the axis" is supported but moderate at 30 ms; the
+strongly-axial statement holds for the asymptotic eigenmode, not the finite-time output. Eigenmode / V1
+optimal input / U1 optimal output / Gabor probe scan are DISTINCT objects (never conflated). `peak_k` moving
+7.11→1.26 is rail-limited (1.26 = 2π/L = the whole-sheet scale at fixed p_max=4); it means "preference moved
+to the largest scale the sheet holds", not a resolved interior optimum (see §4.4 convergence). Result-neutral
+descriptions that co-apply (design §11):
 **same-axis gain increase** + **global/uniform amplification** + **spatial pattern adds effect beyond mean z**.
 
 **Forbidden wording avoided**: not a seizure/ictal event; `z_i` is a phenomenological inhibitory-efficacy

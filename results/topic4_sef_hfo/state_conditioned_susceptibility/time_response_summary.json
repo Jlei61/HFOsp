@@ -1,0 +1,44 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q50_tz10000",
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "states": [
+    "baseline_1000ms",
+    "pre_onset_500ms",
+    "pre_onset_100ms"
+  ],
+  "kick_sigma": 0.6,
+  "kick_center": "source_core",
+  "per_state": {
+    "baseline_1000ms": {
+      "sigma1_cross1_ms": null,
+      "sigma1_peak": 1.0,
+      "T_peak_ms": 0.0
+    },
+    "pre_onset_500ms": {
+      "sigma1_cross1_ms": 5.0,
+      "sigma1_peak": 1.2325319954131368,
+      "T_peak_ms": 15.0
+    },
+    "pre_onset_100ms": {
+      "sigma1_cross1_ms": 5.0,
+      "sigma1_peak": 1.5050024285622832,
+      "T_peak_ms": 15.0
+    }
+  },
+  "note": "FIXED source-core Gaussian kick evolved under exp(J_s t); same kick across states isolates the state change.",
+  "git_sha": "ec85014",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "run-time-response",
+    "--candidate",
+    "zA_q50_tz10000",
+    "--seeds",
+    "1,3,4",
+    "--confirm-run"
+  ]
+}
