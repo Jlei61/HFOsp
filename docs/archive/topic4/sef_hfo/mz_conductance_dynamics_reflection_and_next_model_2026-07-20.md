@@ -92,6 +92,8 @@ runaway 判据命中的是持续高率并触发 early stop。它是计算上和�
 
 ## 6. 我们这条独立路线：把恢复机制放到 recurrent E→E scaffold 的空间资源上
 
+> **2026-07-20 设计修订**：普通 per-spike STD 已在 M1/M4-2 做过，并暴露出 onset 前耗竭与 fragment/suppress 问题；因此本节原始 `x_j` 方程只保留为思考起点。下一版不直接扫 `U_x × tau_x`，而先补齐 E-cell AMPA/GABA full conductance（I-cell 保持原 current 路径），确认 finite high branch，再使用 persistence sensor 门控的 local presynaptic relay resource。binding candidate：`docs/superpowers/specs/2026-07-20-topic4-mz-full-conductance-spatial-relay-design.md`。
+
 为与另一条并行的 Abbott/global-inhibition 路线分开，本线下一步不继续细扫 beta，也不先复制另一套全局抑制池。主更新只加一个 **presynaptic E→E resource** `x_j(t)`：
 
 \[

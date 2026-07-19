@@ -78,6 +78,8 @@ pytest -q \
 
 ## 6. 下一条独立机制线
 
+> **2026-07-20 修订**：下方“直接做普通 `U_x × tau_x`”是第一版设想，现已被旧 M1/M4-2 证据和低维时序审计收紧，**不得直接执行**。binding candidate 改为：先补齐 E-cell AMPA/GABA full-conductance fast-topology gate（I-cell 保持原 current 路径），再做只识别持续招募的 persistence-gated spatial relay `x_j`。精确方程、fold/Hopf 预测、空间 gate 和 stop rules 见 `docs/superpowers/specs/2026-07-20-topic4-mz-full-conductance-spatial-relay-design.md`。
+
 本 worktree 下一步不继续细扫 `beta`，也不把当前线性 M 当主恢复机制。优先加入 presynaptic E→E resource `x_j`：
 
 \[
