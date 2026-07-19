@@ -5,6 +5,29 @@ inhibition-efficacy depletion `D = 1 − z̄` vs firing-adaptation `a = η_m·m�
 their timescale competition governs whether repeated interictal events reach run-off.
 Space / source-sink / rotate-shuffle / early-field-bridge are **out of this figure** (demoted, review §7).
 
+## ★ Latest verdict — z–m gap grid (review 2026-07-19 §6; SUPERSEDES the trajectory-era claims below)
+
+Densified the previously-unsampled gap `0 < eta_m < 0.0745` (`A_target=[0,0.001,0.0025,0.005,0.0075,0.01]`
+× seeds 1/3/4, T=20000ms, no early-stop for z+m, FROZEN slow-off event bar). Verdict
+(`gap_dynamics_summary.json`, `analyze_mz_onset_dynamics.py`):
+**graded prevention with a bounded sub-onset PLATEAU — NOT a containment–recovery cycle.**
+- a=0 runaway 3/3 (D→0.0975). a=0.001 (eta_m=0.0075): D **ratchets** to ~0.056 (~57% of onset), bounded,
+  **recovered 0/3** (stays elevated); events do NOT escalate → plateau, not a discrete recruited event.
+- a≥0.0025: prevention, D_max monotonically lower (0.036 / 0.020 / 0.017 / 0.013). No frac recovers.
+- **Minimal linear spike-adaptation PREVENTS/STALLS onset (graded); it does not contain-and-recover.**
+
+Two corrections to the trajectory-era claims below (both retracted):
+1. NOT binary — an intermediate bounded-elevated regime exists at a=0.001 (was: "binary runaway↔prevention").
+2. "interictal events persist in all non-runaway conditions" was a per-trajectory event-bar artifact; the
+   frozen slow-off bar (P0-2 fix) shows strongly-suppressed cells are near-silent, not interictal-preserved.
+
+Fixes landed: P0-2 frozen slow-off event bar, P1-2 real aggregator (no parallel-writer race), conditional
+early-stop, P1-1/P1-3 relabel. Commits `96159ab`, `c7b72aa`.
+
+Near-critical tau_adp sweep (review §5: 0.5/1 vs 2s at the near-critical a=0.001) RUNNING (nohup, detached).
+Preliminary (tau=1s, seed1): D climbs higher (~0.074, ~76% onset) with stronger recruitment, but STILL a
+plateau (no recovery). Full verdict pending the 6 cells.
+
 Branch `codex/topic4-mz-onset-dynamics` (off merged MZ base). Absolute-SNN-unit legs are unambiguous;
 one proxy-units question (frozen a-axis) is deferred to the user — see Pending.
 
