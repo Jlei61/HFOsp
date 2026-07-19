@@ -650,7 +650,6 @@ def cmd_run(args, cfg):
 
 # ============================================================ controls (P1): plateau + D-matched z-only
 def cmd_controls(args, cfg):
-    import run_sef_hfo_snn_cm_spontaneous_readout as C
     which = "primary"
     label, mzcfg, onsets = _cand(cfg, which)
     seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else cfg["seeds"])]
@@ -672,10 +671,10 @@ def cmd_controls(args, cfg):
             continue
         S = build_S(seed, cfg)
         onset_step = int(round(onsets[seed] / DT))
-        # --- z+m plateau checkpoint: replay to settle, pick a non-event D~median time in the last window ---
-        pk = _select_plateau_checkpoint(S, zm_cfg, cfg, onset_step, C)
-        # --- D-matched z-only checkpoint at the SAME D (selection by D + non-event only) ---
-        zk = _select_dmatched_checkpoint(S, mzcfg, cfg, onset_step, pk["D_target"], C)
+        # --- z+m plateau checkpoint: replay to settle, pick a resting D~median time in the last window ---
+        pk = _select_plateau_checkpoint(S, zm_cfg, cfg, onset_step)
+        # --- D-matched z-only checkpoint at the SAME D (selection by D + resting only) ---
+        zk = _select_dmatched_checkpoint(S, mzcfg, cfg, onset_step, pk["D_target"])
         out = dict(candidate=label, seed=seed, eta_m=eta_m,
                    plateau=dict(branch=pk["branch"], time_ms=pk["branch"] * DT, D=pk["D_target"]),
                    dmatched=dict(branch=zk["branch"], time_ms=zk["branch"] * DT, D=zk["D_actual"]))
@@ -702,77 +701,57 @@ def cmd_controls(args, cfg):
 
 
 def _replay_traj(S, mz_cfg, T_ms):
-    """Full replay accumulating z traces + spikes for event detection (controls only)."""
+    """Replay accumulating z-mean trace + population E-rate (store_spikes=False -> low memory: no
+    ~N x T spike bool). Returns (rate_E_hz, D=1-z_bar) per step."""
     slow = MZSpatialProbe(S["N"], 18.0, mz_cfg, NE=S["NE"])
     S["net"]["rng"] = np.random.default_rng(S["seed"])
     n = int(round(T_ms / DT))
-    res = run_loop(S["p"], S["net"], slow, S["vth"], n_steps=n, capture_final=False, store_spikes=True)
-    return res, slow
+    res = run_loop(S["p"], S["net"], slow, S["vth"], n_steps=n, capture_final=False, store_spikes=False)
+    return res["rate_E"], 1.0 - np.asarray(slow.trace_z_mean, float)
 
 
-def _nonevent_mask(E_spk_bool):
-    af, bin_w = _cm_active_fraction(E_spk_bool)
-    return af, bin_w
+def _resting_mask(rate_hz, *, win_ms=20.0, k=0.3):
+    """Resting (non-event) steps: 20 ms-smoothed population E-rate below floor + k*(peak-floor).
+    Events = bursts above the bar. Uses the cheap population rate (no per-neuron spikes)."""
+    r = np.asarray(rate_hz, float)
+    w = max(1, int(round(win_ms / DT)))
+    sm = np.convolve(r, np.ones(w) / w, mode="same")
+    floor = float(np.percentile(sm, 20))
+    peak = float(np.percentile(sm, 99))
+    return sm <= floor + float(k) * (peak - floor)
 
 
-def _cm_active_fraction(E_spk_bool):
-    import run_sef_hfo_snn_cm_spontaneous_readout as C
-    return C.active_fraction(E_spk_bool, DT, C.BIN_MS)
-
-
-def _select_plateau_checkpoint(S, zm_cfg, cfg, onset_step, C):
-    """Replay the z+m plateau to (onset + guard); pick a non-event time in the last plateau_window_ms
-    whose D is nearest the window median (selection frozen BEFORE any spatial response, spec §1)."""
+def _select_plateau_checkpoint(S, zm_cfg, cfg, onset_step):
+    """Replay the z+m plateau; pick a RESTING time in the last plateau_window_ms whose D is nearest
+    the window median (selection frozen BEFORE any spatial response, spec §1)."""
     cc = cfg["controls"]["zm_plateau"]
     T_ms = min(onset_step * DT, 15000.0)
-    res, slow = _replay_traj(S, zm_cfg, T_ms)
-    D = 1.0 - np.asarray(slow.trace_z_mean, float)
-    af, bin_w = C.active_fraction(res["E_spk_bool"], DT, C.BIN_MS)
-    nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
-    floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
-    bar = floor + C.CAL_FRAC * (float(af.max()) - floor)
-    events = C.detect_events(af, bin_w, event_on_frac=bar)
+    rate, D = _replay_traj(S, zm_cfg, T_ms)
+    rest = _resting_mask(rate)
     win_lo = int(round((T_ms - float(cc["plateau_window_ms"])) / DT))
-    branch = _pick_nonevent_D_median(D, events, bin_w, win_lo, len(D))
+    idx = np.arange(win_lo, len(D))
+    idx = idx[rest[win_lo:len(D)]]
+    if idx.size == 0:
+        idx = np.arange(win_lo, len(D))
+    med = float(np.median(D[idx]))
+    branch = int(idx[np.argmin(np.abs(D[idx] - med))])
     ck = _capture_at(S, zm_cfg, branch)
     return dict(branch=branch, D_target=float(D[branch]), ck=ck)
 
 
-def _select_dmatched_checkpoint(S, mzcfg, cfg, onset_step, D_target, C):
-    """Earliest non-event time in the z-only trajectory whose D is closest to the plateau D."""
+def _select_dmatched_checkpoint(S, mzcfg, cfg, onset_step, D_target):
+    """RESTING time in the z-only trajectory whose D is closest to the plateau D (selection by D +
+    resting + time only, never the spatial response)."""
     T_ms = min(onset_step * DT, 15000.0)
-    res, slow = _replay_traj(S, mzcfg, T_ms)
-    D = 1.0 - np.asarray(slow.trace_z_mean, float)
-    af, bin_w = C.active_fraction(res["E_spk_bool"], DT, C.BIN_MS)
-    nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
-    floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
-    bar = floor + C.CAL_FRAC * (float(af.max()) - floor)
-    events = C.detect_events(af, bin_w, event_on_frac=bar)
-    ev_mask = _event_step_mask(events, bin_w, len(D))
-    cand = np.where(~ev_mask)[0]
+    rate, D = _replay_traj(S, mzcfg, T_ms)
+    rest = _resting_mask(rate)
+    cand = np.where(rest)[0]
     cand = cand[cand < onset_step - 100]
+    if cand.size == 0:
+        cand = np.arange(0, max(1, onset_step - 100))
     branch = int(cand[np.argmin(np.abs(D[cand] - D_target))])
     ck = _capture_at(S, mzcfg, branch)
     return dict(branch=branch, D_actual=float(D[branch]), ck=ck)
-
-
-def _event_step_mask(events, bin_w, n_steps):
-    m = np.zeros(n_steps, bool)
-    for e in events:
-        lo = max(int(e["t_on"] / DT) - 50, 0)
-        hi = min(int(e["t_off"] / DT) + 1000, n_steps)
-        m[lo:hi] = True
-    return m
-
-
-def _pick_nonevent_D_median(D, events, bin_w, win_lo, n_steps):
-    ev = _event_step_mask(events, bin_w, n_steps)
-    idx = np.arange(win_lo, n_steps)
-    idx = idx[~ev[win_lo:n_steps]]
-    if idx.size == 0:
-        idx = np.arange(win_lo, n_steps)
-    med = np.median(D[idx])
-    return int(idx[np.argmin(np.abs(D[idx] - med))])
 
 
 def _capture_at(S, mz_cfg, branch):
