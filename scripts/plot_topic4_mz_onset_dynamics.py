@@ -29,7 +29,9 @@ TRAJ_DIR = os.path.join(OUT, "per_seed")
 FIG_DIR = os.path.join(OUT, "figures")
 
 REGIME = "zA_q75_tz5000"
-NONZERO_FRACS = [0.01, 0.025, 0.05, 0.10, 0.20]   # adaptation-strength axis (fraction of I_EE_scale)
+# target adaptation strengths (offline-calibration TARGET fraction of I_EE_scale, NOT the realized a(t));
+# the review densified the gap 0<eta_m<0.0745 where the runaway->no-runaway transition lives.
+NONZERO_FRACS = [0.001, 0.0025, 0.005, 0.0075, 0.01]
 
 
 def _load():
@@ -68,7 +70,7 @@ def panel_a(fig, gs, cells, rep_frac, rep_seed):
         ax.grid(True, alpha=0.18, lw=0.5)
         for s in ("top", "right"):
             ax.spines[s].set_visible(False)
-    axes[0].set_title(f"A · single-cell push–pull  (adaptation = {rep_frac:g}, seed {rep_seed})",
+    axes[0].set_title(f"A · population-averaged push–pull  (target frac = {rep_frac:g}, seed {rep_seed})",
                       fontsize=10, loc="left", weight="bold")
     axes[0].tick_params(labelbottom=False)
     axes[1].tick_params(labelbottom=False)
@@ -112,8 +114,8 @@ def panel_c(fig, gs, cells):
         ax.spines[s].set_visible(False)
     ax.margins(x=0.02, y=0.04)
     # legend: adaptation ramp + z-only + slow-off + runaway marker
-    handles = [Line2D([0], [0], color="#c0392b", lw=2, label="z-only (a=0) → run-off")]
-    handles += [Line2D([0], [0], color=_frac_color(f), lw=2, label=f"a={f:g}") for f in NONZERO_FRACS]
+    handles = [Line2D([0], [0], color="#c0392b", lw=2, label="z-only (no adaptation) → run-off")]
+    handles += [Line2D([0], [0], color=_frac_color(f), lw=2, label=f"target frac {f:g}") for f in NONZERO_FRACS]
     handles += [Line2D([0], [0], marker="*", color="#c0392b", lw=0, markersize=11,
                        markeredgecolor="white", label="run-off onset"),
                 Line2D([0], [0], marker="o", color="#888", markerfacecolor="#ddd", lw=0,
@@ -124,7 +126,7 @@ def panel_c(fig, gs, cells):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rep-frac", type=float, default=0.05, help="representative z+m adaptation strength for Panel A")
+    ap.add_argument("--rep-frac", type=float, default=0.005, help="representative z+m target frac for Panel A")
     ap.add_argument("--rep-seed", type=int, default=1)
     args = ap.parse_args()
     os.makedirs(FIG_DIR, exist_ok=True)

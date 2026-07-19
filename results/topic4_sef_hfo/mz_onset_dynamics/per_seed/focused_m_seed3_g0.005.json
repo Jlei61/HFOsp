@@ -1,0 +1,118 @@
+{
+  "seeds": 3,
+  "tau_adp_ms": 2000.0,
+  "rows": [
+    {
+      "seed": 3,
+      "z_regime": "zA_q75_tz5000",
+      "A_frac": 0.005,
+      "tau_adp_ms": 2000.0,
+      "eta_m": 0.03726,
+      "realized_a_max": 0.0006,
+      "D_max": 0.02017,
+      "phenotype": "interictal_like",
+      "runaway_ms": null,
+      "n_events": 14,
+      "peak_participation": 0.0432,
+      "peak_returned": false,
+      "event_bar": 0.023625
+    },
+    {
+      "seed": 3,
+      "z_regime": "zA_q75_tz5000",
+      "A_frac": 0.0075,
+      "tau_adp_ms": 2000.0,
+      "eta_m": 0.05589,
+      "realized_a_max": 0.00074,
+      "D_max": 0.01642,
+      "phenotype": "expanded_returned",
+      "runaway_ms": null,
+      "n_events": 14,
+      "peak_participation": 0.0468,
+      "peak_returned": true,
+      "event_bar": 0.023625
+    },
+    {
+      "seed": 3,
+      "z_regime": "zA_q75_tz5000",
+      "A_frac": 0.01,
+      "tau_adp_ms": 2000.0,
+      "eta_m": 0.07452,
+      "realized_a_max": 0.00081,
+      "D_max": 0.01236,
+      "phenotype": "interictal_like",
+      "runaway_ms": null,
+      "n_events": 8,
+      "peak_participation": 0.043,
+      "peak_returned": true,
+      "event_bar": 0.023625
+    }
+  ],
+  "provenance": {
+    "schema_version": "mz-onset-dynamics-1.0",
+    "git_sha": "96159ab",
+    "engine_shas": {
+      "kick_probe.py": "5faaedab37ab",
+      "params.py": "c2036d1e1548",
+      "model.py": "e77aad35cbfa",
+      "connectivity.py": "5ad75ec5066b",
+      "connectivity_rot.py": "2aa442624fef",
+      "lfp.py": "7f079081de4e"
+    },
+    "config_hash": "8a27f7070f27",
+    "module_hash": "ad58653565d1",
+    "argv": [
+      "scripts/run_topic4_mz_onset_dynamics.py",
+      "focused-m",
+      "--seeds",
+      "3",
+      "--regime",
+      "zA_q75_tz5000",
+      "--a-fracs",
+      "0.005,0.0075,0.01",
+      "--t-ms",
+      "20000",
+      "--confirm-run"
+    ],
+    "subject": "epilepsiae_1146",
+    "montage": "narrow",
+    "dt": 0.1,
+    "upstream": {
+      "susceptibility_root": {
+        "path": "results/topic4_sef_hfo/state_conditioned_susceptibility",
+        "hash": null
+      },
+      "snapshots_primary": {
+        "path": "results/topic4_sef_hfo/state_conditioned_susceptibility/snapshots/zA_q75_tz5000",
+        "hash": null
+      },
+      "snapshots_sensitivity": {
+        "path": "results/topic4_sef_hfo/state_conditioned_susceptibility/snapshots/zA_q50_tz10000",
+        "hash": null
+      },
+      "susceptibility_atlas": {
+        "path": "results/topic4_sef_hfo/state_conditioned_susceptibility/susceptibility_atlas.json",
+        "hash": "683cf7c5ff5d"
+      },
+      "second_candidate_sensitivity": {
+        "path": "results/topic4_sef_hfo/state_conditioned_susceptibility/second_candidate_sensitivity.json",
+        "hash": "2e849b02b561"
+      },
+      "bridge_root": {
+        "path": "results/topic4_sef_hfo/mz_early_field_bridge",
+        "hash": null
+      },
+      "bridge_cohort_summary": {
+        "path": "results/topic4_sef_hfo/mz_early_field_bridge/cohort_summary.json",
+        "hash": "56a03a2a825a"
+      },
+      "calibration": {
+        "path": "results/topic4_sef_hfo/mz_slowvars/calibration.json",
+        "hash": "e031f3169847"
+      }
+    },
+    "phase": "focused-m",
+    "seed": 3,
+    "tau_adp_ms": 2000.0
+  }
+}
