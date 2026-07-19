@@ -12,6 +12,18 @@ viridis 紫=早）、pre-t120 早期能量场（Blues）、以及三 seed 的 ob
 能量）；TA 只有约 7 个可读触点、TB 全 15 个——说明两个方向支撑不同，别把某个固定方向当稳定表型；右下三 seed
 里 **seed3 的星正落在自己的 null 线上（弱）**，seed1/4 明显高过。
 
+### fig_mz_cross_seed_transfer.png / .pdf
+跨 seed 模板迁移（回答：间期时序模板是**固定 scaffold 的属性**，还是只是同 seed 噪声重放的巧合）。做法：用
+seed i 的 slow-off 方向模板去预测 seed j 的 pre-t120 失控能量场（3×3，方向无关 maxAB，每格用**打乱目标能量 seed
+在同一根杆内**的 within-shaft null 重算）。A = 3×3 迁移热图（行=模板 seed，列=能量 seed，星=within-shaft
+p<0.05）；B = 同一能量 seed 下三个模板 seed 的 maxAB 点是否收敛成一簇；C = 9 个格子里 maxAB 与非相关指标
+（场余弦、四分位能量对比）是否一起为正、随之增大。
+
+**关注点**：热图**按列几乎恒定、按行才变**（模板 seed 之间散度约 0.007 ≪ 能量 seed 之间散度约 0.095，约 13 倍）
+——说明 maxAB 由「预测哪个 seed 的能量」决定，而不是「用哪个 seed 的模板」；不同 seed 的模板收敛到同一预测，
+指向**共同的固定 scaffold**，显著削弱「只是同噪声重放巧合」的替代解释。seed3 那一列仍然弱（绿、无星、贴 null
+线）。表在 `../cross_seed_transfer.{json,csv}`。仍是观测层、非因果。
+
 ---
 
 口径（这些从画布移到 README/metadata，不压在图上）：
