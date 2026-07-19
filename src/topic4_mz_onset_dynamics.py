@@ -571,3 +571,72 @@ def projected_flow_eligibility(visits, *, min_visits=3, min_seeds=2, min_sign_ag
                 dD_mean=float(np.mean([v["dD"] for v in vs])) if vs else float("nan"),
                 dA_mean=float(np.mean([v["dA"] for v in vs])) if vs else float("nan"),
                 sign_ok_dD=bool(sign_ok_dD), sign_ok_dA=bool(sign_ok_dA))
+
+
+# ======================================================================== focused-m aggregation (task §4)
+FOCUSED_M_REQUIRED_FIELDS = ("seed", "z_regime", "A_frac", "tau_adp_ms", "eta_m", "realized_a_max",
+                             "D_max", "phenotype", "runaway_ms", "n_events", "event_bar")
+FOCUSED_M_MAIN_SEEDS = (1, 3, 4)
+FOCUSED_M_MAIN_A_FRACS = (0.0, 0.001, 0.0025, 0.005, 0.0075, 0.01)
+FOCUSED_M_MAIN_TAU_ADP_MS = 2000.0
+
+
+def validate_focused_m_grid(rows, *, seeds=FOCUSED_M_MAIN_SEEDS, a_fracs=FOCUSED_M_MAIN_A_FRACS,
+                            tau_adp_ms=FOCUSED_M_MAIN_TAU_ADP_MS):
+    """Fail-loud validation of the aggregated focused-m MAIN gap grid (task §4.1).
+
+    RAISES on: a row missing a required field (schema misalignment / stale old-format file), a tau_adp that
+    is not the grid tau (tau contamination), a duplicate (seed, A_frac), or any missing/extra (seed, A_frac)
+    cell versus the expected len(seeds) x len(a_fracs) grid. Returns the rows sorted by (seed, A_frac); does
+    not mutate the inputs.
+    """
+    seen = {}
+    for r in rows:
+        for f in FOCUSED_M_REQUIRED_FIELDS:
+            if f not in r:
+                raise ValueError(f"focused_m row missing required field {f!r} (schema misalignment / stale file): {r}")
+        if float(r["tau_adp_ms"]) != float(tau_adp_ms):
+            raise ValueError(f"focused_m tau contamination: expected tau_adp_ms={tau_adp_ms}, got "
+                             f"{r['tau_adp_ms']} for seed={r.get('seed')} A_frac={r.get('A_frac')}")
+        key = (int(r["seed"]), round(float(r["A_frac"]), 6))
+        if key in seen:
+            raise ValueError(f"focused_m duplicate (seed, A_frac)={key}")
+        seen[key] = r
+    expected = {(int(s), round(float(a), 6)) for s in seeds for a in a_fracs}
+    got = set(seen)
+    if got != expected:
+        raise ValueError(f"focused_m grid mismatch: missing={sorted(expected - got)} extra={sorted(got - expected)}")
+    return sorted(seen.values(), key=lambda r: (int(r["seed"]), float(r["A_frac"])))
+
+
+def tau_phenotype_denominators(rows):
+    """Per-tau phenotype counts + runaway denominator for the tau-sensitivity summary (task §4.2)."""
+    from collections import Counter
+    out = {}
+    for tau in sorted({float(r["tau_adp_ms"]) for r in rows}, reverse=True):
+        sub = [r for r in rows if float(r["tau_adp_ms"]) == tau]
+        out[f"tau{int(tau)}"] = {"n": len(sub),
+                                 "n_runaway": int(sum(1 for r in sub if r["phenotype"] == "runaway")),
+                                 "phenotypes": dict(Counter(r["phenotype"] for r in sub))}
+    return out
+
+
+def build_tau_sensitivity(row_by_seed_tau, *, seeds=FOCUSED_M_MAIN_SEEDS, taus=(2000.0, 1000.0, 500.0),
+                          a_frac=0.001):
+    """Assemble + validate the tau-sensitivity summary (task §4.2): exactly one (seed, tau) row at a fixed
+    A_frac. RAISES on a missing/duplicate/misplaced cell or a row whose A_frac/tau_adp_ms disagree with its
+    slot. Returns (rows_sorted_by_seed_then_descending_tau, phenotype_denominators)."""
+    rows = []
+    for s in seeds:
+        for tau in taus:
+            key = (int(s), float(tau))
+            if key not in row_by_seed_tau:
+                raise ValueError(f"tau-sensitivity missing cell (seed, tau_adp)={key}")
+            r = row_by_seed_tau[key]
+            if abs(float(r["A_frac"]) - float(a_frac)) > 1e-12:
+                raise ValueError(f"tau-sensitivity cell {key}: A_frac {r['A_frac']} != {a_frac}")
+            if float(r["tau_adp_ms"]) != float(tau):
+                raise ValueError(f"tau-sensitivity cell {key}: tau_adp_ms {r['tau_adp_ms']} != {tau}")
+            rows.append(r)
+    rows = sorted(rows, key=lambda r: (int(r["seed"]), -float(r["tau_adp_ms"])))
+    return rows, tau_phenotype_denominators(rows)

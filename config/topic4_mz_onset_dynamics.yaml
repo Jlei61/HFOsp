@@ -89,7 +89,7 @@ ignition:
 # --- z counterfactuals (spec §8). branch at pre_onset_500 / pre_onset_100. ---
 z_counterfactuals:
   states: [pre_onset_500ms, pre_onset_100ms]
-  branches: [native_dynamic, native_frozen, uniform_current_matched, spatial_shuffle, reset_one, rotated_90]
+  branches: [native_dynamic, native_frozen, uniform_mean_matched, spatial_shuffle, reset_one, rotated_90]
   shuffle_seed: 20260719
 
 # --- interictal event suppression (spec §9). calibrate pulse on slow-off ONLY, lock before target runs. ---

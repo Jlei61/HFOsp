@@ -56,6 +56,7 @@ from src.topic4_mz_onset_dynamics import (                 # noqa: E402
     MZOnsetProbe, run_loop, score_runaway, build_region_masks, slow_state_coordinates,
     qeff_region_summary, zbar_qeff_field_audit, realized_D_grid, build_DA_q_field, DA_controls,
     epsilon_c_from_ladder, classify_ignition, natural_zm_trajectory, SCHEMA_VERSION,
+    validate_focused_m_grid, build_tau_sensitivity,
 )
 from src.topic4_mz_slowvars import classify_mz_run, replay_adaptation_peak, eta_m_from_frac  # noqa: E402
 from src.topic4_m3b_spectral_phase import Grid, build_excitability_field  # noqa: E402
@@ -541,7 +542,8 @@ def cmd_counterfactual(args, cfg):
             ck = rep["checkpoint"]
             z_branch = ck.slow.z[:S["NE"]].copy()
             qeff_mean = float(np.nanmean(z_branch))
-            transforms = _counterfactual_transforms(z_branch, regions, qeff_mean, zc["shuffle_seed"])
+            transforms = _counterfactual_transforms(z_branch, regions, qeff_mean, zc["shuffle_seed"],
+                                                    posE=S["posE"], L=S["L"], grid_n=int(cfg["operator"]["grid_n"]))
             for br in zc["branches"]:
                 cell_key = f"{st}:{br}"
                 if args.resume and cell_key in existing["cells"]:
@@ -573,15 +575,49 @@ def cmd_counterfactual(args, cfg):
     _write_csv(rows, os.path.join(OUT, f"z_counterfactual_summary_{label}.csv"))
 
 
-def _counterfactual_transforms(z_branch, regions, qeff_mean, shuffle_seed):
+def _rotate90_neuron_field(z, posE, L, n):
+    """REAL 90-degree rotation of a per-E-neuron scalar field via a coarse n x n grid round-trip (task §5.1).
+
+    Bin each E neuron to its grid cell, take the per-cell mean, np.rot90 the grid, then read each neuron's
+    ROTATED value back from its own cell. This preserves the field's grid histogram and spatial
+    autocorrelation (unlike a shuffle), so it is a valid spatial-pattern control. FAIL-CLOSED: if any
+    occupied target cell's rot90-source cell was empty, the rotation would have to invent a value -> raise.
+    Coordinate provenance (grid n, extent L, row/col convention) is fixed here and never an identity fallback.
+    """
+    z = np.asarray(z, float); pos = np.asarray(posE, float)
+    if pos.shape[0] != z.size:
+        raise ValueError(f"rotated_90: posE has {pos.shape[0]} rows but z has {z.size} entries")
+    ix = np.clip(np.floor(pos[:, 0] / float(L) * n).astype(int), 0, n - 1)
+    iy = np.clip(np.floor(pos[:, 1] / float(L) * n).astype(int), 0, n - 1)
+    flat = iy * n + ix                                          # row-major: iy = row, ix = col
+    sums = np.bincount(flat, weights=z, minlength=n * n).astype(float).reshape(n, n)
+    cnts = np.bincount(flat, minlength=n * n).astype(float).reshape(n, n)
+    with np.errstate(invalid="ignore"):
+        grid = np.where(cnts > 0, sums / cnts, np.nan)
+    z_rot = np.rot90(grid)[iy, ix]                              # each neuron reads its rotated-in value
+    if not np.all(np.isfinite(z_rot)):
+        raise ValueError(f"rotated_90 FAIL-CLOSED: {int((~np.isfinite(z_rot)).sum())}/{z.size} E neurons map "
+                         f"to an empty rot90-source cell on the {n}x{n} grid; cannot rotate without inventing z")
+    return z_rot
+
+
+def _counterfactual_transforms(z_branch, regions, qeff_mean, shuffle_seed, *, posE, L, grid_n):
+    """Per-E-neuron z-counterfactual transforms (task §5). Contract fixes vs the identity-fallback version:
+
+    - ``uniform_mean_matched`` (was the misleadingly-named ``uniform_current_matched``): fills every E cell
+      with the SPATIAL MEAN of z (nanmean). It matches mean disinhibition, NOT inhibitory current, so it is
+      DEMOTED from any causal main analysis until a verified current-aware match (sum(z*I_I)/sum(I_I), which
+      MZOnsetProbe.qeff_fields already computes) is run behind a bit-identical state-resume (task §5.2).
+    - ``rotated_90`` is now a REAL grid round-trip rotation (fail-closed), never ``lambda z: z``.
+    """
     rng = np.random.default_rng(int(shuffle_seed))
     shuf = z_branch.copy(); rng.shuffle(shuf)
     return dict(
-        native_frozen=lambda z: z,                                   # freeze at branch value
-        uniform_current_matched=lambda z: np.full_like(z, qeff_mean),
+        native_frozen=lambda z: z,                                   # freeze at branch value (the ONLY identity arm)
+        uniform_mean_matched=lambda z: np.full_like(z, qeff_mean),   # spatial mean of z (NOT current-matched)
         spatial_shuffle=lambda z, s=shuf: s.copy(),
         reset_one=lambda z: np.ones_like(z),
-        rotated_90=lambda z: z,   # coarse rotate mapping requires grid round-trip; documented as identity fallback
+        rotated_90=lambda z: _rotate90_neuron_field(z, posE, L, grid_n),   # real rotation; fail-closed
     )
 
 
@@ -688,20 +724,53 @@ def _save_traj(S, mz, I_EE, ds_ms, runaway_ms, events, fname, *, z_regime, A_fra
 
 
 def _aggregate_focused_m():
-    """P1-2: combine ALL per-seed focused_m JSONs into focused_m_summary.csv. A single explicit step
-    (run after parallel per-seed/per-frac processes finish) — no process writes the shared CSV, so
-    there is no parallel-writer race that leaves only the last seed."""
+    """Combine the per-seed focused_m MAIN-grid JSONs into focused_m_summary.csv (task §4.1).
+
+    Reads ONLY `focused_m_seed*_g*.json` (the tau-sweep `focused_m_tau*` files and the old-format
+    `focused_m_seed*.json` without a `_g` tag are excluded by the glob), then `validate_focused_m_grid`
+    fail-loudly rejects any missing / duplicate / tau-contaminated / schema-misaligned row before the CSV
+    is written. This is a single explicit step (run after the parallel per-seed/per-frac processes finish),
+    so there is no parallel-writer race and no stale partial CSV.
+    """
     rows = []
     for f in sorted(glob.glob(os.path.join(OUT, "per_seed", "focused_m_seed*_g*.json"))):
         rows += json.load(open(f)).get("rows", [])
-    rows.sort(key=lambda r: (r["seed"], r["A_frac"]))
+    rows = validate_focused_m_grid(rows)                # raises on any grid defect (missing/dup/tau-mix/misalign)
     _write_csv(rows, os.path.join(OUT, "focused_m_summary.csv"))
-    print(f"[focused-m] aggregated {len(rows)} rows into focused_m_summary.csv", flush=True)
+    print(f"[focused-m] aggregated + validated {len(rows)} MAIN-grid rows -> focused_m_summary.csv", flush=True)
+
+
+def _aggregate_tau_sensitivity(a_frac=0.001, taus=(2000, 1000, 500), seeds=(1, 3, 4)):
+    """Independent tau-sensitivity summary at fixed A_frac (task §4.2). tau2000 rows come from the A_frac
+    cell of the MAIN `focused_m_seed{S}_g0.json` files; tau1000/tau500 from `focused_m_tau{tau}_seed{S}_g0.001.json`.
+    Writes focused_m_tau_sensitivity.{csv,json} (with per-tau phenotype denominators). Fail-loud on any
+    missing/duplicate/misplaced cell."""
+    by = {}
+    for s in seeds:
+        for tau in taus:
+            if int(tau) == 2000:
+                fn = os.path.join(OUT, "per_seed", f"focused_m_seed{s}_g0.json")
+                cand = ([r for r in json.load(open(fn)).get("rows", []) if abs(float(r["A_frac"]) - a_frac) < 1e-12]
+                        if os.path.exists(fn) else [])
+            else:
+                fn = os.path.join(OUT, "per_seed", f"focused_m_tau{int(tau)}_seed{s}_g0.001.json")
+                cand = json.load(open(fn)).get("rows", []) if os.path.exists(fn) else []
+            if len(cand) != 1:
+                raise ValueError(f"tau-sensitivity: expected exactly 1 row for seed{s} tau{tau} A={a_frac}, "
+                                 f"got {len(cand)} from {fn}")
+            by[(int(s), float(tau))] = cand[0]
+    rows, denom = build_tau_sensitivity(by, seeds=tuple(seeds), taus=tuple(float(t) for t in taus), a_frac=a_frac)
+    _write_csv(rows, os.path.join(OUT, "focused_m_tau_sensitivity.csv"))
+    _dump(dict(experiment="focused-m tau sensitivity (fixed A_frac, vary tau_adp)", a_frac=a_frac,
+               taus_ms=[float(t) for t in taus], seeds=list(seeds), phenotype_denominators=denom, rows=rows),
+          os.path.join(OUT, "focused_m_tau_sensitivity.json"))
+    print(f"[focused-m] tau sensitivity denominators {denom} -> focused_m_tau_sensitivity.{{csv,json}}", flush=True)
 
 
 def cmd_focused_m(args, cfg):
     if getattr(args, "aggregate", False):
         _aggregate_focused_m()
+        _aggregate_tau_sensitivity()
         return
     fm = cfg["focused_m"]
     seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else fm["seeds"])]
