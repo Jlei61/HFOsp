@@ -127,13 +127,21 @@ grid-converged from n=12 onward**:
 | 24 | 1.029 | 0.762 | 0.674 | 0.877 | 0.551 | 0.133 | 1.26 |
 
 σ1≈1.0, k∥>k⊥, eig_axis≈0.87 (strongly axial), U1_axis≈0.55 (moderately axial), globality≈0.13 all
-stable n=12→24 → **the finding is not an n=12 resolution artifact**. `peak_k` is pinned at 1.26 = 2π/L
-(the whole-sheet scale) at every n: this is a DOMAIN/probe-range limit (fixed p_max=4), i.e. "preference
-sits at the largest scale the sheet holds", NOT a resolved interior optimum — probing a finer optimal
-wavelength needs a larger p_max (and a bigger domain to probe lower k), deferred. At **baseline** the
-eigenmode metrics (eig_axis/globality) are UNSTABLE across n (the near-homogeneous operator has a
-near-degenerate leading subspace); this is expected and is not part of the claim (the claim is the
-resolved, converged pre-onset state).
+stable n=12→24. **Scope of this statement**: this is a REPRESENTATIVE seed (seed 1), NOT a 3-seed median
+(3-seed consistency is established separately at n=12 in §4.1). Accurate wording: *on a representative
+seed, the pre-onset operator conclusions converge for n≥12* — so the finding is not an n=12 resolution
+artifact.
+
+`peak_k` correction (the earlier "larger p_max" wording was wrong): the pre-onset peak sits at the
+**LOWEST nonzero wavenumber** 2π/L=1.26 (the whole-sheet scale) at every n. A larger `p_max` only extends
+the HIGH-k side and CANNOT move this LOW-k rail. To test whether the true optimum is at an even larger
+scale (lower k), one needs a **larger spatial domain L**, **continuous/fractional k**, or **non-periodic
+smooth basis functions of varying width** — deferred. So all that is claimed is "preference sits at the
+largest scale the sheet holds", not a resolved interior optimal wavelength.
+
+At **baseline** the n=8 eigenmode is an anomalous point (eig_axis≈0.99); it stabilizes to non-axial only
+for n≥12 (near-degenerate leading subspace of the near-homogeneous baseline operator). Not part of the
+claim (the claim is the resolved, converged pre-onset state).
 
 ## 5. Answers to the ten Task-8 questions
 
