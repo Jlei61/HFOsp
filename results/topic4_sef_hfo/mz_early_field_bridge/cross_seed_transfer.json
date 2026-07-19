@@ -1,6 +1,8 @@
 {
-  "experiment": "MZ early-ictal bridge cross-seed template transfer (E1146 model)",
-  "framing": "template_seed x energy_seed; mirror-invariant maxAB; maxAB-matched within-shaft null permuting the target energy field; model proxy, not seizure",
+  "experiment": "MZ early-field bridge cross-seed template transfer diagnostic (E1146 model)",
+  "framing": "template_seed x energy_seed; mirror-invariant maxAB; maxAB-matched within-shaft null permuting the target energy field; three target fields are the repeated units; model proxy, not seizure",
+  "scientific_tier": "exploratory descriptive diagnostic; not a nine-replicate inferential test",
+  "safe_interpretation": "Cross-seed templates predict each target field almost as well as its same-seed template, weakening a pure same-noise replay explanation. Because every cell selected B_to_A in this run, this does not establish seed-invariance of both directional branches.",
   "seeds": [
     1,
     3,
@@ -8,6 +10,8 @@
   ],
   "window": "early_0_50_ms",
   "n_perm": 10000,
+  "n_independent_target_fields": 3,
+  "n_descriptive_template_target_cells": 9,
   "maxab_matrix_rows_template_cols_energy": [
     [
       0.9453009843927757,
@@ -42,9 +46,31 @@
       0.000999900009999
     ]
   ],
-  "mean_within_column_spread_across_template_seeds": 0.006640874431544503,
-  "spread_across_energy_seed_column_means": 0.09467287411423544,
-  "energy_seed_dominates_template_seed": true,
+  "descriptive_mean_within_target_spread_across_template_seeds": 0.006640874431544503,
+  "descriptive_spread_across_target_field_means": 0.09467287411423544,
+  "matched_same_seed_vs_foreign_template": [
+    {
+      "target_energy_seed": 1,
+      "same_seed_maxab": 0.9453009843927757,
+      "foreign_template_median_maxab": 0.943254502017576,
+      "same_minus_foreign_median": 0.0020464823751996652
+    },
+    {
+      "target_energy_seed": 3,
+      "same_seed_maxab": 0.7351065022497505,
+      "foreign_template_median_maxab": 0.7375217037084993,
+      "same_minus_foreign_median": -0.00241520145874885
+    },
+    {
+      "target_energy_seed": 4,
+      "same_seed_maxab": 0.9240929684291712,
+      "foreign_template_median_maxab": 0.9336781568377732,
+      "same_minus_foreign_median": -0.009585188408602008
+    }
+  ],
+  "winner_direction_counts": {
+    "B_to_A": 9
+  },
   "diagonal_same_seed_maxab": [
     0.9453009843927757,
     0.7351065022497505,
@@ -66,6 +92,7 @@
       "rho_maxab": 0.9453009843927757,
       "rho_a": -0.5654461466217138,
       "rho_b": 0.9453009843927757,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.00039996000399960006,
       "within_shaft_null_p95": 0.7821603306346664,
       "field_cosine": 0.856099579190269,
@@ -79,6 +106,7 @@
       "rho_maxab": 0.7533708035008839,
       "rho_a": -0.5148091782675305,
       "rho_b": 0.7533708035008839,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.0811918808119188,
       "within_shaft_null_p95": 0.7838643836425864,
       "field_cosine": 0.5538246075884595,
@@ -92,6 +120,7 @@
       "rho_maxab": 0.9291573243177569,
       "rho_a": -0.5316881677189249,
       "rho_b": 0.9291573243177569,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.00029997000299970003,
       "within_shaft_null_p95": 0.7820706436342509,
       "field_cosine": 0.8906417979115415,
@@ -105,6 +134,7 @@
       "rho_maxab": 0.9426140434253557,
       "rho_a": -0.34783428343195877,
       "rho_b": 0.9426140434253557,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.0005999400059994001,
       "within_shaft_null_p95": 0.770426934790279,
       "field_cosine": 0.8505772748012279,
@@ -118,6 +148,7 @@
       "rho_maxab": 0.7351065022497505,
       "rho_a": -0.5263281920352006,
       "rho_b": 0.7351065022497505,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.08609139086091391,
       "within_shaft_null_p95": 0.770426934790279,
       "field_cosine": 0.533942418943849,
@@ -131,6 +162,7 @@
       "rho_maxab": 0.9381989893577897,
       "rho_a": -0.37529488475553446,
       "rho_b": 0.9381989893577897,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.0007999200079992001,
       "within_shaft_null_p95": 0.770426934790279,
       "field_cosine": 0.886612850493616,
@@ -144,6 +176,7 @@
       "rho_maxab": 0.9438949606097963,
       "rho_a": -0.8616404368553291,
       "rho_b": 0.9438949606097963,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.00019998000199980003,
       "within_shaft_null_p95": 0.7634768096307677,
       "field_cosine": 0.8500502382524966,
@@ -157,6 +190,7 @@
       "rho_maxab": 0.7216726039161147,
       "rho_a": -0.28926500380143194,
       "rho_b": 0.7216726039161147,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.09119088091190881,
       "within_shaft_null_p95": 0.7634768096307677,
       "field_cosine": 0.5294548394515771,
@@ -170,6 +204,7 @@
       "rho_maxab": 0.9240929684291712,
       "rho_a": -0.8124038404635959,
       "rho_b": 0.9240929684291712,
+      "winner_direction": "B_to_A",
       "within_shaft_p": 0.000999900009999,
       "within_shaft_null_p95": 0.7612765882773649,
       "field_cosine": 0.8862120601982143,
