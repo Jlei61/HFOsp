@@ -379,6 +379,31 @@ def build_region_masks(pos_E, src_xy, snk_xy, axis_unit, core_r, *, corridor_hal
 
 
 # ======================================================================== slow-state coordinates (§5.1)
+def natural_zm_trajectory(z_mean, adap_current, rate_hz, dt, *, I_EE_scale, downsample_ms):
+    """Continuous MZ D–a state trajectory from the engine's streaming all-E traces (temporal
+    phase-diagram §5.3). ``z_mean`` = MZSlowVars.trace_z_mean (mean z over E cells); ``adap_current``
+    = trace_adap_current (== eta_m·mean(m over E) == A_abs); ``rate_hz`` = E population rate (Hz).
+
+    Returns downsampled arrays: ``t_ms``, ``D_allE`` = 1 - z̄, ``a_allE`` = A_abs/I_EE_scale,
+    ``rate_E_hz``. Downsampling averages within each ``downsample_ms`` window; a trailing partial
+    (< one bin) remainder is dropped."""
+    z_mean = np.asarray(z_mean, float)
+    adap_current = np.asarray(adap_current, float)
+    rate_hz = np.asarray(rate_hz, float)
+    step = max(1, int(round(float(downsample_ms) / float(dt))))
+    n_bins = z_mean.shape[0] // step
+
+    def _avg(x):
+        return x[:n_bins * step].reshape(n_bins, step).mean(axis=1)
+
+    return dict(
+        t_ms=np.arange(n_bins) * (step * float(dt)),
+        D_allE=1.0 - _avg(z_mean),
+        a_allE=_avg(adap_current) / float(I_EE_scale),
+        rate_E_hz=_avg(rate_hz),
+    )
+
+
 def slow_state_coordinates(z_E, m_E, eta_m, region_masks):
     """D_z = 1 - mean(z), A = eta_m * mean(m) per region (spec §5.1). Returns {region: dict(D_z, A, n)}."""
     z = np.asarray(z_E, float); m = np.asarray(m_E, float)

@@ -54,7 +54,7 @@ from mz_slow_vars import MZSlowVarsConfig                  # noqa: E402
 from src.topic4_mz_onset_dynamics import (                 # noqa: E402
     MZOnsetProbe, run_loop, score_runaway, build_region_masks, slow_state_coordinates,
     qeff_region_summary, zbar_qeff_field_audit, realized_D_grid, build_DA_q_field, DA_controls,
-    epsilon_c_from_ladder, classify_ignition, SCHEMA_VERSION,
+    epsilon_c_from_ladder, classify_ignition, natural_zm_trajectory, SCHEMA_VERSION,
 )
 from src.topic4_mz_slowvars import classify_mz_run, replay_adaptation_peak, eta_m_from_frac  # noqa: E402
 from src.topic4_m3b_spectral_phase import Grid, build_excitability_field  # noqa: E402
@@ -671,27 +671,51 @@ def _calibrate_suppression(S, mzcfg, core_mask_E, tgt, gap, events, es, ig):
 
 
 # ============================================================ Task G: focused m push-pull
+def _save_traj(S, mz, I_EE, ds_ms, runaway_ms, events, fname, *, z_regime, A_frac, seed, eta_m):
+    """Save a continuous downsampled MZ D–a trajectory npz (temporal phase-diagram §5.3). rate is
+    derived from trace_rate_E (same _record_traces length as z/adap traces -> no cross-array skew)."""
+    rate_hz = np.asarray(mz.trace_rate_E, float) / float(S["NE"]) / (DT / 1000.0)
+    traj = natural_zm_trajectory(mz.trace_z_mean, mz.trace_adap_current, rate_hz,
+                                 dt=DT, I_EE_scale=I_EE, downsample_ms=ds_ms)
+    np.savez_compressed(
+        os.path.join(OUT, "per_seed", fname),
+        t_ms=traj["t_ms"], D_allE=traj["D_allE"], a_allE=traj["a_allE"], rate_E_hz=traj["rate_E_hz"],
+        runaway_ms=(np.nan if runaway_ms is None else float(runaway_ms)),
+        event_on_ms=np.array([e["t_on"] for e in events], float),
+        event_off_ms=np.array([e["t_off"] for e in events], float),
+        z_regime=z_regime, A_frac=float(A_frac), seed=int(seed), eta_m=float(eta_m), i_ee_scale=float(I_EE))
+
+
 def cmd_focused_m(args, cfg):
     fm = cfg["focused_m"]
     seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else fm["seeds"])]
     tau_adp = float(fm["tau_adp_ms"]); I_EE = float(fm["I_EE_scale"]); peak_m = float(fm["peak_m_tau2000"])
-    A_fracs = [float(a) for a in fm["A_fracs"]]
+    A_fracs = [float(a) for a in (args.a_fracs.split(",") if getattr(args, "a_fracs", None) else fm["A_fracs"])]
+    z_regimes = fm["z_regimes"]
+    if getattr(args, "regime", None):
+        z_regimes = [z for z in z_regimes if z["label"] == args.regime]
+        if not z_regimes:
+            raise SystemExit(f"--regime {args.regime!r} not in focused_m.z_regimes")
+    T_ms = float(args.t_ms) if getattr(args, "t_ms", None) else 15000.0
+    ds_ms = float(fm.get("traj_downsample_ms", 5.0))
+    from run_topic4_mz_slowvars import compute_baseline_ref, extract_run_metrics, run_mz_cell
     rows = []
     for seed in seeds:
         seed_json = os.path.join(OUT, "per_seed", f"focused_m_seed{seed}.json")
         if args.resume and os.path.exists(seed_json):
             rows += json.load(open(seed_json))["rows"]; continue
         S, regions, core_mask_E, core_r = build_S(seed, cfg)
-        # slow-off baseline for phenotype classifier
-        from run_topic4_mz_slowvars import compute_baseline_ref, extract_run_metrics, run_mz_cell
-        res0, _ = run_mz_cell(S, MZSlowVarsConfig(use_z=False, use_m=False), 15000.0, early_stop=False)
+        # slow-off baseline for phenotype classifier + slow-off reference trajectory (D=0, a=0)
+        res0, mz0 = run_mz_cell(S, MZSlowVarsConfig(use_z=False, use_m=False), T_ms, early_stop=False)
         baseline = compute_baseline_ref(res0, DT)
+        _save_traj(S, mz0, I_EE, ds_ms, None, [], f"traj_slow_off_seed{seed}.npz",
+                   z_regime="slow_off", A_frac=0.0, seed=seed, eta_m=0.0)
         seed_rows = []
-        for z in fm["z_regimes"]:
+        for z in z_regimes:
             for A_frac in A_fracs:
                 eta_m = 0.0 if A_frac == 0 else eta_m_from_frac(A_frac, I_EE, peak_m)
                 cfg_cell = MZSlowVarsConfig(use_m=(A_frac > 0), tau_adp=tau_adp, eta_m=eta_m, **z["cfg"])
-                res, mz = run_mz_cell(S, cfg_cell, 15000.0, early_stop=True)
+                res, mz = run_mz_cell(S, cfg_cell, T_ms, early_stop=True)
                 rm, events, af, bin_w, runaway_ms = extract_run_metrics(res, DT, baseline)
                 pheno = classify_mz_run(rm, baseline, runaway_ms)
                 adap_peak = float(max(mz.trace_adap_current)) if mz.trace_adap_current else 0.0
@@ -700,6 +724,8 @@ def cmd_focused_m(args, cfg):
                            n_events=rm["n_events"], peak_participation=round(rm["peak_participation"], 4),
                            peak_returned=rm["peak_returned"])
                 seed_rows.append(row); rows.append(row)
+                _save_traj(S, mz, I_EE, ds_ms, runaway_ms, events, f"traj_{z['label']}_A{A_frac}_seed{seed}.npz",
+                           z_regime=z["label"], A_frac=A_frac, seed=seed, eta_m=eta_m)
                 print(f"[focused-m] s{seed} {z['label']} A={A_frac} -> {pheno} (realized_adap={row['realized_adap_frac']})", flush=True)
         _dump(dict(seeds=seed, rows=seed_rows, provenance=_provenance(cfg, dict(phase="focused-m", seed=seed))), seed_json)
     _write_csv(rows, os.path.join(OUT, "focused_m_summary.csv"))
@@ -716,6 +742,9 @@ def main(argv=None):
         sp.add_argument("--seeds", default=None)
         sp.add_argument("--states", default=None)
         sp.add_argument("--resume", action="store_true")
+        sp.add_argument("--a-fracs", dest="a_fracs", default=None, help="focused-m: comma-separated A_frac subset override")
+        sp.add_argument("--regime", default=None, help="focused-m: z-regime label subset override")
+        sp.add_argument("--t-ms", dest="t_ms", default=None, help="focused-m: sim length override (ms); default 15000")
     args = ap.parse_args(argv)
     cfg = load_cfg()
     needs_run = {"state-coords", "operator-grid", "ignition", "counterfactual", "event-suppress", "focused-m"}

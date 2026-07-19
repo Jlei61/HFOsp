@@ -24,6 +24,7 @@ from src.topic4_mz_onset_dynamics import (  # noqa: E402
     MZOnsetProbe, run_loop, score_runaway, build_region_masks, slow_state_coordinates,
     qeff_region_summary, zbar_qeff_field_audit, realized_D_grid, build_DA_q_field, DA_controls,
     epsilon_c_from_ladder, classify_ignition, projected_flow_eligibility,
+    natural_zm_trajectory,
 )
 
 
@@ -284,3 +285,30 @@ def test_10b_operator_residual_synthetic():
         Yb = batched_finite_time_response(J, B, 30.0)
         y0 = batched_finite_time_response(J, B[:, :1], 30.0)
         assert np.allclose(Yb[:, 0], y0[:, 0], atol=1e-8)
+
+
+def test_14_natural_zm_trajectory_coordinates():
+    """Temporal phase-diagram §5.3: continuous D–a trajectory from engine streaming traces.
+    D_allE = 1 - z̄_E ; a_allE = (eta_m·m̄_E)/I_EE_scale (trace_adap_current already == eta_m·m̄_E)."""
+    z_mean = [1.0, 0.8, 0.6, 0.4]              # -> D = [0, .2, .4, .6]
+    adap_current = [0.0, 10.0, 20.0, 30.0]     # eta_m*m̄_E == A_abs ; /100 -> a = [0, .1, .2, .3]
+    rate_hz = [5.0, 6.0, 7.0, 8.0]
+    tr = natural_zm_trajectory(z_mean, adap_current, rate_hz, dt=0.1,
+                               I_EE_scale=100.0, downsample_ms=0.1)   # downsample_ms==dt -> identity
+    np.testing.assert_allclose(tr["D_allE"], [0.0, 0.2, 0.4, 0.6])
+    np.testing.assert_allclose(tr["a_allE"], [0.0, 0.1, 0.2, 0.3])
+    np.testing.assert_allclose(tr["rate_E_hz"], [5.0, 6.0, 7.0, 8.0])
+    np.testing.assert_allclose(tr["t_ms"], [0.0, 0.1, 0.2, 0.3])
+
+
+def test_15_natural_zm_trajectory_downsample():
+    """§5.3 downsampling averages within each downsample_ms window (bin = round(downsample_ms/dt) steps)."""
+    z_mean = [1.0, 0.8, 0.6, 0.4]              # 2-step bins: [0.9, 0.5] -> D = [0.1, 0.5]
+    adap_current = [0.0, 10.0, 20.0, 30.0]     # bins [5, 25] -> a = [0.05, 0.25]
+    rate_hz = [5.0, 6.0, 7.0, 8.0]             # bins [5.5, 7.5]
+    tr = natural_zm_trajectory(z_mean, adap_current, rate_hz, dt=0.1,
+                               I_EE_scale=100.0, downsample_ms=0.2)   # bin = 2 steps
+    np.testing.assert_allclose(tr["D_allE"], [0.1, 0.5])
+    np.testing.assert_allclose(tr["a_allE"], [0.05, 0.25])
+    np.testing.assert_allclose(tr["rate_E_hz"], [5.5, 7.5])
+    np.testing.assert_allclose(tr["t_ms"], [0.0, 0.2])
