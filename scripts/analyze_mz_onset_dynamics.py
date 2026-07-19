@@ -142,8 +142,13 @@ def main():
     else:
         conclusion = "Binary prevention: adaptation prevents onset with no bounded elevated approach."
     print("\nCONCLUSION:", conclusion)
-    json.dump(dict(D_onset_ref=D_onset_ref, cells=rows, verdict={str(k): v for k, v in verdict.items()},
-                   conclusion=conclusion),
+    runoff_corridor = (dict(n=len(xc), D_mean=round(float(np.mean(xc)), 4), D_sd=round(float(np.std(xc)), 4),
+                            D_min=round(float(np.min(xc)), 4), D_max=round(float(np.max(xc)), 4)) if xc else None)
+    m_timing = (dict(n=len(mt), a_at_crossing_mean=round(float(np.mean([m[0] for m in mt])), 5),
+                     a_post_onset_max_mean=round(float(np.mean([m[1] for m in mt])), 5)) if mt else None)
+    json.dump(dict(D_onset_ref=D_onset_ref, runoff_corridor=runoff_corridor,
+                   adaptation_timing_in_m_runaways=m_timing, cells=rows,
+                   verdict={str(k): v for k, v in verdict.items()}, conclusion=conclusion),
               open(os.path.join(OUT, "gap_dynamics_summary.json"), "w"), indent=1)
     print("wrote", os.path.join(OUT, "gap_dynamics_summary.json"))
 

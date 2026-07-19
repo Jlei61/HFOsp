@@ -322,22 +322,32 @@ def _add_scripts_path():
             sys.path.insert(0, p)
 
 
-def test_plot_load_covers_all_gap_fracs(tmp_path):
-    """P1-1 regression: the plotter's frac key must keep 0.0025/0.0075 distinct — round(...,3) collapsed
-    them (0.0025->0.003) so the D–a plane silently dropped two of five strengths while the legend kept them."""
+def test_plot_load_covers_all_gap_fracs(tmp_path, monkeypatch):
+    """P1-1 + tau-contamination regression for the plotter's _load: (a) keep 0.0025/0.0075 distinct —
+    round(...,3) collapsed 0.0025->0.003, silently dropping two of five strengths; (b) exclude the _tau
+    sweep files so they don't overwrite the tau=2000 gap cell keyed on the SAME A_frac. Self-contained:
+    monkeypatches TRAJ_DIR (the actual producer constant — TRAJ does not exist) so it never reads repo artifacts."""
     _add_scripts_path()
     import plot_topic4_mz_onset_dynamics as P
-    fields = dict(t_ms=np.arange(10.0), D_allE=np.zeros(10), a_allE=np.zeros(10), rate_E_hz=np.zeros(10),
-                  event_on_ms=np.zeros(0), event_off_ms=np.zeros(0), runaway_ms=np.nan)
-    for fr in [0.0] + P.NONZERO_FRACS:
+    monkeypatch.setattr(P, "TRAJ_DIR", str(tmp_path))
+
+    def _save(name, a_frac, seed, dval):
+        np.savez(os.path.join(tmp_path, name), z_regime=P.REGIME, A_frac=a_frac, seed=seed,
+                 t_ms=np.arange(10.0), D_allE=np.full(10, dval), a_allE=np.zeros(10), rate_E_hz=np.zeros(10),
+                 event_on_ms=np.zeros(0), event_off_ms=np.zeros(0), runaway_ms=np.nan)
+
+    for fr in [0.0] + P.NONZERO_FRACS:                        # gap grid: 6 strengths x 3 seeds (plateau D=0.05)
         for s in (1, 3, 4):
-            np.savez(os.path.join(tmp_path, f"traj_{P.REGIME}_A{fr:g}_seed{s}.npz"),
-                     z_regime=P.REGIME, A_frac=fr, seed=s, **fields)
-    P.TRAJ = str(tmp_path)
+            _save(f"traj_{P.REGIME}_A{fr:g}_seed{s}.npz", fr, s, 0.05)
+    # tau-sweep file: SAME (regime, 0.001, seed 1) key but D=0.99 -> must be EXCLUDED, not overwrite the gap cell
+    _save(f"traj_{P.REGIME}_A0.001_tau500_seed1.npz", 0.001, 1, 0.99)
+
     cells = P._load()
-    for fr in P.NONZERO_FRACS:
+    for fr in [0.0] + P.NONZERO_FRACS:                        # six strengths x three seeds all present
         for s in (1, 3, 4):
-            assert (P.REGIME, round(fr, 5), s) in cells, f"frac {fr} seed {s} dropped by _load key"
+            assert (P.REGIME, round(fr, 5), s) in cells, f"frac {fr} seed {s} missing from _load"
+    assert (P.REGIME, 0.0025, 1) in cells and (P.REGIME, 0.0075, 1) in cells   # not collapsed by rounding
+    assert float(cells[(P.REGIME, 0.001, 1)]["D_allE"].max()) < 0.1            # tau=500 (D=0.99) did NOT overwrite
 
 
 def test_aggregate_focused_m_18_rows_unique(tmp_path, monkeypatch):
