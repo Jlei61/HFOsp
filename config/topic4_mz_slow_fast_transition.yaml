@@ -1,0 +1,73 @@
+# Topic 4 — MZ slow–fast dynamical transition.
+# Binding design: docs/superpowers/specs/2026-07-20-topic4-mz-slow-fast-transition-design.md
+# Tier = model-side mechanism analysis. Operational runaway (120 Hz / 100 ms) only; NOT seizure validation.
+# All params LOCKED before target runs; nothing here is tuned on a result.
+
+schema_version: mz-slow-fast-transition-1.0
+subject: epilepsiae_1146
+montage: narrow
+dt_ms: 0.1
+seeds: [1, 3, 4]
+
+# z-only operational-runaway onset anchors, per seed (READ from onset-dynamics; never re-estimated).
+onset_ms: {1: 9293.6, 3: 9499.3, 4: 9757.9}
+
+# --- calibration (from mz_slowvars calibration.json). eta_m computed in-runner (no hardcode drift):
+#     eta_m = A_target * I_EE_scale / peak_m_tau2000  (fixed across tau, per onset-dynamics tau-sweep). ---
+A_target: 0.001
+I_EE_scale: 272.75518960107513
+peak_m_tau2000: 36.6036014019694
+
+# --- four conditions (design §1). z regime = zA_q75_tz5000. eta_m injected when use_m. ---
+conditions:
+  z_only:     {use_z: true, use_m: false, tau_z: 5000.0, I_th_EI: 95.19851312666987}
+  mz_runaway: {use_z: true, use_m: true,  tau_z: 5000.0, I_th_EI: 95.19851312666987, tau_adp: 500.0}
+  mz_edge:    {use_z: true, use_m: true,  tau_z: 5000.0, I_th_EI: 95.19851312666987, tau_adp: 1000.0}
+  mz_plateau: {use_z: true, use_m: true,  tau_z: 5000.0, I_th_EI: 95.19851312666987, tau_adp: 2000.0}
+condition_order: [z_only, mz_runaway, mz_edge, mz_plateau]
+
+# --- registered checkpoints (design §2.1). times resolve per seed from onset_ms; first_crossing per condition. ---
+checkpoints:
+  baseline_ms: 1000.0
+  mid_fraction: 0.50
+  pre_onset_ms: [2000.0, 1000.0, 500.0, 200.0, 100.0]
+natural_tail_ms: 1500.0     # continue past onset anchor to capture crossing / plateau tail
+
+# --- perturbation-free escape probability P_runaway (design §3.1) ---
+p_runaway: {n_replay: 20, horizon_ms: 500.0}
+
+# --- global nonlinear ignition epsilon_c (design §3.2). threshold-LOWERING probe on ALL E;
+#     units a = dVth / median(Vth - Vreset). ---
+ignition:
+  probe_ms: 10.0
+  horizon_ms: 500.0
+  amplitude_ladder: [0.0, 0.025, 0.05, 0.10, 0.20]
+  bisection_refinements: 2
+
+# --- fast-rate recovery time tau_rec (design §3.3). deterministic SUBTHRESHOLD global pulse. ---
+recovery:
+  amp: 0.02               # vth-gap units, below smallest ignition rung (0.025) -> subthreshold
+  pulse_ms: 10.0
+  pre_window_ms: 200.0    # frozen pre-pulse band window (mean +/- band_k*std)
+  horizon_ms: 500.0
+  band_k: 1.0
+  smooth_ms: 20.0
+  min_hold_ms: 50.0
+
+# --- state-matched M/Z counterfactuals (design §4). branch at pre_onset_100ms; early=mid, late=pre_100. ---
+counterfactual:
+  branch_state: pre_onset_100ms
+  early_state: mid_fraction
+  branches: [native_zm, native_z_reset_m, reset_z_native_m, late_z_early_m, early_z_late_m]
+
+# --- matched-D secondary cross-check (design §2.2) ---
+matched_d_targets: [0.02, 0.04, 0.06, 0.08]
+
+# --- shared operational-runaway criterion ---
+runaway_hz: 120.0
+runaway_dur_ms: 100.0
+
+# --- upstream artifacts consumed (natural-trajectory cross-check + calibration provenance) ---
+upstream:
+  onset_dynamics_per_seed: results/topic4_sef_hfo/mz_onset_dynamics/per_seed
+  calibration: results/topic4_sef_hfo/mz_slowvars/calibration.json
