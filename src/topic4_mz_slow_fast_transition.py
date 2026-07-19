@@ -52,3 +52,29 @@ def wilson_ci(k, n, z=1.96):
     center = (p + z2 / (2.0 * n)) / denom
     half = (z / denom) * np.sqrt(p * (1.0 - p) / n + z2 / (4.0 * n * n))
     return (max(0.0, center - half), min(1.0, center + half))
+
+
+# ============================================================ fast-rate recovery time (design §3.3)
+def recovery_time(rate_hz, dt, pulse_off_idx, band_lo, band_hi, *, smooth_ms=20.0, min_hold_ms=50.0):
+    """Time (ms after pulse offset) for the smoothed E-rate to return to the pre-pulse band
+    [band_lo, band_hi] and STAY inside it for ``min_hold_ms``. None (censored) if it never re-enters within
+    the trace — i.e. the perturbed frozen state ran away or stayed elevated. Smoothing is a 20-ms EMA (same
+    constant as score_runaway). The band is supplied by the caller (pre_mean +/- k*pre_std of the frozen
+    state's pre-pulse window), keeping this function pure/testable."""
+    r = np.asarray(rate_hz, float)
+    n = r.size
+    if n == 0:
+        return None
+    alpha = 1.0 - np.exp(-dt / smooth_ms)
+    ema = np.empty(n)
+    acc = float(r[0])                                   # seed at first sample (no spurious ramp from 0)
+    for i in range(n):
+        acc += alpha * (r[i] - acc)
+        ema[i] = acc
+    hold = max(1, int(round(min_hold_ms / dt)))
+    start = int(pulse_off_idx)
+    in_band = (ema >= band_lo) & (ema <= band_hi)
+    for i in range(start, n - hold + 1):
+        if in_band[i:i + hold].all():
+            return float((i - start) * dt)
+    return None

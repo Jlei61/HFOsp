@@ -52,3 +52,23 @@ def test_wilson_ci_bounds_and_monotone():
     lo, hi = MZSF.wilson_ci(10, 20)
     assert lo < 0.5 < hi                               # brackets the point estimate
     assert np.isnan(MZSF.wilson_ci(0, 0)[0])           # n=0 -> nan
+
+
+# ---------------------------------------------------------------- Task 3: recovery_time
+def test_recovery_time_returns_finite_for_decay():
+    dt = 0.1
+    t = np.arange(6000) * dt
+    rate = 5.0 + 20.0 * np.exp(-t / 50.0)              # elevated, decays toward 5 Hz (in band)
+    rt = MZSF.recovery_time(rate, dt, pulse_off_idx=0, band_lo=4.0, band_hi=6.0, min_hold_ms=50.0)
+    assert rt is not None and 80.0 < rt < 400.0
+
+
+def test_recovery_time_censored_when_never_returns():
+    rate = np.full(3000, 40.0)                         # stays elevated -> never re-enters band
+    assert MZSF.recovery_time(rate, 0.1, 0, band_lo=4.0, band_hi=6.0, min_hold_ms=50.0) is None
+
+
+def test_recovery_time_already_in_band_is_near_zero():
+    rate = np.full(3000, 5.0)                          # already inside [4,6]
+    rt = MZSF.recovery_time(rate, 0.1, 0, band_lo=4.0, band_hi=6.0, min_hold_ms=50.0)
+    assert rt is not None and rt < 25.0                # essentially immediate
