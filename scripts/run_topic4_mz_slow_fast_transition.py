@@ -228,46 +228,84 @@ def _tau_rec(S, ck, template, gap, all_E, cfg):
                 runaway_during_probe=False, pre_band=[round(lo, 4), round(hi, 4)], pre_rate_mean=round(mu, 4))
 
 
-# ============================================================ natural trajectory (survey + chained capture)
-def _natural_survey(S, mzcfg, seed, O_s, tail, cfg):
-    """One natural (un-frozen) run to O_s+tail. Returns full D/a/rate traces + operational-runaway crossing."""
+# ============================================================ natural trajectory (single pass + capture)
+def _nearest_earlier(sched, step):
+    """(label, step) of the latest matched-time checkpoint at or before ``step``; (None, None) if none."""
+    cands = [(lab, st) for lab, st in sched.items() if st <= step]
+    return max(cands, key=lambda kv: kv[1]) if cands else (None, None)
+
+
+def _resume_capture(S, base_ck, target_step, mzcfg, seed):
+    """Capture a natural (un-frozen) checkpoint at ``target_step`` via a cheap short re-resume from the
+    nearest earlier checkpoint (or a fresh chain from 0 if none). Bit-identical to the main trajectory."""
+    if base_ck is None:
+        mz = MZOnsetProbe(S["N"], 18.0, mzcfg, NE=S["NE"], core_mask_E=None)
+        S["net"]["rng"] = np.random.default_rng(seed)
+        res = run_loop(S["p"], S["net"], mz, S["vth"], n_steps=int(target_step), capture_final=True,
+                       store_spikes=False)
+    else:
+        d = int(target_step) - int(base_ck.t)
+        if d <= 0:
+            return base_ck
+        res = run_loop(S["p"], S["net"], copy.deepcopy(base_ck.slow), S["vth"], n_steps=d, start=base_ck,
+                       capture_final=True, store_spikes=False)
+    ck = res["checkpoint"]
+    _clear_traces(ck.slow)
+    return ck
+
+
+def _natural_and_capture(S, mzcfg, seed, O_s, tail, cfg):
+    """ONE natural run. Chain-captures the matched-time checkpoints (all pre-onset -> normal speed), then
+    continues with early-stop to O_s+tail so the run stops AT the operational-runaway crossing instead of
+    grinding through the slow post-runaway saturated tail. first_crossing + matched-D checkpoints are captured
+    by cheap short re-resumes. Returns the full pre-onset(+crossing) trajectory + all LoopState checkpoints."""
+    sched = state_step_schedule(O_s, DT)
     mz = MZOnsetProbe(S["N"], 18.0, mzcfg, NE=S["NE"], core_mask_E=None)
     S["net"]["rng"] = np.random.default_rng(seed)
-    n = int(round((O_s + tail) / DT))
-    res = run_loop(S["p"], S["net"], mz, S["vth"], n_steps=n, store_spikes=False, early_stop_runaway=False)
-    rate = res["rate_E"]
+    cks, rate_segs, ck, prev = {}, [], None, 0
+    for label, st in sorted(sched.items(), key=lambda kv: kv[1]):
+        d = st - prev
+        if d > 0:
+            res = run_loop(S["p"], S["net"], mz, S["vth"], n_steps=d, start=ck, capture_final=True,
+                           store_spikes=False)
+            ck = res["checkpoint"]
+            rate_segs.append(res["rate_E"])
+            prev = st
+        _clear_traces(ck.slow)
+        cks[label] = ck
+    end_step = int(round((O_s + tail) / DT))
+    tail_stop = None
+    if end_step > prev:
+        res = run_loop(S["p"], S["net"], mz, S["vth"], n_steps=end_step - prev, start=ck, store_spikes=False,
+                       early_stop_runaway=True, es_thresh_hz=cfg["runaway_hz"], es_dur_ms=cfg["runaway_dur_ms"])
+        rate_segs.append(res["rate_E"])
+        tail_stop = res["runaway_early_stop_step"]
+    full_rate = np.concatenate(rate_segs) if rate_segs else np.array([])
+    I_EE = float(cfg["I_EE_scale"])
     z_mean = np.asarray(mz.trace_z_mean, float)
     adap = np.asarray(mz.trace_adap_current, float)
-    I_EE = float(cfg["I_EE_scale"])
     D_full = 1.0 - z_mean
     a_full = adap / I_EE
     t_full = np.arange(z_mean.size) * DT
-    crossing = score_runaway(rate, DT, thresh_hz=cfg["runaway_hz"], dur_ms=cfg["runaway_dur_ms"])
-    return dict(rate=rate, D_full=D_full, a_full=a_full, t_full=t_full, crossing_ms=crossing,
+    crossing = score_runaway(full_rate, DT, thresh_hz=cfg["runaway_hz"], dur_ms=cfg["runaway_dur_ms"])
+    if crossing is None and tail_stop is not None:
+        crossing = tail_stop * DT
+    crossing_step = None if crossing is None else int(round(crossing / DT))
+    if crossing_step is not None:
+        lab, _ = _nearest_earlier(sched, crossing_step)
+        cks["first_crossing"] = _resume_capture(S, cks.get(lab), crossing_step, mzcfg, seed)
+    md_times = matched_d_times(D_full, t_full, cfg["matched_d_targets"])
+    md_steps = {}
+    for tg, tm in md_times.items():
+        if tm is None:
+            continue
+        st = int(round(tm / DT))
+        md_steps[float(tg)] = st
+        lab, _ = _nearest_earlier(sched, st)
+        cks[f"matched_d_{float(tg)}"] = _resume_capture(S, cks.get(lab), st, mzcfg, seed)
+    return dict(cks=cks, sched=sched, D_full=D_full, a_full=a_full, rate=full_rate, t_full=t_full,
+                crossing_ms=crossing, crossing_step=crossing_step, md_times=md_times, md_steps=md_steps,
                 D_max=float(D_full.max()) if D_full.size else float("nan"))
-
-
-def _chain_capture(S, mzcfg, seed, cap):
-    """Chain natural segments (bit-identical to one continuous run) capturing a LoopState at each requested
-    step. cap = {label: step}. Returns {label: LoopState} (traces on the copies are blanked to save memory)."""
-    label_by_step = {}
-    for lab, st in cap.items():
-        label_by_step.setdefault(int(st), []).append(lab)
-    steps = sorted(label_by_step)
-    mz = MZOnsetProbe(S["N"], 18.0, mzcfg, NE=S["NE"], core_mask_E=None)
-    S["net"]["rng"] = np.random.default_rng(seed)
-    cks, ck, prev = {}, None, 0
-    for st in steps:
-        delta = st - prev
-        if delta > 0:
-            res = run_loop(S["p"], S["net"], mz, S["vth"], n_steps=delta, start=ck, capture_final=True,
-                           store_spikes=False)
-            ck = res["checkpoint"]
-            _clear_traces(ck.slow)
-            prev = st
-        for lab in label_by_step[st]:
-            cks[lab] = ck
-    return cks
 
 
 def _downsample(arr, step):
@@ -291,33 +329,22 @@ def run_unit(cond, seed, cfg, resume=False, verbose=True):
     I_EE = float(cfg["I_EE_scale"])
     tail = float(cfg["natural_tail_ms"])
 
-    # --- survey: full natural trajectory + crossing (also cross-check z_only crossing vs onset anchor) ---
-    survey = _natural_survey(S, mzcfg, seed, O_s, tail, cfg)
+    # --- ONE natural pass: trajectory + all checkpoints (matched-time + first_crossing + matched-D) ---
+    nat = _natural_and_capture(S, mzcfg, seed, O_s, tail, cfg)
+    cks, sched = nat["cks"], nat["sched"]
+    crossing_step, md_times, md_steps = nat["crossing_step"], nat["md_times"], nat["md_steps"]
     npz_path = os.path.join(per_state, f"{cond}_seed{seed}_natural.npz")
     if not (resume and os.path.exists(npz_path)):
         os.makedirs(per_state, exist_ok=True)
         ds = max(1, int(round(5.0 / DT)))               # 5 ms downsample for the figure
         np.savez_compressed(
-            npz_path, t_ms=_downsample(survey["t_full"], ds), D=_downsample(survey["D_full"], ds),
-            a=_downsample(survey["a_full"], ds), rate_E_hz=_downsample(survey["rate"], ds),
-            crossing_ms=(np.nan if survey["crossing_ms"] is None else float(survey["crossing_ms"])),
-            onset_anchor_ms=float(O_s), D_max=float(survey["D_max"]), condition=cond, seed=int(seed))
+            npz_path, t_ms=_downsample(nat["t_full"], ds), D=_downsample(nat["D_full"], ds),
+            a=_downsample(nat["a_full"], ds), rate_E_hz=_downsample(nat["rate"], ds),
+            crossing_ms=(np.nan if nat["crossing_ms"] is None else float(nat["crossing_ms"])),
+            onset_anchor_ms=float(O_s), D_max=float(nat["D_max"]), condition=cond, seed=int(seed))
     xcheck = None
-    if cond == "z_only" and survey["crossing_ms"] is not None:
-        xcheck = round(float(survey["crossing_ms"]) - O_s, 1)   # should be ~0 (validates run_loop reproduction)
-
-    # --- capture steps: matched-time + first_crossing + matched-D ---
-    sched = state_step_schedule(O_s, DT)
-    cap = dict(sched)
-    crossing_step = None
-    if survey["crossing_ms"] is not None:
-        crossing_step = int(round(survey["crossing_ms"] / DT))
-        cap["first_crossing"] = crossing_step
-    md_times = matched_d_times(survey["D_full"], survey["t_full"], cfg["matched_d_targets"])
-    md_steps = {float(tg): int(round(tm / DT)) for tg, tm in md_times.items() if tm is not None}
-    for tg, st in md_steps.items():
-        cap[f"matched_d_{tg}"] = st
-    cks = _chain_capture(S, mzcfg, seed, cap)
+    if cond == "z_only" and nat["crossing_ms"] is not None:
+        xcheck = round(float(nat["crossing_ms"]) - O_s, 1)     # should be ~0 (validates run_loop reproduction)
 
     def _coord(ck):
         z = ck.slow.z[:NE]
@@ -399,25 +426,231 @@ def run_unit(cond, seed, cfg, resume=False, verbose=True):
     if verbose:
         xc = "" if xcheck is None else f" xcheck(cross-onset)={xcheck}ms"
         print(f"[run] DONE {cond} s{seed} wall={wall:.0f}s states_written={written} "
-              f"crossing={survey['crossing_ms']} D_max={survey['D_max']:.4f}{xc}", flush=True)
-    return dict(condition=cond, seed=seed, wall_s=round(wall, 1), crossing_ms=survey["crossing_ms"],
-                D_max=survey["D_max"], onset_xcheck_ms=xcheck)
+              f"crossing={nat['crossing_ms']} D_max={nat['D_max']:.4f}{xc}", flush=True)
+    return dict(condition=cond, seed=seed, wall_s=round(wall, 1), crossing_ms=nat["crossing_ms"],
+                D_max=nat["D_max"], onset_xcheck_ms=xcheck)
+
+
+# ============================================================ resource helpers
+def _rss_gb():
+    import resource
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024.0 ** 2)   # ru_maxrss KB (linux) -> GB
+
+
+def _avail_ram_gb():
+    try:
+        for line in open("/proc/meminfo"):
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1]) / (1024.0 ** 2)                       # KB -> GB
+    except Exception:
+        pass
+    return float("inf")
+
+
+def suggest_workers(peak_rss_gb, n_units=12):
+    """Memory-gated worker count: min(nproc-2, floor((avail - max(30GB,25%avail)) / peak_rss)) (design §8)."""
+    avail = _avail_ram_gb()
+    margin = max(30.0, 0.25 * avail)
+    w_mem = int((avail - margin) // max(peak_rss_gb, 0.05)) if np.isfinite(avail) else n_units
+    return max(1, min((os.cpu_count() or 2) - 2, w_mem, n_units)), avail, margin
 
 
 # ============================================================ CLI dispatch
 def cmd_pilot(args, cfg):
-    raise NotImplementedError("pilot: implemented in Task 6")
+    """1 cond x 1 seed x 1 checkpoint x few replays -> peak RSS + wall/step + projected full-run cost +
+    memory-gated worker suggestion. Validates the full-substrate path (incl. z_only crossing == onset anchor)."""
+    cond, seed = (args.only.split(":") if args.only else ("z_only", "1"))
+    seed = int(seed)
+    n_replay = int(args.replays) if getattr(args, "replays", None) else 4
+    print(f"[pilot] cond={cond} seed={seed} n_replay={n_replay}", flush=True)
+    t0 = time.time(); S = PP.build_substrate(seed); t_build = time.time() - t0
+    NE, N = S["NE"], S["N"]
+    print(f"[pilot] substrate N={N} NE={NE} NI={S['NI']} build={t_build:.1f}s rss={_rss_gb():.2f}GB", flush=True)
+    mzcfg = _mzcfg(cond, cfg)
+    O_s = _onset(cfg, seed)
+    gap = float(np.median(S["vth"][:NE] - S["p"].V_reset))
+    all_E = np.ones(NE, bool)
+    tail = float(cfg["natural_tail_ms"])
+    t0 = time.time(); nat = _natural_and_capture(S, mzcfg, seed, O_s, tail, cfg); t_nat = time.time() - t0
+    xcheck = None if nat["crossing_ms"] is None else round(nat["crossing_ms"] - O_s, 1)
+    main_steps = nat["crossing_step"] or int(round((O_s + tail) / DT))
+    print(f"[pilot] natural+capture {t_nat:.1f}s ({t_nat / max(main_steps, 1) * 1e5:.2f}s/1e5steps) "
+          f"crossing={nat['crossing_ms']} D_max={nat['D_max']:.4f} onset_xcheck={xcheck}ms "
+          f"n_checkpoints={len(nat['cks'])}", flush=True)
+    ck = nat["cks"]["pre_onset_100ms"]
+    template = _frozen_template(ck)
+    cfg_pilot = copy.deepcopy(cfg); cfg_pilot["p_runaway"]["n_replay"] = n_replay
+    t0 = time.time(); pr = _p_runaway(S, ck, template, seed, cond, "pilot", cfg_pilot); t_pr = time.time() - t0
+    t0 = time.time(); ec = _epsilon_c(S, ck, template, gap, all_E, cfg); t_ec = time.time() - t0
+    t0 = time.time(); tr = _tau_rec(S, ck, template, gap, all_E, cfg); t_tr = time.time() - t0
+    peak = _rss_gb()
+    per_replay = t_pr / max(n_replay, 1)
+    print(f"[pilot] P_runaway({n_replay})={pr['p_runaway']:.2f} {t_pr:.1f}s ({per_replay:.2f}s/replay) | "
+          f"eps_c={ec['epsilon_c']} {t_ec:.1f}s | tau_rec={tr['tau_rec']} {t_tr:.1f}s", flush=True)
+    print(f"[pilot] PEAK RSS = {peak:.2f} GB", flush=True)
+    n_rep_full = int(cfg["p_runaway"]["n_replay"])
+    full_pr = n_rep_full * per_replay
+    n_states = len(state_step_schedule(O_s, DT)) + (1 if nat["crossing_ms"] is not None else 0)
+    n_md = len(nat["md_steps"])
+    ckpt = full_pr + t_ec + t_tr
+    job_s = t_nat + n_states * ckpt + 5 * ckpt + n_md * (full_pr + t_ec)
+    workers, avail, margin = suggest_workers(peak)
+    print(f"[pilot] PROJECTED job ~ {job_s / 60:.1f} min/unit (n_replay={n_rep_full}; states={n_states}x{ckpt:.0f}s "
+          f"+ cf 5x{ckpt:.0f}s + md {n_md}x{full_pr + t_ec:.0f}s + natural {t_nat:.0f}s)", flush=True)
+    print(f"[pilot] avail_ram={avail:.0f}GB margin={margin:.0f}GB peak_rss={peak:.2f}GB -> "
+          f"SUGGEST workers={workers} (nproc-2={max(1, (os.cpu_count() or 2) - 2)}); "
+          f"12 units ~ {12 / max(workers, 1) * job_s / 60:.0f} min wall", flush=True)
+
+
+def _unit_worker(t):
+    """Pool worker (spawn-picklable): one (cond, seed) unit, fail-loud but isolated (error -> tagged dict)."""
+    cond, seed, resume = t
+    for v in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+        os.environ[v] = "1"
+    cfg = load_cfg()
+    try:
+        return run_unit(cond, int(seed), cfg, resume=bool(resume), verbose=True)
+    except Exception as e:
+        import traceback
+        return dict(condition=cond, seed=int(seed), error=f"{type(e).__name__}: {e}", tb=traceback.format_exc())
 
 
 def cmd_run(args, cfg):
-    if not args.only:
-        raise SystemExit("run: pass --only cond:seed (single unit) [--all fan-out lands in Task 7]")
-    cond, seed = args.only.split(":")
-    run_unit(cond, int(seed), cfg, resume=args.resume)
+    # single unit
+    if args.only and not args.all:
+        cond, seed = args.only.split(":")
+        run_unit(cond, int(seed), cfg, resume=args.resume)
+        return
+    if not args.all:
+        raise SystemExit("run: pass --only cond:seed (single) OR --all (fan out over all units)")
+    conds = args.conditions.split(",") if args.conditions else cfg["condition_order"]
+    seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else cfg["seeds"])]
+    units = [(c, s) for c in conds for s in seeds]
+    peak = float(args.peak_rss) if getattr(args, "peak_rss", None) else 6.0
+    w_cap, avail, margin = suggest_workers(peak, n_units=len(units))
+    W = min(int(args.workers), w_cap) if args.workers else w_cap
+    print(f"[run] {len(units)} units, workers={W} (mem-cap={w_cap}, avail={avail:.0f}GB, margin={margin:.0f}GB, "
+          f"peak_rss={peak:.1f}GB, resume={args.resume})", flush=True)
+    import multiprocessing as mp
+    ctx = mp.get_context("spawn")
+    results = []
+    with ctx.Pool(W) as pool:
+        for r in pool.imap_unordered(_unit_worker, [(c, s, args.resume) for c, s in units]):
+            results.append(r)
+            tag = f"{r['condition']} s{r['seed']}"
+            if r.get("error"):
+                print(f"[run] FAILED {tag}: {r['error']}", flush=True)
+            else:
+                print(f"[run] OK {tag} wall={r.get('wall_s')}s crossing={r.get('crossing_ms')} "
+                      f"D_max={r.get('D_max'):.4f}", flush=True)
+    failed = [r for r in results if r.get("error")]
+    _dump_atomic(dict(units=results, n_units=len(units), n_failed=len(failed),
+                      provenance=provenance(cfg, dict(phase="run-all", workers=W))),
+                 os.path.join(OUT, "run_manifest.json"))
+    if failed:
+        for r in failed:
+            print(f"[run] --- traceback {r['condition']} s{r['seed']} ---\n{r.get('tb')}", file=sys.stderr)
+        raise SystemExit(f"{len(failed)}/{len(units)} units FAILED (see run_manifest.json)")
+    print(f"[run] all {len(units)} units done", flush=True)
+
+
+# ============================================================ aggregate (no sim)
+_STATE_ORDER = ["baseline_1000ms", "mid_fraction", "pre_onset_2000ms", "pre_onset_1000ms",
+                "pre_onset_500ms", "pre_onset_200ms", "pre_onset_100ms", "first_crossing"]
+
+
+def _write_csv(rows, path, keys):
+    import csv
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore")
+        w.writeheader()
+        for r in rows:
+            w.writerow(r)
 
 
 def cmd_aggregate(args, cfg):
-    raise NotImplementedError("aggregate: implemented in Task 7")
+    per_state = os.path.join(OUT, "per_state")
+    seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else cfg["seeds"])]
+    conds = cfg["condition_order"]
+    # --- load per-state records + natural crossings ---
+    data, crossings, dmax = {}, {}, {}
+    for cond in conds:
+        for seed in seeds:
+            for st in _STATE_ORDER:
+                p = os.path.join(per_state, f"{cond}_seed{seed}_{st}.json")
+                if os.path.exists(p):
+                    data[(cond, seed, st)] = json.load(open(p))
+            npz = os.path.join(per_state, f"{cond}_seed{seed}_natural.npz")
+            if os.path.exists(npz):
+                d = np.load(npz)
+                cm = float(d["crossing_ms"])
+                crossings[(cond, seed)] = None if not np.isfinite(cm) else cm
+                dmax[(cond, seed)] = float(d["D_max"])
+    # --- summary CSV rows ---
+    rows = []
+    for cond in conds:
+        for seed in seeds:
+            for st in _STATE_ORDER:
+                r = data.get((cond, seed, st))
+                if r is None:
+                    continue
+                ci = r.get("p_runaway_ci") or [None, None]
+                rows.append(dict(condition=cond, seed=seed, state=st, time_ms=r.get("time_ms"), D=r.get("D"),
+                                 a=r.get("a"), p_runaway=r.get("p_runaway"), p_ci_lo=ci[0], p_ci_hi=ci[1],
+                                 n_runaway=r.get("n_runaway"), epsilon_c=r.get("epsilon_c"),
+                                 epsilon_c_censored=r.get("epsilon_c_censored"), tau_rec=r.get("tau_rec"),
+                                 tau_rec_censored=r.get("tau_rec_censored")))
+    _write_csv(rows, os.path.join(OUT, "slow_fast_transition_summary.csv"),
+               ["condition", "seed", "state", "time_ms", "D", "a", "p_runaway", "p_ci_lo", "p_ci_hi",
+                "n_runaway", "epsilon_c", "epsilon_c_censored", "tau_rec", "tau_rec_censored"])
+    # --- classify per (cond, seed), consensus per condition ---
+    per_unit, per_condition = {}, {}
+    for cond in conds:
+        labels = []
+        for seed in seeds:
+            ps = [dict(D=data[(cond, seed, st)]["D"], p_runaway=data[(cond, seed, st)]["p_runaway"],
+                       epsilon_c=data[(cond, seed, st)].get("epsilon_c"),
+                       tau_rec=data[(cond, seed, st)].get("tau_rec"))
+                  for st in _STATE_ORDER if (cond, seed, st) in data]
+            natural_crosses = crossings.get((cond, seed)) is not None
+            plateau_outside = crossings.get(("mz_plateau", seed), "missing") is None
+            cls = classify_transition(ps, natural_crosses=natural_crosses, plateau_outside=plateau_outside)
+            per_unit[f"{cond}_seed{seed}"] = dict(label=cls["label"], features=cls["features"],
+                                                  crossing_ms=crossings.get((cond, seed)),
+                                                  D_max=dmax.get((cond, seed)))
+            labels.append(cls["label"])
+        consensus = labels[0] if labels and all(x == labels[0] for x in labels) else "seed-inconsistent"
+        per_condition[cond] = dict(consensus=consensus, per_seed_labels=labels)
+    # --- engine unchanged check ---
+    import subprocess
+    eng_ok = subprocess.run(["git", "-C", ROOT, "diff", "--quiet", "--", "src/snn_engine"]).returncode == 0
+    summary = dict(schema_version=SCHEMA_VERSION, conditions=conds, seeds=seeds,
+                   per_condition=per_condition, per_unit=per_unit, natural_crossings={f"{c}_seed{s}": crossings.get((c, s)) for c in conds for s in seeds},
+                   engine_unmodified=eng_ok, engine_shas=engine_shas(),
+                   provenance=provenance(cfg, dict(phase="aggregate")))
+    _dump_atomic(summary, os.path.join(OUT, "slow_fast_transition_summary.json"))
+    _write_status(cfg, per_condition, per_unit, crossings, dmax, eng_ok)
+    print(f"[aggregate] {len(rows)} state-rows; per-condition consensus: "
+          f"{ {c: per_condition[c]['consensus'] for c in conds} }; engine_unmodified={eng_ok}", flush=True)
+
+
+def _write_status(cfg, per_condition, per_unit, crossings, dmax, eng_ok):
+    lines = ["# MZ slow–fast dynamical transition — STATUS", "",
+             "Tier = model-side mechanism analysis. Operational runaway (120 Hz / 100 ms) only; NOT seizure.",
+             "", "## Per-condition transition class (result-neutral, consensus across seeds 1/3/4)", ""]
+    for cond in cfg["condition_order"]:
+        pc = per_condition.get(cond, {})
+        lines.append(f"- **{cond}** -> `{pc.get('consensus')}`  (per-seed: {pc.get('per_seed_labels')})")
+    lines += ["", "## Natural operational-runaway crossing (ms) + D_max, per (condition, seed)", ""]
+    for cond in cfg["condition_order"]:
+        for seed in cfg["seeds"]:
+            cm = crossings.get((cond, seed))
+            lines.append(f"- {cond} s{seed}: crossing={cm} D_max={dmax.get((cond, seed))}")
+    lines += ["", f"engine_unmodified={eng_ok}. See slow_fast_transition_summary.json for features + CIs,",
+              "docs/archive/topic4/sef_hfo/mz_slow_fast_transition_2026-07-20.md for the verdict.", ""]
+    with open(os.path.join(OUT, "STATUS.md"), "w") as f:
+        f.write("\n".join(lines))
 
 
 def main(argv=None):
@@ -431,6 +664,9 @@ def main(argv=None):
         sp.add_argument("--only", default=None, help="run: single unit 'cond:seed'")
         sp.add_argument("--all", action="store_true", help="run: fan out over all (cond,seed) units")
         sp.add_argument("--workers", type=int, default=None, help="run --all: worker count (default memory-gated)")
+        sp.add_argument("--replays", type=int, default=None, help="pilot: P_runaway replay count (default 4)")
+        sp.add_argument("--peak-rss", dest="peak_rss", type=float, default=None,
+                        help="run --all: measured peak RSS (GB) per unit for the memory gate (from pilot)")
         sp.add_argument("--resume", action="store_true")
     args = ap.parse_args(argv)
     cfg = load_cfg()

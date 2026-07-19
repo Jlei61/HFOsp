@@ -34,7 +34,9 @@ checkpoints:
 natural_tail_ms: 1500.0     # continue past onset anchor to capture crossing / plateau tail
 
 # --- perturbation-free escape probability P_runaway (design §3.1) ---
-p_runaway: {n_replay: 20, horizon_ms: 500.0}
+# n_replay=12 = the spec's stated lower bound ("12-20"); chosen for the 40k-neuron (~2-4 ms/step) compute
+# budget on a shared machine. Wilson CI at n=12 still cleanly separates P~0 from P~1 (the tipping question).
+p_runaway: {n_replay: 12, horizon_ms: 500.0}
 
 # --- global nonlinear ignition epsilon_c (design §3.2). threshold-LOWERING probe on ALL E;
 #     units a = dVth / median(Vth - Vreset). ---
