@@ -1,13 +1,12 @@
-"""Plot the Topic 4 state-conditioned spatial susceptibility diagnostic figure (design §9).
+"""Plot the Topic 4 state-conditioned spatial susceptibility diagnostic figure.
 
-Reads artifacts ONLY (no simulation). Layout (fixed coords/limits/colormaps across state columns):
-  row 1: coarse z(x) slow field  (source ^, sink v, scaffold axis, core outlines)
-  row 2: phase-paired susceptibility in kx-ky at T_primary
-  row 3: registered strongest probe -> finite-time E RESPONSE field (NOT an eigenmode)
-  row 4: within-seed (faint) + median (bold) trajectories of axial / perpendicular / global gain,
-         and gain persistence, across all five states.
-
-Usage: python scripts/plot_topic4_state_conditioned_susceptibility.py --candidate zA_q50_tz10000
+Structure (review 2026-07-19): keep the three DISTINCT linear objects separate, in the order
+  z(x)  ->  leading eigenmode (asymptotic)  ->  V1 optimal finite-time INPUT  ->  U1 optimal OUTPUT
+        ->  G(k_par, k_perp) susceptibility atlas.
+Reads artifacts ONLY (no simulation). Columns = the resolved pre-onset trajectory; onset is the
+unresolved equilibrium boundary (shown as a hatched panel, NOT gain=0). "axial/perp" gains are gains
+for input WAVEVECTOR parallel / perpendicular to the scaffold axis (k_par / k_perp), NOT output
+propagation direction — the propagation-direction evidence is the U1 output-field elongation (row 4).
 """
 import argparse
 import json
@@ -22,10 +21,10 @@ from matplotlib.patches import Circle
 from matplotlib.gridspec import GridSpec
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT_DIR = os.path.join(ROOT, "results", "topic4_sef_hfo", "state_conditioned_susceptibility")
+sys.path.insert(0, ROOT)
+from src.topic4_m3b_spectral_phase import Grid  # noqa: E402
 
-# 4 field columns = the RESOLVED pre-onset trajectory (onset is the unresolved boundary, shown as the
-# blank endpoint in row 4a). Row 4 shows all 5 states.
+OUT_DIR = os.path.join(ROOT, "results", "topic4_sef_hfo", "state_conditioned_susceptibility")
 COL_STATES = ["baseline_1000ms", "mid_fraction", "pre_onset_500ms", "pre_onset_100ms"]
 COL_TITLES = ["baseline (1000 ms)", "mid (0.5x onset)", "pre-onset (-500 ms)", "pre-onset (-100 ms)"]
 ALL_STATES = ["baseline_1000ms", "mid_fraction", "pre_onset_500ms", "pre_onset_100ms", "onset"]
@@ -42,11 +41,41 @@ def _affine(xy, cfg):
     return (np.asarray(xy, float) - np.asarray(cfg["center_phys"], float)) * (cfg["L_norm"] / cfg["L_phys"])
 
 
+def _stack(arrays, seeds, state, key):
+    fs = [arrays[f"{s}__{state}__{key}"] for s in seeds if f"{s}__{state}__{key}" in arrays.files]
+    return [f for f in fs if np.isfinite(f).any()]
+
+
 def _median_field(arrays, seeds, state, key):
-    fields = [arrays[f"{s}__{state}__{key}"] for s in seeds if f"{s}__{state}__{key}" in arrays.files]
-    if not fields:
+    fs = _stack(arrays, seeds, state, key)
+    return np.median(np.stack(fs), axis=0) if fs else None
+
+
+def _sign_aligned_median(arrays, seeds, state, key, align_mask):
+    """Median of a SIGNED field (SVD singular vectors have arbitrary sign): flip each seed so its mean
+    over `align_mask` (source-core region) is >= 0, then median. Makes the +/- lobe structure additive."""
+    fs = _stack(arrays, seeds, state, key)
+    if not fs:
         return None
-    return np.median(np.stack(fields), axis=0)
+    out = []
+    for f in fs:
+        s = np.nanmean(f[align_mask]) if align_mask.any() else np.nanmean(f)
+        out.append(f if s >= 0 else -f)
+    return np.median(np.stack(out), axis=0)
+
+
+def _dig(d, path):
+    cur = d
+    for k in path:
+        if not isinstance(cur, dict) or k not in cur or cur[k] is None:
+            return None
+        cur = cur[k]
+    return cur if isinstance(cur, (int, float)) else None
+
+
+def _cbar(fig, im, ax, label):
+    cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+    cb.ax.tick_params(labelsize=7); cb.set_label(label, fontsize=8)
 
 
 def main():
@@ -60,124 +89,108 @@ def main():
     seeds = [str(s) for s in atlas["seeds"]]
     Tp = float(cfg["T_primary"])
 
-    # geometry overlay (normalized) from the primary seed snapshot
-    snap0 = json.load(open(os.path.join(OUT_DIR, "snapshots", args.candidate, f"seed_{atlas['seeds'][0]}.json")))
-    snp = np.load(os.path.join(OUT_DIR, "snapshots", args.candidate, f"seed_{atlas['seeds'][0]}.npz"), allow_pickle=True)
+    snp = np.load(os.path.join(OUT_DIR, "snapshots", args.candidate, f"seed_{atlas['seeds'][0]}.npz"),
+                  allow_pickle=True)
     src_n = _affine(snp["src_xy"], cfg); snk_n = _affine(snp["snk_xy"], cfg)
     core_r = float(cfg["core_radius_norm"])
+    grid = Grid(n=int(cfg["grid_n"]), L=L)
+    X, Y = grid.coords()
+    src_mask = ((X - src_n[0]) ** 2 + (Y - src_n[1]) ** 2) <= core_r ** 2   # sign-align region for V1/U1
     pmax = int(cfg["p_max"]); kmax = 2 * np.pi * pmax / L
 
-    fig = plt.figure(figsize=(15.5, 15.0))
-    gs = GridSpec(4, 4, figure=fig, hspace=0.34, wspace=0.14,
-                  height_ratios=[1, 1, 1, 1.05], top=0.935, bottom=0.055, left=0.055, right=0.965)
+    # ---- collect per-state fields (median; V1/U1 sign-aligned) ----
+    z_f = {s: _median_field(arrays, seeds, s, "zbar_field") for s in COL_STATES}
+    eig_f = {s: _median_field(arrays, seeds, s, "eigen_field") for s in COL_STATES}
+    v1_f = {s: _sign_aligned_median(arrays, seeds, s, "v1_optimal_input", src_mask) for s in COL_STATES}
+    u1_f = {s: _sign_aligned_median(arrays, seeds, s, "u1_optimal_output", src_mask) for s in COL_STATES}
+    g_f = {s: _median_field(arrays, seeds, s, "gain_kxky") for s in COL_STATES}
 
-    # ---- shared color norms per row (fixed across state columns) ----
-    z_fields = {s: _median_field(arrays, seeds, s, "zbar_field") for s in COL_STATES}
-    k_fields = {s: _median_field(arrays, seeds, s, "gain_kxky") for s in COL_STATES}
-    r_fields = {s: _median_field(arrays, seeds, s, "peak_probe_output_rE") for s in COL_STATES}
-    zvals = np.concatenate([f.ravel() for f in z_fields.values() if f is not None]) if any(v is not None for v in z_fields.values()) else np.array([0.0, 1.0])
-    zlo, zhi = float(np.nanmin(zvals)), float(np.nanmax(zvals))
-    kmaxv = max([np.nanmax(f) for f in k_fields.values() if f is not None] + [1e-9])
-    rmaxv = max([np.nanmax(f) for f in r_fields.values() if f is not None] + [1e-9])
+    def _rng(fdict, absval=False):
+        vals = np.concatenate([(np.abs(f) if absval else f).ravel() for f in fdict.values() if f is not None]) \
+            if any(v is not None for v in fdict.values()) else np.array([0.0, 1.0])
+        return float(np.nanmin(vals)), float(np.nanmax(vals))
 
-    def _mark_geometry(ax):
-        ax.plot([src_n[0], snk_n[0]], [src_n[1], snk_n[1]], "-", color="white", lw=1.0, alpha=0.7)
-        ax.plot(*src_n, "^", color="white", ms=9, mec="k", mew=0.6)      # source
-        ax.plot(*snk_n, "v", color="white", ms=9, mec="k", mew=0.6)      # sink
+    zlo, zhi = _rng(z_f)
+    eighi = _rng(eig_f, absval=True)[1]
+    v1a = max(_rng(v1_f, absval=True)[1], 1e-12); u1a = max(_rng(u1_f, absval=True)[1], 1e-12)
+    ghi = max(_rng(g_f, absval=True)[1], 1e-12)
+
+    fig = plt.figure(figsize=(15.5, 18.5))
+    gs = GridSpec(6, 4, figure=fig, hspace=0.36, wspace=0.14,
+                  height_ratios=[1, 1, 1, 1, 1, 1.05], top=0.945, bottom=0.045, left=0.055, right=0.965)
+
+    def _geom(ax):
+        ax.plot([src_n[0], snk_n[0]], [src_n[1], snk_n[1]], "-", color="w", lw=1.0, alpha=0.65)
+        ax.plot(*src_n, "^", color="w", ms=8, mec="k", mew=0.6); ax.plot(*snk_n, "v", color="w", ms=8, mec="k", mew=0.6)
         for c in (src_n, snk_n):
-            ax.add_patch(Circle(c, core_r, fill=False, ec="white", lw=1.0, ls="--", alpha=0.8))
+            ax.add_patch(Circle(c, core_r, fill=False, ec="w", lw=0.9, ls="--", alpha=0.75))
 
-    def _unresolved_tag(ax, per_state_seed_status):
-        n_res = sum(st == "resolved" for st in per_state_seed_status)
-        if n_res < len(seeds):
-            ax.text(0.5, 0.5, f"{len(seeds)-n_res}/{len(seeds)} seed(s)\nnot resolved",
-                    transform=ax.transAxes, ha="center", va="center", color="crimson", fontsize=9,
-                    bbox=dict(boxstyle="round", fc="white", ec="crimson", alpha=0.85))
+    ROWS = [
+        ("row 1: slow field  z(x)\n(median/seeds)", z_f, "viridis", (zlo, zhi), "z_bar", True, False),
+        ("row 2: leading EIGENMODE |phi_E|\n(asymptotic mode shape)", eig_f, "magma", (0, eighi), "eigenmode", True, False),
+        ("row 3: optimal INPUT V1\n(most-amplified pattern, T=30ms)", v1_f, "RdBu_r", (-v1a, v1a), "V1 (signed)", True, True),
+        ("row 4: optimal OUTPUT U1\n(response; axis elongation = propagation)", u1_f, "RdBu_r", (-u1a, u1a), "U1 (signed)", True, True),
+        ("row 5: susceptibility G(k||, k_perp)\n(probe gain, T=30ms)", g_f, "magma", (0, ghi), "paired gain", False, False),
+    ]
+    for r, (ylab, fdict, cmap, (vlo, vhi), clab, geom, kspace_none) in enumerate(ROWS):
+        for j, (st, title) in enumerate(zip(COL_STATES, COL_TITLES)):
+            ax = fig.add_subplot(gs[r, j])
+            f = fdict[st]
+            is_k = (r == 4)
+            ext = [-kmax, kmax, -kmax, kmax] if is_k else [-half, half, -half, half]
+            if f is not None:
+                im = ax.imshow(f.T, origin="lower", extent=ext, cmap=cmap, vmin=vlo, vmax=vhi, aspect="equal")
+                if geom and not is_k:
+                    _geom(ax)
+                if is_k:
+                    ax.axhline(0, color="w", lw=0.4, alpha=0.4); ax.axvline(0, color="w", lw=0.4, alpha=0.4)
+                    ax.set_xlabel("k|| (along axis)", fontsize=7); ax.set_ylabel("k_perp", fontsize=7)
+                if j == 3:
+                    _cbar(fig, im, ax, clab)
+            else:
+                ax.set_facecolor("0.92")
+                ax.text(0.5, 0.5, "unresolved", transform=ax.transAxes, ha="center", va="center",
+                        color="crimson", fontsize=8)
+            if r == 0:
+                ax.set_title(title, fontsize=11)
+            if j == 0:
+                ax.set_ylabel(ylab, fontsize=8.5)
 
-    for j, (st, title) in enumerate(zip(COL_STATES, COL_TITLES)):
-        statuses = [atlas["per_seed"][s].get(st, {}).get("op_status", "missing") for s in seeds]
-        # row 1: z field
-        ax = fig.add_subplot(gs[0, j])
-        f = z_fields[st]
-        if f is not None:
-            im = ax.imshow(f.T, origin="lower", extent=[-half, half, -half, half], cmap="viridis",
-                           vmin=zlo, vmax=zhi, aspect="equal")
-            _mark_geometry(ax)
-        else:
-            ax.set_facecolor("0.9")
-        _unresolved_tag(ax, statuses)
-        ax.set_title(title, fontsize=11)
-        if j == 0:
-            ax.set_ylabel("row 1: slow field  z(x)\n(median over seeds)", fontsize=9)
-        if f is not None and j == 3:
-            _cbar(fig, im, ax, "z_bar")
-        # row 2: kx-ky susceptibility
-        ax = fig.add_subplot(gs[1, j])
-        f = k_fields[st]
-        if f is not None:
-            im = ax.imshow(f.T, origin="lower", extent=[-kmax, kmax, -kmax, kmax], cmap="magma",
-                           vmin=0, vmax=kmaxv, aspect="equal")
-        else:
-            ax.set_facecolor("0.9"); _unresolved_tag(ax, statuses)
-        ax.axhline(0, color="w", lw=0.4, alpha=0.4); ax.axvline(0, color="w", lw=0.4, alpha=0.4)
-        if j == 0:
-            ax.set_ylabel("row 2: susceptibility\nprobe gain in kx-ky  (T=%.0f ms)" % Tp, fontsize=9)
-        if f is not None and j == 3:
-            _cbar(fig, im, ax, "paired gain")
-        # row 3: finite-time RESPONSE field
-        ax = fig.add_subplot(gs[2, j])
-        f = r_fields[st]
-        if f is not None:
-            im = ax.imshow(f.T, origin="lower", extent=[-half, half, -half, half], cmap="inferno",
-                           vmin=0, vmax=rmaxv, aspect="equal")
-            _mark_geometry(ax)
-        else:
-            ax.set_facecolor("0.9"); _unresolved_tag(ax, statuses)
-        if j == 0:
-            ax.set_ylabel("row 3: finite-time RESPONSE\nC exp(J T) b_peak  (NOT an eigenmode)", fontsize=9)
-        if f is not None and j == 3:
-            _cbar(fig, im, ax, "|rE| response")
-
-    # ---- row 4: gain trajectories + persistence across ALL five states ----
-    ax_g = fig.add_subplot(gs[3, 0:2])
-    ax_p = fig.add_subplot(gs[3, 2:4])
+    # ---- row 6: trajectories ----
     xs = np.arange(len(ALL_STATES))
-    colors = {"axial_gain": "#1b7837", "perp_gain": "#762a83", "global_gain": "#2166ac"}
-    for metric, col in colors.items():
-        per_seed_vals = []
-        for s in seeds:
-            ys = [_dig(atlas["per_seed"][s].get(st), ["atlas", "per_T", str(Tp), metric])
-                  if _dig(atlas["per_seed"][s].get(st), ["atlas", "per_T", str(Tp), metric]) is not None
-                  else _dig(atlas["per_seed"][s].get(st), ["atlas", "per_T", ("%.1f" % Tp), metric]) for st in ALL_STATES]
-            per_seed_vals.append(ys)
-            ax_g.plot(xs, ys, "-", color=col, alpha=0.28, lw=1.0)
-        med = [np.nanmedian([v[i] for v in per_seed_vals if v[i] is not None]) if any(v[i] is not None for v in per_seed_vals) else np.nan for i in range(len(ALL_STATES))]
-        ax_g.plot(xs, med, "-o", color=col, lw=2.4, ms=5, label=metric.replace("_gain", ""))
-    ax_g.set_xticks(xs); ax_g.set_xticklabels([STATE_SHORT[s] for s in ALL_STATES], fontsize=9)
-    ax_g.set_ylabel("finite-time gain  (T=%.0f ms)" % Tp, fontsize=9)
-    ax_g.set_title("row 4a: axial / perpendicular / global gain trajectory  (faint = 3 seeds, bold = median)", fontsize=9.5)
-    ax_g.legend(fontsize=9, loc="best"); ax_g.grid(alpha=0.25)
+    ax_g = fig.add_subplot(gs[5, 0:2]); ax_a = fig.add_subplot(gs[5, 2:4])
 
-    # persistence panel: axial gain vs T at baseline vs the last resolved pre-onset state (median)
-    T_windows = [float(t) for t in atlas["T_windows"]]
-    for st, ls, lab in (("baseline_1000ms", "-", "baseline"), ("pre_onset_100ms", "--", "pre-onset (-100 ms)")):
-        med = []
-        for T in T_windows:
-            vals = [_dig(atlas["per_seed"][s].get(st), ["atlas", "per_T", str(T), "axial_gain"]) for s in seeds]
-            vals = [v for v in vals if v is not None]
-            med.append(np.median(vals) if vals else np.nan)
-        ax_p.plot(T_windows, med, ls + "o", color="#1b7837", lw=2.0, label="axial %s" % lab)
-    ax_p.set_xlabel("finite-time window T (ms)", fontsize=9)
-    ax_p.set_ylabel("median axial gain", fontsize=9)
-    ax_p.set_title("row 4b: axial gain vs T (self-limiting persistence)", fontsize=9.5)
-    ax_p.legend(fontsize=9); ax_p.grid(alpha=0.25)
+    def _traj(metric_path, label, color, ls="-", ax=ax_g, marker="o"):
+        per = [[_dig(atlas["per_seed"][s].get(st), metric_path) for st in ALL_STATES] for s in seeds]
+        for row in per:
+            ax.plot(xs, row, ls, color=color, alpha=0.25, lw=1.0)
+        med = [np.nanmedian([r[i] for r in per if r[i] is not None]) if any(r[i] is not None for r in per) else np.nan
+               for i in range(len(ALL_STATES))]
+        ax.plot(xs, med, ls + marker, color=color, lw=2.3, ms=5, label=label)
+
+    _traj(["atlas", "per_T", str(Tp), "axial_gain"], "k|| gain (wavevector along axis)", "#1b7837")
+    _traj(["atlas", "per_T", str(Tp), "perp_gain"], "k_perp gain", "#762a83")
+    _traj(["optimal", "sigma1"], "sigma1 (true max finite-time gain)", "#b35806", ls="-", marker="s")
+    ax_g.axhline(1.0, color="0.5", lw=0.8, ls=":"); ax_g.text(0.05, 1.02, "gain=1", fontsize=7, color="0.4")
+    ax_g.set_xticks(xs); ax_g.set_xticklabels([STATE_SHORT[s] for s in ALL_STATES], fontsize=9)
+    ax_g.set_ylabel("finite-time gain (T=%.0f ms)" % Tp, fontsize=9)
+    ax_g.set_title("row 6a: input-wavevector gains + true optimal gain (faint=3 seeds, bold=median)", fontsize=9.3)
+    ax_g.legend(fontsize=8, loc="upper left"); ax_g.grid(alpha=0.25)
+
+    _traj(["eigen", "leading_axis_score"], "eigenmode axis (asymptotic)", "#2166ac", ax=ax_a)
+    _traj(["optimal", "u1_output_axis"], "U1 output axis (finite-time, T=30ms)", "#1b7837", ls="--", ax=ax_a)
+    ax_a.axhline(0, color="0.6", lw=0.6)
+    ax_a.set_xticks(xs); ax_a.set_xticklabels([STATE_SHORT[s] for s in ALL_STATES], fontsize=9)
+    ax_a.set_ylabel("axis elongation score", fontsize=9)
+    ax_a.set_title("row 6b: OUTPUT propagation direction — asymptotic eigenmode vs finite-time U1", fontsize=9.3)
+    ax_a.legend(fontsize=8, loc="upper left"); ax_a.grid(alpha=0.25)
 
     fig.suptitle("Topic 4 — state-conditioned spatial susceptibility along the MZ z-depletion trajectory  "
-                 "(candidate %s; model-side diagnostic, NOT a seizure)" % args.candidate, fontsize=12.5, y=0.975)
-    fig.text(0.5, 0.014, "Columns = the resolved pre-onset trajectory; onset (runoff boundary) is "
-             "unresolved/saturated for all 3 seeds (fail-closed) -> blank endpoint in row 4a. "
-             "eigenmode (row-4 text) / probe / finite-time response are distinct objects.",
-             ha="center", fontsize=8.3, style="italic", color="0.35")
+                 "(candidate %s; model-side diagnostic, NOT a seizure)" % args.candidate, fontsize=12.5, y=0.965)
+    fig.text(0.5, 0.012, "eigenmode (asymptotic mode) / V1 (optimal finite-time input) / U1 (optimal output) / "
+             "G (probe scan) are DISTINCT objects. k||/k_perp = input WAVEVECTOR direction (not propagation). "
+             "onset = unresolved equilibrium boundary (blank endpoint, row 6). peak_k is rail-limited on this "
+             "n=12 grid (see convergence check).", ha="center", fontsize=8.2, style="italic", color="0.35")
     os.makedirs(os.path.join(OUT_DIR, "figures"), exist_ok=True)
     for ext in ("png", "pdf"):
         fig.savefig(os.path.join(OUT_DIR, "figures", f"state_conditioned_susceptibility_diagnostic.{ext}"),
@@ -187,9 +200,6 @@ def main():
 
 
 def _plot_controls(cfg, atlas):
-    """Companion (design §9 optional): real vs uniform/rotate/shuffle/z-blocked/AR1 controls, at
-    baseline and the strongest resolved pre-onset state; shows spatial-pattern -> magnitude and
-    scaffold-anisotropy -> axial direction."""
     cpath = os.path.join(OUT_DIR, "control_summary.json")
     if not os.path.exists(cpath):
         return
@@ -218,39 +228,25 @@ def _plot_controls(cfg, atlas):
     for ax, (st, title) in zip(axes, [("baseline_1000ms", "baseline (1000 ms)"),
                                        ("pre_onset_100ms", "pre-onset (-100 ms)")]):
         x = np.arange(len(controls)); w = 0.38
-        axial = [med(cn, st, "axial_gain") for cn in controls]
-        perp = [med(cn, st, "perp_gain") for cn in controls]
-        ax.bar(x - w / 2, axial, w, label="axial", color="#1b7837")
-        ax.bar(x + w / 2, perp, w, label="perpendicular", color="#762a83")
-        for i, (a, p) in enumerate(zip(axial, perp)):
+        kpar = [med(cn, st, "axial_gain") for cn in controls]
+        kperp = [med(cn, st, "perp_gain") for cn in controls]
+        ax.bar(x - w / 2, kpar, w, label="k|| (wavevector along axis)", color="#1b7837")
+        ax.bar(x + w / 2, kperp, w, label="k_perp", color="#762a83")
+        for i, a in enumerate(kpar):
             if np.isnan(a):
                 ax.text(i, 0.01, "unresolved", rotation=90, fontsize=7, ha="center", va="bottom", color="crimson")
         ax.set_xticks(x); ax.set_xticklabels([cn.replace("_isotropic", "").replace("_", "\n") for cn in controls],
                                              fontsize=8.2)
         ax.set_title("%s: finite-time gain (T=%.0f ms), median/3 seeds" % (title, cfg["T_primary"]), fontsize=10)
-        ax.set_ylabel("finite-time gain"); ax.legend(fontsize=9, loc="upper right"); ax.grid(alpha=0.25, axis="y")
+        ax.set_ylabel("finite-time gain"); ax.legend(fontsize=8.5, loc="upper right"); ax.grid(alpha=0.25, axis="y")
     fig.suptitle("Controls — real vs uniform-mean / rotate-90 / shuffle / z-blocked / AR1   "
-                 "(spatial pattern sets MAGNITUDE: real>>uniform;  anisotropic scaffold sets axial DIRECTION: "
-                 "rotate/shuffle keep the axial>perp margin)", fontsize=10.5)
+                 "(spatial pattern sets MAGNITUDE: real>>uniform;  anisotropic scaffold sets the k|| preference: "
+                 "rotate/shuffle keep the k||>k_perp margin, AR1 halves it)", fontsize=10.3)
     fig.tight_layout(rect=[0, 0, 1, 0.94])
     for ext in ("png", "pdf"):
         fig.savefig(os.path.join(OUT_DIR, "figures", f"state_conditioned_susceptibility_controls.{ext}"),
                     dpi=150, bbox_inches="tight")
     print("[plot] wrote figures/state_conditioned_susceptibility_controls.{png,pdf}")
-
-
-def _cbar(fig, im, ax, label):
-    cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
-    cb.ax.tick_params(labelsize=7); cb.set_label(label, fontsize=8)
-
-
-def _dig(d, path):
-    cur = d
-    for k in path:
-        if not isinstance(cur, dict) or k not in cur or cur[k] is None:
-            return None
-        cur = cur[k]
-    return cur if isinstance(cur, (int, float)) else None
 
 
 if __name__ == "__main__":

@@ -208,6 +208,34 @@ def leading_probe_subspace_svd(response_rE):
                 singular_values=s[:6].tolist())
 
 
+def optimal_finite_time_perturbation(J, grid: Grid, T, N):
+    """Rigorous non-normal optimal finite-time perturbation: SVD of the E-rate->E-rate propagator block
+    M(T) = C_E exp(J T) B_E (N x N), over the FULL E-rate input space (dictionary-INDEPENDENT, unlike
+    the Gabor-probe SVD). For a non-normal operator V1/U1 describe short-time transport better than an
+    eigenvector. Returns sigma1 (max finite-time E->E gain over all input fields), the optimal INPUT
+    field V1 (n,n) and optimal OUTPUT field U1 (n,n) (signed; SVD sign is arbitrary but the +/- lobe
+    structure is meaningful)."""
+    from scipy.sparse.linalg import expm_multiply
+    B_E = np.zeros((6 * grid.size, N))
+    B_E[:N, :] = np.eye(N)                                       # embed a unit E-rate field into rE rows
+    M = expm_multiply(np.asarray(J, float) * float(T), B_E)[:N, :]   # C_E exp(JT) B_E  (N x N)
+    U, s, Vh = np.linalg.svd(M)
+    return dict(sigma1=float(s[0]),
+                sigma_ratio=float(s[0] / s[1]) if s.size > 1 and s[1] > 0 else float("inf"),
+                v1_field=Vh[0, :].reshape(grid.n, grid.n), u1_field=U[:, 0].reshape(grid.n, grid.n),
+                singular_values=s[:6].tolist())
+
+
+def eigen_field(J, grid: Grid):
+    """Leading invariant-subspace E-field |phi_E| (n,n) — the TRUE asymptotic eigenmode SHAPE, for
+    plotting alongside (never conflated with) V1/U1 and the response. None if J is unresolved."""
+    eig = rate_eigenpairs(J, grid, n_modes=4)
+    if eig.status != "resolved" or eig.eigenvalues.size == 0:
+        return None
+    idx = leading_subspace_indices(eig.eigenvalues)
+    return pair_loading(eig.right, idx, grid)                    # non-negative (n,n) subspace loading
+
+
 def summarize_probe_atlas(J, grid: Grid, probes, T_list, *, theta, N, core, T_primary=30.0):
     """Full phase-paired gain atlas over T (design §6.2): axial / perpendicular / global gains, peak
     (k, orientation, gain), persistence G(50)/G(30) & G(75)/G(30), probe-subspace SVD, and the
@@ -234,7 +262,10 @@ def summarize_probe_atlas(J, grid: Grid, probes, T_list, *, theta, N, core, T_pr
         axial_curve[float(T)] = float(axial); perp_curve[float(T)] = float(perp)
         glob_curve[float(T)] = float(glob or 0.0); peak_curve[float(T)] = float(peak["gain"])
         if abs(T - T_primary) < 1e-9:
-            peak_col = int(np.argmax(gains))
+            # phase-paired response at the peak (p,q): sqrt(|R_cos|^2 + |R_sin|^2), CONSISTENT with the
+            # row-2 paired gain (not a single-phase argmax column).
+            peak_cols = [i for i, pr in enumerate(probes) if (pr["p"], pr["q"]) == peak_pq]
+            peak_paired = np.sqrt(sum(np.abs(R[:, c]) ** 2 for c in peak_cols)) if peak_cols else np.zeros(N)
             # full (p,q) paired-gain map for the kx-ky susceptibility panel (design §9 row 2); symmetric in k
             pmax = max(pr["p"] for pr in probes)
             gmap = np.zeros((2 * pmax + 1, 2 * pmax + 1))
@@ -243,7 +274,8 @@ def summarize_probe_atlas(J, grid: Grid, probes, T_list, *, theta, N, core, T_pr
                 gmap[-p + pmax, -q + pmax] = v["gain"]
             gmap[pmax, pmax] = float(glob or 0.0)
             fields_primary = dict(
-                peak_probe_output_rE=np.abs(R[:, peak_col]).reshape(grid.n, grid.n),
+                peak_paired_output_rE=peak_paired.reshape(grid.n, grid.n),
+                peak_pq=np.array([peak_pq[0], peak_pq[1]] if peak_pq else [0, 0]),
                 svd_optimal_output_field=np.abs(svd["optimal_output_field"]).reshape(grid.n, grid.n),
                 svd_output_axis=float(elongation_axis_score(np.abs(svd["optimal_output_field"]).reshape(grid.n, grid.n), grid, theta)),
                 svd_output_globality=float(globality(svd["optimal_output_field"], grid)),
@@ -339,5 +371,16 @@ def summarize_state_susceptibility(zbar_field, grid: Grid, scaffold, probes, T_l
     out["eigen"] = eigen_summary(J, grid, core, theta)
     atlas = summarize_probe_atlas(J, grid, probes, T_list, theta=theta, N=N, core=core, T_primary=T_primary)
     out["atlas"] = {k: v for k, v in atlas.items() if k != "fields_primary"}
-    arrays = dict(q_field=q, zbar_field=zb, **atlas.get("fields_primary", {}))
+    # true asymptotic eigenmode field + rigorous non-normal optimal finite-time input/output (V1/U1) at
+    # T_primary — three DISTINCT objects (eigenmode / optimal input / optimal output), never conflated.
+    ef = eigen_field(J, grid)
+    opt = optimal_finite_time_perturbation(J, grid, T_primary, N)
+    out["optimal"] = dict(
+        sigma1=opt["sigma1"], sigma_ratio=opt["sigma_ratio"],
+        v1_wavevector_axis=float(elongation_axis_score(np.abs(opt["v1_field"]), grid, theta)),
+        u1_output_axis=float(elongation_axis_score(np.abs(opt["u1_field"]), grid, theta)),   # OUTPUT propagation-direction evidence
+        u1_output_globality=float(globality(opt["u1_field"], grid)))
+    arrays = dict(q_field=q, zbar_field=zb, **atlas.get("fields_primary", {}),
+                  eigen_field=(ef if ef is not None else np.full((grid.n, grid.n), np.nan)),
+                  v1_optimal_input=opt["v1_field"], u1_optimal_output=opt["u1_field"])
     return out, arrays

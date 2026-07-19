@@ -551,6 +551,73 @@ def cmd_run_nonlinear(args):
     return summary
 
 
+def cmd_run_convergence(args):
+    """Grid-resolution convergence (review 2026-07-19): are the OPERATOR-based quantities (sigma1,
+    eigenmode axis/globality, U1 output axis) grid-converged as n grows? peak_k with fixed p_max=4 is
+    domain-limited (its low rail = the whole-sheet scale), reported for context."""
+    import src.topic4_state_conditioned_susceptibility as M
+    cfg = _load_cfg()
+    label = args.candidate or "zA_q50_tz10000"
+    seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else sorted(_load_locked_candidate(label)["onsets"])
+    grid_ns = [8, 12, 16, 20, 24]
+    states = ["baseline_1000ms", "pre_onset_100ms"]
+    per = {st: {n: [] for n in grid_ns} for st in states}
+    for seed in seeds:
+        snap = _load_snapshot(label, seed)
+        labels = [str(x) for x in snap["snapshot_labels"]]
+        for n in grid_ns:
+            ctx = _seed_context(cfg, snap, n)
+            for st in states:
+                if st not in labels:
+                    continue
+                zbar, _, _ = M.bin_neuron_state_to_grid(snap["z_E"][labels.index(st)], ctx["pos_norm"], ctx["grid"])
+                # T=T_primary ONLY (convergence needs one window, not the 4-window atlas) -> 4x cheaper
+                out, _ = M.summarize_state_susceptibility(
+                    zbar, ctx["grid"], ctx["scaffold"], ctx["probes"], [cfg["T_primary"]],
+                    w_ee_mult=cfg["w_ee_mult"], ratio=cfg["ratio"], q_floor=cfg["q_floor"],
+                    T_primary=cfg["T_primary"], op_dt=cfg["op_dt"], op_t_max=cfg["op_t_max"], op_tol=cfg["op_tol"])
+                if out.get("atlas"):
+                    pt = out["atlas"]["per_T"][cfg["T_primary"]]
+                    per[st][n].append(dict(sigma1=out["optimal"]["sigma1"], eig_glob=out["eigen"]["leading_globality"],
+                                           eig_axis=out["eigen"]["leading_axis_score"],
+                                           u1_axis=out["optimal"]["u1_output_axis"],
+                                           kpar=pt["axial_gain"], kperp=pt["perp_gain"], peak_k=pt["peak_k"]))
+            print(f"[convergence] seed {seed} n={n} done", flush=True)
+    med = {st: {n: {k: float(np.median([r[k] for r in rows])) for k in rows[0]} if rows else None
+                for n, rows in per[st].items()} for st in states}
+    summary = dict(schema_version=SCHEMA_VERSION, candidate=label, seeds=seeds, grid_ns=grid_ns, p_max=cfg["p_max"],
+                   note="operator quantities (sigma1/eig/u1) test grid convergence; peak_k low rail=2pi/L "
+                        "(whole-sheet scale, domain-limited at fixed p_max), not a resolution artifact.",
+                   median_over_seeds=med, git_sha=_git_sha(), argv=sys.argv)
+    _atomic_json(os.path.join(OUT_DIR, "convergence_summary.json"), summary)
+    _plot_convergence(med, grid_ns, states)
+    print(f"[convergence] -> convergence_summary.json + figures/convergence.png", flush=True)
+    return summary
+
+
+def _plot_convergence(med, grid_ns, states):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5))
+    for ax, st in zip(axes, states):
+        ns = [n for n in grid_ns if med[st][n] is not None]
+        for key, col in (("sigma1", "#b35806"), ("kpar", "#1b7837"), ("kperp", "#762a83"),
+                         ("eig_axis", "#2166ac"), ("u1_axis", "#5aae61")):
+            ax.plot(ns, [med[st][n][key] for n in ns], "-o", color=col, label=key, lw=1.8, ms=4)
+        axr = ax.twinx()
+        axr.plot(ns, [med[st][n]["peak_k"] for n in ns], "--s", color="0.5", label="peak_k (right)", lw=1.4, ms=4)
+        axr.set_ylabel("peak_k (rail=2pi/L=1.26)", fontsize=8, color="0.4")
+        ax.set_title(f"{st}: operator quantities vs grid n  (representative seed)", fontsize=10)
+        ax.set_xlabel("grid n (cells per side)"); ax.set_ylabel("gain / axis score")
+        ax.set_xticks(grid_ns); ax.grid(alpha=0.25); ax.legend(fontsize=7.5, loc="center right")
+    fig.suptitle("Grid-resolution convergence — operator quantities (sigma1 / k|| / k_perp / eigenmode axis / "
+                 "U1 output axis) stabilize; peak_k pinned at the whole-sheet rail (fixed p_max=4)", fontsize=10)
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    for ext in ("png", "pdf"):
+        fig.savefig(os.path.join(OUT_DIR, "figures", f"convergence.{ext}"), dpi=150, bbox_inches="tight")
+
+
 # ============================================================ small IO helpers
 def _json_default(o):
     if isinstance(o, (np.integer,)):
@@ -581,7 +648,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Topic 4 state-conditioned spatial susceptibility runner.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("audit-inputs", "smoke", "capture-snapshots", "build-atlas", "run-controls",
-                 "run-nonlinear-spotchecks", "all"):
+                 "run-nonlinear-spotchecks", "run-convergence", "all"):
         sp = sub.add_parser(name)
         sp.add_argument("--confirm-run", action="store_true", help="required to start any simulation")
         sp.add_argument("--candidate", default=None, help="MZ multiseed label (default zA_q50_tz10000)")
@@ -608,6 +675,8 @@ def main(argv=None):
         cmd_run_controls(args)
     elif args.cmd == "run-nonlinear-spotchecks":
         cmd_run_nonlinear(args)
+    elif args.cmd == "run-convergence":
+        cmd_run_convergence(args)
     elif args.cmd == "all":
         cmd_capture_snapshots(args)
         cmd_build_atlas(args)
