@@ -3,6 +3,8 @@
 Pure-function tests use no SNN; the tiny-network smoke tests build a small substrate so the
 freeze / independent-replay invariants are exercised without the full E1146 substrate.
 """
+import copy
+import dataclasses
 import os
 import sys
 
@@ -11,9 +13,14 @@ import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
 sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
 
 import src.topic4_mz_slow_fast_transition as MZSF  # noqa: E402
+from params import Params  # noqa: E402
+from model import build_network  # noqa: E402
+from mz_slow_vars import MZSlowVarsConfig  # noqa: E402
+from src.topic4_mz_onset_dynamics import MZOnsetProbe, run_loop  # noqa: E402
 
 
 def test_module_imports_and_schema():
@@ -126,3 +133,59 @@ def test_classify_unresolved_when_too_few():
     ps = _ps([0.02, 0.05], [0.0, np.nan], [None, None], [None, None])
     out = MZSF.classify_transition(ps, natural_crosses=False, plateau_outside=False)
     assert out["label"] == "unresolved"
+
+
+# ---------------------------------------------------------------- Task 5: fork-mechanics smoke (tiny net)
+@pytest.fixture(scope="module")
+def tiny():
+    p = Params(g=3.6, L=1.0, density=2000.0, T=60.0, dt=0.1, nu_ext_ratio=0.9, seed=1)
+    net = build_network(p, verbose=False)
+    NE, N = net["NE"], net["NE"] + net["NI"]
+    core = np.linalg.norm(net["pos"][:NE] - np.array([0.5, 0.5]), axis=1) <= 0.2
+    vth = np.full(N, p.V_th)
+    vth[:NE][core] -= 1.0
+    cfg = MZSlowVarsConfig(use_z=True, use_m=True, I_th_EI=5.0, tau_z=3000.0, tau_adp=2000.0, eta_m=0.1)
+    return dict(p=p, net=net, NE=NE, N=N, core=core, vth=vth, cfg=cfg)
+
+
+def _fresh(t):
+    slow = MZOnsetProbe(t["N"], 18.0, t["cfg"], NE=t["NE"], core_mask_E=t["core"])
+    t["net"]["rng"] = np.random.default_rng(t["p"].seed)
+    return slow
+
+
+def test_branch_fork_diverges_but_native_resume_reproduces(tiny):
+    """The P_runaway mechanism: from ONE frozen checkpoint, native resume reproduces bit-for-bit, but a
+    branch_rng_state-swapped LoopState gives independent future noise -> a different spike raster."""
+    t = tiny
+    K = 300
+    r1 = run_loop(t["p"], t["net"], _fresh(t), t["vth"], n_steps=K, capture_final=True, store_spikes=False)
+    ck = r1["checkpoint"]
+    a = run_loop(t["p"], t["net"], copy.deepcopy(ck.slow), t["vth"], n_steps=400, start=ck, store_spikes=True)
+    b = run_loop(t["p"], t["net"], copy.deepcopy(ck.slow), t["vth"], n_steps=400, start=ck, store_spikes=True)
+    assert np.array_equal(a["E_spk_bool"], b["E_spk_bool"])       # native resume deterministic
+    assert a["E_spk_bool"].sum() > 0                              # the tiny net is active (test is meaningful)
+    fork = dataclasses.replace(ck, rng_state=MZSF.branch_rng_state(1, "c", "s", 7), slow=None)
+    c = run_loop(t["p"], t["net"], copy.deepcopy(ck.slow), t["vth"], n_steps=400, start=fork, store_spikes=True)
+    assert not np.array_equal(a["E_spk_bool"], c["E_spk_bool"])   # independent future noise -> diverges
+
+
+def test_frozen_template_holds_zm_and_global_probe_lowers_all_E(tiny):
+    """_frozen_template holds z/m across a resumed continuation, and the global probe (target_E=all E)
+    lowers EVERY E threshold in-window (design §3.2 global, not focal)."""
+    import run_topic4_mz_slow_fast_transition as RUN
+    t = tiny
+    K = 300
+    r1 = run_loop(t["p"], t["net"], _fresh(t), t["vth"], n_steps=K, capture_final=True, store_spikes=False)
+    ck = r1["checkpoint"]
+    templ = RUN._frozen_template(ck)
+    z0, m0 = templ.z[:t["NE"]].copy(), templ.m[:t["NE"]].copy()
+    run_loop(t["p"], t["net"], templ, t["vth"], n_steps=300, start=ck, store_spikes=False)
+    assert np.array_equal(templ.z[:t["NE"]], z0) and np.array_equal(templ.m[:t["NE"]], m0)   # frozen
+    all_E = np.ones(t["NE"], bool)
+    templ2 = RUN._frozen_template(ck)
+    templ2.set_probe(lo=int(ck.t), hi=int(ck.t) + 100, target_E=all_E, delta=1.5)
+    templ2._step_i = int(ck.t) + 10
+    v = templ2.threshold(t["vth"])
+    assert np.allclose(t["vth"][:t["NE"]] - v[:t["NE"]], 1.5)      # ALL E lowered, not a focal disk
+    assert np.array_equal(t["vth"][t["NE"]:], v[t["NE"]:])         # I cells untouched
