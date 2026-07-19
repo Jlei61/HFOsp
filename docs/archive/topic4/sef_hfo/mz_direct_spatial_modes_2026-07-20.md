@@ -128,6 +128,31 @@ locked runoff 9293.6/9499.3/9757.9 ms；D≈0.087 runoff corridor。）
    max 很小的时候噪声也能跨 ≥4 位置）→ **baseline arrival 不可解读**；只在有实响应的 pre_onset 解读
    arrival。主图 Supplementary 2c 只画 pre_onset arrival。
 
+### 3.4 控制：z+m plateau vs D-matched z-only（P1）
+
+在**同一个抑制耗竭水平 D** 下，比较"有适应（z+m plateau）"和"无适应但 D 相同（z-only）"两个状态对同一
+源头踢的空间响应，看适应（m）是不是在 D 之外还改变空间响应。选点只用 D + 静息（population rate 低）+
+时间，不看空间响应（spec §1）。`controls_summary.json`。
+
+三种子（每种子 z+m 与 z-only 都 D 精确对齐）：
+
+| seed | 匹配 D | z+m plateau norm (src) | z-only norm (src) | z-only/z+m norm |
+|---|---|---|---|---|
+| 1 | 0.0448 | 0.15 (0.045) | 0.90 (0.494) | 5.9×（z+m 更弱） |
+| 3 | 0.0444 | **504.2 (175.8)** | 0.27 (0.000) | 0.0×（z+m 反而暴涨） |
+| 4 | 0.0344 | 0.00 (0.000) | 9.80 (1.858) | ∞（z+m 死、z-only 强） |
+
+**结论：seed 极不稳定，inconclusive，不成 cohort 主张。** seed1 看起来"适应把响应压下去"，但 seed3 相反
+（z+m 反而被同一踢点燃成一次大暴发 norm=504，no-probe 控制稳定=censor resolved+kick_runaway=None，即这是
+**踢诱发的大瞬态**，不是自发失控），seed4 又是 z+m 几乎无响应。三种子方向不一致。**根因**：D-matched 选到的
+中间耗竭水平（D≈0.034–0.045）正好落在过渡不稳区（跟 §3.3 的 midpoint 一样 seed-variable）——这个 D 上同一
+踢的效应对 seed 极敏感（有的种子点燃大暴发、有的压死、有的无响应）。所以"在匹配 D 下比较有/无适应的空间
+响应"这条对照，在这组 D 上被过渡态不稳定性淹没，**量不出干净的适应效应**。这是诚实的 inconclusive/seed-
+unstable，不是"适应抑制响应"（那只是 seed1 单点，未复现）。
+
+（口径：这条对照是次级机制探针；三种子不一致 → 只登记为"过渡态 seed-unstable，未见可复现的适应空间效应"，
+不写成 cohort 结论。arrival"合格"在近零/暴发响应上都不可解读。）
+
 ## 4. 与旧冻结-q 速率场结果的一致/不一致
 
 - **不一致**：冻结-q 速率场（M3B）是一个线性化，天然有干净的线性算子、本征模、σ₁(T)、exp(JT) 响应；
@@ -165,10 +190,13 @@ locked runoff 9293.6/9499.3/9757.9 ms；D≈0.087 runoff corridor。）
 
 - 最大局限：empirical operator 在注册幅度下不可辨识——线性算子这条路在真 spiking 网络本体上（这组
   幅度 + 1 ms 脉冲 + 50 ms 窗 + 冻结）走不通。fixed-kick 承重全部结论。轴向招募是"像"，非证明。
-- 下一步候选（**待用户定**）：(a) 若要 operator，需要不同的可辨识化设计（更强/更久的探针、更粗的读出、
-  或在更线性的中段），但这些都超出本轮注册合同，不自主做；(b) fixed-kick 的沿轴招募可加 within-window
-  的时间分辨 + 空间置换 null 做更强判读；(c) native-dynamic（不冻结）次级核验；(d) P1 plateau + D-matched
-  控制（本轮若时间不够登记为 deferred）。
+- P1 plateau + D-matched 控制**已做三种子**：inconclusive/seed-unstable（§3.4），中间耗竭水平（D≈0.04）
+  是过渡不稳区，量不出干净适应空间效应。这本身印证了 §3.3 的 midpoint 不稳定——中间 D 状态对同一踢的响应
+  对 seed 极敏感。
+- 下一步候选（**待用户定，不自主启动新机制**）：(a) 若要 operator，需不同可辨识化设计（更强/更久探针、
+  更粗读出、或选真正线性的工作点），超出本轮注册合同；(b) fixed-kick 的沿轴招募可加 within-window 时间
+  分辨 + 空间置换 null 做更强判读；(c) native-dynamic（不冻结）次级核验；(d) 若要看适应的空间效应，得避开
+  过渡不稳的中间 D，或换更稳的匹配量（不是 D）。
 
 ## 8. 产物
 
