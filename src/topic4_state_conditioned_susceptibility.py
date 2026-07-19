@@ -236,6 +236,45 @@ def eigen_field(J, grid: Grid):
     return pair_loading(eig.right, idx, grid)                    # non-negative (n,n) subspace loading
 
 
+# ---- fixed-kick time-response (review 2026-07-19: real propagation dynamics, not compressed scores) ----
+def sigma1_vs_T(J, grid: Grid, T_list, N):
+    """sigma1(T) = max finite-time E->E gain over ALL input fields, vs window T (panel A). sigma1(0)=1
+    (identity). Same dictionary-independent propagator-block SVD as V1/U1 -> when it crosses 1, some
+    input is net-amplified over that window."""
+    return [1.0 if T <= 0 else optimal_finite_time_perturbation(J, grid, float(T), N)["sigma1"] for T in T_list]
+
+
+def make_localized_kick(grid: Grid, center, sigma):
+    """Unit-norm 6N perturbation = a Gaussian bump in the rE field at `center`. Built ONCE and reused
+    across states (the SAME kick) so the response comparison isolates the state change (panels B/C)."""
+    X, Y = grid.coords()
+    g = np.exp(-((X - center[0]) ** 2 + (Y - center[1]) ** 2) / (2.0 * float(sigma) ** 2))
+    return embed_probe_in_rate_state(g, grid)
+
+
+def fixed_kick_evolution(J, grid: Grid, b_fixed, t_list, N):
+    """{t: (n,n) rE response} of the FIXED kick under exp(J t), C_E readout (signed). t=0 -> the kick."""
+    from scipy.sparse.linalg import expm_multiply
+    out = {}
+    for t in t_list:
+        y = b_fixed if t <= 0 else expm_multiply(np.asarray(J, float) * float(t), b_fixed)
+        out[float(t)] = y[:N].reshape(grid.n, grid.n)
+    return out
+
+
+def axial_kymograph(evolution, grid: Grid, y_axis, band):
+    """(xs, ts, kymo[n_t, n_x]): |rE| response profile along x at y≈y_axis (averaged over the band
+    |y-y_axis|<=band), stacked over time -> propagation along the source->sink axis."""
+    X, Y = grid.coords()
+    ycol = Y[0, :]
+    ymask = np.abs(ycol - y_axis) <= band
+    if not ymask.any():
+        ymask = np.abs(ycol - y_axis) <= (grid.L / grid.n)          # fall back to the nearest row
+    ts = sorted(evolution)
+    kymo = np.array([np.abs(evolution[t])[:, ymask].mean(axis=1) for t in ts])   # (n_t, n_x)
+    return X[:, 0].copy(), np.array(ts, float), kymo
+
+
 def summarize_probe_atlas(J, grid: Grid, probes, T_list, *, theta, N, core, T_primary=30.0):
     """Full phase-paired gain atlas over T (design §6.2): axial / perpendicular / global gains, peak
     (k, orientation, gain), persistence G(50)/G(30) & G(75)/G(30), probe-subspace SVD, and the

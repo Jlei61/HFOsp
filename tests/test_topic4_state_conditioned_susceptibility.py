@@ -179,6 +179,26 @@ def test_leading_probe_subspace_svd_shapes():
     assert svd["optimal_probe_weights"].shape == (7,)
 
 
+def test_fixed_kick_time_response():
+    from src.topic4_state_conditioned_susceptibility import (
+        sigma1_vs_T, make_localized_kick, fixed_kick_evolution, axial_kymograph)
+    grid = Grid(n=6, L=5.0)
+    sc = _scaffold(grid, mu_core=0.5)
+    op, J, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
+    assert J is not None
+    N = grid.size
+    Ts = [0.0, 10.0, 30.0, 50.0]
+    s = sigma1_vs_T(J, grid, Ts, N)
+    assert len(s) == 4 and s[0] == 1.0 and all(np.isfinite(s))           # sigma1(0)=identity=1
+    b = make_localized_kick(grid, (-1.62, -0.38), 0.6)
+    assert abs(np.linalg.norm(b) - 1.0) < 1e-9                            # unit norm
+    ev = fixed_kick_evolution(J, grid, b, [0.0, 10.0, 30.0], N)
+    assert ev[0.0].shape == (6, 6)
+    assert np.allclose(ev[0.0], b[:N].reshape(6, 6))                      # t=0 is the kick itself
+    xs, ts, kymo = axial_kymograph(ev, grid, -0.38, band=0.5)
+    assert kymo.shape == (3, 6) and np.all(kymo >= 0)                      # (n_t, n_x), |rE|>=0
+
+
 def test_optimal_perturbation_dominates_any_probe_gain():
     # V1 is the UNCONSTRAINED optimal finite-time input over the whole E-rate space, so sigma1 must be
     # >= the gain of ANY single probe (the probe span is a subset of the input space).

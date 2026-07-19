@@ -115,9 +115,9 @@ def main():
     v1a = max(_rng(v1_f, absval=True)[1], 1e-12); u1a = max(_rng(u1_f, absval=True)[1], 1e-12)
     ghi = max(_rng(g_f, absval=True)[1], 1e-12)
 
-    fig = plt.figure(figsize=(15.5, 18.5))
-    gs = GridSpec(6, 4, figure=fig, hspace=0.36, wspace=0.14,
-                  height_ratios=[1, 1, 1, 1, 1, 1.05], top=0.945, bottom=0.045, left=0.055, right=0.965)
+    fig = plt.figure(figsize=(15.5, 15.5))
+    gs = GridSpec(5, 4, figure=fig, hspace=0.36, wspace=0.14,
+                  height_ratios=[1, 1, 1, 1, 1], top=0.94, bottom=0.06, left=0.055, right=0.965)
 
     def _geom(ax):
         ax.plot([src_n[0], snk_n[0]], [src_n[1], snk_n[1]], "-", color="w", lw=1.0, alpha=0.65)
@@ -156,41 +156,14 @@ def main():
             if j == 0:
                 ax.set_ylabel(ylab, fontsize=8.5)
 
-    # ---- row 6: trajectories ----
-    xs = np.arange(len(ALL_STATES))
-    ax_g = fig.add_subplot(gs[5, 0:2]); ax_a = fig.add_subplot(gs[5, 2:4])
-
-    def _traj(metric_path, label, color, ls="-", ax=ax_g, marker="o"):
-        per = [[_dig(atlas["per_seed"][s].get(st), metric_path) for st in ALL_STATES] for s in seeds]
-        for row in per:
-            ax.plot(xs, row, ls, color=color, alpha=0.25, lw=1.0)
-        med = [np.nanmedian([r[i] for r in per if r[i] is not None]) if any(r[i] is not None for r in per) else np.nan
-               for i in range(len(ALL_STATES))]
-        ax.plot(xs, med, ls + marker, color=color, lw=2.3, ms=5, label=label)
-
-    _traj(["atlas", "per_T", str(Tp), "axial_gain"], "k|| gain (wavevector along axis)", "#1b7837")
-    _traj(["atlas", "per_T", str(Tp), "perp_gain"], "k_perp gain", "#762a83")
-    _traj(["optimal", "sigma1"], "sigma1 (true max finite-time gain)", "#b35806", ls="-", marker="s")
-    ax_g.axhline(1.0, color="0.5", lw=0.8, ls=":"); ax_g.text(0.05, 1.02, "gain=1", fontsize=7, color="0.4")
-    ax_g.set_xticks(xs); ax_g.set_xticklabels([STATE_SHORT[s] for s in ALL_STATES], fontsize=9)
-    ax_g.set_ylabel("finite-time gain (T=%.0f ms)" % Tp, fontsize=9)
-    ax_g.set_title("row 6a: input-wavevector gains + true optimal gain (faint=3 seeds, bold=median)", fontsize=9.3)
-    ax_g.legend(fontsize=8, loc="upper left"); ax_g.grid(alpha=0.25)
-
-    _traj(["eigen", "leading_axis_score"], "eigenmode axis (asymptotic)", "#2166ac", ax=ax_a)
-    _traj(["optimal", "u1_output_axis"], "U1 output axis (finite-time, T=30ms)", "#1b7837", ls="--", ax=ax_a)
-    ax_a.axhline(0, color="0.6", lw=0.6)
-    ax_a.set_xticks(xs); ax_a.set_xticklabels([STATE_SHORT[s] for s in ALL_STATES], fontsize=9)
-    ax_a.set_ylabel("axis elongation score", fontsize=9)
-    ax_a.set_title("row 6b: OUTPUT propagation direction — asymptotic eigenmode vs finite-time U1", fontsize=9.3)
-    ax_a.legend(fontsize=8, loc="upper left"); ax_a.grid(alpha=0.25)
-
     fig.suptitle("Topic 4 — state-conditioned spatial susceptibility along the MZ z-depletion trajectory  "
-                 "(candidate %s; model-side diagnostic, NOT a seizure)" % args.candidate, fontsize=12.5, y=0.965)
-    fig.text(0.5, 0.012, "eigenmode (asymptotic mode) / V1 (optimal finite-time input) / U1 (optimal output) / "
+                 "(candidate %s; static state maps; model-side diagnostic, NOT a seizure)" % args.candidate,
+                 fontsize=12.5, y=0.965)
+    fig.text(0.5, 0.02, "eigenmode (asymptotic mode) / V1 (optimal finite-time input) / U1 (optimal output) / "
              "G (probe scan) are DISTINCT objects. k||/k_perp = input WAVEVECTOR direction (not propagation). "
-             "onset = unresolved equilibrium boundary (blank endpoint, row 6). peak_k is rail-limited on this "
-             "n=12 grid (see convergence check).", ha="center", fontsize=8.2, style="italic", color="0.35")
+             "onset = unresolved equilibrium boundary (omitted). Propagation DYNAMICS are in the separate "
+             "time_response figure (fixed-kick sigma1(T) + evolution + kymograph). peak_k rail-limited "
+             "(low-k = whole-sheet; see convergence figure).", ha="center", fontsize=8.0, style="italic", color="0.35")
     os.makedirs(os.path.join(OUT_DIR, "figures"), exist_ok=True)
     for ext in ("png", "pdf"):
         fig.savefig(os.path.join(OUT_DIR, "figures", f"state_conditioned_susceptibility_diagnostic.{ext}"),

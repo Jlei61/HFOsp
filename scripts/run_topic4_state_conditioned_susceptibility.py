@@ -618,6 +618,121 @@ def _plot_convergence(med, grid_ns, states):
         fig.savefig(os.path.join(OUT_DIR, "figures", f"convergence.{ext}"), dpi=150, bbox_inches="tight")
 
 
+def cmd_run_time_response(args):
+    """Fixed-source-kick time-response (review 2026-07-19): the SAME source-core Gaussian kick evolved
+    under exp(J_s t) at each state, so the comparison isolates the state change. Panels A sigma1(T),
+    B spatial evolution, C axial kymograph. 3-seed median."""
+    import src.topic4_state_conditioned_susceptibility as M
+    cfg = _load_cfg()
+    label = args.candidate or "zA_q50_tz10000"
+    seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else sorted(_load_locked_candidate(label)["onsets"])
+    STATES = ["baseline_1000ms", "pre_onset_500ms", "pre_onset_100ms"]
+    T_sigma = [float(t) for t in range(0, 151, 5)]
+    t_maps = [5.0, 10.0, 20.0, 30.0, 50.0, 100.0]
+    t_kymo = [float(t) for t in range(0, 101, 4)]
+    kick_sigma = 0.6
+    acc = {st: dict(sigma=[], maps=[], kymo=[]) for st in STATES}
+    xs_ref = y_axis = None
+    for seed in seeds:
+        snap = _load_snapshot(label, seed)
+        ctx = _seed_context(cfg, snap, cfg["grid_n"])
+        labels = [str(x) for x in snap["snapshot_labels"]]
+        N = ctx["grid"].size
+        b_fixed = M.make_localized_kick(ctx["grid"], tuple(ctx["src_norm"]), kick_sigma)   # SAME kick
+        y_axis = float(ctx["src_norm"][1])
+        for st in STATES:
+            zbar, _, _ = M.bin_neuron_state_to_grid(snap["z_E"][labels.index(st)], ctx["pos_norm"], ctx["grid"])
+            op, J, _ = M.state_operator(zbar, ctx["grid"], ctx["scaffold"], w_ee_mult=cfg["w_ee_mult"],
+                                        ratio=cfg["ratio"], q_floor=cfg["q_floor"])
+            if J is None:
+                continue
+            acc[st]["sigma"].append(M.sigma1_vs_T(J, ctx["grid"], T_sigma, N))
+            acc[st]["maps"].append(np.stack([M.fixed_kick_evolution(J, ctx["grid"], b_fixed, t_maps, N)[t]
+                                             for t in t_maps]))
+            xs_ref, _, kymo = M.axial_kymograph(M.fixed_kick_evolution(J, ctx["grid"], b_fixed, t_kymo, N),
+                                                ctx["grid"], y_axis, band=0.5)
+            acc[st]["kymo"].append(kymo)
+        print(f"[time-response] seed {seed} done", flush=True)
+    out_arrays, summary = {}, {}
+    for st in STATES:
+        if not acc[st]["sigma"]:
+            continue
+        sig = np.median(np.stack(acc[st]["sigma"]), axis=0)
+        out_arrays[f"{st}__sigma1_T"] = sig
+        out_arrays[f"{st}__maps"] = np.median(np.stack(acc[st]["maps"]), axis=0)
+        out_arrays[f"{st}__kymo"] = np.median(np.stack(acc[st]["kymo"]), axis=0)
+        cross = next((T_sigma[i] for i, v in enumerate(sig) if v > 1.0), None)
+        ip = int(np.argmax(sig))
+        summary[st] = dict(sigma1_cross1_ms=cross, sigma1_peak=float(sig[ip]), T_peak_ms=T_sigma[ip])
+    out_arrays.update(T_sigma=np.array(T_sigma), t_maps=np.array(t_maps), t_kymo=np.array(t_kymo),
+                      xs=xs_ref, y_axis=np.array([y_axis]),
+                      src_x=np.array([float(ctx["src_norm"][0])]), snk_x=np.array([float(ctx["snk_norm"][0])]))
+    _atomic_savez(os.path.join(OUT_DIR, "time_response_arrays.npz"), **out_arrays)
+    _atomic_json(os.path.join(OUT_DIR, "time_response_summary.json"),
+                 dict(schema_version=SCHEMA_VERSION, candidate=label, seeds=seeds, states=STATES,
+                      kick_sigma=kick_sigma, kick_center="source_core", per_state=summary,
+                      note="FIXED source-core Gaussian kick evolved under exp(J_s t); same kick across "
+                           "states isolates the state change.", git_sha=_git_sha(), argv=sys.argv))
+    _plot_time_response(out_arrays, STATES, cfg)
+    print(f"[time-response] -> time_response_summary.json + figures/time_response.png ; {summary}", flush=True)
+
+
+def _plot_time_response(a, states, cfg):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.gridspec import GridSpec
+    t_maps = a["t_maps"]; xs = a["xs"]; tk = a["t_kymo"]
+    src_x, snk_x, half = float(a["src_x"][0]), float(a["snk_x"][0]), float(cfg["L_norm"]) / 2
+    short = {"baseline_1000ms": "baseline", "pre_onset_500ms": "pre-onset -500ms", "pre_onset_100ms": "pre-onset -100ms"}
+    cols = {"baseline_1000ms": "#2166ac", "pre_onset_500ms": "#b35806", "pre_onset_100ms": "#1b7837"}
+    avail = [st for st in states if f"{st}__sigma1_T" in a]
+    fig = plt.figure(figsize=(15, 15))
+    gs = GridSpec(5, 6, figure=fig, hspace=0.5, wspace=0.18, height_ratios=[1.25, 1, 1, 1, 1.35],
+                  top=0.95, bottom=0.05, left=0.06, right=0.965)
+    # panel A: sigma1(T)
+    axA = fig.add_subplot(gs[0, :])
+    for st in avail:
+        axA.plot(a["T_sigma"], a[f"{st}__sigma1_T"], "-o", color=cols[st], ms=3, lw=2, label=short[st])
+    axA.axhline(1.0, color="0.5", ls=":", lw=1); axA.text(2, 1.02, "gain=1", fontsize=8, color="0.4")
+    axA.set_xlabel("finite-time window T (ms)"); axA.set_ylabel("sigma1(T) = max finite-time gain")
+    axA.set_title("A: max finite-time gain sigma1(T) per state (3-seed median) — when/whether some input is net-amplified", fontsize=10.5)
+    axA.legend(fontsize=9); axA.grid(alpha=0.25)
+    # panel B: fixed-kick spatial evolution (states x times), shared signed norm
+    mmax = max([np.abs(a[f"{st}__maps"]).max() for st in avail] + [1e-12])
+    for r, st in enumerate(avail):
+        maps = a[f"{st}__maps"]
+        for c, t in enumerate(t_maps):
+            ax = fig.add_subplot(gs[1 + r, c])
+            im = ax.imshow(maps[c].T, origin="lower", extent=[-half, half, -half, half], cmap="RdBu_r",
+                           vmin=-mmax, vmax=mmax, aspect="equal")
+            ax.plot(src_x, float(a["y_axis"][0]), "^", color="k", ms=5); ax.plot(snk_x, float(a["y_axis"][0]), "v", color="k", ms=5)
+            ax.set_xticks([]); ax.set_yticks([])
+            if r == 0:
+                ax.set_title(f"{int(t)} ms", fontsize=9)
+            if c == 0:
+                ax.set_ylabel(short[st], fontsize=8.5, color=cols[st])
+    fig.text(0.5, 0.735, "B: SAME source-core kick evolved  C_E exp(J_s t) b_fixed  "
+             "(rows=state, cols=time; shared signed color; ^=source v=sink)", ha="center", fontsize=10.5)
+    # panel C: axial kymographs (position along source->sink axis x time)
+    kmax = max([a[f"{st}__kymo"].max() for st in avail] + [1e-12])
+    for c, st in enumerate(avail):
+        ax = fig.add_subplot(gs[4, 2 * c:2 * c + 2])
+        im = ax.imshow(a[f"{st}__kymo"], origin="lower", aspect="auto", cmap="inferno", vmin=0, vmax=kmax,
+                       extent=[xs.min(), xs.max(), tk.min(), tk.max()])
+        ax.axvline(src_x, color="w", ls="--", lw=0.8); ax.axvline(snk_x, color="w", ls=":", lw=0.8)
+        ax.set_title(f"C: {short[st]} kymograph", fontsize=9.5, color=cols[st])
+        ax.set_xlabel("position along axis (source ^ .. sink :)");
+        if c == 0:
+            ax.set_ylabel("time (ms)")
+        if c == len(avail) - 1:
+            fig.colorbar(im, ax=ax, fraction=0.05, pad=0.03).set_label("|rE| response (shared)", fontsize=8)
+    fig.suptitle("Topic 4 — fixed-kick TIME RESPONSE (propagation dynamics)  (candidate %s; NOT a seizure)"
+                 % (cfg.get("_candidate", "zA_q50_tz10000")), fontsize=12.5, y=0.985)
+    for ext in ("png", "pdf"):
+        fig.savefig(os.path.join(OUT_DIR, "figures", f"time_response.{ext}"), dpi=150, bbox_inches="tight")
+
+
 # ============================================================ small IO helpers
 def _json_default(o):
     if isinstance(o, (np.integer,)):
@@ -648,7 +763,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Topic 4 state-conditioned spatial susceptibility runner.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("audit-inputs", "smoke", "capture-snapshots", "build-atlas", "run-controls",
-                 "run-nonlinear-spotchecks", "run-convergence", "all"):
+                 "run-nonlinear-spotchecks", "run-convergence", "run-time-response", "all"):
         sp = sub.add_parser(name)
         sp.add_argument("--confirm-run", action="store_true", help="required to start any simulation")
         sp.add_argument("--candidate", default=None, help="MZ multiseed label (default zA_q50_tz10000)")
@@ -677,6 +792,8 @@ def main(argv=None):
         cmd_run_nonlinear(args)
     elif args.cmd == "run-convergence":
         cmd_run_convergence(args)
+    elif args.cmd == "run-time-response":
+        cmd_run_time_response(args)
     elif args.cmd == "all":
         cmd_capture_snapshots(args)
         cmd_build_atlas(args)

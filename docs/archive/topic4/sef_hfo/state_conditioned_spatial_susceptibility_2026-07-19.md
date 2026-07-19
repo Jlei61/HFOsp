@@ -143,6 +143,29 @@ At **baseline** the n=8 eigenmode is an anomalous point (eig_axis≈0.99); it st
 for n≥12 (near-degenerate leading subspace of the near-homogeneous baseline operator). Not part of the
 claim (the claim is the resolved, converged pre-onset state).
 
+### 4.5 Fixed-source-kick time response (review 2026-07-19; `time_response_summary.json` + `figures/time_response.png`)
+
+The review asked for a real time-response figure instead of compressed axial scores. Using the SAME
+source-core Gaussian kick `b_fixed` evolved under `exp(J_s t)` at each state (so the comparison isolates
+the state change, not each state's own optimal input):
+
+- **A — σ1(T)** (max finite-time gain vs window, 3-seed median): at **baseline** σ1(T) monotonically
+  decays and never exceeds 1 (no input net-amplified at any window). At **pre-onset** it crosses 1 by
+  T≈5 ms and **peaks at T≈15 ms** (peak σ1 = 1.23 at pre_onset_500ms, **1.51** at pre_onset_100ms), then
+  self-limits. So the non-normal transient **peaks EARLIER (~15 ms)** than the T=30 ms window used in
+  §4.1–4.4 (the T=30 static maps are valid but past the peak), and its peak grows as z depletes.
+- **B — fixed-kick spatial evolution** (5/10/20/30/50/100 ms): the baseline kick stays localized at the
+  source and decays; the pre-onset kick spreads into a band ALONG the axis toward the sink (with sign
+  structure by ~30 ms).
+- **C — axial kymograph** (source→sink position × time × |rE|): baseline = source-localized decay (the
+  sink stays dark); pre-onset = the response extends along the axis, the sink lights up, and it persists
+  longer.
+
+Propagation reading: baseline = local decay; pre-onset = a transient axial spread with sink recruitment
+and slower self-limiting — the non-normal axial transient shown as DYNAMICS, not scores. (The diagnostic
+figure now shows only the 5 static state-map rows; this time-response figure replaces the old compressed
+axial-score row.)
+
 ## 5. Answers to the ten Task-8 questions
 
 1. **Replay w/o observer drift?** Yes — byte-parity proven on the real substrate; onsets exact to the ms.
