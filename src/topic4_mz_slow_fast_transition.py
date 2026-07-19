@@ -26,4 +26,29 @@ import numpy as np
 
 SCHEMA_VERSION = "mz-slow-fast-transition-1.0"
 
-# functions added in Tasks 2–4 (TDD).
+
+# ============================================================ P_runaway replay branches (design §3.1)
+def branch_rng_state(seed, cond, state, idx):
+    """A PCG64 ``bit_generator.state`` dict for one independent future-noise replay branch.
+
+    Deterministic in ``(seed, cond, state, idx)`` and reproducible ACROSS processes (stable SHA-256 key,
+    never the salted builtin ``hash``). Distinct ``idx`` -> distinct stream. Swappable directly into a
+    ``LoopState.rng_state`` (run_loop restores ``rng.bit_generator.state``), so a frozen checkpoint can be
+    replayed under different future noise while V / currents / z / m stay identical."""
+    key = f"{int(seed)}|{cond}|{state}|{int(idx)}".encode()
+    digest = hashlib.sha256(key).digest()
+    entropy = [int.from_bytes(digest[i:i + 4], "little") for i in range(0, 16, 4)]   # 4 x uint32
+    ss = np.random.SeedSequence(entropy)
+    return np.random.default_rng(np.random.PCG64(ss)).bit_generator.state
+
+
+def wilson_ci(k, n, z=1.96):
+    """Wilson score interval (lo, hi) for a binomial proportion k/n, clipped to [0,1]. n=0 -> (nan, nan)."""
+    if n == 0:
+        return (float("nan"), float("nan"))
+    p = k / n
+    z2 = z * z
+    denom = 1.0 + z2 / n
+    center = (p + z2 / (2.0 * n)) / denom
+    half = (z / denom) * np.sqrt(p * (1.0 - p) / n + z2 / (4.0 * n * n))
+    return (max(0.0, center - half), min(1.0, center + half))
