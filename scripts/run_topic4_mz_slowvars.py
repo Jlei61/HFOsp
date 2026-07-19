@@ -130,13 +130,24 @@ def run_mz_cell(S, cfg, T, *, early_stop=True, lfp_recorder=None):
 
 
 # ============================================================ event extraction / baseline (reuse cmrun)
-def _events_from_res(res, dt):
+def slowoff_event_bar(res0, dt):
+    """Frozen event-onset bar from a slow-off run (P0-2 fix): ``floor + CAL_FRAC*(max-floor)`` computed
+    ONCE on the same-seed slow-off, then reused for every z/m target run so the threshold is NOT set by
+    each trajectory's own max (which under-counts runaway self-limiting and over-counts near-silence)."""
+    af, bin_w = C.active_fraction(res0["E_spk_bool"], dt, C.BIN_MS)
+    nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
+    floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
+    return floor + C.CAL_FRAC * (float(af.max()) - floor)
+
+
+def _events_from_res(res, dt, event_bar=None):
     spk = res["E_spk_bool"]
     rate = np.asarray(res["rate_E"], float)
     af, bin_w = C.active_fraction(spk, dt, C.BIN_MS)
     nb0, nb1 = int(C.BASELINE_MS[0] / bin_w), int(C.BASELINE_MS[1] / bin_w)
     floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
-    bar = floor + C.CAL_FRAC * (float(af.max()) - floor)
+    # P0-2: a frozen slow-off bar (event_bar) overrides the self-referential af.max() threshold.
+    bar = float(event_bar) if event_bar is not None else floor + C.CAL_FRAC * (float(af.max()) - floor)
     events = C.detect_events(af, bin_w, event_on_frac=bar)
     return events, af, bin_w, floor, rate
 
@@ -170,11 +181,12 @@ def compute_baseline_ref(res, dt, gates=None):
     )
 
 
-def extract_run_metrics(res, dt, baseline, gates=None):
+def extract_run_metrics(res, dt, baseline, gates=None, event_bar=None):
     """Run-metrics dict for classify_mz_run + the raw events/af/runaway_ms. peak event = largest by
-    participation; peak_returned = returns to baseline band (event_recovery, reused)."""
+    participation; peak_returned = returns to baseline band (event_recovery, reused). ``event_bar``
+    (P0-2) freezes the event-onset threshold from the same-seed slow-off run."""
     g = gates or MZPhenotypeGates()
-    events, af, bin_w, floor, rate = _events_from_res(res, dt)
+    events, af, bin_w, floor, rate = _events_from_res(res, dt, event_bar=event_bar)
     rate_s = M4._smooth(rate, dt)
     runaway_ms = M4._first_sustained(rate_s, dt)
     es = res.get("runaway_early_stop_ms")

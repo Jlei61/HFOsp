@@ -43,6 +43,33 @@ def test_expanded_returned_all_three_up_and_returns():
     assert classify_mz_run(rm, _baseline(), runaway_ms=None) == "expanded_returned"
 
 
+def test_frozen_event_bar_overrides_per_trajectory_max():
+    """P0-2: a passed event_bar (frozen from the same-seed slow-off) is used verbatim instead of each
+    trajectory's own af.max(). A bar above the trajectory's peak -> 0 events; a tiny bar -> >= default."""
+    import os
+    import sys
+    ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for p in (ROOT, os.path.join(ROOT, "scripts"), os.path.join(ROOT, "src", "snn_engine")):
+        if p not in sys.path:
+            sys.path.insert(0, p)
+    import run_topic4_mz_slowvars as R
+
+    rng = np.random.default_rng(0)
+    n_cells, dt, n_steps = 200, 0.1, 6000              # 600 ms; baseline window (5-50ms) stays quiet
+    spk = np.zeros((n_steps, n_cells), bool)
+    spk[2000:2200, :] = rng.random((200, n_cells)) < 0.8      # big event (~all cells) -> high af
+    spk[4000:4100, :50] = rng.random((100, 50)) < 0.8         # small event (25% of cells) -> low af
+    res = dict(E_spk_bool=spk, rate_E=spk.mean(axis=1) * 1000.0)
+
+    bar = R.slowoff_event_bar(res, dt)
+    assert bar > 0.0
+    ev_default, *_ = R._events_from_res(res, dt)                    # self-referential af.max() bar
+    ev_tiny, *_ = R._events_from_res(res, dt, event_bar=1e-6)       # frozen tiny -> >= default
+    ev_huge, *_ = R._events_from_res(res, dt, event_bar=2.0)        # above max possible af (<=1) -> none
+    assert len(ev_tiny) >= len(ev_default) >= 1
+    assert len(ev_huge) == 0
+
+
 def test_expanded_bounded_all_three_up_but_no_return():
     rm = _run(peak_dur=150.0, peak_participation=0.20, peak_rate=100.0, peak_returned=False)
     assert classify_mz_run(rm, _baseline(), runaway_ms=None) == "expanded_bounded"

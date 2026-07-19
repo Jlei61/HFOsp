@@ -34,6 +34,7 @@ import copy               # noqa: E402
 import csv                # noqa: E402
 import dataclasses        # noqa: E402
 import hashlib            # noqa: E402
+import glob               # noqa: E402
 import json               # noqa: E402
 import sys                # noqa: E402
 import time               # noqa: E402
@@ -686,7 +687,22 @@ def _save_traj(S, mz, I_EE, ds_ms, runaway_ms, events, fname, *, z_regime, A_fra
         z_regime=z_regime, A_frac=float(A_frac), seed=int(seed), eta_m=float(eta_m), i_ee_scale=float(I_EE))
 
 
+def _aggregate_focused_m():
+    """P1-2: combine ALL per-seed focused_m JSONs into focused_m_summary.csv. A single explicit step
+    (run after parallel per-seed/per-frac processes finish) — no process writes the shared CSV, so
+    there is no parallel-writer race that leaves only the last seed."""
+    rows = []
+    for f in sorted(glob.glob(os.path.join(OUT, "per_seed", "focused_m_seed*_g*.json"))):
+        rows += json.load(open(f)).get("rows", [])
+    rows.sort(key=lambda r: (r["seed"], r["A_frac"]))
+    _write_csv(rows, os.path.join(OUT, "focused_m_summary.csv"))
+    print(f"[focused-m] aggregated {len(rows)} rows into focused_m_summary.csv", flush=True)
+
+
 def cmd_focused_m(args, cfg):
+    if getattr(args, "aggregate", False):
+        _aggregate_focused_m()
+        return
     fm = cfg["focused_m"]
     seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else fm["seeds"])]
     tau_adp = float(fm["tau_adp_ms"]); I_EE = float(fm["I_EE_scale"]); peak_m = float(fm["peak_m_tau2000"])
@@ -696,39 +712,48 @@ def cmd_focused_m(args, cfg):
         z_regimes = [z for z in z_regimes if z["label"] == args.regime]
         if not z_regimes:
             raise SystemExit(f"--regime {args.regime!r} not in focused_m.z_regimes")
+    tau_over = getattr(args, "tau_adp_ms", None)
+    if tau_over:
+        tau_adp = float(tau_over)
     T_ms = float(args.t_ms) if getattr(args, "t_ms", None) else 15000.0
     ds_ms = float(fm.get("traj_downsample_ms", 5.0))
-    from run_topic4_mz_slowvars import compute_baseline_ref, extract_run_metrics, run_mz_cell
-    rows = []
+    tag = f"_tau{int(tau_adp)}" if tau_over else ""     # keep tau-sweep artifacts distinct
+    from run_topic4_mz_slowvars import compute_baseline_ref, extract_run_metrics, run_mz_cell, slowoff_event_bar
+    gtag = f"g{A_fracs[0]:g}"                            # frac-group tag: unique per parallel (seed,frac-subset) process
     for seed in seeds:
-        seed_json = os.path.join(OUT, "per_seed", f"focused_m_seed{seed}.json")
+        seed_json = os.path.join(OUT, "per_seed", f"focused_m{tag}_seed{seed}_{gtag}.json")
         if args.resume and os.path.exists(seed_json):
-            rows += json.load(open(seed_json))["rows"]; continue
+            continue
         S, regions, core_mask_E, core_r = build_S(seed, cfg)
-        # slow-off baseline for phenotype classifier + slow-off reference trajectory (D=0, a=0)
+        # slow-off baseline + FROZEN event bar (P0-2): threshold set once on slow-off, reused for all cells
         res0, mz0 = run_mz_cell(S, MZSlowVarsConfig(use_z=False, use_m=False), T_ms, early_stop=False)
         baseline = compute_baseline_ref(res0, DT)
-        _save_traj(S, mz0, I_EE, ds_ms, None, [], f"traj_slow_off_seed{seed}.npz",
+        frozen_bar = slowoff_event_bar(res0, DT)
+        _save_traj(S, mz0, I_EE, ds_ms, None, [], f"traj_slow_off{tag}_{gtag}_seed{seed}.npz",
                    z_regime="slow_off", A_frac=0.0, seed=seed, eta_m=0.0)
         seed_rows = []
         for z in z_regimes:
             for A_frac in A_fracs:
                 eta_m = 0.0 if A_frac == 0 else eta_m_from_frac(A_frac, I_EE, peak_m)
                 cfg_cell = MZSlowVarsConfig(use_m=(A_frac > 0), tau_adp=tau_adp, eta_m=eta_m, **z["cfg"])
-                res, mz = run_mz_cell(S, cfg_cell, T_ms, early_stop=True)
-                rm, events, af, bin_w, runaway_ms = extract_run_metrics(res, DT, baseline)
+                # P0/§6.3: only pure z-only (A_frac==0) may early-stop; z+m cells run full T to see if m terminates
+                res, mz = run_mz_cell(S, cfg_cell, T_ms, early_stop=(A_frac == 0))
+                rm, events, af, bin_w, runaway_ms = extract_run_metrics(res, DT, baseline, event_bar=frozen_bar)
                 pheno = classify_mz_run(rm, baseline, runaway_ms)
                 adap_peak = float(max(mz.trace_adap_current)) if mz.trace_adap_current else 0.0
-                row = dict(seed=seed, z_regime=z["label"], A_frac=A_frac, eta_m=round(eta_m, 5),
-                           realized_adap_frac=round(adap_peak / I_EE, 4), phenotype=pheno, runaway_ms=runaway_ms,
-                           n_events=rm["n_events"], peak_participation=round(rm["peak_participation"], 4),
-                           peak_returned=rm["peak_returned"])
-                seed_rows.append(row); rows.append(row)
-                _save_traj(S, mz, I_EE, ds_ms, runaway_ms, events, f"traj_{z['label']}_A{A_frac}_seed{seed}.npz",
+                d_max = round(1.0 - float(min(mz.trace_z_mean)), 5) if mz.trace_z_mean else 0.0
+                row = dict(seed=seed, z_regime=z["label"], A_frac=A_frac, tau_adp_ms=tau_adp, eta_m=round(eta_m, 5),
+                           realized_a_max=round(adap_peak / I_EE, 5), D_max=d_max, phenotype=pheno,
+                           runaway_ms=runaway_ms, n_events=rm["n_events"],
+                           peak_participation=round(rm["peak_participation"], 4), peak_returned=rm["peak_returned"],
+                           event_bar=round(frozen_bar, 6))
+                seed_rows.append(row)
+                _save_traj(S, mz, I_EE, ds_ms, runaway_ms, events, f"traj_{z['label']}_A{A_frac}{tag}_seed{seed}.npz",
                            z_regime=z["label"], A_frac=A_frac, seed=seed, eta_m=eta_m)
-                print(f"[focused-m] s{seed} {z['label']} A={A_frac} -> {pheno} (realized_adap={row['realized_adap_frac']})", flush=True)
-        _dump(dict(seeds=seed, rows=seed_rows, provenance=_provenance(cfg, dict(phase="focused-m", seed=seed))), seed_json)
-    _write_csv(rows, os.path.join(OUT, "focused_m_summary.csv"))
+                print(f"[focused-m] s{seed} {z['label']} A_target={A_frac} eta_m={eta_m:.5f} -> {pheno} "
+                      f"(realized_a_max={row['realized_a_max']} D_max={d_max} runaway={runaway_ms})", flush=True)
+        _dump(dict(seeds=seed, tau_adp_ms=tau_adp, rows=seed_rows,
+                   provenance=_provenance(cfg, dict(phase="focused-m", seed=seed, tau_adp_ms=tau_adp))), seed_json)
 
 
 # ============================================================ CLI
@@ -745,10 +770,12 @@ def main(argv=None):
         sp.add_argument("--a-fracs", dest="a_fracs", default=None, help="focused-m: comma-separated A_frac subset override")
         sp.add_argument("--regime", default=None, help="focused-m: z-regime label subset override")
         sp.add_argument("--t-ms", dest="t_ms", default=None, help="focused-m: sim length override (ms); default 15000")
+        sp.add_argument("--aggregate", action="store_true", help="focused-m: combine per-seed JSONs into summary CSV (no sim)")
+        sp.add_argument("--tau-adp-ms", dest="tau_adp_ms", default=None, help="focused-m: tau_adp override (ms), tau-sweep")
     args = ap.parse_args(argv)
     cfg = load_cfg()
     needs_run = {"state-coords", "operator-grid", "ignition", "counterfactual", "event-suppress", "focused-m"}
-    if args.cmd in needs_run and not args.confirm_run:
+    if args.cmd in needs_run and not args.confirm_run and not getattr(args, "aggregate", False):
         print(f"REFUSING: '{args.cmd}' runs simulations. Pass --confirm-run.", file=sys.stderr)
         sys.exit(2)
     os.makedirs(os.path.join(OUT, "per_seed"), exist_ok=True)
