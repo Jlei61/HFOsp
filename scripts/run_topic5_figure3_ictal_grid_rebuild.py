@@ -833,9 +833,10 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
     manifest = {
         "contract": CONTRACT, "git_commit": commit,
         "git_worktree_dirty": dirty,
-        "reproducibility_note": ("git_commit does NOT capture the uncommitted new scripts "
-                                 "(runner/module/fig3c are untracked); reproduce from the working tree, "
-                                 "not from this commit alone."),
+        "reproducibility_note": ("code (runner/module/scripts) is committed on branch "
+                                 "topic5-fig3-r3-grid-rebuild; results/ and figures are gitignored so "
+                                 "they are NOT committed — regenerate from the committed code at this "
+                                 "git_commit with the recorded seed/args."),
         "numpy": np.__version__, "pandas": pd.__version__,
         "seed": args.seed, "n_perm": n_perm, "grids": grids,
         "primary_grid": grids[0], "resolution_sensitivity_grid": grids[1] if len(grids) > 1 else None,
@@ -847,7 +848,9 @@ def _aggregate_and_write(events, fields, common_df, per_event, scored, ws_meta,
         "score_bands_only": bool(getattr(args, "score_bands_only", False)),
         "r3_formula_version": gg.R3_FORMULA_VERSION,
         "s_thresh": gg.S_THRESH, "overlap_min": {str(n): gg.overlap_min_for_n(n) for n in grids},
-        "band_definitions": bands, "routing_rule": "complete_shared_else_own_fallback",
+        "band_definitions": bands,
+        "routing_rule": ("endpoint_per_template_A_B_all_subjects" if args.axis == "endpoint"
+                         else "complete_shared_else_own_fallback"),
         "sigma_rule": prim_sigma_rule,
         "null_modes": ["all_contact_shuffle", "within_shaft_min_group_4"],
         "within_shaft_activation": "phenotype_matched (strict->BB150, gamma->gamma30)",

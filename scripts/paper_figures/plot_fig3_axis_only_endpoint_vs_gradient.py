@@ -10,6 +10,7 @@ and gradient-primary / endpoint-sensitivity.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -49,7 +50,8 @@ def main():
     es = pd.read_csv(Path(args.endpoint_dir) / "multiband_subject.csv")
     gc = pd.read_csv(Path(args.gradient_dir) / "multiband_cohort.csv").set_index("band")
     ec = pd.read_csv(Path(args.endpoint_dir) / "multiband_cohort.csv").set_index("band")
-    pb = pd.read_csv(Path(args.compare_dir) / "axis_only_endpoint_vs_gradient_per_band.csv").set_index("band")
+    pb = pd.read_csv(Path(args.compare_dir) / "endpoint_package_vs_gradient_primary_per_band.csv").set_index("band")
+    summ = json.loads((Path(args.compare_dir) / "endpoint_package_vs_gradient_primary_summary.json").read_text())
     merged = gs.merge(es, on=["band", "subject"], suffixes=("_grad", "_ep"))
     merged["diff"] = merged["delta_ep"] - merged["delta_grad"]
 
@@ -81,37 +83,58 @@ def main():
                loc="lower left", fontsize=7.5, frameon=False)
     axA.spines[["top", "right"]].set_visible(False)
 
-    # Panel B: direct per-band margin contrast (endpoint - gradient)
+    # Panel B: direct per-band margin contrast; stars use the HOLM-CORRECTED p (0/7)
     for bi, b in enumerate(BANDS):
         d = merged[merged.band == b]["diff"].dropna().values
+        p = float(pb.loc[b, "direct_holm_p"])
         if len(d) >= 2 and np.ptp(d) > 0:
             vp = axB.violinplot([d], positions=[bi], widths=0.7, showextrema=False)
-            p = float(pb.loc[b, "direct_paired_wilcoxon_p"])
             vp["bodies"][0].set_facecolor("#c44e52" if p < 0.05 else "#cfcfcf")
             vp["bodies"][0].set_alpha(0.4); vp["bodies"][0].set_edgecolor("gray")
         axB.scatter(bi + np.random.default_rng(bi).uniform(-0.08, 0.08, len(d)), d,
                     s=14, c="#333", alpha=0.7, zorder=4)
         axB.hlines(np.median(d), bi - 0.3, bi + 0.3, color="k", lw=2.4, zorder=6)
-        p = float(pb.loc[b, "direct_paired_wilcoxon_p"])
+        # nominal (uncorrected) p shown small below the star for transparency
+        raw = float(pb.loc[b, "direct_raw_wilcoxon_p"])
         axB.text(bi, axB.get_ylim()[1], _star(p), ha="center", va="top",
-                 color="#c44e52" if p < 0.05 else "gray", fontsize=13 if p < 0.05 else 8, weight="bold")
+                 color="#c44e52" if p < 0.05 else "gray", fontsize=13 if p < 0.05 else 9, weight="bold")
+        axB.text(bi, axB.get_ylim()[1] - 0.06 * (axB.get_ylim()[1] - axB.get_ylim()[0]),
+                 f"nom {raw:.2f}", ha="center", va="top", fontsize=6.2, color="0.55")
     axB.axhline(0, color="gray", lw=0.7)
     axB.set_xticks(range(len(BANDS))); axB.set_xticklabels([LAB[b] for b in BANDS])
     axB.set_ylabel("margin difference  endpoint − gradient\n(per-subject, paired)")
-    axB.set_title("B · DIRECT paired margin contrast (the axis effect)\nstars = direct paired two-sided Wilcoxon p", fontsize=10)
+    ov = summ["overall_band_to_subject_folded"]
+    own = summ["closest_to_pure_axis_own_fallback_stratum"]
+    axB.set_title("B · direct endpoint-package − gradient-primary contrast\n"
+                  "stars = Holm-corrected direct p (0/7 significant; sign-flip maxT also 0/7)", fontsize=9.5)
+    axB.text(0.02, 0.03, f"overall folded {ov['median']:+.4f}, {ov['n_endpoint_gt_gradient']}/{ov['n_subjects']}, p={ov['wilcoxon_p']:.2f} (n.s.)\n"
+             f"own-fallback (closest to pure axis) {own['median']:+.5f}, p={own['wilcoxon_p']:.2f} (≈0)",
+             transform=axB.transAxes, va="bottom", ha="left", fontsize=7, color="0.3")
     axB.spines[["top", "right"]].set_visible(False)
 
-    fig.suptitle("Axis-only sensitivity · endpoint vs gradient-primary · seven bands · onset 0–10 s (n=17/167, N=161)",
-                 fontsize=12)
-    fig.text(0.5, 0.005, "CONFOUND: endpoint is per-template A/B, gradient-primary is shared-else-own — this contrasts the "
-             "endpoint package vs the gradient-primary package, not the axis alone. Gradient stays primary; endpoint is a sensitivity.",
-             ha="center", va="bottom", fontsize=8, color="0.3")
-    fig.tight_layout(rect=(0, 0.03, 1, 0.96))
+    fig.suptitle("endpoint-PACKAGE vs gradient-primary sensitivity (NOT axis-only) · seven bands · onset 0–10 s (n=17/167, N=161)",
+                 fontsize=11.5)
+    fig.text(0.5, 0.005, "endpoint changes axis + routing (per-template A/B vs shared-else-own) + sigma value together — a PACKAGE "
+             "contrast, not the axis alone. No band survives the direct seven-band correction; the nominal β/α gains are confined to "
+             "the shared stratum and vanish in own-fallback (closest to pure axis). Gradient stays primary; endpoint is a sensitivity.",
+             ha="center", va="bottom", fontsize=7.4, color="0.3")
+    fig.tight_layout(rect=(0, 0.035, 1, 0.955))
     stage = Path(args.stage); stage.mkdir(parents=True, exist_ok=True)
-    fig.savefig(stage / "axis_only_endpoint_vs_gradient.png", dpi=200, bbox_inches="tight")
-    fig.savefig(stage / "axis_only_endpoint_vs_gradient.pdf", bbox_inches="tight")
+    fig.savefig(stage / "endpoint_package_vs_gradient_primary.png", dpi=200, bbox_inches="tight")
+    fig.savefig(stage / "endpoint_package_vs_gradient_primary.pdf", bbox_inches="tight")
     plt.close(fig)
-    print(f"[fig] wrote {stage/'axis_only_endpoint_vs_gradient.png'}")
+    (stage / "endpoint_package_vs_gradient_primary_metadata.json").write_text(json.dumps({
+        "figure": "endpoint_package_vs_gradient_primary",
+        "not_axis_only": summ["NOT_axis_only"],
+        "identical_pipeline_verified": summ["identical_pipeline_verified"],
+        "panelA": "seven-band per-subject Δ, gradient (primary) vs endpoint; stars = each axis' own seven-band maxT pFWER",
+        "panelB": "direct per-band endpoint-package − gradient-primary margin contrast; stars = Holm-corrected p (0/7); "
+                  "nominal uncorrected p shown small; sign-flip maxT also 0/7",
+        "overall_folded": summ["overall_band_to_subject_folded"],
+        "own_fallback_stratum": summ["closest_to_pure_axis_own_fallback_stratum"],
+        "shared_stratum": summ["routing_changed_shared_stratum"],
+        "conclusion": summ["conclusion"]}, indent=2, default=str))
+    print(f"[fig] wrote {stage/'endpoint_package_vs_gradient_primary.png'}")
 
 
 if __name__ == "__main__":

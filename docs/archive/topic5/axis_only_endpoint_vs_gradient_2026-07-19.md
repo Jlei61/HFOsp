@@ -1,59 +1,62 @@
-# Axis-only 敏感性：endpoint 轴 vs gradient 主口径（七频带）— 结果与讨论
+# endpoint-package vs gradient-primary 七频带敏感性 — 结果与讨论（NOT axis-only）
 
-date: 2026-07-19
+date: 2026-07-19 (rev2, 审阅收紧)
 spec: `docs/superpowers/specs/2026-07-19-axis-only-seven-band-endpoint-vs-gradient-design.md`
 calc: `results/topic5_ictal_recruitment/field_concordance_grid_endpoint_axis/n161_endpoint/`
-compare: `.../field_concordance_grid_endpoint_axis/axis_only_endpoint_vs_gradient_{per_band.csv,summary.json}`
+compare: `.../field_concordance_grid_endpoint_axis/endpoint_package_vs_gradient_primary_{per_band,subject_contrast}.csv, _summary.json`
 figure: `results/paper-ready-figure/fig3_ictal_field_concordance_grid_method_sensitivity/axis_only/`
+
+> **定位**：诊断性 sensitivity。**不是纯轴效应，也不是 paper-ready 主结果。** gradient 保持 primary，
+> endpoint 只作对照。
 
 ## 测了什么
 
-老的 endpoint 版（F2）七频带里"6/7 频段过 FWER"，现在 gradient 版只"2/7"。到底是不是**换了轴**
-造成的？我们在**完全相同的管线**下，只把投影轴从 gradient（全触点传播梯度）换成 endpoint（源→汇
-端点核，k=3），其余一切不动，然后**直接配对**比两个轴每个被试每个频段的"余量"（真实 − 随机零假设
-中位）差。
+老 endpoint 版七频带"6/7 过 FWER"，现在 gradient 版只"2/7"。这是不是"换了轴"造成的？我们在**完全
+相同的管线**下，把投影从 gradient（全触点传播梯度）换成 endpoint（源→汇端点核，k=3），各算一遍七频带
+一致性，然后**直接配对**比两个轴每个被试的余量差，并做多重比较校正。
 
-## 怎么测的
+## 怎么测的（含一处重要限制）
 
-- **held constant（逐比特相同已验证）**：同 17 人 / 167 次发作、同 `[0,10]s` 七频带能量、同共同
-  mask（含 BB150-anchor 约束）、同 σ 规则、同 N=161 网格、同 coherent all-contact 1000 次置换。
-  **两个轴的置换映射哈希逐事件完全相同**（`identical_pipeline_verified_perm_hashes=True`），所以差
-  异只可能来自轴/投影。
-- **changed**：只有投影轴。endpoint 用 source/sink 端点核定义（`build_endpoint_cores` k=3 →
-  `compute_axis_frame` → 同一个 `make_normalized_plane`），per-template A/B。
-- **confound（已在图/文标明）**：endpoint 是 per-template A/B，gradient 主口径是 shared-else-own。
-  所以这一对比是"endpoint 套餐 vs gradient 主口径套餐"，**混了轴 + routing 两个因素，不是纯轴**。
-- **直接检验**：每个被试每个频段 `endpoint 余量 − gradient 余量`，配对双侧 Wilcoxon + 被试符号翻转；
-  再把七频段折叠到被试一层做一次总体配对检验。**这才是判据，不是"谁星多"。**
+- **held constant，且脚本 fail-closed 核验**：同 17 人 / 167 次发作、同共同 mask、同 seed、同 N=161、同
+  coherent all-contact 1000 次置换——**两个轴的置换映射哈希逐事件完全相同**（不一致就 raise，不再静默）。
+- **⚠️ 这不是纯 axis-only**：换轴的同时也换了 (a) **routing**（endpoint 全部 per-template A/B；gradient
+  主口径是 7 shared + 10 own-fallback）、(b) **σ 数值**（规则同，但 σ 在投影平面上估，endpoint/gradient
+  比值范围约 0.17–1.03）、(c) A/B grid 也随之变。所以右图测的是 **endpoint package − gradient-primary
+  package**，**不能叫"轴效应"**。
+- **判据 = 校正后的直接配对**：每频段 `endpoint 余量 − gradient 余量` 配对 Wilcoxon，**7 频段做 Holm +
+  同步 subject sign-flip maxT** 校正；星号用校正后 p。另报 routing 分层（own-fallback 是最接近纯轴的内部
+  对照）。
 
-## 揭示了什么
+## 揭示了什么（收紧后）
 
-1. **在完全相同的管线下，endpoint 轴只过 3/7（δ/α/FR），gradient 过 2/7（δ/θ）——远不是老版本的
-   6/7。** 所以老"6/7→2/7"的落差**主要不是轴**，而是当初 endpoint 版和现在 gradient 版之间的**其它
-   方法差异**（时间窗、分母、网格、共同 mask、镜像规则、null 那一整套）。把这些都对齐后，换轴带来的
-   过 FWER 频段数只从 2 变到 3。
+1. **同管线下 endpoint 不再复现旧 6/7**：endpoint 过自身七带 maxT 的只有 3/7（δ/α/FR）、gradient 2/7
+   （δ/θ）。所以旧 6/7 明显依赖旧的时间窗、分母、mask、镜像、null 那整套方法——**旧 6/7 不能归因于
+   endpoint 轴本身**。
 
-2. **轴本身的直接效应很小、且频段特异**。直接配对检验（endpoint − gradient 余量）：
-   - **β：+0.040，配对 Wilcoxon p=0.031（显著）**、符号翻转 p=0.015；
-   - α：+0.037，p=0.051（边缘）；
-   - δ/θ/γ/R/FR：中位差都为正但都不显著（p 0.35–0.85）。
-   - 七频段折叠到被试：中位 endpoint−gradient **+0.0046**、17 人里 **11 人** endpoint 略高，但配对
-     **p=0.19（整体不显著）**。
+2. **总体没有检出 package 差异**：七频段折叠到被试一层，中位 endpoint−gradient **+0.0046**、11/17 略高、
+   配对 **Wilcoxon p=0.19**、sign-flip p=0.14。
 
-3. 所以对审阅第 1 条"新旧绝不只是换了轴"的判断**成立且被量化**：换轴在同管线下只给了一点（主要在
-   β、其次 α）的提升，撑不起老版本的 6/7；而且这点提升还**混着 routing**（endpoint per-template vs
-   gradient shared-else-own），不是纯轴效应。整体上两个轴给出的七频带图景高度相似。
+3. **没有任何频段过直接七带校正**：名义 β 原始 p=0.031 → **Holm 0.214**；α 原始 0.051 → **Holm 0.303**；
+   sign-flip maxT 也 **0/7**（β≈0.39、α≈0.23）。**所以图上不打 β 星，只标为名义未校正。**
 
-4. **纪律**：gradient 仍是 primary，endpoint 只作 sensitivity。**不能**用"endpoint 3 星、gradient 2
-   星"推断"轴更好"（显著性差异谬误）——要看直接配对（只有 β 显著）。要真正把"轴"从"routing"里拆
-   出来，需要把两边都固定成 per-template A/B 的纯 axis-only（本轮 out of scope，可作后续）。
+4. **名义 β/α 提升是 routing 混杂，不是轴**：分层看——
+   - **own-fallback（10 人，两侧都 per-template = 最接近纯轴）**：折叠差 **+0.00016，5/10，p=0.62（≈0）**；
+     β +0.004（5/10）、α −0.0045（4/10）都不显著；
+   - **shared（7 人，routing 发生改变）**：折叠差 +0.029，β +0.066（7/7）、α +0.064（7/7）——名义提升
+     全在这里。
+   两侧口径统一的那一批（own）差不多是零，所以 β/α 是 routing 换了带来的，不是轴。
 
-## 一句话
+## 安全结论（正式口径）
 
-老"6/7→2/7"**主要来自方法学口径的整体收紧，不是换轴**；换轴本身在完全对齐的管线下只带来 β（及边缘
-α）频段的小幅、混着 routing 的提升，整体七频带一致性差异不显著（折叠 p=0.19）。endpoint 轴保留为
-sensitivity，gradient 保持 primary。
+> 在完全更新的 17 人 / 167 次发作合同下，endpoint 方法不再复现旧 6/7 结果；endpoint package 与
+> gradient-primary 的总体七频带差异**未检出**，也**没有任何频带在直接七带校正后显示可靠差异**。名义
+> β/α 提升集中在 routing 发生改变的 shared 分层、在最接近纯轴的 own-fallback 分层里≈0，故属 routing
+> 混杂而非轴效应。gradient 继续作 primary，endpoint 保留为 sensitivity。**未做等价检验，故不主张两者
+> 等价。**
 
-（内部归档代号：endpoint build_endpoint_cores k=3 / compute_axis_frame / make_normalized_plane,
-gradient shared-else-own primary, coherent_cohort_spatial_null_p, seven_band_maxt_pfwer, direct paired
-margin contrast, band→subject fold, axis+routing confound, identical-pipeline perm-hash invariant）
+若论文确实需要**纯轴**裁决：把 gradient 也固定成 per-template A/B（并决定是否冻结同一 σ），再重比——
+本轮 out of scope。
+
+（内部归档代号：endpoint build_endpoint_cores k=3 / compute_axis_frame / make_normalized_plane; gradient
+shared-else-own primary; direct paired margin contrast + Holm + sign-flip maxT; routing-stratified own vs
+shared; identical-pipeline perm-hash fail-closed; package-not-axis confound）
