@@ -213,6 +213,33 @@ def test_leading_eigenvalue_and_warmstart_continuation():
     assert op2.status == "resolved" and np.allclose(op2.rE, op.rE, atol=1e-6)
 
 
+def test_forward_integrate_fixed_point_stays_put():
+    from src.topic4_state_conditioned_susceptibility import forward_integrate_ratefield, classify_post_onset
+    grid = Grid(n=6, L=5.0)
+    sc = _scaffold(grid, mu_core=0.5)
+    op, J, q = state_operator(np.full((6, 6), 0.98), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
+    assert op.status == "resolved"
+    # integrate from the fixed point under the SAME q -> stays at the fixed point (rhs ~ 0): validates the
+    # forward integrator reproduces solve_operating_point's dynamics
+    tr = forward_integrate_ratefield(grid, sc, q, op.rE, op.rI, w_ee_mult=1.3, ratio=1.0, t_max=60.0, dt=0.5)
+    assert np.all(np.isfinite(tr["rE_mean"]))
+    assert abs(tr["rE_mean"][-1] - float(op.rE.mean())) < 1e-4
+    assert classify_post_onset(tr)["outcome"] in ("settled_low_amplitude", "limit_cycle", "saturation")
+
+
+def test_jacobian_at_state_matches_fixed_point():
+    from src.topic4_state_conditioned_susceptibility import jacobian_at_state, forward_integrate_ratefield
+    grid = Grid(n=6, L=5.0)
+    sc = _scaffold(grid, mu_core=0.5)
+    op, J_fp, q = state_operator(np.full((6, 6), 0.98), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
+    assert J_fp is not None
+    tr = forward_integrate_ratefield(grid, sc, q, op.rE, op.rI, w_ee_mult=1.3, ratio=1.0, t_max=20.0,
+                                     dt=0.5, record_state_every=20)
+    J_traj = jacobian_at_state(grid, sc, q, tr["states"][0], w_ee_mult=1.3, ratio=1.0)
+    # frozen J at the (recorded) fixed-point state == the fixed-point Jacobian
+    assert J_traj.shape == J_fp.shape and np.allclose(J_traj, J_fp, atol=1e-5)
+
+
 def test_optimal_perturbation_dominates_any_probe_gain():
     # V1 is the UNCONSTRAINED optimal finite-time input over the whole E-rate space, so sigma1 must be
     # >= the gain of ANY single probe (the probe span is a subset of the input space).

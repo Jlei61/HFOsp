@@ -849,6 +849,88 @@ def _plot_continuation(a, seeds):
         fig.savefig(os.path.join(OUT_DIR, "figures", f"continuation.{ext}"), dpi=150, bbox_inches="tight")
 
 
+def cmd_run_post_onset(args):
+    """Post-onset autonomous dynamics (review 2026-07-19): integrate the rate field from the PRE-ONSET
+    fixed point (user-specified init) under the ONSET q-field -> is it a ~24 Hz limit cycle or a
+    saturation? Resolves the continuation's open question (fold-vs-Hopf / oscillatory-vs-saturated)."""
+    import src.topic4_state_conditioned_susceptibility as M
+    cfg = _load_cfg()
+    label = args.candidate or "zA_q50_tz10000"
+    seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else sorted(_load_locked_candidate(label)["onsets"])
+    t_max = float(args.T) if args.T else 2500.0     # runaway is SLOW (>300ms); match solve_operating_point window
+    per_seed, arrays = {}, {}
+    for seed in seeds:
+        snap = _load_snapshot(label, seed)
+        ctx = _seed_context(cfg, snap, cfg["grid_n"])
+        labels = [str(x) for x in snap["snapshot_labels"]]
+        z_pre = M.bin_neuron_state_to_grid(snap["z_E"][labels.index("pre_onset_100ms")], ctx["pos_norm"], ctx["grid"])[0]
+        z_on = M.bin_neuron_state_to_grid(snap["z_E"][labels.index("onset")], ctx["pos_norm"], ctx["grid"])[0]
+        op_pre, _, _ = M.state_operator(z_pre, ctx["grid"], ctx["scaffold"], w_ee_mult=cfg["w_ee_mult"],
+                                        ratio=cfg["ratio"], q_floor=cfg["q_floor"])
+        q_on = M.zbar_to_q(z_on, cfg["q_floor"])
+        tr = M.forward_integrate_ratefield(ctx["grid"], ctx["scaffold"], q_on, op_pre.rE, op_pre.rI,
+                                           w_ee_mult=cfg["w_ee_mult"], ratio=cfg["ratio"], t_max=t_max,
+                                           dt=0.5, record_every=4, record_state_every=125)
+        cl = M.classify_post_onset(tr)
+        per_seed[str(seed)] = cl
+        arrays[f"{seed}__t"] = tr["t"]; arrays[f"{seed}__rE_mean"] = tr["rE_mean"]; arrays[f"{seed}__rE_max"] = tr["rE_max"]
+        # frozen-J finite-time susceptibility along the actual trajectory (time-dependent operator, item 3)
+        N = ctx["grid"].size
+        tsig, tre = [], []
+        for st in tr["states"]:
+            Jt = M.jacobian_at_state(ctx["grid"], ctx["scaffold"], q_on, st, w_ee_mult=cfg["w_ee_mult"], ratio=cfg["ratio"])
+            tsig.append(M.optimal_finite_time_perturbation(Jt, ctx["grid"], cfg["T_primary"], N)["sigma1"])
+            le = M.leading_eigenvalue(Jt, ctx["grid"]); tre.append(le["re"] if le else np.nan)
+        arrays[f"{seed}__traj_t"] = tr["state_times"]
+        arrays[f"{seed}__traj_sigma1"] = np.array(tsig, float); arrays[f"{seed}__traj_re"] = np.array(tre, float)
+        cl["traj_sigma1_peak"] = float(np.nanmax(tsig)); cl["traj_re_max"] = float(np.nanmax(tre))
+        print(f"[post-onset] seed {seed}: {cl}", flush=True)
+    summary = dict(schema_version=SCHEMA_VERSION, candidate=label, seeds=seeds, t_max=t_max,
+                   init="pre_onset_100ms fixed point + onset q-field (user-specified)", per_seed=per_seed,
+                   git_sha=_git_sha(), argv=sys.argv)
+    _atomic_savez(os.path.join(OUT_DIR, "post_onset_arrays.npz"), **arrays)
+    _atomic_json(os.path.join(OUT_DIR, "post_onset_summary.json"), summary)
+    _plot_post_onset(arrays, per_seed, seeds)
+    print(f"[post-onset] -> post_onset_summary.json + figures/post_onset.png ; "
+          f"{ {s: d['outcome'] for s, d in per_seed.items()} }", flush=True)
+
+
+def _plot_post_onset(a, per_seed, seeds):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    cols = ["#2166ac", "#b35806", "#1b7837", "#762a83"]
+    fig, axs = plt.subplots(2, 2, figsize=(14, 9)); ax = axs.ravel()
+    for i, s in enumerate(seeds):
+        t = a[f"{s}__t"]; rm = a[f"{s}__rE_mean"]; rx = a[f"{s}__rE_max"]; c = cols[i % len(cols)]
+        out = per_seed[str(s)]["outcome"]; f0 = per_seed[str(s)].get("dom_freq_hz")
+        lab = f"seed {s} ({out}" + (f", {f0:.0f}Hz)" if f0 else ")")
+        ax[0].plot(t, rm, "-", color=c, lw=1.2, label=lab)
+        ax[1].plot(t, rx, "-", color=c, lw=1.2, label=f"seed {s}")
+        half = len(rm) // 2
+        x = rm[half:] - np.nanmean(rm[half:])
+        fr = np.fft.rfftfreq(len(x), d=(t[1] - t[0]) / 1000.0); amp = np.abs(np.fft.rfft(np.nan_to_num(x)))
+        ax[2].plot(fr, amp, "-", color=c, lw=1.2, label=f"seed {s}")
+        tt = a.get(f"{s}__traj_t")
+        if tt is not None:
+            ax[3].plot(tt, a[f"{s}__traj_sigma1"], "-o", color=c, ms=3, lw=1.4, label=f"seed {s}")
+    ax[0].set_xlabel("time (ms)"); ax[0].set_ylabel("rE_mean (kHz)")
+    ax[0].set_title("A: autonomous rE_mean(t) from pre-onset FP + onset q-field", fontsize=9.5)
+    ax[1].set_xlabel("time (ms)"); ax[1].set_ylabel("rE_max (kHz)"); ax[1].set_yscale("log")
+    ax[1].axhline(0.1, color="0.5", ls=":", lw=0.8); ax[1].set_title("B: rE_max(t)  (dotted=saturation 0.1)", fontsize=9.5)
+    ax[2].set_xlabel("frequency (Hz)"); ax[2].set_ylabel("|FFT rE_mean| (2nd half)"); ax[2].set_xlim(0, 120)
+    ax[2].axvline(24, color="0.5", ls=":", lw=0.8); ax[2].set_title("C: spectrum (dotted=continuation ~24Hz)", fontsize=9.5)
+    ax[3].axhline(1.0, color="0.5", ls=":", lw=0.8)
+    ax[3].set_xlabel("time along trajectory (ms)"); ax[3].set_ylabel("frozen-J sigma1(T=30ms)")
+    ax[3].set_title("D: finite-time susceptibility along the trajectory (frozen J(t))", fontsize=9.5)
+    for x in ax:
+        x.grid(alpha=0.25); x.legend(fontsize=8)
+    fig.suptitle("Post-onset autonomous dynamics (limit cycle vs saturation) + finite-time susceptibility along the trajectory", fontsize=11)
+    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    for ext in ("png", "pdf"):
+        fig.savefig(os.path.join(OUT_DIR, "figures", f"post_onset.{ext}"), dpi=150, bbox_inches="tight")
+
+
 # ============================================================ small IO helpers
 def _json_default(o):
     if isinstance(o, (np.integer,)):
@@ -879,7 +961,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Topic 4 state-conditioned spatial susceptibility runner.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("audit-inputs", "smoke", "capture-snapshots", "build-atlas", "run-controls",
-                 "run-nonlinear-spotchecks", "run-convergence", "run-time-response", "run-continuation", "all"):
+                 "run-nonlinear-spotchecks", "run-convergence", "run-time-response", "run-continuation", "run-post-onset", "all"):
         sp = sub.add_parser(name)
         sp.add_argument("--confirm-run", action="store_true", help="required to start any simulation")
         sp.add_argument("--candidate", default=None, help="MZ multiseed label (default zA_q50_tz10000)")
@@ -912,6 +994,8 @@ def main(argv=None):
         cmd_run_time_response(args)
     elif args.cmd == "run-continuation":
         cmd_run_continuation(args)
+    elif args.cmd == "run-post-onset":
+        cmd_run_post_onset(args)
     elif args.cmd == "all":
         cmd_capture_snapshots(args)
         cmd_build_atlas(args)

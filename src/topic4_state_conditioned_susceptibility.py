@@ -275,6 +275,101 @@ def axial_kymograph(evolution, grid: Grid, y_axis, band):
     return X[:, 0].copy(), np.array(ts, float), kymo
 
 
+# ---- post-onset autonomous dynamics (review 2026-07-19: limit cycle vs saturation) ----
+def forward_integrate_ratefield(grid: Grid, scaffold, q_field, init_rE, init_rI, *, w_ee_mult, ratio,
+                                t_max=250.0, dt=0.5, record_every=2, record_state_every=0):
+    """Autonomous forward integration of the 6-field rate ODE from a GIVEN (rE, rI) initial condition
+    under `q_field`, recording rE_mean/rE_max(t) (+ rE fields every record_every steps). Replicates
+    solve_operating_point's EXACT dynamics (synaptic AMPA/GABA low-pass -> carries the Hopf frequency),
+    but records the trajectory -> post-onset limit-cycle-vs-saturation detection. scale_II=False."""
+    import src.topic4_m3b_spectral_phase as m3
+    from src.sef_hfo_field import convolve_periodic
+    K_EE, K_I = scaffold["kernels"].K_EE, scaffold["kernels"].K_I
+    mu_core = scaffold["exc"].mu_core
+    wee = float(w_ee_mult) * m3.W_EE
+    nuext = float(ratio) * m3.nu_theta_pop()
+    muxE, muxI = m3.TAU_ME * m3.JX_E * nuext, m3.TAU_MI * m3.JX_I * nuext
+    q = np.asarray(q_field, float)
+    wEI = q * m3.W_EI
+    wII = np.full(q.shape, m3.W_II)
+    rE, rI = np.asarray(init_rE, float).copy(), np.asarray(init_rI, float).copy()
+    sEE, sEI = convolve_periodic(rE, K_EE), convolve_periodic(rI, K_I)
+    sIE, sII = convolve_periodic(rE, K_I), convolve_periodic(rI, K_I)
+    nsteps = int(t_max / dt)
+    rE_mean, rE_max = np.full(nsteps, np.nan), np.full(nsteps, np.nan)
+    fields, states, state_times = [], [], []
+    for t in range(nsteps):
+        sEE += dt / m3.TAU_AMPA * (convolve_periodic(rE, K_EE) - sEE)
+        sEI += dt / m3.TAU_GABA * (convolve_periodic(rI, K_I) - sEI)
+        sIE += dt / m3.TAU_AMPA * (convolve_periodic(rE, K_I) - sIE)
+        sII += dt / m3.TAU_GABA * (convolve_periodic(rI, K_I) - sII)
+        muE = m3.TAU_ME * (m3.C_EE * wee * sEE - m3.C_EI * wEI * sEI) + muxE + mu_core
+        muI = m3.TAU_MI * (m3.C_IE * m3.W_IE * sIE - m3.C_II * wII * sII) + muxI
+        varE = m3.TAU_ME * (m3.C_EE * wee ** 2 * sEE + m3.C_EI * wEI ** 2 * sEI) + m3.TAU_ME * m3.JX_E ** 2 * nuext
+        varI = m3.TAU_MI * (m3.C_IE * m3.W_IE ** 2 * sIE + m3.C_II * wII ** 2 * sII) + m3.TAU_MI * m3.JX_I ** 2 * nuext
+        rE = rE + dt / m3.TAU_ME * (-rE + m3._phi_field(muE, np.sqrt(np.maximum(varE, 1e-9)), "E"))
+        rI = rI + dt / m3.TAU_MI * (-rI + m3._phi_field(muI, np.sqrt(np.maximum(varI, 1e-9)), "I"))
+        if not np.all(np.isfinite(rE)):
+            break
+        rE_mean[t], rE_max[t] = float(rE.mean()), float(rE.max())
+        if record_every and t % record_every == 0:
+            fields.append(rE.copy())
+        if record_state_every and t % record_state_every == 0:              # full state for frozen J(t)
+            states.append(dict(rE=rE.copy(), rI=rI.copy(), sEE=sEE.copy(), sEI=sEI.copy(),
+                               sIE=sIE.copy(), sII=sII.copy()))
+            state_times.append(t * dt)
+    return dict(t=np.arange(nsteps) * dt, rE_mean=rE_mean, rE_max=rE_max,
+                fields=(np.array(fields) if fields else None), field_times=np.arange(0, nsteps, record_every) * dt,
+                states=states, state_times=np.array(state_times, float))
+
+
+def jacobian_at_state(grid: Grid, scaffold, q_field, state, *, w_ee_mult, ratio):
+    """Instantaneous (frozen) Jacobian at a NON-fixed-point state x=(rE,rI,sEE,sEI,sIE,sII) along a
+    trajectory: compute the local gains gE,gI at the state's (mu,sigma) from the synaptic states and
+    assemble a minimal OperatingPoint for build_jacobian_dense. The frozen-J(t) probe for the
+    finite-time susceptibility along the actual transition trajectory (review 2026-07-19 item 3)."""
+    import src.topic4_m3b_spectral_phase as m3
+    exc, kernels = scaffold["exc"], scaffold["kernels"]
+    wee = float(w_ee_mult) * m3.W_EE
+    nuext = float(ratio) * m3.nu_theta_pop()
+    q = np.asarray(q_field, float); wEI = q * m3.W_EI; wII = np.full(q.shape, m3.W_II)
+    sEE, sEI, sIE, sII = state["sEE"], state["sEI"], state["sIE"], state["sII"]
+    muE = m3.TAU_ME * (m3.C_EE * wee * sEE - m3.C_EI * wEI * sEI) + m3.TAU_ME * m3.JX_E * nuext + exc.mu_core
+    muI = m3.TAU_MI * (m3.C_IE * m3.W_IE * sIE - m3.C_II * wII * sII) + m3.TAU_MI * m3.JX_I * nuext
+    varE = m3.TAU_ME * (m3.C_EE * wee ** 2 * sEE + m3.C_EI * wEI ** 2 * sEI) + m3.TAU_ME * m3.JX_E ** 2 * nuext
+    varI = m3.TAU_MI * (m3.C_IE * m3.W_IE ** 2 * sIE + m3.C_II * wII ** 2 * sII) + m3.TAU_MI * m3.JX_I ** 2 * nuext
+    sigmaE, sigmaI = np.sqrt(np.maximum(varE, 1e-9)), np.sqrt(np.maximum(varI, 1e-9))
+    h = 1e-3
+    gE = np.maximum((m3._phi_field(muE + h, sigmaE, "E") - m3._phi_field(muE - h, sigmaE, "E")) / (2 * h) * m3.TAU_ME, 0.0)
+    gI = np.maximum((m3._phi_field(muI + h, sigmaI, "I") - m3._phi_field(muI - h, sigmaI, "I")) / (2 * h) * m3.TAU_MI, 0.0)
+    inh = m3.InhibitionField(q=q, q_global=float(np.nanmean(q)), q_core=1.0, scale_II=False, core=scaffold["core"])
+    op = m3.OperatingPoint(rE=state["rE"], rI=state["rI"], muE=muE, muI=muI, sigmaE=sigmaE, sigmaI=sigmaI,
+                           gE=gE, gI=gI, source="trajectory", converged=True, residual=0.0, saturated=False,
+                           excitability=exc, inhibition=inh, wee_mult=float(w_ee_mult), nuext=nuext)
+    return m3.build_jacobian_dense(grid, kernels, op)
+
+
+def classify_post_onset(traj, *, sat_rate=0.1, osc_frac=0.03):
+    """limit_cycle / saturation / settled from the autonomous rE trajectory. FFT the 2nd half for the
+    dominant oscillation; sat_rate matches the M3B saturation flag."""
+    rE_mean, rE_max, t = traj["rE_mean"], traj["rE_max"], traj["t"]
+    if not np.all(np.isfinite(rE_max)):
+        return dict(outcome="diverged_nonfinite")
+    if np.nanmax(rE_max) > sat_rate:
+        return dict(outcome="saturation", rE_max_final=float(rE_max[-1]), rE_max_peak=float(np.nanmax(rE_max)))
+    half = len(rE_mean) // 2
+    x = rE_mean[half:] - rE_mean[half:].mean()
+    freqs = np.fft.rfftfreq(len(x), d=(t[1] - t[0]) / 1000.0)
+    amp = np.abs(np.fft.rfft(x))
+    ipk = int(np.argmax(amp[1:])) + 1 if amp.size > 1 else 0
+    dom_freq = float(freqs[ipk]); dom_amp = float(2 * amp[ipk] / len(x))
+    mean_level = abs(float(rE_mean[half:].mean())) + 1e-12
+    osc = dom_amp > osc_frac * mean_level and dom_freq > 0
+    return dict(outcome=("limit_cycle" if osc else "settled_low_amplitude"),
+                dom_freq_hz=dom_freq, dom_amp=dom_amp, rel_amp=float(dom_amp / mean_level),
+                rE_mean_final=float(rE_mean[-1]))
+
+
 def summarize_probe_atlas(J, grid: Grid, probes, T_list, *, theta, N, core, T_primary=30.0):
     """Full phase-paired gain atlas over T (design §6.2): axial / perpendicular / global gains, peak
     (k, orientation, gain), persistence G(50)/G(30) & G(75)/G(30), probe-subspace SVD, and the

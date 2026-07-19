@@ -191,6 +191,34 @@ fold-vs-Hopf and the existence of a limit cycle needs the post-onset time-depend
 Floquet analysis (deferred; §8 next-step). Caveat: the straight-line z-interpolation is not the actual SNN
 z-trajectory; a continuation along the real trajectory + finer α near the loss would sharpen the verdict.
 
+### 4.7 Post-onset dynamics + susceptibility along the trajectory (review 2026-07-19 items 3–4; `post_onset_summary.json` + `figures/post_onset.png`)
+
+Integrating the 6-field rate ODE forward from the PRE-ONSET fixed point under the ONSET q-field
+(user-specified init), 2500 ms, with the frozen-J finite-time susceptibility σ1(30 ms) + leading Re
+sampled along the trajectory (the time-dependent tangent operator, frozen-J approximation; valid since
+the escape is slow vs 30 ms):
+
+- **The post-onset state is NOT a limit cycle** (Floquet does not apply). It is a SEED-DEPENDENT
+  **bistable escape**:
+  - **seed 1**: settles to a stable low-rate fixed point (rE_mean ~0.0016 kHz); the ~24 Hz mode fully
+    damps (spectrum flat); frozen-J leading Re stays < 0 (−0.011→−0.005), σ1 ~1.3 throughout. No runaway.
+  - **seeds 3, 4**: linger on the low branch, then ESCAPE to a saturated high-rate branch (rE_max →
+    ~0.13 kHz) at ~1.05 s / ~1.36 s, with oscillatory (~24 Hz) growth during the escape.
+- **Susceptibility at the escape**: the frozen-J leading Re CROSSES 0 (→ **+0.077**, genuine linear
+  instability) and **σ1 SPIKES to ~12–14** (enormous non-normal amplification) right at the fold escape,
+  then settles to ~5–7 on the high-rate plateau.
+
+**Interpretation**: the resting→runaway transition is a **fold / bistable escape** to a saturated
+high-rate branch — NOT a supercritical Hopf of the resting state (resting Re stays < 0) and NOT a limit
+cycle. The runaway is triggered by the state drifting off the destabilizing low branch (for the seeds whose
+onset q-field removes the stable low branch), through a linearly-unstable region where σ1 spikes to ~14.
+The ~24 Hz mode is the weakly-damped mode of the LOW branch (seed 1's settled state), not a sustained
+oscillation. So in this surrogate the runaway is a high-rate SATURATED state reached by a fold escape, not
+an oscillation; whether the actual SNN population runaway is oscillatory is a separate open question (the
+rate-field surrogate saturates). Caveat: seed 1 does not run away in the surrogate at the calibrated
+backdrop (its onset q-field still has a stable low branch) — the surrogate reproduces the runaway for 2/3
+seeds; this seed-dependence + the fold (not Hopf) mechanism are honest limitations of the coarse surrogate.
+
 ## 5. Answers to the ten Task-8 questions
 
 1. **Replay w/o observer drift?** Yes — byte-parity proven on the real substrate; onsets exact to the ms.

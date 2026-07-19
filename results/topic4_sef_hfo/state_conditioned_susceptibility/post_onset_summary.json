@@ -1,0 +1,46 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q50_tz10000",
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "t_max": 2500.0,
+  "init": "pre_onset_100ms fixed point + onset q-field (user-specified)",
+  "per_seed": {
+    "1": {
+      "outcome": "settled_low_amplitude",
+      "dom_freq_hz": 23.200000000000003,
+      "dom_amp": 6.831633679441802e-08,
+      "rel_amp": 4.242559617791558e-05,
+      "rE_mean_final": 0.0016103044847190844,
+      "traj_sigma1_peak": 1.3367930021642347,
+      "traj_re_max": -0.004631689647265083
+    },
+    "3": {
+      "outcome": "saturation",
+      "rE_max_final": 0.12677293102581333,
+      "rE_max_peak": 0.13476969876192837,
+      "traj_sigma1_peak": 13.96375439088146,
+      "traj_re_max": 0.07695268517220227
+    },
+    "4": {
+      "outcome": "saturation",
+      "rE_max_final": 0.1275624280291995,
+      "rE_max_peak": 0.1314953333489887,
+      "traj_sigma1_peak": 12.395227594157024,
+      "traj_re_max": 0.07500156380329495
+    }
+  },
+  "git_sha": "f0db805",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "run-post-onset",
+    "--candidate",
+    "zA_q50_tz10000",
+    "--seeds",
+    "1,3,4",
+    "--confirm-run"
+  ]
+}
